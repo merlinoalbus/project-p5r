@@ -24,7 +24,7 @@ import { datiGuida } from './datiGuida.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
 import { condizioneEffettivaQuartiere, tuttiGliInviti } from './condizioni/condizioneEffettiva.js';
 import { cosaManca } from './condizioni/valutatore.js';
-import { descriviRequisitoSpillo, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { descriviRequisitoSpillo } from '../../shared/condizioniSpillo.js';
 
 interface RigaPiantaQ { quartiere_chiave: string; url: string; pagina: string | null; fonte: string; licenza: string; larghezza: number | null; altezza: number | null; note: string }
 
@@ -37,26 +37,14 @@ interface RigaQuartiere { sblocco_data: string | null; chiave: string; ordine: n
  *  `/guida/dungeon/mementos` e dalle richieste dei Memento. */
 const NON_UN_QUARTIERE = new Set(['mementos']);
 
-/** Le regole di sblocco dei quartieri, scritte a mano in `sblocco-quartieri`: la prosa resta e si
- *  continua a mostrarla, qui c'è la stessa cosa nella forma che il valutatore capisce. */
-function regoleSblocco(): Map<string, RequisitoSpillo[]> {
-  const dati = datiGuida<{ quartieri?: Array<{ chiave: string; condizioni: unknown }> }>('sblocco-quartieri');
-  const out = new Map<string, RequisitoSpillo[]>();
-  for (const q of dati?.quartieri ?? []) {
-    const condizioni = normalizzaCondizioniSpillo(q.condizioni);
-    if (condizioni.length > 0) out.set(q.chiave, condizioni);
-  }
-  return out;
-}
-
 /** Se il quartiere, al punto in cui è la partita, esiste già nel mondo. **Solo il rosso nasconde**:
  *  un dubbio non toglie un quartiere dalla mappa. Per il quartiere, che è una destinazione radice,
  *  il rango di un Confidente decide se ci puoi arrivare (decisione dell'utente, 7 settembre 2026). */
-function disponibilitaQuartiere(chiave: string, regole: Map<string, RequisitoSpillo[]>, st: StatoDisponibilita | null): { disponibile: boolean; bloccoMotivo: string | null } {
+function disponibilitaQuartiere(chiave: string, st: StatoDisponibilita | null): { disponibile: boolean; bloccoMotivo: string | null } {
   if (!st) return { disponibile: true, bloccoMotivo: null };
-  // L6 (R6-08, R6-09): la condizione del quartiere (`quartiere.condizioni_json`) in OR con gli inviti; le regole della guida restano solo
-  // per uno schema di prima della 118
-  const condizioni = condizioneEffettivaQuartiere(chiave, st.inviti ??= tuttiGliInviti()) ?? regole.get(chiave);
+  // L6 (R6-08, R6-09): dopo la migrazione 118 questa è l'unica fonte runtime;
+  // la prosa della guida resta nota e non viene più interpretata come condizione.
+  const condizioni = condizioneEffettivaQuartiere(chiave, st.inviti ??= tuttiGliInviti());
   if (!condizioni) return { disponibile: true, bloccoMotivo: null };
   const esito = valutaRequisiti(condizioni.map((c) => ({ ...c, testo: descriviRequisitoSpillo(c) })) as RequisitoDisponibilita[], st);
   if (esito.stato !== 'bloccato') return { disponibile: true, bloccoMotivo: null };
@@ -70,14 +58,13 @@ export function elencaQuartieri(partitaId?: number): QuartiereRiassuntoDto[] {
   const righe = (prepared(`SELECT q.*, (SELECT COUNT(*) FROM luogo l WHERE l.quartiere_chiave = q.chiave AND l.nascosto = 0) AS luoghi, (SELECT COUNT(*) FROM luogo l WHERE l.quartiere_chiave = q.chiave AND l.nascosto = 0 AND l.verificato = 1) AS verificati
     FROM quartiere q ORDER BY q.ordine`).all() as Array<RigaQuartiere & { luoghi: number; verificati: number }>)
     .filter((q) => !NON_UN_QUARTIERE.has(q.chiave));
-  const regole = regoleSblocco();
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
   const caricate = immaginiCaricateDelleMappe();
   const aree = numeroAreePerQuartiere();
   return righe.map((q) => ({ chiave: q.chiave, nome: q.nome, sblocco: q.sblocco, sbloccoData: q.sblocco_data, mappaChiave: chiaveMappa(chiaveImmagineQuartiere(q.chiave)), ingresso: ingressoQuartiere(q.chiave), descrizione: q.descrizione, luoghi: q.luoghi, verificati: q.verificati,
     illustrazione: illustrazioneDellaMappa(chiaveImmagineQuartiere(q.chiave), undefined, caricate),
     aree: aree.get(q.chiave) ?? 0,
-    ...disponibilitaQuartiere(q.chiave, regole, st) }));
+    ...disponibilitaQuartiere(q.chiave, st) }));
 }
 
 /** Scheda di un quartiere con i luoghi. */

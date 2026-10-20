@@ -1,6 +1,6 @@
 # Richieste dell'utente ancora aperte (elenco di controllo del PM)
 
-Nota di ripresa 2026-10-20: il lavoro L6-B5 prosegue; contratto server, filtro della lista del quartiere, rimozione del fallback legacy del validatore mappe, lettura strutturata in `sincronizzaMappe` ed esclusione delle Aree chiuse da indice, figli del visore e «Aree vicine» sono pubblicati fino a `1c86ea58`. GitHub mostra i run #47–#49 ancora in corso; p5s risponde e mostra l'indice aggiornato. Nessuna richiesta già pubblicata è stata dichiarata completata.
+Nota di ripresa 2026-10-20: il lavoro L6-B5 prosegue; contratto server, filtro della lista del quartiere, rimozione dei fallback legacy del validatore e del lettore runtime dei quartieri, lettura strutturata in `sincronizzaMappe` ed esclusione delle Aree chiuse da indice, figli del visore e «Aree vicine» sono pronti localmente. Ultimo commit pubblicato: `b6473244`; la modifica corrente non è ancora pubblicata. Nessuna richiesta già pubblicata è stata dichiarata completata.
 
 Ogni richiesta resta qui finché l'utente non la vede funzionare su p5s. Lo stato si aggiorna a ogni passo. È nato il 2026-10-20 alle 19:45Z, dopo che il PM aveva dichiarato L3 completo con richieste ancora mancanti.
 
