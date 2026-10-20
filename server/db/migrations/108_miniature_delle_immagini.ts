@@ -1,5 +1,5 @@
 // ============================================================
-// 108 — le miniature delle immagini del database (L1, variante «miniature», 2026-10-21)
+// 108 — le miniature delle immagini del database (L1, variante «miniature», 2026-10-20)
 // ============================================================
 //
 // Con «Illustrazione anche nelle schede» (scelta dell'utente, 2026-10-20) La città caricherebbe 19 illustrazioni PNG piene

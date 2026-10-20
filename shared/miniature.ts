@@ -1,5 +1,5 @@
 // ============================================================
-// Miniature delle immagini servite dal database (L1, variante «miniature», 2026-10-21)
+// Miniature delle immagini servite dal database (L1, variante «miniature», 2026-10-20)
 // ============================================================
 //
 // La rotta che serve il file di un'immagine (`GET /api/immagini/:ambito/:chiave/file`) accetta `l`, la larghezza in pixel, e
