@@ -1,6 +1,6 @@
 # Richieste dell'utente ancora aperte (elenco di controllo del PM)
 
-Nota di ripresa 2026-10-20: il lavoro L6-B5 prosegue; il contratto server per lo sblocco ereditato delle Aree e il filtro delle Aree chiuse nella lista del quartiere sono pubblicati, ancora da verificare dall'utente. Nessuna richiesta già pubblicata è stata dichiarata completata.
+Nota di ripresa 2026-10-20: il lavoro L6-B5 prosegue; contratto server, filtro della lista del quartiere e rimozione del fallback legacy del validatore mappe sono pubblicati o in pubblicazione, ancora da verificare dall'utente. Nessuna richiesta già pubblicata è stata dichiarata completata.
 
 Ogni richiesta resta qui finché l'utente non la vede funzionare su p5s. Lo stato si aggiorna a ogni passo. È nato il 2026-10-20 alle 19:45Z, dopo che il PM aveva dichiarato L3 completo con richieste ancora mancanti.
 

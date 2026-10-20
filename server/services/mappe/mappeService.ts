@@ -1344,7 +1344,7 @@ const SOLO_PIN = 'Stato di un pin o di una voce della guida (solo nelle condizio
  * condizione malformata sono scarti a sé.
  *
  * Si controllano: Palazzo esistente (non i Mementos), Confidente e richiesta della Guida, quartiere con uno sblocco
- * strutturato o, su uno schema precedente alla 118, con una data leggibile, e poi articoli, attività, negozi, membri della squadra, letture e Persona
+ * strutturato, e poi articoli, attività, negozi, membri della squadra, letture e Persona
  * citati, che devono esistere nei dati.
  *
  * Lo stato di un altro pin (`spillo`, 2026-10-03) vale solo nelle condizioni dei pin (`pin` presente) e deve citare un pin con
@@ -1380,11 +1380,10 @@ function condizioniConChiaviEsistenti(condizioni: RequisitoSpillo[] | null | und
     else if (c.tipo === 'quartiere') {
       cosa = 'Quartiere con sblocco'; chiave = c.quartiere;
       try {
-        const q = prepared('SELECT condizioni_json, sblocco_data FROM quartiere WHERE chiave = ?').get(c.quartiere) as { condizioni_json: string | null; sblocco_data: string | null } | undefined;
-        ok = !!q && (q.condizioni_json !== null || q.sblocco_data !== null);
+        const q = prepared('SELECT condizioni_json FROM quartiere WHERE chiave = ?').get(c.quartiere) as { condizioni_json: string | null } | undefined;
+        ok = !!q && q.condizioni_json !== null;
       } catch {
-        const q = prepared('SELECT sblocco_data FROM quartiere WHERE chiave = ?').get(c.quartiere) as { sblocco_data: string | null } | undefined;
-        ok = !!q && q.sblocco_data !== null;
+        ok = false;
       }
     }
     else if (c.tipo === 'spillo') {

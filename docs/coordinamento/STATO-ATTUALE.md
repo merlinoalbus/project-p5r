@@ -1,7 +1,7 @@
 # Stato attuale del lavoro — ramo newreview / p5s (aggiornato 2026-10-20, ripresa)
 
 ## DOVE SIAMO ADESSO (leggere per primo; prevale su tutto quanto c'è sotto)
-- **Ramo unico `newreview`**, pubblicato su p5s a ogni push. Ultimo commit pubblicato: `8b78ebd3` (`feat(L6): propaga lo sblocco del quartiere alle aree`); la pipeline #43 aveva verify e backend verdi, frontend ancora in corso all'ultimo controllo. Il fetch locale resta bloccato dai permessi sul metadato condiviso del worktree; non risultano divergenze nel tracking remoto.
+- **Ramo unico `newreview`**, pubblicato su p5s a ogni push. Ultimo commit pubblicato: `8b78ebd3` (`feat(L6): propaga lo sblocco del quartiere alle aree`); pipeline #43 riuscita. Il commit successivo `6a7da5bb` è in pipeline #44, attualmente in coda. Il fetch locale resta bloccato dai permessi sul metadato condiviso del worktree; non risultano divergenze nel tracking remoto.
 - **Dati di p5s**: `userVersion` fino a 119 dopo l'ultimo rilascio. Migrazioni recenti:
   - 114: planimetria della voce;
   - 115: luoghi come fonte unica;
@@ -23,7 +23,7 @@
 | L3 Palazzi | pubblicato. Fatte anche le richieste dell'utente sulla guida: scheda per planimetria (UX3-14, b34e577b), campo «Planimetria» (901c7666), guida nel visore in finestra fluttuante (91986570), pin di spostamento che portano a destinazione (67a7bfda, b8048c1b). Da provare dall'utente |
 | L4 Avanzamento unico | pubblicato (fde7add7, poi unito): FE completo con FUN3-3 e FUN4-1 |
 | L5 Luoghi, negozi, orari | pubblicato, completo: BE 5a22da2a…0fa7bde7 e 50ca121c; FE af5b8e14…820c05ea (F1–F6) |
-| L6 Condizioni uniche | **in corso**, B5 prima parte pubblicata; aggiunti il contratto BE per lo sblocco ereditato delle Aree del mondo e il filtro delle Aree chiuse nella navigazione del quartiere. Typecheck/lint verdi. **Restano** sblocco quartiere con fonte/editor, esclusione dai passaggi/indice/Aree vicine, rimozione del validatore legacy, verifica metro-diario e poi B6/FE (`lotti/L6/piano.md`). |
+| L6 Condizioni uniche | **in corso**, B5 prima parte pubblicata; aggiunti contratto BE per lo sblocco ereditato delle Aree, filtro della lista del quartiere e rimossa la compatibilità del validatore mappe con `sblocco_data` legacy. Typecheck/lint verdi. **Restano** sblocco quartiere con fonte/editor, esclusione dai passaggi/indice/Aree vicine, lettura legacy in `sincronizzaMappe`, verifica metro-diario e poi B6/FE (`lotti/L6/piano.md`). |
 | L7–L11 | progettati (`lotti/Lx/`), da implementare BE e FE |
 
 **Sessioni del team** (app Claude desktop):
