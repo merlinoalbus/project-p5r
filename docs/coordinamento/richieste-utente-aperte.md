@@ -9,7 +9,7 @@ Ogni richiesta resta qui finché l'utente non la vede funzionare su p5s. Lo stat
 | 3 | La guida nel visore sta in una **finestra fluttuante** che si apre, si chiude e si sposta. **Stessi componenti, nessuna copia.** Le funzioni non dipendono dallo schermo intero | **pubblicato** (91986570): finestra trascinabile e dentro lo schermo, foglio dal basso sotto i 768 px, anche a schermo intero. Da provare dall'utente | FE |
 | 4 | La **modalità modifica** (editor) non si cambia | rispettato | — |
 | 5 | Le voci senza pin restano agganciate alla **planimetria 1** e si **spostano a mano** in un'altra planimetria durante la review | **pubblicato**: BE 42b34243 (migrazione 114) e campo «Planimetria» nella modifica della voce senza pin, 901c7666. Da provare dall'utente | FE |
-| 6 | La scheda «Forziere — Fiale delle vertigini S» si deve poter **sistemare** | **non su p5s**: «Collega a una voce» è in L4, in prova | rilascio di L4 |
+| 6 | La scheda «Forziere — Fiale delle vertigini S» si deve poter **sistemare** | **pubblicato con L4** (fde7add7): nella scheda di Madarame, «Schede da sistemare» → «Collega a una voce» → «Apri i Forzieri» → «Collega». Il gesto lo fa l'utente sui suoi dati | utente |
 | 7 | Intestazione al massimo al **30%** della schermata a ogni dispositivo | fatto nella scheda (LAY3-5); Percorso a 375 al limite (230 su 243), da compattare in L10 | — |
 | 8 | Tutto il lavoro salvato su git, per riprendere da qualsiasi IA | fatto e in corso a ogni passo | PM |
 | 9 | La documentazione non blocca il rilascio, se l'app è testata e corretta | applicato | PM |

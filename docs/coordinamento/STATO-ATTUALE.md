@@ -1,7 +1,7 @@
 # Stato attuale del lavoro — ramo newreview / p5s (aggiornato 2026-10-20, ~20:25Z, salvataggio di fine sessione)
 
 ## DOVE SIAMO ADESSO (leggere per primo; prevale su tutto quanto c'è sotto)
-- **Ramo unico `newreview`**, pubblicato su p5s a ogni push. Ultimo commit pubblicato: `eb956688`, L6 B4, con pipeline in corso alle 20:17Z. Su GitHub esistono solo `main` (da non toccare) e `newreview`.
+- **Ramo unico `newreview`**, pubblicato su p5s a ogni push. Ultimo commit pubblicato: quello in cima a `git log` di `newreview` su GitHub (alle 20:40Z era a3d9e9f8, con L6 B5 prima parte; i commit successivi sono solo documenti). Per sapere dov'è p5s si guarda l'esito dell'ultima pipeline con `gh run list --branch newreview`. Su GitHub esistono solo `main` (da non toccare) e `newreview`.
 - **Dati di p5s**: `userVersion` fino a 119 dopo l'ultimo rilascio. Migrazioni recenti:
   - 114: planimetria della voce;
   - 115: luoghi come fonte unica;
@@ -37,6 +37,12 @@
 2. nella guida del visore, mostrare solo le voci dell'infiltrazione aperta o quelle di tutte le infiltrazioni della planimetria, come oggi.
 
 **Lavoro non ancora committato**: nessuno. La prima parte di L6 B5 è committata in c9f3e5bb ed è pubblicata su GitHub (`newreview` = 9e17e2f9, 20:35Z). Il resto di B5 è descritto nel messaggio di quel commit e nella riga L6 qui sopra.
+
+**Note dalla prova di ripresa** (un'altra IA, 2026-10-20 sera):
+- `git fetch` può fallire per i permessi su `.git/FETCH_HEAD`. Il worktree condivide la cartella `.git` del repository principale. Si chiudono gli altri processi git e si riprova, oppure si usa `git ls-remote github newreview` per leggere il commit remoto.
+- `.claude/settings.local.json` è un file di configurazione locale delle sessioni: non va committato.
+- Le prove UX di L4 (`lotti/L4/esiti-ux/fde7add7/esito.md`, solo testo) ora sono committate.
+- Le richieste in `richieste-utente-aperte.md` segnate «pubblicato» sono **da provare dall'utente**, non da rifare. Restano aperte solo le decisioni dell'utente (comando «Importa» del pacchetto, filtro della guida del visore) e il lavoro di L6–L11.
 
 **Da sapere per chi riprende**:
 - `docs/coordinamento/richieste-utente-aperte.md` è l'elenco di controllo delle richieste.
