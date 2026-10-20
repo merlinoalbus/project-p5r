@@ -23,7 +23,7 @@
 import { IngressoQuartiere } from '../components/mappe/IngressoQuartiere';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { getQuartiere, scaricaPiantaQuartiere } from '../services/api';
+import { getQuartiere, isApiError, scaricaPiantaQuartiere } from '../services/api';
 import { MappaIncorporata } from '../components/mappe/MappaIncorporata';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -39,6 +39,7 @@ import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 import { SagomaQuartiere } from '../components/mappe/SagomaQuartiere';
+import { IllustrazioneConSegno } from '../components/mappe/IllustrazioneConSegno';
 import { usePartitaStore } from '../stores/partitaStore';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 
@@ -111,7 +112,12 @@ export function QuartierePage() {
   const [configuraIngresso,setConfiguraIngresso]=useState(false);
   const [tipo, setTipo] = useState<string>('');
   // Mappa pubblicata ma non ancora nell'istanza: scaricata appena il quartiere è aperto, poi il visore la usa come immagine di base
-  const download = useCarica(() => (q && !q.ingresso && !q.mappa && q.pianta ? scaricaPiantaQuartiere(q.chiave) : Promise.resolve(null)), [q?.chiave, q?.mappa, q?.pianta?.url, q?.ingresso]);
+  // Se la mappa ha dei pezzi ritagliati dall'immagine che mostra (L1, F5: 409 `mappa-con-pezzi`), lo scarico automatico non la
+  // sostituisce e non è un errore: la mappa ha già un'immagine con il lavoro dell'utente sopra. Sostituirla resta una scelta
+  // esplicita, dall'editor, con la conferma.
+  const download = useCarica(() => (q && !q.ingresso && !q.mappa && q.pianta
+    ? scaricaPiantaQuartiere(q.chiave).catch((err: unknown) => { if (isApiError(err, 'mappa-con-pezzi')) return null; throw err; })
+    : Promise.resolve(null)), [q?.chiave, q?.mappa, q?.pianta?.url, q?.ingresso]);
   const scaricata = !!q && !!download.dati && download.dati.quartiere === q.chiave;
   // I tipi presenti, nell'ordine del catalogo (shared/tipiLuogo), non in quello in cui capitano.
   const tipi = useMemo(() => ordinaTipiLuogo((q?.luoghi ?? []).map((l) => l.tipo)), [q]);
@@ -129,9 +135,16 @@ export function QuartierePage() {
           <button type="button" className="btn btn-ghost btn-sm self-start touch -ml-2" onClick={() => navigate('/guida/citta')}><IconChevronLeft size={16} /> La città</button>
 
           <header className="card flex flex-col gap-3 sm:flex-row sm:items-start">
-            {/* La sagoma della mappa di Tokyo, la stessa che si è appena toccata: dice «sei nel
-                posto che hai scelto» prima che si legga il titolo. */}
-            <SagomaQuartiere chiave={q.chiave} nome={q.nome} larghezza={132} altezza={100} className="self-center sm:self-start" />
+            {/* L'illustrazione della mappa del quartiere (regola unica di L1), con sopra la sagoma della mappa di Tokyo, la
+                stessa che si è appena toccata: dice «sei nel posto che hai scelto» prima che si legga il titolo (scelta
+                dell'utente, 2026-10-20). Sul telefono sta in cima, larga quanto la carta; da 640 px a fianco del titolo. Senza
+                illustrazione resta la sola sagoma, com'era. Sul telefono la carta toglie ~64 px (margini e imbottitura) alla
+                larghezza della finestra: `sizes` lo dice, perché a densità 2 si scarichi la miniatura da 640 e non quella da 1024. */}
+            <IllustrazioneConSegno illustrazione={q.illustrazione} alt={`Illustrazione di ${q.nome}`}
+              className="w-full max-w-[420px] self-center sm:w-[220px] sm:self-start lg:w-[200px]"
+              sizes="(min-width: 1024px) 200px, (min-width: 640px) 220px, min(420px, calc(100vw - 64px))"
+              segno={<SagomaQuartiere chiave={q.chiave} nome={q.nome} larghezza={72} altezza={54} />}
+              senza={<SagomaQuartiere chiave={q.chiave} nome={q.nome} larghezza={132} altezza={100} className="self-center sm:self-start" />} />
             <div className="flex min-w-0 flex-1 flex-col gap-1.5">
               <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
                 <h1 className="titolo-display m-0 break-words">{q.nome}</h1>

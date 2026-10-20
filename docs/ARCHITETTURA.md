@@ -1614,8 +1614,23 @@ Nessuna chiave, rotta o codice d'errore è cambiato.
   `creaMappa`, `aggiornaMappa` e `importaMappe` riallineano il ruolo. Migrazione 107: la regola applicata una volta.
 - DTO: `MappaRiassuntoDto.immagineUrl` (versionato) e `asset` (quello dichiarato dalla mappa); `assetOriginale` non c'è più (resta
   solo nel pacchetto delle mappe, per compatibilità dei file esportati).
+- Pezzi: `server/services/mappe/pezziMappa.ts` → `confermaPezzi` (409 `mappa-con-pezzi`, anche in blocco); `mappeCheLaPerdono` e
+  `assetEsistente` in `immagineMappa.ts`; `scaricaImmagineMappa` (da URL) e `scaricaPiantaQuartiere` passano da `impostaImmagineMappa`
+  (la pianta pubblicata con `dellUtente: false`). Dimensioni: in `dopoImmagineMappa` l'intestazione dell'immagine vince, altrimenti restano
+  quelle dichiarate (vale per ogni strada, importazione compresa). `creaMappa`/`esportaMappe`: asset dichiarato solo se esiste.
+- Illustrazioni dei posti: `IllustrazioneDto { immagineUrl, asset }` e `illustrazioneDellaMappa(chiave)` (asset null per il ruolo
+  `emblema`) nei DTO di quartiere (elenco e scheda) e Palazzo; `QuartiereDettaglioDto.mappa` = c'è una caricata. Tolto il booleano morto
+  `AreaDungeonDto.mappa`.
+- Miniature: `shared/miniature.ts` (`LARGHEZZE_MINIATURA` 160/320/640/1024, `urlMiniatura`, `srcsetMiniature`);
+  `server/services/miniatureService.ts` (sharp 0.35.5, WebP, cache in `immagine_miniatura` — migrazione 108 — per immagine, larghezza e
+  versione; originale per SVG/GIF o se più piccola; riscaldamento all'avvio delle immagini delle schede; pulizia delle orfane in
+  `regoleAllAvvio` e dopo `ricaricaPacchetto`); rotta `GET /api/immagini/:ambito/:chiave/file?l=` (400 fuori misura, `X-Miniatura`).
+  Nel pacchetto la tabella è `SOLO_SCHEMA` (`pacchettoGioco.ts`): si crea ma non si copia. `Dockerfile.backend` prova sharp nello stadio
+  `deps`.
 - Interfaccia: `useImmagineMappa(m)` (caricata → asset dichiarato via `useAsset`) in `VisoreMappa`, `ImmaginiLuogo`,
-  `IngressoQuartiere`, `EditorMappaPage`; `AnteprimaMappa` (indice) usa la caricata, poi lo stemma di Tokyo/Covo, poi l'asset;
-  `haPlanimetria` legge il ruolo con `ruoloConVisore`. I segni dei posti (sagome dei quartieri, stemmi dei Palazzi, il Covo) stanno in
-  `src/components/mappe/segniMappa.ts` e si risolvono con `useAsset`/`useRisolviAsset` (manifesto e preferenza della grafica
-  predefinita): `MappaTokyo`, `SagomaQuartiere`, `EmblemaDungeon` (già con `AssetImg`).
+  `IngressoQuartiere`, `EditorMappaPage`; `AnteprimaMappa` (indice) con lo stesso ordine e lo stemma di Tokyo/Covo solo se la mappa non ha
+  né caricata né asset; `haPlanimetria` legge il ruolo con `ruoloConVisore` (anche per le mappe sorelle di `MappaPage`).
+  `IllustrazioneConSegno` (illustrazione piena con il segno sopra, proporzione dell'immagine fra 4:3 e 16:9, `srcSet`/`sizes` delle
+  miniature) in `CittaPage`, `QuartierePage`, `DungeonDettaglioPage` (solo Palazzi). I segni dei posti stanno in
+  `src/components/mappe/segniMappa.ts`: `useSegno` (schede, `SagomaQuartiere`) e `useRisolviSegno` (metro, `MappaTokyo`) leggono il
+  manifesto a prescindere dalla preferenza; `EmblemaDungeon` usa `segnoPalazzo` con `AssetImg` e segue la preferenza, come prima.

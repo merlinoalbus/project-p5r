@@ -81,7 +81,7 @@ function Accesso({ tipo, chiave }: { tipo: TipoAccessoMondo; chiave: string }) {
         <ul className="m-0 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 xl:grid-cols-4">
           {dati.destinazioni.map(d => <li key={`${d.mappa}:${d.spillo ?? ''}`} className="flex">
             <Link className="card card--cliccabile group flex w-full flex-col gap-2 no-underline text-text" to={urlDestinazioneMondo(d)}>
-              <AnteprimaMappa mappa={anteprima(d.mappa, d.nomeMappa)} className="aspect-[4/3] w-full" />
+              <AnteprimaMappa mappa={anteprima(d.mappa, d.nomeMappa)} className="aspect-[4/3] w-full" sizes="(min-width: 1280px) 25vw, (min-width: 640px) 33vw, 50vw" />
               <span className="flex flex-col gap-0.5">
                 <span className="text-[13px] font-semibold leading-tight group-hover:text-primary">{d.nomeMappa}</span>
                 {/* Il nome dello spillo solo se aggiunge qualcosa: quasi sempre è il nome della
@@ -97,7 +97,7 @@ function Accesso({ tipo, chiave }: { tipo: TipoAccessoMondo; chiave: string }) {
         <ul className="m-0 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 xl:grid-cols-4">
           {guide.map(g => <li key={`${g.dungeon}:${g.area}`} className="flex">
             <Link className="card card--cliccabile group flex w-full flex-col gap-2 no-underline text-text" to={`/guida/mappe/${encodeURIComponent(g.mappaPalazzo)}?area=${encodeURIComponent(g.area)}`}>
-              <AnteprimaMappa mappa={anteprima(g.mappaPalazzo, g.nome)} className="aspect-[4/3] w-full" />
+              <AnteprimaMappa mappa={anteprima(g.mappaPalazzo, g.nome)} className="aspect-[4/3] w-full" sizes="(min-width: 1280px) 25vw, (min-width: 640px) 33vw, 50vw" />
               <span className="text-[13px] font-semibold leading-tight group-hover:text-primary">{g.nome}</span>
             </Link>
           </li>)}

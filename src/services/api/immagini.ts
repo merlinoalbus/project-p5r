@@ -17,7 +17,9 @@ export const getImmagini =(ambito?: AmbitoImmagine): Promise<ImmagineDto[]> => a
 
 /** Scarica nell'istanza la mappa del quartiere dalla fonte collegata (immagine mai nel repository). Le piante delle aree dei Palazzi
  *  non si scaricano più dalla guida (rotta tolta il 2026-09-18, «la pianta della guida esce di scena»). */
-export const scaricaPiantaQuartiere = (quartiere: string): Promise<{ quartiere: string; mime: string; byte: number; fonte: string; url: string }> => apiPost(`/mappe/piante-citta/${encodeURIComponent(quartiere)}/scarica`, {}, { timeoutMs: 60_000, maxRetries: 0 });
+export const scaricaPiantaQuartiere = (quartiere: string, opz: { eliminaPezzi?: boolean } = {}): Promise<{ quartiere: string; mime: string; byte: number; fonte: string; url: string }> =>
+  // su una mappa del quartiere con pezzi il server chiede conferma (L1, F5: 409 `mappa-con-pezzi`); `eliminaPezzi` la dà
+  apiPost(`/mappe/piante-citta/${encodeURIComponent(quartiere)}/scarica${queryString({ eliminaPezzi: opz.eliminaPezzi ? '1' : undefined })}`, {}, { timeoutMs: 60_000, maxRetries: 0 });
 
 /** URL del file di un'immagine. */
 export function urlImmagine(ambito: AmbitoImmagine, chiave: string): string {
@@ -36,5 +38,7 @@ export const importaImmagineDaUrl =(ambito: AmbitoImmagine, chiave: string, url:
 export const eliminaImmagine =(ambito: AmbitoImmagine, chiave: string): Promise<void> =>
   apiDelete(`/immagini/${encodeURIComponent(ambito)}/${encodeURIComponent(chiave)}`);
 
-/** Rimuove tutte le immagini caricate di un ambito (o di tutta l'istanza). */
-export const eliminaImmagini = (ambito?: AmbitoImmagine): Promise<{ eliminate: number }> => apiDelete(`/immagini${queryString({ ambito })}`);
+/** Rimuove tutte le immagini caricate di un ambito (o di tutta l'istanza). Se fra queste c'è l'immagine di una mappa con pezzi il
+ *  server chiede conferma (L1, F5: 409 `mappa-con-pezzi`, dettagli `{ mappe, pezzi, copie }`); `eliminaPezzi` la dà. */
+export const eliminaImmagini = (ambito?: AmbitoImmagine, opz: { eliminaPezzi?: boolean } = {}): Promise<{ eliminate: number }> =>
+  apiDelete(`/immagini${queryString({ ambito, eliminaPezzi: opz.eliminaPezzi ? '1' : undefined })}`);

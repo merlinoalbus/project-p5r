@@ -23,7 +23,7 @@ import { aggiornaCopiaPezzoMappa, aggiornaImmagineSpillo, aggiornaMappa, aggiorn
 import { notifica } from '../stores/notificationStore';
 import { usePartitaStore } from '../stores/partitaStore';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida';
-import { useAsset } from '../stores/assetStore';
+import { useImmagineMappa } from '../hooks/useImmagineMappa';
 import { PageState } from '../components/shared/PageState';
 import { Modal } from '../components/shared/Modal';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
@@ -110,8 +110,9 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
   const seleziona = (id:number|null) => { setSelezionatoId(id); if(id!==null){setSezione('spilli');setCopiaId(null);} };
   /** Seleziona una copia di un pezzo (o nessuna): il pannello passa alla sezione «Pezzi» e lo spillo si deseleziona. */
   const selezionaCopia = (id: number | null) => { setCopiaId(id); if (id !== null) { setSezione('pezzi'); setSelezionatoId(null); } };
-  /** L'immagine nuova in attesa di conferma su una mappa con dei pezzi (102: 409 `mappa-con-pezzi`). */
-  const [immagineDaConfermare, setImmagineDaConfermare] = useState<{ file: File; messaggio: string } | null>(null);
+  /** L'immagine nuova in attesa di conferma su una mappa con dei pezzi (102: 409 `mappa-con-pezzi`): un file caricato o, da L1 (F5),
+   *  la pianta da scaricare dalla guida. `sostituisci` ripete la stessa operazione con la conferma; `ok` è l'avviso dopo. */
+  const [immagineDaConfermare, setImmagineDaConfermare] = useState<{ messaggio: string; sostituisci: () => Promise<unknown>; ok: string } | null>(null);
   const [occupato, setOccupato] = useState(false);
   const [confermaEliminaMappa, setConfermaEliminaMappa] = useState(false);
   const [nuovaMappaAperta, setNuovaMappaAperta] = useState(false);
@@ -178,7 +179,11 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
       await caricaImmagineMappa(chiave, file);
       notifica('success', 'Immagine di base caricata (resta nella tua istanza).');
     } catch (err) {
-      if (isApiError(err, 'mappa-con-pezzi')) { setImmagineDaConfermare({ file, messaggio: err.message }); return; }
+      if (isApiError(err, 'mappa-con-pezzi')) {
+        setImmagineDaConfermare({ messaggio: err.message, sostituisci: () => caricaImmagineMappa(chiave, file, { eliminaPezzi: true }),
+          ok: 'Immagine di base sostituita; i pezzi ritagliati dall’immagine di prima sono stati eliminati.' });
+        return;
+      }
       throw err;
     }
   });
@@ -232,8 +237,19 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
               onSalvaMappa={(d) => esegui(async()=>{const aggiornata=await aggiornaMappa(chiave,d);await albero.ricarica();if(aggiornata.chiave!==chiave)vai(aggiornata.chiave);}, 'Mappa salvata.')}
               onImmagine={caricaImmagine}
               onScaricaDallaGuida={() => esegui(async () => {
-                if (dati.entita?.tipo === 'quartiere') await scaricaPiantaQuartiere(dati.entita.chiave);
-              }, 'Pianta scaricata dalla guida nella tua istanza.')}
+                if (dati.entita?.tipo !== 'quartiere') return;
+                const quartiere = dati.entita.chiave;
+                try {
+                  await scaricaPiantaQuartiere(quartiere);
+                  notifica('success', 'Pianta scaricata dalla guida nella tua istanza.');
+                } catch (err) {
+                  // sulla mappa con pezzi la pianta scaricata sostituirebbe l'immagine da cui sono ritagliati: la stessa conferma del
+                  // caricamento di un file (L1, F5)
+                  if (!isApiError(err, 'mappa-con-pezzi')) throw err;
+                  setImmagineDaConfermare({ messaggio: err.message, sostituisci: () => scaricaPiantaQuartiere(quartiere, { eliminaPezzi: true }),
+                    ok: 'Pianta scaricata dalla guida; i pezzi ritagliati dall’immagine di prima sono stati eliminati.' });
+                }
+              })}
               onEliminaMappa={() => setConfermaEliminaMappa(true)}
               onNuovaMappa={() => setNuovaMappaAperta(true)}
               onCreaPassaggio={(destinazione) => esegui(async () => {
@@ -280,7 +296,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
           azioni={<>
             <button type="button" className="btn btn-secondary btn-sm touch" onClick={() => setImmagineDaConfermare(null)}>Annulla</button>
             <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Sostituisci ed elimina i pezzi" disabled={occupato}
-              onClick={() => { const da = immagineDaConfermare; setImmagineDaConfermare(null); if (da) void esegui(async () => { await caricaImmagineMappa(chiave, da.file, { eliminaPezzi: true }); setCopiaId(null); }, 'Immagine di base sostituita; i pezzi ritagliati dall’immagine di prima sono stati eliminati.'); }} />
+              onClick={() => { const da = immagineDaConfermare; setImmagineDaConfermare(null); if (da) void esegui(async () => { await da.sostituisci(); setCopiaId(null); }, da.ok); }} />
           </>}>
           <p className="m-0 text-[13px]">{immagineDaConfermare?.messaggio} I pezzi sono ritagli in pixel di quell’immagine: su un’altra ritaglierebbero zone sbagliate.</p>
         </Modal>
@@ -354,8 +370,9 @@ function PannelloEditor(p: PropsPannello) {
   const {sezione,onSezione:setSezione} = p;
   // solo la pianta di un quartiere si scarica dalla guida: quella delle aree dei Palazzi non c'è più (rotta tolta il 2026-09-18)
   const scaricabile = mappa.entita?.tipo === 'quartiere';
-  // l'asset del repository è un puntatore: consegnato solo se sta nel manifest degli asset
-  const assetConsegnato = useAsset(mappa.asset);
+  // l'immagine di base con la regola di ogni vista (`useImmagineMappa`, L1): la caricata, poi l'asset dichiarato se sta nel
+  // manifesto degli asset — la stessa che il visore qui accanto mostra; prima l'editor la ricalcolava per conto suo
+  const immagineDiBase = useImmagineMappa(mappa);
   // una mappa si «raggiunge» da questa se uno spillo (passaggio, stazione o altro) punta a lei: le figlie senza spillo e il genitore senza ritorno vengono segnalati
   const raggiunge = (destinazione: string) => mappa.spilli.some((s) => destinazioneMappaSpillo(s) === destinazione);
   return (
@@ -369,8 +386,8 @@ function PannelloEditor(p: PropsPannello) {
         <h3 className="visore-mappa__intestazione">Pezzi</h3>
         <p className="m-0 text-[12px] text-text-muted">Le parti disegnate a parte nell’immagine (muri mobili, passerelle…): con «Ritaglia pezzo» trascini un rettangolo attorno a una, che sparisce dalla mappa e diventa un pezzo da posare dove va, della stessa misura, con le condizioni che lo mostrano.</p>
         <PulsanteVisivo tono="secondario" compatto attivo={strumento === 'ritaglia'} icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Ritaglia pezzo" dettaglio={strumento === 'ritaglia' ? 'trascina un rettangolo sulla mappa' : 'poi trascina sulla mappa'}
-          disabled={occupato || !(mappa.immagineUrl || assetConsegnato)} onClick={() => p.onStrumento(strumento === 'ritaglia' ? 'seleziona' : 'ritaglia')} />
-        {!(mappa.immagineUrl || assetConsegnato) && <p className="m-0 text-[12px] text-text-muted">Serve un’immagine di base da cui ritagliare.</p>}
+          disabled={occupato || !immagineDiBase} onClick={() => p.onStrumento(strumento === 'ritaglia' ? 'seleziona' : 'ritaglia')} />
+        {!immagineDiBase && <p className="m-0 text-[12px] text-text-muted">Serve un’immagine di base da cui ritagliare.</p>}
         {mappa.pezzi.length === 0
           ? <p className="m-0 text-[12px] text-text-muted">Nessun pezzo su questa mappa.</p>
           : (
@@ -446,7 +463,7 @@ function PannelloEditor(p: PropsPannello) {
       <div hidden={sezione !== 'mappa'} className="editor-mappa__contenuto">
       <section className="visore-mappa__sezione" aria-label="Immagine di base">
         <h3 className="visore-mappa__intestazione">Immagine di base</h3>
-        <p className="m-0 text-[12px] text-text-muted">{mappa.immagineUrl ? `Immagine dell'istanza${mappa.larghezza && mappa.altezza ? ` · ${mappa.larghezza}×${mappa.altezza}` : ''}` : mappa.asset ? (assetConsegnato ? `Asset del repository «${mappa.asset}».` : `Asset del repository «${mappa.asset}» non ancora consegnato: gli spilli stanno su una griglia.`) : 'Nessuna immagine: gli spilli stanno su una griglia.'} Cambiare immagine mantiene gli spilli (coordinate in percentuale).</p>
+        <p className="m-0 text-[12px] text-text-muted">{mappa.immagineUrl ? `Immagine dell'istanza${mappa.larghezza && mappa.altezza ? ` · ${mappa.larghezza}×${mappa.altezza}` : ''}` : mappa.asset ? (immagineDiBase ? `Asset del repository «${mappa.asset}».` : `Asset del repository «${mappa.asset}» non ancora consegnato: gli spilli stanno su una griglia.`) : 'Nessuna immagine: gli spilli stanno su una griglia.'} Cambiare immagine mantiene gli spilli (coordinate in percentuale).</p>
         <input ref={inputImmagine} type="file" accept="image/*" className="sr-only" aria-label="File dell'immagine di base" onChange={(e: ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) void p.onImmagine(f); e.target.value = ''; }} />
         <div className="flex flex-wrap gap-1.5">
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo={mappa.immagineUrl ? 'Sostituisci immagine' : 'Carica immagine'} disabled={occupato} onClick={() => inputImmagine.current?.click()} />

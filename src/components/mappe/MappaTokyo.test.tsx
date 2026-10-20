@@ -7,6 +7,8 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { MappaTokyo } from './MappaTokyo';
 import type { DungeonRiassuntoDto, QuartiereRiassuntoDto } from '../../types';
+import { useAssetStore } from '../../stores/assetStore';
+import { usePreferenzeStore } from '../../stores/preferenzeStore';
 
 const quartieri = [
   { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, sbloccoData: null, descrizione: '' },
@@ -55,5 +57,19 @@ describe('MappaTokyo — fermate non ancora nel mondo', () => {
     expect(indirizzo()).toBe('/guida/mappe/kamoshida%2Fprigione?spillo=42');
     rerender(<MemoryRouter><MappaTokyo quartieri={quartieri} dungeon={[{ ...kamoshida, atterraggio: { mappa: 'kamoshida/ingresso', spillo: null } }]} dataGioco="04-11" /></MemoryRouter>);
     expect(indirizzo()).toBe('/guida/mappe/kamoshida%2Fingresso');
+  });
+});
+
+describe('MappaTokyo — i segni dei posti con la grafica predefinita spenta (UX-2, decisione del PM del 2026-10-21)', () => {
+  afterEach(() => { usePreferenzeStore.setState({ graficaPredefinita: true }); });
+  it('sagome e stemmi restano, presi dal manifesto, e ogni cartellino ha il suo nome', () => {
+    useAssetStore.setState({ manifest: { generato: 'T', totale: 2, file: { 'mappe/lmap/tokyo/shibuya': '/sagoma-shibuya.png', 'palazzi/kamoshida': '/stemma-kamoshida.png' } }, caricato: true, mancanti: {} });
+    usePreferenzeStore.setState({ graficaPredefinita: false });
+    const kamoshida = { chiave: 'kamoshida', nome: 'Palazzo di Kamoshida', finestra: { dal: '04-11', al: '05-02' }, completato: null, atterraggio: null } as DungeonRiassuntoDto;
+    render(<MemoryRouter><MappaTokyo quartieri={quartieri} dungeon={[kamoshida]} dataGioco="04-11" /></MemoryRouter>);
+    const shibuya = screen.getByTitle('Shibuya');
+    expect(shibuya.querySelector('img')).toHaveAttribute('src', '/sagoma-shibuya.png');
+    // il cartellino sulla mappa (non il chip dell'elenco sotto): ha il titolo col nome del Palazzo
+    expect(document.querySelector('a.spillo-tokyo[title^="Palazzo di Kamoshida"] img')).toHaveAttribute('src', '/stemma-kamoshida.png');
   });
 });

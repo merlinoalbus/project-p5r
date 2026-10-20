@@ -7,7 +7,7 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { eliminaImmagini, getImmagini, type AmbitoImmagine } from '../../services/api';
+import { eliminaImmagini, getImmagini, isApiError, type AmbitoImmagine } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { Modal } from '../shared/Modal';
@@ -30,6 +30,8 @@ export function ImmaginiCaricate() {
   const elenco = useCarica(() => getImmagini(), []);
   const [daRimuovere, setDaRimuovere] = useState<AmbitoImmagine | 'tutte' | null>(null);
   const [occupato, setOccupato] = useState(false);
+  /** Il messaggio del server quando la rimozione toglierebbe l'immagine a mappe con dei pezzi (409 `mappa-con-pezzi`). */
+  const [pezziDaConfermare, setPezziDaConfermare] = useState<string | null>(null);
   const conteggi = useMemo(() => {
     const c: Record<string, number> = {};
     for (const i of elenco.dati ?? []) c[i.ambito] = (c[i.ambito] ?? 0) + 1;
@@ -41,21 +43,25 @@ export function ImmaginiCaricate() {
    * Esegue la rimozione confermata nella finestra: elimina sul server le immagini dell'ambito scelto (o tutte),
    * svuota la cache locale delle immagini per lo stesso ambito, chiude la finestra e ricarica i conteggi.
    */
-  const rimuovi = async () => {
+  const rimuovi = async (eliminaPezzi = false) => {
     if (!daRimuovere) return;
     setOccupato(true);
     try {
-      const esito = await eliminaImmagini(daRimuovere === 'tutte' ? undefined : daRimuovere);
+      const esito = await eliminaImmagini(daRimuovere === 'tutte' ? undefined : daRimuovere, { eliminaPezzi });
       azzeraCacheImmagini(daRimuovere === 'tutte' ? undefined : daRimuovere);
       notifica('success', esito.eliminate === 1 ? 'Rimossa 1 immagine.' : `Rimosse ${esito.eliminate} immagini.`);
-      setDaRimuovere(null);
+      chiudi();
       void elenco.ricarica();
     } catch (err) {
-      notifica('error', err instanceof Error ? err.message : 'Rimozione fallita.');
+      // fra le immagini c'è quella di una mappa con pezzi ritagliati da lei (L1, F5): la finestra resta aperta e chiede la conferma
+      if (isApiError(err, 'mappa-con-pezzi')) setPezziDaConfermare(err.message);
+      else notifica('error', err instanceof Error ? err.message : 'Rimozione fallita.');
     } finally {
       setOccupato(false);
     }
   };
+  /** Chiude la finestra di conferma e dimentica l'eventuale richiesta sui pezzi. */
+  const chiudi = () => { setDaRimuovere(null); setPezziDaConfermare(null); };
 
   /** Complemento oggetto per il testo della conferma: «tutte le immagini caricate» o «le immagini caricate per <ambito>». */
   const nomeAmbito = (a:AmbitoImmagine | 'tutte') => (a === 'tutte' ? 'tutte le immagini caricate' : `le immagini caricate per ${AMBITI.find((x) => x.chiave === a)?.nome ?? a}`);
@@ -85,15 +91,18 @@ export function ImmaginiCaricate() {
       <Modal
         titolo="Conferma rimozione"
         aperta={daRimuovere !== null}
-        onChiudi={() => setDaRimuovere(null)}
+        onChiudi={chiudi}
         azioni={
           <>
-            <button type="button" className="btn btn-secondary" onClick={() => setDaRimuovere(null)}>Annulla</button>
-            <button type="button" className="btn btn-danger" disabled={occupato} onClick={() => void rimuovi()}>Rimuovi</button>
+            <button type="button" className="btn btn-secondary" onClick={chiudi}>Annulla</button>
+            {pezziDaConfermare
+              ? <button type="button" className="btn btn-danger" disabled={occupato} onClick={() => void rimuovi(true)}>Rimuovi anche i pezzi</button>
+              : <button type="button" className="btn btn-danger" disabled={occupato} onClick={() => void rimuovi()}>Rimuovi</button>}
           </>
         }
       >
         <p className="m-0 text-[14px]">Rimuovere {daRimuovere ? nomeAmbito(daRimuovere) : ''}? L'app tornerà a mostrare la grafica predefinita; l'operazione non si può annullare.</p>
+        {pezziDaConfermare && <p className="m-0 mt-2 text-[14px] text-warning">{pezziDaConfermare} I pezzi sono ritagli in pixel di quelle immagini: senza di loro non hanno più senso e se ne vanno con loro.</p>}
       </Modal>
     </section>
   );

@@ -26,10 +26,10 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
   },
   'POST /api/mappe/piante-citta/:quartiere/scarica': {
     sommario: 'Scarica nell\'istanza la mappa di un quartiere dall\'indirizzo registrato nei dati di gioco',
-    descrizione: 'Legge l\'indirizzo della pianta del quartiere, scarica l\'immagine e la salva nell\'ambito «mappa» con la chiave `citta-<quartiere>` (sostituendo quella che c\'era). 404 se per il quartiere non è registrata nessuna pianta; 400 se lo scarico fallisce o il file supera il limite.',
+    descrizione: 'Legge l\'indirizzo della pianta del quartiere, scarica l\'immagine e la salva nell\'ambito «mappa» con la chiave `citta-<quartiere>` (sostituendo quella che c\'era). La mappa del quartiere segue la strada dell\'editor (L1): dimensioni e ruolo dalla regola unica, e i pezzi ritagliati dall\'immagine di prima da confermare (409 `mappa-con-pezzi`, con `?eliminaPezzi=1` se ne vanno). L\'origine della mappa non cambia: è la pianta pubblicata dai dati di gioco, non una scelta dell\'utente. 404 se per il quartiere non è registrata nessuna pianta; 400 se lo scarico fallisce o il file supera il limite.',
     risposta: '`{ quartiere, mime, byte, fonte, url }`',
     senzaCorpo: true,
-    errori: [[404, 'pianta-non-disponibile'], [400, 'download-fallito'], [400, 'immagine-troppo-grande'], [400, 'formato-non-ammesso']],
+    errori: [[404, 'pianta-non-disponibile'], [400, 'download-fallito'], [400, 'immagine-troppo-grande'], [400, 'formato-non-ammesso'], [409, 'mappa-con-pezzi']],
   },
   'GET /api/mappe/albero': {
     sommario: 'Albero completo delle mappe, in forma piatta con il genitore',
@@ -38,14 +38,14 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
   },
   'GET /api/mappe/esporta': {
     sommario: 'Pacchetto JSON delle mappe da scaricare: tutte o un luogo con le sue discendenti',
-    descrizione: 'Mappe, spilli (con le schermate in base64) e immagini di base dell\'istanza in base64: è lo stesso formato che `POST /api/mappe/importa` accetta. Con `radice` solo quella mappa e le sue discendenti. La risposta ha `Content-Disposition: attachment` con il nome `mappe-<radice|tutte>.json`.',
+    descrizione: 'Mappe, spilli (con le schermate in base64) e immagini di base dell\'istanza in base64: è lo stesso formato che `POST /api/mappe/importa` accetta. Con `radice` solo quella mappa e le sue discendenti. `asset` (e `assetOriginale`, uguale) è l\'asset dichiarato dalla mappa se esiste, altrimenti null (L1: prima `mappe/<chiave>` per convenzione). La risposta ha `Content-Disposition: attachment` con il nome `mappe-<radice|tutte>.json`.',
     risposta: '`EsportazioneMappeDto`',
     senzaProva: 'Troppo pesante per essere mostrato in una pagina: con le immagini in base64 l\'esportazione di tutte le mappe supera i 10 MB. Prima di esportare assegna l\'uid agli spilli che non l\'hanno ancora (`assegnaUidMancanti`). Si scarica dall\'editor delle mappe (Esporta).',
     errori: [[404, 'mappa-non-trovata']],
   },
   'POST /api/mappe/importa': {
     sommario: 'Importa un pacchetto di mappe nel formato dell\'esportazione',
-    descrizione: 'Il pacchetto deve avere `versione: 1`. Le mappe si abbinano per chiave: senza `sovrascrivi` quelle già presenti si saltano, come quelle con chiave o tipo non validi (elencate in `saltate`); con `sovrascrivi` mappe e spilli esistenti si sostituiscono. Le righe importate sono dell\'utente. I pezzi delle planimetrie (`pezzi`, 102), ognuno con le sue `copie` (103; un pezzo della 102, con la posa accanto alla zona, si legge come un pezzo con una copia), di una mappa importata sostituiscono i suoi (un reseed del seed non li tocca; un pacchetto senza il campo li lascia com\'erano); si scrivono a immagini importate: le copie che escono dall\'immagine della mappa d\'arrivo si scartano (`copieScartate`), e con loro il pezzo con la zona fuori o rimasto senza copie (`pezziScartati`); tutti, se la mappa non ha un\'immagine. Un\'immagine importata diversa da quella che la mappa aveva toglie i pezzi ritagliati dalla vecchia, con le copie (se il pacchetto non ne porta di nuovi per quella mappa), contati in `pezziEliminati` (e le copie in `copieEliminate`); una identica li lascia. Condizioni che citano chiavi assenti dalla guida e voci della guida non ammesse si scartano e si contano; tutto avviene in una transazione.',
+    descrizione: 'Il pacchetto deve avere `versione: 1`. Le mappe si abbinano per chiave: senza `sovrascrivi` quelle già presenti si saltano, come quelle con chiave o tipo non validi (elencate in `saltate`); con `sovrascrivi` mappe e spilli esistenti si sostituiscono. Le righe importate sono dell\'utente. I pezzi delle planimetrie (`pezzi`, 102), ognuno con le sue `copie` (103; un pezzo della 102, con la posa accanto alla zona, si legge come un pezzo con una copia), di una mappa importata sostituiscono i suoi (un reseed del seed non li tocca; un pacchetto senza il campo li lascia com\'erano); si scrivono a immagini importate: le copie che escono dall\'immagine della mappa d\'arrivo si scartano (`copieScartate`), e con loro il pezzo con la zona fuori o rimasto senza copie (`pezziScartati`); tutti, se la mappa non ha un\'immagine. Un\'immagine importata diversa da quella che la mappa aveva toglie i pezzi ritagliati dalla vecchia, con le copie (se il pacchetto non ne porta di nuovi per quella mappa), contati in `pezziEliminati` (e le copie in `copieEliminate`); una identica li lascia. Le dimensioni di una mappa con un\'immagine importata sono quelle lette dall\'intestazione dell\'immagine, che vincono su quelle dichiarate dal pacchetto; se l\'intestazione non si legge (SVG) restano quelle del pacchetto. Condizioni che citano chiavi assenti dalla guida e voci della guida non ammesse si scartano e si contano; tutto avviene in una transazione.',
     risposta: '`{ mappe, spilli, pezzi, copie, pezziScartati, copieScartate, pezziEliminati, copieEliminate, immagini, saltate, condizioniScartate, vociScartate }` (conteggi e chiavi saltate)',
     errori: [[400, 'pacchetto-non-valido'], [400, 'destinazione-non-valida'], [404, 'destinazione-non-trovata'], [400, 'voce-non-valida'], [400, 'pezzi-non-validi']],
   },
@@ -68,7 +68,7 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
   },
   'POST /api/mappe': {
     sommario: 'Crea una mappa dall\'editor',
-    descrizione: 'La chiave si ricava dal nome, preceduta da quella del genitore salvo sotto una città; deve essere valida, non riservata a una rotta di `/api/mappe` e libera (409 se esiste). Una `chiave` richiesta diversa resta come alias. Senza `asset` si usa quello predefinito `mappe/<chiave>`. Un\'infiltrazione si lega solo a una planimetria del suo Palazzo. Con un genitore, `passaggio` crea lo spillo di passaggio nel genitore verso la nuova mappa e `ritorno` quello inverso.',
+    descrizione: 'La chiave si ricava dal nome, preceduta da quella del genitore salvo sotto una città; deve essere valida, non riservata a una rotta di `/api/mappe` e libera (409 se esiste). Una `chiave` richiesta diversa resta come alias. Senza `asset` si usa quello predefinito `mappe/<chiave>` solo se esiste nella grafica predefinita, altrimenti nessuno (L1: niente asset per convenzione che non c\'è); un `asset` indicato si conserva com\'è. Un\'infiltrazione si lega solo a una planimetria del suo Palazzo. Con un genitore, `passaggio` crea lo spillo di passaggio nel genitore verso la nuova mappa e `ritorno` quello inverso.',
     risposta: 'La mappa creata: `MappaDto`',
     errori: [[404, 'mappa-non-trovata'], [409, 'mappa-esistente'], [400, 'chiave-riservata'], [400, 'chiave-non-valida'], [400, 'mappa-fuori-palazzo'], [400, 'area-inesistente'], [400, 'area-di-altro-palazzo']],
   },

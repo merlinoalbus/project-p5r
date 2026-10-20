@@ -1390,9 +1390,15 @@ export interface CruciverbaTuttiDto {
 export type { DoteChiave } from './doti.js';
 
 export interface IngressoQuartiereDto { mappa:string; nome:string; x:number; y:number; zoom:number }
+/** L'illustrazione di un posto (quartiere, Palazzo) presa dalla sua mappa con la regola unica di L1: prima l'immagine
+ *  caricata (URL versionato), poi l'asset dichiarato. `asset` è null quando l'asset della mappa è lo stemma del posto
+ *  (radici dei Palazzi), che le viste mostrano già come segno: l'illustrazione allora c'è solo se caricata. */
+export interface IllustrazioneDto { immagineUrl: string | null; asset: string | null }
 export interface QuartiereRiassuntoDto {
   mappaChiave?:string;
   ingresso?:IngressoQuartiereDto|null;
+  /** L'illustrazione della mappa del quartiere (`citta-<quartiere>`), sotto la sagoma nella scheda (scelta dell'utente, 2026-10-20). */
+  illustrazione: IllustrazioneDto;
   sbloccoData?:string|null;
   chiave: string;
   nome: string;
@@ -1460,8 +1466,10 @@ export interface QuartiereDettaglioDto {
   descrizione: string;
   fonte: string;
   luoghi: LuogoDto[];
-  /** Immagine della mappa presente nell'istanza (ambito «mappa», chiave `citta-<quartiere>`). */
+  /** La mappa del quartiere ha un'immagine caricata nell'istanza (registrata su `immagine_chiave` o con la chiave della mappa). */
   mappa: boolean;
+  /** L'illustrazione della mappa del quartiere, sotto la sagoma nell'intestazione (scelta dell'utente, 2026-10-20). */
+  illustrazione: IllustrazioneDto;
   /** Collegamento alla mappa pubblicata (null se nessuna fonte la offre). */
   pianta: PiantaAreaDto | null;
   piantaAssente: string | null;
@@ -1795,13 +1803,9 @@ export interface AreaDungeonDto {
   ordine: number;
   nome: string;
   descrizione: string;
-  /** Immagine caricata per quest'area nell'istanza (ambito «mappa»), se qualcuno ce l'ha messa.
-   *
-   * La **pianta pubblicata dalla guida non c'è più** (2026-09-18): era una seconda immagine della
-   * stessa stanza, con un suo scaricamento da indirizzi esterni e un suo sistema di marcatori, e
-   * su centosette aree se ne erano scaricate undici. La stanza si guarda sulla planimetria
-   * dell'atlante; dove manca il legame, la scheda dà da collegarla invece di un'altra immagine. */
-  mappa: boolean;
+  // `mappa: boolean` (un'immagine caricata con la chiave dell'infiltrazione, la vecchia «pianta pubblicata dalla guida», tolta il
+  // 2026-09-18) è uscito col lotto L1 (2026-10-20): nessuna vista lo leggeva più, e l'immagine di un posto è quella delle sue
+  // planimetrie, dal risolutore unico (`immagineMappa.ts`).
   /** Le planimetrie native dell'atlante legate a quest'area (`mappa_entita`), in ordine.
    *
    * Servono alla scheda del Palazzo per **mostrare la mappa invece di un rimando**. L'area della
@@ -1939,6 +1943,8 @@ export interface DungeonDettaglioDto extends Omit<DungeonRiassuntoDto, 'aree'> {
   planimetrie: Array<{ chiave: string; nome: string; ordine: number; aree: Array<{ chiave: string; nome: string; ordine: number }>; n: number; presi: number | null; spilli: SpilloRaccoltaDto[] }>;
   /** Le regole di atterraggio dalla mappa di Tokyo, nell'ordine in cui si provano (2026-10-04). */
   atterraggi: AtterraggioPalazzoDto[];
+  /** L'illustrazione caricata sulla radice `dungeon-<chiave>`, sotto lo stemma nell'intestazione (scelta dell'utente, 2026-10-20). */
+  illustrazione: IllustrazioneDto;
   /** Le Persona registrate nel compendio della partita (id): nei Memento sono le «catturate», in ogni area e in ogni dedalo
    *  (scelte dell'utente, 2026-10-12). null senza partita. */
   personeCatturate: number[] | null;

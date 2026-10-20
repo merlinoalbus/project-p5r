@@ -35,8 +35,7 @@ import { urlMappa } from '../../utils/navigazioneMappa';
 import {
   COVO_TOKYO, LINEE_TOKYO, QUARTIERI_TOKYO, RADICI_TOKYO, SENZA_SCHEDA_TOKYO, type Collocazione,
 } from './collocazioneTokyo';
-import { SEGNO_COVO, nascondiSegnoAssente, segnoPalazzo, segnoQuartiere } from './segniMappa';
-import { useRisolviAsset } from '../../stores/assetStore';
+import { SEGNO_COVO, nascondiSegnoAssente, segnoPalazzo, segnoQuartiere, useRisolviSegno } from './segniMappa';
 import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -348,8 +347,9 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
     if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
   }, []);
 
-  // i segni dei posti (sagome, stemmi, il Covo) con la regola della grafica predefinita (L1): manifesto e preferenza
-  const risolvi = useRisolviAsset();
+  // i segni dei posti (sagome, stemmi, il Covo) dal manifesto, anche con la grafica predefinita spenta: senza, la metro restava di
+  // sole linee e nodi (UX-2, decisione del PM del 2026-10-21)
+  const risolvi = useRisolviSegno();
   const { presenti, assenti, nomiFermate } = useMemo(() => {
     const segni: Segno[] = [];
     for (const q of quartieri) {

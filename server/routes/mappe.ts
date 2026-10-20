@@ -33,8 +33,9 @@ router.get('/accesso/:tipo/:chiave', validate({ params: z.object({ tipo: z.enum(
 });
 
 /** Scarica nell'istanza la mappa del quartiere dall'indirizzo collegato nei dati di gioco (`pianta_quartiere`). */
-router.post('/piante-citta/:quartiere/scarica', validate({ params: z.object({ quartiere: z.string().min(1).max(80) }) }), async (req, res) => {
-  res.status(201).json(await scaricaPiantaQuartiere(String(req.params.quartiere)));
+// L1 (F5): sulla mappa del quartiere con pezzi la sostituzione chiede conferma (409 `mappa-con-pezzi`, `?eliminaPezzi=1`).
+router.post('/piante-citta/:quartiere/scarica', validate({ params: z.object({ quartiere: z.string().min(1).max(80) }), query: queryImmagineMappa }), async (req, res) => {
+  res.status(201).json(await scaricaPiantaQuartiere(String(req.params.quartiere), { eliminaPezzi: (req.query as { eliminaPezzi?: string }).eliminaPezzi === '1' }));
 });
 
 // ---- Mappe a livelli e spilli (Fase 13) ----

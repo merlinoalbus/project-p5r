@@ -25,6 +25,7 @@ import { runMigrations } from './db/migrationRunner.js';
 import { createApp } from './bootstrap.js';
 
 import { assicuraPacchettoIniziale, regoleAllAvvio } from './services/pacchetto/pacchettoGioco.js';
+import { riscaldaMiniature } from './services/miniatureService.js';
 /** Quanto può durare la RICEZIONE di una richiesta, corpo compreso.
  *
  * Node ne concede 300 secondi (`requestTimeout`) e il limite riguarda solo la richiesta ancora in arrivo, non il lavoro
@@ -72,6 +73,8 @@ const server = app.listen(config.port, () => {
     { port: config.port, dataDir: config.dataDir },
     `Backend in ascolto su http://localhost:${config.port}`,
   );
+  // le miniature delle schede (L1): in background, mai bloccante; il log dice quante e in quanto tempo
+  setImmediate(() => { void riscaldaMiniature(); });
 });
 server.requestTimeout = RICEZIONE_MAX_MS;
 

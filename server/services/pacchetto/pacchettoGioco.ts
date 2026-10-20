@@ -28,12 +28,15 @@ import { collegaLuoghiAllePlanimetrie } from '../../db/migrations/054_luoghi_con
 import { riallineaSpilliLuoghi } from '../mappe/sincronizzaMappe.js';
 import { assegnaUidMancanti } from '../mappe/identitaSpillo.js';
 import { assorbiFileDelleRighe } from '../../db/migrations/079_immagini_nel_database.js';
+import { pulisciMiniatureOrfane } from '../miniatureService.js';
 
 /** Le regole sui dati che ogni avvio riapplica (non c'è più un seed da ricaricare): nomi degli
  *  spilli non identificati, luoghi legati alla planimetria omonima, spilli dei luoghi allineati
  *  al catalogo dei tipi, immagini rimaste su disco assorbite nel database. Tutte idempotenti. */
-export function regoleAllAvvio(db: AppDatabase): { spilliTradotti: number; luoghiCollegati: number; spilliRiallineati: number; spilliIdentificati: number; immaginiAssorbite: number } {
-  return { spilliTradotti: traduciNomiSpilli(db), luoghiCollegati: collegaLuoghiAllePlanimetrie(db), spilliRiallineati: riallineaSpilliLuoghi(db), spilliIdentificati: assegnaUidMancanti(db), immaginiAssorbite: assorbiImmaginiSuDisco(db) };
+export function regoleAllAvvio(db: AppDatabase): { spilliTradotti: number; luoghiCollegati: number; spilliRiallineati: number; spilliIdentificati: number; immaginiAssorbite: number; miniatureOrfane: number } {
+  // le miniature (108) senza la loro sorgente, o di un'altra versione, se ne vanno dopo l'assorbimento delle immagini (L1)
+  const regole = { spilliTradotti: traduciNomiSpilli(db), luoghiCollegati: collegaLuoghiAllePlanimetrie(db), spilliRiallineati: riallineaSpilliLuoghi(db), spilliIdentificati: assegnaUidMancanti(db), immaginiAssorbite: assorbiImmaginiSuDisco(db) };
+  return { ...regole, miniatureOrfane: pulisciMiniatureOrfane(db) };
 }
 
 /**
@@ -100,6 +103,13 @@ export function assicuraPacchettoIniziale(dbPath: string = resolveDbPath()): { d
 const NON_DAL_PACCHETTO = new Set(['sqlite_sequence', 'sqlite_stat1']);
 
 /**
+ * Le tabelle di dati derivati: dal pacchetto si prende lo schema (in un file nuovo la migrazione che le crea non ripartirebbe:
+ * `user_version` è già quella del pacchetto) ma mai le righe. Le miniature (108, L1) si rigenerano dall'istanza; lo script del
+ * pacchetto le svuota comunque.
+ */
+const SOLO_SCHEMA = new Set(['immagine_miniatura']);
+
+/**
  * Carica il pacchetto dentro la connessione aperta e applica le migrazioni mancanti. Due casi:
  * - file di gioco **vuoto** (l'avvio in memoria dei test): schema e righe arrivano dal pacchetto e
  *   `user_version` diventa quella del pacchetto, poi le migrazioni successive;
@@ -129,11 +139,11 @@ export function caricaPacchetto(db: AppDatabase, percorso: string = percorsoPacc
         if (!schemaFormato) {
           // la DDL del pacchetto vale così com'è: nomi senza schema finiscono in main
           db.exec(o.sql);
-          if (o.type === 'table') {
+          if (o.type === 'table' && !SOLO_SCHEMA.has(o.name)) {
             const colonne = (db.prepare(`PRAGMA pacchetto.table_info("${o.name}")`).all() as Array<{ name: string }>).map((c) => c.name).filter((c) => !senzaByte(o.name, c)).map((c) => `"${c}"`).join(', ');
             righe += db.prepare(`INSERT INTO main."${o.name}" (${colonne}) SELECT ${colonne} FROM pacchetto."${o.name}"`).run().changes; tabelle++;
           }
-        } else if (o.type === 'table' && tabelleMain.has(o.name)) {
+        } else if (o.type === 'table' && tabelleMain.has(o.name) && !SOLO_SCHEMA.has(o.name)) {
           const colonne = (db.prepare(`PRAGMA main.table_info("${o.name}")`).all() as Array<{ name: string }>).map((c) => c.name);
           const nelPacchetto = new Set((db.prepare(`PRAGMA pacchetto.table_info("${o.name}")`).all() as Array<{ name: string }>).map((c) => c.name));
           const comuni = colonne.filter((c) => nelPacchetto.has(c) && !senzaByte(o.name, c)).map((c) => `"${c}"`).join(', ');
@@ -170,7 +180,7 @@ export function ricaricaPacchetto(db: AppDatabase, percorso: string = percorsoPa
     db.transaction(() => {
       const nomi = (db.prepare("SELECT name FROM pacchetto.sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'").all() as Array<{ name: string }>).map((r) => r.name);
       for (const t of nomi) {
-        if (NON_DAL_PACCHETTO.has(t) || !db.prepare("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = ?").get(t)) continue;
+        if (NON_DAL_PACCHETTO.has(t) || SOLO_SCHEMA.has(t) || !db.prepare("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = ?").get(t)) continue;
         const colonne = (db.prepare(`PRAGMA main.table_info("${t}")`).all() as Array<{ name: string }>).map((c) => c.name);
         const nelPacchetto = new Set((db.prepare(`PRAGMA pacchetto.table_info("${t}")`).all() as Array<{ name: string }>).map((c) => c.name));
         const comuni = colonne.filter((c) => nelPacchetto.has(c)).map((c) => `"${c}"`).join(', ');
@@ -201,6 +211,8 @@ export function ricaricaPacchetto(db: AppDatabase, percorso: string = percorsoPa
     db.pragma('foreign_keys = ON');
     db.prepare('DETACH DATABASE pacchetto').run();
   }
+  // le immagini sono state sostituite a chiavi esterne spente: le miniature rimaste senza la loro sorgente se ne vanno (L1)
+  pulisciMiniatureOrfane(db);
   invalidaCacheDiGioco();
   return { tabelle, righe };
 }

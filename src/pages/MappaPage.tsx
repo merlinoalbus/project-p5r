@@ -342,7 +342,7 @@ function Griglia({ mappe, nome, etichetta, titoli, onScendi }: { mappe: MappaRia
       // il filo. Quelli che non contengono niente sono la fine della discesa e portano al visore.
       const corpo = <>
         <span className="relative">
-          <AnteprimaMappa mappa={m} className="aspect-[4/3] w-full" />
+          <AnteprimaMappa mappa={m} className="aspect-[4/3] w-full" sizes="(min-width: 1536px) 25vw, (min-width: 768px) 33vw, 50vw" />
           {/* Il numero degli spilli sta **sull'anteprima**, non sotto il nome: e' il dato che fa
               scegliere quale aprire, e nella riga sotto si perdeva in mezzo al resto. */}
           {m.numeroSpilli > 0 && <span aria-hidden className="chip chip--attivo absolute right-1.5 top-1.5 text-[11px]">{m.numeroSpilli}</span>}
@@ -390,7 +390,7 @@ function DettaglioMappa({ chiave, partitaId }: { chiave: string; partitaId: numb
         {!haPlanimetria(mappa) ? <LuogoSenzaPlanimetria mappa={mappa} nome={presentata!.nome} albero={albero} partitaId={partitaId} />
          : <><VisoreMappa
           key={`${mappa.chiave}-${spilloIniziale ?? ''}-${params.get('x') ?? ''}-${params.get('y') ?? ''}-${params.get('zoom') ?? ''}`}
-          contenutiPannello={<><SelettoreContestoMappa mappa={mappa} selezione={params.get('contesto')} onCambia={id => { const q = new URLSearchParams(params); if (id) q.set('contesto', id); else q.delete('contesto'); setParams(q, { replace: true }); }} />{mappa.gruppoImmagini ? <ImmaginiLuogo mappe={(albero.dati ?? [mappa]).filter(m => m.gruppoImmagini?.id === mappa.gruppoImmagini!.id)} attuale={mappa.chiave} /> : <nav aria-label={etichettaMappeSorelle(mappa.tipo)}><Selettore etichetta={titoloMappeSorelle(mappa.tipo)} valore={mappa.chiave} opzioni={(albero.dati ?? [mappa]).filter(m => m.chiave === mappa.chiave || (m.genitore === mappa.genitore && !!(m.immagineUrl || m.asset))).map(m => ({ chiave: m.chiave, nome: nomePresentazioneMappa(m) }))} onCambia={k => navigate(urlMappa(k))} /></nav>}<ContenutiGuidaMappa mappa={mappa.chiave} area={params.get('area')} dungeon={mappa.entita?.tipo === 'dungeon' ? mappa.entita.chiave : undefined} /></>}
+          contenutiPannello={<><SelettoreContestoMappa mappa={mappa} selezione={params.get('contesto')} onCambia={id => { const q = new URLSearchParams(params); if (id) q.set('contesto', id); else q.delete('contesto'); setParams(q, { replace: true }); }} />{mappa.gruppoImmagini ? <ImmaginiLuogo mappe={(albero.dati ?? [mappa]).filter(m => m.gruppoImmagini?.id === mappa.gruppoImmagini!.id)} attuale={mappa.chiave} /> : <nav aria-label={etichettaMappeSorelle(mappa.tipo)}><Selettore etichetta={titoloMappeSorelle(mappa.tipo)} valore={mappa.chiave} opzioni={(albero.dati ?? [mappa]).filter(m => m.chiave === mappa.chiave || (m.genitore === mappa.genitore && haPlanimetria(m))).map(m => ({ chiave: m.chiave, nome: nomePresentazioneMappa(m) }))} onCambia={k => navigate(urlMappa(k))} /></nav>}<ContenutiGuidaMappa mappa={mappa.chiave} area={params.get('area')} dungeon={mappa.entita?.tipo === 'dungeon' ? mappa.entita.chiave : undefined} /></>}
           mappa={presentata!}
           partitaId={partitaId}
           selezioneIniziale={spilloIniziale} puntoIniziale={puntoIniziale}

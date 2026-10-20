@@ -15,7 +15,7 @@ const voce = (chiave: string, nome: string, stato: PuntoInteresseDto['stato'], d
   chiave, ordine: 0, tipo: 'trama', nome, descrizione, esauribile: false, dettagli: {}, fonte: '', stato, marcatore: null, pin: [], contenitore: null, areaDedalo: 'q-1', persona: null, areeDedalo: [],
 });
 /** Il dedalo con le voci date. */
-const dedalo = (punti: PuntoInteresseDto[]): AreaDungeonDto => ({ chiave: 'mementos-01-qimranut', ordine: 0, nome: 'Dedalo di Qimranut', descrizione: '', mappa: false, mappe: [], punti, dedalo: null });
+const dedalo = (punti: PuntoInteresseDto[]): AreaDungeonDto => ({ chiave: 'mementos-01-qimranut', ordine: 0, nome: 'Dedalo di Qimranut', descrizione: '', mappe: [], punti, dedalo: null });
 
 /** Disegna la Trama e restituisce `cambiaStato`. */
 function monta(punti: PuntoInteresseDto[], partitaId: number | null = 4, modifica = false) {

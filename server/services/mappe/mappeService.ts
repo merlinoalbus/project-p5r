@@ -22,7 +22,7 @@ import { HttpError, httpErrors } from '../../utils/httpError.js';
 import { conCestino, registraRipristinoCestino } from '../cestinoService.js';
 import { verificaPartita } from '../verificaPartita.js';
 import { t } from '../traduzioniService.js';
-import { eliminaImmagine, fileImmagine, leggiImmagine, salvaImmagine } from '../immaginiService.js';
+import { eliminaImmagine, fileImmagine, leggiImmagine, salvaImmagine, scaricaImmagine } from '../immaginiService.js';
 import { acquistiDellaPartita, dettaglioNegozio } from '../negoziService.js';
 import { giocabili } from '../squadraService.js';
 import { nomiCondizioni, pinCitato } from '../condizioni/nomiCondizioni.js';
@@ -34,11 +34,11 @@ import { pinCitati, verificaGiro } from './condizioniTraPin.js';
 import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { palazzoDellaMappa, sottoalberoMappe } from './alberoMappe.js';
-import { allineaRuoliImmagine, caricataDellaMappa, dimensioniImmagine, immaginiCaricateDelleMappe, urlCaricata, type ImmagineCaricata } from './immagineMappa.js';
+import { allineaRuoliImmagine, assetEsistente, caricataDellaMappa, dimensioniImmagine, immaginiCaricateDelleMappe, urlCaricata, type ImmagineCaricata } from './immagineMappa.js';
 import { senzaGergo } from '../../../shared/nomiMappe.js';
 import { ammetteCondizioni, categoriaSpillo, sqlVoceDescrittiva, DEFINIZIONI_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
 import type { CondizioneSpilloDto, CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, DatiPezzoMappa, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto } from '../../../shared/types.js';
-import { aggiornaCopia, aggiornaPezzo, conPezzi, copiaDto, creaCopia, creaPezzo, eliminaCopia, eliminaPezziDellaMappa, eliminaPezzo, pezziDellaMappa, pezziNellImmagine, pezziPerPacchetto, pezzoDto, righeCopie, rigaCopia, rigaPezzo, quanteCopie, quantiPezzi, schemaPezziPacchetto, sostituisciPezzi, type DimensioniMappa, type PezzoDaImportare } from './pezziMappa.js';
+import { aggiornaCopia, aggiornaPezzo, confermaPezzi, conPezzi, copiaDto, creaCopia, creaPezzo, eliminaCopia, eliminaPezziDellaMappa, eliminaPezzo, pezziDellaMappa, pezziNellImmagine, pezziPerPacchetto, pezzoDto, righeCopie, rigaCopia, rigaPezzo, quanteCopie, quantiPezzi, schemaPezziPacchetto, sostituisciPezzi, type DimensioniMappa, type PezzoDaImportare } from './pezziMappa.js';
 
 interface RigaMappa { chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null; larghezza: number | null; altezza: number | null; entita_tipo: string | null; entita_chiave: string | null; origine: 'seed' | 'utente'; note: string; updated_at: string; ruolo_immagine: RuoloImmagine; nome_rivisto?: number }
 interface RigaImmagineSpillo { id: number; spillo_id: number; ordine: number; immagine_chiave: string | null; asset: string | null; didascalia: string; updated_at: string }
@@ -824,10 +824,11 @@ export function creaMappa(chiave: string | undefined, dati: DatiMappa & { nome: 
   if (!(TIPI_MAPPA as readonly string[]).includes(dati.tipo)) throw httpErrors.badRequest('tipo-non-valido', 'Tipo di mappa non ammesso.');
   if (dati.entita?.tipo === 'area') verificaAreePalazzo(dati.genitore ?? null, [dati.entita.chiave]);
   const adesso = nowIso();
-  // 15.25: senza indicazione l'asset del repository è `mappe/<chiave>`, lo stesso percorso che «Esporta questo luogo» dà all'immagine di base:
-  // quando il file verrà consegnato in public/asset la mappa lo userà da sola; finché manca, si usa l'immagine dell'istanza o la griglia.
-  // `asset: null` esplicito resta «nessun asset».
-  const asset = dati.asset === undefined ? assetPredefinitoMappa(chiave) : dati.asset;
+  // Senza indicazione l'asset è quello predefinito `mappe/<chiave>` (15.25) **solo se esiste** nella grafica predefinita del database;
+  // altrimenti nessuno (L1, F9 del validatore): prima si scriveva sempre, per convenzione, un asset che di norma non c'era — dalla
+  // 079 la grafica sta nel database, nessun file «verrà consegnato» in public/asset — e restava nei dati come immagine fantasma.
+  // `asset: null` esplicito resta «nessun asset»; un valore esplicito si conserva com'è (lo dichiara chi crea la mappa).
+  const asset = dati.asset === undefined ? assetEsistente(assetPredefinitoMappa(chiave)) : dati.asset;
   getDb().transaction(() => {
     prepared(`INSERT INTO mappa (chiave, nome, tipo, genitore_chiave, ordine, immagine_chiave, asset, larghezza, altezza, entita_tipo, entita_chiave, origine, note, updated_at)
       VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, 'utente', ?, ?)`).run(chiave, dati.nome, dati.tipo, dati.genitore ?? null, dati.ordine ?? 0, asset, dati.larghezza ?? null, dati.altezza ?? null, dati.entita?.tipo ?? null, dati.entita?.chiave ?? null, dati.note ?? '', adesso);
@@ -976,28 +977,41 @@ registraRipristinoCestino('mappa', (_chiave, _vicini, saltate) => {
   if (saltate.some((s) => s.tabella === 'mappa' || s.tabella === 'mappa_percorso' || s.tabella === 'mappa_alias')) sincronizzaPercorsiMappe(getDb());
 });
 
-/** Immagine di base nell'istanza (ambito «mappa», chiave = chiave della mappa); dimensioni lette dall'intestazione PNG/JPEG/WEBP/GIF quando possibile. */
-export function impostaImmagineMappa(chiave: string, mime: string, contenuto: Buffer, opz: { eliminaPezzi?: boolean } = {}): MappaDto {
+/**
+ * Immagine di base nell'istanza (ambito «mappa», chiave = chiave della mappa); dimensioni lette dall'intestazione PNG/JPEG/WEBP/GIF
+ * quando possibile. È la strada di ogni scrittura dell'immagine di una mappa che esiste (L1): l'editor, la rotta generica delle
+ * immagini, lo scarico da un indirizzo (`scaricaImmagineMappa`) e lo scarico della pianta di un quartiere. `origineUrl` è
+ * l'indirizzo da cui è stata scaricata (null per un file caricato); `dellUtente` (vero se non detto) dice se è una scelta
+ * dell'utente, che fa la mappa sua: lo scarico automatico della pianta pubblicata non lo è, e lascia l'origine com'era.
+ */
+export function impostaImmagineMappa(chiave: string, mime: string, contenuto: Buffer, opz: { eliminaPezzi?: boolean; origineUrl?: string | null; dellUtente?: boolean } = {}): MappaDto {
   chiave=rigaMappa(chiave).chiave;
   // I pezzi (102) sono ritagli in pixel dell'immagine di prima: su un'altra ritaglierebbero zone sbagliate. Scelta dell'utente
-  // (2026-10-14, «Chiedere conferma ed eliminarli»): senza conferma 409 col numero dei pezzi; con la conferma se ne vanno insieme
-  // alla sostituzione, nella stessa transazione. Dalla 103 il messaggio conta anche le copie posate, che se ne vanno coi ritagli.
-  const pezzi = quantiPezzi(chiave);
-  if (pezzi > 0 && !opz.eliminaPezzi) {
-    const copie = quanteCopie(chiave);
-    throw new HttpError(409, 'mappa-con-pezzi', `La mappa ha ${pezzi === 1 ? '1 pezzo ritagliato' : `${pezzi} pezzi ritagliati`} dall’immagine di prima (${copie === 1 ? '1 copia posata' : `${copie} copie posate`}): sostituendola ${pezzi === 1 ? 'verrà eliminato' : 'verranno eliminati'} con le copie.`, { pezzi, copie });
-  }
-  // immagine e dimensioni insieme: una mappa con l'immagine nuova e le dimensioni vecchie sbaglierebbe la posizione di ogni pin
+  // (2026-10-14, «Chiedere conferma ed eliminarli»): senza conferma 409 col numero dei pezzi e delle copie posate (103); con la
+  // conferma se ne vanno insieme alla sostituzione, nella stessa transazione (`confermaPezzi`, la stessa regola delle rimozioni).
+  const togliPezzi = confermaPezzi([chiave], !!opz.eliminaPezzi, 'sostituendola');
   // immagine, dimensioni e ruolo insieme: una mappa con l'immagine nuova e le dimensioni vecchie sbaglierebbe la posizione di ogni
   // pin. `salvaImmagine` registra l'immagine sulla mappa e ne allinea il ruolo alla regola della gerarchia (L1, `immagineMappa.ts`):
   // una planimetria aggiunta al Palazzo con la sua immagine si apre nel visore (2026-10-18), e la regola è la stessa per ogni strada.
   getDb().transaction(() => {
-    if (pezzi > 0) eliminaPezziDellaMappa(chiave);
-    salvaImmagine('mappa', chiave, mime, contenuto);
+    togliPezzi();
+    salvaImmagine('mappa', chiave, mime, contenuto, opz.origineUrl ?? null);
     // caricata dall'utente: la mappa ora è sua (come ogni modifica dall'editor)
-    prepared("UPDATE mappa SET origine = 'utente' WHERE chiave = ?").run(chiave);
+    if (opz.dellUtente !== false) prepared("UPDATE mappa SET origine = 'utente' WHERE chiave = ?").run(chiave);
   })();
   return dettaglioMappa(chiave);
+}
+
+/**
+ * Scarica da un indirizzo l'immagine di base di una mappa che esiste e la imposta con `impostaImmagineMappa` (pezzi da confermare,
+ * dimensioni, ruolo, indirizzo d'origine). I pezzi si controllano anche prima dello scarico, per non scaricare un file che verrebbe
+ * rifiutato; `impostaImmagineMappa` li ricontrolla dopo, perché nel frattempo possono essere cambiati.
+ */
+export async function scaricaImmagineMappa(chiave: string, url: string, opz: { eliminaPezzi?: boolean; dellUtente?: boolean } = {}): Promise<MappaDto> {
+  chiave = rigaMappa(chiave).chiave;
+  confermaPezzi([chiave], !!opz.eliminaPezzi, 'sostituendola');
+  const { contenuto, mime, url: arrivo } = await scaricaImmagine(url);
+  return impostaImmagineMappa(chiave, mime, contenuto, { ...opz, origineUrl: arrivo.toString() });
 }
 
 /** Le dimensioni dalle intestazioni dell'immagine: stanno nel risolutore delle immagini delle mappe (`immagineMappa.ts`). */
@@ -1516,7 +1530,10 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
       // immagine registrata ma file assente: esportata senza immagine
     }
   }
-  for(const m of mappe){m.chiave=chiaveMappa(m.chiave);if(m.genitore)m.genitore=chiaveMappa(m.genitore);m.asset=assetPredefinitoMappa(m.chiave);for(const s of m.spilli)if(s.riferimento?.tipo==='mappa')s.riferimento.chiave=chiaveMappa(s.riferimento.chiave);}
+  // L'asset nel pacchetto è quello dichiarato dalla mappa se esiste, altrimenti nessuno (L1, F9 del validatore): prima ogni mappa
+  // usciva con `mappe/<chiave pubblica>` per convenzione, quasi sempre inesistente, e `assetOriginale` portava la colonna vera.
+  // `assetOriginale` resta (uguale) perché l'importazione lo preferisce e i pacchetti di prima lo usano.
+  for(const m of mappe){m.chiave=chiaveMappa(m.chiave);if(m.genitore)m.genitore=chiaveMappa(m.genitore);m.asset=assetEsistente(m.asset);m.assetOriginale=m.asset;for(const s of m.spilli)if(s.riferimento?.tipo==='mappa')s.riferimento.chiave=chiaveMappa(s.riferimento.chiave);}
   const ingressi=(prepared('SELECT quartiere_chiave AS quartiere,mappa_chiave AS mappa,x,y,zoom FROM quartiere_ingresso').all() as NonNullable<EsportazioneMappeDto['ingressi']>).filter(i=>!ammesse||ammesse.has(i.mappa)).map(i=>({...i,mappa:chiaveMappa(i.mappa)}));
   return { versione: 1, esportato: nowIso(), mappe, immagini, ...(ingressi.length?{ingressi}:{}), ...(provenienze.length > 0 ? { provenienze } : {}) };
 }
@@ -1899,6 +1916,9 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     for (const [chiave, img] of Object.entries(pacchetto.immagini ?? {})) {
       if (!img?.base64 || !img.mime) continue;
       if (!pacchetto.mappe.some((m) => m.immagine === chiave && !esito.saltate.includes(m.chiave))) continue;
+      // Dimensioni (L1, F6 del validatore): `salvaImmagine` registra l'immagine sulla mappa con la regola di ogni strada
+      // (`dopoImmagineMappa`): quelle dell'intestazione vincono su quelle dichiarate dal pacchetto, già scritte sulla riga; se
+      // l'intestazione non si legge (SVG) restano quelle del pacchetto.
       salvaImmagine('mappa', chiave, img.mime, Buffer.from(img.base64, 'base64'));
       esito.immagini++;
     }

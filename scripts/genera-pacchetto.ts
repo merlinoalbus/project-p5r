@@ -61,6 +61,10 @@ try {
   // il cestino (104) è dell'istanza da cui viene il pacchetto: le sue eliminazioni, con i registri e le immagini, non diventano dato
   // predefinito di un'installazione nuova (la parte delle partite sta nel file usa e getta accanto e se ne va con lui)
   console.log('elementi del cestino tolti:', db.prepare('DELETE FROM main.cestino').run().changes);
+  // le miniature (108, L1) sono dati derivati dell'istanza: né il completo né l'iniziale le portano (si rigenerano al primo uso)
+  if (db.prepare("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = 'immagine_miniatura'").get()) {
+    console.log('miniature tolte:', db.prepare('DELETE FROM main.immagine_miniatura').run().changes);
+  }
   const versione = db.pragma('main.user_version', { simple: true }) as number;
   const tabelle = (db.prepare("SELECT COUNT(*) AS n FROM main.sqlite_master WHERE type = 'table'").get() as { n: number }).n;
   const partite = (db.prepare("SELECT COUNT(*) AS n FROM main.sqlite_master WHERE type = 'table' AND name = 'partita'").get() as { n: number }).n;

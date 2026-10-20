@@ -26,7 +26,7 @@ const punto = (extra: Partial<PuntoInteresseDto>): PuntoInteresseDto => ({
 });
 /** L'area «Sala Centrale» (k-02) del Palazzo di Kamoshida, con la sua planimetria m-sala e i punti dati. */
 const area = (punti: PuntoInteresseDto[]): AreaDungeonDto => ({
-  chiave: 'k-02', ordine: 1, nome: 'Sala Centrale', descrizione: '', mappa: true, mappe: [{ chiave: 'm-sala', nome: 'Palazzo di Kamoshida › Sala', n: 0, presi: 0, spilli: [] }], punti, dedalo: null,
+  chiave: 'k-02', ordine: 1, nome: 'Sala Centrale', descrizione: '', mappe: [{ chiave: 'm-sala', nome: 'Palazzo di Kamoshida › Sala', n: 0, presi: 0, spilli: [] }], punti, dedalo: null,
 });
 const planimetrie: DungeonDettaglioDto['planimetrie'] = [
   { chiave: 'm-torre', nome: 'Palazzo di Kamoshida › Torre', ordine: 0, aree: [], n: 0, presi: 0, spilli: [] },

@@ -444,6 +444,27 @@
   .anteprima-mappa > img { width: 100%; height: 100%; object-fit: contain; display: block; }
   .anteprima-mappa__vuota { color: var(--color-text-muted); display: inline-flex; }
 
+  /* ---- L'illustrazione di un posto con il suo segno sopra (L1, scelta dell'utente «Illustrazione anche nelle schede») ----
+     Schede de La città, intestazioni del quartiere e del Palazzo: l'illustrazione della mappa del posto **occupa il suo riquadro
+     al 100%** — come i fregi, non uno sfondo velato dietro al testo — e la sagoma o lo stemma ci stanno sopra, nell'angolo in basso
+     a sinistra, come segno.
+     Due scatole (decisione del PM su LAY-1): lo **spazio** (`.illustrazione-segno`) è largo quanto dice chi lo usa e alto quanto un
+     16:9 di quella larghezza, sempre uguale, così la scheda non cambia altezza né allineamento; il **riquadro** (`__riquadro`) è alto
+     quanto lo spazio e ha la proporzione dell'immagine (16:9 le caricate, 4:3 le quattro dall'asset: Kichijoji, Ikebukuro, Nakano,
+     Santuario Meiji), che il componente legge al caricamento e tiene fra 4:3 e 16:9; sta al centro dello spazio. Con `cover` in un
+     16:9 fisso le 4:3 perdevano un quarto dell'altezza. Spenta: il posto non è ancora aperto, si attenua come si attenuava la sagoma. */
+  /* `min-height: 0`: senza, il minimo automatico di `aspect-ratio` lasciava che il riquadro 4:3, largo quanto lo spazio, lo
+     allungasse a 4:3 (Kichijoji: 299×224 invece di 299×168) */
+  .illustrazione-segno { display: flex; justify-content: center; flex-shrink: 0; aspect-ratio: 16 / 9; min-height: 0; overflow: hidden; }
+  .illustrazione-segno__riquadro { position: relative; display: block; height: 100%; max-width: 100%; aspect-ratio: var(--proporzione, 16 / 9); overflow: hidden; border-radius: 6px; background: #0f0f14; border: 1px solid var(--color-border); }
+  .illustrazione-segno__immagine { display: block; width: 100%; height: 100%; object-fit: cover; }
+  /* Il segno ha una sua piastrina scura: lo stemma rosso di Kamoshida sopra la sala rossa del castello, senza, non si distingueva. */
+  .illustrazione-segno__segno { position: absolute; left: 3px; bottom: 3px; display: flex; padding: 2px; border-radius: 4px; background: color-mix(in srgb, #0a0a0f 72%, transparent); pointer-events: none; }
+  /* senza segno (il manifesto non ha la sagoma) niente piastrina vuota sull'illustrazione */
+  .illustrazione-segno__segno:empty { display: none; }
+  /* 0,6 e non lo 0,4 della sagoma: un'illustrazione notturna (Shinjuku) a 0,45 sul fondo scuro della scheda spariva del tutto */
+  .illustrazione-segno--spenta { opacity: 0.6; filter: grayscale(1); }
+
   /* ---- La mappa di Tokyo: un riquadro definito, con dentro una tela che si ingrandisce ----
      Il riquadro ha bordo, fondo e proporzione fissa come ogni altra mappa dell'app; la tela ci sta
      dentro **esatta** e si trasforma.

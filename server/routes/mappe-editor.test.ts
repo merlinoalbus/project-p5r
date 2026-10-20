@@ -301,8 +301,8 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect((await request(app).put('/api/mappe/shibuya-luogo-zip/immagine').set('Content-Type', 'image/png').send(PNG_2x3)).status).toBe(200);
     const spillo = (await request(app).post('/api/mappe/shibuya-luogo-zip/spilli').send({ tipo: 'passaggio', nome: 'Scala', x: 10, y: 10, riferimento: { tipo: 'mappa', chiave: figlia.chiave } })).body.data as SpilloDto;
     expect(spillo.immagini).toEqual([]);
-    // la figlia è nata senza `asset` indicato: ha quello predefinito «mappe/<chiave>» (15.25), ancora senza file né immagine dell'istanza
-    expect(spillo.dettaglio?.immagine).toEqual({ url: null, asset: 'mappe/shibuya-luogo-zip-interno' });
+    // la figlia è nata senza `asset` indicato e «mappe/<chiave>» non esiste: nessun asset (L1, F9; prima la convenzione della 15.25)
+    expect(spillo.dettaglio?.immagine).toEqual({ url: null, asset: null });
     // schermate
     const conImmagine = await request(app).post(`/api/mappe/spilli/${spillo.id}/immagini?didascalia=Vista%20dalla%20scala`).set('Content-Type', 'image/png').send(PNG_2x3);
     expect(conImmagine.status).toBe(201);
@@ -485,9 +485,10 @@ describe('API mappe a livelli (Fase 13.1)', () => {
 
   it('passaggi dall’albero (15.24): «Nuova mappa» crea il passaggio nel genitore (e il ritorno a scelta) in un punto libero; POST /passaggi con 409/400/404', async () => {
     // radice dell'utente, così i conteggi delle mappe della guida non cambiano; senza `asset` la mappa nasce con «mappe/<chiave>» (15.25)
+    // solo se quell'asset esiste (L1, F9): qui non esiste, e la mappa nasce senza
     const radiceCreata = await request(app).post('/api/mappe').send({ chiave: 'radice-di-prova', nome: 'Radice di prova', tipo: 'generica' });
     expect(radiceCreata.status).toBe(201);
-    expect((radiceCreata.body.data as MappaDto).asset).toBe('mappe/radice-di-prova');
+    expect((radiceCreata.body.data as MappaDto).asset).toBeNull();
     // figlia con passaggio e ritorno: nel genitore uno spillo «passaggio» al centro col nome della figlia; nella figlia uno in basso verso il genitore
     const figlia = (await request(app).post('/api/mappe').send({ chiave: 'radice-di-prova-stanza-a', nome: 'Stanza A', tipo: 'generica', genitore: 'radice-di-prova', passaggio: true, ritorno: true, asset: null })).body.data as MappaDto;
     // `asset: null` esplicito resta «nessun asset»; un valore esplicito viene conservato

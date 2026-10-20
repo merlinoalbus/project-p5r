@@ -19,7 +19,9 @@ import { AMBITI_CARICAMENTO, AMBITI_PREDEFINITI, type AmbitoImmagine } from '../
 import type { ImmagineDto, ManifestImmaginiDto } from '../../shared/types.js';
 import { idMappa } from './mappe/percorsiMappe.js';
 import { scaricaDaUrl } from '../utils/scaricaDaUrl.js';
-import { allineaRuoliImmagine, dopoImmagineMappa, dopoRimozioniImmagini } from './mappe/immagineMappa.js';
+import { allineaRuoliImmagine, dopoImmagineMappa, dopoRimozioniImmagini, mappeCheLaPerdono } from './mappe/immagineMappa.js';
+import { confermaPezzi, mappeConPezzi } from './mappe/pezziMappa.js';
+import { eDelleSchede, eliminaMiniatureDi, riscaldaMiniature } from './miniatureService.js';
 
 export { AMBITI_CARICAMENTO, AMBITI_IMMAGINE, AMBITI_PREDEFINITI, type AmbitoImmagine } from '../../shared/immagini.js';
 
@@ -95,6 +97,8 @@ export function salvaImmagine(ambito: AmbitoImmagine, chiave: string, mime: stri
   // `nome_file` resta per lo schema (NOT NULL) e come nome leggibile: un nome nuovo a ogni sostituzione
   const nomeFile = `${randomUUID()}.${estensione}`;
   getDb().transaction(() => {
+    // le miniature (108) erano dell'immagine di prima: l'`ON CONFLICT DO UPDATE` conserva l'id, e la cascata non scatta
+    eliminaMiniatureDi(getDb(), ambito, chiave);
     prepared(`INSERT INTO immagine (ambito, chiave, nome_file, mime, byte, created_at, origine_url, contenuto) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(ambito, chiave) DO UPDATE SET nome_file = excluded.nome_file, mime = excluded.mime, byte = excluded.byte, created_at = excluded.created_at, origine_url = excluded.origine_url, contenuto = excluded.contenuto`)
       .run(ambito, chiave, nomeFile, mime, contenuto.length, nowIso(), origineUrl, contenuto);
@@ -103,13 +107,16 @@ export function salvaImmagine(ambito: AmbitoImmagine, chiave: string, mime: stri
     if (ambito === 'mappa') dopoImmagineMappa(getDb(), chiave, contenuto);
     else if ((AMBITI_PREDEFINITI as readonly string[]).includes(ambito)) allineaRuoliImmagine(getDb());
   })();
+  // l'illustrazione di una scheda (quartiere, città, radice di un Palazzo) ha subito le sue miniature, fuori dalla transazione e
+  // senza far aspettare chi ha caricato
+  if (ambito === 'mappa' && eDelleSchede(ambito, chiave)) setImmediate(() => { void riscaldaMiniature([{ ambito, chiave }]); });
   return leggiImmagine(ambito, chiave)!;
 }
 
-/** Scarica un'immagine da un URL indicato dall'utente e la salva. Lo scarico è quello condiviso
- *  (`scaricaDaUrl`): tetto applicato mentre arriva, attesa della risposta distinta dall'inattività. */
-export async function importaImmagineDaUrl(ambito: AmbitoImmagine, chiave: string, url: string): Promise<ImmagineDto> {
-  const { contenuto, mime, url: u } = await scaricaDaUrl(url, {
+/** Scarica un'immagine da un URL, senza salvarla: lo scarico condiviso (`scaricaDaUrl`), con il tetto applicato mentre arriva e
+ *  l'attesa della risposta distinta dall'inattività. `url` è l'indirizzo d'arrivo, dopo i redirect. */
+export async function scaricaImmagine(url: string): Promise<{ contenuto: Buffer; mime: string; url: URL }> {
+  return scaricaDaUrl(url, {
     maxByte: MAX_BYTE_IMMAGINE,
     cosa: 'l\'immagine',
     codiceScaricoFallito: 'download-fallito',
@@ -118,27 +125,47 @@ export async function importaImmagineDaUrl(ambito: AmbitoImmagine, chiave: strin
     attesaRispostaMs: 20_000,
     intestazioni: { 'User-Agent': 'Mozilla/5.0 (compatible; ProjectP5R/1.0; +https://github.com/merlinoalbus/project-p5r)' },
   });
+}
+
+/** Scarica un'immagine da un URL indicato dall'utente e la salva, con l'indirizzo d'origine. Per l'immagine di una mappa che
+ *  esiste c'è la strada dell'editor (`scaricaImmagineMappa` in mappeService), che chiede conferma dei pezzi. */
+export async function importaImmagineDaUrl(ambito: AmbitoImmagine, chiave: string, url: string): Promise<ImmagineDto> {
+  const { contenuto, mime, url: u } = await scaricaImmagine(url);
   return salvaImmagine(ambito, chiave, mime, contenuto, u.toString());
 }
 
-/** Rimuove le immagini caricate di un ambito, oppure (senza ambito) di tutti gli ambiti di caricamento: la grafica predefinita non si tocca. */
-export function eliminaImmaginiAmbito(ambito?: string): number {
+/**
+ * Rimuove le immagini caricate di un ambito, oppure (senza ambito) di tutti gli ambiti di caricamento: la grafica predefinita non si
+ * tocca. Le mappe con pezzi (102) che perderebbero l'immagine che mostrano chiedono conferma (L1, F5 del validatore): senza
+ * `eliminaPezzi` 409 `mappa-con-pezzi` e niente si toglie; con la conferma i loro pezzi se ne vanno nella stessa transazione.
+ */
+export function eliminaImmaginiAmbito(ambito?: string, opz: { eliminaPezzi?: boolean } = {}): number {
   return getDb().transaction(() => {
+    const tolto = (a: string) => (ambito ? a === ambito : (AMBITI_CARICAMENTO as readonly string[]).includes(a));
+    const togliPezzi = confermaPezzi(mappeCheLaPerdono(mappeConPezzi(), (a) => tolto(a)), !!opz.eliminaPezzi, 'togliendola', true);
     const esito = ambito
       ? prepared('DELETE FROM immagine WHERE ambito = ?').run(ambito)
       : prepared(`DELETE FROM immagine WHERE ambito IN (${segnapostoCaricamento})`).run(...AMBITI_CARICAMENTO);
+    togliPezzi();
     // le mappe che avevano un'immagine ora tolta tornano alla regola (L1)
     if (esito.changes > 0) dopoRimozioniImmagini(getDb());
     return esito.changes;
   })();
 }
 
-/** Elimina l'immagine di un'entità (per le mappe la chiave si riconduce all'identità della mappa); 404 se non c'era. */
-export function eliminaImmagine(ambito: string, chiave: string): void {
+/**
+ * Elimina l'immagine di un'entità (per le mappe la chiave si riconduce all'identità della mappa); 404 se non c'era. Se era
+ * l'immagine mostrata da una mappa con pezzi (la caricata, o l'asset predefinito di una mappa senza caricata), stessa regola
+ * dell'editor: 409 `mappa-con-pezzi` senza `eliminaPezzi`, con la conferma i pezzi se ne vanno con lei.
+ */
+export function eliminaImmagine(ambito: string, chiave: string, opz: { eliminaPezzi?: boolean } = {}): void {
   getDb().transaction(() => {
-    const esito = prepared('DELETE FROM immagine WHERE ambito = ? AND chiave = ?').run(ambito, chiaveDi(ambito, chiave));
-    if (esito.changes === 0) throw httpErrors.notFound('immagine-non-trovata', `Nessuna immagine per ${ambito}/${chiave}.`);
-    if (ambito === 'mappa') dopoImmagineMappa(getDb(), chiaveDi(ambito, chiave), null);
+    const interna = chiaveDi(ambito, chiave);
+    if (!prepared('SELECT 1 FROM immagine WHERE ambito = ? AND chiave = ?').get(ambito, interna)) throw httpErrors.notFound('immagine-non-trovata', `Nessuna immagine per ${ambito}/${chiave}.`);
+    const togliPezzi = confermaPezzi(mappeCheLaPerdono(mappeConPezzi(), (a, k) => a === ambito && k === interna), !!opz.eliminaPezzi, 'togliendola');
+    prepared('DELETE FROM immagine WHERE ambito = ? AND chiave = ?').run(ambito, interna);
+    togliPezzi();
+    if (ambito === 'mappa') dopoImmagineMappa(getDb(), interna, null);
     else if ((AMBITI_PREDEFINITI as readonly string[]).includes(ambito)) allineaRuoliImmagine(getDb());
   })();
 }

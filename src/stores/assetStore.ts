@@ -13,7 +13,6 @@
 // e non più ritentato nella sessione.
 // ============================================================
 
-import { useCallback } from 'react';
 import { create } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 import { usePreferenzeStore } from './preferenzeStore';
@@ -82,17 +81,6 @@ export function useAssetMulti(nomi: ReadonlyArray<string | null | undefined>): A
   // il risultato si calcola nel selettore e si confronta voce per voce (P4"): iscritti a tutto `mancanti`, ogni file mancante
   // segnato altrove ridisegnava chi usa questi nomi, con un elenco nuovo anche quando non cambiava nulla
   return useAssetStore(useShallow((s) => nomi.map((nome) => (attiva && nome && s.manifest?.file[nome] && !s.mancanti[nome] ? s.manifest.file[nome] : null))));
-}
-
-/**
- * Una funzione che risolve asset scelti mentre si disegna (in un ciclo, dove un hook per asset non si può chiamare), con la
- * stessa regola di `useAsset`: null se la grafica predefinita è spenta, il manifest non ha il nome o il file è risultato mancante.
- */
-export function useRisolviAsset(): (nome: string | null | undefined) => string | null {
-  const attiva = usePreferenzeStore((s) => s.graficaPredefinita);
-  const file = useAssetStore((s) => s.manifest?.file);
-  const mancanti = useAssetStore((s) => s.mancanti);
-  return useCallback((nome: string | null | undefined) => (attiva && nome && file?.[nome] && !mancanti[nome] ? file[nome] : null), [attiva, file, mancanti]);
 }
 
 /**

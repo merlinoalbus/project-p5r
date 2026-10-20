@@ -1,9 +1,11 @@
 // ============================================================
-// EmblemaDungeon — emblema di un Palazzo o Dedalo: asset `palazzi/<chiave>` (consegna 11.6), riserva sull'icona dell'arcano del sovrano, poi l'iniziale
+// EmblemaDungeon — emblema di un Palazzo o Dedalo: lo stemma dei segni dei posti (`segnoPalazzo`, segniMappa.ts; asset `palazzi/<chiave>`,
+// consegna 11.6), riserva sull'icona dell'arcano del sovrano, poi l'iniziale
 // ============================================================
 
 import { AssetImg } from '../shared/AssetImg';
 import { slug } from '../../../shared/slug';
+import { segnoPalazzo } from '../mappe/segniMappa';
 
 interface Props {
   chiave: string;
@@ -22,7 +24,7 @@ export function EmblemaDungeon({ chiave, nome, arcanaSovrano, dimensione = 72, c
     : iniziale;
   return (
     <span className={`inline-flex shrink-0 ${className ?? ''}`}>
-      <AssetImg nome={`palazzi/${chiave}`} alt="" decorativa className="emblema object-contain" style={{ width: dimensione, height: dimensione }} fallback={arcano} />
+      <AssetImg nome={segnoPalazzo(chiave)} alt="" decorativa className="emblema object-contain" style={{ width: dimensione, height: dimensione }} fallback={arcano} />
     </span>
   );
 }

@@ -713,6 +713,25 @@ describe('EditorMappaPage', () => {
     await waitFor(() => expect(api.caricaImmagineMappa).toHaveBeenLastCalledWith('citta-shibuya', file, { eliminaPezzi: true }));
     await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Sostituire l’immagine di base?' })).toBeNull());
   });
+
+  it('«Scarica dalla guida» su un quartiere con dei pezzi chiede la stessa conferma (L1, F5: 409): confermando scarica con «eliminaPezzi»', async () => {
+    useNotificationStore.setState({ notifications: [] });
+    api.getMappa.mockResolvedValue({ ...conImmagine, pezzi: [pezzo] });
+    api.scaricaPiantaQuartiere.mockRejectedValueOnce(new ApiError(409, 'mappa-con-pezzi', 'La mappa ha 1 pezzo ritagliato dall’immagine di prima: sostituendola verrà eliminato.', { pezzi: 1 }))
+      .mockResolvedValue({ quartiere: 'shibuya', mime: 'image/png', byte: 1, fonte: 'x', url: 'x' });
+    monta();
+    fireEvent.click(await screen.findByRole('button', { name: 'Mappa' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Scarica dalla guida' }));
+    const finestra = within(await screen.findByRole('dialog', { name: 'Sostituire l’immagine di base?' }));
+    expect(finestra.getByText(/1 pezzo ritagliato dall’immagine di prima/)).toBeInTheDocument();
+    expect(api.scaricaPiantaQuartiere).toHaveBeenLastCalledWith('shibuya');
+    // il 409 non è un errore: nessun avviso rosso, solo la domanda
+    expect(useNotificationStore.getState().notifications.filter((n) => n.type === 'error')).toEqual([]);
+    await waitFor(() => expect(finestra.getByRole('button', { name: /Sostituisci ed elimina i pezzi/ })).toBeEnabled());
+    fireEvent.click(finestra.getByRole('button', { name: /Sostituisci ed elimina i pezzi/ }));
+    await waitFor(() => expect(api.scaricaPiantaQuartiere).toHaveBeenLastCalledWith('shibuya', { eliminaPezzi: true }));
+    await waitFor(() => expect(useNotificationStore.getState().notifications.map((n) => n.message)).toContain('Pianta scaricata dalla guida; i pezzi ritagliati dall’immagine di prima sono stati eliminati.'));
+  });
 });
 
 it('conserva i campi non salvati cambiando sezione e riapre Spilli quando si seleziona un pin',async()=>{

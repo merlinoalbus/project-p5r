@@ -5,7 +5,8 @@
 // Test CittaPage e QuartierePage — mappa incorporata di Tokyo/quartiere e schede dei luoghi senza posizionamento (Fase 13.4)
 // ============================================================
 
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { ApiError } from '../services/api/_helpers';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { CittaPage } from './CittaPage';
 import { QuartierePage } from './QuartierePage';
@@ -168,12 +169,38 @@ describe('CittaPage', () => {
     expect(within(scheda).getByText(/Non ancora aperto/)).toBeInTheDocument();
     usePartitaStore.setState({ attiva: null });
   });
+
+  it('la scheda mostra l’illustrazione della mappa del quartiere con la sagoma sopra; senza illustrazione la sola sagoma (L1, 2026-10-20)', async () => {
+    api.getQuartieri.mockResolvedValue([
+      { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, descrizione: '', illustrazione: { immagineUrl: '/api/immagini/mappa/citta-shibuya/file?v=1', asset: 'mappe/citta-shibuya' } },
+      { chiave: 'ueno', nome: 'Ueno', mappaChiave: 'citta-ueno', luoghi: 3, verificati: 3, sblocco: null, descrizione: '', illustrazione: { immagineUrl: null, asset: 'mappe/citta-ueno' } },
+      { chiave: 'akihabara', nome: 'Akihabara', mappaChiave: 'citta-akihabara', luoghi: 3, verificati: 3, sblocco: null, disponibile: false, descrizione: '', illustrazione: { immagineUrl: '/api/immagini/mappa/citta-akihabara/file?v=1', asset: null } },
+    ] as QuartiereRiassuntoDto[]);
+    render(<MemoryRouter><CittaPage /></MemoryRouter>);
+    const schede = within(await screen.findByRole('list', { name: 'Quartieri' }));
+    const shibuya = within(schede.getByRole('link', { name: /Shibuya/ }));
+    // la miniatura, non l'originale da ~2 MB: `src` da 320 px come ripiego, `srcset` con le quattro misure e `sizes` della scheda
+    const figura = shibuya.getByAltText('Illustrazione di Shibuya');
+    expect(figura).toHaveAttribute('src', '/api/immagini/mappa/citta-shibuya/file?v=1&l=320');
+    expect(figura.getAttribute('srcset')).toBe(['160', '320', '640', '1024'].map((l) => `/api/immagini/mappa/citta-shibuya/file?v=1&l=${l} ${l}w`).join(', '));
+    expect(figura).toHaveAttribute('sizes', '(min-width: 1280px) 112px, 128px');
+    // la sagoma sta sopra, come segno, nascosta ai lettori di schermo (l'alt e il nome dicono già il quartiere)
+    const segno = shibuya.getByAltText('Illustrazione di Shibuya').parentElement!.querySelector('.illustrazione-segno__segno')!;
+    expect(segno).toHaveAttribute('aria-hidden', 'true');
+    expect(segno.querySelector('img')).toHaveAttribute('src', SEGNI[0][1]);
+    // Ueno: l'asset dichiarato non è nel manifesto, quindi niente illustrazione e la sagoma piena com'era
+    const ueno = within(schede.getByRole('link', { name: /Ueno/ }));
+    expect(ueno.queryByAltText('Illustrazione di Ueno')).toBeNull();
+    expect(ueno.getByAltText('Sagoma di Ueno sulla mappa di Tokyo')).toBeInTheDocument();
+    // il quartiere non ancora aperto: illustrazione attenuata
+    expect(within(schede.getByRole('link', { name: /Akihabara/ })).getByAltText('Illustrazione di Akihabara').parentElement).toHaveClass('illustrazione-segno--spenta');
+  });
 });
 
 describe('QuartierePage', () => {
   it('mostra la mappa del quartiere incorporata e i luoghi senza i pulsanti di posizionamento (ora nell’editor)', async () => {
     // `mappaChiave` la dà il backend (cittaService), non la costruisce la pagina: il mock deve dirla
-    const q: QuartiereDettaglioDto = { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', sblocco: null, fonte: '', descrizione: '', mappa: true, pianta: null, piantaAssente: null,
+    const q: QuartiereDettaglioDto = { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', sblocco: null, fonte: '', descrizione: '', mappa: true, illustrazione: { immagineUrl: null, asset: null }, pianta: null, piantaAssente: null,
       luoghi: [{ chiave: 'shibuya/untouchable', ordine: 0, tipo: 'negozio', nome: 'Untouchable', cosaOffre: 'Armi', quando: 'entrambe', giorni: [], giorniTesto: '', sblocco: null, confidenti: [{ chiave: 'iwai', nome: 'Munehisa Iwai' }], attivita: [], negozi: [{ chiave: 'untouchable', nome: 'Untouchable' }], negozio: 'untouchable', origine: 'seed', piatti: null, note: null, verificato: true, marcatore: null, condizioni: null, disponibilita: null } as QuartiereDettaglioDto['luoghi'][number]] };
     api.getQuartiere.mockResolvedValue(q);
     api.getMappa.mockResolvedValue(mappa('citta-shibuya', 'Shibuya'));
@@ -188,5 +215,39 @@ describe('QuartierePage', () => {
     expect(luoghi.getByRole('button', { name: /Correggi/ })).toBeInTheDocument();
     expect(luoghi.getByRole('link', { name: 'Articoli in vendita' })).toHaveAttribute('href', '/guida/negozi/untouchable');
     expect(api.scaricaPiantaQuartiere).not.toHaveBeenCalled();
+  });
+
+  it('l’intestazione mostra l’illustrazione del quartiere con la sagoma sopra; senza, la sagoma grande (L1, 2026-10-20)', async () => {
+    const q = { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', sblocco: null, fonte: '', descrizione: '', mappa: true, pianta: null, piantaAssente: null, luoghi: [] } as Omit<QuartiereDettaglioDto, 'illustrazione'>;
+    api.getQuartiere.mockResolvedValue({ ...q, illustrazione: { immagineUrl: '/api/immagini/mappa/citta-shibuya/file?v=3', asset: 'mappe/citta-shibuya' } });
+    api.getMappa.mockResolvedValue(mappa('citta-shibuya', 'Shibuya'));
+    const con = render(<MemoryRouter initialEntries={['/guida/citta/shibuya']}><Routes><Route path="/guida/citta/:chiave" element={<QuartierePage />} /></Routes></MemoryRouter>);
+    const intestazione = within((await screen.findByRole('heading', { name: 'Shibuya' })).closest('header')!);
+    const figura = intestazione.getByAltText('Illustrazione di Shibuya');
+    expect(figura).toHaveAttribute('src', '/api/immagini/mappa/citta-shibuya/file?v=3&l=320');
+    expect(figura).toHaveAttribute('sizes', '(min-width: 1024px) 200px, (min-width: 640px) 220px, min(420px, calc(100vw - 64px))');
+    expect(figura.parentElement!.querySelector('.illustrazione-segno__segno img')).toHaveAttribute('src', SEGNI[0][1]);
+    con.unmount();
+    api.getQuartiere.mockResolvedValue({ ...q, illustrazione: { immagineUrl: null, asset: null } });
+    render(<MemoryRouter initialEntries={['/guida/citta/shibuya']}><Routes><Route path="/guida/citta/:chiave" element={<QuartierePage />} /></Routes></MemoryRouter>);
+    const senza = within((await screen.findByRole('heading', { name: 'Shibuya' })).closest('header')!);
+    expect(senza.queryByAltText('Illustrazione di Shibuya')).toBeNull();
+    expect(senza.getByAltText('Sagoma di Shibuya sulla mappa di Tokyo')).toBeInTheDocument();
+  });
+
+  it('lo scarico automatico della pianta su una mappa con pezzi (409 `mappa-con-pezzi`, L1 F5) non sostituisce niente e non mostra errori', async () => {
+    const q = { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', sblocco: null, fonte: '', descrizione: '', mappa: false, illustrazione: { immagineUrl: null, asset: null },
+      pianta: { url: 'https://esempio.test/shibuya.png', fonte: 'Guida', pagina: null }, piantaAssente: null, luoghi: [] } as unknown as QuartiereDettaglioDto;
+    api.getQuartiere.mockResolvedValue(q);
+    api.getMappa.mockResolvedValue(mappa('citta-shibuya', 'Shibuya'));
+    api.scaricaPiantaQuartiere.mockRejectedValue(new ApiError(409, 'mappa-con-pezzi', 'La mappa ha 2 pezzi ritagliati dall’immagine.', { pezzi: 2 }));
+    render(<MemoryRouter initialEntries={['/guida/citta/shibuya']}><Routes><Route path="/guida/citta/:chiave" element={<QuartierePage />} /></Routes></MemoryRouter>);
+    expect(await screen.findByRole('heading', { name: 'Shibuya' })).toBeInTheDocument();
+    await waitFor(() => expect(api.scaricaPiantaQuartiere).toHaveBeenCalledWith('shibuya'));
+    // nessuna conferma da qui (sostituire è una scelta dell'editor) e nessun «Riprova», che c'è solo se lo scarico fallisce davvero
+    expect(api.scaricaPiantaQuartiere).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(screen.queryByText(/scaricamento in corso/)).toBeNull());
+    expect(screen.queryByRole('button', { name: /Riprova/ })).toBeNull();
+    expect(screen.queryByText(/2 pezzi ritagliati/)).toBeNull();
   });
 });

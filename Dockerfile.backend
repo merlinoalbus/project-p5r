@@ -40,6 +40,9 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 # Smoke test del binding nativo: fallisce la BUILD, non il primo boot.
 RUN node -e "new (require('better-sqlite3'))(':memory:').close()"
+# Le miniature (L1): una vera codifica WebP con il binario musl di sharp/libvips. Senza le voci @img/sharp-linuxmusl-x64 e
+# @img/sharp-libvips-linuxmusl-x64 nel lock, `npm ci` qui non installa il binario e la build si ferma.
+RUN node -e "require('sharp')({create:{width:2,height:2,channels:4,background:'#000'}}).webp().toBuffer().then(b=>{if(!b.length)process.exit(1);console.log('sharp', require('sharp').versions.sharp, 'vips', require('sharp').versions.vips)}).catch(e=>{console.error(e);process.exit(1)})"
 
 # ---- Stage 3: runtime (nessun toolchain) ----
 FROM node:24-alpine

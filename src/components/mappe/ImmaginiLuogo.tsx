@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import type { MappaRiassuntoDto } from '../../types';
 import { useImmagineMappa } from '../../hooks/useImmagineMappa';
+import { srcsetMiniature, urlMiniatura } from '../../../shared/miniature';
 import { etichettaVersione } from '../../utils/etichettaVersione';
 import { titoloGruppoImmagini } from '../../utils/presentazioneMappa';
 
@@ -26,8 +27,10 @@ export function ImmaginiLuogo({ mappe, attuale, nome, discendenti }: Props) {
  * (i discendenti passati dall'albero). */
 function Miniatura({ mappa, indice, totale, attuale, children }: { mappa: MappaRiassuntoDto; indice: number; totale: number; attuale?: string; children?: ReactNode }) {
   const src = useImmagineMappa(mappa);
+  // la miniatura della misura del riquadro (112 px), non l'originale (variante «miniature» di L1)
+  const srcSet = src ? srcsetMiniature(src) : '';
   return <li><Link className="card flex flex-col items-center gap-2 no-underline text-text touch max-w-44" aria-current={attuale === mappa.chiave ? 'page' : undefined} to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}`}>
-    {src && <img src={src} alt="" className="w-28 h-24 object-contain bg-neutral-700 rounded" />}
+    {src && <img src={urlMiniatura(src, 320)} srcSet={srcSet || undefined} sizes={srcSet ? '112px' : undefined} alt="" loading="lazy" className="w-28 h-24 object-contain bg-neutral-700 rounded" />}
     <span className="text-[12px] text-center">{etichettaVersione(mappa, indice, totale)}</span>
   </Link>{children}</li>;
 }

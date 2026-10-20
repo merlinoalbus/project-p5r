@@ -33,7 +33,7 @@ vi.mock('../components/guida/EmblemaDungeon', () => ({ EmblemaDungeon: () => nul
 const spillo = (id: number, raccolto: boolean | null) => ({ id, uid: `u${id}`, tipo: 'forziere', nome: 'Forziere', colore: '#eab308', raccolto });
 /** Un'area del dungeon («Cancello», k-01, senza mappe né voci) con i campi di `extra` sovrascritti. */
 const area = (extra: Partial<AreaDungeonDto>): AreaDungeonDto => ({
-  chiave: 'k-01', ordine: 0, nome: 'Cancello', descrizione: '', mappa: false, mappe: [], punti: [], dedalo: null, ...extra,
+  chiave: 'k-01', ordine: 0, nome: 'Cancello', descrizione: '', mappe: [], punti: [], dedalo: null, ...extra,
 });
 /** Il Palazzo di Kamoshida di prova: tre aree (Cancello con una sicura e una planimetria di 2 forzieri, Torre, Cortile)
  *  e due planimetrie (Cancello e Torre). Con `partita` i conteggi e gli spilli portano lo stato della partita (1 preso
@@ -41,7 +41,7 @@ const area = (extra: Partial<AreaDungeonDto>): AreaDungeonDto => ({
 const palazzo = (partita: boolean): DungeonDettaglioDto => ({
   chiave: 'kamoshida', tipo: 'palazzo', ordine: 1, nome: 'Palazzo di Kamoshida', sovrano: 'Kamoshida', arcanaSovrano: '', arcanaSovranoNome: '',
   date: { sblocco: '12 Aprile', scadenza: '2 maggio', furtoConsigliato: '' }, finestra: null, livelloConsigliato: '', punti: 2, esauribili: 1, gestiti: partita ? 0 : null,
-  raccolta: { totale: 4, presi: partita ? 1 : null, mappe: 2, mappeComplete: partita ? 0 : null }, completato: null, atterraggio: null, atterraggi: [], personeCatturate: partita ? [] : null, note: '', fonti: [],
+  raccolta: { totale: 4, presi: partita ? 1 : null, mappe: 2, mappeComplete: partita ? 0 : null }, completato: null, atterraggio: null, atterraggi: [], illustrazione: { immagineUrl: null, asset: null }, personeCatturate: partita ? [] : null, note: '', fonti: [],
   aree: [
     area({ mappe: [{ chiave: 'm-cancello', nome: 'Palazzo di Kamoshida › Cancello', n: 2, presi: partita ? 1 : null, spilli: [spillo(1, partita ? true : null), spillo(2, partita ? false : null)] }], punti: [{ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null, areaDedalo: null, persona: null, areeDedalo: [] }] }),
     area({ chiave: 'k-02', ordine: 1, nome: 'Torre', punti: [] }),
@@ -1220,4 +1220,36 @@ it('cambiato il giorno della partita, la scheda del Palazzo si rilegge: «Oggi s
   act(() => usePartitaStore.setState({ attiva: { id: 4, nome: 'Royal', dataGioco: '04-12' } as PartitaDto }));
   await waitFor(() => expect(finestra.getByText(/Oggi si atterra su:/)).toHaveTextContent('Oggi si atterra su: Torre.'));
   expect(getDungeon).toHaveBeenCalledTimes(2);
+});
+
+describe('intestazione con l’illustrazione (L1, scelta dell’utente «Illustrazione anche nelle schede», 2026-10-20)', () => {
+  it('un Palazzo con l’illustrazione caricata la mostra, piena, nelle tre misure dell’intestazione (da 1024 a 1279 px solo lo stemma); senza resta lo stemma', async () => {
+    getDungeon.mockResolvedValue({ ...palazzo(true), illustrazione: { immagineUrl: '/api/immagini/mappa/dungeon-kamoshida/file?v=1', asset: null } });
+    const conIllustrazione = monta('kamoshida');
+    expect(await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' })).toBeInTheDocument();
+    const figure = screen.getAllByAltText('Illustrazione di Palazzo di Kamoshida');
+    expect(figure).toHaveLength(3);
+    // ogni misura chiede la miniatura della sua larghezza (`sizes` uguale al riquadro), non l'originale
+    expect(figure.map((f) => f.getAttribute('sizes'))).toEqual(['150px', '176px', '104px']);
+    // da 1024 a 1279 px lo stemma da solo, come prima di L1 (UX-1): la fascia `lg:block xl:hidden` non ha l'illustrazione
+    expect(document.querySelector('header .lg\\:block.xl\\:hidden .illustrazione-segno')).toBeNull();
+    // da 1280 px figura e anello in colonna, per non togliere larghezza al testo
+    expect(figure[2].closest('.xl\\:flex-col')).not.toBeNull();
+    for (const f of figure) {
+      expect(f).toHaveAttribute('src', '/api/immagini/mappa/dungeon-kamoshida/file?v=1&l=320');
+      // il segno sopra è nascosto ai lettori di schermo: l'alt dice già quale posto è
+      expect(f.parentElement?.querySelector('.illustrazione-segno__segno')).toHaveAttribute('aria-hidden', 'true');
+    }
+    conIllustrazione.unmount();
+    getDungeon.mockResolvedValue(palazzo(true));
+    monta('kamoshida');
+    expect(await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' })).toBeInTheDocument();
+    expect(screen.queryByAltText('Illustrazione di Palazzo di Kamoshida')).toBeNull();
+  });
+  it('i Memento restano col loro stemma anche se la scheda porta un’illustrazione', async () => {
+    getDungeon.mockResolvedValue({ ...mementos(), illustrazione: { immagineUrl: '/illustrazione-memento.png', asset: null } });
+    monta('mementos');
+    expect(await screen.findByRole('heading', { name: 'Memento' })).toBeInTheDocument();
+    expect(screen.queryByAltText('Illustrazione di Memento')).toBeNull();
+  });
 });

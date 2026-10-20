@@ -32,6 +32,8 @@ import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { IconChevronLeft } from '../components/shared/icons';
 import { MappaIncorporata } from '../components/mappe/MappaIncorporata';
 import { EmblemaDungeon } from '../components/guida/EmblemaDungeon';
+import { IllustrazioneConSegno } from '../components/mappe/IllustrazioneConSegno';
+import { useImmagineMappa } from '../hooks/useImmagineMappa';
 import { AnelloAvanzamento } from '../components/shared/AnelloAvanzamento';
 import { TestoRipiegabile } from '../components/shared/TestoRipiegabile';
 import { RaccoltaPlanimetrie } from '../components/guida/RaccoltaPlanimetrie';
@@ -342,6 +344,8 @@ export function DungeonDettaglioPage() {
   // dai dati della pagina, che si aggiornano a ogni voce segnata.
   const completate = useMemo(() => areeCompletate(d?.aree ?? []), [d]);
   const restanoAltre = altrePlanimetrie.reduce((s, p) => s + p.n - (p.presi ?? 0), 0);
+  // Il Palazzo ha un'illustrazione da mostrare nell'intestazione (la stessa regola di IllustrazioneConSegno): i Memento no.
+  const illustrato = !!useImmagineMappa(memento ? null : d?.illustrazione);
 
   return (
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
@@ -360,15 +364,40 @@ export function DungeonDettaglioPage() {
           {/* Collegando i pin la testata si ritira: l'altezza va alla mappa, che altrimenti faceva scorrere la colonna su uno schermo
               basso («appare la barra che fa salire e scendere la finestra», 2026-10-18); si torna con «Fatto». */}
           {!collegamento && <header className="card relative shrink-0 overflow-hidden lg:py-2.5">
-            <span aria-hidden className="pointer-events-none absolute -right-10 -top-16 hidden opacity-[0.07] sm:block">
+            {/* Lo stemma grande e tenue nell'angolo resta solo dove non c'è l'illustrazione: accanto a una figura piena sarebbe un
+                secondo stemma, e velato (L1). */}
+            {!illustrato && <span aria-hidden className="pointer-events-none absolute -right-10 -top-16 hidden opacity-[0.07] sm:block">
               <EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={280} />
-            </span>
+            </span>}
             {/* Nei Memento (2026-10-12) l'intestazione è compatta a ogni larghezza, come da 1024 px: emblema e anello piccoli in riga. */}
             <div className={`relative flex gap-3 ${memento ? 'flex-row items-center' : 'flex-col sm:flex-row sm:items-start sm:gap-5 lg:items-center lg:gap-3'}`}>
-              <div className={`flex shrink-0 items-center gap-3 ${memento ? 'gap-2' : 'sm:flex-col lg:flex-row lg:gap-2'}`}>
-                <span className={memento ? 'lg:hidden' : 'sm:hidden'}><EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={memento ? 40 : 52} /></span>
-                {!memento && <span className="hidden sm:block lg:hidden"><EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={80} /></span>}
-                <span className="hidden lg:block"><EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={48} /></span>
+              {/* Da 1280 px, con l'illustrazione, figura e anello stanno in colonna: affiancati prendevano larghezza al testo e
+                  in Shido, Niijima e Madarame il sovrano andava a capo (intestazione da 170 a 222 px); in colonna occupano la
+                  larghezza dello stemma e dell'anello di prima e un'altezza che l'intestazione ha già (UX-1, 2026-10-21). */}
+              <div className={`flex shrink-0 items-center gap-3 ${memento ? 'gap-2' : `sm:flex-col lg:flex-row lg:gap-2 ${illustrato ? 'xl:flex-col' : ''}`}`}>
+                {/* Nei Palazzi l'illustrazione della radice `dungeon-<chiave>` (la caricata: l'asset della radice è lo stemma) con
+                    lo stemma sopra come segno (scelta dell'utente, 2026-10-20); senza, lo stemma com'era. Le misure: 150 px sul
+                    telefono, 176 sul tablet, solo lo stemma da 1024 a 1279 e 104, sopra l'anello, da 1280 (vedi sotto).
+                    I Memento restano col loro stemma. */}
+                {(() => {
+                  const emblema = (dimensione: number) => <EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={dimensione} />;
+                  // il riquadro ha una larghezza fissa (`classe`), e la stessa misura (`sizes`) dice al browser quale miniatura scaricare
+                  const figura = (classe: string, sizes: string, stemma: number, senza: number) => memento ? emblema(senza)
+                    : <IllustrazioneConSegno illustrazione={d.illustrazione} alt={`Illustrazione di ${d.nome}`} className={classe} sizes={sizes}
+                        segno={emblema(stemma)} senza={emblema(senza)} />;
+                  return <>
+                    <span className={memento ? 'lg:hidden' : 'sm:hidden'}>{memento ? emblema(40) : figura('w-[150px]', '150px', 34, 52)}</span>
+                    {!memento && <span className="hidden sm:block lg:hidden">{figura('w-[176px]', '176px', 40, 80)}</span>}
+                    {/* Da 1024 a 1279 px lo stemma da 48 com'era prima di L1, senza illustrazione: l'intestazione compatta non ha
+                        spazio per una figura che si riconosca (a 56 px era una macchia, UX-1; più larga il sovrano andava a capo).
+                        Da 1280 px l'illustrazione con lo stemma da 40 sopra, nell'altezza che l'intestazione ha già (decisione del PM,
+                        2026-10-21). */}
+                    <span className="hidden lg:block xl:hidden">{emblema(48)}</span>
+                    {/* 104 px: la larghezza di stemma, spazio e anello di prima (48 + 8 + 48), così il testo accanto non perde niente in
+                        nessun Palazzo (a 128 Iweleth andava a capo a 1366 px) */}
+                    <span className="hidden xl:block">{figura('w-[104px]', '104px', 40, 48)}</span>
+                  </>;
+                })()}
                 {quota !== null && (
                   // un anello solo (è la barra di avanzamento della pagina): da 1024 px si rimpicciolisce, non si duplica
                   <AnelloAvanzamento quota={quota} dimensione={64} spessore={5} className={memento ? 'size-12!' : 'lg:size-12!'} etichetta={`Avanzamento in ${d.nome}: ${d.raccolta.presi} ${memento ? 'elementi fatti' : 'da raccogliere presi'} su ${d.raccolta.totale}`}>

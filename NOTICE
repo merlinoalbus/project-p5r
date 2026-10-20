@@ -25,6 +25,15 @@ backend e servito dall'istanza):
    Copyright 2020-2021 SmartBear Software Inc. Licenza Apache License 2.0
    (copia in licenze/swagger-ui-LICENSE.txt).
 
+Le miniature delle immagini (schede, intestazioni, indice e griglie delle mappe) si generano nel backend con sharp, che usa
+libvips; entrambi sono installati con il backend come binari precompilati e collegati dinamicamente, non modificati:
+   sharp 0.35.5 — https://github.com/lovell/sharp
+   Copyright 2013 Lovell Fuller and others. Licenza Apache License 2.0 (copia in licenze/sharp-LICENSE.txt).
+   libvips e le sue dipendenze (pacchetti @img/sharp-libvips-*) — https://github.com/libvips/libvips
+   libvips è distribuita sotto la GNU Lesser General Public License 3.0 o successiva; le licenze di ogni libreria inclusa nei
+   binari sono elencate nella nota del pacchetto (copia in licenze/sharp-libvips-linuxmusl-x64-LICENSING.md).
+   Testo della LGPL-3.0: copia integrale in licenze/LGPL-3.0.txt (da https://www.gnu.org/licenses/lgpl-3.0.txt).
+
 Le domande e le risposte della negoziazione con le Ombre (server/db/dati/negoziazione-domande.json)
 sono trascritte da «The Ultimate/Most Complete Guide To Negotiations In Persona 5» di joyce-chen e
 GooberSD/Chompobar — https://docs.google.com/document/d/1sPsQ2SPXJdsrhYBj3mMyj5va-hmJ10TycIqJto4k2z4

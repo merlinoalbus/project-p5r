@@ -22,8 +22,9 @@ export const DESCRIZIONI_IMMAGINI: DescrizioniArea = {
   },
   'DELETE /api/immagini': {
     sommario: 'Rimuove in blocco le immagini caricate di un ambito o di tutti gli ambiti di caricamento',
-    descrizione: 'Con `ambito` toglie tutte le immagini di quell\'ambito di caricamento; senza, quelle di tutti gli ambiti di caricamento. La grafica predefinita non si tocca mai (la query accetta solo gli ambiti di caricamento). La cancellazione è definitiva: le immagini stanno solo nel database di gioco.',
+    descrizione: 'Con `ambito` toglie tutte le immagini di quell\'ambito di caricamento; senza, quelle di tutti gli ambiti di caricamento. La grafica predefinita non si tocca mai (la query accetta solo gli ambiti di caricamento). Se fra le immagini tolte c\'è quella che una mappa con pezzi ritagliati (102) mostra, si chiede conferma come nell\'editor (L1): 409 `mappa-con-pezzi` con `{ mappe, pezzi, copie }` e niente si toglie; con `eliminaPezzi=1` i pezzi di quelle mappe se ne vanno con le immagini, nella stessa transazione. La cancellazione è definitiva: le immagini stanno solo nel database di gioco.',
     risposta: '`{ eliminate }`: il numero di immagini rimosse',
+    errori: [[409, 'mappa-con-pezzi']],
   },
   'GET /api/immagini/:ambito/:chiave': {
     sommario: 'I metadati di un\'immagine',
@@ -33,10 +34,10 @@ export const DESCRIZIONI_IMMAGINI: DescrizioniArea = {
   },
   'GET /api/immagini/:ambito/:chiave/file': {
     sommario: 'Il file di un\'immagine, letto dal database',
-    descrizione: 'Manda il contenuto con il suo tipo MIME (PNG, JPEG, WEBP, GIF o SVG) e un `ETag` stabile finché la riga non cambia; con `If-None-Match` uguale risponde 304 senza corpo. Con un parametro `v` non vuoto (URL versionato del manifesto) la risposta è `private, max-age=31536000, immutable`; senza, `private, no-cache`, così una sostituzione si vede subito. Per l\'ambito `mappa` la chiave si riconduce all\'identità della mappa. 404 se la riga manca o se è registrata senza contenuto.',
-    risposta: 'Il file dell\'immagine',
+    descrizione: 'Manda il contenuto con il suo tipo MIME (PNG, JPEG, WEBP, GIF o SVG) e un `ETag` stabile finché la riga non cambia; con `If-None-Match` uguale risponde 304 senza corpo. Con un parametro `v` non vuoto (URL versionato del manifesto) la risposta è `private, max-age=31536000, immutable`; senza, `private, no-cache`, così una sostituzione si vede subito. Per l\'ambito `mappa` la chiave si riconduce all\'identità della mappa. 404 se la riga manca o se è registrata senza contenuto. Con `l` (L1, miniature) la risposta è una miniatura WebP larga al più `l` pixel (160, 320, 640 o 1024; ogni altro valore è 400 `larghezza-non-ammessa`), proporzioni mantenute e alfa conservato, generata la prima volta e poi tenuta nel database legata alla versione dell\'immagine (`shared/miniature.ts` per gli URL e lo `srcset`). Si risponde con l\'originale per SVG e GIF, quando l\'immagine non è più larga di `l` e quando il generatore non c\'è o fallisce. Le regole di cache sono le stesse, l\'`ETag` porta anche la larghezza (`-l<l>`), e l\'intestazione `X-Miniatura` dice `generata`, `cache` o `originale`.',
+    risposta: 'Il file dell\'immagine, o la sua miniatura con `l`',
     rispostaBinaria: 'image/*',
-    errori: [[404, 'immagine-non-trovata'], [404, 'immagine-file-mancante']],
+    errori: [[400, 'larghezza-non-ammessa'], [404, 'immagine-non-trovata'], [404, 'immagine-file-mancante']],
   },
   'PUT /api/immagini/:ambito/:chiave': {
     sommario: 'Carica o sostituisce l\'immagine di (ambito, chiave)',
@@ -47,14 +48,14 @@ export const DESCRIZIONI_IMMAGINI: DescrizioniArea = {
   },
   'POST /api/immagini/:ambito/:chiave/da-url': {
     sommario: 'Scarica un\'immagine da un indirizzo web e la salva per (ambito, chiave)',
-    descrizione: 'Il server scarica l\'indirizzo indicato (solo http/https, redirect seguiti, al più 20 secondi di attesa della risposta e 120 secondi di trasferimento fermo) con il tetto di 8 MB applicato mentre i dati arrivano, poi la salva come un caricamento: il tipo dichiarato dal sito deve essere PNG, JPEG, WEBP, GIF o SVG, e l\'immagine sostituisce quella che c\'era. L\'indirizzo indicato resta in `origineUrl`. Un sito che non risponde, risponde con un errore o senza contenuto dà 400 `download-fallito`.',
+    descrizione: 'Il server scarica l\'indirizzo indicato (solo http/https, redirect seguiti, al più 20 secondi di attesa della risposta e 120 secondi di trasferimento fermo) con il tetto di 8 MB applicato mentre i dati arrivano, poi la salva come un caricamento: il tipo dichiarato dal sito deve essere PNG, JPEG, WEBP, GIF o SVG, e l\'immagine sostituisce quella che c\'era. L\'indirizzo indicato resta in `origineUrl`. Un sito che non risponde, risponde con un errore o senza contenuto dà 400 `download-fallito`. L\'immagine di una mappa che esiste segue la strada dell\'editor come il caricamento (L1): dimensioni, ruolo dedotto dalla gerarchia, la mappa diventa dell\'utente, e i pezzi ritagliati dall\'immagine di prima da confermare (409 `mappa-con-pezzi`, controllato anche prima dello scarico; con `?eliminaPezzi=1` se ne vanno).',
     risposta: 'I metadati dell\'immagine salvata, `ImmagineDto`',
-    errori: [[400, 'url-non-valido'], [400, 'download-fallito'], [400, 'immagine-troppo-grande'], [400, 'formato-non-ammesso']],
+    errori: [[400, 'url-non-valido'], [400, 'download-fallito'], [400, 'immagine-troppo-grande'], [400, 'formato-non-ammesso'], [409, 'mappa-con-pezzi']],
   },
   'DELETE /api/immagini/:ambito/:chiave': {
     sommario: 'Elimina l\'immagine di (ambito, chiave)',
-    descrizione: 'Toglie la riga dal database di gioco, contenuto compreso; vale per ogni ambito, anche per la grafica predefinita. Per l\'ambito `mappa` la chiave si riconduce all\'identità della mappa. 404 se non c\'era nessuna immagine.',
+    descrizione: 'Toglie la riga dal database di gioco, contenuto compreso; vale per ogni ambito, anche per la grafica predefinita. Per l\'ambito `mappa` la chiave si riconduce all\'identità della mappa. Se è l\'immagine che una mappa con pezzi ritagliati (102) mostra — la sua caricata, o l\'asset predefinito di una mappa senza caricata — si chiede conferma come nell\'editor (L1): 409 `mappa-con-pezzi` e niente si toglie; con `?eliminaPezzi=1` i pezzi se ne vanno con lei. 404 se non c\'era nessuna immagine.',
     risposta: 'Nessun contenuto (204)',
-    errori: [[404, 'immagine-non-trovata']],
+    errori: [[404, 'immagine-non-trovata'], [409, 'mappa-con-pezzi']],
   },
 };

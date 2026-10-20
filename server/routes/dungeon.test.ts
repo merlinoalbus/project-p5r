@@ -31,7 +31,7 @@ describe('API dungeon', () => {
     expect(k.date.scadenza.length).toBeGreaterThan(0);
     const tipi = new Set(['sicura', 'forziere', 'forziere-chiuso', 'volonta', 'puzzle', 'miniboss', 'boss', 'ombra-sciagura', 'persona', 'oggetto', 'scorciatoia', 'altro']);
     for (const a of k.aree) {
-      expect(typeof a.mappa).toBe('boolean');
+      expect('mappa' in a).toBe(false); // L1: il campo morto della vecchia pianta dell'area non c'è più
       for (const p of a.punti) {
         expect(p.chiave).toBe(`${a.chiave}/${p.ordine}`);
         expect(tipi.has(p.tipo)).toBe(true);

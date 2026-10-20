@@ -20,6 +20,7 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { MappaTokyo } from '../components/mappe/MappaTokyo';
 import { quartiereAperto } from '../components/mappe/aperturaTokyo';
 import { SagomaQuartiere } from '../components/mappe/SagomaQuartiere';
+import { IllustrazioneConSegno } from '../components/mappe/IllustrazioneConSegno';
 import { usePartitaStore } from '../stores/partitaStore';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
@@ -90,9 +91,13 @@ export function CittaPage() {
                   onFocus={() => setAcceso(x.chiave)} onBlur={() => setAcceso(null)}
                   className={`card card--cliccabile piastrella no-underline text-text flex w-full gap-3 ${classiSuggerito(suggerito)} ${
                     acceso === x.chiave ? 'ring-2 ring-[#ffd23f] ring-offset-0' : ''}`}>
-                  {/* La stessa sagoma della mappa qui sopra, non l'anteprima del nodo d'atlante:
-                      quella per quasi tutti i quartieri non esiste e lasciava riquadri vuoti. */}
-                  <SagomaQuartiere chiave={x.chiave} nome={x.nome} acceso={acceso === x.chiave} className={aperto ? '' : 'opacity-40 grayscale'} />
+                  {/* L'illustrazione della mappa del quartiere, la stessa del visore e dell'indice (regola unica di L1), con
+                      sopra la sagoma della mappa qui accanto come segno (scelta dell'utente, 2026-10-20). Senza illustrazione
+                      resta la sola sagoma, a grandezza piena, com'era. */}
+                  <IllustrazioneConSegno illustrazione={x.illustrazione} alt={`Illustrazione di ${x.nome}`} spenta={!aperto}
+                    className="w-32 self-start xl:w-28" sizes="(min-width: 1280px) 112px, 128px"
+                    segno={<SagomaQuartiere chiave={x.chiave} nome={x.nome} acceso={acceso === x.chiave} larghezza={52} altezza={39} />}
+                    senza={<SagomaQuartiere chiave={x.chiave} nome={x.nome} acceso={acceso === x.chiave} className={aperto ? '' : 'opacity-40 grayscale'} />} />
                   <span className="flex min-w-0 flex-1 flex-col gap-1">
                   <span className="flex flex-wrap items-center gap-1.5">
                     <span className="font-display uppercase text-[20px] leading-none">{x.nome}</span>

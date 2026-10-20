@@ -18,6 +18,7 @@ import { t } from './traduzioniService.js';
 import { registraEvento } from './storicoService.js';
 import { finestreDungeon, invalidaDatiGuida } from './datiGuida.js';
 import { radiceDelPalazzo, SQL_SOTTOALBERO, sottoalberoMappe } from './mappe/alberoMappe.js';
+import { illustrazioneDellaMappa } from './mappe/immagineMappa.js';
 import { fattoPerVoci, vociDiOgniPin, vociGestite } from './mappe/voceDelPin.js';
 import type { AreaDedaloDto, AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, PinDelPuntoDto, PuntiCopiatiDto, PuntiSpostatiDto, PuntoInteresseDto, RichiestaDelDedaloDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta, VoceCollegabileDto } from '../../shared/types.js';
 import { contoAreaDedalo, contoDedalo, tipoDelDedalo } from '../../shared/dedali.js';
@@ -227,10 +228,6 @@ function raccoltaMementos(dungeonChiave: string, partitaId: number | undefined, 
   return { totale, presi: dedali.reduce((s, d) => s + (d.obiettivi.fatti ?? 0), 0), mappe: dedali.length, mappeComplete: dedali.filter((d) => d.completato).length };
 }
 
-/** Le immagini di ambito «mappa» presenti nel database (chiave → URL di origine): dicono quali aree hanno la loro mappa. */
-function mappePresenti(): Map<string, string | null> {
-  return new Map((prepared("SELECT chiave, origine_url FROM immagine WHERE ambito = 'mappa'").all() as Array<{ chiave: string; origine_url: string | null }>).map((r) => [r.chiave, r.origine_url ?? null]));
-}
 
 
 /** Il riassunto di un Palazzo. `gia` porta quello che chi chiama ha già calcolato: la raccolta (la scheda del Palazzo la calcola
@@ -318,7 +315,6 @@ export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDet
   const marc = marcatori();
   const pinPunti = pinDeiPunti();
   const letture = { maschere: indiceMaschere(), areePersone: areeDellePersone() };
-  const mappe = mappePresenti();
   const native = mappeDelleAree(chiave);
   const raccolta = r.tipo === 'mementos' ? null : raccoltaMappe(chiave, partitaId);
   const dedali = r.tipo === 'mementos' ? lettureDedali(chiave, partitaId, stati) : null;
@@ -329,7 +325,7 @@ export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDet
   const statoDi = (p: RigaPunto): StatoPunto | null => (puntoDescrittivo(p.tipo, p.area_dedalo_chiave) ? null
     : r.tipo === 'mementos' && p.tipo === 'persona' ? (catturate.has(p.chiave) ? 'ottenuto' : null) : stati.get(p.chiave) ?? null);
   const aree = (prepared('SELECT * FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine').all(chiave) as RigaArea[]).map((a): AreaDungeonDto => ({
-    chiave: a.chiave, ordine: a.ordine, nome: a.nome, descrizione: a.descrizione, mappa: mappe.has(a.chiave),
+    chiave: a.chiave, ordine: a.ordine, nome: a.nome, descrizione: a.descrizione,
     mappe: (native.get(a.chiave) ?? []).map((m) => {
       const rm = raccolta?.perMappa.get(m.chiave);
       return { chiave: chiaveMappa(m.chiave), nome: m.nome, n: rm?.n ?? 0, presi: partitaId === undefined ? null : (rm?.presi ?? 0), spilli: rm?.spilli ?? [] };
@@ -342,7 +338,8 @@ export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDet
   // nei Memento una Persona è «catturata» se è registrata nel compendio della partita (scelte dell'utente, 2026-10-12)
   const personeCatturate = partitaId === undefined || !tabellaUtente('compendio_partita') ? null
     : (prepared('SELECT persona_id FROM compendio_partita WHERE partita_id = ? AND registrata = 1 ORDER BY persona_id').all(partitaId) as Array<{ persona_id: number }>).map((x) => x.persona_id);
-  return { ...riassunto(r, stati, partitaId, partitaId !== undefined ? palazziCompletati(partitaId) : null, { raccolta }), note: r.note, fonti: JSON.parse(r.fonti_json) as string[], aree, planimetrie, atterraggi: elencaAtterraggi(chiave), personeCatturate };
+  return { ...riassunto(r, stati, partitaId, partitaId !== undefined ? palazziCompletati(partitaId) : null, { raccolta }), note: r.note, fonti: JSON.parse(r.fonti_json) as string[], aree, planimetrie, atterraggi: elencaAtterraggi(chiave), personeCatturate,
+    illustrazione: illustrazioneDellaMappa(radiceDelPalazzo(chiave)) };
 }
 
 /**

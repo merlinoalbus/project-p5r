@@ -1,5 +1,5 @@
 // ============================================================
-// percorsi-map.test.ts — gerarchia delle mappe: chiave e asset derivati dagli antenati, rinomina e spostamento di un sottoalbero con pin, progressi e vecchie URL, collisioni e cicli rifiutati
+// percorsi-map.test.ts — gerarchia delle mappe: chiave derivata dagli antenati (asset per convenzione solo se esiste, L1), rinomina e spostamento di un sottoalbero con pin, progressi e vecchie URL, collisioni e cicli rifiutati
 // ============================================================
 
 import request from 'supertest';
@@ -11,10 +11,10 @@ const app=createApp();
 beforeEach(()=>{dbDiProva();});afterEach(()=>closeDb());
 /** Crea una mappa di tipo area col nome dato sotto il genitore indicato, pretende il 201 e la restituisce. */
 const crea=async(nome:string,genitore:string)=>{const r=await request(app).post('/api/mappe').send({nome,tipo:'area',genitore});expect(r.status).toBe(201);return r.body.data;};
-it('deriva chiave e asset da tutta la gerarchia, preservando i nomi naturali',async()=>{
+it('deriva la chiave da tutta la gerarchia, preservando i nomi naturali; senza asset per convenzione',async()=>{
   const castello=await crea('Castello Imperiale','shibuya');const piano=await crea('Piano 0',castello.chiave);
   expect(castello.chiave).toBe('shibuya-castello-imperiale');expect(piano.chiave).toBe('shibuya-castello-imperiale-piano-0');
-  expect(piano.asset).toBe('mappe/shibuya-castello-imperiale-piano-0');expect(piano.nome).toBe('Piano 0');
+  expect(piano.asset).toBeNull();expect(piano.nome).toBe('Piano 0'); // L1, F9: l'asset «mappe/<chiave>» solo se esiste
   const ricerca=(await request(app).get('/api/mappe/riferimenti?tipo=mappa&q=Shibuya%20Piano')).body.data;
   expect(ricerca).toContainEqual(expect.objectContaining({chiave:piano.chiave,nome:'Shibuya › Castello Imperiale › Piano 0'}));
 });

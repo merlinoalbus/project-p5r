@@ -192,13 +192,13 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/citta': {
     sommario: 'Elenco dei quartieri di Tokyo',
-    descrizione: 'I quartieri in ordine (escluso l\'ingresso dei Memento, che non è un quartiere) con mappa, punto d\'ingresso e conteggi dei luoghi non nascosti e verificati. Con `?partita=` ogni quartiere dice se è già nel mondo: le regole di sblocco non sono solo date, e solo l\'esito «bloccato» lo nasconde (un dubbio no), con il motivo in `bloccoMotivo`; senza partita sono tutti disponibili.',
+    descrizione: 'I quartieri in ordine (escluso l\'ingresso dei Memento, che non è un quartiere) con mappa, punto d\'ingresso, `illustrazione` (l\'immagine della mappa del quartiere con la regola unica di L1: `immagineUrl` della caricata, versionato, poi `asset` dichiarato; la stessa del visore e dell\'indice) e conteggi dei luoghi non nascosti e verificati. Con `?partita=` ogni quartiere dice se è già nel mondo: le regole di sblocco non sono solo date, e solo l\'esito «bloccato» lo nasconde (un dubbio no), con il motivo in `bloccoMotivo`; senza partita sono tutti disponibili.',
     risposta: 'Elenco di `QuartiereRiassuntoDto`',
     errori: [PARTITA_NON_TROVATA],
   },
   'GET /api/compendio/citta/:chiave': {
     sommario: 'Scheda di un quartiere con i suoi luoghi',
-    descrizione: 'Il quartiere con mappa, ingresso, pianta (o il motivo per cui manca) e i luoghi non nascosti in ordine, ciascuno con Confidenti, attività, negozi, marcatore e condizioni. Con `?partita=` ogni luogo porta la disponibilità valutata sulla partita: la partita serve ai luoghi, non al quartiere.',
+    descrizione: 'Il quartiere con mappa (vero se la sua mappa ha un\'immagine caricata, registrata o con la chiave della mappa), `illustrazione` (come nell\'elenco), ingresso, pianta (o il motivo per cui manca) e i luoghi non nascosti in ordine, ciascuno con Confidenti, attività, negozi, marcatore e condizioni. Con `?partita=` ogni luogo porta la disponibilità valutata sulla partita: la partita serve ai luoghi, non al quartiere.',
     risposta: '`QuartiereDettaglioDto`',
     errori: [[404, 'quartiere-non-trovato'], PARTITA_NON_TROVATA],
   },
@@ -274,7 +274,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/dungeon/:chiave': {
     sommario: 'Scheda completa di un Palazzo o dei Memento',
-    descrizione: 'Riassunto, note e fonti, aree in ordine con le loro planimetrie e i punti della guida (marcatore e pin collegati); per i Memento il dedalo di ogni area con le sue aree (099: dettagli, timbri, Richieste, conteggio degli elementi e completamento) e le Richieste da collocare, per i Palazzi l\'elenco di tutte le planimetrie. Con `?partita=` arrivano lo stato dei punti, i collezionabili presi e `personeCatturate` (le Persona registrate nel compendio della partita: nei Memento le «catturate», 2026-10-12); senza, `presi` e `personeCatturate` sono null. Le voci Persona dei dedali portano `areeDedalo` (101).',
+    descrizione: 'Riassunto, note e fonti, aree in ordine con le loro planimetrie e i punti della guida (marcatore e pin collegati); per i Memento il dedalo di ogni area con le sue aree (099: dettagli, timbri, Richieste, conteggio degli elementi e completamento) e le Richieste da collocare, per i Palazzi l\'elenco di tutte le planimetrie. `illustrazione` è l\'immagine caricata sulla radice `dungeon-<chiave>` (URL versionato), con `asset` sempre null: l\'asset della radice è lo stemma, che la scheda mostra già come segno (L1). Con `?partita=` arrivano lo stato dei punti, i collezionabili presi e `personeCatturate` (le Persona registrate nel compendio della partita: nei Memento le «catturate», 2026-10-12); senza, `presi` e `personeCatturate` sono null. Le voci Persona dei dedali portano `areeDedalo` (101).',
     risposta: '`DungeonDettaglioDto`',
     errori: [[404, 'dungeon-non-trovato'], PARTITA_NON_TROVATA],
   },

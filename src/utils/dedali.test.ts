@@ -40,7 +40,7 @@ it('le Persona non contano: catturate o no, l\'area si completa con il resto (20
 
 it('ricalcola le aree del dedalo dalle loro voci, Richieste e timbri, e l\'anello dei Memento dai dedali', () => {
   const dedalo: AreaDungeonDto = {
-    chiave: 'd', ordine: 0, nome: 'Dedalo', descrizione: '', mappa: false, mappe: [],
+    chiave: 'd', ordine: 0, nome: 'Dedalo', descrizione: '', mappe: [],
     punti: [voce('v1', 'a1', 'ottenuto'), voce('v2', 'a2', null)],
     dedalo: { aree: [area('a1', { timbri: { totale: 2, raccolti: 2 } }), area('a2', { richieste: [{ chiave: 'r', nome: 'R', stato: 'completata' }] })], daCollocare: [], obiettivi: { totale: 0, fatti: 0 }, completato: true },
   };

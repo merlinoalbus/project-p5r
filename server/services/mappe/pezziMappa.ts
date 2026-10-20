@@ -180,11 +180,38 @@ export function quanteCopie(mappa: string): number {
   return conPezzi() ? prepared('SELECT COUNT(*) FROM copia_pezzo c JOIN pezzo_mappa p ON p.id = c.pezzo_id WHERE p.mappa_chiave = ?').pluck().get(mappa) as number : 0;
 }
 
+/** Le mappe che hanno almeno un ritaglio. */
+export function mappeConPezzi(): string[] {
+  return conPezzi() ? prepared('SELECT DISTINCT mappa_chiave FROM pezzo_mappa ORDER BY mappa_chiave').pluck().all() as string[] : [];
+}
+
 /** Toglie tutti i pezzi di una mappa con le loro copie (anche senza contare sulla cascata delle chiavi esterne). */
 export function eliminaPezziDellaMappa(mappa: string): void {
   if (!conPezzi()) return;
   prepared('DELETE FROM copia_pezzo WHERE pezzo_id IN (SELECT id FROM pezzo_mappa WHERE mappa_chiave = ?)').run(mappa);
   prepared('DELETE FROM pezzo_mappa WHERE mappa_chiave = ?').run(mappa);
+}
+
+/**
+ * I pezzi (102) sono ritagli in pixel dell'immagine che la mappa mostra: un'altra immagine (sostituita, o tolta e rimpiazzata
+ * dall'asset o da nessuna) li ritaglierebbe da zone sbagliate. Scelta dell'utente del 2026-10-14 («Chiedere conferma ed
+ * eliminarli»), dal lotto L1 la stessa per ogni strada che cambia l'immagine mostrata (editor, rotta generica, da URL, scarico
+ * della pianta, rimozioni): senza `conferma` 409 `mappa-con-pezzi` con i conteggi; con la conferma la funzione restituita toglie
+ * i pezzi con le loro copie, e va chiamata nella stessa transazione del cambio d'immagine. `blocco`: l'operazione tocca più mappe
+ * insieme (rimozione in blocco), e i dettagli contano anche le mappe.
+ */
+export function confermaPezzi(mappe: readonly string[], conferma: boolean, cosa: 'sostituendola' | 'togliendola', blocco = false): () => void {
+  const toccate = [...new Set(mappe)].filter((m) => quantiPezzi(m) > 0);
+  if (toccate.length === 0) return () => {};
+  if (!conferma) {
+    const pezzi = toccate.reduce((n, m) => n + quantiPezzi(m), 0);
+    const copie = toccate.reduce((n, m) => n + quanteCopie(m), 0);
+    const chi = toccate.length === 1 ? 'La mappa ha' : `${toccate.length} mappe hanno`;
+    const azione = blocco ? 'togliendo le immagini' : cosa;
+    throw httpErrors.conflict('mappa-con-pezzi', `${chi} ${pezzi === 1 ? '1 pezzo ritagliato' : `${pezzi} pezzi ritagliati`} dall’immagine di prima (${copie === 1 ? '1 copia posata' : `${copie} copie posate`}): ${azione} ${pezzi === 1 ? 'verrà eliminato' : 'verranno eliminati'} con le copie.`,
+      blocco ? { mappe: toccate.length, pezzi, copie } : { pezzi, copie });
+  }
+  return () => { for (const m of toccate) eliminaPezziDellaMappa(m); };
 }
 
 /** Le condizioni come vanno salvate: normalizzate e in JSON, o null se non ne resta nessuna. */

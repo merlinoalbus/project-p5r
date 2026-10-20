@@ -14,6 +14,7 @@
 
 import { getDb, nowIso, type AppDatabase } from '../../db/dbService.js';
 import { sqlRuoloDaGerarchia } from '../../../shared/immaginiMappa.js';
+import type { IllustrazioneDto } from '../../../shared/types.js';
 
 /** Un'immagine caricata nell'istanza per una mappa: la chiave nella tabella e la data, che versiona l'URL. */
 export interface ImmagineCaricata { chiave: string; createdAt: string }
@@ -40,6 +41,48 @@ export function caricataDellaMappa(r: { chiave: string; immagine_chiave: string 
 /** L'URL dell'immagine caricata, versionato con la data: una sostituzione cambia l'indirizzo, e ogni vista la vede subito. */
 export function urlCaricata(c: ImmagineCaricata): string {
   return `/api/immagini/mappa/${encodeURIComponent(c.chiave)}/file?v=${encodeURIComponent(c.createdAt)}`;
+}
+
+/**
+ * L'illustrazione di un posto dalla sua mappa, con la regola unica: la caricata, poi l'asset dichiarato. Se il ruolo della
+ * mappa è `emblema` (radici dei Palazzi e dei Memento) l'asset è lo stemma, che le viste disegnano già come segno: allora
+ * l'illustrazione è solo la caricata. Mappa inesistente → nessuna illustrazione.
+ */
+export function illustrazioneDellaMappa(chiave: string, db: AppDatabase = getDb(), caricate?: Map<string, string>): IllustrazioneDto {
+  const r = db.prepare('SELECT chiave, immagine_chiave, asset, ruolo_immagine FROM mappa WHERE chiave = ?').get(chiave) as
+    { chiave: string; immagine_chiave: string | null; asset: string | null; ruolo_immagine: string | null } | undefined;
+  if (!r) return { immagineUrl: null, asset: null };
+  const caricata = caricataDellaMappa(r, caricate ?? immaginiCaricateDelleMappe(db));
+  return { immagineUrl: caricata ? urlCaricata(caricata) : null, asset: r.ruolo_immagine === 'emblema' ? null : r.asset };
+}
+
+/**
+ * Le mappe (fra le `candidate`) la cui immagine mostrata — la caricata, poi l'asset dichiarato — se ne andrebbe togliendo le
+ * immagini per cui `tolta(ambito, chiave)` è vera. Serve alle rimozioni per sapere di quali mappe chiedere conferma dei pezzi.
+ */
+export function mappeCheLaPerdono(candidate: readonly string[], tolta: (ambito: string, chiave: string) => boolean, db: AppDatabase = getDb()): string[] {
+  if (candidate.length === 0) return [];
+  const caricate = immaginiCaricateDelleMappe(db);
+  const leggi = db.prepare('SELECT chiave, immagine_chiave, asset FROM mappa WHERE chiave = ?');
+  return candidate.filter((chiave) => {
+    const r = leggi.get(chiave) as { chiave: string; immagine_chiave: string | null; asset: string | null } | undefined;
+    if (!r) return false;
+    const caricata = caricataDellaMappa(r, caricate);
+    if (caricata) return tolta('mappa', caricata.chiave);
+    const i = r.asset ? r.asset.indexOf('/') : -1;
+    return !!r.asset && i > 0 && tolta(r.asset.slice(0, i), r.asset.slice(i + 1));
+  });
+}
+
+/**
+ * L'asset dichiarato se esiste (una riga della grafica predefinita `ambito/chiave`, anche senza contenuto: è la stessa
+ * esistenza della regola del ruolo, `sqlRuoloDaGerarchia`), altrimenti null. F9 del lotto L1: una mappa nuova e il pacchetto
+ * esportato non dichiarano più un asset per convenzione (`mappe/<chiave>`) che non c'è.
+ */
+export function assetEsistente(asset: string | null | undefined, db: AppDatabase = getDb()): string | null {
+  const i = asset ? asset.indexOf('/') : -1;
+  if (!asset || i <= 0) return null;
+  return db.prepare('SELECT 1 FROM immagine WHERE ambito = ? AND chiave = ?').get(asset.slice(0, i), asset.slice(i + 1)) ? asset : null;
 }
 
 /** Riallinea il ruolo dell'immagine (di una mappa, o di tutte) alla regola della gerarchia. Restituisce quante righe cambiano. */
@@ -84,9 +127,12 @@ export function dopoImmagineMappa(db: AppDatabase, chiave: string, contenuto: Bu
   const mappa = db.prepare('SELECT chiave FROM mappa WHERE chiave = ? OR immagine_chiave = ?').all(chiave, chiave) as Array<{ chiave: string }>;
   for (const m of mappa) {
     if (contenuto) {
+      // le dimensioni dell'intestazione vincono su quelle dichiarate (i pin e i pezzi si posano sui pixel veri del file); se
+      // l'intestazione non si legge (SVG, un formato non riconosciuto) restano quelle dichiarate dalla mappa, invece di nessuna: la
+      // stessa regola per ogni strada — editor, rotta generica, da URL, scarico della pianta, importazione (L1, F6 e osservazione O2)
       const dim = dimensioniImmagine(contenuto);
-      db.prepare('UPDATE mappa SET immagine_chiave = ?, larghezza = ?, altezza = ?, updated_at = ? WHERE chiave = ?')
-        .run(chiave, dim?.larghezza ?? null, dim?.altezza ?? null, nowIso(), m.chiave);
+      if (dim) db.prepare('UPDATE mappa SET immagine_chiave = ?, larghezza = ?, altezza = ?, updated_at = ? WHERE chiave = ?').run(chiave, dim.larghezza, dim.altezza, nowIso(), m.chiave);
+      else db.prepare('UPDATE mappa SET immagine_chiave = ?, updated_at = ? WHERE chiave = ?').run(chiave, nowIso(), m.chiave);
     } else {
       // tolta l'immagine registrata, le dimensioni erano le sue: si rileggeranno dall'asset, se c'è
       db.prepare('UPDATE mappa SET immagine_chiave = NULL, larghezza = NULL, altezza = NULL, updated_at = ? WHERE chiave = ? AND immagine_chiave = ?').run(nowIso(), m.chiave, chiave);

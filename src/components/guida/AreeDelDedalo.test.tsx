@@ -34,7 +34,7 @@ type Dedalo = AreaDungeonDto & { dedalo: NonNullable<AreaDungeonDto['dedalo']> }
 /** Qimranut con due aree: «Treno» (una voce esaurita, completata) e «Banchina» (una voce da fare, una Richiesta aperta, timbri 1
  *  su 3; Pixie catturata, Bicorno no); una Richiesta da collocare e una Persona senza area. */
 const dedalo = (): Dedalo => ({
-  chiave: 'mementos-01-qimranut', ordine: 0, nome: 'Dedalo di Qimranut', descrizione: 'La prima discesa.', mappa: false, mappe: [],
+  chiave: 'mementos-01-qimranut', ordine: 0, nome: 'Dedalo di Qimranut', descrizione: 'La prima discesa.', mappe: [],
   punti: [voce('v1', 'Ombra della banchina', 'q-1'), voce('v2', 'Nota del treno', 'q-2', 'esaurito'), persona('p1', 11, 'Pixie', ['q-1', 'q-2']), persona('p2', 12, 'Bicorno', ['q-1']), persona('p3', 13, 'Slime', [])],
   dedalo: {
     aree: [

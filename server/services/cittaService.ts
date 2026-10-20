@@ -14,8 +14,10 @@ import { descriviGiorni, leggiGiorni } from '../../shared/orariNegozio.js';
 import type { IngressoQuartiereDto, LuogoOpzioneDto } from '../../shared/types.js';
 import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
-import type { LuogoDto, PiantaAreaDto, QuartiereDettaglioDto, QuartiereRiassuntoDto } from '../../shared/types.js';
-import { importaImmagineDaUrl } from './immaginiService.js';
+import type { ImmagineDto, LuogoDto, PiantaAreaDto, QuartiereDettaglioDto, QuartiereRiassuntoDto } from '../../shared/types.js';
+import { importaImmagineDaUrl, leggiImmagine } from './immaginiService.js';
+import { mappaEsiste, scaricaImmagineMappa } from './mappe/mappeService.js';
+import { illustrazioneDellaMappa, immaginiCaricateDelleMappe } from './mappe/immagineMappa.js';
 import { datiGuida } from './datiGuida.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
@@ -121,7 +123,9 @@ export function elencaQuartieri(partitaId?: number): QuartiereRiassuntoDto[] {
     .filter((q) => !NON_UN_QUARTIERE.has(q.chiave));
   const regole = regoleSblocco();
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
+  const caricate = immaginiCaricateDelleMappe();
   return righe.map((q) => ({ chiave: q.chiave, nome: q.nome, sblocco: q.sblocco, sbloccoData: q.sblocco_data, mappaChiave: chiaveMappa(chiaveImmagineQuartiere(q.chiave)), ingresso: ingressoQuartiere(q.chiave), descrizione: q.descrizione, luoghi: q.luoghi, verificati: q.verificati,
+    illustrazione: illustrazioneDellaMappa(chiaveImmagineQuartiere(q.chiave), undefined, caricate),
     ...disponibilitaQuartiere(q.chiave, regole, st) }));
 }
 
@@ -139,8 +143,10 @@ export function dettaglioQuartiere(chiave: string, partitaId?: number): Quartier
   const p = prepared('SELECT * FROM pianta_quartiere WHERE quartiere_chiave = ?').get(chiave) as RigaPiantaQ | undefined;
   const pianta: PiantaAreaDto | null = p ? { url: p.url, pagina: p.pagina, fonte: p.fonte, licenza: p.licenza, larghezza: p.larghezza, altezza: p.altezza, copertura: 'quartiere', note: p.note, alternative: [] } : null;
   const assenti = datiGuida<Record<string, string>>('mappe-citta-assenti') ?? {};
-  const mappa = !!prepared("SELECT 1 FROM immagine WHERE ambito = 'mappa' AND chiave = ?").get(chiaveImmagineQuartiere(chiave));
-  return { chiave: q.chiave, nome: q.nome, sblocco: q.sblocco, sbloccoData: q.sblocco_data, mappaChiave: chiaveMappa(chiaveImmagineQuartiere(q.chiave)), ingresso: ingressoQuartiere(q.chiave), descrizione: q.descrizione, fonte: q.fonte, luoghi, mappa, pianta, piantaAssente: pianta ? null : (assenti[chiave] ?? null) };
+  // L'immagine della mappa con la regola unica (L1): la caricata, registrata su `immagine_chiave` o con la chiave della mappa.
+  const illustrazione = illustrazioneDellaMappa(chiaveImmagineQuartiere(chiave));
+  const mappa = illustrazione.immagineUrl !== null;
+  return { chiave: q.chiave, nome: q.nome, sblocco: q.sblocco, sbloccoData: q.sblocco_data, mappaChiave: chiaveMappa(chiaveImmagineQuartiere(q.chiave)), ingresso: ingressoQuartiere(q.chiave), descrizione: q.descrizione, fonte: q.fonte, luoghi, mappa, illustrazione, pianta, piantaAssente: pianta ? null : (assenti[chiave] ?? null) };
 }
 
 /** Tutti i luoghi della città (non nascosti) come voci da scegliere: la sede di un negozio o di un'attività. */
@@ -149,11 +155,21 @@ export function elencaLuoghi(): LuogoOpzioneDto[] {
     .map((r) => ({ chiave: r.chiave, nome: r.nome, tipo: r.tipo, quartiere: r.quartiere, quartiereNome: r.quartiere_nome }));
 }
 
-/** Scarica nell'istanza la mappa del quartiere dall'URL della guida. */
-export async function scaricaPiantaQuartiere(quartiere: string): Promise<{ quartiere: string; mime: string; byte: number; fonte: string; url: string }> {
+/**
+ * Scarica nell'istanza la mappa del quartiere dall'URL della guida. Se la mappa del quartiere esiste passa dalla strada dell'editor
+ * (L1, F5 del validatore): pezzi da confermare (409 `mappa-con-pezzi` senza `eliminaPezzi`), dimensioni e ruolo. L'origine della
+ * mappa resta com'era: è la pianta pubblicata dai dati di gioco, scaricata da sola all'apertura del quartiere, non una scelta
+ * dell'utente (una mappa del seed segnata «utente» non si aggiornerebbe più col pacchetto).
+ */
+export async function scaricaPiantaQuartiere(quartiere: string, opz: { eliminaPezzi?: boolean } = {}): Promise<{ quartiere: string; mime: string; byte: number; fonte: string; url: string }> {
   const p = prepared('SELECT * FROM pianta_quartiere WHERE quartiere_chiave = ?').get(quartiere) as RigaPiantaQ | undefined;
   if (!p) throw httpErrors.notFound('pianta-non-disponibile', `Nessuna mappa collegata per il quartiere '${quartiere}'.`);
-  const img = await importaImmagineDaUrl('mappa', chiaveImmagineQuartiere(quartiere), p.url);
+  const chiave = chiaveImmagineQuartiere(quartiere);
+  let img: ImmagineDto;
+  if (mappaEsiste(chiave)) {
+    await scaricaImmagineMappa(chiave, p.url, { eliminaPezzi: opz.eliminaPezzi, dellUtente: false });
+    img = leggiImmagine('mappa', chiave)!;
+  } else img = await importaImmagineDaUrl('mappa', chiave, p.url);
   return { quartiere, mime: img.mime, byte: img.byte, fonte: p.fonte, url: p.url };
 }
 
