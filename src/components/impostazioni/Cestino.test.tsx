@@ -38,15 +38,37 @@ describe('Cestino', () => {
   it('elenca gli elementi: tipo, nome, dove stava, quando, peso, che cosa si sono portati via; il totale; la parte delle partite mancante', async () => {
     render(<Cestino />);
     const area = within(await screen.findByRole('listitem', { name: 'Infiltrazione «Scopri dov’è il Tesoro»' }));
-    expect(area.getByText('Palazzo di Madarame')).toBeInTheDocument();
+    // UX2-12 (2026-10-20): il posto nel titolo e il contenuto con le parole di chi gioca, senza le tabelle interne né l'elemento stesso
+    expect(area.getByText('Infiltrazione di Palazzo di Madarame: Scopri dov’è il Tesoro')).toBeInTheDocument();
+    expect(area.getByText('con 68 voci della guida e 66 segni nelle partite')).toBeInTheDocument();
     expect(area.getByText(/Nel cestino dal .* · 86 kB/)).toBeInTheDocument();
     const contenuto = within(area.getByRole('list', { name: 'Che cosa si è portato via' }));
-    expect(contenuto.getAllByRole('listitem').map((li) => li.textContent)).toEqual(['87 collegamenti pin-voce', '68 voci della guida', '66 spunte delle voci nelle partite', '8 legami planimetria-infiltrazione', '1 infiltrazione']);
+    expect(contenuto.getAllByRole('listitem').map((li) => li.textContent)).toEqual(['68 voci della guida', '66 segni nelle partite']);
+    expect(area.queryByText(/collegamenti pin-voce|legami planimetria-infiltrazione/)).toBeNull();
     const mappa = within(screen.getByRole('listitem', { name: 'Planimetria «Palazzo di Kamoshida»' }));
     expect(mappa.getByText(/3,2 MB/)).toBeInTheDocument();
     expect(mappa.getByText(/si rimettono solo i dati di gioco, non le spunte/)).toBeInTheDocument();
     expect(area.queryByText(/si rimettono solo i dati di gioco/)).toBeNull();
     expect(screen.getByText('2 elementi · 3,3 MB')).toBeInTheDocument();
+  });
+
+  it('UX2-12: un’area del mondo si legge «Area di Shibuya: Sottopasso, con 2 planimetrie, 14 pin e 3 immagini»; l’introduzione cita le aree', async () => {
+    const SOTTOPASSO: VoceCestinoDto = {
+      id: 9, tipo: 'area-fisica', chiave: 'citta/shibuya/sottopasso', nome: 'Sottopasso', contesto: 'Shibuya', eliminatoIl: '2026-10-20T02:05:00.000Z', partite: 'nessuna', byte: 1_000,
+      contenuto: [
+        { tabella: 'spillo', etichetta: 'pin', quante: 14 }, { tabella: 'mappa_alias', etichetta: 'nomi di prima delle mappe', quante: 4 },
+        { tabella: 'immagine', etichetta: 'immagini', quante: 2 }, { tabella: 'spillo_immagine', etichetta: 'schermata di un pin', quante: 1 },
+        { tabella: 'mappa_percorso', etichetta: 'percorsi delle mappe', quante: 2 }, { tabella: 'mappa', etichetta: 'planimetrie', quante: 2 },
+        { tabella: 'area', etichetta: 'area', quante: 1 }, { tabella: 'immagine_miniatura', etichetta: 'immagine miniatura', quante: 1 },
+      ],
+    };
+    api.getCestino.mockResolvedValue([SOTTOPASSO]);
+    render(<Cestino />);
+    const voce = within(await screen.findByRole('listitem', { name: 'Area «Sottopasso»' }));
+    expect(voce.getByText('Area di Shibuya: Sottopasso')).toBeInTheDocument();
+    expect(voce.getByText('con 2 planimetrie, 14 pin e 3 immagini')).toBeInTheDocument();
+    expect(voce.queryByText(/nomi di prima|percorsi|miniatura/)).toBeNull();
+    expect(screen.getByText(/Le aree dei quartieri e della città, le planimetrie/)).toBeInTheDocument();
   });
 
   it('vuoto: lo dice, e «Svuota il cestino» è spento', async () => {

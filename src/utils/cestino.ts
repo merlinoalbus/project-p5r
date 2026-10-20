@@ -7,7 +7,7 @@
 // parole ovunque; la sezione del cestino usa i nomi dei tipi e dei motivi.
 // ============================================================
 
-import type { MotivoSaltataCestinoDto, TipoCestino } from '../types';
+import type { ContenutoCestinoDto, MotivoSaltataCestinoDto, TipoCestino, VoceCestinoDto } from '../types';
 
 /** La frase delle conferme di eliminazione: dove finisce l'elemento e come tornarlo indietro. */
 export const NEL_CESTINO = 'Finisce nel cestino (Impostazioni → Cestino): da lì la rimetti com’era.';
@@ -37,4 +37,50 @@ const MOTIVO_SALTATA_CESTINO: Record<MotivoSaltataCestinoDto, readonly [uno: str
 /** Il motivo per `quante` righe saltate. */
 export function motivoSaltata(motivo: MotivoSaltataCestinoDto, quante: number): string {
   return MOTIVO_SALTATA_CESTINO[motivo][quante === 1 ? 0 : 1];
+}
+
+/**
+ * Che cosa si è portato via un elemento, con le parole di chi gioca (UX2-12, 2026-10-20). Il server conta le righe tabella per
+ * tabella («1 nome di prima di una mappa», «1 percorso di una mappa», «1 immagine miniatura»): qui restano solo le cose che si
+ * riconoscono — aree, planimetrie, pin, immagini, voci… — e i segni delle partite in un conto solo; i dettagli interni (nomi di
+ * prima, percorsi, miniature, legami) si tacciono. In ordine di importanza, non di numero.
+ */
+const PAROLE_CONTENUTO: ReadonlyArray<{ tabelle: readonly string[]; uno: string; molti: string }> = [
+  { tabelle: ['dungeon_area'], uno: 'infiltrazione', molti: 'infiltrazioni' },
+  { tabelle: ['area'], uno: 'area', molti: 'aree' },
+  { tabelle: ['area_dedalo'], uno: 'area del dedalo', molti: 'aree del dedalo' },
+  { tabelle: ['mappa'], uno: 'planimetria', molti: 'planimetrie' },
+  { tabelle: ['punto_interesse'], uno: 'voce della guida', molti: 'voci della guida' },
+  { tabelle: ['spillo'], uno: 'pin', molti: 'pin' },
+  { tabelle: ['quartiere_ingresso'], uno: 'ingresso del quartiere', molti: 'ingressi dei quartieri' },
+  { tabelle: ['pezzo_mappa'], uno: 'pezzo ritagliato', molti: 'pezzi ritagliati' },
+  { tabelle: ['immagine', 'spillo_immagine'], uno: 'immagine', molti: 'immagini' },
+  { tabelle: ['richiesta'], uno: 'Richiesta', molti: 'Richieste' },
+  { tabelle: ['punto_partita', 'spillo_partita', 'spunta_voce_partita', 'timbri_dedalo_partita'], uno: 'segno nelle partite', molti: 'segni nelle partite' },
+];
+
+/** Il contenuto di un elemento del cestino detto per chi gioca: l'elemento stesso escluso (la sua riga c'è sempre), i dettagli
+ *  interni tolti, le tabelle della stessa cosa sommate. */
+export function contenutoLeggibile(v: Pick<VoceCestinoDto, 'tipo' | 'contenuto'>): Array<{ etichetta: string; quante: number }> {
+  const conti = new Map(v.contenuto.map((c: ContenutoCestinoDto) => [c.tabella, c.quante]));
+  // la riga dell'elemento non è «quel che si porta via»: un'area eliminata non «si porta via 1 area»
+  const radice = RADICE_CESTINO[v.tipo];
+  if (conti.has(radice)) conti.set(radice, (conti.get(radice) ?? 1) - 1);
+  return PAROLE_CONTENUTO
+    .map((p) => ({ p, quante: p.tabelle.reduce((s, t) => s + (conti.get(t) ?? 0), 0) }))
+    .filter((x) => x.quante > 0)
+    .map(({ p, quante }) => ({ etichetta: quante === 1 ? p.uno : p.molti, quante }));
+}
+
+/** La tabella dell'elemento stesso, per tipo (la stessa regola del server). */
+const RADICE_CESTINO: Record<TipoCestino, string> = { area: 'dungeon_area', voce: 'punto_interesse', mappa: 'mappa', 'area-dedalo': 'area_dedalo', 'area-fisica': 'area' };
+
+/** Come si presenta un elemento: «Area di Shibuya: Sottopasso» (il posto da cui viene, se c'è), poi «con 2 planimetrie e 1 pin». */
+export function descrizioneElementoCestino(v: Pick<VoceCestinoDto, 'tipo' | 'nome' | 'contesto' | 'contenuto'>): { titolo: string; con: string | null } {
+  const tipo = NOME_TIPO_CESTINO[v.tipo];
+  // il contesto è il posto (il quartiere, il Palazzo, il dedalo) o una nota come «fusa in …»: solo un nome diventa «di <posto>»
+  const posto = v.contesto && !/[«»]/.test(v.contesto) ? v.contesto : null;
+  const parti = contenutoLeggibile(v).map((c) => `${c.quante.toLocaleString('it-IT')} ${c.etichetta}`);
+  const con = parti.length === 0 ? null : parti.length === 1 ? `con ${parti[0]}` : `con ${parti.slice(0, -1).join(', ')} e ${parti.at(-1)}`;
+  return { titolo: `${tipo}${posto ? ` di ${posto}` : ''}: ${v.nome}`, con };
 }
