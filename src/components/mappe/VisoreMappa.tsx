@@ -438,6 +438,20 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     setZoomEsplicito(z);
     setPanEsplicito({ x: dim.w / 2 - (s.x / 100) * nat.w * z, y: dim.h / 2 - (s.y / 100) * nat.h * z });
   };
+  // Richiesta dell'utente (2026-10-20): «al posto di dare l'opzione raccogli (sulla porta, scala, rampino o altri elementi di spostamento)
+  // dovrebbe semplicemente spostarti». Un pin di spostamento con un arrivo, disponibile, che non ha voci della guida da segnare, al tocco
+  // porta subito all'arrivo (nella scheda del Palazzo con la stessa strada dei passaggi del visore, `onNaviga`); con voci da segnare resta
+  // il popup, con «Vai» e le voci. Fuori dall'editor e dalla scelta dei pin; uno senza arrivo resta com'è.
+  const vaSubito = (s: SpilloDto): boolean => {
+    if (editor || scelta || s.destinazioneNonDisponibile || categoriaSpillo(s.tipo) !== 'spostamento' || !arrivoSpillo(s)) return false;
+    if (partitaId !== null && s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile') return false;
+    return !s.voci.some((v) => !puntoDescrittivo(v.tipo, v.areaDedalo));
+  };
+  /** Porta all'arrivo del pin di spostamento (con lo spillo d'arrivo se indicato). */
+  const vaiAllArrivo = (s: SpilloDto) => {
+    const a = arrivoSpillo(s);
+    if (a) onNaviga(a.mappa, a.spillo ? { spillo: a.spillo } : undefined);
+  };
   // L3 RG-1: la guida della planimetria da usare, nelle planimetrie dei Palazzi, fuori dall'editor e dalla scelta dei pin
   const conGuida = !!guida && !editor && !scelta && mappa.area?.contenitore.tipo === 'dungeon';
   const [guidaAperta, setGuidaAperta] = useState<{ top: number; right: number } | null>(null);
@@ -963,7 +977,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                       tela.current?.setPointerCapture?.(e.pointerId);
                     }
                   }}
-                  onClick={(e) => { e.stopPropagation(); if (scelta) { scelta.onScegli(s); return; } if (editor && editor.strumento !== 'seleziona') return; seleziona(attivo && s.id !== popupSoppresso ? null : s.id); }}
+                  onClick={(e) => { e.stopPropagation(); if (scelta) { scelta.onScegli(s); return; } if (editor && editor.strumento !== 'seleziona') return; if (vaSubito(s)) { vaiAllArrivo(s); return; } seleziona(attivo && s.id !== popupSoppresso ? null : s.id); }}
                   onDoubleClick={(e) => { if (!visitabile) return; e.stopPropagation(); e.preventDefault(); editor!.onVisita!(visitabile.mappa); }}
                 >
                   <SpilloGrafico tipo={s.tipo} colore={s.colore} />
@@ -1103,7 +1117,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                       {/* in modalità scelta l'elenco resta aperto: nello stesso punto se ne collegano anche più d'uno */}
                       <button type="button" className={`visore-mappa__voce ${scelta?.scelti.has(s.id) ? 'visore-mappa__voce--attiva' : ''}`} disabled={scelta?.occupato}
                         aria-pressed={scelta ? scelta.scelti.has(s.id) : undefined}
-                        onClick={() => { if (scelta) { scelta.onScegli(s); return; } setGruppoAperto(null); seleziona(s.id); }}>
+                        onClick={() => { if (scelta) { scelta.onScegli(s); return; } setGruppoAperto(null); if (vaSubito(s)) { vaiAllArrivo(s); return; } seleziona(s.id); }}>
                         <PuntoSpillo tipo={s.tipo} colore={s.colore} />
                         <span className="flex-1 min-w-0 break-words text-left">{nomePin(s)}</span>
                         <span className="text-[11px] text-text-muted shrink-0">{s.tipoNome}{scelta?.scelti.has(s.id) ? ' · collegato' : ''}</span>
