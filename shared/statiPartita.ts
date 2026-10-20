@@ -14,7 +14,7 @@
 // ============================================================
 
 import { DOTI_SOCIALI, eDote } from './doti.js';
-import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, GIORNI_SETTIMANA, PALAZZI_CONDIZIONE, RANGHI_CLIENTE, STAGIONI, dataValida, ordineGioco, type ContatoreChiave, type RangoCliente, type RequisitoSpillo } from './condizioniSpillo.js';
+import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, GIORNI_SETTIMANA, PALAZZI_CONDIZIONE, RANGHI_CLIENTE, STAGIONI, dataValida, ordineGioco, type ContatoreChiave, type RangoCliente, type RequisitoSpillo, type TipoCondizione } from './condizioniSpillo.js';
 import { uidValido } from './spilli.js';
 
 /** Come si sceglie un valore: da quale elenco, o che numero. */
@@ -26,7 +26,9 @@ export type TipoCampo =
   | 'attivita' | 'volte' | 'negozio-con-gradi' | 'rango-cliente' | 'negozio-con-punti' | 'punti'
   | 'evento' | 'contatore' | 'almeno'
   | 'arcano' | 'persona' | 'abilita'
-  | 'spillo' | 'voce-guida';
+  | 'spillo' | 'voce-guida'
+  // L6: un luogo (scelto per nome, salvato per chiave), un invito di un Confidente, il testo di un avviso
+  | 'luogo' | 'invito' | 'testo';
 
 export interface CampoCondizione { nome: string; tipo: TipoCampo; etichetta: string }
 export interface OperatoreCondizione { chiave: string; nome: string; campi: CampoCondizione[] }
@@ -40,6 +42,9 @@ export interface DefinizioneStato {
   /** Solo nelle condizioni dei pin (l'editor delle mappe): lo stato di un altro pin o di una voce della guida (2026-10-11) non dice
    *  niente a un articolo o a un libro. */
   soloSpilli?: true;
+  /** L6: si mostra ma non si sceglie nell'editor. Gli inviti si aggiungono e si tolgono solo dalla pagina del Confidente (R9-07c): una
+   *  condizione che ne cita uno si legge, con il collegamento al Confidente. */
+  soloLettura?: true;
 }
 
 /** Un campo dell'editor delle condizioni: nome del valore, tipo e etichetta mostrata. */
@@ -56,10 +61,20 @@ export const STATI_PARTITA: readonly DefinizioneStato[] = [
   { chiave: 'meteo', nome: 'Meteo', gruppo: 'Calendario e mondo', origine: 'calendario di gioco', operatori: [{ chiave: 'piove', nome: 'piove', campi: [] }, { chiave: 'non-piove', nome: 'non piove', campi: [] }] },
   { chiave: 'giorno-settimana', nome: 'Giorno della settimana', gruppo: 'Calendario e mondo', origine: 'calendario di gioco', operatori: [{ chiave: 'in', nome: 'è uno di', campi: [campo('giorni', 'giorni', 'Giorni')] }] },
   { chiave: 'stagione', nome: 'Stagione', gruppo: 'Calendario e mondo', origine: 'calendario di gioco', operatori: [{ chiave: 'e', nome: 'è', campi: [campo('stagione', 'stagione', 'Stagione')] }] },
-  { chiave: 'quartiere', nome: 'Quartiere', gruppo: 'Calendario e mondo', origine: 'data di sblocco nella Guida', operatori: [{ chiave: 'sbloccato', nome: 'sbloccato', campi: [campo('quartiere', 'quartiere', 'Quartiere')] }] },
+  // L6: sempre vera, per i quartieri aperti dall'inizio del gioco
+  { chiave: 'da-subito', nome: 'Dall’inizio', gruppo: 'Calendario e mondo', origine: 'sempre vera: disponibile dall’inizio del gioco', operatori: [{ chiave: 'sempre', nome: 'disponibile', campi: [] }] },
+  { chiave: 'quartiere', nome: 'Quartiere', gruppo: 'Calendario e mondo', origine: 'sblocco del quartiere (pagina del quartiere)', operatori: [{ chiave: 'sbloccato', nome: 'sbloccato', campi: [campo('quartiere', 'quartiere', 'Quartiere')] }] },
+  // L6: il luogo è sbloccato (lo sblocco, non gli orari): un quartiere si apre se lo è il suo ritrovo
+  { chiave: 'luogo', nome: 'Luogo', gruppo: 'Calendario e mondo', origine: 'sblocco del luogo (pagina del luogo)', operatori: [{ chiave: 'sbloccato', nome: 'sbloccato', campi: [campo('luogo', 'luogo', 'Luogo')] }] },
   { chiave: 'arco', nome: 'Arco della storia', gruppo: 'Calendario e mondo', origine: 'data di gioco', operatori: [{ chiave: 'almeno', nome: 'arrivato almeno a', campi: [campo('dungeon', 'arco', 'Palazzo')] }] },
   // — Storia e progressi —
-  { chiave: 'palazzo', nome: 'Palazzo', gruppo: 'Storia e progressi', origine: 'Tesoro del Palazzo raccolto, boss finale sconfitto (Guida o mappa) e raccolta al 100%, insieme', operatori: [{ chiave: 'completato', nome: 'completato', campi: [campo('dungeon', 'palazzo', 'Palazzo')] }] },
+  // «concluso» (L4 §8.10, R6-16b): Tesoro e boss finale; il 100% della raccolta non sblocca nulla (G-026). La chiave dell'operatore resta
+  // quella di prima, così le scelte salvate nell'editor non cambiano
+  { chiave: 'palazzo', nome: 'Palazzo', gruppo: 'Storia e progressi', origine: 'Tesoro del Palazzo raccolto e boss finale sconfitto (Guida o mappa)', operatori: [{ chiave: 'completato', nome: 'concluso', campi: [campo('dungeon', 'palazzo', 'Palazzo')] }] },
+  // L6: «X ti ha chiesto di uscire», registrato nella partita; si legge qui, si aggiunge dalla pagina del Confidente
+  { chiave: 'invito', nome: 'Invito di un Confidente', gruppo: 'Storia e progressi', origine: 'pagina del Confidente → Inviti («Invito avvenuto»)', soloLettura: true, operatori: [{ chiave: 'registrato', nome: 'avvenuto', campi: [campo('invito', 'invito', 'Invito')] }] },
+  // L6: un'avvertenza da controllare nel gioco, mai bloccante (R6-01b: al posto del vecchio «manuale»)
+  { chiave: 'avviso', nome: 'Avviso', gruppo: 'Storia e progressi', origine: 'da controllare nel gioco: non blocca mai', operatori: [{ chiave: 'testo', nome: 'da controllare', campi: [campo('testo', 'testo', 'Testo')] }] },
   { chiave: 'dote', nome: 'Dote sociale', gruppo: 'Storia e progressi', origine: 'Partita → Doti sociali', operatori: [{ chiave: 'almeno', nome: 'almeno rango', campi: [campo('dote', 'dote', 'Dote'), campo('rango', 'rango5', 'Rango')] }] },
   { chiave: 'confidente', nome: 'Confidente', gruppo: 'Storia e progressi', origine: 'Partita → Confidenti', operatori: [{ chiave: 'almeno', nome: 'almeno rango', campi: [campo('confidente', 'confidente', 'Confidente'), campo('rango', 'rango10', 'Rango')] }] },
   { chiave: 'squadra', nome: 'Ladro Fantasma', gruppo: 'Storia e progressi', origine: 'Partita → Denaro e squadra', operatori: [{ chiave: 'in-squadra', nome: 'in squadra', campi: [campo('membro', 'membro', 'Ladro')] }] },
@@ -88,6 +103,18 @@ export const STATI_PARTITA: readonly DefinizioneStato[] = [
     { chiave: 'non-segnata', nome: 'non segnata', campi: [campo('voce', 'voce-guida', 'Voce')] },
   ] },
 ];
+
+/**
+ * L6 (R6-01): lo stato dell'editor di ogni tipo del vocabolario, che non è più un elenco parallelo: `Record` su tutti i tipi di
+ * `condizioniSpillo.ts`, quindi un tipo nuovo senza il suo stato qui non compila. Gruppi e negazioni sono struttura, non stati.
+ */
+export const STATO_DEL_TIPO: Record<Exclude<TipoCondizione, 'gruppo' | 'non'>, string> = {
+  data: 'data-gioco', intervallo: 'data-gioco', fascia: 'fascia', piove: 'meteo', meteo: 'meteo', 'giorno-settimana': 'giorno-settimana',
+  stagione: 'stagione', quartiere: 'quartiere', 'da-subito': 'da-subito', luogo: 'luogo', invito: 'invito', avviso: 'avviso', arco: 'arco',
+  palazzo: 'palazzo', dote: 'dote', confidente: 'confidente', squadra: 'squadra', richiesta: 'richiesta', lettura: 'libro', articolo: 'articolo',
+  attivita: 'attivita', 'rango-cliente': 'rango-cliente', 'punti-negozio': 'punti-negozio', evento: 'evento', contatore: 'contatore',
+  'persona-arcano': 'persona-arcano', 'persona-abilita': 'persona-abilita', spillo: 'spillo', 'voce-guida': 'voce-guida',
+};
 
 export type ValoriCondizione = Record<string, string | number | string[]>;
 export interface SceltaCondizione { stato: string; operatore: string; valori: ValoriCondizione }
@@ -146,6 +173,10 @@ export function costruisciCondizione(scelta: SceltaCondizione): RequisitoSpillo 
     }
     case 'stagione': return STAGIONI.some((x) => x.chiave === v.stagione) ? { tipo: 'stagione', stagione: s(v.stagione) } : null;
     case 'quartiere': return s(v.quartiere) ? { tipo: 'quartiere', quartiere: s(v.quartiere) } : null;
+    case 'da-subito': return { tipo: 'da-subito' };
+    case 'luogo': return s(v.luogo) ? { tipo: 'luogo', luogo: s(v.luogo) } : null;
+    case 'invito': return s(v.invito) ? { tipo: 'invito', invito: s(v.invito) } : null;
+    case 'avviso': { const testo = s(v.testo).trim().slice(0, 300); return testo ? { tipo: 'avviso', testo } : null; }
     case 'arco': return (ARCHI_STORIA as readonly string[]).includes(s(v.dungeon)) ? { tipo: 'arco', dungeon: s(v.dungeon) } : null;
     case 'palazzo': return s(v.dungeon) ? { tipo: 'palazzo', dungeon: s(v.dungeon) } : null;
     case 'dote': return eDote(v.dote) && n(v.rango) >= 1 && n(v.rango) <= 5 ? { tipo: 'dote', dote: s(v.dote), rango: n(v.rango) } : null;
@@ -180,6 +211,10 @@ export function scomponiCondizione(c: RequisitoSpillo): SceltaCondizione | null 
     case 'giorno-settimana': return { stato: 'giorno-settimana', operatore: 'in', valori: { giorni: c.giorni } };
     case 'stagione': return { stato: 'stagione', operatore: 'e', valori: { stagione: c.stagione } };
     case 'quartiere': return { stato: 'quartiere', operatore: 'sbloccato', valori: { quartiere: c.quartiere } };
+    case 'da-subito': return { stato: 'da-subito', operatore: 'sempre', valori: {} };
+    case 'luogo': return { stato: 'luogo', operatore: 'sbloccato', valori: { luogo: c.luogo } };
+    case 'invito': return { stato: 'invito', operatore: 'registrato', valori: { invito: c.invito } };
+    case 'avviso': return { stato: 'avviso', operatore: 'testo', valori: { testo: c.testo } };
     case 'arco': return { stato: 'arco', operatore: 'almeno', valori: { dungeon: c.dungeon } };
     case 'palazzo': return { stato: 'palazzo', operatore: 'completato', valori: { dungeon: c.dungeon } };
     case 'dote': return { stato: 'dote', operatore: 'almeno', valori: { dote: c.dote, rango: c.rango } };

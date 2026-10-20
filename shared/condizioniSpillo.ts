@@ -89,6 +89,14 @@ export type RequisitoSpillo =
   | { tipo: 'giorno-settimana'; giorni: string[] }
   | { tipo: 'stagione'; stagione: string }
   | { tipo: 'quartiere'; quartiere: string }
+  /** L6: sempre vera, «Disponibile dall'inizio» (i quartieri iniziali). */
+  | { tipo: 'da-subito' }
+  /** L6: il luogo è sbloccato (`presenzaDelLuogo(…).sbloccato` di L5: lo sblocco, non gli orari). Un quartiere si apre se lo è un suo ritrovo. */
+  | { tipo: 'luogo'; luogo: string }
+  /** L6: nella partita è registrato quell'invito di un Confidente (`confidente_invito`, `utente.invito_partita`): «X ti ha chiesto di uscire». */
+  | { tipo: 'invito'; invito: string }
+  /** L6: un'avvertenza da controllare nel gioco, mai bloccante (prende il posto del vecchio «manuale», R6-01b). */
+  | { tipo: 'avviso'; testo: string }
   /** L'arco della storia è arrivato almeno a questo Palazzo: lo dice la data di gioco, perché il gioco li impone in ordine. */
   | { tipo: 'arco'; dungeon: string }
   // — progressi —
@@ -121,6 +129,12 @@ export type RequisitoSpillo =
    *  passi della guida di un'area la condizione di visibilità»). Solo nelle condizioni dei pin; le voci descrittive non si citano. */
   | { tipo: 'voce-guida'; voce: string; segnata: boolean };
 
+/** L6: il vocabolario unico delle condizioni (pin, catalogo, quartieri, luoghi, inviti, requisiti dei Confidenti). Il nome storico
+ *  resta `RequisitoSpillo`; `Condizione` è lo stesso tipo, per chi non parla di pin. */
+export type Condizione = RequisitoSpillo;
+/** I tipi del vocabolario (31, R6-01: nessun `manuale`). */
+export type TipoCondizione = RequisitoSpillo['tipo'];
+
 const PROFONDITA_MASSIMA = 5;
 const CONDIZIONI_PER_GRUPPO = 20;
 
@@ -145,6 +159,8 @@ const CONDIZIONI_PER_GRUPPO = 20;
  */
 export const CONDIZIONI_DI_PRESENZA = [
   'data', 'intervallo', 'fascia', 'piove', 'meteo', 'giorno-settimana', 'stagione', 'quartiere', 'arco', 'spillo', 'voce-guida',
+  // L6: dire se un posto c'è (un quartiere aperto dal suo ritrovo, un luogo aperto da un invito) è presenza come la data
+  'da-subito', 'luogo', 'invito',
 ] as const;
 
 /** Vero se questa condizione, non soddisfatta, deve far sparire il pin invece che spiegarsi. */
@@ -242,6 +258,10 @@ export interface NomiCondizioni {
   /** I pin con uno stato, per uid: nome, tipo e mappa; `parola` è quella dello stato con cui si cita (`statoCitabile`: «ottenuto»
    *  per un pin che la prende dalla sua voce della guida), e se manca vale quella del tipo. */
   spilli?: Record<string, { nome: string; tipo: string; mappa: string; parola?: string }>;
+  /** L6: i luoghi, per chiave. */
+  luoghi?: Record<string, string>;
+  /** L6: gli inviti dei Confidenti, per chiave: «l'invito di Ryuji del 29 maggio». */
+  inviti?: Record<string, string>;
   /** Le voci della guida che si citano (non descrittive), per chiave: nome e posto («Palazzo di Kamoshida › 2. Sala Centrale»). */
   voci?: Record<string, { nome: string; posto: string }>;
 }
@@ -264,6 +284,10 @@ export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni
     case 'giorno-settimana': return `solo ${congiunzione(r.giorni.map((g) => GIORNI_SETTIMANA.find((x) => x.chiave === g)?.nome ?? g))}`;
     case 'stagione': return `solo in ${r.stagione}`;
     case 'quartiere': return `da quando si sblocca ${nomi.quartieri?.[r.quartiere] ?? r.quartiere}`;
+    case 'da-subito': return 'Disponibile dall’inizio';
+    case 'luogo': return `da quando si sblocca ${nomi.luoghi?.[r.luogo] ?? r.luogo}`;
+    case 'invito': return `dopo ${nomi.inviti?.[r.invito] ?? `l’invito ${r.invito}`}`;
+    case 'avviso': return `Avviso: ${r.testo}`;
     case 'arco': return `dall'arco del ${nomePalazzo(r.dungeon, nomi)}`;
     case 'palazzo': return `dopo il ${nomePalazzo(r.dungeon, nomi)}`;
     case 'dote': return `${nomeDote(r.dote)} Rango ${r.rango}`;
@@ -336,6 +360,12 @@ export function normalizzaRequisitoSpillo(x: unknown, profondita = 0): Requisito
     }
     case 'stagione': { const stagione = testoPulito(o.stagione, 20); return stagione && STAGIONI.some((s) => s.chiave === stagione) ? { tipo: 'stagione', stagione } : null; }
     case 'quartiere': { const quartiere = chiavePulita(o.quartiere, 60); return quartiere ? { tipo: 'quartiere', quartiere } : null; }
+    case 'da-subito': return { tipo: 'da-subito' };
+    case 'luogo': { const luogo = chiavePulita(o.luogo, 200); return luogo ? { tipo: 'luogo', luogo } : null; }
+    case 'invito': { const invito = chiavePulita(o.invito, 120); return invito ? { tipo: 'invito', invito } : null; }
+    case 'avviso': { const testo = testoPulito(o.testo, 300); return testo ? { tipo: 'avviso', testo } : null; }
+    // R6-01b: un «manuale» di un pacchetto vecchio diventa un avviso con lo stesso testo (non blocca mai)
+    case 'manuale': { const testo = testoPulito(o.testo ?? o.descrizione, 300); return testo ? { tipo: 'avviso', testo } : null; }
     case 'arco': { const dungeon = chiavePulita(o.dungeon, 60); return dungeon && (ARCHI_STORIA as readonly string[]).includes(dungeon) ? { tipo: 'arco', dungeon } : null; }
     case 'palazzo': { const dungeon = chiavePulita(o.dungeon, 60); return dungeon ? { tipo: 'palazzo', dungeon } : null; }
     case 'dote': { const dote = testoPulito(o.dote, 20); const rango = intero(o.rango, 1, 5); return dote && eDote(dote) && rango ? { tipo: 'dote', dote, rango } : null; }

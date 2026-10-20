@@ -11,7 +11,7 @@
 import type { TipoMappa, TipoRiferimento, TipoSpillo } from './spilli.js';
 import type { GiornoChiave } from './orariNegozio.js';
 import type { TipoLuogo } from './tipiLuogo.js';
-import type { RequisitoSpillo } from './condizioniSpillo.js';
+import type { Condizione, RequisitoSpillo } from './condizioniSpillo.js';
 import type { OrariDelLuogo, OrariNegozio } from './orariNegozio.js';
 import type { VoceEffetto } from './effettiCatalogo.js';
 import type { DoteChiave } from './doti.js';
@@ -178,24 +178,73 @@ export interface OggettoDto {
 
 /** Requisito strutturato per raggiungere un rango di un Confidente (Fase 12.3; righe di `confidente_requisito`). Era
  *  `RequisitoSeed` in `shared/seed.ts`, l'ultimo tipo vivo del seed JSON dismesso (rilievo O12 della verifica, 2026-10-03). */
-export type RequisitoRango =
-  | { tipo: 'dote'; dote: string; rango: number; testo: string }
-  | { tipo: 'persona-arcano'; arcano: string; testo: string }
-  /** Una Persona precisa con una skill precisa nella scorta (richieste delle Gemelle Custodi). */
-  | { tipo: 'persona-abilita'; persona: string; abilita: string; testo: string }
-  | { tipo: 'palazzo'; dungeon: string; testo: string }
-  | { tipo: 'richiesta'; richiesta: string; testo: string }
-  | { tipo: 'confidente'; confidente: string; rango: number; testo: string }
-  /** Un Ladro Fantasma gia' in squadra: il dato sta in `membro_squadra_partita` (migrazione 057). */
-  | { tipo: 'squadra'; membro: string; testo: string }
-  | { tipo: 'data'; dal: string; testo: string }
-  | { tipo: 'meteo'; condizione: 'non-piove'; testo: string }
-  /** Un fatto della storia segnato nella partita (`EVENTI_STORIA`, Partita → Progressi): il caffè al Leblanc, il duello con Akechi… */
-  | { tipo: 'evento'; evento: string; testo: string }
-  /** Un'avvertenza da controllare nel gioco, che **non blocca** il rango (la scuola aperta per Futaba al rango 4). */
-  | { tipo: 'avviso'; testo: string }
-  /** Non verificabile dall'app: grigio finché non lo confermi a mano (resta per i pacchetti che lo usano ancora). */
-  | { tipo: 'manuale'; testo: string };
+export type RequisitoRango = Condizione & {
+  /** La frase della guida che accompagna il requisito (nota): il testo mostrato si genera dalla condizione. */
+  testo: string;
+};
+/* L6 (R6-01, R6-01b): un requisito è una condizione del vocabolario unico (`Condizione`, `shared/condizioniSpillo.ts`) con la sua frase;
+ * niente più elenco parallelo e niente `manuale` («niente condizioni manuali», 2026-09-05; migrazione 090). Un'avvertenza da controllare
+ * nel gioco è un `avviso`, che non blocca mai. */
+
+/** L6: l'esito di una condizione valutata dal server (`POST /api/condizioni/valuta`, un solo valutatore). `avviso` non è né vero né falso
+ *  e non blocca; `grigio` è una condizione che l'app non sa valutare (un riferimento eliminato: «Richiesta eliminata»). */
+export type EsitoCondizione = 'vero' | 'falso' | 'avviso' | 'grigio';
+export interface ValutazioneCondizioneDto {
+  esito: EsitoCondizione;
+  /** La condizione in italiano (`descriviRequisitoSpillo`). */
+  testo: string;
+  /** Con l'esito falso: che cosa manca, in italiano («Ann al rango 10 oppure leggere «Luoghi della movida»»). */
+  manca?: string;
+}
+export interface RispostaValutaCondizioniDto {
+  /** L'esito dell'insieme (tutte le condizioni insieme). */
+  complessivo: ValutazioneCondizioneDto;
+  /** Una valutazione per condizione, nello stesso ordine della richiesta. */
+  condizioni: ValutazioneCondizioneDto[];
+}
+
+/** L6: il posto che un invito apre, con il nome e la pagina («Harajuku», `/guida/luogo/harajuku/harajuku-hangout`). */
+export interface PostoApertoDto { tipo: 'quartiere' | 'luogo' | 'area'; chiave: string; nome: string; casa: string | null }
+/** L6: un invito di un Confidente («X ti ha chiesto di uscire»), riga di `confidente_invito`, con lo stato nella partita. */
+export interface InvitoDto {
+  chiave: string;
+  confidente: string;
+  confidenteNome: string;
+  /** MM-GG del gioco, null se non fissa. */
+  data: string | null;
+  apre: PostoApertoDto;
+  /** Quando l'invito può arrivare nel gioco (vuoto = sempre). */
+  condizioni: Condizione[];
+  /** Le condizioni in italiano. */
+  condizioniTesto: string[];
+  /** Con partita: le condizioni sono vere adesso (il gesto «Invito avvenuto» si può fare). */
+  possibile: boolean | null;
+  /** Con partita: con le condizioni false, che cosa manca. */
+  manca: string | null;
+  /** Con partita: l'invito è registrato. */
+  registrato: boolean | null;
+  nota: string;
+  fonte: string;
+}
+
+/** L6: fonte di una condizione di sblocco (quartiere, luogo): il registro dell'Esperto della guida e la certezza. */
+export interface FonteCondizioneDto { registro: string; certezza: 'alta' | 'media' | 'bassa'; nota?: string | null }
+/** L6: lo sblocco di un quartiere: la condizione effettiva (salvata, in OR con gli inviti che lo aprono), da dove viene e l'esito. */
+export interface SbloccoDto {
+  /** La condizione salvata (null se il posto non ne ha una). */
+  condizione: Condizione | null;
+  /** In italiano, con gli inviti in OR («Dopo aver letto «Vague» oppure dopo l'invito di Ryuji del 29 maggio»). */
+  testo: string | null;
+  fonte: FonteCondizioneDto | null;
+  /** Con partita: l'esito di adesso; senza partita null. */
+  esito: EsitoCondizione | null;
+  /** Con l'esito falso: che cosa manca. */
+  manca: string | null;
+  /** Gli inviti che lo aprono (in sola lettura qui: si gestiscono dalla pagina del Confidente). */
+  inviti: InvitoDto[];
+  /** La condizione salvata è diversa da quella della guida (si può ripristinare). */
+  modificato: boolean;
+}
 
 export interface ConfidenteDto {
   chiave: string;
@@ -1542,6 +1591,9 @@ export interface QuartiereRiassuntoDto {
   disponibile?: boolean;
   /** Perché è chiuso, nelle parole del valutatore: «Yusuke: rango 1 di 3». Null se è aperto. */
   bloccoMotivo?: string | null;
+  /** L6 (R6-08): lo sblocco strutturato (`quartiere.condizioni_json` in OR con gli inviti), con la fonte e l'esito; `sblocco` resta la frase
+   *  della guida, come nota. */
+  sbloccoCondizione?: SbloccoDto;
 }
 
 export interface LuogoDto {
@@ -1647,6 +1699,8 @@ export interface QuartiereDettaglioDto {
   piantaAssente: string | null;
   /** L5: i luoghi del quartiere senza Area (da collocare con «Colloca»), con l'area proposta se la migrazione ne ha dedotta una. */
   luoghiDaCollocare?: Array<LuogoDto & { areaProposta: { slug: string; nome: string } | null }>;
+  /** L6: lo sblocco strutturato, come nel riassunto («Modifica sblocco» e «Ripristina» dalla pagina del quartiere). */
+  sbloccoCondizione?: SbloccoDto;
 }
 
 export interface AttivitaDto {
@@ -1705,6 +1759,9 @@ export interface LibroDto {
    *  riferimento, quindi la scheda ci puo' portare invece di limitarsi a nominarlo. */
   sbloccaLuogo: string | null;
   sbloccaLuogoNome: string | null;
+  /** L6 (R6-11): i posti che leggerlo apre, **calcolati** dalle condizioni dei luoghi e dei quartieri che citano `lettura{libro}` (non
+   *  dalla frase `sblocca`, che resta nota, né dall'effetto «sblocca-luogo»). Vuoto se non apre niente. */
+  apre?: Array<Omit<PostoApertoDto, 'tipo'> & { tipo: 'luogo' | 'quartiere' }>;
   sessioni: number | null;
   dettagli: string | null;
   /** Gli effetti dichiarati (migrazione 074) e le loro frasi: la Dote che alza, che cosa apre. */
@@ -2921,7 +2978,8 @@ export interface RiepilogoCatalogoDto {
 
 /** Che cosa è stato eliminato: un'area della guida di un Palazzo, una voce della guida, una planimetria, un'area di un dedalo, un'Area
  *  con le sue planimetrie (`area-fisica`, L2: il quartiere o la città che la contiene). */
-export type TipoCestino = 'area' | 'voce' | 'mappa' | 'area-dedalo' | 'area-fisica' | 'luogo' | 'negozio';
+/** `richiesta` (L6, R6-04): una Richiesta eliminata va nel cestino; le condizioni che la citano restano e danno «Richiesta eliminata». */
+export type TipoCestino = 'area' | 'voce' | 'mappa' | 'area-dedalo' | 'area-fisica' | 'luogo' | 'negozio' | 'richiesta';
 
 /** Quante righe di una tabella se ne sono andate con l'eliminazione, con il nome per l'utente. */
 export interface ContenutoCestinoDto {

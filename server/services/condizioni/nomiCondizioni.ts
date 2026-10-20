@@ -10,7 +10,7 @@
 import { prepared } from '../../db/dbService.js';
 import { registraCacheDiGioco } from '../cacheDiGioco.js';
 import { giocabili } from '../squadraService.js';
-import type { NomiCondizioni } from '../../../shared/condizioniSpillo.js';
+import { dataLeggibile, type NomiCondizioni } from '../../../shared/condizioniSpillo.js';
 import { sqlVoceDescrittiva, statoCitabile } from '../../../shared/spilli.js';
 import { vociDelPinSql } from '../mappe/voceDelPin.js';
 
@@ -47,6 +47,10 @@ export function nomiCondizioni(opz: { conPin?: boolean } = {}): NomiCondizioni {
     richieste: mappa('SELECT chiave, nome FROM richiesta'), dungeon: mappa('SELECT chiave, nome FROM dungeon'),
     attivita: mappa('SELECT chiave, nome FROM attivita'), negozi: mappa('SELECT chiave, nome FROM negozio'),
     squadra: () => Object.fromEntries(giocabili().map((p) => [p.chiave, p.nome])),
+    // L6: i luoghi (condizione `luogo`) e gli inviti dei Confidenti (`invito`: «l'invito di Ryuji del 29 maggio»)
+    luoghi: mappa('SELECT chiave, nome FROM luogo'),
+    inviti: () => Object.fromEntries((prepared('SELECT i.chiave, i.data, c.nome FROM confidente_invito i JOIN confidente c ON c.chiave = i.confidente_chiave').all() as Array<{ chiave: string; data: string | null; nome: string }>)
+      .map((r) => [r.chiave, `l’invito di ${r.nome}${r.data ? ` del ${dataLeggibile(r.data)}` : ''}`])),
     spilli: () => Object.fromEntries(pinConStato().map((p) => [p.uid, { nome: p.nome, tipo: p.tipo, mappa: p.mappa, parola: p.parola }])),
     voci: () => Object.fromEntries(vociCitabili().map((v) => [v.chiave, { nome: v.nome, posto: v.posto }])),
   };

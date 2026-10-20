@@ -22,6 +22,8 @@ export const NOME_TIPO_CESTINO: Record<TipoCestino, string> = {
   'area-fisica': 'Area',
   luogo: 'Luogo',
   negozio: 'Negozio',
+  // L6: una Richiesta dei Mementos
+  richiesta: 'Richiesta',
 };
 
 /**
@@ -75,7 +77,7 @@ export function contenutoLeggibile(v: Pick<VoceCestinoDto, 'tipo' | 'contenuto'>
 }
 
 /** La tabella dell'elemento stesso, per tipo (la stessa regola del server). */
-const RADICE_CESTINO: Record<TipoCestino, string> = { area: 'dungeon_area', voce: 'punto_interesse', mappa: 'mappa', 'area-dedalo': 'area_dedalo', 'area-fisica': 'area', luogo: 'luogo', negozio: 'negozio' };
+const RADICE_CESTINO: Record<TipoCestino, string> = { area: 'dungeon_area', voce: 'punto_interesse', mappa: 'mappa', 'area-dedalo': 'area_dedalo', 'area-fisica': 'area', luogo: 'luogo', negozio: 'negozio', richiesta: 'richiesta' };
 
 /** Come si presenta un elemento: «Area di Shibuya: Sottopasso» (il posto da cui viene, se c'è), poi «con 2 planimetrie e 1 pin». */
 export function descrizioneElementoCestino(v: Pick<VoceCestinoDto, 'tipo' | 'nome' | 'contesto' | 'contenuto'>): { titolo: string; con: string | null } {

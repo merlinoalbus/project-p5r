@@ -69,6 +69,8 @@ const RADICE: Record<TipoElementoCestino, { tabella: string; colonna: string }> 
   // L5 (migrazione 115): un luogo con i suoi pin, un negozio con articoli, acquisti e punti
   luogo: { tabella: 'luogo', colonna: 'chiave' },
   negozio: { tabella: 'negozio', colonna: 'chiave' },
+  // L6 (R6-04): una Richiesta dei Mementos; le condizioni che la citano restano (per chiave) e danno «Richiesta eliminata»
+  richiesta: { tabella: 'richiesta', colonna: 'chiave' },
 };
 
 /**
