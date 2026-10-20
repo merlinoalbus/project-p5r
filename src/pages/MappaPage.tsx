@@ -4,7 +4,7 @@
 
 import { ImmaginiLuogo } from '../components/mappe/ImmaginiLuogo';
 import { SelettoreContestoMappa } from '../components/mappe/SelettoreContestoMappa';
-import { etichetteDistinte, nomePresentazioneMappa, nomeTecnicoMappa, presentaMappa, testoPin, titoloGruppoImmagini } from '../utils/presentazioneMappa';
+import { etichetteDistinte, nomePresentazioneMappa, nomeTecnicoMappa, pinDiContenuto, presentaMappa, testoConteggiPin, testoPin, titoloGruppoImmagini } from '../utils/presentazioneMappa';
 import { AlberoLuoghi } from '../components/mappe/AlberoLuoghi';
 import { ContenutiGuidaMappa } from '../components/mappe/ContenutiGuidaMappa';
 import { RisolviMappa } from '../components/mappe/RisolviMappa';
@@ -21,7 +21,7 @@ import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-r
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
 import { useMappaPartita } from '../hooks/useMappaPartita';
-import { getAlberoMappe } from '../services/api';
+import { getAlberoMappe, getConteggiAlbero } from '../services/api';
 import { usePartitaStore } from '../stores/partitaStore';
 import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
@@ -142,7 +142,9 @@ function IndiceMappe() {
   }, [mappe]);
   const gruppi = useMemo(() => radiciRaggruppate(mappe), [mappe]);
   const totaleMappe = mappe.length;
-  const totaleSpilli = useMemo(() => mappe.reduce((s, m) => s + m.numeroSpilli, 0), [mappe]);
+  // E2 (L3, deciso dall'utente): i pin di tutto l'albero nei tre gruppi, contati dal server (il FE non somma); finché non arrivano
+  // l'intestazione dice solo le mappe
+  const conteggi = useCarica(() => getConteggiAlbero(), []);
   // Il luogo aperto nel pannello, e la discesa dentro di lui: `['tokyo','citta-shibuya']` vuol
   // dire «sto guardando Shibuya, ci sono arrivato da Tokyo». Il percorso è uno stato della
   // pagina e non dell'indirizzo perché è una sbirciata, non una destinazione: la destinazione è
@@ -155,7 +157,7 @@ function IndiceMappe() {
   // da 1024 px lo spazio fra intestazione ed elenco scende a 12 px: a 1024×690 l'indice sforava di 3 px (LAY2-5)
   return <div className="flex flex-col gap-4 lg:gap-3">
     <IntestazionePagina titolo="Mappe"
-      sottotitolo={`Tutte le mappe della guida: Tokyo, i quartieri con le loro aree e le planimetrie dei Palazzi. ${totaleMappe} mappe con ${testoPin(totaleSpilli)}, raggruppate per il posto a cui appartengono.`} />
+      sottotitolo={`Tutte le mappe della guida: Tokyo, i quartieri con le loro aree e le planimetrie dei Palazzi. ${totaleMappe} mappe${conteggi.dati ? ` con ${testoConteggiPin(conteggi.dati.conteggiPin)}` : ''}, raggruppate per il posto a cui appartengono.`} />
     <PageState isLoading={albero.caricamento} error={albero.errore} onRetry={albero.ricarica}>
       {/* **Le radici a sinistra, quel che contengono a destra.**
           Prima ogni radice era una carta con dentro una piega, e aprire i «Luoghi e planimetrie»
@@ -175,8 +177,12 @@ function IndiceMappe() {
             }, { mappe: 0, spilli: 0 });
             const nome = nomeDi(capofila);
             // E4 ed E5 (L2): i pin con una parola sola (dal rilascio di L3 «pin», `testoPin`), e quel che la radice contiene con le parole
-            // della gerarchia
-            const spilli = testoPin(sotto.spilli);
+            // della gerarchia. E2 (L3): solo i pin di contenuto della radice e del suo sottoalbero, dal server (`conteggiPin`); passaggi
+            // e note nel suggerimento. Le radici dell'indice non hanno versioni raggruppate (una sola per gruppo): vale la capofila.
+            // Senza `conteggiPin` (dati di prima) tutti i pin, come prima.
+            const pinRadice = capofila.conteggiPin;
+            const spilli = testoPin(pinRadice ? pinRadice.contenuto : sotto.spilli);
+            const dettaglioPin = pinRadice ? testoConteggiPin(pinRadice) : undefined;
             const riassunto = `${nomeTipoMappa(capofila)} · ${spilli} · ${sotto.mappe > 0 ? totali.contenuto(versioni.map((v) => v.chiave)) : `${versioni.length} versioni`}`;
             const conFigli = versioni.some(v => (totali.figliDi.get(v.chiave) ?? []).length > 0);
             const apribile = conFigli || versioni.length > 1;
@@ -200,7 +206,7 @@ function IndiceMappe() {
                       className={`text-left font-display text-[17px] leading-tight break-words after:absolute after:inset-0 after:content-[''] ${aperto ? 'text-primary' : ''}`}>
                       {nome}<span className="sr-only">, {riassunto}</span>
                     </button>
-                    <span className="max-w-full text-[11px] leading-tight text-text-muted" aria-hidden>{riassunto}</span>
+                    <span className="max-w-full text-[11px] leading-tight text-text-muted" aria-hidden title={dettaglioPin}>{riassunto}</span>
                   </span>
                   {/* a destra, prima della freccia: alto 44 (il bersaglio) sta nell'altezza dell'anteprima e la carta non cresce (a 1024×690
                       l'indice deve stare in una schermata, LAY2-5) */}
@@ -221,7 +227,7 @@ function IndiceMappe() {
                     <AnteprimaMappa mappa={capofila} className="h-[52px] w-[72px] shrink-0" />
                     <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                       <span className={`font-display text-[17px] leading-tight break-words ${aperto ? 'text-primary' : ''}`}>{nome}</span>
-                      <span className="text-[11px] text-text-muted">{riassunto}</span>
+                      <span className="text-[11px] text-text-muted" title={dettaglioPin}>{riassunto}</span>
                     </span>
                     <span aria-hidden className="shrink-0 text-text-muted">{aperto ? '▾' : '▸'}</span>
                   </button>
@@ -229,7 +235,7 @@ function IndiceMappe() {
                     <AnteprimaMappa mappa={capofila} className="h-[52px] w-[72px] shrink-0" />
                     <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                       <span className="font-display text-[17px] leading-tight break-words">{nome}</span>
-                      <span className="text-[11px] text-text-muted">{nomeTipoMappa(capofila)} · {spilli}</span>
+                      <span className="text-[11px] text-text-muted" title={dettaglioPin}>{nomeTipoMappa(capofila)} · {spilli}</span>
                     </span>
                   </Link>}
             </li>;
@@ -326,6 +332,8 @@ function LuogoSenzaPlanimetria({ mappa, nome, albero, partitaId }: {
     () => (albero.dati ?? []).filter((m) => m.genitore === mappa.chiave).sort((a, b) => a.ordine - b.ordine || a.chiave.localeCompare(b.chiave)),
     [albero.dati, mappa.chiave],
   );
+  const nodo = (albero.dati ?? []).find((m) => m.chiave === mappa.chiave);
+  const pinLuogo = nodo ? pinDiContenuto(nodo) : mappa.numeroSpilli;
   return <div className="flex flex-col gap-4">
     <header className="card flex flex-col gap-2">
       <nav aria-label="Percorso della mappa" className="flex flex-wrap items-center gap-1 text-[12px] text-text-muted">
@@ -347,7 +355,8 @@ function LuogoSenzaPlanimetria({ mappa, nome, albero, partitaId }: {
             : mappa.tipo === 'quartiere'
               ? (contenute.length === 0 ? 'nessuna area' : contenute.length === 1 ? 'un’area' : `${contenute.length} aree`)
               : (contenute.length === 0 ? 'nessuna planimetria' : contenute.length === 1 ? 'una planimetria' : `${contenute.length} planimetrie`)}
-          {mappa.numeroSpilli > 0 ? ` · ${testoPin(mappa.numeroSpilli)}` : ''}
+          {/* E2 (L3): i pin di contenuto del luogo, dal suo nodo dell'albero (`conteggiPin`); senza, i suoi pin come prima */}
+          {pinLuogo > 0 ? ` · ${testoPin(pinLuogo)}` : ''}
         </span>}
       </div>
       {/* Va detto, invece di lasciarlo capire dall'assenza: questo nodo raccoglie, non disegna. */}
@@ -383,11 +392,13 @@ function LuogoSenzaPlanimetria({ mappa, nome, albero, partitaId }: {
 function GriglieDelLuogo({ contenute: tutte, nome, onScendi }: { contenute: MappaRiassuntoDto[]; nome: string; onScendi?: (chiave: string) => void }) {
   const [mostraFogli, setMostraFogli] = useState(false);
   // Sotto un quartiere si elencano le **aree**, una volta sola (L2): le versioni della stessa Area (il Sottopasso, il Covo) sono un
-  // riquadro solo, con la predefinita e «N versioni»; i pin dell'Area si sommano su quel riquadro.
+  // riquadro solo, con la predefinita e «N versioni»; i pin dell'Area si sommano su quel riquadro. E2 (L3): i pin del riquadro sono
+  // quelli di contenuto contati dal server (`conteggiPin.contenuto`, `pinDiContenuto`), messi in `numeroSpilli` del riquadro; la sola
+  // somma qui è quella delle versioni di un'Area in un riquadro, com'era.
   const { contenute, versioni } = useMemo(() => {
     const conteggio = new Map<string, number>();
     const spilli = new Map<string, number>();
-    for (const m of tutte) if (m.area) { conteggio.set(m.area.chiave, (conteggio.get(m.area.chiave) ?? 0) + 1); spilli.set(m.area.chiave, (spilli.get(m.area.chiave) ?? 0) + m.numeroSpilli); }
+    for (const m of tutte) if (m.area) { conteggio.set(m.area.chiave, (conteggio.get(m.area.chiave) ?? 0) + 1); spilli.set(m.area.chiave, (spilli.get(m.area.chiave) ?? 0) + pinDiContenuto(m)); }
     const scelte = new Map<string, MappaRiassuntoDto>();
     const elenco: MappaRiassuntoDto[] = [];
     for (const m of tutte) {
@@ -396,7 +407,7 @@ function GriglieDelLuogo({ contenute: tutte, nome, onScendi }: { contenute: Mapp
       if (!gia) { scelte.set(m.area.chiave, m); elenco.push(m); }
       else if (m.area.predefinita) { elenco[elenco.indexOf(gia)] = m; scelte.set(m.area.chiave, m); }
     }
-    return { contenute: elenco.map((m) => (m.area ? { ...m, numeroSpilli: spilli.get(m.area.chiave) ?? m.numeroSpilli } : m)), versioni: conteggio };
+    return { contenute: elenco.map((m) => ({ ...m, numeroSpilli: m.area ? spilli.get(m.area.chiave) ?? pinDiContenuto(m) : pinDiContenuto(m) })), versioni: conteggio };
   }, [tutte]);
   // UX3-8 (decisione del Manager, 2026-10-20; l'utente non trovava la planimetria di prova appena aggiunta): ogni Area o planimetria
   // con un nome vero sta nella griglia, nel suo ordine, anche senza pin («nessun pin»). I fogli dell'estrazione senza nome vero

@@ -2,7 +2,7 @@
 // presentazioneMappa — il nome con cui si presenta una mappa (contesto scelto, nome rivisto, versione, gruppo)
 // ============================================================
 
-import type { MappaDto, MappaRiassuntoDto } from '../types';
+import type { ConteggiPinDto, MappaDto, MappaRiassuntoDto } from '../types';
 import { nomeConVersione } from './etichettaVersione';
 // il gergo dell'estrattore: condiviso col server, che fissa i nomi delle stanze come li mostra l'interfaccia
 import { senzaGergo } from '../../shared/nomiMappe';
@@ -67,6 +67,14 @@ export function nomeTecnicoMappa(m: IdentitaMappa & Pick<MappaRiassuntoDto, 'ori
 
 /** Quanti pin, a parole, per l'indice delle mappe (L3: la parola è «pin»): «nessun pin», «1 pin», «N pin». */
 export const testoPin = (n: number): string => (n === 0 ? 'nessun pin' : `${n} pin`);
+
+/** E2 (L3, deciso dall'utente): i pin di contenuto di una mappa e del suo sottoalbero, contati dal server (`conteggiPin.contenuto`);
+ *  senza il campo (dati di prima) tutti i suoi pin, come prima. Passaggi e note non sono «pin» nell'indice. */
+export const pinDiContenuto = (m: Pick<MappaRiassuntoDto, 'conteggiPin' | 'numeroSpilli'>): number => m.conteggiPin?.contenuto ?? m.numeroSpilli;
+
+/** E2: i tre gruppi a parole, «N pin · più N passaggi e N note» (col singolare), con i numeri del server. */
+export const testoConteggiPin = (c: ConteggiPinDto): string =>
+  `${testoPin(c.contenuto)} · più ${c.passaggi} ${c.passaggi === 1 ? 'passaggio' : 'passaggi'} e ${c.note} ${c.note === 1 ? 'nota' : 'note'}`;
 
 /** Il nome del contenitore quando più versioni della stessa immagine stanno insieme — la testata
  * dell'albero, la briciola dell'indice, la striscia delle miniature — dove l'etichetta della

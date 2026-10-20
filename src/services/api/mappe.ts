@@ -2,7 +2,7 @@
 // API mappe a livelli e spilli (Fase 13): albero, dettaglio con stato della partita, editor, esportazione/importazione
 // ============================================================
 
-import type { CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, DatiPezzoMappa, DestinazioneSpillo, EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto, VoceCollegabileDto } from '../../types';
+import type { ConteggiAlberoDto, CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, DatiPezzoMappa, DestinazioneSpillo, EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto, VoceCollegabileDto } from '../../types';
 import type { RequisitoSpillo } from '../../../shared/condizioniSpillo';
 import type { TipoMappa, TipoRiferimento, TipoSpillo } from '../../../shared/spilli';
 import { apiDelete, apiGet, apiPost, apiPut, inviaFile, queryString } from './_helpers';
@@ -13,6 +13,8 @@ export interface DatiSpilloApi { soloPosizione?: boolean; destinazione?: Destina
 
 /** Albero completo (riassunti piatti con genitore). */
 export const getAlberoMappe = (): Promise<MappaRiassuntoDto[]> => apiGet('/mappe/albero');
+/** E2 (L3): i pin di tutto l'albero nei tre gruppi (contenuto, passaggi, note), contati dal server: il totale dell'indice delle Mappe. */
+export const getConteggiAlbero = (): Promise<ConteggiAlberoDto> => apiGet('/mappe/albero/conteggi');
 
 /** Mappa con percorso, figli e spilli; con `partita` include lo stato «raccolto» e i dettagli della partita (articoli comprati, punti). */
 export const getMappa = (chiave: string, partita?: number): Promise<MappaDto> => apiGet(`/mappe/${encodeURIComponent(chiave)}${queryString({ partita })}`);

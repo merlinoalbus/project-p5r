@@ -17,8 +17,8 @@ import { annotaNavigazione } from '../utils/ritornoMappe';
 import { usePartitaStore } from '../stores/partitaStore';
 import type { MappaDto, MappaRiassuntoDto, PartitaDto, SpilloDto } from '../types';
 
-const { risolviMappa, getContenutiMappa, getAlberoMappe, getMappa, impostaSpilloRaccolto, impostaStatoPunto, impostaAcquisto } = vi.hoisted(() => ({ risolviMappa: vi.fn(async (mappa: string): Promise<{ tipo: string; mappa: string; casa?: string }> => ({tipo:'mappa',mappa})), getContenutiMappa: vi.fn(async (mappa: string): Promise<ContenutiMappaDto> => ({mappa,aree:[]})), getAlberoMappe: vi.fn(), getMappa: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn() }));
-vi.mock('../services/api', (vero) => moduloApi(vero, { risolviMappa, getContenutiMappa, getAlberoMappe, getMappa, impostaSpilloRaccolto, impostaStatoPunto, impostaAcquisto }));
+const { risolviMappa, getContenutiMappa, getAlberoMappe, getConteggiAlbero, getMappa, impostaSpilloRaccolto, impostaStatoPunto, impostaAcquisto } = vi.hoisted(() => ({ getConteggiAlbero: vi.fn(), risolviMappa: vi.fn(async (mappa: string): Promise<{ tipo: string; mappa: string; casa?: string }> => ({tipo:'mappa',mappa})), getContenutiMappa: vi.fn(async (mappa: string): Promise<ContenutiMappaDto> => ({mappa,aree:[]})), getAlberoMappe: vi.fn(), getMappa: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn() }));
+vi.mock('../services/api', (vero) => moduloApi(vero, { risolviMappa, getContenutiMappa, getAlberoMappe, getConteggiAlbero, getMappa, impostaSpilloRaccolto, impostaStatoPunto, impostaAcquisto }));
 
 /** Il riassunto di una mappa senza genitore, spilli né figli, con chiave, nome e tipo (e il resto) presi da `extra`. */
 const riassunto = (extra: Partial<MappaRiassuntoDto> & { chiave: string; nome: string; tipo: MappaRiassuntoDto['tipo'] }): MappaRiassuntoDto => ({ genitore: null, nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'seed', numeroSpilli: 0, numeroFigli: 0, updatedAt: '', area: null, casa: `/guida/mappe/${encodeURIComponent(extra.chiave)}`, ...extra });
@@ -68,6 +68,8 @@ beforeEach(() => {
     getContenutiMappa.mockReset().mockImplementation(async (mappa:string)=>({mappa,aree:[]}));
     getAlberoMappe.mockReset(); getMappa.mockReset(); impostaSpilloRaccolto.mockReset(); impostaStatoPunto.mockReset(); impostaAcquisto.mockReset();
     getAlberoMappe.mockResolvedValue(albero);
+    // E2 (L3): i conteggi dei pin dell'albero intero, dal server
+    getConteggiAlbero.mockReset().mockResolvedValue({ conteggiPin: { contenuto: 5, passaggi: 1, note: 1 } });
     getMappa.mockResolvedValue(dettaglio);
     usePartitaStore.setState({ attiva: { id: 7, nome: 'Prova' } as PartitaDto });
   });
@@ -192,11 +194,24 @@ describe('MappaPage', () => {
     const tokyo = await screen.findByRole('button', { name: /^Tokyo/ });
     expect(tokyo).toHaveTextContent('1 quartiere · 2 aree');
     expect(tokyo).not.toHaveTextContent(/mappe/);
-    // dal rilascio di L3 la parola dell'indice è «pin» (carte e intestazione); E3: la carta di un Palazzo dice aree e planimetrie
-    expect(tokyo).toHaveTextContent('Città · 2 pin · 1 quartiere · 2 aree');
-    expect(screen.getByRole('button', { name: /^Palazzo di Kamoshida/ })).toHaveTextContent('Palazzo · 5 pin ·');
-    expect(screen.getByText(/mappe con 7 pin, raggruppate/)).toBeInTheDocument();
+    // dal rilascio di L3 la parola dell'indice è «pin»; E3: la carta di un Palazzo dice aree e planimetrie
     expect(document.body).not.toHaveTextContent(/spill/);
+  });
+
+  // E2 (L3, deciso dall'utente): l'indice conta i pin di contenuto e, accanto, passaggi e note; i numeri vengono dal server
+  // (`conteggiPin` di ogni nodo, `/albero/conteggi` per tutto l'albero), il FE non somma
+  it('E2: intestazione «N pin · più N passaggi e N note» e carte coi soli pin di contenuto, dal server', async () => {
+    getAlberoMappe.mockResolvedValue(albero.map((m) => (m.chiave === 'tokyo' ? { ...m, conteggiPin: { contenuto: 9, passaggi: 4, note: 2 } }
+      : m.chiave === 'dungeon-kamoshida' ? { ...m, conteggiPin: { contenuto: 3, passaggi: 1, note: 1 } } : m)));
+    getConteggiAlbero.mockResolvedValue({ conteggiPin: { contenuto: 819, passaggi: 695, note: 228 } });
+    monta('/guida/mappe');
+    expect(await screen.findByText(/819 pin · più 695 passaggi e 228 note/)).toBeInTheDocument();
+    const tokyo = await screen.findByRole('button', { name: /^Tokyo/ });
+    expect(tokyo).toHaveTextContent('Città · 9 pin · 1 quartiere');
+    const kamoshida = screen.getByRole('button', { name: /^Palazzo di Kamoshida/ });
+    expect(kamoshida).toHaveTextContent('Palazzo · 3 pin ·');
+    // passaggi e note della radice nel suggerimento della riga dei conteggi
+    expect(within(kamoshida).getByTitle('3 pin · più 1 passaggio e 1 nota')).toBeInTheDocument();
   });
 
   // UX3-8 (L3, segnalazione dell'utente: «ho aggiunto una planimetria di prova» e non la trovava): un'Area o planimetria con un nome

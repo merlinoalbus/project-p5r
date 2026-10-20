@@ -10,7 +10,7 @@
 // L2 (2026-10-20): le versioni di una stessa Area sono una voce sola col nome dell'Area, e ogni voce porta alla casa del posto.
 // ============================================================
 
-import { etichetteDistinte, nomePresentazioneMappa, testoPin, titoloGruppoImmagini } from '../../utils/presentazioneMappa';
+import { etichetteDistinte, nomePresentazioneMappa, pinDiContenuto, testoPin, titoloGruppoImmagini } from '../../utils/presentazioneMappa';
 import { ImmaginiLuogo } from './ImmaginiLuogo';
 import { Fragment } from 'react';
 import { Link } from 'react-router-dom';
@@ -69,7 +69,8 @@ export function AlberoLuoghi({ mappe, genitore = null, espandibile = false }: { 
         const membri = perArea.get(m.area.chiave)!;
         const capo = rappresentante(membri);
         if (capo.chiave !== m.chiave) return null;
-        const spilli = membri.reduce((n, v) => n + v.numeroSpilli, 0);
+        // E2 (L3): i pin di contenuto contati dal server, sommati sulle versioni dell'Area come prima
+        const spilli = membri.reduce((n, v) => n + pinDiContenuto(v), 0);
         return <li key={`area:${m.area.chiave}`}>
           {/* R1 (validatore L2): l'area in attesa della scelta dell'utente (lo staff di Tokyo) porta il segno «Da verificare» anche qui,
               accanto al nome e con l'aspetto della pagina Area e delle Aree della città; dove non c'è posto va a capo */}
@@ -101,7 +102,7 @@ export function AlberoLuoghi({ mappe, genitore = null, espandibile = false }: { 
             <span>{etichette.get(m.chiave) ?? nomePresentazioneMappa(m)}</span>
           </Link>
           {/* E5 (L2): i pin della mappa, con la parola e il formato delle altre righe */}
-          <span className="text-[11px] text-text-muted">{testoPin(m.numeroSpilli)}</span>
+          <span className="text-[11px] text-text-muted">{testoPin(pinDiContenuto(m))}</span>
         </div>
         {discendenti(m)}
       </li>;
