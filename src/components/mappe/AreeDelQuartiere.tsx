@@ -42,7 +42,10 @@ export function AreeDelQuartiere({ quartiere: q, onCambiato, onAggiungi, onPinSe
   const [daSegnare, setDaSegnare] = useState<AreaRiassuntoDto | null>(null);
   const [occupato, setOccupato] = useState(false);
   const perSlug = new Map(q.aree.map((a) => [a.slug, a]));
-  const elenco = riordina ? riordina.map((s) => perSlug.get(s)).filter((a): a is AreaRiassuntoDto => !!a) : q.aree;
+  // L6: un'Area del mondo eredita l'apertura del quartiere. L'URL diretto resta consultabile,
+  // ma la navigazione del quartiere non deve proporre un'Area ancora chiusa.
+  const navigabili = q.aree.filter((a) => a.disponibile !== false);
+  const elenco = riordina ? riordina.map((s) => perSlug.get(s)).filter((a): a is AreaRiassuntoDto => !!a && a.disponibile !== false) : navigabili;
   const sposta = (i: number, verso: -1 | 1) => setRiordina((o) => { if (!o) return o; const n = [...o]; [n[i], n[i + verso]] = [n[i + verso], n[i]]; return n; });
   const salvaOrdine = async () => {
     if (!riordina) return;
@@ -52,23 +55,23 @@ export function AreeDelQuartiere({ quartiere: q, onCambiato, onAggiungi, onPinSe
     finally { setOccupato(false); }
   };
 
-  if (q.aree.length === 0) return (
+  if (navigabili.length === 0) return (
     <section className="card flex flex-col items-start gap-2" aria-label={`Aree di ${q.nome}`}>
       <h2 className="m-0 font-display text-[17px] uppercase leading-none">Aree</h2>
-      <p className="m-0 text-[13px] text-text-secondary">Nessuna area in {q.nome}: aggiungine una.</p>
+      <p className="m-0 text-[13px] text-text-secondary">{q.aree.length > 0 ? 'Le aree del quartiere non sono ancora aperte nella partita.' : `Nessuna area in ${q.nome}: aggiungine una.`}</p>
       <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Aggiungi area" onClick={onAggiungi} />
     </section>
   );
   return (
     <section className="flex flex-col gap-2" aria-label={`Aree di ${q.nome}`}>
       <div className="flex flex-wrap items-center gap-2">
-        <h2 className="m-0 font-display text-[17px] uppercase leading-none">Aree <span className="text-text-muted">· {q.aree.length}</span></h2>
-        {q.aree.length > 1 && (riordina
+        <h2 className="m-0 font-display text-[17px] uppercase leading-none">Aree <span className="text-text-muted">· {navigabili.length}</span></h2>
+        {navigabili.length > 1 && (riordina
           ? <span className="ml-auto flex gap-1.5">
             <button type="button" className="btn btn-secondary btn-sm touch" onClick={() => setRiordina(null)}>Annulla</button>
             <button type="button" className="btn btn-primary btn-sm touch" disabled={occupato} onClick={() => void salvaOrdine()}>Salva l’ordine</button>
           </span>
-          : <PulsanteVisivo tono="fantasma" compatto className="ml-auto" icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Riordina" onClick={() => setRiordina(q.aree.map((a) => a.slug))} />)}
+          : <PulsanteVisivo tono="fantasma" compatto className="ml-auto" icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Riordina" onClick={() => setRiordina(navigabili.map((a) => a.slug))} />)}
       </div>
       <ul className="m-0 grid list-none grid-cols-1 gap-2 p-0 md:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2" aria-label="Aree">
         {elenco.map((a, i) => (
