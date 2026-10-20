@@ -1,0 +1,7 @@
+### 2026-10-20T17:48:45Z rimozione del worktree temporaneo
+EXIT=0
+worktree temporanei rimasti: 0
+### linea
+newreview-l4
+c93e3d7d458bdabc7b179fa9799afb9271adbe8b
+EXIT=0 (vuoto = pulita)

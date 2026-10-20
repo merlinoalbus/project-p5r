@@ -1,0 +1,22 @@
+### 2026-10-20T17:49:00Z installazione della copia p5s-2026-10-20-1741Z sull'istanza 3301/5473 (codice c93e3d7d458bdabc7b179fa9799afb9271adbe8b, ramo newreview-l4)
+### dati di prima (L3, base 0948Z) già salvati nella foto L3-finale-prima-di-L4
+51b4847e5a0de7710d342ba01228a58703801ea7892130a44065e7ca96ebdfb6 *gioco.db
+29dbd7703fdd913b9a1af0cea9e217904487d5eccc8a964d09120ee174afee76 *partite.db
+### avvio
+[BE] in ascolto sulla porta 3301 (dopo 2s)
+[FE] in ascolto sulla porta 5473 (dopo 2s)
+### health
+{"data":{"status":"ok","timestamp":"2026-10-20T17:49:11.742Z","db":{"ok":true,"userVersion":113}}}
+FE 200
+### migrazioni all'avvio (0 attese: la copia è già a 113/024)
+0
+### errori nel BE.log
+(vuoto = nessuno)
+### impronta dopo l'avvio contro la copia
+IDENTICHE
+### lavoro da preservare dopo l'avvio
+IDENTICO alla copia
+### foto della nuova base L4-base-p5s-20261020-1741Z
+FOTO OK C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/foto/L4-base-p5s-20261020-1741Z {"gioco.db":{"user_version":113,"tabelle":80,"righe":20208},"partite.db":{"user_version":24,"tabelle":36,"righe":3415}}
+### base L4 contro base L3 (0948Z)
+IDENTICHE

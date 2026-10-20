@@ -1,0 +1,10 @@
+### 2026-10-20T17:43:33Z strada (b) del PM: per ogni commit solo il codice (src server shared) con git apply --index sulla base identica, commit con il messaggio originale; documenti alla fine da newreview = 2e5c64e8
+| originale | sulla linea | file di codice | base del codice | patch-id del codice originale | patch-id del codice sulla linea | uguali |
+|---|---|---|---|---|---|---|
+| c4e9f74e | c438ff27 | 7 | IDENTICA | b5710ca6f43f664b044b6305fa3a592530715b91 | b5710ca6f43f664b044b6305fa3a592530715b91 | SÌ |
+| d60bf046 | 5cb98018 | 9 | IDENTICA | 90e9551a093c49aa131141513d4f10f6355b9566 | 90e9551a093c49aa131141513d4f10f6355b9566 | SÌ |
+| 9edb1dc3 | 672b184d | 9 | IDENTICA | 8293ae5200025b66d444e9ee8bdd2b4da06bbb42 | 8293ae5200025b66d444e9ee8bdd2b4da06bbb42 | SÌ |
+| 0219db62 | c2c6d0d2 | 4 | IDENTICA | 4ea8d317750a8f330851844c9a2b59ef45b5c692 | 4ea8d317750a8f330851844c9a2b59ef45b5c692 | SÌ |
+| 51c5f1a9 | f6a6d13e | 3 | IDENTICA | 09c4f6a1392318ca41c79fa0bac093c3363f3cea | 09c4f6a1392318ca41c79fa0bac093c3363f3cea | SÌ |
+| 43303bc5 | c0bbce1c | 2 | IDENTICA | e1c573473ec263a87b083537df8ff4b38b562bfa | e1c573473ec263a87b083537df8ff4b38b562bfa | SÌ |
+| e058918c | 24bf025a | 4 | IDENTICA | d1fc9e9d3d1ee885a09152dc9658130aaaa996b0 | d1fc9e9d3d1ee885a09152dc9658130aaaa996b0 | SÌ |
