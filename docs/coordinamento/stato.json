@@ -144,7 +144,7 @@
       "id": "L6",
       "titolo": "Condizioni uniche",
       "dipende": "L5",
-      "nota": "2026-10-20: B5 pubblicata fino a f672a90d; migrazione 120 con snapshot guida, API BE di modifica/ripristino ed editor FE dello sblocco dei quartieri pubblicati. B6: descrizioni OpenAPI aggiunte per valutazione condizioni, inviti e modifica/ripristino sblocco. Restano verifica metro-diario, prova dell'utente e chiusura funzionale B6/F6. — precedente: 21:30Z: IN CORSO, BE e FE fatti dalla sessione FE (BE ferma, aspetta il via dell'utente): B0 90629264, B1 816ecfeb (valutatore unico, 490/490 risposte identiche); prossima la migrazione 118.",
+      "nota": "2026-10-20: B5 pubblicata fino a f672a90d; migrazione 120 con snapshot guida, API BE di modifica/ripristino ed editor FE dello sblocco dei quartieri pubblicati. B6: descrizioni OpenAPI aggiunte per valutazione condizioni, inviti e modifica/ripristino sblocco. Il confronto del codice conferma la destinazione unica metro/diario tramite destinazionePalazzo; resta la prova funzionale su una partita, la prova dell'utente e la chiusura funzionale B6/F6. — precedente: 21:30Z: IN CORSO, BE e FE fatti dalla sessione FE (BE ferma, aspetta il via dell'utente): B0 90629264, B1 816ecfeb (valutatore unico, 490/490 risposte identiche); prossima la migrazione 118.",
       "fasi": {
         "requisiti": "fatta",
         "dati": "fatta",
