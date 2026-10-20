@@ -8,7 +8,7 @@
 // nella fila. Sotto i 1024 px resta la fila.
 // ============================================================
 
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { AnteprimaMappa } from './AnteprimaMappa';
 import type { PlanimetriaAreaDto } from '../../types';
 import { nomeVersione } from '../../utils/aree';
@@ -42,6 +42,23 @@ export function SelettoreVersioni({ nome, planimetrie, scelta, onScegli, classNa
     document.addEventListener('keydown', esc);
     return () => { document.removeEventListener('pointerdown', fuori); document.removeEventListener('keydown', esc); };
   }, [aperto]);
+  // LAY3-8: l'elenco aperto resta dentro la finestra. All'apertura (prima che si disegni) si misurano il pulsante e l'elenco: se sotto
+  // c'è posto si apre sotto come prima; se no, dalla parte dove ce n'è di più, alto al massimo quello spazio, e scorre (area scorrevole,
+  // overscroll contenuto). Il tetto resta quello di prima: il 60% della finestra, al massimo 420 px.
+  const elenco = useRef<HTMLUListElement>(null);
+  useLayoutEffect(() => {
+    const lista = elenco.current;
+    const pulsante = radice.current?.querySelector<HTMLButtonElement>('button');
+    if (!aperto || !lista || !pulsante) return;
+    const r = pulsante.getBoundingClientRect();
+    const tetto = Math.min(window.innerHeight * 0.6, 420);
+    const sotto = window.innerHeight - r.bottom - 4 - 8;
+    const sopra = r.top - 4 - 8;
+    const versoAlto = lista.scrollHeight > sotto && sopra > sotto;
+    lista.style.maxHeight = `${Math.floor(Math.max(0, Math.min(tetto, versoAlto ? sopra : sotto)))}px`;
+    lista.style.top = versoAlto ? 'auto' : '';
+    lista.style.bottom = versoAlto ? 'calc(100% + 4px)' : '';
+  }, [aperto]);
   if (planimetrie.length < 2) return null;
   const indice = Math.max(0, planimetrie.findIndex((p) => p.chiave === scelta));
   const corrente = planimetrie[indice];
@@ -60,7 +77,7 @@ export function SelettoreVersioni({ nome, planimetrie, scelta, onScegli, classNa
         <span aria-hidden className="shrink-0 pr-1 text-text-muted">▾</span>
       </button>
       {aperto && (
-        <ul id={id} role="listbox" aria-label={`Versioni di ${nome}`}
+        <ul ref={elenco} id={id} role="listbox" aria-label={`Versioni di ${nome}`}
           className="absolute left-0 top-[calc(100%+4px)] z-30 m-0 flex max-h-[min(60vh,420px)] w-[max(100%,260px)] list-none flex-col gap-1 area-scorrevole bg-bg-secondary p-1 shadow-[0_8px_24px_rgba(0,0,0,0.45)]">
           {planimetrie.map((p, i) => (
             <li key={p.chiave} role="option" aria-selected={p.chiave === scelta}>
