@@ -1,0 +1,14 @@
+### 2026-10-20T12:34:29Z cherry-pick su newreview-l3 (da 48d7a958), server fermi
+### ordine: quello di git log su newreview (a4ba5f4c 14:02:01 è prima di 8347d76b 14:11:11; 8347d76b modifica esiti-layout/48d7a958/esito.md, che a4ba5f4c crea)
+## a4ba5f4c base dei file modificati: IDENTICA
+-> b5ac5666
+## 8347d76b base dei file modificati: IDENTICA
+-> ebcaca29
+## 2e22264f base dei file modificati: IDENTICA
+-> 6b61bc66
+## 2831f884 base dei file modificati: IDENTICA
+-> 0fed5f5c
+## d1fbbf3a base dei file modificati: IDENTICA
+-> a09beb8e
+## f89afdea base dei file modificati: IDENTICA
+-> 7562f6ac
