@@ -700,6 +700,16 @@ it('in «Da raccogliere» il nome di una planimetria porta dritto alla sua area 
   expect(colonna.getByRole('link', { name: 'Torre' })).toHaveAttribute('href', '/guida/dungeon/kamoshida/area/torre-alta?planimetria=m-torre');
 });
 
+// Regola dell'utente «opacità al 100%» (decisione del PM dopo Test UX di L3): i segni dei chip delle date non sono attenuati
+it('i segni dei chip delle date («si apre», «furto», «scade») sono all’opacità piena (UX3-11)', async () => {
+  getDungeon.mockResolvedValue(palazzo(true));
+  monta('kamoshida');
+  await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+  const segni = screen.getAllByText(/^(Si apre|Scade)$/).map((e) => e.parentElement!);
+  expect(segni.length).toBeGreaterThan(0);
+  for (const s of segni) expect(s.className).not.toMatch(/opacity-/);
+});
+
 it('senza schede da sistemare la sezione non c’è (AP3-1)', async () => {
   getDungeon.mockResolvedValue({ ...palazzo(true), schedeDaSistemare: [] });
   monta('kamoshida');

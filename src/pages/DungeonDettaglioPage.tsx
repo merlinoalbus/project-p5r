@@ -100,7 +100,8 @@ function LineaDelTempo({ date, memento = false }: { date: DungeonDettaglioDto['d
           {i > 0 && <span aria-hidden className="hidden self-center text-text-muted sm:inline lg:hidden">→</span>}
           {/* Da 1024 px (R3-41) la tappa sta su una riga: segno e data, l'etichetta per chi non vede e nel suggerimento */}
           <span className={`flex flex-col gap-0.5 rounded-md px-2.5 py-1.5 lg:flex-row lg:items-center lg:gap-1 lg:px-1.5 lg:py-1 ${t.tono}`} title={`${t.etichetta}: ${t.valore!}`}>
-            <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] opacity-80"><IconaSegno chiave={t.segno} dimensione={14} /><span className="lg:sr-only">{t.etichetta}</span></span>
+            {/* segno ed etichetta all'opacità piena (regola dell'utente «opacità al 100%», UX3-11): erano a 0,80 */}
+            <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em]"><IconaSegno chiave={t.segno} dimensione={14} /><span className="lg:sr-only">{t.etichetta}</span></span>
             {/* da 1024 px al massimo 6,5rem coi puntini (una data della guida può essere una frase: «Nel corso della…»), intera nel suggerimento */}
             <span className="font-display text-[17px] leading-none lg:max-w-[6.5rem] lg:truncate lg:text-[14px]">{dataBreve(t.valore!)}</span>
           </span>
