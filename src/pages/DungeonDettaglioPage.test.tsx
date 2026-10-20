@@ -15,25 +15,30 @@ import { ApiError } from '../services/api/_helpers';
 import type { AreaDettaglioDto, AreaRiassuntoDto } from '../types';
 
 const { aggiornaCompendio, getDungeon, impostaStatoPunto, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, eliminaArea, collegaPinAlPunto, spostaPunto, creaArea, impostaAtterraggiDungeon, getMappa,
-  getArea, riordinaAree, eliminaAreaMondo, aggiornaAreaMondo, aggiornaPlanimetrieArea, impostaInfiltrazioniArea, impostaAreeInfiltrazione, collocaPlanimetria, creaAreaMondo, getDivergenze, togliFattoAlPin, getVocePercorso } = vi.hoisted(() => ({
+  getArea, riordinaAree, eliminaAreaMondo, aggiornaAreaMondo, aggiornaPlanimetrieArea, impostaInfiltrazioniArea, impostaAreeInfiltrazione, collocaPlanimetria, creaAreaMondo, getDivergenze, togliFattoAlPin, getVocePercorso, risolviMappa } = vi.hoisted(() => ({
   // L4: le divergenze «da verificare» e «Togli il fatto al pin»
   getDivergenze: vi.fn(), togliFattoAlPin: vi.fn(),
   // L3 UX3-1: la voce del diario da cui si arriva (`?daVoce=`)
   getVocePercorso: vi.fn(),
+  // L3 AP3-2: la casa della planimetria d'arrivo di un passaggio con una chiave che la scheda non conosce
+  risolviMappa: vi.fn(),
   aggiornaCompendio: vi.fn(), getDungeon: vi.fn(), impostaStatoPunto: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaTimbri: vi.fn(), impostaStatoRichiesta: vi.fn(),
   eliminaMappa: vi.fn(), getAlberoMappe: vi.fn(), aggiornaDungeon: vi.fn(), aggiornaArea: vi.fn(), aggiornaPunto: vi.fn(), creaPunto: vi.fn(), eliminaPunto: vi.fn(), eliminaArea: vi.fn(), collegaPinAlPunto: vi.fn(), spostaPunto: vi.fn(), creaArea: vi.fn(), impostaAtterraggiDungeon: vi.fn(), getMappa: vi.fn(),
   // L3 (2026-10-20): le Aree del Palazzo con le rotte di L2 (contenitore `dungeon`) e i legami infiltrazione ↔ area
   getArea: vi.fn(), riordinaAree: vi.fn(), eliminaAreaMondo: vi.fn(), aggiornaAreaMondo: vi.fn(), aggiornaPlanimetrieArea: vi.fn(), impostaInfiltrazioniArea: vi.fn(), impostaAreeInfiltrazione: vi.fn(), collocaPlanimetria: vi.fn(), creaAreaMondo: vi.fn(),
 }));
 vi.mock('../services/api', (vero) => moduloApi(vero, { aggiornaCompendio, getDungeon, impostaStatoPunto, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, eliminaArea, collegaPinAlPunto, spostaPunto, creaArea, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, impostaAtterraggiDungeon, getMappa,
-  getArea, riordinaAree, eliminaAreaMondo, aggiornaAreaMondo, aggiornaPlanimetrieArea, impostaInfiltrazioniArea, impostaAreeInfiltrazione, collocaPlanimetria, creaAreaMondo, getDivergenze, togliFattoAlPin, getVocePercorso }));
+  getArea, riordinaAree, eliminaAreaMondo, aggiornaAreaMondo, aggiornaPlanimetrieArea, impostaInfiltrazioniArea, impostaAreeInfiltrazione, collocaPlanimetria, creaAreaMondo, getDivergenze, togliFattoAlPin, getVocePercorso, risolviMappa }));
 vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../stores/suggerimentiStore', () => ({ useSuggerimenti: () => ({ evidenziato: () => false, motivo: () => null }) }));
 // il visore vero è provato a parte: qui dice planimetria e, collegando i pin (2026-10-18), che cosa riceve, e «tocca» il pin 3
-// L3: anche il pannello del visore («Infiltrazioni in quest'area») e lo spillo dell'indirizzo
-vi.mock('../components/mappe/MappaIncorporata', () => ({ MappaIncorporata: ({ chiave, classeVisore, scelta, contenutiPannello, spilloIniziale }: { chiave: string; classeVisore?: string; scelta?: SceltaPin; contenutiPannello?: ReactNode; spilloIniziale?: number | null }) => (
-  <div data-classe-visore={classeVisore}>Visore: {chiave}{scelta ? ` · scelta per ${scelta.titolo} · ${scelta.scelti.size} scelti · sbiaditi ${String(scelta.attenuaNascosti)} · cerca «${scelta.ricerca ?? ''}»` : ''}{spilloIniziale ? ` · pin ${spilloIniziale}` : ''}
+// L3: anche il pannello del visore («Infiltrazioni in quest'area») e lo spillo dell'indirizzo; AP3-2: `senzaVicine` e due passaggi
+// (verso una planimetria che la scheda conosce, e verso una chiave interna da risolvere), con lo spillo d'arrivo 9
+vi.mock('../components/mappe/MappaIncorporata', () => ({ MappaIncorporata: ({ chiave, classeVisore, scelta, contenutiPannello, spilloIniziale, senzaVicine, onNaviga }: { chiave: string; classeVisore?: string; scelta?: SceltaPin; contenutiPannello?: ReactNode; spilloIniziale?: number | null; senzaVicine?: boolean; onNaviga?: (k: string, arrivo?: { spillo: number }) => void }) => (
+  <div data-classe-visore={classeVisore} data-senza-vicine={senzaVicine ? 'sì' : undefined}>Visore: {chiave}{scelta ? ` · scelta per ${scelta.titolo} · ${scelta.scelti.size} scelti · sbiaditi ${String(scelta.attenuaNascosti)} · cerca «${scelta.ricerca ?? ''}»` : ''}{spilloIniziale ? ` · pin ${spilloIniziale}` : ''}
     {scelta && <button type="button" onClick={() => scelta.onScegli({ id: 3, nome: 'Forziere della torre' } as Parameters<SceltaPin['onScegli']>[0])}>Tocca il pin 3</button>}
+    {onNaviga && <button type="button" onClick={() => onNaviga('m-cortile', { spillo: 9 })}>Passaggio al Cortile</button>}
+    {onNaviga && <button type="button" onClick={() => onNaviga('nativo-cortile', { spillo: 9 })}>Passaggio interno al Cortile</button>}
     {contenutiPannello}</div>
 ) }));
 // il pozzo finto: un pulsante che sceglie Qimranut, come toccarne lo strato
@@ -658,6 +663,34 @@ it('le schede della guida senza mappa né voce si vedono nella scheda del Palazz
   expect(righe[1]).toHaveTextContent('Forziere dei 3 Magatama');
 });
 
+describe('i passaggi del visore della scheda restano nella scheda (AP3-2)', () => {
+  /** Il Palazzo di prova col Cortile toccato anche dall'infiltrazione Cancello. */
+  const conCortileNelCancello = (): DungeonDettaglioDto => {
+    const d = palazzo(true);
+    d.areePalazzo = d.areePalazzo!.map((a) => (a.slug === 'cortile' ? { ...a, infiltrazioni: [{ chiave: 'k-01', nome: 'Cancello', ordine: 0 }, ...(a.infiltrazioni ?? [])] } : a));
+    return d;
+  };
+  const arrivo = '/guida/dungeon/kamoshida/area/cortile?infiltrazione=k-01&planimetria=m-cortile&spillo=9';
+
+  it('il visore non mostra le planimetrie vicine; un passaggio verso una planimetria del Palazzo apre la sua area con l’infiltrazione aperta', async () => {
+    getDungeon.mockResolvedValue(conCortileNelCancello());
+    monta('kamoshida', '/area/cancello?infiltrazione=k-01');
+    expect(await screen.findByText(/^Visore: m-cancello/)).toHaveAttribute('data-senza-vicine', 'sì');
+    fireEvent.click(screen.getByRole('button', { name: 'Passaggio al Cortile' }));
+    await waitFor(() => expect(screen.getByTestId('indirizzo')).toHaveTextContent(arrivo));
+    expect(risolviMappa).not.toHaveBeenCalled();
+  });
+
+  it('una chiave che la scheda non conosce si risolve: se la sua casa è un’area del Palazzo si resta nella scheda', async () => {
+    getDungeon.mockResolvedValue(conCortileNelCancello());
+    risolviMappa.mockResolvedValue({ tipo: 'mappa', mappa: 'm-cortile', casa: '/guida/dungeon/kamoshida/area/cortile' });
+    monta('kamoshida', '/area/cancello?infiltrazione=k-01');
+    fireEvent.click(await screen.findByRole('button', { name: 'Passaggio interno al Cortile' }));
+    await waitFor(() => expect(screen.getByTestId('indirizzo')).toHaveTextContent(arrivo));
+    expect(risolviMappa).toHaveBeenCalledWith('nativo-cortile');
+  });
+});
+
 it('senza schede da sistemare la sezione non c’è (AP3-1)', async () => {
   getDungeon.mockResolvedValue({ ...palazzo(true), schedeDaSistemare: [] });
   monta('kamoshida');
@@ -955,7 +988,9 @@ it('L4: «Da verificare» dalla voce — segno sulla riga e «Sistema…» nella
   togliFattoAlPin.mockResolvedValue(undefined);
   monta('kamoshida');
   await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
-  const riga = screen.getByRole('button', { name: /Sicura del cancello/ });
+  // la riga della voce nella guida (il suo nome comincia con quello della voce): quando le divergenze arrivano, anche la riga del pin
+  // in «Pin da verificare» porta il nome della voce, dopo quello del pin
+  const riga = screen.getByRole('button', { name: /^Sicura del cancello/ });
   expect(within(riga).getByText('Da verificare')).toBeInTheDocument();
   fireEvent.click(riga);
   // «Sistema…» è attivo quando le divergenze sono arrivate (prima non saprebbe quale pin)

@@ -22,7 +22,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Selettore } from '../components/shared/Selettore';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { aggiornaArea, aggiornaCompendio, aggiornaDungeon, creaArea, eliminaArea, eliminaAreaMondo, getArea, getDivergenze, getDungeon, impostaStatoPunto, riordinaAree } from '../services/api';
+import { aggiornaArea, aggiornaCompendio, aggiornaDungeon, creaArea, eliminaArea, eliminaAreaMondo, getArea, getDivergenze, getDungeon, impostaStatoPunto, riordinaAree, risolviMappa } from '../services/api';
+import { urlCasa, urlMappa, type NavigaMappa, type PuntoArrivo } from '../utils/navigazioneMappa';
 import { FinestraDaVerificare, SPIEGAZIONE_DA_VERIFICARE, type DivergenzaDaVerificare } from '../components/guida/FinestraDaVerificare';
 import { nomeSenzaPalazzo } from '../utils/gruppiPlanimetrie';
 import { PropostaDallaVoce } from '../components/guida/PropostaDallaVoce';
@@ -375,6 +376,27 @@ export function DungeonDettaglioPage() {
     q.set('planimetria', p);
     for (const k of ['spillo', 'x', 'y', 'zoom']) q.delete(k);
     setParams(q, { replace: true });
+  };
+  /** AP3-2: apre nella scheda la planimetria `mappa` se è di un'area di questo Palazzo (vero se l'ha aperta), con l'arrivo dato.
+   *  L'infiltrazione aperta resta se tocca l'area d'arrivo, come scegliendo l'area dall'elenco; `?planimetria=` c'è sempre, perché
+   *  con `?infiltrazione=` la versione iniziale dell'infiltrazione passerebbe davanti a quella del passaggio. */
+  const apriPlanimetriaQui = (mappa: string, arrivo?: PuntoArrivo): boolean => {
+    const p = d?.planimetrie.find((x) => x.chiave === mappa);
+    const a = p?.area ? areePalazzo.find((x) => x.chiave === p.area) : undefined;
+    if (!a) return false;
+    const q = new URLSearchParams();
+    if (area && a.infiltrazioni?.some((x) => x.chiave === area.chiave)) q.set('infiltrazione', area.chiave);
+    q.set('planimetria', mappa);
+    navigate(urlCasa(`${base}/area/${encodeURIComponent(a.slug)}?${q.toString()}`, arrivo));
+    return true;
+  };
+  /** AP3-2: i passaggi (e le briciole) del visore della scheda. Una planimetria del Palazzo si apre qui; una chiave che la scheda non
+   *  conosce (interna, alias) si risolve, e se è del Palazzo si apre qui, altrimenti si va alla sua casa. */
+  const navigaDalVisore: NavigaMappa = (k, arrivo) => {
+    if (apriPlanimetriaQui(k, arrivo)) return;
+    risolviMappa(k)
+      .then((r) => { if (r.tipo === 'mappa' && apriPlanimetriaQui(r.mappa, arrivo)) return; navigate(r.tipo === 'mappa' ? urlCasa(r.casa, arrivo) : urlMappa(k, arrivo)); })
+      .catch(() => navigate(urlMappa(k, arrivo)));
   };
   /** Un'infiltrazione eliminata dalla guida: se era quella aperta, la scheda torna sul Palazzo. */
   const areaEliminata = (k: string) => { if (area?.chiave === k) navigate(base); };
@@ -919,6 +941,8 @@ export function DungeonDettaglioPage() {
                 {mappaMostrata && (
                   <MappaIncorporata key={mappaMostrata} chiave={mappaMostrata} versione={versioneStati} classeVisore={classeVisoreMappa} onCambiato={() => void dati.ricarica()} scelta={sceltaPin}
                     spilloIniziale={collegamento ? null : spilloIndirizzo} puntoIniziale={collegamento ? null : puntoIndirizzo} titoloVisore={areaFisica?.nome}
+                    // AP3-2: come nella pagina dell'Area (L2) niente «Su:» né planimetrie vicine (l'elenco delle aree è accanto), e i passaggi restano nella scheda
+                    senzaVicine onNaviga={navigaDalVisore}
                     contenutiPannello={areaFisica && !collegamento ? <InfiltrazioniInArea area={areaFisica} aperta={area.chiave} completate={completate} onScegli={scegliInfiltrazioneQui} /> : undefined} />
                 )}
                 {/* un'infiltrazione che non tocca aree (o un Palazzo senza aree): niente da mostrare, si collegano (§4.2) */}
