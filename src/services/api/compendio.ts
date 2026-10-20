@@ -137,6 +137,11 @@ export const aggiornaArea = (chiave: string, dati: DatiAreaApi): Promise<AreaDun
 export const creaPunto = (area: string, dati: DatiPuntoApi & { nome: string; tipo: PuntoInteresseDto['tipo'] }): Promise<PuntoInteresseDto> => apiPost(`/compendio/aree/${encodeURIComponent(area)}/punti`, dati);
 /** Modifica una voce della guida dell'area; risponde con la voce aggiornata. */
 export const aggiornaPunto = (chiave: string, dati: DatiPuntoApi): Promise<PuntoInteresseDto> => apiPut(`/compendio/punti/${encodeURIComponent(chiave)}`, dati);
+/** L4 (§4.3) «Crea la voce» da una scheda da sistemare: voce nuova del tipo dato col nome e la descrizione della scheda, in fondo alla sua
+ *  infiltrazione; risponde con la voce. */
+export const creaVoceDallaScheda = (scheda: number, tipo: PuntoInteresseDto['tipo']): Promise<PuntoInteresseDto> => apiPost(`/compendio/schede/${scheda}/voce`, { tipo });
+/** L4 (§4.3) «Collega a una voce»: la scheda da sistemare diventa la voce data, del suo Palazzo; risponde con la voce. */
+export const collegaSchedaAllaVoce = (scheda: number, voce: string): Promise<PuntoInteresseDto> => apiPut(`/compendio/schede/${scheda}/voce`, { voce });
 /** Elimina una voce della guida dell'area (204, nessun contenuto). */
 export const eliminaPunto =(chiave: string): Promise<void> => apiDelete(`/compendio/punti/${encodeURIComponent(chiave)}`);
 /** Una sezione nuova della guida del Palazzo: `dopo` un'area (null = in cima, assente = in fondo), e se data nella planimetria; da L3

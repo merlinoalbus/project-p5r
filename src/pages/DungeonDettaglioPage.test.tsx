@@ -16,9 +16,12 @@ import { ApiError } from '../services/api/_helpers';
 import type { AreaDettaglioDto, AreaRiassuntoDto } from '../types';
 
 const { aggiornaCompendio, getDungeon, impostaStatoPunto, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, eliminaArea, collegaPinAlPunto, spostaPunto, creaArea, impostaAtterraggiDungeon, getMappa,
-  getArea, riordinaAree, eliminaAreaMondo, aggiornaAreaMondo, aggiornaPlanimetrieArea, impostaInfiltrazioniArea, impostaAreeInfiltrazione, collocaPlanimetria, creaAreaMondo, getDivergenze, togliFattoAlPin, getVocePercorso, risolviMappa } = vi.hoisted(() => ({
+  getArea, riordinaAree, eliminaAreaMondo, aggiornaAreaMondo, aggiornaPlanimetrieArea, impostaInfiltrazioniArea, impostaAreeInfiltrazione, collocaPlanimetria, creaAreaMondo, getDivergenze, togliFattoAlPin, getVocePercorso, risolviMappa,
+  creaVoceDallaScheda, collegaSchedaAllaVoce } = vi.hoisted(() => ({
   // L4: le divergenze «da verificare» e «Togli il fatto al pin»
   getDivergenze: vi.fn(), togliFattoAlPin: vi.fn(),
+  // L4 §4.3: i due gesti delle «Schede da sistemare»
+  creaVoceDallaScheda: vi.fn(), collegaSchedaAllaVoce: vi.fn(),
   // L3 UX3-1: la voce del diario da cui si arriva (`?daVoce=`)
   getVocePercorso: vi.fn(),
   // L3 AP3-2: la casa della planimetria d'arrivo di un passaggio con una chiave che la scheda non conosce
@@ -29,7 +32,8 @@ const { aggiornaCompendio, getDungeon, impostaStatoPunto, impostaSpilloRaccolto,
   getArea: vi.fn(), riordinaAree: vi.fn(), eliminaAreaMondo: vi.fn(), aggiornaAreaMondo: vi.fn(), aggiornaPlanimetrieArea: vi.fn(), impostaInfiltrazioniArea: vi.fn(), impostaAreeInfiltrazione: vi.fn(), collocaPlanimetria: vi.fn(), creaAreaMondo: vi.fn(),
 }));
 vi.mock('../services/api', (vero) => moduloApi(vero, { aggiornaCompendio, getDungeon, impostaStatoPunto, eliminaMappa, getAlberoMappe, aggiornaDungeon, aggiornaArea, aggiornaPunto, creaPunto, eliminaPunto, eliminaArea, collegaPinAlPunto, spostaPunto, creaArea, impostaSpilloRaccolto, impostaTimbri, impostaStatoRichiesta, impostaAtterraggiDungeon, getMappa,
-  getArea, riordinaAree, eliminaAreaMondo, aggiornaAreaMondo, aggiornaPlanimetrieArea, impostaInfiltrazioniArea, impostaAreeInfiltrazione, collocaPlanimetria, creaAreaMondo, getDivergenze, togliFattoAlPin, getVocePercorso, risolviMappa }));
+  getArea, riordinaAree, eliminaAreaMondo, aggiornaAreaMondo, aggiornaPlanimetrieArea, impostaInfiltrazioniArea, impostaAreeInfiltrazione, collocaPlanimetria, creaAreaMondo, getDivergenze, togliFattoAlPin, getVocePercorso, risolviMappa,
+  creaVoceDallaScheda, collegaSchedaAllaVoce }));
 vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 // `useMedia` risponde alla larghezza scelta dal test (0 di partenza: la scheda sotto i 1024 px, come in jsdom senza finto)
 const media = vi.hoisted(() => ({ larghezza: 0 }));
@@ -676,6 +680,79 @@ it('le schede della guida senza mappa né voce si vedono nella scheda del Palazz
   expect(righe[0]).toHaveTextContent('Cortile');
   expect(righe[0]).toHaveTextContent('2 Cavalieri brutali + 1 Nemico potente');
   expect(righe[1]).toHaveTextContent('Forziere dei 3 Magatama');
+});
+
+// L4 §4.3: le «Schede da sistemare» si sistemano con «Crea la voce» o «Collega a una voce» (mai «Elimina»); ogni gesto chiede prima in una
+// finestra, «Annulla» non tocca niente, e dopo il gesto la scheda si rilegge
+describe('§4.3: «Crea la voce» e «Collega a una voce» dalle schede da sistemare', () => {
+  const schede = [
+    { id: 14, nome: 'Tre guardie del Tetto', descrizione: '2 Cavalieri brutali', tipo: 'miniboss', infiltrazione: 'k-03', infiltrazioneNome: 'Cortile', posizione: { x: 1, y: 2 } },
+    { id: 16, nome: 'Seme lussuria verde', descrizione: '', tipo: 'seme-bramosia', infiltrazione: 'k-03', infiltrazioneNome: 'Cortile', posizione: null },
+    { id: 15, nome: 'Forziere dei 3 Magatama', descrizione: '', tipo: 'forziere', infiltrazione: 'k-01', infiltrazioneNome: 'Cancello', posizione: null },
+  ];
+  /** Apre la sezione e ne restituisce il contenuto. */
+  const apriSezione = async () => {
+    const sezione = (await screen.findByText('Schede da sistemare (3)')).closest('details')!;
+    fireEvent.click(within(sezione).getByText('Schede da sistemare (3)'));
+    return within(sezione);
+  };
+
+  it('ogni scheda ha i due gesti e nessun «Elimina»; «Crea la voce» propone il tipo del pin, «Annulla» non crea niente, la conferma crea e rilegge', async () => {
+    getDungeon.mockResolvedValue({ ...palazzo(true), schedeDaSistemare: schede });
+    creaVoceDallaScheda.mockResolvedValue({ chiave: 'k-03-tre-guardie', nome: 'Tre guardie del Tetto' });
+    monta('kamoshida');
+    const sezione = await apriSezione();
+    const righe = within(sezione.getByRole('list', { name: 'Schede da sistemare' })).getAllByRole('listitem');
+    for (const r of righe) {
+      expect(within(r).getByRole('button', { name: /^Crea la voce da/ })).toBeInTheDocument();
+      expect(within(r).getByRole('button', { name: /a una voce$/ })).toBeInTheDocument();
+      expect(within(r).queryByRole('button', { name: /Elimina/ })).toBeNull();
+    }
+    // il tipo proposto viene dal tipo del pin: seme della bramosia → «Semi della bramosia»
+    fireEvent.click(sezione.getByRole('button', { name: 'Crea la voce da «Seme lussuria verde»' }));
+    let finestra = within(screen.getByRole('dialog', { name: 'Crea la voce da «Seme lussuria verde»' }));
+    expect(finestra.getByRole('combobox', { name: 'Tipo' })).toHaveTextContent('Semi della bramosia');
+    expect(finestra.getByRole('combobox', { name: 'Tipo' }).closest('.selettore')).toHaveClass('selettore--in-linea');
+    expect(finestra.getByText(/in fondo a «Cortile».*Nessuno stato si trasferisce/)).toBeInTheDocument();
+    fireEvent.click(finestra.getByRole('button', { name: 'Annulla' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+    // miniboss → «Mini-boss»; la conferma crea la voce col tipo e rilegge la scheda
+    fireEvent.click(sezione.getByRole('button', { name: 'Crea la voce da «Tre guardie del Tetto»' }));
+    finestra = within(screen.getByRole('dialog', { name: 'Crea la voce da «Tre guardie del Tetto»' }));
+    expect(finestra.getByRole('combobox', { name: 'Tipo' })).toHaveTextContent('Mini-boss');
+    const letture = getDungeon.mock.calls.length;
+    fireEvent.click(finestra.getByRole('button', { name: 'Crea la voce' }));
+    await waitFor(() => expect(creaVoceDallaScheda).toHaveBeenCalledWith(14, 'miniboss'));
+    expect(creaVoceDallaScheda).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(getDungeon.mock.calls.length).toBeGreaterThan(letture));
+    expect(notifica).toHaveBeenCalledWith('success', 'Voce «Tre guardie del Tetto» creata in Cortile.');
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(collegaSchedaAllaVoce).not.toHaveBeenCalled();
+  });
+
+  it('«Collega a una voce»: si sceglie fra le voci del Palazzo (prima quelle della sua infiltrazione); senza scelta non si collega; un errore lascia la finestra aperta', async () => {
+    getDungeon.mockResolvedValue({ ...palazzo(true), schedeDaSistemare: schede });
+    collegaSchedaAllaVoce.mockRejectedValueOnce(new Error('La voce non è del Palazzo della scheda.')).mockResolvedValue({ chiave: 'p1', nome: 'Sicura del cancello' });
+    monta('kamoshida');
+    const sezione = await apriSezione();
+    fireEvent.click(sezione.getByRole('button', { name: 'Collega «Forziere dei 3 Magatama» a una voce' }));
+    const finestra = within(screen.getByRole('dialog', { name: 'Collega «Forziere dei 3 Magatama» a una voce' }));
+    expect(finestra.getByRole('button', { name: 'Collega' })).toBeDisabled();
+    // nella finestra la tendina si apre nel flusso: sovrapposta resterebbe tagliata dal corpo scorrevole (si vedeva una voce sola)
+    expect(finestra.getByRole('combobox', { name: 'Voce' }).closest('.selettore')).toHaveClass('selettore--in-linea');
+    fireEvent.click(finestra.getByRole('combobox', { name: 'Voce' }));
+    // la voce dell'infiltrazione della scheda (Cancello), sotto il nome dell'infiltrazione
+    expect(finestra.getByText('1. Cancello')).toBeInTheDocument();
+    fireEvent.click(finestra.getByRole('option', { name: /Sicura del cancello/ }).querySelector('button')!);
+    fireEvent.click(finestra.getByRole('button', { name: 'Collega' }));
+    await waitFor(() => expect(collegaSchedaAllaVoce).toHaveBeenCalledWith(15, 'p1'));
+    await waitFor(() => expect(notifica).toHaveBeenCalledWith('error', 'La voce non è del Palazzo della scheda.'));
+    expect(screen.getByRole('dialog', { name: 'Collega «Forziere dei 3 Magatama» a una voce' })).toBeInTheDocument();
+    fireEvent.click(finestra.getByRole('button', { name: 'Collega' }));
+    await waitFor(() => expect(notifica).toHaveBeenCalledWith('success', '«Forziere dei 3 Magatama» collegata a «Sicura del cancello».'));
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(creaVoceDallaScheda).not.toHaveBeenCalled();
+  });
 });
 
 describe('i passaggi del visore della scheda restano nella scheda (AP3-2)', () => {
