@@ -13,15 +13,17 @@
 import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
-import { datiGuida } from './datiGuida.js';
 import { t } from './traduzioniService.js';
+import { condizioniDiSblocco, regoleSbloccoLuoghi } from './sbloccoLuoghi.js';
 import { chiaveMappa, nomePercorso } from './mappe/percorsiMappe.js';
 import { casaDellArea, casaDellaMappa, contestoAree, type ContestoAree } from './mappe/casaMappa.js';
 import { statoDisponibilitaPartita, valutaRequisiti, valutaRequisitiSpillo, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { dettaglioNegozio, acquistiDellaPartita } from './negoziService.js';
 import { attivitaDellaSede } from './attivitaService.js';
-import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { descriviRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+
+export { condizioniDiSblocco } from './sbloccoLuoghi.js';
 import { descriviGiorni, descriviOrari, descriviOrariDelLuogo, leggiGiorni, leggiOrari, orariComeCondizioni, orariDelLuogo, type OrariDelLuogo, type OrariNegozio } from '../../shared/orariNegozio.js';
 import type { LuogoDettaglioDto, LuogoDto, PresenzaLuogoDto } from '../../shared/types.js';
 
@@ -55,17 +57,6 @@ export interface LettureLuoghi {
 function perSede(righe: Array<{ sede: string; chiave: string; nome: string }>): Map<string, Array<{ chiave: string; nome: string }>> {
   const out = new Map<string, Array<{ chiave: string; nome: string }>>();
   for (const r of righe) (out.get(r.sede) ?? out.set(r.sede, []).get(r.sede)!).push({ chiave: r.chiave, nome: r.nome });
-  return out;
-}
-
-/** Le regole di presenza scritte a mano in `sblocco-luoghi` della guida: ripiego per le righe senza `condizioni_json`. */
-function regoleSbloccoLuoghi(): Map<string, RequisitoSpillo[]> {
-  const dati = datiGuida<{ luoghi?: Array<{ chiave: string; condizioni: unknown }> }>('sblocco-luoghi');
-  const out = new Map<string, RequisitoSpillo[]>();
-  for (const l of dati?.luoghi ?? []) {
-    const condizioni = normalizzaCondizioniSpillo(l.condizioni);
-    if (condizioni.length > 0) out.set(l.chiave, condizioni);
-  }
   return out;
 }
 
@@ -110,12 +101,6 @@ export function lettureLuoghi(partitaId?: number, luogo?: string, stDato?: Stato
     aree,
     pin: pinDeiLuoghi(aree, luogo),
   };
-}
-
-/** Le condizioni di sblocco di un luogo: quelle della riga, o il ripiego della guida. */
-export function condizioniDiSblocco(r: Pick<RigaLuogo, 'chiave' | 'condizioni_json'>, regole: Map<string, RequisitoSpillo[]>): RequisitoSpillo[] {
-  const dellaRiga = leggiCondizioniSalvate(r.condizioni_json);
-  return dellaRiga.length ? dellaRiga : (regole.get(r.chiave) ?? []);
 }
 
 /**

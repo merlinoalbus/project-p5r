@@ -17,21 +17,55 @@ import { registraEvento } from './storicoService.js';
 import { attivitaConQuiz, quizVoceDto } from './attivitaService.js';
 import { risolviOggettoCollegato } from './oggettiSelezionabili.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
-import { descriviOrari, leggiOrari, orariComeCondizioni, type OrariNegozio } from '../../shared/orariNegozio.js';
+import { descriviOrari, descriviOrariDelLuogo, leggiOrari, orariComeCondizioni, orariDelLuogo, type OrariNegozio } from '../../shared/orariNegozio.js';
+import { condizioniDiSblocco, regoleSbloccoLuoghi } from './sbloccoLuoghi.js';
 import type { ArticoloDto, NegozioDettaglioDto, NegozioRiassuntoDto, RicercaArticoliDto } from '../../shared/types.js';
 
-interface RigaNegozio { condizioni_json: string | null; orari_json: string | null; sede_chiave: string | null; sede_nome?: string | null; programma_punti_json: string | null; chiave: string; ordine: number; nome: string; luogo: string; luogo_chiave: string | null; tipo: string; gestore: string | null; confidente_chiave: string | null; orari: string | null; sblocco: string | null; note: string | null; fonte: string; confidente_nome?: string | null; quartiere_nome?: string | null; articoli?: number; verificati?: number }
-interface RigaArticolo { condizioni_json: string | null; oggetto_fonte: string | null; oggetto_chiave: string | null; quantita: number | null; chiave: string; negozio_chiave: string; negozio_confidente?: string | null; negozio_orari?: string | null; ordine: number; nome: string; nome_it: string | null; categoria: string; per: string | null; prezzo: number | null; effetto: string | null; statistiche: string | null; disponibile_dal: string | null; condizione: string | null; nota: string | null; fonte: string; verificato: number; negozio_nome?: string }
+/** L5: quel che serve alla presenza di un negozio, letto con la riga: la sua eccezione d'orario e orari e sblocco della sede. */
+interface PresenzaRiga { orari_json: string | null; eccezione_orari_json?: string | null; sede_chiave: string | null; sede_orari_json?: string | null; sede_condizioni_json?: string | null }
+interface RigaNegozio extends PresenzaRiga { condizioni_json: string | null; orari_json: string | null; sede_chiave: string | null; sede_nome?: string | null; programma_punti_json: string | null; chiave: string; ordine: number; nome: string; luogo: string; luogo_chiave: string | null; tipo: string; gestore: string | null; confidente_chiave: string | null; orari: string | null; sblocco: string | null; note: string | null; fonte: string; confidente_nome?: string | null; quartiere_nome?: string | null; articoli?: number; verificati?: number }
+interface RigaArticolo { condizioni_json: string | null; oggetto_fonte: string | null; oggetto_chiave: string | null; quantita: number | null; chiave: string; negozio_chiave: string; negozio_confidente?: string | null; negozio_orari?: string | null;
+  /** L5: eccezione d'orario e sede del negozio, con orari e sblocco della sede. */
+  negozio_eccezione?: string | null; negozio_sede?: string | null; sede_orari_json?: string | null; sede_condizioni_json?: string | null; ordine: number; nome: string; nome_it: string | null; categoria: string; per: string | null; prezzo: number | null; effetto: string | null; statistiche: string | null; disponibile_dal: string | null; condizione: string | null; nota: string | null; fonte: string; verificato: number; negozio_nome?: string }
 
-const SQL_NEGOZIO = `SELECT n.*, c.nome AS confidente_nome, q.nome AS quartiere_nome, l.nome AS sede_nome,
+// L5: con la sede vengono anche i suoi orari e il suo sblocco (`l.orari_json`, `l.condizioni_json`): sono la presenza del negozio
+const SQL_NEGOZIO = `SELECT n.*, c.nome AS confidente_nome, q.nome AS quartiere_nome, l.nome AS sede_nome, l.orari_json AS sede_orari_json, l.condizioni_json AS sede_condizioni_json,
   (SELECT COUNT(*) FROM articolo a WHERE a.negozio_chiave = n.chiave AND a.nascosto = 0) AS articoli, (SELECT COUNT(*) FROM articolo a WHERE a.negozio_chiave = n.chiave AND a.verificato = 1 AND a.nascosto = 0) AS verificati
   FROM negozio n LEFT JOIN confidente c ON c.chiave = n.confidente_chiave LEFT JOIN quartiere q ON q.chiave = n.luogo_chiave LEFT JOIN luogo l ON l.chiave = n.sede_chiave`;
-const SQL_ARTICOLO = 'SELECT a.*, n.nome AS negozio_nome, n.confidente_chiave AS negozio_confidente, n.orari_json AS negozio_orari FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave';
+const SQL_ARTICOLO = `SELECT a.*, n.nome AS negozio_nome, n.confidente_chiave AS negozio_confidente, n.orari_json AS negozio_orari, n.eccezione_orari_json AS negozio_eccezione,
+  n.sede_chiave AS negozio_sede, l.orari_json AS sede_orari_json, l.condizioni_json AS sede_condizioni_json
+  FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave LEFT JOIN luogo l ON l.chiave = n.sede_chiave`;
 
 // Il testo di una condizione si genera con i nomi della Guida, non con le chiavi: «Articolo ottenuto: Laptop rotto», non «yumenoshima/laptop-rotto».
 function regole(json: string | null) { const nomi = nomiCondizioniMemo(); return leggiCondizioniSalvate(json).map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) })); }
 /** La presenza del negozio: i suoi orari, come condizioni che il valutatore sa leggere. */
 function regoleOrari(orari: OrariNegozio) { return orariComeCondizioni(orari).map((c: RequisitoSpillo) => ({ ...c, testo: descriviRequisitoSpillo(c) })); }
+
+/**
+ * L5 (§3.1, R5-12b): gli orari di un negozio. Con una sede sono quelli del luogo (o la regola dell'app), salvo l'eccezione del negozio quando
+ * la guida la distingue; senza sede (online, televisione, dentro un Palazzo) restano i suoi. Il testo dice da dove vengono.
+ */
+function orariDelNegozio(r: PresenzaRiga): { orari: OrariNegozio; testo: string } {
+  if (r.eccezione_orari_json) { const o = leggiOrari(r.eccezione_orari_json); return { orari: o, testo: descriviOrari(o) }; }
+  if (r.sede_chiave) { const o = orariDelLuogo(r.sede_orari_json ?? null); return { orari: o, testo: descriviOrariDelLuogo(o) }; }
+  const o = leggiOrari(r.orari_json);
+  return { orari: o, testo: descriviOrari(o) };
+}
+
+/** L5: la presenza di un negozio come condizioni: lo sblocco della sede (se ne ha una) e gli orari del negozio. */
+function condizioniPresenza(r: PresenzaRiga, orari: OrariNegozio) {
+  const nomi = nomiCondizioniMemo();
+  const sblocco = r.sede_chiave ? condizioniDiSblocco({ chiave: r.sede_chiave, condizioni_json: r.sede_condizioni_json ?? null }, regoleSbloccoLuoghi()) : [];
+  return [...sblocco.map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) })), ...regoleOrari(orari)];
+}
+
+/** La pagina del luogo in cui il negozio ha la sede, aperta sulla sua sezione; null senza sede. */
+function sedeCasa(chiave: string, sede: string | null): string | null {
+  if (!sede) return null;
+  const i = sede.indexOf('/');
+  const pagina = i > 0 ? `/guida/luogo/${encodeURIComponent(sede.slice(0, i))}/${encodeURIComponent(sede.slice(i + 1))}` : `/guida/luogo/${encodeURIComponent(sede)}`;
+  return `${pagina}#negozio-${encodeURIComponent(chiave)}`;
+}
 
 /** Il programma punti di un negozio, dal JSON della riga (migrazione 076); null se assente o malformato. */
 export function leggiProgrammaPunti(json: string | null): NegozioRiassuntoDto['programmaPunti'] {
@@ -46,13 +80,15 @@ export function leggiProgrammaPunti(json: string | null): NegozioRiassuntoDto['p
 /** Il riassunto di un negozio: orari strutturati e in parole (che sono anche le sue condizioni di presenza, valutate se c'è
  *  lo stato della partita), Confidente, sede, programma punti e conteggi degli articoli non nascosti. */
 function riassunto(r: RigaNegozio, st?: StatoDisponibilita): NegozioRiassuntoDto {
-  const orari = leggiOrari(r.orari_json);
-  const condizioni = regoleOrari(orari);
+  // L5: gli orari della sede (più l'eccezione), e la presenza della sede (sblocco e orari)
+  const { orari, testo } = orariDelNegozio(r);
+  const condizioni = condizioniPresenza(r, orari);
   return {
     condizioni, ...(st ? { disponibilita: valutaRequisiti(condizioni, st) } : {}),
     chiave: r.chiave, nome: r.nome, luogo: r.luogo, luogoChiave: r.luogo_chiave, quartiereNome: r.quartiere_nome ?? null, tipo: r.tipo as NegozioRiassuntoDto['tipo'], gestore: r.gestore,
     confidente: r.confidente_chiave ? { chiave: r.confidente_chiave, nome: r.confidente_nome ?? r.confidente_chiave } : null,
-    orariStrutturati: orari, orariTesto: descriviOrari(orari),
+    orariStrutturati: orari, orariTesto: testo,
+    sedeCasa: sedeCasa(r.chiave, r.sede_chiave), eccezioneOrari: r.eccezione_orari_json ? leggiOrari(r.eccezione_orari_json) : null,
     sedeChiave: r.sede_chiave, sedeNome: r.sede_chiave ? (r.sede_nome ?? null) : null, programmaPunti: leggiProgrammaPunti(r.programma_punti_json),
     articoli: r.articoli ?? 0, verificati: r.verificati ?? 0,
   };
@@ -61,8 +97,10 @@ function riassunto(r: RigaNegozio, st?: StatoDisponibilita): NegozioRiassuntoDto
 /** La disponibilita' di un articolo tiene conto anche di quella del negozio — a bottega chiusa non
  *  si compra niente — ma le due cose restano **distinguibili**: la presenza del negozio sono i suoi
  *  orari (marcati `daNegozio`), il resto è dell'articolo (compreso lo sblocco che era del negozio). */
-function disponibilitaArticolo(r: Pick<RigaArticolo, 'condizioni_json' | 'negozio_orari'>, st: StatoDisponibilita) {
-  const negozio = regoleOrari(leggiOrari(r.negozio_orari ?? null)).map((c) => ({ ...c, testo: 'Negozio: ' + c.testo }));
+function disponibilitaArticolo(r: RigaArticolo, st: StatoDisponibilita) {
+  // L5: la presenza del negozio è quella della sede (sblocco e orari, o l'eccezione del negozio)
+  const presenza: PresenzaRiga = { orari_json: r.negozio_orari ?? null, eccezione_orari_json: r.negozio_eccezione ?? null, sede_chiave: r.negozio_sede ?? null, sede_orari_json: r.sede_orari_json ?? null, sede_condizioni_json: r.sede_condizioni_json ?? null };
+  const negozio = condizioniPresenza(presenza, orariDelNegozio(presenza).orari).map((c) => ({ ...c, testo: 'Negozio: ' + c.testo }));
   const esito = valutaRequisiti([...negozio, ...regole(r.condizioni_json)], st);
   return { ...esito, requisiti: esito.requisiti.map((q, i) => (i < negozio.length ? { ...q, daNegozio: true } : q)) };
 }
