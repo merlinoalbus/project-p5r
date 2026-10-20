@@ -53,6 +53,8 @@ Test no-reg, 2026-10-20, dalle 12:03Z alle 12:18Z. Esito: **VERDE**. NR3-4 risul
   (`api-48d7a958-vs-b28bade7.txt`).
 
 ## 4. Intestazione della scheda del Palazzo a 375×812 → nessuna regressione di L3
+*Nota del PM, arrivata dopo la misura: il punto non serve più. Per decisione dell'utente l'intestazione occupa al massimo il 30% della
+schermata a ogni dispositivo; è il difetto LAY3-5 e lo corregge FE. Le misure qui sotto restano solo come riferimento.*
 Ho misurato `main header.card` col metodo di Test layout, sui 9 Palazzi, alla pagina `/guida/dungeon/<k>`, altezza in px:
 
 | Palazzo | L2 `bff237e0` (prima di L3) | `b28bade7` | `48d7a958` |
