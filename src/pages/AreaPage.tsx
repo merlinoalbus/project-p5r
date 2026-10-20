@@ -29,6 +29,7 @@ import { VersioniArea } from '../components/mappe/VersioniArea';
 import { nomeVersione } from '../utils/aree';
 import { FinestraAggiungiPlanimetria } from '../components/mappe/FinestraAggiungiPlanimetria';
 import { FinestraModificaArea } from '../components/mappe/FinestraModificaArea';
+import { FinestraAggiungiLuogo } from '../components/mappe/FinestraAggiungiLuogo';
 import { centroAccessoMondo } from '../utils/accessoMondo';
 import { urlLuogo } from '../utils/citta';
 import { COVO_AREA, PAGINA_COVO } from '../utils/covo';
@@ -86,6 +87,9 @@ function Contenuto({ area: a, indirizzoContenitore, nomeContenitore, ricarica }:
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const [finestra, setFinestra] = useState<'modifica' | 'aggiungi' | 'elimina' | 'ripristina' | null>(null);
+  // L5 (F5): «Aggiungi luogo» (null = luogo da scegliere) e «Posiziona» di un luogo senza pin, nelle aree di un quartiere
+  const [aggiungiLuogo, setAggiungiLuogo] = useState<{ luogo: { chiave: string; nome: string } | null } | null>(null);
+  const conLuoghi = a.contenitore.tipo === 'quartiere';
   const [riepilogoElimina, setRiepilogoElimina] = useState<string | null>(null);
   const [occupato, setOccupato] = useState(false);
   // «Luoghi qui» e «Aree vicine» (§4.3, UX2-1): da 1280 px nel pannello del visore, aperto all'arrivo, a destra; da 768 a 1279 px nel
@@ -217,9 +221,14 @@ function Contenuto({ area: a, indirizzoContenitore, nomeContenitore, ricarica }:
             // doppie: la testata della pagina li ha già (UX2-4, UX2-5)
             pannelloIniziale={pannello} onPannello={setPannello} titoloVisore={a.nome} senzaVicine nonDisponibili={interruttore}
             classeVisore="h-[min(64dvh,560px)] lg:h-auto lg:min-h-[420px] lg:flex-1" className="lg:flex lg:min-h-0 lg:flex-1 lg:flex-col"
-            contenutiPannello={telefono ? undefined : <PannelloArea area={a} elementi={elementiQui} onSeleziona={selezionaPin} nonDisponibili={interruttore} pinChiesto={spillo} />} />
+            contenutiPannello={telefono ? undefined : <PannelloArea area={a} elementi={elementiQui} onSeleziona={selezionaPin} nonDisponibili={interruttore} pinChiesto={spillo} onAggiungiLuogo={conLuoghi ? (l) => setAggiungiLuogo({ luogo: l }) : undefined} />} />
         : <p className="card m-0 text-[13px] text-text-secondary">{a.nome} non ha più planimetrie: aggiungine una.</p>}
-      {scelta && telefono && <div className="card"><PannelloArea area={a} elementi={elementiQui} onSeleziona={selezionaPin} nonDisponibili={interruttore} pinChiesto={spillo} /></div>}
+      {scelta && telefono && <div className="card"><PannelloArea area={a} elementi={elementiQui} onSeleziona={selezionaPin} nonDisponibili={interruttore} pinChiesto={spillo} onAggiungiLuogo={conLuoghi ? (l) => setAggiungiLuogo({ luogo: l }) : undefined} /></div>}
+      {aggiungiLuogo && scelta && (
+        <FinestraAggiungiLuogo quartiere={a.contenitore.chiave} luogo={aggiungiLuogo.luogo} onChiudi={() => setAggiungiLuogo(null)} onFatto={() => void ricarica()}
+          // la versione mostrata per prima, poi le altre dell'area
+          planimetrie={[scelta, ...a.planimetrie.filter((p) => p.chiave !== scelta.chiave)]} />
+      )}
 
       {finestra === 'modifica' && <FinestraModificaArea area={a} aperta onChiudi={() => setFinestra(null)} onSalvata={ricarica} />}
       <FinestraAggiungiPlanimetria area={a} aperta={finestra === 'aggiungi'} onChiudi={() => setFinestra(null)}
@@ -252,8 +261,10 @@ const chiusoAdesso = (e: ElementoAreaDto) => !!e.presenza && (e.presenza.sblocca
 /** Il pannello del visore: «Luoghi qui» (tocco = seleziona il pin, e il collegamento alla pagina del luogo), «Da posizionare» e «Aree vicine».
  *  L5 (F3): i luoghi chiusi adesso o non ancora sbloccati spariscono, come nel visore, con lo stesso interruttore; quelli solo per gli eventi
  *  di un Confidente non ci sono mai. */
-function PannelloArea({ area, elementi, onSeleziona, nonDisponibili, pinChiesto }: { area: AreaDettaglioDto; elementi: ElementoAreaDto[]; onSeleziona: (spillo: number) => void;
-  nonDisponibili: { valore: boolean; onCambia: (v: boolean) => void }; pinChiesto: number | null }) {
+function PannelloArea({ area, elementi, onSeleziona, nonDisponibili, pinChiesto, onAggiungiLuogo }: { area: AreaDettaglioDto; elementi: ElementoAreaDto[]; onSeleziona: (spillo: number) => void;
+  nonDisponibili: { valore: boolean; onCambia: (v: boolean) => void }; pinChiesto: number | null;
+  /** L5 (F5): «Aggiungi luogo» (null) e «Posiziona» di un luogo senza pin; assente fuori dai quartieri. */
+  onAggiungiLuogo?: (luogo: { chiave: string; nome: string } | null) => void }) {
   const candidati = elementi.filter((e) => !e.soloEventi);
   const chiusi = candidati.filter(chiusoAdesso).length;
   const visibili = candidati.filter((e) => nonDisponibili.valore || !chiusoAdesso(e) || e.spillo === pinChiesto);
@@ -282,12 +293,16 @@ function PannelloArea({ area, elementi, onSeleziona, nonDisponibili, pinChiesto 
             <IconaAzione chiave="bloccato" dimensione={14} />Mostra anche i non ancora disponibili ({chiusi})
           </button>
         )}
+        {onAggiungiLuogo && <button type="button" className="btn btn-secondary btn-sm touch self-start" onClick={() => onAggiungiLuogo(null)}>Aggiungi luogo</button>}
       </section>
-      {/* L5: i luoghi dell'area senza pin su una planimetria: si aprono dalla loro pagina («Posiziona» arriva con le finestre di L5) */}
+      {/* L5: i luoghi dell'area senza pin su una planimetria: la loro pagina, e «Posiziona» (il tocco sul punto della planimetria) */}
       {daPosizionare.length > 0 && <section className="visore-mappa__sezione" aria-label="Da posizionare">
         <h3 className="visore-mappa__intestazione">Da posizionare ({daPosizionare.length})</h3>
         <ul className="m-0 flex list-none flex-col gap-1 p-0">
-          {daPosizionare.map((l) => <li key={l.chiave}><Link className="touch inline-flex items-center" to={l.casa ?? `/guida/citta/${encodeURIComponent(l.quartiere ?? '')}`}>{l.nome}</Link></li>)}
+          {daPosizionare.map((l) => <li key={l.chiave} className="flex items-center justify-between gap-2">
+            <Link className="touch inline-flex items-center" to={l.casa ?? `/guida/citta/${encodeURIComponent(l.quartiere ?? '')}`}>{l.nome}</Link>
+            {onAggiungiLuogo && <button type="button" className="visore-mappa__azione-testo touch text-[12px]" aria-label={`Posiziona ${l.nome}`} onClick={() => onAggiungiLuogo({ chiave: l.chiave, nome: l.nome })}>Posiziona</button>}
+          </li>)}
         </ul>
       </section>}
       {area.vicine.length > 0 && <section className="visore-mappa__sezione" aria-label="Aree vicine">

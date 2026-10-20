@@ -12,7 +12,9 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { getElementoCatalogo, getLuogo } from '../services/api';
+import { getArea, getElementoCatalogo, getLuogo, getQuartiere } from '../services/api';
+import { FinestraAggiungiLuogo } from '../components/mappe/FinestraAggiungiLuogo';
+import { FinestraColloca } from '../components/mappe/FinestraColloca';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -30,7 +32,7 @@ import { COLORE_TIPO_LUOGO, NOME_TIPO_LUOGO, ancoraNegozio } from '../utils/citt
 import { NOME_TIPO_NEGOZIO } from '../utils/negozi';
 import { definizioneTipoLuogo } from '../../shared/tipiLuogo';
 import { descriviOrari } from '../../shared/orariNegozio';
-import type { ElementoCatalogoDto, LuogoDettaglioDto } from '../types';
+import type { ElementoCatalogoDto, LuogoDettaglioDto, PlanimetriaAreaDto } from '../types';
 
 /** Il badge della presenza: «Non ancora nel mondo», «Chiuso adesso», «Aperto adesso»; niente senza partita. */
 function BadgePresenza({ l }: { l: LuogoDettaglioDto }) {
@@ -68,6 +70,21 @@ export function LuogoPage() {
   const [versione, setVersione] = useState(0);
   /** Dopo un salvataggio: chiude il modulo, fa rileggere gli articoli nascosti e la pagina. */
   const salvato = () => { setModulo(null); setVersione((v) => v + 1); void dati.ricarica(); };
+  // L5 (F5): «Posiziona» con le planimetrie dell'area del luogo, «Colloca» con le aree del quartiere (lette al tocco)
+  const [posiziona, setPosiziona] = useState<PlanimetriaAreaDto[] | null>(null);
+  const [colloca, setColloca] = useState<Array<{ slug: string; nome: string }> | null>(null);
+  /** Legge le planimetrie dell'area del luogo e apre «Posiziona». */
+  const apriPosiziona = async () => {
+    if (!l?.area || !l.quartiere) return;
+    try { setPosiziona((await getArea({ tipo: 'quartiere', chiave: l.quartiere }, l.area.slug)).planimetrie); }
+    catch (err) { notifica('error', err instanceof Error ? err.message : 'Planimetrie non disponibili.'); }
+  };
+  /** Legge le aree del quartiere e apre «Colloca». */
+  const apriColloca = async () => {
+    if (!l?.quartiere) return;
+    try { setColloca((await getQuartiere(l.quartiere)).aree.map((a) => ({ slug: a.slug, nome: a.nome }))); }
+    catch (err) { notifica('error', err instanceof Error ? err.message : 'Aree non disponibili.'); }
+  };
   /** Carica dal catalogo l'articolo da correggere e apre il modulo; un errore va in notifica. */
   const apriArticolo = (negozio: string, articolo: string) => {
     void getElementoCatalogo('articolo', articolo).then((e) => setModulo({ negozio, elemento: e })).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Caricamento fallito.'));
@@ -162,7 +179,13 @@ export function LuogoPage() {
                       </div>
                     )}
                   </>
-                  : <p className="m-0 text-[13px] text-text-muted">Non ancora posizionato su una planimetria.</p>}
+                  : <div className="flex flex-col items-start gap-2">
+                    <p className="m-0 text-[13px] text-text-muted">{l.area ? `Non ancora posizionato su una planimetria di ${l.area.nome}.` : 'Non ancora posizionato: prima va collocato in un’area del quartiere.'}</p>
+                    {/* L5 (F5): «Posiziona» (il tocco sul punto di una planimetria dell'area) o, senza area, «Colloca» */}
+                    {l.area
+                      ? <button type="button" className="btn btn-secondary btn-sm touch" onClick={() => void apriPosiziona()}>Posiziona</button>
+                      : <button type="button" className="btn btn-secondary btn-sm touch" onClick={() => void apriColloca()}>Colloca</button>}
+                  </div>}
               </section>
 
               {(l.confidentiDettaglio.length > 0 || l.attivitaDettaglio.length > 0) && (
@@ -192,6 +215,8 @@ export function LuogoPage() {
 
               {l.note && <section className="card order-4 xl:order-none" aria-label="Note"><p className="m-0 text-[12px] text-text-muted">{l.note}</p></section>}
             </div>
+            {posiziona && l.quartiere && <FinestraAggiungiLuogo quartiere={l.quartiere} luogo={{ chiave: l.chiave, nome: l.nome }} planimetrie={posiziona} onChiudi={() => setPosiziona(null)} onFatto={() => void dati.ricarica()} />}
+            {colloca && <FinestraColloca luogo={{ chiave: l.chiave, nome: l.nome }} aree={colloca} onChiudi={() => setColloca(null)} onFatto={() => void dati.ricarica()} />}
           </div>
         );
       })()}

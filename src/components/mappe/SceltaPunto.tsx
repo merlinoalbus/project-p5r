@@ -7,6 +7,8 @@
 // sull'illustrazione» (un'area che sull'illustrazione non ha ancora il suo pin).
 // ============================================================
 
+import { useState } from 'react';
+
 interface Props {
   src: string;
   /** Testo alternativo dell'immagine (dice quale illustrazione è). */
@@ -18,6 +20,9 @@ interface Props {
 
 /** L'immagine da toccare con il segno del punto scelto; le frecce lo spostano (Maiusc per passi da 5), partendo dal centro. */
 export function SceltaPunto({ src, alt, punto, onPunto, disabilitato = false }: Props) {
+  // L5: un'immagine verticale (la planimetria di Central Street, 1:2) a 720 px di larghezza era alta 1440 e si toccava solo scorrendo la
+  // finestra: la larghezza tiene conto della proporzione, così l'immagine intera sta nel 60% dell'altezza dello schermo
+  const [proporzione, setProporzione] = useState<number | null>(null);
   const tocca = (e: React.MouseEvent<HTMLDivElement>) => {
     if (disabilitato) return;
     const r = e.currentTarget.getBoundingClientRect();
@@ -29,10 +34,11 @@ export function SceltaPunto({ src, alt, punto, onPunto, disabilitato = false }: 
   };
   return (
     <div className={`ingresso-quartiere__immagine ${disabilitato ? 'ingresso-quartiere__immagine--occupata' : ''}`} role="application" tabIndex={0}
+      style={proporzione ? { width: `min(100%, 720px, calc(60dvh * ${proporzione}))` } : undefined}
       aria-label={`${alt}: tocca il punto, o usa le frecce`}
       onKeyDown={(e) => { const d = e.shiftKey ? 5 : 1; const mosse: Record<string, [number, number]> = { ArrowLeft: [-d, 0], ArrowRight: [d, 0], ArrowUp: [0, -d], ArrowDown: [0, d] }; const m = mosse[e.key]; if (m) { e.preventDefault(); sposta(m[0], m[1]); } }}
       onClick={tocca}>
-      <img src={src} alt={alt} draggable={false} />
+      <img src={src} alt={alt} draggable={false} onLoad={(e) => { const i = e.currentTarget; if (i.naturalWidth && i.naturalHeight) setProporzione(i.naturalWidth / i.naturalHeight); }} />
       {punto && <span className="ingresso-quartiere__punto" style={{ left: `${punto.x}%`, top: `${punto.y}%` }} aria-hidden="true">+</span>}
     </div>
   );

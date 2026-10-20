@@ -20,6 +20,7 @@
 import { IngressoQuartiere } from '../components/mappe/IngressoQuartiere';
 import { AreeDelQuartiere } from '../components/mappe/AreeDelQuartiere';
 import { FinestraAggiungiArea } from '../components/mappe/FinestraAggiungiArea';
+import { FinestraColloca } from '../components/mappe/FinestraColloca';
 import { Modal } from '../components/shared/Modal';
 import { urlCasa } from '../utils/navigazioneMappa';
 import { useEffect, useMemo, useState } from 'react';
@@ -116,6 +117,8 @@ export function QuartierePage() {
   const q = dati.dati;
   useDocumentTitle(q?.nome ?? 'Quartiere');
   const [finestra, setFinestra] = useState<'ingresso' | 'aggiungi' | null>(null);
+  // L5 (F5): «Colloca» di un luogo senza area, con l'area proposta dalla migrazione
+  const [colloca, setColloca] = useState<{ luogo: { chiave: string; nome: string }; proposta: string | null } | null>(null);
   // La finestra dell'area d'ingresso: aperta arrivando dalla metro (`?ingresso=1`, se c'è un ingresso) o con «Entra»
   const [entraAperta, setEntraAperta] = useState(false);
   // con uno spillo nell'indirizzo vince lo spillo: la finestra d'ingresso non si apre (condizione di Stesura sulla variante 1)
@@ -235,8 +238,8 @@ export function QuartierePage() {
                 {visibili.map((l) => <Luogo key={l.chiave} l={l} onSalvato={() => void dati.ricarica()} />)}
               </ul>
               {visibili.length === 0 && <p className="m-0 text-[13px] text-text-muted" role="status">Nessun luogo di questo tipo in {q.nome}.</p>}
-              {/* L5 (F4): i luoghi del quartiere senza un'Area, con l'area proposta se la migrazione ne ha dedotta una («Colloca» arriva con le
-                  finestre di L5): si aprono dalla loro pagina */}
+              {/* L5 (F4, F5): i luoghi del quartiere senza un'Area, con l'area proposta se la migrazione ne ha dedotta una: la loro pagina e
+                  «Colloca» */}
               {(q.luoghiDaCollocare?.length ?? 0) > 0 && (
                 <details className="card text-[13px]">
                   <summary className="touch cursor-pointer font-semibold text-text-secondary">Luoghi da collocare ({q.luoghiDaCollocare!.length})</summary>
@@ -244,6 +247,7 @@ export function QuartierePage() {
                     {q.luoghiDaCollocare!.map((l) => <li key={l.chiave} className="flex flex-wrap items-center gap-1.5">
                       {l.casa ? <Link to={l.casa} className="touch inline-flex items-center">{l.nome}</Link> : <span>{l.nome}</span>}
                       {l.areaProposta && <span className="text-[12px] text-text-muted">· proposta: {l.areaProposta.nome}</span>}
+                      <button type="button" className="btn btn-ghost btn-sm touch ml-auto" aria-label={`Colloca ${l.nome}`} onClick={() => setColloca({ luogo: { chiave: l.chiave, nome: l.nome }, proposta: l.areaProposta?.slug ?? null })}>Colloca</button>
                     </li>)}
                   </ul>
                 </details>
@@ -253,6 +257,7 @@ export function QuartierePage() {
           </div>
 
           {finestra === 'ingresso' && <IngressoQuartiere quartiere={q} aperta onChiudi={() => setFinestra(null)} onSalvato={() => dati.ricarica()} />}
+          {colloca && <FinestraColloca luogo={colloca.luogo} proposta={colloca.proposta} aree={q.aree.map((a) => ({ slug: a.slug, nome: a.nome }))} onChiudi={() => setColloca(null)} onFatto={() => void dati.ricarica()} />}
           {finestra === 'aggiungi' && <FinestraAggiungiArea quartiere={q} aperta onChiudi={() => setFinestra(null)} onCreata={(area) => { void dati.ricarica().then(() => { if (area.passaggio) mostraPin(area.passaggio.spillo); }); }} />}
           {/* L'area d'ingresso nella sua finestra (decisione del PM, 2026-10-20): dalla metro o con «Entra», sul punto e con lo zoom
               dell'ingresso; «Apri l'area» porta alla sua pagina con lo stesso punto, «Chiudi» resta qui e toglie `ingresso=1`. */}
