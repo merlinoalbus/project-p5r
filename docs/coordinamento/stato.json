@@ -17,7 +17,7 @@
   ],
   "p5s": {
     "url": "https://p5s.nasmerlinoalbus.cloud/",
-    "stato": "online; newreview pubblicato fino a f2195fb4; modifica locale aggiunge lo sblocco strutturato al DTO quartiere; p5s mostra 306 mappe/767 pin; L6 B5 in sviluppo"
+    "stato": "online; newreview pubblicato fino a 7d37ae07; DTO quartiere con sblocco strutturato; p5s mostra 306 mappe/767 pin; L6 B5 in sviluppo"
   },
   "lotti": [
     {
