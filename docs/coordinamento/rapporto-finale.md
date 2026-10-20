@@ -58,6 +58,7 @@ Sono tutte in `decisioni-pm.md`, contrassegnate «Decisione del PM»:
 - LAY-2: Fandom rifiuta i download (403); onesto User-Agent, avviso nel FE.
 - Rigenerazione di `pacchetto/gioco.db`: decisione dell'utente in L11.
 - E9 dell'indice dei Palazzi, rinviato a L11 da FE.
+- Percorso a 375 px: l'intestazione (titolo e barra del giorno su due righe) è alta 230 px, contro una soglia di 243. È entro il 30% ma con 13 px di margine, e una lettura isolata ha dato 252. In L10, «Partita e diario», si compatta la barra del giorno (R9 di L3, `lotti/L3/esiti-layout/b5fd6cfe/R9.md`).
 
 ## Violazioni di regola da dichiarare
 - BE: script node su `server/routes/aree.ts` e `server/openapi/descrizioni/aree.ts` in L2 (d66cf5f5).
