@@ -15,7 +15,7 @@
 // è «Copia o sposta voci» e accanto c'è «Copia in…», che ne fa voci nuove coi passi e le schede (`TrasferisciVociInArea`).
 // ============================================================
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { collegaPinAlPunto, creaPunto, eliminaPunto, aggiornaPunto as salvaPunto, spostaPunto } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { COLORE_TIPO, NOME_TIPO } from '../../utils/dungeon';
@@ -91,8 +91,11 @@ interface Props {
   /** Nei dedali dei Memento (099): l'area del dedalo di cui si mostrano le voci (`area.punti` le ha già filtrate) e le altre aree
    *  dello stesso dedalo, dove una voce si può spostare. Lì ogni voce ha uno stato, e i tipi sono Persona e Trama (2026-10-11). */
   areaDedalo?: { chiave: string; nome: string; altre: ReadonlyArray<{ chiave: string; nome: string }> };
-  /** Nei Palazzi (2026-10-12): le aree del Palazzo, in ordine di guida, dove una voce si può spostare («Area del Palazzo»). */
-  areePalazzo?: ReadonlyArray<{ chiave: string; nome: string; ordine: number }>;
+  /** Nei Palazzi (2026-10-12): le aree del Palazzo, in ordine di guida, dove una voce si può spostare («Area del Palazzo»). Con le loro voci
+   *  (L4 §4.1), per dire in quali altre infiltrazioni sta l'oggetto permanente di una voce. */
+  areePalazzo?: ReadonlyArray<{ chiave: string; nome: string; ordine: number; punti?: ReadonlyArray<PuntoInteresseDto> }>;
+  /** L4 §4.1: apre un'altra infiltrazione del Palazzo («Anche nella 4ª infiltrazione»). Senza, la riga si legge e basta. */
+  onApriInfiltrazione?: (chiave: string) => void;
   /** Il collegamento dei pin aperto o chiuso (null): la pagina lo fa sulla sua mappa (2026-10-18). Senza, «Collega pin» non c'è. */
   onCollegamento?: (c: CollegamentoPin | null) => void;
   /** L4 (§4.1): le divergenze «da verificare» del Palazzo nella partita e l'apertura della finestra che le sistema (la apre la pagina). */
@@ -107,7 +110,7 @@ interface Props {
  * nella partita, pin collegati, spostamento, correzione o eliminazione e «Collega pin», che si fa sulla mappa della pagina
  * (`onCollegamento`): qui resta il conto dei pin collegati con «Fatto». Ogni modifica fa rileggere la scheda.
  */
-export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambiaStato, onPuntoAggiornato, onRicarica, areaDedalo, areePalazzo, onCollegamento, divergenze, onDaVerificare }: Props) {
+export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambiaStato, onPuntoAggiornato, onRicarica, areaDedalo, areePalazzo, onCollegamento, divergenze, onDaVerificare, onApriInfiltrazione }: Props) {
   /** Una voce descrittiva si legge e basta; nelle aree dei dedali non ce ne sono (099, scelta dell'utente: «Tutti con stato»). */
   const descrittiva = (p: PuntoInteresseDto) => puntoDescrittivo(p.tipo, p.areaDedalo);
   /** Il nome di quel che la guida mostra: l'area del dedalo o l'area del Palazzo. */
@@ -286,6 +289,8 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
     const statoTesto = p.stato && p.stato !== 'esaurito' ? (racconto ? 'letto' : p.stato) : null;
     // il carattere scelto a mano nella «Modifica» ('' = vale la regola)
     const carattereScelto = p.carattereScelto && p.carattere ? p.carattere : '';
+    // L4 §4.1: le altre infiltrazioni in cui sta l'oggetto permanente della voce (nell'ordine della guida)
+    const ancheIn = p.oggetto ? [...(areePalazzo ?? [])].filter((a) => a.chiave !== area.chiave && a.punti?.some((x) => x.oggetto === p.oggetto)).sort((x, y) => x.ordine - y.ordine) : [];
     return (
       <li key={p.chiave} data-voce={p.chiave} className={`flex flex-col gap-1 rounded-md px-1 py-2 text-[13px] ${aperto ? 'bg-primary-bg' : ''}`}>
         {/* segnata e chiusa, la riga si attenua: «esaurito» più di «ottenuto» (§4.1, R4-34: si distinguono a colpo d'occhio) */}
@@ -308,6 +313,22 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
             ? <span className="chip chip--icona shrink-0 text-[11px]" title={p.pin.map((x) => `${x.nome} (${nomeSenzaPalazzo(x.mappaNome)})`).join(', ')}><IconaAzione chiave="posizione" dimensione={14} />{p.pin.length === 1 ? '1 pin' : `${p.pin.length} pin`}</span>
             : puntoDaCollegare(p.tipo) && !conPassi && <span className="chip shrink-0 text-[11px] text-text-muted">da collegare</span>}
         </button>
+        {/* L4 §4.1: l'oggetto permanente sta anche in altre infiltrazioni (fatto in una, è fatto in tutte): sotto la riga, un tocco la apre */}
+        {/* una riga sola anche con più infiltrazioni («Anche nella 2ª e 4ª infiltrazione»): ogni ordinale è un bersaglio da 44 px col nome intero */}
+        {ancheIn.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1 pl-5 text-[11px] text-text-muted">
+            <span>Anche nella</span>
+            {ancheIn.map((a, i) => (
+              <Fragment key={a.chiave}>
+                {i > 0 && (i === ancheIn.length - 1 ? <span>e</span> : <span className="-ml-1">,</span>)}
+                {onApriInfiltrazione
+                  ? <button type="button" className="chip touch min-w-11 justify-center text-[11px] text-primary" aria-label={`Anche nella ${a.ordine + 1}ª infiltrazione`} title={a.nome} onClick={() => onApriInfiltrazione(a.chiave)}>{a.ordine + 1}ª</button>
+                  : <span title={a.nome}>{a.ordine + 1}ª</span>}
+              </Fragment>
+            ))}
+            <span>infiltrazione</span>
+          </div>
+        )}
         {aperto && (
           <div className="flex flex-col gap-1.5 pl-5">
             {p.descrizione && <p className="m-0 whitespace-pre-wrap text-text-secondary">{p.descrizione}</p>}

@@ -801,6 +801,25 @@ describe('§4.1: il carattere della voce', () => {
     expect(ottenuto).toHaveClass('opacity-60');
   });
 
+  // §4.1: una voce permanente il cui oggetto ha voci in altre infiltrazioni lo dice sotto la riga, «Anche nella 4ª infiltrazione», e il tocco la apre
+  it('«Anche nella Nª infiltrazione» per l’oggetto permanente con voci altrove; il tocco apre quell’infiltrazione; niente per le voci da sole', () => {
+    const onApriInfiltrazione = vi.fn();
+    const forziere = punto({ chiave: 'k2-forziere', nome: 'Forziere d’oro', carattere: 'permanente', oggetto: 'k2-forziere' });
+    const solo = punto({ chiave: 'k2-porta', tipo: 'porta', nome: 'Porta della sala', carattere: 'permanente', oggetto: null });
+    const aree = [
+      { chiave: 'k-02', nome: 'Sala Centrale', ordine: 1, punti: [forziere, solo] },
+      { chiave: 'k-04', nome: 'Torre', ordine: 3, punti: [punto({ chiave: 'k4-forziere', nome: 'Forziere d’oro (di nuovo)', carattere: 'permanente', oggetto: 'k2-forziere' })] },
+      { chiave: 'k-05', nome: 'Cortile', ordine: 4, punti: [punto({ chiave: 'k5-altro', nome: 'Altro forziere', carattere: 'permanente', oggetto: 'k5-altro' })] },
+    ];
+    render(<MemoryRouter><GuidaDellArea area={area([forziere, solo])} planimetrie={planimetrie} partitaId={4} mappaAperta="m-sala" cambiaStato={vi.fn()} onPuntoAggiornato={vi.fn()} onRicarica={vi.fn()}
+      areePalazzo={aree} onApriInfiltrazione={onApriInfiltrazione} /></MemoryRouter>);
+    const voce = screen.getByRole('button', { name: /Forziere d’oro/ }).closest('li')!;
+    fireEvent.click(within(voce).getByRole('button', { name: 'Anche nella 4ª infiltrazione' }));
+    expect(onApriInfiltrazione).toHaveBeenCalledWith('k-04');
+    expect(within(voce).queryByText(/5ª infiltrazione/)).toBeNull();
+    expect(within(screen.getByRole('button', { name: /Porta della sala/ }).closest('li')!).queryByText(/^Anche nella/)).toBeNull();
+  });
+
   it('un Racconto segnato dice «letto» nella riga, non «ottenuto»', () => {
     monta([punto({ chiave: 'p3', tipo: 'storia', nome: 'Il quadro parla', esauribile: false, carattere: 'descrittiva', stato: 'ottenuto' })]);
     fireEvent.click(screen.getByRole('button', { name: /Anche le segnate/ }));

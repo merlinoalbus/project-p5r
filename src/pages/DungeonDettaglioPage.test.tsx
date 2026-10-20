@@ -682,6 +682,17 @@ it('le schede della guida senza mappa né voce si vedono nella scheda del Palazz
   expect(righe[1]).toHaveTextContent('Forziere dei 3 Magatama');
 });
 
+// L4 §4.1: «Anche nella Nª infiltrazione» sotto una voce permanente il cui oggetto ha voci altrove apre quell'infiltrazione nella scheda
+it('§4.1: «Anche nella 3ª infiltrazione» apre il Cortile nella scheda del Palazzo', async () => {
+  const d = palazzo(true);
+  d.aree[0] = { ...d.aree[0], punti: [{ ...d.aree[0].punti[0], carattere: 'permanente', oggetto: 'p1' }] };
+  d.aree[2] = { ...d.aree[2], punti: [{ ...d.aree[0].punti[0], chiave: 'p9', nome: 'Sicura del cancello (dal cortile)', carattere: 'permanente', oggetto: 'p1' }] };
+  getDungeon.mockResolvedValue(d);
+  monta('kamoshida');
+  fireEvent.click(await screen.findByRole('button', { name: 'Anche nella 3ª infiltrazione' }));
+  await waitFor(() => expect(screen.getByTestId('indirizzo')).toHaveTextContent('?infiltrazione=k-03'));
+});
+
 // L4 §4.3: le «Schede da sistemare» si sistemano con «Crea la voce» o «Collega a una voce» (mai «Elimina»); ogni gesto chiede prima in una
 // finestra, «Annulla» non tocca niente, e dopo il gesto la scheda si rilegge
 describe('§4.3: «Crea la voce» e «Collega a una voce» dalle schede da sistemare', () => {
