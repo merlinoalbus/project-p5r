@@ -14,6 +14,7 @@ import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { t } from './traduzioniService.js';
 import { ingressoDelPalazzo } from './palazziService.js';
+import { postoDelPin } from './mappe/nomiDeiPosti.js';
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
 import { descriviEffettoAzione, normalizzaEffettiAzione, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
 import type { ConfidentePartitaDto, ElenchiAzioneDto, RiferimentoAzioneDto, StatoAzioneDto } from '../../shared/types.js';
@@ -44,8 +45,14 @@ export function statoAzione(a: AzioneClassificata, conf: Map<string, ConfidenteP
 }
 
 /** Mappa (e spillo) del luogo dell'azione: Palazzo → il suo ingresso (`ingressoDelPalazzo`: lo spillo in città, o la prima
- *  planimetria), richiesta → l'ingresso dei Mementos, negozio/Confidente → spillo del luogo in città. */
-export function mappaAzione(a: AzioneClassificata): { chiave: string; spilloId: number | null } | null {
+ *  planimetria), richiesta → l'ingresso dei Mementos, negozio/Confidente → spillo del luogo in città. Con `posto`, il nome del posto del
+ *  pin (L5, M23). */
+export function mappaAzione(a: AzioneClassificata): { chiave: string; spilloId: number | null; posto?: string | null } | null {
+  const m = mappaAzioneSenzaPosto(a);
+  return m ? { ...m, posto: postoDelPin(m.chiave, m.spilloId) } : null;
+}
+
+function mappaAzioneSenzaPosto(a: AzioneClassificata): { chiave: string; spilloId: number | null } | null {
   const r = a.riferimento;
   if (r?.tipo === 'dungeon') return ingressoDelPalazzo(r.chiave, a.giorno);
   if (r?.tipo === 'richiesta' || a.tipo === 'richiesta') return ingressoDelPalazzo('mementos', a.giorno);

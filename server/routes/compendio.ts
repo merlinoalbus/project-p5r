@@ -23,6 +23,7 @@ import { elenchiAzione } from '../services/azioniStrutturateService.js';
 import { aggiornaVoce, creaVoce, eliminaVoce, impostaInfiltrazioniVoce, rivediVoce, spostaVoce, trasferisciVoci, vocePercorso } from '../services/giornataService.js';
 import { completamento } from '../services/completamentoService.js';
 import { datiGuida } from '../services/datiGuida.js';
+import { postoDellArticolo, postoDelNegozio } from '../services/mappe/nomiDeiPosti.js';
 import { httpErrors } from '../utils/httpError.js';
 import { impostaAtterraggi, impostaFinestra, type RegolaAtterraggio } from '../services/atterraggioPalazziService.js';
 import type { DatiVoceGiornata, EsitoRevisioneVoce, OggettiGuidaDto, PersonaggiDto, SfideDto, SpostaPuntiInArea, TrasferisciVociGiornata } from '../../shared/types.js';
@@ -102,9 +103,14 @@ router.get('/oggetti-guida', (_req, res) => {
   // i dati della guida sono condivisi e congelati (`datiGuida`): le voci collegate si costruiscono nuove, non si modificano
   const per = new Map(ponte.abbinamenti.map((a) => [a.nome, a]));
   /** La voce con il suo collegamento dal crosswalk: l'articolo del catalogo se c'è, altrimenti i negozi; invariata se il nome non è abbinato. */
+  // L5 (M24): con il nome del posto (la sede del negozio), che il gesto mostra al posto di «Sulla mappa»
   const lega = <V extends { nome: string }>(v: V): V => {
     const a = per.get(v.nome);
-    return !a ? v : a.articolo ? { ...v, articolo: a.articolo } : { ...v, negozi: a.negozi };
+    if (!a) return v;
+    if (a.articolo) return { ...v, articolo: a.articolo, posto: postoDellArticolo(a.articolo) };
+    const postiNegozi: Record<string, string> = {};
+    for (const n of a.negozi) { const p = postoDelNegozio(n); if (p) postiNegozi[n] = p; }
+    return { ...v, negozi: a.negozi, postiNegozi };
   };
   res.json({ ...dati, consumabili: dati.consumabili?.map(lega), chiaveEMateriali: dati.chiaveEMateriali?.map(lega) });
 });

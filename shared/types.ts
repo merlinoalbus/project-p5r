@@ -923,8 +923,10 @@ export interface DomandeDto {
 
 export interface OggettiGuidaDto {
   /** `articolo` e `negozi` vengono dal crosswalk versionato: sono le chiavi con cui la riga arriva alla mappa. Un oggetto venduto in più posti li elenca tutti, perché sceglierne uno vorrebbe dire mandare l'utente nel posto sbagliato più spesso che in quello giusto. */
-  consumabili: Array<{ nome: string; nomeEn: string | null; categoria: 'cura' | 'sp' | 'stato' | 'battaglia' | 'esplorazione' | 'altro'; effetto: string; dove: string; prezzo: number | null; fonte: string; verificato: boolean; articolo?: string; negozi?: string[] }>;
-  chiaveEMateriali: Array<{ nome: string; nomeEn: string | null; tipo: 'chiave' | 'materiale'; uso: string; dove: string; fonte: string; verificato: boolean; articolo?: string; negozi?: string[] }>;
+  /** L5 (M24): `posto` è il nome del posto dell'articolo (la sede del negozio che lo vende), `postiNegozi` quello di ogni negozio
+   *  di `negozi` (la sede, altrimenti il nome del negozio), per il gesto che li apre. Assenti valgono come «nessun nome». */
+  consumabili: Array<{ nome: string; nomeEn: string | null; categoria: 'cura' | 'sp' | 'stato' | 'battaglia' | 'esplorazione' | 'altro'; effetto: string; dove: string; prezzo: number | null; fonte: string; verificato: boolean; articolo?: string; negozi?: string[]; posto?: string | null; postiNegozi?: Record<string, string> }>;
+  chiaveEMateriali: Array<{ nome: string; nomeEn: string | null; tipo: 'chiave' | 'materiale'; uso: string; dove: string; fonte: string; verificato: boolean; articolo?: string; negozi?: string[]; posto?: string | null; postiNegozi?: Record<string, string> }>;
   fabbricazione: { introduzione: string; sblocco: string; regole: string[]; fonte: string; ricette: Array<{ attrezzo: string; effetto: string; materiali: Array<{ nome: string; quantita: number | null }>; prodotti: number | null; sblocco: string | null; fonte: string; verificato: boolean }> };
   personalizzazioneArmi: { introduzione: string; requisiti: string; costi: string; effetti: Array<{ nome: string; effetto: string; costo: string | null }>; progressioneConfidente: unknown[]; note: string | null; fonte: string };
   abiti: { introduzione: string; elenco: Array<{ nome: string; per: string; dove: string; fonte: string }>; lavanderia: { dove: string; costo: string; regole: string[]; fonte: string } };
@@ -1138,7 +1140,8 @@ export interface AzionePercorsoDto {
   /** Stato rispetto alla partita (solo con partita): consigliata/bloccata/neutra con motivo. */
   stato: StatoAzioneDto | null;
   /** Mappa (e spillo) collegati al luogo dell'azione: Palazzo, Mementos, negozio, luogo del Confidente. */
-  mappa: { chiave: string; spilloId: number | null } | null;
+  /** `posto` (L5, M23): il nome del posto del pin — il luogo, altrimenti l'Area della planimetria — per il gesto che lo apre. */
+  mappa: { chiave: string; spilloId: number | null; posto?: string | null } | null;
   /** Per una voce collegata a un Palazzo: dove si atterra il giorno della voce, con le regole d'atterraggio della mappa di
    *  Tokyo (`atterraggioDelGiorno`, 2026-10-04); il cartellino del Palazzo porta lì. Null senza Palazzo o senza una regola che
    *  copra il giorno (allora porta alla scheda del Palazzo). Assente vale come null. */
