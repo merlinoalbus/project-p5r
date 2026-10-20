@@ -153,6 +153,15 @@ Restano (sotto, «Da fare»):
   3. da 1024 px «Indietro» e «Correggi la scheda» solo icona (con nome e suggerimento), e i chip di L4 fusi in quello «N aree · M planimetrie» o nei «Dettagli» (−40/80, soprattutto a 1024 e 1280).
   - Con 1+2+3 le stime stanno sotto la soglia in tutti e quattro i Palazzi alle tre altezze.
 
+## R3-41 a 1024×690 — chiuso da FE, da verificare (ripresa di L3, 2026-10-20)
+- A 1024 l'intestazione era 137–206 px per due motivi:
+  - la seconda riga (date 341 + Tokyo 44 + «N aree · M planimetrie · K complete» 238 + chip riassuntivo 126) non stava in 624 px;
+  - nella riga del titolo il gruppo sovrano/arcana aveva una base di 160 px, e in Kamoshida, Kaneshiro e Madarame «Dettagli dalla guida» andava a capo.
+- Correzioni (solo da 1024 a 1279 px per il chip; base del gruppo a ogni misura da 1024):
+  - il chip «N aree · M planimetrie · K complete» da 1024 a 1279 sta nei «Dettagli dalla guida», con gli altri conteggi (scelta 3 del PM); da 1280 resta nella riga;
+  - base del gruppo sovrano/arcana da 160 a 128 px (cresce comunque nello spazio libero); con LAY3-2 sovrano e arcana vanno su due righe dentro l'altezza della riga del titolo.
+- Misure (bordo superiore del visore, **tutte** le infiltrazioni con aree, partita attiva, dati locali): **1024×690: 340 in tutti gli otto Palazzi** (obiettivo ≤ 345; intestazione 106 px ovunque); 1366×657: 327 (Kamoshida, Madarame, Maruki, Shido; obiettivo ≤ 328); 1280×689: 327–328 (Kamoshida, Madarame, Maruki, Shido; obiettivo ≤ 344). Nessuna barra della pagina; a 768 e 375 nessun cambiamento.
+
 ## Dati (da segnalare ad Analisi dati)
 - `arcanaSovranoNome` di Maruki è una frase intera: «Consigliere (Councillor) — arcana speciale/esclusi…».
 - I sovrani di Madarame e Okumura hanno note fra parentesi.

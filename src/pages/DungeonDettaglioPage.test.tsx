@@ -1131,7 +1131,9 @@ describe('spunta delle aree completate (scelta dell’utente, 2026-10-04)', () =
     getDungeon.mockResolvedValue(conVuota);
     monta('kamoshida');
     await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
-    expect(screen.getByText('3 aree · 3 planimetrie · 2 complete')).toBeInTheDocument();
+    // il chip della riga sotto il titolo (da 1024 a 1279 px lo stesso testo sta anche nei «Dettagli dalla guida», R3-41)
+    const chipAree = () => screen.getByTitle(/^Le aree del Palazzo, con le loro versioni/);
+    expect(chipAree()).toHaveTextContent('3 aree · 3 planimetrie · 2 complete');
     const torre = rigaArea(1);
     expect(torre).toHaveTextContent('niente da raccogliere · completa');
     expect(torre.querySelectorAll('[data-completata]')).toHaveLength(1);
@@ -1139,7 +1141,7 @@ describe('spunta delle aree completate (scelta dell’utente, 2026-10-04)', () =
     impostaSpilloRaccolto.mockResolvedValue({});
     getDungeon.mockImplementation(() => new Promise<DungeonDettaglioDto>(() => {}));
     fireEvent.click(screen.getAllByRole('checkbox', { name: 'Forziere 2 di Cancello aperto' })[0]);
-    await waitFor(() => expect(screen.getByText('3 aree · 3 planimetrie · 3 complete')).toBeInTheDocument());
+    await waitFor(() => expect(chipAree()).toHaveTextContent('3 aree · 3 planimetrie · 3 complete'));
     cleanup();
     getDungeon.mockReset();
     getArea.mockImplementation(areaDellaPrimaLettura);

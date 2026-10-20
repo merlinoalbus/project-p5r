@@ -494,6 +494,8 @@ export function DungeonDettaglioPage() {
   };
   /** «Dettagli dalla guida»: livello consigliato, le date per esteso, le note e, nei Palazzi da 1024 px, i conteggi che lasciano la riga
    *  sotto il titolo (R3-41). `classe` dice dove si vede: sotto i 1024 in fondo alla riga dei dati, da 1024 nella riga del titolo. */
+  /** Aree, planimetrie e planimetrie complete del Palazzo, a parole (il chip della riga sotto il titolo, o dei «Dettagli» da 1024 a 1279 px). */
+  const testoAreePlanimetrie = `${areePalazzo.length} ${areePalazzo.length === 1 ? 'area' : 'aree'} · ${d?.planimetrie.length ?? 0} planimetrie${planimetrieComplete !== null ? ` · ${planimetrieComplete} complete` : ''}`;
   const dettagliGuida = (classe: string) => d && (d.livelloConsigliato || d.note || tempoInProsa.length > 0 || !memento) ? (
     <details className={`text-[12px] ${classe}`}>
       <summary className="touch cursor-pointer text-text-muted">Dettagli dalla guida</summary>
@@ -502,6 +504,8 @@ export function DungeonDettaglioPage() {
           <span className="chip">{d.aree.length} infiltrazioni</span>
           <span className="chip" title="I collezionabili sulle planimetrie (forzieri, semi, tesori).">{d.raccolta.totale} da raccogliere</span>
           <span className="chip" title="Sicure, scorciatoie, enigmi, incontri e boss della guida.">{d.punti} punti della guida</span>
+          {/* R3-41: da 1024 a 1279 px anche aree e planimetrie stanno qui (nella riga sotto il titolo la mandavano a capo) */}
+          <span className="chip xl:hidden">{testoAreePlanimetrie}</span>
         </span>}
         {/* il dettaglio del chip riassuntivo (R3-41, scelta 3): Tesoro e boss per esteso, e il perché del livello */}
         {!memento && d.completamento && d.completamento.tesoro !== null && d.completamento.boss !== null && (
@@ -695,13 +699,16 @@ export function DungeonDettaglioPage() {
                   </div>
                   {/* Da 1024 px sovrano e arcana prendono quel che resta della riga del nome, ognuno su una riga coi puntini (testo intero nel
                       suggerimento): in Madarame e Okumura il sovrano è una frase e andava a capo (intestazione da 170 a 197 px), l'arcana di
-                      Maruki la portava a 270 (L3, R3-41). Sotto i 160 px rimasti vanno a capo, interi come sotto i 1024. */}
-                  <div className="flex flex-wrap items-center gap-2 text-[13px] text-text-secondary lg:min-w-0 lg:flex-1 lg:basis-40 lg:flex-nowrap">
+                      Maruki la portava a 270 (L3, R3-41). Sotto i 128 px rimasti vanno a capo, interi come sotto i 1024 (erano 160: a 1024 in
+                      Kamoshida, Kaneshiro e Madarame mandavano a capo «Dettagli dalla guida», intestazione da 106 a 154 px). */}
+                  <div className="flex flex-wrap items-center gap-2 text-[13px] text-text-secondary lg:min-w-0 lg:flex-1 lg:basis-32 lg:gap-x-2 lg:gap-y-0">
                     {/* nei Memento, sul telefono, il sovrano sta nella piega dei dettagli: qui andava a capo su due righe */}
-                    {/* LAY3-2: quando lo spazio non basta si accorcia prima l'arcana (si restringe mille volte più in fretta, fino a 3rem coi
-                        puntini) e il nome del sovrano resta leggibile; solo dopo tocca al sovrano */}
-                    {d.sovrano && <span className={`break-words lg:min-w-0 lg:truncate lg:[flex-shrink:1] ${memento ? 'max-md:hidden' : ''}`} title={d.sovrano}>{d.sovrano}</span>}
-                    {d.arcanaSovranoNome && <span className="chip chip--attivo lg:block lg:min-w-[3rem] lg:max-w-[18rem] lg:truncate lg:[flex-shrink:1000]" title={d.arcanaSovranoNome}>{d.arcanaSovranoNome}</span>}
+                    {/* LAY3-2: se sovrano e arcana non stanno in una riga, l'arcana va sulla seconda, sotto il sovrano: le due righe (18 + 22 px)
+                        stanno nell'altezza della riga del titolo (44 px), quindi l'intestazione non cresce. Così il nome del sovrano e le parole
+                        brevi («Avarizia» di Okumura) si leggono intere; si accorcia coi puntini solo un testo più largo di tutto lo spazio (le
+                        frasi lunghe del sovrano di Okumura e Madarame, l'arcana di Maruki), intero nel suggerimento. */}
+                    {d.sovrano && <span className={`break-words lg:min-w-0 lg:max-w-full lg:truncate ${memento ? 'max-md:hidden' : ''}`} title={d.sovrano}>{d.sovrano}</span>}
+                    {d.arcanaSovranoNome && <span className="chip chip--attivo lg:block lg:min-w-0 lg:max-w-[min(100%,18rem)] lg:truncate" title={d.arcanaSovranoNome}>{d.arcanaSovranoNome}</span>}
                     {memento && suggerimentoDiffuso && <span className="chip chip--attivo" title={sugg.motivo('dungeon', d.chiave) ?? undefined}>Suggerito oggi</span>}
                   </div>
                   {/* R3-41: da 1024 px nei Palazzi i «Dettagli dalla guida» chiudono la riga del titolo (aperti vanno a capo, sotto) */}
@@ -722,8 +729,9 @@ export function DungeonDettaglioPage() {
                       riga sotto il titolo tiene finestra, atterraggio, aree e planimetrie, percentuale) */}
                   <span className={`chip ${memento ? '' : 'lg:hidden'}`}>{d.aree.length} {memento ? 'dedali' : 'infiltrazioni'}</span>
                   <span className={`chip ${memento ? '' : 'lg:hidden'}`} title={memento ? 'Gli elementi delle aree dei dedali (Richieste, timbri, voci di Trama): sono questi a fare la percentuale; le Persona no.' : 'I collezionabili sulle planimetrie (forzieri, semi, tesori).'}>{d.raccolta.totale} {memento ? 'elementi' : 'da raccogliere'}</span>
-                  {!memento && <span className="chip" title="Le aree del Palazzo, con le loro versioni: si ordinano e si correggono dall’elenco delle aree.">
-                    {areePalazzo.length} {areePalazzo.length === 1 ? 'area' : 'aree'} · {d.planimetrie.length} planimetrie{planimetrieComplete !== null ? ` · ${planimetrieComplete} complete` : ''}
+                  {/* R3-41: da 1024 a 1279 px questo chip sta nei «Dettagli dalla guida»: qui mandava a capo la riga (intestazione da 106 a 137 px) */}
+                  {!memento && <span className="chip lg:max-xl:hidden" title="Le aree del Palazzo, con le loro versioni: si ordinano e si correggono dall’elenco delle aree.">
+                    {testoAreePlanimetrie}
                   </span>}
                   {largo && !memento
                     // R3-41 (scelta 3 del PM): da 1024 px livello, Tesoro, Boss e «da verificare» in un solo chip riassuntivo; Tesoro e boss
