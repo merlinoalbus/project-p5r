@@ -19,7 +19,7 @@ import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'rea
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
-import { aggiornaCopiaPezzoMappa, aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, creaCopiaPezzoMappa, creaPezzoMappa, eliminaCopiaPezzoMappa, eliminaPezzoMappa, isApiError, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, collegaPinAlPunto, creaMappa, creaPassaggio, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, getVociCollegabili, importaMappe, scaricaPiantaQuartiere } from '../services/api';
+import { aggiornaCopiaPezzoMappa, aggiornaElementoCatalogo, aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, getElementoCatalogo, creaCopiaPezzoMappa, creaPezzoMappa, eliminaCopiaPezzoMappa, eliminaPezzoMappa, isApiError, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, collegaPinAlPunto, creaMappa, creaPassaggio, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, getVociCollegabili, importaMappe, scaricaPiantaQuartiere } from '../services/api';
 import { notifica } from '../stores/notificationStore';
 import { usePartitaStore } from '../stores/partitaStore';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida';
@@ -655,6 +655,23 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
   const luogo = s.dettaglio?.luogo?.casa ? s.dettaglio.luogo : null;
   const descrizioneIniziale = luogo ? s.notaPin ?? '' : s.descrizione;
   const [descrizione, setDescrizione] = useState(descrizioneIniziale);
+  const [spostando, setSpostando] = useState(false);
+  /** «Sposta nel luogo»: aggiunge la nota del pin alle note del luogo (correzione del catalogo) e svuota il campo; lo spillo si salva poi. */
+  const spostaNelLuogo = async () => {
+    if (!luogo || !descrizione.trim()) return;
+    setSpostando(true);
+    try {
+      const e = await getElementoCatalogo('luogo', luogo.chiave);
+      const prima = typeof e.dati.note === 'string' ? e.dati.note.trim() : '';
+      await aggiornaElementoCatalogo('luogo', luogo.chiave, { note: prima ? `${prima} · ${descrizione.trim()}` : descrizione.trim() });
+      setDescrizione('');
+      notifica('success', `Nota aggiunta alle note di «${luogo.nome}»: salva lo spillo per toglierla dal pin.`);
+    } catch (err) {
+      notifica('error', err instanceof Error ? err.message : 'La nota non è stata spostata.');
+    } finally {
+      setSpostando(false);
+    }
+  };
   const [riferimento, setRiferimento] = useState<{ tipo: TipoRiferimento; chiave: string } | null>(s.riferimento);
   const [condizioni, setCondizioni] = useState<RequisitoSpillo[]>(() => condizioniNude(s));
   // gli spostamenti di prima avevano solo il riferimento alla mappa: qui è la stessa cosa di una destinazione senza spillo
@@ -713,7 +730,11 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
         {/* un pin di città con uno stato suo (il Confidente, «incontrato»: 2026-10-03) */}
         {categoria === 'citta' && statoDelTipo(tipo) && <p className="m-0 text-[12px] text-text-muted">Ha uno stato da segnare nella partita («{statoDelTipo(tipo)}»); non conta nel completamento della mappa.</p>}
         <label className="editor-mappa__campo">{luogo ? 'Nota del pin' : 'Descrizione'}<textarea className="form-input" rows={3} value={descrizione} onChange={(e) => setDescrizione(e.target.value)} maxLength={LIMITI_GUIDA.spillo.descrizione} /></label>
-        {luogo && descrizione && <button type="button" className="btn btn-ghost btn-sm touch self-start" disabled={occupato} onClick={() => setDescrizione('')}>Togli la nota</button>}
+        {luogo && descrizione && <div className="flex flex-wrap gap-1.5">
+          <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato || spostando} onClick={() => setDescrizione('')}>Togli la nota</button>
+          {/* L5 (M §4.4): la nota va nelle note del luogo, poi il campo si svuota; salvando lo spillo la nota esce dal pin (due gesti espliciti) */}
+          <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato || spostando} onClick={() => void spostaNelLuogo()}>Sposta nel luogo</button>
+        </div>}
 
         {categoria === 'spostamento' && <DestinazioneSpostamento valore={destinazione} mappaCorrente={mappa.chiave} albero={albero} disabilitato={occupato} onCambia={setDestinazione} />}
         {categoria === 'citta' && <CollegamentoCitta valore={riferimento} disabilitato={occupato} onCambia={setRiferimento} />}
