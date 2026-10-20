@@ -17,7 +17,7 @@
   ],
   "p5s": {
     "url": "https://p5s.nasmerlinoalbus.cloud/",
-    "stato": "online; newreview pubblicato fino a 825ae8c0 (pipeline #60 riuscita); DTO, migrazione 120, API, editor FE dello sblocco quartieri e descrizioni OpenAPI B6 pubblicati; p5s osservato con 301 mappe/767 spilli; verifica metro-diario e prova utente aperte"
+    "stato": "online; newreview pubblicato fino a 4a61b0bc (pipeline #61 riuscita); API p5s coerente per Shibuya, DTO, migrazione 120, API, editor FE dello sblocco quartieri e descrizioni OpenAPI B6 pubblicati; p5s osservato con 301 mappe/767 spilli; nuova scheda FE anonima rimasta su Caricamento; verifica metro-diario e prova utente aperte"
   },
   "lotti": [
     {
