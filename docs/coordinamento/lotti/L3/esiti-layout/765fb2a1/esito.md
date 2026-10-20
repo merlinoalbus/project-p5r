@@ -85,6 +85,9 @@ Nessun titolo d'area troncato in nessuna delle 532 misure. Sono le 76 infiltrazi
 | L3-L11 Memento | verde: 589/589, 621/621, 622/622 con intestazione 106 da 1024 in su; nessun orizzontale |
 
 ## 6. Difetti nuovi
+**Correzione del 2026-10-20, dopo la misura su 7562f6ac.** Il controllo «nessun testo troncato» della scheda in questo esito copriva solo
+l'intestazione e i titoli d'area. Nei selettori compatti il valore chiuso si accorcia già qui: è LAY3-7, vedi `../7562f6ac/esito.md` §5–6.
+
 - **LAY3-3 (media)**: a 375×812 il visore della scheda di un Palazzo è alto 333 px. L3-L07 e R3-40 vogliono `min(64dvh, 560px)`, cioè 520
   px, e il visore comincia sotto la prima schermata (827–837 px). Schermata: `LAY3-3-kamoshida-375x812.jpg`.
 - **LAY3-4 (bassa)**: nell'intestazione, da 1024 px in su, i chip delle date hanno `max-width` di 97,5 px. Dove il valore è una frase si

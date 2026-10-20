@@ -86,4 +86,8 @@ Stato preparato dal Collaudo (foto 11:55:37Z): «Museo 2P - Livello 3» tolta da
 - Misure grezze: `L3-L10-misure-grezze.json`.
 
 ## Difetti
+**Correzione del 2026-10-20, dopo la misura su 7562f6ac.** Il controllo «nessun testo troncato» di questo esito copriva solo l'intestazione e
+i titoli d'area. Nei selettori compatti (infiltrazione, versioni, «Aree · N») il valore chiuso si accorcia già qui: è LAY3-7, vedi
+`../7562f6ac/esito.md` §5–6.
+
 Nessun difetto nuovo. LAY3-3 e LAY3-4 sono «verificato (layout, 48d7a958)».
