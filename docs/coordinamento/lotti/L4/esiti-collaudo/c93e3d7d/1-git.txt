@@ -1,0 +1,54 @@
+### 2026-10-20T17:44:02Z
+### git branch --show-current
+newreview-l4
+### git rev-parse HEAD
+c93e3d7d458bdabc7b179fa9799afb9271adbe8b
+### newreview-l3 invariato
+91ef612892f647201c84f8362a0c8eca94d5e0c7
+### git status --porcelain
+EXIT=0
+### git log --format='%H %an %s' 91ef6128..HEAD
+c93e3d7d458bdabc7b179fa9799afb9271adbe8b merlinoalbus docs: documenti allineati a newreview (2e5c64e8) per il rilascio di L4
+24bf025a04c9f4652bde2fc63c14fe1f2cbb0123 merlinoalbus feat(L4): §4.1, «Anche nella Nª infiltrazione» sotto le voci dell'oggetto permanente
+c0bbce1c54cc508aa1e29ad50cedc3083a7e0284 merlinoalbus feat(L4): §4.1, «Esaurito» come chip proprio e riga più tenue di «ottenuto»
+f6a6d13ed53cca6438d0022975d4f11b61e1e6eb merlinoalbus feat(L4): §4.1, chip del carattere della voce e selettore «Carattere» con «Ripristina»
+c2c6d0d207d0de9b4313cc1a901aa15473d812cb merlinoalbus feat(L4): §4.3, «Crea la voce» e «Collega a una voce» nelle schede da sistemare
+672b184d77a145983f844f19f13230f9a64e5a8b merlinoalbus feat(L4): §4.2, selettore del contesto nel popup del pin
+5cb9801875b8964895980b99c8e9026874bd34a7 merlinoalbus feat(L4): §8.6, conferma prima di riaprire un Enigma risolto
+c438ff2758a7fb9ad579a1d4d6ee02a2c86f6043 merlinoalbus feat(L4): §8.11, contatore k/N sulla voce, «Riapri» con «Riapre anche: …»
+### file fuori da docs/ rispetto a 91ef6128
+ src/components/guida/GuidaDellArea.test.tsx       | 184 ++++++++++++++++++++++
+ src/components/guida/GuidaDellArea.tsx            | 104 ++++++++++--
+ src/components/guida/RaccoltaPlanimetrie.test.tsx |  39 ++++-
+ src/components/guida/RaccoltaPlanimetrie.tsx      |   6 +-
+ src/components/guida/SchedeDaSistemare.tsx        | 100 ++++++++++++
+ src/components/mappe/MappaIncorporata.test.tsx    |  52 +++++-
+ src/components/mappe/MappaIncorporata.tsx         |  26 ++-
+ src/components/mappe/VisoreMappa.test.tsx         |  32 ++++
+ src/components/mappe/VisoreMappa.tsx              |  23 ++-
+ src/hooks/useMappaPartita.test.tsx                |  31 ++++
+ src/hooks/useMappaPartita.ts                      |  23 ++-
+ src/pages/DungeonDettaglioPage.test.tsx           | 167 +++++++++++++++++++-
+ src/pages/DungeonDettaglioPage.tsx                |  67 +++++---
+ src/services/api/compendio.ts                     |  10 +-
+ src/services/api/mappe.ts                         |   4 +-
+ src/utils/gestiVoce.ts                            |  51 ++++++
+ 16 files changed, 866 insertions(+), 53 deletions(-)
+### fuori da docs/ coincide con l'unione del codice dei 7 originali?
+sì, stessi file
+### codice della linea uguale al codice di e058918c sui file toccati?
+sì, identico byte per byte
+### migrazioni (vuoto atteso)
+### file di 42b34243 toccati (vuoto atteso)
+### docs/ uguale a 2e5c64e8
+sì
+### immagini, indirizzi, robertomirabella in docs/ (vuoti attesi)
+0
+0
+0
+### grep 2026-10-21 su src/ server/ shared/
+EXIT=1 (1 = nessuna)
+### alberi
+040000 tree 093595e479429251391f718d540cf5a27f4fb219	server
+040000 tree affd664c3dafb1216db58c44c73ddd8ab8dda851	shared
+040000 tree 5ad6af7f9f7a3622a21d0d7d7076dbe4481b418a	src
