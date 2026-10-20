@@ -69,11 +69,16 @@ export function AlberoLuoghi({ mappe, genitore = null, espandibile = false }: { 
         if (capo.chiave !== m.chiave) return null;
         const pin = membri.reduce((n, v) => n + v.numeroSpilli, 0);
         return <li key={`area:${m.area.chiave}`}>
-          <Link className="touch flex items-center gap-2 py-1 no-underline text-text" to={capo.casa || `/guida/mappe/${encodeURIComponent(capo.chiave)}`}>
-            <IconaAzione chiave="mappa" dimensione={18} />
-            <span>{m.area.nome}</span>
-            {membri.length > 1 && <span className="text-[11px] text-text-muted">{membri.length} versioni · {pin} pin</span>}
-          </Link>
+          {/* R1 (validatore L2): l'area in attesa della scelta dell'utente (lo staff di Tokyo) porta il segno «Da verificare» anche qui,
+              accanto al nome e con l'aspetto della pagina Area e delle Aree della città; dove non c'è posto va a capo */}
+          <div className="flex flex-wrap items-center gap-x-2">
+            <Link className="touch flex min-w-0 items-center gap-2 py-1 no-underline text-text" to={capo.casa || `/guida/mappe/${encodeURIComponent(capo.chiave)}`}>
+              <IconaAzione chiave="mappa" dimensione={18} />
+              <span>{m.area.nome}</span>
+              {membri.length > 1 && <span className="text-[11px] text-text-muted">{membri.length} versioni · {pin} pin</span>}
+            </Link>
+            {m.area.daVerificare && <span className="chip chip--attivo text-[11px]" title="Nessuna fonte colloca questa area: decidi se tenerla o rimuoverla">Da verificare</span>}
+          </div>
           {membri.map(v => <Fragment key={v.chiave}>{discendenti(v)}</Fragment>)}
         </li>;
       }

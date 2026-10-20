@@ -47,6 +47,17 @@ it('FUN2-7: aperto Tokyo, il gruppo di un quartiere si chiama «Aree di …» e 
   render(<MemoryRouter><AlberoLuoghi genitore="tokyo" espandibile mappe={[{...m('tokyo',null,'Tokyo'),tipo:'citta'},quartiere,{...m('vicoli','yongen-jaya','Vicoli'),area:area('vicoli','Vicoli',0)},...covo]}/></MemoryRouter>);
   expect(screen.getByText('Aree di Yongen-Jaya (2)')).toBeInTheDocument();
 });
+// R1 (validatore L2, giro 1): l'area dello staff di Tokyo, in attesa della scelta dell'utente, porta il segno «Da verificare» anche
+// nell'indice, con lo stesso aspetto della pagina Area e delle Aree della città; le altre aree no
+it('R1: nell’indice un’area da verificare porta il segno «Da verificare», come nella pagina Area',()=>{
+  const area=(slug:string,nome:string,daVerificare:boolean)=>({chiave:`citta/tokyo/${slug}`,contenitore:{tipo:'citta' as const,chiave:'tokyo',nome:'Tokyo'},slug,nome,versioneEtichetta:null,versioneOrdine:0,predefinita:true,casa:`/guida/citta/tokyo/${slug}`,daVerificare});
+  render(<MemoryRouter><AlberoLuoghi genitore="tokyo" mappe={[{...m('tokyo',null,'Tokyo'),tipo:'citta'},{...m('staff','tokyo','Area riservata allo staff'),area:area('staff','Area riservata allo staff',true)},{...m('torre','tokyo','Torre'),area:area('torre','Torre',false)}]}/></MemoryRouter>);
+  const staff=screen.getByRole('link',{name:/^Area riservata allo staff/});
+  const segno=within(staff.parentElement!).getByText('Da verificare');
+  expect(segno).toHaveClass('chip','chip--attivo','text-[11px]');
+  expect(segno).toHaveAttribute('title','Nessuna fonte colloca questa area: decidi se tenerla o rimuoverla');
+  expect(within(screen.getByRole('link',{name:/^Torre/}).parentElement!).queryByText('Da verificare')).toBeNull();
+});
 it('un vecchio URL editoriale apre la sezione del palazzo e non carica una planimetria falsa',async()=>{
   api.risolviMappa.mockResolvedValue({tipo:'guida',area:'castello/biblioteca',dungeon:'castello',mappaPalazzo:'palazzo',nome:'Biblioteca'});
   const child=vi.fn(()=> <div>Planimetria falsa</div>);
