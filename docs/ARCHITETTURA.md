@@ -1660,3 +1660,34 @@ Nessuna chiave, rotta o codice d'errore è cambiato.
   cherry-pick dai commit di sviluppo su `newreview` (stesso patch-id). Dopo l'approvazione si pubblica `newreview-l2` su `newreview` e la linea di
   rilascio si ricongiunge a quella di sviluppo con un merge di `newreview-l2` in `newreview`: il codice di L2 è lo stesso sui due rami (i
   cherry-pick hanno lo stesso patch-id), mentre `newreview` contiene in più L3 e L4 e `newreview-l2` i commit di soli documenti del collaudo.
+
+### L3 — Palazzi: aree e infiltrazioni
+- **Dati.**
+  - Migrazione 110 `aree_dei_palazzi`: le «stanze» dei Palazzi diventano righe di `area` con contenitore `dungeon`, e le loro planimetrie ne diventano le versioni. Sono 117 aree nei 9 Palazzi, Iweleth compreso.
+  - Tabelle nuove:
+    - `infiltrazione_area`: legame molti a molti fra infiltrazione (`dungeon_area`) e Area, ordinato, con la planimetria iniziale dell'infiltrazione in quell'area;
+    - `voce_infiltrazione`: l'insieme ordinato delle infiltrazioni di una voce del diario, scritto solo dalla conferma dell'utente;
+    - `proposta_infiltrazione_voce`: le proposte da confermare, ricavate dalla scheda G-022.
+  - Le fonti vecchie del legame (`mappa_entita` di tipo area, `gruppo_immagini_json` dei Palazzi) non le legge più nessuna vista. I dedali dei Memento non cambiano.
+- **Server.**
+  - `server/services/palazziService.ts`: aree del Palazzo, versioni, legami, aggiunta di area, planimetria e infiltrazione, eliminazione nel cestino.
+  - `server/services/mappe/legamiInfiltrazioni.ts`: legami e proposte del diario.
+  - `casaMappa.ts`: **casa unica** dei Palazzi, `/guida/dungeon/<k>/area/<slug>` con `?planimetria=` solo quando non è la predefinita. Gli indirizzi `/guida/mappe/<k>` dei Palazzi vi portano con un redirect; l'interruttore `CASA_SCHEDA_PALAZZI` è stato tolto.
+  - `mappeService.aggiornaMappa`: risponde 409 `usa-aggiungi-area` anche spostando una mappa sotto un Palazzo (AP3-3).
+  - Il limite del corpo della sola `POST /api/mappe/importa` sale a 512 MB, anche in `nginx.conf` (O3-1).
+  - Conteggi dell'indice: `gruppoConteggioSpillo` in `shared/spilli.ts` (contenuto, passaggi con categoria «spostamento» e porte, note); il campo `conteggiPin` nell'albero e `GET /api/mappe/albero/conteggi` (E2).
+- **Interfaccia.**
+  - `DungeonDettaglioPage`, rotta `/guida/dungeon/:chiave/area/:slug`:
+    - le aree a sinistra da 1280 px (`AreePalazzo`), in fila da 768 e nel foglio sotto;
+    - al centro l'infiltrazione, l'area con le sue versioni (`VersioniArea` / `SelettoreVersioni`) e il visore;
+    - a destra «Da raccogliere», «Da verificare», «Schede da sistemare» e la guida dell'infiltrazione.
+  - Arrivando dalla casa di un'Area si apre la sua predefinita; la planimetria iniziale dell'infiltrazione vale solo con `?infiltrazione=` (NR3-4).
+  - Il visore della scheda non mostra le planimetrie vicine e tiene i passaggi nella scheda, conservando l'infiltrazione (AP3-2).
+  - **Misure:**
+    - visore entro metà altezza da 1024 px in su (R3-41) e alto `min(64dvh, 560px)` sotto (LAY3-3);
+    - intestazione al massimo al 30% della schermata a ogni misura (LAY3-5): sotto i 1024 è compatta, con i conteggi e le frasi lunghe nei «Dettagli dalla guida».
+  - Selettori su una riga da 1024 px, col nome intero al tocco (LAY3-7).
+  - Da 1280 px le aree toccate dall'infiltrazione stanno evidenziate nella colonna delle aree, con una legenda, al posto della striscia (UX3-13).
+  - Diario: il campo «Infiltrazione» nella voce (`InfiltrazioniVoce`, `PropostaDallaVoce`), con il collegamento che apre l'infiltrazione proposta o confermata.
+  - Indice delle Mappe: la parola «pin», le carte col numero dei pin di contenuto nel riquadro e «più N passaggi e N note» nell'intestazione; le planimetrie con un nome vero restano nella griglia anche senza pin (UX3-8).
+- **Linea di rilascio:** `newreview-l3`, dal 2026-10-20, con la stessa regola di L2: cherry-pick con patch-id uguali, poi push su `newreview` dopo l'approvazione e merge nella linea di sviluppo. L'integrazione «Guida nel visore» (migrazione 114, `planimetriaDellaVoce.ts`) sta solo sulla linea di sviluppo, fuori da questo rilascio.
