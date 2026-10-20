@@ -115,8 +115,13 @@ export function QuartierePage() {
   // Se la mappa ha dei pezzi ritagliati dall'immagine che mostra (L1, F5: 409 `mappa-con-pezzi`), lo scarico automatico non la
   // sostituisce e non è un errore: la mappa ha già un'immagine con il lavoro dell'utente sopra. Sostituirla resta una scelta
   // esplicita, dall'editor, con la conferma.
+  // Scaricata la pianta, il quartiere si rilegge (L1, rilievo G6 del validatore): il visore prende l'immagine nuova dalla sua
+  // `versione`, e senza rileggere l'intestazione restava sull'illustrazione di prima — due immagini diverse dello stesso quartiere
+  // fino a una ricarica. Rilettura silenziosa (la pagina resta a schermo); col quartiere che ora ha la sua immagine non si riscarica.
   const download = useCarica(() => (q && !q.ingresso && !q.mappa && q.pianta
-    ? scaricaPiantaQuartiere(q.chiave).catch((err: unknown) => { if (isApiError(err, 'mappa-con-pezzi')) return null; throw err; })
+    ? scaricaPiantaQuartiere(q.chiave)
+      .then((esito) => { void dati.ricarica(); return esito; })
+      .catch((err: unknown) => { if (isApiError(err, 'mappa-con-pezzi')) return null; throw err; })
     : Promise.resolve(null)), [q?.chiave, q?.mappa, q?.pianta?.url, q?.ingresso]);
   const scaricata = !!q && !!download.dati && download.dati.quartiere === q.chiave;
   // I tipi presenti, nell'ordine del catalogo (shared/tipiLuogo), non in quello in cui capitano.

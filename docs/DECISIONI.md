@@ -2110,13 +2110,14 @@ Lotto L1 del piano di razionalizzazione (IA, su mandato U). Due regole, ognuna i
 
 - **Quale immagine.** L'immagine caricata nell'istanza vince in ogni vista (visore, indice, miniature delle versioni, ingresso del
   quartiere, editor), con l'URL versionato dalla data di caricamento; senza, l'asset dichiarato della mappa; senza nemmeno quello,
-  l'icona della vista. Lo stemma di Tokyo e del Covo nell'indice è solo il ripiego dove non c'è un'immagine caricata (prima copriva
-  quella di Tokyo). Server `server/services/mappe/immagineMappa.ts`, interfaccia `src/hooks/useImmagineMappa.ts`.
+  l'icona della vista. Lo stemma di Tokyo e del Covo nell'indice è solo il ripiego dove la mappa non ha **né un'immagine caricata né un
+  asset dichiarato** (prima copriva l'immagine caricata di Tokyo). Server `server/services/mappe/immagineMappa.ts`, interfaccia
+  `src/hooks/useImmagineMappa.ts`.
 - **Quale ruolo.** Si deduce dal posto nella gerarchia (`shared/immaginiMappa.ts`): radice di un Palazzo o dei Memento → stemma;
   senza immagine → «nessuna»; città e quartieri → illustrazione; tutto il resto → planimetria. Lo riapplica ogni strada che scrive
   mappe o immagini, e la migrazione 107 una volta a tutte.
 
-**Decisione dell'utente (2026-10-21), dopo il primo giro del validatore: «Illustrazione anche nelle schede».** Le schede dei
+**Decisione dell'utente (2026-10-20), dopo il primo giro del validatore: «Illustrazione anche nelle schede».** Le schede dei
 quartieri (La città) e le intestazioni del quartiere e del Palazzo mostrano l'illustrazione della mappa del posto (`IllustrazioneDto`
 nei DTO: la caricata, poi l'asset dichiarato; per le radici dei Palazzi solo la caricata, perché il loro asset è lo stemma), piena e al
 100% nel suo riquadro (regola dell'utente sulle figure: mai sfondi velati), con la sagoma o lo stemma sopra come segno; la **metro
@@ -2127,6 +2128,8 @@ Scelte del Project manager nello stesso lotto (da confermare):
   preferenza «grafica predefinita», come prima di L1; la preferenza decide solo il ripiego sull'asset delle illustrazioni e delle mappe.
 - **Intestazione del Palazzo compatta** (UX-1): da 1024 a 1279 px solo lo stemma da 48 come prima; da 1280 l'illustrazione con lo
   stemma da 40, in colonna sopra l'anello. Su schermi da circa 1700 px in su l'intestazione cresce di 19 px, senza barra di pagina.
+  L'eccezione della fascia 1024–1279 alla decisione «Illustrazione anche nelle schede» è **confermata dall'utente** il 2026-10-21
+  (domanda: «va bene o vuoi l'illustrazione anche lì?» — risposta: «Per la prima dico sì»).
 - **Proporzione delle illustrazioni** (LAY-1): il riquadro prende la proporzione dell'immagine fra 4:3 e 16:9, mai ritagli oltre il 5%.
 - **Miniature** (rilievo di Test UX: le schede de La città scaricavano ~40 MB): rientrano in L1. Le immagini si servono ridotte in WebP
   (`?l=` 160/320/640/1024) generate con **sharp** (dipendenza nativa, provata nella build Docker; NOTICE e `licenze/` con la LGPL-3.0
