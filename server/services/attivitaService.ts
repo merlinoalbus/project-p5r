@@ -241,6 +241,13 @@ export function quizVoceDto(chiave: string, a: AttivitaConQuiz, giorno: string |
 }
 
 /** Attività, lavori, libri e film; con partita, libri letti e film visti. Le righe nascoste non compaiono. */
+/** Le attività (lavori compresi) che si svolgono in un luogo (`sede_chiave`), non nascoste, nell'ordine; con la partita la disponibilità (L5, pagina del luogo). */
+export function attivitaDellaSede(sede: string, partitaId?: number): AttivitaDto[] {
+  const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
+  const sedi = nomiLuoghi();
+  return (prepared('SELECT * FROM attivita WHERE nascosto = 0 AND sede_chiave = ? ORDER BY ordine').all(sede) as RigaAttivita[]).map((r) => attivitaDto(r, sedi, st));
+}
+
 export function attivitaTutte(partitaId?: number): AttivitaTutteDto {
   const stato = letturePartita(partitaId);
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);

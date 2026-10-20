@@ -13,6 +13,8 @@ import { aggiornaArea, aggiornaAreaDedalo, aggiornaDungeon, ripristinaDungeon, a
 import { bodyArea, bodyAreaDedalo, bodyAreePalazzoInfiltrazione, bodyAtterraggi, bodyCollocaRichiesta, bodyDungeon, bodyFinestraDungeon, bodyNuovaArea, bodyNuovaAreaDedalo, bodyNuovaRichiesta, bodyNuovoPunto, bodyPunto, bodyRequisitoRichiesta, bodyRichiesta, bodySpostaPunto, bodySpostaPuntiInArea, paramsChiaveGuida, paramsPinDelPunto, paramsRequisitoConfidente, querySchedaDungeon, bodyCreaVoceDallaScheda, bodyCollegaSchedaAllaVoce } from '../schemas/guidaDungeon.js';
 import { correggiRequisitoRichiesta, togliRequisitoRichiesta } from '../services/requisitiConfidentiService.js';
 import { dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuartiere } from '../services/cittaService.js';
+import { dettaglioLuogo } from '../services/luoghiService.js';
+import { paramsLuogo, queryLuogo } from '../schemas/luoghi.js';
 import { attivitaTutte, filmDvdTutti, videogiochiTutti, libriTutti } from '../services/attivitaService.js';
 import { cruciverba } from '../services/cruciverbaService.js';
 import { dettaglioNegozio, elencaNegozi, ricercaArticoli } from '../services/negoziService.js';
@@ -178,6 +180,10 @@ router.get('/articoli', validate({ query: queryArticoli }), (req, res) => {
 /** Tutti i luoghi della città come voci da scegliere (la sede di un negozio o di un'attività). */
 router.get('/luoghi', (_req, res) => {
   res.json(elencaLuoghi());
+});
+/** L5: la pagina di un luogo, con presenza, orari, negozi della sede (listini), attività, Confidenti e pin. */
+router.get('/luoghi/:quartiere/:luogo', validate({ params: paramsLuogo, query: queryLuogo }), (req, res) => {
+  res.json(dettaglioLuogo(String(req.params.quartiere), String(req.params.luogo), (req.query as unknown as { partita?: number }).partita));
 });
 router.get('/cruciverba', validate({ query: queryDomande }), (req, res) => {
   res.json(cruciverba((req.query as unknown as { partita?: number }).partita));

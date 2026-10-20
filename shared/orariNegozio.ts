@@ -49,6 +49,13 @@ export function orariDelLuogo(json: string | null | undefined): OrariDelLuogo {
 /** Il testo della regola dell'app (R5-12c): si dice sempre che non è un dato della guida. */
 export const TESTO_REGOLA_APP = 'Giorno e sera · regola dell’app: la guida non indica orari';
 
+/** Gli orari di un luogo in parole (L5): la regola dell'app detta come tale; un orario della guida senza limiti è «Giorno e sera». */
+export function descriviOrariDelLuogo(o: OrariDelLuogo): string {
+  if (o.origine === 'regola-app') return TESTO_REGOLA_APP;
+  if (o.giorni.length === 0 && o.fasce.length === 0 && !o.chiusoConPioggia) return o.nota ? `Giorno e sera (${o.nota})` : 'Giorno e sera';
+  return descriviOrari(o);
+}
+
 const GIORNI: readonly string[] = GIORNI_SETTIMANA.map((g) => g.chiave);
 const FASCE: readonly string[] = FASCE_ORARIO.map((f) => f.chiave);
 

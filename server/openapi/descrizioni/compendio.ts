@@ -202,6 +202,12 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     descrizione: 'I luoghi non nascosti, in ordine di quartiere e poi di luogo, con tipo e quartiere: sono le opzioni per la sede di un negozio o di un\'attività.',
     risposta: 'Elenco di `LuogoOpzioneDto`',
   },
+  'GET /api/compendio/luoghi/:quartiere/:luogo': {
+    sommario: 'La pagina di un luogo (L5): presenza, orari, negozi della sede, attività, Confidenti, pin',
+    descrizione: 'Il luogo è la fonte (L5 «Luoghi, negozi, orari»). `orari` sono quelli del luogo, o la regola dell\'app «giorno e sera» dove la guida non ne dà (`origine: \'regola-app\'`); `presenza` dice sbloccato e aperto adesso con la funzione unica (sblocco dalle condizioni, orari contro giorno, fascia e meteo della partita; null senza partita). `listini` ha un listino per ogni negozio della sede, con articoli e acquisti della partita; `attivitaDettaglio` le attività che si svolgono qui; `confidentiDettaglio` i Confidenti con arcano e pagina; `pins` tutti i pin del luogo con la casa dell\'area aperta sullo spillo e la nota propria del pin se diversa; `area` l\'Area di L2 (null se «da collocare»).',
+    risposta: '`LuogoDettaglioDto`',
+    errori: [[404, 'luogo-non-trovato'], [404, 'partita-non-trovata']],
+  },
   'GET /api/compendio/citta': {
     sommario: 'Elenco dei quartieri di Tokyo',
     descrizione: 'I quartieri in ordine (escluso l\'ingresso dei Memento, che non è un quartiere) con mappa, punto d\'ingresso, `illustrazione` (l\'immagine della mappa del quartiere con la regola unica di L1: `immagineUrl` della caricata, versionato, poi `asset` dichiarato; la stessa del visore e dell\'indice) e conteggi dei luoghi non nascosti e verificati. Con `?partita=` ogni quartiere dice se è già nel mondo: le regole di sblocco non sono solo date, e solo l\'esito «bloccato» lo nasconde (un dubbio no), con il motivo in `bloccoMotivo`; senza partita sono tutti disponibili.',
