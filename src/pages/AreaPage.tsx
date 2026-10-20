@@ -117,6 +117,9 @@ function Contenuto({ area: a, indirizzoContenitore, nomeContenitore, ricarica }:
   };
   /** Il pin chiesto dall'elenco «Luoghi qui»: un comando di chi guarda, che mostra il pin anche se adesso non è disponibile (UX2-2). */
   const [pinChiesto, setPinChiesto] = useState<number | null>(null);
+  // L5 (F3): «Mostra anche i non ancora disponibili» è uno solo per il visore e per «Luoghi qui» (i luoghi chiusi spariscono da tutti e due)
+  const [nonDisponibili, setNonDisponibili] = useState(false);
+  const interruttore = useMemo(() => ({ valore: nonDisponibili, onCambia: setNonDisponibili }), [nonDisponibili]);
   /** Seleziona un pin nel visore (dall'elenco «Luoghi qui»): lo spillo va nell'indirizzo e il visore lo centra. */
   const selezionaPin = (id: number) => {
     setPinChiesto(id); const q = new URLSearchParams(params); q.set('spillo', String(id)); setParams(q, { replace: true });
@@ -212,11 +215,11 @@ function Contenuto({ area: a, indirizzoContenitore, nomeContenitore, ricarica }:
         ? <MappaIncorporata key={scelta.chiave} chiave={scelta.chiave} nome={a.nome} spilloIniziale={spillo} rivelaSpilloIniziale={spillo !== null && spillo === pinChiesto} puntoIniziale={punto}
             // il pannello aperto («Luoghi qui» a portata di tocco, UX2-1), il nome dell'area come titolo e niente «Su: …» né briciole
             // doppie: la testata della pagina li ha già (UX2-4, UX2-5)
-            pannelloIniziale={pannello} onPannello={setPannello} titoloVisore={a.nome} senzaVicine
+            pannelloIniziale={pannello} onPannello={setPannello} titoloVisore={a.nome} senzaVicine nonDisponibili={interruttore}
             classeVisore="h-[min(64dvh,560px)] lg:h-auto lg:min-h-[420px] lg:flex-1" className="lg:flex lg:min-h-0 lg:flex-1 lg:flex-col"
-            contenutiPannello={telefono ? undefined : <PannelloArea area={a} elementi={elementiQui} onSeleziona={selezionaPin} />} />
+            contenutiPannello={telefono ? undefined : <PannelloArea area={a} elementi={elementiQui} onSeleziona={selezionaPin} nonDisponibili={interruttore} pinChiesto={spillo} />} />
         : <p className="card m-0 text-[13px] text-text-secondary">{a.nome} non ha più planimetrie: aggiungine una.</p>}
-      {scelta && telefono && <div className="card"><PannelloArea area={a} elementi={elementiQui} onSeleziona={selezionaPin} /></div>}
+      {scelta && telefono && <div className="card"><PannelloArea area={a} elementi={elementiQui} onSeleziona={selezionaPin} nonDisponibili={interruttore} pinChiesto={spillo} /></div>}
 
       {finestra === 'modifica' && <FinestraModificaArea area={a} aperta onChiudi={() => setFinestra(null)} onSalvata={ricarica} />}
       <FinestraAggiungiPlanimetria area={a} aperta={finestra === 'aggiungi'} onChiudi={() => setFinestra(null)}
@@ -243,21 +246,50 @@ function Contenuto({ area: a, indirizzoContenitore, nomeContenitore, ricarica }:
   );
 }
 
-/** Il pannello del visore: «Luoghi qui» (tocco = seleziona il pin, e il collegamento alla scheda) e «Aree vicine» (le loro case). */
-function PannelloArea({ area, elementi, onSeleziona }: { area: AreaDettaglioDto; elementi: ElementoAreaDto[]; onSeleziona: (spillo: number) => void }) {
+/** Un luogo chiuso adesso o non ancora sbloccato (L5 §2): fuori dai menu, salvo «Mostra anche i non ancora disponibili» o se è il pin chiesto. */
+const chiusoAdesso = (e: ElementoAreaDto) => !!e.presenza && (e.presenza.sbloccato === false || e.presenza.aperto === false);
+
+/** Il pannello del visore: «Luoghi qui» (tocco = seleziona il pin, e il collegamento alla pagina del luogo), «Da posizionare» e «Aree vicine».
+ *  L5 (F3): i luoghi chiusi adesso o non ancora sbloccati spariscono, come nel visore, con lo stesso interruttore; quelli solo per gli eventi
+ *  di un Confidente non ci sono mai. */
+function PannelloArea({ area, elementi, onSeleziona, nonDisponibili, pinChiesto }: { area: AreaDettaglioDto; elementi: ElementoAreaDto[]; onSeleziona: (spillo: number) => void;
+  nonDisponibili: { valore: boolean; onCambia: (v: boolean) => void }; pinChiesto: number | null }) {
+  const candidati = elementi.filter((e) => !e.soloEventi);
+  const chiusi = candidati.filter(chiusoAdesso).length;
+  const visibili = candidati.filter((e) => nonDisponibili.valore || !chiusoAdesso(e) || e.spillo === pinChiesto);
+  const daPosizionare = area.daPosizionare ?? [];
   return (
     <div className="flex flex-col gap-3">
       <section className="visore-mappa__sezione" aria-label="Luoghi qui">
         <h3 className="visore-mappa__intestazione">Luoghi qui</h3>
-        {elementi.length === 0
+        {candidati.length === 0
           ? <p className="m-0 text-[12px] text-text-muted">Nessun luogo segnato su questa planimetria.</p>
           : <ul className="m-0 flex list-none flex-col gap-1 p-0">
-            {elementi.map((e) => <li key={`${e.tipo}:${e.chiave}:${e.spillo}`} className="flex items-center justify-between gap-2">
-              <button type="button" className="visore-mappa__azione-testo touch text-left" onClick={() => onSeleziona(e.spillo)}>{e.nome}</button>
-              <Link className="text-[12px] touch inline-flex items-center" to={schedaElemento(e)} aria-label={`Scheda di ${e.nome}`}>Scheda</Link>
+            {visibili.map((e) => <li key={`${e.tipo}:${e.chiave}:${e.spillo}`} className="flex flex-col gap-0.5">
+              <div className="flex items-center justify-between gap-2">
+                <button type="button" className={`visore-mappa__azione-testo touch text-left ${chiusoAdesso(e) ? 'opacity-60' : ''}`} onClick={() => onSeleziona(e.spillo)} title={e.presenza?.testo}>{e.nome}</button>
+                {/* L5: la pagina del luogo (per un negozio con sede, la sua sezione) */}
+                <Link className="text-[12px] touch inline-flex items-center" to={e.casa ?? schedaElemento(e)} aria-label={`Scheda di ${e.nome}`}>Scheda</Link>
+              </div>
+              {(chiusoAdesso(e) || e.daRivedere) && <div className="flex flex-wrap gap-1">
+                {chiusoAdesso(e) && <span className="chip chip--bloccata text-[11px]">{e.presenza?.sbloccato === false ? 'Non ancora nel mondo' : 'Chiuso adesso'}</span>}
+                {e.daRivedere === 'negozio-altro-quartiere' && <span className="chip chip--oro text-[11px]" title="Il pin è agganciato a un negozio di un altro quartiere: si sistema dall'editor della planimetria">Da rivedere · negozio di un altro quartiere</span>}
+              </div>}
             </li>)}
           </ul>}
+        {chiusi > 0 && (
+          <button type="button" className={`chip chip--icona touch self-start text-[11px] ${nonDisponibili.valore ? 'chip--attivo' : ''}`} aria-pressed={nonDisponibili.valore} onClick={() => nonDisponibili.onCambia(!nonDisponibili.valore)}>
+            <IconaAzione chiave="bloccato" dimensione={14} />Mostra anche i non ancora disponibili ({chiusi})
+          </button>
+        )}
       </section>
+      {/* L5: i luoghi dell'area senza pin su una planimetria: si aprono dalla loro pagina («Posiziona» arriva con le finestre di L5) */}
+      {daPosizionare.length > 0 && <section className="visore-mappa__sezione" aria-label="Da posizionare">
+        <h3 className="visore-mappa__intestazione">Da posizionare ({daPosizionare.length})</h3>
+        <ul className="m-0 flex list-none flex-col gap-1 p-0">
+          {daPosizionare.map((l) => <li key={l.chiave}><Link className="touch inline-flex items-center" to={l.casa ?? `/guida/citta/${encodeURIComponent(l.quartiere ?? '')}`}>{l.nome}</Link></li>)}
+        </ul>
+      </section>}
       {area.vicine.length > 0 && <section className="visore-mappa__sezione" aria-label="Aree vicine">
         <h3 className="visore-mappa__intestazione">Aree vicine</h3>
         <ul className="m-0 flex list-none flex-col gap-1 p-0">

@@ -136,6 +136,9 @@ interface Props {
   /** Falso: la selezione iniziale evidenzia e centra il pin senza aprirne il popup, che si apre al primo tocco (la pagina del luogo, L5:
    *  la pagina dice già tutto quel che il popup direbbe, e su una tela bassa il popup diventava un foglio sopra la pagina). */
   popupIniziale?: boolean;
+  /** L5 (F3): «Mostra anche i non ancora disponibili» condiviso con chi ospita il visore (la pagina dell'Area e il suo «Luoghi qui»). Senza,
+   *  l'interruttore è del visore. */
+  nonDisponibili?: { valore: boolean; onCambia: (v: boolean) => void };
 }
 
 /** Vedi `Props.scelta`. */
@@ -256,7 +259,7 @@ function disponibilita(a: { disponibileDal: string | null }): string {
  * condizioni della partita sono nascosti salvo richiesta esplicita, i raccolti salvo «mostra
  * raccolti». Con `editor` il clic e il trascinamento passano agli strumenti dell'editor;
  * `selezioneIniziale` e `puntoIniziale` fissano l'inquadratura d'apertura una volta per mappa. */
-export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onDaVerificare, onContesto, onChiudi, etichettaChiudi, incorporato, azioni, ritorno, editor, vistaGiornoCorrente, pannello, contenutiPannello, intestazione, className, selezioneIniziale, rivelaSelezione, puntoIniziale, scelta, pannelloIniziale, onPannello, titolo, senzaVicine, guida, popupIniziale = true }: Props) {
+export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onDaVerificare, onContesto, onChiudi, etichettaChiudi, incorporato, azioni, ritorno, editor, vistaGiornoCorrente, pannello, contenutiPannello, intestazione, className, selezioneIniziale, rivelaSelezione, puntoIniziale, scelta, pannelloIniziale, onPannello, titolo, senzaVicine, guida, popupIniziale = true, nonDisponibili }: Props) {
   const sugg = useSuggerimenti();
   const tela = useRef<HTMLDivElement | null>(null);
   const [dim, setDim] = useState<Dimensioni>({ w: 0, h: 0 });
@@ -273,7 +276,19 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   // Un pin chiesto con un comando (il tocco su «Luoghi qui» dell'Area) ma non disponibile adesso accende la vista dei non disponibili:
   // altrimenti il tocco non mostrava niente (UX2-2, L2). Solo col comando: un indirizzo arriva da un collegamento e non deve rivelare
   // quel che l'interfaccia nasconde (regola del test «un indirizzo con lo spillo bloccato non lo rivela»).
-  const [mostraNonDisponibili, setMostraNonDisponibili] = useState(() => !!rivelaSelezione && !!selezioneIniziale && mappa.spilli.some((s) => s.id === selezioneIniziale && nascostoPerCondizioni(s)));
+  const [mostraNonDisponibiliProprio, setMostraNonDisponibiliProprio] = useState(() => !!rivelaSelezione && !!selezioneIniziale && mappa.spilli.some((s) => s.id === selezioneIniziale && nascostoPerCondizioni(s)));
+  // L5 (F3): con `nonDisponibili` l'interruttore è di chi ospita il visore (condiviso con «Luoghi qui»)
+  const mostraNonDisponibili = nonDisponibili ? nonDisponibili.valore : mostraNonDisponibiliProprio;
+  const setMostraNonDisponibili = (v: boolean | ((attuale: boolean) => boolean)) => {
+    const nuovo = typeof v === 'function' ? v(mostraNonDisponibili) : v;
+    if (nonDisponibili) nonDisponibili.onCambia(nuovo); else setMostraNonDisponibiliProprio(nuovo);
+  };
+  // condiviso: il pin chiesto con un comando e non disponibile adesso accende l'interruttore di chi ospita (UX2-2), come farebbe il visore
+  const rivelaCondiviso = useRef(nonDisponibili);
+  useEffect(() => { rivelaCondiviso.current = nonDisponibili; });
+  useEffect(() => {
+    if (mostraNonDisponibiliProprio && rivelaCondiviso.current && !rivelaCondiviso.current.valore) rivelaCondiviso.current.onCambia(true);
+  }, [mostraNonDisponibiliProprio]);
   const [ricerca, setRicerca] = useState('');
   const [selezionatoUso, setSelezionatoUso] = useState<number | null>(selezioneIniziale ?? null);
   /** Il gruppo «+n» aperto, per chiave: l'elenco dice chi c'è dentro e permette di scegliere. */
@@ -391,7 +406,9 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     const s = mappa.spilli.find((x) => x.id === selezioneIniziale);
     // Uno spillo bloccato non si apre nemmeno da un indirizzo: era il modo per rivelarlo
     // aggirando il filtro, e un deep link non deve poter fare quello che l'interfaccia non fa.
-    if (!s || (partitaId && !editor && nascostoPerCondizioni(s))) return;
+    // L5 §2 (decisione dell'utente, 2026-10-20): lo spillo chiesto esplicitamente (`?spillo=`, «Sulla mappa») si apre anche chiuso o non
+    // ancora sbloccato, evidenziato con «Non disponibile adesso» e il motivo (`spilloChiesto` qui sotto): unica eccezione alla regola
+    if (!s) return;
     const id = setTimeout(() => {
       inquadraturaApplicata.current = chiave;
       // uno spillo nascosto perché già raccolto va reso visibile: altrimenti la mappa si centra sul vuoto
@@ -596,8 +613,9 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
    * Quando ricompaiono, i pin bloccati sono **marcati** — grigi, con «non ancora disponibile» nel
    * nome accessibile — così non si confondono mai con quelli veri.
    *
-   * Quel che resta tolto è il reveal **da indirizzo**: un `?spillo=` che forzava visibile un pin
-   * bloccato non è una consultazione esplicita, è un URL che fa quello che l'interfaccia non fa.
+   * Da L5 (§2, decisione dell'utente del 2026-10-20) lo spillo chiesto **esplicitamente** — `?spillo=`, «Sulla mappa» del diario —
+   * si mostra anche se chiuso o non ancora sbloccato, evidenziato con «Non disponibile adesso» e il motivo (`spilloChiesto`): è
+   * l'unica eccezione, gli altri pin bloccati della mappa restano nascosti.
    *
    * Fuori dalla regola solo l'editor, che deve vedere tutto per poterlo modificare.
    *
@@ -621,9 +639,11 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const sbiaditoInScelta = (s: SpilloDto) => !!scelta?.attenuaNascosti && ((s.collezionabile && !!s.raccolto) || bloccato(s));
   // in memoria finché non cambiano spilli o filtri: è l'ingresso del raggruppamento qui sotto, che così non si rifà a ogni disegno (P1")
   const inScelta = scelta !== undefined;
-  const visibili = useMemo(() => mappa.spilli.filter((s) => !tipiNascosti.has(s.tipo) && (inScelta || ((mostraRaccolti || !(s.collezionabile && s.raccolto && !s.daVerificare)) && (mostraNonDisponibili || !(filtraBloccati && nascostoPerCondizioni(s))))) && (!ricercaNorm || s.nome.toLowerCase().includes(ricercaNorm) || nomePin(s).toLowerCase().includes(ricercaNorm))),
-    [mappa.spilli, tipiNascosti, inScelta, mostraRaccolti, mostraNonDisponibili, filtraBloccati, ricercaNorm]);
-  const selezionato = mappa.spilli.find((s) => s.id === selezionatoId && (mostraNonDisponibili || !bloccato(s))) ?? null;
+  // L5 §2: lo spillo chiesto esplicitamente dall'indirizzo o da «Sulla mappa» resta in vista anche se chiuso (fuori dall'editor)
+  const spilloChiesto = editor ? null : selezioneIniziale ?? null;
+  const visibili = useMemo(() => mappa.spilli.filter((s) => !tipiNascosti.has(s.tipo) && (inScelta || ((mostraRaccolti || !(s.collezionabile && s.raccolto && !s.daVerificare)) && (mostraNonDisponibili || s.id === spilloChiesto || !(filtraBloccati && nascostoPerCondizioni(s))))) && (!ricercaNorm || s.nome.toLowerCase().includes(ricercaNorm) || nomePin(s).toLowerCase().includes(ricercaNorm))),
+    [mappa.spilli, tipiNascosti, inScelta, mostraRaccolti, mostraNonDisponibili, filtraBloccati, ricercaNorm, spilloChiesto]);
+  const selezionato = mappa.spilli.find((s) => s.id === selezionatoId && (mostraNonDisponibili || s.id === spilloChiesto || !bloccato(s))) ?? null;
   // Il popup sta sopra allo spillo; sotto quando in alto non c'è spazio, e scorre in orizzontale quanto basta per restare dentro la
   // tela: la freccia resta sullo spillo. L'altezza è **misurata** (`altezzaPopupMisurata`), non stimata: dalla 094 uno spostamento
   // di una voce della guida ha anche «Ottenuto», e su una tela bassa (il visore incorporato, il tablet) il popup non ci stava
@@ -981,7 +1001,13 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   </div>
                   <button type="button" className="spillo-popup__chiudi" onClick={() => seleziona(null)} aria-label="Chiudi il popup">×</button>
                 </div>
+                {/* L5 §2: lo spillo chiesto che adesso non c'è (chiuso, non ancora sbloccato): lo si dice, col motivo */}
+                {selezionato.id === spilloChiesto && nonDisponibile(selezionato) && (
+                  <p className="m-0 flex flex-wrap items-center gap-1.5 text-[12px]" role="status"><span className="chip chip--attivo text-[11px]">Non disponibile adesso</span><span className="text-text-secondary">{selezionato.presenza?.testo ?? selezionato.disponibilita?.requisiti.filter((r) => r.stato === 'rosso').map((r) => r.dettaglio || r.testo).join(' · ')}</span></p>
+                )}
                 {selezionato.descrizione && <p className="m-0 text-[12px] text-text-secondary spillo-popup__testo">{selezionato.descrizione}</p>}
+                {/* L5: la descrizione propria del pin di un luogo, se diversa da quella del luogo */}
+                {selezionato.notaPin && <p className="m-0 text-[11px] text-text-muted">Nota del pin: {selezionato.notaPin}</p>}
                 <CondizioniSpilloElenco condizioni={selezionato.condizioni} disponibilita={selezionato.disponibilita} compatto />
                 {(selezionato.immagini.length > 0 || selezionato.dettaglio?.immagine) && (
                   <div className="flex flex-wrap gap-1 items-start">
@@ -999,8 +1025,15 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   {/* un pin con uno stato (un consumabile, un meccanismo, una porta…: `statoDelPin`, 2026-10-03), e anche un pin senza
                       collegato a una o più voci della guida (una sicura, un passaggio): lo stato delle voci è il suo (2026-10-01, 098) */}
                   {(statoDelPin(selezionato) !== null || selezionato.voci.length > 0) && partitaId && <AzioniStato spillo={selezionato} occupato={occupato} onRaccolto={onRaccolto ? cambiaRaccolto : undefined} onStatoPunto={onStatoPunto ? cambiaStatoPunto : undefined} />}
-                  {categoriaSpillo(selezionato.tipo) === 'citta' && selezionato.dettaglio?.negozio && (
-                    <CollegamentoVisivo to={`/guida/negozi/${encodeURIComponent(selezionato.dettaglio.negozio.chiave)}`} tono="secondario" compatto icona={<IconaAzione chiave="negozio" dimensione={20} />} titolo="Scheda del negozio" />
+                  {/* L5 (T5): il pin di un luogo porta alla pagina del luogo, col suo nome (un negozio con sede: alla sua sezione nella pagina) */}
+                  {categoriaSpillo(selezionato.tipo) === 'citta' && selezionato.dettaglio?.luogo?.casa && (() => {
+                    const l = selezionato.dettaglio.luogo;
+                    const n = selezionato.dettaglio.negozio;
+                    const casaNegozio = n ? l.negozi?.find((x) => x.chiave === n.chiave)?.casa : undefined;
+                    return <CollegamentoVisivo to={casaNegozio ?? l.casa!} tono="secondario" compatto icona={<IconaAzione chiave={n ? 'negozio' : 'scheda'} dimensione={20} />} titolo={l.nome} dettaglio={n && n.nome !== l.nome ? n.nome : l.orariTesto ?? l.quando ?? undefined} />;
+                  })()}
+                  {categoriaSpillo(selezionato.tipo) === 'citta' && selezionato.dettaglio?.negozio && !selezionato.dettaglio.luogo?.casa && (
+                    <CollegamentoVisivo to={`/guida/negozi/${encodeURIComponent(selezionato.dettaglio.negozio.chiave)}`} tono="secondario" compatto icona={<IconaAzione chiave="negozio" dimensione={20} />} titolo={selezionato.dettaglio.negozio.nome} />
                   )}
                   {categoriaSpillo(selezionato.tipo) === 'citta' && selezionato.dettaglio?.tipo === 'confidente' && selezionato.dettaglio.confidente && (
                     <CollegamentoVisivo to={`/confidenti/${encodeURIComponent(selezionato.dettaglio.confidente.chiave)}`} tono="primario" compatto icona={<IconaSpillo tipo="confidente" dimensione={20} />} titolo={selezionato.dettaglio.confidente.nome} dettaglio="scheda del Confidente" />
@@ -1009,7 +1042,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   {selezionato.tipo === 'confidente' && selezionato.dettaglio?.tipo !== 'confidente' && (
                     <CollegamentoVisivo to="/confidenti" tono="primario" compatto icona={<IconaSpillo tipo="confidente" dimensione={20} />} titolo="Confidenti" dettaglio="la pagina dei Confidenti" />
                   )}
-                  {categoriaSpillo(selezionato.tipo) === 'citta' && (selezionato.dettaglio?.tipo === 'luogo' || selezionato.dettaglio?.tipo === 'attivita') && selezionato.dettaglio.luogo && !selezionato.dettaglio.negozio && (
+                  {categoriaSpillo(selezionato.tipo) === 'citta' && (selezionato.dettaglio?.tipo === 'luogo' || selezionato.dettaglio?.tipo === 'attivita') && selezionato.dettaglio.luogo && !selezionato.dettaglio.luogo.casa && !selezionato.dettaglio.negozio && (
                     <CollegamentoVisivo to={`/guida/citta/${encodeURIComponent(selezionato.dettaglio.luogo.quartiere)}`} tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={selezionato.dettaglio.luogo.nome} dettaglio={selezionato.dettaglio.luogo.quando ?? selezionato.dettaglio.luogo.cosaOffre ?? 'scheda del quartiere'} />
                   )}
                   {(selezionato.dettaglio?.negozio || selezionato.voci.length > 0 || selezionato.dettaglio?.tipo === 'luogo' || selezionato.dettaglio?.tipo === 'confidente' || selezionato.dettaglio?.tipo === 'richiesta' || selezionato.immagini.length > 0) && (
@@ -1271,6 +1304,8 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
         <button type="button" className="btn btn-ghost btn-sm" onClick={onChiudi} aria-label="Chiudi la scheda">×</button>
       </div>
       {s.descrizione && <p className="m-0 text-[13px] text-text-secondary whitespace-pre-line">{s.descrizione}</p>}
+      {/* L5: la descrizione propria del pin di un luogo, se diversa da quella del luogo */}
+      {'notaPin' in s && s.notaPin && <p className="m-0 text-[12px] text-text-muted">Nota del pin: {s.notaPin}</p>}
       {s.nativo?.daVerificare && <ProveNativeSpillo nativo={s.nativo} />}
       <CondizioniSpilloElenco condizioni={s.condizioni} disponibilita={s.disponibilita} />
       <GalleriaSpillo immagini={s.immagini} nome={nomePin(s)} />
@@ -1292,14 +1327,16 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
       )}
       {(d?.tipo === 'luogo' || d?.tipo === 'attivita') && d.luogo && (
         <p className="m-0 text-[12px] text-text-secondary">
-          {d.luogo.cosaOffre && d.luogo.cosaOffre !== s.descrizione ? `${d.luogo.cosaOffre} · ` : ''}{d.luogo.quando ? `${d.luogo.quando} · ` : ''}<Link to={`/guida/citta/${encodeURIComponent(d.luogo.quartiere)}`} className="text-primary">scheda del quartiere</Link>
+          {/* L5 (T5): la pagina del luogo, col suo nome; gli orari dal luogo */}
+          {d.luogo.cosaOffre && d.luogo.cosaOffre !== s.descrizione ? `${d.luogo.cosaOffre} · ` : ''}{d.luogo.orariTesto ? `${d.luogo.orariTesto} · ` : d.luogo.quando ? `${d.luogo.quando} · ` : ''}<Link to={d.luogo.casa ?? `/guida/citta/${encodeURIComponent(d.luogo.quartiere)}`} className="text-primary">{d.luogo.casa ? d.luogo.nome : 'scheda del quartiere'}</Link>
         </p>
       )}
       {negozio && (
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <span className="text-[12px] font-semibold flex items-center gap-1.5 flex-wrap">{negozio.nome} · {articoliVisibili.length} {articoliVisibili.length === 1 ? 'articolo' : 'articoli'}<ChipDisponibilita disponibilita={negozio.disponibilita} compatto /></span>
-            <Link to={`/guida/negozi/${encodeURIComponent(negozio.chiave)}`} className="text-[12px] text-primary">scheda del negozio</Link>
+            {/* L5 (T5): il negozio nella pagina del suo luogo, col suo nome */}
+            <Link to={d?.luogo?.negozi?.find((x) => x.chiave === negozio.chiave)?.casa ?? `/guida/negozi/${encodeURIComponent(negozio.chiave)}`} className="text-[12px] text-primary">{negozio.nome}</Link>
           </div>
           {bloccati > 0 && (
             <button type="button" className="visore-mappa__azione-testo self-start" aria-pressed={mostraBloccati} onClick={() => setMostraBloccati((v) => !v)}>

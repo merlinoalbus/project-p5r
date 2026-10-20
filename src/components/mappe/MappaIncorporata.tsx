@@ -43,6 +43,8 @@ interface Props {
   rivelaSpilloIniziale?: boolean;
   /** Falso: lo spillo iniziale si evidenzia e si centra senza aprirne il popup (vedi `VisoreMappa.popupIniziale`; la pagina del luogo, L5). */
   popupIniziale?: boolean;
+  /** L5 (F3): «Mostra anche i non ancora disponibili» condiviso con la pagina (vedi `VisoreMappa.nonDisponibili`). */
+  nonDisponibili?: { valore: boolean; onCambia: (v: boolean) => void };
   /** Partita per lo stato degli spilli (predefinita: quella attiva). */
   partitaId?: number | null;
   /** L4 §8.6: chiamata prima di togliere il segno dal popup — al pin (`voce` null) o a una sua voce —, che può riaprire un Enigma risolto:
@@ -96,7 +98,7 @@ export function MappaIncorporata(props: Props) {
  * «Schermo intero», che porta la stessa istanza a tutto schermo finché non si chiude o si preme Esc,
  * e, se `conEditor`, «Modifica planimetria». Senza `onNaviga` la navigazione fra livelli apre la pagina
  * della mappa. Senza `altezza` né classi dell'ospite il riquadro è alto 560 px. */
-function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, className, classeVisore, spilloIniziale, rivelaSpilloIniziale, popupIniziale, puntoIniziale, onNaviga, partitaId: partitaEsplicita, conEditor = true, scelta, contenutiPannello, nome, pannelloIniziale, onPannello, titoloVisore, senzaVicine, primaDiRiaprire, infiltrazione = null }: Props) {
+function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, className, classeVisore, spilloIniziale, rivelaSpilloIniziale, popupIniziale, nonDisponibili, puntoIniziale, onNaviga, partitaId: partitaEsplicita, conEditor = true, scelta, contenutiPannello, nome, pannelloIniziale, onPannello, titoloVisore, senzaVicine, primaDiRiaprire, infiltrazione = null }: Props) {
   const navigate = useNavigate();
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = partitaEsplicita !== undefined ? partitaEsplicita : attiva?.id ?? null;
@@ -160,6 +162,7 @@ function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, classN
         selezioneIniziale={spilloIniziale ?? null}
         rivelaSelezione={rivelaSpilloIniziale}
         popupIniziale={popupIniziale}
+        nonDisponibili={nonDisponibili}
         incorporato={!intero}
         onNaviga={onNaviga ?? ((k, arrivo) => navigate(urlMappa(k, arrivo)))}
         onRaccolto={raccolto}

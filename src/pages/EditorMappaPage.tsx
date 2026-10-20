@@ -650,7 +650,11 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
   const [didascaliaNuova, setDidascaliaNuova] = useState('');
   const [nome, setNome] = useState(s.nome);
   const [tipo, setTipo] = useState<TipoSpillo>(s.tipo);
-  const [descrizione, setDescrizione] = useState(s.descrizione);
+  // L5 (F3): un pin di luogo mostra nome e descrizione del luogo (fonte unica); qui la descrizione è la **nota del pin** (`notaPin`), così
+  // salvando non si scrive nel pin il testo del luogo
+  const luogo = s.dettaglio?.luogo?.casa ? s.dettaglio.luogo : null;
+  const descrizioneIniziale = luogo ? s.notaPin ?? '' : s.descrizione;
+  const [descrizione, setDescrizione] = useState(descrizioneIniziale);
   const [riferimento, setRiferimento] = useState<{ tipo: TipoRiferimento; chiave: string } | null>(s.riferimento);
   const [condizioni, setCondizioni] = useState<RequisitoSpillo[]>(() => condizioniNude(s));
   // gli spostamenti di prima avevano solo il riferimento alla mappa: qui è la stessa cosa di una destinazione senza spillo
@@ -674,7 +678,7 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
     ? (riferimento && riferimento.tipo !== 'mappa' ? riferimento : (destinazione ? { tipo: 'mappa' as const, chiave: destinazione.mappa } : null))
     : riferimento;
   const dati = { nome: nome.trim() || s.nome, tipo, descrizione, riferimento: riferimentoEffettivo, condizioni: ammetteCondizioni(tipo) ? condizioni : [], destinazione: categoria === 'spostamento' ? destinazione : null };
-  const modificato = dati.nome !== s.nome || tipo !== s.tipo || descrizione !== s.descrizione
+  const modificato = dati.nome !== s.nome || tipo !== s.tipo || descrizione !== descrizioneIniziale
     || (dati.riferimento?.tipo ?? null) !== (s.riferimento?.tipo ?? null) || (dati.riferimento?.chiave ?? null) !== (s.riferimento?.chiave ?? null)
     || JSON.stringify(dati.condizioni) !== JSON.stringify(condizioniNude(s)) || JSON.stringify(dati.destinazione) !== JSON.stringify(categoria === 'spostamento' ? destinazioneIniziale : null);
   /** Invio del modulo dello spillo: blocca il salvataggio se un gruppo di condizioni è vuoto o incompleto (lo notifica), altrimenti salva i dati composti sopra. */
@@ -698,7 +702,9 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
         <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Apri l’arrivo" dettaglio={s.destinazioneNomi?.mappa ?? undefined} onClick={() => onVai(destinazione.mappa)} />
       )}
       <form className="flex flex-col gap-2" onSubmit={salva}>
-        <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} required maxLength={LIMITI_GUIDA.spillo.nome} /></label>
+        <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} required maxLength={LIMITI_GUIDA.spillo.nome} readOnly={!!luogo} aria-describedby={luogo ? 'spillo-dal-luogo' : undefined} /></label>
+        {luogo && <p id="spillo-dal-luogo" className="m-0 flex flex-wrap items-center gap-1.5 text-[12px] text-text-muted">Nome e descrizione vengono dal luogo «{luogo.nome}»: qui si scrive solo la nota del pin.
+          <Link to={luogo.casa!} className="touch inline-flex items-center text-primary">Modifica il luogo</Link></p>}
         <div className="editor-mappa__campo">
           <Selettore etichetta="Tipo" valore={tipo} opzioni={CATEGORIE_SPILLO.flatMap((c) => tipiDellaCategoria(c).map((t) => ({ chiave: t, nome: DEFINIZIONI_SPILLO[t].nome, gruppo: DEFINIZIONI_CATEGORIA[c].nome })))} onCambia={(k) => cambiaTipo(k as TipoSpillo)} />
         </div>
@@ -706,7 +712,8 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
         <p className="m-0 text-[12px] text-text-muted">{categoria === 'informativo' && statoDelTipo(tipo) ? `Un segno sulla mappa con uno stato da segnare nella partita («${statoDelTipo(tipo)}»); non conta nel completamento della mappa.` : DEFINIZIONI_CATEGORIA[categoria].descrizione}</p>
         {/* un pin di città con uno stato suo (il Confidente, «incontrato»: 2026-10-03) */}
         {categoria === 'citta' && statoDelTipo(tipo) && <p className="m-0 text-[12px] text-text-muted">Ha uno stato da segnare nella partita («{statoDelTipo(tipo)}»); non conta nel completamento della mappa.</p>}
-        <label className="editor-mappa__campo">Descrizione<textarea className="form-input" rows={3} value={descrizione} onChange={(e) => setDescrizione(e.target.value)} maxLength={LIMITI_GUIDA.spillo.descrizione} /></label>
+        <label className="editor-mappa__campo">{luogo ? 'Nota del pin' : 'Descrizione'}<textarea className="form-input" rows={3} value={descrizione} onChange={(e) => setDescrizione(e.target.value)} maxLength={LIMITI_GUIDA.spillo.descrizione} /></label>
+        {luogo && descrizione && <button type="button" className="btn btn-ghost btn-sm touch self-start" disabled={occupato} onClick={() => setDescrizione('')}>Togli la nota</button>}
 
         {categoria === 'spostamento' && <DestinazioneSpostamento valore={destinazione} mappaCorrente={mappa.chiave} albero={albero} disabilitato={occupato} onCambia={setDestinazione} />}
         {categoria === 'citta' && <CollegamentoCitta valore={riferimento} disabilitato={occupato} onCambia={setRiferimento} />}
