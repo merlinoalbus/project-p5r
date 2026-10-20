@@ -19,7 +19,7 @@ import { assegnaUidMancanti } from './identitaSpillo.js';
 import { riconciliaAreeGuida } from './organizzazioneMappe.js';
 import { finestraDaDate, unisci } from './presenzaEntita.js';
 import { sincronizzaPercorsiMappe } from './percorsiMappe.js';
-import { bloccoGuidaDi } from '../datiGuida.js';
+import { leggiCondizioniSalvate } from '../../../shared/condizioniSpillo.js';
 
 /** Data e ora correnti in ISO, per `updated_at` delle righe create. */
 function adesso(): string { return new Date().toISOString(); }
@@ -41,7 +41,6 @@ function posizionePassaggio(radice: string, figlia: string, i: number, n: number
   const righe = Math.max(1, Math.ceil(n / colonne));
   return [10 + (80 * (i % colonne)) / Math.max(1, colonne - 1), 10 + (80 * Math.floor(i / colonne)) / Math.max(1, righe - 1)];
 }
-
 /** Un tipo di luogo che oggi ha uno spillo proprio, e quello con cui il pin nasceva prima (2026-09-12):
  *  la scuola era «attività» (il «servizio» resta sull'icona generica dell'attività: il Leblanc e la palestra non sono lavanderie). */
 const VECCHIA_CORRISPONDENZA: Record<string, string> = { scuola: 'attivita' };
@@ -114,22 +113,30 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
   const insSpillo = db.prepare(`INSERT INTO spillo (mappa_chiave, tipo, nome, descrizione, x, y, riferimento_tipo, riferimento_chiave, collezionabile, ordine, origine, updated_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
   const mappaEsiste = db.prepare('SELECT 1 FROM mappa WHERE chiave = ?');
-  // I quartieri con una data di sblocco: prima di quella data non ci sono, e i loro pin nemmeno.
-  // La colonna arriva con una migrazione: dove lo schema è ancora indietro non c'è, e chiedere
-  // comunque farebbe fallire tutta la sincronizzazione invece di saltare una condizione.
-  const haSblocco = tabelle.has('quartiere') && (db.prepare("SELECT name FROM pragma_table_info('quartiere')")
-    .all() as Array<{ name: string }>).some((c) => c.name === 'sblocco_data');
-  const quartieriConSblocco = new Set(haSblocco
-    ? (db.prepare("SELECT chiave FROM quartiere WHERE sblocco_data IS NOT NULL AND sblocco_data <> ''").all() as Array<{ chiave: string }>).map((q) => q.chiave)
-    : []);
-  // Le finestre dei Palazzi, trascritte a mano nella voce `finestre-dungeon` di
-  // `dati_guida`: nel catalogo le date sono prosa, e ricavarle con un'espressione regolare
-  // vorrebbe dire sbagliarne qualcuna senza accorgersene.
-  // Una trascrizione assente o illeggibile non deve impedire la sincronizzazione: nessuna finestra. (Qui si riempiva anche una
-  // mappa degli ingressi dei Palazzi che nessuno leggeva: rilievo R9 della verifica, 2026-10-03.)
+  // La presenza del quartiere è la sua condizione strutturata. La vecchia data derivata dalla
+  // prosa (`sblocco_data`) non è più una fonte: una colonna assente indica semplicemente uno
+  // schema precedente alla migrazione 118 e non aggiunge condizioni.
+  const quartieriConSblocco = new Set<string>();
+  const colonneQuartiere = tabelle.has('quartiere')
+    ? (db.prepare("SELECT name FROM pragma_table_info('quartiere')").all() as Array<{ name: string }>).map((c) => c.name)
+    : [];
+  if (colonneQuartiere.includes('condizioni_json')) {
+    for (const q of db.prepare('SELECT chiave, condizioni_json FROM quartiere WHERE condizioni_json IS NOT NULL').all() as Array<{ chiave: string; condizioni_json: string }>) {
+      if (leggiCondizioniSalvate(q.condizioni_json).length) quartieriConSblocco.add(q.chiave);
+    }
+  }
+  // Le finestre dei Palazzi vivono nelle colonne del catalogo dal 118. Non si rilegge la voce
+  // storica `finestre-dungeon`: la migrazione ha già trascritto le date e una riga mancante non
+  // deve impedire la sincronizzazione.
   const finestrePerDungeon = new Map<string, RequisitoSpillo[]>();
-  const blocco = bloccoGuidaDi(db, 'finestre-dungeon') as { finestre?: Array<{ dungeon: string; dal?: string | null; al?: string | null }> } | null;
-  for (const f of Array.isArray(blocco?.finestre) ? blocco.finestre : []) finestrePerDungeon.set(f.dungeon, finestraDaDate(f.dal, f.al));
+  const colonneDungeon = tabelle.has('dungeon')
+    ? (db.prepare("SELECT name FROM pragma_table_info('dungeon')").all() as Array<{ name: string }>).map((c) => c.name)
+    : [];
+  if (colonneDungeon.includes('finestra_dal') && colonneDungeon.includes('finestra_al')) {
+    for (const f of db.prepare('SELECT chiave, finestra_dal, finestra_al FROM dungeon WHERE finestra_dal IS NOT NULL').all() as Array<{ chiave: string; finestra_dal: string | null; finestra_al: string | null }>) {
+      finestrePerDungeon.set(f.chiave, finestraDaDate(f.finestra_dal, f.finestra_al));
+    }
+  }
   let conSblocco = 0;
   let spilli = 0;
   let riclassificati = 0;
@@ -212,55 +219,10 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
   return { mappe, spilli, riclassificati, conSblocco };
 }
 
-
-/** Il pin che, dalla mappa dove il Palazzo sta davvero, ci porta dentro.
- *
- * Un Palazzo non è un mondo a parte: il castello di Kamoshida è la scuola, il museo di Madarame è
- * Central Street a Shibuya. Finché la sua mappa restava una radice senza nulla che ci portasse, il
- * mondo non era uno — e la finestra di tempo del Palazzo non aveva dove posarsi, perché le
- * condizioni vivono sugli spilli e nessuno spillo ci arrivava.
- *
- * Va eseguita **dopo** l'importazione dei pacchetti, non dentro la sincronizzazione: `importaMappe`
- * ripulisce gli spilli di seed delle mappe che importa, e il pin di Futaba su Yongen-Jaya veniva
- * creato e subito cancellato da un pacchetto successivo — spariva senza che nulla lo segnalasse.
- *
- * Dove il punto del mondo reale non è dichiarato da nessuna fonte, il Palazzo si aggancia alla
- * mappa generale di Tokyo: raggiungibile e onesto, invece che irraggiungibile o messo a caso.
+/**
+ * Compatibilità dell'API interna: il collegamento dei Palazzi alla mappa reale non si ricava più
+ * da `dati_guida.finestre-dungeon`. Le mappe pubblicate sono ormai la fotografia dei dati importati;
+ * le finestre restano in `dungeon` e i passaggi validi vengono creati dall'importazione delle mappe.
  */
-export function collegaPalazziAiLuoghi(db: AppDatabase): number {
-  const t = nowIso();
-  const tabelle = new Set((db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as Array<{ name: string }>).map((x) => x.name));
-  if (!tabelle.has('mappa')) return 0;
-  const dati = bloccoGuidaDi(db, 'finestre-dungeon') as { finestre?: Array<{ dungeon: string; dal?: string | null; al?: string | null; luogo?: { mappa?: string | null; nome?: string | null } }> } | null;
-  if (!dati) return 0;
-  const nomi = new Map<string, string>(tabelle.has('dungeon')
-    ? (db.prepare('SELECT chiave, nome FROM dungeon').all() as Array<{ chiave: string; nome: string }>).map((d) => [d.chiave, d.nome])
-    : []);
-  const mappaEsiste = db.prepare('SELECT 1 FROM mappa WHERE chiave = ?');
-  const esiste = db.prepare("SELECT 1 FROM spillo WHERE riferimento_tipo = 'mappa' AND riferimento_chiave = ?");
-  const inserisci = db.prepare(`INSERT INTO spillo (mappa_chiave, tipo, nome, descrizione, x, y, riferimento_tipo, riferimento_chiave, collezionabile, ordine, origine, updated_at)
-    VALUES (?, 'passaggio', ?, ?, ?, ?, 'mappa', ?, 0, ?, 'seed', ?)`);
-  let creati = 0;
-  for (const f of dati.finestre ?? []) {
-    // I Memento restano fuori dall'atlante: non sono un luogo che si raggiunge da Tokyo, sono un
-    // pozzo con una pagina sua. Un pin d'ingresso sulla mappa generale porterebbe a una radice che
-    // dall'indice delle mappe e' stata tolta apposta.
-    if (f.dungeon === 'mementos') continue;
-    const mappaPalazzo = `dungeon-${f.dungeon}`;
-    const dove = f.luogo?.mappa;
-    if (!dove || !mappaEsiste.get(dove) || !mappaEsiste.get(mappaPalazzo) || esiste.get(mappaPalazzo)) continue;
-    const quante = (db.prepare('SELECT COUNT(*) AS n FROM spillo WHERE mappa_chiave = ?').get(dove) as { n: number }).n;
-    const [x, y] = posizionePassaggio(dove, mappaPalazzo, quante, quante + 1);
-    const creato = inserisci.run(dove, nomi.get(f.dungeon) ?? f.dungeon,
-      `Ingresso nel Metaverso${f.luogo?.nome ? ` — ${f.luogo.nome}` : ''}.`,
-      Math.round(x * 10) / 10, Math.round(y * 10) / 10, mappaPalazzo, quante, t);
-    const finestra = finestraDaDate(f.dal, f.al);
-    if (finestra.length) {
-      db.prepare('UPDATE spillo SET condizioni_json = ? WHERE id = ?')
-        .run(JSON.stringify(finestra), Number(creato.lastInsertRowid));
-    }
-    creati += 1;
-  }
-  assegnaUidMancanti(db);
-  return creati;
-}
+export function collegaPalazziAiLuoghi(_db: AppDatabase): number { return 0; }
+
