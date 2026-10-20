@@ -162,6 +162,26 @@ describe('MappaPage', () => {
     expect(within(screen.getByRole('list', { name: 'Contenuto di Palazzo di Kamoshida' })).getByRole('link', { name: /Ingresso/ })).toBeInTheDocument();
   });
 
+  // R1 (L2, decisione del PM): il segno «Da verificare» si vede nell'indice senza aprire niente — sulla carta di Tokyo nella griglia, un
+  // chip «1 da verificare» che porta all'area dello staff; la carta resta il pulsante che apre il pannello
+  it('R1: la carta di Tokyo dice «1 da verificare» senza aprire niente, e il chip porta all’area da verificare', async () => {
+    const staff = (chiave: string, versioneOrdine: number) => riassunto({ chiave, nome: 'Area riservata allo staff', tipo: 'area', genitore: 'tokyo',
+      area: { chiave: 'citta/tokyo/staff', contenitore: { tipo: 'citta', chiave: 'tokyo', nome: 'Tokyo' }, slug: 'staff', nome: 'Area riservata allo staff', versioneEtichetta: null, versioneOrdine, predefinita: versioneOrdine === 0, casa: '/guida/citta/tokyo/staff', daVerificare: true } });
+    getAlberoMappe.mockResolvedValue([...albero, staff('staff', 0), staff('staff-ovest', 1)]);
+    monta('/guida/mappe');
+    const tokyo = await screen.findByRole('button', { name: /^Tokyo/ });
+    // due planimetrie della stessa area: un'area sola da verificare
+    const chip = screen.getByRole('link', { name: '1 da verificare: Area riservata allo staff' });
+    expect(chip).toHaveAttribute('href', '/guida/citta/tokyo/staff');
+    expect(chip).toHaveClass('chip', 'chip--attivo', 'touch');
+    expect(chip).toHaveTextContent('1 da verificare');
+    // il Palazzo non ha aree da verificare: niente chip
+    expect(screen.getAllByRole('link', { name: /da verificare/ })).toHaveLength(1);
+    // la carta apre ancora il pannello
+    fireEvent.click(tokyo);
+    expect(screen.getByRole('region', { name: 'Dentro Tokyo' })).toBeInTheDocument();
+  });
+
   /** La seconda lettura della mappa (quella in silenzio dopo un'azione) resta in sospeso finché il test non la risolve. */
   const rilettura = () => {
     /** Risolutore della rilettura sospesa: vuoto finché la seconda `getMappa` non parte, poi quello della sua promessa. */

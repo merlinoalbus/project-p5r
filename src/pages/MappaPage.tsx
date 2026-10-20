@@ -98,7 +98,24 @@ function IndiceMappe() {
       cache.set(chiave, esito);
       return esito;
     };
-    return { conta: (chiave: string) => conta(chiave, new Set()), figliDi };
+    /** R1 (L2): le Aree da verificare (lo staff di Tokyo) nel sottoalbero delle chiavi date, una volta per Area (le sue versioni sono più
+     *  mappe), nell'ordine in cui si incontrano. */
+    const daVerificare = (chiavi: string[]): Array<{ nome: string; casa: string }> => {
+      const trovate = new Map<string, { nome: string; casa: string }>();
+      const visti = new Set<string>();
+      const coda = [...chiavi];
+      while (coda.length) {
+        const k = coda.shift()!;
+        if (visti.has(k)) continue;
+        visti.add(k);
+        for (const f of figliDi.get(k) ?? []) {
+          if (f.area?.daVerificare && !trovate.has(f.area.chiave)) trovate.set(f.area.chiave, { nome: f.area.nome, casa: f.area.casa });
+          coda.push(f.chiave);
+        }
+      }
+      return [...trovate.values()];
+    };
+    return { conta: (chiave: string) => conta(chiave, new Set()), figliDi, daVerificare };
   }, [mappe]);
   const gruppi = useMemo(() => radiciRaggruppate(mappe), [mappe]);
   const totaleMappe = mappe.length;
@@ -136,6 +153,33 @@ function IndiceMappe() {
             const conFigli = versioni.some(v => (totali.figliDi.get(v.chiave) ?? []).length > 0);
             const apribile = conFigli || versioni.length > 1;
             const aperto = gruppoAperto?.chiave === chiave;
+            // R1 (L2, decisione del PM): le Aree da verificare sotto questa radice si vedono già sulla sua carta, senza aprire niente
+            const daVerificare = totali.daVerificare(versioni.map((v) => v.chiave));
+            if (apribile && daVerificare.length > 0) {
+              const prima = daVerificare[0];
+              // La carta resta il pulsante che apre il pannello, steso su tutta la carta (`after:inset-0`); il chip è un collegamento a sé,
+              // sopra di lui: un collegamento dentro un pulsante non si può tenere né toccare da solo.
+              return <li key={chiave} className="flex">
+                <div className={`card card--cliccabile relative flex w-full items-center gap-3 ${aperto ? 'border-primary bg-primary-bg' : ''}`}>
+                  <AnteprimaMappa mappa={capofila} className="h-[52px] w-[72px] shrink-0" />
+                  <span className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
+                    <button type="button" aria-expanded={aperto} onClick={() => setPercorso(aperto ? [] : [capofila.chiave])}
+                      // niente `touch` qui: il bersaglio è la carta intera (`after:inset-0`), e 44 px di riga facevano crescere la carta
+                      className={`text-left font-display text-[17px] leading-tight break-words after:absolute after:inset-0 after:content-[''] ${aperto ? 'text-primary' : ''}`}>
+                      {nome}<span className="sr-only">, {nomeTipoMappa(capofila)} · {sotto.spilli} spilli · {sotto.mappe > 0 ? `${sotto.mappe} mappe` : `${versioni.length} versioni`}</span>
+                    </button>
+                    {/* una riga coi puntini: accanto al chip andava a capo e la carta cresceva (l'indice usciva di 3 px a 1024×690); il testo
+                        intero è nel nome del pulsante e nel suggerimento */}
+                    <span className="max-w-full truncate text-[11px] text-text-muted" aria-hidden title={`${nomeTipoMappa(capofila)} · ${sotto.spilli} spilli · ${sotto.mappe > 0 ? `${sotto.mappe} mappe` : `${versioni.length} versioni`}`}>{nomeTipoMappa(capofila)} · {sotto.spilli} spilli · {sotto.mappe > 0 ? `${sotto.mappe} mappe` : `${versioni.length} versioni`}</span>
+                  </span>
+                  {/* a destra, prima della freccia: alto 44 (il bersaglio) sta nell'altezza dell'anteprima e la carta non cresce (a 1024×690
+                      l'indice deve stare in una schermata, LAY2-5) */}
+                  <Link to={prima.casa} className="chip chip--attivo touch relative z-10 shrink-0 text-[11px] no-underline" title="Nessuna fonte colloca questa area: decidi se tenerla o rimuoverla"
+                    aria-label={`${daVerificare.length} da verificare: ${daVerificare.map((a) => a.nome).join(', ')}`}>{daVerificare.length} da verificare</Link>
+                  <span aria-hidden className="shrink-0 text-text-muted">{aperto ? '▾' : '▸'}</span>
+                </div>
+              </li>;
+            }
             return <li key={chiave} className="flex">
               {/* La riga è **una scelta**, non un collegamento: apre il pannello. Ad aprire la
                   mappa ci pensa il pulsante nel pannello, che dice quale mappa apre. Un luogo
