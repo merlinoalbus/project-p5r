@@ -227,9 +227,11 @@ describe('MappaPage', () => {
     const griglia = within(screen.getByRole('list', { name: 'Contenuto di Palazzo di Kamoshida' }));
     const carte = griglia.getAllByRole('listitem');
     // prima le aree con un nome vero, nel loro ordine (con o senza pin), poi i fogli tecnici con pin
-    // (accanto al titolo il numero dei pin, se ce ne sono; i due fogli omonimi sono numerati)
-    expect(carte.map((c) => c.textContent)).toEqual([expect.stringMatching(/^Ingresso55 pin$/), expect.stringMatching(/^Provanessun pin$/), expect.stringMatching(/^Planimetria non attribuita · \d33 pin$/)]);
-    // il numero non sta più sopra il disegno (copriva un angolo della pianta): sta nella riga del titolo
+    // (decisione del PM dopo Test UX: i pin si dicono una volta sola, nel riquadro rosso accanto al titolo — «N pin», «1 pin», «nessun
+    // pin» —, senza ripeterli nella riga sotto; i due fogli omonimi sono numerati)
+    expect(carte.map((c) => c.textContent)).toEqual([expect.stringMatching(/^Ingresso5 pin$/), expect.stringMatching(/^Provanessun pin$/), expect.stringMatching(/^Planimetria non attribuita · \d3 pin$/)]);
+    expect(carte.map((c) => c.querySelector('.chip.chip--attivo')?.textContent)).toEqual(['5 pin', 'nessun pin', '3 pin']);
+    // il riquadro non sta sopra il disegno (copriva un angolo della pianta): sta nella riga del titolo
     expect(carte[0].querySelector('.relative .chip')).toBeNull();
     const gruppo = within(screen.getByRole('region', { name: 'Fogli dell’estrazione senza nome' }));
     const apri = gruppo.getByRole('button', { name: 'Mostra i fogli dell’estrazione senza nome · 1' });
