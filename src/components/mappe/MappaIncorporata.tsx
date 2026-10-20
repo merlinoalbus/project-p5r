@@ -46,6 +46,9 @@ interface Props {
   /** L4 §8.6: chiamata prima di togliere il segno dal popup — al pin (`voce` null) o a una sua voce —, che può riaprire un Enigma risolto:
    *  la pagina chiede conferma e con `false` («Annulla») non si fa niente. Segnare non passa da qui. */
   primaDiRiaprire?: (s: SpilloDto, voce: string | null) => Promise<boolean>;
+  /** L4 §1.4: l'infiltrazione guardata dalla pagina (la scheda del Palazzo con l'infiltrazione aperta): lo stato dei pin condivisi dalle voci
+   *  di più infiltrazioni si legge e si scrive in quella. Il popup ne può scegliere un'altra (§4.2) finché la pagina non cambia la sua. */
+  infiltrazione?: string | null;
   /** Mostra «Modifica planimetria». Predefinito **sì**, che è giusto nelle pagine dell'atlante.
    *
    * Va spento dove il visore è **citato dentro un'altra pagina** per dire dove si trova una cosa:
@@ -91,11 +94,14 @@ export function MappaIncorporata(props: Props) {
  * «Schermo intero», che porta la stessa istanza a tutto schermo finché non si chiude o si preme Esc,
  * e, se `conEditor`, «Modifica planimetria». Senza `onNaviga` la navigazione fra livelli apre la pagina
  * della mappa. Senza `altezza` né classi dell'ospite il riquadro è alto 560 px. */
-function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, className, classeVisore, spilloIniziale, rivelaSpilloIniziale, puntoIniziale, onNaviga, partitaId: partitaEsplicita, conEditor = true, scelta, contenutiPannello, nome, pannelloIniziale, onPannello, titoloVisore, senzaVicine, primaDiRiaprire }: Props) {
+function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, className, classeVisore, spilloIniziale, rivelaSpilloIniziale, puntoIniziale, onNaviga, partitaId: partitaEsplicita, conEditor = true, scelta, contenutiPannello, nome, pannelloIniziale, onPannello, titoloVisore, senzaVicine, primaDiRiaprire, infiltrazione = null }: Props) {
   const navigate = useNavigate();
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = partitaEsplicita !== undefined ? partitaEsplicita : attiva?.id ?? null;
-  const { mappa, caricamento, errore, ricarica, raccolto: raccoltoPartita, statoPunto: statoPuntoPartita, acquisto } = useMappaPartita(chiave, partitaId, { versione, onCambiato });
+  // §4.2: l'infiltrazione scelta nel popup vale per l'infiltrazione guardata in cui è stata scelta; cambiata quella, torna quella della pagina
+  const [sceltaContesto, setSceltaContesto] = useState<{ di: string | null; infiltrazione: string } | null>(null);
+  const contesto = sceltaContesto && sceltaContesto.di === infiltrazione ? sceltaContesto.infiltrazione : infiltrazione;
+  const { mappa, caricamento, errore, ricarica, raccolto: raccoltoPartita, statoPunto: statoPuntoPartita, acquisto } = useMappaPartita(chiave, partitaId, { versione, onCambiato, infiltrazione: contesto });
   // §8.6: togliendo il segno dal popup si chiede prima alla pagina (conferma «Riapre anche l'Enigma «…»»); segnare va diritto
   const raccolto = async (s: SpilloDto, valore: boolean) => {
     if (!valore && primaDiRiaprire && !(await primaDiRiaprire(s, null))) return;
@@ -157,6 +163,7 @@ function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, classN
         onStatoPunto={statoPunto}
         onAcquisto={acquisto}
         onDaVerificare={partitaId ? setDaVerificare : undefined}
+        onContesto={partitaId ? (k) => setSceltaContesto({ di: infiltrazione, infiltrazione: k }) : undefined}
         onChiudi={intero ? () => setIntero(false) : undefined}
         scelta={scelta}
         contenutiPannello={contenutiPannello}

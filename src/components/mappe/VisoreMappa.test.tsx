@@ -10,6 +10,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { VisoreMappa } from './VisoreMappa';
 import * as inquadratura from '../../utils/inquadraturaMappa';
 import type { MappaDto, SpilloDto } from '../../types';
+import { scegliVoce, valoreSelettore } from '../../../test/selettore';
 
 /** Spillo seed al centro della mappa di Shibuya, con id, nome e tipo obbligatori (il nome del tipo ripete il tipo) e gli altri campi di `extra`. */
 function spillo(extra: Partial<SpilloDto> & { id: number; nome: string; tipo: SpilloDto['tipo'] }): SpilloDto {
@@ -272,6 +273,23 @@ describe('VisoreMappa', () => {
     expect(popup.getByText('Stato nella 3ª infiltrazione')).toBeInTheDocument();
     fireEvent.click(popup.getByRole('button', { name: 'Da verificare' }));
     expect(onDaVerificare).toHaveBeenCalledWith({ spilloUid: 'u9', spilloNome: 'Seme della Bramosia', mappaNome: 'Shibuya', voce: 'k-03/7', voceNome: 'Seme del cortile', infiltrazioneNome: 'Cortile' });
+  });
+
+  // L4 §4.2 (§1.4): un pin di voci rigenerabili di più infiltrazioni ha lo stato per infiltrazione: nel popup «Stato nella» è un selettore
+  // dell'infiltrazione di contesto, che chiede alla pagina di rileggere in quella; con una sola infiltrazione resta il testo
+  it('§4.2: un pin di più infiltrazioni ha nel popup il selettore «Stato nella»; scegliendone un’altra lo si chiede alla pagina', () => {
+    const voce = (chiave: string, nome: string, inf: { chiave: string; nome: string }) => ({ chiave, tipo: 'oggetto' as const, nome, descrizione: '', esauribile: false, dungeon: 'madarame', area: inf.chiave, areaDedalo: null, stato: null, carattere: 'rigenerabile' as const, infiltrazione: inf });
+    const seconda = { chiave: 'm-02', nome: 'Scopri dov’è il Tesoro' }, quarta = { chiave: 'm-04', nome: 'Nelle profondità del Museo' };
+    const condiviso = spillo({ id: 12, nome: 'Ombre della sala', tipo: 'nemico', tipoNome: 'Nemico', x: 85, y: 75, contestoInfiltrazione: seconda,
+      voci: [voce('m-02/9', 'Ombre della sala', seconda), voce('m-04/3', 'Ombre della sala', quarta)] });
+    const onContesto = vi.fn();
+    monta({ mappa: { ...mappa, spilli: [...mappa.spilli, condiviso] }, onContesto });
+    fireEvent.click(screen.getByRole('button', { name: /^Nemico: Ombre della sala/ }));
+    const popup = within(screen.getByRole('dialog', { name: 'Ombre della sala' }));
+    // il nome del pulsante porta anche il valore intero (LAY3-7, `valoreNelNome`)
+    expect(valoreSelettore('Stato nella: Scopri dov’è il Tesoro', popup.getByRole('group', { name: 'Infiltrazione dello stato' }))).toBe('Scopri dov’è il Tesoro');
+    scegliVoce(/^Stato nella/, 'Nelle profondità del Museo');
+    expect(onContesto).toHaveBeenCalledWith('m-04');
   });
 
   // L4 §8.11: il popup del pin mostra lo stato del pin e, sotto, le sue voci col loro contatore k/N

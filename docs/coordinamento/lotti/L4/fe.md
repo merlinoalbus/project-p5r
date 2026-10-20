@@ -64,10 +64,27 @@ Aspettano i campi di BE per §8.11 (pin con stato proprio), chiesti a BE il 2026
 - Browser (partita 1): Kamoshida «Tutorial 11/04», passo «Parla con Morgana» → «Riapri» → «Riapre anche l’Enigma «Incontro con Morgana».», e lo
   stesso dal popup del pin «Morgana»; «Annulla» in tutti e due i casi; dati invariati (passo ed Enigma «ottenuto», verificato dall'API).
 
+## §4.2 — fatto (ripresa di L4, 2026-10-20)
+- `getMappa(chiave, partita?, infiltrazione?)`; `useMappaPartita(…, { infiltrazione })` legge la mappa nell'infiltrazione di contesto e, se
+  cambia, la rilegge in silenzio (zoom e posizione restano); il segno di un pin con `contestoInfiltrazione` si scrive in quella (§1.4).
+- `MappaIncorporata.infiltrazione`: la scheda passa l'infiltrazione guardata; la scelta fatta nel popup vale finché la pagina non ne guarda
+  un'altra (allora torna la sua).
+- **Popup** (`VisoreMappa.onContesto`): se le voci del pin stanno in più infiltrazioni, gruppo «Infiltrazione dello stato» con «Stato nella»
+  e un `Selettore` compatto (nome accessibile «Stato nella: <infiltrazione>», 44 px); con una sola, resta il testo «Stato nella X». Il k/N
+  sta anche sulle voci del popup.
+- Test visti rossi e poi verdi: `useMappaPartita.test.tsx` (contesto nella lettura, rilettura al cambio, scrittura nel contesto),
+  `VisoreMappa.test.tsx` (selettore solo con più infiltrazioni; k/N nel popup, pin aperto dal suo gruppo senza spostarlo),
+  `MappaIncorporata.test.tsx` (contesto della pagina, scelta nel popup, ritorno al cambio di pagina), `DungeonDettaglioPage.test.tsx`
+  (l'infiltrazione guardata arriva alla mappa). I 15 file collegati: 319/319; typecheck e lint verdi.
+- Browser (partita 1): Madarame «Entrata del Museo», pin «Installazione Artistica» (voci nella 1ª e in «Scopri dov'è il Tesoro»): il popup apre
+  su «Prima Infiltrazione al Museo», la scelta di «Scopri dov'è il Tesoro» rilegge `?infiltrazione=madarame-scopri-dove-il-tesoro` (solo GET,
+  nessuna scrittura). Misure col popup aperto: visore top 317 (1366×657), 317 (1280×689), 340 (1024×690), 317 (1920×1080) → R3-41 invariato;
+  intestazione 198 a 768×1024, 241 a 375×812; selettore 44 px; nessuno scorrimento orizzontale.
+
 ## Da fare
 1. ~~k/N, «Segna»/«Riapri» con «Riapre anche» e «Segnate anche»~~: fatto (sopra).
 5. ~~§8.6 (O4-2)~~: fatto (sopra).
-2. Selettore del contesto nel popup per un pin di più infiltrazioni (§4.2).
+2. ~~Selettore del contesto nel popup per un pin di più infiltrazioni (§4.2)~~: fatto (sopra).
 3. Sezione «Schede da sistemare», carattere della voce («Permanente», «Si ripropone», «Racconto»), «Esaurito» come chip, «Anche nella Nª infiltrazione» (§4.1, §4.3): non erano nella richiesta del PM di questo giro.
 4. Misure di layout ai formati, quando il lotto è finito.
 5. **§8.6 (O4-2), da Stesura (2026-10-20)**:
