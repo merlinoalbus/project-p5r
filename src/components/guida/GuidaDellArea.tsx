@@ -33,6 +33,8 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { TrasferisciVociInArea } from './TrasferisciVociInArea';
 import { NEL_CESTINO } from '../../utils/cestino';
+import { Modal } from '../shared/Modal';
+import { inCorso, testoAvanzamento, testoVociDelGesto } from '../../utils/gestiVoce';
 
 const TIPI = Object.keys(NOME_TIPO) as PuntoInteresseDto['tipo'][];
 
@@ -108,6 +110,8 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
   const [selezionato, setSelezionato] = useState<string | null>(null);
   /** Il modulo della voce nuova: in fondo all'area, o in fondo ai passi di un Enigma (`contenitore`, 095). */
   const [nuovoPunto, setNuovoPunto] = useState<{ nome: string; tipo: PuntoInteresseDto['tipo']; contenitore: string | null } | null>(null);
+  // L4 §8.11: la voce da riaprire, in attesa della conferma, con le altre voci che si riaprono con lei («Riapre anche: …»)
+  const [riapertura, setRiapertura] = useState<{ voce: PuntoInteresseDto; anche: string } | null>(null);
   /** La voce a cui si stanno collegando i pin (sulla mappa della pagina). */
   const [collegando, setCollegando] = useState<{ punto: string } | null>(null);
   const [occupato, setOccupato] = useState(false);
@@ -272,6 +276,8 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
           </span>
           {/* L4 (§4.1): un suo pin risulta fatto ma la voce no (da prima dell'aggiornamento); si sistema dalla voce aperta */}
           {p.daVerificare && <span className="chip chip--oro shrink-0 text-[11px]">Da verificare</span>}
+          {/* L4 §8.11: ogni pin tiene il suo stato e la voce lo calcola dai suoi pin; con più pin il contatore («In corso · 2/8») */}
+          {testoAvanzamento(p.avanzamento) && <span className={`chip shrink-0 text-[11px] ${inCorso(p.avanzamento) ? 'chip--attivo' : ''}`}>{testoAvanzamento(p.avanzamento)}</span>}
           {p.pin.length > 0
             ? <span className="chip chip--icona shrink-0 text-[11px]" title={p.pin.map((x) => `${x.nome} (${nomeSenzaPalazzo(x.mappaNome)})`).join(', ')}><IconaAzione chiave="posizione" dimensione={14} />{p.pin.length === 1 ? '1 pin' : `${p.pin.length} pin`}</span>
             : puntoDaCollegare(p.tipo) && !conPassi && <span className="chip shrink-0 text-[11px] text-text-muted">da collegare</span>}
@@ -306,7 +312,9 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
               : <div className="flex flex-wrap items-center gap-1.5">
                 {partitaId && p.stato !== 'ottenuto' && <button type="button" className="btn btn-primary btn-sm touch" onClick={() => void segnaEPassaOltre(p, 'ottenuto')}>Ottenuto</button>}
                 {partitaId && p.esauribile && p.stato !== 'esaurito' && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="esaurito" dimensione={20} />} titolo="Esaurito" onClick={() => void segnaEPassaOltre(p, 'esaurito')} />}
-                {partitaId && p.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" onClick={() => void cambiaStato(p, null)} />}
+                {/* L4 §8.11: «Riapri» toglie il segno a tutti i suoi pin; se altre voci li condividono si riaprono anche loro, e prima lo si dice */}
+                {partitaId && p.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri"
+                  onClick={() => ((p.condivise ?? []).length > 0 ? setRiapertura({ voce: p, anche: testoVociDelGesto(p.condivise!, areePalazzo) }) : void cambiaStato(p, null))} />}
               </div>}
             <div className="flex flex-wrap items-center gap-1.5">
               {/* nei dedali niente pin da collegare: i piani si generano a caso (2026-10-11) */}
@@ -476,6 +484,16 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
         {scelte ? null : nuovoPunto && !nuovoPunto.contenitore
           ? moduloNuovaVoce(nuovoPunto)
           : <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una voce" className="self-start" aria-label={areaDedalo ? `Aggiungi una voce di Trama in ${nomeArea}` : undefined} onClick={() => setNuovoPunto({ nome: '', tipo: areaDedalo ? 'trama' : 'altro', contenitore: null })} />}
+        {/* L4 §8.11 e §1.6: la conferma di «Riapri» quando si riaprono anche altre voci */}
+        {riapertura && (
+          <Modal titolo={`Riaprire «${riapertura.voce.nome}»?`} aperta onChiudi={() => setRiapertura(null)}
+            azioni={<>
+              <button type="button" className="btn btn-secondary touch" onClick={() => setRiapertura(null)}>Annulla</button>
+              <button type="button" className="btn btn-primary touch" onClick={() => { const v = riapertura.voce; setRiapertura(null); void cambiaStato(v, null); }}>Riapri</button>
+            </>}>
+            <p className="m-0 text-[14px]">Riapre anche: {riapertura.anche}.</p>
+          </Modal>
+        )}
       </div>
     </details>
   );

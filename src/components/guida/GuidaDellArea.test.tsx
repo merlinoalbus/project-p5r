@@ -675,3 +675,51 @@ describe('i dettagli della voce si correggono dalla «Modifica» (2026-10-18)', 
     expect(aggiornaPunto).not.toHaveBeenCalled();
   });
 });
+
+// L4 §8.11 (NR4-1): ogni pin tiene il suo stato e la voce lo calcola dai suoi pin. La voce con più pin dice il contatore k/N («In corso ·
+// 2/8» se ne è fatta una parte); «Riapri» toglie il segno a tutti i suoi pin e, se altre voci li condividono, chiede conferma elencandole
+describe('§8.11: contatore k/N e «Riapri» con «Riapre anche: …»', () => {
+  const pin = (id: number) => ({ id, nome: `Statua ${id}`, tipo: 'oggetto', mappa: 'm-sala', mappaNome: 'Palazzo di Kamoshida › Sala' });
+  const otto = Array.from({ length: 8 }, (_, i) => pin(i + 1));
+  const altreInfiltrazioni = [{ chiave: 'k-02', nome: 'Sala Centrale', ordine: 1 }, { chiave: 'k-04', nome: 'Torre', ordine: 3 }] as unknown as AreaDungeonDto[];
+
+  it('la voce con più pin dice «In corso · 2/8» se una parte è fatta, «8/8» se sono tutti fatti, niente con un pin solo', () => {
+    monta([
+      punto({ chiave: 'p1', nome: 'Installazioni artistiche', tipo: 'oggetto', pin: otto, avanzamento: { fatti: 2, totale: 8 } }),
+      punto({ chiave: 'p2', nome: 'Forziere fatto', pin: otto.slice(0, 3), avanzamento: { fatti: 3, totale: 3 }, stato: 'ottenuto' }),
+      punto({ chiave: 'p3', nome: 'Forziere singolo', pin: [pin(9)], avanzamento: { fatti: 0, totale: 1 } }),
+    ]);
+    fireEvent.click(screen.getByRole('button', { name: /Anche le segnate/ }));
+    expect(screen.getByRole('button', { name: /Installazioni artistiche/ })).toHaveTextContent('In corso · 2/8');
+    expect(screen.getByRole('button', { name: /Forziere fatto/ })).toHaveTextContent('3/3');
+    expect(screen.getByRole('button', { name: /Forziere singolo/ })).not.toHaveTextContent(/\d\/\d/);
+  });
+
+  it('«Riapri» con voci condivise chiede conferma con «Riapre anche: …»; «Annulla» non tocca niente, «Riapri» riapre', async () => {
+    const onPuntoAggiornato = vi.fn();
+    const cambiaStato = vi.fn().mockResolvedValue(true);
+    render(<MemoryRouter><GuidaDellArea area={area([punto({ chiave: 'p1', nome: 'Forziere d’oro', stato: 'ottenuto', pin: [pin(1)], avanzamento: { fatti: 1, totale: 1 },
+      condivise: [{ chiave: 'k4-forziere', nome: 'Forziere d’oro (di nuovo)', infiltrazione: { chiave: 'k-04', nome: 'Torre' } }] })])}
+      planimetrie={planimetrie} partitaId={4} mappaAperta="m-sala" cambiaStato={cambiaStato} onPuntoAggiornato={onPuntoAggiornato} onRicarica={vi.fn()} areePalazzo={altreInfiltrazioni} /></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: /Anche le segnate/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Forziere d’oro/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Riapri' }));
+    const finestra = within(screen.getByRole('dialog', { name: 'Riaprire «Forziere d’oro»?' }));
+    expect(finestra.getByText('Riapre anche: Forziere d’oro (di nuovo) — 4ª infiltrazione.')).toBeInTheDocument();
+    fireEvent.click(finestra.getByRole('button', { name: 'Annulla' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(cambiaStato).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Riapri' }));
+    fireEvent.click(within(screen.getByRole('dialog', { name: 'Riaprire «Forziere d’oro»?' })).getByRole('button', { name: 'Riapri' }));
+    await waitFor(() => expect(cambiaStato).toHaveBeenCalledWith(expect.objectContaining({ chiave: 'p1' }), null));
+  });
+
+  it('«Riapri» senza voci condivise riapre subito, senza conferma', async () => {
+    const { cambiaStato } = monta([punto({ chiave: 'p1', stato: 'ottenuto', pin: [pin(1)], condivise: [] })]);
+    fireEvent.click(screen.getByRole('button', { name: /Anche le segnate/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Forziere della sala/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Riapri' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+    await waitFor(() => expect(cambiaStato).toHaveBeenCalledWith(expect.objectContaining({ chiave: 'p1' }), null));
+  });
+});

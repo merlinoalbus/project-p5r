@@ -12,6 +12,7 @@ import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMapp
 import { areaImmagine, inquadraturaMappa, type AreaMappa } from '../../utils/inquadraturaMappa';
 import { areaConPezzi, copiePosate, mascheraZone, nomeCopia, posaDi, statoPezzo, stileImmagineMascherata, stilePezzo } from '../../utils/pezziMappa';
 import { raggruppaSpilli, type Punto } from '../../utils/raggruppaSpilli';
+import { testoAvanzamento } from '../../utils/gestiVoce';
 import { NavigazioneSpillo } from './NavigazioneSpillo';
 import { arrivoSpillo, nomeDellaMeta, nomeMetaSpillo, type NavigaMappa } from '../../utils/navigazioneMappa';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type Ref } from 'react';
@@ -1159,7 +1160,8 @@ export function AzioniStato<T extends SpilloDto | SchedaContenutoGuidaDto>({ spi
       <ul className="m-0 flex w-full list-none flex-col gap-1 p-0" aria-label={`Voci della guida di ${nomePin(s)}`}>
         {s.voci.map((v) => (
           <li key={v.chiave} className="flex flex-wrap items-center gap-1" role="group" aria-label={`Voce: ${v.nome}`}>
-            <span className="min-w-0 flex-1 basis-full text-[12px] font-semibold break-words">{v.nome}{v.stato ? ` · ${v.stato}` : ''}</span>
+            {/* L4 §8.11: la voce col suo contatore dei pin fatti («In corso · 2/8»); lo stato del pin sta sopra */}
+            <span className="min-w-0 flex-1 basis-full text-[12px] font-semibold break-words">{v.nome}{v.stato ? ` · ${v.stato}` : ''}{testoAvanzamento(v.avanzamento) ? ` · ${testoAvanzamento(v.avanzamento)}` : ''}</span>
             <AzioniVoce spillo={s} voce={v} occupato={occupato} onStatoPunto={onStatoPunto} />
           </li>
         ))}
