@@ -72,6 +72,26 @@ it('con una proposta la finestra dice che il collegamento apre la prima della pr
   expect(finestra.getByText('Nessuna: il collegamento «Palazzo di Kamoshida» apre «Tetto del Vecchio Castello», la prima della proposta.')).toBeInTheDocument();
 });
 
+// FUN3-3 (strada (a) del PM): con un atterraggio il collegamento porta alla planimetria d'atterraggio (§4.1), non alla proposta: la finestra
+// descrive l'atterraggio; senza atterraggio il testo resta quello della proposta (test qui sopra)
+it('con un atterraggio la finestra dice che il collegamento apre la planimetria d’arrivo del giorno, non la proposta (FUN3-3)', async () => {
+  const proposta = { infiltrazioni: [{ chiave: 'k-11', nome: 'Tutorial Palazzo 12/04' }], motivo: 'la voce descrive il primo accesso', certezza: 'certa' as const };
+  render(<InfiltrazioniVoce a={voce({ tipo: 'palazzo', riferimento: { tipo: 'dungeon', chiave: 'kamoshida' }, riferimentoTesto: 'Palazzo di Kamoshida', infiltrazioni: [], propostaInfiltrazioni: proposta,
+    atterraggio: { mappa: 'palazzo-di-kamoshida-sala-centrale', spillo: null } } as Partial<AzionePercorsoDto>)} partitaId={7} onCambiata={() => {}} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
+  const finestra = within(await screen.findByRole('dialog', { name: 'Infiltrazioni della voce' }));
+  expect(finestra.getByText('Nessuna: il collegamento «Palazzo di Kamoshida» apre la planimetria d’arrivo del giorno, quella dell’atterraggio del Palazzo. Confermata la proposta, aprirà la prima non completata fra quelle scelte.')).toBeInTheDocument();
+  expect(finestra.queryByText(/la prima della proposta/)).toBeNull();
+});
+
+it('con un atterraggio e senza proposta la finestra descrive solo l’atterraggio (FUN3-3)', async () => {
+  render(<InfiltrazioniVoce a={voce({ tipo: 'palazzo', riferimento: { tipo: 'dungeon', chiave: 'kamoshida' }, riferimentoTesto: 'Palazzo di Kamoshida', infiltrazioni: [],
+    atterraggio: { mappa: 'palazzo-di-kamoshida-sala-centrale', spillo: 4 } } as Partial<AzionePercorsoDto>)} partitaId={7} onCambiata={() => {}} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
+  const finestra = within(await screen.findByRole('dialog', { name: 'Infiltrazioni della voce' }));
+  expect(finestra.getByText('Nessuna: il collegamento «Palazzo di Kamoshida» apre la planimetria d’arrivo del giorno, quella dell’atterraggio del Palazzo.')).toBeInTheDocument();
+});
+
 it('nella finestra: sposta, togli e aggiungi salvano subito l’insieme intero; l’ultima non si propone di seguito', async () => {
   api.impostaInfiltrazioniVoce.mockImplementation(async (_uid: string, chiavi: string[]) => voce({ infiltrazioni: chiavi.map((k) => ({ chiave: k, nome: OPZIONI.find((o) => o.chiave === k)!.nome })) }));
   render(<InfiltrazioniVoce a={voce({ infiltrazioni: [{ chiave: 'k-10', nome: 'Vecchio Castello' }, { chiave: 'k-11', nome: 'Tetto del Vecchio Castello' }] })} partitaId={7} onCambiata={() => {}} />);

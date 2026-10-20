@@ -75,11 +75,14 @@ export function InfiltrazioniVoce({ a, partitaId, onCambiata }: Props) {
           <div className="flex flex-col gap-3 text-[13px]">
             {/* il collegamento della voce si chiama come il Palazzo («Palazzo di Madarame»): il testo lo nomina così (UX3-2) */}
             <p className="m-0 text-text-secondary">In ordine, come le percorri: {collegamento ? `${collegamento} apre la prima non completata` : 'dicono in quali infiltrazioni avviene la voce, che non apre il Palazzo'}. Ogni cambio si salva subito e non tocca il resto della voce.</p>
-            {/* con una proposta il collegamento apre la sua prima infiltrazione (UX3-1); senza, la prima non completata del Palazzo; senza
-                collegamento (UX3-9) si dice solo che l'infiltrazione della voce non è ancora indicata */}
-            {insieme.length === 0 && <p className="m-0 text-text-muted">{collegamento
-              ? `Nessuna: ${collegamento} apre ${a.propostaInfiltrazioni?.infiltrazioni.length ? `«${a.propostaInfiltrazioni.infiltrazioni[0].nome}», la prima della proposta` : 'la prima infiltrazione non completata del Palazzo'}.`
-              : 'Nessuna: la voce non dice ancora in quale infiltrazione avviene.'}</p>}
+            {/* con un atterraggio il collegamento porta alla planimetria d'atterraggio del giorno (§4.1, prima della proposta: FUN3-3, strada (a)
+                del PM), e confermata la proposta alla prima non completata fra quelle scelte; con una proposta la sua prima infiltrazione (UX3-1);
+                senza, la prima non completata del Palazzo; senza collegamento (UX3-9) si dice solo che l'infiltrazione non è ancora indicata */}
+            {insieme.length === 0 && <p className="m-0 text-text-muted">{!collegamento
+              ? 'Nessuna: la voce non dice ancora in quale infiltrazione avviene.'
+              : a.atterraggio
+                ? `Nessuna: ${collegamento} apre la planimetria d’arrivo del giorno, quella dell’atterraggio del Palazzo.${proposta ? ' Confermata la proposta, aprirà la prima non completata fra quelle scelte.' : ''}`
+                : `Nessuna: ${collegamento} apre ${a.propostaInfiltrazioni?.infiltrazioni.length ? `«${a.propostaInfiltrazioni.infiltrazioni[0].nome}», la prima della proposta` : 'la prima infiltrazione non completata del Palazzo'}.`}</p>}
             <ol className="m-0 flex list-none flex-col gap-1.5 p-0">
               {insieme.map((x, i) => (
                 <li key={`${x.chiave}:${i}`} className="card flex flex-wrap items-center gap-1 p-1.5">
