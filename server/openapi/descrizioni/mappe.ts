@@ -80,9 +80,9 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
   },
   'PUT /api/mappe/:chiave': {
     sommario: 'Aggiorna una mappa dall\'editor: i campi assenti restano',
-    descrizione: 'Il genitore non può essere la mappa stessa né una sua discendente. Spostandola, le infiltrazioni sue e delle discendenti devono restare del Palazzo di arrivo. Salvare con il nome segna il nome come rivisto; se la mappa dava il titolo alla sua area, quel titolo si fissa prima del cambio. Riga, legame con l\'entità e percorsi si scrivono in una transazione e la mappa diventa dell\'utente.',
+    descrizione: 'Il genitore non può essere la mappa stessa né una sua discendente. Una mappa senza Area di tipo `luogo` o `area` non entra nel mondo (spostata sotto Tokyo o un quartiere, o resa `luogo`/`area` lì): 409 `usa-aggiungi-area`, come la creazione (FUN2-8, R2-27); le generiche del mondo, i Palazzi e i Memento non cambiano. Spostandola, le infiltrazioni sue e delle discendenti devono restare del Palazzo di arrivo. Salvare con il nome segna il nome come rivisto; se la mappa dava il titolo alla sua area, quel titolo si fissa prima del cambio. Riga, legame con l\'entità e percorsi si scrivono in una transazione e la mappa diventa dell\'utente.',
     risposta: 'La mappa aggiornata: `MappaDto`',
-    errori: [[404, 'mappa-non-trovata'], [400, 'genitore-non-valido'], [400, 'mappa-fuori-palazzo'], [400, 'area-inesistente'], [400, 'area-di-altro-palazzo']],
+    errori: [[404, 'mappa-non-trovata'], [400, 'genitore-non-valido'], [409, 'usa-aggiungi-area'], [400, 'mappa-fuori-palazzo'], [400, 'area-inesistente'], [400, 'area-di-altro-palazzo']],
   },
   'PUT /api/mappe/:chiave/aree': {
     sommario: 'Imposta l\'insieme delle infiltrazioni che toccano una planimetria',
