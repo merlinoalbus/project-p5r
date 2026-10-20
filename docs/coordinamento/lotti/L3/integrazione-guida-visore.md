@@ -30,7 +30,7 @@
 | A3. Test funzionali, UX, layout, no-reg (640 indirizzi di NR3-4) | 4 tester, uno alla volta | linea di rilascio | da fare |
 | A4. Riga della ROADMAP e validatore | Collaudo, PM | linea di rilascio | da fare |
 | A5. Push della sola linea di rilascio su `newreview` (avanzamento rapido), pipeline, verifica di p5s | PM | — | da fare |
-| B1. BE di RG-3 e RG-4: migrazione 114 (solo colonna), regola unica, PUT, `GET /api/mappe/:chiave/guida` | BE | sopra c8338fd0 | **in corso** |
+| B1. BE di RG-3 e RG-4: migrazione 114 (solo colonna), regola unica, PUT, `GET /api/mappe/:chiave/guida` | BE | sopra c8338fd0 | **fatto** in 42b34243: copia 0533Z 450/450 voci senza pin collocate, impronta delle 116 tabelle identica (colonna nuova esclusa); da verificare. Decisione del PM: un Enigma con passi non si aggancia a mano (400 `enigma-segue-i-passi`), sta dove stanno i passi |
 | B2. FE di RG-1 e RG-4 | FE | dopo B1 | da fare, quando i tester di A3 hanno finito, mentre il validatore (A4, agent) lavora: sempre una sessione alla volta |
 | B3. Prove e validatore dell'integrazione, poi push | tester, validatore | dopo A5 | da fare |
 | Poi | L4 (FE da completare), L5–L11 | | invariato |

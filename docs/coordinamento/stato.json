@@ -1,6 +1,6 @@
 {
   "obiettivo": "Lotti L0–L11 della razionalizzazione completati sul branch newreview, pubblicati e funzionanti su p5s",
-  "aggiornato": "2026-10-20T10:35:00Z",
+  "aggiornato": "2026-10-20T10:45:00Z",
   "fasi": [
     "requisiti",
     "dati",
@@ -307,8 +307,8 @@
     {
       "nome": "Implementazione BE",
       "fase": "be",
-      "stato": "al lavoro",
-      "attivita": "ORA (10:20Z): riaperta da sola per il requisito nuovo di L3 «planimetria della voce» (deciso dall'utente): campo sulla voce, migrazione che aggancia le voci senza pin alla planimetria 1 dell'infiltrazione, PUT della voce, lettura della guida per il visore; manda prima lo schema al PM. — Prima (10:05Z): chiusa. E2 lato BE consegnato: 0cfbe028 (conteggiPin nell'albero e GET /api/mappe/albero/conteggi) e bc08e3ec (le porte fra i passaggi, come nel testo accettato dall'utente); copia 0533Z 767/747/228; senza push né migrazioni. — Prima (09:40Z): riaperta da sola per E2 di L3, campo conteggiPin {contenuto, passaggi, note} nell'albero; commit senza push, poi si richiude e torna FE per l'interfaccia. — Prima: chiusa (archiviata su richiesta dell'utente). Fatto: UX2-13 consegnato, 7624bdda su newreview, solo L2 (cherry-pick pulito su 62547532, nessuna migrazione; esiti lotti/L2/esiti-giro2/be/11-ux2-13.md), hash a Manager e Collaudo. Per L3 e seguenti, alla ripresa: E2 (conteggiPin nell'albero, rilascio di L3) e poi L5 dal B0 solo quando il Manager lo conferma. Fatto: L3 BE completo, L4 b83c30ac, 71378325 e ad585387, O3-1 12484305",
+      "stato": "chiusa",
+      "attivita": "ORA (10:45Z): chiusa. B1 consegnato in 42b34243 (migrazione 114 solo colonna, regola unica della planimetria della voce, PUT, GET /api/mappe/:chiave/guida; 450/450 voci collocate sulla copia, impronta identica), senza push. — Prima (10:20Z): riaperta da sola per il requisito nuovo di L3 «planimetria della voce» (deciso dall'utente): campo sulla voce, migrazione che aggancia le voci senza pin alla planimetria 1 dell'infiltrazione, PUT della voce, lettura della guida per il visore; manda prima lo schema al PM. — Prima (10:05Z): chiusa. E2 lato BE consegnato: 0cfbe028 (conteggiPin nell'albero e GET /api/mappe/albero/conteggi) e bc08e3ec (le porte fra i passaggi, come nel testo accettato dall'utente); copia 0533Z 767/747/228; senza push né migrazioni. — Prima (09:40Z): riaperta da sola per E2 di L3, campo conteggiPin {contenuto, passaggi, note} nell'albero; commit senza push, poi si richiude e torna FE per l'interfaccia. — Prima: chiusa (archiviata su richiesta dell'utente). Fatto: UX2-13 consegnato, 7624bdda su newreview, solo L2 (cherry-pick pulito su 62547532, nessuna migrazione; esiti lotti/L2/esiti-giro2/be/11-ux2-13.md), hash a Manager e Collaudo. Per L3 e seguenti, alla ripresa: E2 (conteggiPin nell'albero, rilascio di L3) e poi L5 dal B0 solo quando il Manager lo conferma. Fatto: L3 BE completo, L4 b83c30ac, 71378325 e ad585387, O3-1 12484305",
       "avanzamento": 65
     },
     {
@@ -356,8 +356,8 @@
     {
       "nome": "Collaudo",
       "fase": "collaudo",
-      "stato": "chiusa",
-      "attivita": "ORA: chiusa. Ultima riapertura alle 07:27:13Z per la prova git su 8ae417c5 (esito conforme alle 07:27:19Z: solo documenti dopo 292a122e, alberi del codice invariati), poi archiviata. Prima: chiusa dopo il giro 3 di L2 (riaperta e richiusa): prove git su b6066830 conformi, rossi di E4 ed E7 visti. Prima: riaperto per il giro 3 di L2: prove git su b6066830 (codice uguale a 292a122e) e rossi di E4 ed E7 isolato. Fatto: R1 su 292a122e (prove grezze, tutto conforme), 872ac976, 115581b4",
+      "stato": "al lavoro",
+      "attivita": "ORA (10:45Z): riaperta da sola per il collaudo di L3 (A2) sulla linea di rilascio newreview-l3 = fd988a3e: prova git, typecheck, lint, test mirati, istanza di anteprima su copia di p5s, righe dei difetti; poi i quattro tester uno alla volta. — Prima: chiusa. Ultima riapertura alle 07:27:13Z per la prova git su 8ae417c5 (esito conforme alle 07:27:19Z: solo documenti dopo 292a122e, alberi del codice invariati), poi archiviata. Prima: chiusa dopo il giro 3 di L2 (riaperta e richiusa): prove git su b6066830 conformi, rossi di E4 ed E7 visti. Prima: riaperto per il giro 3 di L2: prove git su b6066830 (codice uguale a 292a122e) e rossi di E4 ed E7 isolato. Fatto: R1 su 292a122e (prove grezze, tutto conforme), 872ac976, 115581b4",
       "avanzamento": 80
     }
   ],
