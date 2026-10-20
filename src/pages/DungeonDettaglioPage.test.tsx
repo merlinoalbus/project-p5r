@@ -736,6 +736,22 @@ it('una data che è una frase: da 1024 px il chip dice l’etichetta, la frase i
   expect(screen.getAllByText(/^Furto consigliato: Nella tabella di marcia/).length).toBeGreaterThan(0);
 });
 
+// LAY3-5 (regola dell'utente: intestazione al massimo il 30% della schermata). In jsdom `useMedia` è falso, cioè la scheda sotto i 1024 px:
+// l'intestazione è la griglia compatta e «Sulla mappa di Tokyo» e i conteggi stanno nei «Dettagli dalla guida», non nella riga
+it('sotto i 1024 px l’intestazione è compatta: «Sulla mappa di Tokyo» e i conteggi nei «Dettagli dalla guida» (LAY3-5)', async () => {
+  getDungeon.mockResolvedValue(palazzo(true));
+  monta('kamoshida');
+  await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+  const intestazione = screen.getByRole('heading', { name: 'Palazzo di Kamoshida' }).closest('header')!;
+  expect(intestazione.querySelector(':scope > .grid')).not.toBeNull();
+  const dettagli = within(intestazione).getAllByText('Dettagli dalla guida').map((s) => s.closest('details')!);
+  const sotto = dettagli.find((x) => x.className.includes('lg:hidden'))!;
+  expect(within(sotto).getByRole('button', { name: /Sulla mappa di Tokyo/ })).toBeInTheDocument();
+  expect(within(intestazione).getAllByRole('button', { name: /Sulla mappa di Tokyo/ })).toHaveLength(1);
+  expect(within(sotto).getByText('3 infiltrazioni')).toBeInTheDocument();
+  expect(within(sotto).getByText('Sovrano: Kamoshida')).toBeInTheDocument();
+});
+
 it('senza schede da sistemare la sezione non c’è (AP3-1)', async () => {
   getDungeon.mockResolvedValue({ ...palazzo(true), schedeDaSistemare: [] });
   monta('kamoshida');
@@ -995,16 +1011,19 @@ const palazzoL4 = (): DungeonDettaglioDto => {
 };
 const divergenzaSicura = { spillo: 1, spilloUid: 'u1', spilloNome: 'Forziere', mappa: 'm-cancello', mappaNome: 'Palazzo di Kamoshida › Cancello', voce: 'p1', voceNome: 'Sicura del cancello', infiltrazione: 'k-01', infiltrazioneNome: 'Cancello', rilevataIl: '2026-10-20' };
 
-it('L4: l’anello conta gli oggetti permanenti; il chip dice «Concluso · Tesoro ✓ · Boss ✓» e quel che manca al completamento', async () => {
+// LAY3-5: nei Palazzi il chip riassuntivo (R3-41, scelta 3 del PM) vale a ogni larghezza: livello e «da verificare» in un chip, Tesoro
+// e boss per esteso nel suo nome e nei «Dettagli dalla guida»
+it('L4: l’anello conta gli oggetti permanenti; il chip riassuntivo dice «Concluso · 1 da verificare» e quel che manca al completamento', async () => {
   getDungeon.mockResolvedValue(palazzoL4());
   getDivergenze.mockResolvedValue([divergenzaSicura]);
   monta('kamoshida');
   await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
   expect(screen.getByRole('progressbar', { name: 'Avanzamento in Palazzo di Kamoshida: 56 oggetti permanenti fatti su 71' })).toBeInTheDocument();
   expect(screen.getByText('78%')).toBeInTheDocument();
-  const chip = screen.getByText('Concluso · Tesoro ✓ · Boss ✓');
-  expect(chip).toHaveAccessibleName('Concluso: Tesoro raccolto, boss finale sconfitto');
-  expect(chip).toHaveAttribute('title', 'Tesoro e boss finale · al completamento mancano 15 oggetti permanenti');
+  const chip = screen.getByText('Concluso · 1 da verificare');
+  expect(chip).toHaveAccessibleName('Concluso: Tesoro raccolto, boss finale sconfitto; 1 da verificare');
+  expect(chip).toHaveAttribute('title', 'Tesoro e boss finale · al completamento mancano 15 oggetti permanenti — tocca per i pin da verificare');
+  expect(screen.getAllByText(/^Tesoro raccolto · boss finale sconfitto/).length).toBeGreaterThan(0);
 });
 
 it('L4: «Da verificare» dalla scheda — il chip apre la sezione, l’elenco apre la finestra, «Segna la voce» segna e rilegge', async () => {
@@ -1016,7 +1035,7 @@ it('L4: «Da verificare» dalla scheda — il chip apre la sezione, l’elenco a
   await waitFor(() => expect(getDivergenze).toHaveBeenCalledWith(4, 'kamoshida'));
   const sezione = screen.getByText('Da verificare (1)').closest('details')!;
   expect(sezione).not.toHaveAttribute('open');
-  fireEvent.click(screen.getByRole('button', { name: '1 da verificare' }));
+  fireEvent.click(screen.getByRole('button', { name: /; 1 da verificare$/ }));
   expect(sezione).toHaveAttribute('open');
   fireEvent.click(await within(sezione).findByRole('button', { name: /^Forziere/ }));
   const finestra = within(screen.getByRole('dialog', { name: 'Da verificare' }));
@@ -1421,7 +1440,8 @@ describe('intestazione con l’illustrazione (L1, scelta dell’utente «Illustr
     const figure = screen.getAllByAltText('Illustrazione di Palazzo di Kamoshida');
     expect(figure).toHaveLength(3);
     // ogni misura chiede la miniatura della sua larghezza (`sizes` uguale al riquadro), non l'originale
-    expect(figure.map((f) => f.getAttribute('sizes'))).toEqual(['150px', '176px', '104px']);
+    // LAY3-5: sotto i 1024 px più piccola ma piena (96 px sul telefono, 128 sul tablet; erano 150 e 176)
+    expect(figure.map((f) => f.getAttribute('sizes'))).toEqual(['96px', '128px', '104px']);
     // da 1024 a 1279 px lo stemma da solo (UX-1): la fascia `lg:block xl:hidden` non ha l'illustrazione
     expect(document.querySelector('header .lg\\:block.xl\\:hidden .illustrazione-segno')).toBeNull();
     // da 1280 px in riga con l'anello (non più in colonna, R3-41), e nessuna immagine velata dietro al testo
