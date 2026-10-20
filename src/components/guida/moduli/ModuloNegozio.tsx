@@ -14,7 +14,7 @@ import { SelettoreIcone } from '../../shared/SelettoreIcone';
 import { OrariEditor } from '../OrariEditor';
 import { SceltaLuogo } from '../SceltaLuogo';
 import { NOME_TIPO_NEGOZIO } from '../../../utils/negozi';
-import type { OrariNegozio } from '../../../../shared/orariNegozio';
+import { ORARI_SEMPRE, type OrariNegozio } from '../../../../shared/orariNegozio';
 import { testoDi, type PropsModulo } from './base';
 import { Blocco, Campo, Griglia } from './campi';
 import type { ProgrammaPunti } from './definizioni';
@@ -28,7 +28,8 @@ const OPZIONI_TIPO = Object.entries(NOME_TIPO_NEGOZIO).map(([chiave, nome]) => (
  */
 export function ModuloNegozio({ dati, imposta, disabilitato }: PropsModulo) {
   const confidenti = useCarica(() => getConfidenti(), []);
-  const orari = dati.orari_json as OrariNegozio;
+  // L5 (R5-12b): gli orari sono del luogo (sede); qui solo l'eccezione del negozio, quando la guida lo distingue
+  const eccezione = (dati.eccezione_orari_json as OrariNegozio | null) ?? null;
   const programma = (dati.programma_punti_json as ProgrammaPunti | null) ?? null;
   return (
     <div className="flex flex-col gap-3">
@@ -46,7 +47,15 @@ export function ModuloNegozio({ dati, imposta, disabilitato }: PropsModulo) {
             opzioni={(confidenti.dati ?? []).map((c) => ({ chiave: c.chiave, nome: c.nome, dettaglio: c.arcanaNome }))} onCambia={(k) => imposta({ confidente_chiave: k || null })} />
         </Blocco>
       </Griglia>
-      <OrariEditor valore={orari} onCambia={(o) => imposta({ orari_json: o })} disabilitato={disabilitato} />
+      <fieldset className="regole-editor flex flex-col gap-2">
+        <legend>Orari</legend>
+        <p className="m-0 text-[12px] text-text-muted">Gli orari sono quelli del luogo (la sede): si cambiano dal luogo. Qui solo se il negozio ha orari suoi.</p>
+        <label className="flex items-center gap-2 text-[13px] touch">
+          <input type="checkbox" className="h-5 w-5" checked={eccezione !== null} disabled={disabilitato} onChange={(e) => imposta({ eccezione_orari_json: e.target.checked ? { ...ORARI_SEMPRE } : null })} />
+          Il negozio ha orari suoi, diversi da quelli del luogo
+        </label>
+        {eccezione && <OrariEditor valore={eccezione} onCambia={(o) => imposta({ eccezione_orari_json: o })} disabilitato={disabilitato} />}
+      </fieldset>
       <fieldset className="regole-editor flex flex-col gap-2">
         <legend>Programma punti</legend>
         <label className="flex items-center gap-2 text-[13px] touch">

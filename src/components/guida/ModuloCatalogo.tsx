@@ -11,7 +11,7 @@
 import { useState } from 'react';
 import { CondizioniEditor } from './CondizioniEditor';
 import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../../shared/condizioniSpillo';
-import { aggiornaElementoCatalogo, creaElementoCatalogo, eliminaElementoCatalogo, nascondiElementoCatalogo } from '../../services/api';
+import { aggiornaElementoCatalogo, creaElementoCatalogo, eliminaElementoCatalogo, eliminaNelCestino, isApiError, nascondiElementoCatalogo, ripristinaElementoCatalogo } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
@@ -35,7 +35,7 @@ interface Props {
  * La finestra di creazione o correzione di un elemento del catalogo. Prende dal modulo del tipo (`MODULI`) i dati
  * iniziali, i campi, la validazione e la preparazione del corpo; aggiunge le condizioni (se il tipo le prevede, lette
  * dal JSON salvato), la spunta «Confermato» e i comandi del guscio: «Salva» (attivo solo con dati e condizioni validi),
- * «Ripristina dalla guida» o «Elimina» per le righe dell'utente, corrette o nascoste, e «Nascondi» per quelle della guida.
+ * «Ripristina i valori della guida» per le righe corrette, «Elimina» (nel cestino per luoghi e negozi, L5) e «Nascondi» per quelle della guida.
  */
 export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onChiudi, onSalvato }: Props) {
   const tipo = tipoCatalogoDi(tipoModulo);
@@ -70,16 +70,52 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
     }
   };
 
-  /** Una sola chiamata di eliminazione: il server elimina la riga dell'utente o rimette l'originale della guida, e la notifica dice quale delle due. */
-  const ripristinaOelimina = async () => {
+  // L5 (M §3.2): due gesti, due rotte. «Ripristina i valori della guida» rimette i dati della guida (`POST …/ripristina`, ogni tipo, mai
+  // elimina); «Elimina» di un luogo o di un negozio va nel cestino (con la conferma e, se ha contenuti, il riepilogo del server); gli altri
+  // tipi eliminano le righe create dall'utente come prima (fino a L11)
+  const nelCestino = tipo === 'luogo' || tipo === 'negozio';
+  /** La finestra di conferma dell'eliminazione nel cestino; `riepilogo` è quel che il server ha detto che se ne va (409). */
+  const [eliminazione, setEliminazione] = useState<{ riepilogo: string | null } | null>(null);
+  /** Rimette i valori della guida su una riga corretta. */
+  const ripristina = async () => {
     if (!elemento) return;
     setOccupato(true);
     try {
-      const esito = await eliminaElementoCatalogo(tipo, elemento.chiave);
-      notifica('success', esito.esito === 'eliminata' ? 'Eliminato.' : 'Ripristinati i dati della guida.');
+      await ripristinaElementoCatalogo(tipo, elemento.chiave);
+      notifica('success', 'Ripristinati i valori della guida.');
       onSalvato();
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Operazione fallita.');
+    } finally {
+      setOccupato(false);
+    }
+  };
+  /** Elimina la riga creata dall'utente (tipi diversi da luogo e negozio). */
+  const elimina = async () => {
+    if (!elemento) return;
+    setOccupato(true);
+    try {
+      await eliminaElementoCatalogo(tipo, elemento.chiave);
+      notifica('success', 'Eliminato.');
+      onSalvato();
+    } catch (err) {
+      notifica('error', err instanceof Error ? err.message : 'Operazione fallita.');
+    } finally {
+      setOccupato(false);
+    }
+  };
+  /** Luogo o negozio nel cestino: la prima conferma chiede senza `conferma`; con dei contenuti il server li elenca (409) e la seconda li porta via. */
+  const eliminaLuogoNegozio = async () => {
+    if (!elemento || !nelCestino) return;
+    setOccupato(true);
+    try {
+      await eliminaNelCestino(tipo, elemento.chiave, eliminazione?.riepilogo !== null && eliminazione?.riepilogo !== undefined);
+      notifica('success', `«${elemento.nome}» è nel cestino: si rimette da Impostazioni › Cestino.`);
+      setEliminazione(null);
+      onSalvato();
+    } catch (err) {
+      if (isApiError(err) && err.status === 409) setEliminazione({ riepilogo: testoRiepilogo(err.details) || err.message });
+      else notifica('error', err instanceof Error ? err.message : 'Operazione fallita.');
     } finally {
       setOccupato(false);
     }
@@ -112,10 +148,11 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
       azioni={
         <>
           <button type="button" className="btn btn-secondary" onClick={onChiudi}>Annulla</button>
-          {!nuovo && (elemento.origine === 'utente' || elemento.nascosta) && (
-            <button type="button" className="btn btn-danger" disabled={occupato} onClick={() => void ripristinaOelimina()}>
-              {elemento.modificata || elemento.nascosta ? 'Ripristina dalla guida' : 'Elimina'}
-            </button>
+          {!nuovo && elemento.modificata && (
+            <button type="button" className="btn btn-secondary" disabled={occupato} onClick={() => void ripristina()}>Ripristina i valori della guida</button>
+          )}
+          {!nuovo && (nelCestino || (elemento.origine === 'utente' && !elemento.modificata)) && (
+            <button type="button" className="btn btn-danger" disabled={occupato} onClick={() => (nelCestino ? setEliminazione({ riepilogo: null }) : void elimina())}>Elimina</button>
           )}
           <button type="button" className="btn btn-primary" disabled={occupato || !regoleValide || !modulo.valido(dati)} onClick={() => void salva()}>Salva</button>
         </>
@@ -125,7 +162,7 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
         {!nuovo && (
           <p className="m-0 text-[12px] text-text-muted">
             {elemento.origine === 'utente' && !elemento.modificata && 'Riga aggiunta da te.'}
-            {elemento.modificata && 'Riga della guida corretta da te: «Ripristina dalla guida» rimette i dati originali.'}
+            {elemento.modificata && 'Riga della guida corretta da te: «Ripristina i valori della guida» rimette i dati originali.'}
             {elemento.origine === 'seed' && !elemento.modificata && 'Riga dei dati della guida: salvando, la correzione resterà anche dopo gli aggiornamenti.'}
             {elemento.nascosta && ' Attualmente nascosta.'}
           </p>
@@ -148,6 +185,26 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
           )}
         </div>
       </div>
+      {/* L5 (R5-21): l'eliminazione di un luogo o di un negozio, nel cestino, con quel che porta con sé */}
+      {eliminazione && elemento && (
+        <Modal titolo={`Eliminare «${elemento.nome}»?`} aperta onChiudi={() => setEliminazione(null)}
+          azioni={<>
+            <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={() => setEliminazione(null)}>Annulla</button>
+            <button type="button" className="btn btn-danger touch" disabled={occupato} onClick={() => void eliminaLuogoNegozio()}>{eliminazione.riepilogo ? 'Metti nel cestino' : 'Elimina'}</button>
+          </>}>
+          <div className="flex flex-col gap-2 text-[14px]">
+            {eliminazione.riepilogo && <p className="m-0 text-warning" role="alert">Se ne vanno anche: {eliminazione.riepilogo}.</p>}
+            <p className="m-0 text-text-secondary">Va nel cestino: si può rimettere da Impostazioni › Cestino.</p>
+          </div>
+        </Modal>
+      )}
     </Modal>
   );
+}
+
+/** Il riepilogo del 409 a parole: «2 pin, 1 negozio, 14 articoli, 3 acquisti nelle partite» (solo le voci non a zero). */
+function testoRiepilogo(d: Record<string, unknown> | undefined): string {
+  if (!d) return '';
+  const voci: Array<[string, string, string]> = [['pin', 'pin', 'pin'], ['negozi', 'negozio', 'negozi'], ['attivita', 'attività', 'attività'], ['articoli', 'articolo', 'articoli'], ['acquisti', 'acquisto nelle partite', 'acquisti nelle partite'], ['punti', 'riga di punti nelle partite', 'righe di punti nelle partite']];
+  return voci.filter(([k]) => typeof d[k] === 'number' && (d[k] as number) > 0).map(([k, uno, molti]) => `${d[k] as number} ${(d[k] as number) === 1 ? uno : molti}`).join(', ');
 }

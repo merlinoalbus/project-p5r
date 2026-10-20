@@ -11,6 +11,8 @@ import type { OggettoSelezionabileDto, TipoCatalogo } from '../../../types';
 import { jsonDi, numeroDi, senzaTemporanei, testoDi, testoOnull, verificatoDi, type Dati, type DefinizioneModulo } from './base';
 
 export interface ProgrammaPunti { nome: string; unita: string; calcolo: 'manuale' | 'rango-cliente' }
+/** Un piatto del menu di un luogo (L5, R5-07). */
+export interface PiattoLuogo { nome: string; prezzo: number | null; effetto: string }
 export interface Risposta { ordine: number; testo: string; domanda?: string }
 
 export const negozio: DefinizioneModulo = {
@@ -20,7 +22,8 @@ export const negozio: DefinizioneModulo = {
     nome: testoDi(e?.dati.nome), tipo: testoDi(e?.dati.tipo) || 'altro',
     sede_chiave: (e?.dati.sede_chiave as string | null) ?? null, luogo_chiave: (e?.dati.luogo_chiave as string | null) ?? null,
     luogo: testoDi(e?.dati.luogo), gestore: testoDi(e?.dati.gestore), confidente_chiave: (e?.dati.confidente_chiave as string | null) ?? null,
-    orari_json: normalizzaOrari(jsonDi(e?.dati.orari_json, ORARI_SEMPRE)),
+    // L5 (R5-12b): gli orari sono del luogo; il negozio ha solo la sua eccezione (null = valgono quelli della sede)
+    eccezione_orari_json: e?.dati.eccezione_orari_json ? normalizzaOrari(jsonDi(e.dati.eccezione_orari_json, ORARI_SEMPRE)) : null,
     programma_punti_json: jsonDi<ProgrammaPunti | null>(e?.dati.programma_punti_json, null),
     note: testoDi(e?.dati.note),
   }),
@@ -146,9 +149,23 @@ export const luogo: DefinizioneModulo = {
     nome: testoDi(e?.dati.nome), tipo: testoDi(e?.dati.tipo) || 'altro', quartiere_chiave: testoDi(e?.dati.quartiere_chiave),
     cosa_offre: testoDi(e?.dati.cosa_offre), quando: (e?.dati.quando as string | null) ?? null, giorni_json: (jsonDi<unknown>(e?.dati.giorni_json, []) as unknown[]).filter((g): g is string => typeof g === 'string'), note: testoDi(e?.dati.note),
     verificato: verificatoDi(e),
+    // ---- L5 (R5-07): un modulo solo per tutto il luogo ----
+    // gli orari del luogo; null = la guida non li dà (regola dell'app, «giorno e sera»)
+    orari_json: e?.dati.orari_json ? normalizzaOrari(jsonDi(e.dati.orari_json, ORARI_SEMPRE)) : null,
+    area_chiave: (e?.dati.area_chiave as string | null) ?? null,
+    sblocco: testoDi(e?.dati.sblocco),
+    confidenti_json: (jsonDi<unknown>(e?.dati.confidenti_json, []) as unknown[]).filter((c): c is string => typeof c === 'string'),
+    piatti_json: jsonDi<PiattoLuogo[] | null>(e?.dati.piatti_json, null),
   }),
-  valido: (d) => testoDi(d.nome).trim().length > 0 && testoDi(d.quartiere_chiave).length > 0,
-  prepara: (d) => ({ ...senzaTemporanei(d), nome: testoDi(d.nome).trim(), cosa_offre: testoDi(d.cosa_offre).trim(), giorni_json: Array.isArray(d.giorni_json) ? d.giorni_json : [], note: testoOnull(d.note) }),
+  valido: (d) => testoDi(d.nome).trim().length > 0 && testoDi(d.quartiere_chiave).length > 0 && ((d.piatti_json as PiattoLuogo[] | null) ?? []).every((p) => p.nome.trim().length > 0),
+  prepara: (d) => {
+    const piatti = (d.piatti_json as PiattoLuogo[] | null) ?? null;
+    return {
+      ...senzaTemporanei(d), nome: testoDi(d.nome).trim(), cosa_offre: testoDi(d.cosa_offre).trim(), giorni_json: Array.isArray(d.giorni_json) ? d.giorni_json : [], note: testoOnull(d.note),
+      sblocco: testoOnull(d.sblocco), confidenti_json: Array.isArray(d.confidenti_json) ? d.confidenti_json : [],
+      piatti_json: piatti && piatti.length > 0 ? piatti.map((p) => ({ nome: p.nome.trim(), prezzo: p.prezzo, effetto: p.effetto.trim() })) : null,
+    };
+  },
 };
 
 /** `nullable`: vuoto = null (lo schema lo ammette); altrimenti vuoto = '' (lo schema vuole una stringa, come `ricompensa` e `note` della domanda). */

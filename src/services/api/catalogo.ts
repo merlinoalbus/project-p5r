@@ -38,4 +38,13 @@ export const nascondiElementoCatalogo = (tipo: TipoCatalogo, chiave: string, nas
 export const eliminaElementoCatalogo = (tipo: TipoCatalogo, chiave: string): Promise<{ esito: 'eliminata' | 'ripristinata'; elemento: ElementoCatalogoDto | null }> =>
   apiDelete(`/catalogo/${tipo}/${encodeURIComponent(chiave)}`);
 
+/** L5 (R5-21): elimina un luogo o un negozio **nel cestino**. Senza `conferma`, se ha contenuti, il server risponde 409 col riepilogo
+ *  (pin, negozi, attività, articoli, acquisti, punti) nei `details` dell'errore; con `conferma` va nel cestino (si rimette da Impostazioni). */
+export const eliminaNelCestino = (tipo: 'luogo' | 'negozio', chiave: string, conferma: boolean): Promise<{ esito: 'eliminata' }> =>
+  apiDelete(`/catalogo/${tipo}/${encodeURIComponent(chiave)}${queryString({ conferma: conferma ? '1' : undefined })}`);
+
+/** L5: «Ripristina i valori della guida» per ogni tipo del catalogo: rimette i dati della guida su una riga corretta (mai elimina). */
+export const ripristinaElementoCatalogo = (tipo: TipoCatalogo, chiave: string): Promise<ElementoCatalogoDto> =>
+  apiPost(`/catalogo/${tipo}/${encodeURIComponent(chiave)}/ripristina`, {});
+
 // L'agenda del giorno (eventi e cose da fare) dal 2026-09-30 è fatta di voci della giornata: `services/api/compendio.ts`.
