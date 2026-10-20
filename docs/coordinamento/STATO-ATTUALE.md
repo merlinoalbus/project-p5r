@@ -1,67 +1,110 @@
-# Stato attuale del lavoro — ramo newreview / p5s (aggiornato 2026-10-20, ~08:35Z)
+# Stato attuale del lavoro — ramo newreview / p5s (aggiornato 2026-10-20, ~14:30Z)
 
-Documento per riprendere il lavoro da zero, anche in un'altra sessione. Il dettaglio è nella Regia (`stato.json`), nella bacheca e in `lotti/`.
+Documento per riprendere il lavoro da zero, con qualunque IA o persona. Il dettaglio è nella Regia (`stato.json`), nella bacheca e in `lotti/`. **Leggere tutto prima di toccare qualcosa.**
 
 ## Obiettivo
-Il mandato dell'utente: completare la razionalizzazione in lotti L0–L11 sul ramo `newreview`, pubblicato su https://p5s.nasmerlinoalbus.cloud. Il ramo `main` e la produzione persona5royal non si toccano. A fine progetto, dopo la validazione dell'utente, i dati di p5s sostituiscono quelli di produzione.
+Mandato dell'utente: completare la razionalizzazione in lotti L0–L11 sul ramo `newreview`, pubblicato su https://p5s.nasmerlinoalbus.cloud. Il ramo `main` e la produzione persona5royal non si toccano. A fine progetto, dopo la validazione dell'utente, i dati di p5s sostituiscono quelli di produzione.
 
 ## Avanzamento dei lotti
 | Lotto | Stato |
 |---|---|
 | L0 Vocabolario e testi | consegnato |
 | L1 Immagini | consegnato (approvato al giro 5) |
-| L2 Mondo: aree e planimetrie | **consegnato** (approvato al giro 6; push bff237e0, pipeline riuscita; p5s verificato alle 07:37Z) |
-| L3 Palazzi: aree e infiltrazioni | BE committato; FE committato in 01e7ae12 come lavoro in corso, **non validato**; restano i punti aperti qui sotto |
-| L4 Avanzamento unico | BE committato (b83c30ac, 71378325, ad585387); FE in parte in 01e7ae12; non validato |
-| L5–L11 | progettati (requisiti, dati, app, modifiche, piani di lavoro e casi di prova pronti fino a L9-L10); implementazione da fare |
+| L2 Mondo: aree e planimetrie | consegnato (approvato al giro 6; push bff237e0; p5s verificato) |
+| L3 Palazzi: aree e infiltrazioni | **in chiusura**: tester verdi sulla linea di rilascio `newreview-l3`; resta da correggere LAY3-8; poi riverifica di layout e UX, validatore, push |
+| L3 · integrazione «Guida nel visore» e «Planimetria della voce» | BE fatto (42b34243, non validato, **non** nella linea di rilascio di L3); FE da fare (B2). Vedi `lotti/L3/integrazione-guida-visore.md` |
+| L4 Avanzamento unico | BE fatto (b83c30ac, 71378325, ad585387; migrazioni 111–113); FE in parte (01e7ae12); resto del FE in `lotti/L4/fe.md` «Da fare»; poi tester e validatore |
+| L5–L11 | progettati (requisiti, dati, app, modifiche, piani e casi di prova pronti fino a L9-L10); implementazione da fare |
 
-## Cosa è pubblicato su p5s
-Il push di `newreview` con il merge di L2 e il lavoro di L3/L4 (97c1d46e, 2026-10-20 ~08:28Z) è stato fatto su richiesta dell'utente: «puoi pushare tutto su newreview, comprese le modifiche di L3 ed eventuali altri lavori pending». Così p5s riceve anche L3 e L4, non ancora validati. All'avvio si applicano le migrazioni 110–113 e utente 022–024 sui dati dell'utente; il server fa da solo una copia di avvio in `/data/backups`.
+## Rami e cosa è dove (IMPORTANTE)
+- **`newreview` su GitHub** = ciò che gira su p5s. Ultimo push: 49858485, ~08:35Z. Codice di L3/L4 a 01e7ae12 più alcuni documenti. **Ogni push su `newreview` pubblica su p5s** (pipeline «Build & Push Docker Images (newreview)», Watchtower ~3 min) e applica le migrazioni ai dati dell'utente.
+- **`newreview` locale** (worktree `pensive-burnell-b50941`) = linea di sviluppo, avanti di molti commit:
+  - correzioni di L3 (d73e7027..c8338fd0 e le successive dei tester);
+  - **42b34243**, il BE dell'integrazione con la **migrazione 114**;
+  - documenti.
+  
+  Non si pusha su `newreview` finché il lavoro non è validato. Una copia senza pubblicazione è sul ramo remoto **`newreview-lavoro`**, aggiornato a ogni salvataggio importante.
+- **`newreview-l3`** (worktree del Collaudo `p5s-sviluppo-l2`) = linea di rilascio di L3:
+  - parte da fd988a3e (= c8338fd0 + documenti);
+  - si aggiungono solo correzioni dei tester e documenti, con cherry-pick verificati con `git patch-id`;
+  - HEAD a db7d0423 alle 14:10Z;
+  - copia remota senza pubblicazione: ramo **`newreview-l3`** su GitHub.
+  
+  Al rilascio di L3, dopo l'APPROVATO, si pusha `newreview-l3` su `newreview`. È un avanzamento rapido: la linea discende dall'ultimo push.
+- Poi `newreview` locale si riallinea con un merge di `newreview-l3` e si prosegue con l'integrazione e L4.
+- `newreview-l2` = linea di rilascio di L2, già unita. `main` non si tocca.
 
-## L3 — stato alle 10:30Z
-- Punti aperti di L3: tutti corretti da FE e BE in d73e7027..c8338fd0 (NR3-4, AP3-1/2/4, UX3-7, UX3-8, LAY3-2, R3-41, E2, residui di L2). Sono «da verificare»: il prossimo passo è collaudo, tester e validatore, su una linea di rilascio ferma a c8338fd0.
-- Integrazione decisa dall'utente, «Guida nel visore» e «Planimetria della voce»: requisiti e posto nel piano in `lotti/L3/integrazione-guida-visore.md`. BE è in corso; FE dopo. Non ferma la chiusura di L3.
+## L3 — stato di dettaglio
+- **Difetti:** tutti in `lotti/L3/difetti.md`, con hash e test.
+  - Corretti e verificati dai tester:
+    - NR3-4, AP3-1/2/3/4;
+    - UX3-1…UX3-11;
+    - LAY3-1…LAY3-7;
+    - R3-41, E2, E3;
+    - residui di L2.
+  - E9 rinviato a L11.
+- **Aperto:** **LAY3-8** (bassa). A Shido, 1366×657, l'elenco aperto delle versioni esce di 10 px dalla finestra. È assegnato a FE.
+- **Prove grezze:**
+  - `lotti/L3/esiti-collaudo/<hash>/`;
+  - `esiti-funzionali/d5eb9650/`;
+  - `esiti-ux/d5eb9650/` e `765fb2a1/`;
+  - `esiti-layout/765fb2a1/`, `48d7a958/`, `7562f6ac/`, `db7d0423/`;
+  - `esiti-noreg/48d7a958/`;
+  - cicli di scrittura sull'istanza: `esiti-collaudo/cicli-dati.md`.
+- **Istanza di prova:** del Collaudo, FE 5473 e BE 3301, su `newreview-l3`. Dati = copia di p5s delle 09:48Z, base `L3-base-p5s-20261020-0948Z`. Dopo ogni ciclo di scrittura si ripristina e l'impronta si conferma identica.
+- **Prossimi passi:**
+  1. FE corregge LAY3-8;
+  2. il Collaudo fa il cherry-pick su `newreview-l3`, con typecheck, lint, test mirati e istanza;
+  3. Test layout e Test UX riverificano;
+  4. riga della ROADMAP di L3;
+  5. galaxy-task-validator, con un prompt che indichi linea, prove e richieste dell'utente;
+  6. con l'APPROVATO: push di `newreview-l3` su `newreview`, pipeline fino all'esito, verifica di p5s nel browser, notifica all'utente.
+- Mentre lavora il validatore, che è un agente e non una sessione, riparte il FE di L4.
 
-## Punti aperti di L3 (alla ripresa, ora corretti: vedi sopra)
-**In corso dalle 08:40Z**: la sola sessione Implementazione FE è riaperta su questi punti, nell'ordine sotto; committa su `newreview` senza push. Per NR3-4 il PM ha deciso la strada (a): la `planimetriaIniziale` dell'infiltrazione vale solo con `?infiltrazione=`; arrivando dalla casa si apre la `predefinita` dell'Area.
-- NR3-4 (alta): 80 indirizzi di planimetria su 539 aprono un'altra versione (vedi `lotti/L3/difetti.md`).
-- AP3-1, AP3-2, AP3-4: schede senza mappa, `senzaVicine`, collegamenti diretti alla casa.
-- R3-41: visore entro metà altezza, applicate le scelte 2 e 3 del PM. Resta lo sforamento a 1024×690.
-- LAY3-2: 2 casi residui (nome del sovrano accorciato).
-- Indice delle Mappe: UX3-8 (planimetrie senza pin nascoste), UX3-7 (titolo «con tutti i livelli»), E2 (spilli di contenuto «più N passaggi e N note», deciso dall'utente), E3 (la carta di un Palazzo dice «N aree · M planimetrie»), E9.
-- Da L2: singolare «1 spillo» (MappaPage.tsx:456, :347); commenti di immagini-miniature.test.ts:217 e MappaPage.tsx:166-167; il riquadro del numero degli spilli che copre l'angolo di alcuni disegni; l'asserzione di E7 sui quartieri da irrobustire.
-- AP3-1/2/4 (FE); P3 di Test funzionali; NR3-4 nel browser.
-- Poi: collaudo di L3, i quattro tester, no-reg e validatore.
+## Decisioni dell'utente di oggi da rispettare (oltre a quelle in memoria)
+- **Intestazione:** al massimo il **30% dell'altezza della schermata** a ogni dispositivo (`memoria-del-progetto/feedback-intestazione-30.md`).
+- **Guida nel visore** (integrazione):
+  - solo consultazione: caselle fatto/riapri, dettagli, riferimenti ai pin;
+  - la scheda del Palazzo non si tocca, salvo il campo «Planimetria» nella modifica della voce;
+  - le voci senza pin stanno solo sulla planimetria dove sono state inserite (per regola, la planimetria 1 dell'infiltrazione) e si spostano a mano.
+- **E2:** l'indice conta i pin di contenuto, «più N passaggi e N note». Le porte vanno fra i passaggi.
 
-## Punti aperti di L4
-FE di L4: k/N, «Riapre anche» sugli Enigmi, «Da verificare» nelle tre viste, schede assorbite. Poi i tester e il validatore.
+## Decisioni del PM di oggi
+- **NR3-4:** strada (a). Arrivando dalla casa di un'Area si apre la predefinita.
+- **LAY3-4 e LAY3-7:** il testo intero si legge con un tocco, nei «Dettagli dalla guida» o nell'elenco aperto. R3-41 ha la precedenza sul mandare a capo i selettori da 1024 in su.
+- **UX3-10:** il numero dei pin compare una volta sola, nel riquadro «N pin».
+- **UX3-11:** opacità piena.
+- **Un Enigma con passi** non si aggancia a mano a una planimetria: sta dove stanno i passi.
 
 ## Regole di lavoro in vigore
-- La fonte dei dati è p5s, che non si sovrascrive mai; la produzione è in sola lettura; base delle prove = copia di p5s in sola lettura.
-- Chi implementa non si convalida da solo; validano i tester e il galaxy-task-validator a fine lotto.
-- Modifiche dirette, mai script o sed sui sorgenti; test mirati, typecheck e lint verdi.
-- Le sessioni del team sono **chiuse**, per scelta dell'utente. Si riaprono una alla volta solo quando servono e si richiudono a fine compito. Il PM guida, aggiorna la Regia e porta i blocchi all'utente.
+- La fonte dei dati è p5s, che non si sovrascrive mai. La produzione è in sola lettura. La base delle prove è una copia di p5s, in sola lettura.
+- Chi implementa non si convalida da solo: validano i tester e il galaxy-task-validator a fine lotto.
+- Modifiche dirette, mai script o sed sui sorgenti. Test mirati, con il rosso visto prima e il verde dopo; typecheck e lint verdi.
+- **Una sessione del team alla volta.** Si riapre solo quando serve e si richiude a fine compito. Il PM guida, aggiorna la Regia e porta all'utente solo i blocchi e le decisioni che spettano a lui.
 - Niente backup del volume di p5s prima dei rilasci (decisione dell'utente).
-- Tutto il lavoro va salvato su git (questa cartella).
+- Tutto il lavoro va salvato su git (questa cartella) e copiato su GitHub nei rami `newreview-lavoro` e `newreview-l3`. Mai DB, indirizzi del server o dati personali: il repository è pubblico.
 
 ## Come riprendere (per qualunque IA o persona, partendo dal repository pubblico)
-1. Leggere, in quest'ordine: `CLAUDE.md` alla radice (regole del progetto), questo file, `docs/ROADMAP.md` (righe dei lotti), `docs/DECISIONI.md`, `docs/ARCHITETTURA.md`, poi in `docs/coordinamento/`: `processo.md` (ruoli e regole del team), `bacheca.md`, `decisioni-pm.md`, `stato.json` (la Regia), `memoria-del-progetto/` (regole dell'utente: leggerle tutte, valgono come istruzioni), `lotti/L3/` e `lotti/L4/` (lotti in corso).
-2. Rami:
-   - `newreview` è la linea di sviluppo, pubblicata su p5s a ogni push dalla pipeline «Build & Push Docker Images (newreview)», ed è aggiornata a questo stato;
-   - `newreview-l2` è la linea di rilascio usata per collaudare e validare L2, già unita a `newreview`;
-   - `main` e la produzione non si toccano.
-3. Avvio in locale: `npm install`, `cp .env.example .env`, `bash scripts/start-all.sh`; verifiche: `npm run typecheck`, `npm run lint`, test mirati `npx vitest run <percorso>`. La pipeline controlla typecheck, lint e audit, non i test.
-4. Ciclo di un lotto (vedi `processo.md`):
+1. **Leggere, in quest'ordine:**
+   - `CLAUDE.md`;
+   - questo file;
+   - `PROMPT-RIPRESA.md`;
+   - `docs/ROADMAP.md`, `docs/DECISIONI.md`, `docs/ARCHITETTURA.md`;
+   - in `docs/coordinamento/`: `processo.md`, `bacheca.md`, `decisioni-pm.md`, `stato.json`;
+   - `memoria-del-progetto/`, tutto: sono regole dell'utente;
+   - `lotti/L3/` (difetti, integrazione, esiti) e `lotti/L4/` (fe.md, modifiche.md, difetti.md).
+2. **Prendere i rami** `newreview-lavoro` e `newreview-l3` da GitHub. Controllare con `git log` che coincidano con quanto scritto qui.
+3. **Avvio in locale:** `npm install`, `cp .env.example .env`, `bash scripts/start-all.sh`. Verifiche: `npm run typecheck`, `npm run lint`, test mirati `npx vitest run <percorso>`. La pipeline controlla typecheck, lint e audit, non i test.
+4. **Ciclo di un lotto** (vedi `processo.md`):
    1. requisiti, dati, app e modifiche;
-   2. implementazione BE e FE;
+   2. BE e FE;
    3. prove sul codice esatto: funzionali, UX, layout ai formati 1366×657 · 1280×689 · 1024×690 · 1920×1080 · 768 · 375, no-reg sui dati;
    4. riga della ROADMAP;
-   5. validatore indipendente (galaxy-task-validator, in sola lettura) fino all'APPROVATO;
-   6. push, pipeline e verifica di p5s.
-   I verdetti e le richieste dei giri precedenti sono in `lotti/Lx/` (`correzioni-giro*.md`, `validatore-giro*-prompt.md`).
-5. Dati per le prove: chiedere all'utente una copia fresca di p5s, oppure lavorare su una copia locale. Il pacchetto `pacchetto/gioco.db` del repository serve ai test. Le copie dei database dell'utente non sono nel repository.
-6. Prossimo passo concreto: riprendere L3 dai «Punti aperti di L3» qui sopra, correggere, poi collaudo, prove e validatore come per L2. Le liste dei difetti sono in `lotti/L3/difetti.md` e `lotti/L4/difetti.md`.
-7. Accesso a p5s e al server: solo l'utente ha gli indirizzi e le chiavi, omessi qui perché il repository è pubblico. La verifica di p5s la può fare chiunque dall'indirizzo pubblico.
+   5. validatore fino all'APPROVATO;
+   6. push, pipeline, verifica di p5s.
+5. **Dati per le prove:** una copia fresca di p5s, che fornisce l'utente o la sessione del Collaudo, oppure una copia locale. Le copie dei database non sono nel repository.
+6. **Prossimo passo concreto:** quello indicato in «L3 — stato di dettaglio», poi L4, `lotti/L4/fe.md` «Da fare». Poi l'integrazione B2, `lotti/L3/integrazione-guida-visore.md`. Poi L5.
+7. **Accesso a p5s e al server:** solo l'utente ha indirizzi e chiavi, omessi qui. La verifica di p5s si fa dall'indirizzo pubblico.
 
 ## Elenco «da rivedere» per l'utente
-Vedi `rapporto-finale.md`: Sakura Residence, «Pagine ammuffite», pin 811, invito di Makoto (b), voci boss di Madarame con «Gelo», distributori 1584/1769, Hagoromo, listino di Tanaka, voci di Igor/Lavenza, N1, LAY-2, rigenerazione di `pacchetto/gioco.db`.
+Vedi `rapporto-finale.md`.

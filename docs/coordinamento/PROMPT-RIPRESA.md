@@ -5,7 +5,11 @@
 Riprendi il lavoro sul progetto project-p5r, ramo `newreview` (repository https://github.com/merlinoalbus/project-p5r), pubblicato su https://p5s.nasmerlinoalbus.cloud. Rispondi sempre in italiano.
 
 **1. Ricostruisci lo stato prima di fare qualunque cosa.** Non fidarti della memoria della conversazione: fidati solo dei file e di git.
-- `git fetch` e `git checkout newreview`; leggi `git log --oneline -30` e `git status`.
+- Fai `git fetch` e guarda tre rami:
+  - `newreview`: è quello pubblicato su p5s; ogni push qui pubblica e migra i dati dell'utente;
+  - `newreview-lavoro`: il lavoro di sviluppo non ancora validato;
+  - `newreview-l3` (o `newreview-lN`): la linea di rilascio del lotto in collaudo.
+  Leggi `git log --oneline -30` di ciascuno e `git status`. Lavora su una copia di `newreview-lavoro`. Su `newreview` pusha solo una linea di rilascio APPROVATA dal validatore.
 - Leggi in quest'ordine:
   1. `CLAUDE.md`;
   2. `docs/coordinamento/STATO-ATTUALE.md`;
@@ -49,7 +53,7 @@ Poi procedi senza fermarti. Chiedi all'utente solo le decisioni che spettano a l
   - verifica p5s nel browser.
 - **Salvataggi:**
   - salva su git tutto il lavoro: codice, documenti, aggiornamenti di `docs/coordinamento/` (Regia `stato.json`, `STATO-ATTUALE.md`, difetti, esiti);
-  - fai commit e push a ogni passaggio importante, così nessun lavoro resta solo in memoria;
+  - fai commit a ogni passaggio importante e copia su GitHub nei rami `newreview-lavoro` e `newreview-lN`, che non pubblicano: così nessun lavoro resta solo in memoria e niente di non validato arriva su p5s;
   - non pubblicare mai dati personali, copie di database, indirizzi di server o chiavi: il repository è pubblico.
 - **Sessioni di prova:** se usi sessioni separate (tester, collaudo), aprile una alla volta e chiudile a fine compito.
 - **Regia:** tienila aggiornata (`docs/coordinamento/stato.json`; il server `docs/coordinamento/regia/server.cjs` la mostra su localhost:5999).
@@ -57,6 +61,6 @@ Poi procedi senza fermarti. Chiedi all'utente solo le decisioni che spettano a l
 **4. Ogni volta che ti fermi:**
 - aggiorna `docs/coordinamento/STATO-ATTUALE.md`: cosa è fatto, cosa è in corso, punti aperti, prossimo passo;
 - aggiorna `stato.json`;
-- fai commit e push su `newreview`.
+- fai commit e copia su GitHub in `newreview-lavoro`. Su `newreview` solo dopo l'APPROVATO.
 
 ---
