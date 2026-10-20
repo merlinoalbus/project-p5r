@@ -2128,12 +2128,13 @@ Scelte del Project manager nello stesso lotto (da confermare):
   preferenza «grafica predefinita», come prima di L1; la preferenza decide solo il ripiego sull'asset delle illustrazioni e delle mappe.
 - **Intestazione del Palazzo compatta** (UX-1): da 1024 a 1279 px solo lo stemma da 48 come prima; da 1280 l'illustrazione con lo
   stemma da 40, in colonna sopra l'anello. Su schermi da circa 1700 px in su l'intestazione cresce di 19 px, senza barra di pagina.
-  L'eccezione della fascia 1024–1279 alla decisione «Illustrazione anche nelle schede» è **confermata dall'utente** il 2026-10-21
+  L'eccezione della fascia 1024–1279 alla decisione «Illustrazione anche nelle schede» è **confermata dall'utente** il 2026-10-20
   (domanda: «va bene o vuoi l'illustrazione anche lì?» — risposta: «Per la prima dico sì»).
+  In quella fascia, nei Palazzi con illustrazione, non c'è nemmeno la filigrana dello stemma (prima di L1 c'era).
 - **Proporzione delle illustrazioni** (LAY-1): il riquadro prende la proporzione dell'immagine fra 4:3 e 16:9, mai ritagli oltre il 5%.
 - **Miniature** (rilievo di Test UX: le schede de La città scaricavano ~40 MB): rientrano in L1. Le immagini si servono ridotte in WebP
   (`?l=` 160/320/640/1024) generate con **sharp** (dipendenza nativa, provata nella build Docker; NOTICE e `licenze/` con la LGPL-3.0
-  di libvips, scaricata da gnu.org con il permesso dell'utente) e tenute in cache in `gioco.db` (`immagine_miniatura`, migrazione 108;
+  di libvips e la GPL-3.0 che la integra, scaricate da gnu.org con il permesso dell'utente) e tenute in cache in `gioco.db` (`immagine_miniatura`, migrazione 108;
   solo schema nel pacchetto, orfane pulite all'avvio). Anche indice e griglie delle Mappe. La Città a 375 px passa da ~40 MB a ~390 KB.
 - **Ogni strada che scrive o toglie l'immagine di una mappa** (editor, rotta generica, da URL, scarico della pianta, rimozioni singole e in
   blocco) chiede conferma se la mappa ha pezzi (409 `mappa-con-pezzi`); lo scarico automatico della pianta pubblicata non rende la mappa

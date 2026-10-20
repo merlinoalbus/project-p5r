@@ -60,7 +60,7 @@ describe('MappaTokyo — fermate non ancora nel mondo', () => {
   });
 });
 
-describe('MappaTokyo — i segni dei posti con la grafica predefinita spenta (UX-2, decisione del PM del 2026-10-21)', () => {
+describe('MappaTokyo — i segni dei posti con la grafica predefinita spenta (UX-2, decisione del PM del 2026-10-20)', () => {
   afterEach(() => { usePreferenzeStore.setState({ graficaPredefinita: true }); });
   it('sagome e stemmi restano, presi dal manifesto, e ogni cartellino ha il suo nome', () => {
     useAssetStore.setState({ manifest: { generato: 'T', totale: 2, file: { 'mappe/lmap/tokyo/shibuya': '/sagoma-shibuya.png', 'palazzi/kamoshida': '/stemma-kamoshida.png' } }, caricato: true, mancanti: {} });

@@ -373,7 +373,7 @@ export function DungeonDettaglioPage() {
             <div className={`relative flex gap-3 ${memento ? 'flex-row items-center' : 'flex-col sm:flex-row sm:items-start sm:gap-5 lg:items-center lg:gap-3'}`}>
               {/* Da 1280 px, con l'illustrazione, figura e anello stanno in colonna: affiancati prendevano larghezza al testo e
                   in Shido, Niijima e Madarame il sovrano andava a capo (intestazione da 170 a 222 px); in colonna occupano la
-                  larghezza dello stemma e dell'anello di prima e un'altezza che l'intestazione ha già (UX-1, 2026-10-21). */}
+                  larghezza dello stemma e dell'anello di prima e un'altezza che l'intestazione ha già (UX-1, 2026-10-20). */}
               <div className={`flex shrink-0 items-center gap-3 ${memento ? 'gap-2' : `sm:flex-col lg:flex-row lg:gap-2 ${illustrato ? 'xl:flex-col' : ''}`}`}>
                 {/* Nei Palazzi l'illustrazione della radice `dungeon-<chiave>` (la caricata: l'asset della radice è lo stemma) con
                     lo stemma sopra come segno (scelta dell'utente, 2026-10-20); senza, lo stemma com'era. Le misure: 150 px sul
@@ -391,7 +391,7 @@ export function DungeonDettaglioPage() {
                     {/* Da 1024 a 1279 px lo stemma da 48 com'era prima di L1, senza illustrazione: l'intestazione compatta non ha
                         spazio per una figura che si riconosca (a 56 px era una macchia, UX-1; più larga il sovrano andava a capo).
                         Da 1280 px l'illustrazione con lo stemma da 40 sopra, nell'altezza che l'intestazione ha già (decisione del PM,
-                        2026-10-21). */}
+                        2026-10-20). */}
                     <span className="hidden lg:block xl:hidden">{emblema(48)}</span>
                     {/* 104 px: la larghezza di stemma, spazio e anello di prima (48 + 8 + 48), così il testo accanto non perde niente in
                         nessun Palazzo (a 128 Iweleth andava a capo a 1366 px) */}

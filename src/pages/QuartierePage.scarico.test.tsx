@@ -25,7 +25,7 @@ const shibuya = (illustrazione: QuartiereDettaglioDto['illustrazione'], mappa: b
 } as unknown as QuartiereDettaglioDto);
 
 it('scaricata la pianta, il quartiere si rilegge: l’intestazione mostra l’immagine appena scaricata, come il visore', async () => {
-  const caricata = { immagineUrl: '/api/immagini/mappa/citta-shibuya/file?v=2026-10-21T10%3A00%3A00.000Z', asset: 'mappe/citta-shibuya' };
+  const caricata = { immagineUrl: '/api/immagini/mappa/citta-shibuya/file?v=2026-10-20T10%3A00%3A00.000Z', asset: 'mappe/citta-shibuya' };
   api.getQuartiere.mockResolvedValueOnce(shibuya({ immagineUrl: null, asset: null }, false)).mockResolvedValue(shibuya(caricata, true));
   api.scaricaPiantaQuartiere.mockResolvedValue({ quartiere: 'shibuya', mime: 'image/png', byte: 2407015, fonte: 'Guida', url: 'https://esempio.test/shibuya.png' });
   render(<MemoryRouter initialEntries={['/guida/citta/shibuya']}><Routes><Route path="/guida/citta/:chiave" element={<QuartierePage />} /></Routes></MemoryRouter>);

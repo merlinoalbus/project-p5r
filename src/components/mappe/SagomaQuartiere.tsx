@@ -39,7 +39,7 @@ const CONTORNO_ORO = `${contornoSagoma('#ffd23f', 2)} brightness(1.05)`;
 /** La sagoma del quartiere in un riquadro fisso (112×84 predefinito), col contorno bianco o, se
  * `acceso`, oro e leggermente ingrandita; niente se il manifesto non la ha, e l'immagine si nasconde se il file è rotto. */
 export function SagomaQuartiere({ chiave, nome, acceso = false, larghezza = 112, altezza = 84, className = '' }: Props) {
-  // la sagoma della metro, dal manifesto, anche con la grafica predefinita spenta (UX-2/UX-3, decisione del PM del 2026-10-21)
+  // la sagoma della metro, dal manifesto, anche con la grafica predefinita spenta (UX-2/UX-3, decisione del PM del 2026-10-20)
   const src = useSegno(segnoQuartiere(chiave));
   // Senza la sagoma (il manifesto non la ha) non resta un riquadro vuoto: nell'intestazione del quartiere erano 132×100 px di nulla
   // sopra il nome (UX-3). Il nome è già scritto accanto.

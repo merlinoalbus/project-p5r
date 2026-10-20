@@ -348,7 +348,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
   }, []);
 
   // i segni dei posti (sagome, stemmi, il Covo) dal manifesto, anche con la grafica predefinita spenta: senza, la metro restava di
-  // sole linee e nodi (UX-2, decisione del PM del 2026-10-21)
+  // sole linee e nodi (UX-2, decisione del PM del 2026-10-20)
   const risolvi = useRisolviSegno();
   const { presenti, assenti, nomiFermate } = useMemo(() => {
     const segni: Segno[] = [];

@@ -1,5 +1,5 @@
 // ============================================================
-// miniatureService — le miniature WebP delle immagini del database (L1, variante «miniature», 2026-10-21)
+// miniatureService — le miniature WebP delle immagini del database (L1, variante «miniature», 2026-10-20)
 // ============================================================
 //
 // La rotta del file di un'immagine con `l` (una delle `LARGHEZZE_MINIATURA`) passa da qui: la miniatura si genera la prima volta

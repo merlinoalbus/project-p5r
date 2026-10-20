@@ -94,7 +94,7 @@ describe('haPlanimetria sul riassunto dell’albero (le mappe sorelle di MappaPa
 });
 
 describe('SagomaQuartiere', () => {
-  it('la sagoma viene dal manifesto e resta anche con la grafica predefinita spenta (UX-2, decisione del PM del 2026-10-21)', () => {
+  it('la sagoma viene dal manifesto e resta anche con la grafica predefinita spenta (UX-2, decisione del PM del 2026-10-20)', () => {
     const accesa = render(<SagomaQuartiere chiave="shibuya" nome="Shibuya" />);
     expect(accesa.getByAltText('Sagoma di Shibuya sulla mappa di Tokyo')).toHaveAttribute('src', '/sagoma-shibuya.png');
     accesa.unmount();
@@ -112,7 +112,7 @@ describe('SagomaQuartiere', () => {
   });
 });
 
-describe('IllustrazioneConSegno — il riquadro con la proporzione dell’immagine (LAY-1, decisione del PM del 2026-10-21)', () => {
+describe('IllustrazioneConSegno — il riquadro con la proporzione dell’immagine (LAY-1, decisione del PM del 2026-10-20)', () => {
   /** Monta l'illustrazione e simula il caricamento di un file `l`×`a`; restituisce il riquadro e l'immagine. */
   const carica = (l: number, a: number) => {
     const { container, unmount } = render(<IllustrazioneConSegno illustrazione={{ immagineUrl: '/api/immagini/mappa/x/file?v=1', asset: null }} alt="Illustrazione di X"

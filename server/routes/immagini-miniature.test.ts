@@ -1,5 +1,5 @@
 // ============================================================
-// L1, variante «miniature» (2026-10-21) — la rotta del file con `l`: WebP ridotta, cache nel database legata alla versione della
+// L1, variante «miniature» (2026-10-20) — la rotta del file con `l`: WebP ridotta, cache nel database legata alla versione della
 // sorgente, originale quando non c'è niente da ridurre, intestazioni HTTP, coalescenza, alfa, pacchetto senza righe
 // ============================================================
 

@@ -10,7 +10,7 @@
 // (`IllustrazioneConSegno`); senza illustrazione resta il solo segno. Stanno nella grafica predefinita del database (famiglie
 // `mappe` e `palazzi`) e si prendono dal manifesto (`useSegno`, `useRisolviSegno`), **senza guardare la preferenza «usa grafica
 // predefinita»**: sono il modo in cui la metro e le schede dicono quale posto è quale, e con la preferenza spenta la metro restava
-// fatta di sole linee e nodi (rilievo UX-2 e F7 del validatore; decisione del PM, 2026-10-21: «sagome e stemmi tornano visibili a
+// fatta di sole linee e nodi (rilievo UX-2 e F7 del validatore; decisione del PM, 2026-10-20: «sagome e stemmi tornano visibili a
 // prescindere dalla preferenza, come prima»). La preferenza decide solo il ripiego sull'asset dell'illustrazione e delle mappe
 // (`useImmagineMappa`). Prima di L1 erano indirizzi fissi che ignoravano anche il manifesto; ora un segno che il manifesto non ha,
 // o un file risultato rotto, non si chiede.
