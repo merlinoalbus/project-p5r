@@ -16,7 +16,8 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { useMappaPartita } from '../../hooks/useMappaPartita';
-import { VisoreMappa, type SceltaPin } from './VisoreMappa';
+import { VisoreMappa, type SceltaPin, type StatoPuntoMappa } from './VisoreMappa';
+import type { SpilloDto } from '../../types';
 import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { Spinner } from '../shared/PageState';
@@ -42,6 +43,9 @@ interface Props {
   rivelaSpilloIniziale?: boolean;
   /** Partita per lo stato degli spilli (predefinita: quella attiva). */
   partitaId?: number | null;
+  /** L4 §8.6: chiamata prima di togliere il segno dal popup — al pin (`voce` null) o a una sua voce —, che può riaprire un Enigma risolto:
+   *  la pagina chiede conferma e con `false` («Annulla») non si fa niente. Segnare non passa da qui. */
+  primaDiRiaprire?: (s: SpilloDto, voce: string | null) => Promise<boolean>;
   /** Mostra «Modifica planimetria». Predefinito **sì**, che è giusto nelle pagine dell'atlante.
    *
    * Va spento dove il visore è **citato dentro un'altra pagina** per dire dove si trova una cosa:
@@ -87,11 +91,20 @@ export function MappaIncorporata(props: Props) {
  * «Schermo intero», che porta la stessa istanza a tutto schermo finché non si chiude o si preme Esc,
  * e, se `conEditor`, «Modifica planimetria». Senza `onNaviga` la navigazione fra livelli apre la pagina
  * della mappa. Senza `altezza` né classi dell'ospite il riquadro è alto 560 px. */
-function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, className, classeVisore, spilloIniziale, rivelaSpilloIniziale, puntoIniziale, onNaviga, partitaId: partitaEsplicita, conEditor = true, scelta, contenutiPannello, nome, pannelloIniziale, onPannello, titoloVisore, senzaVicine }: Props) {
+function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, className, classeVisore, spilloIniziale, rivelaSpilloIniziale, puntoIniziale, onNaviga, partitaId: partitaEsplicita, conEditor = true, scelta, contenutiPannello, nome, pannelloIniziale, onPannello, titoloVisore, senzaVicine, primaDiRiaprire }: Props) {
   const navigate = useNavigate();
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = partitaEsplicita !== undefined ? partitaEsplicita : attiva?.id ?? null;
-  const { mappa, caricamento, errore, ricarica, raccolto, statoPunto, acquisto } = useMappaPartita(chiave, partitaId, { versione, onCambiato });
+  const { mappa, caricamento, errore, ricarica, raccolto: raccoltoPartita, statoPunto: statoPuntoPartita, acquisto } = useMappaPartita(chiave, partitaId, { versione, onCambiato });
+  // §8.6: togliendo il segno dal popup si chiede prima alla pagina (conferma «Riapre anche l'Enigma «…»»); segnare va diritto
+  const raccolto = async (s: SpilloDto, valore: boolean) => {
+    if (!valore && primaDiRiaprire && !(await primaDiRiaprire(s, null))) return;
+    await raccoltoPartita(s, valore);
+  };
+  const statoPunto = async (s: SpilloDto, voce: string, stato: StatoPuntoMappa) => {
+    if (stato === null && primaDiRiaprire && !(await primaDiRiaprire(s, voce))) return;
+    await statoPuntoPartita(s, voce, stato);
+  };
   // Schermo intero in pagina: stessa istanza del visore (zoom e selezione restano), «Torna alla pagina» o Esc per rientrare
   const [intero, setIntero] = useState(false);
   // L4 (§4.2): la finestra «Da verificare» aperta dal popup di un pin; risolta, si rilegge la mappa e lo si dice alla pagina

@@ -30,6 +30,8 @@ interface Props {
   /** L'indirizzo del nome di una planimetria (L3, AP3-4: nella scheda del Palazzo la sua area, con l'infiltrazione aperta); senza,
    *  la sua pagina `/guida/mappe/<chiave>`. */
   indirizzo?: (chiave: string) => string;
+  /** L4 §8.6: chiamata prima di togliere il segno a un pin (può riaprire un Enigma risolto): con `false` («Annulla») non si fa niente. */
+  primaDiTogliere?: (spilloId: number) => Promise<boolean>;
 }
 
 /** Il nome della mappa senza il prefisso del Palazzo («Palazzo di Kamoshida › Torre» → «Torre»). */
@@ -41,7 +43,7 @@ const nomeBreve = (nome: string) => nome.split(' › ').slice(1).join(' › ') |
  * nome) con la spunta e la parola del tipo. I raccolti restano nascosti finché non si accende «Anche i raccolti».
  * Senza collezionabili mostra solo il testo `vuoto`.
  */
-export function RaccoltaPlanimetrie({ planimetrie, partitaId, onRaccolto, etichetta = 'Da raccogliere', nota, vuoto = 'Niente da raccogliere sulle planimetrie di quest’infiltrazione.', indirizzo = (k) => `/guida/mappe/${encodeURIComponent(k)}` }: Props) {
+export function RaccoltaPlanimetrie({ planimetrie, partitaId, onRaccolto, etichetta = 'Da raccogliere', nota, vuoto = 'Niente da raccogliere sulle planimetrie di quest’infiltrazione.', indirizzo = (k) => `/guida/mappe/${encodeURIComponent(k)}`, primaDiTogliere }: Props) {
   const [mostraRaccolti, setMostraRaccolti] = useState(false);
   const [occupati, setOccupati] = useState<Record<number, boolean>>({});
   const totale = planimetrie.reduce((s, p) => s + p.n, 0);
@@ -50,6 +52,8 @@ export function RaccoltaPlanimetrie({ planimetrie, partitaId, onRaccolto, etiche
   /** Segna o toglie lo spillo come raccolto nella partita (spunta disabilitata nel frattempo) e avvisa la pagina; l'errore va in notifica. */
   const cambia = async (s: SpilloRaccoltaDto, raccolto: boolean) => {
     if (!partitaId) return;
+    // §8.6: togliendo il segno si chiede prima alla pagina (conferma «Riapre anche l'Enigma «…»»); «Annulla» lascia tutto com'era
+    if (!raccolto && primaDiTogliere && !(await primaDiTogliere(s.id))) return;
     setOccupati((o) => ({ ...o, [s.id]: true }));
     try { await impostaSpilloRaccolto(partitaId, s.id, raccolto); onRaccolto(s.id, raccolto); }
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); }

@@ -24,7 +24,7 @@ import { Selettore } from '../components/shared/Selettore';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { aggiornaArea, aggiornaCompendio, aggiornaDungeon, creaArea, eliminaArea, eliminaAreaMondo, getArea, getDivergenze, getDungeon, impostaStatoPunto, riordinaAree, risolviMappa } from '../services/api';
 import { urlCasa, urlMappa, type NavigaMappa, type PuntoArrivo } from '../utils/navigazioneMappa';
-import { testoVociDelGesto } from '../utils/gestiVoce';
+import { enigmiCheSiRiaprono, righeRiapertura, testoVociDelGesto, vociDelPin } from '../utils/gestiVoce';
 import { FinestraDaVerificare, SPIEGAZIONE_DA_VERIFICARE, type DivergenzaDaVerificare } from '../components/guida/FinestraDaVerificare';
 import { nomeSenzaPalazzo } from '../utils/gruppiPlanimetrie';
 import { PropostaDallaVoce } from '../components/guida/PropostaDallaVoce';
@@ -451,6 +451,26 @@ export function DungeonDettaglioPage() {
   const [correggendoInfiltrazione, setCorreggendoInfiltrazione] = useState<string | null>(null);
   const [descrizioneAperta, setDescrizioneAperta] = useState<string | null>(null);
   const [occupato, setOccupato] = useState(false);
+  // L4 §8.6 (O4-2): la conferma prima di togliere un segno che riapre un Enigma risolto («Riapre anche l'Enigma «…»»), dalla colonna «Da
+  // raccogliere» e dal popup del pin; la promessa si risolve con la scelta («Annulla» = false)
+  const [conferma, setConferma] = useState<{ titolo: string; righe: string[]; azione: string; risolvi: (ok: boolean) => void } | null>(null);
+  const chiediConferma = (titolo: string, righe: string[], azione: string) => new Promise<boolean>((risolvi) => setConferma({ titolo, righe, azione, risolvi }));
+  const chiudiConferma = (ok: boolean) => { conferma?.risolvi(ok); setConferma(null); };
+  const tutteLeVoci = d?.aree.flatMap((a) => a.punti) ?? [];
+  /** Prima di togliere il segno al pin: se riapre un Enigma risolto (un suo passo sta sul pin) chiede conferma, altrimenti va. */
+  const primaDiTogliereIlPin = (id: number, nome?: string): Promise<boolean> => {
+    const enigmi = enigmiCheSiRiaprono(vociDelPin(id, tutteLeVoci), tutteLeVoci);
+    if (enigmi.length === 0) return Promise.resolve(true);
+    const nomePin = nome ?? d?.planimetrie.flatMap((p) => p.spilli).find((s) => s.id === id)?.nome ?? 'pin';
+    return chiediConferma(`Togliere il segno a «${nomePin}»?`, righeRiapertura(null, enigmi), 'Togli il segno');
+  };
+  /** Dal popup del pin: togliere il segno al pin (`voce` null) o riaprire una sua voce, con la stessa conferma. */
+  const primaDiRiaprire = (s: { id: number; nome?: string }, voce: string | null): Promise<boolean> => {
+    if (voce === null) return primaDiTogliereIlPin(s.id, s.nome);
+    const v = tutteLeVoci.find((x) => x.chiave === voce);
+    const enigmi = v ? enigmiCheSiRiaprono([v], tutteLeVoci) : [];
+    return enigmi.length === 0 ? Promise.resolve(true) : chiediConferma(`Riaprire «${v!.nome}»?`, righeRiapertura(null, enigmi), 'Riapri');
+  };
   const contenitorePalazzo = { tipo: 'dungeon' as const, chiave };
   const infiltrazioniPalazzo = (d?.aree ?? []).map((a) => ({ chiave: a.chiave, nome: a.nome, ordine: a.ordine }));
   /** Salva l'ordine nuovo delle aree del Palazzo; vero se è andato. */
@@ -1011,6 +1031,8 @@ export function DungeonDettaglioPage() {
                     spilloIniziale={collegamento ? null : spilloIndirizzo} puntoIniziale={collegamento ? null : puntoIndirizzo} titoloVisore={areaFisica?.nome}
                     // AP3-2: come nella pagina dell'Area (L2) niente «Su:» né planimetrie vicine (l'elenco delle aree è accanto), e i passaggi restano nella scheda
                     senzaVicine onNaviga={navigaDalVisore}
+                    // L4 §8.6: togliendo un segno dal popup che riapre un Enigma risolto, prima la conferma
+                    primaDiRiaprire={primaDiRiaprire}
                     contenutiPannello={areaFisica && !collegamento ? <InfiltrazioniInArea area={areaFisica} aperta={area.chiave} completate={completate} onScegli={scegliInfiltrazioneQui} /> : undefined} />
                 )}
                 {/* un'infiltrazione che non tocca aree (o un Palazzo senza aree): niente da mostrare, si collegano (§4.2) */}
@@ -1024,13 +1046,13 @@ export function DungeonDettaglioPage() {
 
               {/* ---- La colonna di quel che fa la percentuale: le planimetrie dell'area e la guida dell'infiltrazione ---- */}
               <aside className="card flex flex-col gap-3 xl:min-h-0 xl:area-scorrevole" aria-label={`Da raccogliere in ${areaFisica?.nome ?? area.nome}`}>
-                <RaccoltaPlanimetrie planimetrie={mappeArea} partitaId={partitaId} onRaccolto={segnaRaccolto} vuoto={vuotoArea} indirizzo={indirizzoRaccolta} />
+                <RaccoltaPlanimetrie planimetrie={mappeArea} partitaId={partitaId} onRaccolto={segnaRaccolto} vuoto={vuotoArea} indirizzo={indirizzoRaccolta} primaDiTogliere={(id) => primaDiTogliereIlPin(id)} />
                 {/* Il resto del Palazzo, sempre ripiegato: con un'area aperta si vede quell'area (rilievo dell'utente, 2026-10-01). */}
                 {altrePlanimetrie.length > 0 && (
                   <details className="text-[12px]">
                     <summary className="touch cursor-pointer text-text-muted">Tutte le planimetrie del Palazzo · {restanoAltre} da raccogliere</summary>
                     <div className="pt-2">
-                      <RaccoltaPlanimetrie planimetrie={altrePlanimetrie} partitaId={partitaId} onRaccolto={segnaRaccolto} etichetta="Nel resto del Palazzo" indirizzo={indirizzoRaccolta} />
+                      <RaccoltaPlanimetrie planimetrie={altrePlanimetrie} partitaId={partitaId} onRaccolto={segnaRaccolto} etichetta="Nel resto del Palazzo" indirizzo={indirizzoRaccolta} primaDiTogliere={(id) => primaDiTogliereIlPin(id)} />
                     </div>
                   </details>
                 )}
@@ -1081,6 +1103,15 @@ export function DungeonDettaglioPage() {
 
             {/* ---- Le finestre della gestione (§4.3): quelle di L2 col contenitore `dungeon`, i legami dell'infiltrazione, l'infiltrazione nuova ---- */}
             {/* L4 (§4.1): «Da verificare», dalla sezione della scheda, dalla voce della guida o dal pin; risolta, si rilegge tutto */}
+            {conferma && (
+              <Modal titolo={conferma.titolo} aperta onChiudi={() => chiudiConferma(false)}
+                azioni={<>
+                  <button type="button" className="btn btn-secondary touch" onClick={() => chiudiConferma(false)}>Annulla</button>
+                  <button type="button" className="btn btn-primary touch" onClick={() => chiudiConferma(true)}>{conferma.azione}</button>
+                </>}>
+                {conferma.righe.map((r) => <p key={r} className="m-0 text-[14px]">{r}</p>)}
+              </Modal>
+            )}
             {daVerificare && partitaId && (
               <FinestraDaVerificare divergenza={daVerificare} partitaId={partitaId} onChiudi={() => setDaVerificare(null)}
                 onRisolta={async () => { await rileggiTutto(); await divergenze.ricarica(); }} />

@@ -49,8 +49,24 @@ Aspettano i campi di BE per §8.11 (pin con stato proprio), chiesti a BE il 2026
   Aperto — 4ª infiltrazione, Lucernario Aperto — 2ª infiltrazione», «Annulla» → la voce resta «ottenuto» (nessun dato cambiato); pulsanti 44 px
   (`offsetHeight`); a 375 intestazione 241 (invariata), finestra a tutta larghezza, nessun orizzontale.
 
+## §8.6 (O4-2) — fatto (ripresa di L4, 2026-10-20)
+- Regola unica in `utils/gestiVoce.ts`: `enigmiCheSiRiaprono(voci, tutte)` (gli Enigmi risolti di cui le voci sono passi), `vociDelPin`,
+  `righeRiapertura` («Riapre anche: …» e «Riapre anche l’Enigma «…»»). Il campo che manca al popup (la voce del pin non dice il suo Enigma) non
+  serve: nella scheda la pagina conosce tutte le voci, e dopo L3 il popup dei Palazzi si apre solo lì.
+- **Guida**: «Riapri» su un passo di un Enigma risolto apre la stessa finestra di §8.11 con «Riapre anche l’Enigma «…»» (anche insieme a «Riapre
+  anche: …»); Enigma non risolto → nessuna conferma.
+- **Scheda** («Da raccogliere»): `RaccoltaPlanimetrie.primaDiTogliere` chiede alla pagina prima di togliere il segno; finestra «Togliere il segno a
+  «pin»?» con «Annulla» / «Togli il segno»; «Annulla» lascia la spunta.
+- **Popup del pin**: `MappaIncorporata.primaDiRiaprire` (pin o voce del pin), stessa finestra; segnare non chiede niente.
+- Test visti rossi e poi verdi: `GuidaDellArea.test.tsx` (passo di Enigma risolto con «Annulla»; non risolto senza conferma),
+  `RaccoltaPlanimetrie.test.tsx` (Annulla / confermato / segnare non chiede), `MappaIncorporata.test.tsx` (popup: pin e voce, Annulla, segnare),
+  `DungeonDettaglioPage.test.tsx` (scheda e popup, Enigma risolto e no). I 9 file che usano i componenti toccati: 195/195.
+- Browser (partita 1): Kamoshida «Tutorial 11/04», passo «Parla con Morgana» → «Riapri» → «Riapre anche l’Enigma «Incontro con Morgana».», e lo
+  stesso dal popup del pin «Morgana»; «Annulla» in tutti e due i casi; dati invariati (passo ed Enigma «ottenuto», verificato dall'API).
+
 ## Da fare
 1. ~~k/N, «Segna»/«Riapri» con «Riapre anche» e «Segnate anche»~~: fatto (sopra).
+5. ~~§8.6 (O4-2)~~: fatto (sopra).
 2. Selettore del contesto nel popup per un pin di più infiltrazioni (§4.2).
 3. Sezione «Schede da sistemare», carattere della voce («Permanente», «Si ripropone», «Racconto»), «Esaurito» come chip, «Anche nella Nª infiltrazione» (§4.1, §4.3): non erano nella richiesta del PM di questo giro.
 4. Misure di layout ai formati, quando il lotto è finito.

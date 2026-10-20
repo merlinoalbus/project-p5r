@@ -714,6 +714,35 @@ describe('§8.11: contatore k/N e «Riapri» con «Riapre anche: …»', () => {
     await waitFor(() => expect(cambiaStato).toHaveBeenCalledWith(expect.objectContaining({ chiave: 'p1' }), null));
   });
 
+  // §8.6 (O4-2): togliere il segno a un passo di un Enigma risolto lo riapre: prima si chiede conferma, nella stessa finestra
+  it('§8.6: «Riapri» su un passo di un Enigma risolto chiede «Riapre anche l’Enigma «…»»; «Annulla» lascia tutto com’era', async () => {
+    const enigmaRisolto = punto({ chiave: 'e1', tipo: 'puzzle', nome: 'Ogni libro al suo posto', stato: 'ottenuto', esauribile: false });
+    const passo = punto({ chiave: 'e1-a', tipo: 'meccanismo', nome: 'Sistema i libri', contenitore: 'e1', stato: 'ottenuto', esauribile: false, pin: [pin(1)] });
+    const { cambiaStato } = monta([enigmaRisolto, passo]);
+    fireEvent.click(screen.getByRole('button', { name: /Anche le segnate/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Sistema i libri/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Riapri' }));
+    const finestra = within(screen.getByRole('dialog', { name: 'Riaprire «Sistema i libri»?' }));
+    expect(finestra.getByText('Riapre anche l’Enigma «Ogni libro al suo posto».')).toBeInTheDocument();
+    fireEvent.click(finestra.getByRole('button', { name: 'Annulla' }));
+    expect(cambiaStato).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Riapri' }));
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Riapri' }));
+    await waitFor(() => expect(cambiaStato).toHaveBeenCalledWith(expect.objectContaining({ chiave: 'e1-a' }), null));
+  });
+
+  it('§8.6: con l’Enigma non risolto il passo si riapre senza conferma', async () => {
+    const enigmaAperto = punto({ chiave: 'e1', tipo: 'puzzle', nome: 'Ogni libro al suo posto', stato: null, esauribile: false });
+    const passo = punto({ chiave: 'e1-a', tipo: 'meccanismo', nome: 'Sistema i libri', contenitore: 'e1', stato: 'ottenuto', esauribile: false, pin: [pin(1)] });
+    const altro = punto({ chiave: 'e1-b', tipo: 'meccanismo', nome: 'Apri la teca', contenitore: 'e1', stato: null, esauribile: false });
+    const { cambiaStato } = monta([enigmaAperto, passo, altro]);
+    fireEvent.click(screen.getByRole('button', { name: /Anche le segnate/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Sistema i libri/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Riapri' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+    await waitFor(() => expect(cambiaStato).toHaveBeenCalledWith(expect.objectContaining({ chiave: 'e1-a' }), null));
+  });
+
   it('«Riapri» senza voci condivise riapre subito, senza conferma', async () => {
     const { cambiaStato } = monta([punto({ chiave: 'p1', stato: 'ottenuto', pin: [pin(1)], condivise: [] })]);
     fireEvent.click(screen.getByRole('button', { name: /Anche le segnate/ }));
