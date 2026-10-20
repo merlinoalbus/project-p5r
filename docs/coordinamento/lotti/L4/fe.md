@@ -33,8 +33,24 @@ Aspettano i campi di BE per §8.11 (pin con stato proprio), chiesti a BE il 2026
 - Insieme mirato (pagine, guida, mappe, utils, hook, Cestino): **105 file, 811 test verdi**; `npm run typecheck` 0 errori; eslint `src` pulito.
 - Browser, Kamoshida p1 su 3201: anello «56 oggetti permanenti fatti su 71», chip «Concluso · Tesoro ✓ · Boss ✓», «4 da verificare», sezione «Da verificare (4)»; header 170 px a 1366×657 (prima delle modifiche di R3-41).
 
+## §8.11 — fatto (ripresa di L4, 2026-10-20; commit su `newreview`, senza push)
+- I campi del BE ci sono tutti: `PuntoInteresseDto.avanzamento` (k/N), `condivise`, `effetti` nella risposta del gesto, `VoceDelPinDto.avanzamento`.
+- **Voce** (`GuidaDellArea`): chip «In corso · k/N» (evidenziato) se è fatta una parte dei pin, «k/N» altrimenti; niente con un pin solo
+  (`utils/gestiVoce.ts`: `testoAvanzamento`, `inCorso`).
+- **«Riapri»** sulla voce: se altre voci condividono i suoi pin (`condivise`), finestra «Riaprire «nome»?» con «Riapre anche: Lucernario Aperto —
+  4ª infiltrazione, …» e i pulsanti «Annulla» / «Riapri» (44 px); senza voci condivise riapre subito, come prima.
+- **«Segna»** («Ottenuto»/«Esaurito»): segna tutti i pin (lo fa il server); dopo il gesto la scheda dice «Segnate anche: …» o «Riaperte anche: …»
+  leggendo `effetti` (`DungeonDettaglioPage.cambiaStato`), poi rilegge.
+- **Popup del pin** (`VisoreMappa`, `AzioniStato`): le voci del pin col loro contatore («Installazioni artistiche · In corso · 2/8»).
+- Test visti rossi e poi verdi: `GuidaDellArea.test.tsx` (contatore; conferma con «Annulla» che non tocca niente; senza condivise nessuna conferma,
+  già verde: guardia), `DungeonDettaglioPage.test.tsx` («Segnate anche: …»), `VisoreMappa.test.tsx` (contatore nel popup; il pin resta accanto a
+  «Untouchable» e si apre dal gruppo «2 spilli vicini», come fa l'utente — correzione dell'utente: i pin raggruppati non si spostano). 174/174 nei tre file.
+- Browser (5373 → 3201, partita 1, Madarame «Entrata del Museo»): chip «4/4», «8/8»; «Lucernario aperto» → «Riapri» → «Riapre anche: Lucernario
+  Aperto — 4ª infiltrazione, Lucernario Aperto — 2ª infiltrazione», «Annulla» → la voce resta «ottenuto» (nessun dato cambiato); pulsanti 44 px
+  (`offsetHeight`); a 375 intestazione 241 (invariata), finestra a tutta larghezza, nessun orizzontale.
+
 ## Da fare
-1. k/N, «Segna»/«Riapri» con «Riapre anche» e «Segnate anche»: dopo i campi di BE per §8.11.
+1. ~~k/N, «Segna»/«Riapri» con «Riapre anche» e «Segnate anche»~~: fatto (sopra).
 2. Selettore del contesto nel popup per un pin di più infiltrazioni (§4.2).
 3. Sezione «Schede da sistemare», carattere della voce («Permanente», «Si ripropone», «Racconto»), «Esaurito» come chip, «Anche nella Nª infiltrazione» (§4.1, §4.3): non erano nella richiesta del PM di questo giro.
 4. Misure di layout ai formati, quando il lotto è finito.

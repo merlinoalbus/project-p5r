@@ -24,6 +24,7 @@ import { Selettore } from '../components/shared/Selettore';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { aggiornaArea, aggiornaCompendio, aggiornaDungeon, creaArea, eliminaArea, eliminaAreaMondo, getArea, getDivergenze, getDungeon, impostaStatoPunto, riordinaAree, risolviMappa } from '../services/api';
 import { urlCasa, urlMappa, type NavigaMappa, type PuntoArrivo } from '../utils/navigazioneMappa';
+import { testoVociDelGesto } from '../utils/gestiVoce';
 import { FinestraDaVerificare, SPIEGAZIONE_DA_VERIFICARE, type DivergenzaDaVerificare } from '../components/guida/FinestraDaVerificare';
 import { nomeSenzaPalazzo } from '../utils/gruppiPlanimetrie';
 import { PropostaDallaVoce } from '../components/guida/PropostaDallaVoce';
@@ -281,8 +282,13 @@ export function DungeonDettaglioPage() {
   const cambiaStato = async (p: PuntoInteresseDto, stato: StatoPunto | null): Promise<boolean> => {
     if (!partitaId) return false;
     try {
-      aggiornaPunto(await impostaStatoPunto(partitaId, p.chiave, stato));
+      const nuovo = await impostaStatoPunto(partitaId, p.chiave, stato);
+      aggiornaPunto(nuovo);
       setVersioneStati((v) => v + 1);
+      // L4 §8.11: il gesto sulla voce tocca tutti i suoi pin, e con loro le altre voci che li condividono: il server dice quali (la rilettura
+      // sotto le aggiorna nella scheda), qui si dicono a parole
+      if (nuovo.effetti?.segnate.length) notifica('info', `Segnate anche: ${testoVociDelGesto(nuovo.effetti.segnate, d?.aree)}.`);
+      if (nuovo.effetti?.riaperte.length) notifica('info', `Riaperte anche: ${testoVociDelGesto(nuovo.effetti.riaperte, d?.aree)}.`);
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
       return false;

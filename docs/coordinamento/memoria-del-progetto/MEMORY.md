@@ -30,3 +30,4 @@
 - [Implementatori non validano](feedback-implementatori-non-validano.md) — team p5s: BE/FE non lanciano validatori (galaxy compreso), si fermano a typecheck, lint e test mirati
 - [GET che scrivono](reference-get-che-scrivono.md) — dalla 108 un'immagine con ?l= scrive la cache immagine_miniatura: dichiararlo nelle prove «di lettura» su istanze altrui
 - [Manager del team p5s](project-manager-team-p5s.md) — dal 20/10 coordina il Manager; Regia e utente restano al PM, che riceve cambi di stato e preavviso dei push su p5s
+- [Test come l'utente](feedback-test-come-utente.md) — nei test i pin raggruppati restano dove sono: si aprono dal gruppo, mai spostare dati per schivare l'app

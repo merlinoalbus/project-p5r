@@ -273,6 +273,20 @@ describe('VisoreMappa', () => {
     fireEvent.click(popup.getByRole('button', { name: 'Da verificare' }));
     expect(onDaVerificare).toHaveBeenCalledWith({ spilloUid: 'u9', spilloNome: 'Seme della Bramosia', mappaNome: 'Shibuya', voce: 'k-03/7', voceNome: 'Seme del cortile', infiltrazioneNome: 'Cortile' });
   });
+
+  // L4 §8.11: il popup del pin mostra lo stato del pin e, sotto, le sue voci col loro contatore k/N
+  it('§8.11: nel popup le voci del pin dicono il loro contatore («In corso · 2/8»)', () => {
+    const voce = (chiave: string, nome: string, fatti: number, totale: number) => ({ chiave, tipo: 'oggetto' as const, nome, descrizione: '', esauribile: false, dungeon: 'madarame', area: 'm-02', areaDedalo: null, stato: null, avanzamento: { fatti, totale } });
+    // il pin sta accanto a «Untouchable» e il visore li raggruppa: resta lì, e lo si apre dal gruppo, come nell'app
+    const statua = spillo({ id: 11, nome: 'Statua', tipo: 'forziere', tipoNome: 'Forziere', x: 20, y: 20, collezionabile: true,
+      voci: [voce('m-02/1', 'Installazioni artistiche', 2, 8), voce('m-02/2', 'Statue del corridoio', 0, 3)] });
+    monta({ mappa: { ...mappa, spilli: [...mappa.spilli, statua] } });
+    fireEvent.click(screen.getByRole('button', { name: '2 spilli vicini: Untouchable, Statua' }));
+    fireEvent.click(within(screen.getByRole('dialog', { name: '2 spilli vicini' })).getByRole('button', { name: /Statua/ }));
+    const popup = within(screen.getByRole('dialog', { name: 'Statua' }));
+    expect(popup.getByRole('group', { name: 'Voce: Installazioni artistiche' })).toHaveTextContent('In corso · 2/8');
+    expect(popup.getByRole('group', { name: 'Voce: Statue del corridoio' })).toHaveTextContent('0/3');
+  });
 });
 
 it('centra il punto iniziale con lo zoom configurato senza selezionare un pin',async()=>{

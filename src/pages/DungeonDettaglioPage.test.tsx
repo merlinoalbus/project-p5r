@@ -8,6 +8,7 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { DungeonDettaglioPage } from './DungeonDettaglioPage';
 import { scegliVoce, vociSelettore } from '../../test/selettore';
 import { usePartitaStore } from '../stores/partitaStore';
+import { notifica } from '../stores/notificationStore';
 import type { AreaDedaloDto, AreaDungeonDto, DungeonDettaglioDto, PartitaDto, PuntoInteresseDto } from '../types';
 import type { SceltaPin } from '../components/mappe/VisoreMappa';
 import type { ReactNode } from 'react';
@@ -790,6 +791,18 @@ it('da 1280 px niente striscia «Aree toccate» nella riga: la colonna delle are
   expect(screen.queryByRole('list', { name: /^Aree toccate da/ })).toBeNull();
   const colonna = within(screen.getByRole('group', { name: 'Aree del Palazzo' }));
   expect(colonna.getByText('Aree toccate da «1. Cancello» · 1, evidenziate.')).toBeInTheDocument();
+});
+
+// L4 §8.11: «Segna» sulla voce segna tutti i suoi pin; le altre voci che li condividono possono diventare fatte, e la scheda lo dice
+// («Segnate anche: …», dalla risposta del server); «Riapri» lo stesso con «Riaperte anche: …»
+it('dopo «Ottenuto» la scheda dice le altre voci segnate dal gesto («Segnate anche: …»), poi rilegge (§8.11)', async () => {
+  getDungeon.mockResolvedValue(palazzo(true));
+  monta('kamoshida');
+  fireEvent.click(await screen.findByRole('button', { name: /Sicura del cancello/ }));
+  impostaStatoPunto.mockResolvedValue({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', marcatore: null, pin: [],
+    effetti: { segnate: [{ chiave: 'k3-sicura', nome: 'Sicura del cortile', infiltrazione: { chiave: 'k-03', nome: 'Cortile' } }], riaperte: [] } });
+  fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' }));
+  await waitFor(() => expect(notifica).toHaveBeenCalledWith('info', 'Segnate anche: Sicura del cortile — 3ª infiltrazione.'));
 });
 
 it('senza schede da sistemare la sezione non c’è (AP3-1)', async () => {
