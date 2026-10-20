@@ -36,7 +36,7 @@
 1. togliere dalle Impostazioni il comando «Importa» del pacchetto, che sostituirebbe tutto `gioco.db`, e allineare CLAUDE.md, che descrive ancora il pacchetto come fonte;
 2. nella guida del visore, mostrare solo le voci dell'infiltrazione aperta o quelle di tutte le infiltrazioni della planimetria, come oggi.
 
-**Lavoro non ancora committato**: nessuno. La prima parte di L6 B5 è committata in c9f3e5bb, sul ramo locale `newreview` della cartella di lavoro `C:\Repository\project-p5r\.claude\worktrees\pensive-burnell-b50941`, e non è ancora su GitHub. Il resto di B5 è descritto nel messaggio di quel commit e nella riga L6 qui sopra.
+**Lavoro non ancora committato**: nessuno. La prima parte di L6 B5 è committata in c9f3e5bb ed è pubblicata su GitHub (`newreview` = 9e17e2f9, 20:35Z). Il resto di B5 è descritto nel messaggio di quel commit e nella riga L6 qui sopra.
 
 **Da sapere per chi riprende**:
 - `docs/coordinamento/richieste-utente-aperte.md` è l'elenco di controllo delle richieste.
