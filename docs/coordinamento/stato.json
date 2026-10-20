@@ -17,7 +17,7 @@
   ],
   "p5s": {
     "url": "https://p5s.nasmerlinoalbus.cloud/",
-    "stato": "online; newreview pubblicato fino a 7d37ae07; DTO quartiere con sblocco strutturato; p5s mostra 306 mappe/767 pin; migrazione 120 e API modifica/ripristino sblocco pronte nel ramo; editor FE e verifica metro-diario aperti"
+    "stato": "online; newreview pubblicato fino a ea4291fa; DTO, migrazione 120, API ed editor FE dello sblocco quartieri pubblicati; p5s mostra 306 mappe/767 pin; verifica metro-diario e prova utente aperte"
   },
   "lotti": [
     {

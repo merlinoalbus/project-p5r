@@ -1,7 +1,7 @@
 # Stato attuale del lavoro — ramo newreview / p5s (aggiornato 2026-10-20, ripresa)
 
 ## DOVE SIAMO ADESSO (leggere per primo; prevale su tutto quanto c'è sotto)
-- **Ramo unico `newreview`**, pubblicato su p5s a ogni push. Il DTO del quartiere espone ora lo sblocco strutturato con condizione, fonte, inviti ed esito nel commit `7d37ae07`; typecheck, lint e controllo diff sono verdi in tre cicli. Il fetch locale resta bloccato dai permessi sul metadato condiviso del worktree.
+- **Ramo unico `newreview`**, pubblicato su p5s a ogni push. L6 ora comprende migrazione 120, API BE e editor FE dello sblocco dei quartieri fino a `ea4291fa`; typecheck, lint e controllo diff sono verdi in tre cicli. Il fetch locale resta bloccato dai permessi sul metadato condiviso del worktree.
 - **Dati di p5s**: `userVersion` fino a 119 dopo l'ultimo rilascio; la migrazione 120 è pronta nel ramo e copierà senza sovrascrivere la condizione attuale la guida degli sblocchi dei quartieri, per rendere possibile «Ripristina».
   - 114: planimetria della voce;
   - 115: luoghi come fonte unica;
