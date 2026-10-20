@@ -7,6 +7,7 @@ import type {
 import { apiDelete, apiPut, apiPost, apiGet, queryString } from './_helpers';
 import type { AzionePercorsoDto, DatiVoceGiornata, ElenchiAzioneDto, EsitoRevisioneVoce, PuntiCopiatiDto, PuntiSpostatiDto, SpostaPuntiInArea, TrasferisciVociGiornata, VideogiochiDto, VociTrasferiteDto } from '../../types';
 import type { DoteNote } from '../../../shared/effettiAzione';
+import type { CarattereVoce } from '../../../shared/caratteriVoce';
 
 /** Filtri dell'elenco Persona (stessi nomi della query API). */
 export interface FiltriPersona {
@@ -125,7 +126,9 @@ export interface DatiPuntoApi { nome?: string; descrizione?: string; tipo?: Punt
   /** Un'altra area dello stesso Palazzo (2026-10-12): la voce vi passa in fondo, coi passi se è un Enigma. Solo correggendo. */
   area?: string;
   /** Le aree del dedalo in cui si incontra una Persona di un dedalo (101): almeno una creandola; correggendola le sostituisce. */
-  areeDedalo?: string[] }
+  areeDedalo?: string[];
+  /** L4 (§1.1): il carattere scelto per una voce di un Palazzo; null = «Ripristina» (vale la regola del tipo). Solo correggendo. */
+  carattere?: CarattereVoce | null }
 /** Nome, dettagli e totale dei timbri di un'area di un dedalo (099); `timbriTotale` null = senza timbri. */
 export interface DatiAreaDedaloApi { nome?: string; descrizione?: string; timbriTotale?: number | null }
 

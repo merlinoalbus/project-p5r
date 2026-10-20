@@ -97,6 +97,21 @@ Aspettano i campi di BE per §8.11 (pin con stato proprio), chiesti a BE il 2026
   1280×689 finestra 565 px, elenco 207 px, corpo senza scorrimento; 1366×657 556/197, senza scorrimento; 375×812 foglio dal basso (convenzione dei
   selettori sul telefono), niente orizzontale; 768×1024 «Crea la voce» con «Semi della bramosia» proposto.
 
+## §4.1 Carattere della voce — fatto (ripresa di L4, 2026-10-20)
+- `GuidaDellArea`: chip accanto al tipo, nel testo della riga (va a capo con lui, non schiaccia il nome): «Permanente» (lucchetto aperto, chiuso
+  se fatta; `chip--toccata`), «Si ripropone» (ciclo; `chip--dalla-guida`), «Racconto» (libro; neutro). Niente chip senza carattere (dedali,
+  Persona). Voce aperta: «Permanente: si fa una volta per sempre.» / «Si ripropone: il suo stato vale in quest’infiltrazione.» / «Racconto: si
+  segna come letto e non conta nel completamento.».
+- Racconto (Storia): il pulsante è «Letto» (stato `ottenuto` sul server) e la riga dice «· letto».
+- «Modifica»: selettore «Carattere» (Permanente / Si ripropone / Racconto, «regola» sul valore della regola del tipo); senza scelta «Dalla regola
+  del tipo.», con una scelta «Ripristina» (torna alla regola, si salva `carattere: null`); il campo va nel corpo solo se cambiato.
+  `DatiPuntoApi.carattere`.
+- Test visti rossi e poi verdi: `GuidaDellArea.test.tsx`, describe «§4.1» (5: chip e niente chip, spiegazioni e «Letto», «letto» nella riga,
+  scelta salvata, «Ripristina» → null e corpo senza carattere se non toccato). File: 45/45; DungeonDettaglioPage e TramaDellArea 86/86.
+- Browser (Madarame «Entrata del Museo», partita 1; «Modifica» aperta e chiusa con «Annulla», niente salvato): chip su tutte le righe, righe 44–81
+  px; selettore 44 px, «Ripristina» 44 px; 375×812 righe larghe 291 px senza orizzontale, intestazione 241; 768×1024 righe da 44, intestazione 198;
+  visore top 317 (1366×657, 1920×1080), 340 (1024×690) → R3-41 invariato.
+
 ## Da fare
 1. ~~k/N, «Segna»/«Riapri» con «Riapre anche» e «Segnate anche»~~: fatto (sopra).
 5. ~~§8.6 (O4-2)~~: fatto (sopra).

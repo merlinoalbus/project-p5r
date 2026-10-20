@@ -752,3 +752,74 @@ describe('§8.11: contatore k/N e «Riapri» con «Riapre anche: …»', () => {
     await waitFor(() => expect(cambiaStato).toHaveBeenCalledWith(expect.objectContaining({ chiave: 'p1' }), null));
   });
 });
+
+// L4 §4.1: il carattere della voce accanto al tipo — «Permanente» (lucchetto aperto, chiuso se fatta), «Si ripropone» (ciclo; lo stato vale in
+// quest'infiltrazione), «Racconto» (si segna come «Letto», non conta) — e nella «Modifica» il selettore «Carattere» con «Ripristina» alla regola
+describe('§4.1: il carattere della voce', () => {
+  it('la riga porta il chip del carattere accanto al tipo; senza carattere (dedali, Persona) niente chip', () => {
+    monta([
+      punto({ chiave: 'p1', nome: 'Forziere della sala', carattere: 'permanente' }),
+      punto({ chiave: 'p2', tipo: 'oggetto', nome: 'Bottiglia a terra', carattere: 'rigenerabile' }),
+      punto({ chiave: 'p3', tipo: 'storia', nome: 'Il quadro parla', carattere: 'descrittiva' }),
+      punto({ chiave: 'p4', tipo: 'persona', nome: 'Pixie', carattere: null }),
+    ]);
+    const riga = (nome: RegExp) => screen.getByRole('button', { name: nome });
+    expect(within(riga(/Forziere della sala/)).getByText('Permanente')).toHaveClass('chip');
+    expect(within(riga(/Bottiglia a terra/)).getByText('Si ripropone')).toHaveClass('chip');
+    expect(within(riga(/Il quadro parla/)).getByText('Racconto')).toHaveClass('chip');
+    expect(within(riga(/Pixie/)).queryByText(/^(Permanente|Si ripropone|Racconto)$/)).toBeNull();
+  });
+
+  it('aperta: «Si ripropone» dice che lo stato vale in quest’infiltrazione; un Racconto si segna come «Letto» e non conta', async () => {
+    const { cambiaStato } = monta([
+      punto({ chiave: 'p2', tipo: 'oggetto', nome: 'Bottiglia a terra', esauribile: false, carattere: 'rigenerabile' }),
+      punto({ chiave: 'p3', tipo: 'storia', nome: 'Il quadro parla', esauribile: false, carattere: 'descrittiva' }),
+    ]);
+    fireEvent.click(screen.getByRole('button', { name: /Bottiglia a terra/ }));
+    expect(screen.getByText('Si ripropone: il suo stato vale in quest’infiltrazione.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Il quadro parla/ }));
+    expect(screen.getByText('Racconto: si segna come letto e non conta nel completamento.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Ottenuto' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Letto' }));
+    await waitFor(() => expect(cambiaStato).toHaveBeenCalledWith(expect.objectContaining({ chiave: 'p3' }), 'ottenuto'));
+  });
+
+  it('un Racconto segnato dice «letto» nella riga, non «ottenuto»', () => {
+    monta([punto({ chiave: 'p3', tipo: 'storia', nome: 'Il quadro parla', esauribile: false, carattere: 'descrittiva', stato: 'ottenuto' })]);
+    fireEvent.click(screen.getByRole('button', { name: /Anche le segnate/ }));
+    const riga = screen.getByRole('button', { name: /Il quadro parla/ });
+    expect(riga).toHaveTextContent('· letto');
+    expect(riga).not.toHaveTextContent('ottenuto');
+  });
+
+  it('«Modifica»: il selettore «Carattere» parte dalla regola senza «Ripristina»; scegliere «Racconto» salva il carattere', async () => {
+    monta([punto({ chiave: 'p1', nome: 'Forziere della sala', carattere: 'permanente', carattereScelto: false })]);
+    fireEvent.click(screen.getByRole('button', { name: /Forziere della sala/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Modifica: la voce «Forziere della sala»/ }));
+    expect(screen.getByRole('combobox', { name: 'Carattere' })).toHaveTextContent('Permanente');
+    expect(screen.getByText('Dalla regola del tipo.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Ripristina' })).toBeNull();
+    scegliVoce('Carattere', /^Racconto/);
+    aggiornaPunto.mockResolvedValue(punto({ chiave: 'p1', carattere: 'descrittiva', carattereScelto: true }));
+    fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
+    await waitFor(() => expect(aggiornaPunto).toHaveBeenCalledWith('p1', expect.objectContaining({ carattere: 'descrittiva' })));
+  });
+
+  it('«Modifica» di una voce col carattere scelto: «Ripristina» torna alla regola e salva null; senza toccarlo il corpo non lo porta', async () => {
+    monta([punto({ chiave: 'p1', nome: 'Forziere della sala', carattere: 'rigenerabile', carattereScelto: true })]);
+    fireEvent.click(screen.getByRole('button', { name: /Forziere della sala/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Modifica: la voce «Forziere della sala»/ }));
+    expect(screen.getByRole('combobox', { name: 'Carattere' })).toHaveTextContent('Si ripropone');
+    fireEvent.change(screen.getByRole('textbox', { name: 'Nome' }), { target: { value: 'Forziere della sala grande' } });
+    aggiornaPunto.mockResolvedValue(punto({ chiave: 'p1' }));
+    fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
+    await waitFor(() => expect(aggiornaPunto).toHaveBeenCalled());
+    expect(aggiornaPunto.mock.calls.at(-1)![1]).not.toHaveProperty('carattere');
+    fireEvent.click(screen.getByRole('button', { name: /^Modifica: la voce «Forziere della sala»/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Ripristina' }));
+    expect(screen.getByRole('combobox', { name: 'Carattere' })).toHaveTextContent('Permanente');
+    expect(screen.queryByRole('button', { name: 'Ripristina' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
+    await waitFor(() => expect(aggiornaPunto).toHaveBeenLastCalledWith('p1', expect.objectContaining({ carattere: null })));
+  });
+});
