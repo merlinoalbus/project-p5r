@@ -2918,7 +2918,7 @@ export interface RiepilogoCatalogoDto {
 
 /** Che cosa è stato eliminato: un'area della guida di un Palazzo, una voce della guida, una planimetria, un'area di un dedalo, un'Area
  *  con le sue planimetrie (`area-fisica`, L2: il quartiere o la città che la contiene). */
-export type TipoCestino = 'area' | 'voce' | 'mappa' | 'area-dedalo' | 'area-fisica';
+export type TipoCestino = 'area' | 'voce' | 'mappa' | 'area-dedalo' | 'area-fisica' | 'luogo' | 'negozio';
 
 /** Quante righe di una tabella se ne sono andate con l'eliminazione, con il nome per l'utente. */
 export interface ContenutoCestinoDto {

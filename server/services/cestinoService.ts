@@ -49,9 +49,8 @@ interface Passo { seq: number; tabella: string; op: Operazione; prima?: Riga; do
 /** Le chiavi di ciò che stava subito prima e subito dopo l'elemento nel suo elenco (null se era il primo, o l'ultimo). */
 export interface ViciniCestino { prima: string | null; dopo: string | null }
 
-/** I tipi di elemento che il server mette nel cestino: quelli di `TipoCestino` più il luogo e il negozio di L5 (migrazione 115). Passano in
- *  `TipoCestino` quando l'interfaccia ha i loro nomi; fino ad allora l'elenco li manda con il loro valore. */
-export type TipoElementoCestino = TipoCestino | 'luogo' | 'negozio';
+/** I tipi di elemento che il server mette nel cestino (da L5, migrazione 115, anche il luogo e il negozio). */
+export type TipoElementoCestino = TipoCestino;
 
 /** L'elemento che si elimina, per l'elenco del cestino; `vicini` per rimetterlo al suo posto (aree, voci). */
 export interface ElementoCestino { tipo: TipoElementoCestino; chiave: string; nome: string; contesto?: string; vicini?: ViciniCestino }

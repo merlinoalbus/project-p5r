@@ -20,6 +20,8 @@ export const NOME_TIPO_CESTINO: Record<TipoCestino, string> = {
   'area-dedalo': 'Area del dedalo',
   // L2: un'Area del mondo (Central Street, il Sottopasso…) con le sue planimetrie; `area` qui sopra è l'infiltrazione di un Palazzo
   'area-fisica': 'Area',
+  luogo: 'Luogo',
+  negozio: 'Negozio',
 };
 
 /**
@@ -73,7 +75,7 @@ export function contenutoLeggibile(v: Pick<VoceCestinoDto, 'tipo' | 'contenuto'>
 }
 
 /** La tabella dell'elemento stesso, per tipo (la stessa regola del server). */
-const RADICE_CESTINO: Record<TipoCestino, string> = { area: 'dungeon_area', voce: 'punto_interesse', mappa: 'mappa', 'area-dedalo': 'area_dedalo', 'area-fisica': 'area' };
+const RADICE_CESTINO: Record<TipoCestino, string> = { area: 'dungeon_area', voce: 'punto_interesse', mappa: 'mappa', 'area-dedalo': 'area_dedalo', 'area-fisica': 'area', luogo: 'luogo', negozio: 'negozio' };
 
 /** Come si presenta un elemento: «Area di Shibuya: Sottopasso» (il posto da cui viene, se c'è), poi «con 2 planimetrie e 1 pin». */
 export function descrizioneElementoCestino(v: Pick<VoceCestinoDto, 'tipo' | 'nome' | 'contesto' | 'contenuto'>): { titolo: string; con: string | null } {
