@@ -576,8 +576,9 @@ export function pulisciDivergenzeRisolte(db: AppDatabase, partita: number): void
  * 3. lo specchio delle voci con pin si rifà (`rifaiSpecchio`), e le divergenze risolte se ne vanno.
  * Un pin che resta senza voci che contano tiene il segno che aveva (§8.3: lo ha già, non si scrive niente). Senza le partite non fa niente.
  */
-export function riallineaStati(db: AppDatabase, mPrima: ModelloAvanzamento | null, adesso: string): void {
-  if (!conPartite(db)) return;
+export function riallineaStati(db: AppDatabase, mPrima: ModelloAvanzamento | null, adesso: string): SegniAggiunti {
+  const aggiunti: SegniAggiunti = [];
+  if (!conPartite(db)) return aggiunti;
   const partite = db.prepare('SELECT id FROM partita ORDER BY id').pluck().all() as number[];
   if (mPrima) {
     const mDopo = modelloAvanzamento(db);
@@ -595,7 +596,9 @@ export function riallineaStati(db: AppDatabase, mPrima: ModelloAvanzamento | nul
       const infiltrazione = mDopo.voci.get(voce)!.infiltrazione;
       for (const partita of partite) {
         if (!prima.get(partita)!.voci.get(voce)?.fatta) continue;
-        for (const p of nuovi) scriviSegnoDelPin(db, partita, p.uid, infiltrazioneDelPinPerLaVoce(mDopo, p.id, infiltrazione), true, adesso);
+        for (const p of nuovi) {
+          if (scriviSegnoDelPin(db, partita, p.uid, infiltrazioneDelPinPerLaVoce(mDopo, p.id, infiltrazione), true, adesso)) aggiunti.push({ partita, pin: p.id, voce });
+        }
       }
     }
   }
@@ -603,7 +606,11 @@ export function riallineaStati(db: AppDatabase, mPrima: ModelloAvanzamento | nul
     rifaiSpecchio(db, partita, null, adesso);
     pulisciDivergenzeRisolte(db, partita);
   }
+  return aggiunti;
 }
+
+/** I segni dati da `riallineaStati` ai pin nuovi delle voci fatte (§8.15 punto 6): partita, pin e voce, perché la risposta li dica. */
+export type SegniAggiunti = Array<{ partita: number; pin: number; voce: string }>;
 
 /** Le infiltrazioni delle voci rigenerabili di un pin, distinte. */
 function infiltrazioniRigenerabiliDelPin(m: ModelloAvanzamento, id: number): string[] {

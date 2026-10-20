@@ -333,7 +333,9 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     const a = await nuovoPunto('Segnato prima');
     await statoPunto(a.chiave, 'ottenuto');
     expect(raccolto(pinLiberi[0].uid)).toBe(0);
-    await collega(a.chiave, pinLiberi[0].id).expect(200);
+    // §8.15 punto 6: la risposta dice in quale partita il pin nuovo ha preso il segno (solo dove la voce era fatta)
+    const collegata = (await collega(a.chiave, pinLiberi[0].id).expect(200)).body.data as PuntoInteresseDto;
+    expect(collegata.segniAggiunti).toEqual([{ partita, pin: pinLiberi[0].id, voce: a.chiave }]);
     expect([segnato(a.chiave), raccolto(pinLiberi[0].uid)]).toEqual(['ottenuto', 1]);
     // scollegato, il pin tiene il suo segno, e la voce (senza pin) il suo
     await scollega(a.chiave, pinLiberi[0].id).expect(200);
@@ -350,6 +352,19 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     await scollega(b.chiave, pinLiberi[1].id).expect(200);
     expect([segnato(b.chiave), raccolto(pinLiberi[1].uid)]).toEqual(['ottenuto', 1]);
     await raccogli(pinLiberi[1].id, false);
+
+    // §8.15 punto 6: un pin nuovo che ha preso il segno, eliminato, se lo porta via (nessun segno resta nella partita); una partita dove la
+    // voce non era fatta non riceve niente
+    const altraPartita = ((await request(app).post('/api/partite').send({ nome: 'Senza la voce fatta', attiva: false })).body.data as { id: number }).id;
+    const c = await nuovoPunto('Segnato prima, pin da eliminare');
+    await statoPunto(c.chiave, 'ottenuto');
+    const mappa = prepared('SELECT mappa_chiave FROM spillo WHERE id = ?').pluck().get(pinLiberi[0].id) as string;
+    const nuovo = (await request(app).post(`/api/mappe/${mappa}/spilli`).send({ tipo: 'forziere', nome: 'Pin nuovo di prova', x: 3, y: 3 }).expect(201)).body.data as { id: number; uid: string };
+    expect(((await collega(c.chiave, nuovo.id).expect(200)).body.data as PuntoInteresseDto).segniAggiunti).toEqual([{ partita, pin: nuovo.id, voce: c.chiave }]);
+    expect(prepared('SELECT COUNT(*) FROM spillo_partita WHERE partita_id = ? AND spillo_uid = ?').pluck().get(altraPartita, nuovo.uid)).toBe(0);
+    await request(app).delete(`/api/mappe/spilli/${nuovo.id}`).expect(204);
+    expect(prepared('SELECT COUNT(*) FROM spillo_partita WHERE spillo_uid = ?').pluck().get(nuovo.uid)).toBe(0);
+    await request(app).delete(`/api/partite/${altraPartita}`).expect(204);
   });
 
   it('eliminare la voce scollega i pin e lascia il loro «raccolto»', async () => {

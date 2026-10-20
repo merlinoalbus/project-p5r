@@ -105,7 +105,17 @@ function collezionabiliPerPalazzo(palazzi: Map<string, string>): Map<string, Spi
  * segno «Completato») col perché, o null, e `manca`. Da L4 anche i numeri della funzione unica (`completamento`). Per i Memento i
  * due livelli coincidono (il boss finale segnato nella Guida, R4-30).
  */
-export interface StatoPalazzo { concluso: string | null; mancaPerConcludere: string | null; completato: string | null; manca: string | null; completamento?: CompletamentoPalazzo }
+export interface StatoPalazzo { concluso: string | null; mancaPerConcludere: string | null; completato: string | null; manca: string | null; completamento?: CompletamentoPalazzo;
+  /** L4 §8.15: un Palazzo con la regola del boss dei Memento (Iweleth, R8-19b) non entra negli effetti di Palazzo (ingressi, mappa di Tokyo,
+   *  requisiti e condizioni): `palazziConclusi` e i semafori lo saltano. */
+  senzaEffetti?: true }
+
+/** La regola del boss di ogni dungeon (`dungeon.regola_boss`, migrazione 113): i Palazzi con la regola dei Memento; vuota su uno schema
+ *  di prima. */
+function palazziColBossDellaGuida(): Set<string> {
+  if (!(prepared('PRAGMA main.table_info(dungeon)').all() as Array<{ name: string }>).some((c) => c.name === 'regola_boss')) return new Set();
+  return new Set(prepared("SELECT chiave FROM dungeon WHERE tipo = 'palazzo' AND regola_boss = 'memento'").pluck().all() as string[]);
+}
 
 /** Il perché di un Palazzo concluso (§8.10). */
 export const MOTIVO_CONCLUSO = 'Tesoro e boss finale';
@@ -157,15 +167,35 @@ export function statoPalazzi(partitaId: number | undefined, m: ModelloAvanzament
   const palazzi = palazzoDiOgniMappa();
   const collezionabili = collezionabiliPerPalazzo(palazzi);
   const vociBoss = vociBossFinale();
+  const colBossDellaGuida = palazziColBossDellaGuida();
+  const motivo = 'boss finale segnato nella Guida';
   for (const [dungeon, tipo] of tipi) {
     if (tipo === 'mementos') {
       if (partitaId === undefined) continue;
       // niente planimetrie: il boss finale segnato nella Guida, come prima del 2026-10-04
       const finale = finali.get(dungeon);
       const segnato = !!finale && finale.punti.some((p) => puntiGestiti.has(p));
-      const motivo = 'boss finale segnato nella Guida';
       out.set(dungeon, segnato ? { concluso: motivo, mancaPerConcludere: null, completato: motivo, manca: null }
         : { concluso: null, mancaPerConcludere: 'il boss finale segnato nella Guida', completato: null, manca: 'il boss finale segnato nella Guida' });
+      continue;
+    }
+    if (colBossDellaGuida.has(dungeon)) {
+      // L4 §8.15 (Iweleth, R8-19b): il boss con la regola dei Memento (segnato nella Guida), il Tesoro non conta; i numeri dell'anello
+      // restano quelli della funzione unica; nessun effetto di Palazzo
+      const base = valutaPalazzo(dungeon, collezionabili.get(dungeon) ?? [], undefined, m, s);
+      if (!s) { out.set(dungeon, { ...base, senzaEffetti: true }); continue; }
+      const finale = finali.get(dungeon);
+      const segnato = !!finale && finale.punti.some((p) => puntiGestiti.has(p));
+      const c = base.completamento!;
+      const fatti = c.fatti ?? 0;
+      const completato = segnato && c.oggetti > 0 && fatti >= c.oggetti;
+      out.set(dungeon, {
+        concluso: segnato ? motivo : null, mancaPerConcludere: segnato ? null : 'il boss finale segnato nella Guida',
+        completato: completato ? `${motivo} e tutti gli oggetti permanenti (${fatti}/${c.oggetti})` : null,
+        manca: completato ? null : [!segnato ? 'il boss finale segnato nella Guida' : null, fatti < c.oggetti || c.oggetti === 0 ? `tutti gli oggetti permanenti (${fatti}/${c.oggetti})` : null].filter(Boolean).join(', '),
+        completamento: { ...c, boss: segnato, concluso: segnato, completato },
+        senzaEffetti: true,
+      });
       continue;
     }
     out.set(dungeon, valutaPalazzo(dungeon, collezionabili.get(dungeon) ?? [], vociBoss.get(dungeon), m, s));
@@ -181,7 +211,7 @@ export function palazziCompletati(partitaId: number): Map<string, string> {
 /** I Palazzi conclusi nella partita (Tesoro e boss finale: gli effetti, §8.10), ognuno col perché. Li leggono gli ingressi, la mappa
  *  di Tokyo, i requisiti dei Confidenti e le condizioni «Completare il Palazzo» / «dopo il Palazzo di X». */
 export function palazziConclusi(partitaId: number): Map<string, string> {
-  return new Map([...statoPalazzi(partitaId)].flatMap(([k, s]) => (s.concluso ? [[k, s.concluso] as [string, string]] : [])));
+  return new Map([...statoPalazzi(partitaId)].flatMap(([k, s]) => (s.concluso && !s.senzaEffetti ? [[k, s.concluso] as [string, string]] : [])));
 }
 
 /**

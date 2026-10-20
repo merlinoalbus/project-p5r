@@ -334,6 +334,17 @@ describe('L4 — avanzamento unico', () => {
     await scollega(o.chiave, pin[3].id);
   });
 
+  it('eliminando una partita se ne vanno anche le sue divergenze e il suo stato per infiltrazione (utente 024: la cascata come le altre tabelle)', async () => {
+    const altra = ((await request(app).post('/api/partite').send({ nome: 'Da eliminare' })).body.data as { id: number }).id;
+    prepared("INSERT INTO divergenza_partita (partita_id, spillo_uid, voce_chiave, rilevata_il) VALUES (?, ?, 'v', 'x')").run(altra, pin[0].uid);
+    prepared("INSERT INTO spillo_partita_infiltrazione (partita_id, spillo_uid, infiltrazione_chiave, raccolto, updated_at) VALUES (?, ?, ?, 1, 'x')").run(altra, pin[0].uid, inf[1]);
+    await request(app).delete(`/api/partite/${altra}`).expect(204);
+    expect([
+      prepared('SELECT COUNT(*) FROM divergenza_partita WHERE partita_id = ?').pluck().get(altra),
+      prepared('SELECT COUNT(*) FROM spillo_partita_infiltrazione WHERE partita_id = ?').pluck().get(altra),
+    ]).toEqual([0, 0]);
+  });
+
   it('§3.2, R4-15 — le copie secondo la regola dell’utente: vuote a Madarame; con voci uguali sugli stessi pin nella stessa infiltrazione, trovate', async () => {
     expect((await request(app).get('/api/compendio/dungeon/madarame/copie').expect(200)).body.data).toEqual([]);
     const a = await nuova(inf[5], 'Doppione', 'forziere');

@@ -1913,6 +1913,10 @@ export interface PuntoInteresseDto {
   condivise?: VoceDelGestoDto[];
   /** §8.11: solo nella risposta del gesto sulla voce (`PUT /api/partite/:id/punti`): le altre voci segnate o riaperte. */
   effetti?: EffettiDelGestoDto;
+  /** §8.15 punto 6: solo nelle risposte di collegamento e modifica della voce (`PUT /api/compendio/punti/:k/pin/:id`,
+   *  `PUT /api/compendio/punti/:k`), quando un pin nuovo di una voce già fatta ha preso il segno: in quale partita, quale pin, di quale voce
+   *  (la voce resta fatta). Assente se nessuno. */
+  segniAggiunti?: Array<{ partita: number; pin: number; voce: string }>;
 }
 
 /** La Persona del compendio che corrisponde a una maschera scritta dalla guida: id della scheda, nome canonico (per l'immagine)
@@ -2053,6 +2057,9 @@ export interface DungeonRiassuntoDto {
   voceBossFinale?: { chiave: string; nome: string } | null;
   /** L4 §8.14: la voce del boss finale è stata cambiata dall'utente («Ripristina» la riporta a quella della guida). */
   bossFinaleCorretto?: boolean;
+  /** L4 §8.15: la regola del boss del Palazzo — `voce-finale` (la voce dichiarata, «Modifica › Boss finale») o `memento` (il boss segnato
+   *  nella Guida, come nei Memento, senza effetti di Palazzo: Iweleth). Per i Palazzi; assente per i Memento. */
+  regolaBoss?: 'voce-finale' | 'memento';
 }
 
 /** L4 (§3.1): una divergenza conservata «da verificare» — un pin fatto con una sua voce non fatta, da prima dell'aggiornamento. */

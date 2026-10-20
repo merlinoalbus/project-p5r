@@ -19,7 +19,7 @@ import { registraEvento } from './storicoService.js';
 import { finestreDungeon, invalidaDatiGuida } from './datiGuida.js';
 import { radiceDelPalazzo, SQL_SOTTOALBERO, sottoalberoMappe } from './mappe/alberoMappe.js';
 import { illustrazioneDellaMappa } from './mappe/immagineMappa.js';
-import { completamentoDegliOggetti, contaOggetti, effettiDelGestoDto, modelloAvanzamento, oggettiDelleMappe, oggettiDelleVoci, pinFattoPerLaVoce, riallineaStati, statiDellaPartita, statoDelPin, statoDellaVoce, voceDelGestoDto, vociCheCondividonoIPin, vociDellInfiltrazione, type ModelloAvanzamento, type StatiDellaPartita } from './mappe/statiGuida.js';
+import { completamentoDegliOggetti, contaOggetti, effettiDelGestoDto, modelloAvanzamento, oggettiDelleMappe, oggettiDelleVoci, pinFattoPerLaVoce, riallineaStati, type SegniAggiunti, statiDellaPartita, statoDelPin, statoDellaVoce, voceDelGestoDto, vociCheCondividonoIPin, vociDellInfiltrazione, type ModelloAvanzamento, type StatiDellaPartita } from './mappe/statiGuida.js';
 import { infiltrazioneCompletata } from '../../shared/completamentoGuida.js';
 import { carattereDaTipo, type CarattereVoce } from '../../shared/caratteriVoce.js';
 import type { AreaDedaloDto, AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, GruppoCopieDto, PinDelPuntoDto, SchedaDaSistemareDto, PuntiCopiatiDto, PuntiSpostatiDto, PuntoInteresseDto, RichiestaDelDedaloDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta, VoceCollegabileDto } from '../../shared/types.js';
@@ -39,7 +39,8 @@ import { allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, allineaPinScollegat
 import { conCestino, registraRipristinoCestino, type ViciniCestino } from './cestinoService.js';
 
 interface RigaDungeon { chiave: string; tipo: 'palazzo' | 'mementos'; ordine: number; nome: string; sovrano: string; arcana_sovrano: string; data_sblocco: string; data_scadenza: string; furto_consigliato: string; livello_consigliato: string; note: string; fonti_json: string;
-  /** 112 (L4 §8.14) */ voce_boss_finale?: string | null; seed_json?: string | null }
+  /** 112 (L4 §8.14) */ voce_boss_finale?: string | null; seed_json?: string | null;
+  /** 113 (L4 §8.15) */ regola_boss?: 'voce-finale' | 'memento' }
 interface RigaArea { chiave: string; dungeon_chiave: string; ordine: number; nome: string; descrizione: string }
 /** Un'area di un dedalo dei Memento (099). */
 interface RigaAreaDedalo { chiave: string; dedalo_chiave: string; ordine: number; nome: string; descrizione: string; timbri_totale: number | null }
@@ -271,7 +272,8 @@ function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: nu
     completato: palazzo ? palazzi.get(r.chiave)?.completato ?? null : null,
     // §8.10: il furto (Tesoro e boss finale), che governa la presenza sulla mappa di Tokyo e gli ingressi; solo per i Palazzi (AP4-1:
     // la risposta dei Memento resta quella di prima, R4-30)
-    ...(palazzo ? { concluso: palazzi.get(r.chiave)?.concluso ?? null } : {}),
+    // (un Palazzo con la regola del boss dei Memento, Iweleth §8.15, non ha effetti di Palazzo: nessun «concluso» per la mappa di Tokyo)
+    ...(palazzo ? { concluso: palazzi.get(r.chiave)?.senzaEffetti ? null : palazzi.get(r.chiave)?.concluso ?? null } : {}),
     // dove si atterra toccandolo sulla mappa di Tokyo, per il giorno della partita (2026-10-04)
     atterraggio: atterraggioDelGiorno(r.chiave, giornoDellaPartita(partitaId)),
     // L4: la funzione unica e le divergenze da verificare, solo per i Palazzi (i Memento restano come prima, R4-30)
@@ -281,6 +283,8 @@ function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: nu
       // §8.14: la voce del boss finale dichiarata (null = nessuna: il Palazzo non si conclude) e se l'utente l'ha cambiata («Ripristina»)
       voceBossFinale: r.voce_boss_finale ? { chiave: r.voce_boss_finale, nome: (prepared('SELECT nome FROM punto_interesse WHERE chiave = ?').get(r.voce_boss_finale) as { nome: string } | undefined)?.nome ?? r.voce_boss_finale } : null,
       bossFinaleCorretto: r.seed_json != null,
+      // §8.15: la regola del boss (113): `memento` = il boss segnato nella Guida, senza voce dichiarata né effetti di Palazzo (Iweleth)
+      regolaBoss: r.regola_boss === 'memento' ? 'memento' as const : 'voce-finale' as const,
     } : {}),
   };
 }
@@ -486,7 +490,8 @@ export function aggiornaDungeon(chiave: string, dati: DatiDungeon): DungeonDetta
 
 /** La voce data può essere il boss finale del Palazzo? (Vedi `aggiornaDungeon`.) */
 function verificaVoceBossFinale(r: RigaDungeon, voce: string | null): void {
-  if (r.tipo !== 'palazzo') throw httpErrors.badRequest('boss-finale-dei-memento', 'I Memento non hanno una voce del boss finale: il boss si segna nella Guida.');
+  // i Memento, e i Palazzi con la regola del boss dei Memento (Iweleth, §8.15): il boss si segna nella Guida
+  if (r.tipo !== 'palazzo' || r.regola_boss === 'memento') throw httpErrors.badRequest('boss-finale-dei-memento', `${r.tipo === 'palazzo' ? r.nome : 'I Memento'}: il boss si segna nella Guida, come nei Memento, senza una voce del boss finale.`);
   if (!colonnaVoceBossFinale()) throw httpErrors.badRequest('boss-finale-non-disponibile', 'La voce del boss finale arriva con la migrazione 112.');
   if (voce === null) return;
   const v = prepared('SELECT p.nome, p.tipo, a.dungeon_chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE p.chiave = ?').get(voce) as { nome: string; tipo: string; dungeon_chiave: string } | undefined;
@@ -1101,7 +1106,7 @@ export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoIntere
   if (dati.carattere !== undefined && !colonnaCarattere()) throw httpErrors.badRequest('carattere-non-ammesso', 'Il carattere delle voci arriva con la migrazione 111.');
   const adesso = nowIso();
   const db = getDb();
-  db.transaction(() => {
+  const segni = db.transaction((): SegniAggiunti => {
     // §8.11: carattere, tipo e infiltrazione decidono se la voce legge i suoi pin e la forma dei pin condivisi dai rigenerabili
     const mPrima = modelloAvanzamento(db);
     if (dati.carattere !== undefined) prepared('UPDATE punto_interesse SET carattere = ? WHERE chiave = ?').run(dati.carattere, puntoChiave);
@@ -1115,9 +1120,9 @@ export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoIntere
     if (areePersona) collegaPersonaAlleAree(puntoChiave, areePersona);
     // gli Enigmi toccati (lasciato, raggiunto, o il proprio, se cambia tipo e con lui il conto dei passi da segnare) seguono i passi
     for (const enigma of new Set([prima, dopo].filter((x): x is string => x !== null))) allineaEnigmaInOgniPartita(db, enigma, adesso);
-    if (dati.carattere !== undefined || dati.tipo !== undefined || cambiaArea) riallineaStati(db, mPrima, adesso);
+    return dati.carattere !== undefined || dati.tipo !== undefined || cambiaArea ? riallineaStati(db, mPrima, adesso) : [];
   })();
-  return leggiPunto(puntoChiave);
+  return conSegniAggiunti(leggiPunto(puntoChiave), segni);
 }
 
 /**
@@ -1223,7 +1228,7 @@ export function collegaPinAlPunto(puntoChiave: string, spilloId: number, collega
   // le regole sono le stesse dell'editor delle mappe e del pacchetto (`erroreVoceDelPin`)
   const errore = erroreVoceDelPin({ nome: s.nome, mappa: s.mappa_chiave }, puntoChiave);
   if (errore) throw errore;
-  getDb().transaction(() => {
+  const segni = getDb().transaction(() => {
     const mPrima = modelloAvanzamento(getDb());
     if (!suoPunto) {
       prepared('INSERT INTO spillo_voce (spillo_id, voce_chiave) VALUES (?, ?)').run(spilloId, puntoChiave);
@@ -1231,9 +1236,15 @@ export function collegaPinAlPunto(puntoChiave: string, spilloId: number, collega
     }
     allineaStatiPunto(getDb(), puntoChiave, adesso);
     // §8.11: una voce fatta dà il segno al pin nuovo; un pin già segnato che completa i pin della voce la rende fatta
-    riallineaStati(getDb(), mPrima, adesso);
+    return riallineaStati(getDb(), mPrima, adesso);
   })();
-  return leggiPunto(puntoChiave);
+  // §8.15 punto 6: la risposta dice in quali partite il pin nuovo ha preso il segno
+  return conSegniAggiunti(leggiPunto(puntoChiave), segni);
+}
+
+/** Il DTO della voce con i segni dati ai pin nuovi di voci fatte (§8.15 punto 6), solo se ce ne sono. */
+function conSegniAggiunti(dto: PuntoInteresseDto, segni: SegniAggiunti): PuntoInteresseDto {
+  return segni.length ? { ...dto, segniAggiunti: segni.map(({ partita, pin, voce }) => ({ partita, pin, voce })) } : dto;
 }
 
 /**

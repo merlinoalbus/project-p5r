@@ -83,8 +83,9 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   const eventi = new Set((prepared('SELECT evento_chiave FROM evento_storia_partita WHERE partita_id = ? AND avvenuto = 1').all(partitaId) as Array<{ evento_chiave: string }>).map((r) => r.evento_chiave));
   // i Palazzi letti una volta: conclusi (Tesoro e boss finale, §8.10) col perché, gli altri con quel che manca al furto
   const palazzi = statoPalazzi(partitaId);
-  const palazziConclusi = new Map([...palazzi].flatMap(([k, s]) => (s.concluso ? [[k, s.concluso] as [string, string]] : [])));
-  const palazziMancanze = new Map([...palazzi].flatMap(([k, s]) => (s.mancaPerConcludere ? [[k, s.mancaPerConcludere] as [string, string]] : [])));
+  // un Palazzo con la regola del boss dei Memento (Iweleth, §8.15) non entra negli effetti di Palazzo
+  const palazziConclusi = new Map([...palazzi].flatMap(([k, s]) => (s.concluso && !s.senzaEffetti ? [[k, s.concluso] as [string, string]] : [])));
+  const palazziMancanze = new Map([...palazzi].flatMap(([k, s]) => (s.mancaPerConcludere && !s.senzaEffetti ? [[k, s.mancaPerConcludere] as [string, string]] : [])));
   return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, palazziConclusi, palazziMancanze, richiesteCompletate: richieste, richiesteEsistenti, nomiRichieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOra: meteoOra(partitaId, dataGioco, fasciaGioco), conferme, eventi };
 }
 

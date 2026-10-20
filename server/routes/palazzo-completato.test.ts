@@ -382,6 +382,23 @@ describe('Palazzo completato: Tesoro, boss finale e tutti gli oggetti permanenti
     expect(['voceBossFinale', 'bossFinaleCorretto'].filter((k) => k in memento)).toEqual([]);
   });
 
+  it('§8.15 — Iweleth segue la regola del boss dei Memento (113): mai «manca: il boss finale (nessuna voce…)», concluso col boss segnato nella Guida, nessun effetto di Palazzo', async () => {
+    const p = await partitaNuova('Iweleth', '12-24');
+    const st = () => statoPalazzi(p).get('iweleth')!;
+    expect(st().mancaPerConcludere).toBe('il boss finale segnato nella Guida');
+    expect(st().manca ?? '').not.toMatch(/nessuna voce di boss finale/);
+    const boss = bossFinali().get('iweleth')!.punti[0];
+    await request(app).put(`/api/partite/${p}/punti`).send({ punto: boss, stato: 'ottenuto' }).expect(200);
+    expect(st()).toMatchObject({ concluso: 'boss finale segnato nella Guida', mancaPerConcludere: null, senzaEffetti: true });
+    // nessun effetto: non fra i conclusi (ingressi, requisiti), nessun «concluso» per la mappa di Tokyo
+    expect(palazziConclusi(p).has('iweleth')).toBe(false);
+    const r = ((await request(app).get(`/api/compendio/dungeon?partita=${p}`).expect(200)).body.data as DungeonRiassuntoDto[]).find((d) => d.chiave === 'iweleth')!;
+    expect(r).toMatchObject({ concluso: null, regolaBoss: 'memento', voceBossFinale: null });
+    // nessuna voce del boss finale da scegliere
+    expect((await request(app).put('/api/compendio/dungeon/iweleth').send({ voceBossFinale: boss })).body.error.code).toBe('boss-finale-dei-memento');
+    expect(((await request(app).get(`/api/compendio/dungeon?partita=${p}`).expect(200)).body.data as DungeonRiassuntoDto[]).find((d) => d.chiave === 'kamoshida')!.regolaBoss).toBe('voce-finale');
+  });
+
   it('§8.14 — Madarame come nella produzione: due pin «Tesoro» (servono tutti e due) e la voce del boss finale con due pin (fatta a 2/2)', async () => {
     const p = await partitaNuova('Madarame a due tesori', '06-01');
     const infiltrazione = prepared("SELECT chiave FROM dungeon_area WHERE dungeon_chiave = 'madarame' ORDER BY ordine DESC LIMIT 1").pluck().get() as string;
