@@ -1,6 +1,6 @@
 {
   "obiettivo": "Lotti L0–L11 della razionalizzazione completati sul branch newreview, pubblicati e funzionanti su p5s",
-  "aggiornato": "2026-10-20T23:20:00Z",
+  "aggiornato": "2026-10-20T23:38:00Z",
   "fasi": [
     "requisiti",
     "dati",
@@ -17,7 +17,7 @@
   ],
   "p5s": {
     "url": "https://p5s.nasmerlinoalbus.cloud/",
-    "stato": "online; newreview pubblicato fino a 4a61b0bc (pipeline #61 riuscita); API p5s coerente per Shibuya, DTO, migrazione 120, API, editor FE dello sblocco quartieri e descrizioni OpenAPI B6 pubblicati; p5s osservato con 301 mappe/767 spilli; nuova scheda FE anonima rimasta su Caricamento; verifica metro-diario e prova utente aperte"
+    "stato": "online; newreview pubblicato fino a f4dd2c08 (pipeline #62 riuscita: verify, build-backend e build-frontend); API p5s coerente per Shibuya, DTO, migrazione 120, API, editor FE dello sblocco quartieri e descrizioni OpenAPI B6 pubblicati; p5s osservato con 301 mappe/767 spilli; nuova scheda FE anonima rimasta su Caricamento; verifica metro-diario e prova utente aperte"
   },
   "lotti": [
     {
