@@ -26,6 +26,7 @@ import { aggiornaArea, aggiornaCompendio, aggiornaDungeon, creaArea, eliminaArea
 import { urlCasa, urlMappa, type NavigaMappa, type PuntoArrivo } from '../utils/navigazioneMappa';
 import { enigmiCheSiRiaprono, righeRiapertura, testoVociDelGesto, vociDelPin } from '../utils/gestiVoce';
 import { FinestraDaVerificare, SPIEGAZIONE_DA_VERIFICARE, type DivergenzaDaVerificare } from '../components/guida/FinestraDaVerificare';
+import { SchedeDaSistemare } from '../components/guida/SchedeDaSistemare';
 import { nomeSenzaPalazzo } from '../utils/gruppiPlanimetrie';
 import { PropostaDallaVoce } from '../components/guida/PropostaDallaVoce';
 import { useMedia } from '../hooks/useMedia';
@@ -1080,22 +1081,8 @@ export function DungeonDettaglioPage() {
                 )}
                 {/* AP3-1 (decisione del PM): le schede della guida senza mappa né voce (Kamoshida 1, 14, 15, 16; Madarame 28) non si
                     aprono più dal visore di Mappe, che per i Palazzi porta qui: si leggono in questa sezione, col loro testo e la loro
-                    infiltrazione. I gesti che le sistemano («Crea la voce», «Collega a una voce») arrivano con L4 (§4.3). */}
-                {(d.schedeDaSistemare?.length ?? 0) > 0 && (
-                  <details className="text-[12px]">
-                    <summary className="touch cursor-pointer font-semibold text-text-secondary">Schede da sistemare ({d.schedeDaSistemare!.length})</summary>
-                    <p className="m-0 pt-1 text-text-muted">Contenuti della guida che non stanno su una planimetria e non hanno una voce.</p>
-                    <ul className="m-0 flex list-none flex-col gap-1 p-0 pt-1.5" aria-label="Schede da sistemare">
-                      {d.schedeDaSistemare!.map((s) => (
-                        <li key={s.id} className="flex flex-col rounded-md border border-border-light px-2 py-1">
-                          <span className="text-[13px] font-semibold">{s.nome}</span>
-                          <span className="text-[11px] text-text-muted">{s.infiltrazioneNome}</span>
-                          {s.descrizione && <p className="m-0 whitespace-pre-wrap pt-0.5 text-[12px] text-text-secondary">{s.descrizione}</p>}
-                        </li>
-                      ))}
-                    </ul>
-                  </details>
-                )}
+                    infiltrazione, e da L4 (§4.3) si sistemano con «Crea la voce» o «Collega a una voce» */}
+                <SchedeDaSistemare schede={d.schedeDaSistemare ?? []} aree={d.aree} onSistemata={rileggiTutto} />
 
                 {/* La guida dell'area: voci modificabili, spostabili e collegate ai pin delle planimetrie (2026-10-01). */}
                 <GuidaDellArea key={area.chiave} area={area} planimetrie={d.planimetrie} partitaId={partitaId} mappaAperta={mappaScelta} areePalazzo={d.aree}

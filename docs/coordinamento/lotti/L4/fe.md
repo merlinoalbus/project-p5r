@@ -81,6 +81,22 @@ Aspettano i campi di BE per §8.11 (pin con stato proprio), chiesti a BE il 2026
   nessuna scrittura). Misure col popup aperto: visore top 317 (1366×657), 317 (1280×689), 340 (1024×690), 317 (1920×1080) → R3-41 invariato;
   intestazione 198 a 768×1024, 241 a 375×812; selettore 44 px; nessuno scorrimento orizzontale.
 
+## §4.3 «Schede da sistemare» — fatto (ripresa di L4, 2026-10-20)
+- `components/guida/SchedeDaSistemare.tsx` (nuovo), al posto dell'elenco in sola lettura di AP3-1: per ogni scheda «Crea la voce» e «Collega a una
+  voce» (44 px), mai «Elimina». API `creaVoceDallaScheda(id, tipo)` (POST) e `collegaSchedaAllaVoce(id, voce)` (PUT).
+- «Crea la voce»: finestra con il tipo proposto dal tipo del pin (`spilloPerPunto`: miniboss → Mini-boss, seme della bramosia → Semi della
+  bramosia, forziere → Forziere normale, sicura → Stanze sicure; altrimenti Altro) e «Una voce nuova in fondo a «<infiltrazione>»… Nessuno stato
+  si trasferisce.».
+- «Collega a una voce»: finestra con le voci del Palazzo raggruppate per infiltrazione, prima quella della scheda, con ricerca; «Collega»
+  disattivato finché non si sceglie.
+- «Annulla» non chiama niente; dopo il gesto notifica e rilettura della scheda (`rileggiTutto`); un errore lascia la finestra aperta col messaggio.
+  Selettori `selettore--in-linea`: sovrapposti restavano tagliati dal corpo della finestra (nel browser si vedeva una voce sola).
+- Test visti rossi e poi verdi: `DungeonDettaglioPage.test.tsx`, describe «§4.3» (due gesti e niente «Elimina», tipo proposto, Annulla, crea e
+  rilegge; collega con scelta, errore che lascia aperta la finestra, poi riuscito; tendine in linea). File: 84/84.
+- Browser (Kamoshida, 4 schede), solo finestre aperte e chiuse con «Annulla», nessuna richiesta a `/schede/` e 4 schede anche dopo:
+  1280×689 finestra 565 px, elenco 207 px, corpo senza scorrimento; 1366×657 556/197, senza scorrimento; 375×812 foglio dal basso (convenzione dei
+  selettori sul telefono), niente orizzontale; 768×1024 «Crea la voce» con «Semi della bramosia» proposto.
+
 ## Da fare
 1. ~~k/N, «Segna»/«Riapri» con «Riapre anche» e «Segnate anche»~~: fatto (sopra).
 5. ~~§8.6 (O4-2)~~: fatto (sopra).
