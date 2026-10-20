@@ -162,6 +162,13 @@ Restano (sotto, «Da fare»):
   - base del gruppo sovrano/arcana da 160 a 128 px (cresce comunque nello spazio libero); con LAY3-2 sovrano e arcana vanno su due righe dentro l'altezza della riga del titolo.
 - Misure (bordo superiore del visore, **tutte** le infiltrazioni con aree, partita attiva, dati locali): **1024×690: 340 in tutti gli otto Palazzi** (obiettivo ≤ 345; intestazione 106 px ovunque); 1366×657: 327 (Kamoshida, Madarame, Maruki, Shido; obiettivo ≤ 328); 1280×689: 327–328 (Kamoshida, Madarame, Maruki, Shido; obiettivo ≤ 344). Nessuna barra della pagina; a 768 e 375 nessun cambiamento.
 
+## Dichiarazione sulle regole di lavoro (ripresa di L3, 2026-10-20)
+- Tre comandi di shell sbagliati, che **non hanno scritto nulla**:
+  - in L2, un `sed -i.bak '' /dev/null` (nessun file toccato);
+  - in questa ripresa, un heredoc Python vuoto (`python3 - <<'EOF'` senza righe; il comando non c'era nemmeno);
+  - in questa ripresa, un `cat >> src/utils/navigazioneMappa.test.ts <<'EOF'` con contenuto vuoto: `git diff` nullo sul file subito dopo.
+- Tutte le modifiche ai sorgenti, ai test e ai documenti sono fatte con modifiche dirette (Edit).
+
 ## Dati (da segnalare ad Analisi dati)
 - `arcanaSovranoNome` di Maruki è una frase intera: «Consigliere (Councillor) — arcana speciale/esclusi…».
 - I sovrani di Madarame e Okumura hanno note fra parentesi.
