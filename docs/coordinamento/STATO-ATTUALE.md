@@ -19,6 +19,9 @@ Il mandato dell'utente: completare la razionalizzazione in lotti L0–L11 sul ra
 Il push di `newreview` con il merge di L2 e il lavoro di L3/L4 (97c1d46e, 2026-10-20 ~08:28Z) è stato fatto su richiesta dell'utente: «puoi pushare tutto su newreview, comprese le modifiche di L3 ed eventuali altri lavori pending». Così p5s riceve anche L3 e L4, non ancora validati. All'avvio si applicano le migrazioni 110–113 e utente 022–024 sui dati dell'utente; il server fa da solo una copia di avvio in `/data/backups`.
 
 ## Punti aperti di L3 (alla ripresa)
+**In corso dalle 08:40Z**: la sola sessione Implementazione FE è riaperta su questi punti, nell'ordine sotto; committa su `newreview` senza push. Per NR3-4 il PM ha deciso la strada (a): la `planimetriaIniziale` dell'infiltrazione vale solo con `?infiltrazione=`; arrivando dalla casa si apre la `predefinita` dell'Area.
+- NR3-4 (alta): 80 indirizzi di planimetria su 539 aprono un'altra versione (vedi `lotti/L3/difetti.md`).
+- AP3-1, AP3-2, AP3-4: schede senza mappa, `senzaVicine`, collegamenti diretti alla casa.
 - R3-41: visore entro metà altezza, applicate le scelte 2 e 3 del PM. Resta lo sforamento a 1024×690.
 - LAY3-2: 2 casi residui (nome del sovrano accorciato).
 - Indice delle Mappe: UX3-8 (planimetrie senza pin nascoste), UX3-7 (titolo «con tutti i livelli»), E2 (spilli di contenuto «più N passaggi e N note», deciso dall'utente), E3 (la carta di un Palazzo dice «N aree · M planimetrie»), E9.
