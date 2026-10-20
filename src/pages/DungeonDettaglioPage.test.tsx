@@ -727,13 +727,25 @@ it('una data che è una frase: da 1024 px il chip dice l’etichetta, la frase i
   monta('kamoshida');
   await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
   const chipFurto = screen.getByTitle(`Furto consigliato: ${frase}`);
-  // da 1024 px si vede l'etichetta; la frase accorciata resta solo sotto i 1024, dove il chip va a capo
+  // da 1024 px l'etichetta intera; sotto, un'etichetta breve che ha senso da sola, presa dal tipo della data e non dalla prima parola
+  // (UX3-12: «Si» per «Si apre» non si capiva); niente puntini
   expect(within(chipFurto).getByText('Furto consigliato', { selector: '.hidden.lg\\:inline' })).toBeInTheDocument();
+  expect(within(chipFurto).getByText('Furto', { selector: '.lg\\:hidden' })).toBeInTheDocument();
   expect(chipFurto.querySelector('.lg\\:truncate')).toBeNull();
   // una data vera resta la data
   expect(within(screen.getByTitle('Si apre: 12 Aprile')).getByText('12 Aprile')).toBeInTheDocument();
   // la frase nei «Dettagli dalla guida» (testo ripiegabile: lunga, si apre intera col tocco)
   expect(screen.getAllByText(/^Furto consigliato: Nella tabella di marcia/).length).toBeGreaterThan(0);
+});
+
+it('«Si apre» che è una frase: sotto i 1024 px il chip dice «Si apre», mai «Si» (UX3-12)', async () => {
+  const frase = 'Il Palazzo diventa esplorabile per la prima volta il 2 gennaio';
+  getDungeon.mockResolvedValue({ ...palazzo(true), date: { sblocco: frase, scadenza: '2 maggio', furtoConsigliato: '' } });
+  monta('kamoshida');
+  await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+  const chip = screen.getByTitle(`Si apre: ${frase}`);
+  expect(within(chip).getByText('Si apre', { selector: '.lg\\:hidden' })).toBeInTheDocument();
+  expect(within(chip).queryByText('Si')).toBeNull();
 });
 
 // LAY3-5 (regola dell'utente: intestazione al massimo il 30% della schermata). In jsdom `useMedia` è falso, cioè la scheda sotto i 1024 px:
