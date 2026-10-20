@@ -282,12 +282,14 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
     const enigmiPossibili = conPassi ? [] : enigmi.filter((e) => e.chiave !== p.chiave && (e.pin.length === 0 || e.chiave === p.contenitore));
     // L4 §4.1: un Racconto (descrittiva con stato, cioè una Storia) si segna come «Letto» e non conta; la riga dice «letto»
     const racconto = p.carattere === 'descrittiva' && !descrittiva(p);
-    const statoTesto = p.stato ? (racconto ? 'letto' : p.stato) : null;
+    // «esaurito» non sta nel testo: ha il suo chip (§4.1, R4-34)
+    const statoTesto = p.stato && p.stato !== 'esaurito' ? (racconto ? 'letto' : p.stato) : null;
     // il carattere scelto a mano nella «Modifica» ('' = vale la regola)
     const carattereScelto = p.carattereScelto && p.carattere ? p.carattere : '';
     return (
       <li key={p.chiave} data-voce={p.chiave} className={`flex flex-col gap-1 rounded-md px-1 py-2 text-[13px] ${aperto ? 'bg-primary-bg' : ''}`}>
-        <button type="button" className={`touch flex items-start gap-2 text-left ${p.stato && !aperto ? 'opacity-60' : ''}`} onClick={() => { setSelezionato(aperto ? null : p.chiave); if (aperto) setCollegando(null); }} aria-expanded={aperto}>
+        {/* segnata e chiusa, la riga si attenua: «esaurito» più di «ottenuto» (§4.1, R4-34: si distinguono a colpo d'occhio) */}
+        <button type="button" className={`touch flex items-start gap-2 text-left ${p.stato && !aperto ? (p.stato === 'esaurito' ? 'opacity-40' : 'opacity-60') : ''}`} onClick={() => { setSelezionato(aperto ? null : p.chiave); if (aperto) setCollegando(null); }} aria-expanded={aperto}>
           <span className="mt-1 inline-block h-3 w-3 shrink-0 rounded-full" style={{ background: COLORE_TIPO[p.tipo] }} aria-hidden="true" />
           <span className="min-w-0 flex-1">
             <span className="font-semibold">{p.nome}</span>
@@ -296,6 +298,7 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
             {p.carattere && <span className={`chip chip--icona ml-1.5 align-middle text-[11px] ${CLASSE_CARATTERE[p.carattere]}`} title={SPIEGAZIONE_CARATTERE[p.carattere]}>
               <IconaAzione chiave={iconaCarattere(p.carattere, !!p.stato)} dimensione={14} />{NOME_CARATTERE[p.carattere]}
             </span>}
+            {p.stato === 'esaurito' && <span className="chip chip--icona chip--bloccata ml-1.5 align-middle text-[11px]"><IconaAzione chiave="esaurito" dimensione={14} />Esaurito</span>}
           </span>
           {/* L4 (§4.1): un suo pin risulta fatto ma la voce no (da prima dell'aggiornamento); si sistema dalla voce aperta */}
           {p.daVerificare && <span className="chip chip--oro shrink-0 text-[11px]">Da verificare</span>}

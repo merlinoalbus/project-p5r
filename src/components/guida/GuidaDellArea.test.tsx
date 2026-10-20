@@ -784,6 +784,23 @@ describe('§4.1: il carattere della voce', () => {
     await waitFor(() => expect(cambiaStato).toHaveBeenCalledWith(expect.objectContaining({ chiave: 'p3' }), 'ottenuto'));
   });
 
+  // §4.1 (segnalazione C, R4-34): «Esaurito» si vede — chip proprio, non più solo « · esaurito» nel testo — e la riga ha un'opacità diversa da «ottenuto»
+  it('«Esaurito» è un chip proprio, non testo, e la riga è più tenue di una «ottenuto»', () => {
+    monta([
+      punto({ chiave: 'p1', nome: 'Forziere svuotato', carattere: 'permanente', stato: 'esaurito' }),
+      punto({ chiave: 'p2', nome: 'Forziere aperto', carattere: 'permanente', stato: 'ottenuto' }),
+    ]);
+    fireEvent.click(screen.getByRole('button', { name: /Anche le segnate/ }));
+    const esaurito = screen.getByRole('button', { name: /Forziere svuotato/ });
+    const ottenuto = screen.getByRole('button', { name: /Forziere aperto/ });
+    expect(within(esaurito).getByText('Esaurito')).toHaveClass('chip');
+    expect(esaurito).not.toHaveTextContent('· esaurito');
+    expect(within(ottenuto).queryByText('Esaurito')).toBeNull();
+    expect(ottenuto).toHaveTextContent('· ottenuto');
+    expect(esaurito).toHaveClass('opacity-40');
+    expect(ottenuto).toHaveClass('opacity-60');
+  });
+
   it('un Racconto segnato dice «letto» nella riga, non «ottenuto»', () => {
     monta([punto({ chiave: 'p3', tipo: 'storia', nome: 'Il quadro parla', esauribile: false, carattere: 'descrittiva', stato: 'ottenuto' })]);
     fireEvent.click(screen.getByRole('button', { name: /Anche le segnate/ }));
