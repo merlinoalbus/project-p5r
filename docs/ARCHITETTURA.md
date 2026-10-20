@@ -1634,3 +1634,18 @@ Nessuna chiave, rotta o codice d'errore è cambiato.
   miniature) in `CittaPage`, `QuartierePage`, `DungeonDettaglioPage` (solo Palazzi). I segni dei posti stanno in
   `src/components/mappe/segniMappa.ts`: `useSegno` (schede, `SagomaQuartiere`) e `useRisolviSegno` (metro, `MappaTokyo`) leggono il
   manifesto a prescindere dalla preferenza; `EmblemaDungeon` usa `segnoPalazzo` con `AssetImg` e segue la preferenza, come prima.
+
+### L2 — le aree del mondo
+- Dati: migrazione 109 — tabella `area` (contenitore `quartiere` o `citta`, slug, nome, `nome_rivisto`, `da_verificare`, ordine a passi di
+  100, planimetria predefinita), `mappa.area_chiave`, etichetta e ordine della versione, `mappa.percorso_fisso`, `quartiere_ingresso.area`;
+  la regola che assegna le aree è `assegnaAreeDelMondo109`, usata anche dal servizio e dall'importazione dei pacchetti di prima.
+- Server: `server/services/mappe/casaMappa.ts` (contesto delle aree, `casaDellaMappa`, `casaDellArea`, `areaRifDellaMappa`, verifica che
+  l'ingresso stia in un'area del quartiere) e `areeService.ts` (letture e scritture delle aree, versioni, «Tieni», ripristino, ordine,
+  eliminazione nel cestino `area-fisica` con planimetrie, passaggi entranti e ingresso, «Colloca»). Rotte `/api/aree/:contenitore/:chiave`
+  (`server/routes/aree.ts`, `server/schemas/aree.ts`, openapi «Aree del mondo»); `creaMappa` nel mondo risponde 409 `usa-aggiungi-area`;
+  `salvaImmagine` riconosce il formato dai byte (400 `formato-non-ammesso`); `scaricaDaUrl` con User-Agent dell'app e 400 `fonte-rifiuta`.
+  DTO: `MappaRiassuntoDto.area`/`casa`, `QuartiereDettaglioDto.aree`, `IngressoQuartiereDto.area`, pacchetto mappe con `aree`.
+- Interfaccia: `AreaPage` (`/guida/citta/<quartiere>/<area>`, versioni con `VersioniArea`, «Luoghi qui», aree vicine, finestre Modifica,
+  Aggiungi planimetria, Ripristina, Elimina), `QuartierePage` con `AreeDelQuartiere` e la finestra d'ingresso (`?ingresso=1`; lo spillo
+  vince), `AreeDellaCitta` e «Planimetrie da collocare» nella Città, `RisolviMappa` verso la casa con spillo e versione, `Modal` come foglio
+  dal basso sotto i 768 px, etichette di navigazione con il nome della meta (`utils/aree.ts`, `utils/covo.ts`, `navigazioneMappa.ts`).

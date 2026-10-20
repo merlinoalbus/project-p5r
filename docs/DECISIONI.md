@@ -2140,3 +2140,30 @@ Scelte del Project manager nello stesso lotto (da confermare):
   blocco) chiede conferma se la mappa ha pezzi (409 `mappa-con-pezzi`); lo scarico automatico della pianta pubblicata non rende la mappa
   «dell'utente». Le dimensioni lette dall'immagine vincono; se non si leggono (SVG) restano quelle dichiarate. Una mappa nuova non
   dichiara più un asset per convenzione che non esiste.
+
+## 2026-10-20 — L2: le aree del mondo
+
+Lotto L2 del piano (team per ruoli, su mandato U). Le mappe di tipo `luogo` e `area` dei quartieri diventano **aree** (tabella `area`,
+contenitore quartiere o città) con le planimetrie come versioni; ogni mappa ha una sola **casa** (pagina in cui si apre) calcolata dal
+server, e i vecchi indirizzi `/guida/mappe/<k>` vi portano conservando spillo e versione.
+
+Decisioni dell'utente (2026-10-20):
+- **Metro e ingresso**: dalla metro si arriva alla pagina del Quartiere, aperta sull'area d'ingresso con il punto e lo zoom dell'ingresso;
+  dalle schede la stessa pagina si apre intera (regola già data dall'utente: l'ingresso serve a chi arriva dalla mappa di Tokyo).
+- **Area riservata allo staff** (planimetrie 150-3, nessuna fonte la identifica): area di Tokyo, a livello di città, «da verificare»; tenerla
+  o rimuoverla con un gesto («agganciala a tokyo come il covo dei ladri e poi capiamo se tenerla o rimuoverla»).
+- **Luoghi chiusi**: nascosti nei menu di navigazione, che chiamano ogni posto con il suo nome e mai «Mappa»; l'eccezione è lo spillo chiesto
+  dal diario.
+
+Scelte consigliate applicate, da confermare: **D2** il Covo dei Ladri è un'area di Yongen-Jaya (le 5 planimetrie sono sue versioni) come scelta
+di ordinamento dell'app; nel gioco il Covo si apre dal menu dal 6/5 (fonte: Esperto della guida, G-004), quindi la fermata della metro porta
+alla pagina delle sfide e delle Medaglie P, collegata all'area nei due sensi.
+
+Scelte del Project manager e della Stesura (da confermare): un'area per piano della Shujin; Aoyama Itchome sotto Shujin; Sottopasso con la
+versione «planimetria completa» come predefinita e avviso sulla versione senza pin; l'Aula 002-6-0 resta un'area a sé; i pin di passaggio
+non si riscrivono (la navigazione risolve planimetria → area); **percorsi pubblici fissi** (`mappa.percorso_fisso`: la sincronizzazione non
+rinomina più i percorsi del Covo); **formato delle immagini riconosciuto dai byte** in ogni strada di salvataggio; la regola che assegna le
+aree è la funzione della migrazione 109, importata dal servizio (una regola sola); ordine delle aree a passi di 100; contatore del cestino
+conservato; indice unico dello slug per la città; **finestre come fogli dal basso sotto i 768 px in tutta l'app** (chiusura sempre solo con la
+X o con Esc); pannello del visore aperto all'arrivo da 1280 px; per lo scarico delle piante uno User-Agent onesto, senza Referer contraffatto:
+se la fonte rifiuta (oggi Fandom risponde 403) l'app lo dice con il link alla fonte e l'invito a caricare l'immagine dall'editor.
