@@ -240,7 +240,7 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
   const opzioniMappa = useMemo(() => {
     const dellArea = new Set(area.mappe.map((m) => m.chiave));
     return [...planimetrie].sort((a, b) => Number(dellArea.has(b.chiave)) - Number(dellArea.has(a.chiave)))
-      .map((p) => ({ chiave: p.chiave, nome: nomeSenzaPalazzo(p.nome), dettaglio: dellArea.has(p.chiave) ? 'di quest’infiltrazione' : undefined }));
+      .map((p) => ({ chiave: p.chiave, nome: nomePlanimetria(p), dettaglio: dellArea.has(p.chiave) ? 'di quest’infiltrazione' : undefined }));
   }, [planimetrie, area.mappe]);
   /** La planimetria da cui parte la scelta dei pin di una voce. */
   const mappaIniziale = (p: PuntoInteresseDto): string | null => {
@@ -336,6 +336,10 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
     const statoTesto = p.stato && p.stato !== 'esaurito' ? (racconto ? 'letto' : p.stato) : null;
     // il carattere scelto a mano nella «Modifica» ('' = vale la regola)
     const carattereScelto = p.carattereScelto && p.carattere ? p.carattere : '';
+    // L3 RG-4: la planimetria si sceglie a mano per una voce di Palazzo senza pin (con i pin sta dove stanno i pin); non per un Enigma coi
+    // passi, che segue i passi (il server lo rifiuta: `enigma-segue-i-passi`). '' = nessun aggancio, vale la planimetria 1
+    const planimetriaSceglibile =!areaDedalo && p.planimetria !== undefined && p.pin.length === 0 && !conPassi;
+    const planimetriaAMano = p.planimetria?.aMano ? p.planimetria.chiave : '';
     // L4 §4.1: le altre infiltrazioni in cui sta l'oggetto permanente della voce (nell'ordine della guida)
     const ancheIn = p.oggetto ? [...(areePalazzo ?? [])].filter((a) => a.chiave !== area.chiave && a.punti?.some((x) => x.oggetto === p.oggetto)).sort((x, y) => x.ordine - y.ordine) : [];
     return (
@@ -428,7 +432,7 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Su" aria-label={`Sposta su: ${p.nome}`} disabled={occupato || indice <= 0} onClick={() => void sposta(p, -1)} />
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Giù" aria-label={`Sposta giù: ${p.nome}`} disabled={occupato || indice >= fratelli.length - 1} onClick={() => void sposta(p, 1)} />
               <CorrezioneGuida key={p.chiave} cosa={`la voce «${p.nome}»`} compatto etichetta="Modifica"
-                iniziale={() => ({ nome: p.nome, descrizione: p.descrizione, tipo: p.tipo as string, esauribile: p.esauribile ? 'sì' : 'no', contenitore: p.contenitore ?? '', areaDedalo: p.areaDedalo ?? '', area: area.chiave, dettagli: JSON.stringify(righeDaDettagli(p.dettagli)), carattere: carattereScelto })}
+                iniziale={() => ({ nome: p.nome, descrizione: p.descrizione, tipo: p.tipo as string, esauribile: p.esauribile ? 'sì' : 'no', contenitore: p.contenitore ?? '', areaDedalo: p.areaDedalo ?? '', area: area.chiave, dettagli: JSON.stringify(righeDaDettagli(p.dettagli)), carattere: carattereScelto, planimetria: planimetriaAMano })}
                 onSalva={async (b) => {
                   // un'altra area del Palazzo (2026-10-12): solo per una voce fuori da ogni Enigma, come l'area del dedalo
                   const altrove = !!areePalazzo && !b.contenitore && b.area !== area.chiave ? areePalazzo.find((a) => a.chiave === b.area) ?? null : null;
@@ -441,6 +445,8 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
                   ...(altrove ? { area: altrove.chiave } : {}),
                   // L4 §4.1: il carattere solo se cambiato; vuoto = «Ripristina» (null: vale la regola del tipo)
                   ...(b.carattere !== carattereScelto ? { carattere: (b.carattere || null) as CarattereVoce | null } : {}),
+                  // L3 RG-4: l'aggancio a mano solo se cambiato; vuoto = «nessuna» (null: torna la planimetria 1)
+                  ...(planimetriaSceglibile && b.planimetria !== planimetriaAMano ? { planimetria: b.planimetria || null } : {}),
                   // i dettagli (2026-10-18) solo se cambiati: tutti insieme, la maschera di una Persona la tiene il server
                   ...(b.dettagli !== JSON.stringify(righeDaDettagli(p.dettagli)) ? { dettagli: dettagliDaRighe(JSON.parse(b.dettagli)) } : {}) }));
                   if (altrove) { setSelezionato(null); notifica('success', `«${b.nome.trim() || p.nome}» spostata in ${altrove.ordine + 1}. ${altrove.nome}${conPassi ? ', con i suoi passi' : ''}.`); }
@@ -462,6 +468,11 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
                   {/* l'area del Palazzo (2026-10-12): una voce fuori da ogni Enigma passa in fondo a un'altra area, coi passi se è un Enigma */}
                   {areePalazzo && areePalazzo.length > 1 && !b.contenitore && <span className="min-w-[200px]">
                     <Selettore etichetta="Infiltrazione" valore={b.area} opzioni={[...areePalazzo].sort((x, y) => x.ordine - y.ordine).map((a) => ({ chiave: a.chiave, nome: `${a.ordine + 1}. ${a.nome}`, dettaglio: a.chiave === area.chiave ? 'questa' : undefined }))} onCambia={(v) => cambia({ area: v })} />
+                  </span>}
+                  {/* L3 RG-4: la planimetria di una voce senza pin («dammi la possibilità di spostarli a mano in altre planimetrie»): prima quelle
+                      dell'infiltrazione, poi le altre del Palazzo; «nessuna» torna alla planimetria 1 dell'infiltrazione */}
+                  {planimetriaSceglibile && planimetrie.length > 0 && <span className="min-w-[200px]">
+                    <Selettore etichetta="Planimetria" valore={b.planimetria} vuoto="— nessuna: la planimetria 1 dell’infiltrazione —" opzioni={opzioniMappa} onCambia={(v) => cambia({ planimetria: v })} />
                   </span>}
                   {/* L4 §4.1: il carattere (solo nei Palazzi, non per le Persona): la regola del tipo, o la scelta con «Ripristina» */}
                   {p.carattere !== undefined && carattereDaTipo(b.tipo, p.areaDedalo) && (() => {
