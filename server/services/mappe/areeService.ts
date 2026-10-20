@@ -29,7 +29,13 @@ import { creaMappa, creaSpillo, eliminaMappa, eliminaSpillo, impostaImmagineMapp
 import { caricataDellaMappa, illustrazioneDellaMappa, immaginiCaricateDelleMappe, urlCaricata } from './immagineMappa.js';
 import { casaDellArea, casaDellaMappa, conAree, contenitoreDi, contestoAree, type ContestoAree, type RigaArea } from './casaMappa.js';
 import { lettureLuoghi, luoghiDellArea, luogoDelPin } from '../luoghiService.js';
-import type { AreaDettaglioDto, AreaRiassuntoDto, ElementoAreaDto, MappaDaCollocareDto, PlanimetriaAreaDto, RuoloImmagine } from '../../../shared/types.js';
+import { condizioneEffettivaQuartiere } from '../condizioni/condizioneEffettiva.js';
+import { elencaInviti } from '../inviti.js';
+import { descriviRequisitoSpillo, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
+import { nomiCondizioniMemo } from '../condizioni/nomiCondizioni.js';
+import { cosaManca, valutaInsieme } from '../condizioni/valutatore.js';
+import { statoDisponibilitaPartita } from '../disponibilitaService.js';
+import type { AreaDettaglioDto, AreaRiassuntoDto, ElementoAreaDto, MappaDaCollocareDto, PlanimetriaAreaDto, RuoloImmagine, SbloccoDto } from '../../../shared/types.js';
 
 /** I contenitori ammessi nelle rotte: la città (Tokyo) e i suoi quartieri (L2), i Palazzi (L3). */
 export const CONTENITORI_AREA = ['citta', 'dungeon'] as const;
@@ -126,7 +132,27 @@ function raccoltaDelContenitore(c: Contenitore, partitaId?: number): { perMappa:
  * le infiltrazioni che la toccano e la raccolta delle sue planimetrie. Nei Palazzi non c'è un passaggio (l'illustrazione del Palazzo
  * non ha pin verso le aree) né un ingresso.
  */
-function riassuntoArea(a: RigaArea, c: Contenitore, ctx: ContestoElenco): AreaRiassuntoDto {
+function condizioneArea(a: RigaArea): RequisitoSpillo[] | null {
+  return a.quartiere_chiave ? condizioneEffettivaQuartiere(a.quartiere_chiave) : null;
+}
+
+function sbloccoArea(a: RigaArea, partitaId?: number): Pick<AreaRiassuntoDto, 'sblocco' | 'disponibile' | 'bloccoMotivo'> {
+  const condizioni = condizioneArea(a);
+  if (!condizioni) return { disponibile: true, bloccoMotivo: null };
+  const nomi = nomiCondizioniMemo();
+  const condizione = condizioni.length === 1 ? condizioni[0] : { tipo: 'gruppo' as const, modo: 'tutte' as const, condizioni };
+  const testo = descriviRequisitoSpillo(condizione, nomi);
+  const fonte = a.quartiere_chiave ? (prepared('SELECT fonte_condizioni_json FROM quartiere WHERE chiave = ?').get(a.quartiere_chiave) as { fonte_condizioni_json: string | null } | undefined)?.fonte_condizioni_json : null;
+  const fonteDto: SbloccoDto['fonte'] = (() => { try { return fonte ? JSON.parse(fonte) as SbloccoDto['fonte'] : null; } catch { return null; } })();
+  const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
+  const esito = st ? valutaInsieme(condizioni.map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) })), st) : null;
+  const stato = esito?.stato;
+  const manca = stato === 'bloccato' ? cosaManca(condizione, st!, nomi) : null;
+  const sblocco: SbloccoDto = { condizione, testo, fonte: fonteDto, esito: stato === 'disponibile' ? 'vero' : stato === 'bloccato' ? 'falso' : stato === 'ignoto' ? 'grigio' : null, manca, inviti: elencaInviti({ apreTipo: 'quartiere', ...(a.quartiere_chiave ? { apreChiave: a.quartiere_chiave } : {}) }, partitaId), modificato: false };
+  return { sblocco, disponibile: stato !== 'bloccato', bloccoMotivo: manca };
+}
+
+function riassuntoArea(a: RigaArea, c: Contenitore, ctx: ContestoElenco, partitaId?: number): AreaRiassuntoDto {
   const planimetrie = planimetrieDi(a.chiave);
   const chiavi = planimetrie.map((p) => p.chiave);
   // il pin di passaggio verso l'Area sull'illustrazione del contenitore: il primo (per id) che porta a una sua planimetria
@@ -146,6 +172,7 @@ function riassuntoArea(a: RigaArea, c: Contenitore, ctx: ContestoElenco): AreaRi
     casa: casaDellArea(a) ?? '',
     infiltrazioni: ctx.infiltrazioni.get(a.chiave) ?? [],
     raccolta,
+    ...sbloccoArea(a, partitaId),
     // L4 (§1.5): nei Palazzi il completamento dell'Area (oggetti permanenti con un pin su una sua planimetria; senza, completata)
     ...(c.colonna === 'dungeon_chiave' && ctx.l4 ? { completamento: completamentoDegliOggetti(new Set(chiavi.flatMap((k) => [...(ctx.l4!.oggettiPerMappa.get(k) ?? [])])), ctx.l4.s) } : {}),
   };
@@ -157,7 +184,7 @@ export function areeDelContenitore(c: Contenitore, partitaId?: number): AreaRias
   if (partitaId !== undefined) verificaPartita(partitaId);
   const ctx = contestoElenco(raccoltaDelContenitore(c, partitaId));
   if (c.colonna === 'dungeon_chiave') ctx.l4 = avanzamentoDelPalazzo(c.chiave, partitaId);
-  return (prepared(`SELECT * FROM area WHERE ${c.colonna} = ? ORDER BY ordine, slug`).all(c.chiave) as RigaArea[]).map((a) => riassuntoArea(a, c, ctx));
+  return (prepared(`SELECT * FROM area WHERE ${c.colonna} = ? ORDER BY ordine, slug`).all(c.chiave) as RigaArea[]).map((a) => riassuntoArea(a, c, ctx, partitaId));
 }
 
 /**
@@ -241,7 +268,7 @@ export function dettaglioArea(contenitore: ContenitoreRotta, chiave: string, slu
   }
   // L5: i luoghi dell'Area (`luogo.area_chiave`) e quelli fra loro senza pin («Da posizionare»)
   const luoghiArea = luoghiDellArea(a.chiave, luoghi);
-  return { ...riassuntoArea(a, c, ctx), planimetrie: versioni, elementi, vicine, luoghi: luoghiArea, daPosizionare: luoghiArea.filter((l) => l.pin === null) };
+  return { ...riassuntoArea(a, c, ctx, partitaId), planimetrie: versioni, elementi, vicine, luoghi: luoghiArea, daPosizionare: luoghiArea.filter((l) => l.pin === null) };
 }
 
 // ---- Scritture ----

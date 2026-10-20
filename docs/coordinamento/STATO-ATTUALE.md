@@ -1,7 +1,7 @@
-# Stato attuale del lavoro — ramo newreview / p5s (aggiornato 2026-10-20, ~20:25Z, salvataggio di fine sessione)
+# Stato attuale del lavoro — ramo newreview / p5s (aggiornato 2026-10-20, ripresa)
 
 ## DOVE SIAMO ADESSO (leggere per primo; prevale su tutto quanto c'è sotto)
-- **Ramo unico `newreview`**, pubblicato su p5s a ogni push. Ultimo commit pubblicato: quello in cima a `git log` di `newreview` su GitHub (alle 20:40Z era a3d9e9f8, con L6 B5 prima parte; i commit successivi sono solo documenti). Per sapere dov'è p5s si guarda l'esito dell'ultima pipeline con `gh run list --branch newreview`. Su GitHub esistono solo `main` (da non toccare) e `newreview`.
+- **Ramo unico `newreview`**, pubblicato su p5s a ogni push. Ultimo commit locale/remoto verificato prima di questo salvataggio: `5556ceaa` (`fix(L6): valida lo sblocco strutturato dei quartieri`); pipeline riuscita e pagina Mappe di p5s verificata nel browser. Il fetch locale resta bloccato dai permessi sul metadato condiviso del worktree; non risultano divergenze nel tracking remoto.
 - **Dati di p5s**: `userVersion` fino a 119 dopo l'ultimo rilascio. Migrazioni recenti:
   - 114: planimetria della voce;
   - 115: luoghi come fonte unica;
@@ -23,7 +23,7 @@
 | L3 Palazzi | pubblicato. Fatte anche le richieste dell'utente sulla guida: scheda per planimetria (UX3-14, b34e577b), campo «Planimetria» (901c7666), guida nel visore in finestra fluttuante (91986570), pin di spostamento che portano a destinazione (67a7bfda, b8048c1b). Da provare dall'utente |
 | L4 Avanzamento unico | pubblicato (fde7add7, poi unito): FE completo con FUN3-3 e FUN4-1 |
 | L5 Luoghi, negozi, orari | pubblicato, completo: BE 5a22da2a…0fa7bde7 e 50ca121c; FE af5b8e14…820c05ea (F1–F6) |
-| L6 Condizioni uniche | **in corso**, BE e FE fatti dalla sessione FE: B0 90629264, B1 816ecfeb (valutatore unico, 490/490 risposte identiche), B2 fdae7867 (migrazione 118; cambi visibili in `lotti/L6/B2-cambi-visibili.md`: Odaiba si chiude in p1 finché non si legge «Luoghi della movida», per decisione dell'utente), B3 a17f2971 (inviti), B4 eb956688 (riferimenti per chiave, Richieste nel cestino, requisiti per rango con la migrazione 119), B5 prima parte c9f3e5bb (destinazione unica dei Palazzi, finestre nelle colonne, `LibroDto.apre` calcolato). **Prossimo: resto di B5**: sblocco del quartiere con fonte e «Modifica sblocco»/«Ripristina»; Aree che ereditano lo sblocco del quartiere; via il validatore dei 7 quartieri in `mappeService` (1100-1165); rinomina `senzaIngressoAPalazzoConcluso`; verifica metro = diario sui 9 Palazzi. Poi B6 (OpenAPI) e il FE di L6, F1-F6 (`lotti/L6/piano.md`) |
+| L6 Condizioni uniche | **in corso**, B5 prima parte pubblicata e, nella ripresa, aggiunto il contratto BE per lo sblocco ereditato delle Aree del mondo: `AreaRiassuntoDto.sblocco`, esito e motivo; il dettaglio del quartiere passa la partita al servizio Aree. Typecheck/lint verdi. **Restano** sblocco quartiere con fonte/editor, esclusione completa dalla navigazione, rimozione del validatore legacy, verifica metro-diario e poi B6/FE (`lotti/L6/piano.md`). |
 | L7–L11 | progettati (`lotti/Lx/`), da implementare BE e FE |
 
 **Sessioni del team** (app Claude desktop):

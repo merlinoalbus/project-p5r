@@ -1,6 +1,6 @@
 {
   "obiettivo": "Lotti L0–L11 della razionalizzazione completati sul branch newreview, pubblicati e funzionanti su p5s",
-  "aggiornato": "2026-10-20T19:30:00Z",
+  "aggiornato": "2026-10-20T21:00:00Z",
   "fasi": [
     "requisiti",
     "dati",
@@ -17,7 +17,7 @@
   ],
   "p5s": {
     "url": "https://p5s.nasmerlinoalbus.cloud/",
-    "stato": "online con L1 (database alla 108, miniature WebP, illustrazioni nelle schede); L2 in sviluppo"
+    "stato": "online; newreview pubblicato fino a 5556ceaa, pipeline riuscita, Mappe verificata nel browser; L6 B5 in sviluppo"
   },
   "lotti": [
     {

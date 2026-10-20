@@ -1553,6 +1553,11 @@ export interface AreaRiassuntoDto {
   /** L4 (§1.5): gli oggetti permanenti con un pin su una sua planimetria, quanti fatti e se è completata (senza niente da contare sì).
    *  `fatti`/`completata` null senza partita. Solo per le Aree dei Palazzi. */
   completamento?: { oggetti: number; fatti: number | null; completata: boolean | null };
+  /** L6: sblocco effettivo del quartiere ereditato dall'Area del mondo. */
+  sblocco?: SbloccoDto;
+  /** L6: esito dello sblocco ereditato, quando la risposta è legata a una partita. */
+  disponibile?: boolean;
+  bloccoMotivo?: string | null;
 }
 /** Un luogo, negozio, attività o Confidente segnato con un pin su una planimetria dell'Area. */
 export interface ElementoAreaDto { tipo: 'luogo' | 'negozio' | 'attivita' | 'confidente'; chiave: string; nome: string; spillo: number; planimetria: string;

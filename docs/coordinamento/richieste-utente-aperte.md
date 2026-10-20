@@ -1,5 +1,7 @@
 # Richieste dell'utente ancora aperte (elenco di controllo del PM)
 
+Nota di ripresa 2026-10-20: il lavoro L6-B5 prosegue; il nuovo contratto server per lo sblocco ereditato delle Aree è ancora da pubblicare e da verificare dall'utente. Nessuna richiesta già pubblicata è stata dichiarata completata.
+
 Ogni richiesta resta qui finché l'utente non la vede funzionare su p5s. Lo stato si aggiorna a ogni passo. È nato il 2026-10-20 alle 19:45Z, dopo che il PM aveva dichiarato L3 completo con richieste ancora mancanti.
 
 | # | Richiesta (parole dell'utente, in sintesi) | Stato | Chi |
