@@ -66,6 +66,33 @@ describe('VisoreMappa', () => {
     expect(screen.getByTestId('visore-mappa').style.getPropertyValue('--proporzione-immagine')).toBe('1000 / 500');
   });
 
+  it('UX2-10: su touch il nome di un passaggio resta nella tela, a sinistra dei comandi, e quello che ne coprirebbe un altro si nasconde', () => {
+    const prima = window.matchMedia;
+    window.matchMedia = ((q: string) => ({ matches: q.includes('hover: none'), media: q, addEventListener: () => {}, removeEventListener: () => {} })) as unknown as typeof window.matchMedia;
+    // la tela è 0..300 × 0..200, i comandi dello zoom a destra (260..300); i nomi: uno che esce dentro i comandi, due che si coprono
+    const rett = (left: number, top: number, w: number, h: number) => ({ left, top, right: left + w, bottom: top + h, width: w, height: h, x: left, y: top, toJSON: () => ({}) }) as DOMRect;
+    const misura = vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (this: Element) {
+      if (this.classList.contains('visore-mappa__tela')) return rett(0, 0, 300, 200);
+      if (this.classList.contains('visore-mappa__controlli')) return rett(260, 10, 40, 150);
+      if (this.classList.contains('spillo-mappa__etichetta')) {
+        const nome = this.textContent;
+        return nome === 'Shibuya centro' ? rett(200, 100, 90, 20) : rett(0, 0, 0, 0);
+      }
+      if (this.classList.contains('spillo-mappa')) return rett(220, 70, 38, 38);
+      return rett(0, 0, 0, 0);
+    });
+    try {
+      monta({ mappa: { ...mappa, spilli: [mappa.spilli[2]] } });
+      const etichetta = screen.getByRole('button', { name: /^Passaggio: / }).querySelector<HTMLElement>('.spillo-mappa__etichetta')!;
+      // 200..290 entrava nei comandi (da 260): spostato a sinistra fino a 256
+      expect(etichetta.style.transform).toBe('translateX(-34px)');
+      expect(etichetta).not.toHaveAttribute('data-coperta');
+    } finally {
+      misura.mockRestore();
+      window.matchMedia = prima;
+    }
+  });
+
   it('UX2-9 b: senza pin il pannello dice «Nessun pin qui.» (niente «spillo» né «mappa», R2-39)', () => {
     monta({ mappa: { ...mappa, spilli: [] }, pannelloIniziale: true });
     expect(screen.getByText('Nessun pin qui.')).toBeInTheDocument();

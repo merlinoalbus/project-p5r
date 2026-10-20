@@ -101,7 +101,8 @@ export function CovoPage() {
           <IntestazionePagina titolo="Covo dei Ladri"
             sottotitolo={`L'area bonus di Royal, con la sua valuta: ${covo.sfide.length} sfide che danno Medaglie P e ${covo.premi.length} premi che le spendono.`} />
           {/* le planimetrie del Covo sono un'Area di Yongen-Jaya (L2, D2): le due pagine si collegano nei due sensi */}
-          <Link to={COVO_AREA.pagina} className="card card--cliccabile no-underline text-text flex items-center gap-2 py-2 self-start">
+          {/* un bersaglio da toccare: almeno 48 px di altezza a ogni larghezza (LAY2-6, gemello di LAY2-2) */}
+          <Link to={COVO_AREA.pagina} className="card card--cliccabile touch no-underline text-text flex min-h-12 items-center gap-2 py-2 self-start">
             <IconaAzione chiave="mappa" dimensione={20} /><span className="font-semibold">Planimetrie del Covo</span>
             <span className="text-[12px] text-text-muted">un’area di Yongen-Jaya</span>
           </Link>

@@ -586,7 +586,11 @@
   .spillo-mappa:hover .spillo-mappa__etichetta, .spillo-mappa--selezionato .spillo-mappa__etichetta, .spillo-mappa--trovato .spillo-mappa__etichetta { opacity: 1; }
   /* Su telefono e tablet non c'è il passaggio del puntatore: i pin di spostamento (passaggi verso le aree, stazioni) mostrano sempre il
      nome della meta, altrimenti dall'illustrazione non si capisce quale area apre ciascuno finché non lo si tocca (UX2-6, L2) */
-  @media (hover: none) { .spillo-mappa--spostamento .spillo-mappa__etichetta { opacity: 1; } }
+  @media (hover: none) {
+    .spillo-mappa--spostamento .spillo-mappa__etichetta { opacity: 1; }
+    /* il nome che ne coprirebbe un altro si nasconde finché non c'è posto (ingrandendo) o il suo pin non è toccato (UX2-10) */
+    .spillo-mappa--spostamento:not(.spillo-mappa--selezionato) .spillo-mappa__etichetta[data-coperta] { opacity: 0; }
+  }
   .spillo-mappa--gruppo { transform-origin: 0 0; }
   /* Il gruppo («2 spilli vicini») è 34 px, sei meno della goccia: i 3 px d'estensione che bastano a
      una goccia da 38 qui fermavano il bersaglio a 40. Ne servono 5 per parte (rilievo del

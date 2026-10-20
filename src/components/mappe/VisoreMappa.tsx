@@ -684,6 +684,20 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     try { await onAcquisto(s, articolo, fatto); } finally { setOccupato(false); }
   };
 
+  // Su telefono e tablet i nomi dei pin di spostamento restano visibili (UX2-6), e su un'illustrazione piccola si coprivano e
+  // finivano sotto i comandi dello zoom (UX2-10, L2). Dopo ogni disegno (zoom, spostamento, misure, pin visibili) ognuno si sposta
+  // in orizzontale quanto basta per stare nella tela e fuori dai comandi; quello che coprirebbe un nome già posato si nasconde
+  // (`data-coperta`) e torna ingrandendo, o toccando il suo pin. Prima i pin selezionati, poi dall'alto in basso.
+  useLayoutEffect(() => {
+    const t = tela.current;
+    if (!t || typeof window === 'undefined' || !window.matchMedia?.('(hover: none)').matches) return;
+    sistemaEtichette(t);
+    // zoom e spostamento del livello hanno una transizione: le misure buone sono quelle di fine corsa
+    const fine = () => sistemaEtichette(t);
+    t.addEventListener('transitionend', fine);
+    const tardi = window.setTimeout(fine, 400);
+    return () => { t.removeEventListener('transitionend', fine); window.clearTimeout(tardi); };
+  });
   const stileLivello: CSSProperties = { transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, width: nat.w, height: nat.h, '--zoom-mappa': zoom } as CSSProperties;
   const cursore = editor && editor.strumento !== 'seleziona' ? 'cursor-crosshair' : 'cursor-grab';
   const percorsoTesto = mappa.percorso.map((p) => p.nome).join(' › ');
@@ -1023,6 +1037,33 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
       </div>
     </div>
   );
+}
+
+/** I nomi dei pin di spostamento sulla tela, su telefono e tablet (UX2-10): ognuno si sposta in orizzontale quanto basta per stare
+ *  nella tela e a sinistra dei comandi dello zoom; quello che coprirebbe un nome già posato si nasconde (`data-coperta`). Prima i pin
+ *  selezionati, poi dall'alto in basso. I pin fuori dalla tela restano come sono: un nome trascinato dentro si staccherebbe dal pin. */
+function sistemaEtichette(t: HTMLElement): void {
+  const etichette = [...t.querySelectorAll<HTMLElement>('.spillo-mappa--spostamento .spillo-mappa__etichetta')];
+  for (const e of etichette) { e.style.transform = ''; e.removeAttribute('data-coperta'); }
+  const bordo = t.getBoundingClientRect();
+  const comandi = t.querySelector<HTMLElement>('.visore-mappa__controlli')?.getBoundingClientRect() ?? null;
+  const dentro = (r: DOMRect) => r.right > bordo.left && r.left < bordo.right && r.bottom > bordo.top && r.top < bordo.bottom;
+  const misurate = etichette
+    .map((e) => ({ e, r: e.getBoundingClientRect(), pin: e.closest('.spillo-mappa')?.getBoundingClientRect() ?? null, primo: !!e.closest('.spillo-mappa--selezionato') }))
+    .filter((m) => m.pin && dentro(m.pin))
+    .sort((a, b) => Number(b.primo) - Number(a.primo) || a.r.top - b.r.top);
+  const posate: Array<{ left: number; right: number; top: number; bottom: number }> = [];
+  for (const { e, r, primo } of misurate) {
+    let dx = 0;
+    if (r.left < bordo.left + 4) dx = bordo.left + 4 - r.left;
+    if (r.right > bordo.right - 4) dx = bordo.right - 4 - r.right;
+    // accanto ai comandi dello zoom (in colonna a destra) il nome passa a sinistra dei comandi
+    if (comandi && r.bottom > comandi.top && r.top < comandi.bottom && r.right + dx > comandi.left - 4) dx = Math.min(dx, comandi.left - 4 - r.right);
+    if (dx) e.style.transform = `translateX(${Math.round(dx)}px)`;
+    const q = { left: r.left + dx, right: r.right + dx, top: r.top, bottom: r.bottom };
+    if (!primo && posate.some((p) => q.left < p.right + 2 && q.right > p.left - 2 && q.top < p.bottom + 1 && q.bottom > p.top - 1)) { e.setAttribute('data-coperta', ''); continue; }
+    posate.push(q);
+  }
 }
 
 type NegozioNelPopup = NonNullable<NonNullable<SpilloDto['dettaglio']>['negozio']>;
