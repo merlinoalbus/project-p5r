@@ -1,0 +1,38 @@
+### 2026-10-20T15:53:13Z
+### git branch --show-current
+newreview-l3
+### git rev-parse HEAD
+b5fd6cfe1281fe13c5653215b70c6e1070c5e412
+### git status --porcelain
+EXIT=0
+### git log --format='%H %s' 2df44d30..HEAD
+b5fd6cfe1281fe13c5653215b70c6e1070c5e412 docs(L3): riga della ROADMAP di L3 sulla linea di rilascio, in validazione
+5e823f5a01828f1f040459ff6f8595e9927119cf docs(L3): layout verde su 2df44d30
+2efc145796dadabf9ceb8299a1c6cb6568979244 docs(L3): UX verde su 2df44d30, UX3-12 e UX3-13 verificati
+9fc134cb66eba8ff02eaf1390c29b3ecef201d98 docs(L3): prove del collaudo su 2df44d30
+### patch-id dei tre cherry-pick di documenti
+9fc134cb 83df08bbadc9927bdb9dbae054af10648fe01e25 | 47bfaaa1 83df08bbadc9927bdb9dbae054af10648fe01e25 => UGUALI
+2efc1457 e8223d51d34ff6df9aa2638909851595255da064 | aba7d87e e8223d51d34ff6df9aa2638909851595255da064 => UGUALI
+5e823f5a 7ab93f411759b1e231c1bf2d10ee943c0cf2eca8 | 8be7b426 7ab93f411759b1e231c1bf2d10ee943c0cf2eca8 => UGUALI
+### git diff --stat 2df44d30 HEAD
+ .../03-ux3-13-kamoshida-1024x690-invariata.jpg     | Bin 0 -> 38727 bytes
+ .../lotti/L3/esiti-ux/2df44d30/esito.md            |  42 ++++++
+ 19 files changed, 405 insertions(+), 3 deletions(-)
+### fuori da docs/ rispetto a 2df44d30 (vuoto atteso)
+EXIT grep=1 (1 = nessuno)
+### git diff --stat c8338fd0 newreview-l3 -- . ':!docs' (uguale a 2df44d30)
+ 12 files changed, 392 insertions(+), 94 deletions(-)
+codice identico a 2df44d30
+### alberi (uguali a 2df44d30: server 093595e4, shared affd664c, src b7e25211)
+040000 tree 093595e479429251391f718d540cf5a27f4fb219	server
+040000 tree affd664c3dafb1216db58c44c73ddd8ab8dda851	shared
+040000 tree b7e25211db77a7a7d81c88cc9716acee0c81f02a	src
+### grep 2026-10-21 su src/ server/ shared/
+EXIT=1 (1 = nessuna)
+### indirizzi del server (0 atteso)
+0
+### riga 1297 della ROADMAP: colonne
+3 colonne, stato: ⏳ in validazione 
+### istanza
+{"data":{"status":"ok","timestamp":"2026-10-20T15:53:14.617Z","db":{"ok":true,"userVersion":113}}}
+FE 200
