@@ -377,9 +377,8 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
           ? { mappa: q.ingresso.mappa, centro: { x: q.ingresso.x, y: q.ingresso.y, zoom: q.ingresso.zoom }, spillo: null }
           : q.mappaChiave ? { mappa: q.mappaChiave, centro: null, spillo: null } : null,
         presente: q.disponibile !== false,
-        // Che cosa manca, detto come lo dice il valutatore: «Yusuke: rango 1 di 3». Quando la
-        // condizione è una data si dice la data, che è più corta e più chiara.
-        quando: q.sbloccoData ? `dal ${dataLeggibile(q.sbloccoData)}` : q.bloccoMotivo ?? null,
+        // Testo e motivo del valutatore, non la data legacy: potrebbe essere solo una delle vie in OR.
+        quando: q.bloccoMotivo ?? q.sbloccoCondizione?.testo ?? null,
       });
     }
     for (const d of dungeon) {

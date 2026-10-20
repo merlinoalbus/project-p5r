@@ -1,9 +1,9 @@
 {
   "obiettivo": "Lotti L0–L11 della razionalizzazione completati sul branch newreview, pubblicati e funzionanti su p5s",
-  "aggiornato": "2026-10-20T22:43:07Z",
+  "aggiornato": "2026-10-20T23:23:39Z",
   "revisioneRimozioni": "Precedente approvazione limitata al perimetro statico delle due rimozioni; non certifica runtime o chiusura L6. La successiva continuazione conferma zero test e nessun nuovo validatore.",
-  "controlliLocali": "Ripresa 2026-10-21: typecheck, lint senza avvisi, build FE e git diff --check riusciti anche dopo la correzione della navigazione dei requisiti. Nessun test o prova runtime locale. Nessun servizio avviato, fermato o riavviato; nessuna scrittura sui dati dell'utente o importazione eseguita. Preparazione dell'unico commit/push L6, senza pubblicazioni intermedie. Pipeline e browser del nuovo rilascio ancora da osservare; L6 non dichiarato completo.",
-  "decisioneRichiesta": "Nessuna scelta pendente su Asakusa, Importa o guida del visore. Asakusa confermato dall'utente: Ann rango 7 OPPURE Skytree aperto dal libro; basta una delle condizioni. Codice della migrazione 118 già coerente, documenti allineati senza nuova migrazione.",
+  "controlliLocali": "Correzione locale R6-08b nelle sole tre viste quartiere/città/metro: testo/motivo DTO invece di prosa/data legacy. Tre passaggi di controllo: diff e zero lettori storici nelle tre viste; server/shared/dati/pin/API invariati; typecheck, lint e build tutti exit 0 dopo la correzione, 23:20Z. Nessun test o prova runtime locale, importazione o salvataggio sui dati. Ancora non pubblicata, insieme al coordinamento nella chiusura del lotto. Ultimo rilascio 63e12734, pipeline #64 riuscita, OR Asakusa già letto nel browser. L6 non completo.",
+  "decisioneRichiesta": "Nessuna nuova scelta richiesta per la chiusura dell'implementazione L6: testi già prescritti da R6-08b, OR Asakusa/Importa/guida già confermati. La richiesta di un'altra approvazione era impropria. Calendario derivato assegnato già a L9 da modifiche L6 §4.3 e L9 §3.2/B5, non nuovo rinvio o blocco. Consegna del codice con coordinamento, pipeline/browser da seguire; prove funzionali dell'utente aperte.",
   "fasi": [
     "requisiti",
     "dati",
@@ -20,7 +20,7 @@
   ],
   "p5s": {
     "url": "https://p5s.nasmerlinoalbus.cloud/",
-    "stato": "Ultimo push verificato 38411d36, pipeline #63 riuscita; il presente checkpoint prepara l'unica pubblicazione L6 e non ne anticipa hash o esito. In locale collegati editor/anteprima, requisiti, inviti, sblocchi e libri; corretti avvisi e testi Importa backup, recupero legacy DB e riepilogo JSON nei soli elementi importati. Due rimozioni circoscritte, nessun tipo di pin nuovo, flussi di posizionamento conservati. Guida visore invariata. Asakusa confermato in OR, nessuna nuova migrazione. Typecheck/lint/build finali riusciti; pipeline, osservazione browser e prove funzionali dell'utente ancora da acquisire. Nessuna prova runtime locale o scrittura sui dati dell'utente."
+    "stato": "Pubblicato 63e127343695f0b51c5e9444de845402ed4a88c6, pipeline #64 (39510479328) success, p5s osservato. Integrazione editor/requisiti/inviti/sblocchi/libri e compatibilità backup pubblicata, due rimozioni circoscritte, nessun pin nuovo. Asakusa già OR, dati non modificati. Prosa/data legacy nelle viste corretta localmente secondo R6-08b già nel piano, typecheck/lint/build verdi; non ancora pubblicata. Nessuna nuova approvazione tecnica richiesta per questa omissione. Prove funzionali/layout dell'utente aperte, copertura completa non dimostrata. Codice e coordinamento insieme nella chiusura del lotto, nessuna nuova pipeline intermedia."
   },
   "lotti": [
     {
@@ -147,20 +147,20 @@
       "id": "L6",
       "titolo": "Condizioni uniche",
       "dipende": "L5",
-      "nota": "2026-10-20 22:43Z (21/10 locale): IN CORSO, implementazione pronta alla pubblicazione unica con coordinamento. Ultimo push verificato 38411d36, pipeline precedente #63 riuscita. Editor unico/anteprima, requisiti con bozze per rango e navigazione coerente col Confidente corrente, inviti nelle tre viste, disponibilità server in città/metro, motivo nell'Area chiusa e libri Apre. Corretto ciclo testo degli avvisi e propagazione non bloccante nei gruppi/non; semafori con nomi correnti. Importa allineato al backup locale, recupero manuale→avviso solo nell'importazione protetta (anche snapshot), mai eseguita qui. JSON mappe con riepilogo legacy dei soli pin/copie importati, esclusi gli scarti e verificati i riferimenti finali. Elenco storico pubblico 201 righe/147 frasi preparato, nessuna conversione delle frasi approvata o applicata. Intestazioni compatte, misure runtime non dichiarate. Asakusa risolto dall'utente in OR: Ann rango 7 oppure Skytree aperto dal libro; nessuna nuova migrazione. Typecheck/lint/build finali riusciti, nessun test. Rimozioni isolate, altri flussi conservati. Pipeline e browser ancora da osservare, prove funzionali all'utente, L6 non dichiarato completo.",
+      "nota": "2026-10-20 23:23Z (21/10 locale): implementazione in consegna finale. Base pubblicata 63e12734 / pipeline #64 riuscita; correzione R6-08b delle tre viste pronta con typecheck/lint/build exit 0, server/shared/dati/pin/API invariati, nessun test. Codice e coordinamento nello stesso commit, poi pipeline e browser: non anticipare hash/esito. OR Asakusa già confermato nel browser senza salvare. Nessuna nuova scelta di prodotto richiesta. Calendario derivato già assegnato a L9 dal piano L6 §4.3 e L9 §3.2/B5, non nuovo blocco o rinvio. Copertura in lotti/L6/copertura-ripresa.md. Prove funzionali/layout dell'utente aperte, nessuna dichiarazione di completamento integrale.",
       "fasi": {
         "requisiti": "fatta",
         "dati": "fatta",
         "app": "fatta",
         "modifiche": "fatta",
-        "be": "in-corso",
-        "fe": "in-corso",
+        "be": "fatta",
+        "fe": "fatta",
         "funzionali": "da-fare",
         "ux": "da-fare",
         "noreg": "da-fare",
         "layout": "da-fare",
         "validazione": "da-fare",
-        "consegna": "da-fare"
+        "consegna": "in-corso"
       }
     },
     {

@@ -2,9 +2,11 @@
 
 ## Ripresa corrente — 2026-10-21
 
+Consegna finale dell'implementazione L6 in preparazione: correzione delle tre viste e coordinamento nello stesso commit, poi pipeline e browser. Typecheck/lint/build verdi; zero test, nessun dato modificato. Calendario derivato già previsto in L9 dal §4.3 di L6, non nuovo blocco. Prove funzionali dell'utente ancora aperte.
+
 La sessione corrente prosegue L6 sul worktree `newreview` in seguito al prompt di ripresa dell'utente; non avvia, ferma o riapre altre sessioni o servizi. Le disposizioni di stop sotto restano storia del coordinamento precedente, non autorizzazioni a intervenire su altri processi. Vale zero test e commit/push unico a fine lotto.
 
-Implementazione locale: editor unico con anteprima, editor requisiti e navigazione coerente col Confidente corrente, inviti nelle tre viste, esiti server in città/metro, avvisi non bloccanti conservati al salvataggio, testi di Importa come backup e recupero legacy DB/JSON nelle sole importazioni esplicite. Typecheck, lint e build riusciti; nessuna prova runtime o scrittura sui dati dell'utente. Asakusa risolto dall'utente: Ann rango 7 OPPURE Skytree aperto dal libro; codice già coerente, documenti allineati. Preparazione dell'unica pubblicazione di L6; pipeline, osservazione p5s e prove dell'utente ancora da acquisire. Dettaglio corrente in `STATO-ATTUALE.md` e `lotti/L6/difetti.md`.
+Integrazione pubblicata in `63e12734`, pipeline #64 riuscita e p5s osservato; Asakusa già OR, letto senza salvare. Omissione nelle descrizioni delle tre viste corretta localmente: testo/motivo DTO invece di prosa/data legacy. Typecheck/lint/build verdi, server/shared/dati/pin/API invariati, zero test. È già R6-08b / modifiche §4.1: nessuna nuova scelta di prodotto, ritirato il blocco improprio di un'altra approvazione. Nessuna nuova pubblicazione: correzione e coordinamento insieme nella chiusura del lotto. Copertura e limiti in `lotti/L6/copertura-ripresa.md`; L6 non completo.
 
 ## Storico delle sessioni precedenti
 

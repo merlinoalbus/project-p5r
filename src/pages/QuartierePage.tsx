@@ -232,7 +232,7 @@ export function QuartierePage() {
             </div>
           </header>
           <section className="card flex flex-col gap-2" aria-label="Disponibilità e azioni del quartiere">
-              {q.sblocco && <p className="m-0 text-[13px]"><strong className="text-text-secondary">Si apre:</strong> {q.sblocco}</p>}
+              {q.sbloccoCondizione?.testo && <p className="m-0 break-words text-[13px]"><strong className="text-text-secondary">Si apre:</strong> {q.sbloccoCondizione.testo}</p>}
               {q.sbloccoCondizione && <div className="flex flex-wrap items-center gap-1.5 text-[12px] text-text-muted"><span>{q.sbloccoCondizione.modificato ? 'Sblocco modificato' : 'Sblocco strutturato'}</span><button type="button" className="btn btn-ghost btn-sm touch" onClick={() => setFinestra('sblocco')}>Modifica sblocco</button>{q.sbloccoCondizione.modificato && <button type="button" className="btn btn-ghost btn-sm touch" onClick={() => setFinestra('sblocco')}>Ripristina</button>}</div>}
               {q.descrizione && <p className="m-0 text-[13px] text-text-secondary">{q.descrizione}</p>}
               <div className="flex flex-wrap items-center gap-1.5 pt-1">

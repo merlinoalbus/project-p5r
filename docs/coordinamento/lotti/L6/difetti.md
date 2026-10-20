@@ -2,7 +2,11 @@
 
 ## Collegamenti frontend — riscontro aggiornato
 
-La mancanza iniziale di F1–F5 è stata affrontata localmente: anteprima server e tipi nell'editor, inviti nelle tre viste, editor dei requisiti, lettura degli sblocchi e disponibilità del server in città/metro. Le modifiche non sono pubblicate né provate nel runtime. Non dichiarare L6 completo sulla sola base dei DTO, delle descrizioni OpenAPI o dei controlli statici.
+La mancanza iniziale di F1–F5 è stata affrontata e pubblicata in `63e12734`: anteprima server e tipi nell'editor, inviti nelle tre viste, editor dei requisiti, lettura degli sblocchi e disponibilità del server in città/metro. Pipeline #64 riuscita e scheda Asakusa osservata dopo il rilascio. Non dichiarare L6 completo: restano descrizioni residue, copertura completa da dimostrare e prove funzionali dell'utente (`copertura-ripresa.md`). Le sezioni sulle modifiche locali sotto documentano il lavoro poi incluso nel rilascio.
+
+## Descrizioni dei quartieri — residuo dopo il rilascio
+
+Il server espone 23 quartieri con 23 condizioni strutturate e testi generati. In 20 casi il campo storico `sblocco` è diverso. Il codice pubblicato legge ancora prosa/data legacy nelle viste. Corretto localmente: Quartiere e Città usano `sbloccoCondizione.testo`, metro usa motivo/testo server; tolti data legacy dal chip e taglio della descrizione nelle carte. Typecheck/lint/build verdi, nessun server/shared/dato modificato, nessun nuovo rilascio. È un'omissione rispetto a R6-08b e modifiche §4.1 già nel piano, non una nuova scelta da approvare: ritirato il blocco impropriamente introdotto dall'assistente. Da includere con il coordinamento nella chiusura del lotto.
 
 ## Blocco «Da posizionare» nel pannello dell'Area
 

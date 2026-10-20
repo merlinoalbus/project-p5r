@@ -18,7 +18,6 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { MappaTokyo } from '../components/mappe/MappaTokyo';
-import { dataLeggibile } from '../../shared/condizioniSpillo';
 import { SagomaQuartiere } from '../components/mappe/SagomaQuartiere';
 import { IllustrazioneConSegno } from '../components/mappe/IllustrazioneConSegno';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -107,11 +106,11 @@ export function CittaPage() {
                     {/* Il quartiere chiuso resta in elenco — la guida serve anche a sapere cosa
                         arriverà — ma la scheda lo dice, perché lassù non c'è una sagoma da
                         accendere e il collegamento sembrerebbe rotto. */}
-                    {!aperto && <span className="chip text-[11px]" title={x.bloccoMotivo ?? undefined}>Non ancora aperto{x.sbloccoData && <> · <span className="whitespace-nowrap">dal {dataLeggibile(x.sbloccoData)}</span></>}</span>}
+                    {!aperto && <span className="chip text-[11px]" title={x.bloccoMotivo ?? undefined}>Non ancora aperto</span>}
                   </span>
                   {suggerito && <TargaSuggerito motivo={sugg.motivo('quartieri', x.chiave)} compatta />}
                   <span className="text-[12px] text-text-secondary">{x.luoghi} {x.luoghi === 1 ? 'luogo' : 'luoghi'}{x.verificati < x.luoghi ? ` · ${x.luoghi - x.verificati} da fonte secondaria` : ''}</span>
-                  {x.sblocco && <span className="text-[12px] text-text-muted line-clamp-2">Sblocco: {x.sblocco}</span>}
+                  {x.sbloccoCondizione?.testo && <span className="break-words text-[12px] text-text-muted">Sblocco: {x.sbloccoCondizione.testo}</span>}
                   {x.descrizione && <span className="text-[12px] text-text-secondary line-clamp-2">{x.descrizione}</span>}
                   </span>
                 </Link>
