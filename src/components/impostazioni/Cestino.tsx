@@ -1,5 +1,6 @@
 // ============================================================
-// Cestino — le aree, le voci della guida, le planimetrie e le aree dei dedali eliminate, da rimettere o togliere per sempre
+// Cestino — le aree del mondo, le infiltrazioni, le voci della guida, le planimetrie e le aree dei dedali eliminate, da rimettere o
+// togliere per sempre
 // ============================================================
 //
 // Richiesta dell'utente (2026-10-16), dopo che tre aree del Palazzo di Madarame eliminate per errore si sono dovute ricostruire a
@@ -16,7 +17,7 @@ import { eliminaDalCestino, getCestino, ripristinaDalCestino, svuotaCestino } fr
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { byteTesto } from '../../utils/byte';
-import { motivoSaltata, NOME_TIPO_CESTINO } from '../../utils/cestino';
+import { contenutoLeggibile, descrizioneElementoCestino, motivoSaltata, NOME_TIPO_CESTINO } from '../../utils/cestino';
 import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -27,20 +28,20 @@ const quando = (iso: string): string => new Date(iso).toLocaleString('it-IT', { 
 
 /** Un elemento del cestino: che cos'era, dove, quando, che cosa si è portato via; «Rimetti» ed «Elimina per sempre». */
 function ElementoCestino({ v, occupato, onRimetti, onElimina }: { v: VoceCestinoDto; occupato: boolean; onRimetti: () => void; onElimina: () => void }) {
+  // «Area di Shibuya: Sottopasso», poi «con 2 planimetrie, 14 pin e 3 immagini»: le parole di chi gioca, senza le tabelle interne (UX2-12)
+  const { titolo, con } = descrizioneElementoCestino(v);
+  const contenuto = contenutoLeggibile(v);
   return (
     <li className="flex flex-col gap-2 rounded-md border border-border-light px-3 py-2 md:flex-row md:items-start md:justify-between" aria-label={`${NOME_TIPO_CESTINO[v.tipo]} «${v.nome}»`}>
       <div className="flex min-w-0 flex-col gap-1">
-        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-          <span className="rounded bg-bg-tertiary px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-text-secondary">{NOME_TIPO_CESTINO[v.tipo]}</span>
-          <span className="break-words text-[14px] font-semibold">{v.nome}</span>
-        </div>
-        {v.contesto && <span className="break-words text-[12px] text-text-secondary">{v.contesto}</span>}
+        <span className="break-words text-[14px] font-semibold">{titolo}</span>
+        {con && <span className="break-words text-[13px] text-text-secondary">{con}</span>}
+        {/* una nota del server che non è un posto (un'area fusa in un'altra) resta com'è */}
+        {v.contesto && /[«»]/.test(v.contesto) && <span className="break-words text-[12px] text-text-secondary">{v.contesto}</span>}
         <span className="text-[12px] text-text-muted">Nel cestino dal {quando(v.eliminatoIl)} · {byteTesto(v.byte)}</span>
-        <ul className="m-0 flex list-none flex-wrap gap-1 p-0" aria-label="Che cosa si è portato via">
-          {v.contenuto.map((c) => (
-            <li key={c.tabella} className="rounded border border-border-light px-1.5 py-0.5 text-[12px]">{c.quante.toLocaleString('it-IT')} {c.etichetta}</li>
-          ))}
-        </ul>
+        {contenuto.length > 0 && <ul className="sr-only" aria-label="Che cosa si è portato via">
+          {contenuto.map((c) => <li key={c.etichetta}>{c.quante.toLocaleString('it-IT')} {c.etichetta}</li>)}
+        </ul>}
         {v.partite === 'mancante' && (
           <span className="text-[12px] text-warning">Il file delle partite è stato sostituito dopo: si rimettono solo i dati di gioco, non le spunte.</span>
         )}
@@ -116,9 +117,10 @@ export function Cestino() {
         <div className="flex min-w-0 flex-col gap-1">
           <h2 id="titolo-cestino" className="m-0 text-[15px] font-semibold">Cestino</h2>
           <p className="m-0 text-[13px] text-text-secondary">
-            Le infiltrazioni, le voci, le planimetrie e le aree dei dedali eliminate, con tutto quel che si sono portate via (spunte delle
-            partite comprese). «Rimetti» le riporta com’erano; quel che hai cambiato dopo resta com’è. Il cestino si svuota solo a mano: le
-            planimetrie ci portano anche le loro immagini.
+            {/* le aree del mondo ci finiscono da L2 (UX2-12) */}
+            Le aree dei quartieri e della città, le planimetrie, le infiltrazioni dei Palazzi, le voci della guida e le aree dei dedali
+            eliminate, con tutto quel che si sono portate via (pin e segni delle partite compresi). «Rimetti» le riporta com’erano; quel che
+            hai cambiato dopo resta com’è. Il cestino si svuota solo a mano: aree e planimetrie ci portano anche le loro immagini.
           </p>
           {voci.length > 0 && <span className="text-[12px] text-text-muted">{voci.length === 1 ? '1 elemento' : `${voci.length} elementi`} · {byteTesto(peso)}</span>}
         </div>
