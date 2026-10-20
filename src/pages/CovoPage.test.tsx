@@ -66,6 +66,11 @@ describe('CovoPage', () => {
     expect(screen.getByRole('link', { name: /Planimetrie del Covo/ })).toHaveAttribute('href', '/guida/citta/yongen-jaya/covo-dei-ladri');
   });
 
+  it('LAY2-6: la carta «Planimetrie del Covo» è un bersaglio da toccare (alta almeno 48 px a ogni larghezza)', async () => {
+    await apri();
+    expect(screen.getByRole('link', { name: /Planimetrie del Covo/ })).toHaveClass('touch', 'min-h-12');
+  });
+
   it('mostra il totale delle medaglie solo quando lo dichiarano tutte le sfide', async () => {
     await apri({ sfide: [{ nome: 'A', requisito: 'r', medaglie: 10 }, { nome: 'B', requisito: 'r', medaglie: 5 }] });
     expect(within(screen.getByRole('region', { name: 'Come funziona il Covo' })).getByText('15 medaglie in tutto')).toBeInTheDocument();
