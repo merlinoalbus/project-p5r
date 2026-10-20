@@ -26,6 +26,7 @@ import { OggiGuida } from '../components/partita/OggiGuida';
 import { OggiMappa } from '../components/partita/OggiMappa';
 import { slug } from '../../shared/slug';
 import { avanzamentoDote } from '../utils/doti';
+import { useNomeDelPosto } from '../hooks/useNomeDelPosto';
 import type { PartitaDto } from '../types';
 
 /** Le cinque scorciatoie, con **la stessa figura della barra di navigazione**.
@@ -80,6 +81,8 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
   }), [oggi, impostaMappaChiusa]);
 
   const guidaPronta = Boolean(oggi.indice && oggi.giorno);
+  // L5 §4.4b (M1): la linguetta porta il nome del posto mostrato, mai «Mappa»
+  const nomePosto = useNomeDelPosto(oggi.mappa.chiave);
   const statoOggi = oggi.errore
     ? <p className="m-0 text-[13px] text-text-secondary" role="alert">Guida del giorno non disponibile: {oggi.errore}</p>
     : <div className="flex items-center justify-center py-6" aria-busy="true"><Spinner /></div>;
@@ -139,8 +142,8 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
       </section>
 
       {guidaPronta && mappaChiusa && (
-        <button type="button" className="home-linguetta touch" onClick={() => impostaMappaChiusa(false)} aria-label="Mostra la mappa" title="Mostra la mappa (col mouse basta passarci sopra)">
-          <IconaAzione chiave="mappa" dimensione={20} /><span className="home-linguetta__testo">Mappa</span>
+        <button type="button" className="home-linguetta touch" onClick={() => impostaMappaChiusa(false)} aria-label={nomePosto ? `Mostra ${nomePosto}` : 'Mostra la mappa'} title={`Mostra ${nomePosto ?? 'la mappa'} (col mouse basta passarci sopra)`}>
+          <IconaAzione chiave="mappa" dimensione={20} /><span className="home-linguetta__testo">{nomePosto ?? '…'}</span>
         </button>
       )}
       {guidaPronta && (

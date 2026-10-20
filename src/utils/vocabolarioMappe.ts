@@ -18,6 +18,12 @@ export function nomeTipoMappa(mappa: { tipo: TipoMappa; area?: unknown }): strin
   return mappa.area ? 'Planimetria' : NOME_TIPO_MAPPA[mappa.tipo];
 }
 
+/** L5 §4.4b (M9): il gesto che apre l'editor porta il nome di quel che modifica: «Modifica illustrazione» per la città e i quartieri,
+ *  «Modifica planimetria» per il resto (come `MappaIncorporata`). */
+export function titoloModificaMappa(mappa: { tipo: TipoMappa; area?: unknown }): string {
+  return !mappa.area && (mappa.tipo === 'citta' || mappa.tipo === 'quartiere') ? 'Modifica illustrazione' : 'Modifica planimetria';
+}
+
 /** Il testo alternativo dell'immagine di una mappa nel visore (L2, M17): «Planimetria di Central Street» per una planimetria (di
  *  un'Area o di un Palazzo), «Illustrazione di Shibuya» per la città e i quartieri, il solo nome per il resto. Mai «Mappa: …». */
 export function descrizioneImmagineMappa(mappa: { tipo: TipoMappa; nome: string; area?: { nome: string; versioneEtichetta?: string | null } | null }): string {

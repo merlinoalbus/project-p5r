@@ -21,6 +21,7 @@ import { MappaTokyo } from '../mappe/MappaTokyo';
 import { getDungeons, getQuartieri } from '../../services/api';
 import { radiciMetaverso } from '../../utils/palazzi';
 import { useCarica } from '../../hooks/useCarica';
+import { useNomeDelPosto } from '../../hooks/useNomeDelPosto';
 import { usePartitaStore } from '../../stores/partitaStore';
 import type { Oggi } from '../../hooks/useOggi';
 
@@ -38,6 +39,7 @@ export function OggiMappa({ oggi, riempi }: Props) {
   const { mappa } = oggi;
   const attiva = usePartitaStore((s) => s.attiva);
   const suTokyo = mappa.chiave === 'tokyo';
+  const nomePosto = useNomeDelPosto(mappa.chiave);
   // Si caricano solo quando servono davvero, cioè al livello di Tokyo.
   const quartieri = useCarica(() => (suTokyo ? getQuartieri(oggi.partitaId) : Promise.resolve([])), [suTokyo, oggi.partitaId]);
   // con la partita: un Palazzo completato sulla mappa di Tokyo non c'è più; col suo giorno, che decide dove si atterra
@@ -59,7 +61,8 @@ export function OggiMappa({ oggi, riempi }: Props) {
   return (
     <div ref={colonna} className={`flex flex-col gap-1.5 min-w-0 ${riempi ? 'md:min-h-0' : ''}`}>
       <div className="flex items-center gap-2 flex-wrap text-[12px] text-text-muted shrink-0">
-        <span>Mappa{mappa.azione !== null ? ' dell’azione scelta' : ' di Tokyo'}: tocca un quartiere o un passaggio per scendere di livello.</span>
+        {/* L5 §4.4b (M2): il nome del posto mostrato, mai «Mappa»: «Central Street — azione scelta» */}
+        <span>{nomePosto ?? (suTokyo ? 'Tokyo' : '…')}{mappa.azione !== null ? ' — azione scelta' : ''}: tocca un quartiere o un passaggio per scendere di livello.</span>
         {!suTokyo && <button type="button" className="visore-mappa__azione-testo" onClick={oggi.tornaAllaMappaGlobale}>Torna a Tokyo</button>}
       </div>
       {suTokyo ? (

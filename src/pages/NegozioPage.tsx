@@ -2,7 +2,7 @@
 // NegozioPage — scheda di un negozio: sede, orari, gestore/Confidente, programma punti, articoli con filtri e spunta «acquistato», rimossi
 // ============================================================
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getElementoCatalogo, getNegozio } from '../services/api';
 import { notifica } from '../stores/notificationStore';
@@ -12,14 +12,11 @@ import { usePartitaStore } from '../stores/partitaStore';
 import { PageState } from '../components/shared/PageState';
 import { IconChevronLeft } from '../components/shared/icons';
 import { NOME_TIPO_NEGOZIO } from '../utils/negozi';
-import { ArticoliTabella } from '../components/guida/ArticoliTabella';
 import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
-import { ElementiRimossi } from '../components/guida/ElementiRimossi';
-import { FiltriArticoli } from '../components/guida/FiltriArticoli';
+import { ListinoNegozio } from '../components/negozi/ListinoNegozio';
 import { ModuloCatalogo } from '../components/guida/ModuloCatalogo';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
-import { FILTRO_VUOTO, categoriePresenti, destinatariPresenti, filtraArticoli, type FiltroArticoli as Filtro } from '../utils/articoli';
 import type { ElementoCatalogoDto } from '../types';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { ancoraLuogo } from '../utils/citta';
@@ -42,7 +39,6 @@ export function NegozioPage() {
   const dati = useCarica(() => getNegozio(chiave, partitaId ?? undefined), [chiave, partitaId, momento]);
   const n = dati.dati;
   useDocumentTitle(n?.nome ?? 'Negozio');
-  const [filtro, setFiltro] = useState<Filtro>({ ...FILTRO_VUOTO });
   // aggiunte dell'utente al catalogo: nuovo articolo di questo negozio, o correzione del negozio stesso (16.1)
   const [modulo, setModulo] = useState<'articolo' | 'negozio' | null>(null);
   const [elementoArticolo, setElementoArticolo] = useState<ElementoCatalogoDto | null>(null);
@@ -51,11 +47,6 @@ export function NegozioPage() {
   const [versione, setVersione] = useState(0);
   /** Dopo un salvataggio dal modulo: lo chiude, fa rileggere il blocco «Rimossi» e ricarica la scheda. */
   const salvato = () => { setModulo(null); setVersione((v) => v + 1); void dati.ricarica(); };
-  const articoli = useMemo(() => n?.articoliElenco ?? [], [n]);
-  const categorie = useMemo(() => categoriePresenti(articoli), [articoli]);
-  const destinatari = useMemo(() => destinatariPresenti(articoli), [articoli]);
-  // Anche un articolo non ancora acquistabile resta consultabile con condizioni e semaforo.
-  const visibili = useMemo(() => filtraArticoli(articoli, filtro, partitaId !== null), [articoli, filtro, partitaId]);
   /** Carica dal catalogo l'articolo da correggere e apre il modulo su di lui; se il caricamento fallisce lo notifica. */
   const apriArticolo = (chiaveArticolo: string) => {
     void getElementoCatalogo('articolo', chiaveArticolo).then((e) => { setElementoArticolo(e); setModulo('articolo'); }).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Caricamento fallito.'));
@@ -102,13 +93,9 @@ export function NegozioPage() {
               <DoveSiTrova tipo="negozio" chiave={n.chiave} altezza="var(--altezza-tela-negozio)" />
             </div>
             <div className="negozio-merce">
-              {articoli.length > 0 && (
-                <FiltriArticoli filtro={filtro} onCambia={setFiltro} categorie={categorie} destinatari={destinatari} conPartita={partitaId !== null} />
-              )}
-              {articoli.length === 0 ? <p className="m-0 text-[13px] text-text-muted">Nessun articolo acquistabile confermato per questo luogo.</p>
-                : <div className="negozio-elenco"><ArticoliTabella onModifica={(a) => apriArticolo(a.chiave)} articoli={visibili} partitaId={partitaId} onCambiato={(a) => dati.imposta((attuale) => ({ ...attuale, articoliElenco: attuale.articoliElenco.map((x) => (x.chiave === a.chiave ? a : x)), acquistati: attuale.articoliElenco.filter((x) => (x.chiave === a.chiave ? a.acquistato : x.acquistato)).length }))} /></div>}
-              {/* Gli articoli nascosti di questo negozio, con il ripristino in un tocco: la pagina «Rimossi» li ha tutti. */}
-              <ElementiRimossi tipo="articolo" negozio={chiave} versione={versione} onRipristinato={() => void dati.ricarica()} />
+              {/* L5: lo stesso listino della pagina del luogo */}
+              <ListinoNegozio negozio={n} partitaId={partitaId} versione={versione} onModifica={apriArticolo} onRipristinato={() => void dati.ricarica()}
+                onCambiato={(a) => dati.imposta((attuale) => ({ ...attuale, articoliElenco: attuale.articoliElenco.map((x) => (x.chiave === a.chiave ? a : x)), acquistati: attuale.articoliElenco.filter((x) => (x.chiave === a.chiave ? a.acquistato : x.acquistato)).length }))} />
             </div>
           </div>
         </div>

@@ -17,3 +17,4 @@ export * from './condizioni';
 export * from './organizzazioneMappe';
 export * from './accessoMondo';
 export * from './aree';
+export * from './luoghi';

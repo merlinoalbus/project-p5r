@@ -16,7 +16,7 @@ import { Selettore } from '../components/shared/Selettore';
 import type { MappaDto, MappaRiassuntoDto } from '../types';
 import { AnteprimaMappa } from '../components/mappe/AnteprimaMappa';
 import { centroAccessoMondo, schedaAccessoMondo, titoloSchedaAccessoMondo } from '../utils/accessoMondo';
-import { etichettaMappeSorelle, nomeTipoMappa, titoloMappeSorelle } from '../utils/vocabolarioMappe';
+import { etichettaMappeSorelle, nomeTipoMappa, titoloMappeSorelle, titoloModificaMappa } from '../utils/vocabolarioMappe';
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
@@ -363,7 +363,7 @@ function LuogoSenzaPlanimetria({ mappa, nome, albero, partitaId }: {
       {contenute.length > 0 && <p className="m-0 text-[13px] text-text-secondary">Questa mappa non ha una pianta sua: raccoglie le mappe qui sotto.</p>}
       <div className="flex flex-wrap gap-2">
         {mappa.entita && <CollegamentoVisivo to={schedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave)} tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={titoloSchedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave, mappa.nome)} />}
-        <CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica mappa" />
+        <CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={titoloModificaMappa(mappa)} />
         <TornaAllaPartita partitaId={partitaId} />
       </div>
     </header>
@@ -523,7 +523,7 @@ function DettaglioMappa({ chiave, partitaId }: { chiave: string; partitaId: numb
           onAcquisto={acquisto}
           onChiudi={() => navigate(ritornoMappe() ?? '/guida/mappe')}
           ritorno={<TornaAllaPartita partitaId={partitaId} />}
-          azioni={<>{mappa.entita && <Link className="btn btn-secondary touch" to={schedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave)}>{titoloSchedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave, mappa.nome)}</Link>}<CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica mappa" /></>}
+          azioni={<>{mappa.entita && <Link className="btn btn-secondary touch" to={schedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave)}>{titoloSchedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave, mappa.nome)}</Link>}<CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={titoloModificaMappa(mappa)} /></>}
         /></>}
         {!haPlanimetria(mappa) && <ContenutiGuidaMappa mappa={mappa.chiave} area={params.get('area')} dungeon={mappa.entita?.tipo === 'dungeon' ? mappa.entita.chiave : undefined} />}
       </div>}
