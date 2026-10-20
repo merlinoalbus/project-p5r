@@ -1728,7 +1728,9 @@ const RICERCHE: Record<TipoRiferimento, string> = {
   mappa: "SELECT chiave, nome, tipo AS dettaglio FROM mappa WHERE lower(nome) LIKE ? OR chiave LIKE ? ORDER BY nome LIMIT ?",
   negozio: "SELECT chiave, nome, tipo AS dettaglio FROM negozio WHERE lower(nome) LIKE ? OR chiave LIKE ? ORDER BY nome LIMIT ?",
   punto: "SELECT p.chiave, p.nome, a.nome AS dettaglio FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE lower(p.nome) LIKE ? OR p.chiave LIKE ? ORDER BY p.nome LIMIT ?",
-  luogo: "SELECT chiave, nome, quartiere_chiave AS dettaglio FROM luogo WHERE lower(nome) LIKE ? OR chiave LIKE ? ORDER BY nome LIMIT ?",
+  // L5: il luogo si riconosce dal posto, «Quartiere › Area» (o il solo quartiere se è da collocare)
+  luogo: `SELECT l.chiave, l.nome, COALESCE(q.nome, l.quartiere_chiave) || COALESCE(' › ' || a.nome, '') AS dettaglio FROM luogo l LEFT JOIN quartiere q ON q.chiave = l.quartiere_chiave
+    LEFT JOIN area a ON a.chiave = l.area_chiave WHERE lower(l.nome) LIKE ? OR l.chiave LIKE ? ORDER BY l.nome LIMIT ?`,
   confidente: "SELECT chiave, nome, arcana AS dettaglio FROM confidente WHERE lower(nome) LIKE ? OR chiave LIKE ? ORDER BY nome LIMIT ?",
   richiesta: "SELECT chiave, nome, '' AS dettaglio FROM richiesta WHERE lower(nome) LIKE ? OR chiave LIKE ? ORDER BY nome LIMIT ?",
   attivita: "SELECT chiave, nome, quartiere_chiave AS dettaglio FROM luogo WHERE (lower(nome) LIKE ? OR chiave LIKE ?) AND tipo IN ('attivita', 'servizio', 'scuola') ORDER BY nome LIMIT ?",

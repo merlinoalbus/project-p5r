@@ -56,7 +56,7 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
   },
   'GET /api/mappe/riferimenti': {
     sommario: 'Entità collegabili a uno spillo nell\'editor, per tipo e testo',
-    descrizione: 'Cerca nel nome o nella chiave (senza distinzione di maiuscole) le entità del tipo indicato: mappe, negozi, punti della guida, luoghi, Confidenti, richieste, attività (fra i luoghi di tipo attività, servizio o scuola). Per le mappe ogni parola deve comparire nel nome con il percorso o nella chiave, accenti esclusi. Al più `limite` risultati (30 se non indicato).',
+    descrizione: 'Cerca nel nome o nella chiave (senza distinzione di maiuscole) le entità del tipo indicato: mappe, negozi, punti della guida, luoghi, Confidenti, richieste, attività (fra i luoghi di tipo attività, servizio o scuola). Per le mappe ogni parola deve comparire nel nome con il percorso o nella chiave, accenti esclusi. Per un luogo (L5) `dettaglio` è il posto, «Quartiere › Area» (il solo quartiere se è da collocare). Al più `limite` risultati (30 se non indicato).',
     risposta: 'Elenco di `{ tipo, chiave, nome, dettaglio }`',
   },
   'GET /api/mappe/entita/:tipo/:chiave': {

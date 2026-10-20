@@ -118,8 +118,11 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
        */
       const cerca = () => {
         for (const r of riferimenti) {
+          // L5: il pin di un luogo (o di un negozio) si chiama col nome del luogo (o del negozio), la fonte, non con quello scritto sul pin
+          const nomeFonte = r.tipo === 'luogo' || r.tipo === 'negozio'
+            ? (prepared(`SELECT nome FROM ${r.tipo} WHERE chiave = ?`).get(r.chiave) as { nome: string } | undefined)?.nome ?? null : null;
           for (const s of prepared('SELECT s.id,s.nome,s.mappa_chiave FROM spillo s JOIN mappa m ON m.chiave=s.mappa_chiave WHERE s.riferimento_tipo=? AND s.riferimento_chiave=? ORDER BY s.mappa_chiave,s.ordine,s.id').all(r.tipo, r.chiave) as Array<{ id: number; nome: string; mappa_chiave: string }>) {
-            aggiungi(s.mappa_chiave, s.id, s.nome, 'riferimento-spillo', r);
+            aggiungi(s.mappa_chiave, s.id, nomeFonte ?? s.nome, 'riferimento-spillo', r);
           }
           // i pin di una voce della guida la portano nel campo suo (094), non nel riferimento
           if (r.tipo === 'punto') {
