@@ -49,6 +49,8 @@ export function nomiCondizioni(opz: { conPin?: boolean } = {}): NomiCondizioni {
     squadra: () => Object.fromEntries(giocabili().map((p) => [p.chiave, p.nome])),
     // L6: i luoghi (condizione `luogo`) e gli inviti dei Confidenti (`invito`: «l'invito di Ryuji del 29 maggio»)
     luoghi: mappa('SELECT chiave, nome FROM luogo'),
+    persone: mappa('SELECT CAST(id AS TEXT) AS chiave, nome FROM persona'),
+    abilita: mappa('SELECT CAST(id AS TEXT) AS chiave, nome FROM skill'),
     inviti: () => Object.fromEntries((prepared('SELECT i.chiave, i.data, c.nome FROM confidente_invito i JOIN confidente c ON c.chiave = i.confidente_chiave').all() as Array<{ chiave: string; data: string | null; nome: string }>)
       .map((r) => [r.chiave, `l’invito di ${r.nome}${r.data ? ` del ${dataLeggibile(r.data)}` : ''}`])),
     spilli: () => Object.fromEntries(pinConStato().map((p) => [p.uid, { nome: p.nome, tipo: p.tipo, mappa: p.mappa, parola: p.parola }])),

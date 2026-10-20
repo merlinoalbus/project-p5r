@@ -11,7 +11,9 @@ import { aggiornaRichiesta, citazioniRichiesta, collocaRichiesta, creaRichiesta,
 import { battaglia } from '../services/battagliaService.js';
 import { aggiornaArea, aggiornaAreaDedalo, aggiornaDungeon, ripristinaDungeon, aggiornaPunto, collegaPinAlPunto, copiaPuntiInArea, creaArea, impostaAreePalazzoInfiltrazione, creaAreaDedalo, creaPunto, eliminaArea, eliminaAreaDedalo, eliminaPunto, spostaAreaDedalo, spostaPunto, spostaPuntiInArea } from '../services/dungeonService.js';
 import { bodyArea, bodyAreaDedalo, bodyAreePalazzoInfiltrazione, bodyAtterraggi, bodyCollocaRichiesta, bodyDungeon, bodyFinestraDungeon, bodyNuovaArea, bodyNuovaAreaDedalo, bodyNuovaRichiesta, bodyNuovoPunto, bodyPunto, bodyRequisitoRichiesta, bodyRichiesta, bodySpostaPunto, bodySpostaPuntiInArea, paramsChiaveGuida, paramsPinDelPunto, paramsRequisitoConfidente, querySchedaDungeon, bodyCreaVoceDallaScheda, bodyCollegaSchedaAllaVoce } from '../schemas/guidaDungeon.js';
-import { correggiRequisitoRichiesta, togliRequisitoRichiesta } from '../services/requisitiConfidentiService.js';
+import { correggiRequisitoRichiesta, impostaRequisitiRango, requisitiDelConfidente, ripristinaRequisitiRango, togliRequisitoRichiesta } from '../services/requisitiConfidentiService.js';
+import { condizioneSpillo } from '../schemas/mappe.js';
+import type { Condizione } from '../../shared/condizioniSpillo.js';
 import { dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuartiere } from '../services/cittaService.js';
 import { dettaglioLuogo } from '../services/luoghiService.js';
 import { elencaInviti } from '../services/inviti.js';
@@ -367,6 +369,21 @@ router.get('/domande', validate({ query: queryDomande }), (req, res) => {
 });
 router.get('/confidenti/:chiave', validate({ params: paramsChiaveGuida }), (req, res) => {
   res.json(dettaglioConfidente(String(req.params.chiave)));
+});
+/** L6 (§6.1): i requisiti del Confidente per rango, per l'editor («Modifica requisiti»). */
+router.get('/confidenti/:chiave/requisiti', validate({ params: paramsChiaveGuida }), (req, res) => {
+  res.json(requisitiDelConfidente(String(req.params.chiave)));
+});
+const paramsRangoConfidente = z.object({ chiave: z.string().min(1).max(200), rango: z.coerce.number().int().min(1).max(10) });
+/** L6: i requisiti di un rango al posto di quelli di adesso (condizioni del vocabolario unico, con la frase facoltativa). */
+router.put('/confidenti/:chiave/requisiti/:rango', validate({ params: paramsRangoConfidente, body: z.object({ requisiti: z.array(z.object({ condizione: condizioneSpillo, testo: z.string().max(500).nullable().optional() })).max(10) }) }), (req, res) => {
+  const p = req.params as unknown as { chiave: string; rango: number };
+  res.json(impostaRequisitiRango(p.chiave, p.rango, (req.body as { requisiti: Array<{ condizione: Condizione; testo?: string | null }> }).requisiti));
+});
+/** L6: il rango torna come lo dà la guida. */
+router.post('/confidenti/:chiave/requisiti/:rango/ripristina', validate({ params: paramsRangoConfidente }), (req, res) => {
+  const p = req.params as unknown as { chiave: string; rango: number };
+  res.json(ripristinaRequisitiRango(p.chiave, p.rango));
 });
 /** Un requisito che cita una Richiesta (per esempio eliminata, «da correggere»): cita un'altra Richiesta (scelta dell'utente,
  *  2026-10-11: «Requisito correggibile»). */

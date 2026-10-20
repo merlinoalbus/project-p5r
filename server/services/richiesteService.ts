@@ -12,6 +12,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { datiGuida, type Congelato } from './datiGuida.js';
 import { registraEvento } from './storicoService.js';
+import { conCestino } from './cestinoService.js';
 import type { CitazioniRichiestaDto, JoseDto, RichiestaDto, RichiesteDto, StatoRichiesta } from '../../shared/types.js';
 import { slug } from '../../shared/slug.js';
 
@@ -205,12 +206,9 @@ export function aggiornaRichiesta(chiave: string, dati: DatiRichiesta): Richiest
       nome, dati.committente ?? r.committente, dati.disponibileDal ?? r.disponibile_dal, dati.scadenza ?? r.scadenza, dove.dedalo === r.area_chiave ? r.area : dove.nomeDedalo, dove.dedalo, dove.area, dati.piano ?? r.piano,
       dati.bersaglio ? JSON.stringify(dati.bersaglio) : r.bersaglio_json, dati.ricompense ? JSON.stringify(dati.ricompense) : r.ricompense_json, confidente, rango, dati.note ?? r.note, ordine, chiave);
     if (nome !== r.nome) {
-      // le voci della giornata che la indicano mostrano il nome salvato in `riferimento_testo` (`giornataService`): il nome nuovo
+      // le voci della giornata che la indicano mostrano il nome salvato in `riferimento_testo` (`giornataService`): il nome nuovo.
+      // L6 (R6-04): condizioni e requisiti la citano per chiave, e il testo che mostrano si genera dal nome: rinominarla non li tocca
       prepared("UPDATE voce_giornata SET riferimento_testo = ? WHERE riferimento_tipo = 'richiesta' AND riferimento_chiave = ? AND riferimento_testo IS NOT NULL").run(nome, chiave);
-      for (const q of requisitiCheCitano(chiave, r.nome)) {
-        prepared('UPDATE confidente_requisito SET dati_json = ?, testo = ? WHERE confidente_chiave = ? AND rango = ? AND indice = ?')
-          .run(JSON.stringify({ ...q.dati, richiesta: chiave }), q.testo.split(r.nome).join(nome), q.confidente_chiave, q.rango, q.indice);
-      }
     }
   })();
   return dto(rigaRichiesta(chiave), new Map());
@@ -233,15 +231,6 @@ function condizioneCita(nodo: unknown, chiave: string, nome: string): boolean {
   const o = nodo as Record<string, unknown>;
   if (o.tipo === 'richiesta' && citaLaRichiesta(o.richiesta, chiave, nome)) return true;
   return Object.values(o).some((v) => typeof v === 'object' && condizioneCita(v, chiave, nome));
-}
-
-/** Lo stesso albero di condizioni, con il nome al posto della chiave nelle condizioni che citano la Richiesta per chiave. */
-function conIlNome(nodo: unknown, chiave: string, nome: string): unknown {
-  if (Array.isArray(nodo)) return nodo.map((x) => conIlNome(x, chiave, nome));
-  if (!nodo || typeof nodo !== 'object') return nodo;
-  const o = nodo as Record<string, unknown>;
-  if (o.tipo === 'richiesta' && o.richiesta === chiave) return { ...o, richiesta: nome };
-  return Object.fromEntries(Object.entries(o).map(([k, v]) => [k, typeof v === 'object' ? conIlNome(v, chiave, nome) : v]));
 }
 
 /** Le tabelle del file di gioco che hanno condizioni (`condizioni_json`), con che cosa sono. */
@@ -277,31 +266,17 @@ export function citazioniRichiesta(chiave: string): CitazioniRichiestaDto {
 }
 
 /**
- * Elimina una Richiesta per tutte le partite (scelta dell'utente, 2026-10-11: «Si elimina e si avvisa»): se ne vanno i suoi stati
- * nelle partite; i pin e le azioni della giornata che la indicavano perdono il collegamento (restano, col loro testo); le
- * condizioni e i requisiti che la citano restano e diventano grigi, «da correggere» (i semafori riconoscono la Richiesta che non
- * c'è più), e chi la citava per chiave la cita per nome, così l'avviso dice quale.
+ * Elimina una Richiesta per tutte le partite (scelta dell'utente, 2026-10-11: «Si elimina e si avvisa»). L6 (R6-04): va nel cestino
+ * (Impostazioni → Cestino), da dove torna com'era; se ne vanno i suoi stati nelle partite e i pin e le azioni della giornata che la
+ * indicavano perdono il collegamento (tornano col ripristino). Le condizioni e i requisiti che la citano **restano per chiave**, senza
+ * riscritture, e danno «Richiesta eliminata» (grigio) finché non torna.
  */
 export function eliminaRichiesta(chiave: string): void {
   const r = rigaRichiesta(chiave);
-  getDb().transaction(() => {
-    // chi la citava per chiave torna a citarla per nome: la chiave di una Richiesta che non c'è più non dice nulla, e il «non c'è
-    // più: correggi» mostrerebbe «lo-zio-ingordo» invece di «Lo zio ingordo» (trovato nella prova nel browser, 2026-10-11)
-    for (const q of requisitiCheCitano(chiave, r.nome).filter((x) => x.dati.richiesta === chiave)) {
-      prepared('UPDATE confidente_requisito SET dati_json = ? WHERE confidente_chiave = ? AND rango = ? AND indice = ?')
-        .run(JSON.stringify({ ...q.dati, richiesta: r.nome }), q.confidente_chiave, q.rango, q.indice);
-    }
-    for (const t of TABELLE_CON_CONDIZIONI) {
-      const id = t.tabella === 'spillo' ? 'id' : 'chiave';
-      for (const riga of prepared(`SELECT ${id} AS id, condizioni_json FROM ${t.tabella} WHERE condizioni_json LIKE '%richiesta%'`).all() as Array<{ id: string | number; condizioni_json: string }>) {
-        const prima = JSON.parse(riga.condizioni_json) as unknown;
-        const dopo = conIlNome(prima, chiave, r.nome);
-        if (JSON.stringify(dopo) !== JSON.stringify(prima)) prepared(`UPDATE ${t.tabella} SET condizioni_json = ? WHERE ${id} = ?`).run(JSON.stringify(dopo), riga.id);
-      }
-    }
+  conCestino({ tipo: 'richiesta', chiave, nome: r.nome, contesto: r.area }, () => {
     prepared('DELETE FROM richiesta_partita WHERE richiesta_chiave = ?').run(chiave);
     prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'richiesta' AND riferimento_chiave = ?").run(chiave);
     prepared("UPDATE voce_giornata SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'richiesta' AND riferimento_chiave = ?").run(chiave);
     prepared('DELETE FROM richiesta WHERE chiave = ?').run(chiave);
-  })();
+  });
 }

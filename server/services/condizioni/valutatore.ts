@@ -72,10 +72,10 @@ function nomeNegozio(chiave: string): string {
 function nomeAttivita(chiave: string): string {
   return (prepared('SELECT nome FROM attivita WHERE chiave = ?').get(chiave) as { nome: string } | undefined)?.nome ?? chiave;
 }
-/** Il nome di una Persona o di un'abilità citate per id (le condizioni per chiave, R6-03); il valore stesso se non è un id che c'è. */
-function nomePerId(tabella: 'persona' | 'skill', valore: string): string {
-  if (!/^\d+$/.test(valore)) return valore;
-  return (prepared(`SELECT nome FROM ${tabella} WHERE id = ?`).get(Number(valore)) as { nome: string } | undefined)?.nome ?? valore;
+/** Il nome di una Persona o di un'abilità citate per id (le condizioni per chiave, R6-03); null se non è un id che c'è. */
+function nomePerId(tabella: 'persona' | 'skill', valore: string): string | null {
+  if (!/^\d+$/.test(valore)) return null;
+  return (prepared(`SELECT nome FROM ${tabella} WHERE id = ?`).get(Number(valore)) as { nome: string } | undefined)?.nome ?? null;
 }
 
 /** L'esito di una condizione di un posto (quartiere o luogo), con la memoria dello stato e la guardia sui cicli (un posto che, per una via,
@@ -231,10 +231,10 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
       return dentro ? esito('squadra', 'verde', `${t('confidente', r.membro)} e' in squadra`) : esito('squadra', 'rosso', `${t('confidente', r.membro)} non e' in squadra (Partita → Denaro e squadra)`);
     }
     case 'richiesta': {
-      // per chiave (R6-03); il nome resta letto solo per i pacchetti di prima (`migraCondizioni`)
-      const chiave = st.nomiRichieste?.has(r.richiesta) ? r.richiesta : [...(st.nomiRichieste ?? [])].find(([, nome]) => nome.toLowerCase() === r.richiesta.toLowerCase())?.[0] ?? r.richiesta;
-      // eliminata dopo aver scritto la condizione: la condizione resta, grigia (R6-04: «Richiesta eliminata»)
-      if (st.richiesteEsistenti && !st.richiesteEsistenti.has(chiave)) return esito('richiesta', 'grigio', `Richiesta eliminata («${r.richiesta}»): rimettila dal cestino o correggi quel che la cita`);
+      // per chiave (R6-03, B4: niente più nomi; un pacchetto di prima si converte all'ingresso, `migraCondizioni`)
+      const chiave = r.richiesta;
+      // eliminata (nel cestino) o mai esistita: la condizione resta, grigia (R6-04: «Richiesta eliminata»)
+      if (st.nomiRichieste && !st.nomiRichieste.has(chiave)) return esito('richiesta', 'grigio', `Richiesta eliminata («${chiave}»): rimettila dal cestino o correggi quel che la cita`);
       const ok = st.richiesteCompletate.has(chiave);
       const visibile = st.nomiRichieste?.get(chiave) ?? r.richiesta;
       return ok ? esito('richiesta', 'verde', `Richiesta «${visibile}» completata`) : esito('richiesta', 'rosso', `Richiesta «${visibile}» non risulta completata (Guida → Richieste)`);
@@ -286,11 +286,11 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
       return esito('persona-arcano', ok ? 'verde' : 'rosso', ok ? `Persona ${t('arcana', r.arcano)} in scorta` : `Nessuna Persona ${t('arcana', r.arcano)} in scorta`);
     }
     case 'persona-abilita': {
-      // per id (R6-03: Persona e abilità per chiave); i nomi restano letti solo per i pacchetti di prima
-      const perId = /^\d+$/.test(r.persona) && /^\d+$/.test(r.abilita);
-      const ok = perId ? (st.personeConAbilitaId?.has(`${r.persona}|${r.abilita}`) ?? false) : st.personeConAbilita.has(`${r.persona.toLowerCase()}|${r.abilita.toLowerCase()}`);
+      // per id (R6-03, B4: Persona e abilità per chiave, niente più nomi)
       const persona = nomePerId('persona', r.persona);
       const skill = nomePerId('skill', r.abilita);
+      if (persona === null || skill === null) return esito('persona-abilita', 'grigio', `«${persona ?? r.persona}» con «${skill ?? r.abilita}»: Persona o abilità non riconosciute, correggi quel che le cita`);
+      const ok = st.personeConAbilitaId?.has(`${r.persona}|${r.abilita}`) ?? false;
       return esito('persona-abilita', ok ? 'verde' : 'rosso', ok ? `${persona} con ${skill} in scorta` : `Nessuna ${persona} con ${skill} in scorta`);
     }
     // — mappe —

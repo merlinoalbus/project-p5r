@@ -260,6 +260,9 @@ export interface NomiCondizioni {
   spilli?: Record<string, { nome: string; tipo: string; mappa: string; parola?: string }>;
   /** L6: i luoghi, per chiave. */
   luoghi?: Record<string, string>;
+  /** L6 (R6-03): le Persona e le abilità per id, per `persona-abilita` scritta per chiave. */
+  persone?: Record<string, string>;
+  abilita?: Record<string, string>;
   /** L6: gli inviti dei Confidenti, per chiave: «l'invito di Ryuji del 29 maggio». */
   inviti?: Record<string, string>;
   /** Le voci della guida che si citano (non descrittive), per chiave: nome e posto («Palazzo di Kamoshida › 2. Sala Centrale»). */
@@ -302,7 +305,7 @@ export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni
     case 'evento': return EVENTI_STORIA.find((e) => e.chiave === r.evento)?.nome ?? r.evento;
     case 'contatore': return `${CONTATORI.find((c) => c.chiave === r.cosa)?.nome ?? r.cosa}: almeno ${r.almeno}`;
     case 'persona-arcano': return 'Persona in scorta dell’Arcano ' + r.arcano;
-    case 'persona-abilita': return r.persona + ' in scorta con ' + r.abilita;
+    case 'persona-abilita': return `${nomi.persone?.[r.persona] ?? r.persona} in scorta con ${nomi.abilita?.[r.abilita] ?? r.abilita}`;
     case 'spillo': {
       // «Leva del ponte (Vecchio castello 1P): non azionato»; un pin che non c'è più lo dice, invece di mostrare un uid
       const p = nomi.spilli?.[r.spillo];

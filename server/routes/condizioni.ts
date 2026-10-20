@@ -19,7 +19,8 @@ import { z } from 'zod';
 import { getDb, prepared, nowIso } from '../db/dbService.js';
 import { validate } from '../middleware/validate.js';
 import { giocabili } from '../services/squadraService.js';
-import { nomiCondizioni, pinConStato, vociCitabili } from '../services/condizioni/nomiCondizioni.js';
+import { nomiCondizioni, nomiCondizioniMemo, pinConStato, vociCitabili } from '../services/condizioni/nomiCondizioni.js';
+import { tuttiGliInviti } from '../services/condizioni/condizioneEffettiva.js';
 import { statoAlGiorno, statoDisponibilitaPartita } from '../services/disponibilitaService.js';
 import { valutazione } from '../services/condizioni/valutatore.js';
 import { condizioneSpillo } from '../schemas/mappe.js';
@@ -55,8 +56,9 @@ router.get('/elenchi', (_req, res) => {
     articoli: prepared('SELECT a.chiave, COALESCE(a.nome_it, a.nome) AS nome, n.nome AS gruppo FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave WHERE a.nascosto = 0 AND n.nascosto = 0 ORDER BY n.nome, nome').all() as ElenchiRegoleDto['articoli'],
     letture: prepared("SELECT chiave, COALESCE(nome_it, nome) AS nome, 'libro' AS categoria FROM libro WHERE nascosto = 0 UNION ALL SELECT chiave, COALESCE(nome_it, nome), 'film' FROM film WHERE nascosto = 0 ORDER BY nome").all() as ElenchiRegoleDto['letture'],
     arcani: prepared('SELECT DISTINCT arcana AS chiave, arcana AS nome FROM persona ORDER BY arcana').all() as ElenchiRegoleDto['arcani'],
-    persone: prepared('SELECT nome AS chiave, nome FROM persona ORDER BY nome').all() as ElenchiRegoleDto['persone'],
-    abilita: prepared('SELECT nome AS chiave, nome FROM skill ORDER BY nome').all() as ElenchiRegoleDto['abilita'],
+    // L6 (R6-03): Persona e abilità si scelgono per nome e si salvano per id
+    persone: prepared('SELECT CAST(id AS TEXT) AS chiave, nome FROM persona ORDER BY nome').all() as ElenchiRegoleDto['persone'],
+    abilita: prepared('SELECT CAST(id AS TEXT) AS chiave, nome FROM skill ORDER BY nome').all() as ElenchiRegoleDto['abilita'],
     // I Ladri Fantasma per «in squadra»: chi sia la squadra lo dice il seed con `giocabile`.
     squadra: giocabili().map((p) => ({ chiave: p.chiave, nome: p.nome })),
     attivita: attivitaConteggiabili().map((a) => ({ chiave: a.chiave, nome: a.nome })),
@@ -64,6 +66,10 @@ router.get('/elenchi', (_req, res) => {
     negozi: negoziConProgramma().map((n) => ({ chiave: n.chiave, nome: n.nome, programma: n.programma?.calcolo ?? null })),
     eventi: EVENTI_STORIA.map((e) => ({ chiave: e.chiave, nome: e.nome, calcolato: membroDellEvento(e.chiave) !== null })),
     contatori: CONTATORI.map((c) => ({ chiave: c.chiave, nome: c.nome })),
+    // L6: luoghi, tutti i quartieri e gli inviti (questi ultimi si leggono soltanto)
+    luoghi: prepared('SELECT l.chiave, l.nome, q.nome AS gruppo FROM luogo l JOIN quartiere q ON q.chiave = l.quartiere_chiave WHERE l.nascosto = 0 ORDER BY q.ordine, l.ordine').all() as NonNullable<ElenchiRegoleDto['luoghi']>,
+    quartieri: prepared("SELECT chiave, nome FROM quartiere WHERE chiave <> 'mementos' ORDER BY ordine").all() as NonNullable<ElenchiRegoleDto['quartieri']>,
+    inviti: (() => { const n = nomiCondizioniMemo(); return tuttiGliInviti().map((i) => ({ chiave: i.chiave, nome: n.inviti?.[i.chiave] ?? i.chiave, gruppo: n.confidenti?.[i.confidente_chiave] ?? i.confidente_chiave, confidente: i.confidente_chiave })); })(),
   };
   res.json(elenchi);
 });

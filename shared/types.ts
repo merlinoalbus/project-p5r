@@ -186,6 +186,17 @@ export type RequisitoRango = Condizione & {
  * niente più elenco parallelo e niente `manuale` («niente condizioni manuali», 2026-09-05; migrazione 090). Un'avvertenza da controllare
  * nel gioco è un `avviso`, che non blocca mai. */
 
+/** L6 (§6.1): i requisiti di un Confidente per rango, per l'editor della sua pagina («Modifica requisiti», «Ripristina»). */
+export interface RequisitiConfidenteDto {
+  confidente: string;
+  ranghi: Array<{
+    rango: number;
+    requisiti: Array<{ indice: number; condizione: Condizione; testo: string; descrizione: string }>;
+    /** Il rango è diverso da come lo dà la guida (si può ripristinare). */
+    modificato: boolean;
+  }>;
+}
+
 /** L6: l'esito di una condizione valutata dal server (`POST /api/condizioni/valuta`, un solo valutatore). `avviso` non è né vero né falso
  *  e non blocca; `grigio` è una condizione che l'app non sa valutare (un riferimento eliminato: «Richiesta eliminata»). */
 export type EsitoCondizione = 'vero' | 'falso' | 'avviso' | 'grigio';
@@ -2897,6 +2908,12 @@ export interface ElenchiRegoleDto {
   /** `calcolato`: l'evento si legge dalla squadra della partita e non si segna a mano. */
   eventi: Array<{ chiave: string; nome: string; calcolato: boolean }>;
   contatori: Array<{ chiave: string; nome: string }>;
+  /** L6: i luoghi (condizione `luogo`), col quartiere come gruppo. */
+  luoghi?: Array<{ chiave: string; nome: string; gruppo: string }>;
+  /** L6: tutti i quartieri (condizione `quartiere`, R6-09: non solo quelli con una data). */
+  quartieri?: Array<{ chiave: string; nome: string }>;
+  /** L6: gli inviti dei Confidenti (in sola lettura nell'editor: si cambiano dalla pagina del Confidente), col Confidente come gruppo. */
+  inviti?: Array<{ chiave: string; nome: string; gruppo: string; confidente: string }>;
 }
 
 /** Un pin con uno stato (raccolto, aperto, parlato, incontrato, azionato…, o «ottenuto» dalla voce della guida) per la condizione
