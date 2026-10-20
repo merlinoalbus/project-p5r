@@ -1,0 +1,108 @@
+=== l1b (3292)
+esporta dungeon-kamoshida: HTTP 200, 3350985 caratteri {"versione":1,"esportato":"2026-10-20T00:08:54.183Z","mappe":27,"immagini":1}
+importa dungeon-kamoshida: HTTP 200 {"data":{"mappe":27,"spilli":369,"pezzi":10,"copie":10,"pezziScartati":0,"copieScartate":0,"pezziEliminati":0,"copieEliminate":0,"immagini":1,"saltate":[],"condizioniScartate":0,"vociScartate":0}}
+esporta dungeon-madarame: HTTP 200, 10482728 caratteri {"versione":1,"esportato":"2026-10-20T00:08:54.646Z","mappe":18,"immagini":2}
+importa dungeon-madarame: HTTP 200 {"data":{"mappe":18,"spilli":258,"pezzi":14,"copie":32,"pezziScartati":0,"copieScartate":0,"pezziEliminati":0,"copieEliminate":0,"immagini":2,"saltate":[],"condizioniScartate":0,"vociScartate":0}}
+{"diario":254,"spunte":338,"kamoshida":{"aree":7,"voci":169,"pin":373,"statiVoci":302,"statiPin":472},"madarame":{"aree":5,"voci":225,"pin":261,"statiVoci":221,"statiPin":276}}
+IMPRONTA l1b IDENTICA dopo il giro
+=== pre (3293)
+esporta dungeon-kamoshida: HTTP 200, 3351619 caratteri {"versione":1,"esportato":"2026-10-20T00:08:57.352Z","mappe":27,"immagini":1}
+importa dungeon-kamoshida: HTTP 200 {"data":{"mappe":27,"spilli":369,"pezzi":10,"copie":10,"pezziScartati":0,"copieScartate":0,"pezziEliminati":0,"copieEliminate":0,"immagini":1,"saltate":[],"condizioniScartate":0,"vociScartate":0}}
+esporta dungeon-madarame: HTTP 200, 10483152 caratteri {"versione":1,"esportato":"2026-10-20T00:08:57.792Z","mappe":18,"immagini":2}
+importa dungeon-madarame: HTTP 200 {"data":{"mappe":18,"spilli":258,"pezzi":14,"copie":32,"pezziScartati":0,"copieScartate":0,"pezziEliminati":0,"copieEliminate":0,"immagini":2,"saltate":[],"condizioniScartate":0,"vociScartate":0}}
+{"diario":254,"spunte":338,"kamoshida":{"aree":7,"voci":169,"pin":373,"statiVoci":302,"statiPin":472},"madarame":{"aree":5,"voci":225,"pin":261,"statiVoci":221,"statiPin":276}}
+IMPRONTA pre IDENTICA dopo il giro
+== l1b
+= validata
+≠ destinazioni
+= pezzi
+= atterraggi
+≠ mappePalazzi
+   kamoshida nativo-rmap-151-1-0: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-1-1: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-10-0: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-10-1: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-11-0: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-11-1: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-16-0: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-2-0: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-2-1: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-2-2: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-4-1: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-5-1: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-5-2: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-6-0: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-6-1: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-6-2: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-6-3: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-6-4: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-7-0: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-9-0: nome_rivisto 1→0
+   kamoshida nativo-rmap-152-1-0: nome_rivisto 1→0
+   kamoshida nativo-rmap-152-2-0: nome_rivisto 1→0
+   kamoshida nativo-rmap-152-5-0: nome_rivisto 1→0
+   madarame nativo-rmap-153-2-0: nome_rivisto 1→0
+   madarame nativo-rmap-153-2-1: nome_rivisto 1→0
+   madarame nativo-rmap-153-3-0: nome_rivisto 1→0
+   madarame nativo-rmap-153-3-1: nome_rivisto 1→0
+   madarame nativo-rmap-153-3-2: nome_rivisto 1→0
+   madarame nativo-rmap-153-3-3: nome_rivisto 1→0
+   madarame nativo-rmap-153-6-0: nome_rivisto 1→0
+   madarame nativo-rmap-153-6-1: nome_rivisto 1→0
+   madarame nativo-rmap-153-7-0: nome_rivisto 1→0
+   madarame nativo-rmap-153-7-1: nome_rivisto 1→0
+   madarame nativo-rmap-153-7-2: nome_rivisto 1→0
+   madarame nativo-rmap-153-9-0: nome_rivisto 1→0
+   madarame nativo-rmap-153-9-1: nome_rivisto 1→0
+   madarame nativo-rmap-153-9-2: nome_rivisto 1→0
+   madarame palazzo-di-madarame-il-labirinto-contorto: asset "mappe/palazzo-di-madarame-il-labirinto-contorto"→null, nome_rivisto 1→0
+= marcatori
+≠ perimetri
+differenze: 3
+== pre
+= validata
+≠ destinazioni
+= pezzi
+= atterraggi
+≠ mappePalazzi
+   kamoshida nativo-rmap-151-1-0: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-1-1: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-10-0: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-10-1: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-11-0: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-11-1: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-16-0: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-2-0: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-2-1: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-2-2: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-4-1: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-5-1: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-5-2: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-6-0: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-6-1: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-6-2: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-6-3: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-6-4: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-7-0: nome_rivisto 1→0
+   kamoshida nativo-rmap-151-9-0: nome_rivisto 1→0
+   kamoshida nativo-rmap-152-1-0: nome_rivisto 1→0
+   kamoshida nativo-rmap-152-2-0: nome_rivisto 1→0
+   kamoshida nativo-rmap-152-5-0: nome_rivisto 1→0
+   madarame nativo-rmap-153-2-0: nome_rivisto 1→0
+   madarame nativo-rmap-153-2-1: nome_rivisto 1→0
+   madarame nativo-rmap-153-3-0: nome_rivisto 1→0
+   madarame nativo-rmap-153-3-1: nome_rivisto 1→0
+   madarame nativo-rmap-153-3-2: nome_rivisto 1→0
+   madarame nativo-rmap-153-3-3: nome_rivisto 1→0
+   madarame nativo-rmap-153-6-0: nome_rivisto 1→0
+   madarame nativo-rmap-153-6-1: nome_rivisto 1→0
+   madarame nativo-rmap-153-7-0: nome_rivisto 1→0
+   madarame nativo-rmap-153-7-1: nome_rivisto 1→0
+   madarame nativo-rmap-153-7-2: nome_rivisto 1→0
+   madarame nativo-rmap-153-9-0: nome_rivisto 1→0
+   madarame nativo-rmap-153-9-1: nome_rivisto 1→0
+   madarame nativo-rmap-153-9-2: nome_rivisto 1→0
+   madarame palazzo-di-madarame-il-labirinto-contorto: nome_rivisto 1→0
+= marcatori
+≠ perimetri
+differenze: 3

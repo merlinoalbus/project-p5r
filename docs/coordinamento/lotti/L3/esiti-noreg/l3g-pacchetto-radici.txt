@@ -1,0 +1,61 @@
+esporta dungeon-kamoshida: HTTP 200, 3427561 caratteri {"versione":1,"esportato":"2026-10-20T02:15:54.737Z","aree":10,"legami":19,"mappe":27,"immagini":1}
+importa dungeon-kamoshida: HTTP 200 {"data":{"mappe":27,"spilli":369,"pezzi":10,"copie":10,"pezziScartati":0,"copieScartate":0,"pezziEliminati":0,"copieEliminate":0,"immagini":1,"saltate":[],"condizioniScartate":0,"vociScartate":0}}
+esporta dungeon-madarame: HTTP 200, 10540727 caratteri {"versione":1,"esportato":"2026-10-20T02:15:55.298Z","aree":8,"legami":22,"mappe":18,"immagini":2}
+importa dungeon-madarame: HTTP 200 {"data":{"mappe":18,"spilli":258,"pezzi":14,"copie":32,"pezziScartati":0,"copieScartate":0,"pezziEliminati":0,"copieEliminate":0,"immagini":2,"saltate":[],"condizioniScartate":0,"vociScartate":0}}
+== fotografia prima/dopo il giro delle due radici (TUTTI i campi, updated_at compresi):
+versioni prima {"gioco.db":110,"partite.db":21} dopo {"gioco.db":110,"partite.db":21}
+
+# gioco.db:immagine: righe 807 → 807; aggiunte 0, tolte 0, cambiate 3
+  ~ 782
+      nome_file: "41b957c9-127e-4f7c-bfce-58b2695da9e5.png" → "c81c9700-5a7a-41a1-8db9-fa478081094c.png"
+      created_at: "2026-09-29T15:32:16.649Z" → "2026-10-20T02:15:55.243Z"
+  ~ 783
+      nome_file: "02dfba9f-5a25-4c9b-9ad7-8ad7b08a2c9f.png" → "ed06002f-a4c1-4adc-8eb4-b5bcb8ffd9e6.png"
+      created_at: "2026-10-18T17:14:31.551Z" → "2026-10-20T02:15:55.844Z"
+  ~ 800
+      nome_file: "e2d2f2c2-8e2b-41a0-9715-3ec95a980861.png" → "f21c9ec3-2e22-4ea5-a528-530e388be313.png"
+      created_at: "2026-10-18T13:08:53.288Z" → "2026-10-20T02:15:55.840Z"
+
+# gioco.db:immagine_miniatura: righe 68 → 68; aggiunte 0, tolte 0, cambiate 4
+  ~ 782|160
+      versione: "2026-09-29T15:32:16.649Z" → "2026-10-20T02:15:55.243Z"
+      created_at: "2026-10-20T02:15:13.285Z" → "2026-10-20T02:15:55.339Z"
+  ~ 782|320
+      versione: "2026-09-29T15:32:16.649Z" → "2026-10-20T02:15:55.243Z"
+      created_at: "2026-10-20T02:15:13.309Z" → "2026-10-20T02:15:55.365Z"
+  ~ 800|160
+      versione: "2026-10-18T13:08:53.288Z" → "2026-10-20T02:15:55.840Z"
+      created_at: "2026-10-20T02:15:13.384Z" → "2026-10-20T02:15:55.892Z"
+  ~ 800|320
+      versione: "2026-10-18T13:08:53.288Z" → "2026-10-20T02:15:55.840Z"
+      created_at: "2026-10-20T02:15:13.415Z" → "2026-10-20T02:15:55.923Z"
+
+# gioco.db:mappa: righe 317 → 317; aggiunte 0, tolte 0, cambiate 1
+  ~ palazzo-di-madarame-il-labirinto-contorto
+      asset: "mappe/palazzo-di-madarame-il-labirinto-contorto" → null
+
+# gioco.db:spillo: righe 1913 → 1913; aggiunte 0, tolte 0, cambiate 16
+  ~ 541
+      origine: "seed" → "utente"
+  ~ 542
+      origine: "seed" → "utente"
+  ~ 572
+      origine: "seed" → "utente"
+  ~ 573
+      origine: "seed" → "utente"
+  ~ 574
+      origine: "seed" → "utente"
+  ~ 575
+      origine: "seed" → "utente"
+  ~ 626
+      origine: "seed" → "utente"
+  ~ 627
+      origine: "seed" → "utente"
+  … (dettaglio limitato a 8 righe per tipo)
+
+tabelle invariate: 112 su 116
+== estesa (updated_at compresi):
+/c/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941/79867d53-4ec1-4b44-8379-bf96cb5de1df/scratchpad/l3g/out/estesa-p0.json /c/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941/79867d53-4ec1-4b44-8379-bf96cb5de1df/scratchpad/l3g/out/estesa-p1.json differ: char 81352, line 3279
+differenze di stato visibile: 0
+errori: 0
+pin seed diventati utente, per mappa: {"nativo-rmap-151-2-1":2,"nativo-rmap-151-5-1":4,"nativo-rmap-152-1-0":2,"nativo-rmap-152-2-0":2,"nativo-rmap-153-3-0":2,"nativo-rmap-153-6-0":1,"nativo-rmap-153-7-1":1,"nativo-rmap-153-9-0":1,"nativo-rmap-153-9-1":1} uid: 35d27c58 21c6912e d3e01432 a8d2017c 04bb7407 7a5a6a33 23f0d865 0b42723d f7113744 8c5f9374 0ade1157 3c20e16c 6b05e8dd 974f350b 4bd43158 a21f775f

@@ -1,0 +1,9 @@
+mappe del mondo 55 · passaggi 70
+campi di destinazione ["chiave","nome","tipo","area","casa"]
+passaggi con destinazione.casa = casa di risolvi: 70 su 70
+diversi []
+1631 citta-shibuya «Central Street» → nativo-rmap-001-3-0 · casa /guida/citta/shibuya/central-street · nome della meta Central Street
+1501 nativo-rmap-001-3-0 «Piazza della Stazione» → nativo-rmap-001-1-0 · casa /guida/citta/shibuya/piazza-della-stazione · nome della meta Piazza della stazione
+1630 citta-shibuya «Banchina della metropolitana» → nativo-rmap-001-12-0 · casa /guida/citta/shibuya/banchina-della-metropolitana · nome della meta Banchina della metropolitana
+1632 citta-shibuya «Piazza della stazione» → nativo-rmap-001-1-0 · casa /guida/citta/shibuya/piazza-della-stazione · nome della meta Piazza della stazione
+1628 nativo-rmap-009-2-0 «Mappa» → citta-yongen-jaya · casa /guida/citta/yongen-jaya · nome della meta Yongen-Jaya

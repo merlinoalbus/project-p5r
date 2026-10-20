@@ -1,0 +1,10 @@
+partite prima: 1:Partita Roberto:ATTIVA:06-01/giorno | 2:Tutorial:-:04-29/giorno
+crea partita di prova 201 id 3 · partite ora: 3:Prova funzionali L2 Oggi:ATTIVA:05-10/giorno | 1:Partita Roberto:-:06-01/giorno | 2:Tutorial:-:04-29/giorno
+05-10 giorno nativo-rmap-002-0-0 292 «Shujin Academy - Cortile. Acquista dal distrubutore automati»
+05-10 giorno nativo-rmap-001-3-0 1515 «Shibuya - Sala Giochi. Acquista dal distrubutore automatico.»
+05-10 giorno citta-ogikubo 226 «Allenati ancora con Ryuji.»
+05-10 sera nativo-rmap-001-3-0 1516 «Shibuya - Piazza della stazione. Visita Yoshida per creare u»
+partita 1 attiva 200
+DELETE partita 3 204
+partite dopo: 1:Partita Roberto:ATTIVA:06-01/giorno | 2:Tutorial:-:04-29/giorno
+ingresso di Shinjuku: null · righe quartiere_ingresso 2

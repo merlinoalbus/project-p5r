@@ -1,0 +1,22 @@
+### istanza di collaudo su 75894664b96c2acb0ea7c59d3d71f4ca6501b66d — 2026-10-20T04:01:44+02:00
+### foto prima della migrazione 109: foto/L2-prima-migr109-9634bbb5 (identica alla foto del ciclo 4 di L1)
+### curl localhost:3301/api/health
+{"data":{"status":"ok","timestamp":"2026-10-20T02:01:44.508Z","db":{"ok":true,"userVersion":109}}}
+### curl localhost:5473/api/health
+{"data":{"status":"ok","timestamp":"2026-10-20T02:01:44.551Z","db":{"ok":true,"userVersion":109}}}
+### curl localhost:5473/ → HTTP
+200
+### BE.log: migrazioni
+{"level":30,"time":"2026-10-20T02:01:29.402Z","service":"project-p5r-be","aree":23,"planimetrie":29,"etichette":9,"ingressi":2,"daVerificare":1,"senzaArea":0,"covoSpostato":5,"cestinoRicopiato":0,"msg":"migrazione 109: Aree del mondo"}
+{"level":30,"time":"2026-10-20T02:01:29.406Z","service":"project-p5r-be","schema":"main","id":109,"name":"aree_del_mondo","msg":"migrazione applicata"}
+### impronta completa dopo l'avvio contro la foto (cosa ha cambiato la 109)
+{"gioco.db":{"user_version":109,"tabelle":77,"righe":19857},"partite.db":{"user_version":21,"tabelle":34,"righe":3186}}
+gioco.db: user_version 108 ≠ 109
+gioco.db: schema diverso
+gioco.db.area: presente solo in B
+gioco.db.mappa: righe 317 → 317, contenuto diverso
+gioco.db.quartiere_ingresso: righe 2 → 2, contenuto diverso
+EXIT=2 (2 = differenze attese per la migrazione)
+### lavoro da preservare: node impronta.cjs data (sola lettura) contro impronta-prod-20261020.json
+{"diario":254,"spunte":338,"kamoshida":{"aree":7,"voci":169,"pin":373,"statiVoci":302,"statiPin":472},"madarame":{"aree":5,"voci":225,"pin":261,"statiVoci":221,"statiPin":276}}
+IDENTICA alla base di produzione

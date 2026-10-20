@@ -1,0 +1,9 @@
+### HEAD 75894664b96c2acb0ea7c59d3d71f4ca6501b66d
+### npm run typecheck
+
+> project-p5r@0.1.0 typecheck
+> tsc -b tsconfig.full.json
+
+EXIT=0
+### npx tsc -b tsconfig.full.json --force
+EXIT=0

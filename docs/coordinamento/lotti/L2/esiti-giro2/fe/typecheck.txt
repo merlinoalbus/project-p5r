@@ -1,0 +1,7 @@
+
+> project-p5r@0.1.0 typecheck
+> tsc -b tsconfig.full.json
+
+server/routes/palazzi-aree.test.ts(12,1): error TS6133: 'impostaCasaSchedaPalazzi' is declared but its value is never read.
+server/routes/palazzi-aree.test.ts(12,10): error TS2305: Module '"../services/mappe/casaMappa.js"' has no exported member 'impostaCasaSchedaPalazzi'.
+EXIT=2

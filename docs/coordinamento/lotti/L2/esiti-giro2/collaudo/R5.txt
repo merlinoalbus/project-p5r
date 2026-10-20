@@ -1,0 +1,81 @@
+### R5 — docs/DECISIONI.md:2163 (autorizzazione del PM)
+### git rev-parse HEAD
+90137ce22bd1b4a8cb553acee6fd836cd2807f61
+### git show --stat HEAD
+90137ce22bd1b4a8cb553acee6fd836cd2807f61 docs(L2): DECISIONI — predefinita del Sottopasso 001-2-0 «inquadratura orientale», alias shibuya-sottopasso sulla planimetria completa (R5)
+
+ docs/DECISIONI.md | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+### git show HEAD -- docs/DECISIONI.md
+diff --git a/docs/DECISIONI.md b/docs/DECISIONI.md
+index 2894d164..5accad63 100644
+--- a/docs/DECISIONI.md
++++ b/docs/DECISIONI.md
+@@ -2160,7 +2160,8 @@ di ordinamento dell'app; nel gioco il Covo si apre dal menu dal 6/5 (fonte: Espe
+ alla pagina delle sfide e delle Medaglie P, collegata all'area nei due sensi.
+ 
+ Scelte del Project manager e della Stesura (da confermare): un'area per piano della Shujin; Aoyama Itchome sotto Shujin; Sottopasso con la
+-versione «planimetria completa» come predefinita e avviso sulla versione senza pin; l'Aula 002-6-0 resta un'area a sé; i pin di passaggio
++versione `001-2-0` «inquadratura orientale» come predefinita («planimetria completa» è la versione a cui porta l'alias
++`shibuya-sottopasso`) e avviso sulla versione senza pin; l'Aula 002-6-0 resta un'area a sé; i pin di passaggio
+ non si riscrivono (la navigazione risolve planimetria → area); **percorsi pubblici fissi** (`mappa.percorso_fisso`: la sincronizzazione non
+ rinomina più i percorsi del Covo); **formato delle immagini riconosciuto dai byte** in ogni strada di salvataggio; la regola che assegna le
+ aree è la funzione della migrazione 109, importata dal servizio (una regola sola); ordine delle aree a passi di 100; contatore del cestino
+### git status --porcelain (vuoto atteso)
+EXIT=0
+### verifica sui dati dell'istanza (sola lettura, data/gioco.db = base di L2)
+[
+  {
+    chiave: 'shibuya-sottopasso-inquadratura-orientale',
+    mappa_chiave: 'nativo-rmap-001-2-0'
+  },
+  { chiave: 'shibuya-sottopasso', mappa_chiave: 'nativo-rmap-001-2-1' },
+  {
+    chiave: 'shibuya-sottopasso-01',
+    mappa_chiave: 'nativo-rmap-001-2-1'
+  },
+  {
+    chiave: 'shibuya-sottopasso-nativo-rmap-001-2-0',
+    mappa_chiave: 'nativo-rmap-001-2-0'
+  },
+  {
+    chiave: 'shibuya-sottopasso-nativo-rmap-001-2-1',
+    mappa_chiave: 'nativo-rmap-001-2-1'
+  },
+  {
+    chiave: 'shibuya-sottopasso-1',
+    mappa_chiave: 'nativo-rmap-001-2-0'
+  },
+  {
+    chiave: 'shibuya-sottopasso-speciale',
+    mappa_chiave: 'nativo-rmap-001-2-1'
+  }
+]
+[
+  {
+    chiave: 'nativo-rmap-001-2-0',
+    nome: 'Sottopasso',
+    area_chiave: 'citta/shibuya/sottopasso'
+  },
+  {
+    chiave: 'nativo-rmap-001-2-1',
+    nome: 'Sottopasso Speciale',
+    area_chiave: 'citta/shibuya/sottopasso'
+  }
+]
+{
+  chiave: 'citta/shibuya/sottopasso',
+  planimetria_predefinita: 'nativo-rmap-001-2-0'
+}
+[
+  {
+    chiave: 'nativo-rmap-001-2-0',
+    versione_etichetta: 'inquadratura orientale',
+    versione_ordine: 0
+  },
+  {
+    chiave: 'nativo-rmap-001-2-1',
+    versione_etichetta: 'planimetria completa',
+    versione_ordine: 1
+  }
+]

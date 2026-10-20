@@ -1,0 +1,4 @@
+DIVERSA mappa_alias {"righe":690,"hash":"bb6f8f58771cbedc90427fc1f6ba9d2f5ebd4c2f"} → {"righe":695,"hash":"d454164cc900c3249aa3e669dacb98e6eb1ec4d5"}
+DIVERSA mappa_percorso {"righe":317,"hash":"26839b975aee70a27cb3843e04b452373d374b6f"} → {"righe":317,"hash":"354979c435d4f108e82c39ce7dab7b266403e7f1"}
+2 tabelle diverse
+NESSUNA DIFFERENZA

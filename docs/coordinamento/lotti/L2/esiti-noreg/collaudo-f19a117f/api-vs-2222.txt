@@ -1,0 +1,13 @@
+38 endpoint; non 200: 0
+
+# /mappe/albero: 29 differenze
+  + .corpo.data.11.area.daVerificare = false
+  + .corpo.data.12.area.daVerificare = false
+  + .corpo.data.13.area.daVerificare = false
+  + .corpo.data.14.area.daVerificare = false
+  + .corpo.data.15.area.daVerificare = false
+  … (24 altre)
+
+# /mappe/tokyo?partita=1: 2 differenze
+  + .corpo.data.figli.23.area.daVerificare = true
+  + .corpo.data.figli.24.area.daVerificare = true

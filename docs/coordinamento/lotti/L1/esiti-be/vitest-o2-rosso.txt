@@ -1,0 +1,50 @@
+
+ RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/pensive-burnell-b50941
+
+ ↓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F5 — da-url su una mappa con pezzi: 409 senza conferma (niente cambia); con la conferma sostituisce, toglie i pezzi e la mappa è dell’utente
+ ↓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F5 — scarico della pianta di un quartiere con pezzi: 409 senza conferma, poi con la conferma; l’origine della mappa non cambia (non è una scelta dell’utente)
+ ↓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > illustrazione: scheda e intestazione di ogni quartiere mostrano la stessa immagine della loro mappa (caricata, poi asset)
+ ↓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > illustrazione: l’intestazione di un Palazzo ha la caricata della sua radice, mai lo stemma (che è il segno)
+ ↓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F6 — import: le dimensioni dell’intestazione dell’immagine vincono su quelle del pacchetto; se l’intestazione non si legge (SVG) restano quelle del pacchetto
+ × server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > O2 — un SVG senza dimensioni leggibili, caricato dall’editor o dalla rotta generica, conserva le dimensioni dichiarate (come all’import) 42ms
+   → expected { …(6) } to match object { …(4) }
+(2 matching properties omitted from actual)
+ ↓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F9 — una mappa nuova dichiara l’asset predefinito solo se esiste; l’esportazione non inventa asset per convenzione
+ ↓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F5 — rimozione dell’immagine di una mappa con pezzi: 409 senza conferma (niente cambia); con la conferma se ne vanno anche i pezzi
+ ↓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F5 — rimozione in blocco (ambito mappa, o tutti gli ambiti) con una mappa che ha pezzi: 409 senza conferma; con la conferma i pezzi se ne vanno
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > O2 — un SVG senza dimensioni leggibili, caricato dall’editor o dalla rotta generica, conserva le dimensioni dichiarate (come all’import)
+AssertionError: expected { …(6) } to match object { …(4) }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "altezza": 555,
++   "altezza": null,
+    "immagine_chiave": "svg-editor-o2",
+-   "larghezza": 777,
++   "larghezza": null,
+    "ruolo_immagine": "planimetria-nativa",
+  }
+
+ ❯ server/routes/immagine-mappa-strade.test.ts:124:23
+    122|       const url = via === 'editor' ? `/api/mappe/${encodeURIComponent(…
+    123|       await request(app).put(url).set('Content-Type', 'image/svg+xml')…
+    124|       expect(riga(k)).toMatchObject({ immagine_chiave: k, larghezza: 7…
+       |                       ^
+    125|       // un'immagine con l'intestazione leggibile, invece, porta le sue
+    126|       await request(app).put(url).set('Content-Type', 'image/png').sen…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 8 skipped (9)
+   Start at  02:15:51
+   Duration  2.41s (transform 1.42s, setup 110ms, import 1.95s, tests 217ms, environment 0ms)
+
+EXIT=1

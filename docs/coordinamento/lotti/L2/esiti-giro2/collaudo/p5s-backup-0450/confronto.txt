@@ -1,0 +1,39 @@
+### backup di p5s prima della sostituzione delle 04:50 (p5s_data/_data/backups/prima-di-prod-20261020-0440Z), copiato in sola lettura
+c2e74706c0c415f576a8c0c149e6cf9b70dd3682ecde618b528e83d3b6d65a86 *gioco.db
+780ea60e3fb17e8b71b0c6c027157785466fc6eea7b5842d256a404c5f56c441 *partite.db
+### partite.db uguale byte per byte alla copia di produzione del 20/10 00:08 (prod-20261020)?
+SÌ, identico
+### impronta completa del backup
+{"gioco.db":{"user_version":108,"tabelle":76,"righe":19825},"partite.db":{"user_version":21,"tabelle":34,"righe":3186}}
+### confronto: produzione 00:08 (A) → backup p5s (B)
+gioco.db: user_version 106 ≠ 108
+gioco.db: schema diverso
+gioco.db.immagine_miniatura: presente solo in B
+gioco.db.mappa: righe 317 → 317, contenuto diverso
+### confronto: backup p5s (A) → produzione 0440Z (B)
+gioco.db: user_version 108 ≠ 106
+gioco.db: schema diverso
+gioco.db.immagine_miniatura: presente solo in A
+gioco.db.mappa: righe 317 → 317, contenuto diverso
+gioco.db.mappa_entita: righe 134 → 135, contenuto diverso
+gioco.db.punto_interesse: righe 959 → 961, contenuto diverso
+gioco.db.spillo: righe 1913 → 1915, contenuto diverso
+gioco.db.spillo_voce: righe 539 → 542, contenuto diverso
+gioco.db.voce_giornata: righe 996 → 997, contenuto diverso
+partite.db.confidente_partita: righe 46 → 46, contenuto diverso
+partite.db.dote_sociale_partita: righe 10 → 10, contenuto diverso
+partite.db.effetto_lettura_partita: righe 19 → 20, contenuto diverso
+partite.db.evento_partita: righe 1273 → 1284, contenuto diverso
+partite.db.incontro_confidente_partita: righe 50 → 52, contenuto diverso
+partite.db.lettura_partita: righe 13 → 14, contenuto diverso
+partite.db.partita: righe 2 → 2, contenuto diverso
+partite.db.progresso_libro_partita: righe 11 → 11, contenuto diverso
+partite.db.punto_partita: righe 525 → 528, contenuto diverso
+partite.db.spillo_partita: righe 748 → 752, contenuto diverso
+partite.db.spunta_voce_partita: righe 338 → 342, contenuto diverso
+### righe diverse in gioco.db fra produzione 00:08 e backup p5s
+### gioco.db.mappa (chiave chiave): 1 differenze
+  ~ yongen-java-banchina-della-metropolitana ruolo_immagine: "illustrazione-editoriale" → "planimetria-nativa"
+### lavoro da preservare: backup p5s contro produzione 00:08
+{"diario":254,"spunte":338,"kamoshida":{"aree":7,"voci":169,"pin":373,"statiVoci":302,"statiPin":472},"madarame":{"aree":5,"voci":225,"pin":261,"statiVoci":221,"statiPin":276}}
+IDENTICO alla produzione 00:08

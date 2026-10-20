@@ -1,0 +1,756 @@
+{
+ "totale": 254,
+ "conMappa": 75,
+ "voci": [
+  {
+   "giorno": "04-11",
+   "uid": "f3d6ddf19b62f76616e3de65ac00f2b9",
+   "fascia": "giorno",
+   "azione": "Prima infiltrazione tutorial nel Palazzo di Kamoshida: comba",
+   "chiave": "citta-shujin-academy",
+   "spillo": 1656,
+   "pubblica": "shujin-academy",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-12",
+   "uid": "e4290542b3376439f92c71b76e18b64e",
+   "fascia": "giorno",
+   "azione": "Seconda infiltrazione tutorial nel Palazzo di Kamoshida: app",
+   "chiave": "citta-shujin-academy",
+   "spillo": 1616,
+   "pubblica": "shujin-academy",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-12",
+   "uid": "13c631e03c8cb988f4d6da57c7b52e92",
+   "fascia": "giorno",
+   "azione": "Dopo il Palazzo, uscita a mangiare con Ryuji: scambio di num",
+   "chiave": "citta-ogikubo",
+   "spillo": 226,
+   "pubblica": "ogikubo",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-15",
+   "uid": "6fd5031403067e22f9306de902cf57a6",
+   "fascia": "giorno",
+   "azione": "Palazzo di Kamoshida, terza incursione. Tutorial cattura Omb",
+   "chiave": "citta-shujin-academy",
+   "spillo": 1616,
+   "pubblica": "shujin-academy",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-15",
+   "uid": "3a1bfca2ba3cc6ff5f08759d30014ee1",
+   "fascia": "giorno",
+   "azione": "Dopo il Boss e la scena nel presente si ottiene un nuovo all",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1518,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-15",
+   "uid": "facb16e6353e1aa8b09790829685812f",
+   "fascia": "sera",
+   "azione": "Al Leblanc, in mansarda, Morgana si offre di aiutarci a patt",
+   "chiave": "nativo-rmap-152-1-0",
+   "spillo": 1667,
+   "pubblica": "palazzo-di-kamoshida-prigione-sotterranea-tutorial-nativo-rmap-152-1-0",
+   "dominio": "palazzi"
+  },
+  {
+   "giorno": "04-16",
+   "uid": "92228393531757698705e5c4c07c725e",
+   "fascia": "giorno",
+   "azione": "Visita alla Clinica Medica Takemi: sblocco del negozio di og",
+   "chiave": "citta-tsukishima",
+   "spillo": 230,
+   "pubblica": "tsukishima",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-18",
+   "uid": "225dcbea63fa93599b5197e583b8692a",
+   "fascia": "giorno",
+   "azione": "Stazione Aoyama-Itchome. Shibuya. Sottopasso. Consultare le ",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1525,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-18",
+   "uid": "402239f2465b3a075aa7271a6e5f2093",
+   "fascia": "giorno",
+   "azione": "Clinica Takemi: primo incontro, sblocco del Confidente",
+   "chiave": "citta-tsukishima",
+   "spillo": 230,
+   "pubblica": "tsukishima",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-19",
+   "uid": "a23f1d80397aa8315af64e911c3cdf5e",
+   "fascia": "giorno",
+   "azione": "Uscire con Ryuji dopo scuola",
+   "chiave": "citta-ogikubo",
+   "spillo": 226,
+   "pubblica": "ogikubo",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-20",
+   "uid": "a513390589dcbc75a7ae4ef1aa798d06",
+   "fascia": "giorno",
+   "azione": "Palazzo di Kamoshida: infiltrazione completa in un unico via",
+   "chiave": "citta-shujin-academy",
+   "spillo": 1616,
+   "pubblica": "shujin-academy",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-21",
+   "uid": "854d79fc18c6f19dc2a653dfb0bfb2ba",
+   "fascia": "giorno",
+   "azione": "In treno rispondere ad Ann «Inviamo la lettera di sfida»; si",
+   "chiave": "citta-shujin-academy",
+   "spillo": 1616,
+   "pubblica": "shujin-academy",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-22",
+   "uid": "cdc7e3a818e612b94efe7853135f7617",
+   "fascia": "giorno",
+   "azione": "Si va automaticamente al Palazzo con allerta al 100%: visita",
+   "chiave": "citta-shujin-academy",
+   "spillo": 1616,
+   "pubblica": "shujin-academy",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-22",
+   "uid": "0c4dfcf2769bd6c8104fe25327dec13f",
+   "fascia": "giorno",
+   "azione": "Stanza del Tesoro: Morgana sale al rango 2 (Mago)",
+   "chiave": "nativo-rmap-152-1-0",
+   "spillo": 1667,
+   "pubblica": "palazzo-di-kamoshida-prigione-sotterranea-tutorial-nativo-rmap-152-1-0",
+   "dominio": "palazzi"
+  },
+  {
+   "giorno": "04-23",
+   "uid": "2ddbe4c2896e1ed13eb12b6c803d4184",
+   "fascia": "giorno",
+   "azione": "Negozio Softair: vendere tutto il tesoro accumulato nel Pala",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1517,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-23",
+   "uid": "84ede5808ffdc89c3d93dbf8f8f2fbd3",
+   "fascia": "giorno",
+   "azione": "Libreria Taiheido: comprare La pulizia del cuore, Storia di ",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1524,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-23",
+   "uid": "170682887a6ab33e1b6dd07eaa0f0df4",
+   "fascia": "giorno",
+   "azione": "Uscire con Ryuji rispondendo «Allenati con lui»; scelte «Non",
+   "chiave": "citta-ogikubo",
+   "spillo": 226,
+   "pubblica": "ogikubo",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-23",
+   "uid": "fdc77152bf8a86d9e594540d8e2cde5f",
+   "fascia": "sera",
+   "azione": "Leblanc: parlare con Sojiro al bancone scegliendo «Parliamo»",
+   "chiave": "nativo-rmap-009-2-0",
+   "spillo": 1588,
+   "pubblica": "yongen-jaya-vicoli",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-25",
+   "uid": "c554129b8ffd2be194a80b295c57c966",
+   "fascia": "giorno",
+   "azione": "Clinica Takemi: sottoporsi al test clinico",
+   "chiave": "citta-tsukishima",
+   "spillo": 230,
+   "pubblica": "tsukishima",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-26",
+   "uid": "a15b63cdc169d4f9b2635f12c46748ce",
+   "fascia": "giorno",
+   "azione": "Svolgere il primo giorno di lavoro dal Fioraio nel Centro co",
+   "chiave": "nativo-rmap-001-4-0",
+   "spillo": 1537,
+   "pubblica": "shibuya-centro-comm-sotterraneo",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-26",
+   "uid": "2452c2f5cabc2a5848d8850f05375b74",
+   "fascia": "sera",
+   "azione": "Sojiro Sakura: lezione sul caffe",
+   "chiave": "nativo-rmap-009-2-0",
+   "spillo": 1588,
+   "pubblica": "yongen-jaya-vicoli",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-27",
+   "uid": "952a633fdc723b71212596c1c2f15031",
+   "fascia": "giorno",
+   "azione": "Uscire con Ryuji dopo scuola (prima di due sessioni per il p",
+   "chiave": "citta-ogikubo",
+   "spillo": 226,
+   "pubblica": "ogikubo",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-27",
+   "uid": "20449887b636d5a3168b14cb8c1ea7d9",
+   "fascia": "sera",
+   "azione": "Preparare il caffe al Leblanc",
+   "chiave": "nativo-rmap-009-2-0",
+   "spillo": 1588,
+   "pubblica": "yongen-jaya-vicoli",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-28",
+   "uid": "3d33931ee2a8e28ad69f5ce7248d63e5",
+   "fascia": "giorno",
+   "azione": "Uscire con Ryuji a Ogikubo Ramen (seconda sessione, sblocca ",
+   "chiave": "citta-ogikubo",
+   "spillo": 226,
+   "pubblica": "ogikubo",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-28",
+   "uid": "9a5349e0e798b99ce64f9f1d89d573fc",
+   "fascia": "sera",
+   "azione": "Sojiro Sakura: avanzamento legame",
+   "chiave": "nativo-rmap-009-2-0",
+   "spillo": 1588,
+   "pubblica": "yongen-jaya-vicoli",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-29",
+   "uid": "8a3e3ceb0688893254d388e26003686d",
+   "fascia": "giorno",
+   "azione": "Clinica Takemi: nuovo test clinico",
+   "chiave": "citta-tsukishima",
+   "spillo": 230,
+   "pubblica": "tsukishima",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "04-30",
+   "uid": "1f60857f775875f813d98f3d62af6964",
+   "fascia": "sera",
+   "azione": "Aiutare Sojiro al Leblanc",
+   "chiave": "nativo-rmap-009-2-0",
+   "spillo": 1588,
+   "pubblica": "yongen-jaya-vicoli",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-01",
+   "uid": "71875b8dc0c047ad764741a6ca6aa49a",
+   "fascia": "giorno",
+   "azione": "Shibuya - Central Street - Sala Giochi. Acquista dal distrib",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1515,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-04",
+   "uid": "aeb2d2e8e418d3b7418893b4472cc5d0",
+   "fascia": "giorno",
+   "azione": "Shibuya - Central Street - Negozio di Softair. Vendi la meda",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1517,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-04",
+   "uid": "f7e59f3b0f0a428c0d698aa17dd0d310",
+   "fascia": "sera",
+   "azione": "Telefonata con Ann",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1518,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-06",
+   "uid": "419ee48be0f88671ae34670067e3e306",
+   "fascia": "giorno",
+   "azione": "Primo incontro con Mishima: Ne ho sentito parlare / Che cosa",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1519,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-06",
+   "uid": "e24ed2a444abb68bcfc8fa2909ea182e",
+   "fascia": "giorno",
+   "azione": "Uscire con Ann al Diner: Stai meglio, adesso? / Forse hai ra",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1518,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-06",
+   "uid": "8422adb6363761e2ff146665f7032ea2",
+   "fascia": "sera",
+   "azione": "Telefonata di Ann tornando al Leblanc: rispondere «Sì. Sei l",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1518,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-07",
+   "uid": "e7adb0bcac77591a2d811cc5cce4519d",
+   "fascia": "giorno",
+   "azione": "Mementos - Dedalo di Qimranut. Richiesta: \"Un ex piuttosto a",
+   "chiave": "nativo-rmap-190-1-0",
+   "spillo": null,
+   "pubblica": "memento-memento-aree-fisse-strutture-che-i-memento-riusano",
+   "dominio": "palazzi"
+  },
+  {
+   "giorno": "05-08",
+   "uid": "7e57bd30904dfd8a2e59a8dd7e9a57d9",
+   "fascia": "giorno",
+   "azione": "Confidente Mishima: Ottimo lavoro, ragazzo / Sembra figo",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1519,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-09",
+   "uid": "84750a563733527a0c65acbdcb7c5d2b",
+   "fascia": "giorno",
+   "azione": "Ricevi prima Richiesta dei Memento. \"Un bullo che abbaia e m",
+   "chiave": "nativo-rmap-190-1-0",
+   "spillo": null,
+   "pubblica": "memento-memento-aree-fisse-strutture-che-i-memento-riusano",
+   "dominio": "palazzi"
+  },
+  {
+   "giorno": "05-09",
+   "uid": "397837f2e58a1abfcf0ae9bd0c3b11fd",
+   "fascia": "giorno",
+   "azione": "Scendi a scuola al Secondo Piano e parla con Ryuji. Esci con",
+   "chiave": "citta-ogikubo",
+   "spillo": 226,
+   "pubblica": "ogikubo",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-09",
+   "uid": "21884ede0c011dee7ebfff5917c8642b",
+   "fascia": "sera",
+   "azione": "Visita a Yoshida in Piazza Stazione: avvio del Confidente",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1516,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-10",
+   "uid": "9f2e94d4763cd4c31f51d8a0fd6b726b",
+   "fascia": "giorno",
+   "azione": "Shujin Academy - Cortile. Acquista dal distrubutore automati",
+   "chiave": "nativo-rmap-002-0-0",
+   "spillo": 292,
+   "pubblica": "shujin-academy-edificio-principale-1p-edificio-laboratori-1p",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-10",
+   "uid": "0b37e645127776b0e5e8ddf60debf680",
+   "fascia": "giorno",
+   "azione": "Shibuya - Sala Giochi. Acquista dal distrubutore automatico.",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1515,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-10",
+   "uid": "da894e6588150279969562429207f250",
+   "fascia": "giorno",
+   "azione": "Allenati ancora con Ryuji.",
+   "chiave": "citta-ogikubo",
+   "spillo": 226,
+   "pubblica": "ogikubo",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-10",
+   "uid": "39965e251eb93ff3da77b9e0c67bd556",
+   "fascia": "sera",
+   "azione": "Shibuya - Piazza della stazione. Visita Yoshida per creare u",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1516,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-16",
+   "uid": "445731a85c54f6d1fa541f10ee8c64d1",
+   "fascia": "giorno",
+   "azione": "Palazzo di Madarame: infiltrazione iniziale.",
+   "chiave": "nativo-rmap-153-1-0",
+   "spillo": null,
+   "pubblica": "palazzo-di-madarame-entrata-del-museo",
+   "dominio": "palazzi"
+  },
+  {
+   "giorno": "05-16",
+   "uid": "bc4ee27dd69a84a6ef298024ddc36a88",
+   "fascia": "sera",
+   "azione": "Parla con Ryuji al telefono.",
+   "chiave": "citta-ogikubo",
+   "spillo": 226,
+   "pubblica": "ogikubo",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-18",
+   "uid": "989ec15a917e69e787e907deb2895464",
+   "fascia": "giorno",
+   "azione": "Shujin Academy - Cortile. Acquista dal distrubutore automati",
+   "chiave": "nativo-rmap-002-0-0",
+   "spillo": 292,
+   "pubblica": "shujin-academy-edificio-principale-1p-edificio-laboratori-1p",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-18",
+   "uid": "651fab949e5c708964a1b5db57e7f14f",
+   "fascia": "giorno",
+   "azione": "Shibuya - Sala Giochi. Acquista dal distrubutore automatico.",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1515,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-18",
+   "uid": "ffa20a4c3b2d4076e9bdc1f8e85c5bef",
+   "fascia": "giorno",
+   "azione": "Clinica Takemi. Esegui il prossimo test clinico.",
+   "chiave": "citta-tsukishima",
+   "spillo": 230,
+   "pubblica": "tsukishima",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-19",
+   "uid": "cea365dae255a9787afdf99661e5aa0f",
+   "fascia": "giorno",
+   "azione": "Palazzo di Madarame - Scopri dov'è il Tesoro",
+   "chiave": "nativo-rmap-153-1-0",
+   "spillo": null,
+   "pubblica": "palazzo-di-madarame-entrata-del-museo",
+   "dominio": "palazzi"
+  },
+  {
+   "giorno": "05-20",
+   "uid": "464ccfe40659a41b6b201947ed776312",
+   "fascia": "giorno",
+   "azione": "Terza visita al Palazzo di Madarame mentre nel mondo reale A",
+   "chiave": "nativo-rmap-153-1-0",
+   "spillo": null,
+   "pubblica": "palazzo-di-madarame-entrata-del-museo",
+   "dominio": "palazzi"
+  },
+  {
+   "giorno": "05-21",
+   "uid": "a920c1bb939c24a23d598b7dcdd8ff9f",
+   "fascia": "giorno",
+   "azione": "Shibuya - Centro Commerciale Sotterraneo. Esci con Ann.",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1518,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-21",
+   "uid": "450615930d64d4d13c7ce8bcde74b8ba",
+   "fascia": "giorno",
+   "azione": "Telefonata con Ann",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1518,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-21",
+   "uid": "2267efe9623181552b83b87f764ee2d9",
+   "fascia": "sera",
+   "azione": "Leblanc - Trascorri del tempo con Sojiro",
+   "chiave": "nativo-rmap-009-2-0",
+   "spillo": 1588,
+   "pubblica": "yongen-jaya-vicoli",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-22",
+   "uid": "dd09f8eabd9747cf39adb40ccdc92d5f",
+   "fascia": "giorno",
+   "azione": "Clinica Takemi: test clinico con la dottoressa.",
+   "chiave": "citta-tsukishima",
+   "spillo": 230,
+   "pubblica": "tsukishima",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-22",
+   "uid": "0c85aee40878e0b1b52badfe14ee8ae5",
+   "fascia": "sera",
+   "azione": "Visita la Clinica di Takemi",
+   "chiave": "nativo-rmap-009-2-0",
+   "spillo": 1592,
+   "pubblica": "yongen-jaya-vicoli",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-22",
+   "uid": "d1ac527b4a930f13b8e8c05570b80832",
+   "fascia": "sera",
+   "azione": "Shibuya - Piazza della Stazione. Ascolta il discorso di Yosh",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1516,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-23",
+   "uid": "c24d835b473b826274c75cb06b375e46",
+   "fascia": "giorno",
+   "azione": "Rifiuta la richiesta di Yusuke di andare nel palazzo oggi.",
+   "chiave": "citta-tsukishima",
+   "spillo": 230,
+   "pubblica": "tsukishima",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-23",
+   "uid": "0d1f1318757c0119a6407810ad3a245e",
+   "fascia": "giorno",
+   "azione": "Shibuya - Convenience Store. Triple Seven: lavora part-time.",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1525,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-23",
+   "uid": "8bdc0a9fc464a11e04b3898d8140b0c3",
+   "fascia": "sera",
+   "azione": "Shibuya - Sala Giochi. Acquista dal distrubutore automatico.",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1515,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-24",
+   "uid": "fe9c3fc7031fd1afbabece0d8555bf8d",
+   "fascia": "giorno",
+   "azione": "Rispondi al messaggio per incontrare Ann. Destinazione: Parc",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1518,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-25",
+   "uid": "5d42bb3ccd79e0398a64209cb263c905",
+   "fascia": "giorno",
+   "azione": "Clinica Takemi: test clinico con la dottoressa.",
+   "chiave": "citta-tsukishima",
+   "spillo": 230,
+   "pubblica": "tsukishima",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-25",
+   "uid": "e71d57b12a2399d474644a33b3e5f829",
+   "fascia": "sera",
+   "azione": "Ricevi messaggio da Ryuji per l'incontro al ristorante Monja",
+   "chiave": "citta-ogikubo",
+   "spillo": 226,
+   "pubblica": "ogikubo",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-26",
+   "uid": "3db7636b34a050c0eec2f987a5ec1b41",
+   "fascia": "giorno",
+   "azione": "Rispondi al messaggio di Ann ed incontrala al centro commerc",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1518,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-27",
+   "uid": "18d5cfd8ad3f5dfbc15d5c4d55cbb65c",
+   "fascia": "giorno",
+   "azione": "Shujin Academy - Edificio principale 1P. Negozio scolastico:",
+   "chiave": "nativo-rmap-002-0-0",
+   "spillo": 293,
+   "pubblica": "shujin-academy-edificio-principale-1p-edificio-laboratori-1p",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-27",
+   "uid": "faff017a6f660faaf0f9170768d401d3",
+   "fascia": "giorno",
+   "azione": "Shujin Academy - Cortile. Acquista dal distrubutore automati",
+   "chiave": "nativo-rmap-002-0-0",
+   "spillo": 292,
+   "pubblica": "shujin-academy-edificio-principale-1p-edificio-laboratori-1p",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-27",
+   "uid": "c2547d02f288c1af3b8bf425cada0818",
+   "fascia": "giorno",
+   "azione": "Shibuya - Negozio softair: Vendi tesori e acquista armi da m",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1517,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-27",
+   "uid": "6ebb178b6fc4009d3335635446a2c864",
+   "fascia": "giorno",
+   "azione": "Palazzo di Madarame: Nelle profondità del Museo.",
+   "chiave": "nativo-rmap-153-1-0",
+   "spillo": null,
+   "pubblica": "palazzo-di-madarame-entrata-del-museo",
+   "dominio": "palazzi"
+  },
+  {
+   "giorno": "05-27",
+   "uid": "e2312ec57c58764c58184ac6c860a822",
+   "fascia": "giorno",
+   "azione": "Sosta nella Stanza di Velluto",
+   "chiave": "nativo-rmap-153-1-0",
+   "spillo": null,
+   "pubblica": "palazzo-di-madarame-entrata-del-museo",
+   "dominio": "palazzi"
+  },
+  {
+   "giorno": "05-28",
+   "uid": "e10bf1a42113ba7b0989bd89bfe4c98f",
+   "fascia": "giorno",
+   "azione": "Clinica Takemi: visita del Direttore Oyamada",
+   "chiave": "citta-tsukishima",
+   "spillo": 230,
+   "pubblica": "tsukishima",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-28",
+   "uid": "19f03ef3b2a6b5bf0b6880858f71e5b0",
+   "fascia": "sera",
+   "azione": "Conversazione con Sojiro (non sale ancora di rango)",
+   "chiave": "nativo-rmap-009-2-0",
+   "spillo": 1588,
+   "pubblica": "yongen-jaya-vicoli",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-29",
+   "uid": "9254eba5a15ee14c99d7afc1f8b30fda",
+   "fascia": "giorno",
+   "azione": "Shibuya - Central Street - Negozio Softair. Vendi gli oggett",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1517,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-29",
+   "uid": "2476ffa179261f362310915765e6e2a3",
+   "fascia": "giorno",
+   "azione": "Shibuya - Convenience Store - Lavoro part-time.",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1525,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-29",
+   "uid": "862cc4bd2f3ebb5a2e37c92dbb3e029a",
+   "fascia": "sera",
+   "azione": "Shibuya - Piazza della Stazione. Incontro con Yoshida.",
+   "chiave": "nativo-rmap-001-3-0",
+   "spillo": 1516,
+   "pubblica": "shibuya-central-street",
+   "dominio": "mondo"
+  },
+  {
+   "giorno": "05-31",
+   "uid": "fa2b6c8b9e1397c05ed9ce3c042ca299",
+   "fascia": "giorno",
+   "azione": "Incontro con Ryuji: invio della lettera di sfida a Madarame",
+   "chiave": "nativo-rmap-153-1-0",
+   "spillo": null,
+   "pubblica": "palazzo-di-madarame-entrata-del-museo",
+   "dominio": "palazzi"
+  },
+  {
+   "giorno": "06-01",
+   "uid": "b9371f8061aedd71262a200b98d18bd0",
+   "fascia": "giorno",
+   "azione": "Palazzo di Madarame: raccolta dei tesori e scontro con il bo",
+   "chiave": "nativo-rmap-153-1-0",
+   "spillo": null,
+   "pubblica": "palazzo-di-madarame-entrata-del-museo",
+   "dominio": "palazzi"
+  },
+  {
+   "giorno": "06-01",
+   "uid": "826b3d7a82184f63248ffcece670abdc",
+   "fascia": "sera",
+   "azione": "Conversazione con Morgana al Leblanc; ascoltare i clienti de",
+   "chiave": "nativo-rmap-152-1-0",
+   "spillo": 1667,
+   "pubblica": "palazzo-di-kamoshida-prigione-sotterranea-tutorial-nativo-rmap-152-1-0",
+   "dominio": "palazzi"
+  }
+ ]
+}

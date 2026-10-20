@@ -1,0 +1,17 @@
+### git rev-parse HEAD
+9634bbb5dfad21480d19a515b1920245fc791acd
+### git branch --show-current
+newreview-l2
+### git diff --stat 84165da5 HEAD
+ docs/ROADMAP.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+### git status --porcelain (vuoto atteso)
+EXIT=0
+### git log --oneline bd20ed72..HEAD
+9634bbb5 docs(L1): lotto approvato al quinto giro
+84165da5 docs(L1): quarto verdetto — riga della ROADMAP con lo stato vero
+e2cc3ca8 docs(L1): terzo verdetto — date corrette (2026-10-20), ROADMAP del terzo giro, GPL citata in DECISIONI
+e9fb4871 fix(L1): secondo verdetto — G6 intestazione dopo lo scarico della pianta, GPL-3.0, DECISIONI esatte
+ab3b1053 fix(L1): secondo giro — illustrazione nelle schede, miniature, conferma dei pezzi su ogni strada
+### impronta del codice (server/ shared/ src/ rispetto a bd20ed72), invariata attesa d6c65857…09ce
+d6c658574aaa1e9e9c1fb4daef13830d238e6765ec91996d2f6a1d9da72b09ce *-

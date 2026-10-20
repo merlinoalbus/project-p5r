@@ -1,0 +1,8 @@
+== fase importa · 2026-10-20T05:07:37.465Z
+prima {"aree":14,"mappe":26,"legami":14,"pin":148}
+export 200 4 MB · mappe 26 · aree 12 · legami 13 · chiavi versione,esportato,aree,legami,mappe,immagini
+import con sovrascrivi 200 {"mappe":26,"spilli":148,"pezzi":0,"copie":0,"pezziScartati":0,"copieScartate":0,"pezziEliminati":0,"copieEliminate":0,"immagini":5,"saltate":[],"condizioniScartate":0,"vociScartate":0} · idCambiati esempio undefined
+aree: 14 → 14, righe cambiate 0 
+mappe: 26 → 26, righe cambiate 0 
+legami: 14 → 14, righe cambiate 0 
+pin: 148 → 148, righe cambiate 0 

@@ -1,0 +1,77 @@
+Giro funzionale sul collaudo — FE http://localhost:5473, BE http://localhost:3301, commit e9fb4871 (cartella p5s-sviluppo-l2)
+Data: 2026-10-20 (corretta su richiesta del validatore: prima c'era scritto 2026-10-21). Metodo: pagina vera in un iframe della misura indicata (le media query valgono per l'iframe), attesa 4-5 s,
+animazioni portate alla fine, poi lettura del DOM. Solo elementi visibili (rettangolo > 0, display e visibility).
+Formato delle illustrazioni: src | opacità | x,y,larghezza,altezza | segno (sagoma o stemma) | aria-hidden del segno | spenta
+Preferenza «grafica predefinita»: chiave p5r-preferenze assente = accesa; per F-10 impostata a {"graficaPredefinita":false} e poi tolta.
+
+=== F-28 / F-03 — /guida/citta, grafica accesa (pref null) ===
+375x812: scrollOrizz=false; illustrazioni visibili 23 (caricate 19 «mappa/citta-*», asset 4 «mappe/citta-*»), spente 0, tutte opacità 1
+  metro: immagini 10, illustrazioni 0, sagome 8, stemmi 2
+  Shibuya: mappa/citta-shibuya/file?v=2026-09-09T20%3A09%3A28.331Z&l=320 | 1 | 33,960,128,72 | mappe/lmap%2Ftokyo%2Fshibuya (43x39) | true | 0
+  Kichijoji: mappe/citta-kichijoji/file?v=2026-09-12T14%3A55%3A14.943Z&l=320 | 1 | 33,1368,128,72 | mappe/lmap%2Ftokyo%2Fkichijoji | true | 0
+  Ikebukuro: mappe/citta-ikebukuro/file?v=2026-09-12T14%3A55%3A14.943Z&l=320 | 1 | 33,2170,128,72 | mappe/lmap%2Ftokyo%2Fikebukuro | true | 0
+  Nakano: mappe/citta-nakano/file?v=2026-09-12T14%3A55%3A14.943Z&l=320 | 1 | 33,3406,128,72 | mappe/lmap%2Ftokyo%2Fnakano | true | 0
+  Santuario Meiji: mappe/citta-meiji-shrine/file?v=2026-09-12T14%3A55%3A14.943Z&l=320 | 1 | 33,4623,128,72 | mappe/lmap%2Ftokyo%2Fmeiji-shrine | true | 0
+768x1024: scrollOrizz=false; 23 (19 + 4), spente 0, opacità 1; metro 10/0/8/2
+  Shibuya: mappa/citta-shibuya/…&l=320 | 1 | 400,821,128,72 | mappe/lmap%2Ftokyo%2Fshibuya (43x39) | true | 0
+1024x690: scrollOrizz=false; 23 (19 + 4), spente 0, opacità 1; metro 10/0/8/2
+  Shibuya: mappa/citta-shibuya/…&l=320 | 1 | 633,813,128,72 | mappe/lmap%2Ftokyo%2Fshibuya (43x39) | true | 0
+1280x689: scrollOrizz=false; 23 (19 + 4), spente 0, opacità 1; metro 10/0/8/2
+  Shibuya: mappa/citta-shibuya/…&l=320 | 1 | 932,395,112,63 | mappe/lmap%2Ftokyo%2Fshibuya (43x39) | true | 0
+Nota: «spente 0» perché la partita attiva del collaudo ha una data diversa da quella di sviluppo (lì le chiuse erano 16): non è un esito del codice.
+
+=== F-03 — Shibuya: intestazione /guida/citta/shibuya e visore /guida/mappe/shibuya, grafica accesa ===
+375x812  intestazione: mappa/citta-shibuya/file?v=2026-09-09T20%3A09%3A28.331Z&l=320 | 1 | 33,153,299,168 | mappe/lmap%2Ftokyo%2Fshibuya (59x54) | true | 0
+         visore del quartiere (ingresso Central Street): mappe/native%2Fnativo-rmap-001-3-0/file?v=2026-09-12T14%3A55%3A14.943Z
+         visore /guida/mappe/shibuya: /api/immagini/mappa/citta-shibuya/file?v=2026-09-09T20%3A09%3A28.331Z ; scrollOrizz false/false
+768x1024 intestazione: …citta-shibuya…&l=320 | 1 | 33,153,220,124 | sagoma (59x54) | true | 0 ; visore /guida/mappe/shibuya: …citta-shibuya…?v=2026-09-09T20%3A09%3A28.331Z
+1024x690 intestazione: …citta-shibuya…&l=320 | 1 | 247,165,200,113 | sagoma (59x54) | true | 0 ; visore: stesso URL
+1280x689 intestazione: …citta-shibuya…&l=320 | 1 | 247,165,200,113 | sagoma (59x54) | true | 0 ; visore: stesso URL
+
+=== F-06 — Kamoshida /guida/dungeon/kamoshida, grafica accesa ===
+API GET /api/compendio/dungeon/kamoshida → illustrazione {"asset":null,"immagineUrl":"/api/immagini/mappa/dungeon-kamoshida/file?v=2026-09-29T15%3A32%3A16.649Z"}
+375x812  mappa/dungeon-kamoshida/file?v=2026-09-29T15%3A32%3A16.649Z&l=320 | 1 | 33,93,150,84 | palazzi/kamoshida (34x34) | true | 0 ; scrollOrizz false
+768x1024 …dungeon-kamoshida…&l=320 | 1 | 33,93,176,99 | palazzi/kamoshida (40x40) | true | 0
+1024x690 nessuna illustrazione visibile; stemma visibile img.emblema palazzi/kamoshida 247,172,48,48, opacità 1, fuori da .illustrazione-segno
+         (correzione UX-1: 1024–1279 solo lo stemma da 48 come prima di L1; nel DOM le varianti w-[150px], w-[176px], w-[104px] nascoste)
+1280x689 …dungeon-kamoshida…&l=320 | 1 | 247,116,104,59 | palazzi/kamoshida (40x40, dentro l'illustrazione) | true | 0
+
+=== F-10 — grafica predefinita SPENTA ({"graficaPredefinita":false}, letta dentro ogni iframe; chiave tolta dopo ogni blocco, «dopo»=null) ===
+/guida/citta 375x812 e 768x1024: scrollOrizz false; illustrazioni 19 (tutte caricate «mappa/citta-*», asset 0), 19 con il segno sopra;
+  metro: immagini 10, illustrazioni 0, sagome 8, stemmi 2; schede 23, senza illustrazione 4:
+  Kichijoji|sagoma kichijoji · Ikebukuro|ikebukuro · Nakano|nakano · Santuario Meiji|meiji-shrine
+/guida/citta 1024x690 e 1280x689: come sopra; le 4 senza illustrazione mostrano la sagoma 112x84
+/guida/citta/shibuya: intestazione mappa/citta-shibuya (299x168 a 375, 220x124 a 768, 200x113 a 1024 e 1280) con la sagoma «shibuya» sopra;
+  visore del quartiere vuoto a tutte le misure (planimetria nativa = asset, che con la preferenza spenta non si usa); scrollOrizz false
+/guida/citta/kichijoji: nessuna illustrazione; sagoma dell'intestazione 132x94 a tutte le misure; visore vuoto; scrollOrizz false
+/guida/dungeon/kamoshida: 375 illustrazione dungeon-kamoshida 150x84, segno = iniziale «K» (SPAN 34x34, ripiego di EmblemaDungeon);
+  768 176x99 + «K» 40x40; 1024 nessuna illustrazione, «K» 48x48; 1280 104x59 + «K» 40x40; scrollOrizz false
+
+=== G6 — scarico automatico della pianta di Kichijoji (stato del collaudo: mappa=false, nessun ingresso, pianta pubblicata su Fandom) ===
+Lo scarico vero fallisce sempre (Fandom 403, LAY-2, preesistente, spostato in L2) e per puntare pianta_quartiere.url a un'immagine locale
+servirebbe uno script che scrive nel DB (nessuna API lo fa): la regola dell'utente lo vieta (memoria «Modifiche dirette»). Prova quindi
+senza scritture, con l'intercettazione di fetch nell'iframe (script verbatim in esiti-funzionali/g6-intercettazione.js).
+[Descrizione corretta su richiesta del validatore, terzo giro F5: la versione di prima diceva che le GET dopo lo scarico erano «vere, al
+BE 3301», ma le loro risposte erano riscritte nel browser.] Esattamente:
+- SIMULATA, mai arrivata al BE: POST /api/mappe/piante-citta/kichijoji/scarica → risposta 201 costruita nel browser
+  ({quartiere:'kichijoji', mime:'image/png', byte:4242, …}).
+- ARRIVATE al BE 3301 ma con la RISPOSTA RISCRITTA nel browser (tutte quelle dopo la POST simulata): GET /api/compendio/citta/kichijoji
+  e GET /api/mappe/kichijoji. Lo script prende il corpo vero del BE (immagineUrl null, mappa=false) e lo cambia prima di darlo alla
+  pagina: immagineUrl = /api/immagini/mappa/citta-shibuya/file?v=G6-simulato, mappa = true (e larghezza/altezza 1920×1080 se mancanti).
+  Il BE vero non poteva dare questo valore: non ha scaricato nulla.
+- ARRIVATE al BE 3301 e NON toccate: le GET precedenti la POST e il file dell'immagine citta-shibuya (?v=G6-simulato, &l=320), che il
+  BE serve davvero (è la caricata di Shibuya; il parametro v non cambia il file).
+Quindi la prova verifica solo l'interfaccia: dopo uno scarico riuscito la pagina rilegge quartiere e mappa e mostra la stessa immagine in
+intestazione e visore senza ricaricare. Il comportamento del BE nello scarico non è provato qui (è coperto dal test BE «F5 — scarico
+della pianta»). Navigazione interna (pushState), senza ricaricare: performance.getEntriesByType('navigation') invariato.
+Chiamate (uguali alle quattro misure): GET compendio/citta/kichijoji ×2 (prima) → POST scarica (intercettato) → GET mappe/kichijoji ×2
+(prima) → GET mappe/kichijoji (dopo, risposta riscritta) → GET compendio/citta/kichijoji (dopo, risposta riscritta: la rilettura di G6)
+→ GET mappe/kichijoji (dopo, risposta riscritta)
+1280x689: intestazione .illustrazione-segno 200x113 src=/api/immagini/mappa/citta-shibuya/file?v=G6-simulato&l=320 ; visore
+          src=/api/immagini/mappa/citta-shibuya/file?v=G6-simulato ; sagoma da sola 0 ; ricaricata=false ; stessa immagine = true
+1024x690: intestazione 200x113 stesso src &l=320 ; visore stesso URL ; ricaricata=false ; stessa = true
+768x1024: intestazione 220x124 stesso src &l=320 ; visore stesso URL ; ricaricata=false ; stessa = true
+375x812:  intestazione 299x168 stesso src &l=320 ; visore stesso URL ; ricaricata=false ; stessa = true
+Didascalia: «scaricata nella tua istanza al primo uso».
+Dopo la prova, 3301: GET /api/compendio/citta/kichijoji → mappa=false, illustrazione {immagineUrl:null, asset:"mappe/citta-kichijoji"};
+GET /api/immagini?ambito=mappa → 50 immagini, citta-kichijoji assente: nessuna scrittura.

@@ -1,0 +1,365 @@
+{
+  "obiettivo": "Lotti L0–L11 della razionalizzazione completati sul branch newreview, pubblicati e funzionanti su p5s",
+  "aggiornato": "2026-10-20T07:38:10Z",
+  "fasi": [
+    "requisiti",
+    "dati",
+    "app",
+    "modifiche",
+    "be",
+    "fe",
+    "funzionali",
+    "ux",
+    "noreg",
+    "layout",
+    "validazione",
+    "consegna"
+  ],
+  "p5s": {
+    "url": "https://p5s.nasmerlinoalbus.cloud/",
+    "stato": "online con L1 (database alla 108, miniature WebP, illustrazioni nelle schede); L2 in sviluppo"
+  },
+  "lotti": [
+    {
+      "id": "L0",
+      "titolo": "Vocabolario e testi",
+      "dipende": "—",
+      "nota": "APPROVATO al 2° giro, consegnato",
+      "fasi": {
+        "requisiti": "fatta",
+        "dati": "fatta",
+        "app": "fatta",
+        "modifiche": "fatta",
+        "be": "fatta",
+        "fe": "fatta",
+        "funzionali": "fatta",
+        "ux": "fatta",
+        "noreg": "fatta",
+        "layout": "fatta",
+        "validazione": "fatta",
+        "consegna": "fatta"
+      }
+    },
+    {
+      "id": "L1",
+      "titolo": "Immagini",
+      "dipende": "L0",
+      "nota": "APPROVATO al 5° giro; pubblicato su newreview (9634bbb5), pipeline verde, p5s alla versione 108 con illustrazioni e miniature",
+      "fasi": {
+        "requisiti": "fatta",
+        "dati": "fatta",
+        "app": "fatta",
+        "modifiche": "fatta",
+        "be": "fatta",
+        "fe": "fatta",
+        "funzionali": "fatta",
+        "ux": "fatta",
+        "noreg": "fatta",
+        "layout": "fatta",
+        "validazione": "fatta",
+        "consegna": "fatta"
+      }
+    },
+    {
+      "id": "L2",
+      "titolo": "Mondo: aree e planimetrie",
+      "dipende": "L1",
+      "nota": "L2 APPROVATO al giro 6 del validatore. Commit di chiusura bff237e0; push newreview-l2 → newreview (9634bbb5..bff237e0, fast-forward, 07:31Z); pipeline 39387065633 riuscita; p5s VERIFICATO: backend aggiornato alle 07:34Z con backup di avvio automatico, migrazione 109 sui dati dell'utente (23 aree, 29 planimetrie, 0 senza area), userVersion 109; frontend aggiornato alle 07:37Z; nel browser su p5s a 1366×657 una sola barra con Tokyo aperto, «Città · 298 spilli · 23 quartieri · 23 aree», chip «1 da verificare». CONSEGNATO. Resta il merge di newreview-l2 in newreview sulla linea di sviluppo, da fare alla ripresa di L3 (in pensive c'è lavoro di L3 non committato di FE). — Prima: Giro 5 RIGETTATO solo sulla Regia (righe del Collaudo e del PM non aggiornate): corretta; documenti e prove di 8ae417c5 conformi; giro 6 sulla sola Regia IN CORSO. — Prima: VALIDATORE GIRO 5 su 8ae417c5 (prova git del Collaudo conforme: codice identico a 292a122e). — Prima: Giro 4 RIGETTATO solo su due documenti (frase del ricongiungimento nella ROADMAP, righe delle sessioni della Regia): corretti in 8ae417c5 (soli documenti); prova git del Collaudo da ripetere su 8ae417c5, poi giro 5. — Prima: VALIDATORE GIRO 4 IN CORSO su b6066830. Il giro 3 aveva rigettato solo i documenti (cronologia, righe dei difetti) e la prova che il codice non cambi: tutto corretto, e il Collaudo, riaperto e richiuso, ha prodotto le prove git e i rossi di E4 ed E7. — Prima: VALIDATORE GIRO 3 IN CORSO su 217e726a (codice uguale a 292a122e, documenti aggiornati). R1–R4 fatte dalle sessioni riaperte una alla volta e richiuse (Collaudo, Test no-reg, Test layout, Test UX): tutto VERDE. R5–R7 documenti fatti dal PM. Se APPROVATO: push e pipeline senza backup. — Prima: VALIDATORE GIRO 2: RIGETTATO su 292a122e. Codice giudicato in gran parte corretto; mancano prove grezze sul commit finale, no-reg dopo UX2-13, verifica indipendente di UX2-15, rimisura della carta di Tokyo dopo E4, documenti (lotti/L2/correzioni-giro2.md). Via dell'utente: «Riapri e al termine le richiudi... una alla volta». R1 FATTO dal Collaudo (prove grezze in esiti-giro2/collaudo/292a122e/, tutto conforme, rossi visti) e Collaudo richiuso; R2 no-reg VERDE (lavoro da preservare identico, 75/75, metro, 38 endpoint con le sole differenze ?v=…~r2 spiegate, pulizia della cache: 149 miniature vecchie tolte); Test layout: R2 layout, R3 e R4 VERDI (UX2-15 una sola barra in 48 misure, carta di Tokyo intera, indice 622/622 e 964/964, 10 miniature ritagliate in contain; da vedere la striscia rmap-001-12-0) e richiusa; Test UX riaperta: R3 parte UX IN CORSO. Documenti R6 scritti dal PM, da committare. — Prima: VALIDATORE GIRO 2 IN CORSO su 292a122e (lanciato dal PM su autorizzazione dell'utente; sessioni del team chiuse). Sul rilascio: LAY2-7 872ac976, UX2-13 115581b4, E4/E5/E7 0268751a, UX2-15 3a056190 (una sola barra in Mappe, test visto rosso), ROADMAP 292a122e. Verifiche: typecheck e lint verdi, Vitest 91/91, browser a 1366, 1280, 768 e 375 con una sola barra. Dopo: se APPROVATO, push e pipeline senza backup del volume (decisione dell'utente), poi verifica di p5s. — Storico: Lavorano SOLO su L2: FE, BE, Collaudo e i 4 tester; gli analisti, Stesura ed Esperto sono fermi (il Manager ha sospeso i compiti fuori da L2 dati dopo lo STOP). L'utente: la domanda sulle due barre era retorica, è un difetto e non serve nessuna misura su 5474; UX2-15 si corregge. Domanda aperta per l'utente: ripresa del lavoro preparatorio di L3–L11. PERIMETRO CHIUSO (Manager): LAY2-7 fatto (872ac976); FE in corso su E4, E5, E7 e UX2-15 (una sola barra in Mappe, chiesta dall'utente); BE in corso su UX2-13 (miniature); UX3-8 e le segnalazioni nuove → L3. Poi un unico cherry-pick, le riprove, la ROADMAP e il validatore. — Storia: LAY2-7 (fatto, 872ac976), E4/E5/E7 (FE, in corso), UX2-13 miniature (BE, in corso, ~40 min); UX3-8 in L3. Commit nuovi sopra 4e5f55a0, che NON va al validatore; poi i cherry-pick del Collaudo e le riprove di layout, UX, funzionali e no-reg → ROADMAP → validatore. Nuovo: UX2-15, due barre in Mappe (pagina + pannello, il pannello non si vede intero sotto 1920), contro la regola degli scroll annidati; il Manager decide se entra in L2. — Prima: L2 va COMPLETATO (ordine dell'utente): E4, E5, E7 tornano in L2, FE ripartito su di loro; il Collaudo aspetta anche il loro cherry-pick e le riprove prima della ROADMAP. Passi: 1) Collaudo: cherry-pick di 126168a0 (LAY2-7) sul rilascio FATTO (872ac976); istanza 3301/5473 riaccesa; 2) Test layout: LAY2-7 VERDE su 872ac976 (conteggi interi a 1280, 1366, 1024, 768 e 375; chip invariato); Test no-reg: giro breve VERDE su 872ac976 (Vitest 79/79, 75/75, metro, dati invariati); ROADMAP 4e5f55a0 scritta con E4, E5, E7 assegnati a L3: superata, NON va al validatore; FE su E4, E5, E7 IN CORSO → poi cherry-pick, riprove e nuova ROADMAP; 3) Collaudo: riga ROADMAP, con E4, E5, E7, UX2-13 e UX3-8 dichiarati per L3; 4) Manager: validatore giro 2; 5) se APPROVATO: avviso all'utente, backup di p5s_data, push, rilascio su p5s. Già verdi: tutte le correzioni del giro 1 (funzionali; R1, R6, R7, FUN2-9; no-reg 146/146 e 75/75)",
+      "fasi": {
+        "requisiti": "fatta",
+        "dati": "fatta",
+        "app": "fatta",
+        "modifiche": "fatta",
+        "be": "fatta",
+        "fe": "fatta",
+        "funzionali": "fatta",
+        "ux": "fatta",
+        "noreg": "fatta",
+        "layout": "fatta",
+        "validazione": "fatta",
+        "consegna": "fatta"
+      }
+    },
+    {
+      "id": "L3",
+      "titolo": "Palazzi: aree e infiltrazioni",
+      "dipende": "L1",
+      "nota": "BE completo e committato (caf7b511, ae764470, 2f9e6c7f casa unica e AP3-3, d1664295 UX3-1 e GET della voce); funzionali verdi sull'anteprima con base p5s (manca P3); FE: UX3-1 e UX3-4 verificati, LAY3-1 e LAY3-2 fatti; UX3-6 corretto da FE; R3-41 a metà: sulla base p5s, visore entro metà altezza da 1280×800 in su, ancora sopra di 11–29 px a 1366×657 e di 69–141 px a 1024×690; restano da applicare le scelte 2 e 3; LAY3-2 con 2 casi residui; FE ancora da committare. O3-1 corretto (12484305) e provato nel ciclo 5. Nel rilascio di L3 entra il resto dell'indice dei Palazzi: UX3-8 e UX3-7 (FE), E2 (spilli di contenuto, deciso dall'utente), E3, E9 (UX2-13 è passato a L2). Da L2 passano a L3 anche: l'asserzione di E7 «lo staff non è fra i quartieri» in OrganizzazioneMappe.test.tsx:82, da irrobustire (N2 del giro 4); il singolare «1 spillo» in MappaPage.tsx:456 e :347, i commenti di immagini-miniature.test.ts:217 e MappaPage.tsx:166-167, il riquadro del numero degli spilli che copre l'angolo di alcuni disegni. Da sistemare in L3 anche SelettoreVersioni.tsx:64, che viola la regola delle aree scorrevoli (src/test/areeScorrevoli.test.ts). Coda di FE (una sola sessione, per decisione dell'utente; ordine del Manager): 1) E4, E5, E7 di L2; 2) R3-41, LAY3-2, AP3; 3) indice delle Mappe di L3 (UX3-8, E2, E3 con «N aree · M planimetrie», E9, UX3-7); 4) commit di L3; 5) L4 FE; 6) L5 FE. No-reg: con le migrazioni, la «Prova» dell'utente diventa l'area di Kamoshida `dungeon/kamoshida/prova`, intatta",
+      "fasi": {
+        "requisiti": "fatta",
+        "dati": "fatta",
+        "app": "fatta",
+        "modifiche": "fatta",
+        "be": "fatta",
+        "fe": "in-corso",
+        "funzionali": "in-corso",
+        "ux": "difetti",
+        "noreg": "in-corso",
+        "layout": "difetti",
+        "validazione": "da-fare",
+        "consegna": "da-fare"
+      }
+    },
+    {
+      "id": "L4",
+      "titolo": "Avanzamento unico",
+      "dipende": "L3",
+      "nota": "deciso dall'utente: due livelli concluso/completato; base p5s: Kamoshida p1 71/71, divergenze 0; BE fatto: §8.10–8.15, migrazione 112 voce_boss_finale, utente 023, AP4-1…4 risolti, 350 test; COMMITTATO b83c30ac e 71378325 (scostamenti di §8.15; migrazione 113 per Iweleth con la regola dei Memento); Analisi app ha CHIUSO AP4-1…4, con AP4-2 provato anche in scrittura (400, 404 e 409 corretti); O3-1 di L3 corretto da BE in 12484305; resta la condizione «boss finale da dichiarare» in coda a BE (la 112 ha 8 voci su 8, Madarame = ordine 19); scarto della 112 accolto con condizione; no-reg VERDE sul codice di BE (NR4-1 e NR4-2 verificati, k/N come atteso); poi istantanea dell'anteprima e verifica di Analisi app. Inventario dei dati: tutto in migrazioni 107–112 e utente 022–023; nessun lavoro dell'utente su p5s prima delle 04:50",
+      "fasi": {
+        "requisiti": "fatta",
+        "dati": "fatta",
+        "app": "fatta",
+        "modifiche": "fatta",
+        "be": "in-corso",
+        "fe": "in-corso",
+        "funzionali": "in-corso",
+        "ux": "da-fare",
+        "noreg": "in-corso",
+        "layout": "da-fare",
+        "validazione": "da-fare",
+        "consegna": "da-fare"
+      }
+    },
+    {
+      "id": "L5",
+      "titolo": "Luoghi, negozi, orari",
+      "dipende": "L2",
+      "nota": "BE parte in anticipo con contratti e API (dopo O3-1 e UX2-13, decisione del Manager); FE dopo L4. Progetto sulla base p5s; LAY5-1 (scroll della Home) aggiunto; 56 luoghi sbloccati in modo strutturato (G-029/G-031); 9 orari dei Confidenti classificati (G-033: 2 restano, 5 «giorno e sera», 2 orario scolastico); casi pronti: funzionali 42, UX W1–W17, layout L5-L1…L12 con la base «prima»",
+      "fasi": {
+        "requisiti": "fatta",
+        "dati": "fatta",
+        "app": "fatta",
+        "modifiche": "fatta",
+        "be": "da-fare",
+        "fe": "da-fare",
+        "funzionali": "da-fare",
+        "ux": "da-fare",
+        "noreg": "da-fare",
+        "layout": "da-fare",
+        "validazione": "da-fare",
+        "consegna": "da-fare"
+      }
+    },
+    {
+      "id": "L6",
+      "titolo": "Condizioni uniche",
+      "dipende": "L5",
+      "nota": "in preparazione: progetto sulla base p5s (niente condizioni «manuali», inviti con condizioni, «concluso» con il boss finale dichiarato); in corso il piano di lavoro (Stesura), i casi funzionali (con Analisi requisiti) e di layout, la rilettura dell'app (Analisi app)",
+      "fasi": {
+        "requisiti": "fatta",
+        "dati": "fatta",
+        "app": "fatta",
+        "modifiche": "fatta",
+        "be": "da-fare",
+        "fe": "da-fare",
+        "funzionali": "da-fare",
+        "ux": "da-fare",
+        "noreg": "da-fare",
+        "layout": "da-fare",
+        "validazione": "da-fare",
+        "consegna": "da-fare"
+      }
+    },
+    {
+      "id": "L7",
+      "titolo": "Oggetti",
+      "dipende": "L6",
+      "nota": "in preparazione: piano di Stesura e riprove di no-reg pronti (M7: articoli, voci, acquisti, listini invariati); app riletta da Analisi app; Esperto: Jose 37/37 come la guida, «Modellino di moto» 4.800, contraddizioni della guida su Dango lunare e Agodashi Oden, listino di Tanaka in inglese",
+      "fasi": {
+        "requisiti": "fatta",
+        "dati": "fatta",
+        "app": "fatta",
+        "modifiche": "fatta",
+        "be": "da-fare",
+        "fe": "da-fare",
+        "funzionali": "da-fare",
+        "ux": "da-fare",
+        "noreg": "da-fare",
+        "layout": "da-fare",
+        "validazione": "da-fare",
+        "consegna": "da-fare"
+      }
+    },
+    {
+      "id": "L8",
+      "titolo": "Persona e Ombre",
+      "dipende": "L4",
+      "nota": "",
+      "fasi": {
+        "requisiti": "fatta",
+        "dati": "fatta",
+        "app": "fatta",
+        "modifiche": "fatta",
+        "be": "da-fare",
+        "fe": "da-fare",
+        "funzionali": "da-fare",
+        "ux": "da-fare",
+        "noreg": "da-fare",
+        "layout": "da-fare",
+        "validazione": "da-fare",
+        "consegna": "da-fare"
+      }
+    },
+    {
+      "id": "L9",
+      "titolo": "Confidenti, attività, calendario",
+      "dipende": "L6",
+      "nota": "",
+      "fasi": {
+        "requisiti": "fatta",
+        "dati": "fatta",
+        "app": "fatta",
+        "modifiche": "fatta",
+        "be": "da-fare",
+        "fe": "da-fare",
+        "funzionali": "da-fare",
+        "ux": "da-fare",
+        "noreg": "da-fare",
+        "layout": "da-fare",
+        "validazione": "da-fare",
+        "consegna": "da-fare"
+      }
+    },
+    {
+      "id": "L10",
+      "titolo": "Partita e diario",
+      "dipende": "L7, L9",
+      "nota": "",
+      "fasi": {
+        "requisiti": "fatta",
+        "dati": "fatta",
+        "app": "fatta",
+        "modifiche": "fatta",
+        "be": "da-fare",
+        "fe": "da-fare",
+        "funzionali": "da-fare",
+        "ux": "da-fare",
+        "noreg": "da-fare",
+        "layout": "da-fare",
+        "validazione": "da-fare",
+        "consegna": "da-fare"
+      }
+    },
+    {
+      "id": "L11",
+      "titolo": "Pulizia e ricerca",
+      "dipende": "alla fine",
+      "nota": "aggiunti dall'analisi dell'Elenco delle Mappe: E1 («308 mappe» comprende le versioni), E6 (spilli forse contati due volte), E8 (Iweleth sotto i Memento, per la gerarchia dell'utente); elenco unico «da rivedere» (R11-10c); rigenerazione di pacchetto/gioco.db da decidere con l'utente",
+      "fasi": {
+        "requisiti": "fatta",
+        "dati": "fatta",
+        "app": "fatta",
+        "modifiche": "fatta",
+        "be": "da-fare",
+        "fe": "da-fare",
+        "funzionali": "da-fare",
+        "ux": "da-fare",
+        "noreg": "da-fare",
+        "layout": "da-fare",
+        "validazione": "da-fare",
+        "consegna": "da-fare"
+      }
+    }
+  ],
+  "sessioni": [
+    {
+      "nome": "PM (utente)",
+      "fase": "regia, blocchi",
+      "stato": "al lavoro",
+      "attivita": "ORA: guida la chiusura di L2 (dalle 06:07:44Z, su richiesta dell'utente, dopo la chiusura delle sessioni del team): ha portato E4/E5/E7 sul rilascio, implementato UX2-15, scritto i documenti, lanciato i giri 2–5 del validatore e riaperto le sessioni di prova una alla volta. L2 APPROVATO al giro 6 e CONSEGNATO su p5s (push bff237e0, pipeline riuscita, p5s verificato). In attesa delle indicazioni dell'utente per L3. Aggiorna la Regia",
+      "avanzamento": 70
+    },
+    {
+      "nome": "Manager",
+      "fase": "coordinamento",
+      "stato": "chiusa",
+      "attivita": "ORA: chiusa (archiviata su richiesta dell'utente «rimuovi il manager»). Dopo lo stop la chiusura di L2 l'ha guidata il PM",
+      "avanzamento": 20
+    },
+    {
+      "nome": "Analisi requisiti",
+      "fase": "requisiti",
+      "stato": "chiusa",
+      "attivita": "ORA: chiusa (archiviata su richiesta dell'utente). Fatto: requisiti di L2–L11 allineati a tutte le decisioni; casi funzionali di L6–L9 preparati con Test funzionali",
+      "avanzamento": 100
+    },
+    {
+      "nome": "Analisi dati",
+      "fase": "dati",
+      "stato": "ferma",
+      "attivita": "ORA: ferma; non archiviabile dall'app (risulta un messaggio in coda), l'utente può archiviarla dalla barra laterale. Fatto (ultimo, dal Manager): G-034/035/036 integrate con regole e cifre (Tanaka riga per riga in L7 §11.1 e «Da rivedere»); impronte «prima» 0533Z L7 b4d47371, L8 742ed5a2, L9 9a64fde1; nota impronta al Collaudo",
+      "avanzamento": 100
+    },
+    {
+      "nome": "Analisi app attuale",
+      "fase": "app",
+      "stato": "chiusa",
+      "attivita": "ORA: chiusa (archiviata su richiesta dell'utente). Fatto: L4 AP4-1…4 chiusi e verificati; analisi dell'«Elenco completo» delle Mappe (E1–E12); L5 e L7 riletti contro il codice",
+      "avanzamento": 100
+    },
+    {
+      "nome": "Stesura modifiche",
+      "fase": "modifiche",
+      "stato": "chiusa",
+      "attivita": "ORA: chiusa (archiviata su richiesta dell'utente). Fatto: progetti di L2–L11 e piani di lavoro di L5–L8 sulla base p5s, con tutte le decisioni e G-022…G-036",
+      "avanzamento": 100
+    },
+    {
+      "nome": "Implementazione BE",
+      "fase": "be",
+      "stato": "chiusa",
+      "attivita": "ORA: chiusa (archiviata su richiesta dell'utente). Fatto: UX2-13 consegnato, 7624bdda su newreview, solo L2 (cherry-pick pulito su 62547532, nessuna migrazione; esiti lotti/L2/esiti-giro2/be/11-ux2-13.md), hash a Manager e Collaudo. Per L3 e seguenti, alla ripresa: E2 (conteggiPin nell'albero, rilascio di L3) e poi L5 dal B0 solo quando il Manager lo conferma. Fatto: L3 BE completo, L4 b83c30ac, 71378325 e ad585387, O3-1 12484305",
+      "avanzamento": 65
+    },
+    {
+      "nome": "Implementazione FE",
+      "fase": "fe",
+      "stato": "chiusa",
+      "attivita": "ORA: chiusa (archiviata su richiesta dell'utente); UX2-15 l'ha fatto il PM. Fatto: L2 giro 2 FE tutto committato: b0ebdad0, c43b8bc0, fcff89e3, a7fe0aee (R1), 126168a0 (LAY2-7), d71a1bbd (E4/E5/E7); hash al Collaudo e al Manager. Dopo: L3 in cartella, non committato (R3-41 entro soglia a 1366×657 e 1280×689, non a 1024×690; LAY3-2, AP3-1/2/4, UX3-8, UX3-7, E3, commit di L3), poi L4 FE",
+      "avanzamento": 75
+    },
+    {
+      "nome": "Test funzionali",
+      "fase": "funzionali",
+      "stato": "chiusa",
+      "attivita": "ORA: chiusa (archiviata su richiesta dell'utente); per L2 non servono altre prove funzionali. Fatto: casi di L5–L9 pronti; L2 giro 2 CHIUSO su f19a117f: F2-02 (R1), FUN2-8, FUN2-9 e «Colloca» dall'interfaccia verdi (ciclo 9, 05:22:48–05:24:44Z, ripristino chiesto), nessun caso «in parte». L3 funzionali verdi sull'anteprima (base p5s-0503Z), 0 difetti, O3-1 a BE; resta P3 dentro la finestra. L4: i casi che scrivono dopo il commit. L5: 42 casi pronti",
+      "avanzamento": 80
+    },
+    {
+      "nome": "Test user experience",
+      "fase": "ux",
+      "stato": "chiusa",
+      "attivita": "ORA: chiusa dopo R3 di L2 (riaperta e richiusa): UX2-15 chiuso con la rotella vera, UX2-13 verificato, E4/E5/E7 chiari; nota per L3: il riquadro del numero degli spilli copre l'angolo di alcuni disegni. Prima: Domanda sulle due barre in Mappe: verdetto al PM, UX2-15 (alta, FE) aperto su richiesta del PM e mandato al Manager per il lotto; UX2-15 entra in L2 (Manager); misura su 5474 annullata (decisione dell'utente: difetto accertato). In attesa dell'hash del Collaudo per verificare sul 5473 UX2-15, UX2-13 ed E4/E5/E7. Fatto: Elenco completo di /guida/mappe: 28 schermate (p5s, 5473, 5474 × Tokyo, Shibuya, Madarame × 1280/768/375) e testi esatti in L2/analisi-elenco-mappe.md «Lato visivo» (V1–V8) per Analisi app; UX2-14 confermato anche su 5473. Segnalazione dell'utente su Mappe di p5s (sola lettura) analizzata: UX2-13 alta → BE (carte con disegno piccolo in un angolo, anche su 5474), UX2-14 (elenco di L1, assente su 5474), UX3-7 bassa → FE, UX3-8 alta → FE (senza pin nascosti; «Prova» sta sotto Kamoshida, domanda all'utente al PM). L3 · ux — U6 gestione SUPERATO sull'anteprima (05:27:01–05:30:33Z, ripristinato dal Collaudo 05:31:31Z; riga di area residua passata a Test funzionali); UX3-1, UX3-4 verificati; da verificare UX3-6 (corretto da FE) e R3-41 a metà. L5: casi pronti e ordinati per pezzo del piano (W1…W17, W12b). L6: casi C1…C12 pronti in lotti/L6/ux.md. L7: casi O1…O12 pronti; L8: casi P1…P14 pronti (si prova col via del Manager). Riga di area residua di U6 chiusa da Test funzionali (solo updated_at)",
+      "avanzamento": 90
+    },
+    {
+      "nome": "Test no-reg",
+      "fase": "noreg",
+      "stato": "chiusa",
+      "attivita": "ORA: chiusa dopo R2 di L2 (riaperta e richiusa): no-reg VERDE su 292a122e (§4-duodecies). Fatti: L2 872ac976 VERDE (79/79, 75/75, metro); L2 25012240/625475322b74 VERDE; L4 b83c30ac VERDE; base p5s-0533Z; base «prima» di L5 e casi L5 (N5-1…8) e L7 (N7-1…12) pronti. Per L3 e seguenti restano: NR3-4 nel browser dopo la correzione di FE; FE di L4; L5 dal pezzo B1",
+      "avanzamento": 80
+    },
+    {
+      "nome": "Test layout multi device",
+      "fase": "layout",
+      "stato": "chiusa",
+      "attivita": "ORA: chiusa dopo R2 layout, R3 e R4 di L2 (riaperta e richiusa): tutto VERDE su 292a122e (48 misure di UX2-15, carta di Tokyo, La città). Fatto: L2 LAY2-7 VERDE su 872ac976 e chiuso in difetti.md; R1, R6, R7 e FUN2-9 verdi; basi «prima» di L5 e L6; base di L7 a 20 su 48",
+      "avanzamento": 50
+    },
+    {
+      "nome": "Esperto della guida",
+      "fase": "guida",
+      "stato": "chiusa",
+      "attivita": "ORA: chiusa (archiviata su richiesta dell'utente). Fatto: consegnate G-001…G-038 (ultime: G-027 boss finali, G-028 voci da rivedere, G-029/G-031 luoghi di L5, G-030 pin tesoro di Madarame, G-032 Untouchable, G-033 orari dei Confidenti); aperto: Area dello staff 150-3 (solo l'utente può riconoscerla)",
+      "avanzamento": 100
+    },
+    {
+      "nome": "Collaudo",
+      "fase": "collaudo",
+      "stato": "chiusa",
+      "attivita": "ORA: chiusa. Ultima riapertura alle 07:27:13Z per la prova git su 8ae417c5 (esito conforme alle 07:27:19Z: solo documenti dopo 292a122e, alberi del codice invariati), poi archiviata. Prima: chiusa dopo il giro 3 di L2 (riaperta e richiusa): prove git su b6066830 conformi, rossi di E4 ed E7 visti. Prima: riaperto per il giro 3 di L2: prove git su b6066830 (codice uguale a 292a122e) e rossi di E4 ed E7 isolato. Fatto: R1 su 292a122e (prove grezze, tutto conforme), 872ac976, 115581b4",
+      "avanzamento": 80
+    }
+  ],
+  "inAttesaUtente": []
+}

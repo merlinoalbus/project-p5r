@@ -1,0 +1,10 @@
+== albero del commit di L2, isolato (senza il lavoro di L4): 12fad645727d32f8f0ab4e89ada8e52b1ade6999
+== tsc -p tsconfig.server.json
+EXIT=0
+== tsc -b tsconfig.full.json
+EXIT=0
+== eslint server shared
+EXIT=0
+== vitest mirati
+ Test Files  8 passed (8)
+      Tests  92 passed (92)

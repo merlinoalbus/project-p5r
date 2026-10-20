@@ -1,0 +1,14 @@
+
+ RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/pensive-burnell-b50941
+
+ ✓ shared/miniature.test.ts > miniature delle immagini del database > le misure ammesse sono un insieme chiuso 1ms
+ ✓ shared/miniature.test.ts > miniature delle immagini del database > urlMiniatura: `&l=` dopo la versione, `?l=` senza query; un `l` già presente si sostituisce; il frammento resta in fondo 0ms
+ ✓ shared/miniature.test.ts > miniature delle immagini del database > urlMiniatura lascia invariati asset statici, blob:, data:, esterni e le altre rotte delle immagini 0ms
+ ✓ shared/miniature.test.ts > miniature delle immagini del database > srcsetMiniature: tutte le misure in ordine, o quelle chieste 0ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  01:48:26
+   Duration  250ms (transform 34ms, setup 107ms, import 14ms, tests 4ms, environment 0ms)
+
+EXIT=0

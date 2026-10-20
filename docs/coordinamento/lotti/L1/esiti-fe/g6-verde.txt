@@ -1,0 +1,12 @@
+
+ RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/pensive-burnell-b50941
+
+ ✓ src/pages/QuartierePage.scarico.test.tsx > scaricata la pianta, il quartiere si rilegge: l’intestazione mostra l’immagine appena scaricata, come il visore 111ms
+ ✓ src/pages/QuartierePage.scarico.test.tsx > uno scarico non riuscito o rifiutato per i pezzi non rilegge il quartiere 24ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  02:46:53
+   Duration  1.72s (transform 440ms, setup 98ms, import 616ms, tests 136ms, environment 747ms)
+
+EXIT=0

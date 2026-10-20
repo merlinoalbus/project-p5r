@@ -1,0 +1,8 @@
+p1 {"fatte":89} p2 {"fatte":39,"da fare":50}
+diverse dagli attesi: 0
+attese ma senza contatore: 0
+con N>1 fuori elenco: 0
+p1 kamoshida: concluso "Tesoro e boss finale" · completato "Tesoro, boss finale e tutti gli oggetti permanenti (71/71)" · {"oggetti":71,"fatti":71,"tesoro":true,"boss":true,"concluso":true,"completato":true}
+p1 madarame: concluso "Tesoro e boss finale" · completato "Tesoro, boss finale e tutti gli oggetti permanenti (82/82)" · {"oggetti":82,"fatti":82,"tesoro":true,"boss":true,"concluso":true,"completato":true}
+p2 kamoshida: concluso "Tesoro e boss finale" · completato "Tesoro, boss finale e tutti gli oggetti permanenti (71/71)" · {"oggetti":71,"fatti":71,"tesoro":true,"boss":true,"concluso":true,"completato":true}
+p2 madarame: concluso null · completato null · {"oggetti":82,"fatti":0,"tesoro":false,"boss":false,"concluso":false,"completato":false}

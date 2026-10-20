@@ -1,0 +1,15 @@
+{"diario":254,"spunte":338,"kamoshida":{"aree":7,"voci":169,"pin":373,"statiVoci":302,"statiPin":472},"madarame":{"aree":5,"voci":225,"pin":261,"statiVoci":221,"statiPin":276}}
+{"gioco.db":108,"partite.db":21} 112 tabelle
+IMPRONTA-IDENTICA
+ESTESA-IDENTICA
+versioni prima {"gioco.db":106,"partite.db":21} dopo {"gioco.db":108,"partite.db":21}
+
+# gioco.db:__schema__: righe 114 → 115; aggiunte 1, tolte 0, cambiate 0
+  + table|immagine_miniatura
++ TABELLA NUOVA gioco.db:immagine_miniatura (68 righe)
+
+# gioco.db:mappa: righe 317 → 317; aggiunte 0, tolte 0, cambiate 1
+  ~ yongen-java-banchina-della-metropolitana
+      ruolo_immagine: "illustrazione-editoriale" → "planimetria-nativa"
+
+tabelle invariate: 109 su 112

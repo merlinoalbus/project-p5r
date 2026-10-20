@@ -1,0 +1,56 @@
+l1r destinazioni diverse per uid: 0 su 223
+prer destinazioni diverse per uid: 0 su 223
+OK  F9: mappa nuova senza asset → asset null — {"status":201,"asset":null,"ruolo":"nessuna"}
+OK  F9: esportata con asset null — {"asset":null,"assetOriginale":null}
+OK  F9: mappa eliminata — {"status":204}
+OK  F9: reimportata, asset ancora null — {"status":200,"riga":{"chiave":"prova-no-reg-f9-mvfyam3w","nome":"Prova no-reg F9 mvfyam3w","tipo":"generica","asset":null,"immagine_chiave":null,"ruolo_immagine":"nessuna","origine":"utente"}}
+OK  F9: mappa di prova tolta dalla copia — {"status":204}
+OK  F5: sostituzione dell'immagine di palazzo-di-madarame-il-labirinto-contorto senza conferma → 409 — {"status":409,"code":"mappa-con-pezzi","details":{"pezzi":1,"copie":3}}
+OK  F5: da-url su palazzo-di-madarame-il-labirinto-contorto senza conferma → 409 (prima dello scarico) — {"status":409,"code":"mappa-con-pezzi"}
+OK  F5: sostituzione dell'immagine di nativo-rmap-153-6-0 senza conferma → 409 — {"status":409,"code":"mappa-con-pezzi","details":{"pezzi":6,"copie":21}}
+OK  F5: da-url su nativo-rmap-153-6-0 senza conferma → 409 (prima dello scarico) — {"status":409,"code":"mappa-con-pezzi"}
+OK  F5: rimozione dell'immagine di palazzo-di-madarame-il-labirinto-contorto → 409 — {"status":409,"code":"mappa-con-pezzi"}
+OK  F5: rimozione in blocco dell'ambito mappa → 409 — {"status":409,"code":"mappa-con-pezzi","details":{"mappe":1,"pezzi":1,"copie":3}}
+OK  F5: pezzi e copie di palazzo-di-madarame-il-labirinto-contorto invariati — {"prima":[1,3],"dopo":[1,3]}
+OK  F5: pezzi e copie di nativo-rmap-153-6-0 invariati — {"prima":[6,21],"dopo":[6,21]}
+
+errori: 0
+versioni prima {"gioco.db":108,"partite.db":21} dopo {"gioco.db":108,"partite.db":21}
+
+# gioco.db:cestino: righe 0 → 2; aggiunte 2, tolte 0, cambiate 0
+  + 17
+  + 18
+
+tabelle invariate: 111 su 112
+
+OK  istanza della copia in ascolto — {"ok":true,"userVersion":108}
+
+== partita 1
+OK  diario: spunta 06-01 b9371f8061aedd71262a200b98d18bd0 — {"status":200}
+OK  diario: tolta la spunta, doti come prima — {"status":200}
+OK  kamoshida: voce segnata kamoshida-13-tetto-sconfiggi-nemici-potenti — {"status":200,"gestiti":[133,134]}
+OK  kamoshida: voce tolta — {"status":200,"gestiti":133}
+OK  kamoshida: nessun pin collezionabile ancora da raccogliere (tutto raccolto)
+OK  madarame: voce segnata madarame-01-entrata-del-museo-raccogli-installazione-artistica — {"status":200,"gestiti":[221,222]}
+OK  madarame: voce tolta — {"status":200,"gestiti":221}
+OK  madarame: pin raccolto 3646b85101a8d8197051c7235f900dd3 — {"status":200,"presi":[85,86],"totale":86}
+OK  madarame: pin tolto — {"status":200,"presi":85}
+OK  kamoshida: dettaglio per la partita — {"status":200,"aree":7}
+OK  madarame: dettaglio per la partita — {"status":200,"aree":5}
+OK  partita di prova creata — {"status":201,"id":3}
+
+== partita 3
+OK  diario: spunta 06-01 b9371f8061aedd71262a200b98d18bd0 — {"status":200}
+OK  diario: tolta la spunta, doti come prima — {"status":200}
+OK  kamoshida: voce segnata kamoshida-1-tutorial-palazzo-11-04-esamina-la-cella-muro-con-catene-letto-sporco-la-botte — {"status":200,"gestiti":[0,1]}
+OK  kamoshida: voce tolta — {"status":200,"gestiti":0}
+OK  kamoshida: pin raccolto 0036b028ab0351925a0f0db2e85b3def — {"status":200,"presi":[0,1],"totale":107}
+OK  kamoshida: pin tolto — {"status":200,"presi":0}
+OK  madarame: voce segnata madarame-01-entrata-del-museo/0 — {"status":200,"gestiti":[0,1]}
+OK  madarame: voce tolta — {"status":200,"gestiti":0}
+OK  madarame: pin raccolto 033d9e7e159ff0090126a3f7b7ad5203 — {"status":200,"presi":[0,1],"totale":86}
+OK  madarame: pin tolto — {"status":200,"presi":0}
+OK  kamoshida: dettaglio per la partita — {"status":200,"aree":7}
+OK  madarame: dettaglio per la partita — {"status":200,"aree":5}
+
+errori: 0

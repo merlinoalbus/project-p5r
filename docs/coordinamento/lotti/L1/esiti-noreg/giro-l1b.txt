@@ -1,0 +1,4539 @@
+versioni prima {"gioco.db":108,"partite.db":21} dopo {"gioco.db":108,"partite.db":21}
+
+# gioco.db:copia_pezzo: righe 42 → 42; aggiunte 42, tolte 42, cambiate 0
+  + 51
+  + 52
+  + 53
+  + 54
+  + 55
+  + 56
+  + 57
+  + 58
+  + 59
+  + 60
+  + 61
+  + 62
+  + 63
+  + 64
+  + 65
+  + 66
+  + 67
+  + 68
+  + 69
+  + 70
+  + 71
+  + 72
+  + 73
+  + 74
+  + 75
+  + 76
+  + 77
+  + 78
+  + 79
+  + 80
+  + 81
+  + 82
+  + 83
+  + 84
+  + 85
+  + 86
+  + 87
+  + 88
+  + 89
+  + 90
+  + 91
+  + 92
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 10
+  - 11
+  - 12
+  - 13
+  - 14
+  - 15
+  - 16
+  - 17
+  - 18
+  - 19
+  - 20
+  - 22
+  - 24
+  - 25
+  - 28
+  - 29
+  - 32
+  - 33
+  - 34
+  - 35
+  - 36
+  - 37
+  - 38
+  - 39
+  - 40
+  - 41
+  - 42
+  - 43
+  - 45
+  - 46
+  - 47
+  - 48
+  - 49
+  - 50
+
+# gioco.db:dungeon_atterraggio: righe 3 → 3; aggiunte 0, tolte 0, cambiate 1
+  ~ 7
+      spillo_id: 1657 → 2354
+
+# gioco.db:immagine: righe 807 → 807; aggiunte 0, tolte 0, cambiate 3
+  ~ 782
+      nome_file: "<file>.png" → "<file>.png"
+      created_at: "<ora>" → "<ora>"
+  ~ 783
+      nome_file: "<file>.png" → "<file>.png"
+      created_at: "<ora>" → "<ora>"
+  ~ 800
+      nome_file: "<file>.png" → "<file>.png"
+      created_at: "<ora>" → "<ora>"
+
+# gioco.db:immagine_miniatura: righe 68 → 68; aggiunte 0, tolte 0, cambiate 4
+  ~ 782|160
+      versione: "<ora>" → "<ora>"
+      created_at: "<ora>" → "<ora>"
+  ~ 782|320
+      versione: "<ora>" → "<ora>"
+      created_at: "<ora>" → "<ora>"
+  ~ 800|160
+      versione: "<ora>" → "<ora>"
+      created_at: "<ora>" → "<ora>"
+  ~ 800|320
+      versione: "<ora>" → "<ora>"
+      created_at: "<ora>" → "<ora>"
+
+# gioco.db:mappa: righe 317 → 317; aggiunte 0, tolte 0, cambiate 45
+  ~ dungeon-kamoshida
+      updated_at: "<ora>" → "<ora>"
+  ~ dungeon-madarame
+      updated_at: "<ora>" → "<ora>"
+  ~ nativo-rmap-151-1-0
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-1-1
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-2-0
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-2-1
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-2-2
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-4-1
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-5-1
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-5-2
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-6-0
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-6-1
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-6-2
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-6-3
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-6-4
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-7-0
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-9-0
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-10-0
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-10-1
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-11-0
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-11-1
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-13-0
+      updated_at: "<ora>" → "<ora>"
+  ~ nativo-rmap-151-16-0
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-152-1-0
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-152-2-0
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-152-4-0
+      updated_at: "<ora>" → "<ora>"
+  ~ nativo-rmap-152-5-0
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-152-6-0
+      updated_at: "<ora>" → "<ora>"
+  ~ nativo-rmap-153-1-0
+      updated_at: "<ora>" → "<ora>"
+  ~ nativo-rmap-153-2-0
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-153-2-1
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-153-3-0
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-153-3-1
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-153-3-2
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-153-3-3
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-153-5-0
+      updated_at: "<ora>" → "<ora>"
+  ~ nativo-rmap-153-6-0
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-153-6-1
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-153-7-0
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-153-7-1
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-153-7-2
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-153-9-0
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-153-9-1
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-153-9-2
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+  ~ palazzo-di-madarame-il-labirinto-contorto
+      asset: "mappe/palazzo-di-madarame-il-labirinto-contorto" → null
+      updated_at: "<ora>" → "<ora>"
+      nome_rivisto: 1 → 0
+
+# gioco.db:mappa_entita: righe 134 → 136; aggiunte 2, tolte 0, cambiate 66
+  + dungeon-kamoshida|dungeon|kamoshida
+  + dungeon-madarame|dungeon|madarame
+  ~ nativo-rmap-151-1-0|area|kamoshida-01-cancello-del-castello-ingresso
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-6-1|area|kamoshida-13-tetto
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-9-0|area|kamoshida-15-torre-centrale
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-152-2-0|area|kamoshida-1-tutorial-palazzo-11-04
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-16-0|area|kamoshida-tutorial-palazzo-12-04
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-152-1-0|area|kamoshida-1-tutorial-palazzo-11-04
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-152-1-0|area|kamoshida-tutorial-palazzo-12-04
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-152-4-0|area|kamoshida-tutorial-palazzo-12-04
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-152-6-0|area|kamoshida-tutorial-palazzo-12-04
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-1-0|area|kamoshida-tutorial-palazzo-15-04
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-16-0|area|kamoshida-tutorial-palazzo-15-04
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-2-0|area|kamoshida-tutorial-palazzo-15-04
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-2-0|area|kamoshida-01-cancello-del-castello-ingresso
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-2-1|area|kamoshida-01-cancello-del-castello-ingresso
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-2-2|area|kamoshida-01-cancello-del-castello-ingresso
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-5-2|area|kamoshida-01-cancello-del-castello-ingresso
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-4-1|area|kamoshida-01-cancello-del-castello-ingresso
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-5-1|area|kamoshida-01-cancello-del-castello-ingresso
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-6-2|area|kamoshida-13-tetto
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-6-3|area|kamoshida-13-tetto
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-6-4|area|kamoshida-13-tetto
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-7-0|area|kamoshida-15-torre-centrale
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-13-0|area|kamoshida-15-torre-centrale
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-152-5-0|area|kamoshida-15-torre-centrale
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-10-0|area|kamoshida-15-torre-centrale
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-10-1|area|kamoshida-15-torre-centrale
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-2-1|area|kamoshida-15-torre-centrale
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-2-0|area|kamoshida-15-torre-centrale
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-11-0|area|kamoshida-15-torre-centrale
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-11-1|area|kamoshida-15-torre-centrale
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-1-0|area|kamoshida-15-torre-centrale
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-1-0|area|kamoshida-rubare-i-desideri-del-cuore
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-11-0|area|kamoshida-rubare-i-desideri-del-cuore
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-11-1|area|kamoshida-rubare-i-desideri-del-cuore
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-6-0|area|madarame-disabilita-i-sistemi-di-sicurezza
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-5-0|area|madarame-disabilita-i-sistemi-di-sicurezza
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-1-0|area|madarame-01-entrata-del-museo
+      fonte_json: "{\"origine\":\"seed\",\"dichiarata\":\"pacchetto\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-1-0|area|madarame-scopri-dove-il-tesoro
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-2-0|area|madarame-01-entrata-del-museo
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-2-0|area|madarame-scopri-dove-il-tesoro
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-2-1|area|madarame-scopri-dove-il-tesoro
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-3-0|area|madarame-scopri-dove-il-tesoro
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-3-1|area|madarame-scopri-dove-il-tesoro
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-3-2|area|madarame-scopri-dove-il-tesoro
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-3-3|area|madarame-scopri-dove-il-tesoro
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-5-0|area|madarame-scopri-dove-il-tesoro
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-3-0|area|madarame-disabilita-i-sistemi-di-sicurezza
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-2-0|area|madarame-disabilita-i-sistemi-di-sicurezza
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-1-0|area|madarame-nelle-profondita-del-museo
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-2-0|area|madarame-nelle-profondita-del-museo
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-3-0|area|madarame-nelle-profondita-del-museo
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-5-0|area|madarame-nelle-profondita-del-museo
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-6-0|area|madarame-nelle-profondita-del-museo
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-6-1|area|madarame-nelle-profondita-del-museo
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-7-2|area|madarame-nelle-profondita-del-museo
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-7-0|area|madarame-nelle-profondita-del-museo
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-7-1|area|madarame-nelle-profondita-del-museo
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ palazzo-di-madarame-il-labirinto-contorto|area|madarame-nelle-profondita-del-museo
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-9-0|area|madarame-nelle-profondita-del-museo
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-9-1|area|madarame-nelle-profondita-del-museo
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-9-2|area|madarame-nelle-profondita-del-museo
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-1-0|area|madarame-il-furto-del-cuore-di-madarame
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-6-0|area|madarame-il-furto-del-cuore-di-madarame
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-9-0|area|madarame-il-furto-del-cuore-di-madarame
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-9-1|area|madarame-il-furto-del-cuore-di-madarame
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-153-9-2|area|madarame-il-furto-del-cuore-di-madarame
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+
+# gioco.db:pezzo_mappa: righe 24 → 24; aggiunte 24, tolte 24, cambiate 0
+  + 31
+  + 32
+  + 33
+  + 34
+  + 35
+  + 36
+  + 37
+  + 38
+  + 39
+  + 40
+  + 41
+  + 42
+  + 43
+  + 44
+  + 45
+  + 46
+  + 47
+  + 48
+  + 49
+  + 50
+  + 51
+  + 52
+  + 53
+  + 54
+  - 2
+  - 3
+  - 4
+  - 5
+  - 8
+  - 9
+  - 10
+  - 12
+  - 13
+  - 14
+  - 15
+  - 16
+  - 17
+  - 18
+  - 19
+  - 20
+  - 21
+  - 22
+  - 24
+  - 26
+  - 27
+  - 28
+  - 29
+  - 30
+
+# gioco.db:spillo: righe 1913 → 1913; aggiunte 627, tolte 627, cambiate 0
+  + 2300
+  + 2301
+  + 2302
+  + 2303
+  + 2304
+  + 2305
+  + 2306
+  + 2307
+  + 2308
+  + 2309
+  + 2310
+  + 2311
+  + 2312
+  + 2313
+  + 2314
+  + 2315
+  + 2316
+  + 2317
+  + 2318
+  + 2319
+  + 2320
+  + 2321
+  + 2322
+  + 2323
+  + 2324
+  + 2325
+  + 2326
+  + 2327
+  + 2328
+  + 2329
+  + 2330
+  + 2331
+  + 2332
+  + 2333
+  + 2334
+  + 2335
+  + 2336
+  + 2337
+  + 2338
+  + 2339
+  + 2340
+  + 2341
+  + 2342
+  + 2343
+  + 2344
+  + 2345
+  + 2346
+  + 2347
+  + 2348
+  + 2349
+  + 2350
+  + 2351
+  + 2352
+  + 2353
+  + 2354
+  + 2355
+  + 2356
+  + 2357
+  + 2358
+  + 2359
+  + 2360
+  + 2361
+  + 2362
+  + 2363
+  + 2364
+  + 2365
+  + 2366
+  + 2367
+  + 2368
+  + 2369
+  + 2370
+  + 2371
+  + 2372
+  + 2373
+  + 2374
+  + 2375
+  + 2376
+  + 2377
+  + 2378
+  + 2379
+  + 2380
+  + 2381
+  + 2382
+  + 2383
+  + 2384
+  + 2385
+  + 2386
+  + 2387
+  + 2388
+  + 2389
+  + 2390
+  + 2391
+  + 2392
+  + 2393
+  + 2394
+  + 2395
+  + 2396
+  + 2397
+  + 2398
+  + 2399
+  + 2400
+  + 2401
+  + 2402
+  + 2403
+  + 2404
+  + 2405
+  + 2406
+  + 2407
+  + 2408
+  + 2409
+  + 2410
+  + 2411
+  + 2412
+  + 2413
+  + 2414
+  + 2415
+  + 2416
+  + 2417
+  + 2418
+  + 2419
+  + 2420
+  + 2421
+  + 2422
+  + 2423
+  + 2424
+  + 2425
+  + 2426
+  + 2427
+  + 2428
+  + 2429
+  + 2430
+  + 2431
+  + 2432
+  + 2433
+  + 2434
+  + 2435
+  + 2436
+  + 2437
+  + 2438
+  + 2439
+  + 2440
+  + 2441
+  + 2442
+  + 2443
+  + 2444
+  + 2445
+  + 2446
+  + 2447
+  + 2448
+  + 2449
+  + 2450
+  + 2451
+  + 2452
+  + 2453
+  + 2454
+  + 2455
+  + 2456
+  + 2457
+  + 2458
+  + 2459
+  + 2460
+  + 2461
+  + 2462
+  + 2463
+  + 2464
+  + 2465
+  + 2466
+  + 2467
+  + 2468
+  + 2469
+  + 2470
+  + 2471
+  + 2472
+  + 2473
+  + 2474
+  + 2475
+  + 2476
+  + 2477
+  + 2478
+  + 2479
+  + 2480
+  + 2481
+  + 2482
+  + 2483
+  + 2484
+  + 2485
+  + 2486
+  + 2487
+  + 2488
+  + 2489
+  + 2490
+  + 2491
+  + 2492
+  + 2493
+  + 2494
+  + 2495
+  + 2496
+  + 2497
+  + 2498
+  + 2499
+  + 2500
+  + 2501
+  + 2502
+  + 2503
+  + 2504
+  + 2505
+  + 2506
+  + 2507
+  + 2508
+  + 2509
+  + 2510
+  + 2511
+  + 2512
+  + 2513
+  + 2514
+  + 2515
+  + 2516
+  + 2517
+  + 2518
+  + 2519
+  + 2520
+  + 2521
+  + 2522
+  + 2523
+  + 2524
+  + 2525
+  + 2526
+  + 2527
+  + 2528
+  + 2529
+  + 2530
+  + 2531
+  + 2532
+  + 2533
+  + 2534
+  + 2535
+  + 2536
+  + 2537
+  + 2538
+  + 2539
+  + 2540
+  + 2541
+  + 2542
+  + 2543
+  + 2544
+  + 2545
+  + 2546
+  + 2547
+  + 2548
+  + 2549
+  + 2550
+  + 2551
+  + 2552
+  + 2553
+  + 2554
+  + 2555
+  + 2556
+  + 2557
+  + 2558
+  + 2559
+  + 2560
+  + 2561
+  + 2562
+  + 2563
+  + 2564
+  + 2565
+  + 2566
+  + 2567
+  + 2568
+  + 2569
+  + 2570
+  + 2571
+  + 2572
+  + 2573
+  + 2574
+  + 2575
+  + 2576
+  + 2577
+  + 2578
+  + 2579
+  + 2580
+  + 2581
+  + 2582
+  + 2583
+  + 2584
+  + 2585
+  + 2586
+  + 2587
+  + 2588
+  + 2589
+  + 2590
+  + 2591
+  + 2592
+  + 2593
+  + 2594
+  + 2595
+  + 2596
+  + 2597
+  + 2598
+  + 2599
+  + 2600
+  + 2601
+  + 2602
+  + 2603
+  + 2604
+  + 2605
+  + 2606
+  + 2607
+  + 2608
+  + 2609
+  + 2610
+  + 2611
+  + 2612
+  + 2613
+  + 2614
+  + 2615
+  + 2616
+  + 2617
+  + 2618
+  + 2619
+  + 2620
+  + 2621
+  + 2622
+  + 2623
+  + 2624
+  + 2625
+  + 2626
+  + 2627
+  + 2628
+  + 2629
+  + 2630
+  + 2631
+  + 2632
+  + 2633
+  + 2634
+  + 2635
+  + 2636
+  + 2637
+  + 2638
+  + 2639
+  + 2640
+  + 2641
+  + 2642
+  + 2643
+  + 2644
+  + 2645
+  + 2646
+  + 2647
+  + 2648
+  + 2649
+  + 2650
+  + 2651
+  + 2652
+  + 2653
+  + 2654
+  + 2655
+  + 2656
+  + 2657
+  + 2658
+  + 2659
+  + 2660
+  + 2661
+  + 2662
+  + 2663
+  + 2664
+  + 2665
+  + 2666
+  + 2667
+  + 2668
+  + 2669
+  + 2670
+  + 2671
+  + 2672
+  + 2673
+  + 2674
+  + 2675
+  + 2676
+  + 2677
+  + 2678
+  + 2679
+  + 2680
+  + 2681
+  + 2682
+  + 2683
+  + 2684
+  + 2685
+  + 2686
+  + 2687
+  + 2688
+  + 2689
+  + 2690
+  + 2691
+  + 2692
+  + 2693
+  + 2694
+  + 2695
+  + 2696
+  + 2697
+  + 2698
+  + 2699
+  + 2700
+  + 2701
+  + 2702
+  + 2703
+  + 2704
+  + 2705
+  + 2706
+  + 2707
+  + 2708
+  + 2709
+  + 2710
+  + 2711
+  + 2712
+  + 2713
+  + 2714
+  + 2715
+  + 2716
+  + 2717
+  + 2718
+  + 2719
+  + 2720
+  + 2721
+  + 2722
+  + 2723
+  + 2724
+  + 2725
+  + 2726
+  + 2727
+  + 2728
+  + 2729
+  + 2730
+  + 2731
+  + 2732
+  + 2733
+  + 2734
+  + 2735
+  + 2736
+  + 2737
+  + 2738
+  + 2739
+  + 2740
+  + 2741
+  + 2742
+  + 2743
+  + 2744
+  + 2745
+  + 2746
+  + 2747
+  + 2748
+  + 2749
+  + 2750
+  + 2751
+  + 2752
+  + 2753
+  + 2754
+  + 2755
+  + 2756
+  + 2757
+  + 2758
+  + 2759
+  + 2760
+  + 2761
+  + 2762
+  + 2763
+  + 2764
+  + 2765
+  + 2766
+  + 2767
+  + 2768
+  + 2769
+  + 2770
+  + 2771
+  + 2772
+  + 2773
+  + 2774
+  + 2775
+  + 2776
+  + 2777
+  + 2778
+  + 2779
+  + 2780
+  + 2781
+  + 2782
+  + 2783
+  + 2784
+  + 2785
+  + 2786
+  + 2787
+  + 2788
+  + 2789
+  + 2790
+  + 2791
+  + 2792
+  + 2793
+  + 2794
+  + 2795
+  + 2796
+  + 2797
+  + 2798
+  + 2799
+  + 2800
+  + 2801
+  + 2802
+  + 2803
+  + 2804
+  + 2805
+  + 2806
+  + 2807
+  + 2808
+  + 2809
+  + 2810
+  + 2811
+  + 2812
+  + 2813
+  + 2814
+  + 2815
+  + 2816
+  + 2817
+  + 2818
+  + 2819
+  + 2820
+  + 2821
+  + 2822
+  + 2823
+  + 2824
+  + 2825
+  + 2826
+  + 2827
+  + 2828
+  + 2829
+  + 2830
+  + 2831
+  + 2832
+  + 2833
+  + 2834
+  + 2835
+  + 2836
+  + 2837
+  + 2838
+  + 2839
+  + 2840
+  + 2841
+  + 2842
+  + 2843
+  + 2844
+  + 2845
+  + 2846
+  + 2847
+  + 2848
+  + 2849
+  + 2850
+  + 2851
+  + 2852
+  + 2853
+  + 2854
+  + 2855
+  + 2856
+  + 2857
+  + 2858
+  + 2859
+  + 2860
+  + 2861
+  + 2862
+  + 2863
+  + 2864
+  + 2865
+  + 2866
+  + 2867
+  + 2868
+  + 2869
+  + 2870
+  + 2871
+  + 2872
+  + 2873
+  + 2874
+  + 2875
+  + 2876
+  + 2877
+  + 2878
+  + 2879
+  + 2880
+  + 2881
+  + 2882
+  + 2883
+  + 2884
+  + 2885
+  + 2886
+  + 2887
+  + 2888
+  + 2889
+  + 2890
+  + 2891
+  + 2892
+  + 2893
+  + 2894
+  + 2895
+  + 2896
+  + 2897
+  + 2898
+  + 2899
+  + 2900
+  + 2901
+  + 2902
+  + 2903
+  + 2904
+  + 2905
+  + 2906
+  + 2907
+  + 2908
+  + 2909
+  + 2910
+  + 2911
+  + 2912
+  + 2913
+  + 2914
+  + 2915
+  + 2916
+  + 2917
+  + 2918
+  + 2919
+  + 2920
+  + 2921
+  + 2922
+  + 2923
+  + 2924
+  + 2925
+  + 2926
+  - 515
+  - 518
+  - 520
+  - 521
+  - 527
+  - 528
+  - 529
+  - 530
+  - 533
+  - 537
+  - 538
+  - 539
+  - 540
+  - 541
+  - 542
+  - 543
+  - 544
+  - 548
+  - 550
+  - 553
+  - 554
+  - 555
+  - 556
+  - 557
+  - 569
+  - 570
+  - 571
+  - 572
+  - 573
+  - 574
+  - 575
+  - 577
+  - 578
+  - 580
+  - 581
+  - 583
+  - 584
+  - 587
+  - 588
+  - 589
+  - 591
+  - 592
+  - 593
+  - 594
+  - 595
+  - 596
+  - 597
+  - 598
+  - 599
+  - 603
+  - 605
+  - 608
+  - 609
+  - 614
+  - 615
+  - 616
+  - 617
+  - 618
+  - 619
+  - 620
+  - 621
+  - 622
+  - 626
+  - 627
+  - 634
+  - 635
+  - 636
+  - 637
+  - 638
+  - 639
+  - 640
+  - 734
+  - 737
+  - 738
+  - 742
+  - 743
+  - 744
+  - 745
+  - 746
+  - 747
+  - 748
+  - 749
+  - 751
+  - 753
+  - 757
+  - 758
+  - 759
+  - 760
+  - 761
+  - 763
+  - 767
+  - 768
+  - 777
+  - 781
+  - 782
+  - 783
+  - 786
+  - 787
+  - 788
+  - 789
+  - 790
+  - 791
+  - 792
+  - 793
+  - 799
+  - 800
+  - 801
+  - 802
+  - 803
+  - 804
+  - 805
+  - 806
+  - 809
+  - 810
+  - 811
+  - 812
+  - 814
+  - 815
+  - 817
+  - 818
+  - 821
+  - 1657
+  - 1658
+  - 1659
+  - 1662
+  - 1663
+  - 1664
+  - 1665
+  - 1666
+  - 1667
+  - 1668
+  - 1718
+  - 1719
+  - 1720
+  - 1721
+  - 1722
+  - 1723
+  - 1724
+  - 1732
+  - 1733
+  - 1734
+  - 1735
+  - 1744
+  - 1745
+  - 1746
+  - 1776
+  - 1786
+  - 1788
+  - 1789
+  - 1790
+  - 1791
+  - 1792
+  - 1793
+  - 1794
+  - 1795
+  - 1796
+  - 1797
+  - 1798
+  - 1799
+  - 1800
+  - 1801
+  - 1802
+  - 1803
+  - 1804
+  - 1805
+  - 1806
+  - 1807
+  - 1808
+  - 1809
+  - 1810
+  - 1814
+  - 1815
+  - 1816
+  - 1817
+  - 1818
+  - 1819
+  - 1820
+  - 1821
+  - 1822
+  - 1823
+  - 1824
+  - 1825
+  - 1826
+  - 1827
+  - 1828
+  - 1829
+  - 1830
+  - 1831
+  - 1832
+  - 1833
+  - 1834
+  - 1835
+  - 1836
+  - 1837
+  - 1838
+  - 1839
+  - 1840
+  - 1841
+  - 1842
+  - 1843
+  - 1845
+  - 1846
+  - 1847
+  - 1848
+  - 1849
+  - 1850
+  - 1851
+  - 1852
+  - 1853
+  - 1854
+  - 1855
+  - 1856
+  - 1857
+  - 1858
+  - 1859
+  - 1860
+  - 1861
+  - 1862
+  - 1863
+  - 1864
+  - 1865
+  - 1866
+  - 1867
+  - 1868
+  - 1869
+  - 1870
+  - 1871
+  - 1872
+  - 1873
+  - 1874
+  - 1875
+  - 1876
+  - 1877
+  - 1878
+  - 1879
+  - 1880
+  - 1881
+  - 1882
+  - 1883
+  - 1884
+  - 1885
+  - 1886
+  - 1887
+  - 1888
+  - 1889
+  - 1890
+  - 1891
+  - 1892
+  - 1893
+  - 1894
+  - 1895
+  - 1896
+  - 1897
+  - 1898
+  - 1899
+  - 1901
+  - 1902
+  - 1903
+  - 1904
+  - 1905
+  - 1906
+  - 1907
+  - 1908
+  - 1909
+  - 1915
+  - 1916
+  - 1917
+  - 1918
+  - 1919
+  - 1920
+  - 1921
+  - 1922
+  - 1923
+  - 1924
+  - 1925
+  - 1926
+  - 1927
+  - 1928
+  - 1929
+  - 1930
+  - 1931
+  - 1932
+  - 1933
+  - 1934
+  - 1935
+  - 1936
+  - 1937
+  - 1938
+  - 1939
+  - 1940
+  - 1941
+  - 1942
+  - 1943
+  - 1944
+  - 1945
+  - 1946
+  - 1947
+  - 1948
+  - 1949
+  - 1950
+  - 1951
+  - 1952
+  - 1953
+  - 1954
+  - 1955
+  - 1956
+  - 1957
+  - 1958
+  - 1959
+  - 1960
+  - 1961
+  - 1962
+  - 1963
+  - 1964
+  - 1965
+  - 1966
+  - 1967
+  - 1968
+  - 1969
+  - 1970
+  - 1971
+  - 1972
+  - 1973
+  - 1974
+  - 1975
+  - 1976
+  - 1977
+  - 1978
+  - 1979
+  - 1982
+  - 1983
+  - 1984
+  - 1985
+  - 1986
+  - 1987
+  - 1988
+  - 1989
+  - 1990
+  - 1991
+  - 1992
+  - 1993
+  - 1994
+  - 1995
+  - 1996
+  - 1997
+  - 1998
+  - 2004
+  - 2005
+  - 2006
+  - 2008
+  - 2009
+  - 2010
+  - 2011
+  - 2012
+  - 2013
+  - 2014
+  - 2015
+  - 2016
+  - 2017
+  - 2018
+  - 2019
+  - 2020
+  - 2023
+  - 2024
+  - 2025
+  - 2027
+  - 2028
+  - 2029
+  - 2030
+  - 2032
+  - 2033
+  - 2034
+  - 2035
+  - 2036
+  - 2037
+  - 2038
+  - 2039
+  - 2040
+  - 2041
+  - 2042
+  - 2043
+  - 2044
+  - 2046
+  - 2047
+  - 2048
+  - 2049
+  - 2050
+  - 2051
+  - 2052
+  - 2053
+  - 2054
+  - 2055
+  - 2056
+  - 2057
+  - 2058
+  - 2059
+  - 2060
+  - 2061
+  - 2063
+  - 2064
+  - 2065
+  - 2066
+  - 2067
+  - 2068
+  - 2069
+  - 2070
+  - 2071
+  - 2072
+  - 2073
+  - 2074
+  - 2075
+  - 2076
+  - 2077
+  - 2078
+  - 2079
+  - 2080
+  - 2081
+  - 2082
+  - 2083
+  - 2085
+  - 2086
+  - 2087
+  - 2088
+  - 2089
+  - 2090
+  - 2091
+  - 2092
+  - 2093
+  - 2094
+  - 2095
+  - 2096
+  - 2097
+  - 2098
+  - 2099
+  - 2100
+  - 2101
+  - 2102
+  - 2103
+  - 2104
+  - 2105
+  - 2106
+  - 2107
+  - 2108
+  - 2109
+  - 2110
+  - 2111
+  - 2112
+  - 2113
+  - 2114
+  - 2115
+  - 2116
+  - 2117
+  - 2118
+  - 2119
+  - 2120
+  - 2121
+  - 2122
+  - 2123
+  - 2124
+  - 2125
+  - 2126
+  - 2127
+  - 2128
+  - 2129
+  - 2130
+  - 2131
+  - 2132
+  - 2133
+  - 2134
+  - 2135
+  - 2136
+  - 2137
+  - 2138
+  - 2139
+  - 2140
+  - 2141
+  - 2142
+  - 2143
+  - 2144
+  - 2145
+  - 2146
+  - 2147
+  - 2148
+  - 2149
+  - 2150
+  - 2151
+  - 2152
+  - 2153
+  - 2154
+  - 2155
+  - 2156
+  - 2157
+  - 2158
+  - 2159
+  - 2160
+  - 2161
+  - 2162
+  - 2163
+  - 2164
+  - 2165
+  - 2166
+  - 2172
+  - 2174
+  - 2175
+  - 2176
+  - 2177
+  - 2178
+  - 2179
+  - 2180
+  - 2181
+  - 2182
+  - 2183
+  - 2184
+  - 2185
+  - 2186
+  - 2187
+  - 2188
+  - 2189
+  - 2190
+  - 2191
+  - 2192
+  - 2193
+  - 2194
+  - 2195
+  - 2196
+  - 2197
+  - 2198
+  - 2199
+  - 2200
+  - 2201
+  - 2202
+  - 2203
+  - 2204
+  - 2205
+  - 2206
+  - 2207
+  - 2208
+  - 2209
+  - 2210
+  - 2211
+  - 2212
+  - 2213
+  - 2214
+  - 2215
+  - 2216
+  - 2217
+  - 2218
+  - 2219
+  - 2220
+  - 2221
+  - 2222
+  - 2223
+  - 2225
+  - 2226
+  - 2227
+  - 2228
+  - 2229
+  - 2230
+  - 2231
+  - 2232
+  - 2233
+  - 2234
+  - 2235
+  - 2236
+  - 2237
+  - 2238
+  - 2239
+  - 2240
+  - 2241
+  - 2242
+  - 2243
+  - 2244
+  - 2245
+  - 2246
+  - 2247
+  - 2248
+  - 2249
+  - 2250
+  - 2251
+  - 2252
+  - 2253
+  - 2254
+  - 2255
+  - 2256
+  - 2257
+  - 2258
+  - 2259
+  - 2260
+  - 2261
+  - 2262
+  - 2263
+  - 2264
+  - 2265
+  - 2266
+  - 2267
+  - 2268
+  - 2269
+  - 2270
+  - 2271
+  - 2272
+  - 2273
+  - 2274
+  - 2275
+  - 2276
+  - 2277
+  - 2278
+  - 2279
+  - 2280
+  - 2281
+  - 2282
+  - 2283
+  - 2284
+  - 2285
+  - 2286
+  - 2287
+  - 2288
+  - 2289
+  - 2290
+  - 2291
+  - 2292
+  - 2293
+  - 2294
+  - 2295
+  - 2296
+  - 2297
+  - 2298
+  - 2299
+
+# gioco.db:spillo_destinazione: righe 223 → 223; aggiunte 157, tolte 157, cambiate 0
+  + 2302
+  + 2320
+  + 2321
+  + 2322
+  + 2323
+  + 2329
+  + 2333
+  + 2334
+  + 2340
+  + 2345
+  + 2347
+  + 2360
+  + 2364
+  + 2366
+  + 2371
+  + 2372
+  + 2373
+  + 2374
+  + 2375
+  + 2390
+  + 2399
+  + 2401
+  + 2405
+  + 2406
+  + 2425
+  + 2426
+  + 2439
+  + 2445
+  + 2452
+  + 2464
+  + 2465
+  + 2466
+  + 2474
+  + 2475
+  + 2477
+  + 2479
+  + 2480
+  + 2503
+  + 2504
+  + 2507
+  + 2508
+  + 2522
+  + 2523
+  + 2524
+  + 2525
+  + 2526
+  + 2527
+  + 2528
+  + 2529
+  + 2530
+  + 2534
+  + 2538
+  + 2539
+  + 2546
+  + 2548
+  + 2549
+  + 2550
+  + 2551
+  + 2552
+  + 2553
+  + 2554
+  + 2556
+  + 2557
+  + 2558
+  + 2559
+  + 2560
+  + 2564
+  + 2565
+  + 2566
+  + 2568
+  + 2569
+  + 2570
+  + 2571
+  + 2574
+  + 2577
+  + 2581
+  + 2582
+  + 2584
+  + 2590
+  + 2603
+  + 2605
+  + 2609
+  + 2610
+  + 2611
+  + 2626
+  + 2627
+  + 2628
+  + 2630
+  + 2641
+  + 2642
+  + 2649
+  + 2650
+  + 2651
+  + 2658
+  + 2665
+  + 2666
+  + 2669
+  + 2678
+  + 2716
+  + 2727
+  + 2728
+  + 2732
+  + 2733
+  + 2740
+  + 2743
+  + 2744
+  + 2764
+  + 2767
+  + 2768
+  + 2769
+  + 2772
+  + 2773
+  + 2776
+  + 2777
+  + 2778
+  + 2779
+  + 2780
+  + 2782
+  + 2786
+  + 2789
+  + 2791
+  + 2792
+  + 2793
+  + 2795
+  + 2796
+  + 2798
+  + 2799
+  + 2817
+  + 2826
+  + 2827
+  + 2830
+  + 2831
+  + 2832
+  + 2834
+  + 2836
+  + 2837
+  + 2840
+  + 2842
+  + 2843
+  + 2844
+  + 2845
+  + 2854
+  + 2855
+  + 2859
+  + 2860
+  + 2863
+  + 2864
+  + 2866
+  + 2869
+  + 2885
+  + 2894
+  + 2896
+  + 2903
+  + 2909
+  + 2910
+  + 2918
+  + 2919
+  - 515
+  - 518
+  - 520
+  - 537
+  - 548
+  - 577
+  - 578
+  - 580
+  - 589
+  - 594
+  - 595
+  - 596
+  - 603
+  - 608
+  - 616
+  - 617
+  - 618
+  - 619
+  - 620
+  - 621
+  - 636
+  - 637
+  - 639
+  - 734
+  - 737
+  - 746
+  - 747
+  - 751
+  - 759
+  - 760
+  - 781
+  - 782
+  - 791
+  - 792
+  - 799
+  - 804
+  - 810
+  - 1665
+  - 1666
+  - 1786
+  - 1801
+  - 1810
+  - 1815
+  - 1832
+  - 1833
+  - 1834
+  - 1835
+  - 1849
+  - 1855
+  - 1862
+  - 1863
+  - 1864
+  - 1866
+  - 1890
+  - 1891
+  - 1892
+  - 1893
+  - 1894
+  - 1895
+  - 1896
+  - 1897
+  - 1898
+  - 1899
+  - 1901
+  - 1902
+  - 1903
+  - 1904
+  - 1905
+  - 1906
+  - 1907
+  - 1908
+  - 1916
+  - 1921
+  - 1925
+  - 1926
+  - 1927
+  - 1928
+  - 1930
+  - 1931
+  - 1935
+  - 1936
+  - 1937
+  - 1938
+  - 1939
+  - 1940
+  - 1944
+  - 1947
+  - 1949
+  - 1950
+  - 1952
+  - 1957
+  - 1983
+  - 1984
+  - 2009
+  - 2010
+  - 2016
+  - 2017
+  - 2018
+  - 2019
+  - 2020
+  - 2027
+  - 2032
+  - 2035
+  - 2038
+  - 2055
+  - 2073
+  - 2074
+  - 2075
+  - 2076
+  - 2083
+  - 2129
+  - 2131
+  - 2142
+  - 2144
+  - 2146
+  - 2147
+  - 2148
+  - 2174
+  - 2175
+  - 2181
+  - 2182
+  - 2185
+  - 2186
+  - 2188
+  - 2189
+  - 2190
+  - 2191
+  - 2192
+  - 2193
+  - 2194
+  - 2195
+  - 2196
+  - 2214
+  - 2216
+  - 2217
+  - 2222
+  - 2223
+  - 2225
+  - 2227
+  - 2230
+  - 2231
+  - 2232
+  - 2234
+  - 2235
+  - 2236
+  - 2245
+  - 2246
+  - 2248
+  - 2249
+  - 2252
+  - 2268
+  - 2276
+  - 2281
+  - 2284
+  - 2290
+  - 2291
+  - 2292
+
+# gioco.db:spillo_voce: righe 539 → 539; aggiunte 539, tolte 539, cambiate 0
+  + 2538|kamoshida-01-cancello-del-castello-ingresso-accedi-alla-torre
+  + 2473|kamoshida-01-cancello-del-castello-ingresso-apri-forziere
+  + 2518|kamoshida-01-cancello-del-castello-ingresso-apri-forziere-raro
+  + 2468|kamoshida-01-cancello-del-castello-ingresso-apri-il-forziere
+  + 2547|kamoshida-01-cancello-del-castello-ingresso-apri-il-forziere-2
+  + 2420|kamoshida-01-cancello-del-castello-ingresso-continua-a-indagare-nel-castello
+  + 2421|kamoshida-01-cancello-del-castello-ingresso-continua-a-indagare-nel-castello
+  + 2507|kamoshida-01-cancello-del-castello-ingresso-continua-dal-livello-1
+  + 2531|kamoshida-01-cancello-del-castello-ingresso-continua-dal-livello-1
+  + 2532|kamoshida-01-cancello-del-castello-ingresso-continua-dal-livello-1
+  + 2533|kamoshida-01-cancello-del-castello-ingresso-continua-dal-livello-1
+  + 2430|kamoshida-01-cancello-del-castello-ingresso-depreda-oggetti
+  + 2431|kamoshida-01-cancello-del-castello-ingresso-depreda-oggetti
+  + 2432|kamoshida-01-cancello-del-castello-ingresso-depreda-oggetti
+  + 2516|kamoshida-01-cancello-del-castello-ingresso-edificio-est-dependance
+  + 2536|kamoshida-01-cancello-del-castello-ingresso-esamina-stanza-adiacente
+  + 2537|kamoshida-01-cancello-del-castello-ingresso-esamina-stanza-adiacente
+  + 2469|kamoshida-01-cancello-del-castello-ingresso-esplora-la-stanza
+  + 2391|kamoshida-01-cancello-del-castello-ingresso-indaga-nel-castello
+  + 2392|kamoshida-01-cancello-del-castello-ingresso-indaga-nel-castello
+  + 2505|kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici
+  + 2511|kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici
+  + 2512|kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici
+  + 2513|kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici
+  + 2514|kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici
+  + 2515|kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici
+  + 2524|kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici
+  + 2554|kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici
+  + 2428|kamoshida-01-cancello-del-castello-ingresso-nemici-aura-rossa
+  + 2429|kamoshida-01-cancello-del-castello-ingresso-nemici-aura-rossa
+  + 2498|kamoshida-01-cancello-del-castello-ingresso-ottieni-medaglia-di-kamoshida
+  + 2425|kamoshida-01-cancello-del-castello-ingresso-passa-per-i-lampadari
+  + 2475|kamoshida-01-cancello-del-castello-ingresso-passa-per-i-lampadari
+  + 2476|kamoshida-01-cancello-del-castello-ingresso-passa-per-i-lampadari
+  + 2439|kamoshida-01-cancello-del-castello-ingresso-passaggio-aerazione
+  + 2448|kamoshida-01-cancello-del-castello-ingresso-passaggio-aerazione
+  + 2449|kamoshida-01-cancello-del-castello-ingresso-passaggio-aerazione
+  + 2450|kamoshida-01-cancello-del-castello-ingresso-percorri-corridoio
+  + 2472|kamoshida-01-cancello-del-castello-ingresso-percorri-corridoio
+  + 2485|kamoshida-01-cancello-del-castello-ingresso-perlustra-prima-stanza
+  + 2491|kamoshida-01-cancello-del-castello-ingresso-perlustra-prima-stanza
+  + 2492|kamoshida-01-cancello-del-castello-ingresso-perlustra-prima-stanza
+  + 2493|kamoshida-01-cancello-del-castello-ingresso-perlustra-prima-stanza
+  + 2486|kamoshida-01-cancello-del-castello-ingresso-perlustra-stanza-del-palestrato
+  + 2488|kamoshida-01-cancello-del-castello-ingresso-perlustra-stanza-del-palestrato
+  + 2489|kamoshida-01-cancello-del-castello-ingresso-perlustra-stanza-del-palestrato
+  + 2483|kamoshida-01-cancello-del-castello-ingresso-perlustra-stanza-dello-schiavo
+  + 2495|kamoshida-01-cancello-del-castello-ingresso-posiziona-libro-della-regina
+  + 2497|kamoshida-01-cancello-del-castello-ingresso-posiziona-libro-dello-schiavo
+  + 2541|kamoshida-01-cancello-del-castello-ingresso-raccogli-forziere
+  + 2542|kamoshida-01-cancello-del-castello-ingresso-raccogli-forziere-raro
+  + 2550|kamoshida-01-cancello-del-castello-ingresso-raccogli-forziere-raro
+  + 2553|kamoshida-01-cancello-del-castello-ingresso-raccogli-forziere-raro
+  + 2458|kamoshida-01-cancello-del-castello-ingresso-raccogli-mappa-del-castello
+  + 2478|kamoshida-01-cancello-del-castello-ingresso-raggiungi-edificio-est-3p
+  + 2387|kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine
+  + 2393|kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine
+  + 2394|kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine
+  + 2395|kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine
+  + 2400|kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine
+  + 2441|kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine-2
+  + 2442|kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine-2
+  + 2467|kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine-2
+  + 2415|kamoshida-01-cancello-del-castello-ingresso-razia-il-corridoio
+  + 2416|kamoshida-01-cancello-del-castello-ingresso-razia-il-corridoio
+  + 2398|kamoshida-01-cancello-del-castello-ingresso-razia-scatola-alla-base-della-scala-e-la-botte-al-piano-di-sopra
+  + 2412|kamoshida-01-cancello-del-castello-ingresso-razia-scatola-alla-base-della-scala-e-la-botte-al-piano-di-sopra
+  + 2417|kamoshida-01-cancello-del-castello-ingresso-razia-urna-in-fondo
+  + 2506|kamoshida-01-cancello-del-castello-ingresso-razzia-la-cappella
+  + 2519|kamoshida-01-cancello-del-castello-ingresso-razzia-la-cappella
+  + 2521|kamoshida-01-cancello-del-castello-ingresso-razzia-la-cappella
+  + 2517|kamoshida-01-cancello-del-castello-ingresso-recupera-forziere
+  + 2494|kamoshida-01-cancello-del-castello-ingresso-recupera-libro-del-re
+  + 2496|kamoshida-01-cancello-del-castello-ingresso-recupera-libro-del-re
+  + 2501|kamoshida-01-cancello-del-castello-ingresso-recupera-oggetto
+  + 2534|kamoshida-01-cancello-del-castello-ingresso-recupero-1-seme-della-bramosia
+  + 2535|kamoshida-01-cancello-del-castello-ingresso-recupero-1-seme-della-bramosia
+  + 2451|kamoshida-01-cancello-del-castello-ingresso-ricevi-rampino-da-morgana
+  + 2452|kamoshida-01-cancello-del-castello-ingresso-ricevi-rampino-da-morgana
+  + 2463|kamoshida-01-cancello-del-castello-ingresso-ricevi-rampino-da-morgana
+  + 2422|kamoshida-01-cancello-del-castello-ingresso-saccheggia-gli-oggetti
+  + 2423|kamoshida-01-cancello-del-castello-ingresso-saccheggia-gli-oggetti
+  + 2424|kamoshida-01-cancello-del-castello-ingresso-saccheggia-gli-oggetti
+  + 2427|kamoshida-01-cancello-del-castello-ingresso-saccheggia-la-mensola
+  + 2436|kamoshida-01-cancello-del-castello-ingresso-saccheggia-la-mensola-2
+  + 2411|kamoshida-01-cancello-del-castello-ingresso-sala-centrale-2p
+  + 2508|kamoshida-01-cancello-del-castello-ingresso-sali-verso-il-tetto
+  + 2539|kamoshida-01-cancello-del-castello-ingresso-sali-verso-il-tetto
+  + 2557|kamoshida-01-cancello-del-castello-ingresso-sali-verso-il-tetto
+  + 2540|kamoshida-01-cancello-del-castello-ingresso-salta-lungo-le-travi
+  + 2549|kamoshida-01-cancello-del-castello-ingresso-salta-lungo-le-travi
+  + 2555|kamoshida-01-cancello-del-castello-ingresso-salta-lungo-le-travi
+  + 2503|kamoshida-01-cancello-del-castello-ingresso-scappate-dallagguato
+  + 2546|kamoshida-01-cancello-del-castello-ingresso-scendi-la-scala
+  + 2389|kamoshida-01-cancello-del-castello-ingresso-sconfiggete-nemico-e-raziate-corridoio
+  + 2396|kamoshida-01-cancello-del-castello-ingresso-sconfiggete-nemico-e-raziate-corridoio
+  + 2397|kamoshida-01-cancello-del-castello-ingresso-sconfiggete-nemico-e-raziate-corridoio
+  + 2502|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-castigatore-divino
+  + 2462|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-guardia-sala-da-pranzo
+  + 2413|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-i-nemici
+  + 2414|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-i-nemici
+  + 2487|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-i-nemici-2
+  + 2444|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-il-nemico-e-negozia
+  + 2481|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemici-esterni
+  + 2482|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemici-esterni
+  + 2484|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemici-esterni
+  + 2490|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemici-esterni
+  + 2443|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemico
+  + 2386|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemico-corridoio
+  + 2509|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemico-forte
+  + 2388|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemico-sul-retro
+  + 2499|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-ombre-sciagura
+  + 2500|kamoshida-01-cancello-del-castello-ingresso-sistema-libro-palestrato
+  + 2419|kamoshida-01-cancello-del-castello-ingresso-tira-la-leva-iniziale
+  + 2433|kamoshida-01-cancello-del-castello-ingresso-tira-la-prima-leva
+  + 2438|kamoshida-01-cancello-del-castello-ingresso-tira-la-quinta-leva
+  + 2418|kamoshida-01-cancello-del-castello-ingresso-tira-la-seconda-leva
+  + 2434|kamoshida-01-cancello-del-castello-ingresso-tira-la-seconda-leva-2
+  + 2435|kamoshida-01-cancello-del-castello-ingresso-tira-la-terza-leva
+  + 2437|kamoshida-01-cancello-del-castello-ingresso-tira-la-terza-leva
+  + 2440|kamoshida-01-cancello-del-castello-ingresso-tira-lultima-leva
+  + 2445|kamoshida-01-cancello-del-castello-ingresso-trova-una-strada-alternativa
+  + 2446|kamoshida-01-cancello-del-castello-ingresso-trova-una-strada-alternativa
+  + 2447|kamoshida-01-cancello-del-castello-ingresso-trova-una-strada-alternativa
+  + 2520|kamoshida-01-cancello-del-castello-ingresso-usa-medaglia
+  + 2370|kamoshida-01-cancello-del-castello-ingresso-visita-la-stanza-di-velluto
+  + 2325|kamoshida-1-tutorial-palazzo-11-04-esamina-la-statua-di-kamoshida
+  + 2363|kamoshida-1-tutorial-palazzo-11-04-esplorare-le-prigioni
+  + 2333|kamoshida-1-tutorial-palazzo-11-04-identifica-uscita-dal-castello
+  + 2354|kamoshida-1-tutorial-palazzo-11-04-imprigionare-il-re
+  + 2362|kamoshida-1-tutorial-palazzo-11-04-movimento-base-nel-palazzo
+  + 2324|kamoshida-1-tutorial-palazzo-11-04-parla-con-morgana
+  + 2361|kamoshida-1-tutorial-palazzo-11-04-primo-combattimento
+  + 2332|kamoshida-1-tutorial-palazzo-11-04-sconfiggi-le-ragazze-seducenti
+  + 2331|kamoshida-1-tutorial-palazzo-11-04-sconfiggi-tutti-i-nemici
+  + 2579|kamoshida-13-tetto-apri-forziere
+  + 2568|kamoshida-13-tetto-ispeziona-linterno-della-torre
+  + 2578|kamoshida-13-tetto-ispeziona-linterno-della-torre
+  + 2582|kamoshida-13-tetto-ispeziona-linterno-della-torre
+  + 2567|kamoshida-13-tetto-razzia-oggetti-sul-tetto
+  + 2572|kamoshida-13-tetto-razzia-oggetti-sul-tetto
+  + 2573|kamoshida-13-tetto-razzia-oggetti-sul-tetto
+  + 2561|kamoshida-13-tetto-sconfiggi-nemici-potenti
+  + 2562|kamoshida-13-tetto-sconfiggi-nemici-potenti
+  + 2563|kamoshida-13-tetto-sconfiggi-nemici-potenti
+  + 2575|kamoshida-13-tetto-segui-percorso
+  + 2581|kamoshida-13-tetto-seme-della-bramosia
+  + 2583|kamoshida-13-tetto-seme-della-bramosia
+  + 2584|kamoshida-13-tetto-seme-della-bramosia
+  + 2585|kamoshida-13-tetto-seme-della-bramosia
+  + 2576|kamoshida-13-tetto-usa-il-condotto-di-areazione
+  + 2577|kamoshida-13-tetto-usa-il-condotto-di-areazione
+  + 2580|kamoshida-13-tetto-usa-il-condotto-di-areazione
+  + 2407|kamoshida-15-torre-centrale-apri-2-forzieri
+  + 2408|kamoshida-15-torre-centrale-apri-2-forzieri
+  + 2614|kamoshida-15-torre-centrale-apri-forziere
+  + 2601|kamoshida-15-torre-centrale-apri-forziere-raro
+  + 2645|kamoshida-15-torre-centrale-assalta-il-nemico
+  + 2605|kamoshida-15-torre-centrale-attraversa-il-passaggio-segreto
+  + 2649|kamoshida-15-torre-centrale-entra-nella-sala-del-trono
+  + 2366|kamoshida-15-torre-centrale-esci-dal-castello
+  + 2606|kamoshida-15-torre-centrale-esplora-la-stanza-segreta
+  + 2607|kamoshida-15-torre-centrale-esplora-la-stanza-segreta
+  + 2608|kamoshida-15-torre-centrale-esplora-la-stanza-segreta
+  + 2589|kamoshida-15-torre-centrale-esplora-stanza-successiva
+  + 2595|kamoshida-15-torre-centrale-esplora-stanza-successiva
+  + 2596|kamoshida-15-torre-centrale-esplora-stanza-successiva
+  + 2590|kamoshida-15-torre-centrale-lascensore-sensuale
+  + 2591|kamoshida-15-torre-centrale-lascensore-sensuale
+  + 2631|kamoshida-15-torre-centrale-osserva-statua-di-kamoshida
+  + 2646|kamoshida-15-torre-centrale-perlustra-corridoio
+  + 2647|kamoshida-15-torre-centrale-perlustra-corridoio
+  + 2659|kamoshida-15-torre-centrale-perlustra-corridoio
+  + 2621|kamoshida-15-torre-centrale-perlustra-la-stanza
+  + 2622|kamoshida-15-torre-centrale-perlustra-la-stanza
+  + 2625|kamoshida-15-torre-centrale-perlustra-la-stanza
+  + 2639|kamoshida-15-torre-centrale-raccogli-forziere
+  + 2640|kamoshida-15-torre-centrale-raccogli-forziere-2
+  + 2650|kamoshida-15-torre-centrale-raccogli-forziere-3
+  + 2665|kamoshida-15-torre-centrale-raccogli-forziere-3
+  + 2668|kamoshida-15-torre-centrale-raccogli-forziere-3
+  + 2454|kamoshida-15-torre-centrale-raccogli-oggetti
+  + 2661|kamoshida-15-torre-centrale-raccogli-oggetti-2
+  + 2662|kamoshida-15-torre-centrale-raccogli-oggetti-2
+  + 2664|kamoshida-15-torre-centrale-raccogli-oggetti-2
+  + 2635|kamoshida-15-torre-centrale-razia-torre-livello-superiore
+  + 2636|kamoshida-15-torre-centrale-razia-torre-livello-superiore
+  + 2638|kamoshida-15-torre-centrale-razia-torre-livello-superiore
+  + 2592|kamoshida-15-torre-centrale-razzia-oggetto
+  + 2613|kamoshida-15-torre-centrale-recupero-3-seme-della-bramosia
+  + 2587|kamoshida-15-torre-centrale-rompi-il-vaso
+  + 2617|kamoshida-15-torre-centrale-rompi-urna
+  + 2456|kamoshida-15-torre-centrale-sblocca-ascensore
+  + 2455|kamoshida-15-torre-centrale-sblocca-le-grate
+  + 2457|kamoshida-15-torre-centrale-sblocca-le-grate
+  + 2464|kamoshida-15-torre-centrale-scendi-le-scale
+  + 2465|kamoshida-15-torre-centrale-scendi-le-scale
+  + 2597|kamoshida-15-torre-centrale-sconfiggi-i-capitani-delle-guardie
+  + 2598|kamoshida-15-torre-centrale-sconfiggi-i-capitani-delle-guardie
+  + 2599|kamoshida-15-torre-centrale-sconfiggi-i-capitani-delle-guardie
+  + 2600|kamoshida-15-torre-centrale-sconfiggi-i-capitani-delle-guardie
+  + 2588|kamoshida-15-torre-centrale-sconfiggi-il-nemico
+  + 2634|kamoshida-15-torre-centrale-sconfiggi-il-nemico-2
+  + 2615|kamoshida-15-torre-centrale-sconfiggi-nemici
+  + 2616|kamoshida-15-torre-centrale-sconfiggi-nemici
+  + 2619|kamoshida-15-torre-centrale-sconfiggi-nemici-2
+  + 2620|kamoshida-15-torre-centrale-sconfiggi-nemici-2
+  + 2623|kamoshida-15-torre-centrale-sconfiggi-nemico
+  + 2624|kamoshida-15-torre-centrale-sconfiggi-nemico
+  + 2612|kamoshida-15-torre-centrale-sconfiggi-straziato-re-dei-desideri
+  + 2637|kamoshida-15-torre-centrale-segui-i-pilastri
+  + 2594|kamoshida-15-torre-centrale-tira-la-leva
+  + 2628|kamoshida-15-torre-centrale-torna-al-livello-inferiore
+  + 2466|kamoshida-15-torre-centrale-torna-indietro
+  + 2609|kamoshida-15-torre-centrale-tornate-sullascensore-e-alla-torre-centrale
+  + 2611|kamoshida-15-torre-centrale-tornate-sullascensore-e-alla-torre-centrale
+  + 2586|kamoshida-15-torre-centrale-torre-centrale
+  + 2627|kamoshida-15-torre-centrale-torre-livello-superiore
+  + 2629|kamoshida-15-torre-centrale-torre-livello-superiore
+  + 2610|kamoshida-15-torre-centrale-usa-lascensore
+  + 2603|kamoshida-15-torre-centrale-verso-il-livello-intermedio
+  + 2630|kamoshida-15-torre-centrale-verso-la-sala-del-trono
+  + 2373|kamoshida-rubare-i-desideri-del-cuore-infiltrati-fino-alla-safe-room-della-sala-del-trono
+  + 2643|kamoshida-rubare-i-desideri-del-cuore-infiltrati-fino-alla-safe-room-della-sala-del-trono
+  + 2651|kamoshida-rubare-i-desideri-del-cuore-raggiungi-la-sala-del-tesoro
+  + 2667|kamoshida-rubare-i-desideri-del-cuore-ruba-il-tesoro
+  + 2652|kamoshida-rubare-i-desideri-del-cuore-sconfiggi-kamoshida
+  + 2322|kamoshida-tutorial-palazzo-12-04-cerca-la-palestra
+  + 2335|kamoshida-tutorial-palazzo-12-04-cerca-la-palestra
+  + 2348|kamoshida-tutorial-palazzo-12-04-controlla-gli-studenti-schiavi
+  + 2349|kamoshida-tutorial-palazzo-12-04-controlla-gli-studenti-schiavi
+  + 2350|kamoshida-tutorial-palazzo-12-04-controlla-gli-studenti-schiavi
+  + 2351|kamoshida-tutorial-palazzo-12-04-controlla-gli-studenti-schiavi
+  + 2352|kamoshida-tutorial-palazzo-12-04-controlla-gli-studenti-schiavi
+  + 2321|kamoshida-tutorial-palazzo-12-04-indaga-sugli-schiavi
+  + 2326|kamoshida-tutorial-palazzo-12-04-raggiungi-le-celle
+  + 2337|kamoshida-tutorial-palazzo-12-04-safe-room
+  + 2347|kamoshida-tutorial-palazzo-12-04-scappa-dal-castello
+  + 2310|kamoshida-tutorial-palazzo-12-04-sconfiggi-3-bestie-bicorne-sporche-durante-la-fuga
+  + 2311|kamoshida-tutorial-palazzo-12-04-sconfiggi-3-bestie-bicorne-sporche-durante-la-fuga
+  + 2343|kamoshida-tutorial-palazzo-12-04-tutorial-assalto
+  + 2344|kamoshida-tutorial-palazzo-12-04-tutorial-assalto-2
+  + 2341|kamoshida-tutorial-palazzo-12-04-tutorial-utilizzo-pistola
+  + 2342|kamoshida-tutorial-palazzo-12-04-tutorial-utilizzo-pistola
+  + 2306|kamoshida-tutorial-palazzo-15-04-affronta-bestie-bicorne-sporche
+  + 2409|kamoshida-tutorial-palazzo-15-04-apri-il-tesoro
+  + 2371|kamoshida-tutorial-palazzo-15-04-infiltrati-nel-castello
+  + 2376|kamoshida-tutorial-palazzo-15-04-raggiungi-la-safe-room
+  + 2307|kamoshida-tutorial-palazzo-15-04-rapina-la-ragazza-seducente
+  + 2403|kamoshida-tutorial-palazzo-15-04-salva-ann
+  + 2410|kamoshida-tutorial-palazzo-15-04-sblocca-la-porta
+  + 2383|kamoshida-tutorial-palazzo-15-04-sconfiggi-i-nemici
+  + 2384|kamoshida-tutorial-palazzo-15-04-sconfiggi-i-nemici
+  + 2385|kamoshida-tutorial-palazzo-15-04-sconfiggi-i-nemici
+  + 2404|kamoshida-tutorial-palazzo-15-04-sconfiggi-il-capitano-delle-guardie
+  + 2698|madarame-01-entrata-del-museo-affronta-nemici
+  + 2712|madarame-01-entrata-del-museo-affronta-nemici
+  + 2697|madarame-01-entrata-del-museo-depreda-installazione-artistica
+  + 2689|madarame-01-entrata-del-museo-esamina-la-scultura-gigante
+  + 2725|madarame-01-entrata-del-museo-ottieni-forziere
+  + 2688|madarame-01-entrata-del-museo-prendi-lopuscolo-del-museo
+  + 2679|madarame-01-entrata-del-museo-prima-sala-della-mostra
+  + 2680|madarame-01-entrata-del-museo-raccogli-e-depreda-le-installazioni-artistiche
+  + 2681|madarame-01-entrata-del-museo-raccogli-e-depreda-le-installazioni-artistiche
+  + 2682|madarame-01-entrata-del-museo-raccogli-e-depreda-le-installazioni-artistiche
+  + 2683|madarame-01-entrata-del-museo-raccogli-e-depreda-le-installazioni-artistiche
+  + 2684|madarame-01-entrata-del-museo-raccogli-e-depreda-le-installazioni-artistiche
+  + 2685|madarame-01-entrata-del-museo-raccogli-e-depreda-le-installazioni-artistiche
+  + 2686|madarame-01-entrata-del-museo-raccogli-e-depreda-le-installazioni-artistiche
+  + 2687|madarame-01-entrata-del-museo-raccogli-e-depreda-le-installazioni-artistiche
+  + 2723|madarame-01-entrata-del-museo-raccogli-il-tesoro
+  + 2717|madarame-01-entrata-del-museo-raccogli-installazioni-artistiche
+  + 2718|madarame-01-entrata-del-museo-raccogli-installazioni-artistiche
+  + 2724|madarame-01-entrata-del-museo-raccogli-la-sciabola-lunare
+  + 2732|madarame-01-entrata-del-museo-raggiungi-dal-tetto-larea-protetta
+  + 2726|madarame-01-entrata-del-museo-recupera-anello-atomico
+  + 2715|madarame-01-entrata-del-museo-saccheggia-installazione
+  + 2731|madarame-01-entrata-del-museo-saccheggia-installazione-artistica
+  + 2730|madarame-01-entrata-del-museo-sblocca-la-porta
+  + 2699|madarame-01-entrata-del-museo-sconfiggi-nemico
+  + 2700|madarame-01-entrata-del-museo-stanza-del-tesoro
+  + 2716|madarame-01-entrata-del-museo-usa-il-rampino-per-andare-al-livello-1
+  + 2673|madarame-01-entrata-del-museo/0
+  + 2674|madarame-01-entrata-del-museo/0
+  + 2675|madarame-01-entrata-del-museo/0
+  + 2676|madarame-01-entrata-del-museo/0
+  + 2678|madarame-01-entrata-del-museo/1
+  + 2804|madarame-06-sala-del-tesoro-atrio/0
+  + 2805|madarame-06-sala-del-tesoro-atrio/1
+  + 2806|madarame-06-sala-del-tesoro-atrio/2
+  + 2807|madarame-06-sala-del-tesoro-atrio/2
+  + 2821|madarame-06-sala-del-tesoro-atrio/2
+  + 2808|madarame-06-sala-del-tesoro-atrio/3
+  + 2822|madarame-06-sala-del-tesoro-atrio/3
+  + 2811|madarame-06-sala-del-tesoro-atrio/4
+  + 2812|madarame-06-sala-del-tesoro-atrio/5
+  + 2825|madarame-06-sala-del-tesoro-atrio/5
+  + 2823|madarame-06-sala-del-tesoro-atrio/7
+  + 2824|madarame-06-sala-del-tesoro-atrio/7
+  + 2722|madarame-disabilita-i-sistemi-di-sicurezza-affronta-fabbro-amareggiato
+  + 2801|madarame-disabilita-i-sistemi-di-sicurezza-affronta-lombra-agente-security
+  + 2798|madarame-disabilita-i-sistemi-di-sicurezza-cerca-la-sala-di-controllo
+  + 2803|madarame-disabilita-i-sistemi-di-sicurezza-cerca-la-sala-di-controllo
+  + 2826|madarame-disabilita-i-sistemi-di-sicurezza-cerca-la-sala-di-controllo
+  + 2799|madarame-disabilita-i-sistemi-di-sicurezza-la-barriera-viene-abbattuta
+  + 2773|madarame-disabilita-i-sistemi-di-sicurezza-percorso-di-consapevolezza
+  + 2802|madarame-disabilita-i-sistemi-di-sicurezza-razzia-installazione-artistica
+  + 2804|madarame-il-furto-del-cuore-di-madarame-affronta-agente-della-security
+  + 2923|madarame-il-furto-del-cuore-di-madarame-aziona-la-leva-di-controllo
+  + 2926|madarame-il-furto-del-cuore-di-madarame-cerca-una-via-duscita
+  + 2677|madarame-il-furto-del-cuore-di-madarame-entra-nella-stanza-di-velluto
+  + 2899|madarame-il-furto-del-cuore-di-madarame-perlustra-corridoio
+  + 2900|madarame-il-furto-del-cuore-di-madarame-perlustra-corridoio
+  + 2891|madarame-il-furto-del-cuore-di-madarame-raccogli-installazione-artistica
+  + 2917|madarame-il-furto-del-cuore-di-madarame-raccogli-installazione-artistica-2
+  + 2904|madarame-il-furto-del-cuore-di-madarame-raccogli-installazione-artistica-3
+  + 2906|madarame-il-furto-del-cuore-di-madarame-raccogli-installazione-artistica-4
+  + 2797|madarame-il-furto-del-cuore-di-madarame-raggiungi-la-sr-stanza-principale
+  + 2886|madarame-il-furto-del-cuore-di-madarame-raggiungi-la-sr-stanza-principale
+  + 2921|madarame-il-furto-del-cuore-di-madarame-ripulisci-corridoio
+  + 2922|madarame-il-furto-del-cuore-di-madarame-ripulisci-installazione-artistica-e-osserva-leva-di-sicurezza
+  + 2925|madarame-il-furto-del-cuore-di-madarame-riunisciti-con-morgana
+  + 2918|madarame-il-furto-del-cuore-di-madarame-scendi-nel-corridoio-bloccato
+  + 2901|madarame-il-furto-del-cuore-di-madarame-segui-il-condotto
+  + 2903|madarame-il-furto-del-cuore-di-madarame-tetti-e-condotti-di-areazione
+  + 2916|madarame-il-furto-del-cuore-di-madarame-tetti-e-condotti-di-areazione
+  + 2907|madarame-il-furto-del-cuore-di-madarame-usa-rampino-asse-centrale
+  + 2797|madarame-il-furto-del-cuore-di-madarame-visita-safe-room-del-giardino
+  + 2698|madarame-nelle-profondita-del-museo-affronta-nemici-2
+  + 2712|madarame-nelle-profondita-del-museo-affronta-nemici-2
+  + 2788|madarame-nelle-profondita-del-museo-affronta-shiki-ouji-2
+  + 2858|madarame-nelle-profondita-del-museo-apri-forziere
+  + 2857|madarame-nelle-profondita-del-museo-apri-forziere-2
+  + 2866|madarame-nelle-profondita-del-museo-apri-forziere-2
+  + 2912|madarame-nelle-profondita-del-museo-apri-forziere-3
+  + 2756|madarame-nelle-profondita-del-museo-avanza-nel-corridoio-2
+  + 2757|madarame-nelle-profondita-del-museo-avanza-nel-corridoio-2
+  + 2758|madarame-nelle-profondita-del-museo-avanza-nel-corridoio-2
+  + 2759|madarame-nelle-profondita-del-museo-avanza-nel-corridoio-2
+  + 2760|madarame-nelle-profondita-del-museo-avanza-nel-corridoio-2
+  + 2877|madarame-nelle-profondita-del-museo-depreda-forziere
+  + 2879|madarame-nelle-profondita-del-museo-depreda-forziere-2
+  + 2880|madarame-nelle-profondita-del-museo-depreda-forziere-3
+  + 2833|madarame-nelle-profondita-del-museo-entra-nella-galleria
+  + 2892|madarame-nelle-profondita-del-museo-entra-nella-stanza-di-controllo
+  + 2677|madarame-nelle-profondita-del-museo-entra-nella-stanza-di-velluto-2
+  + 2869|madarame-nelle-profondita-del-museo-entri-nel-labirinto
+  + 2817|madarame-nelle-profondita-del-museo-esamina-il-dipinto
+  + 2816|madarame-nelle-profondita-del-museo-esamina-la-statua-di-madarame
+  + 2813|madarame-nelle-profondita-del-museo-esamina-portatile
+  + 2837|madarame-nelle-profondita-del-museo-esci-sullimpalcatura
+  + 2845|madarame-nelle-profondita-del-museo-esci-sullimpalcatura
+  + 2884|madarame-nelle-profondita-del-museo-il-segreto-che-non-ti-aspetti
+  + 2675|madarame-nelle-profondita-del-museo-installazioni-artistiche-2
+  + 2676|madarame-nelle-profondita-del-museo-installazioni-artistiche-2
+  + 2875|madarame-nelle-profondita-del-museo-la-doppia-scalinata
+  + 2882|madarame-nelle-profondita-del-museo-limportanza-dei-dettagli
+  + 2883|madarame-nelle-profondita-del-museo-locchio-dellartista
+  + 2678|madarame-nelle-profondita-del-museo-lucernario-aperto-2
+  + 2895|madarame-nelle-profondita-del-museo-osserva-di-nascosto-il-tesoro
+  + 2899|madarame-nelle-profondita-del-museo-perlustra-corridoio
+  + 2900|madarame-nelle-profondita-del-museo-perlustra-corridoio
+  + 2902|madarame-nelle-profondita-del-museo-perlustra-corridoio
+  + 2855|madarame-nelle-profondita-del-museo-premi-interruttore-saracinesca
+  + 2856|madarame-nelle-profondita-del-museo-premi-interruttore-saracinesca
+  + 2679|madarame-nelle-profondita-del-museo-prima-sala-della-mostra-2
+  + 2854|madarame-nelle-profondita-del-museo-prosegui-verso-il-livello-2
+  + 2767|madarame-nelle-profondita-del-museo-raccogli-installazione-2
+  + 2787|madarame-nelle-profondita-del-museo-raccogli-installazione-2
+  + 2865|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica
+  + 2891|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-10
+  + 2917|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-11
+  + 2904|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-12
+  + 2906|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-13
+  + 2870|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-2
+  + 2871|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-3
+  + 2721|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-4
+  + 2735|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-5
+  + 2784|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-6
+  + 2829|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-7
+  + 2874|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-8
+  + 2872|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-9
+  + 2878|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-9
+  + 2873|madarame-nelle-profondita-del-museo-raccogli-installazioni-artistiche
+  + 2876|madarame-nelle-profondita-del-museo-raccogli-installazioni-artistiche
+  + 2717|madarame-nelle-profondita-del-museo-raccogli-installazioni-artistiche-2
+  + 2718|madarame-nelle-profondita-del-museo-raccogli-installazioni-artistiche-2
+  + 2819|madarame-nelle-profondita-del-museo-raccogli-oggetti
+  + 2820|madarame-nelle-profondita-del-museo-raccogli-oggetti
+  + 2913|madarame-nelle-profondita-del-museo-raccogli-seme-della-vanita-blu
+  + 2911|madarame-nelle-profondita-del-museo-raccogli-vestito-zen
+  + 2732|madarame-nelle-profondita-del-museo-raggiungi-dal-tetto-larea-protetta
+  + 2728|madarame-nelle-profondita-del-museo-raggiungi-il-piano-2-2
+  + 2836|madarame-nelle-profondita-del-museo-raggiungi-la-roccia
+  + 2841|madarame-nelle-profondita-del-museo-raggiungi-la-roccia
+  + 2885|madarame-nelle-profondita-del-museo-raggiungi-la-sala-del-tesoro
+  + 2886|madarame-nelle-profondita-del-museo-raggiungi-la-sr-stanza-principale
+  + 2851|madarame-nelle-profondita-del-museo-razzia-installazioni-artistiche
+  + 2853|madarame-nelle-profondita-del-museo-razzia-installazioni-artistiche
+  + 2923|madarame-nelle-profondita-del-museo-riesamina-la-leva
+  + 2920|madarame-nelle-profondita-del-museo-ripulisci-corridoio
+  + 2921|madarame-nelle-profondita-del-museo-ripulisci-corridoio
+  + 2922|madarame-nelle-profondita-del-museo-ripulisci-installazione-di-sicurezza
+  + 2687|madarame-nelle-profondita-del-museo-saccheggia-2
+  + 2697|madarame-nelle-profondita-del-museo-saccheggia-2
+  + 2715|madarame-nelle-profondita-del-museo-saccheggia-installazione-2
+  + 2731|madarame-nelle-profondita-del-museo-saccheggia-installazione-artistica-3
+  + 2790|madarame-nelle-profondita-del-museo-saccheggia-installazione-artistica-4
+  + 2680|madarame-nelle-profondita-del-museo-saccheggia-installazioni-artistiche-3
+  + 2681|madarame-nelle-profondita-del-museo-saccheggia-installazioni-artistiche-3
+  + 2682|madarame-nelle-profondita-del-museo-saccheggia-installazioni-artistiche-4
+  + 2683|madarame-nelle-profondita-del-museo-saccheggia-installazioni-artistiche-4
+  + 2684|madarame-nelle-profondita-del-museo-saccheggia-installazioni-artistiche-4
+  + 2685|madarame-nelle-profondita-del-museo-saccheggia-installazioni-artistiche-4
+  + 2800|madarame-nelle-profondita-del-museo-sala-del-tesoro
+  + 2903|madarame-nelle-profondita-del-museo-sali-al-livello-2
+  + 2916|madarame-nelle-profondita-del-museo-sali-al-livello-2
+  + 2924|madarame-nelle-profondita-del-museo-sali-sulle-travi
+  + 2841|madarame-nelle-profondita-del-museo-sali-sullimpalcatura
+  + 2860|madarame-nelle-profondita-del-museo-sali-sullimpalcatura
+  + 2694|madarame-nelle-profondita-del-museo-salta-la-distesa-di-laser-2
+  + 2843|madarame-nelle-profondita-del-museo-sblocca-dipinto
+  + 2862|madarame-nelle-profondita-del-museo-sblocca-dipinto
+  + 2863|madarame-nelle-profondita-del-museo-sblocca-dipinto
+  + 2835|madarame-nelle-profondita-del-museo-sblocca-dipinto-2
+  + 2828|madarame-nelle-profondita-del-museo-sblocca-la-porta
+  + 2915|madarame-nelle-profondita-del-museo-sblocca-la-porta-2
+  + 2914|madarame-nelle-profondita-del-museo-sblocca-sala-principale-superiore
+  + 2918|madarame-nelle-profondita-del-museo-scendi-nel-corridoio-bloccato
+  + 2905|madarame-nelle-profondita-del-museo-sconfiggi-arahabaki
+  + 2761|madarame-nelle-profondita-del-museo-sconfiggi-i-due-nemici-2
+  + 2762|madarame-nelle-profondita-del-museo-sconfiggi-i-due-nemici-2
+  + 2695|madarame-nelle-profondita-del-museo-sconfiggi-le-guardie
+  + 2696|madarame-nelle-profondita-del-museo-sconfiggi-le-guardie
+  + 2846|madarame-nelle-profondita-del-museo-sconfiggi-nemici
+  + 2847|madarame-nelle-profondita-del-museo-sconfiggi-nemici
+  + 2849|madarame-nelle-profondita-del-museo-sconfiggi-nemici
+  + 2850|madarame-nelle-profondita-del-museo-sconfiggi-nemici
+  + 2848|madarame-nelle-profondita-del-museo-sconfiggi-nemici-2
+  + 2852|madarame-nelle-profondita-del-museo-sconfiggi-nemici-2
+  + 2908|madarame-nelle-profondita-del-museo-sconfiggi-nemico
+  + 2699|madarame-nelle-profondita-del-museo-sconfiggi-nemico-3
+  + 2754|madarame-nelle-profondita-del-museo-sconfiggi-nemico-4
+  + 2818|madarame-nelle-profondita-del-museo-sconfiggi-nemico-5
+  + 2881|madarame-nelle-profondita-del-museo-sconfiggi-ombra
+  + 2893|madarame-nelle-profondita-del-museo-sconfiggi-spiriti-lupi-cacciatori
+  + 2690|madarame-nelle-profondita-del-museo-sconfiggi-tutte-le-guardie-2
+  + 2691|madarame-nelle-profondita-del-museo-sconfiggi-tutte-le-guardie-2
+  + 2692|madarame-nelle-profondita-del-museo-sconfiggi-tutte-le-guardie-2
+  + 2693|madarame-nelle-profondita-del-museo-sconfiggi-tutte-le-guardie-2
+  + 2830|madarame-nelle-profondita-del-museo-segui-condotto-daria
+  + 2901|madarame-nelle-profondita-del-museo-segui-il-condotto
+  + 2868|madarame-nelle-profondita-del-museo-seme-vanita-verde
+  + 2814|madarame-nelle-profondita-del-museo-spia-le-guardie
+  + 2815|madarame-nelle-profondita-del-museo-spia-le-guardie
+  + 2700|madarame-nelle-profondita-del-museo-stanza-del-tesoro-2
+  + 2734|madarame-nelle-profondita-del-museo-stanza-della-mostra-n-2-2
+  + 2677|madarame-nelle-profondita-del-museo-torna-allentrata-del-museo
+  + 2716|madarame-nelle-profondita-del-museo-usa-il-rampino-per-andare-al-livello-1-2
+  + 2834|madarame-nelle-profondita-del-museo-usa-limpalcatura
+  + 2840|madarame-nelle-profondita-del-museo-usa-limpalcatura
+  + 2861|madarame-nelle-profondita-del-museo-usa-limpalcatura
+  + 2907|madarame-nelle-profondita-del-museo-usa-rampino-asse-centrale
+  + 2772|madarame-nelle-profondita-del-museo-vai-verso-il-giardino-centrale-2
+  + 2755|madarame-nelle-profondita-del-museo-visita-ai-bagni-2
+  + 2797|madarame-nelle-profondita-del-museo-visita-safe-room-del-giardino
+  + 2788|madarame-scopri-dove-il-tesoro-affronta-shiki-ouji
+  + 2748|madarame-scopri-dove-il-tesoro-analizza-terminale
+  + 2774|madarame-scopri-dove-il-tesoro-analizza-terminale
+  + 2794|madarame-scopri-dove-il-tesoro-apri-la-porta-bloccata
+  + 2756|madarame-scopri-dove-il-tesoro-avanza-nel-corridoio
+  + 2757|madarame-scopri-dove-il-tesoro-avanza-nel-corridoio
+  + 2758|madarame-scopri-dove-il-tesoro-avanza-nel-corridoio
+  + 2759|madarame-scopri-dove-il-tesoro-avanza-nel-corridoio
+  + 2760|madarame-scopri-dove-il-tesoro-avanza-nel-corridoio
+  + 2785|madarame-scopri-dove-il-tesoro-disattiva-lallarme
+  + 2776|madarame-scopri-dove-il-tesoro-entra-nella-stanza
+  + 2677|madarame-scopri-dove-il-tesoro-entra-nella-stanza-di-velluto
+  + 2673|madarame-scopri-dove-il-tesoro-installazioni-artistiche
+  + 2674|madarame-scopri-dove-il-tesoro-installazioni-artistiche
+  + 2675|madarame-scopri-dove-il-tesoro-installazioni-artistiche
+  + 2676|madarame-scopri-dove-il-tesoro-installazioni-artistiche
+  + 2678|madarame-scopri-dove-il-tesoro-lucernario-aperto
+  + 2741|madarame-scopri-dove-il-tesoro-premi-interruttore-1
+  + 2745|madarame-scopri-dove-il-tesoro-premi-interruttore-2
+  + 2787|madarame-scopri-dove-il-tesoro-raccogli-installazione
+  + 2721|madarame-scopri-dove-il-tesoro-raccogli-installazione-artistica
+  + 2735|madarame-scopri-dove-il-tesoro-raccogli-installazione-artistica-2
+  + 2784|madarame-scopri-dove-il-tesoro-raccogli-installazione-artistica-3
+  + 2728|madarame-scopri-dove-il-tesoro-raggiungi-il-piano-2
+  + 2789|madarame-scopri-dove-il-tesoro-raggiungi-laltro-lato
+  + 2795|madarame-scopri-dove-il-tesoro-raggiungi-laltro-lato
+  + 2781|madarame-scopri-dove-il-tesoro-recupera-forziere
+  + 2751|madarame-scopri-dove-il-tesoro-recupera-mona-in-squadra
+  + 2742|madarame-scopri-dove-il-tesoro-recupera-panter-in-squadra
+  + 2747|madarame-scopri-dove-il-tesoro-recupera-skull-in-squadra
+  + 2686|madarame-scopri-dove-il-tesoro-saccheggia
+  + 2687|madarame-scopri-dove-il-tesoro-saccheggia
+  + 2697|madarame-scopri-dove-il-tesoro-saccheggia
+  + 2790|madarame-scopri-dove-il-tesoro-saccheggia-installazione-artistica
+  + 2680|madarame-scopri-dove-il-tesoro-saccheggia-installazioni-artistiche
+  + 2681|madarame-scopri-dove-il-tesoro-saccheggia-installazioni-artistiche
+  + 2682|madarame-scopri-dove-il-tesoro-saccheggia-installazioni-artistiche-2
+  + 2683|madarame-scopri-dove-il-tesoro-saccheggia-installazioni-artistiche-2
+  + 2684|madarame-scopri-dove-il-tesoro-saccheggia-installazioni-artistiche-2
+  + 2685|madarame-scopri-dove-il-tesoro-saccheggia-installazioni-artistiche-2
+  + 2771|madarame-scopri-dove-il-tesoro-saccheggia-rasetsu-ofuda
+  + 2778|madarame-scopri-dove-il-tesoro-saccheggia-rasetsu-ofuda
+  + 2779|madarame-scopri-dove-il-tesoro-saccheggia-rasetsu-ofuda
+  + 2791|madarame-scopri-dove-il-tesoro-saccheggia-rasetsu-ofuda
+  + 2792|madarame-scopri-dove-il-tesoro-saccheggia-rasetsu-ofuda
+  + 2764|madarame-scopri-dove-il-tesoro-sali-al-livello-2
+  + 2783|madarame-scopri-dove-il-tesoro-sali-al-livello-2
+  + 2767|madarame-scopri-dove-il-tesoro-sali-le-scale
+  + 2743|madarame-scopri-dove-il-tesoro-sali-sulla-passerella
+  + 2777|madarame-scopri-dove-il-tesoro-sali-sulla-passerella
+  + 2740|madarame-scopri-dove-il-tesoro-salite-al-livello-1
+  + 2694|madarame-scopri-dove-il-tesoro-salta-la-distesa-di-laser
+  + 2729|madarame-scopri-dove-il-tesoro-sblocca-la-porta
+  + 2748|madarame-scopri-dove-il-tesoro-sblocca-laser
+  + 2761|madarame-scopri-dove-il-tesoro-sconfiggi-i-due-nemici
+  + 2762|madarame-scopri-dove-il-tesoro-sconfiggi-i-due-nemici
+  + 2738|madarame-scopri-dove-il-tesoro-sconfiggi-il-nemico
+  + 2739|madarame-scopri-dove-il-tesoro-sconfiggi-il-nemico-2
+  + 2754|madarame-scopri-dove-il-tesoro-sconfiggi-nemico
+  + 2690|madarame-scopri-dove-il-tesoro-sconfiggi-tutte-le-guardie
+  + 2691|madarame-scopri-dove-il-tesoro-sconfiggi-tutte-le-guardie
+  + 2692|madarame-scopri-dove-il-tesoro-sconfiggi-tutte-le-guardie
+  + 2693|madarame-scopri-dove-il-tesoro-sconfiggi-tutte-le-guardie
+  + 2752|madarame-scopri-dove-il-tesoro-sconfiggi-vaso-dorato
+  + 2775|madarame-scopri-dove-il-tesoro-seme-della-vanita-rosso
+  + 2749|madarame-scopri-dove-il-tesoro-spia-le-due-guardie
+  + 2750|madarame-scopri-dove-il-tesoro-spia-le-due-guardie
+  + 2734|madarame-scopri-dove-il-tesoro-stanza-della-mostra-n-2
+  + 2746|madarame-scopri-dove-il-tesoro-usa-condotto-di-aerazione
+  + 2772|madarame-scopri-dove-il-tesoro-vai-verso-il-giardino-centrale
+  + 2755|madarame-scopri-dove-il-tesoro-visita-ai-bagni
+  + 2770|madarame-scopri-dove-il-tesoro-visita-ai-bagni
+  + 2797|madarame-scopri-dove-il-tesoro-visita-safe-room-del-giardino
+  - 1925|kamoshida-01-cancello-del-castello-ingresso-accedi-alla-torre
+  - 544|kamoshida-01-cancello-del-castello-ingresso-apri-forziere
+  - 555|kamoshida-01-cancello-del-castello-ingresso-apri-forziere-raro
+  - 539|kamoshida-01-cancello-del-castello-ingresso-apri-il-forziere
+  - 1865|kamoshida-01-cancello-del-castello-ingresso-apri-il-forziere-2
+  - 1827|kamoshida-01-cancello-del-castello-ingresso-continua-a-indagare-nel-castello
+  - 1828|kamoshida-01-cancello-del-castello-ingresso-continua-a-indagare-nel-castello
+  - 1916|kamoshida-01-cancello-del-castello-ingresso-continua-dal-livello-1
+  - 1918|kamoshida-01-cancello-del-castello-ingresso-continua-dal-livello-1
+  - 1919|kamoshida-01-cancello-del-castello-ingresso-continua-dal-livello-1
+  - 1920|kamoshida-01-cancello-del-castello-ingresso-continua-dal-livello-1
+  - 1839|kamoshida-01-cancello-del-castello-ingresso-depreda-oggetti
+  - 1840|kamoshida-01-cancello-del-castello-ingresso-depreda-oggetti
+  - 1841|kamoshida-01-cancello-del-castello-ingresso-depreda-oggetti
+  - 553|kamoshida-01-cancello-del-castello-ingresso-edificio-est-dependance
+  - 1923|kamoshida-01-cancello-del-castello-ingresso-esamina-stanza-adiacente
+  - 1924|kamoshida-01-cancello-del-castello-ingresso-esamina-stanza-adiacente
+  - 540|kamoshida-01-cancello-del-castello-ingresso-esplora-la-stanza
+  - 1802|kamoshida-01-cancello-del-castello-ingresso-indaga-nel-castello
+  - 1803|kamoshida-01-cancello-del-castello-ingresso-indaga-nel-castello
+  - 1894|kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici
+  - 1908|kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici
+  - 1909|kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici
+  - 2068|kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici
+  - 2069|kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici
+  - 2070|kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici
+  - 2071|kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici
+  - 2072|kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici
+  - 1837|kamoshida-01-cancello-del-castello-ingresso-nemici-aura-rossa
+  - 1838|kamoshida-01-cancello-del-castello-ingresso-nemici-aura-rossa
+  - 1885|kamoshida-01-cancello-del-castello-ingresso-ottieni-medaglia-di-kamoshida
+  - 1832|kamoshida-01-cancello-del-castello-ingresso-passa-per-i-lampadari
+  - 1834|kamoshida-01-cancello-del-castello-ingresso-passa-per-i-lampadari
+  - 2063|kamoshida-01-cancello-del-castello-ingresso-passa-per-i-lampadari
+  - 1849|kamoshida-01-cancello-del-castello-ingresso-passaggio-aerazione
+  - 1858|kamoshida-01-cancello-del-castello-ingresso-passaggio-aerazione
+  - 1859|kamoshida-01-cancello-del-castello-ingresso-passaggio-aerazione
+  - 543|kamoshida-01-cancello-del-castello-ingresso-percorri-corridoio
+  - 1860|kamoshida-01-cancello-del-castello-ingresso-percorri-corridoio
+  - 1872|kamoshida-01-cancello-del-castello-ingresso-perlustra-prima-stanza
+  - 1878|kamoshida-01-cancello-del-castello-ingresso-perlustra-prima-stanza
+  - 1879|kamoshida-01-cancello-del-castello-ingresso-perlustra-prima-stanza
+  - 1880|kamoshida-01-cancello-del-castello-ingresso-perlustra-prima-stanza
+  - 1873|kamoshida-01-cancello-del-castello-ingresso-perlustra-stanza-del-palestrato
+  - 1875|kamoshida-01-cancello-del-castello-ingresso-perlustra-stanza-del-palestrato
+  - 1876|kamoshida-01-cancello-del-castello-ingresso-perlustra-stanza-del-palestrato
+  - 1870|kamoshida-01-cancello-del-castello-ingresso-perlustra-stanza-dello-schiavo
+  - 1882|kamoshida-01-cancello-del-castello-ingresso-posiziona-libro-della-regina
+  - 1884|kamoshida-01-cancello-del-castello-ingresso-posiziona-libro-dello-schiavo
+  - 571|kamoshida-01-cancello-del-castello-ingresso-raccogli-forziere
+  - 572|kamoshida-01-cancello-del-castello-ingresso-raccogli-forziere-raro
+  - 1897|kamoshida-01-cancello-del-castello-ingresso-raccogli-forziere-raro
+  - 1901|kamoshida-01-cancello-del-castello-ingresso-raccogli-forziere-raro
+  - 2059|kamoshida-01-cancello-del-castello-ingresso-raccogli-mappa-del-castello
+  - 550|kamoshida-01-cancello-del-castello-ingresso-raggiungi-edificio-est-3p
+  - 1798|kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine
+  - 1804|kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine
+  - 1805|kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine
+  - 1806|kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine
+  - 1814|kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine
+  - 538|kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine-2
+  - 1851|kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine-2
+  - 1852|kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine-2
+  - 1822|kamoshida-01-cancello-del-castello-ingresso-razia-il-corridoio
+  - 1823|kamoshida-01-cancello-del-castello-ingresso-razia-il-corridoio
+  - 1809|kamoshida-01-cancello-del-castello-ingresso-razia-scatola-alla-base-della-scala-e-la-botte-al-piano-di-sopra
+  - 1819|kamoshida-01-cancello-del-castello-ingresso-razia-scatola-alla-base-della-scala-e-la-botte-al-piano-di-sopra
+  - 1824|kamoshida-01-cancello-del-castello-ingresso-razia-urna-in-fondo
+  - 556|kamoshida-01-cancello-del-castello-ingresso-razzia-la-cappella
+  - 569|kamoshida-01-cancello-del-castello-ingresso-razzia-la-cappella
+  - 1915|kamoshida-01-cancello-del-castello-ingresso-razzia-la-cappella
+  - 554|kamoshida-01-cancello-del-castello-ingresso-recupera-forziere
+  - 1881|kamoshida-01-cancello-del-castello-ingresso-recupera-libro-del-re
+  - 1883|kamoshida-01-cancello-del-castello-ingresso-recupera-libro-del-re
+  - 1888|kamoshida-01-cancello-del-castello-ingresso-recupera-oggetto
+  - 1921|kamoshida-01-cancello-del-castello-ingresso-recupero-1-seme-della-bramosia
+  - 1922|kamoshida-01-cancello-del-castello-ingresso-recupero-1-seme-della-bramosia
+  - 1861|kamoshida-01-cancello-del-castello-ingresso-ricevi-rampino-da-morgana
+  - 1862|kamoshida-01-cancello-del-castello-ingresso-ricevi-rampino-da-morgana
+  - 2066|kamoshida-01-cancello-del-castello-ingresso-ricevi-rampino-da-morgana
+  - 1829|kamoshida-01-cancello-del-castello-ingresso-saccheggia-gli-oggetti
+  - 1830|kamoshida-01-cancello-del-castello-ingresso-saccheggia-gli-oggetti
+  - 1831|kamoshida-01-cancello-del-castello-ingresso-saccheggia-gli-oggetti
+  - 1836|kamoshida-01-cancello-del-castello-ingresso-saccheggia-la-mensola
+  - 1846|kamoshida-01-cancello-del-castello-ingresso-saccheggia-la-mensola-2
+  - 533|kamoshida-01-cancello-del-castello-ingresso-sala-centrale-2p
+  - 577|kamoshida-01-cancello-del-castello-ingresso-sali-verso-il-tetto
+  - 1926|kamoshida-01-cancello-del-castello-ingresso-sali-verso-il-tetto
+  - 1927|kamoshida-01-cancello-del-castello-ingresso-sali-verso-il-tetto
+  - 570|kamoshida-01-cancello-del-castello-ingresso-salta-lungo-le-travi
+  - 1896|kamoshida-01-cancello-del-castello-ingresso-salta-lungo-le-travi
+  - 1917|kamoshida-01-cancello-del-castello-ingresso-salta-lungo-le-travi
+  - 1890|kamoshida-01-cancello-del-castello-ingresso-scappate-dallagguato
+  - 1864|kamoshida-01-cancello-del-castello-ingresso-scendi-la-scala
+  - 1800|kamoshida-01-cancello-del-castello-ingresso-sconfiggete-nemico-e-raziate-corridoio
+  - 1807|kamoshida-01-cancello-del-castello-ingresso-sconfiggete-nemico-e-raziate-corridoio
+  - 1808|kamoshida-01-cancello-del-castello-ingresso-sconfiggete-nemico-e-raziate-corridoio
+  - 1889|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-castigatore-divino
+  - 2065|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-guardia-sala-da-pranzo
+  - 1820|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-i-nemici
+  - 1821|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-i-nemici
+  - 1874|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-i-nemici-2
+  - 1854|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-il-nemico-e-negozia
+  - 1868|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemici-esterni
+  - 1869|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemici-esterni
+  - 1871|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemici-esterni
+  - 1877|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemici-esterni
+  - 1853|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemico
+  - 1797|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemico-corridoio
+  - 1929|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemico-forte
+  - 1799|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemico-sul-retro
+  - 1886|kamoshida-01-cancello-del-castello-ingresso-sconfiggi-ombre-sciagura
+  - 1887|kamoshida-01-cancello-del-castello-ingresso-sistema-libro-palestrato
+  - 1826|kamoshida-01-cancello-del-castello-ingresso-tira-la-leva-iniziale
+  - 1842|kamoshida-01-cancello-del-castello-ingresso-tira-la-prima-leva
+  - 1848|kamoshida-01-cancello-del-castello-ingresso-tira-la-quinta-leva
+  - 1825|kamoshida-01-cancello-del-castello-ingresso-tira-la-seconda-leva
+  - 1843|kamoshida-01-cancello-del-castello-ingresso-tira-la-seconda-leva-2
+  - 1845|kamoshida-01-cancello-del-castello-ingresso-tira-la-terza-leva
+  - 1847|kamoshida-01-cancello-del-castello-ingresso-tira-la-terza-leva
+  - 1850|kamoshida-01-cancello-del-castello-ingresso-tira-lultima-leva
+  - 1855|kamoshida-01-cancello-del-castello-ingresso-trova-una-strada-alternativa
+  - 1856|kamoshida-01-cancello-del-castello-ingresso-trova-una-strada-alternativa
+  - 1857|kamoshida-01-cancello-del-castello-ingresso-trova-una-strada-alternativa
+  - 557|kamoshida-01-cancello-del-castello-ingresso-usa-medaglia
+  - 1776|kamoshida-01-cancello-del-castello-ingresso-visita-la-stanza-di-velluto
+  - 1668|kamoshida-1-tutorial-palazzo-11-04-esamina-la-statua-di-kamoshida
+  - 2025|kamoshida-1-tutorial-palazzo-11-04-esplorare-le-prigioni
+  - 2032|kamoshida-1-tutorial-palazzo-11-04-identifica-uscita-dal-castello
+  - 1657|kamoshida-1-tutorial-palazzo-11-04-imprigionare-il-re
+  - 2024|kamoshida-1-tutorial-palazzo-11-04-movimento-base-nel-palazzo
+  - 1667|kamoshida-1-tutorial-palazzo-11-04-parla-con-morgana
+  - 2023|kamoshida-1-tutorial-palazzo-11-04-primo-combattimento
+  - 2030|kamoshida-1-tutorial-palazzo-11-04-sconfiggi-le-ragazze-seducenti
+  - 2029|kamoshida-1-tutorial-palazzo-11-04-sconfiggi-tutti-i-nemici
+  - 581|kamoshida-13-tetto-apri-forziere
+  - 580|kamoshida-13-tetto-ispeziona-linterno-della-torre
+  - 1952|kamoshida-13-tetto-ispeziona-linterno-della-torre
+  - 1953|kamoshida-13-tetto-ispeziona-linterno-della-torre
+  - 1941|kamoshida-13-tetto-razzia-oggetti-sul-tetto
+  - 1942|kamoshida-13-tetto-razzia-oggetti-sul-tetto
+  - 1943|kamoshida-13-tetto-razzia-oggetti-sul-tetto
+  - 1932|kamoshida-13-tetto-sconfiggi-nemici-potenti
+  - 1933|kamoshida-13-tetto-sconfiggi-nemici-potenti
+  - 1934|kamoshida-13-tetto-sconfiggi-nemici-potenti
+  - 1945|kamoshida-13-tetto-segui-percorso
+  - 583|kamoshida-13-tetto-seme-della-bramosia
+  - 1949|kamoshida-13-tetto-seme-della-bramosia
+  - 1950|kamoshida-13-tetto-seme-della-bramosia
+  - 1951|kamoshida-13-tetto-seme-della-bramosia
+  - 1946|kamoshida-13-tetto-usa-il-condotto-di-areazione
+  - 1947|kamoshida-13-tetto-usa-il-condotto-di-areazione
+  - 1948|kamoshida-13-tetto-usa-il-condotto-di-areazione
+  - 527|kamoshida-15-torre-centrale-apri-2-forzieri
+  - 528|kamoshida-15-torre-centrale-apri-2-forzieri
+  - 592|kamoshida-15-torre-centrale-apri-forziere
+  - 587|kamoshida-15-torre-centrale-apri-forziere-raro
+  - 2004|kamoshida-15-torre-centrale-assalta-il-nemico
+  - 616|kamoshida-15-torre-centrale-attraversa-il-passaggio-segreto
+  - 2009|kamoshida-15-torre-centrale-entra-nella-sala-del-trono
+  - 515|kamoshida-15-torre-centrale-esci-dal-castello
+  - 1959|kamoshida-15-torre-centrale-esplora-la-stanza-segreta
+  - 1960|kamoshida-15-torre-centrale-esplora-la-stanza-segreta
+  - 1961|kamoshida-15-torre-centrale-esplora-la-stanza-segreta
+  - 1956|kamoshida-15-torre-centrale-esplora-stanza-successiva
+  - 1970|kamoshida-15-torre-centrale-esplora-stanza-successiva
+  - 1971|kamoshida-15-torre-centrale-esplora-stanza-successiva
+  - 1957|kamoshida-15-torre-centrale-lascensore-sensuale
+  - 1958|kamoshida-15-torre-centrale-lascensore-sensuale
+  - 1985|kamoshida-15-torre-centrale-osserva-statua-di-kamoshida
+  - 609|kamoshida-15-torre-centrale-perlustra-corridoio
+  - 2005|kamoshida-15-torre-centrale-perlustra-corridoio
+  - 2006|kamoshida-15-torre-centrale-perlustra-corridoio
+  - 593|kamoshida-15-torre-centrale-perlustra-la-stanza
+  - 1978|kamoshida-15-torre-centrale-perlustra-la-stanza
+  - 1979|kamoshida-15-torre-centrale-perlustra-la-stanza
+  - 598|kamoshida-15-torre-centrale-raccogli-forziere
+  - 599|kamoshida-15-torre-centrale-raccogli-forziere-2
+  - 615|kamoshida-15-torre-centrale-raccogli-forziere-3
+  - 2010|kamoshida-15-torre-centrale-raccogli-forziere-3
+  - 2016|kamoshida-15-torre-centrale-raccogli-forziere-3
+  - 1962|kamoshida-15-torre-centrale-raccogli-oggetti
+  - 2012|kamoshida-15-torre-centrale-raccogli-oggetti-2
+  - 2013|kamoshida-15-torre-centrale-raccogli-oggetti-2
+  - 2015|kamoshida-15-torre-centrale-raccogli-oggetti-2
+  - 597|kamoshida-15-torre-centrale-razia-torre-livello-superiore
+  - 1995|kamoshida-15-torre-centrale-razia-torre-livello-superiore
+  - 1996|kamoshida-15-torre-centrale-razia-torre-livello-superiore
+  - 1967|kamoshida-15-torre-centrale-razzia-oggetto
+  - 640|kamoshida-15-torre-centrale-recupero-3-seme-della-bramosia
+  - 1954|kamoshida-15-torre-centrale-rompi-il-vaso
+  - 1974|kamoshida-15-torre-centrale-rompi-urna
+  - 1964|kamoshida-15-torre-centrale-sblocca-ascensore
+  - 1963|kamoshida-15-torre-centrale-sblocca-le-grate
+  - 1965|kamoshida-15-torre-centrale-sblocca-le-grate
+  - 2073|kamoshida-15-torre-centrale-scendi-le-scale
+  - 2074|kamoshida-15-torre-centrale-scendi-le-scale
+  - 1990|kamoshida-15-torre-centrale-sconfiggi-i-capitani-delle-guardie
+  - 1991|kamoshida-15-torre-centrale-sconfiggi-i-capitani-delle-guardie
+  - 1992|kamoshida-15-torre-centrale-sconfiggi-i-capitani-delle-guardie
+  - 1993|kamoshida-15-torre-centrale-sconfiggi-i-capitani-delle-guardie
+  - 1955|kamoshida-15-torre-centrale-sconfiggi-il-nemico
+  - 1994|kamoshida-15-torre-centrale-sconfiggi-il-nemico-2
+  - 1972|kamoshida-15-torre-centrale-sconfiggi-nemici
+  - 1973|kamoshida-15-torre-centrale-sconfiggi-nemici
+  - 1976|kamoshida-15-torre-centrale-sconfiggi-nemici-2
+  - 1977|kamoshida-15-torre-centrale-sconfiggi-nemici-2
+  - 1988|kamoshida-15-torre-centrale-sconfiggi-nemico
+  - 1989|kamoshida-15-torre-centrale-sconfiggi-nemico
+  - 1966|kamoshida-15-torre-centrale-sconfiggi-straziato-re-dei-desideri
+  - 1997|kamoshida-15-torre-centrale-segui-i-pilastri
+  - 1969|kamoshida-15-torre-centrale-tira-la-leva
+  - 596|kamoshida-15-torre-centrale-torna-al-livello-inferiore
+  - 537|kamoshida-15-torre-centrale-torna-indietro
+  - 617|kamoshida-15-torre-centrale-tornate-sullascensore-e-alla-torre-centrale
+  - 639|kamoshida-15-torre-centrale-tornate-sullascensore-e-alla-torre-centrale
+  - 584|kamoshida-15-torre-centrale-torre-centrale
+  - 595|kamoshida-15-torre-centrale-torre-livello-superiore
+  - 1982|kamoshida-15-torre-centrale-torre-livello-superiore
+  - 618|kamoshida-15-torre-centrale-usa-lascensore
+  - 589|kamoshida-15-torre-centrale-verso-il-livello-intermedio
+  - 1983|kamoshida-15-torre-centrale-verso-la-sala-del-trono
+  - 605|kamoshida-rubare-i-desideri-del-cuore-infiltrati-fino-alla-safe-room-della-sala-del-trono
+  - 2083|kamoshida-rubare-i-desideri-del-cuore-infiltrati-fino-alla-safe-room-della-sala-del-trono
+  - 2020|kamoshida-rubare-i-desideri-del-cuore-raggiungi-la-sala-del-tesoro
+  - 614|kamoshida-rubare-i-desideri-del-cuore-ruba-il-tesoro
+  - 2077|kamoshida-rubare-i-desideri-del-cuore-sconfiggi-kamoshida
+  - 621|kamoshida-tutorial-palazzo-12-04-cerca-la-palestra
+  - 2036|kamoshida-tutorial-palazzo-12-04-cerca-la-palestra
+  - 2039|kamoshida-tutorial-palazzo-12-04-controlla-gli-studenti-schiavi
+  - 2040|kamoshida-tutorial-palazzo-12-04-controlla-gli-studenti-schiavi
+  - 2041|kamoshida-tutorial-palazzo-12-04-controlla-gli-studenti-schiavi
+  - 2042|kamoshida-tutorial-palazzo-12-04-controlla-gli-studenti-schiavi
+  - 2043|kamoshida-tutorial-palazzo-12-04-controlla-gli-studenti-schiavi
+  - 620|kamoshida-tutorial-palazzo-12-04-indaga-sugli-schiavi
+  - 1718|kamoshida-tutorial-palazzo-12-04-raggiungi-le-celle
+  - 622|kamoshida-tutorial-palazzo-12-04-safe-room
+  - 2038|kamoshida-tutorial-palazzo-12-04-scappa-dal-castello
+  - 2044|kamoshida-tutorial-palazzo-12-04-sconfiggi-3-bestie-bicorne-sporche-durante-la-fuga
+  - 2046|kamoshida-tutorial-palazzo-12-04-sconfiggi-3-bestie-bicorne-sporche-durante-la-fuga
+  - 1723|kamoshida-tutorial-palazzo-12-04-tutorial-assalto
+  - 1724|kamoshida-tutorial-palazzo-12-04-tutorial-assalto-2
+  - 1721|kamoshida-tutorial-palazzo-12-04-tutorial-utilizzo-pistola
+  - 1722|kamoshida-tutorial-palazzo-12-04-tutorial-utilizzo-pistola
+  - 1817|kamoshida-tutorial-palazzo-15-04-affronta-bestie-bicorne-sporche
+  - 529|kamoshida-tutorial-palazzo-15-04-apri-il-tesoro
+  - 1786|kamoshida-tutorial-palazzo-15-04-infiltrati-nel-castello
+  - 521|kamoshida-tutorial-palazzo-15-04-raggiungi-la-safe-room
+  - 1818|kamoshida-tutorial-palazzo-15-04-rapina-la-ragazza-seducente
+  - 2057|kamoshida-tutorial-palazzo-15-04-salva-ann
+  - 530|kamoshida-tutorial-palazzo-15-04-sblocca-la-porta
+  - 1794|kamoshida-tutorial-palazzo-15-04-sconfiggi-i-nemici
+  - 1795|kamoshida-tutorial-palazzo-15-04-sconfiggi-i-nemici
+  - 1796|kamoshida-tutorial-palazzo-15-04-sconfiggi-i-nemici
+  - 2058|kamoshida-tutorial-palazzo-15-04-sconfiggi-il-capitano-delle-guardie
+  - 2111|madarame-01-entrata-del-museo-affronta-nemici
+  - 2125|madarame-01-entrata-del-museo-affronta-nemici
+  - 2110|madarame-01-entrata-del-museo-depreda-installazione-artistica
+  - 2102|madarame-01-entrata-del-museo-esamina-la-scultura-gigante
+  - 744|madarame-01-entrata-del-museo-ottieni-forziere
+  - 2101|madarame-01-entrata-del-museo-prendi-lopuscolo-del-museo
+  - 738|madarame-01-entrata-del-museo-prima-sala-della-mostra
+  - 2093|madarame-01-entrata-del-museo-raccogli-e-depreda-le-installazioni-artistiche
+  - 2094|madarame-01-entrata-del-museo-raccogli-e-depreda-le-installazioni-artistiche
+  - 2095|madarame-01-entrata-del-museo-raccogli-e-depreda-le-installazioni-artistiche
+  - 2096|madarame-01-entrata-del-museo-raccogli-e-depreda-le-installazioni-artistiche
+  - 2097|madarame-01-entrata-del-museo-raccogli-e-depreda-le-installazioni-artistiche
+  - 2098|madarame-01-entrata-del-museo-raccogli-e-depreda-le-installazioni-artistiche
+  - 2099|madarame-01-entrata-del-museo-raccogli-e-depreda-le-installazioni-artistiche
+  - 2100|madarame-01-entrata-del-museo-raccogli-e-depreda-le-installazioni-artistiche
+  - 742|madarame-01-entrata-del-museo-raccogli-il-tesoro
+  - 2132|madarame-01-entrata-del-museo-raccogli-installazioni-artistiche
+  - 2133|madarame-01-entrata-del-museo-raccogli-installazioni-artistiche
+  - 743|madarame-01-entrata-del-museo-raccogli-la-sciabola-lunare
+  - 2131|madarame-01-entrata-del-museo-raggiungi-dal-tetto-larea-protetta
+  - 745|madarame-01-entrata-del-museo-recupera-anello-atomico
+  - 2128|madarame-01-entrata-del-museo-saccheggia-installazione
+  - 2130|madarame-01-entrata-del-museo-saccheggia-installazione-artistica
+  - 749|madarame-01-entrata-del-museo-sblocca-la-porta
+  - 2112|madarame-01-entrata-del-museo-sconfiggi-nemico
+  - 2113|madarame-01-entrata-del-museo-stanza-del-tesoro
+  - 2129|madarame-01-entrata-del-museo-usa-il-rampino-per-andare-al-livello-1
+  - 2088|madarame-01-entrata-del-museo/0
+  - 2089|madarame-01-entrata-del-museo/0
+  - 2090|madarame-01-entrata-del-museo/0
+  - 2091|madarame-01-entrata-del-museo/0
+  - 737|madarame-01-entrata-del-museo/1
+  - 2201|madarame-06-sala-del-tesoro-atrio/0
+  - 2202|madarame-06-sala-del-tesoro-atrio/1
+  - 786|madarame-06-sala-del-tesoro-atrio/2
+  - 2203|madarame-06-sala-del-tesoro-atrio/2
+  - 2204|madarame-06-sala-del-tesoro-atrio/2
+  - 787|madarame-06-sala-del-tesoro-atrio/3
+  - 2205|madarame-06-sala-del-tesoro-atrio/3
+  - 2208|madarame-06-sala-del-tesoro-atrio/4
+  - 790|madarame-06-sala-del-tesoro-atrio/5
+  - 2209|madarame-06-sala-del-tesoro-atrio/5
+  - 788|madarame-06-sala-del-tesoro-atrio/7
+  - 789|madarame-06-sala-del-tesoro-atrio/7
+  - 2200|madarame-disabilita-i-sistemi-di-sicurezza-affronta-fabbro-amareggiato
+  - 2197|madarame-disabilita-i-sistemi-di-sicurezza-affronta-lombra-agente-security
+  - 781|madarame-disabilita-i-sistemi-di-sicurezza-cerca-la-sala-di-controllo
+  - 791|madarame-disabilita-i-sistemi-di-sicurezza-cerca-la-sala-di-controllo
+  - 2199|madarame-disabilita-i-sistemi-di-sicurezza-cerca-la-sala-di-controllo
+  - 782|madarame-disabilita-i-sistemi-di-sicurezza-la-barriera-viene-abbattuta
+  - 760|madarame-disabilita-i-sistemi-di-sicurezza-percorso-di-consapevolezza
+  - 2198|madarame-disabilita-i-sistemi-di-sicurezza-razzia-installazione-artistica
+  - 2201|madarame-il-furto-del-cuore-di-madarame-affronta-agente-della-security
+  - 2296|madarame-il-furto-del-cuore-di-madarame-aziona-la-leva-di-controllo
+  - 2299|madarame-il-furto-del-cuore-di-madarame-cerca-una-via-duscita
+  - 2092|madarame-il-furto-del-cuore-di-madarame-entra-nella-stanza-di-velluto
+  - 2277|madarame-il-furto-del-cuore-di-madarame-perlustra-corridoio
+  - 2278|madarame-il-furto-del-cuore-di-madarame-perlustra-corridoio
+  - 2273|madarame-il-furto-del-cuore-di-madarame-raccogli-installazione-artistica
+  - 2283|madarame-il-furto-del-cuore-di-madarame-raccogli-installazione-artistica-2
+  - 2285|madarame-il-furto-del-cuore-di-madarame-raccogli-installazione-artistica-3
+  - 2287|madarame-il-furto-del-cuore-di-madarame-raccogli-installazione-artistica-4
+  - 777|madarame-il-furto-del-cuore-di-madarame-raggiungi-la-sr-stanza-principale
+  - 806|madarame-il-furto-del-cuore-di-madarame-raggiungi-la-sr-stanza-principale
+  - 2294|madarame-il-furto-del-cuore-di-madarame-ripulisci-corridoio
+  - 2295|madarame-il-furto-del-cuore-di-madarame-ripulisci-installazione-artistica-e-osserva-leva-di-sicurezza
+  - 2298|madarame-il-furto-del-cuore-di-madarame-riunisciti-con-morgana
+  - 2284|madarame-il-furto-del-cuore-di-madarame-scendi-nel-corridoio-bloccato
+  - 2279|madarame-il-furto-del-cuore-di-madarame-segui-il-condotto
+  - 2281|madarame-il-furto-del-cuore-di-madarame-tetti-e-condotti-di-areazione
+  - 2282|madarame-il-furto-del-cuore-di-madarame-tetti-e-condotti-di-areazione
+  - 2288|madarame-il-furto-del-cuore-di-madarame-usa-rampino-asse-centrale
+  - 777|madarame-il-furto-del-cuore-di-madarame-visita-safe-room-del-giardino
+  - 2111|madarame-nelle-profondita-del-museo-affronta-nemici-2
+  - 2125|madarame-nelle-profondita-del-museo-affronta-nemici-2
+  - 2184|madarame-nelle-profondita-del-museo-affronta-shiki-ouji-2
+  - 803|madarame-nelle-profondita-del-museo-apri-forziere
+  - 802|madarame-nelle-profondita-del-museo-apri-forziere-2
+  - 2248|madarame-nelle-profondita-del-museo-apri-forziere-2
+  - 815|madarame-nelle-profondita-del-museo-apri-forziere-3
+  - 2160|madarame-nelle-profondita-del-museo-avanza-nel-corridoio-2
+  - 2161|madarame-nelle-profondita-del-museo-avanza-nel-corridoio-2
+  - 2162|madarame-nelle-profondita-del-museo-avanza-nel-corridoio-2
+  - 2163|madarame-nelle-profondita-del-museo-avanza-nel-corridoio-2
+  - 2164|madarame-nelle-profondita-del-museo-avanza-nel-corridoio-2
+  - 2260|madarame-nelle-profondita-del-museo-depreda-forziere
+  - 2262|madarame-nelle-profondita-del-museo-depreda-forziere-2
+  - 2263|madarame-nelle-profondita-del-museo-depreda-forziere-3
+  - 2221|madarame-nelle-profondita-del-museo-entra-nella-galleria
+  - 2274|madarame-nelle-profondita-del-museo-entra-nella-stanza-di-controllo
+  - 2092|madarame-nelle-profondita-del-museo-entra-nella-stanza-di-velluto-2
+  - 2252|madarame-nelle-profondita-del-museo-entri-nel-labirinto
+  - 2214|madarame-nelle-profondita-del-museo-esamina-il-dipinto
+  - 2213|madarame-nelle-profondita-del-museo-esamina-la-statua-di-madarame
+  - 2210|madarame-nelle-profondita-del-museo-esamina-portatile
+  - 2235|madarame-nelle-profondita-del-museo-esci-sullimpalcatura
+  - 2236|madarame-nelle-profondita-del-museo-esci-sullimpalcatura
+  - 2267|madarame-nelle-profondita-del-museo-il-segreto-che-non-ti-aspetti
+  - 2090|madarame-nelle-profondita-del-museo-installazioni-artistiche-2
+  - 2091|madarame-nelle-profondita-del-museo-installazioni-artistiche-2
+  - 2258|madarame-nelle-profondita-del-museo-la-doppia-scalinata
+  - 2265|madarame-nelle-profondita-del-museo-limportanza-dei-dettagli
+  - 2266|madarame-nelle-profondita-del-museo-locchio-dellartista
+  - 737|madarame-nelle-profondita-del-museo-lucernario-aperto-2
+  - 809|madarame-nelle-profondita-del-museo-osserva-di-nascosto-il-tesoro
+  - 2277|madarame-nelle-profondita-del-museo-perlustra-corridoio
+  - 2278|madarame-nelle-profondita-del-museo-perlustra-corridoio
+  - 2280|madarame-nelle-profondita-del-museo-perlustra-corridoio
+  - 2249|madarame-nelle-profondita-del-museo-premi-interruttore-saracinesca
+  - 2251|madarame-nelle-profondita-del-museo-premi-interruttore-saracinesca
+  - 738|madarame-nelle-profondita-del-museo-prima-sala-della-mostra-2
+  - 2245|madarame-nelle-profondita-del-museo-prosegui-verso-il-livello-2
+  - 2181|madarame-nelle-profondita-del-museo-raccogli-installazione-2
+  - 2183|madarame-nelle-profondita-del-museo-raccogli-installazione-2
+  - 2247|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica
+  - 2273|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-10
+  - 2283|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-11
+  - 2285|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-12
+  - 2287|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-13
+  - 2253|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-2
+  - 2254|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-3
+  - 2136|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-4
+  - 2137|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-5
+  - 2177|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-6
+  - 2215|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-7
+  - 2257|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-8
+  - 2255|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-9
+  - 2261|madarame-nelle-profondita-del-museo-raccogli-installazione-artistica-9
+  - 2256|madarame-nelle-profondita-del-museo-raccogli-installazioni-artistiche
+  - 2259|madarame-nelle-profondita-del-museo-raccogli-installazioni-artistiche
+  - 2132|madarame-nelle-profondita-del-museo-raccogli-installazioni-artistiche-2
+  - 2133|madarame-nelle-profondita-del-museo-raccogli-installazioni-artistiche-2
+  - 2219|madarame-nelle-profondita-del-museo-raccogli-oggetti
+  - 2220|madarame-nelle-profondita-del-museo-raccogli-oggetti
+  - 817|madarame-nelle-profondita-del-museo-raccogli-seme-della-vanita-blu
+  - 814|madarame-nelle-profondita-del-museo-raccogli-vestito-zen
+  - 2131|madarame-nelle-profondita-del-museo-raggiungi-dal-tetto-larea-protetta
+  - 747|madarame-nelle-profondita-del-museo-raggiungi-il-piano-2-2
+  - 2226|madarame-nelle-profondita-del-museo-raggiungi-la-roccia
+  - 2234|madarame-nelle-profondita-del-museo-raggiungi-la-roccia
+  - 2268|madarame-nelle-profondita-del-museo-raggiungi-la-sala-del-tesoro
+  - 806|madarame-nelle-profondita-del-museo-raggiungi-la-sr-stanza-principale
+  - 2242|madarame-nelle-profondita-del-museo-razzia-installazioni-artistiche
+  - 2244|madarame-nelle-profondita-del-museo-razzia-installazioni-artistiche
+  - 2296|madarame-nelle-profondita-del-museo-riesamina-la-leva
+  - 2293|madarame-nelle-profondita-del-museo-ripulisci-corridoio
+  - 2294|madarame-nelle-profondita-del-museo-ripulisci-corridoio
+  - 2295|madarame-nelle-profondita-del-museo-ripulisci-installazione-di-sicurezza
+  - 2100|madarame-nelle-profondita-del-museo-saccheggia-2
+  - 2110|madarame-nelle-profondita-del-museo-saccheggia-2
+  - 2128|madarame-nelle-profondita-del-museo-saccheggia-installazione-2
+  - 2130|madarame-nelle-profondita-del-museo-saccheggia-installazione-artistica-3
+  - 2187|madarame-nelle-profondita-del-museo-saccheggia-installazione-artistica-4
+  - 2093|madarame-nelle-profondita-del-museo-saccheggia-installazioni-artistiche-3
+  - 2094|madarame-nelle-profondita-del-museo-saccheggia-installazioni-artistiche-3
+  - 2095|madarame-nelle-profondita-del-museo-saccheggia-installazioni-artistiche-4
+  - 2096|madarame-nelle-profondita-del-museo-saccheggia-installazioni-artistiche-4
+  - 2097|madarame-nelle-profondita-del-museo-saccheggia-installazioni-artistiche-4
+  - 2098|madarame-nelle-profondita-del-museo-saccheggia-installazioni-artistiche-4
+  - 783|madarame-nelle-profondita-del-museo-sala-del-tesoro
+  - 2281|madarame-nelle-profondita-del-museo-sali-al-livello-2
+  - 2282|madarame-nelle-profondita-del-museo-sali-al-livello-2
+  - 2297|madarame-nelle-profondita-del-museo-sali-sulle-travi
+  - 2223|madarame-nelle-profondita-del-museo-sali-sullimpalcatura
+  - 2226|madarame-nelle-profondita-del-museo-sali-sullimpalcatura
+  - 2107|madarame-nelle-profondita-del-museo-salta-la-distesa-di-laser-2
+  - 2229|madarame-nelle-profondita-del-museo-sblocca-dipinto
+  - 2230|madarame-nelle-profondita-del-museo-sblocca-dipinto
+  - 2231|madarame-nelle-profondita-del-museo-sblocca-dipinto
+  - 2233|madarame-nelle-profondita-del-museo-sblocca-dipinto-2
+  - 793|madarame-nelle-profondita-del-museo-sblocca-la-porta
+  - 821|madarame-nelle-profondita-del-museo-sblocca-la-porta-2
+  - 818|madarame-nelle-profondita-del-museo-sblocca-sala-principale-superiore
+  - 2284|madarame-nelle-profondita-del-museo-scendi-nel-corridoio-bloccato
+  - 2286|madarame-nelle-profondita-del-museo-sconfiggi-arahabaki
+  - 2165|madarame-nelle-profondita-del-museo-sconfiggi-i-due-nemici-2
+  - 2166|madarame-nelle-profondita-del-museo-sconfiggi-i-due-nemici-2
+  - 2108|madarame-nelle-profondita-del-museo-sconfiggi-le-guardie
+  - 2109|madarame-nelle-profondita-del-museo-sconfiggi-le-guardie
+  - 2237|madarame-nelle-profondita-del-museo-sconfiggi-nemici
+  - 2238|madarame-nelle-profondita-del-museo-sconfiggi-nemici
+  - 2240|madarame-nelle-profondita-del-museo-sconfiggi-nemici
+  - 2241|madarame-nelle-profondita-del-museo-sconfiggi-nemici
+  - 2239|madarame-nelle-profondita-del-museo-sconfiggi-nemici-2
+  - 2243|madarame-nelle-profondita-del-museo-sconfiggi-nemici-2
+  - 2289|madarame-nelle-profondita-del-museo-sconfiggi-nemico
+  - 2112|madarame-nelle-profondita-del-museo-sconfiggi-nemico-3
+  - 2158|madarame-nelle-profondita-del-museo-sconfiggi-nemico-4
+  - 2218|madarame-nelle-profondita-del-museo-sconfiggi-nemico-5
+  - 2264|madarame-nelle-profondita-del-museo-sconfiggi-ombra
+  - 2275|madarame-nelle-profondita-del-museo-sconfiggi-spiriti-lupi-cacciatori
+  - 2103|madarame-nelle-profondita-del-museo-sconfiggi-tutte-le-guardie-2
+  - 2104|madarame-nelle-profondita-del-museo-sconfiggi-tutte-le-guardie-2
+  - 2105|madarame-nelle-profondita-del-museo-sconfiggi-tutte-le-guardie-2
+  - 2106|madarame-nelle-profondita-del-museo-sconfiggi-tutte-le-guardie-2
+  - 2216|madarame-nelle-profondita-del-museo-segui-condotto-daria
+  - 2279|madarame-nelle-profondita-del-museo-segui-il-condotto
+  - 800|madarame-nelle-profondita-del-museo-seme-vanita-verde
+  - 2211|madarame-nelle-profondita-del-museo-spia-le-guardie
+  - 2212|madarame-nelle-profondita-del-museo-spia-le-guardie
+  - 2113|madarame-nelle-profondita-del-museo-stanza-del-tesoro-2
+  - 753|madarame-nelle-profondita-del-museo-stanza-della-mostra-n-2-2
+  - 2092|madarame-nelle-profondita-del-museo-torna-allentrata-del-museo
+  - 2129|madarame-nelle-profondita-del-museo-usa-il-rampino-per-andare-al-livello-1-2
+  - 2222|madarame-nelle-profondita-del-museo-usa-limpalcatura
+  - 2225|madarame-nelle-profondita-del-museo-usa-limpalcatura
+  - 2228|madarame-nelle-profondita-del-museo-usa-limpalcatura
+  - 2288|madarame-nelle-profondita-del-museo-usa-rampino-asse-centrale
+  - 759|madarame-nelle-profondita-del-museo-vai-verso-il-giardino-centrale-2
+  - 2159|madarame-nelle-profondita-del-museo-visita-ai-bagni-2
+  - 777|madarame-nelle-profondita-del-museo-visita-safe-room-del-giardino
+  - 2184|madarame-scopri-dove-il-tesoro-affronta-shiki-ouji
+  - 761|madarame-scopri-dove-il-tesoro-analizza-terminale
+  - 2152|madarame-scopri-dove-il-tesoro-analizza-terminale
+  - 768|madarame-scopri-dove-il-tesoro-apri-la-porta-bloccata
+  - 2160|madarame-scopri-dove-il-tesoro-avanza-nel-corridoio
+  - 2161|madarame-scopri-dove-il-tesoro-avanza-nel-corridoio
+  - 2162|madarame-scopri-dove-il-tesoro-avanza-nel-corridoio
+  - 2163|madarame-scopri-dove-il-tesoro-avanza-nel-corridoio
+  - 2164|madarame-scopri-dove-il-tesoro-avanza-nel-corridoio
+  - 2178|madarame-scopri-dove-il-tesoro-disattiva-lallarme
+  - 2144|madarame-scopri-dove-il-tesoro-entra-nella-stanza
+  - 2092|madarame-scopri-dove-il-tesoro-entra-nella-stanza-di-velluto
+  - 2088|madarame-scopri-dove-il-tesoro-installazioni-artistiche
+  - 2089|madarame-scopri-dove-il-tesoro-installazioni-artistiche
+  - 2090|madarame-scopri-dove-il-tesoro-installazioni-artistiche
+  - 2091|madarame-scopri-dove-il-tesoro-installazioni-artistiche
+  - 737|madarame-scopri-dove-il-tesoro-lucernario-aperto
+  - 2143|madarame-scopri-dove-il-tesoro-premi-interruttore-1
+  - 2149|madarame-scopri-dove-il-tesoro-premi-interruttore-2
+  - 2183|madarame-scopri-dove-il-tesoro-raccogli-installazione
+  - 2136|madarame-scopri-dove-il-tesoro-raccogli-installazione-artistica
+  - 2137|madarame-scopri-dove-il-tesoro-raccogli-installazione-artistica-2
+  - 2177|madarame-scopri-dove-il-tesoro-raccogli-installazione-artistica-3
+  - 747|madarame-scopri-dove-il-tesoro-raggiungi-il-piano-2
+  - 2185|madarame-scopri-dove-il-tesoro-raggiungi-laltro-lato
+  - 2186|madarame-scopri-dove-il-tesoro-raggiungi-laltro-lato
+  - 767|madarame-scopri-dove-il-tesoro-recupera-forziere
+  - 2155|madarame-scopri-dove-il-tesoro-recupera-mona-in-squadra
+  - 2145|madarame-scopri-dove-il-tesoro-recupera-panter-in-squadra
+  - 2151|madarame-scopri-dove-il-tesoro-recupera-skull-in-squadra
+  - 2099|madarame-scopri-dove-il-tesoro-saccheggia
+  - 2100|madarame-scopri-dove-il-tesoro-saccheggia
+  - 2110|madarame-scopri-dove-il-tesoro-saccheggia
+  - 2187|madarame-scopri-dove-il-tesoro-saccheggia-installazione-artistica
+  - 2093|madarame-scopri-dove-il-tesoro-saccheggia-installazioni-artistiche
+  - 2094|madarame-scopri-dove-il-tesoro-saccheggia-installazioni-artistiche
+  - 2095|madarame-scopri-dove-il-tesoro-saccheggia-installazioni-artistiche-2
+  - 2096|madarame-scopri-dove-il-tesoro-saccheggia-installazioni-artistiche-2
+  - 2097|madarame-scopri-dove-il-tesoro-saccheggia-installazioni-artistiche-2
+  - 2098|madarame-scopri-dove-il-tesoro-saccheggia-installazioni-artistiche-2
+  - 758|madarame-scopri-dove-il-tesoro-saccheggia-rasetsu-ofuda
+  - 2188|madarame-scopri-dove-il-tesoro-saccheggia-rasetsu-ofuda
+  - 2189|madarame-scopri-dove-il-tesoro-saccheggia-rasetsu-ofuda
+  - 2190|madarame-scopri-dove-il-tesoro-saccheggia-rasetsu-ofuda
+  - 2191|madarame-scopri-dove-il-tesoro-saccheggia-rasetsu-ofuda
+  - 2174|madarame-scopri-dove-il-tesoro-sali-al-livello-2
+  - 2176|madarame-scopri-dove-il-tesoro-sali-al-livello-2
+  - 2181|madarame-scopri-dove-il-tesoro-sali-le-scale
+  - 2146|madarame-scopri-dove-il-tesoro-sali-sulla-passerella
+  - 2147|madarame-scopri-dove-il-tesoro-sali-sulla-passerella
+  - 2142|madarame-scopri-dove-il-tesoro-salite-al-livello-1
+  - 2107|madarame-scopri-dove-il-tesoro-salta-la-distesa-di-laser
+  - 748|madarame-scopri-dove-il-tesoro-sblocca-la-porta
+  - 2152|madarame-scopri-dove-il-tesoro-sblocca-laser
+  - 2165|madarame-scopri-dove-il-tesoro-sconfiggi-i-due-nemici
+  - 2166|madarame-scopri-dove-il-tesoro-sconfiggi-i-due-nemici
+  - 2140|madarame-scopri-dove-il-tesoro-sconfiggi-il-nemico
+  - 2141|madarame-scopri-dove-il-tesoro-sconfiggi-il-nemico-2
+  - 2158|madarame-scopri-dove-il-tesoro-sconfiggi-nemico
+  - 2103|madarame-scopri-dove-il-tesoro-sconfiggi-tutte-le-guardie
+  - 2104|madarame-scopri-dove-il-tesoro-sconfiggi-tutte-le-guardie
+  - 2105|madarame-scopri-dove-il-tesoro-sconfiggi-tutte-le-guardie
+  - 2106|madarame-scopri-dove-il-tesoro-sconfiggi-tutte-le-guardie
+  - 2156|madarame-scopri-dove-il-tesoro-sconfiggi-vaso-dorato
+  - 763|madarame-scopri-dove-il-tesoro-seme-della-vanita-rosso
+  - 2153|madarame-scopri-dove-il-tesoro-spia-le-due-guardie
+  - 2154|madarame-scopri-dove-il-tesoro-spia-le-due-guardie
+  - 753|madarame-scopri-dove-il-tesoro-stanza-della-mostra-n-2
+  - 2150|madarame-scopri-dove-il-tesoro-usa-condotto-di-aerazione
+  - 759|madarame-scopri-dove-il-tesoro-vai-verso-il-giardino-centrale
+  - 757|madarame-scopri-dove-il-tesoro-visita-ai-bagni
+  - 2159|madarame-scopri-dove-il-tesoro-visita-ai-bagni
+  - 777|madarame-scopri-dove-il-tesoro-visita-safe-room-del-giardino
+
+# partite.db:spillo_partita: righe 748 → 748; aggiunte 0, tolte 0, cambiate 725
+  ~ 1|61656ce3d1b038b84258f5fafeaf90be
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|f222dc9d04558417981e6e0b52abe376
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|28cd128e9720c37717ffaff21fc3afd6
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|57f47e3a904653da2fee0b4252d006aa
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|7f71b707f4e4e5ecbdc6bf6708288a21
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|7b323d194d941199ab8ba0bff0e09b9d
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|604f92ba22afc6f2424034b11aee88df
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|86aefe752705fb51e5983915a5808ff1
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|884719519e91d19e38529610a2059fb2
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|948898dd848eef5bbe5014c2362e527d
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|140ffed11fb90c4fe23a206677636d9f
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|38c558b6f7d084fde3d7a1a5a47eb16f
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|d512b0021e2808277d8b0cafe680e255
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|c0920b7ffc850cabe04aa71dfed2db55
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|2724fe2782ff6d0cfcf1b1e466cfe98d
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|a8b8acbe1ff89e67b6b8434923e14051
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|2b2d9f69a0441829f7603b2321770742
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|a37edc5787a72aa8f82a5688dcb7d5a3
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|7c6ded5d4413b5626de3401855da5f10
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|2d6d73f4953ab6ebddbef01ab2563a0c
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|1ace10e015b95679e95e67a303c857ee
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|bea5c1e2ccc55f76956f6e8f87c5c736
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|f31fad20ae0ef86eb56a5270eff84033
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|55e588f08b25672ed5118210cbdf90cd
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|803afb418ee3f28ee9e9b30410614a34
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|8456fa946c97aac125340627d186396c
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|848a34b2035a7a252c69d46fb07021cd
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|7548b248ba02687beb27a867bc2c9cbc
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|d22d95ac32f0c19800148609912a1961
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|1b3b9b7e0b79d1e5900d9d683066ef3b
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|9a85140e72efef63e2843ecde541e474
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|313118d941cb9d2148f283b6dedb5394
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|0736918cb8563611f6ace3e28c60ea5c
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|598228e6415a37e95aa5f074862b82a8
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|36f63fbb6c492fce774283a2349c4ab3
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|bc17bf1b2c5ce0080f7b5e68dfbf29f5
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|ed7adea8e145e80e34f97183ba63748f
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|572fccb4ba851853b1fc78dc14da8183
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|b031d820ab66eae825a20931415b4d6d
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|8229ac971cc37e21e0215fcae34aa3d7
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|0036b028ab0351925a0f0db2e85b3def
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|c91ba2dc973dd25caa86be82915cdec6
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|3f63bac7ff4bb6cb0b1380ac1d33e70c
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|64b21dafb530bf72d9a158d979db17d9
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|4563a5298615e311e7e325c1c43be19c
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|f5a2fd0f693e21f4be636f9ed6d10c62
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|69acdd9b1e4248f67b500eef6b10149f
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|6e28c6d62533634358788c1ea9eba734
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|f04132854a54e82de0f82a98e891768c
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|94ab28ad1555ca7301e6c5bddd48ecc0
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|58c19b474db0e2449d81e84771040ead
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|a25c3dca4823c1a2d09d9e3b11d8dcf5
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|1475a674e065a5024b8a13c74c54b651
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|bc763951572baf0fd97db51737de2b5d
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|5af0c88715da7a42003134fffbb571df
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|04d47911e3979e6d22f79b122340941e
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|d5df1a5b7a03381ff5ce8b18fc3f8813
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|53002070da20f871bd9d7b36e4bb8057
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|d3e01432d5f7e07f1193febaedd2e511
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|05f0bed10afcf8dc74a86c4ec5270120
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|0403d750d2db22c6c2a6dec1b9c964e3
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|508ccddec3a1de51c6994be0b8a05b90
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|d101c5961c3a3774e1968f1de4a1d27d
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|469aa003f8ece7ff734a09c2774f21d5
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|7700b172aaa5d9eb09c451147ad50899
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|3519b9b15caed5a7f7c52df5828c55c7
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|0257a5452229c544dea4c30ff8db1cc9
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|14bc54cfe5b0a318200fd9dc01918a44
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|5b332514480b93d6c5f886f817b740db
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|753232572e77c27c94ff0f255d69df1a
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|e912a3e8cfcf927ee63b4e6f878cbdaa
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|c5f0df40ab8c1b479945ddc89fdc2d91
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|81b279e10c8741613cce9132a134a6a2
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|ea92a81a9227433e5457b8d83442bd10
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|4943b216a4270696fbb2d0478ba1ce1a
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|b42ec11069c2d4302d65bce3309cc566
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|c9e537e2bc25719e8d6cc5c9acaaa0a9
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|43fdcc9835ac308437ee0578bd24765e
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|295354c6584a04b6a2c672fd68b07595
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|75fa7ad4e2a9665b631c2468a2a593b9
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|347e26bca7afffba2461e9c061e587a4
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|55de42f03236829ad1be2b8446717030
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|faeb6808a0f05af19278c70122cbbfcd
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|5a6402269c8677332e91dae01786782d
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|a397fee7a8897bceae320858b408d5df
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|63cde3e516a68188dd6b9c1b58e5a8d8
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|2d9e471fc1c71bd79db2073171cbc453
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|ba728ac8c06285a65a6ae6b1d49f38ba
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|82f67ab6979a8fd96cae9024abb78e04
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|5985fa7a6affd8eda3ac38f1d81fa918
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|4b3460b5e81a4fdbe1559675743cde4d
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|0c920ec6e66d7bf5fa7de7df276a0196
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|82ba4f7fb6ad214cb19f1cc3807e2082
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|3519b9b15caed5a7f7c52df5828c55c7
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|6119bee9f5b0481f099c34e4a0947387
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|48e4a0ded674ade68acc2b24224a860a
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|831855ecb5a047994f86e2de0ca06af6
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|c7c56868eaf264780209509713270b69
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|271d3793fe5523e8b2abe464e830988f
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|2416a778927ee66b60437fd27fa8cd38
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|19ade8042e3b9ee5daf7cc2ebf1e9cc6
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|4c8cb9cf4b7bbf16a4d769be03f08a8b
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|8e7d7db05208a834f8b517927b6a59bf
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|4a4326590f7992b06d618fe696e2e25b
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|5ea0a22cd9a0f0def48787188036ec78
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|e3358a3980a336ce79150594970163fa
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|b9bca1fd2e082c75517cb245251c138f
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|a9d22e7cb706dd9d8a9b5adafcf453eb
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|0d4a59c572de66c564d2c79d2bf8421a
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|208a04e967b82e71c9d7843bc6789ec5
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|e6081a3c1bcffe3a461fa27ed7cf0f46
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|2150494f7a55db6e298be6c063e35a23
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|56bdc840ee501dc803d18ad840041c79
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|3e4cb96e3c8e4442a49aa1b5d04b992f
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|642b98c624e24d4894d61d4bf1a66abb
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|dce1a1a33e2b14979210154e78456a11
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|24d2940b6a6b83a2757c1b260f379729
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|11fcadc1d593dc37d3f1ab6c2e055293
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|b93f8abc5a8d1c58d47cf75d193483fd
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|50b9de64211a96c4893c6ebc7c193325
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|61656ce3d1b038b84258f5fafeaf90be
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|f222dc9d04558417981e6e0b52abe376
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|8e8c688e0c4eed1858855b56f9da0cb9
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|c0920b7ffc850cabe04aa71dfed2db55
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|33310b9572728403c1b24ff8b4cb1e98
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|473e165d39484bafabeaae7dc26e1cb4
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|342ad252d8123e972108f9fe848f8fd6
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|7f302b7d16f3105c3ac236c23f3ef00e
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|d0b18d15dd184918cd4aa30cbdb4d613
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|47cb6fed84667fa7beec694535d3ae60
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|28cd128e9720c37717ffaff21fc3afd6
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|57f47e3a904653da2fee0b4252d006aa
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|868dbfe164d258a5f8928b1a2aacd469
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|df63fe00754ec2c7602266c0e3fb3377
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|df63fe00754ec2c7602266c0e3fb3377
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|7f71b707f4e4e5ecbdc6bf6708288a21
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|7b323d194d941199ab8ba0bff0e09b9d
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|604f92ba22afc6f2424034b11aee88df
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|140ffed11fb90c4fe23a206677636d9f
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|34ab3fe584e0d3736dc7e0322bd791be
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|412784de4873db240d50a47e4f659327
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|412784de4873db240d50a47e4f659327
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|86aefe752705fb51e5983915a5808ff1
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|884719519e91d19e38529610a2059fb2
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|948898dd848eef5bbe5014c2362e527d
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|2724fe2782ff6d0cfcf1b1e466cfe98d
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|57f46cd1c8fe3f917845ca2c0e8904cb
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|3964ced27690007225833bfa3fa9881c
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|a8b8acbe1ff89e67b6b8434923e14051
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|2b2d9f69a0441829f7603b2321770742
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|a37edc5787a72aa8f82a5688dcb7d5a3
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|2d536077f000b829b85a4e20eb4a8b75
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|fe0c8038318c37b469e4277b0572cac0
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|9e4ed9ad0c0bfe9fd972986ad050fc54
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|819737f8f0ffa9697f558600cf23d950
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|dd8019118e3fbf9038809d3564c12b9c
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|3b501d73eb10fafa0c437bf0234c7635
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|7c6ded5d4413b5626de3401855da5f10
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|2d6d73f4953ab6ebddbef01ab2563a0c
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|1ace10e015b95679e95e67a303c857ee
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|0ef7b47280ec67bda0dd208b0ab783d5
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|6fbc40fb27c5391fd48d2067334e2cfe
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|06cc2d49c6a92b4d7e251f71573a8914
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|5ec8151f78166cfd20935133f2cbf06b
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|0736918cb8563611f6ace3e28c60ea5c
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|bea5c1e2ccc55f76956f6e8f87c5c736
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|af641dda5081f865093e37797fe20f28
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|7b66f8dcefc6cde1ffa5e1053b6c348e
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|ada016c3a3cf0cd2a471aaf4af76bfd8
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|f31fad20ae0ef86eb56a5270eff84033
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|55e588f08b25672ed5118210cbdf90cd
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|803afb418ee3f28ee9e9b30410614a34
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|6fb53030d8ef77c30db367ab03f94c2d
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|bd236da476823d0c042f05c5f3e04078
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|efb059454a0fdec832b272af80fe80e7
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|b0c6e86070cc1e77aadb2c6230464e1f
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|a76021c67decd12815d7211e978a6787
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|5671b1b84f918b332492391b3ac51c44
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|3dacb4037fb293f61258bb0c6faadd28
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|0dd078e7002de020df9f16a7aa0c693e
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|50c5dfd264231c1fa19ef5369c9810df
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|8456fa946c97aac125340627d186396c
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|598228e6415a37e95aa5f074862b82a8
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|88a288a5eac93ef4a5a72ecfd2aa6d71
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|9a85140e72efef63e2843ecde541e474
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|35ba2260e292be6206834f557cbd3f87
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|848a34b2035a7a252c69d46fb07021cd
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|d1a96ef3ce251e429d704eb20c2e2148
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|f0eb2f01d37e2a883409c24016c18849
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|fdbcfcad94f8195059bdaa76fde969d7
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|35d71b5439ce45471a864a6cfc32a51b
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|ee5ef330e80a0458825656b5256c3a70
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|313118d941cb9d2148f283b6dedb5394
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|683e4fc721d48e19ff832f30aa2c0106
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|7548b248ba02687beb27a867bc2c9cbc
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|d22d95ac32f0c19800148609912a1961
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|bb9bba128c83d60d2ea431a82016a525
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|e7b90c7d9e9de1c7ef7821540647e871
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|05f0bed10afcf8dc74a86c4ec5270120
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|186b8e24f12d54f79bc807a49889f80e
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|58a753171058111c7c9989ff3ca2e1ed
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|4b8c43d435f14f7f4563b8fa4bc02306
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|4b8c43d435f14f7f4563b8fa4bc02306
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|8229ac971cc37e21e0215fcae34aa3d7
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|0036b028ab0351925a0f0db2e85b3def
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|c91ba2dc973dd25caa86be82915cdec6
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|36f63fbb6c492fce774283a2349c4ab3
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|1b3fc0a8abbe75d063eaf63fe51eed4b
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|38be3e7232d489bd7f4fef2134c179d4
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|ea35b08069b437fc716a58107718953e
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|ea35b08069b437fc716a58107718953e
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|572fccb4ba851853b1fc78dc14da8183
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|b031d820ab66eae825a20931415b4d6d
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|bc17bf1b2c5ce0080f7b5e68dfbf29f5
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|ed7adea8e145e80e34f97183ba63748f
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|f7a66f39867e6e7bf19cb73a5a7f85d0
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|0e528af3408866316073f4f49058650d
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|b0ed927cfcd7c469ce78de4075b99cf1
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|97984a413a895144175ff9547024efcc
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|9d3055a53d9488915c8a52e0b2e81530
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|7fd9ea148e88cab27dfb883ce25e4287
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|6e28c6d62533634358788c1ea9eba734
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|f7a66f39867e6e7bf19cb73a5a7f85d0
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|3f63bac7ff4bb6cb0b1380ac1d33e70c
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|64b21dafb530bf72d9a158d979db17d9
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|a879a76c99e8942fb56a028a48cb966e
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|2025e16101360cb4e0783893ded8a964
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|4563a5298615e311e7e325c1c43be19c
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|f5a2fd0f693e21f4be636f9ed6d10c62
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|9ab0145514bb23bf685bfed1f398cf1e
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|2d29173752d118228e10eaa747984306
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|d5df1a5b7a03381ff5ce8b18fc3f8813
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|2d29173752d118228e10eaa747984306
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|0403d750d2db22c6c2a6dec1b9c964e3
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|94ab28ad1555ca7301e6c5bddd48ecc0
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|69acdd9b1e4248f67b500eef6b10149f
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|cb8c4d6e3dd8494e4c463b3a5da56c20
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|a25c3dca4823c1a2d09d9e3b11d8dcf5
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|1475a674e065a5024b8a13c74c54b651
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|bc763951572baf0fd97db51737de2b5d
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|d3e01432d5f7e07f1193febaedd2e511
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|2c93ad8611d082a34149df23cbe9ce14
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|e28be333baaea9849ae5cc89629f171a
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|ea614ea53a5bd4f5b7e8f9bdcfb768e5
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|4bb5a22bdd8c4950dc71295e9c7085e5
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|71a7f9236412ae4a38c65444788143d1
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|0053cacb0d067345f1ab1b26ee16e4d0
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|f619a043221f5ff9097e66521461a83d
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|df5e3d7de7e2d113bf7bf64b5afc82b5
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|342068a3520f6cbeea40a0770c9cf586
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|c5af35a4b0369baaed5929b225aacd78
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|53002070da20f871bd9d7b36e4bb8057
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|806ff06d1e0ce99822445bfb301d7c40
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|04d47911e3979e6d22f79b122340941e
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|2043df878f77ae04969558327b00d577
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|5af0c88715da7a42003134fffbb571df
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|3630b9eadda26d02cbc431c399885385
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|83ff02faa0678b30ddde32ac53489441
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|f04132854a54e82de0f82a98e891768c
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|4062a5f5498faa5e73bce3d75fdc8213
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|c785f732fc1cf15cf70c99f3b6366130
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|12ef41cf54d6adc8c06bb617c9b347f9
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|74353d346bf6561125db96dc21fe6632
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|b3e44bd7290f4e51444e7596f06f2a20
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|2aafb33a0dd37330d4cb01a7bdaea7a1
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|d101c5961c3a3774e1968f1de4a1d27d
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|469aa003f8ece7ff734a09c2774f21d5
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|508ccddec3a1de51c6994be0b8a05b90
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|5d234349f6180b094d65ce0755c5905a
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|7700b172aaa5d9eb09c451147ad50899
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|f8f763771ff09a1d5b1a6c3a3fc8cafc
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|d65440d1fcde61f22ca55bbd172d8a85
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|15a416a2ee797500f09097dfa57fec98
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|d2f6acf51abeb2e971bd19709d2fec99
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|3ceb8eaa62dee0a1a15876fbb4ca67ee
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|34c5fd4db3d8084df72a216d68c0f2d6
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|1a6487f51218e244be207aaa6b30b45f
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|083c5e9437fe83ea3cee7381dc23a2e8
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|efb5cb847170fbdc2b36560eaddc9ebd
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|15609e48376349fe43ae87a646a64da1
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|0257a5452229c544dea4c30ff8db1cc9
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|d23cbdc0dc6977f1bbb5330ac2be7a31
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|8c0d13763795413b281e772e87aeb1ba
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|753232572e77c27c94ff0f255d69df1a
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|e912a3e8cfcf927ee63b4e6f878cbdaa
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|c5f0df40ab8c1b479945ddc89fdc2d91
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|57cd09638b20abaf8122d2fb209df881
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|26f50029e7a5bfe35bdf8681caba99af
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|1b3b9b7e0b79d1e5900d9d683066ef3b
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|38c558b6f7d084fde3d7a1a5a47eb16f
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|d512b0021e2808277d8b0cafe680e255
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|2209a018d1d173d1063c358d013b1547
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|58c19b474db0e2449d81e84771040ead
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|eac8dc793e8c613ac1eddd32bb900300
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|8c8cf8ae6c046b31e0db76f6ddcc26d1
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|c4be9e59f07aad79dec8c266cba1ad42
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|f50d96534c5c8e8a7801a10c2782ae84
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|1b23ba3d308c84ad771329a90e9861c4
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|81b279e10c8741613cce9132a134a6a2
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|ea92a81a9227433e5457b8d83442bd10
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|76f5aef1506cdf3d0802941f94369537
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|ebd5df9fb13d28f36be00790806e69c3
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|5b332514480b93d6c5f886f817b740db
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|be8ebfb495ee3ebd09c8bd6b3782af80
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|b8b4ac0fd8859ca346deef7019c63294
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|3c177c38ea6d192491665aeb2ab5b9ea
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|c9749b2e0758a3871020721068f6758c
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|679055c570caeb29f05d4b262668506c
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|fa69df1654d644cdfa6ebf2d8a3f23ea
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|b42ec11069c2d4302d65bce3309cc566
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|4d9115c3bfa1bc72e8e6deea86dd25ee
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|2e8307ba8391362e01ba1fdf29cdd500
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|c9e537e2bc25719e8d6cc5c9acaaa0a9
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|e9bc0e64c224e7fd6a1ef13963908eba
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|8c8d151b3d4d3bcdecb108ac6ac9e476
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|4943b216a4270696fbb2d0478ba1ce1a
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|43fdcc9835ac308437ee0578bd24765e
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|295354c6584a04b6a2c672fd68b07595
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|5101268b4f4f838136e276d0351f2cf0
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|4b9fb9f8574ad7a8b243b491be911ac5
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|9bfcf4834cc80512e2e7821be70b2d3b
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|0a7843c3ab6bfd377cffd3d26466bb61
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|75fa7ad4e2a9665b631c2468a2a593b9
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|347e26bca7afffba2461e9c061e587a4
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|9a4e6e83ab8f907839782be526666147
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|53eefba7feca30c9640cef159581036c
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|fd32580a28b59163509d99ec05947ee9
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|2d4e5e28d4d8a9e9c85a38a63efe2fc2
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|14bc54cfe5b0a318200fd9dc01918a44
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|a397fee7a8897bceae320858b408d5df
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|9891ab46bde16c697ff76535ef7297a6
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|d9ca8b4107ae83f1a131e7841ebf383f
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|5a6402269c8677332e91dae01786782d
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|55de42f03236829ad1be2b8446717030
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|faeb6808a0f05af19278c70122cbbfcd
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|63cde3e516a68188dd6b9c1b58e5a8d8
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|d9ca8b4107ae83f1a131e7841ebf383f
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|1d6dff9855355d6633a95a3f2f74b57e
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|c6b39b69ed5bbf482ecbdc2f91671bb6
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|82f67ab6979a8fd96cae9024abb78e04
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|2d9e471fc1c71bd79db2073171cbc453
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|ba728ac8c06285a65a6ae6b1d49f38ba
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|ac5feb061a85a46869a432280321130a
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|57db1b0b1c797e674d776b6c2666c106
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|f0631f7a69eea18af903cb2aafee9389
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|be1ba50c05a06b8a15a191e3c397beef
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|5985fa7a6affd8eda3ac38f1d81fa918
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|4b3460b5e81a4fdbe1559675743cde4d
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|0c920ec6e66d7bf5fa7de7df276a0196
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|e641ff268e993350e4f7009fe6412b22
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|5d962956f69669798edef3b212410546
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|2fedfca017b4d1d7e6c13002df8e13d6
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|330f81e58dcec4b410875456732450f7
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|82ba4f7fb6ad214cb19f1cc3807e2082
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|a80b6cce93ef96c7dc75ebb78ecb7c58
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|831855ecb5a047994f86e2de0ca06af6
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|c7c56868eaf264780209509713270b69
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|271d3793fe5523e8b2abe464e830988f
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|48e4a0ded674ade68acc2b24224a860a
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|6119bee9f5b0481f099c34e4a0947387
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|2416a778927ee66b60437fd27fa8cd38
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|19ade8042e3b9ee5daf7cc2ebf1e9cc6
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|4c8cb9cf4b7bbf16a4d769be03f08a8b
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|8e7d7db05208a834f8b517927b6a59bf
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|4a4326590f7992b06d618fe696e2e25b
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|5ea0a22cd9a0f0def48787188036ec78
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|e3358a3980a336ce79150594970163fa
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|b9bca1fd2e082c75517cb245251c138f
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|a9d22e7cb706dd9d8a9b5adafcf453eb
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|0d4a59c572de66c564d2c79d2bf8421a
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|208a04e967b82e71c9d7843bc6789ec5
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|e6081a3c1bcffe3a461fa27ed7cf0f46
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|2150494f7a55db6e298be6c063e35a23
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|56bdc840ee501dc803d18ad840041c79
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|3e4cb96e3c8e4442a49aa1b5d04b992f
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|642b98c624e24d4894d61d4bf1a66abb
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|dce1a1a33e2b14979210154e78456a11
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|24d2940b6a6b83a2757c1b260f379729
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|11fcadc1d593dc37d3f1ab6c2e055293
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|b93f8abc5a8d1c58d47cf75d193483fd
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|50b9de64211a96c4893c6ebc7c193325
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|33310b9572728403c1b24ff8b4cb1e98
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|473e165d39484bafabeaae7dc26e1cb4
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|342ad252d8123e972108f9fe848f8fd6
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|8e8c688e0c4eed1858855b56f9da0cb9
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|7f302b7d16f3105c3ac236c23f3ef00e
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|d0b18d15dd184918cd4aa30cbdb4d613
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|2209a018d1d173d1063c358d013b1547
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|47cb6fed84667fa7beec694535d3ae60
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|868dbfe164d258a5f8928b1a2aacd469
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|34ab3fe584e0d3736dc7e0322bd791be
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|57f46cd1c8fe3f917845ca2c0e8904cb
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|3964ced27690007225833bfa3fa9881c
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|2d536077f000b829b85a4e20eb4a8b75
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|fe0c8038318c37b469e4277b0572cac0
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|9e4ed9ad0c0bfe9fd972986ad050fc54
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|dd8019118e3fbf9038809d3564c12b9c
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|3b501d73eb10fafa0c437bf0234c7635
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|0ef7b47280ec67bda0dd208b0ab783d5
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|6fbc40fb27c5391fd48d2067334e2cfe
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|06cc2d49c6a92b4d7e251f71573a8914
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|af641dda5081f865093e37797fe20f28
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|7b66f8dcefc6cde1ffa5e1053b6c348e
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|ada016c3a3cf0cd2a471aaf4af76bfd8
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|6fb53030d8ef77c30db367ab03f94c2d
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|efb059454a0fdec832b272af80fe80e7
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|bd236da476823d0c042f05c5f3e04078
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|b0c6e86070cc1e77aadb2c6230464e1f
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|a76021c67decd12815d7211e978a6787
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|5671b1b84f918b332492391b3ac51c44
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|3dacb4037fb293f61258bb0c6faadd28
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|0dd078e7002de020df9f16a7aa0c693e
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|50c5dfd264231c1fa19ef5369c9810df
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|88a288a5eac93ef4a5a72ecfd2aa6d71
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|35ba2260e292be6206834f557cbd3f87
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|d1a96ef3ce251e429d704eb20c2e2148
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|f0eb2f01d37e2a883409c24016c18849
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|fdbcfcad94f8195059bdaa76fde969d7
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|35d71b5439ce45471a864a6cfc32a51b
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|ee5ef330e80a0458825656b5256c3a70
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|683e4fc721d48e19ff832f30aa2c0106
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|e7b90c7d9e9de1c7ef7821540647e871
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|bb9bba128c83d60d2ea431a82016a525
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|186b8e24f12d54f79bc807a49889f80e
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|58a753171058111c7c9989ff3ca2e1ed
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|1b3fc0a8abbe75d063eaf63fe51eed4b
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|38be3e7232d489bd7f4fef2134c179d4
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|97984a413a895144175ff9547024efcc
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|0e528af3408866316073f4f49058650d
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|b0ed927cfcd7c469ce78de4075b99cf1
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|9d3055a53d9488915c8a52e0b2e81530
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|7fd9ea148e88cab27dfb883ce25e4287
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|a879a76c99e8942fb56a028a48cb966e
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|2025e16101360cb4e0783893ded8a964
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|9ab0145514bb23bf685bfed1f398cf1e
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|2c93ad8611d082a34149df23cbe9ce14
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|e28be333baaea9849ae5cc89629f171a
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|ea614ea53a5bd4f5b7e8f9bdcfb768e5
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|4bb5a22bdd8c4950dc71295e9c7085e5
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|71a7f9236412ae4a38c65444788143d1
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|0053cacb0d067345f1ab1b26ee16e4d0
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|f619a043221f5ff9097e66521461a83d
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|df5e3d7de7e2d113bf7bf64b5afc82b5
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|342068a3520f6cbeea40a0770c9cf586
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|c5af35a4b0369baaed5929b225aacd78
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|cb8c4d6e3dd8494e4c463b3a5da56c20
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|806ff06d1e0ce99822445bfb301d7c40
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|2043df878f77ae04969558327b00d577
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|3630b9eadda26d02cbc431c399885385
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|83ff02faa0678b30ddde32ac53489441
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|4062a5f5498faa5e73bce3d75fdc8213
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|c785f732fc1cf15cf70c99f3b6366130
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|12ef41cf54d6adc8c06bb617c9b347f9
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|5d962956f69669798edef3b212410546
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|2fedfca017b4d1d7e6c13002df8e13d6
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|330f81e58dcec4b410875456732450f7
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|a80b6cce93ef96c7dc75ebb78ecb7c58
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|d600c88fc0c3aa44cc64f46a42fd0a64
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|0b2cc91b961592d0b1480cd4f48a8646
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|300fdc077e9fdab5d4d20ad3eb5e5e57
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|ab2add5fda02c01216ccb50c874c24e1
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|9ec933fa98e793fe499032a9396bf299
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|12b484ddbc2fbefd26c053ca97555fc4
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|3d565f64a920d742af53a1bb222f83fc
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|e4704a815eab81d3a1b6183b176e3b34
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|a85166589c36f8987256db48ea40f1c1
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|30ad38e4bbc6c1d1058e1e7791d38939
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|7bba7544752edba295b16377e69176f3
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|59c5a065f307a72e06cad00029f0701b
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|28a83e4894d72749d0f73bb84ea8ef17
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|83189e7aedb0eefca920b62dd75e3c34
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|bc20221afb538698129d9e7eba9b5807
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|0c2cc10289129fb40b8e7ba5f2293cad
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|e3cc9ef04496b3a3a9ca114e75061829
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|d600c88fc0c3aa44cc64f46a42fd0a64
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|0b2cc91b961592d0b1480cd4f48a8646
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|300fdc077e9fdab5d4d20ad3eb5e5e57
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|ab2add5fda02c01216ccb50c874c24e1
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|9ec933fa98e793fe499032a9396bf299
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|c8276771a06a360443b8c370a44b023c
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|12b484ddbc2fbefd26c053ca97555fc4
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|3d565f64a920d742af53a1bb222f83fc
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|7bba7544752edba295b16377e69176f3
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|e4704a815eab81d3a1b6183b176e3b34
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|a85166589c36f8987256db48ea40f1c1
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|30ad38e4bbc6c1d1058e1e7791d38939
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|500d6c61b934833839b298b7657c16eb
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|9fc7a1e81d51d57c4df2eb6410666b0a
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|fbdf47bef56a1ca202dd98876c2b8121
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|0a84f2a3dfe188bedfef2dcc5ca86950
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|c66306560301a81841b6490899240292
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|b4c954b8d3b433bfa8f624fa183890e1
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|59c5a065f307a72e06cad00029f0701b
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|28a83e4894d72749d0f73bb84ea8ef17
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|5245edb6c8dd54d89aad94659bca7577
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|5245edb6c8dd54d89aad94659bca7577
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|d2556ded1c2e65feea9825aaf79f0b69
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|d2556ded1c2e65feea9825aaf79f0b69
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|2ad15668167e08476c9d6d8ce8331b12
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|12c8e740a45c8e1b5c18ac36f7973d13
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|e893085f96ceeb5ae356321cd44a95f5
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|80ee36f81d3e5e6735084e3948965e4d
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|0bed1ddcaf1184eb081a2f441f2fe42b
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|2ee8be507b0631a83691e4ddae0bd39c
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|6d96914a01431f8172660e5f8d29684f
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|aacef0432113c0d192e8d6bed812c8ba
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|484b72178ae41e67adf0439f9190d653
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|70928fe34f500aec546585f31f46c12f
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|db30a3985d2c595d7b7710a0cb2456df
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|de8ecbfcd7a05d414068d70b3ef02e6d
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|503099bdd117a3a3a1642f5f2e6a69ca
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|965d266ac81fc5fb17c2ba917526a6b5
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|965d266ac81fc5fb17c2ba917526a6b5
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|1651ecbc73a24bd57ea6df71b8fda9f1
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|fa3c0217cb26b5fb1085d1fb9d526c7b
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|63f90b819a6f9fbd540502aa6f22c05e
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|4aab1f40ceabe7f8e4e7982417e7eb3e
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|72d11fdb7f406a398f545b3f7e215e23
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|885d16464d9f3bec08ed333fa46eb28f
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|3e4f550f6c750e92900630733fcc1b50
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|ee486da819d41b223d42f3ca0ef934e5
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|78d9f180153468b5604323a7315e92b3
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|4b17ad3d54adb9dd6548208bacb26f16
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|0dfd3af7c7e06152e7effc60592a9f52
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|ef1320ff732bb223ff641717d97181cb
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|36c010b18ac7aab62399df0be136459b
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|a46f48314c102aa951aec231b4ed0060
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|0ade1157c5e2e9e4073e68076be84580
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|0fbdd300616d56880a2a97aa363faf62
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|c6696b7d2db246b35daccde405fbd276
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|a46f48314c102aa951aec231b4ed0060
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|8f3a90f321ceaa26d6177d39821091c2
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|bc825821105b66befb876ce04398582e
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|577cc5b6304b01dd7f6e71ec4d94fc08
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|5493ac85fd799147bb0c05ca3533bfc1
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|4f802fd2c0d787e0c81097e6ca809f2a
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|c035260cd66073071d61b0d020476810
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|6ea39706b3d950615c8f9acb4dbe515e
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|48588683657c0f0b6ab9df421b93934a
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|f6c395cef483e4919597b968f35446ef
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|8a83431aa27b2fa407964b259c016a6f
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|11b798af426515c3a85941ecdae4c671
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|8053a30a569dcba485541befc0604b95
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|a175ef5c94614677ea4cbcdda47094a7
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|8e95fa44a68f64582350d42660722d0c
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|337db0a76346bdbd753119ef59d615a8
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|5f82d1701f97e3c7ccae509770772b93
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|e375f345580077fa19ab29c9cee375fc
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|19e26ec8db3e172b1f852eb0a4da9dc6
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|84549e1c760e2f8ea7553edfb6e506d6
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|6ff2eceadc1e1a37408fb440453ba670
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|ee48105a64eea71da2d1e7807174ac4c
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|c215b87cd27c554ab66aa06cccb95a62
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|f90958cebed54537408aae87bc13894e
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|5a4aa11cabefc4862295c222f95b2fc7
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|23ee44815ee065c72e9311198ca3123f
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|064de49a654b6e7decffd55a301c9b0e
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|591714a3f2d16df175bfac6fb91db466
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|4c6a12df287d3a94af8810ef0ae4ad72
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|cf3be7822ee1f0ce02945d93b24def24
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|58377d7f557c6bc88f5f1606a4464613
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|3c20e16c4167e0d87d363c8a86828755
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|5b38a0c149076eba9c6001f3e3f1123a
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|22b52697192de916a7a9f341539524b1
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|ef7c47d664ebb0e54edbdd2163a358f6
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|80988c7a2b7b0cf601be8fd5ac9a9007
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|371168c4581a355b327436cd26211230
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|40fab59f0812029e3206ee6393569b6e
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|49906e0b286d0b64eda3bdfefb267c37
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|783287c695a428991ddbc6025bdb6ca9
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|6f6f8c4cf16a472cd531790487dda379
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|8cb3e92965b47baf71510152308823f5
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|c8276771a06a360443b8c370a44b023c
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|fbdf47bef56a1ca202dd98876c2b8121
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|0a84f2a3dfe188bedfef2dcc5ca86950
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|c66306560301a81841b6490899240292
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|b4c954b8d3b433bfa8f624fa183890e1
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|9fc7a1e81d51d57c4df2eb6410666b0a
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|2ad15668167e08476c9d6d8ce8331b12
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|12c8e740a45c8e1b5c18ac36f7973d13
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|80ee36f81d3e5e6735084e3948965e4d
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|0bed1ddcaf1184eb081a2f441f2fe42b
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|2ee8be507b0631a83691e4ddae0bd39c
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|6d96914a01431f8172660e5f8d29684f
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|aacef0432113c0d192e8d6bed812c8ba
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|484b72178ae41e67adf0439f9190d653
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|db30a3985d2c595d7b7710a0cb2456df
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|de8ecbfcd7a05d414068d70b3ef02e6d
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|1651ecbc73a24bd57ea6df71b8fda9f1
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|fa3c0217cb26b5fb1085d1fb9d526c7b
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|577cc5b6304b01dd7f6e71ec4d94fc08
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|5493ac85fd799147bb0c05ca3533bfc1
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|c035260cd66073071d61b0d020476810
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|6ea39706b3d950615c8f9acb4dbe515e
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|48588683657c0f0b6ab9df421b93934a
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|f6c395cef483e4919597b968f35446ef
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|8a83431aa27b2fa407964b259c016a6f
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|11b798af426515c3a85941ecdae4c671
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|8053a30a569dcba485541befc0604b95
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|a175ef5c94614677ea4cbcdda47094a7
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|5f82d1701f97e3c7ccae509770772b93
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|19e26ec8db3e172b1f852eb0a4da9dc6
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|84549e1c760e2f8ea7553edfb6e506d6
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|6ff2eceadc1e1a37408fb440453ba670
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|23ee44815ee065c72e9311198ca3123f
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|5b38a0c149076eba9c6001f3e3f1123a
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|22b52697192de916a7a9f341539524b1
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|75635f29e50cdc88a99beebfc484e01b
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|1699024c1afe26471fe66b2071ad52b5
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|fbb67aa50970abecd005e0e1d1529fb4
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|0cfc461c82075b3d3c43009e2c5b24c0
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|475614f2fe436859c6cf420a250c6d68
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|f77db07a300111b94ebd70806d00aba7
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|514b873b71bfd92d510ad5236abdb685
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|54f9008461f1c6f84bdd819fcc77efe8
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|cd54c3c191b5d7017742b4a553dc1139
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|8448a25977214baf20f7fdcd3947f5e3
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|6b05e8dd0d5884e4084ee2aac929b13c
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|628b8529edf633f69b00407f0411231f
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|72aae80442dbc45ca847f864493a15f8
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|2488e5d6c206b0e8a0ae34c7b38c0c2e
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|3833f50b679da32990da2af0f59e1fb2
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|402dd24867eebafce27a9c2e4aadd764
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|26fd5df2f18c41c49198e820c29976ed
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|f1feae1fca045c8320477d6d3fa51369
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|cde7c57e12c34d07c11751d4cfae9f46
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|0552a7d1d75d7396514eeeca57bba70c
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|d55097ade6fc820eee22082f4b8f494e
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|b8e720badfdad58caaf0a17c9a343ba6
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|4a369075da546fd55408994b96d46593
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|f582e07e05cda001a115aca201e853a9
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|6ecbc1cb4f277be2f4a552ab5f55b5c6
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|803a8d89b6ab1e5c110283aeb0bd1bb3
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|1db0eed09e68e681364ce5fc4c271940
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|fa75abcbdef33c3008865ef20df79a99
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|07fa7ae062033bac3b547f486eee6417
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|e009a823a5d7a0c71b7d5f41bfc0e0df
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|55a28b36e2e1b275d520dd3095b9530a
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|fa32d68c131ad2e5a33f0de0fd4b0c42
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|739ea017ea457f2c7c0bb6adebecc9e2
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|7397443a9ec72c83d7daa8adbc134fdd
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|5bd2045c22953427e54b62d19ee12c56
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|baaa5fe9d98005deb3b1374e59d82a57
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|9db78c3e4724cd6ab63ab2b036f68819
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|fa32d68c131ad2e5a33f0de0fd4b0c42
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|6d5c01dc543912525c1d0baec63992ca
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|e2770f10d07c8a7b1de10f49963564d6
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|520b79f4378b5ef1ff00c9ba19967fc3
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|7220fc9c4290d3a1c9b801c2088d7a36
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|aaaa82f1037ca1494743d954b2fe6f51
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|bcdfa87bf61d1228137830a832de3be0
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|8dfb579d17dc9fb48fb47379bb4292b1
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|ae6665b6c0e9c8118de3c53775433c9f
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|7c81684f17636a51918c39b459365725
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|ee93c852dd6c8e8387cb696645cea3a6
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|c8d7a3261836dda86ccd5c2adde6fa86
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|e6d39a5fb412d84650085ae2b164da22
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|ddefe89ad109dd85fea90c9529ce8ef9
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|78afc9594b883312a1394a861d65286a
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|a7c48c225910b827c6f65d6d8f26ba4f
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|f16fab836e7f0ce7791e29f8dfd96edf
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|b9eccaf8e1658564bd8b8ab39fefde85
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|f62a45567d0ced9bfb659a6cd92804e3
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|88cea3b905ee426dbe89e130412b300a
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|b51cf6af422eb8216eb44abf67a5ec2b
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|54eecb7942a625cb025b0ffc2aa6697f
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|07c7a27205c101ae90fc7b50de97ec17
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|7feaaa49578ed637a492fb196e3ccf1a
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|e763d51f49a2b971c6b90cff467d1d73
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|033d9e7e159ff0090126a3f7b7ad5203
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|1f83983be477af314db95c20ff028bef
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|e407e3bf9e25e753d83c3b4ddd4abc44
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|9c5ef51b76cdb12a9edaec1e922676ff
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|ef414831900e4aeab66d9cf7c1d6894d
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|529c5465e066e97240a503c486c04aef
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|4d917681429bb439888a6c37d30122c2
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|30875c7ec6a8b08b6ff741505abca7d2
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|7dc6d16e6c7a0078de60eb1568f7bbcf
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|6ecb34e4efc3d0977a7ec5525b30965f
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|7924805680bb680e7489639888ed01ae
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|3161a1a9b8df8ca5f851b6389ce131a1
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|890e71d8741330193041d54bf648e613
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|4b308ad7a7a76e1291a433dbe4fbcccf
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|3e473d06a549cb2a4d493ec3d764b117
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|6ca9b6626941e386f9d9d729a71753c8
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|a6af1e6a63b3d1e75b4a66c6c0f7d043
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|5715eeff15b0a60213a466c6ae5643f0
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|020e2c98dc705a5ee4831bda5892c9a2
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|682f687de62a7239f69acc007d14ec48
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|966f716f34e32d623a34877262ab75bb
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|5210107c1fee391bc0478fd2da2890f6
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|fe8050a18b89e46269c52f0fa9214383
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|a43e51f8791ac257baecb72bc704122a
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|8c6a89a4b17a549d5ef92c2dae809340
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|a21f775f7444948b5d2a4cb65cb12f36
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|36f9889c45c7deaee60cc1be7297284b
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|d4c5b0444bb7a18c14df0d0ad19aa06c
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|a1aaaca9287cb4d6a4c473ab37f3f6b1
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|119e8fac5ea51f80f9ea56d86cc9e537
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|74801982ddf01d3d446bf7b6080c82e0
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|0ecc6fb769b6cd8fdbb881198e57c13b
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|d46cf2bb115125793c478f285a503c5d
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|601feb68192869afbe302bc45883710b
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|1b4d3c6548b15b0a845200c4950fdedd
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|98623a0d34796ba36a4eae2d7e28fc46
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|e042437e00a572b23762d951c86b0928
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|dd1b670674e6e1a0eaac56a2f92cc963
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|d14632848c3eeffa5661a5616c1faf24
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|890e71d8741330193041d54bf648e613
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|4b308ad7a7a76e1291a433dbe4fbcccf
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|a6af1e6a63b3d1e75b4a66c6c0f7d043
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|5715eeff15b0a60213a466c6ae5643f0
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|682f687de62a7239f69acc007d14ec48
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|966f716f34e32d623a34877262ab75bb
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|5210107c1fee391bc0478fd2da2890f6
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|fe8050a18b89e46269c52f0fa9214383
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|8c6a89a4b17a549d5ef92c2dae809340
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|36f9889c45c7deaee60cc1be7297284b
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|74801982ddf01d3d446bf7b6080c82e0
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|0ecc6fb769b6cd8fdbb881198e57c13b
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|98623a0d34796ba36a4eae2d7e28fc46
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|e042437e00a572b23762d951c86b0928
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|fbb67aa50970abecd005e0e1d1529fb4
+      updated_at: "<ora>" → "<ora>"
+  ~ 2|d14632848c3eeffa5661a5616c1faf24
+      updated_at: "<ora>" → "<ora>"
+  ~ 1|a436528f527938e0ad444022b41ae0a2
+      updated_at: "<ora>" → "<ora>"
+
+tabelle invariate: 101 su 112

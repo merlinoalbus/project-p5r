@@ -1,0 +1,6 @@
+non permanenti segnate 12 di cui passi di un Enigma 12 · non passi: []
+Enigmi con passi 5 ["orial-palazzo-11-04-incontro-con-morgana:permanente:ottenuto","astello-ingresso-ogni-libro-al-suo-posto:permanente:ottenuto","l-castello-ingresso-oltrepassa-le-sbarre:permanente:ottenuto","lo-ingresso-attraversa-la-sala-da-pranzo:permanente:ottenuto","ida-15-torre-centrale-ponte-di-kamoshida:permanente:ottenuto"]
+tolgo il passo rigenerabile kamoshida-01-cancello-del-castello-ingresso-sconfiggi-i-nemici-2 dell Enigma kamoshida-01-cancello-del-castello-ingresso-ogni-libro-al-suo-posto → 200
+Enigma null · completamento {"oggetti":71,"fatti":70,"tesoro":true,"boss":true,"completato":false} completato null
+rimetto → 200
+completamento {"oggetti":71,"fatti":71,"tesoro":true,"boss":true,"completato":true}

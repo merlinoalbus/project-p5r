@@ -1,0 +1,30 @@
+# Indice della memoria — project-p5r
+
+- [Modifiche dirette ai file](feedback-modifiche-dirette.md) — niente patch né script (Python o tsx) che scrivono sorgenti, dati o documenti
+- [Flusso di lavoro dei lotti](project-flusso-di-lavoro-p5r.md) — worktree main, ramo lavoro/…, validatore emulato in sola lettura, PR + merge + solo main
+- [Browser pane nascosto](reference-browser-pane-p5r.md) — click/hover non arrivano (nascosto o sotto emulazione scalata): gesti a misura reale, misure in emulazione, pulire i dati di prova
+- [Tre formati](feedback-tre-formati.md) — ogni elemento FE ottimizzato per desktop, tablet e mobile; verifica a 1280/768/375
+- [Avanzamento in chat](feedback-avanzamento-in-chat.md) — dopo ogni voce del piano: percentuale e voci fatte/residue
+- [Immagini nel DB](feedback-immagini-nel-db.md) — tutto fuorché compendio e ui vive in gioco.db; mai attribuire all'utente decisioni non sue
+- [Altezze realistiche](feedback-altezze-realistiche.md) — «una schermata» si verifica a 1366×657, 1280×689, 1024×690… (browser aperto)
+- [Scroll annidati](feedback-scroll-annidati.md) — area scorrevole interna evidente, overscroll contenuto, mai più barre che scorrono insieme
+- [Non interrompere](feedback-non-interrompere.md) — finita una voce si prosegue con la successiva; ci si ferma solo per decisioni davvero aperte
+- [Push e pipeline](feedback-push-pipeline.md) — dopo ogni push seguire la pipeline fino all'esito (audit compreso); mai «fatto» senza
+- [Prove sui dati reali](feedback-prove-sui-dati-reali.md) — partita di prova creata apposta o confronto prima del ripristino; mai ripristinare alla cieca
+- [Dati freschi: segni esatti](feedback-verifica-dati-freschi.md) — conteggi e id della copia prima di dire «dati nuovi», mai una parola trovata
+- [Produzione in sola lettura](feedback-produzione-sola-lettura.md) — persona5royal si guarda soltanto: niente localStorage né preferenze, nemmeno ripristinate
+- [Recupero dalla produzione](reference-recupero-produzione.md) — ssh, container, WAL ricostruito su copia; scrivere solo dopo il sì dell'utente
+- [Validare alla fine](feedback-validare-alla-fine.md) — più veloce: un solo giro del validatore a lavoro finito, non a ogni voce
+- [Test non a ogni run](feedback-test-non-a-ogni-run.md) — test nel repo ma non eseguiti a ogni modifica né in pipeline; mai cancellarli
+- [Gerarchia del mondo](project-gerarchia-mondo.md) — Città → Quartiere → Area → Planimetrie → Luoghi; Città → Palazzo → Area → Planimetria, Infiltrazioni ↔ Aree; Città → Memento → Dedalo → Area (senza planimetrie)
+- [Un punto di modifica, si gioca da Partita](feedback-tutto-modificabile-partita.md) — ogni dato si modifica in un solo punto letto ovunque; stati dal diario; analisi sistematica mia
+- [Copie di voci](project-copie-voci.md) — due voci sono la stessa solo con stesso testo, stessi pin e stessa infiltrazione; fusioni solo su elenco approvato
+- [Lavoro da preservare](project-lavoro-da-preservare.md) — diario validato fino al 1° giugno, Palazzi di Kamoshida e Madarame: mai persi nelle migrazioni
+- [Dati di riferimento: p5s](project-dati-attuali-produzione.md) — dal 20/10 l'utente lavora su p5s (dati suoi, mai sovrascritti) e non tocca persona5royal; base = copia di p5s; alla fine sostituisce i principali
+- [Ruoli PM e Manager](project-ruoli-pm-manager.md) — dal 20/10 il Manager coordina il team; il PM aggiorna la Regia e porta all'utente solo i blocchi
+- [Domande retoriche](feedback-regole-ovvie-non-si-testano.md) — «è corretto che…» su una violazione di una regola = difetto da correggere subito, niente misure prima
+- [PM: ascoltare i messaggi](feedback-pm-ascoltare-i-messaggi.md) — ogni resoconto letto per intero e tradotto in azione o in un aggiornamento; mai ricevute di una riga (cartellino giallo 2026-10-20)
+- [PM: mai team fermo](feedback-pm-non-bloccare-team.md) — prima di domande o fine turno dare lavoro a ogni sessione idle; max 10 messaggi fra sessioni per messaggio dell'utente
+- [Implementatori non validano](feedback-implementatori-non-validano.md) — team p5s: BE/FE non lanciano validatori (galaxy compreso), si fermano a typecheck, lint e test mirati
+- [GET che scrivono](reference-get-che-scrivono.md) — dalla 108 un'immagine con ?l= scrive la cache immagine_miniatura: dichiararlo nelle prove «di lettura» su istanze altrui
+- [Manager del team p5s](project-manager-team-p5s.md) — dal 20/10 coordina il Manager; Regia e utente restano al PM, che riceve cambi di stato e preavviso dei push su p5s

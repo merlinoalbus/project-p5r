@@ -1,0 +1,370 @@
+
+ RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/pensive-burnell-b50941
+
+ ❯ src/pages/EditorMappaPage.test.tsx (48 tests | 1 failed | 47 skipped) 1208ms
+     × FUN2-8: spostare una mappa sciolta sotto un quartiere mostra il messaggio del server con «Aggiungi area» e «Da collocare» 1206ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pages/EditorMappaPage.test.tsx > EditorMappaPage > FUN2-8: spostare una mappa sciolta sotto un quartiere mostra il messaggio del server con «Aggiungi area» e «Da collocare»
+TestingLibraryElementError: Unable to find role="alert" and name "La mappa non si sposta lì"
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"visore-mappa visore-mappa--intero  visore-mappa--editor"[39m
+      [33mdata-testid[39m=[32m"visore-mappa"[39m
+      [33mstyle[39m=[32m"--proporzione-immagine: 1000 / 500;"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"visore-mappa__barra"[39m
+      [36m>[39m
+        [36m<nav[39m
+          [33maria-label[39m=[32m"Percorso della mappa"[39m
+          [33mclass[39m=[32m"visore-mappa__percorso"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"editor-mappa__targhetta"[39m
+          [36m>[39m
+            [0mModifica[0m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"visore-mappa__tappa visore-mappa__tappa--attuale"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"visore-mappa__titolo"[39m
+            [36m>[39m
+              [0mMagazzino[0m
+            [36m</span>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"visore-mappa__tipo chip text-[11px]"[39m
+          [36m>[39m
+            [0mArea[0m
+          [36m</span>[39m
+        [36m</nav>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"visore-mappa__strumenti"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33maria-pressed[39m=[32m"false"[39m
+            [33mclass[39m=[32m"btn btn-sm btn-visivo btn-ghost btn-visivo--compatto  "[39m
+            [33mdisabled[39m=[32m""[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"btn-visivo__icona"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"20"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"20"[39m
+              [36m>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"12"[39m
+                  [33mcy[39m=[32m"12"[39m
+                  [33mr[39m=[32m"9"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 7v5l3.5 2"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"btn-visivo__testo"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"btn-visivo__titolo"[39m
+              [36m>[39m
+                [0mGiorno corrente[0m
+              [36m</span>[39m
+              [0m [0m
+              [36m<span[39m
+                [33mclass[39m=[32m"btn-visivo__dettaglio"[39m
+              [36m>[39m
+                [0mserve una partita attiva[0m
+              [36m</span>[39m
+            [36m</span>[39m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"btn btn-sm btn-visivo btn-ghost btn-visivo--compatto  "[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"btn-visivo__icona"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"20"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"20"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M9 4v14M15 6v14"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"btn-visivo__testo"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"btn-visivo__titolo"[39m
+              [36m>[39m
+                [0mApri il visore[0m
+              [36m</span>[39m
+            [36m</span>[39m
+          [36m</button>[39m
+          [36m<button[39m
+            [33maria-controls[39m=[32m"visore-mappa-pannello"[39m
+            [33maria-expanded[39m=[32m"true"[39m
+            [33mclass[39m=[32m"btn btn-sm btn-visivo btn-ghost btn-visivo--compatto  "[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"btn-visivo__icona"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"20"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"20"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M7 17 17 7M9 7h8v8"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"btn-visivo__testo"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"btn-visivo__titolo"[39m
+              [36m>[39m
+                [0mNascondi pannello[0m
+              [36m</span>[39m
+            [36m</span>[39m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"btn btn-sm btn-visivo btn-ghost btn-visivo--compatto  "[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"btn-visivo__icona"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"20"[39...
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"visore-mappa visore-mappa--intero  visore-mappa--editor"[39m
+      [33mdata-testid[39m=[32m"visore-mappa"[39m
+      [33mstyle[39m=[32m"--proporzione-immagine: 1000 / 500;"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"visore-mappa__barra"[39m
+      [36m>[39m
+        [36m<nav[39m
+          [33maria-label[39m=[32m"Percorso della mappa"[39m
+          [33mclass[39m=[32m"visore-mappa__percorso"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"editor-mappa__targhetta"[39m
+          [36m>[39m
+            [0mModifica[0m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"visore-mappa__tappa visore-mappa__tappa--attuale"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"visore-mappa__titolo"[39m
+            [36m>[39m
+              [0mMagazzino[0m
+            [36m</span>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"visore-mappa__tipo chip text-[11px]"[39m
+          [36m>[39m
+            [0mArea[0m
+          [36m</span>[39m
+        [36m</nav>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"visore-mappa__strumenti"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33maria-pressed[39m=[32m"false"[39m
+            [33mclass[39m=[32m"btn btn-sm btn-visivo btn-ghost btn-visivo--compatto  "[39m
+            [33mdisabled[39m=[32m""[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"btn-visivo__icona"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"20"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"20"[39m
+              [36m>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"12"[39m
+                  [33mcy[39m=[32m"12"[39m
+                  [33mr[39m=[32m"9"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 7v5l3.5 2"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"btn-visivo__testo"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"btn-visivo__titolo"[39m
+              [36m>[39m
+                [0mGiorno corrente[0m
+              [36m</span>[39m
+              [0m [0m
+              [36m<span[39m
+                [33mclass[39m=[32m"btn-visivo__dettaglio"[39m
+              [36m>[39m
+                [0mserve una partita attiva[0m
+              [36m</span>[39m
+            [36m</span>[39m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"btn btn-sm btn-visivo btn-ghost btn-visivo--compatto  "[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"btn-visivo__icona"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"20"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"20"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M9 4v14M15 6v14"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"btn-visivo__testo"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"btn-visivo__titolo"[39m
+              [36m>[39m
+                [0mApri il visore[0m
+              [36m</span>[39m
+            [36m</span>[39m
+          [36m</button>[39m
+          [36m<button[39m
+            [33maria-controls[39m=[32m"visore-mappa-pannello"[39m
+            [33maria-expanded[39m=[32m"true"[39m
+            [33mclass[39m=[32m"btn btn-sm btn-visivo btn-ghost btn-visivo--compatto  "[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"btn-visivo__icona"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"20"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"20"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M7 17 17 7M9 7h8v8"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"btn-visivo__testo"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"btn-visivo__titolo"[39m
+              [36m>[39m
+                [0mNascondi pannello[0m
+              [36m</span>[39m
+            [36m</span>[39m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"btn btn-sm btn-visivo btn-ghost btn-visivo--compatto  "[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"btn-visivo__icona"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"20"[39...
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/pages/EditorMappaPage.test.tsx:404:40
+    402|     fireEvent.click(form.getByRole('button', { name: 'Salva mappa' }));
+    403|     await waitFor(() => expect(api.aggiornaMappa).toHaveBeenCalledWith…
+    404|     const avviso = within(await screen.findByRole('alert', { name: 'La…
+       |                                        ^
+    405|     expect(avviso.getByText(testo)).toBeInTheDocument();
+    406|     expect(avviso.getByRole('link', { name: 'Aggiungi area / planimetr…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 47 skipped (48)
+   Start at  05:32:07
+   Duration  2.86s (transform 461ms, setup 108ms, import 623ms, tests 1.21s, environment 793ms)
+

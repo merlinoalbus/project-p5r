@@ -1,0 +1,10 @@
+### commit dei documenti
+4e5f55a03889087f2c0c3a64f85b9a577e2b6ab9 docs(L2): giro 2 — riga della ROADMAP con LAY2-7 (872ac976) e i punti assegnati a L3
+872ac9767730e90a37d26a05c22f16991f146d38 fix(L2): giro 2 — la riga dei conteggi della carta di Tokyo si legge intera (LAY2-7, effetto di R1)
+625475322b745489e5da1a9b674b5fa7b77e795b docs(L2): giro 2 — riga della ROADMAP con le correzioni e il collaudo
+### diff --stat 872ac976 HEAD
+ docs/ROADMAP.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+### status
+### impronta codice invariata (9634bbb5..HEAD -- server shared src)
+3b466c27d5dae15471a812504fb9463231962161749a986d1de34c618b1947ce *-

@@ -1,0 +1,22 @@
+OK  F9: mappa nuova senza asset → asset null — {"status":201,"asset":null,"ruolo":"nessuna"}
+OK  F9: esportata con asset null — {"asset":null,"assetOriginale":null}
+OK  F9: mappa eliminata — {"status":204}
+OK  F9: reimportata, asset ancora null — {"status":200,"riga":{"chiave":"prova-no-reg-f9-mvfxh85o","nome":"Prova no-reg F9 mvfxh85o","tipo":"generica","asset":null,"immagine_chiave":null,"ruolo_immagine":"nessuna","origine":"utente"}}
+OK  F9: mappa di prova tolta dalla copia — {"status":204}
+OK  F5: sostituzione dell'immagine di palazzo-di-madarame-il-labirinto-contorto senza conferma → 409 — {"status":409,"code":"mappa-con-pezzi","details":{"pezzi":1,"copie":3}}
+OK  F5: da-url su palazzo-di-madarame-il-labirinto-contorto senza conferma → 409 (prima dello scarico) — {"status":409,"code":"mappa-con-pezzi"}
+OK  F5: sostituzione dell'immagine di nativo-rmap-153-6-0 senza conferma → 409 — {"status":409,"code":"mappa-con-pezzi","details":{"pezzi":6,"copie":21}}
+OK  F5: da-url su nativo-rmap-153-6-0 senza conferma → 409 (prima dello scarico) — {"status":409,"code":"mappa-con-pezzi"}
+OK  F5: rimozione dell'immagine di palazzo-di-madarame-il-labirinto-contorto → 409 — {"status":409,"code":"mappa-con-pezzi"}
+OK  F5: rimozione in blocco dell'ambito mappa → 409 — {"status":409,"code":"mappa-con-pezzi","details":{"mappe":1,"pezzi":1,"copie":3}}
+OK  F5: pezzi e copie di palazzo-di-madarame-il-labirinto-contorto invariati — {"prima":[1,3],"dopo":[1,3]}
+OK  F5: pezzi e copie di nativo-rmap-153-6-0 invariati — {"prima":[6,21],"dopo":[6,21]}
+
+errori: 0
+versioni prima {"gioco.db":108,"partite.db":21} dopo {"gioco.db":108,"partite.db":21}
+
+# gioco.db:cestino: righe 4 → 6; aggiunte 2, tolte 0, cambiate 0
+  + 21
+  + 22
+
+tabelle invariate: 111 su 112

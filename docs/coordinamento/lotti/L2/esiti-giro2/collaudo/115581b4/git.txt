@@ -1,0 +1,16 @@
+### HEAD
+115581b421f42b2cd4f6dfa8aeb6ee90e5ebac86 fix(L2): UX2-13 — la miniatura ?l= si ritaglia sul riquadro del disegno
+4e5f55a03889087f2c0c3a64f85b9a577e2b6ab9 docs(L2): giro 2 — riga della ROADMAP con LAY2-7 (872ac976) e i punti assegnati a L3
+872ac9767730e90a37d26a05c22f16991f146d38 fix(L2): giro 2 — la riga dei conteggi della carta di Tokyo si legge intera (LAY2-7, effetto di R1)
+625475322b745489e5da1a9b674b5fa7b77e795b docs(L2): giro 2 — riga della ROADMAP con le correzioni e il collaudo
+### status
+### 6 file identici a 7624bdda
+sì
+### albero HEAD contro 54811711 (62547532+7624bdda di BE)
+ docs/ROADMAP.md         |  2 +-
+ src/pages/MappaPage.tsx | 18 ++++++++++--------
+ 2 files changed, 11 insertions(+), 9 deletions(-)
+### migrazioni nuove
+(nessuna se vuoto)
+### grep 2026-10-21
+EXIT=1

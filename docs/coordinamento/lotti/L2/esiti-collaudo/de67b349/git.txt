@@ -1,0 +1,40 @@
+### git rev-parse HEAD
+de67b349f702850cbdb299de82967e18d81396d6
+### git branch --show-current
+newreview-l2
+### git status --porcelain (vuoto atteso)
+EXIT=0
+### git status --porcelain --ignored
+!! .env
+!! BE.log
+!! FE.log
+!! data/
+!! node_modules/
+### git diff --stat 8e75abbb HEAD
+ src/components/mappe/AlberoLuoghi.tsx             |  5 +-
+ src/components/mappe/AreeDelQuartiere.tsx         | 12 +++--
+ src/components/mappe/AreeDellaCitta.tsx           | 15 +++---
+ src/components/mappe/CollezioniImmagini.test.tsx  |  3 +-
+ src/components/mappe/FinestraAggiungiArea.tsx     |  2 +-
+ src/components/mappe/FinestraModificaArea.tsx     |  7 +--
+ src/components/mappe/FinestreAree.test.tsx        | 61 +++++++++++++++++++++++
+ src/components/mappe/OrganizzazioneMappe.test.tsx |  7 +++
+ src/components/mappe/VisoreMappa.test.tsx         | 16 ++++++
+ src/components/mappe/VisoreMappa.tsx              |  9 ++--
+ src/pages/AreaPage.test.tsx                       | 29 +++++++++--
+ src/pages/AreaPage.tsx                            | 41 +++++++++++----
+ src/pages/CittaPage.test.tsx                      | 40 ++++++++++++++-
+ src/pages/MappaPage.test.tsx                      |  7 +++
+ src/pages/MappaPage.tsx                           |  3 +-
+ src/pages/QuartierePage.tsx                       | 12 +++--
+ src/tailwind.css                                  | 11 ++++
+ 17 files changed, 240 insertions(+), 40 deletions(-)
+### git diff --stat 9634bbb5 HEAD (riepilogo L2)
+ 95 files changed, 4345 insertions(+), 479 deletions(-)
+### git log --oneline 9634bbb5..HEAD
+de67b349 fix(L2): difetti del collaudo — Elimina area con conferma, pannello chiuso sul telefono, nomi dei passaggi al tocco
+8e75abbb docs(L2): ROADMAP, DECISIONI e ARCHITETTURA del lotto
+75894664 merge: L1 pubblicato (date e documenti dei verdetti 3-5) nella linea di sviluppo
+aed23dee feat(L2): parte FE — pagine Quartiere e Area, ingresso in finestra, redirect con spillo e versione, etichette con il nome del posto
+d66cf5f5 fix(L2): BE — testo del 409 di «Elimina area» (FUN2-5) e rotta GET /api/aree/:contenitore/:chiave
+1db43bd8 feat(L2): parte BE — aree del mondo (migrazione 109), casa delle mappe, API /api/aree

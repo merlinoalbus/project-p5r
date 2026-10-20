@@ -1,0 +1,12 @@
+
+ RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/pensive-burnell-b50941
+
+ ✓ server/db/migrations/109_aree_del_mondo.test.ts > crea le Aree del mondo: gruppi in un’Area con le versioni, sciolte una per Area, Covo sotto Yongen-Jaya dopo le altre, staff Area di Tokyo da verificare; nient’altro cambia 112ms
+ ✓ server/db/migrations/109_aree_del_mondo.test.ts > si può rieseguire: la seconda volta nessuna riga toccata; una zona nuova riceve la sua Area in fondo al quartiere, con lo slug libero 112ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  02:46:28
+   Duration  1.36s (transform 689ms, setup 111ms, import 890ms, tests 225ms, environment 0ms)
+
+EXIT=0

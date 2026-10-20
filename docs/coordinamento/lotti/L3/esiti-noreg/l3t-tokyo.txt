@@ -1,0 +1,32 @@
+esporta tokyo: HTTP 200, 61076995 caratteri {"versione":1,"esportato":"2026-10-20T03:15:32.269Z","aree":23,"mappe":54,"immagini":22,"ingressi":2}
+importa tokyo: HTTP 200 {"data":{"mappe":54,"spilli":298,"pezzi":0,"copie":0,"pezziScartati":0,"copieScartate":0,"pezziEliminati":0,"copieEliminate":0,"immagini":22,"saltate":[],"condizioniScartate":0,"vociScartate":0}}
+== fotografia prima/dopo il giro della radice tokyo (TUTTI i campi, updated_at compresi):
+versioni prima {"gioco.db":111,"partite.db":22} dopo {"gioco.db":111,"partite.db":22}
+
+# gioco.db:mappa: righe 317 → 317; aggiunte 0, tolte 0, cambiate 1
+  ~ shibuya-tornello-della-linea-ginza-aoyama-itchome
+      asset: "mappe/shibuya-tornello-della-linea-ginza-aoyama-itchome" → null
+
+tabelle invariate: 116 su 117
+pin confrontati per uid: 1913 | id cambiati: 0 | origine cambiata: 0 | condizioni cambiate: 0
+nativo-rmap-001-2-0 nome_rivisto 1 → 1 | nome Sottopasso
+nativo-rmap-001-2-1 nome_rivisto 1 → 1 | nome Sottopasso Speciale
+area citta/shibuya/sottopasso nome_rivisto 1 → 1 | nome Sottopasso
+area citta/shujin-academy/banchina-aoyama-itchome nome_rivisto 1 → 1 | nome Banchina Aoyama Itchome
+area dungeon/kamoshida/prigione-sotterranea-tutorial nome_rivisto 1 → 1 | nome Prigione sotterranea - Tutorial
+area dungeon/kamoshida/cancello-del-castello nome_rivisto 1 → 1 | nome Cancello del castello
+area dungeon/kamoshida/vecchio-castello-1p nome_rivisto 1 → 1 | nome Vecchio castello 1P
+area dungeon/kamoshida/vecchio-castello-2p nome_rivisto 1 → 1 | nome Vecchio castello 2P
+area dungeon/kamoshida/vecchio-castello-3p nome_rivisto 1 → 1 | nome Vecchio castello 3P
+area dungeon/kamoshida/tetto nome_rivisto 1 → 1 | nome Tetto
+area dungeon/kamoshida/torre-livello-inferiore nome_rivisto 1 → 1 | nome Torre - Livello inferiore
+area dungeon/kamoshida/torre-livello-intermedio nome_rivisto 1 → 1 | nome Torre - Livello Intermedio
+area dungeon/kamoshida/torre-livello-superiore nome_rivisto 1 → 1 | nome Torre - Livello superiore
+area dungeon/kamoshida/torre-sala-del-trono nome_rivisto 1 → 1 | nome Torre - Sala del trono
+area dungeon/madarame/museo-1p nome_rivisto 1 → 1 | nome Museo, 1P
+area dungeon/madarame/museo-2p nome_rivisto 1 → 1 | nome Museo, 2P
+area dungeon/madarame/sala-del-tesoro-atrio nome_rivisto 1 → 1 | nome Sala del Tesoro - Atrio
+area dungeon/madarame/sala-del-tesoro-galleria nome_rivisto 1 → 1 | nome Sala del Tesoro - Galleria
+area dungeon/madarame/il-labirinto-contorto nome_rivisto 1 → 1 | nome Il Labirinto Contorto
+area dungeon/madarame/sala-principale nome_rivisto 1 → 1 | nome Sala Principale
+mappa shibuya-tornello-della-linea-ginza-aoyama-itchome nome_rivisto 1 → 1

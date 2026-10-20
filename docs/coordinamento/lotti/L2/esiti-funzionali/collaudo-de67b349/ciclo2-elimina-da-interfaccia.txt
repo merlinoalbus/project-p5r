@@ -1,0 +1,5 @@
+02:22:41
+cestino dopo Elimina da interfaccia [[18,"area-fisica","citta/kichijoji/prova-funzionali-l2","mappa_alias:5,mappa_percorso:3,mappa:3,immagine:2,area:1,quartiere_ingresso:1,spillo:1"]]
+ripristino 18 200
+area rimessa Prova funzionali L2 rinominata ["prima","seconda rinominata","collocata"] passaggio {"spillo":2300,"x":30,"y":40}
+ingresso {"mappa":"kichijoji-prova-funzionali-l2","nome":"Kichijoji › Prova funzionali L2","x":20,"y":30,"zoom":2,"area":{"slug":"prova-funzionali-l2","nome":"Prova funzionali L2 rinominata"}}

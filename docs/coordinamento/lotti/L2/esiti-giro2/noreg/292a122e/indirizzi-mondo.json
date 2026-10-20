@@ -1,0 +1,1275 @@
+{
+ "conteggi": {
+  "totale": 115,
+  "pubblica": 54,
+  "alias": 8,
+  "interna": 53
+ },
+ "righe": [
+  {
+   "indirizzo": "akihabara",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-akihabara",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "akihabara",
+    "casa": "/guida/citta/akihabara"
+   }
+  },
+  {
+   "indirizzo": "akihabara-electric-town",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-007-1-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "akihabara-electric-town",
+    "casa": "/guida/citta/akihabara/electric-town"
+   }
+  },
+  {
+   "indirizzo": "area-riservata-allo-staff",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-150-3-1",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "area-riservata-allo-staff",
+    "casa": "/guida/citta/tokyo/area-riservata-allo-staff?planimetria=area-riservata-allo-staff"
+   }
+  },
+  {
+   "indirizzo": "area-riservata-allo-staff-porzione-occidentale",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-150-3-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "area-riservata-allo-staff-porzione-occidentale",
+    "casa": "/guida/citta/tokyo/area-riservata-allo-staff"
+   }
+  },
+  {
+   "indirizzo": "asakusa",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-asakusa",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "asakusa",
+    "casa": "/guida/citta/asakusa"
+   }
+  },
+  {
+   "indirizzo": "banchina-della-metropolitana-di-yongen-jaya",
+   "fonte": "alias",
+   "mappaNelDb": "yongen-java-banchina-della-metropolitana",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "yongen-jaya-banchina-della-metropolitana",
+    "casa": "/guida/citta/yongen-jaya/banchina-della-metropolitana"
+   }
+  },
+  {
+   "indirizzo": "chinatown",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-yokohama-chinatown",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "chinatown",
+    "casa": "/guida/citta/yokohama-chinatown"
+   }
+  },
+  {
+   "indirizzo": "citta-akihabara",
+   "fonte": "interna",
+   "mappaNelDb": "citta-akihabara",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "akihabara",
+    "casa": "/guida/citta/akihabara"
+   }
+  },
+  {
+   "indirizzo": "citta-asakusa",
+   "fonte": "interna",
+   "mappaNelDb": "citta-asakusa",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "asakusa",
+    "casa": "/guida/citta/asakusa"
+   }
+  },
+  {
+   "indirizzo": "citta-harajuku",
+   "fonte": "interna",
+   "mappaNelDb": "citta-harajuku",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "harajuku",
+    "casa": "/guida/citta/harajuku"
+   }
+  },
+  {
+   "indirizzo": "citta-ichigaya",
+   "fonte": "interna",
+   "mappaNelDb": "citta-ichigaya",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "ichigaya",
+    "casa": "/guida/citta/ichigaya"
+   }
+  },
+  {
+   "indirizzo": "citta-ikebukuro",
+   "fonte": "interna",
+   "mappaNelDb": "citta-ikebukuro",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "ikebukuro",
+    "casa": "/guida/citta/ikebukuro"
+   }
+  },
+  {
+   "indirizzo": "citta-inokashira-park",
+   "fonte": "interna",
+   "mappaNelDb": "citta-inokashira-park",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "parco-inokashira",
+    "casa": "/guida/citta/inokashira-park"
+   }
+  },
+  {
+   "indirizzo": "citta-kanda-jinbocho",
+   "fonte": "interna",
+   "mappaNelDb": "citta-kanda-jinbocho",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "kanda-jinbocho",
+    "casa": "/guida/citta/kanda-jinbocho"
+   }
+  },
+  {
+   "indirizzo": "citta-kichijoji",
+   "fonte": "interna",
+   "mappaNelDb": "citta-kichijoji",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "kichijoji",
+    "casa": "/guida/citta/kichijoji"
+   }
+  },
+  {
+   "indirizzo": "citta-maihama",
+   "fonte": "interna",
+   "mappaNelDb": "citta-maihama",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "maihama",
+    "casa": "/guida/citta/maihama"
+   }
+  },
+  {
+   "indirizzo": "citta-meiji-shrine",
+   "fonte": "interna",
+   "mappaNelDb": "citta-meiji-shrine",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "santuario-meiji",
+    "casa": "/guida/citta/meiji-shrine"
+   }
+  },
+  {
+   "indirizzo": "citta-mementos",
+   "fonte": "interna",
+   "mappaNelDb": "citta-mementos",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "entrata-dei-memento",
+    "casa": "/guida/mappe/entrata-dei-memento"
+   }
+  },
+  {
+   "indirizzo": "citta-nakano",
+   "fonte": "interna",
+   "mappaNelDb": "citta-nakano",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "nakano",
+    "casa": "/guida/citta/nakano"
+   }
+  },
+  {
+   "indirizzo": "citta-odaiba",
+   "fonte": "interna",
+   "mappaNelDb": "citta-odaiba",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "odaiba-seaside-park",
+    "casa": "/guida/citta/odaiba"
+   }
+  },
+  {
+   "indirizzo": "citta-ogikubo",
+   "fonte": "interna",
+   "mappaNelDb": "citta-ogikubo",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "ogikubo",
+    "casa": "/guida/citta/ogikubo"
+   }
+  },
+  {
+   "indirizzo": "citta-roppongi",
+   "fonte": "interna",
+   "mappaNelDb": "citta-roppongi",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "roppongi",
+    "casa": "/guida/citta/roppongi"
+   }
+  },
+  {
+   "indirizzo": "citta-shibuya",
+   "fonte": "interna",
+   "mappaNelDb": "citta-shibuya",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shibuya",
+    "casa": "/guida/citta/shibuya"
+   }
+  },
+  {
+   "indirizzo": "citta-shinagawa",
+   "fonte": "interna",
+   "mappaNelDb": "citta-shinagawa",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shinagawa",
+    "casa": "/guida/citta/shinagawa"
+   }
+  },
+  {
+   "indirizzo": "citta-shinjuku",
+   "fonte": "interna",
+   "mappaNelDb": "citta-shinjuku",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shinjuku",
+    "casa": "/guida/citta/shinjuku"
+   }
+  },
+  {
+   "indirizzo": "citta-shujin-academy",
+   "fonte": "interna",
+   "mappaNelDb": "citta-shujin-academy",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shujin-academy",
+    "casa": "/guida/citta/shujin-academy"
+   }
+  },
+  {
+   "indirizzo": "citta-suidobashi",
+   "fonte": "interna",
+   "mappaNelDb": "citta-suidobashi",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "suidobashi",
+    "casa": "/guida/citta/suidobashi"
+   }
+  },
+  {
+   "indirizzo": "citta-tsukishima",
+   "fonte": "interna",
+   "mappaNelDb": "citta-tsukishima",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "tsukishima",
+    "casa": "/guida/citta/tsukishima"
+   }
+  },
+  {
+   "indirizzo": "citta-ueno",
+   "fonte": "interna",
+   "mappaNelDb": "citta-ueno",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "ueno",
+    "casa": "/guida/citta/ueno"
+   }
+  },
+  {
+   "indirizzo": "citta-yokohama-chinatown",
+   "fonte": "interna",
+   "mappaNelDb": "citta-yokohama-chinatown",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "chinatown",
+    "casa": "/guida/citta/yokohama-chinatown"
+   }
+  },
+  {
+   "indirizzo": "citta-yongen-jaya",
+   "fonte": "interna",
+   "mappaNelDb": "citta-yongen-jaya",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "yongen-jaya",
+    "casa": "/guida/citta/yongen-jaya"
+   }
+  },
+  {
+   "indirizzo": "covo-dei-ladri",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-022-1-1",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "covo-dei-ladri",
+    "casa": "/guida/citta/yongen-jaya/covo-dei-ladri?planimetria=covo-dei-ladri"
+   }
+  },
+  {
+   "indirizzo": "covo-dei-ladri-inquadratura-orientale",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-022-1-4",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "covo-dei-ladri-inquadratura-orientale",
+    "casa": "/guida/citta/yongen-jaya/covo-dei-ladri?planimetria=covo-dei-ladri-inquadratura-orientale"
+   }
+  },
+  {
+   "indirizzo": "covo-dei-ladri-porzione-occidentale",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-022-1-2",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "covo-dei-ladri-porzione-occidentale",
+    "casa": "/guida/citta/yongen-jaya/covo-dei-ladri?planimetria=covo-dei-ladri-porzione-occidentale"
+   }
+  },
+  {
+   "indirizzo": "covo-dei-ladri-porzione-settentrionale",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-022-1-3",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "covo-dei-ladri-porzione-settentrionale",
+    "casa": "/guida/citta/yongen-jaya/covo-dei-ladri?planimetria=covo-dei-ladri-porzione-settentrionale"
+   }
+  },
+  {
+   "indirizzo": "covo-dei-ladri-settore-dingresso",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-022-1-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "covo-dei-ladri-settore-dingresso",
+    "casa": "/guida/citta/yongen-jaya/covo-dei-ladri"
+   }
+  },
+  {
+   "indirizzo": "entrata-dei-memento",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-mementos",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "entrata-dei-memento",
+    "casa": "/guida/mappe/entrata-dei-memento"
+   }
+  },
+  {
+   "indirizzo": "harajuku",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-harajuku",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "harajuku",
+    "casa": "/guida/citta/harajuku"
+   }
+  },
+  {
+   "indirizzo": "ichigaya",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-ichigaya",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "ichigaya",
+    "casa": "/guida/citta/ichigaya"
+   }
+  },
+  {
+   "indirizzo": "ikebukuro",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-ikebukuro",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "ikebukuro",
+    "casa": "/guida/citta/ikebukuro"
+   }
+  },
+  {
+   "indirizzo": "kanda-jinbocho",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-kanda-jinbocho",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "kanda-jinbocho",
+    "casa": "/guida/citta/kanda-jinbocho"
+   }
+  },
+  {
+   "indirizzo": "kanda-jinbocho-cappella",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-010-4-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "kanda-jinbocho-cappella",
+    "casa": "/guida/citta/kanda-jinbocho/cappella"
+   }
+  },
+  {
+   "indirizzo": "kichijoji",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-kichijoji",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "kichijoji",
+    "casa": "/guida/citta/kichijoji"
+   }
+  },
+  {
+   "indirizzo": "kichijoji-quartiere-dello-shopping",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-005-1-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "kichijoji-quartiere-dello-shopping",
+    "casa": "/guida/citta/kichijoji/quartiere-dello-shopping"
+   }
+  },
+  {
+   "indirizzo": "maihama",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-maihama",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "maihama",
+    "casa": "/guida/citta/maihama"
+   }
+  },
+  {
+   "indirizzo": "nakano",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-nakano",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "nakano",
+    "casa": "/guida/citta/nakano"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-001-1-0",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-001-1-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shibuya-piazza-della-stazione",
+    "casa": "/guida/citta/shibuya/piazza-della-stazione"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-001-12-0",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-001-12-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shibuya-banchina-della-metropolitana",
+    "casa": "/guida/citta/shibuya/banchina-della-metropolitana"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-001-2-0",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-001-2-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shibuya-sottopasso-nativo-rmap-001-2-0",
+    "casa": "/guida/citta/shibuya/sottopasso"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-001-2-1",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-001-2-1",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shibuya-sottopasso-speciale",
+    "casa": "/guida/citta/shibuya/sottopasso?planimetria=shibuya-sottopasso-speciale"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-001-3-0",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-001-3-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shibuya-central-street",
+    "casa": "/guida/citta/shibuya/central-street"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-001-4-0",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-001-4-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shibuya-centro-comm-sotterraneo",
+    "casa": "/guida/citta/shibuya/centro-comm-sotterraneo"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-001-5-0",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-001-5-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shibuya-tornello-della-linea-ginza",
+    "casa": "/guida/citta/shibuya/tornello-della-linea-ginza"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-002-0-0",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-002-0-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shujin-academy-edificio-principale-1p-edificio-laboratori-1p",
+    "casa": "/guida/citta/shujin-academy/edificio-principale-1p-edificio-laboratori-1p"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-002-0-1",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-002-0-1",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shujin-academy-edificio-principale-2p-edificio-laboratori-2p",
+    "casa": "/guida/citta/shujin-academy/edificio-principale-2p-edificio-laboratori-2p"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-002-0-2",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-002-0-2",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shujin-academy-edificio-principale-3p-edificio-laboratori-3p",
+    "casa": "/guida/citta/shujin-academy/edificio-principale-3p-edificio-laboratori-3p"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-002-1-0",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-002-1-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shujin-academy-cancello-della-scuola",
+    "casa": "/guida/citta/shujin-academy/cancello-della-scuola"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-002-5-0",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-002-5-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shujin-academy-tetto",
+    "casa": "/guida/citta/shujin-academy/tetto"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-002-6-0",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-002-6-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shujin-academy-aula",
+    "casa": "/guida/citta/shujin-academy/aula"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-002-8-0",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-002-8-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shujin-academy-biblioteca",
+    "casa": "/guida/citta/shujin-academy/biblioteca"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-005-1-0",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-005-1-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "kichijoji-quartiere-dello-shopping",
+    "casa": "/guida/citta/kichijoji/quartiere-dello-shopping"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-006-1-0",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-006-1-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shinjuku-quartiere-a-luci-rosse",
+    "casa": "/guida/citta/shinjuku/quartiere-a-luci-rosse"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-007-1-0",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-007-1-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "akihabara-electric-town",
+    "casa": "/guida/citta/akihabara/electric-town"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-009-2-0",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-009-2-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "yongen-jaya-vicoli",
+    "casa": "/guida/citta/yongen-jaya/vicoli"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-010-4-0",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-010-4-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "kanda-jinbocho-cappella",
+    "casa": "/guida/citta/kanda-jinbocho/cappella"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-012-29-0",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-012-29-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "odaiba-seaside-park-cantiere-dello-stadio",
+    "casa": "/guida/citta/odaiba/cantiere-dello-stadio"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-022-1-0",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-022-1-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "covo-dei-ladri-settore-dingresso",
+    "casa": "/guida/citta/yongen-jaya/covo-dei-ladri"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-022-1-1",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-022-1-1",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "covo-dei-ladri",
+    "casa": "/guida/citta/yongen-jaya/covo-dei-ladri?planimetria=covo-dei-ladri"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-022-1-2",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-022-1-2",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "covo-dei-ladri-porzione-occidentale",
+    "casa": "/guida/citta/yongen-jaya/covo-dei-ladri?planimetria=covo-dei-ladri-porzione-occidentale"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-022-1-3",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-022-1-3",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "covo-dei-ladri-porzione-settentrionale",
+    "casa": "/guida/citta/yongen-jaya/covo-dei-ladri?planimetria=covo-dei-ladri-porzione-settentrionale"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-022-1-4",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-022-1-4",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "covo-dei-ladri-inquadratura-orientale",
+    "casa": "/guida/citta/yongen-jaya/covo-dei-ladri?planimetria=covo-dei-ladri-inquadratura-orientale"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-150-3-0",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-150-3-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "area-riservata-allo-staff-porzione-occidentale",
+    "casa": "/guida/citta/tokyo/area-riservata-allo-staff"
+   }
+  },
+  {
+   "indirizzo": "nativo-rmap-150-3-1",
+   "fonte": "interna",
+   "mappaNelDb": "nativo-rmap-150-3-1",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "area-riservata-allo-staff",
+    "casa": "/guida/citta/tokyo/area-riservata-allo-staff?planimetria=area-riservata-allo-staff"
+   }
+  },
+  {
+   "indirizzo": "odaiba-seaside-park",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-odaiba",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "odaiba-seaside-park",
+    "casa": "/guida/citta/odaiba"
+   }
+  },
+  {
+   "indirizzo": "odaiba-seaside-park-cantiere-dello-stadio",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-012-29-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "odaiba-seaside-park-cantiere-dello-stadio",
+    "casa": "/guida/citta/odaiba/cantiere-dello-stadio"
+   }
+  },
+  {
+   "indirizzo": "ogikubo",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-ogikubo",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "ogikubo",
+    "casa": "/guida/citta/ogikubo"
+   }
+  },
+  {
+   "indirizzo": "parco-inokashira",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-inokashira-park",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "parco-inokashira",
+    "casa": "/guida/citta/inokashira-park"
+   }
+  },
+  {
+   "indirizzo": "roppongi",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-roppongi",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "roppongi",
+    "casa": "/guida/citta/roppongi"
+   }
+  },
+  {
+   "indirizzo": "santuario-meiji",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-meiji-shrine",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "santuario-meiji",
+    "casa": "/guida/citta/meiji-shrine"
+   }
+  },
+  {
+   "indirizzo": "shibuya",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-shibuya",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shibuya",
+    "casa": "/guida/citta/shibuya"
+   }
+  },
+  {
+   "indirizzo": "shibuya-banchina-della-metropolitana",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-001-12-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shibuya-banchina-della-metropolitana",
+    "casa": "/guida/citta/shibuya/banchina-della-metropolitana"
+   }
+  },
+  {
+   "indirizzo": "shibuya-central-street",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-001-3-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shibuya-central-street",
+    "casa": "/guida/citta/shibuya/central-street"
+   }
+  },
+  {
+   "indirizzo": "shibuya-centro-comm-sotterraneo",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-001-4-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shibuya-centro-comm-sotterraneo",
+    "casa": "/guida/citta/shibuya/centro-comm-sotterraneo"
+   }
+  },
+  {
+   "indirizzo": "shibuya-piazza-della-stazione",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-001-1-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shibuya-piazza-della-stazione",
+    "casa": "/guida/citta/shibuya/piazza-della-stazione"
+   }
+  },
+  {
+   "indirizzo": "shibuya-sottopasso",
+   "fonte": "alias",
+   "mappaNelDb": "nativo-rmap-001-2-1",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shibuya-sottopasso-speciale",
+    "casa": "/guida/citta/shibuya/sottopasso?planimetria=shibuya-sottopasso-speciale"
+   }
+  },
+  {
+   "indirizzo": "shibuya-sottopasso-01",
+   "fonte": "alias",
+   "mappaNelDb": "nativo-rmap-001-2-1",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shibuya-sottopasso-speciale",
+    "casa": "/guida/citta/shibuya/sottopasso?planimetria=shibuya-sottopasso-speciale"
+   }
+  },
+  {
+   "indirizzo": "shibuya-sottopasso-1",
+   "fonte": "alias",
+   "mappaNelDb": "nativo-rmap-001-2-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shibuya-sottopasso-nativo-rmap-001-2-0",
+    "casa": "/guida/citta/shibuya/sottopasso"
+   }
+  },
+  {
+   "indirizzo": "shibuya-sottopasso-inquadratura-orientale",
+   "fonte": "alias",
+   "mappaNelDb": "nativo-rmap-001-2-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shibuya-sottopasso-nativo-rmap-001-2-0",
+    "casa": "/guida/citta/shibuya/sottopasso"
+   }
+  },
+  {
+   "indirizzo": "shibuya-sottopasso-nativo-rmap-001-2-0",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-001-2-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shibuya-sottopasso-nativo-rmap-001-2-0",
+    "casa": "/guida/citta/shibuya/sottopasso"
+   }
+  },
+  {
+   "indirizzo": "shibuya-sottopasso-nativo-rmap-001-2-1",
+   "fonte": "alias",
+   "mappaNelDb": "nativo-rmap-001-2-1",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shibuya-sottopasso-speciale",
+    "casa": "/guida/citta/shibuya/sottopasso?planimetria=shibuya-sottopasso-speciale"
+   }
+  },
+  {
+   "indirizzo": "shibuya-sottopasso-speciale",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-001-2-1",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shibuya-sottopasso-speciale",
+    "casa": "/guida/citta/shibuya/sottopasso?planimetria=shibuya-sottopasso-speciale"
+   }
+  },
+  {
+   "indirizzo": "shibuya-tornello-della-linea-ginza",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-001-5-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shibuya-tornello-della-linea-ginza",
+    "casa": "/guida/citta/shibuya/tornello-della-linea-ginza"
+   }
+  },
+  {
+   "indirizzo": "shibuya-tornello-della-linea-ginza-aoyama-itchome",
+   "fonte": "interna",
+   "mappaNelDb": "shibuya-tornello-della-linea-ginza-aoyama-itchome",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shujin-academy-banchina-aoyama-itchome",
+    "casa": "/guida/citta/shujin-academy/banchina-aoyama-itchome"
+   }
+  },
+  {
+   "indirizzo": "shinagawa",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-shinagawa",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shinagawa",
+    "casa": "/guida/citta/shinagawa"
+   }
+  },
+  {
+   "indirizzo": "shinjuku",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-shinjuku",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shinjuku",
+    "casa": "/guida/citta/shinjuku"
+   }
+  },
+  {
+   "indirizzo": "shinjuku-quartiere-a-luci-rosse",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-006-1-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shinjuku-quartiere-a-luci-rosse",
+    "casa": "/guida/citta/shinjuku/quartiere-a-luci-rosse"
+   }
+  },
+  {
+   "indirizzo": "shujin-academy",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-shujin-academy",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shujin-academy",
+    "casa": "/guida/citta/shujin-academy"
+   }
+  },
+  {
+   "indirizzo": "shujin-academy-aula",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-002-6-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shujin-academy-aula",
+    "casa": "/guida/citta/shujin-academy/aula"
+   }
+  },
+  {
+   "indirizzo": "shujin-academy-banchina-aoyama-itchome",
+   "fonte": "pubblica",
+   "mappaNelDb": "shibuya-tornello-della-linea-ginza-aoyama-itchome",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shujin-academy-banchina-aoyama-itchome",
+    "casa": "/guida/citta/shujin-academy/banchina-aoyama-itchome"
+   }
+  },
+  {
+   "indirizzo": "shujin-academy-biblioteca",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-002-8-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shujin-academy-biblioteca",
+    "casa": "/guida/citta/shujin-academy/biblioteca"
+   }
+  },
+  {
+   "indirizzo": "shujin-academy-cancello-della-scuola",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-002-1-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shujin-academy-cancello-della-scuola",
+    "casa": "/guida/citta/shujin-academy/cancello-della-scuola"
+   }
+  },
+  {
+   "indirizzo": "shujin-academy-edificio-principale-1p-edificio-laboratori-1p",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-002-0-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shujin-academy-edificio-principale-1p-edificio-laboratori-1p",
+    "casa": "/guida/citta/shujin-academy/edificio-principale-1p-edificio-laboratori-1p"
+   }
+  },
+  {
+   "indirizzo": "shujin-academy-edificio-principale-2p-edificio-laboratori-2p",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-002-0-1",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shujin-academy-edificio-principale-2p-edificio-laboratori-2p",
+    "casa": "/guida/citta/shujin-academy/edificio-principale-2p-edificio-laboratori-2p"
+   }
+  },
+  {
+   "indirizzo": "shujin-academy-edificio-principale-3p-edificio-laboratori-3p",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-002-0-2",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shujin-academy-edificio-principale-3p-edificio-laboratori-3p",
+    "casa": "/guida/citta/shujin-academy/edificio-principale-3p-edificio-laboratori-3p"
+   }
+  },
+  {
+   "indirizzo": "shujin-academy-tetto",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-002-5-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "shujin-academy-tetto",
+    "casa": "/guida/citta/shujin-academy/tetto"
+   }
+  },
+  {
+   "indirizzo": "suidobashi",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-suidobashi",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "suidobashi",
+    "casa": "/guida/citta/suidobashi"
+   }
+  },
+  {
+   "indirizzo": "tokyo",
+   "fonte": "pubblica",
+   "mappaNelDb": "tokyo",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "tokyo",
+    "casa": "/guida/citta"
+   }
+  },
+  {
+   "indirizzo": "tsukishima",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-tsukishima",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "tsukishima",
+    "casa": "/guida/citta/tsukishima"
+   }
+  },
+  {
+   "indirizzo": "ueno",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-ueno",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "ueno",
+    "casa": "/guida/citta/ueno"
+   }
+  },
+  {
+   "indirizzo": "yongen-java-banchina-della-metropolitana",
+   "fonte": "interna",
+   "mappaNelDb": "yongen-java-banchina-della-metropolitana",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "yongen-jaya-banchina-della-metropolitana",
+    "casa": "/guida/citta/yongen-jaya/banchina-della-metropolitana"
+   }
+  },
+  {
+   "indirizzo": "yongen-jaya",
+   "fonte": "pubblica",
+   "mappaNelDb": "citta-yongen-jaya",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "yongen-jaya",
+    "casa": "/guida/citta/yongen-jaya"
+   }
+  },
+  {
+   "indirizzo": "yongen-jaya-banchina-della-metropolitana",
+   "fonte": "pubblica",
+   "mappaNelDb": "yongen-java-banchina-della-metropolitana",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "yongen-jaya-banchina-della-metropolitana",
+    "casa": "/guida/citta/yongen-jaya/banchina-della-metropolitana"
+   }
+  },
+  {
+   "indirizzo": "yongen-jaya-banchina-della-metropolitana-2",
+   "fonte": "alias",
+   "mappaNelDb": "yongen-java-banchina-della-metropolitana",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "yongen-jaya-banchina-della-metropolitana",
+    "casa": "/guida/citta/yongen-jaya/banchina-della-metropolitana"
+   }
+  },
+  {
+   "indirizzo": "yongen-jaya-banchina-della-metropolitana-di-yongen-jaya",
+   "fonte": "alias",
+   "mappaNelDb": "yongen-java-banchina-della-metropolitana",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "yongen-jaya-banchina-della-metropolitana",
+    "casa": "/guida/citta/yongen-jaya/banchina-della-metropolitana"
+   }
+  },
+  {
+   "indirizzo": "yongen-jaya-vicoli",
+   "fonte": "pubblica",
+   "mappaNelDb": "nativo-rmap-009-2-0",
+   "status": 200,
+   "risolve": {
+    "tipo": "mappa",
+    "mappa": "yongen-jaya-vicoli",
+    "casa": "/guida/citta/yongen-jaya/vicoli"
+   }
+  }
+ ]
+}

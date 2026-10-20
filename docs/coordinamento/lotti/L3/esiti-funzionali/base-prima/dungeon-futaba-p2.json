@@ -1,0 +1,1480 @@
+{
+ "data": {
+  "chiave": "futaba",
+  "tipo": "palazzo",
+  "ordine": 4,
+  "nome": "Palazzo di Futaba",
+  "sovrano": "Futaba Sakura",
+  "arcanaSovrano": "Eremita",
+  "arcanaSovranoNome": "Eremita",
+  "date": {
+   "sblocco": "25 luglio",
+   "scadenza": "21 agosto (attacco di Medjed; la guida consiglia di completare entro il 19 agosto)",
+   "furtoConsigliato": "1 agosto (completamento infiltrazione in giornata unica)"
+  },
+  "finestra": {
+   "dal": "07-25",
+   "al": "08-21"
+  },
+  "livelloConsigliato": "circa 30-37 (fonti discordanti: allgamestaff indica ~32-37, samurai-gamers indica 18-36, gamerant indica 30-35)",
+  "aree": [
+   {
+    "chiave": "futaba-01-entrata-della-piramide",
+    "ordine": 0,
+    "nome": "Entrata della piramide",
+    "descrizione": "Area esterna di ingresso al Palazzo. Da qui si esplora verso ovest lungo un sentiero di mattoni sconnessi fino a una piattaforma rialzata con una statua di Anubi.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-futaba-entrata-della-piramide",
+      "nome": "Palazzo di Futaba › Entrata della piramide",
+      "n": 0,
+      "presi": 0,
+      "spilli": []
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "futaba-01-entrata-della-piramide/0",
+      "ordine": 0,
+      "tipo": "sicura",
+      "nome": "Punto di ritorno iniziale",
+      "descrizione": "Safe room disponibile all'ingresso del Palazzo.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-01-entrata-della-piramide/1",
+      "ordine": 1,
+      "tipo": "scorciatoia",
+      "nome": "Cancello chiuso",
+      "descrizione": "Scorciatoia che si apre per una visita futura all'area.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-01-entrata-della-piramide/2",
+      "ordine": 2,
+      "tipo": "oggetto",
+      "nome": "Vaso con volto di cane",
+      "descrizione": "Vaso saccheggiabile a ovest dell'entrata.",
+      "esauribile": true,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "futaba-02-corridoio-principale-grande-corridoio-della-piramide-prima-s",
+    "ordine": 1,
+    "nome": "Corridoio principale (Grande Corridoio della Piramide) - prima sezione",
+    "descrizione": "Percorso perlopiù lineare. Dalla piattaforma con la statua di Anubi si prosegue verso est fino a un bivio: a sud-est il punto di ritorno del Palazzo, a est scale che scendono verso un cancello chiuso e scale che portano verso la Città Distante/nel deserto, dove Morgana avverte la presenza del Tesoro.",
+    "mappe": [],
+    "punti": [
+     {
+      "chiave": "futaba-02-corridoio-principale-grande-corridoio-della-piramide-prima-s/0",
+      "ordine": 0,
+      "tipo": "altro",
+      "nome": "Tesoro avvistato",
+      "descrizione": "Il Tesoro è visibile da lontano ma non raggiungibile alla prima visita.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": {
+       "x": 44,
+       "y": 87
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-02-corridoio-principale-grande-corridoio-della-piramide-prima-s/1",
+      "ordine": 1,
+      "tipo": "ombra-sciagura",
+      "nome": "Ombra di Futaba (blocco narrativo)",
+      "descrizione": "Presenza che blocca il progresso nella prima sezione del corridoio, legata alla trama.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": {
+       "x": 44,
+       "y": 32
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "futaba-03-citta-nel-deserto",
+    "ordine": 2,
+    "nome": "Città nel deserto",
+    "descrizione": "Area esterna con banditi/Ombre. Qui avviene un inseguimento con battaglia finale contro il miniboss Garuda.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-futaba-citta-nel-deserto",
+      "nome": "Palazzo di Futaba › Città nel deserto",
+      "n": 0,
+      "presi": 0,
+      "spilli": []
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "futaba-03-citta-nel-deserto/0",
+      "ordine": 0,
+      "tipo": "miniboss",
+      "nome": "Garuda (\"Dio-uccello furente\" / Raging Bird God)",
+      "descrizione": "Miniboss incontrato durante l'inseguimento del bandito nella Città nel deserto. Può infliggere Soggiogamento (Down) e Disperazione (Despair).",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [],
+       "resistenze": [
+        "Vento (respinge/annulla in Royal)"
+       ],
+       "note": "In Persona 5 Royal Garuda non ha debolezze elementari nette (a differenza dell'originale dove era debole al fuoco). Strategia consigliata: infliggere Sonno per ottenere Colpi Tecnici, oppure Dimenticanza per ridurne l'offensiva; attacchi in mischia/fisici funzionano bene."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/ (confermato anche da GameFAQs via ricerca web)",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-03-citta-nel-deserto/1",
+      "ordine": 1,
+      "tipo": "persona",
+      "nome": "Sandman",
+      "descrizione": "Ombra nemica incontrabile nella Città nel deserto.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [
+        "Fuoco",
+        "Tuono"
+       ],
+       "resistenze": [
+        "Vento"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-03-citta-nel-deserto/2",
+      "ordine": 2,
+      "tipo": "persona",
+      "nome": "Anzu",
+      "descrizione": "Ombra nemica incontrabile nella Città nel deserto (Ladro delle tavole).",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [
+        "Armi da fuoco",
+        "Nucleare"
+       ],
+       "resistenze": [
+        "Tuono (respinge)"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-03-citta-nel-deserto/3",
+      "ordine": 3,
+      "tipo": "oggetto",
+      "nome": "Papiro rubato (Stolen Papyrus)",
+      "descrizione": "Oggetto chiave della trama ottenuto come bottino dopo la battaglia con Garuda; funge da mappa/indizio per proseguire.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Oggetto chiave di trama"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/ ; https://gamerant.com/persona-5-royal-futaba-palace-walkthrough/",
+      "stato": null,
+      "marcatore": {
+       "x": 65,
+       "y": 20
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "futaba-04-caverna-passaggio-sotterraneo-della-piramide-livelli-1p-e-2p",
+    "ordine": 3,
+    "nome": "Caverna/Passaggio sotterraneo della piramide (livelli 1P e 2P)",
+    "descrizione": "Sezione con salti tra sarcofagi, ganci di arrampicata (si attivano quando la mano brilla) e piattaforme a più quote. Presenti sabbie mobili e trappole (una trappola a pavimento fa cadere il gruppo in una fossa di sabbie mobili, che conta comunque come progresso).",
+    "mappe": [],
+    "punti": [
+     {
+      "chiave": "futaba-04-caverna-passaggio-sotterraneo-della-piramide-livelli-1p-e-2p/0",
+      "ordine": 0,
+      "tipo": "sicura",
+      "nome": "Inizio del corridoio",
+      "descrizione": "Prima safe room/punto di viaggio veloce della sezione sotterranea.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-04-caverna-passaggio-sotterraneo-della-piramide-livelli-1p-e-2p/1",
+      "ordine": 1,
+      "tipo": "miniboss",
+      "nome": "Mot (\"Signore dei cenotafi\")",
+      "descrizione": "Miniboss incontrato nel Corridoio Sotterraneo della Piramide. Ha molti HP e buona difesa; può usare 'Topo in trappola' che trasforma i membri del party in ratti per 2 turni.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [
+        "Vento"
+       ],
+       "resistenze": [],
+       "note": "Strategia: colpire con attacchi di Vento e Assalti Totali per ridurne rapidamente gli HP elevati."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/ (corroborato da samurai-gamers.com e gamerant.com)",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-04-caverna-passaggio-sotterraneo-della-piramide-livelli-1p-e-2p/2",
+      "ordine": 2,
+      "tipo": "persona",
+      "nome": "Thoth (\"Babbuino cantilenante\")",
+      "descrizione": "Ombra forte incontrabile nella zona (livello indicativo 36).",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [
+        "Psicocinesi"
+       ],
+       "resistenze": [
+        "Nucleare",
+        "Sacro",
+        "Maledizione"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-04-caverna-passaggio-sotterraneo-della-piramide-livelli-1p-e-2p/3",
+      "ordine": 3,
+      "tipo": "persona",
+      "nome": "Anubis (\"Giudice delle anime\")",
+      "descrizione": "Ombra forte incontrabile nella zona (livello indicativo 37). Attenzione: può usare attacchi di morte istantanea sul protagonista.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [],
+       "resistenze": [
+        "Armi da fuoco (annulla)",
+        "Sacro",
+        "Maledizione",
+        "Psicocinesi"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/ ; https://bai-gaming.com/guides/persona5royal/futaba-palace/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-04-caverna-passaggio-sotterraneo-della-piramide-livelli-1p-e-2p/4",
+      "ordine": 4,
+      "tipo": "scorciatoia",
+      "nome": "Punti di aggancio rampino",
+      "descrizione": "Diversi punti utilizzabili con il rampino per traversate tra piattaforme sopraelevate.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-04-caverna-passaggio-sotterraneo-della-piramide-livelli-1p-e-2p/5",
+      "ordine": 5,
+      "tipo": "forziere",
+      "nome": "Forzieri della caverna sotterranea",
+      "descrizione": "Gruppo di forzieri contenenti: Ofuda invincibile, Perlina, Fiale disperazione S (x3), Pane sacramentale (x3).",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Ofuda invincibile; Perlina; Fiala disperazione S x3; Pane sacramentale x3"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": {
+       "x": 67,
+       "y": 79
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "futaba-05-camera-dei-sarcofagi",
+    "ordine": 4,
+    "nome": "Camera dei sarcofagi",
+    "descrizione": "Camera con statue misteriose contenenti le Gemme dell'Abisso (Abyss Gems/Jewels), necessarie per sbloccare passaggi sigillati più avanti. Presenti punti di aggancio rampino per raggiungere sporgenze e una tavoletta di pietra con un enigma geroglifico sulla luce.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-futaba-camera-dei-sarcofagi-1p",
+      "nome": "Palazzo di Futaba › Camera dei Sarcofagi 1P",
+      "n": 0,
+      "presi": 0,
+      "spilli": []
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "futaba-05-camera-dei-sarcofagi/0",
+      "ordine": 0,
+      "tipo": "oggetto",
+      "nome": "Gemma dell'abisso (prima statua)",
+      "descrizione": "Oggetto chiave ottenuto da una statua misteriosa nella camera.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Oggetto chiave necessario per i puzzle a pannello riflettente successivi"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": {
+       "x": 10,
+       "y": 58
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-05-camera-dei-sarcofagi/1",
+      "ordine": 1,
+      "tipo": "oggetto",
+      "nome": "Gemma dell'abisso (seconda statua)",
+      "descrizione": "Seconda Gemma dell'Abisso ottenuta da un'altra statua nella camera.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Oggetto chiave"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": {
+       "x": 74,
+       "y": 81
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-05-camera-dei-sarcofagi/2",
+      "ordine": 2,
+      "tipo": "puzzle",
+      "nome": "Tavoletta geroglifica sulla luce",
+      "descrizione": "Enigma su tavoletta di pietra con geroglifici che introduce la meccanica dei pannelli riflettenti/raggi di luce usata nelle sale successive.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-05-camera-dei-sarcofagi/3",
+      "ordine": 3,
+      "tipo": "scorciatoia",
+      "nome": "Punti di aggancio rampino",
+      "descrizione": "Utilizzati per raggiungere sporgenze nella camera.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "futaba-06-corridoio-principale-sezione-centrale",
+    "ordine": 5,
+    "nome": "Corridoio principale - sezione centrale",
+    "descrizione": "Prosecuzione del Grande Corridoio. Contiene piedistalli di pietra su cui posizionare le Gemme dell'Abisso per spostare un pannello riflettente che reindirizza un raggio di luce, oltre a una fossa attraversabile tramite piattaforme.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-futaba-corridoio-principale",
+      "nome": "Palazzo di Futaba › Corridoio principale",
+      "n": 0,
+      "presi": 0,
+      "spilli": []
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "futaba-06-corridoio-principale-sezione-centrale/0",
+      "ordine": 0,
+      "tipo": "sicura",
+      "nome": "Metà corridoio",
+      "descrizione": "Secondo punto di viaggio veloce del Palazzo.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-06-corridoio-principale-sezione-centrale/1",
+      "ordine": 1,
+      "tipo": "puzzle",
+      "nome": "Piedistalli e pannello riflettente",
+      "descrizione": "Puzzle che richiede l'uso delle Gemme dell'Abisso sui piedistalli per spostare il pannello riflettente e reindirizzare il raggio di luce, sbloccando il passaggio.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": {
+       "x": 7,
+       "y": 81
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "futaba-07-camera-del-rigetto-chamber-of-rejection",
+    "ordine": 6,
+    "nome": "Camera del rigetto (Chamber of Rejection)",
+    "descrizione": "Prima delle tre grandi camere con enigmi a codice binario legati a sarcofagi luminosi rossi e blu, oltre a un puzzle a pannello riflettente con 8 tessere triangolari.",
+    "mappe": [],
+    "punti": [
+     {
+      "chiave": "futaba-07-camera-del-rigetto-chamber-of-rejection/0",
+      "ordine": 0,
+      "tipo": "puzzle",
+      "nome": "Tavoletta geroglifica - codice B01010",
+      "descrizione": "Tavoletta di pietra con indizio geroglifico che fornisce il codice B01010 da applicare ai sarcofagi.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-07-camera-del-rigetto-chamber-of-rejection/1",
+      "ordine": 1,
+      "tipo": "puzzle",
+      "nome": "Puzzle sarcofagi a sistema binario (ON/OFF)",
+      "descrizione": "Serie di sarcofagi luminosi da accendere/spegnere secondo un codice binario: R01010 per i sarcofagi rossi, B10011 per i sarcofagi blu. Dopo la correzione va premuto un pulsante per aprire una porta rossa sigillata.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-07-camera-del-rigetto-chamber-of-rejection/2",
+      "ordine": 2,
+      "tipo": "puzzle",
+      "nome": "Puzzle pannello riflettente a 8 tessere triangolari",
+      "descrizione": "Puzzle di ricomposizione con 8 tessere triangolari da ruotare per ricostruire l'immagine/reindirizzare la luce.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-07-camera-del-rigetto-chamber-of-rejection/3",
+      "ordine": 3,
+      "tipo": "sicura",
+      "nome": "Fine del corridoio",
+      "descrizione": "Terzo punto di viaggio veloce.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-07-camera-del-rigetto-chamber-of-rejection/4",
+      "ordine": 4,
+      "tipo": "volonta",
+      "nome": "Seme di Volontà dell'Ira (rosso)",
+      "descrizione": "Primo Seme di Volontà (Wrath). Fonte non-allgamestaff (thegamer.com, tradotto): dal Grande Corridoio, entrare nella Camera del Rigetto, salire le scale e usare il rampino per superare una trappola; il seme si trova in una stanza laterale prima di una sala con un forziere su un blocco, servirà arrampicarsi sopra un sarcofago a destra del forziere per raggiungerlo.",
+      "esauribile": true,
+      "dettagli": {},
+      "fonte": "https://www.thegamer.com/persona-5-royal-futaba-palace-will-seed-locations/ (fonte diversa da allgamestaff, non verificata su allgamestaff)",
+      "stato": null,
+      "marcatore": {
+       "x": 81,
+       "y": 69
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-07-camera-del-rigetto-chamber-of-rejection/5",
+      "ordine": 5,
+      "tipo": "forziere",
+      "nome": "Forziere - Catena di perline",
+      "descrizione": "Forziere raggiungibile nella Camera del Rigetto, contiene una Catena di perline.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Catena di perline"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": {
+       "x": 33,
+       "y": 70
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-07-camera-del-rigetto-chamber-of-rejection/6",
+      "ordine": 6,
+      "tipo": "oggetto",
+      "nome": "Porta con Seme dell'Ira verde (dettaglio incerto)",
+      "descrizione": "Secondo il riassunto automatico di allgamestaff, una porta protetta condurrebbe a un 'Seme ira verde'; il nome esatto della porta riportato ('Porta Seme della Bramosia') è probabilmente un errore di traduzione/estrazione automatica poiché 'Bramosia' (Lust) non è l'Arcana di questo Palazzo (Ira/Wrath). Dato da verificare manualmente sulla pagina originale.",
+      "esauribile": true,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/ (dato incerto, vedi note)",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "futaba-08-camera-del-rimorso-chamber-of-guilt",
+    "ordine": 7,
+    "nome": "Camera del rimorso (Chamber of Guilt)",
+    "descrizione": "Seconda grande camera. Presenti una tavoletta geroglifica con indovinello su 'rosso e blu allineati', una trappola con macigno gigante aggirabile tramite un passaggio da percorrere strisciando, e piattaforme collassanti come pericolo ambientale.",
+    "mappe": [],
+    "punti": [
+     {
+      "chiave": "futaba-08-camera-del-rimorso-chamber-of-guilt/0",
+      "ordine": 0,
+      "tipo": "puzzle",
+      "nome": "Tavoletta geroglifica - allineamento rosso/blu",
+      "descrizione": "Indovinello su tavoletta di pietra riguardante l'allineamento dei colori rosso e blu, propedeutico al puzzle dei sarcofagi/12 bare della camera.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": {
+       "x": 84,
+       "y": 76
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-08-camera-del-rimorso-chamber-of-guilt/1",
+      "ordine": 1,
+      "tipo": "puzzle",
+      "nome": "Puzzle delle 12 bare/sarcofagi",
+      "descrizione": "Puzzle con dodici sarcofagi e codice numerico (soluzione riportata: B01010). Dato incrociato con fonte non-allgamestaff.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.thegamer.com/persona-5-royal-futaba-palace-dungeon-walkthrough-guide/ (fonte diversa da allgamestaff)",
+      "stato": null,
+      "marcatore": {
+       "x": 63,
+       "y": 51
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-08-camera-del-rimorso-chamber-of-guilt/2",
+      "ordine": 2,
+      "tipo": "puzzle",
+      "nome": "Trappola del macigno gigante",
+      "descrizione": "Trappola ambientale aggirabile tramite un passaggio da attraversare strisciando.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": {
+       "x": 75,
+       "y": 70
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-08-camera-del-rimorso-chamber-of-guilt/3",
+      "ordine": 3,
+      "tipo": "oggetto",
+      "nome": "Vaso con volto d'uccello",
+      "descrizione": "Oggetto saccheggiabile nella camera.",
+      "esauribile": true,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-08-camera-del-rimorso-chamber-of-guilt/4",
+      "ordine": 4,
+      "tipo": "oggetto",
+      "nome": "Vaso con volto di cane",
+      "descrizione": "Oggetto saccheggiabile nella camera.",
+      "esauribile": true,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-08-camera-del-rimorso-chamber-of-guilt/5",
+      "ordine": 5,
+      "tipo": "forziere",
+      "nome": "Forziere - Homunculus",
+      "descrizione": "Forziere presente nella camera, contiene un Homunculus.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Homunculus"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": {
+       "x": 62,
+       "y": 22
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-08-camera-del-rimorso-chamber-of-guilt/6",
+      "ordine": 6,
+      "tipo": "ombra-sciagura",
+      "nome": "Ombra forte in pattuglia",
+      "descrizione": "Ombra forte che pattuglia la zona; da evitare o affrontare con cautela.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "futaba-09-camera-del-santuario-chamber-of-sanctuary",
+    "ordine": 8,
+    "nome": "Camera del santuario (Chamber of Sanctuary)",
+    "descrizione": "Terza e ultima grande camera prima del Santuario Interno. Layout quadrato con stanze laterali e vicoli ciechi; un buco gigante blocca inizialmente il progresso e un passaggio a ovest richiede di strisciare. Presenti tre miniboss/Ombre forti in sequenza secondo alcune fonti non-allgamestaff.",
+    "mappe": [],
+    "punti": [
+     {
+      "chiave": "futaba-09-camera-del-santuario-chamber-of-sanctuary/0",
+      "ordine": 0,
+      "tipo": "forziere-chiuso",
+      "nome": "Forziere intrappolato - Veste nera",
+      "descrizione": "Forziere trovato in un vicolo cieco centrale, protetto da una trappola; va disattivata tramite un pulsante di disarmo prima di poterlo saccheggiare. Contiene una Veste nera.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Veste nera"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": {
+       "x": 69,
+       "y": 42
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-09-camera-del-santuario-chamber-of-sanctuary/1",
+      "ordine": 1,
+      "tipo": "ombra-sciagura",
+      "nome": "Ombra vagante (cane da guardia)",
+      "descrizione": "Ombra forte che vaga nei corridoi della camera.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-09-camera-del-santuario-chamber-of-sanctuary/2",
+      "ordine": 2,
+      "tipo": "volonta",
+      "nome": "Seme di Volontà dell'Ira (blu)",
+      "descrizione": "Terzo Seme di Volontà (Wrath), Blu. Fonte non-allgamestaff (thegamer.com, tradotto): si trova poco dopo il miniboss della camera, nella Camera del Santuario 2F, appena prima dell'ultimo murale del Palazzo, nella grande sala con due enormi statue egizie e gemme fluttuanti che sparano raggi di luce; occorre arrampicarsi sulla testa della statua di destra per agganciarsi con il rampino alla piattaforma che porta al Seme.",
+      "esauribile": true,
+      "dettagli": {},
+      "fonte": "https://www.thegamer.com/persona-5-royal-futaba-palace-will-seed-locations/ (fonte diversa da allgamestaff)",
+      "stato": null,
+      "marcatore": {
+       "x": 23,
+       "y": 77
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "futaba-09-camera-del-santuario-chamber-of-sanctuary/3",
+      "ordine": 3,
+      "tipo": "miniboss",
+      "nome": "Mot + Lamia + Naga (scontro triplo) - dato non-allgamestaff",
+      "descrizione": "Secondo fonti diverse da allgamestaff (samurai-gamers.com, gamerant.com), nella Camera del Santuario/Santuario Interno si svolgerebbe uno scontro con Mot accompagnato da Lamia e Naga. Non confermato dal riassunto automatico di allgamestaff, che si è interrotto prima di questa sezione: dato da verificare manualmente.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [
+        "Vento (per Mot/Lamia secondo samurai-gamers)"
+       ],
+       "note": "gamerant riporta invece un terzetto 'Garuda, Naga, Alilat/Allatu' nella stessa area; le fonti automatiche sono discordanti tra loro sulla composizione esatta dello scontro."
+      },
+      "fonte": "https://samurai-gamers.com/persona-5/p5r-futaba-palace-guide/ ; https://gamerant.com/persona-5-royal-futaba-palace-walkthrough/ (fonti diverse da allgamestaff, dato incerto)",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "futaba-10-santuario-interno-camera-del-vuoto-area-finale-dato-parzialm",
+    "ordine": 9,
+    "nome": "Santuario Interno / Camera del Vuoto (area finale) - dato parzialmente non-allgamestaff",
+    "descrizione": "Area finale del Palazzo, accessibile solo nel giorno di completamento dell'infiltrazione (secondo gamerant.com, denominata 'Chamber of Emptiness'). Il riassunto automatico della guida allgamestaff si è interrotto prima di descrivere questa sezione ed il relativo scontro con il boss: dato da verificare manualmente sulla pagina originale.",
+    "mappe": [],
+    "punti": [
+     {
+      "chiave": "futaba-10-santuario-interno-camera-del-vuoto-area-finale-dato-parzialm/0",
+      "ordine": 0,
+      "tipo": "boss",
+      "nome": "La Sfinge / Wakaba Isshiki (Cognizione, non un'Ombra)",
+      "descrizione": "Boss finale del Palazzo di Futaba: non è un'Ombra ma la Cognizione della madre di Futaba (Wakaba Isshiki), che assume la forma di una sfinge gigante con volto umano. È l'unico boss di Persona 5 che non è un'Ombra bensì una cognizione. Dopo la prima fase, una cutscene mostra Futaba entrare nel proprio Palazzo e risvegliare il suo Persona (Necronomicon), dando inizio alla seconda fase dello scontro in cui Futaba si unisce come alleata.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [
+        "Attacchi fisici quando la sfinge è a terra/atterrata dopo il colpo di balista (3-4 volte più danni)"
+       ],
+       "resistenze": [
+        "Poche debolezze elementari nette; in volo non è raggiungibile da attacchi fisici/mischia"
+       ],
+       "contenuto": "HP stimati: circa 18.000 (fonte samurai-gamers.com, non-allgamestaff)",
+       "strategia": "Fase 1 (in volo): la sfinge mantiene le distanze, non attaccabile con abilità fisiche o mischia; usare abilità elementali e Armi da fuoco, mantenendo il gruppo curato con pazienza. Fase 2: la sfinge sparisce temporaneamente offrendo una finestra di recupero; consigliato usare buff difensivi e bloccare (Guard) al turno indicato per evitare danni ingenti al rientro della sfinge. Fase 3: Futaba hackera il Palazzo e ottiene una Balista utilizzabile da un membro del gruppo; il colpo di balista infligge danni significativi e fa atterrare la sfinge, rendendola vulnerabile agli attacchi fisici (3-4x danni). Ripetere il ciclo balista un paio di volte prima della scena finale con lo scontro a pistole.",
+       "bug_noto": "Un bug segnalato da alcune fonti impedisce a volte la generazione della seconda Balista; le soluzioni proposte sono svuotare i colpi, usare l'assist R1/RB o riavviare lo scontro."
+      },
+      "fonte": "https://giochipertutti.org/come-sconfiggere-il-boss-wakaba-isshiki-di-persona-5/ ; https://gamerant.com/persona-5-royal-futaba-boss-guide/ ; https://samurai-gamers.com/persona-5/p5r-futaba-palace-guide/ (NESSUNA di queste è allgamestaff.it: la sezione corrispondente della guida allgamestaff non è stata recuperabile per limiti di estrazione automatica, vedi note)",
+      "stato": null,
+      "marcatore": {
+       "x": 19,
+       "y": 34
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   }
+  ],
+  "punti": 40,
+  "esauribili": 16,
+  "gestiti": 0,
+  "raccolta": {
+   "totale": 21,
+   "presi": 0,
+   "mappe": 32,
+   "mappeComplete": 21
+  },
+  "completato": null,
+  "atterraggio": null,
+  "note": "Palazzo particolarmente lungo, a forma di piramide egizia nel deserto. Non è possibile scivolare lungo i pendii come nel gioco originale a causa delle sabbie mobili. Contiene più 'capitoli'/sale con enigmi a geroglifici e codici binari legati a sarcofagi luminosi. Il boss finale non è un'Ombra ma una Cognizione (la sfinge dal volto di Wakaba Isshiki, madre di Futaba). Consigliato portare oggetti curativi per stati alterati e un party con debolezze/colpi tecnici su Vento e Fisico.",
+  "fonti": [
+   "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/",
+   "https://megamitensei.fandom.com/wiki/Futaba's_Palace (fetch fallito: errore HTTP 402, non consultabile in questa sessione)",
+   "https://www.thegamer.com/persona-5-royal-futaba-palace-dungeon-walkthrough-guide/",
+   "https://www.thegamer.com/persona-5-royal-futaba-palace-will-seed-locations/",
+   "https://gamerant.com/persona-5-royal-futaba-palace-walkthrough/",
+   "https://gamerant.com/persona-5-royal-futaba-boss-guide/",
+   "https://samurai-gamers.com/persona-5/p5r-futaba-palace-guide/",
+   "https://bai-gaming.com/guides/persona5royal/futaba-palace/",
+   "https://giochipertutti.org/come-sconfiggere-il-boss-wakaba-isshiki-di-persona-5/",
+   "https://gamefaqs.gamespot.com/ps4/260936-persona-5-royal/faqs/78256/week-16-august-1st-august-7th-futabas-palace"
+  ],
+  "planimetrie": [
+   {
+    "chiave": "palazzo-di-futaba-entrata-della-piramide",
+    "nome": "Palazzo di Futaba › Entrata della piramide",
+    "ordine": 0,
+    "aree": [
+     {
+      "chiave": "futaba-01-entrata-della-piramide",
+      "nome": "Entrata della piramide",
+      "ordine": 0
+     }
+    ],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-futaba-corridoio-principale-settore-dingresso",
+    "nome": "Palazzo di Futaba › Corridoio principale — settore d’ingresso",
+    "ordine": 100,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-futaba-corridoio-principale",
+    "nome": "Palazzo di Futaba › Corridoio principale",
+    "ordine": 101,
+    "aree": [
+     {
+      "chiave": "futaba-06-corridoio-principale-sezione-centrale",
+      "nome": "Corridoio principale - sezione centrale",
+      "ordine": 5
+     }
+    ],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-futaba-corridoio-principale-inquadratura-orientale-piu-ampia",
+    "nome": "Palazzo di Futaba › Corridoio principale — inquadratura orientale — più ampia",
+    "ordine": 102,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-futaba-corridoio-principale-inquadratura-orientale-seconda-per-ampiezza",
+    "nome": "Palazzo di Futaba › Corridoio principale — inquadratura orientale — seconda per ampiezza",
+    "ordine": 103,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-futaba-corridoio-principale-inquadratura-orientale-piu-ristretta",
+    "nome": "Palazzo di Futaba › Corridoio principale — inquadratura orientale — più ristretta",
+    "ordine": 104,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-futaba-corridoio-principale-inquadratura-occidentale",
+    "nome": "Palazzo di Futaba › Corridoio principale — inquadratura occidentale",
+    "ordine": 105,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-futaba-camera-del-rimorso-1p-inquadratura-settentrionale",
+    "nome": "Palazzo di Futaba › Camera del Rimorso 1P — inquadratura settentrionale",
+    "ordine": 200,
+    "aree": [],
+    "n": 3,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 456,
+      "uid": "ca383b98b2685d391d72bc82e7801304",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     },
+     {
+      "id": 457,
+      "uid": "596d6c11f75e8cfd82c0cb31af19e689",
+      "tipo": "seme-bramosia",
+      "nome": "Seme della bramosia",
+      "colore": "#c85cff",
+      "raccolto": false
+     },
+     {
+      "id": 458,
+      "uid": "e21a459105190fad2eb8d0647ab19c83",
+      "tipo": "seme-bramosia",
+      "nome": "Seme di bramosia",
+      "colore": "#c85cff",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-futaba-camera-del-rimorso-1p",
+    "nome": "Palazzo di Futaba › Camera del Rimorso 1P",
+    "ordine": 201,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-futaba-camera-del-rimorso-2p",
+    "nome": "Palazzo di Futaba › Camera del Rimorso 2P",
+    "ordine": 300,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-futaba-camera-del-santuario-1p",
+    "nome": "Palazzo di Futaba › Camera del Santuario 1P",
+    "ordine": 400,
+    "aree": [],
+    "n": 2,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 466,
+      "uid": "919d19be7c7c9f7e5855f03996666084",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     },
+     {
+      "id": 467,
+      "uid": "9c1a22009a4d332c14f3a277d693f1de",
+      "tipo": "forziere-raro",
+      "nome": "Forziere raro",
+      "colore": "#fde047",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-futaba-camera-del-santuario-2p-variante-grafica",
+    "nome": "Palazzo di Futaba › Camera del Santuario 2P — variante grafica",
+    "ordine": 500,
+    "aree": [],
+    "n": 3,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 473,
+      "uid": "975fd0303386baf9bb25634b41036ad3",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     },
+     {
+      "id": 476,
+      "uid": "8f7d116978cb6a930ab75422b806a2ca",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     },
+     {
+      "id": 477,
+      "uid": "79ffa4f55a65216dc799bb590170d53a",
+      "tipo": "forziere-raro",
+      "nome": "Forziere raro",
+      "colore": "#fde047",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-futaba-camera-del-santuario-2p",
+    "nome": "Palazzo di Futaba › Camera del Santuario 2P",
+    "ordine": 501,
+    "aree": [],
+    "n": 3,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 480,
+      "uid": "7f2e63366573b82ebd9dc7d099b39563",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     },
+     {
+      "id": 483,
+      "uid": "631adeece7dbd9146252dba88347334e",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     },
+     {
+      "id": 484,
+      "uid": "b07558d2d74ceaa08b43bd343880097a",
+      "tipo": "forziere-raro",
+      "nome": "Forziere raro",
+      "colore": "#fde047",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-futaba-camera-del-santuario-2p-inquadratura-orientale",
+    "nome": "Palazzo di Futaba › Camera del Santuario 2P — inquadratura orientale",
+    "ordine": 502,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 486,
+      "uid": "7b191a4fb9188999e33961d3502a6629",
+      "tipo": "seme-bramosia",
+      "nome": "Seme di bramosia",
+      "colore": "#c85cff",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-futaba-caverna-sotterranea-1p-settore-dingresso",
+    "nome": "Palazzo di Futaba › Caverna sotterranea 1P — settore d’ingresso",
+    "ordine": 600,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-futaba-caverna-sotterranea-1p",
+    "nome": "Palazzo di Futaba › Caverna sotterranea 1P",
+    "ordine": 601,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 487,
+      "uid": "55f93f24f5c3664014a81bd128d358f6",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-futaba-caverna-sotterranea-2p-inquadratura-settentrionale",
+    "nome": "Palazzo di Futaba › Caverna sotterranea 2P — inquadratura settentrionale",
+    "ordine": 700,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-futaba-caverna-sotterranea-2p",
+    "nome": "Palazzo di Futaba › Caverna sotterranea 2P",
+    "ordine": 701,
+    "aree": [],
+    "n": 2,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 488,
+      "uid": "67b034b0de708564335630d7e366f5c8",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     },
+     {
+      "id": 489,
+      "uid": "e9f09a43bdb8cc4636021501346c5cc6",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-futaba-camera-del-rigetto-1p",
+    "nome": "Palazzo di Futaba › Camera del Rigetto 1P",
+    "ordine": 800,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 491,
+      "uid": "992ae3551cd8614e3c7fda2eb25f3a39",
+      "tipo": "seme-bramosia",
+      "nome": "Seme della bramosia",
+      "colore": "#c85cff",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-futaba-camera-del-rigetto-2p",
+    "nome": "Palazzo di Futaba › Camera del Rigetto 2P",
+    "ordine": 900,
+    "aree": [],
+    "n": 3,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 494,
+      "uid": "67b25952faa43bab7477ee1fb8f1cf64",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     },
+     {
+      "id": 495,
+      "uid": "e70cd8dcda0ff1419455c8f46362fc55",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     },
+     {
+      "id": 496,
+      "uid": "344d3574e1cf4bb93d6bc9ccba8c0b56",
+      "tipo": "seme-bramosia",
+      "nome": "Seme di bramosia",
+      "colore": "#c85cff",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-futaba-camera-dei-sarcofagi-1p-settore-dingresso",
+    "nome": "Palazzo di Futaba › Camera dei Sarcofagi 1P — settore d’ingresso",
+    "ordine": 1000,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-futaba-camera-dei-sarcofagi-1p",
+    "nome": "Palazzo di Futaba › Camera dei Sarcofagi 1P",
+    "ordine": 1001,
+    "aree": [
+     {
+      "chiave": "futaba-05-camera-dei-sarcofagi",
+      "nome": "Camera dei sarcofagi",
+      "ordine": 4
+     }
+    ],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-futaba-camera-dei-sarcofagi-2p",
+    "nome": "Palazzo di Futaba › Camera dei Sarcofagi 2P",
+    "ordine": 1100,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-futaba-camera-dei-sarcofagi-2p-inquadratura-settentrionale",
+    "nome": "Palazzo di Futaba › Camera dei Sarcofagi 2P — inquadratura settentrionale",
+    "ordine": 1101,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-futaba-camera-della-vacuita-1p",
+    "nome": "Palazzo di Futaba › Camera della Vacuità 1P",
+    "ordine": 1200,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 498,
+      "uid": "fa1c479a16781234bfc2214289d973b7",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-futaba-camera-della-vacuita-2p",
+    "nome": "Palazzo di Futaba › Camera della Vacuità 2P",
+    "ordine": 1300,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-futaba-palazzo-di-futaba-immagini-native-che-nessun-campo-usa",
+    "nome": "Palazzo di Futaba › Palazzo di Futaba — Immagini native che nessun campo usa",
+    "ordine": 1400,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-futaba-passaggio-sotterraneo-1f-porzione-meridionale",
+    "nome": "Palazzo di Futaba › Passaggio sotterraneo 1F — porzione meridionale",
+    "ordine": 1500,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 500,
+      "uid": "04a82d3c5dd4b5ff7b7ec48b98a0f45c",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-futaba-passaggio-sotterraneo-1f",
+    "nome": "Palazzo di Futaba › Passaggio sotterraneo 1F",
+    "ordine": 1501,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-futaba-passaggio-sotterraneo-2f",
+    "nome": "Palazzo di Futaba › Passaggio sotterraneo 2F",
+    "ordine": 1600,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-futaba-passaggio-sotterraneo-2f-inquadratura-settentrionale",
+    "nome": "Palazzo di Futaba › Passaggio sotterraneo 2F — inquadratura settentrionale",
+    "ordine": 1601,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-futaba-citta-nel-deserto",
+    "nome": "Palazzo di Futaba › Città nel deserto",
+    "ordine": 1700,
+    "aree": [
+     {
+      "chiave": "futaba-03-citta-nel-deserto",
+      "nome": "Città nel deserto",
+      "ordine": 2
+     }
+    ],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   }
+  ],
+  "atterraggi": [],
+  "personeCatturate": [],
+  "illustrazione": {
+   "immagineUrl": "/api/immagini/mappa/dungeon-futaba/file?v=2026-10-18T13%3A09%3A29.364Z",
+   "asset": null
+  }
+ }
+}

@@ -1,0 +1,1909 @@
+{
+ "data": {
+  "chiave": "okumura",
+  "tipo": "palazzo",
+  "ordine": 5,
+  "nome": "Palazzo di Okumura",
+  "sovrano": "Kunikazu Okumura (aspetto Ombra/boss finale: \"Kunikazu Mammon Okumura\")",
+  "arcanaSovrano": "Avarizia",
+  "arcanaSovranoNome": "Avarizia",
+  "date": {
+   "sblocco": "15 settembre (giovedì 9/15) - prima visita esplorativa; il Palazzo diventa pienamente percorribile dal 4 ottobre",
+   "scadenza": "11 ottobre (ultimo giorno utile; la guida consiglia il furto il 6 ottobre)",
+   "furtoConsigliato": "6 ottobre (giovedì 10/6) - furto del Tesoro materializzato e battaglia col boss finale"
+  },
+  "finestra": {
+   "dal": "09-15",
+   "al": "10-11"
+  },
+  "livelloConsigliato": "circa Lv 41-43 all'ingresso nell'area finale; la guida consiglia di arrivare a Lv 50 prima di affrontare il boss finale (battaglia definita \"probabilmente la più difficile del gioco\")",
+  "aree": [
+   {
+    "chiave": "okumura-01-entrata-laterale",
+    "ordine": 0,
+    "nome": "Entrata Laterale",
+    "descrizione": "Area iniziale di esplorazione (visita del 15 settembre), lineare, nessuna Safe Room. Al ritorno del 4 ottobre da qui si riparte per il resto del Palazzo; qui si trova anche il portale per la Stanza di Velluto (raggiungibile tramite la Safe Room dei Corridoi del Complesso).",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-okumura-entrata-laterale",
+      "nome": "Palazzo di Okumura › Entrata laterale",
+      "n": 0,
+      "presi": 0,
+      "spilli": []
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "okumura-01-entrata-laterale/0",
+      "ordine": 0,
+      "tipo": "oggetto",
+      "nome": "Capsula d'immagazzinamento (angolo nord-est)",
+      "descrizione": "Capsula di bottino generico trovata subito dopo l'ingresso, prima di attivare l'ascensore verso i Corridoi del Complesso.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "oggetti/materiali generici"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "okumura-02-corridoi-del-complesso",
+    "ordine": 1,
+    "nome": "Corridoi del Complesso",
+    "descrizione": "Prima area con combattimenti veri, introduce il tutorial della Fattorizzazione Ombra. Contiene la prima Safe Room del Palazzo (1 di 8) e il primo Seme della Bramosia. Al termine si sale con l'ascensore verso la Caserma.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-okumura-corridoi-del-complesso",
+      "nome": "Palazzo di Okumura › Corridoi del complesso",
+      "n": 1,
+      "presi": 0,
+      "spilli": [
+       {
+        "id": 1142,
+        "uid": "d897ffc07fac272d76b2effd2f0643ab",
+        "tipo": "seme-bramosia",
+        "nome": "Seme di bramosia",
+        "colore": "#c85cff",
+        "raccolto": false
+       }
+      ]
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "okumura-02-corridoi-del-complesso/0",
+      "ordine": 0,
+      "tipo": "sicura",
+      "nome": "Prima Safe Room",
+      "descrizione": "Sblocca il viaggio veloce ai Corridoi del Complesso; nei pressi (all'Entrata Laterale) è raggiungibile anche il portale per la Stanza di Velluto.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-02-corridoi-del-complesso/1",
+      "ordine": 1,
+      "tipo": "miniboss",
+      "nome": "Fidanzato di Haru (con 2 Servobot MDL-WKR)",
+      "descrizione": "Battaglia di \"risveglio\" di Haru/Noir alla Porta di autenticazione biometrica. Il Fidanzato usa Annichilimento (danni fisici medi, può infliggere Soggiogamento) e Rakukaja; i Servobot MDL-WKR alternano Raffica (danni leggeri da arma da fuoco su tutti) e Attacco in picchiata (danni fisici pesanti su singolo bersaglio). Haru è il membro più debole in questa battaglia. Dopo il combattimento Haru diventa Noir e si unisce ufficialmente al party.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [
+        "Psicocinesi (Fidanzato di Haru)",
+        "Fuoco e Vento (Servobot MDL-WKR)"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": {
+       "x": 43,
+       "y": 12
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-02-corridoi-del-complesso/2",
+      "ordine": 2,
+      "tipo": "forziere",
+      "nome": "Forziere - Fiala della furia S x3",
+      "descrizione": "A est, subito dopo la battaglia col Fidanzato di Haru.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Fiala della furia S x3"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-02-corridoi-del-complesso/3",
+      "ordine": 3,
+      "tipo": "forziere",
+      "nome": "Forziere - Kongou Ofuda",
+      "descrizione": "Oltre la porta ovest, dopo aver eliminato un nemico, prima della prima Safe Room.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Kongou Ofuda"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-02-corridoi-del-complesso/4",
+      "ordine": 4,
+      "tipo": "volonta",
+      "nome": "Seme avarizia rosso",
+      "descrizione": "Raggiungibile risalendo con rampini due sporgenze successive nel corridoio circolare che parte dai Controlli del Terminale (dove Oracle ottiene la Mappa del Porto spaziale); dal secondo punto di aggancio si trova un corridoio laterale con la stanza del Seme.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Seme della Bramosia (1 di 3, si combina nel Cristallo dell'Avarizia)"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-02-corridoi-del-complesso/5",
+      "ordine": 5,
+      "tipo": "scorciatoia",
+      "nome": "Punti di aggancio per il Rampino / presa d'aria",
+      "descrizione": "Serie di rampini e una presa d'aria/condotto che permettono di aggirare una porta bloccata e raggiungere il Seme avarizia rosso e i Controlli del Terminale.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-02-corridoi-del-complesso/6",
+      "ordine": 6,
+      "tipo": "persona",
+      "nome": "Tabella Ombre catturabili del Palazzo di Okumura",
+      "descrizione": "Elenco delle Ombre incontrabili nel Palazzo con relative maschera/Persona, resistenze e debolezze (valido genericamente per tutte le aree, non solo per questa): Arahabaki (Divinità risvegliata) resiste a fisico/armi da fuoco (respinge), Sacro/Maledizione (dimezza), debole a Psicocinesi/Nucleare; Belphegor (Palindromo di turpitudine) resiste a Ghiaccio/Tuono/Nucleare (dimezza), Maledizione (respinge), debole a Fuoco; Decarabia (Subdolo pentacolo) resiste a Fuoco (respinge), Nucleare/Maledizione (dimezza), debole a danni fisici; Girimehkala (Elefante ribelle) resiste a fisico/armi da fuoco (respinge), Fuoco (dimezza), Maledizione (annulla), debole a Sacro; Kaiwan (Stella senza desideri) annulla armi da fuoco e Psicocinesi, debole a Nucleare; Koh-i-Noor resiste a fisico (dimezza), debole ad armi da fuoco; Kumbhanda (Spirito divoravita) annulla Fuoco, dimezza Maledizione, debole a Psicocinesi; Lilim (Portatrice di rovina) dimezza Ghiaccio, annulla Maledizione, debole a Vento/Sacro; Mithras (Sole oscuro) dimezza fisico/armi da fuoco, assorbe Fuoco, respinge Nucleare, debole a Psicocinesi; Mothman (Falena vampirica) annulla Tuono, dimezza Psicocinesi, debole ad armi da fuoco; Wakinyan (Pernice invocatempeste) assorbe Tuono, debole a Psicocinesi/Maledizione.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-02-corridoi-del-complesso/7",
+      "ordine": 7,
+      "tipo": "oggetto",
+      "nome": "Capsule d'immagazzinamento (multiple)",
+      "descrizione": "Diverse capsule di bottino sparse nell'area (corridoio circolare, stanze laterali).",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "materiali/oggetti generici"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "okumura-03-caserma",
+    "ordine": 2,
+    "nome": "Caserma",
+    "descrizione": "Area a hub circolari con robot dirigenti da identificare tramite indizi (colori/frasi). Contiene la seconda Safe Room. Obiettivo: ottenere il Tesserino del Direttore Capo per proseguire.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-okumura-caserma",
+      "nome": "Palazzo di Okumura › Caserma",
+      "n": 1,
+      "presi": 0,
+      "spilli": [
+       {
+        "id": 1260,
+        "uid": "aa727f7a98de1c5ca45675c0cbcb166a",
+        "tipo": "forziere",
+        "nome": "Forziere",
+        "colore": "#eab308",
+        "raccolto": false
+       }
+      ]
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "okumura-03-caserma/0",
+      "ordine": 0,
+      "tipo": "sicura",
+      "nome": "Seconda Safe Room",
+      "descrizione": "Vicino al bivio a nord della prima stanza circolare della Caserma.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-03-caserma/1",
+      "ordine": 1,
+      "tipo": "miniboss",
+      "nome": "Robot Capufficio (con Servobot MDL-WKR x2 e Servobot MDL-?)",
+      "descrizione": "Va interrogato con le opzioni di dialogo giuste (\"Che tipo è il direttore di sezione?\" poi \"Potrei far sì che accada, se...\") per scoprire che il Direttore di Sezione è debole al Vento, prima di combatterlo. Ricompensa: Tesserino Capufficio.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [
+        "Fuoco e Vento (Servobot MDL-WKR)",
+        "Tuono e Nucleare (secondo tipo Servobot, debole essendo di elemento Vento)"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-03-caserma/2",
+      "ordine": 2,
+      "tipo": "ombra-sciagura",
+      "nome": "Girimehkala Lv 43 (Ombra potente)",
+      "descrizione": "Nemico forte che pattuglia l'area nord vicino alla seconda Safe Room. Respinge danni fisici e da arma da fuoco, annulla Maledizione, resiste al Fuoco. Nota terminologica: la guida allgamestaff usa la dicitura generica \"Ombra potente\", non è confermato sia la categoria formale \"Ombra della sciagura/Ira\" di P5R - vedi note.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [
+        "Sacro (unica debolezza)"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-03-caserma/3",
+      "ordine": 3,
+      "tipo": "miniboss",
+      "nome": "Direttore di Sezione (con Servobot MDL-WKR x3 e Servobot MDL-DM)",
+      "descrizione": "Si trova nella stanza est dell'hub circolare successivo (identificabile perché insulta il party). Va provocato con le opzioni giuste in battaglia (\"A dire il vero è col tuo capo\", \"Wow, impressionante\") per rivelare che il Direttore Capo è debole a Psicocinesi. Ricompensa: Tessera Dirett. Sezione.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [
+        "Vento (Direttore di Sezione e i suoi Servobot)"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-03-caserma/4",
+      "ordine": 4,
+      "tipo": "miniboss",
+      "nome": "Direttore Capo (con Servobot MDL-WKR x4 e Servobot MDL-?)",
+      "descrizione": "Robot verde nella stanza sud del secondo hub (va affrontato dopo il robot nord, che è opzionale). Ricompensa: Tessera Direttore Capo, che apre tutte le porte della Caserma.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [
+        "Psicocinesi e Maledizione (Direttore Capo e Servobot MDL-?)",
+        "Fuoco e Vento (Servobot MDL-WKR)"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-03-caserma/5",
+      "ordine": 5,
+      "tipo": "oggetto",
+      "nome": "Tesserino Capufficio / Tessera Dirett. Sezione / Tessera Direttore Capo",
+      "descrizione": "Tessere di accesso ottenute sconfiggendo i tre robot dirigenti; necessarie per aprire le porte chiuse dell'area.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "chiavi/tessere di progressione"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "okumura-04-dintorni-del-complesso",
+    "ordine": 3,
+    "nome": "Dintorni del Complesso",
+    "descrizione": "Area completamente rivista nella versione Royal rispetto alla Vanilla: piattaforme circolari sospese collegate da rampini, da percorrere in senso orario/antiorario per raccogliere tutto il bottino prima di infiltrarsi nella fabbrica.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-okumura-dintorni-del-complesso",
+      "nome": "Palazzo di Okumura › Dintorni del complesso",
+      "n": 2,
+      "presi": 0,
+      "spilli": [
+       {
+        "id": 1151,
+        "uid": "184ef899d4fce8ec82ad4bda16f4905e",
+        "tipo": "forziere",
+        "nome": "Forziere",
+        "colore": "#eab308",
+        "raccolto": false
+       },
+       {
+        "id": 1152,
+        "uid": "cc730b794f200d4d9c3eee661ee3c3dc",
+        "tipo": "forziere",
+        "nome": "Forziere",
+        "colore": "#eab308",
+        "raccolto": false
+       }
+      ]
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "okumura-04-dintorni-del-complesso/0",
+      "ordine": 0,
+      "tipo": "sicura",
+      "nome": "Terza Safe Room",
+      "descrizione": "Subito dopo l'ingresso nell'area, oltre la porta a est.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": {
+       "x": 87,
+       "y": 85
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-04-dintorni-del-complesso/1",
+      "ordine": 1,
+      "tipo": "scorciatoia",
+      "nome": "Percorso di piattaforme circolari e rampini",
+      "descrizione": "Rete di piattaforme sospese e punti di aggancio per il Rampino che collegano l'intera area; necessaria per raggiungere tutti i forzieri e le capsule.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-04-dintorni-del-complesso/2",
+      "ordine": 2,
+      "tipo": "forziere",
+      "nome": "Forziere - Unguento magico x2",
+      "descrizione": "Su una piattaforma raggiunta scendendo a nord-est dopo un punto di aggancio a est della terza piattaforma dell'anello principale.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Unguento magico x2"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": {
+       "x": 44,
+       "y": 33
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-04-dintorni-del-complesso/3",
+      "ordine": 3,
+      "tipo": "forziere",
+      "nome": "Forziere - Roccia nera",
+      "descrizione": "Su una piattaforma a nord-ovest, oltre un'Ombra potente all'incrocio sud-ovest/nord-ovest.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Roccia nera"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": {
+       "x": 47,
+       "y": 66
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-04-dintorni-del-complesso/4",
+      "ordine": 4,
+      "tipo": "ombra-sciagura",
+      "nome": "Ombra potente (incrocio sud-ovest/nord-ovest)",
+      "descrizione": "Nemico forte che protegge l'accesso al forziere della Roccia nera. Tipo esatto non specificato nel testo della guida.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": []
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-04-dintorni-del-complesso/5",
+      "ordine": 5,
+      "tipo": "oggetto",
+      "nome": "Capsule d'immagazzinamento (multiple)",
+      "descrizione": "Diverse capsule sparse tra le piattaforme, alcune protette da Ombre in agguato.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "materiali/oggetti generici"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "okumura-05-linea-esportazioni",
+    "ordine": 4,
+    "nome": "Linea Esportazioni",
+    "descrizione": "Prima area della fabbrica vera e propria. Contiene la quarta Safe Room, il secondo Seme della Bramosia (protetto da un reticolo laser) e i primi bracci meccanici da sabotare tramite Console.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-okumura-linea-esportazioni",
+      "nome": "Palazzo di Okumura › Linea esportazioni",
+      "n": 2,
+      "presi": 0,
+      "spilli": [
+       {
+        "id": 1210,
+        "uid": "9b7c5157d04673e06b335ed52c3edf3c",
+        "tipo": "forziere",
+        "nome": "Forziere",
+        "colore": "#eab308",
+        "raccolto": false
+       },
+       {
+        "id": 1212,
+        "uid": "9236a19c397d4c499c1d6996b666e99b",
+        "tipo": "seme-bramosia",
+        "nome": "Seme di bramosia",
+        "colore": "#c85cff",
+        "raccolto": false
+       }
+      ]
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "okumura-05-linea-esportazioni/0",
+      "ordine": 0,
+      "tipo": "sicura",
+      "nome": "Quarta Safe Room",
+      "descrizione": "Poco dopo l'ingresso nell'area, seguendo il bordo della prima rampa verso sud.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": {
+       "x": 31,
+       "y": 61
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-05-linea-esportazioni/1",
+      "ordine": 1,
+      "tipo": "forziere",
+      "nome": "Forziere - Replica d'arma",
+      "descrizione": "Seguendo una seconda serie di tubi verso sud dalla prima rampa dell'area.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Replica d'arma"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": {
+       "x": 13,
+       "y": 85
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-05-linea-esportazioni/2",
+      "ordine": 2,
+      "tipo": "volonta",
+      "nome": "Seme avarizia verde",
+      "descrizione": "Raggiungibile tramite una presa d'aria oltre un passaggio a ovest; protetto da laser, disattivabili con una Console vicino a scaffali di circuiteria a ovest del braccio meccanico principale.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Seme della Bramosia (2 di 3)"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": {
+       "x": 27,
+       "y": 98
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-05-linea-esportazioni/3",
+      "ordine": 3,
+      "tipo": "puzzle",
+      "nome": "Console dei bracci meccanici",
+      "descrizione": "Diverse Console (\"Selezioniamo 3x\", \"Aumenta la velocità del braccio\") che rompono/fermano bracci meccanici per creare passaggi attraverso la fabbrica; una scena rivela che Okumura sfrutta i bracci anche contro i dipendenti.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": {
+       "x": 70,
+       "y": 31
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-05-linea-esportazioni/4",
+      "ordine": 4,
+      "tipo": "forziere-chiuso",
+      "nome": "Forziere chiuso a chiave - Ascia Big Bang",
+      "descrizione": "Oltre il braccio meccanico giallo sabotato tramite Console cilindrica; arma per Noir.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Ascia Big Bang (arma per Noir/Haru)"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": {
+       "x": 73,
+       "y": 17
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-05-linea-esportazioni/5",
+      "ordine": 5,
+      "tipo": "ombra-sciagura",
+      "nome": "Ombra potente all'ingresso della fabbrica (probabile Kumbhanda)",
+      "descrizione": "Coppia di Ombre all'ingresso della fabbrica, una molto più forte dell'altra (la guida ipotizza si tratti di un Kumbhanda).",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [
+        "Psicocinesi (se Kumbhanda)"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-05-linea-esportazioni/6",
+      "ordine": 6,
+      "tipo": "oggetto",
+      "nome": "Capsule d'immagazzinamento (multiple, incluse capsule fittizie senza bottino)",
+      "descrizione": "Diverse capsule sparse nell'area, incluso una capsula \"fittizia\" priva di bottino sul ponte est.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "materiali/oggetti generici"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "okumura-06-linea-di-produzione",
+    "ordine": 5,
+    "nome": "Linea di Produzione",
+    "descrizione": "Area con presse idrauliche azionate da Console con timer \"Pranzo\" (30 secondi) da attraversare prima che le presse si riattivino.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-okumura-linea-di-produzione",
+      "nome": "Palazzo di Okumura › Linea di produzione",
+      "n": 1,
+      "presi": 0,
+      "spilli": [
+       {
+        "id": 1215,
+        "uid": "8582581aac5d75985643fb851d69da00",
+        "tipo": "forziere",
+        "nome": "Forziere",
+        "colore": "#eab308",
+        "raccolto": false
+       }
+      ]
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "okumura-06-linea-di-produzione/0",
+      "ordine": 0,
+      "tipo": "puzzle",
+      "nome": "Console \"Pranzo\" e presse idrauliche",
+      "descrizione": "Diverse Console fermano temporaneamente (30 secondi) le presse idrauliche blu e gialle per permettere l'attraversamento; una Console consente anche di disabilitare la sicurezza dei laser che bloccano una rampa a nord.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": {
+       "x": 17,
+       "y": 69
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-06-linea-di-produzione/1",
+      "ordine": 1,
+      "tipo": "forziere",
+      "nome": "Forziere - Polvere d'anima",
+      "descrizione": "Su una piattaforma raggiunta attraversando la seconda pressa idraulica (più occidentale) col Terzo Occhio.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Polvere d'anima"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": {
+       "x": 7,
+       "y": 83
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-06-linea-di-produzione/2",
+      "ordine": 2,
+      "tipo": "oggetto",
+      "nome": "Capsule d'immagazzinamento (multiple)",
+      "descrizione": "Diverse capsule sparse nell'area, incluse vicino alle Ombre in agguato e in un'alcova a sud prima dell'uscita.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "materiali/oggetti generici"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "okumura-07-linea-di-smaltimento",
+    "ordine": 6,
+    "nome": "Linea di Smaltimento",
+    "descrizione": "Area con la quinta Safe Room, ulteriori presse/bracci meccanici a timer, il forziere con l'arma definitiva di Ryuji e un'ondata di 15 Servobot MDL-CH (deboli a Ghiaccio) da superare per proseguire.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-okumura-linea-di-smaltimento",
+      "nome": "Palazzo di Okumura › Linea di smaltimento",
+      "n": 0,
+      "presi": 0,
+      "spilli": []
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "okumura-07-linea-di-smaltimento/0",
+      "ordine": 0,
+      "tipo": "sicura",
+      "nome": "Quinta Safe Room",
+      "descrizione": "Subito dopo l'ingresso nell'area, scendendo una rampa e girando a est.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-07-linea-di-smaltimento/1",
+      "ordine": 1,
+      "tipo": "forziere",
+      "nome": "Forziere - Bastone Apocalittico (arma per Ryuji)",
+      "descrizione": "Su una piattaforma raggiunta saltando tra tubi oltre un ponte a est, dopo aver eliminato un'Ombra potente (probabile Girimehkala). Descritto come \"potenziamento definitivo\" per Ryuji/Skull.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Bastone Apocalittico (arma per Ryuji/Skull)"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-07-linea-di-smaltimento/2",
+      "ordine": 2,
+      "tipo": "forziere",
+      "nome": "Forziere - Muschio FR-FO",
+      "descrizione": "In una cassa raggiungibile verso est da un bivio dopo il ponte, poco prima della Console del timer finale dell'area.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Muschio FR-FO"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-07-linea-di-smaltimento/3",
+      "ordine": 3,
+      "tipo": "ombra-sciagura",
+      "nome": "Ombra potente (probabile Girimehkala)",
+      "descrizione": "Nemico forte da eliminare sul ponte est dell'area, prima del forziere del Bastone Apocalittico.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [
+        "Sacro (se Girimehkala)"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-07-linea-di-smaltimento/4",
+      "ordine": 4,
+      "tipo": "miniboss",
+      "nome": "Ondata di Servobot MDL-CH (3 ondate da 5 unità)",
+      "descrizione": "Ondata di robot gialli obbligatoria da affrontare (3 gruppi da 5 Servobot MDL-CH) dopo aver attraversato la pressa gialla finale dell'area. La guida consiglia di usare Fox (e/o Joker) per abilità di Ghiaccio ad area.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [
+        "Ghiaccio"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": {
+       "x": 49,
+       "y": 43
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-07-linea-di-smaltimento/5",
+      "ordine": 5,
+      "tipo": "oggetto",
+      "nome": "Capsule d'immagazzinamento (multiple)",
+      "descrizione": "Diverse capsule sparse lungo le passerelle dell'area.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "materiali/oggetti generici"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "okumura-08-fabbrica-centrale",
+    "ordine": 7,
+    "nome": "Fabbrica Centrale",
+    "descrizione": "Area breve e più lineare con la sesta Safe Room e la prima Camera Stagna del Palazzo (meccanica che anticipa l'enigma dell'Interscambio).",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-okumura-fabbrica-centrale",
+      "nome": "Palazzo di Okumura › Fabbrica centrale",
+      "n": 1,
+      "presi": 0,
+      "spilli": [
+       {
+        "id": 1250,
+        "uid": "1bbbb0d3b4210fbd18fd81b7c4ac9b87",
+        "tipo": "forziere",
+        "nome": "Forziere",
+        "colore": "#eab308",
+        "raccolto": false
+       }
+      ]
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "okumura-08-fabbrica-centrale/0",
+      "ordine": 0,
+      "tipo": "sicura",
+      "nome": "Sesta Safe Room",
+      "descrizione": "Poco dopo l'ingresso nell'area, attraverso una porta a sud nel corridoio principale.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": {
+       "x": 45,
+       "y": 88
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-08-fabbrica-centrale/1",
+      "ordine": 1,
+      "tipo": "forziere-chiuso",
+      "nome": "Porta chiusa a chiave (non apribile in questa visita)",
+      "descrizione": "Porta chiusa incontrata dopo la Safe Room, oltre la quale non si può ancora passare; si prosegue tramite la Camera Stagna adiacente.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-08-fabbrica-centrale/2",
+      "ordine": 2,
+      "tipo": "forziere",
+      "nome": "Forziere - Unguento fisico x2",
+      "descrizione": "In una stanza sul retro raggiungibile riattraversando la Camera Stagna iniziale dell'area.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Unguento fisico x2"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": {
+       "x": 15,
+       "y": 70
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-08-fabbrica-centrale/3",
+      "ordine": 3,
+      "tipo": "puzzle",
+      "nome": "Camera Stagna e Console di sblocco porte",
+      "descrizione": "Prima Camera Stagna del Palazzo; una Console in una stanza est apre due porte chiuse a ovest.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": {
+       "x": 77,
+       "y": 36
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-08-fabbrica-centrale/4",
+      "ordine": 4,
+      "tipo": "oggetto",
+      "nome": "Capsule d'immagazzinamento (multiple)",
+      "descrizione": "Diverse capsule nell'area, incluse due nel corridoio oltre la Camera Stagna.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "materiali/oggetti generici"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "okumura-09-interscambio",
+    "ordine": 8,
+    "nome": "Interscambio",
+    "descrizione": "Area-enigma basata su Camere Stagne Alfa (α) e Omega (Ω) attivate a coppie tramite Leve; contiene la settima Safe Room e il terzo Seme della Bramosia, protetto dal mini-boss Primo Sacerdote/Melchizedek.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-okumura-interscambio",
+      "nome": "Palazzo di Okumura › Interscambio",
+      "n": 1,
+      "presi": 0,
+      "spilli": [
+       {
+        "id": 1178,
+        "uid": "0e4cb35b45eb9968b14135f83a48ee09",
+        "tipo": "forziere",
+        "nome": "Forziere",
+        "colore": "#eab308",
+        "raccolto": false
+       }
+      ]
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "okumura-09-interscambio/0",
+      "ordine": 0,
+      "tipo": "sicura",
+      "nome": "Settima Safe Room",
+      "descrizione": "Raggiunta dopo l'ascensore e le prime Camere Stagne dell'area; settima Safe Room su otto totali del Palazzo.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-09-interscambio/1",
+      "ordine": 1,
+      "tipo": "puzzle",
+      "nome": "Enigma delle Camere Stagne Alfa/Omega",
+      "descrizione": "Rete di Camere Stagne (portali) attivabili a coppie tramite Leve Alfa (α) e Omega (Ω): tirando una leva si attiva un set di Camere Stagne e si disattiva l'altro. Va risolto più volte per raggiungere le varie sotto-aree (incluso il percorso finale verso il Tesoro).",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": {
+       "x": 56,
+       "y": 50
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-09-interscambio/2",
+      "ordine": 2,
+      "tipo": "miniboss",
+      "nome": "Primo Sacerdote (Melchizedek)",
+      "descrizione": "Guardiano del terzo Seme della Bramosia. Routine fissa su 3 turni: 1° turno Morsi della fame (infligge Fame a tutto il party); 2° turno Mano di Dio (danno Psicocinetico colossale a un singolo bersaglio); 3° turno Makougaon (danno Sacro pesante ad area, oltre 150 danni). La guida consiglia Joker/Mona (deboli a Vento nel nemico) e Skull con Batterie portatili per infliggere Folgorazione; mantenere guarigione costante.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [
+        "Vento"
+       ],
+       "contenuto": "Attacchi: Morsi della fame, Mano di Dio, Makougaon"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": {
+       "x": 81,
+       "y": 19
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-09-interscambio/3",
+      "ordine": 3,
+      "tipo": "volonta",
+      "nome": "Seme avarizia blu",
+      "descrizione": "Ottenuto sconfiggendo il Primo Sacerdote/Melchizedek. Combinando i tre Semi della Bramosia (rosso, verde, blu) si ottiene il Cristallo dell'Avarizia.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Seme della Bramosia (3 di 3)"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-09-interscambio/4",
+      "ordine": 4,
+      "tipo": "oggetto",
+      "nome": "Cristallo dell'Avarizia (accessorio)",
+      "descrizione": "Ottenuto combinando i tre Semi della Bramosia. Conferisce l'abilità passiva \"Sign. dell'attacco\" (Tarukaja automatica all'inizio della battaglia). Consigliato su un personaggio aggressivo come Skull o Fox.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Accessorio: Tarukaja automatica a inizio battaglia"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-09-interscambio/5",
+      "ordine": 5,
+      "tipo": "forziere",
+      "nome": "Forziere - Balsamo vitale",
+      "descrizione": "In fondo a un lungo corridoio ovest, verso la fine dell'area, prima di tornare alla stanza con la Camera Stagna che conduce al Tesoro.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Balsamo vitale"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-09-interscambio/6",
+      "ordine": 6,
+      "tipo": "oggetto",
+      "nome": "Capsule d'immagazzinamento (multiple)",
+      "descrizione": "Numerose capsule sparse tra le varie stanze e Camere Stagne dell'enigma.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "materiali/oggetti generici"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "okumura-10-produzione-armamenti",
+    "ordine": 9,
+    "nome": "Produzione Armamenti",
+    "descrizione": "Area finale del Palazzo (visita del 4 ottobre) con l'ottava e ultima Safe Room; qui si trova il varco verso il Tesoro, percorso che diventa attivo solo il 6 ottobre col conto alla rovescia di 10 minuti fino allo scontro con il boss.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-okumura-produzione-armamenti",
+      "nome": "Palazzo di Okumura › Produzione armamenti",
+      "n": 0,
+      "presi": 0,
+      "spilli": []
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "okumura-10-produzione-armamenti/0",
+      "ordine": 0,
+      "tipo": "sicura",
+      "nome": "Ottava Safe Room (finale)",
+      "descrizione": "Ultima Safe Room del Palazzo (8 di 8); da qui parte, il 6 ottobre, il percorso a timer verso il Tesoro/boss.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": {
+       "x": 89,
+       "y": 74
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-10-produzione-armamenti/1",
+      "ordine": 1,
+      "tipo": "forziere-chiuso",
+      "nome": "Forziere chiuso a chiave - Tuta spaziale",
+      "descrizione": "Scendendo la rampa sud subito dopo l'ingresso nell'area, prima della Safe Room.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Tuta spaziale (equipaggiamento)"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": {
+       "x": 57,
+       "y": 85
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-10-produzione-armamenti/2",
+      "ordine": 2,
+      "tipo": "oggetto",
+      "nome": "Capsule d'immagazzinamento (multiple)",
+      "descrizione": "Diverse capsule nell'area, incluse una raggiunta con la rampa nord-est prima di lasciare il Palazzo il 4 ottobre.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "materiali/oggetti generici"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-10-produzione-armamenti/3",
+      "ordine": 3,
+      "tipo": "forziere",
+      "nome": "Forziere - Magatama elettrico x3",
+      "descrizione": "Percorso del 6 ottobre verso il Tesoro (timer 10 minuti): su una rampa poco dopo l'inizio del percorso, prima della porta che conduce al corridoio più lungo verso il boss.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Magatama elettrico x3"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-10-produzione-armamenti/4",
+      "ordine": 4,
+      "tipo": "forziere",
+      "nome": "Forziere - Catena di perline",
+      "descrizione": "Percorso del 6 ottobre verso il Tesoro: a ovest, raggiunto tramite un ascensore dopo il corridoio pieno di Ombre (Decarabia, Mithras o Wakinyan).",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Catena di perline"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-10-produzione-armamenti/5",
+      "ordine": 5,
+      "tipo": "scorciatoia",
+      "nome": "Rampino verso l'UFO (percorso alternativo al boss)",
+      "descrizione": "Dopo il forziere del Magatama elettrico, guardando a nord-ovest si individua un UFO agganciabile col Rampino: scorciatoia che porta prima da Okumura ma con meno nemici/ricompense rispetto al percorso al piano inferiore attraverso la porta.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "okumura-10-produzione-armamenti/6",
+      "ordine": 6,
+      "tipo": "boss",
+      "nome": "Kunikazu Mammon Okumura",
+      "descrizione": "Battaglia finale del Palazzo, timer di 30 minuti non mettibile in pausa. Okumura stesso non può essere bersagliato finché non sono state sconfitte tutte le sue ondate di Servobot evocate con \"Ordine di lavoro\"; usa inoltre Dekaja (rimuove i potenziamenti nemici), Morsi della fame (Fame ad area), Marakunda/Rakukaja/Rakunda (buff/debuff Difesa) e Ordine di sacrificio (fa autodistruggere un servitore infliggendo danni ad area). Ogni ondata di Servobot va eliminata in 2 turni o fugge e viene sostituita da una nuova ondata identica a piena salute; contro Okumura non sono possibili gli Assalti. Fasi in sequenza: 1) Servobot MDL-WKR x4 (blu scuro, ~270 HP, deboli a Fuoco/Vento); 2) Servobot MDL-CH x4 (giallo, ~350 HP, deboli a Ghiaccio/Psicocinesi); 3) Servobot MDL-AM x4 (rosso, ~500 HP, deboli a Tuono/Nucleare, usano incantesimi invece di attacchi fisici); 4) Servobot MDL-DM x4 (blu chiaro, ~700 HP, deboli a Vento/Sacro, possono autodistruggersi con Devozione totale su Ordine di sacrificio); 5) Servobot MDL-GM x4 (verde, ~1200 HP, deboli a Psicocinesi/Maledizione, usano anche Attacco devastante fisico); 6) Robomanager MDL-ED (~3000 HP, nessuna debolezza/resistenza, usa Ordine Big Bang seguito da Big Bang Challenge devastante ad area - richiede l'intero party in Guardia); 7) Haru Okumura Cognitiva (~1500 HP, nessuna debolezza, autodistruzione finale con Devozione totale per ~100 danni ad area); 8) Kunikazu Mammon Okumura vero e proprio, HP 1, nessun attacco: basta un colpo qualsiasi per vincere (PE 8250, Yen 31000). Strategia generale: party consigliato Joker/Queen/Fox/Mona (o Skull/Panther a seconda di chi ha imparato Carica/Concentrazione), sfruttare Staffetta e bombe elementali (Psico-bombe, Bombe maledette, Cannoni ad aria, Bombe allegre) per colpire le debolezze anche con personaggi che non le possiedono nativamente, tenere Kajaclear-R/Acqua battesimale/Kundaclear-R/Acqua benedetta per rimuovere buff/debuff. La guida consiglia la difficoltà Spietata per rendere più gestibile il combattimento grazie al maggior danno sui colpi debolezza.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [
+        "Nessuna debolezza propria di Okumura (non attacca, HP 1 nella fase finale)",
+        "Ondata 1 - Servobot MDL-WKR: Fuoco, Vento",
+        "Ondata 2 - Servobot MDL-CH: Ghiaccio, Psicocinesi",
+        "Ondata 3 - Servobot MDL-AM: Tuono (Elettricità), Nucleare",
+        "Ondata 4 - Servobot MDL-DM: Vento, Sacro",
+        "Ondata 5 - Servobot MDL-GM: Psicocinesi, Maledizione",
+        "Robomanager MDL-ED: nessuna debolezza",
+        "Haru Okumura Cognitiva: nessuna debolezza"
+       ],
+       "contenuto": "Battaglia a fasi/ondate multiple; ricompensa 8250 PE, 31000 Yen"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   }
+  ],
+  "punti": 56,
+  "esauribili": 39,
+  "gestiti": 0,
+  "raccolta": {
+   "totale": 20,
+   "presi": 0,
+   "mappe": 21,
+   "mappeComplete": 6
+  },
+  "completato": null,
+  "atterraggio": null,
+  "note": "Quinto Palazzo di Persona 5 Royal. Struttura a fabbrica/astroporto spaziale con più settori/linee produttive robotiche. Il Palazzo non ha Ombre come miniboss classici nella maggior parte delle aree: gli ostacoli principali sono i robot Servobot e i \"dirigenti\" robotici (Robot Capufficio, Direttore di Sezione, Direttore Capo) che vanno identificati tramite indizi ambientali. Il boss finale è una battaglia a ondate con timer di 30 minuti, preceduta da un percorso col Tesoro a timer di 10 minuti. Fonte primaria: allgamestaff.it (guida italiana ufficiale). Dati di supporto/incrocio da WebSearch (aggregazione di più fonti EN: thegamer.com, gamerant.com, samurai-gamers.com, gamefaqs.gamespot.com) per il dettaglio delle fasi del boss e le date di scadenza - vedi file note per dettagli sulle discrepanze.",
+  "fonti": [
+   "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/",
+   "https://www.thegamer.com/persona-5-royal-okumuras-palace-walkthrough/",
+   "https://samurai-gamers.com/persona-5/p5r-okumura-palace-guide/",
+   "https://gamerant.com/persona-5-royal-okumura-palace-walkthrough/",
+   "https://gamerant.com/persona-5-royal-how-to-beat-okumura/",
+   "https://www.thegamer.com/persona-5-royal-shadow-okumura-robot-boss-battle-guide/",
+   "https://gamefaqs.gamespot.com/ps5/370928-persona-5-royal/faqs/80193 (non consultabile direttamente, errore HTTP 403 - citato solo da aggregazione WebSearch)",
+   "https://megamitensei.fandom.com/wiki/Okumura's_Palace (non consultabile direttamente, errore HTTP 402 - citato solo da aggregazione WebSearch)"
+  ],
+  "planimetrie": [
+   {
+    "chiave": "palazzo-di-okumura-entrata-laterale",
+    "nome": "Palazzo di Okumura › Entrata laterale",
+    "ordine": 0,
+    "aree": [
+     {
+      "chiave": "okumura-01-entrata-laterale",
+      "nome": "Entrata Laterale",
+      "ordine": 0
+     }
+    ],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-okumura-corridoi-del-complesso-inquadratura-occidentale",
+    "nome": "Palazzo di Okumura › Corridoi del complesso — inquadratura occidentale",
+    "ordine": 100,
+    "aree": [],
+    "n": 2,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1126,
+      "uid": "c2878325376354466a21e9db1c233a69",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     },
+     {
+      "id": 1127,
+      "uid": "b102291609f06bd0626e9da4ee23592c",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-okumura-corridoi-del-complesso-porzione-occidentale",
+    "nome": "Palazzo di Okumura › Corridoi del complesso — porzione occidentale",
+    "ordine": 101,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1132,
+      "uid": "64801642283ec689f392b09f1d5dd507",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-okumura-corridoi-del-complesso",
+    "nome": "Palazzo di Okumura › Corridoi del complesso",
+    "ordine": 102,
+    "aree": [
+     {
+      "chiave": "okumura-02-corridoi-del-complesso",
+      "nome": "Corridoi del Complesso",
+      "ordine": 1
+     }
+    ],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1142,
+      "uid": "d897ffc07fac272d76b2effd2f0643ab",
+      "tipo": "seme-bramosia",
+      "nome": "Seme di bramosia",
+      "colore": "#c85cff",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-okumura-dintorni-del-complesso",
+    "nome": "Palazzo di Okumura › Dintorni del complesso",
+    "ordine": 200,
+    "aree": [
+     {
+      "chiave": "okumura-04-dintorni-del-complesso",
+      "nome": "Dintorni del Complesso",
+      "ordine": 3
+     }
+    ],
+    "n": 2,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1151,
+      "uid": "184ef899d4fce8ec82ad4bda16f4905e",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     },
+     {
+      "id": 1152,
+      "uid": "cc730b794f200d4d9c3eee661ee3c3dc",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-okumura-interscambio-inquadratura-orientale",
+    "nome": "Palazzo di Okumura › Interscambio — inquadratura orientale",
+    "ordine": 300,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1160,
+      "uid": "df3003862ab2ab4205f2bcd4d4fbd0be",
+      "tipo": "seme-bramosia",
+      "nome": "Seme di bramosia",
+      "colore": "#c85cff",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-okumura-interscambio",
+    "nome": "Palazzo di Okumura › Interscambio",
+    "ordine": 301,
+    "aree": [
+     {
+      "chiave": "okumura-09-interscambio",
+      "nome": "Interscambio",
+      "ordine": 8
+     }
+    ],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1178,
+      "uid": "0e4cb35b45eb9968b14135f83a48ee09",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-okumura-linea-esportazioni-inquadratura-settentrionale",
+    "nome": "Palazzo di Okumura › Linea esportazioni — inquadratura settentrionale",
+    "ordine": 400,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1204,
+      "uid": "881083bbfe08fbb0cde0bce0c1e05355",
+      "tipo": "forziere-raro",
+      "nome": "Forziere raro",
+      "colore": "#fde047",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-okumura-linea-esportazioni",
+    "nome": "Palazzo di Okumura › Linea esportazioni",
+    "ordine": 401,
+    "aree": [
+     {
+      "chiave": "okumura-05-linea-esportazioni",
+      "nome": "Linea Esportazioni",
+      "ordine": 4
+     }
+    ],
+    "n": 2,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1210,
+      "uid": "9b7c5157d04673e06b335ed52c3edf3c",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     },
+     {
+      "id": 1212,
+      "uid": "9236a19c397d4c499c1d6996b666e99b",
+      "tipo": "seme-bramosia",
+      "nome": "Seme di bramosia",
+      "colore": "#c85cff",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-okumura-linea-di-produzione",
+    "nome": "Palazzo di Okumura › Linea di produzione",
+    "ordine": 500,
+    "aree": [
+     {
+      "chiave": "okumura-06-linea-di-produzione",
+      "nome": "Linea di Produzione",
+      "ordine": 5
+     }
+    ],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1215,
+      "uid": "8582581aac5d75985643fb851d69da00",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-okumura-linea-di-smaltimento-inquadratura-occidentale",
+    "nome": "Palazzo di Okumura › Linea di smaltimento — inquadratura occidentale",
+    "ordine": 600,
+    "aree": [],
+    "n": 2,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1225,
+      "uid": "1c5cfbaa288f5d421480c674ef1b4572",
+      "tipo": "forziere-raro",
+      "nome": "Forziere raro",
+      "colore": "#fde047",
+      "raccolto": false
+     },
+     {
+      "id": 1226,
+      "uid": "b8ef8e87a2b68691232f805dc245aa7b",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-okumura-linea-di-smaltimento",
+    "nome": "Palazzo di Okumura › Linea di smaltimento",
+    "ordine": 601,
+    "aree": [
+     {
+      "chiave": "okumura-07-linea-di-smaltimento",
+      "nome": "Linea di Smaltimento",
+      "ordine": 6
+     }
+    ],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-okumura-produzione-armamenti-porzione-meridionale",
+    "nome": "Palazzo di Okumura › Produzione armamenti — porzione meridionale",
+    "ordine": 700,
+    "aree": [],
+    "n": 2,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1235,
+      "uid": "99fe29cedded617eb223290edd5f113d",
+      "tipo": "tesoro-palazzo",
+      "nome": "Tesoro del Palazzo",
+      "colore": "#d946ef",
+      "raccolto": false
+     },
+     {
+      "id": 1236,
+      "uid": "43eebd892863efd50bb1ebe584163c41",
+      "tipo": "forziere-raro",
+      "nome": "Forziere raro",
+      "colore": "#fde047",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-okumura-produzione-armamenti",
+    "nome": "Palazzo di Okumura › Produzione armamenti",
+    "ordine": 701,
+    "aree": [
+     {
+      "chiave": "okumura-10-produzione-armamenti",
+      "nome": "Produzione Armamenti",
+      "ordine": 9
+     }
+    ],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-okumura-produzione-armamenti-inquadratura-settentrionale",
+    "nome": "Palazzo di Okumura › Produzione armamenti — inquadratura settentrionale",
+    "ordine": 702,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1243,
+      "uid": "562d1efee8266c558d1ff17f5b329ed2",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-okumura-manutenzione-armamenti-inquadratura-occidentale-piu-ristretta",
+    "nome": "Palazzo di Okumura › Manutenzione armamenti — inquadratura occidentale — più ristretta",
+    "ordine": 800,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-okumura-manutenzione-armamenti-inquadratura-occidentale-piu-ampia",
+    "nome": "Palazzo di Okumura › Manutenzione armamenti — inquadratura occidentale — più ampia",
+    "ordine": 801,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1245,
+      "uid": "202d0fda84adf064029d0d1124d23d4f",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-okumura-manutenzione-armamenti-porzione-meridionale",
+    "nome": "Palazzo di Okumura › Manutenzione armamenti — porzione meridionale",
+    "ordine": 802,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-okumura-manutenzione-armamenti",
+    "nome": "Palazzo di Okumura › Manutenzione armamenti",
+    "ordine": 803,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-okumura-fabbrica-centrale",
+    "nome": "Palazzo di Okumura › Fabbrica centrale",
+    "ordine": 900,
+    "aree": [
+     {
+      "chiave": "okumura-08-fabbrica-centrale",
+      "nome": "Fabbrica Centrale",
+      "ordine": 7
+     }
+    ],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1250,
+      "uid": "1bbbb0d3b4210fbd18fd81b7c4ac9b87",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-okumura-caserma",
+    "nome": "Palazzo di Okumura › Caserma",
+    "ordine": 1000,
+    "aree": [
+     {
+      "chiave": "okumura-03-caserma",
+      "nome": "Caserma",
+      "ordine": 2
+     }
+    ],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1260,
+      "uid": "aa727f7a98de1c5ca45675c0cbcb166a",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   }
+  ],
+  "atterraggi": [],
+  "personeCatturate": [
+   2,
+   5,
+   8,
+   11,
+   16,
+   17,
+   18,
+   19,
+   20,
+   23,
+   24,
+   33,
+   34,
+   79,
+   80,
+   84,
+   85,
+   86,
+   87,
+   88,
+   89,
+   92,
+   93,
+   96,
+   100,
+   103,
+   104,
+   108,
+   121,
+   122,
+   123,
+   124,
+   129,
+   130,
+   136,
+   149,
+   155,
+   159,
+   161,
+   162,
+   170,
+   179,
+   182,
+   183,
+   193,
+   197,
+   199,
+   202,
+   206,
+   209,
+   210,
+   217,
+   218
+  ],
+  "illustrazione": {
+   "immagineUrl": "/api/immagini/mappa/dungeon-okumura/file?v=2026-10-18T13%3A09%3A51.475Z",
+   "asset": null
+  }
+ }
+}

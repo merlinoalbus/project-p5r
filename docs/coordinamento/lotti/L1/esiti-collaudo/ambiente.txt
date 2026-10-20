@@ -1,0 +1,13 @@
+### istanza di collaudo — 2026-10-20T02:49:03+02:00
+cartella: /c/Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2  branch: newreview-l2  HEAD: e9fb48719bcf1be6a85529c202e8e066654284cb
+dati: data/ = copia con API di backup di better-sqlite3 dalla base pulita di produzione prod-20261020 (gioco user_version 106, partite 21, integrity ok), migrazioni 107-108 applicate all'avvio
+### curl localhost:3301/api/health
+{"data":{"status":"ok","timestamp":"2026-10-20T00:49:03.830Z","db":{"ok":true,"userVersion":108}}}
+### curl localhost:5473/api/health (proxy Vite)
+{"data":{"status":"ok","timestamp":"2026-10-20T00:49:03.871Z","db":{"ok":true,"userVersion":108}}}
+### curl localhost:5473/ → HTTP
+200
+### BE.log: migrazioni
+{"level":30,"time":"2026-10-20T00:48:43.708Z","service":"project-p5r-be","mappe":1,"cambiate":[{"chiave":"yongen-java-banchina-della-metropolitana","prima":"illustrazione-editoriale","dopo":"planimetria-nativa"}],"msg":"migrazione 107: ruolo dell’immagine dedotto dalla gerarchia"}
+{"level":30,"time":"2026-10-20T00:48:43.713Z","service":"project-p5r-be","schema":"main","id":107,"name":"ruolo_dalla_gerarchia","msg":"migrazione applicata"}
+{"level":30,"time":"2026-10-20T00:48:43.717Z","service":"project-p5r-be","schema":"main","id":108,"name":"miniature_delle_immagini","msg":"migrazione applicata"}

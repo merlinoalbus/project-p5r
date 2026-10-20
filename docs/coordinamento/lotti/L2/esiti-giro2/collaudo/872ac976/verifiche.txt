@@ -1,0 +1,49 @@
+### npm run typecheck
+
+> project-p5r@0.1.0 typecheck
+> tsc -b tsconfig.full.json
+
+EXIT=0
+### npx tsc -b tsconfig.full.json --force
+EXIT=0
+### npm run lint
+
+> project-p5r@0.1.0 lint
+> eslint .
+
+EXIT=0
+### npx vitest run src/pages/MappaPage.test.tsx --reporter=verbose
+
+ RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2
+
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > «Chiudi» del visore torna alla pagina da cui si era aperta la mappa; senza, all’elenco delle mappe 177ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > «Torna alla partita» porta alla pagina Partita, sulla scheda Oggi, e sta subito prima di «Chiudi» (2026-10-04) 48ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > senza partita attiva «Torna alla partita» non c’è nel visore 34ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > nel luogo senza pianta «Torna alla partita» sta dopo «Scheda del Palazzo» e «Modifica mappa» e porta alla pagina Partita, scheda Oggi 28ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > la mappa dei Memento dice «Scheda dei Memento», è di tipo «Memento» e non chiede planimetrie 16ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > senza partita attiva «Torna alla partita» non c’è nel luogo senza pianta 18ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > aperta direttamente, «Chiudi» porta all’elenco delle mappe come prima 43ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > l’indice apre una radice nel pannello e ne mostra le mappe 47ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > R1: la carta di Tokyo dice «1 da verificare» senza aprire niente, e il chip porta all’area da verificare 24ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > il visore carica la mappa con la partita attiva e segna un collezionabile raccolto tramite l’API, poi rilegge la mappa in silenzio 109ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > un punto della Guida segnato «Ottenuto» dalla mappa aggiorna lo stato del punto e conta come raccolto 83ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > le condizioni sono assolute: anche un elemento fisso del gioco con condizioni che non valgono sparisce, come gli altri pin (2026-10-09) 47ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > due azioni ravvicinate: la rilettura vecchia che arriva per ultima non sovrascrive quella nuova 96ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > dopo un’azione la rilettura applica la visibilità calcolata dal server: un pin che dipendeva dallo stato appena segnato sparisce 82ms
+ ✓ src/pages/MappaPage.test.tsx > un contenitore senza immagine apre i luoghi figli senza una finta planimetria 29ms
+ ✓ src/pages/MappaPage.test.tsx > la planimetria di Tokyo non è più una destinazione: si finisce sulla mappa della Città 9ms
+ ✓ src/pages/MappaPage.test.tsx > anche un alias che risolve a Tokyo finisce sulla mappa della Città 16ms
+ ✓ src/pages/MappaPage.test.tsx > LAY2-5: da 1024 px lo spazio fra intestazione ed elenco è 12 px (a 1024×690 l’indice sforava di 3 px) 16ms
+ ✓ src/pages/MappaPage.test.tsx > un vecchio indirizzo di una planimetria porta alla sua casa (la pagina dell’Area sulla versione) con spillo e punto, senza aprire il visore 15ms
+ ✓ src/pages/MappaPage.test.tsx > un quartiere si apre nella sua pagina; una mappa la cui casa è il visore resta nel visore 31ms
+ ✓ src/pages/MappaPage.test.tsx > il contesto URL cambia il titolo del visore e il selettore può ripristinare tutte le alternative 49ms
+ ✓ src/pages/MappaPage.test.tsx > l’emblema del palazzo senza dimensioni lascia guida e planimetrie accessibili senza visore 22ms
+ ✓ src/pages/MappaPage.test.tsx > la planimetria nativa mantiene contesto e guida dentro il pannello reale del visore 51ms
+ ✓ src/pages/MappaPage.test.tsx > una mappa con asset originale e dimensioni non registrate mantiene la planimetria 10ms
+
+ Test Files  1 passed (1)
+      Tests  24 passed (24)
+   Start at  07:56:51
+   Duration  2.86s (transform 466ms, setup 112ms, import 632ms, tests 1.10s, environment 860ms)
+
+EXIT=0

@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941/79867d53-4ec1-4b44-8379-bf96cb5de1df/scratchpad/codice-ant0523
+
+
+ Test Files  17 passed (17)
+      Tests  180 passed (180)
+   Start at  07:28:52
+   Duration  9.81s (transform 17.03s, setup 4.64s, import 29.26s, tests 21.77s, environment 5.62s)
+

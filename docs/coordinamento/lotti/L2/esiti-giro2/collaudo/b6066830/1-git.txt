@@ -1,0 +1,23 @@
+### 2026-10-20T07:19:56Z
+### git branch --show-current
+newreview-l2
+### git rev-parse HEAD
+b6066830e496b31981201d0efebf0d2a024ab10c
+### git log --format='%H %s' 292a122e..HEAD
+b6066830e496b31981201d0efebf0d2a024ab10c docs(L2): giro 3 — cronologia con orari di UX2-13 (Collaudo, prima dello stop) e del lavoro del PM, ricongiungimento della linea di rilascio
+217e726a15d61004204e60d89c3ef640f5a00e33 docs(L2): giro 2 — prove sul commit finale, dichiarazione del PM su UX2-15, miniature e linea di rilascio in ARCHITETTURA, decisioni del giro 2
+### git diff --stat 292a122e HEAD
+ docs/ARCHITETTURA.md | 13 ++++++++++++-
+ docs/DECISIONI.md    | 21 +++++++++++++++++++++
+ docs/ROADMAP.md      |  2 +-
+ 3 files changed, 34 insertions(+), 2 deletions(-)
+### git diff --name-only 292a122e HEAD -- server shared src (vuoto atteso)
+EXIT=0
+### git ls-tree HEAD server shared src (attesi ccdf7f0f…, 99c6fb85…, f6616819…)
+040000 tree ccdf7f0f74a703eb94a4e29857f279f0813cee67	server
+040000 tree 99c6fb851766ded1cafd467b882cc72b564cd5ef	shared
+040000 tree f6616819b243786083fc4c437b97bc6d24cd27ff	src
+### git status --porcelain (vuoto atteso)
+EXIT=0
+### grep -rn 2026-10-21 src/ server/ shared/ docs/
+EXIT=1 (1 = nessuna occorrenza)

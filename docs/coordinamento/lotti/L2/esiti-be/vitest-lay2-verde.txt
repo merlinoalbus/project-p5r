@@ -1,0 +1,22 @@
+
+ RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/pensive-burnell-b50941
+
+ ✓ server/utils/scaricaDaUrl.test.ts > rifiuta gli indirizzi che non sono http/https 1ms
+ ✓ server/utils/scaricaDaUrl.test.ts > scarica il contenuto e riporta il tipo dichiarato 12ms
+ ✓ server/utils/scaricaDaUrl.test.ts > un corpo LENTO ma vivo arriva intero: la scadenza è sull’inattività, non sul totale 632ms
+ ✓ server/utils/scaricaDaUrl.test.ts > un corpo FERMO viene interrotto con il motivo giusto 157ms
+ ✓ server/utils/scaricaDaUrl.test.ts > se le intestazioni non arrivano, lo dice senza aspettare il corpo 123ms
+ ✓ server/utils/scaricaDaUrl.test.ts > il tetto vale anche quando l’origine non dichiara la dimensione 3ms
+ ✓ server/utils/scaricaDaUrl.test.ts > il tetto dichiarato viene fermato prima di scaricare 2ms
+ ✓ server/utils/scaricaDaUrl.test.ts > uno stato diverso da 200 e un corpo vuoto sono errori parlanti 2ms
+ ✓ server/utils/scaricaDaUrl.test.ts > LAY-2 — una fonte che rifiuta (401, 403, 429, 451) è `fonte-rifiuta`, con lo stato e l’host; gli altri stati restano «scarico fallito» 5ms
+ ✓ server/utils/scaricaDaUrl.test.ts > un host che non risponde non lascia appeso il chiamante 0ms
+ ✓ server/routes/scarico-fonte.test.ts > scarico da una fonte esterna (LAY-2) > la fonte riceve uno User-Agent che dice chi è (project-p5r con la versione), e nessun Referer 27ms
+ ✓ server/routes/scarico-fonte.test.ts > scarico da una fonte esterna (LAY-2) > una fonte che rifiuta (403) è 400 `fonte-rifiuta` con la pagina della fonte, e l’immagine non cambia 14ms
+
+ Test Files  2 passed (2)
+      Tests  12 passed (12)
+   Start at  03:02:06
+   Duration  2.23s (transform 1.33s, setup 214ms, import 1.82s, tests 1.19s, environment 0ms)
+
+EXIT=0

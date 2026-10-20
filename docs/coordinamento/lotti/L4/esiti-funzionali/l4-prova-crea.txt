@@ -1,0 +1,3 @@
+partite prima: 1:Partita Roberto:ATTIVA | 2:Tutorial:-
+POST /api/partite 201 id 3 attiva false
+partite dopo: 1:Partita Roberto:ATTIVA | 3:Prova funzionali L4:- | 2:Tutorial:-

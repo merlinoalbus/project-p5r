@@ -1,0 +1,21 @@
+### git rev-parse HEAD
+625475322b745489e5da1a9b674b5fa7b77e795b
+### git branch --show-current
+newreview-l2
+### git diff --stat 25012240 HEAD
+ docs/ROADMAP.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+### git status --porcelain (vuoto atteso)
+EXIT=0
+### grep -rn "2026-10-21" src/ server/ shared/ docs/
+EXIT=1 (1 = nessuna occorrenza)
+### impronta del codice (invariata attesa 4ec3badc…9d29)
+4ec3badc31c65b6c2c399f28b91e58b5f61264d3c76d79dd9496823244469d29 *-
+### git log --oneline 5ae62692..HEAD
+62547532 docs(L2): giro 2 — riga della ROADMAP con le correzioni e il collaudo
+25012240 fix(L2): giro 2 — «1 da verificare» sulla carta di Tokyo nell'indice delle mappe, senza aprire niente (R1, decisione del PM)
+f19a117f fix(L2): giro 2 — l'editor lascia scritto il rifiuto di una planimetria senza Area nel mondo (FUN2-8, parte FE)
+98e3cc1c fix(L2): giro 2 — segno «Da verificare» nell'indice delle mappe (R1, parte FE)
+4e6119a6 fix(L2): giro 2 — «Colloca» propone il quartiere del genitore (FUN2-9) e test della finestra con una lista non vuota (R6)
+5fd97d9f fix(L2): giro 2 — «da verificare» nell'indice delle mappe (R1), Area corretta conservata dal seed (R2-28), niente mappe senza Area nel mondo dall'editor (FUN2-8), chiave del genitore delle planimetrie da collocare (FUN2-9)
+90137ce2 docs(L2): DECISIONI — predefinita del Sottopasso 001-2-0 «inquadratura orientale», alias shibuya-sottopasso sulla planimetria completa (R5)

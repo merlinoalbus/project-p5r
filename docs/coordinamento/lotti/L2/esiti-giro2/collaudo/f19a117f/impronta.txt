@@ -1,0 +1,18 @@
+### impronta: sha256 di 'git diff 9634bbb5 HEAD -- server/ shared/ src/' (a 2222d51f era 4a38faa0…dfd2)
+e282188558e6def6141fe80e3345575194b2d6d8d8b99efabbd3f1fa63f897c7 *-
+### sha256 del solo giro 2 (git diff 5ae62692 HEAD -- server/ shared/ src/)
+326da4d314103a2363bea99cae8dfd67efe6e5accfd280d51c5039c08a158e3f *-
+### sha256 per file del giro 2
+d1151552eaae57ee924d531675496d50501fe80f836fca0374d66c19ff552d90 *server/openapi/descrizioni/aree.ts
+7c4a781dedcaa07945fac3309a15ca0f64c8e4b87e46ad3b4c51fb5076f4da72 *server/openapi/descrizioni/mappe.ts
+bf0b97b4aa6e92e019f0ca224b63bc656c383531d0a8fe851fa749364b1eca17 *server/routes/aree-mondo.test.ts
+d5ffc00706d4aa591c0244cbbccf887efc09cd25c11e4269b113aa97df63690c *server/services/mappe/areeService.ts
+2fc0825760a5b4a0c2019ff20ea4aa5e3946910a75854f2a4a0b0a074a78a20c *server/services/mappe/casaMappa.ts
+919c9a0f35e7d69e3c81e95b3710df7ee445048a4bfea596a27a97d2e801d342 *server/services/mappe/mappeService.ts
+0726d625143f3160a2644e04cd65436385f44787d2018e6e1990980558697432 *shared/types.ts
+0b710eec0253b67d59ab2bce32836f85c80a8589a96c26986dc92d5a98c33c3d *src/components/mappe/AlberoLuoghi.tsx
+01724cb928a516debd1d62df09106c572fd693a16c7441fbdfaf837476f6bc89 *src/components/mappe/AreeDellaCitta.tsx
+d0dc03e96806f76f11dfa03c4e5087a9cc72e354de4959af419cbe7eae00f09a *src/components/mappe/OrganizzazioneMappe.test.tsx
+fd291a34d61ebb81785c28a4b3d0ffcc6bc5b02890db4a80a97ab676f79d8d4d *src/pages/CittaPage.test.tsx
+3082f436df4597aad631dee6cea5795749b3fb95817dea7c14b35071c1bb1316 *src/pages/EditorMappaPage.test.tsx
+dd6b44183c7f8ab36c2cd764dd4321a76dfaebdac71e82d3c76d99ef888b7ab1 *src/pages/EditorMappaPage.tsx

@@ -1,0 +1,28 @@
+### ciclo 5 — impronta dopo le prove contro la foto
+{"gioco.db":{"user_version":109,"tabelle":77,"righe":19857},"partite.db":{"user_version":21,"tabelle":34,"righe":3186}}
+gioco.db.area: righe 23 → 23, contenuto diverso
+partite.db.partita: righe 2 → 2, contenuto diverso
+EXIT=2
+### scritture nel BE.log
+"time":"2026-10-20T02:55:11.782Z"	"method":"POST","path":"/api/partite","status":201
+"time":"2026-10-20T02:55:11.840Z"	"method":"PUT","path":"/api/partite/3/spilli/1750","status":200
+"time":"2026-10-20T02:57:33.649Z"	"method":"PUT","path":"/api/aree/citta/kichijoji/quartiere-dello-shopping","status":200
+"time":"2026-10-20T02:57:33.659Z"	"method":"POST","path":"/api/aree/citta/kichijoji/quartiere-dello-shopping/ripristina","status":200
+"time":"2026-10-20T02:57:33.666Z"	"method":"POST","path":"/api/aree/citta/kichijoji/quartiere-dello-shopping/ripristina","status":409
+"time":"2026-10-20T02:57:44.691Z"	"method":"PUT","path":"/api/aree/citta/kichijoji/quartiere-dello-shopping","status":200
+"time":"2026-10-20T02:57:53.100Z"	"method":"POST","path":"/api/aree/citta/kichijoji/quartiere-dello-shopping/ripristina","status":200
+"time":"2026-10-20T02:58:04.698Z"	"method":"POST","path":"/api/partite/1/attiva","status":200
+"time":"2026-10-20T02:58:04.700Z"	"method":"DELETE","path":"/api/partite/3","status":204
+### ripristino a BE fermo
+terminato albero WINPID 54516
+[BE] fermato
+RIPRISTINO OK: impronta identica alla foto {"gioco.db":{"user_version":109,"tabelle":77,"righe":19857},"partite.db":{"user_version":21,"tabelle":34,"righe":3186}}
+EXIT=0
+[BE] in ascolto sulla porta 3301 (dopo 1s)
+{"data":{"status":"ok","timestamp":"2026-10-20T02:58:57.705Z","db":{"ok":true,"userVersion":109}}}
+### impronta dopo il riavvio contro la base L2-base-8e75abbb
+IDENTICHE
+EXIT=0
+### lavoro da preservare (impronta.cjs) contro quello della foto
+IDENTICO
+2026-10-20T04:58:58+02:00

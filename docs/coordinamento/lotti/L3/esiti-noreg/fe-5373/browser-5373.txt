@@ -1,0 +1,40 @@
+L3 FE nel browser — istanza di sviluppo 5373 (→ BE 3201, data/ di sviluppo: gioco 111, partite 022), sola lettura, 2026-10-20
+Codice: cartella di sviluppo, HEAD fcff89e3 più le modifiche non committate di FE (L3) e BE (L3/L4 in corso). Partita attiva 1, 06-01 giorno.
+localStorage `p5r-preferenze` trovato vuoto e non toccato (grafica accesa). Solo GET; le immagini delle pagine chiedono anche miniature (`?l=`),
+che scrivono la cache `immagine_miniatura` di data/ (vedi memoria «GET che scrivono»): nessun altro dato scritto.
+
+# 1) 75 «Sulla mappa» (04:55:19Z–04:56:0xZ), 19 indirizzi distinti, confronto con la base (base-sulla-mappa-20261020.json, esiti di L2 2222d51f)
+RIEPILOGO uguali 75/75 (ok 49, nascosto 17, mappa 9), diversi 0
+Righe cambiate solo nell'arrivo (L3, casa dei Palazzi), con stesso esito, stessa planimetria, stessi pin e stessa scheda:
+ 5 | 3 voci | /guida/mappe/nativo-rmap-152-1-0?spillo=1667 → /guida/dungeon/kamoshida/area/prigione-sotterranea-tutorial?spillo=1667 | pin 8 |
+     Confidente: Morgana (ottenuto) selezionato e scheda aperta | immagine native/nativo-rmap-152-1-0 (prima: visore /guida/mappe/…152-1-0, pin 8, Morgana)
+17 | 7 voci | /guida/mappe/nativo-rmap-153-1-0 → /guida/dungeon/madarame/area/entrata-del-museo | pin 6 | immagine native/nativo-rmap-153-1-0
+     (prima: visore /guida/mappe/palazzo-di-madarame-entrata-del-museo, pin 6)
+14 | 2 voci | Memento: /guida/mappe/nativo-rmap-190-1-0 → visore /guida/mappe/memento-memento-aree-fisse-… (invariato, pin 3)
+Tutte le altre 16 righe: arrivo, titolo, pin, pin selezionato e scheda identici alla base.
+
+# 2) Metro, grafica ACCESA (04:56:23Z, /guida/citta)
+{"h":"b923bfaa0dafed8f1e1a562d20c7aa66a466074d9f8089e4abac26f2fbe49358","len":26012,"pref":null, 10 posti con gli stessi byte delle immagini della base:
+ Yongen-Jaya 857073004445, Shibuya 30e4bed12ac2, Shujin Academy 93c8987819c2, Parco Inokashira b4a84147208c, Odaiba / Seaside Park f4987be2a451,
+ Ogikubo 1fd0572d67b9, Tsukishima 58d3e8280e0a, Madarame 972d98ffb81c, Memento d91a6c749c24, Covo dei Ladri 032d4b5d201e}
+Markup diverso dalla base (1d6d23d2…, 26120) per sole modifiche volute nel codice condiviso:
+ - L3 §4.1: Madarame e Memento portano alla scheda: href /guida/dungeon/madarame e /guida/dungeon/mementos (prima /guida/mondo/dungeon/<k>), 2+2 link;
+ - L4 §8.10 (in corso): titolo nascosto di Kamoshida «concluso: Tesoro e boss finale» (prima «completato: …»), requisito di Roppongi «non risulta
+   concluso — manca il Tesoro del Palazzo raccolto, il boss finale sconfitto».
+ Kamoshida resta fuori dalla metro come nella base (p1 concluso). Grafica spenta NON provata (nessun via richiesto su 5373).
+ Per riferimento, il Collaudo 5473 (04:57:06Z, dati 0440Z, gioco 109) ha un'altra metro (Madarame concluso → assente): non confrontabile.
+
+# 3) Diario 04-09..06-01 (04:58:21Z–04:59:53Z): 54 giorni, per ogni giorno pagina /guida/percorso/<g> contro GET /api/compendio/percorso/<g>?partita=1
+ pagina = API in 54/54 giorni (stesso numero di voci, stesso ordine, stessa spunta);
+ API contro l'impronta della base (diario-confronto.txt): 254/254 voci, testo (sha), giorno, fascia e ordine identici; spunte p1 236/236 identiche.
+
+# 4) Kamoshida e Madarame p1 nella scheda (05:0xZ), riepilogo «Guida dell'infiltrazione · N voci (M segnate)» per infiltrazione, pagina = API:
+ kamoshida: 11/11, 10/10, 11/11, 77/77, 7/2, 49/18, 4/4 → 169 voci, 133 segnate; «Tesoro ✓ · Boss ✓»; «Tutte le planimetrie · 0 da raccogliere» (107/107)
+ madarame: 10/9, 68/66, 6/6, 123/123, 18/17 → 225 voci, 221 segnate; «Tesoro ✗ · Boss ✗»; «1 da raccogliere» (85/86)
+ Uguale alla base (gestiti 133 e 221, raccolta 107/107 e 85/86). Stato visibile dall'API (stato-visibile.cjs su 3201 alle 07:01 locali): 0 differenze
+ voce per voce e pin per pin, p1 e p2 (Kamoshida 169 voci / 369 pin, Madarame 225 / 258).
+
+# 5) Memento nel visore
+ /guida/mappe/memento → resta nel visore («Memento — Mappe»); /guida/mappe/nativo-rmap-190-1-0 → visore della planimetria (pin 3);
+ /guida/mappe/mementos-01-qimranut → /guida/mappe/memento?area=mementos-01-qimranut (come prima); /guida/dungeon/mementos → scheda dei dedali.
+ GET /api/compendio/dungeon/mementos?partita=1 contro il giro di L4: unica differenza `.data.concluso: undefined → null` = AP4-1 (L4, già aperto).

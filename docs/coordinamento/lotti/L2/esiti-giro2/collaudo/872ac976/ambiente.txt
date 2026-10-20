@@ -1,0 +1,9 @@
+### health
+{"data":{"status":"ok","timestamp":"2026-10-20T05:57:01.824Z","db":{"ok":true,"userVersion":109}}}
+### migrazioni all'avvio
+0
+### impronta dei dati contro L2-base-p5s-20261020-0533Z
+gioco.db.immagine_miniatura: righe 149 → 177, contenuto diverso
+### lettura
+Cambia solo immagine_miniatura: cache delle miniature riempita dalle letture, come nei cicli 8 e 9 (cicli-dati.md). Nessun'altra tabella e partite.db identico: nessuna scrittura dei dati.
+Vitest: solo MappaPage.test.tsx, l'unico file toccato da 126168a0 (24/24).

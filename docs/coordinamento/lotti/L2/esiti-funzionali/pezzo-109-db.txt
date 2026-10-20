@@ -1,0 +1,41 @@
+user_version 109
+colonne area chiave,quartiere_chiave,dungeon_chiave,slug,nome,nome_rivisto,ordine,planimetria_predefinita,origine,seed_json,updated_at,citta_chiave,da_verificare
+colonne nuove mappa area_chiave,versione_etichetta,versione_ordine
+colonne quartiere_ingresso quartiere_chiave,mappa_chiave,x,y,zoom,area_chiave
+
+aree 23
+{"akihabara":1,"kanda-jinbocho":1,"kichijoji":1,"odaiba":1,"shibuya":6,"shinjuku":1,"shujin-academy":8,"città:tokyo":1,"yongen-jaya":3}
+citta/akihabara/electric-town | Electric Town | ord 0 | pred nativo-rmap-007-1-0 OK | seed nr=0 dv=0 | nativo-rmap-007-1-0#0
+citta/kanda-jinbocho/cappella | Cappella | ord 0 | pred nativo-rmap-010-4-0 OK | seed nr=0 dv=0 | nativo-rmap-010-4-0#0
+citta/kichijoji/quartiere-dello-shopping | Quartiere dello shopping | ord 0 | pred nativo-rmap-005-1-0 OK | seed nr=0 dv=0 | nativo-rmap-005-1-0#0
+citta/odaiba/cantiere-dello-stadio | Cantiere dello stadio | ord 0 | pred nativo-rmap-012-29-0 OK | seed nr=0 dv=0 | nativo-rmap-012-29-0#0
+citta/shibuya/piazza-della-stazione | Piazza della stazione | ord 0 | pred nativo-rmap-001-1-0 OK | seed nr=0 dv=0 | nativo-rmap-001-1-0#0
+citta/shibuya/sottopasso | Sottopasso | ord 100 | pred nativo-rmap-001-2-0 OK | utente nr=1 dv=0 | nativo-rmap-001-2-0#0«inquadratura orientale», nativo-rmap-001-2-1#1«planimetria completa»
+citta/shibuya/central-street | Central Street | ord 200 | pred nativo-rmap-001-3-0 OK | seed nr=0 dv=0 | nativo-rmap-001-3-0#0
+citta/shibuya/centro-comm-sotterraneo | Centro comm. sotterraneo | ord 300 | pred nativo-rmap-001-4-0 OK | seed nr=0 dv=0 | nativo-rmap-001-4-0#0
+citta/shibuya/tornello-della-linea-ginza | Tornello della linea Ginza | ord 400 | pred nativo-rmap-001-5-0 OK | seed nr=0 dv=0 | nativo-rmap-001-5-0#0
+citta/shibuya/banchina-della-metropolitana | Banchina della metropolitana | ord 500 | pred nativo-rmap-001-12-0 OK | seed nr=0 dv=0 | nativo-rmap-001-12-0#0
+citta/shinjuku/quartiere-a-luci-rosse | Quartiere a luci rosse | ord 0 | pred nativo-rmap-006-1-0 OK | seed nr=0 dv=0 | nativo-rmap-006-1-0#0
+citta/shujin-academy/edificio-principale-1p-edificio-laboratori-1p | Edificio principale 1P / Edificio laboratori 1P | ord 0 | pred nativo-rmap-002-0-0 OK | seed nr=0 dv=0 | nativo-rmap-002-0-0#0
+citta/shujin-academy/banchina-aoyama-itchome | Banchina Aoyama Itchome | ord 100 | pred shibuya-tornello-della-linea-ginza-aoyama-itchome OK | utente nr=1 dv=0 | shibuya-tornello-della-linea-ginza-aoyama-itchome#0
+citta/shujin-academy/edificio-principale-2p-edificio-laboratori-2p | Edificio principale 2P / Edificio laboratori 2P | ord 200 | pred nativo-rmap-002-0-1 OK | seed nr=0 dv=0 | nativo-rmap-002-0-1#0
+citta/shujin-academy/edificio-principale-3p-edificio-laboratori-3p | Edificio principale 3P / Edificio laboratori 3P | ord 300 | pred nativo-rmap-002-0-2 OK | seed nr=0 dv=0 | nativo-rmap-002-0-2#0
+citta/shujin-academy/cancello-della-scuola | Cancello della scuola | ord 400 | pred nativo-rmap-002-1-0 OK | seed nr=0 dv=0 | nativo-rmap-002-1-0#0
+citta/shujin-academy/tetto | Tetto | ord 500 | pred nativo-rmap-002-5-0 OK | seed nr=0 dv=0 | nativo-rmap-002-5-0#0
+citta/shujin-academy/aula | Aula | ord 600 | pred nativo-rmap-002-6-0 OK | seed nr=0 dv=0 | nativo-rmap-002-6-0#0
+citta/shujin-academy/biblioteca | Biblioteca | ord 700 | pred nativo-rmap-002-8-0 OK | utente nr=0 dv=0 | nativo-rmap-002-8-0#0
+citta/tokyo/area-riservata-allo-staff | Area riservata allo staff | ord 0 | pred nativo-rmap-150-3-0 OK | seed nr=0 dv=1 | nativo-rmap-150-3-0#0«porzione occidentale», nativo-rmap-150-3-1#1«planimetria completa»
+citta/yongen-jaya/banchina-della-metropolitana | Banchina della metropolitana | ord 0 | pred yongen-java-banchina-della-metropolitana OK | utente nr=0 dv=0 | yongen-java-banchina-della-metropolitana#0
+citta/yongen-jaya/vicoli | Vicoli | ord 100 | pred nativo-rmap-009-2-0 OK | utente nr=0 dv=0 | nativo-rmap-009-2-0#0
+citta/yongen-jaya/covo-dei-ladri | Covo dei Ladri | ord 200 | pred nativo-rmap-022-1-0 OK | seed nr=0 dv=0 | nativo-rmap-022-1-0#0«settore d’ingresso», nativo-rmap-022-1-1#1«planimetria completa», nativo-rmap-022-1-2#2«porzione occidentale», nativo-rmap-022-1-3#3«porzione settentrionale», nativo-rmap-022-1-4#4«inquadratura orientale»
+
+planimetrie con area 29 · con etichetta 9
+aree con più versioni 3
+zone del mondo senza area 0 []
+aree su mappe di Palazzi/Memento 0
+genitore del Covo [{"chiave":"nativo-rmap-022-1-0","genitore_chiave":"citta-yongen-jaya","ordine":0},{"chiave":"nativo-rmap-022-1-1","genitore_chiave":"citta-yongen-jaya","ordine":1},{"chiave":"nativo-rmap-022-1-2","genitore_chiave":"citta-yongen-jaya","ordine":2},{"chiave":"nativo-rmap-022-1-3","genitore_chiave":"citta-yongen-jaya","ordine":3},{"chiave":"nativo-rmap-022-1-4","genitore_chiave":"citta-yongen-jaya","ordine":4}]
+staff [{"chiave":"nativo-rmap-150-3-0","genitore_chiave":"tokyo","area_chiave":"citta/tokyo/area-riservata-allo-staff"},{"chiave":"nativo-rmap-150-3-1","genitore_chiave":"tokyo","area_chiave":"citta/tokyo/area-riservata-allo-staff"}]
+ingressi [{"quartiere_chiave":"yongen-jaya","mappa_chiave":"nativo-rmap-009-2-0","x":37.46,"y":25.14,"zoom":1,"area_chiave":"citta/yongen-jaya/vicoli"},{"quartiere_chiave":"shibuya","mappa_chiave":"nativo-rmap-001-3-0","x":38.29,"y":32.67,"zoom":1,"area_chiave":"citta/shibuya/central-street"}]
+alias 690 · percorsi 317 · mappe 317
+cestino "CHECK (tipo IN ('area', 'voce', 'mappa', 'area-dedalo', 'area-fisica'))" righe 0 seq [{"name":"cestino","seq":20}]
+indici area sqlite_autoindex_area_1,area_slug_quartiere,area_slug_dungeon,area_slug_citta,mappa_area,idx_cestino_eliminato

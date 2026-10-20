@@ -1,0 +1,29 @@
+### ciclo 9 — 2026-10-20T07:25:20+02:00 — impronta dopo le prove contro la foto
+{"gioco.db":{"user_version":109,"tabelle":77,"righe":19880},"partite.db":{"user_version":21,"tabelle":34,"righe":3325}}
+gioco.db.immagine_miniatura: righe 88 → 91, contenuto diverso
+gioco.db.mappa: righe 317 → 317, contenuto diverso
+EXIT=2
+### scritture nel BE.log (dal riavvio delle 05:21:17Z)
+"time":"2026-10-20T05:22:48.615Z"	"method":"POST","path":"/api/mappe","status":201
+"time":"2026-10-20T05:22:48.624Z"	"method":"PUT","path":"/api/mappe/prova-funzionali-fun2-8","status":409
+"time":"2026-10-20T05:22:48.626Z"	"method":"PUT","path":"/api/mappe/prova-funzionali-fun2-8","status":409
+"time":"2026-10-20T05:24:11.675Z"	"method":"PUT","path":"/api/mappe/prova-funzionali-fun2-8","status":409
+"time":"2026-10-20T05:24:20.960Z"	"method":"DELETE","path":"/api/mappe/prova-funzionali-fun2-8","status":204
+"time":"2026-10-20T05:24:20.971Z"	"method":"DELETE","path":"/api/impostazioni/cestino/17","status":204
+"time":"2026-10-20T05:24:41.117Z"	"method":"PUT","path":"/api/aree/colloca","status":200
+### ripristino a BE fermo
+terminato albero WINPID 25168
+[BE] fermato
+RIPRISTINO OK: impronta identica alla foto {"gioco.db":{"user_version":109,"tabelle":77,"righe":19877},"partite.db":{"user_version":21,"tabelle":34,"righe":3325}}
+EXIT=0
+[BE] in ascolto sulla porta 3301 (dopo 2s)
+{"data":{"status":"ok","timestamp":"2026-10-20T05:25:27.451Z","db":{"ok":true,"userVersion":109}}}
+### impronta dopo il riavvio contro la foto e la base
+IDENTICHE
+foto EXIT=0
+gioco.db.immagine_miniatura: righe 68 → 88, contenuto diverso
+base EXIT=2
+### lavoro da preservare
+IDENTICO
+{"data":[]}
+2026-10-20T07:25:28+02:00

@@ -1,0 +1,17 @@
+== fase extra · 2026-10-20T05:04:51.166Z
+area C 201 prova-funzionali-l3-c palazzo-di-okumura-prova-funzionali-l3-c ["okumura-03-caserma"]
+Colloca senza conferma → 409 {"area":"prova-funzionali-l3-c","arrivo":"prova-funzionali-l3","legami":1}
+con conferma → 200
+cestino {"id":21,"tipo":"area-fisica","chiave":"dungeon/okumura/prova-funzionali-l3-c","nome":"Prova funzionali L3 C","contesto":"fusa in «Prova funzionali L3 rinominata»","eliminatoIl":"2026-10-20T05:04:51.271Z","contenuto":[{"tabella":"area","etichetta":"area","quante":1},{"tabella":"infiltrazione_area","etichetta":"legame infiltrazione-area","quante":1}],"partite":"nessuna","byte":601}
+ripristino 200 · C: [{"planimetrie":0,"legami":"okumura-03-caserma"}]
+
+caserma prima {"mappe":1,"pin":14,"spillo_voce":0,"legami":2,"voci":[{"n":6}]}
+DELETE caserma 204 undefined
+cestino {"id":22,"tipo":"area-fisica","chiave":"dungeon/okumura/caserma","nome":"Caserma","contesto":"Palazzo di Okumura","eliminatoIl":"2026-10-20T05:04:51.401Z","contenuto":[{"tabella":"spillo","etichetta":"pin","quante":14},{"tabella":"infiltrazione_area","etichetta":"legami infiltrazione-area","quante":2},{"tabella":"mappa_alias","etichetta":"nomi di prima delle mappe","quante":2},{"tabella":"area","etichetta":"area","quante":1},{"tabella":"mappa_entita","etichetta":"legame planimetria-infiltrazione","quante":1},{"tabella":"mappa_percorso","etichetta":"percorso di una mappa","quante":1},{"tabella" · dopo: {"mappe":0,"pin":0,"voci":[{"n":6}]}
+ripristino 200 undefined
+  mappe identico: true 
+  pin identico: true 
+  sv identico: true 
+  legami identico: true 
+  area identico: true 
+  voci identico: true 

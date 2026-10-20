@@ -1,0 +1,42 @@
+differenze spiegate (stesso valore con ?v=<data>~r2): 124
+non spiegate: 0
+
+per tipo di URL:
+  124  immagine caricata di mappa (ambito mappa)
+
+per endpoint e campo:
+  19  /compendio/citta .corpo.data[].illustrazione.immagineUrl
+  19  /compendio/citta?partita=1 .corpo.data[].illustrazione.immagineUrl
+  33  /mappe/albero .corpo.data[].immagineUrl
+  1  /mappe/tokyo?partita=1 .corpo.data.immagineUrl
+  19  /mappe/tokyo?partita=1 .corpo.data.figli[].immagineUrl
+  3  /mappe/tokyo?partita=1 .corpo.data.spilli[].dettaglio.immagine.url
+  1  /compendio/citta/yongen-jaya?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/citta/shibuya?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/citta/shinjuku?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/citta/akihabara?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/citta/shujin-academy?partita=1 .corpo.data.illustrazione.immagineUrl
+  2  /compendio/citta/shujin-academy?partita=1 .corpo.data.aree[].illustrazione.immagineUrl
+  1  /compendio/citta/kanda-jinbocho?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/citta/harajuku?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/citta/ueno?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/citta/inokashira-park?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/citta/odaiba?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/citta/shinagawa?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/citta/ogikubo?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/citta/yokohama-chinatown?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/citta/maihama?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/citta/roppongi?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/citta/tsukishima?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/citta/ichigaya?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/citta/suidobashi?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/citta/asakusa?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/dungeon/kamoshida?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/dungeon/madarame?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/dungeon/kaneshiro?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/dungeon/futaba?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/dungeon/okumura?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/dungeon/niijima?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/dungeon/shido?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/dungeon/iweleth?partita=1 .corpo.data.illustrazione.immagineUrl
+  1  /compendio/dungeon/maruki?partita=1 .corpo.data.illustrazione.immagineUrl

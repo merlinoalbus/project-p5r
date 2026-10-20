@@ -1,0 +1,19 @@
+8e75abbb42e2bbeb430fbabc7cabd70e0312f8d8
+porcelain: 0
+impronta bd20ed72..HEAD server/shared/src: 77fd8738dafcb5290beb1f1932d2bb5e297b6550d64d5f2a81fe06e453319cf9 *-
+impronta ab3b1053..HEAD server/shared/src: 54b4794746c5698018b12c3ea5f790f259ac26da6ca2e3331e05204e355e1f60 *-
+BE-avvio-75894664.log
+LEGGIMI.md
+ambiente.txt
+cicli-dati.md
+git.txt
+impronta.txt
+lint.txt
+typecheck.txt
+### impronta: sha256 di 'git diff 9634bbb5 HEAD -- server/ shared/ src/'
+### sha256 per file a HEAD
+### a HEAD 8e75abbb: sha256 di 'git diff 9634bbb5 HEAD -- server/ shared/ src/' (invariata attesa 18c4d350…3ee0)
+src: archive = Collaudo
+server: archive = Collaudo
+shared: archive = Collaudo
+impronta 9634bbb5..HEAD (metodo del Collaudo): 18c4d350075ac57667d21534512f4ef737b0bb42f78b34b8f8bea618ad6d3ee0 *-

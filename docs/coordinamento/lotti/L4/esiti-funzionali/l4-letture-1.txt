@@ -1,0 +1,36 @@
+== F4-01 carattere per Palazzo (p1)
+kamoshida {"descrittiva":49,"null":2,"permanente":71,"rigenerabile":47} · completamento {"oggetti":71,"fatti":56,"tesoro":true,"boss":true,"completato":false} · completato null · daVerificare 4 · schedeDaSistemare 4
+madarame {"rigenerabile":82,"permanente":99,"descrittiva":44} · completamento {"oggetti":80,"fatti":80,"tesoro":false,"boss":false,"completato":false} · completato null · daVerificare 0 · schedeDaSistemare 1
+mementos {"(assente)":164} · completamento undefined · completato null · daVerificare undefined · schedeDaSistemare undefined
+
+== F4-19 completamenti
+kamoshida p1 {"oggetti":71,"fatti":56,"tesoro":true,"boss":true,"completato":false} completato null
+kamoshida p2 {"oggetti":71,"fatti":71,"tesoro":true,"boss":true,"completato":true} completato Tesoro, boss finale e tutti gli oggetti permanenti (71/71)
+madarame p1 {"oggetti":80,"fatti":80,"tesoro":false,"boss":false,"completato":false} completato null
+madarame p2 {"oggetti":80,"fatti":0,"tesoro":false,"boss":false,"completato":false} completato null
+
+== F4-18 schede da sistemare
+kamoshida [[1,"Cancello del Castello","sicura"],[14,"Tre guardie del Tetto (2 Cavalieri brutali + 1 Nemico potente)","miniboss"],[15,"Forziere dei 3 Magatama maledetto","forziere"],[16,"Seme lussuria verde (2° Seme della Bramosia)","seme-bramosia"]]
+madarame [[28,"Forziere — Fiale delle vertigini S","forziere"]]
+
+== F4-16 copie
+kamoshida []
+madarame []
+
+== F4-15 divergenze (lettura)
+p1 [{"spillo":583,"spilloUid":"d2f6acf51abeb2e971bd19709d2fec99","spilloNome":"Seme lussuria verde","mappa":"palazzo-di-kamoshida-tetto-balcone-del-seme-bramosia","mappaNome":"Palazzo di Kamoshida › Tetto - Balcone del Seme Bramosia","voce":"kamoshida-13-tetto-seme-della-bramosia","voceNome":"Recupero 2 Seme della Bramosia","infiltrazione":"kamoshida-13-tetto","infiltrazioneNome":"Tetto del Vecchio Castello","rilevataIl":"2026-10-20T02:50:28.017Z"},{"spillo":1992,"spilloUid":"fd32580a28b59163509d99ec05947ee9","spilloNome":"Guardia d'Elitè","mappa":"palazzo-di-kamoshida-torre-livello-inferiore","mappaNome":"Palazzo di Kamoshida › Torre - Livello inferiore","voce":"kamoshida-15-torre-centrale-sconfiggi-i-capitani-delle-guardie","voceNome":"Sconfiggi i Capitani delle Guardie","infiltrazione":"kamoshida-15-torre-centrale","infiltrazioneNome":"Ispeziona l’interno della torre","rilevataIl":"2026-10-20T02:50:28.017Z"},{"spillo":1993,"spilloUid":"2d4e5e28d4d8a9e9c85a38a63efe2fc2","spilloNome":"Occhio SX Lussurioso","mappa":"palazzo-di-kamoshida-torre-livello-inferiore","mappaNome":"Palazzo di Kamoshida › Torre - Livello inferiore","voce":"kamoshida-15-torre-centrale-sconfiggi-i-capitani-delle-guardie","voceNome":"Sconfiggi i Capitani delle Guardie","infiltrazione":"kamoshida-15-torre-centrale","infiltrazioneNome":"Ispeziona l’interno della torre","rilevataIl":"2026-10-20T02:50:28.017Z"},{"spillo":615,"spilloUid":"ac5feb061a85a46869a432280321130a","spilloNome":"Forziere","mappa":"palazzo-di-kamoshida-stanza-del-tesoro","mappaNome":"Palazzo di Kamoshida › Stanza del Tesoro","voce":"kamoshida-15-torre-centrale-raccogli-forziere-3","voceNome":"Raccogli Forziere","infiltrazione":"kamoshida-15-torre-centrale","infiltrazioneNome":"Ispeziona l’interno della torre","rilevataIl":"2026-10-20T02:50:28.017Z"}] · madarame []
+p2 [] · madarame []
+
+== F4-23 stato delle voci contro la base «prima» (L3/base-prima, schema 109)
+kamoshida p1: voci uguali 169, diverse 0, nuove/assenti nella base 0 
+kamoshida p2: voci uguali 169, diverse 0, nuove/assenti nella base 0 
+madarame p1: voci uguali 225, diverse 0, nuove/assenti nella base 0 
+madarame p2: voci uguali 225, diverse 0, nuove/assenti nella base 0 
+mementos p1: voci uguali 164, diverse 0, nuove/assenti nella base 0 
+mementos p2: voci uguali 164, diverse 0, nuove/assenti nella base 0 
+
+== F4-23 stato dei pin contro la base «prima» (L4/base-prima)
+kamoshida p1: pin uguali 369, diversi 0, assenti 0 
+kamoshida p2: pin uguali 369, diversi 0, assenti 0 
+madarame p1: pin uguali 258, diversi 0, assenti 0 
+madarame p2: pin uguali 258, diversi 0, assenti 0 

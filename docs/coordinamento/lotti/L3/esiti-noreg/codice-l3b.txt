@@ -1,0 +1,27 @@
+cbe6ff8dfb5f4801b0aad3f469b37702845a4b1ccee38b38500a68d8c1f078ef *-
+ M server/bootstrap.ts
+ M server/openapi/descrizioni/aree.ts
+ M server/openapi/descrizioni/mappe.ts
+ M server/routes/aree.ts
+ M server/routes/mappe.ts
+ M server/routes/palazzi-aree.test.ts
+ M server/schemas/aree.ts
+ M server/services/mappe/areeService.ts
+ M server/services/mappe/mappeService.ts
+ M server/services/mappe/pezziMappa.ts
+ M src/components/guida/AreeDelDedalo.tsx
+ M src/components/guida/ModuloNuovaArea.tsx
+ M src/components/impostazioni/Cestino.test.tsx
+ M src/components/impostazioni/Cestino.tsx
+ M src/components/mappe/FinestraAggiungiArea.tsx
+ M src/components/mappe/FinestraAggiungiPlanimetria.tsx
+ M src/components/mappe/FinestraModificaArea.tsx
+ M src/router.tsx
+ M src/services/api/aree.ts
+ M src/services/api/compendio.ts
+ M src/tailwind.css
+ M src/utils/cestino.ts
+?? server/routes/importa-mappe-grande.test.ts
+?? src/components/guida/AreePalazzo.tsx
+?? src/components/guida/FinestraLegamiInfiltrazione.tsx
+?? src/components/guida/SpuntaCompletata.tsx

@@ -1,0 +1,30 @@
+sqlite_sequence [{"name":"cestino","seq":16},{"name":"copia_pezzo","seq":50},{"name":"dungeon_atterraggio","seq":9},{"name":"pezzo_mappa","seq":30}]
+sqlite_sequence [{"name":"cestino","seq":16},{"name":"copia_pezzo","seq":50},{"name":"dungeon_atterraggio","seq":9},{"name":"pezzo_mappa","seq":30}]
+--- Sulla mappa (API)
+{"giorni":54,"voci":254,"conMappa":75,"perMappa":{"citta-shujin-academy":6,"citta-ogikubo":9,"nativo-rmap-001-3-0":26,"nativo-rmap-152-1-0":3,"citta-tsukishima":9,"nativo-rmap-009-2-0":8,"nativo-rmap-001-4-0":1,"nativo-rmap-190-1-0":2,"nativo-rmap-002-0-0":4,"nativo-rmap-153-1-0":7},"spilloNonSullaMappa":0,"senzaSpillo":9}
+destinazioni diverse dalla base: 0
+--- indirizzi del mondo
+{"totale":115,"pubblica":54,"alias":8,"interna":53} non risolti: 0
+indirizzi che portano a una mappa diversa da prima: 0
+--- stato visibile
+differenze di stato visibile: 0
+--- API
+38 endpoint; non 200: 0
+
+# /mappe/albero: 601 differenze
+  - .corpo.data.0.contesti (era [])
+  - .corpo.data.0.gruppoImmagini (era {"id":"nativo-rmap-022-1-0","nome":"Covo dei Ladri","ordine":0,"etichetta":"settore d’ingresso"})
+  ~ .corpo.data.0.chiave: "covo-dei-ladri-settore-dingresso" → "tokyo"
+  ~ .corpo.data.0.nome: "Covo dei Ladri — settore d’ingresso" → "Tokyo"
+  ~ .corpo.data.0.nomeCompleto: "Covo dei Ladri — settore d’ingresso" → "Tokyo"
+  ~ .corpo.data.0.tipo: "luogo" → "citta"
+  ~ .corpo.data.0.immagineUrl: null → "/api/immagini/mappa/tokyo/file?v=*"
+  ~ .corpo.data.0.asset: "mappe/native/nativo-rmap-022-1-0" → "mappe/tokyo"
+  ~ .corpo.data.0.ruoloImmagine: "planimetria-nativa" → "illustrazione-editoriale"
+  ~ .corpo.data.0.origine: "seed" → "utente"
+  ~ .corpo.data.0.numeroFigli: 0 → 25
+  ~ .corpo.data.0.updatedAt: "2026-09-09T19:47:16.182Z" → "2026-10-18T13:17:02.580Z"
+  … (589 altre)
+
+# /mappe/tokyo?partita=1: 1 differenze
+  ~ .corpo.data.figli.0.numeroFigli: 2 → 7

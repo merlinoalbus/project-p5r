@@ -1,0 +1,14 @@
+
+ RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/pensive-burnell-b50941
+
+ ✓ server/db/migrations/109_aree_del_mondo.test.ts > crea le Aree del mondo: gruppi in un’Area con le versioni, sciolte una per Area, Covo sotto Yongen-Jaya dopo le altre, staff Area di Tokyo da verificare; nient’altro cambia 118ms
+ ✓ server/db/migrations/109_aree_del_mondo.test.ts > si può rieseguire: la seconda volta nessuna riga toccata; una zona nuova riceve la sua Area in fondo al quartiere, con lo slug libero 95ms
+ ✓ server/routes/aree-mondo.test.ts > Aree del mondo (L2) > FUN2-2 — il Covo sotto Yongen-Jaya tiene i suoi percorsi pubblici anche quando i percorsi si risincronizzano (import, creazione, eliminazione) 206ms
+ ✓ server/routes/aree-mondo.test.ts > Aree del mondo (L2) > FUN2-1 — l’ingresso di un quartiere sta in una sua Area: una planimetria di un altro quartiere si rifiuta, dalla PUT e dall’import 155ms
+
+ Test Files  2 passed (2)
+      Tests  4 passed (4)
+   Start at  02:51:22
+   Duration  2.40s (transform 1.87s, setup 228ms, import 2.66s, tests 579ms, environment 0ms)
+
+EXIT=0

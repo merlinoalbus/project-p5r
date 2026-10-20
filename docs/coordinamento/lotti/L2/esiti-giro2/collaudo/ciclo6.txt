@@ -1,0 +1,27 @@
+### ciclo 6 — 2026-10-20T05:03:51+02:00 — impronta dopo le prove contro la foto
+{"gioco.db":{"user_version":109,"tabelle":77,"righe":19862},"partite.db":{"user_version":21,"tabelle":34,"righe":3186}}
+gioco.db.cestino: righe 0 → 1, contenuto diverso
+gioco.db.immagine_miniatura: righe 77 → 78, contenuto diverso
+gioco.db.mappa: righe 317 → 318, contenuto diverso
+gioco.db.mappa_alias: righe 690 → 691, contenuto diverso
+gioco.db.mappa_percorso: righe 317 → 318, contenuto diverso
+EXIT=2
+### scritture nel BE.log
+"time":"2026-10-20T02:59:19.899Z"	"method":"POST","path":"/api/aree/citta/kichijoji","status":201
+"time":"2026-10-20T02:59:19.984Z"	"method":"DELETE","path":"/api/aree/citta/kichijoji/prova-collaudo-cestino","status":204
+"time":"2026-10-20T02:59:24.894Z"	"method":"POST","path":"/api/mappe","status":201
+"time":"2026-10-20T02:59:29.100Z"	"method":"PUT","path":"/api/mappe/planimetria-di-prova-collaudo","status":200
+### ripristino a BE fermo
+terminato albero WINPID 63916
+[BE] fermato
+RIPRISTINO OK: impronta identica alla foto {"gioco.db":{"user_version":109,"tabelle":77,"righe":19857},"partite.db":{"user_version":21,"tabelle":34,"righe":3186}}
+EXIT=0
+[BE] in ascolto sulla porta 3301 (dopo 2s)
+{"data":{"status":"ok","timestamp":"2026-10-20T03:03:57.539Z","db":{"ok":true,"userVersion":109}}}
+### impronta dopo il riavvio contro la base L2-base-8e75abbb
+IDENTICHE
+EXIT=0
+### GET /api/aree/da-collocare e cestino dopo il ripristino
+{"data":[]}
+{"data":[]}
+2026-10-20T05:03:58+02:00

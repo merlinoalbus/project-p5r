@@ -1,0 +1,17 @@
+== FUN2-2 prima: covo-dei-ladri-settore-dingresso, covo-dei-ladri, covo-dei-ladri-porzione-occidentale, covo-dei-ladri-porzione-settentrionale, covo-dei-ladri-inquadratura-orientale · alias 690 · percorsi 317
+percorso_fisso: [{"chiave":"nativo-rmap-022-1-0","percorso_fisso":"covo-dei-ladri-settore-dingresso"},{"chiave":"nativo-rmap-022-1-1","percorso_fisso":"covo-dei-ladri"},{"chiave":"nativo-rmap-022-1-2","percorso_fisso":"covo-dei-ladri-porzione-occidentale"},{"chiave":"nativo-rmap-022-1-3","percorso_fisso":"covo-dei-ladri-porzione-settentrionale"},{"chiave":"nativo-rmap-022-1-4","percorso_fisso":"covo-dei-ladri-inquadratura-orientale"}]
+
+== FUN2-1 prima: null · righe 2
+PUT {mappa} di Shibuya → 400 {"code":"area-di-altro-quartiere","message":"L’area «Central Street» non è di questo quartiere: l’ingresso si sceglie fra le sue aree."} · DB null · righe 2
+PUT {mappa} = la mappa del quartiere → 400 {"code":"ingresso-senza-area","message":"L’ingresso di un quartiere sta in una delle sue aree: questa planimetria non appartiene a nessuna area."} · DB null · righe 2
+PUT {area} propria → 200 {"mappa":"kichijoji-quartiere-dello-shopping","nome":"Kichijoji › Quartiere dello shopping","x":10,"y":20,"zoom":2,"area":{"slug":"quartiere-dello-shopping","nome":"Quartiere dello shopping"}} · DB {"quartiere_chiave":"kichijoji","mappa_chiave":"nativo-rmap-005-1-0","x":10,"y":20,"zoom":2,"area_chiave":"citta/kichijoji/quartiere-dello-shopping"} · righe 3
+PUT {area} di un altro quartiere (slug di Shibuya) → 404 {"code":"area-non-trovata","message":"Nessuna area 'central-street' in questo quartiere."} · DB {"quartiere_chiave":"kichijoji","mappa_chiave":"nativo-rmap-005-1-0","x":10,"y":20,"zoom":2,"area_chiave":"citta/kichijoji/quartiere-dello-shopping"} · righe 3
+DELETE → 204 · DB null · righe 2
+IMPORT ingresso con planimetria di Shibuya → 400 {"code":"area-di-altro-quartiere","message":"L’area «Central Street» non è di questo quartiere: l’ingresso si sceglie fra le sue aree."} · DB null · righe 2
+
+== FUN2-2 dopo un import (anche rifiutato): covo-dei-ladri-settore-dingresso, covo-dei-ladri, covo-dei-ladri-porzione-occidentale, covo-dei-ladri-porzione-settentrionale, covo-dei-ladri-inquadratura-orientale · alias 690 · percorsi 317
+IMPORT pacchetto vuoto → 200 {"mappe":0,"spilli":0,"pezzi":0,"copie":0,"pezziScartati":0,"copieScartate":0,"pezziEliminati":0,"copieEliminate":0,"immagini":0,"saltate":[],"condizioniScartate":0,"vociScartate":0}
+== FUN2-2 dopo un import riuscito: covo-dei-ladri-settore-dingresso, covo-dei-ladri, covo-dei-ladri-porzione-occidentale, covo-dei-ladri-porzione-settentrionale, covo-dei-ladri-inquadratura-orientale · alias 690 · percorsi 317
+risolvi covo-dei-ladri {"data":{"tipo":"mappa","mappa":"covo-dei-ladri","casa":"/guida/citta/yongen-jaya/covo-dei-ladri?planimetria=covo-dei-ladri"}}
+risolvi covo-dei-ladri-settore-dingresso {"data":{"tipo":"mappa","mappa":"covo-dei-ladri-settore-dingresso","casa":"/guida/citta/yongen-jaya/covo-dei-ladri"}}
+risolvi yongen-jaya-covo-dei-ladri {"error":{"code":"mappa-non-trovata","message":"La mappa o il contenuto richiesto non esiste."},"requestId":"47d46bf8-3591-4364-b415-5efc2cbdbe22"}

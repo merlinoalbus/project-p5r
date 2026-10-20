@@ -1,0 +1,24 @@
+partita 3
+
+pin 758 voce madarame-scopri-dove-il-tesoro-saccheggia-rasetsu-ofuda carattere permanente oggetto null pin della voce [758,2188,2189,2190,2191]
+ pin prima {"raccolto":false,"statoProprio":false,"contesto":null,"voci":["esoro-saccheggia-rasetsu-ofuda:permanente:copri-dove-il-tesoro"]}
+ PUT spunta 200 {"data":{"id":758,"uid":"064de49a654b6e7decffd55a301c9b0e","tipo":"forziere","tipoNome":"Forziere","colore":"#eab308","nome":"Forziere","descrizione":"Rasetsu Ofuda","riferimento":null,"soloPosizione":false,"collezionabile":true,"nativo":{"tipoNativo":17,"indicePin":5,"bandiera":536871796,"condizion
+ righe punto_partita [] spillo_partita [{"partita_id":3,"spillo_uid":"064de49a654b6e7decffd55a301c9b0e","raccolto":1,"updated_at":"2026-10-20T05:06:50.127Z"}] tabelle ["spillo_partita","spillo_partita_infiltrazione"]
+  spillo_partita_infiltrazione []
+ voce dopo null
+
+pin 2142 voce madarame-scopri-dove-il-tesoro-salite-al-livello-1 carattere permanente oggetto null pin della voce [2142]
+ pin prima {"raccolto":false,"statoProprio":false,"contesto":null,"voci":["-il-tesoro-salite-al-livello-1:permanente:copri-dove-il-tesoro"]}
+ PUT spunta 200 {"data":{"id":2142,"uid":"63f90b819a6f9fbd540502aa6f22c05e","tipo":"scorciatoia","tipoNome":"Scorciatoia","colore":"#9ca3af","nome":"Sali al Livello 1","descrizione":"Sali sull'armadio e quindi sul muro per muoverti al Livello 1","riferimento":{"tipo":"mappa","chiave":"palazzo-di-madarame-museo-2p-l
+ righe punto_partita [{"punto_chiave":"madarame-scopri-dove-il-tesoro-salite-al-livello-1","stato":"ottenuto"}] spillo_partita [{"partita_id":3,"spillo_uid":"064de49a654b6e7decffd55a301c9b0e","raccolto":0,"updated_at":"2026-10-20T05:06:50.194Z"},{"partita_id":3,"spillo_uid":"63f90b819a6f9fbd540502aa6f22c05e","raccolto":1,"updated_at":"2026-10-20T05:06:50.321Z"}] tabelle ["spillo_partita","spillo_partita_infiltrazione"]
+  spillo_partita_infiltrazione []
+ voce dopo ottenuto
+
+pin 757 voce madarame-scopri-dove-il-tesoro-visita-ai-bagni carattere permanente oggetto "madarame-nelle-profondita-del-museo-visita-ai-bagni-2" pin della voce [757,2159]
+ pin prima {"raccolto":false,"statoProprio":false,"contesto":null,"voci":["dove-il-tesoro-visita-ai-bagni:permanente:copri-dove-il-tesoro"]}
+ PUT spunta 200 {"data":{"id":757,"uid":"4f802fd2c0d787e0c81097e6ca809f2a","tipo":"forziere","tipoNome":"Forziere","colore":"#eab308","nome":"Forziere","descrizione":"Strangolino dei Chakra","riferimento":null,"soloPosizione":false,"collezionabile":true,"nativo":{"tipoNativo":17,"indicePin":4,"bandiera":536871790,"
+ righe punto_partita [] spillo_partita [{"partita_id":3,"spillo_uid":"064de49a654b6e7decffd55a301c9b0e","raccolto":0,"updated_at":"2026-10-20T05:06:50.194Z"},{"partita_id":3,"spillo_uid":"4f802fd2c0d787e0c81097e6ca809f2a","raccolto":1,"updated_at":"2026-10-20T05:06:50.492Z"},{"partita_id":3,"spillo_uid":"63f90b819a6f9fbd540502aa6f22c05e","raccolto":0,"updated_at":"2026-10-20T05:06:50.384Z"}] tabelle ["spillo_partita","spillo_partita_infiltrazione"]
+  spillo_partita_infiltrazione []
+ voce dopo null
+
+DELETE 204

@@ -1,0 +1,40 @@
+Collaudo L2 finale (600af81c) — parte nel browser, esito grezzo
+Istanza del Collaudo su 600af81c, dati ripristinati alla base L2-base-8e75abbb alle 04:28:17. FE http://localhost:5473 → BE 3301
+(`userVersion` 109), partita 1 al 06-01, giorno. Solo GET. Inizio 2026-10-20T02:28:55.140Z, fine 2026-10-20T02:30:10.465Z
+(04:28:55–04:30:10 ora italiana); scheda chiusa, `date` 04:30:12. Strumento: javascript_tool del browser integrato (scheda tab-8). Sotto,
+l'output restituito copiato tale e quale; i commenti sono miei («#»).
+
+# Stato all'inizio
+{"attiva":{"data":"06-01","fascia":"giorno","id":1},"db":{"ok":true,"userVersion":109},"inizio":"2026-10-20T02:28:55.140Z","pref":null}
+
+# 1) 75 «Sulla mappa» riga per riga
+# n | uguale alla base | voci | atteso/ottenuto | indirizzo del pulsante | → | indirizzo d'arrivo | titolo | numero di pin | pin selezionato | scheda aperta
+1 | = | 1 | nascosto/nascosto | /guida/mappe/citta-shujin-academy?spillo=1656 | → | /guida/citta/shujin-academy?spillo=1656 | «Shujin Academy — Project P5R» | pin 3 | — | —
+2 | = | 5 | nascosto/nascosto | /guida/mappe/citta-shujin-academy?spillo=1616 | → | /guida/citta/shujin-academy?spillo=1616 | «Shujin Academy — Project P5R» | pin 3 | — | —
+3 | = | 9 | ok/ok | /guida/mappe/citta-ogikubo?spillo=226 | → | /guida/citta/ogikubo?spillo=226 | «Ogikubo — Project P5R» | pin 1 | Ristorante: Ristorante di ramen di Ogikubo | Ristorante di ramen di OgikuboRistorante×Ramen, luogo di han
+4 | = | 8 | ok/ok | /guida/mappe/nativo-rmap-001-3-0?spillo=1518 | → | /guida/citta/shibuya/central-street?spillo=1518 | «Central Street — Shibuya — Project P5R» | pin 16 | 2 spilli vicini: Palestra Protein Lovers, Big Bang Burger | Palestra Protein LoversAttività×Pin nativo del gioco.Palestr
+5 | = | 3 | ok/ok | /guida/mappe/nativo-rmap-152-1-0?spillo=1667 | → | /guida/mappe/palazzo-di-kamoshida-prigione-sotterranea-tutorial-nativo-rmap-152-1-0?spillo=1667 | «Prigione sotterranea - Tutorial — Mappe — Project P5R» | pin 8 | Confidente: Morgana (ottenuto) | MorganaConfidente · ottenuto×Qui Morgana è prigionieroRiapri
+6 | = | 9 | ok/ok | /guida/mappe/citta-tsukishima?spillo=230 | → | /guida/citta/tsukishima?spillo=230 | «Tsukishima — Project P5R» | pin 1 | Ristorante: Ristorante di monjayaki | Ristorante di monjayakiRistorante×Monjayaki (piatto alla pia
+7 | = | 3 | ok/ok | /guida/mappe/nativo-rmap-001-3-0?spillo=1525 | → | /guida/citta/shibuya/central-street?spillo=1525 | «Central Street — Shibuya — Project P5R» | pin 16 | Negozio: Triple Seven | Triple SevenNegozio×Pin nativo del gioco.Triple Seven · 6 ar
+8 | = | 4 | nascosto/nascosto | /guida/mappe/nativo-rmap-001-3-0?spillo=1517 | → | /guida/citta/shibuya/central-street?spillo=1517 | «Central Street — Shibuya — Project P5R» | pin 16 | — | —
+9 | = | 1 | ok/ok | /guida/mappe/nativo-rmap-001-3-0?spillo=1524 | → | /guida/citta/shibuya/central-street?spillo=1524 | «Central Street — Shibuya — Project P5R» | pin 16 | Negozio: Libreria Taiheido | Libreria TaiheidoNegozio×Pin nativo del gioco.Libreria Taihe
+10 | = | 7 | nascosto/nascosto | /guida/mappe/nativo-rmap-009-2-0?spillo=1588 | → | /guida/citta/yongen-jaya/vicoli?spillo=1588 | «Vicoli — Yongen-Jaya — Project P5R» | pin 13 | — | —
+11 | = | 1 | ok/ok | /guida/mappe/nativo-rmap-001-4-0?spillo=1537 | → | /guida/citta/shibuya/centro-comm-sotterraneo?spillo=1537 | «Centro comm. sotterraneo — Shibuya — Project P5R» | pin 10 | Negozio: Fiorista | FioristaNegozio×Fiorista RafflesiaFiorista Rafflesia · 3 art
+12 | = | 4 | ok/ok | /guida/mappe/nativo-rmap-001-3-0?spillo=1515 | → | /guida/citta/shibuya/central-street?spillo=1515 | «Central Street — Shibuya — Project P5R» | pin 16 | 2 spilli vicini: Distributore di bevande, Sala giochi (Central Street) | Sala giochi (Central Street)Sala giochi×Pin nativo del gioco
+13 | = | 2 | ok/ok | /guida/mappe/nativo-rmap-001-3-0?spillo=1519 | → | /guida/citta/shibuya/central-street?spillo=1519 | «Central Street — Shibuya — Project P5R» | pin 16 | Negozio: Videonoleggio Scarlet | Videonoleggio ScarletNegozio×Videonoleggio Scarlet Noleggio
+14 | = | 2 | mappa/mappa | /guida/mappe/nativo-rmap-190-1-0 | → | /guida/mappe/memento-memento-aree-fisse-strutture-che-i-memento-riusano | «Memento - aree fisse — Strutture che i Memento riusano — tela quadrata, disegno minuto — la meno estesa — Mappe — Project P5R» | pin 3 | — | —
+15 | = | 4 | ok/ok | /guida/mappe/nativo-rmap-001-3-0?spillo=1516 | → | /guida/citta/shibuya/central-street?spillo=1516 | «Central Street — Shibuya — Project P5R» | pin 16 | Ristorante: Ore no Beko (Gyudon) | Ore no Beko (Gyudon)Ristorante×Pin nativo del gioco.Ore no B
+16 | = | 3 | ok/ok | /guida/mappe/nativo-rmap-002-0-0?spillo=292 | → | /guida/citta/shujin-academy/edificio-principale-1p-edificio-laboratori-1p?spillo=292 | «Edificio principale 1P / Edificio laboratori 1P — Shujin Academy — Project P5R» | pin 15 | Bevande: Distributore Cortile | Distributore CortileBevande×Distributore del CortileDistribu
+17 | = | 7 | mappa/mappa | /guida/mappe/nativo-rmap-153-1-0 | → | /guida/mappe/palazzo-di-madarame-entrata-del-museo | «Entrata del Museo — Mappe — Project P5R» | pin 6 | — | —
+18 | = | 1 | ok/ok | /guida/mappe/nativo-rmap-009-2-0?spillo=1592 | → | /guida/citta/yongen-jaya/vicoli?spillo=1592 | «Vicoli — Yongen-Jaya — Project P5R» | pin 13 | Negozio: Clinica Medica Takemi | Clinica Medica TakemiNegozio×Pin nativo del gioco.Clinica di
+19 | = | 1 | ok/ok | /guida/mappe/nativo-rmap-002-0-0?spillo=293 | → | /guida/citta/shujin-academy/edificio-principale-1p-edificio-laboratori-1p?spillo=293 | «Edificio principale 1P / Edificio laboratori 1P — Shujin Academy — Project P5R» | pin 15 | Negozio: Panetteria | PanetteriaNegozio×Pin nativo del gioco. Luogo del catalogo n
+RIEPILOGO {"fine":"2026-10-20T02:29:31.099Z","righe":19,"uguali":75,"perEsito":{"nascosto":17,"ok":49,"mappa":9},"diversi":0}
+
+# 2) Metro, grafica ACCESA (preferenza vuota)
+{"cart":["Yongen-Jaya | /guida/citta/yongen-jaya?ingresso=1 | 19.3% | 50.1% | 857073004445","Shibuya | /guida/citta/shibuya?ingresso=1 | 33.4% | 51.8% | 30e4bed12ac2","Shujin Academy | /guida/citta/shujin-academy?ingresso=1 | 41.7% | 38.4% | 93c8987819c2","Parco Inokashira | /guida/citta/inokashira-park?ingresso=1 | 15.6% | 27.2% | b4a84147208c","Odaiba / Seaside Park | /guida/citta/odaiba?ingresso=1 | 51% | 92% | f4987be2a451","Ogikubo | /guida/citta/ogikubo?ingresso=1 | 26% | 5% | 1fd0572d67b9","Tsukishima | /guida/citta/tsukishima?ingresso=1 | 71.5% | 87.5% | 58d3e8280e0a","Madarame | /guida/mondo/dungeon/madarame | 26.7% | 64.2% | 972d98ffb81c","Memento | /guida/mondo/dungeon/mementos | 82.5% | 17% | d91a6c749c24","Covo dei Ladri | /guida/covo | 13% | 89.5% | 032d4b5d201e"],"h":"1d6d23d2d66dce7b1bda20265c17757cdaabed85f6d663526e4a43a7239ade43","hNorm":"1061b9328390810fac3ac5eec252241e3e5b4fae51b4b8da2d1dd27623652e88","len":26120,"ora":"2026-10-20T02:29:50.553Z","pref":null,"ugualeA8e75abbb":true,"ugualeAPrimaDiL1":true}
+# hNorm = stesso blocco con i 14 collegamenti ai quartieri e il titolo del Covo riportati a come erano prima di L2 (metodo di collaudo-8e75abbb/browser-5473.txt)
+
+# 3) Metro, grafica SPENTA (avvisato prima Test layout con «spengo»; Test funzionali era a riposo)
+{"inizio":"2026-10-20T02:29:58.174Z","trovata":null}
+{"byte":["Yongen-Jaya | 857073004445","Shibuya | 30e4bed12ac2","Shujin Academy | 93c8987819c2","Parco Inokashira | b4a84147208c","Odaiba / Seaside Park | f4987be2a451","Ogikubo | 1fd0572d67b9","Tsukishima | 58d3e8280e0a","Madarame | 972d98ffb81c","Memento | d91a6c749c24","Covo dei Ladri | 032d4b5d201e"],"fine":"2026-10-20T02:30:10.465Z","h":"1d6d23d2d66dce7b1bda20265c17757cdaabed85f6d663526e4a43a7239ade43","len":26120,"ora":"2026-10-20T02:30:10.465Z","pref":"{\"graficaPredefinita\":false}","prefRimessa":null,"prefTrovata":"null","ugualeAdAccesa":true}
+# → a grafica spenta identica a quella a grafica accesa; preferenza rimessa vuota alle 02:30:10Z.

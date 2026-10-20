@@ -1,0 +1,10 @@
+### impronta: sha256 di 'git diff 9634bbb5 HEAD -- server/ shared/ src/' (a 600af81c era da68d62c…12cc)
+4a38faa0f0c69b5a7adf25904854e9d5868adf343b823f7017d4281eb0a3dfd2 *-
+### sha256 del solo cherry-pick (git diff 600af81c HEAD)
+15ac47f0f2f9f20bc8f43a6b8a64e3e3bdb7b04420c86dbd6daf145ee719fef8 *-
+### sha256 dello stesso diff nell'originale (git diff 227937b7^ 227937b7)
+15ac47f0f2f9f20bc8f43a6b8a64e3e3bdb7b04420c86dbd6daf145ee719fef8 *-
+### sha256 per file a HEAD
+d579b76a9e2f4ed5c0222c2e9eb102453b3f36ce7a1ac1b32477334c748c22c4 *src/components/impostazioni/Cestino.test.tsx
+3bfe5c2049331cae97499398e4f4c7509cb9f3952cd1819f7a0b04d071a385b0 *src/components/impostazioni/Cestino.tsx
+f48cad2f41c8914fdc7cf347074ca774d9ee32fe0a40e03dc21e29fc9e3d1f23 *src/utils/cestino.ts

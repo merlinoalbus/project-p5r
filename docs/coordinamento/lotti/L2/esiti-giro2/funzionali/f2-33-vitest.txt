@@ -1,0 +1,633 @@
+90137ce2 docs(L2): DECISIONI — predefinita del Sottopasso 001-2-0 «inquadratura orientale», alias shibuya-sottopasso sulla planimetria completa (R5)
+
+ RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2
+
+ ✓ src/utils/vocabolarioMappe.test.ts > titoloMappeVicine > dice che cosa sono le mappe sotto e sopra quella aperta 1ms
+ ✓ src/utils/vocabolarioMappe.test.ts > titoloMappeSorelle > dice che cosa sono le mappe accanto a quella aperta 0ms
+ ✓ src/utils/vocabolarioMappe.test.ts > etichettaMappeSorelle > accorda il nome del gruppo per i lettori di schermo 0ms
+ ✓ src/utils/vocabolarioMappe.test.ts > nomeTipoMappa e nessuna «Mappa» nei nomi dei livelli > una mappa con area è una Planimetria qualunque sia il tipo; senza, il nome del suo tipo 0ms
+ ✓ src/utils/vocabolarioMappe.test.ts > nomeTipoMappa e nessuna «Mappa» nei nomi dei livelli > nessun titolo di vicine o sorelle contiene «mappa» 1ms
+ ✓ src/utils/navigazioneMappa.test.ts > la destinazione esplicita vince sul vecchio riferimento, e porta lo spillo di arrivo 2ms
+ ✓ src/utils/navigazioneMappa.test.ts > non considera raggiungibile un arrivo invalidato 0ms
+ ✓ src/utils/navigazioneMappa.test.ts > mantiene il collegamento legacy risolto e scarta quello non risolto 0ms
+ ✓ src/utils/navigazioneMappa.test.ts > solo gli spostamenti portano altrove: un negozio o una nota con un riferimento a una mappa non sono un passaggio 0ms
+ ✓ src/utils/navigazioneMappa.test.ts > urlCasa > aggiunge l’arrivo con ? o & secondo la casa, e sostituisce un arrivo già presente 0ms
+ ✓ src/utils/navigazioneMappa.test.ts > casaConArrivo e casaEQuesta (il redirect di /guida/mappe/<k>) > porta spillo, punto, contesto e area dell’indirizzo vecchio; la versione della casa resta 0ms
+ ✓ src/utils/navigazioneMappa.test.ts > casaConArrivo e casaEQuesta (il redirect di /guida/mappe/<k>) > una casa che è il visore stesso non reindirizza, qualunque sia la codifica della chiave: niente giri di redirect 0ms
+ ✓ src/utils/navigazioneMappa.test.ts > nomeDellaMeta e nomeMetaSpillo (i pin di passaggio col nome del posto) > l’area se la meta è una sua planimetria, altrimenti il nome della mappa; mai «Mappa» 0ms
+ ✓ server/db/migrations/104_cestino.test.ts > crea il cestino nel file di gioco e la parte delle partite nel loro file, con i vincoli; rieseguirle non cambia niente 157ms
+ ✓ server/services/mappe/alberoMappe.test.ts > alberoMappe > il sottoalbero di un Palazzo contiene la radice e tutte le discendenti, e solo loro 6ms
+ ✓ server/services/mappe/alberoMappe.test.ts > alberoMappe > il Palazzo di ogni mappa è lo stesso con le due strade (una mappa → tutte le mappe) 7ms
+ ✓ server/services/mappe/alberoMappe.test.ts > alberoMappe > un ciclo nei genitori (dato rovinato) non fa girare le query all'infinito 1ms
+ ✓ server/db/migrations/109_aree_del_mondo.test.ts > crea le Aree del mondo: gruppi in un’Area con le versioni, sciolte una per Area, Covo sotto Yongen-Jaya dopo le altre, staff Area di Tokyo da verificare; nient’altro cambia 159ms
+ ✓ server/db/migrations/109_aree_del_mondo.test.ts > si può rieseguire: la seconda volta nessuna riga toccata; una zona nuova riceve la sua Area in fondo al quartiere, con lo slug libero 114ms
+ ✓ server/services/cestinoService.test.ts > registrare un'eliminazione > ogni riga toccata nei due file finisce nel registro, cascate e BLOB compresi; i trigger non restano 31ms
+ ✓ server/services/cestinoService.test.ts > registrare un'eliminazione > se l'eliminazione fallisce non resta niente: né l'eliminazione, né il registro, né i trigger 26ms
+ ✓ server/services/cestinoService.test.ts > registrare un'eliminazione > dentro una transazione già aperta registra lo stesso, anche il REPLACE (e un annullamento di fuori toglie tutto) 53ms
+ ✓ server/services/mappe/sincronizzaMappe.test.ts > sincronizzaMappe: riclassificazione degli spilli di seed > riporta al tipo del registro uno spillo di seed rimasto a un tipo vecchio, senza toccare quelli dell’utente 31ms
+ ✓ server/services/mappe/sincronizzaMappe.test.ts > sincronizzaMappe: riclassificazione degli spilli di seed > nel database sincronizzato esistono i cinque tipi nuovi dove i punti lo prevedono 1ms
+ ✓ server/services/cestinoService.test.ts > registrare un'eliminazione > un'eliminazione dentro un'altra finisce nel registro di quella di fuori 23ms
+ ✓ server/services/cestinoService.test.ts > rimettere com'era > rimette ogni riga com'era (BLOB, rowid, partite), toglie quella aggiunta, ed esce dal cestino 28ms
+ ✓ server/services/cestinoService.test.ts > rimettere com'era > quel che è cambiato dopo l'eliminazione resta com'è, colonna per colonna, e l'esito lo dice 25ms
+ ✓ server/services/cestinoService.test.ts > rimettere com'era > una chiave del file di gioco presa da qualcosa creato dopo blocca tutto (409) e non cambia niente 27ms
+ ✓ server/services/cestinoService.test.ts > rimettere com'era > una riga che punta a qualcosa eliminato dopo non torna, il resto sì 20ms
+ ✓ server/services/cestinoService.test.ts > rimettere com'era > senza la parte delle partite (file sostituito) si rimettono i dati di gioco, e lo si dice 17ms
+ ✓ server/services/cestinoService.test.ts > rimettere com'era > se l'elemento stesso non può tornare non si rimette niente (409) 22ms
+ ✓ server/services/cestinoService.test.ts > svuotare > eliminare un elemento lo toglie con la sua parte nelle partite; svuotare toglie tutto; 404 se non c'è 42ms
+ ✓ server/services/mappe/sincronizzaMappe.test.ts > riallineaSpilliLuoghi: gli spilli dei luoghi seguono il catalogo dei tipi di luogo > un luogo «scuola» rimasto con lo spillo «attività» passa a «biblioteca»; un tipo più fine e gli spilli dell’utente restano 1ms
+ ✓ server/services/mappe/sincronizzaMappe.test.ts > sincronizzaMappe: i passaggi automatici verso le mappe figlie di una radice della guida > Tokyo della guida: un passaggio per quartiere, Shibuya dove la mette la mappa ufficiale, nessuno verso i Memento 214ms
+ ✓ server/services/mappe/sincronizzaMappe.test.ts > sincronizzaMappe: i passaggi automatici verso le mappe figlie di una radice della guida > un Palazzo della guida: un passaggio per area, non verso le planimetrie native; una radice dell’utente non ne riceve 195ms
+ ✓ server/routes/citta.test.ts > API città e attività > quartieri con conteggi e scheda con luoghi (Confidenti risolti, piatti, flag verificato) 35ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > costruisce l’albero dalla guida (Tokyo → quartieri, Palazzi/Dedalo → aree) con gli spilli dai marcatori 41ms
+ ✓ server/routes/citta.test.ts > API città e attività > con una partita dice quali quartieri sono davvero nel mondo, non solo quelli con una data 102ms
+ ✓ server/routes/citta.test.ts > API città e attività > ogni quartiere è raggiungibile: nessuna regola scritta a mano lo chiude per sempre 14ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B1: un punto con un nome lungo nasce con una chiave che le sue rotte accettano; un nome senza lettere non lascia un trattino in fondo 184ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B2/B1': le finestre dei Palazzi si rileggono quando il DB di gioco cambia (registro unico delle cache) 16ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B2': i semafori dei Confidenti vedono un evento segnato anche se la data della partita non cambia 13ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B3: con «sovrascrivi» una mappa che il pacchetto dichiara radice torna radice 46ms
+ ✓ server/routes/citta.test.ts > API città e attività > attività, lavori, libri e film con Doti; letture per partita con evento, riapertura, validazione, reseed stabile 106ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > il dettaglio espone percorso, figli, spilli con il dettaglio dell’entità collegata (punto, luogo con negozio e articoli) 38ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > editor: crea, aggiorna ed elimina mappe e spilli con validazione (coordinate, tipo, genitore ciclico) 51ms
+ ✓ server/routes/struttura-server.test.ts > voce 5 — il server legge i valori del catalogo > la presenza di un negozio sono i suoi orari; la sede e il programma punti sono nel DTO 152ms
+ ✓ server/routes/accesso-mondo.test.ts > risolve lo stesso pin dal negozio e dai suoi articoli senza inventare coordinate 358ms
+ ✓ server/routes/percorsi-map.test.ts > deriva la chiave da tutta la gerarchia, preservando i nomi naturali; senza asset per convenzione 365ms
+ ✓ server/routes/aree-mondo.test.ts > Aree del mondo (L2) > FUN2-2 — il Covo sotto Yongen-Jaya tiene i suoi percorsi pubblici anche quando i percorsi si risincronizzano (import, creazione, eliminazione) 374ms
+ ✓ server/routes/struttura-server.test.ts > voce 5 — il server legge i valori del catalogo > la ricerca degli articoli filtra per più categorie, per stato d’acquisto e per disponibilità 124ms
+ ✓ server/routes/struttura-server.test.ts > voce 5 — il server legge i valori del catalogo > i luoghi: elenco per la scelta della sede, negozi e attività dalle sedi, il tipo «luogo» nel catalogo 30ms
+ ✓ server/routes/struttura-server.test.ts > voce 5 — il server legge i valori del catalogo > scrivendo la sede il quartiere segue; gli orari e il programma punti si salvano come valori 12ms
+ ✓ server/routes/struttura-server.test.ts > voce 5 — il server legge i valori del catalogo > la correzione di alcuni campi soltanto vale per ogni tipo, e non cancella gli effetti ricavati dalla migrazione 26ms
+ ✓ server/routes/struttura-server.test.ts > voce 5 — il server legge i valori del catalogo > libri, film e attività portano gli effetti dichiarati, dove si comprano e dove si svolgono 9ms
+ ✓ server/routes/struttura-server.test.ts > voce 5 — il server legge i valori del catalogo > una lettura non ancora disponibile non si registra (409), e con la pioggia lo studio vale di più 17ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B4: reimportando una mappa, i passaggi di altre mappe ritrovano lo spillo d'arrivo reinserito 44ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B5: eliminando un pin o una mappa se ne vanno anche le schermate caricate; la pianta di un quartiere resta 83ms
+ ✓ server/routes/ingressi.test.ts > salva ingresso con coordinate anche agli estremi e mantiene destinazione dopo rinomina e reseed 385ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > stato «raccolto» per partita: uno spillo collegato a un punto aggiorna anche il punto della Guida 36ms
+ ✓ server/routes/struttura-server.test.ts > voce 5 — il server legge i valori del catalogo > i Palazzi contano la raccolta sulle planimetrie; i Memento gli obiettivi dei dedali, timbri compresi 66ms
+ ✓ server/routes/struttura-server.test.ts > voce 5 — il server legge i valori del catalogo > le richieste sono ordinate per dedalo e l’elenco porta i dedali con i conteggi 8ms
+ ✓ server/routes/struttura-server.test.ts > voce 5 — il server legge i valori del catalogo > il cruciverba conosce il giorno della partita e il prossimo da risolvere 5ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B6: dentro un gruppo le condizioni si descrivono coi nomi, non con le chiavi 7ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B7: uno stato rimasto su una voce descrittiva non conta per la raccolta del Palazzo 3ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B8: Tokyo elenca tanti figli quanti ne conta, senza il nodo dei Memento 10ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B9: immagine e righe che la legano nascono insieme o per niente 10ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B12: a pari ordine decide la chiave, anche quando il nome ordinerebbe diversamente 23ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B14: eliminando un luogo dell'utente, i pin che lo citavano perdono il riferimento 14ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B14: eliminando un negozio dell'utente, i pin che lo citavano perdono il riferimento 12ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > immagine di base nell’istanza (dimensioni dall’intestazione), esportazione con base64 e importazione idempotente 273ms
+ ✓ server/routes/accesso-mondo.test.ts > conserva alternative reali e non sceglie arbitrariamente il primo piano 219ms
+ ✓ server/routes/aree-mondo.test.ts > Aree del mondo (L2) > FUN2-1 — l’ingresso di un quartiere sta in una sua Area: una planimetria di un altro quartiere si rifiuta, dalla PUT e dall’import 212ms
+ ✓ server/routes/ingressi.test.ts > rifiuta valori e riferimenti non validi senza alterare ingresso salvato; eliminare destinazione ripristina il default 278ms
+ ✓ server/routes/percorsi-map.test.ts > rinomina e sposta un sottoalbero mantenendo pin, progressi e vecchie URL 284ms
+ ✓ server/routes/percorsi-map.test.ts > rifiuta collisioni e cicli senza modifiche parziali 222ms
+ ✓ server/routes/ingressi.test.ts > trasporta ingresso con il pacchetto mappe e non sovrascrive una configurazione personale durante il seed 239ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > un pacchetto della guida non cancella gli spilli aggiunti dall’utente su una mappa della guida 83ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > ricerca delle entità collegabili per tipo e testo; la pianta scaricata con la chiave della mappa diventa la sua immagine di base 74ms
+ ✓ server/routes/accesso-mondo.test.ts > unifica riferimento diretto e mappa della stessa entità senza duplicare destinazioni 212ms
+ ✓ server/routes/aree-mondo.test.ts > Aree del mondo (L2) > 3/4 — la casa di ogni mappa: La città, il quartiere, l’Area (con la versione se non è la predefinita), il visore per Palazzi e Memento 226ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > le immagini scaricate dalle guide entrano nel pacchetto come tutte le altre, con la provenienza annotata 15ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > schermate degli spilli: caricamento, didascalia, eliminazione; esportazione per luogo (JSON) e reimportazione 218ms
+ ✓ server/routes/accesso-mondo.test.ts > raggiunge il pin di un luogo attraverso il suo legame strutturato con il negozio 208ms
+ ✓ server/routes/aree-mondo.test.ts > Aree del mondo (L2) > 5 — il quartiere: le Aree in ordine con predefinite, passaggi sull’illustrazione e ingresso; Kichijoji con un’Area senza passaggio 205ms
+ ✓ server/routes/accesso-mondo.test.ts > usa ingresso solo per il quartiere e conserva alias dopo rinomina 210ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > condizioni di visibilità degli spilli: solo quelle calcolabili, validate sulla Guida, valutate con la partita, esportate e reimportate 151ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > uno spillo del seed a cui l’utente aggiunge condizioni sopravvive al reseed senza doppioni; date e periodi impossibili sono rifiutati 22ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > condizione «solo di sera»: segue il momento della giornata della partita, che torna a «giorno» quando cambia il giorno corrente 60ms
+ ✓ server/routes/aree-mondo.test.ts > Aree del mondo (L2) > 6 — la pagina di un’Area: versioni con pin, elementi, vicine; quartiere o Area inesistenti 404 197ms
+ ✓ server/routes/accesso-mondo.test.ts > distingue il punto preciso dal posto dichiarato, l’entità inesistente e il pin eliminato 202ms
+ ✓ server/routes/aree-mondo.test.ts > Aree del mondo (L2) > 7 — creare un’Area: con l’immagine nasce l’Area con la sua planimetria e il passaggio; un errore non lascia niente; slug riservato e collisione 232ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > l’importazione scarta e conta le condizioni con chiavi assenti dalla Guida invece di nascondere lo spillo per sempre 59ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > passaggi dall’albero (15.24): «Nuova mappa» crea il passaggio nel genitore (e il ritorno a scelta) in un punto libero; POST /passaggi con 409/400/404 214ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > dimensioniImmagine legge le intestazioni PNG, GIF, JPEG e WEBP 0ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > una planimetria aggiunta al Palazzo diventa una pianta caricandone l’immagine; uno stemma resta stemma (2026-10-18) 29ms
+ ✓ server/routes/accesso-mondo.test.ts > un’attività porta al posto che dichiara, e non a uno scelto per somiglianza del nome 165ms
+ ✓ server/routes/aree-mondo.test.ts > Aree del mondo (L2) > 8 — le versioni: aggiunta in coda, predefinita, ordine ed etichette; l’ultima non si elimina; quella d’ingresso con conferma; la predefinita passa alla successiva 227ms
+ ✓ server/routes/accesso-mondo.test.ts > un confidente porta ai luoghi che il catalogo gli attribuisce 191ms
+ ✓ server/routes/aree-mondo.test.ts > Aree del mondo (L2) > 9 — correggere un’Area: nome (lo slug resta) e predefinita; la prima correzione di un’Area della guida conserva i valori, «Ripristina» li rimette; un’Area dell’utente no 198ms
+ ✓ server/routes/accesso-mondo.test.ts > non affianca mai una meta generica al pin preciso, nemmeno su mappe diverse 205ms
+ ✓ server/routes/accesso-mondo.test.ts > senza alcun pin arriva al posto dichiarato, e lo dice nel criterio 195ms
+ ✓ server/routes/aree-mondo.test.ts > Aree del mondo (L2) > 10 — eliminare un’Area con contenuti chiede conferma; con la conferma va nel cestino con planimetrie, passaggi e ingresso; dal cestino torna com’era 254ms
+ ✓ server/routes/aree-mondo.test.ts > Aree del mondo (L2) > staff — un’Area di Tokyo da verificare: «Tieni» la tiene; «Rimuovi» la mette nel cestino, e da lì torna 214ms
+ ✓ server/routes/aree-mondo.test.ts > Aree del mondo (L2) > 11 — dall’editor una mappa `luogo` o `area` nel mondo è 409 usa-aggiungi-area; nei Palazzi e le generiche restano ammesse 223ms
+ ✓ server/routes/aree-mondo.test.ts > Aree del mondo (L2) > 12 — pacchetto delle mappe: le Aree viaggiano (esporta → importa sulla stessa istanza dopo averle tolte); un pacchetto senza Aree le riceve dalla regola 238ms
+ ✓ server/routes/aree-mondo.test.ts > Aree del mondo (L2) > FUN2-3 — un corpo che non è un’immagine (testo dichiarato image/png) è 400 formato-non-ammesso, e non si scrive niente 170ms
+ ✓ server/routes/aree-mondo.test.ts > Aree del mondo (L2) > FUN2-4 — il messaggio della conferma dice «1 planimetria, 1 pin, 1 passaggio», al singolare 173ms
+ ✓ server/routes/aree-mondo.test.ts > Aree del mondo (L2) > 13 — l’ingresso col corpo nuovo { area } e con quello di prima { mappa }; un’Area inesistente è 404 165ms
+ ✓ src/pages/AccessoMondoPage.test.tsx > apre il pin unico anche per chiavi di articolo contenenti slash 65ms
+ ✓ src/pages/AccessoMondoPage.test.tsx > mantiene una scelta esplicita per destinazioni multiple 33ms
+ ✓ src/components/mappe/IngressoQuartiere.test.tsx > si sceglie l’area fra quelle del quartiere, si tocca la sua planimetria e «Salva» manda area, punto e zoom 187ms
+ ✓ src/components/mappe/IngressoQuartiere.test.tsx > cambiando area il punto torna al centro e l’immagine è la sua; «Avanzate» tiene le coordinate esatte 64ms
+ ✓ src/components/mappe/IngressoQuartiere.test.tsx > con un ingresso salvato riparte da lì, e «Togli l’ingresso» lo toglie 30ms
+ ✓ src/components/mappe/IngressoQuartiere.test.tsx > un quartiere senza aree non ha niente da scegliere: lo dice, e «Salva» resta spento 8ms
+ ✓ src/pages/CovoPage.test.tsx > CovoPage > conta quel che i dati reggono e tace il totale finché le sfide non dichiarano il valore 150ms
+ ✓ src/pages/CovoPage.test.tsx > CovoPage > la carta «Planimetrie del Covo» porta alla pagina dell’Area del Covo (L2, 2026-10-20), non più al visore dell’atlante 36ms
+ ✓ src/pages/CovoPage.test.tsx > CovoPage > LAY2-6: la carta «Planimetrie del Covo» è un bersaglio da toccare (alta almeno 48 px a ogni larghezza) 26ms
+ ✓ src/pages/CovoPage.test.tsx > CovoPage > mostra il totale delle medaglie solo quando lo dichiarano tutte le sfide 18ms
+ ✓ src/pages/CovoPage.test.tsx > CovoPage > tiene sfide e premi in due elenchi distinti 19ms
+ ✓ src/pages/CovoPage.test.tsx > CovoPage > cerca in tutte e due le colonne con un campo solo 41ms
+ ✓ src/pages/AccessoMondoPage.test.tsx > mantiene il catalogo raggiungibile quando associazione è assente o il servizio fallisce 121ms
+ ✓ src/pages/AccessoMondoPage.test.tsx > ignora risposte tardive della precedente entità 27ms
+ ✓ src/pages/AccessoMondoPage.test.tsx > un quartiere va dritto alla sua pagina, senza chiedere niente al server (L2, R2-15) 15ms
+ ✓ src/pages/AccessoMondoPage.test.tsx > trasporta l’ingresso configurato e accetta solo coordinate complete e valide 16ms
+ ✓ src/pages/AccessoMondoPage.test.tsx > mantiene i contenuti guida distinti da un arrivo geografico 29ms
+ ✓ src/components/mappe/MappaTokyo.test.tsx > MappaTokyo — fermate non ancora nel mondo > nella pagina le elenca per esteso, con il perché sul nome 140ms
+ ✓ src/components/mappe/MappaTokyo.test.tsx > MappaTokyo — fermate non ancora nel mondo > nella schermata piena resta il conto in una riga, e i nomi con il perché stanno nella finestra «Quali» 54ms
+ ✓ src/components/mappe/MappaTokyo.test.tsx > MappaTokyo — fermate non ancora nel mondo > un Palazzo completato non c’è più, anche dentro la sua finestra, e si dice perché 15ms
+ ✓ src/components/mappe/MappaTokyo.test.tsx > MappaTokyo — fermate non ancora nel mondo > toccando il Palazzo si atterra dove dice la regola del giorno: planimetria e pin d’arrivo; senza regola la scheda (2026-10-04) 66ms
+ ✓ src/components/mappe/MappaTokyo.test.tsx > MappaTokyo — i segni dei posti con la grafica predefinita spenta (UX-2, decisione del PM del 2026-10-20) > sagome e stemmi restano, presi dal manifesto, e ogni cartellino ha il suo nome 14ms
+stderr | src/components/partita/OggiMappa.test.tsx > OggiMappa — il Palazzo sulla mappa di Tokyo > con una regola d’atterraggio scende nella planimetria, centrata sul pin d’arrivo, senza cambiare pagina
+An update to OggiMappa inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/partita/OggiMappa.test.tsx > OggiMappa — il Palazzo sulla mappa di Tokyo > con una regola d’atterraggio scende nella planimetria, centrata sul pin d’arrivo, senza cambiare pagina
+An update to OggiMappa inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/pages/AreaPage.test.tsx > briciole fino al quartiere, titolo dell’Area e la predefinita nel visore col nome dell’Area 175ms
+ ✓ src/components/partita/OggiMappa.test.tsx > OggiMappa — il Palazzo sulla mappa di Tokyo > con una regola d’atterraggio scende nella planimetria, centrata sul pin d’arrivo, senza cambiare pagina 183ms
+stderr | src/components/partita/OggiMappa.test.tsx > OggiMappa — il Palazzo sulla mappa di Tokyo > senza pin d’arrivo la planimetria si apre intera; senza regola resta il collegamento alla scheda del Palazzo
+An update to OggiMappa inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/partita/OggiMappa.test.tsx > OggiMappa — il Palazzo sulla mappa di Tokyo > senza pin d’arrivo la planimetria si apre intera; senza regola resta il collegamento alla scheda del Palazzo
+An update to OggiMappa inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/partita/OggiMappa.test.tsx > OggiMappa — il Palazzo sulla mappa di Tokyo > cambiato il giorno della partita, i Palazzi si rileggono: l’atterraggio dipende dal giorno
+An update to OggiMappa inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/partita/OggiMappa.test.tsx > OggiMappa — il Palazzo sulla mappa di Tokyo > cambiato il giorno della partita, i Palazzi si rileggono: l’atterraggio dipende dal giorno
+An update to OggiMappa inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/pages/AreaPage.test.tsx > scegliere una versione cambia solo `?planimetria=`; la versione senza pin lo dice e riporta a quella che li ha 102ms
+ ✓ src/pages/AreaPage.test.tsx > «Luoghi qui» seleziona il pin nell’indirizzo e porta alla scheda; «Aree vicine» porta alle case col quartiere se diverso 59ms
+ ✓ src/pages/AreaPage.test.tsx > LAY2-4: sul telefono «Luoghi qui» e «Aree vicine» stanno nella pagina sotto il visore, non nel suo pannello 37ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > «Chiudi» del visore torna alla pagina da cui si era aperta la mappa; senza, all’elenco delle mappe 234ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > «Torna alla partita» porta alla pagina Partita, sulla scheda Oggi, e sta subito prima di «Chiudi» (2026-10-04) 61ms
+stderr | src/components/partita/OggiMappa.test.tsx > OggiMappa — il Palazzo sulla mappa di Tokyo > cambiato il giorno della partita, i Palazzi si rileggono: l’atterraggio dipende dal giorno
+An update to OggiMappa inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/partita/OggiMappa.test.tsx > OggiMappa — il Palazzo sulla mappa di Tokyo > cambiato il giorno della partita, i Palazzi si rileggono: l’atterraggio dipende dal giorno
+An update to OggiMappa inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/partita/OggiMappa.test.tsx > OggiMappa — il Palazzo sulla mappa di Tokyo > senza pin d’arrivo la planimetria si apre intera; senza regola resta il collegamento alla scheda del Palazzo 97ms
+ ✓ src/components/partita/OggiMappa.test.tsx > OggiMappa — il Palazzo sulla mappa di Tokyo > cambiato il giorno della partita, i Palazzi si rileggono: l’atterraggio dipende dal giorno 93ms
+stderr | src/components/partita/OggiMappa.test.tsx > OggiMappa — il quartiere sulla mappa di Tokyo (L2, punto C) > con un ingresso scende nell’area d’ingresso col suo centro, senza cambiare pagina; senza, sull’illustrazione del quartiere
+An update to OggiMappa inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/partita/OggiMappa.test.tsx > OggiMappa — il quartiere sulla mappa di Tokyo (L2, punto C) > con un ingresso scende nell’area d’ingresso col suo centro, senza cambiare pagina; senza, sull’illustrazione del quartiere
+An update to OggiMappa inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/partita/OggiMappa.test.tsx > OggiMappa — una voce chiede la mappa: se è fuori dallo schermo la pagina ci scorre (2026-10-04) > richiesta nuova con la mappa sotto lo schermo (telefono): scorre; il primo disegno no
+An update to OggiMappa inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to OggiMappa inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to MappaIncorporata inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/partita/OggiMappa.test.tsx > OggiMappa — una voce chiede la mappa: se è fuori dallo schermo la pagina ci scorre (2026-10-04) > richiesta nuova con la mappa sotto lo schermo (telefono): scorre; il primo disegno no
+An update to OggiMappa inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/partita/OggiMappa.test.tsx > OggiMappa — una voce chiede la mappa: se è fuori dallo schermo la pagina ci scorre (2026-10-04) > richiesta nuova con la mappa sotto lo schermo (telefono): scorre; il primo disegno no
+An update to OggiMappa inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/pages/AreaPage.test.tsx > uno spillo che arriva con l’indirizzo si seleziona ma non è un comando: un pin non disponibile resta nascosto 16ms
+ ✓ src/pages/AreaPage.test.tsx > il Covo ha il collegamento alle sfide e alle Medaglie P nella testata 31ms
+ ✓ src/pages/AreaPage.test.tsx > un Covo con una sola planimetria (niente fila) tiene il collegamento in testata in ogni fascia 27ms
+stderr | src/components/partita/OggiMappa.test.tsx > OggiMappa — una voce chiede la mappa: se è fuori dallo schermo la pagina ci scorre (2026-10-04) > con la mappa già in vista non si muove niente; senza richiesta nuova nemmeno
+An update to OggiMappa inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/partita/OggiMappa.test.tsx > OggiMappa — una voce chiede la mappa: se è fuori dallo schermo la pagina ci scorre (2026-10-04) > con la mappa già in vista non si muove niente; senza richiesta nuova nemmeno
+An update to OggiMappa inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/partita/OggiMappa.test.tsx > OggiMappa — una voce chiede la mappa: se è fuori dallo schermo la pagina ci scorre (2026-10-04) > con la mappa già in vista non si muove niente; senza richiesta nuova nemmeno
+An update to OggiMappa inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/partita/OggiMappa.test.tsx > OggiMappa — una voce chiede la mappa: se è fuori dallo schermo la pagina ci scorre (2026-10-04) > con la mappa già in vista non si muove niente; senza richiesta nuova nemmeno
+An update to OggiMappa inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/partita/OggiMappa.test.tsx > OggiMappa — il quartiere sulla mappa di Tokyo (L2, punto C) > con un ingresso scende nell’area d’ingresso col suo centro, senza cambiare pagina; senza, sull’illustrazione del quartiere 22ms
+ ✓ src/components/partita/OggiMappa.test.tsx > OggiMappa — una voce chiede la mappa: se è fuori dallo schermo la pagina ci scorre (2026-10-04) > richiesta nuova con la mappa sotto lo schermo (telefono): scorre; il primo disegno no 13ms
+ ✓ src/components/partita/OggiMappa.test.tsx > OggiMappa — una voce chiede la mappa: se è fuori dallo schermo la pagina ci scorre (2026-10-04) > con la mappa già in vista non si muove niente; senza richiesta nuova nemmeno 18ms
+ ✓ src/pages/AreaPage.test.tsx > «Elimina area»: la finestra dice che cosa si porta via e «Elimina» è la conferma (UX2-8): una richiesta, con la conferma, poi il quartiere 50ms
+ ✓ src/pages/AreaPage.test.tsx > un’Area che non c’è: «Area non trovata» col messaggio e il ritorno al quartiere 18ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > senza partita attiva «Torna alla partita» non c’è nel visore 54ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > nel luogo senza pianta «Torna alla partita» sta dopo «Scheda del Palazzo» e «Modifica mappa» e porta alla pagina Partita, scheda Oggi 54ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > la mappa dei Memento dice «Scheda dei Memento», è di tipo «Memento» e non chiede planimetrie 31ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > senza partita attiva «Torna alla partita» non c’è nel luogo senza pianta 29ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > aperta direttamente, «Chiudi» porta all’elenco delle mappe come prima 48ms
+ ✓ src/pages/CittaPage.test.tsx > CittaPage > mostra una sola Tokyo — quella disegnata — e le piastrelle dei quartieri 161ms
+ ✓ src/pages/CittaPage.test.tsx > CittaPage > sulla mappa disegnata ogni quartiere porta alla sua pagina, con `ingresso=1` (L2, R2-15): l’unica che apre il quartiere 33ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > l’indice apre una radice nel pannello e ne mostra le mappe 52ms
+stderr | src/pages/CittaPage.test.tsx > CittaPage > quel che è chiuso sulla mappa è un pallino col nome, non una figura
+An update to CittaPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to CittaPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/pages/CittaPage.test.tsx > CittaPage > quel che è chiuso sulla mappa è un pallino col nome, non una figura
+An update to CittaPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/pages/CittaPage.test.tsx > CittaPage > quel che è chiuso sulla mappa è un pallino col nome, non una figura
+An update to CittaPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/pages/CittaPage.test.tsx > CittaPage > i Memento stanno sulla mappa di Tokyo, dentro la loro finestra e non prima 53ms
+ ✓ src/pages/CittaPage.test.tsx > CittaPage > la scheda del quartiere mostra la stessa sagoma della mappa composta 20ms
+ ✓ src/pages/CittaPage.test.tsx > CittaPage > mappa e schede sono una selezione sola: si accendono a vicenda 43ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > con lo strumento «Aggiungi» un tocco sulla mappa crea lo spillo del tipo scelto (coordinate in percentuale) e lo seleziona 514ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > il visore carica la mappa con la partita attiva e segna un collezionabile raccolto tramite l’API, poi rilegge la mappa in silenzio 111ms
+ ✓ src/pages/CittaPage.test.tsx > CittaPage > quel che è chiuso sulla mappa è un pallino col nome, non una figura 41ms
+ ✓ src/pages/CittaPage.test.tsx > CittaPage > la scheda mostra l’illustrazione della mappa del quartiere con la sagoma sopra; senza illustrazione la sola sagoma (L1, 2026-10-20) 35ms
+ ✓ src/pages/CittaPage.test.tsx > CittaPage — Aree della città (L2, 2026-10-20) > l’area dello staff, da verificare, ha la sua pagina, «Tieni» e «Rimuovi»; «Tieni» la toglie dalle aree da verificare 60ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > un punto della Guida segnato «Ottenuto» dalla mappa aggiorna lo stato del punto e conta come raccolto 112ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > le condizioni sono assolute: anche un elemento fisso del gioco con condizioni che non valgono sparisce, come gli altri pin (2026-10-09) 72ms
+ ✓ src/pages/CittaPage.test.tsx > CittaPage — Aree della città (L2, 2026-10-20) > UX2-7: la colonna del testo non scende sotto i 10rem, così «Tieni» e «Rimuovi» vanno a capo invece di schiacciarla 43ms
+ ✓ src/pages/CittaPage.test.tsx > CittaPage — Aree della città (L2, 2026-10-20) > «Rimuovi» nella finestra è la conferma (UX2-8): una sola richiesta, con la conferma 56ms
+ ✓ src/pages/CittaPage.test.tsx > CittaPage — Aree della città (L2, 2026-10-20) > senza Aree della città né planimetrie da collocare le due sezioni non ci sono 73ms
+ ✓ src/pages/CittaPage.test.tsx > QuartierePage > mostra la mappa del quartiere incorporata e i luoghi senza i pulsanti di posizionamento (ora nell’editor) 74ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > due azioni ravvicinate: la rilettura vecchia che arriva per ultima non sovrascrive quella nuova 142ms
+stderr | src/pages/EditorMappaPage.test.tsx > EditorMappaPage > la descrizione del tipo dice se il pin ha uno stato nella partita (2026-10-03): la nota è un segno e basta, il meccanismo si aziona, il boss si sconfigge
+An update to CollegamentoCitta inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > uno spillo di città si collega a un negozio scelto da un elenco con ricerca, senza condizioni; «Elimina» rimuove lo spillo 324ms
+ ✓ src/pages/CittaPage.test.tsx > QuartierePage > l’intestazione mostra l’illustrazione del quartiere con la sagoma sopra; senza, la sagoma grande (L1, 2026-10-20) 29ms
+ ✓ src/pages/CittaPage.test.tsx > QuartierePage > lo scarico automatico della pianta su una mappa con pezzi (409 `mappa-con-pezzi`, L1 F5) non sostituisce niente e non mostra errori 22ms
+ ✓ src/pages/CittaPage.test.tsx > QuartierePage > dalla metro (`?ingresso=1`) si apre la finestra dell’area d’ingresso; «Apri l’area» porta alla sua pagina sul punto, «Chiudi» toglie il parametro 59ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > dopo un’azione la rilettura applica la visibilità calcolata dal server: un pin che dipendeva dallo stato appena segnato sparisce 114ms
+ ✓ src/pages/MappaPage.test.tsx > un contenitore senza immagine apre i luoghi figli senza una finta planimetria 18ms
+ ✓ src/pages/MappaPage.test.tsx > la planimetria di Tokyo non è più una destinazione: si finisce sulla mappa della Città 8ms
+ ✓ src/pages/MappaPage.test.tsx > anche un alias che risolve a Tokyo finisce sulla mappa della Città 16ms
+ ✓ src/pages/MappaPage.test.tsx > LAY2-5: da 1024 px lo spazio fra intestazione ed elenco è 12 px (a 1024×690 l’indice sforava di 3 px) 8ms
+ ✓ src/pages/MappaPage.test.tsx > un vecchio indirizzo di una planimetria porta alla sua casa (la pagina dell’Area sulla versione) con spillo e punto, senza aprire il visore 7ms
+ ✓ src/pages/MappaPage.test.tsx > un quartiere si apre nella sua pagina; una mappa la cui casa è il visore resta nel visore 31ms
+ ✓ src/pages/CittaPage.test.tsx > QuartierePage > con uno spillo nell’indirizzo vince lo spillo: la finestra d’ingresso non si apre, e «Entra» la apre a richiesta 36ms
+ ✓ src/pages/CittaPage.test.tsx > QuartierePage > UX2-6: sul telefono il visore dell’illustrazione è alto quanto la figura (classe dell’ospite, proporzione dal visore) 37ms
+ ✓ src/pages/CittaPage.test.tsx > QuartierePage > un quartiere senza ingresso (Kichijoji): dalla metro nessuna finestra, niente «Entra», «Ingresso» da scegliere 19ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > la descrizione del tipo dice se il pin ha uno stato nella partita (2026-10-03): la nota è un segno e basta, il meccanismo si aziona, il boss si sconfigge 271ms
+ ✓ src/pages/MappaPage.test.tsx > il contesto URL cambia il titolo del visore e il selettore può ripristinare tutte le alternative 83ms
+ ✓ src/pages/MappaPage.test.tsx > l’emblema del palazzo senza dimensioni lascia guida e planimetrie accessibili senza visore 20ms
+ ✓ src/pages/MappaPage.test.tsx > la planimetria nativa mantiene contesto e guida dentro il pannello reale del visore 60ms
+ ✓ src/pages/MappaPage.test.tsx > una mappa con asset originale e dimensioni non registrate mantiene la planimetria 10ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > «Copia» sullo spillo selezionato mette negli appunti tutti i campi tranne la posizione; con «Incolla» un tocco sulla mappa crea lo spillo identico nel nuovo punto 204ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > gli appunti salvati in sessione riattivano «Incolla» all'apertura dell'editor (copia da un'altra mappa) 58ms
+stderr | src/pages/EditorMappaPage.test.tsx > EditorMappaPage > il pin del Confidente, unico fra quelli di città, ha le condizioni (2026-10-04); tornando a un negozio se ne vanno
+An update to EditorMappaRisolta inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/pages/EditorMappaPage.test.tsx > EditorMappaPage > il pin del Confidente, unico fra quelli di città, ha le condizioni (2026-10-04); tornando a un negozio se ne vanno
+An update to EditorMappaRisolta inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > il pin del Confidente, unico fra quelli di città, ha le condizioni (2026-10-04); tornando a un negozio se ne vanno 276ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > da Confidente con una condizione a Negozio: la condizione non si salva 221ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > le condizioni sono stati: una riga nasce già valida, si cambia sul posto con elenchi chiusi, si toglie e si salva con lo spillo 279ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > la condizione «Pin di una mappa» (2026-10-03): si cerca il pin fra quelli con uno stato, «segnato» o «non segnato», è di presenza e si salva con l’uid 215ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > la condizione «Voce della guida» (2026-10-11): si cerca la voce fra quelle dei Palazzi e dei Memento, «segnata» o «non segnata», è di presenza e si salva con la chiave 229ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > fra i pin citabili non c’è quello che si sta modificando: un pin non dipende da se stesso 172ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > un periodo resta sempre valido: la fine segue l’inizio, e i giorni offerti sono quelli del mese 203ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > «Voci della guida» (098): «Aggiungi voce» collega una voce del Palazzo, «Scollega» la toglie; ogni gesto si salva e rilegge la mappa 211ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > un pin senza voci e senza voci collegabili (fuori dai Palazzi) non mostra le «Voci della guida» 57ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > uno spostamento che è di una voce della Guida la mostra: la scheda non risulta modificata e il salvataggio non tocca la voce, che sta nel campo suo (094) 106ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > con ?sezione=mappa l’editor si apre sulla sezione Mappa (dove si carica l’immagine); senza, sugli spilli 85ms
+stderr | src/pages/EditorMappaPage.test.tsx > EditorMappaPage > le proprietà della mappa si salvano (nome, genitore, asset); il genitore proposto esclude la mappa stessa
+An update to EditorMappaRisolta inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/pages/EditorMappaPage.test.tsx > EditorMappaPage > le proprietà della mappa si salvano (nome, genitore, asset); il genitore proposto esclude la mappa stessa
+An update to EditorMappaRisolta inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > le proprietà della mappa si salvano (nome, genitore, asset); il genitore proposto esclude la mappa stessa 150ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > «Elimina mappa» chiede conferma dicendo che la mappa finisce nel cestino (2026-10-16), poi la elimina 92ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > O9: su una planimetria d'area «Scarica dalla guida» non c'è (la rotta delle piante d'area non esiste più); su un quartiere scarica la sua pianta 121ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > albero (15.24): le figlie senza spillo che le raggiunge e il genitore senza ritorno hanno «Crea passaggio», che chiama l’API e seleziona lo spillo creato 168ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > albero rispetta destinazione esplicita e precedenza sul riferimento 57ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > albero rispetta destinazione invalidata e precedenza sul riferimento 40ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > albero rispetta destinazione legacy e precedenza sul riferimento 62ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > «Nuova mappa» (15.24): chiede il passaggio sul genitore (preselezionato) e il ritorno (a scelta) e li passa all’API 245ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > nomi uguali nella stessa mappa impediscono la creazione, senza una chiave da inserire 94ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > la palette di «Aggiungi» è divisa nelle quattro categorie (Spostamento, Città, Consumabile, Informativo) con tutti i tipi, «Ingresso al Palazzo» compreso 170ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > «Ritaglia pezzo»: il rettangolo trascinato sulla mappa diventa un pezzo (pixel dell'immagine), selezionato; un tocco senza rettangolo non ritaglia 172ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > senza immagine di base non si ritaglia 89ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > il modulo della copia: nome del pezzo, etichetta, posizione al pixel (campi e frecce), rotazione, specchio e condizioni si salvano insieme; l'ultima copia «Elimina» chiede conferma e dice che se ne va il pezzo 203ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > le copie (103): l'elenco le raggruppa sotto il pezzo; «Aggiungi copia» ne posa una accanto, con rotazione, specchio e condizioni; si eliminano una copia o il pezzo intero, con conferma 275ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > la notifica dell'importazione conta pezzi e copie (scritti, scartati, tolti), con singolari e plurali 124ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > trascinata sulla mappa (strumento «Seleziona»), la copia si sposta e si salva al rilascio; selezionarla deseleziona lo spillo 102ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > sostituire l'immagine di una mappa con dei pezzi chiede conferma (409): confermando si ricarica con «eliminaPezzi» 60ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > «Scarica dalla guida» su un quartiere con dei pezzi chiede la stessa conferma (L1, F5: 409): confermando scarica con «eliminaPezzi» 90ms
+stderr | src/pages/EditorMappaPage.test.tsx > EditorMappaPage > un quartiere del mondo: il passaggio senza arrivo non offre «Crea mappa collegata» ma la pagina del quartiere
+An update to DestinazioneSpostamento inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to VociDelPin inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/pages/EditorMappaPage.test.tsx > EditorMappaPage > un quartiere del mondo: il passaggio senza arrivo non offre «Crea mappa collegata» ma la pagina del quartiere
+An update to CondizioniEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > una planimetria di un’Area: niente «Nuova mappa» ma il collegamento al quartiere, e «Chiudi» torna alla versione nella pagina dell’Area 73ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > una planimetria di un’Area: il form non offre tipo né genitore e non li manda all’API 64ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > un quartiere del mondo: il passaggio senza arrivo non offre «Crea mappa collegata» ma la pagina del quartiere 59ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > fuori dal mondo (un Palazzo) «Nuova mappa» e il form completo restano 68ms
+stderr | src/pages/EditorMappaPage.test.tsx > conserva i campi non salvati cambiando sezione e riapre Spilli quando si seleziona un pin
+An update to VociDelPin inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/pages/EditorMappaPage.test.tsx > conserva i campi non salvati cambiando sezione e riapre Spilli quando si seleziona un pin
+An update to CondizioniEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/pages/EditorMappaPage.test.tsx > conserva i campi non salvati cambiando sezione e riapre Spilli quando si seleziona un pin 125ms
+ ✓ src/pages/EditorMappaPage.test.tsx > il doppio tocco su uno spillo di spostamento apre la mappa d’arrivo, restando in modifica 50ms
+ ✓ src/pages/EditorMappaPage.test.tsx > la scheda Collegamenti porta alla mappa dove va un passaggio in uscita 61ms
+ ✓ src/pages/EditorMappaPage.test.tsx > la scheda Collegamenti porta anche alla mappa da cui si arriva qui 86ms
+ ✓ src/pages/EditorMappaPage.test.tsx > «Apri l’arrivo» sta in cima al pannello dello spillo, prima dei campi 79ms
+ ✓ src/pages/EditorMappaPage.test.tsx > una mappa mai rivista dice quale nome si legge in alto e lascia «Salva» attivo per confermarlo 73ms
+ ✓ src/pages/EditorMappaPage.test.tsx > una mappa già rivista non mostra l’avviso e torna a «Salva» solo dopo una modifica 58ms
+ ✓ src/pages/EditorMappaPage.test.tsx > l’interruttore del giorno corrente è spento e senza partita non si può accendere 39ms
+ ✓ src/pages/EditorMappaPage.test.tsx > acceso, la mappa si rilegge con la partita attiva: è così che si nasconde quel che oggi non c’è 75ms
+
+ Test Files  24 passed (24)
+      Tests  234 passed (234)
+   Start at  05:03:17
+   Duration  21.59s (transform 18.63s, setup 24.91s, import 59.17s, tests 23.83s, environment 114.55s)
+
+EXIT=0

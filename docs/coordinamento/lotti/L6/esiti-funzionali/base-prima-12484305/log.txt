@@ -1,0 +1,11 @@
+== base «prima» L6 · 2026-10-20T05:45:04.852Z · http://localhost:3302
+partite prima [[1,"Partita Roberto",true,"06-02","giorno"],[2,"Tutorial",false,"04-29","giorno"]]
+p1 2098 esiti · quartieri 23 · mappe 53 · http {"citta":200,"negozi":200,"attivita":200,"libri":200,"film":200,"videogiochi":200,"richieste":200,"dungeon":200,"completamento":200,"citta/yongen-jaya":200,"citta/shibuya":200,"citta/shinjuku":200,"ci
+partita di prova 201 3 attiva false
+data 04-11: PUT 200 · esiti 2131
+data 04-16: PUT 200 · esiti 2131
+data 05-20: PUT 200 · esiti 2131
+data 06-09: PUT 200 · esiti 2131
+data 07-05: PUT 200 · esiti 2131
+data 10-11: PUT 200 · esiti 2131
+DELETE partita di prova 204 · partite dopo [[1,true,"06-02"],[2,false,"04-29"]] 2026-10-20T05:45:20.268Z

@@ -1,0 +1,9 @@
+= validata
+= destinazioni
+= pezzi
+= atterraggi
+= mappePalazzi
+= marcatori
+= perimetri
+≠ partite.divergenza_partita: 8 righe diverse
+differenze: 1

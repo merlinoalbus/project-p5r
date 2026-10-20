@@ -1,0 +1,41 @@
+chiavi ignorate: da_rivedere, aggiunta_da, testo_precedente_json, motivo_revisione; differenze: 0
+differenze di stato visibile: 0
+== giro 1: radici Kamoshida e Madarame dalla rotta dell'app
+esporta dungeon-kamoshida: HTTP 200, 3427561 caratteri {"versione":1,"esportato":"2026-10-20T02:34:25.018Z","aree":10,"legami":19,"mappe":27,"immagini":1}
+importa dungeon-kamoshida: HTTP 200 {"data":{"mappe":27,"spilli":369,"pezzi":10,"copie":10,"pezziScartati":0,"copieScartate":0,"pezziEliminati":0,"copieEliminate":0,"immagini":1,"saltate":[],"condizioniScartate":0,"vociScartate":0}}
+esporta dungeon-madarame: HTTP 200, 10540727 caratteri {"versione":1,"esportato":"2026-10-20T02:34:25.551Z","aree":8,"legami":22,"mappe":18,"immagini":2}
+importa dungeon-madarame: HTTP 200 {"data":{"mappe":18,"spilli":258,"pezzi":14,"copie":32,"pezziScartati":0,"copieScartate":0,"pezziEliminati":0,"copieEliminate":0,"immagini":2,"saltate":[],"condizioniScartate":0,"vociScartate":0}}
+versioni prima {"gioco.db":110,"partite.db":21} dopo {"gioco.db":110,"partite.db":21}
+
+# gioco.db:mappa: righe 317 → 317; aggiunte 0, tolte 0, cambiate 1
+  ~ palazzo-di-madarame-il-labirinto-contorto
+      asset: "mappe/palazzo-di-madarame-il-labirinto-contorto" → null
+
+tabelle invariate: 115 su 116
+/c/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941/79867d53-4ec1-4b44-8379-bf96cb5de1df/scratchpad/l3h/out/estesa-p0.json /c/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941/79867d53-4ec1-4b44-8379-bf96cb5de1df/scratchpad/l3h/out/estesa-p1.json differ: char 81352, line 3279
+== giro 2: esportazione COMPLETA dalla rotta dell'app
+esporta TUTTE: HTTP 200, 103000644 caratteri {"versione":1,"esportato":"2026-10-20T02:34:27.578Z","aree":140,"legami":105,"mappe":317,"immagini":32,"ingressi":2}
+importa TUTTE: HTTP 200 {"data":{"mappe":317,"spilli":1759,"pezzi":24,"copie":42,"pezziScartati":0,"copieScartate":0,"pezziEliminati":0,"copieEliminate":0,"immagini":32,"saltate":[],"condizioniScartate":0,"vociScartate":0}}
+versioni prima {"gioco.db":110,"partite.db":21} dopo {"gioco.db":110,"partite.db":21}
+
+# gioco.db:mappa: righe 317 → 317; aggiunte 0, tolte 0, cambiate 2
+  ~ shibuya-tornello-della-linea-ginza-aoyama-itchome
+      asset: "mappe/shibuya-tornello-della-linea-ginza-aoyama-itchome" → null
+  ~ palazzo-di-madarame-il-labirinto-contorto
+      asset: "mappe/palazzo-di-madarame-il-labirinto-contorto" → null
+
+tabelle invariate: 115 su 116
+/c/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941/79867d53-4ec1-4b44-8379-bf96cb5de1df/scratchpad/l3h/out/estesa-p0.json /c/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941/79867d53-4ec1-4b44-8379-bf96cb5de1df/scratchpad/l3h/out/estesa-p2.json differ: char 81352, line 3279
+= validata
+= destinazioni
+= pezzi
+= atterraggi
+≠ mappePalazzi
+   madarame palazzo-di-madarame-il-labirinto-contorto: asset "mappe/palazzo-di-madarame-il-labirinto-contorto"→null
+= marcatori
+= perimetri
+differenze: 1
+estesa, differenze con updated_at compresi: 1
+  estesa.mappePalazzi.madarame.17.asset: "mappe/palazzo-di-madarame-il-labirinto-contorto" → null
+differenze di stato visibile: 0
+errori: 0

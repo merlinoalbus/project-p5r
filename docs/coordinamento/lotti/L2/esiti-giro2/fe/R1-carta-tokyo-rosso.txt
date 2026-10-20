@@ -1,0 +1,278 @@
+
+ RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/pensive-burnell-b50941
+
+ ❯ src/pages/MappaPage.test.tsx (24 tests | 1 failed | 23 skipped) 125ms
+     × R1: la carta di Tokyo dice «1 da verificare» senza aprire niente, e il chip porta all’area da verificare 123ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pages/MappaPage.test.tsx > MappaPage > R1: la carta di Tokyo dice «1 da verificare» senza aprire niente, e il chip porta all’area da verificare
+TestingLibraryElementError: Unable to find an accessible element with the role "link" and name "1 da verificare: Area riservata allo staff"
+
+Here are the accessible roles:
+
+  banner:
+
+  Name "":
+  [36m<header[39m
+    [33mclass[39m=[32m"intestazione  "[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  heading:
+
+  Name "Mappe":
+  [36m<h1[39m
+    [33mclass[39m=[32m"titolo-tasselli m-0"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"m-0 text-[13px] text-text-secondary max-w-[78ch]"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  list:
+
+  Name "Mappe":
+  [36m<ul[39m
+    [33maria-label[39m=[32m"Mappe"[39m
+    [33mclass[39m=[32m"m-0 grid list-none grid-cols-1 items-start gap-2 p-0 sm:grid-cols-2 xl:grid-cols-1"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  listitem:
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "TokyoCittà · 2 spilli · 3 mappe":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33mclass[39m=[32m"card card--cliccabile touch flex w-full items-center gap-3 text-left "[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Palazzo di KamoshidaPalazzo · 5 spilli · 1 mappe":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33mclass[39m=[32m"card card--cliccabile touch flex w-full items-center gap-3 text-left "[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  status:
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"card m-0 hidden text-[13px] text-text-muted xl:block"[39m
+    [33mrole[39m=[32m"status"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col gap-4 lg:gap-3"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"intestazione  "[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-end gap-4 flex-wrap"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"min-w-0 flex-1 flex flex-col gap-2"[39m
+          [36m>[39m
+            [36m<h1[39m
+              [33mclass[39m=[32m"titolo-tasselli m-0"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"tassello"[39m
+              [36m>[39m
+                [0mMappe[0m
+              [36m</span>[39m
+            [36m</h1>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"m-0 text-[13px] text-text-secondary max-w-[78ch]"[39m
+            [36m>[39m
+              [0mTutte le mappe della guida: Tokyo, i quartieri con le loro aree e le planimetrie dei Palazzi. 6 mappe con 7 spilli, raggruppate per il posto a cui appartengono.[0m
+            [36m</p>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</header>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"grid items-start gap-3 xl:grid-cols-[minmax(240px,300px)_minmax(0,1fr)]"[39m
+      [36m>[39m
+        [36m<ul[39m
+          [33maria-label[39m=[32m"Mappe"[39m
+          [33mclass[39m=[32m"m-0 grid list-none grid-cols-1 items-start gap-2 p-0 sm:grid-cols-2 xl:grid-cols-1"[39m
+        [36m>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"flex"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33maria-expanded[39m=[32m"false"[39m
+              [33mclass[39m=[32m"card card--cliccabile touch flex w-full items-center gap-3 text-left "[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"anteprima-mappa h-[52px] w-[72px] shrink-0"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"anteprima-mappa__vuota"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"26"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"26"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M9 4v14M15 6v14"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                [36m</span>[39m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col gap-0.5"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"font-display text-[17px] leading-tight break-words "[39m
+                [36m>[39m
+                  [0mTokyo[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-[11px] text-text-muted"[39m
+                [36m>[39m
+                  [0mCittà[0m
+                  [0m · [0m
+                  [0m2[0m
+                  [0m spilli · [0m
+                  [0m3 mappe[0m
+                [36m</span>[39m
+              [36m</span>[39m
+              [36m<span[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"shrink-0 text-text-muted"[39m
+              [36m>[39m
+                [0m▸[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"flex"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33maria-expanded[39m=[32m"false"[39m
+              [33mclass[39m=[32m"card card--cliccabile touch flex w-full items-center gap-3 text-left "[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"anteprima-mappa h-[52px] w-[72px] shrink-0"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"anteprima-mappa__vuota"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"26"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"26"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M9 4v14M15 6v14"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                [36m</span>[39m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col gap-0.5"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"font-display text-[17px] leading-tight break-words "[39m
+                [36m>[39m
+                  [0mPalazzo di Kamoshida[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-[11px] text-text-muted"[39m
+                [36m>[39m
+                  [0mPalazzo[0m
+                  [0m · [0m
+                  [0m5[0m
+                  [0m spilli · [0m
+                  [0m1 mappe[0m
+                [36m</span>[39m
+              [36m</span>[39m
+              [36m<span[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"shrink-0 text-text-muted"[39m
+              [36m>[39m
+                [0m▸[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ul>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"card m-0 hidden text-[13px] text-text-muted xl:block"[39m
+          [33mrole[39m=[32m"status"[39m
+        [36m>[39m
+          [0mScegli una mappa a sinistra per vedere che cosa contiene: quartieri, aree, planimetrie. Da qui si apre la mappa vera e propria.[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/pages/MappaPage.test.tsx:174:25
+    172|     const tokyo = await screen.findByRole('button', { name: /^Tokyo/ }…
+    173|     // due planimetrie della stessa area: un'area sola da verificare
+    174|     const chip = screen.getByRole('link', { name: '1 da verificare: Ar…
+       |                         ^
+    175|     expect(chip).toHaveAttribute('href', '/guida/citta/tokyo/staff');
+    176|     expect(chip).toHaveClass('chip', 'chip--attivo', 'touch');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 23 skipped (24)
+   Start at  07:31:32
+   Duration  1.89s (transform 500ms, setup 110ms, import 701ms, tests 125ms, environment 824ms)
+

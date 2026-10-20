@@ -1,0 +1,231 @@
+versioni prima {"gioco.db":106,"partite.db":21} dopo {"gioco.db":108,"partite.db":21}
+
+# gioco.db:__schema__: righe 114 → 115; aggiunte 1, tolte 0, cambiate 0
+  + table|immagine_miniatura
++ TABELLA NUOVA gioco.db:immagine_miniatura (68 righe)
+
+# gioco.db:mappa: righe 317 → 317; aggiunte 0, tolte 0, cambiate 2
+  ~ nativo-rmap-153-5-0
+      updated_at: "2026-10-18T18:02:50.469Z" → "2026-10-19T22:18:24.123Z"
+  ~ yongen-java-banchina-della-metropolitana
+      ruolo_immagine: "illustrazione-editoriale" → "planimetria-nativa"
+
+# gioco.db:mappa_entita: righe 134 → 135; aggiunte 1, tolte 0, cambiate 0
+  + nativo-rmap-153-5-0|area|madarame-il-furto-del-cuore-di-madarame
+
+# gioco.db:punto_interesse: righe 959 → 961; aggiunte 2, tolte 0, cambiate 0
+  + madarame-il-furto-del-cuore-di-madarame-scontro-con-madarame
+  + madarame-il-furto-del-cuore-di-madarame-scontro-con-madarame-2
+
+# gioco.db:spillo: righe 1913 → 1915; aggiunte 2, tolte 0, cambiate 1
+  + 2300
+  + 2301
+  ~ 811
+      updated_at: "2026-10-18T18:09:34.885Z" → "2026-10-19T22:19:00.029Z"
+
+# gioco.db:spillo_voce: righe 539 → 542; aggiunte 3, tolte 0, cambiate 0
+  + 811|madarame-il-furto-del-cuore-di-madarame-riunisciti-con-morgana
+  + 2300|madarame-il-furto-del-cuore-di-madarame-scontro-con-madarame-2
+  + 2301|madarame-il-furto-del-cuore-di-madarame-scontro-con-madarame-2
+
+# gioco.db:voce_giornata: righe 996 → 997; aggiunte 1, tolte 0, cambiate 1
+  + 9b4f62e2f6694fd5af10a407a455d546
+  ~ b9371f8061aedd71262a200b98d18bd0
+      note: "Giorno di scadenza (deadline)" → "Ruba il Tesoro di Madarame"
+      updated_at: "2026-09-30T22:40:53.560Z" → "2026-10-19T22:28:55.470Z"
+
+# partite.db:confidente_partita: righe 46 → 46; aggiunte 0, tolte 0, cambiate 2
+  ~ 1|igor
+      rango: 3 → 4
+      updated_at: "2026-10-11T15:18:17.780Z" → "2026-10-19T22:35:59.016Z"
+  ~ 1|morgana
+      rango: 2 → 3
+      updated_at: "2026-09-30T10:45:30.773Z" → "2026-10-19T22:31:49.435Z"
+
+# partite.db:dote_sociale_partita: righe 10 → 10; aggiunte 0, tolte 0, cambiate 1
+  ~ 1|gentilezza
+      punti: 30 → 37
+      updated_at: "2026-10-17T13:45:07.463Z" → "2026-10-19T22:33:34.081Z"
+
+# partite.db:effetto_lettura_partita: righe 19 → 20; aggiunte 1, tolte 0, cambiate 0
+  + 1|libro|storia-di-buchiko|1|gentilezza
+
+# partite.db:evento_partita: righe 1273 → 1316; aggiunte 43, tolte 0, cambiate 0
+  + 1275
+  + 1276
+  + 1277
+  + 1278
+  + 1279
+  + 1280
+  + 1281
+  + 1282
+  + 1283
+  + 1284
+  + 1285
+  + 1286
+  + 1287
+  + 1288
+  + 1289
+  + 1290
+  + 1291
+  + 1292
+  + 1293
+  + 1294
+  + 1295
+  + 1296
+  + 1297
+  + 1298
+  + 1299
+  + 1300
+  + 1301
+  + 1302
+  + 1303
+  + 1304
+  + 1305
+  + 1306
+  + 1307
+  + 1308
+  + 1309
+  + 1310
+  + 1311
+  + 1312
+  + 1313
+  + 1314
+  + 1315
+  + 1316
+  + 1317
+
+# partite.db:incontro_confidente_partita: righe 50 → 52; aggiunte 2, tolte 0, cambiate 0
+  + 51
+  + 52
+
+# partite.db:lettura_partita: righe 13 → 14; aggiunte 1, tolte 0, cambiate 0
+  + 1|libro|storia-di-buchiko
+
+# partite.db:partita: righe 2 → 2; aggiunte 0, tolte 0, cambiate 1
+  ~ 1
+      data_gioco: "06-01" → "06-02"
+      updated_at: "2026-10-19T20:24:35.645Z" → "2026-10-20T05:01:24.303Z"
+
+# partite.db:progresso_libro_partita: righe 11 → 11; aggiunte 0, tolte 0, cambiate 1
+  ~ 1|storia-di-buchiko
+      avanzamento: 1 → 2
+      updated_at: "2026-10-19T07:15:39.717Z" → "2026-10-19T22:33:53.120Z"
+
+# partite.db:punto_partita: righe 525 → 564; aggiunte 39, tolte 0, cambiate 0
+  + 1|madarame-il-furto-del-cuore-di-madarame-cerca-una-via-duscita
+  + 1|madarame-il-furto-del-cuore-di-madarame-scontro-con-madarame
+  + 1|madarame-il-furto-del-cuore-di-madarame-scontro-con-madarame-2
+  + 1|kamoshida-15-torre-centrale-lascensore-sensuale
+  + 1|kamoshida-15-torre-centrale-attraversa-il-passaggio-segreto
+  + 1|kamoshida-15-torre-centrale-sblocca-ascensore
+  + 1|kamoshida-15-torre-centrale-sblocca-le-grate
+  + 1|kamoshida-15-torre-centrale-scendi-le-scale
+  + 1|kamoshida-15-torre-centrale-torna-indietro
+  + 1|kamoshida-15-torre-centrale-usa-lascensore
+  + 1|kamoshida-15-torre-centrale-tornate-sullascensore-e-alla-torre-centrale
+  + 1|kamoshida-15-torre-centrale-esplora-la-stanza-a-sud-ovest
+  + 1|kamoshida-15-torre-centrale-sconfiggi-il-nemico
+  + 1|kamoshida-15-torre-centrale-esplora-stanza-successiva
+  + 1|kamoshida-15-torre-centrale-tira-la-leva
+  + 1|kamoshida-15-torre-centrale-torre-centrale
+  + 1|kamoshida-15-torre-centrale-verso-il-livello-intermedio
+  + 1|kamoshida-15-torre-centrale-sconfiggi-nemici
+  + 1|kamoshida-15-torre-centrale-sconfiggi-nemici-2
+  + 1|kamoshida-15-torre-centrale-torre-livello-superiore
+  + 1|kamoshida-15-torre-centrale-osserva-statua-di-kamoshida
+  + 1|kamoshida-15-torre-centrale-torna-al-livello-inferiore
+  + 1|kamoshida-15-torre-centrale-trova-la-chiave
+  + 1|kamoshida-15-torre-centrale-sconfiggi-i-capitani-delle-guardie
+  + 1|kamoshida-15-torre-centrale-usa-gli-occhi-sulla-statua-di-kamoshida
+  + 1|kamoshida-15-torre-centrale-ponte-di-kamoshida
+  + 1|kamoshida-15-torre-centrale-sconfiggi-il-nemico-2
+  + 1|kamoshida-15-torre-centrale-verso-la-sala-del-trono
+  + 1|kamoshida-15-torre-centrale-assalta-il-nemico
+  + 1|kamoshida-15-torre-centrale-sala-del-trono
+  + 1|kamoshida-15-torre-centrale-raccogli-forziere-3
+  + 1|kamoshida-15-torre-centrale-entra-nella-sala-del-trono
+  + 1|kamoshida-15-torre-centrale-individua-il-tesoro
+  + 1|kamoshida-15-torre-centrale-esci-dal-castello
+  + 1|kamoshida-13-tetto-sconfiggi-nemici-potenti
+  + 1|kamoshida-13-tetto-segui-percorso
+  + 1|kamoshida-13-tetto-usa-il-condotto-di-areazione
+  + 1|kamoshida-13-tetto-seme-della-bramosia
+  + 1|kamoshida-13-tetto-ispeziona-linterno-della-torre
+
+# partite.db:spillo_partita: righe 748 → 797; aggiunte 49, tolte 0, cambiate 9
+  + 1|02fc74c8906b546a6be54ed9d77230ee
+  + 1|3646b85101a8d8197051c7235f900dd3
+  + 1|28e64247a1732b5dd4d9bf54ee41708d
+  + 1|e5f3b5d98591996314653a8310c07603
+  + 1|d23cbdc0dc6977f1bbb5330ac2be7a31
+  + 1|8c0d13763795413b281e772e87aeb1ba
+  + 1|57cd09638b20abaf8122d2fb209df881
+  + 1|26f50029e7a5bfe35bdf8681caba99af
+  + 1|819737f8f0ffa9697f558600cf23d950
+  + 1|5ec8151f78166cfd20935133f2cbf06b
+  + 1|eac8dc793e8c613ac1eddd32bb900300
+  + 1|8c8cf8ae6c046b31e0db76f6ddcc26d1
+  + 1|f50d96534c5c8e8a7801a10c2782ae84
+  + 1|c4be9e59f07aad79dec8c266cba1ad42
+  + 1|76f5aef1506cdf3d0802941f94369537
+  + 1|1b23ba3d308c84ad771329a90e9861c4
+  + 1|ebd5df9fb13d28f36be00790806e69c3
+  + 1|be8ebfb495ee3ebd09c8bd6b3782af80
+  + 1|c9749b2e0758a3871020721068f6758c
+  + 1|679055c570caeb29f05d4b262668506c
+  + 1|fa69df1654d644cdfa6ebf2d8a3f23ea
+  + 1|4d9115c3bfa1bc72e8e6deea86dd25ee
+  + 1|2e8307ba8391362e01ba1fdf29cdd500
+  + 1|e9bc0e64c224e7fd6a1ef13963908eba
+  + 1|8c8d151b3d4d3bcdecb108ac6ac9e476
+  + 1|5101268b4f4f838136e276d0351f2cf0
+  + 1|9bfcf4834cc80512e2e7821be70b2d3b
+  + 1|0a7843c3ab6bfd377cffd3d26466bb61
+  + 1|9a4e6e83ab8f907839782be526666147
+  + 1|53eefba7feca30c9640cef159581036c
+  + 1|9891ab46bde16c697ff76535ef7297a6
+  + 1|1d6dff9855355d6633a95a3f2f74b57e
+  + 1|c6b39b69ed5bbf482ecbdc2f91671bb6
+  + 1|57db1b0b1c797e674d776b6c2666c106
+  + 1|f0631f7a69eea18af903cb2aafee9389
+  + 1|be1ba50c05a06b8a15a191e3c397beef
+  + 1|e641ff268e993350e4f7009fe6412b22
+  + 1|74353d346bf6561125db96dc21fe6632
+  + 1|b3e44bd7290f4e51444e7596f06f2a20
+  + 1|2aafb33a0dd37330d4cb01a7bdaea7a1
+  + 1|5d234349f6180b094d65ce0755c5905a
+  + 1|f8f763771ff09a1d5b1a6c3a3fc8cafc
+  + 1|d65440d1fcde61f22ca55bbd172d8a85
+  + 1|15a416a2ee797500f09097dfa57fec98
+  + 1|3ceb8eaa62dee0a1a15876fbb4ca67ee
+  + 1|34c5fd4db3d8084df72a216d68c0f2d6
+  + 1|1a6487f51218e244be207aaa6b30b45f
+  + 1|15609e48376349fe43ae87a646a64da1
+  + 1|083c5e9437fe83ea3cee7381dc23a2e8
+  ~ 1|efb5cb847170fbdc2b36560eaddc9ebd
+      updated_at: "2026-09-30T04:59:33.100Z" → "2026-10-20T05:01:24.303Z"
+  ~ 1|d2f6acf51abeb2e971bd19709d2fec99
+      updated_at: "2026-09-30T05:07:57.410Z" → "2026-10-20T05:01:23.612Z"
+  ~ 1|b8b4ac0fd8859ca346deef7019c63294
+      updated_at: "2026-09-30T06:32:49.252Z" → "2026-10-20T05:00:46.180Z"
+  ~ 1|3c177c38ea6d192491665aeb2ab5b9ea
+      updated_at: "2026-09-30T06:32:49.912Z" → "2026-10-20T05:00:46.180Z"
+  ~ 1|fd32580a28b59163509d99ec05947ee9
+      updated_at: "2026-09-30T09:47:48.313Z" → "2026-10-20T05:00:52.164Z"
+  ~ 1|2d4e5e28d4d8a9e9c85a38a63efe2fc2
+      updated_at: "2026-09-30T09:47:49.310Z" → "2026-10-20T05:00:52.164Z"
+  ~ 1|4b9fb9f8574ad7a8b243b491be911ac5
+      updated_at: "2026-09-30T09:48:15.791Z" → "2026-10-20T05:00:51.414Z"
+  ~ 1|ac5feb061a85a46869a432280321130a
+      updated_at: "2026-09-30T09:48:37.628Z" → "2026-10-20T05:00:59.298Z"
+  ~ 1|a436528f527938e0ad444022b41ae0a2
+      updated_at: "2026-10-19T20:24:35.645Z" → "2026-10-19T22:19:00.029Z"
+
+# partite.db:spunta_voce_partita: righe 338 → 342; aggiunte 4, tolte 0, cambiate 0
+  + 1|b9371f8061aedd71262a200b98d18bd0
+  + 1|826b3d7a82184f63248ffcece670abdc
+  + 1|8bb60c5778f0519be5a310c4334e2914
+  + 1|9b4f62e2f6694fd5af10a407a455d546
+
+tabelle invariate: 93 su 112

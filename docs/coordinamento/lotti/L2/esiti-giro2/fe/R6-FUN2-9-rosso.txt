@@ -1,0 +1,30 @@
+
+ RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/pensive-burnell-b50941
+
+ ❯ src/pages/CittaPage.test.tsx (20 tests | 1 failed | 18 skipped) 158ms
+     × «Colloca» propone il quartiere del genitore con le sue aree, invia a collocaPlanimetria e rilegge la lista 129ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pages/CittaPage.test.tsx > CittaPage — Aree della città (L2, 2026-10-20) > «Colloca» propone il quartiere del genitore con le sue aree, invia a collocaPlanimetria e rilegge la lista
+AssertionError: expected 'Yongen-Jaya' to be 'Kichijoji' // Object.is equality
+
+Expected: "Kichijoji"
+Received: "Yongen-Jaya"
+
+ ❯ src/pages/CittaPage.test.tsx:273:52
+    271|     const finestra = await screen.findByRole('dialog', { name: 'Colloc…
+    272|     // il quartiere proposto è quello del genitore, e le aree offerte …
+    273|     expect(valoreSelettore('Quartiere', finestra)).toBe('Kichijoji');
+       |                                                    ^
+    274|     await waitFor(() => expect(api.getQuartiere).toHaveBeenCalledWith(…
+    275|     await waitFor(() => expect(within(finestra).getByRole('combobox', …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed | 18 skipped (20)
+   Start at  05:25:13
+   Duration  1.97s (transform 633ms, setup 103ms, import 845ms, tests 158ms, environment 738ms)
+

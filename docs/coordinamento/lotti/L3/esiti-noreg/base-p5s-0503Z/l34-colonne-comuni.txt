@@ -1,0 +1,29 @@
+# gioco.db:mappa: valori cambiati 5, tolte 0, aggiunte 0
+   ~ nativo-rmap-022-1-0: genitore_chiave null → "citta-yongen-jaya"
+   ~ nativo-rmap-022-1-1: genitore_chiave null → "citta-yongen-jaya"
+   ~ nativo-rmap-022-1-2: genitore_chiave null → "citta-yongen-jaya"
+   ~ nativo-rmap-022-1-3: genitore_chiave null → "citta-yongen-jaya"
+   ~ nativo-rmap-022-1-4: genitore_chiave null → "citta-yongen-jaya"
+# gioco.db:voce_giornata: valori cambiati 6, tolte 0, aggiunte 1
+   ~ 65fdbeab5101e6068310fea982553d22: note "Usare attacchi nucleari contro i nemici" → "Usare attacchi nucleari contro i nemici. Nella guida: Cerca il boss della mala"
+   ~ c9efdb83a3eeb29a6ceea9a6f6cc2ea2: azione "Palazzo di Futaba: esplorazione della Camera del Rigetto e della Camera del Rimorso, risoluzione di puzzle con codici binari e pannelli riflettenti, combattimenti contro nemici potenziati" → "Palazzo di Futaba: esplorazione della Camera del Vuoto, risoluzione di puzzle con codici binari e pannelli riflettenti, combattimenti contro nemici potenziati"
+   ~ 7dd92df212b81bb87aba6e7a2fa8c874: riferimento_tipo "confidente" → "dungeon"; riferimento_chiave "makoto" → "niijima"
+   ~ dece90bfb20d9d3328f2a6b0ca417590: riferimento_tipo "confidente" → "dungeon"; riferimento_chiave "makoto" → "niijima"
+   ~ 589d82e823703ee879d72f974fd51139: riferimento_tipo "confidente" → "dungeon"; riferimento_chiave "makoto" → "niijima"
+   ~ 527cf9832e94e93e855436191e06f8b6: note "Assicurarsi di avere equipaggiata una Persona di Arcano Imperatrice per i giorni successivi" → "Assicurarsi di avere equipaggiata una Persona di Arcano Imperatrice per i giorni successivi. Nella guida: Ponte anteriore"
+   + 8c58ad986d8176c681c76ed93d2d3fe5
+# gioco.db:__schema__: valori cambiati 5, tolte 0, aggiunte 11
+   ~ table|cestino: sql "CREATE TABLE cestino (\n      id              INTEGER PRIMARY KEY AUTOINCREMENT,\n      uid             TEXT NOT NULL UNIQUE,\n      tipo            TEXT NOT NULL CHECK (tipo IN ('area', 'voce', 'mappa', 'area-dedalo')),\n      chiave          TEXT NOT NULL,\n      nome            TEXT NOT NULL,\n      contesto        TEXT NOT NULL DEFAULT '',\n      riepilogo_json  TEXT NOT 
+   ~ table|mappa: sql "CREATE TABLE \"mappa\" (\n  chiave           TEXT PRIMARY KEY,\n  nome             TEXT NOT NULL,\n  tipo             TEXT NOT NULL CHECK (tipo IN ('citta','quartiere','luogo','palazzo','area','dedalo','generica')),\n  genitore_chiave  TEXT REFERENCES mappa(chiave) ON DELETE SET NULL,\n  ordine           INTEGER NOT NULL DEFAULT 0,\n  immagine_chiave  TEXT,\n  asset            
+   ~ table|punto_interesse: sql "CREATE TABLE punto_interesse (\n  chiave        TEXT PRIMARY KEY,                 -- '<area>/<ordine>'\n  area_chiave   TEXT NOT NULL REFERENCES dungeon_area(chiave) ON DELETE CASCADE,\n  ordine        INTEGER NOT NULL,\n  tipo          TEXT NOT NULL,\n  nome          TEXT NOT NULL,\n  descrizione   TEXT NOT NULL DEFAULT '',\n  esauribile    INTEGER NOT NULL DEFAULT 0
+   ~ table|quartiere_ingresso: sql "CREATE TABLE quartiere_ingresso(quartiere_chiave TEXT PRIMARY KEY REFERENCES quartiere(chiave) ON DELETE CASCADE,mappa_chiave TEXT NOT NULL REFERENCES mappa(chiave) ON DELETE CASCADE,x REAL NOT NULL CHECK(x BETWEEN 0 AND 100),y REAL NOT NULL CHECK(y BETWEEN 0 AND 100),zoom REAL NOT NULL CHECK(zoom BETWEEN 1 AND 6))" → "CREATE TABLE quartiere_ingresso(quartiere_chia
+   ~ table|voce_giornata: sql "CREATE TABLE voce_giornata (\n      uid                 TEXT PRIMARY KEY,\n      data                TEXT NOT NULL,\n      fascia              TEXT NOT NULL CHECK (fascia IN ('giorno','sera')),\n      ordine              INTEGER NOT NULL,\n      genere              TEXT NOT NULL DEFAULT 'azione' CHECK (genere IN ('azione','evento','scadenza','promemoria')),\n      azion
+   + index|area_slug_citta
+   + index|area_slug_dungeon
+   + index|area_slug_quartiere
+   + index|infiltrazione_area_area
+   + index|mappa_area
+# partite.db:__schema__: valori cambiati 0, tolte 0, aggiunte 2
+   + table|divergenza_partita
+   + table|spillo_partita_infiltrazione
+tabelle con valori cambiati, righe tolte o aggiunte: 4

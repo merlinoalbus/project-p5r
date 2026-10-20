@@ -1,0 +1,329 @@
+planimetrie citta-ikebukuro Ikebukuro origine: "seed" → "utente"
+planimetrie citta-kichijoji Kichijoji origine: "seed" → "utente"
+planimetrie citta-meiji-shrine Santuario Meiji origine: "seed" → "utente"
+planimetrie citta-mementos Entrata dei Memento origine: "seed" → "utente"
+planimetrie citta-nakano Nakano origine: "seed" → "utente"
+planimetrie nativo-rmap-001-1-0 Piazza della stazione origine: "seed" → "utente"
+planimetrie nativo-rmap-001-12-0 Banchina della metropolitana origine: "seed" → "utente"
+planimetrie nativo-rmap-001-2-0 Sottopasso nome_rivisto: 1 → 0
+planimetrie nativo-rmap-001-2-1 Sottopasso Speciale nome_rivisto: 1 → 0
+planimetrie nativo-rmap-001-3-0 Central Street origine: "seed" → "utente"
+planimetrie nativo-rmap-001-4-0 Centro comm. sotterraneo origine: "seed" → "utente"
+planimetrie nativo-rmap-001-5-0 Tornello della linea Ginza origine: "seed" → "utente"
+planimetrie nativo-rmap-002-0-0 Edificio principale 1P / Edificio laboratori 1P origine: "seed" → "utente"
+planimetrie nativo-rmap-002-0-1 Edificio principale 2P / Edificio laboratori 2P origine: "seed" → "utente"
+planimetrie nativo-rmap-002-0-2 Edificio principale 3P / Edificio laboratori 3P origine: "seed" → "utente"
+planimetrie nativo-rmap-002-1-0 Cancello della scuola origine: "seed" → "utente"
+planimetrie nativo-rmap-002-5-0 Tetto origine: "seed" → "utente"
+planimetrie nativo-rmap-002-6-0 Aula origine: "seed" → "utente"
+planimetrie nativo-rmap-005-1-0 Quartiere dello shopping origine: "seed" → "utente"
+planimetrie nativo-rmap-006-1-0 Quartiere a luci rosse origine: "seed" → "utente"
+planimetrie nativo-rmap-007-1-0 Electric Town origine: "seed" → "utente"
+planimetrie nativo-rmap-010-4-0 Cappella origine: "seed" → "utente"
+planimetrie nativo-rmap-012-29-0 Cantiere dello stadio origine: "seed" → "utente"
+planimetrie nativo-rmap-022-1-0 Covo dei Ladri — settore d’ingresso origine: "seed" → "utente"
+planimetrie nativo-rmap-022-1-1 Covo dei Ladri origine: "seed" → "utente"
+planimetrie nativo-rmap-022-1-2 Covo dei Ladri — porzione occidentale origine: "seed" → "utente"
+planimetrie nativo-rmap-022-1-3 Covo dei Ladri — porzione settentrionale origine: "seed" → "utente"
+planimetrie nativo-rmap-022-1-4 Covo dei Ladri — inquadratura orientale origine: "seed" → "utente"
+planimetrie nativo-rmap-150-3-0 Area riservata allo staff — porzione occidentale origine: "seed" → "utente"
+planimetrie nativo-rmap-150-3-1 Area riservata allo staff origine: "seed" → "utente"
+planimetrie shibuya-tornello-della-linea-ginza-aoyama-itchome Banchina Aoyama Itchome asset: "mappe/shibuya-tornello-della-linea-ginza-aoyama-itchome" → null ; nome_rivisto: 1 → 0
+spilliMondo 904ba928195188fe044c79d3c429ab12 Cinema "Cult 9" id: 208 → 2424 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo 5183bf62455772bc884ecfd2124006a8 Bar Crossroads id: 209 → 2420 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo befe35da662c6cf076e21e5cbcc30ca8 Fioraio Sukebe id: 210 → 2422 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo 3a516751deb5d8ef62b99b7b38c53e35 Libreria Hinokuniya id: 211 → 2421 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo e9fc5f434c7716095e428da50c0917d4 Negozio di articoli vari Mran Mran id: 212 → 2423 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo a9e8019fbfa59a26d367af20a45aeb6a Negozio di elettronica Akiba id: 213 → 2431 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo 61df917d78c075fa7d391efc70795e0c Megastore di elettronica Akindo id: 214 → 2429 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo 12e62fe425af1e9e8b4b9ccac06fd874 Distributori automatici speciali id: 215 → 2433 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo eff987a66fc914587f73134d5f5008f0 Maid Café id: 216 → 2434 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo 2c7809888b596fa2c557f3d6ae299f41 Sala giochi di Akihabara id: 217 → 2432 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo c1d4c11f5880d79592d7548f1f4de2d1 Negozio Otaku Tokobushiya id: 218 → 2430 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo ce0a3736e24b19750f093128aaabbf8d Libreria Nagiuri id: 220 → 2445 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo 235dce1f042a14c0ecf30a7de0c50cb2 Harajuku (zona crepes/moda) id: 221 → 2446 ; origine: "seed" → "utente"
+spilliMondo 20172ab4ca0f820c39e3d8ebace82d39 Museo di Ueno id: 222 → 2447 ; origine: "seed" → "utente"
+spilliMondo 9bc82ecfd2973363e5cff45a989b2265 Parco Inokashira (area hangout) id: 223 → 2448 ; origine: "seed" → "utente"
+spilliMondo b2b1bf7efe41d80fcc468221066e648d Odaiba Seaside Park id: 224 → 2449 ; origine: "seed" → "utente"
+spilliMondo 887eaf62541218c899282486b06aae74 Acquario di Shinagawa id: 225 → 2450 ; origine: "seed" → "utente"
+spilliMondo e391fa8e4c1a1ed230c1a9a441f4e0b2 Ristorante di ramen di Ogikubo id: 226 → 2451 ; origine: "seed" → "utente"
+spilliMondo 2f9a8fefec3a352537526cf5cd5919d0 Chinatown (area hangout) id: 227 → 2452 ; origine: "seed" → "utente"
+spilliMondo d8b72a0c5ab80936087c4fd586505007 Tokyo Destinyland id: 228 → 2453 ; origine: "seed" → "utente"
+spilliMondo 6443124df30ef1e1439001ba10b315d0 Sede Okumura Foods id: 229 → 2454 ; origine: "seed" → "utente"
+spilliMondo 46340f110463d8149fc265fb343810f2 Ristorante di monjayaki id: 230 → 2455 ; origine: "seed" → "utente"
+spilliMondo 7615d9981c4a48292f936244987db446 Santuario Meiji (area hangout) id: 231 → 2456 ; origine: "seed" → "utente"
+spilliMondo 716d193779268beb7cdd7b06ee8baa5c Laghetto di Ichigaya id: 232 → 2457 ; origine: "seed" → "utente"
+spilliMondo 3670ec2ecaef66662d581df666c2ee11 Dome Town id: 233 → 2458 ; origine: "seed" → "utente"
+spilliMondo 9d7f9c35e318e46d2c28a0d3b3d8b4ba Asakusa (area hangout) id: 234 → 2459 ; origine: "seed" → "utente"
+spilliMondo 92b99d7685f5e5ca387b9c0a005784e6 Punto di spostamento id: 258 → 2367 ; origine: "seed" → "utente"
+spilliMondo 8e8a8c04f4577a6b53f649721f892467 Passaggio id: 259 → 2368 ; origine: "seed" → "utente"
+spilliMondo 157b39e4e7407a3886a1bfb288c5a351 Da identificare (tipo 28) — minimappa: icona del giocatore id: 260 → 2369 ; origine: "seed" → "utente"
+spilliMondo 59c564869aa0174285e443aa63a66eda Da identificare (tipo 20) — minimappa: Velluto id: 261 → 2370 ; origine: "seed" → "utente"
+spilliMondo 5ff51c91a8323ae29188c0ea28336d5b Punto di spostamento id: 262 → 2371 ; origine: "seed" → "utente"
+spilliMondo 48c190e039eb421180ed87c04ad96272 Punto di spostamento id: 263 → 2372 ; origine: "seed" → "utente"
+spilliMondo 3ed9db89b10e6bdd99314d8ee3d2bbf4 Punto di spostamento id: 264 → 2373 ; origine: "seed" → "utente"
+spilliMondo c68434594efa08b4b5e7dc16ef347da3 Negozio Otaku Tokobushiya id: 265 → 2374 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo 9812689730541efd98a6aaab92a06c47 Maid Café id: 266 → 2375 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo d1f86e83a4859a5489e1116afeb16d74 Megastore di elettronica Akindo id: 267 → 2376 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo c17003e696178a2b3a5fc3bf66394cfc Ferramenta id: 268 → 2377 ; origine: "seed" → "utente"
+spilliMondo ee105f3c2c4340d8d2955df7dda79b4b Distributori di capsule id: 269 → 2378 ; origine: "seed" → "utente"
+spilliMondo 0e50663ef724612a860a1500eac7efc7 Negozio di retrogaming Super Baron id: 270 → 2379 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo 72a0c582f9ecc2e1ed02476b169754c2 Sala giochi di Akihabara id: 271 → 2380 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo 7fae2387fe56bf99c8b3a42af179deb6 Distributore di bevande id: 272 → 2381 ; origine: "seed" → "utente"
+spilliMondo 9bb62d8f2c6823d9d0e3855fac04660f Distributore di bevande id: 273 → 2382 ; origine: "seed" → "utente"
+spilliMondo 8af8d70507e11d44a814dc7b997480d7 Distributore di bevande id: 274 → 2383 ; origine: "seed" → "utente"
+spilliMondo 97ed4209b8c1817a90f1625e5de68645 Distributore di bevande id: 275 → 2384 ; origine: "seed" → "utente"
+spilliMondo a87236f3cf1771f5757c6a0b0cbe91b9 Piano 2 id: 285 → 2331
+spilliMondo 902293238a8bfcd75d0188d3fa5c0794 Cancello della Scuola id: 289 → 2332
+spilliMondo e17a163617a1f2aa33fa4bdb3952aefd Distributore di bevande id: 290 → 2333
+spilliMondo 74f0a5c4f60cb7473419ce0755f9d069 Distributore di bevande id: 291 → 2334
+spilliMondo 4f09aeb32069759f1d62f21dac842bba Distributore Cortile id: 292 → 2335
+spilliMondo 4b0335e1c877dbe4691bda9d9e0b2203 Panetteria id: 293 → 2336
+spilliMondo 1bb2575d76f6f9d711d3a33a94cf1fa3 Piano 3 id: 304 → 2500
+spilliMondo d126b88e4036f440c9c7ffcd250311a2 Aula 2D id: 315 → 2501
+spilliMondo 55855d951b68be035f72205bdbac154b Libreria id: 334 → 2566
+spilliMondo 687cc4aeff8e21013228977d3d3ba9cc Shujin Academy id: 336 → 2579
+spilliMondo 12e2b257a92a1645e2c71fc842412785 Stazione Metropolitana id: 337 → 2580
+spilliMondo 2f9a84fe407df45bcd1af8df57d39bea Distributore di bevande id: 339 → 2581
+spilliMondo 506df65a0ea4b6d84e251c1db12d5f52 Da identificare (tipo 28) — minimappa: icona del giocatore id: 344 → 2594 ; origine: "seed" → "utente"
+spilliMondo fb558afd098969b4fa7f96edb7812d2b Punto di spostamento id: 345 → 2595 ; origine: "seed" → "utente"
+spilliMondo 8122002fe3c341bde8d206e60496ca3b Biblioteca Scolastica id: 346 → 2596
+spilliMondo 3c82b2be4a84b1eb91b41bae37206561 Punto di spostamento id: 347 → 2385 ; origine: "seed" → "utente"
+spilliMondo 97f036311b947742b67b6e28d973836f Da identificare (tipo 28) — minimappa: icona del giocatore id: 348 → 2386 ; origine: "seed" → "utente"
+spilliMondo 6e5090ce2888bae8a468993d0229939f Chiesa id: 349 → 2387 ; origine: "seed" → "utente"
+spilliMondo 7e7db5d8ed82e81a44f16f1b05437372 Da identificare (tipo 20) — minimappa: Velluto id: 350 → 2337 ; origine: "seed" → "utente"
+spilliMondo 3a0cb2c3df952bf0d46da1d235fcf6b7 Cristalloterapia Stoneon id: 351 → 2338 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo cc85625a2c70a243a595c4d656e7b3bf Cartoleria Mitsubachi id: 352 → 2339 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo 321f65e3fa4b0dd3454e4c71db4ef3ed Mantra Ganda id: 353 → 2340 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo c82b18b599a8a4d542858b645b8367c8 Negozio di abiti usati id: 354 → 2341 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo 6232fa6c8e4afa723730393bfd7ff1fe Vecchio tempio id: 355 → 2342 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo a16a9ae752d1062af298b880bb21868f Jazz Club (Jazz Jin) id: 356 → 2343 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo 97c990badf697b99c1db559f278503a1 Penguin Sniper (Freccette e Biliardo) id: 357 → 2344 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo 353626dffd332d38519a95aa70c4a425 Friggitoria/Macelleria Hagoromo id: 358 → 2345 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo fed23b11ba2e2b8fc60219440d2dfe93 Distributore di bevande id: 359 → 2346 ; origine: "seed" → "utente"
+spilliMondo 39c2580f77bf72af9772282b571ed0b0 Panini al vapore id: 360 → 2347 ; origine: "seed" → "utente"
+spilliMondo 31ebe9730655511ea09d76dfdcedd859 Passaggio id: 361 → 2348 ; origine: "seed" → "utente"
+spilliMondo 15987cdbe3523154078e13df64923152 Punto informazioni id: 362 → 2349 ; origine: "seed" → "utente"
+spilliMondo c642c22d36c8b871bb69e9a746a5814c Alimentari importati id: 363 → 2350 ; origine: "seed" → "utente"
+spilliMondo 160074488cdb691f76d37f82829c55d4 Da identificare (tipo 5) — minimappa: destinazione, punto di blocco cognitivo id: 364 → 2351 ; origine: "seed" → "utente"
+spilliMondo 375ea11a579963c50d89678cb4be0bf4 Punto di spostamento id: 365 → 2388 ; origine: "seed" → "utente"
+spilliMondo 1083a95237d7f625d9fbb8c442a1a908 Da identificare (tipo 28) — minimappa: icona del giocatore id: 366 → 2389 ; origine: "seed" → "utente"
+spilliMondo d618f3b8ca3370b9bdb38eeaeb304869 Passaggio id: 367 → 2390 ; origine: "seed" → "utente"
+spilliMondo 41996494a429b11530077a56c748ff6d Passaggio id: 368 → 2391 ; origine: "seed" → "utente"
+spilliMondo 6d3345c1897248680a6b6098fe8aac41 Da identificare (tipo 104) — Covo dei Ladri: quando è stato posizionato un oggetto id: 369 → 2392 ; origine: "seed" → "utente"
+spilliMondo 126273cc6ba0259d3ad602060b2e110d Da identificare (tipo 104) — Covo dei Ladri: quando è stato posizionato un oggetto id: 370 → 2393 ; origine: "seed" → "utente"
+spilliMondo 1d63270d8d3935154f621b599760b724 Da identificare (tipo 104) — Covo dei Ladri: quando è stato posizionato un oggetto id: 371 → 2394 ; origine: "seed" → "utente"
+spilliMondo 31b402f86f5659e601c112f5fafe584c Uscita id: 372 → 2405 ; origine: "seed" → "utente"
+spilliMondo fbd58fcd8c2c181cb937986bd3381dde Da identificare (tipo 104) — Covo dei Ladri: quando è stato posizionato un oggetto id: 373 → 2406 ; origine: "seed" → "utente"
+spilliMondo 78e1733f1ef48ec877c9a0d683776bef Da identificare (tipo 104) — Covo dei Ladri: quando è stato posizionato un oggetto id: 374 → 2407 ; origine: "seed" → "utente"
+spilliMondo febfb1103f3c6d467658fca63050d828 Creatore del Palazzo id: 375 → 2408 ; origine: "seed" → "utente"
+spilliMondo 1f41c449fa1e144d16b473d3983a777a Musica id: 376 → 2409 ; origine: "seed" → "utente"
+spilliMondo 32dd1a6f50c7647991a74e23681794cc Televisione id: 377 → 2410 ; origine: "seed" → "utente"
+spilliMondo e838bf64eda13b7b8ccbe4e11c9b404c Galleria id: 378 → 2411 ; origine: "seed" → "utente"
+spilliMondo 5f5d4f0b5e56bf712bde80a243b191cd Area giochi id: 379 → 2412 ; origine: "seed" → "utente"
+spilliMondo 48d592ea06e4b5ac05293e39f3e7836e Premi id: 380 → 2413 ; origine: "seed" → "utente"
+spilliMondo e3d0a489e99fa0a7ac7a72e25e66def9 Premi id: 381 → 2414 ; origine: "seed" → "utente"
+spilliMondo fefc52d7e56b151470316a32523db0c7 Premi id: 382 → 2415 ; origine: "seed" → "utente"
+spilliMondo bd31112de4fff1ab5a545142546edca2 Premi id: 383 → 2416 ; origine: "seed" → "utente"
+spilliMondo 9c546823383c45e4c3c5a7830d2497c3 Passaggio in basso a sinistra id: 384 → 2417 ; origine: "seed" → "utente"
+spilliMondo c93ef8c9511259412963fbb22f0e3e9d Passaggio in alto a destra id: 385 → 2418 ; origine: "seed" → "utente"
+spilliMondo 601c528c698f0d8253c83ade4369c1e5 Jose id: 386 → 2419 ; origine: "seed" → "utente"
+spilliMondo 3cce08156e0c5d89586322785d2c4556 Da identificare (tipo 104) — Covo dei Ladri: quando è stato posizionato un oggetto id: 387 → 2425 ; origine: "seed" → "utente"
+spilliMondo 12912db5895199d8c33a7b59cbdaf3ce Da identificare (tipo 104) — Covo dei Ladri: quando è stato posizionato un oggetto id: 388 → 2426 ; origine: "seed" → "utente"
+spilliMondo d988dfd48594fe5ca5fb2a1c1771145e Da identificare (tipo 104) — Covo dei Ladri: quando è stato posizionato un oggetto id: 389 → 2427 ; origine: "seed" → "utente"
+spilliMondo 0c9037c931d42f1634bf8078b126d4b8 Da identificare (tipo 104) — Covo dei Ladri: quando è stato posizionato un oggetto id: 390 → 2428 ; origine: "seed" → "utente"
+spilliMondo 7191bac51807f33a1d0af7edf08ca6b6 Da identificare (tipo 104) — Covo dei Ladri: quando è stato posizionato un oggetto id: 391 → 2435 ; origine: "seed" → "utente"
+spilliMondo ccd86f5635a1192c33639f43252faf8e Da identificare (tipo 104) — Covo dei Ladri: quando è stato posizionato un oggetto id: 392 → 2436 ; origine: "seed" → "utente"
+spilliMondo 7cfb9eb9a8d302ee4f7b93061247071a Da identificare (tipo 104) — Covo dei Ladri: quando è stato posizionato un oggetto id: 393 → 2437 ; origine: "seed" → "utente"
+spilliMondo 214fb64fd10cf82f5226366798562275 Passaggio in alto a destra id: 394 → 2438 ; origine: "seed" → "utente"
+spilliMondo 0509949a34da9187b994d1270b0301d3 Passaggio id: 395 → 2439 ; origine: "seed" → "utente"
+spilliMondo 1e2c1721030ed48c88466d1959251ef9 Sottopasso id: 1457 → 2306
+spilliMondo 4041e7fd698f773386eda9fe8c69f4fb Central Street id: 1460 → 2311
+spilliMondo eb4ce44e3283b18ef0fd656883ab5afc Central Street id: 1461 → 2312
+spilliMondo abfc1a5deefbd6e97085fe361726f87f Sottopasso id: 1463 → 2313
+spilliMondo 55b12973fad93716d9dafadbaa7d7cde Linea Ginza id: 1464 → 2314
+spilliMondo 86ffed9e0a978ac75135618c5c6e53d7 Lotteria id: 1466 → 2315
+spilliMondo f4b6a271a1bf10ba1afd5b3e3238964d Central Street id: 1477 → 2466
+spilliMondo 39c53fc4e886109b29d2a29d7c26a2cb Banchina Metro id: 1478 → 2467
+spilliMondo ae2cdfaf0079a63b3874dabe0f0437e4 Piazza della Stazione id: 1480 → 2468
+spilliMondo 4c88337c69332ea66ab5c911e03c7d67 Piazza della Stazione id: 1482 → 2469
+spilliMondo f42d59a05209f725050775a454fff4cf Centro Commerciale Sotterraneo id: 1483 → 2470
+spilliMondo f18174c2eb726e4a3d8648c138e2dbb2 Chiosco dei succhi id: 1486 → 2471
+spilliMondo cc9cab6b73740490a3b5f33f3eb29deb Chiosco della stazione KiyasuKu id: 1487 → 2472
+spilliMondo 5d75595084a5c7a8159fc0a1637c33bc Bacheca dei lavori id: 1488 → 2473 ; origine: "seed" → "utente"
+spilliMondo e88189971ad1ee0292c277847e8554ff Bacheca dei lavori id: 1489 → 2474 ; origine: "seed" → "utente"
+spilliMondo c348c92c6a5b4cea971d4f11a6d41e23 Distributore di bevande id: 1494 → 2475
+spilliMondo da3946dc39d2cea09926262d25654b07 Piazza della Stazione id: 1501 → 2536
+spilliMondo 7982ceaa234ae2afcf706d87de443a36 Sottopasso id: 1502 → 2537
+spilliMondo 9f17173a30379b04a06e6d4998916f62 Sala giochi (Central Street) id: 1515 → 2538
+spilliMondo 94e5ccab33cab8dd0d8be3d99ae16637 Ore no Beko (Gyudon) id: 1516 → 2539
+spilliMondo e0ba38d4af4b9e0869f482a315cbe38e Untouchable id: 1517 → 2540
+spilliMondo e35be70aca8f6c5694c28babf23d012f Palestra Protein Lovers id: 1518 → 2541
+spilliMondo 35365b5ad91bed1731af603df2f635c5 Videonoleggio Scarlet id: 1519 → 2542
+spilliMondo 58b539fe463331847b199a3ea1160251 Discount Rocinante id: 1520 → 2543
+spilliMondo 552bf4d52709ae8cc2e1287b42716a04 Farmacia Aohige id: 1521 → 2544
+spilliMondo ecee0ed39e42cd1909a0c6f0c03511aa Diner id: 1522 → 2545
+spilliMondo 7a8b285ee4f8df4f1979cd75c9fdf1ba Big Bang Burger id: 1523 → 2546
+spilliMondo 1bb2eb4ad1f9ca9d5eaf38facfd0ba9a Libreria Taiheido id: 1524 → 2547
+spilliMondo d3da3e007e1020adb816f39429171558 Triple Seven id: 1525 → 2548
+spilliMondo 3dbb3afc8b0bc5b0f4b8f4df060d0c3d Cinema id: 1526 → 2549
+spilliMondo 446c772e697f3e8a35b1a6940ec11e92 Distributore di bevande id: 1527 → 2550
+spilliMondo 8174f04406ff5045b1c1fdc45c85c473 Venditore di accessori nel vicolo id: 1530 → 2551
+spilliMondo 872c54f46fee063b059c0e62aa091541 Gioielleria id: 1536 → 2570
+spilliMondo 8fb6439228f402c49636d5892e5bdd65 Fiorista id: 1537 → 2571
+spilliMondo 48db5d0b30935756e380c0c024c8cd39 Accessori id: 1538 → 2572
+spilliMondo 4a134ee44e047c23bf799d666c9f29e8 Cosmetici id: 1539 → 2573
+spilliMondo b7ca8f84daa92569806077623ecaafcc Articoli Locali id: 1540 → 2574
+spilliMondo 9600fc3c4eb39731b08b533130d4bf6d Articoli sportivi id: 1541 → 2575
+spilliMondo 512f38f20817c44c52f65ffe664711f7 Supermercato di Lusso id: 1542 → 2576
+spilliMondo f024f5930ddc39b0b6de349f1e285c7e Passaggio id: 1544 → 2584 ; origine: "seed" → "utente"
+spilliMondo 4e55f80cfa8378901fc980674cb7a60c Piazza della Stazione id: 1545 → 2585
+spilliMondo e7b53e315c13476cb1f9339a148f753c Panetteria Yon-Germain id: 1546 → 2586
+spilliMondo 893abd4c6a3c5d10312ec59ce8364505 Distributore di bevande id: 1547 → 2587
+spilliMondo a0263bf91fdec589ad92bda73db21676 Distributore di bevande id: 1548 → 2588
+spilliMondo fc065da72210c0e4b179e2324c13fb5f Sottopasso id: 1550 → 2593
+spilliMondo 265229b7172cb0f44a798ca3a277d078 Punto di spostamento id: 1553 → 2352 ; origine: "seed" → "utente"
+spilliMondo 6010c466726f3c955b613377d7d5d9c7 Passaggio id: 1554 → 2353 ; origine: "seed" → "utente"
+spilliMondo c37309454ba077425017ab7d26dba970 Da identificare (tipo 28) — minimappa: icona del giocatore id: 1555 → 2354 ; origine: "seed" → "utente"
+spilliMondo 1281d842b6fd55486e6b40fb3f84485b Punto di spostamento id: 1556 → 2355 ; origine: "seed" → "utente"
+spilliMondo dc5cff7724a2d90f6fa1b509c1df2d21 Punto di spostamento id: 1557 → 2356 ; origine: "seed" → "utente"
+spilliMondo 3cd894f29b0523d0e4888a1f2d9c883c Da identificare (tipo 20) — minimappa: Velluto id: 1558 → 2357 ; origine: "seed" → "utente"
+spilliMondo 2b3d87047b0a37f6c02b2120ee10e1e1 Punto di spostamento id: 1559 → 2358 ; origine: "seed" → "utente"
+spilliMondo cb1f8cb2b93bed416e212c460fb795b5 Bar Crossroads id: 1560 → 2359 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo f59ce6f58462d41281e15d78353d6884 Casalinghi id: 1561 → 2360 ; origine: "seed" → "utente"
+spilliMondo aec5db4a656e54a48d346776bb51d94f Fioraio id: 1562 → 2361 ; origine: "seed" → "utente"
+spilliMondo a3771a66228d8085c4fe90bc292f76fe Libreria Hinokuniya id: 1563 → 2362 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo eae018419e730a7ce35b5fa178e11b60 Distributore di bevande id: 1564 → 2363 ; origine: "seed" → "utente"
+spilliMondo f3f52e412cd7a3c3c0b9e5fe83796fe4 Distributore di bevande id: 1565 → 2364 ; origine: "seed" → "utente"
+spilliMondo a0bbc3287d79eda12d67b0af96165273 Distributore di bevande id: 1566 → 2365 ; origine: "seed" → "utente"
+spilliMondo b8a6592fdfc9c572258a574a7d54aecf Cinema "Cult 9" id: 1567 → 2366 ; condizioni_json: "[]" → null ; origine: "seed" → "utente"
+spilliMondo 6cae2a422f8e35b2c8b7cdbdbf493f2c Banchina della Metro id: 1569 → 2516
+spilliMondo 6a185604491aeaeed5d9d2a561fec98e Banchina della Metro id: 1572 → 2517
+spilliMondo 8515b4af14646ce578112684d3796b86 Distributore automatico id: 1584 → 2518
+spilliMondo b5a3cf410649f8d83f90b4f14aad799e Distributore automatico (Tabaccaio) id: 1585 → 2519
+spilliMondo 6f099f0d2a420d0c44274c7ce3f7e214 Lavanderia id: 1586 → 2520
+spilliMondo 4ad213e617e5a57427d09044db6561c3 Gabbie di Battuta id: 1587 → 2521
+spilliMondo 78cdcd31833e3489fa3e5d21e811dfbd Café Leblanc id: 1588 → 2522
+spilliMondo 354d867da3e01b065e8843121a79f901 Super Muramasa id: 1589 → 2523
+spilliMondo 8ffc2f49aee792c2433d90ec93736d53 Bagno pubblico (Terme Yongen-Jaya) id: 1590 → 2524
+spilliMondo cd3d9e822d24adfa30d54b2825e6ba15 Negozio di articoli usati Yumenoshima id: 1591 → 2525 ; condizioni_json: "[]" → null
+spilliMondo 92f3dbd016dcbb3fd7ddaf8af98b745d Clinica Medica Takemi id: 1592 → 2526 ; condizioni_json: "[]" → null
+spilliMondo 2631914361d240120d446327eabcd99d Cinema di Yongen-Jaya id: 1593 → 2527 ; origine: "seed" → "utente"
+spilliMondo 0cbd5b60848e7e3c04cfd791e657b0d5 Vicoli id: 1614 → 2397
+spilliMondo 3afeac8065adbc4d940b18a72fc0f130 Vicoli id: 1615 → 2398
+spilliMondo e1e1c93f6d728e15c55714e0ccf7d474 Palazzo di Kamoshida id: 1616 → 2444
+spilliMondo fcd716bf66d7747fefd1ca76fd37ce2f Banchina della metropolitana id: 1625 → 2303
+spilliMondo b68963e72a235f974ad487069f5ba698 Vicoli id: 1626 → 2304
+spilliMondo 9451b32ea4192842e51413d0046ee19a Tokyo id: 1627 → 2305
+spilliMondo 99d834c141b7f859e97c2bd28e7be325 Mappa id: 1628 → 2502
+spilliMondo 0efa87a86069f98334fb1f3715311424 Tokyo id: 1629 → 2401
+spilliMondo d6bee82904e5d14fb793fca08e056f1a Banchina della metropolitana id: 1630 → 2402
+spilliMondo 4bff92facee13b22d9e63db65381ec14 Central Street id: 1631 → 2403
+spilliMondo fcdcbc3bdf9e7a9ccb0319d4e23bf5a1 Piazza della stazione id: 1632 → 2404
+spilliMondo f7660922a13b856db2679932a6c3c482 Edificio principale 1P id: 1633 → 2440
+spilliMondo 20be1c8b7e87957cbb324cf108f99e9e Cancello della scuola id: 1634 → 2441
+spilliMondo 62ec60258925ef90a6e4959398b2f1d7 Banchina Metro id: 1635 → 2442
+spilliMondo ec80c9de204d3ede6b620b053e78853b Lavoro part-time id: 1636 → 2399
+spilliMondo b65967e30e9bb274334ff0a5748ccbc5 Vecchietto id: 1637 → 2503
+spilliMondo 1119ddff3547af3f0e152a93a7166d63 Agente Scortese id: 1638 → 2504
+spilliMondo 86a2ce32bf9558e15b966cb0a4803efa Uomo indisposto id: 1639 → 2505
+spilliMondo 26f7937d51f28767161ac896cab6fd05 Ragazze con il cane id: 1640 → 2506
+spilliMondo 40bef6e91bddee1398cf6cce085bcb3f Casa di Sojiro Sakura id: 1641 → 2507
+spilliMondo a6dbb891883016a832f05f26b1ac0151 Corriere id: 1642 → 2508
+spilliMondo 0f961cad6e75268ee37397e6bcd88f34 Uomo di mezza età id: 1643 → 2509
+spilliMondo 46106615ac2cd7c9daa8f09f900925ff Agente Cordiale id: 1644 → 2510
+spilliMondo 4eef77f33e80aa4b2fb05cdf71e3d990 Shibuya id: 1645 → 2400
+spilliMondo bb5e75bd6ba21817f187077d081cfe5d Sottopasso id: 1646 → 2590
+spilliMondo 053159e5872ad48c26ae5bd828c54627 Yongen-Java id: 1647 → 2591
+spilliMondo 3ef3e59e4d5f4a1acf15bfd7ec3ed47a Yongen-Java id: 1648 → 2592
+spilliMondo 1aa825f6d8875dcdf66f198d48c4f31f Banchina Metro id: 1649 → 2460
+spilliMondo 04ab1ff6c98717c4b24b78e46a7489c9 Addetto id: 1650 → 2307
+spilliMondo e6f0b320ecc162a042e4fb956cac27c6 Sottopasso id: 1651 → 2308
+spilliMondo ce3ecb47934e7b19250e24ddd9751838 Addetto id: 1652 → 2582
+spilliMondo db16b85a2a379b3efb8e78b7f5eeb855 Aoyama Itchome id: 1653 → 2583
+spilliMondo a30a4cb922af8520ffd066ed546641e1 Shujin Academy id: 1654 → 2395
+spilliMondo efebedf129fb9e13093be0bea71654b5 Shibuya id: 1655 → 2396
+spilliMondo 552fe35369f31e660cdf9c0339f9fae5 Palazzo di Kamoshida id: 1656 → 2443
+spilliMondo 166caea281f8f9f1d11d3cda43e84e0b Piano 2 id: 1669 → 2316
+spilliMondo c019041f119ae3248a2680a7adb55c4c Piano 2 id: 1670 → 2317
+spilliMondo 4394a9ca7efac2e7b4e11b7509d9a729 Piano 2 id: 1671 → 2318
+spilliMondo 832432146fc3b948e8ea8d4aa770ae2c Bagno id: 1672 → 2319
+spilliMondo d1e1a101a280f57042ba228127ede64e Bagno id: 1673 → 2320
+spilliMondo 4b890027f25f50f927d835fe0e02f7ff Insegnante di mezza età id: 1674 → 2321
+spilliMondo 8e5b66b87f3ceacbdbcedebb1653a67a Mensa id: 1675 → 2322
+spilliMondo 5f1063bf8ff3e8436267b5590fe3707b Piano 1 id: 1677 → 2476
+spilliMondo 478c7a2391a2b0b5e674d6596a4fc3b9 Bagno id: 1680 → 2477
+spilliMondo 5284a956690f89e8b239be33d3a25c29 Bagno id: 1681 → 2478
+spilliMondo c789528795b78c1012280e0c6bac3192 Ufficio del Preside id: 1682 → 2479
+spilliMondo df57f6cd42112e791a0a5802586f3770 Sala Docenti id: 1683 → 2480
+spilliMondo 53eed6a51a6e3348c4d1b91bc5ac92d6 Consulente Scolastico id: 1684 → 2481
+spilliMondo cdcf4c43ddb0826e917ac184fa89de0d Studente educato id: 1685 → 2482
+spilliMondo 14c1a84ec858772776c447bf6264ee99 Membro del Giornale Scolastico id: 1686 → 2483
+spilliMondo 85426533dbc50a62b436dd3d08600014 Piano 1 id: 1687 → 2484
+spilliMondo 30f9d3bdab2aaba4a73826b6e33d88d8 Piano 1 id: 1688 → 2485
+spilliMondo c6a2d0c15f884e7b3306fda70e22b564 Piano 1 id: 1689 → 2486
+spilliMondo 4a97f588242c2cf99ecf6eb71acce41e Piano 3 id: 1690 → 2487
+spilliMondo 298d9a64c677007cec51ecd48b2cae8c Piano 3 id: 1691 → 2488
+spilliMondo 9a69136d4b5d9c77028f5a0c90f78e60 Piano 3 id: 1692 → 2489
+spilliMondo 8b635f084b4d38377bd9f147e3dced69 Piano 2 id: 1693 → 2552
+spilliMondo 03a8fd865aebe3c6be00d466c5405505 Piano 2 id: 1694 → 2553
+spilliMondo 50c4ab4a24bebef9936c38cc47a26cec Piano 2 id: 1695 → 2554
+spilliMondo 9bb52507881d51b58033ca35b0be4d46 Piano 2 id: 1696 → 2555
+spilliMondo 972cd7b55df011b6eacf2dce7db8388d Bagno id: 1697 → 2556
+spilliMondo 9e25477a6308fa92b4bcfb598cfeefbd Bagno id: 1698 → 2557
+spilliMondo c737832623b23ccba9fbda82a30da403 Sala Trasmissioni id: 1699 → 2558
+spilliMondo 8f0b0951203afd93642bb57e49e05a9b Aule Primo Anno id: 1700 → 2559
+spilliMondo 221bf13127b85e6de09b53f6da5fbfdb Aule Primo Anno id: 1701 → 2560
+spilliMondo 42d8672e283acf4c5dff7ef954185d0f Aule Primo Anno id: 1702 → 2561
+spilliMondo 73db4d76dae2283f38145cc5277be704 Aule Secondo Anno id: 1703 → 2490
+spilliMondo 7b856cd6a76e18b0a787075942c735dc Aule Secondo Anno id: 1704 → 2491
+spilliMondo 8c7fb667fb201d98b13aed56f22dad04 Aule Secondo Anno id: 1705 → 2492
+spilliMondo 95320bba8b5062c01b2466553e7bfd6a Aule Terzo Anno id: 1706 → 2323
+spilliMondo cf05adfaf135fc2ad9d2c493111ef621 Aule Terzo Anno id: 1707 → 2324
+spilliMondo 04f0e67edf3de0db8237a1562ed414f9 Aule Terzo Anno id: 1708 → 2325
+spilliMondo 07621644f49f58ff48d211a69952ac53 Shujin Academy id: 1709 → 2597
+spilliMondo 2669a3f7e2cebe88311a001413808b5f Haru & Insegnante id: 1710 → 2562
+spilliMondo 418b4a18060794209efca3e32e1baf6b Tetto id: 1711 → 2563
+spilliMondo 37446efcb07ba4fe689a7983a867d981 Piano 3 id: 1712 → 2589
+spilliMondo 97f69d29af86d55e65b00e2706af976e Yongen-Jaya id: 1713 → 2300
+spilliMondo cd69bc56276c5017db3ad42bed9d2f86 Shibuya id: 1714 → 2301
+spilliMondo e2f648011df453272104f7c811dd7558 Shujin Academy id: 1715 → 2302
+spilliMondo 6b8b97e13b8f85a40c0d75734e30f575 Stazione Metropolitana id: 1716 → 2577
+spilliMondo 7c8bf2161da2ee856b2dbd551ff6a6d7 Pallavolista Infortunato id: 1725 → 2493
+spilliMondo 0f89ed41930782433be7d57472be6811 Membro del Giornale Scolastico id: 1726 → 2494
+spilliMondo 12f30cfec987fc67b96e27340862f06c Studente Educato id: 1727 → 2495
+spilliMondo 76e63ef5cf0c95fc5121be3cab87a7f3 Membro del Giornale Scolastico id: 1728 → 2326
+spilliMondo aa6f16a4af6c80729b7f5744f1f1e3dc Shiho & Ann id: 1729 → 2327
+spilliMondo 627d0437650c0cc64a01224220022c37 Studentesse del 1 anno id: 1730 → 2564
+spilliMondo adb5be085437982e44aa721419100634 Pallavolista Infortunato id: 1731 → 2565
+spilliMondo 2596de3a9f6abbc8953fffa7683c0f17 Vecchietto Arcigno id: 1747 → 2511
+spilliMondo 7f496064ac7234df9590d5df6276bd65 Donna loquace id: 1748 → 2512
+spilliMondo 162e38d08a7a221bae7e93e2072d2cc6 Uomo Indisposto id: 1749 → 2513
+spilliMondo b8d0a80b93829c749e72e184c1fb9ee9 Uomo Minaccioso id: 1750 → 2528
+spilliMondo 1c34f2990224bd84829fcdc662980004 Studente Timoroso id: 1751 → 2529
+spilliMondo ade3bf763c3be39763222412ef39f87f Ragazzo Gentile id: 1752 → 2530
+spilliMondo d42667c566363742567b9d3f14b8d9ed Ann Takamaki id: 1753 → 2496
+spilliMondo e0e52821d12e94d8efd1cca60dbe3803 Mishima id: 1754 → 2497
+spilliMondo 8ca32a581452a60054e09c16b0fe4109 Coppia di Pallavolisti id: 1755 → 2498
+spilliMondo db18168c871dad82da0333029fd79afb Membro Giornale Scolastico id: 1756 → 2499
+spilliMondo 8f2c20733245f863bbebaabd6e651b65 Studente Sognatore id: 1757 → 2328
+spilliMondo 169f999575ceab090d3cb2d834554144 Kamoshida id: 1758 → 2329
+spilliMondo 9090382a626b0f350444647b4aed66fd Distributore di bevande id: 1759 → 2330
+spilliMondo 74cd274bb517240d82ccbf4b40c3ebb3 Distributore Cancello id: 1760 → 2578
+spilliMondo 6ffd478f5a38cd912b33bb70d358946b Piazza della Stazione id: 1761 → 2461
+spilliMondo 901cc727080af5f10c9940356351a990 Senzatetto id: 1762 → 2462
+spilliMondo 43c29f96509226d7edc4c1a1ba606533 Centro Commerciale Sotterraneo id: 1763 → 2463
+spilliMondo 0288523bdc33959370efa2e8d93756fb Centro Commerciale Sotterraneo id: 1764 → 2464
+spilliMondo 30ecd8782de9b1544b38d1c6e61ec937 Corridoio Linea Inogami id: 1765 → 2465
+spilliMondo d9be2906655098a72fb46b345b129c1e Uomo Curioso id: 1766 → 2531
+spilliMondo 879c2e51ca99e89c17f80d2cba49b510 Toranosuke Toshida id: 1767 → 2309
+spilliMondo 2d486eff82f9423f1496e0e308155ed1 Distributore di bevande id: 1768 → 2532
+spilliMondo 75f4f19ca61a45e7098db063cd8c0209 Distributore di bevande id: 1769 → 2533
+spilliMondo df232aeebfb55b2f63b981abecc97135 Scelta Stazione id: 1770 → 2310
+spilliMondo d3025d9783177167908a3a0592aca7ad Commesso del Supermercato id: 1771 → 2514
+spilliMondo c22bb9e6fb9bf11bef3bdcde393e4f74 Uomo in Salute id: 1772 → 2515
+spilliMondo 475ded65a54af4f8ada123b1c119c887 Sottopasso id: 1773 → 2567
+spilliMondo 936465fa19483508c8c21a339c31ba22 Sottopasso id: 1774 → 2568
+spilliMondo e87e487994cb8ebf7f91a6c7f2608f26 Sottopasso id: 1775 → 2569
+spilliMondo 023e955974f15d0c5f212603855925f6 Stanza di Velluto id: 2022 → 2534
+spilliMondo 3582aeceb27633fc442e0ed6e64d9e5f Distributore di bevande id: 2084 → 2535

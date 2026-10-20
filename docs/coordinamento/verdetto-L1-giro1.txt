@@ -1,0 +1,125 @@
+<task-notification>
+<task-id>ac901b983aa8a77db</task-id>
+<tool-use-id>toolu_01QinkjCnUPFQDq9hx9oJetU</tool-use-id>
+<output-file>C:\Users\rober\AppData\Local\Temp\claude\C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941\cffd8da6-5996-4013-b5ec-2c69430948db\tasks\ac901b983aa8a77db.output</output-file>
+<status>completed</status>
+<summary>Agent "Validazione lotto L1" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>## GALAXY TASK VALIDATOR — VERDETTO
+
+**punto:** Lotto L1 «Immagini», commit bd20ed72 su `newreview`
+**verdetto:** RIGETTATO
+
+Il lavoro sul server è in gran parte solido: regola unica del ruolo, migrazione 107, URL versionato, pezzi con 409 sulla PUT generica. Il lotto però non soddisfa ancora il criterio «Fatto quando» del piano, e il report dichiara cose che il codice smentisce.
+
+### Perimetro ricostruito
+1. Un risolutore unico dell'immagine (caricata → asset → icona base) per tutte le viste: visore, indice, miniature, schede, metro — ❌
+2. Il ruolo dell'immagine si deduce dalla gerarchia, in un posto solo — ✅ (regola e 107 corrette)
+3. Ogni strada di scrittura riallinea l'immagine — ❌ (restano strade che saltano la conferma dei pezzi o la gestiscono a metà)
+4. «Fatto quando»: Tokyo, i quartieri e ogni planimetria mostrano la stessa immagine in visore, indice, schede e miniature — ❌
+5. Sparisce lo stemma fisso di Tokyo e del Covo sopra l'immagine caricata; sagome e Palazzi passano dal risolutore — ⚠️ (la prima metà è fatta, la seconda è stata sostituita da una scelta dell'IA)
+6. Nessuna regressione (pacchetto mappe, pezzi, collezioni) — ⚠️
+7. Grafica e UX identiche all'originale — ⚠️
+8. Test non indeboliti e visti fallire senza la correzione — ✅ per i 5 test nuovi; ⚠️ per la copertura
+9. Typecheck e lint verdi — ✅ (`typecheck.txt` e `lint.txt`, EXIT=0)
+10. Documenti aggiornati e veritieri — ❌
+
+### Prove raccolte
+- **Lato server:**
+  - Letti `immagineMappa.ts`, `shared/immaginiMappa.ts`, `107_ruolo_dalla_gerarchia.ts` e il suo test. La regola della 107 è identica a `sqlRuoloDaGerarchia`.
+  - In `BE.log:595` la 107 cambia 1 mappa: `yongen-java-banchina-della-metropolitana`, da illustrazione a planimetria. Il dato del report torna.
+  - Letti `immaginiService.ts` e `routes/immagini.ts`. La PUT generica passa da `impostaImmagineMappa`; il ramo da-url (righe 77-78) no.
+  - Letto `mappeService.ts`: `riassunto`, `dettaglioRiferimento`, `creaMappa`, `aggiornaMappa`, `impostaImmagineMappa`, `immagineMostrata`, `esportaMappe`, `importaMappe` (righe 1692-1907).
+- **Lato interfaccia:**
+  - Letti `useImmagineMappa.ts`, `AnteprimaMappa.tsx`, `segniMappa.ts`, `SagomaQuartiere.tsx`, `MappaTokyo.tsx` (righe 351-465), `ImmaginiLuogo.tsx`, `haPlanimetria.ts` e `VisoreMappa.tsx` (righe 166-172 e 261-262).
+  - Con Grep: `EditorMappaPage.tsx` non importa `useImmagineMappa`.
+- **Confronti con il prima:**
+  - Prima di L1, `SagomaQuartiere.tsx` e `assetTokyo.ts` (checkout principale) usavano URL fissi sia sulla metro sia nelle schede.
+  - Lo conferma `vitest-fallimento-6b3dfb99.txt:23`: il vecchio indirizzo era `src="/api/immagini/mappe/lmap%2Ftokyo%2Fshibuya/file"`.
+- **Piano:** `docs/analisi/2026-10-20-piano-razionalizzazione.md` righe 89, 214 e 414.
+- **Esiti dei test:** `vitest-verbose.txt` riporta 100 file e 705 test, EXIT=0. L'elenco dei file eseguiti è alla riga 3. `vitest-fallimento-6b3dfb99.txt` mostra 5 fallimenti genuini sui sorgenti di prima.
+
+### Findings
+
+**[F1] bloccante — la scelta sui «segni» contraddice il piano**
+- **Dove:** `src/components/mappe/segniMappa.ts`, `MappaTokyo.tsx:359,388,462`, `SagomaQuartiere.tsx:44`, DECISIONI «L1».
+- **Cosa:** il piano è esplicito su tre punti:
+  - riga 214: «sagome e Palazzi passano dal risolutore»;
+  - riga 89: l'immagine di un quartiere «La leggono: Visore, indice, miniature, schede, metro»;
+  - riga 414: i quartieri mostrano la stessa immagine «in visore, indice, schede e miniature».
+
+  Invece un quartiere con un'illustrazione caricata la mostra nel visore e nell'indice, mentre nelle schede e sulla metro mostra la sagoma. C'è un conflitto reale fra la regola nuova dell'utente («si vede uguale ovunque») e una sua scelta passata sugli stemmi (commento in `MappaTokyo.tsx:384-386`). Un conflitto di questo tipo lo decide Roberto: l'esecutore non può applicare la sua scelta e chiudere il lotto con «da confermare».
+- **Richiesta:** portare il conflitto a Roberto, citando le righe 89, 214 e 414 del piano. Poi implementare quello che decide.
+
+**[F2] da correggere — l'indice usa una regola sua per Tokyo e il Covo**
+- **Dove:** `AnteprimaMappa.tsx:46-51` e il test `ImmagineMappaUnica.test.tsx:38-41`.
+- **Cosa:** l'ordine è caricata → stemma → asset. Senza un'immagine caricata, l'indice mostra `guida/citta` mentre il visore mostra `mappe/tokyo`, l'asset dichiarato (`sincronizzaMappe.ts:89`). Questo viola «caricata → asset → icona base» e il «Fatto quando». Il test fissa proprio questa divergenza.
+- **Richiesta:** rientra nella decisione di F1. In alternativa: lo stemma solo dove la mappa non ha né caricata né asset, e il test riscritto di conseguenza.
+
+**[F3] da correggere — report e documenti dichiarano più di quanto c'è**
+- **Dove:**
+  - `EditorMappaPage.tsx:358, 372-373, 449`;
+  - ROADMAP riga L1, ARCHITETTURA §L1 (righe 1617-1621), dichiarazione di completamento;
+  - `EmblemaDungeon.tsx:25`.
+- **Cosa:**
+  - L'editor non usa `useImmagineMappa`: calcola da sé `mappa.immagineUrl || useAsset(mappa.asset)`.
+  - ARCHITETTURA dà `EmblemaDungeon` fra gli utenti di `segniMappa`, ma costruisce da sé `` `palazzi/${chiave}` ``.
+  - Il commento in `segniMappa.ts:9-10` dice che prima «le schede no». È falso: anche le schede usavano l'URL fisso (vedi le prove).
+- **Richiesta:** far passare l'editor da `useImmagineMappa` ed `EmblemaDungeon` da `segnoPalazzo`, oppure correggere i documenti. Correggere il commento.
+
+**[F4] da correggere — restano punti che decidono «ha un'immagine» con una regola propria**
+- **Dove e cosa:**
+  - `MappaPage.tsx:393`: il selettore delle mappe sorelle filtra con `!!(m.immagineUrl || m.asset)`. Ora `asset` è la colonna dichiarata, quindi entra anche un asset per convenzione che non esiste.
+  - `cittaService.ts:142`: `mappa` controlla solo l'immagine con la chiave esatta del quartiere, ignorando `immagine_chiave` e l'asset. Da quel valore dipende lo scarico automatico della pianta in `QuartierePage.tsx:114`.
+  - `dungeonService.ts:231,332`: `mappePresenti` serve ad `AreaDungeonDto.mappa`.
+- **Richiesta:** riportare i punti a `caricataDellaMappa`, `useImmagineMappa` o `ruoloConVisore`, oppure motivare per iscritto perché uno di questi non è un'immagine di mappa (per `dungeonService` può esserlo: pianta di un'area della guida).
+
+**[F5] da correggere — strade di scrittura non allineate**
+- **Dove:** `routes/immagini.ts:77-78`, `cittaService.ts:156`, `immagineMappa.ts:92,103`.
+- **Cosa:**
+  - `POST /api/immagini/mappa/:chiave/da-url` e lo scarico della pianta passano da `salvaImmagine` senza il 409 sui pezzi e senza `origine='utente'`. Questo contraddice «la rotta generica passa da impostaImmagineMappa».
+  - `DELETE /api/immagini/mappa/:chiave` e `DELETE /api/immagini?ambito=mappa` su una mappa con pezzi azzerano le dimensioni e lasciano i pezzi, ritagliati da un'immagine che non si mostra più.
+- **Richiesta:** stessa regola dell'editor (conferma o 409) su queste strade. Un test che fallisca prima della correzione.
+
+**[F6] da correggere — copertura dei test incompleta**
+- **Dove:** elenco dei file eseguiti in `vitest-verbose.txt` riga 3.
+- **Cosa:** `importaMappe` è stato modificato (ruolo riallineato; `salvaImmagine` ora riscrive le dimensioni sopra quelle dichiarate dal pacchetto), ma non sono stati eseguiti:
+  - `planimetrie-aree-multiple`, `sulla-mappa-palazzo`, `posizioni-spilli`, `guida-pin`, `condizioni-voce`, `condizioni-pin`;
+  - `082_*` e `067_*`, che applicano tutte le migrazioni, 107 compresa.
+- **Richiesta:** output grezzo di questi file. Dichiarare (con un test) l'effetto sulle dimensioni importate: dimensioni del pacchetto diverse da quelle dell'intestazione dell'immagine.
+
+**[F7] nota — cambia la UX con la grafica predefinita spenta**
+Con la preferenza spenta, sagome e stemmi ora spariscono sia dalla metro sia dalle schede; prima si vedevano sempre. È un cambio visibile da far rientrare nella decisione di F1.
+
+**[F8] nota — effetto della 107 sulle collezioni**
+La Banchina ora è una «planimetria-nativa», quindi entra nella numerazione delle collezioni (`mappeService.ts:100`, `fisica`). Va mostrato che le etichette delle mappe sorelle di Yongen-Jaya restano come prima, oppure dichiarato cosa cambia.
+
+**[F9] nota — asset per convenzione ancora scritti nei dati**
+`creaMappa` (riga 830) scrive ancora `mappe/&lt;chiave&gt;` per convenzione, e l'esportazione (riga 1519) riscrive `asset` allo stesso modo. Il ruolo lo gestisce, ma gli asset inesistenti restano nei dati delle mappe nuove: va dichiarato.
+
+**[F10] nota — verifiche nel browser senza prove grezze**
+Le verifiche nel browser sono riportate senza estratti del DOM, e manca il caso «Tokyo senza immagine caricata».
+
+**[F11] nota — AlberoLuoghi**
+Rimosso il caso `nativo-archivio-022`. Che non esista più si può provare solo sul dato.
+
+### Richieste all'esecutore
+1. Appellarsi a Roberto su F1 e F2, riportando le righe 89, 214 e 414 del piano e il commento in `MappaTokyo.tsx:384-386`. Implementare la sua decisione.
+2. Correggere F3 nel codice o nei documenti (ROADMAP, ARCHITETTURA, dichiarazione) e il commento di `segniMappa.ts`.
+3. Riallineare o motivare i tre punti di F4.
+4. Sistemare da-url, lo scarico della pianta e le rimozioni rispetto ai pezzi (F5), con un test visto prima rosso.
+5. Eseguire i file di F6 con `npx vitest run --reporter=verbose …` e consegnare l'output grezzo, insieme al test sulle dimensioni importate.
+6. Consegnare l'output di `SELECT chiave FROM mappa` per le chiavi pubbliche che finiscono in `archivio-022`, e le etichette di Yongen-Jaya prima e dopo la 107.
+7. Consegnare estratti grezzi del DOM per indice, visore e schede di Tokyo e di un quartiere con immagine caricata, e di Tokyo senza.
+
+File principali:
+- `C:\Repository\project-p5r\.claude\worktrees\pensive-burnell-b50941\src\components\mappe\AnteprimaMappa.tsx`
+- `C:\Repository\project-p5r\.claude\worktrees\pensive-burnell-b50941\src\components\mappe\segniMappa.ts`
+- `C:\Repository\project-p5r\.claude\worktrees\pensive-burnell-b50941\src\pages\EditorMappaPage.tsx`
+- `C:\Repository\project-p5r\.claude\worktrees\pensive-burnell-b50941\src\pages\MappaPage.tsx`
+- `C:\Repository\project-p5r\.claude\worktrees\pensive-burnell-b50941\server\routes\immagini.ts`
+- `C:\Repository\project-p5r\.claude\worktrees\pensive-burnell-b50941\server\services\cittaService.ts`
+- `C:\Repository\project-p5r\.claude\worktrees\pensive-burnell-b50941\server\services\mappe\immagineMappa.ts`
+- `C:\Repository\project-p5r\.claude\worktrees\pensive-burnell-b50941\docs\analisi\2026-10-20-piano-razionalizzazione.md`</result>
+<usage><subagent_tokens>199528</subagent_tokens><tool_uses>76</tool_uses><duration_ms>434492</duration_ms></usage>
+</task-notification>

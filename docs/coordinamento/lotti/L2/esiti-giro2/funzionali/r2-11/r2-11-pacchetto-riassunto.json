@@ -1,0 +1,245 @@
+{
+ "chiavi": [
+  "versione",
+  "esportato",
+  "aree",
+  "mappe",
+  "immagini",
+  "ingressi"
+ ],
+ "mappe": 54,
+ "aree": 23,
+ "ingressi": 2,
+ "immagini": 22,
+ "byte": 60969741,
+ "esempioMappa": {
+  "chiave": "shibuya-piazza-della-stazione",
+  "nome": "Piazza della stazione",
+  "tipo": "luogo",
+  "genitore": "shibuya",
+  "ordine": 0,
+  "immagine": null,
+  "asset": "mappe/native/nativo-rmap-001-1-0",
+  "assetOriginale": "mappe/native/nativo-rmap-001-1-0",
+  "larghezza": 2048,
+  "altezza": 1024,
+  "ruoloImmagine": "planimetria-nativa",
+  "entita": null,
+  "note": "",
+  "area": "citta/shibuya/piazza-della-stazione",
+  "versione": {
+   "etichetta": null,
+   "ordine": 0
+  },
+  "pezzi": [],
+  "spilli": [
+   {
+    "destinazione": {
+     "mappa": "shibuya-sottopasso-nativo-rmap-001-2-0",
+     "spillo": null
+    },
+    "uid": "1e2c1721030ed48c88466d1959251ef9",
+    "tipo": "passaggio",
+    "nome": "Sottopasso",
+    "descrizione": "Verso Sottopasso",
+    "x": 38.5,
+    "y": 31.4,
+    "riferimento": {
+     "tipo": "mappa",
+     "chiave": "shibuya-sottopasso-nativo-rmap-001-2-0"
+    },
+    "voci": [],
+    "soloPosizione": false,
+    "collezionabile": false,
+    "ordine": 0,
+    "immagini": []
+   },
+   {
+    "uid": "04ab1ff6c98717c4b24b78e46a7489c9",
+    "tipo": "dialogo",
+    "nome": "Addetto",
+    "descrizione": "Ritardo Linea JL e indicazioni sulla linea Ginza.",
+    "x": 28.3,
+    "y": 28.7,
+    "riferimento": null,
+    "voci": [],
+    "soloPosizione": false,
+    "collezionabile": true,
+    "ordine": 0,
+    "condizioni": [
+     {
+      "tipo": "intervallo",
+      "dal": "04-11",
+      "al": "04-11"
+     }
+    ],
+    "immagini": []
+   },
+   {
+    "destinazione": {
+     "mappa": "shibuya-sottopasso-nativo-rmap-001-2-0",
+     "spillo": null
+    },
+    "uid": "e6f0b320ecc162a042e4fb956cac27c6",
+    "tipo": "passaggio",
+    "nome": "Sottopasso",
+    "descrizione": "Verso il Sottopasso",
+    "x": 33.8,
+    "y": 13.8,
+    "riferimento": {
+     "tipo": "mappa",
+     "chiave": "shibuya-sottopasso-nativo-rmap-001-2-0"
+    },
+    "voci": [],
+    "soloPosizione": false,
+    "collezionabile": false,
+    "ordine": 0,
+    "immagini": []
+   },
+   {
+    "uid": "879c2e51ca99e89c17f80d2cba49b510",
+    "tipo": "confidente",
+    "nome": "Toranosuke Toshida",
+    "descrizione": "",
+    "x": 41.5,
+    "y": 29.6,
+    "riferimento": {
+     "tipo": "confidente",
+     "chiave": "yoshida"
+    },
+    "voci": [],
+    "soloPosizione": false,
+    "collezionabile": false,
+    "ordine": 0,
+    "immagini": []
+   },
+   {
+    "destinazione": {
+     "mappa": "tokyo",
+     "spillo": null
+    },
+    "uid": "df232aeebfb55b2f63b981abecc97135",
+    "tipo": "passaggio",
+    "nome": "Scelta Stazione",
+    "descrizione": "Verso una Stazione Metro",
+    "x": 29.7,
+    "y": 29.5,
+    "riferimento": {
+     "tipo": "mappa",
+     "chiave": "tokyo"
+    },
+    "voci": [],
+    "soloPosizione": false,
+    "collezionabile": false,
+    "ordine": 0,
+    "immagini": []
+   },
+   {
+    "destinazione": {
+     "mappa": "shibuya-central-street",
+     "spillo": null
+    },
+    "uid": "4041e7fd698f773386eda9fe8c69f4fb",
+    "tipo": "passaggio",
+    "nome": "Central Street",
+    "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti. Porta a nativo-rmap-001-3-0.",
+    "x": 44.6,
+    "y": 45.9,
+    "riferimento": null,
+    "voci": [],
+    "soloPosizione": false,
+    "collezionabile": false,
+    "ordine": 3,
+    "immagini": []
+   },
+   {
+    "destinazione": {
+     "mappa": "shibuya-central-street",
+     "spillo": null
+    },
+    "uid": "eb4ce44e3283b18ef0fd656883ab5afc",
+    "tipo": "passaggio",
+    "nome": "Central Street",
+    "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti. Porta a nativo-rmap-001-3-0.",
+    "x": 35.6,
+    "y": 45.1,
+    "riferimento": null,
+    "voci": [],
+    "soloPosizione": false,
+    "collezionabile": false,
+    "ordine": 4,
+    "immagini": []
+   },
+   {
+    "destinazione": {
+     "mappa": "shibuya-sottopasso-nativo-rmap-001-2-0",
+     "spillo": null
+    },
+    "uid": "abfc1a5deefbd6e97085fe361726f87f",
+    "tipo": "passaggio",
+    "nome": "Sottopasso",
+    "descrizione": "Verso il Sottopasso",
+    "x": 32.6,
+    "y": 30.6,
+    "riferimento": {
+     "tipo": "mappa",
+     "chiave": "shibuya-sottopasso-nativo-rmap-001-2-0"
+    },
+    "voci": [],
+    "soloPosizione": false,
+    "collezionabile": false,
+    "ordine": 6,
+    "immagini": []
+   },
+   {
+    "destinazione": {
+     "mappa": "shibuya-tornello-della-linea-ginza",
+     "spillo": null
+    },
+    "uid": "55b12973fad93716d9dafadbaa7d7cde",
+    "tipo": "passaggio",
+    "nome": "Linea Ginza",
+    "descrizione": "Verso il Tornello della linea Ginza della metro.",
+    "x": 33.7,
+    "y": 17.3,
+    "riferimento": {
+     "tipo": "mappa",
+     "chiave": "shibuya-tornello-della-linea-ginza"
+    },
+    "voci": [],
+    "soloPosizione": false,
+    "collezionabile": false,
+    "ordine": 7,
+    "immagini": []
+   },
+   {
+    "uid": "86ffed9e0a978ac75135618c5c6e53d7",
+    "tipo": "attivita",
+    "nome": "Lotteria",
+    "descrizione": "Acquisto biglietti della lotteria radiofonica e verifica vincite.",
+    "x": 42.7,
+    "y": 23.5,
+    "riferimento": null,
+    "voci": [],
+    "soloPosizione": false,
+    "collezionabile": false,
+    "ordine": 9,
+    "immagini": []
+   }
+  ]
+ },
+ "esempioArea": {
+  "chiave": "citta/akihabara/electric-town",
+  "quartiere": "akihabara",
+  "dungeon": null,
+  "citta": null,
+  "slug": "electric-town",
+  "nome": "Electric Town",
+  "nomeRivisto": false,
+  "ordine": 0,
+  "predefinita": "akihabara-electric-town",
+  "origine": "seed",
+  "seedJson": null,
+  "daVerificare": false
+ }
+}

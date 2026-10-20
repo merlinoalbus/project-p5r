@@ -1,0 +1,2417 @@
+{
+ "data": {
+  "chiave": "maruki",
+  "tipo": "palazzo",
+  "ordine": 9,
+  "nome": "Palazzo di Maruki",
+  "sovrano": "Dott. Takuto Maruki",
+  "arcanaSovrano": "Consigliere (Councillor) — arcana speciale/esclusiva introdotta in Persona 5 Royal, non è la carta dei tarocchi tradizionali. NOTA: una precedente estrazione automatica aveva riportato erroneamente 'Fede' come arcana del Palazzo: 'Fede' è invece l'arcana del Confidente di Sumire Yoshizawa (la Persona del boss/sovrano è Azathoth/Adam Kadmon, non collegata all'arcana Fede). Fonte arcana Consigliere: allgamestaff (pagina rango confidente di Maruki) e Megami Tensei Wiki.",
+  "arcanaSovranoNome": "Consigliere (Councillor) — arcana speciale/esclusiva introdotta in Persona 5 Royal, non è la carta dei tarocchi tradizionali. NOTA: una precedente estrazione automatica aveva riportato erroneamente 'Fede' come arcana del Palazzo: 'Fede' è invece l'arcana del Confidente di Sumire Yoshizawa (la Persona del boss/sovrano è Azathoth/Adam Kadmon, non collegata all'arcana Fede). Fonte arcana Consigliere: allgamestaff (pagina rango confidente di Maruki) e Megami Tensei Wiki.",
+  "date": {
+   "sblocco": "Il Palazzo diventa esplorabile per la prima volta il 2 gennaio (evento di trama, 'Palazzo sconosciuto'). Per sbloccare l'accesso al terzo semestre in generale è necessario portare il Confidente di Maruki (Consigliere) al Rango 9 entro il 17 novembre; il Rango 10 si ottiene poi automaticamente il 18 novembre. Se questa condizione non è soddisfatta il terzo semestre non si attiva affatto.",
+   "scadenza": "3 febbraio (giorno delle battaglie finali; il percorso va assicurato entro il 2 febbraio)",
+   "furtoConsigliato": "3 febbraio (Venerdì 2/3) — 'Palazzo di Maruki (Battaglie finali)': si raggiunge l'Eden (Modello psi-cognitivo Eden) e si affronta il Dott. Maruki nelle sue forme finali per completare il furto/l'atto finale del terzo semestre."
+  },
+  "finestra": {
+   "dal": "01-02",
+   "al": "02-03"
+  },
+  "livelloConsigliato": "Livello 75+ già al primo ingresso nel January arc (Kasumi e Akechi arrivano a Livello 75); per lo scontro finale del 3 febbraio la guida consiglia una squadra vicina al livello massimo (i boss Maruki/Azathoth sono di Livello 85-90). Scorta consigliata: 20+ Carote chiardiluna.",
+  "aree": [
+   {
+    "chiave": "maruki-01-ingresso",
+    "ordine": 0,
+    "nome": "Ingresso",
+    "descrizione": "Area di ingresso del Palazzo, visitata più volte (2 gennaio come 'Palazzo sconosciuto'; 9 gennaio e 12 gennaio come 'Palazzo di Maruki'). Poco da fare qui a parte proseguire verso l'ascensore; il 12 gennaio da qui si punta al centro del Palazzo e alla Staff Room chiusa a chiave.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-maruki-ingresso",
+      "nome": "Palazzo di Maruki › ??? Ingresso",
+      "n": 0,
+      "presi": 0,
+      "spilli": []
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "maruki-01-ingresso/0",
+      "ordine": 0,
+      "tipo": "miniboss",
+      "nome": "Teschio di cristallo x5 (Loa)",
+      "descrizione": "Scontro sbloccato il 12 gennaio nei pressi della Staff Room chiusa, in concomitanza col debutto di Sumire in squadra. Consigliato l'uso di Sumire con Makougaon (Sacro) per un Assalto rapido. Al termine si ottiene il Rango Confidente +1 con Sumire (Arcano Fede, Rango 5).",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [
+        "Sacro"
+       ],
+       "resistenze": [
+        "Fuoco (dimezza)",
+        "Nucleare (dimezza)",
+        "Tuono (annulla)"
+       ],
+       "contenuto": "Rango Confidente Sumire Yoshizawa +1 (Arcano Fede, Rango 5)"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-01-ingresso/1",
+      "ordine": 1,
+      "tipo": "forziere-chiuso",
+      "nome": "Forziere chiuso a chiave — Percorso di prova (raggiungibile da qui il 12 gennaio)",
+      "descrizione": "Tornando indietro fino all'area del Percorso di prova, dopo aver ottenuto il Tesserino del personale si può aprire un forziere chiuso a chiave.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Spray detergente"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-01-ingresso/2",
+      "ordine": 2,
+      "tipo": "forziere",
+      "nome": "Forziere sala d'aspetto (Sala d'ingresso, angolo nord-ovest)",
+      "descrizione": "Esplorando dietro i pannelli sul versante nord-ovest della Sala d'ingresso (raggiungibile dall'area Ingresso).",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Incenso Nirvana FO"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-01-ingresso/3",
+      "ordine": 3,
+      "tipo": "persona",
+      "nome": "Oricalco (demone del tesoro)",
+      "descrizione": "Nemico speciale 'demone del tesoro' che si aggira in questo dungeon (incontro non fisso in una singola stanza); possiede abilità elementali a Danno grave, ottimo per le fusioni.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [
+        "Sacro"
+       ],
+       "resistenze": [
+        "Attacchi fisici (dimezza)",
+        "Armi da fuoco (dimezza)"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "maruki-02-sala-d-ingresso",
+    "ordine": 1,
+    "nome": "Sala d'ingresso",
+    "descrizione": "Prima grande sala del Palazzo, visitata il 2 gennaio e nuovamente il 9 gennaio (tesori ripristinati). Contiene la prima Safe Room del dungeon.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-maruki-sala-dingresso",
+      "nome": "Palazzo di Maruki › Sala d'ingresso",
+      "n": 0,
+      "presi": 0,
+      "spilli": []
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "maruki-02-sala-d-ingresso/0",
+      "ordine": 0,
+      "tipo": "sicura",
+      "nome": "Safe Room — Sala d'ingresso",
+      "descrizione": "Sblocca il viaggio veloce 'Sala d'ingresso'.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 80.8,
+       "y": 65.9
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-02-sala-d-ingresso/1",
+      "ordine": 1,
+      "tipo": "forziere",
+      "nome": "Forziere iniziale (a sinistra salendo le scale)",
+      "descrizione": "Primo forziere del Palazzo.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Perlina rigenerante x3, Pane per l'anima x2, Portafoglio guarigione"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 38.5,
+       "y": 49.4
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-02-sala-d-ingresso/2",
+      "ordine": 2,
+      "tipo": "oggetto",
+      "nome": "Oggetti a forma di cuore",
+      "descrizione": "Tesori 'cuore' del Palazzo (equivalente ai gettoni/monete raccoglibili), sparsi in più punti della Sala d'ingresso (almeno 6 raccolti nel percorso guidato). Si ripristinano ad ogni nuova infiltrazione/data.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-02-sala-d-ingresso/3",
+      "ordine": 3,
+      "tipo": "miniboss",
+      "nome": "Ballerino mortale x2",
+      "descrizione": "Scontro dopo una scena con una Guardia in camice da laboratorio. Kasumi (attacchi Sacro) eccelle qui; vittoria rapida.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [
+        "Sacro"
+       ],
+       "resistenze": [
+        "Tuono (dimezza)",
+        "Maledizione (annulla)"
+       ],
+       "contenuto": "Planimetria edificio"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "maruki-03-percorso-di-prova",
+    "ordine": 2,
+    "nome": "Percorso di prova",
+    "descrizione": "Area raggiunta il 2 gennaio proseguendo dalla Sala d'ingresso lungo il ballatoio ad anello.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-maruki-percorso-di-prova",
+      "nome": "Palazzo di Maruki › ??? Percorso di prova",
+      "n": 1,
+      "presi": 0,
+      "spilli": [
+       {
+        "id": 859,
+        "uid": "b424bc9a4069d2750e060e4765aae642",
+        "tipo": "forziere-raro",
+        "nome": "Forziere raro",
+        "colore": "#fde047",
+        "raccolto": false
+       }
+      ]
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "maruki-03-percorso-di-prova/0",
+      "ordine": 0,
+      "tipo": "oggetto",
+      "nome": "Oggetti a forma di cuore",
+      "descrizione": "Diversi Oggetti a forma di cuore lungo il percorso (almeno 5).",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-03-percorso-di-prova/1",
+      "ordine": 1,
+      "tipo": "miniboss",
+      "nome": "Araldo della depravazione x2 (Belial)",
+      "descrizione": "Bloccano attacchi fisici ed elemento Maledizione; usano Eigaon (danni Maledizione, Akechi immune) e Brutto colpo (raggio globale). Le abilità Divino/Sacro di Akechi e Kasumi risolvono rapidamente lo scontro.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [],
+       "resistenze": [
+        "Attacchi fisici (annulla)",
+        "Ghiaccio (dimezza)",
+        "Maledizione (annulla)"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 55.2,
+       "y": 45
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-03-percorso-di-prova/2",
+      "ordine": 2,
+      "tipo": "miniboss",
+      "nome": "Abisso contorto (Hastur)",
+      "descrizione": "Usa attacchi Divino e può infliggere Paura con Tocco del male. Nessuna debolezza nota; assorbe Psicocinesi, respinge Vento, annulla Maledizione. Usa Concentrazione, Bagno di sangue e attacchi a base di Vento. Dopo la sconfitta si cura e mette KO il party con Occhio abissale (scriptato): sblocca un nuovo Attacco speciale.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [],
+       "resistenze": [
+        "Fuoco (dimezza)",
+        "Vento (assorbe)",
+        "Psicocinesi (annulla)",
+        "Maledizione (annulla)"
+       ],
+       "contenuto": "Sblocco Attacco speciale Joker+Akechi"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 66.4,
+       "y": 76.5
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-03-percorso-di-prova/3",
+      "ordine": 3,
+      "tipo": "forziere-chiuso",
+      "nome": "Forziere chiuso a chiave",
+      "descrizione": "Apribile solo dopo aver ottenuto il Tesserino del personale (12 gennaio), tornando qui dall'area Ingresso.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Spray detergente"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "maruki-04-corridoio",
+    "ordine": 3,
+    "nome": "Corridoio",
+    "descrizione": "Area raggiunta il 9 gennaio dalla Sala d'ingresso (porta a sinistra ora aperta), conduce all'Auditorium.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-maruki-corridoio",
+      "nome": "Palazzo di Maruki › Corridoio",
+      "n": 0,
+      "presi": 0,
+      "spilli": []
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "maruki-04-corridoio/0",
+      "ordine": 0,
+      "tipo": "oggetto",
+      "nome": "Oggetti a forma di cuore",
+      "descrizione": "Almeno 3 nella zona (uno vicino a un monitor).",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-04-corridoio/1",
+      "ordine": 1,
+      "tipo": "forziere",
+      "nome": "Forziere nella sala retrostante",
+      "descrizione": "Nella sala a ovest del Corridoio.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Roccia nera"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 34.4,
+       "y": 58.1
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-04-corridoio/2",
+      "ordine": 2,
+      "tipo": "sicura",
+      "nome": "Safe Room — Corridoio",
+      "descrizione": "IMPORTANTE: se si vuole vedere il finale alternativo negativo, salvare qui prima di procedere in Auditorium, per poter ricaricare il salvataggio dopo aver visto quel finale.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-04-corridoio/3",
+      "ordine": 3,
+      "tipo": "forziere-chiuso",
+      "nome": "Staff Room chiusa a chiave",
+      "descrizione": "Segnalata sulla mappa interagendo; si sblocca più avanti nella trama (12 gennaio, con miniboss Teschio di cristallo x5 nei pressi).",
+      "esauribile": true,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "maruki-05-auditorium",
+    "ordine": 4,
+    "nome": "Auditorium",
+    "descrizione": "Grande area centrale raggiunta il 9 gennaio, teatro dello scontro decisivo con Maruki/Sumire/Cenerentola e, il 12 gennaio, prosecuzione con Fafnir e Dioniso/Chimera fino al recupero del Tesserino del personale.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-maruki-auditorium",
+      "nome": "Palazzo di Maruki › ??? Auditorium",
+      "n": 1,
+      "presi": 0,
+      "spilli": [
+       {
+        "id": 867,
+        "uid": "f9b92d8def01f386128ab2c5c014452e",
+        "tipo": "forziere-raro",
+        "nome": "Forziere raro",
+        "colore": "#fde047",
+        "raccolto": false
+       }
+      ]
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "maruki-05-auditorium/0",
+      "ordine": 0,
+      "tipo": "oggetto",
+      "nome": "Oggetti a forma di cuore",
+      "descrizione": "Numerosi lungo tutto il percorso dell'Auditorium (almeno 8 tra le due visite del 9 e 12 gennaio).",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-05-auditorium/1",
+      "ordine": 1,
+      "tipo": "scorciatoia",
+      "nome": "Punti di aggancio del Rampino",
+      "descrizione": "Diversi punti di aggancio permettono di scalare/attraversare l'Auditorium su più livelli.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-05-auditorium/2",
+      "ordine": 2,
+      "tipo": "boss",
+      "nome": "Sumire (mini-boss, 9 gennaio)",
+      "descrizione": "Battaglia di riscaldamento in solitaria con Joker. Usa Passo del coraggio (crit up), Carica, attacchi Sacro, Lama danzante (crit), Vertigo (Vertigini). Aumentare l'Elusione aiuta; attacchi fisici standard bastano.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [],
+       "contenuto": ""
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-05-auditorium/3",
+      "ordine": 3,
+      "tipo": "boss",
+      "nome": "Cenerentola (Persona di Sumire, prime due fasi, 9 gennaio)",
+      "descrizione": "Affiancata da Organismi sintetici malvagi che assorbe con Assorbimento (cura in base agli HP residui della vittima). Cenerentola non ha debolezze note, ma gli Organismi sono deboli al Ghiaccio (Yusuke consigliato per 1 More). Terza fase con supporto della squadra completa: strategia — Yusuke/Joker eliminano gli organismi prima che vengano assorbiti, Ryuji con Carica, cure di supporto; Anello dell'orgoglio su Yusuke per caricare Ryuji.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [],
+       "contenuto": ""
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-05-auditorium/4",
+      "ordine": 4,
+      "tipo": "miniboss",
+      "nome": "Malvagio drago vorace (Fafnir)",
+      "descrizione": "Nemico potente ricorrente nel Palazzo (appare anche in altre aree). Riflette attacchi fisici e da arma da fuoco, assorbe Fuoco e Nucleare, resiste al Tuono. Vulnerabile a Congelamento/Infuriare. Usa abilità nucleari a raggio globale (Fungo atomico/Esplosione nucleare) e Gigantomachia (fisico globale); può eliminare la resistenza al Nucleare del party.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [],
+       "resistenze": [
+        "Attacchi fisici (annulla)",
+        "Armi da fuoco (annulla)",
+        "Tuono (dimezza)",
+        "Fuoco (assorbe)",
+        "Nucleare (assorbe)"
+       ],
+       "contenuto": "Forziere con Stocco decisivo (nell'Auditorium)"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-05-auditorium/5",
+      "ordine": 5,
+      "tipo": "miniboss",
+      "nome": "Sbruffone edonista (Dioniso) e Dio-leone deformato (Chimera)",
+      "descrizione": "Chimera è debole a Vento/Maledizione; Dioniso non ha debolezze note, riflette danni elettrici, annulla Sacro e Maledizione. Scontro non impegnativo.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [],
+       "contenuto": "Tesserino del personale"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "maruki-06-ripostiglio",
+    "ordine": 5,
+    "nome": "Ripostiglio",
+    "descrizione": "Magazzino buio raggiunto tramite il Tesserino del personale (12 gennaio); introduce il collezionabile 'Tentacolo inquietante' e prosegue fino alla Sala di controllo.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-maruki-ripostiglio",
+      "nome": "Palazzo di Maruki › ??? Ripostiglio",
+      "n": 1,
+      "presi": 0,
+      "spilli": [
+       {
+        "id": 970,
+        "uid": "a856fde506f6344844fcd30a7d387375",
+        "tipo": "forziere",
+        "nome": "Forziere",
+        "colore": "#eab308",
+        "raccolto": false
+       }
+      ]
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "maruki-06-ripostiglio/0",
+      "ordine": 0,
+      "tipo": "oggetto",
+      "nome": "Tentacoli inquietanti",
+      "descrizione": "Nuovo tipo di tesoro collezionabile introdotto in questa area: se ne contano almeno 8-9 sparsi nel Ripostiglio (angoli, retro scaffalature, condotti, aree di stoccaggio).",
+      "esauribile": true,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-06-ripostiglio/1",
+      "ordine": 1,
+      "tipo": "forziere",
+      "nome": "Forziere su area sopraelevata (via Rampino)",
+      "descrizione": "Raggiungibile con un punto di aggancio del Rampino.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Fiala delle vertigini S"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 49.6,
+       "y": 64.8
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-06-ripostiglio/2",
+      "ordine": 2,
+      "tipo": "forziere",
+      "nome": "Forziere dietro le scaffalature",
+      "descrizione": "Inizialmente non raggiungibile; accessibile passando da una porta dopo aver girato con un punto di aggancio.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Ofuda debilitante"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 28.5,
+       "y": 27.7
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-06-ripostiglio/3",
+      "ordine": 3,
+      "tipo": "miniboss",
+      "nome": "Malvagio drago vorace (Fafnir) — secondo incontro",
+      "descrizione": "Stesso nemico incontrato nell'Auditorium; stessa strategia (Congelamento/Infuriare).",
+      "esauribile": true,
+      "dettagli": {
+       "resistenze": [
+        "Attacchi fisici (annulla)",
+        "Armi da fuoco (annulla)",
+        "Tuono (dimezza)",
+        "Fuoco (assorbe)",
+        "Nucleare (assorbe)"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-06-ripostiglio/4",
+      "ordine": 4,
+      "tipo": "scorciatoia",
+      "nome": "Punto di aggancio — ritorno alle casse",
+      "descrizione": "Scorciatoia che riporta rapidamente all'area delle casse iniziali.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "maruki-07-sala-di-controllo",
+    "ordine": 6,
+    "nome": "Sala di controllo",
+    "descrizione": "Raggiunta tramite ascensore dal Ripostiglio (12 gennaio); prosegue il 26 gennaio con l'esplorazione del laboratorio, l'enigma della porta parlante e i Semi della Bramosia, fino alla Ala ricerca.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-maruki-sala-di-controllo",
+      "nome": "Palazzo di Maruki › ??? Sala di controllo",
+      "n": 3,
+      "presi": 0,
+      "spilli": [
+       {
+        "id": 964,
+        "uid": "3b4d3e575e03706b017ed4bfe1cdd40d",
+        "tipo": "forziere-raro",
+        "nome": "Forziere raro",
+        "colore": "#fde047",
+        "raccolto": false
+       },
+       {
+        "id": 965,
+        "uid": "321d4b15f4de5448ca371507036366b7",
+        "tipo": "forziere",
+        "nome": "Forziere",
+        "colore": "#eab308",
+        "raccolto": false
+       },
+       {
+        "id": 966,
+        "uid": "791ae986e1ac6ec16d40ea1084fac813",
+        "tipo": "seme-bramosia",
+        "nome": "Seme di bramosia",
+        "colore": "#c85cff",
+        "raccolto": false
+       }
+      ]
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "maruki-07-sala-di-controllo/0",
+      "ordine": 0,
+      "tipo": "sicura",
+      "nome": "Safe Room — Sala di monitoraggio",
+      "descrizione": "Sblocca il viaggio veloce 'Sala di monitoraggio'; buon punto per fondere Persona di alto livello (es. Messia Picaro Lv96, Cibele, Futsunushi Lv92, con investimento economico rilevante).",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 18.7,
+       "y": 61.1
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-07-sala-di-controllo/1",
+      "ordine": 1,
+      "tipo": "miniboss",
+      "nome": "Sovrana di Skye (Scathach) e Generale lanciere (Cu Chulainn)",
+      "descrizione": "Il Generale è debole al Tuono; la Sovrana protegge con Muro elettrico. Colpire la Sovrana con Fuoco/Nucleare/Psicocinesi e il Generale con Tuono. Entrambi resistenti agli attacchi fisici.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [
+        "Tuono (Generale lanciere)",
+        "Fuoco/Nucleare/Psicocinesi (Sovrana di Skye)"
+       ],
+       "resistenze": [
+        "Attacchi fisici (entrambi, dimezza)"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-07-sala-di-controllo/2",
+      "ordine": 2,
+      "tipo": "oggetto",
+      "nome": "Tentacoli inquietanti",
+      "descrizione": "Diversi Tentacoli inquietanti nel laboratorio e nelle stanze adiacenti (almeno 6).",
+      "esauribile": true,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-07-sala-di-controllo/3",
+      "ordine": 3,
+      "tipo": "puzzle",
+      "nome": "Porta parlante — enigma 1",
+      "descrizione": "Richiede una risposta corretta per aprirsi; la risposta si scopre guardando l'Appunto (diario di Maruki) e la videocassetta nella Vecchia TV.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Risposta corretta: 'La sua ragazza'"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 80.4,
+       "y": 17.8
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-07-sala-di-controllo/4",
+      "ordine": 4,
+      "tipo": "forziere",
+      "nome": "Forziere — Catena di perline",
+      "descrizione": "Vicino allo scaffale con l'Appunto.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Catena di perline"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 30.7,
+       "y": 90.2
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-07-sala-di-controllo/5",
+      "ordine": 5,
+      "tipo": "forziere",
+      "nome": "Forziere — Infini-sciabola",
+      "descrizione": "Raggiungibile tramite condotto e piattaforme.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Infini-sciabola"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 19.4,
+       "y": 75
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-07-sala-di-controllo/6",
+      "ordine": 6,
+      "tipo": "volonta",
+      "nome": "Seme della Bramosia — Seme tristezza rosso",
+      "descrizione": "Primo dei tre Semi della Bramosia raccoglibili nel Palazzo, che si combinano nell'accessorio 'Cristallo del dolore' (abilità passiva Supporto medico, +8% HP/SP dopo ogni battaglia). Classificato come punto Volontà/oggetto speciale del Palazzo per analogia con altri collezionabili a tema; la guida non lo definisce esplicitamente 'Volontà' ma è l'oggetto più simile a un sistema di progressione/potenziamento del Palazzo (vedi note generali).",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Seme tristezza rosso (1 di 3, per il Cristallo del dolore)"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 7.7,
+       "y": 79.3
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-07-sala-di-controllo/7",
+      "ordine": 7,
+      "tipo": "forziere",
+      "nome": "Forziere — Pane per l'anima x2",
+      "descrizione": "In una delle stanze quadrate della Sala di controllo.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Pane per l'anima x2"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 81,
+       "y": 41.5
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "maruki-08-ala-ricerca",
+    "ordine": 7,
+    "nome": "Ala ricerca",
+    "descrizione": "Complesso su tre piani raggiunto dopo aver risposto 'La sua ragazza' alla porta parlante (26 gennaio). Contiene un secondo enigma di porta parlante e il secondo Seme della Bramosia.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-maruki-ala-ricerca",
+      "nome": "Palazzo di Maruki › Ala ricerca",
+      "n": 1,
+      "presi": 0,
+      "spilli": [
+       {
+        "id": 994,
+        "uid": "d721f4dbbc0492d3504e556b85673171",
+        "tipo": "forziere",
+        "nome": "Forziere",
+        "colore": "#eab308",
+        "raccolto": false
+       }
+      ]
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "maruki-08-ala-ricerca/0",
+      "ordine": 0,
+      "tipo": "sicura",
+      "nome": "Safe Room — Laboratorio Ala Ricerche",
+      "descrizione": "Nell'angolo nord della prima grande stanza.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 56.5,
+       "y": 11.3
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-08-ala-ricerca/1",
+      "ordine": 1,
+      "tipo": "forziere",
+      "nome": "Forziere — Kongou Ofuda",
+      "descrizione": "Nella grande stanza iniziale, dopo aver sbloccato le porte.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Kongou Ofuda"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 62.3,
+       "y": 37.4
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-08-ala-ricerca/2",
+      "ordine": 2,
+      "tipo": "forziere",
+      "nome": "Forziere — Gel rilassante x3",
+      "descrizione": "In una piccola stanza al secondo piano.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Gel rilassante x3"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-08-ala-ricerca/3",
+      "ordine": 3,
+      "tipo": "oggetto",
+      "nome": "Tentacoli inquietanti",
+      "descrizione": "Vari Tentacoli inquietanti sui tre piani dell'Ala ricerca (almeno 5).",
+      "esauribile": true,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-08-ala-ricerca/4",
+      "ordine": 4,
+      "tipo": "puzzle",
+      "nome": "Porta parlante — enigma 2",
+      "descrizione": "Al terzo piano; richiede di guardare la videocassetta sulla Vecchia TV per ottenere l'informazione necessaria.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Risposta corretta: 'Dimostrazione'"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-08-ala-ricerca/5",
+      "ordine": 5,
+      "tipo": "miniboss",
+      "nome": "Malvagio drago vorace (Fafnir) — terzo incontro",
+      "descrizione": "Stesso nemico, stessa strategia.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Forziere con Vestito dorato dopo la vittoria"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-08-ala-ricerca/6",
+      "ordine": 6,
+      "tipo": "volonta",
+      "nome": "Seme della Bramosia — Seme tristezza verde",
+      "descrizione": "Secondo dei tre Semi della Bramosia (per il Cristallo del dolore), raggiunto rompendo un vetro dopo un percorso su condotti.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Seme tristezza verde (2 di 3)"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "maruki-09-sala-visite",
+    "ordine": 8,
+    "nome": "Sala visite",
+    "descrizione": "Area con pannelli informativi e tre 'quiz' basati sull'osservazione degli NPC cognitivi, per scegliere l'ascensore corretto (26 gennaio).",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-maruki-sala-visite",
+      "nome": "Palazzo di Maruki › Sala visite",
+      "n": 0,
+      "presi": 0,
+      "spilli": []
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "maruki-09-sala-visite/0",
+      "ordine": 0,
+      "tipo": "sicura",
+      "nome": "Safe Room — Sala visite",
+      "descrizione": "In una piccola stanza vicino all'ingresso dell'area.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-09-sala-visite/1",
+      "ordine": 1,
+      "tipo": "puzzle",
+      "nome": "Pannello informativo — Domanda 1",
+      "descrizione": "Osservare l'Uomo determinato e l'Uomo riservato che prendono gli ascensori, poi scegliere la risposta al tavolo delle consultazioni.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Risposta corretta: Ascensore B (rosso) — ricompensa: Muscoli d'acciaio S"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-09-sala-visite/2",
+      "ordine": 2,
+      "tipo": "puzzle",
+      "nome": "Pannello informativo — Domanda 2",
+      "descrizione": "Osservare il Ragazzo energico, la Donna coscienziosa e lo Studente razionale.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Risposta corretta: Ascensore C (grigio) — ricompensa: Scorza dura S"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-09-sala-visite/3",
+      "ordine": 3,
+      "tipo": "puzzle",
+      "nome": "Pannello informativo — Domanda 3 (5 scelte)",
+      "descrizione": "La più difficile: un percorso alternativo via condotto permette di scoprire in anticipo che C ed E sono risposte sbagliate (comporta un combattimento extra), poi si parla con l'Uomo pacato e la Donna dall'aria sicura.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Risposta corretta: Ascensore D (azzurro) — ricompensa: Catena di perline + forziere con Rasetsu Ofuda"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-09-sala-visite/4",
+      "ordine": 4,
+      "tipo": "forziere",
+      "nome": "Forziere — Tavola Ouija",
+      "descrizione": "Raggiungibile arrampicandosi sulle librerie e passando per un condotto fino a una stanza di monitoraggio.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Tavola Ouija"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 64.8,
+       "y": 43.7
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-09-sala-visite/5",
+      "ordine": 5,
+      "tipo": "oggetto",
+      "nome": "Oggetti a forma di cuore",
+      "descrizione": "Almeno 3 sparsi nella Sala visite.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "maruki-10-sala-di-supporto",
+    "ordine": 9,
+    "nome": "Sala di supporto",
+    "descrizione": "Area su più livelli raggiunta da un condotto oltre la Sala visite (26 gennaio); contiene il terzo enigma di porta parlante e la ricerca della terza videocassetta nascosta in una 'Scatola dei documenti'.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-maruki-sala-di-supporto",
+      "nome": "Palazzo di Maruki › Sala di supporto",
+      "n": 2,
+      "presi": 0,
+      "spilli": [
+       {
+        "id": 985,
+        "uid": "a2803b5981a1ece958b0f81df63a2c85",
+        "tipo": "forziere-raro",
+        "nome": "Forziere raro",
+        "colore": "#fde047",
+        "raccolto": false
+       },
+       {
+        "id": 986,
+        "uid": "f6df7613b42c5e49e09603cb892caec1",
+        "tipo": "forziere",
+        "nome": "Forziere",
+        "colore": "#eab308",
+        "raccolto": false
+       }
+      ]
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "maruki-10-sala-di-supporto/0",
+      "ordine": 0,
+      "tipo": "sicura",
+      "nome": "Safe Room — Sala di supporto",
+      "descrizione": "A est rispetto all'ingresso dell'area.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-10-sala-di-supporto/1",
+      "ordine": 1,
+      "tipo": "oggetto",
+      "nome": "Oggetti a forma di cuore (nella Sala visite adiacente)",
+      "descrizione": "Tornando verso la Sala visite: 4 Oggetti a forma di cuore su più livelli (2 in alto, 2 in basso).",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-10-sala-di-supporto/2",
+      "ordine": 2,
+      "tipo": "miniboss",
+      "nome": "Gigante fiammeggiante (Surt)",
+      "descrizione": "Assorbe Fuoco, resiste a fisico/Elettricità/Nucleare. Consigliato non portare Fox (Yusuke) in squadra per evitare che il boss ottenga '1 More' con Inferno di fuoco. Usa Fungo atomico (Nucleare) e Marakunda (riduce difesa party).",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [],
+       "resistenze": [
+        "Attacchi fisici (dimezza)",
+        "Fuoco (assorbe)",
+        "Tuono (annulla)",
+        "Nucleare (dimezza)"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 27.1,
+       "y": 61.7
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-10-sala-di-supporto/3",
+      "ordine": 3,
+      "tipo": "puzzle",
+      "nome": "Porta parlante — enigma 3",
+      "descrizione": "Richiede di trovare la videocassetta nascosta in una Scatola dei documenti (nella stanza raggiungibile dagli armadi elettrici) e guardarla sulla Vecchia TV.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Risposta corretta: 'Desiderando di essere quella persona'"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 18.6,
+       "y": 24.2
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-10-sala-di-supporto/4",
+      "ordine": 4,
+      "tipo": "forziere",
+      "nome": "Forziere — Veste della saggezza",
+      "descrizione": "Nella stanza raggiunta tramite gli armadi elettrici e il condotto sul soffitto.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Veste della saggezza"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-10-sala-di-supporto/5",
+      "ordine": 5,
+      "tipo": "oggetto",
+      "nome": "Tentacoli inquietanti",
+      "descrizione": "Numerosi (almeno 8) sparsi tra le stanze in senso antiorario e sulle passerelle superiori.",
+      "esauribile": true,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-10-sala-di-supporto/6",
+      "ordine": 6,
+      "tipo": "forziere",
+      "nome": "Forziere — Amrita Soda x3 e Gel rilassante",
+      "descrizione": "In una delle stanze percorse in senso antiorario, insieme a una Scatola dei documenti.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Amrita Soda x3, Gel rilassante"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-10-sala-di-supporto/7",
+      "ordine": 7,
+      "tipo": "oggetto",
+      "nome": "Anima da masticare",
+      "descrizione": "Su una cassa raggiungibile con un secondo punto di aggancio del Rampino a sud-ovest.",
+      "esauribile": true,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "maruki-11-corridoio-del-crepuscolo",
+    "ordine": 10,
+    "nome": "Corridoio del Crepuscolo",
+    "descrizione": "Area-puzzle basata su un sistema di Regolatori di luminosità (miscelazione additiva di Rosso/Verde/Blu per creare Ciano, Bianco, Magenta, Giallo ecc.) per aprire scalinate di luce e progredire verso il Tesoro (26 gennaio).",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-maruki-corridoio-del-crepuscolo",
+      "nome": "Palazzo di Maruki › Corridoio del Crepuscolo",
+      "n": 3,
+      "presi": 0,
+      "spilli": [
+       {
+        "id": 908,
+        "uid": "7a5c17a75c8165503b3b2efdb34bb8e0",
+        "tipo": "forziere",
+        "nome": "Forziere",
+        "colore": "#eab308",
+        "raccolto": false
+       },
+       {
+        "id": 909,
+        "uid": "f383adcc5397136115246eba3262266a",
+        "tipo": "forziere-raro",
+        "nome": "Forziere raro",
+        "colore": "#fde047",
+        "raccolto": false
+       },
+       {
+        "id": 918,
+        "uid": "656d367b675fa4a81646302be84df2d6",
+        "tipo": "seme-bramosia",
+        "nome": "Seme di bramosia",
+        "colore": "#c85cff",
+        "raccolto": false
+       }
+      ]
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "maruki-11-corridoio-del-crepuscolo/0",
+      "ordine": 0,
+      "tipo": "puzzle",
+      "nome": "Regolatori di luminosità (puzzle RGB)",
+      "descrizione": "Serie di terminali che accendono/spengono i colori Rosso, Verde, Blu in combinazione per formare Ciano, Bianco, Magenta e Giallo, sbloccando via via scalinate luminose verso l'area successiva e verso il Tesoro finale.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 90.1,
+       "y": 60.3
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-11-corridoio-del-crepuscolo/1",
+      "ordine": 1,
+      "tipo": "sicura",
+      "nome": "Safe Room — Corridoio del Crepuscolo",
+      "descrizione": "Oltre la grande scala bianca, prima della stanza con la quarta videocassetta.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-11-corridoio-del-crepuscolo/2",
+      "ordine": 2,
+      "tipo": "forziere",
+      "nome": "Forziere — Ofuda del potere",
+      "descrizione": "Vicino all'inizio dell'area, verso ovest.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Ofuda del potere"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 47.1,
+       "y": 33.3
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-11-corridoio-del-crepuscolo/3",
+      "ordine": 3,
+      "tipo": "forziere",
+      "nome": "Forziere — Soma",
+      "descrizione": "Raggiungibile risolvendo una combinazione di scale gialle/verdi/rosse tra più Regolatori di luminosità.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Soma"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-11-corridoio-del-crepuscolo/4",
+      "ordine": 4,
+      "tipo": "forziere",
+      "nome": "Forziere — Balsamo vitale",
+      "descrizione": "Nella zona più a sud dell'area.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Balsamo vitale"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 47.5,
+       "y": 68.6
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-11-corridoio-del-crepuscolo/5",
+      "ordine": 5,
+      "tipo": "oggetto",
+      "nome": "Tentacoli inquietanti",
+      "descrizione": "Diversi lungo il percorso a puzzle (almeno 6).",
+      "esauribile": true,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-11-corridoio-del-crepuscolo/6",
+      "ordine": 6,
+      "tipo": "miniboss",
+      "nome": "Malvagio drago vorace (Fafnir) — quarto incontro",
+      "descrizione": "Stessa strategia dei precedenti incontri (Congelamento/Infuriare, curare costantemente il party).",
+      "esauribile": true,
+      "dettagli": {
+       "resistenze": [
+        "Attacchi fisici (annulla)",
+        "Armi da fuoco (annulla)",
+        "Tuono (dimezza)",
+        "Fuoco (assorbe)",
+        "Nucleare (assorbe)"
+       ],
+       "contenuto": "Seme tristezza blu — completa il Cristallo del dolore (3° e ultimo Seme; accessorio con abilità passiva Supporto medico: +8% HP/SP massimi dopo ogni battaglia)"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-11-corridoio-del-crepuscolo/7",
+      "ordine": 7,
+      "tipo": "puzzle",
+      "nome": "Porta parlante — enigma 4",
+      "descrizione": "Ultima porta parlante del Palazzo, dopo la Safe Room del Corridoio del Crepuscolo.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Risposta corretta: 'La sua Persona si è risvegliata del tutto'"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-11-corridoio-del-crepuscolo/8",
+      "ordine": 8,
+      "tipo": "miniboss",
+      "nome": "Genio ammazzadraghi (Siegfried)",
+      "descrizione": "Nessuna debolezza nota, resiste al Ghiaccio, immune ai danni fisici. Ha più turni del solito e usa Maziodyne (Elettricità globale, elimina la nostra resistenza all'Elettricità) e Lama turbinante (pericolosa se il boss è potenziato con Tarukaja). Consigliato puntare a Colpi critici/tecnici; tenere Morgana fuori squadra.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [],
+       "resistenze": [
+        "Attacchi fisici (annulla)",
+        "Arma da fuoco (dimezza)",
+        "Ghiaccio (dimezza)"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "maruki-12-eden-modello-psi-cognitivo-eden",
+    "ordine": 11,
+    "nome": "Eden (Modello psi-cognitivo Eden)",
+    "descrizione": "Area finale del Palazzo, raggiunta il 3 febbraio tramite ascensore dal Corridoio del Crepuscolo/Safe Room. Contiene il Tesoro e lo scontro finale multi-fase contro il Dott. Maruki.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-maruki-modello-psi-cognitivo-eden",
+      "nome": "Palazzo di Maruki › Modello psi-cognitivo Eden",
+      "n": 0,
+      "presi": 0,
+      "spilli": []
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "maruki-12-eden-modello-psi-cognitivo-eden/0",
+      "ordine": 0,
+      "tipo": "boss",
+      "nome": "Maruki — Prima fase (con Azathoth Prima fase + Tentacoli)",
+      "descrizione": "Non si combatte 'davvero' Maruki ma la sua Persona Azathoth e tre Tentacoli di supporto (Protezione, Assistenza, Cura) che lo proteggono. Azathoth usa Commozione cerebrale (fisico leggero, rischio Amnesia), Schianto nucleare (Nucleare globale), Pioggia di semi (fisico multiplo 1-3 colpi), Amplifica forza/Amplifica magia (potenziamenti 2,5x); tratto Tentacolo scudo riduce i danni finché i tentacoli sono vivi. Colpire i tentacoli con le loro debolezze alimenta le Staffette.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [],
+       "resistenze": [],
+       "contenuto": "Statistiche Maruki: Livello 90, HP 8.000, SP 999. Azathoth (1ª fase): Livello 85, HP 6.000, SP 999, nessuna debolezza/resistenza/immunità/assorbimento nota. Tentacolo della protezione: HP 650, debole a danni fisici, immune/respinge quasi tutto il resto (usa solo Guardia informe). Tentacolo dell'assistenza: HP 650, debole a Fuoco/Ghiaccio/Elettricità/Vento, immune a fisico/Sacro/Maledizione, respinge Psicocinesi/Nucleare (usa Tarukaja/Tarunda/Rakunda). Tentacolo della cura: HP 650, debole a Psicocinesi/Nucleare/Sacro/Maledizione, immune a fisico/Fuoco/Ghiaccio, respinge Elettricità/Vento (usa Corrente di energia per curare Maruki). Strategia consigliata: Ann (Super-energia, equivalente di Concentrazione per tutta la squadra) + Akechi (Signore della magia riduce il costo SP) + Joker (bombardamento magico/cura/potenziamenti) + Makoto (Nucleare + cura)."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 60,
+       "y": 94.1
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-12-eden-modello-psi-cognitivo-eden/1",
+      "ordine": 1,
+      "tipo": "boss",
+      "nome": "Maruki — Seconda fase (con Azathoth Seconda fase + Tentacoli)",
+      "descrizione": "Azathoth acquisisce nuove abilità Divino (Radianza eterna, Colpo perforante, Posa del tiranno + Caos del tiranno) e Ghigno crudele (Paura globale); Maruki introduce gli 'Editti', che bloccano temporaneamente una categoria di azioni della squadra (magia, Staffetta, cura, Guardia o oggetti) per 1-2 turni. Se lo scontro si protrae, Azathoth usa Megidolaon (Divino globale). Sconfiggere Azathoth mette KO anche Maruki.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [],
+       "resistenze": [],
+       "contenuto": "Statistiche Maruki (2ª fase): Livello 90, HP 8.999, SP 999. Azathoth (2ª fase): Livello 87, HP 12.000, SP 999, nessuna debolezza/resistenza/immunità/assorbimento nota."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 60,
+       "y": 94.1
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-12-eden-modello-psi-cognitivo-eden/2",
+      "ordine": 2,
+      "tipo": "boss",
+      "nome": "Maruki — Adam Kadmon (terza forma)",
+      "descrizione": "Dopo l'apparente vittoria, Maruki evolve la sua Persona in Adam Kadmon: i danni inflitti al boss sono notevolmente ridotti. Usa Luce dell'origine (Divino ad area pesante), Palma grande (Divino a bersaglio singolo, circa 150 danni) e Rivitalizza anima (Divino ad area che cura Maruki in base ai bersagli colpiti, circa 300 danni inflitti). Consigliato potenziare la squadra (Carica/Concentrazione) e usare le tecniche più potenti disponibili.",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [],
+       "resistenze": [],
+       "contenuto": "Statistiche: Livello 90, HP 3.000, SP 999."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 60,
+       "y": 94.1
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "maruki-12-eden-modello-psi-cognitivo-eden/3",
+      "ordine": 3,
+      "tipo": "boss",
+      "nome": "Adam Kadmon (forma finale — battaglia di sopravvivenza)",
+      "descrizione": "Fase finale scriptata: l'obiettivo non è sconfiggere il boss ma sopravvivere ad alcuni turni (Futaba sta preparando un contromisura). Il boss alterna Posizione attacco (fase di carica, mettersi in Guardia) e Piena potenza (danno Divino colossale che riduce a 1 HP la maggior parte della squadra). Al termine, un prompt su schermo fa sferrare il colpo di pistola definitivo che conclude il combattimento e sblocca il trofeo di bronzo 'Riprenditi il futuro' (completamento di tutti i Palazzi).",
+      "esauribile": true,
+      "dettagli": {
+       "debolezze": [],
+       "resistenze": [],
+       "contenuto": "Statistiche: Livello 90, HP 99.999, SP 999. Dopo questa fase segue uno scontro finale 'a mani nude' (solo comando Attacca, senza abilità) puramente narrativo."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+      "stato": null,
+      "marcatore": {
+       "x": 60,
+       "y": 94.1
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   }
+  ],
+  "punti": 69,
+  "esauribili": 52,
+  "gestiti": 0,
+  "raccolta": {
+   "totale": 21,
+   "presi": 0,
+   "mappe": 35,
+   "mappeComplete": 19
+  },
+  "completato": null,
+  "atterraggio": null,
+  "note": "Palazzo speciale e ULTIMO dungeon esclusivo di Persona 5 Royal (contenuto 'terzo semestre'). NON segue lo schema classico degli altri Palazzi: 1) Non esiste una vera e propria 'Calling Card' né un termine legato a una barra di Volontà/Sanità del Sovrano da consumare con giorni di esplorazione liberi — la progressione è interamente vincolata a un calendario di eventi di trama fissi (2/1, 9/1, 12/1, 20/1, 26/1, 2/2, 3/2) durante i quali si sblocca via via l'accesso a nuove aree del Palazzo, spesso senza possibilità di tornare prima della data prevista. 2) Il 'furto' non è un Cambio di Cuore verso un vero criminale ma una scelta narrativa a bivio: il 9 gennaio e poi il 2 febbraio il giocatore deve rifiutare l'offerta di realtà distorta di Maruki ('Non posso accettare questa realtà') per proseguire verso il True Ending; accettandola ('Accetto questa realtà' / 'Accetteremo l'offerta') si ottiene invece un finale alternativo negativo (consigliato salvare in una Safe Room dedicata — quella del Corridoio, 9 gennaio — per poter vedere entrambi gli esiti). 3) Non è stato individuato nella guida allgamestaff alcun campo esplicito denominato 'Volontà' associato a questo Palazzo (vedi file note per dettagli). 4) Al Palazzo è collegato tematicamente ma SEPARATO il 'Dedalo di Da'at' (dungeon opzionale nei Memento, 15 piani, sbloccato il 20 gennaio, raggiungibile dal Dedalo di Iweleth/Sala del Graal), usato per boss opzionali e Timbri: il vero Tesoro/furto avviene comunque dentro il Palazzo di Maruki, non nel Dedalo di Da'at.\nSemi della Bramosia: la guida documenta i primi due Semi con posizione precisa; il terzo non è localizzato nella pagina consultata (lacuna della fonte, non colmata).",
+  "fonti": [
+   "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/",
+   "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-maruki-consigliere/",
+   "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/",
+   "https://www.allgamestaff.it/persona-5-royal/guida-tutti-i-finali/",
+   "https://megamitensei.fandom.com/wiki/Takuto_Maruki",
+   "https://megamitensei.fandom.com/wiki/Councillor_Arcana"
+  ],
+  "planimetrie": [
+   {
+    "chiave": "palazzo-di-maruki-ingresso",
+    "nome": "Palazzo di Maruki › ??? Ingresso",
+    "ordine": 0,
+    "aree": [
+     {
+      "chiave": "maruki-01-ingresso",
+      "nome": "Ingresso",
+      "ordine": 0
+     }
+    ],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-maruki-sala-dingresso-inquadratura-meridionale-piu-ristretta",
+    "nome": "Palazzo di Maruki › Sala d'ingresso — inquadratura meridionale — più ristretta",
+    "ordine": 100,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-maruki-sala-dingresso-inquadratura-meridionale-piu-ampia",
+    "nome": "Palazzo di Maruki › Sala d'ingresso — inquadratura meridionale — più ampia",
+    "ordine": 101,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 831,
+      "uid": "4ffffefdd53e23fa2250fc9fb1f4fd02",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-maruki-sala-dingresso",
+    "nome": "Palazzo di Maruki › Sala d'ingresso",
+    "ordine": 102,
+    "aree": [
+     {
+      "chiave": "maruki-02-sala-d-ingresso",
+      "nome": "Sala d'ingresso",
+      "ordine": 1
+     }
+    ],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-maruki-sala-dingresso-inquadratura-settentrionale",
+    "nome": "Palazzo di Maruki › Sala d'ingresso — inquadratura settentrionale",
+    "ordine": 103,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-maruki-corridoio-porzione-settentrionale",
+    "nome": "Palazzo di Maruki › Corridoio — porzione settentrionale",
+    "ordine": 200,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-maruki-corridoio",
+    "nome": "Palazzo di Maruki › Corridoio",
+    "ordine": 201,
+    "aree": [
+     {
+      "chiave": "maruki-04-corridoio",
+      "nome": "Corridoio",
+      "ordine": 3
+     }
+    ],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-maruki-percorso-di-prova",
+    "nome": "Palazzo di Maruki › ??? Percorso di prova",
+    "ordine": 300,
+    "aree": [
+     {
+      "chiave": "maruki-03-percorso-di-prova",
+      "nome": "Percorso di prova",
+      "ordine": 2
+     }
+    ],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 859,
+      "uid": "b424bc9a4069d2750e060e4765aae642",
+      "tipo": "forziere-raro",
+      "nome": "Forziere raro",
+      "colore": "#fde047",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-maruki-modello-psi-cognitivo-eden",
+    "nome": "Palazzo di Maruki › Modello psi-cognitivo Eden",
+    "ordine": 400,
+    "aree": [
+     {
+      "chiave": "maruki-12-eden-modello-psi-cognitivo-eden",
+      "nome": "Eden (Modello psi-cognitivo Eden)",
+      "ordine": 11
+     }
+    ],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-maruki-modello-psi-cognitivo-eden-inquadratura-meridionale-piu-ristretta",
+    "nome": "Palazzo di Maruki › Modello psi-cognitivo Eden — inquadratura meridionale — più ristretta",
+    "ordine": 401,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-maruki-modello-psi-cognitivo-eden-inquadratura-meridionale-piu-ampia",
+    "nome": "Palazzo di Maruki › Modello psi-cognitivo Eden — inquadratura meridionale — più ampia",
+    "ordine": 402,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-maruki-auditorium-porzione-orientale",
+    "nome": "Palazzo di Maruki › ??? Auditorium — porzione orientale",
+    "ordine": 500,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-maruki-auditorium",
+    "nome": "Palazzo di Maruki › ??? Auditorium",
+    "ordine": 501,
+    "aree": [
+     {
+      "chiave": "maruki-05-auditorium",
+      "nome": "Auditorium",
+      "ordine": 4
+     }
+    ],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 867,
+      "uid": "f9b92d8def01f386128ab2c5c014452e",
+      "tipo": "forziere-raro",
+      "nome": "Forziere raro",
+      "colore": "#fde047",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-maruki-sala-visite-inquadratura-meridionale-piu-ristretta",
+    "nome": "Palazzo di Maruki › Sala visite — inquadratura meridionale — più ristretta",
+    "ordine": 600,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-maruki-sala-visite-inquadratura-meridionale-seconda-per-ampiezza",
+    "nome": "Palazzo di Maruki › Sala visite — inquadratura meridionale — seconda per ampiezza",
+    "ordine": 601,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-maruki-sala-visite-inquadratura-meridionale-piu-ampia",
+    "nome": "Palazzo di Maruki › Sala visite — inquadratura meridionale — più ampia",
+    "ordine": 602,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 875,
+      "uid": "e4837916f94961685fc73b0fdfab9efc",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-maruki-sala-visite",
+    "nome": "Palazzo di Maruki › Sala visite",
+    "ordine": 603,
+    "aree": [
+     {
+      "chiave": "maruki-09-sala-visite",
+      "nome": "Sala visite",
+      "ordine": 8
+     }
+    ],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-maruki-sala-visite-inquadratura-settentrionale",
+    "nome": "Palazzo di Maruki › Sala visite — inquadratura settentrionale",
+    "ordine": 604,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 877,
+      "uid": "df39fdc88e860cc40191324ef961045b",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-maruki-corridoio-del-crepuscolo-inquadratura-orientale",
+    "nome": "Palazzo di Maruki › Corridoio del Crepuscolo — inquadratura orientale",
+    "ordine": 700,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 881,
+      "uid": "fbd94f37829b5f8b647495a3f322f8c0",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-maruki-corridoio-del-crepuscolo",
+    "nome": "Palazzo di Maruki › Corridoio del Crepuscolo",
+    "ordine": 701,
+    "aree": [
+     {
+      "chiave": "maruki-11-corridoio-del-crepuscolo",
+      "nome": "Corridoio del Crepuscolo",
+      "ordine": 10
+     }
+    ],
+    "n": 3,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 908,
+      "uid": "7a5c17a75c8165503b3b2efdb34bb8e0",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     },
+     {
+      "id": 909,
+      "uid": "f383adcc5397136115246eba3262266a",
+      "tipo": "forziere-raro",
+      "nome": "Forziere raro",
+      "colore": "#fde047",
+      "raccolto": false
+     },
+     {
+      "id": 918,
+      "uid": "656d367b675fa4a81646302be84df2d6",
+      "tipo": "seme-bramosia",
+      "nome": "Seme di bramosia",
+      "colore": "#c85cff",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-maruki-corridoio-del-crepuscolo-inquadratura-occidentale",
+    "nome": "Palazzo di Maruki › Corridoio del Crepuscolo — inquadratura occidentale",
+    "ordine": 702,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-maruki-sala-di-controllo-porzione-orientale",
+    "nome": "Palazzo di Maruki › ??? Sala di controllo — porzione orientale",
+    "ordine": 800,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 953,
+      "uid": "57e5fd16668ae58debad7ed8c47a1471",
+      "tipo": "forziere-raro",
+      "nome": "Forziere raro",
+      "colore": "#fde047",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-maruki-sala-di-controllo",
+    "nome": "Palazzo di Maruki › ??? Sala di controllo",
+    "ordine": 801,
+    "aree": [
+     {
+      "chiave": "maruki-07-sala-di-controllo",
+      "nome": "Sala di controllo",
+      "ordine": 6
+     }
+    ],
+    "n": 3,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 964,
+      "uid": "3b4d3e575e03706b017ed4bfe1cdd40d",
+      "tipo": "forziere-raro",
+      "nome": "Forziere raro",
+      "colore": "#fde047",
+      "raccolto": false
+     },
+     {
+      "id": 965,
+      "uid": "321d4b15f4de5448ca371507036366b7",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     },
+     {
+      "id": 966,
+      "uid": "791ae986e1ac6ec16d40ea1084fac813",
+      "tipo": "seme-bramosia",
+      "nome": "Seme di bramosia",
+      "colore": "#c85cff",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-maruki-ripostiglio-inquadratura-meridionale-piu-ristretta",
+    "nome": "Palazzo di Maruki › ??? Ripostiglio — inquadratura meridionale — più ristretta",
+    "ordine": 900,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-maruki-ripostiglio-inquadratura-meridionale-piu-ampia",
+    "nome": "Palazzo di Maruki › ??? Ripostiglio — inquadratura meridionale — più ampia",
+    "ordine": 901,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 968,
+      "uid": "5ce7468e805acc16a7ad869a0eeef88e",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-maruki-ripostiglio",
+    "nome": "Palazzo di Maruki › ??? Ripostiglio",
+    "ordine": 902,
+    "aree": [
+     {
+      "chiave": "maruki-06-ripostiglio",
+      "nome": "Ripostiglio",
+      "ordine": 5
+     }
+    ],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 970,
+      "uid": "a856fde506f6344844fcd30a7d387375",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-maruki-ripostiglio-porzione-orientale",
+    "nome": "Palazzo di Maruki › ??? Ripostiglio — porzione orientale",
+    "ordine": 903,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-maruki-sala-di-supporto-inquadratura-occidentale-piu-ampia",
+    "nome": "Palazzo di Maruki › Sala di supporto — inquadratura occidentale — più ampia",
+    "ordine": 1000,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-maruki-sala-di-supporto",
+    "nome": "Palazzo di Maruki › Sala di supporto",
+    "ordine": 1001,
+    "aree": [
+     {
+      "chiave": "maruki-10-sala-di-supporto",
+      "nome": "Sala di supporto",
+      "ordine": 9
+     }
+    ],
+    "n": 2,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 985,
+      "uid": "a2803b5981a1ece958b0f81df63a2c85",
+      "tipo": "forziere-raro",
+      "nome": "Forziere raro",
+      "colore": "#fde047",
+      "raccolto": false
+     },
+     {
+      "id": 986,
+      "uid": "f6df7613b42c5e49e09603cb892caec1",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-maruki-sala-di-supporto-inquadratura-occidentale-piu-ristretta",
+    "nome": "Palazzo di Maruki › Sala di supporto — inquadratura occidentale — più ristretta",
+    "ordine": 1002,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-maruki-ala-ricerca-porzione-occidentale",
+    "nome": "Palazzo di Maruki › Ala ricerca — porzione occidentale",
+    "ordine": 1100,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 990,
+      "uid": "1011428cf9fffa05ffc9cee17ec50a42",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-maruki-ala-ricerca",
+    "nome": "Palazzo di Maruki › Ala ricerca",
+    "ordine": 1101,
+    "aree": [
+     {
+      "chiave": "maruki-08-ala-ricerca",
+      "nome": "Ala ricerca",
+      "ordine": 7
+     }
+    ],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 994,
+      "uid": "d721f4dbbc0492d3504e556b85673171",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-maruki-ala-ricerca-inquadratura-orientale-piu-ristretta",
+    "nome": "Palazzo di Maruki › Ala ricerca — inquadratura orientale — più ristretta",
+    "ordine": 1102,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1000,
+      "uid": "064b22103f2003ad335051cce43b55d4",
+      "tipo": "seme-bramosia",
+      "nome": "Seme di bramosia",
+      "colore": "#c85cff",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-maruki-ala-ricerca-inquadratura-orientale-piu-ampia",
+    "nome": "Palazzo di Maruki › Ala ricerca — inquadratura orientale — più ampia",
+    "ordine": 1103,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1001,
+      "uid": "905d31e4674b22dcb503f1e382646fda",
+      "tipo": "forziere-raro",
+      "nome": "Forziere raro",
+      "colore": "#fde047",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-maruki-ala-ricerca-settore-dingresso",
+    "nome": "Palazzo di Maruki › Ala ricerca — settore d’ingresso",
+    "ordine": 1104,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   }
+  ],
+  "atterraggi": [],
+  "personeCatturate": [
+   2,
+   5,
+   8,
+   11,
+   16,
+   17,
+   18,
+   19,
+   20,
+   23,
+   24,
+   33,
+   34,
+   79,
+   80,
+   84,
+   85,
+   86,
+   87,
+   88,
+   89,
+   92,
+   93,
+   96,
+   100,
+   103,
+   104,
+   108,
+   121,
+   122,
+   123,
+   124,
+   129,
+   130,
+   136,
+   149,
+   155,
+   159,
+   161,
+   162,
+   170,
+   179,
+   182,
+   183,
+   193,
+   197,
+   199,
+   202,
+   206,
+   209,
+   210,
+   217,
+   218
+  ],
+  "illustrazione": {
+   "immagineUrl": "/api/immagini/mappa/dungeon-maruki/file?v=2026-10-18T13%3A16%3A30.570Z",
+   "asset": null
+  }
+ }
+}

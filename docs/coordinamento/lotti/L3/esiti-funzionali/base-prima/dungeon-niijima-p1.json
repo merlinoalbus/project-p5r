@@ -1,0 +1,2172 @@
+{
+ "data": {
+  "chiave": "niijima",
+  "tipo": "palazzo",
+  "ordine": 6,
+  "nome": "Palazzo di Niijima",
+  "sovrano": "Sae Niijima",
+  "arcanaSovrano": "Giudizio (Judgement)",
+  "arcanaSovranoNome": "Giudizio (Judgement)",
+  "date": {
+   "sblocco": "29 ottobre (sabato) — primo accesso",
+   "scadenza": "20 novembre (ultimo giorno utile; la guida consiglia il 13 novembre)",
+   "furtoConsigliato": "13 novembre (domenica) — data indicata da allgamestaff come esplorazione/completamento principale del palazzo"
+  },
+  "finestra": {
+   "dal": "10-29",
+   "al": "11-20"
+  },
+  "livelloConsigliato": "Party circa livello 45+ (fonte secondaria thegamer.com/samurai-gamers; allgamestaff indica genericamente livello medio-alto, difficoltà crescente). Party consigliato da allgamestaff: Joker, Crow (Akechi — ottimo con Maledizione/Sacro), Skull, Queen. Consigliato equipaggiare Adesivo SP 3 su Crow per gli alti consumi.",
+  "aree": [
+   {
+    "chiave": "niijima-01-entrata-del-casino",
+    "ordine": 0,
+    "nome": "Entrata del Casinò",
+    "descrizione": "Ingresso del Palazzo/casinò.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-niijima-entrata-del-casino",
+      "nome": "Palazzo di Niijima › Entrata del casinò",
+      "n": 0,
+      "presi": 0,
+      "spilli": []
+     }
+    ],
+    "punti": [],
+    "dedalo": null
+   },
+   {
+    "chiave": "niijima-02-piano-terra",
+    "ordine": 1,
+    "nome": "Piano terra",
+    "descrizione": "Prima area esplorabile del casinò.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-niijima-piano-terra",
+      "nome": "Palazzo di Niijima › Piano terra",
+      "n": 1,
+      "presi": 0,
+      "spilli": [
+       {
+        "id": 1019,
+        "uid": "5f772a0175d06ea88a529d26eab807f9",
+        "tipo": "forziere",
+        "nome": "Forziere",
+        "colore": "#eab308",
+        "raccolto": false
+       }
+      ]
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "niijima-02-piano-terra/0",
+      "ordine": 0,
+      "tipo": "sicura",
+      "nome": "Sala sicura piano terra",
+      "descrizione": "Prima Sala Sicura del palazzo, raggiunta dopo il miniboss 'Leopardo crudele'.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": {
+       "x": 41,
+       "y": 94
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-02-piano-terra/1",
+      "ordine": 1,
+      "tipo": "miniboss",
+      "nome": "Leopardo crudele (Ose)",
+      "descrizione": "Miniboss del piano terra.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [
+        "Sacro"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-02-piano-terra/2",
+      "ordine": 2,
+      "tipo": "forziere",
+      "nome": "Forziere angolo sud-est",
+      "descrizione": "Forziere al piano terra.",
+      "esauribile": false,
+      "dettagli": {
+       "contenuto": "Fiala confusione S x3"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-02-piano-terra/3",
+      "ordine": 3,
+      "tipo": "oggetto",
+      "nome": "Ornamenti distruttibili",
+      "descrizione": "Ornamenti sparsi da distruggere per ottenere risorse.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Vari materiali"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-02-piano-terra/4",
+      "ordine": 4,
+      "tipo": "persona",
+      "nome": "Ganesha (Pachiderma benevolo)",
+      "descrizione": "Ombra catturabile al piano terra.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [
+        "Psicocinesi"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-02-piano-terra/5",
+      "ordine": 5,
+      "tipo": "persona",
+      "nome": "Jatayu (Avvoltoio arrogante)",
+      "descrizione": "Ombra catturabile al piano terra.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [
+        "Nucleare"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-02-piano-terra/6",
+      "ordine": 6,
+      "tipo": "persona",
+      "nome": "Kikuri-Hime (Ragazza di montagna)",
+      "descrizione": "Ombra catturabile al piano terra.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [
+        "Fuoco"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-02-piano-terra/7",
+      "ordine": 7,
+      "tipo": "persona",
+      "nome": "Kushinada (Sacrificio lamentoso)",
+      "descrizione": "Ombra catturabile al piano terra.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [
+        "Ghiaccio",
+        "Nucleare"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-02-piano-terra/8",
+      "ordine": 8,
+      "tipo": "persona",
+      "nome": "Norna (Giudice finale)",
+      "descrizione": "Ombra catturabile al piano terra.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": []
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-02-piano-terra/9",
+      "ordine": 9,
+      "tipo": "persona",
+      "nome": "Orlov",
+      "descrizione": "Ombra catturabile al piano terra.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [
+        "Maledizione"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-02-piano-terra/10",
+      "ordine": 10,
+      "tipo": "persona",
+      "nome": "Potestà (Guerriero divino)",
+      "descrizione": "Ombra catturabile al piano terra.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [
+        "Maledizione"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-02-piano-terra/11",
+      "ordine": 11,
+      "tipo": "persona",
+      "nome": "Regina Mab (Regina di Mezzanotte)",
+      "descrizione": "Ombra catturabile al piano terra.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [
+        "Vento"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-02-piano-terra/12",
+      "ordine": 12,
+      "tipo": "persona",
+      "nome": "Rangda (Strega del sabba)",
+      "descrizione": "Ombra catturabile al piano terra.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [
+        "Tuono",
+        "Sacro"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-02-piano-terra/13",
+      "ordine": 13,
+      "tipo": "persona",
+      "nome": "Skadi (Pavida signora dell'ombra)",
+      "descrizione": "Ombra catturabile presente anche al piano terra.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [],
+       "resistenze": [
+        "Ghiaccio",
+        "Maledizione"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-02-piano-terra/14",
+      "ordine": 14,
+      "tipo": "persona",
+      "nome": "Unicorno (Bestia inespressiva)",
+      "descrizione": "Ombra catturabile al piano terra.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [
+        "Maledizione"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-02-piano-terra/15",
+      "ordine": 15,
+      "tipo": "persona",
+      "nome": "Valchiria (Guerriera dell'oltretomba)",
+      "descrizione": "Ombra catturabile al piano terra.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [
+        "Fuoco"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "niijima-03-area-riservata-allo-staff-parte-i",
+    "ordine": 2,
+    "nome": "Area riservata allo staff — Parte I",
+    "descrizione": "Prima sezione dell'area riservata al personale del casinò.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-niijima-area-riservata-allo-staff-verso-piano-terra",
+      "nome": "Palazzo di Niijima › Area riservata allo staff (verso Piano terra)",
+      "n": 0,
+      "presi": 0,
+      "spilli": []
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "niijima-03-area-riservata-allo-staff-parte-i/0",
+      "ordine": 0,
+      "tipo": "sicura",
+      "nome": "Sala sicura Staff I",
+      "descrizione": "Sala Sicura che sblocca il viaggio veloce in quest'area.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": {
+       "x": 26,
+       "y": 7
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-03-area-riservata-allo-staff-parte-i/1",
+      "ordine": 1,
+      "tipo": "miniboss",
+      "nome": "Regina di Mezzanotte x2",
+      "descrizione": "Coppia di miniboss nell'area Staff Parte I.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [
+        "Vento"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": {
+       "x": 7,
+       "y": 39
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-03-area-riservata-allo-staff-parte-i/2",
+      "ordine": 2,
+      "tipo": "oggetto",
+      "nome": "Drop miniboss",
+      "descrizione": "Oggetti ottenuti dal miniboss e sparsi nell'area.",
+      "esauribile": false,
+      "dettagli": {
+       "contenuto": "Balsamo vitale, Chiave elettr. security (drop miniboss), Tavola dei semi, Ornamenti"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-03-area-riservata-allo-staff-parte-i/3",
+      "ordine": 3,
+      "tipo": "volonta",
+      "nome": "Seme Invidia Rosso",
+      "descrizione": "Presso il cancello con lettore di tessere nell'area Staff; si apre dopo aver ottenuto la Chiave elettronica security dal miniboss.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Seme della Bramosia (Invidia) rosso"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-03-area-riservata-allo-staff-parte-i/4",
+      "ordine": 4,
+      "tipo": "persona",
+      "nome": "Skadi (Pavida signora dell'ombra)",
+      "descrizione": "Nemico potente presente nell'area, evitabile o affrontabile.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": []
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "niijima-04-area-riservata-allo-staff-parte-ii",
+    "ordine": 3,
+    "nome": "Area riservata allo staff — Parte II",
+    "descrizione": "Seconda sezione dell'area riservata al personale.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-niijima-area-riservata-allo-staff-verso-area-dadi",
+      "nome": "Palazzo di Niijima › Area riservata allo staff (verso Area dadi)",
+      "n": 2,
+      "presi": 0,
+      "spilli": [
+       {
+        "id": 1058,
+        "uid": "ca90ed3078cdcac5dc6f902e9cd2a530",
+        "tipo": "forziere",
+        "nome": "Forziere",
+        "colore": "#eab308",
+        "raccolto": false
+       },
+       {
+        "id": 1059,
+        "uid": "0c9747a771db08de86bd1d4736b2f4a2",
+        "tipo": "forziere",
+        "nome": "Forziere",
+        "colore": "#eab308",
+        "raccolto": false
+       }
+      ]
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "niijima-04-area-riservata-allo-staff-parte-ii/0",
+      "ordine": 0,
+      "tipo": "forziere",
+      "nome": "Forziere nord-est Staff II",
+      "descrizione": "Forziere nella parte nord-est dell'area.",
+      "esauribile": false,
+      "dettagli": {
+       "contenuto": "Tirapugni da baccarat (per Queen)"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-04-area-riservata-allo-staff-parte-ii/1",
+      "ordine": 1,
+      "tipo": "oggetto",
+      "nome": "Oggetti sparsi Staff II",
+      "descrizione": "Materiali reperibili nell'area.",
+      "esauribile": false,
+      "dettagli": {
+       "contenuto": "Roccia nera, Ornamenti, Tavola dei semi, Replica d'arma"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-04-area-riservata-allo-staff-parte-ii/2",
+      "ordine": 2,
+      "tipo": "persona",
+      "nome": "Skadi x2",
+      "descrizione": "Coppia di nemici potenti nell'area.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": []
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-04-area-riservata-allo-staff-parte-ii/3",
+      "ordine": 3,
+      "tipo": "puzzle",
+      "nome": "Gate con lettore di Tessera socio",
+      "descrizione": "Utilizzo della Tessera socio per aprire un cancello di passaggio.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": {
+       "x": 35,
+       "y": 89
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "niijima-05-area-riservata-allo-staff-parte-iii",
+    "ordine": 4,
+    "nome": "Area riservata allo staff — Parte III",
+    "descrizione": "Terza sezione dell'area riservata al personale, contiene il terminale di controllo verde.",
+    "mappe": [],
+    "punti": [
+     {
+      "chiave": "niijima-05-area-riservata-allo-staff-parte-iii/0",
+      "ordine": 0,
+      "tipo": "puzzle",
+      "nome": "Terminale di controllo VERDE",
+      "descrizione": "Terminale presso un armadio elettrico a nord, da attivare insieme ai terminali rosso e blu per garantire la vittoria alla slot machine gigante. (Fonte: sintesi WebSearch da allgamestaff.it/persona-5-royal/palazzo-di-sae/ (non verificato con citazione diretta del testo).)",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": {
+       "x": 26,
+       "y": 27
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "niijima-06-lobby-piano-riservato-ai-soci",
+    "ordine": 5,
+    "nome": "Lobby piano riservato ai soci",
+    "descrizione": "Lobby che dà accesso al piano riservato ai soci; obiettivo: guadagnare 50.000 monete per procedere.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-niijima-lobby-piano-riservato-ai-soci",
+      "nome": "Palazzo di Niijima › Lobby piano riservato ai soci",
+      "n": 0,
+      "presi": 0,
+      "spilli": []
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "niijima-06-lobby-piano-riservato-ai-soci/0",
+      "ordine": 0,
+      "tipo": "sicura",
+      "nome": "Sala sicura Lobby soci",
+      "descrizione": "Sala Sicura che sblocca il viaggio veloce.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": {
+       "x": 10,
+       "y": 51
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-06-lobby-piano-riservato-ai-soci/1",
+      "ordine": 1,
+      "tipo": "altro",
+      "nome": "Cassiere Ombra",
+      "descrizione": "Fornisce 1.000 monete iniziali e la Mappa del piano riservato.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": {
+       "x": 39,
+       "y": 89
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-06-lobby-piano-riservato-ai-soci/2",
+      "ordine": 2,
+      "tipo": "oggetto",
+      "nome": "Scatola regalo",
+      "descrizione": "Scatola regalo nella lobby.",
+      "esauribile": false,
+      "dettagli": {
+       "contenuto": "100 monete"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "niijima-07-area-dadi-parte-i",
+    "ordine": 6,
+    "nome": "Area dadi — Parte I",
+    "descrizione": "Prima sezione dell'area dedicata al minigioco dei dadi.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-niijima-area-dadi",
+      "nome": "Palazzo di Niijima › Area dadi",
+      "n": 0,
+      "presi": 0,
+      "spilli": []
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "niijima-07-area-dadi-parte-i/0",
+      "ordine": 0,
+      "tipo": "puzzle",
+      "nome": "Minigioco dei dadi",
+      "descrizione": "Gioco d'azzardo con i dadi: si può vincere denaro manipolando le puntate oppure evitare di giocare.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": {
+       "x": 23,
+       "y": 55
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-07-area-dadi-parte-i/1",
+      "ordine": 1,
+      "tipo": "oggetto",
+      "nome": "Scatole regalo Area dadi I",
+      "descrizione": "Tre scatole regalo nell'area.",
+      "esauribile": false,
+      "dettagli": {
+       "contenuto": "100, 200, 200 monete"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "niijima-08-area-dadi-parte-ii",
+    "ordine": 7,
+    "nome": "Area dadi — Parte II",
+    "descrizione": "Seconda sezione dell'area dadi, con miniboss e terminali per truccare le probabilità.",
+    "mappe": [],
+    "punti": [
+     {
+      "chiave": "niijima-08-area-dadi-parte-ii/0",
+      "ordine": 0,
+      "tipo": "miniboss",
+      "nome": "Generale necromante (Nebiros)",
+      "descrizione": "Miniboss dell'area dadi.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [
+        "Vento",
+        "Sacro"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": {
+       "x": 62,
+       "y": 35
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-08-area-dadi-parte-ii/1",
+      "ordine": 1,
+      "tipo": "oggetto",
+      "nome": "Oggetti Area dadi II",
+      "descrizione": "Materiali reperibili.",
+      "esauribile": false,
+      "dettagli": {
+       "contenuto": "Ornamenti, Tavola dei semi"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-08-area-dadi-parte-ii/2",
+      "ordine": 2,
+      "tipo": "puzzle",
+      "nome": "Terminali di controllo dadi",
+      "descrizione": "Attivare i terminali di controllo per modificare le probabilità del gioco. Scommettendo su '11-18' dopo aver sconfitto il Generale necromante si ottengono 625 monete a puntata, ripetibile 4 volte (2.500 monete totali).",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "625 monete per scommessa x4 = 2.500 monete"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": {
+       "x": 42,
+       "y": 35
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "niijima-09-stanza-slot-machine-1",
+    "ordine": 8,
+    "nome": "Stanza slot machine 1",
+    "descrizione": "Prima stanza delle slot machine, con miniboss e terminale rosso.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-niijima-stanza-slot-machine",
+      "nome": "Palazzo di Niijima › Stanza slot machine",
+      "n": 2,
+      "presi": 0,
+      "spilli": [
+       {
+        "id": 1073,
+        "uid": "183e1417a0d121a7a2ac1ecd821ab538",
+        "tipo": "forziere",
+        "nome": "Forziere",
+        "colore": "#eab308",
+        "raccolto": false
+       },
+       {
+        "id": 1074,
+        "uid": "5bcd28d12554f86b70efd615fa75fb09",
+        "tipo": "seme-bramosia",
+        "nome": "Seme di bramosia",
+        "colore": "#c85cff",
+        "raccolto": false
+       }
+      ]
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "niijima-09-stanza-slot-machine-1/0",
+      "ordine": 0,
+      "tipo": "miniboss",
+      "nome": "Avvoltoio arrogante (Jatayu)",
+      "descrizione": "Miniboss della stanza slot machine 1.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [
+        "Nucleare"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": {
+       "x": 86,
+       "y": 19
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-09-stanza-slot-machine-1/1",
+      "ordine": 1,
+      "tipo": "forziere",
+      "nome": "Forziere zona elevata est",
+      "descrizione": "Forziere in una zona elevata a est della stanza.",
+      "esauribile": false,
+      "dettagli": {
+       "contenuto": "Hiranya"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": {
+       "x": 84,
+       "y": 53
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-09-stanza-slot-machine-1/2",
+      "ordine": 2,
+      "tipo": "forziere",
+      "nome": "Forziere area nord-est",
+      "descrizione": "Forziere nella zona nord-est della stanza.",
+      "esauribile": false,
+      "dettagli": {
+       "contenuto": "Muschio MA-FO"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-09-stanza-slot-machine-1/3",
+      "ordine": 3,
+      "tipo": "forziere",
+      "nome": "Forziere piano inferiore",
+      "descrizione": "Forziere al piano inferiore della stanza.",
+      "esauribile": false,
+      "dettagli": {
+       "contenuto": "Roccia Nera"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-09-stanza-slot-machine-1/4",
+      "ordine": 4,
+      "tipo": "oggetto",
+      "nome": "Scatola regalo",
+      "descrizione": "Scatola regalo nella stanza.",
+      "esauribile": false,
+      "dettagli": {
+       "contenuto": "200 monete"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-09-stanza-slot-machine-1/5",
+      "ordine": 5,
+      "tipo": "puzzle",
+      "nome": "Terminale di controllo ROSSO",
+      "descrizione": "Terminale sul muro sud della stanza (in standby), da attivare insieme ai terminali verde e blu per la vittoria garantita alla slot machine gigante.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": {
+       "x": 19,
+       "y": 84
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-09-stanza-slot-machine-1/6",
+      "ordine": 6,
+      "tipo": "volonta",
+      "nome": "Seme Invidia Verde",
+      "descrizione": "Sul retro di una porta della Stanza slot machine 1, raggiungibile attraverso i container e il condotto nord.",
+      "esauribile": true,
+      "dettagli": {
+       "contenuto": "Seme della Bramosia (Invidia) verde"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": {
+       "x": 8,
+       "y": 61
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-09-stanza-slot-machine-1/7",
+      "ordine": 7,
+      "tipo": "scorciatoia",
+      "nome": "Porta chiusa sbloccabile dall'interno",
+      "descrizione": "Scorciatoia che va aperta dall'interno.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "niijima-10-stanza-slot-machine-2",
+    "ordine": 9,
+    "nome": "Stanza slot machine 2",
+    "descrizione": "Seconda stanza delle slot machine con la slot machine gigante (jackpot 50.000 monete) e terminale blu.",
+    "mappe": [],
+    "punti": [
+     {
+      "chiave": "niijima-10-stanza-slot-machine-2/0",
+      "ordine": 0,
+      "tipo": "forziere",
+      "nome": "Forziere sporgenza nord",
+      "descrizione": "Forziere su una sporgenza a nord della stanza.",
+      "esauribile": false,
+      "dettagli": {
+       "contenuto": "Idaten Ofuda"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-10-stanza-slot-machine-2/1",
+      "ordine": 1,
+      "tipo": "oggetto",
+      "nome": "Oggetti sparsi",
+      "descrizione": "Materiali reperibili nella stanza.",
+      "esauribile": false,
+      "dettagli": {
+       "contenuto": "Ornamenti, Tavola dei semi"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-10-stanza-slot-machine-2/2",
+      "ordine": 2,
+      "tipo": "puzzle",
+      "nome": "Slot machine gigante",
+      "descrizione": "Meccanica principale della stanza: jackpot da 50.000 monete. Attivando il Terminale di controllo BLU (in questa stanza) insieme ai terminali VERDE (Staff III) e ROSSO (Slot 1) si ottiene la vittoria garantita al jackpot. Dopo la vincita, al Cassiere Ombra si può scambiare 50.000 monete con la Tessera puntate alte.",
+      "esauribile": false,
+      "dettagli": {
+       "contenuto": "Jackpot 50.000 monete -> scambio con Tessera Puntate Alte"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": {
+       "x": 17,
+       "y": 78
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-10-stanza-slot-machine-2/3",
+      "ordine": 3,
+      "tipo": "miniboss",
+      "nome": "Giudice finale (Norna)",
+      "descrizione": "Miniboss che appare dopo la sequenza della slot machine.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [],
+       "resistenze": [
+        "Tuono"
+       ],
+       "assorbimenti": [
+        "Vento"
+       ],
+       "dimezzamenti": [
+        "Sacro"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-10-stanza-slot-machine-2/4",
+      "ordine": 4,
+      "tipo": "persona",
+      "nome": "Norna",
+      "descrizione": "Ombra catturabile nella stanza (debole a Ghiaccio/Nucleare a questo punto del gioco).",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [
+        "Ghiaccio",
+        "Nucleare"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "niijima-11-lobby-piano-puntate-alte",
+    "ordine": 10,
+    "nome": "Lobby piano puntate alte",
+    "descrizione": "Lobby di accesso al piano puntate alte, sbloccata con la Tessera puntate alte.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-niijima-lobby-piano-puntate-alte",
+      "nome": "Palazzo di Niijima › Lobby piano puntate alte",
+      "n": 1,
+      "presi": 0,
+      "spilli": [
+       {
+        "id": 1088,
+        "uid": "d66bf489744b6e04df7873c71af7ab19",
+        "tipo": "forziere-raro",
+        "nome": "Forziere raro",
+        "colore": "#fde047",
+        "raccolto": false
+       }
+      ]
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "niijima-11-lobby-piano-puntate-alte/0",
+      "ordine": 0,
+      "tipo": "forziere-chiuso",
+      "nome": "Forziere chiuso Piano Puntate",
+      "descrizione": "Forziere chiuso nel piano puntate alte.",
+      "esauribile": false,
+      "dettagli": {
+       "contenuto": "Pugnale reale (per Joker)"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-31/",
+      "stato": null,
+      "marcatore": {
+       "x": 73,
+       "y": 89
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "niijima-12-arena-combattimenti",
+    "ordine": 11,
+    "nome": "Arena combattimenti",
+    "descrizione": "Arena con tre round di combattimento consecutivi; la ricompensa finale sono 100.000 monete necessarie per accedere al Ponte della Giustizia.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-niijima-arena-combattimenti",
+      "nome": "Palazzo di Niijima › Arena combattimenti",
+      "n": 0,
+      "presi": 0,
+      "spilli": []
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "niijima-12-arena-combattimenti/0",
+      "ordine": 0,
+      "tipo": "miniboss",
+      "nome": "Round 1 — due Pachidermi benevoli (Ganesha)",
+      "descrizione": "Primo round dell'arena.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [
+        "Psicocinesi"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-31/",
+      "stato": null,
+      "marcatore": {
+       "x": 86,
+       "y": 50
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-12-arena-combattimenti/1",
+      "ordine": 1,
+      "tipo": "miniboss",
+      "nome": "Round 2 — tre Streghe del sabba (Rangda)",
+      "descrizione": "Secondo round dell'arena.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [
+        "Elettricità",
+        "Sacro"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-31/",
+      "stato": null,
+      "marcatore": {
+       "x": 86,
+       "y": 50
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-12-arena-combattimenti/2",
+      "ordine": 2,
+      "tipo": "miniboss",
+      "nome": "Round 3 — Signore del tuono (Thor)",
+      "descrizione": "Terzo round, combattimento leale uno contro uno.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-31/",
+      "stato": null,
+      "marcatore": {
+       "x": 86,
+       "y": 50
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-12-arena-combattimenti/3",
+      "ordine": 3,
+      "tipo": "oggetto",
+      "nome": "Raggio della vittoria",
+      "descrizione": "Oggetto ottenibile presso il negozio dell'arena.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-31/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-12-arena-combattimenti/4",
+      "ordine": 4,
+      "tipo": "altro",
+      "nome": "Ricompensa completamento arena",
+      "descrizione": "Completare i tre round garantisce le 100.000 monete necessarie per il Ponte della Giustizia.",
+      "esauribile": false,
+      "dettagli": {
+       "contenuto": "100.000 monete"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-31/",
+      "stato": null,
+      "marcatore": {
+       "x": 86,
+       "y": 50
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "niijima-13-oscura-dimora",
+    "ordine": 12,
+    "nome": "Oscura dimora",
+    "descrizione": "Labirinto buio con numerose Ombre, situato fra le arene di combattimento.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-niijima-oscura-dimora",
+      "nome": "Palazzo di Niijima › Oscura Dimora",
+      "n": 4,
+      "presi": 0,
+      "spilli": [
+       {
+        "id": 1102,
+        "uid": "a2d5fff77d1e05b6290d7629067473f9",
+        "tipo": "forziere-raro",
+        "nome": "Forziere raro",
+        "colore": "#fde047",
+        "raccolto": false
+       },
+       {
+        "id": 1103,
+        "uid": "18698a7bb9d5ac490314cdadc1ce8266",
+        "tipo": "forziere",
+        "nome": "Forziere",
+        "colore": "#eab308",
+        "raccolto": false
+       },
+       {
+        "id": 1104,
+        "uid": "bd4e268336219c8dc719eeabc65ff145",
+        "tipo": "forziere",
+        "nome": "Forziere",
+        "colore": "#eab308",
+        "raccolto": false
+       },
+       {
+        "id": 1105,
+        "uid": "e96b291213a56c145aff1992018c6297",
+        "tipo": "forziere",
+        "nome": "Forziere",
+        "colore": "#eab308",
+        "raccolto": false
+       }
+      ]
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "niijima-13-oscura-dimora/0",
+      "ordine": 0,
+      "tipo": "miniboss",
+      "nome": "Re dei serpenti (Raja Naga)",
+      "descrizione": "Miniboss finale dell'Oscura dimora; premia 10.000 monete al completamento.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [],
+       "resistenze": [
+        "Fisico",
+        "Arma da fuoco"
+       ]
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-31/",
+      "stato": null,
+      "marcatore": {
+       "x": 9,
+       "y": 81
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-13-oscura-dimora/1",
+      "ordine": 1,
+      "tipo": "forziere",
+      "nome": "Forziere — Tavola Ouija",
+      "descrizione": "Forziere nell'Oscura dimora.",
+      "esauribile": false,
+      "dettagli": {
+       "contenuto": "Tavola Ouija"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-31/",
+      "stato": null,
+      "marcatore": {
+       "x": 64,
+       "y": 32
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-13-oscura-dimora/2",
+      "ordine": 2,
+      "tipo": "forziere",
+      "nome": "Forziere — Kogatana nera",
+      "descrizione": "Forziere nell'Oscura dimora.",
+      "esauribile": false,
+      "dettagli": {
+       "contenuto": "Kogatana nera"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-31/",
+      "stato": null,
+      "marcatore": {
+       "x": 36,
+       "y": 14
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-13-oscura-dimora/3",
+      "ordine": 3,
+      "tipo": "forziere",
+      "nome": "Forziere — Pane per l'anima",
+      "descrizione": "Forziere nell'Oscura dimora.",
+      "esauribile": false,
+      "dettagli": {
+       "contenuto": "Pane per l'anima"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-31/",
+      "stato": null,
+      "marcatore": {
+       "x": 10,
+       "y": 77
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-13-oscura-dimora/4",
+      "ordine": 4,
+      "tipo": "forziere",
+      "nome": "Forziere — Camicia d'azzardo",
+      "descrizione": "Forziere nell'Oscura dimora.",
+      "esauribile": false,
+      "dettagli": {
+       "contenuto": "Camicia d'azzardo"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-31/",
+      "stato": null,
+      "marcatore": {
+       "x": 17,
+       "y": 30
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-13-oscura-dimora/5",
+      "ordine": 5,
+      "tipo": "altro",
+      "nome": "Ricompensa completamento",
+      "descrizione": "Ricompensa per aver attraversato l'Oscura dimora.",
+      "esauribile": false,
+      "dettagli": {
+       "contenuto": "10.000 monete"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-31/",
+      "stato": null,
+      "marcatore": null,
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   },
+   {
+    "chiave": "niijima-14-direzione-sala-del-boss",
+    "ordine": 13,
+    "nome": "Direzione (sala del boss)",
+    "descrizione": "Area finale del Palazzo, accessibile dopo il Ponte della Giustizia (pagando 100.000 monete). Sede dello scontro finale con l'Ombra di Sae Niijima.",
+    "mappe": [
+     {
+      "chiave": "palazzo-di-niijima-direzione",
+      "nome": "Palazzo di Niijima › Direzione",
+      "n": 0,
+      "presi": 0,
+      "spilli": []
+     }
+    ],
+    "punti": [
+     {
+      "chiave": "niijima-14-direzione-sala-del-boss/0",
+      "ordine": 0,
+      "tipo": "boss",
+      "nome": "Ombra di Sae Niijima — Fase 1",
+      "descrizione": "Prima fase del combattimento: livello 52, HP 65.535. Meccanica 'Tempo di Roulette': Sae fa scommettere il gruppo (HP, SP o denaro) sull'esito della ruota. Attaccarla mentre la ruota gira riduce a 1 gli HP del Ladro che colpisce. Sae bara usando una lastra di vetro per truccare i risultati a suo favore: individuata l'inganno, un membro del party si allontana per sabotare il meccanismo, permettendo di controllare i successivi risultati della roulette e ottenere un recupero di HP/SP prima della seconda fase.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [],
+       "resistenze": [],
+       "strategia": "Individuare la lastra di vetro e mandare un personaggio a colpirla/sabotarla quando Sae bara; non attaccare durante la rotazione della ruota per evitare il malus HP=1."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-31/",
+      "stato": null,
+      "marcatore": {
+       "x": 51,
+       "y": 24
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     },
+     {
+      "chiave": "niijima-14-direzione-sala-del-boss/1",
+      "ordine": 1,
+      "tipo": "boss",
+      "nome": "Sae Niijima Leviathan — Fase 2",
+      "descrizione": "Seconda e ultima fase: livello 53, HP 8.000, SP 2.000. Nessuna debolezza/resistenza/immunità/assorbimento fissi: a ogni turno la ruota della roulette assegna un elemento (Fuoco, Ghiaccio, Vento, Tuono/Elettricità, Psicocinesi, Nucleare, Sacro, Maledizione, Fisico, Arma da fuoco) a cui Leviathan diventa forte, mentre l'elemento opposto la danneggia normalmente (coppie: Fuoco/Ghiaccio, Elettricità/Vento, Psicocinesi/Nucleare, Sacro/Maledizione, Fisico/Arma da fuoco). Attacchi: Grandine punitiva, Tempesta punitiva, Colpo sacro, Colpo nucleare (~400 danni). Nella seconda metà dello scontro la ruota si ferma sempre su 'Divino': Leviathan smette di usare gli attacchi elementali mirati e passa ad attacchi Divini che ignorano tutte le resistenze (Gatling: danni multipli da arma da fuoco; Impatto brutale: danno pesante a tutti; Danza berserk: danno Divino grave a tutti, ~400 danni). Alta difesa e alti HP: combattimento lungo.",
+      "esauribile": false,
+      "dettagli": {
+       "debolezze": [
+        "variabile per turno, indicata dalla ruota della roulette (elemento opposto a quello assegnato a Leviathan)"
+       ],
+       "resistenze": [
+        "variabile per turno secondo la ruota; nella seconda metà del combattimento immune/forte contro tutto tranne il Divino"
+       ],
+       "strategia": "Potenziare con Carica/Concentrazione, usare Marakukaja per proteggere il party, sfruttare l'elemento opposto a quello indicato dalla ruota per colpi critici/potenziati; nella fase finale (elemento Divino) puntare su danno bruto poiché le resistenze elementali non contano più."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-31/",
+      "stato": null,
+      "marcatore": {
+       "x": 51,
+       "y": 24
+      },
+      "pin": [],
+      "contenitore": null,
+      "areaDedalo": null,
+      "persona": null,
+      "areeDedalo": []
+     }
+    ],
+    "dedalo": null
+   }
+  ],
+  "punti": 61,
+  "esauribili": 4,
+  "gestiti": 0,
+  "raccolta": {
+   "totale": 20,
+   "presi": 0,
+   "mappe": 26,
+   "mappeComplete": 14
+  },
+  "completato": null,
+  "atterraggio": null,
+  "note": "Sesto Palazzo del gioco, ambientato a Kasumigaseki (quartiere degli uffici del governo), tema Casinò. Per progredire serve una 'prenotazione' (non basta la tessera socio): bisogna cambiare la percezione di Sae in tribunale. Confidente Fortuna 3 di Chihaya (lettura del denaro) aumenta i guadagni nei minigiochi del casinò. Boss finale in due fasi: Ombra di Sae Niijima (lv.52, HP 65.535, meccanica 'Tempo di Roulette' truccata con lastra di vetro da individuare e sabotare) seguita da Sae Niijima Leviathan (lv.53, HP 8.000, SP 2.000, nessuna debolezza/resistenza fissa: la ruota della roulette assegna a inizio turno un elemento a cui è forte, mentre l'elemento opposto la danneggia normalmente; sotto il 50% HP passa all'elemento Divino che ignora tutte le resistenze). Vedi niijima_note.md per le incertezze e le fonti non-allgamestaff usate.",
+  "fonti": [
+   "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/",
+   "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-31/",
+   "https://www.thegamer.com/persona-5-royal-shadow-niijima-boss-fight-guide/",
+   "https://www.thegamer.com/persona-5-royal-niijimas-palace-walkthrough-guide/",
+   "https://megamitensei.fandom.com/wiki/Niijima's_Palace",
+   "https://samurai-gamers.com/persona-5/p5r-niijima-palace-guide/",
+   "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-sae-giudizio/"
+  ],
+  "planimetrie": [
+   {
+    "chiave": "palazzo-di-niijima-entrata-del-casino-porzione-meridionale",
+    "nome": "Palazzo di Niijima › Entrata del casinò — porzione meridionale",
+    "ordine": 0,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-niijima-entrata-del-casino",
+    "nome": "Palazzo di Niijima › Entrata del casinò",
+    "ordine": 1,
+    "aree": [
+     {
+      "chiave": "niijima-01-entrata-del-casino",
+      "nome": "Entrata del Casinò",
+      "ordine": 0
+     }
+    ],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-niijima-palazzo-di-niijima-zona-che-nessuna-tabella-nativa-nomina",
+    "nome": "Palazzo di Niijima › Palazzo di Niijima — Zona che nessuna tabella nativa nomina",
+    "ordine": 100,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-niijima-palazzo-di-niijima-zona-che-nessuna-tabella-nativa-nomina-tela-quadrata-disegno-esteso",
+    "nome": "Palazzo di Niijima › Palazzo di Niijima — Zona che nessuna tabella nativa nomina — tela quadrata, disegno esteso",
+    "ordine": 101,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-niijima-piano-terra-settore-dingresso",
+    "nome": "Palazzo di Niijima › Piano terra — settore d’ingresso",
+    "ordine": 200,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-niijima-piano-terra",
+    "nome": "Palazzo di Niijima › Piano terra",
+    "ordine": 201,
+    "aree": [
+     {
+      "chiave": "niijima-02-piano-terra",
+      "nome": "Piano terra",
+      "ordine": 1
+     }
+    ],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1019,
+      "uid": "5f772a0175d06ea88a529d26eab807f9",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-niijima-area-riservata-allo-staff-verso-piano-terra-inquadratura-settentrionale",
+    "nome": "Palazzo di Niijima › Area riservata allo staff (verso Piano terra) — inquadratura settentrionale",
+    "ordine": 300,
+    "aree": [],
+    "n": 3,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1029,
+      "uid": "6044e559ceb96f54eee095e08fbf190c",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     },
+     {
+      "id": 1030,
+      "uid": "e134979df4afeeaee9d86d92fb95e0f5",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     },
+     {
+      "id": 1031,
+      "uid": "ea7aad7c05a74d087787a7e8ee79680f",
+      "tipo": "seme-bramosia",
+      "nome": "Seme di bramosia",
+      "colore": "#c85cff",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-niijima-area-riservata-allo-staff-verso-piano-terra",
+    "nome": "Palazzo di Niijima › Area riservata allo staff (verso Piano terra)",
+    "ordine": 301,
+    "aree": [
+     {
+      "chiave": "niijima-03-area-riservata-allo-staff-parte-i",
+      "nome": "Area riservata allo staff — Parte I",
+      "ordine": 2
+     }
+    ],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-niijima-lobby-piano-riservato-ai-soci",
+    "nome": "Palazzo di Niijima › Lobby piano riservato ai soci",
+    "ordine": 400,
+    "aree": [
+     {
+      "chiave": "niijima-06-lobby-piano-riservato-ai-soci",
+      "nome": "Lobby piano riservato ai soci",
+      "ordine": 5
+     }
+    ],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-niijima-area-dadi",
+    "nome": "Palazzo di Niijima › Area dadi",
+    "ordine": 500,
+    "aree": [
+     {
+      "chiave": "niijima-07-area-dadi-parte-i",
+      "nome": "Area dadi — Parte I",
+      "ordine": 6
+     }
+    ],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-niijima-area-dadi-inquadratura-occidentale",
+    "nome": "Palazzo di Niijima › Area dadi — inquadratura occidentale",
+    "ordine": 501,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-niijima-area-riservata-allo-staff-verso-area-dadi-porzione-meridionale",
+    "nome": "Palazzo di Niijima › Area riservata allo staff (verso Area dadi) — porzione meridionale",
+    "ordine": 600,
+    "aree": [],
+    "n": 2,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1055,
+      "uid": "9cf0b7ae505360e10f385e0e902bb243",
+      "tipo": "forziere-raro",
+      "nome": "Forziere raro",
+      "colore": "#fde047",
+      "raccolto": false
+     },
+     {
+      "id": 1056,
+      "uid": "a1ff8504d311efbb896e48542540480b",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-niijima-area-riservata-allo-staff-verso-area-dadi",
+    "nome": "Palazzo di Niijima › Area riservata allo staff (verso Area dadi)",
+    "ordine": 601,
+    "aree": [
+     {
+      "chiave": "niijima-04-area-riservata-allo-staff-parte-ii",
+      "nome": "Area riservata allo staff — Parte II",
+      "ordine": 3
+     }
+    ],
+    "n": 2,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1058,
+      "uid": "ca90ed3078cdcac5dc6f902e9cd2a530",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     },
+     {
+      "id": 1059,
+      "uid": "0c9747a771db08de86bd1d4736b2f4a2",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-niijima-stanza-slot-machine-porzione-settentrionale",
+    "nome": "Palazzo di Niijima › Stanza slot machine — porzione settentrionale",
+    "ordine": 700,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1065,
+      "uid": "cbb1a66157fdb165ef94b9780bdce793",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-niijima-stanza-slot-machine",
+    "nome": "Palazzo di Niijima › Stanza slot machine",
+    "ordine": 701,
+    "aree": [
+     {
+      "chiave": "niijima-09-stanza-slot-machine-1",
+      "nome": "Stanza slot machine 1",
+      "ordine": 8
+     }
+    ],
+    "n": 2,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1073,
+      "uid": "183e1417a0d121a7a2ac1ecd821ab538",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     },
+     {
+      "id": 1074,
+      "uid": "5bcd28d12554f86b70efd615fa75fb09",
+      "tipo": "seme-bramosia",
+      "nome": "Seme di bramosia",
+      "colore": "#c85cff",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-niijima-stanza-slot-machine-inquadratura-orientale-piu-ristretta",
+    "nome": "Palazzo di Niijima › Stanza slot machine — inquadratura orientale — più ristretta",
+    "ordine": 702,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-niijima-stanza-slot-machine-inquadratura-orientale-piu-ampia",
+    "nome": "Palazzo di Niijima › Stanza slot machine — inquadratura orientale — più ampia",
+    "ordine": 703,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1081,
+      "uid": "f6a50cc127e7c59e659a175e5d605fb5",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-niijima-lobby-piano-puntate-alte-porzione-settentrionale",
+    "nome": "Palazzo di Niijima › Lobby piano puntate alte — porzione settentrionale",
+    "ordine": 800,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-niijima-lobby-piano-puntate-alte",
+    "nome": "Palazzo di Niijima › Lobby piano puntate alte",
+    "ordine": 801,
+    "aree": [
+     {
+      "chiave": "niijima-11-lobby-piano-puntate-alte",
+      "nome": "Lobby piano puntate alte",
+      "ordine": 10
+     }
+    ],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1088,
+      "uid": "d66bf489744b6e04df7873c71af7ab19",
+      "tipo": "forziere-raro",
+      "nome": "Forziere raro",
+      "colore": "#fde047",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-niijima-lobby-piano-puntate-alte-inquadratura-meridionale",
+    "nome": "Palazzo di Niijima › Lobby piano puntate alte — inquadratura meridionale",
+    "ordine": 802,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1095,
+      "uid": "b8f0d8b4256a0089d1234aa2f65e5e13",
+      "tipo": "seme-bramosia",
+      "nome": "Seme di bramosia",
+      "colore": "#c85cff",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-niijima-oscura-dimora",
+    "nome": "Palazzo di Niijima › Oscura Dimora",
+    "ordine": 900,
+    "aree": [
+     {
+      "chiave": "niijima-13-oscura-dimora",
+      "nome": "Oscura dimora",
+      "ordine": 12
+     }
+    ],
+    "n": 4,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1102,
+      "uid": "a2d5fff77d1e05b6290d7629067473f9",
+      "tipo": "forziere-raro",
+      "nome": "Forziere raro",
+      "colore": "#fde047",
+      "raccolto": false
+     },
+     {
+      "id": 1103,
+      "uid": "18698a7bb9d5ac490314cdadc1ce8266",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     },
+     {
+      "id": 1104,
+      "uid": "bd4e268336219c8dc719eeabc65ff145",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     },
+     {
+      "id": 1105,
+      "uid": "e96b291213a56c145aff1992018c6297",
+      "tipo": "forziere",
+      "nome": "Forziere",
+      "colore": "#eab308",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-niijima-oscura-dimora-inquadratura-meridionale",
+    "nome": "Palazzo di Niijima › Oscura Dimora — inquadratura meridionale",
+    "ordine": 901,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1111,
+      "uid": "4ffa4d493f61d35bfe57413b8def6a1e",
+      "tipo": "forziere-raro",
+      "nome": "Forziere raro",
+      "colore": "#fde047",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-niijima-arena-combattimenti",
+    "nome": "Palazzo di Niijima › Arena combattimenti",
+    "ordine": 1000,
+    "aree": [
+     {
+      "chiave": "niijima-12-arena-combattimenti",
+      "nome": "Arena combattimenti",
+      "ordine": 11
+     }
+    ],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-niijima-direzione-porzione-settentrionale",
+    "nome": "Palazzo di Niijima › Direzione — porzione settentrionale",
+    "ordine": 1100,
+    "aree": [],
+    "n": 1,
+    "presi": 0,
+    "spilli": [
+     {
+      "id": 1117,
+      "uid": "18dc45756ccc0619cb37f06ba7411014",
+      "tipo": "tesoro-palazzo",
+      "nome": "Tesoro del Palazzo",
+      "colore": "#d946ef",
+      "raccolto": false
+     }
+    ]
+   },
+   {
+    "chiave": "palazzo-di-niijima-direzione",
+    "nome": "Palazzo di Niijima › Direzione",
+    "ordine": 1101,
+    "aree": [
+     {
+      "chiave": "niijima-14-direzione-sala-del-boss",
+      "nome": "Direzione (sala del boss)",
+      "ordine": 13
+     }
+    ],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   },
+   {
+    "chiave": "palazzo-di-niijima-palazzo-di-niijima",
+    "nome": "Palazzo di Niijima › Palazzo di Niijima",
+    "ordine": 1200,
+    "aree": [],
+    "n": 0,
+    "presi": 0,
+    "spilli": []
+   }
+  ],
+  "atterraggi": [],
+  "personeCatturate": [
+   2,
+   5,
+   8,
+   11,
+   16,
+   17,
+   18,
+   19,
+   20,
+   23,
+   24,
+   33,
+   34,
+   79,
+   80,
+   84,
+   85,
+   86,
+   87,
+   88,
+   89,
+   92,
+   93,
+   96,
+   100,
+   103,
+   104,
+   108,
+   121,
+   122,
+   123,
+   124,
+   129,
+   130,
+   136,
+   149,
+   155,
+   159,
+   161,
+   162,
+   170,
+   179,
+   182,
+   183,
+   193,
+   197,
+   199,
+   202,
+   206,
+   209,
+   210,
+   217,
+   218
+  ],
+  "illustrazione": {
+   "immagineUrl": "/api/immagini/mappa/dungeon-niijima/file?v=2026-10-18T13%3A15%3A00.659Z",
+   "asset": null
+  }
+ }
+}

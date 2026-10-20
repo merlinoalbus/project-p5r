@@ -1,0 +1,82 @@
+c43b8bc0da9a2a0ba0409f6e2a5a7c924fed1290
+ M server/db/migrations/index.ts
+ M server/db/migrazioniUtente/index.ts
+ M server/openapi/descrizioni/compendio.ts
+ M server/openapi/descrizioni/mappe.ts
+ M server/openapi/descrizioni/partite.ts
+ M server/routes/aree-mondo.test.ts
+ M server/routes/compendio.ts
+ M server/routes/condizioni-voce.test.ts
+ M server/routes/copia-voci-area.test.ts
+ M server/routes/dungeon.test.ts
+ M server/routes/enigmi-guida.test.ts
+ M server/routes/guida-modificabile.test.ts
+ M server/routes/guida-pin.test.ts
+ M server/routes/mappe-editor.test.ts
+ M server/routes/mappe.ts
+ M server/routes/palazzi-aree.test.ts
+ M server/routes/palazzo-completato.test.ts
+ M server/routes/partite.ts
+ M server/schemas/guidaDungeon.ts
+ M server/schemas/mappe.ts
+ M server/services/cestinoService.ts
+ M server/services/disponibilitaService.ts
+ M server/services/dungeonService.ts
+ M server/services/mappe/areeService.ts
+ M server/services/mappe/casaMappa.ts
+ M server/services/mappe/collegamentiGuida.ts
+ M server/services/mappe/contenutiGuidaService.ts
+ M server/services/mappe/mappeService.ts
+ M server/services/mappe/organizzazioneMappe.test.ts
+ M server/services/mappe/statiGuida.ts
+ M server/services/pacchettoGiocoService.ts
+ M server/services/palazziService.ts
+ M shared/organizzazioneMappe.ts
+ M shared/types.ts
+ M src/components/guida/AreeDelDedalo.tsx
+ M src/components/guida/GiornoGuida.tsx
+ M src/components/guida/ModuloNuovaArea.tsx
+ M src/components/guida/PartiAzione.tsx
+ D src/components/guida/PlanimetriePalazzo.tsx
+ D src/components/guida/SceltaAreePlanimetria.tsx
+ D src/components/guida/SchedaAreaGuida.tsx
+ D src/components/guida/SchedaPlanimetria.tsx
+ M src/components/mappe/ContenutiGuidaAccesso.test.tsx
+ M src/components/mappe/ContenutiGuidaMappa.tsx
+ M src/components/mappe/FinestraAggiungiArea.tsx
+ M src/components/mappe/FinestraAggiungiPlanimetria.tsx
+ M src/components/mappe/FinestraModificaArea.tsx
+ M src/components/mappe/MappaTokyo.test.tsx
+ M src/components/mappe/MappaTokyo.tsx
+ M src/components/mappe/OrganizzazioneMappe.test.tsx
+ M src/pages/AccessoMondoPage.tsx
+ M src/pages/BattagliaPage.tsx
+ M src/pages/CittaPage.test.tsx
+ M src/pages/DungeonDettaglioPage.test.tsx
+ M src/pages/DungeonDettaglioPage.tsx
+ M src/router.tsx
+ M src/services/api/aree.ts
+ M src/services/api/compendio.ts
+ M src/tailwind.css
+ M src/utils/percorso.test.ts
+ M src/utils/percorso.ts
+?? server/db/migrations/111_carattere_delle_voci.test.ts
+?? server/db/migrations/111_carattere_delle_voci.ts
+?? server/db/migrazioniUtente/022_divergenze_da_verificare.test.ts
+?? server/db/migrazioniUtente/022_divergenze_da_verificare.ts
+?? server/routes/avanzamento-unico.test.ts
+?? server/services/divergenzeService.ts
+?? shared/caratteriVoce.test.ts
+?? shared/caratteriVoce.ts
+?? shared/completamentoGuida.test.ts
+?? shared/completamentoGuida.ts
+?? src/components/guida/AreePalazzo.test.tsx
+?? src/components/guida/AreePalazzo.tsx
+?? src/components/guida/FinestraLegamiInfiltrazione.test.tsx
+?? src/components/guida/FinestraLegamiInfiltrazione.tsx
+?? src/components/guida/InfiltrazioniVoce.test.tsx
+?? src/components/guida/InfiltrazioniVoce.tsx
+?? src/components/guida/SpuntaCompletata.tsx
+?? src/components/shared/Maniglia.tsx
+?? src/hooks/useRiordino.ts
+impronta diff+nuovi: 7c40b4f6…

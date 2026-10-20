@@ -1,0 +1,5 @@
+== gioco.db
+NESSUNA DIFFERENZA
+== partite.db
+DIVERSA partita {"righe":2,"hash":"1e0d541388a327e6ac61bf48646f06c6354c5bed"} → {"righe":2,"hash":"16f8492c597254218f22d92ba428e043262e9e43"}
+1 tabelle diverse

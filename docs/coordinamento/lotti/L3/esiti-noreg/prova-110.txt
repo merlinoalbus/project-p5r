@@ -1,0 +1,55 @@
+{"level":30,"time":"2026-10-20T01:30:15.502Z","service":"project-p5r-be","aree":117,"planimetrie":245,"etichette":203,"legami":105,"legamiDaRegola":1,"proposte":102,"corrette":6,"segnalate":1,"nuove":1,"diarioCurato":true,"senzaArea":0,"msg":"migrazione 110: Aree dei Palazzi e infiltrazioni"}
+fk 1 { prima: 0, dopo: 0 }
+{
+ "aree8": 101,
+ "areeTot": 117,
+ "perPalazzo": "kamoshida:10 madarame:8 kaneshiro:13 futaba:18 okumura:11 niijima:13 shido:16 iweleth:16 maruki:12",
+ "plan8": 219,
+ "planTot": 245,
+ "senza": 0,
+ "etichette8": 187,
+ "etichetteTot": 203,
+ "legami8": 93,
+ "legamiTot": 105,
+ "regola": [
+  {
+   "infiltrazione_chiave": "madarame-il-furto-del-cuore-di-madarame",
+   "area_chiave": "dungeon/madarame/giardino-centrale",
+   "ordine": 1,
+   "planimetria_iniziale": "nativo-rmap-153-5-0",
+   "origine": "regola"
+  }
+ ],
+ "origini": [
+  {
+   "origine": "regola",
+   "n": 1
+  },
+  {
+   "origine": "seed",
+   "n": 65
+  },
+  {
+   "origine": "utente",
+   "n": 39
+  }
+ ],
+ "infSenzaAree": 15,
+ "areeSenzaInf8": 31,
+ "areeSenzaInfTot": 35,
+ "memento": 0,
+ "areeMondo": 23,
+ "voceInf": 0,
+ "proposte": 37,
+ "proposteRighe": 102,
+ "corrette": 6,
+ "daRivedere": 8,
+ "segnalate": 1,
+ "nuove": 1,
+ "validatoToccato": 0,
+ "mappaEntitaArea": 130,
+ "colonneArea": 105
+}
+fk 2 { prima: 0, dopo: 0 }
+idempotente true
+{"level":30,"time":"2026-10-20T01:30:15.512Z","service":"project-p5r-be","aree":0,"planimetrie":0,"etichette":0,"legami":0,"legamiDaRegola":0,"proposte":0,"corrette":0,"segnalate":0,"nuove":0,"diarioCurato":true,"senzaArea":0,"msg":"migrazione 110: Aree dei Palazzi e infiltrazioni"}

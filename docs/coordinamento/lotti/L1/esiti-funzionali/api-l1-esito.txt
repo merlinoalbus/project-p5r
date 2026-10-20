@@ -1,0 +1,36 @@
+manifest totale 757 chiavi esempio [ 'affinita/ab', 'affinita/ab-senza-testo', 'affinita/normale' ]
+albero 307 {"planimetria-nativa":274,"illustrazione-editoriale":24,"emblema":9}
+
+== F-18 Banchina Yongen-Jaya
+yongen-jaya-banchina-della-metropolitana planimetria-nativa null mappe/yongen-java-banchina-della-metropolitana
+
+== dettaglio mappe
+tokyo 200 ruolo= illustrazione-editoriale immagineUrl= /api/immagini/mappa/tokyo/file?v=2026-10-18T13%3A17%3A02.571Z asset= mappe/tokyo inManifest= true | albero: /api/immagini/mappa/tokyo/file?v=2026-10-18T13%3A17%3A02.571Z mappe/tokyo | file: 200 image/png 2109283B
+shibuya 200 ruolo= illustrazione-editoriale immagineUrl= /api/immagini/mappa/citta-shibuya/file?v=2026-09-09T20%3A09%3A28.331Z asset= mappe/citta-shibuya inManifest= true | albero: /api/immagini/mappa/citta-shibuya/file?v=2026-09-09T20%3A09%3A28.331Z mappe/citta-shibuya | file: 200 image/png 2407015B
+kichijoji 200 ruolo= illustrazione-editoriale immagineUrl= null asset= mappe/citta-kichijoji inManifest= true | albero: null mappe/citta-kichijoji | file: -
+nakano 200 ruolo= illustrazione-editoriale immagineUrl= null asset= mappe/citta-nakano inManifest= true | albero: null mappe/citta-nakano | file: -
+ikebukuro 200 ruolo= illustrazione-editoriale immagineUrl= null asset= mappe/citta-ikebukuro inManifest= true | albero: null mappe/citta-ikebukuro | file: -
+santuario-meiji 200 ruolo= illustrazione-editoriale immagineUrl= null asset= mappe/citta-meiji-shrine inManifest= true | albero: null mappe/citta-meiji-shrine | file: -
+palazzo-di-kamoshida 200 ruolo= emblema immagineUrl= /api/immagini/mappa/dungeon-kamoshida/file?v=2026-09-29T15%3A32%3A16.649Z asset= palazzi/kamoshida inManifest= true | albero: /api/immagini/mappa/dungeon-kamoshida/file?v=2026-09-29T15%3A32%3A16.649Z palazzi/kamoshida | file: 200 image/png 2401139B
+
+== F-03/F-04 compendio/citta vs mappa del quartiere
+quartieri 23 illustrazione = MappaDto: 23 diversi: []
+
+== F-14 dettaglio quartiere
+shibuya 200 mappa= true illustrazione= {"immagineUrl":"/api/immagini/mappa/citta-shibuya/file?v=2026-09-09T20%3A09%3A28.331Z","asset":"mappe/citta-shibuya"} mappaChiave= shibuya
+kichijoji 200 mappa= false illustrazione= {"immagineUrl":null,"asset":"mappe/citta-kichijoji"} mappaChiave= kichijoji
+nakano 200 mappa= false illustrazione= {"immagineUrl":null,"asset":"mappe/citta-nakano"} mappaChiave= nakano
+yongen-jaya 200 mappa= true illustrazione= {"immagineUrl":"/api/immagini/mappa/citta-yongen-jaya/file?v=2026-09-09T19%3A50%3A02.441Z","asset":"mappe/citta-yongen-jaya"} mappaChiave= yongen-jaya
+
+== F-06/F-07 dungeon
+kamoshida 200 illustrazione= {"immagineUrl":"/api/immagini/mappa/dungeon-kamoshida/file?v=2026-09-29T15%3A32%3A16.649Z","asset":null} | file: 200 image/png 2401139B
+madarame 200 illustrazione= {"immagineUrl":"/api/immagini/mappa/dungeon-madarame/file?v=2026-10-18T13%3A08%3A53.288Z","asset":null} | file: 200 image/png 2973036B
+mementos 200 illustrazione= {"immagineUrl":null,"asset":null} | file: -
+radice kamoshida (albero): /api/immagini/mappa/dungeon-kamoshida/file?v=2026-09-29T15%3A32%3A16.649Z palazzi/kamoshida
+
+== asset dei 4 quartieri nel manifesto (file)
+mappe/citta-kichijoji "/api/immagini/mappe/citta-kichijoji/file?v=2026-09-12T14%3A55%3A14.943Z"
+mappe/citta-nakano "/api/immagini/mappe/citta-nakano/file?v=2026-09-12T14%3A55%3A14.943Z"
+mappe/citta-ikebukuro "/api/immagini/mappe/citta-ikebukuro/file?v=2026-09-12T14%3A55%3A14.943Z"
+mappe/citta-meiji-shrine "/api/immagini/mappe/citta-meiji-shrine/file?v=2026-09-12T14%3A55%3A14.943Z"
+mappe/tokyo "/api/immagini/mappe/tokyo/file?v=2026-09-12T14%3A55%3A14.943Z"

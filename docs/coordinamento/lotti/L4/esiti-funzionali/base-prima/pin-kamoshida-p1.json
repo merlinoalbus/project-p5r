@@ -1,0 +1,4336 @@
+{
+ "dungeon-kamoshida": {
+  "chiave": "palazzo-di-kamoshida",
+  "spilli": [
+   {
+    "id": 1735,
+    "uid": "6ffff430efc0c344ae193675b35dff18",
+    "nome": "Cancello del castello",
+    "tipo": "passaggio",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1816,
+    "uid": "4ec00f46af5748585e4c0cdeec766fb3",
+    "nome": "Sala Centrale",
+    "tipo": "passaggio",
+    "stato": false,
+    "voci": []
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-151-1-0": {
+  "chiave": "palazzo-di-kamoshida-cancello-del-castello-nativo-rmap-151-1-0",
+  "spilli": [
+   {
+    "id": 515,
+    "uid": "e641ff268e993350e4f7009fe6412b22",
+    "nome": "Uscita",
+    "tipo": "uscita",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-esci-dal-castello"
+    ]
+   },
+   {
+    "id": 1732,
+    "uid": "27be02dd04042714a793e64e3c6ffb46",
+    "nome": "Porta chiusa",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1733,
+    "uid": "8dbe595c81622049804463cadc54f19d",
+    "nome": "Porta chiusa",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1734,
+    "uid": "b15550a25c02a51350db9a6655f154c3",
+    "nome": "Porta chiusa",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1776,
+    "uid": "47cb6fed84667fa7beec694535d3ae60",
+    "nome": "Stanza di Velluto",
+    "tipo": "velluto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-visita-la-stanza-di-velluto"
+    ]
+   },
+   {
+    "id": 1786,
+    "uid": "50b9de64211a96c4893c6ebc7c193325",
+    "nome": "Punto di Infiltrazione Iniziale",
+    "tipo": "infiltrazione",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-15-04-infiltrati-nel-castello"
+    ]
+   },
+   {
+    "id": 1815,
+    "uid": "d8c4526c7429fde426750b4231c47025",
+    "nome": "Palazzo di Kamoshida",
+    "tipo": "ingresso-palazzo",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2083,
+    "uid": "2fedfca017b4d1d7e6c13002df8e13d6",
+    "nome": "Furto del Tesoro",
+    "tipo": "passaggio",
+    "stato": true,
+    "voci": [
+     "kamoshida-rubare-i-desideri-del-cuore-infiltrati-fino-alla-safe-room-della-sala-del-trono"
+    ]
+   },
+   {
+    "id": 518,
+    "uid": "601d9dffc4b154e2fae582883df911f7",
+    "nome": "Punto di Infiltrazione Iniziale",
+    "tipo": "infiltrazione",
+    "stato": false,
+    "voci": []
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "nativo",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "destinazioneNomi",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-151-1-1": {
+  "chiave": "palazzo-di-kamoshida-cancello-del-castello-nativo-rmap-151-1-1",
+  "spilli": [
+   {
+    "id": 520,
+    "uid": "08ee451c00b8f3c478a3824022e15ccc",
+    "nome": "Punto di Infiltrazione 2",
+    "tipo": "infiltrazione",
+    "stato": false,
+    "voci": []
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "nativo",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "destinazioneNomi",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-151-2-0": {
+  "chiave": "palazzo-di-kamoshida-vecchio-castello-1p",
+  "spilli": [
+   {
+    "id": 521,
+    "uid": "8e8c688e0c4eed1858855b56f9da0cb9",
+    "nome": "Edificio Ovest 1P",
+    "tipo": "sicura",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-15-04-raggiungi-la-safe-room"
+    ]
+   },
+   {
+    "id": 1788,
+    "uid": "a49bb391f9d72719f844fbe385763b66",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1789,
+    "uid": "5bd7b2a6f1541687f2ac4a575f1e8753",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1790,
+    "uid": "7a8edd1941c77a309779d7c7a197a977",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1791,
+    "uid": "e79b0d3e2b20c02f1c926d1bdf772797",
+    "nome": "Porta chiusa",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1792,
+    "uid": "5a895b0995983a6a40b86c4ea2516422",
+    "nome": "Porta chiusa",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1793,
+    "uid": "aeec3908ea55cfef2d139e8f7f9cf421",
+    "nome": "Porta chiusa",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1794,
+    "uid": "33310b9572728403c1b24ff8b4cb1e98",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-15-04-sconfiggi-i-nemici"
+    ]
+   },
+   {
+    "id": 1795,
+    "uid": "473e165d39484bafabeaae7dc26e1cb4",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-15-04-sconfiggi-i-nemici"
+    ]
+   },
+   {
+    "id": 1796,
+    "uid": "342ad252d8123e972108f9fe848f8fd6",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-15-04-sconfiggi-i-nemici"
+    ]
+   },
+   {
+    "id": 1797,
+    "uid": "868dbfe164d258a5f8928b1a2aacd469",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemico-corridoio"
+    ]
+   },
+   {
+    "id": 1798,
+    "uid": "df63fe00754ec2c7602266c0e3fb3377",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine"
+    ]
+   },
+   {
+    "id": 1799,
+    "uid": "34ab3fe584e0d3736dc7e0322bd791be",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemico-sul-retro"
+    ]
+   },
+   {
+    "id": 1800,
+    "uid": "412784de4873db240d50a47e4f659327",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-sconfiggete-nemico-e-raziate-corridoio"
+    ]
+   },
+   {
+    "id": 1801,
+    "uid": "b55ab881693f2abfd5cd00722da32b68",
+    "nome": "Punto di infiltrazione",
+    "tipo": "infiltrazione",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1802,
+    "uid": "28cd128e9720c37717ffaff21fc3afd6",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-indaga-nel-castello"
+    ]
+   },
+   {
+    "id": 1803,
+    "uid": "57f47e3a904653da2fee0b4252d006aa",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-indaga-nel-castello"
+    ]
+   },
+   {
+    "id": 1804,
+    "uid": "7f71b707f4e4e5ecbdc6bf6708288a21",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine"
+    ]
+   },
+   {
+    "id": 1805,
+    "uid": "7b323d194d941199ab8ba0bff0e09b9d",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine"
+    ]
+   },
+   {
+    "id": 1806,
+    "uid": "604f92ba22afc6f2424034b11aee88df",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine"
+    ]
+   },
+   {
+    "id": 1807,
+    "uid": "86aefe752705fb51e5983915a5808ff1",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-sconfiggete-nemico-e-raziate-corridoio"
+    ]
+   },
+   {
+    "id": 1808,
+    "uid": "884719519e91d19e38529610a2059fb2",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-sconfiggete-nemico-e-raziate-corridoio"
+    ]
+   },
+   {
+    "id": 1809,
+    "uid": "948898dd848eef5bbe5014c2362e527d",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-razia-scatola-alla-base-della-scala-e-la-botte-al-piano-di-sopra"
+    ]
+   },
+   {
+    "id": 1810,
+    "uid": "be4919c283b99d7bd6677b98d50e7b1e",
+    "nome": "Scala",
+    "tipo": "scala",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1814,
+    "uid": "140ffed11fb90c4fe23a206677636d9f",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine"
+    ]
+   },
+   {
+    "id": 2019,
+    "uid": "42aa0f5acfef70ed8c8ec318f18b2e24",
+    "nome": "Prigione Sotterranei -P1",
+    "tipo": "passaggio",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2056,
+    "uid": "2fe142e94dca683d24351532c1b8bdc5",
+    "nome": "Sbarre di metallo",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2057,
+    "uid": "7f302b7d16f3105c3ac236c23f3ef00e",
+    "nome": "Ann Takamaki",
+    "tipo": "confidente",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-15-04-salva-ann"
+    ]
+   },
+   {
+    "id": 2058,
+    "uid": "d0b18d15dd184918cd4aa30cbdb4d613",
+    "nome": "Capitano della Guardia",
+    "tipo": "miniboss",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-15-04-sconfiggi-il-capitano-delle-guardie"
+    ]
+   },
+   {
+    "id": 2075,
+    "uid": "749657d509819899ead30bd1acf47f87",
+    "nome": "Sala Centrale 2P",
+    "tipo": "scala",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2076,
+    "uid": "8d0fa08ff28473f771c5aec0b6bb16cf",
+    "nome": "Sala Centrale 2P",
+    "tipo": "scala",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 527,
+    "uid": "38c558b6f7d084fde3d7a1a5a47eb16f",
+    "nome": "Forziere",
+    "tipo": "forziere",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-apri-2-forzieri"
+    ]
+   },
+   {
+    "id": 528,
+    "uid": "d512b0021e2808277d8b0cafe680e255",
+    "nome": "Forziere",
+    "tipo": "forziere",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-apri-2-forzieri"
+    ]
+   },
+   {
+    "id": 529,
+    "uid": "c0920b7ffc850cabe04aa71dfed2db55",
+    "nome": "Forziere",
+    "tipo": "forziere",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-15-04-apri-il-tesoro"
+    ]
+   },
+   {
+    "id": 530,
+    "uid": "2209a018d1d173d1063c358d013b1547",
+    "nome": "Porta",
+    "tipo": "porta",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-15-04-sblocca-la-porta"
+    ]
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "nativo",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-151-2-1": {
+  "chiave": "palazzo-di-kamoshida-vecchio-castello-2p-nativo-rmap-151-2-1",
+  "spilli": [
+   {
+    "id": 533,
+    "uid": "af641dda5081f865093e37797fe20f28",
+    "nome": "Sala centrale 2P",
+    "tipo": "sicura",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-sala-centrale-2p"
+    ]
+   },
+   {
+    "id": 1819,
+    "uid": "2724fe2782ff6d0cfcf1b1e466cfe98d",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-razia-scatola-alla-base-della-scala-e-la-botte-al-piano-di-sopra"
+    ]
+   },
+   {
+    "id": 1820,
+    "uid": "57f46cd1c8fe3f917845ca2c0e8904cb",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-sconfiggi-i-nemici"
+    ]
+   },
+   {
+    "id": 1821,
+    "uid": "3964ced27690007225833bfa3fa9881c",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-sconfiggi-i-nemici"
+    ]
+   },
+   {
+    "id": 1822,
+    "uid": "a8b8acbe1ff89e67b6b8434923e14051",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-razia-il-corridoio"
+    ]
+   },
+   {
+    "id": 1823,
+    "uid": "2b2d9f69a0441829f7603b2321770742",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-razia-il-corridoio"
+    ]
+   },
+   {
+    "id": 1824,
+    "uid": "a37edc5787a72aa8f82a5688dcb7d5a3",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-razia-urna-in-fondo"
+    ]
+   },
+   {
+    "id": 1825,
+    "uid": "fe0c8038318c37b469e4277b0572cac0",
+    "nome": "Leva 2",
+    "tipo": "punto-sensibile",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-tira-la-seconda-leva"
+    ]
+   },
+   {
+    "id": 1826,
+    "uid": "2d536077f000b829b85a4e20eb4a8b75",
+    "nome": "Leva 1",
+    "tipo": "punto-sensibile",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-tira-la-leva-iniziale"
+    ]
+   },
+   {
+    "id": 1827,
+    "uid": "dd8019118e3fbf9038809d3564c12b9c",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-continua-a-indagare-nel-castello"
+    ]
+   },
+   {
+    "id": 1828,
+    "uid": "3b501d73eb10fafa0c437bf0234c7635",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-continua-a-indagare-nel-castello"
+    ]
+   },
+   {
+    "id": 1829,
+    "uid": "7c6ded5d4413b5626de3401855da5f10",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-saccheggia-gli-oggetti"
+    ]
+   },
+   {
+    "id": 1830,
+    "uid": "2d6d73f4953ab6ebddbef01ab2563a0c",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-saccheggia-gli-oggetti"
+    ]
+   },
+   {
+    "id": 1831,
+    "uid": "1ace10e015b95679e95e67a303c857ee",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-saccheggia-gli-oggetti"
+    ]
+   },
+   {
+    "id": 1832,
+    "uid": "0ef7b47280ec67bda0dd208b0ab783d5",
+    "nome": "Punto Rampino Est",
+    "tipo": "rampino",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-passa-per-i-lampadari"
+    ]
+   },
+   {
+    "id": 1835,
+    "uid": "6906b85306201c6c6ba8c6b9dc759419",
+    "nome": "Punto Rampino Ovest",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1836,
+    "uid": "bea5c1e2ccc55f76956f6e8f87c5c736",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-saccheggia-la-mensola"
+    ]
+   },
+   {
+    "id": 1837,
+    "uid": "7b66f8dcefc6cde1ffa5e1053b6c348e",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-nemici-aura-rossa"
+    ]
+   },
+   {
+    "id": 1838,
+    "uid": "ada016c3a3cf0cd2a471aaf4af76bfd8",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-nemici-aura-rossa"
+    ]
+   },
+   {
+    "id": 1839,
+    "uid": "f31fad20ae0ef86eb56a5270eff84033",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-depreda-oggetti"
+    ]
+   },
+   {
+    "id": 1840,
+    "uid": "55e588f08b25672ed5118210cbdf90cd",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-depreda-oggetti"
+    ]
+   },
+   {
+    "id": 1841,
+    "uid": "803afb418ee3f28ee9e9b30410614a34",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-depreda-oggetti"
+    ]
+   },
+   {
+    "id": 1842,
+    "uid": "efb059454a0fdec832b272af80fe80e7",
+    "nome": "Leva 1",
+    "tipo": "meccanismo",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-tira-la-prima-leva"
+    ]
+   },
+   {
+    "id": 1843,
+    "uid": "bd236da476823d0c042f05c5f3e04078",
+    "nome": "Leva 2",
+    "tipo": "meccanismo",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-tira-la-seconda-leva-2"
+    ]
+   },
+   {
+    "id": 1845,
+    "uid": "b0c6e86070cc1e77aadb2c6230464e1f",
+    "nome": "Leva 3",
+    "tipo": "meccanismo",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-tira-la-terza-leva"
+    ]
+   },
+   {
+    "id": 1846,
+    "uid": "8456fa946c97aac125340627d186396c",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-saccheggia-la-mensola-2"
+    ]
+   },
+   {
+    "id": 1847,
+    "uid": "a76021c67decd12815d7211e978a6787",
+    "nome": "Leva 4",
+    "tipo": "meccanismo",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-tira-la-terza-leva"
+    ]
+   },
+   {
+    "id": 1848,
+    "uid": "5671b1b84f918b332492391b3ac51c44",
+    "nome": "Leva 5",
+    "tipo": "meccanismo",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-tira-la-quinta-leva"
+    ]
+   },
+   {
+    "id": 1849,
+    "uid": "3dacb4037fb293f61258bb0c6faadd28",
+    "nome": "Salire Armadio",
+    "tipo": "rampino",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-passaggio-aerazione"
+    ]
+   },
+   {
+    "id": 1850,
+    "uid": "88a288a5eac93ef4a5a72ecfd2aa6d71",
+    "nome": "Leva 6",
+    "tipo": "meccanismo",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-tira-lultima-leva"
+    ]
+   },
+   {
+    "id": 1851,
+    "uid": "35ba2260e292be6206834f557cbd3f87",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine-2"
+    ]
+   },
+   {
+    "id": 1852,
+    "uid": "848a34b2035a7a252c69d46fb07021cd",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine-2"
+    ]
+   },
+   {
+    "id": 1853,
+    "uid": "d1a96ef3ce251e429d704eb20c2e2148",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemico"
+    ]
+   },
+   {
+    "id": 1854,
+    "uid": "ee5ef330e80a0458825656b5256c3a70",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-sconfiggi-il-nemico-e-negozia"
+    ]
+   },
+   {
+    "id": 1855,
+    "uid": "f0eb2f01d37e2a883409c24016c18849",
+    "nome": "Salire Armadio",
+    "tipo": "rampino",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-trova-una-strada-alternativa"
+    ]
+   },
+   {
+    "id": 1856,
+    "uid": "fdbcfcad94f8195059bdaa76fde969d7",
+    "nome": "Condotto",
+    "tipo": "scorciatoia",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-trova-una-strada-alternativa"
+    ]
+   },
+   {
+    "id": 1857,
+    "uid": "35d71b5439ce45471a864a6cfc32a51b",
+    "nome": "Condotto",
+    "tipo": "scorciatoia",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-trova-una-strada-alternativa"
+    ]
+   },
+   {
+    "id": 1858,
+    "uid": "0dd078e7002de020df9f16a7aa0c693e",
+    "nome": "Condotto",
+    "tipo": "scorciatoia",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-passaggio-aerazione"
+    ]
+   },
+   {
+    "id": 1859,
+    "uid": "50c5dfd264231c1fa19ef5369c9810df",
+    "nome": "Condotto",
+    "tipo": "scorciatoia",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-passaggio-aerazione"
+    ]
+   },
+   {
+    "id": 1860,
+    "uid": "7548b248ba02687beb27a867bc2c9cbc",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-percorri-corridoio"
+    ]
+   },
+   {
+    "id": 1861,
+    "uid": "d22d95ac32f0c19800148609912a1961",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-ricevi-rampino-da-morgana"
+    ]
+   },
+   {
+    "id": 1862,
+    "uid": "e7b90c7d9e9de1c7ef7821540647e871",
+    "nome": "Rampino",
+    "tipo": "rampino",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-ricevi-rampino-da-morgana"
+    ]
+   },
+   {
+    "id": 1867,
+    "uid": "6f9fcd7b66c0be4f67a4e3f2d30a8d94",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1962,
+    "uid": "1b3b9b7e0b79d1e5900d9d683066ef3b",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-raccogli-oggetti"
+    ]
+   },
+   {
+    "id": 1963,
+    "uid": "819737f8f0ffa9697f558600cf23d950",
+    "nome": "Meccanismo Grata",
+    "tipo": "meccanismo",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-sblocca-le-grate"
+    ]
+   },
+   {
+    "id": 1964,
+    "uid": "26f50029e7a5bfe35bdf8681caba99af",
+    "nome": "Sblocco Ascensore",
+    "tipo": "meccanismo",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-sblocca-ascensore"
+    ]
+   },
+   {
+    "id": 1965,
+    "uid": "5ec8151f78166cfd20935133f2cbf06b",
+    "nome": "Meccanismo Grata",
+    "tipo": "meccanismo",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-sblocca-le-grate"
+    ]
+   },
+   {
+    "id": 2059,
+    "uid": "9e4ed9ad0c0bfe9fd972986ad050fc54",
+    "nome": "Mappa del Castello",
+    "tipo": "oggetto-chiave",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-raccogli-mappa-del-castello"
+    ]
+   },
+   {
+    "id": 2060,
+    "uid": "7aede57e15092802366f71efdc2330dc",
+    "nome": "Porta chiusa",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2061,
+    "uid": "9d1ccb034653810c4eb90f3b60fc35c8",
+    "nome": "Grata Chiusa",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2064,
+    "uid": "216f782cd9f2bdf885e4bd3a7f5d3319",
+    "nome": "Grata Chiusa",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2065,
+    "uid": "6fb53030d8ef77c30db367ab03f94c2d",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-sconfiggi-guardia-sala-da-pranzo"
+    ]
+   },
+   {
+    "id": 2066,
+    "uid": "bb9bba128c83d60d2ea431a82016a525",
+    "nome": "Rampino",
+    "tipo": "oggetto-chiave",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-ricevi-rampino-da-morgana"
+    ]
+   },
+   {
+    "id": 2073,
+    "uid": "eac8dc793e8c613ac1eddd32bb900300",
+    "nome": "Sala Centrale 1P",
+    "tipo": "scala",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-scendi-le-scale"
+    ]
+   },
+   {
+    "id": 2074,
+    "uid": "8c8cf8ae6c046b31e0db76f6ddcc26d1",
+    "nome": "Sala Centrale 1P",
+    "tipo": "scala",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-scendi-le-scale"
+    ]
+   },
+   {
+    "id": 537,
+    "uid": "f50d96534c5c8e8a7801a10c2782ae84",
+    "nome": "Passaggio Segreto",
+    "tipo": "passaggio",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-torna-indietro"
+    ]
+   },
+   {
+    "id": 538,
+    "uid": "9a85140e72efef63e2843ecde541e474",
+    "nome": "Forziere",
+    "tipo": "forziere",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-raggiungi-le-cucine-2"
+    ]
+   },
+   {
+    "id": 539,
+    "uid": "313118d941cb9d2148f283b6dedb5394",
+    "nome": "Forziere",
+    "tipo": "forziere",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-apri-il-forziere"
+    ]
+   },
+   {
+    "id": 540,
+    "uid": "0736918cb8563611f6ace3e28c60ea5c",
+    "nome": "Forziere raro",
+    "tipo": "forziere-raro",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-esplora-la-stanza"
+    ]
+   },
+   {
+    "id": 541,
+    "uid": "35d27c58ae4e620691ba90538cce2f03",
+    "nome": "Porta",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 542,
+    "uid": "21c6912edc2e5de143f2dec10db4055d",
+    "nome": "Porta che non si apre",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 543,
+    "uid": "683e4fc721d48e19ff832f30aa2c0106",
+    "nome": "Porta",
+    "tipo": "porta",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-percorri-corridoio"
+    ]
+   },
+   {
+    "id": 544,
+    "uid": "598228e6415a37e95aa5f074862b82a8",
+    "nome": "Forziere",
+    "tipo": "forziere",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-apri-forziere"
+    ]
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "nativo",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-151-2-2": {
+  "chiave": "palazzo-di-kamoshida-vecchio-castello-2p-nativo-rmap-151-2-2",
+  "spilli": [
+   {
+    "id": 1833,
+    "uid": "454ced5a4c0535c422a841b04c0fcc85",
+    "nome": "Punto Rampino",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1834,
+    "uid": "6fbc40fb27c5391fd48d2067334e2cfe",
+    "nome": "Punto Rampino Ovest",
+    "tipo": "rampino",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-passa-per-i-lampadari"
+    ]
+   },
+   {
+    "id": 2063,
+    "uid": "06cc2d49c6a92b4d7e251f71573a8914",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-passa-per-i-lampadari"
+    ]
+   },
+   {
+    "id": 548,
+    "uid": "1a0668a822bb8e42bf6521c0d83855b7",
+    "nome": "Punto di Infiltrazione Over",
+    "tipo": "infiltrazione",
+    "stato": false,
+    "voci": []
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "destinazioneNomi",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-151-4-1": {
+  "chiave": "palazzo-di-kamoshida-vecchio-castello-3p-nativo-rmap-151-4-1",
+  "spilli": [
+   {
+    "id": 550,
+    "uid": "58a753171058111c7c9989ff3ca2e1ed",
+    "nome": "Edificio Est 3P",
+    "tipo": "sicura",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-raggiungi-edificio-est-3p"
+    ]
+   },
+   {
+    "id": 1863,
+    "uid": "bba2fccba82b6a2df2342a76822fe559",
+    "nome": "Livello 2",
+    "tipo": "scala",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1866,
+    "uid": "571c40a11db9c2f4620fd88d72c70ed9",
+    "nome": "Piano 2",
+    "tipo": "scala",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1868,
+    "uid": "36f63fbb6c492fce774283a2349c4ab3",
+    "nome": "Miniboss",
+    "tipo": "miniboss",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemici-esterni"
+    ]
+   },
+   {
+    "id": 1869,
+    "uid": "bc17bf1b2c5ce0080f7b5e68dfbf29f5",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemici-esterni"
+    ]
+   },
+   {
+    "id": 1870,
+    "uid": "ed7adea8e145e80e34f97183ba63748f",
+    "nome": "Libro dello schiavo",
+    "tipo": "oggetto-chiave",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-perlustra-stanza-dello-schiavo"
+    ]
+   },
+   {
+    "id": 1871,
+    "uid": "1b3fc0a8abbe75d063eaf63fe51eed4b",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemici-esterni"
+    ]
+   },
+   {
+    "id": 1872,
+    "uid": "4b8c43d435f14f7f4563b8fa4bc02306",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-perlustra-prima-stanza"
+    ]
+   },
+   {
+    "id": 1873,
+    "uid": "ea35b08069b437fc716a58107718953e",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-perlustra-stanza-del-palestrato"
+    ]
+   },
+   {
+    "id": 1874,
+    "uid": "97984a413a895144175ff9547024efcc",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-sconfiggi-i-nemici-2"
+    ]
+   },
+   {
+    "id": 1875,
+    "uid": "572fccb4ba851853b1fc78dc14da8183",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-perlustra-stanza-del-palestrato"
+    ]
+   },
+   {
+    "id": 1876,
+    "uid": "b031d820ab66eae825a20931415b4d6d",
+    "nome": "Libro del palestrato",
+    "tipo": "oggetto-chiave",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-perlustra-stanza-del-palestrato"
+    ]
+   },
+   {
+    "id": 1877,
+    "uid": "38be3e7232d489bd7f4fef2134c179d4",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemici-esterni"
+    ]
+   },
+   {
+    "id": 1878,
+    "uid": "8229ac971cc37e21e0215fcae34aa3d7",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-perlustra-prima-stanza"
+    ]
+   },
+   {
+    "id": 1879,
+    "uid": "0036b028ab0351925a0f0db2e85b3def",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-perlustra-prima-stanza"
+    ]
+   },
+   {
+    "id": 1880,
+    "uid": "c91ba2dc973dd25caa86be82915cdec6",
+    "nome": "Libro della regina",
+    "tipo": "oggetto-chiave",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-perlustra-prima-stanza"
+    ]
+   },
+   {
+    "id": 1881,
+    "uid": "3f63bac7ff4bb6cb0b1380ac1d33e70c",
+    "nome": "Libro del Re",
+    "tipo": "oggetto-chiave",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-recupera-libro-del-re"
+    ]
+   },
+   {
+    "id": 1882,
+    "uid": "0e528af3408866316073f4f49058650d",
+    "nome": "Punto sensibile Regina",
+    "tipo": "punto-sensibile",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-posiziona-libro-della-regina"
+    ]
+   },
+   {
+    "id": 1883,
+    "uid": "f7a66f39867e6e7bf19cb73a5a7f85d0",
+    "nome": "Punto sensibile Re",
+    "tipo": "punto-sensibile",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-recupera-libro-del-re"
+    ]
+   },
+   {
+    "id": 1884,
+    "uid": "b0ed927cfcd7c469ce78de4075b99cf1",
+    "nome": "Punto sensibile Schiavo",
+    "tipo": "punto-sensibile",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-posiziona-libro-dello-schiavo"
+    ]
+   },
+   {
+    "id": 1885,
+    "uid": "64b21dafb530bf72d9a158d979db17d9",
+    "nome": "Medaglia di Kamoshida",
+    "tipo": "oggetto-chiave",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-ottieni-medaglia-di-kamoshida"
+    ]
+   },
+   {
+    "id": 1886,
+    "uid": "9d3055a53d9488915c8a52e0b2e81530",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-sconfiggi-ombre-sciagura"
+    ]
+   },
+   {
+    "id": 1887,
+    "uid": "7fd9ea148e88cab27dfb883ce25e4287",
+    "nome": "Punto sensibile",
+    "tipo": "punto-sensibile",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-sistema-libro-palestrato"
+    ]
+   },
+   {
+    "id": 1888,
+    "uid": "4563a5298615e311e7e325c1c43be19c",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-recupera-oggetto"
+    ]
+   },
+   {
+    "id": 1889,
+    "uid": "f5a2fd0f693e21f4be636f9ed6d10c62",
+    "nome": "Castigatore Divino",
+    "tipo": "miniboss",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-sconfiggi-castigatore-divino"
+    ]
+   },
+   {
+    "id": 1890,
+    "uid": "9ab0145514bb23bf685bfed1f398cf1e",
+    "nome": "Livello 2",
+    "tipo": "rampino",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-scappate-dallagguato"
+    ]
+   },
+   {
+    "id": 1907,
+    "uid": "5fc805fa89ff1226e0748766cdebc159",
+    "nome": "Livello 1",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1909,
+    "uid": "71a7f9236412ae4a38c65444788143d1",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici"
+    ]
+   },
+   {
+    "id": 1915,
+    "uid": "69acdd9b1e4248f67b500eef6b10149f",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-razzia-la-cappella"
+    ]
+   },
+   {
+    "id": 1916,
+    "uid": "cb8c4d6e3dd8494e4c463b3a5da56c20",
+    "nome": "Livello 1",
+    "tipo": "rampino",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-continua-dal-livello-1"
+    ]
+   },
+   {
+    "id": 1926,
+    "uid": "c785f732fc1cf15cf70c99f3b6366130",
+    "nome": "Livello 1",
+    "tipo": "scala",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-sali-verso-il-tetto"
+    ]
+   },
+   {
+    "id": 1929,
+    "uid": "83ff02faa0678b30ddde32ac53489441",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-sconfiggi-nemico-forte"
+    ]
+   },
+   {
+    "id": 2067,
+    "uid": "2732215e7346d88e6e9df335c350ab04",
+    "nome": "Passaggio Segreto",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2068,
+    "uid": "0053cacb0d067345f1ab1b26ee16e4d0",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici"
+    ]
+   },
+   {
+    "id": 2069,
+    "uid": "f619a043221f5ff9097e66521461a83d",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici"
+    ]
+   },
+   {
+    "id": 2070,
+    "uid": "df5e3d7de7e2d113bf7bf64b5afc82b5",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici"
+    ]
+   },
+   {
+    "id": 2071,
+    "uid": "342068a3520f6cbeea40a0770c9cf586",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici"
+    ]
+   },
+   {
+    "id": 2072,
+    "uid": "c5af35a4b0369baaed5929b225aacd78",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici"
+    ]
+   },
+   {
+    "id": 553,
+    "uid": "2025e16101360cb4e0783893ded8a964",
+    "nome": "Edificio Est - Dependance",
+    "tipo": "sicura",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-edificio-est-dependance"
+    ]
+   },
+   {
+    "id": 554,
+    "uid": "6e28c6d62533634358788c1ea9eba734",
+    "nome": "Forziere",
+    "tipo": "forziere",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-recupera-forziere"
+    ]
+   },
+   {
+    "id": 555,
+    "uid": "f04132854a54e82de0f82a98e891768c",
+    "nome": "Forziere raro",
+    "tipo": "forziere-raro",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-apri-forziere-raro"
+    ]
+   },
+   {
+    "id": 556,
+    "uid": "94ab28ad1555ca7301e6c5bddd48ecc0",
+    "nome": "Forziere",
+    "tipo": "forziere",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-razzia-la-cappella"
+    ]
+   },
+   {
+    "id": 557,
+    "uid": "a879a76c99e8942fb56a028a48cb966e",
+    "nome": "Porta",
+    "tipo": "porta",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-usa-medaglia"
+    ]
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "nativo",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-151-5-1": {
+  "chiave": "palazzo-di-kamoshida-vecchio-castello-3p-nativo-rmap-151-5-1",
+  "spilli": [
+   {
+    "id": 569,
+    "uid": "58c19b474db0e2449d81e84771040ead",
+    "nome": "Forziere",
+    "tipo": "forziere",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-razzia-la-cappella"
+    ]
+   },
+   {
+    "id": 1892,
+    "uid": "28fa24fa03227bfaa20bfd6976ab22ed",
+    "nome": "Livello 2",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1893,
+    "uid": "18c393b55cc17f88a2594082c47bf2e6",
+    "nome": "Livello 2",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1894,
+    "uid": "ea614ea53a5bd4f5b7e8f9bdcfb768e5",
+    "nome": "Livello 2",
+    "tipo": "rampino",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici"
+    ]
+   },
+   {
+    "id": 1895,
+    "uid": "95cf816fd26ddacf9e559ce430e216e1",
+    "nome": "Livello 2",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1902,
+    "uid": "9c7f49cd9d13c9bf87a0ad528c162069",
+    "nome": "Livello 2",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1903,
+    "uid": "a70e25a5fb568dbf94f3d96152deab0b",
+    "nome": "Livello 2",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1904,
+    "uid": "995d610e02d99623e8cc1b3866174011",
+    "nome": "Livello 2",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1905,
+    "uid": "0f0f0209bc7ae12bf5dab92cc9510686",
+    "nome": "Livello 2",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1906,
+    "uid": "6e1549297ac193782d72bb26b3d3334c",
+    "nome": "Livello 0",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1918,
+    "uid": "a25c3dca4823c1a2d09d9e3b11d8dcf5",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-continua-dal-livello-1"
+    ]
+   },
+   {
+    "id": 1919,
+    "uid": "1475a674e065a5024b8a13c74c54b651",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-continua-dal-livello-1"
+    ]
+   },
+   {
+    "id": 1920,
+    "uid": "bc763951572baf0fd97db51737de2b5d",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-continua-dal-livello-1"
+    ]
+   },
+   {
+    "id": 1921,
+    "uid": "2043df878f77ae04969558327b00d577",
+    "nome": "Rampino Seme",
+    "tipo": "rampino",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-recupero-1-seme-della-bramosia"
+    ]
+   },
+   {
+    "id": 1922,
+    "uid": "5af0c88715da7a42003134fffbb571df",
+    "nome": "Seme lussuria rosso",
+    "tipo": "seme-bramosia",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-recupero-1-seme-della-bramosia"
+    ]
+   },
+   {
+    "id": 1923,
+    "uid": "806ff06d1e0ce99822445bfb301d7c40",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-esamina-stanza-adiacente"
+    ]
+   },
+   {
+    "id": 1924,
+    "uid": "04d47911e3979e6d22f79b122340941e",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-esamina-stanza-adiacente"
+    ]
+   },
+   {
+    "id": 1925,
+    "uid": "3630b9eadda26d02cbc431c399885385",
+    "nome": "Livello 0",
+    "tipo": "scala",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-accedi-alla-torre"
+    ]
+   },
+   {
+    "id": 1927,
+    "uid": "12ef41cf54d6adc8c06bb617c9b347f9",
+    "nome": "Livello 2",
+    "tipo": "scala",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-sali-verso-il-tetto"
+    ]
+   },
+   {
+    "id": 570,
+    "uid": "d5df1a5b7a03381ff5ce8b18fc3f8813",
+    "nome": "Forziere",
+    "tipo": "forziere",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-salta-lungo-le-travi"
+    ]
+   },
+   {
+    "id": 571,
+    "uid": "53002070da20f871bd9d7b36e4bb8057",
+    "nome": "Forziere",
+    "tipo": "forziere",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-raccogli-forziere"
+    ]
+   },
+   {
+    "id": 572,
+    "uid": "d3e01432d5f7e07f1193febaedd2e511",
+    "nome": "Forziere",
+    "tipo": "forziere",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-raccogli-forziere-raro"
+    ]
+   },
+   {
+    "id": 573,
+    "uid": "a8d2017c32749aa5f775621099ec2caa",
+    "nome": "Stanza sicura",
+    "tipo": "sicura",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 574,
+    "uid": "04bb7407386acbb9f8bb3ae38c70c977",
+    "nome": "Stanza sicura",
+    "tipo": "sicura",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 575,
+    "uid": "7a5a6a3393ce5fbca4f614ab2f116e19",
+    "nome": "Porta",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "nativo",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-151-5-2": {
+  "chiave": "palazzo-di-kamoshida-vecchio-castello-3p-nativo-rmap-151-5-2",
+  "spilli": [
+   {
+    "id": 1864,
+    "uid": "186b8e24f12d54f79bc807a49889f80e",
+    "nome": "Livello 0",
+    "tipo": "scala",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-scendi-la-scala"
+    ]
+   },
+   {
+    "id": 1865,
+    "uid": "05f0bed10afcf8dc74a86c4ec5270120",
+    "nome": "Forziere",
+    "tipo": "forziere",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-apri-il-forziere-2"
+    ]
+   },
+   {
+    "id": 1891,
+    "uid": "bf987cad1350385fe8abe824b099aa18",
+    "nome": "Livello 1",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1896,
+    "uid": "2d29173752d118228e10eaa747984306",
+    "nome": "Livello 1",
+    "tipo": "rampino",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-salta-lungo-le-travi"
+    ]
+   },
+   {
+    "id": 1897,
+    "uid": "2c93ad8611d082a34149df23cbe9ce14",
+    "nome": "Livello 1",
+    "tipo": "rampino",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-raccogli-forziere-raro"
+    ]
+   },
+   {
+    "id": 1898,
+    "uid": "49c70ee01dbe21bb4d5f398ce2524af5",
+    "nome": "Livello 1",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1899,
+    "uid": "0fc90b3fae4c95a4e06065bae5e44ed9",
+    "nome": "Livello 1",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1901,
+    "uid": "e28be333baaea9849ae5cc89629f171a",
+    "nome": "Livello 1",
+    "tipo": "rampino",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-raccogli-forziere-raro"
+    ]
+   },
+   {
+    "id": 1908,
+    "uid": "4bb5a22bdd8c4950dc71295e9c7085e5",
+    "nome": "Livello 0",
+    "tipo": "rampino",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-la-rivincita-sui-nemici"
+    ]
+   },
+   {
+    "id": 1917,
+    "uid": "0403d750d2db22c6c2a6dec1b9c964e3",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-salta-lungo-le-travi"
+    ]
+   },
+   {
+    "id": 1928,
+    "uid": "c07e49d556c4ab02025766569d45980e",
+    "nome": "Livello 1",
+    "tipo": "scala",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 577,
+    "uid": "4062a5f5498faa5e73bce3d75fdc8213",
+    "nome": "Tetto",
+    "tipo": "passaggio",
+    "stato": true,
+    "voci": [
+     "kamoshida-01-cancello-del-castello-ingresso-sali-verso-il-tetto"
+    ]
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "destinazioneNomi",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-151-6-0": {
+  "chiave": "palazzo-di-kamoshida-tetto-nativo-rmap-151-6-0",
+  "spilli": [
+   {
+    "id": 578,
+    "uid": "0cd7597aa4e98e23f108b6e3bd0e2ba3",
+    "nome": "Passaggio",
+    "tipo": "passaggio",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1930,
+    "uid": "10949d6158bfd6cea1def9811043358f",
+    "nome": "Scala",
+    "tipo": "scala",
+    "stato": false,
+    "voci": []
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "nativo",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "destinazioneNomi",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-151-6-1": {
+  "chiave": "palazzo-di-kamoshida-tetto-nativo-rmap-151-6-1",
+  "spilli": [
+   {
+    "id": 1931,
+    "uid": "263597d4f82d7a4d3bb3b67462fb22f2",
+    "nome": "Tetto",
+    "tipo": "passaggio",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1932,
+    "uid": "74353d346bf6561125db96dc21fe6632",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": [
+     "kamoshida-13-tetto-sconfiggi-nemici-potenti"
+    ]
+   },
+   {
+    "id": 1933,
+    "uid": "b3e44bd7290f4e51444e7596f06f2a20",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": [
+     "kamoshida-13-tetto-sconfiggi-nemici-potenti"
+    ]
+   },
+   {
+    "id": 1934,
+    "uid": "2aafb33a0dd37330d4cb01a7bdaea7a1",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": [
+     "kamoshida-13-tetto-sconfiggi-nemici-potenti"
+    ]
+   },
+   {
+    "id": 1935,
+    "uid": "e9bfb86c5f446cfbbb780b30432627ba",
+    "nome": "Tetto Pagoda",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1937,
+    "uid": "a47ec391105dffcc93b6600b32f449c5",
+    "nome": "Tetto Pagoda",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1938,
+    "uid": "316b9a56561d465527d97471e68df8e4",
+    "nome": "Merlate",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1943,
+    "uid": "508ccddec3a1de51c6994be0b8a05b90",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-13-tetto-razzia-oggetti-sul-tetto"
+    ]
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "destinazioneNomi",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-151-6-2": {
+  "chiave": "palazzo-di-kamoshida-tetto-condotto-areazione",
+  "spilli": [
+   {
+    "id": 580,
+    "uid": "15609e48376349fe43ae87a646a64da1",
+    "nome": "Torre Livello Inferiore",
+    "tipo": "passaggio",
+    "stato": false,
+    "voci": [
+     "kamoshida-13-tetto-ispeziona-linterno-della-torre"
+    ]
+   },
+   {
+    "id": 1936,
+    "uid": "6adb79e3984c43b925b7033d60cc3287",
+    "nome": "Tetto",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1939,
+    "uid": "4e3069c32e2d6a28d453a8b4963dd9aa",
+    "nome": "Tetto",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1940,
+    "uid": "1e7cbf99b9f67ea6d84f82aebd9b0daf",
+    "nome": "Tetto",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1941,
+    "uid": "d101c5961c3a3774e1968f1de4a1d27d",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-13-tetto-razzia-oggetti-sul-tetto"
+    ]
+   },
+   {
+    "id": 1942,
+    "uid": "469aa003f8ece7ff734a09c2774f21d5",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-13-tetto-razzia-oggetti-sul-tetto"
+    ]
+   },
+   {
+    "id": 1944,
+    "uid": "9c0d9de61728de9feff6461787884d04",
+    "nome": "Tetto Torre",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1945,
+    "uid": "5d234349f6180b094d65ce0755c5905a",
+    "nome": "Finestra",
+    "tipo": "scorciatoia",
+    "stato": false,
+    "voci": [
+     "kamoshida-13-tetto-segui-percorso"
+    ]
+   },
+   {
+    "id": 1946,
+    "uid": "f8f763771ff09a1d5b1a6c3a3fc8cafc",
+    "nome": "Areazione",
+    "tipo": "scorciatoia",
+    "stato": false,
+    "voci": [
+     "kamoshida-13-tetto-usa-il-condotto-di-areazione"
+    ]
+   },
+   {
+    "id": 1947,
+    "uid": "d65440d1fcde61f22ca55bbd172d8a85",
+    "nome": "Livello 2",
+    "tipo": "scorciatoia",
+    "stato": false,
+    "voci": [
+     "kamoshida-13-tetto-usa-il-condotto-di-areazione"
+    ]
+   },
+   {
+    "id": 1953,
+    "uid": "efb5cb847170fbdc2b36560eaddc9ebd",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-13-tetto-ispeziona-linterno-della-torre"
+    ]
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "nativo",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "destinazioneNomi",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-151-6-3": {
+  "chiave": "palazzo-di-kamoshida-tetto-balcone-del-tesoro",
+  "spilli": [
+   {
+    "id": 581,
+    "uid": "7700b172aaa5d9eb09c451147ad50899",
+    "nome": "Forziere",
+    "tipo": "forziere",
+    "stato": true,
+    "voci": [
+     "kamoshida-13-tetto-apri-forziere"
+    ]
+   },
+   {
+    "id": 1948,
+    "uid": "15a416a2ee797500f09097dfa57fec98",
+    "nome": "Uscita areazione",
+    "tipo": "scorciatoia",
+    "stato": false,
+    "voci": [
+     "kamoshida-13-tetto-usa-il-condotto-di-areazione"
+    ]
+   },
+   {
+    "id": 1949,
+    "uid": "3ceb8eaa62dee0a1a15876fbb4ca67ee",
+    "nome": "Rampino Balcone Superiore",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": [
+     "kamoshida-13-tetto-seme-della-bramosia"
+    ]
+   },
+   {
+    "id": 1952,
+    "uid": "083c5e9437fe83ea3cee7381dc23a2e8",
+    "nome": "Uscita areazione",
+    "tipo": "scorciatoia",
+    "stato": false,
+    "voci": [
+     "kamoshida-13-tetto-ispeziona-linterno-della-torre"
+    ]
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "nativo",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-151-6-4": {
+  "chiave": "palazzo-di-kamoshida-tetto-balcone-del-seme-bramosia",
+  "spilli": [
+   {
+    "id": 583,
+    "uid": "d2f6acf51abeb2e971bd19709d2fec99",
+    "nome": "Seme lussuria verde",
+    "tipo": "seme-bramosia",
+    "stato": true,
+    "voci": [
+     "kamoshida-13-tetto-seme-della-bramosia"
+    ]
+   },
+   {
+    "id": 1950,
+    "uid": "34c5fd4db3d8084df72a216d68c0f2d6",
+    "nome": "Balcone Forziere",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": [
+     "kamoshida-13-tetto-seme-della-bramosia"
+    ]
+   },
+   {
+    "id": 1951,
+    "uid": "1a6487f51218e244be207aaa6b30b45f",
+    "nome": "Rampino",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": [
+     "kamoshida-13-tetto-seme-della-bramosia"
+    ]
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "nativo",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-151-7-0": {
+  "chiave": "palazzo-di-kamoshida-torre-livello-inferiore",
+  "spilli": [
+   {
+    "id": 584,
+    "uid": "679055c570caeb29f05d4b262668506c",
+    "nome": "Stanza sicura",
+    "tipo": "sicura",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-torre-centrale"
+    ]
+   },
+   {
+    "id": 1954,
+    "uid": "0257a5452229c544dea4c30ff8db1cc9",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-rompi-il-vaso"
+    ]
+   },
+   {
+    "id": 1955,
+    "uid": "ebd5df9fb13d28f36be00790806e69c3",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-sconfiggi-il-nemico"
+    ]
+   },
+   {
+    "id": 1956,
+    "uid": "be8ebfb495ee3ebd09c8bd6b3782af80",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-esplora-stanza-successiva"
+    ]
+   },
+   {
+    "id": 1957,
+    "uid": "d23cbdc0dc6977f1bbb5330ac2be7a31",
+    "nome": "Ascensore Sessuale",
+    "tipo": "scorciatoia",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-lascensore-sensuale"
+    ]
+   },
+   {
+    "id": 1958,
+    "uid": "8c0d13763795413b281e772e87aeb1ba",
+    "nome": "Leva Ascensore",
+    "tipo": "meccanismo",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-lascensore-sensuale"
+    ]
+   },
+   {
+    "id": 1967,
+    "uid": "14bc54cfe5b0a318200fd9dc01918a44",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-razzia-oggetto"
+    ]
+   },
+   {
+    "id": 1968,
+    "uid": "df6ebe5d51934fdf8f7edf737f551657",
+    "nome": "Punto del rampino",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1969,
+    "uid": "c9749b2e0758a3871020721068f6758c",
+    "nome": "Leva Grata",
+    "tipo": "meccanismo",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-tira-la-leva"
+    ]
+   },
+   {
+    "id": 1970,
+    "uid": "b8b4ac0fd8859ca346deef7019c63294",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-esplora-stanza-successiva"
+    ]
+   },
+   {
+    "id": 1971,
+    "uid": "3c177c38ea6d192491665aeb2ab5b9ea",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-esplora-stanza-successiva"
+    ]
+   },
+   {
+    "id": 1990,
+    "uid": "9a4e6e83ab8f907839782be526666147",
+    "nome": "Guardia d'Elitè",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-sconfiggi-i-capitani-delle-guardie"
+    ]
+   },
+   {
+    "id": 1991,
+    "uid": "53eefba7feca30c9640cef159581036c",
+    "nome": "Guardia d'Elitè",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-sconfiggi-i-capitani-delle-guardie"
+    ]
+   },
+   {
+    "id": 1992,
+    "uid": "fd32580a28b59163509d99ec05947ee9",
+    "nome": "Guardia d'Elitè",
+    "tipo": "miniboss",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-sconfiggi-i-capitani-delle-guardie"
+    ]
+   },
+   {
+    "id": 1993,
+    "uid": "2d4e5e28d4d8a9e9c85a38a63efe2fc2",
+    "nome": "Occhio SX Lussurioso",
+    "tipo": "oggetto-chiave",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-sconfiggi-i-capitani-delle-guardie"
+    ]
+   },
+   {
+    "id": 587,
+    "uid": "5b332514480b93d6c5f886f817b740db",
+    "nome": "Forziere raro",
+    "tipo": "forziere-raro",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-apri-forziere-raro"
+    ]
+   },
+   {
+    "id": 588,
+    "uid": "b95223d9cd72f774a55bdd19bca7ca97",
+    "nome": "Passaggio",
+    "tipo": "passaggio",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 589,
+    "uid": "fa69df1654d644cdfa6ebf2d8a3f23ea",
+    "nome": "Torre Intermedia",
+    "tipo": "scala",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-verso-il-livello-intermedio"
+    ]
+   },
+   {
+    "id": 591,
+    "uid": "517706cfb352fdf4a4d2ae97c5837e2c",
+    "nome": "Porta",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "nativo",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-151-9-0": {
+  "chiave": "palazzo-di-kamoshida-torre-livello-intermedio",
+  "spilli": [
+   {
+    "id": 592,
+    "uid": "b42ec11069c2d4302d65bce3309cc566",
+    "nome": "Forziere",
+    "tipo": "forziere",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-apri-forziere"
+    ]
+   },
+   {
+    "id": 1972,
+    "uid": "4d9115c3bfa1bc72e8e6deea86dd25ee",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-sconfiggi-nemici"
+    ]
+   },
+   {
+    "id": 1973,
+    "uid": "2e8307ba8391362e01ba1fdf29cdd500",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-sconfiggi-nemici"
+    ]
+   },
+   {
+    "id": 1974,
+    "uid": "c9e537e2bc25719e8d6cc5c9acaaa0a9",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-rompi-urna"
+    ]
+   },
+   {
+    "id": 1975,
+    "uid": "2617e25455f908f8d5319359d4e0dd72",
+    "nome": "Porta chiusa",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1976,
+    "uid": "e9bc0e64c224e7fd6a1ef13963908eba",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-sconfiggi-nemici-2"
+    ]
+   },
+   {
+    "id": 1977,
+    "uid": "8c8d151b3d4d3bcdecb108ac6ac9e476",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-sconfiggi-nemici-2"
+    ]
+   },
+   {
+    "id": 1978,
+    "uid": "43fdcc9835ac308437ee0578bd24765e",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-perlustra-la-stanza"
+    ]
+   },
+   {
+    "id": 1979,
+    "uid": "295354c6584a04b6a2c672fd68b07595",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-perlustra-la-stanza"
+    ]
+   },
+   {
+    "id": 1988,
+    "uid": "75fa7ad4e2a9665b631c2468a2a593b9",
+    "nome": "Guardia d'Elitè",
+    "tipo": "miniboss",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-sconfiggi-nemico"
+    ]
+   },
+   {
+    "id": 1989,
+    "uid": "347e26bca7afffba2461e9c061e587a4",
+    "nome": "Occhio DX Lascivo",
+    "tipo": "oggetto-chiave",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-sconfiggi-nemico"
+    ]
+   },
+   {
+    "id": 593,
+    "uid": "4943b216a4270696fbb2d0478ba1ce1a",
+    "nome": "Forziere",
+    "tipo": "forziere",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-perlustra-la-stanza"
+    ]
+   },
+   {
+    "id": 594,
+    "uid": "b49e54080a0d8a05023911c5860b7e4e",
+    "nome": "Torre Inferiore",
+    "tipo": "passaggio",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 595,
+    "uid": "5101268b4f4f838136e276d0351f2cf0",
+    "nome": "Torre Superiore",
+    "tipo": "passaggio",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-torre-livello-superiore"
+    ]
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "nativo",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-151-10-0": {
+  "chiave": "palazzo-di-kamoshida-torre-livello-superiore-nativo-rmap-151-10-0",
+  "spilli": [
+   {
+    "id": 596,
+    "uid": "0a7843c3ab6bfd377cffd3d26466bb61",
+    "nome": "Torre Intermedia",
+    "tipo": "passaggio",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-torna-al-livello-inferiore"
+    ]
+   },
+   {
+    "id": 1982,
+    "uid": "4b9fb9f8574ad7a8b243b491be911ac5",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-torre-livello-superiore"
+    ]
+   },
+   {
+    "id": 1983,
+    "uid": "1d6dff9855355d6633a95a3f2f74b57e",
+    "nome": "Sala del Trono",
+    "tipo": "scala",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-verso-la-sala-del-trono"
+    ]
+   },
+   {
+    "id": 1985,
+    "uid": "9bfcf4834cc80512e2e7821be70b2d3b",
+    "nome": "Statua Kamoshida",
+    "tipo": "meccanismo",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-osserva-statua-di-kamoshida"
+    ]
+   },
+   {
+    "id": 1986,
+    "uid": "0d7f78224da59a142a06998708969aaa",
+    "nome": "Passaggio Interrotto",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1987,
+    "uid": "b6375811ce485e095682aaa40210fcdf",
+    "nome": "Trappola da disattivare",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1994,
+    "uid": "9891ab46bde16c697ff76535ef7297a6",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-sconfiggi-il-nemico-2"
+    ]
+   },
+   {
+    "id": 1995,
+    "uid": "55de42f03236829ad1be2b8446717030",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-razia-torre-livello-superiore"
+    ]
+   },
+   {
+    "id": 1996,
+    "uid": "faeb6808a0f05af19278c70122cbbfcd",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-razia-torre-livello-superiore"
+    ]
+   },
+   {
+    "id": 1997,
+    "uid": "d9ca8b4107ae83f1a131e7841ebf383f",
+    "nome": "Rampino Labirinto",
+    "tipo": "rampino",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-segui-i-pilastri"
+    ]
+   },
+   {
+    "id": 597,
+    "uid": "5a6402269c8677332e91dae01786782d",
+    "nome": "Forziere",
+    "tipo": "forziere",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-razia-torre-livello-superiore"
+    ]
+   },
+   {
+    "id": 598,
+    "uid": "a397fee7a8897bceae320858b408d5df",
+    "nome": "Forziere",
+    "tipo": "forziere",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-raccogli-forziere"
+    ]
+   },
+   {
+    "id": 599,
+    "uid": "63cde3e516a68188dd6b9c1b58e5a8d8",
+    "nome": "Forziere",
+    "tipo": "forziere",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-raccogli-forziere-2"
+    ]
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "nativo",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "destinazioneNomi",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-151-10-1": {
+  "chiave": "palazzo-di-kamoshida-torre-scala",
+  "spilli": [
+   {
+    "id": 1984,
+    "uid": "dbde67774644bb85fdf195d89482035c",
+    "nome": "Scala",
+    "tipo": "scala",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 603,
+    "uid": "21967e38144ab0a43acd25c4540a0765",
+    "nome": "Sala del Trono",
+    "tipo": "passaggio",
+    "stato": false,
+    "voci": []
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "destinazioneNomi",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-151-11-0": {
+  "chiave": "palazzo-di-kamoshida-sala-del-trono-livello-0",
+  "spilli": [
+   {
+    "id": 605,
+    "uid": "5d962956f69669798edef3b212410546",
+    "nome": "Sala del Trono",
+    "tipo": "sicura",
+    "stato": true,
+    "voci": [
+     "kamoshida-rubare-i-desideri-del-cuore-infiltrati-fino-alla-safe-room-della-sala-del-trono"
+    ]
+   },
+   {
+    "id": 1998,
+    "uid": "ece2a01a68fbce876009511e8c16003e",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2004,
+    "uid": "c6b39b69ed5bbf482ecbdc2f91671bb6",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-assalta-il-nemico"
+    ]
+   },
+   {
+    "id": 2005,
+    "uid": "2d9e471fc1c71bd79db2073171cbc453",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-perlustra-corridoio"
+    ]
+   },
+   {
+    "id": 2006,
+    "uid": "ba728ac8c06285a65a6ae6b1d49f38ba",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-perlustra-corridoio"
+    ]
+   },
+   {
+    "id": 2008,
+    "uid": "2bd38dbfc4ccd5b9e96aedb41a96b488",
+    "nome": "Porta chiusa",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2009,
+    "uid": "be1ba50c05a06b8a15a191e3c397beef",
+    "nome": "Stanza del Tesoro",
+    "tipo": "scorciatoia",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-entra-nella-sala-del-trono"
+    ]
+   },
+   {
+    "id": 2010,
+    "uid": "57db1b0b1c797e674d776b6c2666c106",
+    "nome": "Stanza del Tesoro",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-raccogli-forziere-3"
+    ]
+   },
+   {
+    "id": 2020,
+    "uid": "330f81e58dcec4b410875456732450f7",
+    "nome": "Sala del Tesoro",
+    "tipo": "scala",
+    "stato": true,
+    "voci": [
+     "kamoshida-rubare-i-desideri-del-cuore-raggiungi-la-sala-del-tesoro"
+    ]
+   },
+   {
+    "id": 2077,
+    "uid": "a80b6cce93ef96c7dc75ebb78ecb7c58",
+    "nome": "Ombra di Kamoshida",
+    "tipo": "boss",
+    "stato": true,
+    "voci": [
+     "kamoshida-rubare-i-desideri-del-cuore-sconfiggi-kamoshida"
+    ]
+   },
+   {
+    "id": 2078,
+    "uid": "2f8fd690308bdaca636680941dc98519",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2079,
+    "uid": "7423c1b6583c21d0be89b1edd042f2ac",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2080,
+    "uid": "fcec07c5121ebae52b80b304b4e374c2",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2081,
+    "uid": "894deaef672c776cf05f3f80c8f6df77",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2082,
+    "uid": "fab9a7c80babf29e2d57113dad1c268f",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 608,
+    "uid": "472df0b5126dfcb83b3af414ba707a4b",
+    "nome": "Torre Superiore",
+    "tipo": "passaggio",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 609,
+    "uid": "82f67ab6979a8fd96cae9024abb78e04",
+    "nome": "Forziere",
+    "tipo": "forziere",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-perlustra-corridoio"
+    ]
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "nativo",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-151-11-1": {
+  "chiave": "palazzo-di-kamoshida-stanza-del-tesoro",
+  "spilli": [
+   {
+    "id": 2011,
+    "uid": "b0e118ca15f8d5e03f4764327cfc2b6f",
+    "nome": "Cancello",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2012,
+    "uid": "5985fa7a6affd8eda3ac38f1d81fa918",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-raccogli-oggetti-2"
+    ]
+   },
+   {
+    "id": 2013,
+    "uid": "4b3460b5e81a4fdbe1559675743cde4d",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-raccogli-oggetti-2"
+    ]
+   },
+   {
+    "id": 2014,
+    "uid": "accc2f45e388071e624b4a4abede7fc4",
+    "nome": "Cancello",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2015,
+    "uid": "0c920ec6e66d7bf5fa7de7df276a0196",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-raccogli-oggetti-2"
+    ]
+   },
+   {
+    "id": 2016,
+    "uid": "f0631f7a69eea18af903cb2aafee9389",
+    "nome": "Sala del Trono",
+    "tipo": "rampino",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-raccogli-forziere-3"
+    ]
+   },
+   {
+    "id": 2017,
+    "uid": "0ccc4432644fec3f0124e2275c6faf50",
+    "nome": "Sala del Trono",
+    "tipo": "passaggio",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 614,
+    "uid": "82ba4f7fb6ad214cb19f1cc3807e2082",
+    "nome": "Tesoro del Palazzo",
+    "tipo": "tesoro-palazzo",
+    "stato": true,
+    "voci": [
+     "kamoshida-rubare-i-desideri-del-cuore-ruba-il-tesoro"
+    ]
+   },
+   {
+    "id": 615,
+    "uid": "ac5feb061a85a46869a432280321130a",
+    "nome": "Forziere",
+    "tipo": "forziere",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-raccogli-forziere-3"
+    ]
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-151-13-0": {
+  "chiave": "palazzo-di-kamoshida-stanza-segreta",
+  "spilli": [
+   {
+    "id": 616,
+    "uid": "57cd09638b20abaf8122d2fb209df881",
+    "nome": "Passaggio Segreto",
+    "tipo": "passaggio",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-attraversa-il-passaggio-segreto"
+    ]
+   },
+   {
+    "id": 1959,
+    "uid": "753232572e77c27c94ff0f255d69df1a",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-esplora-la-stanza-segreta"
+    ]
+   },
+   {
+    "id": 1960,
+    "uid": "e912a3e8cfcf927ee63b4e6f878cbdaa",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-esplora-la-stanza-segreta"
+    ]
+   },
+   {
+    "id": 1961,
+    "uid": "c5f0df40ab8c1b479945ddc89fdc2d91",
+    "nome": "Oggetto",
+    "tipo": "oggetto",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-esplora-la-stanza-segreta"
+    ]
+   },
+   {
+    "id": 617,
+    "uid": "76f5aef1506cdf3d0802941f94369537",
+    "nome": "Torre: Livello Inferiore",
+    "tipo": "scorciatoia",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-tornate-sullascensore-e-alla-torre-centrale"
+    ]
+   },
+   {
+    "id": 618,
+    "uid": "c4be9e59f07aad79dec8c266cba1ad42",
+    "nome": "Area Nascosta",
+    "tipo": "scorciatoia",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-usa-lascensore"
+    ]
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "nativo",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "destinazioneNomi",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-151-16-0": {
+  "chiave": "palazzo-di-kamoshida-sala-centrale",
+  "spilli": [
+   {
+    "id": 619,
+    "uid": "ab6a802a10b73a050ccb8b1e50036031",
+    "nome": "Punto di Infiltrazione",
+    "tipo": "infiltrazione",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1744,
+    "uid": "3c2098d1a6411493df566901ee132ac8",
+    "nome": "Porta chiusa",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1745,
+    "uid": "637df792ef8e0efca3a185210e594ffd",
+    "nome": "Porta chiusa",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1746,
+    "uid": "644101e4cc05b348be0d826eaa3add83",
+    "nome": "Porta chiusa",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1817,
+    "uid": "61656ce3d1b038b84258f5fafeaf90be",
+    "nome": "Bestie bicorne sporche",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-15-04-affronta-bestie-bicorne-sporche"
+    ]
+   },
+   {
+    "id": 1818,
+    "uid": "f222dc9d04558417981e6e0b52abe376",
+    "nome": "Ragazza seducente",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-15-04-rapina-la-ragazza-seducente"
+    ]
+   },
+   {
+    "id": 2033,
+    "uid": "e3554f2734a6ec999502bce87ba9f0ac",
+    "nome": "Porta chiusa",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2034,
+    "uid": "d41d17ec9b5994f51eb82969fb8ff9a5",
+    "nome": "Porta chiusa",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2044,
+    "uid": "11fcadc1d593dc37d3f1ab6c2e055293",
+    "nome": "Confidente",
+    "tipo": "confidente",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-12-04-sconfiggi-3-bestie-bicorne-sporche-durante-la-fuga"
+    ]
+   },
+   {
+    "id": 2046,
+    "uid": "b93f8abc5a8d1c58d47cf75d193483fd",
+    "nome": "Capitano della Guardia",
+    "tipo": "miniboss",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-12-04-sconfiggi-3-bestie-bicorne-sporche-durante-la-fuga"
+    ]
+   },
+   {
+    "id": 2047,
+    "uid": "3f2ee4c8c6bcd8476cdd3ed96c3d23e3",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2048,
+    "uid": "590a4bb49e9f67d4d1814f67a413fe80",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2049,
+    "uid": "736ef86593234ec9d7fb3e58b9f74991",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2050,
+    "uid": "03f62709fc86c9bec9e96b67da553fa3",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2051,
+    "uid": "d57db37cfaf0900884eb08f555e2037a",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2052,
+    "uid": "bd639be5a7d61f4683a522f7aad917b2",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2053,
+    "uid": "0ba57a8ea42181473e2980b97acc894a",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2054,
+    "uid": "49d36db63ced75aca445076e15970850",
+    "nome": "Miniboss",
+    "tipo": "miniboss",
+    "stato": true,
+    "voci": []
+   },
+   {
+    "id": 2055,
+    "uid": "8e7d5dd9671b1f31d63ed3dfbbaec32b",
+    "nome": "Doppia Porta",
+    "tipo": "passaggio",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 620,
+    "uid": "8e7d7db05208a834f8b517927b6a59bf",
+    "nome": "Prigione Sotterranea",
+    "tipo": "passaggio",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-12-04-indaga-sugli-schiavi"
+    ]
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "nativo",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "destinazioneNomi",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-152-1-0": {
+  "chiave": "palazzo-di-kamoshida-prigione-sotterranea-tutorial-nativo-rmap-152-1-0",
+  "spilli": [
+   {
+    "id": 621,
+    "uid": "e3358a3980a336ce79150594970163fa",
+    "nome": "Passaggio Sotterraneo",
+    "tipo": "passaggio",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-12-04-cerca-la-palestra"
+    ]
+   },
+   {
+    "id": 1666,
+    "uid": "a45499372bf8458ff76d4ec5a72c0bce",
+    "nome": "Cella della prigione",
+    "tipo": "passaggio",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1667,
+    "uid": "48e4a0ded674ade68acc2b24224a860a",
+    "nome": "Morgana",
+    "tipo": "confidente",
+    "stato": true,
+    "voci": [
+     "kamoshida-1-tutorial-palazzo-11-04-parla-con-morgana"
+    ]
+   },
+   {
+    "id": 1668,
+    "uid": "6119bee9f5b0481f099c34e4a0947387",
+    "nome": "Leva del Ponte",
+    "tipo": "meccanismo",
+    "stato": true,
+    "voci": [
+     "kamoshida-1-tutorial-palazzo-11-04-esamina-la-statua-di-kamoshida"
+    ]
+   },
+   {
+    "id": 1718,
+    "uid": "4a4326590f7992b06d618fe696e2e25b",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-12-04-raggiungi-le-celle"
+    ]
+   },
+   {
+    "id": 1719,
+    "uid": "82f0d5f4da1e720294c7618192b15686",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1720,
+    "uid": "2a045725ab828a291c2dfe056843319a",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2018,
+    "uid": "9acd6689713f942096dfa028b3132666",
+    "nome": "Sala Centrale 1P",
+    "tipo": "passaggio",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2028,
+    "uid": "7aa7f03487c10258ab017f26317bf1d6",
+    "nome": "Ponte Sbarrato",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2029,
+    "uid": "2416a778927ee66b60437fd27fa8cd38",
+    "nome": "Bruto Notturno",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-1-tutorial-palazzo-11-04-sconfiggi-tutti-i-nemici"
+    ]
+   },
+   {
+    "id": 2030,
+    "uid": "19ade8042e3b9ee5daf7cc2ebf1e9cc6",
+    "nome": "Ragazza seducente",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-1-tutorial-palazzo-11-04-sconfiggi-le-ragazze-seducenti"
+    ]
+   },
+   {
+    "id": 2032,
+    "uid": "4c8cb9cf4b7bbf16a4d769be03f08a8b",
+    "nome": "Verso Uscita",
+    "tipo": "passaggio",
+    "stato": true,
+    "voci": [
+     "kamoshida-1-tutorial-palazzo-11-04-identifica-uscita-dal-castello"
+    ]
+   },
+   {
+    "id": 2035,
+    "uid": "76b5ba0bce2ef0c1d9b3914e6dbf3859",
+    "nome": "Sala Centrale 1P",
+    "tipo": "passaggio",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2036,
+    "uid": "b9bca1fd2e082c75517cb245251c138f",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-12-04-cerca-la-palestra"
+    ]
+   },
+   {
+    "id": 2037,
+    "uid": "8536157bc6eb91fe3561997d2b846d4c",
+    "nome": "Porta che non si apre",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 622,
+    "uid": "5ea0a22cd9a0f0def48787188036ec78",
+    "nome": "Stanza sicura",
+    "tipo": "sicura",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-12-04-safe-room"
+    ]
+   },
+   {
+    "id": 626,
+    "uid": "23f0d8655a885c8605face4a0f3051a3",
+    "nome": "Porta che non si apre",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 627,
+    "uid": "0b42723d1e756c5ce8a4fd4c40dd4d92",
+    "nome": "Porta che non si apre",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "nativo",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "destinazioneNomi",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-152-2-0": {
+  "chiave": "palazzo-di-kamoshida-prigione-sotterranea-tutorial-nativo-rmap-152-2-0",
+  "spilli": [
+   {
+    "id": 634,
+    "uid": "f7113744a6ded5323daaca30fd58d65e",
+    "nome": "Porta che non si apre",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1657,
+    "uid": "3519b9b15caed5a7f7c52df5828c55c7",
+    "nome": "Boss",
+    "tipo": "boss",
+    "stato": true,
+    "voci": [
+     "kamoshida-1-tutorial-palazzo-11-04-imprigionare-il-re"
+    ]
+   },
+   {
+    "id": 1658,
+    "uid": "32716e0cdbdc4ff193ff3101201c7cbd",
+    "nome": "Buco alla Parete",
+    "tipo": "scorciatoia",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1659,
+    "uid": "eeee113d49275a8530ac9ec2faaeafd0",
+    "nome": "Buco alla Parete",
+    "tipo": "scorciatoia",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1662,
+    "uid": "8a2b806efe3a7958251e6b640755e3ed",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1663,
+    "uid": "53dfa133c2d05ad2e58fea116d287998",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1664,
+    "uid": "bec3d59a5bb53e7717b9b05913f6f99d",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1665,
+    "uid": "8920b96344ca51e74631c6d12665dfbe",
+    "nome": "Prigione Sotterranea -1P",
+    "tipo": "passaggio",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 2023,
+    "uid": "831855ecb5a047994f86e2de0ca06af6",
+    "nome": "Piromani delle cripte",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-1-tutorial-palazzo-11-04-primo-combattimento"
+    ]
+   },
+   {
+    "id": 2024,
+    "uid": "c7c56868eaf264780209509713270b69",
+    "nome": "Ponte Rotto",
+    "tipo": "punto-sensibile",
+    "stato": true,
+    "voci": [
+     "kamoshida-1-tutorial-palazzo-11-04-movimento-base-nel-palazzo"
+    ]
+   },
+   {
+    "id": 2025,
+    "uid": "271d3793fe5523e8b2abe464e830988f",
+    "nome": "Gabbie Galleggianti",
+    "tipo": "punto-sensibile",
+    "stato": true,
+    "voci": [
+     "kamoshida-1-tutorial-palazzo-11-04-esplorare-le-prigioni"
+    ]
+   },
+   {
+    "id": 2027,
+    "uid": "54e1063a32bc34875dff7c1dea85ed34",
+    "nome": "Prigione Sotterranea -1P",
+    "tipo": "passaggio",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 635,
+    "uid": "8c5f93748a6d7e70b665fae9e99a4fe0",
+    "nome": "Porta che non si apre",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "nativo",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-152-4-0": {
+  "chiave": "palazzo-di-kamoshida-passaggio-sotterraneo",
+  "spilli": [
+   {
+    "id": 636,
+    "uid": "5aeac7fca2c1a505dfa37c3f21c2166d",
+    "nome": "Prigione Sotterranea 2P",
+    "tipo": "passaggio",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 1721,
+    "uid": "a9d22e7cb706dd9d8a9b5adafcf453eb",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-12-04-tutorial-utilizzo-pistola"
+    ]
+   },
+   {
+    "id": 1722,
+    "uid": "0d4a59c572de66c564d2c79d2bf8421a",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-12-04-tutorial-utilizzo-pistola"
+    ]
+   },
+   {
+    "id": 1723,
+    "uid": "208a04e967b82e71c9d7843bc6789ec5",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-12-04-tutorial-assalto"
+    ]
+   },
+   {
+    "id": 1724,
+    "uid": "e6081a3c1bcffe3a461fa27ed7cf0f46",
+    "nome": "Nemico",
+    "tipo": "nemico",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-12-04-tutorial-assalto-2"
+    ]
+   },
+   {
+    "id": 637,
+    "uid": "6aaac5c2fcde4ce55efbad7d41fbf553",
+    "nome": "Palestra dell'Amore",
+    "tipo": "passaggio",
+    "stato": false,
+    "voci": []
+   },
+   {
+    "id": 638,
+    "uid": "972def0a11e8581bbde4c3d744add699",
+    "nome": "Porta che non si apre",
+    "tipo": "porta",
+    "stato": false,
+    "voci": []
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "nativo",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "destinazioneNomi",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-152-5-0": {
+  "chiave": "palazzo-di-kamoshida-corridoio-seme-della-bramosia",
+  "spilli": [
+   {
+    "id": 639,
+    "uid": "1b23ba3d308c84ad771329a90e9861c4",
+    "nome": "Ascensore Sensuale",
+    "tipo": "scorciatoia",
+    "stato": false,
+    "voci": [
+     "kamoshida-15-torre-centrale-tornate-sullascensore-e-alla-torre-centrale"
+    ]
+   },
+   {
+    "id": 1966,
+    "uid": "81b279e10c8741613cce9132a134a6a2",
+    "nome": "Miniboss",
+    "tipo": "miniboss",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-sconfiggi-straziato-re-dei-desideri"
+    ]
+   },
+   {
+    "id": 640,
+    "uid": "ea92a81a9227433e5457b8d83442bd10",
+    "nome": "Seme Lussuria Blu",
+    "tipo": "seme-bramosia",
+    "stato": true,
+    "voci": [
+     "kamoshida-15-torre-centrale-recupero-3-seme-della-bramosia"
+    ]
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "nativo",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "destinazioneNomi",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ },
+ "nativo-rmap-152-6-0": {
+  "chiave": "palazzo-di-kamoshida-palestra-dellamore",
+  "spilli": [
+   {
+    "id": 2038,
+    "uid": "24d2940b6a6b83a2757c1b260f379729",
+    "nome": "Sala Centrale",
+    "tipo": "passaggio",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-12-04-scappa-dal-castello"
+    ]
+   },
+   {
+    "id": 2039,
+    "uid": "2150494f7a55db6e298be6c063e35a23",
+    "nome": "Percossi sulla rete",
+    "tipo": "punto-sensibile",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-12-04-controlla-gli-studenti-schiavi"
+    ]
+   },
+   {
+    "id": 2040,
+    "uid": "56bdc840ee501dc803d18ad840041c79",
+    "nome": "Tapis Roulant Infinito",
+    "tipo": "punto-sensibile",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-12-04-controlla-gli-studenti-schiavi"
+    ]
+   },
+   {
+    "id": 2041,
+    "uid": "3e4cb96e3c8e4442a49aa1b5d04b992f",
+    "nome": "Studente Disperato",
+    "tipo": "dialogo",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-12-04-controlla-gli-studenti-schiavi"
+    ]
+   },
+   {
+    "id": 2042,
+    "uid": "642b98c624e24d4894d61d4bf1a66abb",
+    "nome": "Palla Infuocata Appesa",
+    "tipo": "punto-sensibile",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-12-04-controlla-gli-studenti-schiavi"
+    ]
+   },
+   {
+    "id": 2043,
+    "uid": "dce1a1a33e2b14979210154e78456a11",
+    "nome": "Studente Disperato",
+    "tipo": "dialogo",
+    "stato": true,
+    "voci": [
+     "kamoshida-tutorial-palazzo-12-04-controlla-gli-studenti-schiavi"
+    ]
+   }
+  ],
+  "chiaviSpillo": [
+   "id",
+   "uid",
+   "tipo",
+   "tipoNome",
+   "colore",
+   "nome",
+   "descrizione",
+   "riferimento",
+   "soloPosizione",
+   "collezionabile",
+   "condizioni",
+   "disponibilita",
+   "ordine",
+   "origine",
+   "raccolto",
+   "dettaglio",
+   "voci",
+   "immagini",
+   "updatedAt",
+   "destinazione",
+   "destinazioneNonDisponibile",
+   "destinazioneNomi",
+   "mappaChiave",
+   "x",
+   "y"
+  ]
+ }
+}

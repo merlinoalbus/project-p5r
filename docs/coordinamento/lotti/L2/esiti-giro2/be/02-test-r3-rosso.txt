@@ -1,0 +1,41 @@
+
+ RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/pensive-burnell-b50941
+
+ ❯ server/routes/aree-mondo.test.ts (18 tests | 1 failed | 16 skipped) 544ms
+     × R3 (giro 2), R2-28 — un’Area corretta dall’utente resta com’è dopo un import senza «sovrascrivi», dall’app e dal seed; «Ripristina» la riporta 330ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/routes/aree-mondo.test.ts > Aree del mondo (L2) > R3 (giro 2), R2-28 — un’Area corretta dall’utente resta com’è dopo un import senza «sovrascrivi», dall’app e dal seed; «Ripristina» la riporta
+AssertionError: expected { nome: 'Piazza della stazione', …(4) } to deeply equal { nome: 'Nome dato dall’utente', …(4) }
+
+- Expected
++ Received
+
+  {
+-   "corretta": 1,
+-   "nome": "Nome dato dall’utente",
+-   "nome_rivisto": 1,
++   "corretta": 0,
++   "nome": "Piazza della stazione",
++   "nome_rivisto": 0,
+    "origine": "seed",
+    "planimetria_predefinita": "nativo-rmap-001-1-0",
+  }
+
+ ❯ server/routes/aree-mondo.test.ts:250:24
+    248|     // dal seed (il pacchetto del seed sopra un'Area del seed corretta…
+    249|     importaMappe(structuredClone(pacchetto), { origine: 'seed' });
+    250|     expect(corretta()).toEqual(prima);
+       |                        ^
+    251|     // «Ripristina» rimette i valori della guida
+    252|     await request(app).post(`/api/aree/citta/shibuya/${slug}/ripristin…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed | 16 skipped (18)
+   Start at  05:18:12
+   Duration  3.38s (transform 2.06s, setup 114ms, import 2.58s, tests 544ms, environment 0ms)
+

@@ -1,0 +1,230 @@
+
+ RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/pensive-burnell-b50941
+
+ ✓ server/services/impostazioniService.test.ts > impostazioniService — backup e ripristino (15.29) > lo stato dell’istanza riporta versioni, dimensioni e conteggi reali 4ms
+ ✓ server/services/deposito-flussi.test.ts > cartella d'appoggio — copie e letture a flusso > depositaCopia copia il file, ruota solo le copie dell'app (5) e lascia stare i file dell'utente 15ms
+ ✓ server/services/deposito-flussi.test.ts > cartella d'appoggio — copie e letture a flusso > se la copia nel deposito fallisce, lo scaricamento non si ferma (null) e non resta un file a metà 3ms
+ ✓ server/services/pacchettoGiocoService.test.ts > pacchettoGiocoService — pacchetto di gioco (voce 10) > una importazione per volta, con la fase interrogabile e l’esito che resta 45ms
+ ✓ server/services/pacchettoGiocoService.test.ts > pacchettoGiocoService — pacchetto di gioco (voce 10) > la versione dello schema che il codice sa leggere è l’ultima migrazione 0ms
+ ✓ server/services/pacchettoGiocoService.test.ts > pacchettoGiocoService — pacchetto di gioco (voce 10) > esporta il solo gioco.db, con le immagini dentro e senza partite 38ms
+ ✓ server/services/pacchettoGiocoService.test.ts > pacchettoGiocoService — pacchetto di gioco (voce 10) > l’anteprima confronta tabelle e immagini con l’istanza e trova gli orfani delle partite, senza toccare nulla 64ms
+ ✓ server/services/impostazioniService.test.ts > impostazioniService — backup e ripristino (15.29) > esporta il database come file SQLite valido e l’istanza completa come ZIP con i due database, i caratteri e il manifesto 205ms
+ ✓ server/services/impostazioniService.test.ts > impostazioniService — backup e ripristino (15.29) > rifiuta i file che non sono database dell’app 24ms
+ ✓ server/db/migrations/067_identita_stabile_degli_spilli.test.ts > 067 — uid deterministico degli spilli > due file discesi dagli stessi dati danno gli stessi uid, e i doppioni si distinguono in ordine di id 240ms
+ ✓ server/db/migrations/082_nome_rivisto_mappa.test.ts > la colonna esiste, parte a 0 per tutte le righe ed è idempotente 130ms
+ ✓ server/services/deposito-flussi.test.ts > cartella d'appoggio — copie e letture a flusso > importa un pacchetto depositato: il file sul NAS resta com'era, senza giornali, e la cartella di lavoro si toglie 196ms
+ ✓ server/services/impostazioniService.test.ts > impostazioniService — backup e ripristino (15.29) > ripristina da un database esportato: i dati tornano quelli del file e resta una copia di sicurezza 100ms
+ ✓ server/db/migrations/082_nome_rivisto_mappa.test.ts > salvare dall’editor dichiara il nome, anche quando il testo non cambia 121ms
+ ✓ server/db/migrations/067_identita_stabile_degli_spilli.test.ts > 067 — uid deterministico degli spilli > è idempotente e non tocca gli uid già assegnati 115ms
+ ✓ server/services/deposito-flussi.test.ts > cartella d'appoggio — copie e letture a flusso > ripristina l'istanza da uno ZIP depositato, con lo stesso file che resta intatto sul NAS 216ms
+ ✓ server/services/deposito-flussi.test.ts > cartella d'appoggio — copie e letture a flusso > un nome che non c'è nel deposito è un 404, e il lucchetto torna libero 7ms
+ ✓ server/db/migrations/082_nome_rivisto_mappa.test.ts > un salvataggio che non porta il nome non cambia quel che era dichiarato 113ms
+ ✓ server/db/migrations/082_nome_rivisto_mappa.test.ts > importare un pacchetto lo spegne: quel nome torna a essere quello dichiarato dal pacchetto 131ms
+ ✓ server/services/impostazioniService.test.ts > impostazioniService — backup e ripristino (15.29) > ripristina da uno ZIP dell’istanza: tornano anche le immagini (dentro il database di gioco) e i caratteri 213ms
+ ✓ server/services/pacchettoGiocoService.test.ts > pacchettoGiocoService — pacchetto di gioco (voce 10) > un pacchetto più nuovo del codice non è importabile; una tabella di gioco assente rende orfane le righe che la referenziano 408ms
+ ✓ server/db/migrations/067_identita_stabile_degli_spilli.test.ts > uid nell'applicazione > il pacchetto porta un uid valido e unico su ogni spillo, deterministico su quelli della guida 223ms
+ ✓ server/services/impostazioniService.test.ts > impostazioniService — backup e ripristino (15.29) > le voci dello ZIP che porterebbero fuori dalla cartella dati vengono scartate (anche con separatori Windows) 274ms
+ ✓ server/openapi/openapi.test.ts > registro delle descrizioni > ogni rotta montata ha la sua descrizione, e ogni descrizione una rotta 4ms
+ ✓ server/openapi/openapi.test.ts > registro delle descrizioni > ogni area di montaggio ha un nome, e ogni nome un'area 0ms
+ ✓ server/openapi/openapi.test.ts > registro delle descrizioni > sommario, descrizione e risposta ci sono e hanno la forma chiesta 1ms
+ ✓ server/openapi/openapi.test.ts > registro delle descrizioni > i tipi …Dto citati nelle risposte esistono in shared/ 5ms
+ ✓ server/openapi/openapi.test.ts > registro delle descrizioni > JSON o file come risponde davvero il gestore; corpo binario dove c'è express.raw; ogni scrittura dichiara il suo corpo 1ms
+ ✓ server/openapi/openapi.test.ts > registro delle descrizioni > le GET che scrivono o pesano troppo non si provano dalla pagina (senzaProva) 1ms
+ ✓ server/openapi/openapi.test.ts > registro delle descrizioni > i codici d'errore dichiarati il server li lancia davvero 173ms
+ ✓ server/routes/citta.test.ts > API città e attività > quartieri con conteggi e scheda con luoghi (Confidenti risolti, piatti, flag verificato) 59ms
+ ✓ server/routes/citta.test.ts > API città e attività > con una partita dice quali quartieri sono davvero nel mondo, non solo quelli con una data 33ms
+ ✓ server/routes/api.test.ts > API > GET /api/compendio/arcani → 24 arcani con nome italiano 31ms
+ ✓ server/routes/api.test.ts > API > GET /api/compendio/glossario → sezioni tradotte 4ms
+ ✓ server/routes/api.test.ts > API > GET /api/compendio/persona con filtri e validazione 37ms
+ ✓ server/routes/api.test.ts > API > GET /api/compendio/persona/:id → scheda completa in italiano 24ms
+ ✓ server/routes/api.test.ts > API > GET /api/compendio/skill e /skill/:id 12ms
+ ✓ server/routes/sulla-mappa-palazzo.test.ts > «Sulla mappa» di un Palazzo > Kamoshida: lo spillo d’ingresso sulla mappa della Shujin, quello che a Palazzo completato si blocca 95ms
+ ✓ server/routes/pezzi-mappa.test.ts > pezzi delle planimetrie > crea un pezzo dalla zona scelta con la sua prima copia: senza posizione sta dove stava, senza nome «Pezzo N»; la copia si sposta, si ruota, si specchia; il pezzo si rinomina 89ms
+ ✓ server/routes/sulla-mappa-palazzo.test.ts > «Sulla mappa» di un Palazzo > con più ingressi vince quello aperto nel giorno della voce (la Shujin: il solo 11 aprile, poi dal 12 aprile) 26ms
+ ✓ server/routes/sulla-mappa-palazzo.test.ts > «Sulla mappa» di un Palazzo > un Palazzo senza ingresso sulle mappe: la sua prima planimetria in ordine logico, mai la radice 6ms
+ ✓ server/routes/sulla-mappa-palazzo.test.ts > «Sulla mappa» di un Palazzo > i Memento (le richieste) seguono la stessa regola; un dungeon senza mappe non porta da nessuna parte 6ms
+ ✓ server/routes/immagine-mappa-unica.test.ts > l’immagine di una mappa da un posto solo (L1) > caricata dall’editor: una planimetria nuova del Palazzo diventa «planimetria-nativa» con le dimensioni, e l’URL è versionato 96ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > collega e scollega un pin; la scheda del Palazzo lo mostra sotto la voce 56ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > un pin si collega a più voci (098, 2026-10-09); fuori dal Palazzo si rifiuta 40ms
+ ✓ server/routes/planimetrie-aree-multiple.test.ts > più aree della guida nella stessa planimetria > una planimetria contiene più aree, restituite e mostrate nella scheda del Palazzo in ordine di guida 72ms
+ ✓ server/routes/planimetrie-aree-multiple.test.ts > più aree della guida nella stessa planimetria > un’area aggiunta a un’altra planimetria resta anche su questa: tutte e due la contengono (2026-10-04) 20ms
+ ✓ server/routes/planimetrie-aree-multiple.test.ts > più aree della guida nella stessa planimetria > l’insieme sostituisce: le aree non più elencate si staccano, e l’insieme vuoto le toglie tutte 7ms
+ ✓ server/routes/immagini-miniature.test.ts > miniature delle immagini del database > 1 — PNG 1672×941 con l=320: WebP 320×180 generata, molto più leggera; la seconda richiesta viene dalla cache, senza righe nuove 88ms
+ ✓ server/routes/immagini-miniature.test.ts > miniature delle immagini del database > 2 — sostituita l’immagine, le sue miniature se ne vanno; il nuovo `v` dà la miniatura nuova; una riga di un’altra versione si rigenera 81ms
+ ✓ server/services/impostazioniService.test.ts > impostazioniService — backup e ripristino (15.29) > se il ripristino fallisce a metà, l’istanza torna com’era e il database resta utilizzabile 250ms
+ ✓ server/openapi/openapi.test.ts > documento OpenAPI > è un documento OpenAPI 3.1 valido 175ms
+ ✓ server/routes/dungeon.test.ts > API dungeon > elenco e scheda: 10 dungeon in ordine, aree e punti con chiave stabile, tipi ammessi, fonti 80ms
+ ✓ server/routes/dungeon.test.ts > API dungeon > ogni area porta le planimetrie native dell’atlante che le sono legate 17ms
+ ✓ server/routes/posizioni-spilli.test.ts > uno spillo di città non è mai condizionato né bloccato: le condizioni inviate non si salvano, il pin resta 268ms
+ ✓ server/services/impostazioniService.test.ts > impostazioniService — backup e ripristino (15.29) > uno ZIP senza database viene rifiutato senza toccare l’istanza 7ms
+ ✓ server/db/migrations/067_identita_stabile_degli_spilli.test.ts > uid nell'applicazione > spostare o rinominare uno spillo non ne cambia l'uid 242ms
+ ✓ server/routes/api.test.ts > API > GET /api/compendio/oggetti, /confidenti, /fusione/regole 74ms
+ ✓ server/routes/piante-citta.test.ts > Mappe dei quartieri > 22 quartieri su 24 hanno una mappa collegata con credito; i luoghi espongono lo spillo (nullo se non posizionato) 37ms
+ ✓ server/routes/piante-citta.test.ts > Mappe dei quartieri > spillo di un luogo: si rilegge nella scheda; le regole dell'avvio non toccano gli spilli dell'utente 13ms
+ ✓ server/routes/citta.test.ts > API città e attività > ogni quartiere è raggiungibile: nessuna regola scritta a mano lo chiude per sempre 11ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > costruisce l’albero dalla guida (Tokyo → quartieri, Palazzi/Dedalo → aree) con gli spilli dai marcatori 68ms
+ ✓ server/routes/piante-citta.test.ts > Mappe dei quartieri > scarica la mappa del quartiere nell'istanza dall'URL del seed e la registra come immagine «citta-<quartiere>» 67ms
+ ✓ server/routes/citta.test.ts > API città e attività > attività, lavori, libri e film con Doti; letture per partita con evento, riapertura, validazione, reseed stabile 138ms
+ ✓ server/routes/pezzi-mappa.test.ts > pezzi delle planimetrie > un pezzo si posa in più copie: ognuna con posizione, rotazione, specchio ed etichetta propri; la zona resta una 64ms
+ ✓ server/routes/pezzi-mappa.test.ts > pezzi delle planimetrie > zona e ingombro di ogni copia devono stare nell'immagine (2048×1024), anche ruotati; le forme sbagliate si rifiutano 37ms
+ ✓ server/routes/immagine-mappa-unica.test.ts > l’immagine di una mappa da un posto solo (L1) > caricata dalla rotta generica delle immagini: stessa regola dell’editor (prima salvava e basta, col ruolo «nessuna») 25ms
+ ✓ server/routes/immagine-mappa-unica.test.ts > l’immagine di una mappa da un posto solo (L1) > un quartiere con l’immagine caricata è un’illustrazione; la radice di un Palazzo resta stemma anche con un’illustrazione caricata 42ms
+ ✓ server/routes/immagine-mappa-unica.test.ts > l’immagine di una mappa da un posto solo (L1) > una mappa con i pezzi ritagliati: anche dalla rotta generica la sostituzione chiede conferma (409 mappa-con-pezzi) 58ms
+ ✓ server/routes/immagini-miniature.test.ts > miniature delle immagini del database > 3 — larghezze non ammesse: 400 larghezza-non-ammessa 15ms
+ ✓ server/routes/immagini-miniature.test.ts > miniature delle immagini del database > 4 — l non minore della larghezza reale, SVG e GIF: l’originale, con lo stesso tipo e gli stessi byte 37ms
+ ✓ server/routes/immagini-miniature.test.ts > miniature delle immagini del database > 5 — eliminando l’immagine, singola o in blocco, le sue miniature se ne vanno (cascata) 43ms
+ ✓ server/services/pacchettoGiocoService.test.ts > pacchettoGiocoService — pacchetto di gioco (voce 10) > rifiuta ciò che non è un pacchetto di gioco: non SQLite, backup ZIP dell’istanza, database con le partite 587ms
+ ✓ server/openapi/openapi.test.ts > documento OpenAPI > contiene ogni rotta, con i parametri del percorso e le query degli schemi zod 2ms
+ ✓ server/openapi/openapi.test.ts > documento OpenAPI > le operazioni senza prova portano `x-senza-prova` e lo dicono nella descrizione; le altre no 5ms
+ ✓ server/openapi/openapi.test.ts > rotte della documentazione > GET /api/openapi.json manda il documento senza la busta { data } 77ms
+ ✓ server/openapi/openapi.test.ts > rotte della documentazione > GET /api/docs manda la pagina di Swagger UI, e i suoi file statici arrivano da /api/docs/ 18ms
+ ✓ server/routes/planimetrie-aree-multiple.test.ts > più aree della guida nella stessa planimetria > gli altri legami della mappa (un luogo) non si toccano, e le colonne di un legame di altro tipo restano 4ms
+ ✓ server/routes/planimetrie-aree-multiple.test.ts > più aree della guida nella stessa planimetria > il pacchetto delle mappe porta tutte le aree e le rimette uguali all’importazione, senza cancellare il luogo 47ms
+ ✓ server/routes/planimetrie-aree-multiple.test.ts > più aree della guida nella stessa planimetria > un pacchetto di prima, con la sola `entita` area, lega quell’area 36ms
+ ✓ server/routes/planimetrie-aree-multiple.test.ts > più aree della guida nella stessa planimetria > importando il pacchetto, un’area che sta anche su un’altra planimetria resta anche lì (2026-10-04) 44ms
+ ✓ server/openapi/openapi.test.ts > rotte della documentazione > la pagina spegne «Prova» sui metodi che scrivono e sulle GET senza prova 3ms
+ ✓ server/openapi/openapi.test.ts > rotte della documentazione > un file inesistente sotto /api/docs/ è il solito 404 JSON 4ms
+ ✓ server/routes/api.test.ts > API > traduzioni: elenco, modifica utente e ripristino dal seed 48ms
+ ✓ server/routes/condizioni-pin.test.ts > condizione «Pin di una mappa» > la porta si vede finché la leva non è azionata; azionata la leva sparisce, richiusa ricompare 171ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > il dettaglio espone percorso, figli, spilli con il dettaglio dell’entità collegata (punto, luogo con negozio e articoli) 40ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > editor: crea, aggiorna ed elimina mappe e spilli con validazione (coordinate, tipo, genitore ciclico) 61ms
+ ✓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F5 — da-url su una mappa con pezzi: 409 senza conferma (niente cambia); con la conferma sostituisce, toglie i pezzi e la mappa è dell’utente 130ms
+ ✓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F5 — scarico della pianta di un quartiere con pezzi: 409 senza conferma, poi con la conferma; l’origine della mappa non cambia (non è una scelta dell’utente) 32ms
+ ✓ server/routes/dungeon.test.ts > API dungeon > stato dei punti per partita (ottenuto/esaurito/riapri) con evento, avanzamento nell'elenco, marcatori delle mappe 180ms
+ ✓ server/routes/pezzi-mappa.test.ts > pezzi delle planimetrie > senza dimensioni salvate si leggono dall'immagine mostrata; senza immagine 409 8ms
+ ✓ server/routes/pezzi-mappa.test.ts > pezzi delle planimetrie > le condizioni sono per copia, quelle dei pin: con la partita ogni copia porta il suo esito; senza partita nessun esito; si tolgono con null 85ms
+ ✓ server/routes/conservazione.test.ts > Conservazione catalogo e spunte > nasconde articoli e negozi da conteggi, ricerca e dettaglio, conservando accesso editor 360ms
+ ✓ server/routes/condizioni-voce.test.ts > condizione «Voce della guida» > il pin compare quando la voce è segnata (Ottenuta o Esaurita) e sparisce quando si riapre; «non segnata» fa il contrario 197ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > voci indipendenti (2026-10-09): ogni voce si segna da sola, il pin è fatto quando lo sono tutte 106ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > la spunta di un pin con più voci le segna tutte, tolta le riapre (scelta dell’utente, 2026-10-09); gli altri pin seguono le loro voci 59ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > il rilievo del validatore: un pin con più voci non resta fatto se una sua voce si riapre dalla spunta di un altro pin 31ms
+ ✓ server/routes/posizioni-spilli.test.ts > la categoria decide collezionabile e riferimento: consumabile sì, gli altri no; un riferimento estraneo è rifiutato 196ms
+ ✓ server/routes/immagini-miniature.test.ts > miniature delle immagini del database > 6 — intestazioni: con `v` immutabile, senza `v` no-cache; ETag con la larghezza; 304 con If-None-Match, anche prima di generare 34ms
+ ✓ server/routes/planimetrie-aree-multiple.test.ts > più aree della guida nella stessa planimetria > funziona sulle planimetrie vere, che l’interfaccia chiama con la chiave di percorso (diversa da quella interna) 11ms
+ ✓ server/routes/planimetrie-aree-multiple.test.ts > più aree della guida nella stessa planimetria > un’area di un altro Palazzo non si lega, e nemmeno la mappa d’insieme del Palazzo 17ms
+ ✓ server/routes/planimetrie-aree-multiple.test.ts > più aree della guida nella stessa planimetria > il legame singolo (`entita` di tipo area) sostituisce solo l’area dichiarata: le altre aree della planimetria restano 40ms
+ ✓ server/routes/planimetrie-aree-multiple.test.ts > più aree della guida nella stessa planimetria > importazione: planimetrie nuove annidate, con la figlia prima del genitore, legano le loro aree 41ms
+ ✓ server/routes/percorsi-map.test.ts > deriva la chiave da tutta la gerarchia, preservando i nomi naturali; senza asset per convenzione 410ms
+ ✓ server/routes/api.test.ts > API > partite: creazione, attiva unica, doti, confidenti, compendio, possedute, eliminazione 183ms
+ ✓ server/routes/api.test.ts > API > statistiche reali delle Persona (15.26): registrate a un livello, ribasano la stima, azzerano i bonus, viaggiano con l’istantanea del compendio 29ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > stato «raccolto» per partita: uno spillo collegato a un punto aggiorna anche il punto della Guida 45ms
+ ✓ server/routes/planimetrie-aree-multiple.test.ts > più aree della guida nella stessa planimetria > spostare una planimetria con aree fuori dal suo Palazzo è un 400; dentro lo stesso Palazzo si può 41ms
+ ✓ server/routes/planimetrie-aree-multiple.test.ts > più aree della guida nella stessa planimetria > importazione: un elenco di aree non valido è un 400, non un errore del database 5ms
+ ✓ server/routes/planimetrie-aree-multiple.test.ts > più aree della guida nella stessa planimetria > validazione: area inesistente 400, mappa inesistente 404, corpo senza elenco 400 8ms
+ ✓ server/routes/condizioni-pin.test.ts > condizione «Pin di una mappa» > TUTTE e ALMENO UNA su più pin, e NON: il meccanismo si vede solo con le due chiavi, il passaggio con una delle due 244ms
+ ✓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > illustrazione: scheda e intestazione di ogni quartiere mostrano la stessa immagine della loro mappa (caricata, poi asset) 201ms
+ ✓ server/routes/condizioni-voce.test.ts > condizione «Voce della guida» > si combina con TUTTE, ALMENO UNA e NON, anche con le altre condizioni 119ms
+ ✓ server/routes/condizioni-voce.test.ts > condizione «Voce della guida» > al salvataggio: una voce che non c’è o è descrittiva si rifiuta (404), una chiave malformata pure (400); fuori dai pin non vale 21ms
+ ✓ server/routes/condizioni-voce.test.ts > condizione «Voce della guida» > il catalogo la rifiuta attraverso le sue rotte, anche negli effetti; e così una scheda della guida senza mappa 22ms
+ ✓ server/db/migrations/067_identita_stabile_degli_spilli.test.ts > uid nell'applicazione > uno spillo creato dall'app riceve subito l'uid della sua identità, e la stessa identità su un altro file dà lo stesso uid 303ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > collegando un pin raccolto che ha solo questa voce, la voce si segna anche se un altro suo pin ha più voci (stessa regola della spunta) 33ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > una voce descrittiva rimasta su un pin non lo tiene «da fare»: contano le voci che si segnano 16ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > con più voci il raccolto del Palazzo conta il pin una volta sola, preso quando le sue voci sono tutte segnate 59ms
+ ✓ server/services/pacchettoGiocoService.test.ts > pacchettoGiocoService — pacchetto di gioco (voce 10) > importa: i dati di gioco tornano quelli del pacchetto (immagini comprese), le partite restano e gli orfani sono elencati 284ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > con più voci la condizione «Pin di una mappa: segnato» vale quando sono segnate tutte 69ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > l’editor delle mappe elenca le voci collegabili: del Palazzo, da segnare, non già sue 22ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > lo stato è uno solo: la voce segna e riapre i suoi pin; un punto con due pin è segnato quando li ha raccolti tutti 38ms
+ ✓ server/services/mappe/collezioniImmagini.test.ts > collezioni presentative globali > ordina con chiave stabile, separa genitori e non include contenitori o gruppi geografici 7ms
+ ✓ server/services/mappe/collezioniImmagini.test.ts > collezioni presentative globali > normalizza le alternative contestuali senza dipendere dalla selezione o ordine dei contesti 11ms
+ ✓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > illustrazione: l’intestazione di un Palazzo ha la caricata della sua radice, mai lo stemma (che è il segno) 38ms
+ ✓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F6 — import: le dimensioni dell’intestazione dell’immagine vincono su quelle del pacchetto; se l’intestazione non si legge (SVG) restano quelle del pacchetto 82ms
+ ✓ server/services/mappe/collezioniImmagini.test.ts > collezioni presentative globali > dettaglio isolato e sottoinsieme dell’albero conservano indice e totale globali senza toccare nomi o relazioni 220ms
+ ✓ server/routes/posizioni-spilli.test.ts > il pacchetto porta e riporta le stesse regole: i valori fuori categoria non tornano 227ms
+ ✓ server/routes/pezzi-mappa.test.ts > pezzi delle planimetrie > eliminando una copia restano le altre; eliminando l'ultima se ne va anche il pezzo e la sua zona torna 35ms
+ ✓ server/routes/pezzi-mappa.test.ts > pezzi delle planimetrie > esportazione e importazione: i pezzi viaggiano con le loro copie; un pacchetto senza il campo li lascia; un reseed non li tocca 253ms
+ ✓ server/routes/conservazione.test.ts > Conservazione catalogo e spunte > nomi massimi duplicati producono chiavi distinte e terminano 266ms
+ ✓ server/db/migrations/067_identita_stabile_degli_spilli.test.ts > uid nell'applicazione > «raccolto» segue l'uid: un pacchetto mappe reimportato lo conserva, eliminare lo spillo pulisce il segno 432ms
+ ✓ server/routes/api.test.ts > API > immagini: caricamento grezzo, lettura file, sostituzione, eliminazione 220ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > collegando, gli stati che c’erano si uniscono: il punto segnato raccoglie il pin, il pin raccolto segna il punto 23ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > eliminare la voce scollega i pin e lascia il loro «raccolto» 43ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > sposta una voce su e giù nella sua area, con l’ordine ricompattato; ai capi dice di no 23ms
+ ✓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F9 — una mappa nuova dichiara l’asset predefinito solo se esiste; l’esportazione non inventa asset per convenzione 56ms
+ ✓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F5 — rimozione dell’immagine di una mappa con pezzi: 409 senza conferma (niente cambia); con la conferma se ne vanno anche i pezzi 31ms
+ ✓ shared/miniature.test.ts > miniature delle immagini del database > le misure ammesse sono un insieme chiuso 2ms
+ ✓ shared/miniature.test.ts > miniature delle immagini del database > urlMiniatura: `&l=` dopo la versione, `?l=` senza query; un `l` già presente si sostituisce; il frammento resta in fondo 1ms
+ ✓ shared/miniature.test.ts > miniature delle immagini del database > urlMiniatura lascia invariati asset statici, blob:, data:, esterni e le altre rotte delle immagini 1ms
+ ✓ shared/miniature.test.ts > miniature delle immagini del database > srcsetMiniature: tutte le misure in ordine, o quelle chieste 0ms
+ ✓ server/routes/condizioni-pin.test.ts > condizione «Pin di una mappa» > una porta del gioco (elemento fisso) sparisce per lo stato di un altro pin e per una data: le condizioni sono assolute (2026-10-09) 269ms
+ ✓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F5 — rimozione in blocco (ambito mappa, o tutti gli ambiti) con una mappa che ha pezzi: 409 senza conferma; con la conferma i pezzi se ne vanno 43ms
+ ✓ server/routes/pezzi-mappa.test.ts > pezzi delle planimetrie > un pacchetto della 102 (la posa accanto alla zona) si importa ancora: ogni pezzo diventa un pezzo con una copia 123ms
+ ✓ server/routes/conservazione.test.ts > Conservazione catalogo e spunte > una guida aggiornata senza il negozio conserva figli personali, acquisti e righe nascoste 375ms
+ ✓ server/routes/api.test.ts > API > immagini: importazione da URL (successo, formato rifiutato, 404 remoto, URL non http) 102ms
+ ✓ server/routes/condizioni-voce.test.ts > condizione «Voce della guida» > una voce eliminata lascia la condizione grigia («ignoto», da correggere): il pin resta nascosto finché non la si corregge 59ms
+ ✓ server/routes/condizioni-voce.test.ts > condizione «Voce della guida» > una voce diventata descrittiva lascia la condizione grigia: non ha più stato, e la condizione va corretta 38ms
+ ✓ server/routes/condizioni-voce.test.ts > condizione «Voce della guida» > il pacchetto delle mappe porta la condizione; una voce che non c’è si scarta e si conta 248ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > un nemico si segna «affrontato» anche libero (2026-10-03); collegato a una voce (un’Ombra sciagura), segnarlo segna la voce 26ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > i tipi del 2026-10-01: Persona e Storia si collegano a qualunque pin e si segnano; Porta e Meccanismo esistono 19ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > una voce descrittiva («Altro») non ha stato né pin: il server lo rifiuta, e uno stato rimasto si ignora 36ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > anche dalla mappa una voce descrittiva non ha stato né pin nuovi: niente stato nel dettaglio, il raccolto non la segna, l’editor la rifiuta 29ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > immagine di base nell’istanza (dimensioni dall’intestazione), esportazione con base64 e importazione idempotente 477ms
+ ✓ server/routes/percorsi-map.test.ts > rinomina e sposta un sottoalbero mantenendo pin, progressi e vecchie URL 402ms
+ ✓ server/routes/condizioni-pin.test.ts > condizione «Pin di una mappa» > lo stato si legge anche dalla voce della guida del pin: segnata la voce, il pin è segnato 97ms
+ ✓ server/routes/condizioni-voce.test.ts > condizione «Voce della guida» > GET /api/condizioni/voci elenca le voci che si segnano, passi degli Enigmi compresi, col posto; non le descrittive 33ms
+ ✓ server/routes/percorsi-map.test.ts > rifiuta collisioni e cicli senza modifiche parziali 302ms
+ ✓ server/routes/posizioni-spilli.test.ts > il pin del Confidente si può condizionare (2026-10-04): le condizioni si salvano, valgono con la partita e passano dal pacchetto 269ms
+ ✓ server/routes/immagini-miniature.test.ts > miniature delle immagini del database > 8 — cinque richieste contemporanee della stessa miniatura: una generazione sola, una riga 106ms
+ ✓ server/routes/immagini-miniature.test.ts > miniature delle immagini del database > 9 — una PNG trasparente resta trasparente nella WebP 43ms
+ ✓ server/routes/immagini-miniature.test.ts > miniature delle immagini del database > riscaldamento e pulizia: le immagini date ricevono le misure delle schede; le miniature orfane o stantie se ne vanno 50ms
+ ✓ server/routes/immagini-miniature.test.ts > miniature delle immagini del database > 10 — il pacchetto porta lo schema delle miniature ma mai le righe 405ms
+ ✓ server/routes/pezzi-mappa.test.ts > pezzi delle planimetrie > sostituire l'immagine di una mappa con dei pezzi chiede conferma (409, con le copie); confermata, i pezzi se ne vanno con le copie 30ms
+ ✓ server/routes/pezzi-mappa.test.ts > pezzi delle planimetrie > all'importazione le copie che escono dall'immagine della mappa d'arrivo si scartano; il pezzo con la zona fuori o senza copie dentro anche 138ms
+ ✓ server/routes/posizioni-spilli.test.ts > reseed del seed: un pin Confidente del seed con condizioni resta «invariato» e tiene il suo id (2026-10-04) 237ms
+ ✓ server/services/pacchettoGiocoService.test.ts > pacchettoGiocoService — pacchetto di gioco (voce 10) > se l’importazione fallisce a connessione chiusa, l’istanza torna com’era 394ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > una «Storia» si collega a un pin con destinazione: il riferimento resta, lo stato è uno solo, scollegando la destinazione non si tocca 29ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > dall’editor delle mappe un riferimento «punto» diventa una voce del pin e lascia libero il riferimento 7ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > «Sulla mappa» di una voce porta ai suoi pin, che la portano nel campo suo 9ms
+ ✓ server/routes/condizioni-voce.test.ts > condizione «Voce della guida» > una Persona dei Memento è «segnata» se è catturata, cioè registrata nel compendio; il vecchio stato e i pin non la segnano (rilievo F1) 187ms
+ ✓ server/routes/immagini-miniature-senza-generatore.test.ts > miniature senza generatore > 7 — sharp in errore: 200 con l’originale, un warn per immagine, nessuna riga 28ms
+ ✓ server/routes/condizioni-pin.test.ts > condizione «Pin di una mappa» > un pin eliminato lascia la condizione «non si sa» (grigia), detta per nome; senza partita non si valuta 56ms
+ ✓ server/routes/condizioni-pin.test.ts > condizione «Pin di una mappa» > in scrittura: il pin deve esistere e avere uno stato; nel catalogo la condizione non vale 16ms
+ ✓ server/routes/condizioni-pin.test.ts > condizione «Pin di una mappa» > un pacchetto mappe porta con sé le condizioni sugli altri pin, anche verso un pin dello stesso pacchetto; un uid ignoto si scarta 89ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > un pacchetto della guida non cancella gli spilli aggiunti dall’utente su una mappa della guida 113ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > ricerca delle entità collegabili per tipo e testo; la pianta scaricata con la chiave della mappa diventa la sua immagine di base 110ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > il pacchetto delle mappe porta le voci; uno di prima (riferimento «punto» o `voce`) le ritrova, con lo stesso uid 141ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > dall’editor la voce segue le regole della guida e un passaggio tiene la sua destinazione 15ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > un pacchetto con una voce non valida si rifiuta (400), una voce di un altro Palazzo si scarta e si conta 32ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > reimportando un pacchetto che tace sulla voce (di prima della 094) la voce resta al pin con lo stesso uid; uno che la dichiara vuota la toglie 52ms
+ ✓ server/routes/condizioni-pin.test.ts > condizione «Pin di una mappa» > un pin non dipende da se stesso e le condizioni non chiudono giri, anche lunghi (scelta dell’utente): 400 coi nomi 41ms
+ ✓ server/routes/condizioni-pin.test.ts > condizione «Pin di una mappa» > un pin citato che diventa di un tipo senza stato lascia la condizione grigia («Da correggere»), invece che rossa per sempre 43ms
+ ✓ server/routes/condizioni-pin.test.ts > condizione «Pin di una mappa» > il catalogo rifiuta la condizione dei soli pin attraverso le sue rotte, anche negli effetti; e così una scheda della guida senza mappa 8ms
+ ✓ server/db/migrations/107_ruolo_dalla_gerarchia.test.ts > radici dei Palazzi e dei Memento stemmi; città e quartieri con immagine illustrazioni; le altre con immagine planimetrie; senza immagine «nessuna» 139ms
+ ✓ server/db/migrations/108_miniature_delle_immagini.test.ts > crea immagine_miniatura vuota; solo le misure ammesse; eliminata la sorgente, le miniature se ne vanno; le altre tabelle invariate 146ms
+ ✓ server/routes/pezzi-mappa.test.ts > pezzi delle planimetrie > un pacchetto senza pezzi che porta un'immagine diversa toglie i pezzi della mappa, con le copie, e li conta; con la stessa immagine restano 207ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > le immagini scaricate dalle guide entrano nel pacchetto come tutte le altre, con la provenienza annotata 16ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > reseed del seed: un pin invariato tiene id e voce; cambiato, torna con la voce; un pacchetto di prima (riferimento «punto») la dà nel campo suo 89ms
+ ✓ server/routes/guida-pin.test.ts > guida del Palazzo: voci modificabili e collegate ai pin > una voce con pin non diventa descrittiva finché non li si scollega 8ms
+ ✓ server/routes/pezzi-mappa.test.ts > pezzi delle planimetrie > eliminando la mappa se ne vanno i suoi pezzi con le copie 42ms
+ ✓ server/routes/condizioni-pin.test.ts > condizione «Pin di una mappa» > NON su un gruppo misto (difetto corretto): NON(TUTTE(Coraggio 5, leva azionata)) con il Coraggio basso è vera, e la leva azionata non toglie il pin 27ms
+ ✓ server/routes/condizioni-pin.test.ts > condizione «Pin di una mappa» > tutti i pin con uno stato si segnano e si citano con la loro parola: Confidente «incontrato», Dialogo «parlato»; un pin senza stato proprio, con la sua voce della guida, «ottenuto» 80ms
+ ✓ server/routes/condizioni-pin.test.ts > condizione «Pin di una mappa» > un pacchetto: la porta che entra prima cita un pin citabile solo per la sua voce della guida, che entra dopo 39ms
+ ✓ server/services/pacchetto/ricaricaPezzi.test.ts > un pacchetto della 102: i ritagli arrivano senza la posa e la posa diventa la prima copia; le copie di prima se ne vanno 234ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > schermate degli spilli: caricamento, didascalia, eliminazione; esportazione per luogo (JSON) e reimportazione 205ms
+ ✓ server/services/pacchetto/ricaricaPezzi.test.ts > un pacchetto della 103 senza copie: nessuna copia resta senza il suo ritaglio 176ms
+ ✓ server/routes/condizioni-pin.test.ts > condizione «Pin di una mappa» > un pacchetto con un pin citabile solo per la sua voce della guida: l’esito non dipende dall’ordine dei pin (F1) > la stanza sicura viene prima della porta, sulla stessa planimetria 35ms
+ ✓ server/routes/condizioni-pin.test.ts > condizione «Pin di una mappa» > un pacchetto con un pin citabile solo per la sua voce della guida: l’esito non dipende dall’ordine dei pin (F1) > la stanza sicura sta su una planimetria importata prima di quella della porta 43ms
+ ✓ server/routes/condizioni-pin.test.ts > condizione «Pin di una mappa» > un pacchetto con un pin citabile solo per la sua voce della guida: l’esito non dipende dall’ordine dei pin (F1) > il contrario: una porta che cita un pin del pacchetto senza stato si scarta a pacchetto inserito — una nota, o una stanza sicura la cui voce non è ammessa (G1) 32ms
+ ✓ server/bootstrap.test.ts > createApp > GET /api/health risponde con envelope { data } e stato ok 18ms
+ ✓ server/bootstrap.test.ts > createApp > GET /api/config espone versione e gioco 5ms
+ ✓ server/bootstrap.test.ts > createApp > non espone X-Powered-By 3ms
+ ✓ server/bootstrap.test.ts > createApp > propaga un X-Request-Id in ingresso 3ms
+ ✓ server/bootstrap.test.ts > createApp > GET /api/inesistente → 404 JSON con codice not-found e requestId 4ms
+ ✓ server/bootstrap.test.ts > createApp > body JSON malformato → 400 json-malformato 12ms
+ ✓ server/bootstrap.test.ts > createApp > percorso con codifica non valida → 400 percorso-non-valido (non 500) 5ms
+ ✓ server/routes/condizioni-pin.test.ts > condizione «Pin di una mappa» > un pacchetto con un pin citabile solo per la sua voce della guida: l’esito non dipende dall’ordine dei pin (F1) > un pacchetto senza il campo della voce (di prima della 094): la voce del pin reinserito vale lo stesso 38ms
+ ✓ server/routes/condizioni-pin.test.ts > condizione «Pin di una mappa» > un Confidente collegato a una voce della guida la segna quando lo si incontra, e la voce segnata segna lui 29ms
+ ✓ server/routes/condizioni-pin.test.ts > condizione «Pin di una mappa» > un pin senza stato proprio collegato solo a una voce «Altro» (descrittiva) non si segna e non si cita 7ms
+ ✓ server/routes/condizioni-pin.test.ts > condizione «Pin di una mappa» > l’elenco per l’editor: solo i pin con uno stato, con la mappa e il tipo 10ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > condizioni di visibilità degli spilli: solo quelle calcolabili, validate sulla Guida, valutate con la partita, esportate e reimportate 138ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > uno spillo del seed a cui l’utente aggiunge condizioni sopravvive al reseed senza doppioni; date e periodi impossibili sono rifiutati 22ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > condizione «solo di sera»: segue il momento della giornata della partita, che torna a «giorno» quando cambia il giorno corrente 54ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > l’importazione scarta e conta le condizioni con chiavi assenti dalla Guida invece di nascondere lo spillo per sempre 48ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > passaggi dall’albero (15.24): «Nuova mappa» crea il passaggio nel genitore (e il ritorno a scelta) in un punto libero; POST /passaggi con 409/400/404 191ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > dimensioniImmagine legge le intestazioni PNG, GIF, JPEG e WEBP 0ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > una planimetria aggiunta al Palazzo diventa una pianta caricandone l’immagine; uno stemma resta stemma (2026-10-18) 25ms
+
+ Test Files  30 passed (30)
+      Tests  220 passed (220)
+   Start at  01:59:39
+   Duration  5.06s (transform 20.14s, setup 8.70s, import 53.71s, tests 25.59s, environment 4ms)
+
+EXIT=0

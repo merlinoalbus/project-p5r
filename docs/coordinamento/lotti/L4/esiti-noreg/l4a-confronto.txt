@@ -1,0 +1,39 @@
+{"level":30,"time":"2026-10-20T03:16:03.484Z","service":"project-p5r-be","divergenze":4,"pin":4,"inversi":0,"righe":[{"partita":1,"spillo":"d2f6acf51abeb2e971bd19709d2fec99","voce":"kamoshida-13-tetto-seme-della-bramosia"},{"partita":1,"spillo":"fd32580a28b59163509d99ec05947ee9","voce":"kamoshida-15-torre-centrale-sconfiggi-i-capitani-delle-guardie"},{"partita":1,"spillo":"2d4e5e28d4d8a9e9c85a38a63efe2fc2","voce":"kamoshida-15-torre-centrale-sconfiggi-i-capitani-delle-guardie"},{"partita":1,"spillo":"ac5feb061a85a46869a432280321130a","voce":"kamoshida-15-torre-centrale-raccogli-forziere-3"}],"msg":"migrazione utente 022: divergenze pin/voci conservate «da verificare»"}
+{"level":30,"time":"2026-10-20T03:16:03.487Z","service":"project-p5r-be","schema":"utente","id":22,"name":"divergenze_da_verificare","msg":"migrazione applicata"}
+-- impronta contro la base:
+chiavi ignorate: da_rivedere, aggiunta_da, testo_precedente_json, motivo_revisione; differenze: 0
+-- estesa contro la 110 (l3g):
+= validata
+= destinazioni
+= pezzi
+= atterraggi
+= mappePalazzi
+= marcatori
+= perimetri
+ESTESA IDENTICA (tolti updated_at/created_at)
+  ≠ gioco.db:area {"updated_at":140}
+  ≠ gioco.db:punto_interesse {"carattere":959}
+  ≠ gioco.db:voce_giornata {"created_at":1,"updated_at":1}
+  ≠ gioco.db:__schema__ {"sql":1}
+  ≠ partite.db:__schema__ {"(riga aggiunta)":1}
+  + tabella nuova partite.db:divergenza_partita 4 righe
+  tabelle identiche alla 110 (l3g, prima del pacchetto): 110
+-- stato visibile contro la base (p1, p2):
+p1|kamoshida {"punti":169,"esauribili":0,"gestiti":133,"raccolta":{"totale":107,"presi":107,"mappe":26,"mappeComplete":26},"completato":null} voci 169 pin 369
+p1|madarame {"punti":225,"esauribili":10,"gestiti":221,"raccolta":{"totale":86,"presi":85,"mappe":17,"mappeComplete":16},"completato":null} voci 225 pin 258
+p2|kamoshida {"punti":169,"esauribili":0,"gestiti":169,"raccolta":{"totale":107,"presi":107,"mappe":26,"mappeComplete":26},"completato":"Tesoro, boss finale e tutti gli oggetti permanenti (71/71)"} voci 169 pin 369
+p2|madarame {"punti":225,"esauribili":10,"gestiti":0,"raccolta":{"totale":86,"presi":0,"mappe":17,"mappeComplete":3},"completato":null} voci 225 pin 258
+p1|kamoshida riepilogo: {"punti":169,"esauribili":0,"gestiti":133,"raccolta":{"totale":107,"presi":107,"mappe":26,"mappeComplete":26},"completato":"Tesoro, boss finale e raccolto tutto (107/107)"} → {"punti":169,"esauribili":0,"gestiti":133,"raccolta":{"totale":107,"presi":107,"mappe":26,"mappeComplete":26},"completato":null}
+p2|kamoshida riepilogo: {"punti":169,"esauribili":0,"gestiti":169,"raccolta":{"totale":107,"presi":107,"mappe":26,"mappeComplete":26},"completato":"Tesoro, boss finale e raccolto tutto (107/107)"} → {"punti":169,"esauribili":0,"gestiti":169,"raccolta":{"totale":107,"presi":107,"mappe":26,"mappeComplete":26},"completato":"Tesoro, boss finale e tutti gli oggetti permanenti (71/71)"}
+differenze di stato visibile: 2
+Memento identici byte per byte alla base: true
+kamoshida p1 voci e stati identici alla base: true | completato: "Tesoro, boss finale e raccolto tutto (107/107)" → null
+madarame p1 voci e stati identici alla base: true | completato: null → null
+destinazioni diverse dalla base: 0
+
+== partita 1
+
+== partita 3
+KO  madarame: pin raccolto 033d9e7e159ff0090126a3f7b7ad5203 — {"status":200,"presi":[0,2],"totale":86}
+
+errori: 1

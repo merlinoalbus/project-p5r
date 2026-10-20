@@ -1,0 +1,21 @@
+### ciclo 6 — preparazione degli stati (Collaudo, 2026-10-20T04:59:19+02:00), immagine di prova public/asset/ui/allerta-notte-torrida.png
+### R7: POST /api/aree/citta/kichijoji?nome=Prova collaudo cestino
+{"data":{"chiave":"citta/kichijoji/prova-collaudo-cestino","contenitore":{"tipo":"quartiere","chiave":"kichijoji","nome":"Kichijoji"},"slug":"prova-collaudo-cestino","nome":"Prova collaudo cestino","nomeRivisto":false,"ordine":100,"predefinita":"kichijoji-prova-collaudo-cestino","illustrazione":{"immagineUrl":"/api/immagini/mappa/kichijoji-prova-collaudo-cestino/file?v=2026-10-20T02%3A59%3A19.890Z","asset":null},"numeroPlanimetrie":1,"numeroSpilli":0,"passaggio":null,"ingresso":false,"origine":"utente","modificata":false,"daVerificare":false,"casa":"/guida/citta/kichijoji/prova-collaudo-cestin
+HTTP 201
+### R7: DELETE /api/aree/citta/kichijoji/prova-collaudo-cestino?conferma=1
+
+HTTP 204
+### R7: GET /api/impostazioni/cestino
+{"data":[{"id":17,"tipo":"area-fisica","chiave":"citta/kichijoji/prova-collaudo-cestino","nome":"Prova collaudo cestino","contesto":"Kichijoji","eliminatoIl":"2026-10-20T02:59:19.976Z","contenuto":[{"tabella":"area","etichetta":"area","quante":1},{"tabella":"immagine","etichetta":"immagine","quante":1},{"tabella":"mappa_alias","etichetta":"nome di prima di una mappa","quante":1},{"tabella":"mappa_percorso","etichetta":"percorso di una mappa","quante":1},{"tabella":"mappa","etichetta":"planimetria","quante":1}],"partite":"nessuna","byte":153627}]}
+
+
+### R6: GET /api/aree/da-collocare (prima)
+{"data":[]}
+### R6: POST /api/mappe {nome:'Planimetria di prova collaudo', tipo:'luogo'} senza genitore
+{"data":{"chiave":"planimetria-di-prova-collaudo","nome":"Planimetria di prova collaudo","nomeCompleto":"Planimetria di prova collaudo","tipo":"luogo","genitore":null,"ordine":0,"genitoreNome":null,"immagineUrl":null,"asset":null,"entita":null,"ruoloImmagine":"nessuna","origine":"utente","nomeRivisto":false,"numeroSpilli":0,"numeroFigli":0,"updatedAt":"2026-10-20T02:59:24.887Z","area":null,"casa":"/guida/mappe/planimetria-di-prova-collaudo","larghezza":null,"altezza":null,"note":"","percorso":[{
+HTTP 201
+### R6: PUT /api/mappe/planimetria-di-prova-collaudo {genitore:'citta-kichijoji'}
+{"data":{"chiave":"kichijoji-planimetria-di-prova-collaudo","nome":"Planimetria di prova collaudo","nomeCompleto":"Kichijoji › Planimetria di prova collaudo","tipo":"luogo","genitore":"kichijoji","ordine":0,"genitoreNome":"Kichijoji","immagineUrl":null,"asset":null,"entita":null,"ruoloImmagine":"nessuna","origine":"utente","nomeRivisto":false,"numeroSpilli":0,"numeroFigli":0,"updatedAt":"2026-10-20T02:59:29.092Z","area":null,"casa":"/guida/mappe/kichijoji-planimetria-di-prova-collaudo","larghe
+HTTP 200
+### R6: GET /api/aree/da-collocare (dopo)
+{"data":[{"chiave":"kichijoji-planimetria-di-prova-collaudo","nome":"Planimetria di prova collaudo","genitoreNome":"Kichijoji","numeroSpilli":0,"immagineUrl":null,"asset":null}]}

@@ -1,0 +1,330 @@
+esporta dungeon-kamoshida: HTTP 200, 3350985 caratteri {"versione":1,"esportato":"2026-10-20T00:07:36.501Z","mappe":27,"immagini":1}
+importa dungeon-kamoshida: HTTP 200 {"data":{"mappe":27,"spilli":369,"pezzi":10,"copie":10,"pezziScartati":0,"copieScartate":0,"pezziEliminati":0,"copieEliminate":0,"immagini":1,"saltate":[],"condizioniScartate":0,"vociScartate":0}}
+esporta dungeon-madarame: HTTP 200, 10482728 caratteri {"versione":1,"esportato":"2026-10-20T00:07:36.901Z","mappe":18,"immagini":2}
+importa dungeon-madarame: HTTP 200 {"data":{"mappe":18,"spilli":258,"pezzi":14,"copie":32,"pezziScartati":0,"copieScartate":0,"pezziEliminati":0,"copieEliminate":0,"immagini":2,"saltate":[],"condizioniScartate":0,"vociScartate":0}}
+versioni prima {"gioco.db":108,"partite.db":21} dopo {"gioco.db":108,"partite.db":21}
+
+# gioco.db:copia_pezzo: righe 42 → 42; aggiunte 42, tolte 42, cambiate 0
+  + 51
+  + 52
+  + 53
+  + 54
+  + 55
+  + 56
+  + 57
+  + 58
+  + 59
+  + 60
+  + 61
+  + 62
+  + 63
+  + 64
+  + 65
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 10
+  - 11
+  - 12
+  - 13
+  - 14
+  - 15
+  - 16
+  … (dettaglio limitato a 15 righe per tipo)
+
+# gioco.db:dungeon_atterraggio: righe 3 → 3; aggiunte 0, tolte 0, cambiate 1
+  ~ 7
+      spillo_id: 1657 → 2354
+
+# gioco.db:immagine: righe 807 → 807; aggiunte 0, tolte 0, cambiate 3
+  ~ 782
+      nome_file: "41b957c9-127e-4f7c-bfce-58b2695da9e5.png" → "5ea02f4b-5e0a-457c-b8e3-11504578c629.png"
+      created_at: "2026-09-29T15:32:16.649Z" → "2026-10-20T00:07:36.858Z"
+  ~ 783
+      nome_file: "02dfba9f-5a25-4c9b-9ad7-8ad7b08a2c9f.png" → "6e71c39c-c0e7-44de-8015-6f4a2b0fbe92.png"
+      created_at: "2026-10-18T17:14:31.551Z" → "2026-10-20T00:07:37.317Z"
+  ~ 800
+      nome_file: "e2d2f2c2-8e2b-41a0-9715-3ec95a980861.png" → "5aa614bf-4e71-4c68-8db8-58a6cfe7c621.png"
+      created_at: "2026-10-18T13:08:53.288Z" → "2026-10-20T00:07:37.313Z"
+
+# gioco.db:immagine_miniatura: righe 68 → 68; aggiunte 0, tolte 0, cambiate 4
+  ~ 782|160
+      versione: "2026-09-29T15:32:16.649Z" → "2026-10-20T00:07:36.858Z"
+      created_at: "2026-10-20T00:05:33.390Z" → "2026-10-20T00:07:36.930Z"
+  ~ 782|320
+      versione: "2026-09-29T15:32:16.649Z" → "2026-10-20T00:07:36.858Z"
+      created_at: "2026-10-20T00:05:33.415Z" → "2026-10-20T00:07:36.955Z"
+  ~ 800|160
+      versione: "2026-10-18T13:08:53.288Z" → "2026-10-20T00:07:37.313Z"
+      created_at: "2026-10-20T00:05:33.497Z" → "2026-10-20T00:07:37.356Z"
+  ~ 800|320
+      versione: "2026-10-18T13:08:53.288Z" → "2026-10-20T00:07:37.313Z"
+      created_at: "2026-10-20T00:05:33.525Z" → "2026-10-20T00:07:37.383Z"
+
+# gioco.db:mappa: righe 317 → 317; aggiunte 0, tolte 0, cambiate 45
+  ~ dungeon-kamoshida
+      updated_at: "2026-09-29T15:33:52.149Z" → "2026-10-20T00:07:36.861Z"
+  ~ dungeon-madarame
+      updated_at: "2026-10-18T13:08:53.302Z" → "2026-10-20T00:07:37.315Z"
+  ~ nativo-rmap-151-1-0
+      updated_at: "2026-10-11T10:12:24.878Z" → "2026-10-20T00:07:36.565Z"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-1-1
+      updated_at: "2026-10-04T17:01:47.716Z" → "2026-10-20T00:07:36.565Z"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-2-0
+      updated_at: "2026-10-15T04:52:01.315Z" → "2026-10-20T00:07:36.565Z"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-2-1
+      updated_at: "2026-10-10T22:31:28.553Z" → "2026-10-20T00:07:36.565Z"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-2-2
+      updated_at: "2026-10-10T13:31:02.186Z" → "2026-10-20T00:07:36.565Z"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-4-1
+      updated_at: "2026-10-15T04:57:49.550Z" → "2026-10-20T00:07:36.565Z"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-5-1
+      updated_at: "2026-10-15T05:00:24.289Z" → "2026-10-20T00:07:36.565Z"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-5-2
+      updated_at: "2026-10-15T05:02:41.046Z" → "2026-10-20T00:07:36.565Z"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-6-0
+      updated_at: "2026-10-04T17:01:47.716Z" → "2026-10-20T00:07:36.565Z"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-6-1
+      updated_at: "2026-10-04T17:01:47.716Z" → "2026-10-20T00:07:36.565Z"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-6-2
+      updated_at: "2026-10-10T18:01:31.266Z" → "2026-10-20T00:07:36.565Z"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-6-3
+      updated_at: "2026-10-10T22:05:53.271Z" → "2026-10-20T00:07:36.565Z"
+      nome_rivisto: 1 → 0
+  ~ nativo-rmap-151-6-4
+      updated_at: "2026-10-10T22:09:39.619Z" → "2026-10-20T00:07:36.565Z"
+      nome_rivisto: 1 → 0
+  … (dettaglio limitato a 15 righe per tipo)
+
+# gioco.db:mappa_entita: righe 134 → 136; aggiunte 2, tolte 0, cambiate 66
+  + dungeon-kamoshida|dungeon|kamoshida
+  + dungeon-madarame|dungeon|madarame
+  ~ nativo-rmap-151-1-0|area|kamoshida-01-cancello-del-castello-ingresso
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-6-1|area|kamoshida-13-tetto
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-9-0|area|kamoshida-15-torre-centrale
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-152-2-0|area|kamoshida-1-tutorial-palazzo-11-04
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-16-0|area|kamoshida-tutorial-palazzo-12-04
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-152-1-0|area|kamoshida-1-tutorial-palazzo-11-04
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-152-1-0|area|kamoshida-tutorial-palazzo-12-04
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-152-4-0|area|kamoshida-tutorial-palazzo-12-04
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-152-6-0|area|kamoshida-tutorial-palazzo-12-04
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-1-0|area|kamoshida-tutorial-palazzo-15-04
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-16-0|area|kamoshida-tutorial-palazzo-15-04
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-2-0|area|kamoshida-tutorial-palazzo-15-04
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-2-0|area|kamoshida-01-cancello-del-castello-ingresso
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-2-1|area|kamoshida-01-cancello-del-castello-ingresso
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  ~ nativo-rmap-151-2-2|area|kamoshida-01-cancello-del-castello-ingresso
+      fonte_json: "{\"origine\":\"utente\",\"dichiarata\":\"editor\"}" → "{\"origine\":\"utente\",\"dichiarata\":\"pacchetto\"}"
+  … (dettaglio limitato a 15 righe per tipo)
+
+# gioco.db:pezzo_mappa: righe 24 → 24; aggiunte 24, tolte 24, cambiate 0
+  + 31
+  + 32
+  + 33
+  + 34
+  + 35
+  + 36
+  + 37
+  + 38
+  + 39
+  + 40
+  + 41
+  + 42
+  + 43
+  + 44
+  + 45
+  - 2
+  - 3
+  - 4
+  - 5
+  - 8
+  - 9
+  - 10
+  - 12
+  - 13
+  - 14
+  - 15
+  - 16
+  - 17
+  - 18
+  - 19
+  … (dettaglio limitato a 15 righe per tipo)
+
+# gioco.db:spillo: righe 1913 → 1913; aggiunte 627, tolte 627, cambiate 0
+  + 2300
+  + 2301
+  + 2302
+  + 2303
+  + 2304
+  + 2305
+  + 2306
+  + 2307
+  + 2308
+  + 2309
+  + 2310
+  + 2311
+  + 2312
+  + 2313
+  + 2314
+  - 515
+  - 518
+  - 520
+  - 521
+  - 527
+  - 528
+  - 529
+  - 530
+  - 533
+  - 537
+  - 538
+  - 539
+  - 540
+  - 541
+  - 542
+  … (dettaglio limitato a 15 righe per tipo)
+
+# gioco.db:spillo_destinazione: righe 223 → 223; aggiunte 157, tolte 157, cambiate 0
+  + 2302
+  + 2320
+  + 2321
+  + 2322
+  + 2323
+  + 2329
+  + 2333
+  + 2334
+  + 2340
+  + 2345
+  + 2347
+  + 2360
+  + 2364
+  + 2366
+  + 2371
+  - 515
+  - 518
+  - 520
+  - 537
+  - 548
+  - 577
+  - 578
+  - 580
+  - 589
+  - 594
+  - 595
+  - 596
+  - 603
+  - 608
+  - 616
+  … (dettaglio limitato a 15 righe per tipo)
+
+# gioco.db:spillo_voce: righe 539 → 539; aggiunte 539, tolte 539, cambiate 0
+  + 2538|kamoshida-01-cancello-del-castello-ingresso-accedi-alla-torre
+  + 2473|kamoshida-01-cancello-del-castello-ingresso-apri-forziere
+  + 2518|kamoshida-01-cancello-del-castello-ingresso-apri-forziere-raro
+  + 2468|kamoshida-01-cancello-del-castello-ingresso-apri-il-forziere
+  + 2547|kamoshida-01-cancello-del-castello-ingresso-apri-il-forziere-2
+  + 2420|kamoshida-01-cancello-del-castello-ingresso-continua-a-indagare-nel-castello
+  + 2421|kamoshida-01-cancello-del-castello-ingresso-continua-a-indagare-nel-castello
+  + 2507|kamoshida-01-cancello-del-castello-ingresso-continua-dal-livello-1
+  + 2531|kamoshida-01-cancello-del-castello-ingresso-continua-dal-livello-1
+  + 2532|kamoshida-01-cancello-del-castello-ingresso-continua-dal-livello-1
+  + 2533|kamoshida-01-cancello-del-castello-ingresso-continua-dal-livello-1
+  + 2430|kamoshida-01-cancello-del-castello-ingresso-depreda-oggetti
+  + 2431|kamoshida-01-cancello-del-castello-ingresso-depreda-oggetti
+  + 2432|kamoshida-01-cancello-del-castello-ingresso-depreda-oggetti
+  + 2516|kamoshida-01-cancello-del-castello-ingresso-edificio-est-dependance
+  - 1925|kamoshida-01-cancello-del-castello-ingresso-accedi-alla-torre
+  - 544|kamoshida-01-cancello-del-castello-ingresso-apri-forziere
+  - 555|kamoshida-01-cancello-del-castello-ingresso-apri-forziere-raro
+  - 539|kamoshida-01-cancello-del-castello-ingresso-apri-il-forziere
+  - 1865|kamoshida-01-cancello-del-castello-ingresso-apri-il-forziere-2
+  - 1827|kamoshida-01-cancello-del-castello-ingresso-continua-a-indagare-nel-castello
+  - 1828|kamoshida-01-cancello-del-castello-ingresso-continua-a-indagare-nel-castello
+  - 1916|kamoshida-01-cancello-del-castello-ingresso-continua-dal-livello-1
+  - 1918|kamoshida-01-cancello-del-castello-ingresso-continua-dal-livello-1
+  - 1919|kamoshida-01-cancello-del-castello-ingresso-continua-dal-livello-1
+  - 1920|kamoshida-01-cancello-del-castello-ingresso-continua-dal-livello-1
+  - 1839|kamoshida-01-cancello-del-castello-ingresso-depreda-oggetti
+  - 1840|kamoshida-01-cancello-del-castello-ingresso-depreda-oggetti
+  - 1841|kamoshida-01-cancello-del-castello-ingresso-depreda-oggetti
+  - 553|kamoshida-01-cancello-del-castello-ingresso-edificio-est-dependance
+  … (dettaglio limitato a 15 righe per tipo)
+
+# partite.db:spillo_partita: righe 758 → 823; aggiunte 65, tolte 0, cambiate 729
+  + 3|c8276771a06a360443b8c370a44b023c
+  + 3|9ec933fa98e793fe499032a9396bf299
+  + 3|d2556ded1c2e65feea9825aaf79f0b69
+  + 3|12b484ddbc2fbefd26c053ca97555fc4
+  + 3|3d565f64a920d742af53a1bb222f83fc
+  + 3|e4704a815eab81d3a1b6183b176e3b34
+  + 3|a85166589c36f8987256db48ea40f1c1
+  + 3|30ad38e4bbc6c1d1058e1e7791d38939
+  + 3|7bba7544752edba295b16377e69176f3
+  + 3|59c5a065f307a72e06cad00029f0701b
+  + 3|28a83e4894d72749d0f73bb84ea8ef17
+  + 3|fbdf47bef56a1ca202dd98876c2b8121
+  + 3|0a84f2a3dfe188bedfef2dcc5ca86950
+  + 3|c66306560301a81841b6490899240292
+  + 3|b4c954b8d3b433bfa8f624fa183890e1
+  ~ 1|61656ce3d1b038b84258f5fafeaf90be
+      updated_at: "2026-09-29T15:36:46.717Z" → "2026-10-20T00:07:36.565Z"
+  ~ 1|f222dc9d04558417981e6e0b52abe376
+      updated_at: "2026-09-29T15:36:47.401Z" → "2026-10-20T00:07:36.565Z"
+  ~ 1|28cd128e9720c37717ffaff21fc3afd6
+      updated_at: "2026-09-30T04:58:38.891Z" → "2026-10-20T00:07:36.565Z"
+  ~ 1|57f47e3a904653da2fee0b4252d006aa
+      updated_at: "2026-09-30T04:58:41.545Z" → "2026-10-20T00:07:36.565Z"
+  ~ 1|7f71b707f4e4e5ecbdc6bf6708288a21
+      updated_at: "2026-09-30T04:58:42.685Z" → "2026-10-20T00:07:36.565Z"
+  ~ 1|7b323d194d941199ab8ba0bff0e09b9d
+      updated_at: "2026-09-30T04:58:43.503Z" → "2026-10-20T00:07:36.565Z"
+  ~ 1|604f92ba22afc6f2424034b11aee88df
+      updated_at: "2026-09-30T04:58:43.983Z" → "2026-10-20T00:07:36.565Z"
+  ~ 1|86aefe752705fb51e5983915a5808ff1
+      updated_at: "2026-09-30T04:58:44.447Z" → "2026-10-20T00:07:36.565Z"
+  ~ 1|884719519e91d19e38529610a2059fb2
+      updated_at: "2026-09-30T04:58:44.944Z" → "2026-10-20T00:07:36.565Z"
+  ~ 1|948898dd848eef5bbe5014c2362e527d
+      updated_at: "2026-09-30T04:58:45.431Z" → "2026-10-20T00:07:36.565Z"
+  ~ 1|140ffed11fb90c4fe23a206677636d9f
+      updated_at: "2026-09-30T04:58:45.842Z" → "2026-10-20T00:07:36.565Z"
+  ~ 1|38c558b6f7d084fde3d7a1a5a47eb16f
+      updated_at: "2026-09-30T04:58:46.398Z" → "2026-10-20T00:07:36.565Z"
+  ~ 1|d512b0021e2808277d8b0cafe680e255
+      updated_at: "2026-09-30T04:58:46.883Z" → "2026-10-20T00:07:36.565Z"
+  ~ 1|c0920b7ffc850cabe04aa71dfed2db55
+      updated_at: "2026-09-30T04:58:47.386Z" → "2026-10-20T00:07:36.565Z"
+  ~ 1|2724fe2782ff6d0cfcf1b1e466cfe98d
+      updated_at: "2026-09-30T04:59:01.195Z" → "2026-10-20T00:07:36.565Z"
+  … (dettaglio limitato a 15 righe per tipo)
+
+tabelle invariate: 101 su 112

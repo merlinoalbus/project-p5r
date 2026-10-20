@@ -1,0 +1,166 @@
+{
+ "errori": 0,
+ "log": [
+  {
+   "ok": true,
+   "cosa": "istanza della copia in ascolto"
+  },
+  {
+   "ok": true,
+   "cosa": "partita di prova per i gesti",
+   "dati": {
+    "id": 3
+   }
+  },
+  {
+   "ok": true,
+   "cosa": "voce più grande: madarame-01-entrata-del-museo-raccogli-e-depreda-le-installazioni-artistiche (Raccogli e depreda le Installazioni Artistiche), 8 pin, 0/8"
+  },
+  {
+   "ok": true,
+   "cosa": "raccolto 1 pin → voce 1/8, gli altri 7 pin invariati, voce non segnata",
+   "dati": {
+    "status": 200,
+    "avanzamento": {
+     "fatti": 1,
+     "totale": 8
+    },
+    "pinFatti": 1,
+    "stato": null
+   }
+  },
+  {
+   "ok": true,
+   "cosa": "«Segna» sulla voce → 8/8, tutti i pin fatti, specchio «ottenuto»",
+   "dati": {
+    "status": 200,
+    "avanzamento": {
+     "fatti": 8,
+     "totale": 8
+    },
+    "effetti": {
+     "segnate": [],
+     "riaperte": []
+    }
+   }
+  },
+  {
+   "ok": true,
+   "cosa": "tolto 1 pin → 7/8, la voce non è più fatta e lo specchio sparisce",
+   "dati": {
+    "status": 200,
+    "avanzamento": {
+     "fatti": 7,
+     "totale": 8
+    },
+    "stato": null,
+    "specchio": null
+   }
+  },
+  {
+   "ok": true,
+   "cosa": "pin 2226 con 2 voci: tolto il pin si riaprono tutte",
+   "dati": {
+    "voci": [
+     "madarame-nelle-profondita-del-museo-sali-sullimpalcatura",
+     "madarame-nelle-profondita-del-museo-raggiungi-la-roccia"
+    ],
+    "prima": [
+     "ottenuto",
+     "ottenuto"
+    ],
+    "dopo": [
+     null,
+     null
+    ]
+   }
+  },
+  {
+   "ok": true,
+   "cosa": "pin condiviso 2088 raccolto in «madarame-01-entrata-del-museo» resta da fare in madarame-scopri-dove-il-tesoro",
+   "dati": {
+    "stati": [
+     {
+      "i": "madarame-01-entrata-del-museo",
+      "pinFatto": [
+       true
+      ],
+      "avanzamento": [
+       {
+        "fatti": 1,
+        "totale": 4
+       }
+      ]
+     },
+     {
+      "i": "madarame-scopri-dove-il-tesoro",
+      "pinFatto": [
+       false
+      ],
+      "avanzamento": [
+       {
+        "fatti": 0,
+        "totale": 4
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "ok": true,
+   "cosa": "partita di prova per il Palazzo concluso e non completato",
+   "dati": {
+    "id": 5
+   }
+  },
+  {
+   "ok": true,
+   "cosa": "Kamoshida: Tesoro e boss fatti, 15 permanenti non segnate → concluso e NON completato",
+   "dati": {
+    "errori": 0,
+    "completamento": {
+     "oggetti": 71,
+     "fatti": 56,
+     "tesoro": true,
+     "boss": true,
+     "concluso": true,
+     "completato": false
+    },
+    "concluso": "Tesoro e boss finale",
+    "completato": null
+   }
+  },
+  {
+   "ok": true,
+   "cosa": "elenco dei Palazzi: Kamoshida concluso, non completato",
+   "dati": {
+    "concluso": "Tesoro e boss finale",
+    "completato": null
+   }
+  },
+  {
+   "ok": true,
+   "cosa": "giorno della partita di prova",
+   "dati": {
+    "data": "04-09",
+    "fascia": "giorno"
+   }
+  },
+  {
+   "ok": true,
+   "cosa": "riferimenti a un ingresso di Kamoshida nelle risposte di città e Tokyo (da leggere)",
+   "dati": {
+    "occorrenze": 0
+   }
+  },
+  {
+   "ok": true,
+   "cosa": "nessun requisito rosso su Kamoshida nel diario 04-09..06-30",
+   "dati": {
+    "righe": [],
+    "totale": 0
+   }
+  }
+ ]
+}

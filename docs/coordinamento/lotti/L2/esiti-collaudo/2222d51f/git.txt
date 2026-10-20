@@ -1,0 +1,38 @@
+### verifica preliminare: i file di 227937b7 non sono toccati da L3
+### git show --stat 227937b7
+ src/components/impostazioni/Cestino.test.tsx | 26 +++++++++++++--
+ src/components/impostazioni/Cestino.tsx      | 32 ++++++++++---------
+ src/utils/cestino.ts                         | 48 +++++++++++++++++++++++++++-
+ 3 files changed, 88 insertions(+), 18 deletions(-)
+### git diff --stat 600af81c 227937b7^ -- <file> (vuoto = stesso contenuto di partenza)
+EXIT=0
+### git log --oneline 600af81c..227937b7^ -- <file> (vuoto = nessun commit di L3 sugli stessi file)
+### tipi usati dal diff già presenti a 600af81c
+600af81c:shared/types.ts:2639:export type TipoCestino = 'area' | 'voce' | 'mappa' | 'area-dedalo' | 'area-fisica';
+600af81c:shared/types.ts:2642:export interface ContenutoCestinoDto {
+600af81c:shared/types.ts:2649:export interface VoceCestinoDto {
+600af81c:shared/types.ts:2658:  contenuto: ContenutoCestinoDto[];
+
+### git cherry-pick 227937b7 (autorizzato dal PM) su 600af81c
+### git rev-parse HEAD
+2222d51f52352de838c5247dee5abae1cd014ce2
+### git branch --show-current
+newreview-l2
+### git status --porcelain (vuoto atteso)
+EXIT=0
+### git diff --stat 600af81c HEAD
+ src/components/impostazioni/Cestino.test.tsx | 26 +++++++++++++--
+ src/components/impostazioni/Cestino.tsx      | 32 ++++++++++---------
+ src/utils/cestino.ts                         | 48 +++++++++++++++++++++++++++-
+ 3 files changed, 88 insertions(+), 18 deletions(-)
+### git diff --stat 227937b7 HEAD -- <file> (vuoto = identico all'originale)
+EXIT=0
+### git log --oneline 9634bbb5..HEAD
+2222d51f fix(L2): testi del Cestino per le aree del mondo (UX2-12)
+600af81c fix(L2): etichette dei passaggi senza sovrapposizioni a 375 (UX2-10), carta del Covo come bersaglio pieno (LAY2-6)
+de67b349 fix(L2): difetti del collaudo — Elimina area con conferma, pannello chiuso sul telefono, nomi dei passaggi al tocco
+8e75abbb docs(L2): ROADMAP, DECISIONI e ARCHITETTURA del lotto
+75894664 merge: L1 pubblicato (date e documenti dei verdetti 3-5) nella linea di sviluppo
+aed23dee feat(L2): parte FE — pagine Quartiere e Area, ingresso in finestra, redirect con spillo e versione, etichette con il nome del posto
+d66cf5f5 fix(L2): BE — testo del 409 di «Elimina area» (FUN2-5) e rotta GET /api/aree/:contenitore/:chiave
+1db43bd8 feat(L2): parte BE — aree del mondo (migrazione 109), casa delle mappe, API /api/aree

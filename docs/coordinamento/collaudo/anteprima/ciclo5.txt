@@ -1,0 +1,60 @@
+### ciclo 5 anteprima — 2026-10-20T07:46:05+02:00 — impronta dopo le prove contro la foto
+{"gioco.db":{"user_version":113,"tabelle":80,"righe":20276},"partite.db":{"user_version":24,"tabelle":36,"righe":3415}}
+gioco.db.area: righe 141 → 142, contenuto diverso
+gioco.db.cestino: righe 0 → 2, contenuto diverso
+gioco.db.immagine: righe 808 → 809, contenuto diverso
+gioco.db.infiltrazione_area: righe 105 → 106, contenuto diverso
+gioco.db.mappa: righe 318 → 319, contenuto diverso
+gioco.db.mappa_alias: righe 691 → 692, contenuto diverso
+gioco.db.mappa_entita: righe 135 → 135, contenuto diverso
+gioco.db.mappa_percorso: righe 318 → 319, contenuto diverso
+### lavoro da preservare prima del ripristino
+IDENTICO
+### righe diverse in gioco.db (miniature escluse): area,cestino,immagine,infiltrazione_area,mappa,mappa_alias,mappa_entita,mappa_percorso
+### gioco.db.area (chiave chiave): 2 differenze
+  + dungeon/okumura/prova-o3-1-vuota {"chiave":"dungeon/okumura/prova-o3-1-vuota","quartiere_chiave":null,"dungeon_chiave":"okumura","slug":"prova-o3-1-vuota","nome":"Prova O3-1 vuota","nome_rivisto":0,"ordine":1100,"planimetria_predefinita":null,"origine":"utente","seed_json":null,"updated_at":"2026-10-20T05:44:53.698Z","citta_chiave":null,"da_verificare":0}
+  ~ dungeon/okumura/caserma updated_at: "2026-10-20T05:36:39.465Z" → "2026-10-20T05:44:28.456Z"
+### gioco.db.cestino (chiave id): 2 differenze
+  + 17 {"id":17,"uid":"3899898d11a75323caf70c1f3836d949","tipo":"area-fisica","chiave":"dungeon/okumura/prova-residuo-area","nome":"Prova residuo area","contesto":"Palazzo di Okumura","riepilogo_json":"{\"infiltrazione_area\":2,\"immagine\":2,\"mappa_alias\":2,\"mappa_percorso\":2,\"mappa\":2,\"area\":1}","registro_json":"[{\"tabella\":\"infiltrazione_area\",\"op\":\"D\",\"prima\":{\"infiltrazione_chiave\":\"okumura-05-linea-esportazioni\",\"area_chiave\":\"dungeon/okumura/prova-residuo-area\",\
+  + 18 {"id":18,"uid":"c4ea817cdc89a372479ca4f1aa4471d2","tipo":"area","chiave":"okumura-prova-residuo-infiltrazione","nome":"Prova residuo infiltrazione","contesto":"Palazzo di Okumura","riepilogo_json":"{\"infiltrazione_area\":1,\"dungeon_area\":1}","registro_json":"[{\"tabella\":\"infiltrazione_area\",\"op\":\"D\",\"prima\":{\"infiltrazione_chiave\":\"okumura-prova-residuo-infiltrazione\",\"area_chiave\":\"dungeon/okumura/caserma\",\"ordine\":0,\"planimetria_iniziale\":null,\"origine\":\"uten
+### gioco.db.immagine (chiave id): 1 differenze
+  + 809 {"id":809,"ambito":"mappa","chiave":"palazzo-di-okumura-prova-o3-1-vuota","nome_file":"2900bbbf-7e5a-46f0-a0a7-3147afda4e26.png","mime":"image/png","byte":94,"created_at":"2026-10-20T05:44:53.696Z","origine_url":null,"contenuto":"<blob 94 f82265c4b3d2>"}
+### gioco.db.infiltrazione_area (chiave infiltrazione_chiave+area_chiave): 1 differenze
+  + okumura-03-caserma|dungeon/okumura/prova-o3-1-vuota {"infiltrazione_chiave":"okumura-03-caserma","area_chiave":"dungeon/okumura/prova-o3-1-vuota","ordine":1,"planimetria_iniziale":null,"origine":"utente"}
+### gioco.db.mappa (chiave chiave): 1 differenze
+  + palazzo-di-okumura-prova-o3-1-vuota {"chiave":"palazzo-di-okumura-prova-o3-1-vuota","nome":"Prova O3-1 vuota","tipo":"area","genitore_chiave":"dungeon-okumura","ordine":0,"immagine_chiave":"palazzo-di-okumura-prova-o3-1-vuota","asset":null,"larghezza":30,"altezza":30,"entita_tipo":null,"entita_chiave":null,"origine":"utente","note":"","updated_at":"2026-10-20T05:44:53.707Z","ruolo_immagine":"planimetria-nativa","nome_rivisto":0,"area_chiave":"dungeon/okumura/caserma","versione_etichetta":nul
+### gioco.db.mappa_alias (chiave chiave): 1 differenze
+  + palazzo-di-okumura-prova-o3-1-vuota {"chiave":"palazzo-di-okumura-prova-o3-1-vuota","mappa_chiave":"palazzo-di-okumura-prova-o3-1-vuota"}
+### gioco.db.mappa_entita (chiave mappa_chiave+entita_tipo+entita_chiave): 0 differenze
+### gioco.db.mappa_percorso (chiave mappa_chiave): 1 differenze
+  + palazzo-di-okumura-prova-o3-1-vuota {"mappa_chiave":"palazzo-di-okumura-prova-o3-1-vuota","chiave":"palazzo-di-okumura-prova-o3-1-vuota","nome":"Palazzo di Okumura › Prova O3-1 vuota"}
+### righe diverse in partite.db (miniature escluse): nessuna tabella
+### scritture nel BE.log
+"time":"2026-10-20T05:44:28.420Z"	"method":"POST","path":"/api/aree/dungeon/okumura","status":201
+"time":"2026-10-20T05:44:28.440Z"	"method":"POST","path":"/api/aree/dungeon/okumura/prova-residuo-area/planimetrie","status":201
+"time":"2026-10-20T05:44:28.453Z"	"method":"POST","path":"/api/compendio/dungeon/okumura/aree","status":201
+"time":"2026-10-20T05:44:28.476Z"	"method":"PUT","path":"/api/compendio/aree/okumura-prova-residuo-infiltrazione/aree-palazzo","status":200
+"time":"2026-10-20T05:44:28.577Z"	"method":"DELETE","path":"/api/aree/dungeon/okumura/prova-residuo-area","status":204
+"time":"2026-10-20T05:44:28.602Z"	"method":"DELETE","path":"/api/compendio/aree/okumura-prova-residuo-infiltrazione","status":204
+"time":"2026-10-20T05:44:53.700Z"	"method":"POST","path":"/api/aree/dungeon/okumura","status":201
+"time":"2026-10-20T05:44:53.726Z"	"method":"PUT","path":"/api/aree/colloca","status":200
+"time":"2026-10-20T05:44:53.744Z"	"method":"POST","path":"/api/impostazioni/cestino/19/ripristina","status":200
+"time":"2026-10-20T05:44:53.904Z"	"method":"POST","path":"/api/mappe/importa","status":200
+"time":"2026-10-20T05:45:07.678Z"	"method":"POST","path":"/api/partite","status":201
+"time":"2026-10-20T05:45:07.680Z"	"method":"PUT","path":"/api/partite/3","status":200
+"time":"2026-10-20T05:45:09.757Z"	"method":"PUT","path":"/api/partite/3","status":200
+"time":"2026-10-20T05:45:11.799Z"	"method":"PUT","path":"/api/partite/3","status":200
+"time":"2026-10-20T05:45:13.962Z"	"method":"PUT","path":"/api/partite/3","status":200
+"time":"2026-10-20T05:45:16.119Z"	"method":"PUT","path":"/api/partite/3","status":200
+"time":"2026-10-20T05:45:18.144Z"	"method":"PUT","path":"/api/partite/3","status":200
+"time":"2026-10-20T05:45:20.267Z"	"method":"DELETE","path":"/api/partite/3","status":204
+### ripristino a server fermi
+terminato albero WINPID 81436
+[BE] fermato
+RIPRISTINO OK: impronta identica alla foto {"gioco.db":{"user_version":113,"tabelle":80,"righe":20268},"partite.db":{"user_version":24,"tabelle":36,"righe":3415}}
+EXIT=0
+[BE] in ascolto sulla porta 3302 (dopo 2s)
+{"data":{"status":"ok","timestamp":"2026-10-20T05:46:12.645Z","db":{"ok":true,"userVersion":113}}}
+IDENTICHE
+contro la base EXIT=0
+2026-10-20T07:46:13+02:00

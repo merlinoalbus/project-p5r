@@ -1,0 +1,149 @@
+### 2026-10-20T06:41:16Z HEAD 292a122e7600ccbaaba68a06ab81e637a3dc452f
+### npx vitest run --reporter=verbose (5 file)
+
+ RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2
+
+ ✓ src/test/areeScorrevoli.test.ts > aree che scorrono dentro la pagina > nel codice nessuno scorrimento con classi di Tailwind, classi arbitrarie o stili in linea: si usano area-scorrevole / area-scorrevole-x 46ms
+ ✓ src/test/areeScorrevoli.test.ts > aree che scorrono dentro la pagina > i tre riconoscitori prendono le forme che devono prendere, e non le altre 0ms
+ ✓ src/test/areeScorrevoli.test.ts > aree che scorrono dentro la pagina > l'area di lettura principale è l'unico scorrimento di pagina (e c'è ancora) 0ms
+ ✓ src/test/areeScorrevoli.test.ts > aree che scorrono dentro la pagina > nel foglio di stile ogni regola che fa scorrere un contenitore ne contiene anche il gesto (overscroll-behavior) 2ms
+ ✓ src/test/areeScorrevoli.test.ts > aree che scorrono dentro la pagina > le due utility dichiarano confine, contenimento e barra 1ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > rende ogni profondità e mantiene distinti gli omonimi senza icone di passaggio 108ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > L2 (2026-10-20): le versioni di un’Area sono una voce sola col nome dell’Area, verso la sua casa, e il gruppo si chiama «Aree di …» 20ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > FUN2-7: aperto Tokyo, il gruppo di un quartiere si chiama «Aree di …» e conta le aree, non le planimetrie 6ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > R1: nell’indice un’area da verificare porta il segno «Da verificare», come nella pagina Area 10ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > E5 ed E7: ogni riga dell’Elenco dice i suoi spilli con la stessa parola; l’Area da verificare sta nel gruppo «Da verificare» 21ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > un vecchio URL editoriale apre la sezione del palazzo e non carica una planimetria falsa 23ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > i contenuti mantengono testo e punti senza inventare coordinate o attività 10ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > «Chiudi» del visore torna alla pagina da cui si era aperta la mappa; senza, all’elenco delle mappe 167ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > «Torna alla partita» porta alla pagina Partita, sulla scheda Oggi, e sta subito prima di «Chiudi» (2026-10-04) 45ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > i passi di un Enigma rientrano sotto di lui (095), le altre voci no 23ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > la sezione originale della guida rimane aperta quando il vecchio riquadro era editoriale 14ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > il selettore mostra alternative senza default e cambia il contesto esplicitamente 35ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > il Covo presenta cinque immagini selezionabili sotto un solo luogo, senza piani inventati 25ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > il riquadro con emblema e dimensioni null/null apre il luogo senza falsa planimetria 8ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > senza partita attiva «Torna alla partita» non c’è nel visore 47ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > nel luogo senza pianta «Torna alla partita» sta dopo «Scheda del Palazzo» e «Modifica mappa» e porta alla pagina Partita, scheda Oggi 43ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > la mappa dei Memento dice «Scheda dei Memento», è di tipo «Memento» e non chiede planimetrie 18ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > senza partita attiva «Torna alla partita» non c’è nel luogo senza pianta 18ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > il riquadro con emblema e dimensioni +0/600 apre il luogo senza falsa planimetria 22ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > il riquadro con emblema e dimensioni 800/+0 apre il luogo senza falsa planimetria 15ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > il riquadro con asset nativo e dimensioni positive conserva il visore reale 16ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > l’emblema futaba non diventa una planimetria per il solo asset normalizzato 8ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > l’emblema iweleth non diventa una planimetria per il solo asset normalizzato 21ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > l’emblema kamoshida non diventa una planimetria per il solo asset normalizzato 6ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > l’emblema kaneshiro non diventa una planimetria per il solo asset normalizzato 8ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > l’emblema madarame non diventa una planimetria per il solo asset normalizzato 15ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > l’emblema maruki non diventa una planimetria per il solo asset normalizzato 7ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > aperta direttamente, «Chiudi» porta all’elenco delle mappe come prima 56ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > l’indice apre una radice nel pannello e ne mostra le mappe 35ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > R1: la carta di Tokyo dice «1 da verificare» senza aprire niente, e il chip porta all’area da verificare 24ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > E4: la carta di Tokyo dice «N quartieri · N aree», non le mappe 10ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > l’emblema mementos non diventa una planimetria per il solo asset normalizzato 8ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > l’emblema niijima non diventa una planimetria per il solo asset normalizzato 15ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > l’emblema okumura non diventa una planimetria per il solo asset normalizzato 16ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > l’emblema shido non diventa una planimetria per il solo asset normalizzato 16ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > il contesto senza titolo rimane selezionato e non è segnalato come estraneo 13ms
+ ✓ src/components/mappe/OrganizzazioneMappe.test.tsx > il nodo parziale dell’albero usa il padre verificato senza mostrare titolo noto come universale 6ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > UX2-15: il pannello del luogo non ha riquadri scorrevoli, né nella griglia né nell’«Elenco completo» 14ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > il visore carica la mappa con la partita attiva e segna un collezionabile raccolto tramite l’API, poi rilegge la mappa in silenzio 85ms
+ ✓ src/pages/CittaPage.test.tsx > CittaPage > mostra una sola Tokyo — quella disegnata — e le piastrelle dei quartieri 127ms
+ ✓ src/pages/CittaPage.test.tsx > CittaPage > sulla mappa disegnata ogni quartiere porta alla sua pagina, con `ingresso=1` (L2, R2-15): l’unica che apre il quartiere 23ms
+ ✓ src/pages/CittaPage.test.tsx > CittaPage > i Memento stanno sulla mappa di Tokyo, dentro la loro finestra e non prima 48ms
+stderr | src/pages/CittaPage.test.tsx > CittaPage > quel che è chiuso sulla mappa è un pallino col nome, non una figura
+An update to CittaPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to CittaPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/pages/CittaPage.test.tsx > CittaPage > quel che è chiuso sulla mappa è un pallino col nome, non una figura
+An update to CittaPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/pages/CittaPage.test.tsx > CittaPage > quel che è chiuso sulla mappa è un pallino col nome, non una figura
+An update to CittaPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > un punto della Guida segnato «Ottenuto» dalla mappa aggiorna lo stato del punto e conta come raccolto 86ms
+ ✓ src/pages/CittaPage.test.tsx > CittaPage > la scheda del quartiere mostra la stessa sagoma della mappa composta 16ms
+ ✓ src/pages/CittaPage.test.tsx > CittaPage > mappa e schede sono una selezione sola: si accendono a vicenda 34ms
+ ✓ src/pages/CittaPage.test.tsx > CittaPage > quel che è chiuso sulla mappa è un pallino col nome, non una figura 22ms
+ ✓ src/pages/CittaPage.test.tsx > CittaPage > la scheda mostra l’illustrazione della mappa del quartiere con la sagoma sopra; senza illustrazione la sola sagoma (L1, 2026-10-20) 30ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > le condizioni sono assolute: anche un elemento fisso del gioco con condizioni che non valgono sparisce, come gli altri pin (2026-10-09) 47ms
+ ✓ src/pages/CittaPage.test.tsx > CittaPage — Aree della città (L2, 2026-10-20) > l’area dello staff, da verificare, ha la sua pagina, «Tieni» e «Rimuovi»; «Tieni» la toglie dalle aree da verificare 50ms
+ ✓ src/pages/CittaPage.test.tsx > CittaPage — Aree della città (L2, 2026-10-20) > UX2-7: la colonna del testo non scende sotto i 10rem, così «Tieni» e «Rimuovi» vanno a capo invece di schiacciarla 27ms
+ ✓ src/pages/CittaPage.test.tsx > CittaPage — Aree della città (L2, 2026-10-20) > «Rimuovi» nella finestra è la conferma (UX2-8): una sola richiesta, con la conferma 41ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > due azioni ravvicinate: la rilettura vecchia che arriva per ultima non sovrascrive quella nuova 118ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > dopo un’azione la rilettura applica la visibilità calcolata dal server: un pin che dipendeva dallo stato appena segnato sparisce 77ms
+ ✓ src/pages/CittaPage.test.tsx > CittaPage — Aree della città (L2, 2026-10-20) > senza Aree della città né planimetrie da collocare le due sezioni non ci sono 88ms
+ ✓ src/pages/MappaPage.test.tsx > un contenitore senza immagine apre i luoghi figli senza una finta planimetria 18ms
+ ✓ src/pages/MappaPage.test.tsx > la planimetria di Tokyo non è più una destinazione: si finisce sulla mappa della Città 10ms
+ ✓ src/pages/MappaPage.test.tsx > anche un alias che risolve a Tokyo finisce sulla mappa della Città 15ms
+ ✓ src/pages/MappaPage.test.tsx > LAY2-5: da 1024 px lo spazio fra intestazione ed elenco è 12 px (a 1024×690 l’indice sforava di 3 px) 5ms
+ ✓ src/pages/MappaPage.test.tsx > un vecchio indirizzo di una planimetria porta alla sua casa (la pagina dell’Area sulla versione) con spillo e punto, senza aprire il visore 11ms
+ ✓ src/pages/MappaPage.test.tsx > un quartiere si apre nella sua pagina; una mappa la cui casa è il visore resta nel visore 14ms
+ ✓ src/pages/CittaPage.test.tsx > CittaPage — Aree della città (L2, 2026-10-20) > «Colloca» propone il quartiere del genitore con le sue aree, invia a collocaPlanimetria e rilegge la lista 71ms
+ ✓ src/pages/CittaPage.test.tsx > CittaPage — Aree della città (L2, 2026-10-20) > «Colloca» per una planimetria il cui genitore non è un quartiere propone il primo quartiere 23ms
+ ✓ src/pages/CittaPage.test.tsx > QuartierePage > mostra la mappa del quartiere incorporata e i luoghi senza i pulsanti di posizionamento (ora nell’editor) 55ms
+ ✓ src/pages/CittaPage.test.tsx > QuartierePage > l’intestazione mostra l’illustrazione del quartiere con la sagoma sopra; senza, la sagoma grande (L1, 2026-10-20) 21ms
+ ✓ src/pages/MappaPage.test.tsx > il contesto URL cambia il titolo del visore e il selettore può ripristinare tutte le alternative 98ms
+ ✓ src/pages/MappaPage.test.tsx > l’emblema del palazzo senza dimensioni lascia guida e planimetrie accessibili senza visore 16ms
+ ✓ src/pages/MappaPage.test.tsx > la planimetria nativa mantiene contesto e guida dentro il pannello reale del visore 46ms
+ ✓ src/pages/MappaPage.test.tsx > una mappa con asset originale e dimensioni non registrate mantiene la planimetria 10ms
+ ✓ src/pages/CittaPage.test.tsx > QuartierePage > lo scarico automatico della pianta su una mappa con pezzi (409 `mappa-con-pezzi`, L1 F5) non sostituisce niente e non mostra errori 32ms
+ ✓ src/pages/CittaPage.test.tsx > QuartierePage > dalla metro (`?ingresso=1`) si apre la finestra dell’area d’ingresso; «Apri l’area» porta alla sua pagina sul punto, «Chiudi» toglie il parametro 61ms
+ ✓ src/pages/CittaPage.test.tsx > QuartierePage > con uno spillo nell’indirizzo vince lo spillo: la finestra d’ingresso non si apre, e «Entra» la apre a richiesta 25ms
+ ✓ src/pages/CittaPage.test.tsx > QuartierePage > UX2-6: sul telefono il visore dell’illustrazione è alto quanto la figura (classe dell’ospite, proporzione dal visore) 21ms
+ ✓ src/pages/CittaPage.test.tsx > QuartierePage > un quartiere senza ingresso (Kichijoji): dalla metro nessuna finestra, niente «Entra», «Ingresso» da scegliere 13ms
+ ✓ server/routes/immagini-miniature.test.ts > miniature delle immagini del database > 1 — PNG 1672×941 con l=320: WebP 320×180 generata, molto più leggera; la seconda richiesta viene dalla cache, senza righe nuove 47ms
+ ✓ server/routes/immagini-miniature.test.ts > miniature delle immagini del database > 2 — sostituita l’immagine, le sue miniature se ne vanno; il nuovo `v` dà la miniatura nuova; una riga di un’altra versione si rigenera 56ms
+ ✓ server/routes/immagini-miniature.test.ts > miniature delle immagini del database > 3 — larghezze non ammesse: 400 larghezza-non-ammessa 8ms
+ ✓ server/routes/immagini-miniature.test.ts > miniature delle immagini del database > 4 — l non minore della larghezza reale, SVG e GIF: l’originale, con lo stesso tipo e gli stessi byte 19ms
+ ✓ server/routes/immagini-miniature.test.ts > miniature delle immagini del database > 5 — eliminando l’immagine, singola o in blocco, le sue miniature se ne vanno (cascata) 21ms
+ ✓ server/routes/immagini-miniature.test.ts > miniature delle immagini del database > 6 — intestazioni: con `v` immutabile, senza `v` no-cache; ETag con la larghezza; 304 con If-None-Match, anche prima di generare 18ms
+ ✓ server/routes/immagini-miniature.test.ts > miniature delle immagini del database > 8 — cinque richieste contemporanee della stessa miniatura: una generazione sola, una riga 59ms
+ ✓ server/routes/immagini-miniature.test.ts > miniature delle immagini del database > 9 — una PNG trasparente resta trasparente nella WebP 20ms
+ ✓ server/routes/immagini-miniature.test.ts > miniature delle immagini del database > 11 — UX2-13: una planimetria su una tela trasparente si ritaglia sul riquadro del disegno, con un piccolo bordo trasparente; anche sotto la larghezza chiesta 38ms
+ ✓ server/routes/immagini-miniature.test.ts > miniature delle immagini del database > 12 — UX2-13: le miniature della generazione di prima (la cache già piena su p5s) non si servono: si rigenerano, e la pulizia le toglie; ETag e URL delle mappe cambiano con la generazione 45ms
+ ✓ server/routes/immagini-miniature.test.ts > miniature delle immagini del database > 13 — UX2-13: un’immagine caricata senza margini (la «Prova» dell’utente, 1378×1142, disegno 99%×98%) resta intera 37ms
+ ✓ server/routes/immagini-miniature.test.ts > miniature delle immagini del database > riscaldamento e pulizia: le immagini date ricevono le misure delle schede; le miniature orfane o stantie se ne vanno 31ms
+ ✓ server/routes/immagini-miniature.test.ts > miniature delle immagini del database > 10 — il pacchetto porta lo schema delle miniature ma mai le righe 362ms
+
+ Test Files  5 passed (5)
+      Tests  91 passed (91)
+   Start at  08:41:17
+   Duration  3.77s (transform 3.44s, setup 516ms, import 4.82s, tests 3.43s, environment 2.93s)
+
+EXIT=0

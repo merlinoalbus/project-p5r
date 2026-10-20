@@ -1,0 +1,25 @@
+1c1
+< versioni prima {"gioco.db":106,"partite.db":21} dopo {"gioco.db":106,"partite.db":21}
+---
+> versioni prima {"gioco.db":108,"partite.db":21} dopo {"gioco.db":108,"partite.db":21}
+103a104,117
+> # gioco.db:immagine_miniatura: righe 68 → 68; aggiunte 0, tolte 0, cambiate 4
+>   ~ 782|160
+>       versione: "<ora>" → "<ora>"
+>       created_at: "<ora>" → "<ora>"
+>   ~ 782|320
+>       versione: "<ora>" → "<ora>"
+>       created_at: "<ora>" → "<ora>"
+>   ~ 800|160
+>       versione: "<ora>" → "<ora>"
+>       created_at: "<ora>" → "<ora>"
+>   ~ 800|320
+>       versione: "<ora>" → "<ora>"
+>       created_at: "<ora>" → "<ora>"
+> 
+230a245
+>       asset: "mappe/palazzo-di-madarame-il-labirinto-contorto" → null
+4524c4539
+< tabelle invariate: 101 su 111
+---
+> tabelle invariate: 101 su 112

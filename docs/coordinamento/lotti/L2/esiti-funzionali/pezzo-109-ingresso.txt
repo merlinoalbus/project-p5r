@@ -1,0 +1,19 @@
+prima null (righe totali 2)
+
+PUT corpo vecchio {mappa} (planimetria di Kichijoji) 200 {"mappa":"kichijoji-quartiere-dello-shopping","nome":"Kichijoji › Quartiere dello shopping","x":10,"y":20,"zoom":2} → DB {"quartiere_chiave":"kichijoji","mappa_chiave":"nativo-rmap-005-1-0","x":10,"y":20,"zoom":2,"area_chiave":"citta/kichijoji/quartiere-dello-shopping"} (righe totali 3)
+GET dettaglio → ingresso {"mappa":"kichijoji-quartiere-dello-shopping","nome":"Kichijoji › Quartiere dello shopping","x":10,"y":20,"zoom":2}
+
+PUT con una planimetria di UN ALTRO quartiere (Central Street di Shibuya) 200 {"mappa":"shibuya-central-street","nome":"Shibuya › Central Street","x":10,"y":20,"zoom":2} → DB {"quartiere_chiave":"kichijoji","mappa_chiave":"nativo-rmap-001-3-0","x":10,"y":20,"zoom":2,"area_chiave":"citta/shibuya/central-street"} (righe totali 3)
+
+PUT corpo nuovo {area} (non ancora annunciato) 400 {"code":"validation-error","message":"Richiesta non valida (body).","details":{"issues":[{"expected":"string","code":"invalid_type","path":["mappa"],"message":"Input non valido: atteso string, ricevuto undefined"},{"code":"unrecognized_keys","keys":["area"],"path":[],"message":"Chiave non riconosciu → DB {"quartiere_chiave":"kichijoji","mappa_chiave":"nativo-rmap-001-3-0","x":10,"y":20,"zoom":2,"area_chiave":"citta/shibuya/central-street"} (righe totali 3)
+
+DELETE ingresso 204 → DB null (righe totali 2)
+
+chiave pubblica della planimetria di Kichijoji kichijoji-quartiere-dello-shopping
+IMPORT pacchetto con solo l’ingresso 200 {"mappe":0,"spilli":0,"pezzi":0,"copie":0,"pezziScartati":0,"copieScartate":0,"pezziEliminati":0,"copieEliminate":0,"immagini":0,"saltate":[],"condizioniScartate":0,"vociScartate":0} → DB {"quartiere_chiave":"kichijoji","mappa_chiave":"nativo-rmap-005-1-0","x":11,"y":22,"zoom":3,"area_chiave":"citta/kichijoji/quartiere-dello-shopping"} (righe totali 3)
+IMPORT di nuovo con sovrascrivi 200 {"mappe":0,"spilli":0,"pezzi":0,"copie":0,"pezziScartati":0,"copieScartate":0,"pezziEliminati":0,"copieEliminate":0,"immagini":0,"saltate":[],"condizioniScartate":0,"vociScartate":0} → DB {"quartiere_chiave":"kichijoji","mappa_chiave":"nativo-rmap-005-1-0","x":12,"y":23,"zoom":4,"area_chiave":"citta/kichijoji/quartiere-dello-shopping"} (righe totali 3)
+IMPORT con la planimetria di UN ALTRO quartiere 200 {"mappe":0,"spilli":0,"pezzi":0,"copie":0,"pezziScartati":0,"copieScartate":0,"pezziEliminati":0,"copieEliminate":0,"immagini":0,"saltate":[],"condizioniScartate":0,"vociScartate":0} → DB {"quartiere_chiave":"kichijoji","mappa_chiave":"nativo-rmap-001-3-0","x":13,"y":24,"zoom":1,"area_chiave":"citta/shibuya/central-street"} (righe totali 3)
+
+DELETE ingresso (pulizia) 204 → DB null (righe totali 2)
+ingresso shibuya {"mappa":"shibuya-central-street","nome":"Shibuya › Central Street","x":38.29,"y":32.67,"zoom":1}
+ingresso yongen-jaya {"mappa":"yongen-jaya-vicoli","nome":"Yongen-Jaya › Vicoli","x":37.46,"y":25.14,"zoom":1}

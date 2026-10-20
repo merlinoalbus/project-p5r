@@ -1,0 +1,34 @@
+### git rev-parse HEAD
+f19a117fe259c9828c9e57343a26cbd2c7802417
+### git branch --show-current
+newreview-l2
+### git status --porcelain (vuoto atteso)
+EXIT=0
+### git log --oneline 5ae62692..HEAD (giro 2)
+f19a117f fix(L2): giro 2 — l'editor lascia scritto il rifiuto di una planimetria senza Area nel mondo (FUN2-8, parte FE)
+98e3cc1c fix(L2): giro 2 — segno «Da verificare» nell'indice delle mappe (R1, parte FE)
+4e6119a6 fix(L2): giro 2 — «Colloca» propone il quartiere del genitore (FUN2-9) e test della finestra con una lista non vuota (R6)
+5fd97d9f fix(L2): giro 2 — «da verificare» nell'indice delle mappe (R1), Area corretta conservata dal seed (R2-28), niente mappe senza Area nel mondo dall'editor (FUN2-8), chiave del genitore delle planimetrie da collocare (FUN2-9)
+90137ce2 docs(L2): DECISIONI — predefinita del Sottopasso 001-2-0 «inquadratura orientale», alias shibuya-sottopasso sulla planimetria completa (R5)
+### git diff --stat 5ae62692 HEAD
+ docs/DECISIONI.md                                 |  3 +-
+ server/openapi/descrizioni/aree.ts                |  2 +-
+ server/openapi/descrizioni/mappe.ts               |  4 +-
+ server/routes/aree-mondo.test.ts                  | 75 ++++++++++++++++++++++-
+ server/services/mappe/areeService.ts              |  7 ++-
+ server/services/mappe/casaMappa.ts                |  2 +
+ server/services/mappe/mappeService.ts             | 18 +++++-
+ shared/types.ts                                   |  8 ++-
+ src/components/mappe/AlberoLuoghi.tsx             | 15 +++--
+ src/components/mappe/AreeDellaCitta.tsx           |  6 +-
+ src/components/mappe/OrganizzazioneMappe.test.tsx | 11 ++++
+ src/pages/CittaPage.test.tsx                      | 53 +++++++++++++++-
+ src/pages/EditorMappaPage.test.tsx                | 27 ++++++++
+ src/pages/EditorMappaPage.tsx                     | 33 +++++++++-
+ 14 files changed, 244 insertions(+), 20 deletions(-)
+### confronto con gli originali di newreview
+b0ebdad0: contenuto identico
+c43b8bc0: contenuto identico
+fcff89e3: contenuto identico
+### grep -rn "2026-10-21" src/ server/ shared/ docs/
+EXIT=1 (1 = nessuna occorrenza)

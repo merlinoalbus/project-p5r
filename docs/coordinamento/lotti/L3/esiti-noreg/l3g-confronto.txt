@@ -1,0 +1,20 @@
+chiavi ignorate: da_rivedere, aggiunta_da, testo_precedente_json, motivo_revisione; differenze: 0
+-- estesa contro la 110 provata (l3-110r):
+= validata
+= destinazioni
+= pezzi
+= atterraggi
+= mappePalazzi
+= marcatori
+= perimetri
+ESTESA IDENTICA (tolti updated_at/created_at)
+impronta del mondo = 110 (= 109)
+  ≠ gioco.db:area {"updated_at":140}
+  ≠ gioco.db:voce_giornata {"created_at":1,"updated_at":1}
+  tabelle identiche alla 110 provata: 113
+differenze di stato visibile: 0
+destinazioni diverse dalla base: 0
+indirizzi che portano a una mappa diversa da prima: 0
+Memento identici alla base: true
+kamoshida voci e stati identici: true | riepilogo identico: true
+madarame voci e stati identici: true | riepilogo identico: true

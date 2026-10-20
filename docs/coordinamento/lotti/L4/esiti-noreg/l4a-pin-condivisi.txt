@@ -1,0 +1,14 @@
+kamoshida : voci non descrittive con più di un pin: 40 | pin coinvolti: 110 | di cui collezionabili: 50
+    8 pin (0 collez.) ombra-sciagura «La Rivincita sui Nemici»
+    4 pin (2 collez.) ombra-sciagura «Sconfiggi Nemici Esterni»
+    4 pin (1 collez.) volonta «Recupero 2 Seme della Bramosia»
+    4 pin (2 collez.) ombra-sciagura «Sconfiggi i Capitani delle Guardie»
+    3 pin (3 collez.) oggetto «Depreda Oggetti»
+    3 pin (0 collez.) scorciatoia «Passa per i lampadari»
+madarame : voci non descrittive con più di un pin: 49 | pin coinvolti: 127 | di cui collezionabili: 67
+    8 pin (8 collez.) oggetto «Raccogli e depreda le Installazioni Artistiche»
+    5 pin (1 collez.) forziere «Saccheggia Rasetsu Ofuda»
+    4 pin (4 collez.) oggetto «Installazioni artistiche»
+    4 pin (4 collez.) oggetto «Saccheggia Installazioni Artistiche»
+    4 pin (0 collez.) ombra-sciagura «Sconfiggi Nemici»
+    4 pin (0 collez.) ombra-sciagura «Sconfiggi tutte le guardie»

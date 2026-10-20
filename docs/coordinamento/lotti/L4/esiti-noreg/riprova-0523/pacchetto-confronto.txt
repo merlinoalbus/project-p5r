@@ -1,0 +1,9 @@
+versioni prima {"gioco.db":112,"partite.db":23} dopo {"gioco.db":112,"partite.db":23}
+
+# gioco.db:mappa: righe 317 → 317; aggiunte 0, tolte 0, cambiate 2
+  ~ shibuya-tornello-della-linea-ginza-aoyama-itchome
+      asset: "mappe/shibuya-tornello-della-linea-ginza-aoyama-itchome" → null
+  ~ palazzo-di-madarame-il-labirinto-contorto
+      asset: "mappe/palazzo-di-madarame-il-labirinto-contorto" → null
+
+tabelle invariate: 117 su 118

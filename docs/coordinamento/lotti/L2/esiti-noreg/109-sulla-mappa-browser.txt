@@ -1,0 +1,28 @@
+«Sulla mappa» delle 75 voci del diario validato — prova nel browser, 2026-10-20 ~02:50, FE 5373 → BE 3201 (data/ a 109),
+partita 1 al 06-01 giorno. Ogni indirizzo aperto in un riquadro 1280×800 della stessa origine. Colonne: uguale alla base (=/≠) |
+voci | atteso/ottenuto (ok = spillo selezionato e scheda aperta; nascosto = spillo non mostrato; mappa = planimetria senza spillo;
+diverso = spillo visibile ma non selezionato) | indirizzo del pulsante | → | indirizzo d'arrivo | titolo | pin selezionato
+
+= | 1 | nascosto/nascosto | /guida/mappe/citta-shujin-academy?spillo=1656 | → | /guida/citta/shujin-academy?spillo=1656 | «Shujin Academy — Project P5R» |
+≠ | 5 | nascosto/nascosto | /guida/mappe/citta-shujin-academy?spillo=1616 | → | /guida/citta/shujin-academy?spillo=1616 | «Quartiere — Project P5R» |
+≠ | 9 | ok/diverso | /guida/mappe/citta-ogikubo?spillo=226 | → | /guida/citta/ogikubo?spillo=226 | «Ogikubo — Project P5R» |
+≠ | 8 | ok/nascosto | /guida/mappe/nativo-rmap-001-3-0?spillo=1518 | → | /guida/citta/shibuya/central-street?spillo=1518 | «Pagina non trovata — Project P5R» |
+= | 3 | ok/ok | /guida/mappe/nativo-rmap-152-1-0?spillo=1667 | → | /guida/mappe/palazzo-di-kamoshida-prigione-sotterranea-tutorial-nativo-rmap-152-1-0?spillo=1667 | «Prigione sotterranea - Tutorial — Mappe — Project P5R» | Confidente: Morgana (ottenuto)
+≠ | 9 | ok/diverso | /guida/mappe/citta-tsukishima?spillo=230 | → | /guida/citta/tsukishima?spillo=230 | «Tsukishima — Project P5R» |
+≠ | 3 | ok/nascosto | /guida/mappe/nativo-rmap-001-3-0?spillo=1525 | → | /guida/citta/shibuya/central-street?spillo=1525 | «Pagina non trovata — Project P5R» |
+≠ | 4 | nascosto/nascosto | /guida/mappe/nativo-rmap-001-3-0?spillo=1517 | → | /guida/citta/shibuya/central-street?spillo=1517 | «Pagina non trovata — Project P5R» |
+≠ | 1 | ok/nascosto | /guida/mappe/nativo-rmap-001-3-0?spillo=1524 | → | /guida/citta/shibuya/central-street?spillo=1524 | «Pagina non trovata — Project P5R» |
+≠ | 7 | nascosto/nascosto | /guida/mappe/nativo-rmap-009-2-0?spillo=1588 | → | /guida/citta/yongen-jaya/vicoli?spillo=1588 | «Pagina non trovata — Project P5R» |
+≠ | 1 | ok/nascosto | /guida/mappe/nativo-rmap-001-4-0?spillo=1537 | → | /guida/mappe/nativo-rmap-001-4-0?spillo=1537 | «Project P5R — Compagno di gioco» |
+≠ | 4 | ok/nascosto | /guida/mappe/nativo-rmap-001-3-0?spillo=1515 | → | /guida/citta/shibuya/central-street?spillo=1515 | «Pagina non trovata — Project P5R» |
+≠ | 2 | ok/nascosto | /guida/mappe/nativo-rmap-001-3-0?spillo=1519 | → | /guida/citta/shibuya/central-street?spillo=1519 | «Pagina non trovata — Project P5R» |
+= | 2 | mappa/mappa | /guida/mappe/nativo-rmap-190-1-0 | → | /guida/mappe/memento-memento-aree-fisse-strutture-che-i-memento-riusano | «Memento - aree fisse — … — Mappe — Project P5R» |
+≠ | 4 | ok/nascosto | /guida/mappe/nativo-rmap-001-3-0?spillo=1516 | → | /guida/citta/shibuya/central-street?spillo=1516 | «Pagina non trovata — Project P5R» |
+≠ | 3 | ok/nascosto | /guida/mappe/nativo-rmap-002-0-0?spillo=292 | → | /guida/citta/shujin-academy/edificio-principale-1p-edificio-laboratori-1p?spillo=292 | «Pagina non trovata — Project P5R» |
+= | 7 | mappa/mappa | /guida/mappe/nativo-rmap-153-1-0 | → | /guida/mappe/palazzo-di-madarame-entrata-del-museo | «Entrata del Museo — Mappe — Project P5R» |
+≠ | 1 | ok/nascosto | /guida/mappe/nativo-rmap-009-2-0?spillo=1592 | → | /guida/citta/yongen-jaya/vicoli?spillo=1592 | «Pagina non trovata — Project P5R» |
+≠ | 1 | ok/nascosto | /guida/mappe/nativo-rmap-002-0-0?spillo=293 | → | /guida/citta/shujin-academy/edificio-principale-1p-edificio-laboratori-1p?spillo=293 | «Pagina non trovata — Project P5R» |
+
+Riepilogo: 19 indirizzi, 75 voci. Come la base: 13 voci (Palazzi 3+7, Memento 2, Shujin 1656 nascosto 1).
+«Pagina non trovata»: 38 voci (Central Street 26, Vicoli 8, Shujin 1P 4). Pagina del Quartiere senza spillo selezionato: Ogikubo 9,
+Tsukishima 9 (+ Shujin 1616, 5 voci, nascosto comunque). Fiorista 1: resta su /guida/mappe/… senza pin selezionato.

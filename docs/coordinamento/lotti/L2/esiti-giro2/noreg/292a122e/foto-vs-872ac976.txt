@@ -1,0 +1,39 @@
+versioni prima {"gioco.db":109,"partite.db":21} dopo {"gioco.db":109,"partite.db":21}
+
+# gioco.db:area: righe 23 → 23; aggiunte 0, tolte 0, cambiate 23
+  ~ citta/tokyo/area-riservata-allo-staff
+      updated_at: "2026-10-20T06:43:44.227Z" → "2026-10-20T06:43:46.336Z"
+  ~ citta/akihabara/electric-town
+      updated_at: "2026-10-20T06:43:44.227Z" → "2026-10-20T06:43:46.336Z"
+  ~ citta/kanda-jinbocho/cappella
+      updated_at: "2026-10-20T06:43:44.227Z" → "2026-10-20T06:43:46.336Z"
+  ~ citta/kichijoji/quartiere-dello-shopping
+      updated_at: "2026-10-20T06:43:44.227Z" → "2026-10-20T06:43:46.336Z"
+  ~ citta/odaiba/cantiere-dello-stadio
+      updated_at: "2026-10-20T06:43:44.227Z" → "2026-10-20T06:43:46.336Z"
+  … (dettaglio limitato a 5 righe per tipo)
+
+# gioco.db:immagine_miniatura: righe 149 → 68; aggiunte 0, tolte 81, cambiate 68
+  - 410|160
+  - 784|640
+  - 1|640
+  - 4|640
+  - 3|640
+  ~ 785|160
+      versione: "2026-10-18T13:02:14.823Z" → "2026-10-18T13:02:14.823Z~r2"
+      created_at: "2026-10-20T04:50:42.398Z" → "2026-10-20T06:43:46.429Z"
+  ~ 785|320
+      versione: "2026-10-18T13:02:14.823Z" → "2026-10-18T13:02:14.823Z~r2"
+      created_at: "2026-10-20T04:50:42.456Z" → "2026-10-20T06:43:46.454Z"
+  ~ 799|160
+      versione: "2026-10-18T13:08:23.144Z" → "2026-10-18T13:08:23.144Z~r2"
+      created_at: "2026-10-20T04:50:42.501Z" → "2026-10-20T06:43:46.474Z"
+  ~ 799|320
+      versione: "2026-10-18T13:08:23.144Z" → "2026-10-18T13:08:23.144Z~r2"
+      created_at: "2026-10-20T04:50:42.551Z" → "2026-10-20T06:43:46.499Z"
+  ~ 787|160
+      versione: "2026-10-18T13:03:26.541Z" → "2026-10-18T13:03:26.541Z~r2"
+      created_at: "2026-10-20T04:50:42.605Z" → "2026-10-20T06:43:46.520Z"
+  … (dettaglio limitato a 5 righe per tipo)
+
+tabelle invariate: 111 su 113

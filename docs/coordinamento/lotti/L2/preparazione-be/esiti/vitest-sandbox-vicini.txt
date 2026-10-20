@@ -1,0 +1,229 @@
+
+ RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941/365ea5e8-f698-4350-bd74-d5465a3b19f3/scratchpad/l2/sandbox
+
+ ✓ server/db/migrations/104_cestino.test.ts > crea il cestino nel file di gioco e la parte delle partite nel loro file, con i vincoli; rieseguirle non cambia niente 171ms
+ ✓ server/db/migrations/107_ruolo_dalla_gerarchia.test.ts > radici dei Palazzi e dei Memento stemmi; città e quartieri con immagine illustrazioni; le altre con immagine planimetrie; senza immagine «nessuna» 178ms
+ ✓ server/db/migrations/106_ruolo_delle_immagini_caricate.test.ts > solo le mappe con immagine e ruolo «nessuna» cambiano; stemmi, ruoli già dati e mappe senza immagine restano 173ms
+ ✓ server/db/migrations/108_miniature_delle_immagini.test.ts > crea immagine_miniatura vuota; solo le misure ammesse; eliminata la sorgente, le miniature se ne vanno; le altre tabelle invariate 178ms
+ ✓ server/services/mappe/alberoMappe.test.ts > alberoMappe > il sottoalbero di un Palazzo contiene la radice e tutte le discendenti, e solo loro 5ms
+ ✓ server/services/mappe/alberoMappe.test.ts > alberoMappe > il Palazzo di ogni mappa è lo stesso con le due strade (una mappa → tutte le mappe) 5ms
+ ✓ server/services/mappe/alberoMappe.test.ts > alberoMappe > un ciclo nei genitori (dato rovinato) non fa girare le query all'infinito 1ms
+ ✓ server/db/migrations/105_quiz_delle_attivita.test.ts > nasce quiz_json; il Triple Seven ha il quiz, gli altri no; il quiz è già nella forma normalizzata 175ms
+ ✓ server/db/migrations/105_quiz_delle_attivita.test.ts > le risposte seguono la tabella incollata dall'utente, voce per voce; i due abbinamenti incerti lo dicono 1ms
+ ✓ server/db/migrations/109_aree_del_mondo.test.ts > crea le Aree del mondo: gruppi in un’Area con le versioni, sciolte una per Area, Covo sotto Yongen-Jaya dopo le altre, staff da collocare; nient’altro cambia 182ms
+ ✓ server/db/migrations/109_aree_del_mondo.test.ts > si può rieseguire: la seconda volta nessuna riga toccata; una zona nuova riceve la sua Area in fondo al quartiere, con lo slug libero 130ms
+ ✓ server/services/cestinoService.test.ts > registrare un'eliminazione > ogni riga toccata nei due file finisce nel registro, cascate e BLOB compresi; i trigger non restano 33ms
+ ✓ server/services/cestinoService.test.ts > registrare un'eliminazione > se l'eliminazione fallisce non resta niente: né l'eliminazione, né il registro, né i trigger 40ms
+ ✓ server/services/cestinoService.test.ts > registrare un'eliminazione > dentro una transazione già aperta registra lo stesso, anche il REPLACE (e un annullamento di fuori toglie tutto) 65ms
+ ✓ server/db/migrations/105_quiz_delle_attivita.test.ts > una riga corretta dall'utente: il quiz va nella riga e nell'istantanea; un quiz già scritto dall'utente resta; ripetere non cambia niente 125ms
+ ✓ server/db/migrations/105_quiz_delle_attivita.test.ts > un'istantanea illeggibile resta com'era 139ms
+ ✓ server/services/mappe/sincronizzaMappe.test.ts > sincronizzaMappe: riclassificazione degli spilli di seed > riporta al tipo del registro uno spillo di seed rimasto a un tipo vecchio, senza toccare quelli dell’utente 32ms
+ ✓ server/services/mappe/sincronizzaMappe.test.ts > sincronizzaMappe: riclassificazione degli spilli di seed > nel database sincronizzato esistono i cinque tipi nuovi dove i punti lo prevedono 1ms
+ ✓ server/services/cestinoService.test.ts > registrare un'eliminazione > un'eliminazione dentro un'altra finisce nel registro di quella di fuori 26ms
+ ✓ server/services/cestinoService.test.ts > rimettere com'era > rimette ogni riga com'era (BLOB, rowid, partite), toglie quella aggiunta, ed esce dal cestino 25ms
+ ✓ server/services/cestinoService.test.ts > rimettere com'era > quel che è cambiato dopo l'eliminazione resta com'è, colonna per colonna, e l'esito lo dice 25ms
+ ✓ server/services/cestinoService.test.ts > rimettere com'era > una chiave del file di gioco presa da qualcosa creato dopo blocca tutto (409) e non cambia niente 18ms
+ ✓ server/services/cestinoService.test.ts > rimettere com'era > una riga che punta a qualcosa eliminato dopo non torna, il resto sì 19ms
+ ✓ server/services/cestinoService.test.ts > rimettere com'era > senza la parte delle partite (file sostituito) si rimettono i dati di gioco, e lo si dice 25ms
+ ✓ server/services/cestinoService.test.ts > rimettere com'era > se l'elemento stesso non può tornare non si rimette niente (409) 25ms
+ ✓ server/services/cestinoService.test.ts > svuotare > eliminare un elemento lo toglie con la sua parte nelle partite; svuotare toglie tutto; 404 se non c'è 41ms
+ ✓ server/services/mappe/sincronizzaMappe.test.ts > riallineaSpilliLuoghi: gli spilli dei luoghi seguono il catalogo dei tipi di luogo > un luogo «scuola» rimasto con lo spillo «attività» passa a «biblioteca»; un tipo più fine e gli spilli dell’utente restano 1ms
+ ✓ server/services/mappe/sincronizzaMappe.test.ts > sincronizzaMappe: i passaggi automatici verso le mappe figlie di una radice della guida > Tokyo della guida: un passaggio per quartiere, Shibuya dove la mette la mappa ufficiale, nessuno verso i Memento 215ms
+ ✓ server/services/mappe/sincronizzaMappe.test.ts > sincronizzaMappe: i passaggi automatici verso le mappe figlie di una radice della guida > un Palazzo della guida: un passaggio per area, non verso le planimetrie native; una radice dell’utente non ne riceve 175ms
+ ✓ server/routes/struttura-server.test.ts > voce 5 — il server legge i valori del catalogo > la presenza di un negozio sono i suoi orari; la sede e il programma punti sono nel DTO 64ms
+ ✓ server/routes/immagine-mappa-unica.test.ts > l’immagine di una mappa da un posto solo (L1) > caricata dall’editor: una planimetria nuova del Palazzo diventa «planimetria-nativa» con le dimensioni, e l’URL è versionato 51ms
+ ✓ server/routes/immagine-mappa-unica.test.ts > l’immagine di una mappa da un posto solo (L1) > caricata dalla rotta generica delle immagini: stessa regola dell’editor (prima salvava e basta, col ruolo «nessuna») 19ms
+ ✓ server/routes/immagine-mappa-unica.test.ts > l’immagine di una mappa da un posto solo (L1) > un quartiere con l’immagine caricata è un’illustrazione; la radice di un Palazzo resta stemma anche con un’illustrazione caricata 26ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B1: un punto con un nome lungo nasce con una chiave che le sue rotte accettano; un nome senza lettere non lascia un trattino in fondo 84ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B2/B1': le finestre dei Palazzi si rileggono quando il DB di gioco cambia (registro unico delle cache) 14ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > costruisce l’albero dalla guida (Tokyo → quartieri, Palazzi/Dedalo → aree) con gli spilli dai marcatori 42ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > il dettaglio espone percorso, figli, spilli con il dettaglio dell’entità collegata (punto, luogo con negozio e articoli) 43ms
+ ✓ server/routes/piante-citta.test.ts > Mappe dei quartieri > 22 quartieri su 24 hanno una mappa collegata con credito; i luoghi espongono lo spillo (nullo se non posizionato) 28ms
+ ✓ server/routes/piante-citta.test.ts > Mappe dei quartieri > spillo di un luogo: si rilegge nella scheda; le regole dell'avvio non toccano gli spilli dell'utente 13ms
+ ✓ server/routes/piante-citta.test.ts > Mappe dei quartieri > scarica la mappa del quartiere nell'istanza dall'URL del seed e la registra come immagine «citta-<quartiere>» 35ms
+ ✓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F5 — da-url su una mappa con pezzi: 409 senza conferma (niente cambia); con la conferma sostituisce, toglie i pezzi e la mappa è dell’utente 84ms
+ ✓ server/routes/immagine-mappa-unica.test.ts > l’immagine di una mappa da un posto solo (L1) > una mappa con i pezzi ritagliati: anche dalla rotta generica la sostituzione chiede conferma (409 mappa-con-pezzi) 37ms
+ ✓ server/routes/stanze-planimetrie.test.ts > la stanza di una planimetria > una mappa a sé entra nella stanza di un’altra: se quella non ne ha una, nasce col nome dato; l’etichetta resta 40ms
+ ✓ server/routes/stanze-planimetrie.test.ts > la stanza di una planimetria > una planimetria di una stanza diventa una stanza a sé, col suo nome e la sua etichetta; le altre restano insieme 7ms
+ ✓ server/routes/stanze-planimetrie.test.ts > la stanza di una planimetria > il nome della stanza scelto da una persona si segna su tutte le sue planimetrie, anche su chi ci entra dopo 78ms
+ ✓ server/routes/citta.test.ts > API città e attività > quartieri con conteggi e scheda con luoghi (Confidenti risolti, piatti, flag verificato) 30ms
+ ✓ server/routes/citta.test.ts > API città e attività > con una partita dice quali quartieri sono davvero nel mondo, non solo quelli con una data 35ms
+ ✓ server/routes/citta.test.ts > API città e attività > ogni quartiere è raggiungibile: nessuna regola scritta a mano lo chiude per sempre 12ms
+ ✓ server/routes/citta.test.ts > API città e attività > attività, lavori, libri e film con Doti; letture per partita con evento, riapertura, validazione, reseed stabile 121ms
+ ✓ server/routes/struttura-server.test.ts > voce 5 — il server legge i valori del catalogo > la ricerca degli articoli filtra per più categorie, per stato d’acquisto e per disponibilità 151ms
+ ✓ server/routes/struttura-server.test.ts > voce 5 — il server legge i valori del catalogo > i luoghi: elenco per la scelta della sede, negozi e attività dalle sedi, il tipo «luogo» nel catalogo 30ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B2': i semafori dei Confidenti vedono un evento segnato anche se la data della partita non cambia 18ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B3: con «sovrascrivi» una mappa che il pacchetto dichiara radice torna radice 56ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B4: reimportando una mappa, i passaggi di altre mappe ritrovano lo spillo d'arrivo reinserito 44ms
+ ✓ server/routes/stanze-planimetrie.test.ts > la stanza di una planimetria > rinominare la prima planimetria di una stanza (anche dall’editor) fissa il titolo che la stanza aveva; le altre non la toccano 65ms
+ ✓ server/routes/stanze-planimetrie.test.ts > la stanza di una planimetria > solo fra planimetrie dello stesso luogo; non nella propria stanza; mappa inesistente 404; corpo non valido 400 13ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > editor: crea, aggiorna ed elimina mappe e spilli con validazione (coordinate, tipo, genitore ciclico) 75ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > stato «raccolto» per partita: uno spillo collegato a un punto aggiorna anche il punto della Guida 39ms
+ ✓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F5 — scarico della pianta di un quartiere con pezzi: 409 senza conferma, poi con la conferma; l’origine della mappa non cambia (non è una scelta dell’utente) 24ms
+ ✓ server/routes/accesso-mondo.test.ts > risolve lo stesso pin dal negozio e dai suoi articoli senza inventare coordinate 277ms
+ ✓ server/routes/percorsi-map.test.ts > deriva la chiave da tutta la gerarchia, preservando i nomi naturali; senza asset per convenzione 286ms
+ × server/routes/ingressi.test.ts > salva ingresso con coordinate anche agli estremi e mantiene destinazione dopo rinomina e reseed 318ms
+   → expected 500 to be 200 // Object.is equality
+ ✓ server/routes/struttura-server.test.ts > voce 5 — il server legge i valori del catalogo > scrivendo la sede il quartiere segue; gli orari e il programma punti si salvano come valori 14ms
+ ✓ server/routes/struttura-server.test.ts > voce 5 — il server legge i valori del catalogo > la correzione di alcuni campi soltanto vale per ogni tipo, e non cancella gli effetti ricavati dalla migrazione 30ms
+ ✓ server/routes/struttura-server.test.ts > voce 5 — il server legge i valori del catalogo > libri, film e attività portano gli effetti dichiarati, dove si comprano e dove si svolgono 11ms
+ ✓ server/routes/struttura-server.test.ts > voce 5 — il server legge i valori del catalogo > una lettura non ancora disponibile non si registra (409), e con la pioggia lo studio vale di più 17ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B5: eliminando un pin o una mappa se ne vanno anche le schermate caricate; la pianta di un quartiere resta 90ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B6: dentro un gruppo le condizioni si descrivono coi nomi, non con le chiavi 8ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B7: uno stato rimasto su una voce descrittiva non conta per la raccolta del Palazzo 3ms
+ ✓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > illustrazione: scheda e intestazione di ogni quartiere mostrano la stessa immagine della loro mappa (caricata, poi asset) 143ms
+ ✓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > illustrazione: l’intestazione di un Palazzo ha la caricata della sua radice, mai lo stemma (che è il segno) 23ms
+ ✓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F6 — import: le dimensioni dell’intestazione dell’immagine vincono su quelle del pacchetto; se l’intestazione non si legge (SVG) restano quelle del pacchetto 40ms
+ ✓ server/routes/struttura-server.test.ts > voce 5 — il server legge i valori del catalogo > i Palazzi contano la raccolta sulle planimetrie; i Memento gli obiettivi dei dedali, timbri compresi 56ms
+ ✓ server/routes/struttura-server.test.ts > voce 5 — il server legge i valori del catalogo > le richieste sono ordinate per dedalo e l’elenco porta i dedali con i conteggi 7ms
+ ✓ server/routes/struttura-server.test.ts > voce 5 — il server legge i valori del catalogo > il cruciverba conosce il giorno della partita e il prossimo da risolvere 6ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B8: Tokyo elenca tanti figli quanti ne conta, senza il nodo dei Memento 8ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B9: immagine e righe che la legano nascono insieme o per niente 8ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B12: a pari ordine decide la chiave, anche quando il nome ordinerebbe diversamente 19ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B14: eliminando un luogo dell'utente, i pin che lo citavano perdono il riferimento 14ms
+ ✓ server/routes/verifica-mappe.test.ts > verifica mappe e guida > B14: eliminando un negozio dell'utente, i pin che lo citavano perdono il riferimento 15ms
+ ✓ server/routes/cestino.test.ts > ogni eliminazione va nel cestino e si rimette com'era (impronta identica di ogni tabella) > un'area della guida di un Palazzo, con voci, pin collegati, legami alle planimetrie e spunte 329ms
+ ✓ server/routes/accesso-mondo.test.ts > conserva alternative reali e non sceglie arbitrariamente il primo piano 241ms
+ ✓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F9 — una mappa nuova dichiara l’asset predefinito solo se esiste; l’esportazione non inventa asset per convenzione 31ms
+ ✓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F5 — rimozione dell’immagine di una mappa con pezzi: 409 senza conferma (niente cambia); con la conferma se ne vanno anche i pezzi 17ms
+ ✓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F5 — rimozione in blocco (ambito mappa, o tutti gli ambiti) con una mappa che ha pezzi: 409 senza conferma; con la conferma i pezzi se ne vanno 28ms
+ × server/routes/ingressi.test.ts > rifiuta valori e riferimenti non validi senza alterare ingresso salvato; eliminare destinazione ripristina il default 245ms
+   → expected 38.29 to be 20 // Object.is equality
+ ✓ server/routes/percorsi-map.test.ts > rinomina e sposta un sottoalbero mantenendo pin, progressi e vecchie URL 296ms
+ × server/routes/ingressi.test.ts > trasporta ingresso con il pacchetto mappe e non sovrascrive una configurazione personale durante il seed 167ms
+   → expected [ { quartiere: 'shibuya', …(4) } ] to deeply equal [ { quartiere: 'shibuya', …(4) } ]
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > immagine di base nell’istanza (dimensioni dall’intestazione), esportazione con base64 e importazione idempotente 267ms
+ ✓ server/services/mappe/organizzazioneMappe.test.ts > organizzazione geografica e contenuti guida > rifiuta conversioni che perderebbero una vera immagine o un arrivo configurato 608ms
+ ✓ server/routes/percorsi-map.test.ts > rifiuta collisioni e cicli senza modifiche parziali 181ms
+ ✓ server/routes/accesso-mondo.test.ts > unifica riferimento diretto e mappa della stessa entità senza duplicare destinazioni 162ms
+ ✓ server/routes/cestino.test.ts > ogni eliminazione va nel cestino e si rimette com'era (impronta identica di ogni tabella) > una voce della guida che è un Enigma: i passi tornano suoi, con il loro ordine e il loro stato 163ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > un pacchetto della guida non cancella gli spilli aggiunti dall’utente su una mappa della guida 64ms
+ ✓ server/services/mappe/organizzazioneMappe.test.ts > organizzazione geografica e contenuti guida > una nuova installazione conserva le sezioni senza creare false planimetrie 160ms
+ ✓ server/routes/accesso-mondo.test.ts > raggiunge il pin di un luogo attraverso il suo legame strutturato con il negozio 149ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > ricerca delle entità collegabili per tipo e testo; la pianta scaricata con la chiave della mappa diventa la sua immagine di base 80ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > le immagini scaricate dalle guide entrano nel pacchetto come tutte le altre, con la provenienza annotata 10ms
+ ✓ server/routes/cestino.test.ts > ogni eliminazione va nel cestino e si rimette com'era (impronta identica di ogni tabella) > una planimetria con pin, figlie e immagini (BLOB) e lo stato dei pin nelle partite 192ms
+ × server/routes/accesso-mondo.test.ts > usa ingresso solo per il quartiere e conserva alias dopo rinomina 163ms
+   → expected 500 to be 200 // Object.is equality
+ ✓ server/services/mappe/organizzazioneMappe.test.ts > organizzazione geografica e contenuti guida > ricaricare il pacchetto base invariato dopo nuove mappe conserva ID e dipendenti dei vecchi pacchetti 206ms
+ ✓ server/routes/cestino.test.ts > ogni eliminazione va nel cestino e si rimette com'era (impronta identica di ogni tabella) > un'area di un dedalo dei Memento, con le voci, le Richieste che vi stavano e i timbri 139ms
+ ✓ server/routes/cestino.test.ts > quel che cambia dopo l'eliminazione > una planimetria figlia rinominata dopo torna sotto la sua mappa col nome nuovo, e i percorsi si ricalcolano 70ms
+ ✓ server/routes/cestino.test.ts > l'ordine dopo il ripristino > un'area torna al suo posto anche se nel frattempo se n'è aggiunta un'altra: l'ordine resta senza buchi né doppioni 22ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > schermate degli spilli: caricamento, didascalia, eliminazione; esportazione per luogo (JSON) e reimportazione 187ms
+ ✓ server/routes/cestino.test.ts > l'ordine dopo il ripristino > una voce torna al suo posto; se una voce nuova ha preso il suo posto, quelle da lì in giù scendono di uno 22ms
+ ✓ server/routes/cestino.test.ts > il posto delle voci > una voce torna subito dopo la voce che la precedeva, anche se quella nel frattempo è stata spostata 20ms
+ ✓ server/routes/cestino.test.ts > il primo e l'ultimo > un'area del dedalo che era la prima torna la prima, anche se nel frattempo un'altra è salita in cima 22ms
+ ✓ server/routes/accesso-mondo.test.ts > distingue il punto preciso dal posto dichiarato, l’entità inesistente e il pin eliminato 160ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > condizioni di visibilità degli spilli: solo quelle calcolabili, validate sulla Guida, valutate con la partita, esportate e reimportate 134ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > uno spillo del seed a cui l’utente aggiunge condizioni sopravvive al reseed senza doppioni; date e periodi impossibili sono rifiutati 19ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > condizione «solo di sera»: segue il momento della giornata della partita, che torna a «giorno» quando cambia il giorno corrente 62ms
+ ✓ server/services/mappe/organizzazioneMappe.test.ts > organizzazione geografica e contenuti guida > conserva contesti nominali e gruppi immagini senza scegliere un contesto, e non sceglie la prima associazione multipla 185ms
+ ✓ server/services/mappe/organizzazioneMappe.test.ts > organizzazione geografica e contenuti guida > API guida mantiene immagini, condizioni e stato modificabili sullo stesso ID senza esporre coordinate 205ms
+ ✓ server/routes/cestino.test.ts > il primo e l'ultimo > una voce che era la prima torna in cima; una che era l'ultima, senza più la sua precedente, torna in fondo 59ms
+ ✓ server/routes/accesso-mondo.test.ts > un’attività porta al posto che dichiara, e non a uno scelto per somiglianza del nome 153ms
+ ✓ server/routes/cestino.test.ts > le rotte del cestino > chiave occupata → 409 con l'involucro d'errore e niente cambia; id che non c'è → 404; id non valido → 400 162ms
+ ✓ server/routes/cestino.test.ts > le rotte del cestino > eliminare per sempre un elemento (204) e svuotare il cestino ({ eliminati }) 38ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > l’importazione scarta e conta le condizioni con chiavi assenti dalla Guida invece di nascondere lo spillo per sempre 50ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > passaggi dall’albero (15.24): «Nuova mappa» crea il passaggio nel genitore (e il ritorno a scelta) in un punto libero; POST /passaggi con 409/400/404 201ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > dimensioniImmagine legge le intestazioni PNG, GIF, JPEG e WEBP 0ms
+ ✓ server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > una planimetria aggiunta al Palazzo diventa una pianta caricandone l’immagine; uno stemma resta stemma (2026-10-18) 29ms
+ ✓ server/routes/accesso-mondo.test.ts > un confidente porta ai luoghi che il catalogo gli attribuisce 155ms
+ ✓ server/routes/accesso-mondo.test.ts > non affianca mai una meta generica al pin preciso, nemmeno su mappe diverse 162ms
+ ✓ server/routes/accesso-mondo.test.ts > senza alcun pin arriva al posto dichiarato, e lo dice nel criterio 152ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/routes/accesso-mondo.test.ts > usa ingresso solo per il quartiere e conserva alias dopo rinomina
+AssertionError: expected 500 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 500
+
+ ❯ server/routes/accesso-mondo.test.ts:75:134
+     73|
+     74| it('usa ingresso solo per il quartiere e conserva alias dopo rinomina'…
+     75|   expect((await request(app).put('/api/compendio/citta/shibuya/ingress…
+       |                                                                                                                                      ^
+     76|   const id = await creaPin('shibuya');
+     77|   expect((await request(app).put('/api/mappe/shibuya').send({ nome: 'S…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  server/routes/ingressi.test.ts > salva ingresso con coordinate anche agli estremi e mantiene destinazione dopo rinomina e reseed
+AssertionError: expected 500 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 500
+
+ ❯ server/routes/ingressi.test.ts:14:88
+     12| const url='/api/compendio/citta/shibuya/ingresso';
+     13| it('salva ingresso con coordinate anche agli estremi e mantiene destin…
+     14|  expect((await request(app).put(url).send({mappa:'shibuya',x:0,y:100,z…
+       |                                                                                        ^
+     15|  await request(app).put('/api/mappe/shibuya').send({nome:'Shibuya Cent…
+     16|  regoleAllAvvio(getDb());
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  server/routes/ingressi.test.ts > rifiuta valori e riferimenti non validi senza alterare ingresso salvato; eliminare destinazione ripristina il default
+AssertionError: expected 38.29 to be 20 // Object.is equality
+
+- Expected
++ Received
+
+- 20
++ 38.29
+
+ ❯ server/routes/ingressi.test.ts:27:88
+     25|  for(const patch of [{x:-1},{y:101},{zoom:8},{x:'20'}])expect((await r…
+     26|  expect((await request(app).put(url).send({mappa:'inesistente',x:20,y:…
+     27|  expect((await request(app).get('/api/compendio/citta/shibuya')).body.…
+       |                                                                                        ^
+     28|  await request(app).delete('/api/mappe/'+m.chiave);expect((await reque…
+     29| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  server/routes/ingressi.test.ts > trasporta ingresso con il pacchetto mappe e non sovrascrive una configurazione personale durante il seed
+AssertionError: expected [ { quartiere: 'shibuya', …(4) } ] to deeply equal [ { quartiere: 'shibuya', …(4) } ]
+
+- Expected
++ Received
+
+  [
+    {
+-     "mappa": "shibuya",
++     "mappa": "shibuya-central-street",
+      "quartiere": "shibuya",
+-     "x": 21,
+-     "y": 34,
+-     "zoom": 2.5,
++     "x": 38.29,
++     "y": 32.67,
++     "zoom": 1,
+    },
+  ]
+
+ ❯ server/routes/ingressi.test.ts:33:29
+     31|  await request(app).put(url).send({mappa:'shibuya',x:21,y:34,zoom:2.5}…
+     32|  const pacchetto=(await request(app).get('/api/mappe/esporta?radice=sh…
+     33|  expect(pacchetto.ingressi).toEqual([{quartiere:'shibuya',mappa:'shibu…
+       |                             ^
+     34|  await request(app).delete(url);
+     35|  expect((await request(app).post('/api/mappe/importa').send({pacchetto…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  2 failed | 20 passed (22)
+      Tests  4 failed | 121 passed (125)
+   Start at  02:06:29
+   Duration  4.95s (transform 19.78s, setup 7.47s, import 44.77s, tests 14.38s, environment 2ms)
+
+EXIT=1

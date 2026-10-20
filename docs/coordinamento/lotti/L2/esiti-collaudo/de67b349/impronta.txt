@@ -1,0 +1,22 @@
+### impronta: sha256 di 'git diff 9634bbb5 HEAD -- server/ shared/ src/' (a 8e75abbb era 18c4d350…3ee0)
+01138ad04a762a7b34dc1b5b7817a27f876b34e657970872c713f72128e8071b *-
+### sha256 di 'git diff 8e75abbb HEAD -- server/ shared/ src/' (solo le correzioni)
+cc28a0d6c38ead4a92982f4485def32bc62cd341cab25ca4bf19b597ded75618 *-
+### file della correzione e sha256 a HEAD
+15ff354c8560c977cc3b8213d94d09283663028f0566535ce000eaeb92ec99ba *src/components/mappe/AlberoLuoghi.tsx
+9dea01b2600b968ad594c113447e681ceca6335fcf967c5b1939426c2e678954 *src/components/mappe/AreeDelQuartiere.tsx
+abdac9598daf3d957d30218f040a488dc37f71532ee4a698c756a3bac1f6e390 *src/components/mappe/AreeDellaCitta.tsx
+bbacb6036cc1125d6a13deb615efc2a7ae5e04f69a55a1347c84fc69ca480a56 *src/components/mappe/CollezioniImmagini.test.tsx
+0afff3ba98a6a81f79c1dc6688a5007742339fc8aab6450af2e47a4960c557e0 *src/components/mappe/FinestraAggiungiArea.tsx
+42bb7901e5577089a143d1e83f310e7c26e03cbc2297974c3380e19a2b7a2f97 *src/components/mappe/FinestraModificaArea.tsx
+0b2e53c5d446a5f278fa45b8f8021729f2f35475854513b4992f8cc4c6695cc1 *src/components/mappe/FinestreAree.test.tsx
+9c4798970687a16f3600ba56a2d3bf7b8147ad86195a837a8583d5992265dad0 *src/components/mappe/OrganizzazioneMappe.test.tsx
+a3a9704cf6eb5d89fbb08b2681b360d198b3b97c94c6c2ef593d7711c8b9b71c *src/components/mappe/VisoreMappa.test.tsx
+d749d49f1b075328b83f765481ce0b59ee156ee8c28d1d2f14d6023acb053af2 *src/components/mappe/VisoreMappa.tsx
+b761fc53f692d92e07e29cf013411d451f2cb25c51e034edb61422afc5c6846e *src/pages/AreaPage.test.tsx
+e71a83e7eefd8d1247f02ee1895cc42ff41a437e05d9d1f83a482d8542e2ad17 *src/pages/AreaPage.tsx
+347416f12bfd62b369897e4bc5bba144204118628a637f0b4ffff290573a6299 *src/pages/CittaPage.test.tsx
+d4fa647454448a006449168b52bcd0432efdca651ad4d387089c05d85ec1b965 *src/pages/MappaPage.test.tsx
+1b2b7af6b4487f5c3a81f26929a9ac73f76757e94ed1a664b7e35c989ca22fe4 *src/pages/MappaPage.tsx
+f6a1f0edaa649ca22b74ddf9555727e837ddc109da9e03adff003d5001611298 *src/pages/QuartierePage.tsx
+b350a45acfae5fcdc984cc267e723e70005c7d40b22d16fbac2b3ef803364603 *src/tailwind.css

@@ -1,0 +1,117 @@
+### impronta: sha256 di 'git diff bd20ed72 HEAD -- server/ shared/ src/' (HEAD e2cc3ca8)
+d6c658574aaa1e9e9c1fb4daef13830d238e6765ec91996d2f6a1d9da72b09ce *-
+### precedente (e9fb4871): 77a017dab975f3e27f5eae7a65127ad8a10c09f26927df84a004258d6d67b654
+### file coinvolti
+server/db/migrations/108_miniature_delle_immagini.test.ts
+server/db/migrations/108_miniature_delle_immagini.ts
+server/db/migrations/index.ts
+server/index.ts
+server/openapi/descrizioni/compendio.ts
+server/openapi/descrizioni/immagini.ts
+server/openapi/descrizioni/mappe.ts
+server/routes/dungeon.test.ts
+server/routes/immagine-mappa-strade.test.ts
+server/routes/immagini-miniature-senza-generatore.test.ts
+server/routes/immagini-miniature.test.ts
+server/routes/immagini.ts
+server/routes/mappe-editor.test.ts
+server/routes/mappe.ts
+server/routes/percorsi-map.test.ts
+server/schemas/immagini.ts
+server/services/cittaService.ts
+server/services/dungeonService.ts
+server/services/immaginiService.ts
+server/services/mappe/immagineMappa.ts
+server/services/mappe/mappeService.ts
+server/services/mappe/pezziMappa.ts
+server/services/miniatureService.ts
+server/services/pacchetto/pacchettoGioco.ts
+shared/miniature.test.ts
+shared/miniature.ts
+shared/types.ts
+src/components/guida/AreeDelDedalo.test.tsx
+src/components/guida/EmblemaDungeon.tsx
+src/components/guida/GuidaDellArea.test.tsx
+src/components/guida/TramaDellArea.test.tsx
+src/components/impostazioni/ImmaginiCaricate.test.tsx
+src/components/impostazioni/ImmaginiCaricate.tsx
+src/components/mappe/AnteprimaMappa.tsx
+src/components/mappe/IllustrazioneConSegno.tsx
+src/components/mappe/ImmagineMappaUnica.test.tsx
+src/components/mappe/ImmaginiLuogo.tsx
+src/components/mappe/MappaTokyo.test.tsx
+src/components/mappe/MappaTokyo.tsx
+src/components/mappe/SagomaQuartiere.tsx
+src/components/mappe/segniMappa.ts
+src/pages/AccessoMondoPage.tsx
+src/pages/CittaPage.test.tsx
+src/pages/CittaPage.tsx
+src/pages/DungeonDettaglioPage.test.tsx
+src/pages/DungeonDettaglioPage.tsx
+src/pages/EditorMappaPage.test.tsx
+src/pages/EditorMappaPage.tsx
+src/pages/MappaPage.tsx
+src/pages/QuartierePage.scarico.test.tsx
+src/pages/QuartierePage.tsx
+src/services/api/immagini.ts
+src/stores/assetStore.ts
+src/tailwind.css
+src/utils/dedali.test.ts
+src/utils/haPlanimetria.ts
+### sha256 per file a HEAD
+c18aef24d0846c792eea0172d3e0c51e4b5f74642e4107ce5a6df811e25086cf *server/db/migrations/108_miniature_delle_immagini.test.ts
+f09cd175c7c0d8a8d52340a8e023f33a1372aa878fae3e7bc3a89615bc6d15e6 *server/db/migrations/108_miniature_delle_immagini.ts
+45a2e6cff4e76d0948aa163b2a945481e1b59a9f7f3984642b16eb8d6c6dc6c1 *server/db/migrations/index.ts
+4a3208639372a43244c2310c0112cafde9765757d4070aba4c83d315331bfbee *server/index.ts
+66aa0e49577f7b08be33cf8131d600cb3bb064418111d36b23ece2f5fa1ce5c0 *server/openapi/descrizioni/compendio.ts
+d9b4fae82f2aeb8a6b7a4355ce6fc6d729fdd4455fd548d57972a97ed465fdbc *server/openapi/descrizioni/immagini.ts
+c58f5b9ebd4a6ee980ddb9a8edbc4c12655bdd6e02c3d7e9e06b5de524ec66d3 *server/openapi/descrizioni/mappe.ts
+14c62570cf36847e28b6c1316301f24766e472cd21a3f98911bd489ad75fd5aa *server/routes/dungeon.test.ts
+0471be50151e37b68c0393b075f5aac7c0560079f7bee6f417c05d0d183862e1 *server/routes/immagine-mappa-strade.test.ts
+f1c2d9558c2ea28718e00b1cc7cdfb0f1094615c4656e8f276109acf65c02cf1 *server/routes/immagini-miniature-senza-generatore.test.ts
+b16e5c8a3af7a67edc4a1a9670d5180e3e9bdf8d13424d860b5289645ea41265 *server/routes/immagini-miniature.test.ts
+462202bb2250714beb09f1f6643d37689d9b3ff8646759acda397b0d1c9e48dd *server/routes/immagini.ts
+fa41c8e7fc63ff1e1c01b5eb3b8b4da1e31734d737a8196d294b3e0eeba98d4b *server/routes/mappe-editor.test.ts
+ac9733ba052548aa98d123ba399c94ec98c7d0de0d812000f0a404d7673d47b0 *server/routes/mappe.ts
+6a450e2c86d53d025cf31b83732508a5d1b149cec1199ec8e1a64e92322f4bcc *server/routes/percorsi-map.test.ts
+501712f4ac9a46da033aefa086957ba07495c3ce0f11c64822e4b7a638ca985b *server/schemas/immagini.ts
+bc8ebff60c18b5c726b22f74a6704a985e8c60b94c918989118e3aa87728a577 *server/services/cittaService.ts
+3667e5887b41696f5cd9869a9433b597a68f685a8a199833baad555b9e665fc1 *server/services/dungeonService.ts
+3c60f0ed4f7ce8fb0192e5f61d014a70951cde2ac2c8d8a9519aa8e74c7febb7 *server/services/immaginiService.ts
+bf66717d7038e9f28d55bf86f3010f5cde3d110b05503ff7e5fccb80c056f5e8 *server/services/mappe/immagineMappa.ts
+c6063d0b5d97e56f60ceb71eba4d97f360e7f4810b730c6c16cb5ddfc13b599f *server/services/mappe/mappeService.ts
+441113b2366831fafcc54ca60d31c34d0005bcf16f6140d627f5d53d9a8c7ead *server/services/mappe/pezziMappa.ts
+02324cbd700e2da1e0f22473282ac98d09796790f4018c017653e7edf9977310 *server/services/miniatureService.ts
+289468b0f01d5eee6be281ec1082941ce0501dec592cbbb213328c888836854a *server/services/pacchetto/pacchettoGioco.ts
+499f132e2d5abee043f9d6475d889c99c703e8eb068a55bba56a25e775bbf7c2 *shared/miniature.test.ts
+31373f4629977d01d158e7afe4a4c849a88aa3de7b7b3c40a45aac059aaca387 *shared/miniature.ts
+dace863100810cd8f8c8dee610dd3ad43b6762388c08045429cb672d03c03664 *shared/types.ts
+3571eb5a0e35108b63474b96216dd81534a5b6895ca9686825824359306bf3bc *src/components/guida/AreeDelDedalo.test.tsx
+935ccbb284c49aee6c2570fa6e344e4f9f9a8adb2721eb1fed420acdda495d9b *src/components/guida/EmblemaDungeon.tsx
+14afbbcb28546c0f1b782914bab99d0804be6347b7b877c26f738e9e4a26e09f *src/components/guida/GuidaDellArea.test.tsx
+44814500be62082d3c37e5fa5a62226c25fefd7c78ff06c47c8e112cce892f34 *src/components/guida/TramaDellArea.test.tsx
+f7c2db65f8739fa1f4a2b0c22ec7990e8a4ab9c7fe7538a79947d65df1f4de7d *src/components/impostazioni/ImmaginiCaricate.test.tsx
+5adb38630321fe148edc6945d5b0127a71830cd2cfe76d2dc2557292568d5770 *src/components/impostazioni/ImmaginiCaricate.tsx
+b81e49367c40b1e52bfcd7ce3df59fed9e61764efc3b404dce538a784ccc3672 *src/components/mappe/AnteprimaMappa.tsx
+da7ce44f4ad4c0adf3165c5b217986da56f9db1bec88fe7455e219c0ca34c857 *src/components/mappe/IllustrazioneConSegno.tsx
+67027ed4c150f3b4c51ba6d58874daf5e8576c48935724e86bd41b502451d822 *src/components/mappe/ImmagineMappaUnica.test.tsx
+4f395c8bf63f567791194fa8ac480cf2bbdd8ef82d8a32207f42cace045e52b9 *src/components/mappe/ImmaginiLuogo.tsx
+76fecce393a6ff46a887df419c6ec7e8beaf213e48d94f90737fb39d2a77fb35 *src/components/mappe/MappaTokyo.test.tsx
+6107fa7293b62e66cb9d7b48a5fd756031528be1255959671c9c955bf0240fdd *src/components/mappe/MappaTokyo.tsx
+ee46be45034c423eda4e13ff72018e3f77a5f55629b5a5aed17f0b584b3e84b1 *src/components/mappe/SagomaQuartiere.tsx
+811effdbcfca80244b21e95ff4baaa9d3d10a50fcce2ff0521c5f1b22070c403 *src/components/mappe/segniMappa.ts
+ba5d32184e16875adb28017a61cf930519c2f4261f123db1f67b5f4d424c3deb *src/pages/AccessoMondoPage.tsx
+9d5d19f555db7db8a603e91e279d0048bd42491c3d4d4cc2809d3fe584e34f6e *src/pages/CittaPage.test.tsx
+d1bbf3959b41026d9126a2353fc711304d33df07ade70fe5d2a0962fef26b8d9 *src/pages/CittaPage.tsx
+c10d5dadec6629231596ff067a91c6bed2d97cde1f8c00859b24500b4d90c6f0 *src/pages/DungeonDettaglioPage.test.tsx
+c10e2b262a0166447fc8273615fd1c8a5b8e1264e834b4156ccd5b3d887e5542 *src/pages/DungeonDettaglioPage.tsx
+b91dd20ba924cd8d85110ba441c640c94a3c48ebbe0c47285cddfefa45209fa5 *src/pages/EditorMappaPage.test.tsx
+d9925ec9020929ee83072988b35badc8cb128021e8ebda272e1061ac2fb261ed *src/pages/EditorMappaPage.tsx
+2a3ade5a225139bacb11d77c49314d15e87547fc5ea1d0e49dcb6b2e29568119 *src/pages/MappaPage.tsx
+1941262737dc71731a4516575d1f3fb0ec60e014ae514de7b66363732cf02ee4 *src/pages/QuartierePage.scarico.test.tsx
+42b07052495b277c3ddafb78f1dc6fdd88ae6cc541fef89d4f131ea35420565e *src/pages/QuartierePage.tsx
+d13f559cf9ee7e6b08a01af9352487af39341089211234b21f761c01613611c7 *src/services/api/immagini.ts
+547fa6fa016db05b8512285614c68b829bf3c7194e3f6565b25040ffed6cdd70 *src/stores/assetStore.ts
+0fb0db8c3c00aec272a5d783b81e11ccb1a957cbe812504d9291f623804e8401 *src/tailwind.css
+9c1672c55809dec60fcf26301e0d89c4a7857b171817b94e2659c5b5df91b3bf *src/utils/dedali.test.ts
+035806a3a56e7859b5540a73c69e471ae81585ab8a078a1023e63405892282ad *src/utils/haPlanimetria.ts

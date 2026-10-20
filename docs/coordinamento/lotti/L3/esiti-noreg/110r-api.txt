@@ -1,0 +1,208 @@
+38 endpoint; non 200: 0
+
+# /compendio/citta: 25 differenze
+  + .corpo.data.0.ingresso.area = {"slug":"vicoli","nome":"Vicoli"}
+  + .corpo.data.0.aree = 3
+  + .corpo.data.1.ingresso.area = {"slug":"central-street","nome":"Central Street"}
+  + .corpo.data.1.aree = 6
+  + .corpo.data.2.aree = 1
+  + .corpo.data.3.aree = 1
+  … (19 altre)
+
+# /compendio/citta?partita=1: 25 differenze
+  + .corpo.data.0.ingresso.area = {"slug":"vicoli","nome":"Vicoli"}
+  + .corpo.data.0.aree = 3
+  + .corpo.data.1.ingresso.area = {"slug":"central-street","nome":"Central Street"}
+  + .corpo.data.1.aree = 6
+  + .corpo.data.2.aree = 1
+  + .corpo.data.3.aree = 1
+  … (19 altre)
+
+# /mappe/albero: 1215 differenze
+  - .corpo.data.0.contesti (era [])
+  - .corpo.data.0.gruppoImmagini (era {"id":"nativo-rmap-022-1-0","nome":"Covo dei Ladri","ordine":0,"etichetta":"settore d’ingresso"})
+  ~ .corpo.data.0.chiave: "covo-dei-ladri-settore-dingresso" → "tokyo"
+  ~ .corpo.data.0.nome: "Covo dei Ladri — settore d’ingresso" → "Tokyo"
+  ~ .corpo.data.0.nomeCompleto: "Covo dei Ladri — settore d’ingresso" → "Tokyo"
+  ~ .corpo.data.0.tipo: "luogo" → "citta"
+  … (1209 altre)
+
+# /mappe/tokyo?partita=1: 59 differenze
+  ~ .corpo.data.figli.0.numeroFigli: 2 → 7
+  + .corpo.data.figli.0.area = null
+  + .corpo.data.figli.0.casa = "/guida/citta/yongen-jaya"
+  + .corpo.data.figli.1.area = null
+  + .corpo.data.figli.1.casa = "/guida/citta/shibuya"
+  + .corpo.data.figli.2.area = null
+  … (53 altre)
+
+# /compendio/citta/yongen-jaya?partita=1: 2 differenze
+  + .corpo.data.ingresso.area = {"slug":"vicoli","nome":"Vicoli"}
+  + .corpo.data.aree = [{"chiave":"citta/yongen-jaya/banchina-della-metropolitana","contenitore":{"tipo":"quartiere","chiave":"yongen-jaya","nome":"Yongen-Jaya"},"slug":"banchina-dell
+
+# /compendio/citta/shibuya?partita=1: 2 differenze
+  + .corpo.data.ingresso.area = {"slug":"central-street","nome":"Central Street"}
+  + .corpo.data.aree = [{"chiave":"citta/shibuya/piazza-della-stazione","contenitore":{"tipo":"quartiere","chiave":"shibuya","nome":"Shibuya"},"slug":"piazza-della-stazione","nome":"P
+
+# /compendio/citta/shinjuku?partita=1: 1 differenze
+  + .corpo.data.aree = [{"chiave":"citta/shinjuku/quartiere-a-luci-rosse","contenitore":{"tipo":"quartiere","chiave":"shinjuku","nome":"Shinjuku"},"slug":"quartiere-a-luci-rosse","nom
+
+# /compendio/citta/kichijoji?partita=1: 1 differenze
+  + .corpo.data.aree = [{"chiave":"citta/kichijoji/quartiere-dello-shopping","contenitore":{"tipo":"quartiere","chiave":"kichijoji","nome":"Kichijoji"},"slug":"quartiere-dello-shoppin
+
+# /compendio/citta/akihabara?partita=1: 1 differenze
+  + .corpo.data.aree = [{"chiave":"citta/akihabara/electric-town","contenitore":{"tipo":"quartiere","chiave":"akihabara","nome":"Akihabara"},"slug":"electric-town","nome":"Electric To
+
+# /compendio/citta/shujin-academy?partita=1: 1 differenze
+  + .corpo.data.aree = [{"chiave":"citta/shujin-academy/edificio-principale-1p-edificio-laboratori-1p","contenitore":{"tipo":"quartiere","chiave":"shujin-academy","nome":"Shujin Acade
+
+# /compendio/citta/kanda-jinbocho?partita=1: 1 differenze
+  + .corpo.data.aree = [{"chiave":"citta/kanda-jinbocho/cappella","contenitore":{"tipo":"quartiere","chiave":"kanda-jinbocho","nome":"Kanda / Jinbocho"},"slug":"cappella","nome":"Capp
+
+# /compendio/citta/ikebukuro?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/harajuku?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/ueno?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/inokashira-park?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/odaiba?partita=1: 1 differenze
+  + .corpo.data.aree = [{"chiave":"citta/odaiba/cantiere-dello-stadio","contenitore":{"tipo":"quartiere","chiave":"odaiba","nome":"Odaiba / Seaside Park"},"slug":"cantiere-dello-stadi
+
+# /compendio/citta/shinagawa?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/nakano?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/ogikubo?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/yokohama-chinatown?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/maihama?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/roppongi?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/tsukishima?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/meiji-shrine?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/ichigaya?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/suidobashi?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/asakusa?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/dungeon/kamoshida?partita=1: 601 differenze
+  ~ .corpo.data.aree.0.mappe.0.chiave: "palazzo-di-kamoshida-prigione-sotterranea-tutorial-nativo-rmap-152-1-0" → "palazzo-di-kamoshida-sala-centrale"
+  ~ .corpo.data.aree.0.mappe.0.nome: "Palazzo di Kamoshida › Prigione sotterranea - Tutorial" → "Palazzo di Kamoshida › Sala Centrale"
+  ~ .corpo.data.aree.0.mappe.0.n: 0 → 2
+  ~ .corpo.data.aree.0.mappe.0.presi: 0 → 2
+  + .corpo.data.aree.0.mappe.0.spilli.0 = {"id":2046,"uid":"b93f8abc5a8d1c58d47cf75d193483fd","tipo":"miniboss","nome":"Capitano della Guardia","colore":"#f97316","raccolto":true}
+  + .corpo.data.aree.0.mappe.0.spilli.1 = {"id":2054,"uid":"49d36db63ced75aca445076e15970850","tipo":"miniboss","nome":"Miniboss","colore":"#f97316","raccolto":true}
+  … (595 altre)
+
+# /compendio/dungeon/madarame?partita=1: 372 differenze
+  + .corpo.data.aree.0.mappe.0.area = "dungeon/madarame/entrata-del-museo"
+  + .corpo.data.aree.0.mappe.1.area = "dungeon/madarame/museo-1p"
+  + .corpo.data.aree.0.mappe.2 = {"chiave":"palazzo-di-madarame-museo-1p-nativo-rmap-153-2-1","nome":"Palazzo di Madarame › Museo 1P","n":1,"presi":1,"spilli":[{"id":2130,"uid":"aacef0432113c0d
+  + .corpo.data.aree.0.areePalazzo = [{"chiave":"dungeon/madarame/entrata-del-museo","slug":"entrata-del-museo","nome":"Entrata del Museo","planimetriaIniziale":"palazzo-di-madarame-entrata-del-mus
+  + .corpo.data.aree.1.mappe.0.area = "dungeon/madarame/entrata-del-museo"
+  + .corpo.data.aree.1.mappe.1.area = "dungeon/madarame/museo-1p"
+  … (366 altre)
+
+# /compendio/dungeon/kaneshiro?partita=1: 86 differenze
+  + .corpo.data.aree.0.mappe.0.area = "dungeon/kaneshiro/sala-dingresso-1p"
+  + .corpo.data.aree.0.areePalazzo = [{"chiave":"dungeon/kaneshiro/sala-dingresso-1p","slug":"sala-dingresso-1p","nome":"Sala d'ingresso 1P","planimetriaIniziale":"palazzo-di-kaneshiro-sala-dingres
+  + .corpo.data.aree.1.areePalazzo = []
+  ~ .corpo.data.aree.2.mappe.0.chiave: "palazzo-di-kaneshiro-ufficio-riciclaggio-parte-i" → "palazzo-di-kaneshiro-ufficio-riciclaggio-parte-i-inquadratura-meridionale-piu-ristretta"
+  ~ .corpo.data.aree.2.mappe.0.nome: "Palazzo di Kaneshiro › Ufficio riciclaggio – Parte I" → "Palazzo di Kaneshiro › Ufficio riciclaggio – Parte I — inquadratura meridionale — più ristretta"
+  ~ .corpo.data.aree.2.mappe.0.n: 1 → 2
+  … (80 altre)
+
+# /compendio/dungeon/futaba?partita=1: 95 differenze
+  + .corpo.data.aree.0.mappe.0.area = "dungeon/futaba/entrata-della-piramide"
+  + .corpo.data.aree.0.areePalazzo = [{"chiave":"dungeon/futaba/entrata-della-piramide","slug":"entrata-della-piramide","nome":"Entrata della piramide","planimetriaIniziale":"palazzo-di-futaba-entr
+  + .corpo.data.aree.1.areePalazzo = []
+  + .corpo.data.aree.2.mappe.0.area = "dungeon/futaba/citta-nel-deserto"
+  + .corpo.data.aree.2.areePalazzo = [{"chiave":"dungeon/futaba/citta-nel-deserto","slug":"citta-nel-deserto","nome":"Città nel deserto","planimetriaIniziale":"palazzo-di-futaba-citta-nel-deserto"}
+  + .corpo.data.aree.3.areePalazzo = []
+  … (89 altre)
+
+# /compendio/dungeon/okumura?partita=1: 112 differenze
+  + .corpo.data.aree.0.mappe.0.area = "dungeon/okumura/entrata-laterale"
+  + .corpo.data.aree.0.areePalazzo = [{"chiave":"dungeon/okumura/entrata-laterale","slug":"entrata-laterale","nome":"Entrata laterale","planimetriaIniziale":"palazzo-di-okumura-entrata-laterale"}]
+  ~ .corpo.data.aree.1.mappe.0.chiave: "palazzo-di-okumura-corridoi-del-complesso" → "palazzo-di-okumura-corridoi-del-complesso-inquadratura-occidentale"
+  ~ .corpo.data.aree.1.mappe.0.nome: "Palazzo di Okumura › Corridoi del complesso" → "Palazzo di Okumura › Corridoi del complesso — inquadratura occidentale"
+  ~ .corpo.data.aree.1.mappe.0.n: 1 → 2
+  ~ .corpo.data.aree.1.mappe.0.spilli.0.id: 1142 → 1126
+  … (106 altre)
+
+# /compendio/dungeon/niijima?partita=1: 137 differenze
+  ~ .corpo.data.aree.0.mappe.0.chiave: "palazzo-di-niijima-entrata-del-casino" → "palazzo-di-niijima-entrata-del-casino-porzione-meridionale"
+  ~ .corpo.data.aree.0.mappe.0.nome: "Palazzo di Niijima › Entrata del casinò" → "Palazzo di Niijima › Entrata del casinò — porzione meridionale"
+  + .corpo.data.aree.0.mappe.0.area = "dungeon/niijima/entrata-del-casino"
+  + .corpo.data.aree.0.mappe.1 = {"chiave":"palazzo-di-niijima-entrata-del-casino","nome":"Palazzo di Niijima › Entrata del casinò","n":0,"presi":0,"spilli":[],"area":"dungeon/niijima/entrata-d
+  + .corpo.data.aree.0.areePalazzo = [{"chiave":"dungeon/niijima/entrata-del-casino","slug":"entrata-del-casino","nome":"Entrata del casinò","planimetriaIniziale":"palazzo-di-niijima-entrata-del-ca
+  ~ .corpo.data.aree.1.mappe.0.chiave: "palazzo-di-niijima-piano-terra" → "palazzo-di-niijima-piano-terra-settore-dingresso"
+  … (131 altre)
+
+# /compendio/dungeon/shido?partita=1: 178 differenze
+  ~ .corpo.data.aree.0.mappe.0.chiave: "palazzo-di-shido-sala-dingresso" → "palazzo-di-shido-sala-dingresso-inquadratura-meridionale-seconda-per-ampiezza"
+  ~ .corpo.data.aree.0.mappe.0.nome: "Palazzo di Shido › Sala d'ingresso" → "Palazzo di Shido › Sala d'ingresso — inquadratura meridionale — seconda per ampiezza"
+  ~ .corpo.data.aree.0.mappe.0.n: 1 → 0
+  - .corpo.data.aree.0.mappe.0.spilli.0 (era {"id":1280,"uid":"b5b7bddd58ce96c575b4ffb9e9d1b093","tipo":"forziere","nome":"Forziere","colore":"#eab308","raccolto":false})
+  + .corpo.data.aree.0.mappe.0.area = "dungeon/shido/sala-dingresso"
+  + .corpo.data.aree.0.mappe.1 = {"chiave":"palazzo-di-shido-sala-dingresso-inquadratura-meridionale-piu-ampia","nome":"Palazzo di Shido › Sala d'ingresso — inquadratura meridionale — più ampia
+  … (172 altre)
+
+# /compendio/dungeon/iweleth?partita=1: 95 differenze
+  + .corpo.data.aree.0.mappe.0.area = "dungeon/iweleth/entrata"
+  + .corpo.data.aree.0.areePalazzo = [{"chiave":"dungeon/iweleth/entrata","slug":"entrata","nome":"Entrata","planimetriaIniziale":"dedalo-di-iweleth-entrata"}]
+  ~ .corpo.data.aree.1.mappe.0.chiave: "dedalo-di-iweleth-corridoio-della-prigione-parte-i" → "dedalo-di-iweleth-corridoio-della-prigione-parte-i-inquadratura-occidentale"
+  ~ .corpo.data.aree.1.mappe.0.nome: "Dedalo di Iweleth › Corridoio della prigione – Parte I" → "Dedalo di Iweleth › Corridoio della prigione – Parte I — inquadratura occidentale"
+  ~ .corpo.data.aree.1.mappe.0.n: 0 → 1
+  + .corpo.data.aree.1.mappe.0.spilli.0 = {"id":1428,"uid":"928d1f0f49d0cb13b0275713a6000a34","tipo":"forziere","nome":"Forziere","colore":"#eab308","raccolto":false}
+  … (89 altre)
+
+# /compendio/dungeon/maruki?partita=1: 178 differenze
+  + .corpo.data.aree.0.mappe.0.area = "dungeon/maruki/ingresso"
+  + .corpo.data.aree.0.areePalazzo = [{"chiave":"dungeon/maruki/ingresso","slug":"ingresso","nome":"??? Ingresso","planimetriaIniziale":"palazzo-di-maruki-ingresso"}]
+  ~ .corpo.data.aree.1.mappe.0.chiave: "palazzo-di-maruki-sala-dingresso" → "palazzo-di-maruki-sala-dingresso-inquadratura-meridionale-piu-ristretta"
+  ~ .corpo.data.aree.1.mappe.0.nome: "Palazzo di Maruki › Sala d'ingresso" → "Palazzo di Maruki › Sala d'ingresso — inquadratura meridionale — più ristretta"
+  + .corpo.data.aree.1.mappe.0.area = "dungeon/maruki/sala-dingresso"
+  + .corpo.data.aree.1.mappe.1 = {"chiave":"palazzo-di-maruki-sala-dingresso-inquadratura-meridionale-piu-ampia","nome":"Palazzo di Maruki › Sala d'ingresso — inquadratura meridionale — più amp
+  … (172 altre)
+
+# /compendio/dungeon/mementos?partita=1: 10 differenze
+  + .corpo.data.aree.0.areePalazzo = []
+  + .corpo.data.aree.1.areePalazzo = []
+  + .corpo.data.aree.2.areePalazzo = []
+  + .corpo.data.aree.3.areePalazzo = []
+  + .corpo.data.aree.4.areePalazzo = []
+  + .corpo.data.aree.5.areePalazzo = []
+  … (4 altre)
+Memento (scheda): identico false
+elenco Palazzi identico true
+kamoshida campi di primo livello cambiati: aree, planimetrie, areePalazzo
+  voci per infiltrazione (chiave, stato, nome, tipo, ordine, pin): identiche true
+  riepilogo identico true
+  campi delle infiltrazioni cambiati: mappe | nuovi: areePalazzo
+madarame campi di primo livello cambiati: aree, planimetrie, areePalazzo
+  voci per infiltrazione (chiave, stato, nome, tipo, ordine, pin): identiche true
+  riepilogo identico true
+  campi delle infiltrazioni cambiati: mappe | nuovi: areePalazzo

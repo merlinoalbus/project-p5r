@@ -1,0 +1,7 @@
+
+C:\Users\rober\AppData\Local\Temp\claude\C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941\365ea5e8-f698-4350-bd74-d5465a3b19f3\scratchpad\l2\sandbox\prova-l2\applica-109.ts
+  0:0  warning  File ignored because no matching configuration was supplied
+
+✖ 1 problem (0 errors, 1 warning)
+
+EXIT=0

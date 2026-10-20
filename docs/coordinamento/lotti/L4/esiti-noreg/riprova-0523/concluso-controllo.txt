@@ -1,0 +1,13 @@
+controllo 6 boss segnato 200
+data 5 200
+data 6 200
+
+partita 5 (Tesoro + boss, 15 permanenti mancanti):
+  elenco: {"concluso":"Tesoro e boss finale","completato":null,"completamento":{"oggetti":71,"fatti":56,"tesoro":true,"boss":true,"concluso":true,"completato":false}}
+  pin di Kamoshida sulla Shujin: [{"id":1656,"nome":"Palazzo di Kamoshida","tipo":"ingresso-palazzo","disponibile":{"stato":"bloccato","requisiti":[{"indice":0,"testo":"solo il 11 aprile","confermato":false,"tipo":"data","stato":"rosso","dettaglio":"Solo il 11 aprile, oggi è il 20 aprile","manuale":false},{"indice":1,"tipo":"palazzo","testo":"Palazzo di Kamoshida non ancora concluso","stato":"rosso","dettaglio":"Palazzo di Kamoshida: concluso (Tesoro e boss finale), non ci si entra più","manuale":false,"confermato":false}]},"na
+  requisiti su Kamoshida ( 0 ): 
+
+partita 6 (controllo: solo boss):
+  elenco: {"concluso":null,"completato":null,"completamento":{"oggetti":71,"fatti":1,"tesoro":false,"boss":true,"concluso":false,"completato":false}}
+  pin di Kamoshida sulla Shujin: [{"id":1656,"nome":"Palazzo di Kamoshida","tipo":"ingresso-palazzo","disponibile":{"stato":"bloccato","requisiti":[{"indice":0,"testo":"solo il 11 aprile","confermato":false,"tipo":"data","stato":"rosso","dettaglio":"Solo il 11 aprile, oggi è il 20 aprile","manuale":false}]},"nascosto":null},{"id":1616,"nome":"Palazzo di Kamoshida","tipo":"punto-sensibile","disponibile":{"stato":"disponibile","requisiti":[{"indice":0,"testo":"solo dal 12 aprile al 2 maggio","confermato":false,"tipo":"data","stat
+  requisiti su Kamoshida ( 0 ): 

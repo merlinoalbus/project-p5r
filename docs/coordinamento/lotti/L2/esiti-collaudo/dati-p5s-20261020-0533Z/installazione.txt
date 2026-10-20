@@ -1,0 +1,9 @@
+### collaudo su f19a117fe259c9828c9e57343a26cbd2c7802417 con la base p5s-2026-10-20-0533Z — 2026-10-20T07:35:06+02:00
+{"data":{"status":"ok","timestamp":"2026-10-20T05:35:06.629Z","db":{"ok":true,"userVersion":109}}}
+{"level":30,"time":"2026-10-20T05:35:01.651Z","service":"project-p5r-be","aree":23,"planimetrie":29,"etichette":9,"ingressi":2,"daVerificare":1,"senzaArea":0,"covoSpostato":5,"cestinoRicopiato":0,"msg":"migrazione 109: Aree del mondo"}
+{"level":30,"time":"2026-10-20T05:35:01.656Z","service":"project-p5r-be","schema":"main","id":109,"name":"aree_del_mondo","msg":"migrazione applicata"}
+### foto L2-base-p5s-20261020-0533Z
+FOTO OK C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/foto/L2-base-p5s-20261020-0533Z {"gioco.db":{"user_version":109,"tabelle":77,"righe":19942},"partite.db":{"user_version":21,"tabelle":34,"righe":3325}}
+lavoro da preservare IDENTICO alla copia
+### la planimetria di prova dal vivo
+palazzo-di-kamoshida-prova Prova area palazzo-di-kamoshida 1378x1142 /api/immagini/mappa/palazzo-di-kamoshida-prova/file?v=2026-10-20T05%3A29%3A55.924Z

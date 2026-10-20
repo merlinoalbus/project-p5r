@@ -1,0 +1,7 @@
+### HEAD 600af81c4f6e09cc18bb1d8f09ebf7116c5723f7
+### npm run lint
+
+> project-p5r@0.1.0 lint
+> eslint .
+
+EXIT=0

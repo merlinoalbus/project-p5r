@@ -1,0 +1,13 @@
+### istanza di collaudo riavviata su e2cc3ca897d54ca7696aace0d631466f824969e7 — 2026-10-20T03:13:02+02:00
+### curl localhost:3301/api/health
+{"data":{"status":"ok","timestamp":"2026-10-20T01:13:02.727Z","db":{"ok":true,"userVersion":108}}}
+### curl localhost:5473/api/health (proxy Vite)
+{"data":{"status":"ok","timestamp":"2026-10-20T01:13:02.841Z","db":{"ok":true,"userVersion":108}}}
+### curl localhost:5473/ → HTTP
+200
+### BE.log: migrazioni applicate all'avvio
+0
+### impronta di data/ contro la foto L1-ciclo2-funzionali-G6
+{"gioco.db":{"user_version":108,"tabelle":76,"righe":19834},"partite.db":{"user_version":21,"tabelle":34,"righe":3186}}
+gioco.db.immagine_miniatura: righe 72 → 77, contenuto diverso
+EXIT=2

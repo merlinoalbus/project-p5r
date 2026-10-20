@@ -1,0 +1,16 @@
+# gioco.db:mappa: valori cambiati 5, tolte 0, aggiunte 0
+   ~ nativo-rmap-022-1-0: genitore_chiave null → "citta-yongen-jaya"
+   ~ nativo-rmap-022-1-1: genitore_chiave null → "citta-yongen-jaya"
+   ~ nativo-rmap-022-1-2: genitore_chiave null → "citta-yongen-jaya"
+   ~ nativo-rmap-022-1-3: genitore_chiave null → "citta-yongen-jaya"
+   ~ nativo-rmap-022-1-4: genitore_chiave null → "citta-yongen-jaya"
+# gioco.db:__schema__: valori cambiati 3, tolte 0, aggiunte 5
+   ~ table|cestino: sql "CREATE TABLE cestino (\n      id              INTEGER PRIMARY KEY AUTOINCREMENT,\n      uid             TEXT NOT NULL UNIQUE,\n      tipo            TEXT NOT NULL CHECK (tipo IN ('area', 'voce', 'mappa', 'area-dedalo')),\n      chiave          TEXT NOT NULL,\n      nome            TEXT NOT NULL,\n      contesto        TEXT NOT NULL DEFAULT '',\n      riepilogo_json  TEXT NOT 
+   ~ table|mappa: sql "CREATE TABLE \"mappa\" (\n  chiave           TEXT PRIMARY KEY,\n  nome             TEXT NOT NULL,\n  tipo             TEXT NOT NULL CHECK (tipo IN ('citta','quartiere','luogo','palazzo','area','dedalo','generica')),\n  genitore_chiave  TEXT REFERENCES mappa(chiave) ON DELETE SET NULL,\n  ordine           INTEGER NOT NULL DEFAULT 0,\n  immagine_chiave  TEXT,\n  asset            
+   ~ table|quartiere_ingresso: sql "CREATE TABLE quartiere_ingresso(quartiere_chiave TEXT PRIMARY KEY REFERENCES quartiere(chiave) ON DELETE CASCADE,mappa_chiave TEXT NOT NULL REFERENCES mappa(chiave) ON DELETE CASCADE,x REAL NOT NULL CHECK(x BETWEEN 0 AND 100),y REAL NOT NULL CHECK(y BETWEEN 0 AND 100),zoom REAL NOT NULL CHECK(zoom BETWEEN 1 AND 6))" → "CREATE TABLE quartiere_ingresso(quartiere_chia
+   + index|area_slug_citta
+   + index|area_slug_dungeon
+   + index|area_slug_quartiere
+   + index|mappa_area
+   + table|area
+tabelle con valori cambiati, righe tolte o aggiunte: 2

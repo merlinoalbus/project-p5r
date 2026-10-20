@@ -1,0 +1,59 @@
+
+ RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/pensive-burnell-b50941
+
+ × server/routes/aree-mondo.test.ts > Aree del mondo (L2) > FUN2-2 — il Covo sotto Yongen-Jaya tiene i suoi percorsi pubblici anche quando i percorsi si risincronizzano (import, creazione, eliminazione) 201ms
+   → expected [ …(5) ] to deeply equal [ …(5) ]
+ × server/routes/aree-mondo.test.ts > Aree del mondo (L2) > FUN2-1 — l’ingresso di un quartiere sta in una sua Area: una planimetria di un altro quartiere si rifiuta, dalla PUT e dall’import 137ms
+   → expected [ 200, undefined ] to deeply equal [ 400, 'area-di-altro-quartiere' ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/routes/aree-mondo.test.ts > Aree del mondo (L2) > FUN2-2 — il Covo sotto Yongen-Jaya tiene i suoi percorsi pubblici anche quando i percorsi si risincronizzano (import, creazione, eliminazione)
+AssertionError: expected [ …(5) ] to deeply equal [ …(5) ]
+
+- Expected
++ Received
+
+  [
+-   "covo-dei-ladri-settore-dingresso | Covo dei Ladri — settore d’ingresso",
+-   "covo-dei-ladri | Covo dei Ladri",
+-   "covo-dei-ladri-porzione-occidentale | Covo dei Ladri — porzione occidentale",
+-   "covo-dei-ladri-porzione-settentrionale | Covo dei Ladri — porzione settentrionale",
+-   "covo-dei-ladri-inquadratura-orientale | Covo dei Ladri — inquadratura orientale",
++   "yongen-jaya-covo-dei-ladri-settore-dingresso | Yongen-Jaya › Covo dei Ladri — settore d’ingresso",
++   "yongen-jaya-covo-dei-ladri | Yongen-Jaya › Covo dei Ladri",
++   "yongen-jaya-covo-dei-ladri-porzione-occidentale | Yongen-Jaya › Covo dei Ladri — porzione occidentale",
++   "yongen-jaya-covo-dei-ladri-porzione-settentrionale | Yongen-Jaya › Covo dei Ladri — porzione settentrionale",
++   "yongen-jaya-covo-dei-ladri-inquadratura-orientale | Yongen-Jaya › Covo dei Ladri — inquadratura orientale",
+  ]
+
+ ❯ server/routes/aree-mondo.test.ts:35:28
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  server/routes/aree-mondo.test.ts > Aree del mondo (L2) > FUN2-1 — l’ingresso di un quartiere sta in una sua Area: una planimetria di un altro quartiere si rifiuta, dalla PUT e dall’import
+AssertionError: expected [ 200, undefined ] to deeply equal [ 400, 'area-di-altro-quartiere' ]
+
+- Expected
++ Received
+
+  [
+-   400,
+-   "area-di-altro-quartiere",
++   200,
++   undefined,
+  ]
+
+ ❯ server/routes/aree-mondo.test.ts:42:48
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  02:49:50
+   Duration  2.72s (transform 1.51s, setup 121ms, import 2.11s, tests 340ms, environment 0ms)
+
+EXIT=1

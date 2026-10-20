@@ -1,0 +1,50 @@
+
+ RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/pensive-burnell-b50941
+
+ ❯ src/components/mappe/OrganizzazioneMappe.test.tsx (28 tests | 1 failed | 27 skipped) 103ms
+   × E5 ed E7: ogni riga dell’Elenco dice i suoi spilli con la stessa parola; l’Area da verificare sta nel gruppo «Da verificare» 101ms
+ ❯ src/pages/MappaPage.test.tsx (25 tests | 1 failed | 24 skipped) 118ms
+     × E4: la carta di Tokyo dice «N quartieri · N aree», non le mappe 116ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pages/MappaPage.test.tsx > MappaPage > E4: la carta di Tokyo dice «N quartieri · N aree», non le mappe
+Error: [2mexpect([22m[31melement[39m[2m).toHaveTextContent()[22m
+
+Expected element to have text content:
+[32m  1 quartiere · 2 aree[39m
+Received:
+[31m  TokyoCittà · 2 spilli · 4 mappe▸[39m
+ ❯ src/pages/MappaPage.test.tsx:193:19
+    191|     monta('/guida/mappe');
+    192|     const tokyo = await screen.findByRole('button', { name: /^Tokyo/ }…
+    193|     expect(tokyo).toHaveTextContent('1 quartiere · 2 aree');
+       |                   ^
+    194|     expect(tokyo).not.toHaveTextContent(/mappe/);
+    195|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/mappe/OrganizzazioneMappe.test.tsx > E5 ed E7: ogni riga dell’Elenco dice i suoi spilli con la stessa parola; l’Area da verificare sta nel gruppo «Da verificare»
+Error: [2mexpect([22m[31melement[39m[2m).toHaveTextContent()[22m
+
+Expected element to have text content:
+[32m  4 spilli[39m
+Received:
+[31m  Shibuya[39m
+ ❯ src/components/mappe/OrganizzazioneMappe.test.tsx:73:54
+     71|   render(<MemoryRouter><AlberoLuoghi genitore="tokyo" mappe={[tokyo,sh…
+     72|   // ogni riga col suo conteggio, una sola parola
+     73|   expect(screen.getByRole('link',{name:/^Shibuya/})).toHaveTextContent…
+       |                                                      ^
+     74|   expect(screen.getByRole('link',{name:/^Ueno/})).toHaveTextContent('1…
+     75|   expect(screen.getByRole('link',{name:/^Sottopasso/})).toHaveTextCont…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  2 failed | 51 skipped (53)
+   Start at  08:00:40
+   Duration  1.69s (transform 727ms, setup 200ms, import 1.15s, tests 220ms, environment 1.52s)
+

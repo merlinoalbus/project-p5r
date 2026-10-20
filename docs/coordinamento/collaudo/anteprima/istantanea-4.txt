@@ -1,0 +1,22 @@
+### anteprima: istantanea 4 = git archive 12484305 (985 file identici al commit), dati della base p5s-0533Z già a 112 — 2026-10-20T07:43:46+02:00
+{"data":{"status":"ok","timestamp":"2026-10-20T05:43:46.535Z","db":{"ok":true,"userVersion":113}}}
+FE 200
+### migrazioni all'avvio
+{"memento":["iweleth"],"msg":"migrazione 113: regola del boss di ogni Palazzo (i Palazzi con la regola dei Memento)"}
+{"schema":"main","id":113,"name":"regola_del_boss","msg":"migrazione applicata"}
+{"esito":{"divergenza_partita":{"righe":0,"orfaneTolte":0},"spillo_partita_infiltrazione":{"righe":90,"orfaneTolte":0}},"msg":"migrazione utente 024: divergenze e stato per infiltrazione con la cascata sulla partita"}
+{"schema":"utente","id":24,"name":"cascata_delle_tabelle_di_l4","msg":"migrazione applicata"}
+### errori/avvisi
+### foto anteprima-base-istantanea-4
+FOTO OK C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/foto/anteprima-base-istantanea-4 {"gioco.db":{"user_version":113,"tabelle":80,"righe":20268},"partite.db":{"user_version":24,"tabelle":36,"righe":3415}}
+gioco.db: user_version 112 ≠ 113
+gioco.db: schema diverso
+gioco.db.dungeon: righe 10 → 10, contenuto diverso
+partite.db: user_version 23 ≠ 24
+partite.db: schema diverso
+partite.db.spillo_partita_infiltrazione: righe 90 → 90, contenuto diverso
+lavoro da preservare: diario differenze 0 | Palazzi identici | spunte identiche
+kamoshida p1 {"oggetti":71,"fatti":71,"tesoro":true,"boss":true,"concluso":true,"completato":true} regola voce-finale
+madarame p1 {"oggetti":82,"fatti":82,"tesoro":true,"boss":true,"concluso":true,"completato":true} regola voce-finale
+iweleth p1 {"oggetti":29,"fatti":0,"tesoro":false,"boss":false,"concluso":false,"completato":false} regola memento
+### verifica di spillo_partita_infiltrazione (contenuto ordinato per tutte le colonne, prima/dopo la utente 024): vedi l'esito nel LEGGIMI

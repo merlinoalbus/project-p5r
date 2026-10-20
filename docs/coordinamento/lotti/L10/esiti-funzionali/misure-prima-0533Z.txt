@@ -1,0 +1,42 @@
+user_version gioco 108 · partite 21
+voci del diario 997 · validato 04-01..06-01 255
+produce_json: voci con effetti 266 · per tipo {"dote":204,"lettura":72,"turno":9}
+riferimento_tipo delle voci [{"t":"(nessuno)","n":515},{"t":"confidente","n":297},{"t":"libro","n":65},{"t":"dungeon","n":48},{"t":"negozio","n":39},{"t":"film","n":19},{"t":"dote","n":7},{"t":"attivita","n":4},{"t":"richiesta","n":3}]
+voci «domanda in classe» 46 · voci «Cruciverba» 36
+domande 78 · cruciverba 38
+«Inizia a pulire» 04-09 [{"uid":"b79da6f663d32b6845e6489065b8e841","data":"04-09","fascia":"giorno","ordine":5,"a":"Interagisci con la Scatola di cartone sc","riferimento_tipo":null,"riferimento_chiave":null}]
+voci Stanza di Velluto 19 · voci con rango_atteso 202
+  07-02 sera: voci 1, ordine max 0
+  07-03 giorno: voci 5, ordine max 4
+  07-28 sera: voci 1, ordine max 0
+  07-29 giorno: voci 1, ordine max 0
+  07-30 giorno: voci 1, ordine max 0
+  08-06 giorno: voci 0, ordine max null
+  10-08 sera: voci 0, ordine max null
+  10-09 giorno: voci 0, ordine max null
+  spunta_voce_partita: 342 p1=240 p2=102
+  evento_partita: 1316 p1=977 p2=339
+  evento_storia_partita: 7 p1=4 p2=3
+  lettura_partita: 14 p1=11 p2=3
+  effetto_lettura_partita: 20 p1=16 p2=4
+  progresso_libro_partita: 11 p1=9 p2=2
+  progresso_film_partita: 3 p1=2 p2=1
+  progresso_videogioco_partita: 0 
+  turno_partita: 11 p1=9 p2=2
+  attivita_svolta_partita: 8 p1=6 p2=2
+  acquisto_partita: 7 p1=7
+  regalo_partita: 0 
+  incontro_confidente_partita: 52 p1=37 p2=15
+  confidente_partita: 46 p1=23 p2=23
+  dote_sociale_partita: 10 p1=5 p2=5
+  richiesta_partita: 1 p1=1
+  domanda_partita: 12 p1=6 p2=6
+  cruciverba_partita: 3 p1=1 p2=2
+  compendio_partita: 53 p1=53
+  persona_posseduta: 7 p1=7
+  punti_negozio_partita: 0 
+  cestino_partite: 0 
+  requisito_partita: 0 
+mansarda pulita negli eventi di storia [{"partita_id":1,"evento_chiave":"mansarda-pulita","avvenuto":1,"updated_at":"2026-09-12T22:57:07.017Z"},{"partita_id":2,"evento_chiave":"mansarda-pulita","avvenuto":1,"updated_at":"2026-10-11T10:47:37.591Z"}]
+Sojiro p1 [{"partita_id":1,"confidente_chiave":"sojiro","sbloccato":1,"rango":3,"note":"","updated_at":"2026-10-19T06:13:07.111Z","punti":50}]
+partite [{"id":1,"nome":"Partita Roberto","attiva":1,"data_gioco":"06-02","fascia_gioco":"giorno","yen":79253},{"id":2,"nome":"Tutorial","attiva":0,"data_gioco":"04-29","fascia_gioco":"giorno","yen":0}]

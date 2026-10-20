@@ -1,0 +1,170 @@
+38 endpoint; non 200: 0
+
+# /compendio/citta: 25 differenze
+  + .corpo.data.0.ingresso.area = {"slug":"vicoli","nome":"Vicoli"}
+  + .corpo.data.0.aree = 3
+  + .corpo.data.1.ingresso.area = {"slug":"central-street","nome":"Central Street"}
+  + .corpo.data.1.aree = 6
+  … (21 altre)
+
+# /compendio/citta?partita=1: 25 differenze
+  + .corpo.data.0.ingresso.area = {"slug":"vicoli","nome":"Vicoli"}
+  + .corpo.data.0.aree = 3
+  + .corpo.data.1.ingresso.area = {"slug":"central-street","nome":"Central Street"}
+  + .corpo.data.1.aree = 6
+  … (21 altre)
+
+# /mappe/albero: 1215 differenze
+  - .corpo.data.0.contesti (era [])
+  - .corpo.data.0.gruppoImmagini (era {"id":"nativo-rmap-022-1-0","nome":"Covo dei Ladri","ordine":0,"etichetta":"settore d’ingresso"})
+  ~ .corpo.data.0.chiave: "covo-dei-ladri-settore-dingresso" → "tokyo"
+  ~ .corpo.data.0.nome: "Covo dei Ladri — settore d’ingresso" → "Tokyo"
+  … (1211 altre)
+
+# /mappe/tokyo?partita=1: 59 differenze
+  ~ .corpo.data.figli.0.numeroFigli: 2 → 7
+  + .corpo.data.figli.0.area = null
+  + .corpo.data.figli.0.casa = "/guida/citta/yongen-jaya"
+  + .corpo.data.figli.1.area = null
+  … (55 altre)
+
+# /compendio/citta/yongen-jaya?partita=1: 2 differenze
+  + .corpo.data.ingresso.area = {"slug":"vicoli","nome":"Vicoli"}
+  + .corpo.data.aree = [{"chiave":"citta/yongen-jaya/banchina-della-metropolitana","contenitore":{"tipo":"quartiere","chiave":"yongen-jaya","nome":"Yongen-Jaya"},"slug":"banchina-dell
+
+# /compendio/citta/shibuya?partita=1: 2 differenze
+  + .corpo.data.ingresso.area = {"slug":"central-street","nome":"Central Street"}
+  + .corpo.data.aree = [{"chiave":"citta/shibuya/piazza-della-stazione","contenitore":{"tipo":"quartiere","chiave":"shibuya","nome":"Shibuya"},"slug":"piazza-della-stazione","nome":"P
+
+# /compendio/citta/shinjuku?partita=1: 1 differenze
+  + .corpo.data.aree = [{"chiave":"citta/shinjuku/quartiere-a-luci-rosse","contenitore":{"tipo":"quartiere","chiave":"shinjuku","nome":"Shinjuku"},"slug":"quartiere-a-luci-rosse","nom
+
+# /compendio/citta/kichijoji?partita=1: 1 differenze
+  + .corpo.data.aree = [{"chiave":"citta/kichijoji/quartiere-dello-shopping","contenitore":{"tipo":"quartiere","chiave":"kichijoji","nome":"Kichijoji"},"slug":"quartiere-dello-shoppin
+
+# /compendio/citta/akihabara?partita=1: 1 differenze
+  + .corpo.data.aree = [{"chiave":"citta/akihabara/electric-town","contenitore":{"tipo":"quartiere","chiave":"akihabara","nome":"Akihabara"},"slug":"electric-town","nome":"Electric To
+
+# /compendio/citta/shujin-academy?partita=1: 1 differenze
+  + .corpo.data.aree = [{"chiave":"citta/shujin-academy/edificio-principale-1p-edificio-laboratori-1p","contenitore":{"tipo":"quartiere","chiave":"shujin-academy","nome":"Shujin Acade
+
+# /compendio/citta/kanda-jinbocho?partita=1: 1 differenze
+  + .corpo.data.aree = [{"chiave":"citta/kanda-jinbocho/cappella","contenitore":{"tipo":"quartiere","chiave":"kanda-jinbocho","nome":"Kanda / Jinbocho"},"slug":"cappella","nome":"Capp
+
+# /compendio/citta/ikebukuro?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/harajuku?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/ueno?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/inokashira-park?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/odaiba?partita=1: 1 differenze
+  + .corpo.data.aree = [{"chiave":"citta/odaiba/cantiere-dello-stadio","contenitore":{"tipo":"quartiere","chiave":"odaiba","nome":"Odaiba / Seaside Park"},"slug":"cantiere-dello-stadi
+
+# /compendio/citta/shinagawa?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/nakano?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/ogikubo?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/yokohama-chinatown?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/maihama?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/roppongi?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/tsukishima?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/meiji-shrine?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/ichigaya?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/suidobashi?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/citta/asakusa?partita=1: 1 differenze
+  + .corpo.data.aree = []
+
+# /compendio/dungeon/kamoshida?partita=1: 601 differenze
+  ~ .corpo.data.aree.0.mappe.0.chiave: "palazzo-di-kamoshida-prigione-sotterranea-tutorial-nativo-rmap-152-1-0" → "palazzo-di-kamoshida-sala-centrale"
+  ~ .corpo.data.aree.0.mappe.0.nome: "Palazzo di Kamoshida › Prigione sotterranea - Tutorial" → "Palazzo di Kamoshida › Sala Centrale"
+  ~ .corpo.data.aree.0.mappe.0.n: 0 → 2
+  ~ .corpo.data.aree.0.mappe.0.presi: 0 → 2
+  … (597 altre)
+
+# /compendio/dungeon/madarame?partita=1: 372 differenze
+  + .corpo.data.aree.0.mappe.0.area = "dungeon/madarame/entrata-del-museo"
+  + .corpo.data.aree.0.mappe.1.area = "dungeon/madarame/museo-1p"
+  + .corpo.data.aree.0.mappe.2 = {"chiave":"palazzo-di-madarame-museo-1p-nativo-rmap-153-2-1","nome":"Palazzo di Madarame › Museo 1P","n":1,"presi":1,"spilli":[{"id":2130,"uid":"aacef0432113c0d
+  + .corpo.data.aree.0.areePalazzo = [{"chiave":"dungeon/madarame/entrata-del-museo","slug":"entrata-del-museo","nome":"Entrata del Museo","planimetriaIniziale":"palazzo-di-madarame-entrata-del-mus
+  … (368 altre)
+
+# /compendio/dungeon/kaneshiro?partita=1: 86 differenze
+  + .corpo.data.aree.0.mappe.0.area = "dungeon/kaneshiro/sala-dingresso-1p"
+  + .corpo.data.aree.0.areePalazzo = [{"chiave":"dungeon/kaneshiro/sala-dingresso-1p","slug":"sala-dingresso-1p","nome":"Sala d'ingresso 1P","planimetriaIniziale":"palazzo-di-kaneshiro-sala-dingres
+  + .corpo.data.aree.1.areePalazzo = []
+  ~ .corpo.data.aree.2.mappe.0.chiave: "palazzo-di-kaneshiro-ufficio-riciclaggio-parte-i" → "palazzo-di-kaneshiro-ufficio-riciclaggio-parte-i-inquadratura-meridionale-piu-ristretta"
+  … (82 altre)
+
+# /compendio/dungeon/futaba?partita=1: 95 differenze
+  + .corpo.data.aree.0.mappe.0.area = "dungeon/futaba/entrata-della-piramide"
+  + .corpo.data.aree.0.areePalazzo = [{"chiave":"dungeon/futaba/entrata-della-piramide","slug":"entrata-della-piramide","nome":"Entrata della piramide","planimetriaIniziale":"palazzo-di-futaba-entr
+  + .corpo.data.aree.1.areePalazzo = []
+  + .corpo.data.aree.2.mappe.0.area = "dungeon/futaba/citta-nel-deserto"
+  … (91 altre)
+
+# /compendio/dungeon/okumura?partita=1: 112 differenze
+  + .corpo.data.aree.0.mappe.0.area = "dungeon/okumura/entrata-laterale"
+  + .corpo.data.aree.0.areePalazzo = [{"chiave":"dungeon/okumura/entrata-laterale","slug":"entrata-laterale","nome":"Entrata laterale","planimetriaIniziale":"palazzo-di-okumura-entrata-laterale"}]
+  ~ .corpo.data.aree.1.mappe.0.chiave: "palazzo-di-okumura-corridoi-del-complesso" → "palazzo-di-okumura-corridoi-del-complesso-inquadratura-occidentale"
+  ~ .corpo.data.aree.1.mappe.0.nome: "Palazzo di Okumura › Corridoi del complesso" → "Palazzo di Okumura › Corridoi del complesso — inquadratura occidentale"
+  … (108 altre)
+
+# /compendio/dungeon/niijima?partita=1: 137 differenze
+  ~ .corpo.data.aree.0.mappe.0.chiave: "palazzo-di-niijima-entrata-del-casino" → "palazzo-di-niijima-entrata-del-casino-porzione-meridionale"
+  ~ .corpo.data.aree.0.mappe.0.nome: "Palazzo di Niijima › Entrata del casinò" → "Palazzo di Niijima › Entrata del casinò — porzione meridionale"
+  + .corpo.data.aree.0.mappe.0.area = "dungeon/niijima/entrata-del-casino"
+  + .corpo.data.aree.0.mappe.1 = {"chiave":"palazzo-di-niijima-entrata-del-casino","nome":"Palazzo di Niijima › Entrata del casinò","n":0,"presi":0,"spilli":[],"area":"dungeon/niijima/entrata-d
+  … (133 altre)
+
+# /compendio/dungeon/shido?partita=1: 178 differenze
+  ~ .corpo.data.aree.0.mappe.0.chiave: "palazzo-di-shido-sala-dingresso" → "palazzo-di-shido-sala-dingresso-inquadratura-meridionale-seconda-per-ampiezza"
+  ~ .corpo.data.aree.0.mappe.0.nome: "Palazzo di Shido › Sala d'ingresso" → "Palazzo di Shido › Sala d'ingresso — inquadratura meridionale — seconda per ampiezza"
+  ~ .corpo.data.aree.0.mappe.0.n: 1 → 0
+  - .corpo.data.aree.0.mappe.0.spilli.0 (era {"id":1280,"uid":"b5b7bddd58ce96c575b4ffb9e9d1b093","tipo":"forziere","nome":"Forziere","colore":"#eab308","raccolto":false})
+  … (174 altre)
+
+# /compendio/dungeon/iweleth?partita=1: 95 differenze
+  + .corpo.data.aree.0.mappe.0.area = "dungeon/iweleth/entrata"
+  + .corpo.data.aree.0.areePalazzo = [{"chiave":"dungeon/iweleth/entrata","slug":"entrata","nome":"Entrata","planimetriaIniziale":"dedalo-di-iweleth-entrata"}]
+  ~ .corpo.data.aree.1.mappe.0.chiave: "dedalo-di-iweleth-corridoio-della-prigione-parte-i" → "dedalo-di-iweleth-corridoio-della-prigione-parte-i-inquadratura-occidentale"
+  ~ .corpo.data.aree.1.mappe.0.nome: "Dedalo di Iweleth › Corridoio della prigione – Parte I" → "Dedalo di Iweleth › Corridoio della prigione – Parte I — inquadratura occidentale"
+  … (91 altre)
+
+# /compendio/dungeon/maruki?partita=1: 178 differenze
+  + .corpo.data.aree.0.mappe.0.area = "dungeon/maruki/ingresso"
+  + .corpo.data.aree.0.areePalazzo = [{"chiave":"dungeon/maruki/ingresso","slug":"ingresso","nome":"??? Ingresso","planimetriaIniziale":"palazzo-di-maruki-ingresso"}]
+  ~ .corpo.data.aree.1.mappe.0.chiave: "palazzo-di-maruki-sala-dingresso" → "palazzo-di-maruki-sala-dingresso-inquadratura-meridionale-piu-ristretta"
+  ~ .corpo.data.aree.1.mappe.0.nome: "Palazzo di Maruki › Sala d'ingresso" → "Palazzo di Maruki › Sala d'ingresso — inquadratura meridionale — più ristretta"
+  … (174 altre)
+Memento prima di L2: 8dbe3350fe420fda 141251 byte | adesso: 8dbe3350fe420fda 141251 byte | identica: true | occorrenze areePalazzo: 0
+senza partita: occorrenze areePalazzo 0 | mappe[].area 0
+kamoshida areePalazzo radice 10 | infiltrazioni con areePalazzo 7/7
+madarame areePalazzo radice 8 | infiltrazioni con areePalazzo 5/5
+chiavi ignorate: da_rivedere, aggiunta_da, testo_precedente_json, motivo_revisione; differenze: 0
+differenze di stato visibile: 0
+errori: 0

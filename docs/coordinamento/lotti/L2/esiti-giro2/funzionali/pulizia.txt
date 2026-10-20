@@ -1,0 +1,6 @@
+partite prima della pulizia: 3:Prova funzionali L2:ATTIVA:06-01/giorno | 1:Partita Roberto:-:06-01/giorno | 2:Tutorial:-:04-29/giorno
+partita 1 attiva 200
+DELETE partita 3 204
+partite dopo: 1:Partita Roberto:ATTIVA:06-01/giorno | 2:Tutorial:-:04-29/giorno
+righe di spillo_partita della partita di prova: 0
+partita 1 dopo: pin 1750 raccolto false

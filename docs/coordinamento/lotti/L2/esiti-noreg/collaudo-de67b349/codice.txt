@@ -1,0 +1,14 @@
+de67b349f702850cbdb299de82967e18d81396d6
+de67b349 fix(L2): difetti del collaudo — Elimina area con conferma, pannello chiuso sul telefono, nomi dei passaggi al tocco
+8e75abbb docs(L2): ROADMAP, DECISIONI e ARCHITETTURA del lotto
+75894664 merge: L1 pubblicato (date e documenti dei verdetti 3-5) nella linea di sviluppo
+porcelain: 0
+impronta 9634bbb5..HEAD: 01138ad04a762a7b34dc1b5b7817a27f876b34e657970872c713f72128e8071b *-
+file cambiati rispetto a 8e75abbb:
+ src/pages/QuartierePage.tsx                       | 12 +++--
+ src/tailwind.css                                  | 11 ++++
+ 17 files changed, 240 insertions(+), 40 deletions(-)
+server/shared cambiati: 0
+src: archive = Collaudo
+server: archive = Collaudo
+shared: archive = Collaudo

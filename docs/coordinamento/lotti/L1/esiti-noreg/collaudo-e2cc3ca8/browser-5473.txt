@@ -1,0 +1,75 @@
+Collaudo e2cc3ca8 — parte nel browser (noreg.md §8.5), esito grezzo
+Ciclo 3 del Collaudo (foto L1-ciclo3-noreg-e2cc3ca8 delle 03:14), prove 2026-10-20 03:15–03:19 ora italiana (01:15–01:19Z);
+ultima azione (chiusura della scheda) con `date` della macchina = 2026-10-20 03:19:14 / 01:19:14Z.
+FE http://localhost:5473 → BE 3301. Strumento: javascript_tool del browser integrato (scheda tab-4). Sotto, l'output restituito dallo
+strumento, copiato tale e quale (JSON); i commenti che lo introducono sono miei e cominciano con «#».
+
+# 1) Stato dell'istanza all'avvio del giro (GET /api/partite/attiva, GET /api/health, localStorage 'p5r-preferenze')
+{
+  "attiva": {
+    "data": "06-01",
+    "fascia": "giorno",
+    "id": 1
+  },
+  "db": {
+    "ok": true,
+    "userVersion": 108
+  },
+  "pref": null
+}
+
+# 2) 75 «Sulla mappa»: i 19 indirizzi distinti (elenco in L1/noreg.md §1-bis e in L1/base-sulla-mappa-20261020.json), ognuno aperto
+#    in un iframe 1280×800 della stessa origine; per ognuno: indirizzo d'arrivo, titolo, pin con classe spillo-mappa--selezionato,
+#    scheda role=dialog con il nome dello spillo; confronto con l'esito atteso della base (ok / nascosto / mappa).
+#    Conteggio delle righe raccolte:
+19
+#    Riepilogo restituito (voci uguali alla base, voci per esito, righe diverse, arrivi fuori da /guida/mappe/):
+{
+  "arrivi": [],
+  "diversi": [],
+  "perEsito": {
+    "mappa": 9,
+    "nascosto": 17,
+    "ok": 49
+  },
+  "uguali": 75
+}
+#    NOTA: in questo giro ho stampato il riepilogo e non le 19 righe una per una; la scheda è chiusa e il dettaglio riga per riga di questo
+#    ciclo non è più disponibile. Il riepilogo dice che tutte le 19 righe sono uguali alla base («diversi»: []) e che nessuna ha lasciato
+#    /guida/mappe/ («arrivi»: []). Il dettaglio riga per riga di questo controllo esiste solo per la base (L1/noreg.md §1-bis, giro del
+#    2026-10-20 ~02:00 su 5373) e per i giri di L2 (L2/esiti-noreg/*-sulla-mappa-browser.txt), non per i collaudi e9fb4871 ed e2cc3ca8,
+#    dove ho stampato solo il riepilogo. → La tabella riga per riga sullo stesso codice (impronta d6c65857…) l'ho prodotta in seguito,
+#    nel ciclo 4 del Collaudo (03:24–03:25:46): `sulla-mappa-75-righe.txt`, 19 righe, 75/75 uguali alla base.
+
+# 3) Metro, /guida/citta, grafica predefinita ACCESA (localStorage vuoto = predefinito)
+#    sha256 dell'outerHTML di .blocco-mappa-tokyo, tolti i ?v= di versione; sha256 (primi 12 caratteri) dei byte di ogni immagine delle 10 fermate
+{
+  "byte": [
+    "857073004445",
+    "30e4bed12ac2",
+    "93c8987819c2",
+    "b4a84147208c",
+    "f4987be2a451",
+    "1fd0572d67b9",
+    "58d3e8280e0a",
+    "972d98ffb81c",
+    "d91a6c749c24",
+    "032d4b5d201e"
+  ],
+  "h": "1061b9328390810fac3ac5eec252241e3e5b4fae51b4b8da2d1dd27623652e88",
+  "n": 10,
+  "pref": null,
+  "url": "/guida/citta"
+}
+
+# 4) Metro, /guida/citta, grafica predefinita SPENTA (localStorage {"graficaPredefinita":false}), poi preferenza rimessa vuota
+{
+  "h": "1061b9328390810fac3ac5eec252241e3e5b4fae51b4b8da2d1dd27623652e88",
+  "n": 10,
+  "pref": "{\"graficaPredefinita\":false}",
+  "prefRipristinata": null
+}
+
+# Riferimento «prima di L1» (codice 6b3dfb99, L1/noreg.md §6.B.1): sha256 del blocco metro = 1061b9328390810fac3ac5eec252241e3e5b4fae51b4b8da2d1dd27623652e88
+# (accesa e spenta), byte delle 10 immagini: 857073004445 30e4bed12ac2 93c8987819c2 b4a84147208c f4987be2a451 1fd0572d67b9 58d3e8280e0a
+# 972d98ffb81c d91a6c749c24 032d4b5d201e — identici.

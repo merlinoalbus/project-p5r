@@ -1,0 +1,29 @@
+### git cherry-pick 1cd41876 su 90137ce2 — conflitto
+server/openapi/descrizioni/mappe.ts
+### parte in conflitto
+diff --cc server/openapi/descrizioni/mappe.ts
+index 5d254d1f,6cae200a..00000000
+--- a/server/openapi/descrizioni/mappe.ts
++++ b/server/openapi/descrizioni/mappe.ts
+@@@ -80,13 -80,13 +80,19 @@@ export const DESCRIZIONI_MAPPE: Descriz
+    },
+    'PUT /api/mappe/:chiave': {
+      sommario: 'Aggiorna una mappa dall\'editor: i campi assenti restano',
+++<<<<<<< HEAD
+ +    descrizione: 'Il genitore non può essere la mappa stessa né una sua discendente. Spostandola, le infiltrazioni sue e delle discendenti devono restare del Palazzo di arrivo. Salvare con il nome segna il nome come rivisto; se la mappa dava il titolo alla sua area, quel titolo si fissa prima del cambio. Riga, legame con l\'entità e percorsi si scrivono in una transazione e la mappa diventa dell\'utente.',
+ +    risposta: 'La mappa aggiornata: `MappaDto`',
+ +    errori: [[404, 'mappa-non-trovata'], [400, 'genitore-non-valido'], [400, 'mappa-fuori-palazzo'], [400, 'area-inesistente'], [400, 'area-di-altro-palazzo']],
+++=======
++     descrizione: 'Il genitore non può essere la mappa stessa né una sua discendente. Una mappa senza Area di tipo `luogo` o `area` non entra nel mondo (spostata sotto Tokyo o un quartiere, o resa `luogo`/`area` lì): 409 `usa-aggiungi-area`, come la creazione (FUN2-8, R2-27); le generiche del mondo, i Palazzi e i Memento non cambiano. Spostandola, le infiltrazioni sue e delle discendenti devono restare del Palazzo di arrivo. Salvare con il nome segna il nome come rivisto; se la mappa dava il titolo alla sua area, quel titolo si fissa prima del cambio. Riga, legame con l\'entità e percorsi si scrivono in una transazione e la mappa diventa dell\'utente. L3: un\'`entita` di tipo `area` (un\'infiltrazione) si lega all\'**Area** della planimetria (`infiltrazione_area`, in aggiunta alle sue; 400 `planimetria-senza-area` se non ne ha una del Palazzo); le colonne `entita_*` e `mappa_entita` di tipo area non si scrivono più, e `entita: null` non stacca le infiltrazioni (si tolgono con le rotte delle Aree o con `PUT /api/mappe/:chiave/aree`).',
++     risposta: 'La mappa aggiornata: `MappaDto`',
++     errori: [[404, 'mappa-non-trovata'], [400, 'genitore-non-valido'], [409, 'usa-aggiungi-area'], [400, 'mappa-fuori-palazzo'], [400, 'area-inesistente'], [400, 'area-di-altro-palazzo'], [400, 'planimetria-senza-area']],
+++>>>>>>> 1cd41876 (fix(L2): giro 2 — «da verificare» nell'indice delle mappe (R1), Area corretta conservata dal seed (R2-28), niente mappe senza Area nel mondo dall'editor (FUN2-8))
+    },
+    'PUT /api/mappe/:chiave/aree': {
+ -    sommario: 'Imposta l\'insieme delle infiltrazioni che toccano una planimetria (rotta vecchia)',
+ -    descrizione: 'Rotta di prima di L3, riscritta sul modello nuovo: le infiltrazioni di una planimetria sono quelle della sua **Area**, quindi l\'insieme passato diventa quello dell\'Area (`infiltrazione_area`, come `PUT /api/aree/dungeon/:k/:slug/infiltrazioni`), per tutte le sue versioni; voci e pin non si toccano. Le infiltrazioni devono essere del Palazzo della planimetria; la mappa d\'insieme del Palazzo non ne accetta. Per le mappe senza Area (i Memento) resta il comportamento di prima. Il client nuovo usa le rotte delle Aree.',
+ +    sommario: 'Imposta l\'insieme delle infiltrazioni che toccano una planimetria',
+ +    descrizione: 'Si passa l\'insieme completo: le infiltrazioni tolte si staccano, quelle nuove si aggiungono e restano anche sulle altre planimetrie che le avevano (un\'infiltrazione può stare su più planimetrie, dal 2026-10-04). Le infiltrazioni devono essere del Palazzo della planimetria; la mappa d\'insieme del Palazzo non ne accetta. Gli altri legami della mappa restano; la mappa diventa dell\'utente.',
+      risposta: '`{ aree }`: le infiltrazioni legate in ordine di guida, ognuna `{ chiave, nome, ordine }`',
+      errori: [[404, 'mappa-non-trovata'], [400, 'mappa-fuori-palazzo'], [400, 'area-inesistente'], [400, 'area-di-altro-palazzo']],
+    },

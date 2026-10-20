@@ -1,0 +1,99 @@
+
+ RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/pensive-burnell-b50941
+
+ ✓ server/utils/scaricaDaUrl.test.ts > rifiuta gli indirizzi che non sono http/https 1ms
+ ✓ server/utils/scaricaDaUrl.test.ts > scarica il contenuto e riporta il tipo dichiarato 12ms
+ ✓ server/utils/scaricaDaUrl.test.ts > un corpo LENTO ma vivo arriva intero: la scadenza è sull’inattività, non sul totale 622ms
+ ✓ server/utils/scaricaDaUrl.test.ts > un corpo FERMO viene interrotto con il motivo giusto 157ms
+ ✓ server/utils/scaricaDaUrl.test.ts > se le intestazioni non arrivano, lo dice senza aspettare il corpo 135ms
+ ✓ server/utils/scaricaDaUrl.test.ts > il tetto vale anche quando l’origine non dichiara la dimensione 3ms
+ ✓ server/utils/scaricaDaUrl.test.ts > il tetto dichiarato viene fermato prima di scaricare 2ms
+ ✓ server/utils/scaricaDaUrl.test.ts > uno stato diverso da 200 e un corpo vuoto sono errori parlanti 2ms
+ × server/utils/scaricaDaUrl.test.ts > LAY-2 — una fonte che rifiuta (401, 403, 429, 451) è `fonte-rifiuta`, con lo stato e l’host; gli altri stati restano «scarico fallito» 6ms
+   → expected HttpError: L'indirizzo ha risposto 401: c… { …(3) } to match object { status: 400, …(2) }
+(1 matching property omitted from actual)
+ ✓ server/utils/scaricaDaUrl.test.ts > un host che non risponde non lascia appeso il chiamante 0ms
+ × server/routes/scarico-fonte.test.ts > scarico da una fonte esterna (LAY-2) > la fonte riceve uno User-Agent che dice chi è (project-p5r con la versione), e nessun Referer 28ms
+   → expected 'Mozilla/5.0 (compatible; ProjectP5R/1…' to match /^project-p5r\/\d+\.\d…/\d+\.\d+\.\d+ \(
+ × server/routes/scarico-fonte.test.ts > scarico da una fonte esterna (LAY-2) > una fonte che rifiuta (403) è 400 `fonte-rifiuta` con la pagina della fonte, e l’immagine non cambia 5ms
+   → expected [ 400, 'download-fallito' ] to deeply equal [ 400, 'fonte-rifiuta' ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/routes/scarico-fonte.test.ts > scarico da una fonte esterna (LAY-2) > la fonte riceve uno User-Agent che dice chi è (project-p5r con la versione), e nessun Referer
+AssertionError: expected 'Mozilla/5.0 (compatible; ProjectP5R/1…' to match /^project-p5r\/\d+\.\d…/\d+\.\d+\.\d+ \(
+
+- Expected:
+/^project-p5r\/\d+\.\d+\.\d+ \(/
+
++ Received:
+"Mozilla/5.0 (compatible; ProjectP5R/1.0; +https://github.com/merlinoalbus/project-p5r)"
+
+ ❯ server/routes/scarico-fonte.test.ts:37:36
+     35|     stato = 200;
+     36|     await request(app).post('/api/mappe/piante-citta/kichijoji/scarica…
+     37|     expect(ricevute['user-agent']).toMatch(/^project-p5r\/\d+\.\d+\.\d…
+       |                                    ^
+     38|     expect(ricevute['user-agent']).not.toMatch(/Mozilla/);
+     39|     expect(ricevute.referer).toBeUndefined();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  server/routes/scarico-fonte.test.ts > scarico da una fonte esterna (LAY-2) > una fonte che rifiuta (403) è 400 `fonte-rifiuta` con la pagina della fonte, e l’immagine non cambia
+AssertionError: expected [ 400, 'download-fallito' ] to deeply equal [ 400, 'fonte-rifiuta' ]
+
+- Expected
++ Received
+
+  [
+    400,
+-   "fonte-rifiuta",
++   "download-fallito",
+  ]
+
+ ❯ server/routes/scarico-fonte.test.ts:46:43
+     44|     stato = 403;
+     45|     const r = await request(app).post('/api/mappe/piante-citta/kichijo…
+     46|     expect([r.status, r.body.error.code]).toEqual([400, 'fonte-rifiuta…
+       |                                           ^
+     47|     expect(r.body.error.details).toMatchObject({ stato: 403, host: `12…
+     48|     expect(r.body.error.message).toMatch(/editor/);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  server/utils/scaricaDaUrl.test.ts > LAY-2 — una fonte che rifiuta (401, 403, 429, 451) è `fonte-rifiuta`, con lo stato e l’host; gli altri stati restano «scarico fallito»
+AssertionError: expected HttpError: L'indirizzo ha risposto 401: c… { …(3) } to match object { status: 400, …(2) }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+- {
+-   "code": "fonte-rifiuta",
+-   "details": {
+-     "host": "127.0.0.1:53477",
+-     "stato": 401,
+-   },
++ HttpError {
++   "code": "scarico-fallito",
++   "details": undefined,
+    "status": 400,
+  }
+
+ ❯ server/utils/scaricaDaUrl.test.ts:97:60
+     95|   for (const stato of [401, 403, 429, 451]) {
+     96|     rispondi = (_req, res) => { res.writeHead(stato); res.end('Just a …
+     97|     await expect(scaricaDaUrl(`${base}/protetta`, OPZIONI)).rejects.to…
+       |                                                            ^
+     98|   }
+     99|   rispondi = (_req, res) => { res.writeHead(500); res.end(); };
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  3 failed | 9 passed (12)
+   Start at  03:01:45
+   Duration  2.35s (transform 1.42s, setup 209ms, import 1.94s, tests 1.19s, environment 0ms)
+
+EXIT=1

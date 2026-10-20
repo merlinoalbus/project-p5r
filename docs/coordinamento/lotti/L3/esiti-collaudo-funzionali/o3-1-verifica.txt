@@ -1,0 +1,10 @@
+== O3-1 2026-10-20T05:44:53.631Z
+area da svuotare 201 prova-o3-1-vuota palazzo-di-okumura-prova-o3-1-vuota
+colloca con conferma 200
+ripristino area vuota 200
+area vuota nel DB true legami [ 'okumura-03-caserma' ]
+export 200 aree 12 legami 11 area vuota nel pacchetto true suo legame [{"infiltrazione":"okumura-03-caserma","area":"dungeon/okumura/prova-o3-1-vuota","ordine":1,"planimetriaIniziale":null,"origine":"utente"}] · aree DB 12 legami DB 11
+import sovrascrivi 200 {"data":{"mappe":23,"spilli":148,"pezzi":0,"copie":0,"pezziScartati":0,"copieScartate":0,"pezziEliminati":0,"copieEliminate":0,"immagini":2,"saltate":[],"condizioniScartate":0,"vociScartate":0}}
+area 12 → 12 righe cambiate 0 
+legami 11 → 11 righe cambiate 0 
+fine 2026-10-20T05:44:53.908Z

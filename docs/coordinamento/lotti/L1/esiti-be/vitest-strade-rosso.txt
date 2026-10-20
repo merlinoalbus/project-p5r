@@ -1,0 +1,148 @@
+
+ RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/pensive-burnell-b50941
+
+ × server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F5 — da-url su una mappa con pezzi: 409 senza conferma (niente cambia); con la conferma sostituisce, toglie i pezzi e la mappa è dell’utente 67ms
+   → expected 201 to be 409 // Object.is equality
+ × server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F5 — scarico della pianta di un quartiere con pezzi: 409 senza conferma, poi con la conferma; l’origine della mappa non cambia (non è una scelta dell’utente) 10ms
+   → expected 201 to be 409 // Object.is equality
+ ✓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > illustrazione: scheda e intestazione di ogni quartiere mostrano la stessa immagine della loro mappa (caricata, poi asset) 98ms
+ ✓ server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > illustrazione: l’intestazione di un Palazzo ha la caricata della sua radice, mai lo stemma (che è il segno) 22ms
+ × server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F6 — import: le dimensioni dell’intestazione dell’immagine vincono su quelle del pacchetto; se l’intestazione non si legge (SVG) restano quelle del pacchetto 39ms
+   → expected { …(6) } to match object { …(3) }
+(3 matching properties omitted from actual)
+ × server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F9 — una mappa nuova dichiara l’asset predefinito solo se esiste; l’esportazione non inventa asset per convenzione 9ms
+   → expected 'mappe/senza-asset-f9' to be null
+ × server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F5 — rimozione dell’immagine di una mappa con pezzi: 409 senza conferma (niente cambia); con la conferma se ne vanno anche i pezzi 12ms
+   → expected 204 to be 409 // Object.is equality
+ × server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F5 — rimozione in blocco (ambito mappa, o tutti gli ambiti) con una mappa che ha pezzi: 409 senza conferma; con la conferma i pezzi se ne vanno 27ms
+   → expected 200 to be 409 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F5 — da-url su una mappa con pezzi: 409 senza conferma (niente cambia); con la conferma sostituisce, toglie i pezzi e la mappa è dell’utente
+AssertionError: expected 201 to be 409 // Object.is equality
+
+- Expected
++ Received
+
+- 409
++ 201
+
+ ❯ server/routes/immagine-mappa-strade.test.ts:52:22
+     50|     const url = `http://127.0.0.1:${porta}/da-url.png`;
+     51|     const r = await request(app).post(`/api/immagini/mappa/${encodeURI…
+     52|     expect(r.status).toBe(409);
+       |                      ^
+     53|     expect(r.body.error.code).toBe('mappa-con-pezzi');
+     54|     expect(r.body.error.details).toEqual({ pezzi: 1, copie: 1 });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F5 — scarico della pianta di un quartiere con pezzi: 409 senza conferma, poi con la conferma; l’origine della mappa non cambia (non è una scelta dell’utente)
+AssertionError: expected 201 to be 409 // Object.is equality
+
+- Expected
++ Received
+
+- 409
++ 201
+
+ ❯ server/routes/immagine-mappa-strade.test.ts:70:22
+     68|     prepared("UPDATE mappa SET origine = 'seed' WHERE chiave = 'citta-…
+     69|     const r = await request(app).post('/api/mappe/piante-citta/shibuya…
+     70|     expect(r.status).toBe(409);
+       |                      ^
+     71|     expect(r.body.error.code).toBe('mappa-con-pezzi');
+     72|     expect(pezzi('citta-shibuya')).toBe(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F6 — import: le dimensioni dell’intestazione dell’immagine vincono su quelle del pacchetto; se l’intestazione non si legge (SVG) restano quelle del pacchetto
+AssertionError: expected { …(6) } to match object { …(3) }
+(3 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "altezza": 400,
++   "altezza": null,
+    "immagine_chiave": "import-dimensioni-svg",
+-   "larghezza": 500,
++   "larghezza": null,
+  }
+
+ ❯ server/routes/immagine-mappa-strade.test.ts:114:43
+    112|     expect(riga('import-dimensioni-png')).toMatchObject({ immagine_chi…
+    113|     importaMappe(pacchetto('import-dimensioni-svg', 'image/svg+xml', S…
+    114|     expect(riga('import-dimensioni-svg')).toMatchObject({ immagine_chi…
+       |                                           ^
+    115|   });
+    116|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F9 — una mappa nuova dichiara l’asset predefinito solo se esiste; l’esportazione non inventa asset per convenzione
+AssertionError: expected 'mappe/senza-asset-f9' to be null
+
+- Expected:
+null
+
++ Received:
+"mappe/senza-asset-f9"
+
+ ❯ server/routes/immagine-mappa-strade.test.ts:119:25
+    117|   it('F9 — una mappa nuova dichiara l’asset predefinito solo se esiste…
+    118|     const senza = creaMappa(undefined, { nome: 'Senza asset F9', tipo:…
+    119|     expect(senza.asset).toBeNull();
+       |                         ^
+    120|     expect(riga(interna('Senza asset F9'))).toMatchObject({ asset: nul…
+    121|     salvaImmagine('mappe', 'con-asset-f9', 'image/png', png(8, 8));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F5 — rimozione dell’immagine di una mappa con pezzi: 409 senza conferma (niente cambia); con la conferma se ne vanno anche i pezzi
+AssertionError: expected 204 to be 409 // Object.is equality
+
+- Expected
++ Received
+
+- 409
++ 204
+
+ ❯ server/routes/immagine-mappa-strade.test.ts:136:22
+    134|     const m = await planimetriaConPezzo('Rimozione F5');
+    135|     const r = await request(app).delete(`/api/immagini/mappa/${encodeU…
+    136|     expect(r.status).toBe(409);
+       |                      ^
+    137|     expect(r.body.error.code).toBe('mappa-con-pezzi');
+    138|     expect(pezzi(m.chiave)).toBe(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  server/routes/immagine-mappa-strade.test.ts > L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni e asset > F5 — rimozione in blocco (ambito mappa, o tutti gli ambiti) con una mappa che ha pezzi: 409 senza conferma; con la conferma i pezzi se ne vanno
+AssertionError: expected 200 to be 409 // Object.is equality
+
+- Expected
++ Received
+
+- 409
++ 200
+
+ ❯ server/routes/immagine-mappa-strade.test.ts:151:24
+    149|     for (const query of ['?ambito=mappa', '']) {
+    150|       const r = await request(app).delete(`/api/immagini${query}`);
+    151|       expect(r.status).toBe(409);
+       |                        ^
+    152|       expect(r.body.error.code).toBe('mappa-con-pezzi');
+    153|       expect(r.body.error.details).toMatchObject({ mappe: 1, pezzi: 1,…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 2 passed (8)
+   Start at  01:44:16
+   Duration  2.92s (transform 1.57s, setup 119ms, import 2.16s, tests 484ms, environment 0ms)
+
+EXIT=1

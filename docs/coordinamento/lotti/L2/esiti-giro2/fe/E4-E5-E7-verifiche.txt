@@ -1,0 +1,3 @@
+app EXIT=0
+test EXIT=0
+lint EXIT=0

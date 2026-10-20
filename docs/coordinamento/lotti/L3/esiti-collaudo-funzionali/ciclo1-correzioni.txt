@@ -1,0 +1,10 @@
+== fase correzioni · 2026-10-20T05:04:30.421Z
+area B 201 prova-funzionali-l3-b palazzo-di-okumura-prova-funzionali-l3-b
+«Rendila un'area a sé» sull'unica versione → 400 {"code":"gia-area-a-se","message":"«Prova funzionali L3 B» ha solo questa planimetria: è già un’area a sé."}
+Colloca unica versione di B in A → 409 {"code":"area-si-svuota","message":"«Prova funzionali L3 B» resta senza planimetrie: la versione si sposta in «Prova funzionali L3 rinominata», «Prova funzionali L3 B» va nel cestino.","details":{"area":"prova-funzionali-l3-b","arrivo":"prova-funzionali-l3","legami":0}}
+con ?conferma=1 → 200 {"slug":"prova-funzionali-l3","nome":"Prova funzionali L3 rinominata"}
+B nella scheda: false · versioni di A: [{"chiave":"palazzo-di-okumura-prova-funzionali-l3-livello-2","versione_etichetta":"Livello alto (presentazione)"},{"chiave":"palazzo-di-okumura-prova-funzionali-l3","versione_etichetta":"Livello 1"},{"chiave":"palazzo-di-okumura-prova-funzionali-l3-b","versione_etichetta":"Da B"}]
+cestino: [[20,"area-fisica","Prova funzionali L3 B",null]]
+ripristino di B 200 undefined · B: {"planimetrie":0} [{"n":0}]
+
+/stanza con nome → 200 undefined · A prima {"nome":"Prova funzionali L3 rinominata","nome_rivisto":1} dopo [{"nome":"Prova funzionali L3 rinominata","nome_rivisto":1}]

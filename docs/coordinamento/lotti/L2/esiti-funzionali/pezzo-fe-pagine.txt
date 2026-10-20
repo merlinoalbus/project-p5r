@@ -1,0 +1,58 @@
+L2 · pezzo FE (5373 contro 3201), 2026-10-20 — estratti grezzi del DOM (iframe 1280x800 salvo dove detto), solo letture.
+
+== R2-15 strade verso Shibuya (href letti dal DOM)
+metro (.mappa-tokyo a): Yongen-Jaya → /guida/citta/yongen-jaya?ingresso=1 · Shibuya → /guida/citta/shibuya?ingresso=1 · Shujin Academy → /guida/citta/shujin-academy?ingresso=1
+  · Parco Inokashira → /guida/citta/inokashira-park?ingresso=1 · Odaiba / Seaside Park → /guida/citta/odaiba?ingresso=1 · Ogikubo → …/ogikubo?ingresso=1
+  · Tsukishima → …/tsukishima?ingresso=1 · Madarame → /guida/mondo/dungeon/madarame · Memento → /guida/mondo/dungeon/mementos · Covo dei Ladri → /guida/covo
+  Covo: title="Covo dei Ladri — dal menu di gioco, dal 6/5"; «soffitta» assente nella pagina.
+schede de La città: Yongen-Jaya → /guida/citta/yongen-jaya · Shibuya → /guida/citta/shibuya · Kichijoji → /guida/citta/kichijoji
+  (le due piastrelle in cima alla pagina, accanto alla metro, portano a …?ingresso=1 come la metro)
+testo in testa: «tocca un quartiere sulla mappa o una scheda per aprirlo, con le sue aree, i luoghi, gli orari e gli sblocchi.»
+accesso al mondo: /guida/mondo/quartiere/shibuya → /guida/citta/shibuya
+briciole dalla pagina Area: «La città» → /guida/citta ; «Shibuya» → /guida/citta/shibuya
+indice /guida/mappe e S5 (Oggi): non ancora provati (l'indice per aree è fra le cose ancora da fare di FE)
+
+== R2-22 ingresso dalla metro
+/guida/citta/shibuya?ingresso=1: [role=dialog] titolo «Central Street — ingresso di Shibuya»; visore mappe/native%2Fnativo-rmap-001-3-0;
+  «Apri l’area» → /guida/citta/shibuya/central-street?x=38.29&y=32.67&zoom=1 ; «Chiudi» → /guida/citta/shibuya, finestra chiusa
+/guida/citta/yongen-jaya?ingresso=1: titolo «Vicoli — ingresso di Yongen-Jaya»; visore nativo-rmap-009-2-0; «Apri l’area» →
+  /guida/citta/yongen-jaya/vicoli?x=37.46&y=25.14&zoom=1 ; «Chiudi» → /guida/citta/yongen-jaya
+/guida/citta/shibuya (senza parametro): nessuna finestra · /guida/citta/kichijoji?ingresso=1 (senza ingresso): nessuna finestra
+
+== R2-12 pagina Quartiere /guida/citta/shibuya
+azioni: «Entra: Central Street», «Ingresso», «Aggiungi area», «Riordina», «Segna sull’illustrazione il suo pin manca» ×3
+aree (link): Piazza della stazione, Sottopasso, Central Street, Centro comm. sotterraneo, Tornello della linea Ginza, Banchina della metropolitana
+  → /guida/citta/shibuya/<slug> (nessun «Sottopasso Speciale»: R2-06)
+visore: /api/immagini/mappa/citta-shibuya (illustrazione); pin di passaggio: Banchina della metropolitana, Central Street, Piazza della stazione
+titoli: «Aree · 6», …; parola «mappa/mappe» nel testo della pagina: nessuna
+(nota: le miniature delle aree sono asset statici delle planimetrie native: niente srcset/sizes, come la regola di L1)
+
+== R2-13 / R2-14 / R2-17 pagina Area /guida/citta/shibuya/sottopasso
+titolo «Sottopasso — Shibuya — Project P5R»; briciole La città › Shibuya; azioni «Modifica area», «Aggiungi planimetria», «Elimina area», «Modifica planimetria»
+versioni: [«inquadratura orientale · 16 pin · si apre per prima», aria-pressed=true] [«planimetria completa · nessun pin», aria-pressed=false]
+visore: mappe/native%2Fnativo-rmap-001-2-0 (predefinita)
+clic su «planimetria completa» → /guida/citta/shibuya/sottopasso?planimetria=shibuya-sottopasso-speciale, history.length invariato (replace),
+  visore nativo-rmap-001-2-1, avviso «Su questa planimetria non ci sono pin: quelli dell’area stanno su «inquadratura orientale».»
+pannello (aperto con «Pannello», 1280x689), sezioni visibili:
+  LUOGHI QUI: Chiosco della stazione KiyasuKu (Scheda), Distributore del sottopasso (Scheda)
+  AREE VICINE: Banchina della metropolitana, Piazza della stazione, Centro comm. sotterraneo, Central Street
+  AREE VICINE: Su: Shibuya            ← FUN2-6 (titolo doppio)
+  CATEGORIE … · PROGRESSO 0 di 1 raccolti · 0% · SPILLI (16) …
+parola «mappa/mappe» nel testo della pagina: nessuna
+
+== R2-31 «Sulla mappa» del diario: /guida/mappe/<k>?spillo=<id> per le 16 destinazioni delle 63 voci del mondo + le 3 di Palazzi e Memento
+(atteso: la casa della planimetria con lo spillo; popup del visore aperto sullo spillo)
+citta-tsukishima|230 OK /guida/citta/tsukishima?spillo=230 · popup «Ristorante di monjayaki»
+citta-ogikubo|226 OK /guida/citta/ogikubo?spillo=226 · «Ristorante di ramen di Ogikubo»
+citta-shujin-academy|1656 /guida/citta/shujin-academy?spillo=1656 · pin «Palazzo di Kamoshida», popup «Prigione sotterranea - Tutorial»
+  (passaggio: il popup dice il nome della meta, §4.6 «pin di passaggio col nome della meta» — atteso, non difetto)
+citta-shujin-academy|1616 OK /guida/citta/shujin-academy?spillo=1616 · «Palazzo di Kamoshida»
+nativo-rmap-001-3-0|1515,1516,1517,1518,1519,1524,1525 OK /guida/citta/shibuya/central-street?spillo=<id> · Sala giochi (Central Street), Ore no Beko (Gyudon),
+  Untouchable, Palestra Protein Lovers, Videonoleggio Scarlet, Libreria Taiheido, Triple Seven
+nativo-rmap-009-2-0|1588,1592 OK /guida/citta/yongen-jaya/vicoli?spillo=<id> · Café Leblanc, Clinica Medica Takemi
+nativo-rmap-001-4-0|1537 OK /guida/citta/shibuya/centro-comm-sotterraneo?spillo=1537 · Fiorista
+nativo-rmap-002-0-0|292,293 OK /guida/citta/shujin-academy/edificio-principale-1p-edificio-laboratori-1p?spillo=<id> · Distributore Cortile, Panetteria
+Palazzi e Memento (invariati, restano nel visore): nativo-rmap-152-1-0|1667 → /guida/mappe/palazzo-di-kamoshida-prigione-sotterranea-tutorial-nativo-rmap-152-1-0?spillo=1667 · «Morgana»
+  nativo-rmap-190-1-0 → /guida/mappe/memento-memento-aree-fisse-strutture-che-i-memento-riusano · nativo-rmap-153-1-0 → /guida/mappe/palazzo-di-madarame-entrata-del-museo
+Esito: 19/19 destinazioni giuste; per le 63 voci del mondo lo spillo arriva selezionato (popup aperto) sulla pagina dell'area o del quartiere.
+Nessuna destinazione è una planimetria non predefinita, quindi nessun ?planimetria= in questi arrivi.

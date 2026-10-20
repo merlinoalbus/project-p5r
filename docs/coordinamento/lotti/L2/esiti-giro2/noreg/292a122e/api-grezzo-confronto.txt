@@ -1,0 +1,123 @@
+38 endpoint; non 200: 0
+
+# /compendio/citta: 19 differenze
+  ~ .corpo.data.0.illustrazione.immagineUrl: "/api/immagini/mappa/citta-yongen-jaya/file?v=2026-09-09T19%3A50%3A02.441Z" → "/api/immagini/mappa/citta-yongen-jaya/file?v=2026-09-09T19%3A50%3A02.441Z~r2"
+  ~ .corpo.data.1.illustrazione.immagineUrl: "/api/immagini/mappa/citta-shibuya/file?v=2026-09-09T20%3A09%3A28.331Z" → "/api/immagini/mappa/citta-shibuya/file?v=2026-09-09T20%3A09%3A28.331Z~r2"
+  ~ .corpo.data.2.illustrazione.immagineUrl: "/api/immagini/mappa/citta-shinjuku/file?v=2026-10-18T13%3A01%3A39.422Z" → "/api/immagini/mappa/citta-shinjuku/file?v=2026-10-18T13%3A01%3A39.422Z~r2"
+  ~ .corpo.data.4.illustrazione.immagineUrl: "/api/immagini/mappa/citta-akihabara/file?v=2026-10-18T13%3A02%3A14.823Z" → "/api/immagini/mappa/citta-akihabara/file?v=2026-10-18T13%3A02%3A14.823Z~r2"
+  ~ .corpo.data.5.illustrazione.immagineUrl: "/api/immagini/mappa/citta-shujin-academy/file?v=2026-09-09T20%3A17%3A24.753Z" → "/api/immagini/mappa/citta-shujin-academy/file?v=2026-09-09T20%3A17%3A24.753Z~r2"
+  ~ .corpo.data.6.illustrazione.immagineUrl: "/api/immagini/mappa/citta-kanda-jinbocho/file?v=2026-10-18T13%3A02%3A53.623Z" → "/api/immagini/mappa/citta-kanda-jinbocho/file?v=2026-10-18T13%3A02%3A53.623Z~r2"
+  … (13 altre)
+
+# /compendio/citta?partita=1: 19 differenze
+  ~ .corpo.data.0.illustrazione.immagineUrl: "/api/immagini/mappa/citta-yongen-jaya/file?v=2026-09-09T19%3A50%3A02.441Z" → "/api/immagini/mappa/citta-yongen-jaya/file?v=2026-09-09T19%3A50%3A02.441Z~r2"
+  ~ .corpo.data.1.illustrazione.immagineUrl: "/api/immagini/mappa/citta-shibuya/file?v=2026-09-09T20%3A09%3A28.331Z" → "/api/immagini/mappa/citta-shibuya/file?v=2026-09-09T20%3A09%3A28.331Z~r2"
+  ~ .corpo.data.2.illustrazione.immagineUrl: "/api/immagini/mappa/citta-shinjuku/file?v=2026-10-18T13%3A01%3A39.422Z" → "/api/immagini/mappa/citta-shinjuku/file?v=2026-10-18T13%3A01%3A39.422Z~r2"
+  ~ .corpo.data.4.illustrazione.immagineUrl: "/api/immagini/mappa/citta-akihabara/file?v=2026-10-18T13%3A02%3A14.823Z" → "/api/immagini/mappa/citta-akihabara/file?v=2026-10-18T13%3A02%3A14.823Z~r2"
+  ~ .corpo.data.5.illustrazione.immagineUrl: "/api/immagini/mappa/citta-shujin-academy/file?v=2026-09-09T20%3A17%3A24.753Z" → "/api/immagini/mappa/citta-shujin-academy/file?v=2026-09-09T20%3A17%3A24.753Z~r2"
+  ~ .corpo.data.6.illustrazione.immagineUrl: "/api/immagini/mappa/citta-kanda-jinbocho/file?v=2026-10-18T13%3A02%3A53.623Z" → "/api/immagini/mappa/citta-kanda-jinbocho/file?v=2026-10-18T13%3A02%3A53.623Z~r2"
+  … (13 altre)
+
+# /mappe/albero: 33 differenze
+  ~ .corpo.data.0.immagineUrl: "/api/immagini/mappa/tokyo/file?v=2026-10-18T13%3A17%3A02.571Z" → "/api/immagini/mappa/tokyo/file?v=2026-10-18T13%3A17%3A02.571Z~r2"
+  ~ .corpo.data.1.immagineUrl: "/api/immagini/mappa/dungeon-kamoshida/file?v=2026-09-29T15%3A32%3A16.649Z" → "/api/immagini/mappa/dungeon-kamoshida/file?v=2026-09-29T15%3A32%3A16.649Z~r2"
+  ~ .corpo.data.2.immagineUrl: "/api/immagini/mappa/dungeon-madarame/file?v=2026-10-18T13%3A08%3A53.288Z" → "/api/immagini/mappa/dungeon-madarame/file?v=2026-10-18T13%3A08%3A53.288Z~r2"
+  ~ .corpo.data.3.immagineUrl: "/api/immagini/mappa/dungeon-kaneshiro/file?v=2026-10-18T13%3A09%3A13.168Z" → "/api/immagini/mappa/dungeon-kaneshiro/file?v=2026-10-18T13%3A09%3A13.168Z~r2"
+  ~ .corpo.data.4.immagineUrl: "/api/immagini/mappa/dungeon-futaba/file?v=2026-10-18T13%3A09%3A29.364Z" → "/api/immagini/mappa/dungeon-futaba/file?v=2026-10-18T13%3A09%3A29.364Z~r2"
+  ~ .corpo.data.5.immagineUrl: "/api/immagini/mappa/dungeon-okumura/file?v=2026-10-18T13%3A09%3A51.475Z" → "/api/immagini/mappa/dungeon-okumura/file?v=2026-10-18T13%3A09%3A51.475Z~r2"
+  … (27 altre)
+
+# /mappe/tokyo?partita=1: 23 differenze
+  ~ .corpo.data.immagineUrl: "/api/immagini/mappa/tokyo/file?v=2026-10-18T13%3A17%3A02.571Z" → "/api/immagini/mappa/tokyo/file?v=2026-10-18T13%3A17%3A02.571Z~r2"
+  ~ .corpo.data.figli.0.immagineUrl: "/api/immagini/mappa/citta-yongen-jaya/file?v=2026-09-09T19%3A50%3A02.441Z" → "/api/immagini/mappa/citta-yongen-jaya/file?v=2026-09-09T19%3A50%3A02.441Z~r2"
+  ~ .corpo.data.figli.1.immagineUrl: "/api/immagini/mappa/citta-shibuya/file?v=2026-09-09T20%3A09%3A28.331Z" → "/api/immagini/mappa/citta-shibuya/file?v=2026-09-09T20%3A09%3A28.331Z~r2"
+  ~ .corpo.data.figli.2.immagineUrl: "/api/immagini/mappa/citta-shinjuku/file?v=2026-10-18T13%3A01%3A39.422Z" → "/api/immagini/mappa/citta-shinjuku/file?v=2026-10-18T13%3A01%3A39.422Z~r2"
+  ~ .corpo.data.figli.4.immagineUrl: "/api/immagini/mappa/citta-akihabara/file?v=2026-10-18T13%3A02%3A14.823Z" → "/api/immagini/mappa/citta-akihabara/file?v=2026-10-18T13%3A02%3A14.823Z~r2"
+  ~ .corpo.data.figli.5.immagineUrl: "/api/immagini/mappa/citta-shujin-academy/file?v=2026-09-09T20%3A17%3A24.753Z" → "/api/immagini/mappa/citta-shujin-academy/file?v=2026-09-09T20%3A17%3A24.753Z~r2"
+  … (17 altre)
+
+# /compendio/citta/yongen-jaya?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/citta-yongen-jaya/file?v=2026-09-09T19%3A50%3A02.441Z" → "/api/immagini/mappa/citta-yongen-jaya/file?v=2026-09-09T19%3A50%3A02.441Z~r2"
+
+# /compendio/citta/shibuya?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/citta-shibuya/file?v=2026-09-09T20%3A09%3A28.331Z" → "/api/immagini/mappa/citta-shibuya/file?v=2026-09-09T20%3A09%3A28.331Z~r2"
+
+# /compendio/citta/shinjuku?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/citta-shinjuku/file?v=2026-10-18T13%3A01%3A39.422Z" → "/api/immagini/mappa/citta-shinjuku/file?v=2026-10-18T13%3A01%3A39.422Z~r2"
+
+# /compendio/citta/akihabara?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/citta-akihabara/file?v=2026-10-18T13%3A02%3A14.823Z" → "/api/immagini/mappa/citta-akihabara/file?v=2026-10-18T13%3A02%3A14.823Z~r2"
+
+# /compendio/citta/shujin-academy?partita=1: 3 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/citta-shujin-academy/file?v=2026-09-09T20%3A17%3A24.753Z" → "/api/immagini/mappa/citta-shujin-academy/file?v=2026-09-09T20%3A17%3A24.753Z~r2"
+  ~ .corpo.data.aree.1.illustrazione.immagineUrl: "/api/immagini/mappa/shibuya-tornello-della-linea-ginza-aoyama-itchome/file?v=2026-09-13T09%3A23%3A05.784Z" → "/api/immagini/mappa/shibuya-tornello-della-linea-ginza-aoyama-itchome/file?v=2026-09-13T09%3A23%3A05.784Z~r2"
+  ~ .corpo.data.aree.7.illustrazione.immagineUrl: "/api/immagini/mappa/nativo-rmap-002-8-0/file?v=2026-09-13T13%3A42%3A01.885Z" → "/api/immagini/mappa/nativo-rmap-002-8-0/file?v=2026-09-13T13%3A42%3A01.885Z~r2"
+
+# /compendio/citta/kanda-jinbocho?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/citta-kanda-jinbocho/file?v=2026-10-18T13%3A02%3A53.623Z" → "/api/immagini/mappa/citta-kanda-jinbocho/file?v=2026-10-18T13%3A02%3A53.623Z~r2"
+
+# /compendio/citta/harajuku?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/citta-harajuku/file?v=2026-10-18T13%3A03%3A26.541Z" → "/api/immagini/mappa/citta-harajuku/file?v=2026-10-18T13%3A03%3A26.541Z~r2"
+
+# /compendio/citta/ueno?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/citta-ueno/file?v=2026-10-18T13%3A03%3A49.926Z" → "/api/immagini/mappa/citta-ueno/file?v=2026-10-18T13%3A03%3A49.926Z~r2"
+
+# /compendio/citta/inokashira-park?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/citta-inokashira-park/file?v=2026-10-18T13%3A04%3A09.438Z" → "/api/immagini/mappa/citta-inokashira-park/file?v=2026-10-18T13%3A04%3A09.438Z~r2"
+
+# /compendio/citta/odaiba?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/citta-odaiba/file?v=2026-10-18T13%3A04%3A30.475Z" → "/api/immagini/mappa/citta-odaiba/file?v=2026-10-18T13%3A04%3A30.475Z~r2"
+
+# /compendio/citta/shinagawa?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/citta-shinagawa/file?v=2026-10-18T13%3A04%3A52.240Z" → "/api/immagini/mappa/citta-shinagawa/file?v=2026-10-18T13%3A04%3A52.240Z~r2"
+
+# /compendio/citta/ogikubo?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/citta-ogikubo/file?v=2026-10-18T13%3A05%3A20.763Z" → "/api/immagini/mappa/citta-ogikubo/file?v=2026-10-18T13%3A05%3A20.763Z~r2"
+
+# /compendio/citta/yokohama-chinatown?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/citta-yokohama-chinatown/file?v=2026-10-18T13%3A05%3A53.059Z" → "/api/immagini/mappa/citta-yokohama-chinatown/file?v=2026-10-18T13%3A05%3A53.059Z~r2"
+
+# /compendio/citta/maihama?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/citta-maihama/file?v=2026-10-18T13%3A06%3A19.400Z" → "/api/immagini/mappa/citta-maihama/file?v=2026-10-18T13%3A06%3A19.400Z~r2"
+
+# /compendio/citta/roppongi?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/citta-roppongi/file?v=2026-10-18T13%3A06%3A38.155Z" → "/api/immagini/mappa/citta-roppongi/file?v=2026-10-18T13%3A06%3A38.155Z~r2"
+
+# /compendio/citta/tsukishima?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/citta-tsukishima/file?v=2026-10-18T13%3A06%3A58.078Z" → "/api/immagini/mappa/citta-tsukishima/file?v=2026-10-18T13%3A06%3A58.078Z~r2"
+
+# /compendio/citta/ichigaya?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/citta-ichigaya/file?v=2026-10-18T13%3A07%3A38.611Z" → "/api/immagini/mappa/citta-ichigaya/file?v=2026-10-18T13%3A07%3A38.611Z~r2"
+
+# /compendio/citta/suidobashi?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/citta-suidobashi/file?v=2026-10-18T13%3A08%3A04.729Z" → "/api/immagini/mappa/citta-suidobashi/file?v=2026-10-18T13%3A08%3A04.729Z~r2"
+
+# /compendio/citta/asakusa?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/citta-asakusa/file?v=2026-10-18T13%3A08%3A23.144Z" → "/api/immagini/mappa/citta-asakusa/file?v=2026-10-18T13%3A08%3A23.144Z~r2"
+
+# /compendio/dungeon/kamoshida?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/dungeon-kamoshida/file?v=2026-09-29T15%3A32%3A16.649Z" → "/api/immagini/mappa/dungeon-kamoshida/file?v=2026-09-29T15%3A32%3A16.649Z~r2"
+
+# /compendio/dungeon/madarame?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/dungeon-madarame/file?v=2026-10-18T13%3A08%3A53.288Z" → "/api/immagini/mappa/dungeon-madarame/file?v=2026-10-18T13%3A08%3A53.288Z~r2"
+
+# /compendio/dungeon/kaneshiro?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/dungeon-kaneshiro/file?v=2026-10-18T13%3A09%3A13.168Z" → "/api/immagini/mappa/dungeon-kaneshiro/file?v=2026-10-18T13%3A09%3A13.168Z~r2"
+
+# /compendio/dungeon/futaba?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/dungeon-futaba/file?v=2026-10-18T13%3A09%3A29.364Z" → "/api/immagini/mappa/dungeon-futaba/file?v=2026-10-18T13%3A09%3A29.364Z~r2"
+
+# /compendio/dungeon/okumura?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/dungeon-okumura/file?v=2026-10-18T13%3A09%3A51.475Z" → "/api/immagini/mappa/dungeon-okumura/file?v=2026-10-18T13%3A09%3A51.475Z~r2"
+
+# /compendio/dungeon/niijima?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/dungeon-niijima/file?v=2026-10-18T13%3A15%3A00.659Z" → "/api/immagini/mappa/dungeon-niijima/file?v=2026-10-18T13%3A15%3A00.659Z~r2"
+
+# /compendio/dungeon/shido?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/dungeon-shido/file?v=2026-10-18T13%3A15%3A24.324Z" → "/api/immagini/mappa/dungeon-shido/file?v=2026-10-18T13%3A15%3A24.324Z~r2"
+
+# /compendio/dungeon/iweleth?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/dungeon-iweleth/file?v=2026-10-18T13%3A15%3A50.492Z" → "/api/immagini/mappa/dungeon-iweleth/file?v=2026-10-18T13%3A15%3A50.492Z~r2"
+
+# /compendio/dungeon/maruki?partita=1: 1 differenze
+  ~ .corpo.data.illustrazione.immagineUrl: "/api/immagini/mappa/dungeon-maruki/file?v=2026-10-18T13%3A16%3A30.570Z" → "/api/immagini/mappa/dungeon-maruki/file?v=2026-10-18T13%3A16%3A30.570Z~r2"

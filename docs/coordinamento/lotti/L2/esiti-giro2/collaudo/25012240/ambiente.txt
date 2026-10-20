@@ -1,0 +1,8 @@
+### collaudo su 250122406a3c0afc7abd204df0e5a0ec0764a5a6 — 2026-10-20T07:38:56+02:00
+{"data":{"status":"ok","timestamp":"2026-10-20T05:38:56.894Z","db":{"ok":true,"userVersion":109}}}
+FE 200
+### migrazioni all'avvio (attese 0)
+0
+### impronta dei dati contro la base L2-base-p5s-20261020-0533Z
+IDENTICHE
+EXIT=0

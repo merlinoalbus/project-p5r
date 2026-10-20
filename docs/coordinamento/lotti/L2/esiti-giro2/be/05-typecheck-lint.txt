@@ -1,0 +1,14 @@
+== npx tsc -p tsconfig.server.json --noEmit
+EXIT=0
+== npm run typecheck (tsc -b tsconfig.full.json)
+
+> project-p5r@0.1.0 typecheck
+> tsc -b tsconfig.full.json
+
+EXIT=0
+== npm run lint
+
+> project-p5r@0.1.0 lint
+> eslint .
+
+EXIT=0
