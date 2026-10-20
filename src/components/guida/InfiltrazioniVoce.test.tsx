@@ -53,6 +53,17 @@ it('la finestra nomina il collegamento della voce col suo nome («Palazzo di Mad
   expect(finestra.queryByText(/«Entra»/)).toBeNull();
 });
 
+// UX3-9: una voce senza collegamento (né il Palazzo né «Sulla mappa») non parla di un collegamento che non c'è
+it('senza collegamento la finestra dice a cosa servono le infiltrazioni per la voce, senza nominare un collegamento (UX3-9)', async () => {
+  const proposta = { infiltrazioni: [{ chiave: 'k-10', nome: 'Vecchio Castello' }], motivo: 'la voce descrive il primo accesso', certezza: 'certa' as const };
+  render(<InfiltrazioniVoce a={voce({ tipo: 'trama', riferimento: null, infiltrazioni: [], propostaInfiltrazioni: proposta } as Partial<AzionePercorsoDto>)} partitaId={7} onCambiata={() => {}} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
+  const finestra = within(await screen.findByRole('dialog', { name: 'Infiltrazioni della voce' }));
+  expect(finestra.queryByText(/collegamento/)).toBeNull();
+  expect(finestra.getByText(/^In ordine, come le percorri: dicono in quali infiltrazioni avviene la voce, che non apre il Palazzo\./)).toBeInTheDocument();
+  expect(finestra.getByText('Nessuna: la voce non dice ancora in quale infiltrazione avviene.')).toBeInTheDocument();
+});
+
 it('con una proposta la finestra dice che il collegamento apre la prima della proposta (UX3-1)', async () => {
   const proposta = { infiltrazioni: [{ chiave: 'k-11', nome: 'Tetto del Vecchio Castello' }, { chiave: 'k-12', nome: 'Torre' }], motivo: 'la voce descrive più infiltrazioni', certezza: 'multipla' as const };
   render(<InfiltrazioniVoce a={voce({ tipo: 'palazzo', riferimento: { tipo: 'dungeon', chiave: 'kamoshida' }, riferimentoTesto: 'Palazzo di Kamoshida', infiltrazioni: [], propostaInfiltrazioni: proposta } as Partial<AzionePercorsoDto>)} partitaId={7} onCambiata={() => {}} />);
