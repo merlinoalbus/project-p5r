@@ -12,7 +12,7 @@
 import express, { Router } from 'express';
 import { validate } from '../middleware/validate.js';
 import { bodyDaUrl, paramsImmagine, queryConfermaPezzi, queryFileImmagine, queryImmagini, queryRimozioneImmagini } from '../schemas/immagini.js';
-import { MISURE_AMMESSE, miniaturaDi } from '../services/miniatureService.js';
+import { MISURE_AMMESSE, etagMiniatura, miniaturaDi } from '../services/miniatureService.js';
 import { larghezzaMiniaturaAmmessa, type LarghezzaMiniatura } from '../../shared/miniature.js';
 import {
   MAX_BYTE_IMMAGINE, eliminaImmagine, eliminaImmaginiAmbito, elencaImmagini, fileImmagine, importaImmagineDaUrl, leggiImmagine, manifestoPredefinite, salvaImmagine, type AmbitoImmagine,
@@ -67,8 +67,8 @@ router.get('/:ambito/:chiave/file', validate({ params: paramsImmagine, query: qu
     return;
   }
   // con la larghezza: la miniatura WebP (dalla cache o generata ora), o l'originale quando non c'è niente da ridurre o il generatore
-  // non c'è; l'ETag porta anche la larghezza, e si confronta prima di generare
-  const etag = `"${f.id}-${f.byte}-${f.createdAt}-l${larghezza}"`;
+  // non c'è; l'ETag porta anche la generazione dell'algoritmo e la larghezza, e si confronta prima di generare
+  const etag = etagMiniatura(f, larghezza as LarghezzaMiniatura);
   res.setHeader('ETag', etag);
   if (req.headers['if-none-match'] === etag) { res.status(304).end(); return; }
   const m = await miniaturaDi({ id: f.id, contenuto: f.contenuto, mime: f.mime, byte: f.byte, createdAt: f.createdAt }, larghezza as LarghezzaMiniatura);

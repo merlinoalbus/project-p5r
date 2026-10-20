@@ -12,6 +12,23 @@
 /** Le larghezze ammesse per una miniatura, in pixel, dalla più piccola. */
 export const LARGHEZZE_MINIATURA = [160, 320, 640, 1024] as const;
 
+/**
+ * La generazione delle miniature: cambia quando cambia il modo di calcolarle, e con lei la versione delle righe in cache
+ * (`immagine_miniatura.versione`), l'ETag e la versione `?v=` degli URL (`versioneImmagine`), così né la cache del
+ * database né quella del browser (un anno, immutabile) servono una miniatura dell'algoritmo di prima. `r2` (UX2-13, 2026-10-20):
+ * un'immagine con margini trasparenti si ritaglia sul riquadro del disegno.
+ */
+export const GENERAZIONE_MINIATURE = 'r2';
+
+/**
+ * La versione di un'immagine del database negli URL (`?v=`) e nelle righe della cache delle miniature: la sua data con la
+ * generazione delle miniature. La usano il manifesto della grafica predefinita (le planimetrie native) e le immagini caricate
+ * delle mappe, cioè gli URL a cui le viste aggiungono `l`.
+ */
+export function versioneImmagine(createdAt: string): string {
+  return `${createdAt}~${GENERAZIONE_MINIATURE}`;
+}
+
 /** Una larghezza ammessa. */
 export type LarghezzaMiniatura = (typeof LARGHEZZE_MINIATURA)[number];
 

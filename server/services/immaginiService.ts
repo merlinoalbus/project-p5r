@@ -17,6 +17,7 @@ import { readFileSync } from 'node:fs';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { AMBITI_CARICAMENTO, AMBITI_PREDEFINITI, type AmbitoImmagine } from '../../shared/immagini.js';
+import { versioneImmagine } from '../../shared/miniature.js';
 import type { ImmagineDto, ManifestImmaginiDto } from '../../shared/types.js';
 import { idMappa } from './mappe/percorsiMappe.js';
 import { scaricaDaUrl } from '../utils/scaricaDaUrl.js';
@@ -66,11 +67,12 @@ export function elencaImmagini(ambito?: string): ImmagineDto[] {
   return righe.map(dto);
 }
 
-/** Il manifesto della grafica predefinita nel database: chiave del manifesto → URL del file versionato. */
+/** Il manifesto della grafica predefinita nel database: chiave del manifesto → URL del file versionato (data e generazione delle
+ *  miniature, `versioneImmagine`: le viste aggiungono `l` a questi URL per le planimetrie native, UX2-13). */
 export function manifestoPredefinite(): ManifestImmaginiDto {
   const righe = prepared(`SELECT ambito, chiave, created_at FROM immagine WHERE contenuto IS NOT NULL AND ambito IN (${segnapostoPredefiniti}) ORDER BY ambito, chiave`).all(...AMBITI_PREDEFINITI) as Array<{ ambito: string; chiave: string; created_at: string }>;
   const file: Record<string, string> = {};
-  for (const r of righe) file[`${r.ambito}/${r.chiave}`] = `${urlFileImmagine(r.ambito, r.chiave)}?v=${encodeURIComponent(r.created_at)}`;
+  for (const r of righe) file[`${r.ambito}/${r.chiave}`] = `${urlFileImmagine(r.ambito, r.chiave)}?v=${encodeURIComponent(versioneImmagine(r.created_at))}`;
   return { generato: nowIso(), totale: righe.length, file };
 }
 
