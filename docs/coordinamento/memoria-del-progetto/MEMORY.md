@@ -21,6 +21,7 @@
 - [Copie di voci](project-copie-voci.md) — due voci sono la stessa solo con stesso testo, stessi pin e stessa infiltrazione; fusioni solo su elenco approvato
 - [Lavoro da preservare](project-lavoro-da-preservare.md) — diario validato fino al 1° giugno, Palazzi di Kamoshida e Madarame: mai persi nelle migrazioni
 - [Dati di riferimento: p5s](project-dati-attuali-produzione.md) — dal 20/10 l'utente lavora su p5s (dati suoi, mai sovrascritti) e non tocca persona5royal; base = copia di p5s; alla fine sostituisce i principali
+- [Documentazione non blocca](feedback-documentazione-non-blocca.md) — app testata e corretta ⇒ si rilascia e si procede; i documenti si allineano al codice in parallelo
 - [Intestazione ≤ 30%](feedback-intestazione-30.md) — a ogni dispositivo l'intestazione occupa al massimo il 30% dell'altezza della schermata; telefono compreso
 - [Tutto su git](feedback-tutto-su-git.md) — coordinamento, stato e memoria in docs/coordinamento con commit e push a ogni passaggio; mai DB né indirizzi del server (repo pubblico)
 - [Ruoli PM e Manager](project-ruoli-pm-manager.md) — dal 20/10 il Manager coordina il team; il PM aggiorna la Regia e porta all'utente solo i blocchi
