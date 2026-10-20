@@ -127,5 +127,7 @@ export function areaRifDellaMappa(r: { chiave: string; area_chiave?: string | nu
     chiave: a.chiave, contenitore: contenitoreDi(a, ctx), slug: a.slug, nome: a.nome,
     versioneEtichetta: r.versione_etichetta ?? null, versioneOrdine: r.versione_ordine ?? 0, predefinita: a.planimetria_predefinita === r.chiave,
     casa: casaDellArea(a, r.chiave) ?? `/guida/mappe/${encodeURIComponent(chiaveMappa(r.chiave))}`,
+    // L2, R1 del giro 1: l'indice `/guida/mappe` mostra «Da verificare» come la pagina dell'Area
+    daVerificare: a.da_verificare === 1,
   };
 }

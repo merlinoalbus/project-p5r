@@ -1438,6 +1438,9 @@ export interface AreaRifDto {
   predefinita: boolean;
   /** La casa dell'Area, con la versione se non è la predefinita. */
   casa: string;
+  /** L'Area è in attesa della scelta dell'utente (lo staff di Tokyo): il segno «Da verificare» anche nell'indice delle mappe (L2, R1).
+   *  Il server lo manda sempre: è facoltativo solo per i dati di prova scritti prima. */
+  daVerificare?: boolean;
 }
 /** Una planimetria (versione) di un'Area. */
 export interface PlanimetriaAreaDto {
