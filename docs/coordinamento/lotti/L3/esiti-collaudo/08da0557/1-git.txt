@@ -1,0 +1,44 @@
+### 2026-10-20T14:01:52Z
+### git branch --show-current
+newreview-l3
+### git rev-parse HEAD
+08da0557fc97b8f435cb12df31f2e445098fd566
+### git status --porcelain
+EXIT=0
+### git log --format='%H %s' db7d0423..HEAD
+08da0557fc97b8f435cb12df31f2e445098fd566 fix(L3): LAY3-8, l'elenco aperto delle versioni resta dentro la finestra
+37f72c2b26db123d3e912ed10bd7b4adb2821c70 docs(coordinamento): stato attuale per la ripresa, rami di lavoro senza pubblicazione, prompt di ripresa aggiornato
+c2a75bc8a27b5e4e61e15ce1142885d48817f279 docs(L3): layout su db7d0423, LAY3-6 e LAY3-7 verdi; nuovo LAY3-8
+### git diff --stat c8338fd0 newreview-l3 -- . ':!docs'
+ src/components/guida/AreePalazzo.test.tsx       |   2 +
+ src/components/guida/AreePalazzo.tsx            |   7 +-
+ src/components/guida/InfiltrazioniVoce.test.tsx |  11 ++
+ src/components/guida/InfiltrazioniVoce.tsx      |  14 ++-
+ src/components/mappe/SelettoreVersioni.test.tsx |  84 +++++++++++++++
+ src/components/mappe/SelettoreVersioni.tsx      |  21 +++-
+ src/components/shared/Selettore.test.tsx        |  20 ++++
+ src/components/shared/Selettore.tsx             |   7 +-
+ src/pages/DungeonDettaglioPage.test.tsx         |  81 ++++++++++++--
+ src/pages/DungeonDettaglioPage.tsx              | 137 ++++++++++++++++--------
+ src/pages/MappaPage.test.tsx                    |   8 +-
+ src/pages/MappaPage.tsx                         |  17 +--
+ 12 files changed, 337 insertions(+), 72 deletions(-)
+### fuori da docs/ da db7d0423 a HEAD
+src/components/mappe/SelettoreVersioni.test.tsx
+src/components/mappe/SelettoreVersioni.tsx
+### migrazioni, server/, shared/ (vuoto atteso)
+### 4614c443 non portato: stato.json uguale a db7d0423
+sì, stato.json invariato
+### patch-id --stable
+c2a75bc8 3cda9da33fc5d45598c88aaf29d3f38a4b65d39a | 24b655cd 3cda9da33fc5d45598c88aaf29d3f38a4b65d39a => UGUALI
+37f72c2b 0362af972ef9aa12ba8b094d86ed42c3ba72d01c | de06c8ad 0362af972ef9aa12ba8b094d86ed42c3ba72d01c => UGUALI
+08da0557 5a1ed38e01f57672cb708e6540fb72a62b2918a0 | b49c28b0 5a1ed38e01f57672cb708e6540fb72a62b2918a0 => UGUALI
+### file di 42b34243 toccati da c8338fd0 a HEAD fuori da docs (vuoto atteso)
+### grep 2026-10-21 su src/ server/ shared/
+EXIT=1 (1 = nessuna)
+### indirizzi del server in tutto newreview-l3 rispetto a newreview già pubblicato e nei commit portati (0 atteso)
+0
+### alberi
+040000 tree 093595e479429251391f718d540cf5a27f4fb219	server
+040000 tree affd664c3dafb1216db58c44c73ddd8ab8dda851	shared
+040000 tree 76e517697073f8f8a45e785e737200e901a5a9f8	src
