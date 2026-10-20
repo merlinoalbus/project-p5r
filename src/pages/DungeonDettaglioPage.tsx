@@ -87,6 +87,9 @@ function versioneSenzaPin(versioni: PlanimetriaAreaDto[], scelta: string | null)
  *  («Nella tabella di marcia…», «Il Palazzo diventa esplorabile…»). */
 const eUnaData = (valore: string) => /^\d{1,2}\s+\p{L}+$/u.test(dataBreve(valore));
 
+/** La finestra del Palazzo (o dei Memento) in tappe. Nei Palazzi (LAY3-5, regola dell'utente «intestazione al massimo il 30% della
+ *  schermata») la tappa è compatta a ogni larghezza, come era da 1024 px (R3-41): segno e data su una riga, l'etichetta per chi non vede e
+ *  nel suggerimento, niente frecce; nei Memento resta com'era (compatta da 1024 px). */
 function LineaDelTempo({ date, memento = false }: { date: DungeonDettaglioDto['date']; memento?: boolean }) {
   const tappe = [
     { chiave: 'sblocco', etichetta: 'Si apre', valore: date.sblocco, tono: 'bg-white/10 text-text', segno: 'si-apre' as const },
@@ -95,26 +98,33 @@ function LineaDelTempo({ date, memento = false }: { date: DungeonDettaglioDto['d
   ].filter((t) => !!t.valore);
   if (tappe.length === 0) return null;
   return (
-    <ol className="m-0 flex list-none flex-wrap items-stretch gap-1.5 p-0" aria-label={memento ? 'Finestra dei Memento' : 'Finestra del Palazzo'}>
+    <ol className={`m-0 flex list-none flex-wrap items-stretch p-0 ${memento ? 'gap-1.5' : 'gap-1 lg:gap-1.5'}`} aria-label={memento ? 'Finestra dei Memento' : 'Finestra del Palazzo'}>
       {tappe.map((t, i) => (
         <li key={t.chiave} className="flex items-stretch gap-1.5">
           {/* Le tappe vanno a capo sugli schermi stretti, e una freccia a inizio riga non collega
               più niente: da lì in giù l'ordine lo dicono già le etichette. */}
           {/* da 1024 px niente frecce: l'ordine lo dicono i segni delle tappe, e la riga sotto il titolo deve stare su una riga (R3-41) */}
-          {i > 0 && <span aria-hidden className="hidden self-center text-text-muted sm:inline lg:hidden">→</span>}
-          {/* Da 1024 px (R3-41) la tappa sta su una riga: segno e data, l'etichetta per chi non vede e nel suggerimento */}
-          <span className={`flex flex-col gap-0.5 rounded-md px-2.5 py-1.5 lg:flex-row lg:items-center lg:gap-1 lg:px-1.5 lg:py-1 ${t.tono}`} title={`${t.etichetta}: ${t.valore!}`}>
+          {i > 0 && memento && <span aria-hidden className="hidden self-center text-text-muted sm:inline lg:hidden">→</span>}
+          {/* Da 1024 px (R3-41; nei Palazzi a ogni larghezza, LAY3-5) la tappa sta su una riga: segno e data, l'etichetta per chi non vede
+              e nel suggerimento */}
+          <span className={`${memento ? 'flex flex-col gap-0.5 rounded-md px-2.5 py-1.5 lg:flex-row lg:items-center lg:gap-1 lg:px-1.5 lg:py-1' : 'flex flex-row items-center gap-1 rounded-md px-1 py-1 lg:px-1.5'} ${t.tono}`} title={`${t.etichetta}: ${t.valore!}`}>
             {/* segno ed etichetta all'opacità piena (regola dell'utente «opacità al 100%», UX3-11): erano a 0,80 */}
-            <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em]"><IconaSegno chiave={t.segno} dimensione={14} /><span className="lg:sr-only">{t.etichetta}</span></span>
+            <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em]"><IconaSegno chiave={t.segno} dimensione={14} /><span className={memento ? 'lg:sr-only' : 'sr-only'}>{t.etichetta}</span></span>
             {/* LAY3-4 (decisione del PM, strada (b)): una «data» della guida che è una frase (Shido, Maruki) da 1024 px non si tronca:
                 il chip dice l'etichetta e la frase intera sta nei «Dettagli dalla guida». Andare a capo (strada (a)) alzava l'intestazione
                 e a 1024×690 il visore usciva dalla soglia di R3-41 (340 su 345). Una data vera resta la data, al massimo 6,5rem. */}
-            {eUnaData(t.valore!)
-              ? <span className="font-display text-[17px] leading-none lg:max-w-[6.5rem] lg:truncate lg:text-[14px]">{dataBreve(t.valore!)}</span>
-              : <span className="font-display text-[17px] leading-none lg:text-[14px]">
-                  <span className="lg:hidden">{dataBreve(t.valore!)}</span>
-                  <span aria-hidden className="hidden lg:inline">{t.etichetta}</span>
-                </span>}
+            {memento
+              ? (eUnaData(t.valore!)
+                ? <span className="font-display text-[17px] leading-none lg:max-w-[6.5rem] lg:truncate lg:text-[14px]">{dataBreve(t.valore!)}</span>
+                : <span className="font-display text-[17px] leading-none lg:text-[14px]">
+                    <span className="lg:hidden">{dataBreve(t.valore!)}</span>
+                    <span aria-hidden className="hidden lg:inline">{t.etichetta}</span>
+                  </span>)
+              // nei Palazzi a ogni larghezza (LAY3-5): una data al massimo 6,5rem, una frase diventa l'etichetta (intera nei «Dettagli»)
+              : eUnaData(t.valore!)
+                ? <span className="max-w-[6.5rem] truncate font-display text-[14px] leading-none">{dataBreve(t.valore!)}</span>
+                // sotto i 1024 px l'etichetta breve («Furto»): quella intera mandava a capo la fila delle date (LAY3-5)
+                : <span className="font-display text-[14px] leading-none"><span className="sr-only">{dataBreve(t.valore!)}</span><span aria-hidden className="hidden lg:inline">{t.etichetta}</span><span aria-hidden className="lg:hidden">{t.etichetta.split(' ')[0]}</span></span>}
           </span>
         </li>
       ))}
@@ -510,11 +520,16 @@ export function DungeonDettaglioPage() {
    *  sotto il titolo (R3-41). `classe` dice dove si vede: sotto i 1024 in fondo alla riga dei dati, da 1024 nella riga del titolo. */
   /** Aree, planimetrie e planimetrie complete del Palazzo, a parole (il chip della riga sotto il titolo, o dei «Dettagli» da 1024 a 1279 px). */
   const testoAreePlanimetrie = `${areePalazzo.length} ${areePalazzo.length === 1 ? 'area' : 'aree'} · ${d?.planimetrie.length ?? 0} planimetrie${planimetrieComplete !== null ? ` · ${planimetrieComplete} complete` : ''}`;
-  const dettagliGuida = (classe: string) => d && (d.livelloConsigliato || d.note || tempoInProsa.length > 0 || !memento) ? (
+  // `sotto`: è l'istanza dei «Dettagli» della riga sotto il titolo (quella che si vede sotto i 1024 px); solo lei porta «Sulla mappa di
+  // Tokyo», che così non è montato due volte
+  const dettagliGuida = (classe: string, sotto = false) => d && (d.livelloConsigliato || d.note || tempoInProsa.length > 0 || !memento) ? (
     <details className={`text-[12px] ${classe}`}>
       <summary className="touch cursor-pointer text-text-muted">Dettagli dalla guida</summary>
       <div className="flex flex-col gap-1 pt-1.5">
-        {!memento && <span className="hidden flex-wrap gap-1.5 lg:flex">
+        {/* LAY3-5: nei Palazzi sotto i 1024 px «Sulla mappa di Tokyo» sta qui, per esteso (nell'intestazione mandava a capo la riga) */}
+        {!memento && !largo && sotto && <AtterraggioTokyo dungeon={d} onSalvato={() => dati.ricarica()} />}
+        {/* LAY3-5: nei Palazzi a ogni larghezza (prima da 1024 px): sotto i 1024 l'intestazione non tiene più i conteggi */}
+        {!memento && <span className="flex flex-wrap gap-1.5">
           <span className="chip">{d.aree.length} infiltrazioni</span>
           <span className="chip" title="I collezionabili sulle planimetrie (forzieri, semi, tesori).">{d.raccolta.totale} da raccogliere</span>
           <span className="chip" title="Sicure, scorciatoie, enigmi, incontri e boss della guida.">{d.punti} punti della guida</span>
@@ -523,10 +538,13 @@ export function DungeonDettaglioPage() {
         </span>}
         {/* il dettaglio del chip riassuntivo (R3-41, scelta 3): Tesoro e boss per esteso, e il perché del livello */}
         {!memento && d.completamento && d.completamento.tesoro !== null && d.completamento.boss !== null && (
-          <span className="hidden text-[12px] text-text-secondary lg:block">
+          <span className="block text-[12px] text-text-secondary">
             Tesoro {d.completamento.tesoro ? 'raccolto' : 'da prendere'} · boss finale {d.completamento.boss ? 'sconfitto' : 'da sconfiggere'}{livello ? ` · ${livello.testo}: ${livello.perche}` : ''}
           </span>
         )}
+        {/* LAY3-5 (e LAY3-2): sovrano e arcana interi, perché nell'intestazione si accorciano quando sono frasi lunghe */}
+        {!memento && d.sovrano && <TestoRipiegabile testo={`Sovrano: ${d.sovrano}`} massimo={120} className="text-[12px] text-text-secondary" />}
+        {!memento && d.arcanaSovranoNome && <TestoRipiegabile testo={`Arcana: ${d.arcanaSovranoNome}`} massimo={120} className="text-[12px] text-text-secondary" />}
         {d.livelloConsigliato && <TestoRipiegabile testo={`Livello consigliato: ${d.livelloConsigliato}`} massimo={120} className="text-[13px] text-text-secondary" />}
         {tempoInProsa.map((t) => <TestoRipiegabile key={t.etichetta} testo={`${t.etichetta}: ${t.valore}`} massimo={90} className="text-[12px] text-text-muted" />)}
         {d.note && <TestoRipiegabile testo={d.note} massimo={140} className="text-[12px] text-text-muted whitespace-pre-wrap" />}
@@ -650,20 +668,25 @@ export function DungeonDettaglioPage() {
               nome, sovrano e arcana; seconda riga la finestra del Palazzo, i conteggi e «Dettagli dalla guida». */}
           {/* Collegando i pin la testata si ritira: l'altezza va alla mappa, che altrimenti faceva scorrere la colonna su uno schermo
               basso («appare la barra che fa salire e scendere la finestra», 2026-10-18); si torna con «Fatto». */}
-          {!collegamento && <header className="card relative shrink-0 overflow-hidden lg:py-1.5">
+          {/* LAY3-5: nei Palazzi sotto i 1024 px margine verticale di 12 px (l'intestazione al massimo il 30% della schermata) */}
+          {!collegamento && <header className={`card relative shrink-0 overflow-hidden lg:py-1.5 ${memento ? '' : 'max-lg:py-3'}`}>
             {/* Lo stemma grande e tenue nell'angolo resta solo dove non c'è l'illustrazione: accanto a una figura piena sarebbe un
                 secondo stemma, e velato (L1). */}
             {!illustrato && <span aria-hidden className="pointer-events-none absolute -right-10 -top-16 hidden opacity-[0.07] sm:block">
               <EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={280} />
             </span>}
             {/* Nei Memento (2026-10-12) l'intestazione è compatta a ogni larghezza, come da 1024 px: emblema e anello piccoli in riga. */}
-            <div className={`relative flex gap-3 ${memento ? 'flex-row items-center' : 'flex-col sm:flex-row sm:items-start sm:gap-5 lg:items-center lg:gap-3'}`}>
+            {/* LAY3-5 (regola dell'utente: l'intestazione al massimo il 30% della schermata, ≤ 243 px a 375×812 e ≤ 307 a 768×1024): nei
+                Palazzi sotto i 1024 px una griglia in tre righe — il titolo su tutta la riga; la figura (piena, più piccola) e l'anello a
+                sinistra, sovrano e arcana a destra; date e chip sotto —, con i contenitori intermedi «trasparenti» (`contents`). Da 1024 px
+                la disposizione di R3-41, invariata. Conteggi, testi lunghi e «Sulla mappa di Tokyo» stanno nei «Dettagli dalla guida». */}
+            <div className={`relative gap-3 ${memento ? 'flex flex-row items-center' : 'grid grid-cols-[auto_minmax(0,1fr)] items-center gap-y-1.5 lg:flex lg:items-center'}`}>
               {/* Da 1280 px, con l'illustrazione, figura e anello stanno in colonna: affiancati prendevano larghezza al testo e
                   in Shido, Niijima e Madarame il sovrano andava a capo (intestazione da 170 a 222 px); in colonna occupano la
                   larghezza dello stemma e dell'anello di prima e un'altezza che l'intestazione ha già (UX-1, 2026-10-20). */}
               {/* R3-41 (decisione del PM, 2026-10-20): da 1024 px stemma piccolo e anello in riga accanto al titolo (variante G1 di L1),
                   e l'illustrazione passa a sfondo dell'intestazione (sotto): in colonna, alta 115 px, teneva alta l'intestazione. */}
-              <div className={`flex shrink-0 items-center gap-3 ${memento ? 'gap-2' : 'sm:flex-col lg:flex-row lg:gap-2'}`}>
+              <div className={`flex shrink-0 items-center ${memento ? 'gap-2' : 'gap-2 max-lg:col-start-1 max-lg:row-start-2'}`}>
                 {/* Nei Palazzi l'illustrazione della radice `dungeon-<chiave>` (la caricata: l'asset della radice è lo stemma) con
                     lo stemma sopra come segno (scelta dell'utente, 2026-10-20); senza, lo stemma com'era. Le misure: 150 px sul
                     telefono, 176 sul tablet, solo lo stemma da 1024 a 1279 e 104, sopra l'anello, da 1280 (vedi sotto).
@@ -675,8 +698,10 @@ export function DungeonDettaglioPage() {
                     : <IllustrazioneConSegno illustrazione={d.illustrazione} alt={`Illustrazione di ${d.nome}`} className={classe} sizes={sizes}
                         segno={emblema(stemma)} senza={emblema(senza)} />;
                   return <>
-                    <span className={memento ? 'lg:hidden' : 'sm:hidden'}>{memento ? emblema(40) : figura('w-[150px]', '150px', 34, 52)}</span>
-                    {!memento && <span className="hidden sm:block lg:hidden">{figura('w-[176px]', '176px', 40, 80)}</span>}
+                    {/* LAY3-5: sotto i 1024 px la figura resta piena, al 100%, più piccola: 96 px sul telefono, 128 sul tablet (erano 150 e
+                        176, sopra al titolo) */}
+                    <span className={memento ? 'lg:hidden' : 'sm:hidden'}>{memento ? emblema(40) : figura('w-[96px]', '96px', 28, 48)}</span>
+                    {!memento && <span className="hidden sm:block lg:hidden">{figura('w-[128px]', '128px', 32, 56)}</span>}
                     {/* Da 1024 a 1279 px lo stemma da 48, senza illustrazione (decisione di L1, UX-1). Da 1280 px l'illustrazione piena, al
                         100%, nel suo spazio (104 px, lo stemma da 40 sopra), in riga con l'anello e non più in colonna: alta 59 px, sta nelle due
                         righe dell'intestazione compatta (R3-41). Mai velata dietro al testo (regola dell'utente, UX3-6). */}
@@ -686,19 +711,23 @@ export function DungeonDettaglioPage() {
                 })()}
                 {anello && percentuale !== null && (
                   // un anello solo (è la barra di avanzamento della pagina): da 1024 px si rimpicciolisce, non si duplica
-                  <AnelloAvanzamento quota={anello.quota} dimensione={64} spessore={5} className={memento ? 'size-12!' : 'lg:size-12!'} etichetta={anello.etichetta}>
-                    <span className={`font-display leading-none tabular-nums ${memento ? 'text-[13px]' : 'text-[17px] lg:text-[13px]'}`}>{percentuale}%</span>
+                  // LAY3-5: nei Palazzi piccolo (48 px) a ogni larghezza, come nei Memento
+                  <AnelloAvanzamento quota={anello.quota} dimensione={64} spessore={5} className="size-12!" etichetta={anello.etichetta}>
+                    <span className="font-display text-[13px] leading-none tabular-nums">{percentuale}%</span>
                   </AnelloAvanzamento>
                 )}
               </div>
-              <div className="flex min-w-0 flex-1 flex-col gap-2.5 lg:gap-1">
-                <div className="flex flex-col gap-1 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    {/* nei Palazzi da 1024 px solo l'icona (R3-41, scelta 3 del PM): il nome resta per chi non vede e nel suggerimento */}
-                    <button type="button" className="btn btn-ghost btn-sm touch -ml-2" title="Indietro" onClick={() => navigate(-1)}><IconChevronLeft size={18} /><span className={memento ? '' : 'lg:sr-only'}> Indietro</span></button>
-                    <h1 className="titolo-display m-0 break-words">{d.nome}</h1>
+              {/* LAY3-5: nei Palazzi sotto i 1024 px colonna del testo e riga del titolo sono «trasparenti» (`contents`): i loro pezzi vanno
+                  nelle righe della griglia sopra */}
+              <div className={memento ? 'flex min-w-0 flex-1 flex-col gap-2.5 lg:gap-1' : 'contents lg:flex lg:min-w-0 lg:flex-1 lg:flex-col lg:gap-1'}>
+                <div className={memento ? 'flex flex-col gap-1 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-3' : 'contents lg:flex lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-3'}>
+                  <div className={`flex flex-wrap items-center gap-2 ${memento ? '' : 'max-lg:col-span-2 max-lg:row-start-1 max-lg:flex-nowrap'}`}>
+                    {/* nei Palazzi solo l'icona (da 1024 px per R3-41, scelta 3 del PM; sotto per LAY3-5): il nome resta per chi non vede e nel
+                        suggerimento */}
+                    <button type="button" className="btn btn-ghost btn-sm touch -ml-2 shrink-0" title="Indietro" onClick={() => navigate(-1)}><IconChevronLeft size={18} /><span className={memento ? '' : 'sr-only'}> Indietro</span></button>
+                    <h1 className="titolo-display m-0 min-w-0 break-words">{d.nome}</h1>
                     {/* nei Memento la correzione della scheda è un comando per sistemare la guida: solo in «Modifica la guida» */}
-                    {(!memento || modifica) && <CorrezioneGuida cosa={memento ? 'i Memento' : `il Palazzo «${d.nome}»`} etichetta="Correggi la scheda" classeEtichetta={memento ? undefined : 'lg:sr-only'}
+                    {(!memento || modifica) && <CorrezioneGuida cosa={memento ? 'i Memento' : `il Palazzo «${d.nome}»`} etichetta="Correggi la scheda" classeEtichetta={memento ? undefined : 'sr-only'}
                       iniziale={() => ({ nome: d.nome, sovrano: d.sovrano, dataSblocco: d.date.sblocco, dataScadenza: d.date.scadenza, furtoConsigliato: d.date.furtoConsigliato, livelloConsigliato: d.livelloConsigliato, note: d.note })}
                       onSalva={async (b) => { await aggiornaDungeon(d.chiave, b); await dati.ricarica(); }}>
                       {(b, cambia) => {
@@ -715,14 +744,16 @@ export function DungeonDettaglioPage() {
                       suggerimento): in Madarame e Okumura il sovrano è una frase e andava a capo (intestazione da 170 a 197 px), l'arcana di
                       Maruki la portava a 270 (L3, R3-41). Sotto i 128 px rimasti vanno a capo, interi come sotto i 1024 (erano 160: a 1024 in
                       Kamoshida, Kaneshiro e Madarame mandavano a capo «Dettagli dalla guida», intestazione da 106 a 154 px). */}
-                  <div className="flex flex-wrap items-center gap-2 text-[13px] text-text-secondary lg:min-w-0 lg:flex-1 lg:basis-32 lg:gap-x-2 lg:gap-y-0">
+                  <div className={`flex flex-wrap items-center gap-2 text-[13px] text-text-secondary lg:min-w-0 lg:flex-1 lg:basis-32 lg:gap-x-2 lg:gap-y-0 ${memento ? '' : 'max-lg:col-start-2 max-lg:row-start-2 max-lg:min-w-0 max-lg:gap-x-2 max-lg:gap-y-1'}`}>
                     {/* nei Memento, sul telefono, il sovrano sta nella piega dei dettagli: qui andava a capo su due righe */}
                     {/* LAY3-2: se sovrano e arcana non stanno in una riga, l'arcana va sulla seconda, sotto il sovrano: le due righe (18 + 22 px)
                         stanno nell'altezza della riga del titolo (44 px), quindi l'intestazione non cresce. Così il nome del sovrano e le parole
                         brevi («Avarizia» di Okumura) si leggono intere; si accorcia coi puntini solo un testo più largo di tutto lo spazio (le
                         frasi lunghe del sovrano di Okumura e Madarame, l'arcana di Maruki), intero nel suggerimento. */}
-                    {d.sovrano && <span className={`break-words lg:min-w-0 lg:max-w-full lg:truncate ${memento ? 'max-md:hidden' : ''}`} title={d.sovrano}>{d.sovrano}</span>}
-                    {d.arcanaSovranoNome && <span className="chip chip--attivo lg:block lg:min-w-0 lg:max-w-[min(100%,18rem)] lg:truncate" title={d.arcanaSovranoNome}>{d.arcanaSovranoNome}</span>}
+                    {/* LAY3-5: sotto i 1024 px nei Palazzi il sovrano al massimo su due righe e l'arcana su una coi puntini; tutti e due interi
+                        anche nei «Dettagli dalla guida», che si leggono senza mouse */}
+                    {d.sovrano && <span className={`break-words lg:min-w-0 lg:max-w-full lg:truncate ${memento ? 'max-md:hidden' : 'max-lg:line-clamp-2'}`} title={d.sovrano}>{d.sovrano}</span>}
+                    {d.arcanaSovranoNome && <span className={`chip chip--attivo lg:block lg:min-w-0 lg:max-w-[min(100%,18rem)] lg:truncate ${memento ? '' : 'max-lg:block max-lg:min-w-0 max-lg:max-w-full max-lg:truncate'}`} title={d.arcanaSovranoNome}>{d.arcanaSovranoNome}</span>}
                     {memento && suggerimentoDiffuso && <span className="chip chip--attivo" title={sugg.motivo('dungeon', d.chiave) ?? undefined}>Suggerito oggi</span>}
                   </div>
                   {/* R3-41: da 1024 px nei Palazzi i «Dettagli dalla guida» chiudono la riga del titolo (aperti vanno a capo, sotto) */}
@@ -733,21 +764,24 @@ export function DungeonDettaglioPage() {
                 {(() => { const riga = <>
                 {memento && d.sovrano && <span className="text-[13px] text-text-secondary md:hidden">{d.sovrano}</span>}
                 <LineaDelTempo date={d.date} memento={memento} />
-                {/* `lg:contents`: da 1024 px i chip entrano nella riga uno per uno, e vanno a capo solo quelli che non ci stanno. */}
-                <div className="flex flex-wrap items-center gap-2 lg:contents">
+                {/* `lg:contents`: da 1024 px i chip entrano nella riga uno per uno, e vanno a capo solo quelli che non ci stanno (nei Palazzi
+                    a ogni larghezza, LAY3-5). */}
+                <div className={memento ? 'flex flex-wrap items-center gap-2 lg:contents' : 'contents'}>
                   {/* nei Palazzi «Mappa del Palazzo» non c'è più: il visore è nella scheda stessa (L3, §4.1); nei Memento resta */}
                   {memento && <CollegamentoMappa tipo="dungeon" chiave={d.chiave} testo="Mappa dei Memento" />}
-                  {/* Quando compare sulla mappa di Tokyo e dove si atterra toccandolo (2026-10-04) */}
-                  <AtterraggioTokyo dungeon={d} onSalvato={() => dati.ricarica()} compatto={!memento} />
-                  {/* nei Palazzi, da 1024 px, infiltrazioni, collezionabili e punti della guida stanno nei «Dettagli dalla guida» (R3-41: la
-                      riga sotto il titolo tiene finestra, atterraggio, aree e planimetrie, percentuale) */}
-                  <span className={`chip ${memento ? '' : 'lg:hidden'}`}>{d.aree.length} {memento ? 'dedali' : 'infiltrazioni'}</span>
-                  <span className={`chip ${memento ? '' : 'lg:hidden'}`} title={memento ? 'Gli elementi delle aree dei dedali (Richieste, timbri, voci di Trama): sono questi a fare la percentuale; le Persona no.' : 'I collezionabili sulle planimetrie (forzieri, semi, tesori).'}>{d.raccolta.totale} {memento ? 'elementi' : 'da raccogliere'}</span>
-                  {/* R3-41: da 1024 a 1279 px questo chip sta nei «Dettagli dalla guida»: qui mandava a capo la riga (intestazione da 106 a 137 px) */}
-                  {!memento && <span className="chip lg:max-xl:hidden" title="Le aree del Palazzo, con le loro versioni: si ordinano e si correggono dall’elenco delle aree.">
+                  {/* Quando compare sulla mappa di Tokyo e dove si atterra toccandolo (2026-10-04). Nei Palazzi sotto i 1024 px sta nei
+                      «Dettagli dalla guida» (LAY3-5): qui, intero, mandava a capo la riga; uno solo alla volta (`largo`) */}
+                  {(memento || largo) && <AtterraggioTokyo dungeon={d} onSalvato={() => dati.ricarica()} compatto={!memento} />}
+                  {/* nei Palazzi infiltrazioni, collezionabili e punti della guida stanno nei «Dettagli dalla guida» (da 1024 px per R3-41,
+                      sotto per LAY3-5: la riga tiene finestra, atterraggio e il chip riassuntivo) */}
+                  <span className={`chip ${memento ? '' : 'hidden'}`}>{d.aree.length} {memento ? 'dedali' : 'infiltrazioni'}</span>
+                  <span className={`chip ${memento ? '' : 'hidden'}`} title={memento ? 'Gli elementi delle aree dei dedali (Richieste, timbri, voci di Trama): sono questi a fare la percentuale; le Persona no.' : 'I collezionabili sulle planimetrie (forzieri, semi, tesori).'}>{d.raccolta.totale} {memento ? 'elementi' : 'da raccogliere'}</span>
+                  {/* R3-41: da 1024 a 1279 px questo chip sta nei «Dettagli dalla guida»: qui mandava a capo la riga (intestazione da 106 a 137 px);
+                      sotto i 1024 px anche (LAY3-5) */}
+                  {!memento && <span className="chip max-xl:hidden" title="Le aree del Palazzo, con le loro versioni: si ordinano e si correggono dall’elenco delle aree.">
                     {testoAreePlanimetrie}
                   </span>}
-                  {largo && !memento
+                  {!memento
                     // R3-41 (scelta 3 del PM): da 1024 px livello, Tesoro, Boss e «da verificare» in un solo chip riassuntivo; Tesoro e boss
                     // per esteso stanno nei «Dettagli dalla guida». Con qualcosa da verificare il chip apre quella sezione.
                     ? chipRiassunto()
@@ -763,18 +797,19 @@ export function DungeonDettaglioPage() {
                   {quanteDaVerificare > 0 && <button type="button" className="chip chip--oro touch" title="Pin fatti con una voce non fatta, da prima dell’aggiornamento: tocca per sistemarli"
                     onClick={apriDaVerificare}>{quanteDaVerificare} da verificare</button>}
                   </>}
-                  <span className={`chip ${memento ? '' : 'lg:hidden'}`} title="Sicure, scorciatoie, enigmi, incontri e boss della guida.">{d.punti} punti della guida</span>
+                  <span className={`chip ${memento ? '' : 'hidden'}`} title="Sicure, scorciatoie, enigmi, incontri e boss della guida.">{d.punti} punti della guida</span>
                   {suggerimentoDiffuso && !memento && <span className="chip chip--attivo" title={sugg.motivo('dungeon', d.chiave) ?? undefined}>Suggerito oggi</span>}
                 </div>
                 {/* nei Palazzi, da 1024 px, i «Dettagli dalla guida» stanno nella riga del titolo (R3-41): qui solo sotto i 1024 */}
-                {dettagliGuida(memento ? 'lg:open:basis-full' : 'lg:hidden')}
+                {dettagliGuida(memento ? 'lg:open:basis-full' : 'lg:hidden', true)}
                 </>;
                 return memento
                   ? <details className="text-[12px]">
                       <summary className="touch cursor-pointer text-text-muted">Date, mappe e conteggi del Memento</summary>
                       <div className="flex flex-col gap-2.5 pt-1.5 lg:flex-row lg:flex-wrap lg:items-center lg:gap-2">{riga}</div>
                     </details>
-                  : <div className="flex flex-col gap-2.5 lg:flex-row lg:flex-wrap lg:items-center lg:gap-2">{riga}</div>;
+                  // LAY3-5: nei Palazzi la riga è in fila a ogni larghezza; sotto i 1024 px è la terza riga della griglia
+                  : <div className="flex flex-row flex-wrap items-center gap-x-1.5 gap-y-1.5 max-lg:col-span-2 max-lg:row-start-3 lg:gap-2">{riga}</div>;
                 })()}
               </div>
             </div>
