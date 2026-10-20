@@ -25,11 +25,16 @@ import { atterraggioDelGiorno } from './atterraggioPalazziService.js';
 import { normalizzaEffettiAzione, TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
 import type { AzionePercorsoDto, ConfidentePartitaDto, DatiVoceGiornata, EffettiAzioneDto, FasciaGioco, GenereVoce, QuizVoceDto, RiferimentoAzioneDto, TrasferisciVociGiornata, VociTrasferiteDto } from '../../shared/types.js';
 import { attivitaConQuiz, quizVoceDto, type AttivitaConQuiz } from './attivitaService.js';
+import { conLegami } from './mappe/legamiInfiltrazioni.js';
+import { puntoDescrittivo } from '../../shared/spilli.js';
+import type { EsitoRevisioneVoce } from '../../shared/types.js';
 
 export interface RigaVoce {
   uid: string; data: string; fascia: string; ordine: number; genere: string; azione: string; note: string | null; tipo: string;
   riferimento_tipo: string | null; riferimento_chiave: string | null; riferimento_testo: string | null; rango_atteso: number | null;
   produce_json: string; indice_guida: number | null; created_at: string; updated_at: string;
+  /** L3 §1.4 (migrazione 110; assenti su uno schema di prima): voce aggiunta, corretta o segnalata dal team, da rivedere con l'utente. */
+  da_rivedere?: number; aggiunta_da?: string | null; testo_precedente_json?: string | null; motivo_revisione?: string | null;
 }
 
 const TIPI = new Set<string>(TIPI_AZIONE.map((t) => t.chiave));
@@ -73,7 +78,9 @@ export function voceBase(r: RigaVoce): VoceBase {
   };
 }
 
-interface Contesto { fatte: Map<string, EffettiAzioneDto | null>; conf: Map<string, ConfidentePartitaDto> | null; nomi: NomiEffettiAzione; quiz: Map<string, AttivitaConQuiz> }
+interface Contesto { fatte: Map<string, EffettiAzioneDto | null>; conf: Map<string, ConfidentePartitaDto> | null; nomi: NomiEffettiAzione; quiz: Map<string, AttivitaConQuiz>;
+  /** La partita (L3: per l'infiltrazione che «Entra» apre). */
+  partita?: number }
 
 /** La guida del quiz delle attività di cui la voce registra un turno o a cui è collegata (richiesta dell'utente, 2026-10-17:
  *  «quando è previsto lavoro al Convenience Store deve essere consultabile la guida»), una volta sola per attività, con
@@ -98,7 +105,159 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
     // il Palazzo collegato: dove si atterra il giorno della voce, con le regole della mappa di Tokyo (scelta dell'utente, 2026-10-04)
     atterraggio: v.riferimento?.tipo === 'dungeon' ? atterraggioDelGiorno(v.riferimento.chiave, v.giorno) : null,
     quiz: quizDellaVoce(v, ctx.quiz),
+    // L3: il campo «Infiltrazioni» (solo per le voci di un Palazzo) e lo stato «da rivedere» (solo se c'è)
+    ...campiInfiltrazioni(r, ctx.partita),
+    ...campiRevisione(r),
   };
+}
+
+// ---- L3: il campo «Infiltrazioni» delle voci di Palazzo (lotti/L3/modifiche.md §2.1.6, §3.4, §4.4) ----
+//
+// Una voce può descrivere più infiltrazioni: il legame è un insieme **ordinato** (`voce_infiltrazione`, la chiave è la posizione), che
+// solo l'utente scrive (nessuna migrazione lo fa) e che non tocca testo, ordine, giorno, fascia, uid né spunte della voce. La stessa
+// infiltrazione può tornare, mai in due posizioni di seguito. Accanto, una **proposta**: le righe di G-022 dell'Esperto della guida
+// (`proposta_infiltrazione_voce`, 110), oppure, per le voci scritte dopo, le due regole certe calcolate a richiesta.
+
+/** Le infiltrazioni di un Palazzo, in ordine. */
+function infiltrazioniDelPalazzo(palazzo: string): Array<{ chiave: string; nome: string; ordine: number }> {
+  return prepared('SELECT chiave, nome, ordine FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine, chiave').all(palazzo) as Array<{ chiave: string; nome: string; ordine: number }>;
+}
+
+/** L'insieme scelto per la voce, nell'ordine (con il Palazzo di ogni infiltrazione). */
+function insiemeDellaVoce(uid: string): Array<{ chiave: string; nome: string; dungeon: string }> {
+  return prepared(`SELECT i.chiave, i.nome, i.dungeon_chiave AS dungeon FROM voce_infiltrazione v JOIN dungeon_area i ON i.chiave = v.infiltrazione_chiave
+    WHERE v.voce_uid = ? ORDER BY v.ordine`).all(uid) as Array<{ chiave: string; nome: string; dungeon: string }>;
+}
+
+/** Le righe della proposta di G-022 per la voce, in ordine (con il Palazzo di ogni infiltrazione). */
+function propostaSalvata(uid: string): Array<{ chiave: string; nome: string; dungeon: string; motivo: string; certezza: 'certa' | 'multipla' | 'probabile' }> {
+  return prepared(`SELECT i.chiave, i.nome, i.dungeon_chiave AS dungeon, p.motivo, p.certezza FROM proposta_infiltrazione_voce p JOIN dungeon_area i ON i.chiave = p.infiltrazione_chiave
+    WHERE p.voce_uid = ? ORDER BY p.ordine`).all(uid) as Array<{ chiave: string; nome: string; dungeon: string; motivo: string; certezza: 'certa' | 'multipla' | 'probabile' }>;
+}
+
+/** Vero se il dungeon è un Palazzo (i Memento non hanno il campo: R3-12). */
+function ePalazzo(dungeon: string): boolean {
+  return !!prepared("SELECT 1 FROM dungeon WHERE chiave = ? AND tipo = 'palazzo'").get(dungeon);
+}
+
+/**
+ * Il Palazzo della voce, che decide se il campo c'è e quali infiltrazioni ammette (§2.1.6, regola unica): quello del riferimento
+ * `dungeon:<k>`; altrimenti quello delle infiltrazioni già nell'insieme; altrimenti quello della sua proposta; altrimenti nessuno.
+ */
+export function palazzoDellaVoce(r: Pick<RigaVoce, 'uid' | 'riferimento_tipo' | 'riferimento_chiave'>): string | null {
+  if (!conLegami()) return null;
+  if (r.riferimento_tipo === 'dungeon' && r.riferimento_chiave && ePalazzo(r.riferimento_chiave)) return r.riferimento_chiave;
+  const insieme = insiemeDellaVoce(r.uid);
+  if (insieme.length > 0) return insieme[0].dungeon;
+  const proposta = propostaSalvata(r.uid);
+  return proposta.length > 0 ? proposta[0].dungeon : null;
+}
+
+/** Il testo confrontabile: minuscolo, senza accenti né punteggiatura, parole separate da uno spazio. */
+function normalizzato(testo: string): string {
+  return ` ${testo.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()} `;
+}
+
+/**
+ * La proposta per la voce, solo con l'insieme vuoto: le righe di G-022, oppure le regole certe a richiesta — (a) il nome di **una sola**
+ * infiltrazione del Palazzo compare nel testo della voce (senza maiuscole, accenti e punteggiatura); (b) la data della voce (`gg/mm`)
+ * compare nel nome di **una sola** infiltrazione. Più candidati, o nessuno: nessuna proposta.
+ */
+export function propostaInfiltrazioni(r: Pick<RigaVoce, 'uid' | 'data' | 'azione' | 'note'>, palazzo: string): AzionePercorsoDto['propostaInfiltrazioni'] {
+  const salvata = propostaSalvata(r.uid).filter((p) => p.dungeon === palazzo);
+  if (salvata.length > 0) return { infiltrazioni: salvata.map(({ chiave, nome }) => ({ chiave, nome })), motivo: salvata[0].motivo, certezza: salvata[0].certezza };
+  const elenco = infiltrazioniDelPalazzo(palazzo);
+  const testo = normalizzato(`${r.azione} ${r.note ?? ''}`);
+  const perNome = elenco.filter((i) => normalizzato(i.nome).trim() && testo.includes(normalizzato(i.nome)));
+  if (perNome.length === 1) return { infiltrazioni: [{ chiave: perNome[0].chiave, nome: perNome[0].nome }], motivo: 'Il nome dell’infiltrazione è nel testo della voce.', certezza: 'certa' };
+  const [mm, gg] = r.data.split('-');
+  const perData = elenco.filter((i) => new RegExp(`(^|[^0-9])${gg}/${mm}([^0-9]|$)`).test(i.nome));
+  if (perData.length === 1) return { infiltrazioni: [{ chiave: perData[0].chiave, nome: perData[0].nome }], motivo: 'La data della voce è nel nome dell’infiltrazione.', certezza: 'certa' };
+  return null;
+}
+
+/** Le infiltrazioni completate nella partita: almeno una voce da segnare, e tutte segnate (la regola di `completamentoAree.ts`). */
+function infiltrazioniCompletate(chiavi: readonly string[], partitaId: number): Set<string> {
+  const out = new Set<string>();
+  for (const k of new Set(chiavi)) {
+    const voci = prepared('SELECT chiave, tipo, area_dedalo_chiave FROM punto_interesse WHERE area_chiave = ?').all(k) as Array<{ chiave: string; tipo: string; area_dedalo_chiave: string | null }>;
+    const daSegnare = voci.filter((v) => !puntoDescrittivo(v.tipo, v.area_dedalo_chiave));
+    if (daSegnare.length > 0 && daSegnare.every((v) => prepared('SELECT 1 FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partitaId, v.chiave))) out.add(k);
+  }
+  return out;
+}
+
+/** I campi del §3.1 per una voce con un Palazzo; nessuno per le altre (assenti, non vuoti). */
+function campiInfiltrazioni(r: RigaVoce, partitaId?: number): Partial<AzionePercorsoDto> {
+  const palazzo = palazzoDellaVoce(r);
+  if (!palazzo) return {};
+  const insieme = insiemeDellaVoce(r.uid).map(({ chiave, nome }) => ({ chiave, nome }));
+  let daAprire: string | null = null;
+  if (insieme.length > 0) {
+    const completate = partitaId === undefined ? new Set<string>() : infiltrazioniCompletate(insieme.map((i) => i.chiave), partitaId);
+    daAprire = insieme.find((i) => !completate.has(i.chiave))?.chiave ?? insieme[insieme.length - 1].chiave;
+  }
+  return {
+    infiltrazioni: insieme, infiltrazioniDelPalazzo: infiltrazioniDelPalazzo(palazzo),
+    propostaInfiltrazioni: insieme.length === 0 ? propostaInfiltrazioni(r, palazzo) : null,
+    infiltrazioneDaAprire: daAprire,
+  };
+}
+
+/** Lo stato «da rivedere» (§1.4) della voce, solo quando c'è qualcosa da dire (assente vale «non da rivedere»). */
+function campiRevisione(r: RigaVoce): Partial<AzionePercorsoDto> {
+  if (!r.da_rivedere && !r.aggiunta_da && !r.testo_precedente_json && !r.motivo_revisione) return {};
+  let testoPrecedente: AzionePercorsoDto['testoPrecedente'] = null;
+  if (r.testo_precedente_json) {
+    const p = JSON.parse(r.testo_precedente_json) as { azione: string; note: string | null; riferimento_tipo: string | null; riferimento_chiave: string | null; riferimento_testo: string | null };
+    const riferimento = riferimentoDi({ ...r, riferimento_tipo: p.riferimento_tipo, riferimento_chiave: p.riferimento_chiave });
+    testoPrecedente = { azione: p.azione, note: p.note, riferimento, riferimentoTesto: p.riferimento_testo };
+  }
+  return { daRivedere: r.da_rivedere === 1, aggiuntaDa: r.aggiunta_da === 'team' ? 'team' : null, motivoRevisione: r.motivo_revisione ?? null, testoPrecedente };
+}
+
+/**
+ * L'insieme ordinato delle infiltrazioni di una voce (R3-37), anche vuoto («nessuna»): sostituisce quello di prima in una transazione e
+ * scrive **solo** `voce_infiltrazione` (testo, ordine, giorno, fascia, uid e spunte della voce restano). Solo infiltrazioni del Palazzo
+ * della voce (400 `infiltrazione-di-un-altro-palazzo`), che esistono (400 `infiltrazione-inesistente`); la stessa può tornare, ma non
+ * in due posizioni di seguito (400 `infiltrazione-ripetuta-di-seguito`). Una voce senza Palazzo non ha il campo (400 `voce-senza-palazzo`).
+ */
+export function impostaInfiltrazioniVoce(uid: string, chiavi: readonly string[], partitaId?: number): AzionePercorsoDto {
+  if (partitaId !== undefined) verificaPartita(partitaId);
+  const r = rigaVoce(uid);
+  const palazzo = palazzoDellaVoce(r);
+  if (!palazzo) throw httpErrors.badRequest('voce-senza-palazzo', 'Questa voce non riguarda un Palazzo: non ha il campo «Infiltrazioni».');
+  for (const k of new Set(chiavi)) {
+    const i = prepared('SELECT nome, dungeon_chiave FROM dungeon_area WHERE chiave = ?').get(k) as { nome: string; dungeon_chiave: string } | undefined;
+    if (!i) throw httpErrors.badRequest('infiltrazione-inesistente', `L’infiltrazione '${k}' non esiste.`);
+    if (i.dungeon_chiave !== palazzo) throw httpErrors.badRequest('infiltrazione-di-un-altro-palazzo', `«${i.nome}» è di un altro Palazzo: la voce si lega alle infiltrazioni del suo.`);
+  }
+  if (chiavi.some((k, i) => i > 0 && k === chiavi[i - 1])) throw httpErrors.badRequest('infiltrazione-ripetuta-di-seguito', 'La stessa infiltrazione non può stare due volte di seguito: un percorso ci torna dopo un’altra.');
+  getDb().transaction(() => {
+    prepared('DELETE FROM voce_infiltrazione WHERE voce_uid = ?').run(uid);
+    chiavi.forEach((k, i) => prepared('INSERT INTO voce_infiltrazione (voce_uid, ordine, infiltrazione_chiave) VALUES (?, ?, ?)').run(uid, i, k));
+  })();
+  return vociDelGiorno(r.data, partitaId).find((v) => v.uid === uid)!;
+}
+
+/**
+ * «Da rivedere» (§1.4, il meccanismo unico con L10): «Tieni il nuovo» (`tieni`) e «Fatto» (`fatto`) tolgono il segno; «Rimetti il
+ * precedente» (`rimetti`) rimette i campi com'erano prima della correzione del team (il testo precedente resta) e toglie il segno — solo
+ * con un testo precedente (400 `senza-testo-precedente`). Una voce non da rivedere: 409 `voce-non-da-rivedere`.
+ */
+export function rivediVoce(uid: string, esito: EsitoRevisioneVoce, partitaId?: number): AzionePercorsoDto {
+  if (partitaId !== undefined) verificaPartita(partitaId);
+  const r = rigaVoce(uid);
+  if (r.da_rivedere !== 1) throw httpErrors.conflict('voce-non-da-rivedere', 'Questa voce non è da rivedere.');
+  if (esito === 'rimetti') {
+    if (!r.testo_precedente_json) throw httpErrors.badRequest('senza-testo-precedente', 'Questa voce non ha un testo precedente da rimettere.');
+    const p = JSON.parse(r.testo_precedente_json) as { azione: string; note: string | null; riferimento_tipo: string | null; riferimento_chiave: string | null; riferimento_testo: string | null };
+    prepared(`UPDATE voce_giornata SET azione = ?, note = ?, riferimento_tipo = ?, riferimento_chiave = ?, riferimento_testo = ?, da_rivedere = 0, updated_at = ? WHERE uid = ?`)
+      .run(p.azione, p.note, p.riferimento_tipo, p.riferimento_chiave, p.riferimento_testo, nowIso(), uid);
+  } else {
+    prepared('UPDATE voce_giornata SET da_rivedere = 0 WHERE uid = ?').run(uid);
+  }
+  return vociDelGiorno(r.data, partitaId).find((v) => v.uid === uid)!;
 }
 
 /** 404 se la data non è un giorno del percorso. */
@@ -126,7 +285,7 @@ export function vociDelGiorno(data: string, partitaId?: number, conf?: Map<strin
   const ctx: Contesto = {
     fatte: spuntePartita(partitaId, data),
     conf: conf ?? (partitaId !== undefined ? new Map(confidenti(partitaId).map((c) => [c.chiave, c])) : null),
-    nomi: nomiEffetti(), quiz: attivitaConQuiz(),
+    nomi: nomiEffetti(), quiz: attivitaConQuiz(), partita: partitaId,
   };
   return righeDelGiorno(data).map((r) => voceDto(r, ctx));
 }
@@ -328,6 +487,11 @@ export function eliminaVoce(uid: string): void {
     }
     prepared('DELETE FROM voce_giornata WHERE uid = ?').run(uid);
     prepared('DELETE FROM spunta_voce_partita WHERE voce_uid = ?').run(uid);
+    // L3: l'insieme d'infiltrazioni e la proposta della voce se ne vanno con lei (la chiave è l'uid, senza vincolo)
+    if (conLegami()) {
+      prepared('DELETE FROM voce_infiltrazione WHERE voce_uid = ?').run(uid);
+      prepared('DELETE FROM proposta_infiltrazione_voce WHERE voce_uid = ?').run(uid);
+    }
     compatta(r.data, r.fascia);
   })();
 }

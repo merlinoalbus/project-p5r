@@ -78,6 +78,9 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   copia_pezzo: ['copia di un pezzo', 'copie dei pezzi'], pianta_area: ['pianta di un’infiltrazione', 'piante delle infiltrazioni'],
   guida_mappa: ['scheda di guida di un’infiltrazione', 'schede di guida delle infiltrazioni'], guida_alias: ['nome di prima di un’infiltrazione', 'nomi di prima delle infiltrazioni'],
   area_dedalo: ['area di un dedalo', 'aree dei dedali'], area: ['area', 'aree'], quartiere_ingresso: ['ingresso di un quartiere', 'ingressi dei quartieri'], persona_area_dedalo: ['Persona di un’area di un dedalo', 'Persona delle aree dei dedali'],
+  // L3 (migrazione 110)
+  infiltrazione_area: ['legame infiltrazione-area', 'legami infiltrazione-area'], voce_infiltrazione: ['infiltrazione di una voce del diario', 'infiltrazioni delle voci del diario'],
+  proposta_infiltrazione_voce: ['proposta d’infiltrazione di una voce del diario', 'proposte d’infiltrazione delle voci del diario'],
   richiesta: ['Richiesta', 'Richieste'], dati_guida: ['dato della guida', 'dati della guida'],
   punto_partita: ['spunta di una voce nelle partite', 'spunte delle voci nelle partite'], spillo_partita: ['stato di un pin nelle partite', 'stati dei pin nelle partite'],
   timbri_dedalo_partita: ['conteggio dei timbri nelle partite', 'conteggi dei timbri nelle partite'],

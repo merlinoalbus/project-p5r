@@ -4,117 +4,108 @@
 //
 // «Come faccio a rendere una mappa censita come a sé e trasformarla in planimetria di un'altra mappa? E il
 // viceversa, prendere una planimetria gestita all'interno di una mappa ed eleggerla mappa individuale?»
-// La stanza è il gruppo di immagini: `PUT /api/mappe/:chiave/stanza` con `con` (entra nella stanza di
-// quella) o `con: null` (diventa una stanza a sé), in un'operazione sola.
+// `PUT /api/mappe/:chiave/stanza` con `con` (entra nella stanza di quella) o `con: null` (diventa una stanza a sé), in un'operazione
+// sola. Da L3 la «stanza» di una planimetria di un Palazzo è la sua **Area** (migrazione 110): la rotta vecchia sposta la versione fra
+// le Aree (`PUT /api/aree/colloca`), e il nome della stanza è il nome dell'Area. I gruppi d'immagini non si scrivono più.
 // ============================================================
 
 import request from 'supertest';
 import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
-import { creaMappa, esportaMappe, importaMappe } from '../services/mappe/mappeService.js';
+import { esportaMappe, importaMappe } from '../services/mappe/mappeService.js';
 import type { MappaDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
+import { planimetriaDiPalazzo } from '../../test/planimetriaDiPalazzo.js';
 
 const app = createApp();
 
-type Gruppo = { id: string; nome: string; ordine: number; etichetta?: string; nomeRivisto?: boolean };
-/** Il gruppo di immagini (la stanza) salvato nella presentazione della planimetria, o null se non ne ha. */
-const gruppo = (mappa: string): Gruppo | null => {
-  const r = prepared('SELECT gruppo_immagini_json FROM mappa_presentazione WHERE mappa_chiave = ?').get(mappa) as { gruppo_immagini_json: string | null } | undefined;
-  return r?.gruppo_immagini_json ? JSON.parse(r.gruppo_immagini_json) as Gruppo : null;
-};
+/** L'Area di una planimetria con la sua versione (null se non ne ha). */
+const areaDi = (mappa: string) => prepared(`SELECT a.chiave, a.nome, a.nome_rivisto AS rivisto, m.versione_ordine AS versione, m.versione_etichetta AS etichetta
+  FROM mappa m JOIN area a ON a.chiave = m.area_chiave WHERE m.chiave = ?`).get(mappa) as { chiave: string; nome: string; rivisto: number; versione: number; etichetta: string | null } | undefined;
+/** Il gruppo d'immagini salvato nella presentazione (fonte vecchia: da L3 nessuno lo scrive per le planimetrie con un'Area). */
+const gruppo = (mappa: string) => (prepared('SELECT gruppo_immagini_json FROM mappa_presentazione WHERE mappa_chiave = ?').get(mappa) as { gruppo_immagini_json: string | null } | undefined)?.gruppo_immagini_json ?? null;
 
-describe('la stanza di una planimetria', () => {
+describe('la stanza (Area) di una planimetria', () => {
   let a: MappaDto; let b: MappaDto; let c: MappaDto;
   beforeAll(() => {
     dbDiProva();
-    a = creaMappa(undefined, { nome: 'Salone porzione ovest', tipo: 'area', genitore: 'dungeon-kamoshida' });
-    b = creaMappa(undefined, { nome: 'Salone', tipo: 'area', genitore: 'dungeon-kamoshida' });
-    c = creaMappa(undefined, { nome: 'Salone porzione est', tipo: 'area', genitore: 'dungeon-kamoshida' });
+    a = planimetriaDiPalazzo('kamoshida', { nome: 'Salone porzione ovest' });
+    b = planimetriaDiPalazzo('kamoshida', { nome: 'Salone' });
+    c = planimetriaDiPalazzo('kamoshida', { nome: 'Salone porzione est' });
   });
   afterAll(() => closeDb());
 
-  it('una mappa a sé entra nella stanza di un’altra: se quella non ne ha una, nasce col nome dato; l’etichetta resta', async () => {
+  it('una planimetria sola nella sua Area entra nell’Area di un’altra, che prende il nome dato; l’etichetta resta; l’Area rimasta vuota se ne va', async () => {
     await request(app).put(`/api/mappe/${a.chiave}/presentazione`).send({ etichetta: 'Porzione ovest' }).expect(200);
+    expect(areaDi(a.chiave)!.etichetta).toBe('Porzione ovest');
+    const areaDiA = areaDi(a.chiave)!.chiave;
     const r = await request(app).put(`/api/mappe/${a.chiave}/stanza`).send({ con: b.chiave, nome: 'Salone dei trofei' });
     expect(r.status).toBe(200);
-    expect(gruppo(b.chiave)).toMatchObject({ nome: 'Salone dei trofei', ordine: 0 });
-    // il nome della stanza l'ha dato l'interfaccia: è scelto, e vince sul nome rivisto delle singole mappe
-    expect(gruppo(a.chiave)).toEqual({ id: gruppo(b.chiave)!.id, nome: 'Salone dei trofei', ordine: 1, etichetta: 'Porzione ovest', nomeRivisto: true });
-    // nell'ordine del luogo è subito dopo la stanza in cui è entrata, così le versioni si leggono in fila
-    const ordine = () => (prepared("SELECT chiave FROM mappa WHERE genitore_chiave = 'dungeon-kamoshida' ORDER BY ordine, chiave").all() as Array<{ chiave: string }>).map((x) => x.chiave);
-    expect(ordine().indexOf(a.chiave)).toBe(ordine().indexOf(b.chiave) + 1);
-    // una terza entra in fondo, anche nell'ordine
+    expect(areaDi(b.chiave)).toMatchObject({ nome: 'Salone dei trofei', rivisto: 1, versione: 0 });
+    // in fondo alle versioni dell'Area di b, con la sua etichetta
+    expect(areaDi(a.chiave)).toMatchObject({ chiave: areaDi(b.chiave)!.chiave, versione: 1, etichetta: 'Porzione ovest' });
+    expect(prepared('SELECT 1 FROM area WHERE chiave = ?').get(areaDiA)).toBeUndefined();
+    // una terza entra in fondo
     await request(app).put(`/api/mappe/${c.chiave}/stanza`).send({ con: a.chiave }).expect(200);
-    expect(gruppo(c.chiave)).toMatchObject({ id: gruppo(b.chiave)!.id, ordine: 2 });
-    expect(ordine().slice(ordine().indexOf(b.chiave), ordine().indexOf(b.chiave) + 3)).toEqual([b.chiave, a.chiave, c.chiave]);
-    // le righe diventano dell'utente, come ogni modifica dall'app
-    expect((prepared('SELECT origine FROM mappa WHERE chiave = ?').get(b.chiave) as { origine: string }).origine).toBe('utente');
+    expect(areaDi(c.chiave)).toMatchObject({ chiave: areaDi(b.chiave)!.chiave, versione: 2 });
+    // l'Area non è più quella di una planimetria sola: il nome dato a chi entra dopo non la rinomina
+    expect(areaDi(b.chiave)!.nome).toBe('Salone dei trofei');
+    // i gruppi d'immagini (fonte vecchia) non si scrivono
+    expect([gruppo(a.chiave), gruppo(b.chiave), gruppo(c.chiave)]).toEqual([null, null, null]);
   });
 
-  it('una planimetria di una stanza diventa una stanza a sé, col suo nome e la sua etichetta; le altre restano insieme', async () => {
-    const prima = gruppo(b.chiave)!.id;
+  it('una versione di un’Area diventa un’Area a sé, col nome dato e la sua etichetta; le altre restano insieme e si ricompattano', async () => {
+    const prima = areaDi(b.chiave)!.chiave;
     await request(app).put(`/api/mappe/${a.chiave}/stanza`).send({ con: null, nome: 'Ala ovest' }).expect(200);
-    expect(gruppo(a.chiave)).toMatchObject({ nome: 'Ala ovest', ordine: 0, etichetta: 'Porzione ovest' });
-    expect(gruppo(a.chiave)!.id).not.toBe(prima);
-    expect(gruppo(b.chiave)!.id).toBe(prima);
-    expect(gruppo(c.chiave)!.id).toBe(prima);
-    // anche la mappa che ha dato il nome alla stanza può uscirne
+    expect(areaDi(a.chiave)).toMatchObject({ nome: 'Ala ovest', versione: 0, etichetta: 'Porzione ovest' });
+    expect(areaDi(a.chiave)!.chiave).not.toBe(prima);
+    expect(areaDi(b.chiave)).toMatchObject({ chiave: prima, versione: 0 });
+    expect(areaDi(c.chiave)).toMatchObject({ chiave: prima, versione: 1 });
+    // anche la planimetria che dava il nome all'Area può uscirne
     await request(app).put(`/api/mappe/${b.chiave}/stanza`).send({ con: null, nome: 'Salone' }).expect(200);
-    expect(gruppo(b.chiave)!.id).not.toBe(gruppo(c.chiave)!.id);
+    expect(areaDi(b.chiave)!.chiave).not.toBe(areaDi(c.chiave)!.chiave);
+    expect(areaDi(b.chiave)!.nome).toBe('Salone');
+    // una planimetria già sola nella sua Area: `con: null` col nome rinomina l'Area
+    await request(app).put(`/api/mappe/${b.chiave}/stanza`).send({ con: null, nome: 'Salone grande' }).expect(200);
+    expect(areaDi(b.chiave)).toMatchObject({ nome: 'Salone grande', rivisto: 1 });
   });
 
-  it('il nome della stanza scelto da una persona si segna su tutte le sue planimetrie, anche su chi ci entra dopo', async () => {
-    const d = creaMappa(undefined, { nome: 'Cripta', tipo: 'area', genitore: 'dungeon-kamoshida' });
-    const e = creaMappa(undefined, { nome: 'Cripta laterale', tipo: 'area', genitore: 'dungeon-kamoshida' });
+  it('il nome dell’Area scelto da una persona vale per tutte le sue planimetrie, anche per chi ci entra dopo, e viaggia nel pacchetto', async () => {
+    const d = planimetriaDiPalazzo('kamoshida', { nome: 'Cripta' });
+    const e = planimetriaDiPalazzo('kamoshida', { nome: 'Cripta laterale' });
     await request(app).put(`/api/mappe/${e.chiave}/stanza`).send({ con: d.chiave, nome: 'Cripta' }).expect(200);
     await request(app).put(`/api/mappe/${e.chiave}/presentazione`).send({ gruppoNome: 'Cripta dei re' }).expect(200);
-    expect(gruppo(d.chiave)).toMatchObject({ nome: 'Cripta dei re', nomeRivisto: true });
-    expect(gruppo(e.chiave)).toMatchObject({ nome: 'Cripta dei re', nomeRivisto: true });
+    expect(areaDi(d.chiave)).toMatchObject({ nome: 'Cripta dei re', rivisto: 1 });
+    expect(areaDi(e.chiave)).toMatchObject({ nome: 'Cripta dei re', rivisto: 1 });
     // la sola etichetta non toglie il segno
     await request(app).put(`/api/mappe/${d.chiave}/presentazione`).send({ etichetta: 'Pianta completa' }).expect(200);
-    expect(gruppo(d.chiave)).toMatchObject({ nomeRivisto: true, etichetta: 'Pianta completa' });
-    const f = creaMappa(undefined, { nome: 'Cripta, ossario', tipo: 'area', genitore: 'dungeon-kamoshida' });
+    expect(areaDi(d.chiave)).toMatchObject({ rivisto: 1, etichetta: 'Pianta completa' });
+    const f = planimetriaDiPalazzo('kamoshida', { nome: 'Cripta, ossario' });
     await request(app).put(`/api/mappe/${f.chiave}/stanza`).send({ con: d.chiave }).expect(200);
-    expect(gruppo(f.chiave)).toMatchObject({ nome: 'Cripta dei re', nomeRivisto: true });
-    // il segno viaggia nel pacchetto delle mappe: esportato e reimportato resta
+    expect(areaDi(f.chiave)).toMatchObject({ nome: 'Cripta dei re', rivisto: 1 });
+    // il nome e il segno viaggiano nel pacchetto delle mappe: esportati e reimportati restano
     const pacchetto = esportaMappe(d.chiave);
-    expect(pacchetto.mappe.find((m) => m.chiave === d.chiave)!.gruppoImmagini).toMatchObject({ nomeRivisto: true });
-    prepared('UPDATE mappa_presentazione SET gruppo_immagini_json = NULL WHERE mappa_chiave = ?').run(d.chiave);
+    expect(pacchetto.aree?.find((x) => x.chiave === areaDi(d.chiave)!.chiave)).toMatchObject({ nome: 'Cripta dei re', nomeRivisto: true });
+    prepared('UPDATE area SET nome = ?, nome_rivisto = 0 WHERE chiave = ?').run('Cripta', areaDi(d.chiave)!.chiave);
     importaMappe(pacchetto, { sovrascrivi: true });
-    expect(gruppo(d.chiave)).toMatchObject({ nome: 'Cripta dei re', nomeRivisto: true });
+    expect(areaDi(d.chiave)).toMatchObject({ nome: 'Cripta dei re', rivisto: 1 });
   });
 
-  it('rinominare la prima planimetria di una stanza (anche dall’editor) fissa il titolo che la stanza aveva; le altre non la toccano', async () => {
-    const g = creaMappa(undefined, { nome: 'Torre ovest', tipo: 'area', genitore: 'dungeon-kamoshida' });
-    const h = creaMappa(undefined, { nome: 'Torre ovest bis', tipo: 'area', genitore: 'dungeon-kamoshida' });
-    // una stanza dell'estrazione: nome col gergo, nessun nome scelto; «g» è la prima nell'ordine
-    const estratta = { id: 'nativo-prova-torre', nome: 'Palazzo di Kamoshida — Immagini native che nessun campo usa', ordine: 0 };
-    for (const [k, o] of [[g.chiave, 0], [h.chiave, 1]] as const) {
-      prepared("INSERT INTO mappa_presentazione (mappa_chiave, contesti_json, gruppo_immagini_json) VALUES (?, '[]', ?) ON CONFLICT(mappa_chiave) DO UPDATE SET gruppo_immagini_json = excluded.gruppo_immagini_json")
-        .run(k, JSON.stringify({ ...estratta, ordine: o }));
-    }
-    prepared('UPDATE mappa SET ordine = -2 WHERE chiave = ?').run(g.chiave);
-    prepared('UPDATE mappa SET ordine = -1 WHERE chiave = ?').run(h.chiave);
-    // la seconda cambia nome: il titolo della stanza non dipende da lei, niente da fissare
+  it('rinominare una planimetria (anche dall’editor) non rinomina la sua Area, né la prima né le altre', async () => {
+    const g = planimetriaDiPalazzo('kamoshida', { nome: 'Torre ovest' });
+    const h = planimetriaDiPalazzo('kamoshida', { nome: 'Torre ovest bis' });
+    await request(app).put(`/api/mappe/${h.chiave}/stanza`).send({ con: g.chiave }).expect(200);
+    const area = areaDi(g.chiave)!;
     await request(app).put(`/api/mappe/${h.chiave}`).send({ nome: 'Torre ovest, porzione' }).expect(200);
-    expect(gruppo(h.chiave)!.nomeRivisto).toBeUndefined();
-    // la prima cambia nome: il titolo di prima (senza gergo, come lo mostra la scheda) diventa il nome scelto
     await request(app).put(`/api/mappe/${g.chiave}`).send({ nome: 'Torre ovest rinominata' }).expect(200);
-    expect(gruppo(g.chiave)).toMatchObject({ nome: 'Palazzo di Kamoshida — Planimetria non attribuita', nomeRivisto: true });
-    expect(gruppo(h.chiave)).toMatchObject({ nome: 'Palazzo di Kamoshida — Planimetria non attribuita', nomeRivisto: true });
-
-    // con la prima già rinominata a mano, il titolo era il suo nome: è quello che si fissa
-    const i = creaMappa(undefined, { nome: 'Cella', tipo: 'area', genitore: 'dungeon-kamoshida' });
-    prepared("INSERT INTO mappa_presentazione (mappa_chiave, contesti_json, gruppo_immagini_json) VALUES (?, '[]', ?) ON CONFLICT(mappa_chiave) DO UPDATE SET gruppo_immagini_json = excluded.gruppo_immagini_json")
-      .run(i.chiave, JSON.stringify({ id: 'nativo-prova-cella', nome: 'Cella grezza', ordine: 0 }));
-    prepared('UPDATE mappa SET nome_rivisto = 1 WHERE chiave = ?').run(i.chiave);
-    await request(app).put(`/api/mappe/${i.chiave}`).send({ nome: 'Cella nord' }).expect(200);
-    expect(gruppo(i.chiave)).toMatchObject({ nome: 'Cella', nomeRivisto: true });
+    expect(areaDi(g.chiave)).toMatchObject({ chiave: area.chiave, nome: area.nome, rivisto: area.rivisto });
+    expect(areaDi(h.chiave)!.nome).toBe(area.nome);
+    // il titolo della «stanza» di un gruppo d'immagini non si fissa più per le planimetrie dei Palazzi
+    expect([gruppo(g.chiave), gruppo(h.chiave)]).toEqual([null, null]);
   });
 
-  it('solo fra planimetrie dello stesso luogo; non nella propria stanza; mappa inesistente 404; corpo non valido 400', async () => {
-    const altrove = creaMappa(undefined, { nome: 'Galleria', tipo: 'area', genitore: 'dungeon-madarame' });
+  it('solo fra planimetrie dello stesso luogo; non nella propria Area; mappa inesistente 404; corpo non valido 400', async () => {
+    const altrove = planimetriaDiPalazzo('madarame', { nome: 'Galleria' });
     const r1 = await request(app).put(`/api/mappe/${a.chiave}/stanza`).send({ con: altrove.chiave });
     expect(r1.status).toBe(400);
     expect(r1.body.error.code).toBe('stanza-di-altro-luogo');

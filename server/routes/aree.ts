@@ -1,11 +1,12 @@
 // ============================================================
-// Route /api/aree — le Aree del mondo (L2): pagina, creazione con la prima planimetria, versioni, correzioni, ordine, ripristino,
-// eliminazione nel cestino, planimetrie da collocare
+// Route /api/aree — le Aree del mondo (L2) e dei Palazzi (L3): pagina, creazione con la prima planimetria, versioni, correzioni,
+// ordine, ripristino, eliminazione nel cestino, planimetrie da collocare, infiltrazioni di un'Area di un Palazzo
 // ============================================================
 //
-// Le rotte sono scritte una volta col contenitore come parametro (`/:contenitore/:chiave/…`): in L2 il contenitore è `citta`, con
-// la chiave di un quartiere o `tokyo` per la città; L3 aggiungerà `dungeon` senza rotte nuove. Le immagini arrivano come corpo
-// grezzo (`image/*`, 8 MB), come nell'editor delle mappe; nome, punto ed etichetta stanno nella query.
+// Le rotte sono scritte una volta col contenitore come parametro (`/:contenitore/:chiave/…`): `citta`, con la chiave di un quartiere
+// o `tokyo` per la città (L2), e `dungeon`, con la chiave di un Palazzo (L3; l'unica rotta in più è `…/:slug/infiltrazioni`). Le
+// immagini arrivano come corpo grezzo (`image/*`, 8 MB), come nell'editor delle mappe; nome, punto, etichetta e infiltrazioni stanno
+// nella query.
 // ============================================================
 
 import express, { Router } from 'express';
@@ -13,11 +14,11 @@ import { validate } from '../middleware/validate.js';
 import { httpErrors } from '../utils/httpError.js';
 import { MAX_BYTE_IMMAGINE } from '../services/immaginiService.js';
 import {
-  aggiornaArea, aggiornaVersioni, aggiungiPlanimetria, areeDelContenitore, collocaPlanimetria, contenitoreDaRotta, creaArea, dettaglioArea, eliminaArea, mappeDaCollocare, riordinaAree, ripristinaArea,
+  aggiornaArea, aggiornaVersioni, aggiungiPlanimetria, areeDelContenitore, collocaPlanimetria, contenitoreDaRotta, creaArea, dettaglioArea, eliminaArea, impostaInfiltrazioniDellArea, mappeDaCollocare, riordinaAree, ripristinaArea,
   type ContenitoreRotta, type ImmagineNuova,
 } from '../services/mappe/areeService.js';
 import {
-  bodyAggiornaArea, bodyColloca, bodyOrdineAree, bodyVersioni, paramsArea, paramsContenitore, queryAggiungiPlanimetria, queryCreaArea, queryDettaglioArea, queryEliminaArea,
+  bodyAggiornaArea, bodyColloca, bodyInfiltrazioniArea, bodyOrdineAree, bodyVersioni, paramsArea, paramsContenitore, queryAggiungiPlanimetria, queryCreaArea, queryDettaglioArea, queryEliminaArea,
 } from '../schemas/aree.js';
 
 const router = Router();
@@ -40,12 +41,12 @@ router.put('/colloca', validate({ body: bodyColloca }), (req, res) => {
   res.json(collocaPlanimetria(req.body as Parameters<typeof collocaPlanimetria>[0]));
 });
 
-router.get('/:contenitore/:chiave', validate({ params: paramsContenitore }), (req, res) => {
-  res.json(areeDelContenitore(contenitoreDaRotta(...parametri(req))));
+router.get('/:contenitore/:chiave', validate({ params: paramsContenitore, query: queryDettaglioArea }), (req, res) => {
+  res.json(areeDelContenitore(contenitoreDaRotta(...parametri(req)), (req.query as { partita?: number }).partita));
 });
 router.post('/:contenitore/:chiave', validate({ params: paramsContenitore, query: queryCreaArea }), corpoImmagine, (req, res) => {
-  const q = req.query as unknown as { nome: string; x?: number; y?: number; etichetta?: string };
-  res.status(201).json(creaArea(...parametri(req), { nome: q.nome, immagine: immagineDalCorpo(req), x: q.x, y: q.y, etichetta: q.etichetta }));
+  const q = req.query as unknown as { nome: string; x?: number; y?: number; etichetta?: string; infiltrazioni?: string[] };
+  res.status(201).json(creaArea(...parametri(req), { nome: q.nome, immagine: immagineDalCorpo(req), x: q.x, y: q.y, etichetta: q.etichetta, infiltrazioni: q.infiltrazioni }));
 });
 router.put('/:contenitore/:chiave/ordine', validate({ params: paramsContenitore, body: bodyOrdineAree }), (req, res) => {
   res.json(riordinaAree(...parametri(req), (req.body as { slug: string[] }).slug));
@@ -70,6 +71,10 @@ router.post('/:contenitore/:chiave/:slug/planimetrie', validate({ params: params
 });
 router.put('/:contenitore/:chiave/:slug/planimetrie', validate({ params: paramsArea, body: bodyVersioni }), (req, res) => {
   res.json(aggiornaVersioni(...parametri(req), String(req.params.slug), req.body as Parameters<typeof aggiornaVersioni>[3]));
+});
+/** L3 (R3-23): le infiltrazioni che toccano un'Area di un Palazzo (dall'area); non sposta voci né pin. */
+router.put('/:contenitore/:chiave/:slug/infiltrazioni', validate({ params: paramsArea, body: bodyInfiltrazioniArea }), (req, res) => {
+  res.json(impostaInfiltrazioniDellArea(...parametri(req), String(req.params.slug), (req.body as { infiltrazioni: string[] }).infiltrazioni));
 });
 
 export default router;

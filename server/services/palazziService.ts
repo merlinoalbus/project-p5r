@@ -27,6 +27,7 @@ import { prepared } from '../db/dbService.js';
 import { leggiCondizioniSalvate, ordineGioco } from '../../shared/condizioniSpillo.js';
 import { fattoPerVoci, vociDiOgniPin, vociGestite } from './mappe/voceDelPin.js';
 import { radiceDelPalazzo, SQL_RADICE_PALAZZO, SQL_SOTTOALBERO } from './mappe/alberoMappe.js';
+import { infiltrazioniDelleMappe } from './mappe/legamiInfiltrazioni.js';
 
 /** Le mappe di ogni Palazzo: l'albero sotto la radice `dungeon-<chiave>` (mappa → Palazzo). */
 export function palazzoDiOgniMappa(): Map<string, string> {
@@ -59,16 +60,12 @@ export function bossFinali(): Map<string, BossFinale> {
   return new Map([...out].map(([k, v]) => [k, { area: v.area, punti: v.punti, unico: v.aree.size === 1 }]));
 }
 
-/** Le aree della guida contenute in ogni planimetria (mappa → aree), per riconoscere dove sta il boss finale. */
+/**
+ * Le infiltrazioni contenute in ogni planimetria (mappa → infiltrazioni), per riconoscere dove sta il boss finale. Da L3 sono quelle
+ * dell'Area della planimetria (`infiltrazione_area`): l'infiltrazione tocca l'area intera, versioni comprese (dubbio 1).
+ */
 function areeDelleMappe(): Map<string, Set<string>> {
-  const out = new Map<string, Set<string>>();
-  if (!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_entita'").get()) return out;
-  for (const r of prepared("SELECT mappa_chiave, entita_chiave FROM mappa_entita WHERE entita_tipo = 'area'").all() as Array<{ mappa_chiave: string; entita_chiave: string }>) {
-    const s = out.get(r.mappa_chiave) ?? new Set<string>();
-    s.add(r.entita_chiave);
-    out.set(r.mappa_chiave, s);
-  }
-  return out;
+  return new Map([...infiltrazioniDelleMappe()].map(([mappa, inf]) => [mappa, new Set(inf.map((i) => i.chiave))]));
 }
 
 interface SpilloCollezionabile { uid: string | null; tipo: string; mappa: string; /** Le voci della guida del pin che si segnano (`vociDiOgniPin(true)`, una o più dalla 098). */ voci: string[] }

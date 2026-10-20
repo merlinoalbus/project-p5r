@@ -81,7 +81,7 @@ const impronta = (db: AppDatabase) => JSON.stringify({
 it('crea le Aree del mondo: gruppi in un’Area con le versioni, sciolte una per Area, Covo sotto Yongen-Jaya dopo le altre, staff Area di Tokyo da verificare; nient’altro cambia', () => {
   const db = primaDella109();
   const prima = impronta(db);
-  runMigrations(db);
+  runMigrations(db, migrations.filter((m) => m.id <= 109));
   expect(db.pragma('main.user_version', { simple: true })).toBeGreaterThanOrEqual(109);
   expect(impronta(db)).toBe(prima);
 
@@ -142,7 +142,7 @@ it('crea le Aree del mondo: gruppi in un’Area con le versioni, sciolte una per
 
 it('si può rieseguire: la seconda volta nessuna riga toccata; una zona nuova riceve la sua Area in fondo al quartiere, con lo slug libero', () => {
   const db = primaDella109();
-  runMigrations(db);
+  runMigrations(db, migrations.filter((m) => m.id <= 109));
   const prima = JSON.stringify([db.prepare('SELECT * FROM area ORDER BY chiave').all(), db.prepare('SELECT chiave, area_chiave, versione_ordine, versione_etichetta, genitore_chiave FROM mappa ORDER BY chiave').all(), db.prepare('SELECT * FROM quartiere_ingresso').all()]);
   expect(assegnaAreeDelMondo109(db, 'y')).toEqual({ aree: 0, planimetrie: 0, etichette: 0, ingressi: 0 });
   expect(JSON.stringify([db.prepare('SELECT * FROM area ORDER BY chiave').all(), db.prepare('SELECT chiave, area_chiave, versione_ordine, versione_etichetta, genitore_chiave FROM mappa ORDER BY chiave').all(), db.prepare('SELECT * FROM quartiere_ingresso').all()])).toBe(prima);

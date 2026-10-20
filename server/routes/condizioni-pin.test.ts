@@ -11,10 +11,11 @@
 import request from 'supertest';
 import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
-import { creaMappa, esportaMappe, importaMappe, verificaCondizioni } from '../services/mappe/mappeService.js';
+import { esportaMappe, importaMappe, verificaCondizioni } from '../services/mappe/mappeService.js';
 import { palazzoDiOgniMappa } from '../services/palazziService.js';
 import type { PuntoInteresseDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
+import { planimetriaDiPalazzo } from '../../test/planimetriaDiPalazzo.js';
 
 const app = createApp();
 interface Pin { id: number; nome: string; raccolto: boolean; disponibilita?: { stato: string; requisiti: Array<{ tipo: string; stato: string; dettaglio: string }> }; condizioni: Array<{ tipo: string; testo: string }> }
@@ -296,7 +297,8 @@ describe('condizione «Pin di una mappa»', () => {
     });
 
     it('la stanza sicura sta su una planimetria importata prima di quella della porta', async () => {
-      const altra = creaMappa(undefined, { nome: 'Planimetria della porta', tipo: 'area', genitore: prepared('SELECT genitore_chiave FROM mappa WHERE chiave = ?').pluck().get(mappa) as string });
+      // L3: una planimetria nuova del Palazzo nasce nella sua Area (R3-26)
+      const altra = planimetriaDiPalazzo((prepared('SELECT genitore_chiave FROM mappa WHERE chiave = ?').pluck().get(mappa) as string).replace(/^dungeon-/, ''), { nome: 'Planimetria della porta' });
       const sicura = await prepara('Stanza sicura dell’altra mappa', 'Porta dell’altra mappa', altra.chiave);
       const prima = soloQuesta(structuredClone(esportaMappe(mappa)), 'Porta dell’altra mappa');
       const seconda = soloQuesta(structuredClone(esportaMappe(altra.chiave)), 'Porta dell’altra mappa');

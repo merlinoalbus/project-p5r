@@ -9,6 +9,7 @@ import { createApp } from '../bootstrap.js';
 import { creaMappa } from '../services/mappe/mappeService.js';
 import type { MappaDto, MappaRiassuntoDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
+import { planimetriaDiPalazzo } from '../../test/planimetriaDiPalazzo.js';
 
 const app = createApp();
 
@@ -24,7 +25,7 @@ describe('l’immagine di una mappa da un posto solo (L1)', () => {
   afterAll(() => closeDb());
 
   it('caricata dall’editor: una planimetria nuova del Palazzo diventa «planimetria-nativa» con le dimensioni, e l’URL è versionato', async () => {
-    const m = creaMappa(undefined, { nome: 'Planimetria L1', tipo: 'area', genitore: 'dungeon-kamoshida', asset: null });
+    const m = planimetriaDiPalazzo('kamoshida', { nome: 'Planimetria L1', asset: null });
     expect(riga(m.chiave).ruolo_immagine).toBe('nessuna');
     const r = await request(app).put(`/api/mappe/${encodeURIComponent(m.chiave)}/immagine`).set('Content-Type', 'image/png').send(png(40, 30)).expect(200);
     const d = r.body.data as MappaDto;
@@ -38,7 +39,7 @@ describe('l’immagine di una mappa da un posto solo (L1)', () => {
   });
 
   it('caricata dalla rotta generica delle immagini: stessa regola dell’editor (prima salvava e basta, col ruolo «nessuna»)', async () => {
-    const m = creaMappa(undefined, { nome: 'Rotta generica L1', tipo: 'area', genitore: 'dungeon-kamoshida', asset: null });
+    const m = planimetriaDiPalazzo('kamoshida', { nome: 'Rotta generica L1', asset: null });
     const interna = prepared('SELECT chiave FROM mappa WHERE nome = ?').pluck().get('Rotta generica L1') as string;
     await request(app).put(`/api/immagini/mappa/${encodeURIComponent(m.chiave)}`).set('Content-Type', 'image/png').send(png(64, 48)).expect(201);
     expect(riga(interna)).toMatchObject({ immagine_chiave: interna, larghezza: 64, altezza: 48, ruolo_immagine: 'planimetria-nativa' });
@@ -56,7 +57,7 @@ describe('l’immagine di una mappa da un posto solo (L1)', () => {
   });
 
   it('una mappa con i pezzi ritagliati: anche dalla rotta generica la sostituzione chiede conferma (409 mappa-con-pezzi)', async () => {
-    const m = creaMappa(undefined, { nome: 'Con pezzi L1', tipo: 'area', genitore: 'dungeon-kamoshida', asset: null });
+    const m = planimetriaDiPalazzo('kamoshida', { nome: 'Con pezzi L1', asset: null });
     await request(app).put(`/api/mappe/${encodeURIComponent(m.chiave)}/immagine`).set('Content-Type', 'image/png').send(png(100, 100)).expect(200);
     await request(app).post(`/api/mappe/${encodeURIComponent(m.chiave)}/pezzi`).send({ nome: 'Muro', sorgente: { x: 10, y: 10, larghezza: 20, altezza: 20 } }).expect(201);
     const r = await request(app).put(`/api/immagini/mappa/${encodeURIComponent(m.chiave)}`).set('Content-Type', 'image/png').send(png(50, 50));

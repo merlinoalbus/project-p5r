@@ -11,12 +11,14 @@
 import request from 'supertest';
 import { closeDb, getDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
-import { creaMappa, creaSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe } from '../services/mappe/mappeService.js';
+import { creaSpillo, eliminaSpillo, esportaMappe, importaMappe } from '../services/mappe/mappeService.js';
 import { regolaCopre } from '../services/atterraggioPalazziService.js';
 import { finestreDungeon } from '../services/datiGuida.js';
 import { migration097 } from '../db/migrations/097_atterraggio_palazzi.js';
 import type { DungeonRiassuntoDto, MappaDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
+// L3: nei Palazzi una planimetria nasce in un'Area (R3-26); qui serve solo come posto d'atterraggio
+import { planimetriaDiPalazzo } from '../../test/planimetriaDiPalazzo.js';
 
 const app = createApp();
 
@@ -52,10 +54,10 @@ describe('finestra e atterraggio dei Palazzi sulla mappa di Tokyo', () => {
 
   beforeAll(async () => {
     dbDiProva();
-    prigione = creaMappa(undefined, { nome: 'Prova prigione del tutorial', tipo: 'area', genitore: 'dungeon-kamoshida' });
-    sala = creaMappa(undefined, { nome: 'Prova sala del 12 aprile', tipo: 'area', genitore: 'dungeon-kamoshida' });
-    ingresso = creaMappa(undefined, { nome: 'Prova ingresso del castello', tipo: 'area', genitore: 'dungeon-kamoshida' });
-    altrove = creaMappa(undefined, { nome: 'Galleria di prova', tipo: 'area', genitore: 'dungeon-madarame' });
+    prigione = planimetriaDiPalazzo('kamoshida', { nome: 'Prova prigione del tutorial' });
+    sala = planimetriaDiPalazzo('kamoshida', { nome: 'Prova sala del 12 aprile' });
+    ingresso = planimetriaDiPalazzo('kamoshida', { nome: 'Prova ingresso del castello' });
+    altrove = planimetriaDiPalazzo('madarame', { nome: 'Galleria di prova' });
     pinPrigione = creaSpillo(prigione.chiave, { tipo: 'nota', nome: 'Cella', x: 30, y: 40 } as Parameters<typeof creaSpillo>[1]).id;
     pinSala = creaSpillo(sala.chiave, { tipo: 'nota', nome: 'Sala Centrale', x: 50, y: 50 } as Parameters<typeof creaSpillo>[1]).id;
     partita = ((await request(app).post('/api/partite').send({ nome: 'Prova atterraggio' })).body.data as { id: number }).id;
@@ -155,14 +157,15 @@ describe('finestra e atterraggio dei Palazzi sulla mappa di Tokyo', () => {
 
   it('il pin d\'arrivo eliminato lascia la regola senza pin; la planimetria eliminata porta via le sue regole', async () => {
     const extra = creaSpillo(sala.chiave, { tipo: 'nota', nome: 'Da togliere', x: 10, y: 10 } as Parameters<typeof creaSpillo>[1]).id;
-    const temporanea = creaMappa(undefined, { nome: 'Planimetria da eliminare', tipo: 'area', genitore: 'dungeon-kamoshida' });
+    const temporanea = planimetriaDiPalazzo('kamoshida', { nome: 'Planimetria da eliminare' });
     await request(app).put('/api/compendio/dungeon/kamoshida/atterraggi').send({ regole: [
       { dal: '04-12', al: '04-12', mappa: sala.chiave, spillo: extra },
       { dal: '04-13', al: '04-13', mappa: temporanea.chiave, spillo: null },
       { dal: null, al: null, mappa: ingresso.chiave, spillo: null },
     ] }).expect(200);
     eliminaSpillo(extra);
-    eliminaMappa(temporanea.chiave);
+    // L3: la planimetria è l'unica della sua Area, che si elimina con lei (`eliminaMappa` da sola è 409 `ultima-planimetria`, L2)
+    await request(app).delete(`/api/aree/dungeon/kamoshida/${temporanea.area!.slug}?conferma=1`).expect(204);
     const dopo = (await request(app).get('/api/compendio/dungeon/kamoshida').expect(200)).body.data.atterraggi as Array<{ mappa: string; spillo: number | null }>;
     expect(dopo.map((r) => [r.mappa, r.spillo])).toEqual([[sala.chiave, null], [ingresso.chiave, null]]);
   });
@@ -174,8 +177,9 @@ describe('finestra e atterraggio dei Palazzi sulla mappa di Tokyo', () => {
     const uid = prepared('SELECT uid FROM spillo WHERE id = ?').pluck().get(pinSala) as string;
     importaMappe(esportaMappe(sala.chiave), { sovrascrivi: true });
     const nuovo = prepared('SELECT id FROM spillo WHERE uid = ?').pluck().get(uid) as number;
-    expect(prepared('SELECT 1 FROM spillo WHERE id = ?').get(pinSala)).toBeUndefined(); // il pin è stato davvero tolto e reinserito
-    expect(nuovo).toBeGreaterThan(pinSala);
+    // L3 (andata e ritorno identica del pacchetto): il pin tolto e reinserito con lo stesso uid riprende il suo id, anche con un pin più
+    // nuovo altrove; la regola lo ritrova (prima tornava con un id nuovo e la regola si ricollegava per uid)
+    expect(nuovo).toBe(pinSala);
     const regola = (await request(app).get('/api/compendio/dungeon/kamoshida').expect(200)).body.data.atterraggi[0] as { spillo: number | null; spilloNome: string | null };
     expect(regola).toMatchObject({ spillo: nuovo, spilloNome: 'Sala Centrale' });
   });

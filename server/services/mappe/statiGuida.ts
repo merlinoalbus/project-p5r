@@ -34,8 +34,11 @@ export function allineaRaccoltoDelPin(db: AppDatabase, partita: number, pin: { i
   if (voci.length === 0) return;
   const gestite = new Set(db.prepare(VOCI_GESTITE_SQL).pluck().all(partita) as string[]);
   const fatto = voci.every((v) => gestite.has(v));
+  // si scrive solo se il «raccolto» cambia (L3, andata e ritorno identica del pacchetto: prima un import riscriveva `updated_at` di
+  // centinaia di stati uguali, lotti/L1/noreg.md §5)
   db.prepare(`INSERT INTO spillo_partita (partita_id, spillo_uid, raccolto, updated_at) VALUES (?, ?, ?, ?)
-    ON CONFLICT(partita_id, spillo_uid) DO UPDATE SET raccolto = excluded.raccolto, updated_at = excluded.updated_at`).run(partita, pin.uid, fatto ? 1 : 0, adesso);
+    ON CONFLICT(partita_id, spillo_uid) DO UPDATE SET raccolto = excluded.raccolto, updated_at = excluded.updated_at
+    WHERE spillo_partita.raccolto IS NOT excluded.raccolto`).run(partita, pin.uid, fatto ? 1 : 0, adesso);
 }
 
 // ---- L'Enigma e i suoi passi (095, scelte dell'utente del 2026-10-01) ----

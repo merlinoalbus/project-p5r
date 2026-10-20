@@ -97,7 +97,8 @@ describe('verifica mappe e guida', () => {
     const pacchetto = esportaMappe(arrivo.chiave);
     importaMappe({ ...pacchetto, mappe: pacchetto.mappe.filter((m) => m.chiave === arrivo.chiave) }, { sovrascrivi: true });
     const nuovaPorta = getDb().prepare("SELECT id FROM spillo WHERE mappa_chiave = ? AND nome = 'Porta B4'").pluck().get(arrivo.chiave) as number;
-    expect(nuovaPorta).not.toBe(porta.id);
+    // da L3 (andata e ritorno identica) lo spillo reinserito con lo stesso uid riprende il suo id; il passaggio lo ritrova comunque
+    expect(nuovaPorta).toBe(porta.id);
     expect(arrivoDi()).toBe(nuovaPorta);
   });
 

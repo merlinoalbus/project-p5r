@@ -68,17 +68,36 @@ describe('nuova infiltrazione', () => {
     await request(app).delete(`/api/compendio/aree/${a.chiave}`).expect(204);
   });
 
-  it('con la planimetria si aggiunge alle sue aree, e quelle che aveva restano', async () => {
+  /** Le infiltrazioni legate all'Area di una planimetria (L3, `infiltrazione_area`), ordinate per chiave. */
+  const infiltrazioniDellArea = (pianta: string) => prepared(`SELECT ia.infiltrazione_chiave FROM mappa m JOIN infiltrazione_area ia ON ia.area_chiave = m.area_chiave
+    WHERE m.chiave = ? ORDER BY ia.infiltrazione_chiave`).pluck().all(pianta) as string[];
+
+  it('con la planimetria (client di prima) si aggiunge all’Area di quella planimetria, e le infiltrazioni che aveva restano', async () => {
     const palazzi = palazzoDiOgniMappa();
-    const pianta = (prepared("SELECT e.mappa_chiave FROM mappa_entita e WHERE e.entita_tipo = 'area' AND e.entita_chiave LIKE 'kamoshida-%' LIMIT 1").pluck().get() as string);
+    const pianta = (prepared(`SELECT m.chiave FROM mappa m JOIN infiltrazione_area ia ON ia.area_chiave = m.area_chiave JOIN dungeon_area d ON d.chiave = ia.infiltrazione_chiave
+      WHERE d.dungeon_chiave = 'kamoshida' ORDER BY m.chiave LIMIT 1`).pluck().get() as string);
     expect(palazzi.get(pianta)).toBe('kamoshida');
-    const gia = prepared("SELECT entita_chiave FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = 'area' ORDER BY entita_chiave").pluck().all(pianta) as string[];
+    const gia = infiltrazioniDellArea(pianta);
     const pubblica = prepared('SELECT chiave FROM mappa_percorso WHERE mappa_chiave = ? LIMIT 1').pluck().get(pianta) as string | undefined;
     const nuova = (await crea({ nome: 'Stanza dietro l’arazzo', planimetria: pubblica ?? pianta }).expect(201)).body.data as { chiave: string };
-    const dopo = prepared("SELECT entita_chiave FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = 'area' ORDER BY entita_chiave").pluck().all(pianta) as string[];
-    expect(dopo).toEqual([...gia, nuova.chiave].sort());
+    expect(infiltrazioniDellArea(pianta)).toEqual([...gia, nuova.chiave].sort());
+    // la scheda: l'infiltrazione nuova tocca quell'Area, e le sue planimetrie sono tutte le versioni dell'Area
+    const versioni = prepared('SELECT COUNT(*) FROM mappa WHERE area_chiave = (SELECT area_chiave FROM mappa WHERE chiave = ?)').pluck().get(pianta) as number;
     const scheda = (await request(app).get('/api/compendio/dungeon/kamoshida').expect(200)).body.data as DungeonDettaglioDto;
-    expect(scheda.aree.find((a) => a.chiave === nuova.chiave)!.mappe.length).toBe(1);
+    const inf = scheda.aree.find((a) => a.chiave === nuova.chiave)!;
+    expect(inf.mappe.length).toBe(versioni);
+    expect(inf.areePalazzo?.map((a) => a.chiave)).toEqual([prepared('SELECT area_chiave FROM mappa WHERE chiave = ?').pluck().get(pianta)]);
+  });
+
+  it('con `areePalazzo` (L3, R3-22) tocca le Aree date, nell’ordine dato; un’area che non c’è è un 404 e non crea niente', async () => {
+    const slug = prepared("SELECT slug FROM area WHERE dungeon_chiave = 'kamoshida' ORDER BY ordine LIMIT 2").pluck().all() as string[];
+    const nuova = (await crea({ nome: 'Ronda notturna', areePalazzo: [slug[1], slug[0]] }).expect(201)).body.data as { chiave: string };
+    expect(prepared('SELECT area_chiave FROM infiltrazione_area WHERE infiltrazione_chiave = ? ORDER BY ordine').pluck().all(nuova.chiave))
+      .toEqual([`dungeon/kamoshida/${slug[1]}`, `dungeon/kamoshida/${slug[0]}`]);
+    expect(prepared("SELECT origine FROM infiltrazione_area WHERE infiltrazione_chiave = ? LIMIT 1").pluck().get(nuova.chiave)).toBe('utente');
+    const quante = aree().length;
+    expect((await crea({ nome: 'Ronda sbagliata', areePalazzo: ['area-che-non-esiste'] })).status).toBe(404);
+    expect(aree().length).toBe(quante);
   });
 
   it('tutto o niente: una planimetria di un altro Palazzo, un’area di riferimento altrui o un Palazzo che non c’è non creano niente', async () => {

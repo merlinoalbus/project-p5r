@@ -17,7 +17,7 @@
 import request from 'supertest';
 import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
-import { creaMappa } from '../services/mappe/mappeService.js';
+import { planimetriaDiPalazzo } from '../../test/planimetriaDiPalazzo.js';
 import { statoPartitaSemafori, valuta } from '../services/semaforiService.js';
 import { bossFinali, palazziCompletati, statoPalazzi } from '../services/palazziService.js';
 import type { DungeonRiassuntoDto, MappaDto } from '../../shared/types.js';
@@ -48,7 +48,7 @@ describe('Palazzo completato: Tesoro, boss finale e raccolto tutto, insieme', ()
   };
   /** Crea uno spillo dato sulla prima planimetria del Palazzo e lo restituisce. */
   const spilloNuovo = async (dungeon: string, tipo: string, nome: string) => {
-    const mappa = creaMappa(undefined, { nome: `${nome} di prova (${dungeon})`, tipo: 'area', genitore: `dungeon-${dungeon}` });
+    const mappa = planimetriaDiPalazzo(dungeon, { nome: `${nome} di prova (${dungeon})` });
     return (await request(app).post(`/api/mappe/${mappa.chiave}/spilli`).send({ tipo, nome, x: 50, y: 50 })).body.data as { id: number };
   };
 

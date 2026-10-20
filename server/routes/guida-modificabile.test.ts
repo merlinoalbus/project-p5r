@@ -12,10 +12,11 @@ import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { bodyAggiornaMappa } from '../schemas/mappe.js';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida.js';
-import { creaMappa, aggiornaPresentazioneMappa } from '../services/mappe/mappeService.js';
+import { aggiornaPresentazioneMappa } from '../services/mappe/mappeService.js';
 import { dettaglioDungeon } from '../services/dungeonService.js';
 import type { AreaDungeonDto, DungeonDettaglioDto, PuntoInteresseDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
+import { planimetriaDiPalazzo } from '../../test/planimetriaDiPalazzo.js';
 
 const app = createApp();
 
@@ -75,32 +76,42 @@ describe('raggruppamento delle planimetrie', () => {
   beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 
-  /** Il gruppo di immagini salvato nella presentazione della mappa (id, nome, etichetta), o null se la mappa non ne ha. */
-  const gruppoDi = (chiave: string) => {
-    const r = prepared('SELECT gruppo_immagini_json FROM mappa_presentazione WHERE mappa_chiave = ?').get(chiave) as { gruppo_immagini_json: string | null } | undefined;
-    return r?.gruppo_immagini_json ? JSON.parse(r.gruppo_immagini_json) as { id: string; nome: string; etichetta?: string } : null;
-  };
+  // L3: nei Palazzi la «stanza» di una tavola è la sua Area (migrazione 110) e la presentazione scrive l'Area, non il gruppo d'immagini
+  /** L'Area della planimetria (chiave, nome) con l'etichetta della sua versione, o null se non ne ha. */
+  const areaDi = (chiave: string) => prepared(`SELECT a.chiave, a.nome, m.versione_etichetta AS etichetta FROM mappa m JOIN area a ON a.chiave = m.area_chiave
+    WHERE m.chiave = ?`).get(chiave) as { chiave: string; nome: string; etichetta: string | null } | undefined ?? null;
+  /** Il gruppo di immagini salvato nella presentazione della mappa (fonte vecchia, che per le planimetrie con un'Area non si scrive più). */
+  const gruppoDi = (chiave: string) => (prepared('SELECT gruppo_immagini_json FROM mappa_presentazione WHERE mappa_chiave = ?').get(chiave) as { gruppo_immagini_json: string | null } | undefined)?.gruppo_immagini_json ?? null;
 
   it('due tavole si dichiarano la stessa stanza, e il nome vale per tutte', async () => {
-    const una = creaMappa(undefined, { nome: 'Sala A', tipo: 'area', genitore: 'dungeon-kamoshida' });
-    const altra = creaMappa(undefined, { nome: 'Sala A bis', tipo: 'area', genitore: 'dungeon-kamoshida' });
-    aggiornaPresentazioneMappa(una.chiave, { gruppoNome: 'Sala del trono', etichetta: 'pianta completa' });
-    const id = gruppoDi(una.chiave)!.id;
-    await request(app).put(`/api/mappe/${altra.chiave}/presentazione`).send({ gruppoId: id, etichetta: 'porzione nord' }).expect(200);
-    expect(gruppoDi(altra.chiave)).toMatchObject({ id, nome: 'Sala del trono', etichetta: 'porzione nord' });
+    const una = planimetriaDiPalazzo('kamoshida', { nome: 'Sala A' });
+    const altra = planimetriaDiPalazzo('kamoshida', { nome: 'Sala A bis' });
+    await request(app).put(`/api/mappe/${una.chiave}/presentazione`).send({ gruppoNome: 'Sala del trono', etichetta: 'pianta completa' }).expect(200);
+    expect(areaDi(una.chiave)).toMatchObject({ nome: 'Sala del trono', etichetta: 'pianta completa' });
+    await request(app).put(`/api/mappe/${altra.chiave}/stanza`).send({ con: una.chiave }).expect(200);
+    await request(app).put(`/api/mappe/${altra.chiave}/presentazione`).send({ etichetta: 'porzione nord' }).expect(200);
+    expect(areaDi(altra.chiave)).toMatchObject({ chiave: areaDi(una.chiave)!.chiave, nome: 'Sala del trono', etichetta: 'porzione nord' });
 
-    // rinominare la stanza da una tavola la rinomina su tutte
+    // rinominare la stanza da una tavola la rinomina per tutte (il nome è dell'Area)
     await request(app).put(`/api/mappe/${altra.chiave}/presentazione`).send({ gruppoNome: 'Sala del trono — piano alto' }).expect(200);
-    expect(gruppoDi(una.chiave)!.nome).toBe('Sala del trono — piano alto');
-    expect(gruppoDi(altra.chiave)!.etichetta).toBe('porzione nord');
+    expect(areaDi(una.chiave)!.nome).toBe('Sala del trono — piano alto');
+    expect(areaDi(altra.chiave)!.etichetta).toBe('porzione nord');
+    expect([gruppoDi(una.chiave), gruppoDi(altra.chiave)]).toEqual([null, null]);
   });
 
   it('una tavola può uscire dal raggruppamento e tornare a stare da sola', async () => {
-    const sola = creaMappa(undefined, { nome: 'Sala B', tipo: 'area', genitore: 'dungeon-kamoshida' });
-    aggiornaPresentazioneMappa(sola.chiave, { gruppoNome: 'Un gruppo' });
-    expect(gruppoDi(sola.chiave)).not.toBeNull();
+    const sola = planimetriaDiPalazzo('kamoshida', { nome: 'Sala B' });
+    const compagna = planimetriaDiPalazzo('kamoshida', { nome: 'Sala B bis' });
+    await request(app).put(`/api/mappe/${sola.chiave}/stanza`).send({ con: compagna.chiave }).expect(200);
+    expect(areaDi(sola.chiave)!.chiave).toBe(areaDi(compagna.chiave)!.chiave);
     await request(app).put(`/api/mappe/${sola.chiave}/presentazione`).send({ gruppoId: null }).expect(200);
-    expect(gruppoDi(sola.chiave)).toBeNull();
+    expect(areaDi(sola.chiave)!.chiave).not.toBe(areaDi(compagna.chiave)!.chiave);
+    // una mappa senza Area (fuori dai Palazzi e dal mondo) tiene la regola di prima: il gruppo d'immagini
+    const generica = (await request(app).post('/api/mappe').send({ nome: 'Tavole sciolte', tipo: 'generica' }).expect(201)).body.data as { chiave: string };
+    aggiornaPresentazioneMappa(generica.chiave, { gruppoNome: 'Un gruppo' });
+    expect(gruppoDi(generica.chiave)).not.toBeNull();
+    await request(app).put(`/api/mappe/${generica.chiave}/presentazione`).send({ gruppoId: null }).expect(200);
+    expect(gruppoDi(generica.chiave)).toBeNull();
   });
 });
 
@@ -175,7 +186,7 @@ describe('i tetti dei campi valgono davvero, e sono quelli condivisi', () => {
     await request(app).put(`/api/compendio/aree/${encodeURIComponent(area.chiave)}`).send({ nome: lungo(LIMITI_GUIDA.area.nome + 1) }).expect(400);
     const punto = dettaglioDungeon('kamoshida').aree[0].punti[0];
     await request(app).put(`/api/compendio/punti/${encodeURIComponent(punto.chiave)}`).send({ descrizione: lungo(LIMITI_GUIDA.punto.descrizione) }).expect(200);
-    const mappa = creaMappa(undefined, { nome: 'Tetti', tipo: 'area', genitore: 'dungeon-kamoshida' });
+    const mappa = planimetriaDiPalazzo('kamoshida', { nome: 'Tetti' });
     // il nome di una mappa entra nella chiave del percorso: il tetto dello schema è il massimo
     // teorico, ma dentro un Palazzo c'è già il prefisso, e quel che non ci sta lo dice il server
     await request(app).put(`/api/mappe/${mappa.chiave}`).send({ nome: lungo(120) }).expect(200);
@@ -192,7 +203,7 @@ describe('i tetti dei campi valgono davvero, e sono quelli condivisi', () => {
   });
 
   it('anche gli spilli dell’editor hanno i tetti del modulo condiviso', async () => {
-    const mappa = creaMappa(undefined, { nome: 'Tetti degli spilli', tipo: 'area', genitore: 'dungeon-kamoshida' });
+    const mappa = planimetriaDiPalazzo('kamoshida', { nome: 'Tetti degli spilli' });
     /** Il corpo di uno spillo forziere minimo, con i campi dati che ne sostituiscono i valori. */
     const corpo = (extra: Record<string, unknown>) => ({ tipo: 'forziere', nome: 'Spillo', x: 10, y: 10, ...extra });
     await request(app).post(`/api/mappe/${mappa.chiave}/spilli`).send(corpo({ nome: lungo(LIMITI_GUIDA.spillo.nome) })).expect(201);

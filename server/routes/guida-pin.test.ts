@@ -583,14 +583,15 @@ describe('guida del Palazzo: voci modificabili e collegate ai pin', () => {
     // invariato anche dichiarando le stesse voci (098: si confrontano come insieme)
     importaMappe(esportaMappe(mappa), { origine: 'seed' });
     expect(prepared('SELECT id FROM spillo WHERE uid = ?').pluck().get(pin.uid)).toBe(pin.id);
-    // il seed lo cambia (il nome): torna con un id nuovo, lo stesso uid e la sua voce
+    // il seed lo cambia (il nome): il pin si toglie e si reinserisce con lo stesso uid e la sua voce, e da L3 (andata e ritorno
+    // identica del pacchetto) anche con il suo id
     const cambiato = muto();
     cambiato.mappe.flatMap((m) => m.spilli).find((s) => s.uid === pin.uid)!.nome = 'Porta rinominata dal seed';
     importaMappe(cambiato, { origine: 'seed' });
     const dopo = prepared('SELECT id, nome FROM spillo WHERE uid = ?').get(pin.uid) as { id: number; nome: string };
     expect(dopo.nome).toBe('Porta rinominata dal seed');
     expect(vociDiUid(pin.uid)).toEqual([v]);
-    expect(dopo.id).not.toBe(pin.id);
+    expect(dopo.id).toBe(pin.id);
     // un pacchetto di prima della 094 dichiara la voce nel riferimento: diventa la voce del pin, il riferimento resta libero
     const vecchio = muto();
     vecchio.mappe.flatMap((m) => m.spilli).find((s) => s.uid === pin.uid)!.riferimento = { tipo: 'punto', chiave: w };

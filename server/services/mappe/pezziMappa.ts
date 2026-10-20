@@ -382,17 +382,43 @@ export function pezziNellImmagine(pezzi: readonly PezzoDaImportare[], dim: Dimen
  * nuovi. La forma la controlla `schemaPezziPacchetto`. Dice quanti ritagli e quante copie ha scritto.
  */
 export function sostituisciPezzi(mappa: string, pezzi: readonly PezzoDaImportare[]): { pezzi: number; copie: number } {
+  // L3 (andata e ritorno identica del pacchetto, lotti/L3/modifiche.md §2.3): un pezzo o una copia che torna con lo stesso uid riprende
+  // il suo id e, se nulla è cambiato, la sua ultima modifica (e il testo delle condizioni com'era salvato)
+  const pezziPrima = new Map((prepared('SELECT * FROM pezzo_mappa WHERE mappa_chiave = ?').all(mappa) as RigaPezzo[]).map((r) => [r.uid, r]));
+  const copiePrima = new Map((prepared('SELECT c.* FROM copia_pezzo c JOIN pezzo_mappa p ON p.id = c.pezzo_id WHERE p.mappa_chiave = ?').all(mappa) as Array<RigaCopiaSalvata>).map((r) => [r.uid, r]));
   eliminaPezziDellaMappa(mappa);
   const adesso = nowIso();
   let copie = 0;
   for (const p of pezzi) {
-    const info = prepared(`INSERT INTO pezzo_mappa (uid, mappa_chiave, nome, sorgente_x, sorgente_y, larghezza, altezza, ordine, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(uidTenibile(p.uid, 'pezzo_mappa') ? p.uid : uidNuovo(), mappa, p.nome, p.sorgente.x, p.sorgente.y, p.sorgente.larghezza, p.sorgente.altezza, p.ordine, adesso);
+    const uid = uidTenibile(p.uid, 'pezzo_mappa') ? p.uid! : uidNuovo();
+    const prima = pezziPrima.get(uid);
+    const uguale = !!prima && prima.nome === p.nome && prima.sorgente_x === p.sorgente.x && prima.sorgente_y === p.sorgente.y && prima.larghezza === p.sorgente.larghezza
+      && prima.altezza === p.sorgente.altezza && prima.ordine === p.ordine;
+    const id = prima && !prepared('SELECT 1 FROM pezzo_mappa WHERE id = ?').get(prima.id) ? prima.id : null;
+    const info = prepared(`INSERT INTO pezzo_mappa (id, uid, mappa_chiave, nome, sorgente_x, sorgente_y, larghezza, altezza, ordine, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .run(id, uid, mappa, p.nome, p.sorgente.x, p.sorgente.y, p.sorgente.larghezza, p.sorgente.altezza, p.ordine, uguale ? prima!.updated_at : adesso);
     const ritaglio = rigaPezzo(Number(info.lastInsertRowid));
     for (const c of p.copie) {
-      inserisciCopia(ritaglio, c, adesso, uidTenibile(c.uid, 'copia_pezzo') ? c.uid : uidNuovo());
+      const nuova = inserisciCopia(ritaglio, c, adesso, uidTenibile(c.uid, 'copia_pezzo') ? c.uid : uidNuovo());
+      riprendiCopiaDiPrima(nuova, copiePrima);
       copie++;
     }
   }
   return { pezzi: pezzi.length, copie };
+}
+
+/** Una copia com'è salvata (le colonne che `riprendiCopiaDiPrima` confronta). */
+interface RigaCopiaSalvata { id: number; uid: string; pezzo_id: number; etichetta: string; x: number; y: number; rotazione: number; specchio_orizzontale: number; specchio_verticale: number; condizioni_json: string | null; ordine: number; updated_at: string }
+
+/** La copia appena reinserita riprende id, testo delle condizioni e ultima modifica di quella di prima con lo stesso uid, se è uguale. */
+function riprendiCopiaDiPrima(id: number, prima: ReadonlyMap<string, RigaCopiaSalvata>): void {
+  const ora = prepared('SELECT * FROM copia_pezzo WHERE id = ?').get(id) as RigaCopiaSalvata;
+  const p = prima.get(ora.uid);
+  if (!p) return;
+  const condizioniUguali = JSON.stringify(leggiCondizioniSalvate(p.condizioni_json)) === JSON.stringify(leggiCondizioniSalvate(ora.condizioni_json));
+  const uguale = condizioniUguali && p.etichetta === ora.etichetta && p.x === ora.x && p.y === ora.y && p.rotazione === ora.rotazione
+    && p.specchio_orizzontale === ora.specchio_orizzontale && p.specchio_verticale === ora.specchio_verticale && p.ordine === ora.ordine;
+  const idLibero = p.id !== id && !prepared('SELECT 1 FROM copia_pezzo WHERE id = ?').get(p.id);
+  prepared('UPDATE copia_pezzo SET id = ?, condizioni_json = ?, updated_at = ? WHERE id = ?')
+    .run(idLibero ? p.id : id, condizioniUguali ? p.condizioni_json : ora.condizioni_json, uguale ? p.updated_at : ora.updated_at, id);
 }

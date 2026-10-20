@@ -55,8 +55,14 @@ const campiVoce = {
   ...campiAzioneStrutturata,
 };
 export const bodyNuovaVoce = z.object({ ...campiVoce, azione: z.string().trim().min(1).max(2000) });
-export const bodyAggiornaVoce = z.object(campiVoce)
-  .refine((b) => Object.values(b).some((v) => v !== undefined), { message: 'Indica almeno un campo da cambiare (testo, note, genere, fascia, posizione, tipo, collegamento, rango atteso o effetti).' });
+export const bodyAggiornaVoce = z.object({
+  ...campiVoce,
+  /** L3: l'insieme ordinato delle infiltrazioni della voce (anche vuoto = «nessuna»); si manda da solo. */
+  infiltrazioni: z.array(z.string().trim().min(1).max(200)).max(50).optional(),
+})
+  .refine((b) => Object.values(b).some((v) => v !== undefined), { message: 'Indica almeno un campo da cambiare (testo, note, genere, fascia, posizione, tipo, collegamento, rango atteso, effetti o infiltrazioni).' });
+/** L3 §1.4: l'esito di «da rivedere» su una voce. */
+export const bodyRivistaVoce = z.object({ esito: z.enum(['tieni', 'rimetti', 'fatto']) });
 export const bodySpostaVoce = z.object({ verso: z.union([z.literal(-1), z.literal(1)]) });
 /** Copiare o spostare una o più voci in un altro giorno e fascia (2026-10-12): le voci, in fondo alla fascia, nel loro ordine. */
 export const bodyTrasferisciVoci = z.object({

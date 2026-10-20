@@ -11,7 +11,7 @@
 import request from 'supertest';
 import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
-import { creaMappa } from '../services/mappe/mappeService.js';
+import { planimetriaDiPalazzo } from '../../test/planimetriaDiPalazzo.js';
 import { dettaglioDungeon } from '../services/dungeonService.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
 
@@ -33,7 +33,7 @@ describe('eliminare un’infiltrazione', () => {
   it('toglie l’area con i suoi punti e le loro segnature; la planimetria tiene le altre aree; l’ordine si ricompatta', async () => {
     const prima = aree('kamoshida');
     const [a1, a2] = [prima[4], prima[5]];
-    const mappa = creaMappa(undefined, { nome: 'Planimetria con due aree', tipo: 'area', genitore: 'dungeon-kamoshida' });
+    const mappa = planimetriaDiPalazzo('kamoshida', { nome: 'Planimetria con due aree' });
     await request(app).put(`/api/mappe/${mappa.chiave}/aree`).send({ aree: [a1.chiave, a2.chiave] }).expect(200);
     // un punto dell'area segnato dalla partita
     const punto = await request(app).post(`/api/compendio/aree/${a1.chiave}/punti`).send({ nome: 'Punto da perdere', tipo: 'altro' });
@@ -45,10 +45,11 @@ describe('eliminare un’infiltrazione', () => {
     expect(conta('SELECT COUNT(*) AS n FROM dungeon_area WHERE chiave = ?', a1.chiave)).toBe(0);
     expect(conta('SELECT COUNT(*) AS n FROM punto_interesse WHERE area_chiave = ?', a1.chiave)).toBe(0);
     expect(conta('SELECT COUNT(*) AS n FROM punto_partita WHERE punto_chiave = ?', punto.body.data.chiave)).toBe(0);
-    // la planimetria resta, con l'altra area, e le colonne dichiarano quella
-    const legate = prepared("SELECT entita_chiave FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = 'area'").all(mappa.chiave) as Array<{ entita_chiave: string }>;
-    expect(legate.map((x) => x.entita_chiave)).toEqual([a2.chiave]);
-    expect(prepared('SELECT entita_tipo, entita_chiave FROM mappa WHERE chiave = ?').get(mappa.chiave)).toEqual({ entita_tipo: 'area', entita_chiave: a2.chiave });
+    // la planimetria resta, e la sua Area con l'altra infiltrazione (L3: i legami stanno in `infiltrazione_area`; le colonne della mappa
+    // non si scrivono più)
+    const legate = prepared('SELECT ia.infiltrazione_chiave FROM mappa m JOIN infiltrazione_area ia ON ia.area_chiave = m.area_chiave WHERE m.chiave = ?').pluck().all(mappa.chiave) as string[];
+    expect(legate).toEqual([a2.chiave]);
+    expect(prepared('SELECT entita_tipo, entita_chiave FROM mappa WHERE chiave = ?').get(mappa.chiave)).toEqual({ entita_tipo: null, entita_chiave: null });
     // l'ordine resta consecutivo, con le altre nello stesso ordine
     const dopo = aree('kamoshida');
     expect(dopo.map((x) => x.ordine)).toEqual(dopo.map((_, i) => i));
@@ -104,7 +105,7 @@ describe('eliminare un’infiltrazione', () => {
   });
 
   it('nemico, meccanismo, punto sensibile e porta chiusa hanno uno stato (affrontato, azionato, gestito, aperta) che non conta nel completamento; un pin senza stato non si segna', async () => {
-    const mappa = creaMappa(undefined, { nome: 'Planimetria con un nemico', tipo: 'area', genitore: 'dungeon-kamoshida' });
+    const mappa = planimetriaDiPalazzo('kamoshida', { nome: 'Planimetria con un nemico' });
     /** Crea sulla planimetria di prova un pin del tipo dato, verifica il 201 e che non risulti collezionabile, e ne restituisce l'id. */
     const pin = async (tipo: string, nome: string) => {
       const r = await request(app).post(`/api/mappe/${mappa.chiave}/spilli`).send({ tipo, nome, x: 10, y: 10 });

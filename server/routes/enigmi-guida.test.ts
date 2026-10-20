@@ -11,7 +11,7 @@ import request from 'supertest';
 import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { bossFinali } from '../services/palazziService.js';
-import { creaMappa } from '../services/mappe/mappeService.js';
+import { planimetriaDiPalazzo } from '../../test/planimetriaDiPalazzo.js';
 import type { DungeonDettaglioDto, PuntoInteresseDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
 
@@ -213,7 +213,7 @@ describe('Enigma con i suoi passi', () => {
     const finale = bossFinali().get('okumura')!;
     const enigma = await nuova('Enigma del boss', 'puzzle', undefined, finale.area);
     for (const p of finale.punti) await modifica(p, { contenitore: enigma.chiave }).expect(200);
-    const mappa = creaMappa(undefined, { nome: 'Caveau degli enigmi', tipo: 'area', genitore: 'dungeon-okumura' });
+    const mappa = planimetriaDiPalazzo('okumura', { nome: 'Caveau degli enigmi' });
     const tesoro = (await request(app).post(`/api/mappe/${mappa.chiave}/spilli`).send({ tipo: 'tesoro-palazzo', nome: 'Tesoro del Palazzo', x: 50, y: 50 }).expect(201)).body.data as { id: number };
     // il Tesoro raccolto non segna il boss della Guida («Togli l'automatismo», scelta dell'utente): né il boss né l'Enigma
     await request(app).put(`/api/partite/${partita}/spilli/${tesoro.id}`).send({ raccolto: true }).expect(200);

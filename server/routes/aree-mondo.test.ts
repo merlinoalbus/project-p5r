@@ -203,11 +203,15 @@ describe('Aree del mondo (L2)', () => {
     expect((await request(app).get('/api/aree/citta/tokyo/area-riservata-allo-staff').expect(200)).body.data).toMatchObject({ daVerificare: false, numeroPlanimetrie: 2 });
   });
 
-  it('11 — dall’editor una mappa `luogo` o `area` nel mondo è 409 usa-aggiungi-area; nei Palazzi e le generiche restano ammesse', async () => {
+  it('11 — dall’editor una mappa `luogo` o `area` nel mondo è 409 usa-aggiungi-area; da L3 anche nei Palazzi (qualunque tipo, R3-26); le generiche del mondo restano ammesse', async () => {
     const mondo = await request(app).post('/api/mappe').send({ nome: 'Zona sciolta', tipo: 'luogo', genitore: 'shibuya' });
     expect([mondo.status, mondo.body.error.code]).toEqual([409, 'usa-aggiungi-area']);
     expect((await request(app).post('/api/mappe').send({ nome: 'Zona sotto Tokyo', tipo: 'area', genitore: 'tokyo' })).status).toBe(409);
-    await request(app).post('/api/mappe').send({ nome: 'Stanza di prova L2', tipo: 'area', genitore: 'dungeon-kamoshida' }).expect(201);
+    const palazzo = await request(app).post('/api/mappe').send({ nome: 'Stanza di prova L2', tipo: 'area', genitore: 'dungeon-kamoshida' });
+    expect([palazzo.status, palazzo.body.error.code]).toEqual([409, 'usa-aggiungi-area']);
+    expect((await request(app).post('/api/mappe').send({ nome: 'Appunti nel Palazzo', tipo: 'generica', genitore: 'dungeon-kamoshida' })).status).toBe(409);
+    // i Memento no (R3-12)
+    expect((await request(app).post('/api/mappe').send({ nome: 'Appunti nei Memento', tipo: 'generica', genitore: 'dungeon-mementos' })).status).toBe(201);
     await request(app).post('/api/mappe').send({ nome: 'Appunti L2', tipo: 'generica', genitore: 'shibuya' }).expect(201);
   });
 

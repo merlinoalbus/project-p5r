@@ -62,13 +62,14 @@ function segnaProgressi(voci: readonly string[]): void {
 
 describe('ogni eliminazione va nel cestino e si rimette com\'era (impronta identica di ogni tabella)', () => {
   it('un\'area della guida di un Palazzo, con voci, pin collegati, legami alle planimetrie e spunte', async () => {
-    // un'area legata a planimetrie con pin; i pin si collegano alle sue voci dall'API, con le regole dell'app (`vociCollegabili`)
+    // un'infiltrazione legata ad Aree del Palazzo (L3, `infiltrazione_area`) con pin sulle loro planimetrie; i pin si collegano alle sue
+    // voci dall'API, con le regole dell'app (`vociCollegabili`)
     const chiave = (prepared(`SELECT a.chiave FROM dungeon_area a
-      WHERE EXISTS (SELECT 1 FROM mappa_entita e JOIN spillo s ON s.mappa_chiave = e.mappa_chiave WHERE e.entita_tipo = 'area' AND e.entita_chiave = a.chiave AND s.uid IS NOT NULL)
+      WHERE EXISTS (SELECT 1 FROM infiltrazione_area ia JOIN mappa m ON m.area_chiave = ia.area_chiave JOIN spillo s ON s.mappa_chiave = m.chiave WHERE ia.infiltrazione_chiave = a.chiave AND s.uid IS NOT NULL)
         AND (SELECT count(*) FROM punto_interesse p WHERE p.area_chiave = a.chiave) >= 3
       ORDER BY a.chiave LIMIT 1`).get() as { chiave: string }).chiave;
-    const pin = prepared(`SELECT s.id FROM spillo s JOIN mappa_entita e ON e.mappa_chiave = s.mappa_chiave
-      WHERE e.entita_tipo = 'area' AND e.entita_chiave = ? AND s.uid IS NOT NULL ORDER BY s.id`).all(chiave) as Array<{ id: number }>;
+    const pin = prepared(`SELECT s.id FROM spillo s JOIN mappa m ON m.chiave = s.mappa_chiave JOIN infiltrazione_area ia ON ia.area_chiave = m.area_chiave
+      WHERE ia.infiltrazione_chiave = ? AND s.uid IS NOT NULL ORDER BY s.id`).all(chiave) as Array<{ id: number }>;
     let collegati = 0;
     for (const { id } of pin) {
       const voce = ((await request(app).get(`/api/mappe/spilli/${id}/voci-collegabili`).expect(200)).body.data as VoceCollegabileDto[]).find((x) => x.area === chiave);
@@ -79,7 +80,7 @@ describe('ogni eliminazione va nel cestino e si rimette com\'era (impronta ident
     const area = prepared(`SELECT a.chiave, a.nome, d.nome AS dungeon,
         (SELECT count(*) FROM punto_interesse p WHERE p.area_chiave = a.chiave) AS voci,
         (SELECT count(*) FROM spillo_voce sv JOIN punto_interesse p ON p.chiave = sv.voce_chiave WHERE p.area_chiave = a.chiave) AS legami,
-        (SELECT count(*) FROM mappa_entita e WHERE e.entita_tipo = 'area' AND e.entita_chiave = a.chiave) AS mappe
+        (SELECT count(*) FROM infiltrazione_area ia WHERE ia.infiltrazione_chiave = a.chiave) AS mappe
       FROM dungeon_area a JOIN dungeon d ON d.chiave = a.dungeon_chiave WHERE a.chiave = ?`).get(chiave) as { chiave: string; nome: string; dungeon: string; voci: number; legami: number; mappe: number };
     expect(area.voci).toBeGreaterThanOrEqual(3);
     expect(area.legami).toBeGreaterThan(0);
@@ -88,14 +89,17 @@ describe('ogni eliminazione va nel cestino e si rimette com\'era (impronta ident
     const prima = impronta();
 
     await request(app).delete(`/api/compendio/aree/${encodeURIComponent(area.chiave)}`).expect(204);
-    expect(diverse(prima, impronta())).toEqual(expect.arrayContaining(['main.dungeon_area', 'main.punto_interesse', 'main.spillo_voce', 'main.mappa_entita', 'utente.punto_partita']));
+    // L3: i legami con le Aree (`infiltrazione_area`) se ne vanno con l'infiltrazione; `mappa_entita` non si tocca più
+    expect(diverse(prima, impronta())).toEqual(expect.arrayContaining(['main.dungeon_area', 'main.punto_interesse', 'main.spillo_voce', 'main.infiltrazione_area', 'utente.punto_partita']));
+    expect(diverse(prima, impronta())).not.toContain('main.mappa_entita');
     const [v] = await cestino();
     expect(v).toMatchObject({ tipo: 'area', chiave: area.chiave, nome: area.nome, contesto: area.dungeon, partite: 'presente' });
     const quante = Object.fromEntries(v.contenuto.map((c) => [c.tabella, c.quante]));
-    expect(quante).toMatchObject({ dungeon_area: 1, punto_interesse: area.voci, spillo_voce: area.legami, mappa_entita: area.mappe, punto_partita: area.voci });
+    expect(quante).toMatchObject({ dungeon_area: 1, punto_interesse: area.voci, spillo_voce: area.legami, infiltrazione_area: area.mappe, punto_partita: area.voci });
     // il nome per l'utente col numero giusto: una sola area al singolare, le voci al plurale
     const etichetta = Object.fromEntries(v.contenuto.map((c) => [c.tabella, c.etichetta]));
-    expect(etichetta).toMatchObject({ dungeon_area: 'infiltrazione', punto_interesse: 'voci della guida', punto_partita: 'spunte delle voci nelle partite' });
+    expect(etichetta).toMatchObject({ dungeon_area: 'infiltrazione', punto_interesse: 'voci della guida', punto_partita: 'spunte delle voci nelle partite',
+      infiltrazione_area: area.mappe === 1 ? 'legame infiltrazione-area' : 'legami infiltrazione-area' });
     expect(v.byte).toBeGreaterThan(0);
 
     const esito = await ripristina(v.id);

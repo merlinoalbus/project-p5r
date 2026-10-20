@@ -28,7 +28,9 @@ import { timbriPartita } from './timbriService.js';
 import { slug } from '../../shared/slug.js';
 import { indiceMaschere, personaDellaMaschera, type IndiceMaschere } from './maschere.js';
 import { ePersonaDeiMemento, erroreCatturaNelCompendio, vociPersonaCatturate } from './catturePersona.js';
-import { eliminaImmaginiDeiPin, impostaAreeMappa, staccaAreaDaOgniMappa } from './mappe/mappeService.js';
+import { eliminaImmaginiDeiPin } from './mappe/mappeService.js';
+import { areeDelleInfiltrazioni, conLegami, impostaLegamiInfiltrazione, infiltrazioniDelleAree, planimetrieDelleInfiltrazioni, staccaInfiltrazioneDalleVoci, type AreaDellInfiltrazione } from './mappe/legamiInfiltrazioni.js';
+import { areeDelPalazzo } from './mappe/areeService.js';
 import { palazziCompletati, palazzoDiOgniMappa } from './palazziService.js';
 import { atterraggioDelGiorno, elencaAtterraggi } from './atterraggioPalazziService.js';
 import { allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, allineaPinScollegato, allineaStatiPunto, erroreVoceDelPin, passiDi, pinDelPuntoGuida, scriviStatoVoce, segnaPassiDellEnigma } from './mappe/collegamentiGuida.js';
@@ -88,20 +90,13 @@ function marcatori(): Map<string, { x: number; y: number }> {
   return new Map((prepared('SELECT punto_chiave, x, y FROM marcatore_mappa').all() as Array<{ punto_chiave: string; x: number; y: number }>).map((r) => [r.punto_chiave, { x: r.x, y: r.y }]));
 }
 
-/** Le planimetrie native dell'atlante legate a ogni area della guida (`mappa_entita`, `entita_tipo = 'area'`). */
-function mappeDelleAree(dungeonChiave: string): Map<string, Array<{ chiave: string; nome: string }>> {
-  const righe = prepared(`SELECT e.entita_chiave AS area, m.chiave AS mappa
-    FROM mappa_entita e
-    JOIN mappa m ON m.chiave = e.mappa_chiave
-    JOIN dungeon_area a ON a.chiave = e.entita_chiave
-    WHERE e.entita_tipo = 'area' AND a.dungeon_chiave = ?
-    ORDER BY a.ordine, m.ordine, m.chiave`).all(dungeonChiave) as Array<{ area: string; mappa: string }>;
-  const out = new Map<string, Array<{ chiave: string; nome: string }>>();
-  for (const r of righe) {
-    const elenco = out.get(r.area) ?? [];
-    elenco.push({ chiave: r.mappa, nome: nomePercorso(r.mappa) });
-    out.set(r.area, elenco);
-  }
+/**
+ * Le planimetrie di ogni infiltrazione del Palazzo (L3): tutte quelle delle Aree che tocca (`infiltrazione_area`), nell'ordine dei
+ * legami e poi delle versioni, con l'Area di ognuna. Prima di L3 venivano da `mappa_entita` per planimetria, che non si legge più.
+ */
+function mappeDelleAree(dungeonChiave: string): Map<string, Array<{ chiave: string; nome: string; area: string }>> {
+  const out = new Map<string, Array<{ chiave: string; nome: string; area: string }>>();
+  for (const [inf, mappe] of planimetrieDelleInfiltrazioni(dungeonChiave)) out.set(inf, mappe.map((m) => ({ chiave: m.chiave, nome: nomePercorso(m.chiave), area: m.area })));
   return out;
 }
 
@@ -280,25 +275,20 @@ export function elencaDungeon(partitaId?: number): DungeonRiassuntoDto[] {
  */
 function planimetrieDelPalazzo(dungeonChiave: string, raccolta: RaccoltaDungeon, partitaId?: number): DungeonDettaglioDto['planimetrie'] {
   const righe = prepared(`${SQL_SOTTOALBERO}
-    SELECT m.chiave, m.ordine
+    SELECT m.chiave, m.ordine, m.area_chiave, m.versione_etichetta
     FROM mappa m JOIN albero t ON t.chiave = m.chiave
     WHERE m.chiave <> ?
-    ORDER BY m.ordine, m.chiave`).all(radiceDelPalazzo(dungeonChiave), radiceDelPalazzo(dungeonChiave)) as Array<{ chiave: string; ordine: number }>;
-  // Una planimetria può contenere più aree della guida (2026-09-29): si leggono a parte, in ordine di
-  // guida. Con il LEFT JOIN di prima una mappa con due aree sarebbe comparsa due volte nell'elenco.
-  const areePerMappa = new Map<string, Array<{ chiave: string; nome: string; ordine: number }>>();
-  for (const a of prepared(`SELECT e.mappa_chiave, a.chiave, a.nome, a.ordine FROM mappa_entita e JOIN dungeon_area a ON a.chiave = e.entita_chiave
-      WHERE e.entita_tipo = 'area' AND a.dungeon_chiave = ? ORDER BY a.ordine, a.chiave`).all(dungeonChiave) as Array<{ mappa_chiave: string; chiave: string; nome: string; ordine: number }>) {
-    const elenco = areePerMappa.get(a.mappa_chiave) ?? [];
-    elenco.push({ chiave: a.chiave, nome: a.nome, ordine: a.ordine });
-    areePerMappa.set(a.mappa_chiave, elenco);
-  }
+    ORDER BY m.ordine, m.chiave`).all(radiceDelPalazzo(dungeonChiave), radiceDelPalazzo(dungeonChiave)) as Array<{ chiave: string; ordine: number; area_chiave: string | null; versione_etichetta: string | null }>;
+  // L3: le infiltrazioni di una planimetria sono quelle della sua Area (`infiltrazione_area`), in ordine di guida; una planimetria
+  // ne contiene anche più d'una, e un'infiltrazione tocca più aree. `mappa_entita` non si legge più.
+  const perArea = infiltrazioniDelleAree(dungeonChiave);
   return righe.map((r) => {
     const m = raccolta.perMappa.get(r.chiave);
     return {
       chiave: chiaveMappa(r.chiave), nome: nomePercorso(r.chiave), ordine: r.ordine,
-      aree: areePerMappa.get(r.chiave) ?? [],
+      aree: r.area_chiave ? perArea.get(r.area_chiave) ?? [] : [],
       n: m?.n ?? 0, presi: partitaId === undefined ? null : (m?.presi ?? 0), spilli: m?.spilli ?? [],
+      area: r.area_chiave, versioneEtichetta: r.versione_etichetta,
     };
   });
 }
@@ -324,12 +314,17 @@ export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDet
    *  Persona dei Memento «ottenuto» se catturata. */
   const statoDi = (p: RigaPunto): StatoPunto | null => (puntoDescrittivo(p.tipo, p.area_dedalo_chiave) ? null
     : r.tipo === 'mementos' && p.tipo === 'persona' ? (catturate.has(p.chiave) ? 'ottenuto' : null) : stati.get(p.chiave) ?? null);
+  // L3: le Aree toccate da ogni infiltrazione. Solo nei Palazzi: per i Memento i campi nuovi non si emettono e la risposta resta
+  // identica byte per byte a quella di prima (R3-12; difetto NR3-1, decisione del PM del 2026-10-20)
+  const palazzo = r.tipo === 'palazzo';
+  const areeToccate = palazzo ? areeDelleInfiltrazioni(chiave) : new Map<string, AreaDellInfiltrazione[]>();
   const aree = (prepared('SELECT * FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine').all(chiave) as RigaArea[]).map((a): AreaDungeonDto => ({
     chiave: a.chiave, ordine: a.ordine, nome: a.nome, descrizione: a.descrizione,
     mappe: (native.get(a.chiave) ?? []).map((m) => {
       const rm = raccolta?.perMappa.get(m.chiave);
-      return { chiave: chiaveMappa(m.chiave), nome: m.nome, n: rm?.n ?? 0, presi: partitaId === undefined ? null : (rm?.presi ?? 0), spilli: rm?.spilli ?? [] };
+      return { chiave: chiaveMappa(m.chiave), nome: m.nome, n: rm?.n ?? 0, presi: partitaId === undefined ? null : (rm?.presi ?? 0), spilli: rm?.spilli ?? [], ...(palazzo ? { area: m.area } : {}) };
     }),
+    ...(palazzo ? { areePalazzo: (areeToccate.get(a.chiave) ?? []).map((x) => ({ chiave: x.chiave, slug: x.slug, nome: x.nome, planimetriaIniziale: x.planimetriaIniziale ? chiaveMappa(x.planimetriaIniziale) : null })) } : {}),
     punti: (prepared('SELECT * FROM punto_interesse WHERE area_chiave = ? ORDER BY ordine, chiave').all(a.chiave) as RigaPunto[])
       .map((p) => puntoDto(p, statoDi(p), marc.get(p.chiave) ?? null, pinPunti.get(p.chiave) ?? [], letture)),
     dedalo: dedali ? dedaloDto(a.chiave, dedali) : null,
@@ -339,7 +334,9 @@ export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDet
   const personeCatturate = partitaId === undefined || !tabellaUtente('compendio_partita') ? null
     : (prepared('SELECT persona_id FROM compendio_partita WHERE partita_id = ? AND registrata = 1 ORDER BY persona_id').all(partitaId) as Array<{ persona_id: number }>).map((x) => x.persona_id);
   return { ...riassunto(r, stati, partitaId, partitaId !== undefined ? palazziCompletati(partitaId) : null, { raccolta }), note: r.note, fonti: JSON.parse(r.fonti_json) as string[], aree, planimetrie, atterraggi: elencaAtterraggi(chiave), personeCatturate,
-    illustrazione: illustrazioneDellaMappa(radiceDelPalazzo(chiave)) };
+    illustrazione: illustrazioneDellaMappa(radiceDelPalazzo(chiave)),
+    // L3: le Aree del Palazzo con infiltrazioni e raccolta (la stessa della colonna «Da raccogliere», per planimetria); non per i Memento
+    ...(palazzo && raccolta ? { areePalazzo: areeDelPalazzo(chiave, raccolta.perMappa, partitaId !== undefined) } : {}) };
 }
 
 /**
@@ -397,6 +394,24 @@ export function aggiornaDungeon(chiave: string, dati: DatiDungeon): DungeonDetta
 }
 
 export interface DatiArea { nome?: string; descrizione?: string }
+
+/**
+ * Le Aree del Palazzo che un'infiltrazione tocca (L3, R3-23, «Modifica aree» dell'infiltrazione): l'insieme ordinato dato (slug delle
+ * aree del suo Palazzo, o chiavi `dungeon/<k>/<slug>`) sostituisce quello di prima, con la versione da aprire dove indicata. Un gesto
+ * solo, che non sposta voci né pin (`impostaLegamiInfiltrazione`). 404 per un'infiltrazione o un'area che non c'è, 409
+ * `area-di-un-altro-palazzo` per un'area di un altro Palazzo. Risponde con l'infiltrazione com'è nella scheda.
+ */
+export function impostaAreePalazzoInfiltrazione(chiaveInfiltrazione: string, aree: readonly string[], planimetrieIniziali?: Readonly<Record<string, string | null>>, partitaId?: number): AreaDungeonDto {
+  const a = prepared('SELECT * FROM dungeon_area WHERE chiave = ?').get(chiaveInfiltrazione) as RigaArea | undefined;
+  if (!a) throw httpErrors.notFound('area-non-trovata', `L'infiltrazione '${chiaveInfiltrazione}' non esiste.`);
+  if (!prepared("SELECT 1 FROM dungeon WHERE chiave = ? AND tipo = 'palazzo'").get(a.dungeon_chiave)) throw httpErrors.badRequest('infiltrazione-dei-memento', 'I dedali dei Memento non hanno aree.');
+  const chiaveDi = (x: string) => (x.includes('/') ? x : `dungeon/${a.dungeon_chiave}/${x}`);
+  const chiavi = aree.map(chiaveDi);
+  for (const k of chiavi) if (!prepared('SELECT 1 FROM area WHERE chiave = ?').get(k)) throw httpErrors.notFound('area-non-trovata', `Nessuna area '${k}'.`);
+  const iniziali = planimetrieIniziali ? Object.fromEntries(Object.entries(planimetrieIniziali).map(([k, v]) => [chiaveDi(k), v])) : undefined;
+  impostaLegamiInfiltrazione({ infiltrazione: chiaveInfiltrazione, aree: chiavi, planimetrieIniziali: iniziali });
+  return dettaglioDungeon(a.dungeon_chiave, partitaId).aree.find((x) => x.chiave === chiaveInfiltrazione)!;
+}
 
 /** Nome e descrizione di un'area della guida. */
 export function aggiornaArea(chiaveArea: string, dati: DatiArea): AreaDungeonDto {
@@ -532,7 +547,10 @@ function eliminaAreaInTransazione(chiaveArea: string, a: RigaArea): void {
     }
     prepared('UPDATE richiesta SET area_dedalo_chiave = NULL WHERE area_dedalo_chiave IN (SELECT chiave FROM area_dedalo WHERE dedalo_chiave = ?)').run(chiaveArea);
     prepared('DELETE FROM area_dedalo WHERE dedalo_chiave = ?').run(chiaveArea);
-    staccaAreaDaOgniMappa(chiaveArea);
+    // L3: i legami con le Aree del Palazzo e il posto nei diari (insiemi e proposte, ricompattati); le aree e le voci restano.
+    // Le fonti vecchie (`mappa_entita`) non si scrivono più: restano fino a L11 e nessuno le legge
+    if (conLegami()) prepared('DELETE FROM infiltrazione_area WHERE infiltrazione_chiave = ?').run(chiaveArea);
+    staccaInfiltrazioneDalleVoci(chiaveArea);
     ripulisciRiferimentiTestuali(chiaveArea);
     prepared('DELETE FROM dungeon_area WHERE chiave = ?').run(chiaveArea);
     prepared('UPDATE dungeon_area SET ordine = ordine - 1 WHERE dungeon_chiave = ? AND ordine > ?').run(a.dungeon_chiave, a.ordine);
@@ -590,15 +608,23 @@ const MAX_CHIAVE_AREA = 200;
 /**
  * Una sezione nuova della guida di un Palazzo (richiesta dell'utente, 2026-10-01: «come faccio ad aggiungere una nuova
  * sezione di guida ad una planimetria che non ha sezioni di guida autonome?»). Nasce nel posto scelto — `dopo` un'area
- * del Palazzo, `null` in cima, assente in fondo — e l'ordine del Palazzo si ricompatta (0, 1, 2…); con `planimetria` si
- * aggiunge alle aree di quella planimetria (`impostaAreeMappa`, che controlla che sia del Palazzo). È canone: vale per tutte
- * le partite e va nel pacchetto di gioco, come ogni correzione della guida.
+ * del Palazzo, `null` in cima, assente in fondo — e l'ordine del Palazzo si ricompatta (0, 1, 2…). Da L3 tocca le Aree del
+ * Palazzo date in `areePalazzo` (slug, in ordine; R3-22); `planimetria` (i client di prima) aggiunge l'Area di quella planimetria,
+ * che dev'essere del Palazzo. È canone: vale per tutte le partite e va nel pacchetto di gioco, come ogni correzione della guida.
  */
-export function creaArea(dungeonChiave: string, dati: { nome: string; descrizione?: string; dopo?: string | null; planimetria?: string }): { chiave: string; nome: string; ordine: number } {
+export function creaArea(dungeonChiave: string, dati: { nome: string; descrizione?: string; dopo?: string | null; planimetria?: string; areePalazzo?: string[] }): { chiave: string; nome: string; ordine: number } {
   if (!prepared('SELECT 1 FROM dungeon WHERE chiave = ?').get(dungeonChiave)) throw httpErrors.notFound('dungeon-non-trovato', `Il dungeon '${dungeonChiave}' non esiste.`);
   const nome = dati.nome.trim();
   const elenco = (prepared('SELECT chiave FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine, chiave').all(dungeonChiave) as Array<{ chiave: string }>).map((r) => r.chiave);
   if (dati.dopo && !elenco.includes(dati.dopo)) throw httpErrors.badRequest('area-non-del-palazzo', `L'infiltrazione '${dati.dopo}' non è di questo Palazzo.`);
+  // L3: le Aree toccate (slug delle aree del Palazzo, in ordine; R3-22) e, per i client di prima, l'Area della `planimetria` data
+  const areeToccate = [...(dati.areePalazzo ?? []).map((s) => `dungeon/${dungeonChiave}/${s}`)];
+  if (dati.planimetria) {
+    const m = prepared('SELECT m.area_chiave, a.dungeon_chiave FROM mappa m LEFT JOIN area a ON a.chiave = m.area_chiave WHERE m.chiave = ?').get(idMappa(dati.planimetria)) as { area_chiave: string | null; dungeon_chiave: string | null } | undefined;
+    if (!m) throw httpErrors.notFound('mappa-non-trovata', 'La planimetria indicata non esiste.');
+    if (!m.area_chiave || m.dungeon_chiave !== dungeonChiave) throw httpErrors.badRequest('planimetria-non-del-palazzo', 'La planimetria indicata non è di un’area di questo Palazzo.');
+    if (!areeToccate.includes(m.area_chiave)) areeToccate.push(m.area_chiave);
+  }
   // La chiave sta nei 200 caratteri che le route delle aree accettano (`paramsChiaveGuida`), suffisso «-N» compreso (fino a «-99999»): un nome
   // di 300 caratteri darebbe un'area che poi non si modifica né si elimina (rilievo della revisione). Senza lettere né cifre
   // («???») lo slug è vuoto: si usa «area».
@@ -613,10 +639,7 @@ export function creaArea(dungeonChiave: string, dati: { nome: string; descrizion
   getDb().transaction(() => {
     prepared('INSERT INTO dungeon_area (chiave, dungeon_chiave, ordine, nome, descrizione) VALUES (?, ?, ?, ?, ?)').run(chiave, dungeonChiave, posto, nome, dati.descrizione ?? '');
     elenco.forEach((k, n) => prepared('UPDATE dungeon_area SET ordine = ? WHERE chiave = ?').run(n, k));
-    if (dati.planimetria) {
-      const gia = (prepared("SELECT entita_chiave FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = 'area'").all(idMappa(dati.planimetria)) as Array<{ entita_chiave: string }>).map((r) => r.entita_chiave);
-      impostaAreeMappa(dati.planimetria, [...gia, chiave]);
-    }
+    if (areeToccate.length > 0) impostaLegamiInfiltrazione({ infiltrazione: chiave, aree: areeToccate });
   })();
   return { chiave, nome, ordine: posto };
 }

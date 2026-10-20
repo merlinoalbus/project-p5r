@@ -6,11 +6,18 @@
 // colloca — e ne dice nome, ordine e planimetria predefinita (tabella `area`, migrazione 109). Questo servizio la legge per le
 // pagine (elenco del contenitore, pagina dell'Area, planimetrie da collocare) e la scrive (creazione con la prima planimetria,
 // versioni, rinomina, ordine, ripristino, eliminazione nel cestino, collocazione). Le rotte sono generiche sul contenitore
-// (`/api/aree/:contenitore/:chiave/…`): in L2 il contenitore è `citta`, con la chiave di un quartiere o `tokyo` per la città; L3
-// aggiungerà `dungeon` senza rotte nuove (lotti/L2/modifiche.md §3).
+// (`/api/aree/:contenitore/:chiave/…`): `citta`, con la chiave di un quartiere o `tokyo` per la città (L2), e `dungeon`, con la
+// chiave di un Palazzo (L3, migrazione 110: le «stanze» dei Palazzi, legate alle infiltrazioni in `infiltrazione_area`). Nei Palazzi
+// le planimetrie nascono di tipo `area` sotto `dungeon-<k>`, senza un punto sull'illustrazione (lì non ci sono passaggi), e l'Area
+// porta le infiltrazioni che la toccano e la raccolta delle sue planimetrie.
 // ============================================================
 
-import { getDb, nowIso, prepared } from '../../db/dbService.js';
+import { getDb, nowIso, prepared, type AppDatabase } from '../../db/dbService.js';
+import { assegnaAreePalazzi110, type EsitoAreePalazzi } from '../../db/migrations/110_aree_dei_palazzi.js';
+import { radiceDelPalazzo } from './alberoMappe.js';
+import { conLegami, impostaLegamiInfiltrazione, infiltrazioniDelleAree, staccaAreaDalleInfiltrazioni, type InfiltrazioneDellArea } from './legamiInfiltrazioni.js';
+// la raccolta per planimetria dei Palazzi è quella della scheda (dungeonService la usa a sua volta per le Aree: l'uso è nelle funzioni)
+import { raccoltaMappe } from '../dungeonService.js';
 import { HttpError, httpErrors } from '../../utils/httpError.js';
 import { slug } from '../../../shared/slug.js';
 import { verificaPartita } from '../verificaPartita.js';
@@ -22,22 +29,34 @@ import { caricataDellaMappa, illustrazioneDellaMappa, immaginiCaricateDelleMappe
 import { casaDellArea, casaDellaMappa, conAree, contenitoreDi, contestoAree, type ContestoAree, type RigaArea } from './casaMappa.js';
 import type { AreaDettaglioDto, AreaRiassuntoDto, ElementoAreaDto, MappaDaCollocareDto, PlanimetriaAreaDto, RuoloImmagine } from '../../../shared/types.js';
 
-/** I contenitori ammessi nelle rotte, in L2: la città (Tokyo) e i suoi quartieri. */
-export const CONTENITORI_AREA = ['citta'] as const;
+/** I contenitori ammessi nelle rotte: la città (Tokyo) e i suoi quartieri (L2), i Palazzi (L3). */
+export const CONTENITORI_AREA = ['citta', 'dungeon'] as const;
 export type ContenitoreRotta = (typeof CONTENITORI_AREA)[number];
 
-/** Dove sta un'Area: la colonna che la lega al contenitore, la sua chiave e la mappa che lo illustra (pin di passaggio, genitore). */
-export interface Contenitore { colonna: 'quartiere_chiave' | 'citta_chiave'; chiave: string; mappa: string; nome: string }
+/**
+ * Dove sta un'Area: la colonna che la lega al contenitore, la sua chiave, la mappa che lo illustra (genitore delle planimetrie, e nel
+ * mondo l'illustrazione con i pin di passaggio), il prefisso delle chiavi delle sue Aree e il tipo delle planimetrie che vi nascono.
+ */
+export interface Contenitore {
+  colonna: 'quartiere_chiave' | 'citta_chiave' | 'dungeon_chiave'; chiave: string; mappa: string; nome: string;
+  rotta: ContenitoreRotta; prefisso: string; tipoPlanimetria: 'luogo' | 'area';
+}
 
 /**
- * Il contenitore indicato dalla rotta: `citta/tokyo` è la città, `citta/<quartiere>` un quartiere. 404 `quartiere-non-trovato` se
- * il quartiere non c'è (o è l'ingresso dei Memento, che non ha Aree).
+ * Il contenitore indicato dalla rotta: `citta/tokyo` è la città, `citta/<quartiere>` un quartiere, `dungeon/<palazzo>` un Palazzo.
+ * 404 `quartiere-non-trovato` se il quartiere non c'è (o è l'ingresso dei Memento, che non ha Aree), 404 `dungeon-non-trovato` se il
+ * Palazzo non c'è o sono i Memento (i dedali non hanno Aree, R3-12).
  */
 export function contenitoreDaRotta(contenitore: ContenitoreRotta, chiave: string): Contenitore {
-  if (contenitore === 'citta' && chiave === 'tokyo') return { colonna: 'citta_chiave', chiave: 'tokyo', mappa: 'tokyo', nome: 'Tokyo' };
+  if (contenitore === 'dungeon') {
+    const d = prepared("SELECT chiave, nome FROM dungeon WHERE chiave = ? AND tipo = 'palazzo'").get(chiave) as { chiave: string; nome: string } | undefined;
+    if (!d) throw httpErrors.notFound('dungeon-non-trovato', `Il Palazzo '${chiave}' non esiste.`);
+    return { colonna: 'dungeon_chiave', chiave: d.chiave, mappa: radiceDelPalazzo(d.chiave), nome: d.nome, rotta: 'dungeon', prefisso: `dungeon/${d.chiave}/`, tipoPlanimetria: 'area' };
+  }
+  if (chiave === 'tokyo') return { colonna: 'citta_chiave', chiave: 'tokyo', mappa: 'tokyo', nome: 'Tokyo', rotta: 'citta', prefisso: 'citta/tokyo/', tipoPlanimetria: 'luogo' };
   const q = chiave === 'mementos' ? undefined : prepared('SELECT chiave, nome FROM quartiere WHERE chiave = ?').get(chiave) as { chiave: string; nome: string } | undefined;
   if (!q) throw httpErrors.notFound('quartiere-non-trovato', `Il quartiere '${chiave}' non esiste.`);
-  return { colonna: 'quartiere_chiave', chiave: q.chiave, mappa: `citta-${q.chiave}`, nome: q.nome };
+  return { colonna: 'quartiere_chiave', chiave: q.chiave, mappa: `citta-${q.chiave}`, nome: q.nome, rotta: 'citta', prefisso: `citta/${q.chiave}/`, tipoPlanimetria: 'luogo' };
 }
 
 /** La riga di un'Area del contenitore per slug; 404 `area-non-trovata` se manca. */
@@ -54,25 +73,56 @@ function planimetrieDi(area: string): RigaPlanimetria[] {
   return prepared('SELECT chiave, nome, immagine_chiave, asset, ruolo_immagine, versione_etichetta, versione_ordine, area_chiave FROM mappa WHERE area_chiave = ? ORDER BY versione_ordine, chiave').all(area) as RigaPlanimetria[];
 }
 
-/** I conteggi letti una volta per una risposta che descrive più Aree. */
-interface ContestoElenco { aree: ContestoAree; spilli: Map<string, number>; ingressi: Set<string>; caricate: Map<string, string> }
+/** La raccolta di ogni planimetria: collezionabili e quanti presi (null senza partita). */
+type RaccoltaPerMappa = ReadonlyMap<string, { n: number; presi: number | null }>;
 
-function contestoElenco(): ContestoElenco {
+/** I conteggi letti una volta per una risposta che descrive più Aree. */
+interface ContestoElenco {
+  aree: ContestoAree; spilli: Map<string, number>; ingressi: Set<string>; caricate: Map<string, string>;
+  /** Le infiltrazioni di ogni Area dei Palazzi (L3). */
+  infiltrazioni: Map<string, InfiltrazioneDellArea[]>;
+  /** La raccolta per planimetria: nei Palazzi quella della scheda (`raccoltaMappe`, con la partita); nel mondo i soli collezionabili. */
+  raccolta: RaccoltaPerMappa; conPartita: boolean;
+}
+
+/** I collezionabili di ogni planimetria, senza partita (la raccolta del mondo, che non ha un conteggio dei presi). */
+function collezionabiliPerMappa(): RaccoltaPerMappa {
+  return new Map((prepared('SELECT mappa_chiave AS chiave, COUNT(*) AS n FROM spillo WHERE collezionabile = 1 AND mappa_chiave IS NOT NULL GROUP BY mappa_chiave').all() as Array<{ chiave: string; n: number }>)
+    .map((r) => [r.chiave, { n: r.n, presi: null }]));
+}
+
+function contestoElenco(raccolta?: { perMappa: RaccoltaPerMappa; conPartita: boolean }): ContestoElenco {
   return {
     aree: contestoAree(),
     spilli: new Map((prepared('SELECT mappa_chiave AS chiave, COUNT(*) AS n FROM spillo GROUP BY mappa_chiave').all() as Array<{ chiave: string; n: number }>).map((r) => [r.chiave, r.n])),
     ingressi: new Set((prepared('SELECT area_chiave FROM quartiere_ingresso WHERE area_chiave IS NOT NULL').all() as Array<{ area_chiave: string }>).map((r) => r.area_chiave)),
     caricate: immaginiCaricateDelleMappe(),
+    infiltrazioni: infiltrazioniDelleAree(),
+    raccolta: raccolta?.perMappa ?? collezionabiliPerMappa(), conPartita: raccolta?.conPartita ?? false,
   };
 }
 
-/** Il riassunto di un'Area: contenitore, nome, ordine, predefinita con la sua illustrazione, conteggi, passaggio, ingresso, stato. */
+/** La raccolta di un Palazzo per planimetria, nella forma che serve qui (null fuori dai Palazzi). */
+function raccoltaDelContenitore(c: Contenitore, partitaId?: number): { perMappa: RaccoltaPerMappa; conPartita: boolean } | undefined {
+  if (c.colonna !== 'dungeon_chiave') return undefined;
+  return { perMappa: raccoltaMappe(c.chiave, partitaId).perMappa, conPartita: partitaId !== undefined };
+}
+
+/**
+ * Il riassunto di un'Area: contenitore, nome, ordine, predefinita con la sua illustrazione, conteggi, passaggio, ingresso, stato; da L3
+ * le infiltrazioni che la toccano e la raccolta delle sue planimetrie. Nei Palazzi non c'è un passaggio (l'illustrazione del Palazzo
+ * non ha pin verso le aree) né un ingresso.
+ */
 function riassuntoArea(a: RigaArea, c: Contenitore, ctx: ContestoElenco): AreaRiassuntoDto {
   const planimetrie = planimetrieDi(a.chiave);
   const chiavi = planimetrie.map((p) => p.chiave);
   // il pin di passaggio verso l'Area sull'illustrazione del contenitore: il primo (per id) che porta a una sua planimetria
-  const passaggio = chiavi.length === 0 ? undefined : prepared(`SELECT id, x, y FROM spillo WHERE mappa_chiave = ? AND riferimento_tipo = 'mappa'
+  const passaggio = chiavi.length === 0 || c.colonna === 'dungeon_chiave' ? undefined : prepared(`SELECT id, x, y FROM spillo WHERE mappa_chiave = ? AND riferimento_tipo = 'mappa'
     AND riferimento_chiave IN (${chiavi.map(() => '?').join(', ')}) ORDER BY id LIMIT 1`).get(c.mappa, ...chiavi) as { id: number; x: number; y: number } | undefined;
+  const raccolta = chiavi.reduce((t, k) => {
+    const r = ctx.raccolta.get(k);
+    return { n: t.n + (r?.n ?? 0), presi: t.presi === null ? null : t.presi + (r?.presi ?? 0) };
+  }, { n: 0, presi: ctx.conPartita ? 0 : null as number | null });
   return {
     chiave: a.chiave, contenitore: contenitoreDi(a, ctx.aree), slug: a.slug, nome: a.nome, nomeRivisto: a.nome_rivisto === 1, ordine: a.ordine,
     predefinita: a.planimetria_predefinita ? chiaveMappa(a.planimetria_predefinita) : null,
@@ -81,14 +131,28 @@ function riassuntoArea(a: RigaArea, c: Contenitore, ctx: ContestoElenco): AreaRi
     passaggio: passaggio ? { spillo: passaggio.id, x: passaggio.x, y: passaggio.y } : null,
     ingresso: ctx.ingressi.has(a.chiave), origine: a.origine, modificata: a.seed_json !== null, daVerificare: a.da_verificare === 1,
     casa: casaDellArea(a) ?? '',
+    infiltrazioni: ctx.infiltrazioni.get(a.chiave) ?? [],
+    raccolta,
   };
 }
 
-/** Le Aree di un contenitore, nel loro ordine (a parità, per slug). */
-export function areeDelContenitore(c: Contenitore): AreaRiassuntoDto[] {
+/** Le Aree di un contenitore, nel loro ordine (a parità, per slug); nei Palazzi con la raccolta della partita, se c'è. */
+export function areeDelContenitore(c: Contenitore, partitaId?: number): AreaRiassuntoDto[] {
   if (!conAree()) return [];
-  const ctx = contestoElenco();
+  if (partitaId !== undefined) verificaPartita(partitaId);
+  const ctx = contestoElenco(raccoltaDelContenitore(c, partitaId));
   return (prepared(`SELECT * FROM area WHERE ${c.colonna} = ? ORDER BY ordine, slug`).all(c.chiave) as RigaArea[]).map((a) => riassuntoArea(a, c, ctx));
+}
+
+/**
+ * Le Aree di un Palazzo per la sua scheda (L3, `DungeonDettaglioDto.areePalazzo`), con la raccolta che la scheda ha già calcolato per
+ * planimetria (la stessa della colonna «Da raccogliere»: R3-31). Vuoto per un Palazzo senza Aree.
+ */
+export function areeDelPalazzo(dungeon: string, perMappa: RaccoltaPerMappa, conPartita: boolean): AreaRiassuntoDto[] {
+  if (!conAree()) return [];
+  const c = contenitoreDaRotta('dungeon', dungeon);
+  const ctx = contestoElenco({ perMappa, conPartita });
+  return (prepared('SELECT * FROM area WHERE dungeon_chiave = ? ORDER BY ordine, slug').all(dungeon) as RigaArea[]).map((a) => riassuntoArea(a, c, ctx));
 }
 
 /** Quante Aree ha ogni quartiere (per le schede de La città). */
@@ -113,7 +177,7 @@ export function dettaglioArea(contenitore: ContenitoreRotta, chiave: string, slu
   if (partitaId !== undefined) verificaPartita(partitaId);
   const c = contenitoreDaRotta(contenitore, chiave);
   const a = rigaArea(c, slug);
-  const ctx = contestoElenco();
+  const ctx = contestoElenco(raccoltaDelContenitore(c, partitaId));
   const planimetrie = planimetrieDi(a.chiave);
   const proprie = new Set(planimetrie.map((p) => p.chiave));
   const versioni: PlanimetriaAreaDto[] = planimetrie.map((p, i) => {
@@ -183,7 +247,7 @@ function creaPlanimetria(c: Contenitore, nome: string): string {
   for (let n = 1; n < 100; n++) {
     const tentativo = n === 1 ? nome : `${nome} (${n})`;
     try {
-      return idMappa(creaMappa(undefined, { nome: tentativo, tipo: 'luogo', genitore: c.mappa, asset: null }, { dallArea: true }).chiave);
+      return idMappa(creaMappa(undefined, { nome: tentativo, tipo: c.tipoPlanimetria, genitore: c.mappa, asset: null }, { dallArea: true }).chiave);
     } catch (err) {
       if (err instanceof HttpError && CHIAVE_PRESA.has(err.code)) continue;
       throw err;
@@ -205,19 +269,30 @@ function ordineInFondo(c: Contenitore): number {
 /** L'immagine di una planimetria nuova: tipo, byte e conferma dei pezzi come nell'editor (una mappa nuova non ne ha). */
 export interface ImmagineNuova { mime: string; contenuto: Buffer }
 
+/** Una riga nuova di `area` nel contenitore, dell'utente, in fondo (dentro la transazione di chi chiama). Restituisce la chiave. */
+function inserisciArea(c: Contenitore, slugArea: string, nome: string, predefinita: string | null): string {
+  const chiaveArea = `${c.prefisso}${slugArea}`;
+  prepared(`INSERT INTO area (chiave, quartiere_chiave, dungeon_chiave, citta_chiave, slug, nome, nome_rivisto, ordine, planimetria_predefinita, origine, seed_json, da_verificare, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, 'utente', NULL, 0, ?)`).run(chiaveArea, c.colonna === 'quartiere_chiave' ? c.chiave : null, c.colonna === 'dungeon_chiave' ? c.chiave : null,
+    c.colonna === 'citta_chiave' ? c.chiave : null, slugArea, nome, ordineInFondo(c), predefinita, nowIso());
+  return chiaveArea;
+}
+
 /**
- * Crea un'Area con la sua prima planimetria e l'immagine (R2-23): in una transazione l'Area (dell'utente, in fondo al contenitore),
- * la planimetria sotto la mappa del contenitore (ruolo dedotto, L1), e — se c'è il punto — il pin di passaggio sull'illustrazione
- * del contenitore, col nome dell'Area. Un errore (immagine non valida, nome vuoto o riservato) non lascia niente.
+ * Crea un'Area con la sua prima planimetria e l'immagine (R2-23, R3-20): in una transazione l'Area (dell'utente, in fondo al
+ * contenitore), la planimetria sotto la mappa del contenitore (ruolo dedotto, L1), e — nel mondo, se c'è il punto — il pin di
+ * passaggio sull'illustrazione del contenitore, col nome dell'Area; in un Palazzo, i legami con le `infiltrazioni` date (chiavi delle
+ * infiltrazioni del Palazzo: R3-22), e niente punto (400 `punto-non-ammesso`: nei Palazzi non c'è un'illustrazione con passaggi). Un
+ * errore (immagine non valida, nome vuoto o riservato, infiltrazione di un altro Palazzo) non lascia niente.
  */
-export function creaArea(contenitore: ContenitoreRotta, chiave: string, dati: { nome: string; immagine: ImmagineNuova; x?: number; y?: number; etichetta?: string }): AreaDettaglioDto {
+export function creaArea(contenitore: ContenitoreRotta, chiave: string, dati: { nome: string; immagine: ImmagineNuova; x?: number; y?: number; etichetta?: string; infiltrazioni?: readonly string[] }): AreaDettaglioDto {
   const c = contenitoreDaRotta(contenitore, chiave);
   const nome = nomeValido(dati.nome);
   const slugArea = slugLibero(c, nome);
-  const chiaveArea = `citta/${c.chiave}/${slugArea}`;
+  if (c.colonna === 'dungeon_chiave' && (dati.x !== undefined || dati.y !== undefined)) throw httpErrors.badRequest('punto-non-ammesso', 'Nei Palazzi un’area non ha un punto sull’illustrazione: si crea senza x e y.');
+  if (c.colonna !== 'dungeon_chiave' && dati.infiltrazioni?.length) throw httpErrors.badRequest('infiltrazioni-solo-nei-palazzi', 'Le infiltrazioni si legano alle aree dei Palazzi.');
   getDb().transaction(() => {
-    prepared(`INSERT INTO area (chiave, quartiere_chiave, dungeon_chiave, citta_chiave, slug, nome, nome_rivisto, ordine, planimetria_predefinita, origine, seed_json, da_verificare, updated_at)
-      VALUES (?, ?, NULL, ?, ?, ?, 0, ?, NULL, 'utente', NULL, 0, ?)`).run(chiaveArea, c.colonna === 'quartiere_chiave' ? c.chiave : null, c.colonna === 'citta_chiave' ? c.chiave : null, slugArea, nome, ordineInFondo(c), nowIso());
+    const chiaveArea = inserisciArea(c, slugArea, nome, null);
     const mappa = creaPlanimetria(c, nome);
     legaVersione(mappa, chiaveArea, 0, dati.etichetta);
     impostaImmagineMappa(mappa, dati.immagine.mime, dati.immagine.contenuto);
@@ -225,9 +300,25 @@ export function creaArea(contenitore: ContenitoreRotta, chiave: string, dati: { 
     if (dati.x !== undefined && dati.y !== undefined) {
       creaSpillo(c.mappa, { tipo: 'passaggio', nome, x: dati.x, y: dati.y, riferimento: { tipo: 'mappa', chiave: chiaveMappa(mappa) } });
     }
+    if (dati.infiltrazioni?.length) impostaLegamiInfiltrazione({ area: chiaveArea, infiltrazioni: dati.infiltrazioni });
   })();
   invalidaCacheDiGioco();
   return dettaglioArea(contenitore, chiave, slugArea);
+}
+
+/** Le infiltrazioni che toccano un'Area di un Palazzo (R3-23, dall'area): l'insieme dato sostituisce quello di prima. */
+export function impostaInfiltrazioniDellArea(contenitore: ContenitoreRotta, chiave: string, slugArea: string, infiltrazioni: readonly string[]): AreaDettaglioDto {
+  const c = contenitoreDaRotta(contenitore, chiave);
+  const a = rigaArea(c, slugArea);
+  if (c.colonna !== 'dungeon_chiave') throw httpErrors.badRequest('infiltrazioni-solo-nei-palazzi', 'Le infiltrazioni si legano alle aree dei Palazzi.');
+  impostaLegamiInfiltrazione({ area: a.chiave, infiltrazioni });
+  invalidaCacheDiGioco();
+  return dettaglioArea(contenitore, chiave, slugArea);
+}
+
+/** La regola delle Aree dei Palazzi della migrazione 110, per l'import di un pacchetto di prima (L3 §2.3): crea le aree mancanti. */
+export function assegnaAreePalazzi(db: AppDatabase = getDb()): EsitoAreePalazzi {
+  return conAree(db) ? assegnaAreePalazzi110(db, nowIso()) : { aree: 0, planimetrie: 0, etichette: 0, legami: 0, legamiDaRegola: 0 };
 }
 
 /** Aggiunge una planimetria in coda alle versioni dell'Area (R2-24), con l'immagine; `predefinita` la fa aprire per prima. */
@@ -332,8 +423,11 @@ export function aggiornaVersioni(contenitore: ContenitoreRotta, chiave: string, 
   return dettaglioArea(contenitore, chiave, slugArea);
 }
 
-/** Che cosa un'Area si porta via eliminandola (per la conferma). */
-export interface ContenutiArea { planimetrie: number; pin: number; passaggi: number; ingresso: boolean; elementi: number }
+/**
+ * Che cosa un'Area si porta via eliminandola (per la conferma). Nei Palazzi (L3 §3.3) anche quanti pin sono collegati a voci della
+ * guida (le voci restano nelle loro infiltrazioni, i pin vanno nel cestino con l'Area) e quante infiltrazioni la toccano.
+ */
+export interface ContenutiArea { planimetrie: number; pin: number; passaggi: number; ingresso: boolean; elementi: number; pinConVoci: number; infiltrazioni: number }
 
 function contenutiArea(a: RigaArea): { riepilogo: ContenutiArea; planimetrie: string[]; passaggi: number[] } {
   const planimetrie = planimetrieDi(a.chiave).map((p) => p.chiave);
@@ -343,7 +437,9 @@ function contenutiArea(a: RigaArea): { riepilogo: ContenutiArea; planimetrie: st
   // i passaggi che arrivano alle sue planimetrie da fuori (da lei stessa se ne vanno con le planimetrie)
   const passaggi = planimetrie.length ? prepared(`SELECT id FROM spillo WHERE riferimento_tipo = 'mappa' AND riferimento_chiave IN (${segnaposti}) AND mappa_chiave NOT IN (${segnaposti})`).pluck().all(...planimetrie, ...planimetrie) as number[] : [];
   const ingresso = !!prepared('SELECT 1 FROM quartiere_ingresso WHERE area_chiave = ?').get(a.chiave);
-  return { riepilogo: { planimetrie: planimetrie.length, pin, passaggi: passaggi.length, ingresso, elementi }, planimetrie, passaggi };
+  const pinConVoci = planimetrie.length ? prepared(`SELECT COUNT(DISTINCT s.id) FROM spillo s JOIN spillo_voce sv ON sv.spillo_id = s.id WHERE s.mappa_chiave IN (${segnaposti})`).pluck().get(...planimetrie) as number : 0;
+  const infiltrazioni = conLegami() ? prepared('SELECT COUNT(*) FROM infiltrazione_area WHERE area_chiave = ?').pluck().get(a.chiave) as number : 0;
+  return { riepilogo: { planimetrie: planimetrie.length, pin, passaggi: passaggi.length, ingresso, elementi, pinConVoci, infiltrazioni }, planimetrie, passaggi };
 }
 
 /**
@@ -356,21 +452,27 @@ export function eliminaArea(contenitore: ContenitoreRotta, chiave: string, slugA
   const c = contenitoreDaRotta(contenitore, chiave);
   const a = rigaArea(c, slugArea);
   const { riepilogo, planimetrie, passaggi } = contenutiArea(a);
-  if (!conferma && (riepilogo.pin > 0 || riepilogo.passaggi > 0 || riepilogo.ingresso || riepilogo.elementi > 0)) {
-    // il riepilogo in parole, al singolare e al plurale (difetto FUN2-4): «1 planimetria, 1 pin e 1 passaggio che porta qui»
+  if (!conferma && (riepilogo.pin > 0 || riepilogo.passaggi > 0 || riepilogo.ingresso || riepilogo.elementi > 0 || riepilogo.infiltrazioni > 0)) {
+    // il riepilogo in parole, al singolare e al plurale (difetto FUN2-4): «1 planimetria, 1 pin e 1 passaggio che porta qui»; nei
+    // Palazzi «3 planimetrie, 52 pin di cui 40 collegati a voci e 2 infiltrazioni» (le voci restano, L3 §4.3)
+    const pin = `${riepilogo.pin} pin${riepilogo.pinConVoci > 0 ? ` di cui ${riepilogo.pinConVoci} ${riepilogo.pinConVoci === 1 ? 'collegato a voci' : 'collegati a voci'}` : ''}`;
     const parti = [
       riepilogo.planimetrie === 1 ? '1 planimetria' : `${riepilogo.planimetrie} planimetrie`,
-      `${riepilogo.pin} pin`,
+      pin,
       ...(riepilogo.passaggi > 0 ? [riepilogo.passaggi === 1 ? '1 passaggio che porta qui' : `${riepilogo.passaggi} passaggi che portano qui`] : []),
+      ...(riepilogo.infiltrazioni > 0 ? [riepilogo.infiltrazioni === 1 ? '1 infiltrazione' : `${riepilogo.infiltrazioni} infiltrazioni`] : []),
     ];
     const elenco = parti.length > 1 ? `${parti.slice(0, -1).join(', ')} e ${parti[parti.length - 1]}` : parti[0];
-    throw httpErrors.conflict('area-con-contenuti', `L’area «${a.nome}» ha ${elenco}${riepilogo.ingresso ? ', ed è l’ingresso del quartiere' : ''}: eliminandola va tutto nel cestino.`, { ...riepilogo });
+    const voci = riepilogo.pinConVoci > 0 ? ' (le voci della guida restano nelle loro infiltrazioni)' : '';
+    throw httpErrors.conflict('area-con-contenuti', `L’area «${a.nome}» ha ${elenco}${riepilogo.ingresso ? ', ed è l’ingresso del quartiere' : ''}: eliminandola va tutto nel cestino${voci}.`, { ...riepilogo });
   }
   const vicine = prepared(`SELECT slug FROM area WHERE ${c.colonna} = ? ORDER BY ordine, slug`).pluck().all(c.chiave) as string[];
   const i = vicine.indexOf(a.slug);
   conCestino({ tipo: 'area-fisica', chiave: a.chiave, nome: a.nome, contesto: c.nome, vicini: { prima: i > 0 ? vicine[i - 1] : null, dopo: i >= 0 && i < vicine.length - 1 ? vicine[i + 1] : null } }, () => getDb().transaction(() => {
     for (const id of passaggi) eliminaSpillo(id);
     prepared('DELETE FROM quartiere_ingresso WHERE area_chiave = ?').run(a.chiave);
+    // L3: i legami con le infiltrazioni (le altre aree di ogni infiltrazione si ricompattano); il cestino li rimette
+    staccaAreaDalleInfiltrazioni(a.chiave);
     for (const k of planimetrie) eliminaMappa(k, { dallArea: true });
     prepared('DELETE FROM area WHERE chiave = ?').run(a.chiave);
   })());
@@ -388,50 +490,231 @@ registraRipristinoCestino('area-fisica', (_chiave, _vicini, saltate) => {
  * Colloca una planimetria del mondo senza Area (R2-27): in coda alle versioni di un'Area esistente del contenitore, o come prima di
  * un'Area nuova; se non è già sotto la mappa del contenitore ci si sposta (i percorsi si ricalcolano, il vecchio resta come alias).
  */
-export function collocaPlanimetria(dati: { mappa: string; quartiere: string; area?: string; nuova?: { nome: string }; etichetta?: string }): AreaDettaglioDto {
-  const c = contenitoreDaRotta('citta', dati.quartiere);
+export function collocaPlanimetria(dati: { mappa: string; quartiere?: string; dungeon?: string; area?: string; nuova?: { nome: string }; etichetta?: string },
+  /** `sposta`: anche nel mondo una versione può cambiare Area (le rotte vecchie `/stanza` e `/presentazione`, L3 §3.3). */
+  opz: { sposta?: boolean } = {}): AreaDettaglioDto {
+  if ((dati.quartiere === undefined) === (dati.dungeon === undefined)) throw httpErrors.badRequest('colloca-non-valido', 'Indica il quartiere (o la città) oppure il Palazzo.');
+  const c = dati.dungeon !== undefined ? contenitoreDaRotta('dungeon', dati.dungeon) : contenitoreDaRotta('citta', dati.quartiere!);
   const mappa = idMappa(dati.mappa);
-  const r = prepared('SELECT chiave, tipo, genitore_chiave, area_chiave FROM mappa WHERE chiave = ?').get(mappa) as { chiave: string; tipo: string; genitore_chiave: string | null; area_chiave: string | null } | undefined;
+  const r = prepared('SELECT chiave, tipo, genitore_chiave, area_chiave, versione_etichetta FROM mappa WHERE chiave = ?').get(mappa) as { chiave: string; tipo: string; genitore_chiave: string | null; area_chiave: string | null; versione_etichetta: string | null } | undefined;
   if (!r) throw httpErrors.notFound('mappa-non-trovata', 'La planimetria da collocare non esiste.');
-  if (r.area_chiave) throw httpErrors.conflict('planimetria-gia-collocata', 'La planimetria appartiene già a un’area: si sposta dalla pagina della sua area.');
   if ((dati.area === undefined) === (dati.nuova === undefined)) throw httpErrors.badRequest('colloca-non-valido', 'Indica un’area esistente oppure il nome di un’area nuova.');
+  // nel mondo si collocano le planimetrie senza Area; nei Palazzi (L3) anche «Sposta la versione in un'altra area» e «Rendila un'area
+  // a sé», ma solo dentro il suo Palazzo
+  const vecchia = r.area_chiave ? prepared('SELECT * FROM area WHERE chiave = ?').get(r.area_chiave) as RigaArea | undefined : undefined;
+  if (r.area_chiave && c.colonna !== 'dungeon_chiave' && !opz.sposta) throw httpErrors.conflict('planimetria-gia-collocata', 'La planimetria appartiene già a un’area: si sposta dalla pagina della sua area.');
+  if (vecchia && opz.sposta && r.genitore_chiave !== c.mappa) throw httpErrors.badRequest('stanza-di-altro-luogo', 'Una versione si sposta solo fra le aree dello stesso posto.');
+  if (c.colonna === 'dungeon_chiave' && r.genitore_chiave !== c.mappa) throw httpErrors.badRequest('planimetria-di-un-altro-palazzo', 'La planimetria non è di questo Palazzo: si sposta fra le aree del suo Palazzo.');
+  if (vecchia && dati.area !== undefined && vecchia.slug === dati.area) throw httpErrors.badRequest('colloca-non-valido', 'La planimetria è già una versione di quest’area.');
+  // l'unica versione della sua Area: «entra in un'altra area» fonde le due (i legami della vecchia passano alla nuova, la vecchia vuota
+  // se ne va); «rendila un'area a sé» non ha senso, lo è già
+  const sola = !!vecchia && (prepared('SELECT COUNT(*) FROM mappa WHERE area_chiave = ?').pluck().get(vecchia.chiave) as number) < 2;
+  if (sola && dati.nuova) throw httpErrors.badRequest('colloca-non-valido', `«${vecchia!.nome}» ha solo questa planimetria: è già un’area a sé.`);
+  // spostando una versione, l'etichetta resta la sua se non se ne dà un'altra
+  const etichetta = dati.etichetta ?? (vecchia ? r.versione_etichetta ?? undefined : undefined);
   let slugArea: string;
   getDb().transaction(() => {
+    let nuovaArea: string;
     if (dati.nuova) {
       const nome = nomeValido(dati.nuova.nome);
       slugArea = slugLibero(c, nome);
-      prepared(`INSERT INTO area (chiave, quartiere_chiave, dungeon_chiave, citta_chiave, slug, nome, nome_rivisto, ordine, planimetria_predefinita, origine, seed_json, da_verificare, updated_at)
-        VALUES (?, ?, NULL, ?, ?, ?, 0, ?, ?, 'utente', NULL, 0, ?)`).run(`citta/${c.chiave}/${slugArea}`, c.colonna === 'quartiere_chiave' ? c.chiave : null, c.colonna === 'citta_chiave' ? c.chiave : null, slugArea, nome, ordineInFondo(c), mappa, nowIso());
-      legaVersione(mappa, `citta/${c.chiave}/${slugArea}`, 0, dati.etichetta);
+      nuovaArea = inserisciArea(c, slugArea, nome, mappa);
+      legaVersione(mappa, nuovaArea, 0, etichetta);
     } else {
       const a = rigaArea(c, dati.area!);
       slugArea = a.slug;
+      nuovaArea = a.chiave;
       const ordine = prepared('SELECT COALESCE(MAX(versione_ordine) + 1, 0) FROM mappa WHERE area_chiave = ?').pluck().get(a.chiave) as number;
-      legaVersione(mappa, a.chiave, ordine, dati.etichetta);
+      legaVersione(mappa, a.chiave, ordine, etichetta);
       if (!a.planimetria_predefinita) prepared('UPDATE area SET planimetria_predefinita = ? WHERE chiave = ?').run(mappa, a.chiave);
     }
+    if (vecchia && sola) fondiNellArea(vecchia, mappa, nuovaArea);
+    else if (vecchia) lasciaLArea(vecchia, mappa, nuovaArea);
     if (r.genitore_chiave !== c.mappa) {
       prepared('UPDATE mappa SET genitore_chiave = ?, updated_at = ? WHERE chiave = ?').run(c.mappa, nowIso(), mappa);
       sincronizzaPercorsiMappe(getDb());
     }
   })();
   invalidaCacheDiGioco();
-  return dettaglioArea('citta', c.chiave, slugArea!);
+  return dettaglioArea(c.rotta, c.chiave, slugArea!);
 }
 
 /**
- * Le planimetrie del mondo senza Area (figlie di Tokyo o di un quartiere, `luogo` o `area`): dopo la 109 nessuna, ma una mappa
- * importata da un pacchetto di prima o tolta da un'Area finisce qui, e «Colloca» la assegna.
+ * L'unica versione di un'Area che entra in un'altra (L3, dentro la transazione di chi chiama): le due Aree diventano una. Le infiltrazioni
+ * della vecchia passano alla nuova (in fondo a ciascuna, con questa versione da aprire, origine e ordine dove già c'erano), l'ingresso del
+ * quartiere che stava sulla vecchia passa alla nuova, e la vecchia, ormai vuota, se ne va. Nessuna voce né pin cambia.
+ */
+function fondiNellArea(vecchia: RigaArea, mappa: string, nuovaArea: string): void {
+  if (conLegami()) {
+    for (const l of prepared('SELECT infiltrazione_chiave, planimetria_iniziale, origine FROM infiltrazione_area WHERE area_chiave = ?').all(vecchia.chiave) as Array<{ infiltrazione_chiave: string; planimetria_iniziale: string | null; origine: string }>) {
+      if (prepared('SELECT 1 FROM infiltrazione_area WHERE infiltrazione_chiave = ? AND area_chiave = ?').get(l.infiltrazione_chiave, nuovaArea)) continue;
+      const ordine = prepared('SELECT COALESCE(MAX(ordine) + 1, 0) FROM infiltrazione_area WHERE infiltrazione_chiave = ?').pluck().get(l.infiltrazione_chiave) as number;
+      prepared('INSERT INTO infiltrazione_area (infiltrazione_chiave, area_chiave, ordine, planimetria_iniziale, origine) VALUES (?, ?, ?, ?, ?)').run(l.infiltrazione_chiave, nuovaArea, ordine, l.planimetria_iniziale ?? mappa, l.origine);
+    }
+    staccaAreaDalleInfiltrazioni(vecchia.chiave);
+  }
+  prepared('UPDATE quartiere_ingresso SET area_chiave = ? WHERE area_chiave = ?').run(nuovaArea, vecchia.chiave);
+  prepared('DELETE FROM area WHERE chiave = ?').run(vecchia.chiave);
+}
+
+/**
+ * Una versione che lascia la sua Area (L3, dentro la transazione di chi chiama): le versioni rimaste si ricompattano (0…n-1), la
+ * predefinita passa alla prima se era lei; le infiltrazioni che aprivano l'area su questa versione (`planimetria_iniziale`) la
+ * seguono nell'area di arrivo — un legame in più, con la stessa versione da aprire — e nell'area di prima tornano alla predefinita.
+ * Nessuna voce né pin cambia.
+ */
+function lasciaLArea(vecchia: RigaArea, mappa: string, nuovaArea: string): void {
+  (prepared('SELECT chiave FROM mappa WHERE area_chiave = ? ORDER BY versione_ordine, chiave').pluck().all(vecchia.chiave) as string[])
+    .forEach((k, i) => prepared('UPDATE mappa SET versione_ordine = ? WHERE chiave = ? AND versione_ordine IS NOT ?').run(i, k, i));
+  if (vecchia.planimetria_predefinita === mappa) {
+    const prima = prepared('SELECT chiave FROM mappa WHERE area_chiave = ? ORDER BY versione_ordine, chiave LIMIT 1').pluck().get(vecchia.chiave) as string | undefined;
+    prepared('UPDATE area SET planimetria_predefinita = ?, updated_at = ? WHERE chiave = ?').run(prima ?? null, nowIso(), vecchia.chiave);
+  }
+  if (!conLegami()) return;
+  for (const inf of prepared('SELECT infiltrazione_chiave FROM infiltrazione_area WHERE area_chiave = ? AND planimetria_iniziale = ?').pluck().all(vecchia.chiave, mappa) as string[]) {
+    if (!prepared('SELECT 1 FROM infiltrazione_area WHERE infiltrazione_chiave = ? AND area_chiave = ?').get(inf, nuovaArea)) {
+      const ordine = prepared('SELECT COALESCE(MAX(ordine) + 1, 0) FROM infiltrazione_area WHERE infiltrazione_chiave = ?').pluck().get(inf) as number;
+      prepared("INSERT INTO infiltrazione_area (infiltrazione_chiave, area_chiave, ordine, planimetria_iniziale, origine) VALUES (?, ?, ?, ?, 'utente')").run(inf, nuovaArea, ordine, mappa);
+    }
+  }
+  prepared('UPDATE infiltrazione_area SET planimetria_iniziale = NULL WHERE area_chiave = ? AND planimetria_iniziale = ?').run(vecchia.chiave, mappa);
+}
+
+/**
+ * Le planimetrie senza Area — del mondo (figlie di Tokyo o di un quartiere, `luogo` o `area`) e, da L3, dei Palazzi (figlie di
+ * `dungeon-<k>`, i Memento esclusi): dopo le migrazioni 109 e 110 nessuna, ma una mappa importata da un pacchetto di prima o tolta da
+ * un'Area finisce qui, e «Colloca» la assegna.
  */
 export function mappeDaCollocare(): MappaDaCollocareDto[] {
   if (!conAree()) return [];
   const caricate = immaginiCaricateDelleMappe();
   return (prepared(`SELECT m.chiave, m.nome, m.immagine_chiave, m.asset, g.nome AS genitore_nome, (SELECT COUNT(*) FROM spillo s WHERE s.mappa_chiave = m.chiave) AS spilli
-      FROM mappa m JOIN mappa g ON g.chiave = m.genitore_chiave AND g.tipo IN ('citta', 'quartiere') AND COALESCE(g.entita_chiave, '') <> 'mementos'
-      WHERE m.tipo IN ('luogo', 'area') AND m.area_chiave IS NULL ORDER BY g.nome, m.ordine, m.chiave`).all() as
+      FROM mappa m JOIN mappa g ON g.chiave = m.genitore_chiave AND COALESCE(g.entita_chiave, '') <> 'mementos'
+        AND (g.tipo IN ('citta', 'quartiere') OR (g.tipo = 'palazzo' AND g.entita_tipo = 'dungeon'))
+      WHERE (m.tipo IN ('luogo', 'area') OR g.tipo = 'palazzo') AND m.area_chiave IS NULL ORDER BY g.nome, m.ordine, m.chiave`).all() as
       Array<{ chiave: string; nome: string; immagine_chiave: string | null; asset: string | null; genitore_nome: string | null; spilli: number }>)
     .map((m) => {
       const img = caricataDellaMappa(m, caricate);
       return { chiave: chiaveMappa(m.chiave), nome: m.nome, genitoreNome: m.genitore_nome, numeroSpilli: m.spilli, immagineUrl: img ? urlCaricata(img) : null, asset: m.asset };
     });
+}
+
+// ---- Le rotte vecchie dei gruppi e dei legami, sul modello nuovo (L3 §3.3) ----
+//
+// `PUT /api/mappe/:k/aree`, `/presentazione` e `/stanza` scrivevano i legami per planimetria (`mappa_entita`) e i gruppi d'immagini,
+// che da L3 nessuno legge più. Restano per i client e i test di prima, riscritte così: per una planimetria che ha un'Area agiscono
+// sull'Area (legami, nome, etichetta della versione, spostamento della versione); per le mappe senza Area (i Memento, le radici)
+// restano le funzioni di prima, perché lì quei dati si leggono ancora.
+
+/** La riga di una mappa con la sua Area (null se non ne ha), dalla chiave pubblica. */
+function planimetriaConArea(chiavePubblica: string): { chiave: string; nome: string; genitore_chiave: string | null; area: RigaArea | null } {
+  const interna = idMappa(chiavePubblica);
+  const r = prepared('SELECT chiave, nome, genitore_chiave, area_chiave FROM mappa WHERE chiave = ?').get(interna) as { chiave: string; nome: string; genitore_chiave: string | null; area_chiave: string | null } | undefined;
+  if (!r) throw httpErrors.notFound('mappa-non-trovata', `La mappa '${chiavePubblica}' non esiste.`);
+  const area = r.area_chiave && conAree() ? prepared('SELECT * FROM area WHERE chiave = ?').get(r.area_chiave) as RigaArea | undefined : undefined;
+  return { chiave: r.chiave, nome: r.nome, genitore_chiave: r.genitore_chiave, area: area ?? null };
+}
+
+/** Il contenitore di un'Area già letta. */
+function contenitoreDellArea(a: RigaArea): Contenitore {
+  return a.dungeon_chiave ? contenitoreDaRotta('dungeon', a.dungeon_chiave) : contenitoreDaRotta('citta', a.citta_chiave ?? a.quartiere_chiave ?? '');
+}
+
+/** Sposta una versione nell'Area data (o in un'Area nuova col nome dato), dentro il suo contenitore. */
+function spostaVersione(mappa: string, area: RigaArea, verso: { area: RigaArea } | { nuova: string }): void {
+  const c = contenitoreDellArea(area);
+  collocaPlanimetria({ mappa, ...(c.colonna === 'dungeon_chiave' ? { dungeon: c.chiave } : { quartiere: c.chiave }), ...('area' in verso ? { area: verso.area.slug } : { nuova: { nome: verso.nuova } }) }, { sposta: true });
+}
+
+/**
+ * `PUT /api/mappe/:k/aree` (vecchia): le infiltrazioni «della planimetria» sono quelle della sua Area, quindi l'insieme dato diventa
+ * quello dell'Area (`impostaLegamiInfiltrazione` dall'area). Gli errori sono quelli di prima: 400 `mappa-fuori-palazzo` per una mappa
+ * del mondo, 400 `area-inesistente`, 400 `area-di-altro-palazzo`. Restituisce le infiltrazioni della planimetria; null per una mappa
+ * senza Area (la radice, i Memento: chi chiama usa la funzione di prima, con i suoi errori).
+ */
+export function impostaInfiltrazioniDellaPlanimetria(chiavePubblica: string, infiltrazioni: readonly string[]): Array<{ chiave: string; nome: string; ordine: number }> | null {
+  const p = planimetriaConArea(chiavePubblica);
+  if (!p.area) return null;
+  const uniche = [...new Set(infiltrazioni)];
+  const palazzo = p.area.dungeon_chiave;
+  if (!palazzo) {
+    if (uniche.length === 0) return [];
+    throw httpErrors.badRequest('mappa-fuori-palazzo', 'Le infiltrazioni si legano solo alle planimetrie di un Palazzo.');
+  }
+  const trovate = uniche.length ? prepared(`SELECT chiave, dungeon_chiave FROM dungeon_area WHERE chiave IN (${uniche.map(() => '?').join(',')})`).all(...uniche) as Array<{ chiave: string; dungeon_chiave: string }> : [];
+  const mancanti = uniche.filter((a) => !trovate.some((t) => t.chiave === a));
+  if (mancanti.length) throw httpErrors.badRequest('area-inesistente', `Infiltrazione inesistente: ${mancanti.join(', ')}.`);
+  const altrove = trovate.filter((t) => t.dungeon_chiave !== palazzo);
+  if (altrove.length) throw httpErrors.badRequest('area-di-altro-palazzo', `Infiltrazione di un altro Palazzo: ${altrove.map((t) => t.chiave).join(', ')}.`);
+  impostaLegamiInfiltrazione({ area: p.area!.chiave, infiltrazioni: uniche });
+  invalidaCacheDiGioco();
+  return infiltrazioniDelleAree(palazzo).get(p.area!.chiave) ?? [];
+}
+
+/**
+ * `PUT /api/mappe/:k/presentazione` (vecchia) per una planimetria con Area: `etichetta` è l'etichetta della versione, `gruppoNome` il
+ * nome dell'Area (come «Modifica area»), `gruppoId` = l'id del gruppo d'immagini di un'altra planimetria → la versione va nella sua
+ * Area; `gruppoId: null` senza nome → la versione diventa un'Area a sé (se l'Area ha altre versioni). Vero se l'ha gestita; falso per
+ * una mappa senza Area (chi chiama usa la funzione di prima).
+ */
+export function presentazioneDellaPlanimetria(chiavePubblica: string, dati: { gruppoId?: string | null; gruppoNome?: string; etichetta?: string | null }): boolean {
+  const p = planimetriaConArea(chiavePubblica);
+  if (!p.area) return false;
+  const area = p.area;
+  const c = contenitoreDellArea(area);
+  const etichetta = dati.etichetta === undefined ? undefined : dati.etichetta?.trim() || null;
+  const nome = dati.gruppoNome?.trim();
+  getDb().transaction(() => {
+    if (etichetta !== undefined) prepared('UPDATE mappa SET versione_etichetta = ?, updated_at = ? WHERE chiave = ? AND versione_etichetta IS NOT ?').run(etichetta, nowIso(), p.chiave, etichetta);
+    if (dati.gruppoId === null && !nome) {
+      if ((prepared('SELECT COUNT(*) FROM mappa WHERE area_chiave = ?').pluck().get(area.chiave) as number) > 1) spostaVersione(p.chiave, area, { nuova: p.nome });
+      return;
+    }
+    if (typeof dati.gruppoId === 'string') {
+      const verso = prepared(`SELECT a.* FROM mappa_presentazione mp JOIN mappa m ON m.chiave = mp.mappa_chiave JOIN area a ON a.chiave = m.area_chiave
+        WHERE mp.gruppo_immagini_json IS NOT NULL AND json_extract(mp.gruppo_immagini_json, '$.id') = ? ORDER BY m.ordine, m.chiave LIMIT 1`).get(dati.gruppoId) as RigaArea | undefined;
+      if (verso && verso.chiave !== area.chiave) {
+        spostaVersione(p.chiave, area, { area: verso });
+        if (nome) aggiornaArea(c.rotta, c.chiave, verso.slug, { nome });
+        return;
+      }
+    }
+    if (nome) aggiornaArea(c.rotta, c.chiave, area.slug, { nome });
+  })();
+  invalidaCacheDiGioco();
+  return true;
+}
+
+/**
+ * `PUT /api/mappe/:k/stanza` (vecchia) per una planimetria con Area: `con` = un'altra planimetria dello stesso posto → la versione va
+ * nella sua Area; `con: null` → diventa un'Area a sé chiamata `nome` (se è già sola nella sua Area, l'Area prende quel nome). Vero se
+ * l'ha gestita; falso per una mappa senza Area.
+ */
+export function stanzaDellaPlanimetria(chiavePubblica: string, dati: { con: string | null; nome?: string }): boolean {
+  const p = planimetriaConArea(chiavePubblica);
+  if (!p.area) return false;
+  const area = p.area;
+  const c = contenitoreDellArea(area);
+  getDb().transaction(() => {
+    if (dati.con === null) {
+      const sola = (prepared('SELECT COUNT(*) FROM mappa WHERE area_chiave = ?').pluck().get(area.chiave) as number) < 2;
+      if (sola) {
+        if (dati.nome?.trim()) aggiornaArea(c.rotta, c.chiave, area.slug, { nome: dati.nome });
+        return;
+      }
+      spostaVersione(p.chiave, area, { nuova: dati.nome?.trim() || p.nome });
+      return;
+    }
+    const altra = planimetriaConArea(dati.con);
+    if (altra.chiave === p.chiave) throw httpErrors.badRequest('stanza-non-valida', 'Una planimetria non può entrare nella propria area.');
+    if (!altra.area || altra.genitore_chiave !== p.genitore_chiave) throw httpErrors.badRequest('stanza-di-altro-luogo', 'Le due planimetrie non stanno nello stesso posto: un’area raccoglie solo planimetrie dello stesso Palazzo o quartiere.');
+    if (altra.area.chiave === area.chiave) return;
+    // come la stanza di prima, che «nasceva col nome dato» se quella planimetria non ne aveva una: un'Area di una planimetria sola
+    // prende il nome dato
+    const sola = (prepared('SELECT COUNT(*) FROM mappa WHERE area_chiave = ?').pluck().get(altra.area.chiave) as number) < 2;
+    spostaVersione(p.chiave, area, { area: altra.area });
+    if (sola && dati.nome?.trim()) aggiornaArea(c.rotta, c.chiave, altra.area.slug, { nome: dati.nome });
+  })();
+  invalidaCacheDiGioco();
+  return true;
 }

@@ -4,7 +4,8 @@
 //
 // La casa è l'indirizzo dell'**unica pagina** che mostra una mappa (lotti/L2/modifiche.md §1.2): Tokyo → La città, la mappa di un
 // quartiere → la pagina del quartiere, una planimetria con un'Area → la pagina dell'Area (con `?planimetria=` se non è la
-// predefinita), tutto il resto (Palazzi, Memento) → il visore. La regola sta qui, una volta, e viaggia nei DTO: l'interfaccia non
+// predefinita); da L3 la radice di un Palazzo → la sua scheda e una planimetria di un'Area del Palazzo → la scheda con l'Area aperta;
+// tutto il resto (Memento, mappe senza Area) → il visore. La regola sta qui, una volta, e viaggia nei DTO: l'interfaccia non
 // la ricostruisce, e gli indirizzi vecchi `/guida/mappe/<chiave>` portano qui con il redirect.
 //
 // Senza dipendenze dagli altri servizi delle mappe (solo il database, i percorsi pubblici e i condivisi): lo usano `mappeService`,
@@ -15,6 +16,22 @@ import { getDb, type AppDatabase } from '../../db/dbService.js';
 import { chiaveMappa } from './percorsiMappe.js';
 import { httpErrors } from '../../utils/httpError.js';
 import type { AreaRifDto, ContenitoreAreaDto } from '../../../shared/types.js';
+
+/**
+ * La casa di L3 per i Palazzi (la scheda del Palazzo, con l'Area aperta) vale solo quando la pagina del FE c'è: BE e FE escono insieme
+ * (difetto FUN3-1, 2026-10-20: con la casa nuova e il FE di prima ogni collegamento a una planimetria di un Palazzo finiva in «Pagina
+ * non trovata»). Spenta, le mappe dei Palazzi tengono la casa di oggi, il visore `/guida/mappe/<chiave>`. Si accende con la variabile
+ * d'ambiente `CASA_SCHEDA_PALAZZI=1` (al rilascio di L3) o, nei test, con `impostaCasaSchedaPalazzi`.
+ */
+let casaSchedaPalazzi = process.env.CASA_SCHEDA_PALAZZI === '1';
+/** Accende o spegne la casa di L3 dei Palazzi (test; in produzione decide la variabile d'ambiente). */
+export function impostaCasaSchedaPalazzi(accesa: boolean): void {
+  casaSchedaPalazzi = accesa;
+}
+/** Vero se la casa dei Palazzi è la scheda (L3) invece del visore. */
+export function conCasaSchedaPalazzi(): boolean {
+  return casaSchedaPalazzi;
+}
 
 /** Il nome della città, contenitore delle Aree che non stanno in nessun quartiere (la colonna `area.citta_chiave` ammette solo Tokyo). */
 const NOME_CITTA: Record<string, string> = { tokyo: 'Tokyo' };
@@ -52,15 +69,26 @@ export function contenitoreDi(a: RigaArea, ctx: ContestoAree): ContenitoreAreaDt
 }
 
 /**
- * La casa di un'Area: `/guida/citta/<quartiere>/<slug>` (o `/guida/citta/tokyo/<slug>` per un'Area della città), con
- * `?planimetria=<chiave pubblica>` se si vuole una versione che non è la predefinita. Null per un'Area di un Palazzo: fino a L3
- * le sue planimetrie restano nel visore.
+ * La casa di un'Area: `/guida/citta/<quartiere>/<slug>` (o `/guida/citta/tokyo/<slug>` per un'Area della città); per un'Area di un
+ * Palazzo (L3) la scheda del Palazzo con l'Area aperta, `/guida/dungeon/<palazzo>/area/<slug>`. Con `?planimetria=<chiave pubblica>`
+ * se si vuole una versione che non è la predefinita. Null solo per una riga senza contenitore (il CHECK della tabella lo esclude).
  */
 export function casaDellArea(a: RigaArea, planimetria?: string | null): string | null {
   const contenitore = a.citta_chiave ?? a.quartiere_chiave;
-  if (!contenitore) return null;
-  const base = `/guida/citta/${encodeURIComponent(contenitore)}/${encodeURIComponent(a.slug)}`;
+  // un'Area di un Palazzo con la casa di L3 spenta (FUN3-1): la casa è quella della planimetria, il visore
+  if (!contenitore && a.dungeon_chiave && !casaSchedaPalazzi) {
+    const mappa = planimetria ?? a.planimetria_predefinita;
+    return mappa ? `/guida/mappe/${encodeURIComponent(chiaveMappa(mappa))}` : null;
+  }
+  const base = contenitore ? `/guida/citta/${encodeURIComponent(contenitore)}/${encodeURIComponent(a.slug)}`
+    : a.dungeon_chiave ? `/guida/dungeon/${encodeURIComponent(a.dungeon_chiave)}/area/${encodeURIComponent(a.slug)}` : null;
+  if (!base) return null;
   return planimetria && planimetria !== a.planimetria_predefinita ? `${base}?planimetria=${encodeURIComponent(chiaveMappa(planimetria))}` : base;
+}
+
+/** La casa di un Palazzo (L3): la sua scheda. I Memento non hanno una scheda di Palazzo: restano nel visore. */
+export function casaDelPalazzo(dungeon: string): string {
+  return `/guida/dungeon/${encodeURIComponent(dungeon)}`;
 }
 
 /** I campi di una riga di `mappa` che servono alla casa. */
@@ -70,6 +98,8 @@ export interface RigaPerCasa { chiave: string; tipo: string; entita_tipo: string
 export function casaDellaMappa(r: RigaPerCasa, ctx: ContestoAree): string {
   if (r.chiave === 'tokyo' && r.tipo === 'citta') return '/guida/citta';
   if (r.tipo === 'quartiere' && r.entita_tipo === 'quartiere' && r.entita_chiave && r.entita_chiave !== 'mementos') return `/guida/citta/${encodeURIComponent(r.entita_chiave)}`;
+  // L3: la radice di un Palazzo (non dei Memento, che è un `dedalo`) → la scheda del Palazzo
+  if (casaSchedaPalazzi && r.tipo === 'palazzo' && r.entita_tipo === 'dungeon' && r.entita_chiave && r.entita_chiave !== 'mementos') return casaDelPalazzo(r.entita_chiave);
   const area = r.area_chiave ? ctx.aree.get(r.area_chiave) : undefined;
   const dellArea = area ? casaDellArea(area, r.chiave) : null;
   return dellArea ?? `/guida/mappe/${encodeURIComponent(chiaveMappa(r.chiave))}`;

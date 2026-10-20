@@ -1146,7 +1146,30 @@ export interface AzionePercorsoDto {
   quiz?: QuizVoceDto[];
   /** Solo nella risposta di una spunta: era l'ultima attività del giorno corrente e la partita è passata al giorno dopo. */
   giornoAvanzato?: GiornoAvanzatoDto;
+  // ---- L3: il campo «Infiltrazioni» delle voci di Palazzo (presenti solo se la voce ha un Palazzo: riferimento `dungeon`,
+  // oppure infiltrazioni già scelte, oppure una proposta — `palazzoDellaVoce`; assenti per le altre voci) ----
+  /** L'insieme scelto, in ordine (la stessa infiltrazione può tornare, mai di seguito); vuoto = nessuna. */
+  infiltrazioni?: Array<{ chiave: string; nome: string }>;
+  /** Le infiltrazioni del Palazzo della voce, le opzioni del selettore. */
+  infiltrazioniDelPalazzo?: Array<{ chiave: string; nome: string; ordine: number }>;
+  /** La proposta (da G-022, o calcolata con le regole certe), solo con l'insieme vuoto; null se non c'è. */
+  propostaInfiltrazioni?: { infiltrazioni: Array<{ chiave: string; nome: string }>; motivo: string; certezza: 'certa' | 'multipla' | 'probabile' } | null;
+  /** L'infiltrazione che «Entra» apre per la partita: la prima non completata dell'insieme, altrimenti l'ultima; null con
+   *  l'insieme vuoto (allora la scheda apre la prima non completata del Palazzo, `?infiltrazione=in-corso`). */
+  infiltrazioneDaAprire?: string | null;
+  // ---- L3 §1.4: voci «da rivedere» (meccanismo unico con L10); assenti valgono false/null ----
+  /** Voce aggiunta, corretta o segnalata dal team, da rivedere con l'utente. */
+  daRivedere?: boolean;
+  /** 'team' per le voci aggiunte dal team. */
+  aggiuntaDa?: 'team' | null;
+  /** Perché è da rivedere (frase dell'Esperto o del team). */
+  motivoRevisione?: string | null;
+  /** I campi com'erano prima della prima correzione del team (null se mai corretta): «Rimetti il precedente» li rimette. */
+  testoPrecedente?: { azione: string; note: string | null; riferimento: RiferimentoAzioneDto | null; riferimentoTesto: string | null } | null;
 }
+
+/** L'esito di «da rivedere» su una voce: tieni il nuovo, rimetti il precedente (solo con un testo precedente), fatto. */
+export type EsitoRevisioneVoce = 'tieni' | 'rimetti' | 'fatto';
 
 /** La guida del quiz di un'attività come la porta una voce della giornata. */
 export interface QuizVoceDto { attivita: string; nome: string; quiz: QuizAttivita; oggi: boolean }
@@ -1445,6 +1468,12 @@ export interface AreaRiassuntoDto {
   /** L'Area è in attesa della scelta dell'utente: tenerla o rimuoverla (lo staff, decisione del 2026-10-20). */
   daVerificare: boolean;
   casa: string;
+  /** Le infiltrazioni che toccano l'Area (`infiltrazione_area`, L3), nell'ordine del Palazzo; vuoto nel mondo. Il server lo manda
+   *  sempre: è facoltativo solo per i dati di prova scritti prima di L3. */
+  infiltrazioni?: Array<{ chiave: string; nome: string; ordine: number }>;
+  /** I collezionabili delle sue planimetrie e quanti ne ha presi la partita, come la raccolta del Palazzo (L3). `presi` è null
+   *  senza partita e sempre nel mondo (la raccolta con la partita la contano i Palazzi). Il server lo manda sempre. */
+  raccolta?: { n: number; presi: number | null };
 }
 /** Un luogo, negozio, attività o Confidente segnato con un pin su una planimetria dell'Area. */
 export interface ElementoAreaDto { tipo: 'luogo' | 'negozio' | 'attivita' | 'confidente'; chiave: string; nome: string; spillo: number; planimetria: string }
@@ -1882,11 +1911,20 @@ export interface AreaDungeonDto {
    * al posto del visore compariva un riquadro vuoto con dentro un collegamento. Il legame però
    * c'è ed è dichiarato: 72 aree su 116 hanno una planimetria nativa. Qui viene esposto, così la
    * scheda la monta. Vuoto per le aree che non ne hanno (i piani dei Memento, per esempio). */
-  mappe: Array<{ chiave: string; nome: string; /** Quanti collezionabili ha la mappa e quanti sono raccolti (null senza partita). */ n: number; presi: number | null; spilli: SpilloRaccoltaDto[] }>;
+  mappe: Array<{ chiave: string; nome: string; /** Quanti collezionabili ha la mappa e quanti sono raccolti (null senza partita). */ n: number; presi: number | null; spilli: SpilloRaccoltaDto[];
+    /** L3: la chiave dell'Area del Palazzo della planimetria. Da L3 le planimetrie di un'infiltrazione sono tutte quelle delle sue
+     *  aree (`infiltrazione_area.ordine`, poi `versione_ordine`). */
+    area?: string }>;
+  /** L3: le Aree del Palazzo che l'infiltrazione tocca, in ordine, con la versione da aprire (null = la predefinita). Il server lo
+   *  manda per ogni infiltrazione di un Palazzo; per i dedali dei Memento è **assente**, come `mappe[].area` (la risposta dei Memento
+   *  resta quella di prima, R3-12, NR3-1). */
+  areePalazzo?: Array<{ chiave: string; slug: string; nome: string; planimetriaIniziale: string | null }>;
   punti: PuntoInteresseDto[];
   /** Solo per i dedali dei Memento: le aree del dedalo con i loro elementi e il completamento (099); null per i Palazzi. */
   dedalo: DedaloDto | null;
 }
+/** L'infiltrazione di un Palazzo (`dungeon_area`): il contratto resta `AreaDungeonDto` (L3 §0), questo nome è per il codice nuovo. */
+export type InfiltrazioneDto = AreaDungeonDto;
 
 /** Un collezionabile di una planimetria (forziere, seme, tesoro…) con il suo stato nella partita. */
 export interface SpilloRaccoltaDto {
@@ -2008,7 +2046,12 @@ export interface DungeonDettaglioDto extends Omit<DungeonRiassuntoDto, 'aree'> {
    *  in ordine di guida: una planimetria può contenerne più d'una, 2026-09-29; un'area può stare su più
    *  planimetrie, 2026-10-04). Le planimetrie senza collezionabili ci sono lo stesso, perché è da qui che si
    *  ordinano, si legano e si cancellano. Vuoto per i Memento, che contano gli obiettivi dei dedali. */
-  planimetrie: Array<{ chiave: string; nome: string; ordine: number; aree: Array<{ chiave: string; nome: string; ordine: number }>; n: number; presi: number | null; spilli: SpilloRaccoltaDto[] }>;
+  planimetrie: Array<{ chiave: string; nome: string; ordine: number; aree: Array<{ chiave: string; nome: string; ordine: number }>; n: number; presi: number | null; spilli: SpilloRaccoltaDto[];
+    /** L3: la chiave dell'Area del Palazzo e l'etichetta della versione; da L3 `aree` (le infiltrazioni) sono quelle dell'Area. */
+    area?: string | null; versioneEtichetta?: string | null }>;
+  /** L3: le Aree del Palazzo (tabella `area`), nell'ordine della colonna, con infiltrazioni e raccolta. Il server lo manda per ogni
+   *  Palazzo; per i Memento è **assente** (la risposta resta quella di prima, R3-12, NR3-1). */
+  areePalazzo?: AreaRiassuntoDto[];
   /** Le regole di atterraggio dalla mappa di Tokyo, nell'ordine in cui si provano (2026-10-04). */
   atterraggi: AtterraggioPalazzoDto[];
   /** L'illustrazione caricata sulla radice `dungeon-<chiave>`, sotto lo stemma nell'intestazione (scelta dell'utente, 2026-10-20). */
@@ -2354,7 +2397,13 @@ export interface PezzoPacchetto102 {
  *  planimetria predefinita (chiave pubblica) e lo stato. Un pacchetto di prima della 109 non ha il campo `aree`: l'importazione allora
  *  assegna le Aree con la regola della migrazione. */
 export interface AreaPacchetto { chiave: string; quartiere: string | null; dungeon: string | null; citta: string | null; slug: string; nome: string; nomeRivisto: boolean;
-  ordine: number; predefinita: string | null; origine: 'seed' | 'utente'; seedJson: string | null; daVerificare: boolean }
+  ordine: number; predefinita: string | null; origine: 'seed' | 'utente'; seedJson: string | null; daVerificare: boolean;
+  /** L3: l'ultima modifica, che l'import conserva (andata e ritorno identica). Un pacchetto di prima non l'ha. */
+  updatedAt?: string }
+/** Un legame infiltrazione ↔ area di un Palazzo nel pacchetto delle mappe (L3, `infiltrazione_area`). */
+export interface LegamePacchetto { infiltrazione: string; area: string; ordine: number; /** Chiave pubblica della versione da aprire; null = la predefinita. */ planimetriaIniziale: string | null; origine: 'seed' | 'utente' | 'regola' }
+/** Un legame di una mappa con un'entità (`mappa_entita`, fino a L11), con la sua fonte com'è salvata: viaggia per l'andata e ritorno identica. */
+export interface LegameEntitaPacchetto { tipo: string; chiave: string; fonte: string }
 export interface EsportazioneMappeDto {
   /** Gli ingressi dei quartieri; `area` (L2) è l'Area della planimetria, informativa: all'import si deduce dalla planimetria. */
   ingressi?:Array<{quartiere:string;mappa:string;x:number;y:number;zoom:number;area?:string|null}>;
@@ -2362,7 +2411,13 @@ export interface EsportazioneMappeDto {
   esportato?: string;
   /** Le Aree delle planimetrie esportate (L2, migrazione 109). */
   aree?: AreaPacchetto[];
+  /** L3: i legami infiltrazione ↔ area delle Aree esportate. Un pacchetto senza il campo (di prima) lega le infiltrazioni dal campo
+   *  `aree` di ogni mappa all'Area della planimetria. */
+  legami?: LegamePacchetto[];
   mappe: Array<{
+    /** L3 (andata e ritorno identica, lotti/L3/modifiche.md §2.3): il nome rivisto a mano, l'origine, l'ultima modifica, il percorso
+     *  pubblico fissato e i legami con le entità con la loro fonte. Assenti in un pacchetto di prima: l'import fa come allora. */
+    nomeRivisto?: boolean; origine?: 'seed' | 'utente'; updatedAt?: string; percorsoFisso?: string | null; entitaLegami?: LegameEntitaPacchetto[];
     /** L'Area della planimetria (chiave di `aree`) e la sua versione dentro l'Area (L2). */
     area?: string | null;
     versione?: { etichetta: string | null; ordine: number };
@@ -2378,7 +2433,10 @@ export interface EsportazioneMappeDto {
     /** I pezzi della planimetria (102), ognuno con le sue copie (103). Un pacchetto di prima della 102 non ha il campo: i pezzi della
      *  mappa restano com'erano; uno della 102 porta la posa accanto alla zona, e si legge come un pezzo con una copia. */
     pezzi?: Array<PezzoPacchetto | PezzoPacchetto102>;
-    spilli: Array<{ /** Identità stabile dello spillo (067): la porta il pacchetto, così «raccolto» la ritrova. */ uid?: string; soloPosizione?: boolean; nativo?: NativoSpilloDto | null; destinazione?: DestinazionePacchetto | null; destinazioneNonDisponibile?: boolean; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; /** Le voci della guida del pin (098); un pacchetto di prima porta `voce` (094), o un riferimento «punto». */ voci?: string[]; /** La voce di un pacchetto della 094-097: si legge ancora, non si scrive più. */ voce?: string | null; collezionabile: boolean; ordine: number; condizioni?: RequisitoSpillo[]; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
+    spilli: Array<{ /** Identità stabile dello spillo (067): la porta il pacchetto, così «raccolto» la ritrova. */ uid?: string; soloPosizione?: boolean;
+      /** L3 (andata e ritorno identica): origine, ultima modifica, identità del seed e prove native com'erano salvate (`nativoJson`, il
+       *  testo: `nativo` è la forma dei pacchetti del seed). Assenti in un pacchetto di prima. */
+      origine?: 'seed' | 'utente'; updatedAt?: string; seedIdentita?: string | null; nativoJson?: string | null; nativo?: NativoSpilloDto | null; destinazione?: DestinazionePacchetto | null; destinazioneNonDisponibile?: boolean; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; /** Le voci della guida del pin (098); un pacchetto di prima porta `voce` (094), o un riferimento «punto». */ voci?: string[]; /** La voce di un pacchetto della 094-097: si legge ancora, non si scrive più. */ voce?: string | null; collezionabile: boolean; ordine: number; condizioni?: RequisitoSpillo[]; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
   }>;
   immagini?: Record<string, { mime: string; base64: string }>;
   /** Provenienza (informativa) delle immagini di base scaricate dalle guide: sono comunque incluse nel pacchetto. */

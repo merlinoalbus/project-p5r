@@ -1,41 +1,49 @@
 // ============================================================
-// descrizioni/aree — le rotte di /api/aree: le Aree del mondo (L2, migrazione 109)
+// descrizioni/aree — le rotte di /api/aree: le Aree del mondo (L2, migrazione 109) e dei Palazzi (L3, migrazione 110)
 // ============================================================
 
 import type { DescrizioniArea } from '../tipi.js';
 
 const AREA_NON_TROVATA = [404, 'area-non-trovata'] as const;
 const QUARTIERE_NON_TROVATO = [404, 'quartiere-non-trovato'] as const;
+const DUNGEON_NON_TROVATO = [404, 'dungeon-non-trovato'] as const;
 const IMMAGINE = [[400, 'immagine-vuota'], [400, 'formato-non-ammesso'], [400, 'immagine-troppo-grande'], [413, 'corpo-troppo-grande']] as const;
 
 /**
  * Le descrizioni delle rotte di `server/routes/aree.ts` (servizio `areeService`). Il contenitore è nel percorso (`:contenitore/:chiave`):
- * in L2 `citta`, con la chiave di un quartiere o `tokyo` per la città (le Aree che nessuna fonte colloca, come lo staff).
+ * `citta`, con la chiave di un quartiere o `tokyo` per la città (le Aree che nessuna fonte colloca, come lo staff), e da L3 `dungeon`,
+ * con la chiave di un Palazzo (i Memento non hanno Aree).
  */
 export const DESCRIZIONI_AREE: DescrizioniArea = {
   'GET /api/aree/da-collocare': {
-    sommario: 'Le planimetrie del mondo senza un’Area',
-    descrizione: 'Le planimetrie (`luogo` o `area`) figlie di Tokyo o di un quartiere che non appartengono a nessuna Area: dopo la migrazione 109 nessuna, ma una mappa importata o tolta da un’Area finisce qui, e «Colloca» la assegna. In ordine di genitore e di mappa.',
+    sommario: 'Le planimetrie senza un’Area',
+    descrizione: 'Le planimetrie (`luogo` o `area`) figlie di Tokyo o di un quartiere e, da L3, quelle figlie della radice di un Palazzo (Memento esclusi) che non appartengono a nessuna Area: dopo le migrazioni 109 e 110 nessuna, ma una mappa importata o tolta da un’Area finisce qui, e «Colloca» la assegna. In ordine di genitore e di mappa.',
     risposta: 'Elenco di `MappaDaCollocareDto`',
   },
   'PUT /api/aree/colloca': {
-    sommario: 'Assegna una planimetria senza Area a un’Area esistente o nuova',
-    descrizione: 'Corpo `{ mappa, quartiere, area?, nuova?: { nome }, etichetta? }`: `quartiere` è la chiave del quartiere o `tokyo`; con `area` (slug) la planimetria va in coda alle versioni di quell’Area, con `nuova` diventa la prima di un’Area nuova (dell’utente, in fondo). Se la planimetria non è sotto la mappa del contenitore ci si sposta, e i percorsi si ricalcolano (il vecchio resta come alias). Una planimetria che ha già un’Area è un 409.',
+    sommario: 'Assegna una planimetria a un’Area esistente o nuova (nei Palazzi anche: sposta una versione)',
+    descrizione: 'Corpo `{ mappa, quartiere? | dungeon?, area?, nuova?: { nome }, etichetta? }`: `quartiere` è la chiave del quartiere o `tokyo`, `dungeon` quella di un Palazzo (uno dei due); con `area` (slug) la planimetria va in coda alle versioni di quell’Area, con `nuova` diventa la prima di un’Area nuova (dell’utente, in fondo). Nel mondo: se la planimetria non è sotto la mappa del contenitore ci si sposta, e i percorsi si ricalcolano (il vecchio resta come alias); una planimetria che ha già un’Area è un 409. Nei Palazzi (L3) la planimetria deve essere del Palazzo, e se ha già un’Area è «Sposta la versione in un’altra area» (o «Rendila un’area a sé» con `nuova`): le versioni rimaste si ricompattano, la predefinita passa alla prima se era lei, le infiltrazioni che la aprivano la seguono; l’unica versione di un’Area che entra in un’altra fonde le due Aree (i legami passano alla nuova, la vecchia vuota se ne va), e non si rende «un’area a sé» (lo è già: 400 `colloca-non-valido`).',
     risposta: '`AreaDettaglioDto` dell’Area che la riceve',
-    errori: [[404, 'mappa-non-trovata'], QUARTIERE_NON_TROVATO, AREA_NON_TROVATA, [409, 'planimetria-gia-collocata'], [400, 'colloca-non-valido'], [400, 'nome-vuoto'], [400, 'slug-riservato']],
+    errori: [[404, 'mappa-non-trovata'], QUARTIERE_NON_TROVATO, DUNGEON_NON_TROVATO, AREA_NON_TROVATA, [409, 'planimetria-gia-collocata'], [400, 'colloca-non-valido'], [400, 'planimetria-di-un-altro-palazzo'], [400, 'nome-vuoto'], [400, 'slug-riservato']],
   },
   'GET /api/aree/:contenitore/:chiave': {
-    sommario: 'Le Aree di un quartiere (o della città)',
-    descrizione: 'Le Aree del contenitore nell’ordine dell’elenco (`ordine`, poi slug), con planimetrie, pin e versioni contati: con `citta/tokyo` le Aree agganciate alla città (come lo staff, da verificare), con `citta/<quartiere>` quelle del quartiere (le stesse della scheda del quartiere).',
+    sommario: 'Le Aree di un quartiere, della città o di un Palazzo',
+    descrizione: 'Le Aree del contenitore nell’ordine dell’elenco (`ordine`, poi slug), con planimetrie, pin e versioni contati: con `citta/tokyo` le Aree agganciate alla città (come lo staff, da verificare), con `citta/<quartiere>` quelle del quartiere (le stesse della scheda del quartiere), con `dungeon/<palazzo>` quelle del Palazzo con le infiltrazioni che le toccano e la raccolta (con `?partita=` i presi).',
     risposta: 'Elenco di `AreaRiassuntoDto`',
-    errori: [QUARTIERE_NON_TROVATO],
+    errori: [QUARTIERE_NON_TROVATO, DUNGEON_NON_TROVATO, [404, 'partita-non-trovata']],
   },
   'POST /api/aree/:contenitore/:chiave': {
     sommario: 'Crea un’Area con la sua prima planimetria',
-    descrizione: 'Il corpo è l’immagine grezza della prima planimetria (`image/*`, 8 MB); in query `nome` (1–80), `x` e `y` (0–100, insieme) del punto sull’illustrazione del contenitore, `etichetta` della versione. In una transazione: l’Area (dell’utente, in fondo al contenitore, slug dal nome con `-2`, `-3`… se preso; `ordine`, `da-collocare`, `nuova` sono riservati), la planimetria sotto la mappa del contenitore con l’immagine (ruolo dedotto dalla gerarchia), e col punto il pin di passaggio sull’illustrazione verso la planimetria, col nome dell’Area. Un errore non lascia niente.',
+    descrizione: 'Il corpo è l’immagine grezza della prima planimetria (`image/*`, 8 MB); in query `nome` (1–80), `x` e `y` (0–100, insieme) del punto sull’illustrazione del contenitore (solo nel mondo), `etichetta` della versione e — nei Palazzi — `infiltrazioni` (chiavi separate da virgola) da collegare. In una transazione: l’Area (dell’utente, in fondo al contenitore, slug dal nome con `-2`, `-3`… se preso; `ordine`, `da-collocare`, `nuova` sono riservati), la planimetria sotto la mappa del contenitore con l’immagine (ruolo dedotto dalla gerarchia; nei Palazzi di tipo `area`), col punto il pin di passaggio sull’illustrazione verso la planimetria, col nome dell’Area, e i legami con le infiltrazioni. Un errore non lascia niente.',
     risposta: '`AreaDettaglioDto` (201)',
     corpoBinario: 'image/*',
-    errori: [QUARTIERE_NON_TROVATO, [400, 'nome-vuoto'], [400, 'slug-riservato'], ...IMMAGINE],
+    errori: [QUARTIERE_NON_TROVATO, DUNGEON_NON_TROVATO, [400, 'nome-vuoto'], [400, 'slug-riservato'], [400, 'punto-non-ammesso'], [400, 'infiltrazioni-solo-nei-palazzi'], [404, 'area-non-trovata'], [409, 'area-di-un-altro-palazzo'], ...IMMAGINE],
+  },
+  'PUT /api/aree/:contenitore/:chiave/:slug/infiltrazioni': {
+    sommario: 'Le infiltrazioni che toccano un’Area di un Palazzo (L3)',
+    descrizione: 'Corpo `{ infiltrazioni: [...] }` (chiavi): l’insieme sostituisce quello di prima; i legami nuovi vanno in fondo a ogni infiltrazione, quelli che restano non cambiano. Un gesto solo, che non sposta voci né pin; lo stesso legame si scrive anche dall’infiltrazione (`PUT /api/compendio/aree/:chiave/aree-palazzo`).',
+    risposta: '`AreaDettaglioDto` dell’Area',
+    errori: [DUNGEON_NON_TROVATO, AREA_NON_TROVATA, [400, 'infiltrazioni-solo-nei-palazzi'], [409, 'area-di-un-altro-palazzo']],
   },
   'PUT /api/aree/:contenitore/:chiave/ordine': {
     sommario: 'Riordina le Aree di un quartiere (o della città)',
@@ -57,9 +65,9 @@ export const DESCRIZIONI_AREE: DescrizioniArea = {
   },
   'DELETE /api/aree/:contenitore/:chiave/:slug': {
     sommario: 'Elimina un’Area (nel cestino), con le sue planimetrie',
-    descrizione: 'Con contenuti — pin sulle sue planimetrie, passaggi che portano alle sue planimetrie (dal quartiere o da altre mappe), l’ingresso del quartiere, elementi — chiede conferma: 409 `area-con-contenuti` con `{ planimetrie, pin, passaggi, ingresso, elementi }`. Con `?conferma=1` (o senza contenuti) va nel cestino come `area-fisica`, con le planimetrie (gli stessi passi dell’eliminazione di una mappa), i passaggi che vi portavano e l’ingresso; da Impostazioni › Cestino si rimette com’era. Per un’Area da verificare è «Rimuovi».',
+    descrizione: 'Con contenuti — pin sulle sue planimetrie, passaggi che portano alle sue planimetrie (dal quartiere o da altre mappe), l’ingresso del quartiere, elementi, nei Palazzi le infiltrazioni che la toccano — chiede conferma: 409 `area-con-contenuti` con `{ planimetrie, pin, passaggi, ingresso, elementi, pinConVoci, infiltrazioni }` (le voci della guida dei pin restano nelle loro infiltrazioni). Con `?conferma=1` (o senza contenuti) va nel cestino come `area-fisica`, con le planimetrie (gli stessi passi dell’eliminazione di una mappa), i passaggi che vi portavano, l’ingresso e i legami con le infiltrazioni; da Impostazioni › Cestino si rimette com’era. Per un’Area da verificare è «Rimuovi».',
     risposta: 'Nessun contenuto (204)',
-    errori: [QUARTIERE_NON_TROVATO, AREA_NON_TROVATA, [409, 'area-con-contenuti']],
+    errori: [QUARTIERE_NON_TROVATO, DUNGEON_NON_TROVATO, AREA_NON_TROVATA, [409, 'area-con-contenuti']],
   },
   'POST /api/aree/:contenitore/:chiave/:slug/ripristina': {
     sommario: 'Rimette i valori della guida di un’Area corretta',

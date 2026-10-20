@@ -9,8 +9,8 @@ import { calendario } from '../services/calendarioService.js';
 import { dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
 import { aggiornaRichiesta, citazioniRichiesta, collocaRichiesta, creaRichiesta, eliminaRichiesta, richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
-import { aggiornaArea, aggiornaAreaDedalo, aggiornaDungeon, aggiornaPunto, collegaPinAlPunto, copiaPuntiInArea, creaArea, creaAreaDedalo, creaPunto, eliminaArea, eliminaAreaDedalo, eliminaPunto, spostaAreaDedalo, spostaPunto, spostaPuntiInArea } from '../services/dungeonService.js';
-import { bodyArea, bodyAreaDedalo, bodyAtterraggi, bodyCollocaRichiesta, bodyDungeon, bodyFinestraDungeon, bodyNuovaArea, bodyNuovaAreaDedalo, bodyNuovaRichiesta, bodyNuovoPunto, bodyPunto, bodyRequisitoRichiesta, bodyRichiesta, bodySpostaPunto, bodySpostaPuntiInArea, paramsChiaveGuida, paramsPinDelPunto, paramsRequisitoConfidente } from '../schemas/guidaDungeon.js';
+import { aggiornaArea, aggiornaAreaDedalo, aggiornaDungeon, aggiornaPunto, collegaPinAlPunto, copiaPuntiInArea, creaArea, impostaAreePalazzoInfiltrazione, creaAreaDedalo, creaPunto, eliminaArea, eliminaAreaDedalo, eliminaPunto, spostaAreaDedalo, spostaPunto, spostaPuntiInArea } from '../services/dungeonService.js';
+import { bodyArea, bodyAreaDedalo, bodyAreePalazzoInfiltrazione, bodyAtterraggi, bodyCollocaRichiesta, bodyDungeon, bodyFinestraDungeon, bodyNuovaArea, bodyNuovaAreaDedalo, bodyNuovaRichiesta, bodyNuovoPunto, bodyPunto, bodyRequisitoRichiesta, bodyRichiesta, bodySpostaPunto, bodySpostaPuntiInArea, paramsChiaveGuida, paramsPinDelPunto, paramsRequisitoConfidente } from '../schemas/guidaDungeon.js';
 import { correggiRequisitoRichiesta, togliRequisitoRichiesta } from '../services/requisitiConfidentiService.js';
 import { dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuartiere } from '../services/cittaService.js';
 import { attivitaTutte, filmDvdTutti, videogiochiTutti, libriTutti } from '../services/attivitaService.js';
@@ -18,14 +18,14 @@ import { cruciverba } from '../services/cruciverbaService.js';
 import { dettaglioNegozio, elencaNegozi, ricercaArticoli } from '../services/negoziService.js';
 import { giornoPercorso, indicePercorso } from '../services/percorsoService.js';
 import { elenchiAzione } from '../services/azioniStrutturateService.js';
-import { aggiornaVoce, creaVoce, eliminaVoce, spostaVoce, trasferisciVoci } from '../services/giornataService.js';
+import { aggiornaVoce, creaVoce, eliminaVoce, impostaInfiltrazioniVoce, rivediVoce, spostaVoce, trasferisciVoci } from '../services/giornataService.js';
 import { completamento } from '../services/completamentoService.js';
 import { datiGuida } from '../services/datiGuida.js';
 import { httpErrors } from '../utils/httpError.js';
 import { impostaAtterraggi, impostaFinestra, type RegolaAtterraggio } from '../services/atterraggioPalazziService.js';
-import type { DatiVoceGiornata, OggettiGuidaDto, PersonaggiDto, SfideDto, SpostaPuntiInArea, TrasferisciVociGiornata } from '../../shared/types.js';
+import type { DatiVoceGiornata, EsitoRevisioneVoce, OggettiGuidaDto, PersonaggiDto, SfideDto, SpostaPuntiInArea, TrasferisciVociGiornata } from '../../shared/types.js';
 import { validate } from '../middleware/validate.js';
-import { bodyAggiornaVoce, bodyDotiIncontro, bodyNuovaVoce, bodySpostaVoce, bodyTrasferisciVoci, paramsGiornoGuida, paramsId, paramsVoceGiornata, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
+import { bodyAggiornaVoce, bodyDotiIncontro, bodyRivistaVoce, bodyNuovaVoce, bodySpostaVoce, bodyTrasferisciVoci, paramsGiornoGuida, paramsId, paramsVoceGiornata, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
 import type { DoteNote } from '../../shared/effettiAzione.js';
 import { categoriaArticolo, dataGioco, idParam } from '../schemas/comuni.js';
 import { eCategoriaArticolo } from '../../shared/articoli.js';
@@ -135,7 +135,19 @@ router.post('/percorso/:data/voci', validate({ params: paramsGiornoGuida, body: 
   res.status(201).json(creaVoce(String(req.params.data), req.body as DatiVoceGiornata, (req.query as unknown as { partita?: number }).partita));
 });
 router.put('/percorso/voci/:uid', validate({ params: paramsVoceGiornata, body: bodyAggiornaVoce, query: queryDomande }), (req, res) => {
-  res.json(aggiornaVoce(String(req.params.uid), req.body as DatiVoceGiornata, (req.query as unknown as { partita?: number }).partita));
+  const { infiltrazioni, ...resto } = req.body as DatiVoceGiornata & { infiltrazioni?: string[] };
+  const partita = (req.query as unknown as { partita?: number }).partita;
+  // L3: il campo «Infiltrazioni» si salva da solo (insieme ordinato, anche vuoto) e non tocca niente della voce
+  if (infiltrazioni !== undefined) {
+    if (Object.values(resto).some((v) => v !== undefined)) throw httpErrors.badRequest('infiltrazioni-da-sole', 'Le infiltrazioni della voce si salvano da sole, senza altri campi.');
+    res.json(impostaInfiltrazioniVoce(String(req.params.uid), infiltrazioni, partita));
+    return;
+  }
+  res.json(aggiornaVoce(String(req.params.uid), resto, partita));
+});
+/** L3 §1.4: «Tieni il nuovo», «Rimetti il precedente» o «Fatto» su una voce da rivedere. */
+router.post('/percorso/voci/:uid/rivista', validate({ params: paramsVoceGiornata, body: bodyRivistaVoce, query: queryDomande }), (req, res) => {
+  res.json(rivediVoce(String(req.params.uid), (req.body as { esito: EsitoRevisioneVoce }).esito, (req.query as unknown as { partita?: number }).partita));
 });
 /** Sposta la voce di un passo nella sua fascia; risponde con tutte le voci del giorno, nel nuovo ordine. */
 router.put('/percorso/voci/:uid/sposta', validate({ params: paramsVoceGiornata, body: bodySpostaVoce, query: queryDomande }), (req, res) => {
@@ -239,6 +251,11 @@ router.put('/dungeon/:chiave/atterraggi', validate({ params: paramsChiaveGuida, 
 /** Una sezione nuova della guida del Palazzo, al posto scelto e, se data, nella planimetria (2026-10-01). */
 router.post('/dungeon/:chiave/aree', validate({ params: paramsChiaveGuida, body: bodyNuovaArea }), (req, res) => {
   res.status(201).json(creaArea(String(req.params.chiave), req.body as Parameters<typeof creaArea>[1]));
+});
+/** L3 (R3-23): le Aree del Palazzo che l'infiltrazione tocca, in ordine, con la versione da aprire; non sposta voci né pin. */
+router.put('/aree/:chiave/aree-palazzo', validate({ params: paramsChiaveGuida, body: bodyAreePalazzoInfiltrazione, query: queryDomande }), (req, res) => {
+  const b = req.body as { aree: string[]; planimetrieIniziali?: Record<string, string | null> };
+  res.json(impostaAreePalazzoInfiltrazione(String(req.params.chiave), b.aree, b.planimetrieIniziali, (req.query as unknown as { partita?: number }).partita));
 });
 router.put('/aree/:chiave', validate({ params: paramsChiaveGuida, body: bodyArea }), (req, res) => {
   res.json(aggiornaArea(String(req.params.chiave), req.body as Parameters<typeof aggiornaArea>[1]));

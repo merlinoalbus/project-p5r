@@ -141,9 +141,15 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'PUT /api/compendio/percorso/voci/:uid': {
     sommario: 'Modifica una voce della giornata (canone, per tutte le partite)',
-    descrizione: 'Si cambiano solo i campi inviati (almeno uno): testo, note (null o vuote le tolgono), genere, fascia, posto nella fascia, tipo, collegamento, rango atteso, effetti. Un collegamento o degli effetti nuovi si verificano; quelli che la voce ha già passano come sono. Cambiando fascia la voce va al posto chiesto o in fondo e la fascia vecchia si ricompatta. Un\'azione che diventa evento perde le spunte, ma se in qualche partita è spuntata con effetti la modifica si rifiuta (409). `?partita=` facoltativo, come per la creazione.',
+    descrizione: 'Si cambiano solo i campi inviati (almeno uno): testo, note (null o vuote le tolgono), genere, fascia, posto nella fascia, tipo, collegamento, rango atteso, effetti. Un collegamento o degli effetti nuovi si verificano; quelli che la voce ha già passano come sono. Cambiando fascia la voce va al posto chiesto o in fondo e la fascia vecchia si ricompatta. Un\'azione che diventa evento perde le spunte, ma se in qualche partita è spuntata con effetti la modifica si rifiuta (409). L3: `infiltrazioni` (da solo, 400 `infiltrazioni-da-sole` con altri campi) è l\'insieme ordinato delle infiltrazioni della voce, anche vuoto: solo del Palazzo della voce, la stessa ammessa più volte ma non di seguito; scrive solo il legame, niente della voce. `?partita=` facoltativo, come per la creazione.',
     risposta: 'La voce aggiornata, `AzionePercorsoDto`',
-    errori: [[400, 'voce-vuota'], [400, 'riferimento-non-valido'], [400, 'riferimento-inesistente'], [400, 'effetto-non-valido'], [400, 'effetto-inesistente'], [404, 'voce-non-trovata'], PARTITA_NON_TROVATA, [409, 'voce-con-effetti']],
+    errori: [[400, 'voce-vuota'], [400, 'riferimento-non-valido'], [400, 'riferimento-inesistente'], [400, 'effetto-non-valido'], [400, 'effetto-inesistente'], [400, 'infiltrazioni-da-sole'], [400, 'voce-senza-palazzo'], [400, 'infiltrazione-inesistente'], [400, 'infiltrazione-di-un-altro-palazzo'], [400, 'infiltrazione-ripetuta-di-seguito'], [404, 'voce-non-trovata'], PARTITA_NON_TROVATA, [409, 'voce-con-effetti']],
+  },
+  'POST /api/compendio/percorso/voci/:uid/rivista': {
+    sommario: 'Esito di «da rivedere» su una voce della giornata (L3 §1.4)',
+    descrizione: 'Corpo `{ esito: "tieni" | "rimetti" | "fatto" }`: «Tieni il nuovo» e «Fatto» tolgono il segno; «Rimetti il precedente» rimette testo, note e collegamento com\'erano prima della correzione del team (il testo precedente resta) e toglie il segno, solo con un testo precedente. È il meccanismo unico delle voci aggiunte, corrette o segnalate dal team. `?partita=` facoltativo.',
+    risposta: 'La voce, `AzionePercorsoDto`',
+    errori: [[404, 'voce-non-trovata'], [409, 'voce-non-da-rivedere'], [400, 'senza-testo-precedente'], PARTITA_NON_TROVATA],
   },
   'PUT /api/compendio/percorso/voci/:uid/sposta': {
     sommario: 'Sposta una voce della giornata di un passo nella sua fascia',
@@ -298,9 +304,15 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'POST /api/compendio/dungeon/:chiave/aree': {
     sommario: 'Aggiunge un\'infiltrazione nuova alla guida di un Palazzo',
-    descrizione: 'L\'infiltrazione nasce `dopo` quella indicata, in cima con `dopo: null`, in fondo se `dopo` manca; l\'ordine del Palazzo si ricompatta. La chiave si ricava dal nome (resa unica e nei limiti accettati dalle rotte). Con `planimetria` l\'infiltrazione si aggiunge a quelle di quella planimetria, che deve essere del Palazzo. È canone: vale per tutte le partite.',
+    descrizione: 'L\'infiltrazione nasce `dopo` quella indicata, in cima con `dopo: null`, in fondo se `dopo` manca; l\'ordine del Palazzo si ricompatta. La chiave si ricava dal nome (resa unica e nei limiti accettati dalle rotte). L3: `areePalazzo` (slug, in ordine) sono le Aree del Palazzo che tocca; `planimetria` (client di prima) aggiunge l\'Area di quella planimetria, che deve essere del Palazzo. È canone: vale per tutte le partite.',
     risposta: '`{ chiave, nome, ordine }` dell\'area creata',
-    errori: [[400, 'area-non-del-palazzo'], [400, 'mappa-fuori-palazzo'], [404, 'dungeon-non-trovato'], [404, 'mappa-non-trovata']],
+    errori: [[400, 'area-non-del-palazzo'], [400, 'planimetria-non-del-palazzo'], [404, 'dungeon-non-trovato'], [404, 'mappa-non-trovata'], [404, 'area-non-trovata']],
+  },
+  'PUT /api/compendio/aree/:chiave/aree-palazzo': {
+    sommario: 'Le Aree del Palazzo che un\'infiltrazione tocca (L3)',
+    descrizione: 'Corpo `{ aree: [...], planimetrieIniziali?: { <area>: <planimetria> | null } }`: le Aree (slug, o chiavi `dungeon/<k>/<slug>`) nell\'ordine in cui l\'infiltrazione le percorre, e per ognuna, se si vuole, la versione da aprire (null = la predefinita). L\'insieme sostituisce quello di prima; un gesto solo, che non sposta voci né pin. Lo stesso legame si scrive anche dall\'area (`PUT /api/aree/dungeon/:k/:slug/infiltrazioni`). `?partita=` facoltativo.',
+    risposta: 'L\'infiltrazione com\'è nella scheda del Palazzo, `AreaDungeonDto`',
+    errori: [[404, 'area-non-trovata'], [409, 'area-di-un-altro-palazzo'], [400, 'infiltrazione-dei-memento'], [400, 'planimetria-di-altra-area'], [404, 'partita-non-trovata']],
   },
   'PUT /api/compendio/aree/:chiave': {
     sommario: 'Corregge nome e descrizione di un\'infiltrazione (o di un dedalo dei Memento)',

@@ -70,6 +70,16 @@ export const bodyNuovaAreaDedalo = bodyAreaDedalo.extend({ nome: z.string().trim
 export const bodyNuovaArea = z.object({
   nome: z.string().trim().min(1).max(LIMITI_GUIDA.area.nome), descrizione: z.string().max(LIMITI_GUIDA.area.descrizione).optional(),
   dopo: z.string().min(1).max(200).nullable().optional(), planimetria: z.string().min(1).max(200).optional(),
+  /** L3 (R3-22): le Aree del Palazzo che l'infiltrazione tocca (slug, in ordine). */
+  areePalazzo: z.array(z.string().min(1).max(120)).max(100).refine((a) => new Set(a).size === a.length, { message: 'Un’area compare due volte.' }).optional(),
+});
+/**
+ * L3 (R3-23, dall'infiltrazione): le Aree del Palazzo che l'infiltrazione tocca, in ordine (slug, o chiave `dungeon/<k>/<slug>`), e per
+ * ognuna, se si vuole, la versione da aprire (chiave pubblica di una sua planimetria; null = la predefinita).
+ */
+export const bodyAreePalazzoInfiltrazione = z.object({
+  aree: z.array(z.string().min(1).max(260)).max(100).refine((a) => new Set(a).size === a.length, { message: 'Un’area compare due volte.' }),
+  planimetrieIniziali: z.record(z.string().min(1).max(260), z.string().min(1).max(200).nullable()).optional(),
 });
 /** Più voci di un Palazzo da spostare insieme in un'altra sua area (2026-10-14): chiavi senza ripetizioni e l'area d'arrivo. */
 export const bodySpostaPuntiInArea = z.object({

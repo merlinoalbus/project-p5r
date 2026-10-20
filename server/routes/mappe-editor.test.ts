@@ -10,6 +10,7 @@ import { creaMappa, creaSpillo, dimensioniImmagine, importaMappe } from '../serv
 import { salvaImmagine } from '../services/immaginiService.js';
 import type { EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
+import { planimetriaDiPalazzo } from '../../test/planimetriaDiPalazzo.js';
 
 const app = createApp();
 
@@ -27,7 +28,7 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     // Explicit positioned fixture: editorial seed points no longer pretend to have a physical map.
     // una voce del Palazzo della planimetria di prova (che è figlia di Kamoshida), che si segna: le regole del collegamento (094)
     const punto=db.prepare("SELECT p.chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = 'kamoshida' AND p.tipo <> 'altro' ORDER BY p.chiave LIMIT 1").get() as {chiave:string};
-    const fixture=creaMappa(undefined,{nome:'Fixture geografica',tipo:'area',genitore:'dungeon-kamoshida'});
+    const fixture=planimetriaDiPalazzo('kamoshida',{nome:'Fixture geografica'});
     creaSpillo(fixture.chiave,{tipo:'nota',nome:'Punto verificato fixture',x:10,y:20,riferimento:{tipo:'punto',chiave:punto.chiave}});
     partitaId = ((await request(app).post('/api/partite').send({ nome: 'Mappe' })).body.data as { id: number }).id;
   });
@@ -553,8 +554,8 @@ describe('API mappe a livelli (Fase 13.1)', () => {
   });
 
   it('una planimetria aggiunta al Palazzo diventa una pianta caricandone l’immagine; uno stemma resta stemma (2026-10-18)', async () => {
-    // «Aggiungi» nell'elenco del Palazzo: una mappa «area» sotto la radice del Palazzo, senza ruolo dell'immagine
-    const nuova = creaMappa(undefined, { nome: 'Pinacoteca nascosta', tipo: 'area', genitore: 'dungeon-madarame', ordine: 99 });
+    // una planimetria nuova del Palazzo (L3: nella sua Area), senza ruolo dell'immagine
+    const nuova = planimetriaDiPalazzo('madarame', { nome: 'Pinacoteca nascosta', ordine: 99 });
     expect(nuova.ruoloImmagine).toBe('nessuna');
     const caricata = (await request(app).put(`/api/mappe/${nuova.chiave}/immagine`).set('Content-Type', 'image/png').send(PNG_2x3).expect(200)).body.data as MappaDto;
     expect(caricata.ruoloImmagine).toBe('planimetria-nativa');

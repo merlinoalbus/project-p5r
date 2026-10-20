@@ -12,6 +12,7 @@ import { creaMappa, esportaMappe, importaMappe } from '../services/mappe/mappeSe
 import { salvaImmagine } from '../services/immaginiService.js';
 import type { DungeonDettaglioDto, MappaDto, QuartiereDettaglioDto, QuartiereRiassuntoDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
+import { planimetriaDiPalazzo } from '../../test/planimetriaDiPalazzo.js';
 
 const app = createApp();
 
@@ -27,7 +28,7 @@ const interna = (nome: string) => prepared('SELECT chiave FROM mappa WHERE nome 
 
 /** Una planimetria del Palazzo di Kamoshida con l'immagine caricata dall'editor (100×100) e un pezzo ritagliato. */
 async function planimetriaConPezzo(nome: string): Promise<{ pubblica: string; chiave: string }> {
-  const m = creaMappa(undefined, { nome, tipo: 'area', genitore: 'dungeon-kamoshida', asset: null });
+  const m = planimetriaDiPalazzo('kamoshida', { nome, asset: null });
   await request(app).put(`/api/mappe/${encodeURIComponent(m.chiave)}/immagine`).set('Content-Type', 'image/png').send(png(100, 100)).expect(200);
   await request(app).post(`/api/mappe/${encodeURIComponent(m.chiave)}/pezzi`).send({ nome: 'Muro', sorgente: { x: 10, y: 10, larghezza: 20, altezza: 20 } }).expect(201);
   return { pubblica: m.chiave, chiave: interna(nome) };

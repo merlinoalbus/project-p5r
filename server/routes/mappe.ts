@@ -9,6 +9,7 @@
 
 import { risolviPercorsoMappa, contenutiMappa } from '../services/mappe/contenutiGuidaService.js';
 import { risolviAccessoMondo } from '../services/mappe/accessoMondoService.js';
+import { impostaInfiltrazioniDellaPlanimetria, presentazioneDellaPlanimetria, stanzaDellaPlanimetria } from '../services/mappe/areeService.js';
 import { TIPI_ACCESSO_MONDO, type TipoAccessoMondo } from '../../shared/accessoMondo.js';
 import { vociCollegabili } from '../services/dungeonService.js';
 import { Router } from 'express';
@@ -90,22 +91,31 @@ router.get('/:chiave', validate({ params: paramsMappa, query: queryMappa }), (re
 router.put('/:chiave', validate({ params: paramsMappa, body: bodyAggiornaMappa }), (req, res) => {
   res.json(aggiornaMappa(String(req.params.chiave), req.body as DatiMappa));
 });
-/** Le aree della guida contenute nella planimetria: si passa l'insieme, risponde con le aree in ordine di guida. */
+/** Le infiltrazioni della planimetria: si passa l'insieme, risponde con le infiltrazioni in ordine di guida. Rotta vecchia (L3 §3.3): per
+ *  una planimetria con Area sono i legami dell'Area; per le mappe senza Area (Memento) resta quella di prima. */
 router.put('/:chiave/aree', validate({ params: paramsMappa, body: bodyAreeMappa }), (req, res) => {
-  res.json({ aree: impostaAreeMappa(String(req.params.chiave), (req.body as { aree: string[] }).aree) });
+  const chiave = String(req.params.chiave);
+  const aree = (req.body as { aree: string[] }).aree;
+  res.json({ aree: impostaInfiltrazioniDellaPlanimetria(chiave, aree) ?? impostaAreeMappa(chiave, aree) });
 });
 // L2: la planimetria dell'ingresso di un quartiere si elimina con `?conferma=1` (l'ingresso se ne va con lei)
 router.delete('/:chiave', validate({ params: paramsMappa, query: z.object({ conferma: boolQuery }) }), (req, res) => {
   eliminaMappa(String(req.params.chiave), { conferma: (req.query as { conferma?: boolean }).conferma === true });
   res.status(204).end();
 });
-/** Raggruppamento della planimetria: la stanza (gruppo di immagini) e l'etichetta della sua versione. */
+/** Raggruppamento della planimetria: l'Area (nome, o un'altra Area) e l'etichetta della sua versione. Rotta vecchia (L3 §3.3): per una
+ *  planimetria con Area agisce sull'Area; per le mappe senza Area resta quella di prima (gruppo d'immagini). */
 router.put('/:chiave/presentazione', validate({ params: paramsMappa, body: bodyPresentazioneMappa }), (req, res) => {
-  res.json(aggiornaPresentazioneMappa(String(req.params.chiave), req.body as Parameters<typeof aggiornaPresentazioneMappa>[1]));
+  const chiave = String(req.params.chiave);
+  const dati = req.body as Parameters<typeof aggiornaPresentazioneMappa>[1];
+  res.json(presentazioneDellaPlanimetria(chiave, dati) ? dettaglioMappa(chiave) : aggiornaPresentazioneMappa(chiave, dati));
 });
-/** La stanza della planimetria: entra in quella di un'altra (`con`) o diventa una stanza a sé (`con: null`). */
+/** L'Area della planimetria: entra in quella di un'altra (`con`) o diventa un'Area a sé (`con: null`). Rotta vecchia (L3 §3.3): per
+ *  le mappe senza Area resta quella di prima (gruppo d'immagini). */
 router.put('/:chiave/stanza', validate({ params: paramsMappa, body: bodyStanzaMappa }), (req, res) => {
-  res.json(impostaStanzaMappa(String(req.params.chiave), req.body as { con: string | null; nome?: string }));
+  const chiave = String(req.params.chiave);
+  const dati = req.body as { con: string | null; nome?: string };
+  res.json(stanzaDellaPlanimetria(chiave, dati) ? dettaglioMappa(chiave) : impostaStanzaMappa(chiave, dati));
 });
 
 /** Immagine di base (corpo grezzo `image/*`): salvata nell'istanza nell'ambito «mappa» con la chiave della mappa. */

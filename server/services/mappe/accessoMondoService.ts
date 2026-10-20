@@ -13,6 +13,7 @@ import type { DestinazioneGuidaDto } from '../../../shared/organizzazioneMappe.j
 import { prepared } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { chiaveMappa, idMappa, nomePercorso } from './percorsiMappe.js';
+import { areeDelleInfiltrazioni } from './legamiInfiltrazioni.js';
 import type { AccessoMondoDto, DestinazioneMondoDto, TipoAccessoMondo } from '../../../shared/accessoMondo.js';
 
 const TABELLE: Record<TipoAccessoMondo, string> = {
@@ -26,7 +27,7 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
   const richiesta = { tipo, chiave };
   if (tipo === 'mappa') {
     const risolta = risolviPercorsoMappa(chiave);
-    if (risolta.tipo === 'guida') return { entita: richiesta, esito: 'assente', destinazioni: [], guide: [{ area: risolta.area,dungeon:risolta.dungeon,mappaPalazzo:risolta.mappaPalazzo,nome:risolta.nome }] };
+    if (risolta.tipo === 'guida') return { entita: richiesta, esito: 'assente', destinazioni: [], guide: [{ area: risolta.area,dungeon:risolta.dungeon,mappaPalazzo:risolta.mappaPalazzo,nome:risolta.nome,casa:risolta.casa }] };
     chiave = idMappa(chiave);
   }
   const guide = new Map<string, DestinazioneGuidaDto>();
@@ -125,6 +126,15 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
             for (const s of prepared('SELECT s.id,s.nome,s.mappa_chiave FROM spillo_voce sv JOIN spillo s ON s.id=sv.spillo_id JOIN mappa m ON m.chiave=s.mappa_chiave WHERE sv.voce_chiave=? ORDER BY s.mappa_chiave,s.ordine,s.id').all(r.chiave) as Array<{ id: number; nome: string; mappa_chiave: string }>) {
               aggiungi(s.mappa_chiave, s.id, s.nome, 'riferimento-spillo', r);
             }
+          }
+          // L3: un'infiltrazione sta nelle Aree che tocca (`infiltrazione_area`), ognuna sulla versione da aprire (o la predefinita);
+          // le colonne `mappa.entita_*` e `mappa_entita` di tipo area non si leggono più (R3-09)
+          if (r.tipo === 'area') {
+            for (const a of areeDelleInfiltrazioni().get(r.chiave) ?? []) {
+              const m = a.planimetriaIniziale ?? a.predefinita;
+              if (m) aggiungi(m, null, null, 'entita-mappa', r);
+            }
+            continue;
           }
           for (const m of prepared('SELECT chiave FROM mappa WHERE entita_tipo=? AND entita_chiave=? ORDER BY chiave').all(r.tipo, r.chiave) as Array<{ chiave: string }>) aggiungi(m.chiave, null, null, 'entita-mappa', r);
           for (const m of prepared('SELECT mappa_chiave AS chiave FROM mappa_entita WHERE entita_tipo=? AND entita_chiave=? ORDER BY mappa_chiave').all(r.tipo,r.chiave) as Array<{chiave:string}>) aggiungi(m.chiave,null,null,'entita-mappa',r);

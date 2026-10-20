@@ -12,6 +12,7 @@ import { contenutiMappa, risolviPercorsoMappa } from './contenutiGuidaService.js
 import { importaMappe, dettaglioMappa, esportaMappe, mappaPerEntita } from './mappeService.js';
 import { risolviAccessoMondo } from './accessoMondoService.js';
 import { dbDiProva } from '../../../test/dbDiProva.js';
+import { chiaveMappa } from './percorsiMappe.js';
 
 describe('organizzazione geografica e contenuti guida',()=>{
  afterEach(()=>closeDb());
@@ -61,12 +62,15 @@ describe('organizzazione geografica e contenuti guida',()=>{
   importaMappe({versione:1,mappe:[nodo]});
   expect(dettaglioMappa(nodo.chiave)).toMatchObject({nome:nodo.nome,contesti:nodo.contesti,gruppoImmagini:nodo.gruppoImmagini});
   expect(esportaMappe(nodo.chiave).mappe[0]).toMatchObject({contesti:nodo.contesti,gruppoImmagini:nodo.gruppoImmagini});
-  const a=(db.prepare('SELECT chiave FROM dungeon_area LIMIT 1').get() as {chiave:string}).chiave;
-  db.prepare('INSERT INTO mappa_entita VALUES(?,?,?,?)').run('tokyo','area',a,'{"fixture":true}');
-  db.prepare('INSERT INTO mappa_entita VALUES(?,?,?,?)').run(nodo.chiave,'area',a,'{"fixture":true}');
+  // L3 (110): un'infiltrazione sta nelle Aree del Palazzo che tocca (`infiltrazione_area`). Con più planimetrie nelle sue Aree non c'è
+  // una mappa sola da scegliere; l'accesso dal mondo apre ogni Area sulla sua versione (quella da aprire, o la predefinita)
+  const a=db.prepare('SELECT ia.infiltrazione_chiave FROM infiltrazione_area ia JOIN mappa m ON m.area_chiave = ia.area_chiave GROUP BY ia.infiltrazione_chiave HAVING COUNT(*) > 1 ORDER BY 1 LIMIT 1').pluck().get() as string;
   expect(mappaPerEntita('area',a)).toBeNull();
-  // l'area puo' essere rappresentata anche dalle planimetrie native: qui contano le due associazioni della fixture
-  expect(risolviAccessoMondo('area',a).destinazioni.map(d=>d.mappa)).toEqual(expect.arrayContaining(['tokyo',nodo.chiave]));
+  const attese=(db.prepare('SELECT COALESCE(ia.planimetria_iniziale, ar.planimetria_predefinita) FROM infiltrazione_area ia JOIN area ar ON ar.chiave = ia.area_chiave WHERE ia.infiltrazione_chiave = ?').pluck().all(a) as string[]).map((k) => chiaveMappa(k));
+  expect(risolviAccessoMondo('area',a).destinazioni.map(d=>d.mappa)).toEqual(expect.arrayContaining(attese));
+  // le fonti vecchie (`mappa_entita` di tipo area) non si leggono più: una riga lì non aggiunge destinazioni
+  db.prepare('INSERT INTO mappa_entita VALUES(?,?,?,?)').run(nodo.chiave,'area',a,'{"fixture":true}');
+  expect(risolviAccessoMondo('area',a).destinazioni.map(d=>d.mappa)).not.toContain(nodo.chiave);
   expect(mappaPerEntita('area',a)).toBeNull();
   expect(()=>importaMappe({versione:1,mappe:[{...nodo,contesti:[nodo.contesti[0],nodo.contesti[0]]}]},{sovrascrivi:true})).toThrow();
   expect(dettaglioMappa(nodo.chiave).contesti).toEqual(nodo.contesti);
