@@ -119,7 +119,8 @@ function SchedaOmbre({ ombre }: { ombre: OmbraDto[] }) {
               <span className="text-[11px] uppercase tracking-[0.06em] text-text-muted">resiste</span>
               {o.resistenze.map((r) => <ChipElementoGuida key={r} testo={r} />)}
             </div>}
-            <Link to={o.areaChiave ? `/guida/dungeon/${o.dungeonChiave}?area=${o.areaChiave}` : `/guida/dungeon/${o.dungeonChiave}`} className="mt-auto touch inline-flex items-center text-[12px] text-text-muted">{o.area ?? o.dungeon}</Link>
+            {/* L3 (§4.1): nei Palazzi l'infiltrazione va in `?infiltrazione=`; i dedali dei Memento restano in `?area=` */}
+            <Link to={o.areaChiave ? `/guida/dungeon/${o.dungeonChiave}?${o.dungeonChiave === 'mementos' ? 'area' : 'infiltrazione'}=${encodeURIComponent(o.areaChiave)}` : `/guida/dungeon/${o.dungeonChiave}`} className="mt-auto touch inline-flex items-center text-[12px] text-text-muted">{o.area ?? o.dungeon}</Link>
           </li>
         ))}
       </ul>

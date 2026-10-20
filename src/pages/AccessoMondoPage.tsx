@@ -34,6 +34,9 @@ export function AccessoMondoPage() {
   if (!chiave || !TIPI_ACCESSO_MONDO.includes(tipo as TipoAccessoMondo)) return <div role="alert">Destinazione non valida. <Link to="/guida/citta">Apri La città</Link></div>;
   // Un quartiere ha la sua pagina, l'unica che lo apre (L2, R2-15): ci si va senza chiedere niente al server
   if (tipo === 'quartiere') return <Navigate to={`/guida/citta/${encodeURIComponent(chiave)}`} replace />;
+  // …e un Palazzo (o i Memento) la sua scheda, col visore dentro (L3, §4.1): non più la griglia delle sue planimetrie
+  // il vecchio ingresso della metro: come il cartellino della mappa di Tokyo, la prima infiltrazione non completata (UX3-4); i Memento senza
+  if (tipo === 'dungeon') return <Navigate to={`/guida/dungeon/${encodeURIComponent(chiave)}${chiave === 'mementos' ? '' : '?infiltrazione=in-corso'}`} replace />;
   return <Accesso tipo={tipo as TipoAccessoMondo} chiave={chiave} />;
 }
 

@@ -19,7 +19,7 @@ const dungeon = (extra: Partial<DungeonRiassuntoDto>): DungeonRiassuntoDto => ({
   chiave: 'kamoshida', tipo: 'palazzo', ordine: 1, nome: 'Palazzo di Kamoshida', sovrano: 'Suguru Kamoshida', arcanaSovrano: '', arcanaSovranoNome: '',
   date: { sblocco: '12 Aprile (Martedì) — prima infiltrazione esplorativa nel Palazzo', scadenza: '2 maggio (ultimo giorno utile)', furtoConsigliato: '22 Aprile' },
   finestra: { dal: '04-12', al: '05-02' },
-  livelloConsigliato: 'Non esplicitato testualmente da allgamestaff. Il boss finale è di Livello 11.', aree: 18, punti: 58, esauribili: 41, gestiti: 29, raccolta: { totale: 34, presi: 17, mappe: 12, mappeComplete: 4 }, completato: null, atterraggio: null, ...extra,
+  livelloConsigliato: 'Non esplicitato testualmente da allgamestaff. Il boss finale è di Livello 11.', aree: 18, punti: 58, esauribili: 41, gestiti: 29, raccolta: { totale: 34, presi: 17, mappe: 12, mappeComplete: 4 }, completato: null, concluso: null, atterraggio: null, ...extra,
 });
 
 beforeEach(() => {
@@ -50,6 +50,21 @@ describe('DungeonPage', () => {
     expect(screen.getAllByText('M')).toHaveLength(1);
     // senza partita gestita nel secondo palazzo non c'è anello
     expect(screen.getAllByRole('progressbar')).toHaveLength(1);
+  });
+
+  // L4 (§1.5, §8.10): l'anello conta gli oggetti permanenti; «Concluso» (Tesoro e boss) non è «Completato»; i pin da verificare si dicono
+  it('L4: anello sugli oggetti permanenti, «Concluso» con quel che manca, «N da verificare»', async () => {
+    getDungeons.mockResolvedValue([dungeon({ concluso: 'Tesoro e boss finale', daVerificare: 4,
+      completamento: { oggetti: 71, fatti: 56, tesoro: true, boss: true, concluso: true, completato: false } })]);
+    render(<MemoryRouter><DungeonPage /></MemoryRouter>);
+    const carta = await screen.findByRole('link', { name: 'Palazzo di Kamoshida, Suguru Kamoshida' });
+    // 56 su 71 = 78% (per difetto, come la percentuale del server), non i 17/34 dei collezionabili
+    expect(screen.getByRole('progressbar', { name: 'Avanzamento in Palazzo di Kamoshida: 56 oggetti permanenti fatti su 71' })).toHaveAttribute('aria-valuenow', '79');
+    expect(screen.getByText('78%')).toBeInTheDocument();
+    expect(carta).toHaveTextContent('Concluso');
+    expect(screen.getByText('Concluso')).toHaveAttribute('title', 'Tesoro e boss finale · al completamento mancano 15 oggetti permanenti');
+    expect(screen.queryByText('Completato')).toBeNull();
+    expect(screen.getByText('4 da verificare')).toBeInTheDocument();
   });
 
   it('è l’elenco dei Palazzi: Iweleth sì, i Memento no', async () => {

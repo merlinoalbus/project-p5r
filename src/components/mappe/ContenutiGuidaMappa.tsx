@@ -29,7 +29,9 @@ export function ContenutiGuidaMappa({ mappa, area, dungeon }: { mappa: string; a
   return <PageState isLoading={contenuti.caricamento} error={contenuti.errore} onRetry={contenuti.ricarica}>
     {!!contenuti.dati?.aree.length && <section className="card flex flex-col gap-3" aria-label="Contenuti della guida">
       <h2 className="m-0 text-lg">Contenuti della guida</h2>
-      {dungeon && <Link className="touch inline-flex items-center self-start" to={`/guida/dungeon/${encodeURIComponent(dungeon)}`}>{memento ? 'Apri la scheda dei Memento' : 'Apri la scheda del Palazzo'}</Link>}
+      {/* L3 (§4.1): nei Palazzi la scheda si apre sull'infiltrazione chiesta (`?infiltrazione=`); i Memento restano col loro `?area=`.
+          Una richiesta che non appartiene a questa mappa apre la scheda e basta. */}
+      {dungeon && <Link className="touch inline-flex items-center self-start" to={`/guida/dungeon/${encodeURIComponent(dungeon)}${area && contenuti.dati.aree.some(a => a.chiave === area) ? `?${memento ? 'area' : 'infiltrazione'}=${encodeURIComponent(area)}` : ''}`}>{memento ? 'Apri la scheda dei Memento' : 'Apri la scheda del Palazzo'}</Link>}
       {area && !contenuti.dati.aree.some(a => a.chiave === area) && <p role="status">{memento ? 'Il dedalo richiesto non appartiene a questa mappa.' : 'L’infiltrazione richiesta non appartiene a questa mappa.'}</p>}
       {contenuti.dati.aree.map(a => <details className="border-b border-border-light py-2" key={`${a.chiave}:${area ?? ''}`} open={a.chiave === area || undefined}>
         <summary className="cursor-pointer font-semibold touch">{a.nome}</summary>

@@ -255,6 +255,24 @@ describe('VisoreMappa', () => {
     const popup = within(screen.getByRole('dialog', { name: 'Bancarella estiva' }));
     expect(within(popup.getByRole('group', { name: 'Condizioni di visibilità' })).getByText('dal 18 giugno')).toBeInTheDocument();
   });
+
+  // L4 (§1.4, §4.2): il contesto dello stato e il pin «da verificare» (fatto con una voce non fatta, da prima dell'aggiornamento)
+  it('L4: un pin da verificare resta in vista anche raccolto, con l’anello ambra; il popup dice il contesto e apre la finestra', () => {
+    const daVerificare = spillo({ id: 9, uid: 'u9', nome: 'Seme della Bramosia', tipo: 'forziere', tipoNome: 'Forziere', x: 30, y: 70, collezionabile: true, raccolto: true, daVerificare: true,
+      contestoInfiltrazione: { chiave: 'k-03', nome: '3ª infiltrazione' },
+      voci: [{ chiave: 'k-03/7', tipo: 'forziere', nome: 'Seme del cortile', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'k-03', areaDedalo: null, stato: null, daVerificare: true, infiltrazione: { chiave: 'k-03', nome: 'Cortile' } }] });
+    const onDaVerificare = vi.fn();
+    monta({ mappa: { ...mappa, spilli: [...mappa.spilli, daVerificare] }, onDaVerificare });
+    // raccolto ma in vista (gli altri raccolti restano nascosti), con l'anello e l'avviso nel nome
+    const pin = screen.getByRole('button', { name: 'Forziere: Seme della Bramosia (segnato) (da verificare)' });
+    expect(pin).toHaveClass('spillo-mappa--da-verificare');
+    expect(screen.queryByRole('button', { name: /Scrigno raccolto/ })).toBeNull();
+    fireEvent.click(pin);
+    const popup = within(screen.getByRole('dialog', { name: 'Seme della Bramosia' }));
+    expect(popup.getByText('Stato nella 3ª infiltrazione')).toBeInTheDocument();
+    fireEvent.click(popup.getByRole('button', { name: 'Da verificare' }));
+    expect(onDaVerificare).toHaveBeenCalledWith({ spilloUid: 'u9', spilloNome: 'Seme della Bramosia', mappaNome: 'Shibuya', voce: 'k-03/7', voceNome: 'Seme del cortile', infiltrazioneNome: 'Cortile' });
+  });
 });
 
 it('centra il punto iniziale con lo zoom configurato senza selezionare un pin',async()=>{

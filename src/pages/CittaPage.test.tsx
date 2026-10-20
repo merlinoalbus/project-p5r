@@ -88,7 +88,8 @@ describe('CittaPage', () => {
     render(<MemoryRouter><CittaPage /></MemoryRouter>);
     mappa = await screen.findByRole('img', { name: /^Mappa di Tokyo con/ });
     const memento = await within(mappa).findByTitle(/^Memento/);
-    expect(memento).toHaveAttribute('href', '/guida/mondo/dungeon/mementos');
+    // senza una regola d'atterraggio, la scheda (L3, §4.1; prima `/guida/mondo/dungeon/<k>`)
+    expect(memento).toHaveAttribute('href', '/guida/dungeon/mementos');
     expect(memento.querySelector('img')).toHaveAttribute('src', '/api/immagini/palazzi/mementos/file');
     // i Palazzi si chiedono con la partita: un Palazzo completato non c'è più (rilievo dell'utente, 2026-10-01)
     expect(api.getDungeons).toHaveBeenCalledWith(1);

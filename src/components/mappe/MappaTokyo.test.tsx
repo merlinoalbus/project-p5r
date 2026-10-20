@@ -36,15 +36,20 @@ describe('MappaTokyo — fermate non ancora nel mondo', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
-  it('un Palazzo completato non c’è più, anche dentro la sua finestra, e si dice perché', () => {
-    const kamoshida = { chiave: 'kamoshida', nome: 'Palazzo di Kamoshida', finestra: { dal: '04-12', al: '05-02' }, completato: null } as DungeonRiassuntoDto;
+  // L4 §8.10 (decisione dell'utente del 2026-10-20): sulla mappa conta il **concluso** (Tesoro e boss finale), non il completato
+  it('un Palazzo concluso non c’è più, anche dentro la sua finestra e anche se non è completato, e si dice perché', () => {
+    const kamoshida = { chiave: 'kamoshida', nome: 'Palazzo di Kamoshida', finestra: { dal: '04-12', al: '05-02' }, completato: null, concluso: null } as DungeonRiassuntoDto;
     /** Il cartellino del Palazzo di Kamoshida sulla mappa (il link alla sua scheda), o null se non è disegnato. */
-    const cartellino = () => document.querySelector('a[href="/guida/mondo/dungeon/kamoshida"]');
+    const cartellino = () => document.querySelector('a[href="/guida/dungeon/kamoshida?infiltrazione=in-corso"]');
     const { rerender } = render(<MemoryRouter><MappaTokyo quartieri={quartieri} dungeon={[kamoshida]} dataGioco="04-22" /></MemoryRouter>);
     expect(cartellino()).not.toBeNull();
-    rerender(<MemoryRouter><MappaTokyo quartieri={quartieri} dungeon={[{ ...kamoshida, completato: 'Tesoro, boss finale e raccolto tutto (40/40)' }]} dataGioco="04-22" /></MemoryRouter>);
+    // la partita 1: concluso, 56/71 oggetti permanenti, non completato → non c'è più
+    rerender(<MemoryRouter><MappaTokyo quartieri={quartieri} dungeon={[{ ...kamoshida, concluso: 'Tesoro e boss finale' }]} dataGioco="04-22" /></MemoryRouter>);
     expect(cartellino()).toBeNull();
-    expect(screen.getByText('Palazzo di Kamoshida', { selector: 'span[title]' })).toHaveAttribute('title', 'completato: Tesoro, boss finale e raccolto tutto (40/40)');
+    expect(screen.getByText('Palazzo di Kamoshida', { selector: 'span[title]' })).toHaveAttribute('title', 'concluso: Tesoro e boss finale');
+    // una risposta di prima, senza `concluso`: vale il completato
+    rerender(<MemoryRouter><MappaTokyo quartieri={quartieri} dungeon={[{ ...kamoshida, concluso: undefined as unknown as null, completato: 'Tesoro, boss finale e raccolto tutto (40/40)' }]} dataGioco="04-22" /></MemoryRouter>);
+    expect(cartellino()).toBeNull();
   });
 
   it('toccando il Palazzo si atterra dove dice la regola del giorno: planimetria e pin d’arrivo; senza regola la scheda (2026-10-04)', () => {
@@ -52,7 +57,9 @@ describe('MappaTokyo — fermate non ancora nel mondo', () => {
     /** L'indirizzo del cartellino del Palazzo (l'unico link con la sua targa). */
     const indirizzo = () => screen.getByRole('link', { name: /Palazzo di Kamoshida/ }).getAttribute('href');
     const { rerender } = render(<MemoryRouter><MappaTokyo quartieri={quartieri} dungeon={[kamoshida]} dataGioco="04-11" /></MemoryRouter>);
-    expect(indirizzo()).toBe('/guida/mondo/dungeon/kamoshida');
+    // L3 (§4.1): senza regola la scheda del Palazzo, non più la griglia delle planimetrie (`/guida/mondo/dungeon/<k>`); dalla metro sulla
+    // prima infiltrazione non completata (UX3-4, §4.2)
+    expect(indirizzo()).toBe('/guida/dungeon/kamoshida?infiltrazione=in-corso');
     rerender(<MemoryRouter><MappaTokyo quartieri={quartieri} dungeon={[{ ...kamoshida, atterraggio: { mappa: 'kamoshida/prigione', spillo: 42 } }]} dataGioco="04-11" /></MemoryRouter>);
     expect(indirizzo()).toBe('/guida/mappe/kamoshida%2Fprigione?spillo=42');
     rerender(<MemoryRouter><MappaTokyo quartieri={quartieri} dungeon={[{ ...kamoshida, atterraggio: { mappa: 'kamoshida/ingresso', spillo: null } }]} dataGioco="04-11" /></MemoryRouter>);

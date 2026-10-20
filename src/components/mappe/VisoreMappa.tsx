@@ -29,6 +29,7 @@ import { Modal } from '../shared/Modal';
 import { ChipDisponibilita } from '../guida/ChipDisponibilita';
 import { CondizioniSpilloElenco } from './CondizioniSpillo';
 import { ProveNativeSpillo } from './ProveNativeSpillo';
+import type { DivergenzaDaVerificare } from '../guida/FinestraDaVerificare';
 import type { ImmagineSpilloDto } from '../../types';
 import { formattaYen } from '../../utils/punti';
 import { useSuggerimenti } from '../../stores/suggerimentiStore';
@@ -79,6 +80,8 @@ interface Props {
   onStatoPunto?: (spillo: SpilloDto, voce: string, stato: StatoPuntoMappa) => Promise<void> | void;
   /** Acquisto (o riapertura) di un articolo del negozio collegato allo spillo. */
   onAcquisto?: (spillo: SpilloDto, articoloChiave: string, fatto: boolean) => Promise<void> | void;
+  /** L4 (§4.2): apre la finestra «Da verificare» di un pin fatto con una voce non fatta (la apre chi monta il visore). */
+  onDaVerificare?: (d: DivergenzaDaVerificare) => void;
   onChiudi?: () => void;
   /** Testo del pulsante di chiusura (predefinito «Chiudi»; «Torna alla pagina» per lo schermo intero aperto da una pagina). */
   etichettaChiudi?: string;
@@ -241,7 +244,7 @@ function disponibilita(a: { disponibileDal: string | null }): string {
  * condizioni della partita sono nascosti salvo richiesta esplicita, i raccolti salvo «mostra
  * raccolti». Con `editor` il clic e il trascinamento passano agli strumenti dell'editor;
  * `selezioneIniziale` e `puntoIniziale` fissano l'inquadratura d'apertura una volta per mappa. */
-export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onChiudi, etichettaChiudi, incorporato, azioni, ritorno, editor, vistaGiornoCorrente, pannello, contenutiPannello, intestazione, className, selezioneIniziale, rivelaSelezione, puntoIniziale, scelta, pannelloIniziale, onPannello, titolo, senzaVicine }: Props) {
+export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onDaVerificare, onChiudi, etichettaChiudi, incorporato, azioni, ritorno, editor, vistaGiornoCorrente, pannello, contenutiPannello, intestazione, className, selezioneIniziale, rivelaSelezione, puntoIniziale, scelta, pannelloIniziale, onPannello, titolo, senzaVicine }: Props) {
   const sugg = useSuggerimenti();
   const tela = useRef<HTMLDivElement | null>(null);
   const [dim, setDim] = useState<Dimensioni>({ w: 0, h: 0 });
@@ -536,7 +539,8 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
 
   // Spilli visibili: filtri per tipo, raccolti nascosti, ricerca.
   const tipiPresenti = useMemo(() => TIPI_SPILLO.filter((t) => mappa.spilli.some((s) => s.tipo === t)), [mappa.spilli]);
-  const raccoltiNascosti = useMemo(() => mappa.spilli.filter((s) => s.collezionabile && s.raccolto).length, [mappa.spilli]);
+  // un pin «da verificare» (L4) resta in vista anche raccolto, finché non si sistema: nascosto, il suo anello ambra non si vedrebbe
+  const raccoltiNascosti = useMemo(() => mappa.spilli.filter((s) => s.collezionabile && s.raccolto && !s.daVerificare).length, [mappa.spilli]);
   const filtraBloccati = Boolean(partitaId) && (!editor || vistaGiornoCorrente === true);
   // anche le copie dei pezzi (102, 103) senza le loro condizioni: si contano e ricompaiono, in trasparenza, con lo stesso comando dei pin
   const pezziBloccati = useMemo(() => (filtraBloccati ? posate.filter((x) => statoPezzo(x.copia, true, false) === 'nascosto').length : 0), [posate, filtraBloccati]);
@@ -580,7 +584,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const sbiaditoInScelta = (s: SpilloDto) => !!scelta?.attenuaNascosti && ((s.collezionabile && !!s.raccolto) || bloccato(s));
   // in memoria finché non cambiano spilli o filtri: è l'ingresso del raggruppamento qui sotto, che così non si rifà a ogni disegno (P1")
   const inScelta = scelta !== undefined;
-  const visibili = useMemo(() => mappa.spilli.filter((s) => !tipiNascosti.has(s.tipo) && (inScelta || ((mostraRaccolti || !(s.collezionabile && s.raccolto)) && (mostraNonDisponibili || !(filtraBloccati && nascostoPerCondizioni(s))))) && (!ricercaNorm || s.nome.toLowerCase().includes(ricercaNorm) || nomePin(s).toLowerCase().includes(ricercaNorm))),
+  const visibili = useMemo(() => mappa.spilli.filter((s) => !tipiNascosti.has(s.tipo) && (inScelta || ((mostraRaccolti || !(s.collezionabile && s.raccolto && !s.daVerificare)) && (mostraNonDisponibili || !(filtraBloccati && nascostoPerCondizioni(s))))) && (!ricercaNorm || s.nome.toLowerCase().includes(ricercaNorm) || nomePin(s).toLowerCase().includes(ricercaNorm))),
     [mappa.spilli, tipiNascosti, inScelta, mostraRaccolti, mostraNonDisponibili, filtraBloccati, ricercaNorm]);
   const selezionato = mappa.spilli.find((s) => s.id === selezionatoId && (mostraNonDisponibili || !bloccato(s))) ?? null;
   // Il popup sta sopra allo spillo; sotto quando in alto non c'è spazio, e scorre in orizzontale quanto basta per restare dentro la
@@ -884,12 +888,12 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 <button
                   key={s.id}
                   type="button"
-                  className={`spillo-mappa ${attivo ? 'spillo-mappa--selezionato' : ''} ${scelta?.scelti.has(s.id) ? 'spillo-mappa--scelto' : ''} ${s.raccolto && !scelta ? 'spillo-mappa--raccolto' : ''} ${nonDisponibile(s) && !scelta ? 'spillo-mappa--bloccato' : ''} ${sbiaditoInScelta(s) ? 'spillo-mappa--nascosto-in-scelta' : ''} ${ricercaNorm ? 'spillo-mappa--trovato' : ''} ${sugg.evidenziato('spilli', s.id) ? 'spillo-mappa--suggerito' : ''} ${categoriaSpillo(s.tipo) === 'spostamento' ? 'spillo-mappa--spostamento' : ''}`}
+                  className={`spillo-mappa ${attivo ? 'spillo-mappa--selezionato' : ''} ${scelta?.scelti.has(s.id) ? 'spillo-mappa--scelto' : ''} ${s.raccolto && !scelta ? 'spillo-mappa--raccolto' : ''} ${nonDisponibile(s) && !scelta ? 'spillo-mappa--bloccato' : ''} ${sbiaditoInScelta(s) ? 'spillo-mappa--nascosto-in-scelta' : ''} ${ricercaNorm ? 'spillo-mappa--trovato' : ''} ${sugg.evidenziato('spilli', s.id) ? 'spillo-mappa--suggerito' : ''} ${categoriaSpillo(s.tipo) === 'spostamento' ? 'spillo-mappa--spostamento' : ''} ${s.daVerificare && !scelta ? 'spillo-mappa--da-verificare' : ''}`}
                   // Con «Aggiungi» o «Incolla» in mano il pin si fa da parte come il gruppo: il tocco
                   // serve a posare uno spillo in quel punto, e prima su un pin esistente non
                   // succedeva nulla, senza nemmeno un segnale (rilievo del validatore, 2026-09-13).
                   style={{ left: `${pos.x}%`, top: `${pos.y}%`, '--colore-spillo': s.colore, transform: `scale(${1 / zoom}) translate(-50%, -100%)`, pointerEvents: editor && editor.strumento !== 'seleziona' ? 'none' : undefined } as CSSProperties}
-                  aria-label={scelta ? `${s.tipoNome}: ${nomePin(s)}${sbiaditoInScelta(s) ? (s.raccolto ? ` · ${parolaSegnato(s)}` : ' · non ancora disponibile') : ''}${scelta.scelti.has(s.id) ? ' (collegato: tocca per scollegare)' : ' (tocca per collegare)'}` : `${s.tipoNome}: ${nomePin(s)}${s.raccolto ? ` (${parolaSegnato(s)})` : ''}${nonDisponibile(s) ? ' (non ancora disponibile)' : ''}${visitabile ? ' — doppio tocco per aprire l’arrivo' : ''}`}
+                  aria-label={scelta ? `${s.tipoNome}: ${nomePin(s)}${sbiaditoInScelta(s) ? (s.raccolto ? ` · ${parolaSegnato(s)}` : ' · non ancora disponibile') : ''}${scelta.scelti.has(s.id) ? ' (collegato: tocca per scollegare)' : ' (tocca per collegare)'}` : `${s.tipoNome}: ${nomePin(s)}${s.raccolto ? ` (${parolaSegnato(s)})` : ''}${s.daVerificare ? ' (da verificare)' : ''}${nonDisponibile(s) ? ' (non ancora disponibile)' : ''}${visitabile ? ' — doppio tocco per aprire l’arrivo' : ''}`}
                   aria-pressed={scelta ? scelta.scelti.has(s.id) : attivo}
                   disabled={scelta?.occupato}
                   title={nomePin(s)}
@@ -916,7 +920,15 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   <div className="flex-1 min-w-0">
                     <strong className="block text-[13px] leading-tight">{nomePin(selezionato)}</strong>
                     <span className="block text-[11px] text-text-muted">{selezionato.tipoNome}{selezionato.raccolto ? ` · ${parolaSegnato(selezionato)}` : ''}</span>
+                    {/* L4 (§1.4, R4-34): a quale infiltrazione si riferisce lo stato di un pin di voci che si ripropongono */}
+                    {selezionato.contestoInfiltrazione && <span className="block text-[11px] text-text-secondary">Stato nella {selezionato.contestoInfiltrazione.nome}</span>}
                     {selezionato.disponibilita && <ChipDisponibilita disponibilita={selezionato.disponibilita} compatto />}
+                    {/* L4 (§4.2): pin fatto con una voce non fatta, da prima dell'aggiornamento: il tocco apre la finestra che lo sistema */}
+                    {selezionato.daVerificare && onDaVerificare && partitaId && selezionato.uid && (() => {
+                      const voce = selezionato.voci.find((v) => v.daVerificare) ?? selezionato.voci[0];
+                      return voce ? <button type="button" className="chip chip--oro touch mt-1 text-[11px]"
+                        onClick={() => onDaVerificare({ spilloUid: selezionato.uid!, spilloNome: nomePin(selezionato), mappaNome: mappa.nome, voce: voce.chiave, voceNome: voce.nome, infiltrazioneNome: voce.infiltrazione?.nome ?? null })}>Da verificare</button> : null;
+                    })()}
                   </div>
                   <button type="button" className="spillo-popup__chiudi" onClick={() => seleziona(null)} aria-label="Chiudi il popup">×</button>
                 </div>

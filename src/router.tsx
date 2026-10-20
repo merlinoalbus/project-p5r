@@ -77,6 +77,8 @@ export const router = createBrowserRouter([
       { path: 'guida/calendario', element: <CalendarioPage /> },
       { path: 'guida/dungeon', element: <DungeonPage /> },
       { path: 'guida/dungeon/:chiave', element: <DungeonDettaglioPage /> },
+      // L3: la casa di un'Area del Palazzo è la scheda stessa, con l'area aperta (`?infiltrazione=`, `?planimetria=`, `?spillo=`…)
+      { path: 'guida/dungeon/:chiave/area/:slug', element: <DungeonDettaglioPage /> },
       { path: 'guida/richieste', element: <RichiestePage /> },
       { path: 'guida/battaglia', element: <BattagliaPage /> },
       { path: 'guida/mappe', element: <MappaPage /> },

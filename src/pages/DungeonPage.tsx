@@ -25,6 +25,7 @@ import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 import { schedaAccessoMondo } from '../utils/accessoMondo';
 import { soloPalazzi } from '../utils/palazzi';
+import { anelloPalazzo, livelloPalazzo } from '../utils/completamentoPalazzo';
 
 /**
  * Elenco dei Palazzi: carica i dungeon per la partita attiva tenendo solo i Palazzi (Iweleth
@@ -44,7 +45,9 @@ export function DungeonPage() {
           <IntestazionePagina titolo="Palazzi" sottotitolo="I nove Palazzi e il Dedalo di Iweleth: infiltrazioni e punti di interesse dalla guida allgamestaff (sicure, forzieri, Volontà, enigmi, mini-boss e boss con debolezze). Con una partita attiva segni ciò che hai ottenuto o esaurito; le planimetrie portano gli spilli preposizionati." />
           <ul className="m-0 p-0 list-none grid grid-cols-1 md:grid-cols-2 gap-3" aria-label="Palazzi">
             {dati.dati.map((d) => {
-              const quota = d.raccolta.presi !== null && d.raccolta.totale > 0 ? d.raccolta.presi / d.raccolta.totale : null;
+              // L4 (§1.5, §8.10): l'anello conta gli oggetti permanenti (numeri del server); il segno dice «Concluso» o «Completato»
+              const anello = anelloPalazzo(d);
+              const livello = livelloPalazzo(d);
               return (
                 <li key={d.chiave} className="flex">
                   {/* La carta porta alla **scheda** del Palazzo, non al risolutore della mappa.
@@ -57,9 +60,9 @@ export function DungeonPage() {
                   <Link to={schedaAccessoMondo('dungeon', d.chiave)} className={`card card--cliccabile piastrella no-underline text-text flex gap-4 w-full ${classiSuggerito(sugg.evidenziato('dungeon', d.chiave))}`} aria-label={`${d.nome}${d.sovrano ? `, ${d.sovrano}` : ''}`}>
                     <div className="flex flex-col items-center gap-2 shrink-0">
                       <EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={84} />
-                      {quota !== null && (
-                        <AnelloAvanzamento quota={quota} dimensione={56} spessore={4} etichetta={`Avanzamento in ${d.nome}: ${d.raccolta.presi} da raccogliere presi su ${d.raccolta.totale}`}>
-                          <span className="font-display text-[15px] leading-none tabular-nums">{Math.round(quota * 100)}%</span>
+                      {anello && (
+                        <AnelloAvanzamento quota={anello.quota} dimensione={56} spessore={4} etichetta={anello.etichetta}>
+                          <span className="font-display text-[15px] leading-none tabular-nums">{Math.floor(anello.quota * 100)}%</span>
                         </AnelloAvanzamento>
                       )}
                     </div>
@@ -68,6 +71,8 @@ export function DungeonPage() {
                         <span className="font-display uppercase text-[21px] leading-none">{d.nome}</span>
                         {sugg.evidenziato('dungeon', d.chiave) && <TargaSuggerito motivo={sugg.motivo('dungeon', d.chiave)} compatta />}
                         {d.arcanaSovranoNome && <span className="chip">{d.arcanaSovranoNome}</span>}
+                        {livello && <span className={`chip ${livello.testo === 'Completato' ? 'chip--attivo' : ''}`} title={livello.perche}>{livello.testo}</span>}
+                        {!!d.daVerificare && <span className="chip chip--oro" title="Pin fatti con una voce non fatta, da prima dell’aggiornamento: si sistemano dalla scheda">{d.daVerificare} da verificare</span>}
                       </div>
                       {d.sovrano && <span className="text-[13px] text-text-secondary">{d.sovrano}</span>}
                       <div className="flex flex-wrap gap-1.5">

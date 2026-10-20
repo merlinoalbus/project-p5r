@@ -27,15 +27,32 @@ export interface CollegamentoAzione {
 /** Scheda collegata a un'azione (Confidente con le risposte, dungeon, Richieste, libri…), se ricavabile. Per un Palazzo, se c'è
  *  una regola d'atterraggio per il giorno della voce, la sua planimetria (centrata sul pin d'arrivo), come l'icona della mappa
  *  di Tokyo (scelta dell'utente, 2026-10-04). */
-export function collegamentoAzione(a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento' | 'riferimentoTesto' | 'atterraggio'>): CollegamentoAzione | null {
+export function collegamentoAzione(a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento' | 'riferimentoTesto' | 'atterraggio'> & Partial<Pick<AzionePercorsoDto, 'uid' | 'infiltrazioni' | 'infiltrazioneDaAprire' | 'infiltrazioniDelPalazzo' | 'propostaInfiltrazioni'>>): CollegamentoAzione | null {
   const r = a.riferimento;
   const testo = a.riferimentoTesto;
   if (r) {
     switch (r.tipo) {
       case 'confidente': return { href: `/confidenti/${r.chiave}`, etichetta: testo ?? 'Scheda Confidente' };
-      case 'dungeon': return a.atterraggio
-        ? { href: urlMappa(a.atterraggio.mappa, a.atterraggio.spillo !== null ? { spillo: a.atterraggio.spillo } : undefined), etichetta: testo ?? 'Palazzo', atterraggio: { chiave: a.atterraggio.mappa, spilloId: a.atterraggio.spillo } }
-        : { href: `/guida/dungeon/${r.chiave}`, etichetta: testo ?? 'Palazzo' };
+      case 'dungeon': {
+        // L3 (§4.4, «Entra»): con le infiltrazioni della voce scelte, la prima non completata dell'insieme (la calcola il server per la
+        // partita, `infiltrazioneDaAprire`; tutte completate = l'ultima); senza, la regola d'atterraggio se c'è, altrimenti per una
+        // voce di Palazzo la prima infiltrazione non completata del Palazzo (`in-corso`). I Memento (campi assenti) restano com'erano.
+        const scelte = a.infiltrazioni ?? [];
+        if (scelte.length) {
+          const daAprire = a.infiltrazioneDaAprire ?? scelte[scelte.length - 1].chiave;
+          return { href: `/guida/dungeon/${r.chiave}?infiltrazione=${encodeURIComponent(daAprire)}`, etichetta: testo ?? 'Palazzo' };
+        }
+        if (a.atterraggio) return { href: urlMappa(a.atterraggio.mappa, a.atterraggio.spillo !== null ? { spillo: a.atterraggio.spillo } : undefined), etichetta: testo ?? 'Palazzo', atterraggio: { chiave: a.atterraggio.mappa, spilloId: a.atterraggio.spillo } };
+        // insieme vuoto con una proposta (UX3-1, decisione del PM del 2026-10-20): la prima infiltrazione della proposta, qualunque sia la
+        // certezza (il server la mette in `infiltrazioneDaAprire`; senza, la prima della proposta), con `daVoce` perché la scheda possa dire
+        // da dove è venuta e farla confermare
+        const proposta = a.propostaInfiltrazioni?.infiltrazioni ?? [];
+        if (proposta.length) {
+          const daAprire = a.infiltrazioneDaAprire ?? proposta[0].chiave;
+          return { href: `/guida/dungeon/${r.chiave}?infiltrazione=${encodeURIComponent(daAprire)}${a.uid ? `&daVoce=${encodeURIComponent(a.uid)}` : ''}`, etichetta: testo ?? 'Palazzo' };
+        }
+        return { href: `/guida/dungeon/${r.chiave}${a.infiltrazioniDelPalazzo ? '?infiltrazione=in-corso' : ''}`, etichetta: testo ?? 'Palazzo' };
+      }
       case 'richiesta': return { href: '/guida/richieste', etichetta: testo ?? 'Richieste dei Mementos' };
       case 'libro': return { href: '/guida/libri', etichetta: testo ?? 'Libri' };
       case 'film': return { href: '/guida/film', etichetta: testo ?? 'Film e DVD' };

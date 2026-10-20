@@ -34,7 +34,8 @@ export function FinestraAggiungiPlanimetria({ area, aperta, onChiudi, onAggiunta
     if (!file || !pronto) return;
     setOccupato(true);
     try {
-      const aggiornata = await aggiungiPlanimetriaArea(area.contenitore.chiave, area.slug, file, { etichetta: etichetta.trim() || undefined, predefinita });
+      // il contenitore com'è (quartiere, città o Palazzo, L3): la rotta prende il segmento giusto
+      const aggiornata = await aggiungiPlanimetriaArea(area.contenitore, area.slug, file, { etichetta: etichetta.trim() || undefined, predefinita });
       notifica('success', `Planimetria aggiunta a ${area.nome}.`);
       onAggiunta(aggiornata, aggiornata.planimetrie.at(-1)?.chiave ?? null);
       chiudi();

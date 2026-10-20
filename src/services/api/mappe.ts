@@ -66,7 +66,10 @@ export const aggiornaSpillo = (id: number, dati: DatiSpilloApi): Promise<SpilloD
 export const eliminaSpillo =(id: number): Promise<void> => apiDelete(`/mappe/spilli/${id}`);
 
 /** Segna uno spillo come raccolto (o non raccolto) nella partita. */
-export const impostaSpilloRaccolto = (partitaId: number, spilloId: number, raccolto: boolean): Promise<SpilloDto> => apiPut(`/partite/${partitaId}/spilli/${spilloId}`, { raccolto });
+/** Segna o toglie un pin nella partita. L4 (§1.4, §8.11): per un pin condiviso da voci rigenerabili di più infiltrazioni, `infiltrazione`
+ *  dice in quale (il contesto); senza, il server usa quello che la lettura ha mostrato (guardata, altrimenti in corso). */
+export const impostaSpilloRaccolto = (partitaId: number, spilloId: number, raccolto: boolean, infiltrazione?: string): Promise<SpilloDto> =>
+  apiPut(`/partite/${partitaId}/spilli/${spilloId}`, infiltrazione ? { raccolto, infiltrazione } : { raccolto });
 
 export interface RiferimentoTrovatoApi { tipo: TipoRiferimento; chiave: string; nome: string; dettaglio: string }
 /** Entità collegabili a uno spillo (editor): per tipo e testo. */

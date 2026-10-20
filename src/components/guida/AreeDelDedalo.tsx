@@ -30,7 +30,7 @@ import { Selettore } from '../shared/Selettore';
 import { FilaScorrevole } from '../shared/FilaScorrevole';
 import { TestoRipiegabile } from '../shared/TestoRipiegabile';
 import { CampoCorrezione, CorrezioneGuida } from './CorrezioneGuida';
-import { SpuntaCompletata, TestoCompletata } from './PlanimetriePalazzo';
+import { SpuntaCompletata, TestoCompletata } from './SpuntaCompletata';
 import { ModuloRichiesta } from './ModuloRichiesta';
 import { ModuloPersona } from './ModuloPersona';
 import { PersoneDellArea } from './PersoneDellArea';

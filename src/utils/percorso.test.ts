@@ -42,4 +42,27 @@ describe('collegamentoAzione — il Palazzo con le regole d’atterraggio (2026-
     expect(collegamentoAzione(palazzo(null))).toEqual({ href: '/guida/dungeon/kamoshida', etichetta: 'Palazzo di Kamoshida' });
     expect(collegamentoAzione(palazzo())).toEqual({ href: '/guida/dungeon/kamoshida', etichetta: 'Palazzo di Kamoshida' });
   });
+
+  // ---- L3 (2026-10-20, §4.4): «Entra» apre l'infiltrazione giusta ----
+  const opzioni = [{ chiave: 'k-1', nome: 'Primo giorno', ordine: 0 }, { chiave: 'k-2', nome: 'Secondo giorno', ordine: 1 }];
+  it('con le infiltrazioni della voce apre quella che il server indica (la prima non completata), anche se c’è l’atterraggio', () => {
+    expect(collegamentoAzione({ ...palazzo({ mappa: 'kamoshida/prigione', spillo: 42 }), infiltrazioni: [{ chiave: 'k-1', nome: 'Primo giorno' }, { chiave: 'k-2', nome: 'Secondo giorno' }], infiltrazioneDaAprire: 'k-2', infiltrazioniDelPalazzo: opzioni }))
+      .toEqual({ href: '/guida/dungeon/kamoshida?infiltrazione=k-2', etichetta: 'Palazzo di Kamoshida' });
+    // senza indicazione del server (nessuna partita): l'ultima dell'insieme
+    expect(collegamentoAzione({ ...palazzo(null), infiltrazioni: [{ chiave: 'k-1', nome: 'Primo giorno' }, { chiave: 'k-2', nome: 'Secondo giorno' }], infiltrazioniDelPalazzo: opzioni })?.href).toBe('/guida/dungeon/kamoshida?infiltrazione=k-2');
+  });
+  it('una voce di Palazzo senza infiltrazioni né atterraggio apre la prima non completata del Palazzo; i Memento restano com’erano', () => {
+    expect(collegamentoAzione({ ...palazzo(null), infiltrazioni: [], infiltrazioniDelPalazzo: opzioni })?.href).toBe('/guida/dungeon/kamoshida?infiltrazione=in-corso');
+    expect(collegamentoAzione({ ...palazzo({ mappa: 'kamoshida/sala', spillo: null }), infiltrazioni: [], infiltrazioniDelPalazzo: opzioni })?.href).toBe('/guida/mappe/kamoshida%2Fsala');
+    expect(collegamentoAzione({ tipo: 'palazzo', riferimento: { tipo: 'dungeon', chiave: 'mementos' }, riferimentoTesto: 'Memento', atterraggio: null })?.href).toBe('/guida/dungeon/mementos');
+  });
+  // UX3-1 (decisione del PM del 2026-10-20, §4.4): insieme vuoto con una proposta → la prima della proposta, con `daVoce`
+  it('insieme vuoto con una proposta: apre la prima infiltrazione della proposta (o quella del server) con daVoce, qualunque sia la certezza', () => {
+    const proposta = { infiltrazioni: [{ chiave: 'k-2', nome: 'Secondo giorno' }, { chiave: 'k-1', nome: 'Primo giorno' }], motivo: 'la voce descrive più infiltrazioni', certezza: 'multipla' as const };
+    expect(collegamentoAzione({ ...palazzo(null), uid: 'v-9', infiltrazioni: [], infiltrazioniDelPalazzo: opzioni, propostaInfiltrazioni: proposta })?.href).toBe('/guida/dungeon/kamoshida?infiltrazione=k-2&daVoce=v-9');
+    expect(collegamentoAzione({ ...palazzo(null), uid: 'v-9', infiltrazioni: [], infiltrazioniDelPalazzo: opzioni, propostaInfiltrazioni: { ...proposta, certezza: 'certa' }, infiltrazioneDaAprire: 'k-1' })?.href).toBe('/guida/dungeon/kamoshida?infiltrazione=k-1&daVoce=v-9');
+    // con una regola d'atterraggio vale l'atterraggio (§4.1), con l'insieme valorizzato l'insieme
+    expect(collegamentoAzione({ ...palazzo({ mappa: 'kamoshida/sala', spillo: null }), uid: 'v-9', infiltrazioni: [], infiltrazioniDelPalazzo: opzioni, propostaInfiltrazioni: proposta })?.href).toBe('/guida/mappe/kamoshida%2Fsala');
+    expect(collegamentoAzione({ ...palazzo(null), uid: 'v-9', infiltrazioni: [{ chiave: 'k-1', nome: 'Primo giorno' }], infiltrazioniDelPalazzo: opzioni, propostaInfiltrazioni: proposta })?.href).toBe('/guida/dungeon/kamoshida?infiltrazione=k-1');
+  });
 });

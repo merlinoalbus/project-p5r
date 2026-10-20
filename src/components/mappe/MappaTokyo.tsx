@@ -395,15 +395,19 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
         // posti dell'altro mondo, non fermate del treno.
         src: risolvi(segnoPalazzo(d.chiave)), dove, palazzo: true,
         // Dove si atterra lo dicono le regole del Palazzo per il giorno della partita (2026-10-04): una planimetria, centrata
-        // sul pin d'arrivo se c'è. Senza una regola che copra il giorno resta la scheda del Palazzo.
+        // sul pin d'arrivo se c'è. Senza una regola che copra il giorno, la scheda del Palazzo (L3, §4.1: prima `/guida/mondo/dungeon/<k>`,
+        // che finiva nella griglia delle planimetrie); con la regola il redirect della casa porta all'area, col pin (R3-35).
         href: d.atterraggio
           ? urlMappa(d.atterraggio.mappa, d.atterraggio.spillo !== null ? { spillo: d.atterraggio.spillo } : undefined)
-          : `/guida/mondo/dungeon/${encodeURIComponent(d.chiave)}`,
+          // dalla metro si arriva dove si è nel Palazzo (UX3-4, decisione del PM del 2026-10-20): la prima infiltrazione non completata
+          // della partita, come dal diario; tutte completate, o senza partita, la prima. I Memento restano senza (non hanno infiltrazioni)
+          : `/guida/dungeon/${encodeURIComponent(d.chiave)}${d.tipo === 'mementos' ? '' : '?infiltrazione=in-corso'}`,
         destinazione: d.atterraggio ? { mappa: d.atterraggio.mappa, centro: null, spillo: d.atterraggio.spillo } : null,
-        // Un Palazzo completato non c'è più, anche dentro la sua finestra: come nel gioco, e come
-        // l'ingresso dalla città che a Palazzo completato risulta bloccato (`palazziService`).
-        presente: !d.completato && (!dataGioco || !f || dentroFinestra(dataGioco, f.dal, f.al)),
-        quando: d.completato ? `completato: ${d.completato}` : f ? (f.al ? `dal ${f.dal} al ${f.al}` : `dal ${f.dal}`) : null,
+        // Un Palazzo **concluso** (Tesoro e boss finale) non c'è più, anche dentro la sua finestra: come nel gioco dopo il furto, e come
+        // l'ingresso dalla città, chiuso a Palazzo concluso (`palazziService`). Dal 2026-10-20 (L4 §8.10) gli effetti seguono il concluso,
+        // non il completato (che vale solo per anello e percentuale); `completato` resta per le risposte di prima, senza `concluso`.
+        presente: !(d.concluso ?? d.completato) && (!dataGioco || !f || dentroFinestra(dataGioco, f.dal, f.al)),
+        quando: (d.concluso ?? d.completato) ? `concluso: ${d.concluso ?? d.completato}` : f ? (f.al ? `dal ${f.dal} al ${f.al}` : `dal ${f.dal}`) : null,
       });
     }
     // Il nome di ogni fermata, cartellino o non cartellino. Serve ai pallini: quando una fermata

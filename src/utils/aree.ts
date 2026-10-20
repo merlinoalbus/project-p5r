@@ -22,6 +22,12 @@ export function eMappaDelMondo(mappa: { casa: string }): boolean {
   return mappa.casa === '/guida/citta' || mappa.casa.startsWith('/guida/citta/');
 }
 
+/** Una mappa con una pagina sua che non è il visore: del mondo (`/guida/citta…`) o, da L3, di un Palazzo (la scheda, `/guida/dungeon/…`:
+ *  la radice, o una planimetria nella pagina della sua area con la versione). Lì si va dritti, senza passare dal redirect (AP3-4). */
+export function haCasaPropria(mappa: { casa: string }): boolean {
+  return eMappaDelMondo(mappa) || mappa.casa.startsWith('/guida/dungeon/');
+}
+
 /** La pagina da cui si aggiungono aree e planimetrie accanto a una mappa del mondo (L2, `modifiche.md` §4.6, EditorMappaPage): il
  *  quartiere dell'Area (con «Aggiungi area», e da lì l'Area con «Aggiungi planimetria»); per un'Area della città, che un quartiere
  *  non ce l'ha, la sua pagina («Aggiungi planimetria»); per Tokyo la città, da cui si sceglie il quartiere; per un quartiere la sua

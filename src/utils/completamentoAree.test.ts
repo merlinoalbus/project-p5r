@@ -35,6 +35,17 @@ describe('completamentoArea', () => {
   it('senza partita le voci non hanno stato: nessuna area è completata', () => {
     expect(completamentoArea({ punti: [voce('forziere', null, 'a'), voce('boss', null, 'b')] }).completata).toBe(false);
   });
+
+  // L4 (§1.5, segnalazione D): con i numeri del server (oggetti permanenti) non si ricalcola a modo proprio
+  it('L4: con `completamento` del server vale il suo «completata», anche se le voci direbbero altro', () => {
+    // un rigenerabile non segnato non toglie il completamento (non conta); un permanente fatto dal suo oggetto in un'altra infiltrazione sì
+    const punti = [voce('forziere', 'ottenuto', 'a'), voce('oggetto', null, 'b')];
+    expect(completamentoArea({ punti, completamento: { oggetti: 1, fatti: 1, completata: true } }).completata).toBe(true);
+    expect(completamentoArea({ punti: [voce('forziere', 'ottenuto', 'a')], completamento: { oggetti: 2, fatti: 1, completata: false } }).completata).toBe(false);
+    // senza partita il server dice null: non completata
+    expect(completamentoArea({ punti, completamento: { oggetti: 1, fatti: null, completata: null } }).completata).toBe(false);
+    expect(areeCompletate([{ chiave: 'k', punti, completamento: { oggetti: 1, fatti: 1, completata: true } }])).toEqual(new Set(['k']));
+  });
 });
 
 describe('areeCompletate e tutteCompletate', () => {

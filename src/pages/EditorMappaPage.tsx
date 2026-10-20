@@ -40,7 +40,7 @@ import { ammetteCondizioni, CATEGORIE_SPILLO, DEFINIZIONI_CATEGORIA, DEFINIZIONI
 import { slug } from '../../shared/slug';
 import { ritornoMappe } from '../utils/ritornoMappe';
 import { NEL_CESTINO } from '../utils/cestino';
-import { eMappaDelMondo, paginaPerAggiungere } from '../utils/aree';
+import { haCasaPropria, paginaPerAggiungere } from '../utils/aree';
 import type { DatiAggiornaCopiaPezzo, EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../types';
 
 
@@ -214,7 +214,8 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
           onNaviga={vai}
           // nel mondo «Chiudi» porta alla casa della mappa (la pagina della città, del quartiere o dell'Area, sulla versione aperta: L2,
           // R2-20); fuori resta il ritorno alla pagina da cui si è entrati nelle mappe
-          onChiudi={() => navigate(eMappaDelMondo(dati) ? dati.casa : ritornoMappe() ?? `/guida/mappe/${encodeURIComponent(chiave)}`)}
+          // L3 (AP3-4): anche per una planimetria di un Palazzo, dritti alla sua casa (la scheda, sulla sua area e versione)
+          onChiudi={() => navigate(haCasaPropria(dati) ? dati.casa : ritornoMappe() ?? `/guida/mappe/${encodeURIComponent(chiave)}`)}
           editor={editor}
           className="visore-mappa--editor"
           intestazione={<span className="editor-mappa__targhetta">Modifica</span>}
@@ -223,7 +224,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
               icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Giorno corrente"
               dettaglio={attiva ? (conGiorno ? 'acceso: vedi solo quel che c’è oggi' : 'spento: vedi tutto') : 'serve una partita attiva'}
               disabled={!attiva} onClick={() => setGiornoCorrente((v) => !v)} />
-            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Apri il visore" onClick={() => navigate(eMappaDelMondo(dati) ? dati.casa : `/guida/mappe/${encodeURIComponent(chiave)}`)} />
+            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Apri il visore" onClick={() => navigate(haCasaPropria(dati) ? dati.casa : `/guida/mappe/${encodeURIComponent(chiave)}`)} />
           </>}
           pannello={
             <PannelloEditor

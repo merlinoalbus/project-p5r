@@ -57,6 +57,13 @@ interface Props<T extends Record<string, string>> {
   /** Testo accanto alla matita. Serve dove il comando finisce da solo su una riga: un glifo
       isolato sembra un refuso, due parole dicono che cosa fa. */
   etichetta?: string;
+  /** Aperta da fuori (per esempio da un menu, scheda del Palazzo da 1024 px, R3-41): con `aperta` il modulo si apre senza il pulsante,
+   *  chiuso non si disegna niente, e `onChiudi` dice che il modulo si è chiuso (salvato, annullato o eliminato). */
+  aperta?: boolean;
+  onChiudi?: () => void;
+  /** Classe della scritta accanto alla matita: per esempio `lg:sr-only`, solo icona da 1024 px (intestazione del Palazzo, R3-41); il
+   *  nome accessibile resta «<etichetta>: <cosa>». */
+  classeEtichetta?: string;
 }
 
 /**
@@ -65,12 +72,18 @@ interface Props<T extends Record<string, string>> {
  * bozza e la funzione per aggiornarla. «Salva» è attivo solo se la bozza differisce dalla partenza; con `elimina` c'è
  * anche «Elimina», che chiede conferma mostrando l'avviso. Chiudere il modulo scarta la bozza.
  */
-export function CorrezioneGuida<T extends Record<string, string>>({ cosa, iniziale, children, onSalva, elimina, compatto, etichetta }: Props<T>) {
-  const [bozza, setBozza] = useState<{ partenza: T; corrente: T } | null>(null);
+export function CorrezioneGuida<T extends Record<string, string>>({ cosa, iniziale, children, onSalva, elimina, compatto, etichetta, aperta, onChiudi, classeEtichetta }: Props<T>) {
+  const controllata = aperta !== undefined;
+  // aperta da fuori: la bozza parte dai valori del momento dell'apertura, come col pulsante
+  const [bozza, setBozza] = useState<{ partenza: T; corrente: T } | null>(() => {
+    if (!aperta) return null;
+    const v = iniziale();
+    return { partenza: v, corrente: v };
+  });
   const [occupato, setOccupato] = useState(false);
   const [conferma, setConferma] = useState(false);
   /** Chiude il modulo: scarta la bozza e l'eventuale richiesta di conferma dell'eliminazione. */
-  const chiudi = () => { setBozza(null); setConferma(false); };
+  const chiudi = () => { setBozza(null); setConferma(false); onChiudi?.(); };
 
   /** Salva la bozza con `onSalva`; a buon fine chiude il modulo e notifica, altrimenti lascia la bozza aperta e notifica l'errore. */
   const salva = async () => {
@@ -82,13 +95,14 @@ export function CorrezioneGuida<T extends Record<string, string>>({ cosa, inizia
   };
 
   if (!bozza) {
+    if (controllata) return null;
     return (
       <button type="button" className={`touch shrink-0 rounded px-1.5 text-text-muted hover:text-text ${compatto ? 'text-[11px]' : 'text-[12px]'}`}
         // Con una scritta accanto alla matita il nome accessibile comincia da quella (WCAG 2.5.3): chi dà comandi a
         // voce dice quello che legge, «Modifica testo», e deve trovarlo nel nome del pulsante.
         aria-label={etichetta ? `${etichetta}: ${cosa}` : `Correggi ${cosa}`} title={`Correggi ${cosa}`}
         onClick={() => { const v = iniziale(); setBozza({ partenza: v, corrente: v }); }}>
-        ✎{etichetta ? <span className="ml-1">{etichetta}</span> : null}
+        ✎{etichetta ? <span className={`ml-1 ${classeEtichetta ?? ''}`}>{etichetta}</span> : null}
       </button>
     );
   }

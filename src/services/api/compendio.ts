@@ -5,7 +5,7 @@
 import type {
   CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, AreaDedaloDto, AreaDungeonDto, AtterraggioPalazzoDto, PuntoInteresseDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, CitazioniRichiestaDto, RichiestaDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto, LuogoOpzioneDto } from '../../types';
 import { apiDelete, apiPut, apiPost, apiGet, queryString } from './_helpers';
-import type { AzionePercorsoDto, DatiVoceGiornata, ElenchiAzioneDto, PuntiCopiatiDto, PuntiSpostatiDto, SpostaPuntiInArea, TrasferisciVociGiornata, VideogiochiDto, VociTrasferiteDto } from '../../types';
+import type { AzionePercorsoDto, DatiVoceGiornata, ElenchiAzioneDto, EsitoRevisioneVoce, PuntiCopiatiDto, PuntiSpostatiDto, SpostaPuntiInArea, TrasferisciVociGiornata, VideogiochiDto, VociTrasferiteDto } from '../../types';
 import type { DoteNote } from '../../../shared/effettiAzione';
 
 /** Filtri dell'elenco Persona (stessi nomi della query API). */
@@ -59,6 +59,16 @@ export const creaVoceGiornata = (data: string, dati: DatiVoceGiornata, partita?:
 /** Modifica una voce: testo, note, genere, fascia, posto, tipo, collegamento, rango atteso, effetti. */
 export const aggiornaVoceGiornata = (uid: string, dati: DatiVoceGiornata, partita?: number): Promise<AzionePercorsoDto> =>
   apiPut(`/compendio/percorso/voci/${uid}${queryString({ partita })}`, dati);
+/** L3 (§4.4): l'insieme ordinato delle infiltrazioni di una voce di Palazzo (anche vuoto = «nessuna»). Va da solo, senza altri campi:
+ *  non tocca nient'altro della voce. */
+export const impostaInfiltrazioniVoce = (uid: string, infiltrazioni: string[], partita?: number): Promise<AzionePercorsoDto> =>
+  apiPut(`/compendio/percorso/voci/${uid}${queryString({ partita })}`, { infiltrazioni });
+/** L3 (§4.4, UX3-1): una voce del diario dal suo uid, per la scheda del Palazzo aperta dalla voce (`?daVoce=`): la proposta e il giorno. */
+export const getVocePercorso = (uid: string, partita?: number): Promise<AzionePercorsoDto> =>
+  apiGet(`/compendio/percorso/voci/${encodeURIComponent(uid)}${queryString({ partita })}`);
+/** L3 §1.4: l'esito di una voce «da rivedere» — tieni il nuovo, rimetti il precedente (solo con un testo precedente), fatto. */
+export const rivediVoceGiornata = (uid: string, esito: EsitoRevisioneVoce, partita?: number): Promise<AzionePercorsoDto> =>
+  apiPost(`/compendio/percorso/voci/${uid}/rivista${queryString({ partita })}`, { esito });
 /** Sposta una voce di un passo nella sua fascia (-1 su, +1 giù); risponde con tutte le voci del giorno. È relativo (un passo da dove
  *  sta): ripetuto dopo un 5xx o un timeout a scrittura già avvenuta la sposterebbe di due, quindi nessun nuovo tentativo. */
 export const spostaVoceGiornata = (uid: string, verso: -1 | 1, partita?: number): Promise<AzionePercorsoDto[]> =>
@@ -129,8 +139,9 @@ export const creaPunto = (area: string, dati: DatiPuntoApi & { nome: string; tip
 export const aggiornaPunto = (chiave: string, dati: DatiPuntoApi): Promise<PuntoInteresseDto> => apiPut(`/compendio/punti/${encodeURIComponent(chiave)}`, dati);
 /** Elimina una voce della guida dell'area (204, nessun contenuto). */
 export const eliminaPunto =(chiave: string): Promise<void> => apiDelete(`/compendio/punti/${encodeURIComponent(chiave)}`);
-/** Una sezione nuova della guida del Palazzo: `dopo` un'area (null = in cima, assente = in fondo), e se data nella planimetria. */
-export const creaArea = (dungeon: string, dati: { nome: string; descrizione?: string; dopo?: string | null; planimetria?: string }): Promise<{ chiave: string; nome: string; ordine: number }> =>
+/** Una sezione nuova della guida del Palazzo: `dopo` un'area (null = in cima, assente = in fondo), e se data nella planimetria; da L3
+ *  (R3-22) le Aree del Palazzo che tocca (`areePalazzo`, slug in ordine). */
+export const creaArea = (dungeon: string, dati: { nome: string; descrizione?: string; dopo?: string | null; planimetria?: string; areePalazzo?: string[] }): Promise<{ chiave: string; nome: string; ordine: number }> =>
   apiPost(`/compendio/dungeon/${encodeURIComponent(dungeon)}/aree`, dati);
 /** Un posto su (-1) o giù (+1) nella guida dell'area. Relativo come `spostaVoceGiornata`: nessun nuovo tentativo. */
 export const spostaPunto = (chiave: string, verso: -1 | 1): Promise<PuntoInteresseDto> => apiPut(`/compendio/punti/${encodeURIComponent(chiave)}/sposta`, { verso }, { maxRetries: 0 });

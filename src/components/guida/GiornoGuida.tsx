@@ -32,6 +32,7 @@ import { GestiVoce, PulsanteMenuVoce, type GestoVoce } from './MenuVoce';
 import { ModuloVoceGiornata, type SoggettoVoce } from './ModuloVoceGiornata';
 import { VoceEvento } from './VociAgenda';
 import { CartelliniAzione, ImmagineAzione, SceltaNote } from './PartiAzione';
+import { DaRivedereVoce, InfiltrazioniVoce } from './InfiltrazioniVoce';
 import { chiedeNote } from '../../utils/azioneStrutturata';
 import { seGiornoAvanzato } from '../../utils/giornoAvanzato';
 import { TrasferisciVoci } from './TrasferisciVoci';
@@ -95,9 +96,11 @@ export function Azione({ a, partitaId, onCambiata, onSullaMappa, evidenziata, ge
       {partitaId && <label className="touch flex items-start justify-center shrink-0 -my-1 pr-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 mt-2 shrink-0" checked={a.fatta} disabled={occupato || bloccata} onChange={(e) => void cambia(e.target.checked)} aria-label={`Fatto: ${a.azione.slice(0, 60)}`} /></label>}
       <ImmagineAzione a={a} />
       <div className="flex flex-col gap-0.5 text-[13px] min-w-0 flex-1">
-        <span className={a.fatta ? 'line-through' : ''}>{a.azione}</span>
+        <span className={a.fatta ? 'line-through' : ''}>{a.azione}{a.daRivedere && <>{' '}<DaRivedereVoce a={a} partitaId={partitaId} onCambiata={onCambiata} /></>}</span>
         <CartelliniAzione a={a} onSullaMappa={onSullaMappa && a.mappa ? () => onSullaMappa(a.mappa!, a.uid) : undefined}
           onApriMappa={onSullaMappa ? (m) => onSullaMappa(m, a.uid) : undefined} />
+        {/* L3 (§4.4): il campo «Infiltrazioni» delle voci di Palazzo, accanto al cartellino del Palazzo */}
+        <InfiltrazioniVoce a={a} partitaId={partitaId} onCambiata={onCambiata} />
         {chiediNote && <SceltaNote occupato={occupato} onScegli={(n) => void cambia(true, n ?? undefined, n === null)} onAnnulla={() => setChiediNote(false)} />}
       </div>
       {gesti && onMenu && <PulsanteMenuVoce voce={a.azione} aperto={menuAperto} onCambia={onMenu} disabled={occupato || bloccata} />}

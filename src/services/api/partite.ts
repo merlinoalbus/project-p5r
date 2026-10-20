@@ -5,7 +5,7 @@
 import type {
   CompendioPartitaDto, ConfidentePartitaDto, OsservazioneStatisticheDto, Difficolta, DoteSocialePartitaDto, FasciaGioco, ModificaConfidente, ModificaDote, PartitaDto, AnteprimaFusioneDto, CicloSalvatoDto, DomandeDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, ObiettivoDto, PersonaPossedutaDto, ArticoloDto, AzionePercorsoDto, CruciverbaDto, FilmDto, GiornoCorrenteDto, LibroDto, PuntoInteresseDto, RichiestaDto, TipoLettura, StatoPunto, StatoRichiesta, TrofeoDto, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto, SuggerimentoIsolamentoDto, SuggerimentiOggiDto, SquadraPartitaDto, TimbriDedaloDto } from '../../types';
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut, queryString } from './_helpers';
-import type { MeteoGiornoDto, VideogiocoDto } from '../../types';
+import type { DivergenzaDto, MeteoGiornoDto, VideogiocoDto } from '../../types';
 import type { MeteoPartita } from '../../../shared/meteoPartita';
 
 /** Campi modificabili di una partita. */
@@ -109,6 +109,11 @@ export const impostaTimbri = (id: number, area: string, raccolti: number): Promi
 
 /** Stato di un punto di interesse nella partita (null = riaperto). */
 export const impostaStatoPunto = (id: number, punto: string, stato: StatoPunto | null): Promise<PuntoInteresseDto> => apiPut(`/partite/${id}/punti`, { punto, stato });
+/** L4 (§3.2): le divergenze conservate «da verificare» della partita (pin fatto, voce non fatta, da prima dell'aggiornamento), di un
+ *  Palazzo o di tutti. */
+export const getDivergenze = (id: number, dungeon?: string): Promise<DivergenzaDto[]> => apiGet(`/partite/${id}/divergenze${queryString({ dungeon })}`);
+/** L4 (§3.2): «Togli il fatto al pin» — il pin torna da fare e la divergenza sparisce; la voce resta com'è. */
+export const togliFattoAlPin = (id: number, spilloUid: string): Promise<void> => apiDelete(`/partite/${id}/divergenze/${encodeURIComponent(spilloUid)}`);
 
 /** Domanda in classe segnata come fatta (con eventuale nota di Conoscenza). */
 export const impostaDomandaFatta = (id: number, domandaId: number, fatta: boolean, conoscenza: boolean): Promise<DomandeDto> => apiPut(`/partite/${id}/domande/${domandaId}`, { fatta, conoscenza });

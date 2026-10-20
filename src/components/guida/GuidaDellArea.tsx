@@ -22,7 +22,8 @@ import { COLORE_TIPO, NOME_TIPO } from '../../utils/dungeon';
 import { LIMITI_GUIDA } from '../../../shared/limitiGuida';
 import { puntoDaCollegare, puntoDescrittivo, puntoEnigma } from '../../../shared/spilli';
 import { nomeSenzaPalazzo } from '../../utils/gruppiPlanimetrie';
-import type { AreaDungeonDto, DungeonDettaglioDto, PuntoInteresseDto, StatoPunto } from '../../types';
+import type { AreaDungeonDto, DivergenzaDto, DungeonDettaglioDto, PuntoInteresseDto, StatoPunto } from '../../types';
+import type { DivergenzaDaVerificare } from './FinestraDaVerificare';
 import { CampoCorrezione, CorrezioneGuida } from './CorrezioneGuida';
 import { DettagliPunto } from './DettagliPunto';
 import { EditorDettagli } from './EditorDettagli';
@@ -79,6 +80,9 @@ interface Props {
   areePalazzo?: ReadonlyArray<{ chiave: string; nome: string; ordine: number }>;
   /** Il collegamento dei pin aperto o chiuso (null): la pagina lo fa sulla sua mappa (2026-10-18). Senza, «Collega pin» non c'è. */
   onCollegamento?: (c: CollegamentoPin | null) => void;
+  /** L4 (§4.1): le divergenze «da verificare» del Palazzo nella partita e l'apertura della finestra che le sistema (la apre la pagina). */
+  divergenze?: ReadonlyArray<DivergenzaDto>;
+  onDaVerificare?: (d: DivergenzaDaVerificare) => void;
 }
 
 /**
@@ -88,7 +92,7 @@ interface Props {
  * nella partita, pin collegati, spostamento, correzione o eliminazione e «Collega pin», che si fa sulla mappa della pagina
  * (`onCollegamento`): qui resta il conto dei pin collegati con «Fatto». Ogni modifica fa rileggere la scheda.
  */
-export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambiaStato, onPuntoAggiornato, onRicarica, areaDedalo, areePalazzo, onCollegamento }: Props) {
+export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambiaStato, onPuntoAggiornato, onRicarica, areaDedalo, areePalazzo, onCollegamento, divergenze, onDaVerificare }: Props) {
   /** Una voce descrittiva si legge e basta; nelle aree dei dedali non ce ne sono (099, scelta dell'utente: «Tutti con stato»). */
   const descrittiva = (p: PuntoInteresseDto) => puntoDescrittivo(p.tipo, p.areaDedalo);
   /** Il nome di quel che la guida mostra: l'area del dedalo o l'area del Palazzo. */
@@ -266,6 +270,8 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
             <span className="font-semibold">{p.nome}</span>
             <span className="text-[12px] text-text-muted"> · {NOME_TIPO[p.tipo]}{p.esauribile ? ' · esauribile' : ''}{p.stato ? ` · ${p.stato}` : ''}{passiDaSegnare.length > 0 ? ` · ${passiFatti}/${passiDaSegnare.length} passi` : ''}</span>
           </span>
+          {/* L4 (§4.1): un suo pin risulta fatto ma la voce no (da prima dell'aggiornamento); si sistema dalla voce aperta */}
+          {p.daVerificare && <span className="chip chip--oro shrink-0 text-[11px]">Da verificare</span>}
           {p.pin.length > 0
             ? <span className="chip chip--icona shrink-0 text-[11px]" title={p.pin.map((x) => `${x.nome} (${nomeSenzaPalazzo(x.mappaNome)})`).join(', ')}><IconaAzione chiave="posizione" dimensione={14} />{p.pin.length === 1 ? '1 pin' : `${p.pin.length} pin`}</span>
             : puntoDaCollegare(p.tipo) && !conPassi && <span className="chip shrink-0 text-[11px] text-text-muted">da collegare</span>}
@@ -275,6 +281,14 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
             {p.descrizione && <p className="m-0 whitespace-pre-wrap text-text-secondary">{p.descrizione}</p>}
             <DettagliPunto d={p.dettagli} />
             {conPassi && <p className="m-0 text-[11px] text-text-muted">Risolto quando i suoi passi sono fatti: segnarlo li segna tutti, riaprirlo li riapre. I pin stanno sui passi.</p>}
+            {p.daVerificare && partitaId && (() => {
+              const div = divergenze?.find((x) => x.voce === p.chiave);
+              return <div className="flex flex-wrap items-center gap-2 rounded-md border border-warning/50 px-2 py-1 text-[12px]">
+                <span className="min-w-0 flex-1">Il pin {div ? `«${div.spilloNome}» ` : ''}risulta fatto ma la voce no: era così prima dell’aggiornamento.</span>
+                {onDaVerificare && <button type="button" className="btn btn-secondary btn-sm touch" disabled={!div}
+                  onClick={() => div && onDaVerificare({ spilloUid: div.spilloUid, spilloNome: div.spilloNome, mappaNome: nomeSenzaPalazzo(div.mappaNome), voce: div.voce, voceNome: div.voceNome, infiltrazioneNome: div.infiltrazioneNome })}>Sistema…</button>}
+              </div>;
+            })()}
             {p.pin.length > 0 && (
               <ul className="m-0 flex list-none flex-col gap-1 p-0" aria-label={`Pin collegati a ${p.nome}`}>
                 {p.pin.map((x) => (

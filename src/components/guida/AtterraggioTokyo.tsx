@@ -67,14 +67,18 @@ interface Props {
   dungeon: DungeonDettaglioDto;
   /** Rilegge la scheda del Palazzo dopo un salvataggio. */
   onSalvato: () => Promise<unknown>;
+  /** Da 1024 px solo l'icona (intestazione compatta della scheda del Palazzo, R3-41). */
+  compatto?: boolean;
 }
 
 /** Il pulsante dell'intestazione del Palazzo e la finestra che modifica comparsa e atterraggio sulla mappa di Tokyo. */
-export function AtterraggioTokyo({ dungeon: d, onSalvato }: Props) {
+export function AtterraggioTokyo({ dungeon: d, onSalvato, compatto }: Props) {
   const [aperta, setAperta] = useState(false);
   return (
     <>
-      <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Sulla mappa di Tokyo"
+      {/* `compatto` (scheda del Palazzo da 1024 px, R3-41): solo l'icona, col testo per chi non vede e nel suggerimento */}
+      <PulsanteVisivo tono="secondario" compatto className={compatto ? 'btn-visivo--icona-lg' : undefined} title={compatto ? `Sulla mappa di Tokyo: ${testoFinestra(d.finestra)}` : undefined}
+        icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Sulla mappa di Tokyo"
         dettaglio={testoFinestra(d.finestra)} aria-haspopup="dialog" onClick={() => setAperta(true)} />
       {aperta && <FinestraAtterraggio d={d} onSalvato={onSalvato} onChiudi={() => setAperta(false)} />}
     </>

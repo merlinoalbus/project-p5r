@@ -20,6 +20,7 @@ import { VisoreMappa, type SceltaPin } from './VisoreMappa';
 import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { Spinner } from '../shared/PageState';
+import { FinestraDaVerificare, type DivergenzaDaVerificare } from '../guida/FinestraDaVerificare';
 
 interface Props {
   chiave: string;
@@ -93,6 +94,8 @@ function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, classN
   const { mappa, caricamento, errore, ricarica, raccolto, statoPunto, acquisto } = useMappaPartita(chiave, partitaId, { versione, onCambiato });
   // Schermo intero in pagina: stessa istanza del visore (zoom e selezione restano), «Torna alla pagina» o Esc per rientrare
   const [intero, setIntero] = useState(false);
+  // L4 (§4.2): la finestra «Da verificare» aperta dal popup di un pin; risolta, si rilegge la mappa e lo si dice alla pagina
+  const [daVerificare, setDaVerificare] = useState<DivergenzaDaVerificare | null>(null);
   useEffect(() => {
     if (!intero) return;
     /** Esc riporta il visore dentro la pagina. */
@@ -140,6 +143,7 @@ function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, classN
         onRaccolto={raccolto}
         onStatoPunto={statoPunto}
         onAcquisto={acquisto}
+        onDaVerificare={partitaId ? setDaVerificare : undefined}
         onChiudi={intero ? () => setIntero(false) : undefined}
         scelta={scelta}
         contenutiPannello={contenutiPannello}
@@ -153,6 +157,8 @@ function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, classN
           {conEditor && <CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica planimetria" />}
         </>}
       />
+      {daVerificare && partitaId && <FinestraDaVerificare divergenza={daVerificare} partitaId={partitaId} onChiudi={() => setDaVerificare(null)}
+        onRisolta={async () => { await ricarica(); onCambiato?.(); }} />}
     </div>
   );
 }

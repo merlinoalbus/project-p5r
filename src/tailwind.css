@@ -491,6 +491,8 @@
   .versioni-area--continua-sinistra::before, .versioni-area--continua-destra::after { opacity: 1; }
   .versioni-area__segmento { display: flex; flex: 0 0 auto; align-items: center; gap: 8px; min-height: 48px; padding: 3px 10px 3px 3px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg-secondary); color: var(--color-text); cursor: pointer; }
   .versioni-area__segmento:hover { border-color: var(--color-primary); }
+  /* R3-41: da 1024 px il segmento è alto 44 (il bersaglio minimo) invece di 48, per far salire il visore della scheda del Palazzo */
+  @media (min-width: 1024px) { .versioni-area__segmento { min-height: 44px; padding-top: 1px; padding-bottom: 1px; } }
   .versioni-area__segmento[aria-pressed="true"] { border-color: var(--color-primary); box-shadow: inset 0 0 0 1px var(--color-primary); background: color-mix(in srgb, var(--color-primary) 14%, var(--color-bg-secondary)); }
   /* ---- Il menu «Altro» (L2): azioni rare o distruttive raccolte in una tendina, sotto i 768 px nella testata dell'Area ---- */
   .menu-altro > summary::-webkit-details-marker { display: none; }
@@ -622,6 +624,8 @@
   /* al passaggio o alla selezione lo spillo suggerito tiene l'alone dorato e aggiunge quello rosso */
   .spillo-mappa--suggerito:hover .spillo-mappa__goccia, .spillo-mappa--suggerito.spillo-mappa--selezionato .spillo-mappa__goccia { box-shadow: 0 0 0 3px var(--color-oro), 0 0 16px rgba(245,197,66,.6), 0 0 0 6px color-mix(in srgb, var(--color-primary) 70%, transparent); }
   .spillo-mappa--suggerito { z-index: 14; }
+  /* L4 (§4.2): pin fatto con una voce non fatta, da prima dell'aggiornamento — anello ambra (--color-warning), pieno anche se raccolto */
+  .spillo-mappa--da-verificare .spillo-mappa__goccia { box-shadow: 0 0 0 3px var(--color-warning); opacity: 1; filter: none; }
   /* Modalità scelta (pin per una voce della guida, 2026-10-01): il riquadro verde, dentro la voce, dice che il tocco collega
      invece di aprire; i pin già collegati hanno l'anello verde e il nome sempre visibile. */
   .scelta-pin { display: flex; flex-direction: column; gap: 6px; padding: 6px; border: 1px solid var(--color-success); border-radius: var(--radius-md); background: color-mix(in srgb, var(--color-success) 10%, var(--color-bg-secondary)); }
@@ -1079,6 +1083,19 @@
     --chip-sfondo: color-mix(in srgb, var(--color-primary) 18%, var(--color-bg-secondary));
     --chip-bordo: var(--color-primary);
     color: var(--color-primary);
+  }
+  /* L3: un'area del Palazzo toccata dall'infiltrazione aperta (evidenziata, ma non scelta) */
+  .chip--toccata { --chip-bordo: color-mix(in srgb, var(--color-primary) 60%, transparent); }
+  /* L3: da 1280 px, nella colonna centrale stretta della scheda del Palazzo (fra «Aree» e «Da raccogliere»), i comandi delle righe
+     restano solo icona: il nome lo dicono `aria-label` e il suggerimento, e la riga non va a capo (R3-41) */
+  /* L3 (R3-41): la stessa cosa da 1024 px, per l'intestazione compatta della scheda del Palazzo («Sulla mappa di Tokyo») */
+  @media (min-width: 1024px) {
+    .btn-visivo--icona-lg { padding: 4px 6px; gap: 0; }
+    .btn-visivo--icona-lg .btn-visivo__testo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  }
+  @media (min-width: 1280px) {
+    .btn-visivo--icona-xl { padding: 4px 6px; gap: 0; }
+    .btn-visivo--icona-xl .btn-visivo__testo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   }
   /* oro (azioni consigliate, scadenze, «Oggi c'è il quiz») e grigio (azioni bloccate, 12.4): stavano prima di `.chip`, che con la
      stessa specificità ne riscriveva colore e variabili, e uscivano grigi come un chip qualunque (trovato il 2026-10-17) */

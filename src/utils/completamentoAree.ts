@@ -14,15 +14,18 @@
 import { puntoDescrittivo } from '../../shared/spilli';
 import type { AreaDungeonDto } from '../types';
 
-/** Quante voci da segnare ha un'area, quante sono segnate, e se è completata (almeno una voce, e tutte segnate). */
-export function completamentoArea(area: Pick<AreaDungeonDto, 'punti'>): { daSegnare: number; segnate: number; completata: boolean } {
+/** Quante voci da segnare ha un'area, quante sono segnate, e se è completata (almeno una voce, e tutte segnate).
+ *  L4 (§1.5, segnalazione D): quando il server manda `completamento` (le infiltrazioni dei Palazzi), «completata» è la sua — la
+ *  funzione unica, sugli oggetti permanenti — e qui non si ricalcola; senza (dati di prima) vale la regola di prima. */
+export function completamentoArea(area: Pick<AreaDungeonDto, 'punti'> & Partial<Pick<AreaDungeonDto, 'completamento'>>): { daSegnare: number; segnate: number; completata: boolean } {
   const voci = area.punti.filter((p) => !puntoDescrittivo(p.tipo, p.areaDedalo));
   const segnate = voci.filter((p) => p.stato !== null).length;
+  if (area.completamento) return { daSegnare: voci.length, segnate, completata: area.completamento.completata === true };
   return { daSegnare: voci.length, segnate, completata: voci.length > 0 && segnate === voci.length };
 }
 
 /** Le chiavi delle aree completate, per sapere in un colpo solo quali righe e chip portano la spunta. */
-export function areeCompletate(aree: ReadonlyArray<Pick<AreaDungeonDto, 'chiave' | 'punti'>>): ReadonlySet<string> {
+export function areeCompletate(aree: ReadonlyArray<Pick<AreaDungeonDto, 'chiave' | 'punti'> & Partial<Pick<AreaDungeonDto, 'completamento'>>>): ReadonlySet<string> {
   return new Set(aree.filter((a) => completamentoArea(a).completata).map((a) => a.chiave));
 }
 

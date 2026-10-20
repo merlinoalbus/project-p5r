@@ -129,3 +129,8 @@ it('in un Palazzo dice «infiltrazione» e «scheda del Palazzo»',async()=>{
   expect(screen.getByRole('link',{name:'Apri la scheda del Palazzo'})).toHaveAttribute('href','/guida/dungeon/kamoshida');
   expect(screen.getByText('Dettagli dell’infiltrazione')).toBeInTheDocument();
 });
+// L3 (§4.1): con l'infiltrazione chiesta che sta sulla mappa, la scheda del Palazzo si apre su di lei
+it('in un Palazzo la scheda si apre sull’infiltrazione chiesta, se appartiene alla mappa',async()=>{
+  monta();
+  expect(await screen.findByRole('link',{name:'Apri la scheda del Palazzo'})).toHaveAttribute('href','/guida/dungeon/castello?infiltrazione=castello-biblioteca');
+});

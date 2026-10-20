@@ -89,12 +89,19 @@ it('un vecchio URL editoriale apre la sezione del palazzo e non carica una plani
   render(<MemoryRouter initialEntries={['/vecchia']}><Routes><Route path="/vecchia" element={<RisolviMappa chiave="vecchia">{child}</RisolviMappa>}/><Route path="/guida/mappe/:id" element={<Indirizzo/>}/></Routes></MemoryRouter>);
   expect(await screen.findByText('/guida/mappe/palazzo?area=castello%2Fbiblioteca')).toBeInTheDocument();expect(child).not.toHaveBeenCalled();
 });
+it('L3: un alias di un’infiltrazione apre la sua casa, la scheda del Palazzo con ?infiltrazione=',async()=>{
+  api.risolviMappa.mockResolvedValue({tipo:'guida',area:'kamoshida-01',dungeon:'kamoshida',mappaPalazzo:'palazzo-di-kamoshida',nome:'Vecchio Castello',casa:'/guida/dungeon/kamoshida?infiltrazione=kamoshida-01'});
+  const child=vi.fn(()=> <div>Planimetria falsa</div>);
+  render(<MemoryRouter initialEntries={['/vecchia']}><Routes><Route path="/vecchia" element={<RisolviMappa chiave="vecchia">{child}</RisolviMappa>}/><Route path="/guida/dungeon/:chiave" element={<Indirizzo/>}/></Routes></MemoryRouter>);
+  expect(await screen.findByText('/guida/dungeon/kamoshida?infiltrazione=kamoshida-01')).toBeInTheDocument();expect(child).not.toHaveBeenCalled();
+});
 it('i contenuti mantengono testo e punti senza inventare coordinate o attività',async()=>{
   api.getContenutiMappa.mockResolvedValue({mappa:'palazzo',aree:[{chiave:'biblioteca',nome:'Biblioteca',descrizione:'Descrizione conservata',note:'Nota conservata',mappe:[],punti:[{id:7,nome:'Libro',descrizione:'Descrizione del libro',tipo:'nota',riferimento:null,collezionabile:true,soloPosizione:false}]}]});
   render(<MemoryRouter><ContenutiGuidaMappa mappa="palazzo" area="biblioteca" dungeon="castello"/></MemoryRouter>);
   const sezione=await screen.findByRole('region',{name:'Contenuti della guida'});
   expect(within(sezione).getByText('Descrizione conservata')).toBeInTheDocument();expect(within(sezione).getByText('Nota conservata')).toBeInTheDocument();expect(within(sezione).getByText('Libro')).toBeInTheDocument();
-  expect(within(sezione).queryByRole('button')).not.toBeInTheDocument();expect(within(sezione).getByRole('link')).toHaveAttribute('href','/guida/dungeon/castello');
+  // L3 (§4.1): la scheda si apre sull'infiltrazione chiesta
+  expect(within(sezione).queryByRole('button')).not.toBeInTheDocument();expect(within(sezione).getByRole('link')).toHaveAttribute('href','/guida/dungeon/castello?infiltrazione=biblioteca');
   expect(within(sezione).getByText('Biblioteca').closest('details')).toHaveAttribute('open');
 });
 
