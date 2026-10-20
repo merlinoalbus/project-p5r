@@ -594,8 +594,17 @@ it('«Aggiungi area» crea un’area del Palazzo legata all’infiltrazione aper
 it('da 1280 px il minimo di 240 px della mappa vale per la tela, non per il riquadro del visore', async () => {
   await apriAree();
   const classi = (await screen.findByText(/^Visore: /)).getAttribute('data-classe-visore')!.split(' ');
-  expect(classi).toEqual(expect.arrayContaining(['xl:[--minimo-tela:240px]', 'xl:min-h-fit', 'xl:flex-1', 'h-[max(300px,min(41vh,560px))]']));
+  expect(classi).toEqual(expect.arrayContaining(['xl:[--minimo-tela:240px]', 'xl:min-h-fit', 'xl:flex-1', 'lg:h-[max(300px,min(41vh,560px))]']));
   expect(classi).not.toContain('xl:min-h-[240px]');
+});
+
+// LAY3-3 (R3-40, caso L3-L07): sotto i 1024 px il visore è alto min(64dvh, 560px) — 520 a 375×812, 560 a 768×1024 —; da 1024 px
+// restano le misure di R3-41
+it('sotto i 1024 px il visore è alto min(64dvh, 560px); da 1024 px restano le misure di R3-41 (LAY3-3)', async () => {
+  await apriAree();
+  const classi = (await screen.findByText(/^Visore: /)).getAttribute('data-classe-visore')!.split(' ');
+  expect(classi).toEqual(expect.arrayContaining(['h-[min(64dvh,560px)]', 'lg:h-[max(300px,min(41vh,560px))]', 'xl:h-auto']));
+  expect(classi).not.toContain('h-[max(300px,min(41vh,560px))]');
 });
 
 // L3: l'ordine delle aree non dipende più dall'atlante (che diceva quali tavole erano la stessa stanza): le aree lo sanno da sé. Resta
