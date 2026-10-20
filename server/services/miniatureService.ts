@@ -6,7 +6,13 @@
 // che serve, con sharp (libvips), e si tiene in `immagine_miniatura` (migrazione 108) legata alla versione della sorgente
 // (`immagine.created_at`). Le regole:
 //   - formato WebP, qualità 80, `effort` 4, alfa conservato, metadati tolti, proporzioni mantenute e mai ingrandita;
-//   - si risponde con l'**originale** per SVG e GIF, quando `l` non riduce (la sorgente non è più larga), e quando il generatore
+//   - **ritaglio sul disegno** (UX2-13): un'immagine con alfa e margini trasparenti (le planimetrie su tele native da 2048) si
+//     ritaglia sul riquadro dei pixel visibili, con un piccolo bordo trasparente, prima di ridurla; le immagini senza margini restano
+//     intere. Solo la miniatura: il file pieno (visore, editor, coordinate dei pin) è sempre la tela intera;
+//   - la riga in cache vale per la versione della sorgente **e** per la generazione dell'algoritmo (`GENERAZIONE_MINIATURE`): le
+//     miniature di una generazione di prima non si servono, si rigenerano e la pulizia all'avvio le toglie;
+//   - si risponde con l'**originale** per SVG e GIF, quando `l` non riduce (la sorgente non è più larga e non c'è niente da
+//     ritagliare), e quando il generatore
 //     non c'è o fallisce (un `warn` per immagine, mai un 500 per una miniatura): l'app resta utilizzabile;
 //   - **coalescenza**: richieste contemporanee della stessa miniatura aspettano la stessa generazione, e la riga si scrive una volta;
 //   - la riga si scrive solo se la sorgente è ancora quella (un'immagine sostituita durante la generazione non riceve la miniatura
@@ -19,7 +25,7 @@
 import type { Sharp, SharpOptions } from 'sharp';
 import { getDb, nowIso, type AppDatabase } from '../db/dbService.js';
 import { logger } from '../utils/logger.js';
-import { LARGHEZZE_MINIATURA, type LarghezzaMiniatura } from '../../shared/miniature.js';
+import { GENERAZIONE_MINIATURE, LARGHEZZE_MINIATURA, versioneImmagine, type LarghezzaMiniatura } from '../../shared/miniature.js';
 import { caricataDellaMappa, dimensioniImmagine, immaginiCaricateDelleMappe } from './mappe/immagineMappa.js';
 
 /** La sorgente di una miniatura: la riga dell'immagine col suo contenuto (quella che la rotta del file ha appena letto). */
@@ -33,6 +39,17 @@ type Generatore = (input: Buffer, opzioni?: SharpOptions) => Sharp;
 
 /** Formati che non si riducono: vettoriali (SVG) o animati (GIF), si serve l'originale. */
 const SENZA_MINIATURA = new Set(['image/svg+xml', 'image/gif']);
+/** Formati che possono avere l'alfa: anche quando `l` non riduce, potrebbero avere margini trasparenti da ritagliare. */
+const CON_ALFA = new Set(['image/png', 'image/webp', 'image/avif', 'image/tiff']);
+
+/** Un pixel conta come disegno sopra questa opacità (su 255): l'alone quasi invisibile dell'antialias resta fuori dal riquadro. */
+const SOGLIA_ALFA = 8;
+/** Il bordo trasparente attorno al riquadro del disegno: il 2% del suo lato maggiore, almeno 2 pixel. */
+const BORDO_RITAGLIO = 0.02;
+const BORDO_MINIMO = 2;
+
+/** La versione di una riga in cache: la data della sorgente con la generazione dell'algoritmo (la stessa degli URL `?v=`). */
+export const versioneMiniatura = versioneImmagine;
 
 let caricamento: Promise<Generatore | null> | null = null;
 
@@ -58,13 +75,14 @@ const inCorso = new Map<string, Promise<RispostaMiniatura>>();
 /** Le immagini (id e versione) per cui una generazione è fallita: il `warn` si scrive una volta sola. */
 const fallite = new Set<string>();
 
-/** L'ETag della risposta con `l`: quello del file più la larghezza, così ogni misura ha il suo. */
-function etagDi(s: SorgenteMiniatura, l: LarghezzaMiniatura): string {
-  return `"${s.id}-${s.byte}-${s.createdAt}-l${l}"`;
+/** L'ETag della risposta con `l`: quello del file più la generazione e la larghezza, così ogni misura (e ogni generazione
+ *  dell'algoritmo) ha il suo. La rotta lo usa anche per il 304 prima di generare. */
+export function etagMiniatura(f: { id: number; byte: number; createdAt: string }, l: LarghezzaMiniatura): string {
+  return `"${f.id}-${f.byte}-${f.createdAt}-${GENERAZIONE_MINIATURE}-l${l}"`;
 }
 
 function originale(s: SorgenteMiniatura, l: LarghezzaMiniatura): RispostaMiniatura {
-  return { contenuto: s.contenuto, mime: s.mime, etag: etagDi(s, l), esito: 'originale' };
+  return { contenuto: s.contenuto, mime: s.mime, etag: etagMiniatura(s, l), esito: 'originale' };
 }
 
 /** Vero se la tabella delle miniature c'è (dalla 108; i test su uno schema di prima non l'hanno). */
@@ -78,12 +96,15 @@ function conMiniature(db: AppDatabase): boolean {
  */
 export async function miniaturaDi(s: SorgenteMiniatura, l: LarghezzaMiniatura, db: AppDatabase = getDb()): Promise<RispostaMiniatura> {
   if (SENZA_MINIATURA.has(s.mime) || !conMiniature(db)) return originale(s, l);
+  // niente da ridurre: l'originale subito, senza decodificare; non per i formati con l'alfa, che potrebbero avere margini
+  // trasparenti da ritagliare (lo decide `genera`, che risponde con l'originale se non ce ne sono)
   const dim = dimensioniImmagine(s.contenuto);
-  if (dim && l >= dim.larghezza) return originale(s, l);
-  const inCache = db.prepare('SELECT mime, contenuto FROM immagine_miniatura WHERE immagine_id = ? AND larghezza = ? AND versione = ?').get(s.id, l, s.createdAt) as
+  if (dim && l >= dim.larghezza && !CON_ALFA.has(s.mime)) return originale(s, l);
+  const versione = versioneMiniatura(s.createdAt);
+  const inCache = db.prepare('SELECT mime, contenuto FROM immagine_miniatura WHERE immagine_id = ? AND larghezza = ? AND versione = ?').get(s.id, l, versione) as
     { mime: string; contenuto: Buffer } | undefined;
-  if (inCache) return { contenuto: inCache.contenuto, mime: inCache.mime, etag: etagDi(s, l), esito: 'cache' };
-  const chiave = `${s.id}|${s.createdAt}|${l}`;
+  if (inCache) return { contenuto: inCache.contenuto, mime: inCache.mime, etag: etagMiniatura(s, l), esito: 'cache' };
+  const chiave = `${s.id}|${versione}|${l}`;
   const gia = inCorso.get(chiave);
   if (gia) return gia;
   const lavoro = genera(s, l, db).finally(() => inCorso.delete(chiave));
@@ -95,13 +116,14 @@ async function genera(s: SorgenteMiniatura, l: LarghezzaMiniatura, db: AppDataba
   const sharp = await generatore();
   if (!sharp) return originale(s, l);
   try {
-    // intestazione non letta da `dimensioniImmagine` (un formato che non conosce): la larghezza la dice sharp, e se non c'è niente
-    // da ridurre si serve l'originale
-    if (dimensioniImmagine(s.contenuto) === null) {
-      const larghezza = (await sharp(s.contenuto).metadata()).width;
-      if (larghezza !== undefined && l >= larghezza) return originale(s, l);
-    }
-    const { data, info } = await sharp(s.contenuto)
+    // le misure e l'alfa li dice sharp (anche per un formato che `dimensioniImmagine` non conosce); con l'alfa si cerca il riquadro
+    // del disegno, e se non c'è niente da ritagliare né da ridurre si serve l'originale
+    const meta = await sharp(s.contenuto).metadata();
+    const riquadro = meta.hasAlpha ? await riquadroDelDisegno(sharp, s.contenuto, meta.channels) : null;
+    if (!riquadro && meta.width !== undefined && l >= meta.width) return originale(s, l);
+    const sorgente = sharp(s.contenuto);
+    if (riquadro) sorgente.extract(riquadro);
+    const { data, info } = await sorgente
       .resize({ width: l, fit: 'inside', withoutEnlargement: true })
       .webp({ quality: 80, effort: 4 })
       .toBuffer({ resolveWithObject: true });
@@ -110,8 +132,8 @@ async function genera(s: SorgenteMiniatura, l: LarghezzaMiniatura, db: AppDataba
       SELECT ?, ?, ?, 'image/webp', ?, ?, ?, ?, ? WHERE EXISTS (SELECT 1 FROM immagine WHERE id = ? AND created_at = ?)
       ON CONFLICT(immagine_id, larghezza) DO UPDATE SET versione = excluded.versione, mime = excluded.mime, byte = excluded.byte,
         larghezza_reale = excluded.larghezza_reale, altezza_reale = excluded.altezza_reale, contenuto = excluded.contenuto, created_at = excluded.created_at`)
-      .run(s.id, l, s.createdAt, data.length, info.width, info.height, data, nowIso(), s.id, s.createdAt);
-    return { contenuto: data, mime: 'image/webp', etag: etagDi(s, l), esito: 'generata' };
+      .run(s.id, l, versioneMiniatura(s.createdAt), data.length, info.width, info.height, data, nowIso(), s.id, s.createdAt);
+    return { contenuto: data, mime: 'image/webp', etag: etagMiniatura(s, l), esito: 'generata' };
   } catch (err) {
     const quale = `${s.id}|${s.createdAt}`;
     if (!fallite.has(quale)) {
@@ -122,6 +144,41 @@ async function genera(s: SorgenteMiniatura, l: LarghezzaMiniatura, db: AppDataba
   }
 }
 
+/**
+ * Il riquadro del disegno di un'immagine con l'alfa (UX2-13): il rettangolo dei pixel con opacità sopra `SOGLIA_ALFA`, allargato
+ * del bordo e tenuto dentro la tela. Null se non c'è niente da ritagliare: tela tutta trasparente (si riduce intera) o disegno che
+ * col bordo arriva già ai lati. Il canale alfa è l'ultimo (RGBA, scala di grigi con alfa, tavolozza con trasparenza); a 16 bit
+ * conta il byte alto.
+ */
+async function riquadroDelDisegno(sharp: Generatore, contenuto: Buffer, canali: number | undefined): Promise<{ left: number; top: number; width: number; height: number } | null> {
+  const ultimo = Math.min(3, Math.max(1, (canali ?? 4) - 1)) as 1 | 2 | 3;
+  const { data, info } = await sharp(contenuto).extractChannel(ultimo).raw().toBuffer({ resolveWithObject: true });
+  const { width: w, height: h } = info;
+  const passo = data.length / (w * h);
+  const alto = passo - 1;
+  let minX = w; let minY = h; let maxX = -1; let maxY = -1;
+  for (let y = 0; y < h; y++) {
+    const riga = y * w;
+    let primo = -1;
+    for (let x = 0; x < w; x++) if (data[(riga + x) * passo + alto] > SOGLIA_ALFA) { primo = x; break; }
+    if (primo < 0) continue;
+    let ultimo = primo;
+    for (let x = w - 1; x > primo; x--) if (data[(riga + x) * passo + alto] > SOGLIA_ALFA) { ultimo = x; break; }
+    if (primo < minX) minX = primo;
+    if (ultimo > maxX) maxX = ultimo;
+    if (y < minY) minY = y;
+    maxY = y;
+  }
+  if (maxX < 0) return null;
+  const bordo = Math.max(BORDO_MINIMO, Math.round(Math.max(maxX - minX + 1, maxY - minY + 1) * BORDO_RITAGLIO));
+  const left = Math.max(0, minX - bordo);
+  const top = Math.max(0, minY - bordo);
+  const right = Math.min(w - 1, maxX + bordo);
+  const bottom = Math.min(h - 1, maxY + bordo);
+  if (left === 0 && top === 0 && right === w - 1 && bottom === h - 1) return null;
+  return { left, top, width: right - left + 1, height: bottom - top + 1 };
+}
+
 /** Toglie le miniature di un'immagine (prima di sostituirla: l'`ON CONFLICT DO UPDATE` conserva l'id, e la cascata non scatta). */
 export function eliminaMiniatureDi(db: AppDatabase, ambito: string, chiave: string): void {
   if (!conMiniature(db)) return;
@@ -129,13 +186,14 @@ export function eliminaMiniatureDi(db: AppDatabase, ambito: string, chiave: stri
 }
 
 /**
- * Toglie le miniature orfane o stantie: della riga d'immagine che non c'è più, di un'altra versione, o di una sorgente rimasta senza
- * contenuto (il pacchetto iniziale). Si fa all'avvio, con le altre regole sui dati, e dopo una ricarica del pacchetto.
+ * Toglie le miniature orfane o stantie: della riga d'immagine che non c'è più, di un'altra versione o di un'altra generazione
+ * dell'algoritmo (`versioneMiniatura`), o di una sorgente rimasta senza contenuto (il pacchetto iniziale). Si fa all'avvio, con le
+ * altre regole sui dati, e dopo una ricarica del pacchetto.
  */
 export function pulisciMiniatureOrfane(db: AppDatabase): number {
   if (!conMiniature(db)) return 0;
   return db.prepare(`DELETE FROM immagine_miniatura WHERE NOT EXISTS (SELECT 1 FROM immagine i
-    WHERE i.id = immagine_miniatura.immagine_id AND i.created_at = immagine_miniatura.versione AND i.contenuto IS NOT NULL)`).run().changes;
+    WHERE i.id = immagine_miniatura.immagine_id AND i.created_at || '~' || ? = immagine_miniatura.versione AND i.contenuto IS NOT NULL)`).run(GENERAZIONE_MINIATURE).changes;
 }
 
 /** Le misure che le schede chiedono (riquadri da ~128 px a densità 1 e 2): quelle che il riscaldamento prepara. */

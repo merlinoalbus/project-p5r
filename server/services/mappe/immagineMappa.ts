@@ -14,6 +14,7 @@
 
 import { getDb, nowIso, type AppDatabase } from '../../db/dbService.js';
 import { sqlRuoloDaGerarchia } from '../../../shared/immaginiMappa.js';
+import { versioneImmagine } from '../../../shared/miniature.js';
 import type { IllustrazioneDto } from '../../../shared/types.js';
 
 /** Un'immagine caricata nell'istanza per una mappa: la chiave nella tabella e la data, che versiona l'URL. */
@@ -38,9 +39,11 @@ export function caricataDellaMappa(r: { chiave: string; immagine_chiave: string 
   return null;
 }
 
-/** L'URL dell'immagine caricata, versionato con la data: una sostituzione cambia l'indirizzo, e ogni vista la vede subito. */
+/** L'URL dell'immagine caricata, versionato con la data e la generazione delle miniature: una sostituzione (o un nuovo modo di
+ *  calcolare le miniature, che le viste chiedono aggiungendo `l` a questo URL) cambia l'indirizzo, e ogni vista la vede subito
+ *  anche col file in cache immutabile nel browser. */
 export function urlCaricata(c: ImmagineCaricata): string {
-  return `/api/immagini/mappa/${encodeURIComponent(c.chiave)}/file?v=${encodeURIComponent(c.createdAt)}`;
+  return `/api/immagini/mappa/${encodeURIComponent(c.chiave)}/file?v=${encodeURIComponent(versioneImmagine(c.createdAt))}`;
 }
 
 /**
