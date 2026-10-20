@@ -38,8 +38,10 @@ vi.mock('../stores/suggerimentiStore', () => ({ useSuggerimenti: () => ({ eviden
 // il visore vero è provato a parte: qui dice planimetria e, collegando i pin (2026-10-18), che cosa riceve, e «tocca» il pin 3
 // L3: anche il pannello del visore («Infiltrazioni in quest'area») e lo spillo dell'indirizzo; AP3-2: `senzaVicine` e due passaggi
 // (verso una planimetria che la scheda conosce, e verso una chiave interna da risolvere), con lo spillo d'arrivo 9
-vi.mock('../components/mappe/MappaIncorporata', () => ({ MappaIncorporata: ({ chiave, classeVisore, scelta, contenutiPannello, spilloIniziale, senzaVicine, onNaviga }: { chiave: string; classeVisore?: string; scelta?: SceltaPin; contenutiPannello?: ReactNode; spilloIniziale?: number | null; senzaVicine?: boolean; onNaviga?: (k: string, arrivo?: { spillo: number }) => void }) => (
-  <div data-classe-visore={classeVisore} data-senza-vicine={senzaVicine ? 'sì' : undefined}>Visore: {chiave}{scelta ? ` · scelta per ${scelta.titolo} · ${scelta.scelti.size} scelti · sbiaditi ${String(scelta.attenuaNascosti)} · cerca «${scelta.ricerca ?? ''}»` : ''}{spilloIniziale ? ` · pin ${spilloIniziale}` : ''}
+vi.mock('../components/mappe/MappaIncorporata', () => ({ MappaIncorporata: ({ chiave, classeVisore, scelta, contenutiPannello, spilloIniziale, senzaVicine, onNaviga, primaDiRiaprire }: { chiave: string; classeVisore?: string; scelta?: SceltaPin; contenutiPannello?: ReactNode; spilloIniziale?: number | null; senzaVicine?: boolean; onNaviga?: (k: string, arrivo?: { spillo: number }) => void; primaDiRiaprire?: (s: { id: number }, voce: string | null) => Promise<boolean> }) => (
+  <div data-classe-visore={classeVisore} data-senza-vicine={senzaVicine ? 'sì' : undefined}>
+    {/* L4 §8.6: il popup del pin «toglie il segno» al pin 1 chiedendo prima alla pagina; l'esito si scrive qui */}
+    {primaDiRiaprire && <button type="button" onClick={(e) => { const b = e.currentTarget; void primaDiRiaprire({ id: 1 }, null).then((ok) => { b.dataset.esito = String(ok); }); }}>Togli il segno al pin 1 dal popup</button>}Visore: {chiave}{scelta ? ` · scelta per ${scelta.titolo} · ${scelta.scelti.size} scelti · sbiaditi ${String(scelta.attenuaNascosti)} · cerca «${scelta.ricerca ?? ''}»` : ''}{spilloIniziale ? ` · pin ${spilloIniziale}` : ''}
     {scelta && <button type="button" onClick={() => scelta.onScegli({ id: 3, nome: 'Forziere della torre' } as Parameters<SceltaPin['onScegli']>[0])}>Tocca il pin 3</button>}
     {onNaviga && <button type="button" onClick={() => onNaviga('m-cortile', { spillo: 9 })}>Passaggio al Cortile</button>}
     {onNaviga && <button type="button" onClick={() => onNaviga('nativo-cortile', { spillo: 9 })}>Passaggio interno al Cortile</button>}
@@ -803,6 +805,55 @@ it('dopo «Ottenuto» la scheda dice le altre voci segnate dal gesto («Segnate 
     effetti: { segnate: [{ chiave: 'k3-sicura', nome: 'Sicura del cortile', infiltrazione: { chiave: 'k-03', nome: 'Cortile' } }], riaperte: [] } });
   fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' }));
   await waitFor(() => expect(notifica).toHaveBeenCalledWith('info', 'Segnate anche: Sicura del cortile — 3ª infiltrazione.'));
+});
+
+// L4 §8.6 (O4-2): togliere il segno a un pin di un passo di un Enigma risolto lo riapre: nella scheda («Da raccogliere») e dal popup del
+// pin si chiede prima conferma con «Riapre anche l'Enigma «…»»; «Annulla» lascia tutto com'era; con l'Enigma non risolto niente conferma
+describe('§8.6: la riapertura di un Enigma risolto si conferma prima, nella scheda e dal popup', () => {
+  /** Il Palazzo di prova con l'Enigma «Ogni libro al suo posto» nel Cancello: il passo «Sistema i libri» sta sul pin 1 (raccolto). */
+  const conEnigma = (risolto: boolean): DungeonDettaglioDto => {
+    const d = palazzo(true);
+    const voce = (extra: Partial<PuntoInteresseDto>): PuntoInteresseDto => ({ ...d.aree[0].punti[0], pin: [], contenitore: null, ...extra });
+    d.aree[0] = { ...d.aree[0], punti: [...d.aree[0].punti,
+      voce({ chiave: 'e1', tipo: 'puzzle', nome: 'Ogni libro al suo posto', stato: risolto ? 'ottenuto' : null }),
+      voce({ chiave: 'e1-a', tipo: 'meccanismo', nome: 'Sistema i libri', contenitore: 'e1', stato: 'ottenuto',
+        pin: [{ id: 1, nome: 'Forziere', tipo: 'forziere', mappa: 'm-cancello', mappaNome: 'Palazzo di Kamoshida › Cancello' }] })] };
+    return d;
+  };
+
+  it('«Da raccogliere»: togliendo il segno al pin 1 si chiede conferma; «Annulla» non tocca niente, «Togli il segno» lo toglie', async () => {
+    getDungeon.mockResolvedValue(conEnigma(true));
+    impostaSpilloRaccolto.mockResolvedValue({});
+    monta('kamoshida');
+    const colonna = within(await screen.findByRole('complementary', { name: 'Da raccogliere in Cancello' }));
+    fireEvent.click(colonna.getByRole('button', { name: /Anche i raccolti/ }));
+    fireEvent.click(colonna.getByRole('checkbox', { name: 'Forziere 1 di Cancello aperto' }));
+    const finestra = within(await screen.findByRole('dialog', { name: 'Togliere il segno a «Forziere»?' }));
+    expect(finestra.getByText('Riapre anche l’Enigma «Ogni libro al suo posto».')).toBeInTheDocument();
+    fireEvent.click(finestra.getByRole('button', { name: 'Annulla' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(impostaSpilloRaccolto).not.toHaveBeenCalled();
+    expect(colonna.getByRole('checkbox', { name: 'Forziere 1 di Cancello aperto' })).toBeChecked();
+    fireEvent.click(colonna.getByRole('checkbox', { name: 'Forziere 1 di Cancello aperto' }));
+    fireEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Togli il segno' }));
+    await waitFor(() => expect(impostaSpilloRaccolto).toHaveBeenCalledWith(4, 1, false));
+  });
+
+  it('dal popup del pin la stessa conferma; con l’Enigma non risolto nessuna conferma', async () => {
+    getDungeon.mockResolvedValue(conEnigma(true));
+    const prima = monta('kamoshida');
+    const togli = await screen.findByRole('button', { name: 'Togli il segno al pin 1 dal popup' });
+    fireEvent.click(togli);
+    fireEvent.click(within(await screen.findByRole('dialog', { name: 'Togliere il segno a «Forziere»?' })).getByRole('button', { name: 'Annulla' }));
+    await waitFor(() => expect(togli.dataset.esito).toBe('false'));
+    prima.unmount();
+    getDungeon.mockResolvedValue(conEnigma(false));
+    monta('kamoshida');
+    const senza = await screen.findByRole('button', { name: 'Togli il segno al pin 1 dal popup' });
+    fireEvent.click(senza);
+    await waitFor(() => expect(senza.dataset.esito).toBe('true'));
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
 });
 
 it('senza schede da sistemare la sezione non c’è (AP3-1)', async () => {

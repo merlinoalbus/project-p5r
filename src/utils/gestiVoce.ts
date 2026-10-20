@@ -7,7 +7,26 @@
 // server dice quali (`condivise` prima del gesto, `effetti` nella risposta); qui si scrivono «Forziere — 4ª infiltrazione».
 // ============================================================
 
-import type { AvanzamentoVoceDto, VoceDelGestoDto } from '../types';
+import type { AvanzamentoVoceDto, PuntoInteresseDto, VoceDelGestoDto } from '../types';
+
+/**
+ * L4 §8.6 (O4-2): gli Enigmi **risolti** che si riaprono togliendo il segno a delle voci — quelle di cui le voci sono passi. Un Enigma è
+ * risolto quando i suoi passi sono fatti (R4-13), quindi togliere il segno a un suo passo lo riapre: prima lo si dice. Un Enigma non risolto
+ * non c'è (niente da riaprire, nessuna conferma). `tutte`: le voci in cui cercare gli Enigmi (quelle del Palazzo).
+ */
+export function enigmiCheSiRiaprono(voci: readonly Pick<PuntoInteresseDto, 'contenitore'>[], tutte: readonly PuntoInteresseDto[]): PuntoInteresseDto[] {
+  const chiavi = new Set(voci.map((v) => v.contenitore).filter((c): c is string => !!c));
+  return tutte.filter((e) => chiavi.has(e.chiave) && e.stato !== null);
+}
+
+/** Le voci che contengono il pin dato (togliendogli il segno si riaprono tutte, §8.11 punto 4). */
+export const vociDelPin = (pin: number, tutte: readonly PuntoInteresseDto[]): PuntoInteresseDto[] => tutte.filter((v) => v.pin.some((x) => x.id === pin));
+
+/** Le righe della conferma di una riapertura: «Riapre anche: …» per le voci che condividono i pin (§8.11), «Riapre anche l'Enigma «…»» per
+ *  ogni Enigma risolto che si riapre (§8.6). Vuoto = niente da confermare. */
+export function righeRiapertura(condivise: string | null, enigmi: readonly Pick<PuntoInteresseDto, 'nome'>[]): string[] {
+  return [...(condivise ? [`Riapre anche: ${condivise}.`] : []), ...enigmi.map((e) => `Riapre anche l’Enigma «${e.nome}».`)];
+}
 
 /** Il contatore dei pin fatti di una voce con più pin: «In corso · k/N» se ne è fatta una parte, «k/N» altrimenti; null con un pin solo o
  *  senza contatore (voci senza pin, senza partita, dedali). */
