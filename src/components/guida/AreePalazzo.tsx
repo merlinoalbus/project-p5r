@@ -68,9 +68,10 @@ export function AreePalazzo(p: Props) {
     const scelta = p.aree.find((a) => a.slug === p.areaScelta);
     return (
       <>
-        <button type="button" className="btn btn-secondary touch w-full justify-between" aria-haspopup="dialog" onClick={() => setFoglioAperto(true)}>
-          <span>Aree · {p.aree.length}</span>
-          <span className="min-w-0 truncate text-text-secondary">{scelta ? scelta.nome : 'scegli'} ▾</span>
+        {/* LAY3-7 (decisione del PM): il nome dell'area scelta si legge intero e, se serve, va a capo (era coi puntini a 375) */}
+        <button type="button" className="btn btn-secondary touch w-full justify-between gap-2 text-left" aria-haspopup="dialog" onClick={() => setFoglioAperto(true)}>
+          <span className="shrink-0">Aree · {p.aree.length}</span>
+          <span className="min-w-0 whitespace-normal break-words text-right text-text-secondary">{scelta ? scelta.nome : 'scegli'} ▾</span>
         </button>
         {foglioAperto && (
           <Modal titolo={`Aree · ${p.aree.length}`} aperta onChiudi={() => setFoglioAperto(false)}>
