@@ -72,8 +72,8 @@ function SchedaConsumabili({ d }: { d: OggettiGuidaDto }) {
       <div className="area-scorrevole-x">
         <table className="tabella tabella--adattiva text-[12px]">
           <thead><tr><th>Oggetto</th><th>Categoria</th><th>Effetto</th><th>Dove</th><th>Prezzo</th></tr></thead>
-          <tbody>{visibili.map((x) => <tr key={`${x.nome}-${x.categoria}`}><td data-etichetta="Oggetto"><strong>{x.nome}</strong>{x.nomeEn && x.nomeEn !== x.nome && <span className="text-text-muted"> ({x.nomeEn})</span>} <Secondaria v={x.verificato} /></td><td data-etichetta="Categoria"><CellaCategoria categoria={x.categoria} nome={NOME_CATEGORIA[x.categoria] ?? x.categoria} /></td><td data-etichetta="Effetto">{x.effetto}</td><td data-etichetta="Dove">{x.dove || '—'}{x.articolo ? <> <CollegamentoMappa tipo="articolo" chiave={x.articolo} testo="Sulla mappa" compatto /></>
-                : x.negozi?.map((n) => <span key={n}> <CollegamentoMappa tipo="negozio" chiave={n} testo="Sulla mappa" compatto /></span>)}</td><td data-etichetta="Prezzo" className="tabular-nums whitespace-nowrap">{x.prezzo !== null ? `${x.prezzo.toLocaleString('it-IT')} ¥` : '—'}</td></tr>)}</tbody>
+          <tbody>{visibili.map((x) => <tr key={`${x.nome}-${x.categoria}`}><td data-etichetta="Oggetto"><strong>{x.nome}</strong>{x.nomeEn && x.nomeEn !== x.nome && <span className="text-text-muted"> ({x.nomeEn})</span>} <Secondaria v={x.verificato} /></td><td data-etichetta="Categoria"><CellaCategoria categoria={x.categoria} nome={NOME_CATEGORIA[x.categoria] ?? x.categoria} /></td><td data-etichetta="Effetto">{x.effetto}</td><td data-etichetta="Dove">{x.dove || '—'}{x.articolo ? <> <CollegamentoMappa tipo="articolo" chiave={x.articolo} testo={x.posto ?? 'Sulla mappa'} compatto /></>
+                : x.negozi?.map((n) => <span key={n}> <CollegamentoMappa tipo="negozio" chiave={n} testo={x.postiNegozi?.[n] ?? 'Sulla mappa'} compatto /></span>)}</td><td data-etichetta="Prezzo" className="tabular-nums whitespace-nowrap">{x.prezzo !== null ? `${x.prezzo.toLocaleString('it-IT')} ¥` : '—'}</td></tr>)}</tbody>
         </table>
       </div>
     </div>
@@ -95,8 +95,8 @@ function SchedaChiave({ d }: { d: OggettiGuidaDto }) {
       <div className="area-scorrevole-x">
         <table className="tabella tabella--adattiva text-[12px]">
           <thead><tr><th>Oggetto</th><th>Tipo</th><th>Uso</th><th>Dove</th></tr></thead>
-          <tbody>{visibili.map((x) => <tr key={`${x.nome}-${x.tipo}`}><td data-etichetta="Oggetto"><strong>{x.nome}</strong>{x.nomeEn && x.nomeEn !== x.nome && <span className="text-text-muted"> ({x.nomeEn})</span>} <Secondaria v={x.verificato} /></td><td data-etichetta="Tipo"><CellaCategoria categoria={x.tipo === 'chiave' ? 'oggetti-chiave' : 'materiali'} nome={x.tipo === 'chiave' ? 'Oggetto chiave' : 'Materiale'} /></td><td data-etichetta="Uso">{x.uso}</td><td data-etichetta="Dove">{x.dove || '—'}{x.articolo ? <> <CollegamentoMappa tipo="articolo" chiave={x.articolo} testo="Sulla mappa" compatto /></>
-                : x.negozi?.map((n) => <span key={n}> <CollegamentoMappa tipo="negozio" chiave={n} testo="Sulla mappa" compatto /></span>)}</td></tr>)}</tbody>
+          <tbody>{visibili.map((x) => <tr key={`${x.nome}-${x.tipo}`}><td data-etichetta="Oggetto"><strong>{x.nome}</strong>{x.nomeEn && x.nomeEn !== x.nome && <span className="text-text-muted"> ({x.nomeEn})</span>} <Secondaria v={x.verificato} /></td><td data-etichetta="Tipo"><CellaCategoria categoria={x.tipo === 'chiave' ? 'oggetti-chiave' : 'materiali'} nome={x.tipo === 'chiave' ? 'Oggetto chiave' : 'Materiale'} /></td><td data-etichetta="Uso">{x.uso}</td><td data-etichetta="Dove">{x.dove || '—'}{x.articolo ? <> <CollegamentoMappa tipo="articolo" chiave={x.articolo} testo={x.posto ?? 'Sulla mappa'} compatto /></>
+                : x.negozi?.map((n) => <span key={n}> <CollegamentoMappa tipo="negozio" chiave={n} testo={x.postiNegozi?.[n] ?? 'Sulla mappa'} compatto /></span>)}</td></tr>)}</tbody>
         </table>
       </div>
     </div>

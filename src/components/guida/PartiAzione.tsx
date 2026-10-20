@@ -52,8 +52,9 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa }: PropsCartelli
         onClick={apriAccanto ? (e) => { if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) { e.preventDefault(); onApriMappa!(apriAccanto); } } : undefined}>{link.etichetta}</Link>
         : a.riferimentoTesto && <span className="chip text-[11px]">{a.riferimentoTesto}</span>}
       {a.mappa && onSullaMappa && (
-        <button type="button" className="chip chip--icona touch text-[11px]" onClick={onSullaMappa} aria-label={`Sulla mappa: ${a.azione.slice(0, 60)}`}>
-          <IconaSpillo tipo="passaggio" dimensione={14} />Sulla mappa
+        <button type="button" className="chip chip--icona touch text-[11px]" onClick={onSullaMappa} aria-label={`${a.mappa.posto ? `Apri in ${a.mappa.posto}` : 'Sulla mappa'}: ${a.azione.slice(0, 60)}`}>
+          {/* L5 (M23): il nome del posto del pin («Clinica Takemi», «Central Street»); «Sulla mappa» solo se il posto non ha un nome */}
+          <IconaSpillo tipo="passaggio" dimensione={14} />{a.mappa.posto ?? 'Sulla mappa'}
         </button>
       )}
       {/* la guida del quiz del lavoro (il quiz dei codici a barre al Triple Seven), consultabile da ogni turno: in oro nei giorni del quiz */}
