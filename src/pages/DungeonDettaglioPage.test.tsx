@@ -38,8 +38,8 @@ vi.mock('../stores/suggerimentiStore', () => ({ useSuggerimenti: () => ({ eviden
 // il visore vero è provato a parte: qui dice planimetria e, collegando i pin (2026-10-18), che cosa riceve, e «tocca» il pin 3
 // L3: anche il pannello del visore («Infiltrazioni in quest'area») e lo spillo dell'indirizzo; AP3-2: `senzaVicine` e due passaggi
 // (verso una planimetria che la scheda conosce, e verso una chiave interna da risolvere), con lo spillo d'arrivo 9
-vi.mock('../components/mappe/MappaIncorporata', () => ({ MappaIncorporata: ({ chiave, classeVisore, scelta, contenutiPannello, spilloIniziale, senzaVicine, onNaviga, primaDiRiaprire }: { chiave: string; classeVisore?: string; scelta?: SceltaPin; contenutiPannello?: ReactNode; spilloIniziale?: number | null; senzaVicine?: boolean; onNaviga?: (k: string, arrivo?: { spillo: number }) => void; primaDiRiaprire?: (s: { id: number }, voce: string | null) => Promise<boolean> }) => (
-  <div data-classe-visore={classeVisore} data-senza-vicine={senzaVicine ? 'sì' : undefined}>
+vi.mock('../components/mappe/MappaIncorporata', () => ({ MappaIncorporata: ({ chiave, classeVisore, scelta, contenutiPannello, spilloIniziale, senzaVicine, onNaviga, primaDiRiaprire, infiltrazione }: { chiave: string; classeVisore?: string; scelta?: SceltaPin; contenutiPannello?: ReactNode; spilloIniziale?: number | null; senzaVicine?: boolean; onNaviga?: (k: string, arrivo?: { spillo: number }) => void; primaDiRiaprire?: (s: { id: number }, voce: string | null) => Promise<boolean>; infiltrazione?: string | null }) => (
+  <div data-classe-visore={classeVisore} data-senza-vicine={senzaVicine ? 'sì' : undefined} data-infiltrazione={infiltrazione ?? undefined}>
     {/* L4 §8.6: il popup del pin «toglie il segno» al pin 1 chiedendo prima alla pagina; l'esito si scrive qui */}
     {primaDiRiaprire && <button type="button" onClick={(e) => { const b = e.currentTarget; void primaDiRiaprire({ id: 1 }, null).then((ok) => { b.dataset.esito = String(ok); }); }}>Togli il segno al pin 1 dal popup</button>}Visore: {chiave}{scelta ? ` · scelta per ${scelta.titolo} · ${scelta.scelti.size} scelti · sbiaditi ${String(scelta.attenuaNascosti)} · cerca «${scelta.ricerca ?? ''}»` : ''}{spilloIniziale ? ` · pin ${spilloIniziale}` : ''}
     {scelta && <button type="button" onClick={() => scelta.onScegli({ id: 3, nome: 'Forziere della torre' } as Parameters<SceltaPin['onScegli']>[0])}>Tocca il pin 3</button>}
@@ -854,6 +854,13 @@ describe('§8.6: la riapertura di un Enigma risolto si conferma prima, nella sch
     await waitFor(() => expect(senza.dataset.esito).toBe('true'));
     expect(screen.queryByRole('dialog')).toBeNull();
   });
+});
+
+// L4 §1.4 (regola 1): nella scheda il contesto dello stato dei pin condivisi è l'infiltrazione aperta; il visore la riceve
+it('il visore della scheda legge lo stato nell’infiltrazione aperta (§1.4, §4.2)', async () => {
+  getDungeon.mockResolvedValue(palazzo(true));
+  monta('kamoshida', '/area/cortile?infiltrazione=k-03');
+  expect(await screen.findByText(/^Visore: m-cortile/)).toHaveAttribute('data-infiltrazione', 'k-03');
 });
 
 it('senza schede da sistemare la sezione non c’è (AP3-1)', async () => {

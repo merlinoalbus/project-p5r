@@ -8,17 +8,21 @@
 // con l'altezza fissa del visore, un elenco lungo di figli sarebbe uscito dalla scheda (rilievo della revisione).
 // ============================================================
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { MappaIncorporata } from './MappaIncorporata';
 
 // `gesti`: raccolto e stato della voce del gancio della partita, e le funzioni che il visore riceve (per provare §8.6)
 const { risolviMappa, haPlanimetria, figli, gesti } = vi.hoisted(() => ({ risolviMappa: vi.fn(), haPlanimetria: vi.fn(), figli: { elenco: [{ chiave: 'm-figlia', nome: 'Stanza figlia' }] as Array<{ chiave: string; nome: string }> },
-  gesti: { raccolto: vi.fn(), statoPunto: vi.fn(), visore: null as null | { onRaccolto?: (s: unknown, v: boolean) => Promise<void>; onStatoPunto?: (s: unknown, voce: string, stato: string | null) => Promise<void> } } }));
+  gesti: { raccolto: vi.fn(), statoPunto: vi.fn(), opz: null as null | { infiltrazione?: string | null },
+    visore: null as null | { onRaccolto?: (s: unknown, v: boolean) => Promise<void>; onStatoPunto?: (s: unknown, voce: string, stato: string | null) => Promise<void>; onContesto?: (k: string) => void } } }));
 vi.mock('../../services/api', (vero) => moduloApi(vero, { risolviMappa }));
 vi.mock('../../utils/haPlanimetria', () => ({ haPlanimetria }));
 vi.mock('../../hooks/useMappaPartita', () => ({
-  useMappaPartita: () => ({ mappa: { chiave: 'm-sala', nome: 'Sala', figli: figli.elenco, spilli: [] }, caricamento: false, errore: null, ricarica: vi.fn(), raccolto: gesti.raccolto, statoPunto: gesti.statoPunto, acquisto: vi.fn() }),
+  useMappaPartita: (_c: string, _p: number | null, opz: { infiltrazione?: string | null }) => {
+    gesti.opz = opz;
+    return { mappa: { chiave: 'm-sala', nome: 'Sala', figli: figli.elenco, spilli: [] }, caricamento: false, errore: null, ricarica: vi.fn(), raccolto: gesti.raccolto, statoPunto: gesti.statoPunto, acquisto: vi.fn() };
+  },
 }));
 vi.mock('../../utils/presentazioneMappa', () => ({ presentaMappa: (m: unknown) => m }));
 vi.mock('./VisoreMappa', () => ({ VisoreMappa: (p: NonNullable<typeof gesti.visore>) => { gesti.visore = p; return <div data-testid="visore">Visore</div>; } }));
@@ -88,4 +92,18 @@ it('§8.6: prima di togliere il segno dal popup si chiede alla pagina; «Annulla
   primaDiRiaprire.mockResolvedValue(true);
   await gesti.visore!.onRaccolto!(pin, false);
   expect(gesti.raccolto).toHaveBeenCalledWith(pin, false);
+});
+
+// L4 §1.4, §4.2: la mappa si legge nell'infiltrazione guardata dalla pagina; il popup ne sceglie un'altra (per i pin di più infiltrazioni), e
+// cambiando l'infiltrazione guardata vale di nuovo quella della pagina
+it('§4.2: il contesto è l’infiltrazione della pagina; il popup ne sceglie un’altra; la pagina che cambia infiltrazione lo riporta alla sua', async () => {
+  haPlanimetria.mockReturnValue(true);
+  // con una partita: senza, lo stato non c'è e il popup non sceglie l'infiltrazione
+  const { rerender } = render(<MemoryRouter><MappaIncorporata chiave="m-sala" partitaId={4} infiltrazione="k-01" /></MemoryRouter>);
+  await screen.findByTestId('visore');
+  expect(gesti.opz?.infiltrazione).toBe('k-01');
+  await act(async () => { gesti.visore!.onContesto!('k-04'); });
+  expect(gesti.opz?.infiltrazione).toBe('k-04');
+  rerender(<MemoryRouter><MappaIncorporata chiave="m-sala" partitaId={4} infiltrazione="k-05" /></MemoryRouter>);
+  expect(gesti.opz?.infiltrazione).toBe('k-05');
 });

@@ -171,3 +171,34 @@ it('una versione nuova rilegge in silenzio: la mappa resta a schermo mentre arri
   await act(async () => { risolvi(mappa('a', [{ ...leva, raccolto: true }])); });
   expect(screen.getByTestId('mappa')).toHaveTextContent('a: Leva (segnato)');
 });
+
+// L4 §1.4 e §4.2: la mappa si legge nell'infiltrazione di contesto (quella guardata, o scelta nel popup); cambiarla rilegge in silenzio, e il
+// segno di un pin condiviso dalle voci di più infiltrazioni si scrive nell'infiltrazione in cui se ne legge lo stato
+describe('§1.4, §4.2: l’infiltrazione di contesto', () => {
+  function ConContesto() {
+    const [infiltrazione, setInfiltrazione] = useState('m-02');
+    const m = useMappaPartita('a', 7, { infiltrazione });
+    const primo = m.mappa?.spilli[0];
+    return <>
+      <p data-testid="mappa">{m.mappa ? m.mappa.spilli.map((s) => `${s.nome} nella ${s.contestoInfiltrazione?.nome ?? '—'}`).join(', ') : 'caricamento'}</p>
+      <button type="button" onClick={() => setInfiltrazione('m-04')}>Quarta</button>
+      {primo && <button type="button" onClick={() => void m.raccolto(primo, true)}>Segna</button>}
+    </>;
+  }
+  const ombre = (inf: { chiave: string; nome: string }): SpilloDto => ({ ...leva, id: 12, tipo: 'nemico', nome: 'Ombre', contestoInfiltrazione: inf });
+
+  it('legge nel contesto, lo cambia in silenzio e segna il pin condiviso nell’infiltrazione dello stato', async () => {
+    getMappa.mockImplementation(async (_k: string, _p?: number, inf?: string) => mappa('a', [ombre(inf === 'm-04' ? { chiave: 'm-04', nome: '4ª' } : { chiave: 'm-02', nome: '2ª' })]));
+    impostaSpilloRaccolto.mockImplementation(async () => ({ ...ombre({ chiave: 'm-04', nome: '4ª' }), raccolto: true }));
+    render(<ConContesto />);
+    expect(await screen.findByText('Ombre nella 2ª')).toBeInTheDocument();
+    expect(getMappa).toHaveBeenCalledWith('a', 7, 'm-02');
+    fireEvent.click(screen.getByRole('button', { name: 'Quarta' }));
+    // la mappa resta a schermo mentre si rilegge (niente «caricamento»)
+    expect(screen.getByTestId('mappa')).not.toHaveTextContent('caricamento');
+    expect(await screen.findByText('Ombre nella 4ª')).toBeInTheDocument();
+    expect(getMappa).toHaveBeenLastCalledWith('a', 7, 'm-04');
+    fireEvent.click(screen.getByRole('button', { name: 'Segna' }));
+    await waitFor(() => expect(impostaSpilloRaccolto).toHaveBeenCalledWith(7, 12, true, 'm-04'));
+  });
+});

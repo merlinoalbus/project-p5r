@@ -17,7 +17,9 @@ export const getAlberoMappe = (): Promise<MappaRiassuntoDto[]> => apiGet('/mappe
 export const getConteggiAlbero = (): Promise<ConteggiAlberoDto> => apiGet('/mappe/albero/conteggi');
 
 /** Mappa con percorso, figli e spilli; con `partita` include lo stato «raccolto» e i dettagli della partita (articoli comprati, punti). */
-export const getMappa = (chiave: string, partita?: number): Promise<MappaDto> => apiGet(`/mappe/${encodeURIComponent(chiave)}${queryString({ partita })}`);
+export const getMappa = (chiave: string, partita?: number, infiltrazione?: string): Promise<MappaDto> =>
+  // L4 §1.4: con `infiltrazione` lo stato dei pin condivisi dalle voci di più infiltrazioni si legge in quella (il contesto)
+  apiGet(`/mappe/${encodeURIComponent(chiave)}${queryString({ partita, infiltrazione })}`);
 
 /** Crea una mappa (chiave facoltativa, nome e tipo obbligatori); risponde con la mappa creata. */
 export const creaMappa = (dati: DatiMappaApi & { chiave?: string; nome: string; tipo: TipoMappa }): Promise<MappaDto> => apiPost('/mappe', dati);

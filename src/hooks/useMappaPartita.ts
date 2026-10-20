@@ -27,12 +27,19 @@ export interface MappaPartita {
 }
 
 /** Carica la mappa `chiave` con lo stato della partita; una `versione` nuova la rilegge in silenzio (la mappa resta a schermo); `onCambiato` avvisa la pagina ospite di ogni azione salvata. */
-export function useMappaPartita(chiave: string, partitaId: number | null, opz: { versione?: string | number; onCambiato?: () => void } = {}): MappaPartita {
+export function useMappaPartita(chiave: string, partitaId: number | null, opz: { versione?: string | number; onCambiato?: () => void; infiltrazione?: string | null } = {}): MappaPartita {
+  // L4 §1.4, §4.2: l'infiltrazione di contesto (guardata o scelta nel popup); letta da un riferimento, così cambiarla rilegge in silenzio
+  // (più sotto) invece di ricaricare tutto sotto uno spinner
+  const contesto = useRef(opz.infiltrazione ?? undefined);
+  // aggiornato in un effetto dichiarato prima di quello che rilegge al cambio di contesto: quando la rilettura parte, vale già il nuovo
+  useEffect(() => { contesto.current = opz.infiltrazione ?? undefined; }, [opz.infiltrazione]);
   // la fascia della giornata, il giorno corrente e il meteo di adesso decidono quali spilli sono disponibili: al cambio si ricarica
   const momento = usePartitaStore((s) => (s.attiva?.id === partitaId ? `${s.attiva.dataGioco ?? ''}|${s.attiva.fasciaGioco ?? ''}|${s.attiva.meteoOra ?? ''}` : ''));
   // La `versione` non è fra le dipendenze del caricamento completo: cambiarla azzerava la mappa sotto uno spinner e il visore si
   // rimontava (zoom e posizione persi a ogni pin toccato nel «Collega pin», 2026-10-18). La rilegge in silenzio l'effetto più sotto.
-  const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => getMappa(chiave, partitaId ?? undefined), [chiave, partitaId, momento]);
+  /** La mappa con lo stato della partita, nell'infiltrazione di contesto se c'è (altrimenti la chiamata di sempre). */
+  const leggi = () => (contesto.current ? getMappa(chiave, partitaId ?? undefined, contesto.current) : getMappa(chiave, partitaId ?? undefined));
+  const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => leggi(), [chiave, partitaId, momento]);
   // Gli spilli aggiornati in locale dopo un'azione valgono **sulla copia della mappa a cui si riferiscono**: arrivata una copia
   // nuova (una rilettura, anche quella di una versione nuova, o un caricamento completo per un cambio di momento o mappa) vale
   // quella del server.
@@ -59,7 +66,7 @@ export function useMappaPartita(chiave: string, partitaId: number | null, opz: {
   const rileggiInSilenzio = async () => {
     const n = ++ultimaLettura.current;
     try {
-      const fresca = await getMappa(chiave, partitaId ?? undefined);
+      const fresca = await leggi();
       if (n === ultimaLettura.current) imposta(fresca);
     } catch { /* resta l'aggiornamento immediato */ }
   };
@@ -72,12 +79,20 @@ export function useMappaPartita(chiave: string, partitaId: number | null, opz: {
     versioneVista.current = opz.versione;
     void rileggiRef.current();
   }, [opz.versione]);
+  // un contesto nuovo (§4.2): rilettura in silenzio, la mappa resta a schermo
+  const contestoVisto = useRef(opz.infiltrazione);
+  useEffect(() => {
+    if (contestoVisto.current === opz.infiltrazione) return;
+    contestoVisto.current = opz.infiltrazione;
+    void rileggiRef.current();
+  }, [opz.infiltrazione]);
 
   /** Segna lo spillo come raccolto (o lo riapre) nella partita, notifica con la parola adatta al tipo e rilegge la mappa. */
   const raccolto = async (s: SpilloDto, valore: boolean) => {
     if (!partitaId) return;
     try {
-      const nuovo = await impostaSpilloRaccolto(partitaId, s.id, valore);
+      // §1.4: il segno di un pin condiviso dalle voci di più infiltrazioni si scrive nell'infiltrazione in cui se ne legge lo stato
+      const nuovo = s.contestoInfiltrazione ? await impostaSpilloRaccolto(partitaId, s.id, valore, s.contestoInfiltrazione.chiave) : await impostaSpilloRaccolto(partitaId, s.id, valore);
       aggiorna(nuovo);
       // «Scrigno: aperto», «Scrigno: chiuso», «Porta della torre: aperta», «Vecchietto: parlato», «Leva: non più azionato»: la
       // parola concorda col tipo (scelte dell'utente, 2026-10-03)

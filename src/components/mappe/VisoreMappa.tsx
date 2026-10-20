@@ -27,6 +27,7 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { IconMappa } from '../shared/iconeGuida';
 import { AssetImg } from '../shared/AssetImg';
 import { Modal } from '../shared/Modal';
+import { Selettore } from '../shared/Selettore';
 import { ChipDisponibilita } from '../guida/ChipDisponibilita';
 import { CondizioniSpilloElenco } from './CondizioniSpillo';
 import { ProveNativeSpillo } from './ProveNativeSpillo';
@@ -83,6 +84,9 @@ interface Props {
   onAcquisto?: (spillo: SpilloDto, articoloChiave: string, fatto: boolean) => Promise<void> | void;
   /** L4 (§4.2): apre la finestra «Da verificare» di un pin fatto con una voce non fatta (la apre chi monta il visore). */
   onDaVerificare?: (d: DivergenzaDaVerificare) => void;
+  /** L4 §4.2 (§1.4): l'infiltrazione di contesto scelta nel popup di un pin di voci di più infiltrazioni; chi ospita il visore rilegge la
+   *  mappa in quell'infiltrazione. Senza, «Stato nella …» resta un testo. */
+  onContesto?: (infiltrazione: string) => void;
   onChiudi?: () => void;
   /** Testo del pulsante di chiusura (predefinito «Chiudi»; «Torna alla pagina» per lo schermo intero aperto da una pagina). */
   etichettaChiudi?: string;
@@ -245,7 +249,7 @@ function disponibilita(a: { disponibileDal: string | null }): string {
  * condizioni della partita sono nascosti salvo richiesta esplicita, i raccolti salvo «mostra
  * raccolti». Con `editor` il clic e il trascinamento passano agli strumenti dell'editor;
  * `selezioneIniziale` e `puntoIniziale` fissano l'inquadratura d'apertura una volta per mappa. */
-export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onDaVerificare, onChiudi, etichettaChiudi, incorporato, azioni, ritorno, editor, vistaGiornoCorrente, pannello, contenutiPannello, intestazione, className, selezioneIniziale, rivelaSelezione, puntoIniziale, scelta, pannelloIniziale, onPannello, titolo, senzaVicine }: Props) {
+export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onDaVerificare, onContesto, onChiudi, etichettaChiudi, incorporato, azioni, ritorno, editor, vistaGiornoCorrente, pannello, contenutiPannello, intestazione, className, selezioneIniziale, rivelaSelezione, puntoIniziale, scelta, pannelloIniziale, onPannello, titolo, senzaVicine }: Props) {
   const sugg = useSuggerimenti();
   const tela = useRef<HTMLDivElement | null>(null);
   const [dim, setDim] = useState<Dimensioni>({ w: 0, h: 0 });
@@ -922,7 +926,18 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                     <strong className="block text-[13px] leading-tight">{nomePin(selezionato)}</strong>
                     <span className="block text-[11px] text-text-muted">{selezionato.tipoNome}{selezionato.raccolto ? ` · ${parolaSegnato(selezionato)}` : ''}</span>
                     {/* L4 (§1.4, R4-34): a quale infiltrazione si riferisce lo stato di un pin di voci che si ripropongono */}
-                    {selezionato.contestoInfiltrazione && <span className="block text-[11px] text-text-secondary">Stato nella {selezionato.contestoInfiltrazione.nome}</span>}
+                    {/* §4.2: con voci di più infiltrazioni, l'infiltrazione dello stato si sceglie (la pagina rilegge in quella) */}
+                    {selezionato.contestoInfiltrazione && (() => {
+                      const contesto = selezionato.contestoInfiltrazione;
+                      const infiltrazioni = [...new Map(selezionato.voci.filter((v) => v.infiltrazione).map((v) => [v.infiltrazione!.chiave, v.infiltrazione!])).values()];
+                      return onContesto && infiltrazioni.length > 1
+                        ? <span className="flex w-full items-center gap-1.5 text-[11px] text-text-secondary" role="group" aria-label="Infiltrazione dello stato">
+                            <span className="shrink-0">Stato nella</span>
+                            <Selettore compatto valoreNelNome className="min-w-0 flex-1" etichetta="Stato nella" valore={contesto.chiave} ricerca="mai"
+                              opzioni={infiltrazioni.map((i) => ({ chiave: i.chiave, nome: i.nome }))} onCambia={(k) => { if (k && k !== contesto.chiave) onContesto(k); }} />
+                          </span>
+                        : <span className="block text-[11px] text-text-secondary">Stato nella {contesto.nome}</span>;
+                    })()}
                     {selezionato.disponibilita && <ChipDisponibilita disponibilita={selezionato.disponibilita} compatto />}
                     {/* L4 (§4.2): pin fatto con una voce non fatta, da prima dell'aggiornamento: il tocco apre la finestra che lo sistema */}
                     {selezionato.daVerificare && onDaVerificare && partitaId && selezionato.uid && (() => {

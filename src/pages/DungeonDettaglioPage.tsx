@@ -1033,6 +1033,9 @@ export function DungeonDettaglioPage() {
                     senzaVicine onNaviga={navigaDalVisore}
                     // L4 §8.6: togliendo un segno dal popup che riapre un Enigma risolto, prima la conferma
                     primaDiRiaprire={primaDiRiaprire}
+                    // L4 §1.4 (regola 1): lo stato dei pin condivisi dalle voci di più infiltrazioni si legge nell'infiltrazione aperta; il popup
+                    // ne sceglie un'altra (§4.2)
+                    infiltrazione={area.chiave}
                     contenutiPannello={areaFisica && !collegamento ? <InfiltrazioniInArea area={areaFisica} aperta={area.chiave} completate={completate} onScegli={scegliInfiltrazioneQui} /> : undefined} />
                 )}
                 {/* un'infiltrazione che non tocca aree (o un Palazzo senza aree): niente da mostrare, si collegano (§4.2) */}
