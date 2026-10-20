@@ -27,6 +27,7 @@ import { OggiMappa } from '../components/partita/OggiMappa';
 import { slug } from '../../shared/slug';
 import { avanzamentoDote } from '../utils/doti';
 import { useNomeDelPosto } from '../hooks/useNomeDelPosto';
+import { useMedia } from '../hooks/useMedia';
 import type { PartitaDto } from '../types';
 
 /** Le cinque scorciatoie, con **la stessa figura della barra di navigazione**.
@@ -83,6 +84,8 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
   const guidaPronta = Boolean(oggi.indice && oggi.giorno);
   // L5 §4.4b (M1): la linguetta porta il nome del posto mostrato, mai «Mappa»
   const nomePosto = useNomeDelPosto(oggi.mappa.chiave);
+  // L5 (LAY5-1): la stessa soglia della regola `@media` della Home in `tailwind.css`
+  const riempi = useMedia('(min-width: 1024px) and (min-height: 1150px)');
   const statoOggi = oggi.errore
     ? <p className="m-0 text-[13px] text-text-secondary" role="alert">Guida del giorno non disponibile: {oggi.errore}</p>
     : <div className="flex items-center justify-center py-6" aria-busy="true"><Spinner /></div>;
@@ -138,7 +141,8 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
 
       <section className="home-oggi flex flex-col gap-1.5" aria-label="Oggi nella partita">
         <h2 className="m-0 font-display text-[19px] uppercase shrink-0">Oggi</h2>
-        <div className="flex-1 min-h-0 riempi-figli">{guidaPronta ? <OggiGuida oggi={oggiHome} riempi /> : statoOggi}</div>
+        {/* L5 (LAY5-1): l'area interna della guida solo dove c'è altezza (da 1024 × 1150); altrove la guida cresce con la pagina */}
+        <div className={riempi ? 'flex-1 min-h-0 riempi-figli' : undefined}>{guidaPronta ? <OggiGuida oggi={oggiHome} riempi={riempi} /> : statoOggi}</div>
       </section>
 
       {guidaPronta && mappaChiusa && (

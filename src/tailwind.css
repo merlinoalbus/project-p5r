@@ -670,9 +670,16 @@
   /* ---- Home in una schermata (desktop): il contenuto riempie l'altezza disponibile e scorre solo la guida del giorno ---- */
   /* La pagina riempie l'area di lettura (main è flex-col con overflow proprio): niente 100vh, niente taglio del contenuto. */
   @media (min-width: 768px) {
-    .home, .scheda-riempi { flex: 1 1 auto; min-height: 0; }
+    .scheda-riempi { flex: 1 1 auto; min-height: 0; }
     /* i contenitori marcati passano l'altezza al figlio (PageState non aggiunge un livello proprio) */
     .riempi-figli, .riempi-figli > * { height: 100%; min-height: 0; }
+  }
+  /* L5 (LAY5-1, decisione del PM): la Home riempie la schermata, con la guida del giorno in un'area interna, solo dove c'è altezza
+     (da 1024 × 1150: misurato, a 1440×900 intestazione, carta e guida non ci stavano e scorreva anche la pagina, e a 1920×1080 l'area della
+     guida restava di 331 px, sotto i 400 del criterio LAY5-1); a tutte le altezze più basse e sotto i 1024 px scorre come pagina, una barra
+     sola. Stessa soglia in `HomePage` */
+  @media (min-width: 1024px) and (min-height: 1150px) {
+    .home { flex: 1 1 auto; min-height: 0; }
   }
   /* Schermi bassi (tablet in orizzontale, portatili 768-860 px): la Home si comprime per restare in una schermata */
   @media (min-width: 768px) and (max-height: 900px) {
@@ -1138,22 +1145,30 @@
     .home-griglia {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
       grid-template-areas: "carta carta" "oggi mappa";
-      grid-template-rows: auto minmax(0, 1fr);
-      flex: 1 1 auto;
-      min-height: 0;
+      align-items: start;
     }
-    .home-oggi, .home-mappa { min-height: 0; }
-    /* solo il contenitore della guida riempie l'area: il titolo «Oggi» resta della sua altezza */
-    .home-oggi > .riempi-figli { flex: 1 1 auto; min-height: 0; }
-    /* la barra col pulsante della mappa sta sopra, la mappa riempie il resto */
-    .home-mappa > :last-child { flex: 1 1 auto; min-height: 0; }
+    /* a pagina (LAY5-1) la mappa ha un'altezza sua: la guida accanto cresce col suo contenuto e scorre con la pagina */
+    .home-mappa > :last-child { height: min(60dvh, 520px); min-height: 0; }
+  }
+  /* da 1024 px la mappa resta in vista mentre si legge la guida */
+  @media (min-width: 1024px) {
+    .home-mappa { position: sticky; top: 8px; }
   }
   @media (min-width: 1360px) {
     .home-griglia {
       grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
       grid-template-areas: "carta mappa" "oggi mappa";
-      grid-template-rows: auto minmax(0, 1fr);
     }
+  }
+  /* la disposizione che riempie la schermata (da 1024 × 1150): la guida del giorno in un'area interna alta almeno 400 px, la mappa fino in fondo */
+  @media (min-width: 1024px) and (min-height: 1150px) {
+    .home-griglia { grid-template-rows: auto minmax(0, 1fr); flex: 1 1 auto; min-height: 0; align-items: stretch; }
+    .home-oggi { min-height: 400px; }
+    .home-mappa { min-height: 0; position: static; }
+    /* solo il contenitore della guida riempie l'area: il titolo «Oggi» resta della sua altezza */
+    .home-oggi > .riempi-figli { flex: 1 1 auto; min-height: 0; }
+    /* la barra col pulsante della mappa sta sopra, la mappa riempie il resto */
+    .home-mappa > :last-child { flex: 1 1 auto; min-height: 0; height: auto; }
   }
 
   /* ---- Mappa della Home a scomparsa (richiesta dell'utente, 2026-09-30) ----
@@ -1190,12 +1205,15 @@
     .home-griglia--mappa-chiusa {
       grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
       grid-template-areas: "carta oggi";
-      grid-template-rows: minmax(0, 1fr);
       padding-right: 40px;
     }
-    /* la carta affiancata è più stretta e più alta: margine verticale ridotto perché a 1024×690 stia intera; se su uno
-       schermo più basso ancora non ci stesse, scorre lei (accanto alla guida, mai dentro) */
-    .home-griglia--mappa-chiusa .home-carta { overflow-y: auto; overscroll-behavior: contain; padding-block: 8px; }
+    .home-griglia--mappa-chiusa .home-carta { padding-block: 8px; }
+  }
+  /* nella disposizione che riempie la schermata: carta e guida alte quanto la pagina; se la carta non ci stesse, scorre lei (accanto alla
+     guida, mai dentro). A pagina (LAY5-1) nessuna delle due scorre da sé */
+  @media (min-width: 1024px) and (min-height: 1150px) {
+    .home-griglia--mappa-chiusa { grid-template-rows: minmax(0, 1fr); }
+    .home-griglia--mappa-chiusa .home-carta { overflow-y: auto; overscroll-behavior: contain; }
   }
   @media (min-width: 768px) and (max-width: 1023px) {
     .home-griglia--mappa-chiusa { grid-template-columns: minmax(0, 1fr); grid-template-areas: "carta" "oggi"; padding-right: 40px; }
