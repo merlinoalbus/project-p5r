@@ -2,11 +2,12 @@
 // ContenutiGuidaMappa — le sezioni della guida legate a un luogo, con le loro schede apribili
 // ============================================================
 
-import { useState } from 'react';
+import { useState, type MouseEvent } from 'react';
 import { SchedaContenutoGuida } from './SchedaContenutoGuida';
 import { usePartitaStore } from '../../stores/partitaStore';
-import { Link } from 'react-router-dom';
-import { getContenutiMappa } from '../../services/api';
+import { Link, useNavigate } from 'react-router-dom';
+import { getContenutiMappa, risolviMappa } from '../../services/api';
+import { casaConInfiltrazione, urlMappa } from '../../utils/navigazioneMappa';
 import { useCarica } from '../../hooks/useCarica';
 import { PageState } from '../shared/PageState';
 /** Pannello «Contenuti della guida» di una mappa: un `details` per area, con descrizione, note,
@@ -21,6 +22,17 @@ export function ContenutiGuidaMappa({ mappa, area, dungeon }: { mappa: string; a
   // L0: nei Memento le sezioni sono dedali, nei Palazzi infiltrazioni; il collegamento porta alla scheda del posto
   const memento = dungeon === 'mementos';
   const contenuti = useCarica(() => getContenutiMappa(mappa, attiva?.id), [mappa, attiva?.id, attiva?.dataGioco, attiva?.fasciaGioco, attiva?.meteoOra]);
+  const navigate = useNavigate();
+  /** L3 (AP3-4): il nome di una planimetria porta dritto alla sua casa (la scheda del Palazzo sulla sua area, con l'infiltrazione
+   *  della sezione), senza passare dal redirect di `/guida/mappe/<k>` che la perderebbe. Il collegamento resta per aprirla altrove
+   *  (nuova scheda, tasti); se la casa non si trova si va comunque al vecchio indirizzo. */
+  const apriPlanimetria = (e: MouseEvent<HTMLAnchorElement>, chiave: string, infiltrazione: string | null) => {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    risolviMappa(chiave)
+      .then((r) => navigate(r.tipo === 'mappa' ? casaConInfiltrazione(r.casa, r.mappa, infiltrazione) : urlMappa(chiave)))
+      .catch(() => navigate(urlMappa(chiave)));
+  };
   // Ogni comando di questo pannello è l'unico contenuto della sua riga — un `li`, uno `strong`,
   // una riga a sé — e non una parola dentro una frase: valgono 44 px come tutti gli altri. Erano
   // 19-22 px, e si vedevano solo aprendo il pannello sulla radice di un Palazzo, che è una vista
@@ -40,7 +52,7 @@ export function ContenutiGuidaMappa({ mappa, area, dungeon }: { mappa: string; a
           <button type="button" className="touch inline-flex items-center text-left" onClick={() => seleziona(c.id)}>{c.nome}</button>
           {selezionato === c.id && <SchedaContenutoGuida key={`${c.id}:${attiva?.id ?? 'nessuna'}`} spillo={c} partitaId={attiva?.id ?? null} onChiudi={() => seleziona(null)} onCambiato={contenuti.ricarica} />}
         </div>)}</details>}
-        {!!a.mappe.length && <ul aria-label={`Planimetrie di ${a.nome}`}>{a.mappe.map(m => <li key={m.chiave}><Link className="touch inline-flex items-center" to={`/guida/mappe/${encodeURIComponent(m.chiave)}`}>{m.nome}</Link></li>)}</ul>}
+        {!!a.mappe.length && <ul aria-label={`Planimetrie di ${a.nome}`}>{a.mappe.map(m => <li key={m.chiave}><Link className="touch inline-flex items-center" to={`/guida/mappe/${encodeURIComponent(m.chiave)}`} onClick={(e) => apriPlanimetria(e, m.chiave, memento ? null : a.chiave)}>{m.nome}</Link></li>)}</ul>}
         {!!a.punti.length && <ul className="list-none p-0 flex flex-col gap-2" aria-label={`Elementi di ${a.nome}`}>{a.punti.filter(p => p.ruolo !== 'sezione').map(p => <li key={p.id} className={p.contenitore != null ? 'ml-4 border-l-2 border-border-light pl-2' : undefined} data-passo-di={p.contenitore ?? undefined}><strong>{p.scheda ? <button type="button" className="touch inline-flex items-center text-left" onClick={() => seleziona(p.scheda!.id)}>{p.nome}</button> : p.nome}</strong>{p.descrizione && <p className="whitespace-pre-wrap">{p.descrizione}</p>}{p.scheda && selezionato === p.id && <SchedaContenutoGuida key={`${p.id}:${attiva?.id ?? 'nessuna'}`} spillo={p.scheda} partitaId={attiva?.id ?? null} onChiudi={() => seleziona(null)} onCambiato={contenuti.ricarica} />}</li>)}</ul>}
       </details>)}
     </section>}

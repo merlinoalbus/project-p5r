@@ -822,6 +822,20 @@ describe('EditorMappaPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Mappa' }));
     expect(within(screen.getByRole('region', { name: 'Proprietà della mappa' })).getByText('Tipo di mappa')).toBeInTheDocument();
   });
+
+  it('una planimetria di un Palazzo aperta dalla scheda: «Chiudi» e «Apri il visore» vanno dritti alla sua casa con l’infiltrazione aperta (L3, AP3-4)', async () => {
+    const museo: MappaDto = { ...base, chiave: 'palazzo-di-madarame-museo-1p', nome: 'Museo 1P', tipo: 'luogo', genitore: 'palazzo-di-madarame', entita: null, casa: '/guida/dungeon/madarame/area/museo-1p' };
+    api.getMappa.mockResolvedValue(museo);
+    // la pagina da cui si è entrati nell'editor: la scheda di Madarame sull'infiltrazione k-04
+    sessionStorage.setItem('p5r-ritorno-mappe', '/guida/dungeon/madarame/area/entrata?infiltrazione=k-04');
+    montaConArrivo('/guida/mappe/palazzo-di-madarame-museo-1p/modifica');
+    fireEvent.click(await screen.findByRole('button', { name: /^Chiudi/ }));
+    expect(await screen.findByText('Arrivo: /guida/dungeon/madarame/area/museo-1p?infiltrazione=k-04&planimetria=palazzo-di-madarame-museo-1p')).toBeInTheDocument();
+    cleanup();
+    montaConArrivo('/guida/mappe/palazzo-di-madarame-museo-1p/modifica');
+    fireEvent.click(await screen.findByRole('button', { name: /Apri il visore/ }));
+    expect(await screen.findByText('Arrivo: /guida/dungeon/madarame/area/museo-1p?infiltrazione=k-04&planimetria=palazzo-di-madarame-museo-1p')).toBeInTheDocument();
+  });
 });
 
 it('conserva i campi non salvati cambiando sezione e riapre Spilli quando si seleziona un pin',async()=>{

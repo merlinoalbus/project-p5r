@@ -27,6 +27,9 @@ interface Props {
   nota?: string;
   /** Che cosa dire quando non c'è niente da raccogliere (dipende da che cosa si sta guardando). */
   vuoto?: string;
+  /** L'indirizzo del nome di una planimetria (L3, AP3-4: nella scheda del Palazzo la sua area, con l'infiltrazione aperta); senza,
+   *  la sua pagina `/guida/mappe/<chiave>`. */
+  indirizzo?: (chiave: string) => string;
 }
 
 /** Il nome della mappa senza il prefisso del Palazzo («Palazzo di Kamoshida › Torre» → «Torre»). */
@@ -38,7 +41,7 @@ const nomeBreve = (nome: string) => nome.split(' › ').slice(1).join(' › ') |
  * nome) con la spunta e la parola del tipo. I raccolti restano nascosti finché non si accende «Anche i raccolti».
  * Senza collezionabili mostra solo il testo `vuoto`.
  */
-export function RaccoltaPlanimetrie({ planimetrie, partitaId, onRaccolto, etichetta = 'Da raccogliere', nota, vuoto = 'Niente da raccogliere sulle planimetrie di quest’infiltrazione.' }: Props) {
+export function RaccoltaPlanimetrie({ planimetrie, partitaId, onRaccolto, etichetta = 'Da raccogliere', nota, vuoto = 'Niente da raccogliere sulle planimetrie di quest’infiltrazione.', indirizzo = (k) => `/guida/mappe/${encodeURIComponent(k)}` }: Props) {
   const [mostraRaccolti, setMostraRaccolti] = useState(false);
   const [occupati, setOccupati] = useState<Record<number, boolean>>({});
   const totale = planimetrie.reduce((s, p) => s + p.n, 0);
@@ -72,7 +75,7 @@ export function RaccoltaPlanimetrie({ planimetrie, partitaId, onRaccolto, etiche
           return (
             <li key={p.chiave} className="flex flex-col gap-1 rounded-md bg-white/[0.04] px-2 py-1.5">
               <div className="flex flex-wrap items-center justify-between gap-2 text-[13px]">
-                <Link to={`/guida/mappe/${encodeURIComponent(p.chiave)}`} className="touch inline-flex items-center font-semibold">{nomeBreve(p.nome)}</Link>
+                <Link to={indirizzo(p.chiave)} className="touch inline-flex items-center font-semibold">{nomeBreve(p.nome)}</Link>
                 <span className="text-[11px] tabular-nums text-text-muted">{p.presi !== null ? `${p.presi}/${p.n}` : p.n}</span>
               </div>
               {visibili.length > 0 && (

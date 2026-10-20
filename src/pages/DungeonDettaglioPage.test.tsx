@@ -691,6 +691,15 @@ describe('i passaggi del visore della scheda restano nella scheda (AP3-2)', () =
   });
 });
 
+it('in «Da raccogliere» il nome di una planimetria porta dritto alla sua area nella scheda, con l’infiltrazione aperta (AP3-4)', async () => {
+  getDungeon.mockResolvedValue(palazzo(true));
+  monta('kamoshida', '/area/cancello?infiltrazione=k-01');
+  const colonna = within(await screen.findByRole('complementary', { name: 'Da raccogliere in Cancello' }));
+  expect(await colonna.findByRole('link', { name: 'Cancello' })).toHaveAttribute('href', '/guida/dungeon/kamoshida/area/cancello?infiltrazione=k-01&planimetria=m-cancello');
+  // una planimetria del resto del Palazzo, in un'area che l'infiltrazione aperta non tocca: la sua area, senza infiltrazione
+  expect(colonna.getByRole('link', { name: 'Torre' })).toHaveAttribute('href', '/guida/dungeon/kamoshida/area/torre-alta?planimetria=m-torre');
+});
+
 it('senza schede da sistemare la sezione non c’è (AP3-1)', async () => {
   getDungeon.mockResolvedValue({ ...palazzo(true), schedeDaSistemare: [] });
   monta('kamoshida');

@@ -2,7 +2,7 @@
 // Test navigazioneMappa — dove porta uno spillo: destinazione esplicita, collegamento legacy, arrivo invalidato, solo gli spostamenti
 // ============================================================
 
-import { arrivoSpillo, casaConArrivo, casaEQuesta, destinazioneMappaSpillo, nomeDellaMeta, nomeMetaSpillo, urlCasa } from './navigazioneMappa';
+import { arrivoSpillo, casaConArrivo, casaConInfiltrazione, casaEQuesta, destinazioneMappaSpillo, infiltrazioneDelRitorno, nomeDellaMeta, nomeMetaSpillo, urlCasa } from './navigazioneMappa';
 import type { SpilloDto } from '../types';
 const legacy = { tipo: 'passaggio', riferimento: { tipo: 'mappa', chiave: 'vecchia' }, dettaglio: { tipo: 'mappa', mappa: { chiave: 'vecchia' } } } as SpilloDto;
 it('la destinazione esplicita vince sul vecchio riferimento, e porta lo spillo di arrivo', () => {
@@ -54,5 +54,22 @@ describe('nomeDellaMeta e nomeMetaSpillo (i pin di passaggio col nome del posto)
     const scala = { tipo: 'passaggio', nome: 'Piano 2', dettaglio: { tipo: 'mappa', mappa: { chiave: 'nativo-002-0-1', nome: 'Edificio principale 2P', tipo: 'luogo', area: { nome: 'Edificio principale 2P / Edificio laboratori 2P' }, casa: '/guida/citta/shujin-academy/x' } } } as SpilloDto;
     expect(nomeMetaSpillo(scala)).toBe('Edificio principale 2P / Edificio laboratori 2P');
     expect(nomeMetaSpillo({ ...pin1628, tipo: 'negozio' } as SpilloDto)).toBeNull();
+  });
+});
+
+describe('casaConInfiltrazione e infiltrazioneDelRitorno (L3, AP3-4: dritti alla casa, con l’infiltrazione aperta)', () => {
+  it('sulla casa di un’area di un Palazzo mette l’infiltrazione e sempre la planimetria; le altre case restano com’erano', () => {
+    expect(casaConInfiltrazione('/guida/dungeon/madarame/area/museo-1p', 'm-153-2-0', 'k-04')).toBe('/guida/dungeon/madarame/area/museo-1p?infiltrazione=k-04&planimetria=m-153-2-0');
+    expect(casaConInfiltrazione('/guida/dungeon/madarame/area/museo-1p?planimetria=m-153-2-1', 'm-153-2-1', 'k-04')).toBe('/guida/dungeon/madarame/area/museo-1p?planimetria=m-153-2-1&infiltrazione=k-04');
+    expect(casaConInfiltrazione('/guida/dungeon/madarame/area/museo-1p', 'm-153-2-0', null)).toBe('/guida/dungeon/madarame/area/museo-1p');
+    expect(casaConInfiltrazione('/guida/citta/shibuya/area/x', 'm', 'k-04')).toBe('/guida/citta/shibuya/area/x');
+  });
+  it('l’infiltrazione viene dalla pagina da cui si è entrati, solo se è la scheda dello stesso Palazzo', () => {
+    expect(infiltrazioneDelRitorno('/guida/dungeon/madarame/area/museo-1p', '/guida/dungeon/madarame/area/entrata?infiltrazione=k-04&planimetria=x')).toBe('k-04');
+    expect(infiltrazioneDelRitorno('/guida/dungeon/madarame/area/museo-1p', '/guida/dungeon/madarame?infiltrazione=k-04')).toBe('k-04');
+    expect(infiltrazioneDelRitorno('/guida/dungeon/madarame/area/museo-1p', '/guida/dungeon/madarame-bis?infiltrazione=k-04')).toBeNull();
+    expect(infiltrazioneDelRitorno('/guida/dungeon/madarame/area/museo-1p', '/guida/dungeon/kamoshida?infiltrazione=k-04')).toBeNull();
+    expect(infiltrazioneDelRitorno('/guida/dungeon/madarame/area/museo-1p', null)).toBeNull();
+    expect(infiltrazioneDelRitorno('/guida/citta/shibuya/area/x', '/guida/dungeon/madarame?infiltrazione=k-04')).toBeNull();
   });
 });

@@ -377,19 +377,26 @@ export function DungeonDettaglioPage() {
     for (const k of ['spillo', 'x', 'y', 'zoom']) q.delete(k);
     setParams(q, { replace: true });
   };
-  /** AP3-2: apre nella scheda la planimetria `mappa` se è di un'area di questo Palazzo (vero se l'ha aperta), con l'arrivo dato.
-   *  L'infiltrazione aperta resta se tocca l'area d'arrivo, come scegliendo l'area dall'elenco; `?planimetria=` c'è sempre, perché
-   *  con `?infiltrazione=` la versione iniziale dell'infiltrazione passerebbe davanti a quella del passaggio. */
-  const apriPlanimetriaQui = (mappa: string, arrivo?: PuntoArrivo): boolean => {
+  /** AP3-2, AP3-4: l'indirizzo nella scheda della planimetria `mappa`, se è di un'area di questo Palazzo (altrimenti null), con
+   *  l'arrivo dato. L'infiltrazione aperta resta se tocca l'area d'arrivo, come scegliendo l'area dall'elenco; `?planimetria=` c'è
+   *  sempre, perché con `?infiltrazione=` la versione iniziale dell'infiltrazione passerebbe davanti a quella chiesta. */
+  const indirizzoPlanimetriaQui = (mappa: string, arrivo?: PuntoArrivo): string | null => {
     const p = d?.planimetrie.find((x) => x.chiave === mappa);
     const a = p?.area ? areePalazzo.find((x) => x.chiave === p.area) : undefined;
-    if (!a) return false;
+    if (!a) return null;
     const q = new URLSearchParams();
     if (area && a.infiltrazioni?.some((x) => x.chiave === area.chiave)) q.set('infiltrazione', area.chiave);
     q.set('planimetria', mappa);
-    navigate(urlCasa(`${base}/area/${encodeURIComponent(a.slug)}?${q.toString()}`, arrivo));
-    return true;
+    return urlCasa(`${base}/area/${encodeURIComponent(a.slug)}?${q.toString()}`, arrivo);
   };
+  /** Apre nella scheda la planimetria `mappa` se è di un'area di questo Palazzo (vero se l'ha aperta). */
+  const apriPlanimetriaQui = (mappa: string, arrivo?: PuntoArrivo): boolean => {
+    const indirizzo = indirizzoPlanimetriaQui(mappa, arrivo);
+    if (indirizzo) navigate(indirizzo);
+    return indirizzo !== null;
+  };
+  /** AP3-4: il collegamento del nome di una planimetria in «Da raccogliere»: la sua area nella scheda, altrimenti la sua pagina. */
+  const indirizzoRaccolta = (mappa: string) => indirizzoPlanimetriaQui(mappa) ?? urlMappa(mappa);
   /** AP3-2: i passaggi (e le briciole) del visore della scheda. Una planimetria del Palazzo si apre qui; una chiave che la scheda non
    *  conosce (interna, alias) si risolve, e se è del Palazzo si apre qui, altrimenti si va alla sua casa. */
   const navigaDalVisore: NavigaMappa = (k, arrivo) => {
@@ -956,13 +963,13 @@ export function DungeonDettaglioPage() {
 
               {/* ---- La colonna di quel che fa la percentuale: le planimetrie dell'area e la guida dell'infiltrazione ---- */}
               <aside className="card flex flex-col gap-3 xl:min-h-0 xl:area-scorrevole" aria-label={`Da raccogliere in ${areaFisica?.nome ?? area.nome}`}>
-                <RaccoltaPlanimetrie planimetrie={mappeArea} partitaId={partitaId} onRaccolto={segnaRaccolto} vuoto={vuotoArea} />
+                <RaccoltaPlanimetrie planimetrie={mappeArea} partitaId={partitaId} onRaccolto={segnaRaccolto} vuoto={vuotoArea} indirizzo={indirizzoRaccolta} />
                 {/* Il resto del Palazzo, sempre ripiegato: con un'area aperta si vede quell'area (rilievo dell'utente, 2026-10-01). */}
                 {altrePlanimetrie.length > 0 && (
                   <details className="text-[12px]">
                     <summary className="touch cursor-pointer text-text-muted">Tutte le planimetrie del Palazzo · {restanoAltre} da raccogliere</summary>
                     <div className="pt-2">
-                      <RaccoltaPlanimetrie planimetrie={altrePlanimetrie} partitaId={partitaId} onRaccolto={segnaRaccolto} etichetta="Nel resto del Palazzo" />
+                      <RaccoltaPlanimetrie planimetrie={altrePlanimetrie} partitaId={partitaId} onRaccolto={segnaRaccolto} etichetta="Nel resto del Palazzo" indirizzo={indirizzoRaccolta} />
                     </div>
                   </details>
                 )}

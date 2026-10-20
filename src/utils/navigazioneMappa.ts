@@ -52,6 +52,33 @@ export function casaConArrivo(casa: string, ricerca: URLSearchParams): string {
   return s ? `${percorso}?${s}` : percorso;
 }
 
+/** La scheda del Palazzo di una casa `/guida/dungeon/<k>/area/<slug>` (il percorso `/guida/dungeon/<k>`), o null per le altre case. */
+function schedaDellaCasa(casa: string): string | null {
+  return /^(\/guida\/dungeon\/[^/?#]+)\/area\/[^/?#]+/.exec(casa)?.[1] ?? null;
+}
+
+/** L3 (AP3-4): la casa di una planimetria di un Palazzo con l'infiltrazione aperta, per andarci direttamente senza perderla:
+ *  `?infiltrazione=` e sempre `?planimetria=` (con l'infiltrazione la sua versione iniziale passerebbe davanti alla predefinita, che
+ *  la casa omette). Senza infiltrazione, o per le case che non sono un'area di un Palazzo, la casa resta com'è. */
+export function casaConInfiltrazione(casa: string, mappa: string, infiltrazione: string | null | undefined): string {
+  if (!infiltrazione || !schedaDellaCasa(casa)) return casa;
+  const [percorso, query = ''] = casa.split('?', 2) as [string, string | undefined];
+  const parametri = new URLSearchParams(query);
+  parametri.set('infiltrazione', infiltrazione);
+  if (!parametri.has('planimetria')) parametri.set('planimetria', mappa);
+  return `${percorso}?${parametri}`;
+}
+
+/** L3 (AP3-4): l'infiltrazione aperta nella pagina da cui si è entrati nelle mappe (`ritornoMappe`), se è la scheda dello stesso
+ *  Palazzo della casa; altrimenti null. */
+export function infiltrazioneDelRitorno(casa: string, ritorno: string | null): string | null {
+  const scheda = schedaDellaCasa(casa);
+  if (!scheda || !ritorno) return null;
+  const [percorso, query = ''] = ritorno.split('?', 2) as [string, string | undefined];
+  if (percorso !== scheda && !percorso.startsWith(`${scheda}/`)) return null;
+  return new URLSearchParams(query).get('infiltrazione');
+}
+
 /** Vero se la casa è proprio la pagina `/guida/mappe/<chiave>` su cui si è (stessa chiave, codifiche a parte): lì non si reindirizza,
  *  ed è ciò che impedisce un giro di redirect sulle mappe la cui casa è il visore (Palazzi, Memento). */
 export function casaEQuesta(casa: string, chiave: string): boolean {

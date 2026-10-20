@@ -10,7 +10,7 @@
 
 import { etichettaPlanimetria, nomePresentazioneMappa, presentaMappa } from '../utils/presentazioneMappa';
 import { RisolviMappa } from '../components/mappe/RisolviMappa';
-import { destinazioneMappaSpillo } from '../utils/navigazioneMappa';
+import { casaConInfiltrazione, destinazioneMappaSpillo, infiltrazioneDelRitorno } from '../utils/navigazioneMappa';
 import { Selettore } from '../components/shared/Selettore';
 import type { DestinazioneSpillo } from '../types';
 import { CondizioniEditor } from '../components/guida/CondizioniEditor';
@@ -197,6 +197,9 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
   const copiaSelezionata = copiePosate(dati?.pezzi ?? []).find((x) => x.copia.id === copiaId) ?? null;
   /** L'immagine della mappa in pixel, per tenere le copie dentro (null se non nota: lo controlla il server). */
   const immagineMappa = dati?.larghezza && dati.altezza ? { larghezza: dati.larghezza, altezza: dati.altezza } : null;
+  /** La casa della mappa per «Chiudi» e «Apri il visore»: per una planimetria di un Palazzo (L3, AP3-4) con l'infiltrazione aperta
+   *  nella scheda da cui si è entrati, se è la scheda di quel Palazzo. */
+  const casaDellaMappa = (m: { chiave: string; casa: string }) => casaConInfiltrazione(m.casa, m.chiave, infiltrazioneDelRitorno(m.casa, ritornoMappe()));
   /** Copia uno spillo negli appunti (in pagina e nella memoria di sessione), passa allo strumento «Incolla» e spiega come incollarlo. */
   const copia = (a: AppuntiSpillo) => {
     setAppunti(a); scriviAppunti(a); setStrumento('incolla');
@@ -215,7 +218,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
           // nel mondo «Chiudi» porta alla casa della mappa (la pagina della città, del quartiere o dell'Area, sulla versione aperta: L2,
           // R2-20); fuori resta il ritorno alla pagina da cui si è entrati nelle mappe
           // L3 (AP3-4): anche per una planimetria di un Palazzo, dritti alla sua casa (la scheda, sulla sua area e versione)
-          onChiudi={() => navigate(haCasaPropria(dati) ? dati.casa : ritornoMappe() ?? `/guida/mappe/${encodeURIComponent(chiave)}`)}
+          onChiudi={() => navigate(haCasaPropria(dati) ? casaDellaMappa(dati) : ritornoMappe() ?? `/guida/mappe/${encodeURIComponent(chiave)}`)}
           editor={editor}
           className="visore-mappa--editor"
           intestazione={<span className="editor-mappa__targhetta">Modifica</span>}
@@ -224,7 +227,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
               icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Giorno corrente"
               dettaglio={attiva ? (conGiorno ? 'acceso: vedi solo quel che c’è oggi' : 'spento: vedi tutto') : 'serve una partita attiva'}
               disabled={!attiva} onClick={() => setGiornoCorrente((v) => !v)} />
-            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Apri il visore" onClick={() => navigate(haCasaPropria(dati) ? dati.casa : `/guida/mappe/${encodeURIComponent(chiave)}`)} />
+            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Apri il visore" onClick={() => navigate(haCasaPropria(dati) ? casaDellaMappa(dati) : `/guida/mappe/${encodeURIComponent(chiave)}`)} />
           </>}
           pannello={
             <PannelloEditor

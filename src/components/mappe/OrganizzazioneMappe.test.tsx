@@ -6,7 +6,7 @@ import { usePreferenzeStore } from '../../stores/preferenzeStore';
 import { useAssetStore } from '../../stores/assetStore';
 import { SelettoreContestoMappa } from './SelettoreContestoMappa';
 /** @vitest-environment jsdom */
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { scegliVoce, valoreSelettore, vociSelettore } from '../../../test/selettore';
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom';
 import type { MappaRiassuntoDto } from '../../types';
@@ -103,6 +103,18 @@ it('i contenuti mantengono testo e punti senza inventare coordinate o attività'
   // L3 (§4.1): la scheda si apre sull'infiltrazione chiesta
   expect(within(sezione).queryByRole('button')).not.toBeInTheDocument();expect(within(sezione).getByRole('link')).toHaveAttribute('href','/guida/dungeon/castello?infiltrazione=biblioteca');
   expect(within(sezione).getByText('Biblioteca').closest('details')).toHaveAttribute('open');
+});
+
+it('L3 (AP3-4): una planimetria dell’infiltrazione porta dritto alla sua casa nella scheda del Palazzo, con l’infiltrazione', async () => {
+  api.getContenutiMappa.mockResolvedValue({ mappa: 'palazzo', aree: [{ chiave: 'biblioteca', nome: 'Biblioteca', descrizione: '', note: '', mappe: [{ chiave: 'nativo-biblioteca', nome: 'Biblioteca 1' }], punti: [] }] });
+  api.risolviMappa.mockResolvedValue({ tipo: 'mappa', mappa: 'castello-biblioteca-1', casa: '/guida/dungeon/castello/area/biblioteca' });
+  render(<MemoryRouter initialEntries={['/guida/mappe/palazzo']}><Routes>
+    <Route path="/guida/mappe/:chiave" element={<ContenutiGuidaMappa mappa="palazzo" dungeon="castello" />} />
+    <Route path="/guida/dungeon/:chiave/area/:slug" element={<Indirizzo />} />
+  </Routes></MemoryRouter>);
+  fireEvent.click(within(await screen.findByRole('list', { name: 'Planimetrie di Biblioteca' })).getByRole('link', { name: 'Biblioteca 1' }));
+  expect(await screen.findByText('/guida/dungeon/castello/area/biblioteca?infiltrazione=biblioteca&planimetria=castello-biblioteca-1')).toBeInTheDocument();
+  expect(api.risolviMappa).toHaveBeenCalledWith('nativo-biblioteca');
 });
 
 it('i passi di un Enigma rientrano sotto di lui (095), le altre voci no', async () => {
