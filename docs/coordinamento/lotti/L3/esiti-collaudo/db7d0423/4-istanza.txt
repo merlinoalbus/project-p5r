@@ -1,0 +1,14 @@
+### 2026-10-20T13:22:38Z ripristino della base 0948Z (tolta la sola cache delle letture) e avvio su db7d042352c66b29d455c2b8eb3d2e086e2579f3
+RIPRISTINO OK: impronta identica alla foto {"gioco.db":{"user_version":113,"tabelle":80,"righe":20208},"partite.db":{"user_version":24,"tabelle":36,"righe":3415}}
+EXIT ripristina=0
+[BE] in ascolto sulla porta 3301 (dopo 2s)
+[FE] in ascolto sulla porta 5473 (dopo 1s)
+### health
+{"data":{"status":"ok","timestamp":"2026-10-20T13:22:48.472Z","db":{"ok":true,"userVersion":113}}}
+FE 200
+### migrazioni all'avvio (0 attese)
+0
+### errori nel BE.log
+(vuoto = nessuno)
+### impronta dopo l'avvio contro la base 0948Z
+IDENTICHE

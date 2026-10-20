@@ -1,0 +1,11 @@
+### 2026-10-20T13:21:45Z cherry-pick su newreview-l3 (da 7562f6ac), server fermi, ordine di git log: 0ffdf403 6f5673c2 14d7b9e8 5e56a266 c5725908
+## 0ffdf403 base dei file modificati: IDENTICA
+-> b2accdce
+## 6f5673c2 base dei file modificati: IDENTICA
+-> 0a2fc834
+## 14d7b9e8 base dei file modificati: IDENTICA
+-> 8535c16b
+## 5e56a266 base dei file modificati: IDENTICA
+-> 5bedd907
+## c5725908 base dei file modificati: IDENTICA
+-> db7d0423

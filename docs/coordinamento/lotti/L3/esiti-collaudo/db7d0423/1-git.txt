@@ -1,0 +1,136 @@
+### 2026-10-20T13:22:02Z
+### git branch --show-current
+newreview-l3
+### git rev-parse HEAD
+db7d042352c66b29d455c2b8eb3d2e086e2579f3
+### git status --porcelain
+EXIT=0
+### git log --format='%H %s' 7562f6ac..HEAD
+db7d042352c66b29d455c2b8eb3d2e086e2579f3 fix(L3): LAY3-7, selettori su una riga col nome intero al tocco
+5bedd907d60b1e5e45dbdeef24f73c4a4b31c46d fix(L3): LAY3-7 in parte, il nome dell'area in «Aree · N» intero, a capo
+8535c16bd40f6c5e6621ea19a6fb783ce4b9122a fix(L3): LAY3-6, sotto i 1024 px l'arcana va a capo invece di accorciarsi
+0a2fc834e0a6b5023b0f34872dfc78a148d9e550 docs(L3): layout su 7562f6ac, LAY3-5 verde; nuovi LAY3-6 e LAY3-7
+b2accdce9b4e098d2ea64f4072d60efd8d4b818c docs(L3): prove del collaudo su 7562f6ac
+### git diff --stat c8338fd0 newreview-l3 -- . ':!docs'
+ src/components/guida/AreePalazzo.test.tsx       |   2 +
+ src/components/guida/AreePalazzo.tsx            |   7 +-
+ src/components/guida/InfiltrazioniVoce.test.tsx |  11 ++
+ src/components/guida/InfiltrazioniVoce.tsx      |  14 ++-
+ src/components/mappe/SelettoreVersioni.test.tsx |  38 +++++++
+ src/components/shared/Selettore.test.tsx        |  20 ++++
+ src/components/shared/Selettore.tsx             |   7 +-
+ src/pages/DungeonDettaglioPage.test.tsx         |  81 ++++++++++++--
+ src/pages/DungeonDettaglioPage.tsx              | 137 ++++++++++++++++--------
+ src/pages/MappaPage.test.tsx                    |   8 +-
+ src/pages/MappaPage.tsx                         |  17 +--
+ 11 files changed, 272 insertions(+), 70 deletions(-)
+### fuori da docs/ da 7562f6ac a HEAD
+src/components/guida/AreePalazzo.test.tsx
+src/components/guida/AreePalazzo.tsx
+src/components/mappe/SelettoreVersioni.test.tsx
+src/components/shared/Selettore.test.tsx
+src/components/shared/Selettore.tsx
+src/pages/DungeonDettaglioPage.test.tsx
+src/pages/DungeonDettaglioPage.tsx
+### migrazioni, server/, shared/ (vuoto atteso)
+### patch-id --stable
+b2accdce 091dffd5b5f62e818133b1bc0f8200c126260664 | 0ffdf403 091dffd5b5f62e818133b1bc0f8200c126260664 => UGUALI
+0a2fc834 6577dc7e4da39458e8b9399f515e3447e2c13c04 | 6f5673c2 6577dc7e4da39458e8b9399f515e3447e2c13c04 => UGUALI
+8535c16b 6fddbd09b90a7c551b3b283f5b70ab0ae044412f | 14d7b9e8 6fddbd09b90a7c551b3b283f5b70ab0ae044412f => UGUALI
+5bedd907 2134db90aa624ce4d1bc36e35aaa0614be62c1d4 | 5e56a266 2134db90aa624ce4d1bc36e35aaa0614be62c1d4 => UGUALI
+db7d0423 f48349c665fd2b643ca1c822107134deba2bed9c | c5725908 f48349c665fd2b643ca1c822107134deba2bed9c => UGUALI
+### file di 42b34243 toccati da c8338fd0 a HEAD fuori da docs (vuoto atteso)
+### grep 2026-10-21 su src/ server/ shared/
+EXIT=1 (1 = nessuna)
+### indirizzi del server nei commit portati (0 atteso)
+0
+### file che importano shared/Selettore: grep -rlE "from '.*shared/Selettore'" src
+src/components/fusione/CicliFusione.tsx
+src/components/fusione/EseguiFusioneModal.tsx
+src/components/fusione/ForcaIsolamento.tsx
+src/components/fusione/PianiFusione.tsx
+src/components/guida/AreeDelDedalo.tsx
+src/components/guida/AtterraggioTokyo.tsx
+src/components/guida/BarraCollegamentoPin.tsx
+src/components/guida/CondizioniEditor.tsx
+src/components/guida/EditorAzioneStrutturata.tsx
+src/components/guida/EditorEffetto.tsx
+src/components/guida/ElencoRichieste.tsx
+src/components/guida/FiltriArticoli.tsx
+src/components/guida/GuidaDellArea.tsx
+src/components/guida/InfiltrazioniVoce.tsx
+src/components/guida/ModuloNuovaArea.tsx
+src/components/guida/ModuloPersona.tsx
+src/components/guida/ModuloRichiesta.tsx
+src/components/guida/RigaDote.tsx
+src/components/guida/SceltaLuogo.tsx
+src/components/guida/SceltaOggetto.tsx
+src/components/guida/TrasferisciVoci.tsx
+src/components/guida/TrasferisciVociInArea.tsx
+src/components/guida/moduli/ModuloArticolo.tsx
+src/components/guida/moduli/ModuloAttivita.tsx
+src/components/guida/moduli/ModuloGenerico.tsx
+src/components/guida/moduli/ModuloLuogo.tsx
+src/components/guida/moduli/ModuloNegozio.tsx
+src/components/impostazioni/BackupIstanza.tsx
+src/components/impostazioni/PacchettoGioco.tsx
+src/components/impostazioni/TraduzioniEditor.tsx
+src/components/layout/PartitaSelettore.tsx
+src/components/mappe/AreeDellaCitta.tsx
+src/components/mappe/FinestraModificaArea.tsx
+src/components/mappe/IngressoQuartiere.tsx
+src/components/mappe/SelettoreContestoMappa.tsx
+src/components/partita/CorreggiRequisito.tsx
+src/components/partita/NuovaPartitaModal.tsx
+src/components/partita/ObiettiviPartita.tsx
+src/components/partita/RiepilogoPartita.tsx
+src/pages/AttivitaPage.tsx
+src/pages/BattagliaPage.tsx
+src/pages/CompendioPage.tsx
+src/pages/CompletamentoPage.tsx
+src/pages/DungeonDettaglioPage.tsx
+src/pages/EditorMappaPage.tsx
+src/pages/FilmPage.tsx
+src/pages/FusionePage.tsx
+src/pages/LibriPage.tsx
+src/pages/MappaPage.tsx
+src/pages/OggettiPage.tsx
+src/pages/PercorsoPage.tsx
+src/pages/RichiestePage.tsx
+src/pages/SfidePage.tsx
+src/utils/selettore.ts
+### test accanto a quei file
+src/components/fusione/EseguiFusioneModal.test.tsx
+src/components/fusione/PianiFusione.test.tsx
+src/components/guida/AreeDelDedalo.test.tsx
+src/components/guida/AtterraggioTokyo.test.tsx
+src/components/guida/CondizioniEditor.test.tsx
+src/components/guida/ElencoRichieste.test.tsx
+src/components/guida/GuidaDellArea.test.tsx
+src/components/guida/InfiltrazioniVoce.test.tsx
+src/components/guida/ModuloPersona.test.tsx
+src/components/guida/ModuloRichiesta.test.tsx
+src/components/guida/moduli/ModuloLuogo.test.tsx
+src/components/impostazioni/BackupIstanza.test.tsx
+src/components/impostazioni/PacchettoGioco.test.tsx
+src/components/impostazioni/TraduzioniEditor.test.tsx
+src/components/mappe/IngressoQuartiere.test.tsx
+src/components/partita/CorreggiRequisito.test.tsx
+src/components/partita/ObiettiviPartita.test.tsx
+src/pages/AttivitaPage.test.tsx
+src/pages/BattagliaPage.test.tsx
+src/pages/CompendioPage.test.tsx
+src/pages/CompletamentoPage.test.tsx
+src/pages/DungeonDettaglioPage.test.tsx
+src/pages/EditorMappaPage.test.tsx
+src/pages/FilmPage.test.tsx
+src/pages/LibriPage.test.tsx
+src/pages/MappaPage.test.tsx
+src/pages/OggettiPage.test.tsx
+src/pages/PercorsoPage.test.tsx
+src/pages/RichiestePage.test.tsx
+src/pages/SfidePage.test.tsx
+### alberi
+040000 tree 093595e479429251391f718d540cf5a27f4fb219	server
+040000 tree affd664c3dafb1216db58c44c73ddd8ab8dda851	shared
+040000 tree f91a031fdc3480aacd4f2c11b2c7786b468e164e	src
