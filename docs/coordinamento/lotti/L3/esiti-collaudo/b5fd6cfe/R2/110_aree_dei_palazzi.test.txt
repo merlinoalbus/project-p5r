@@ -1,0 +1,18 @@
+### 2026-10-20T16:05:37Z HEAD b5fd6cfe1281fe13c5653215b70c6e1070c5e412 (newreview-l3), status: 0 righe
+### npx vitest run --reporter=verbose server/db/migrations/110_aree_dei_palazzi.test.ts
+
+ RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2
+
+ ✓ server/db/migrations/110_aree_dei_palazzi.test.ts > il nome di ogni Area è quello che la pagina del Palazzo mostra oggi: 117 nomi dorati uno per uno 3ms
+ ✓ server/db/migrations/110_aree_dei_palazzi.test.ts > crea le Aree dei Palazzi con le versioni nell’ordine di mappa e i legami; Memento, fonti vecchie, pin e voci intatti 117ms
+ ✓ server/db/migrations/110_aree_dei_palazzi.test.ts > il diario: proposte di G-022, sei correzioni con il testo precedente, una voce segnalata, una nuova; il validato e le altre voci intatti 91ms
+ ✓ server/db/migrations/110_aree_dei_palazzi.test.ts > si può rieseguire: la seconda volta nessuna riga toccata, anche dopo «Rimetti il precedente»; un’area nuova del Palazzo riceve lo slug libero 91ms
+ ✓ server/db/migrations/110_aree_dei_palazzi.test.ts > si ferma con un errore leggibile su un uid del diario validato, su un valore di oggi diverso dall’atteso, su un’infiltrazione con un altro nome 552ms
+ ✓ server/db/migrations/110_aree_dei_palazzi.test.ts > una base senza il diario curato (il pacchetto iniziale di una generazione precedente) riceve le aree ma non tocca il diario 90ms
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  18:05:39
+   Duration  2.23s (transform 866ms, setup 107ms, import 1.06s, tests 945ms, environment 0ms)
+
+EXIT=0

@@ -1,0 +1,32 @@
+area: 11 → 12 righe; DIVERSE
+   - {"chiave":"dungeon/okumura/caserma","quartiere_chiave":null,"dungeon_chiave":"okumura","slug":"caserma","nome":"Caserma","nome_rivisto":0,"ordine":1000,"planimetria_predefinita":"nativo-rmap-156-13-0","origine":"seed","seed_json":null,"updated_at":"2026-10-20T08:31:23.848Z","citta_chiave":null,"da_v
+   - {"chiave":"dungeon/okumura/interscambio","quartiere_chiave":null,"dungeon_chiave":"okumura","slug":"interscambio","nome":"Interscambio","nome_rivisto":0,"ordine":300,"planimetria_predefinita":"nativo-rmap-156-5-0","origine":"seed","seed_json":null,"updated_at":"2026-10-20T08:31:23.848Z","citta_chiav
+   + {"chiave":"dungeon/okumura/caserma","quartiere_chiave":null,"dungeon_chiave":"okumura","slug":"caserma","nome":"Caserma","nome_rivisto":0,"ordine":1000,"planimetria_predefinita":"nativo-rmap-156-13-0","origine":"seed","seed_json":null,"updated_at":"2026-10-20T17:23:38.375Z","citta_chiave":null,"da_v
+   + {"chiave":"dungeon/okumura/interscambio","quartiere_chiave":null,"dungeon_chiave":"okumura","slug":"interscambio","nome":"Interscambio","nome_rivisto":0,"ordine":300,"planimetria_predefinita":"nativo-rmap-156-5-0","origine":"seed","seed_json":null,"updated_at":"2026-10-20T17:23:38.375Z","citta_chiav
+   + {"chiave":"dungeon/okumura/prova-r8-area","quartiere_chiave":null,"dungeon_chiave":"okumura","slug":"prova-r8-area","nome":"Prova R8 area","nome_rivisto":0,"ordine":1100,"planimetria_predefinita":"palazzo-di-okumura-prova-r8-area","origine":"utente","seed_json":null,"updated_at":"2026-10-20T17:23:38
+dungeon_area: 10 → 11 righe; DIVERSE
+   - {"chiave":"okumura-06-linea-di-produzione","dungeon_chiave":"okumura","ordine":5,"nome":"Linea di Produzione","descrizione":"Area con presse idrauliche azionate da Console con timer \"Pranzo\" (30 secondi) da attraversare prima che le presse si riattivino."}
+   - {"chiave":"okumura-07-linea-di-smaltimento","dungeon_chiave":"okumura","ordine":6,"nome":"Linea di Smaltimento","descrizione":"Area con la quinta Safe Room, ulteriori presse/bracci meccanici a timer, il forziere con l'arma definitiva di Ryuji e un'ondata di 15 Servobot MDL-CH (deboli a Ghiaccio) da 
+   - {"chiave":"okumura-08-fabbrica-centrale","dungeon_chiave":"okumura","ordine":7,"nome":"Fabbrica Centrale","descrizione":"Area breve e più lineare con la sesta Safe Room e la prima Camera Stagna del Palazzo (meccanica che anticipa l'enigma dell'Interscambio)."}
+   - {"chiave":"okumura-09-interscambio","dungeon_chiave":"okumura","ordine":8,"nome":"Interscambio","descrizione":"Area-enigma basata su Camere Stagne Alfa (α) e Omega (Ω) attivate a coppie tramite Leve; contiene la settima Safe Room e il terzo Seme della Bramosia, protetto dal mini-boss Primo Sacerdote
+   - {"chiave":"okumura-10-produzione-armamenti","dungeon_chiave":"okumura","ordine":9,"nome":"Produzione Armamenti","descrizione":"Area finale del Palazzo (visita del 4 ottobre) con l'ottava e ultima Safe Room; qui si trova il varco verso il Tesoro, percorso che diventa attivo solo il 6 ottobre col cont
+   + {"chiave":"okumura-06-linea-di-produzione","dungeon_chiave":"okumura","ordine":6,"nome":"Linea di Produzione","descrizione":"Area con presse idrauliche azionate da Console con timer \"Pranzo\" (30 secondi) da attraversare prima che le presse si riattivino."}
+   + {"chiave":"okumura-07-linea-di-smaltimento","dungeon_chiave":"okumura","ordine":7,"nome":"Linea di Smaltimento","descrizione":"Area con la quinta Safe Room, ulteriori presse/bracci meccanici a timer, il forziere con l'arma definitiva di Ryuji e un'ondata di 15 Servobot MDL-CH (deboli a Ghiaccio) da 
+   + {"chiave":"okumura-08-fabbrica-centrale","dungeon_chiave":"okumura","ordine":8,"nome":"Fabbrica Centrale","descrizione":"Area breve e più lineare con la sesta Safe Room e la prima Camera Stagna del Palazzo (meccanica che anticipa l'enigma dell'Interscambio)."}
+   + {"chiave":"okumura-09-interscambio","dungeon_chiave":"okumura","ordine":9,"nome":"Interscambio","descrizione":"Area-enigma basata su Camere Stagne Alfa (α) e Omega (Ω) attivate a coppie tramite Leve; contiene la settima Safe Room e il terzo Seme della Bramosia, protetto dal mini-boss Primo Sacerdote
+   + {"chiave":"okumura-10-produzione-armamenti","dungeon_chiave":"okumura","ordine":10,"nome":"Produzione Armamenti","descrizione":"Area finale del Palazzo (visita del 4 ottobre) con l'ottava e ultima Safe Room; qui si trova il varco verso il Tesoro, percorso che diventa attivo solo il 6 ottobre col con
+   + {"chiave":"okumura-prova-r8-infiltrazione","dungeon_chiave":"okumura","ordine":5,"nome":"Prova R8 infiltrazione","descrizione":"Infiltrazione di prova del ciclo R8."}
+infiltrazione_area: 10 → 14 righe; DIVERSE
+   + {"infiltrazione_chiave":"okumura-05-linea-esportazioni","area_chiave":"dungeon/okumura/prova-r8-area","ordine":1,"planimetria_iniziale":null,"origine":"utente"}
+   + {"infiltrazione_chiave":"okumura-prova-r8-infiltrazione","area_chiave":"dungeon/okumura/caserma","ordine":1,"planimetria_iniziale":null,"origine":"utente"}
+   + {"infiltrazione_chiave":"okumura-prova-r8-infiltrazione","area_chiave":"dungeon/okumura/interscambio","ordine":2,"planimetria_iniziale":null,"origine":"utente"}
+   + {"infiltrazione_chiave":"okumura-prova-r8-infiltrazione","area_chiave":"dungeon/okumura/prova-r8-area","ordine":0,"planimetria_iniziale":null,"origine":"utente"}
+punto_interesse: 56 → 56 righe; identiche
+mappa: 22 → 24 righe; DIVERSE
+   + {"chiave":"palazzo-di-okumura-prova-r8-area","nome":"Prova R8 area","tipo":"area","genitore_chiave":"dungeon-okumura","ordine":0,"immagine_chiave":"palazzo-di-okumura-prova-r8-area","asset":null,"larghezza":640,"altezza":400,"entita_tipo":null,"entita_chiave":null,"origine":"utente","note":"","updat
+   + {"chiave":"palazzo-di-okumura-prova-r8-area-livello-2","nome":"Prova R8 area — Livello 2","tipo":"area","genitore_chiave":"dungeon-okumura","ordine":0,"immagine_chiave":"palazzo-di-okumura-prova-r8-area-livello-2","asset":null,"larghezza":640,"altezza":400,"entita_tipo":null,"entita_chiave":null,"or
+spillo: 167 → 167 righe; identiche
+spillo_voce: 0 → 0 righe; identiche
+mappa_entita: 10 → 10 righe; identiche
+voce_infiltrazione: 0 → 0 righe; identiche
+cestino: 1 → 1 righe; identiche

@@ -1,0 +1,808 @@
+### 2026-10-20T16:10:00Z AP3-2 — commit 235b1216 (fix(L3): AP3-2, visore della scheda senza vicine e passaggi nella scheda)
+### worktree staccato su 235b12166b77f9daa90319eb138ce7df64a72286; commit precedente 1b29352b
+### test del commit (forma committata): src/pages/DungeonDettaglioPage.test.tsx 
+### sorgenti del commit da riportare a 235b1216^: src/pages/DungeonDettaglioPage.tsx ; sorgenti nuovi da togliere: nessuno
+### 1) controllo sul codice di 235b1216: npx vitest run --reporter=verbose src/pages/DungeonDettaglioPage.test.tsx 
+
+ RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
+
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > in un Palazzo la colonna elenca i collezionabili delle planimetrie e «Raccolto» aggiorna anello e conteggi subito, senza caricamento, poi rilegge la scheda in silenzio (voci e Enigmi, 095) 303ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > due riletture sovrapposte: la risposta vecchia che arriva dopo non sovrascrive quella nuova 132ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione che non tocca aree: niente visore, «Collega aree»; la colonna lo dice e il Palazzo resta nella piega chiusa (L3) 39ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’area senza collezionabili lo dice così, senza mostrare il resto del Palazzo 35ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > scollegando un pin da una voce «ottenuto» la voce resta com’è nella partita: la scheda si rilegge 152ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Collega pin» usa la mappa principale: barra con voce, conto, planimetria, ricerca e «Fatto»; tutti i pin, i nascosti sbiaditi (2026-10-18) 188ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > collegando i pin l'elenco del Palazzo resta e una sua area porta quella planimetria nella mappa del collegamento, senza cambiare infiltrazione (2026-10-18) 95ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un'area senza planimetria propria collega lo stesso, su una del Palazzo; l'elenco del Palazzo resta (2026-10-18) 93ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > senza partita non ci sono spunte, e l’elenco resta consultabile 39ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > nei Memento (progetto del 2026-10-12): binario dei dedali, scheda del dedalo e un’area per volta; timbri a un tocco e Richieste a tre stati muovono area, dedalo e anello 145ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > nei Memento la linea del tempo è la «Finestra dei Memento» 24ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > nei Memento l’area ha Timbri, Persona, Richieste e Trama in quest’ordine; catturare una Persona non sposta l’anello; «Correggi la scheda» solo in «Modifica la guida» 98ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Memento: la risposta dei timbri, arrivata dopo una richiesta completata, non la riapre 48ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Memento: la risposta di una richiesta, arrivata dopo un timbro, non toglie il timbro 49ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Palazzo: lo stato di una voce, arrivato dopo un raccolto, non riapre il raccolto 106ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Palazzo: un raccolto, arrivato dopo lo stato di una voce, non riporta indietro la voce 99ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > l’elenco dice le aree in ordine, quanto resta, se sono complete e le infiltrazioni che le toccano 35ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > le frecce sulla maniglia spostano l’area e salvano l’ordine di tutto il Palazzo 37ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > trascinare la maniglia porta l’area dove la si lascia 30ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > toccare un’area apre la sua casa: la sua planimetria nel visore e i suoi collezionabili nella colonna (L3, §4.1) 36ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > arrivando sulla casa di un’area senza infiltrazione si apre la prima infiltrazione che la tocca (L3, FUN3-1) 16ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > `?infiltrazione=in-corso` (il diario senza infiltrazioni) apre la prima infiltrazione non completata 14ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Aggiungi area» crea un’area del Palazzo legata all’infiltrazione aperta, e la scheda la apre 72ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > da 1280 px il minimo di 240 px della mappa vale per la tela, non per il riquadro del visore 24ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > se l’ordine non si salva, l’elenco torna a quello del server e lo dice 35ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’area con più versioni: si scelgono nella fila (cambia solo `?planimetria=`), e la versione senza pin lo dice 78ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dalla casa di un’area (senza parametri) si apre la sua predefinita; la versione iniziale dell’infiltrazione vale solo con `?infiltrazione=` (NR3-4, strada (a)) 51ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > le schede della guida senza mappa né voce si vedono nella scheda del Palazzo, in «Schede da sistemare (N)», col testo e l’infiltrazione (AP3-1) 21ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > i passaggi del visore della scheda restano nella scheda (AP3-2) > il visore non mostra le planimetrie vicine; un passaggio verso una planimetria del Palazzo apre la sua area con l’infiltrazione aperta 76ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > i passaggi del visore della scheda restano nella scheda (AP3-2) > una chiave che la scheda non conosce si risolve: se la sua casa è un’area del Palazzo si resta nella scheda 59ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > senza schede da sistemare la sezione non c’è (AP3-1) 21ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Modifica area»: le versioni si riordinano e l’etichetta svuotata si toglie (torna «Planimetria N»), col contenitore del Palazzo 104ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Modifica area» cambia nome, etichetta e infiltrazioni in un salvataggio, e la scheda si rilegge 102ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dalla finestra dell’area si elimina una versione (non l’ultima): va nel cestino 68ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Elimina area» dice che cosa si porta via (versioni, pin, legami; le voci restano) e la manda nel cestino con una richiesta 45ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > «Modifica aree» dell’infiltrazione aggiunge un’area in coda, conservando la versione che si apriva per quelle già legate 54ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > «Togli» scollega un’area dall’infiltrazione senza toccare le altre; l’ordine si cambia con ↑/↓ 63ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > un’infiltrazione senza aree si collega da «Collega aree», in coda all’elenco 29ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > l’eliminazione di un’area dice i legami al plurale quando sono più d’uno 35ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > mentre un ordine si salva, la maniglia dice perché è ferma 45ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > rinominare l’area non cambia il suo indirizzo né le versioni: si manda solo il nome 54ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Sposta la versione in un’altra area»: l’unica versione si sposta solo confermando che l’area va nel cestino (409 `area-si-svuota`) 83ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > una versione di un’area con più versioni diventa «un’area a sé», col nome scelto 74ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > il testo di un’infiltrazione si modifica con «Modifica testo», anche di una che non tocca aree 83ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > anche l’infiltrazione aperta si elimina, dal suo modulo di correzione, e la scheda torna sul Palazzo 88ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dalla proposta di una voce (`?daVoce=`) la riga «Aperta dalla proposta…»; «Chiudi» toglie il parametro e lascia l’infiltrazione 65ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > L4: l’anello conta gli oggetti permanenti; il chip dice «Concluso · Tesoro ✓ · Boss ✓» e quel che manca al completamento 27ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > L4: «Da verificare» dalla scheda — il chip apre la sezione, l’elenco apre la finestra, «Segna la voce» segna e rilegge 107ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > L4: «Da verificare» dalla voce — segno sulla riga e «Sistema…» nella voce aperta, «Togli il fatto al pin» per uid 117ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > L4: senza divergenze non si chiede niente e non c’è la sezione 35ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > tutte le voci segnate (Ottenute o Esaurite; le descrittive non contano): spunta sulle infiltrazioni, sull’area che le ha tutte completate e nel pannello del visore 27ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > una voce ancora da fare: niente spunta su quell’infiltrazione né sull’area; un’infiltrazione senza voci da segnare non ha spunta 25ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > un’infiltrazione senza aree, completata, ha la spunta sulla sua riga in coda all’elenco 26ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > in un’area con più versioni la spunta compare sull’area e sulle sue infiltrazioni, una volta sola (le versioni si scelgono nella fila) 30ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > un’area senza niente da raccogliere è completa (2026-10-11): testo, ✓, chip delle complete; senza partita resta solo «niente da raccogliere» 64ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > segnando l’ultima voce dalla guida la spunta compare subito, prima della rilettura; riaprendola sparisce subito 93ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > senza partita le voci non hanno stato: nessuna spunta 14ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’area con più infiltrazioni le mostra in ordine di guida: nell’elenco del Palazzo e nel pannello del visore, dove toccarne una la apre restando sull’area 40ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > le infiltrazioni di un’area si scelgono insieme nella finestra dell’area: in ordine di guida, e si salva l’insieme (L3, R3-24) 62ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > la bozza di correzione appartiene al pezzo che stai correggendo, non alla schermata 59ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > salvata l’intestazione, la scheda si rilegge con la partita attiva 61ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > la finestra dell’area salva solo quel che cambia: la sola etichetta non tocca nome né infiltrazioni 76ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Aggiungi infiltrazione» crea un’infiltrazione con le aree che tocca: il modulo si apre dal nome 93ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > l’infiltrazione nuova propone il posto subito dopo quella aperta; senza aree toccate non manda il campo 87ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > senza nome l’infiltrazione nuova non si crea 50ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione nuova all’inizio del Palazzo: creata, la scheda la apre 109ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dall’intestazione del Palazzo si sceglie dove si atterra dalla mappa di Tokyo: salvata la regola, la scheda si rilegge e la mostra (2026-10-04) 87ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > cambiato il giorno della partita, la scheda del Palazzo si rilegge: «Oggi si atterra su…» segue il giorno (2026-10-04) 72ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > intestazione con l’illustrazione (L1, scelta dell’utente «Illustrazione anche nelle schede», 2026-10-20) > un Palazzo con l’illustrazione caricata la mostra, piena, nelle tre misure dell’intestazione (da 1024 a 1279 px solo lo stemma), mai come sfondo; senza resta lo stemma 39ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > intestazione con l’illustrazione (L1, scelta dell’utente «Illustrazione anche nelle schede», 2026-10-20) > i Memento restano col loro stemma anche se la scheda porta un’illustrazione 14ms
+
+ Test Files  1 passed (1)
+      Tests  70 passed (70)
+   Start at  18:10:02
+   Duration  6.62s (transform 763ms, setup 105ms, import 970ms, tests 4.66s, environment 747ms)
+
+EXIT=0
+### stato della copia dopo il ritorno ai sorgenti di 235b1216^ (git status --porcelain)
+M  src/pages/DungeonDettaglioPage.tsx
+### test invariati rispetto a 235b1216:
+sì, identici al commit
+### 2) sul codice di 235b1216^: npx vitest run --reporter=verbose src/pages/DungeonDettaglioPage.test.tsx 
+
+ RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
+
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > in un Palazzo la colonna elenca i collezionabili delle planimetrie e «Raccolto» aggiorna anello e conteggi subito, senza caricamento, poi rilegge la scheda in silenzio (voci e Enigmi, 095) 272ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > due riletture sovrapposte: la risposta vecchia che arriva dopo non sovrascrive quella nuova 112ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione che non tocca aree: niente visore, «Collega aree»; la colonna lo dice e il Palazzo resta nella piega chiusa (L3) 37ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’area senza collezionabili lo dice così, senza mostrare il resto del Palazzo 30ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > scollegando un pin da una voce «ottenuto» la voce resta com’è nella partita: la scheda si rilegge 143ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Collega pin» usa la mappa principale: barra con voce, conto, planimetria, ricerca e «Fatto»; tutti i pin, i nascosti sbiaditi (2026-10-18) 175ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > collegando i pin l'elenco del Palazzo resta e una sua area porta quella planimetria nella mappa del collegamento, senza cambiare infiltrazione (2026-10-18) 94ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un'area senza planimetria propria collega lo stesso, su una del Palazzo; l'elenco del Palazzo resta (2026-10-18) 76ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > senza partita non ci sono spunte, e l’elenco resta consultabile 19ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > nei Memento (progetto del 2026-10-12): binario dei dedali, scheda del dedalo e un’area per volta; timbri a un tocco e Richieste a tre stati muovono area, dedalo e anello 132ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > nei Memento la linea del tempo è la «Finestra dei Memento» 18ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > nei Memento l’area ha Timbri, Persona, Richieste e Trama in quest’ordine; catturare una Persona non sposta l’anello; «Correggi la scheda» solo in «Modifica la guida» 110ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Memento: la risposta dei timbri, arrivata dopo una richiesta completata, non la riapre 49ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Memento: la risposta di una richiesta, arrivata dopo un timbro, non toglie il timbro 51ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Palazzo: lo stato di una voce, arrivato dopo un raccolto, non riapre il raccolto 107ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Palazzo: un raccolto, arrivato dopo lo stato di una voce, non riporta indietro la voce 128ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > l’elenco dice le aree in ordine, quanto resta, se sono complete e le infiltrazioni che le toccano 36ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > le frecce sulla maniglia spostano l’area e salvano l’ordine di tutto il Palazzo 36ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > trascinare la maniglia porta l’area dove la si lascia 30ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > toccare un’area apre la sua casa: la sua planimetria nel visore e i suoi collezionabili nella colonna (L3, §4.1) 34ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > arrivando sulla casa di un’area senza infiltrazione si apre la prima infiltrazione che la tocca (L3, FUN3-1) 19ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > `?infiltrazione=in-corso` (il diario senza infiltrazioni) apre la prima infiltrazione non completata 11ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Aggiungi area» crea un’area del Palazzo legata all’infiltrazione aperta, e la scheda la apre 58ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > da 1280 px il minimo di 240 px della mappa vale per la tela, non per il riquadro del visore 23ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > se l’ordine non si salva, l’elenco torna a quello del server e lo dice 44ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’area con più versioni: si scelgono nella fila (cambia solo `?planimetria=`), e la versione senza pin lo dice 71ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dalla casa di un’area (senza parametri) si apre la sua predefinita; la versione iniziale dell’infiltrazione vale solo con `?infiltrazione=` (NR3-4, strada (a)) 33ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > le schede della guida senza mappa né voce si vedono nella scheda del Palazzo, in «Schede da sistemare (N)», col testo e l’infiltrazione (AP3-1) 12ms
+ × src/pages/DungeonDettaglioPage.test.tsx > i passaggi del visore della scheda restano nella scheda (AP3-2) > il visore non mostra le planimetrie vicine; un passaggio verso una planimetria del Palazzo apre la sua area con l’infiltrazione aperta 14ms
+   → [2mexpect([22m[31melement[39m[2m).toHaveAttribute([22m[32m[32m"data-senza-vicine"[32m[39m[2m, [22m[32m[32m"sì"[32m[39m[2m) // element.getAttribute("data-senza-vicine") === "sì"[22m
+
+Expected the element to have attribute:
+[32m  data-senza-vicine="sì"[39m
+Received:
+[31m  null[39m
+ × src/pages/DungeonDettaglioPage.test.tsx > i passaggi del visore della scheda restano nella scheda (AP3-2) > una chiave che la scheda non conosce si risolve: se la sua casa è un’area del Palazzo si resta nella scheda 1021ms
+   → Unable to find role="button" and name "Passaggio interno al Cortile"
+
+Ignored nodes: comments, script, style
+[36m<body[39m
+  [33mstyle[39m=[32m""[39m
+[36m>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col gap-4 lg:min-h-0 lg:flex-1 lg:gap-3"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"card relative shrink-0 overflow-hidden lg:py-1.5"[39m
+      [36m>[39m
+        [36m<span[39m
+          [33maria-hidden[39m=[32m"true"[39m
+          [33mclass[39m=[32m"pointer-events-none absolute -right-10 -top-16 hidden opacity-[0.07] sm:block"[39m
+        [36m/>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"relative flex gap-3 flex-col sm:flex-row sm:items-start sm:gap-5 lg:items-center lg:gap-3"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex shrink-0 items-center gap-3 sm:flex-col lg:flex-row lg:gap-2"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"sm:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden sm:block lg:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden lg:block xl:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden xl:block"[39m
+            [36m/>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Avanzamento in Palazzo di Kamoshida: 1 da raccogliere presi su 4"[39m
+              [33maria-valuemax[39m=[32m"100"[39m
+              [33maria-valuemin[39m=[32m"0"[39m
+              [33maria-valuenow[39m=[32m"25"[39m
+              [33mclass[39m=[32m"relative inline-flex items-center justify-center shrink-0 lg:size-12!"[39m
+              [33mrole[39m=[32m"progressbar"[39m
+              [33mstyle[39m=[32m"width: 64px; height: 64px;"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"absolute inset-0 -rotate-90"[39m
+                [33mviewBox[39m=[32m"0 0 64 64"[39m
+              [36m>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"32"[39m
+                  [33mcy[39m=[32m"32"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mr[39m=[32m"29.5"[39m
+                  [33mstroke[39m=[32m"var(--color-border)"[39m
+                  [33mstroke-width[39m=[32m"5"[39m
+                [36m/>[39m
+                [36m<circle[39m
+                  [33mclass[39m=[32m"transition-[stroke-dasharray] duration-500"[39m
+                  [33mcx[39m=[32m"32"[39m
+                  [33mcy[39m=[32m"32"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mr[39m=[32m"29.5"[39m
+                  [33mstroke[39m=[32m"var(--color-primary)"[39m
+                  [33mstroke-dasharray[39m=[32m"46.33849164044945 185.3539665617978"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"5"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"relative flex items-center justify-center"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"font-display leading-none tabular-nums text-[17px] lg:text-[13px]"[39m
+                [36m>[39m
+                  [0m25[0m
+                  [0m%[0m
+                [36m</span>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col gap-2.5 lg:gap-1"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-col gap-1 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-3"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-wrap items-center gap-2"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"btn btn-ghost btn-sm touch -ml-2"[39m
+                  [33mtitle[39m=[32m"Indietro"[39m
+                  [33mtype[39m=[32m"button"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"18"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"18"[39m
+                  [36m>[39m
+                    [36m<polyline[39m
+                      [33mpoints[39m=[32m"15 18 9 12 15 6"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"lg:sr-only"[39m
+                  [36m>[39m
+                    [0m Indietro[0m
+                  [36m</span>[39m
+                [36m</button>[39m
+                [36m<h1[39m
+                  [33mclass[39m=[32m"titolo-display m-0 break-words"[39m
+                [36m>[39m
+                  [0mPalazzo di Kamoshida[0m
+                [36m</h1>[39m
+                [36m<button[39m
+                  [33maria-label[39m=[32m"Correggi la scheda: il Palazzo «Palazzo di Kamoshida»"[39m
+                  [33mclass[39m=[32m"touch shrink-0 rounded px-1.5 text-text-muted hover:text-text text-[12px]"[39m
+                  [33mtitle[39m=[32m"Correggi il Palazzo «Palazzo di Kamoshida»"[39m
+                  [33mtype[39m=[32m"button"[39m
+                [36m>[39m
+                  [0m✎[0m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"ml-1 lg:sr-only"[39m
+                  [36m>[39m
+                    [0mCorreggi la scheda[0m
+                  [36m</span>[39m
+                [36m</button>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-wrap items-center gap-2 text-[13px] text-text-secondary lg:min-w-0 lg:flex-1 lg:basis-40 lg:flex-nowrap"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"break-words lg:min-w-0 lg:truncate lg:[flex-shrink:1] "[39m
+                  [33mtitle[39m=[32m"Kamoshida"[39m
+                [36m>[39m
+                  [0mKamoshida[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<details[39m
+                [33mclass[39m=[32m"text-[12px] hidden lg:block lg:open:basis-full"[39m
+              [36m>[39m
+                [36m<summary[39m
+                  [33mclass[39m=[32m"tou...
+
+Ignored nodes: comments, script, style
+[36m<body[39m
+  [33mstyle[39m=[32m""[39m
+[36m>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col gap-4 lg:min-h-0 lg:flex-1 lg:gap-3"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"card relative shrink-0 overflow-hidden lg:py-1.5"[39m
+      [36m>[39m
+        [36m<span[39m
+          [33maria-hidden[39m=[32m"true"[39m
+          [33mclass[39m=[32m"pointer-events-none absolute -right-10 -top-16 hidden opacity-[0.07] sm:block"[39m
+        [36m/>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"relative flex gap-3 flex-col sm:flex-row sm:items-start sm:gap-5 lg:items-center lg:gap-3"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex shrink-0 items-center gap-3 sm:flex-col lg:flex-row lg:gap-2"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"sm:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden sm:block lg:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden lg:block xl:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden xl:block"[39m
+            [36m/>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Avanzamento in Palazzo di Kamoshida: 1 da raccogliere presi su 4"[39m
+              [33maria-valuemax[39m=[32m"100"[39m
+              [33maria-valuemin[39m=[32m"0"[39m
+              [33maria-valuenow[39m=[32m"25"[39m
+              [33mclass[39m=[32m"relative inline-flex items-center justify-center shrink-0 lg:size-12!"[39m
+              [33mrole[39m=[32m"progressbar"[39m
+              [33mstyle[39m=[32m"width: 64px; height: 64px;"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"absolute inset-0 -rotate-90"[39m
+                [33mviewBox[39m=[32m"0 0 64 64"[39m
+              [36m>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"32"[39m
+                  [33mcy[39m=[32m"32"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mr[39m=[32m"29.5"[39m
+                  [33mstroke[39m=[32m"var(--color-border)"[39m
+                  [33mstroke-width[39m=[32m"5"[39m
+                [36m/>[39m
+                [36m<circle[39m
+                  [33mclass[39m=[32m"transition-[stroke-dasharray] duration-500"[39m
+                  [33mcx[39m=[32m"32"[39m
+                  [33mcy[39m=[32m"32"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mr[39m=[32m"29.5"[39m
+                  [33mstroke[39m=[32m"var(--color-primary)"[39m
+                  [33mstroke-dasharray[39m=[32m"46.33849164044945 185.3539665617978"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"5"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"relative flex items-center justify-center"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"font-display leading-none tabular-nums text-[17px] lg:text-[13px]"[39m
+                [36m>[39m
+                  [0m25[0m
+                  [0m%[0m
+                [36m</span>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col gap-2.5 lg:gap-1"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-col gap-1 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-3"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-wrap items-center gap-2"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"btn btn-ghost btn-sm touch -ml-2"[39m
+                  [33mtitle[39m=[32m"Indietro"[39m
+                  [33mtype[39m=[32m"button"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"18"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"18"[39m
+                  [36m>[39m
+                    [36m<polyline[39m
+                      [33mpoints[39m=[32m"15 18 9 12 15 6"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"lg:sr-only"[39m
+                  [36m>[39m
+                    [0m Indietro[0m
+                  [36m</span>[39m
+                [36m</button>[39m
+                [36m<h1[39m
+                  [33mclass[39m=[32m"titolo-display m-0 break-words"[39m
+                [36m>[39m
+                  [0mPalazzo di Kamoshida[0m
+                [36m</h1>[39m
+                [36m<button[39m
+                  [33maria-label[39m=[32m"Correggi la scheda: il Palazzo «Palazzo di Kamoshida»"[39m
+                  [33mclass[39m=[32m"touch shrink-0 rounded px-1.5 text-text-muted hover:text-text text-[12px]"[39m
+                  [33mtitle[39m=[32m"Correggi il Palazzo «Palazzo di Kamoshida»"[39m
+                  [33mtype[39m=[32m"button"[39m
+                [36m>[39m
+                  [0m✎[0m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"ml-1 lg:sr-only"[39m
+                  [36m>[39m
+                    [0mCorreggi la scheda[0m
+                  [36m</span>[39m
+                [36m</button>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-wrap items-center gap-2 text-[13px] text-text-secondary lg:min-w-0 lg:flex-1 lg:basis-40 lg:flex-nowrap"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"break-words lg:min-w-0 lg:truncate lg:[flex-shrink:1] "[39m
+                  [33mtitle[39m=[32m"Kamoshida"[39m
+                [36m>[39m
+                  [0mKamoshida[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<details[39m
+                [33mclass[39m=[32m"text-[12px] hidden lg:block lg:open:basis-full"[39m
+              [36m>[39m
+                [36m<summary[39m
+                  [33mclass[39m=[32m"tou...
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > senza schede da sistemare la sezione non c’è (AP3-1) 23ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Modifica area»: le versioni si riordinano e l’etichetta svuotata si toglie (torna «Planimetria N»), col contenitore del Palazzo 108ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Modifica area» cambia nome, etichetta e infiltrazioni in un salvataggio, e la scheda si rilegge 104ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dalla finestra dell’area si elimina una versione (non l’ultima): va nel cestino 83ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Elimina area» dice che cosa si porta via (versioni, pin, legami; le voci restano) e la manda nel cestino con una richiesta 85ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > «Modifica aree» dell’infiltrazione aggiunge un’area in coda, conservando la versione che si apriva per quelle già legate 72ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > «Togli» scollega un’area dall’infiltrazione senza toccare le altre; l’ordine si cambia con ↑/↓ 60ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > un’infiltrazione senza aree si collega da «Collega aree», in coda all’elenco 27ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > l’eliminazione di un’area dice i legami al plurale quando sono più d’uno 35ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > mentre un ordine si salva, la maniglia dice perché è ferma 48ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > rinominare l’area non cambia il suo indirizzo né le versioni: si manda solo il nome 55ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Sposta la versione in un’altra area»: l’unica versione si sposta solo confermando che l’area va nel cestino (409 `area-si-svuota`) 97ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > una versione di un’area con più versioni diventa «un’area a sé», col nome scelto 80ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > il testo di un’infiltrazione si modifica con «Modifica testo», anche di una che non tocca aree 62ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > anche l’infiltrazione aperta si elimina, dal suo modulo di correzione, e la scheda torna sul Palazzo 56ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dalla proposta di una voce (`?daVoce=`) la riga «Aperta dalla proposta…»; «Chiudi» toglie il parametro e lascia l’infiltrazione 63ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > L4: l’anello conta gli oggetti permanenti; il chip dice «Concluso · Tesoro ✓ · Boss ✓» e quel che manca al completamento 33ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > L4: «Da verificare» dalla scheda — il chip apre la sezione, l’elenco apre la finestra, «Segna la voce» segna e rilegge 106ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > L4: «Da verificare» dalla voce — segno sulla riga e «Sistema…» nella voce aperta, «Togli il fatto al pin» per uid 106ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > L4: senza divergenze non si chiede niente e non c’è la sezione 36ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > tutte le voci segnate (Ottenute o Esaurite; le descrittive non contano): spunta sulle infiltrazioni, sull’area che le ha tutte completate e nel pannello del visore 28ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > una voce ancora da fare: niente spunta su quell’infiltrazione né sull’area; un’infiltrazione senza voci da segnare non ha spunta 26ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > un’infiltrazione senza aree, completata, ha la spunta sulla sua riga in coda all’elenco 28ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > in un’area con più versioni la spunta compare sull’area e sulle sue infiltrazioni, una volta sola (le versioni si scelgono nella fila) 51ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > un’area senza niente da raccogliere è completa (2026-10-11): testo, ✓, chip delle complete; senza partita resta solo «niente da raccogliere» 74ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > segnando l’ultima voce dalla guida la spunta compare subito, prima della rilettura; riaprendola sparisce subito 89ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > senza partita le voci non hanno stato: nessuna spunta 14ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’area con più infiltrazioni le mostra in ordine di guida: nell’elenco del Palazzo e nel pannello del visore, dove toccarne una la apre restando sull’area 33ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > le infiltrazioni di un’area si scelgono insieme nella finestra dell’area: in ordine di guida, e si salva l’insieme (L3, R3-24) 58ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > la bozza di correzione appartiene al pezzo che stai correggendo, non alla schermata 57ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > salvata l’intestazione, la scheda si rilegge con la partita attiva 44ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > la finestra dell’area salva solo quel che cambia: la sola etichetta non tocca nome né infiltrazioni 46ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Aggiungi infiltrazione» crea un’infiltrazione con le aree che tocca: il modulo si apre dal nome 58ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > l’infiltrazione nuova propone il posto subito dopo quella aperta; senza aree toccate non manda il campo 54ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > senza nome l’infiltrazione nuova non si crea 56ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione nuova all’inizio del Palazzo: creata, la scheda la apre 121ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dall’intestazione del Palazzo si sceglie dove si atterra dalla mappa di Tokyo: salvata la regola, la scheda si rilegge e la mostra (2026-10-04) 113ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > cambiato il giorno della partita, la scheda del Palazzo si rilegge: «Oggi si atterra su…» segue il giorno (2026-10-04) 89ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > intestazione con l’illustrazione (L1, scelta dell’utente «Illustrazione anche nelle schede», 2026-10-20) > un Palazzo con l’illustrazione caricata la mostra, piena, nelle tre misure dell’intestazione (da 1024 a 1279 px solo lo stemma), mai come sfondo; senza resta lo stemma 39ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > intestazione con l’illustrazione (L1, scelta dell’utente «Illustrazione anche nelle schede», 2026-10-20) > i Memento restano col loro stemma anche se la scheda porta un’illustrazione 13ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pages/DungeonDettaglioPage.test.tsx > i passaggi del visore della scheda restano nella scheda (AP3-2) > il visore non mostra le planimetrie vicine; un passaggio verso una planimetria del Palazzo apre la sua area con l’infiltrazione aperta
+Error: [2mexpect([22m[31melement[39m[2m).toHaveAttribute([22m[32m[32m"data-senza-vicine"[32m[39m[2m, [22m[32m[32m"sì"[32m[39m[2m) // element.getAttribute("data-senza-vicine") === "sì"[22m
+
+Expected the element to have attribute:
+[32m  data-senza-vicine="sì"[39m
+Received:
+[31m  null[39m
+ ❯ src/pages/DungeonDettaglioPage.test.tsx:678:60
+    676|     getDungeon.mockResolvedValue(conCortileNelCancello());
+    677|     monta('kamoshida', '/area/cancello?infiltrazione=k-01');
+    678|     expect(await screen.findByText(/^Visore: m-cancello/)).toHaveAttri…
+       |                                                            ^
+    679|     fireEvent.click(screen.getByRole('button', { name: 'Passaggio al C…
+    680|     await waitFor(() => expect(screen.getByTestId('indirizzo')).toHave…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/pages/DungeonDettaglioPage.test.tsx > i passaggi del visore della scheda restano nella scheda (AP3-2) > una chiave che la scheda non conosce si risolve: se la sua casa è un’area del Palazzo si resta nella scheda
+TestingLibraryElementError: Unable to find role="button" and name "Passaggio interno al Cortile"
+
+Ignored nodes: comments, script, style
+[36m<body[39m
+  [33mstyle[39m=[32m""[39m
+[36m>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col gap-4 lg:min-h-0 lg:flex-1 lg:gap-3"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"card relative shrink-0 overflow-hidden lg:py-1.5"[39m
+      [36m>[39m
+        [36m<span[39m
+          [33maria-hidden[39m=[32m"true"[39m
+          [33mclass[39m=[32m"pointer-events-none absolute -right-10 -top-16 hidden opacity-[0.07] sm:block"[39m
+        [36m/>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"relative flex gap-3 flex-col sm:flex-row sm:items-start sm:gap-5 lg:items-center lg:gap-3"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex shrink-0 items-center gap-3 sm:flex-col lg:flex-row lg:gap-2"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"sm:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden sm:block lg:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden lg:block xl:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden xl:block"[39m
+            [36m/>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Avanzamento in Palazzo di Kamoshida: 1 da raccogliere presi su 4"[39m
+              [33maria-valuemax[39m=[32m"100"[39m
+              [33maria-valuemin[39m=[32m"0"[39m
+              [33maria-valuenow[39m=[32m"25"[39m
+              [33mclass[39m=[32m"relative inline-flex items-center justify-center shrink-0 lg:size-12!"[39m
+              [33mrole[39m=[32m"progressbar"[39m
+              [33mstyle[39m=[32m"width: 64px; height: 64px;"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"absolute inset-0 -rotate-90"[39m
+                [33mviewBox[39m=[32m"0 0 64 64"[39m
+              [36m>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"32"[39m
+                  [33mcy[39m=[32m"32"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mr[39m=[32m"29.5"[39m
+                  [33mstroke[39m=[32m"var(--color-border)"[39m
+                  [33mstroke-width[39m=[32m"5"[39m
+                [36m/>[39m
+                [36m<circle[39m
+                  [33mclass[39m=[32m"transition-[stroke-dasharray] duration-500"[39m
+                  [33mcx[39m=[32m"32"[39m
+                  [33mcy[39m=[32m"32"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mr[39m=[32m"29.5"[39m
+                  [33mstroke[39m=[32m"var(--color-primary)"[39m
+                  [33mstroke-dasharray[39m=[32m"46.33849164044945 185.3539665617978"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"5"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"relative flex items-center justify-center"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"font-display leading-none tabular-nums text-[17px] lg:text-[13px]"[39m
+                [36m>[39m
+                  [0m25[0m
+                  [0m%[0m
+                [36m</span>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col gap-2.5 lg:gap-1"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-col gap-1 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-3"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-wrap items-center gap-2"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"btn btn-ghost btn-sm touch -ml-2"[39m
+                  [33mtitle[39m=[32m"Indietro"[39m
+                  [33mtype[39m=[32m"button"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"18"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"18"[39m
+                  [36m>[39m
+                    [36m<polyline[39m
+                      [33mpoints[39m=[32m"15 18 9 12 15 6"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"lg:sr-only"[39m
+                  [36m>[39m
+                    [0m Indietro[0m
+                  [36m</span>[39m
+                [36m</button>[39m
+                [36m<h1[39m
+                  [33mclass[39m=[32m"titolo-display m-0 break-words"[39m
+                [36m>[39m
+                  [0mPalazzo di Kamoshida[0m
+                [36m</h1>[39m
+                [36m<button[39m
+                  [33maria-label[39m=[32m"Correggi la scheda: il Palazzo «Palazzo di Kamoshida»"[39m
+                  [33mclass[39m=[32m"touch shrink-0 rounded px-1.5 text-text-muted hover:text-text text-[12px]"[39m
+                  [33mtitle[39m=[32m"Correggi il Palazzo «Palazzo di Kamoshida»"[39m
+                  [33mtype[39m=[32m"button"[39m
+                [36m>[39m
+                  [0m✎[0m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"ml-1 lg:sr-only"[39m
+                  [36m>[39m
+                    [0mCorreggi la scheda[0m
+                  [36m</span>[39m
+                [36m</button>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-wrap items-center gap-2 text-[13px] text-text-secondary lg:min-w-0 lg:flex-1 lg:basis-40 lg:flex-nowrap"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"break-words lg:min-w-0 lg:truncate lg:[flex-shrink:1] "[39m
+                  [33mtitle[39m=[32m"Kamoshida"[39m
+                [36m>[39m
+                  [0mKamoshida[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<details[39m
+                [33mclass[39m=[32m"text-[12px] hidden lg:block lg:open:basis-full"[39m
+              [36m>[39m
+                [36m<summary[39m
+                  [33mclass[39m=[32m"tou...
+
+Ignored nodes: comments, script, style
+[36m<body[39m
+  [33mstyle[39m=[32m""[39m
+[36m>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col gap-4 lg:min-h-0 lg:flex-1 lg:gap-3"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"card relative shrink-0 overflow-hidden lg:py-1.5"[39m
+      [36m>[39m
+        [36m<span[39m
+          [33maria-hidden[39m=[32m"true"[39m
+          [33mclass[39m=[32m"pointer-events-none absolute -right-10 -top-16 hidden opacity-[0.07] sm:block"[39m
+        [36m/>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"relative flex gap-3 flex-col sm:flex-row sm:items-start sm:gap-5 lg:items-center lg:gap-3"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex shrink-0 items-center gap-3 sm:flex-col lg:flex-row lg:gap-2"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"sm:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden sm:block lg:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden lg:block xl:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden xl:block"[39m
+            [36m/>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Avanzamento in Palazzo di Kamoshida: 1 da raccogliere presi su 4"[39m
+              [33maria-valuemax[39m=[32m"100"[39m
+              [33maria-valuemin[39m=[32m"0"[39m
+              [33maria-valuenow[39m=[32m"25"[39m
+              [33mclass[39m=[32m"relative inline-flex items-center justify-center shrink-0 lg:size-12!"[39m
+              [33mrole[39m=[32m"progressbar"[39m
+              [33mstyle[39m=[32m"width: 64px; height: 64px;"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"absolute inset-0 -rotate-90"[39m
+                [33mviewBox[39m=[32m"0 0 64 64"[39m
+              [36m>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"32"[39m
+                  [33mcy[39m=[32m"32"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mr[39m=[32m"29.5"[39m
+                  [33mstroke[39m=[32m"var(--color-border)"[39m
+                  [33mstroke-width[39m=[32m"5"[39m
+                [36m/>[39m
+                [36m<circle[39m
+                  [33mclass[39m=[32m"transition-[stroke-dasharray] duration-500"[39m
+                  [33mcx[39m=[32m"32"[39m
+                  [33mcy[39m=[32m"32"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mr[39m=[32m"29.5"[39m
+                  [33mstroke[39m=[32m"var(--color-primary)"[39m
+                  [33mstroke-dasharray[39m=[32m"46.33849164044945 185.3539665617978"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"5"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"relative flex items-center justify-center"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"font-display leading-none tabular-nums text-[17px] lg:text-[13px]"[39m
+                [36m>[39m
+                  [0m25[0m
+                  [0m%[0m
+                [36m</span>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col gap-2.5 lg:gap-1"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-col gap-1 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-3"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-wrap items-center gap-2"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"btn btn-ghost btn-sm touch -ml-2"[39m
+                  [33mtitle[39m=[32m"Indietro"[39m
+                  [33mtype[39m=[32m"button"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"18"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"18"[39m
+                  [36m>[39m
+                    [36m<polyline[39m
+                      [33mpoints[39m=[32m"15 18 9 12 15 6"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"lg:sr-only"[39m
+                  [36m>[39m
+                    [0m Indietro[0m
+                  [36m</span>[39m
+                [36m</button>[39m
+                [36m<h1[39m
+                  [33mclass[39m=[32m"titolo-display m-0 break-words"[39m
+                [36m>[39m
+                  [0mPalazzo di Kamoshida[0m
+                [36m</h1>[39m
+                [36m<button[39m
+                  [33maria-label[39m=[32m"Correggi la scheda: il Palazzo «Palazzo di Kamoshida»"[39m
+                  [33mclass[39m=[32m"touch shrink-0 rounded px-1.5 text-text-muted hover:text-text text-[12px]"[39m
+                  [33mtitle[39m=[32m"Correggi il Palazzo «Palazzo di Kamoshida»"[39m
+                  [33mtype[39m=[32m"button"[39m
+                [36m>[39m
+                  [0m✎[0m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"ml-1 lg:sr-only"[39m
+                  [36m>[39m
+                    [0mCorreggi la scheda[0m
+                  [36m</span>[39m
+                [36m</button>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-wrap items-center gap-2 text-[13px] text-text-secondary lg:min-w-0 lg:flex-1 lg:basis-40 lg:flex-nowrap"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"break-words lg:min-w-0 lg:truncate lg:[flex-shrink:1] "[39m
+                  [33mtitle[39m=[32m"Kamoshida"[39m
+                [36m>[39m
+                  [0mKamoshida[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<details[39m
+                [33mclass[39m=[32m"text-[12px] hidden lg:block lg:open:basis-full"[39m
+              [36m>[39m
+                [36m<summary[39m
+                  [33mclass[39m=[32m"tou...
+ ❯ waitForWrapper ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/pages/DungeonDettaglioPage.test.tsx:688:34
+    686|     risolviMappa.mockResolvedValue({ tipo: 'mappa', mappa: 'm-cortile'…
+    687|     monta('kamoshida', '/area/cancello?infiltrazione=k-01');
+    688|     fireEvent.click(await screen.findByRole('button', { name: 'Passagg…
+       |                                  ^
+    689|     await waitFor(() => expect(screen.getByTestId('indirizzo')).toHave…
+    690|     expect(risolviMappa).toHaveBeenCalledWith('nativo-cortile');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 68 passed (70)
+   Start at  18:10:10
+   Duration  7.31s (transform 713ms, setup 106ms, import 906ms, tests 5.43s, environment 748ms)
+
+EXIT=1
+### ripristino della copia a 235b1216: 0 righe in status

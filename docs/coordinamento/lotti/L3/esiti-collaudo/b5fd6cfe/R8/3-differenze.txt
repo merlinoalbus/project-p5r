@@ -1,0 +1,66 @@
+### 2026-10-20T17:30:18Z impronta dopo le prove contro la foto
+gioco.db.area: righe 140 → 141, contenuto diverso
+gioco.db.dungeon_area: righe 100 → 101, contenuto diverso
+gioco.db.guida_alias: righe 92 → 92, contenuto diverso
+gioco.db.guida_mappa: righe 92 → 92, contenuto diverso
+gioco.db.immagine: righe 807 → 809, contenuto diverso
+gioco.db.immagine_miniatura: righe 93 → 103, contenuto diverso
+gioco.db.infiltrazione_area: righe 105 → 109, contenuto diverso
+gioco.db.mappa: righe 317 → 319, contenuto diverso
+gioco.db.mappa_alias: righe 690 → 692, contenuto diverso
+gioco.db.mappa_entita: righe 135 → 135, contenuto diverso
+gioco.db.mappa_percorso: righe 317 → 319, contenuto diverso
+gioco.db.mappa_presentazione: righe 227 → 227, contenuto diverso
+gioco.db.pianta_area: righe 84 → 84, contenuto diverso
+gioco.db.proposta_infiltrazione_voce: righe 102 → 102, contenuto diverso
+gioco.db.punto_interesse: righe 961 → 961, contenuto diverso
+partite.db.partita: righe 2 → 2, contenuto diverso
+### differenze riga per riga
+### gioco.db.area (chiave chiave): 3 differenze
+  + dungeon/okumura/prova-r8-area {"chiave":"dungeon/okumura/prova-r8-area","quartiere_chiave":null,"dungeon_chiave":"okumura","slug":"prova-r8-area","nome":"Prova R8 area","nome_rivisto":0,"ordine":1100,"planimetria_predefinita":"palazzo-di-okumura-prova-r8-area","origine":"utente","seed_json":null,"updated_at":"2026-10-20T17:23:38.375Z","citta_chiave":null,"da_verificare":0}
+  ~ dungeon/okumura/interscambio updated_at: "2026-10-20T08:31:23.848Z" → "2026-10-20T17:23:38.375Z"
+  ~ dungeon/okumura/caserma updated_at: "2026-10-20T08:31:23.848Z" → "2026-10-20T17:23:38.375Z"
+### gioco.db.dungeon_area (chiave chiave): 6 differenze
+  + okumura-prova-r8-infiltrazione {"chiave":"okumura-prova-r8-infiltrazione","dungeon_chiave":"okumura","ordine":5,"nome":"Prova R8 infiltrazione","descrizione":"Infiltrazione di prova del ciclo R8."}
+  ~ okumura-06-linea-di-produzione ordine: 5 → 6
+  ~ okumura-07-linea-di-smaltimento ordine: 6 → 7
+  ~ okumura-08-fabbrica-centrale ordine: 7 → 8
+  ~ okumura-09-interscambio ordine: 8 → 9
+  ~ okumura-10-produzione-armamenti ordine: 9 → 10
+### gioco.db.guida_alias (chiave chiave): 0 differenze
+### gioco.db.guida_mappa (chiave area_chiave): 0 differenze
+### gioco.db.immagine (chiave id): 2 differenze
+  + 808 {"id":808,"ambito":"mappa","chiave":"palazzo-di-okumura-prova-r8-area","nome_file":"c4fec3cf-3ea5-4923-9e89-199f0bf49bc3.png","mime":"image/png","byte":11725,"created_at":"2026-10-20T17:22:49.584Z","origine_url":null,"contenuto":"<blob 11725 1fd1f5428101>"}
+  + 809 {"id":809,"ambito":"mappa","chiave":"palazzo-di-okumura-prova-r8-area-livello-2","nome_file":"03974658-3670-42fd-9f6d-0b56bafe08a9.png","mime":"image/png","byte":12254,"created_at":"2026-10-20T17:23:13.064Z","origine_url":null,"contenuto":"<blob 12254 5af4b0ee997b>"}
+### gioco.db.immagine_miniatura (chiave immagine_id+larghezza): 10 differenze
+  + 453|320 {"immagine_id":453,"larghezza":320,"versione":"2026-09-12T14:55:14.943Z~r2","mime":"image/webp","byte":8346,"larghezza_reale":320,"altezza_reale":368,"contenuto":"<blob 8346 bd259a9f6f23>","created_at":"2026-10-20T17:23:00.305Z"}
+  + 469|320 {"immagine_id":469,"larghezza":320,"versione":"2026-09-12T14:55:14.943Z~r2","mime":"image/webp","byte":3842,"larghezza_reale":320,"altezza_reale":388,"contenuto":"<blob 3842 2594c03038a9>","created_at":"2026-10-20T17:23:00.309Z"}
+  + 458|320 {"immagine_id":458,"larghezza":320,"versione":"2026-09-12T14:55:14.943Z~r2","mime":"image/webp","byte":11208,"larghezza_reale":320,"altezza_reale":411,"contenuto":"<blob 11208 1cd30cd02426>","created_at":"2026-10-20T17:23:00.319Z"}
+  + 467|320 {"immagine_id":467,"larghezza":320,"versione":"2026-09-12T14:55:14.943Z~r2","mime":"image/webp","byte":8224,"larghezza_reale":320,"altezza_reale":398,"contenuto":"<blob 8224 af2e5c204fb2>","created_at":"2026-10-20T17:23:00.327Z"}
+  + 465|320 {"immagine_id":465,"larghezza":320,"versione":"2026-09-12T14:55:14.943Z~r2","mime":"image/webp","byte":7532,"larghezza_reale":320,"altezza_reale":536,"contenuto":"<blob 7532 1c12344e148b>","created_at":"2026-10-20T17:23:00.330Z"}
+  + 460|320 {"immagine_id":460,"larghezza":320,"versione":"2026-09-12T14:55:14.943Z~r2","mime":"image/webp","byte":7592,"larghezza_reale":320,"altezza_reale":279,"contenuto":"<blob 7592 fe4ee25c1ede>","created_at":"2026-10-20T17:23:00.343Z"}
+  + 475|320 {"immagine_id":475,"larghezza":320,"versione":"2026-09-12T14:55:14.943Z~r2","mime":"image/webp","byte":6758,"larghezza_reale":320,"altezza_reale":306,"contenuto":"<blob 6758 5407a905e83b>","created_at":"2026-10-20T17:23:00.362Z"}
+  + 783|320 {"immagine_id":783,"larghezza":320,"versione":"2026-10-18T17:14:31.551Z~r2","mime":"image/webp","byte":39776,"larghezza_reale":320,"altezza_reale":225,"contenuto":"<blob 39776 b8744bda64cb>","created_at":"2026-10-20T17:23:00.479Z"}
+  + 809|160 {"immagine_id":809,"larghezza":160,"versione":"2026-10-20T17:23:13.064Z~r2","mime":"image/webp","byte":440,"larghezza_reale":160,"altezza_reale":100,"contenuto":"<blob 440 8874cb76913e>","created_at":"2026-10-20T17:23:14.094Z"}
+  + 808|160 {"immagine_id":808,"larghezza":160,"versione":"2026-10-20T17:22:49.584Z~r2","mime":"image/webp","byte":408,"larghezza_reale":160,"altezza_reale":100,"contenuto":"<blob 408 bf4c52aa5ea7>","created_at":"2026-10-20T17:23:39.474Z"}
+### gioco.db.infiltrazione_area (chiave infiltrazione_chiave+area_chiave): 4 differenze
+  + okumura-05-linea-esportazioni|dungeon/okumura/prova-r8-area {"infiltrazione_chiave":"okumura-05-linea-esportazioni","area_chiave":"dungeon/okumura/prova-r8-area","ordine":1,"planimetria_iniziale":null,"origine":"utente"}
+  + okumura-prova-r8-infiltrazione|dungeon/okumura/prova-r8-area {"infiltrazione_chiave":"okumura-prova-r8-infiltrazione","area_chiave":"dungeon/okumura/prova-r8-area","ordine":0,"planimetria_iniziale":null,"origine":"utente"}
+  + okumura-prova-r8-infiltrazione|dungeon/okumura/interscambio {"infiltrazione_chiave":"okumura-prova-r8-infiltrazione","area_chiave":"dungeon/okumura/interscambio","ordine":2,"planimetria_iniziale":null,"origine":"utente"}
+  + okumura-prova-r8-infiltrazione|dungeon/okumura/caserma {"infiltrazione_chiave":"okumura-prova-r8-infiltrazione","area_chiave":"dungeon/okumura/caserma","ordine":1,"planimetria_iniziale":null,"origine":"utente"}
+### gioco.db.mappa (chiave chiave): 2 differenze
+  + palazzo-di-okumura-prova-r8-area {"chiave":"palazzo-di-okumura-prova-r8-area","nome":"Prova R8 area","tipo":"area","genitore_chiave":"dungeon-okumura","ordine":0,"immagine_chiave":"palazzo-di-okumura-prova-r8-area","asset":null,"larghezza":640,"altezza":400,"entita_tipo":null,"entita_chiave":null,"origine":"utente","note":"","updated_at":"2026-10-20T17:22:49.584Z","ruolo_immagine":"planimetria-nativa","nome_rivisto":0,"area_chiave":"dungeon/okumura/prova-r8-area","versione_etichetta":"Livello 1","versione_ordine":0,"percorso_fisso":null}
+  + palazzo-di-okumura-prova-r8-area-livello-2 {"chiave":"palazzo-di-okumura-prova-r8-area-livello-2","nome":"Prova R8 area — Livello 2","tipo":"area","genitore_chiave":"dungeon-okumura","ordine":0,"immagine_chiave":"palazzo-di-okumura-prova-r8-area-livello-2","asset":null,"larghezza":640,"altezza":400,"entita_tipo":null,"entita_chiave":null,"origine":"utente","note":"","updated_at":"2026-10-20T17:23:13.064Z","ruolo_immagine":"planimetria-nativa","nome_rivisto":0,"area_chiave":"dungeon/okumura/prova-r8-area","versione_etichetta":"Livello 2","versione_ordine":1,"percorso_fisso":null}
+### gioco.db.mappa_alias (chiave chiave): 2 differenze
+  + palazzo-di-okumura-prova-r8-area {"chiave":"palazzo-di-okumura-prova-r8-area","mappa_chiave":"palazzo-di-okumura-prova-r8-area"}
+  + palazzo-di-okumura-prova-r8-area-livello-2 {"chiave":"palazzo-di-okumura-prova-r8-area-livello-2","mappa_chiave":"palazzo-di-okumura-prova-r8-area-livello-2"}
+### gioco.db.mappa_entita (chiave mappa_chiave+entita_tipo+entita_chiave): 0 differenze
+### gioco.db.mappa_percorso (chiave mappa_chiave): 2 differenze
+  + palazzo-di-okumura-prova-r8-area-livello-2 {"mappa_chiave":"palazzo-di-okumura-prova-r8-area-livello-2","chiave":"palazzo-di-okumura-prova-r8-area-livello-2","nome":"Palazzo di Okumura › Prova R8 area — Livello 2"}
+  + palazzo-di-okumura-prova-r8-area {"mappa_chiave":"palazzo-di-okumura-prova-r8-area","chiave":"palazzo-di-okumura-prova-r8-area","nome":"Palazzo di Okumura › Prova R8 area"}
+### gioco.db.mappa_presentazione (chiave mappa_chiave): 0 differenze
+### gioco.db.pianta_area (chiave area_chiave): 0 differenze
+### gioco.db.proposta_infiltrazione_voce (chiave voce_uid+ordine): 0 differenze
+### gioco.db.punto_interesse (chiave chiave): 0 differenze
+### partite.db.partita (chiave id): 1 differenze
+  ~ 1 updated_at: "2026-10-20T05:01:24.303Z" → "2026-10-20T17:29:55.860Z"
