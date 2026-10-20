@@ -1489,7 +1489,10 @@ export interface AreaDettaglioDto extends AreaRiassuntoDto {
   vicine: Array<{ nome: string; quartiereNome: string | null; casa: string }>;
 }
 /** Una planimetria del mondo senza Area (da assegnare con «Colloca»). */
-export interface MappaDaCollocareDto { chiave: string; nome: string; genitoreNome: string | null; numeroSpilli: number; immagineUrl: string | null; asset: string | null }
+export interface MappaDaCollocareDto { chiave: string; nome: string;
+  /** La chiave pubblica del genitore (FUN2-9 di L2): «Colloca» propone il quartiere con `mappaChiave` uguale. */
+  genitore: string | null;
+  genitoreNome: string | null; numeroSpilli: number; immagineUrl: string | null; asset: string | null }
 export interface QuartiereRiassuntoDto {
   mappaChiave?:string;
   ingresso?:IngressoQuartiereDto|null;

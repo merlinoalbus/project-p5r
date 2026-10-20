@@ -6,7 +6,7 @@
 import request from 'supertest';
 import { closeDb, getDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
-import { idMappa, sincronizzaPercorsiMappe } from '../services/mappe/percorsiMappe.js';
+import { chiaveMappa, idMappa, sincronizzaPercorsiMappe } from '../services/mappe/percorsiMappe.js';
 import { importaMappe } from '../services/mappe/mappeService.js';
 import type { AreaDettaglioDto, AreaRiassuntoDto, EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, QuartiereDettaglioDto, QuartiereRiassuntoDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
@@ -271,6 +271,21 @@ describe('Aree del mondo (L2)', () => {
     await request(app).put(`/api/mappe/${encodeURIComponent(sciolta.chiave)}`).send({ genitore: altra.chiave }).expect(200);
     // nessuna planimetria del mondo è finita fra le «da collocare»
     expect(((await request(app).get('/api/aree/da-collocare').expect(200)).body.data as Array<{ chiave: string }>).some((m) => [sciolta.chiave, generica.chiave].includes(m.chiave))).toBe(false);
+  });
+
+  it('FUN2-9 (giro 2) — le planimetrie da collocare dicono la chiave del loro genitore, perché «Colloca» proponga il quartiere giusto', async () => {
+    // una planimetria di Shibuya tolta dalla sua Area finisce fra le «da collocare»
+    const pianta = prepared("SELECT chiave FROM mappa WHERE area_chiave = 'citta/shibuya/central-street' ORDER BY versione_ordine LIMIT 1").pluck().get() as string;
+    getDb().pragma('foreign_keys = OFF');
+    prepared('UPDATE area SET planimetria_predefinita = NULL WHERE chiave = ?').run('citta/shibuya/central-street');
+    prepared('UPDATE mappa SET area_chiave = NULL, versione_ordine = NULL, versione_etichetta = NULL WHERE chiave = ?').run(pianta);
+    getDb().pragma('foreign_keys = ON');
+    const elenco = (await request(app).get('/api/aree/da-collocare').expect(200)).body.data as Array<{ chiave: string; genitore?: string | null; genitoreNome: string | null }>;
+    const voce = elenco.find((m) => m.chiave === chiaveMappa(pianta))!;
+    expect(voce).toMatchObject({ genitore: chiaveMappa(prepared('SELECT genitore_chiave FROM mappa WHERE chiave = ?').pluck().get(pianta) as string), genitoreNome: expect.any(String) });
+    // la chiave è quella con cui il quartiere si riconosce nella città (`mappaChiave`)
+    const quartieri = (await request(app).get('/api/compendio/citta').expect(200)).body.data as QuartiereRiassuntoDto[];
+    expect(quartieri.find((q) => q.mappaChiave === voce.genitore)?.chiave).toBe('shibuya');
   });
 
   it('12 — pacchetto delle mappe: le Aree viaggiano (esporta → importa sulla stessa istanza dopo averle tolte); un pacchetto senza Aree le riceve dalla regola', async () => {

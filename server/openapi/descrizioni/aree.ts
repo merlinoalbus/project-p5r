@@ -17,7 +17,7 @@ const IMMAGINE = [[400, 'immagine-vuota'], [400, 'formato-non-ammesso'], [400, '
 export const DESCRIZIONI_AREE: DescrizioniArea = {
   'GET /api/aree/da-collocare': {
     sommario: 'Le planimetrie senza un’Area',
-    descrizione: 'Le planimetrie (`luogo` o `area`) figlie di Tokyo o di un quartiere e, da L3, quelle figlie della radice di un Palazzo (Memento esclusi) che non appartengono a nessuna Area: dopo le migrazioni 109 e 110 nessuna, ma una mappa importata o tolta da un’Area finisce qui, e «Colloca» la assegna. In ordine di genitore e di mappa.',
+    descrizione: 'Le planimetrie (`luogo` o `area`) figlie di Tokyo o di un quartiere e, da L3, quelle figlie della radice di un Palazzo (Memento esclusi) che non appartengono a nessuna Area: dopo le migrazioni 109 e 110 nessuna, ma una mappa importata o tolta da un’Area finisce qui, e «Colloca» la assegna. In ordine di genitore e di mappa. Ognuna porta `genitore`, la chiave pubblica del genitore (FUN2-9): per un quartiere è la sua `mappaChiave`.',
     risposta: 'Elenco di `MappaDaCollocareDto`',
   },
   'PUT /api/aree/colloca': {
