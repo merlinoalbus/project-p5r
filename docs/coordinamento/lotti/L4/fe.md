@@ -112,6 +112,14 @@ Aspettano i campi di BE per §8.11 (pin con stato proprio), chiesti a BE il 2026
   px; selettore 44 px, «Ripristina» 44 px; 375×812 righe larghe 291 px senza orizzontale, intestazione 241; 768×1024 righe da 44, intestazione 198;
   visore top 317 (1366×657, 1920×1080), 340 (1024×690) → R3-41 invariato.
 
+## §4.1 «Esaurito» — fatto (ripresa di L4, 2026-10-20)
+- `GuidaDellArea`: «Esaurito» è un chip proprio (`chip--bloccata` con l'icona «esaurito»), non più « · esaurito» nel testo; la riga segnata e chiusa
+  si attenua di più (`opacity-40`) di una «ottenuto» (`opacity-60`).
+- Test visto rosso e poi verde: `GuidaDellArea.test.tsx` «Esaurito è un chip proprio…». GuidaDellArea, DungeonDettaglioPage, TramaDellArea: 132/132.
+- Browser: nella partita 1 non c'è nessuna voce esaurita e non si scrivono dati per crearne; la risposta GET della scheda di Madarame è stata
+  riscritta **solo nella pagina** (fetch intercettata, poi ripristinata e pagina ricaricata) con «Raccogli il Tesoro» esaurito: chip «Permanente»
+  ed «Esaurito», opacità 40 contro 60; 1280×689 riga 64 px, 375×812 64 px larga 291 senza orizzontale, 768×1024 44 px.
+
 ## Da fare
 1. ~~k/N, «Segna»/«Riapri» con «Riapre anche» e «Segnate anche»~~: fatto (sopra).
 5. ~~§8.6 (O4-2)~~: fatto (sopra).
