@@ -2192,6 +2192,33 @@ Giro 2 (segnalazioni dell'utente e revisione dell'indice delle Mappe, 2026-10-20
   - 06:39:53Z l'utente: «Riapri e al termine le richiudi... una alla volta». Le sessioni di prova sono state riaperte una alla volta e
     richiuse; la verifica indipendente di UX2-15 l'hanno fatta Test layout (48 misure) e Test UX.
 
+## 2026-10-20 — L3: i Palazzi in aree, le infiltrazioni trasversali
+
+Lotto L3 del piano. I Palazzi seguono la gerarchia **Città → Palazzo → Area → Planimetria (versioni)**. Le infiltrazioni sono legate molti a molti alle aree che toccano (migrazione 110, `infiltrazione_area`). Ogni planimetria di Palazzo ha una sola casa, la scheda del Palazzo sull'Area (`/guida/dungeon/<k>/area/<slug>`). I vecchi indirizzi `/guida/mappe/<k>` portano lì, con lo spillo e la versione, e la griglia del Palazzo in Mappe non esiste più.
+
+Decisioni dell'utente (2026-10-20):
+- **Il legame voce del diario ↔ infiltrazione** è un campo visibile e selezionabile: «non deve essere nascosto ma selezionabile... attingendo alle infiltrazioni già esistenti nel palazzo» (R3-37b). Vale per tutte le voci di Palazzo di ogni giorno: «va applicata a tutti i riferimenti dei palazzi» (R3-37c). Le proposte vengono dalla scheda G-022 e servono sempre la conferma dell'utente; la migrazione non scrive nessun legame.
+- **Conteggi dell'indice (E2):** ogni carta mostra i pin di contenuto, e l'intestazione aggiunge «più N passaggi e N note». Le porte stanno fra i passaggi, come nel testo accettato.
+- **Intestazione al massimo al 30% della schermata a ogni dispositivo**: «e va ridotto mi sembra ovvio... l'intestazione deve occupare massimo il 30% di una schermata dispositivo» (LAY3-5). Supera la scelta del PM di lasciarla fra le cose da rivedere.
+- **Scheda del Palazzo da non peggiorare**: «non voglio che tocchi la scheda del palazzo che funziona bene». La guida nel visore è un'integrazione separata (vedi sotto).
+- **Schermate fuori dal repository pubblico**: le 24 schermate dei tester committate per errore si tolgono dall'albero, senza riscrivere la storia dei rami di copia (scelta dell'utente dopo il giro 1 del validatore).
+- **Iweleth (D3)**: in L3 migra come gli altri Palazzi; la confluenza nel dedalo dei Memento è di L8.
+
+Scelte del Project manager (2026-10-20):
+- **NR3-4**: arrivando dalla casa di un'Area (senza `?infiltrazione=`) si apre la sua planimetria predefinita. La planimetria iniziale dell'infiltrazione vale solo quando l'indirizzo porta l'infiltrazione. È la regola di L2, e i 459 indirizzi già giusti non cambiano.
+- **FUN3-2**: per il 04-20 il campo, che è un insieme ordinato, propone le tre infiltrazioni in ordine, sempre da confermare.
+- **AP3-1**: le 5 schede della guida senza mappa né voce si leggono nella scheda del Palazzo già in L3; con L4 ricevono i gesti che le sistemano.
+- **LAY3-4 e LAY3-7**: il testo intero si legge con un tocco, nei «Dettagli dalla guida» o nell'elenco aperto del selettore. Da 1024 px in su il visore entro metà altezza (R3-41) ha la precedenza sul mandare a capo i selettori.
+- **UX3-10**: il numero dei pin compare una sola volta, nel riquadro «N pin».
+- **UX3-11**: i segni dei chip delle date sono a opacità piena, per la regola dell'opacità al 100%.
+- **UX3-13**, come l'ha realizzato FE: da 1280 px le aree toccate stanno evidenziate nella colonna delle aree con una legenda, invariato sotto i 1280.
+- **UX3-5**: lo stemma delle intestazioni segue la preferenza della grafica, come prima di L1; nessuna modifica.
+
+Integrazione «Guida nel visore» e «Planimetria della voce» (decisa dall'utente il 2026-10-20, fuori dal rilascio di L3, vedi `docs/coordinamento/lotti/L3/integrazione-guida-visore.md`):
+- nel visore solo le funzioni d'uso: casella fatto/riapri, dettagli della voce, riferimenti ai pin;
+- le voci senza pin stanno solo sulla planimetria dove sono state inserite, per regola la planimetria 1 dell'infiltrazione, e si spostano a mano durante la review;
+- un Enigma con passi sta dove stanno i passi.
+
 ## 2026-10-20 — L4: un Palazzo «concluso» e «completato», gli effetti seguono il furto
 
 Davanti alla partita 1, dove Kamoshida aveva Tesoro e boss ma 15 voci permanenti non segnate (56/71), l'utente ha scelto due livelli.
