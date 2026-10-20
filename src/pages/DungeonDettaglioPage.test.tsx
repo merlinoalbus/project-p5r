@@ -631,6 +631,18 @@ it('un’area con più versioni: si scelgono nella fila (cambia solo `?planimetr
   expect(await screen.findByText(/^Visore: m-cancello(?!-)/)).toBeInTheDocument();
 });
 
+it('dalla casa di un’area (senza parametri) si apre la sua predefinita; la versione iniziale dell’infiltrazione vale solo con `?infiltrazione=` (NR3-4, strada (a))', async () => {
+  // l'infiltrazione Cancello apre «Pianta completa», ma la predefinita dell'area è «Porzione ovest»
+  const d = conDueVersioni();
+  d.areePalazzo = d.areePalazzo!.map((a) => (a.slug === 'cancello' ? { ...a, predefinita: 'm-cancello-ovest' } : a));
+  getDungeon.mockResolvedValue(d);
+  const casa = monta('kamoshida', '/area/cancello');
+  expect(await screen.findByText(/^Visore: m-cancello-ovest/)).toBeInTheDocument();
+  casa.unmount();
+  monta('kamoshida', '/area/cancello?infiltrazione=k-01');
+  expect(await screen.findByText(/^Visore: m-cancello(?!-)/)).toBeInTheDocument();
+});
+
 it('«Modifica area»: le versioni si riordinano e l’etichetta svuotata si toglie (torna «Planimetria N»), col contenitore del Palazzo', async () => {
   getDungeon.mockResolvedValue(conDueVersioni());
   aggiornaPlanimetrieArea.mockResolvedValue({});

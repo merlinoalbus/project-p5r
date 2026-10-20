@@ -201,9 +201,12 @@ export function DungeonDettaglioPage() {
     [d?.chiave, areaFisica?.slug, partitaId, revisioneArea]);
   const versioniArea = dettaglioArea.dati && dettaglioArea.dati.slug === areaFisica?.slug ? dettaglioArea.dati.planimetrie : [];
   const planimetrieArea = useMemo(() => (d?.planimetrie ?? []).filter((p) => !!areaFisica && p.area === areaFisica.chiave), [d, areaFisica]);
-  // la versione mostrata: quella dell'indirizzo se è dell'area, poi quella che l'infiltrazione apre, poi la predefinita, poi la prima
+  // la versione mostrata: quella dell'indirizzo se è dell'area, poi quella che l'infiltrazione apre, poi la predefinita, poi la prima.
+  // NR3-4 (strada (a) del PM): sulla casa di un'area (`/area/<slug>` senza `?infiltrazione=`) la versione iniziale dell'infiltrazione
+  // non conta e si apre la predefinita, perché il BE omette `?planimetria=` proprio per la predefinita: un indirizzo salvato apre ciò
+  // che apriva. Senza area nell'indirizzo l'area viene dall'infiltrazione, e la sua versione iniziale resta.
   const chiaviVersioni = versioniArea.length ? versioniArea.map((v) => v.chiave) : planimetrieArea.map((p) => p.chiave);
-  const inizialeInfiltrazione = area?.areePalazzo?.find((x) => x.chiave === areaFisica?.chiave)?.planimetriaIniziale ?? null;
+  const inizialeInfiltrazione = !slug || richiestaInfiltrazione ? area?.areePalazzo?.find((x) => x.chiave === areaFisica?.chiave)?.planimetriaIniziale ?? null : null;
   const planimetriaScelta = [params.get('planimetria'), inizialeInfiltrazione, areaFisica?.predefinita]
     .find((k): k is string => !!k && chiaviVersioni.includes(k)) ?? chiaviVersioni[0] ?? null;
   const spilloIndirizzo = Number(params.get('spillo')) || null;
