@@ -44,8 +44,8 @@ router.post('/piante-citta/:quartiere/scarica', validate({ params: z.object({ qu
 // ---- Mappe a livelli e spilli (Fase 13) ----
 
 /** Albero completo delle mappe (riassunti con genitore e conteggi; ogni nodo con i conteggi dei pin del suo sottoalbero, E2 di L3). */
-router.get('/albero', (_req, res) => {
-  res.json(elencaMappe());
+router.get('/albero', validate({ query: queryMappa }), (req, res) => {
+  res.json(elencaMappe((req.query as unknown as { partita?: number }).partita));
 });
 
 /** I conteggi dei pin della radice dell'indice delle Mappe: tutto l'albero nei tre gruppi (E2 di L3). */

@@ -35,6 +35,7 @@ import { descriviRequisitoSpillo, type RequisitoSpillo } from '../../../shared/c
 import { nomiCondizioniMemo } from '../condizioni/nomiCondizioni.js';
 import { cosaManca, valutaInsieme } from '../condizioni/valutatore.js';
 import { statoDisponibilitaPartita } from '../disponibilitaService.js';
+import { areaDisponibilePerPartita } from './disponibilitaAree.js';
 import type { AreaDettaglioDto, AreaRiassuntoDto, ElementoAreaDto, MappaDaCollocareDto, PlanimetriaAreaDto, RuoloImmagine, SbloccoDto } from '../../../shared/types.js';
 
 /** I contenitori ammessi nelle rotte: la città (Tokyo) e i suoi quartieri (L2), i Palazzi (L3). */
@@ -259,6 +260,7 @@ export function dettaglioArea(contenitore: ContenitoreRotta, chiave: string, slu
       { chiave: string; nome: string; tipo: string; entita_tipo: string | null; entita_chiave: string | null; area_chiave: string | null } | undefined;
     if (!meta || proprie.has(meta.chiave)) continue;
     const areaMeta = meta.area_chiave ? ctx.aree.aree.get(meta.area_chiave) : undefined;
+    if (areaMeta && partitaId !== undefined && !areaDisponibilePerPartita(areaMeta, partitaId)) continue;
     const chiaveVista = areaMeta ? `area:${areaMeta.chiave}` : `mappa:${meta.chiave}`;
     if (viste.has(chiaveVista)) continue;
     viste.add(chiaveVista);

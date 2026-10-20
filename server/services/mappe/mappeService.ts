@@ -39,6 +39,7 @@ import { casaDelLuogo, condizioniDiSblocco, lettureLuoghi, luogoDelPin, presenza
 import { descriviOrariDelLuogo, orariDelLuogo } from '../../../shared/orariNegozio.js';
 import { allineaRuoliImmagine, assetEsistente, caricataDellaMappa, dimensioniImmagine, dopoImmagineMappa, immaginiCaricateDelleMappe, urlCaricata, type ImmagineCaricata } from './immagineMappa.js';
 import { areaRifDellaMappa, casaDellaMappa, conAree, contestoAree, verificaIngressoNelQuartiere, type ContestoAree, type RigaArea } from './casaMappa.js';
+import { areaDisponibilePerPartita } from './disponibilitaAree.js';
 import { assegnaAreeDelMondo109 } from '../../db/migrations/109_aree_del_mondo.js';
 import { assegnaAreePalazzi110 } from '../../db/migrations/110_aree_dei_palazzi.js';
 import { conLegami, impostaLegamiInfiltrazione, infiltrazioniDellaMappa, infiltrazioniDelleMappe } from './legamiInfiltrazioni.js';
@@ -218,9 +219,9 @@ function conteggiDellAlbero(righe: RigaMappa[]): { perMappa: Map<string, Contegg
 
 /** Albero completo (piatto, con genitore): radici prima, poi per ordine. Senza i Memento. Ogni nodo porta i conteggi dei pin del
  *  suo sottoalbero (E2 di L3). */
-export function elencaMappe(): MappaRiassuntoDto[] {
+export function elencaMappe(partitaId?: number): MappaRiassuntoDto[] {
   const ctx = contestoMappe();
-  const righe = righeDellAlbero();
+  const righe = righeDellAlbero().filter((r) => !r.area_chiave || areaDisponibilePerPartita(ctx.aree.aree.get(r.area_chiave) ?? { quartiere_chiave: null }, partitaId));
   const { perMappa } = conteggiDellAlbero(righe);
   return righe.map((r) => ({ ...riassunto(r, ctx), conteggiPin: perMappa.get(r.chiave) ?? conteggiVuoti() }));
 }
@@ -596,7 +597,9 @@ export function dettaglioMappa(chiave: string, partitaId?: number, contesto: str
   const mappe = contestoMappe();
   // gli stessi figli che i conteggi contano (senza il nodo dei Memento, tolto dall'albero): Tokyo diceva 24 luoghi e ne elencava 25.
   // A pari ordine decide la chiave, come nella scheda del Palazzo e nel riordino.
-  const figli = (prepared("SELECT * FROM mappa WHERE genitore_chiave = ? AND chiave <> 'citta-mementos' ORDER BY ordine, chiave").all(chiave) as RigaMappa[]).map((f) => riassunto(f, mappe));
+  const figli = (prepared("SELECT * FROM mappa WHERE genitore_chiave = ? AND chiave <> 'citta-mementos' ORDER BY ordine, chiave").all(chiave) as RigaMappa[])
+    .filter((f) => !f.area_chiave || areaDisponibilePerPartita(mappe.aree.aree.get(f.area_chiave) ?? { quartiere_chiave: null }, partitaId))
+    .map((f) => riassunto(f, mappe));
   const ctx = { ...contestoSpilli(partitaId, contesto), aree: mappe.aree };
   const spilli = (prepared('SELECT * FROM spillo WHERE mappa_chiave = ? ORDER BY ordine, id').all(chiave) as RigaSpillo[]).map((s) => spilloDto(s, ctx));
   return {

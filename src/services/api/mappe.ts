@@ -12,7 +12,7 @@ export interface DatiMappaApi { nome?: string; tipo?: TipoMappa; genitore?: stri
 export interface DatiSpilloApi { soloPosizione?: boolean; destinazione?: DestinazioneSpillo | null; tipo?: TipoSpillo; nome?: string; descrizione?: string; x?: number; y?: number; riferimento?: { tipo: TipoRiferimento; chiave: string } | null; collezionabile?: boolean; ordine?: number; mappa?: string; condizioni?: RequisitoSpillo[] | null }
 
 /** Albero completo (riassunti piatti con genitore). */
-export const getAlberoMappe = (): Promise<MappaRiassuntoDto[]> => apiGet('/mappe/albero');
+export const getAlberoMappe = (partita?: number): Promise<MappaRiassuntoDto[]> => apiGet(`/mappe/albero${queryString({ partita })}`);
 /** E2 (L3): i pin di tutto l'albero nei tre gruppi (contenuto, passaggi, note), contati dal server: il totale dell'indice delle Mappe. */
 export const getConteggiAlbero = (): Promise<ConteggiAlberoDto> => apiGet('/mappe/albero/conteggi');
 

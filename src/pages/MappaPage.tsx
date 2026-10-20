@@ -78,7 +78,8 @@ function radiciRaggruppate(mappe: MappaRiassuntoDto[]): Array<{ chiave: string; 
 /** Indice: radici (Tokyo, Palazzi) con le mappe figlie. */
 function IndiceMappe() {
   useDocumentTitle('Mappe');
-  const albero = useCarica(() => getAlberoMappe(), []);
+  const attiva = usePartitaStore((s) => s.attiva);
+  const albero = useCarica(() => getAlberoMappe(attiva?.id), [attiva?.id]);
   const mappe = useMemo(() => albero.dati ?? [], [albero.dati]);
   // discendenti e spilli dell'intero sottoalbero: la scheda dice quanto contiene davvero, non solo il primo livello
   const totali = useMemo(() => {

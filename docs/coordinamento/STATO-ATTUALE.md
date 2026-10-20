@@ -1,7 +1,7 @@
 # Stato attuale del lavoro — ramo newreview / p5s (aggiornato 2026-10-20, ripresa)
 
 ## DOVE SIAMO ADESSO (leggere per primo; prevale su tutto quanto c'è sotto)
-- **Ramo unico `newreview`**, pubblicato su p5s a ogni push. Ultimo commit pubblicato: `1b1e2426` (`fix(L6): elimina il fallback legacy dello sblocco quartieri`); typecheck, lint e controllo diff verdi. Il fetch locale resta bloccato dai permessi sul metadato condiviso del worktree; il tracking remoto è stato aggiornato con push riuscito.
+- **Ramo unico `newreview`**, pubblicato su p5s a ogni push. Ultimo commit pubblicato: `1b1e2426` (`fix(L6): elimina il fallback legacy dello sblocco quartieri`); typecheck, lint e controllo diff verdi. È in preparazione il filtro delle Aree chiuse in indice, figli del visore e «Aree vicine». Il fetch locale resta bloccato dai permessi sul metadato condiviso del worktree; il tracking remoto è stato aggiornato con push riuscito.
 - **Dati di p5s**: `userVersion` fino a 119 dopo l'ultimo rilascio. Migrazioni recenti:
   - 114: planimetria della voce;
   - 115: luoghi come fonte unica;
@@ -23,7 +23,7 @@
 | L3 Palazzi | pubblicato. Fatte anche le richieste dell'utente sulla guida: scheda per planimetria (UX3-14, b34e577b), campo «Planimetria» (901c7666), guida nel visore in finestra fluttuante (91986570), pin di spostamento che portano a destinazione (67a7bfda, b8048c1b). Da provare dall'utente |
 | L4 Avanzamento unico | pubblicato (fde7add7, poi unito): FE completo con FUN3-3 e FUN4-1 |
 | L5 Luoghi, negozi, orari | pubblicato, completo: BE 5a22da2a…0fa7bde7 e 50ca121c; FE af5b8e14…820c05ea (F1–F6) |
-| L6 Condizioni uniche | **in corso**, B5 pubblicata per contratto BE, filtro lista quartiere, rimozione fallback legacy del validatore e sostituzione dei lettori legacy in `sincronizzaMappe` con colonne strutturate. **Restano** sblocco quartiere con fonte/editor, esclusione dai passaggi/indice/Aree vicine, verifica metro-diario e poi B6/FE (`lotti/L6/piano.md`). |
+| L6 Condizioni uniche | **in corso**, B5 pubblicata per contratto BE, filtro lista quartiere, rimozione fallback legacy del validatore e sostituzione dei lettori legacy in `sincronizzaMappe` con colonne strutturate. In lavorazione il filtro delle Aree chiuse nell’indice, nei figli del visore e nelle «Aree vicine». **Restano** sblocco quartiere con fonte/editor, verifica metro-diario e poi B6/FE (`lotti/L6/piano.md`). |
 | L7–L11 | progettati (`lotti/Lx/`), da implementare BE e FE |
 
 **Sessioni del team** (app Claude desktop):
@@ -36,7 +36,7 @@
 1. togliere dalle Impostazioni il comando «Importa» del pacchetto, che sostituirebbe tutto `gioco.db`, e allineare CLAUDE.md, che descrive ancora il pacchetto come fonte;
 2. nella guida del visore, mostrare solo le voci dell'infiltrazione aperta o quelle di tutte le infiltrazioni della planimetria, come oggi.
 
-**Lavoro non ancora committato**: nessuno dopo il commit `1b1e2426`; il dettaglio di B5 è nella cartella `docs/coordinamento/lotti/L6/`.
+**Lavoro non ancora committato**: filtro disponibilità Aree in indice/visore/«Aree vicine», in attesa di commit e pipeline; il dettaglio di B5 è nella cartella `docs/coordinamento/lotti/L6/`.
 
 **Note dalla prova di ripresa** (un'altra IA, 2026-10-20 sera):
 - `git fetch` può fallire per i permessi su `.git/FETCH_HEAD`. Il worktree condivide la cartella `.git` del repository principale. Si chiudono gli altri processi git e si riprova, oppure si usa `git ls-remote github newreview` per leggere il commit remoto.
