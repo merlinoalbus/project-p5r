@@ -3,6 +3,18 @@
 Sessione «Test no-reg — team p5s». Ritmo continuo: a ogni pezzo nuovo rilancio i confronti su una copia della produzione e mando i difetti
 man mano. Esiti grezzi in `lotti/L3/esiti-noreg/`. Casi preparati: `lotti/L2/noreg.md` §5 (L3).
 
+## 0-ter. A3 — no-reg di L3 su 48d7a958 (newreview-l3), base p5s-0948Z — VERDE (2026-10-20 12:03–12:18Z)
+Esito completo in `esiti-noreg/48d7a958/esito.md`.
+- **NR3-4 verificato** sul Collaudo 5473.
+  - 640/640 indirizzi dei Palazzi alla casa giusta.
+  - 539/539 planimetrie con la stessa immagine di prima di L3; nelle Aree con più versioni, nome e numero della versione uguali
+    all'atteso (379/379).
+  - Gli 80 indirizzi sbagliati del giro precedente ora sono 80/80 giusti, nelle stesse 37 Aree.
+- **Lavoro da preservare identico**: 118 tabelle su 118 fra base, `b28bade7` e `48d7a958`; stato visibile 0; k/N invariato; 75 «Sulla mappa».
+- **Pagine di L2** (metro, Città, 19 quartieri, 28 Aree): 47/48 identiche. L'indice delle Mappe cambia solo per E2 (`c8338fd0`, conteggi dei
+  pin di contenuto).
+- **Intestazione a 375**: identica a `b28bade7` e più bassa di prima di L3 in 8 Palazzi su 9, quindi nessuna regressione di L3.
+
 ## 0-bis. BASE NUOVA: copia di p5s `p5s-2026-10-20-0503Z` — cifre e boot di L3+L4 (2026-10-20 07:10–07:13 locali)
 La base e i dati aggiunti dall'utente sono descritti in `L2/noreg.md` §0-bis: diario 255 voci, 342 spunte; Kamoshida 169 voci / 359 pin
 dell'utente; Madarame 227 / 254. Da qui in poi si confronta con questa base; le sezioni sotto valgono come storia.
