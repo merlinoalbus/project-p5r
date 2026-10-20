@@ -2168,3 +2168,16 @@ aree è la funzione della migrazione 109, importata dal servizio (una regola sol
 conservato; indice unico dello slug per la città; **finestre come fogli dal basso sotto i 768 px in tutta l'app** (chiusura sempre solo con la
 X o con Esc); pannello del visore aperto all'arrivo da 1280 px; per lo scarico delle piante uno User-Agent onesto, senza Referer contraffatto:
 se la fonte rifiuta (oggi Fandom risponde 403) l'app lo dice con il link alla fonte e l'invito a caricare l'immagine dall'editor.
+
+Giro 2 (segnalazioni dell'utente e revisione dell'indice delle Mappe, 2026-10-20):
+- **UX2-13, miniature delle planimetrie ritagliate sul disegno.** L'utente ha segnalato che nelle carte di Mappe i disegni erano piccoli e
+  decentrati: le planimetrie native sono tele 2048×2048 col disegno in un angolo. La miniatura si ritaglia sui pixel non trasparenti, con un
+  bordo. La decisione «Immagini: mai ritagliate» del 2026-09-03 resta valida: il ritaglio toglie solo il **margine vuoto e trasparente**, mai
+  una parte del disegno (se il disegno arriva ai bordi non si ritaglia), e il visore mostra sempre l'immagine intera.
+- **UX2-15, una sola barra in Mappe** (domanda dell'utente sulle due barre di scorrimento, regola degli scroll annidati): il pannello del luogo
+  non ha riquadri scorrevoli suoi, griglia ed «Elenco completo» crescono con la pagina.
+- **Parola dei conteggi**: nell'indice delle Mappe di L2 si dice «spilli» (E5); in La città e nelle pagine delle aree resta «pin» fino al
+  rilascio di L3, dove si uniforma con la scelta dell'utente sugli spilli di contenuto (E2).
+- **Dichiarazione**: dopo la chiusura delle sessioni del team, su autorizzazione dell'utente («quindi organizza tu per risolvere il L2»,
+  poi «Autorizzo a fare in modo di completare l2»), il Project manager ha portato sul rilascio UX2-13 ed E4/E5/E7 e ha **implementato
+  UX2-15**, con una prima verifica propria. Dopo il giro 2 del validatore le sessioni di prova sono state riaperte una alla volta, su indicazione dell'utente, e la verifica indipendente di UX2-15 l'hanno fatta Test layout (48 misure) e Test UX.
