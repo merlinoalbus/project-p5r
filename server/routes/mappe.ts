@@ -55,10 +55,12 @@ router.get('/esporta', validate({ query: queryEsporta }), (req, res) => {
 });
 
 
-/** Importa un pacchetto (stesso formato dell'esportazione). */
+/** Importa un pacchetto (stesso formato dell'esportazione). L'origine di mappe e pin è quella del pacchetto (difetto NR3-2 di L3: la
+ *  rotta la forzava a «utente», e un esporta → importa trasformava i pin del seed in pin dell'utente); dove il pacchetto non la porta
+ *  (pacchetti di prima di L3) vale «utente», come prima. Solo il seed la forza. */
 router.post('/importa', validate({ body: bodyImporta }), (req, res) => {
   const b = req.body as { pacchetto: Parameters<typeof importaMappe>[0]; sovrascrivi?: boolean };
-  res.json(importaMappe(b.pacchetto, { sovrascrivi: b.sovrascrivi ?? false, origine: 'utente' }));
+  res.json(importaMappe(b.pacchetto, { sovrascrivi: b.sovrascrivi ?? false }));
 });
 
 /** Entità collegabili a uno spillo (editor): per tipo e testo. */

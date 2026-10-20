@@ -18,7 +18,7 @@ import {
   type ContenitoreRotta, type ImmagineNuova,
 } from '../services/mappe/areeService.js';
 import {
-  bodyAggiornaArea, bodyColloca, bodyInfiltrazioniArea, bodyOrdineAree, bodyVersioni, paramsArea, paramsContenitore, queryAggiungiPlanimetria, queryCreaArea, queryDettaglioArea, queryEliminaArea,
+  bodyAggiornaArea, bodyColloca, bodyInfiltrazioniArea, bodyOrdineAree, bodyVersioni, paramsArea, paramsContenitore, queryAggiungiPlanimetria, queryColloca, queryCreaArea, queryDettaglioArea, queryEliminaArea,
 } from '../schemas/aree.js';
 
 const router = Router();
@@ -37,8 +37,8 @@ const parametri = (req: express.Request) => [String(req.params.contenitore) as C
 router.get('/da-collocare', (_req, res) => {
   res.json(mappeDaCollocare());
 });
-router.put('/colloca', validate({ body: bodyColloca }), (req, res) => {
-  res.json(collocaPlanimetria(req.body as Parameters<typeof collocaPlanimetria>[0]));
+router.put('/colloca', validate({ body: bodyColloca, query: queryColloca }), (req, res) => {
+  res.json(collocaPlanimetria(req.body as Parameters<typeof collocaPlanimetria>[0], { conferma: (req.query as { conferma?: boolean }).conferma === true }));
 });
 
 router.get('/:contenitore/:chiave', validate({ params: paramsContenitore, query: queryDettaglioArea }), (req, res) => {

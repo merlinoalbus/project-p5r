@@ -57,6 +57,9 @@ export const bodyVersioni = z.object({
 /** L'eliminazione: `conferma=1` quando l'Area ha contenuti. */
 export const queryEliminaArea = z.object({ conferma: boolQuery });
 
+/** «Colloca»: `conferma=1` quando la versione spostata è l'unica della sua Area, che si svuota e va nel cestino (L3 §3.6.1). */
+export const queryColloca = z.object({ conferma: boolQuery });
+
 /**
  * «Colloca»: una planimetria senza Area in un'Area esistente (slug) o in una nuova (nome), con l'etichetta della versione; il contenitore
  * è il `quartiere` (o `tokyo`) oppure, da L3, il `dungeon` (lì anche «Sposta la versione in un'altra area» e «Rendila un'area a sé»).

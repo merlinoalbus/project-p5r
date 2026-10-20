@@ -37,8 +37,9 @@ export function createApp(): Express {
   // ---- Middleware globali ----
   app.use(requestContextMiddleware);
   app.use(responseShapeMiddleware);
-  // Il pacchetto delle mappe include le immagini: deve essere letto prima del limite globale.
-  app.post('/api/mappe/importa', express.json({ limit: '64mb' }));
+  // Il pacchetto delle mappe include le immagini: deve essere letto prima del limite globale. L'esportazione completa pesa 103 MB
+  // (O3-1 di L3, decisione del PM del 2026-10-20): 512 MB la coprono con margine; vale per questa sola rotta.
+  app.post('/api/mappe/importa', express.json({ limit: '512mb' }));
   app.use(express.json({ limit: '5mb' }));
 
   // ---- Router di area ----

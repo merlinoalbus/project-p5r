@@ -34,7 +34,7 @@ import { pinCitati, verificaGiro } from './condizioniTraPin.js';
 import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { palazzoDellaMappa, sottoalberoMappe } from './alberoMappe.js';
-import { allineaRuoliImmagine, assetEsistente, caricataDellaMappa, dimensioniImmagine, immaginiCaricateDelleMappe, urlCaricata, type ImmagineCaricata } from './immagineMappa.js';
+import { allineaRuoliImmagine, assetEsistente, caricataDellaMappa, dimensioniImmagine, dopoImmagineMappa, immaginiCaricateDelleMappe, urlCaricata, type ImmagineCaricata } from './immagineMappa.js';
 import { areaRifDellaMappa, casaDellaMappa, conAree, contestoAree, verificaIngressoNelQuartiere, type ContestoAree, type RigaArea } from './casaMappa.js';
 import { assegnaAreeDelMondo109 } from '../../db/migrations/109_aree_del_mondo.js';
 import { assegnaAreePalazzi110 } from '../../db/migrations/110_aree_dei_palazzi.js';
@@ -1756,7 +1756,12 @@ function identitaRettificata(identita:string): {identita:string;mappa?:string} {
   return r?{identita:identitaSpillo({...r.dopo,riferimento:r.dopo.riferimento??null}),mappa:r.mappa}:{identita};
 }
 
-export interface EsitoImportazione { mappe: number; spilli: number; /** I pezzi delle planimetrie scritti (102: i ritagli). */ pezzi: number; /** Le copie posate scritte (103). */ copie: number; /** I pezzi scartati perché la zona esce dall'immagine della mappa d'arrivo, o nessuna copia ci sta (o la mappa non ne ha una). */ pezziScartati: number; /** Le copie scartate perché escono dall'immagine della mappa d'arrivo, comprese quelle dei pezzi scartati (103). */ copieScartate: number; /** I pezzi tolti, con le loro copie, perché l'immagine della loro mappa è stata sostituita da una diversa (102). */ pezziEliminati: number; /** Le copie tolte con quei pezzi (103). */ copieEliminate: number; immagini: number; saltate: string[]; /** Condizioni scartate perché citano chiavi assenti dalla Guida. */ condizioniScartate: number; /** Voci della guida scartate (094; una per voce dalla 098): inesistenti, descrittive o di un altro Palazzo. */ vociScartate: number }
+export interface EsitoImportazione { mappe: number; spilli: number; /** I pezzi delle planimetrie scritti (102: i ritagli). */ pezzi: number; /** Le copie posate scritte (103). */ copie: number; /** I pezzi scartati perché la zona esce dall'immagine della mappa d'arrivo, o nessuna copia ci sta (o la mappa non ne ha una). */ pezziScartati: number; /** Le copie scartate perché escono dall'immagine della mappa d'arrivo, comprese quelle dei pezzi scartati (103). */ copieScartate: number; /** I pezzi tolti, con le loro copie, perché l'immagine della loro mappa è stata sostituita da una diversa (102). */ pezziEliminati: number; /** Le copie tolte con quei pezzi (103). */ copieEliminate: number; immagini: number; saltate: string[]; /** Condizioni scartate perché citano chiavi assenti dalla Guida. */ condizioniScartate: number; /** Voci della guida scartate (094; una per voce dalla 098): inesistenti, descrittive o di un altro Palazzo. */ vociScartate: number;
+  /** L3 (§3.6.3): pin, pezzi e copie tornati con lo stesso uid che non hanno potuto riprendere il loro id (preso da un'altra riga): id
+   *  nuovo, con i riferimenti (voci, stati, passaggi, atterraggi, copie) che seguono l'uid nella stessa transazione. Assente se vuoto. */
+  idCambiati?: IdCambiatoImportazione[] }
+/** Una riga reimportata con un id diverso da quello di prima (L3, §3.6.3). */
+export interface IdCambiatoImportazione { tipo: 'pin' | 'pezzo' | 'copia'; uid: string; prima: number; dopo: number }
 
 /** Importa un pacchetto (o il seed): per chiave, con `sovrascrivi` sostituisce mappe e spilli esistenti; altrimenti salta le mappe già presenti
  * (il seed aggiorna solo le mappe di origine seed, sostituendo i soli spilli di origine seed e conservando quelli dell'utente). */
@@ -1911,6 +1916,8 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     const conSeedIdentita = colonnaSpillo('seed_identita_json');
     /** I pin tolti per essere reinseriti, per uid: id e colonne che il pacchetto può non portare (L3, andata e ritorno identica). */
     const pinDiPrima = new Map<string, { id: number; seedIdentita: string | null; nativo: string | null; condizioni: string | null }>();
+    /** Le immagini dei pin tolti per essere reinseriti, per uid: quelle che tornano identiche si riprendono, le altre si tolgono in fondo. */
+    const immaginiPinDiPrima = new Map<string, RigaImmagineSpillo[]>();
     // I pin che erano già senza uid lo ricevono adesso, come prima al primo pin inserito (in ordine di id, prima dei nuovi):
     // poi `assegnaUidMancanti` serve solo per un pin nuovo rimasto senza uid, e non va più rifatta per ogni pin.
     if (conUid) assegnaUidMancanti(getDb());
@@ -2015,7 +2022,11 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
         if (conVoce && prima?.uid && vociPrima.length > 0) vociDiPrima.set(prima.uid, vociPrima);
         if (prima?.uid) for (const d of prepared('SELECT spillo_id, mappa_chiave FROM spillo_destinazione WHERE spillo_arrivo_id = ?').all(id) as Array<{ spillo_id: number; mappa_chiave: string }>) arriviDaRicollegare.push({ spilloId: d.spillo_id, mappa: d.mappa_chiave, uid: prima.uid });
         if (prima?.uid && conAtterraggi) for (const a of prepared('SELECT id FROM dungeon_atterraggio WHERE spillo_id = ?').pluck().all(id) as number[]) atterraggiDaRicollegare.push({ id: a, uid: prima.uid });
-        for (const i of prepared('SELECT immagine_chiave FROM spillo_immagine WHERE spillo_id = ?').all(id) as Array<{ immagine_chiave: string | null }>) if (i.immagine_chiave && leggiImmagine('spillo', i.immagine_chiave)) eliminaImmagine('spillo', i.immagine_chiave);
+        // L3 (come NR3-3): le immagini del pin che torna con lo stesso uid restano da parte fino a pacchetto inserito, perché quelle
+        // identiche si riprendano (riga, chiave e data); le altre si tolgono subito, come prima
+        const immaginiPin = prepared('SELECT * FROM spillo_immagine WHERE spillo_id = ? ORDER BY ordine, id').all(id) as RigaImmagineSpillo[];
+        if (prima?.uid) immaginiPinDiPrima.set(prima.uid, [...(immaginiPinDiPrima.get(prima.uid) ?? []), ...immaginiPin]);
+        else for (const i of immaginiPin) if (i.immagine_chiave && leggiImmagine('spillo', i.immagine_chiave)) eliminaImmagine('spillo', i.immagine_chiave);
         prepared('DELETE FROM spillo WHERE id = ?').run(id);
       }
       // spilli del seed che l'utente ha modificato (ora `utente`, con l'identità di allora): il pacchetto non li reinserisce
@@ -2041,6 +2052,8 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
           .run(idDiPrima, m.chiave, s.tipo, s.nome, s.descrizione ?? '', x, y, riferimento?.tipo ?? null, riferimento?.chiave ?? null, categoria === 'consumabile' ? 1 : 0, s.ordine ?? 0, opz.origine ?? s.origine ?? origine, s.updatedAt ?? adesso,
             // le stesse condizioni del pin di prima restano scritte com'erano («[]» non diventa null)
             diPrima && JSON.stringify(condizioniDiRiga(diPrima.condizioni)) === JSON.stringify(condizioniDiRiga(jsonCondizioni(valide))) ? diPrima.condizioni : jsonCondizioni(valide));
+        // l'id di prima preso da un'altra riga: il pin ne ha uno nuovo, i suoi riferimenti lo seguono per uid; si dice nel riepilogo (§3.6.3)
+        if (diPrima && idDiPrima === null) (esito.idCambiati ??= []).push({ tipo: 'pin', uid: s.uid as string, prima: diPrima.id, dopo: Number(info.lastInsertRowid) });
         if (conSeedIdentita) {
           const seedIdentita = s.seedIdentita !== undefined ? s.seedIdentita : diPrima?.seedIdentita ?? null;
           if (seedIdentita !== null) prepared('UPDATE spillo SET seed_identita_json = ? WHERE id = ?').run(seedIdentita, Number(info.lastInsertRowid));
@@ -2081,13 +2094,24 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
         const spilloId = Number(info.lastInsertRowid);
         if (pinCitati(valide).length > 0) conCondizioniSuPin.push(spilloId);
         arrivi.push({id:spilloId,valore:verificate.get(s),invalidata:s.destinazioneNonDisponibile??false});
+        // L3 (come NR3-3): un'immagine che torna identica (stesso posto, didascalia e asset o byte) riprende riga, chiave e data di prima
+        const immaginiDiPrima = uidValido(s.uid) ? immaginiPinDiPrima.get(s.uid as string) ?? [] : [];
         (s.immagini ?? []).forEach((img, ordine) => {
-          if (img.asset) {
-            prepared('INSERT INTO spillo_immagine (spillo_id, ordine, immagine_chiave, asset, didascalia, updated_at) VALUES (?, ?, NULL, ?, ?, ?)').run(spilloId, ordine, img.asset, (img.didascalia ?? '').slice(0, 300), adesso);
+          const didascalia = (img.didascalia ?? '').slice(0, 300);
+          const uguale = immaginiDiPrima.findIndex((i) => i.ordine === ordine && i.didascalia === didascalia && (img.asset
+            ? !i.immagine_chiave && i.asset === img.asset
+            : !!img.base64 && !!i.immagine_chiave && (prepared("SELECT contenuto FROM immagine WHERE ambito = 'spillo' AND chiave = ?").get(i.immagine_chiave) as { contenuto: Buffer | null } | undefined)?.contenuto?.equals(Buffer.from(img.base64, 'base64')) === true));
+          if (uguale >= 0) {
+            const i = immaginiDiPrima.splice(uguale, 1)[0];
+            const idLibero = !prepared('SELECT 1 FROM spillo_immagine WHERE id = ?').get(i.id);
+            prepared('INSERT INTO spillo_immagine (id, spillo_id, ordine, immagine_chiave, asset, didascalia, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)').run(idLibero ? i.id : null, spilloId, ordine, i.immagine_chiave, i.asset, i.didascalia, i.updated_at);
+            if (i.immagine_chiave) esito.immagini++;
+          } else if (img.asset) {
+            prepared('INSERT INTO spillo_immagine (spillo_id, ordine, immagine_chiave, asset, didascalia, updated_at) VALUES (?, ?, NULL, ?, ?, ?)').run(spilloId, ordine, img.asset, didascalia, adesso);
           } else if (img.base64 && img.mime) {
             const chiave = `${spilloId}-imp-${ordine}-${Date.now().toString(36)}`;
             salvaImmagine('spillo', chiave, img.mime, Buffer.from(img.base64, 'base64'));
-            prepared('INSERT INTO spillo_immagine (spillo_id, ordine, immagine_chiave, asset, didascalia, updated_at) VALUES (?, ?, ?, NULL, ?, ?)').run(spilloId, ordine, chiave, (img.didascalia ?? '').slice(0, 300), adesso);
+            prepared('INSERT INTO spillo_immagine (spillo_id, ordine, immagine_chiave, asset, didascalia, updated_at) VALUES (?, ?, ?, NULL, ?, ?)').run(spilloId, ordine, chiave, didascalia, adesso);
             esito.immagini++;
           }
         });
@@ -2095,6 +2119,8 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       }
       esito.mappe++;
     }
+    // le immagini dei pin tolti che nessun pin reinserito ha ripreso: si tolgono adesso, come si toglievano col pin
+    for (const resto of immaginiPinDiPrima.values()) for (const i of resto) if (i.immagine_chiave && leggiImmagine('spillo', i.immagine_chiave)) eliminaImmagine('spillo', i.immagine_chiave);
     // Il genitore si scrive sempre per le mappe importate, anche quando è nullo o assente: una mappa che il pacchetto dichiara radice
     // (o il cui genitore non esiste) è radice anche se prima ne aveva uno — «sovrascrivi» la sostituisce per intero, come una mappa nuova.
     for (const m of pacchetto.mappe) {
@@ -2202,7 +2228,13 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       // Dimensioni (L1, F6 del validatore): `salvaImmagine` registra l'immagine sulla mappa con la regola di ogni strada
       // (`dopoImmagineMappa`): quelle dell'intestazione vincono su quelle dichiarate dal pacchetto, già scritte sulla riga; se
       // l'intestazione non si legge (SVG) restano quelle del pacchetto.
-      salvaImmagine('mappa', chiave, img.mime, Buffer.from(img.base64, 'base64'));
+      const contenuto = Buffer.from(img.base64, 'base64');
+      // L3 (difetto NR3-3): un'immagine identica byte per byte a quella già salvata (il formato lo dicono i byte, `salvaImmagine`) non
+      // si riscrive: nome del file, data, versione `?v=` e miniature restano quelli di prima. La mappa la registra comunque, con le
+      // dimensioni dell'intestazione, come farebbe `salvaImmagine`.
+      const salvata = prepared("SELECT contenuto FROM immagine WHERE ambito = 'mappa' AND chiave = ?").get(chiave) as { contenuto: Buffer | null } | undefined;
+      if (salvata?.contenuto && salvata.contenuto.equals(contenuto)) dopoImmagineMappa(getDb(), chiave, contenuto);
+      else salvaImmagine('mappa', chiave, img.mime, contenuto);
       esito.immagini++;
     }
     // Il ruolo dichiarato dal pacchetto (o dedotto alla vecchia maniera, se tace) cede alla regola della gerarchia (L1): mappe e
@@ -2217,7 +2249,7 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       const { dentro, pezziScartati, copieScartate } = pezziNellImmagine(pezzi, dim);
       esito.pezziScartati += pezziScartati;
       esito.copieScartate += copieScartate;
-      const scritti = sostituisciPezzi(mappa, dentro);
+      const scritti = sostituisciPezzi(mappa, dentro, (c) => (esito.idCambiati ??= []).push(c));
       esito.pezzi += scritti.pezzi;
       esito.copie += scritti.copie;
     }

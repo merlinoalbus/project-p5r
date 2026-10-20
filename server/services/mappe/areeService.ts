@@ -491,8 +491,9 @@ registraRipristinoCestino('area-fisica', (_chiave, _vicini, saltate) => {
  * un'Area nuova; se non è già sotto la mappa del contenitore ci si sposta (i percorsi si ricalcolano, il vecchio resta come alias).
  */
 export function collocaPlanimetria(dati: { mappa: string; quartiere?: string; dungeon?: string; area?: string; nuova?: { nome: string }; etichetta?: string },
-  /** `sposta`: anche nel mondo una versione può cambiare Area (le rotte vecchie `/stanza` e `/presentazione`, L3 §3.3). */
-  opz: { sposta?: boolean } = {}): AreaDettaglioDto {
+  /** `sposta`: anche nel mondo una versione può cambiare Area (le rotte vecchie `/stanza` e `/presentazione`, L3 §3.3). `conferma`:
+   *  spostare l'unica versione di un'Area la svuota, e l'Area va nel cestino (L3 §3.6.1): senza, 409 `area-si-svuota` col riepilogo. */
+  opz: { sposta?: boolean; conferma?: boolean } = {}): AreaDettaglioDto {
   if ((dati.quartiere === undefined) === (dati.dungeon === undefined)) throw httpErrors.badRequest('colloca-non-valido', 'Indica il quartiere (o la città) oppure il Palazzo.');
   const c = dati.dungeon !== undefined ? contenitoreDaRotta('dungeon', dati.dungeon) : contenitoreDaRotta('citta', dati.quartiere!);
   const mappa = idMappa(dati.mappa);
@@ -507,9 +508,16 @@ export function collocaPlanimetria(dati: { mappa: string; quartiere?: string; du
   if (c.colonna === 'dungeon_chiave' && r.genitore_chiave !== c.mappa) throw httpErrors.badRequest('planimetria-di-un-altro-palazzo', 'La planimetria non è di questo Palazzo: si sposta fra le aree del suo Palazzo.');
   if (vecchia && dati.area !== undefined && vecchia.slug === dati.area) throw httpErrors.badRequest('colloca-non-valido', 'La planimetria è già una versione di quest’area.');
   // l'unica versione della sua Area: «entra in un'altra area» fonde le due (i legami della vecchia passano alla nuova, la vecchia vuota
-  // se ne va); «rendila un'area a sé» non ha senso, lo è già
+  // va nel cestino), e lo si conferma (L3 §3.6.1); «rendila un'area a sé» non ha senso, lo è già
   const sola = !!vecchia && (prepared('SELECT COUNT(*) FROM mappa WHERE area_chiave = ?').pluck().get(vecchia.chiave) as number) < 2;
-  if (sola && dati.nuova) throw httpErrors.badRequest('colloca-non-valido', `«${vecchia!.nome}» ha solo questa planimetria: è già un’area a sé.`);
+  if (sola && dati.nuova) throw httpErrors.badRequest('gia-area-a-se', `«${vecchia!.nome}» ha solo questa planimetria: è già un’area a sé.`);
+  if (sola && dati.area !== undefined && !opz.conferma) {
+    const arrivo = rigaArea(c, dati.area);
+    const legami = conLegami() ? prepared('SELECT COUNT(*) FROM infiltrazione_area WHERE area_chiave = ?').pluck().get(vecchia!.chiave) as number : 0;
+    const conLegamiTesto = legami === 0 ? '' : ` con ${legami === 1 ? '1 legame a un’infiltrazione' : `${legami} legami a infiltrazioni`}`;
+    throw httpErrors.conflict('area-si-svuota', `«${vecchia!.nome}» resta senza planimetrie: la versione si sposta in «${arrivo.nome}», «${vecchia!.nome}» va nel cestino${conLegamiTesto}.`,
+      { area: vecchia!.slug, arrivo: arrivo.slug, legami });
+  }
   // spostando una versione, l'etichetta resta la sua se non se ne dà un'altra
   const etichetta = dati.etichetta ?? (vecchia ? r.versione_etichetta ?? undefined : undefined);
   let slugArea: string;
@@ -528,7 +536,7 @@ export function collocaPlanimetria(dati: { mappa: string; quartiere?: string; du
       legaVersione(mappa, a.chiave, ordine, etichetta);
       if (!a.planimetria_predefinita) prepared('UPDATE area SET planimetria_predefinita = ? WHERE chiave = ?').run(mappa, a.chiave);
     }
-    if (vecchia && sola) fondiNellArea(vecchia, mappa, nuovaArea);
+    if (vecchia && sola) fondiNellArea(c, vecchia, mappa, nuovaArea);
     else if (vecchia) lasciaLArea(vecchia, mappa, nuovaArea);
     if (r.genitore_chiave !== c.mappa) {
       prepared('UPDATE mappa SET genitore_chiave = ?, updated_at = ? WHERE chiave = ?').run(c.mappa, nowIso(), mappa);
@@ -540,21 +548,28 @@ export function collocaPlanimetria(dati: { mappa: string; quartiere?: string; du
 }
 
 /**
- * L'unica versione di un'Area che entra in un'altra (L3, dentro la transazione di chi chiama): le due Aree diventano una. Le infiltrazioni
- * della vecchia passano alla nuova (in fondo a ciascuna, con questa versione da aprire, origine e ordine dove già c'erano), l'ingresso del
- * quartiere che stava sulla vecchia passa alla nuova, e la vecchia, ormai vuota, se ne va. Nessuna voce né pin cambia.
+ * L'unica versione di un'Area che entra in un'altra (L3 §3.6.1, dentro la transazione di chi chiama, a versione già spostata): le due
+ * Aree diventano una. Le infiltrazioni della vecchia passano alla nuova al **posto** della vecchia (stesso ordine, origine, questa versione
+ * da aprire; `INSERT OR IGNORE`: dove la nuova c'era già resta com'era), l'ingresso del quartiere che stava sulla vecchia passa alla
+ * nuova, e la vecchia, ormai vuota e senza planimetria predefinita, va nel **cestino** (`area-fisica`, «fusa in …») con i suoi legami:
+ * rimessa, torna vuota con i legami di prima, e la versione resta dov'è. Nessuna voce né pin cambia.
  */
-function fondiNellArea(vecchia: RigaArea, mappa: string, nuovaArea: string): void {
+function fondiNellArea(c: ReturnType<typeof contenitoreDaRotta>, vecchia: RigaArea, mappa: string, nuovaArea: string): void {
   if (conLegami()) {
-    for (const l of prepared('SELECT infiltrazione_chiave, planimetria_iniziale, origine FROM infiltrazione_area WHERE area_chiave = ?').all(vecchia.chiave) as Array<{ infiltrazione_chiave: string; planimetria_iniziale: string | null; origine: string }>) {
-      if (prepared('SELECT 1 FROM infiltrazione_area WHERE infiltrazione_chiave = ? AND area_chiave = ?').get(l.infiltrazione_chiave, nuovaArea)) continue;
-      const ordine = prepared('SELECT COALESCE(MAX(ordine) + 1, 0) FROM infiltrazione_area WHERE infiltrazione_chiave = ?').pluck().get(l.infiltrazione_chiave) as number;
-      prepared('INSERT INTO infiltrazione_area (infiltrazione_chiave, area_chiave, ordine, planimetria_iniziale, origine) VALUES (?, ?, ?, ?, ?)').run(l.infiltrazione_chiave, nuovaArea, ordine, l.planimetria_iniziale ?? mappa, l.origine);
-    }
-    staccaAreaDalleInfiltrazioni(vecchia.chiave);
+    prepared(`INSERT OR IGNORE INTO infiltrazione_area (infiltrazione_chiave, area_chiave, ordine, planimetria_iniziale, origine)
+      SELECT infiltrazione_chiave, ?, ordine, ?, origine FROM infiltrazione_area WHERE area_chiave = ?`).run(nuovaArea, mappa, vecchia.chiave);
   }
   prepared('UPDATE quartiere_ingresso SET area_chiave = ? WHERE area_chiave = ?').run(nuovaArea, vecchia.chiave);
-  prepared('DELETE FROM area WHERE chiave = ?').run(vecchia.chiave);
+  // la predefinita era la versione spostata: l'Area che va nel cestino (e che ne può tornare) resta senza
+  prepared('UPDATE area SET planimetria_predefinita = NULL WHERE chiave = ?').run(vecchia.chiave);
+  const arrivo = prepared('SELECT nome FROM area WHERE chiave = ?').pluck().get(nuovaArea) as string;
+  const vicine = prepared(`SELECT slug FROM area WHERE ${c.colonna} = ? ORDER BY ordine, slug`).pluck().all(c.chiave) as string[];
+  const i = vicine.indexOf(vecchia.slug);
+  conCestino({ tipo: 'area-fisica', chiave: vecchia.chiave, nome: vecchia.nome, contesto: `fusa in «${arrivo}»`, vicini: { prima: i > 0 ? vicine[i - 1] : null, dopo: i >= 0 && i < vicine.length - 1 ? vicine[i + 1] : null } }, () => {
+    // i legami della vecchia (le altre aree di ogni infiltrazione si ricompattano, se la nuova c'era già) e l'Area
+    staccaAreaDalleInfiltrazioni(vecchia.chiave);
+    prepared('DELETE FROM area WHERE chiave = ?').run(vecchia.chiave);
+  });
 }
 
 /**
@@ -623,7 +638,9 @@ function contenitoreDellArea(a: RigaArea): Contenitore {
 /** Sposta una versione nell'Area data (o in un'Area nuova col nome dato), dentro il suo contenitore. */
 function spostaVersione(mappa: string, area: RigaArea, verso: { area: RigaArea } | { nuova: string }): void {
   const c = contenitoreDellArea(area);
-  collocaPlanimetria({ mappa, ...(c.colonna === 'dungeon_chiave' ? { dungeon: c.chiave } : { quartiere: c.chiave }), ...('area' in verso ? { area: verso.area.slug } : { nuova: { nome: verso.nuova } }) }, { sposta: true });
+  // le rotte vecchie non conoscono la conferma: il loro gesto («unisci a quella stanza») era già esplicito; l'Area che si svuota va
+  // comunque nel cestino, e da lì si rimette (L3 §3.6.1)
+  collocaPlanimetria({ mappa, ...(c.colonna === 'dungeon_chiave' ? { dungeon: c.chiave } : { quartiere: c.chiave }), ...('area' in verso ? { area: verso.area.slug } : { nuova: { nome: verso.nuova } }) }, { sposta: true, conferma: true });
 }
 
 /**
@@ -710,10 +727,12 @@ export function stanzaDellaPlanimetria(chiavePubblica: string, dati: { con: stri
     if (!altra.area || altra.genitore_chiave !== p.genitore_chiave) throw httpErrors.badRequest('stanza-di-altro-luogo', 'Le due planimetrie non stanno nello stesso posto: un’area raccoglie solo planimetrie dello stesso Palazzo o quartiere.');
     if (altra.area.chiave === area.chiave) return;
     // come la stanza di prima, che «nasceva col nome dato» se quella planimetria non ne aveva una: un'Area di una planimetria sola
-    // prende il nome dato
+    // prende il nome dato, come correzione (`aggiornaArea` salva i valori del seed alla prima modifica: «Ripristina» la riporta), ma
+    // mai sopra un nome dato dall'utente, che resta (L3 §3.6.1)
     const sola = (prepared('SELECT COUNT(*) FROM mappa WHERE area_chiave = ?').pluck().get(altra.area.chiave) as number) < 2;
+    const rivista = altra.area.nome_rivisto === 1 && !(altra.area.origine === 'seed' && altra.area.seed_json === null);
     spostaVersione(p.chiave, area, { area: altra.area });
-    if (sola && dati.nome?.trim()) aggiornaArea(c.rotta, c.chiave, altra.area.slug, { nome: dati.nome });
+    if (sola && !rivista && dati.nome?.trim()) aggiornaArea(c.rotta, c.chiave, altra.area.slug, { nome: dati.nome });
   })();
   invalidaCacheDiGioco();
   return true;

@@ -178,8 +178,63 @@ describe('Palazzi: aree e infiltrazioni (L3)', () => {
     expect(sola).toMatchObject({ slug: 'museo-2p-ala-nord', numeroPlanimetrie: 1, origine: 'utente' });
     const fuori = await request(app).put('/api/aree/colloca').send({ mappa: versioni[0], dungeon: 'kamoshida', area: prepared("SELECT slug FROM area WHERE dungeon_chiave = 'kamoshida' LIMIT 1").pluck().get() });
     expect([fuori.status, fuori.body.error.code]).toEqual([400, 'planimetria-di-un-altro-palazzo']);
-    // l'unica versione di un'Area «a sé» lo è già
-    expect((await request(app).put('/api/aree/colloca').send({ mappa: versioni[2], dungeon: 'madarame', nuova: { nome: 'Altro nome' } })).body.error.code).toBe('colloca-non-valido');
+    // l'unica versione di un'Area «a sé» lo è già (§3.6.1)
+    expect((await request(app).put('/api/aree/colloca').send({ mappa: versioni[2], dungeon: 'madarame', nuova: { nome: 'Altro nome' } })).body.error.code).toBe('gia-area-a-se');
+  });
+
+  it('§3.6.1 — spostare l’unica versione chiede conferma (409 `area-si-svuota`); confermato, l’area svuotata va nel cestino coi suoi legami, che passano all’area d’arrivo; dal cestino torna vuota', async () => {
+    const sola = prepared(`SELECT a.chiave, a.slug, a.nome FROM area a WHERE a.dungeon_chiave = 'madarame' AND (SELECT COUNT(*) FROM mappa m WHERE m.area_chiave = a.chiave) = 1
+      AND (SELECT COUNT(*) FROM infiltrazione_area ia WHERE ia.area_chiave = a.chiave) > 0 ORDER BY a.ordine LIMIT 1`).get() as { chiave: string; slug: string; nome: string };
+    const arrivo = prepared("SELECT chiave, slug, nome FROM area WHERE dungeon_chiave = 'madarame' AND chiave <> ? ORDER BY ordine LIMIT 1").get(sola.chiave) as { chiave: string; slug: string; nome: string };
+    const versione = prepared('SELECT chiave FROM mappa WHERE area_chiave = ?').pluck().get(sola.chiave) as string;
+    const legami = prepared('SELECT infiltrazione_chiave, area_chiave, ordine, planimetria_iniziale, origine FROM infiltrazione_area WHERE area_chiave = ? ORDER BY 1').all(sola.chiave) as Array<{ infiltrazione_chiave: string; ordine: number; planimetria_iniziale: string | null; origine: string }>;
+    const corpo = { mappa: versione, dungeon: 'madarame', area: arrivo.slug };
+    // senza conferma: 409 con il riepilogo, e nulla cambia
+    const no = await request(app).put('/api/aree/colloca').send(corpo);
+    expect([no.status, no.body.error.code]).toEqual([409, 'area-si-svuota']);
+    expect(no.body.error.message).toContain(`«${sola.nome}» resta senza planimetrie`);
+    expect(no.body.error.message).toContain(`«${arrivo.nome}»`);
+    expect(no.body.error.details).toEqual({ area: sola.slug, arrivo: arrivo.slug, legami: legami.length });
+    expect(prepared('SELECT area_chiave FROM mappa WHERE chiave = ?').pluck().get(versione)).toBe(sola.chiave);
+    // confermato: la versione entra nell'area d'arrivo, l'area di partenza va nel cestino («fusa in …»)
+    await request(app).put('/api/aree/colloca?conferma=1').send(corpo).expect(200);
+    expect(prepared('SELECT area_chiave FROM mappa WHERE chiave = ?').pluck().get(versione)).toBe(arrivo.chiave);
+    expect(prepared('SELECT 1 FROM area WHERE chiave = ?').get(sola.chiave)).toBeUndefined();
+    expect(prepared('SELECT COUNT(*) FROM infiltrazione_area WHERE area_chiave = ?').pluck().get(sola.chiave)).toBe(0);
+    // i legami passano all'area d'arrivo con lo stesso ordine e la versione spostata da aprire (dove non c'erano già)
+    for (const l of legami) {
+      const ora = prepared('SELECT ordine, planimetria_iniziale, origine FROM infiltrazione_area WHERE infiltrazione_chiave = ? AND area_chiave = ?').get(l.infiltrazione_chiave, arrivo.chiave);
+      expect(ora).toBeDefined();
+    }
+    const nelCestino = ((await request(app).get('/api/impostazioni/cestino').expect(200)).body.data as VoceCestinoDto[]).find((v) => v.tipo === 'area-fisica' && v.chiave === sola.chiave)!;
+    expect(nelCestino.contesto).toBe(`fusa in «${arrivo.nome}»`);
+    expect(nelCestino.contenuto.map((c) => c.tabella).sort()).toEqual(['area', 'infiltrazione_area']);
+    // dal cestino: l'area torna vuota (senza planimetria predefinita) coi suoi legami; la versione resta dov'è
+    await request(app).post(`/api/impostazioni/cestino/${nelCestino.id}/ripristina`).expect(200);
+    expect(prepared('SELECT planimetria_predefinita FROM area WHERE chiave = ?').get(sola.chiave)).toEqual({ planimetria_predefinita: null });
+    expect(prepared('SELECT infiltrazione_chiave, area_chiave, ordine, planimetria_iniziale, origine FROM infiltrazione_area WHERE area_chiave = ? ORDER BY 1').all(sola.chiave)).toEqual(legami);
+    expect(prepared('SELECT area_chiave FROM mappa WHERE chiave = ?').pluck().get(versione)).toBe(arrivo.chiave);
+    // con più versioni nessuna conferma in più
+    const due = prepared("SELECT area_chiave FROM mappa WHERE area_chiave IN (SELECT chiave FROM area WHERE dungeon_chiave = 'madarame') GROUP BY area_chiave HAVING COUNT(*) > 2 LIMIT 1").pluck().get() as string;
+    const unaDiDue = prepared('SELECT chiave FROM mappa WHERE area_chiave = ? ORDER BY versione_ordine DESC LIMIT 1').pluck().get(due) as string;
+    await request(app).put('/api/aree/colloca').send({ mappa: unaDiDue, dungeon: 'madarame', area: sola.slug }).expect(200);
+  });
+
+  it('§3.6.1 — la rotta vecchia `/stanza` con `con` e `nome`: l’area d’arrivo di una sola planimetria prende il nome come correzione (Ripristina la riporta), mai sopra un nome dell’utente', async () => {
+    const sole = prepared(`SELECT a.chiave, a.slug, a.nome, m.chiave AS mappa FROM area a JOIN mappa m ON m.area_chiave = a.chiave WHERE a.dungeon_chiave = 'iweleth' AND a.origine = 'seed'
+      AND (SELECT COUNT(*) FROM mappa x WHERE x.area_chiave = a.chiave) = 1 ORDER BY a.ordine LIMIT 3`).all() as Array<{ chiave: string; slug: string; nome: string; mappa: string }>;
+    const [da, verso, rivista] = sole;
+    expect(sole.length).toBe(3);
+    // la stanza: la versione di `da` entra nell'area di `verso`, che prende il nome dato (come correzione dell'area del seed)
+    await request(app).put(`/api/mappe/${encodeURIComponent(chiaveMappa(da.mappa))}/stanza`).send({ con: chiaveMappa(verso.mappa), nome: 'Nome dato' }).expect(200);
+    expect(prepared('SELECT nome, nome_rivisto, seed_json IS NOT NULL AS corretta FROM area WHERE chiave = ?').get(verso.chiave)).toEqual({ nome: 'Nome dato', nome_rivisto: 1, corretta: 1 });
+    await request(app).post(`/api/aree/dungeon/iweleth/${verso.slug}/ripristina`).expect(200);
+    expect(prepared('SELECT nome FROM area WHERE chiave = ?').pluck().get(verso.chiave)).toBe(verso.nome);
+    // un nome dato dall'utente resta: la rotta lo lascia e risponde col nome di adesso
+    await request(app).put(`/api/aree/dungeon/iweleth/${rivista.slug}`).send({ nome: 'Nome dell’utente' }).expect(200);
+    const altra = prepared("SELECT m.chiave FROM mappa m WHERE m.area_chiave = ?").pluck().get(verso.chiave) as string;
+    await request(app).put(`/api/mappe/${encodeURIComponent(chiaveMappa(altra))}/stanza`).send({ con: chiaveMappa(rivista.mappa), nome: 'Altro nome' }).expect(200);
+    expect(prepared('SELECT nome FROM area WHERE chiave = ?').pluck().get(rivista.chiave)).toBe('Nome dell’utente');
   });
 
   it('8 — pacchetto del Palazzo: esporta → importa (con e senza «sovrascrivi») identico colonna per colonna; un pacchetto di prima lega le infiltrazioni dal campo `aree`', async () => {
@@ -212,6 +267,59 @@ describe('Palazzi: aree e infiltrazioni (L3)', () => {
       const area = prepared('SELECT area_chiave FROM mappa WHERE chiave = ?').pluck().get(idMappa(m.chiave)) as string;
       for (const inf of m.aree!) expect(areeDi(inf)).toContain(area);
     }
+  });
+
+  it('NR3-2, NR3-3 — dalla rotta dell’app (esporta → importa, con e senza «sovrascrivi») i pin del seed restano del seed e l’immagine caricata resta la stessa riga', async () => {
+    const radice = 'dungeon-madarame';
+    await request(app).put(`/api/mappe/${radice}/immagine`).set('Content-Type', 'image/png').send(png(64, 48)).expect(200);
+    // e la schermata di un pin, che deve tornare con la sua riga e la sua chiave
+    const pin = prepared("SELECT s.id FROM spillo s JOIN mappa m ON m.chiave = s.mappa_chiave WHERE m.genitore_chiave = ? AND s.uid IS NOT NULL ORDER BY s.id LIMIT 1").pluck().get(radice) as number;
+    await request(app).post(`/api/mappe/spilli/${pin}/immagini?didascalia=Schermata`).set('Content-Type', 'image/png').send(png(32, 32)).expect(201);
+    const tabelle = () => JSON.stringify({
+      mappa: prepared('SELECT * FROM mappa WHERE chiave = ? OR genitore_chiave = ? ORDER BY chiave').all(radice, radice),
+      spillo: prepared('SELECT s.* FROM spillo s JOIN mappa m ON m.chiave = s.mappa_chiave WHERE m.chiave = ? OR m.genitore_chiave = ? ORDER BY s.id').all(radice, radice),
+      immagine: prepared("SELECT id, ambito, chiave, nome_file, mime, byte, created_at, origine_url, hex(contenuto) AS contenuto FROM immagine WHERE (ambito = 'mappa' AND chiave = ?) OR ambito = 'spillo' ORDER BY id").all(radice),
+      spilloImmagine: prepared('SELECT * FROM spillo_immagine ORDER BY id').all(),
+    });
+    expect(JSON.parse(tabelle()).spilloImmagine.length).toBe(1);
+    const seme = prepared("SELECT COUNT(*) FROM spillo s JOIN mappa m ON m.chiave = s.mappa_chiave WHERE (m.chiave = ? OR m.genitore_chiave = ?) AND s.origine = 'seed'").pluck().get(radice, radice) as number;
+    expect(seme).toBeGreaterThan(0);
+    const prima = tabelle();
+    const pacchetto = (await request(app).get(`/api/mappe/esporta?radice=${radice}`).expect(200)).body.data;
+    expect(Object.keys(pacchetto.immagini)).toContain(radice);
+    await request(app).post('/api/mappe/importa').send({ pacchetto, sovrascrivi: true }).expect(200);
+    expect(tabelle()).toBe(prima);
+    await request(app).post('/api/mappe/importa').send({ pacchetto }).expect(200);
+    expect(tabelle()).toBe(prima);
+    // un'immagine diversa, invece, si scrive (riga aggiornata, contenuto nuovo)
+    const altra = structuredClone(pacchetto);
+    altra.immagini[radice].base64 = png(80, 40).toString('base64');
+    await request(app).post('/api/mappe/importa').send({ pacchetto: altra, sovrascrivi: true }).expect(200);
+    expect(prepared("SELECT larghezza || 'x' || altezza FROM mappa WHERE chiave = ?").pluck().get(radice)).toBe('80x40');
+    expect(prepared("SELECT nome_file FROM immagine WHERE ambito = 'mappa' AND chiave = ?").pluck().get(radice)).not.toBe(JSON.parse(prima).immagine[0].nome_file);
+  });
+
+  it('§3.6.3 — un pin reimportato il cui id è stato preso da un’altra riga ne riceve uno nuovo, lo dice nel riepilogo e il suo stato lo segue per uid', async () => {
+    const planimetria = prepared("SELECT chiave FROM mappa WHERE genitore_chiave = 'dungeon-madarame' ORDER BY chiave LIMIT 1").pluck().get() as string;
+    const pubblica = chiaveMappa(planimetria);
+    // il pin più recente di tutta la base: liberato dall'import, il suo id è il primo che SQLite dà a un pin nuovo
+    const x = (await request(app).post(`/api/mappe/${encodeURIComponent(pubblica)}/spilli`).send({ tipo: 'forziere', nome: 'Forziere di prova', x: 40, y: 40 }).expect(201)).body.data as { id: number; uid: string };
+    expect(prepared('SELECT MAX(id) FROM spillo').pluck().get()).toBe(x.id);
+    const partita = ((await request(app).post('/api/partite').send({ nome: 'Id occupati' }).expect(201)).body.data as { id: number }).id;
+    await request(app).put(`/api/partite/${partita}/spilli/${x.id}`).send({ raccolto: true }).expect(200);
+    const pacchetto = (await request(app).get(`/api/mappe/esporta?radice=${encodeURIComponent(pubblica)}`).expect(200)).body.data;
+    const mappa = pacchetto.mappe.find((m: { chiave: string }) => m.chiave === pubblica);
+    // un pin nuovo in testa alla mappa: inserito per primo, prende l'id liberato da quello di prima
+    mappa.spilli.unshift({ ...mappa.spilli.find((s: { uid: string }) => s.uid === x.uid), uid: undefined, nome: 'Pin nuovo', x: 10, y: 10 });
+    const esito = (await request(app).post('/api/mappe/importa').send({ pacchetto, sovrascrivi: true }).expect(200)).body.data as { idCambiati?: Array<{ tipo: string; uid: string; prima: number; dopo: number }> };
+    const dopo = prepared('SELECT id FROM spillo WHERE uid = ?').pluck().get(x.uid) as number;
+    expect(dopo).not.toBe(x.id);
+    expect(esito.idCambiati).toEqual([{ tipo: 'pin', uid: x.uid, prima: x.id, dopo }]);
+    expect(prepared("SELECT nome FROM spillo WHERE id = ?").pluck().get(x.id)).toBe('Pin nuovo');
+    expect(prepared('SELECT raccolto FROM utente.spillo_partita WHERE partita_id = ? AND spillo_uid = ?').pluck().get(partita, x.uid)).toBe(1);
+    // reimportato di nuovo, senza conflitti: nessun id cambiato, e il campo non c'è
+    const di = (await request(app).post('/api/mappe/importa').send({ pacchetto: (await request(app).get(`/api/mappe/esporta?radice=${encodeURIComponent(pubblica)}`)).body.data, sovrascrivi: true }).expect(200)).body.data;
+    expect('idCambiati' in di).toBe(false);
   });
 
   it('9 — il campo «Infiltrazioni» delle voci: presente solo con un Palazzo; scelta, aggiunta, riordino, togli, nessuna; ripetizione non consecutiva sì, consecutiva no; la voce non cambia', async () => {
