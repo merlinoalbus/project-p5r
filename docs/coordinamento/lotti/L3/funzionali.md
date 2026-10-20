@@ -202,6 +202,27 @@ dal vivo sull'anteprima su 12484305 (pezzo 8): l'area vuota e il suo legame sono
 
 **Resta:** P3 dentro la finestra (partita con data dal 04-15) e la ricerca dell'interfaccia per F3-23.
 
+### Pezzo 10 — R8 del validatore: ciclo di scrittura su `newreview-l3` = b5fd6cfe dall'interfaccia (collaudo 5473/3301, 1280×800, 2026-10-20)
+Ciclo con la foto del Collaudo (17:21:59Z, identica alla base 0948Z). Le scritture vanno dalle **17:22:49.593Z alle 17:29:55.868Z**.
+Gesti dall'interfaccia, con le risposte API grezze registrate dal `fetch` della pagina. Okumura per la gestione, partita 1 per il diario.
+La partita di prova 3 serve al 04-20: è stata creata, ha avuto 77 punti segnati via API ed è stata eliminata.
+Esito completo in `esiti-collaudo/b5fd6cfe/R8/funzionali-R8-esito.md`, con le fotografie e i confronti `funzionali-*.txt`. Solo testo.
+
+| id | Esito | Prova |
+|---|---|---|
+| F3-19 | ✅ | «Aggiungi area» (nome, immagine, «Livello 1», infiltrazione aperta già spuntata) → `POST /api/aree/dungeon/okumura?…` 201. Subito `/area/prova-r8-area?infiltrazione=okumura-05-linea-esportazioni`: nell'elenco come «12.», nel visore l'immagine, nessun «scegli una planimetria» |
+| F3-20 | ✅ | «Aggiungi planimetria» → `POST …/prova-r8-area/planimetrie?etichetta=Livello 2` 201. Si apre la versione nuova («versione 2 di 2»); `tipo` area e `ruoloImmagine` planimetria-nativa dedotti, `versioneOrdine` 1 |
+| F3-21 | ✅ | «Aggiungi infiltrazione» con Caserma e l'area nuova → `POST /api/compendio/dungeon/okumura/aree` 201 `okumura-prova-r8-infiltrazione`, ordine 5. Si apre «Infiltrazione 6 di 11»; il pannello dell'area la elenca |
+| F3-22 («Modifica aree») | ✅ | «Altro» → «Modifica aree»: ↑ e «+ Interscambio» → `PUT …/aree-palazzo?partita=1` `["prova-r8-area","caserma","interscambio"]` 200. Si apre la prima area; voci e pin invariati |
+| F3-24 | ✅ | «Elimina area» su Caserma (finestra: «planimetria con 14 pin e i legami con 2 infiltrazioni») → `DELETE …?conferma=1` 204. Infiltrazione «Caserma» con «Modifica testo» → «Elimina» → «Confermo» → `DELETE /api/compendio/aree/okumura-03-caserma` 204. Dal cestino «Rimetti com'era» → `ripristina` 200 (`rimesse` 33 e 661, `saltate` []). Le **10 tabelle di Okumura e del diario sono identiche riga per riga** a prima dell'eliminazione, `updated_at` compresi: versione, 14 pin, legami, 6 voci, `mappa_entita`, ordine delle infiltrazioni |
+| R3-37b (9 voci) | ✅ | 04-11, 04-12, 04-15, 04-22, 05-16 (×2), 05-19, 05-20, 05-27, 06-01. Per ognuna: «Conferma» → `PUT …/percorso/voci/<uid>?partita=1` con la proposta, 200. Il collegamento apre la `?infiltrazione=` confermata e si arriva sull'infiltrazione giusta. «Togli» → `[]` 200, e voce, campo, proposta e collegamento tornano **identici** a prima. La voce del 05-16 senza riferimento non ha collegamento, com'è giusto |
+| 04-20 | ✅ | «Conferma» → tre infiltrazioni in ordine. Partita 1, tutte completate → l'ultima, «Ispeziona l'interno della torre». Partita di prova vuota → «Vecchio Castello», la prima non completata. Con Vecchio Castello completato (34/34) → «Tetto del Vecchio Castello». «Togli» ×3 → come prima |
+| — | **FUN3-3** aperto | Con un atterraggio (04-12, 04-20, 04-22) la finestra «Infiltrazioni della voce» dice che il collegamento apre la prima della proposta, ma porta alla planimetria d'atterraggio e a un'altra infiltrazione. Il comportamento segue la §4.1; il testo no. Vedi `difetti.md` |
+
+Osservazione per Test UX: l'area nuova, vuota, si presenta nell'elenco come «(completata) · niente da raccogliere · completa».
+`voce_infiltrazione` alla fine a 0 righe; partita 1 di nuovo attiva. **Ripristinata dal Collaudo alle 17:30:32Z**: impronta identica alla foto e alla
+base 0948Z; 114 scritture nel BE.log, tutte dei gesti dichiarati, nessun 5xx (`esiti-collaudo/b5fd6cfe/R8/LEGGIMI.md`).
+
 ### Pezzo 9 — linea di rilascio `newreview-l3` = d5eb9650 sul collaudo (FE 5473, BE 3301, base p5s 0948Z), 2026-10-20 (passo A3)
 Codice c8338fd0 + soli documenti (correzioni della ripresa d73e7027..c8338fd0); userVersion 113. Prove grezze in
 `esiti-funzionali/d5eb9650/`. Letture 09:57–10:12Z; ciclo di scrittura con foto del Collaudo (10:13:04Z, identica a `L3-base-p5s-20261020-0948Z`)

@@ -1,0 +1,7 @@
+### 2026-10-20T16:12:47Z rimozione del worktree temporaneo
+EXIT=0
+worktree temporanei rimasti: 0
+### linea di rilascio
+newreview-l3
+b5fd6cfe1281fe13c5653215b70c6e1070c5e412
+EXIT=0 (vuoto = pulita)

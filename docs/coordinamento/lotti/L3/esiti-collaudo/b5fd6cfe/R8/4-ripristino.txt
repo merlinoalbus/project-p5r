@@ -1,0 +1,16 @@
+### 2026-10-20T17:30:32Z ripristino del ciclo R8
+terminato albero WINPID 70568
+[BE] fermato
+RIPRISTINO OK: impronta identica alla foto {"gioco.db":{"user_version":113,"tabelle":80,"righe":20208},"partite.db":{"user_version":24,"tabelle":36,"righe":3415}}
+EXIT ripristina=0
+[BE] in ascolto sulla porta 3301 (dopo 4s)
+### health
+{"data":{"status":"ok","timestamp":"2026-10-20T17:30:43.445Z","db":{"ok":true,"userVersion":113}}}
+FE 200
+### impronta dopo il riavvio contro la foto
+IDENTICHE
+### contro la base 0948Z
+IDENTICHE
+### linea
+b5fd6cfe1281fe13c5653215b70c6e1070c5e412
+EXIT=0 (vuoto = pulita)

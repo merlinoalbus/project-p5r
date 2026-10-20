@@ -1,0 +1,2188 @@
+### 2026-10-20T16:07:50Z LAY3-5 — commit 7562f6ac (fix(L3): LAY3-5, intestazione della scheda entro il 30% a telefono e tablet)
+### worktree staccato su 7562f6acb12e9783e98752991a1b32871e550c9a; commit precedente a09beb8e
+### test del commit (forma committata): src/pages/DungeonDettaglioPage.test.tsx 
+### sorgenti del commit da riportare a 7562f6ac^: src/pages/DungeonDettaglioPage.tsx ; sorgenti nuovi da togliere: nessuno
+### 1) controllo sul codice di 7562f6ac: npx vitest run --reporter=verbose src/pages/DungeonDettaglioPage.test.tsx 
+
+ RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
+
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > in un Palazzo la colonna elenca i collezionabili delle planimetrie e «Raccolto» aggiorna anello e conteggi subito, senza caricamento, poi rilegge la scheda in silenzio (voci e Enigmi, 095) 286ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > due riletture sovrapposte: la risposta vecchia che arriva dopo non sovrascrive quella nuova 118ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione che non tocca aree: niente visore, «Collega aree»; la colonna lo dice e il Palazzo resta nella piega chiusa (L3) 30ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’area senza collezionabili lo dice così, senza mostrare il resto del Palazzo 33ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > scollegando un pin da una voce «ottenuto» la voce resta com’è nella partita: la scheda si rilegge 148ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Collega pin» usa la mappa principale: barra con voce, conto, planimetria, ricerca e «Fatto»; tutti i pin, i nascosti sbiaditi (2026-10-18) 176ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > collegando i pin l'elenco del Palazzo resta e una sua area porta quella planimetria nella mappa del collegamento, senza cambiare infiltrazione (2026-10-18) 91ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un'area senza planimetria propria collega lo stesso, su una del Palazzo; l'elenco del Palazzo resta (2026-10-18) 80ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > senza partita non ci sono spunte, e l’elenco resta consultabile 22ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > nei Memento (progetto del 2026-10-12): binario dei dedali, scheda del dedalo e un’area per volta; timbri a un tocco e Richieste a tre stati muovono area, dedalo e anello 111ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > nei Memento la linea del tempo è la «Finestra dei Memento» 18ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > nei Memento l’area ha Timbri, Persona, Richieste e Trama in quest’ordine; catturare una Persona non sposta l’anello; «Correggi la scheda» solo in «Modifica la guida» 136ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Memento: la risposta dei timbri, arrivata dopo una richiesta completata, non la riapre 51ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Memento: la risposta di una richiesta, arrivata dopo un timbro, non toglie il timbro 43ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Palazzo: lo stato di una voce, arrivato dopo un raccolto, non riapre il raccolto 110ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Palazzo: un raccolto, arrivato dopo lo stato di una voce, non riporta indietro la voce 121ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > l’elenco dice le aree in ordine, quanto resta, se sono complete e le infiltrazioni che le toccano 34ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > le frecce sulla maniglia spostano l’area e salvano l’ordine di tutto il Palazzo 37ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > trascinare la maniglia porta l’area dove la si lascia 29ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > toccare un’area apre la sua casa: la sua planimetria nel visore e i suoi collezionabili nella colonna (L3, §4.1) 32ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > arrivando sulla casa di un’area senza infiltrazione si apre la prima infiltrazione che la tocca (L3, FUN3-1) 16ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > `?infiltrazione=in-corso` (il diario senza infiltrazioni) apre la prima infiltrazione non completata 11ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Aggiungi area» crea un’area del Palazzo legata all’infiltrazione aperta, e la scheda la apre 60ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > da 1280 px il minimo di 240 px della mappa vale per la tela, non per il riquadro del visore 24ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > sotto i 1024 px il visore è alto min(64dvh, 560px); da 1024 px restano le misure di R3-41 (LAY3-3) 23ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > se l’ordine non si salva, l’elenco torna a quello del server e lo dice 44ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’area con più versioni: si scelgono nella fila (cambia solo `?planimetria=`), e la versione senza pin lo dice 75ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dalla casa di un’area (senza parametri) si apre la sua predefinita; la versione iniziale dell’infiltrazione vale solo con `?infiltrazione=` (NR3-4, strada (a)) 30ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > le schede della guida senza mappa né voce si vedono nella scheda del Palazzo, in «Schede da sistemare (N)», col testo e l’infiltrazione (AP3-1) 13ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > i passaggi del visore della scheda restano nella scheda (AP3-2) > il visore non mostra le planimetrie vicine; un passaggio verso una planimetria del Palazzo apre la sua area con l’infiltrazione aperta 57ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > i passaggi del visore della scheda restano nella scheda (AP3-2) > una chiave che la scheda non conosce si risolve: se la sua casa è un’area del Palazzo si resta nella scheda 56ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > in «Da raccogliere» il nome di una planimetria porta dritto alla sua area nella scheda, con l’infiltrazione aperta (AP3-4) 34ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > i segni dei chip delle date («si apre», «furto», «scade») sono all’opacità piena (UX3-11) 24ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > una data che è una frase: da 1024 px il chip dice l’etichetta, la frase intera sta nei «Dettagli dalla guida» (LAY3-4) 30ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > sotto i 1024 px l’intestazione è compatta: «Sulla mappa di Tokyo» e i conteggi nei «Dettagli dalla guida» (LAY3-5) 36ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > senza schede da sistemare la sezione non c’è (AP3-1) 22ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Modifica area»: le versioni si riordinano e l’etichetta svuotata si toglie (torna «Planimetria N»), col contenitore del Palazzo 106ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Modifica area» cambia nome, etichetta e infiltrazioni in un salvataggio, e la scheda si rilegge 97ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dalla finestra dell’area si elimina una versione (non l’ultima): va nel cestino 76ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Elimina area» dice che cosa si porta via (versioni, pin, legami; le voci restano) e la manda nel cestino con una richiesta 49ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > «Modifica aree» dell’infiltrazione aggiunge un’area in coda, conservando la versione che si apriva per quelle già legate 66ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > «Togli» scollega un’area dall’infiltrazione senza toccare le altre; l’ordine si cambia con ↑/↓ 64ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > un’infiltrazione senza aree si collega da «Collega aree», in coda all’elenco 29ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > l’eliminazione di un’area dice i legami al plurale quando sono più d’uno 39ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > mentre un ordine si salva, la maniglia dice perché è ferma 40ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > rinominare l’area non cambia il suo indirizzo né le versioni: si manda solo il nome 56ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Sposta la versione in un’altra area»: l’unica versione si sposta solo confermando che l’area va nel cestino (409 `area-si-svuota`) 96ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > una versione di un’area con più versioni diventa «un’area a sé», col nome scelto 106ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > il testo di un’infiltrazione si modifica con «Modifica testo», anche di una che non tocca aree 92ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > anche l’infiltrazione aperta si elimina, dal suo modulo di correzione, e la scheda torna sul Palazzo 89ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dalla proposta di una voce (`?daVoce=`) la riga «Aperta dalla proposta…»; «Chiudi» toglie il parametro e lascia l’infiltrazione 73ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > L4: l’anello conta gli oggetti permanenti; il chip riassuntivo dice «Concluso · 1 da verificare» e quel che manca al completamento 40ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > L4: «Da verificare» dalla scheda — il chip apre la sezione, l’elenco apre la finestra, «Segna la voce» segna e rilegge 97ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > L4: «Da verificare» dalla voce — segno sulla riga e «Sistema…» nella voce aperta, «Togli il fatto al pin» per uid 86ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > L4: senza divergenze non si chiede niente e non c’è la sezione 32ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > tutte le voci segnate (Ottenute o Esaurite; le descrittive non contano): spunta sulle infiltrazioni, sull’area che le ha tutte completate e nel pannello del visore 22ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > una voce ancora da fare: niente spunta su quell’infiltrazione né sull’area; un’infiltrazione senza voci da segnare non ha spunta 20ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > un’infiltrazione senza aree, completata, ha la spunta sulla sua riga in coda all’elenco 25ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > in un’area con più versioni la spunta compare sull’area e sulle sue infiltrazioni, una volta sola (le versioni si scelgono nella fila) 36ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > un’area senza niente da raccogliere è completa (2026-10-11): testo, ✓, chip delle complete; senza partita resta solo «niente da raccogliere» 50ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > segnando l’ultima voce dalla guida la spunta compare subito, prima della rilettura; riaprendola sparisce subito 97ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > senza partita le voci non hanno stato: nessuna spunta 15ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’area con più infiltrazioni le mostra in ordine di guida: nell’elenco del Palazzo e nel pannello del visore, dove toccarne una la apre restando sull’area 37ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > le infiltrazioni di un’area si scelgono insieme nella finestra dell’area: in ordine di guida, e si salva l’insieme (L3, R3-24) 47ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > la bozza di correzione appartiene al pezzo che stai correggendo, non alla schermata 62ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > salvata l’intestazione, la scheda si rilegge con la partita attiva 57ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > la finestra dell’area salva solo quel che cambia: la sola etichetta non tocca nome né infiltrazioni 77ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Aggiungi infiltrazione» crea un’infiltrazione con le aree che tocca: il modulo si apre dal nome 92ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > l’infiltrazione nuova propone il posto subito dopo quella aperta; senza aree toccate non manda il campo 84ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > senza nome l’infiltrazione nuova non si crea 75ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione nuova all’inizio del Palazzo: creata, la scheda la apre 103ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dall’intestazione del Palazzo si sceglie dove si atterra dalla mappa di Tokyo: salvata la regola, la scheda si rilegge e la mostra (2026-10-04) 85ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > cambiato il giorno della partita, la scheda del Palazzo si rilegge: «Oggi si atterra su…» segue il giorno (2026-10-04) 49ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > intestazione con l’illustrazione (L1, scelta dell’utente «Illustrazione anche nelle schede», 2026-10-20) > un Palazzo con l’illustrazione caricata la mostra, piena, nelle tre misure dell’intestazione (da 1024 a 1279 px solo lo stemma), mai come sfondo; senza resta lo stemma 36ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > intestazione con l’illustrazione (L1, scelta dell’utente «Illustrazione anche nelle schede», 2026-10-20) > i Memento restano col loro stemma anche se la scheda porta un’illustrazione 13ms
+
+ Test Files  1 passed (1)
+      Tests  75 passed (75)
+   Start at  18:07:51
+   Duration  6.68s (transform 711ms, setup 105ms, import 899ms, tests 4.68s, environment 867ms)
+
+EXIT=0
+### stato della copia dopo il ritorno ai sorgenti di 7562f6ac^ (git status --porcelain)
+M  src/pages/DungeonDettaglioPage.tsx
+### test invariati rispetto a 7562f6ac:
+sì, identici al commit
+### 2) sul codice di 7562f6ac^: npx vitest run --reporter=verbose src/pages/DungeonDettaglioPage.test.tsx 
+
+ RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
+
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > in un Palazzo la colonna elenca i collezionabili delle planimetrie e «Raccolto» aggiorna anello e conteggi subito, senza caricamento, poi rilegge la scheda in silenzio (voci e Enigmi, 095) 324ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > due riletture sovrapposte: la risposta vecchia che arriva dopo non sovrascrive quella nuova 117ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione che non tocca aree: niente visore, «Collega aree»; la colonna lo dice e il Palazzo resta nella piega chiusa (L3) 42ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’area senza collezionabili lo dice così, senza mostrare il resto del Palazzo 37ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > scollegando un pin da una voce «ottenuto» la voce resta com’è nella partita: la scheda si rilegge 167ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Collega pin» usa la mappa principale: barra con voce, conto, planimetria, ricerca e «Fatto»; tutti i pin, i nascosti sbiaditi (2026-10-18) 186ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > collegando i pin l'elenco del Palazzo resta e una sua area porta quella planimetria nella mappa del collegamento, senza cambiare infiltrazione (2026-10-18) 102ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un'area senza planimetria propria collega lo stesso, su una del Palazzo; l'elenco del Palazzo resta (2026-10-18) 109ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > senza partita non ci sono spunte, e l’elenco resta consultabile 35ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > nei Memento (progetto del 2026-10-12): binario dei dedali, scheda del dedalo e un’area per volta; timbri a un tocco e Richieste a tre stati muovono area, dedalo e anello 142ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > nei Memento la linea del tempo è la «Finestra dei Memento» 20ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > nei Memento l’area ha Timbri, Persona, Richieste e Trama in quest’ordine; catturare una Persona non sposta l’anello; «Correggi la scheda» solo in «Modifica la guida» 138ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Memento: la risposta dei timbri, arrivata dopo una richiesta completata, non la riapre 53ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Memento: la risposta di una richiesta, arrivata dopo un timbro, non toglie il timbro 52ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Palazzo: lo stato di una voce, arrivato dopo un raccolto, non riapre il raccolto 94ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Palazzo: un raccolto, arrivato dopo lo stato di una voce, non riporta indietro la voce 104ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > l’elenco dice le aree in ordine, quanto resta, se sono complete e le infiltrazioni che le toccano 35ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > le frecce sulla maniglia spostano l’area e salvano l’ordine di tutto il Palazzo 39ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > trascinare la maniglia porta l’area dove la si lascia 35ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > toccare un’area apre la sua casa: la sua planimetria nel visore e i suoi collezionabili nella colonna (L3, §4.1) 37ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > arrivando sulla casa di un’area senza infiltrazione si apre la prima infiltrazione che la tocca (L3, FUN3-1) 26ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > `?infiltrazione=in-corso` (il diario senza infiltrazioni) apre la prima infiltrazione non completata 12ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Aggiungi area» crea un’area del Palazzo legata all’infiltrazione aperta, e la scheda la apre 80ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > da 1280 px il minimo di 240 px della mappa vale per la tela, non per il riquadro del visore 32ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > sotto i 1024 px il visore è alto min(64dvh, 560px); da 1024 px restano le misure di R3-41 (LAY3-3) 42ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > se l’ordine non si salva, l’elenco torna a quello del server e lo dice 62ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’area con più versioni: si scelgono nella fila (cambia solo `?planimetria=`), e la versione senza pin lo dice 95ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dalla casa di un’area (senza parametri) si apre la sua predefinita; la versione iniziale dell’infiltrazione vale solo con `?infiltrazione=` (NR3-4, strada (a)) 48ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > le schede della guida senza mappa né voce si vedono nella scheda del Palazzo, in «Schede da sistemare (N)», col testo e l’infiltrazione (AP3-1) 21ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > i passaggi del visore della scheda restano nella scheda (AP3-2) > il visore non mostra le planimetrie vicine; un passaggio verso una planimetria del Palazzo apre la sua area con l’infiltrazione aperta 62ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > i passaggi del visore della scheda restano nella scheda (AP3-2) > una chiave che la scheda non conosce si risolve: se la sua casa è un’area del Palazzo si resta nella scheda 52ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > in «Da raccogliere» il nome di una planimetria porta dritto alla sua area nella scheda, con l’infiltrazione aperta (AP3-4) 38ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > i segni dei chip delle date («si apre», «furto», «scade») sono all’opacità piena (UX3-11) 24ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > una data che è una frase: da 1024 px il chip dice l’etichetta, la frase intera sta nei «Dettagli dalla guida» (LAY3-4) 20ms
+ × src/pages/DungeonDettaglioPage.test.tsx > sotto i 1024 px l’intestazione è compatta: «Sulla mappa di Tokyo» e i conteggi nei «Dettagli dalla guida» (LAY3-5) 31ms
+   → expected null not to be null
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > senza schede da sistemare la sezione non c’è (AP3-1) 17ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Modifica area»: le versioni si riordinano e l’etichetta svuotata si toglie (torna «Planimetria N»), col contenitore del Palazzo 96ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Modifica area» cambia nome, etichetta e infiltrazioni in un salvataggio, e la scheda si rilegge 90ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dalla finestra dell’area si elimina una versione (non l’ultima): va nel cestino 67ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Elimina area» dice che cosa si porta via (versioni, pin, legami; le voci restano) e la manda nel cestino con una richiesta 46ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > «Modifica aree» dell’infiltrazione aggiunge un’area in coda, conservando la versione che si apriva per quelle già legate 53ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > «Togli» scollega un’area dall’infiltrazione senza toccare le altre; l’ordine si cambia con ↑/↓ 79ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > un’infiltrazione senza aree si collega da «Collega aree», in coda all’elenco 28ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > l’eliminazione di un’area dice i legami al plurale quando sono più d’uno 59ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > mentre un ordine si salva, la maniglia dice perché è ferma 52ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > rinominare l’area non cambia il suo indirizzo né le versioni: si manda solo il nome 78ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Sposta la versione in un’altra area»: l’unica versione si sposta solo confermando che l’area va nel cestino (409 `area-si-svuota`) 139ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > una versione di un’area con più versioni diventa «un’area a sé», col nome scelto 115ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > il testo di un’infiltrazione si modifica con «Modifica testo», anche di una che non tocca aree 90ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > anche l’infiltrazione aperta si elimina, dal suo modulo di correzione, e la scheda torna sul Palazzo 64ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dalla proposta di una voce (`?daVoce=`) la riga «Aperta dalla proposta…»; «Chiudi» toglie il parametro e lascia l’infiltrazione 56ms
+ × src/pages/DungeonDettaglioPage.test.tsx > L4: l’anello conta gli oggetti permanenti; il chip riassuntivo dice «Concluso · 1 da verificare» e quel che manca al completamento 26ms
+   → Unable to find an element with the text: Concluso · 1 da verificare. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body[39m
+  [33mstyle[39m=[32m""[39m
+[36m>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col gap-4 lg:min-h-0 lg:flex-1 lg:gap-3"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"card relative shrink-0 overflow-hidden lg:py-1.5"[39m
+      [36m>[39m
+        [36m<span[39m
+          [33maria-hidden[39m=[32m"true"[39m
+          [33mclass[39m=[32m"pointer-events-none absolute -right-10 -top-16 hidden opacity-[0.07] sm:block"[39m
+        [36m/>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"relative flex gap-3 flex-col sm:flex-row sm:items-start sm:gap-5 lg:items-center lg:gap-3"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex shrink-0 items-center gap-3 sm:flex-col lg:flex-row lg:gap-2"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"sm:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden sm:block lg:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden lg:block xl:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden xl:block"[39m
+            [36m/>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Avanzamento in Palazzo di Kamoshida: 56 oggetti permanenti fatti su 71"[39m
+              [33maria-valuemax[39m=[32m"100"[39m
+              [33maria-valuemin[39m=[32m"0"[39m
+              [33maria-valuenow[39m=[32m"79"[39m
+              [33mclass[39m=[32m"relative inline-flex items-center justify-center shrink-0 lg:size-12!"[39m
+              [33mrole[39m=[32m"progressbar"[39m
+              [33mstyle[39m=[32m"width: 64px; height: 64px;"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"absolute inset-0 -rotate-90"[39m
+                [33mviewBox[39m=[32m"0 0 64 64"[39m
+              [36m>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"32"[39m
+                  [33mcy[39m=[32m"32"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mr[39m=[32m"29.5"[39m
+                  [33mstroke[39m=[32m"var(--color-border)"[39m
+                  [33mstroke-width[39m=[32m"5"[39m
+                [36m/>[39m
+                [36m<circle[39m
+                  [33mclass[39m=[32m"transition-[stroke-dasharray] duration-500"[39m
+                  [33mcx[39m=[32m"32"[39m
+                  [33mcy[39m=[32m"32"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mr[39m=[32m"29.5"[39m
+                  [33mstroke[39m=[32m"var(--color-primary)"[39m
+                  [33mstroke-dasharray[39m=[32m"146.19467785155882 185.3539665617978"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"5"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"relative flex items-center justify-center"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"font-display leading-none tabular-nums text-[17px] lg:text-[13px]"[39m
+                [36m>[39m
+                  [0m78[0m
+                  [0m%[0m
+                [36m</span>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col gap-2.5 lg:gap-1"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-col gap-1 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-3"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-wrap items-center gap-2"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"btn btn-ghost btn-sm touch -ml-2"[39m
+                  [33mtitle[39m=[32m"Indietro"[39m
+                  [33mtype[39m=[32m"button"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"18"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"18"[39m
+                  [36m>[39m
+                    [36m<polyline[39m
+                      [33mpoints[39m=[32m"15 18 9 12 15 6"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"lg:sr-only"[39m
+                  [36m>[39m
+                    [0m Indietro[0m
+                  [36m</span>[39m
+                [36m</button>[39m
+                [36m<h1[39m
+                  [33mclass[39m=[32m"titolo-display m-0 break-words"[39m
+                [36m>[39m
+                  [0mPalazzo di Kamoshida[0m
+                [36m</h1>[39m
+                [36m<button[39m
+                  [33maria-label[39m=[32m"Correggi la scheda: il Palazzo «Palazzo di Kamoshida»"[39m
+                  [33mclass[39m=[32m"touch shrink-0 rounded px-1.5 text-text-muted hover:text-text text-[12px]"[39m
+                  [33mtitle[39m=[32m"Correggi il Palazzo «Palazzo di Kamoshida»"[39m
+                  [33mtype[39m=[32m"button"[39m
+                [36m>[39m
+                  [0m✎[0m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"ml-1 lg:sr-only"[39m
+                  [36m>[39m
+                    [0mCorreggi la scheda[0m
+                  [36m</span>[39m
+                [36m</button>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-wrap items-center gap-2 text-[13px] text-text-secondary lg:min-w-0 lg:flex-1 lg:basis-32 lg:gap-x-2 lg:gap-y-0"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"break-words lg:min-w-0 lg:max-w-full lg:truncate "[39m
+                  [33mtitle[39m=[32m"Kamoshida"[39m
+                [36m>[39m
+                  [0mKamoshida[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<details[39m
+                [33mclass[39m=[32m"text-[12px] hidden lg:block lg:open:basis-full"[39m
+              [36m>[39m
+                [36m<summary[39m
+                  [33mclass[39m=...
+ × src/pages/DungeonDettaglioPage.test.tsx > L4: «Da verificare» dalla scheda — il chip apre la sezione, l’elenco apre la finestra, «Segna la voce» segna e rilegge 104ms
+   → Unable to find an accessible element with the role "button" and name `/; 1 da verificare$/`
+
+Here are the accessible roles:
+
+  banner:
+
+  Name "":
+  [36m<header[39m
+    [33mclass[39m=[32m"card relative shrink-0 overflow-hidden lg:py-1.5"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  progressbar:
+
+  Name "Avanzamento in Palazzo di Kamoshida: 56 oggetti permanenti fatti su 71":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Avanzamento in Palazzo di Kamoshida: 56 oggetti permanenti fatti su 71"[39m
+    [33maria-valuemax[39m=[32m"100"[39m
+    [33maria-valuemin[39m=[32m"0"[39m
+    [33maria-valuenow[39m=[32m"79"[39m
+    [33mclass[39m=[32m"relative inline-flex items-center justify-center shrink-0 lg:size-12!"[39m
+    [33mrole[39m=[32m"progressbar"[39m
+    [33mstyle[39m=[32m"width: 64px; height: 64px;"[39m
+  [36m/>[39m
+
+  Name "Da raccogliere: raccolti":
+  [36m<span[39m
+    [33maria-label[39m=[32m"Da raccogliere: raccolti"[39m
+    [33maria-valuemax[39m=[32m"2"[39m
+    [33maria-valuemin[39m=[32m"0"[39m
+    [33maria-valuenow[39m=[32m"1"[39m
+    [33mclass[39m=[32m"visore-mappa__progresso h-1.5 flex-1"[39m
+    [33mrole[39m=[32m"progressbar"[39m
+  [36m/>[39m
+
+  Name "Nel resto del Palazzo: raccolti":
+  [36m<span[39m
+    [33maria-label[39m=[32m"Nel resto del Palazzo: raccolti"[39m
+    [33maria-valuemax[39m=[32m"2"[39m
+    [33maria-valuemin[39m=[32m"0"[39m
+    [33maria-valuenow[39m=[32m"0"[39m
+    [33mclass[39m=[32m"visore-mappa__progresso h-1.5 flex-1"[39m
+    [33mrole[39m=[32m"progressbar"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "Indietro":
+  [36m<button[39m
+    [33mclass[39m=[32m"btn btn-ghost btn-sm touch -ml-2"[39m
+    [33mtitle[39m=[32m"Indietro"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Correggi la scheda: il Palazzo «Palazzo di Kamoshida»":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Correggi la scheda: il Palazzo «Palazzo di Kamoshida»"[39m
+    [33mclass[39m=[32m"touch shrink-0 rounded px-1.5 text-text-muted hover:text-text text-[12px]"[39m
+    [33mtitle[39m=[32m"Correggi il Palazzo «Palazzo di Kamoshida»"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sulla mappa di Tokyo sempre":
+  [36m<button[39m
+    [33maria-haspopup[39m=[32m"dialog"[39m
+    [33mclass[39m=[32m"btn btn-sm btn-visivo btn-secondary btn-visivo--compatto  btn-visivo--icona-lg"[39m
+    [33mtitle[39m=[32m"Sulla mappa di Tokyo: sempre"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "1 da verificare":
+  [36m<button[39m
+    [33mclass[39m=[32m"chip chip--oro touch"[39m
+    [33mtitle[39m=[32m"Pin fatti con una voce non fatta, da prima dell’aggiornamento: tocca per sistemarli"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Aggiungi area":
+  [36m<button[39m
+    [33mclass[39m=[32m"btn btn-sm btn-visivo btn-secondary btn-visivo--compatto  "[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sposta l’area «Cancello»":
+  [36m<button[39m
+    [33maria-keyshortcuts[39m=[32m"ArrowUp ArrowDown"[39m
+    [33maria-label[39m=[32m"Sposta l’area «Cancello»"[39m
+    [33mclass[39m=[32m"touch flex w-8 shrink-0 select-none items-center justify-center rounded text-[18px] leading-none text-text-muted touch-none hover:text-text cursor-grab active:cursor-grabbing"[39m
+    [33mtitle[39m=[32m"Trascina per spostare (con la tastiera: frecce su e giù)"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "1. Cancello1 da prendere su 21. Cancello":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"true"[39m
+    [33mclass[39m=[32m"touch min-w-0 flex-1 text-left"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sposta l’area «Torre alta»":
+  [36m<button[39m
+    [33maria-keyshortcuts[39m=[32m"ArrowUp ArrowDown"[39m
+    [33maria-label[39m=[32m"Sposta l’area «Torre alta»"[39m
+    [33mclass[39m=[32m"touch flex w-8 shrink-0 select-none items-center justify-center rounded text-[18px] leading-none text-text-muted touch-none hover:text-text cursor-grab active:cursor-grabbing"[39m
+    [33mtitle[39m=[32m"Trascina per spostare (con la tastiera: frecce su e giù)"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "2. Torre alta2 da prendere su 2":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"touch min-w-0 flex-1 text-left"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sposta l’area «Cortile»":
+  [36m<button[39m
+    [33maria-keyshortcuts[39m=[32m"ArrowUp ArrowDown"[39m
+    [33maria-label[39m=[32m"Sposta l’area «Cortile»"[39m
+    [33mclass[39m=[32m"touch flex w-8 shrink-0 select-none items-center justify-center rounded text-[18px] leading-none text-text-muted touch-none hover:text-text cursor-grab active:cursor-grabbing"[39m
+    [33mtitle[39m=[32m"Trascina per spostare (con la tastiera: frecce su e giù)"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "3. Cortile (completata)niente da raccogliere · completa3. Cortile":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"touch min-w-0 flex-1 text-left"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "2. Torre":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"touch min-w-0 flex-1 text-left text-[13px] font-semibold leading-tight"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Collega aree a «Torre»":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Collega aree a «Torre»"[39m
+    [33mclass[39m=[32m"chip touch shrink-0 text-[11px]"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Modifica testo: l’infiltrazione «Cancello»":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Modifica testo: l’infiltrazione «Cancello»"[39m
+    [33mclass[39m=[32m"touch shrink-0 rounded px-1.5 text-text-muted hover:text-text text-[12px]"[39m
+    [33mtitle[39m=[32m"Correggi l’infiltrazione «Cancello»"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Aggiungi infiltrazione":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Aggiungi infiltrazione"[39m
+    [33mclass[39m=[32m"btn btn-sm btn-visivo btn-ghost btn-visivo--compatto  btn-visivo--icona-xl"[39m
+    [33mtitle[39m=[32m"Aggiungi infiltrazione"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Cancello":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"true"[39m
+    [33mclass[39m=[32m"chip touch text-[11px] chip--attivo"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Modifica aree":
+  [36m<button[39m
+    [33mclass[39m=[32m"chip touch text-[11px]"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "1. Cancello":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"true"[39m
+    [33mclass[39m=[32m"chip touch shrink-0 lg:max-w-[14rem] lg:overflow-hidden lg:text-ellipsis lg:whitespace-nowrap chip--attivo  "[39m
+    [33mtitle[39m=[32m"Cancello"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "2. Torre alta":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"chip touch shrink-0 lg:max-w-[14rem] lg:overflow-hidden lg:text-ellipsis lg:whitespace-nowrap   "[39m
+    [33mtitle[39m=[32m"Torre alta"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "3. Cortile (completata)":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"chip touch shrink-0 lg:max-w-[14rem] lg:overflow-hidden lg:text-ellipsis lg:whitespace-nowrap   chip--icona"[39m
+    [33mtitle[39m=[32m"Cortile"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Aggiungi area":
+  [36m<button[39m
+    [33mclass[39m=[32m"btn btn-sm btn-visivo btn-ghost btn-visivo--compatto  "[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Aree · 3Cancello ▾":
+  [36m<button[39m
+    [33maria-haspopup[39m=[32m"dialog"[39m
+    [33mclass[39m=[32m"btn btn-secondary touch w-full justify-between"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Modifica area":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Modifica area"[39m
+    [33mclass[39m=[32m"btn btn-sm btn-visivo btn-secondary btn-visivo--compatto  btn-visivo--icona-xl"[39m
+    [33mtitle[39m=[32m"Modifica area"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Aggiungi planimetria":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Aggiungi planimetria"[39m
+    [33mclass[39m=[32m"btn btn-sm btn-visivo btn-secondary btn-visivo--compatto  btn-visivo--icona-xl"[39m
+    [33mtitle[39m=[32m"Aggiungi planimetria"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Elimina area":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Elimina area"[39m
+    [33mclass[39m=[32m"btn btn-sm btn-visivo btn-ghost btn-visivo--compatto  btn-visivo--icona-xl text-error"[39m
+    [33mtitle[39m=[32m"Elimina area"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Aggiungi planimetria":
+  [36m<button[39m
+    [33mclass[39m=[32m"btn btn-ghost touch justify-start md:hidden"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Elimina area":
+  [36m<button[39m
+    [33mclass[39m=[32m"btn btn-ghost touch justify-start text-error"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Passaggio al Cortile":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Passaggio interno al Cortile":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "1. Cancello":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"true"[39m
+    [33mclass[39m=[32m"chip touch text-[11px] chip--attivo "[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Anche i raccolti (1)":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"chip touch text-[11px] "[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "ForziereSicura del cancello · Cancello":
+  [36m<button[39m
+    [33mclass[39m=[32m"touch flex w-full flex-col items-start rounded-md border border-warning/50 px-2 py-1 text-left"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Filtra per tipo ▾":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33mclass[39m=[32m"chip touch text-[11px] "[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Scegli voci da copiare o spostare in un’altra infiltrazione del Palazzo":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Scegli voci da copiare o spostare in un’altra infiltrazione del Palazzo"[39m
+    [33mclass[39m=[32m"btn btn-sm btn-visivo btn-ghost btn-visivo--compatto  self-start"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sicura del cancello· Stanze sicureDa verificareda collegare":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33mclass[39m=[32m"touch flex items-start gap-2 text-left "[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Aggiungi una voce":
+  [36m<button[39m
+    [33mclass[39m=[32m"btn btn-sm btn-visivo btn-secondary btn-visivo--compatto  self-start"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  heading:
+
+  Name "Palazzo di Kamoshida":
+  [36m<h1[39m
+    [33mclass[39m=[32m"titolo-display m-0 break-words"[39m
+  [36m/>[39m
+
+  Name "Aree · 3":
+  [36m<h3[39m
+    [33mclass[39m=[32m"m-0 font-display text-[15px] uppercase leading-none"[39m
+  [36m/>[39m
+
+  Name "Infiltrazioni senza aree · 1":
+  [36m<h4[39m
+    [33mclass[39m=[32m"m-0 text-[11px] uppercase tracking-wide text-text-muted"[39m
+  [36m/>[39m
+
+  Name "Cancello":
+  [36m<h2[39m
+    [33mclass[39m=[32m"sr-only"[39m
+  [36m/>[39m
+
+  Name "Cancello":
+  [36m<h3[39m
+    [33mclass[39m=[32m"m-0 break-words text-[15px] font-semibold xl:min-w-0 xl:flex-1"[39m
+    [33mtitle[39m=[32m"Cancello"[39m
+  [36m/>[39m
+
+  Name "Infiltrazioni in quest’area":
+  [36m<h3[39m
+    [33mclass[39m=[32m"visore-mappa__intestazione"[39m
+  [36m/>[39m
+
+  Name "Da raccogliere · 1":
+  [36m<h3[39m
+    [33mclass[39m=[32m"m-0 font-display text-[15px] uppercase leading-none"[39m
+  [36m/>[39m
+
+  Name "Nel resto del Palazzo · 2":
+  [36m<h3[39m
+    [33mclass[39m=[32m"m-0 font-display text-[15px] uppercase leading-none"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  group:
+
+  Name "":
+  [36m<details[39m
+    [33mclass[39m=[32m"text-[12px] hidden lg:block lg:open:basis-full"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<details[39m
+    [33mclass[39m=[32m"text-[12px] lg:hidden"[39m
+  [36m/>[39m
+
+  Name "Aree del Palazzo":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Aree del Palazzo"[39m
+    [33mclass[39m=[32m"flex flex-col gap-2.5"[39m
+    [33mrole[39m=[32m"group"[39m
+  [36m/>[39m
+
+  Name "Aree · 3":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Aree · 3"[39m
+    [33mclass[39m=[32m"fila-scorrevole fila-scorrevole--sempre min-w-0 flex-1 items-center"[39m
+    [33mrole[39m=[32m"group"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<details[39m
+    [33mclass[39m=[32m"menu-altro relative md:max-lg:hidden xl:hidden max-md:[&_.menu-altro\\_\\_voci]:left-0 max-md:[&_.menu-altro\\_\\_voci]:right-auto"[39m
+  [36m/>[39m
+
+  Name "Da raccogliere":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Da raccogliere"[39m
+    [33mclass[39m=[32m"flex flex-col gap-2"[39m
+    [33mrole[39m=[32m"group"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<details[39m
+    [33mclass[39m=[32m"text-[12px]"[39m
+  [36m/>[39m
+
+  Name "Nel resto del Palazzo":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Nel resto del Palazzo"[39m
+    [33mclass[39m=[32m"flex flex-col gap-2"[39m
+    [33mrole[39m=[32m"group"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<details[39m
+    [33mclass[39m=[32m"text-[12px]"[39m
+    [33mid[39m=[32m"da-verificare"[39m
+  [36m/>[39m
+
+  Name "Guida di Cancello":
+  [36m<details[39m
+    [33maria-label[39m=[32m"Guida di Cancello"[39m
+    [33mclass[39m=[32m"text-[12px]"[39m
+    [33mopen[39m=[32m""[39m
+  [36m/>[39m
+
+  Name "Filtri per tipo":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Filtri per tipo"[39m
+    [33mclass[39m=[32m"flex flex-col gap-1"[39m
+    [33mrole[39m=[32m"group"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  list:
+
+  Name "Finestra del Palazzo":
+  [36m<ol[39m
+    [33maria-label[39m=[32m"Finestra del Palazzo"[39m
+    [33mclass[39m=[32m"m-0 flex list-none flex-wrap items-stretch gap-1.5 p-0"[39m
+  [36m/>[39m
+
+  Name "Aree":
+  [36m<ol[39m
+    [33maria-label[39m=[32m"Aree"[39m
+    [33mclass[39m=[32m"m-0 flex list-none flex-col gap-1.5 p-0"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<ul[39m
+    [33mclass[39m=[32m"m-0 flex list-none flex-col gap-1.5 p-0"[39m
+  [36m/>[39m
+
+  Name "Aree toccate da Cancello":
+  [36m<ol[39m
+    [33maria-label[39m=[32m"Aree toccate da Cancello"[39m
+    [33mclass[39m=[32m"m-0 flex list-none flex-wrap gap-1 p-0"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<ul[39m
+    [33mclass[39m=[32m"m-0 flex list-none flex-wrap gap-1 p-0"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<ul[39m
+    [33mclass[39m=[32m"m-0 flex list-none flex-col gap-2 p-0"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<ul[39m
+    [33mclass[39m=[32m"m-0 flex list-none flex-col p-0"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<ul[39m
+    [33mclass[39m=[32m"m-0 flex list-none flex-col gap-2 p-0"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<ul[39m
+    [33mclass[39m=[32m"m-0 flex list-none flex-col p-0"[39m
+  [36m/>[39m
+
+  Name "Pin da verificare":
+  [36m<ul[39m
+    [33maria-label[39m=[32m"Pin da verificare"[39m
+    [33mclass[39m=[32m"m-0 flex list-none flex-col gap-1 p-0 pt-1.5"[39m
+  [36m/>[39m
+
+  Name "Voci della guida di Cancello":
+  [36m<ul[39m
+    [33maria-label[39m=[32m"Voci della guida di Cancello"[39m
+    [33mclass[39m=[32m"m-0 flex list-none flex-col divide-y divide-border-light p-0"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  listitem:
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-stretch gap-1.5"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-stretch gap-1.5"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-stretch gap-1 rounded-md border px-1.5 py-1.5 border-primary bg-primary-bg  "[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-stretch gap-1 rounded-md border px-1.5 py-1.5 border-border-light bg-white/[0.02]  "[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-stretch gap-1 rounded-md border px-1.5 py-1.5 border-border-light bg-white/[0.02]  "[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-center gap-1 rounded-md border border-dashed px-1.5 py-1.5 border-border-light"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex flex-col gap-1 rounded-md bg-white/[0.04] px-2 py-1.5"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-center gap-2 text-[12px]"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex flex-col gap-1 rounded-md bg-white/[0.04] px-2 py-1.5"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-center gap-2 text-[12px]"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-center gap-2 text-[12px]"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex flex-col gap-1 rounded-md px-1 py-2 text-[13px] "[39m
+    [33mdata-voce[39m=[32m"p1"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  navigation:
+
+  Name "Il Palazzo":
+  [36m<nav[39m
+    [33maria-label[39m=[32m"Il Palazzo"[39m
+    [33mclass[39m=[32m"hidden xl:block xl:min-h-0"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"m-0 text-[11px] text-text-muted"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"m-0 pt-1 text-text-muted"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"m-0 text-[11px] text-text-muted"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p[39m
+    [33mdata-testid[39m=[32m"indirizzo"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  region:
+
+  Name "Infiltrazioni senza aree":
+  [36m<section[39m
+    [33maria-label[39m=[32m"Infiltrazioni senza aree"[39m
+    [33mclass[39m=[32m"flex flex-col gap-1.5"[39m
+  [36m/>[39m
+
+  Name "Infiltrazioni in quest’area":
+  [36m<section[39m
+    [33maria-label[39m=[32m"Infiltrazioni in quest’area"[39m
+    [33mclass[39m=[32m"visore-mappa__sezione"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  combobox:
+
+  Name "Infiltrazione 1 di 3":
+  [36m<button[39m
+    [33maria-controls[39m=[32m"_r_23_"[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-haspopup[39m=[32m"listbox"[39m
+    [33maria-label[39m=[32m"Infiltrazione 1 di 3"[39m
+    [33mclass[39m=[32m"selettore__scelta touch"[39m
+    [33mrole[39m=[32m"combobox"[39m
+    [33mtitle[39m=[32m"1. Cancello"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  complementary:
+
+  Name "Da raccogliere in Cancello":
+  [36m<aside[39m
+    [33maria-label[39m=[32m"Da raccogliere in Cancello"[39m
+    [33mclass[39m=[32m"card flex flex-col gap-3 xl:min-h-0 xl:area-scorrevole"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  link:
+
+  Name "Cancello":
+  [36m<a[39m
+    [33mclass[39m=[32m"touch inline-flex items-center font-semibold"[39m
+    [33mdata-discover[39m=[32m"true"[39m
+    [33mhref[39m=[32m"/guida/dungeon/kamoshida/area/cancello?infiltrazione=k-01&planimetria=m-cancello"[39m
+  [36m/>[39m
+
+  Name "Torre":
+  [36m<a[39m
+    [33mclass[39m=[32m"touch inline-flex items-center font-semibold"[39m
+    [33mdata-discover[39m=[32m"true"[39m
+    [33mhref[39m=[32m"/guida/dungeon/kamoshida/area/torre-alta?planimetria=m-torre"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  checkbox:
+
+  Name "Forziere 2 di Cancello aperto":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Forziere 2 di Cancello aperto"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Forziere 1 di Torre aperto":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Forziere 1 di Torre aperto"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Forziere 2 di Torre aperto":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Forziere 2 di Torre aperto"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body[39m
+  [33mstyle[39m=[32m""[39m
+[36m>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col gap-4 lg:min-h-0 lg:flex-1 lg:gap-3"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"card relative shrink-0 overflow-hidden lg:py-1.5"[39m
+      [36m>[39m
+        [36m<span[39m
+          [33maria-hidden[39m=[32m"true"[39m
+          [33mclass[39m=[32m"pointer-events-none absolute -right-10 -top-16 hidden opacity-[0.07] sm:block"[39m
+        [36m/>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"relative flex gap-3 flex-col sm:flex-row sm:items-start sm:gap-5 lg:items-center lg:gap-3"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex shrink-0 items-center gap-3 sm:flex-col lg:flex-row lg:gap-2"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"sm:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden sm:block lg:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden lg:block xl:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden xl:block"[39m
+            [36m/>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Avanzamento in Palazzo di Kamoshida: 56 oggetti permanenti fatti su 71"[39m
+              [33maria-valuemax[39m=[32m"100"[39m
+              [33maria-valuemin[39m=[32m"0"[39m
+              [33maria-valuenow[39m=[32m"79"[39m
+              [33mclass[39m=[32m"relative inline-flex items-center justify-center shrink-0 lg:size-12!"[39m
+              [33mrole[39m=[32m"progressbar"[39m
+              [33mstyle[39m=[32m"width: 64px; height: 64px;"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"absolute inset-0 -rotate-90"[39m
+                [33mviewBox[39m=[32m"0 0 64 64"[39m
+              [36m>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"32"[39m
+                  [33mcy[39m=[32m"32"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mr[39m=[32m"29.5"[39m
+                  [33mstroke[39m=[32m"var(--color-border)"[39m
+                  [33mstroke-width[39m=[32m"5"[39m
+                [36m/>[39m
+                [36m<circle[39m
+                  [33mclass[39m=[32m"transition-[stroke-dasharray] duration-500"[39m
+                  [33mcx[39m=[32m"32"[39m
+                  [33mcy[39m=[32m"32"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mr[39m=[32m"29.5"[39m
+                  [33mstroke[39m=[32m"var(--color-primary)"[39m
+                  [33mstroke-dasharray[39m=[32m"146.19467785155882 185.3539665617978"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"5"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"relative flex items-center justify-center"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"font-display leading-none tabular-nums text-[17px] lg:text-[13px]"[39m
+                [36m>[39m
+                  [0m78[0m
+                  [0m%[0m
+                [36m</span>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col gap-2.5 lg:gap-1"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-col gap-1 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-3"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-wrap items-center gap-2"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"btn btn-ghost btn-sm touch -ml-2"[39m
+                  [33mtitle[39m=[32m"Indietro"[39m
+                  [33mtype[39m=[32m"button"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"18"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"18"[39m
+                  [36m>[39m
+                    [36m<polyline[39m
+                      [33mpoints[39m=[32m"15 18 9 12 15 6"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"lg:sr-only"[39m
+                  [36m>[39m
+                    [0m Indietro[0m
+                  [36m</span>[39m
+                [36m</button>[39m
+                [36m<h1[39m
+                  [33mclass[39m=[32m"titolo-display m-0 break-words"[39m
+                [36m>[39m
+                  [0mPalazzo di Kamoshida[0m
+                [36m</h1>[39m
+                [36m<button[39m
+                  [33maria-label[39m=[32m"Correggi la scheda: il Palazzo «Palazzo di Kamoshida»"[39m
+                  [33mclass[39m=[32m"touch shrink-0 rounded px-1.5 text-text-muted hover:text-text text-[12px]"[39m
+                  [33mtitle[39m=[32m"Correggi il Palazzo «Palazzo di Kamoshida»"[39m
+                  [33mtype[39m=[32m"button"[39m
+                [36m>[39m
+                  [0m✎[0m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"ml-1 lg:sr-only"[39m
+                  [36m>[39m
+                    [0mCorreggi la scheda[0m
+                  [36m</span>[39m
+                [36m</button>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-wrap items-center gap-2 text-[13px] text-text-secondary lg:min-w-0 lg:flex-1 lg:basis-32 lg:gap-x-2 lg:gap-y-0"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"break-words lg:min-w-0 lg:max-w-full lg:truncate "[39m
+                  [33mtitle[39m=[32m"Kamoshida"[39m
+                [36m>[39m
+                  [0mKamoshida[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<details[39m
+                [33mclass[39m=[32m"text-[12px] hidden lg:block lg:open:basis-full"[39m
+              [36m>[39m
+                [36m<summary[39m
+                  [33mclass[39m=...
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > L4: «Da verificare» dalla voce — segno sulla riga e «Sistema…» nella voce aperta, «Togli il fatto al pin» per uid 95ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > L4: senza divergenze non si chiede niente e non c’è la sezione 33ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > tutte le voci segnate (Ottenute o Esaurite; le descrittive non contano): spunta sulle infiltrazioni, sull’area che le ha tutte completate e nel pannello del visore 24ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > una voce ancora da fare: niente spunta su quell’infiltrazione né sull’area; un’infiltrazione senza voci da segnare non ha spunta 30ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > un’infiltrazione senza aree, completata, ha la spunta sulla sua riga in coda all’elenco 27ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > in un’area con più versioni la spunta compare sull’area e sulle sue infiltrazioni, una volta sola (le versioni si scelgono nella fila) 32ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > un’area senza niente da raccogliere è completa (2026-10-11): testo, ✓, chip delle complete; senza partita resta solo «niente da raccogliere» 67ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > segnando l’ultima voce dalla guida la spunta compare subito, prima della rilettura; riaprendola sparisce subito 145ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > senza partita le voci non hanno stato: nessuna spunta 26ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’area con più infiltrazioni le mostra in ordine di guida: nell’elenco del Palazzo e nel pannello del visore, dove toccarne una la apre restando sull’area 53ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > le infiltrazioni di un’area si scelgono insieme nella finestra dell’area: in ordine di guida, e si salva l’insieme (L3, R3-24) 83ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > la bozza di correzione appartiene al pezzo che stai correggendo, non alla schermata 95ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > salvata l’intestazione, la scheda si rilegge con la partita attiva 83ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > la finestra dell’area salva solo quel che cambia: la sola etichetta non tocca nome né infiltrazioni 53ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Aggiungi infiltrazione» crea un’infiltrazione con le aree che tocca: il modulo si apre dal nome 74ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > l’infiltrazione nuova propone il posto subito dopo quella aperta; senza aree toccate non manda il campo 53ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > senza nome l’infiltrazione nuova non si crea 55ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione nuova all’inizio del Palazzo: creata, la scheda la apre 75ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dall’intestazione del Palazzo si sceglie dove si atterra dalla mappa di Tokyo: salvata la regola, la scheda si rilegge e la mostra (2026-10-04) 81ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > cambiato il giorno della partita, la scheda del Palazzo si rilegge: «Oggi si atterra su…» segue il giorno (2026-10-04) 57ms
+ × src/pages/DungeonDettaglioPage.test.tsx > intestazione con l’illustrazione (L1, scelta dell’utente «Illustrazione anche nelle schede», 2026-10-20) > un Palazzo con l’illustrazione caricata la mostra, piena, nelle tre misure dell’intestazione (da 1024 a 1279 px solo lo stemma), mai come sfondo; senza resta lo stemma 22ms
+   → expected [ '150px', '176px', '104px' ] to deeply equal [ '96px', '128px', '104px' ]
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > intestazione con l’illustrazione (L1, scelta dell’utente «Illustrazione anche nelle schede», 2026-10-20) > i Memento restano col loro stemma anche se la scheda porta un’illustrazione 23ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pages/DungeonDettaglioPage.test.tsx > sotto i 1024 px l’intestazione è compatta: «Sulla mappa di Tokyo» e i conteggi nei «Dettagli dalla guida» (LAY3-5)
+AssertionError: expected null not to be null
+ ❯ src/pages/DungeonDettaglioPage.test.tsx:746:60
+    744|   await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+    745|   const intestazione = screen.getByRole('heading', { name: 'Palazzo di…
+    746|   expect(intestazione.querySelector(':scope > .grid')).not.toBeNull();
+       |                                                            ^
+    747|   const dettagli = within(intestazione).getAllByText('Dettagli dalla g…
+    748|   const sotto = dettagli.find((x) => x.className.includes('lg:hidden')…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/pages/DungeonDettaglioPage.test.tsx > L4: l’anello conta gli oggetti permanenti; il chip riassuntivo dice «Concluso · 1 da verificare» e quel che manca al completamento
+TestingLibraryElementError: Unable to find an element with the text: Concluso · 1 da verificare. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body[39m
+  [33mstyle[39m=[32m""[39m
+[36m>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col gap-4 lg:min-h-0 lg:flex-1 lg:gap-3"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"card relative shrink-0 overflow-hidden lg:py-1.5"[39m
+      [36m>[39m
+        [36m<span[39m
+          [33maria-hidden[39m=[32m"true"[39m
+          [33mclass[39m=[32m"pointer-events-none absolute -right-10 -top-16 hidden opacity-[0.07] sm:block"[39m
+        [36m/>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"relative flex gap-3 flex-col sm:flex-row sm:items-start sm:gap-5 lg:items-center lg:gap-3"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex shrink-0 items-center gap-3 sm:flex-col lg:flex-row lg:gap-2"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"sm:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden sm:block lg:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden lg:block xl:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden xl:block"[39m
+            [36m/>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Avanzamento in Palazzo di Kamoshida: 56 oggetti permanenti fatti su 71"[39m
+              [33maria-valuemax[39m=[32m"100"[39m
+              [33maria-valuemin[39m=[32m"0"[39m
+              [33maria-valuenow[39m=[32m"79"[39m
+              [33mclass[39m=[32m"relative inline-flex items-center justify-center shrink-0 lg:size-12!"[39m
+              [33mrole[39m=[32m"progressbar"[39m
+              [33mstyle[39m=[32m"width: 64px; height: 64px;"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"absolute inset-0 -rotate-90"[39m
+                [33mviewBox[39m=[32m"0 0 64 64"[39m
+              [36m>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"32"[39m
+                  [33mcy[39m=[32m"32"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mr[39m=[32m"29.5"[39m
+                  [33mstroke[39m=[32m"var(--color-border)"[39m
+                  [33mstroke-width[39m=[32m"5"[39m
+                [36m/>[39m
+                [36m<circle[39m
+                  [33mclass[39m=[32m"transition-[stroke-dasharray] duration-500"[39m
+                  [33mcx[39m=[32m"32"[39m
+                  [33mcy[39m=[32m"32"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mr[39m=[32m"29.5"[39m
+                  [33mstroke[39m=[32m"var(--color-primary)"[39m
+                  [33mstroke-dasharray[39m=[32m"146.19467785155882 185.3539665617978"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"5"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"relative flex items-center justify-center"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"font-display leading-none tabular-nums text-[17px] lg:text-[13px]"[39m
+                [36m>[39m
+                  [0m78[0m
+                  [0m%[0m
+                [36m</span>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col gap-2.5 lg:gap-1"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-col gap-1 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-3"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-wrap items-center gap-2"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"btn btn-ghost btn-sm touch -ml-2"[39m
+                  [33mtitle[39m=[32m"Indietro"[39m
+                  [33mtype[39m=[32m"button"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"18"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"18"[39m
+                  [36m>[39m
+                    [36m<polyline[39m
+                      [33mpoints[39m=[32m"15 18 9 12 15 6"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"lg:sr-only"[39m
+                  [36m>[39m
+                    [0m Indietro[0m
+                  [36m</span>[39m
+                [36m</button>[39m
+                [36m<h1[39m
+                  [33mclass[39m=[32m"titolo-display m-0 break-words"[39m
+                [36m>[39m
+                  [0mPalazzo di Kamoshida[0m
+                [36m</h1>[39m
+                [36m<button[39m
+                  [33maria-label[39m=[32m"Correggi la scheda: il Palazzo «Palazzo di Kamoshida»"[39m
+                  [33mclass[39m=[32m"touch shrink-0 rounded px-1.5 text-text-muted hover:text-text text-[12px]"[39m
+                  [33mtitle[39m=[32m"Correggi il Palazzo «Palazzo di Kamoshida»"[39m
+                  [33mtype[39m=[32m"button"[39m
+                [36m>[39m
+                  [0m✎[0m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"ml-1 lg:sr-only"[39m
+                  [36m>[39m
+                    [0mCorreggi la scheda[0m
+                  [36m</span>[39m
+                [36m</button>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-wrap items-center gap-2 text-[13px] text-text-secondary lg:min-w-0 lg:flex-1 lg:basis-32 lg:gap-x-2 lg:gap-y-0"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"break-words lg:min-w-0 lg:max-w-full lg:truncate "[39m
+                  [33mtitle[39m=[32m"Kamoshida"[39m
+                [36m>[39m
+                  [0mKamoshida[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<details[39m
+                [33mclass[39m=[32m"text-[12px] hidden lg:block lg:open:basis-full"[39m
+              [36m>[39m
+                [36m<summary[39m
+                  [33mclass[39m=...
+ ❯ Object.getElementError ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/pages/DungeonDettaglioPage.test.tsx:1023:23
+    1021|   expect(screen.getByRole('progressbar', { name: 'Avanzamento in Palaz…
+    1022|   expect(screen.getByText('78%')).toBeInTheDocument();
+    1023|   const chip = screen.getByText('Concluso · 1 da verificare');
+       |                       ^
+    1024|   expect(chip).toHaveAccessibleName('Concluso: Tesoro raccolto, boss f…
+    1025|   expect(chip).toHaveAttribute('title', 'Tesoro e boss finale · al com…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/pages/DungeonDettaglioPage.test.tsx > L4: «Da verificare» dalla scheda — il chip apre la sezione, l’elenco apre la finestra, «Segna la voce» segna e rilegge
+TestingLibraryElementError: Unable to find an accessible element with the role "button" and name `/; 1 da verificare$/`
+
+Here are the accessible roles:
+
+  banner:
+
+  Name "":
+  [36m<header[39m
+    [33mclass[39m=[32m"card relative shrink-0 overflow-hidden lg:py-1.5"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  progressbar:
+
+  Name "Avanzamento in Palazzo di Kamoshida: 56 oggetti permanenti fatti su 71":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Avanzamento in Palazzo di Kamoshida: 56 oggetti permanenti fatti su 71"[39m
+    [33maria-valuemax[39m=[32m"100"[39m
+    [33maria-valuemin[39m=[32m"0"[39m
+    [33maria-valuenow[39m=[32m"79"[39m
+    [33mclass[39m=[32m"relative inline-flex items-center justify-center shrink-0 lg:size-12!"[39m
+    [33mrole[39m=[32m"progressbar"[39m
+    [33mstyle[39m=[32m"width: 64px; height: 64px;"[39m
+  [36m/>[39m
+
+  Name "Da raccogliere: raccolti":
+  [36m<span[39m
+    [33maria-label[39m=[32m"Da raccogliere: raccolti"[39m
+    [33maria-valuemax[39m=[32m"2"[39m
+    [33maria-valuemin[39m=[32m"0"[39m
+    [33maria-valuenow[39m=[32m"1"[39m
+    [33mclass[39m=[32m"visore-mappa__progresso h-1.5 flex-1"[39m
+    [33mrole[39m=[32m"progressbar"[39m
+  [36m/>[39m
+
+  Name "Nel resto del Palazzo: raccolti":
+  [36m<span[39m
+    [33maria-label[39m=[32m"Nel resto del Palazzo: raccolti"[39m
+    [33maria-valuemax[39m=[32m"2"[39m
+    [33maria-valuemin[39m=[32m"0"[39m
+    [33maria-valuenow[39m=[32m"0"[39m
+    [33mclass[39m=[32m"visore-mappa__progresso h-1.5 flex-1"[39m
+    [33mrole[39m=[32m"progressbar"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "Indietro":
+  [36m<button[39m
+    [33mclass[39m=[32m"btn btn-ghost btn-sm touch -ml-2"[39m
+    [33mtitle[39m=[32m"Indietro"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Correggi la scheda: il Palazzo «Palazzo di Kamoshida»":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Correggi la scheda: il Palazzo «Palazzo di Kamoshida»"[39m
+    [33mclass[39m=[32m"touch shrink-0 rounded px-1.5 text-text-muted hover:text-text text-[12px]"[39m
+    [33mtitle[39m=[32m"Correggi il Palazzo «Palazzo di Kamoshida»"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sulla mappa di Tokyo sempre":
+  [36m<button[39m
+    [33maria-haspopup[39m=[32m"dialog"[39m
+    [33mclass[39m=[32m"btn btn-sm btn-visivo btn-secondary btn-visivo--compatto  btn-visivo--icona-lg"[39m
+    [33mtitle[39m=[32m"Sulla mappa di Tokyo: sempre"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "1 da verificare":
+  [36m<button[39m
+    [33mclass[39m=[32m"chip chip--oro touch"[39m
+    [33mtitle[39m=[32m"Pin fatti con una voce non fatta, da prima dell’aggiornamento: tocca per sistemarli"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Aggiungi area":
+  [36m<button[39m
+    [33mclass[39m=[32m"btn btn-sm btn-visivo btn-secondary btn-visivo--compatto  "[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sposta l’area «Cancello»":
+  [36m<button[39m
+    [33maria-keyshortcuts[39m=[32m"ArrowUp ArrowDown"[39m
+    [33maria-label[39m=[32m"Sposta l’area «Cancello»"[39m
+    [33mclass[39m=[32m"touch flex w-8 shrink-0 select-none items-center justify-center rounded text-[18px] leading-none text-text-muted touch-none hover:text-text cursor-grab active:cursor-grabbing"[39m
+    [33mtitle[39m=[32m"Trascina per spostare (con la tastiera: frecce su e giù)"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "1. Cancello1 da prendere su 21. Cancello":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"true"[39m
+    [33mclass[39m=[32m"touch min-w-0 flex-1 text-left"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sposta l’area «Torre alta»":
+  [36m<button[39m
+    [33maria-keyshortcuts[39m=[32m"ArrowUp ArrowDown"[39m
+    [33maria-label[39m=[32m"Sposta l’area «Torre alta»"[39m
+    [33mclass[39m=[32m"touch flex w-8 shrink-0 select-none items-center justify-center rounded text-[18px] leading-none text-text-muted touch-none hover:text-text cursor-grab active:cursor-grabbing"[39m
+    [33mtitle[39m=[32m"Trascina per spostare (con la tastiera: frecce su e giù)"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "2. Torre alta2 da prendere su 2":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"touch min-w-0 flex-1 text-left"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sposta l’area «Cortile»":
+  [36m<button[39m
+    [33maria-keyshortcuts[39m=[32m"ArrowUp ArrowDown"[39m
+    [33maria-label[39m=[32m"Sposta l’area «Cortile»"[39m
+    [33mclass[39m=[32m"touch flex w-8 shrink-0 select-none items-center justify-center rounded text-[18px] leading-none text-text-muted touch-none hover:text-text cursor-grab active:cursor-grabbing"[39m
+    [33mtitle[39m=[32m"Trascina per spostare (con la tastiera: frecce su e giù)"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "3. Cortile (completata)niente da raccogliere · completa3. Cortile":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"touch min-w-0 flex-1 text-left"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "2. Torre":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"touch min-w-0 flex-1 text-left text-[13px] font-semibold leading-tight"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Collega aree a «Torre»":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Collega aree a «Torre»"[39m
+    [33mclass[39m=[32m"chip touch shrink-0 text-[11px]"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Modifica testo: l’infiltrazione «Cancello»":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Modifica testo: l’infiltrazione «Cancello»"[39m
+    [33mclass[39m=[32m"touch shrink-0 rounded px-1.5 text-text-muted hover:text-text text-[12px]"[39m
+    [33mtitle[39m=[32m"Correggi l’infiltrazione «Cancello»"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Aggiungi infiltrazione":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Aggiungi infiltrazione"[39m
+    [33mclass[39m=[32m"btn btn-sm btn-visivo btn-ghost btn-visivo--compatto  btn-visivo--icona-xl"[39m
+    [33mtitle[39m=[32m"Aggiungi infiltrazione"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Cancello":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"true"[39m
+    [33mclass[39m=[32m"chip touch text-[11px] chip--attivo"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Modifica aree":
+  [36m<button[39m
+    [33mclass[39m=[32m"chip touch text-[11px]"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "1. Cancello":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"true"[39m
+    [33mclass[39m=[32m"chip touch shrink-0 lg:max-w-[14rem] lg:overflow-hidden lg:text-ellipsis lg:whitespace-nowrap chip--attivo  "[39m
+    [33mtitle[39m=[32m"Cancello"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "2. Torre alta":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"chip touch shrink-0 lg:max-w-[14rem] lg:overflow-hidden lg:text-ellipsis lg:whitespace-nowrap   "[39m
+    [33mtitle[39m=[32m"Torre alta"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "3. Cortile (completata)":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"chip touch shrink-0 lg:max-w-[14rem] lg:overflow-hidden lg:text-ellipsis lg:whitespace-nowrap   chip--icona"[39m
+    [33mtitle[39m=[32m"Cortile"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Aggiungi area":
+  [36m<button[39m
+    [33mclass[39m=[32m"btn btn-sm btn-visivo btn-ghost btn-visivo--compatto  "[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Aree · 3Cancello ▾":
+  [36m<button[39m
+    [33maria-haspopup[39m=[32m"dialog"[39m
+    [33mclass[39m=[32m"btn btn-secondary touch w-full justify-between"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Modifica area":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Modifica area"[39m
+    [33mclass[39m=[32m"btn btn-sm btn-visivo btn-secondary btn-visivo--compatto  btn-visivo--icona-xl"[39m
+    [33mtitle[39m=[32m"Modifica area"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Aggiungi planimetria":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Aggiungi planimetria"[39m
+    [33mclass[39m=[32m"btn btn-sm btn-visivo btn-secondary btn-visivo--compatto  btn-visivo--icona-xl"[39m
+    [33mtitle[39m=[32m"Aggiungi planimetria"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Elimina area":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Elimina area"[39m
+    [33mclass[39m=[32m"btn btn-sm btn-visivo btn-ghost btn-visivo--compatto  btn-visivo--icona-xl text-error"[39m
+    [33mtitle[39m=[32m"Elimina area"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Aggiungi planimetria":
+  [36m<button[39m
+    [33mclass[39m=[32m"btn btn-ghost touch justify-start md:hidden"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Elimina area":
+  [36m<button[39m
+    [33mclass[39m=[32m"btn btn-ghost touch justify-start text-error"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Passaggio al Cortile":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Passaggio interno al Cortile":
+  [36m<button[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "1. Cancello":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"true"[39m
+    [33mclass[39m=[32m"chip touch text-[11px] chip--attivo "[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Anche i raccolti (1)":
+  [36m<button[39m
+    [33maria-pressed[39m=[32m"false"[39m
+    [33mclass[39m=[32m"chip touch text-[11px] "[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "ForziereSicura del cancello · Cancello":
+  [36m<button[39m
+    [33mclass[39m=[32m"touch flex w-full flex-col items-start rounded-md border border-warning/50 px-2 py-1 text-left"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Filtra per tipo ▾":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33mclass[39m=[32m"chip touch text-[11px] "[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Scegli voci da copiare o spostare in un’altra infiltrazione del Palazzo":
+  [36m<button[39m
+    [33maria-label[39m=[32m"Scegli voci da copiare o spostare in un’altra infiltrazione del Palazzo"[39m
+    [33mclass[39m=[32m"btn btn-sm btn-visivo btn-ghost btn-visivo--compatto  self-start"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Sicura del cancello· Stanze sicureDa verificareda collegare":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33mclass[39m=[32m"touch flex items-start gap-2 text-left "[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "Aggiungi una voce":
+  [36m<button[39m
+    [33mclass[39m=[32m"btn btn-sm btn-visivo btn-secondary btn-visivo--compatto  self-start"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  heading:
+
+  Name "Palazzo di Kamoshida":
+  [36m<h1[39m
+    [33mclass[39m=[32m"titolo-display m-0 break-words"[39m
+  [36m/>[39m
+
+  Name "Aree · 3":
+  [36m<h3[39m
+    [33mclass[39m=[32m"m-0 font-display text-[15px] uppercase leading-none"[39m
+  [36m/>[39m
+
+  Name "Infiltrazioni senza aree · 1":
+  [36m<h4[39m
+    [33mclass[39m=[32m"m-0 text-[11px] uppercase tracking-wide text-text-muted"[39m
+  [36m/>[39m
+
+  Name "Cancello":
+  [36m<h2[39m
+    [33mclass[39m=[32m"sr-only"[39m
+  [36m/>[39m
+
+  Name "Cancello":
+  [36m<h3[39m
+    [33mclass[39m=[32m"m-0 break-words text-[15px] font-semibold xl:min-w-0 xl:flex-1"[39m
+    [33mtitle[39m=[32m"Cancello"[39m
+  [36m/>[39m
+
+  Name "Infiltrazioni in quest’area":
+  [36m<h3[39m
+    [33mclass[39m=[32m"visore-mappa__intestazione"[39m
+  [36m/>[39m
+
+  Name "Da raccogliere · 1":
+  [36m<h3[39m
+    [33mclass[39m=[32m"m-0 font-display text-[15px] uppercase leading-none"[39m
+  [36m/>[39m
+
+  Name "Nel resto del Palazzo · 2":
+  [36m<h3[39m
+    [33mclass[39m=[32m"m-0 font-display text-[15px] uppercase leading-none"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  group:
+
+  Name "":
+  [36m<details[39m
+    [33mclass[39m=[32m"text-[12px] hidden lg:block lg:open:basis-full"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<details[39m
+    [33mclass[39m=[32m"text-[12px] lg:hidden"[39m
+  [36m/>[39m
+
+  Name "Aree del Palazzo":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Aree del Palazzo"[39m
+    [33mclass[39m=[32m"flex flex-col gap-2.5"[39m
+    [33mrole[39m=[32m"group"[39m
+  [36m/>[39m
+
+  Name "Aree · 3":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Aree · 3"[39m
+    [33mclass[39m=[32m"fila-scorrevole fila-scorrevole--sempre min-w-0 flex-1 items-center"[39m
+    [33mrole[39m=[32m"group"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<details[39m
+    [33mclass[39m=[32m"menu-altro relative md:max-lg:hidden xl:hidden max-md:[&_.menu-altro\\_\\_voci]:left-0 max-md:[&_.menu-altro\\_\\_voci]:right-auto"[39m
+  [36m/>[39m
+
+  Name "Da raccogliere":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Da raccogliere"[39m
+    [33mclass[39m=[32m"flex flex-col gap-2"[39m
+    [33mrole[39m=[32m"group"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<details[39m
+    [33mclass[39m=[32m"text-[12px]"[39m
+  [36m/>[39m
+
+  Name "Nel resto del Palazzo":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Nel resto del Palazzo"[39m
+    [33mclass[39m=[32m"flex flex-col gap-2"[39m
+    [33mrole[39m=[32m"group"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<details[39m
+    [33mclass[39m=[32m"text-[12px]"[39m
+    [33mid[39m=[32m"da-verificare"[39m
+  [36m/>[39m
+
+  Name "Guida di Cancello":
+  [36m<details[39m
+    [33maria-label[39m=[32m"Guida di Cancello"[39m
+    [33mclass[39m=[32m"text-[12px]"[39m
+    [33mopen[39m=[32m""[39m
+  [36m/>[39m
+
+  Name "Filtri per tipo":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Filtri per tipo"[39m
+    [33mclass[39m=[32m"flex flex-col gap-1"[39m
+    [33mrole[39m=[32m"group"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  list:
+
+  Name "Finestra del Palazzo":
+  [36m<ol[39m
+    [33maria-label[39m=[32m"Finestra del Palazzo"[39m
+    [33mclass[39m=[32m"m-0 flex list-none flex-wrap items-stretch gap-1.5 p-0"[39m
+  [36m/>[39m
+
+  Name "Aree":
+  [36m<ol[39m
+    [33maria-label[39m=[32m"Aree"[39m
+    [33mclass[39m=[32m"m-0 flex list-none flex-col gap-1.5 p-0"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<ul[39m
+    [33mclass[39m=[32m"m-0 flex list-none flex-col gap-1.5 p-0"[39m
+  [36m/>[39m
+
+  Name "Aree toccate da Cancello":
+  [36m<ol[39m
+    [33maria-label[39m=[32m"Aree toccate da Cancello"[39m
+    [33mclass[39m=[32m"m-0 flex list-none flex-wrap gap-1 p-0"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<ul[39m
+    [33mclass[39m=[32m"m-0 flex list-none flex-wrap gap-1 p-0"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<ul[39m
+    [33mclass[39m=[32m"m-0 flex list-none flex-col gap-2 p-0"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<ul[39m
+    [33mclass[39m=[32m"m-0 flex list-none flex-col p-0"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<ul[39m
+    [33mclass[39m=[32m"m-0 flex list-none flex-col gap-2 p-0"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<ul[39m
+    [33mclass[39m=[32m"m-0 flex list-none flex-col p-0"[39m
+  [36m/>[39m
+
+  Name "Pin da verificare":
+  [36m<ul[39m
+    [33maria-label[39m=[32m"Pin da verificare"[39m
+    [33mclass[39m=[32m"m-0 flex list-none flex-col gap-1 p-0 pt-1.5"[39m
+  [36m/>[39m
+
+  Name "Voci della guida di Cancello":
+  [36m<ul[39m
+    [33maria-label[39m=[32m"Voci della guida di Cancello"[39m
+    [33mclass[39m=[32m"m-0 flex list-none flex-col divide-y divide-border-light p-0"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  listitem:
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-stretch gap-1.5"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-stretch gap-1.5"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-stretch gap-1 rounded-md border px-1.5 py-1.5 border-primary bg-primary-bg  "[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-stretch gap-1 rounded-md border px-1.5 py-1.5 border-border-light bg-white/[0.02]  "[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-stretch gap-1 rounded-md border px-1.5 py-1.5 border-border-light bg-white/[0.02]  "[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-center gap-1 rounded-md border border-dashed px-1.5 py-1.5 border-border-light"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex flex-col gap-1 rounded-md bg-white/[0.04] px-2 py-1.5"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-center gap-2 text-[12px]"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex flex-col gap-1 rounded-md bg-white/[0.04] px-2 py-1.5"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-center gap-2 text-[12px]"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-center gap-2 text-[12px]"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex flex-col gap-1 rounded-md px-1 py-2 text-[13px] "[39m
+    [33mdata-voce[39m=[32m"p1"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  navigation:
+
+  Name "Il Palazzo":
+  [36m<nav[39m
+    [33maria-label[39m=[32m"Il Palazzo"[39m
+    [33mclass[39m=[32m"hidden xl:block xl:min-h-0"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"m-0 text-[11px] text-text-muted"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"m-0 pt-1 text-text-muted"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"m-0 text-[11px] text-text-muted"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p[39m
+    [33mdata-testid[39m=[32m"indirizzo"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  region:
+
+  Name "Infiltrazioni senza aree":
+  [36m<section[39m
+    [33maria-label[39m=[32m"Infiltrazioni senza aree"[39m
+    [33mclass[39m=[32m"flex flex-col gap-1.5"[39m
+  [36m/>[39m
+
+  Name "Infiltrazioni in quest’area":
+  [36m<section[39m
+    [33maria-label[39m=[32m"Infiltrazioni in quest’area"[39m
+    [33mclass[39m=[32m"visore-mappa__sezione"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  combobox:
+
+  Name "Infiltrazione 1 di 3":
+  [36m<button[39m
+    [33maria-controls[39m=[32m"_r_23_"[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-haspopup[39m=[32m"listbox"[39m
+    [33maria-label[39m=[32m"Infiltrazione 1 di 3"[39m
+    [33mclass[39m=[32m"selettore__scelta touch"[39m
+    [33mrole[39m=[32m"combobox"[39m
+    [33mtitle[39m=[32m"1. Cancello"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  complementary:
+
+  Name "Da raccogliere in Cancello":
+  [36m<aside[39m
+    [33maria-label[39m=[32m"Da raccogliere in Cancello"[39m
+    [33mclass[39m=[32m"card flex flex-col gap-3 xl:min-h-0 xl:area-scorrevole"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  link:
+
+  Name "Cancello":
+  [36m<a[39m
+    [33mclass[39m=[32m"touch inline-flex items-center font-semibold"[39m
+    [33mdata-discover[39m=[32m"true"[39m
+    [33mhref[39m=[32m"/guida/dungeon/kamoshida/area/cancello?infiltrazione=k-01&planimetria=m-cancello"[39m
+  [36m/>[39m
+
+  Name "Torre":
+  [36m<a[39m
+    [33mclass[39m=[32m"touch inline-flex items-center font-semibold"[39m
+    [33mdata-discover[39m=[32m"true"[39m
+    [33mhref[39m=[32m"/guida/dungeon/kamoshida/area/torre-alta?planimetria=m-torre"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  checkbox:
+
+  Name "Forziere 2 di Cancello aperto":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Forziere 2 di Cancello aperto"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Forziere 1 di Torre aperto":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Forziere 1 di Torre aperto"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  Name "Forziere 2 di Torre aperto":
+  [36m<input[39m
+    [33maria-label[39m=[32m"Forziere 2 di Torre aperto"[39m
+    [33mclass[39m=[32m"h-5 w-5"[39m
+    [33mtype[39m=[32m"checkbox"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body[39m
+  [33mstyle[39m=[32m""[39m
+[36m>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col gap-4 lg:min-h-0 lg:flex-1 lg:gap-3"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"card relative shrink-0 overflow-hidden lg:py-1.5"[39m
+      [36m>[39m
+        [36m<span[39m
+          [33maria-hidden[39m=[32m"true"[39m
+          [33mclass[39m=[32m"pointer-events-none absolute -right-10 -top-16 hidden opacity-[0.07] sm:block"[39m
+        [36m/>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"relative flex gap-3 flex-col sm:flex-row sm:items-start sm:gap-5 lg:items-center lg:gap-3"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex shrink-0 items-center gap-3 sm:flex-col lg:flex-row lg:gap-2"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"sm:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden sm:block lg:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden lg:block xl:hidden"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"hidden xl:block"[39m
+            [36m/>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Avanzamento in Palazzo di Kamoshida: 56 oggetti permanenti fatti su 71"[39m
+              [33maria-valuemax[39m=[32m"100"[39m
+              [33maria-valuemin[39m=[32m"0"[39m
+              [33maria-valuenow[39m=[32m"79"[39m
+              [33mclass[39m=[32m"relative inline-flex items-center justify-center shrink-0 lg:size-12!"[39m
+              [33mrole[39m=[32m"progressbar"[39m
+              [33mstyle[39m=[32m"width: 64px; height: 64px;"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"absolute inset-0 -rotate-90"[39m
+                [33mviewBox[39m=[32m"0 0 64 64"[39m
+              [36m>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"32"[39m
+                  [33mcy[39m=[32m"32"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mr[39m=[32m"29.5"[39m
+                  [33mstroke[39m=[32m"var(--color-border)"[39m
+                  [33mstroke-width[39m=[32m"5"[39m
+                [36m/>[39m
+                [36m<circle[39m
+                  [33mclass[39m=[32m"transition-[stroke-dasharray] duration-500"[39m
+                  [33mcx[39m=[32m"32"[39m
+                  [33mcy[39m=[32m"32"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mr[39m=[32m"29.5"[39m
+                  [33mstroke[39m=[32m"var(--color-primary)"[39m
+                  [33mstroke-dasharray[39m=[32m"146.19467785155882 185.3539665617978"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"5"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"relative flex items-center justify-center"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"font-display leading-none tabular-nums text-[17px] lg:text-[13px]"[39m
+                [36m>[39m
+                  [0m78[0m
+                  [0m%[0m
+                [36m</span>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex min-w-0 flex-1 flex-col gap-2.5 lg:gap-1"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-col gap-1 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-3"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-wrap items-center gap-2"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"btn btn-ghost btn-sm touch -ml-2"[39m
+                  [33mtitle[39m=[32m"Indietro"[39m
+                  [33mtype[39m=[32m"button"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"18"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"18"[39m
+                  [36m>[39m
+                    [36m<polyline[39m
+                      [33mpoints[39m=[32m"15 18 9 12 15 6"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"lg:sr-only"[39m
+                  [36m>[39m
+                    [0m Indietro[0m
+                  [36m</span>[39m
+                [36m</button>[39m
+                [36m<h1[39m
+                  [33mclass[39m=[32m"titolo-display m-0 break-words"[39m
+                [36m>[39m
+                  [0mPalazzo di Kamoshida[0m
+                [36m</h1>[39m
+                [36m<button[39m
+                  [33maria-label[39m=[32m"Correggi la scheda: il Palazzo «Palazzo di Kamoshida»"[39m
+                  [33mclass[39m=[32m"touch shrink-0 rounded px-1.5 text-text-muted hover:text-text text-[12px]"[39m
+                  [33mtitle[39m=[32m"Correggi il Palazzo «Palazzo di Kamoshida»"[39m
+                  [33mtype[39m=[32m"button"[39m
+                [36m>[39m
+                  [0m✎[0m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"ml-1 lg:sr-only"[39m
+                  [36m>[39m
+                    [0mCorreggi la scheda[0m
+                  [36m</span>[39m
+                [36m</button>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-wrap items-center gap-2 text-[13px] text-text-secondary lg:min-w-0 lg:flex-1 lg:basis-32 lg:gap-x-2 lg:gap-y-0"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"break-words lg:min-w-0 lg:max-w-full lg:truncate "[39m
+                  [33mtitle[39m=[32m"Kamoshida"[39m
+                [36m>[39m
+                  [0mKamoshida[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<details[39m
+                [33mclass[39m=[32m"text-[12px] hidden lg:block lg:open:basis-full"[39m
+              [36m>[39m
+                [36m<summary[39m
+                  [33mclass[39m=...
+ ❯ Object.getElementError ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/pages/DungeonDettaglioPage.test.tsx:1038:26
+    1036|   const sezione = screen.getByText('Da verificare (1)').closest('detai…
+    1037|   expect(sezione).not.toHaveAttribute('open');
+    1038|   fireEvent.click(screen.getByRole('button', { name: /; 1 da verificar…
+       |                          ^
+    1039|   expect(sezione).toHaveAttribute('open');
+    1040|   fireEvent.click(await within(sezione).findByRole('button', { name: /…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/pages/DungeonDettaglioPage.test.tsx > intestazione con l’illustrazione (L1, scelta dell’utente «Illustrazione anche nelle schede», 2026-10-20) > un Palazzo con l’illustrazione caricata la mostra, piena, nelle tre misure dell’intestazione (da 1024 a 1279 px solo lo stemma), mai come sfondo; senza resta lo stemma
+AssertionError: expected [ '150px', '176px', '104px' ] to deeply equal [ '96px', '128px', '104px' ]
+
+- Expected
++ Received
+
+  [
+-   "96px",
+-   "128px",
++   "150px",
++   "176px",
+    "104px",
+  ]
+
+ ❯ src/pages/DungeonDettaglioPage.test.tsx:1444:56
+    1442|     // ogni misura chiede la miniatura della sua larghezza (`sizes` ug…
+    1443|     // LAY3-5: sotto i 1024 px più piccola ma piena (96 px sul telefon…
+    1444|     expect(figure.map((f) => f.getAttribute('sizes'))).toEqual(['96px'…
+       |                                                        ^
+    1445|     // da 1024 a 1279 px lo stemma da solo (UX-1): la fascia `lg:block…
+    1446|     expect(document.querySelector('header .lg\\:block.xl\\:hidden .ill…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 71 passed (75)
+   Start at  18:08:00
+   Duration  7.03s (transform 750ms, setup 106ms, import 957ms, tests 5.06s, environment 770ms)
+
+EXIT=1
+### ripristino della copia a 7562f6ac: 0 righe in status

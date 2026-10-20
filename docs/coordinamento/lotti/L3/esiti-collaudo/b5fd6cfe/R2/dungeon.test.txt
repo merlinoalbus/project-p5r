@@ -1,0 +1,15 @@
+### 2026-10-20T16:05:46Z HEAD b5fd6cfe1281fe13c5653215b70c6e1070c5e412 (newreview-l3), status: 0 righe
+### npx vitest run --reporter=verbose server/routes/dungeon.test.ts
+
+ RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2
+
+ ✓ server/routes/dungeon.test.ts > API dungeon > elenco e scheda: 10 dungeon in ordine, aree e punti con chiave stabile, tipi ammessi, fonti 54ms
+ ✓ server/routes/dungeon.test.ts > API dungeon > ogni area porta le planimetrie native dell’atlante che le sono legate 18ms
+ ✓ server/routes/dungeon.test.ts > API dungeon > stato dei punti per partita (ottenuto/esaurito/riapri) con evento, avanzamento nell'elenco, marcatori delle mappe 137ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  18:05:48
+   Duration  2.96s (transform 1.76s, setup 129ms, import 2.29s, tests 388ms, environment 0ms)
+
+EXIT=0

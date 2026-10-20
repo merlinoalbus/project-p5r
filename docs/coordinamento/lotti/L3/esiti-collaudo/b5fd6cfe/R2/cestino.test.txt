@@ -1,0 +1,24 @@
+### 2026-10-20T16:05:41Z HEAD b5fd6cfe1281fe13c5653215b70c6e1070c5e412 (newreview-l3), status: 0 righe
+### npx vitest run --reporter=verbose server/routes/cestino.test.ts
+
+ RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2
+
+ ✓ server/routes/cestino.test.ts > ogni eliminazione va nel cestino e si rimette com'era (impronta identica di ogni tabella) > un'area della guida di un Palazzo, con voci, pin collegati, legami alle planimetrie e spunte 350ms
+ ✓ server/routes/cestino.test.ts > ogni eliminazione va nel cestino e si rimette com'era (impronta identica di ogni tabella) > una voce della guida che è un Enigma: i passi tornano suoi, con il loro ordine e il loro stato 157ms
+ ✓ server/routes/cestino.test.ts > ogni eliminazione va nel cestino e si rimette com'era (impronta identica di ogni tabella) > una planimetria con pin, figlie e immagini (BLOB) e lo stato dei pin nelle partite 168ms
+ ✓ server/routes/cestino.test.ts > ogni eliminazione va nel cestino e si rimette com'era (impronta identica di ogni tabella) > un'area di un dedalo dei Memento, con le voci, le Richieste che vi stavano e i timbri 144ms
+ ✓ server/routes/cestino.test.ts > quel che cambia dopo l'eliminazione > una planimetria figlia rinominata dopo torna sotto la sua mappa col nome nuovo, e i percorsi si ricalcolano 64ms
+ ✓ server/routes/cestino.test.ts > l'ordine dopo il ripristino > un'area torna al suo posto anche se nel frattempo se n'è aggiunta un'altra: l'ordine resta senza buchi né doppioni 30ms
+ ✓ server/routes/cestino.test.ts > l'ordine dopo il ripristino > una voce torna al suo posto; se una voce nuova ha preso il suo posto, quelle da lì in giù scendono di uno 26ms
+ ✓ server/routes/cestino.test.ts > il posto delle voci > una voce torna subito dopo la voce che la precedeva, anche se quella nel frattempo è stata spostata 25ms
+ ✓ server/routes/cestino.test.ts > il primo e l'ultimo > un'area del dedalo che era la prima torna la prima, anche se nel frattempo un'altra è salita in cima 29ms
+ ✓ server/routes/cestino.test.ts > il primo e l'ultimo > una voce che era la prima torna in cima; una che era l'ultima, senza più la sua precedente, torna in fondo 78ms
+ ✓ server/routes/cestino.test.ts > le rotte del cestino > chiave occupata → 409 con l'involucro d'errore e niente cambia; id che non c'è → 404; id non valido → 400 164ms
+ ✓ server/routes/cestino.test.ts > le rotte del cestino > eliminare per sempre un elemento (204) e svuotare il cestino ({ eliminati }) 39ms
+
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+   Start at  18:05:42
+   Duration  3.99s (transform 1.78s, setup 108ms, import 2.32s, tests 1.44s, environment 0ms)
+
+EXIT=0

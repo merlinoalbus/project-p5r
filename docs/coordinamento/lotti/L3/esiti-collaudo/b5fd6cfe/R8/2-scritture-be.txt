@@ -1,0 +1,140 @@
+### 2026-10-20T17:30:17Z R8 — scritture nel BE.log dopo la foto (righe da 6350; metodi diversi da GET)
+"time":"2026-10-20T17:22:49.591Z","method":"POST","path":"/api/aree/dungeon/okumura","status":201
+"time":"2026-10-20T17:23:13.067Z","method":"POST","path":"/api/aree/dungeon/okumura/prova-r8-area/planimetrie","status":201
+"time":"2026-10-20T17:23:25.859Z","method":"POST","path":"/api/compendio/dungeon/okumura/aree","status":201
+"time":"2026-10-20T17:23:38.389Z","method":"PUT","path":"/api/compendio/aree/okumura-prova-r8-infiltrazione/aree-palazzo","status":200
+"time":"2026-10-20T17:24:09.828Z","method":"DELETE","path":"/api/aree/dungeon/okumura/caserma","status":204
+"time":"2026-10-20T17:24:48.975Z","method":"DELETE","path":"/api/compendio/aree/okumura-03-caserma","status":204
+"time":"2026-10-20T17:25:13.828Z","method":"POST","path":"/api/impostazioni/cestino/19/ripristina","status":200
+"time":"2026-10-20T17:25:15.562Z","method":"POST","path":"/api/impostazioni/cestino/18/ripristina","status":200
+"time":"2026-10-20T17:25:49.902Z","method":"PUT","path":"/api/compendio/percorso/voci/f3d6ddf19b62f76616e3de65ac00f2b9","status":200
+"time":"2026-10-20T17:26:29.890Z","method":"PUT","path":"/api/compendio/percorso/voci/f3d6ddf19b62f76616e3de65ac00f2b9","status":200
+"time":"2026-10-20T17:26:45.147Z","method":"PUT","path":"/api/compendio/percorso/voci/f3d6ddf19b62f76616e3de65ac00f2b9","status":200
+"time":"2026-10-20T17:26:48.699Z","method":"PUT","path":"/api/compendio/percorso/voci/f3d6ddf19b62f76616e3de65ac00f2b9","status":200
+"time":"2026-10-20T17:27:06.619Z","method":"PUT","path":"/api/compendio/percorso/voci/e4290542b3376439f92c71b76e18b64e","status":200
+"time":"2026-10-20T17:27:10.137Z","method":"PUT","path":"/api/compendio/percorso/voci/e4290542b3376439f92c71b76e18b64e","status":200
+"time":"2026-10-20T17:27:32.969Z","method":"PUT","path":"/api/compendio/percorso/voci/6fd5031403067e22f9306de902cf57a6","status":200
+"time":"2026-10-20T17:27:36.527Z","method":"PUT","path":"/api/compendio/percorso/voci/6fd5031403067e22f9306de902cf57a6","status":200
+"time":"2026-10-20T17:27:44.995Z","method":"PUT","path":"/api/compendio/percorso/voci/cdc7e3a818e612b94efe7853135f7617","status":200
+"time":"2026-10-20T17:27:48.528Z","method":"PUT","path":"/api/compendio/percorso/voci/cdc7e3a818e612b94efe7853135f7617","status":200
+"time":"2026-10-20T17:27:57.736Z","method":"PUT","path":"/api/compendio/percorso/voci/445731a85c54f6d1fa541f10ee8c64d1","status":200
+"time":"2026-10-20T17:28:01.289Z","method":"PUT","path":"/api/compendio/percorso/voci/445731a85c54f6d1fa541f10ee8c64d1","status":200
+"time":"2026-10-20T17:28:10.033Z","method":"PUT","path":"/api/compendio/percorso/voci/3fb31dded3f9581173037ce9d1ec9535","status":200
+"time":"2026-10-20T17:28:10.960Z","method":"PUT","path":"/api/compendio/percorso/voci/3fb31dded3f9581173037ce9d1ec9535","status":200
+"time":"2026-10-20T17:28:19.405Z","method":"PUT","path":"/api/compendio/percorso/voci/cea365dae255a9787afdf99661e5aa0f","status":200
+"time":"2026-10-20T17:28:22.990Z","method":"PUT","path":"/api/compendio/percorso/voci/cea365dae255a9787afdf99661e5aa0f","status":200
+"time":"2026-10-20T17:28:25.647Z","method":"PUT","path":"/api/compendio/percorso/voci/464ccfe40659a41b6b201947ed776312","status":200
+"time":"2026-10-20T17:28:29.164Z","method":"PUT","path":"/api/compendio/percorso/voci/464ccfe40659a41b6b201947ed776312","status":200
+"time":"2026-10-20T17:28:36.816Z","method":"PUT","path":"/api/compendio/percorso/voci/6ebb178b6fc4009d3335635446a2c864","status":200
+"time":"2026-10-20T17:28:40.438Z","method":"PUT","path":"/api/compendio/percorso/voci/6ebb178b6fc4009d3335635446a2c864","status":200
+"time":"2026-10-20T17:28:43.053Z","method":"PUT","path":"/api/compendio/percorso/voci/b9371f8061aedd71262a200b98d18bd0","status":200
+"time":"2026-10-20T17:28:46.608Z","method":"PUT","path":"/api/compendio/percorso/voci/b9371f8061aedd71262a200b98d18bd0","status":200
+"time":"2026-10-20T17:28:58.405Z","method":"PUT","path":"/api/compendio/percorso/voci/a513390589dcbc75a7ae4ef1aa798d06","status":200
+"time":"2026-10-20T17:29:12.144Z","method":"POST","path":"/api/partite","status":201
+"time":"2026-10-20T17:29:29.796Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:29.820Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:29.843Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:29.855Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:29.878Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:29.903Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:29.914Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:29.936Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:29.951Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:29.972Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:29.994Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.005Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.017Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.039Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.061Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.082Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.096Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.111Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.132Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.147Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.163Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.185Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.205Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.216Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.237Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.257Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.272Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.293Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.314Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.325Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.346Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.361Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.383Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.397Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.410Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.421Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.437Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.452Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.467Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.482Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.496Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.511Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.526Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.541Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.556Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.567Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.579Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.593Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.607Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.621Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.636Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.647Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.658Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.673Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.685Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.700Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.711Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.724Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.735Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.747Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.757Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.771Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.785Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.799Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.812Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.826Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.839Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.852Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.865Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.876Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.890Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.905Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.920Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.932Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.946Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.961Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:30.972Z","method":"PUT","path":"/api/partite/3/punti","status":200
+"time":"2026-10-20T17:29:44.878Z","method":"PUT","path":"/api/compendio/percorso/voci/a513390589dcbc75a7ae4ef1aa798d06","status":200
+"time":"2026-10-20T17:29:45.808Z","method":"PUT","path":"/api/compendio/percorso/voci/a513390589dcbc75a7ae4ef1aa798d06","status":200
+"time":"2026-10-20T17:29:46.719Z","method":"PUT","path":"/api/compendio/percorso/voci/a513390589dcbc75a7ae4ef1aa798d06","status":200
+"time":"2026-10-20T17:29:55.861Z","method":"POST","path":"/api/partite/1/attiva","status":200
+"time":"2026-10-20T17:29:55.867Z","method":"DELETE","path":"/api/partite/3","status":204
+### conteggio per metodo e rotta
+      1 "method":"DELETE","path":"/api/aree/dungeon/okumura/caserma","status":204
+      1 "method":"DELETE","path":"/api/compendio/aree/okumura-03-caserma","status":204
+      1 "method":"DELETE","path":"/api/partite/<id>","status":204
+      1 "method":"POST","path":"/api/aree/dungeon/okumura","status":201
+      1 "method":"POST","path":"/api/aree/dungeon/okumura/prova-r8-area/planimetrie","status":201
+      1 "method":"POST","path":"/api/compendio/dungeon/okumura/aree","status":201
+      2 "method":"POST","path":"/api/impostazioni/cestino/<id>/ripristina","status":200
+      1 "method":"POST","path":"/api/partite","status":201
+      1 "method":"POST","path":"/api/partite/<id>/attiva","status":200
+      1 "method":"PUT","path":"/api/compendio/aree/okumura-prova-r8-infiltrazione/aree-palazzo","status":200
+      2 "method":"PUT","path":"/api/compendio/percorso/voci/3fb31dded3f9581173037ce9d1ec9535","status":200
+      2 "method":"PUT","path":"/api/compendio/percorso/voci/445731a85c54f6d1fa541f10ee8c64d1","status":200
+      2 "method":"PUT","path":"/api/compendio/percorso/voci/464ccfe40659a41b6b201947ed776312","status":200
+      2 "method":"PUT","path":"/api/compendio/percorso/voci/6ebb178b6fc4009d3335635446a2c864","status":200
+      2 "method":"PUT","path":"/api/compendio/percorso/voci/6fd5031403067e22f9306de902cf57a6","status":200
+      4 "method":"PUT","path":"/api/compendio/percorso/voci/a513390589dcbc75a7ae4ef1aa798d06","status":200
+      2 "method":"PUT","path":"/api/compendio/percorso/voci/b9371f8061aedd71262a200b98d18bd0","status":200
+      2 "method":"PUT","path":"/api/compendio/percorso/voci/cdc7e3a818e612b94efe7853135f7617","status":200
+      2 "method":"PUT","path":"/api/compendio/percorso/voci/cea365dae255a9787afdf99661e5aa0f","status":200
+      2 "method":"PUT","path":"/api/compendio/percorso/voci/e4290542b3376439f92c71b76e18b64e","status":200
+      4 "method":"PUT","path":"/api/compendio/percorso/voci/f3d6ddf19b62f76616e3de65ac00f2b9","status":200
+     77 "method":"PUT","path":"/api/partite/<id>/punti","status":200
+### risposte 5xx (nessuna attesa)
+(vuoto = nessuna)

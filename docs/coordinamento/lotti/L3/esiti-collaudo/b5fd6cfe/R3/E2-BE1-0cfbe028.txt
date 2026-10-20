@@ -1,0 +1,125 @@
+### 2026-10-20T16:11:17Z E2-BE1 — commit 0cfbe028 (feat(L3): E2 — conteggi dei pin dell'indice delle Mappe in contenuto, passaggi e note)
+### worktree staccato su 0cfbe028e245b9554c4eae4d34c62c6600016613; commit precedente 6d56cb6e
+### test del commit (forma committata): server/routes/mappe-conteggi-pin.test.ts 
+### sorgenti del commit da riportare a 0cfbe028^: server/openapi/descrizioni/mappe.ts server/routes/mappe.ts server/services/mappe/mappeService.ts shared/spilli.ts shared/types.ts ; sorgenti nuovi da togliere: nessuno
+### 1) controllo sul codice di 0cfbe028: npx vitest run --reporter=verbose server/routes/mappe-conteggi-pin.test.ts 
+
+ RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
+
+ ✓ server/routes/mappe-conteggi-pin.test.ts > E2 — conteggi dei pin dell’indice delle Mappe > la regola unica: ogni tipo di pin ha il suo gruppo, letto dalla categoria 2ms
+ ✓ server/routes/mappe-conteggi-pin.test.ts > E2 — conteggi dei pin dell’indice delle Mappe > ogni nodo dell’albero porta i conteggi del suo sottoalbero: Tokyo, Kamoshida e Madarame come in SQL, e per ogni nodo la somma dei gruppi 30ms
+ ✓ server/routes/mappe-conteggi-pin.test.ts > E2 — conteggi dei pin dell’indice delle Mappe > la radice dell’indice: `/albero/conteggi` dà i tre gruppi dell’albero intero, e la loro somma è il totale degli spilli dell’albero 15ms
+ ✓ server/routes/mappe-conteggi-pin.test.ts > E2 — conteggi dei pin dell’indice delle Mappe > un pin nuovo cambia solo il suo gruppo: un passaggio i passaggi, un forziere il contenuto 6ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  18:11:19
+   Duration  3.03s (transform 2.00s, setup 112ms, import 2.52s, tests 221ms, environment 0ms)
+
+EXIT=0
+### stato della copia dopo il ritorno ai sorgenti di 0cfbe028^ (git status --porcelain)
+M  server/openapi/descrizioni/mappe.ts
+M  server/routes/mappe.ts
+M  server/services/mappe/mappeService.ts
+M  shared/spilli.ts
+M  shared/types.ts
+### test invariati rispetto a 0cfbe028:
+sì, identici al commit
+### 2) sul codice di 0cfbe028^: npx vitest run --reporter=verbose server/routes/mappe-conteggi-pin.test.ts 
+
+ RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
+
+ × server/routes/mappe-conteggi-pin.test.ts > E2 — conteggi dei pin dell’indice delle Mappe > la regola unica: ogni tipo di pin ha il suo gruppo, letto dalla categoria 2ms
+   → gruppoConteggioSpillo is not a function
+ × server/routes/mappe-conteggi-pin.test.ts > E2 — conteggi dei pin dell’indice delle Mappe > ogni nodo dell’albero porta i conteggi del suo sottoalbero: Tokyo, Kamoshida e Madarame come in SQL, e per ogni nodo la somma dei gruppi 39ms
+   → expected [ 'tokyo', undefined ] to deeply equal [ 'tokyo', { contenuto: 158, …(2) } ]
+ × server/routes/mappe-conteggi-pin.test.ts > E2 — conteggi dei pin dell’indice delle Mappe > la radice dell’indice: `/albero/conteggi` dà i tre gruppi dell’albero intero, e la loro somma è il totale degli spilli dell’albero 11ms
+   → expected 200 "OK", got 404 "Not Found"
+ × server/routes/mappe-conteggi-pin.test.ts > E2 — conteggi dei pin dell’indice delle Mappe > un pin nuovo cambia solo il suo gruppo: un passaggio i passaggi, un forziere il contenuto 2ms
+   → expected 200 "OK", got 404 "Not Found"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/routes/mappe-conteggi-pin.test.ts > E2 — conteggi dei pin dell’indice delle Mappe > la regola unica: ogni tipo di pin ha il suo gruppo, letto dalla categoria
+TypeError: gruppoConteggioSpillo is not a function
+ ❯ server/routes/mappe-conteggi-pin.test.ts:44:18
+     42|     for (const t of TIPI_SPILLO) {
+     43|       const atteso = PASSAGGI.includes(t) ? 'passaggi' : NOTE.includes…
+     44|       expect([t, gruppoConteggioSpillo(t)]).toEqual([t, atteso]);
+       |                  ^
+     45|     }
+     46|     // le differenze con la misura a mano, dette una per una
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  server/routes/mappe-conteggi-pin.test.ts > E2 — conteggi dei pin dell’indice delle Mappe > ogni nodo dell’albero porta i conteggi del suo sottoalbero: Tokyo, Kamoshida e Madarame come in SQL, e per ogni nodo la somma dei gruppi
+AssertionError: expected [ 'tokyo', undefined ] to deeply equal [ 'tokyo', { contenuto: 158, …(2) } ]
+
+- Expected
++ Received
+
+  [
+    "tokyo",
+-   {
+-     "contenuto": 158,
+-     "note": 43,
+-     "passaggi": 96,
+-   },
++   undefined,
+  ]
+
+ ❯ server/routes/mappe-conteggi-pin.test.ts:59:45
+     57|       const c = attesi(identita);
+     58|       expect(c.contenuto + c.passaggi + c.note, `${identita} senza pin…
+     59|       expect([identita, nodo!.conteggiPin]).toEqual([identita, c]);
+       |                                             ^
+     60|     }
+     61|     // una foglia: i conteggi sono i suoi, e la somma è il suo `numero…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  server/routes/mappe-conteggi-pin.test.ts > E2 — conteggi dei pin dell’indice delle Mappe > la radice dell’indice: `/albero/conteggi` dà i tre gruppi dell’albero intero, e la loro somma è il totale degli spilli dell’albero
+Error: expected 200 "OK", got 404 "Not Found"
+ ❯ server/routes/mappe-conteggi-pin.test.ts:73:69
+     71|   it('la radice dell’indice: `/albero/conteggi` dà i tre gruppi dell’a…
+     72|     const albero = (await request(app).get('/api/mappe/albero').expect…
+     73|     const r = (await request(app).get('/api/mappe/albero/conteggi').ex…
+       |                                                                     ^
+     74|     const radici = albero.filter((n) => n.genitore === null);
+     75|     const somma = (g: keyof ConteggiPinDto) => radici.reduce((s, n) =>…
+ ❯ Test._assertStatus ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/supertest/lib/test.js:376:14
+ ❯ ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/supertest/lib/test.js:432:13
+ ❯ Test._assertFunction ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/supertest/lib/test.js:409:13
+ ❯ Test.assert ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/supertest/lib/test.js:274:23
+ ❯ localAssert ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/supertest/lib/test.js:196:38
+ ❯ finish ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/supertest/lib/test.js:209:7
+ ❯ fn ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/superagent/src/node/index.js:904:2
+ ❯ callback ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/superagent/src/node/index.js:1183:17
+ ❯ fn ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/superagent/src/node/parsers/json.js:19:6
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  server/routes/mappe-conteggi-pin.test.ts > E2 — conteggi dei pin dell’indice delle Mappe > un pin nuovo cambia solo il suo gruppo: un passaggio i passaggi, un forziere il contenuto
+Error: expected 200 "OK", got 404 "Not Found"
+ ❯ server/routes/mappe-conteggi-pin.test.ts:81:74
+
+ ❯ Test._assertStatus ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/supertest/lib/test.js:376:14
+ ❯ ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/supertest/lib/test.js:432:13
+ ❯ Test._assertFunction ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/supertest/lib/test.js:409:13
+ ❯ Test.assert ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/supertest/lib/test.js:274:23
+ ❯ localAssert ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/supertest/lib/test.js:196:38
+ ❯ finish ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/supertest/lib/test.js:209:7
+ ❯ fn ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/superagent/src/node/index.js:904:2
+ ❯ callback ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/superagent/src/node/index.js:1183:17
+ ❯ fn ../../../../../../../../../../Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2/node_modules/superagent/src/node/parsers/json.js:19:6
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+   Start at  18:11:23
+   Duration  3.01s (transform 2.00s, setup 116ms, import 2.53s, tests 223ms, environment 0ms)
+
+EXIT=1
+### ripristino della copia a 0cfbe028: 0 righe in status

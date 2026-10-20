@@ -1,0 +1,848 @@
+### 2026-10-20T13:23:17Z HEAD db7d042352c66b29d455c2b8eb3d2e086e2579f3
+### richiesti dal PM: src/pages/DungeonDettaglioPage.test.tsx src/components/guida/AreePalazzo.test.tsx src/components/shared/Selettore.test.tsx src/components/mappe/SelettoreVersioni.test.tsx src/pages/MappaPage.test.tsx src/components/guida/InfiltrazioniVoce.test.tsx src/test/areeScorrevoli.test.ts
+### test dei file che importano shared/Selettore (30):
+src/components/fusione/EseguiFusioneModal.test.tsx
+src/components/fusione/PianiFusione.test.tsx
+src/components/guida/AreeDelDedalo.test.tsx
+src/components/guida/AtterraggioTokyo.test.tsx
+src/components/guida/CondizioniEditor.test.tsx
+src/components/guida/ElencoRichieste.test.tsx
+src/components/guida/GuidaDellArea.test.tsx
+src/components/guida/InfiltrazioniVoce.test.tsx
+src/components/guida/ModuloPersona.test.tsx
+src/components/guida/ModuloRichiesta.test.tsx
+src/components/guida/moduli/ModuloLuogo.test.tsx
+src/components/impostazioni/BackupIstanza.test.tsx
+src/components/impostazioni/PacchettoGioco.test.tsx
+src/components/impostazioni/TraduzioniEditor.test.tsx
+src/components/mappe/IngressoQuartiere.test.tsx
+src/components/partita/CorreggiRequisito.test.tsx
+src/components/partita/ObiettiviPartita.test.tsx
+src/pages/AttivitaPage.test.tsx
+src/pages/BattagliaPage.test.tsx
+src/pages/CompendioPage.test.tsx
+src/pages/CompletamentoPage.test.tsx
+src/pages/DungeonDettaglioPage.test.tsx
+src/pages/EditorMappaPage.test.tsx
+src/pages/FilmPage.test.tsx
+src/pages/LibriPage.test.tsx
+src/pages/MappaPage.test.tsx
+src/pages/OggettiPage.test.tsx
+src/pages/PercorsoPage.test.tsx
+src/pages/RichiestePage.test.tsx
+src/pages/SfidePage.test.tsx
+### insieme lanciato (34 file)
+### npx vitest run --reporter=verbose <insieme>
+
+ RUN  v4.1.11 C:/Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2
+
+ ✓ src/components/shared/Selettore.test.tsx > Selettore > è un combobox che apre un listbox e sceglie la voce toccata 127ms
+ ✓ src/components/shared/Selettore.test.tsx > Selettore > sotto le dieci voci non mostra il campo di ricerca; da dieci in su sì, e filtra 29ms
+ ✓ src/components/shared/Selettore.test.tsx > Selettore > con «ricerca: mai» il campo non compare nemmeno con molte voci; con «sempre» compare anche con poche 17ms
+ ✓ src/components/shared/Selettore.test.tsx > Selettore > la voce vuota sta in testa, ha chiave vuota e si conta nella soglia 33ms
+ ✓ src/components/shared/Selettore.test.tsx > Selettore > le intestazioni di gruppo compaiono dove il gruppo cambia 5ms
+ ✓ src/components/shared/Selettore.test.tsx > Selettore > da tastiera: frecce ed Invio scelgono, Esc chiude 13ms
+ ✓ src/components/shared/Selettore.test.tsx > Selettore > con il campo di ricerca attivo: frecce ed Invio scelgono fra le voci filtrate, Esc chiude e riporta il focus al pulsante 28ms
+ ✓ src/components/shared/Selettore.test.tsx > Selettore > un tocco fuori chiude la tendina 5ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > senza Palazzo (campo assente) non mostra niente 11ms
+ ✓ src/components/shared/Selettore.test.tsx > Selettore > oltre le duecento voci mostra le prime duecento e chiede di scrivere; il filtro toglie l’avviso 115ms
+ ✓ src/components/shared/Selettore.test.tsx > Selettore > la variante compatta non mostra l’etichetta nel pulsante ma la conserva per chi legge 4ms
+ ✓ src/components/shared/Selettore.test.tsx > Selettore > quando a destra non c’è spazio la tendina si appende al bordo destro del pulsante 7ms
+ ✓ src/components/shared/Selettore.test.tsx > Selettore > in una finestra il corpo scorre quanto basta a mostrare la tendina, senza far uscire il pulsante dalla cima 17ms
+ ✓ src/components/shared/Selettore.test.tsx > Selettore > disabilitato non si apre 4ms
+ ✓ src/components/shared/Selettore.test.tsx > Selettore > compatto con `valoreNelNome`: il valore intero nel nome del pulsante; l’elenco aperto non accorcia nessun nome (LAY3-7) 11ms
+ ✓ src/components/shared/Selettore.test.tsx > Selettore > senza `valoreNelNome` il nome del pulsante resta l’etichetta 3ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > insieme vuoto con proposta: la dice con il motivo e la certezza; «Conferma» scrive l’insieme proposto nell’ordine 128ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > con l’insieme valorizzato la proposta non c’è; la ripetuta si dice «(di nuovo)» 21ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > la finestra nomina il collegamento della voce col suo nome («Palazzo di Madarame»), non «Entra» 30ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > senza collegamento la finestra dice a cosa servono le infiltrazioni per la voce, senza nominare un collegamento (UX3-9) 31ms
+ ✓ src/components/guida/AreePalazzo.test.tsx > colonna: ogni area dice numero, nome, versioni, raccolta e le infiltrazioni che la toccano in ordine di guida 154ms
+ ✓ src/components/guida/AreePalazzo.test.tsx > senza partita niente è completo e la raccolta dice solo quanto c’è 39ms
+ ✓ src/components/guida/AreePalazzo.test.tsx > un’area è completa anche quando tutte le infiltrazioni che la toccano sono completate 48ms
+ ✓ src/components/impostazioni/PacchettoGioco.test.tsx > PacchettoGioco > mostra lo stato dei dati di gioco, scarica e dice dove è finita la copia 184ms
+ ✓ src/components/impostazioni/PacchettoGioco.test.tsx > PacchettoGioco > non si carica più niente dal browser: nessun pulsante di caricamento né campo per un indirizzo 41ms
+ ✓ src/components/impostazioni/BackupIstanza.test.tsx > BackupIstanza > mostra lo stato dell’istanza, scarica e dice dove è finita la copia 215ms
+ ✓ src/components/impostazioni/BackupIstanza.test.tsx > BackupIstanza > senza cartella d’appoggio lo scaricamento non promette una copia che non c’è 51ms
+ ✓ src/components/guida/ModuloPersona.test.tsx > aggiunge una Persona scelta dal compendio nell'area; senza nome dell'Ombra prende quello della Persona 236ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > con una proposta la finestra dice che il collegamento apre la prima della proposta (UX3-1) 28ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > nella finestra: sposta, togli e aggiungi salvano subito l’insieme intero; l’ultima non si propone di seguito 88ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > «Da rivedere» con il testo di prima: lo mostra e «Rimetti il precedente» lo chiede al server 35ms
+ ✓ src/components/guida/InfiltrazioniVoce.test.tsx > «Da rivedere» solo segnalata: «Fatto»; una voce non da rivedere non ha il chip 37ms
+ ✓ src/components/guida/CondizioniEditor.test.tsx > CondizioniEditor > parte chiuso e vuoto; «+ condizione» crea una riga già valida e ogni cambio produce la condizione nuova 247ms
+ ✓ src/components/guida/AreePalazzo.test.tsx > l’area toccata dall’infiltrazione aperta lo dice; toccare un’area la sceglie 51ms
+ ✓ src/components/guida/AreePalazzo.test.tsx > in coda le infiltrazioni senza aree: si aprono, e «Collega aree» chiede di legarle 31ms
+ ✓ src/components/guida/AreePalazzo.test.tsx > un Palazzo senza aree lo dice, e «Aggiungi area» resta 15ms
+ ✓ src/components/impostazioni/BackupIstanza.test.tsx > BackupIstanza > non si carica più niente dal browser: nessun pulsante di caricamento 51ms
+ ✓ src/components/impostazioni/PacchettoGioco.test.tsx > PacchettoGioco > dalla cartella d’appoggio: elenca i database, li fa scegliere e l’import lo fa il server 137ms
+ ✓ src/components/guida/AreePalazzo.test.tsx > riordino: lo spostamento si vede subito; se il salvataggio non va, torna l’ordine del server 86ms
+ ✓ src/components/guida/AreePalazzo.test.tsx > fila: chip delle aree con l’aperta premuta e quelle toccate dall’infiltrazione aperta evidenziate 12ms
+ ✓ src/components/guida/AreePalazzo.test.tsx > foglio: «Aree · N» con l’area aperta; il foglio si chiude scegliendo 33ms
+stderr | src/components/guida/AtterraggioTokyo.test.tsx > AtterraggioTokyo > «Quando compare»: si salva la finestra, anche senza fine, e la pagina si rilegge
+An update to FinestraAtterraggio inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to FinestraAtterraggio inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/guida/AtterraggioTokyo.test.tsx > AtterraggioTokyo > «Quando compare»: si salva la finestra, anche senza fine, e la pagina si rilegge
+An update to FinestraAtterraggio inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/guida/ModuloPersona.test.tsx > corregge una Persona: nome, area e la stessa Persona (il server lascia i dettagli dell'Ombra), senza avvisi 101ms
+ ✓ src/components/guida/ModuloPersona.test.tsx > senza aree non si salva; se le aree non cambiano non si mandano 86ms
+ ✓ src/components/guida/AtterraggioTokyo.test.tsx > AtterraggioTokyo > il pulsante dice la finestra; la finestra mostra le regole salvate, i loro pin e dove si atterra oggi 345ms
+ ✓ src/pages/OggettiPage.test.tsx > porta al risolutore con la chiave dell’articolo intera, barra compresa 254ms
+ ✓ src/pages/OggettiPage.test.tsx > dà un comando per ogni negozio quando l’oggetto si vende in più posti 52ms
+stderr | src/pages/CompendioPage.test.tsx > CompendioPage > mostra le Persona a piastrelle con livello e badge; il passaggio all'elenco viene ricordato
+An update to ImmagineEntita inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to ImmagineEntita inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to ImmagineEntita inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/impostazioni/PacchettoGioco.test.tsx > PacchettoGioco > un pacchetto più nuovo del codice non si può confermare 115ms
+ ✓ src/components/impostazioni/PacchettoGioco.test.tsx > PacchettoGioco > un’istanza nata senza pacchetto lo dice; una con i soli dati iniziali invita a importare il completo 69ms
+ ✓ src/components/partita/ObiettiviPartita.test.tsx > ObiettiviPartita > mostra l'avanzamento, i filtri per stato e le azioni; «Segna raggiunto» aggiorna la voce 411ms
+ ✓ src/components/partita/ObiettiviPartita.test.tsx > ObiettiviPartita > linkPiano porta le skill dell'obiettivo nei parametri 1ms
+ ✓ src/components/impostazioni/BackupIstanza.test.tsx > BackupIstanza > dalla cartella d’appoggio: elenca gli ZIP, li fa scegliere e il ripristino lo fa il server 168ms
+ ✓ src/components/guida/ModuloPersona.test.tsx > con un'altra Persona dice che resistenze, debolezze e personalità dell'Ombra se ne vanno 108ms
+ ✓ src/components/guida/ModuloPersona.test.tsx > «Elimina» chiede conferma; «No» torna indietro, «Confermo» elimina la voce 85ms
+ ✓ src/components/guida/CondizioniEditor.test.tsx > CondizioniEditor > lo stato si sceglie da un elenco con ricerca e i valori dagli elenchi della Guida: Confidente con rango a passi 171ms
+ ✓ src/components/guida/ModuloRichiesta.test.tsx > si apre coi campi della Richiesta e salva i dati veri: righe in elenchi, numeri, dedalo e area 464ms
+ ✓ src/components/partita/ObiettiviPartita.test.tsx > ObiettiviPartita — due gesti ravvicinati (B3", validazione voce 2) > cambio di stato: la risposta di Jack Frost arrivata dopo quella di Pixie non riapre Pixie 114ms
+ ✓ src/components/partita/ObiettiviPartita.test.tsx > ObiettiviPartita — due gesti ravvicinati (B3", validazione voce 2) > eliminazione: l'obiettivo eliminato mentre un altro cambia stato non ricompare 73ms
+ ✓ src/pages/OggettiPage.test.tsx > tiene il comando anche per una voce senza posizione, che è dove le si dice perché 44ms
+ ✓ src/pages/OggettiPage.test.tsx > senza chiave e senza negozi non promette una mappa che non c’è 14ms
+ ✓ src/pages/OggettiPage.test.tsx > scheda Equipaggiamento > mostra i pezzi con nome italiano, originale ed effetto 72ms
+stderr | src/components/guida/AreeDelDedalo.test.tsx > la scheda del dedalo dice il conto per elemento, la barra e la percentuale; le aree sono schede e si apre la prima da fare
+An update to AnteprimaPersona inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/impostazioni/BackupIstanza.test.tsx > BackupIstanza > se la cartella d’appoggio non è montata lo dice, senza far credere che sia vuota 111ms
+ ✓ src/pages/BattagliaPage.test.tsx > BattagliaPage > ricerca rapida delle Ombre con filtri e cambio scheda alla negoziazione 524ms
+stderr | src/components/guida/AtterraggioTokyo.test.tsx > AtterraggioTokyo > una finestra con la fine prima dell’inizio non si salva e lo dice
+An update to FinestraAtterraggio inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to FinestraAtterraggio inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/guida/AtterraggioTokyo.test.tsx > AtterraggioTokyo > «Quando compare»: si salva la finestra, anche senza fine, e la pagina si rilegge 162ms
+stderr | src/components/guida/AreeDelDedalo.test.tsx > da tastiera le schede delle aree si raggiungono con Tab solo sull'aperta e si cambiano con frecce, Inizio e Fine
+An update to AnteprimaPersona inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/guida/ModuloRichiesta.test.tsx > cambiando dedalo l’area torna «da collocare»; senza dedalo non c’è area; senza Confidente non c’è rango 213ms
+stderr | src/components/guida/AreeDelDedalo.test.tsx > l'area dell'indirizzo si apre; il conto per elemento conta i timbri solo delle aree con un totale
+An update to AnteprimaPersona inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/guida/GuidaDellArea.test.tsx > i filtri per tipo sono una riga sola che si apre: i tipi con il conto, quanti sono scelti, «Tutti» li toglie (2026-10-18) 282ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > la riga dice se la voce è collegata («N pin») o da collegare; le descrittive non dicono niente 40ms
+stderr | src/components/guida/GuidaDellArea.test.tsx > «Collega pin» apre il collegamento sulla mappa della pagina (niente mappa nella voce): un tocco collega, «Fatto» chiude (2026-10-18)
+An update to GuidaDellArea inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/impostazioni/BackupIstanza.test.tsx > BackupIstanza > una cartella d’appoggio vuota lo dice e non offre il ripristino 104ms
+stderr | src/pages/CompendioPage.test.tsx > CompendioPage > filtra per testo, livello minimo e massimo e inverte il verso dell'ordinamento
+An update to ImmagineEntita inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to ImmagineEntita inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/pages/CompendioPage.test.tsx > CompendioPage > mostra le Persona a piastrelle con livello e badge; il passaggio all'elenco viene ricordato 365ms
+ ✓ src/components/impostazioni/BackupIstanza.test.tsx > BackupIstanza > un ripristino rifiutato dal server lascia l’istanza com’è e mostra il motivo 124ms
+ ✓ src/components/guida/AreeDelDedalo.test.tsx > la scheda del dedalo dice il conto per elemento, la barra e la percentuale; le aree sono schede e si apre la prima da fare 279ms
+ ✓ src/components/guida/AreeDelDedalo.test.tsx > da tastiera le schede delle aree si raggiungono con Tab solo sull'aperta e si cambiano con frecce, Inizio e Fine 74ms
+ ✓ src/components/guida/AreeDelDedalo.test.tsx > l'area dell'indirizzo si apre; il conto per elemento conta i timbri solo delle aree con un totale 12ms
+ ✓ src/pages/RichiestePage.test.tsx > RichiestePage > mostra le Richieste, filtra per dedalo (nell’indirizzo), per testo e per stato, apre Jose e segna completata 594ms
+ ✓ src/pages/RichiestePage.test.tsx > RichiestePage > con «?dedalo=» nell’indirizzo l’elenco è già filtrato 35ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > una voce si elimina dalla sua modifica, dopo una conferma che dice che cosa si perde e che finisce nel cestino (2026-10-16) 257ms
+ ✓ src/components/guida/CondizioniEditor.test.tsx > CondizioniEditor > NON, gruppi TUTTE / ALMENO UNA annidati, cambio di modo, rimozione 215ms
+ ✓ src/pages/OggettiPage.test.tsx > scheda Equipaggiamento > filtra per tipo e per chi lo può equipaggiare 210ms
+ ✓ src/components/guida/ModuloRichiesta.test.tsx > una nuova nasce nel dedalo e nell’area dati; senza nome o bersaglio, o con numeri sbagliati, non parte e lo dice 222ms
+ ✓ src/pages/OggettiPage.test.tsx > scheda Equipaggiamento > il vincolo diventa i volti: uno per «Solo Joker», le cinque ragazze per «Solo donne», tutti se non c’è 169ms
+stderr | src/components/guida/AtterraggioTokyo.test.tsx > AtterraggioTokyo > le regole: si aggiunge, si cambia il «quando», la planimetria e il pin, si sposta, si toglie; si salva nell’ordine
+An update to FinestraAtterraggio inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to FinestraAtterraggio inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to FinestraAtterraggio inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/guida/AtterraggioTokyo.test.tsx > AtterraggioTokyo > una finestra con la fine prima dell’inizio non si salva e lo dice 176ms
+ ✓ src/components/guida/ModuloRichiesta.test.tsx > «Elimina» dice prima chi la cita, e solo «Confermo» la elimina 161ms
+ ✓ src/components/guida/ModuloRichiesta.test.tsx > una Richiesta che non c’è più lo dice 11ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > «Chiudi» del visore torna alla pagina da cui si era aperta la mappa; senza, all’elenco delle mappe 415ms
+ ✓ src/pages/RichiestePage.test.tsx > RichiestePage > due cambi di stato ravvicinati: la risposta del primo, arrivata dopo il secondo, non riapre il secondo (B3") 86ms
+ ✓ src/pages/RichiestePage.test.tsx > RichiestePage > «Modifica» su una carta e «Aggiungi una Richiesta» in cima aprono il modulo; salvata, l’elenco si rilegge 238ms
+ ✓ src/components/guida/CondizioniEditor.test.tsx > CondizioniEditor > gli stati con più campi: attività con volte, grado cliente di un negozio, Persona con abilità 300ms
+ ✓ src/components/guida/AreeDelDedalo.test.tsx > in «Gioca» solo i comandi per segnare: timbri, catture, Richieste a tre stati e caselle della Trama 131ms
+stderr | src/pages/CompendioPage.test.tsx > CompendioPage > filtra per affinità (elemento e tipo) e per immagine personalizzata presente o assente
+An update to ImmagineEntita inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to ImmagineEntita inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to ImmagineEntita inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/pages/CompendioPage.test.tsx > CompendioPage > filtra per testo, livello minimo e massimo e inverte il verso dell'ordinamento 247ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > «Torna alla partita» porta alla pagina Partita, sulla scheda Oggi, e sta subito prima di «Chiudi» (2026-10-04) 83ms
+ ✓ src/pages/CompendioPage.test.tsx > CompendioPage > filtra per affinità (elemento e tipo) e per immagine personalizzata presente o assente 336ms
+ ✓ src/pages/CompendioPage.test.tsx > CompendioPage > al ritorno dalla scheda evidenzia la Persona vista 57ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > «Collega pin» apre il collegamento sulla mappa della pagina (niente mappa nella voce): un tocco collega, «Fatto» chiude (2026-10-18) 283ms
+ ✓ src/components/guida/CondizioniEditor.test.tsx > CondizioniEditor > i negozi si offrono secondo il loro programma punti 224ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > senza partita attiva «Torna alla partita» non c’è nel visore 112ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > nel luogo senza pianta «Torna alla partita» sta dopo «Scheda del Palazzo» e «Modifica mappa» e porta alla pagina Partita, scheda Oggi 41ms
+ ✓ src/pages/PercorsoPage.test.tsx > PercorsoPage > apre il giorno corrente, mostra azioni con collegamenti e avvisi, segna un'azione fatta, naviga al giorno successivo 520ms
+stderr | src/components/guida/GuidaDellArea.test.tsx > dalla voce si scollega un pin, e il tocco su un pin già collegato lo scollega
+An update to GuidaDellArea inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/test/areeScorrevoli.test.ts > aree che scorrono dentro la pagina > nel codice nessuno scorrimento con classi di Tailwind, classi arbitrarie o stili in linea: si usano area-scorrevole / area-scorrevole-x 86ms
+ ✓ src/test/areeScorrevoli.test.ts > aree che scorrono dentro la pagina > i tre riconoscitori prendono le forme che devono prendere, e non le altre 0ms
+ ✓ src/test/areeScorrevoli.test.ts > aree che scorrono dentro la pagina > l'area di lettura principale è l'unico scorrimento di pagina (e c'è ancora) 0ms
+ ✓ src/test/areeScorrevoli.test.ts > aree che scorrono dentro la pagina > nel foglio di stile ogni regola che fa scorrere un contenitore ne contiene anche il gesto (overscroll-behavior) 2ms
+ ✓ src/test/areeScorrevoli.test.ts > aree che scorrono dentro la pagina > le due utility dichiarano confine, contenimento e barra 1ms
+stderr | src/components/guida/AtterraggioTokyo.test.tsx > AtterraggioTokyo > le regole: si aggiunge, si cambia il «quando», la planimetria e il pin, si sposta, si toglie; si salva nell’ordine
+An update to FinestraAtterraggio inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/guida/GuidaDellArea.test.tsx > senza la mappa della pagina «Collega pin» non c'è; senza planimetria dell'area a schermo c'è lo stesso (la pagina mostra una del Palazzo), spento solo senza planimetrie; chiusa la guida il collegamento si chiude 176ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > dalla voce si scollega un pin, e il tocco su un pin già collegato lo scollega 61ms
+ ✓ src/components/guida/CondizioniEditor.test.tsx > CondizioniEditor > fuori dall’editor delle mappe gli stati «Pin di una mappa» e «Voce della guida» non ci sono (valgono solo nelle condizioni dei pin) 112ms
+ ✓ src/components/guida/CondizioniEditor.test.tsx > CondizioniEditor — righe con chiavi stabili (A3, verifica 2026-10-03) > togliendo una riga, quella dopo tiene il suo operatore scelto invece di prendere lo stato della riga tolta 112ms
+ ✓ src/pages/PercorsoPage.test.tsx > PercorsoPage > due spunte ravvicinate: la risposta della prima, arrivata dopo la seconda, non toglie la seconda (B3") 109ms
+ ✓ src/pages/PercorsoPage.test.tsx > PercorsoPage > una spunta fatta mentre si segna il giorno corrente resta (B3") 91ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > la mappa dei Memento dice «Scheda dei Memento», è di tipo «Memento» e non chiede planimetrie 74ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > senza partita attiva «Torna alla partita» non c’è nel luogo senza pianta 38ms
+ ✓ src/pages/FilmPage.test.tsx > FilmPage > serializza pressioni rapide sul DVD e conserva lo stato finale 375ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > in un Palazzo la colonna elenca i collezionabili delle planimetrie e «Raccolto» aggiorna anello e conteggi subito, senza caricamento, poi rilegge la scheda in silenzio (voci e Enigmi, 095) 614ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > Su e Giù spostano la voce e rileggono la scheda; ai capi sono spenti 49ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > si aggiunge una voce in fondo all’area, e si apre per sistemarla 49ms
+ ✓ src/pages/LibriPage.test.tsx > LibriPage > serializza pressioni rapide e conserva nel refresh lo stato finale più recente 439ms
+ ✓ src/pages/LibriPage.test.tsx > LibriPage > mostra i negozi collegati come collegamenti con il prezzo e gli effetti dichiarati 69ms
+ ✓ src/pages/AttivitaPage.test.tsx > AttivitaPage > mostra le attività con sede, tipo e fascia dal catalogo, filtra per Dote dagli effetti e tiene la scheda Lavori con la paga in yen 456ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > aperta direttamente, «Chiudi» porta all’elenco delle mappe come prima 116ms
+ ✓ src/pages/FilmPage.test.tsx > FilmPage > permette rivisioni illimitate al cinema, mostra condizioni ed effetti, e filtra per supporto con i segmenti 211ms
+ ✓ src/pages/LibriPage.test.tsx > LibriPage > con il libro bloccato il «+» resta spento e dice perché 42ms
+ ✓ src/components/guida/AreeDelDedalo.test.tsx > l'interruttore porta in «Modifica la guida»: le aree si aggiungono, si spostano, si correggono e si eliminano 562ms
+ ✓ src/pages/AttivitaPage.test.tsx > AttivitaPage > un lavoro con il quiz ha il pulsante della guida, in oro se nella partita è un giorno del quiz; gli altri no 111ms
+ ✓ src/pages/AttivitaPage.test.tsx > AttivitaPage > aprendo una scheda mostra i dettagli come testo unico 54ms
+ ✓ src/pages/AttivitaPage.test.tsx > AttivitaPage > reindirizza il vecchio indirizzo della scheda Libri alla pagina autonoma 26ms
+ ✓ src/pages/AttivitaPage.test.tsx > AttivitaPage > reindirizza il vecchio indirizzo Film e DVD alla pagina autonoma 13ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > con lo strumento «Aggiungi» un tocco sulla mappa crea lo spillo del tipo scelto (coordinate in percentuale) e lo seleziona 999ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > l’indice apre una radice nel pannello e ne mostra le mappe 72ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > R1: la carta di Tokyo dice «1 da verificare» senza aprire niente, e il chip porta all’area da verificare 43ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > E4: la carta di Tokyo dice «N quartieri · N aree», non le mappe 25ms
+ ✓ src/pages/FilmPage.test.tsx > FilmPage > con il titolo bloccato il «+» resta spento e dice perché 68ms
+ ✓ src/pages/FilmPage.test.tsx > FilmPage > mostra una sola posizione contestuale e disabilita il tracking senza partita 55ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > in un Palazzo il tipo non propone Trama, che è solo dei Memento (2026-10-11) 70ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > una voce descrittiva si legge e basta: niente Ottenuto, niente «Collega pin», e non conta fra le segnate 29ms
+ ✓ src/pages/AttivitaPage.test.tsx > mostra la posizione di una attività per volta 89ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > due riletture sovrapposte: la risposta vecchia che arriva dopo non sovrascrive quella nuova 249ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione che non tocca aree: niente visore, «Collega aree»; la colonna lo dice e il Palazzo resta nella piega chiusa (L3) 64ms
+stderr | src/components/guida/AtterraggioTokyo.test.tsx > AtterraggioTokyo > «da un giorno in poi» si salva senza fine; un intervallo rovesciato blocca il salvataggio; cambiando planimetria il pin si azzera
+An update to FinestraAtterraggio inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to FinestraAtterraggio inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/guida/AtterraggioTokyo.test.tsx > AtterraggioTokyo > «da un giorno in poi» si salva senza fine; un intervallo rovesciato blocca il salvataggio; cambiando planimetria il pin si azzera
+An update to FinestraAtterraggio inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/guida/AtterraggioTokyo.test.tsx > AtterraggioTokyo > le regole: si aggiunge, si cambia il «quando», la planimetria e il pin, si sposta, si toglie; si salva nell’ordine 661ms
+ ✓ src/pages/LibriPage.test.tsx > LibriPage > filtra per Dote dagli effetti dichiarati e per stato con i segmenti 105ms
+ ✓ src/pages/LibriPage.test.tsx > LibriPage > gestisce senza invenzioni libri con zero o più provenienze 130ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > E2: intestazione «N pin · più N passaggi e N note» e carte coi soli pin di contenuto, dal server 33ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > UX3-8: la planimetria senza pin con un nome vero sta nella griglia; chiusi solo i fogli dell’estrazione senza nome 52ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > UX2-15: il pannello del luogo non ha riquadri scorrevoli, né nella griglia né nell’«Elenco completo» 38ms
+stderr | src/components/guida/AreeDelDedalo.test.tsx > senza partita: i conti sono i totali, niente comandi di stato; un dedalo senza aree lo dice
+An update to AnteprimaPersona inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to AnteprimaPersona inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/guida/AtterraggioTokyo.test.tsx > AtterraggioTokyo > un errore del server resta notificato e la pagina non si rilegge
+An update to FinestraAtterraggio inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to FinestraAtterraggio inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/guida/GuidaDellArea.test.tsx > i tipi si chiamano come li vuole l’utente, e Persona e Storia si collegano e si segnano senza dirsi «da collegare» 152ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > l’Enigma contiene i suoi passi (095) > i passi stanno dentro l’Enigma, non fra le voci dell’area; la riga dice quanti sono fatti e niente «da collegare» 58ms
+ ✓ src/components/guida/AtterraggioTokyo.test.tsx > AtterraggioTokyo > «da un giorno in poi» si salva senza fine; un intervallo rovesciato blocca il salvataggio; cambiando planimetria il pin si azzera 301ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > UX3-7: l’elenco sotto la griglia si chiama come quel che contiene 25ms
+ ✓ src/components/guida/AreeDelDedalo.test.tsx > in «Modifica la guida»: totale dei timbri, Richieste da spostare e da collocare, Persona senza area 248ms
+ ✓ src/components/guida/AreeDelDedalo.test.tsx > senza partita: i conti sono i totali, niente comandi di stato; un dedalo senza aree lo dice 33ms
+ ✓ src/components/guida/AreeDelDedalo.test.tsx > un dedalo senza aree lo dice (in «Gioca» rimanda a «Modifica la guida»); vi si aggiunge una Richiesta, da collocare 60ms
+ ✓ src/components/guida/AtterraggioTokyo.test.tsx > AtterraggioTokyo > un errore del server resta notificato e la pagina non si rilegge 113ms
+ ✓ src/components/guida/AtterraggioTokyo.test.tsx > AtterraggioTokyo > la finestra si dice con le preposizioni apostrofate davanti a 8 e 11: «dall’8 aprile all’11 maggio», «dall’11 aprile» 12ms
+ ✓ src/components/guida/AtterraggioTokyo.test.tsx > AtterraggioTokyo > senza regole e senza finestra: si atterra sulla scheda, e i Memento (senza planimetrie) non hanno regole 27ms
+ ✓ src/components/guida/AtterraggioTokyo.test.tsx > AtterraggioTokyo > i Memento non hanno planimetrie: niente regole da aggiungere 18ms
+ ✓ src/components/guida/AtterraggioTokyo.test.tsx > nei Memento i testi dicono «i Memento» e «dei Memento», mai «il Palazzo» 13ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > l’Enigma contiene i suoi passi (095) > aperto, l’Enigma coi passi non collega pin e offre «Aggiungi un passo»; il passo nasce dentro di lui 67ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > l’Enigma contiene i suoi passi (095) > Su e Giù di un passo si muovono fra i passi 34ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > l’Enigma contiene i suoi passi (095) > un Enigma risolto si nasconde con le segnate anche se fra i passi ha una nota (le descrittive non hanno stato) 27ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’area senza collezionabili lo dice così, senza mostrare il resto del Palazzo 70ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > il visore carica la mappa con la partita attiva e segna un collezionabile raccolto tramite l’API, poi rilegge la mappa in silenzio 159ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > l’Enigma contiene i suoi passi (095) > «Passo di» non propone un Enigma con pin (il server lo rifiuta) 53ms
+stderr | src/components/guida/AreeDelDedalo.test.tsx > sul telefono: la tendina dei dedali e il menu ⋯ con l'interruttore e il pozzo
+An update to AnteprimaPersona inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to AnteprimaPersona inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/guida/AreeDelDedalo.test.tsx > «Modifica» su una Richiesta e «Aggiungi» nella sezione aprono il modulo (nell'area aperta); salvata, la scheda si rilegge 138ms
+ ✓ src/components/guida/AreeDelDedalo.test.tsx > sul telefono: la tendina dei dedali e il menu ⋯ con l'interruttore e il pozzo 129ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > un punto della Guida segnato «Ottenuto» dalla mappa aggiorna lo stato del punto e conta come raccolto 133ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > l’Enigma contiene i suoi passi (095) > dalla modifica una voce diventa un passo di un Enigma dell’area; un Enigma coi passi resta un Enigma 135ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > «Ottenuto» ed «Esaurito» chiudono la voce, la nascondono e aprono la successiva (2026-10-04) > Ottenuto: la voce si chiude e sparisce, si apre la prossima da segnare (saltate la descrittiva e la già segnata) e la si porta in vista 89ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > scollegando un pin da una voce «ottenuto» la voce resta com’è nella partita: la scheda si rilegge 284ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > le condizioni sono assolute: anche un elemento fisso del gioco con condizioni che non valgono sparisce, come gli altri pin (2026-10-09) 95ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > «Ottenuto» ed «Esaurito» chiudono la voce, la nascondono e aprono la successiva (2026-10-04) > Esaurito fa lo stesso; con «Anche le segnate» la voce resta in elenco, chiusa 86ms
+stderr | src/pages/EditorMappaPage.test.tsx > EditorMappaPage > la descrizione del tipo dice se il pin ha uno stato nella partita (2026-10-03): la nota è un segno e basta, il meccanismo si aziona, il boss si sconfigge
+An update to CollegamentoCitta inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > uno spillo di città si collega a un negozio scelto da un elenco con ricerca, senza condizioni; «Elimina» rimuove lo spillo 463ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > due azioni ravvicinate: la rilettura vecchia che arriva per ultima non sovrascrive quella nuova 164ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > la descrizione del tipo dice se il pin ha uno stato nella partita (2026-10-03): la nota è un segno e basta, il meccanismo si aziona, il boss si sconfigge 364ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > «Ottenuto» ed «Esaurito» chiudono la voce, la nascondono e aprono la successiva (2026-10-04) > se il salvataggio non riesce la voce resta aperta; all’ultima voce non si apre niente 105ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > «Ottenuto» ed «Esaurito» chiudono la voce, la nascondono e aprono la successiva (2026-10-04) > con un filtro per tipo la successiva è la prossima che il filtro mostra 69ms
+ ✓ src/pages/MappaPage.test.tsx > MappaPage > dopo un’azione la rilettura applica la visibilità calcolata dal server: un pin che dipendeva dallo stato appena segnato sparisce 118ms
+ ✓ src/pages/MappaPage.test.tsx > un contenitore senza immagine apre i luoghi figli senza una finta planimetria 24ms
+ ✓ src/pages/MappaPage.test.tsx > la planimetria di Tokyo non è più una destinazione: si finisce sulla mappa della Città 5ms
+ ✓ src/pages/MappaPage.test.tsx > anche un alias che risolve a Tokyo finisce sulla mappa della Città 7ms
+ ✓ src/pages/MappaPage.test.tsx > LAY2-5: da 1024 px lo spazio fra intestazione ed elenco è 12 px (a 1024×690 l’indice sforava di 3 px) 10ms
+ ✓ src/pages/MappaPage.test.tsx > un vecchio indirizzo di una planimetria porta alla sua casa (la pagina dell’Area sulla versione) con spillo e punto, senza aprire il visore 14ms
+ ✓ src/pages/MappaPage.test.tsx > un quartiere si apre nella sua pagina; una mappa la cui casa è il visore resta nel visore 24ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Collega pin» usa la mappa principale: barra con voce, conto, planimetria, ricerca e «Fatto»; tutti i pin, i nascosti sbiaditi (2026-10-18) 323ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > «Ottenuto» ed «Esaurito» chiudono la voce, la nascondono e aprono la successiva (2026-10-04) > un passo segnato apre il passo dopo; l’Enigma segnato salta i suoi passi e apre la voce che lo segue 141ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > in un'area di un dedalo dei Memento (099) > le voci di Trama si segnano e la guida lo dice; l'elenco si chiama «Trama» (2026-10-11) 22ms
+ ✓ src/pages/MappaPage.test.tsx > il contesto URL cambia il titolo del visore e il selettore può ripristinare tutte le alternative 95ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > «Copia» sullo spillo selezionato mette negli appunti tutti i campi tranne la posizione; con «Incolla» un tocco sulla mappa crea lo spillo identico nel nuovo punto 252ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > gli appunti salvati in sessione riattivano «Incolla» all'apertura dell'editor (copia da un'altra mappa) 54ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > in un'area di un dedalo dei Memento (099) > Trama è l'unico tipo: niente scelta del tipo né filtri per tipo, niente «Collega pin» (2026-10-11) 50ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > in un'area di un dedalo dei Memento (099) > la voce nuova nasce Trama nell'area del dedalo; dalla modifica passa in un'altra area dello stesso dedalo 98ms
+ ✓ src/pages/MappaPage.test.tsx > l’emblema del palazzo senza dimensioni lascia guida e planimetrie accessibili senza visore 35ms
+ ✓ src/pages/MappaPage.test.tsx > la planimetria nativa mantiene contesto e guida dentro il pannello reale del visore 74ms
+ ✓ src/pages/MappaPage.test.tsx > una mappa con asset originale e dimensioni non registrate mantiene la planimetria 17ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > collegando i pin l'elenco del Palazzo resta e una sua area porta quella planimetria nella mappa del collegamento, senza cambiare infiltrazione (2026-10-18) 241ms
+ ✓ src/pages/CompletamentoPage.test.tsx > CompletamentoPage > mostra i trofei, filtra per tipo, segna un trofeo ottenuto e cambia scheda 309ms
+ ✓ src/pages/CompletamentoPage.test.tsx > CompletamentoPage > due spunte ravvicinate: la risposta della prima, arrivata dopo la seconda, non toglie la seconda (B3") 60ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > in un'area di un dedalo dei Memento (099) > senza un cambio d'area la modifica non la manda 50ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un'area senza planimetria propria collega lo stesso, su una del Palazzo; l'elenco del Palazzo resta (2026-10-18) 198ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > senza partita non ci sono spunte, e l’elenco resta consultabile 43ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > «Area del Palazzo»: una voce passa in un'altra area dello stesso Palazzo (2026-10-12) > le aree in ordine di guida, questa compresa; scelta un'altra, la voce vi si sposta e lo si dice 94ms
+stderr | src/pages/EditorMappaPage.test.tsx > EditorMappaPage > il pin del Confidente, unico fra quelli di città, ha le condizioni (2026-10-04); tornando a un negozio se ne vanno
+An update to EditorMappaRisolta inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/pages/EditorMappaPage.test.tsx > EditorMappaPage > il pin del Confidente, unico fra quelli di città, ha le condizioni (2026-10-04); tornando a un negozio se ne vanno
+An update to EditorMappaRisolta inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > nei Memento (progetto del 2026-10-12): binario dei dedali, scheda del dedalo e un’area per volta; timbri a un tocco e Richieste a tre stati muovono area, dedalo e anello 203ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > nei Memento la linea del tempo è la «Finestra dei Memento» 35ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > «Area del Palazzo»: una voce passa in un'altra area dello stesso Palazzo (2026-10-12) > senza cambiarla `area` non parte; un passo non la offre (si sposta il suo Enigma); un Palazzo di un'area sola nemmeno 125ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > «Copia o sposta voci»: più voci insieme in un'altra area del Palazzo (spostare 2026-10-14, copiare 2026-10-18) > nella scelta le voci dell'area sono righe da spuntare (i passi seguono il loro Enigma); scelte due, vanno nell'area scelta, nell'ordine della guida 123ms
+ ✓ src/components/fusione/PianiFusione.test.tsx > PianiFusione > chiama l'API con le opzioni e disegna l'albero con modi, costi e conteggi 248ms
+ ✓ src/components/fusione/PianiFusione.test.tsx > PianiFusione > senza piani mostra il suggerimento; senza partita il limite di livello è disabilitato 29ms
+ ✓ src/components/mappe/IngressoQuartiere.test.tsx > si sceglie l’area fra quelle del quartiere, si tocca la sua planimetria e «Salva» manda area, punto e zoom 220ms
+ ✓ src/components/mappe/IngressoQuartiere.test.tsx > cambiando area il punto torna al centro e l’immagine è la sua; «Avanzate» tiene le coordinate esatte 61ms
+ ✓ src/components/mappe/IngressoQuartiere.test.tsx > con un ingresso salvato riparte da lì, e «Togli l’ingresso» lo toglie 30ms
+ ✓ src/components/mappe/IngressoQuartiere.test.tsx > un quartiere senza aree non ha niente da scegliere: lo dice, e «Salva» resta spento 8ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > il pin del Confidente, unico fra quelli di città, ha le condizioni (2026-10-04); tornando a un negozio se ne vanno 364ms
+ ✓ src/components/guida/ElencoRichieste.test.tsx > ogni Richiesta ha lo stato scelto fra tre; scegliere «—» toglie lo stato; la fatta è barrata 176ms
+ ✓ src/components/guida/ElencoRichieste.test.tsx > da tastiera: Tab entra sullo stato scelto, le frecce scelgono il seguente o il precedente (in giro) 53ms
+ ✓ src/components/guida/ElencoRichieste.test.tsx > senza partita niente stati; in «Modifica la guida» «Modifica» e l'area 19ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > nei Memento l’area ha Timbri, Persona, Richieste e Trama in quest’ordine; catturare una Persona non sposta l’anello; «Correggi la scheda» solo in «Modifica la guida» 206ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > «Copia o sposta voci»: più voci insieme in un'altra area del Palazzo (spostare 2026-10-14, copiare 2026-10-18) > «Copia in…» copia le voci scelte nell'area scelta, nell'ordine della guida, e lo dice coi passi copiati; gli originali restano 195ms
+ ✓ src/components/partita/CorreggiRequisito.test.tsx > mostra il requisito; «Salva» si accende dopo aver scelto la Richiesta e la manda 198ms
+ ✓ src/components/partita/CorreggiRequisito.test.tsx > «Togli il requisito» chiede conferma; «No» torna indietro, «Confermo» lo toglie 50ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > da Confidente con una condizione a Negozio: la condizione non si salva 308ms
+ ✓ src/components/fusione/EseguiFusioneModal.test.tsx > EseguiFusioneModal > mostra il livello suggerito col bonus, limita le skill agli slot ed esegue con i dati scelti 202ms
+ ✓ src/components/mappe/SelettoreVersioni.test.tsx > il nome intero della versione scelta è nel nome del pulsante; l’elenco aperto non accorcia nessun nome (LAY3-7) 130ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Memento: la risposta dei timbri, arrivata dopo una richiesta completata, non la riapre 81ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Memento: la risposta di una richiesta, arrivata dopo un timbro, non toglie il timbro 68ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > «Copia o sposta voci»: più voci insieme in un'altra area del Palazzo (spostare 2026-10-14, copiare 2026-10-18) > «Tutte» e «Nessuna» sulle voci in elenco; un errore resta in notifica con la finestra aperta; «Fine» esce dalla scelta 91ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > «Copia o sposta voci»: più voci insieme in un'altra area del Palazzo (spostare 2026-10-14, copiare 2026-10-18) > il comando non c'è con un'area sola, senza voci, né nei dedali dei Memento 23ms
+ ✓ src/components/guida/moduli/ModuloLuogo.test.tsx > mostra i sette giorni come chip e aggiorna giorni_json al tocco 147ms
+ ✓ src/pages/SfidePage.test.tsx > SfidePage > mostra le Battaglie Sfida, i boss, Magnate e i tratti con ricerca 221ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > i dettagli della voce si correggono dalla «Modifica» (2026-10-18) > una riga corretta, una tolta e una aggiunta: il corpo porta i dettagli nuovi, le righe non toccate identiche 133ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > i dettagli della voce si correggono dalla «Modifica» (2026-10-18) > salvando senza toccare i dettagli il corpo non li porta 59ms
+ ✓ src/components/impostazioni/TraduzioniEditor.test.tsx > TraduzioniEditor > ripristino: la risposta di «Fool» arrivata dopo quella di «Magician» non rimette la modifica di Magician 182ms
+ ✓ src/components/impostazioni/TraduzioniEditor.test.tsx > TraduzioniEditor > salvataggio: il testo salvato si vede nella sua riga 59ms
+ ✓ src/components/guida/GuidaDellArea.test.tsx > i dettagli della voce si correggono dalla «Modifica» (2026-10-18) > due dettagli con la stessa etichetta: avviso, e il salvataggio non parte 74ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Palazzo: lo stato di una voce, arrivato dopo un raccolto, non riapre il raccolto 173ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > le condizioni sono stati: una riga nasce già valida, si cambia sul posto con elenchi chiusi, si toglie e si salva con lo spillo 344ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > DungeonDettaglioPage — due gesti ravvicinati (B3") > Palazzo: un raccolto, arrivato dopo lo stato di una voce, non riporta indietro la voce 160ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > l’elenco dice le aree in ordine, quanto resta, se sono complete e le infiltrazioni che le toccano 38ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > le frecce sulla maniglia spostano l’area e salvano l’ordine di tutto il Palazzo 49ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > trascinare la maniglia porta l’area dove la si lascia 57ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > la condizione «Pin di una mappa» (2026-10-03): si cerca il pin fra quelli con uno stato, «segnato» o «non segnato», è di presenza e si salva con l’uid 223ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > toccare un’area apre la sua casa: la sua planimetria nel visore e i suoi collezionabili nella colonna (L3, §4.1) 69ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > arrivando sulla casa di un’area senza infiltrazione si apre la prima infiltrazione che la tocca (L3, FUN3-1) 33ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > `?infiltrazione=in-corso` (il diario senza infiltrazioni) apre la prima infiltrazione non completata 20ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Aggiungi area» crea un’area del Palazzo legata all’infiltrazione aperta, e la scheda la apre 113ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > la condizione «Voce della guida» (2026-10-11): si cerca la voce fra quelle dei Palazzi e dei Memento, «segnata» o «non segnata», è di presenza e si salva con la chiave 213ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > da 1280 px il minimo di 240 px della mappa vale per la tela, non per il riquadro del visore 44ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > sotto i 1024 px il visore è alto min(64dvh, 560px); da 1024 px restano le misure di R3-41 (LAY3-3) 38ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > se l’ordine non si salva, l’elenco torna a quello del server e lo dice 58ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > fra i pin citabili non c’è quello che si sta modificando: un pin non dipende da se stesso 137ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’area con più versioni: si scelgono nella fila (cambia solo `?planimetria=`), e la versione senza pin lo dice 94ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dalla casa di un’area (senza parametri) si apre la sua predefinita; la versione iniziale dell’infiltrazione vale solo con `?infiltrazione=` (NR3-4, strada (a)) 25ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > un periodo resta sempre valido: la fine segue l’inizio, e i giorni offerti sono quelli del mese 159ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > le schede della guida senza mappa né voce si vedono nella scheda del Palazzo, in «Schede da sistemare (N)», col testo e l’infiltrazione (AP3-1) 14ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > i passaggi del visore della scheda restano nella scheda (AP3-2) > il visore non mostra le planimetrie vicine; un passaggio verso una planimetria del Palazzo apre la sua area con l’infiltrazione aperta 38ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > i passaggi del visore della scheda restano nella scheda (AP3-2) > una chiave che la scheda non conosce si risolve: se la sua casa è un’area del Palazzo si resta nella scheda 31ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > in «Da raccogliere» il nome di una planimetria porta dritto alla sua area nella scheda, con l’infiltrazione aperta (AP3-4) 20ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > i segni dei chip delle date («si apre», «furto», «scade») sono all’opacità piena (UX3-11) 16ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > una data che è una frase: da 1024 px il chip dice l’etichetta, la frase intera sta nei «Dettagli dalla guida» (LAY3-4) 22ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > sotto i 1024 px l’intestazione è compatta: «Sulla mappa di Tokyo» e i conteggi nei «Dettagli dalla guida» (LAY3-5) 25ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > sotto i 1024 px l’arcana va a capo su due righe al massimo, non si accorcia su una (LAY3-6) 14ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > senza schede da sistemare la sezione non c’è (AP3-1) 16ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > «Voci della guida» (098): «Aggiungi voce» collega una voce del Palazzo, «Scollega» la toglie; ogni gesto si salva e rilegge la mappa 110ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > un pin senza voci e senza voci collegabili (fuori dai Palazzi) non mostra le «Voci della guida» 49ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > uno spostamento che è di una voce della Guida la mostra: la scheda non risulta modificata e il salvataggio non tocca la voce, che sta nel campo suo (094) 69ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > con ?sezione=mappa l’editor si apre sulla sezione Mappa (dove si carica l’immagine); senza, sugli spilli 62ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Modifica area»: le versioni si riordinano e l’etichetta svuotata si toglie (torna «Planimetria N»), col contenitore del Palazzo 73ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Modifica area» cambia nome, etichetta e infiltrazioni in un salvataggio, e la scheda si rilegge 77ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dalla finestra dell’area si elimina una versione (non l’ultima): va nel cestino 74ms
+stderr | src/pages/EditorMappaPage.test.tsx > EditorMappaPage > le proprietà della mappa si salvano (nome, genitore, asset); il genitore proposto esclude la mappa stessa
+An update to EditorMappaRisolta inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/pages/EditorMappaPage.test.tsx > EditorMappaPage > le proprietà della mappa si salvano (nome, genitore, asset); il genitore proposto esclude la mappa stessa
+An update to EditorMappaRisolta inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > FUN2-8: spostare una mappa sciolta sotto un quartiere mostra il messaggio del server con «Aggiungi area» e «Da collocare» 83ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > le proprietà della mappa si salvano (nome, genitore, asset); il genitore proposto esclude la mappa stessa 111ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > «Elimina mappa» chiede conferma dicendo che la mappa finisce nel cestino (2026-10-16), poi la elimina 90ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Elimina area» dice che cosa si porta via (versioni, pin, legami; le voci restano) e la manda nel cestino con una richiesta 97ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > «Modifica aree» dell’infiltrazione aggiunge un’area in coda, conservando la versione che si apriva per quelle già legate 91ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > «Togli» scollega un’area dall’infiltrazione senza toccare le altre; l’ordine si cambia con ↑/↓ 85ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > un’infiltrazione senza aree si collega da «Collega aree», in coda all’elenco 58ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > O9: su una planimetria d'area «Scarica dalla guida» non c'è (la rotta delle piante d'area non esiste più); su un quartiere scarica la sua pianta 122ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione su più aree, un’area con più infiltrazioni (L3, R3-23: legami molti a molti) > l’eliminazione di un’area dice i legami al plurale quando sono più d’uno 70ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > mentre un ordine si salva, la maniglia dice perché è ferma 52ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > albero (15.24): le figlie senza spillo che le raggiunge e il genitore senza ritorno hanno «Crea passaggio», che chiama l’API e seleziona lo spillo creato 134ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > albero rispetta destinazione esplicita e precedenza sul riferimento 33ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > albero rispetta destinazione invalidata e precedenza sul riferimento 58ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > rinominare l’area non cambia il suo indirizzo né le versioni: si manda solo il nome 71ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > albero rispetta destinazione legacy e precedenza sul riferimento 49ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Sposta la versione in un’altra area»: l’unica versione si sposta solo confermando che l’area va nel cestino (409 `area-si-svuota`) 98ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > una versione di un’area con più versioni diventa «un’area a sé», col nome scelto 92ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > «Nuova mappa» (15.24): chiede il passaggio sul genitore (preselezionato) e il ritorno (a scelta) e li passa all’API 198ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > il testo di un’infiltrazione si modifica con «Modifica testo», anche di una che non tocca aree 70ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > nomi uguali nella stessa mappa impediscono la creazione, senza una chiave da inserire 63ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > anche l’infiltrazione aperta si elimina, dal suo modulo di correzione, e la scheda torna sul Palazzo 56ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dalla proposta di una voce (`?daVoce=`) la riga «Aperta dalla proposta…»; «Chiudi» toglie il parametro e lascia l’infiltrazione 50ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > L4: l’anello conta gli oggetti permanenti; il chip riassuntivo dice «Concluso · 1 da verificare» e quel che manca al completamento 23ms
+ ✓ src/components/impostazioni/PacchettoGioco.test.tsx > PacchettoGioco > se la richiesta cade ma il server sta ancora lavorando, si aspetta e si mostra l’esito vero 5097ms
+ ✓ src/components/impostazioni/PacchettoGioco.test.tsx > PacchettoGioco > un’importazione respinta prima di arrivare al server non eredita l’esito riuscito di prima 64ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > la palette di «Aggiungi» è divisa nelle quattro categorie (Spostamento, Città, Consumabile, Informativo) con tutti i tipi, «Ingresso al Palazzo» compreso 123ms
+ ✓ src/components/impostazioni/PacchettoGioco.test.tsx > PacchettoGioco > se non si riesce nemmeno a leggere lo stato di partenza, l’errore resta un errore 60ms
+ ✓ src/components/impostazioni/PacchettoGioco.test.tsx > PacchettoGioco > se la cartella d’appoggio non è montata lo dice, senza far credere che sia vuota 33ms
+ ✓ src/components/impostazioni/PacchettoGioco.test.tsx > PacchettoGioco > una cartella d’appoggio vuota lo dice e non offre l’importazione 31ms
+ ✓ src/components/impostazioni/PacchettoGioco.test.tsx > PacchettoGioco > un file che non è un pacchetto viene segnalato senza aprire l’anteprima 43ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > L4: «Da verificare» dalla scheda — il chip apre la sezione, l’elenco apre la finestra, «Segna la voce» segna e rilegge 82ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > L4: «Da verificare» dalla voce — segno sulla riga e «Sistema…» nella voce aperta, «Togli il fatto al pin» per uid 103ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > L4: senza divergenze non si chiede niente e non c’è la sezione 50ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > tutte le voci segnate (Ottenute o Esaurite; le descrittive non contano): spunta sulle infiltrazioni, sull’area che le ha tutte completate e nel pannello del visore 28ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > «Ritaglia pezzo»: il rettangolo trascinato sulla mappa diventa un pezzo (pixel dell'immagine), selezionato; un tocco senza rettangolo non ritaglia 134ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > senza immagine di base non si ritaglia 53ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > una voce ancora da fare: niente spunta su quell’infiltrazione né sull’area; un’infiltrazione senza voci da segnare non ha spunta 28ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > un’infiltrazione senza aree, completata, ha la spunta sulla sua riga in coda all’elenco 29ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > in un’area con più versioni la spunta compare sull’area e sulle sue infiltrazioni, una volta sola (le versioni si scelgono nella fila) 63ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > il modulo della copia: nome del pezzo, etichetta, posizione al pixel (campi e frecce), rotazione, specchio e condizioni si salvano insieme; l'ultima copia «Elimina» chiede conferma e dice che se ne va il pezzo 208ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > un’area senza niente da raccogliere è completa (2026-10-11): testo, ✓, chip delle complete; senza partita resta solo «niente da raccogliere» 81ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > le copie (103): l'elenco le raggruppa sotto il pezzo; «Aggiungi copia» ne posa una accanto, con rotazione, specchio e condizioni; si eliminano una copia o il pezzo intero, con conferma 149ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > la notifica dell'importazione conta pezzi e copie (scritti, scartati, tolti), con singolari e plurali 47ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > segnando l’ultima voce dalla guida la spunta compare subito, prima della rilettura; riaprendola sparisce subito 129ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > spunta delle aree completate (scelta dell’utente, 2026-10-04) > senza partita le voci non hanno stato: nessuna spunta 17ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’area con più infiltrazioni le mostra in ordine di guida: nell’elenco del Palazzo e nel pannello del visore, dove toccarne una la apre restando sull’area 45ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > trascinata sulla mappa (strumento «Seleziona»), la copia si sposta e si salva al rilascio; selezionarla deseleziona lo spillo 61ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > sostituire l'immagine di una mappa con dei pezzi chiede conferma (409): confermando si ricarica con «eliminaPezzi» 60ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > le infiltrazioni di un’area si scelgono insieme nella finestra dell’area: in ordine di guida, e si salva l’insieme (L3, R3-24) 53ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > la bozza di correzione appartiene al pezzo che stai correggendo, non alla schermata 61ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > «Scarica dalla guida» su un quartiere con dei pezzi chiede la stessa conferma (L1, F5: 409): confermando scarica con «eliminaPezzi» 94ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > salvata l’intestazione, la scheda si rilegge con la partita attiva 55ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > la finestra dell’area salva solo quel che cambia: la sola etichetta non tocca nome né infiltrazioni 53ms
+stderr | src/pages/EditorMappaPage.test.tsx > EditorMappaPage > un quartiere del mondo: il passaggio senza arrivo non offre «Crea mappa collegata» ma la pagina del quartiere
+An update to DestinazioneSpostamento inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to VociDelPin inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/pages/EditorMappaPage.test.tsx > EditorMappaPage > un quartiere del mondo: il passaggio senza arrivo non offre «Crea mappa collegata» ma la pagina del quartiere
+An update to CondizioniEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > una planimetria di un’Area: niente «Nuova mappa» ma il collegamento al quartiere, e «Chiudi» torna alla versione nella pagina dell’Area 54ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > una planimetria di un’Area: il form non offre tipo né genitore e non li manda all’API 48ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > un quartiere del mondo: il passaggio senza arrivo non offre «Crea mappa collegata» ma la pagina del quartiere 43ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > «Aggiungi infiltrazione» crea un’infiltrazione con le aree che tocca: il modulo si apre dal nome 57ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > l’infiltrazione nuova propone il posto subito dopo quella aperta; senza aree toccate non manda il campo 56ms
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > fuori dal mondo (un Palazzo) «Nuova mappa» e il form completo restano 41ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > senza nome l’infiltrazione nuova non si crea 52ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > un’infiltrazione nuova all’inizio del Palazzo: creata, la scheda la apre 91ms
+stderr | src/pages/EditorMappaPage.test.tsx > conserva i campi non salvati cambiando sezione e riapre Spilli quando si seleziona un pin
+An update to VociDelPin inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/pages/EditorMappaPage.test.tsx > conserva i campi non salvati cambiando sezione e riapre Spilli quando si seleziona un pin
+An update to CondizioniEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/pages/EditorMappaPage.test.tsx > EditorMappaPage > una planimetria di un Palazzo aperta dalla scheda: «Chiudi» e «Apri il visore» vanno dritti alla sua casa con l’infiltrazione aperta (L3, AP3-4) 86ms
+ ✓ src/pages/EditorMappaPage.test.tsx > conserva i campi non salvati cambiando sezione e riapre Spilli quando si seleziona un pin 122ms
+ ✓ src/pages/EditorMappaPage.test.tsx > il doppio tocco su uno spillo di spostamento apre la mappa d’arrivo, restando in modifica 49ms
+ ✓ src/pages/EditorMappaPage.test.tsx > la scheda Collegamenti porta alla mappa dove va un passaggio in uscita 43ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > dall’intestazione del Palazzo si sceglie dove si atterra dalla mappa di Tokyo: salvata la regola, la scheda si rilegge e la mostra (2026-10-04) 118ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > cambiato il giorno della partita, la scheda del Palazzo si rilegge: «Oggi si atterra su…» segue il giorno (2026-10-04) 83ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > intestazione con l’illustrazione (L1, scelta dell’utente «Illustrazione anche nelle schede», 2026-10-20) > un Palazzo con l’illustrazione caricata la mostra, piena, nelle tre misure dell’intestazione (da 1024 a 1279 px solo lo stemma), mai come sfondo; senza resta lo stemma 52ms
+ ✓ src/pages/DungeonDettaglioPage.test.tsx > intestazione con l’illustrazione (L1, scelta dell’utente «Illustrazione anche nelle schede», 2026-10-20) > i Memento restano col loro stemma anche se la scheda porta un’illustrazione 21ms
+ ✓ src/pages/EditorMappaPage.test.tsx > la scheda Collegamenti porta anche alla mappa da cui si arriva qui 55ms
+ ✓ src/pages/EditorMappaPage.test.tsx > «Apri l’arrivo» sta in cima al pannello dello spillo, prima dei campi 65ms
+ ✓ src/pages/EditorMappaPage.test.tsx > una mappa mai rivista dice quale nome si legge in alto e lascia «Salva» attivo per confermarlo 53ms
+ ✓ src/pages/EditorMappaPage.test.tsx > una mappa già rivista non mostra l’avviso e torna a «Salva» solo dopo una modifica 42ms
+ ✓ src/pages/EditorMappaPage.test.tsx > l’interruttore del giorno corrente è spento e senza partita non si può accendere 29ms
+ ✓ src/pages/EditorMappaPage.test.tsx > acceso, la mappa si rilegge con la partita attiva: è così che si nasconde quel che oggi non c’è 56ms
+
+ Test Files  34 passed (34)
+      Tests  339 passed (339)
+   Start at  15:23:19
+   Duration  13.36s (transform 16.69s, setup 8.00s, import 28.10s, tests 42.82s, environment 121.98s)
+
+EXIT=0

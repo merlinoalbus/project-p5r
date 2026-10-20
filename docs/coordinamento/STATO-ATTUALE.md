@@ -11,9 +11,9 @@ Mandato dell'utente: completare la razionalizzazione in lotti L0–L11 sul ramo 
 | L0 Vocabolario e testi | consegnato |
 | L1 Immagini | consegnato (approvato al giro 5) |
 | L2 Mondo: aree e planimetrie | consegnato (approvato al giro 6; push bff237e0; p5s verificato) |
-| L3 Palazzi: aree e infiltrazioni | **in chiusura**: tester verdi sulla linea di rilascio `newreview-l3`; resta da correggere LAY3-8; poi riverifica di layout e UX, validatore, push |
+| L3 Palazzi: aree e infiltrazioni | **dal validatore** (giro 1, dalle 15:30Z) sulla linea di rilascio `newreview-l3` = b5fd6cfe. Tutti i tester sono verdi e tutti i difetti, fino a UX3-13 e LAY3-8, sono corretti e verificati. Con l'APPROVATO: push di `newreview-l3` su `newreview` |
 | L3 · integrazione «Guida nel visore» e «Planimetria della voce» | BE fatto (42b34243, non validato, **non** nella linea di rilascio di L3); FE da fare (B2). Vedi `lotti/L3/integrazione-guida-visore.md` |
-| L4 Avanzamento unico | BE fatto (b83c30ac, 71378325, ad585387; migrazioni 111–113); FE in parte (01e7ae12); resto del FE in `lotti/L4/fe.md` «Da fare»; poi tester e validatore |
+| L4 Avanzamento unico | BE fatto (b83c30ac, 71378325, ad585387; migrazioni 111–113); FE in parte (01e7ae12). **Il FE riparte alle 15:30Z** sul «Da fare» di `lotti/L4/fe.md`: §8.11 k/N, §8.6, §4.2, §4.1/4.3. Un commit per punto su `newreview`, senza push. Poi la linea di rilascio `newreview-l4`, i tester e il validatore |
 | L5–L11 | progettati (requisiti, dati, app, modifiche, piani e casi di prova pronti fino a L9-L10); implementazione da fare |
 
 ## Rami e cosa è dove (IMPORTANTE)

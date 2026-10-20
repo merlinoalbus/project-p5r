@@ -1,0 +1,8 @@
+2026-10-20T17:29:12.148Z POST /api/partite 201 {"id":3,"attiva":true,"dataGioco":"04-20"}
+voce 04-20 nella prova: infiltrazioneDaAprire kamoshida-01-cancello-del-castello-ingresso
+2026-10-20T17:29:29.768Z → 2026-10-20T17:29:30.989Z PUT /api/partite/3/punti ×77 (200: 77 altri: [] )
+completamento nella prova: [["kamoshida-01-cancello-del-castello-ingresso",{"oggetti":34,"fatti":34,"completata":true}],["kamoshida-13-tetto",{"oggetti":3,"fatti":0,"completata":false}],["kamoshida-15-torre-centrale",{"oggetti":25,"fatti":0,"completata":false}]]
+voce 04-20: infiltrazioneDaAprire kamoshida-13-tetto
+2026-10-20T17:29:55.863Z POST /api/partite/1/attiva 200
+2026-10-20T17:29:55.868Z DELETE /api/partite/3 204
+partite [[1,"Partita Roberto",true,"06-02","giorno"],[2,"Tutorial",false,"04-29","giorno"]]

@@ -1,0 +1,7 @@
+### 2026-10-20T15:50:48Z cherry-pick su newreview-l3 (da 2df44d30), soli documenti, ordine di git log: 47bfaaa1 aba7d87e 8be7b426
+## 47bfaaa1 base dei file modificati: IDENTICA
+-> 9fc134cb
+## aba7d87e base dei file modificati: IDENTICA
+-> 2efc1457
+## 8be7b426 base dei file modificati: IDENTICA
+-> 5e823f5a
