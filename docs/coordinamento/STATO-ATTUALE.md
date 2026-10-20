@@ -1,7 +1,7 @@
 # Stato attuale del lavoro — ramo newreview / p5s (aggiornato 2026-10-20, ripresa)
 
 ## DOVE SIAMO ADESSO (leggere per primo; prevale su tutto quanto c'è sotto)
-- **Ramo unico `newreview`**, pubblicato su p5s a ogni push. Ultimo commit pubblicato: `1b1e2426` (`fix(L6): elimina il fallback legacy dello sblocco quartieri`); typecheck, lint e controllo diff verdi. È in preparazione il filtro delle Aree chiuse in indice, figli del visore e «Aree vicine». Il fetch locale resta bloccato dai permessi sul metadato condiviso del worktree; il tracking remoto è stato aggiornato con push riuscito.
+- **Ramo unico `newreview`**, pubblicato su p5s a ogni push. Ultimo commit pubblicato: `ca54c39c` (`feat(L6): nascondi le aree chiuse dalla navigazione`); typecheck, lint e controllo diff verdi. La pipeline del commit è da verificare; il fetch locale resta bloccato dai permessi sul metadato condiviso del worktree.
 - **Dati di p5s**: `userVersion` fino a 119 dopo l'ultimo rilascio. Migrazioni recenti:
   - 114: planimetria della voce;
   - 115: luoghi come fonte unica;
@@ -36,7 +36,7 @@
 1. togliere dalle Impostazioni il comando «Importa» del pacchetto, che sostituirebbe tutto `gioco.db`, e allineare CLAUDE.md, che descrive ancora il pacchetto come fonte;
 2. nella guida del visore, mostrare solo le voci dell'infiltrazione aperta o quelle di tutte le infiltrazioni della planimetria, come oggi.
 
-**Lavoro non ancora committato**: filtro disponibilità Aree in indice/visore/«Aree vicine», in attesa di commit e pipeline; il dettaglio di B5 è nella cartella `docs/coordinamento/lotti/L6/`.
+**Lavoro non ancora committato**: nessuno; il commit `ca54c39c` contiene il filtro disponibilità Aree in indice/visore/«Aree vicine». Il dettaglio di B5 è nella cartella `docs/coordinamento/lotti/L6/`.
 
 **Note dalla prova di ripresa** (un'altra IA, 2026-10-20 sera):
 - `git fetch` può fallire per i permessi su `.git/FETCH_HEAD`. Il worktree condivide la cartella `.git` del repository principale. Si chiudono gli altri processi git e si riprova, oppure si usa `git ls-remote github newreview` per leggere il commit remoto.
