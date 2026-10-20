@@ -20,7 +20,8 @@ import { scaricaPiantaQuartiere } from '../services/cittaService.js';
 import express from 'express';
 import { MAX_BYTE_IMMAGINE } from '../services/immaginiService.js';
 import { aggiornaCopiaPezzoMappa, aggiornaImmagineSpillo, aggiornaMappa, aggiornaPezzoMappa, creaCopiaPezzoMappa, creaPezzoMappa, eliminaCopiaPezzoMappa, eliminaPezzoMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, conteggiAlbero, creaMappa, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaAreeMappa, impostaImmagineMappa, impostaStanzaMappa, mappaPerEntita, aggiornaPresentazioneMappa, riordinaMappe, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
-import { bodyAggiornaCopiaPezzo, bodyAggiornaMappa, bodyAggiornaPezzo, bodyCreaCopiaPezzo, bodyAggiornaSpillo, bodyCreaPezzo, bodyAreeMappa, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, bodyPresentazioneMappa, bodyRiordinaMappe, bodyStanzaMappa, paramsCopiaPezzo, paramsMappa, paramsPezzo, paramsSpillo, queryDidascalia, queryEsporta, queryImmagineMappa, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
+import { bodyAggiornaCopiaPezzo, bodyAggiornaMappa, bodyAggiornaPezzo, bodyCreaCopiaPezzo, bodyAggiornaSpillo, bodyCreaPezzo, bodyAreeMappa, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, bodyPresentazioneMappa, bodyRiordinaMappe, bodyStanzaMappa, paramsCopiaPezzo, paramsMappa, paramsPezzo, paramsSpillo, queryDidascalia, queryEsporta, queryGuidaMappa, queryImmagineMappa, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
+import { guidaDellaPlanimetria } from '../services/dungeonService.js';
 import { httpErrors } from '../utils/httpError.js';
 
 const router = Router();
@@ -94,6 +95,11 @@ router.post('/', validate({ body: bodyCreaMappa }), (req, res) => {
 router.get('/:chiave', validate({ params: paramsMappa, query: queryMappa }), (req, res) => {
   const q = req.query as unknown as { partita?: number; infiltrazione?: string };
   res.json(dettaglioMappa(String(req.params.chiave), q.partita, q.infiltrazione ?? null));
+});
+/** L3 «planimetria della voce»: le voci della guida che stanno sulla planimetria (con pin su di lei, o senza pin e con lei come
+ *  planimetria), per infiltrazione e ordine, con lo stato della partita. Sola lettura: il visore non filtra da sé. */
+router.get('/:chiave/guida', validate({ params: paramsMappa, query: queryGuidaMappa }), (req, res) => {
+  res.json(guidaDellaPlanimetria(String(req.params.chiave), (req.query as unknown as { partita?: number }).partita));
 });
 router.put('/:chiave', validate({ params: paramsMappa, body: bodyAggiornaMappa }), (req, res) => {
   res.json(aggiornaMappa(String(req.params.chiave), req.body as DatiMappa));

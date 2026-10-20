@@ -1917,6 +1917,26 @@ export interface PuntoInteresseDto {
    *  `PUT /api/compendio/punti/:k`), quando un pin nuovo di una voce già fatta ha preso il segno: in quale partita, quale pin, di quale voce
    *  (la voce resta fatta). Assente se nessuno. */
   segniAggiunti?: Array<{ partita: number; pin: number; voce: string }>;
+  /** L3 «planimetria della voce»: la planimetria su cui sta la voce di un Palazzo, con la regola unica (dai pin; senza pin l'aggancio a
+   *  mano; senza aggancio la planimetria 1 della sua infiltrazione; un Enigma con passi quella del primo passo). `aMano` vero se è
+   *  l'aggancio scelto dall'utente. Null se non se ne trova nessuna; assente per le voci dei Memento. */
+  planimetria?: PlanimetriaDellaVoceDto | null;
+}
+
+/** La planimetria di una voce (L3): chiave pubblica e nome con il percorso; `aMano` se l'ha scelta l'utente. */
+export interface PlanimetriaDellaVoceDto { chiave: string; nome: string; aMano: boolean }
+
+/**
+ * `GET /api/mappe/:chiave/guida` (L3, «planimetria della voce»): le voci della guida che stanno sulla planimetria, cioè quelle con almeno
+ * un pin su di lei e quelle senza pin la cui planimetria (aggancio a mano o planimetria 1) è lei; un Enigma se c'è almeno uno dei suoi
+ * passi. Raggruppate per infiltrazione (nell'ordine delle infiltrazioni) e poi per ordine, con lo stato della partita se indicata.
+ */
+export interface GuidaDellaPlanimetriaDto {
+  /** Chiave pubblica della planimetria. */
+  mappa: string;
+  /** Il Palazzo della planimetria, o null fuori dai Palazzi. */
+  palazzo: string | null;
+  infiltrazioni: Array<{ chiave: string; nome: string; ordine: number; voci: PuntoInteresseDto[] }>;
 }
 
 /** La Persona del compendio che corrisponde a una maschera scritta dalla guida: id della scheda, nome canonico (per l'immagine)
@@ -1925,6 +1945,8 @@ export interface PersonaDellaMascheraDto { id: number; nome: string; nomeIt: str
 
 /** Un pin di una planimetria collegato a un punto della guida. */
 export interface PinDelPuntoDto { id: number; nome: string; tipo: string; mappa: string; mappaNome: string;
+  /** L3: l'identità stabile del pin (per centrarlo nel visore); null per un pin che non l'ha ancora. */
+  uid?: string | null;
   /** §8.11: per le voci dei Palazzi con la partita, il segno del pin letto per la voce (un pin condiviso dai rigenerabili, nella sua
    *  infiltrazione). Assente senza partita e per i dedali. */
   fatto?: boolean }

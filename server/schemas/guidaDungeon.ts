@@ -49,6 +49,8 @@ export const bodyPunto = z.object({
   areeDedalo: z.array(z.string().min(1).max(200)).max(100).optional(),
   /** L'area del Palazzo in cui spostare la voce (2026-10-12): un'altra area dello stesso Palazzo; non nei Memento. */
   area: z.string().min(1).max(200).optional(),
+  /** L3 «planimetria della voce»: la planimetria del Palazzo a cui agganciare a mano la voce; null toglie l'aggancio (torna la planimetria 1). */
+  planimetria: z.string().min(1).max(200).nullable().optional(),
   /**
    * I dettagli della voce, tutti (2026-10-18, «ci sono elementi non modificabili come questo Contenuto»; scelta «Renderli
    * modificabili»): etichetta → testo, numero o elenco; le tabelle della guida (righe di campi) tornano com'erano. La `maschera`

@@ -17,12 +17,12 @@ import { verificaPartita } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
 import { registraEvento } from './storicoService.js';
 import { finestreDungeon, invalidaDatiGuida } from './datiGuida.js';
-import { radiceDelPalazzo, SQL_SOTTOALBERO, sottoalberoMappe } from './mappe/alberoMappe.js';
+import { palazzoDellaMappa, radiceDelPalazzo, SQL_SOTTOALBERO, sottoalberoMappe } from './mappe/alberoMappe.js';
 import { illustrazioneDellaMappa } from './mappe/immagineMappa.js';
 import { completamentoDegliOggetti, contaOggetti, effettiDelGestoDto, modelloAvanzamento, oggettiDelleMappe, oggettiDelleVoci, pinFattoPerLaVoce, riallineaStati, type SegniAggiunti, statiDellaPartita, statoDelPin, statoDellaVoce, voceDelGestoDto, vociCheCondividonoIPin, vociDellInfiltrazione, type ModelloAvanzamento, type StatiDellaPartita } from './mappe/statiGuida.js';
 import { infiltrazioneCompletata } from '../../shared/completamentoGuida.js';
 import { carattereDaTipo, type CarattereVoce } from '../../shared/caratteriVoce.js';
-import type { AreaDedaloDto, AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, GruppoCopieDto, PinDelPuntoDto, SchedaDaSistemareDto, PuntiCopiatiDto, PuntiSpostatiDto, PuntoInteresseDto, RichiestaDelDedaloDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta, VoceCollegabileDto } from '../../shared/types.js';
+import type { AreaDedaloDto, AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, GruppoCopieDto, GuidaDellaPlanimetriaDto, PinDelPuntoDto, PlanimetriaDellaVoceDto, SchedaDaSistemareDto, PuntiCopiatiDto, PuntiSpostatiDto, PuntoInteresseDto, RichiestaDelDedaloDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta, VoceCollegabileDto } from '../../shared/types.js';
 import { contoAreaDedalo, contoDedalo, tipoDelDedalo } from '../../shared/dedali.js';
 import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
 import { DEFINIZIONI_SPILLO, puntoDescrittivo, puntoEnigma, sqlVoceDescrittiva, type TipoSpillo } from '../../shared/spilli.js';
@@ -37,6 +37,7 @@ import { palazzoDiOgniMappa, statoPalazzi, type StatoPalazzo } from './palazziSe
 import { atterraggioDelGiorno, elencaAtterraggi } from './atterraggioPalazziService.js';
 import { allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, allineaPinScollegato, allineaStatiPunto, erroreVoceDelPin, passiDi, pinDelPuntoGuida, scriviStatoVoce, segnaPassiDellEnigma } from './mappe/collegamentiGuida.js';
 import { conCestino, registraRipristinoCestino, type ViciniCestino } from './cestinoService.js';
+import { letturePlanimetrieDelleVoci, planimetriaDellaVoce, planimetrieDellaVoce, type PlanimetrieDelleVoci } from './mappe/planimetriaDellaVoce.js';
 
 interface RigaDungeon { chiave: string; tipo: 'palazzo' | 'mementos'; ordine: number; nome: string; sovrano: string; arcana_sovrano: string; data_sblocco: string; data_scadenza: string; furto_consigliato: string; livello_consigliato: string; note: string; fonti_json: string;
   /** 112 (L4 §8.14) */ voce_boss_finale?: string | null; seed_json?: string | null;
@@ -46,8 +47,15 @@ interface RigaArea { chiave: string; dungeon_chiave: string; ordine: number; nom
 interface RigaAreaDedalo { chiave: string; dedalo_chiave: string; ordine: number; nome: string; descrizione: string; timbri_totale: number | null }
 interface RigaPunto { chiave: string; area_chiave: string; ordine: number; tipo: PuntoInteresseDto['tipo']; nome: string; descrizione: string; esauribile: number; dettagli_json: string; fonte: string; contenitore_chiave?: string | null; area_dedalo_chiave: string | null; /** 111 */ carattere?: string | null }
 
-/** Ciò che serve alla voce di un Palazzo per i campi di L4: il modello e, con la partita, i suoi stati. */
-interface AvanzamentoVoce { m: ModelloAvanzamento; s: StatiDellaPartita | null }
+/** Ciò che serve alla voce di un Palazzo per i campi di L4: il modello e, con la partita, i suoi stati; e (L3) quel che serve alla regola
+ *  della planimetria della voce, letto una volta per risposta. */
+interface AvanzamentoVoce { m: ModelloAvanzamento; s: StatiDellaPartita | null; pl?: PlanimetrieDelleVoci }
+
+/** L3: la planimetria di una voce come la vede il client (chiave pubblica, nome con il percorso, se è a mano), con la regola unica. */
+function planimetriaDto(pl: PlanimetrieDelleVoci, voce: string): PlanimetriaDellaVoceDto | null {
+  const p = planimetriaDellaVoce(pl, voce);
+  return p ? { chiave: chiaveMappa(p.chiave), nome: nomePercorso(p.chiave), aMano: p.aMano } : null;
+}
 
 /**
  * La voce della guida come la vede il client: una sola forma per la scheda del Palazzo e per le risposte delle modifiche. Una
@@ -67,8 +75,12 @@ function puntoDto(r: RigaPunto, stato: StatoPunto | null, marcatore: { x: number
   // §8.11: il contatore k/N e il segno di ogni pin letto per la voce (con la partita), le voci che condividono i suoi pin
   const sv = s?.voci.get(r.chiave) ?? null;
   const uid = new Map((m.pinDellaVoce.get(r.chiave) ?? []).map((p) => [p.id, p.uid]));
+  // L3: l'uid di ogni pin (per centrarlo nel visore), solo per le voci dei Palazzi (la risposta dei Memento resta com'era)
+  const conUid = pin.map((p) => ({ ...p, uid: uid.get(p.id) ?? p.uid ?? null }));
+  const pl = avanzamento.pl ?? letturePlanimetrieDelleVoci(getDb());
   return { ...base, carattere: v?.carattere ?? null, carattereScelto: r.carattere != null && v?.carattere != null,
-    pin: s && v ? pin.map((p) => (uid.has(p.id) ? { ...p, fatto: pinFattoPerLaVoce(m, s, { id: p.id, uid: uid.get(p.id)! }, v.infiltrazione) } : p)) : pin,
+    pin: s && v ? conUid.map((p) => (uid.has(p.id) ? { ...p, fatto: pinFattoPerLaVoce(m, s, { id: p.id, uid: uid.get(p.id)! }, v.infiltrazione) } : p)) : conUid,
+    planimetria: planimetriaDto(pl, r.chiave),
     oggetto: oggetto && (m.vociOggetto.get(oggetto)?.length ?? 0) > 1 ? oggetto : null,
     daVerificare: !!s && [...s.divergenze.values()].some((voci) => voci.includes(r.chiave)),
     avanzamento: sv && sv.totale > 0 ? { fatti: sv.fatti, totale: sv.totale } : null,
@@ -370,7 +382,7 @@ export function dettaglioDungeon(chiave: string, partitaId?: number, contesto: s
   // L3: le Aree toccate da ogni infiltrazione. Solo nei Palazzi: per i Memento i campi nuovi non si emettono e la risposta resta
   // identica byte per byte a quella di prima (R3-12; difetto NR3-1, decisione del PM del 2026-10-20)
   const palazzo = r.tipo === 'palazzo';
-  const avanzamento: AvanzamentoVoce | undefined = palazzo ? { m, s: segni?.s ?? null } : undefined;
+  const avanzamento: AvanzamentoVoce | undefined = palazzo ? { m, s: segni?.s ?? null, pl: letturePlanimetrieDelleVoci(getDb()) } : undefined;
   /** Lo stato da mostrare di una voce: nessuno per una descrittiva (uno rimasto da prima si ignora, senza cancellarlo); per una
    *  Persona dei Memento «ottenuto» se catturata; nei Palazzi (L4) quello con cui risulta (§8.11: dai suoi pin, se ne ha). */
   const statoDi = (p: RigaPunto): StatoPunto | null => (puntoDescrittivo(p.tipo, p.area_dedalo_chiave) ? null
@@ -403,6 +415,37 @@ export function dettaglioDungeon(chiave: string, partitaId?: number, contesto: s
     ...(areePalazzo ? { areePalazzo } : {}),
     // L4 (§2.3, §4.3): le schede senza mappa né voce, da sistemare
     ...(palazzo ? { schedeDaSistemare: schedeDaSistemare(chiave) } : {}) };
+}
+
+/**
+ * L3 «planimetria della voce»: le voci della guida che stanno sulla planimetria, per il visore (sola lettura). Una voce ci sta se ha almeno
+ * un pin su di lei, o se è senza pin e la sua planimetria (aggancio a mano, o la planimetria 1) è lei, anche se la sua infiltrazione non tocca
+ * la planimetria (una voce spostata a mano compare dove l'ha messa l'utente); un Enigma ci sta se ci sta almeno uno dei suoi passi, e i passi
+ * seguono ognuno la propria regola (`planimetrieDellaVoce`). Raggruppate per infiltrazione (nell'ordine) e poi per ordine, nella stessa forma
+ * della scheda del Palazzo, con lo stato della partita se indicata e i pin di ogni voce (con uid). 404 se la mappa non esiste.
+ */
+export function guidaDellaPlanimetria(chiave: string, partitaId?: number): GuidaDellaPlanimetriaDto {
+  const mappa = idMappa(chiave);
+  if (!prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(mappa)) throw httpErrors.notFound('mappa-non-trovata', `La mappa '${chiave}' non esiste.`);
+  if (partitaId !== undefined) verificaPartita(partitaId);
+  const db = getDb();
+  const pl = letturePlanimetrieDelleVoci(db);
+  const qui = new Set([...pl.voci.keys()].filter((k) => planimetrieDellaVoce(pl, k).has(mappa)));
+  const m = modelloAvanzamento(db);
+  const avanzamento: AvanzamentoVoce = { m, s: partitaId === undefined ? null : statiDellaPartita(db, m, partitaId), pl };
+  const marc = marcatori();
+  const pinPunti = pinDeiPunti();
+  const letture = { maschere: indiceMaschere(), areePersone: new Map<string, string[]>() };
+  const righe = (prepared(`SELECT p.*, a.nome AS infiltrazione_nome, a.ordine AS infiltrazione_ordine FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave
+    ORDER BY a.ordine, a.chiave, p.ordine, p.chiave`).all() as Array<RigaPunto & { infiltrazione_nome: string; infiltrazione_ordine: number }>).filter((r) => qui.has(r.chiave));
+  const infiltrazioni: GuidaDellaPlanimetriaDto['infiltrazioni'] = [];
+  for (const r of righe) {
+    let gruppo = infiltrazioni.at(-1);
+    if (gruppo?.chiave !== r.area_chiave) infiltrazioni.push(gruppo = { chiave: r.area_chiave, nome: r.infiltrazione_nome, ordine: r.infiltrazione_ordine, voci: [] });
+    const stato = puntoDescrittivo(r.tipo, r.area_dedalo_chiave) ? null : statoL4(avanzamento, r.chiave);
+    gruppo.voci.push(puntoDto(r, stato, marc.get(r.chiave) ?? null, pinPunti.get(r.chiave) ?? [], letture, avanzamento));
+  }
+  return { mappa: chiaveMappa(mappa), palazzo: palazzoDellaMappa(mappa), infiltrazioni };
 }
 
 /** L4: il completamento di un'infiltrazione (oggetti permanenti delle sue voci; senza niente da contare mai completata, R4-22). */
@@ -774,6 +817,9 @@ export function creaArea(dungeonChiave: string, dati: { nome: string; descrizion
 }
 
 export interface DatiPunto { nome?: string; descrizione?: string; tipo?: PuntoInteresseDto['tipo']; esauribile?: boolean; ordine?: number;
+  /** L3 «planimetria della voce»: la planimetria scelta a mano (chiave pubblica o interna) per una voce di un Palazzo senza pin; null = torna
+   *  alla planimetria 1 (toglie l'aggancio); assente = invariato. Deve essere una planimetria del Palazzo della voce. */
+  planimetria?: string | null;
   /** L4 (§1.1): il carattere scelto dall'utente; null = «Ripristina» (la regola del tipo); assente = invariato. Solo nei Palazzi. */
   carattere?: CarattereVoce | null;
   /** Tutti i dettagli della voce (2026-10-18): sostituiscono quelli di prima, tranne la `maschera` di una Persona; assenti = invariati. */
@@ -1108,6 +1154,9 @@ export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoIntere
     throw httpErrors.badRequest('carattere-non-ammesso', `«${p.nome}» non ha un carattere da scegliere: le voci dei dedali dei Memento e le Persona restano come sono.`);
   }
   if (dati.carattere !== undefined && !colonnaCarattere()) throw httpErrors.badRequest('carattere-non-ammesso', 'Il carattere delle voci arriva con la migrazione 111.');
+  // L3: l'aggancio a mano a una planimetria del suo Palazzo (null lo toglie: la voce torna alla planimetria 1); controllato con l'infiltrazione
+  // dopo l'eventuale spostamento
+  const planimetria = dati.planimetria === undefined ? undefined : planimetriaScelta({ nome: p.nome, area_chiave: areaGuida, chiave: puntoChiave }, dati.planimetria);
   const adesso = nowIso();
   const db = getDb();
   const segni = db.transaction((): SegniAggiunti => {
@@ -1118,6 +1167,7 @@ export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoIntere
     const ordine = dati.ordine ?? (dopo !== prima || areaDopo !== areaPrima || cambiaArea ? ordineInFondo(areaGuida, dopo, areaDopo) : p.ordine);
     prepared('UPDATE punto_interesse SET nome = ?, descrizione = ?, tipo = ?, esauribile = ?, ordine = ?, contenitore_chiave = ?, area_dedalo_chiave = ?, dettagli_json = ?, area_chiave = ? WHERE chiave = ?').run(
       dati.nome?.trim() || p.nome, dati.descrizione ?? p.descrizione, dati.tipo ?? p.tipo, dati.esauribile === undefined ? p.esauribile : (dati.esauribile ? 1 : 0), ordine, dopo, areaDopo, dettagli, areaGuida, puntoChiave);
+    if (planimetria !== undefined) prepared('UPDATE punto_interesse SET planimetria_chiave = ? WHERE chiave = ?').run(planimetria, puntoChiave);
     if (cambiaArea) seguonoLaVoce(puntoChiave, p.area_chiave, areaGuida);
     // i passi di un Enigma seguono la sua area del dedalo
     if (areaDopo !== areaPrima) prepared('UPDATE punto_interesse SET area_dedalo_chiave = ? WHERE contenitore_chiave = ?').run(areaDopo, puntoChiave);
@@ -1127,6 +1177,25 @@ export function aggiornaPunto(puntoChiave: string, dati: DatiPunto): PuntoIntere
     return dati.carattere !== undefined || dati.tipo !== undefined || cambiaArea ? riallineaStati(db, mPrima, adesso) : [];
   })();
   return conSegniAggiunti(leggiPunto(puntoChiave), segni);
+}
+
+/**
+ * L3 «planimetria della voce»: la planimetria scelta a mano per una voce, in chiave interna (null = nessun aggancio). 404 se la mappa non
+ * esiste; 400 `planimetria-fuori-dal-palazzo` se non è una planimetria del Palazzo della voce (un altro Palazzo, la mappa del Palazzo
+ * stesso, una voce dei Memento); 400 `enigma-segue-i-passi` per un Enigma con passi, che sta dove stanno i passi.
+ */
+function planimetriaScelta(voce: { nome: string; area_chiave: string; chiave: string | null }, planimetria: string | null): string | null {
+  if (planimetria === null) return null;
+  const chiave = idMappa(planimetria);
+  if (!prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(chiave)) throw httpErrors.notFound('mappa-non-trovata', `La planimetria '${planimetria}' non esiste.`);
+  const d = prepared('SELECT d.chiave, d.tipo FROM dungeon_area a JOIN dungeon d ON d.chiave = a.dungeon_chiave WHERE a.chiave = ?').get(voce.area_chiave) as { chiave: string; tipo: string } | undefined;
+  if (!d || d.tipo !== 'palazzo' || chiave === radiceDelPalazzo(d.chiave) || palazzoDellaMappa(chiave) !== d.chiave) {
+    throw httpErrors.badRequest('planimetria-fuori-dal-palazzo', `«${nomePercorso(chiave)}» non è una planimetria del Palazzo di «${voce.nome}».`);
+  }
+  if (voce.chiave && passiDi(getDb(), voce.chiave).length > 0) {
+    throw httpErrors.badRequest('enigma-segue-i-passi', `«${voce.nome}» è un Enigma con dei passi: sta dove stanno i passi, sposta quelli.`);
+  }
+  return chiave;
 }
 
 /**
@@ -1308,9 +1377,12 @@ export function creaPunto(chiaveArea: string, dati: DatiPunto & { nome: string; 
   const areaDedalo = contenitore ? areaDelPunto(contenitore) : (dati.areaDedalo ?? null);
   if (contenitore && dati.areaDedalo !== undefined && dati.areaDedalo !== areaDedalo) throw httpErrors.badRequest('passo-di-altra-area', 'Un passo sta nell’area del suo Enigma.');
   const ordine = dati.ordine ?? ordineInFondo(chiaveArea, contenitore, areaDedalo);
+  // L3: una voce nuova creata con una planimetria indicata la tiene (agganciata a mano)
+  const planimetria = dati.planimetria == null ? null : planimetriaScelta({ nome: dati.nome.trim(), area_chiave: chiaveArea, chiave: null }, dati.planimetria);
   getDb().transaction(() => {
     prepared("INSERT INTO punto_interesse (chiave, area_chiave, ordine, tipo, nome, descrizione, esauribile, dettagli_json, fonte, contenitore_chiave, area_dedalo_chiave) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'utente', ?, ?)")
       .run(chiave, chiaveArea, ordine, dati.tipo, dati.nome.trim(), dati.descrizione ?? '', dati.esauribile ? 1 : 0, dettagli, contenitore, areaDedalo);
+    if (planimetria) prepared('UPDATE punto_interesse SET planimetria_chiave = ? WHERE chiave = ?').run(planimetria, chiave);
     if (areePersona) collegaPersonaAlleAree(chiave, areePersona);
     // l'Enigma segue i passi: un passo nuovo ancora da fare lo riapre dove era risolto (scelta dell'utente, 2026-10-02)
     if (contenitore) allineaEnigmaInOgniPartita(getDb(), contenitore, nowIso());

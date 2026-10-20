@@ -28,6 +28,8 @@ export const queryDidascalia = z.object({ didascalia: z.string().max(300).option
 export const bodyImmagineSpillo = z.object({ didascalia: z.string().max(300).optional(), ordine: z.number().int().min(0).max(999).optional() });
 /** La partita e, da L4 (§1.4), l'infiltrazione guardata: il contesto dei pin di rigenerabili di più infiltrazioni. */
 export const queryMappa = z.object({ partita: idParam.optional(), infiltrazione: z.string().min(1).max(160).optional() });
+/** L3 «planimetria della voce»: le voci della guida sulla planimetria, con lo stato della partita se indicata. */
+export const queryGuidaMappa = z.object({ partita: idParam.optional() });
 /** Sostituire l'immagine di una mappa con dei pezzi (102): `eliminaPezzi=1` conferma che se ne vanno con l'immagine di prima. */
 export const queryImmagineMappa = z.object({ eliminaPezzi: z.enum(['0', '1']).optional() });
 export const bodyCreaMappa = z.object({
