@@ -22,6 +22,7 @@ import { datiGuida, finestreDungeon, invalidaDatiGuida, type FinestraDungeon } f
 import { palazzoDellaMappa } from './mappe/alberoMappe.js';
 import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
 import { dataValida, ordineGioco } from '../../shared/condizioniSpillo.js';
+import { copreIlGiorno } from './condizioni/valutatore.js';
 import type { AtterraggioPalazzoDto } from '../../shared/types.js';
 
 /** Una riga di `dungeon_atterraggio`. */
@@ -43,9 +44,9 @@ function richiediDungeon(chiave: string): void {
  * inizio vale da lì in poi, con inizio e fine vale fra i due, estremi compresi.
  */
 export function regolaCopre(r: { dal: string | null; al: string | null }, giorno: string): boolean {
+  // L6: la regola come condizione di data, letta dal valutatore unico (`copreIlGiorno`)
   if (!r.dal) return true;
-  const g = ordineGioco(giorno);
-  return g >= ordineGioco(r.dal) && (!r.al || g <= ordineGioco(r.al));
+  return copreIlGiorno([r.al ? { tipo: 'intervallo', dal: r.dal, al: r.al } : { tipo: 'data', dal: r.dal }], giorno);
 }
 
 /** Le regole di un Palazzo, nell'ordine in cui si provano, come DTO (chiave pubblica e nomi di planimetria e pin). */

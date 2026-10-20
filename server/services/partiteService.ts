@@ -10,7 +10,8 @@ import { t } from './traduzioniService.js';
 import { skillDto, skillRiassunti } from './compendioService.js';
 import { registraEvento } from './storicoService.js';
 import { verificaObiettivi } from './obiettiviService.js';
-import { requisitoBloccante, semaforiConfidente, statoPartitaSemafori, type StatoPartitaSemafori } from './semaforiService.js';
+import { requisitoBloccante, semaforiConfidente } from './semaforiService.js';
+import { statoDisponibilitaPartita } from './disponibilitaService.js';
 import { meteoOra } from './meteoService.js';
 import type {
   CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, EffettiAzioneDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto,
@@ -281,14 +282,15 @@ function regaliFatti(partitaId: number, chiave?: string): Map<string, string[]> 
 }
 
 /**
- * I DTO delle righe date. Lo stato della partita per i semafori (`statoPartitaSemafori`) si calcola una volta e vale per tutte le
+ * I DTO delle righe date. Lo stato della partita per i semafori (`statoDisponibilitaPartita`) si calcola una volta e vale per tutte le
  * righe; i ranghi che servono ai requisiti sono quelli di TUTTI i Confidenti, anche quando le righe sono una sola. Prima lo stato
  * stava in una cache di modulo con la firma su `partita.updated_at`, che alcune scritture (i collegamenti alla guida) non toccano:
  * semafori vecchi.
  */
 function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi: Map<string, number>, regali: Map<string, string[]>): ConfidentePartitaDto[] {
-  const doti = new Map(dotiSociali(partitaId).map((d) => [d.chiave, d.rango]));
-  const stato: StatoPartitaSemafori = statoPartitaSemafori(partitaId, ranghi, doti);
+  // L6: un requisito è una condizione del vocabolario unico (anche una lettura, un luogo, un invito): lo stato è quello completo del
+  // valutatore, con i ranghi di TUTTI i Confidenti
+  const stato = { ...statoDisponibilitaPartita(partitaId), ranghiConfidenti: ranghi };
   return righe.map((c) => {
     const semafori = semaforiConfidente(c.chiave, c.rango, stato);
     return {

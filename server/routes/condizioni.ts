@@ -19,17 +19,19 @@ import { z } from 'zod';
 import { getDb, prepared, nowIso } from '../db/dbService.js';
 import { validate } from '../middleware/validate.js';
 import { giocabili } from '../services/squadraService.js';
-import { pinConStato, vociCitabili } from '../services/condizioni/nomiCondizioni.js';
-import { statoDisponibilitaPartita } from '../services/disponibilitaService.js';
+import { nomiCondizioni, pinConStato, vociCitabili } from '../services/condizioni/nomiCondizioni.js';
+import { statoAlGiorno, statoDisponibilitaPartita } from '../services/disponibilitaService.js';
+import { valutazione } from '../services/condizioni/valutatore.js';
+import { condizioneSpillo } from '../schemas/mappe.js';
 import { impostaEventoStoria, ranghiPerEvento } from '../services/semaforiService.js';
 import { leggiProgrammaPunti } from '../services/negoziService.js';
 import { verificaPartita } from '../services/verificaPartita.js';
-import { idParam } from '../schemas/comuni.js';
+import { dataGioco, idParam } from '../schemas/comuni.js';
 import { effettiDelTurno, impostaVolteAttivita } from '../services/attivitaService.js';
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
 import { httpErrors } from '../utils/httpError.js';
-import { CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, membroDellEvento } from '../../shared/condizioniSpillo.js';
-import type { ElenchiRegoleDto, PinConStatoDto, ProgressiPartitaDto, VoceCitabileDto } from '../../shared/types.js';
+import { CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, dataValida, membroDellEvento, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import type { ElenchiRegoleDto, PinConStatoDto, ProgressiPartitaDto, RispostaValutaCondizioniDto, VoceCitabileDto } from '../../shared/types.js';
 
 const router = Router();
 const idPartita = idParam;
@@ -108,6 +110,26 @@ function progressi(id: number): ProgressiPartitaDto {
     contatori: CONTATORI.map((c) => ({ chiave: c.chiave, nome: c.nome, valore: st.contatori.get(c.chiave) ?? 0 })),
   };
 }
+
+/**
+ * L6 (§2, §6.1): l'anteprima dell'esito, col valutatore unico. Per ogni condizione esito («vero», «falso», «avviso», «grigio»), testo e cosa
+ * manca; più l'esito dell'insieme (tutte le condizioni insieme, in AND). Con `giorno` si valuta la partita a quel giorno di gioco (il resto
+ * della partita resta com'è). L'interfaccia mostra questi esiti e non rivaluta (R6-02).
+ */
+router.post('/valuta', validate({ body: z.object({ condizioni: z.array(condizioneSpillo).max(20), partita: idPartita, giorno: dataGioco.optional() }) }), (req, res) => {
+  const { condizioni, partita, giorno } = req.body as { condizioni: RequisitoSpillo[]; partita: number; giorno?: string };
+  verificaPartita(partita);
+  if (giorno && !dataValida(giorno)) throw httpErrors.badRequest('giorno-non-valido', 'Il giorno non esiste nel calendario di gioco.');
+  const base = statoDisponibilitaPartita(partita);
+  const st = giorno ? statoAlGiorno(base, giorno) : base;
+  const nomi = nomiCondizioni({ conPin: true });
+  const insieme: RequisitoSpillo = condizioni.length === 1 ? condizioni[0] : { tipo: 'gruppo', modo: 'tutte', condizioni };
+  const risposta: RispostaValutaCondizioniDto = {
+    complessivo: condizioni.length ? valutazione(insieme, st, nomi) : { esito: 'vero', testo: 'Nessuna condizione' },
+    condizioni: condizioni.map((c) => valutazione(c, st, nomi)),
+  };
+  res.json(risposta);
+});
 
 router.get('/partite/:partita/progressi', validate({ params: z.object({ partita: idPartita }) }), (req, res) => {
   const id = Number(req.params.partita); verificaPartita(id);

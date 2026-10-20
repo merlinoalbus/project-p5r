@@ -35,7 +35,8 @@
 // ============================================================
 
 import { getDb, prepared } from '../db/dbService.js';
-import { leggiCondizioniSalvate, ordineGioco } from '../../shared/condizioniSpillo.js';
+import { leggiCondizioniSalvate } from '../../shared/condizioniSpillo.js';
+import { copreIlGiorno } from './condizioni/valutatore.js';
 import { vociDiOgniPin, vociGestite } from './mappe/voceDelPin.js';
 import { contaOggetti, modelloAvanzamento, oggettiDelleVoci, statiDellaPartita, statoDelPin, voceFatta, type ModelloAvanzamento, type StatiDellaPartita } from './mappe/statiGuida.js';
 import { palazzoCompletato, palazzoConcluso, type CompletamentoPalazzo } from '../../shared/completamentoGuida.js';
@@ -265,9 +266,8 @@ export function ingressoDelPalazzo(dungeon: string, giorno?: string): { chiave: 
 /** Le condizioni di data dello spillo (in cima, cioè in AND) reggono quel giorno? Le altre non si guardano: qui conta solo
  *  scegliere fra più ingressi quello del giorno, non dire se adesso si entra (quello lo dice la mappa). */
 function apertoIl(json: string | null, giorno: string): boolean {
-  const oggi = ordineGioco(giorno);
-  return leggiCondizioniSalvate(json).every((c) => c.tipo === 'data' ? oggi >= ordineGioco(c.dal)
-    : c.tipo === 'intervallo' ? oggi >= ordineGioco(c.dal) && oggi <= ordineGioco(c.al) : true);
+  // L6: la stessa lettura delle date del valutatore unico (`copreIlGiorno`)
+  return copreIlGiorno(leggiCondizioniSalvate(json), giorno);
 }
 
 /** La mappa a cui portava lo spillo quando è nato dal seed (`seed_identita_json.riferimento`), se era una mappa. */
