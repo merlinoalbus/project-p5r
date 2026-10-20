@@ -1,6 +1,6 @@
 {
   "obiettivo": "Lotti L0–L11 della razionalizzazione completati sul branch newreview, pubblicati e funzionanti su p5s",
-  "aggiornato": "2026-10-20T10:45:00Z",
+  "aggiornato": "2026-10-20T10:55:00Z",
   "fasi": [
     "requisiti",
     "dati",
@@ -321,8 +321,8 @@
     {
       "nome": "Test funzionali",
       "fase": "funzionali",
-      "stato": "chiusa",
-      "attivita": "ORA: chiusa (archiviata su richiesta dell'utente); per L2 non servono altre prove funzionali. Fatto: casi di L5–L9 pronti; L2 giro 2 CHIUSO su f19a117f: F2-02 (R1), FUN2-8, FUN2-9 e «Colloca» dall'interfaccia verdi (ciclo 9, 05:22:48–05:24:44Z, ripristino chiesto), nessun caso «in parte». L3 funzionali verdi sull'anteprima (base p5s-0503Z), 0 difetti, O3-1 a BE; resta P3 dentro la finestra. L4: i casi che scrivono dopo il commit. L5: 42 casi pronti",
+      "stato": "al lavoro",
+      "attivita": "ORA (10:55Z): riaperta da sola, prima dei quattro tester di L3 (A3), su newreview-l3 = d5eb9650 e istanza 5473/3301 (copia di p5s 09:48Z): casi di funzionali.md con P3, righe corrette nella ripresa (NR3-4, AP3-1/2/3/4, E2, UX3-1/4). — Prima: chiusa (archiviata su richiesta dell'utente); per L2 non servono altre prove funzionali. Fatto: casi di L5–L9 pronti; L2 giro 2 CHIUSO su f19a117f: F2-02 (R1), FUN2-8, FUN2-9 e «Colloca» dall'interfaccia verdi (ciclo 9, 05:22:48–05:24:44Z, ripristino chiesto), nessun caso «in parte». L3 funzionali verdi sull'anteprima (base p5s-0503Z), 0 difetti, O3-1 a BE; resta P3 dentro la finestra. L4: i casi che scrivono dopo il commit. L5: 42 casi pronti",
       "avanzamento": 80
     },
     {
@@ -357,7 +357,7 @@
       "nome": "Collaudo",
       "fase": "collaudo",
       "stato": "al lavoro",
-      "attivita": "ORA (10:45Z): riaperta da sola per il collaudo di L3 (A2) sulla linea di rilascio newreview-l3 = fd988a3e: prova git, typecheck, lint, test mirati, istanza di anteprima su copia di p5s, righe dei difetti; poi i quattro tester uno alla volta. — Prima: chiusa. Ultima riapertura alle 07:27:13Z per la prova git su 8ae417c5 (esito conforme alle 07:27:19Z: solo documenti dopo 292a122e, alberi del codice invariati), poi archiviata. Prima: chiusa dopo il giro 3 di L2 (riaperta e richiusa): prove git su b6066830 conformi, rossi di E4 ed E7 visti. Prima: riaperto per il giro 3 di L2: prove git su b6066830 (codice uguale a 292a122e) e rossi di E4 ed E7 isolato. Fatto: R1 su 292a122e (prove grezze, tutto conforme), 872ac976, 115581b4",
+      "attivita": "ORA (10:55Z): ferma, non archiviata perché tiene accesa l'istanza dei tester 5473/3301. Collaudo di L3 conforme: newreview-l3 = d5eb9650 (fd988a3e + 9ab06d6a, solo documenti dopo c8338fd0), typecheck e lint verdi, 267/267 test mirati, copia di p5s 09:48Z, lavoro da preservare identico. — Prima (10:45Z): riaperta da sola per il collaudo di L3 (A2) sulla linea di rilascio newreview-l3 = fd988a3e: prova git, typecheck, lint, test mirati, istanza di anteprima su copia di p5s, righe dei difetti; poi i quattro tester uno alla volta. — Prima: chiusa. Ultima riapertura alle 07:27:13Z per la prova git su 8ae417c5 (esito conforme alle 07:27:19Z: solo documenti dopo 292a122e, alberi del codice invariati), poi archiviata. Prima: chiusa dopo il giro 3 di L2 (riaperta e richiusa): prove git su b6066830 conformi, rossi di E4 ed E7 visti. Prima: riaperto per il giro 3 di L2: prove git su b6066830 (codice uguale a 292a122e) e rossi di E4 ed E7 isolato. Fatto: R1 su 292a122e (prove grezze, tutto conforme), 872ac976, 115581b4",
       "avanzamento": 80
     }
   ],
