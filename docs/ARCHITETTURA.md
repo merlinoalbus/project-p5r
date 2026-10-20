@@ -1623,7 +1623,10 @@ Nessuna chiave, rotta o codice d'errore è cambiato.
   `AreaDungeonDto.mappa`.
 - Miniature: `shared/miniature.ts` (`LARGHEZZE_MINIATURA` 160/320/640/1024, `urlMiniatura`, `srcsetMiniature`);
   `server/services/miniatureService.ts` (sharp 0.35.5, WebP, cache in `immagine_miniatura` — migrazione 108 — per immagine, larghezza e
-  versione; originale per SVG/GIF o se più piccola; riscaldamento all'avvio delle immagini delle schede; pulizia delle orfane in
+  versione; originale per SVG/GIF o se più piccola; dal giro 2 di L2 (UX2-13) la miniatura `?l=` di un'immagine con margini trasparenti
+  si ritaglia sul riquadro del disegno, cioè sui pixel non trasparenti con un bordo, e non si ritaglia se il disegno arriva ai bordi; il visore
+  usa sempre l'immagine intera, quindi le coordinate dei pin non cambiano. Le versioni nell'URL portano la generazione `~r2` e all'avvio si
+  tolgono le miniature delle generazioni precedenti; riscaldamento all'avvio delle immagini delle schede; pulizia delle orfane in
   `regoleAllAvvio` e dopo `ricaricaPacchetto`); rotta `GET /api/immagini/:ambito/:chiave/file?l=` (400 fuori misura, `X-Miniatura`).
   Nel pacchetto la tabella è `SOLO_SCHEMA` (`pacchettoGioco.ts`): si crea ma non si copia. `Dockerfile.backend` prova sharp nello stadio
   `deps`.
@@ -1649,3 +1652,11 @@ Nessuna chiave, rotta o codice d'errore è cambiato.
   Aggiungi planimetria, Ripristina, Elimina), `QuartierePage` con `AreeDelQuartiere` e la finestra d'ingresso (`?ingresso=1`; lo spillo
   vince), `AreeDellaCitta` e «Planimetrie da collocare» nella Città, `RisolviMappa` verso la casa con spillo e versione, `Modal` come foglio
   dal basso sotto i 768 px, etichette di navigazione con il nome della meta (`utils/aree.ts`, `utils/covo.ts`, `navigazioneMappa.ts`).
+- Indice delle Mappe (giro 2): la carta di Tokyo porta il chip «N da verificare» verso l'area dello staff, senza aprire nulla (R1); i
+  conteggi dicono quartieri, aree e planimetrie, non righe di `mappa` (E4); ogni riga dell'«Elenco completo» ha il conteggio degli spilli con la
+  stessa parola dell'indice (E5); le aree da verificare stanno in un gruppo «Da verificare» sotto i quartieri (E7). Il pannello del luogo non ha
+  riquadri scorrevoli suoi: griglia ed Elenco crescono con la pagina, che è l'unica a scorrere (UX2-15).
+- Linea di rilascio: L2 è stato collaudato e validato sul branch `newreview-l2` (worktree `p5s-sviluppo-l2`), su cui le correzioni arrivano con
+  cherry-pick dai commit di sviluppo su `newreview` (stesso patch-id). Dopo l'approvazione si pubblica `newreview-l2` su `newreview` e la linea di
+  rilascio si ricongiunge a quella di sviluppo con un merge di `newreview-l2` in `newreview`: il codice di L2 è lo stesso sui due rami (i
+  cherry-pick hanno lo stesso patch-id), mentre `newreview` contiene in più L3 e L4 e `newreview-l2` i commit di soli documenti del collaudo.

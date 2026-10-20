@@ -2160,7 +2160,7 @@ di ordinamento dell'app; nel gioco il Covo si apre dal menu dal 6/5 (fonte: Espe
 alla pagina delle sfide e delle Medaglie P, collegata all'area nei due sensi.
 
 Scelte del Project manager e della Stesura (da confermare): un'area per piano della Shujin; Aoyama Itchome sotto Shujin; Sottopasso con la
-versione `001-2-0` «inquadratura orientale» come predefinita (la versione «planimetria completa» è quella a cui porta l'alias
+versione `001-2-0` «inquadratura orientale» come predefinita («planimetria completa» è la versione a cui porta l'alias
 `shibuya-sottopasso`) e avviso sulla versione senza pin; l'Aula 002-6-0 resta un'area a sé; i pin di passaggio
 non si riscrivono (la navigazione risolve planimetria → area); **percorsi pubblici fissi** (`mappa.percorso_fisso`: la sincronizzazione non
 rinomina più i percorsi del Covo); **formato delle immagini riconosciuto dai byte** in ogni strada di salvataggio; la regola che assegna le
@@ -2168,6 +2168,29 @@ aree è la funzione della migrazione 109, importata dal servizio (una regola sol
 conservato; indice unico dello slug per la città; **finestre come fogli dal basso sotto i 768 px in tutta l'app** (chiusura sempre solo con la
 X o con Esc); pannello del visore aperto all'arrivo da 1280 px; per lo scarico delle piante uno User-Agent onesto, senza Referer contraffatto:
 se la fonte rifiuta (oggi Fandom risponde 403) l'app lo dice con il link alla fonte e l'invito a caricare l'immagine dall'editor.
+
+Giro 2 (segnalazioni dell'utente e revisione dell'indice delle Mappe, 2026-10-20):
+- **UX2-13, miniature delle planimetrie ritagliate sul disegno.** L'utente ha segnalato che nelle carte di Mappe i disegni erano piccoli e
+  decentrati: le planimetrie native sono tele 2048×2048 col disegno in un angolo. La miniatura si ritaglia sui pixel non trasparenti, con un
+  bordo. La decisione «Immagini: mai ritagliate» del 2026-09-03 resta valida: il ritaglio toglie solo il **margine vuoto e trasparente**, mai
+  una parte del disegno (se il disegno arriva ai bordi non si ritaglia), e il visore mostra sempre l'immagine intera.
+- **UX2-15, una sola barra in Mappe** (domanda dell'utente sulle due barre di scorrimento, regola degli scroll annidati): il pannello del luogo
+  non ha riquadri scorrevoli suoi, griglia ed «Elenco completo» crescono con la pagina.
+- **Parola dei conteggi**: nell'indice delle Mappe di L2 si dice «spilli» (E5); in La città e nelle pagine delle aree resta «pin» fino al
+  rilascio di L3, dove si uniforma con la scelta dell'utente sugli spilli di contenuto (E2).
+- **Dichiarazione e cronologia** (orari UTC dal registro della sessione del PM e dai reflog):
+  - prima del secondo stop: dopo «riprendi L2 e completalo» dell'utente (05:55Z e 05:59Z) e sul perimetro deciso dal Manager, il **Collaudo**
+    ha portato sul rilascio UX2-13 (115581b4 alle 06:05:01Z, cherry-pick del BE 7624bdda);
+  - 06:06:08Z secondo stop dell'utente («interrompi tutto»), poi la chiusura delle sessioni del team (06:07:25Z, «ho detto tutto»);
+  - 06:07:44Z l'utente: «quindi organizza tu per risolvere il L2». Dopo, il **Project manager** ha portato sul rilascio E4/E5/E7 (0268751a
+    alle 06:08:01Z, cherry-pick del FE d71a1bbd) e ha **implementato UX2-15** (63b4d80e alle 06:09:41Z, sul rilascio 3a056190 alle 06:09:44Z),
+    con una prima verifica propria;
+  - 06:12:36Z il PM ha tentato di scrivere `docs/ROADMAP.md` nella cartella di rilascio prima di avere l'autorizzazione; il tentativo è stato
+    bloccato dalla regola che impedisce di scrivere nelle cartelle di altri, e il PM ha chiesto all'utente il permesso;
+  - 06:19:21Z l'utente: «Autorizzo a fare in modo di completare l2». Il PM entra nella cartella di rilascio e scrive la ROADMAP (292a122e
+    alle 06:19:32Z);
+  - 06:39:53Z l'utente: «Riapri e al termine le richiudi... una alla volta». Le sessioni di prova sono state riaperte una alla volta e
+    richiuse; la verifica indipendente di UX2-15 l'hanno fatta Test layout (48 misure) e Test UX.
 
 ## 2026-10-20 — L4: un Palazzo «concluso» e «completato», gli effetti seguono il furto
 
