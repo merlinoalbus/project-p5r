@@ -1,7 +1,7 @@
 # Stato attuale del lavoro — ramo newreview / p5s (aggiornato 2026-10-20, ripresa)
 
 ## DOVE SIAMO ADESSO (leggere per primo; prevale su tutto quanto c'è sotto)
-- **Ramo unico `newreview`**, pubblicato su p5s a ogni push. Ultimo commit locale/pubblicato: `5a6944fc` (`docs(coordinamento): aggiorna stato del filtro Aree`); il codice funzionale è in `ca54c39c`, con typecheck, lint e controllo diff verdi. La pipeline non è verificabile ora per indisponibilità DNS; il fetch locale resta bloccato dai permessi sul metadato condiviso del worktree.
+- **Ramo unico `newreview`**, pubblicato su p5s a ogni push. Ultimo commit locale/pubblicato: `1c86ea58` (`docs(coordinamento): allinea il commit pubblicato`); il codice funzionale è in `ca54c39c`, con typecheck, lint e controllo diff verdi. GitHub mostra ancora in corso i run #47, #48 e #49; il browser su p5s risponde e mostra l'indice aggiornato («306 mappe con 767 pin», 23 aree di Tokyo e i quartieri/Palazzi). Il fetch locale resta bloccato dai permessi sul metadato condiviso del worktree.
 - **Dati di p5s**: `userVersion` fino a 119 dopo l'ultimo rilascio. Migrazioni recenti:
   - 114: planimetria della voce;
   - 115: luoghi come fonte unica;
