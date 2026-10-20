@@ -92,9 +92,10 @@ const eUnaData = (valore: string) => /^\d{1,2}\s+\p{L}+$/u.test(dataBreve(valore
  *  nel suggerimento, niente frecce; nei Memento resta com'era (compatta da 1024 px). */
 function LineaDelTempo({ date, memento = false }: { date: DungeonDettaglioDto['date']; memento?: boolean }) {
   const tappe = [
-    { chiave: 'sblocco', etichetta: 'Si apre', valore: date.sblocco, tono: 'bg-white/10 text-text', segno: 'si-apre' as const },
-    { chiave: 'furto', etichetta: 'Furto consigliato', valore: date.furtoConsigliato, tono: 'bg-[#f5c542]/15 text-[#f5c542]', segno: 'furto' as const },
-    { chiave: 'scadenza', etichetta: 'Scade', valore: date.scadenza, tono: 'bg-primary/20 text-primary', segno: 'scade' as const },
+    // `breve`: l'etichetta dei chip stretti (sotto i 1024 px) quando il valore è una frase; ha senso da sola (UX3-12)
+    { chiave: 'sblocco', etichetta: 'Si apre', breve: 'Si apre', valore: date.sblocco, tono: 'bg-white/10 text-text', segno: 'si-apre' as const },
+    { chiave: 'furto', etichetta: 'Furto consigliato', breve: 'Furto', valore: date.furtoConsigliato, tono: 'bg-[#f5c542]/15 text-[#f5c542]', segno: 'furto' as const },
+    { chiave: 'scadenza', etichetta: 'Scade', breve: 'Scade', valore: date.scadenza, tono: 'bg-primary/20 text-primary', segno: 'scade' as const },
   ].filter((t) => !!t.valore);
   if (tappe.length === 0) return null;
   return (
@@ -123,8 +124,10 @@ function LineaDelTempo({ date, memento = false }: { date: DungeonDettaglioDto['d
               // nei Palazzi a ogni larghezza (LAY3-5): una data al massimo 6,5rem, una frase diventa l'etichetta (intera nei «Dettagli»)
               : eUnaData(t.valore!)
                 ? <span className="max-w-[6.5rem] truncate font-display text-[14px] leading-none">{dataBreve(t.valore!)}</span>
-                // sotto i 1024 px l'etichetta breve («Furto»): quella intera mandava a capo la fila delle date (LAY3-5)
-                : <span className="font-display text-[14px] leading-none"><span className="sr-only">{dataBreve(t.valore!)}</span><span aria-hidden className="hidden lg:inline">{t.etichetta}</span><span aria-hidden className="lg:hidden">{t.etichetta.split(' ')[0]}</span></span>}
+                // UX3-12: da 1024 px l'etichetta intera; sotto, quella breve del tipo della data («Si apre», «Furto», «Scade»), che ha senso
+                // da sola (l'abbreviazione presa dalla prima parola dava «Si»). «Furto consigliato» intero a 375 mandava a capo le date di
+                // Shido (intestazione 234 su 243, oltre la soglia con «Suggerito oggi»)
+                : <span className="font-display text-[14px] leading-none"><span className="sr-only">{dataBreve(t.valore!)}</span><span aria-hidden className="hidden lg:inline">{t.etichetta}</span><span aria-hidden className="lg:hidden">{t.breve}</span></span>}
           </span>
         </li>
       ))}
