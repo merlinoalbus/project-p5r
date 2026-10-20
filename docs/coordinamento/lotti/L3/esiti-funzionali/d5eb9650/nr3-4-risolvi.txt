@@ -1,0 +1,2 @@
+indirizzi 669 {"memento·visore":29,"palazzo·scheda":100,"palazzo·area":254,"palazzo·area+planimetria":285,"memento·scheda":1}
+casa senza ?planimetria per una mappa NON predefinita: 0

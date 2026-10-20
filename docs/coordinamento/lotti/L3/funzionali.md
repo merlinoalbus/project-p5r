@@ -202,6 +202,27 @@ dal vivo sull'anteprima su 12484305 (pezzo 8): l'area vuota e il suo legame sono
 
 **Resta:** P3 dentro la finestra (partita con data dal 04-15) e la ricerca dell'interfaccia per F3-23.
 
+### Pezzo 9 — linea di rilascio `newreview-l3` = d5eb9650 sul collaudo (FE 5473, BE 3301, base p5s 0948Z), 2026-10-20 (passo A3)
+Codice c8338fd0 + soli documenti (correzioni della ripresa d73e7027..c8338fd0); userVersion 113. Prove grezze in
+`esiti-funzionali/d5eb9650/`. Letture 09:57–10:12Z; ciclo di scrittura con foto del Collaudo (10:13:04Z, identica a `L3-base-p5s-20261020-0948Z`)
+dalle **10:13:31 alle 10:14:12Z**; **ripristinata dal Collaudo alle 10:14:39Z**, impronta identica alla foto e alla base (prima del ripristino cambiati solo due `updated_at`, area `dungeon/okumura/caserma` e partita 1; 17 scritture nel BE.log, tutte dichiarate: `esiti-collaudo/cicli-dati.md`). Su p5s nessuna scrittura.
+
+| Caso / riga | Esito | Prova |
+|---|---|---|
+| Letture di L3 (F3-01/02/05/11/15/29/30/31) rifatte | ✅ | `l3-letture-collaudo.txt`: uscita **identica** a quella dell'anteprima su p5s-0503Z (pezzo 6), salvo `user_version` 113 (prima 111). Copia del DB presa con l'API di backup |
+| NR3-4 (indirizzi) | ✅ | `risolvi` sui 669 indirizzi della base: Palazzi alla scheda 100, alla pagina dell'area 254 senza e 285 con `?planimetria=`, Memento nel visore 29 (+1 alias d'infiltrazione di Iweleth che ha «Memento» nel nome, giustamente alla scheda); **0** case senza `?planimetria=` che puntino a una mappa diversa dalla predefinita (`nr3-4-risolvi.txt`). Nel browser le **37 Aree** in cui iniziale ≠ predefinita: `/area/<slug>` senza parametri apre la **predefinita** 37/37 (es. Tetto «Scala», Galleria «Livello -2»), con `?infiltrazione=<i>` l'iniziale di `<i>` 37/37 (`nr3-4-browser-37-aree.txt`). Osservazione per Test UX: in 6 Aree la predefinita non ha pin («nessun pin: stanno su …»), è il dato |
+| AP3-1 | ✅ | «Schede da sistemare (4)» a Kamoshida (le 4 attese) e «(1)» a Madarame, sezione richiudibile chiusa di base (`browser-letture.txt`) |
+| AP3-2 | ✅ | Visore della scheda senza «Su:» né «Planimetrie»; «Vai: Museo 1P» → `/area/museo-1p?infiltrazione=…nelle-profondita…&planimetria=…153-2-0`; «Vai: Central Street» (fuori dal Palazzo) → `/guida/citta/shibuya/central-street` |
+| AP3-4 | ✅ | «Da raccogliere»: i nomi delle planimetrie vanno a `/area/<slug>?infiltrazione=<aperta>&planimetria=<k>`; editor da «Modifica planimetria» → «Chiudi» e «Apri il visore» tornano a `/area/museo-1p?infiltrazione=…&planimetria=…153-2-0` |
+| AP3-3 | ✅ | `POST /api/mappe` senza genitore → 201; `PUT` genitore `dungeon-okumura`, `palazzo-di-okumura`, `palazzo-di-okumura-caserma` → **409 `usa-aggiungi-area`** («Nei Palazzi una planimetria sta in un'area: aggiungila dalla scheda del Palazzo…»); `dungeon-mementos` → 200 (Memento esclusi); mappa eliminata e tolta dal cestino (`ciclo-ricerca-ap33.txt`) |
+| E2 | ✅ | `GET /api/mappe/albero` e `/albero/conteggi` contro un conteggio SQL **scritto da me** (CTE ricorsivo sull'albero, Memento esclusi, gruppi dalla regola di `modifiche.md` §E2) su una copia del DB: radice 767/747/228 uguale; **307/307 nodi** uguali (`e2-conteggi.txt`, `e2-conteggi.cjs`). Interfaccia: intestazione «307 mappe con 767 pin · più 747 passaggi e 228 note»; Tokyo 159 (title «più 96 passaggi e 43 note»), Kamoshida 221, Madarame 179 |
+| UX3-1 | ✅ | 20/5 → `?infiltrazione=madarame-disabilita-i-sistemi-di-sicurezza&daVoce=…` → «Infiltrazione 3 di 5 · Disabilita i sistemi di sicurezza» |
+| UX3-4 | ✅ | Partita di prova al 05-20 con la 1ª infiltrazione di Madarame completata (3 permanenti segnati): metro «Madarame» → `?infiltrazione=in-corso` → «Infiltrazione **2** di 5 · Scopri dov'è il Tesoro» (la prima non completata). Con la partita 1 al 06-02 i due Palazzi sono conclusi e la metro mostra solo i Memento (`ciclo-partita.txt`) |
+| P3 (F3-15) | ✅ | Stessa partita portata al 04-15: metro «Kamoshida» → `/guida/mappe/…cancello-del-castello-nativo-rmap-151-1-0` → `/guida/dungeon/kamoshida/area/cancello-del-castello`, versione «Livello 0» (si apre per prima), infiltrazione «3. Tutorial Palazzo 15/04» |
+| F3-23 (ricerca) | ✅ | Rinomina di Caserma in «Caserma prova ricerca L3»: `GET /api/mappe/riferimenti?tipo=mappa&q=prova ricerca L3` → «Palazzo di Okumura › Caserma prova ricerca L3» (dettaglio «area»); «Ripristina» → «Caserma». Con questo F3-23 è completo |
+
+Nessun difetto nuovo. Le righe di `difetti.md` sono aggiornate a «verificato (funzionali)».
+
 ### Pezzo 8 — residuo dopo «Elimina area» e verifica di O3-1 (ciclo 5 dell'anteprima, foto `anteprima-ciclo5-funzionali`, 05:44:28–05:45:20Z)
 Anteprima su **12484305** (L4 con 71378325 e la correzione di O3-1, senza L6), base p5s-0533Z, userVersion 113/24. Scritture via API su Okumura;
 DB letto in sola lettura. Prove in `esiti-collaudo-funzionali/residuo-area-esito.txt`, `residuo-area/prima|dopo.json`, `o3-1-verifica.txt`;

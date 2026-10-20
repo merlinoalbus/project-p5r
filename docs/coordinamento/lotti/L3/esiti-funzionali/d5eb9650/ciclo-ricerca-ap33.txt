@@ -1,0 +1,15 @@
+== ricerca · 2026-10-20T10:13:31.316Z
+ricerca «Caserma» prima 200 ["Palazzo di Okumura › Caserma"]
+rinomina 200 undefined
+ricerca «prova ricerca L3» 200 [{"tipo":"mappa","chiave":"palazzo-di-okumura-caserma","nome":"Palazzo di Okumura › Caserma prova ricerca L3","dettaglio":"area"}]
+ricerca «Caserma» dopo la rinomina 200 ["Palazzo di Okumura › Caserma prova ricerca L3"]
+Ripristina 200 "Caserma"
+== ap33 · 2026-10-20T10:13:31.604Z
+POST /api/mappe senza genitore 201 {"chiave":"prova-funzionali-ap3-3","genitore":null,"area":null}
+PUT genitore dungeon-okumura → 409 {"code":"usa-aggiungi-area","message":"Nei Palazzi una planimetria sta in un’area: aggiungila dalla scheda del Palazzo («Aggiungi area», o «Aggiungi planimetria» in un’area)."}
+PUT genitore palazzo-di-okumura → 409 {"code":"usa-aggiungi-area","message":"Nei Palazzi una planimetria sta in un’area: aggiungila dalla scheda del Palazzo («Aggiungi area», o «Aggiungi planimetria» in un’area)."}
+PUT genitore palazzo-di-okumura-caserma → 409 {"code":"usa-aggiungi-area","message":"Nei Palazzi una planimetria sta in un’area: aggiungila dalla scheda del Palazzo («Aggiungi area», o «Aggiungi planimetria» in un’area)."}
+PUT genitore dungeon-mementos → 200 {"genitore":"memento","area":null}
+  rimessa senza genitore 200 undefined
+DELETE 204
+tolta dal cestino 18 204

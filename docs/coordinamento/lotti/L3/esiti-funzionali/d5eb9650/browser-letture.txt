@@ -1,0 +1,33 @@
+Letture nel browser, collaudo FE 5473 / BE 3301, newreview-l3 = d5eb9650, base p5s 0948Z, 2026-10-20 ~10:00–10:12Z (partita 1 attiva, 06-02).
+Pagine aperte in iframe 1280×900; letture del DOM; clic con .click() solo su collegamenti e pulsanti di navigazione (nessun salvataggio).
+
+AP3-1 — /guida/dungeon/kamoshida: sezione richiudibile «Schede da sistemare (4)» (chiusa di base), con «Contenuti della guida che non
+stanno su una planimetria e non hanno una voce.»; aperta contiene: «Cancello del Castello» (Vecchio Castello), «Tre guardie del Tetto
+(2 Cavalieri brutali + 1 Nemico potente)» (Tetto del Vecchio Castello), «Forziere dei 3 Magatama maledetto» (Tetto del Vecchio Castello),
+«Seme lussuria verde (2° Seme della Bramosia)» — tutti e 4 presenti. /guida/dungeon/madarame: «Schede da sistemare (1)» con
+«Forziere — Fiale delle vertigini S» (Nelle profondità del Museo) «Il secondo forziere (senza chiave) protetto da laser nella stessa sala.».
+
+AP3-4 — /guida/dungeon/madarame/area/museo-1p?infiltrazione=madarame-nelle-profondita-del-museo:
+- «Da raccogliere», nomi delle planimetrie (8 visti): tutti /guida/dungeon/madarame/area/<slug>?infiltrazione=madarame-nelle-profondita-del-museo&planimetria=<k>
+  (Museo 1P 153-2-0 e 153-2-1, Entrata del Museo, Museo 2P Livello 0 e 2, Giardino centrale, Sala del Tesoro – Atrio Livello 0 e 1);
+  nessun collegamento della pagina va a /guida/mappe/palazzo-di-madarame… salvo «Modifica planimetria» (…/modifica, l'editor).
+- «Modifica planimetria» → /guida/mappe/palazzo-di-madarame-museo-1p-nativo-rmap-153-2-0/modifica → «Chiudi» →
+  /guida/dungeon/madarame/area/museo-1p?infiltrazione=madarame-nelle-profondita-del-museo&planimetria=palazzo-di-madarame-museo-1p-nativo-rmap-153-2-0
+- stesso giro con «Apri il visore» → stesso indirizzo (infiltrazione e planimetria conservate).
+
+AP3-2 — /guida/dungeon/madarame?infiltrazione=madarame-nelle-profondita-del-museo: nel visore nessun «Su: …» e nessuna sezione «Planimetrie».
+- pin «Punto di infiltrazione: Museo, 1P (ottenuto)» → popup «Vai: Museo 1P» →
+  /guida/dungeon/madarame/area/museo-1p?infiltrazione=madarame-nelle-profondita-del-museo&planimetria=palazzo-di-madarame-museo-1p-nativo-rmap-153-2-0
+- pin «Uscita: Central Street» → «Vai: Central Street» → /guida/citta/shibuya/central-street (fuori dal Palazzo: la casa dell'area del mondo).
+
+E2 (interfaccia) — /guida/mappe: intestazione «307 mappe con 767 pin · più 747 passaggi e 228 note, raggruppate per il posto a cui appartengono.»;
+carta Tokyo «Città · 159 pin · 23 quartieri · 23 aree», suggerimento (title) «159 pin · più 96 passaggi e 43 note»; carta Kamoshida «221 pin · 10 aree
+· 26 planimetrie», title «221 pin · più 148 passaggi e 0 note»; Madarame «179 pin · 8 aree · 17 planimetrie», title «179 pin · più 81 passaggi e 0 note».
+Stessi numeri dell'API e del conteggio SQL (e2-conteggi.txt).
+
+UX3-1 — /guida/percorso/05-20: voce di Madarame, collegamento «Palazzo di Madarame» →
+/guida/dungeon/madarame?infiltrazione=madarame-disabilita-i-sistemi-di-sicurezza&daVoce=464ccfe40659a41b6b201947ed776312; all'arrivo il selettore
+«Infiltrazione 3 di 5 = 3. Disabilita i sistemi di sicurezza».
+
+UX3-4 (partita 1) — /guida/citta al 06-02: Kamoshida e Madarame conclusi, nella metro solo «Memento → /guida/dungeon/mementos»: la prova
+con un Palazzo in corso è nel ciclo (ciclo-partita.txt e funzionali.md, pezzo 9).
