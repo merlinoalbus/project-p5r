@@ -439,13 +439,12 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     setPanEsplicito({ x: dim.w / 2 - (s.x / 100) * nat.w * z, y: dim.h / 2 - (s.y / 100) * nat.h * z });
   };
   // Richiesta dell'utente (2026-10-20): «al posto di dare l'opzione raccogli (sulla porta, scala, rampino o altri elementi di spostamento)
-  // dovrebbe semplicemente spostarti». Un pin di spostamento con un arrivo, disponibile, che non ha voci della guida da segnare, al tocco
-  // porta subito all'arrivo (nella scheda del Palazzo con la stessa strada dei passaggi del visore, `onNaviga`); con voci da segnare resta
-  // il popup, con «Vai» e le voci. Fuori dall'editor e dalla scelta dei pin; uno senza arrivo resta com'è.
+  // dovrebbe semplicemente spostarti». Un pin di spostamento con un arrivo, disponibile, al tocco porta subito all'arrivo (nella scheda del
+  // Palazzo con la stessa strada dei passaggi del visore, `onNaviga`), anche se ha voci della guida (strada (b) del PM: le voci si segnano
+  // dalla guida). Fuori dall'editor e dalla scelta dei pin; uno senza arrivo, o non disponibile, resta com'è.
   const vaSubito = (s: SpilloDto): boolean => {
-    if (editor || scelta || s.destinazioneNonDisponibile || categoriaSpillo(s.tipo) !== 'spostamento' || !arrivoSpillo(s)) return false;
-    if (partitaId !== null && s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile') return false;
-    return !s.voci.some((v) => !puntoDescrittivo(v.tipo, v.areaDedalo));
+    if (editor || scelta || !passaggioConArrivo(s)) return false;
+    return !(partitaId !== null && s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile');
   };
   /** Porta all'arrivo del pin di spostamento (con lo spillo d'arrivo se indicato). */
   const vaiAllArrivo = (s: SpilloDto) => {
@@ -1038,7 +1037,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   {categoriaSpillo(selezionato.tipo) === 'spostamento' && <NavigazioneSpillo spillo={selezionato} partitaId={partitaId} onNaviga={onNaviga} nomeMappa={selezionato.destinazioneNomi?.mappa} nomeSpillo={selezionato.destinazioneNomi?.spillo ?? undefined} />}
                   {/* un pin con uno stato (un consumabile, un meccanismo, una porta…: `statoDelPin`, 2026-10-03), e anche un pin senza
                       collegato a una o più voci della guida (una sicura, un passaggio): lo stato delle voci è il suo (2026-10-01, 098) */}
-                  {(statoDelPin(selezionato) !== null || selezionato.voci.length > 0) && partitaId && <AzioniStato spillo={selezionato} occupato={occupato} onRaccolto={onRaccolto ? cambiaRaccolto : undefined} onStatoPunto={onStatoPunto ? cambiaStatoPunto : undefined} />}
+                  {(statoDelPin(selezionato) !== null || selezionato.voci.length > 0) && partitaId && !passaggioConArrivo(selezionato) && <AzioniStato spillo={selezionato} occupato={occupato} onRaccolto={onRaccolto ? cambiaRaccolto : undefined} onStatoPunto={onStatoPunto ? cambiaStatoPunto : undefined} />}
                   {/* L5 (T5): il pin di un luogo porta alla pagina del luogo, col suo nome (un negozio con sede: alla sua sezione nella pagina) */}
                   {categoriaSpillo(selezionato.tipo) === 'citta' && selezionato.dettaglio?.luogo?.casa && (() => {
                     const l = selezionato.dettaglio.luogo;
@@ -1224,6 +1223,12 @@ function parolaSegnato(s: SpilloDto | SchedaContenutoGuidaDto): string {
   return stati.length === 1 && stati[0] ? stati[0] : 'segnato';
 }
 
+/** Un pin di spostamento con un arrivo raggiungibile (porta, scala, rampino, passaggio…): serve a spostarsi e non si segna, nemmeno con
+ *  le voci della guida che ha (richiesta dell'utente, 2026-10-20, strada (b) del PM): quelle si segnano dalla guida. */
+function passaggioConArrivo(s: SpilloDto | SchedaContenutoGuidaDto): boolean {
+  return 'mappaChiave' in s && categoriaSpillo(s.tipo) === 'spostamento' && !s.destinazioneNonDisponibile && arrivoSpillo(s) !== null;
+}
+
 /** Che cosa si potrebbe segnare con una partita attiva: le voci della guida, lo stato del pin con la sua parola, gli acquisti. */
 function invitoSenzaPartita(s: SpilloDto | SchedaContenutoGuidaDto, negozio: boolean): string {
   const stato = statoDelPin(s);
@@ -1404,9 +1409,10 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
 
       <div className="flex flex-wrap gap-1.5">
         {!nonSpaziale && onCentra && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Centra" onClick={onCentra} />}
-        {partitaId && <AzioniStato spillo={s} occupato={occupato} onRaccolto={onRaccolto} onStatoPunto={onStatoPunto} />}
+        {/* un passaggio con arrivo non si segna (le sue voci si segnano dalla guida) */}
+        {partitaId && !passaggioConArrivo(s) && <AzioniStato spillo={s} occupato={occupato} onRaccolto={onRaccolto} onStatoPunto={onStatoPunto} />}
       </div>
-      {(statoDelPin(s) !== null || s.voci.length > 0 || negozio) && !partitaId && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary">partita</Link> per {invitoSenzaPartita(s, !!negozio)}.</span>}
+      {(statoDelPin(s) !== null || s.voci.length > 0 || negozio) && !partitaId && !passaggioConArrivo(s) && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary">partita</Link> per {invitoSenzaPartita(s, !!negozio)}.</span>}
     </section>
   );
 }
