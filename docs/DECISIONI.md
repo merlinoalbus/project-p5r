@@ -2185,6 +2185,8 @@ Giro 2 (segnalazioni dell'utente e revisione dell'indice delle Mappe, 2026-10-20
   - 06:07:44Z l'utente: «quindi organizza tu per risolvere il L2». Dopo, il **Project manager** ha portato sul rilascio E4/E5/E7 (0268751a
     alle 06:08:01Z, cherry-pick del FE d71a1bbd) e ha **implementato UX2-15** (63b4d80e alle 06:09:41Z, sul rilascio 3a056190 alle 06:09:44Z),
     con una prima verifica propria;
+  - 06:12:36Z il PM ha tentato di scrivere `docs/ROADMAP.md` nella cartella di rilascio prima di avere l'autorizzazione; il tentativo è stato
+    bloccato dalla regola che impedisce di scrivere nelle cartelle di altri, e il PM ha chiesto all'utente il permesso;
   - 06:19:21Z l'utente: «Autorizzo a fare in modo di completare l2». Il PM entra nella cartella di rilascio e scrive la ROADMAP (292a122e
     alle 06:19:32Z);
   - 06:39:53Z l'utente: «Riapri e al termine le richiudi... una alla volta». Le sessioni di prova sono state riaperte una alla volta e
