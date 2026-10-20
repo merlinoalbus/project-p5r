@@ -386,6 +386,33 @@ describe('EditorMappaPage', () => {
     expect(await screen.findByRole('button', { name: 'Spilli' })).toHaveAttribute('aria-pressed', 'true');
   });
 
+  // FUN2-8 (L2): nel mondo una planimetria sta in un'Area; spostarne una sciolta sotto un quartiere il server lo rifiuta (409
+  // `usa-aggiungi-area`) col messaggio pronto: l'editor lo lascia scritto sopra le proprietà, con la strada per farlo bene
+  it('FUN2-8: spostare una mappa sciolta sotto un quartiere mostra il messaggio del server con «Aggiungi area» e «Da collocare»', async () => {
+    const magazzino: MappaDto = { ...base, ...riassunto({ chiave: 'magazzino', nome: 'Magazzino', tipo: 'luogo', origine: 'utente' }), genitoreNome: null, percorso: [{ chiave: 'magazzino', nome: 'Magazzino' }] };
+    api.getAlberoMappe.mockResolvedValue([...albero.map((m) => m.chiave === 'citta-shibuya' ? { ...m, casa: '/guida/citta/shibuya' } : m), riassunto({ chiave: 'magazzino', nome: 'Magazzino', tipo: 'luogo', origine: 'utente' })]);
+    api.getMappa.mockResolvedValue(magazzino);
+    const testo = 'Nel mondo una planimetria sta in un’area: aggiungila con «Aggiungi area» nel quartiere (o «Aggiungi planimetria» in un’area), o collocala dall’elenco «Da collocare».';
+    api.aggiornaMappa.mockRejectedValue(new ApiError(409, 'usa-aggiungi-area', testo));
+    useNotificationStore.setState({ notifications: [] });
+    monta('/guida/mappe/magazzino/modifica');
+    fireEvent.click(await screen.findByRole('button', { name: 'Mappa' }));
+    const form = within(await screen.findByRole('region', { name: 'Proprietà della mappa' }));
+    scegliVoce('Mappa genitore', /^Shibuya/);
+    fireEvent.click(form.getByRole('button', { name: 'Salva mappa' }));
+    await waitFor(() => expect(api.aggiornaMappa).toHaveBeenCalledWith('magazzino', expect.objectContaining({ genitore: 'citta-shibuya' })));
+    const avviso = within(await screen.findByRole('alert', { name: 'La mappa non si sposta lì' }));
+    expect(avviso.getByText(testo)).toBeInTheDocument();
+    expect(avviso.getByRole('link', { name: 'Aggiungi area / planimetria dalla pagina del quartiere' })).toHaveAttribute('href', '/guida/citta/shibuya');
+    expect(avviso.getByRole('link', { name: 'Planimetrie da collocare' })).toHaveAttribute('href', '/guida/citta');
+    // niente «Mappa salvata.» né un secondo avviso che sparisce
+    expect(useNotificationStore.getState().notifications.map((n) => n.message)).not.toContain('Mappa salvata.');
+    expect(useNotificationStore.getState().notifications.map((n) => n.message)).not.toContain(testo);
+    // «Chiudi» lo toglie
+    fireEvent.click(avviso.getByRole('button', { name: 'Chiudi l’avviso' }));
+    expect(screen.queryByRole('alert', { name: 'La mappa non si sposta lì' })).toBeNull();
+  });
+
   it('le proprietà della mappa si salvano (nome, genitore, asset); il genitore proposto esclude la mappa stessa', async () => {
     api.aggiornaMappa.mockResolvedValue(base);
     monta();
