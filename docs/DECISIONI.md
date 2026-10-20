@@ -2160,7 +2160,8 @@ di ordinamento dell'app; nel gioco il Covo si apre dal menu dal 6/5 (fonte: Espe
 alla pagina delle sfide e delle Medaglie P, collegata all'area nei due sensi.
 
 Scelte del Project manager e della Stesura (da confermare): un'area per piano della Shujin; Aoyama Itchome sotto Shujin; Sottopasso con la
-versione «planimetria completa» come predefinita e avviso sulla versione senza pin; l'Aula 002-6-0 resta un'area a sé; i pin di passaggio
+versione `001-2-0` «inquadratura orientale» come predefinita («planimetria completa» è la versione a cui porta l'alias
+`shibuya-sottopasso`) e avviso sulla versione senza pin; l'Aula 002-6-0 resta un'area a sé; i pin di passaggio
 non si riscrivono (la navigazione risolve planimetria → area); **percorsi pubblici fissi** (`mappa.percorso_fisso`: la sincronizzazione non
 rinomina più i percorsi del Covo); **formato delle immagini riconosciuto dai byte** in ogni strada di salvataggio; la regola che assegna le
 aree è la funzione della migrazione 109, importata dal servizio (una regola sola); ordine delle aree a passi di 100; contatore del cestino
