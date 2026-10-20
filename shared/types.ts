@@ -12,7 +12,7 @@ import type { TipoMappa, TipoRiferimento, TipoSpillo } from './spilli.js';
 import type { GiornoChiave } from './orariNegozio.js';
 import type { TipoLuogo } from './tipiLuogo.js';
 import type { RequisitoSpillo } from './condizioniSpillo.js';
-import type { OrariNegozio } from './orariNegozio.js';
+import type { OrariDelLuogo, OrariNegozio } from './orariNegozio.js';
 import type { VoceEffetto } from './effettiCatalogo.js';
 import type { DoteChiave } from './doti.js';
 import type { CategoriaArticolo } from './articoli.js';
@@ -1336,6 +1336,11 @@ export interface NegozioRiassuntoDto {
   verificati: number;
   /** Solo con `partita`: la presenza del negozio alla data corrente, dagli orari. */
   disponibilita?: DisponibilitaDto;
+  /** L5: la sezione del negozio nella pagina del suo luogo (`/guida/luogo/<q>/<l>#negozio-<k>`), o null senza sede. Da L5 gli orari
+   *  (`orariStrutturati`, `orariTesto`, `disponibilita`) sono quelli della sede, più l'eccezione del negozio se c'è. */
+  sedeCasa?: string | null;
+  /** L5 (R5-12b): l'orario del solo negozio quando la guida lo distingue dal luogo (Chiesa di Kanda la domenica…), o null. */
+  eccezioneOrari?: OrariNegozio | null;
 }
 
 /** Disponibilità nella partita alla data corrente: «bloccato» con almeno un requisito rosso, «ignoto» se resta del grigio, altrimenti disponibile. */
@@ -1485,12 +1490,24 @@ export interface AreaRiassuntoDto {
   completamento?: { oggetti: number; fatti: number | null; completata: boolean | null };
 }
 /** Un luogo, negozio, attività o Confidente segnato con un pin su una planimetria dell'Area. */
-export interface ElementoAreaDto { tipo: 'luogo' | 'negozio' | 'attivita' | 'confidente'; chiave: string; nome: string; spillo: number; planimetria: string }
+export interface ElementoAreaDto { tipo: 'luogo' | 'negozio' | 'attivita' | 'confidente'; chiave: string; nome: string; spillo: number; planimetria: string;
+  /** L5: la presenza del luogo (o della sede del negozio) con la funzione unica; assente per Confidenti e attività senza sede. */
+  presenza?: PresenzaLuogoDto;
+  /** L5: la pagina del luogo (per un negozio con sede, la sua sezione `#negozio-<k>`), o null. */
+  casa?: string | null;
+  /** L5: il pin è agganciato a un negozio di un altro quartiere (da rivedere, nessun cambio senza il sì dell'utente). */
+  daRivedere?: 'negozio-altro-quartiere';
+  /** L5 R5-20f: luogo solo per gli eventi di un Confidente, mai in «Luoghi qui». */
+  soloEventi?: boolean }
 /** La pagina di un'Area. */
 export interface AreaDettaglioDto extends AreaRiassuntoDto {
   /** Le versioni, nell'ordine. */
   planimetrie: PlanimetriaAreaDto[];
   elementi: ElementoAreaDto[];
+  /** L5: i luoghi dell'Area (`luogo.area_chiave`), con la loro presenza. */
+  luoghi?: LuogoDto[];
+  /** L5: i luoghi dell'Area senza pin («Da posizionare»). */
+  daPosizionare?: LuogoDto[];
   /** Dove portano i passaggi delle sue planimetrie (lei esclusa), una volta per destinazione. */
   vicine: Array<{ nome: string; quartiereNome: string | null; casa: string }>;
 }
@@ -1561,6 +1578,49 @@ export interface LuogoDto {
   condizioni: CondizioneSpilloDto[] | null;
   /** Se il luogo, al punto in cui è la partita, è già nel mondo. Null senza partita. */
   disponibilita: DisponibilitaDto | null;
+  // ---- L5 «Luoghi, negozi, orari» (M §3.1): il luogo è la fonte. Il server li emette sempre; opzionali nel tipo finché il FE li legge ----
+  /** Il quartiere del luogo (chiave e nome). */
+  quartiere?: string;
+  quartiereNome?: string;
+  /** L'Area di L2 in cui sta il luogo, o null se è «da collocare». */
+  area?: { slug: string; nome: string; casa: string } | null;
+  /** Gli orari del luogo (`luogo.orari_json`), o la regola dell'app se la guida non ne dà (`origine: 'regola-app'`, R5-12c). */
+  orari?: OrariDelLuogo;
+  /** La frase degli orari (`descriviOrari`): «Solo di sera, dal giovedì alla domenica», o la regola dell'app. */
+  orariTesto?: string;
+  /** Sbloccato e aperto adesso, con la funzione unica `presenzaDelLuogo` (§2). */
+  presenza?: PresenzaLuogoDto;
+  /** La pagina del luogo: `/guida/luogo/<quartiere>/<luogo>`. */
+  casa?: string;
+  /** Il primo pin del luogo (per id), con la planimetria e la casa dell'area aperta sullo spillo; null se il luogo non è posizionato. */
+  pin?: { spillo: number; mappa: string; casa: string } | null;
+  /** Quanti altri pin ha il luogo (doppio pin, R5-16). */
+  altriPin?: number;
+  /** R5-20f: il luogo si visita solo negli eventi di quel Confidente (Sakura Residence → Futaba): mai nei menu né in «Luoghi qui». */
+  soloEventiConfidente?: { chiave: string; nome: string } | null;
+}
+
+/**
+ * La presenza di un luogo (L5 §2, funzione unica `presenzaDelLuogo` letta da tutte le viste): `sbloccato` (le sue condizioni di sblocco
+ * nella partita) e `aperto` (gli orari del luogo, o l'eccezione del negozio, contro giorno, fascia e meteo della partita); null senza
+ * partita. `testo` dice orari e stato: «Aperto adesso», «Chiuso adesso · apre giovedì sera», «Non ancora nel mondo».
+ */
+export interface PresenzaLuogoDto { sbloccato: boolean | null; aperto: boolean | null; testo: string }
+
+/** La pagina di un luogo (L5 §4.1, `GET /api/compendio/luoghi/:quartiere/:luogo`): il luogo con tutto quel che sta lì. */
+export interface LuogoDettaglioDto extends LuogoDto {
+  /** Un listino per ogni negozio della sede, con articoli e acquisti della partita come nella pagina del negozio. */
+  listini: NegozioDettaglioDto[];
+  /** Le attività che si svolgono qui, intere. */
+  attivitaDettaglio: AttivitaDto[];
+  /** I Confidenti che si incontrano qui, con l'arcano e la pagina. */
+  confidentiDettaglio: Array<{ chiave: string; nome: string; arcanaNome: string; casa: string }>;
+  /** Tutti i pin del luogo, con la planimetria, la casa dell'area aperta sullo spillo e la nota propria del pin se diversa. */
+  pins: Array<{ spillo: number; mappa: string; mappaNome: string; casa: string; notaPin: string | null }>;
+  /** Riga della guida corretta dall'utente (c'è un `seed_json`). */
+  modificato: boolean;
+  /** Il testo dello sblocco generato dalla condizione (L6, `nomiCondizioni`); null se non ce n'è. */
+  sbloccoTesto: string | null;
 }
 
 export interface QuartiereDettaglioDto {
@@ -1582,6 +1642,8 @@ export interface QuartiereDettaglioDto {
   /** Collegamento alla mappa pubblicata (null se nessuna fonte la offre). */
   pianta: PiantaAreaDto | null;
   piantaAssente: string | null;
+  /** L5: i luoghi del quartiere senza Area (da collocare con «Colloca»), con l'area proposta se la migrazione ne ha dedotta una. */
+  luoghiDaCollocare?: Array<LuogoDto & { areaProposta: { slug: string; nome: string } | null }>;
 }
 
 export interface AttivitaDto {
@@ -2321,8 +2383,12 @@ export interface DettaglioSpilloDto {
     /** §8.11: per una voce permanente o rigenerabile con pin, quanti dei suoi pin sono fatti nella partita (k/N; «in corso» se
      *  0 < k < N); null per una voce senza pin (il suo stato è il suo) o senza partita. */
     avanzamento?: AvanzamentoVoceDto | null };
-  luogo?: { chiave: string; quartiere: string; tipo: string; nome: string; cosaOffre: string; quando: string | null };
-  negozio?: { chiave: string; nome: string; tipo: string; disponibilita?: DisponibilitaDto; articoli: Array<{ chiave: string; nome: string; categoria: string; prezzo: number | null; disponibileDal: string | null; comprato: boolean; disponibilita?: DisponibilitaDto }> } | null;
+  luogo?: { chiave: string; quartiere: string; tipo: string; nome: string; cosaOffre: string; quando: string | null;
+    /** L5: gli orari del luogo in parole, la presenza, la pagina del luogo e tutti i negozi della sede. */
+    orariTesto?: string; presenza?: PresenzaLuogoDto; casa?: string; negozi?: Array<{ chiave: string; nome: string; casa: string }> };
+  negozio?: { chiave: string; nome: string; tipo: string; disponibilita?: DisponibilitaDto;
+    /** L5: la sezione del negozio nella pagina della sede, o null. */
+    sedeCasa?: string | null; articoli: Array<{ chiave: string; nome: string; categoria: string; prezzo: number | null; disponibileDal: string | null; comprato: boolean; disponibilita?: DisponibilitaDto }> } | null;
   confidente?: { chiave: string; nome: string; arcanaNome: string };
   richiesta?: { chiave: string; nome: string; stato: string | null };
 }
@@ -2416,6 +2482,11 @@ export interface SpilloDto {
   statoProprio?: boolean;
   /** Il riferimento del pin (dove porta, il luogo, il Confidente…) risolto. Non dice le voci della guida: quelle sono `voci`. */
   dettaglio: DettaglioSpilloDto | null;
+  /** L5: per un pin di luogo (o di negozio con sede) `nome` e `descrizione` sono quelli del luogo; la descrizione propria del pin, se
+   *  diversa e non vuota, resta qui (mai persa). Null per gli altri pin. */
+  notaPin?: string | null;
+  /** L5: la presenza del luogo del pin (o della sede del negozio), con la funzione unica; assente per gli altri pin. */
+  presenza?: PresenzaLuogoDto;
   /** Le voci della guida a cui il pin appartiene, ognuna col suo stato nella partita (2026-10-01; più d'una dalla 098, 2026-10-09:
    *  «Voci indipendenti»), in ordine di chiave: separate dal riferimento, così un passaggio porta alla sua mappa *e* fa parte di
    *  una voce. Vuoto = il pin non è di nessuna voce. */

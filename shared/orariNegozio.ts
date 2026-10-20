@@ -29,6 +29,26 @@ export interface OrariNegozio {
 
 export const ORARI_SEMPRE: OrariNegozio = { giorni: [], fasce: [], chiusoConPioggia: false, nota: null };
 
+/**
+ * L5 (R5-12c): dove la guida non dà un orario al luogo vale la **regola dichiarata dell'app**, «aperto giorno e sera, tutti i giorni»,
+ * segnata come regola e mai come dato della guida. È l'unica costante: chi legge un luogo senza orari (`luogo.orari_json` NULL) usa questa.
+ */
+export const ORARI_REGOLA_APP: OrariNegozio = ORARI_SEMPRE;
+
+/** Da dove vengono gli orari di un luogo: dalla guida (`luogo.orari_json`) o dalla regola dell'app (`ORARI_REGOLA_APP`). */
+export type OrigineOrari = 'guida' | 'regola-app';
+
+/** Gli orari di un luogo come li vede il client (L5): i valori e la loro origine. */
+export interface OrariDelLuogo extends OrariNegozio { origine: OrigineOrari }
+
+/** Gli orari di un luogo dalla sua colonna (L5): quelli della guida, o la regola dell'app se la colonna è vuota. */
+export function orariDelLuogo(json: string | null | undefined): OrariDelLuogo {
+  return json ? { ...leggiOrari(json), origine: 'guida' } : { ...ORARI_REGOLA_APP, origine: 'regola-app' };
+}
+
+/** Il testo della regola dell'app (R5-12c): si dice sempre che non è un dato della guida. */
+export const TESTO_REGOLA_APP = 'Giorno e sera · regola dell’app: la guida non indica orari';
+
 const GIORNI: readonly string[] = GIORNI_SETTIMANA.map((g) => g.chiave);
 const FASCE: readonly string[] = FASCE_ORARIO.map((f) => f.chiave);
 
@@ -91,8 +111,9 @@ export function descriviGiorni(giorni: GiornoChiave[]): string {
   return congiunzione(nomi);
 }
 
-/** La frase italiana degli orari: una sola per ogni valore uguale. */
-export function descriviOrari(o: OrariNegozio): string {
+/** La frase italiana degli orari: una sola per ogni valore uguale. Con l'origine «regola-app» (L5, R5-12c) dice che è la regola dell'app. */
+export function descriviOrari(o: OrariNegozio | OrariDelLuogo): string {
+  if ('origine' in o && o.origine === 'regola-app') return TESTO_REGOLA_APP;
   const parti: string[] = [];
   if (o.fasce.length === 1) parti.push(o.fasce[0] === 'giorno' ? 'Solo di giorno' : 'Solo di sera');
   if (o.giorni.length > 0) parti.push(descriviGiorni(o.giorni));
