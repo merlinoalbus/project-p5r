@@ -18,7 +18,7 @@ import { attivitaConQuiz, quizVoceDto } from './attivitaService.js';
 import { risolviOggettoCollegato } from './oggettiSelezionabili.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { descriviOrari, descriviOrariDelLuogo, leggiOrari, orariComeCondizioni, orariDelLuogo, type OrariNegozio } from '../../shared/orariNegozio.js';
-import { condizioniDiSblocco, regoleSbloccoLuoghi } from './sbloccoLuoghi.js';
+import { condizioniDiSblocco } from './sbloccoLuoghi.js';
 import type { ArticoloDto, NegozioDettaglioDto, NegozioRiassuntoDto, RicercaArticoliDto } from '../../shared/types.js';
 
 /** L5: quel che serve alla presenza di un negozio, letto con la riga: la sua eccezione d'orario e orari e sblocco della sede. */
@@ -55,7 +55,7 @@ function orariDelNegozio(r: PresenzaRiga): { orari: OrariNegozio; testo: string 
 /** L5: la presenza di un negozio come condizioni: lo sblocco della sede (se ne ha una) e gli orari del negozio. */
 function condizioniPresenza(r: PresenzaRiga, orari: OrariNegozio) {
   const nomi = nomiCondizioniMemo();
-  const sblocco = r.sede_chiave ? condizioniDiSblocco({ chiave: r.sede_chiave, condizioni_json: r.sede_condizioni_json ?? null }, regoleSbloccoLuoghi()) : [];
+  const sblocco = r.sede_chiave ? condizioniDiSblocco({ chiave: r.sede_chiave, condizioni_json: r.sede_condizioni_json ?? null }) : [];
   return [...sblocco.map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) })), ...regoleOrari(orari)];
 }
 

@@ -296,7 +296,7 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
       const riga = luoghi.righe.get(l.chiave);
       const orari = orariDelLuogo(riga?.orari_json ?? null);
       return { tipo, luogo: { chiave: l.chiave, quartiere: l.quartiere_chiave, tipo: l.tipo, nome: l.nome, cosaOffre: l.cosa_offre, quando: l.quando,
-        orariTesto: descriviOrariDelLuogo(orari), presenza: presenzaDelLuogo(riga ? condizioniDiSblocco(riga, luoghi.regole) : [], orari, luoghi.st), casa,
+        orariTesto: descriviOrariDelLuogo(orari), presenza: presenzaDelLuogo(riga ? condizioniDiSblocco(riga, luoghi.inviti) : [], orari, luoghi.st), casa,
         negozi: sedi.map((n) => ({ chiave: n.chiave, nome: n.nome, casa: `${casa}#negozio-${encodeURIComponent(n.chiave)}` })) }, negozio };
     }
     case 'negozio': {

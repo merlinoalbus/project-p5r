@@ -14,7 +14,8 @@ import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
-import { condizioniDiSblocco, regoleSbloccoLuoghi } from './sbloccoLuoghi.js';
+import { condizioniDiSblocco, invitiPerSblocco } from './sbloccoLuoghi.js';
+import type { RigaInvito } from './condizioni/condizioneEffettiva.js';
 import { chiaveMappa, nomePercorso } from './mappe/percorsiMappe.js';
 import { casaDellArea, casaDellaMappa, contestoAree, type ContestoAree } from './mappe/casaMappa.js';
 import { statoDisponibilitaPartita, valutaRequisiti, valutaRequisitiSpillo, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
@@ -44,7 +45,8 @@ export interface LettureLuoghi {
   nomiQuartieri: Map<string, string>;
   negozi: Map<string, Array<{ chiave: string; nome: string }>>;
   attivita: Map<string, Array<{ chiave: string; nome: string }>>;
-  regole: Map<string, RequisitoSpillo[]>;
+  /** L6: gli inviti dei Confidenti, letti una volta (lo sblocco di un luogo è la sua condizione oppure un invito che lo apre). */
+  inviti: RigaInvito[];
   aree: ContestoAree;
   pin: Map<string, PinDelLuogo[]>;
   /** Tutti i luoghi (anche nascosti: un pin può citarne uno), per chiave. */
@@ -97,7 +99,7 @@ export function lettureLuoghi(partitaId?: number, luogo?: string, stDato?: Stato
     nomiQuartieri: aree.nomiQuartieri.size ? aree.nomiQuartieri : new Map((prepared('SELECT chiave, nome FROM quartiere').all() as Array<{ chiave: string; nome: string }>).map((q) => [q.chiave, q.nome])),
     negozi: perSede(prepared('SELECT sede_chiave AS sede, chiave, nome FROM negozio WHERE nascosto = 0 AND sede_chiave IS NOT NULL ORDER BY ordine').all() as Array<{ sede: string; chiave: string; nome: string }>),
     attivita: perSede(prepared('SELECT sede_chiave AS sede, chiave, nome FROM attivita WHERE nascosto = 0 AND sede_chiave IS NOT NULL ORDER BY ordine').all() as Array<{ sede: string; chiave: string; nome: string }>),
-    regole: regoleSbloccoLuoghi(),
+    inviti: invitiPerSblocco(),
     aree,
     pin: pinDeiLuoghi(aree, luogo),
   };
@@ -124,8 +126,8 @@ export function presenzaDelLuogo(condizioni: RequisitoSpillo[], orari: OrariNego
 }
 
 /** La presenza di un negozio con sede: lo sblocco del luogo e l'orario del negozio (la sua eccezione, o quello del luogo). */
-export function presenzaDelNegozio(sede: RigaLuogo, eccezioneJson: string | null, l: Pick<LettureLuoghi, 'regole' | 'st'>): PresenzaLuogoDto {
-  return presenzaDelLuogo(condizioniDiSblocco(sede, l.regole), eccezioneJson ? leggiOrari(eccezioneJson) : orariDelLuogo(sede.orari_json), l.st);
+export function presenzaDelNegozio(sede: RigaLuogo, eccezioneJson: string | null, l: Pick<LettureLuoghi, 'inviti' | 'st'>): PresenzaLuogoDto {
+  return presenzaDelLuogo(condizioniDiSblocco(sede, l.inviti), eccezioneJson ? leggiOrari(eccezioneJson) : orariDelLuogo(sede.orari_json), l.st);
 }
 
 /** Il luogo come DTO (§3.1): negozi e attività dalle sedi, Confidenti con il nome, condizioni con il testo, area, orari e presenza dal luogo,
@@ -133,7 +135,7 @@ export function presenzaDelNegozio(sede: RigaLuogo, eccezioneJson: string | null
 export function luogoDto(r: RigaLuogo, l: LettureLuoghi): LuogoDto {
   const confidenti = (JSON.parse(r.confidenti_json) as string[]).map((c) => ({ chiave: c, nome: l.nomiConfidenti.get(c) ?? c }));
   const nomi = nomiCondizioniMemo();
-  const grezze = condizioniDiSblocco(r, l.regole);
+  const grezze = condizioniDiSblocco(r, l.inviti);
   const condizioni = grezze.length ? grezze.map((c) => ({ ...c, testo: descriviRequisitoSpillo(c, nomi) })) : null;
   const negozi = l.negozi.get(r.chiave) ?? [];
   const orari = orariDelLuogo(r.orari_json ?? null);
@@ -190,7 +192,7 @@ export function luogoDelPin(s: { riferimento_tipo: string | null; riferimento_ch
     casa = `${casaDelLuogo(luogo.chiave)}#negozio-${encodeURIComponent(s.riferimento_chiave)}`;
   } else return null;
   const orari = eccezione ? leggiOrari(eccezione) : orariDelLuogo(luogo.orari_json ?? null);
-  const presenza = presenzaDelLuogo(condizioniDiSblocco(luogo, l.regole), orari, l.st);
+  const presenza = presenzaDelLuogo(condizioniDiSblocco(luogo, l.inviti), orari, l.st);
   const descrizione = (s.descrizione ?? '').trim();
   if (s.riferimento_tipo === 'negozio') {
     const nomeNegozio = l.sediNegozi.get(s.riferimento_chiave)!.nome;

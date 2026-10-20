@@ -31,5 +31,6 @@ import { utente021 } from './021_cestino_delle_partite.js';
 import { utente022 } from './022_divergenze_da_verificare.js';
 import { utente023 } from './023_stato_del_pin_per_infiltrazione.js';
 import { utente024 } from './024_cascata_delle_tabelle_di_l4.js';
+import { utente025 } from './025_inviti_della_partita.js';
 
-export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006, utente007, utente008, utente009, utente010, utente011, utente012, utente013, utente014, utente015, utente016, utente017, utente018, utente019, utente020, utente021, utente022, utente023, utente024];
+export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006, utente007, utente008, utente009, utente010, utente011, utente012, utente013, utente014, utente015, utente016, utente017, utente018, utente019, utente020, utente021, utente022, utente023, utente024, utente025];

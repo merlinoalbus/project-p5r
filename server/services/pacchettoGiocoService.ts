@@ -87,6 +87,8 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
   { tabella: 'spillo_partita_infiltrazione', colonna: 'spillo_uid', entita: 'spillo', tabellaGioco: 'spillo', colonnaGioco: 'uid' },
   { tabella: 'spillo_partita_infiltrazione', colonna: 'infiltrazione_chiave', entita: 'infiltrazione', tabellaGioco: 'dungeon_area', colonnaGioco: 'chiave' },
   { tabella: 'richiesta_partita', colonna: 'richiesta_chiave', entita: 'richiesta', tabellaGioco: 'richiesta', colonnaGioco: 'chiave' },
+  // gli inviti dei Confidenti registrati nella partita (L6, utente 025): un invito che sparisce lascia la riga orfana
+  { tabella: 'invito_partita', colonna: 'invito_chiave', entita: 'invito di un Confidente', tabellaGioco: 'confidente_invito', colonnaGioco: 'chiave' },
   // i timbri si contano nelle aree dei dedali (099, utente 018)
   { tabella: 'timbri_dedalo_partita', colonna: 'area_chiave', entita: 'area di un dedalo dei Memento', tabellaGioco: 'area_dedalo', colonnaGioco: 'chiave' },
   { tabella: 'domanda_partita', colonna: 'domanda_id', entita: 'domanda', tabellaGioco: 'domanda', colonnaGioco: 'id' },

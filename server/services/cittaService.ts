@@ -22,6 +22,8 @@ import { verificaIngressoNelQuartiere } from './mappe/casaMappa.js';
 import { illustrazioneDellaMappa, immaginiCaricateDelleMappe } from './mappe/immagineMappa.js';
 import { datiGuida } from './datiGuida.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
+import { condizioneEffettivaQuartiere, tuttiGliInviti } from './condizioni/condizioneEffettiva.js';
+import { cosaManca } from './condizioni/valutatore.js';
 import { descriviRequisitoSpillo, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 
 interface RigaPiantaQ { quartiere_chiave: string; url: string; pagina: string | null; fonte: string; licenza: string; larghezza: number | null; altezza: number | null; note: string }
@@ -51,11 +53,16 @@ function regoleSblocco(): Map<string, RequisitoSpillo[]> {
  *  un dubbio non toglie un quartiere dalla mappa. Per il quartiere, che è una destinazione radice,
  *  il rango di un Confidente decide se ci puoi arrivare (decisione dell'utente, 7 settembre 2026). */
 function disponibilitaQuartiere(chiave: string, regole: Map<string, RequisitoSpillo[]>, st: StatoDisponibilita | null): { disponibile: boolean; bloccoMotivo: string | null } {
-  const condizioni = regole.get(chiave);
-  if (!st || !condizioni) return { disponibile: true, bloccoMotivo: null };
+  if (!st) return { disponibile: true, bloccoMotivo: null };
+  // L6 (R6-08, R6-09): la condizione del quartiere (`quartiere.condizioni_json`) in OR con gli inviti; le regole della guida restano solo
+  // per uno schema di prima della 118
+  const condizioni = condizioneEffettivaQuartiere(chiave, st.inviti ??= tuttiGliInviti()) ?? regole.get(chiave);
+  if (!condizioni) return { disponibile: true, bloccoMotivo: null };
   const esito = valutaRequisiti(condizioni.map((c) => ({ ...c, testo: descriviRequisitoSpillo(c) })) as RequisitoDisponibilita[], st);
   if (esito.stato !== 'bloccato') return { disponibile: true, bloccoMotivo: null };
-  return { disponibile: false, bloccoMotivo: esito.requisiti.map((r) => r.dettaglio).join(' · ') };
+  // L6 (R6-29): che cosa manca, generato dalla condizione («Manca: Libro letto: Vague»); il dettaglio del valutatore se non si sa dire
+  const manca = cosaManca(condizioni.length === 1 ? condizioni[0] : { tipo: 'gruppo', modo: 'tutte', condizioni }, st);
+  return { disponibile: false, bloccoMotivo: manca ? `Manca: ${manca}` : esito.requisiti.map((r) => r.dettaglio).join(' · ') };
 }
 
 /** Quartieri in ordine con conteggi dei luoghi (non nascosti); con una partita, anche se sono già nel mondo. */
