@@ -17,7 +17,7 @@
   ],
   "p5s": {
     "url": "https://p5s.nasmerlinoalbus.cloud/",
-    "stato": "online; newreview pubblicato fino a 7d37ae07; DTO quartiere con sblocco strutturato; p5s mostra 306 mappe/767 pin; L6 B5 in sviluppo"
+    "stato": "online; newreview pubblicato fino a 7d37ae07; DTO quartiere con sblocco strutturato; p5s mostra 306 mappe/767 pin; migrazione 120 e API modifica/ripristino sblocco pronte nel ramo; editor FE e verifica metro-diario aperti"
   },
   "lotti": [
     {
@@ -144,7 +144,7 @@
       "id": "L6",
       "titolo": "Condizioni uniche",
       "dipende": "L5",
-      "nota": "21:30Z: IN CORSO, BE e FE fatti dalla sessione FE (BE ferma, aspetta il via dell'utente): B0 90629264, B1 816ecfeb (valutatore unico, 490/490 risposte identiche); prossima la migrazione 118. — in preparazione: progetto sulla base p5s (niente condizioni «manuali», inviti con condizioni, «concluso» con il boss finale dichiarato); in corso il piano di lavoro (Stesura), i casi funzionali (con Analisi requisiti) e di layout, la rilettura dell'app (Analisi app)",
+      "nota": "2026-10-20: B5 pubblicata fino a 7d37ae07; migrazione 120 con snapshot guida e API BE di modifica/ripristino dello sblocco dei quartieri pronte nel ramo. Restano editor FE, verifica metro-diario e B6. — precedente: 21:30Z: IN CORSO, BE e FE fatti dalla sessione FE (BE ferma, aspetta il via dell'utente): B0 90629264, B1 816ecfeb (valutatore unico, 490/490 risposte identiche); prossima la migrazione 118.",
       "fasi": {
         "requisiti": "fatta",
         "dati": "fatta",

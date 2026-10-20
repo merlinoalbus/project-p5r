@@ -14,7 +14,7 @@ import { bodyArea, bodyAreaDedalo, bodyAreePalazzoInfiltrazione, bodyAtterraggi,
 import { correggiRequisitoRichiesta, impostaRequisitiRango, requisitiDelConfidente, ripristinaRequisitiRango, togliRequisitoRichiesta } from '../services/requisitiConfidentiService.js';
 import { condizioneSpillo } from '../schemas/mappe.js';
 import type { Condizione } from '../../shared/condizioniSpillo.js';
-import { dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuartiere } from '../services/cittaService.js';
+import { aggiornaSbloccoQuartiere, dettaglioQuartiere, elencaLuoghi, elencaQuartieri, impostaIngressoQuartiere, ripristinaSbloccoQuartiere } from '../services/cittaService.js';
 import { dettaglioLuogo } from '../services/luoghiService.js';
 import { elencaInviti } from '../services/inviti.js';
 import { paramsLuogo, queryLuogo } from '../schemas/luoghi.js';
@@ -220,6 +220,14 @@ router.get('/citta/:chiave', validate({ params: z.object({ chiave: z.string().mi
   // La partita serve ai **luoghi**, non al quartiere: senza, l'elenco non può dire quali posti a
   // quel punto della partita non esistono ancora.
   res.json(dettaglioQuartiere(String(req.params.chiave), (req.query as unknown as { partita?: number }).partita));
+});
+/** L6: modifica la condizione propria dello sblocco del quartiere; gli inviti restano gestiti dal Confidente. */
+router.put('/citta/:chiave/sblocco', validate({ params: z.object({ chiave: z.string().min(1).max(80) }), body: z.object({ condizioni: z.array(condizioneSpillo).max(20) }).strict() }), (req, res) => {
+  res.json(aggiornaSbloccoQuartiere(String(req.params.chiave), (req.body as { condizioni: Condizione[] }).condizioni));
+});
+/** L6: ripristina la condizione propria dalla copia della guida. */
+router.post('/citta/:chiave/sblocco/ripristina', validate({ params: z.object({ chiave: z.string().min(1).max(80) }) }), (req, res) => {
+  res.json(ripristinaSbloccoQuartiere(String(req.params.chiave)));
 });
 router.get('/attivita', validate({ query: queryDomande }), (req, res) => {
   res.json(attivitaTutte((req.query as unknown as { partita?: number }).partita));

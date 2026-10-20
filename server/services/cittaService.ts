@@ -24,7 +24,7 @@ import { datiGuida } from './datiGuida.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
 import { condizioneEffettivaQuartiere, tuttiGliInviti } from './condizioni/condizioneEffettiva.js';
 import { cosaManca } from './condizioni/valutatore.js';
-import { descriviRequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { valutaInsieme } from './condizioni/valutatore.js';
 import { elencaInviti } from './inviti.js';
@@ -34,7 +34,7 @@ interface RigaPiantaQ { quartiere_chiave: string; url: string; pagina: string | 
 /** Chiave dell'immagine (ambito «mappa») della mappa di un quartiere. */
 export const chiaveImmagineQuartiere = (quartiere: string): string => `citta-${quartiere}`;
 
-interface RigaQuartiere { sblocco_data: string | null; chiave: string; ordine: number; nome: string; sblocco: string | null; descrizione: string; fonte: string }
+interface RigaQuartiere { sblocco_data: string | null; chiave: string; ordine: number; nome: string; sblocco: string | null; descrizione: string; fonte: string; condizioni_json?: string | null; fonte_condizioni_json?: string | null; condizioni_guida_json?: string | null; fonte_condizioni_guida_json?: string | null }
 
 /** «Entrata dei Memento» sta nella tabella dei quartieri, ma un quartiere non è: si raggiunge da
  *  `/guida/dungeon/mementos` e dalle richieste dei Memento. */
@@ -62,7 +62,7 @@ function sbloccoQuartiere(chiave: string, partitaId?: number): SbloccoDto | unde
   if (!condizioni) return undefined;
   const nomi = nomiCondizioniMemo();
   const condizione = condizioni.length === 1 ? condizioni[0] : { tipo: 'gruppo' as const, modo: 'tutte' as const, condizioni };
-  const fonteRiga = prepared('SELECT fonte_condizioni_json FROM quartiere WHERE chiave = ?').get(chiave) as { fonte_condizioni_json: string | null } | undefined;
+  const fonteRiga = prepared('SELECT fonte_condizioni_json, condizioni_json, condizioni_guida_json FROM quartiere WHERE chiave = ?').get(chiave) as { fonte_condizioni_json: string | null; condizioni_json: string | null; condizioni_guida_json: string | null } | undefined;
   let fonte: SbloccoDto['fonte'] = null;
   try { fonte = fonteRiga?.fonte_condizioni_json ? JSON.parse(fonteRiga.fonte_condizioni_json) as SbloccoDto['fonte'] : null; } catch { /* fonte non valida: resta null */ }
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
@@ -72,8 +72,28 @@ function sbloccoQuartiere(chiave: string, partitaId?: number): SbloccoDto | unde
     condizione, testo: descriviRequisitoSpillo(condizione, nomi), fonte,
     esito: stato === 'disponibile' ? 'vero' : stato === 'bloccato' ? 'falso' : stato === 'ignoto' ? 'grigio' : null,
     manca: stato === 'bloccato' && st ? cosaManca(condizione, st, nomi) : null,
-    inviti: elencaInviti({ apreTipo: 'quartiere', apreChiave: chiave }, partitaId), modificato: false,
+    inviti: elencaInviti({ apreTipo: 'quartiere', apreChiave: chiave }, partitaId),
+    modificato: fonteRiga?.condizioni_guida_json !== null && fonteRiga?.condizioni_guida_json !== undefined
+      ? JSON.stringify(leggiCondizioniSalvate(fonteRiga.condizioni_json)) !== JSON.stringify(leggiCondizioniSalvate(fonteRiga.condizioni_guida_json))
+      : false,
   };
+}
+
+/** Sostituisce la condizione propria del quartiere; gli inviti dei Confidenti restano separati e intatti. */
+export function aggiornaSbloccoQuartiere(chiave: string, condizioni: ReadonlyArray<RequisitoSpillo>): QuartiereDettaglioDto {
+  if (!prepared('SELECT 1 FROM quartiere WHERE chiave = ?').get(chiave)) throw httpErrors.notFound('quartiere-non-trovato', `Il quartiere '${chiave}' non esiste.`);
+  const normalizzate = normalizzaCondizioniSpillo(condizioni);
+  prepared('UPDATE quartiere SET condizioni_json = ? WHERE chiave = ?').run(JSON.stringify(normalizzate), chiave);
+  return dettaglioQuartiere(chiave);
+}
+
+/** Ripristina la condizione propria dalla copia immutabile della guida creata dalla migrazione 120. */
+export function ripristinaSbloccoQuartiere(chiave: string): QuartiereDettaglioDto {
+  const guida = prepared('SELECT condizioni_guida_json, fonte_condizioni_guida_json FROM quartiere WHERE chiave = ?').get(chiave) as { condizioni_guida_json: string | null; fonte_condizioni_guida_json: string | null } | undefined;
+  if (!guida) throw httpErrors.notFound('quartiere-non-trovato', `Il quartiere '${chiave}' non esiste.`);
+  if (guida.condizioni_guida_json === null) throw httpErrors.conflict('guida-non-disponibile', 'La condizione della guida non è disponibile per questo quartiere.');
+  prepared('UPDATE quartiere SET condizioni_json = ?, fonte_condizioni_json = ? WHERE chiave = ?').run(guida.condizioni_guida_json, guida.fonte_condizioni_guida_json, chiave);
+  return dettaglioQuartiere(chiave);
 }
 
 /** Quartieri in ordine con conteggi dei luoghi (non nascosti); con una partita, anche se sono già nel mondo. */
