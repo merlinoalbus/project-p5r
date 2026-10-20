@@ -643,6 +643,28 @@ it('dalla casa di un’area (senza parametri) si apre la sua predefinita; la ver
   expect(await screen.findByText(/^Visore: m-cancello(?!-)/)).toBeInTheDocument();
 });
 
+it('le schede della guida senza mappa né voce si vedono nella scheda del Palazzo, in «Schede da sistemare (N)», col testo e l’infiltrazione (AP3-1)', async () => {
+  getDungeon.mockResolvedValue({ ...palazzo(true), schedeDaSistemare: [
+    { id: 14, nome: 'Tre guardie del Tetto', descrizione: '2 Cavalieri brutali + 1 Nemico potente', tipo: 'miniboss', infiltrazione: 'k-03', infiltrazioneNome: 'Cortile', posizione: { x: 1, y: 2 } },
+    { id: 15, nome: 'Forziere dei 3 Magatama', descrizione: '', tipo: 'forziere', infiltrazione: 'k-01', infiltrazioneNome: 'Cancello', posizione: null },
+  ] });
+  monta('kamoshida');
+  const sezione = within((await screen.findByText('Schede da sistemare (2)')).closest('details')!);
+  const righe = within(sezione.getByRole('list', { name: 'Schede da sistemare' })).getAllByRole('listitem');
+  expect(righe).toHaveLength(2);
+  expect(righe[0]).toHaveTextContent('Tre guardie del Tetto');
+  expect(righe[0]).toHaveTextContent('Cortile');
+  expect(righe[0]).toHaveTextContent('2 Cavalieri brutali + 1 Nemico potente');
+  expect(righe[1]).toHaveTextContent('Forziere dei 3 Magatama');
+});
+
+it('senza schede da sistemare la sezione non c’è (AP3-1)', async () => {
+  getDungeon.mockResolvedValue({ ...palazzo(true), schedeDaSistemare: [] });
+  monta('kamoshida');
+  await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+  expect(screen.queryByText(/^Schede da sistemare/)).not.toBeInTheDocument();
+});
+
 it('«Modifica area»: le versioni si riordinano e l’etichetta svuotata si toglie (torna «Planimetria N»), col contenitore del Palazzo', async () => {
   getDungeon.mockResolvedValue(conDueVersioni());
   aggiornaPlanimetrieArea.mockResolvedValue({});
