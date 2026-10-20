@@ -30,12 +30,16 @@ import { tracciamentoPerTipo } from '../../shared/attivita.js';
 // non hanno `disponibile_dal`/`condizione`/`fonte` (prosa: si scrivono le condizioni), libri, film
 // e attività portano `effetti_json`; `fonte` resta colonna ma non si scrive più da qui.
 const CAMPI: Record<TipoCatalogo, readonly string[]> = {
-  negozio: ['nome', 'luogo', 'luogo_chiave', 'sede_chiave', 'tipo', 'gestore', 'confidente_chiave', 'orari_json', 'programma_punti_json', 'note'],
+  // L5: `orari_json` conta solo per un negozio senza sede (online, televisione); con la sede valgono gli orari del luogo, salvo
+  // `eccezione_orari_json` quando la guida distingue il negozio (R5-12b)
+  negozio: ['nome', 'luogo', 'luogo_chiave', 'sede_chiave', 'tipo', 'gestore', 'confidente_chiave', 'orari_json', 'eccezione_orari_json', 'programma_punti_json', 'note'],
   articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'nome_it', 'categoria', 'per', 'prezzo', 'quantita', 'oggetto_fonte', 'oggetto_chiave', 'effetto_json', 'effetto', 'statistiche', 'nota', 'verificato'],
   libro: ['condizioni_json', 'nome', 'nome_it', 'dove', 'prezzo', 'dote', 'note', 'sblocca', 'effetto_json', 'effetti_json', 'sessioni', 'dettagli', 'verificato'],
   film: ['condizioni_json', 'nome', 'nome_it', 'dove', 'dote', 'note', 'note_successive', 'effetti_json', 'prezzo', 'sessioni', 'dettagli', 'verificato'],
   attivita: ['condizioni_json', 'nome', 'tipo', 'luogo', 'luogo_chiave', 'sede_chiave', 'fascia', 'costo', 'sblocco', 'sessioni', 'doti_json', 'altri_effetti', 'regole', 'premi', 'paga', 'paga_yen', 'paga_massima', 'dettagli', 'effetti_json', 'tracciamento', 'quiz_json', 'verificato'],
-  luogo: ['condizioni_json', 'quartiere_chiave', 'tipo', 'nome', 'cosa_offre', 'quando', 'giorni_json', 'note', 'verificato'],
+  // L5 (R5-07, un modulo solo): orari strutturati (null = regola dell'app), Area, sblocco, Confidenti e piatti; `quando`/`giorni_json` non si
+  // leggono più (restano scrivibili per i pacchetti di prima)
+  luogo: ['condizioni_json', 'quartiere_chiave', 'tipo', 'nome', 'cosa_offre', 'quando', 'giorni_json', 'orari_json', 'area_chiave', 'sblocco', 'confidenti_json', 'piatti_json', 'note', 'verificato'],
   domanda: ['data', 'tipo', 'chi', 'domanda', 'risposte_json', 'ricompensa', 'note', 'fonte'],
   cruciverba: ['data', 'indizio', 'risposta', 'risposta_en', 'fonte'],
 };
@@ -117,7 +121,7 @@ function chiaveLibera(tipo: TipoCatalogo, nome: string, negozio?: string): strin
 }
 
 /** I riferimenti indicati devono esistere davvero: un negozio in un quartiere inventato sparirebbe dalle pagine. */
-function verificaRiferimenti(tipo: TipoCatalogo, dati: Record<string, unknown>): void {
+function verificaRiferimenti(tipo: TipoCatalogo, dati: Record<string, unknown>, esistente: Riga | null = null): void {
   /** Vero se la chiave è una stringa e nella tabella indicata c'è una riga con quella chiave. */
   const esiste = (tabella: string, chiave: unknown) => typeof chiave === 'string' && !!prepared(`SELECT 1 FROM ${tabella} WHERE chiave = ?`).get(chiave);
   // la sede di un negozio o di un'attività è un luogo della città, e deve esistere
@@ -130,6 +134,18 @@ function verificaRiferimenti(tipo: TipoCatalogo, dati: Record<string, unknown>):
   const padre = PROFILO[tipo].padre;
   if (padre && dati[padre.campo] != null && !esiste(padre.tabella, dati[padre.campo])) {
     throw httpErrors.badRequest(padre.codice, `${padre.nome} '${String(dati[padre.campo])}' non esiste.`);
+  }
+  // L5: l'Area di un luogo è del suo quartiere; i Confidenti citati esistono
+  if (tipo === 'luogo') {
+    if (dati.area_chiave != null) {
+      const a = prepared('SELECT quartiere_chiave FROM area WHERE chiave = ?').get(dati.area_chiave) as { quartiere_chiave: string | null } | undefined;
+      if (!a) throw httpErrors.badRequest('area-sconosciuta', `L’area '${String(dati.area_chiave)}' non esiste.`);
+      const quartiere = typeof dati.quartiere_chiave === 'string' ? dati.quartiere_chiave : esistente?.quartiere_chiave;
+      if (quartiere && a.quartiere_chiave !== quartiere) throw httpErrors.badRequest('area-di-altro-quartiere', 'L’area scelta è di un altro quartiere.');
+    }
+    if (typeof dati.confidenti_json === 'string') {
+      for (const c of JSON.parse(dati.confidenti_json) as string[]) if (!esiste('confidente', c)) throw httpErrors.badRequest('confidente-sconosciuto', `Il Confidente '${c}' non esiste.`);
+    }
   }
 }
 
@@ -282,7 +298,7 @@ export function creaElemento(tipo: TipoCatalogo, grezzi: Record<string, unknown>
 export function aggiornaElemento(tipo: TipoCatalogo, chiave: string, grezzi: Record<string, unknown>): ElementoCatalogoDto {
   const r = riga(tipo, chiave);
   if (typeof grezzi.condizioni_json === 'string') verificaCondizioni(JSON.parse(grezzi.condizioni_json));
-  verificaRiferimenti(tipo, grezzi);
+  verificaRiferimenti(tipo, grezzi, r);
   const dati = normalizzaScrittura(tipo, grezzi, r);
   const adesso = nowIso();
   const seedJson = r.seed_json ?? (r.origine === 'seed' ? JSON.stringify(Object.fromEntries(CAMPI[tipo].map((c) => [c, r[c] ?? null]))) : null);
@@ -328,11 +344,21 @@ export function eliminaElemento(tipo: TipoCatalogo, chiave: string): { esito: 'e
     })();
     return { esito: 'eliminata', elemento: null };
   }
+  return { esito: 'ripristinata', elemento: ripristinaElemento(tipo, chiave) };
+}
+
+/**
+ * «Ripristina i valori della guida» (L5, M §3.2, `POST /api/catalogo/:tipo/:chiave/ripristina`, per tutti i tipi): rimette `seed_json` sulla riga.
+ * 400 `creata-da-te` per una riga dell'utente (non c'è un valore della guida), 400 `riga-del-seed` per una riga della guida mai corretta. Non
+ * elimina mai.
+ */
+export function ripristinaElemento(tipo: TipoCatalogo, chiave: string): ElementoCatalogoDto {
+  const r = riga(tipo, chiave);
+  if (r.origine === 'utente' && r.seed_json === null) throw httpErrors.badRequest('creata-da-te', 'Questa riga l’hai creata tu: non c’è un valore della guida da rimettere. Per toglierla usa «Elimina».');
   const originale = r.seed_json ? (JSON.parse(r.seed_json) as Record<string, unknown>) : null;
   if (!originale) throw httpErrors.badRequest('riga-del-seed', 'Questa riga arriva dai dati della guida e non è stata modificata: non c\'è nulla da ripristinare. Usa «Nascondi» se non vuoi vederla.');
   const daProsaRip = PROFILO[tipo].condizioniDa;
   if (daProsaRip && originale.condizioni_json == null) originale.condizioni_json = JSON.stringify(migraTestiCondizioni(daProsaRip(originale), contestoRiga(getDb(), contestoConversione(getDb()), { tabella: tipo, chiave: String(r.chiave), negozio_chiave: originale.negozio_chiave, confidente_chiave: originale.confidente_chiave })));
-  const set = CAMPI[tipo].map((c) => `${c} = @${c}`);
   // **Un'istantanea vecchia non conosce i campi aggiunti dopo.** `seed_json` conserva la riga com'era
   // il giorno in cui l'hai corretta: se da allora la tabella ha guadagnato una colonna — `verificato`
   // e' entrata fra i campi salvati con la stellina delle righe tue — quel campo nell'istantanea non
@@ -345,7 +371,12 @@ export function eliminaElemento(tipo: TipoCatalogo, chiave: string): { esito: 'e
   // Stessa cosa per `giorni_json` (migrazione 080): un'istantanea di prima porta la frase `giorni`, e da quella si
   // ricavano le chiavi, come ha fatto la migrazione; senza nemmeno la frase, nessuna limitazione.
   const predefinito = (c: string): unknown => c === 'verificato' ? 1 : c === 'giorni_json' ? JSON.stringify(giorniDallaFrase(typeof originale.giorni === 'string' ? originale.giorni : null).giorni) : null;
-  const valori: Record<string, unknown> = { chiave, ...Object.fromEntries(CAMPI[tipo].map((c) => [c, originale[c] ?? predefinito(c)])) };
+  // L5: i campi nuovi che un'istantanea di prima della 115 non conosce restano come sono (orari, Area, eccezione: la guida non li aveva), invece
+  // di tornare null; gli altri campi assenti prendono il predefinito come prima
+  const nuoviL5 = new Set(['orari_json', 'area_chiave', 'eccezione_orari_json']);
+  const campi = CAMPI[tipo].filter((c) => c in originale || !nuoviL5.has(c));
+  const set = campi.map((c) => `${c} = @${c}`);
+  const valori: Record<string, unknown> = { chiave, ...Object.fromEntries(campi.map((c) => [c, originale[c] ?? predefinito(c)])) };
   prepared(`UPDATE ${TABELLA[tipo]} SET ${set.join(', ')}, origine = 'seed', nascosto = 0, seed_json = NULL, updated_at = NULL WHERE chiave = @chiave`).run(valori);
-  return { esito: 'ripristinata', elemento: dto(tipo, riga(tipo, chiave)) };
+  return dto(tipo, riga(tipo, chiave));
 }

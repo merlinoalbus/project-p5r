@@ -53,8 +53,15 @@ export const DESCRIZIONI_CATALOGO: DescrizioniArea = {
   },
   'DELETE /api/catalogo/:tipo/:chiave': {
     sommario: 'Elimina una riga creata dall\'utente o riporta com\'era una riga della guida corretta',
-    descrizione: 'Una riga creata dall\'utente si elimina (gli articoli di un negozio dell\'utente se ne vanno con lui) e pin e mappe che citavano quel luogo o quel negozio perdono il collegamento. Una riga della guida corretta o nascosta torna com\'era nei dati della guida, visibile. Una riga della guida mai modificata non ha nulla da ripristinare: 400 (per toglierla dalla vista si nasconde).',
+    descrizione: 'Una riga creata dall\'utente si elimina (gli articoli di un negozio dell\'utente se ne vanno con lui) e pin e mappe che citavano quel luogo o quel negozio perdono il collegamento. Una riga della guida corretta o nascosta torna com\'era nei dati della guida, visibile. Una riga della guida mai modificata non ha nulla da ripristinare: 400 (per toglierla dalla vista si nasconde). **L5, luoghi e negozi**: `DELETE` elimina e basta, sempre nel cestino (righe della guida e dell\'utente): senza `?conferma=1` e con contenuti risponde 409 (`luogo-con-contenuti`: pin, negozi e attività della sede; `negozio-con-acquisti`: articoli, acquisti e punti nelle partite, pin) con il riepilogo nei dettagli; con la conferma il luogo se ne va con i suoi pin (immagini e stati compresi) e negozi e attività restano senza sede, il negozio con articoli, acquisti e punti delle partite (i pin restano senza riferimento). Si rimette dal Cestino. La risposta porta anche `riepilogo`. «Ripristina» è `POST …/ripristina`.',
     risposta: '`{ esito: "eliminata" | "ripristinata", elemento }`: `elemento` è la riga ripristinata (`ElementoCatalogoDto`) o null se eliminata',
-    errori: [[400, 'riga-del-seed']],
+    errori: [[400, 'riga-del-seed'], [409, 'luogo-con-contenuti'], [409, 'negozio-con-acquisti'], [404, 'luogo-non-trovato'], [404, 'negozio-non-trovato']],
+  },
+  'POST /api/catalogo/:tipo/:chiave/ripristina': {
+    sommario: '«Ripristina i valori della guida» di una riga corretta (ogni tipo del catalogo)',
+    descrizione: 'L5: rimette sulla riga i valori della guida (`seed_json`), la rende di nuovo della guida e visibile. Non elimina mai: per un luogo o un negozio «Elimina» è `DELETE …?conferma=1` (cestino); per gli altri tipi `DELETE` resta com\'è fino a L11. 400 `creata-da-te` per una riga creata dall\'utente (non c\'è un valore della guida), 400 `riga-del-seed` per una riga della guida mai corretta.',
+    senzaCorpo: true,
+    risposta: 'La riga ripristinata, `ElementoCatalogoDto`',
+    errori: [[400, 'creata-da-te'], [400, 'riga-del-seed']],
   },
 };

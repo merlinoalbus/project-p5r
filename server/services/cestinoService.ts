@@ -49,20 +49,27 @@ interface Passo { seq: number; tabella: string; op: Operazione; prima?: Riga; do
 /** Le chiavi di ciò che stava subito prima e subito dopo l'elemento nel suo elenco (null se era il primo, o l'ultimo). */
 export interface ViciniCestino { prima: string | null; dopo: string | null }
 
+/** I tipi di elemento che il server mette nel cestino: quelli di `TipoCestino` più il luogo e il negozio di L5 (migrazione 115). Passano in
+ *  `TipoCestino` quando l'interfaccia ha i loro nomi; fino ad allora l'elenco li manda con il loro valore. */
+export type TipoElementoCestino = TipoCestino | 'luogo' | 'negozio';
+
 /** L'elemento che si elimina, per l'elenco del cestino; `vicini` per rimetterlo al suo posto (aree, voci). */
-export interface ElementoCestino { tipo: TipoCestino; chiave: string; nome: string; contesto?: string; vicini?: ViciniCestino }
+export interface ElementoCestino { tipo: TipoElementoCestino; chiave: string; nome: string; contesto?: string; vicini?: ViciniCestino }
 
 /** Le tabelle del cestino stesso non si registrano. */
 const ESCLUSE: Record<Schema, ReadonlySet<string>> = { main: new Set(['cestino']), utente: new Set(['cestino_partite']) };
 
 /** La riga che è l'elemento: se dopo il ripristino non c'è, non si è rimesso niente. */
-const RADICE: Record<TipoCestino, { tabella: string; colonna: string }> = {
+const RADICE: Record<TipoElementoCestino, { tabella: string; colonna: string }> = {
   area: { tabella: 'dungeon_area', colonna: 'chiave' },
   voce: { tabella: 'punto_interesse', colonna: 'chiave' },
   mappa: { tabella: 'mappa', colonna: 'chiave' },
   'area-dedalo': { tabella: 'area_dedalo', colonna: 'chiave' },
   // un'Area del mondo con le sue planimetrie (L2, migrazione 109)
   'area-fisica': { tabella: 'area', colonna: 'chiave' },
+  // L5 (migrazione 115): un luogo con i suoi pin, un negozio con articoli, acquisti e punti
+  luogo: { tabella: 'luogo', colonna: 'chiave' },
+  negozio: { tabella: 'negozio', colonna: 'chiave' },
 };
 
 /**
@@ -90,6 +97,10 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   divergenza_partita: ['divergenza da verificare nelle partite', 'divergenze da verificare nelle partite'],
   // L4 (§8.11, utente 023)
   spillo_partita_infiltrazione: ['stato di un pin in un’infiltrazione nelle partite', 'stati dei pin per infiltrazione nelle partite'],
+  // L5 (migrazione 115): luoghi e negozi
+  luogo: ['luogo', 'luoghi'], negozio: ['negozio', 'negozi'], articolo: ['articolo', 'articoli'], attivita: ['attività', 'attività'],
+  marcatore_luogo: ['segnaposto di un luogo', 'segnaposto dei luoghi'],
+  acquisto_partita: ['acquisto nelle partite', 'acquisti nelle partite'], punti_negozio_partita: ['punti di un negozio nelle partite', 'punti dei negozi nelle partite'],
 };
 
 /** Il nome per l'utente di `quante` righe di una tabella (al singolare per una sola). */
@@ -105,10 +116,10 @@ export function etichettaTabella(tabella: string, quante = 2): string {
 export type DopoRipristinoCestino = (chiave: string, vicini: ViciniCestino | null, saltate: readonly SaltataCestinoDto[]) => void;
 
 /** Dopo un ripristino, ciò che dipende dall'elemento (ordine delle aree, percorsi delle mappe): lo registra il servizio del tipo. */
-const dopoRipristino = new Map<TipoCestino, DopoRipristinoCestino>();
+const dopoRipristino = new Map<TipoElementoCestino, DopoRipristinoCestino>();
 
 /** Registra ciò che va rimesso a posto dopo il ripristino di un elemento di un tipo (una funzione per tipo). */
-export function registraRipristinoCestino(tipo: TipoCestino, fn: DopoRipristinoCestino): void {
+export function registraRipristinoCestino(tipo: TipoElementoCestino, fn: DopoRipristinoCestino): void {
   dopoRipristino.set(tipo, fn);
 }
 
@@ -260,7 +271,7 @@ function riepilogo(db: AppDatabase, schema: Schema, passi: readonly Passo[]): Re
 
 // ---- L'elenco ----
 
-interface RigaCestino { id: number; uid: string; tipo: TipoCestino; chiave: string; nome: string; contesto: string; riepilogo_json: string; registro_json: string; con_partite: number; vicini_json: string | null; eliminato_il: string }
+interface RigaCestino { id: number; uid: string; tipo: TipoElementoCestino; chiave: string; nome: string; contesto: string; riepilogo_json: string; registro_json: string; con_partite: number; vicini_json: string | null; eliminato_il: string }
 
 /** Gli elementi del cestino, dal più recente, con quel che contengono (dati di gioco e partite). */
 export function elencoCestino(): VoceCestinoDto[] {
@@ -275,7 +286,7 @@ export function elencoCestino(): VoceCestinoDto[] {
     const contenuto: ContenutoCestinoDto[] = Object.entries(conti).map(([tabella, quante]) => ({ tabella, etichetta: etichettaTabella(tabella, quante), quante }))
       .sort((a, b) => b.quante - a.quante || a.etichetta.localeCompare(b.etichetta));
     const statoPartite = !r.con_partite ? 'nessuna' : p ? 'presente' : 'mancante';
-    return { id: r.id, tipo: r.tipo, chiave: r.chiave, nome: r.nome, contesto: r.contesto, eliminatoIl: r.eliminato_il, contenuto, partite: statoPartite, byte: r.byte_gioco + (p?.registro_json.length ?? 0) };
+    return { id: r.id, tipo: r.tipo as TipoCestino, chiave: r.chiave, nome: r.nome, contesto: r.contesto, eliminatoIl: r.eliminato_il, contenuto, partite: statoPartite, byte: r.byte_gioco + (p?.registro_json.length ?? 0) };
   });
 }
 
@@ -395,7 +406,7 @@ export function ripristinaDalCestino(id: number): EsitoRipristinoCestinoDto {
   invalidaCacheDiGioco();
   // il nome delle righe saltate col numero giusto (al singolare per una sola), ora che si sa quante sono
   const elencoSaltate = [...saltate.values()].map((s) => ({ ...s, etichetta: etichettaTabella(s.tabella, s.quante) }));
-  return { tipo: r.tipo, chiave: r.chiave, nome: r.nome, rimesse, saltate: elencoSaltate, partiteMancanti };
+  return { tipo: r.tipo as TipoCestino, chiave: r.chiave, nome: r.nome, rimesse, saltate: elencoSaltate, partiteMancanti };
 }
 
 // ---- Svuotare ----

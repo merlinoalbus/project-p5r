@@ -5,7 +5,11 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { validate } from '../middleware/validate.js';
-import { aggiornaElemento, creaElemento, elencaCatalogo, elencaNascosti, eliminaElemento, leggiElemento, nascondiElemento, riepilogoCatalogo } from '../services/catalogoService.js';
+import { aggiornaElemento, creaElemento, elencaCatalogo, elencaNascosti, eliminaElemento, leggiElemento, nascondiElemento, riepilogoCatalogo, ripristinaElemento } from '../services/catalogoService.js';
+import { eliminaNelCestino } from '../services/luoghiScritture.js';
+
+/** La conferma di un'eliminazione con contenuti (L5, luoghi e negozi). */
+const queryConferma = z.object({ conferma: z.enum(['0', '1']).optional() });
 import { oggettiSelezionabili, tuttiGliOggettiSelezionabili } from '../services/oggettiSelezionabili.js';
 import { SCHEMI_CATALOGO, SCHEMI_CATALOGO_PARZIALI, bodyNascondi, paramsElementoCatalogo, paramsTipoCatalogo, queryNascosti } from '../schemas/catalogo.js';
 import { httpErrors } from '../utils/httpError.js';
@@ -68,9 +72,19 @@ router.put('/:tipo/:chiave', validate({ params: paramsElementoCatalogo }), (req,
 router.put('/:tipo/:chiave/nascosta', validate({ params: paramsElementoCatalogo, body: bodyNascondi }), (req, res) => {
   res.json(nascondiElemento(req.params.tipo as TipoCatalogo, String(req.params.chiave), (req.body as { nascosta: boolean }).nascosta));
 });
-/** Elimina la riga creata dall'utente oppure riporta al seed quella corretta. */
-router.delete('/:tipo/:chiave', validate({ params: paramsElementoCatalogo }), (req, res) => {
-  res.json(eliminaElemento(req.params.tipo as TipoCatalogo, String(req.params.chiave)));
+/** Elimina la riga creata dall'utente oppure riporta al seed quella corretta. L5: per un luogo o un negozio `DELETE` elimina e basta, nel
+ *  cestino (409 col riepilogo senza `?conferma=1` se ha contenuti); «Ripristina» è `POST …/ripristina`. */
+router.delete('/:tipo/:chiave', validate({ params: paramsElementoCatalogo, query: queryConferma }), (req, res) => {
+  const tipo = req.params.tipo as TipoCatalogo;
+  if (tipo === 'luogo' || tipo === 'negozio') {
+    res.json(eliminaNelCestino(tipo, String(req.params.chiave), (req.query as { conferma?: string }).conferma === '1'));
+    return;
+  }
+  res.json(eliminaElemento(tipo, String(req.params.chiave)));
+});
+/** L5: «Ripristina i valori della guida» per ogni tipo del catalogo: rimette `seed_json`; non elimina mai. */
+router.post('/:tipo/:chiave/ripristina', validate({ params: paramsElementoCatalogo }), (req, res) => {
+  res.json(ripristinaElemento(req.params.tipo as TipoCatalogo, String(req.params.chiave)));
 });
 
 export default router;

@@ -15,6 +15,7 @@ import { DESCRIZIONI_FONT } from './font.js';
 import { DESCRIZIONI_FUSIONE } from './fusione.js';
 import { DESCRIZIONI_IMMAGINI } from './immagini.js';
 import { DESCRIZIONI_IMPOSTAZIONI } from './impostazioni.js';
+import { DESCRIZIONI_LUOGHI } from './luoghi.js';
 import { DESCRIZIONI_MAPPE } from './mappe.js';
 import { DESCRIZIONI_PARTITE } from './partite.js';
 import { DESCRIZIONI_SISTEMA } from './sistema.js';
@@ -33,6 +34,7 @@ export const AREE: Readonly<Record<string, AreaApi>> = {
   '/api/catalogo': { nome: 'Catalogo', descrizione: 'Le righe dei dati della guida aggiunte, corrette o nascoste dall\'utente.' },
   '/api/condizioni': { nome: 'Condizioni', descrizione: 'Gli elenchi chiusi e la normalizzazione delle condizioni di disponibilità e visibilità.' },
   '/api/aree': { nome: 'Aree del mondo', descrizione: 'Le Aree dei quartieri e della città (Città → Quartiere → Area → Planimetrie): pagina, creazione, versioni, ordine, ripristino, eliminazione nel cestino, planimetrie da collocare.' },
+  '/api/luoghi': { nome: 'Luoghi', descrizione: 'I luoghi della città come fonte (L5): posizionarli su una planimetria con il loro pin e collocarli in un\'Area del quartiere.' },
   sistema: { nome: 'Sistema', descrizione: 'Salute del server, configurazione pubblica, questa documentazione.' },
 };
 
@@ -49,5 +51,6 @@ export const DESCRIZIONI: DescrizioniArea = {
   ...DESCRIZIONI_CATALOGO,
   ...DESCRIZIONI_CONDIZIONI,
   ...DESCRIZIONI_AREE,
+  ...DESCRIZIONI_LUOGHI,
   ...DESCRIZIONI_SISTEMA,
 };

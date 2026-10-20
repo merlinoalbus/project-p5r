@@ -67,6 +67,8 @@ export const datiNegozio = z.object({
   /** La sede: un luogo della città (migrazione 072). */
   sede_chiave: z.string().max(200).nullable().optional(),
   orari_json: orariNegozio.transform((v) => JSON.stringify(v)).optional(),
+  /** L5 (R5-12b): l'orario del solo negozio quando la guida lo distingue dal luogo; null = vale quello della sede. */
+  eccezione_orari_json: orariNegozio.nullable().optional().transform((v) => (v === null || v === undefined ? v : JSON.stringify(v))),
   programma_punti_json: z.object({ nome: testo(80).min(1), unita: testo(40).min(1), calcolo: z.enum(['manuale', 'rango-cliente']) }).nullable().optional()
     .transform((v) => (v === null || v === undefined ? v : JSON.stringify(v))),
   note: testo(2000).nullable().optional(),
@@ -221,6 +223,18 @@ const datiLuogo = z.object({
   quando: z.enum(['giorno', 'sera', 'entrambe']).nullable().optional(),
   /** Le chiavi dei giorni (migrazione 080); vuoto = nessuna limitazione. */
   giorni_json: z.array(z.enum(GIORNI_SETTIMANA_CHIAVI)).max(7).transform((v) => JSON.stringify(GIORNI_SETTIMANA_CHIAVI.filter((g) => v.includes(g)))).optional(),
+  // ---- L5 (R5-07): un modulo solo per tutto il luogo ----
+  /** Gli orari del luogo come valori; null = regola dell'app «giorno e sera» (la guida non dà orari). */
+  orari_json: orariNegozio.nullable().optional().transform((v) => (v === null || v === undefined ? v : JSON.stringify(v))),
+  /** L'Area di L2 del luogo (chiave dell'area, del suo quartiere); null = «da collocare». */
+  area_chiave: z.string().min(1).max(200).nullable().optional(),
+  /** Lo sblocco come lo dice la guida (prosa, resta come nota: la condizione valutata è `condizioni_json`). */
+  sblocco: testo(600).nullable().optional(),
+  /** I Confidenti che si incontrano qui. */
+  confidenti_json: z.array(z.string().min(1).max(80)).max(30).transform((v) => JSON.stringify([...new Set(v)])).optional(),
+  /** I piatti del menu (nome, prezzo, effetto). */
+  piatti_json: z.array(z.object({ nome: testo(160).min(1), prezzo: z.number().int().min(0).max(1_000_000).nullable(), effetto: testo(400).default('') })).max(60).nullable().optional()
+    .transform((v) => (v === null || v === undefined ? v : JSON.stringify(v))),
   note: testo(2000).nullable().optional(),
 });
 
