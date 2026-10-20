@@ -1,6 +1,6 @@
 # Richieste dell'utente ancora aperte (elenco di controllo del PM)
 
-Nota di ripresa 2026-10-20: il lavoro L6-B5 prosegue; contratto server, filtro della lista del quartiere, rimozione del fallback legacy del validatore mappe, lettura strutturata in `sincronizzaMappe` ed esclusione delle Aree chiuse da indice, figli del visore e «Aree vicine» sono pubblicati nel commit `ca54c39c`, con pipeline ancora da verificare. Nessuna richiesta già pubblicata è stata dichiarata completata.
+Nota di ripresa 2026-10-20: il lavoro L6-B5 prosegue; contratto server, filtro della lista del quartiere, rimozione del fallback legacy del validatore mappe, lettura strutturata in `sincronizzaMappe` ed esclusione delle Aree chiuse da indice, figli del visore e «Aree vicine» sono pubblicati nei commit `ca54c39c` e `5a6944fc`, con pipeline non verificabile ora per indisponibilità DNS. Nessuna richiesta già pubblicata è stata dichiarata completata.
 
 Ogni richiesta resta qui finché l'utente non la vede funzionare su p5s. Lo stato si aggiorna a ogni passo. È nato il 2026-10-20 alle 19:45Z, dopo che il PM aveva dichiarato L3 completo con richieste ancora mancanti.
 
