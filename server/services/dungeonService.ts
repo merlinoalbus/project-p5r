@@ -33,8 +33,8 @@ import { ePersonaDeiMemento, erroreCatturaNelCompendio, vociPersonaCatturate } f
 import { eliminaImmaginiDeiPin } from './mappe/mappeService.js';
 import { areeDelleInfiltrazioni, conLegami, impostaLegamiInfiltrazione, infiltrazioniDelleAree, planimetrieDelleInfiltrazioni, staccaInfiltrazioneDalleVoci, type AreaDellInfiltrazione } from './mappe/legamiInfiltrazioni.js';
 import { areeDelPalazzo } from './mappe/areeService.js';
-import { palazzoDiOgniMappa, statoPalazzi, type StatoPalazzo } from './palazziService.js';
-import { atterraggioDelGiorno, elencaAtterraggi } from './atterraggioPalazziService.js';
+import { atterraggioDelPalazzo, palazzoDiOgniMappa, statoPalazzi, type StatoPalazzo } from './palazziService.js';
+import { elencaAtterraggi } from './atterraggioPalazziService.js';
 import { allineaEnigmaDellaVoce, allineaEnigmaInOgniPartita, allineaPinScollegato, allineaStatiPunto, erroreVoceDelPin, passiDi, pinDelPuntoGuida, scriviStatoVoce, segnaPassiDellEnigma } from './mappe/collegamentiGuida.js';
 import { conCestino, registraRipristinoCestino, type ViciniCestino } from './cestinoService.js';
 import { letturePlanimetrieDelleVoci, planimetriaDellaVoce, planimetrieDellaVoce, type PlanimetrieDelleVoci } from './mappe/planimetriaDellaVoce.js';
@@ -287,7 +287,8 @@ function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, partitaId: nu
     // (un Palazzo con la regola del boss dei Memento, Iweleth §8.15, non ha effetti di Palazzo: nessun «concluso» per la mappa di Tokyo)
     ...(palazzo ? { concluso: palazzi.get(r.chiave)?.senzaEffetti ? null : palazzi.get(r.chiave)?.concluso ?? null } : {}),
     // dove si atterra toccandolo sulla mappa di Tokyo, per il giorno della partita (2026-10-04)
-    atterraggio: atterraggioDelGiorno(r.chiave, giornoDellaPartita(partitaId)),
+    // L6 (R6-17): la destinazione unica, la stessa del diario (la regola d'atterraggio del giorno, o l'ingresso del Palazzo)
+    atterraggio: atterraggioDelPalazzo(r.chiave, giornoDellaPartita(partitaId)),
     // L4: la funzione unica e le divergenze da verificare, solo per i Palazzi (i Memento restano come prima, R4-30)
     ...(palazzo ? {
       completamento: palazzi.get(r.chiave)?.completamento ?? { oggetti: 0, fatti: conPartita ? 0 : null, tesoro: conPartita ? false : null, boss: conPartita ? false : null, concluso: conPartita ? false : null, completato: conPartita ? false : null },

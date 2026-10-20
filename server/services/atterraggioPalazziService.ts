@@ -104,13 +104,19 @@ export function impostaAtterraggi(dungeon: string, regole: readonly RegolaAtterr
 }
 
 /**
- * Cambia la finestra del Palazzo sulla mappa di Tokyo: la sua voce in `finestre-dungeon` (creata se manca). `al` nullo = senza
- * fine. Le altre voci e i campi descrittivi del blocco restano come sono. Svuota la copia in memoria dei dati della guida.
+ * Cambia la finestra del Palazzo sulla mappa di Tokyo. L6 (§4.4): nelle colonne `dungeon.finestra_dal`/`finestra_al` (migrazione 118);
+ * su uno schema di prima, la sua voce in `finestre-dungeon` (creata se manca). `al` nullo = senza fine. Svuota la copia in memoria.
  */
 export function impostaFinestra(dungeon: string, dal: string, al: string | null): FinestraDungeon {
   richiediDungeon(dungeon);
   if (!dataValida(dal) || (al !== null && !dataValida(al))) throw httpErrors.badRequest('data-non-valida', 'Le date sono giorni del calendario di gioco, MM-GG.');
   if (al !== null && ordineGioco(al) < ordineGioco(dal)) throw httpErrors.badRequest('fine-prima-di-inizio', `La fine (${al}) viene prima dell'inizio (${dal}).`);
+  const conColonne = (prepared("SELECT name FROM pragma_table_info('dungeon')").all() as Array<{ name: string }>).some((c) => c.name === 'finestra_dal');
+  if (conColonne) {
+    prepared('UPDATE dungeon SET finestra_dal = ?, finestra_al = ? WHERE chiave = ?').run(dal, al, dungeon);
+    invalidaDatiGuida();
+    return finestreDungeon().get(dungeon)!;
+  }
   // il blocco in memoria è congelato: si lavora su una copia
   const attuale = datiGuida<{ finestre?: Array<{ dungeon: string; dal: string; al?: string }> } & Record<string, unknown>>('finestre-dungeon');
   const dati = attuale ? (JSON.parse(JSON.stringify(attuale)) as { finestre?: Array<{ dungeon: string; dal: string; al?: string }> } & Record<string, unknown>) : { finestre: [] };

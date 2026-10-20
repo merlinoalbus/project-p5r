@@ -37,6 +37,8 @@
 import { getDb, prepared } from '../db/dbService.js';
 import { leggiCondizioniSalvate } from '../../shared/condizioniSpillo.js';
 import { copreIlGiorno } from './condizioni/valutatore.js';
+import { atterraggioDelGiorno } from './atterraggioPalazziService.js';
+import { chiaveMappa, idMappa } from './mappe/percorsiMappe.js';
 import { vociDiOgniPin, vociGestite } from './mappe/voceDelPin.js';
 import { contaOggetti, modelloAvanzamento, oggettiDelleVoci, statiDellaPartita, statoDelPin, voceFatta, type ModelloAvanzamento, type StatiDellaPartita } from './mappe/statiGuida.js';
 import { palazzoCompletato, palazzoConcluso, type CompletamentoPalazzo } from '../../shared/completamentoGuida.js';
@@ -261,6 +263,23 @@ export function ingressoDelPalazzo(dungeon: string, giorno?: string): { chiave: 
     WHERE m.chiave <> ? AND m.ruolo_immagine IN ('planimetria-nativa', 'illustrazione-editoriale')
     ORDER BY m.ordine, m.chiave LIMIT 1`).get(radice, radice) as { chiave: string } | undefined;
   return { chiave: prima?.chiave ?? radice, spilloId: null };
+}
+
+/**
+ * L6 (§4.4, R6-17): dove porta un Palazzo un dato giorno, una regola sola per metro, cartellino del diario e campo `mappa` della voce: la
+ * regola d'atterraggio del giorno (`dungeon_atterraggio`, `atterraggioDelGiorno`) se c'è, altrimenti l'ingresso (`ingressoDelPalazzo`).
+ * La chiave è quella interna della mappa (come `ingressoDelPalazzo`); null se il Palazzo non ha mappe.
+ */
+export function destinazionePalazzo(dungeon: string, giorno?: string | null): { chiave: string; spilloId: number | null } | null {
+  const atterraggio = atterraggioDelGiorno(dungeon, giorno ?? null);
+  if (atterraggio) return { chiave: idMappa(atterraggio.mappa), spilloId: atterraggio.spillo };
+  return ingressoDelPalazzo(dungeon, giorno ?? undefined);
+}
+
+/** La stessa destinazione nella forma del campo `atterraggio` (metro, cartellino del diario): la chiave pubblica della mappa e il pin. */
+export function atterraggioDelPalazzo(dungeon: string, giorno?: string | null): { mappa: string; spillo: number | null } | null {
+  const d = destinazionePalazzo(dungeon, giorno);
+  return d ? { mappa: chiaveMappa(d.chiave), spillo: d.spilloId } : null;
 }
 
 /** Le condizioni di data dello spillo (in cima, cioè in AND) reggono quel giorno? Le altre non si guardano: qui conta solo

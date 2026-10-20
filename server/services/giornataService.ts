@@ -21,7 +21,7 @@ import { registraEvento } from './storicoService.js';
 import { confidenti } from './partiteService.js';
 import { applicaEffettiAzione, annullaEffettiAzione, descriviEffettiApplicati, type OpzioniSpunta } from './effettiAzioneService.js';
 import { mappaAzione, nomeRiferimento, nomiEffetti, statoAzione, testoEffetti, verificaEffetti } from './azioniStrutturateService.js';
-import { atterraggioDelGiorno } from './atterraggioPalazziService.js';
+import { atterraggioDelPalazzo } from './palazziService.js';
 import { normalizzaEffettiAzione, TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
 import type { AzionePercorsoDto, ConfidentePartitaDto, DatiVoceGiornata, EffettiAzioneDto, FasciaGioco, GenereVoce, QuizVoceDto, RiferimentoAzioneDto, TrasferisciVociGiornata, VociTrasferiteDto } from '../../shared/types.js';
 import { attivitaConQuiz, quizVoceDto, type AttivitaConQuiz } from './attivitaService.js';
@@ -102,8 +102,9 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
     ...v, produceTesto: testoEffetti(v.produce, ctx.nomi),
     fatta: spuntabile && ctx.fatte.has(r.uid), effetti: ctx.fatte.get(r.uid) ?? null,
     stato: ctx.conf && spuntabile ? statoAzione(v, ctx.conf) : null, mappa: mappaAzione(v),
-    // il Palazzo collegato: dove si atterra il giorno della voce, con le regole della mappa di Tokyo (scelta dell'utente, 2026-10-04)
-    atterraggio: v.riferimento?.tipo === 'dungeon' ? atterraggioDelGiorno(v.riferimento.chiave, v.giorno) : null,
+    // il Palazzo collegato: dove si atterra il giorno della voce (scelta dell'utente, 2026-10-04). L6 (R6-17): la destinazione unica, la stessa
+    // della metro e del campo `mappa` (la regola d'atterraggio del giorno, o l'ingresso del Palazzo)
+    atterraggio: v.riferimento?.tipo === 'dungeon' ? atterraggioDelPalazzo(v.riferimento.chiave, v.giorno) : null,
     quiz: quizDellaVoce(v, ctx.quiz),
     // L3: il campo «Infiltrazioni» (solo per le voci di un Palazzo) e lo stato «da rivedere» (solo se c'è)
     ...campiInfiltrazioni(r, ctx.partita),

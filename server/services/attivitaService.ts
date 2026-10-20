@@ -17,7 +17,8 @@ import { registraEvento } from './storicoService.js';
 import type { AttivitaDto, AttivitaTutteDto, CondizioneSpilloDto, DisponibilitaDto, DoteDaSegnareDto, FilmDto, FilmDvdDto, LibroDto, LibriDto, QuizVoceDto, TipoLettura, VideogiocoDto, VideogiochiDto, VoceEffettoDto } from '../../shared/types.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
 import { nomeDote, puntiDaNote } from './partiteService.js';
-import { descriviRequisitoSpillo, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { descriviRequisitoSpillo, foglieCondizione, leggiCondizioniSalvate, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { casaDelLuogo } from './luoghiService.js';
 import { descriviVoceEffetto, dotiDaEffetti, leggiVociEffetto, type VoceEffetto } from '../../shared/effettiCatalogo.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
@@ -98,9 +99,33 @@ function luogoSbloccato(effettiJson: string | null): { sbloccaLuogo: string | nu
   const q = prepared('SELECT nome FROM quartiere WHERE chiave = ?').get(luogo) as { nome: string } | undefined;
   return { sbloccaLuogo: luogo, sbloccaLuogoNome: q?.nome ?? null };
 }
+/**
+ * L6 (R6-11): i posti che ogni libro apre, **calcolati** dalle condizioni dei luoghi e dei quartieri che citano `lettura{libro}` (a
+ * qualunque profondità: «il libro oppure Ann al rango 10» apre lo stesso). Non dalla frase `libro.sblocca` (nota) né dall'effetto
+ * «sblocca-luogo»: così un libro apre davvero quel che dice la sua scheda.
+ */
+function postiApertiDaiLibri(): Map<string, NonNullable<LibroDto['apre']>> {
+  const out = new Map<string, NonNullable<LibroDto['apre']>>();
+  /** Aggiunge il posto ai libri citati dalle sue condizioni. */
+  const aggiungi = (json: string | null, posto: NonNullable<LibroDto['apre']>[number]) => {
+    const libri = new Set(leggiCondizioniSalvate(json).flatMap(foglieCondizione).flatMap((c) => (c.tipo === 'lettura' && c.categoria === 'libro' ? [c.chiave] : [])));
+    for (const l of libri) { const v = out.get(l) ?? []; v.push(posto); out.set(l, v); }
+  };
+  const conQuartieri = (prepared("SELECT name FROM pragma_table_info('quartiere')").all() as Array<{ name: string }>).some((c) => c.name === 'condizioni_json');
+  if (conQuartieri) {
+    for (const q of prepared('SELECT chiave, nome, condizioni_json FROM quartiere WHERE condizioni_json IS NOT NULL ORDER BY ordine').all() as Array<{ chiave: string; nome: string; condizioni_json: string }>) {
+      aggiungi(q.condizioni_json, { tipo: 'quartiere', chiave: q.chiave, nome: q.nome, casa: `/guida/citta/${encodeURIComponent(q.chiave)}` });
+    }
+  }
+  for (const l of prepared("SELECT chiave, nome, condizioni_json FROM luogo WHERE nascosto = 0 AND condizioni_json LIKE '%lettura%' ORDER BY quartiere_chiave, ordine").all() as Array<{ chiave: string; nome: string; condizioni_json: string }>) {
+    aggiungi(l.condizioni_json, { tipo: 'luogo', chiave: l.chiave, nome: l.nome, casa: casaDelLuogo(l.chiave) });
+  }
+  return out;
+}
+
 /** Un libro come DTO con il suo stato nella partita: sessioni totali, avanzamento limitato fra 0 e il totale (pieno se il
  *  libro risulta letto), quartiere che apre, negozi che lo vendono, posizioni e disponibilità. */
-const libroDto = (r: RigaLibro, stato: StatoLetture, posizioni: Map<string, LibroDto['posizioni']>, negozi: Map<string, LibroDto['negozi']>, st: StatoDisponibilita | null = null): LibroDto => {
+const libroDto = (r: RigaLibro, stato: StatoLetture, posizioni: Map<string, LibroDto['posizioni']>, negozi: Map<string, LibroDto['negozi']>, st: StatoDisponibilita | null = null, apre: Map<string, NonNullable<LibroDto['apre']>> = new Map()): LibroDto => {
   const totaleSessioni = totaleLibro(r);
   const grezzo = stato.progressiLibri.get(r.chiave) ?? 0;
   // «Finito» resta un fatto registrato, non dedotto dal conteggio: se una correzione dei dati
@@ -108,7 +133,7 @@ const libroDto = (r: RigaLibro, stato: StatoLetture, posizioni: Map<string, Libr
   // «Lettura rapida», che è un fatto della partita, riallineato esplicitamente in `impostaLettura`.
   const fatto = stato.fatti.has(`libro/${r.chiave}`);
   return {
-    chiave: r.chiave, nome: r.nome, nomeIt: r.nome_it, dove: r.dove, prezzo: r.prezzo, disponibileDal: r.disponibile_dal, dote: r.dote as LibroDto['dote'], note: r.note, sblocca: r.sblocca, ...luogoSbloccato(r.effetti_json), sessioni: r.sessioni, dettagli: r.dettagli,
+    chiave: r.chiave, nome: r.nome, nomeIt: r.nome_it, dove: r.dove, prezzo: r.prezzo, disponibileDal: r.disponibile_dal, dote: r.dote as LibroDto['dote'], note: r.note, sblocca: r.sblocca, ...luogoSbloccato(r.effetti_json), apre: apre.get(r.chiave) ?? [], sessioni: r.sessioni, dettagli: r.dettagli,
     ...effettiDto(r.effetti_json), negozi: negozi.get(r.chiave) ?? [],
     verificato: r.verificato === 1,
     posizioni: posizioni.get(r.chiave) ?? [], totaleSessioni, progresso: fatto ? totaleSessioni : Math.min(Math.max(grezzo, 0), totaleSessioni), fatto,
@@ -189,7 +214,8 @@ function elencoLibri(partitaId: number | undefined, stato: StatoLetture = lettur
   st: StatoDisponibilita | null = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId)): LibroDto[] {
   const posizioni = posizioniLibri();
   const negozi = articoliCollegati('libri');
-  return (prepared('SELECT * FROM libro WHERE nascosto = 0 ORDER BY ordine').all() as RigaLibro[]).map((r) => libroDto(r, stato, posizioni, negozi, st));
+  const apre = postiApertiDaiLibri();
+  return (prepared('SELECT * FROM libro WHERE nascosto = 0 ORDER BY ordine').all() as RigaLibro[]).map((r) => libroDto(r, stato, posizioni, negozi, st, apre));
 }
 
 /** I libri non nascosti con i totali della partita: libri finiti, sessioni lette e da leggere, e se vale «Lettura rapida». */
@@ -390,7 +416,7 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
   const stato = letturePartita(partitaId);
   // che cosa il conseguimento dà (o, disfatto, dava): da segnare a mano nelle Doti
   const daSegnare = daSegnareFra(registroPrima, puntiRegistrati(partitaId, tipo, chiave));
-  const dto = tipo === 'libro' ? libroDto(riga as RigaLibro, stato, posizioniLibri(), articoliCollegati('libri')) : tipo === 'film' ? filmDto(riga as RigaFilm, stato, posizioniFilm()) : videogiocoDto(riga as RigaAttivita, stato, nomiLuoghi(), articoliCollegati('videogiochi'));
+  const dto = tipo === 'libro' ? libroDto(riga as RigaLibro, stato, posizioniLibri(), articoliCollegati('libri'), null, postiApertiDaiLibri()) : tipo === 'film' ? filmDto(riga as RigaFilm, stato, posizioniFilm()) : videogiocoDto(riga as RigaAttivita, stato, nomiLuoghi(), articoliCollegati('videogiochi'));
   return daSegnare.length ? { ...dto, daSegnare } : dto;
 }
 

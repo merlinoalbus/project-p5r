@@ -81,9 +81,16 @@ export function finestreDaDati(dati: unknown): Map<string, FinestraDungeon> {
   return out;
 }
 
-/** Le finestre dei Palazzi della guida. Una trascrizione illeggibile vale «nessuna finestra»: non si indovina una data. */
+/** Le finestre dei Palazzi. L6 (§4.4): stanno nelle colonne `dungeon.finestra_dal`/`finestra_al` (migrazione 118, un solo scrittore:
+ *  `impostaFinestra`); il blocco `finestre-dungeon` della guida si legge solo su uno schema di prima della 118. Una trascrizione
+ *  illeggibile vale «nessuna finestra»: non si indovina una data. */
 export function finestreDungeon(): ReadonlyMap<string, FinestraDungeon> {
   if (finestre) return finestre;
+  try {
+    const righe = prepared('SELECT chiave, finestra_dal, finestra_al FROM dungeon WHERE finestra_dal IS NOT NULL').all() as Array<{ chiave: string; finestra_dal: string; finestra_al: string | null }>;
+    finestre = new Map(righe.map((r) => [r.chiave, { dal: r.finestra_dal, al: r.finestra_al }]));
+    return finestre;
+  } catch { /* uno schema di prima della 118: le colonne non ci sono */ }
   let dati: unknown;
   try {
     dati = datiGuida('finestre-dungeon');

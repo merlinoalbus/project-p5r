@@ -1204,9 +1204,9 @@ export interface AzionePercorsoDto {
   /** Mappa (e spillo) collegati al luogo dell'azione: Palazzo, Mementos, negozio, luogo del Confidente. */
   /** `posto` (L5, M23): il nome del posto del pin — il luogo, altrimenti l'Area della planimetria — per il gesto che lo apre. */
   mappa: { chiave: string; spilloId: number | null; posto?: string | null } | null;
-  /** Per una voce collegata a un Palazzo: dove si atterra il giorno della voce, con le regole d'atterraggio della mappa di
-   *  Tokyo (`atterraggioDelGiorno`, 2026-10-04); il cartellino del Palazzo porta lì. Null senza Palazzo o senza una regola che
-   *  copra il giorno (allora porta alla scheda del Palazzo). Assente vale come null. */
+  /** Per una voce collegata a un Palazzo: dove si atterra il giorno della voce (2026-10-04); il cartellino del Palazzo porta lì. L6
+   *  (R6-17): la destinazione unica `destinazionePalazzo`, la stessa della metro e del campo `mappa` (la regola d'atterraggio del giorno,
+   *  o l'ingresso del Palazzo). Null senza Palazzo o se il Palazzo non ha mappe (allora porta alla sua scheda). Assente vale come null. */
   atterraggio?: { mappa: string; spillo: number | null } | null;
   /** La guida del quiz delle attività di cui la voce registra un turno o a cui è collegata (migrazione 105), con `oggi` vero
    *  se il giorno della voce è uno dei giorni del quiz. Assente o vuoto: nessun quiz. */
@@ -2203,7 +2203,8 @@ export interface DungeonRiassuntoDto {
    *  e il suo ingresso è chiuso. Per i Palazzi; assente per i Memento (AP4-1, R4-30). */
   concluso?: string | null;
   /** Dove si atterra toccando il Palazzo sulla mappa di Tokyo, per il giorno della partita (senza partita, o senza data: la
-   *  regola che vale sempre): la prima regola di `dungeon_atterraggio` che lo copre (2026-10-04). Null se nessuna lo copre. */
+   *  regola che vale sempre): la prima regola di `dungeon_atterraggio` che lo copre (2026-10-04); L6 (R6-17) senza una regola che lo
+   *  copra, l'ingresso del Palazzo (`destinazionePalazzo`, la stessa del diario). Null se il Palazzo non ha mappe. */
   atterraggio: { mappa: string; spillo: number | null } | null;
   /** L4 (§1.5): il completamento con la funzione unica — oggetti permanenti, Tesoro, boss finale (`shared/completamentoGuida.ts`); i
    *  campi della partita null senza partita. Per i Palazzi; assente per i Memento. `raccolta` resta l'elenco dei collezionabili, con lo
