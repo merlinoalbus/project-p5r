@@ -1,5 +1,15 @@
 # A12 — l’attività dei test rimanda alla fonte Confidente
 
+**18:24Z — esiti reali135:** e679ac8a/pipeline79 riuscita; p5s135/27, attività rettificata e beneficio8 aggiunto.
+Confronto readonly: soltanto cinque campi dell’attività cambiati;38tabelle utente,998vociDiario/1913spilli/316mappe,
+identità/requisiti/disponibilitàTakemi e primi sette benefici identici. Nuovo8: Coraggio1nota. R6-31 conserva201ID,
+23ricerche; A12 fontecollegata, formula coincidente, audit valido con due esiti e nessun Applica parziale.
+Il revisore ha osservato autonomamente scheda/editor/R6/riepilogo, senza salvare. Gate finale sospeso per due testi UI:
+data della nota conservata concatenata al requisito e «sempre disponibile» generico nel guscio linked. Delta solo
+presentazione approvato staticamente: requisito strutturato principale e testo informativo separato; condizioni
+proprie vuote distinte dalla disponibilità del Confidente. Tre riesami propri del delta completati. Segue controllo
+di un esatto snapshot git e rilascio separato, escludendo l’implementazione I71 già in corso nella worktree.
+
 **18:09Z — pronto al rilascio:** gate statico integrato135 e successivo raccordo R6-31 approvati dal revisore distinto,
 comprese le correzioni dei RAW, ricevute storiche, fonte illeggibile e due esiti135 mostrati anche nella conferma.
 Tre riesami propri del coordinatore completati; controlli finali typecheck10735/lint43607/build83003 exit0.

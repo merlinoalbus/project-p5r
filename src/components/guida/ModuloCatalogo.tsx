@@ -52,6 +52,7 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
   const impostaCondizioni = (v: RequisitoSpillo[]) => { setCondizioni(v); setCondizioniScelte(true); setCondizioniDaRisolvere(false); };
   // Il modulo delle attività deve vedere le condizioni effettivamente inviate, non una copia iniziale.
   const datiModulo = tipo === 'attivita' ? { ...dati, condizioni_json: condizioni, _condizioniDaRisolvere: condizioniDaRisolvere } : dati;
+  const fonteConfidente = tipo === 'attivita' && typeof dati.confidente_chiave === 'string' && dati.confidente_chiave.length > 0;
   const [erroreSalvataggio, setErroreSalvataggio] = useState<string | null>(null);
   const regoleValide = !modulo.conCondizioni || (!condizioniDaRisolvere && condizioni.every((c) => normalizzaRequisitoSpillo(c) !== null));
   const [occupato, setOccupato] = useState(false);
@@ -201,8 +202,10 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
             <p className="m-0 whitespace-pre-wrap break-all">{String(elemento?.dati.condizioni_json)}</p>
             <button type="button" className="btn btn-secondary min-h-11 self-start" disabled={occupato} onClick={() => impostaCondizioni(condizioni)}>Usa le condizioni leggibili qui sotto e scarta le altre parti</button>
           </div>}
-          <CondizioniEditor condizioni={condizioni} onCambia={impostaCondizioni} disabilitato={occupato || condizioniDaRisolvere} />
-          {nuovo && condizioni.length === 0 && <div className="space-y-2 text-sm">
+          {fonteConfidente && !condizioniDaRisolvere && condizioni.length === 0
+            ? <p className="m-0 text-sm">Condizioni proprie dell’attività: nessuna. Disponibilità e requisiti vengono dalla fonte Confidente.</p>
+            : <CondizioniEditor condizioni={condizioni} onCambia={impostaCondizioni} disabilitato={occupato || condizioniDaRisolvere} />}
+          {nuovo && !fonteConfidente && condizioni.length === 0 && <div className="space-y-2 text-sm">
             <p>{condizioniScelte ? 'Hai scelto di non aggiungere condizioni proprie.' : 'Le condizioni proprie non sono ancora state scelte. Una frase non interamente compresa richiederà una tua scelta prima del salvataggio.'}</p>
             {!condizioniScelte && <button type="button" className="btn btn-secondary min-h-11" disabled={occupato} onClick={() => setCondizioniScelte(true)}>Nessuna condizione propria</button>}
           </div>}
