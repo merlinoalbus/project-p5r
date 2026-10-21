@@ -25,3 +25,19 @@ Le note conservano obbligatoriamente giorni/fasce/data/requisiti precedenti, esp
 Tre riesami del worker e tre del coordinatore: firma/conservazione; transazione/CAS/replay; percorsi UI/errori/consumatori. Gate statico distinto APPROVATO dopo correzione del selettore e della frase sulla prima data. Typecheck24689 e lint51330 verdi; build62824 verde dopo le correzioni finali131. Nessun test, simulazione o migrazione locale.
 
 Lettura reale prima131 conservata solo in memoria:23righe informative e4requisiti Makoto. Gli otto RAW Makoto coincidono con la base pubblica. Restano pubblicazione, pipeline, rendiconto effettivo131, confronto prima/dopo e osservazione dell'editor su p5s; il codice approvato non costituisce già prova runtime.
+
+## Consegna effettiva,21ottobre16:08Z
+
+`295b7dbe`, pipeline74 (`39629768702`) riuscita, p5s healthok/schema131. Audit `applicata`; prima/dopo in memoria: cinque campi Makoto attesi cambiati, tre conservati, altre22informazioni e4requisiti identici. Gli otto RAW iniziali e finali del registro corrispondono alle letture prima/dopo. Nota precedente integrale e vecchi giorni/fasce/data/requisiti conservati. Unica revisione, azione bonifica.
+
+Editor aperto nel browser e tab Storico leggibile, senza gesti mutanti. Proiezioni dopo131:54giorni/255voci Diario,169Kamoshida,226Madarame,611pin/43mappe identici nei campi rilevati. Gate finale distinto APPROVATO per editor/otto campi, con riscontri live attribuiti al coordinatore. Nessun test, esecuzione di salvataggi/ripristini o certificazione dell'intero DB.
+
+Rimane separata la nota del dialogo rango1 PK51, mostrata in due intestazioni e ancora imperativa sull'equipaggiamento: soluzione133 approvata per rettificare soltanto quella nota e conservare l'originale nel registro dedicato. Questa consegna non dichiara bonificati tutti i testi di Makoto.
+
+## Nota rango1,133 pronta al rilascio
+
+Firma pubblica completa dei sette campi di `confidente_dialogo` PK51 e unicità Makoto/rango1/ordine0. Il coordinatore ha confrontato separatamente il RAW pubblico93 con la riga live: coincide. La133 cambia soltanto `note`, preservando Conoscenza3 e chiarendo Papessa in scorta per affinità. L'originale integrale resta nell'audit dedicato `rettifica-nota-rango1-makoto-133`, mai reincollato come istruzione attuale.
+
+Assente/esclusa/già corretta/rettificata distinti; audit preesistente immutabile. Inserimento dell'audit prima dell'UPDATE nella stessa transazione, CAS sui sette campi e changes1. Firma diversa, tuple ambigue o ID riutilizzato non vengono normalizzati. Scelte, punti e requisiti operativi intatti.
+
+Tre riesami propri worker/coordinatore; gate distinto di soluzione, codice e append133 APPROVATI. Controlli integrati83837/66206/74741 verdi. Ancora da osservare dopo rilascio; nessun test o scrittura locale.

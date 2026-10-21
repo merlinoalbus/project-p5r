@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { CATEGORIA_OGGETTO, normalizzaNomeOggetto } from '../../../shared/catalogo';
 import type { CatalogoOggettoDto, PropostaAbbinamentoDto, RiferimentoOggettoDto, TipoPropostaOggetto } from '../../types';
 import { useCarica } from '../../hooks/useCarica';
@@ -12,6 +12,7 @@ import { Selettore } from '../shared/Selettore';
 import { SceltaCatalogoOggetto } from './SceltaCatalogoOggetto';
 import { CostoDellOggetto } from './CostoDellOggetto';
 import { OggettiCollegati } from './OggettiCollegati';
+import { leggiIdentitaProposta, stessaProposta, stessoGruppoProposta, type IdentitaProposta } from '../../utils/collegamentiProposte';
 
 const NOME_TIPO: Record<TipoPropostaOggetto, string> = { articolo: 'Listini e scambi', regalo: 'Regali', voce: 'Contenuti delle voci', ricompensa: 'Ricompense', ricetta: 'Materiali delle ricette', catalogo: 'Fusioni del catalogo' };
 const CERTEZZA = { certa: 'Abbinamento certo, da confermare', probabile: 'Abbinamento probabile', 'da-verificare': 'Da verificare' } as const;
@@ -22,9 +23,23 @@ interface Props { onCambiato?: () => void | Promise<void> }
 /** Stessa sezione nel catalogo e nelle Impostazioni, visibile soltanto con proposte pendenti. */
 export function AbbinamentiDaApprovare({ onCambiato }: Props) {
   const dati = useCarica(() => getProposteOggetti(), []);
+  const [params, setParams] = useSearchParams();
+  const selezione = leggiIdentitaProposta(params.get('proposta'));
+  const scelta = selezione.identita;
+  const tornaATutte = () => setParams(prima => { const dopo = new URLSearchParams(prima); dopo.delete('proposta'); return dopo; }, { replace: true });
   if (dati.caricamento && !dati.dati) return <div className="flex items-center gap-2 text-[13px]" role="status"><Spinner size={16} />Caricamento delle proposte…</div>;
   if (dati.errore) return <div className="flex flex-wrap items-center gap-2 text-[13px]" role="alert"><span>{dati.errore}</span><button type="button" className="btn btn-secondary touch" onClick={() => void dati.ricarica()}>Riprova le proposte</button></div>;
-  return dati.dati ? <ElencoAbbinamenti proposte={dati.dati} titolo="Da approvare" onCambiato={async () => { await dati.ricarica(); await onCambiato?.(); }} /> : null;
+  const trovata = scelta && dati.dati?.some(p => stessaProposta(p, scelta));
+  const erroreSelezione = selezione.errore ?? (scelta && !trovata ? 'La proposta indicata non è più pendente oppure non esiste. Nessun’altra proposta è stata scelta al suo posto.' : null);
+  return dati.dati ? <div className="flex min-w-0 flex-col gap-2">
+    {params.has('proposta') && <div className="flex flex-wrap items-center gap-2 text-[13px]">
+      <span role={erroreSelezione ? 'alert' : 'status'}>{erroreSelezione ?? 'Proposta indicata nel collegamento e tutte le alternative del suo gruppo.'}</span>
+      <button type="button" className="btn btn-secondary touch" onClick={tornaATutte}>Tutte le proposte</button>
+    </div>}
+    {!erroreSelezione && <ElencoAbbinamenti key={params.get('proposta') ?? 'tutte'}
+      proposte={scelta ? dati.dati.filter(p => stessoGruppoProposta(p, scelta)) : dati.dati} scelta={scelta ?? undefined}
+      titolo="Da approvare" onCambiato={async () => { await dati.ricarica(); await onCambiato?.(); }} />}
+  </div> : null;
 }
 
 /** Le proposte sono già nel DTO della voce: nessuna richiesta per ogni riga della guida. */
@@ -33,8 +48,8 @@ export function AbbinamentiDellaVoce({ proposte, onCambiato }: Props & { propost
 }
 
 interface Conferma { proposta: PropostaAbbinamentoDto; oggetto: RiferimentoOggettoDto | null; scarta: boolean }
-function ElencoAbbinamenti({ proposte, titolo, onCambiato }: Props & { proposte: readonly PropostaAbbinamentoDto[]; titolo: string }) {
-  const [aperto, setAperto] = useState(false);
+function ElencoAbbinamenti({ proposte, titolo, onCambiato, scelta: sceltaIndicata }: Props & { proposte: readonly PropostaAbbinamentoDto[]; titolo: string; scelta?: IdentitaProposta }) {
+  const [aperto, setAperto] = useState(!!sceltaIndicata);
   const [q, setQ] = useState('');
   const [tipo, setTipo] = useState('');
   const [alternativa, setAlternativa] = useState<string | null>(null);
@@ -109,6 +124,7 @@ function ElencoAbbinamenti({ proposte, titolo, onCambiato }: Props & { proposte:
           const nascondi = p.modifica?.azione === 'nascondi';
           const alternative = alternativePerGruppo.get(gruppoDi(p)) ?? 1;
           return <article key={k} className="card flex min-w-0 flex-col gap-2">
+            {sceltaIndicata && stessaProposta(p, sceltaIndicata) && <strong className="text-primary text-[13px]">Proposta indicata nel collegamento</strong>}
             <h4 className="m-0 break-words text-[14px] font-semibold">{p.rigaNome}</h4>
             <span className="text-[12px] text-text-muted">{CERTEZZA[p.certezza]}</span>
             {alternative > 1 && <span className="text-[12px] text-text-muted">Una delle {alternative} alternative per questo contenuto</span>}

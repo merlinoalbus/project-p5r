@@ -1,21 +1,22 @@
 {
   "obiettivo": "Completare i lotti L0–L11 della razionalizzazione sul ramo newreview e pubblicarli funzionanti su p5s",
-  "aggiornato": "2026-10-21T15:53:00Z",
+  "aggiornato": "2026-10-21T16:11:00Z",
   "cruscotto": {
     "adesso": {
-      "attivita": "Editor delle informazioni dei Confidenti e rettifica Makoto131 pronti al rilascio: soluzione, firma pubblica e codice approvati dal revisore; controlli verdi. Raccordi97fonti L7 e relativa UI in implementazione separata, soluzione approvata.",
-      "stato": "Rilascio Makoto131 in preparazione; L26 concluso, altri residui aperti",
+      "attivita": "Rilascio dei raccordi delle 97 fonti L7 e della nota del rango 1 Makoto: codice 132 e 133 approvato dal revisore, typecheck, lint e build verdi. Seguono pipeline, rendiconti e osservazione su p5s.",
+      "stato": "Editor Confidenti 131 consegnato; rilascio raccordi 132 e nota 133 in preparazione",
       "responsabile": "Esecutore: editor Confidenti e Makoto. Coordinatore: integrazione, documenti e rilascio. Revisore distinto: controllo avversariale. Esploratore L7: contratto dei raccordi.",
-      "prossimaConsegna": "Editor con anteprima, modifiche per campi selezionati, CAS, storico e ripristino; bonifica Makoto solo sulla firma pubblica, senza alterare requisiti operativi o progressi."
+      "prossimaConsegna": "Raccordi consultabili nell’app con fonti, offerte e proposte correnti; nota Makoto corretta anche nelle intestazioni del rango 1, con originale conservato."
     },
     "ultimaConsegna": {
-      "titolo": "Ingresso Memento: data rettificata al 7 maggio e fotografia coerente",
-      "commit": "8d0a80bc",
-      "pipeline": { "testo": "Pipeline 73 riuscita", "url": "https://github.com/merlinoalbus/project-p5r/actions/runs/39625842203" },
-      "istanza": { "testo": "p5s operativo, schema 130/27", "url": "https://p5s.nasmerlinoalbus.cloud" },
-      "verifica": "Audit rettificata; cambiano solo data e relativa fotografia. Quartiere invariato, ancora senza data di sblocco. Gate finale distinto approvato con osservazione autonoma della scheda. Diario, Kamoshida, Madarame e 611 pin protetti identici nei campi rilevati dopo la 130."
+      "titolo": "Editor delle informazioni dei Confidenti e rettifica degli otto campi Makoto",
+      "commit": "295b7dbe",
+      "pipeline": { "testo": "Pipeline 74 riuscita", "url": "https://github.com/merlinoalbus/project-p5r/actions/runs/39629768702" },
+      "istanza": { "testo": "p5s operativo, schema 131/27", "url": "https://p5s.nasmerlinoalbus.cloud" },
+      "verifica": "Audit applicata; cinque campi Makoto corretti, altri campi, 22 Confidenti e quattro requisiti invariati. Storico coerente, editor osservato e gate finale distinto approvato nel perimetro. Diario, Palazzi e pin protetti identici. Nota separata del rango 1 ancora da rettificare con la 133."
     },
     "chiusi": [
+      "Editor degli otto campi informativi dei Confidenti e bonifica canonica Makoto 131: rilasciati e gate finale distinto approvato. Non comprende la nota per rango ancora aperta.",
       "L26: sola data del primo ingresso Memento corretta dal 9 al 7 maggio e snapshot coerente; gate finale distinto approvato. Non certifica il calendario delle visite libere o lo sblocco del quartiere.",
       "Elenco degli otto collegamenti approvati: 8 applicati su 8, compresa Area Central Street del Venditore; gate distinto finale approvato.",
       "Incidente di avvio della 125 risolto: quantità ignota della proposta Carta Media conservata come NULL; p5s nuovamente operativo."
@@ -36,7 +37,7 @@
         "cosaManca": [
           "Accertare e modellare le regole Royal della pesca: il difetto del convertitore è corretto, le condizioni fattuali non sono ancora bonificate.",
           "Risolvere rotazione Aojiru e finestra del negozio di Niijima.",
-          "Implementare l'editor informativo e la rettifica di Makoto già approvati, senza rendere obbligatori bonus o itinerari consigliati.",
+          "Rettificare la nota separata del rango 1 di Makoto, ancora imperativa sull’equipaggiamento. Editor e otto campi informativi sono già consegnati; soluzione 133 approvata.",
           "Completare l'istruttoria di Takemi su ambito e fascia e applicare soltanto correzioni attestate; nessun nuovo premio ripetuto o requisito dedotto.",
           "Completare gli esiti della riconciliazione delle frasi: 26 erano marcate da ricercare all'ultima lettura, con sovrapposizioni ai casi sopra."
         ],
@@ -102,7 +103,7 @@
     },
     "notaConteggi": "Questo è il lavoro noto per blocchi, non un conteggio deduplicato di bug. Candidati, frasi, nodi e proposte si sovrappongono; non si sommano e non producono una percentuale attendibile."
   },
-  "mandatoCorrente": "Otto raccordi e sola dataL26 conclusi con gate finale distinto APPROVATO.8d0a80bc attivo130/27,pipeline73SUCCESS, RAWeprotetti post130conformi nel perimetro dichiarato. EditorConfidenti/Makoto131 in implementazione dopo gate soluzione/firma pubblica; L7contratto raccordi97in preparazione. Regia aggiornata senza stime, osservata e aperta. Altri residui e L8-L11 nel mandato; nessuna nuova autorizzazione generale pendente o chiusura globale, zero test.",
+  "mandatoCorrente": "Otto raccordi, sola data L26 ed editor degli otto campi Confidenti/Makoto131 consegnati con gate finale distinto approvato. Pubblicato295b7dbe, pipeline74 riuscita, p5s131/27. Raccordi documentali132 con UI e nota rango1 Makoto133 approvati staticamente, controlli verdi, pronti al rilascio. Altri residui e L8–L11 ancora da completare. Nessuna nuova autorizzazione generale pendente o chiusura globale, zero test.",
   "verificaConsegne": "Disposizione utente del 21/10: ogni consegna richiede un agente distinto che acceda direttamente alla specifica originale in modo avversariale. Sola lettura, evidenze requisito/codice, copertura e limiti espliciti, esito motivato. Rilievi da risolvere e riesaminare o sottoporre all'utente. Supera il precedente divieto di verificatori; resta zero test.",
   "auditSpecifiche": "Riesami distinti contro originali43ad8889: codice123–130 e registri approvati staticamente, inclusi GET97, paginaR6-19/31, A10, scannerL26 eCAS. Gate finale otto raccordi dopo129 e sola dataL26 dopo130approvati; campioni browser autonomi dichiarati. Cruscotto codice e dati APPROVATI. SoluzioneMakoto e firma8RAWpubblici approvate; codice ancora da riesaminare. Nessuna chiusura complessiva o approvazione di proposte dubbie.",
   "salvataggioAudit": "Bonifica L5-L7 in e0ea995e; censimento readonly, coordinamento post-rilascio e piani L8 pubblicati in 1de1ccba887f533a43c7ef6fe36524ac0264c249. Pipeline67 riuscita. Riconciliazioni correnti e aggiornamenti successivi ancora in lavorazione. Nessun dato privato salvato.",
@@ -126,7 +127,7 @@
   ],
   "p5s": {
     "url": "https://p5s.nasmerlinoalbus.cloud/",
-    "stato": "8d0a80bc2e7af1fde6b428e7daf5b211b21df77d attivo130/27, healthok. Pipeline73/39625842203SUCCESS. Audit130rettificata,data e snapshot7maggio; altri campi e quartiere invariati. Gate finale distinto sola dataL26approvato con browser autonomo. GETprotetto dopo130:Diario255/54giorni,Kamoshida169,Madarame226,611pin/43mappe identici nei campi rilevati. Otto raccordi L5già conclusi. Nessuna certificazione interoDB o lotto completo."
+    "stato": "295b7dbea474d42e14455101c73035e6490d7713 attivo131/27, healthok. Pipeline74/39629768702 riuscita. Audit Makoto applicata; 22 altre disponibilità e quattro requisiti invariati, storia RAW coerente. Editor osservato; gate finale distinto circoscritto approvato. Proiezioni protette dopo131 identiche: Diario255/54giorni, Kamoshida169, Madarame226,611pin/43mappe. Nota separata rango1 da correggere con133. Nessuna certificazione interoDB o lotto completo."
   },
   "lotti": [
     {

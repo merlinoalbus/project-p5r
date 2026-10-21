@@ -10,6 +10,7 @@ import { Selettore } from '../shared/Selettore';
 import { ModuloOggetto } from './ModuloOggetto';
 import { AbbinamentiDaApprovare } from './AbbinamentiDaApprovare';
 import { AuditConversioneCatalogo } from './AuditConversioneCatalogo';
+import { ScambiConFonti } from './ScambiConFonti';
 
 const GRUPPI = Object.entries(GRUPPI_OGGETTO) as Array<[GruppoOggetto, string]>;
 const ORDINI = [{ chiave: 'nome', nome: 'Nome' }, { chiave: 'prezzo', nome: 'Prezzo minimo' }];
@@ -57,6 +58,7 @@ export function CatalogoOggetti({ gruppoIniziale = '' }: { gruppoIniziale?: Grup
     <section className="flex min-w-0 flex-col gap-3" aria-label="Catalogo degli oggetti">
       <AbbinamentiDaApprovare onCambiato={dati.ricarica} />
       <AuditConversioneCatalogo />
+      <ScambiConFonti />
       <div className="flex flex-wrap items-end gap-2">
         <div className="min-w-0 flex-1 basis-64"><CampoRicerca valore={q} onCambia={(v) => cambia('q', v)} segnaposto="Cerca un nome, un altro nome o un effetto…" /></div>
         <Selettore etichetta="Ordina per" valore={ordine} opzioni={ORDINI} ricerca="mai" onCambia={(v) => cambia('ordine', v === 'nome' ? '' : v)} />

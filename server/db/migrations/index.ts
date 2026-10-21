@@ -140,6 +140,8 @@ import { migration128 } from './128_ripresa_raccordi_legacy.js';
 import { migration129 } from './129_raccordi_panoramiche_quartiere.js';
 import { migration130 } from './130_data_ingresso_memento.js';
 import { migration131 } from './131_informazioni_makoto.js';
+import { migration132 } from './132_raccordi_scambi_catalogo.js';
+import { migration133 } from './133_nota_rango_makoto.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -155,5 +157,5 @@ export const migrations: Migration[] = [
   migration091, migration092, migration093, migration094, migration095, migration096, migration097, migration098, migration099, migration100,
   migration101, migration102, migration103, migration104, migration105, migration106, migration107, migration108, migration109, migration110,
   migration111, migration112, migration113, migration114, migration115, migration116, migration117, migration118, migration119, migration120,
-  migration121, migration122, migration123, migration124, migration125, migration126, migration127, migration128, migration129, migration130, migration131,
+  migration121, migration122, migration123, migration124, migration125, migration126, migration127, migration128, migration129, migration130, migration131, migration132, migration133,
 ];

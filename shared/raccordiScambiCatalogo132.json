@@ -1,0 +1,2237 @@
+{
+  "versione": 1,
+  "specifica": "43ad8889",
+  "origine": {
+    "percorso": "pacchetto/gioco.db",
+    "versione": 93,
+    "sha256": "113d09a15ba62127e6cc93b291605bf8fe5db6db641a16aefd635f76a539d5ba"
+  },
+  "gruppi": [
+    {
+      "percorso": "oggetti-guida/scambi/0",
+      "rawMetadati": {
+        "venditore": "Mercante Sakai",
+        "dove": "Kichijoji",
+        "quando": "Un'offerta diversa ogni settimana circa; il Mercante scompare e ritorna con nuovi baratti",
+        "fonte": "https://www.allgamestaff.it/persona-5-royal/scambi-oggetti-curiosi-venditori-nascosti/",
+        "verificato": true
+      }
+    },
+    {
+      "percorso": "oggetti-guida/scambi/1",
+      "rawMetadati": {
+        "venditore": "Venditore Ambulante",
+        "dove": "Central Street, Shibuya",
+        "quando": "Sera, dal lunedì al venerdì (non nei giorni di pioggia)",
+        "fonte": "https://www.allgamestaff.it/persona-5-royal/scambi-oggetti-curiosi-venditori-nascosti/",
+        "verificato": true
+      }
+    },
+    {
+      "percorso": "oggetti-guida/scambi/2",
+      "rawMetadati": {
+        "venditore": "Gachapon di Akihabara (\"L'Uomo avido\")",
+        "dove": "Akihabara",
+        "quando": "Sempre disponibile; la macchina gacha costa 500¥ a capsula",
+        "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+        "verificato": true
+      }
+    },
+    {
+      "percorso": "oggetti-guida/scambi/3",
+      "rawMetadati": {
+        "venditore": "Affari Loschi di Tanaka",
+        "dove": "Online, dal Laptop del protagonista (dopo averlo riparato con il Set di strumenti da PC di Akihabara)",
+        "quando": "Dal 19 dicembre al 30 gennaio; consegna in 3 giorni per ordine, un solo ordine alla volta",
+        "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+        "verificato": true
+      }
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4",
+      "rawMetadati": {
+        "venditore": "Jose",
+        "dove": "Nei Memento, a bordo di un veicolo particolare (posizione segnalata sulla mappa quando appare)",
+        "quando": "Casualmente durante l'esplorazione dei Memento, dopo aver completato la prima richiesta; il catalogo cambia in base al Dedalo raggiunto",
+        "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/ ; https://www.allgamestaff.it/persona-5-royal-guida-ai-memento/",
+        "verificato": true
+      }
+    }
+  ],
+  "nodi": [
+    {
+      "percorso": "jose/scambi/0",
+      "rawFonte": {
+        "nome": "Fiala delle vertigini S",
+        "effetto": "Chance alta di infliggere Vertigini a un nemico",
+        "costo": 30,
+        "requisito": "Aver sbloccato il Dedalo di Aiyatsbus"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-delle-vertigini-s",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/1",
+      "rawFonte": {
+        "nome": "Fiala del Sonno S",
+        "effetto": "Chance alta di infliggere Sonno a un nemico",
+        "costo": 40,
+        "requisito": "Aver sbloccato il Dedalo di Aiyatsbus"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-del-sonno-s",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/2",
+      "rawFonte": {
+        "nome": "Goccia dell'anima",
+        "effetto": "Ripristina 10 SP di un alleato",
+        "costo": 15,
+        "requisito": "Aver sbloccato il Dedalo di Aiyatsbus"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/goccia-dellanima",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/3",
+      "rawFonte": {
+        "nome": "Polvere d'anima",
+        "effetto": "Ripristina 50 SP di un alleato",
+        "costo": 75,
+        "requisito": "Aver sbloccato il Dedalo di Aiyatsbus"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/polvere-danima",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/4",
+      "rawFonte": {
+        "nome": "Kit energetico S",
+        "effetto": "Usare solo in posti sicuri: ripristina il 20% degli SP di tutti gli alleati",
+        "costo": 80,
+        "requisito": "Aver sbloccato il Dedalo di Aiyatsbus"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/kit-energetico-s",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/5",
+      "rawFonte": {
+        "nome": "Carta bianca",
+        "effetto": "Una carta bianca su cui non c'è scritto nulla (base per trasmutazioni)",
+        "costo": 15,
+        "requisito": "Aver sbloccato il Dedalo di Chemdah"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/carta-bianca",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/6",
+      "rawFonte": {
+        "nome": "Fiala confusione S",
+        "effetto": "Chance alta di infliggere Confusione a un nemico",
+        "costo": 65,
+        "requisito": "Aver sbloccato il Dedalo di Chemdah"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-confusione-s",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/7",
+      "rawFonte": {
+        "nome": "Fiala del sonno L",
+        "effetto": "Chance media di infliggere Sonno a tutti i nemici",
+        "costo": 40,
+        "requisito": "Aver sbloccato il Dedalo di Chemdah"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-del-sonno-l",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/8",
+      "rawFonte": {
+        "nome": "Ambra grigia MA",
+        "effetto": "Aumenta Ma di una Persona di 2",
+        "costo": 80,
+        "requisito": "Aver sbloccato il Dedalo di Chemdah"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/ambra-grigia-ma",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/9",
+      "rawFonte": {
+        "nome": "Ambra grigia AG",
+        "effetto": "Aumenta Ag di una Persona di 2",
+        "costo": 80,
+        "requisito": "Aver sbloccato il Dedalo di Chemdah"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/ambra-grigia-ag",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/10",
+      "rawFonte": {
+        "nome": "Ambra grigia FO",
+        "effetto": "Aumenta Fo di una Persona di 2",
+        "costo": 80,
+        "requisito": "Aver sbloccato il Dedalo di Chemdah"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/ambra-grigia-fo",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/11",
+      "rawFonte": {
+        "nome": "Kogatana nera",
+        "effetto": "Spada in grado di mutare forma (base per trasmutazioni)",
+        "costo": 30,
+        "requisito": "Aver sbloccato il Dedalo di Chemdah"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/kogatana-nera",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/12",
+      "rawFonte": {
+        "nome": "Replica d'arma",
+        "effetto": "Replica d'arma in grado di operare trasmutazioni",
+        "costo": 30,
+        "requisito": "Aver sbloccato il Dedalo di Chemdah"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/replica-darma",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/13",
+      "rawFonte": {
+        "nome": "Veste nera",
+        "effetto": "Una veste nera che ha il potere di mutare forma (base per trasmutazioni)",
+        "costo": 30,
+        "requisito": "Aver sbloccato il Dedalo di Chemdah"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/veste-nera",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/14",
+      "rawFonte": {
+        "nome": "Ambra grigia RS",
+        "effetto": "Aumenta Rs di una Persona di 2",
+        "costo": 80,
+        "requisito": "Aver sbloccato il Dedalo di Kaitul"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/ambra-grigia-rs",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/15",
+      "rawFonte": {
+        "nome": "Ambra grigia FR",
+        "effetto": "Aumenta Fr di una Persona di 2",
+        "costo": 80,
+        "requisito": "Aver sbloccato il Dedalo di Kaitul"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/ambra-grigia-fr",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/16",
+      "rawFonte": {
+        "nome": "Fiala delle vertigini L",
+        "effetto": "Chance media di infliggere Vertigini a tutti i nemici",
+        "costo": 40,
+        "requisito": "Aver sbloccato il Dedalo di Kaitul"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-delle-vertigini-l",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/17",
+      "rawFonte": {
+        "nome": "Fiala della paura S",
+        "effetto": "Chance alta di infliggere Paura a un nemico",
+        "costo": 65,
+        "requisito": "Aver sbloccato il Dedalo di Kaitul"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-della-paura-s",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/18",
+      "rawFonte": {
+        "nome": "Idaten Ofuda",
+        "effetto": "Potenzia precisione ed elusione per tutti gli alleati per tre turni",
+        "costo": 70,
+        "requisito": "Aver sbloccato il Dedalo di Akzeriyyuth"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/idaten-ofuda",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/19",
+      "rawFonte": {
+        "nome": "Kongou Ofuda",
+        "effetto": "Aumenta l'attacco di tutti gli alleati per 3 turni",
+        "costo": 70,
+        "requisito": "Aver sbloccato il Dedalo di Akzeriyyuth"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/kongou-ofuda",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/20",
+      "rawFonte": {
+        "nome": "Rasetsu Ofuda",
+        "effetto": "Aumenta l'attacco di tutti gli alleati per 3 turni",
+        "costo": 70,
+        "requisito": "Aver sbloccato il Dedalo di Akzeriyyuth"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/rasetsu-ofuda",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/21",
+      "rawFonte": {
+        "nome": "Kit energetico L",
+        "effetto": "Usare solo in posti sicuri: ripristina il 40% degli SP di tutti gli alleati",
+        "costo": 210,
+        "requisito": "Aver sbloccato il Dedalo di Akzeriyyuth"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/kit-energetico-l",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/22",
+      "rawFonte": {
+        "nome": "Anima da masticare",
+        "effetto": "Ripristina 100 SP di un alleato",
+        "costo": 170,
+        "requisito": "Aver sbloccato il Dedalo di Akzeriyyuth"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/anima-da-masticare",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/23",
+      "rawFonte": {
+        "nome": "Fiala confusione L",
+        "effetto": "Chance media di infliggere Confusione a tutti i nemici",
+        "costo": 70,
+        "requisito": "Aver sbloccato il Dedalo di Akzeriyyuth"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-confusione-l",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/24",
+      "rawFonte": {
+        "nome": "Fiala dell'amnesia S",
+        "effetto": "Chance alta di infliggere Amnesia a un nemico",
+        "costo": 30,
+        "requisito": "Aver sbloccato il Dedalo di Akzeriyyuth"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-dellamnesia-s",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/25",
+      "rawFonte": {
+        "nome": "Fiala della paura L",
+        "effetto": "Chance media di infliggere Paura a tutti i nemici",
+        "costo": 70,
+        "requisito": "Aver sbloccato il Dedalo di Adyeshach"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-della-paura-l",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/26",
+      "rawFonte": {
+        "nome": "Fiala soggiogamento S",
+        "effetto": "Chance alta di infliggere Soggiogamento a un nemico",
+        "costo": 70,
+        "requisito": "Aver sbloccato il Dedalo di Adyeshach"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-soggiogamento-s",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/27",
+      "rawFonte": {
+        "nome": "Nirvana FO",
+        "effetto": "Aumenta Fo di una Persona di 3",
+        "costo": 80,
+        "requisito": "Aver sbloccato il Dedalo di Adyeshach"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/nirvana-fo",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/28",
+      "rawFonte": {
+        "nome": "Nirvana AG",
+        "effetto": "Aumenta Ag di una Persona di 3",
+        "costo": 80,
+        "requisito": "Aver sbloccato il Dedalo di Adyeshach"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/nirvana-ag",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/29",
+      "rawFonte": {
+        "nome": "Nirvana RS",
+        "effetto": "Aumenta Rs di una Persona di 3",
+        "costo": 80,
+        "requisito": "Aver sbloccato il Dedalo di Adyeshach"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/nirvana-rs",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/30",
+      "rawFonte": {
+        "nome": "Nirvana MA",
+        "effetto": "Aumenta Ma di una Persona di 3",
+        "costo": 80,
+        "requisito": "Aver sbloccato il Dedalo di Adyeshach"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/nirvana-ma",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/31",
+      "rawFonte": {
+        "nome": "Nirvana FR",
+        "effetto": "Aumenta Fr di una Persona di 3",
+        "costo": 80,
+        "requisito": "Aver sbloccato il Dedalo di Adyeshach"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/nirvana-fr",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/32",
+      "rawFonte": {
+        "nome": "Pane per l'anima",
+        "effetto": "Ripristina del tutto gli SP di un alleato",
+        "costo": 450,
+        "requisito": "Aver sbloccato il Dedalo di Sheriruth"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/pane-per-lanima",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/33",
+      "rawFonte": {
+        "nome": "Fiala dell'amnesia L",
+        "effetto": "Chance media di infliggere Amnesia a tutti i nemici",
+        "costo": 40,
+        "requisito": "Aver sbloccato il Dedalo di Sheriruth"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-dellamnesia-l",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/34",
+      "rawFonte": {
+        "nome": "Fiala disperazione S",
+        "effetto": "Chance alta di infliggere Disperazione a un nemico",
+        "costo": 100,
+        "requisito": "Aver sbloccato il Dedalo di Sheriruth"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-disperazione-s",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/35",
+      "rawFonte": {
+        "nome": "Soma",
+        "effetto": "Ripristina del tutto gli HP e gli SP di tutti gli alleati",
+        "costo": 520,
+        "requisito": "Aver sbloccato il Dedalo di Da'at"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/soma",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "jose/scambi/36",
+      "rawFonte": {
+        "nome": "Fiala soggiogamento L",
+        "effetto": "Chance media di infliggere Soggiogamento a tutti i nemici",
+        "costo": 90,
+        "requisito": "Aver sbloccato il Dedalo di Da'at"
+      },
+      "gruppo": null,
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-soggiogamento-l",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "oggetti-guida/scambi/0/offerte/0",
+      "rawFonte": {
+        "ricevi": "Frusta decorativa (arma di Ann: Fo +5)",
+        "dai": "Proteine d'importazione",
+        "note": "6/12 - 6/17"
+      },
+      "gruppo": "oggetti-guida/scambi/0",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "mercante-sakai/frusta-decorativa",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "oggetti-guida/scambi/0/offerte/1",
+      "rawFonte": {
+        "ricevi": "Veste nera (materiale mutageno per la Trasmutazione)",
+        "dai": "Panino con yakisoba",
+        "note": "6/26 - 7/2"
+      },
+      "gruppo": "oggetti-guida/scambi/0",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "mercante-sakai/veste-nera",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": [
+        "identita-ricevuta-da-risolvere"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/0/offerte/2",
+      "rawFonte": {
+        "ricevi": "Spada Koedo (arma di Yusuke: Amnesia debole)",
+        "dai": "Soba calmante",
+        "note": "7/11 - 7/12"
+      },
+      "gruppo": "oggetti-guida/scambi/0",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "mercante-sakai/spada-koedo",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "oggetti-guida/scambi/0/offerte/3",
+      "rawFonte": {
+        "ricevi": "La fattorizzazione (libro, bonus statistiche di studio)",
+        "dai": "Razione militare",
+        "note": "7/26 - 7/30"
+      },
+      "gruppo": "oggetti-guida/scambi/0",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "mercante-sakai/la-fattorizzazione",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": [
+        "identita-ricevuta-da-risolvere"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/0/offerte/4",
+      "rawFonte": {
+        "ricevi": "Replica d'arma (materiale mutageno per la Trasmutazione)",
+        "dai": "Acqua benedetta",
+        "note": "8/7 - 8/13"
+      },
+      "gruppo": "oggetti-guida/scambi/0",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "mercante-sakai/replica-darma",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "oggetti-guida/scambi/0/offerte/5",
+      "rawFonte": {
+        "ricevi": "Pugno del padre (arma di Makoto: In fiamme medio)",
+        "dai": "Melon pan",
+        "note": "8/22 - 8/27"
+      },
+      "gruppo": "oggetti-guida/scambi/0",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "mercante-sakai/pugno-del-padre",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "oggetti-guida/scambi/0/offerte/6",
+      "rawFonte": {
+        "ricevi": "Ofuda della forza (raddoppia una volta gli attacchi fisici)",
+        "dai": "Wafer dei ladri",
+        "note": "9/4 - 9/6"
+      },
+      "gruppo": "oggetti-guida/scambi/0",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "mercante-sakai/ofuda-della-forza",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "oggetti-guida/scambi/0/offerte/7",
+      "rawFonte": {
+        "ricevi": "Ofuda della magia (raddoppia una volta gli attacchi magici)",
+        "dai": "Maschera del ladro",
+        "note": "9/19 - 9/24"
+      },
+      "gruppo": "oggetti-guida/scambi/0",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "mercante-sakai/ofuda-della-magia",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "oggetti-guida/scambi/0/offerte/8",
+      "rawFonte": {
+        "ricevi": "Daifuku alla fragola (cura alterazioni e ripristina tutti gli HP)",
+        "dai": "Cartolina",
+        "note": "10/2 - 10/8"
+      },
+      "gruppo": "oggetti-guida/scambi/0",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "mercante-sakai/daifuku-alla-fragola",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "oggetti-guida/scambi/0/offerte/9",
+      "rawFonte": {
+        "ricevi": "Spada sangue ardente (arma di Morgana: In fiamme medio)",
+        "dai": "Strumento Girimehkala",
+        "note": "10/16 - 10/22"
+      },
+      "gruppo": "oggetti-guida/scambi/0",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "mercante-sakai/spada-sangue-ardente",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "oggetti-guida/scambi/0/offerte/10",
+      "rawFonte": {
+        "ricevi": "Distintivo dell'angelo (accessorio: elusione magia)",
+        "dai": "Stufato misterioso",
+        "note": "10/30 - 11/5"
+      },
+      "gruppo": "oggetti-guida/scambi/0",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "mercante-sakai/distintivo-dellangelo",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "oggetti-guida/scambi/0/offerte/11",
+      "rawFonte": {
+        "ricevi": "Ascia Kintaro (arma di Haru: +30 HP)",
+        "dai": "Dango lunare",
+        "note": "11/13 - 11/17"
+      },
+      "gruppo": "oggetti-guida/scambi/0",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "mercante-sakai/ascia-kintaro",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "oggetti-guida/scambi/0/offerte/12",
+      "rawFonte": {
+        "ricevi": "Ofuda del potere (potenzia le statistiche per 3 turni)",
+        "dai": "Yaki-Imo leggendario",
+        "note": "11/27 - 12/3"
+      },
+      "gruppo": "oggetti-guida/scambi/0",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "mercante-sakai/ofuda-del-potere",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "oggetti-guida/scambi/0/offerte/13",
+      "rawFonte": {
+        "ricevi": "Mazza fervente (arma di Ryuji: In fiamme medio)",
+        "dai": "Crostatina angelo",
+        "note": "12/11 - 12/17"
+      },
+      "gruppo": "oggetti-guida/scambi/0",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "mercante-sakai/mazza-fervente",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "oggetti-guida/scambi/0/offerte/14",
+      "rawFonte": {
+        "ricevi": "Cintura della forza (accessorio: resistenza fisica)",
+        "dai": "Chimaki speciale",
+        "note": "1/13 - 1/14"
+      },
+      "gruppo": "oggetti-guida/scambi/0",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "mercante-sakai/cintura-della-forza",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "oggetti-guida/scambi/0/offerte/15",
+      "rawFonte": {
+        "ricevi": "Elisir del padre (ripristina tutti gli HP e SP)",
+        "dai": "Panino supernova",
+        "note": "1/22 - 2/2"
+      },
+      "gruppo": "oggetti-guida/scambi/0",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "mercante-sakai/elisir-del-padre",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "oggetti-guida/scambi/1/offerte/0",
+      "rawFonte": {
+        "ricevi": "Specchio della vendetta (accessorio)",
+        "dai": "8.000¥",
+        "note": "Fascino Rango 2"
+      },
+      "gruppo": "oggetti-guida/scambi/1",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "venditore-ambulante/specchio-della-vendetta",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "oggetti-guida/scambi/1/offerte/1",
+      "rawFonte": {
+        "ricevi": "Portafortuna croce (accessorio)",
+        "dai": "2.000¥",
+        "note": "Fascino Rango 2"
+      },
+      "gruppo": "oggetti-guida/scambi/1",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "venditore-ambulante/portafortuna-croce",
+          "ruolo": "offerta-principale"
+        },
+        {
+          "articolo": "venditore-ambulante/portafortuna-a-croce",
+          "ruolo": "variante-non-equiparata"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "offerte-distinte",
+      "rilievi": [
+        "variante-non-fusa"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/1/offerte/2",
+      "rawFonte": {
+        "ricevi": "Portafortuna teschio (accessorio)",
+        "dai": "2.000¥",
+        "note": "Fascino Rango 2"
+      },
+      "gruppo": "oggetti-guida/scambi/1",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "venditore-ambulante/portafortuna-teschio",
+          "ruolo": "offerta-principale"
+        },
+        {
+          "articolo": "venditore-ambulante/portafortuna-a-teschio",
+          "ruolo": "variante-non-equiparata"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "offerte-distinte",
+      "rilievi": [
+        "variante-non-fusa"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/1/offerte/3",
+      "rawFonte": {
+        "ricevi": "Cintura Rakshasa (accessorio)",
+        "dai": "9.000¥",
+        "note": "Fascino Rango 3"
+      },
+      "gruppo": "oggetti-guida/scambi/1",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "venditore-ambulante/cintura-rakshasa",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "oggetti-guida/scambi/1/offerte/4",
+      "rawFonte": {
+        "ricevi": "Cintura Vajra (accessorio)",
+        "dai": "9.000¥",
+        "note": "Fascino Rango 3"
+      },
+      "gruppo": "oggetti-guida/scambi/1",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "venditore-ambulante/cintura-vajra",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "oggetti-guida/scambi/1/offerte/5",
+      "rawFonte": {
+        "ricevi": "Cintura Skanda (accessorio)",
+        "dai": "9.000¥",
+        "note": "Fascino Rango 3"
+      },
+      "gruppo": "oggetti-guida/scambi/1",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "venditore-ambulante/cintura-skanda",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "oggetti-guida/scambi/1/offerte/6",
+      "rawFonte": {
+        "ricevi": "Specchio del rimbotto (accessorio)",
+        "dai": "16.000¥",
+        "note": "Fascino Rango 3"
+      },
+      "gruppo": "oggetti-guida/scambi/1",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "venditore-ambulante/specchio-del-rimbotto",
+          "ruolo": "offerta-principale"
+        },
+        {
+          "articolo": "venditore-ambulante/specchio-del-rimbalzo",
+          "ruolo": "variante-non-equiparata"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "offerte-distinte",
+      "rilievi": [
+        "variante-non-fusa"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/1/offerte/7",
+      "rawFonte": {
+        "ricevi": "Anello del vento (accessorio)",
+        "dai": "4.000¥",
+        "note": "Fascino Rango 5"
+      },
+      "gruppo": "oggetti-guida/scambi/1",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "venditore-ambulante/anello-del-vento",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "oggetti-guida/scambi/1/offerte/8",
+      "rawFonte": {
+        "ricevi": "Piastrina incisa (accessorio)",
+        "dai": "4.000¥",
+        "note": "Fascino Rango 5"
+      },
+      "gruppo": "oggetti-guida/scambi/1",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "venditore-ambulante/piastrina-incisa",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "oggetti-guida/scambi/1/offerte/9",
+      "rawFonte": {
+        "ricevi": "Specchio di rappresaglia (accessorio)",
+        "dai": "24.000¥",
+        "note": "Fascino Rango 5"
+      },
+      "gruppo": "oggetti-guida/scambi/1",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "venditore-ambulante/specchio-di-rappresaglia",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": []
+    },
+    {
+      "percorso": "oggetti-guida/scambi/2/offerte/0",
+      "rawFonte": {
+        "ricevi": "Dr. Salt NEO",
+        "dai": "Capsula Minidominazione",
+        "note": null
+      },
+      "gruppo": "oggetti-guida/scambi/2",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "gachapon-akihabara/scambio-minidominazione",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": [
+        "baratto-distinto-da-capsula-casuale"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/2/offerte/1",
+      "rawFonte": {
+        "ricevi": "Riempitivo + Lenzuolo rinfrescante",
+        "dai": "Capsula Die-soujou",
+        "note": null
+      },
+      "gruppo": "oggetti-guida/scambi/2",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "gachapon-akihabara/scambio-die-soujou",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": [
+        "baratto-distinto-da-capsula-casuale"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/2/offerte/2",
+      "rawFonte": {
+        "ricevi": "Bevanda energetica + Salsa rancida",
+        "dai": "Capsula Decarabia addobbato",
+        "note": null
+      },
+      "gruppo": "oggetti-guida/scambi/2",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "gachapon-akihabara/scambio-decarabia-addobbato",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": [
+        "baratto-distinto-da-capsula-casuale"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/2/offerte/3",
+      "rawFonte": {
+        "ricevi": "Curry alla fragola + Stufato misterioso",
+        "dai": "Capsula Strumento Girimehkala",
+        "note": null
+      },
+      "gruppo": "oggetti-guida/scambi/2",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "gachapon-akihabara/scambio-strumento-girimehkala",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": [
+        "baratto-distinto-da-capsula-casuale"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/2/offerte/4",
+      "rawFonte": {
+        "ricevi": "Rianidrin + Unguento vitale",
+        "dai": "Capsula Kin-Ki kink",
+        "note": null
+      },
+      "gruppo": "oggetti-guida/scambi/2",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "gachapon-akihabara/scambio-kin-ki-kink",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": [
+        "baratto-distinto-da-capsula-casuale"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/2/offerte/5",
+      "rawFonte": {
+        "ricevi": "Replica d'arma (poi Balsamo vitale dal 5° scambio)",
+        "dai": "Capsula Mothman muschiato",
+        "note": "Mothman è la capsula più ricercata: dopo 5 scambi la ricompensa cambia in Balsamo vitale"
+      },
+      "gruppo": "oggetti-guida/scambi/2",
+      "disposizione": "offerta",
+      "destinazioni": [
+        {
+          "articolo": "gachapon-akihabara/scambio-mothman-muschiato",
+          "ruolo": "offerta-principale"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "singola",
+      "rilievi": [
+        "baratto-distinto-da-capsula-casuale",
+        "differenza-soglia-mothman",
+        "risultati-alternativi-mothman"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/3/offerte/0",
+      "rawFonte": {
+        "ricevi": "Spec. senso spirit / Chiodo ossidato / Magatama (infernale, ciclonico, ghiaccio, elettrico)",
+        "dai": "5.000-6.000¥ (grado Nero, oltre 10.000¥ spesi)",
+        "note": "Sblocco progressivo in base al totale speso su Tanaka"
+      },
+      "gruppo": "oggetti-guida/scambi/3",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "tanaka-affari-loschi/five-inch-nail",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "tanaka-affari-loschi/inspired-hand-mirror",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "tanaka-affari-loschi/gemme-elementali",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "tanaka-affari-loschi/magatama-ciclonico",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "tanaka-affari-loschi/magatama-del-gelo",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "tanaka-affari-loschi/magatama-elettrico",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "gradi-sintetici-non-operativi",
+        "intervallo-non-prezzo-individuale"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/3/offerte/1",
+      "rawFonte": {
+        "ricevi": "Magatama (divino, esplosivo) / Veste nera / Spec. spirit. oscuro",
+        "dai": "500-6.000¥ (grado Nero avanzato)",
+        "note": null
+      },
+      "gruppo": "oggetti-guida/scambi/3",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "tanaka-affari-loschi/magatama-divino",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "tanaka-affari-loschi/magatama-esplosivo",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "tanaka-affari-loschi/black-robe",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "tanaka-affari-loschi/spec-spirit-oscuro",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "gradi-sintetici-non-operativi",
+        "intervallo-non-prezzo-individuale"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/3/offerte/2",
+      "rawFonte": {
+        "ricevi": "Kogatana nera / Sacra Sindone / Tavola Ouija / Fotocamera spirituale",
+        "dai": "1.000-10.000¥ (grado Oscurità, oltre 50.000¥ spesi)",
+        "note": "Fotocamera spirituale limitata a 1 unità"
+      },
+      "gruppo": "oggetti-guida/scambi/3",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "tanaka-affari-loschi/black-kogatana",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "tanaka-affari-loschi/holy-cloth",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "tanaka-affari-loschi/ouija-board",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "tanaka-affari-loschi/fotocamera-spirituale",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "gradi-sintetici-non-operativi",
+        "intervallo-non-prezzo-individuale"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/3/offerte/3",
+      "rawFonte": {
+        "ricevi": "Replica d'arma / Homunculus / Maschera sorridente / Corona della salvezza",
+        "dai": "1.000-990.000¥ (grado Caos, oltre 100.000¥ spesi)",
+        "note": "Maschera sorridente limitata a 1 unità; Corona della salvezza limitata a 1 unità"
+      },
+      "gruppo": "oggetti-guida/scambi/3",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "tanaka-affari-loschi/model-gun",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "tanaka-affari-loschi/homunculus",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "tanaka-affari-loschi/maschera-sorridente",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "tanaka-affari-loschi/crown-of-salvation",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "gradi-sintetici-non-operativi",
+        "intervallo-non-prezzo-individuale"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/0",
+      "rawFonte": {
+        "ricevi": "Fiala vertigini S / Fiala del sonno S",
+        "dai": "30-40 Fiori",
+        "note": "[Dedalo di Aiyatsbus]"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-delle-vertigini-s",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "jose/fiala-del-sonno-s",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/0",
+        "jose/scambi/1"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/1",
+      "rawFonte": {
+        "ricevi": "Goccia dell'anima / Polvere d'anima",
+        "dai": "15-75 Fiori",
+        "note": "[Dedalo di Aiyatsbus] Ripristino SP"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/goccia-dellanima",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "jose/polvere-danima",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/2",
+        "jose/scambi/3"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/2",
+      "rawFonte": {
+        "ricevi": "Kit energetico S",
+        "dai": "80 Fiori",
+        "note": "[Dedalo di Aiyatsbus]"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/kit-energetico-s",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/4"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/3",
+      "rawFonte": {
+        "ricevi": "Carta bianca",
+        "dai": "15 Fiori",
+        "note": "[Dedalo di Chemdah]"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/carta-bianca",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/5"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/4",
+      "rawFonte": {
+        "ricevi": "Fiala confusione S",
+        "dai": "65 Fiori",
+        "note": "[Dedalo di Chemdah]"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-confusione-s",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/6"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/5",
+      "rawFonte": {
+        "ricevi": "Fiala del sonno L",
+        "dai": "40 Fiori",
+        "note": "[Dedalo di Chemdah]"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-del-sonno-l",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/7"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/6",
+      "rawFonte": {
+        "ricevi": "Ambra grigia (Ma/Ag/Fo +2 a una Persona)",
+        "dai": "80 Fiori",
+        "note": "[Dedalo di Chemdah]"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/ambra-grigia-ma",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "jose/ambra-grigia-ag",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "jose/ambra-grigia-fo",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/8",
+        "jose/scambi/9",
+        "jose/scambi/10"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/7",
+      "rawFonte": {
+        "ricevi": "Kogatana nera / Replica d'arma / Veste nera",
+        "dai": "30 Fiori",
+        "note": "[Dedalo di Chemdah] Oggetti mutageni per la Trasmutazione"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/kogatana-nera",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "jose/replica-darma",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "jose/veste-nera",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/11",
+        "jose/scambi/12",
+        "jose/scambi/13"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/8",
+      "rawFonte": {
+        "ricevi": "Ambra grigia RS/FR (Rs/Fr +2 a una Persona)",
+        "dai": "80 Fiori",
+        "note": "[Dedalo di Kaitul]"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/ambra-grigia-rs",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "jose/ambra-grigia-fr",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/14",
+        "jose/scambi/15"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/9",
+      "rawFonte": {
+        "ricevi": "Fiala delle vertigini L",
+        "dai": "40 Fiori",
+        "note": "[Dedalo di Kaitul]"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-delle-vertigini-l",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/16"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/10",
+      "rawFonte": {
+        "ricevi": "Fiala della paura S",
+        "dai": "65 Fiori",
+        "note": "[Dedalo di Kaitul]"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-della-paura-s",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/17"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/11",
+      "rawFonte": {
+        "ricevi": "Ofuda speciali (potenziano precisione/elusione/attacco di gruppo)",
+        "dai": "70 Fiori",
+        "note": "[Dedalo di Akzeriyyuth]"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/idaten-ofuda",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "jose/kongou-ofuda",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "jose/rasetsu-ofuda",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/18",
+        "jose/scambi/19",
+        "jose/scambi/20"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/12",
+      "rawFonte": {
+        "ricevi": "Kit energetico L",
+        "dai": "210 Fiori",
+        "note": "[Dedalo di Akzeriyyuth]"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/kit-energetico-l",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/21"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/13",
+      "rawFonte": {
+        "ricevi": "Anima da masticare",
+        "dai": "170 Fiori",
+        "note": "[Dedalo di Akzeriyyuth]"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/anima-da-masticare",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/22"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/14",
+      "rawFonte": {
+        "ricevi": "Fiala confusione L",
+        "dai": "70 Fiori",
+        "note": "[Dedalo di Akzeriyyuth]"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-confusione-l",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/23"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/15",
+      "rawFonte": {
+        "ricevi": "Fiala dell'amnesia S",
+        "dai": "30 Fiori",
+        "note": "[Dedalo di Akzeriyyuth]"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-dellamnesia-s",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/24"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/16",
+      "rawFonte": {
+        "ricevi": "Fiala della paura L",
+        "dai": "70 Fiori",
+        "note": "[Dedalo di Adyeshach]"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-della-paura-l",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/25"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/17",
+      "rawFonte": {
+        "ricevi": "Fiala soggiogamento S",
+        "dai": "70 Fiori",
+        "note": "[Dedalo di Adyeshach]"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-soggiogamento-s",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/26"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/18",
+      "rawFonte": {
+        "ricevi": "Nirvana (+3 a tutte le statistiche di una Persona)",
+        "dai": "80 Fiori",
+        "note": "[Dedalo di Adyeshach]"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/nirvana-fo",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "jose/nirvana-ag",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "jose/nirvana-rs",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "jose/nirvana-ma",
+          "ruolo": "riferimento-archivio"
+        },
+        {
+          "articolo": "jose/nirvana-fr",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/27",
+        "jose/scambi/28",
+        "jose/scambi/29",
+        "jose/scambi/30",
+        "jose/scambi/31"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto",
+        "divergenza-nirvana-tutte-statistiche"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/19",
+      "rawFonte": {
+        "ricevi": "Pane per l'anima",
+        "dai": "450 Fiori",
+        "note": "[Dedalo di Sheriruth] Ripristino SP totale"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/pane-per-lanima",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/32"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/20",
+      "rawFonte": {
+        "ricevi": "Fiala dell'amnesia L",
+        "dai": "40 Fiori",
+        "note": "[Dedalo di Sheriruth]"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-dellamnesia-l",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/33"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/21",
+      "rawFonte": {
+        "ricevi": "Fiala disperazione S",
+        "dai": "100 Fiori",
+        "note": "[Dedalo di Sheriruth]"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-disperazione-s",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/34"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/22",
+      "rawFonte": {
+        "ricevi": "Soma",
+        "dai": "520 Fiori",
+        "note": "[Dedalo di Da'at] Ripristino HP e SP totale di gruppo"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/soma",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/35"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto"
+      ]
+    },
+    {
+      "percorso": "oggetti-guida/scambi/4/offerte/23",
+      "rawFonte": {
+        "ricevi": "Fiala soggiogamento L",
+        "dai": "90 Fiori",
+        "note": "[Dedalo di Da'at]"
+      },
+      "gruppo": "oggetti-guida/scambi/4",
+      "disposizione": "archivio",
+      "destinazioni": [
+        {
+          "articolo": "jose/fiala-soggiogamento-l",
+          "ruolo": "riferimento-archivio"
+        }
+      ],
+      "fontiComplete": [
+        "jose/scambi/36"
+      ],
+      "relazione": "archivio-con-rinvii",
+      "rilievi": [
+        "copia-sintetica-in-archivio",
+        "offerte-alternative-non-pacchetto"
+      ]
+    }
+  ]
+}
