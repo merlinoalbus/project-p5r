@@ -10,6 +10,13 @@ import type { DoteNote } from '../../../shared/effettiAzione';
 import type { CarattereVoce } from '../../../shared/caratteriVoce';
 import type { Condizione } from '../../../shared/condizioniSpillo';
 import type { InvitoDto, RequisitiConfidenteDto } from '../../types';
+import type { AnteprimaInformazioniConfidenteDto, AzioneInformazioniConfidente, EditorInformazioniConfidenteDto, EsitoInformazioniConfidenteDto, SalvaInformazioniConfidente } from '../../../shared/disponibilitaConfidenti';
+
+export const getInformazioniConfidente = (chiave: string): Promise<EditorInformazioniConfidenteDto> => apiGet(`/compendio/confidenti/${encodeURIComponent(chiave)}/disponibilita`);
+export const anteprimaInformazioniConfidente = (chiave: string, input: AzioneInformazioniConfidente): Promise<AnteprimaInformazioniConfidenteDto> =>
+  apiPost(`/compendio/confidenti/${encodeURIComponent(chiave)}/disponibilita/anteprima`, input, { maxRetries: 0 });
+export const salvaInformazioniConfidente = (chiave: string, input: SalvaInformazioniConfidente): Promise<EsitoInformazioniConfidenteDto> =>
+  apiPut(`/compendio/confidenti/${encodeURIComponent(chiave)}/disponibilita`, input, { maxRetries: 0 });
 
 export const getRequisitiConfidente = (chiave: string): Promise<RequisitiConfidenteDto> => apiGet(`/compendio/confidenti/${encodeURIComponent(chiave)}/requisiti`);
 export const salvaRequisitiRango = (chiave: string, rango: number, requisiti: Array<{ condizione: Condizione; testo?: string }>): Promise<RequisitiConfidenteDto> =>

@@ -14,6 +14,7 @@ import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import { SemaforiRango } from '../components/partita/SemaforiRango';
 import { EditorRequisiti } from '../components/confidenti/EditorRequisiti';
 import { InvitiConfidente } from '../components/confidenti/InvitiConfidente';
+import { EditorDisponibilita } from '../components/confidenti/EditorDisponibilita';
 import { IconChevronLeft } from '../components/shared/icons';
 import type { DialogoConfidenteDto, RegaloConfidenteDto } from '../types';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
@@ -88,6 +89,10 @@ export function ConfidenteDettaglioPage() {
   const regaloConsegnato = (g: RegaloConfidenteDto): boolean => g.catalogo && mio?.regaliFattiCatalogo !== undefined
     ? regaliCatalogoFatti.has(g.catalogo.chiave) : regaliFatti.has(g.nomeStorico ?? g.nome);
   const prossimo = mio ? mio.rango + 1 : null;
+  // Il recupero informativo deve restare disponibile anche se un vecchio JSON è valido ma non è un elenco.
+  const erroreInformativo = c && [c.disponibilita.giorni, c.disponibilita.fasce, c.fonti]
+    .some(v => !Array.isArray(v) || !v.every(x => typeof x === 'string'))
+    ? 'Le informazioni della disponibilità contengono un elenco illeggibile. Apri «Modifica informazioni del Confidente» per correggere i soli campi interessati.' : null;
 
   const [confermaInCorso, setConfermaInCorso] = useState(false);
   // Lo stesso parametro apre «Correggi» dalla Partita e governa la finestra anche durante la navigazione.
@@ -97,6 +102,12 @@ export function ConfidenteDettaglioPage() {
   const setRangoDaModificare = (rango: number | null) => {
     const p = new URLSearchParams(params);
     if (rango === null) p.delete('requisiti'); else p.set('requisiti', String(rango));
+    setParams(p, { replace: true });
+  };
+  const informazioniAperte = params.get('informazioni') === '1';
+  const setInformazioniAperte = (aperta: boolean) => {
+    const p = new URLSearchParams(params);
+    if (aperta) p.set('informazioni', '1'); else p.delete('informazioni');
     setParams(p, { replace: true });
   };
   /** Conferma o annulla a mano un requisito di rango nella partita attiva, poi rilegge lo stato della partita; durante la richiesta i semafori sono occupati, l'errore viene notificato. */
@@ -130,8 +141,10 @@ export function ConfidenteDettaglioPage() {
   };
 
   return (
-    <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
-      {c && (
+    <>
+    <div className="flex justify-end mb-3"><button type="button" className="btn btn-secondary touch" onClick={() => setInformazioniAperte(true)}>Modifica informazioni del Confidente</button></div>
+    <PageState isLoading={caricamento} error={errore || erroreInformativo} onRetry={() => void ricarica()}>
+      {c && !erroreInformativo && (
         <div className="flex flex-col gap-4">
           <button type="button" className="btn btn-ghost self-start -ml-2" onClick={() => navigate(-1)}><IconChevronLeft size={18} /> Indietro</button>
           <header className="card flex items-center gap-3">
@@ -259,5 +272,7 @@ export function ConfidenteDettaglioPage() {
       {rangoDaModificare !== null && c && <EditorRequisiti key={`${c.chiave}:${rangoDaModificare}`} confidente={{ chiave: c.chiave, nome: c.nome }} rangoIniziale={rangoDaModificare}
         onChiudi={() => setRangoDaModificare(null)} onSalvato={async () => { await Promise.all([ricarica(), stato.ricarica(), requisiti.ricarica()]); }} />}
     </PageState>
+    {informazioniAperte && <EditorDisponibilita key={chiave} chiave={chiave} onChiudi={() => setInformazioniAperte(false)} onSalvato={ricarica} />}
+    </>
   );
 }

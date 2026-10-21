@@ -18,6 +18,9 @@ import { aggiornaSbloccoQuartiere, dettaglioQuartiere, elencaLuoghi, elencaQuart
 import { dettaglioLuogo } from '../services/luoghiService.js';
 import { elencaInviti } from '../services/inviti.js';
 import { paramsLuogo, queryLuogo } from '../schemas/luoghi.js';
+import { bodyAnteprimaInformazioniConfidente, bodySalvaInformazioniConfidente } from '../schemas/disponibilitaConfidenti.js';
+import { anteprimaInformazioniConfidente, informazioniConfidente, salvaInformazioniConfidente } from '../services/disponibilitaConfidentiService.js';
+import type { AzioneInformazioniConfidente, SalvaInformazioniConfidente } from '../../shared/disponibilitaConfidenti.js';
 import { attivitaTutte, filmDvdTutti, videogiochiTutti, libriTutti } from '../services/attivitaService.js';
 import { cruciverba } from '../services/cruciverbaService.js';
 import { dettaglioNegozio, elencaNegozi, ricercaArticoli } from '../services/negoziService.js';
@@ -356,6 +359,19 @@ router.get('/domande', validate({ query: queryDomande }), (req, res) => {
 });
 router.get('/confidenti/:chiave', validate({ params: paramsChiaveGuida }), (req, res) => {
   res.json(dettaglioConfidente(String(req.params.chiave)));
+});
+/** Editor informativo indipendente dal dettaglio, leggibile anche con elenchi JSON storici malformati. */
+router.get('/confidenti/:chiave/disponibilita', validate({ params: paramsChiaveGuida }), (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(informazioniConfidente(String(req.params.chiave)));
+});
+router.post('/confidenti/:chiave/disponibilita/anteprima', validate({ params: paramsChiaveGuida, body: bodyAnteprimaInformazioniConfidente }), (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(anteprimaInformazioniConfidente(String(req.params.chiave), req.body as AzioneInformazioniConfidente));
+});
+router.put('/confidenti/:chiave/disponibilita', validate({ params: paramsChiaveGuida, body: bodySalvaInformazioniConfidente }), (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(salvaInformazioniConfidente(String(req.params.chiave), req.body as SalvaInformazioniConfidente));
 });
 /** L6 (§6.1): i requisiti del Confidente per rango, per l'editor («Modifica requisiti»). */
 router.get('/confidenti/:chiave/requisiti', validate({ params: paramsChiaveGuida }), (req, res) => {

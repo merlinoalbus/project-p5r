@@ -188,6 +188,7 @@ export function ConfidentiPartita({ partitaId }: Props) {
                   </div>
                   <CollegamentoVisivo to={`/confidenti/${c.chiave}`} tono="fantasma" compatto className="shrink-0" icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Scheda" aria-label={`Scheda di ${c.nome}: risposte migliori, abilità, regali`} />
                 </div>
+                <CollegamentoVisivo to={`/confidenti/${encodeURIComponent(c.chiave)}?informazioni=1`} tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Informazioni" aria-label={`Modifica le informazioni di ${c.nome}`} />
                 <div className="flex items-center gap-2">
                   <span className="text-[12px] uppercase tracking-wide text-text-muted flex-1">Rango {c.rango === 10 ? 'MAX' : c.rango}</span>
                   <button type="button" className="btn btn-secondary btn-sm w-12" disabled={occ || c.rango === 0} onClick={() => void salva(c.chiave, { rango: c.rango - 1 })} aria-label={`Rango di ${c.nome} meno uno`}>−</button>

@@ -82,6 +82,24 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     risposta: '`ConfidenteDettaglioDto` aggiornato',
     errori: [[404, 'confidente-non-trovato']],
   },
+  'GET /api/compendio/confidenti/:chiave/disponibilita': {
+    sommario: 'Informazioni del Confidente e storico, indipendenti dai requisiti operativi',
+    descrizione: 'Sola lettura, no-store. Gli otto campi informativi conservano i valori RAW: giorni/fasce/fonti illeggibili sono segnalati senza impedire l’accesso all’editor. Riporta proposta Makoto, esito della bonifica131, versioni ripristinabili e revisione CAS comprendente riga completa e registro. Registro malformato, identità o catena incoerente:409, nessun reset. Non legge o modifica la partita.',
+    risposta: '`EditorInformazioniConfidenteDto`',
+    errori: [[404, 'confidente-non-trovato'], [409, 'storico-disponibilita-incoerente'], [409, 'informazioni-confidente-illeggibili']],
+  },
+  'POST /api/compendio/confidenti/:chiave/disponibilita/anteprima': {
+    sommario: 'Anteprima della proposta, PATCH manuale, creazione o ripristino informativo',
+    descrizione: 'Sola lettura, no-store. Azioni strict:applica-proposta con ID makoto-calendario-v1; modifica-manuale con i soli valori selezionati e motivo; crea-informazioni con tutti gli otto campi e motivo; ripristina-versione con ID. Ogni azione richiede revisioneAttesa. La proposta conserva obbligatoriamente nelle note i valori correnti esatti di giorni/fasce/data/requisiti, anche sulle varianti, e non modifica i requisiti del rango1. La PATCH conserva i byte degli altri campi e non normalizza elenchi semanticamente invariati. Il ripristino RAW illeggibile è consentito ma segnalato come non validato.',
+    risposta: '`AnteprimaInformazioniConfidenteDto`: prima/dopo RAW, campiCambiati, avvertenze e anteprimaAttesa',
+    errori: [[404, 'confidente-non-trovato'], [409, 'informazioni-confidente-obsolete'], [409, 'storico-disponibilita-incoerente'], [409, 'proposta-disponibilita-inapplicabile'], [409, 'versione-disponibilita-assente'], [409, 'informazioni-confidente-presenza-diversa']],
+  },
+  'PUT /api/compendio/confidenti/:chiave/disponibilita': {
+    sommario: 'Salva la modifica informativa mostrata nell’anteprima, con storico e CAS',
+    descrizione: 'Payload dell’anteprima più anteprimaAttesa e operazioneId UUID. Transazione immediata: verifica registro e identità, riconosce prima del CAS il replay del payload originale, poi confronta CAS/anteprima e aggiorna solo i campi cambiati, insieme alla revisione append-only. Replay identico restituisce l’esito storico e il corrente anche se successivamente cambiato, senza riscriverlo; stesso ID con payload diverso:409. No-op non scrive né aggiunge revisioni. Ripristino recupera una versione esatta, senza cancellare lo storico; creazione e modifica restano distinte. Nessun effetto su requisiti strutturati, semafori, Diario o progressi.',
+    risposta: '`EsitoInformazioniConfidenteDto`: esito salvata/invariata/gia-eseguita, versione e corrente',
+    errori: [[404, 'confidente-non-trovato'], [409, 'storico-disponibilita-incoerente'], [409, 'informazioni-confidente-obsolete'], [409, 'anteprima-disponibilita-obsoleta'], [409, 'operazione-disponibilita-riutilizzata'], [409, 'informazioni-confidente-cambiate']],
+  },
 
   // ---- Blocchi della guida (dati_guida) ----
   'GET /api/compendio/oggetti-guida': {

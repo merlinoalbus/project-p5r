@@ -1,5 +1,7 @@
 # L6 — riscontri sul codice e richieste successive
 
+**21/10 15:40Z — L26 data ingresso rilasciata:**130 attiva in `8d0a80bc`, pipeline73SUCCESS. Audit rettificata; corrente e snapshot dal7maggio, altri campi/quartiere invariati. Tre riesami propri, controlli verdi e gate finale distinto approvato con osservazione autonoma della scheda. Confronti protetti dopo130 identici nel perimetro dichiarato in STATO-ATTUALE. Il quartiere resta senza data e il calendario visite libere non è certificato. Prossima implementazione Makoto/editor informativo131; gli altri residui L6 rimangono aperti.
+
 **21/10 11:12Z — bonifiche e pagina operativa al rilascio:**123/124/T2/R5-02 e utente027 approvati staticamente e registrati nel codice locale; nessuna esecuzione locale. Pagina Frasi e condizioni implementata e approvata dal revisore: 201 identità/147 gruppi, tre gesti distinti, fonte e decisione controllate atomicamente, storico e note preservati. Le proposte descrittive non diventano formule per la sola classe M/E/R. Typecheck99280/lint28078/build88584 verdi, nessun test. L26, pesca, Confidenti e altre ricerche rimangono aperti nei dossier; righe personali o escluse richiedono riconciliazione. Pubblicato ancora1de1ccba/pipeline67/schema122-26 fino al prossimo rilascio e lettura dei suoi rendiconti.
 
 ## Bonifica locale successiva all'audit — da riesaminare e rilasciare
