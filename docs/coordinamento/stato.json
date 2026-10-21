@@ -1,23 +1,24 @@
 {
   "obiettivo": "Completare i lotti L0–L11 della razionalizzazione sul ramo newreview e pubblicarli funzionanti su p5s",
-  "aggiornato": "2026-10-21T16:40:00Z",
+  "aggiornato": "2026-10-21T17:00:00Z",
   "cruscotto": {
     "adesso": {
-      "attivita": "Rilascio Niijima 134: modello, codice e append approvati dal revisore distinto; typecheck, lint e build verdi. Dopo la pipeline acquisisco audit, conservazione e browser. In parallelo il revisore esamina il contratto dell’operazione atomica per tre nuovi luoghi L5 dai pin esistenti.",
-      "stato": "Niijima 134 pronta: pubblicazione e riscontro reale in corso",
-      "responsabile": "Esecutore: Niijima e riconciliazione L6. Coordinatore: integrazione, dati, Regia e rilascio. Revisore distinto: controllo avversariale. Esploratore L5: tre creazioni senza duplicare i pin.",
-      "prossimaConsegna": "Disponibilità distinta dei due banchi Niijima senza modificare acquisti, identità o prezzi; riconciliazione aggiornata anche per la data Memento già corretta."
+      "attivita": "Pubblico il gesto L5 completo per creare un luogo dal pin esistente: BE, FE e correzioni finali approvati dal revisore distinto. Typecheck, lint e build verdi. Poi leggo le anteprime reali e presento i tre luoghi per il consenso specifico; nessuna creazione è già applicata.",
+      "stato": "Gesto L5 approvato e controlli verdi: rilascio in corso",
+      "responsabile": "Esecutore BE: operazione atomica e contratto. Esecutore FE: finestra e integrazione nel visore. Coordinatore: integrazione, dati, Regia e rilascio. Revisore distinto: controllo avversariale.",
+      "prossimaConsegna": "Gesto ordinario completo per creare luoghi dai pin esistenti; poi consenso specifico e applicazione dei tre luoghi attestati, senza duplicare i pin."
     },
     "ultimaConsegna": {
-      "titolo": "97 raccordi documentali consultabili e nota del rango 1 Makoto rettificata",
-      "commit": "7fef5eb4",
-      "pipeline": { "testo": "Pipeline 75 riuscita", "url": "https://github.com/merlinoalbus/project-p5r/actions/runs/39632634846" },
-      "istanza": { "testo": "p5s operativo, schema 133/27", "url": "https://p5s.nasmerlinoalbus.cloud" },
-      "verifica": "Registro 97/97, 69 fonti commerciali e 28 archivi; nessuna offerta o proposta applicata. Tabelle commerciali, fonti e audit precedente identici. Nota Makoto corretta nelle due intestazioni, originale conservato; riscontro autonomo del revisore. Dati protetti identici dopo 133, gate finale distinto approvato nei due perimetri."
+      "titolo": "Banchi Niijima distinti, finestra unica e riconciliazione N14/L26 aggiornata",
+      "commit": "47e1ad08",
+      "pipeline": { "testo": "Pipeline 76 riuscita", "url": "https://github.com/merlinoalbus/project-p5r/actions/runs/39636871632" },
+      "istanza": { "testo": "p5s operativo, schema 134/27", "url": "https://p5s.nasmerlinoalbus.cloud" },
+      "verifica": "Audit applicata7/7, sole condizioni del negozio e delle sei offerte cambiate; altri RAW, eventi e acquisti identici. Diario, due Palazzi e pin protetti identici nei campi rilevati. Browser autonomo del revisore positivo, gate finale distinto approvato nel perimetro. Nessun fatto inizializzato automaticamente."
     },
     "chiusi": [
+      "Niijima134: due banchi dichiarati separatamente e sei offerte con finestra unica; riconciliazione N14/L26 aggiornata. Rilasciata e gate finale distinto approvato.",
       "Consultazione dei 97 raccordi documentali L7 e sola nota canonica Makoto PK51: rilasciati, dati riletti e gate finale distinto approvato. Le scelte semantiche su proposte e fusioni rimangono separate.",
-      "Editor degli otto campi informativi dei Confidenti e bonifica canonica Makoto 131: rilasciati e gate finale distinto approvato. Non comprende la nota per rango ancora aperta.",
+      "Editor degli otto campi informativi dei Confidenti e bonifica canonica Makoto 131: rilasciati e gate finale distinto approvato. La separata nota per rango è stata poi corretta con la133.",
       "L26: sola data del primo ingresso Memento corretta dal 9 al 7 maggio e snapshot coerente; gate finale distinto approvato. Non certifica il calendario delle visite libere o lo sblocco del quartiere.",
       "Elenco degli otto collegamenti approvati: 8 applicati su 8, compresa Area Central Street del Venditore; gate distinto finale approvato.",
       "Incidente di avvio della 125 risolto: quantità ignota della proposta Carta Media conservata come NULL; p5s nuovamente operativo."
@@ -37,11 +38,11 @@
         "lotto": "L6", "titolo": "Condizioni uniche", "stato": "In corso",
         "cosaManca": [
           "Accertare e modellare le regole Royal della pesca: il difetto del convertitore è corretto, le condizioni fattuali non sono ancora bonificate.",
-          "Risolvere rotazione Aojiru e finestra del negozio di Niijima.",
+          "Risolvere rotazione Aojiru sulla base delle consumazioni effettive, senza calendario assoluto; finestra e banchi Niijima già consegnati con134.",
           "Completare l'istruttoria di Takemi su ambito e fascia e applicare soltanto correzioni attestate; nessun nuovo premio ripetuto o requisito dedotto.",
-          "Completare gli esiti della riconciliazione delle frasi: 26 erano marcate da ricercare all'ultima lettura, con sovrapposizioni ai casi sopra."
+          "Completare gli esiti della riconciliazione delle frasi: 24 da ricercare sulle201 alla lettura dopo134, con sovrapposizioni ai casi sopra."
         ],
-        "prossimoPasso": "Completare codice e rilascio Niijima 134 dopo gate distinto; editor Makoto, nota del rango 1 e data L26 già consegnati nei rispettivi perimetri."
+        "prossimoPasso": "Completare Aojiru, pesca, istruttoria Takemi e frasi residue; Niijima134, editor Makoto, nota del rango1 e data L26 già consegnati nei rispettivi perimetri."
       },
       {
         "lotto": "L7", "titolo": "Oggetti e fonti", "stato": "Parziale",
@@ -103,12 +104,12 @@
     },
     "notaConteggi": "Questo è il lavoro noto per blocchi, non un conteggio deduplicato di bug. Candidati, frasi, nodi e proposte si sovrappongono; non si sommano e non producono una percentuale attendibile."
   },
-  "mandatoCorrente": "Pubblicato7fef5eb4, pipeline75 riuscita, p5s133/27. Otto raccordi L5, sola dataL26, editor e otto campi Confidenti/Makoto131, raccordi documentali97fonti132 e sola nota rango1 Makoto133 consegnati con gate finale distinto approvato nei rispettivi perimetri. Niijima134 in implementazione dopo gate migratorio completo; tre nuove creazioni L5 da preparare atomicamente e sottoporre al consenso. Altri residui e L8–L11 ancora da completare; nessuna chiusura globale, zero test.",
+  "mandatoCorrente": "Pubblicato47e1ad08, pipeline76 riuscita, p5s134/27. Otto raccordi L5, dataL26, editor Confidenti/Makoto131, raccordi documentali132, notaMakoto133 e Niijima134 consegnati con gate finale distinto approvato nei rispettivi perimetri. Gesto ordinario L5 da pin esistente in implementazione BE/FE dopo gate soluzione; tre nuove creazioni ancora da sottoporre al consenso. Altri residui e L8–L11 da completare; nessuna chiusura globale, zero test.",
   "verificaConsegne": "Disposizione utente del 21/10: ogni consegna richiede un agente distinto che acceda direttamente alla specifica originale in modo avversariale. Sola lettura, evidenze requisito/codice, copertura e limiti espliciti, esito motivato. Rilievi da risolvere e riesaminare o sottoporre all'utente. Supera il precedente divieto di verificatori; resta zero test.",
-  "auditSpecifiche": "Riesami distinti contro originali43ad8889: codice e registri fino134 approvati staticamente, compreso append134. Gate finali perimetri otto raccordi, dataL26, editor131, raccordi documentali132 e nota133 approvati; campioni autonomi browser e RAWpubblici attribuiti. Niijima134 e ampliamento readonly R6-31 attendono riscontro reale. Dossier23L5 approvato come istruttoria, contratto del nuovo gesto al gate soluzione. Nessuna equivalenza semantica o proposta dubbia approvata per effetto del raccordo.",
+  "auditSpecifiche": "Riesami distinti contro originali43ad8889: codice e registri fino134 approvati staticamente. Gate finali otto raccordi, dataL26, editor131, raccordi132, nota133 e Niijima134 approvati, con prove del coordinatore distinte dalle osservazioni autonome. Dossier23L5 e soluzione del gesto da pin approvati; codice L5 in corso. Nessuna equivalenza semantica o proposta dubbia approvata per effetto del raccordo.",
   "salvataggioAudit": "Bonifica L5-L7 in e0ea995e; censimento readonly, coordinamento post-rilascio e piani L8 pubblicati in 1de1ccba887f533a43c7ef6fe36524ac0264c249. Pipeline67 riuscita. Riconciliazioni correnti e aggiornamenti successivi ancora in lavorazione. Nessun dato privato salvato.",
   "revisioneRimozioni": "Precedente approvazione limitata alle due rimozioni UI; non certifica runtime o chiusura L6. La nuova disposizione richiede verifica indipendente e avversariale delle consegne.",
-  "controlliLocali": "Niijima134: typecheck65873, lint39515, build78712 exit0 dopo tutti i delta e append. Tre riesami propri e gate distinto completo del codice. Prima del rilascio sette eventi e sette acquisti rilevati solo in memoria, oltre ai sette RAW del negozio/offerte; nessun alias o sede entrante. Dopo133 tabelle commerciali/fonti/audit121 e proiezioni protette identici; sola nota51 corretta con audit coerente. Zero test, migrazioni locali, copie DB o dati privati salvati.",
+  "controlliLocali": "Gesto L5 finale: typecheck11026, lint40133, build47129 exit0; tre riesami propri e gate distinto integrato, inclusi delta lint. Il primo lint20078 era fallito ed è stato corretto prima di questi controlli. Niijima134 già consegnata con RAW7/7, eventi/acquisti7+7 e proiezioni protette identici nei campi dichiarati, audit applicata7/7. Zero test, migrazioni locali, copie DB o dati privati salvati.",
   "censimentoCatalogo": "Manifest ricostruito shared/l7-fonti-ricostruite.json, seconda revisione dei campi e formato schemaVersion 1: 2.430 fonti pubbliche dal pacchetto schema 93, precedente al locale 120. Non è l7-proposte.json originale né prova equivalenza. Input runtime e risultati solo nel DB della singola istanza, audit-catalogo-121. Fonti aggregate e sottoelementi non riconciliati restano decisioni aperte visibili; A7-04 non integralmente chiuso. Dettagli in lotti/L7/ricostruzione-input.md.",
   "decisioneRichiesta": "Consenso specifico8raccordi ACQUISITO: utenteApprovo tutti eotto, inclusaAreaCentralStreetVenditore. Nessuna ulteriore domanda per applicarequestoelenco. Altre fusioni/proposte non autorizzate automaticamente. Nessun abbinamento solo per nome. DiarioMemento/ORAsakusa/Importa/guida già decisi.",
   "fasi": [
@@ -376,7 +377,7 @@
       "nome": "Coordinatore — implementazione e rilascio",
       "fase": "be, fe, regia",
       "stato": "al lavoro",
-      "attivita": "132/133 consegnate con gate finale approvato. Integra Niijima134, aggiorna Regia e documenti; acquisisce dati live mirati dei tre nuovi luoghi L5."
+      "attivita": "Niijima134 consegnata con gate finale approvato. Integra il nuovo gesto L5, mantiene Regia e conservazione dati; completa poi gli altri residui e L8–L11."
     },
     {
       "nome": "Esecutore L5/L6",
@@ -391,22 +392,22 @@
       "attivita": "Nessuna attività corrente; residui L7 ancora nel mandato, in carico al coordinatore."
     },
     {
-      "nome": "Esecutore Niijima e condizioni",
+      "nome": "Esecutore interfaccia L5",
       "fase": "be, fe",
       "stato": "al lavoro",
-      "attivita": "134 completata e codice approvato dal revisore distinto; tre riesami propri. Controlli integrati verdi; pubblicazione e riscontro reale affidati al coordinatore."
+      "attivita": "Realizza finestra Crea luogo dal pin e integrazione nel visore, con ricevuta201 distinta dal refresh e protezioni dalle risposte superate."
     },
     {
-      "nome": "Esploratore luoghi L5",
+      "nome": "Esecutore backend L5",
       "fase": "dati, be",
       "stato": "al lavoro",
-      "attivita": "Raccordi132 consegnati. Ha classificato i23candidati; prepara creazione atomica da pin esistente per tre luoghi prima del consenso specifico. Nessun nuovo raccordo applicato."
+      "attivita": "Realizza anteprima e scrittura atomica del luogo dal pin esistente, con guardie e ricevuta201. Nessuna creazione dati ancora applicata."
     },
     {
       "nome": "Revisore indipendente",
       "fase": "validazione",
       "stato": "al lavoro",
-      "attivita": "Gate finale132/133 approvato; modello e soluzione migratoria134 approvati. Riesamina classificazione23L5 e tre proposte contro originali e fonti; sempre in sola lettura."
+      "attivita": "Gate finale134 e soluzione L5 approvati; disponibile per riesame avversariale del codice L5 contro originali e contratto, sempre in sola lettura."
     }
   ],
   "notaSessioniStoriche": "Le righe seguenti sono il registro del precedente team, non lo stato live delle sessioni o dei servizi. Nessuna sessione precedente è stata riaperta o gestita durante questo audit.",

@@ -4,6 +4,7 @@
 
 import type { LuogoDettaglioDto } from '../../types';
 import type { OrariNegozio } from '../../../shared/orariNegozio';
+import type { AnteprimaLuogoDaPinDto, LuogoCreatoDaPinDto, RichiestaAnteprimaLuogoDaPin, RichiestaCreaLuogoDaPin } from '../../../shared/luogoDaPin';
 import { apiGet, apiPost, apiPut, queryString } from './_helpers';
 
 /** Un luogo nuovo da creare mentre lo si posiziona («Nuovo luogo» di «Aggiungi luogo»). */
@@ -25,3 +26,11 @@ export const getLuogo = (chiave: string, partita?: number): Promise<LuogoDettagl
   const [quartiere, ...resto] = chiave.split('/');
   return apiGet(`/compendio/luoghi/${encodeURIComponent(quartiere)}/${encodeURIComponent(resto.join('/'))}${queryString({ partita })}`);
 };
+
+/** L5: anteprima in sola lettura di un luogo nuovo collegato a un pin personale esistente. */
+export const anteprimaLuogoDaPin = (id: number, dati: RichiestaAnteprimaLuogoDaPin): Promise<AnteprimaLuogoDaPinDto> =>
+  apiPost(`/luoghi/da-pin/${id}/anteprima`, dati, { maxRetries: 0, silent: true });
+
+/** Ricevuta del solo gesto atomico. Un errore di rete non autorizza a ripetere il POST. */
+export const creaLuogoDaPin = (id: number, dati: RichiestaCreaLuogoDaPin): Promise<LuogoCreatoDaPinDto> =>
+  apiPost(`/luoghi/da-pin/${id}`, dati, { maxRetries: 0, silent: true });

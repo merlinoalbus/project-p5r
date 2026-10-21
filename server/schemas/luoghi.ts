@@ -4,6 +4,8 @@
 
 import { z } from 'zod';
 import { idParam } from './comuni.js';
+import { TIPI_LUOGO, type TipoLuogo } from '../../shared/tipiLuogo.js';
+import { normalizzaOrari } from '../../shared/orariNegozio.js';
 
 /** La pagina di un luogo: quartiere e parte del luogo della sua chiave (`<quartiere>/<luogo>`). */
 export const paramsLuogo = z.object({ quartiere: z.string().min(1).max(120), luogo: z.string().min(1).max(160) });
@@ -30,3 +32,18 @@ export const bodyPosizionaLuogo = z.object({
 
 /** «Colloca»: l'Area del quartiere (slug), o null per rimetterlo fra i da collocare. */
 export const bodyCollocaLuogo = z.object({ area: z.string().min(1).max(120).nullable() }).strict();
+
+/** Il flusso da un pin esistente non accetta campi ignoti, neppure dentro i nuovi orari. */
+const nuovoDaPin = z.object({
+  nome: z.string().trim().min(1).max(160),
+  tipo: z.enum(TIPI_LUOGO.map(t => t.chiave) as [TipoLuogo, ...TipoLuogo[]]),
+  cosaOffre: z.string().trim().max(600),
+  orari: orari.strict().transform(normalizzaOrari).nullable(),
+}).strict();
+
+export const paramsLuogoDaPin = z.object({ id: idParam.max(Number.MAX_SAFE_INTEGER) }).strict();
+export const bodyAnteprimaLuogoDaPin = z.object({ nuovo: nuovoDaPin }).strict();
+export const bodyCreaLuogoDaPin = z.object({
+  nuovo: nuovoDaPin,
+  revisioneRaccordoAttesa: z.string().regex(/^[a-fA-F0-9]{64}$/).transform(v => v.toLowerCase()),
+}).strict();

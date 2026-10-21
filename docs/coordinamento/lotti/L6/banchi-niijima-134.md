@@ -62,3 +62,13 @@ Note e prosa rimangono identiche. Le sole date duplicate sulle sei offerte vengo
 R6-31 mostra la formula corrente `sblocco_json` di N14 e il rendiconto134 come informazioni distinte. La coincidenza della formula del negozio non certifica l’intero blocco o le sue eventuali varianti. L26 mostra, con identità del luogo e quartiere attestata in130, la formula intera dal 7 maggio e il rendiconto130. Entrambi i confronti hanno `prima: []`: non abilitano l’applicazione di una proposta parziale. Gli esiti nativi130 restano espliciti nel motivo del DTO audit; un audit assente o illeggibile non riceve un esito inventato. Le decisioni umane precedenti restano conservate, con il normale confronto dell’impronta corrente.
 
 Gate distinto del codice e dell’append134 approvati. Tre riesami propri completati; controlli integrati finali typecheck65873, lint39515 e build78712 conclusi con exit0. Non sono stati eseguiti test, simulazioni, migrazioni locali o scritture nei database. I riscontri dopo il rilascio restano distinti e ancora da acquisire.
+
+## Esito pubblicato
+
+Commit `47e1ad08`, [pipeline76 riuscita](https://github.com/merlinoalbus/project-p5r/actions/runs/39636871632), p5s schema134/27. Audit `applicata`, tutte e sette le righe; cestino leggibile con3registri,1280passi,0pertinenti. Nel confronto RAW del coordinatore cambiano solo `negozio.sblocco_json` e le sei `articolo.condizioni_json`, nelle formule esatte. Tutti gli altri campi delle sette righe sono identici. Le intere tabelle di eventi e acquisti della partita, sette righe ciascuna, restano identiche nel confronto temporaneo in memoria.
+
+Dopo134 il coordinatore ha confrontato le proiezioni protette già definite: Diario255voci/54giorni, Kamoshida169, Madarame226 e611pin personali/43mappe identici. Un timeout iniziale di navigazione è stato superato dalla lettura completa delle54giornate; nessuna lacuna residua dichiarata. Non è una certificazione dell’intero database.
+
+Browser del coordinatore e osservazione autonoma del revisore: i due fatti sono non segnati, le sei offerte distinguono il proprio banco ed ereditano finestra e chiusura. R6-31 mostra N14/L26 con formule coincidenti e audit134/130 distinti, senza applicazione parziale.201righe correnti,24da ricercare. Nessun gesto mutante o test eseguito nel browser.
+
+**Gate finale distinto APPROVATO**, limitato a N14 e alla visualizzazione informativa N14/L26. Gli altri punti L6 e i lotti complessivi rimangono aperti.

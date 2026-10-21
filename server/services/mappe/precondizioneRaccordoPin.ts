@@ -5,7 +5,7 @@ import { httpErrors } from '../../utils/httpError.js';
 import { normalizzaRequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { ammetteCondizioni, categoriaSpillo, RIFERIMENTI_PER_CATEGORIA, TIPI_SPILLO } from '../../../shared/spilli.js';
 
-interface PinDelRaccordo {
+export interface PinDelRaccordo {
   id: number; origine: string; riferimento_tipo: string | null; riferimento_chiave: string | null;
   collezionabile: number; tipo: string; condizioni_json: string | null; mappa_chiave: string | null;
 }
@@ -30,7 +30,7 @@ export function richiestaRaccordoPin(dati: object): RichiestaRaccordoPin {
 /** Tipi marcati e chiavi ordinate: SQL NULL, testo JSON grezzo e BLOB restano distinguibili.
  * I BLOB contribuiscono integralmente tramite SHA256, senza costruire o restituire copie base64.
  */
-function canonico(valore: unknown): string {
+export function canonico(valore: unknown): string {
   if (valore === null) return '["null"]';
   if (typeof valore === 'string') return JSON.stringify(['string', valore]);
   if (typeof valore === 'number' && Number.isFinite(valore)) return JSON.stringify(['number', Object.is(valore, -0) ? '-0' : String(valore)]);
@@ -44,7 +44,7 @@ function canonico(valore: unknown): string {
   throw httpErrors.conflict('raccordo-formato-inatteso', 'La fotografia del raccordo contiene un formato non supportato. Nessun collegamento eseguito.');
 }
 
-function verificaPin(pin: PinDelRaccordo, destinazioni: unknown[], ripresaLuogo?: string): void {
+export function verificaPin(pin: PinDelRaccordo, destinazioni: unknown[], ripresaLuogo?: string): void {
   const riferimentoAmmesso = (pin.riferimento_tipo === null && pin.riferimento_chiave === null)
     || (ripresaLuogo !== undefined && pin.riferimento_tipo === 'luogo' && pin.riferimento_chiave === ripresaLuogo);
   if (pin.origine !== 'utente' || !riferimentoAmmesso

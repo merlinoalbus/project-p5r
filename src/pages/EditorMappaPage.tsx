@@ -15,7 +15,7 @@ import { Selettore } from '../components/shared/Selettore';
 import type { DestinazioneSpillo } from '../types';
 import { CondizioniEditor } from '../components/guida/CondizioniEditor';
 
-import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
@@ -32,6 +32,8 @@ import { VisoreMappa, type StrumentiEditor, type StrumentoEditor } from '../comp
 import { IconaSpillo, PuntoSpillo } from '../components/mappe/IconaSpillo';
 import { PassaggiMappa } from '../components/mappe/PassaggiMappa';
 import { FormPezzo } from '../components/mappe/FormPezzo';
+import { FinestraLuogoDaPin } from '../components/mappe/FinestraLuogoDaPin';
+import { pinCompatibileConNuovoLuogo } from '../../shared/luogoDaPin';
 import { copiePosate, nomeCopia, posizioneNuovaCopia, type CopiaPosata } from '../utils/pezziMappa';
 
 import { condizioniSenzaTesto, ELENCHI_VUOTI, type ElenchiCondizioni } from '../utils/condizioniSpillo';
@@ -105,6 +107,9 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
   const [selezionatoId, setSelezionatoId] = useState<number | null>(null);
   /** La copia di un pezzo della planimetria selezionata (102; copie dalla 103): uno spillo o una copia alla volta. */
   const [copiaId, setCopiaId] = useState<number | null>(null);
+  const [pinDaLuogo, setPinDaLuogo] = useState<{ spillo: SpilloDto; contesto: string } | null>(null);
+  const [versioneFormSpillo, setVersioneFormSpillo] = useState(0);
+  const contestoEditorRef = useRef('');
   // `?sezione=mappa` apre l'editor sulla sezione dell'immagine («Carica l'immagine» di una planimetria che non ce l'ha, 2026-10-18)
   const [parametri] = useSearchParams();
   const [sezione, setSezione] = useState(() => (SEZIONI_EDITOR as readonly string[]).includes(parametri.get('sezione') ?? '') ? parametri.get('sezione')! : 'spilli');
@@ -194,6 +199,14 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
   });
 
   const selezionato = dati?.spilli.find((s) => s.id === selezionatoId) ?? null;
+  const uidSelezionato = selezionato?.uid ?? (pinDaLuogo?.spillo.id === selezionatoId ? pinDaLuogo.spillo.uid : null);
+  const contestoEditor = JSON.stringify([chiave, selezionatoId, uidSelezionato, attiva?.id ?? null, momento, conGiorno]);
+  // Il contesto diventa attivo insieme alla vista, prima delle callback asincrone e degli effetti passivi.
+  // Anche smontare l'editor invalida subito i gesti ancora pendenti della vecchia selezione.
+  useLayoutEffect(() => {
+    contestoEditorRef.current = contestoEditor;
+    return () => { contestoEditorRef.current = ''; };
+  }, [contestoEditor]);
   /** La copia selezionata con il suo pezzo e il suo posto fra le copie (null se non c'è più, per esempio dopo un'eliminazione). */
   const copiaSelezionata = copiePosate(dati?.pezzi ?? []).find((x) => x.copia.id === copiaId) ?? null;
   /** L'immagine della mappa in pixel, per tenere le copie dentro (null se non nota: lo controlla il server). */
@@ -208,7 +221,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
   };
 
   return (
-    <PageState isLoading={caricamento && !dati} error={errore} onRetry={ricarica}>
+    <><PageState isLoading={caricamento && !dati} error={errore} onRetry={ricarica}>
       {dati && (
         <VisoreMappa
           key={dati.chiave}
@@ -237,6 +250,8 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
               onSalvaSpillo={(id, d) => esegui(() => aggiornaSpillo(id, d), 'Spillo salvato.')}
               onEliminaSpillo={(id) => esegui(async () => { await eliminaSpillo(id); setSelezionatoId(null); }, 'Spillo eliminato.')}
               onCollegaVoce={(id, voce, collega) => esegui(() => collegaPinAlPunto(voce, id, collega), collega ? 'Voce della guida collegata.' : 'Voce della guida scollegata.')}
+              versioneFormSpillo={versioneFormSpillo}
+              onCreaLuogoDaPin={(spillo) => setPinDaLuogo({ spillo, contesto: contestoEditor })}
               onCreaMappaCollegata={(s) => esegui(async () => {
                 const nuova=await creaMappa({ nome:s.nome, tipo:dati.tipo==='palazzo'||dati.tipo==='dedalo'||dati.tipo==='area'?'area':'luogo', genitore:dati.chiave, ordine:dati.figli.length });
                 await aggiornaSpillo(s.id,{tipo:'passaggio',riferimento:{tipo:'mappa',chiave:nuova.chiave}});
@@ -342,6 +357,14 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
         onCrea={(d) => esegui(async () => { const m = await creaMappa(d); setNuovaMappaAperta(false); await albero.ricarica(); vai(m.chiave); },
           d.passaggio ? `Mappa creata. Il passaggio verso «${d.nome}» è al centro di «${dati.nome}»: torna «Su» e trascinalo dove sta l'ingresso.${d.ritorno ? ' Qui in basso c\'è il passaggio di ritorno.' : ''}` : 'Mappa creata (senza passaggio: si aggiunge dall\'albero con «Crea passaggio»).')} />}
     </PageState>
+      {pinDaLuogo && pinDaLuogo.contesto === contestoEditor && <FinestraLuogoDaPin
+        key={`${pinDaLuogo.spillo.id}:${pinDaLuogo.spillo.uid}:${pinDaLuogo.contesto}`}
+        spillo={pinDaLuogo.spillo} mappa={chiave} partita={conGiorno ? attiva.id : undefined}
+        mappaRiletta={dati} caricamentoMappa={caricamento} erroreMappa={errore} onRileggi={ricarica}
+        contestoAncoraAttivo={() => contestoEditorRef.current === pinDaLuogo.contesto}
+        onRiletta={() => { if (contestoEditorRef.current === pinDaLuogo.contesto) setVersioneFormSpillo(v => v + 1); }}
+        onChiudi={() => setPinDaLuogo(null)} />}
+    </>
   );
 }
 
@@ -364,6 +387,8 @@ interface PropsPannello {
   /** Collega (o scollega) una voce della guida a uno spillo (098). */
   onCollegaVoce: (id: number, voce: string, collega: boolean) => Promise<void>;
   onCreaMappaCollegata: (s: SpilloDto) => Promise<void>;
+  onCreaLuogoDaPin: (s: SpilloDto) => void;
+  versioneFormSpillo: number;
   onSalvaMappa: (dati: Parameters<typeof aggiornaMappa>[1]) => Promise<void>;
   /** FUN2-8: il rifiuto di mettere nel mondo una planimetria senza Area (messaggio del server e pagina da cui aggiungerla), o null. */
   avvisoMondo: { messaggio: string; aggiunta: { href: string; testo: string } | null } | null;
@@ -484,7 +509,7 @@ function PannelloEditor(p: PropsPannello) {
       </section>
 
       {selezionato && (
-        <FormSpillo key={selezionato.id} spillo={selezionato} mappa={mappa} albero={p.albero} occupato={occupato} onSalva={(d) => p.onSalvaSpillo(selezionato.id, d)} onCopia={p.onCopia} onElimina={() => p.onEliminaSpillo(selezionato.id)} elenchi={p.elenchi} onCreaMappaCollegata={() => p.onCreaMappaCollegata(selezionato)} onChiudi={() => p.onSeleziona(null)} onVai={p.onVai} onCollegaVoce={(voce, collega) => p.onCollegaVoce(selezionato.id, voce, collega)} />
+        <FormSpillo key={`${selezionato.id}:${p.versioneFormSpillo}`} spillo={selezionato} mappa={mappa} albero={p.albero} occupato={occupato} onSalva={(d) => p.onSalvaSpillo(selezionato.id, d)} onCopia={p.onCopia} onElimina={() => p.onEliminaSpillo(selezionato.id)} elenchi={p.elenchi} onCreaMappaCollegata={() => p.onCreaMappaCollegata(selezionato)} onCreaLuogoDaPin={() => p.onCreaLuogoDaPin(selezionato)} onChiudi={() => p.onSeleziona(null)} onVai={p.onVai} onCollegaVoce={(voce, collega) => p.onCollegaVoce(selezionato.id, voce, collega)} />
       )}
 
       {!selezionato && strumento === 'seleziona' && <p className="editor-mappa__aiuto">Seleziona un punto sulla mappa per modificarne nome, collegamento e condizioni, oppure scegli Aggiungi.</p>}
@@ -574,7 +599,7 @@ function PannelloEditor(p: PropsPannello) {
   );
 }
 
-interface PropsFormSpillo { spillo: SpilloDto; mappa: MappaDto; albero: MappaRiassuntoDto[]; occupato: boolean; elenchi: ElenchiCondizioni; onSalva: (dati: Parameters<typeof aggiornaSpillo>[1]) => Promise<void>; onCopia: (a: AppuntiSpillo) => void; onElimina: () => Promise<void>; onCreaMappaCollegata: () => Promise<void>; onChiudi: () => void; onVai: (chiave: string) => void; /** Collega o scollega una voce della guida (098). */ onCollegaVoce: (voce: string, collega: boolean) => Promise<void> }
+interface PropsFormSpillo { spillo: SpilloDto; mappa: MappaDto; albero: MappaRiassuntoDto[]; occupato: boolean; elenchi: ElenchiCondizioni; onSalva: (dati: Parameters<typeof aggiornaSpillo>[1]) => Promise<void>; onCopia: (a: AppuntiSpillo) => void; onElimina: () => Promise<void>; onCreaMappaCollegata: () => Promise<void>; onCreaLuogoDaPin: () => void; onChiudi: () => void; onVai: (chiave: string) => void; /** Collega o scollega una voce della guida (098). */ onCollegaVoce: (voce: string, collega: boolean) => Promise<void> }
 
 const COLLEGAMENTI_CITTA: Array<{ tipo: TipoRiferimento; nome: string }> = [{ tipo: 'negozio', nome: 'Negozio' }, { tipo: 'attivita', nome: 'Attività' }, { tipo: 'luogo', nome: 'Luogo della città' }, { tipo: 'confidente', nome: 'Confidente' }];
 
@@ -646,7 +671,7 @@ function VociDelPin({ spillo: s, disabilitato, onCollega }: { spillo: SpilloDto;
 }
 
 /** Proprietà dello spillo selezionato: nome, tipo e descrizione, poi quel che la categoria del tipo richiede. */
-function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCopia, onElimina, onCreaMappaCollegata, onChiudi, onVai, onCollegaVoce }: PropsFormSpillo) {
+function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCopia, onElimina, onCreaMappaCollegata, onCreaLuogoDaPin, onChiudi, onVai, onCollegaVoce }: PropsFormSpillo) {
   const [nome, setNome] = useState(s.nome);
   const [tipo, setTipo] = useState<TipoSpillo>(s.tipo);
   // L5 (F3): un pin di luogo mostra nome e descrizione del luogo (fonte unica); qui la descrizione è la **nota del pin** (`notaPin`), così
@@ -697,6 +722,10 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
   const modificato = dati.nome !== s.nome || tipo !== s.tipo || descrizione !== descrizioneIniziale
     || (dati.riferimento?.tipo ?? null) !== (s.riferimento?.tipo ?? null) || (dati.riferimento?.chiave ?? null) !== (s.riferimento?.chiave ?? null)
     || JSON.stringify(dati.condizioni) !== JSON.stringify(condizioniNude(s)) || JSON.stringify(dati.destinazione) !== JSON.stringify(categoria === 'spostamento' ? destinazioneIniziale : null);
+  const puoCreareLuogo = pinCompatibileConNuovoLuogo(s);
+  const azioneLuogo = puoCreareLuogo && <PulsanteVisivo tono="secondario" compatto
+    icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Crea luogo da questo pin"
+    disabled={occupato || modificato || !s.uid} onClick={onCreaLuogoDaPin} />;
   /** Invio del modulo dello spillo: blocca il salvataggio se un gruppo di condizioni è vuoto o incompleto (lo notifica), altrimenti salva i dati composti sopra. */
   const salva = (e: FormEvent) => {
     e.preventDefault();
@@ -737,6 +766,8 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
 
         {categoria === 'spostamento' && <DestinazioneSpostamento valore={destinazione} mappaCorrente={mappa.chiave} albero={albero} disabilitato={occupato} onCambia={setDestinazione} />}
         {categoria === 'citta' && <CollegamentoCitta valore={riferimento} disabilitato={occupato} onCambia={setRiferimento} />}
+        {categoria === 'citta' && azioneLuogo}
+        {puoCreareLuogo && (modificato || !s.uid) && <p className="editor-mappa__avviso">{!s.uid ? 'Ricarica la mappa per recuperare l’identità del pin.' : 'Salva prima le modifiche del pin.'}</p>}
         <VociDelPin spillo={s} disabilitato={occupato} onCollega={onCollegaVoce} />
         {categoria === 'consumabile' && <p className="m-0 text-[12px] text-text-muted">Si segna nella partita («{statoDelTipo(tipo)}»); non porta da nessuna parte.</p>}
         {ammetteCondizioni(tipo) && <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} elenchi={elenchi} disabilitato={occupato} perSpillo pinCorrente={s.uid} />}
@@ -745,6 +776,7 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
           <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva spillo" disabled={occupato || !modificato} />
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia" dettaglio="per incollarlo altrove" disabled={occupato} onClick={() => onCopia({ tipo, nome: dati.nome, descrizione, riferimento: dati.riferimento, condizioni: dati.condizioni, destinazione: dati.destinazione })} />
           {categoria === 'spostamento' && !destinazione && !aggiunta && <PulsanteVisivo tono="secondario" compatto icona={<IconaSpillo tipo="passaggio" dimensione={20} />} titolo="Crea mappa collegata" disabled={occupato || modificato} onClick={() => void onCreaMappaCollegata()} />}
+          {categoria !== 'citta' && azioneLuogo}
           <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" disabled={occupato} onClick={() => void onElimina()} />
         </div>
         {/* nel mondo la mappa di destinazione non nasce dallo spillo: si aggiunge come area o planimetria e poi si sceglie qui sopra (L2, R2-27) */}
