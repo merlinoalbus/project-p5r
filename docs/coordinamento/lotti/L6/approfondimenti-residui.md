@@ -1,5 +1,7 @@
 # Approfondimenti dei residui L6
 
+**Aggiornamento 21ottobre,15:24Z:** il disegno L26 è implementato nella130, ancora da rilasciare. Manifest effettivo18proprietà del pubblico93 e RAW snapshot verificati autonomamente dal revisore; corrente live e fotografia coincidono, nuovi4campiNULL. Correzione09→07maggio nelle sole colonne necessarie (`condizioni_json` e/o `seed_json`), indipendenti: entrambe già07 senzaUPDATE, seedNULL preservato. Altri17valori dello snapshot e tutti gli altri campi della riga conservati; nessuna modifica a quartiere, Jose, cestino, eventi o Diario. Copertura cestino rafforzata su sequenze/tabelle/identità e riutilizzata sulDBiniettato nella stessa transazione; qualsiasi fotografia pertinente o struttura incerta impedisce la bonifica. Lettura reale prima del rilascio:3registri/1280passi,0errori e0latiL26. Esiti distinti nel rendiconto130. Tre riesami propri e typecheck32111/lint38823/build92466 exit0, gate codice/manifest/registro distinto approvato; nessun test o migrazione locale. Esito effettivo e confronto prima/dopo ancora necessari per chiudere L26. Le analisi originarie sotto restano la motivazione, non uno stato di implementazione corrente.
+
 21 ottobre 2026. Analisi documentale e statica, senza implementazione, test o scritture DB. Le letture correnti sono attribuite alla Regia; questo documento conserva soltanto conclusioni, chiavi pubbliche e proposte. Non certifica l'intero lotto e non sostituisce la riconciliazione corrente.
 
 ## L26 — ingresso dei Memento

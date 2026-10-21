@@ -1,12 +1,113 @@
 {
-  "obiettivo": "Lotti L0–L11 della razionalizzazione completati sul branch newreview, pubblicati e funzionanti su p5s",
-  "aggiornato": "2026-10-21T14:47:00Z",
-  "mandatoCorrente": "Otto raccordi approvati: 5 applicati (269/360/363 con128,346/1530 conCAS).79912056 operativo128/27, pipeline70 e71 riuscite.129 approvata con controlli verdi per le tre coppie di panoramiche268/213,1561/212,1562/210: nessuno spostamento oArea fittizia, audit precedenti intatti. Prima esiti129/RAW/browser/gate8, poi altri residui e L8-L11. Conteggi censimenti/proposte sovrapposti, non totale difetti deduplicato; nessuna chiusura globale, zero test.",
+  "obiettivo": "Completare i lotti L0–L11 della razionalizzazione sul ramo newreview e pubblicarli funzionanti su p5s",
+  "aggiornato": "2026-10-21T15:24:28Z",
+  "cruscotto": {
+    "adesso": {
+      "attivita": "Rettifica L26: ingresso Memento dal 9 al 7 maggio. Codice 130 approvato dal revisore e typecheck, lint e build verdi; rilascio ed esito reale ancora da completare. Cruscotto scritto e osservato nel browser.",
+      "stato": "Pronto al rilascio, non ancora pubblicato",
+      "responsabile": "Coordinatore: codice L26 e rilascio. Esecutore cruscotto: Regia. Revisore distinto: controllo avversariale.",
+      "prossimaConsegna": "130 pubblicata con rendiconto della rettifica e confronto dei dati preservati; Regia consultabile con stato esplicito."
+    },
+    "ultimaConsegna": {
+      "titolo": "Otto collegamenti L5 applicati e approvati dal revisore",
+      "commit": "d226c8be",
+      "pipeline": { "testo": "Pipeline 72 riuscita", "url": "https://github.com/merlinoalbus/project-p5r/actions/runs/39620171138" },
+      "istanza": { "testo": "p5s operativo, schema 129/27", "url": "https://p5s.nasmerlinoalbus.cloud" },
+      "verifica": "Otto riferimenti riletti; vecchi pin, panoramiche e altri campi conservati. Revisore autonomo su Fioraio e Venditore. Diario, Kamoshida, Madarame e 611 pin protetti identici nei campi rilevati dopo la 129."
+    },
+    "chiusi": [
+      "Elenco degli otto collegamenti approvati: 8 applicati su 8, compresa Area Central Street del Venditore; gate distinto finale approvato.",
+      "Incidente di avvio della 125 risolto: quantità ignota della proposta Carta Media conservata come NULL; p5s nuovamente operativo."
+    ],
+    "mancanti": [
+      {
+        "lotto": "L5", "titolo": "Luoghi, negozi e orari", "stato": "Parziale",
+        "cosaManca": [
+          "Risolvere gli altri 23 candidati al collegamento e completare le collocazioni dei luoghi ancora senza Area.",
+          "Riconciliare le Aree storiche e le sedi indirette, conservando le diverse collocazioni dei pin.",
+          "Risolvere i casi Shujin, servizi del Covo, sedi online e distinzione Chiosco succhi/KiyasuKu senza fusioni nominali.",
+          "Completare il riscontro di nomi e descrizioni fra mappe, luoghi e attività, preservando le note proprie."
+        ],
+        "prossimoPasso": "Preparare i raccordi residui con identità e collocazione documentate; nessun altro collegamento è implicitamente approvato."
+      },
+      {
+        "lotto": "L6", "titolo": "Condizioni uniche", "stato": "In corso",
+        "cosaManca": [
+          "Rilasciare e osservare la rettifica L26 della data dell'ingresso Memento; il codice 130 è locale.",
+          "Accertare e modellare le regole Royal della pesca: il difetto del convertitore è corretto, le condizioni fattuali non sono ancora bonificate.",
+          "Risolvere rotazione Aojiru e finestra del negozio di Niijima.",
+          "Implementare l'editor informativo e la rettifica di Makoto già approvati, senza rendere obbligatori bonus o itinerari consigliati.",
+          "Completare l'istruttoria di Takemi su ambito e fascia e applicare soltanto correzioni attestate; nessun nuovo premio ripetuto o requisito dedotto.",
+          "Completare gli esiti della riconciliazione delle frasi: 26 erano marcate da ricercare all'ultima lettura, con sovrapposizioni ai casi sopra."
+        ],
+        "prossimoPasso": "Pubblicazione 130 dopo controlli verdi, poi esito corrente e snapshot; nessun evento o progresso di partita modificato."
+      },
+      {
+        "lotto": "L7", "titolo": "Oggetti e fonti", "stato": "Parziale",
+        "cosaManca": [
+          "Riconciliare i 97 nodi Jose/scambi esposti dal GET e completare gli esiti dei sottoelementi segnalati nell'audit.",
+          "Completare l'istruttoria delle proposte operative: 87 all'ultima lettura, compresa Carta Media con quantità non indicata.",
+          "Risolvere identità e fonti dubbie di Sakai, Tanaka e Gachapon con costi, risultati e quantità attestati.",
+          "Concludere il riscontro fra fonti, catalogo, listini e consumatori; i casi storici assenti non vanno ricreati."
+        ],
+        "prossimoPasso": "Assegnare a ogni nodo un legame valido, una proposta documentata o un conflitto motivato; nessuna fusione per solo nome."
+      },
+      {
+        "lotto": "L8", "titolo": "Persona e Ombre", "stato": "Da implementare",
+        "cosaManca": [
+          "Implementare Ombre collegate per chiave alle Persona del compendio, con pagina e collocazioni.",
+          "Unificare cattura e affinità: registrazione nel compendio da ogni vista, senza copie delle debolezze.",
+          "Implementare negoziazione con fonti e storia e completare i raccordi di Iweleth.",
+          "Collegare le 27 Persona del gruppo al compendio; completare schede, abilità, formazioni e nomi canonici secondo R8-20/20b/20c.",
+          "Completare il gate del DDL e le conversioni conservative prima del rilascio."
+        ],
+        "prossimoPasso": "Applicare il piano già preparato dopo le bonifiche precedenti; nessun codice L8 è ancora scritto."
+      },
+      {
+        "lotto": "L9", "titolo": "Confidenti, attività e calendario", "stato": "Da implementare",
+        "cosaManca": [
+          "Unificare disponibilità, requisiti, luoghi e modifica dei Confidenti nelle loro pagine.",
+          "Creare le pagine delle attività con effetti strutturati e paga.",
+          "Unificare giorno, meteo, esami ed eventi; rendere il Calendario una vista del Diario."
+        ],
+        "prossimoPasso": "Implementazione del lotto dopo L8, secondo requisiti originali e senza cancellare il lavoro protetto."
+      },
+      {
+        "lotto": "L10", "titolo": "Partita e Diario", "stato": "Da implementare",
+        "cosaManca": [
+          "Completare il Diario come motore degli effetti collegati per chiave, con annullamento persistente.",
+          "Implementare punti legame e avanzamento dei Confidenti nell'ordine cronologico del Diario.",
+          "Collegare acquisti, risorse, contatori e proposte economiche alle azioni, mantenendo distinti i fatti dichiarati.",
+          "Preservare il Diario fino al primo giugno e rendere esplicite le successive voci da rivedere."
+        ],
+        "prossimoPasso": "Implementare dopo l'unificazione dei dati L9; nessuna migrazione L10 è già consegnata."
+      },
+      {
+        "lotto": "L11", "titolo": "Pulizia e ricerca", "stato": "Da implementare",
+        "cosaManca": [
+          "Implementare ricerca globale e albero delle mappe sulla gerarchia finale.",
+          "Raccogliere in un elenco unico gli elementi da rivedere, con collegamento e gesto di risoluzione.",
+          "Rimuovere fonti e codice vecchi solo dopo il passaggio completo dei lettori, conservando import e ripristini compatibili.",
+          "Allineare documentazione, API e modifiche/ripristini al modello finale."
+        ],
+        "prossimoPasso": "Pulizia conclusiva dopo L8–L10; nessuna eliminazione anticipata."
+      }
+    ],
+    "decisioni": {
+      "bloccantiOra": [],
+      "future": [
+        "Le proposte sui dati saranno presentate quando l'istruttoria è completa e la specifica richiede una decisione dell'utente.",
+        "L'autorizzazione generale alla bonifica non equivale ad approvare fusioni o identità dubbie. Gli otto raccordi sono invece già approvati e conclusi."
+      ]
+    },
+    "notaConteggi": "Questo è il lavoro noto per blocchi, non un conteggio deduplicato di bug. Candidati, frasi, nodi e proposte si sovrappongono; non si sommano e non producono una percentuale attendibile."
+  },
+  "mandatoCorrente": "Otto raccordi applicati e gate finale distinto APPROVATO sul solo elenco. d226c8be attivo129/27, pipeline72SUCCESS. RAW8/vecchi pin/panoramiche preservati; confrontoGETprotetto interamente dopo129 identico. Browser8schede/5Aree del coordinatore e campione autonomo Fioraio/Venditore del revisore. ProssimoL26dataMemento9→7maggio: disegno approvato, fotografie appena rilevate, manifest e codice ancora da completare. Altri residui e L8-L11 aperti; conteggi non deduplicati, nessuna chiusura globale, zero test.",
   "verificaConsegne": "Disposizione utente del 21/10: ogni consegna richiede un agente distinto che acceda direttamente alla specifica originale in modo avversariale. Sola lettura, evidenze requisito/codice, copertura e limiti espliciti, esito motivato. Rilievi da risolvere e riesaminare o sottoporre all'utente. Supera il precedente divieto di verificatori; resta zero test.",
-  "auditSpecifiche": "Gate distinti statici contro originali43ad8889 approvati per123-128, T2/R5-02, parser/snapshot/ledger, GET97, pagina R6-19/31, A10, GETL26 e CAS. Consenso specifico8raccordi acquisito; personali applicati, sei seed attendono128 e gate finale. Dossier Confidenti approvato come disegno circoscritto; nessuna approvazione globale delle interpretazioni, dei dati o del runtime/layout.",
+  "auditSpecifiche": "Riesami distinti contro originali 43ad8889: codice 123–130 e registri approvati staticamente, inclusi GET97, pagina R6-19/31, A10, scanner L26 e CAS. Gate finale degli otto raccordi approvato dopo 129 e osservazioni attribuite.130 locale, esito dati ancora da osservare. Cruscotto: soluzione approvata, codice e testi al riesame. Nessuna chiusura complessiva dei lotti o approvazione di proposte dubbie.",
   "salvataggioAudit": "Bonifica L5-L7 in e0ea995e; censimento readonly, coordinamento post-rilascio e piani L8 pubblicati in 1de1ccba887f533a43c7ef6fe36524ac0264c249. Pipeline67 riuscita. Riconciliazioni correnti e aggiornamenti successivi ancora in lavorazione. Nessun dato privato salvato.",
   "revisioneRimozioni": "Precedente approvazione limitata alle due rimozioni UI; non certifica runtime o chiusura L6. La nuova disposizione richiede verifica indipendente e avversariale delle consegne.",
-  "controlliLocali": "129: gate soluzione/codice/registro distinto approvato; tre riesami propri identità/catene, replay/transazione e conservazione/consumatori. Typecheck17438/lint49850/build52900 exit0. RAW8 dopo128: tutti altri campi e legami identici; 5raccordi applicati,3conflitti panoramica nominativi. Nuovo confrontoGET:Diario255/54giorni,Kamoshida169,Madarame226,611pin/43mappeprotette identici;2personali fuori43 con RAWseparato positivo. Nessun test o migrazione locale, nessun dato privato salvato.",
+  "controlliLocali": "129 conclusa: gate finale otto e confronto protetto dopo129 positivi nei campi rilevati.130: gate statico codice/manifest/registro approvato; typecheck32111/lint38823/build92466 exit0. Tre riesami propri su firma/snapshot, atomicità/idempotenza e conservazione/consumer. Manifest18 e RAW pubblico verificati autonomamente dal revisore. Lettura reale cestino:3registri/1280passi,0erroristrutturali/0latiL26. Cruscotto:3riesami worker e node--check verdi, HTML staticamente approvato e osservato nel browser; testi riallineati alle richieste del revisore. Nessun test, migrazione locale o dato privato salvato.",
   "censimentoCatalogo": "Manifest ricostruito shared/l7-fonti-ricostruite.json, seconda revisione dei campi e formato schemaVersion 1: 2.430 fonti pubbliche dal pacchetto schema 93, precedente al locale 120. Non è l7-proposte.json originale né prova equivalenza. Input runtime e risultati solo nel DB della singola istanza, audit-catalogo-121. Fonti aggregate e sottoelementi non riconciliati restano decisioni aperte visibili; A7-04 non integralmente chiuso. Dettagli in lotti/L7/ricostruzione-input.md.",
   "decisioneRichiesta": "Consenso specifico8raccordi ACQUISITO: utenteApprovo tutti eotto, inclusaAreaCentralStreetVenditore. Nessuna ulteriore domanda per applicarequestoelenco. Altre fusioni/proposte non autorizzate automaticamente. Nessun abbinamento solo per nome. DiarioMemento/ORAsakusa/Importa/guida già decisi.",
   "fasi": [
@@ -25,7 +126,7 @@
   ],
   "p5s": {
     "url": "https://p5s.nasmerlinoalbus.cloud/",
-    "stato": "799120565de046d20ca93dc8a8dfa16a1d64aea5 attivo128/27 sano. Pipeline70/39615410944 e71/39617693398 entrambeSUCCESS.5raccordi applicati,3panoramiche alla129 da rilasciare. ConfrontiRAW8 eGETprotetto positivi nei campi rilevati. Venditore renderizzato inCentralStreet, chiuso correttamente sottofiltro. Nessuna certificazione interoDB o lotto completo."
+    "stato": "d226c8be0f56f3917cfad97cec70dc8a27bcfa11 attivo129/27, healthok. Pipeline72/39620171138SUCCESS.8raccordi applicati, gate finale distinto approvato. RAW8 evecchi3pin/3mappe preservati. GETprotetto dopo129:Diario255/54giorni,Kamoshida169,Madarame226,611pin/43mappe identici nei campi rilevati. Browser8schede/5Aree, campione autonomo revisore Fioraio/Venditore. Nessuna certificazione interoDB o lotto completo."
   },
   "lotti": [
     {
@@ -132,7 +233,7 @@
       "id": "L5",
       "titolo": "Luoghi, negozi, orari",
       "dipende": "L2",
-      "nota": "Otto raccordi approvati:5applicati,129 pronta per3coppie panoramica nominative con gate distinto/controlli verdi. P5s128/27, pipeline70/71SUCCESS. Vecchi pin213/212/210 e mappe conservati, nessunaAreafittizia. Altri23candidati e censimenti collocazioni nonchiusi;1486distinto1487. Gate finale8 ancora aperto, totale difetti non deduplicato, nessuna chiusura globale.",
+      "nota": "Otto raccordi applicati su129 e gate finale distinto APPROVATO per il solo elenco. Vecchi pin213/212/210, panoramiche e altri campi conservati; RAW/GETprotetto post129 positivi. Browser8schede/5Aree, campione autonomo Fioraio/Venditore. Altri23candidati e collocazioni nonchiusi;1486distinto1487. Totale difetti non deduplicato; L5 resta aperto.",
       "fasi": {
         "requisiti": "fatta",
         "dati": "fatta",
@@ -152,7 +253,7 @@
       "id": "L6",
       "titolo": "Condizioni uniche",
       "dipende": "L5",
-      "nota": "P5s127/27operativo con d0dc94bd; paginaR6caricata201righe, audit36applicazioni124/4applicazioni123. A10rifiutoatomico e GETL26 pubblicati con controlliverdi; nonbonificataformula pesca odataMemento. Confidenti/varianti ancoraaperti, nessun test odecisioneautomatica.",
+      "nota": "P5s129/27 operativo. A10 convertitore/ripristino atomici e GET fotografie L26 pubblicati; pagina R6 con201righe.130locale approvata staticamente per ingressoMemento09→07maggio e snapshot coerente, esito ancora da osservare. Pesca fattuale, Aojiru, Niijima, Makoto/Takemi e frasi dubbie ancora aperti; nessuna decisione automatica su varianti personali.",
       "fasi": {
         "requisiti": "fatta",
         "dati": "fatta",
@@ -172,7 +273,7 @@
       "id": "L7",
       "titolo": "Oggetti",
       "dipende": "L6",
-      "nota": "33efc8ed/pipeline69 recupera125 dopoCHECKerrato; p5s12627operativo,87proposteconCartaMediaNULLpendente e86precedenti invariate. DatiPalazzi/Diario/pinprotetti identici nelperimetroGET.97nodi da riconciliare conGEToraattivo; nessuna chiusuraglobale oapprovazionedi proposte.",
+      "nota": "P5s129/27 operativo; incidente125 risolto con33efc8ed. Ultima lettura:87proposte, CartaMedia con quantitàNULL e86preesistenti conservate.97nodi Jose/scambi da riconciliare e sottoelementi audit da completare. Identità/fonti dubbie e consumatori non dichiarati conclusi; nessuna approvazione di proposte o chiusura globale.",
       "fasi": {
         "requisiti": "fatta",
         "dati": "fatta",
@@ -271,28 +372,34 @@
   ],
   "sessioni": [
     {
-      "nome": "Coordinatore integrazione e rilascio",
-      "fase": "regia, blocchi",
+      "nome": "Coordinatore — implementazione e rilascio",
+      "fase": "be, fe, regia",
       "stato": "al lavoro",
-    "attivita": "L5-L7 pubblicato e0ea995e/pipeline66success, p5s122/26 osservato; confrontoGETprotettoidentico. Inventari correntiL5-L6 primaL8: integrazione GETcensimento/OpenAPI, coordinamento riesame e rilascio mirato. Nessun codiceL8."
+      "attivita": "Codice130 Memento scritto e riesaminato; controlli e rilascio. Aggiorna dati della Regia e integra il cruscotto. Otto raccordi conclusi."
     },
     {
       "nome": "Esecutore L5/L6",
       "fase": "be, fe",
-      "stato": "al lavoro",
-    "attivita": "PianoL8 pronto e fonti cartograficheIweleth approfondite; correzione della precedente ipotesi Clifoto sulla famiglia16010 documentata. Nessun codiceL8."
+      "stato": "non operativo",
+      "attivita": "Nessuna attività corrente; implementazione in carico al coordinatore."
     },
     {
       "nome": "Esecutore L7",
       "fase": "be, fe",
-      "stato": "al lavoro",
-    "attivita": "L7 pubblicato e contratto negoziazione L8 documentato. Servizio e DTO GET censimento L5-L6 implementati, riesaminati e approvati staticamente; controlli finali verdi. Codice congelato per il rilascio mirato. Nessuna migrazione o codice L8."
+      "stato": "non operativo",
+      "attivita": "Nessuna attività corrente; residui L7 ancora nel mandato, in carico al coordinatore."
+    },
+    {
+      "nome": "Esecutore cruscotto Regia",
+      "fase": "fe",
+      "stato": "in attesa",
+      "attivita": "HTML consegnato: attività, ultima consegna, mancanti, decisioni e storico senza percentuali stimate. Tre riesami e controllo sintassi verdi; attende integrazione e gate finale."
     },
     {
       "nome": "Revisore indipendente",
       "fase": "validazione",
       "stato": "al lavoro",
-    "attivita": "Gate tecnico L8 delimitato; soluzione e codice GET censimento L5-L6 approvati staticamente. Documenti pubblicabili dopo il riallineamento delle sessioni e del limite sugli editor. Sola lettura, zero test; nessuna chiusura funzionale attestata."
+      "attivita": "Gate finale otto raccordi approvato con campione autonomo nel browser. Codice130 e manifest pubblico approvati staticamente; attende esito reale. Riesamina cruscotto e contenuti, sempre in sola lettura."
     }
   ],
   "notaSessioniStoriche": "Le righe seguenti sono il registro del precedente team, non lo stato live delle sessioni o dei servizi. Nessuna sessione precedente è stata riaperta o gestita durante questo audit.",
@@ -397,7 +504,7 @@
     }
   ],
   "inAttesaUtente": [
-    "Nessuna autorizzazione generale pendente: utente ha ordinato implementazione completa. Soluzioni concrete sottoposte al revisore distinto prima degli edit.",
-    "Restano da risolvere forma estesa/abbreviata e proposte mancanti con evidenze e validazione. Non richiedere di nuovo la scelta sulle identità dataset/listini già delegata con 'la soluzione migliore'."
+    "Nessuna decisione richiesta adesso: preparazione e implementazione dei residui sono in carico al team.",
+    "Le future proposte che richiedono una scelta saranno presentate con istruttoria completa; non sono già approvate. Gli otto raccordi e la scelta tecnica sulle identità dataset/listini sono già decisi."
   ]
 }

@@ -1,4 +1,4 @@
-import { getDb } from '../db/dbService.js';
+import { getDb, type AppDatabase } from '../db/dbService.js';
 import { normalizzaRequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import type {
   CampoConfrontatoL26Dto, CampoFotografiaL26, FormulaFotografiaL26, FotografieIngressoMementoDto,
@@ -78,8 +78,7 @@ function seed(riga: Riga): SeedIngressoMementoDto {
 }
 
 /** Solo SELECT/PRAGMA di lettura su main; nessun log, cache, apertura DB, partita o mutazione. */
-export function fotografieIngressoMemento(): FotografieIngressoMementoDto {
-  const db = getDb();
+export function fotografieIngressoMemento(db: AppDatabase = getDb()): FotografieIngressoMementoDto {
   return db.transaction((): FotografieIngressoMementoDto => {
     const copertura: FotografieIngressoMementoDto['copertura'] = {
       stato: 'leggibile', righeTroncate: false, registriEsaminati: 0, passiEsaminati: 0,
@@ -133,18 +132,26 @@ export function fotografieIngressoMemento(): FotografieIngressoMementoDto {
         try { passi = typeof row.registro_json === 'string' ? JSON.parse(row.registro_json) as unknown : null; }
         catch { passi = null; }
         if (!Array.isArray(passi)) { copertura.radiciIlleggibili++; copertura.stato = 'incerta'; continue; }
+        const sequenze = new Set<number>();
         for (const [indice, p] of passi.entries()) {
           copertura.passiEsaminati++;
           const op = oggetto(p) ? p.op : null;
-          if (!oggetto(p) || !Number.isInteger(p.seq) || typeof p.tabella !== 'string' || !p.tabella
+          if (!oggetto(p) || !Number.isSafeInteger(p.seq) || Number(p.seq) < 0 || sequenze.has(Number(p.seq)) || typeof p.tabella !== 'string' || !p.tabella
               || (op !== 'D' && op !== 'U' && op !== 'I')) {
             copertura.passiNonRiconoscibili++; copertura.stato = 'incerta'; continue;
           }
+          sequenze.add(Number(p.seq));
+          const struttura = db.prepare('SELECT name, pk FROM pragma_table_info(?, ?) ORDER BY pk').all(p.tabella, 'main') as Array<{ name: string; pk: number }>;
+          if (!struttura.length) { copertura.passiNonRiconoscibili++; copertura.stato = 'incerta'; continue; }
+          const primarie = struttura.filter(c => c.pk > 0).map(c => c.name);
+          const identita = primarie.length ? primarie : ['rowid'];
           const lati = (op === 'D' ? ['prima'] : op === 'I' ? ['dopo'] : ['prima', 'dopo']) as Array<'prima' | 'dopo'>;
           const malformato = (op === 'D' && Object.hasOwn(p, 'dopo')) || (op === 'I' && Object.hasOwn(p, 'prima'))
             || lati.some(lato => {
               const riga = p[lato];
-              return !oggetto(riga) || (p.tabella === 'luogo' && (typeof riga.chiave !== 'string' || !riga.chiave));
+              return !oggetto(riga) || identita.some(c => !Object.hasOwn(riga, c)
+                || (typeof riga[c] !== 'string' && !(typeof riga[c] === 'number' && Number.isSafeInteger(riga[c]))))
+                || (p.tabella === 'luogo' && (typeof riga.chiave !== 'string' || !riga.chiave));
             });
           if (malformato) { copertura.passiNonRiconoscibili++; copertura.stato = 'incerta'; }
           if (p.tabella !== 'luogo') continue;
