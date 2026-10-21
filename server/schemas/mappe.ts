@@ -23,7 +23,7 @@ const condizioni = z.array(condizioneSpillo).max(20).nullable().optional();
 
 export const paramsMappa = z.object({ chiave: chiaveMappa });
 export const paramsSpillo = z.object({ id: idParam });
-export const queryPrecondizioneRaccordo = z.object({ luogo: z.string().min(1).max(200) }).strict();
+export const queryPrecondizioneRaccordo = z.object({ luogo: z.string().min(1).max(200), areaLuogo: z.string().min(1).max(200).optional() }).strict();
 export const queryEsporta = z.object({ radice: chiaveMappa.optional() });
 export const queryDidascalia = z.object({ didascalia: z.string().max(300).optional() });
 export const bodyImmagineSpillo = z.object({ didascalia: z.string().max(300).optional(), ordine: z.number().int().min(0).max(999).optional() });
@@ -58,16 +58,17 @@ export const bodyCreaSpillo = z.object({
   tipo: z.enum(TIPI_SPILLO), nome: z.string().min(1).max(LIMITI_GUIDA.spillo.nome), descrizione: z.string().max(LIMITI_GUIDA.spillo.descrizione).optional(), x: z.number().min(0).max(100), y: z.number().min(0).max(100),
   riferimento: riferimento.optional(), collezionabile: z.boolean().optional(), ordine: z.number().int().min(0).max(9999).optional(), condizioni,
 });
-// Il ramo CAS è chiuso prima che lo schema storico possa eliminare campi ignoti. I due campi
+// Il ramo CAS è chiuso prima che lo schema storico possa eliminare campi ignoti. I campi
 // riservati sono vietati nel ramo storico: una richiesta CAS non valida non può ricadervi.
 const bodyRaccordoSpillo = z.object({
   riferimentoLuogo: z.string().min(1).max(200),
   revisioneRaccordoAttesa: z.string().regex(/^[a-fA-F0-9]{64}$/),
+  areaLuogo: z.string().min(1).max(200).optional(),
 }).strict();
 export const bodyAggiornaSpillo = z.union([
   bodyRaccordoSpillo,
   bodyCreaSpillo.partial().extend({
-    mappa: chiaveMappa.optional(), riferimentoLuogo: z.never().optional(), revisioneRaccordoAttesa: z.never().optional(),
+    mappa: chiaveMappa.optional(), riferimentoLuogo: z.never().optional(), revisioneRaccordoAttesa: z.never().optional(), areaLuogo: z.never().optional(),
   }),
 ]);
 /** Il segno di un pin; `infiltrazione` (L4, §3.2) è il contesto per un pin di rigenerabili di più infiltrazioni (null = quella in corso). */

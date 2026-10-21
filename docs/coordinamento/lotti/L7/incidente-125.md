@@ -7,3 +7,7 @@ La correzione è circoscritta: helper chiamato prima della bonifica125, nella st
 Soluzione e tre file approvati staticamente dal revisore distinto. Tre riesami propri: ambito del CHECK, conservazione e atomicità, installazioni nuove/esistenti e ripresa dopo rollback. Typecheck46070/lint21093/build69238 exit0 sul working tree; nessun test o migrazione locale eseguiti. Il commit correttivo esclude A10, GET L26 e raccordo Area ancora locali. La pipeline del commit esatto e l'avvio reale restano da osservare; non si attesta già il recupero di p5s o l'integrità dell'intero DB.
 
 Il lavoro secondario è congelato fino al ritorno operativo e al confronto delle proiezioni protette. Il ciclo precedente ha accumulato analisi e documenti senza una consegna utilizzabile: è un errore di gestione del coordinatore, non una scelta dell'utente.
+
+## Recupero osservato
+
+Correttivo `33efc8edd82ed1f748858373d1767081c46e2906`, pipeline69 (`39610794278`) riuscita. Healthok/schema126, log di completamento125/126/utente027 e backend in ascolto. Pagina Frasi e condizioni effettivamente caricata. Confronto delle proiezioni GET prima/dopo: Diario255 su54giorni, Kamoshida169, Madarame226,611pinutente su43planimetrie identici. Le86proposte precedenti mantengono chiavi/candidato/quantità/motivo/certezza/stato/nota/modifica; totale87 con sola nuova CartaMedia a quantitàNULL, ancora da approvare. Nessuna proposta confermata, copia DB acquisita o prova di scrittura eseguita. Il confronto copre i campi rilevati, non tutti i contenuti dell'istanza.

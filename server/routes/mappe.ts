@@ -151,7 +151,7 @@ router.get('/spilli/:id/precondizione-raccordo', (_req, res, next) => {
   res.setHeader('Cache-Control', 'no-store');
   next();
 }, validate({ params: paramsSpillo, query: queryPrecondizioneRaccordo }), (req, res) => {
-  res.json(precondizioneRaccordoSpillo(Number(req.params.id), String(req.query.luogo)));
+  res.json(precondizioneRaccordoSpillo(Number(req.params.id), String(req.query.luogo), typeof req.query.areaLuogo === 'string' ? req.query.areaLuogo : undefined));
 });
 router.put('/spilli/:id', validate({ params: paramsSpillo, body: bodyAggiornaSpillo }), (req, res) => {
   res.json(aggiornaSpillo(Number(req.params.id), req.body as DatiAggiornaSpillo));

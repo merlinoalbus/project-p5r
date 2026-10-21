@@ -228,7 +228,6 @@ function regola(t: string, ctx: ContestoConversione): RequisitoSpillo[] | null {
   if ((m = t.match(/^incluso nel set per retrogaming \(.*, dal (\d{1,2}|primo) ([a-z]+)\)$/)) && MESI[m[2]]) { const d = data(m[1], m[2]); return d ? [{ tipo: 'data', dal: d }] : null; }
 
   // — sfide con più doti —
-  if ((m = t.match(/^guardiano: perizia rango ([1-5]); boss: .*$/))) return [{ tipo: 'dote', dote: 'perizia', rango: Number(m[1]) }];
   if ((m = t.match(/^tre sfide progressive: [a-z ]+ \(coraggio\/conoscenza\/perizia rango ([1-5])\).*$/))) return ['coraggio', 'conoscenza', 'perizia'].map((d) => ({ tipo: 'dote', dote: d, rango: Number(m![1]) }));
 
   return null;
@@ -239,6 +238,9 @@ function converti(testo: string, ctx: ContestoConversione, scartate: string[]): 
   const t = piatto(testo);
   if (!t) return [];
   if (RUMORE.test(t)) return [];
+  // Due sfide e una cattura non sono una sola soglia di Perizia. Conservare tutta la
+  // frase come incompleta, prima che la separazione ne trasformi le clausole in AND.
+  if (/^guardiano:/.test(t) && /;\s*boss:/.test(t)) { scartate.push(testo); return []; }
   const intera = regola(t, ctx);
   if (intera) return intera;
 

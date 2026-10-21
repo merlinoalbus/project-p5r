@@ -47,7 +47,7 @@ Controesempi statici da coprire nel riesame della futura implementazione: prima 
 
 **Gate distinto: APPROVATO il disegno circoscritto**, dopo lettura diretta del revisore delle due fonti AGS. Il censimento delle fotografie/cestino e il manifest integrale restano prerequisiti del codice. Il gate non certifica la completezza di tutti i prerequisiti narrativi, né si estende al quartiere o a Jose. Non si propone una regola universale delle visite libere né si certificano tutte le finestre successive dei Memento. Nessuna modifica al prodotto in questo approfondimento.
 
-### Proiezione proposta delle fotografie L26 — ancora senza implementazione
+### Proiezione delle fotografie L26
 
 Il censimento corrente esclude intenzionalmente `seed_json`. Il servizio R6-31 riguarda inventario e decisioni; non viene esteso implicitamente a restituire fotografie. Si propone una lettura mirata `GET /api/condizioni/censimento/fotografie-ingresso-memento`, senza parametri di tabella, chiave o percorso: il server usa soltanto la chiave pubblica fissa `mementos/ingresso-mementos` e il contesto `mementos`.
 
@@ -61,6 +61,23 @@ Il censimento corrente esclude intenzionalmente `seed_json`. Il servizio R6-31 r
 `seed_json` creato da `aggiornaElemento` può non contenere la chiave: l'appartenenza della fotografia deriva dalla riga proprietaria identificata, e viene dichiarata come tale; non si inventa una chiave interna mancante. In `cestinoService.ripristinaDalCestino`, D reinserisce `prima`, U ripristina soltanto le colonne ancora uguali a `dopo`, I annulla l'inserimento: perciò il rapporto separa i lati e le operazioni. Un lato `dopo` che contiene la data errata non viene automaticamente classificato come futuro valore ripristinato.
 
 La futura bonifica dovrà rileggere e verificare in transazione queste medesime condizioni: il rapporto informativo non autorizza a usare una fotografia diventata vecchia. Restano aperte la scelta puntuale sui registri personali e la preservazione dei conflitti del cestino. Questa proiezione non modifica né ripristina alcuna riga.
+
+### Manifest della proiezione e provenienza dei confronti
+
+Prima dell'implementazione del GET è stato letto in sola lettura il file **pubblico e tracciato** `pacchetto/gioco.db`, versione 93. Nessuna migrazione è stata eseguita e nessun database corrente è stato copiato. La Regia ha confermato che il censimento corrente di confronto risale alla versione 122 **prima del rilascio `61ccb6ef`**: non costituisce una lettura successiva a quel rilascio. Ogni campo della risposta indica quale delle due fonti ha fornito l'atteso.
+
+| Ambito | Atteso attestato dal pacchetto pubblico 93 | Atteso soltanto dalla baseline Regia 122 |
+| --- | --- | --- |
+| Luogo | Chiave `mementos/ingresso-mementos`; origine `seed`; nascosto 0; tipo `trasporto`; quartiere `mementos`; sblocco «dopo il primo Palazzo (Kamoshida)»; fonte `https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/`; quando/giorni/note NULL; giorni_json `[]`; condizioni_json con il solo nodo data dal `05-09`. | area_chiave, orari_json e fonte_condizioni_json NULL. Queste colonne non esistevano nel pacchetto 93. |
+| Quartiere | Chiave `mementos`; sblocco e sblocco_data NULL; medesima fonte pubblica. | condizioni_json, condizioni_guida_json, fonte_condizioni_json e fonte_condizioni_guida_json NULL. Queste colonne non esistevano nel pacchetto 93. |
+
+Il nome non viene usato come criterio di riconoscimento. La fotografia seed **pubblica** è un oggetto parziale: conserva la chiave e la data del 9 maggio, ma non ha origine, nascosto, Area, orari o fonte_condizioni. Questa misura dimostra la necessità di distinguere i campi assenti; non prova la forma della fotografia corrente. Non si presume `origine = seed` all'interno di una fotografia che omette il campo.
+
+Il revisore distinto ha approvato il manifest e il contratto prima del codice. Ha precisato che la chiave interna contraddittoria va segnalata anche quando la riga proprietaria è identificata, e che un lato necessario mancante o una chiave illeggibile nei passi del cestino rende la copertura incerta. Il confronto **non è una firma già approvata per mutazioni**.
+
+Implementazione locale: `shared/fotografieIngressoMemento.ts`, `server/services/fotografieIngressoMementoService.ts`, GET fisso nelle rotte condizioni e relativa descrizione OpenAPI. Il servizio confronta esattamente i valori raw con il manifest, senza restituirli; separatamente riconosce la forma delle condizioni. La data esatta richiede un solo nodo con le sole due proprietà `tipo` e `dal`. «Altra formula supportata» significa soltanto che il riconoscitore esistente la comprende, non che il valore raw sia identico a una versione normalizzata. Il servizio non salva una normalizzazione.
+
+Tre riesami propri: (1) proiezione e privacy — solo allowlist, nessun UID/nome/nota/raw nell'output, nessun accesso al cestino delle partite; (2) fotografie e controesempi — NULL atteso diverso dall'assente, chiave interna contraddittoria, proprietario assente, lati D/U/I e registri illeggibili; (3) integrazione — transazione di sole letture, nessun taglio, route fissa con no-store prima del servizio, descrizione API e DTO coerenti. **Gate distinto sul codice: APPROVATO STATICAMENTE**, dopo lettura completa del servizio, DTO, route e descrizione API; nessun blocker emerso nel perimetro. I controlli centrali restano alla Regia. Il GET non è stato eseguito dall'autore né dal revisore; la bonifica della data e la lettura delle fotografie correnti restano aperte.
 
 ## A10 — Guardiano e Boss della pesca
 
@@ -108,6 +125,12 @@ Il revisore ha approvato il confine del disegno e confermato il difetto del pars
 **Perimetro futuro completo:** parser, `creaElemento`, `ripristinaElemento` e chiamante DELETE delegante; schema/descrizioni API degli errori; `ModuloCatalogo` per distinguere la scelta della formula e mantenere la bozza. La pagina di riconciliazione R6-31 continua a mostrare A10 come ricerca e non riceve una falsa decisione di conferma dal fallimento del salvataggio. Non sono richiesti nuovi eventi di cattura, modifiche ai turni o una tabella di conversioni. Restano da approvare il codice futuro e la soluzione fattuale completa della pesca.
 
 ## Altri sottoblocchi assegnati
+
+### Consegna locale successiva al recupero di p5s
+
+A10: codice del contratto di rifiuto atomico implementato e approvato staticamente dal revisore distinto dopo tre correzioni: messaggio di ripristino distinto dalla modifica corrente, errore persistente anche per ripristino/DELETE delegante e JSONnull storico distinto da SQLNULL. Parser, transazioni, scelta esplicita nel modulo e OpenAPI riesaminati. Non è una bonifica della formula corrente della pesca né prova delle sue regole nel gioco.
+
+GET L26: servizio/DTO/route/OpenAPI approvati staticamente, con manifest pubblico93 e baseline122 pre61 distinti. La proiezione preserva NULL/assente/parziale e copertura incerta senza esporre valori privati. Il codice non modifica la data dell'ingresso. Controlli integrati e osservazione dopo rilascio al coordinatore; nessun test o gesto di scrittura eseguito per questi due interventi.
 
 - **N14 — negozio del Palazzo di Niijima:** ancora da approfondire; distinguere le lobby e la loro progressione dalla finestra generale del Palazzo.
 - **I71 — Aojiru:** ancora da approfondire; il pin 1486 del chiosco dei succhi è distinto dal 1487 KiyasuKu. Non spostare listini o acquisti per somiglianza nominale. La rotazione deve essere confrontata con gli acquisti effettivi, senza trasformare le date di un percorso esemplificativo in calendario assoluto.

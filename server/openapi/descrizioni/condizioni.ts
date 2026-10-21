@@ -6,6 +6,11 @@ import type { DescrizioniArea } from '../tipi.js';
 
 /** Le descrizioni delle rotte di `/api/condizioni` (`routes/condizioni.ts`). */
 export const DESCRIZIONI_CONDIZIONI: DescrizioniArea = {
+  'GET /api/condizioni/censimento/fotografie-ingresso-memento': {
+    sommario: 'Metadati delle fotografie del solo ingresso dei Memento (L26)',
+    descrizione: 'Lettura fissa senza selettori di tabella, chiave o percorso. Confronta la riga corrente e il contesto del quartiere con il pacchetto pubblico 93 e la baseline Regia 122 precedente a 61ccb6ef. Proietta soltanto stati dei campi, formula esatta 05-09/05-07 o altra formula supportata, presenza e forma della fotografia seed e lati pertinenti dei passi D/U/I di main.cestino. Un NULL atteso è distinto da un NULL difforme e da un campo assente; le fotografie parziali non vengono completate. Chiavi interne contraddittorie, radici o passi illeggibili rendono la copertura incerta. Gli ordinali sono effimeri, non ID del cestino. Nessun valore raw, nome, nota, impronta, UID o dato di partita; nessuna mutazione, normalizzazione o approvazione della futura bonifica. Scansione senza taglio in una transazione di sole letture e Cache-Control: no-store anche prima di eventuali errori.',
+    risposta: '`FotografieIngressoMementoDto` (shared/fotografieIngressoMemento.ts)',
+  },
   'GET /api/condizioni/riconciliazione': {
     sommario: 'Frasi da riconciliare con condizioni, fonti e decisioni',
     descrizione: 'Censimento completo delle 201 identità storiche e delle nuove frasi correnti, comprese righe mutate, assenti e nascoste. Separa requisiti propri e fonti ereditate, proposte documentate e ricerca ancora aperta. Le bonifiche 123/124 sono proiettate senza prima-immagini. Nessuna scrittura durante la lettura. Ogni riga espone improntaFonte e revisioneAttesa distinta per il controllo concorrente.',

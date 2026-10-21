@@ -8,7 +8,8 @@
 // ============================================================
 
 import { calcolaCollezioniImmagini } from './collezioniImmagini.js';
-import { improntaRaccordoPin, richiestaRaccordoPin, type PrecondizioneRaccordoPinDto } from './precondizioneRaccordoPin.js';
+import { applicaAreaRaccordoPin, improntaRaccordoPin, richiestaRaccordoPin, type PrecondizioneRaccordoPinDto } from './precondizioneRaccordoPin.js';
+import { invalidaCacheDiGioco } from '../cacheDiGioco.js';
 import { isDeepStrictEqual } from 'node:util';
 import { RETTIFICHE_NOMI_SEED } from './rettificheNomiSeed.js';
 import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMappe.js';
@@ -1330,7 +1331,7 @@ export function eliminaCopiaPezzoMappa(id: number): { pezzoEliminato: boolean } 
 }
 
 export interface DatiSpillo { soloPosizione?: boolean; destinazione?: DestinazioneSpillo | null; tipo?: TipoSpillo; nome?: string; descrizione?: string; x?: number; y?: number; riferimento?: { tipo: TipoRiferimento; chiave: string } | null; collezionabile?: boolean; ordine?: number; condizioni?: RequisitoSpillo[] | null }
-export type DatiAggiornaSpillo = DatiSpillo & { mappa?: string; riferimentoLuogo?: string; revisioneRaccordoAttesa?: string };
+export type DatiAggiornaSpillo = DatiSpillo & { mappa?: string; riferimentoLuogo?: string; revisioneRaccordoAttesa?: string; areaLuogo?: string };
 
 /** L'etichetta con cui si scarta lo stato di un pin o di una voce della guida citato fuori dalle condizioni dei pin. */
 const SOLO_PIN = 'Stato di un pin o di una voce della guida (solo nelle condizioni dei pin)';
@@ -1503,12 +1504,12 @@ export function creaSpillo(mappaChiave: string, dati: DatiSpillo & { tipo: TipoS
 }
 
 /** Sola lettura coerente: restituisce solo il token, senza fotografia né effetti sulle relazioni. */
-export function precondizioneRaccordoSpillo(id: number, luogo: string): PrecondizioneRaccordoPinDto {
+export function precondizioneRaccordoSpillo(id: number, luogo: string, areaLuogo?: string): PrecondizioneRaccordoPinDto {
   const db = getDb();
   return db.transaction(() => {
     const r = db.prepare('SELECT * FROM spillo WHERE id = ?').get(id) as RigaSpillo | undefined;
     if (!r) throw httpErrors.notFound('spillo-non-trovato', `Lo spillo ${id} non esiste.`);
-    return { revisioneRaccordoAttesa: improntaRaccordoPin(db, r, luogo) };
+    return { revisioneRaccordoAttesa: improntaRaccordoPin(db, r, luogo, areaLuogo) };
   })();
 }
 
@@ -1523,13 +1524,18 @@ export function aggiornaSpillo(id: number, dati: DatiAggiornaSpillo): SpilloDto 
   const r = prepared('SELECT * FROM spillo WHERE id = ?').get(id) as RigaSpillo | undefined;
   if (!r) throw httpErrors.notFound('spillo-non-trovato', `Lo spillo ${id} non esiste.`);
 
-  if (Object.prototype.hasOwnProperty.call(dati, 'revisioneRaccordoAttesa') || Object.prototype.hasOwnProperty.call(dati, 'riferimentoLuogo')) {
+  if (Object.prototype.hasOwnProperty.call(dati, 'revisioneRaccordoAttesa') || Object.prototype.hasOwnProperty.call(dati, 'riferimentoLuogo') || Object.prototype.hasOwnProperty.call(dati, 'areaLuogo')) {
     const raccordo = richiestaRaccordoPin(dati);
-    const attuale = improntaRaccordoPin(getDb(), r, raccordo.riferimentoLuogo);
+    const attuale = improntaRaccordoPin(getDb(), r, raccordo.riferimentoLuogo, raccordo.areaLuogo);
     if (attuale !== raccordo.revisioneRaccordoAttesa) throw httpErrors.conflict('raccordo-precondizione-cambiata', 'Il pin, i suoi collegamenti o il luogo sono cambiati dopo la lettura. Rileggi la proposta prima di collegare.');
     // Ramo deliberatamente separato dalle normalizzazioni dell'editor: anche NULL e [] raw,
     // voci, immagini, destinazione, origine, nome e coordinate restano esattamente quelli letti.
-    prepared("UPDATE spillo SET riferimento_tipo = 'luogo', riferimento_chiave = ?, updated_at = ? WHERE id = ?").run(raccordo.riferimentoLuogo, nowIso(), id);
+    if (raccordo.areaLuogo !== undefined) applicaAreaRaccordoPin(getDb(), raccordo.riferimentoLuogo, raccordo.areaLuogo);
+    if (r.riferimento_tipo !== 'luogo' || r.riferimento_chiave !== raccordo.riferimentoLuogo) {
+      const esito = prepared("UPDATE spillo SET riferimento_tipo = 'luogo', riferimento_chiave = ?, updated_at = ? WHERE id = ? AND riferimento_tipo IS NULL AND riferimento_chiave IS NULL").run(raccordo.riferimentoLuogo, nowIso(), id);
+      if (esito.changes !== 1) throw httpErrors.conflict('raccordo-precondizione-cambiata', 'Il riferimento è cambiato: nessuna parte del raccordo è stata applicata.');
+    }
+    if (raccordo.areaLuogo !== undefined) invalidaCacheDiGioco();
     return elementoSpilloDto(prepared('SELECT * FROM spillo WHERE id = ?').get(id) as RigaSpillo);
   }
 

@@ -46,6 +46,8 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
   /** Unisce una modifica parziale ai dati del modulo. */
   const imposta = (patch: Dati) => setDati((d) => ({ ...d, ...patch }));
   const [condizioni, setCondizioni] = useState<RequisitoSpillo[]>(() => { try { return JSON.parse(String(elemento?.dati.condizioni_json ?? '[]')) as RequisitoSpillo[]; } catch { return []; } });
+  const [condizioniScelte, setCondizioniScelte] = useState(!nuovo);
+  const [erroreSalvataggio, setErroreSalvataggio] = useState<string | null>(null);
   const regoleValide = !modulo.conCondizioni || condizioni.every((c) => normalizzaRequisitoSpillo(c) !== null);
   const [occupato, setOccupato] = useState(false);
   const nome = tipoModulo === 'videogioco' ? { singolare: 'Videogioco', nuovo: 'Nuovo videogioco' } : NOME_TIPO_CATALOGO[tipo];
@@ -55,9 +57,11 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
   /** Prepara il corpo col modulo del tipo (più le condizioni, se previste) e crea o aggiorna l'elemento; a buon fine notifica e avvisa il genitore. */
   const salva = async () => {
     setOccupato(true);
+    setErroreSalvataggio(null);
     try {
       const corpo: Dati = modulo.prepara(dati);
-      if (modulo.conCondizioni) corpo.condizioni_json = condizioni;
+      if (modulo.conCondizioni && (!nuovo || condizioniScelte)) corpo.condizioni_json = condizioni;
+      else if (nuovo) delete corpo.condizioni_json;
       if (nuovo) {
         const e = await creaElementoCatalogo(tipo, corpo);
         notifica('success', `${nome.singolare} «${e.nome}» aggiunto: resta anche quando i dati della guida vengono aggiornati.`);
@@ -67,7 +71,9 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
       }
       onSalvato();
     } catch (err) {
-      notifica('error', err instanceof Error ? err.message : 'Salvataggio fallito.');
+      const messaggio = err instanceof Error ? err.message : 'Salvataggio fallito.';
+      setErroreSalvataggio(messaggio);
+      notifica('error', messaggio);
     } finally {
       setOccupato(false);
     }
@@ -83,12 +89,15 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
   const ripristina = async () => {
     if (!elemento) return;
     setOccupato(true);
+    setErroreSalvataggio(null);
     try {
       await ripristinaElementoCatalogo(tipo, elemento.chiave);
       notifica('success', 'Ripristinati i valori della guida.');
       onSalvato();
     } catch (err) {
-      notifica('error', err instanceof Error ? err.message : 'Operazione fallita.');
+      const messaggio = err instanceof Error ? err.message : 'Operazione fallita.';
+      setErroreSalvataggio(messaggio);
+      notifica('error', messaggio);
     } finally {
       setOccupato(false);
     }
@@ -97,12 +106,15 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
   const elimina = async () => {
     if (!elemento) return;
     setOccupato(true);
+    setErroreSalvataggio(null);
     try {
       await eliminaElementoCatalogo(tipo, elemento.chiave);
       notifica('success', 'Eliminato.');
       onSalvato();
     } catch (err) {
-      notifica('error', err instanceof Error ? err.message : 'Operazione fallita.');
+      const messaggio = err instanceof Error ? err.message : 'Operazione fallita.';
+      setErroreSalvataggio(messaggio);
+      notifica('error', messaggio);
     } finally {
       setOccupato(false);
     }
@@ -177,7 +189,14 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
         {/* Le condizioni valgono per quel che compare e sparisce col procedere della partita. Una
             domanda in classe e una riga del cruciverba hanno già il loro giorno, che è la
             condizione; il negozio ha gli orari, e lo sblocco della merce sta sugli articoli. */}
-        {modulo.conCondizioni && <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} disabilitato={occupato} />}
+        {modulo.conCondizioni && <>
+          <CondizioniEditor condizioni={condizioni} onCambia={(v) => { setCondizioni(v); setCondizioniScelte(true); }} disabilitato={occupato} />
+          {nuovo && condizioni.length === 0 && <div className="space-y-2 text-sm">
+            <p>{condizioniScelte ? 'Hai scelto di non aggiungere condizioni proprie.' : 'Le condizioni proprie non sono ancora state scelte. Una frase non interamente compresa richiederà una tua scelta prima del salvataggio.'}</p>
+            {!condizioniScelte && <button type="button" className="btn btn-secondary min-h-11" disabled={occupato} onClick={() => setCondizioniScelte(true)}>Nessuna condizione propria</button>}
+          </div>}
+        </>}
+        {erroreSalvataggio && <p role="alert" className="m-0 text-sm text-error">{erroreSalvataggio} La finestra resta aperta.</p>}
         {!regoleValide && <p role="alert" className="m-0 text-[13px] text-error">Completa o rimuovi i gruppi vuoti prima di salvare.</p>}
         <div className="flex flex-wrap items-center justify-between gap-2">
           {modulo.conVerificato

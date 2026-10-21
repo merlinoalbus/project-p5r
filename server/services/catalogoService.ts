@@ -15,10 +15,12 @@
 
 import { verificaCondizioni } from './mappe/mappeService.js';
 import { giorniDallaFrase } from '../db/migrations/080_giorni_luogo_strutturati.js';
-import { migraTestiCondizioni } from '../../shared/migraCondizioni.js';
+import { convertiProsa } from '../../shared/migraCondizioni.js';
+import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { isDeepStrictEqual } from 'node:util';
 import { contestoConversione, contestoRiga } from './condizioni/contestoConversione.js';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { httpErrors } from '../utils/httpError.js';
+import { HttpError, httpErrors } from '../utils/httpError.js';
 import { slug } from '../../shared/slug.js';
 import type { ElementoCatalogoDto, RiepilogoCatalogoDto, TipoCatalogo } from '../../shared/types.js';
 import { normalizzaVociEffetto, type VoceEffetto } from '../../shared/effettiCatalogo.js';
@@ -367,11 +369,58 @@ function verificaTipoVideogioco(tipo: TipoCatalogo, attuale: Riga, nuovoTipo: un
   }
 }
 
-/** Crea una riga del catalogo (origine «utente»): la chiave nasce dal nome e non collide mai con quelle del seed. */
+type OperazioneCondizioni = 'creazione' | 'ripristino';
+
+/** Nessun testo o fotografia privati nei dettagli: soltanto esito, campi e motivo classificato. */
+function condizioniDaDefinire(operazione: OperazioneCondizioni, motivo: string, scarti = 0): never {
+  const messaggio = operazione === 'ripristino'
+    ? 'La fotografia della guida contiene condizioni incomplete o non leggibili. Nessun dato è stato ripristinato e la fotografia è conservata. Puoi modificare la riga corrente come gesto distinto; tale modifica non corregge la fotografia e non rende possibile questo ripristino.'
+    : 'Le condizioni non sono interamente definite. Nessun dato è stato salvato: definisci le condizioni nell’editor prima di procedere.';
+  throw httpErrors.conflict('condizioni-da-definire', messaggio,
+    { operazione, campi: ['condizioni_json'], motivo, scarti });
+}
+
+/** Valida senza riscrivere la fotografia: anche una forma che perderebbe campi richiede una scelta esplicita. */
+function verificaFormulaCompleta(valore: unknown, operazione: OperazioneCondizioni): string {
+  let formula: unknown = valore;
+  if (typeof valore === 'string') {
+    try { formula = JSON.parse(valore); }
+    catch { condizioniDaDefinire(operazione, 'formula-illeggibile'); }
+  }
+  if (!Array.isArray(formula) || formula.length > 20) condizioniDaDefinire(operazione, 'formula-non-valida');
+  const normalizzate = formula.map((c) => normalizzaRequisitoSpillo(c));
+  if (normalizzate.some((c) => c === null) || !isDeepStrictEqual(formula, normalizzate)) condizioniDaDefinire(operazione, 'formula-non-supportata');
+  try { verificaCondizioni(formula as RequisitoSpillo[]); }
+  catch (err) {
+    if (operazione === 'ripristino' && err instanceof HttpError && err.status < 500) condizioniDaDefinire(operazione, 'riferimenti-non-validi');
+    throw err;
+  }
+  return typeof valore === 'string' ? valore : JSON.stringify(formula);
+}
+
+/** Conversione accettata soltanto se completa; una frase ignota non equivale a nessuna condizione. */
+function condizioniCompleteDaProsa(tipo: TipoCatalogo, chiave: string, dati: Record<string, unknown>, operazione: OperazioneCondizioni): string {
+  const testi = PROFILO[tipo].condizioniDa?.(dati) ?? [];
+  if (testi.some((t) => t != null && typeof t !== 'string')) condizioniDaDefinire(operazione, 'prosa-non-valida');
+  const esito = convertiProsa(testi, contestoRiga(getDb(), contestoConversione(getDb()), {
+    tabella: tipo, chiave, negozio_chiave: dati.negozio_chiave, confidente_chiave: dati.confidente_chiave, catalogo_chiave: dati.catalogo_chiave,
+  }));
+  if (esito.scartate.length) condizioniDaDefinire(operazione, 'prosa-incompleta', esito.scartate.length);
+  verificaFormulaCompleta(esito.condizioni, operazione);
+  return JSON.stringify(esito.condizioni);
+}
+
+/** Crea una riga del catalogo e l'eventuale identità nella stessa transazione, compresi conversione e riferimenti. */
 export function creaElemento(tipo: TipoCatalogo, grezzi: Record<string, unknown>): ElementoCatalogoDto {
+  const elemento = getDb().transaction(() => creaElementoNellaTransazione(tipo, grezzi))();
+  invalidaCacheDiGioco();
+  return elemento;
+}
+
+function creaElementoNellaTransazione(tipo: TipoCatalogo, grezzi: Record<string, unknown>): ElementoCatalogoDto {
   if (tipo === 'negozio' && typeof grezzi.sblocco_json === 'string') verificaCondizioni(JSON.parse(grezzi.sblocco_json));
   if (tipo === 'articolo' && typeof grezzi.negozio_chiave === 'string') grezzi = { ...grezzi, negozio_chiave: chiaveCondivisa('negozio', grezzi.negozio_chiave) };
-  if (typeof grezzi.condizioni_json === 'string') verificaCondizioni(JSON.parse(grezzi.condizioni_json));
+  if (grezzi.condizioni_json != null) grezzi = { ...grezzi, condizioni_json: verificaFormulaCompleta(grezzi.condizioni_json, 'creazione') };
   verificaRiferimenti(tipo, grezzi);
   const dati = normalizzaScrittura(tipo, grezzi, null);
   const nome = tipo === 'articolo' && typeof dati.catalogo_chiave === 'string' ? riferimentoOggetto(dati.catalogo_chiave)?.nome ?? ''
@@ -389,9 +438,9 @@ export function creaElemento(tipo: TipoCatalogo, grezzi: Record<string, unknown>
   for (const c of compilate) valori[c] = c === 'verificato' ? (dati[c] === true ? 1 : 0) : (dati[c] ?? null);
   const colonne = ['chiave', 'ordine', ...compilate, 'origine', 'nascosto', 'updated_at'];
   const daProsa = PROFILO[tipo].condizioniDa;
-  if (daProsa && valori.condizioni_json === undefined) {
-    valori.condizioni_json = JSON.stringify(migraTestiCondizioni(daProsa(dati), contestoRiga(getDb(), contestoConversione(getDb()), { tabella: tipo, chiave, negozio_chiave: dati.negozio_chiave, confidente_chiave: dati.confidente_chiave, catalogo_chiave: dati.catalogo_chiave })));
-    colonne.push('condizioni_json');
+  if (daProsa && valori.condizioni_json == null) {
+    valori.condizioni_json = condizioniCompleteDaProsa(tipo, chiave, dati, 'creazione');
+    if (!colonne.includes('condizioni_json')) colonne.push('condizioni_json');
   }
   // **Quel che aggiungi tu e' verificato: la fonte sei tu.**
   //
@@ -408,11 +457,8 @@ export function creaElemento(tipo: TipoCatalogo, grezzi: Record<string, unknown>
   if (PROFILO[tipo].haVerificato) valori.verificato = dati.verificato === false ? 0 : 1;
   const extra = PROFILO[tipo].haVerificato ? ', verificato' : '';
   const extraVal = PROFILO[tipo].haVerificato ? ', @verificato' : '';
-  getDb().transaction(() => {
-    prepared(`INSERT INTO ${TABELLA[tipo]} (${colonne.join(', ')}${extra}) VALUES (${colonne.map((c) => `@${c}`).join(', ')}${extraVal})`).run(valori);
-    assicuraIdentitaLettura(tipo, chiave, nome);
-  })();
-  invalidaCacheDiGioco();
+  prepared(`INSERT INTO ${TABELLA[tipo]} (${colonne.join(', ')}${extra}) VALUES (${colonne.map((c) => `@${c}`).join(', ')}${extraVal})`).run(valori);
+  assicuraIdentitaLettura(tipo, chiave, nome);
   return dto(tipo, riga(tipo, chiave));
 }
 
@@ -498,13 +544,26 @@ export function eliminaElemento(tipo: TipoCatalogo, chiave: string): { esito: 'e
  * elimina mai.
  */
 export function ripristinaElemento(tipo: TipoCatalogo, chiave: string): ElementoCatalogoDto {
+  const elemento = getDb().transaction(() => ripristinaElementoNellaTransazione(tipo, chiave))();
+  invalidaCacheDiGioco();
+  return elemento;
+}
+
+function ripristinaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string): ElementoCatalogoDto {
   chiave = chiaveCondivisa(tipo, chiave);
   const r = riga(tipo, chiave);
   if (r.origine === 'utente' && r.seed_json === null) throw httpErrors.badRequest('creata-da-te', 'Questa riga l’hai creata tu: non c’è un valore della guida da rimettere. Per toglierla usa «Elimina».');
-  const originale = r.seed_json ? (JSON.parse(r.seed_json) as Record<string, unknown>) : null;
+  let fotografia: unknown = null;
+  if (r.seed_json !== null) {
+    try { fotografia = JSON.parse(r.seed_json); }
+    catch { condizioniDaDefinire('ripristino', 'fotografia-illeggibile'); }
+  }
+  if (r.seed_json !== null && (fotografia === null || typeof fotografia !== 'object' || Array.isArray(fotografia))) condizioniDaDefinire('ripristino', 'fotografia-non-valida');
+  const originale = fotografia as Record<string, unknown> | null;
   if (!originale) throw httpErrors.badRequest('riga-del-seed', 'Questa riga arriva dai dati della guida e non è stata modificata: non c\'è nulla da ripristinare. Usa «Nascondi» se non vuoi vederla.');
   const daProsaRip = PROFILO[tipo].condizioniDa;
-  if (daProsaRip && originale.condizioni_json == null) originale.condizioni_json = JSON.stringify(migraTestiCondizioni(daProsaRip(originale), contestoRiga(getDb(), contestoConversione(getDb()), { tabella: tipo, chiave: String(r.chiave), negozio_chiave: originale.negozio_chiave, confidente_chiave: originale.confidente_chiave, catalogo_chiave: originale.catalogo_chiave })));
+  if (daProsaRip && originale.condizioni_json == null) originale.condizioni_json = condizioniCompleteDaProsa(tipo, String(r.chiave), originale, 'ripristino');
+  else if (originale.condizioni_json != null) originale.condizioni_json = verificaFormulaCompleta(originale.condizioni_json, 'ripristino');
   // **Un'istantanea vecchia non conosce i campi aggiunti dopo.** `seed_json` conserva la riga com'era
   // il giorno in cui l'hai corretta: se da allora la tabella ha guadagnato una colonna — `verificato`
   // e' entrata fra i campi salvati con la stellina delle righe tue — quel campo nell'istantanea non
@@ -533,10 +592,7 @@ export function ripristinaElemento(tipo: TipoCatalogo, chiave: string): Elemento
   }
   const set = campi.map((c) => `${c} = @${c}`);
   const valori: Record<string, unknown> = { chiave, ...Object.fromEntries(campi.map((c) => [c, originale[c] ?? predefinito(c)])) };
-  getDb().transaction(() => {
-    verificaTipoVideogioco(tipo, r, originale.tipo ?? r.tipo);
-    prepared(`UPDATE ${TABELLA[tipo]} SET ${set.join(', ')}, origine = 'seed', nascosto = 0, seed_json = NULL, updated_at = NULL WHERE chiave = @chiave`).run(valori);
-  })();
-  invalidaCacheDiGioco();
+  verificaTipoVideogioco(tipo, r, originale.tipo ?? r.tipo);
+  prepared(`UPDATE ${TABELLA[tipo]} SET ${set.join(', ')}, origine = 'seed', nascosto = 0, seed_json = NULL, updated_at = NULL WHERE chiave = @chiave`).run(valori);
   return dto(tipo, riga(tipo, chiave));
 }
