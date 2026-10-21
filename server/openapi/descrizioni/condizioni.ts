@@ -6,6 +6,12 @@ import type { DescrizioniArea } from '../tipi.js';
 
 /** Le descrizioni delle rotte di `/api/condizioni` (`routes/condizioni.ts`). */
 export const DESCRIZIONI_CONDIZIONI: DescrizioniArea = {
+  'GET /api/condizioni/censimento': {
+    sommario: 'Inventario corrente di frasi, condizioni, orari e collegamenti dei luoghi',
+    descrizione: 'Lettura mirata per gli inventari L5/L6, nello stesso perimetro delle API esistenti. Include le righe nascoste e distingue frasi e orari storici, condizioni proprie salvate, collegamenti strutturati e dati derivati. I JSON mantengono il valore originale e la diagnosi di lettura: un valore illeggibile non diventa una lista vuota. Il contesto di sedi e pin permette di distinguere passaggi, riferimenti indiretti validi, assenze e riferimenti orfani; null non significa automaticamente difetto. Nessuna conversione, scrittura, lettura delle partite, copia del database o immagine. Risposta coerente fra le sezioni e intestazione Cache-Control: no-store. Il risultato descrive i dati correnti; non approva le proposte né prova l’equivalenza storica delle migrazioni.',
+    risposta: '`CensimentoLuoghiCondizioniDto` (shared/censimentoLuoghiCondizioni.ts)',
+    errori: [[409, 'censimento-tipo-inatteso']],
+  },
   'POST /api/condizioni/valuta': {
     sommario: 'Valuta condizioni sulla partita corrente o su un giorno scelto',
     descrizione: 'Valuta ogni condizione e l’insieme in AND con il valutatore unico del server. `partita` identifica la partita e `giorno`, se presente, sposta solo il giorno di valutazione senza modificare la partita; la risposta distingue vero, falso, avviso e riferimento non più valido, con il testo e ciò che manca. La variante `meteo{condizione: senza-allerta, allerta}` legge le allerte del calendario nella data e fascia correnti, senza duplicarne le date nelle condizioni; un riferimento mancante resta da verificare, non diventa disponibile.',

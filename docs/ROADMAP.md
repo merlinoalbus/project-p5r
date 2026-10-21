@@ -2,6 +2,8 @@
 
 Legenda stato: ✅ fatto e validato · 🔄 in corso · ⏳ fatto, in attesa di validazione · ⬜ da fare.
 
+**Ripresa 21/10 07:43Z:** bonifica L5–L7 pubblicata in `e0ea995e`, pipeline #66 riuscita; p5s schema122/26, catalogo e audit osservati. Confronto GET protetto identico prima/dopo (Diario255, Kamoshida169, Madarame226,611pinutente). Proposte e conferme funzionali restano aperte. L8 in piano concreto e revisione della soluzione; nessuna implementazione ancora. Seguono L9–L11. Il checkpoint 07:30Z sotto precede il rilascio.
+
 **Ripresa 21/10 07:30Z:** bonifica integrata L5–L7 approvata staticamente da agente distinto contro gli originali; registrate migrazioni121/122/utente026 e API del catalogo. Typecheck/lint/build finali verdi; rilascio in preparazione, nessuna migrazione locale o test eseguiti. Proposte umane e aggregati della riconciliazione restano espliciti. Seguono L8–L11; L8 attualmente in analisi readonly. Stato operativo e pubblicazione in `coordinamento/STATO-ATTUALE.md`.
 **Regola corrente del 21 ottobre:** nessun test scritto/eseguito né ciclo di collaudo; ogni consegna richiede un agente distinto con verifica avversariale della specifica originale. Le prove funzionali spettano all'utente. Typecheck e lint restano obbligatori per le modifiche al prodotto. Gli esiti e le procedure di prova nelle sezioni storiche descrivono il lavoro dell'epoca, non autorizzano a riattivarlo. Stato di L5/L6/L7 e limiti nell'audit corrente; nessuna approvazione globale del prodotto.
 

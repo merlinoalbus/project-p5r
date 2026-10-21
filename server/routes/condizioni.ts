@@ -22,6 +22,7 @@ import { giocabili } from '../services/squadraService.js';
 import { nomiCondizioni, nomiCondizioniMemo, pinConStato, vociCitabili } from '../services/condizioni/nomiCondizioni.js';
 import { tuttiGliInviti } from '../services/condizioni/condizioneEffettiva.js';
 import { apertureDalDiario, apertureDichiarabili } from '../services/apertureDedaliService.js';
+import { censimentoLuoghiCondizioni } from '../services/censimentoLuoghiCondizioniService.js';
 import { statoAlGiorno, statoDisponibilitaPartita } from '../services/disponibilitaService.js';
 import { valutazione } from '../services/condizioni/valutatore.js';
 import { condizioneSpillo } from '../schemas/mappe.js';
@@ -38,6 +39,12 @@ import type { ElenchiRegoleDto, PinConStatoDto, ProgressiPartitaDto, RispostaVal
 const router = Router();
 const idPartita = idParam;
 const chiave = z.string().regex(/^[a-z0-9][a-z0-9-]{0,119}$/);
+
+/** Proiezione mirata per riconciliare gli inventari L5/L6; non converte o corregge dati. */
+router.get('/censimento', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(censimentoLuoghiCondizioni());
+});
 
 /** I negozi con il loro programma punti (null se non ne hanno). */
 function negoziConProgramma() {

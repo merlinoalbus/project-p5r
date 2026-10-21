@@ -1,6 +1,6 @@
 # L7 — difetti e mancanze dell'implementazione locale
 
-**Stato corrente 21/10, dopo il gate finale:** bonifica L7 e attivazione integrata approvate staticamente dal revisore distinto; nessun blocker di codice residuo nei perimetri riesaminati. Migrazioni 121/122/utente 026, router e OpenAPI registrati, non eseguiti localmente. Il coordinatore riporta typecheck `39444`, lint `29880` e build `41169` exit 0 dopo l'attivazione. Nessun test; dati convertiti, runtime e layout non certificati. Pubblicazione ed esiti successivi sono nella Regia.
+**Stato corrente 21/10 07:43Z:** bonifica L7 e attivazione integrata approvate staticamente dal revisore distinto e pubblicate in `e0ea995e`, pipeline #66 riuscita. p5s schema122/26; catalogo/audit caricati senza salvataggi. Typecheck `39444`, lint `29880`, build `41169` exit0 dopo attivazione. Nessun test o migrazione locale. Dati protetti GET identici prima/dopo; non certifica l'intero DB, tutti gli abbinamenti o scritture/layout. Proposte umane e limiti A7-04 restano aperti. Le righe storiche sotto che indicano migrazioni non attive sono superate per la sola pubblicazione.
 
 | Rilievo corrente | Stato e limite |
 |---|---|

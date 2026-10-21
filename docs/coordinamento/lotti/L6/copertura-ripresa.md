@@ -1,5 +1,7 @@
 # L6 — copertura della ripresa dopo il rilascio
 
+**Aggiornamento 21/10 07:43Z:** bonifica codice/attivazione approvata staticamente e pubblicata in `e0ea995e`, pipeline #66 riuscita. Il coordinatore ha osservato p5s122/26 e catalogo/audit; le proiezioni GET dei dati protetti sono identiche prima/dopo, con campi e limiti in STATO-ATTUALE. Typecheck39444/lint29880/build41169 exit0, nessun test o migrazione locale. Restano inventari correnti R5/R6-19, riconciliazioni ed esiti funzionali/layout non dimostrati: il rilascio non li chiude. I paragrafi seguenti che indicano controlli/rilascio ancora pendenti sono checkpoint precedenti.
+
 ## Aggiornamento della bonifica locale L5–L7
 
 Il mandato successivo all'audit richiede correzione e completamento prima del rilascio unico. A56-01…08 hanno un'attuazione locale, descritta in [difetti L6](difetti.md), dopo gate distinto sulla soluzione. Il successivo riesame statico dell'implementazione è approvato dopo le correzioni richieste su esito ignoto e fonte effettiva degli sblocchi; il codice non è pubblicato. Non è approvazione integrale dei requisiti dati/runtime.

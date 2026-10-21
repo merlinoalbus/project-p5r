@@ -1,5 +1,7 @@
 # L5 — difetti accertati nell'audit del 21 ottobre 2026
 
+**Aggiornamento del coordinatore, 21/10 07:43Z:** bonifica pubblicata in `e0ea995e`, pipeline #66 riuscita, p5s schema122/26 osservato. Controlli finali typecheck/lint/build verdi e gate statico distinto approvato. Confronto delle proiezioni GET protette identico prima/dopo, nei limiti descritti in STATO-ATTUALE. Restano inventari correnti e proposte puntuali da completare, oltre alle conferme funzionali/layout dell'utente. Le note di implementazione locale e migrazione122 non eseguita sotto sono checkpoint precedenti al rilascio, non lo stato corrente.
+
 ## Bonifica locale successiva all'audit
 
 Mandato successivo dell'utente: correggere e completare L5–L7 prima del rilascio unico. Soluzione sottoposta al revisore distinto `audit_documenti_originali` e approvata prima delle modifiche, con protezione delle condizioni dell'utente e distinzione fra sblocco intrinseco e presenza fisica. **Codice locale implementato e riesame statico A56-01…08 approvato dal revisore distinto dopo le correzioni richieste. Controlli finali integrati e rilascio ancora da completare.**

@@ -1,12 +1,12 @@
 {
   "obiettivo": "Lotti L0–L11 della razionalizzazione completati sul branch newreview, pubblicati e funzionanti su p5s",
-  "aggiornato": "2026-10-21T07:30:07Z",
-  "mandatoCorrente": "Bonificare e rilasciare tutti i difetti, completare implementazioni parziali e poi L8-L11, come ordinato dall'utente. Codice e attivazione integrata L5-L7 APPROVATI staticamente dal revisore distinto. Registrate121M7,122bonifica,026utente; nessuna migrazione locale eseguita. Controlli finali verdi, commit e rilascio in preparazione. Zero test. Dopo pubblicazione e osservazione p5s segue L8; analisi readonly gia avviata.",
+  "aggiornato": "2026-10-21T09:21:00Z",
+  "mandatoCorrente": "Bonificare e rilasciare tutti i difetti, completare implementazioni parziali e poi L8-L11. Bonifica integrata L5-L7 pubblicata e0ea995e, pipeline66 riuscita; p5s122/26 osservato. Prima del codiceL8 si completano inventari correnti/proposteL5-L6: GET mirato readonly approvato dal revisore, implementazione in corso senza copieDB/partite/immagini. L8 piano tecnico P1-P3/P6 approvato, P4modello favorevole con gateDDLpendente, P5decisioni cartografiche da chiudere. Zero test e nessuna implementazioneL8.",
   "verificaConsegne": "Disposizione utente del 21/10: ogni consegna richiede un agente distinto che acceda direttamente alla specifica originale in modo avversariale. Sola lettura, evidenze requisito/codice, copertura e limiti espliciti, esito motivato. Rilievi da risolvere e riesaminare o sottoporre all'utente. Supera il precedente divieto di verificatori; resta zero test.",
   "auditSpecifiche": "Gate finale codice e attivazione L5-L7 APPROVATO STATICAMENTE contro originali43ad8889 e decisioni successive: nessun rilievo bloccante noto residuo nei percorsi esaminati. Chiusi snapshot/costi/cestino, proposte obsolete, audit immutabile e categorie letture. Proposte umane previste e riconciliazioni aggregate restano esplicite, senza certificazione dei singoli abbinamenti, dati/runtime/layout.",
-  "salvataggioAudit": "Dossier approvato e preparato nell'indice git, non ancora committato. Mandato successivo richiede implementazione e rilascio: codice e coordinamento nella consegna integrata L5-L7 dopo riesame distinto, non un rilascio della bozza incompleta. Nessun push della ripresa ancora eseguito.",
+  "salvataggioAudit": "Dossier, codice e coordinamento L5-L7 committati e pubblicati in e0ea995e39782bb4a459e82d3dd6686a40a22ffd. Aggiornamento post-rilascio e pianoL8 locali da includere nella prossima consegna. Nessun dato privato salvato.",
   "revisioneRimozioni": "Precedente approvazione limitata alle due rimozioni UI; non certifica runtime o chiusura L6. La nuova disposizione richiede verifica indipendente e avversariale delle consegne.",
-  "controlliLocali": "Dopo attivazione: typecheck39444, lint29880 e build41169 exit0. Tre riesami propri documentati e gate distinto finale approvato. Diffcheck e controllo privacy aggiunte/file nuovi verdi. Nessun test o migrazione locale eseguiti. Pubblicato ancora c025154a, pipeline65success. Baseline odierna GETp5s solo memoria: schema120/25, Diary255, Kamoshida169, Madarame226voci,611pinutente su43planimetrie; verifica successiva nel medesimo perimetroAPI, non certificazione interoDB. Nessuna impronta privata nel repo. Asserzioni test storico non aggiornate né eseguite: non certificanoL7.",
+  "controlliLocali": "Dopo attivazione: typecheck39444, lint29880 e build41169 exit0. Tre riesami propri e gate distinto finale approvati. Diffcheck e controllo privacy verdi. Nessun test o migrazione locale. Pipeline66success; GETp5s dopo rilascio schema122/26: Diario255voci in54giorni, Kamoshida169, Madarame226,611pinutente in43planimetrie identici ai campi rilevati prima. PerimetroAPI, non interoDB. Catalogo e audit caricati, nessun errore console osservato. Nessuna impronta privata nel repo. Asserzioni test storico non aggiornate né eseguite: non certificanoL7.",
   "censimentoCatalogo": "Manifest ricostruito shared/l7-fonti-ricostruite.json, seconda revisione dei campi e formato schemaVersion 1: 2.430 fonti pubbliche dal pacchetto schema 93, precedente al locale 120. Non è l7-proposte.json originale né prova equivalenza. Input runtime e risultati solo nel DB della singola istanza, audit-catalogo-121. Fonti aggregate e sottoelementi non riconciliati restano decisioni aperte visibili; A7-04 non integralmente chiuso. Dettagli in lotti/L7/ricostruzione-input.md.",
   "decisioneRichiesta": "Nessuna nuova approvazione generale richiesta: mandato implementazione esplicito e tre soluzioni approvate. Scelta delegata identità: nessun abbinamento solo per nome, equivalenza documentata prima di una fusione approvata; associazioni e riferimenti preservati. Proposte mancanti da ricostruire senza dichiararne equivalenza. Diario nella visita Memento già scelto, senza conteggio; OR Asakusa/Importa/guida già decisi.",
   "fasi": [
@@ -25,7 +25,7 @@
   ],
   "p5s": {
     "url": "https://p5s.nasmerlinoalbus.cloud/",
-    "stato": "Pubblicato c025154a0d2c2e73245348fb532ee74c617ca5e1, pipeline #65 (39514931684) success. Descrizione generata di Asakusa con entrambe le alternative osservata nel browser senza salvare. Nessun dato modificato dalla correzione. Prove funzionali/layout dell'utente aperte; copertura completa non dimostrata. L7 resta locale fino alla fine del lotto."
+    "stato": "Pubblicato e0ea995e39782bb4a459e82d3dd6686a40a22ffd, pipeline #66 (39563033231) success. Healthok schema122, partite26. Catalogo1300oggetti e audit2739fonti/3254risultati osservati;478fonti daesaminare,86proposteoperative. Nessuna proposta confermata. Dati protetti nel perimetroGET identici prima/dopo. Prove funzionali/layout utente e riconciliazioni ancora aperte."
   },
   "lotti": [
     {
@@ -132,7 +132,7 @@
       "id": "L5",
       "titolo": "Luoghi, negozi, orari",
       "dipende": "L2",
-      "nota": "Bonifiche locali A56-01..08 APPROVATE staticamente dal revisore distinto; non pubblicate e non certificano tutti i requisiti, gli inventari correnti o i dati/runtime. Rilascio integrato con L6-L7 dopo completamento e controlli finali. Le fasi storiche non equivalgono a consegna della bonifica.",
+      "nota": "Bonifiche A56-01..08 APPROVATE staticamente e pubblicate e0ea995e con L6-L7, pipeline66success, p5s122/26. Dati protetti API identici prima/dopo. Inventari e conferme funzionali/layout aperti; nessuna certificazione globale.",
       "fasi": {
         "requisiti": "fatta",
         "dati": "fatta",
@@ -152,7 +152,7 @@
       "id": "L6",
       "titolo": "Condizioni uniche",
       "dipende": "L5",
-      "nota": "Pubblicato invariato c025154a, ultima pipeline nota #65 riuscita. Bonifiche locali A56-01..08 APPROVATE staticamente: fonte finestra-palazzo distinta da arco, provenienza e dati utente protetti. Migrazione 122 non registrata/eseguita. Inventario R6-19 e dati/runtime non certificati, nessuna chiusura integrale. OR Asakusa già deciso; calendario derivato previsto in L9.",
+      "nota": "Bonifiche pubblicate e0ea995e, pipeline66success; p5s schema122. Fonte finestra-palazzo distinta da arco, gate statico distinto approvato. Diario/Palazzi/pin protetti API identici. Inventario R6-19 e conformità integrale non certificati. OR Asakusa già deciso; calendario derivato previsto in L9.",
       "fasi": {
         "requisiti": "fatta",
         "dati": "fatta",
@@ -172,7 +172,7 @@
       "id": "L7",
       "titolo": "Oggetti",
       "dipende": "L6",
-      "nota": "Locale, in modifica e riesame distinto. Diario A7-03 approvato staticamente. Helper A7-04 e UI audit con elenco limitato/Shinya approvati solo nel loro perimetro; sottoelementi e aggregati non riconciliati restano aperti. Manifest ricostruito: 2.430 fonti pubbliche schema 93, non equivalente all'input perduto. Blocchi: snapshot non più attuali alla conferma delle proposte e riferimenti costi JSON in fusioni/ripristino/cestino. Typecheck e lint intermedi verdi, non finali. Migrazioni 121/026 non registrate, nessun rilascio o completamento integrale.",
+      "nota": "Pubblicato e0ea995e, pipeline66success, p5s122/26. Codice/attivazione e DiarioA7-03 approvati staticamente; snapshot/proposte obsolete/costi/cestino corretti e riesaminati. Audit2739fonti/3254risultati leggibile;478fonti daesaminare e86proposteoperative non approvate automaticamente. Manifest2430fontipubbliche non equivalente all'inputperduto. Conferme funzionali/layout e dati restano aperte; nessuna chiusura integrale.",
       "fasi": {
         "requisiti": "fatta",
         "dati": "fatta",
@@ -192,7 +192,7 @@
       "id": "L8",
       "titolo": "Persona e Ombre",
       "dipende": "L4",
-      "nota": "",
+      "nota": "Piano-operativo/contratto negoziazione/censimentoIweleth pronti. Gate tecnico distinto: P1-P3/P6 approvati; P4modello favorevole, DDLda approvare; P5raccordi conservativi favorevoli, decisioni cartografiche/conversioni pendenti. Prima del codiceL8 si chiudono inventari correntiL5-L6. Nessuna implementazioneL8, zero test.",
       "fasi": {
         "requisiti": "fatta",
         "dati": "fatta",
@@ -274,25 +274,25 @@
       "nome": "Coordinatore integrazione e rilascio",
       "fase": "regia, blocchi",
       "stato": "al lavoro",
-      "attivita": "Diario A7-03 approvato staticamente. Ownership API, UI audit, Shinya e integrazione L5-L7; manifest pubblico ricostruito e aggiornato. Coordinamento blocchi L7 e controlli finali prima del rilascio, poi L8-L11. Nessuna percentuale stimata."
+    "attivita": "L5-L7 pubblicato e0ea995e/pipeline66success, p5s122/26 osservato; confrontoGETprotettoidentico. Inventari correntiL5-L6 primaL8: integrazione GETcensimento/OpenAPI, coordinamento riesame e rilascio mirato. Nessun codiceL8."
     },
     {
       "nome": "Esecutore L5/L6",
       "fase": "be, fe",
       "stato": "al lavoro",
-      "attivita": "A56 e helperaudit approvati staticamente. Preparazione L8 in sola lettura: originali, fonti negoziazione e Persona del gruppo, piano concreto. Nessuna implementazione L8 anticipata al rilascioL5-L7."
+    "attivita": "PianoL8 pronto e fonti cartograficheIweleth approfondite; correzione della precedente ipotesi Clifoto sulla famiglia16010 documentata. Nessun codiceL8."
     },
     {
       "nome": "Esecutore L7",
       "fase": "be, fe",
       "stato": "al lavoro",
-      "attivita": "Implementazione L7 ferma e approvata staticamente. Ultimo allineamento descrizioniAPI e dossier prima del commit, nessuna ulteriore modifica di comportamento."
+    "attivita": "L7 pubblicato e contratto negoziazione L8 documentato. Servizio e DTO GET censimento L5-L6 implementati, riesaminati e approvati staticamente; controlli finali verdi. Codice congelato per il rilascio mirato. Nessuna migrazione o codice L8."
     },
     {
       "nome": "Revisore indipendente",
       "fase": "validazione",
       "stato": "al lavoro",
-      "attivita": "Gate codiceL5-L7 e attivazione121/122/026/router/OpenAPI APPROVATI staticamente. Nessun blocker noto residuo; non certifica migrazioni/dati live/runtime/layout o approvazione di tutte le proposte. Sola lettura, zero test."
+    "attivita": "Gate tecnico L8 delimitato; soluzione e codice GET censimento L5-L6 approvati staticamente. Documenti pubblicabili dopo il riallineamento delle sessioni e del limite sugli editor. Sola lettura, zero test; nessuna chiusura funzionale attestata."
     }
   ],
   "notaSessioniStoriche": "Le righe seguenti sono il registro del precedente team, non lo stato live delle sessioni o dei servizi. Nessuna sessione precedente è stata riaperta o gestita durante questo audit.",
