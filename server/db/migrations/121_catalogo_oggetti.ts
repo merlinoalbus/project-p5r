@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS proposta_abbinamento (
   riga_tipo TEXT NOT NULL CHECK (riga_tipo IN ('articolo','regalo','voce','ricompensa','ricetta','catalogo')),
   riga_chiave TEXT NOT NULL, gruppo TEXT NOT NULL DEFAULT '',
   catalogo_chiave TEXT REFERENCES catalogo_oggetto(chiave) ON DELETE SET NULL,
-  quantita INTEGER DEFAULT 1 CHECK ((quantita IS NOT NULL AND quantita > 0) OR ((riga_tipo = 'ricetta' OR (riga_tipo = 'ricompensa' AND substr(riga_chiave,1,8) = 'ricetta/')) AND quantita IS NULL)), motivo TEXT NOT NULL,
+  quantita INTEGER DEFAULT 1 CHECK ((quantita IS NOT NULL AND quantita > 0) OR ((riga_tipo IN ('ricetta','voce') OR (riga_tipo = 'ricompensa' AND substr(riga_chiave,1,8) = 'ricetta/')) AND quantita IS NULL)), motivo TEXT NOT NULL,
   certezza TEXT NOT NULL CHECK (certezza IN ('certa','probabile','da-verificare')),
   stato TEXT NOT NULL DEFAULT 'da-approvare' CHECK (stato IN ('da-approvare','confermata','scartata')),
   modifica_json TEXT, fonte_snapshot_json TEXT, nota TEXT, updated_at TEXT NOT NULL,

@@ -1,7 +1,7 @@
 {
   "obiettivo": "Lotti L0–L11 della razionalizzazione completati sul branch newreview, pubblicati e funzionanti su p5s",
-  "aggiornato": "2026-10-21T11:12:00Z",
-  "mandatoCorrente": "Bonificare e rilasciare tutti i difetti, completare implementazioni parziali e poi L8-L11. Blocco123-126/027, pagina R6-19/31, GET97 e CAS approvati staticamente e registrati localmente, nessuna esecuzione locale. Typecheck99280/lint28078/build88584 verdi. Rilascio in preparazione; pubblicato ancora1de1ccba/pipeline67/schema122-26. Otto raccordi L5 inattivi: consenso specifico elenco non acquisito. L26, pesca, Confidenti e riconciliazioni restano aperti. Zero test, nessuna copia DB o implementazione L8.",
+  "aggiornato": "2026-10-21T13:42:00Z",
+  "mandatoCorrente": "PRIORITA INCIDENTE:61ccb6ef/pipeline68verde, p5s502.125 viola CHECK delle propostevoce con quantitàNULL; log confermano avvio fallito e riavvii. Hotfix causale approvato staticamente, controlli verdi, da pubblicare con soli3file e coordinamento. Lavoro secondario congelato, nessun raccordo o DBsostituito. Dopo avvio e confronto protetto riprendere bonifica completa e L8-L11. Zero test.",
   "verificaConsegne": "Disposizione utente del 21/10: ogni consegna richiede un agente distinto che acceda direttamente alla specifica originale in modo avversariale. Sola lettura, evidenze requisito/codice, copertura e limiti espliciti, esito motivato. Rilievi da risolvere e riesaminare o sottoporre all'utente. Supera il precedente divieto di verificatori; resta zero test.",
   "auditSpecifiche": "Gate distinti statici contro originali43ad8889 approvati per123/124/T2/R5-02,125/126/parser/snapshot/ledger, GET97, pagina operativa R6-19/31, CAS e registri123-126/027. Raccordi L5 inattivi senza consenso specifico. Dossier Confidenti approvato come disegno circoscritto; nessuna approvazione globale, delle singole interpretazioni, dei dati o del runtime/layout.",
   "salvataggioAudit": "Bonifica L5-L7 in e0ea995e; censimento readonly, coordinamento post-rilascio e piani L8 pubblicati in 1de1ccba887f533a43c7ef6fe36524ac0264c249. Pipeline67 riuscita. Riconciliazioni correnti e aggiornamenti successivi ancora in lavorazione. Nessun dato privato salvato.",
@@ -25,7 +25,7 @@
   ],
   "p5s": {
     "url": "https://p5s.nasmerlinoalbus.cloud/",
-    "stato": "Pubblicato1de1ccba887f533a43c7ef6fe36524ac0264c249, pipeline67(39577244857)success. Healthok schema122, censimento v1 disponibile senza tagli/colonne assenti;201frasi storiche identiche. Audit2739fonti/3254risultati,376fonti aggregate da riconciliare,86proposte pendenti;confermate0/scartate0 letti dall'esecutore L7. Nessuna proposta confermata dall'assistente. Proiezioni protette GET identiche prima/dopo.123-126/027 registrate nel codice locale, non ancora pubblicate o eseguite su p5s."
+    "stato": "61ccb6efa2bda3d150eaec42fbaa4b322747d568 pubblicato; pipeline68/39590822569success. Backend502:125fallisce CHECK quantitàNULLvoce, container riparte. Ultimo stato operativo osservato122/26 prima del rollout; versioni successive da rileggere. Hotfix vincolo approvato e pronto al rilascio, nessuna consegna funzionante ancora attestata. Riferimento protetto solo in memoria."
   },
   "lotti": [
     {

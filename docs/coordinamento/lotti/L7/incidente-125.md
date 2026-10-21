@@ -1,0 +1,9 @@
+# Incidente del rilascio 61ccb6ef
+
+La pipeline68 è riuscita, ma p5s restituisce502. I log del solo backend p5s, letti senza scritture, dimostrano `SQLITE_CONSTRAINT_CHECK` nella125: l'INSERT della proposta di voce con quantitàNULL contraddice il CHECK creato dalla121, che ammetteva NULL soltanto per le ricette. Il runner transazionale annulla125, senza avanzarne la versione. Non è un problema attribuito ai dati personali. Il gate statico precedente aveva omesso questo confronto; compilazione e pipeline non verificano l'esecuzione delle migrazioni.
+
+La correzione è circoscritta: helper chiamato prima della bonifica125, nella stessa transazione, riconosce una sola clausola attesa o già corretta. Ricostruisce la tabella con la medesima DDL e con l'unica estensione NULL per `voce`, copia tutte le colonne e i rowid e confronta conteggi ed EXCEPT bidirezionali prima di sostituire la tabella. Conserva PK, FK, indici, indice univoco a espressione e trigger. Uno schema inatteso interrompe senza commit. Nessuna quantità inventata, nessun dato o file DB sostituito, nessun PRAGMA per aggirare il vincolo. La121 usa lo stesso CHECK nelle sole installazioni future; non viene riapplicata alle istanze aggiornate.
+
+Soluzione e tre file approvati staticamente dal revisore distinto. Tre riesami propri: ambito del CHECK, conservazione e atomicità, installazioni nuove/esistenti e ripresa dopo rollback. Typecheck46070/lint21093/build69238 exit0 sul working tree; nessun test o migrazione locale eseguiti. Il commit correttivo esclude A10, GET L26 e raccordo Area ancora locali. La pipeline del commit esatto e l'avvio reale restano da osservare; non si attesta già il recupero di p5s o l'integrità dell'intero DB.
+
+Il lavoro secondario è congelato fino al ritorno operativo e al confronto delle proiezioni protette. Il ciclo precedente ha accumulato analisi e documenti senza una consegna utilizzabile: è un errore di gestione del coordinatore, non una scelta dell'utente.

@@ -2,6 +2,7 @@ import type { Migration } from '../migrationRunner.js';
 import type { AppDatabase } from '../dbService.js';
 import { selezionaContenutiVoce } from './contenutiOggetti.js';
 import { snapshotFonteProposta } from '../../services/snapshotProposteOggetti.js';
+import { ammettiQuantitaIgnotaVoce125 } from './quantitaProposte125.js';
 
 const VOCE = 'madarame-06-sala-del-tesoro-atrio/4';
 const OGGETTO = 'carta-abilita/media';
@@ -85,5 +86,5 @@ function bonifica(db: AppDatabase): void {
 
 export const migration125: Migration = {
   id: 125, name: 'Ricompensa Carta Media: proposta conservativa sul Palazzo protetto',
-  up(db) { db.transaction(() => bonifica(db))(); },
+  up(db) { db.transaction(() => { ammettiQuantitaIgnotaVoce125(db); bonifica(db); })(); },
 };
