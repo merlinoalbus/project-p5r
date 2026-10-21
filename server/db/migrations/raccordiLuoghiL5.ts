@@ -33,10 +33,16 @@ function fotografiaLegacyCoerente(luogo: Riga): boolean {
 }
 
 type Esito127 = 'conflitto' | 'esclusa' | 'collegata' | 'gia-collegata';
+const PANORAMICHE_L5 = new Map<number, { vecchioPin: number; mappa: string; quartiere: string; luogo: string }>([
+  [268, { vecchioPin: 213, mappa: 'citta-akihabara', quartiere: 'akihabara', luogo: 'akihabara/akiba-electronics' }],
+  [1561, { vecchioPin: 212, mappa: 'citta-shinjuku', quartiere: 'shinjuku', luogo: 'shinjuku/mran-mran' }],
+  [1562, { vecchioPin: 210, mappa: 'citta-shinjuku', quartiere: 'shinjuku', luogo: 'shinjuku/fioraio-sukebe' }],
+]);
 
 /** Solo i sei esiti nominativi della127; uno storico assente o non riconoscibile non autorizza scritture. */
-function esitiDella127(db: AppDatabase): Map<number, Esito127> | null {
-  const r = db.prepare('SELECT json FROM main.dati_guida WHERE chiave = ?').get('raccordi-luoghi-l5-approvati') as { json: string } | undefined;
+function esitiPrecedenti(db: AppDatabase, migrazione: '127' | '128'): Map<number, Esito127> | null {
+  const chiave = migrazione === '127' ? 'raccordi-luoghi-l5-approvati' : 'raccordi-luoghi-l5-approvati-128';
+  const r = db.prepare('SELECT json FROM main.dati_guida WHERE chiave = ?').get(chiave) as { json: string } | undefined;
   const audit = record(json(r?.json));
   if (!audit || audit.versione !== 1 || audit.elenco !== 'otto-raccordi-l5-v1'
     || Object.keys(audit).length !== 3 || !Array.isArray(audit.esiti) || audit.esiti.length !== RACCORDI_L5.length) return null;
@@ -52,8 +58,8 @@ function esitiDella127(db: AppDatabase): Map<number, Esito127> | null {
 }
 
 /** Stesse vie strutturali del lettore dei luoghi: riferimento diretto, listino/sede-pin e associazioni mappa. */
-function collocazioni(db: AppDatabase, luogo: string, mappaProposta: string): { luoghi: Array<{ pin: number | null; mappa: string; area: string | null }>; areaProposta: string | null; negozi: Set<string>; mappe: Set<string>; sediPin: Set<string> } {
-  const mappe = new Map((db.prepare('SELECT chiave, area_chiave, genitore_chiave, entita_tipo, entita_chiave FROM main.mappa').all() as Array<{ chiave: string; area_chiave: string | null; genitore_chiave: string | null; entita_tipo: string | null; entita_chiave: string | null }>).map((m) => [m.chiave, m]));
+function collocazioni(db: AppDatabase, luogo: string, mappaProposta: string): { luoghi: Array<{ pin: number | null; mappa: string; area: string | null; panoramica: boolean }>; areaProposta: string | null; negozi: Set<string>; mappe: Set<string>; sediPin: Set<string> } {
+  const mappe = new Map((db.prepare('SELECT chiave, area_chiave, genitore_chiave, entita_tipo, entita_chiave, origine FROM main.mappa').all() as Array<{ chiave: string; area_chiave: string | null; genitore_chiave: string | null; entita_tipo: string | null; entita_chiave: string | null; origine: string }>).map((m) => [m.chiave, m]));
   const negozi = new Map((db.prepare('SELECT chiave, sede_chiave, listino_condiviso FROM main.negozio').all() as Array<{ chiave: string; sede_chiave: string | null; listino_condiviso: string | null }>).map((n) => [n.chiave, n]));
   const sediPin = new Map((db.prepare('SELECT spillo_uid, negozio_chiave, luogo_chiave FROM main.negozio_sede_spillo').all() as Array<{ spillo_uid: string; negozio_chiave: string; luogo_chiave: string }>).map((s) => [s.spillo_uid, s]));
   const sedeListino = (chiave: string): string | null => {
@@ -83,23 +89,35 @@ function collocazioni(db: AppDatabase, luogo: string, mappaProposta: string): { 
   for (const r of db.prepare('SELECT negozio_chiave FROM main.negozio_luogo_extra WHERE luogo_chiave=?').all(luogo) as Array<{ negozio_chiave: string }>) pertinenti.add(r.negozio_chiave);
   let aggiunti: boolean;
   do { aggiunti = false; for (const [k, n] of negozi) if (!pertinenti.has(k) && n.listino_condiviso && pertinenti.has(n.listino_condiviso)) { pertinenti.add(k); aggiunti = true; } } while (aggiunti);
-  const out: Array<{ pin: number | null; mappa: string; area: string | null }> = [];
-  for (const p of db.prepare('SELECT id, uid, mappa_chiave, riferimento_tipo, riferimento_chiave FROM main.spillo WHERE mappa_chiave IS NOT NULL').all() as Array<{ id: number; uid: string | null; mappa_chiave: string; riferimento_tipo: string | null; riferimento_chiave: string | null }>) {
+  const out: Array<{ pin: number | null; mappa: string; area: string | null; panoramica: boolean }> = [];
+  const proposta = RACCORDI_L5.find(p => p.luogo === luogo && p.mappa === mappaProposta);
+  const prevista = proposta ? PANORAMICHE_L5.get(proposta.id) : undefined;
+  const panoramicaAttestata = (p: { id: number; origine: string; tipo: string; mappa_chiave: string; riferimento_tipo: string | null; riferimento_chiave: string | null }): boolean => {
+    if (!prevista || p.id !== prevista.vecchioPin || p.origine !== 'seed' || p.tipo !== 'negozio'
+      || p.mappa_chiave !== prevista.mappa || p.riferimento_tipo !== 'luogo' || p.riferimento_chiave !== prevista.luogo) return false;
+    const m = mappe.get(prevista.mappa); const tokyo = mappe.get('tokyo');
+    // È una panoramica distinta, non un'Area fisica: nessuna Area viene attribuita al vecchio pin o alla mappa.
+    return m?.origine === 'utente' && m.area_chiave === null && m.genitore_chiave === 'tokyo'
+      && m.entita_tipo === 'quartiere' && m.entita_chiave === prevista.quartiere
+      && tokyo?.origine === 'utente' && tokyo.area_chiave === null && tokyo.genitore_chiave === null
+      && tokyo.entita_tipo === null && tokyo.entita_chiave === null;
+  };
+  for (const p of db.prepare('SELECT id, uid, tipo, origine, mappa_chiave, riferimento_tipo, riferimento_chiave FROM main.spillo WHERE mappa_chiave IS NOT NULL').all() as Array<{ id: number; uid: string | null; tipo: string; origine: string; mappa_chiave: string; riferimento_tipo: string | null; riferimento_chiave: string | null }>) {
     let sede: string | null = null;
     if (p.riferimento_tipo === 'luogo' || p.riferimento_tipo === 'attivita') sede = p.riferimento_chiave;
     if (p.riferimento_tipo === 'negozio' && p.riferimento_chiave) {
       const confermata = p.uid ? sediPin.get(p.uid) : undefined;
       sede = confermata?.negozio_chiave === p.riferimento_chiave ? confermata.luogo_chiave : sedeListino(p.riferimento_chiave);
     }
-    if (sede === luogo) out.push({ pin: p.id, mappa: p.mappa_chiave, area: areaMappa(p.mappa_chiave) });
-    else if (sede === null && p.riferimento_tipo === 'negozio' && p.riferimento_chiave && pertinenti.has(p.riferimento_chiave)) out.push({ pin: p.id, mappa: p.mappa_chiave, area: null });
+    if (sede === luogo) out.push({ pin: p.id, mappa: p.mappa_chiave, area: areaMappa(p.mappa_chiave), panoramica: panoramicaAttestata(p) });
+    else if (sede === null && p.riferimento_tipo === 'negozio' && p.riferimento_chiave && pertinenti.has(p.riferimento_chiave)) out.push({ pin: p.id, mappa: p.mappa_chiave, area: null, panoramica: false });
   }
   const associazioni = [...(db.prepare('SELECT mappa_chiave, entita_tipo, entita_chiave FROM main.mappa_entita').all() as Array<{ mappa_chiave: string; entita_tipo: string | null; entita_chiave: string | null }>),
     ...[...mappe.values()].map(m => ({ mappa_chiave: m.chiave, entita_tipo: m.entita_tipo, entita_chiave: m.entita_chiave }))];
   for (const m of associazioni) {
     const sede = m.entita_tipo === 'luogo' || m.entita_tipo === 'attivita' ? m.entita_chiave : m.entita_tipo === 'negozio' && m.entita_chiave ? sedeListino(m.entita_chiave) : null;
-    if (sede === luogo) out.push({ pin: null, mappa: m.mappa_chiave, area: areaMappa(m.mappa_chiave) });
-    else if (sede === null && m.entita_tipo === 'negozio' && m.entita_chiave && pertinenti.has(m.entita_chiave)) out.push({ pin: null, mappa: m.mappa_chiave, area: null });
+    if (sede === luogo) out.push({ pin: null, mappa: m.mappa_chiave, area: areaMappa(m.mappa_chiave), panoramica: false });
+    else if (sede === null && m.entita_tipo === 'negozio' && m.entita_chiave && pertinenti.has(m.entita_chiave)) out.push({ pin: null, mappa: m.mappa_chiave, area: null, panoramica: false });
   }
   const mappePertinenti = new Set<string>();
   for (const c of [{ mappa: mappaProposta }, ...out]) {
@@ -110,16 +128,19 @@ function collocazioni(db: AppDatabase, luogo: string, mappaProposta: string): { 
 }
 
 /** Solo i sei seed approvati; qualsiasi variante o storia incerta resta esplicita nel rendiconto. */
-export function applicaRaccordiLuoghiL5(db: AppDatabase, ripresa127 = false): void {
+export function applicaRaccordiLuoghiL5(db: AppDatabase, ripresa: '127' | '128' | null = null): void {
   db.transaction(() => {
-    const audit = ripresa127 ? 'raccordi-luoghi-l5-approvati-128' : 'raccordi-luoghi-l5-approvati';
+    const audit = ripresa === '128' ? 'raccordi-luoghi-l5-approvati-129' : ripresa === '127' ? 'raccordi-luoghi-l5-approvati-128' : 'raccordi-luoghi-l5-approvati';
     if (db.prepare('SELECT 1 FROM main.dati_guida WHERE chiave = ?').get(audit)) return;
-    const precedenti = ripresa127 ? esitiDella127(db) : null;
+    const precedenti = ripresa ? esitiPrecedenti(db, ripresa) : null;
     const esiti: Array<{ id: number; luogo: string; esito: string; motivo: string }> = [];
     const registri = (db.prepare('SELECT registro_json FROM main.cestino').all() as Array<{ registro_json: string }>).map((r) => json(r.registro_json));
     for (const proposta of RACCORDI_L5) {
       const esito = (stato: string, motivo: string) => esiti.push({ id: proposta.id, luogo: proposta.luogo, esito: stato, motivo });
-      if (ripresa127 && !precedenti) { esito('conflitto', 'Rendiconto127 assente o incoerente: nessuna ripresa autorizzata.'); continue; }
+      if (ripresa && !precedenti) { esito('conflitto', 'Rendiconto precedente assente o incoerente: nessuna ripresa autorizzata.'); continue; }
+      if (ripresa === '128' && precedenti?.get(proposta.id) === 'conflitto' && !PANORAMICHE_L5.has(proposta.id)) {
+        esito('conflitto', 'Conflitto fuori dalle tre coppie di panoramiche ammesse: nessuna ripresa.'); continue;
+      }
       const pin = db.prepare('SELECT * FROM main.spillo WHERE id = ?').get(proposta.id) as Riga | undefined;
       const luogo = db.prepare('SELECT * FROM main.luogo WHERE chiave = ?').get(proposta.luogo) as Riga | undefined;
       const mappa = db.prepare('SELECT origine, area_chiave, genitore_chiave FROM main.mappa WHERE chiave = ?').get(proposta.mappa) as Riga | undefined;
@@ -136,9 +157,9 @@ export function applicaRaccordiLuoghiL5(db: AppDatabase, ripresa127 = false): vo
         esito('conflitto', 'Identità, provenienza o contesto diversi dall’elenco approvato: nessuna modifica.'); continue;
       }
       const giaCollegato = pin.riferimento_tipo === 'luogo' && pin.riferimento_chiave === proposta.luogo;
-      if (ripresa127 && precedenti?.get(proposta.id) !== 'conflitto'
+      if (ripresa && precedenti?.get(proposta.id) !== 'conflitto'
         && !(['collegata', 'gia-collegata'].includes(precedenti?.get(proposta.id) ?? '') && giaCollegato && luogo.area_chiave === proposta.area)) {
-        esito('conflitto', 'Esito127 diverso dal conflitto ammesso o collegamento successivamente cambiato: nessuna nuova modifica.'); continue;
+        esito('conflitto', 'Esito precedente diverso dal conflitto ammesso o collegamento successivamente cambiato: nessuna nuova modifica.'); continue;
       }
       if ((!giaCollegato && (pin.riferimento_tipo !== null || pin.riferimento_chiave !== null))
         || (luogo.area_chiave !== null && luogo.area_chiave !== proposta.area)) {
@@ -151,7 +172,7 @@ export function applicaRaccordiLuoghiL5(db: AppDatabase, ripresa127 = false): vo
       if (altreCollocazioni.some((c) => c.pin !== null && c.mappa === proposta.mappa)) {
         esito('conflitto', 'Un altro pin della stessa planimetria cita già il luogo: nessun duplicato.'); continue;
       }
-      if (altreCollocazioni.some((c) => c.area === null || c.area !== proposta.area)) {
+      if (altreCollocazioni.some((c) => c.area === null ? !c.panoramica : c.area !== proposta.area)) {
         esito('conflitto', 'Altra collocazione strutturata in Area diversa, anche tramite attività, negozio o mappa: legami preservati.'); continue;
       }
       const storiaIncerta = registri.some((r) => {
