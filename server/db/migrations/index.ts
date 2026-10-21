@@ -136,6 +136,7 @@ import { migration124 } from './124_bonifica_condizioni_attivita.js';
 import { migration125 } from './125_ricompensa_media.js';
 import { migration126 } from './126_fascino_ambulante.js';
 import { migration127 } from './127_raccordi_luoghi_approvati.js';
+import { migration128 } from './128_ripresa_raccordi_legacy.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -151,5 +152,5 @@ export const migrations: Migration[] = [
   migration091, migration092, migration093, migration094, migration095, migration096, migration097, migration098, migration099, migration100,
   migration101, migration102, migration103, migration104, migration105, migration106, migration107, migration108, migration109, migration110,
   migration111, migration112, migration113, migration114, migration115, migration116, migration117, migration118, migration119, migration120,
-  migration121, migration122, migration123, migration124, migration125, migration126, migration127,
+  migration121, migration122, migration123, migration124, migration125, migration126, migration127, migration128,
 ];

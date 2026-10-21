@@ -1,12 +1,12 @@
 {
   "obiettivo": "Lotti L0–L11 della razionalizzazione completati sul branch newreview, pubblicati e funzionanti su p5s",
-  "aggiornato": "2026-10-21T14:09:00Z",
-  "mandatoCorrente": "Utente approva tutti8raccordi, inclusa AreaVenditore.127sei seed e CASv2 approvati staticamente, registrazione locale attiva, nessuna esecuzione ancora. Rilascio concreto con A10/GETL26 approvati; typecheck36836/lint75097/build24335 exit0. P5s operativo33efc8ed/pipeline69/schema12627; dati protetti e86proposte invariati. Prima rendicontare8raccordi, poi altri residui e L8-L11; nessuna chiusura globale, zero test.",
+  "aggiornato": "2026-10-21T14:30:00Z",
+  "mandatoCorrente": "Otto raccordi approvati: 2 personali applicati con CAS 200 e rilettura RAW; Area Biblioteca invariata, Central Street assegnata atomicamente al Venditore. D0dc94bd attivo schema127/27; sei seed non modificati dalla127 per fotografie legacy.128 correttiva approvata dal revisore distinto, typecheck7208/lint60154/build11239 exit0 e tre riesami, da pubblicare. Prima esiti128/browser/confronti/gate8, poi altri residui e L8-L11; nessuna chiusura globale, zero test.",
   "verificaConsegne": "Disposizione utente del 21/10: ogni consegna richiede un agente distinto che acceda direttamente alla specifica originale in modo avversariale. Sola lettura, evidenze requisito/codice, copertura e limiti espliciti, esito motivato. Rilievi da risolvere e riesaminare o sottoporre all'utente. Supera il precedente divieto di verificatori; resta zero test.",
-  "auditSpecifiche": "Gate distinti statici contro originali43ad8889 approvati per123/124/T2/R5-02,125/126/parser/snapshot/ledger, GET97, pagina operativa R6-19/31, CAS e registri123-126/027. Raccordi L5 inattivi senza consenso specifico. Dossier Confidenti approvato come disegno circoscritto; nessuna approvazione globale, delle singole interpretazioni, dei dati o del runtime/layout.",
+  "auditSpecifiche": "Gate distinti statici contro originali43ad8889 approvati per123-128, T2/R5-02, parser/snapshot/ledger, GET97, pagina R6-19/31, A10, GETL26 e CAS. Consenso specifico8raccordi acquisito; personali applicati, sei seed attendono128 e gate finale. Dossier Confidenti approvato come disegno circoscritto; nessuna approvazione globale delle interpretazioni, dei dati o del runtime/layout.",
   "salvataggioAudit": "Bonifica L5-L7 in e0ea995e; censimento readonly, coordinamento post-rilascio e piani L8 pubblicati in 1de1ccba887f533a43c7ef6fe36524ac0264c249. Pipeline67 riuscita. Riconciliazioni correnti e aggiornamenti successivi ancora in lavorazione. Nessun dato privato salvato.",
   "revisioneRimozioni": "Precedente approvazione limitata alle due rimozioni UI; non certifica runtime o chiusura L6. La nuova disposizione richiede verifica indipendente e avversariale delle consegne.",
-  "controlliLocali": "Typecheck36836/lint75097/build24335 exit0 per blocco127/A10/GETL26/CASv2, dopo gate distinti e tre riesami. Zero test o migrazioni locali. Hotfix33efc8ed pipeline69success e avvio126/27 osservati; confrontoGET protetto identico e86proposte invariate. Prossimo rilascio127 e due gesti personali approvati da rendicontare. Nessun dato o impronta privata nel repository.",
+  "controlliLocali": "Correttivo128: tre riesami propri su firma/provenienza, transazione/ripresa e ripristino/campi esclusi; gate codice distinto approvato. Typecheck7208/lint60154/build11239 exit0. Nessun test o migrazione locale. ConfrontoRAW127:8record e relativi legami identici, sei conflitti espliciti; fotografie18campi coincidenti con pubblico93 e corrente. DuePUTpersonali200 con altri campi preservati; confronto finale e browser ancora aperti. Nessun dato o impronta privata nel repository.",
   "censimentoCatalogo": "Manifest ricostruito shared/l7-fonti-ricostruite.json, seconda revisione dei campi e formato schemaVersion 1: 2.430 fonti pubbliche dal pacchetto schema 93, precedente al locale 120. Non è l7-proposte.json originale né prova equivalenza. Input runtime e risultati solo nel DB della singola istanza, audit-catalogo-121. Fonti aggregate e sottoelementi non riconciliati restano decisioni aperte visibili; A7-04 non integralmente chiuso. Dettagli in lotti/L7/ricostruzione-input.md.",
   "decisioneRichiesta": "Consenso specifico8raccordi ACQUISITO: utenteApprovo tutti eotto, inclusaAreaCentralStreetVenditore. Nessuna ulteriore domanda per applicarequestoelenco. Altre fusioni/proposte non autorizzate automaticamente. Nessun abbinamento solo per nome. DiarioMemento/ORAsakusa/Importa/guida già decisi.",
   "fasi": [
@@ -25,7 +25,7 @@
   ],
   "p5s": {
     "url": "https://p5s.nasmerlinoalbus.cloud/",
-    "stato": "33efc8edd82ed1f748858373d1767081c46e2906 pubblicato, pipeline69/39610794278success. Healthok126; log125126027applicate e backendascolto; paginaR6caricata. ConfrontoGETDiario255/54giorni,Kamoshida169,Madarame226,pin611/43mappe identico.86proposte precedenti invariate, totale87 conCartaMediaNULLdaapprovare. Nessunraccordoapplicato oDBsostituito; limiti del perimetroGET espliciti."
+    "stato": "d0dc94bd51ff038df52d67e0677ed54451300113 attivo, schema127/27 sano. Pipeline70/39615410944: tre job success, aggregato ancora in_progress alla lettura14:30Z.127 sei conflitti conservativi, nessun seed modificato;128 da pubblicare.346Biblioteca e1530Venditore applicati con CAS200 e rilettura; AreaBiblioteca identica, CentralStreet assegnata. Confronto protetto precedente resta quello13:53Z, da aggiornare dopo128; nessuna certificazione interoDB."
   },
   "lotti": [
     {
@@ -132,7 +132,7 @@
       "id": "L5",
       "titolo": "Luoghi, negozi, orari",
       "dipende": "L2",
-      "nota": "Utente approva8raccordi inclusaAreaVenditore.127sei seed e CASv2 approvati staticamente, controlliverdi, rilascio imminente; nessunraccordo ancoraapplicato. P5s33efc8ed/12627operativo. Altri51luoghi/31candidati/181residui nonchiusi;1486distinto1487. Nessuna chiusura globale.",
+      "nota": "Otto raccordi approvati: personali346/1530 applicati con CAS200 e riletturaRAW; AreaBiblioteca invariata, CentralStreetVenditore assegnata.127sei conflitti per foto legacy, nessun seed modificato;128 approvata/controlliverdi da pubblicare, audit127intatto. P5s127/27operativo. Altri51luoghi/31candidati/181residui nonchiusi;1486distinto1487. Gate finale8 ancora aperto, nessuna chiusura globale.",
       "fasi": {
         "requisiti": "fatta",
         "dati": "fatta",
@@ -152,7 +152,7 @@
       "id": "L6",
       "titolo": "Condizioni uniche",
       "dipende": "L5",
-      "nota": "P5s12627operativo dopo hotfix33efc8ed; paginaR6caricata201righe, audit36applicazioni124/4applicazioni123. A10rifiutoatomico e GETL26 approvati staticamente e controlliverdi, prossimorilascio; nonbonificaformula pesca odataMemento. Confidenti/varianti ancoraaperti, nessun test odecisioneautomatica.",
+      "nota": "P5s127/27operativo con d0dc94bd; paginaR6caricata201righe, audit36applicazioni124/4applicazioni123. A10rifiutoatomico e GETL26 pubblicati con controlliverdi; nonbonificataformula pesca odataMemento. Confidenti/varianti ancoraaperti, nessun test odecisioneautomatica.",
       "fasi": {
         "requisiti": "fatta",
         "dati": "fatta",

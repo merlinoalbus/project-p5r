@@ -1,4 +1,12 @@
-# Otto raccordi L5 — elenco approvato, applicazione da rendicontare
+# Otto raccordi L5 — elenco approvato, applicazione 2/8
+
+**Esito reale al 21 ottobre, 14:30Z.** `d0dc94bd` è attivo su p5s, schema 127. Tutti i sei esiti della 127 sono `conflitto`: la guardia `seed_json IS NULL` era incompatibile con le fotografie legacy create automaticamente dalle migrazioni 071/081. Nessun campo degli otto record o dei legami voci/immagini/destinazioni è cambiato nella 127. Le fotografie dei sei luoghi hanno esattamente 18 proprietà, tutte identiche sia al pacchetto pubblico 93 sia alla riga corrente, e non contengono `area_chiave`. Nessun valore privato o impronta è salvato qui.
+
+La 128 riprende soltanto i sei conflitti nominativi del rendiconto 127 riconoscibile. Ammette NULL o questa firma legacy esatta e coerente con la riga corrente; preserva il testo RAW di ogni fotografia e l'audit 127, scrivendo `raccordi-luoghi-l5-approvati-128`. Il ripristino esistente conserva l'Area quando manca dalla fotografia vecchia. Audit assente/incoerente, fotografie diverse e tutte le altre guardie impediscono nuove modifiche; collegamenti già applicati devono risultare ancora corrispondenti. L'helper condiviso corretto vale anche per future esecuzioni 127 sul medesimo elenco. Soluzione e codice approvati dal revisore distinto; tre riesami propri, typecheck 7208/lint 60154/build 11239 exit 0. Nessuna migrazione locale o test. Esecuzione 128 ancora da osservare.
+
+I due personali sono stati invece applicati attraverso normali API: GET precondizione fresco e PUT CAS entrambi 200 per 346 e 1530, seguiti da rilettura RAW. Cambiano soltanto le due FK e `updated_at` del singolo pin; per 1530 anche Area NULL del luogo verso Central Street. Tutti gli altri campi dei due record e l'Area Biblioteca sono identici. Un precedente comando operativo non era parsabile e non ha eseguito alcuna richiesta; nessun retry dopo risposta incerta. Resa nel browser e confronto finale dei legami ancora da completare; gate di completamento degli otto aperto.
+
+**Le sezioni seguenti descrivono la predisposizione e il consenso; per l'esito corrente vale quanto sopra.**
 
 Le prove native e la merce dei listini sono documentate in `riconciliazione-corrente.md` §6.1/6.3. Il coordinatore ha confrontato pin e destinazioni con il censimento corrente: tutti gli otto pin esistono e sono privi di riferimento. Nessun nome da solo è usato come prova.
 

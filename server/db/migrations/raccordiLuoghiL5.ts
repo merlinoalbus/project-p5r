@@ -1,4 +1,5 @@
 import type { AppDatabase } from '../dbService.js';
+import { isDeepStrictEqual } from 'node:util';
 
 /** Elenco approvato esplicitamente dall'utente il21ottobre; sei seed nella127, due personali tramite CAS. */
 export const RACCORDI_L5 = [
@@ -15,6 +16,39 @@ function record(v: unknown): Riga | null { return v && typeof v === 'object' && 
 function json(v: unknown): unknown {
   if (typeof v !== 'string') return undefined;
   try { return JSON.parse(v) as unknown; } catch { return undefined; }
+}
+
+// Fotografie create dalle migrazioni 071/081, anteriori ai campi L5. Le 18 proprietà
+// coincidono con il pacchetto pubblico e con i sei record osservati: nessun valore viene riscritto.
+const CAMPI_FOTOGRAFIA_LEGACY = [
+  'chiave', 'quartiere_chiave', 'ordine', 'tipo', 'nome', 'cosa_offre', 'quando', 'giorni', 'sblocco',
+  'confidenti_json', 'attivita_json', 'negozio', 'piatti_json', 'note', 'fonte', 'verificato', 'condizioni_json', 'giorni_json',
+] as const;
+
+function fotografiaLegacyCoerente(luogo: Riga): boolean {
+  if (luogo.seed_json === null) return true;
+  const foto = record(json(luogo.seed_json));
+  return foto !== null && Object.keys(foto).length === CAMPI_FOTOGRAFIA_LEGACY.length
+    && CAMPI_FOTOGRAFIA_LEGACY.every(c => Object.hasOwn(foto, c) && isDeepStrictEqual(foto[c], luogo[c]));
+}
+
+type Esito127 = 'conflitto' | 'esclusa' | 'collegata' | 'gia-collegata';
+
+/** Solo i sei esiti nominativi della127; uno storico assente o non riconoscibile non autorizza scritture. */
+function esitiDella127(db: AppDatabase): Map<number, Esito127> | null {
+  const r = db.prepare('SELECT json FROM main.dati_guida WHERE chiave = ?').get('raccordi-luoghi-l5-approvati') as { json: string } | undefined;
+  const audit = record(json(r?.json));
+  if (!audit || audit.versione !== 1 || audit.elenco !== 'otto-raccordi-l5-v1'
+    || Object.keys(audit).length !== 3 || !Array.isArray(audit.esiti) || audit.esiti.length !== RACCORDI_L5.length) return null;
+  const esiti = new Map<number, Esito127>();
+  for (const valore of audit.esiti) {
+    const e = record(valore);
+    const proposta = RACCORDI_L5.find(p => p.id === e?.id && p.luogo === e?.luogo);
+    if (!e || !proposta || esiti.has(proposta.id) || Object.keys(e).length !== 4 || typeof e.motivo !== 'string'
+      || !['conflitto', 'esclusa', 'collegata', 'gia-collegata'].includes(String(e.esito))) return null;
+    esiti.set(proposta.id, e.esito as Esito127);
+  }
+  return esiti;
 }
 
 /** Stesse vie strutturali del lettore dei luoghi: riferimento diretto, listino/sede-pin e associazioni mappa. */
@@ -76,14 +110,16 @@ function collocazioni(db: AppDatabase, luogo: string, mappaProposta: string): { 
 }
 
 /** Solo i sei seed approvati; qualsiasi variante o storia incerta resta esplicita nel rendiconto. */
-export function applicaRaccordiLuoghiL5(db: AppDatabase): void {
+export function applicaRaccordiLuoghiL5(db: AppDatabase, ripresa127 = false): void {
   db.transaction(() => {
-    const audit = 'raccordi-luoghi-l5-approvati';
+    const audit = ripresa127 ? 'raccordi-luoghi-l5-approvati-128' : 'raccordi-luoghi-l5-approvati';
     if (db.prepare('SELECT 1 FROM main.dati_guida WHERE chiave = ?').get(audit)) return;
+    const precedenti = ripresa127 ? esitiDella127(db) : null;
     const esiti: Array<{ id: number; luogo: string; esito: string; motivo: string }> = [];
     const registri = (db.prepare('SELECT registro_json FROM main.cestino').all() as Array<{ registro_json: string }>).map((r) => json(r.registro_json));
     for (const proposta of RACCORDI_L5) {
       const esito = (stato: string, motivo: string) => esiti.push({ id: proposta.id, luogo: proposta.luogo, esito: stato, motivo });
+      if (ripresa127 && !precedenti) { esito('conflitto', 'Rendiconto127 assente o incoerente: nessuna ripresa autorizzata.'); continue; }
       const pin = db.prepare('SELECT * FROM main.spillo WHERE id = ?').get(proposta.id) as Riga | undefined;
       const luogo = db.prepare('SELECT * FROM main.luogo WHERE chiave = ?').get(proposta.luogo) as Riga | undefined;
       const mappa = db.prepare('SELECT origine, area_chiave, genitore_chiave FROM main.mappa WHERE chiave = ?').get(proposta.mappa) as Riga | undefined;
@@ -93,13 +129,17 @@ export function applicaRaccordiLuoghiL5(db: AppDatabase): void {
       if (pin.origine !== 'seed' || pin.seed_identita_json !== null || pin.nome !== proposta.nome || pin.tipo !== proposta.tipo
         || pin.mappa_chiave !== proposta.mappa || pin.area_guida_chiave !== null
         || nativo?.tipoNativo !== proposta.nativo || nativo.indicePin !== proposta.indice || nativo.daVerificare !== false
-        || luogo.origine !== 'seed' || luogo.seed_json !== null || luogo.nascosto !== 0 || luogo.nome !== proposta.nomeLuogo
+        || luogo.origine !== 'seed' || !fotografiaLegacyCoerente(luogo) || luogo.nascosto !== 0 || luogo.nome !== proposta.nomeLuogo
         || luogo.tipo !== proposta.tipoLuogo || luogo.quartiere_chiave !== proposta.quartiere
         || mappa?.origine !== 'seed' || mappa.area_chiave !== proposta.area || mappa.genitore_chiave !== `citta-${proposta.quartiere}`
         || area?.origine !== 'seed' || area.quartiere_chiave !== proposta.quartiere) {
         esito('conflitto', 'Identità, provenienza o contesto diversi dall’elenco approvato: nessuna modifica.'); continue;
       }
       const giaCollegato = pin.riferimento_tipo === 'luogo' && pin.riferimento_chiave === proposta.luogo;
+      if (ripresa127 && precedenti?.get(proposta.id) !== 'conflitto'
+        && !(['collegata', 'gia-collegata'].includes(precedenti?.get(proposta.id) ?? '') && giaCollegato && luogo.area_chiave === proposta.area)) {
+        esito('conflitto', 'Esito127 diverso dal conflitto ammesso o collegamento successivamente cambiato: nessuna nuova modifica.'); continue;
+      }
       if ((!giaCollegato && (pin.riferimento_tipo !== null || pin.riferimento_chiave !== null))
         || (luogo.area_chiave !== null && luogo.area_chiave !== proposta.area)) {
         esito('conflitto', 'Riferimento o Area già diversi: scelta corrente preservata.'); continue;
