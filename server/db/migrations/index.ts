@@ -145,6 +145,7 @@ import { migration133 } from './133_nota_rango_makoto.js';
 import { migration134 } from './134_banchi_niijima.js';
 import { migration135 } from './135_attivita_confidente.js';
 import { migration136 } from './136_aojiru_e_effetti_voce.js';
+import { migration137 } from './137_cestino_pin.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -160,5 +161,5 @@ export const migrations: Migration[] = [
   migration091, migration092, migration093, migration094, migration095, migration096, migration097, migration098, migration099, migration100,
   migration101, migration102, migration103, migration104, migration105, migration106, migration107, migration108, migration109, migration110,
   migration111, migration112, migration113, migration114, migration115, migration116, migration117, migration118, migration119, migration120,
-  migration121, migration122, migration123, migration124, migration125, migration126, migration127, migration128, migration129, migration130, migration131, migration132, migration133, migration134, migration135, migration136,
+  migration121, migration122, migration123, migration124, migration125, migration126, migration127, migration128, migration129, migration130, migration131, migration132, migration133, migration134, migration135, migration136, migration137,
 ];

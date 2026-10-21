@@ -1,5 +1,27 @@
 # L5 — difetti accertati nell'audit del 21 ottobre 2026
 
+## 21/10 19:55Z — tre schede applicate e approvate nel perimetro
+
+Consenso esplicito alle tre schede collegate ricevuto; API ordinaria pubblicata,
+anteprima e CAS freschi individuali, tre201. Confronti della Regia positivi e
+osservazione autonoma Galaxy su tutte le schede/Area/visore: gate finale positivo.
+Dettagli in crea-luogo-da-pin.md. Nessun nuovo pin o trasferimento commerciale.
+La rimozione1636 resta separata, autorizzata e in implementazione recuperabile137.
+
+## 21/10 19:44Z — pin1636 e tre punti già presenti
+
+L’utente ordina di rimuovere il pin personale1636. Il DELETE ordinario attuale
+non lo porta nel Cestino: prima dell’applicazione si prepara il tipo pin con
+radice UID originale, fotografia/CAS fresca e ripristino protetto. Nessuna
+rimozione ancora eseguita. Lettura mirata readonly del coordinamento: nessuna
+dipendenza, immagine o stato collegato al bersaglio rilevato; dati RAW solo RAM.
+
+L’utente precisa che Lotteria/Chiosco/Cinema esistono già: confermati i pin
+1466/1486/1526 con identità native e collocazioni esatte. Manca il raccordo al
+catalogo luoghi; non si creano pin nuovi. Richiesto consenso alle sole tre
+schede collegate in adempimento dell’elenco approvabile originale. Non è una
+nuova approvazione a creare duplicati o a trasferire offerte/acquisti.
+
 ## 21/10 17:11Z — nuova anteprima da pin, identità della mappa
 
 Sul rilascio `dab604ae`, pipeline77 riuscita, il revisore ha osservato nel browser il gesto fino a «Rivedi», senza creare o salvare dati. L’API risponde200, ma la finestra rifiuta la mappa: il DTO nuovo espone la chiave interna, mentre `MappaDto`, `SpilloDto` e `RisolviMappa` usano il percorso pubblico. Il confronto fra i due domini produce un falso conflitto.

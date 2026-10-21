@@ -35,7 +35,8 @@ import { randomBytes } from 'node:crypto';
 import { getDb, nowIso, type AppDatabase } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
-import { riallineaStati } from './mappe/statiGuida.js';
+import { modelloAvanzamento, riallineaStati } from './mappe/statiGuida.js';
+import { verificaRegistroCestinoPin } from './mappe/registroCestinoPin.js';
 import { eBloccoGuidaCatalogo, ripristinaPuntatoriGuida } from '../../shared/riferimentiCatalogoGuida.js';
 import { normalizzaCostoScambio } from '../../shared/catalogo.js';
 import { verificaAttivitaConfidente } from './vincoliAttivitaConfidente.js';
@@ -81,6 +82,7 @@ const RADICE: Record<TipoElementoCestino, { tabella: string; colonna: string }> 
   richiesta: { tabella: 'richiesta', colonna: 'chiave' },
   oggetto: { tabella: 'catalogo_oggetto', colonna: 'chiave' },
   'voce-diario': { tabella: 'voce_giornata', colonna: 'uid' },
+  pin: { tabella: 'spillo', colonna: 'uid' },
 };
 
 /**
@@ -198,6 +200,9 @@ const DERIVATE: ReadonlySet<string> = new Set(['mappa_percorso', 'mappa_alias'])
 /** Vero mentre un'eliminazione si sta registrando: una dentro l'altra la registra quella di fuori. */
 let registrando = false;
 
+/** Lettura del contesto: le eliminazioni aggregate mantengono un solo registro esterno. */
+export function registrazioneCestinoInCorso(): boolean { return registrando; }
+
 /**
  * Esegue `opera` (l'eliminazione) in una transazione registrando ogni riga che tocca nei due file, e mette nel cestino il
  * registro con l'elemento. Se `opera` fallisce non resta niente (né l'eliminazione né il registro). Chiamata dentro un'altra
@@ -265,6 +270,7 @@ export function conCestinoPrivato<T>(elemento: ElementoCestinoPrivato, opera: ()
 
 /** Mette nel cestino l'elemento con il suo registro, diviso fra i due file (stesso `uid`). */
 function salvaNelCestino(db: AppDatabase, elemento: ElementoCestino | ElementoCestinoPrivato, passi: ReadonlyArray<Omit<Passo, 'seq'> & { schema: Schema }>): void {
+  if (elemento.tipo === 'pin') verificaRegistroCestinoPin(db, passi, elemento.chiave);
   const uid = randomBytes(16).toString('hex');
   const adesso = nowIso();
   const numerati = passi.map((p, seq) => ({ ...p, seq }));
@@ -456,6 +462,7 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
   const attivitaPrecedenti = new Map<string, Record<string, unknown> | null>();
 
   db.transaction(() => {
+    if (r.tipo === 'pin') verificaRegistroCestinoPin(db, passi, r.chiave);
     const partitaIds = new Set<number>(), acquistoIds = new Set<string>(), voceUids = new Set<string>();
     for (const p of passi) for (const lato of [p.prima, p.dopo]) if (lato) {
       if (p.schema === 'utente') {
@@ -476,7 +483,7 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
         'L’identità personale da ripristinare è già presente: nessuna fusione o sovrascrittura è stata eseguita.');
     }
     const attivaPrima = r.tipo === 'partita' ? db.prepare('SELECT id FROM utente.partita WHERE attiva=1').get() as { id: number } | undefined : undefined;
-    const contestoAcquisti = preparaRipristinoAcquisti({ tipoCestino: r.tipo, partitaIds: [...partitaIds], acquistoIds: [...acquistoIds] });
+    const contestoAcquisti = r.tipo === 'pin' ? null : preparaRipristinoAcquisti({ tipoCestino: r.tipo, partitaIds: [...partitaIds], acquistoIds: [...acquistoIds] });
     for (const p of passi) {
       // La storia dei delta avvenuti dopo l'eliminazione vince. Il dominio ricalcola
       // T−B dopo aver rimesso identità e fonti, senza rieseguire movimenti o premi.
@@ -494,9 +501,11 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
         && ['acquisto_registrato', 'acquisto_provenienza'].includes(p.tabella);
       const eventoAcquisto = p.schema === 'utente' && p.op === 'D' && p.tabella === 'evento_partita'
         && azioneEventoAcquistoV1(riferimento.dati_json) !== null;
+      const radicePin = r.tipo === 'pin' && p.schema === 'main' && p.tabella === 'spillo';
       // L'eccezione UUID non può usare una proiezione parziale né valori di default:
       // anche JSON, legami e metadati devono coincidere esattamente con la fotografia.
-      if ((identitaImmutabile || eventoAcquisto) && (!s || Object.keys(riferimento).length !== s.colonne.length || s.colonne.some(c => !(c in riferimento)))) {
+      if ((identitaImmutabile || eventoAcquisto || radicePin) && (!s || Object.keys(riferimento).length !== s.colonne.length || s.colonne.some(c => !(c in riferimento)))) {
+        if (radicePin) throw httpErrors.conflict('cestino-pin-registro-incoerente', 'La fotografia integrale del pin non coincide con lo schema corrente: ripristino annullato, cestino conservato.');
         throw httpErrors.conflict('cestino-fotografia-acquisto-incompleta', 'Lo schema e la fotografia integrale personale non coincidono: ripristino annullato, cestino conservato.');
       }
       const descrivi = (riga: Riga) => s ? s.chiave.map((c) => String(riga[c] ?? '')).join(' · ') : '';
@@ -654,8 +663,8 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
     if (!radicePresente) {
       throw httpErrors.conflict('cestino-non-ripristinabile', `Non si può rimettere «${r.nome}»: ciò che la conteneva non c'è più.`);
     }
-    verificaRipristinoAcquisti(contestoAcquisti);
-    if (r.tipo !== 'partita') for (const partita of partitaIds) {
+    if (contestoAcquisti) verificaRipristinoAcquisti(contestoAcquisti);
+    if (r.tipo !== 'partita' && r.tipo !== 'pin') for (const partita of partitaIds) {
       if (!db.prepare('SELECT 1 FROM utente.partita WHERE id=?').get(partita)) continue;
       riconciliaAcquistiDopoRipristino(partita, [...acquistoIds]);
       riconciliaEffettiDopoRipristino(partita, [...voceUids]);
@@ -665,7 +674,8 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
     else if (r.tipo !== 'partita' && r.tipo !== 'fonte-acquisto') dopoRipristino.get(r.tipo)?.(r.chiave, vicini, [...saltate.values()]);
     // L4 (§8.11): lo specchio delle voci con pin si rifà con la funzione unica — quel che è cambiato dopo l'eliminazione (un pin
     // segnato o tolto) vince, come per le altre righe delle partite
-    riallineaStati(db, null, nowIso());
+    const pinRipristinato = r.tipo === 'pin' ? db.prepare('SELECT id FROM main.spillo WHERE uid=?').get(r.chiave) as { id: number } | undefined : undefined;
+    if (r.tipo !== 'pin' || (pinRipristinato && modelloAvanzamento(db).pin.has(pinRipristinato.id))) riallineaStati(db, null, nowIso());
     if (r.id !== null) db.prepare('DELETE FROM main.cestino WHERE id = ?').run(r.id);
     db.prepare('DELETE FROM utente.cestino_partite WHERE uid = ?').run(r.uid);
   })();

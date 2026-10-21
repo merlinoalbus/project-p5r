@@ -9,6 +9,8 @@
 
 import { calcolaCollezioniImmagini } from './collezioniImmagini.js';
 import { applicaAreaRaccordoPin, improntaRaccordoPin, richiestaRaccordoPin, type PrecondizioneRaccordoPinDto } from './precondizioneRaccordoPin.js';
+import { fotografiaRimozionePin, richiestaRimozionePin } from './precondizioneRimozionePin.js';
+import type { PrecondizioneRimozionePinDto, RichiestaRimozionePin } from '../../../shared/rimozionePin.js';
 import { invalidaCacheDiGioco } from '../cacheDiGioco.js';
 import { isDeepStrictEqual } from 'node:util';
 import { RETTIFICHE_NOMI_SEED } from './rettificheNomiSeed.js';
@@ -21,7 +23,7 @@ import { idMappa, chiaveMappa, nomePercorso, sincronizzaPercorsiMappe } from './
 import { slug } from '../../../shared/slug.js';
 import { getDb, nowIso, prepared } from '../../db/dbService.js';
 import { HttpError, httpErrors } from '../../utils/httpError.js';
-import { conCestino, registraRipristinoCestino } from '../cestinoService.js';
+import { conCestino, registrazioneCestinoInCorso, registraRipristinoCestino } from '../cestinoService.js';
 import { verificaPartita } from '../verificaPartita.js';
 import { t } from '../traduzioniService.js';
 import { eliminaImmagine, fileImmagine, leggiImmagine, salvaImmagine, scaricaImmagine } from '../immaginiService.js';
@@ -1588,22 +1590,41 @@ export function aggiornaSpillo(id: number, dati: DatiAggiornaSpillo): SpilloDto 
   })();
 }
 
-/** Elimina uno spillo (404 se non esiste) con le sue immagini caricate e i suoi «raccolto» nelle partite, in una transazione. */
-export function eliminaSpillo(id: number): void {
-  const r = prepared('SELECT id, uid FROM spillo WHERE id = ?').get(id) as { id: number; uid: string | null } | undefined;
-  if (!r) throw httpErrors.notFound('spillo-non-trovato', `Lo spillo ${id} non esiste.`);
-  getDb().transaction(() => {
-    const mPrima = modelloAvanzamento(getDb());
-    eliminaImmaginiDeiPin('s.id = ?', id);
-    prepared('DELETE FROM spillo WHERE id = ?').run(id);
-    // «raccolto» sta in un altro file: il vincolo non lo pulisce, lo si fa qui
-    if (r.uid) prepared('DELETE FROM spillo_partita WHERE spillo_uid = ?').run(r.uid);
-    // L4: e le sue divergenze «da verificare», e il suo stato per infiltrazione (§8.11)
-    if (r.uid && conDivergenze(getDb())) prepared('DELETE FROM divergenza_partita WHERE spillo_uid = ?').run(r.uid);
-    if (r.uid && conStatoPerInfiltrazione(getDb())) prepared('DELETE FROM spillo_partita_infiltrazione WHERE spillo_uid = ?').run(r.uid);
-    // §8.11: le voci del pin lo perdono, e il loro stato si ricalcola dai pin che restano
-    if (mPrima.pin.has(id)) riallineaStati(getDb(), mPrima, nowIso());
+/** Fotografia volatile, senza riparazioni di UID o scritture durante la lettura. */
+export function precondizioneRimozioneSpillo(id: number): PrecondizioneRimozionePinDto {
+  const db = getDb();
+  return db.transaction(() => {
+    const f = fotografiaRimozionePin(db, id);
+    if (f.immaginiCondivise) throw httpErrors.conflict('rimozione-pin-immagini-condivise', 'Una schermata caricata del pin è usata anche da un altro pin: nessuna rimozione automatica di contenuti condivisi.');
+    return f.dto;
   })();
+}
+
+/** Il gesto singolo è recuperabile; i chiamanti aggregati mantengono il loro unico cestino esterno. */
+export function eliminaSpillo(id: number, dati?: RichiestaRimozionePin): void {
+  const richiesta = richiestaRimozionePin(dati), db = getDb();
+  db.transaction(() => {
+    const r = db.prepare('SELECT * FROM main.spillo WHERE id=?').get(id) as RigaSpillo | undefined;
+    if (!r) throw httpErrors.notFound('spillo-non-trovato', `Lo spillo ${id} non esiste.`);
+    const aggregata = registrazioneCestinoInCorso();
+    const foto = !aggregata || richiesta ? fotografiaRimozionePin(db, id) : null;
+    if (!aggregata && foto?.immaginiCondivise) throw httpErrors.conflict('rimozione-pin-immagini-condivise', 'Una schermata caricata del pin è usata anche da un altro pin: nessun dato è stato eliminato.');
+    if (richiesta && (richiesta.spilloUid !== foto!.dto.spillo.uid || richiesta.revisioneRimozioneAttesa !== foto!.dto.revisioneRimozioneAttesa)) {
+      throw httpErrors.conflict('rimozione-pin-conflitto', 'Identità, contenuti o Cestino sono cambiati: rileggi il pin prima di confermare.');
+    }
+    const opera = () => {
+      const mPrima = modelloAvanzamento(db);
+      eliminaImmaginiDeiPin('s.id = ?', id);
+      if (db.prepare('DELETE FROM main.spillo WHERE id=? AND uid IS ?').run(id, r.uid).changes !== 1) throw httpErrors.conflict('rimozione-pin-conflitto', 'L’identità del pin non coincide più: transazione annullata.');
+      // Stati nel file delle partite: il vincolo main non li può eliminare.
+      if (r.uid) db.prepare('DELETE FROM utente.spillo_partita WHERE spillo_uid=?').run(r.uid);
+      if (r.uid && conDivergenze(db)) db.prepare('DELETE FROM utente.divergenza_partita WHERE spillo_uid=?').run(r.uid);
+      if (r.uid && conStatoPerInfiltrazione(db)) db.prepare('DELETE FROM utente.spillo_partita_infiltrazione WHERE spillo_uid=?').run(r.uid);
+      if (mPrima.pin.has(id)) riallineaStati(db, mPrima, nowIso());
+    };
+    if (aggregata) opera();
+    else conCestino({ tipo: 'pin', chiave: foto!.dto.spillo.uid, nome: r.nome, contesto: foto!.contesto }, opera);
+  }).immediate();
 }
 
 /**

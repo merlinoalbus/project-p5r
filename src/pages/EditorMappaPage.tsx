@@ -19,7 +19,7 @@ import { useLayoutEffect, useMemo, useRef, useState, type ChangeEvent, type Form
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
-import { aggiornaCopiaPezzoMappa, aggiornaElementoCatalogo, aggiornaMappa, aggiornaSpillo, getElementoCatalogo, creaCopiaPezzoMappa, creaPezzoMappa, eliminaCopiaPezzoMappa, eliminaPezzoMappa, isApiError, caricaImmagineMappa, cercaRiferimenti, collegaPinAlPunto, creaMappa, creaPassaggio, creaSpillo, eliminaMappa, eliminaSpillo, esportaMappe, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, getVociCollegabili, importaMappe, scaricaPiantaQuartiere } from '../services/api';
+import { aggiornaCopiaPezzoMappa, aggiornaElementoCatalogo, aggiornaMappa, aggiornaSpillo, getElementoCatalogo, creaCopiaPezzoMappa, creaPezzoMappa, eliminaCopiaPezzoMappa, eliminaPezzoMappa, isApiError, caricaImmagineMappa, cercaRiferimenti, collegaPinAlPunto, creaMappa, creaPassaggio, creaSpillo, eliminaMappa, esportaMappe, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, getVociCollegabili, importaMappe, scaricaPiantaQuartiere } from '../services/api';
 import { notifica } from '../stores/notificationStore';
 import { usePartitaStore } from '../stores/partitaStore';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida';
@@ -33,6 +33,7 @@ import { IconaSpillo, PuntoSpillo } from '../components/mappe/IconaSpillo';
 import { PassaggiMappa } from '../components/mappe/PassaggiMappa';
 import { FormPezzo } from '../components/mappe/FormPezzo';
 import { FinestraLuogoDaPin } from '../components/mappe/FinestraLuogoDaPin';
+import { FinestraRimozionePin } from '../components/mappe/FinestraRimozionePin';
 import { pinCompatibileConNuovoLuogo } from '../../shared/luogoDaPin';
 import { copiePosate, nomeCopia, posizioneNuovaCopia, type CopiaPosata } from '../utils/pezziMappa';
 
@@ -108,6 +109,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
   /** La copia di un pezzo della planimetria selezionata (102; copie dalla 103): uno spillo o una copia alla volta. */
   const [copiaId, setCopiaId] = useState<number | null>(null);
   const [pinDaLuogo, setPinDaLuogo] = useState<{ spillo: SpilloDto; contesto: string } | null>(null);
+  const [pinDaRimuovere, setPinDaRimuovere] = useState<{ spillo: SpilloDto; contesto: string } | null>(null);
   const [versioneFormSpillo, setVersioneFormSpillo] = useState(0);
   const contestoEditorRef = useRef('');
   // `?sezione=mappa` apre l'editor sulla sezione dell'immagine («Carica l'immagine» di una planimetria che non ce l'ha, 2026-10-18)
@@ -248,7 +250,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
               mappa={dati} albero={albero.dati ?? []} strumento={strumento} tipoNuovo={tipoNuovo} selezionato={selezionato} occupato={occupato} appunti={appunti} elenchi={elenchi.dati ?? ELENCHI_VUOTI}
               onStrumento={setStrumento} onTipoNuovo={setTipoNuovo} onSeleziona={seleziona} sezione={sezione} onSezione={setSezione} onCopia={copia}
               onSalvaSpillo={(id, d) => esegui(() => aggiornaSpillo(id, d), 'Spillo salvato.')}
-              onEliminaSpillo={(id) => esegui(async () => { await eliminaSpillo(id); setSelezionatoId(null); }, 'Spillo eliminato.')}
+              onEliminaSpillo={async (id) => { const spillo = dati.spilli.find(s => s.id === id); if (spillo) setPinDaRimuovere({ spillo, contesto: contestoEditor }); }}
               onCollegaVoce={(id, voce, collega) => esegui(() => collegaPinAlPunto(voce, id, collega), collega ? 'Voce della guida collegata.' : 'Voce della guida scollegata.')}
               versioneFormSpillo={versioneFormSpillo}
               onCreaLuogoDaPin={(spillo) => setPinDaLuogo({ spillo, contesto: contestoEditor })}
@@ -357,6 +359,12 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
         onCrea={(d) => esegui(async () => { const m = await creaMappa(d); setNuovaMappaAperta(false); await albero.ricarica(); vai(m.chiave); },
           d.passaggio ? `Mappa creata. Il passaggio verso «${d.nome}» è al centro di «${dati.nome}»: torna «Su» e trascinalo dove sta l'ingresso.${d.ritorno ? ' Qui in basso c\'è il passaggio di ritorno.' : ''}` : 'Mappa creata (senza passaggio: si aggiunge dall\'albero con «Crea passaggio»).')} />}
     </PageState>
+      {pinDaRimuovere && pinDaRimuovere.contesto === contestoEditor && <FinestraRimozionePin
+        key={`${pinDaRimuovere.spillo.id}:${pinDaRimuovere.spillo.uid}:${pinDaRimuovere.contesto}`}
+        spillo={pinDaRimuovere.spillo} mappa={chiave}
+        contestoAncoraAttivo={() => contestoEditorRef.current === pinDaRimuovere.contesto}
+        onChiudi={() => setPinDaRimuovere(null)}
+        onRimosso={async () => { if (contestoEditorRef.current !== pinDaRimuovere.contesto) return; setPinDaRimuovere(null); setSelezionatoId(null); await Promise.all([ricarica(), albero.ricarica()]); }} />}
       {pinDaLuogo && pinDaLuogo.contesto === contestoEditor && <FinestraLuogoDaPin
         key={`${pinDaLuogo.spillo.id}:${pinDaLuogo.spillo.uid}:${pinDaLuogo.contesto}`}
         spillo={pinDaLuogo.spillo} mappa={chiave} partita={conGiorno ? attiva.id : undefined}

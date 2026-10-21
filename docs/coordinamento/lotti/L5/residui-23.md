@@ -1,5 +1,7 @@
 # L5 — disposizione mirata dei 23 candidati rimasti
 
+**Aggiornamento19:55Z:** tre dei23 ora conclusi: schede collegate ai pin1466/1486/1526 approvate dall’utente, applicate senza nuovi pin e con gate finale distinto positivo. Rimangono20candidati di questa popolazione:9distributori,9serviziCovo,1eccezioneJose e pin1636. Per1636 l’utente ordina la rimozione, autorizzata ma non ancora applicata: recuperabilità137 in implementazione. Non sono20bug identici né il totale dei residui L5. Le sezioni seguenti documentano l’istruttoria originaria, con il consuntivo dei tre in [crea-luogo-da-pin](crea-luogo-da-pin.md).
+
 Istruttoria del 21 ottobre 2026. Nessuna applicazione o chiusura del lotto. I 23 sono i 31 candidati di [riconciliazione-corrente.md §6.1](riconciliazione-corrente.md#61-riscontro-corrente-e-proposte-nominative-per-tutti-i-31-candidati), esclusi gli [otto approvati e applicati](approvazione-otto-raccordi.md). Non si sommano ai luoghi senza Area o alle altre popolazioni L5.
 
 Fonti: M5 §7.9 originale a `43ad8889`, dossier già presenti e letture mirate di `pacchetto/gioco.db` pubblico93, aperto `readonly/fileMustExist`. Sono stati letti soltanto i 23 pin, i loro contesti e i luoghi/listini pertinenti. I riscontri correnti del dossier sono attribuiti alla Regia: questa istruttoria non è una nuova lettura di p5s. Nessun dato privato, test, copia DB o scrittura.

@@ -17,6 +17,7 @@ export const NOME_TIPO_CESTINO: Record<TipoCestino, string> = {
   area: 'Infiltrazione',
   voce: 'Voce della guida',
   mappa: 'Planimetria',
+  pin: 'Pin',
   'area-dedalo': 'Area del dedalo',
   // L2: un'Area del mondo (Central Street, il Sottopasso…) con le sue planimetrie; `area` qui sopra è l'infiltrazione di un Palazzo
   'area-fisica': 'Area',
@@ -87,7 +88,7 @@ export function contenutoLeggibile(v: Pick<VoceCestinoUnificatoDto, 'tipo' | 'co
 }
 
 /** La tabella dell'elemento stesso, per tipo (la stessa regola del server). */
-const RADICE_CESTINO: Record<TipoCestino, string> = { area: 'dungeon_area', voce: 'punto_interesse', mappa: 'mappa', 'area-dedalo': 'area_dedalo', 'area-fisica': 'area', luogo: 'luogo', negozio: 'negozio', richiesta: 'richiesta', oggetto: 'catalogo_oggetto', 'voce-diario': 'voce_giornata', partita: 'partita', 'fonte-acquisto': 'acquisto_provenienza' };
+const RADICE_CESTINO: Record<TipoCestino, string> = { area: 'dungeon_area', voce: 'punto_interesse', mappa: 'mappa', pin: 'spillo', 'area-dedalo': 'area_dedalo', 'area-fisica': 'area', luogo: 'luogo', negozio: 'negozio', richiesta: 'richiesta', oggetto: 'catalogo_oggetto', 'voce-diario': 'voce_giornata', partita: 'partita', 'fonte-acquisto': 'acquisto_provenienza' };
 
 /** Come si presenta un elemento: «Area di Shibuya: Sottopasso» (il posto da cui viene, se c'è), poi «con 2 planimetrie e 1 pin». */
 export function descrizioneElementoCestino(v: Pick<VoceCestinoUnificatoDto, 'tipo' | 'nome' | 'contesto' | 'contenuto'>): { titolo: string; con: string | null } {

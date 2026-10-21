@@ -1,21 +1,23 @@
 {
   "obiettivo": "Completare i lotti L0–L11 della razionalizzazione sul ramo newreview e pubblicarli funzionanti su p5s",
-  "aggiornato": "2026-10-21T19:32:00Z",
+  "aggiornato": "2026-10-21T20:12:00Z",
   "cruscotto": {
     "adesso": {
-      "attivita": "I71 pronto al rilascio: gate statici distinti approvati, Galaxy chiude F71-01…05; typecheck/lint/build finali verdi. Seguono push, pipeline, dati reali e browser. Risposte L5 ricevute: ritrovare i tre luoghi già presenti senza creare duplicati; rimuovere pin1636 in modo recuperabile dopo verifica del bersaglio.",
-      "stato": "Implementazione Aojiru e motore Diario",
-      "responsabile": "Coordinatore: frontend I71, integrazione e rilascio. Esecutore nucleo: acquisti, Diario, proposte e136/028. Esecutore integrazione: servizi, ripristini, route e DTO. Revisore distinto: gate contro originali.",
-      "prossimaConsegna": "I71/136-028 dopo pubblicazione e riscontri reali. L5: raccordo dei tre luoghi esistenti e rimozione recuperabile1636 autorizzata; istruttoria concreta in corso."
+      "attivita": "I71 consegnato in 814b17d8, pipeline 81 riuscita, p5s 136/28; approvazione limitata al perimetro osservato. Tre schede L5 applicate ai pin 1466/1486/1526 esistenti, conservazione positiva e gate finale Galaxy positivo. Rimozione recuperabile 137: BE/FE completi, due gate statici PASS, typecheck/lint/build exit0; pubblicazione e rimozione del pin 1636 ancora da eseguire. A10: analisi consolidata, riesame distinto avviato; nessuna formula applicata.",
+      "stato": "L5: tre raccordi consegnati; 137 pronta alla pubblicazione",
+      "responsabile": "Coordinatore: controlli, pubblicazione 137 e applicazione autorizzata. Esecutore 137: codice BE/Cestino. Revisore distinto: gate e riscontri. Redattore: stato e dossier A10/1636.",
+      "prossimaConsegna": "Pubblicare la 137, seguirne la pipeline e osservare p5s; quindi rimuovere il pin 1636 già autorizzato con fotografia fresca e recuperabilità nel Cestino."
     },
     "ultimaConsegna": {
-      "titolo": "A12/Takemi135 e raccordo R6: gate finale distinto approvato",
-      "commit": "8d111ced",
-      "pipeline": { "testo": "Pipeline 80 riuscita", "url": "https://github.com/merlinoalbus/project-p5r/actions/runs/39654227575" },
-      "istanza": { "testo": "p5s operativo, schema 135/27", "url": "https://p5s.nasmerlinoalbus.cloud" },
-      "verifica": "Attività rettificata/beneficio8 aggiunto;38tabelle utente e Diario/mappe invariati nei confronti dichiarati. Revisore autonomo su nuova scheda/editor/R6/riepilogo: testi corretti, nessun salvataggio. Controlli del commit UI esatto tutti verdi. R6-31:201ID/23ricerche; resto del mandato aperto."
+      "titolo": "I71: consumazioni e motore degli effetti rilasciati",
+      "commit": "814b17d8",
+      "pipeline": { "testo": "Pipeline 81 riuscita", "url": "https://github.com/merlinoalbus/project-p5r/actions/runs/39662850767" },
+      "istanza": { "testo": "p5s operativo, schema 136/28", "url": "https://p5s.nasmerlinoalbus.cloud" },
+      "verifica": "38tabelle utente preesistenti e Diario/pin/mappe/cestino identici nel confronto prima/dopo; sole2rettifiche testo Aojiru, nuove tabelle utente vuote. Galaxy osserva autonomamente registro/form/editor/R6 e approva il perimetro. Writer/replay/undo/restore non esercitati; nessun test o chiusura globale L10."
     },
     "chiusi": [
+      "Tre schede L5 collegate ai pin 1466/1486/1526 approvate e applicate con CAS freschi, senza nuovi pin; 46 tabelle utente e gli altri dati confrontati preservati, gate finale Galaxy positivo nel perimetro delle tre schede. Dei 23 candidati restano 20, compreso il pin 1636 ancora presente.",
+      "I71: consumi/provenienze, ricevute e proposte del Diario rilasciati814b17d8, pipeline81/schema136-28; gate finale positivo sulle pagine osservate e conservazione nei confronti dichiarati. Resto L10 e ricerca R6 aperti.",
       "A12/Takemi135 e raccordo R6: fonte canonica, beneficio8 e testi coerenti; pipeline79/80 riuscite e gate finale distinto approvato sul pubblicato. Non chiude il calendario globale o gli altri residui L6.",
       "Niijima134: due banchi dichiarati separatamente e sei offerte con finestra unica; riconciliazione N14/L26 aggiornata. Rilasciata e gate finale distinto approvato.",
       "Consultazione dei 97 raccordi documentali L7 e sola nota canonica Makoto PK51: rilasciati, dati riletti e gate finale distinto approvato. Le scelte semantiche su proposte e fusioni rimangono separate.",
@@ -28,21 +30,21 @@
       {
         "lotto": "L5", "titolo": "Luoghi, negozi e orari", "stato": "Parziale",
         "cosaManca": [
-          "Dei 23 candidati: tre nuovi luoghi proponibili, nove distributori senza listino identificato, nove servizi del Covo, un pin personale da chiarire e un falso abbinamento commerciale a Jose da escludere. Completare anche le altre collocazioni senza Area.",
+          "Dei 23 candidati, tre schede collegate ai pin esistenti sono consegnate; restano 20: nove distributori senza listino identificato, nove servizi del Covo, un'eccezione Jose e il pin 1636. La rimozione di quest'ultimo è autorizzata ma non applicata. Non è il totale deduplicato dei residui L5.",
           "Riconciliare le Aree storiche e le sedi indirette, conservando le diverse collocazioni dei pin.",
           "Risolvere i casi Shujin, servizi del Covo, sedi online e distinzione Chiosco succhi/KiyasuKu senza fusioni nominali.",
           "Completare il riscontro di nomi e descrizioni fra mappe, luoghi e attività, preservando le note proprie."
         ],
-        "prossimoPasso": "L’utente precisa che i tre luoghi esistono già: ritrovare le identità correnti e collegare senza duplicazioni. Rimozione1636 autorizzata, da rendere recuperabile e applicare dopo gate. Nessuna nuova creazione approvata."
+        "prossimoPasso": "Rilasciare la rimozione recuperabile 137 dopo i controlli conclusivi e applicare il gesto autorizzato sul pin 1636. Le tre schede sui pin 1466/1486/1526 sono già applicate e approvate; proseguire sugli altri 19 candidati senza fusioni nominali o collocazioni presunte."
       },
       {
         "lotto": "L6", "titolo": "Condizioni uniche", "stato": "In corso",
         "cosaManca": [
-          "Accertare e modellare le regole Royal della pesca: il difetto del convertitore è corretto, le condizioni fattuali non sono ancora bonificate.",
-          "Risolvere rotazione Aojiru sulla base delle consumazioni effettive, senza calendario assoluto; finestra e banchi Niijima già consegnati con134.",
-          "Completare gli esiti della riconciliazione delle frasi: 23 da ricercare sulle201 alla lettura dopo135, con sovrapposizioni ai casi sopra."
+          "A10 pesca: analisi Royal consolidata in pesca-A10.md e riesame distinto avviato, senza gate di soluzione o implementazione. Distinguere visita, possibilità dei due pesci, cattura, riscossione finale e beneficio effettivamente riconosciuto; conservare le due chiavi e i progressi.",
+          "I71 Aojiru è rilasciato con consumazioni e provenienze, schema 136/28; l'audit della rettifica è osservato, mentre la ricerca R6 resta aperta. Writer, replay, undo e restore non sono stati esercitati: non trasformare il gate readonly in copertura di quei gesti. Niijima 134 è già consegnato.",
+          "Completare gli esiti della riconciliazione delle frasi: 201 righe osservate dopo 136, ricerca ancora aperta. Il precedente conteggio di 23 da ricercare appartiene alla lettura dopo 135 e non viene presentato come un nuovo conteggio dopo 136."
         ],
-        "prossimoPasso": "Completare Aojiru, pesca e frasi residue; Takemi135, Niijima134, editor Makoto, nota del rango1 e data L26 già consegnati nei rispettivi perimetri."
+        "prossimoPasso": "Sottoporre il contratto A10 al revisore con le incertezze esplicite, poi completare la bonifica e le frasi residue. I71, Takemi 135, Niijima 134, editor Makoto, nota del rango 1 e data L26 sono consegnati nei rispettivi perimetri; nessuna chiusura globale L6."
       },
       {
         "lotto": "L7", "titolo": "Oggetti e fonti", "stato": "Parziale",
@@ -75,14 +77,14 @@
         "prossimoPasso": "Implementazione del lotto dopo L8, secondo requisiti originali e senza cancellare il lavoro protetto."
       },
       {
-        "lotto": "L10", "titolo": "Partita e Diario", "stato": "Da implementare",
+        "lotto": "L10", "titolo": "Partita e Diario", "stato": "Parziale",
         "cosaManca": [
-          "Completare il Diario come motore degli effetti collegati per chiave, con annullamento persistente.",
+          "Completare il Diario come motore di tutte le famiglie di effetti per chiave. I71 ha consegnato il nucleo di consumazioni, ricevute e proposte nel perimetro descritto; non equivale al lotto L10 completo né alla verifica dei writer/replay/undo/restore non esercitati.",
           "Implementare punti legame e avanzamento dei Confidenti nell'ordine cronologico del Diario.",
-          "Collegare acquisti, risorse, contatori e proposte economiche alle azioni, mantenendo distinti i fatti dichiarati.",
+          "Estendere i raccordi consegnati da I71 alle altre risorse, contatori ed effetti richiesti da L10, senza duplicare consumazioni, fatti dichiarati o benefici e senza inizializzare progressi dalle vecchie spunte.",
           "Preservare il Diario fino al primo giugno e rendere esplicite le successive voci da rivedere."
         ],
-        "prossimoPasso": "Implementare dopo l'unificazione dei dati L9; nessuna migrazione L10 è già consegnata."
+        "prossimoPasso": "Completare le dipendenze e le famiglie ancora richieste dagli originali L9/L10, partendo dal nucleo I71 già pubblicato in 814b17d8 con migrazioni 136/028. Conservare i limiti del gate osservato; nessun rinvio o riduzione dei requisiti rimanenti."
       },
       {
         "lotto": "L11", "titolo": "Pulizia e ricerca", "stato": "Da implementare",
@@ -104,14 +106,14 @@
     },
     "notaConteggi": "Questo è il lavoro noto per blocchi, non un conteggio deduplicato di bug. Candidati, frasi, nodi e proposte si sovrappongono; non si sommano e non producono una percentuale attendibile."
   },
-  "mandatoCorrente": "Pubblicato8d111ced/pipeline80/p5s135-27, A12 consegnata. I71/136-028 pronto al rilascio con gate statici distinti e controlli verdi; esiti reali da acquisire. L’utente dichiara i tre luoghi già esistenti e autorizza rimozione1636: istruttoria per collegare senza duplicare e rimuovere recuperabilmente. Altri residui e L8–L11 da completare, nessuna chiusura globale o test.",
+  "mandatoCorrente": "Pubblicato 814b17d8, pipeline 81 riuscita, p5s 136/28. I71 consegnato nel perimetro readonly osservato; writer/replay/undo/restore non esercitati. Tre schede L5 applicate senza nuovi pin e con gate finale Galaxy positivo; restano 20 dei 23 candidati. Rimozione 1636 autorizzata: codice recuperabile 137 completo, due gate statici PASS e typecheck/lint/build exit0; non ancora pubblicata né applicata. Pesca, altri residui e L8–L11 ancora da completare; nessuna chiusura globale o test.",
   "verificaConsegne": "Disposizione utente del 21/10: ogni consegna richiede un agente distinto che acceda direttamente alla specifica originale in modo avversariale. Sola lettura, evidenze requisito/codice, copertura e limiti espliciti, esito motivato. Rilievi da risolvere e riesaminare o sottoporre all'utente. Supera il precedente divieto di verificatori; resta zero test.",
-  "auditSpecifiche": "Riesami distinti contro originali43ad8889. Gate finali dei perimetri già consegnati invariati; I71 nucleo/integrato approvato staticamente dal revisore e FE/integrazioni da Galaxy, tre riesami propri. Rilascio e osservazioni reali ancora pendenti. Le vecchie tre anteprime di creazione L5 non autorizzano copie: l’utente dichiara i luoghi già presenti. Nessuna equivalenza nominale o proposta dubbia approvata automaticamente.",
-  "salvataggioAudit": "Bonifica L5-L7 in e0ea995e; censimento readonly, coordinamento post-rilascio e piani L8 pubblicati in 1de1ccba887f533a43c7ef6fe36524ac0264c249. Pipeline67 riuscita. Riconciliazioni correnti e aggiornamenti successivi ancora in lavorazione. Nessun dato privato salvato.",
+  "auditSpecifiche": "Riesami distinti contro gli originali 43ad8889. I71 pubblicato in 814b17d8, pipeline 81 riuscita, p5s 136/28: gate statici e finale readonly positivi nei perimetri descritti, senza esercizio di writer/replay/undo/restore o approvazione globale L10. Tre schede L5 approvate e applicate ai pin esistenti 1466/1486/1526: confronto di conservazione positivo e gate finale Galaxy positivo. Rimozione pin 1636: due gate statici 137 PASS, ancora da pubblicare e applicare. A10 ha un dossier analitico e un riesame avviato, senza gate o implementazione; nessuna regola controversa è promossa a formula. Nessuna equivalenza nominale o proposta dubbia approvata automaticamente.",
+  "salvataggioAudit": "Ultima consegna pubblicata: I71 in 814b17d8, pipeline 81 riuscita, p5s 136/28. La 137 e i nuovi dossier sono ancora locali e non pubblicati. Riferimenti storici della bonifica: e0ea995e e censimento/piani L8 in 1de1ccba887f533a43c7ef6fe36524ac0264c249, pipeline 67 riuscita. Nessun dato privato, fotografia o copia DB salvata nel repository.",
   "revisioneRimozioni": "Precedente approvazione limitata alle due rimozioni UI; non certifica runtime o chiusura L6. La nuova disposizione richiede verifica indipendente e avversariale delle consegne.",
-  "controlliLocali": "I71 finale dopo tutti i delta: typecheck12581/lint40007/build18606 exit0. Tre riesami propri e gate statici distinti approvati. Baseline readonly135/27 solo RAM:38tabelle utente e998voci/1913spilli/316mappe/3cestino; DDL reale uguale guardia136, due indici/zero trigger. A12 commit esatto e riscontri già consegnati. Nessun test, migrazione locale, copia DB o dato privato salvato.",
+  "controlliLocali": "I71 finale: typecheck 12581, lint 40007 e build 18606 exit0, poi pubblicazione e gate readonly nei limiti registrati. Per 137: typecheck 2245, lint 38912 e build 62830 exit0 comunicati dal coordinatore, tre riesami propri e due gate statici distinti PASS sul codice BE/FE. Baseline compatta fresca 136/28 readonly delle 20:11Z: 46 tabelle utente, 95 main, 998 voci Diario, 1913 pin, 316 mappe e tre righe Cestino integre; pin 1636 presente. DDL 136 con 11 colonne, due indici noti, zero trigger/FK entranti coincide con la guardia 137. Le baselines restano solo in RAM; nessun test, migrazione locale o copia DB da questo aggiornamento documentale.",
   "censimentoCatalogo": "Manifest ricostruito shared/l7-fonti-ricostruite.json, seconda revisione dei campi e formato schemaVersion 1: 2.430 fonti pubbliche dal pacchetto schema 93, precedente al locale 120. Non è l7-proposte.json originale né prova equivalenza. Input runtime e risultati solo nel DB della singola istanza, audit-catalogo-121. Fonti aggregate e sottoelementi non riconciliati restano decisioni aperte visibili; A7-04 non integralmente chiuso. Dettagli in lotti/L7/ricostruzione-input.md.",
-  "decisioneRichiesta": "Risposte ricevute: i tre luoghi esistono già, cercare e raccordare senza duplicare; pin personale1636 da rimuovere, operazione autorizzata. Otto raccordi già conclusi. Nessuna ulteriore domanda pendente in questi due perimetri; fusioni o identità diverse restano soggette alle specifiche. Nessun abbinamento solo per nome.",
+  "decisioneRichiesta": "Tre schede collegate ai pin esistenti 1466/1486/1526 approvate, applicate via CAS fresco e con gate finale positivo. Pin 1636 da rimuovere: già autorizzato, ancora presente, nessuna nuova domanda. Otto raccordi precedenti conclusi. Le altre identità dubbie non sono approvate automaticamente e le incognite fattuali A10 non diventano scelte arbitrarie dell'utente.",
   "fasi": [
     "requisiti",
     "dati",
@@ -128,7 +130,7 @@
   ],
   "p5s": {
     "url": "https://p5s.nasmerlinoalbus.cloud/",
-    "stato": "8d111ced attivo, pipeline80/39654227575 riuscita, schema135/27. A12/Takemi135+R6 consegnata con osservazione autonoma e gate finale distinto.38tabelle utente,998vociDiario/1913spilli/316mappe identici nei confronti dichiarati della135. I71/136-028 soltanto locale e al riesame, nessun dato applicato o chiusura globale."
+    "stato": "814b17d8 attivo, pipeline 81/39662850767 riuscita, schema 136/28. I71 approvato nel perimetro readonly osservato; conservazione positiva nei confronti dichiarati. Tre schede L5 applicate ai pin esistenti, 46 tabelle utente e gli altri dati confrontati preservati, gate finale Galaxy positivo. La 137 è implementata e approvata staticamente ma non ancora pubblicata; pin 1636 ancora presente. Nessuna chiusura globale."
   },
   "lotti": [
     {
@@ -235,7 +237,7 @@
       "id": "L5",
       "titolo": "Luoghi, negozi, orari",
       "dipende": "L2",
-      "nota": "Otto raccordi applicati su129 e gate finale distinto APPROVATO per il solo elenco. Vecchi pin213/212/210, panoramiche e altri campi conservati; RAW/GETprotetto post129 positivi. Browser8schede/5Aree, campione autonomo Fioraio/Venditore. Altri23candidati e collocazioni nonchiusi;1486distinto1487. Totale difetti non deduplicato; L5 resta aperto.",
+      "nota": "Otto raccordi precedenti consegnati su 129. Tre schede collegate ai pin 1466/1486/1526 esistenti approvate e applicate su 136/28: conservazione positiva di 46 tabelle utente e degli altri dati confrontati, gate finale Galaxy positivo. Dei 23 candidati restano 20, incluso il pin 1636 ancora presente: rimozione autorizzata, codice 137 e gate statici pronti, pubblicazione/applicazione pendenti. Altre collocazioni e requisiti L5 restano aperti; 1486 distinto da 1487.",
       "fasi": {
         "requisiti": "fatta",
         "dati": "fatta",
@@ -255,7 +257,7 @@
       "id": "L6",
       "titolo": "Condizioni uniche",
       "dipende": "L5",
-      "nota": "P5s129/27 operativo. A10 convertitore/ripristino atomici e GETL26 pubblicati; paginaR6 con201righe.130 approvata staticamente e pubblicata in8d0a80bc, pipeline73 in corso, esito dati ingressoMemento09→07maggio da acquisire. Pesca fattuale, Aojiru, Niijima, Makoto/Takemi e frasi dubbie ancora aperti; nessuna decisione automatica su varianti personali.",
+      "nota": "P5s 136/28, 814b17d8, pipeline 81 riuscita. Data L26, editor/nota Makoto, Niijima 134 e Takemi 135 consegnati nei rispettivi perimetri. I71 Aojiru rilasciato con gate readonly positivo e audit osservato; writer/replay/undo/restore non esercitati, ricerca R6 ancora aperta su 201 righe osservate. A10: parser già corretto, analisi pesca consolidata e riesame avviato, nessuna nuova formula o implementazione fattuale. Nessuna rettifica automatica delle varianti personali; L6 resta aperto.",
       "fasi": {
         "requisiti": "fatta",
         "dati": "fatta",
@@ -335,7 +337,7 @@
       "id": "L10",
       "titolo": "Partita e diario",
       "dipende": "L7, L9",
-      "nota": "",
+      "nota": "Nucleo I71 pubblicato in 814b17d8, pipeline 81 riuscita, schema 136/28: consumazioni/provenienze, ricevute e proposte del Diario. Gate finale limitato alle pagine e alle conservazioni osservate; writer/replay/undo/restore non esercitati. Le fasi ancora da fare si riferiscono al completamento del lotto L10, non all'assenza del nucleo già consegnato. Restano tutti i requisiti originali delle altre famiglie di effetti e dei Confidenti.",
       "fasi": {
         "requisiti": "fatta",
         "dati": "fatta",
@@ -377,7 +379,7 @@
       "nome": "Coordinatore — implementazione e rilascio",
       "fase": "be, fe, regia",
       "stato": "al lavoro",
-      "attivita": "I71 approvato staticamente con controlli finali verdi: prepara pubblicazione, segue pipeline e riscontri reali. L5: risposte ricevute, nessuna creazione duplicata e rimozione1636 recuperabile autorizzata."
+      "attivita": "I71 pubblicato in 814b17d8, pipeline 81 riuscita e gate readonly positivo nel perimetro osservato. Tre schede L5 applicate e approvate da Galaxy. Prepara il rilascio 137 dopo due gate statici PASS e typecheck/lint/build exit0; applicazione autorizzata sul pin 1636 ancora da eseguire."
     },
     {
       "nome": "Esecutore L5/L6",
@@ -395,19 +397,19 @@
       "nome": "Esecutore nucleo Aojiru e Diario",
       "fase": "be, fe",
       "stato": "concluso",
-      "attivita": "Nucleo136/028 e delta Storico congelati e approvati staticamente; tre riesami completati. Nessun progresso inizializzato o test."
+      "attivita": "Nucleo 136/028 consegnato in 814b17d8 nel perimetro readonly osservato; nessun writer/replay/undo/restore esercitato. Analisi A10 consolidata e dossier salvato, senza gate o implementazione. Aggiornamento documentale affidato a questo esecutore; nessun nuovo sorgente modificato."
     },
     {
       "nome": "Esecutore integrazione e ripristini",
       "fase": "dati, be",
       "stato": "al lavoro",
-      "attivita": "I71 integrazione/restore/Storico approvati staticamente e congelati. Ora istruttoria readonly sui tre luoghi dichiarati esistenti e sulla rimozione recuperabile del pin1636."
+      "attivita": "I71 integrazione/restore/Storico consegnati nel perimetro osservato. Codice BE e Cestino della rimozione 137 completo e approvato staticamente; nessuna rimozione 1636 ancora applicata. Contratto tecnico A10 in analisi separata, senza codice o modifiche ai dati."
     },
     {
       "nome": "Revisore indipendente",
       "fase": "validazione",
-      "stato": "concluso",
-      "attivita": "Gate statici I71 approvati: nucleo/integrato da revisore distinto, FE/integrazioni da Galaxy dopo originali43ad8889. Nessuna attestazione runtime anticipata; osservazioni successive al rilascio."
+      "stato": "al lavoro",
+      "attivita": "I71 approvato nel perimetro readonly e tre schede L5 con gate finale Galaxy positivo. Due gate statici 137 PASS; osservazione successiva alla pubblicazione ancora pendente. Riesame A10 avviato sugli originali e sulle fonti: integrazioni contrattuali finite ancora da chiudere, nessun PASS A10."
     }
   ],
   "notaSessioniStoriche": "Le righe seguenti sono il registro del precedente team, non lo stato live delle sessioni o dei servizi. Nessuna sessione precedente è stata riaperta o gestita durante questo audit.",

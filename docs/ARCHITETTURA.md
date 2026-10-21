@@ -1550,6 +1550,10 @@ stesso ritaglio si posa in più punti: il **pezzo** è il ritaglio (zona e nome)
 
 ## Il cestino (2026-10-16)
 
+**Estensione137,21ottobre2026:** il gesto singolo di rimozione di un pin usa il tipo `pin`, con radice `spillo.uid` originale. Anteprima volatile `GET /api/mappe/spilli/:id/precondizione-rimozione`; il DELETE esistente accetta la coppia UID/precondizione completa e controlla la fotografia nella transazione IMMEDIATE prima degli effetti. La fotografia comprende contenuti, dipendenze, stati e un’epoca monotona del Cestino: un ciclo rimozione/ripristino non rende riutilizzabile una vecchia anteprima. Immagini cancellabili condivise provocano409. Cattura e ripristino applicano la stessa allowlist di righe integrali; i gesti aggregati mantengono il registro esterno unico.137 estende il vincolo dei tipi preservando integralmente righe, sequenza e indici noti, con rifiuto di schemi inattesi.
+
+Il frontend conferma il bersaglio fresco e conserva l’intento in `sessionStorage` prima dell’invio. Chiusura e reload non reinviano una rimozione incerta; Impostazioni permette la sola rilettura di identità, mappa e Cestino anche quando il pin non è selezionabile. Il registro è della sola scheda del browser. Una risposta204 acquisita resta un successo anche se il successivo aggiornamento della vista o del registro fallisce. Contratto e limiti di rilascio nel dossier `coordinamento/lotti/L5/rimozione-pin-1636.md`; non costituisce un ripristino esercitato sui dati dell’utente.
+
 Le eliminazioni di aree della guida dei Palazzi, voci della guida, planimetrie e aree dei dedali si rimettono com'erano da
 Impostazioni → Cestino.
 - **Dati**: `cestino` nel file di gioco (migrazione 104: `uid`, `tipo` area|voce|mappa|area-dedalo, `chiave`, `nome`, `contesto`,

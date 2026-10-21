@@ -2,7 +2,7 @@
 
 ## Perimetro e stato
 
-Aggiornamento17:25Z: correttivo `817c06bb`, pipeline78 riuscita; tre anteprime reali API200 con percorsi pubblici e valori proposti esatti. Il revisore ha osservato autonomamente l’anteprima1466 completa e chiuso con Annulla; il coordinatore ha osservato anche1486 con la domenica e la nota sulla regola app. Gate del solo flusso fino all’anteprima approvato. Consenso ai tre richiesto, ancora pendente; nessuna creazione applicata. Il controllo finale dei dati seguirà l’applicazione autorizzata.
+Aggiornamento19:55Z: **tre schede approvate dall’utente e applicate** ai pin1466/1486/1526 esistenti su p5s136/28. Anteprima fresca e CAS individuale, tre ricevute201; nessun retry o nuovo pin. Confronto readonly della Regia solo RAM:46tabelle utente, negozi/articoli/Diario/mappe/cestino/altri1910pin e tutti i luoghi preesistenti identici. Dei tre pin cambiano soltanto i due riferimenti e updated_at, UID e altri campi identici. Tre schede/Aree/orari esatti. Galaxy ha osservato autonomamente tutte le schede e i percorsi Area/visore verso i pin originari, con esito positivo; note proprie separate e domenica/regola app coerenti. **Gate finale del solo elenco3 APPROVATO.** Nessuna chiusura di tutto L5 o rimozione1636; le sezioni seguenti conservano contratto e cronologia precedente.
 
 M5 §7.9 originale a `43ad8889` richiede un elenco approvato prima di trasformare i pin commerciali personali. I [23 residui](residui-23.md) restano distinti: qui si prepara soltanto il gesto ordinario necessario ai tre luoghi documentati. Nessuna migrazione, applicazione automatica, fusione, nuovo pin, offerta o avanzamento.
 

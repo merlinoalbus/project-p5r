@@ -93,6 +93,9 @@ export const apiPatch = <T>(path: string, body?: unknown, opts?: HttpFetchOption
 /** DELETE → contenuto di `data`. */
 export const apiDelete = <T>(path: string, opts?: HttpFetchOptions): Promise<T> =>
   requestJson<T>('DELETE', path, undefined, opts);
+/** DELETE con precondizioni nel corpo: non espone fotografie o token nell’URL. */
+export const apiDeleteConCorpo = <T>(path: string, body: unknown, opts?: HttpFetchOptions): Promise<T> =>
+  requestJson<T>('DELETE', path, body, opts);
 
 /**
  * Invia un file come corpo grezzo (Content-Type = tipo del file) e restituisce il contenuto di `data`. Lo stato si controlla

@@ -2,6 +2,8 @@
 
 Legenda stato: ✅ fatto e validato · 🔄 in corso · ⏳ fatto, in attesa di validazione · ⬜ da fare.
 
+**21/10 20:12Z — avanzamento dei correttivi:** I71 rilasciato in814b17d8, pipeline81/schema136-28, e tre schede luogo collegate ai pin esistenti consegnate dopo il consenso specifico. Gate finali distinti limitati ai rispettivi perimetri osservati; L10 non è concluso. Rimozione recuperabile137 pronta al rilascio con gate statici e typecheck/lint/build verdi; il pin1636 autorizzato è ancora presente fino alla pubblicazione. Restano residui L5–L7, quindi L8–L11 nel mandato; nessuna chiusura globale. Stato operativo e dossier puntuali in `coordinamento/`.
+
 **21/10 11:12Z — blocco pronto al rilascio:**123–126/027, pagina approvabileR6, GET97 e CAS approvati staticamente e registrati localmente; typecheck/lint/build verdi. Nessuna nuova migrazione locale o test. Helper raccordiL5 inattivo, consenso specifico non acquisito. Dopo il rilascio si leggono rendiconti e nodi correnti e si completano i residui; nessuna chiusura globale di L5–L7 o implementazione L8.
 
 **21/10 10:36Z — bonifica precedente a L8 ancora in corso:**123 e124/T2/R5-02 approvati staticamente, non registrati o eseguiti; Carta125/parser e Ambulante126 al riesame. Mancante e da completare la superficie approvabile R6-19/31. Inventari e fonti correnti L5–L7 in riconciliazione, con limiti espliciti. Pubblicato1de1ccba/pipeline67/schema122-26; controlli verdi solo intermedi. Nessun codice L8 o test. Le note precedenti sono cronologia, non chiusura dei residui.

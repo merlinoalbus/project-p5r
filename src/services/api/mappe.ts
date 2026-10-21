@@ -5,7 +5,8 @@
 import type { ConteggiAlberoDto, CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, DatiPezzoMappa, DestinazioneSpillo, EsportazioneMappeDto, GuidaDellaPlanimetriaDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto, VoceCollegabileDto } from '../../types';
 import type { RequisitoSpillo } from '../../../shared/condizioniSpillo';
 import type { TipoMappa, TipoRiferimento, TipoSpillo } from '../../../shared/spilli';
-import { apiDelete, apiGet, apiPost, apiPut, inviaFile, queryString } from './_helpers';
+import type { PrecondizioneRimozionePinDto, RichiestaRimozionePin } from '../../../shared/rimozionePin';
+import { apiDelete, apiDeleteConCorpo, apiGet, apiPost, apiPut, inviaFile, queryString } from './_helpers';
 
 /** `passaggio`/`ritorno` valgono solo alla creazione con un genitore: spillo «passaggio» nel genitore verso la nuova mappa e viceversa (15.24). */
 export interface DatiMappaApi { nome?: string; tipo?: TipoMappa; genitore?: string | null; ordine?: number; asset?: string | null; larghezza?: number | null; altezza?: number | null; entita?: { tipo: string; chiave: string } | null; note?: string; passaggio?: boolean; ritorno?: boolean }
@@ -70,8 +71,12 @@ export const creaSpillo =(mappa: string, dati: DatiSpilloApi & { tipo: TipoSpill
 export const creaPassaggio = (mappa: string, destinazione: string): Promise<SpilloDto> => apiPost(`/mappe/${encodeURIComponent(mappa)}/passaggi`, { destinazione });
 /** Modifica uno spillo (anche solo la posizione o la mappa di appartenenza); risponde con lo spillo aggiornato. */
 export const aggiornaSpillo = (id: number, dati: DatiSpilloApi): Promise<SpilloDto> => apiPut(`/mappe/spilli/${id}`, dati);
-/** Elimina uno spillo con le sue immagini e i suoi stati «raccolto» nelle partite. */
-export const eliminaSpillo =(id: number): Promise<void> => apiDelete(`/mappe/spilli/${id}`);
+/** Fotografia fresca del pin e delle conseguenze della rimozione recuperabile. */
+export const precondizioneRimozionePin = (id: number): Promise<PrecondizioneRimozionePinDto> => apiGet(`/mappe/spilli/${id}/precondizione-rimozione`, { maxRetries: 0, silent: true });
+/** Conserva il pin nel Cestino. I client nuovi inviano identità e fotografia, senza retry. */
+export const eliminaSpillo = (id: number, richiesta?: RichiestaRimozionePin): Promise<void> => richiesta
+  ? apiDeleteConCorpo(`/mappe/spilli/${id}`, richiesta, { maxRetries: 0 })
+  : apiDelete(`/mappe/spilli/${id}`, { maxRetries: 0 });
 
 /** Segna uno spillo come raccolto (o non raccolto) nella partita. */
 /** Segna o toglie un pin nella partita. L4 (§1.4, §8.11): per un pin condiviso da voci rigenerabili di più infiltrazioni, `infiltrazione`

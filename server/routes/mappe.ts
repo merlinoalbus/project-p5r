@@ -25,6 +25,9 @@ import { guidaDellaPlanimetria } from '../services/dungeonService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { precondizioneRaccordoSpillo, type DatiAggiornaSpillo } from '../services/mappe/mappeService.js';
 import { queryPrecondizioneRaccordo } from '../schemas/mappe.js';
+import { precondizioneRimozioneSpillo } from '../services/mappe/mappeService.js';
+import { bodyRimozionePin, queryPrecondizioneRimozionePin } from '../schemas/mappe.js';
+import type { RichiestaRimozionePin } from '../../shared/rimozionePin.js';
 
 const router = Router();
 // Chiave libera ma limitata: un indirizzo scritto a mano che non corrisponde a nulla resta un 404 «mappa-non-trovata», non un 400.
@@ -156,8 +159,14 @@ router.get('/spilli/:id/precondizione-raccordo', (_req, res, next) => {
 router.put('/spilli/:id', validate({ params: paramsSpillo, body: bodyAggiornaSpillo }), (req, res) => {
   res.json(aggiornaSpillo(Number(req.params.id), req.body as DatiAggiornaSpillo));
 });
-router.delete('/spilli/:id', validate({ params: paramsSpillo }), (req, res) => {
-  eliminaSpillo(Number(req.params.id));
+router.get('/spilli/:id/precondizione-rimozione', (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+}, validate({ params: paramsSpillo, query: queryPrecondizioneRimozionePin }), (req, res) => {
+  res.json(precondizioneRimozioneSpillo(Number(req.params.id)));
+});
+router.delete('/spilli/:id', validate({ params: paramsSpillo, body: bodyRimozionePin }), (req, res) => {
+  eliminaSpillo(Number(req.params.id), req.body as RichiestaRimozionePin | undefined);
   res.status(204).end();
 });
 /** I pezzi della planimetria (102): zone dell'immagine scelte nell'editor, posate altrove con le condizioni che li mostrano, in una o

@@ -23,6 +23,11 @@ const condizioni = z.array(condizioneSpillo).max(20).nullable().optional();
 
 export const paramsMappa = z.object({ chiave: chiaveMappa });
 export const paramsSpillo = z.object({ id: idParam });
+export const queryPrecondizioneRimozionePin = z.object({}).strict();
+export const bodyRimozionePin = z.union([
+  z.object({ spilloUid: z.string().regex(/^[0-9a-f]{32}$/), revisioneRimozioneAttesa: z.string().regex(/^[0-9a-f]{64}$/) }).strict(),
+  z.object({}).strict(),
+]).optional();
 export const queryPrecondizioneRaccordo = z.object({ luogo: z.string().min(1).max(200), areaLuogo: z.string().min(1).max(200).optional() }).strict();
 export const queryEsporta = z.object({ radice: chiaveMappa.optional() });
 export const queryDidascalia = z.object({ didascalia: z.string().max(300).optional() });

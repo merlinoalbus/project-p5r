@@ -194,9 +194,15 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
   },
   'DELETE /api/mappe/spilli/:id': {
     sommario: 'Elimina uno spillo',
-    descrizione: 'In una transazione: le sue schermate caricate, lo spillo e i suoi stati («raccolto» e simili) in tutte le partite.',
+    descrizione: 'Rimozione recuperabile nel Cestino, con radice UID originale, schermate e stati di tutte le partite. Corpo facoltativo strict `{spilloUid,revisioneRimozioneAttesa}` ottenuto dalla precondizione: entrambi obbligatori insieme. UID, fotografia RAW ed epoca del Cestino sono riletti nella stessa transazione IMMEDIATE prima di ogni effetto. Senza corpo o con `{}` resta il contratto legacy per ID, che non può attestare l’UID visto da un client precedente. Immagini condivise con altri pin bloccano il gesto singolo. Le eliminazioni aggregate conservano il loro solo registro esterno. Nessuna generazione o correzione di UID; collisioni o fotografie divergenti bloccano il ripristino.',
     risposta: 'Nessun contenuto (204)',
-    errori: [[404, 'spillo-non-trovato']],
+    errori: [[404, 'spillo-non-trovato'], [409, 'rimozione-pin-conflitto'], [409, 'rimozione-pin-immagini-condivise'], [409, 'cestino-pin-registro-incoerente']],
+  },
+  'GET /api/mappe/spilli/:id/precondizione-rimozione': {
+    sommario: 'Fotografia per la rimozione recuperabile di un pin',
+    descrizione: 'Lettura transazionale e Cache-Control no-store; query vuota strict. Restituisce identità e mappa pubblica, conteggi dei contenuti coinvolti e token volatile. Il CAS include RAW, BLOB e miniature, riferimenti entranti, stati e input del riallineamento quando necessario, oltre a epoca AUTOINCREMENT e radici UID nel Cestino: DELETE seguito da restore non riabilita il token precedente. Nessun RAW personale viene esposto e nessun dato viene modificato.',
+    risposta: '`PrecondizioneRimozionePinDto` (shared/rimozionePin.ts)',
+    errori: [[404, 'spillo-non-trovato'], [409, 'rimozione-pin-conflitto'], [409, 'rimozione-pin-immagini-condivise']],
   },
   'POST /api/mappe/spilli/:id/immagini': {
     sommario: 'Aggiunge una schermata di riferimento a uno spillo (corpo grezzo image/*)',

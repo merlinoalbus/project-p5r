@@ -1,6 +1,6 @@
-# I71 — Aojiru: soluzione approvata, implementazione in corso
+# I71 — Aojiru: implementazione rilasciata e perimetro osservato approvato
 
-Data: 2026-10-21. Stato: **SOLUZIONE APPROVATA, IMPLEMENTAZIONE IN CORSO; GATE CODICE APERTO**.
+Data: 2026-10-21. Stato: **RILASCIATO814b17d8, PIPELINE81 RIUSCITA; GATE FINALE DEL PERIMETRO OSSERVATO APPROVATO**.
 
 Questo dossier raccoglie il contratto trasmesso in quattro parti e le sei
 integrazioni richieste dal revisore indipendente, che ha approvato integralmente
@@ -8,7 +8,8 @@ il gate della soluzione. Non costituisce un consuntivo di implementazione.
 Numeri assegnati dalla Regia: **gioco 136, partite 028**; 135 appartiene ad A12.
 La Regia ha autorizzato l'implementazione dopo la pubblicazione135. Il contratto
 approvato precede il codice: le sezioni di soluzione restano la sua base di confronto.
-Nessuna migrazione locale, prova, simulazione o scrittura ai database è stata eseguita.
+Durante l’analisi della soluzione non sono state eseguite migrazioni locali,
+prove, simulazioni o scritture ai database. Il consuntivo del rilascio è nel §19.
 
 ## 1. Mandato e perimetro
 
@@ -801,3 +802,32 @@ Baseline reale135/27 readonly conservata solo in RAM:38tabelle utente,
 998voci Diario/1913spilli/316mappe/3cestino; DDL del cestino coincide con la
 guardia136, due indici e nessun trigger. Rilascio, osservazioni e confronto
 dopo136/028 ancora da acquisire: non è una consegna runtime o la chiusura L10.
+
+## 19. Rilascio e osservazioni reali
+
+Commit `814b17d8acd63ba5018df7d2d4f4b13a0fcff9ab`, pipeline81
+`39662850767` riuscita; p5s healthok e schema136/28 alle19:39Z.
+Confronto readonly della Regia prima/dopo, tenuto esclusivamente in RAM:
+38tabelle utente preesistenti identiche nelle rispettive colonne precedenti;
+998voci Diario,1913spilli,316mappe e3righe cestino identici integralmente,
+compresa la sequenza del cestino. Sole differenze dei due record Aojiru:
+campo `effetto` dell’articolo e del catalogo. Audit136: rettificata.
+Tutte le otto nuove tabelle utente vuote: nessuna consumazione/proposta/saldo
+inizializzato.998transizioni convertite,285effetti e20candidati guida aperti;
+i21candidati del pacchetto pubblico citati nel §12 non sono il conteggio live.
+
+Galaxy ha osservato autonomamente in sola lettura il frontend nuovo: registro
+delle sette presenze legacy e zero consumazioni, coda vuota, form Aojiru con
+variante da scegliere/Fortuna ignota e anteprima disabilitata, testo canonico,
+editor di una voce reale convertita e R6 con audit136 rettificata,201righe e
+ricerca ancora aperta. Nessun campo, conferma o dato di partita modificato.
+Gate finale positivo nel perimetro osservato. Regia ha osservato anche il
+registro a602×884: una sola area verticale e nessun overflow orizzontale;
+questo non certifica tutte le risoluzioni richieste.
+
+Durante il cambio degli asset il revisore ha visto un errore di importazione
+di un vecchio chunk; risolto con reload, senza ulteriori errori/warning osservati.
+Riscontro operativo registrato in L11. Writer/replay/undo/restore e fallback
+non convertibile non sono stati esercitati: nessun test o progresso inventato.
+Questi limiti non diventano un’approvazione dell’intero L10 o di tutte le
+decisioni della riconciliazione R6.

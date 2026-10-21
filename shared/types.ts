@@ -3110,7 +3110,7 @@ export interface RiepilogoCatalogoDto {
 /** Che cosa è stato eliminato: un'area della guida di un Palazzo, una voce della guida, una planimetria, un'area di un dedalo, un'Area
  *  con le sue planimetrie (`area-fisica`, L2: il quartiere o la città che la contiene). */
 /** `richiesta` (L6, R6-04): una Richiesta eliminata va nel cestino; le condizioni che la citano restano e danno «Richiesta eliminata». */
-export type TipoCestino = 'area' | 'voce' | 'mappa' | 'area-dedalo' | 'area-fisica' | 'luogo' | 'negozio' | 'richiesta' | 'oggetto' | 'voce-diario' | 'partita' | 'fonte-acquisto';
+export type TipoCestino = 'area' | 'voce' | 'mappa' | 'area-dedalo' | 'area-fisica' | 'luogo' | 'negozio' | 'richiesta' | 'oggetto' | 'voce-diario' | 'pin' | 'partita' | 'fonte-acquisto';
 
 // ---- L7: catalogo unico. I riferimenti non contengono prezzi: il prezzo appartiene all'offerta. ----
 
