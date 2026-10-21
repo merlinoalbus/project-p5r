@@ -8,6 +8,8 @@ Il revisore distinto `audit_documenti_originali` ha approvato prima il disegno, 
 
 ## Contratto implementato
 
+Controlli integrati del correttivo dei due DTO mappa: typecheck47872, lint94003 e build10780 exit0 dopo tre riesami propri e gate distinto mirato. Il riscontro dopo il nuovo rilascio resta distinto e da acquisire; nessuna creazione applicata.
+
 - `POST /api/luoghi/da-pin/:id/anteprima`: sola lettura coerente, `no-store`; corpo `{nuovo:{nome,tipo,cosaOffre,orari}}`, tutti i livelli oggetto strict, inclusi gli orari. Mostra i dati effettivamente normalizzati, chiave proposta, contesto reale e tutti i luoghi del quartiere, anche nascosti, con token transitorio.
 - `POST /api/luoghi/da-pin/:id`: stesso `nuovo` e `revisioneRaccordoAttesa` appena ricevuta. TX IMMEDIATE unica sulla connessione che ha `utente` attached: rilettura e fotografia completa, confronto CAS, `creaElemento('luogo',...)` ordinario annidato, verifica chiave e campi persistiti, aggiornamento dei soli riferimenti e `updated_at` del pin. Ogni errore annulla entrambe le scritture.
 - Risposta 201 costruita dentro la TX: `{esito:'creato-collegato',luogo:{chiave,nome},spillo:{id,uid,mappaChiave}}`. Dettaglio del luogo e ricarica della planimetria sono letture successive: un loro errore non significa creazione fallita e non ripete il POST.
@@ -24,6 +26,8 @@ Nell'editor, dalle proprietà del pin compatibile, «Crea un luogo da questo pin
 Contratti comuni: `shared/luogoDaPin.ts`; BE: `server/services/luogoDaPinService.ts`, `server/services/mappe/fotografiaLuogoDaPin.ts`, schemi/rotte/OpenAPI di `luoghi`. FE: `src/components/mappe/FinestraLuogoDaPin.tsx`, `src/services/api/luoghi.ts`, integrazione in `EditorMappaPage.tsx`. Il vecchio `precondizioneRaccordoPin.ts` cambia soltanto tre export: corpi e hash v1/v2 invariati.
 
 Tre riesami statici propri hanno riguardato contratto UI/API, atomicità e conservazione. Il revisore ha poi individuato e fatto correggere due difetti: il formato canonico nuovo doveva trattare i booleani senza cambiare lo storico; lo scanner del cestino doveva rifiutare operazioni coercibili, lati incongrui, identità numeriche non sicure e viste scambiate per tabelle. Il codice finale richiede registri coerenti con il writer reale, PK secondo schema e tabelle effettive. Nessun test, simulazione DB o applicazione dei tre eseguita da questi agenti.
+
+**Difetto emerso nell'osservazione dopo il primo rilascio:** l'anteprima del pin 1466 veniva rifiutata dalla finestra con «L'identità o la mappa del pin sono cambiate» anche a identità invariata. Il servizio esponeva la FK RAW della mappa, mentre editor e `SpilloDto` confrontano il percorso pubblico. La correzione converte soltanto `anteprima.spillo.mappa.chiave` e `ricevuta.spillo.mappaChiave` con `chiaveMappa(raw, db)` nella stessa TX. Fotografia, hash, FK e UPDATE restano RAW e invariati; nessun edit FE o dato applicato. Il revisore ha approvato anche questo delta statico mirato; controlli integrati, rilascio e nuova osservazione dell'anteprima sono necessari prima del consenso ai tre.
 
 ## Identità dei tre e fonti
 

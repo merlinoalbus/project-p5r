@@ -1,10 +1,10 @@
 {
   "obiettivo": "Completare i lotti L0–L11 della razionalizzazione sul ramo newreview e pubblicarli funzionanti su p5s",
-  "aggiornato": "2026-10-21T17:00:00Z",
+  "aggiornato": "2026-10-21T17:13:00Z",
   "cruscotto": {
     "adesso": {
-      "attivita": "Pubblico il gesto L5 completo per creare un luogo dal pin esistente: BE, FE e correzioni finali approvati dal revisore distinto. Typecheck, lint e build verdi. Poi leggo le anteprime reali e presento i tre luoghi per il consenso specifico; nessuna creazione è già applicata.",
-      "stato": "Gesto L5 approvato e controlli verdi: rilascio in corso",
+      "attivita": "Pubblico il correttivo L5 dei due identificativi mappa nei DTO: gate distinto mirato approvato, typecheck47872/lint94003/build10780 verdi. Dopo deploy riprendo l’anteprima reale, poi consenso ai tre luoghi. Nessuna creazione o modifica dei pin applicata.",
+      "stato": "L5: correttivo approvato e controlli verdi, rilascio in corso",
       "responsabile": "Esecutore BE: operazione atomica e contratto. Esecutore FE: finestra e integrazione nel visore. Coordinatore: integrazione, dati, Regia e rilascio. Revisore distinto: controllo avversariale.",
       "prossimaConsegna": "Gesto ordinario completo per creare luoghi dai pin esistenti; poi consenso specifico e applicazione dei tre luoghi attestati, senza duplicare i pin."
     },
@@ -109,7 +109,7 @@
   "auditSpecifiche": "Riesami distinti contro originali43ad8889: codice e registri fino134 approvati staticamente. Gate finali otto raccordi, dataL26, editor131, raccordi132, nota133 e Niijima134 approvati, con prove del coordinatore distinte dalle osservazioni autonome. Dossier23L5 e soluzione del gesto da pin approvati; codice L5 in corso. Nessuna equivalenza semantica o proposta dubbia approvata per effetto del raccordo.",
   "salvataggioAudit": "Bonifica L5-L7 in e0ea995e; censimento readonly, coordinamento post-rilascio e piani L8 pubblicati in 1de1ccba887f533a43c7ef6fe36524ac0264c249. Pipeline67 riuscita. Riconciliazioni correnti e aggiornamenti successivi ancora in lavorazione. Nessun dato privato salvato.",
   "revisioneRimozioni": "Precedente approvazione limitata alle due rimozioni UI; non certifica runtime o chiusura L6. La nuova disposizione richiede verifica indipendente e avversariale delle consegne.",
-  "controlliLocali": "Gesto L5 finale: typecheck11026, lint40133, build47129 exit0; tre riesami propri e gate distinto integrato, inclusi delta lint. Il primo lint20078 era fallito ed è stato corretto prima di questi controlli. Niijima134 già consegnata con RAW7/7, eventi/acquisti7+7 e proiezioni protette identici nei campi dichiarati, audit applicata7/7. Zero test, migrazioni locali, copie DB o dati privati salvati.",
+  "controlliLocali": "Correttivo DTO L5: typecheck47872, lint94003, build10780 exit0; tre riesami propri e gate distinto mirato approvato. Il gesto dab604ae aveva controlli verdi ma il browser ha trovato il conflitto RAW/percorso pubblico; nessuna creazione eseguita. Niijima134 già consegnata con RAW7/7, eventi/acquisti7+7 e proiezioni protette identici nei campi dichiarati, audit applicata7/7. Zero test, migrazioni locali, copie DB o dati privati salvati.",
   "censimentoCatalogo": "Manifest ricostruito shared/l7-fonti-ricostruite.json, seconda revisione dei campi e formato schemaVersion 1: 2.430 fonti pubbliche dal pacchetto schema 93, precedente al locale 120. Non è l7-proposte.json originale né prova equivalenza. Input runtime e risultati solo nel DB della singola istanza, audit-catalogo-121. Fonti aggregate e sottoelementi non riconciliati restano decisioni aperte visibili; A7-04 non integralmente chiuso. Dettagli in lotti/L7/ricostruzione-input.md.",
   "decisioneRichiesta": "Consenso specifico8raccordi ACQUISITO: utenteApprovo tutti eotto, inclusaAreaCentralStreetVenditore. Nessuna ulteriore domanda per applicarequestoelenco. Altre fusioni/proposte non autorizzate automaticamente. Nessun abbinamento solo per nome. DiarioMemento/ORAsakusa/Importa/guida già decisi.",
   "fasi": [

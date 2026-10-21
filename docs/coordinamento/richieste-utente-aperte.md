@@ -1,5 +1,7 @@
 # Richieste dell'utente ancora aperte (elenco di controllo del PM)
 
+**17:13Z — L5, correttivo dell’anteprima pronto:** sul gesto pubblicato in `dab604ae` il riscontro indipendente ha trovato un conflitto fra chiave interna della mappa e percorso pubblico. Correzione dei soli DTO approvata staticamente; typecheck47872/lint94003/build10780 verdi. Rilascio e nuova osservazione necessari prima di chiedere consenso ai tre luoghi. Nessuna creazione o modifica dei pin applicata; gli otto precedenti e Niijima134 restano consegnati. Tutto il mandato residuo è invariato.
+
 **17:00Z — gesto ordinario L5 pronto:** crea il luogo e collega il pin esistente atomicamente, con anteprima e ricevuta distinte dal refresh. Gate distinto integrato e ultimi delta approvati; typecheck11026/lint40133/build47129 verdi. Nessuna migrazione o creazione dati applicata. Al rilascio seguono le anteprime reali e il consenso ai tre luoghi, separato da quello già concluso sugli otto. Gli altri residui e L8–L11 restano integralmente nel mandato.
 
 **16:50Z — perimetro Niijima134 consegnato e approvato:** `47e1ad08`, pipeline76 riuscita, schema134/27; audit7/7, sole condizioni modificate, eventi/acquisti e proiezioni protette identici. Browser indipendente positivo, R6-31 N14/L26 coerente con audit separati;24frasi ancora da ricercare sulle201 correnti. Il nuovo gesto atomico L5 è in implementazione BE/FE dopo gate della soluzione; tre nuove creazioni ancora da riesaminare e sottoporre al consenso specifico. Nessuna chiusura complessiva L5–L7, nessun rinvio di L8–L11; zero test.

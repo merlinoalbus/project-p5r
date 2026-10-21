@@ -1,5 +1,11 @@
 # L5 — difetti accertati nell'audit del 21 ottobre 2026
 
+## 21/10 17:11Z — nuova anteprima da pin, identità della mappa
+
+Sul rilascio `dab604ae`, pipeline77 riuscita, il revisore ha osservato nel browser il gesto fino a «Rivedi», senza creare o salvare dati. L’API risponde200, ma la finestra rifiuta la mappa: il DTO nuovo espone la chiave interna, mentre `MappaDto`, `SpilloDto` e `RisolviMappa` usano il percorso pubblico. Il confronto fra i due domini produce un falso conflitto.
+
+**Correttivo statico approvato, riscontro reale ancora aperto:** `chiaveMappa(raw, db)` nei soli DTO di anteprima e ricevuta. Fotografia, hash, FK e UPDATE mantengono le identità RAW. Tre riesami propri e gate distinto mirato approvati; typecheck47872/lint94003/build10780 exit0. Restano rilascio e anteprima reale prima del gate del gesto e del consenso ai tre luoghi. Nessuna creazione o modifica dei pin è stata applicata.
+
 **Aggiornamento del coordinatore, 21/10 07:43Z:** bonifica pubblicata in `e0ea995e`, pipeline #66 riuscita, p5s schema122/26 osservato. Controlli finali typecheck/lint/build verdi e gate statico distinto approvato. Confronto delle proiezioni GET protette identico prima/dopo, nei limiti descritti in STATO-ATTUALE. Restano inventari correnti e proposte puntuali da completare, oltre alle conferme funzionali/layout dell'utente. Le note di implementazione locale e migrazione122 non eseguita sotto sono checkpoint precedenti al rilascio, non lo stato corrente.
 
 ## Bonifica locale successiva all'audit

@@ -8,6 +8,7 @@ import { bodyAnteprimaLuogoDaPin, bodyCreaLuogoDaPin } from '../schemas/luoghi.j
 import { httpErrors } from '../utils/httpError.js';
 import { creaElemento } from './catalogoService.js';
 import { casaDelLuogo } from './luoghiService.js';
+import { chiaveMappa } from './mappe/percorsiMappe.js';
 import { fotografiaCanonicaLuogoDaPin, fotografiaLuogoDaPin, chiaveLuogoDaPin, type FotografiaLuogoDaPin } from './mappe/fotografiaLuogoDaPin.js';
 
 function richiesta<T>(schema: ZodType<T>, dati: unknown): T {
@@ -29,7 +30,7 @@ export function anteprimaLuogoDaPin(id: number, dati: unknown): AnteprimaLuogoDa
     const f = fotografiaLuogoDaPin(db, id, nuovo);
     return {
       nuovo,
-      spillo: { id: f.pin.id, uid: f.pin.uid, nome: f.pin.nome, tipo: f.pin.tipo as TipoSpillo, mappa: { chiave: String(f.mappa.chiave), nome: String(f.mappa.nome) } },
+      spillo: { id: f.pin.id, uid: f.pin.uid, nome: f.pin.nome, tipo: f.pin.tipo as TipoSpillo, mappa: { chiave: chiaveMappa(String(f.mappa.chiave), db), nome: String(f.mappa.nome) } },
       quartiere: { chiave: String(f.quartiere.chiave), nome: String(f.quartiere.nome) },
       area: { chiave: String(f.area.chiave), slug: String(f.area.slug), nome: String(f.area.nome) },
       luogoPrevisto: { ...nuovo, chiave: chiaveLuogoDaPin(String(f.quartiere.chiave), nuovo.nome) },
@@ -67,6 +68,6 @@ export function creaLuogoDaPin(id: number, dati: unknown): LuogoCreatoDaPinDto {
     if (esito.changes !== 1) throw httpErrors.conflict('luogo-da-pin-precondizione-cambiata', 'Il riferimento del pin è cambiato: nessuna parte della creazione è stata applicata.');
     // Niente riletture o costruzione del dettaglio dopo COMMIT: questa è già la ricevuta del successo.
     // creaElemento ha invalidato le cache nella TX (solo memoria); non serve un effetto fallibile dopo commit.
-    return { esito: 'creato-collegato', luogo: { chiave, nome: nuovo.nome }, spillo: { id, uid: foto.pin.uid, mappaChiave: foto.pin.mappa_chiave } };
+    return { esito: 'creato-collegato', luogo: { chiave, nome: nuovo.nome }, spillo: { id, uid: foto.pin.uid, mappaChiave: chiaveMappa(foto.pin.mappa_chiave, db) } };
   }).immediate();
 }
