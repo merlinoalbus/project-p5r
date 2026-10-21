@@ -29,6 +29,9 @@ import { eGiornoDelQuiz, leggiQuiz, type QuizAttivita } from '../../shared/quizA
 import { catalogoOggettiDisponibile, negoziPerFonte, oggettiPerFonte } from './catalogoOggettiLetture.js';
 import { sessioniVideogioco } from './sessioniVideogioco.js';
 import { disponibilitaAttivita, sediAttivita, type SediAttivita } from './disponibilitaAttivita.js';
+import { fonteConfidenteAttivita } from './fonteConfidenteAttivitaService.js';
+
+interface RigaAttivita { confidente_chiave: string | null }
 
 type CatalogoLetture = Map<string, CatalogoOggettoDto>;
 /** I prezzi copiati dalla guida non sono offerte. Gli avanzamenti non dipendono da questi campi. */
@@ -85,14 +88,17 @@ function articoliCollegati(fonte: 'libri' | 'videogiochi'): Map<string, LibroDto
 const attivitaDto = (r: RigaAttivita, sedi: SediAttivita, st: StatoDisponibilita | null = null, catalogo: CatalogoLetture = new Map()): AttivitaDto => {
   const oggetto = r.tipo === 'videogioco' ? catalogo.get(r.chiave) : undefined;
   const { prezzo, ...identita } = datiCatalogoLettura(oggetto, r.costo);
+  const fonteConfidente = fonteConfidenteAttivita({ ...r }, st);
   return {
+    confidenteChiave: r.confidente_chiave ?? null, fonteConfidente,
     chiave: r.chiave, nome: oggetto?.nome ?? r.nome, ...identita, tipo: r.tipo as AttivitaDto['tipo'], luogo: r.luogo, luogoChiave: r.luogo_chiave, fascia: r.fascia as AttivitaDto['fascia'], costo: prezzo, sblocco: r.sblocco, sessioni: r.sessioni,
-    doti: JSON.parse(r.doti_json) as AttivitaDto['doti'], altriEffetti: r.altri_effetti, regole: r.regole, premi: r.premi, paga: r.paga,
-    pagaYen: r.paga_yen, pagaMassima: r.paga_massima, dettagli: r.dettagli, ...effettiDto(r.effetti_json),
+    doti: fonteConfidente ? [] : JSON.parse(r.doti_json) as AttivitaDto['doti'], altriEffetti: r.altri_effetti, regole: r.regole, premi: r.premi, paga: r.paga,
+    pagaYen: r.paga_yen, pagaMassima: r.paga_massima, dettagli: r.dettagli, ...effettiDto(fonteConfidente ? null : r.effetti_json),
     tracciamento: eTracciamentoAttivita(r.tracciamento) ? r.tracciamento : tracciamentoPerTipo(r.tipo), quiz: leggiQuiz(r.quiz_json),
     sedeChiave: r.sede_chiave, sedeNome: r.sede_chiave ? (sedi.luoghi.get(r.sede_chiave)?.nome ?? null) : null,
     verificato: r.verificato === 1,
-    ...disponibilitaAttivita(r, st, sedi),
+    ...(fonteConfidente ? { fascia: null, sblocco: null, doti: [], effetti: [], effettiTesto: [], tracciamento: 'nessuno' as const,
+      quiz: null, condizioni: null, disponibilita: null } : disponibilitaAttivita(r, st, sedi)),
   };
 };
 interface StatoLetture { fatti: Set<string>; progressiLibri: Map<string, number>; progressiFilm: Map<string, number>; progressiVideogiochi: Map<string, number>; sessioniVideogioco: ReturnType<typeof sessioniVideogioco> }
@@ -194,6 +200,7 @@ export function impostaSessioneVideogioco(partitaId: number, chiave: string, dic
   const r = prepared(`SELECT * FROM attivita WHERE chiave = ? AND tipo = 'videogioco'${dichiarata ? ' AND nascosto = 0' : ''}`).get(chiave) as RigaAttivita | undefined;
   if (!r) throw httpErrors.notFound('lettura-non-trovata', `Il videogioco '${chiave}' non esiste.`);
   const presente = !!prepared('SELECT 1 FROM sessione_videogioco_partita WHERE partita_id = ? AND videogioco_chiave = ?').get(partitaId, chiave);
+  if (r.confidente_chiave && dichiarata && !presente) throw httpErrors.conflict('attivita-fonte-confidente', 'Questa attività rimanda al Confidente: registra l’incontro nella sua scheda.');
   const st = statoDisponibilitaPartita(partitaId);
   if (dichiarata && !presente && disponibilitaAttivita(r, st).disponibilita?.stato === 'bloccato') {
     throw httpErrors.conflict('lettura-non-disponibile', 'Il videogioco non è ancora disponibile nella partita.');
@@ -334,6 +341,7 @@ export function haAnimaDaCineasta(partitaId: number): boolean {
  * contate per volte: contano le voci `ripetuto`, e dove la guida non dichiara niente ripetere non dà niente. Una voce con condizioni
  * («piove») conta solo se la partita le soddisfa in quel momento. */
 function noteDelConseguimento(riga: RigaLibro | RigaFilm | RigaAttivita, successiva: boolean, st: StatoDisponibilita): Array<{ dote: string; note: 1 | 2 | 3 }> {
+  if ('confidente_chiave' in riga && riga.confidente_chiave != null) return [];
   const voci: VoceEffetto[] = leggiVociEffetto(riga.effetti_json);
   const nomi = nomiCondizioniMemo();
   return dotiDaEffetti(voci, { successiva })
@@ -401,6 +409,7 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
   }
   const st = statoDisponibilitaPartita(partitaId);
   const precedente = avanzamentoLettura(partitaId, tipo, chiave).avanzamento;
+  if (tipo === 'videogioco' && (riga as RigaAttivita).confidente_chiave && richiesto > precedente) throw httpErrors.conflict('attivita-fonte-confidente', 'Questa attività rimanda al Confidente: non si avanza per sessioni.');
   const disponibilita = tipo === 'videogioco' ? disponibilitaAttivita(riga as RigaAttivita, st) : conDisponibilita(riga.condizioni_json, st);
   if (richiesto > precedente && disponibilita.disponibilita?.stato === 'bloccato') {
     throw httpErrors.conflict('lettura-non-disponibile', `'${nomeCorrente}' non è ancora disponibile nella partita: la condizione di sblocco non è soddisfatta.`);
@@ -492,9 +501,13 @@ export function avanzamentoLettura(partitaId: number, tipo: TipoLettura, chiave:
 // contatore, il turno si conta da una parte sola.
 
 /** L'attività contata per volte (`tracciamento = 'svolta'`), o un errore che dice perché no. */
-function attivitaConTurni(chiave: string): RigaAttivita {
+function attivitaConTurni(chiave: string, soloRiduzione = false): RigaAttivita {
   const riga = prepared('SELECT * FROM attivita WHERE chiave = ?').get(chiave) as RigaAttivita | undefined;
   if (!riga) throw httpErrors.notFound('attivita-non-trovata', `L'attività '${chiave}' non esiste.`);
+  if (riga.confidente_chiave) {
+    if (soloRiduzione) return riga;
+    throw httpErrors.conflict('attivita-fonte-confidente', 'Questa attività rimanda al Confidente: registra l’incontro nella sua scheda, senza aggiungere un turno generico.');
+  }
   // come la scheda dell'attività: un valore fuori catalogo vale quello del tipo
   const tracciamento = eTracciamentoAttivita(riga.tracciamento) ? riga.tracciamento : tracciamentoPerTipo(riga.tipo);
   if (tracciamento !== 'svolta') throw httpErrors.badRequest('attivita-non-conteggiabile', `«${riga.nome}» non si conta per volte svolte: non ha turni da registrare.`);
@@ -553,7 +566,7 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
  *  ancora — il contatore può averlo già tolto, e `volte` non deve scendere due volte —, oppure l'ultimo (il contatore):
  *  l'ultimo registrato, o uno di quelli contati prima del registro, che non hanno punti da restituire. */
 export function togliTurno(partitaId: number, chiave: string, ordine?: number): void {
-  attivitaConTurni(chiave);
+  attivitaConTurni(chiave, true);
   const adesso = nowIso();
   getDb().transaction(() => {
     const prima = volteSvolte(partitaId, chiave);
@@ -574,11 +587,11 @@ export function togliTurno(partitaId: number, chiave: string, ordine?: number): 
 /** Il contatore dell'attività: porta le volte a `volte` registrando o togliendo turni. Dice che cosa danno i turni
  *  aggiunti (o davano quelli tolti), da segnare a mano nelle Doti. */
 export function impostaVolteAttivita(partitaId: number, chiave: string, volte: number): DoteDaSegnareDto[] {
-  attivitaConTurni(chiave);
   const prima = puntiRegistrati(partitaId, 'attivita', chiave);
   getDb().transaction(() => {
     // lo stato della partita si calcola una volta per tutti i turni da aggiungere, non una per turno (P5')
     const da = volteSvolte(partitaId, chiave);
+    attivitaConTurni(chiave, volte <= da);
     const st = da < volte ? statoDisponibilitaPartita(partitaId) : undefined;
     for (let v = da; v < volte; v++) registraTurno(partitaId, chiave, undefined, st);
     for (let v = volteSvolte(partitaId, chiave); v > volte; v--) togliTurno(partitaId, chiave);

@@ -28,6 +28,7 @@ import { closeDb, copiaSchema, getDb, initDb, resolveDbPath, resolvePartitePath 
 import { runMigrations, type Migration } from '../db/migrationRunner.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { occupaIstanza } from './lucchettoIstanza.js';
+import { verificaCollegamentiAttivitaImportati } from './vincoliAttivitaConfidente.js';
 import { migrations } from '../db/migrations/index.js';
 import { migrazioniUtente } from '../db/migrazioniUtente/index.js';
 import { assorbiImmaginiSuDisco } from './pacchetto/pacchettoGioco.js';
@@ -324,6 +325,7 @@ function rimuoviDatabase(dbPath: string): void {
 export function riapriIstanza(): void {
   const db = initDb();
   runMigrations(db);
+  verificaCollegamentiAttivitaImportati(db);
   assorbiImmaginiSuDisco(db);
   invalidaCacheDiGioco();
 }

@@ -1,7 +1,7 @@
 import type { AnalisiRiconciliazione, FonteRiconciliazione, TabellaRiconciliazione } from './riconciliazioneCondizioni.js';
 
 /** Trascrizione esplicita del censimento pubblico: mai parsing di Markdown o formule ricavate dalla prosa. */
-export const REVISIONE_RICONCILIAZIONE = '2026-10-21.2';
+export const REVISIONE_RICONCILIAZIONE = '2026-10-21.3';
 export interface GruppoFraseCondizioni {
   id: string;
   classeStorica: 'M' | 'E' | 'R';
@@ -21,6 +21,8 @@ const giochi = { titolo: 'AGS — Videogiochi', url: 'https://www.allgamestaff.i
 const niijima = { titolo: 'AGS — Banchi e progressione del Palazzo di Niijima', url: 'https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/' };
 const negozi = { titolo: 'AGS — Offerte dei due banchi', url: 'https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/' };
 const qimranut = { titolo: 'AGS — Primo ingresso guidato nei Memento', url: 'https://www.allgamestaff.it/persona-5-royal/dedalo-di-qimranut/' };
+const takemi = { titolo: 'AGS Royal — Tae Takemi, requisiti e passaggi di rango', url: 'https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-tae-takemi-morte/' };
+const takemiRoyal = { titolo: 'GameFAQs Royal — Death, beneficio del passaggio8', url: 'https://gamefaqs.gamespot.com/ps4/260936-persona-5-royal/faqs/78212/death' };
 const g = (codice: string, chiavi: string, fraseStorica: string, propostaTesto: string, analisi: AnalisiRiconciliazione = 'ricerca'): GruppoFraseCondizioni => {
   const [id, classe] = codice.split(' ');
   const tabella: TabellaRiconciliazione = id[0] === 'L' ? 'luogo' : id[0] === 'N' ? 'negozio' : id[0] === 'A' ? 'attivita' : 'articolo';
@@ -28,7 +30,7 @@ const g = (codice: string, chiavi: string, fraseStorica: string, propostaTesto: 
     campoFrase: tabella === 'articolo' ? 'condizione' : 'sblocco', fraseStorica, propostaTesto, analisi,
     notaDaConservare: 'Conservare integralmente la frase nella sua provenienza. La nota storica non sostituisce i requisiti strutturati.',
     fonti: [specifica, matrice, ...(['I38', 'I41', 'I73'].includes(id) ? [libri] : ['A04', 'A06', 'A11', 'I43'].includes(id) ? [giochi]
-      : id === 'N14' ? [niijima, negozi] : id === 'L26' ? [qimranut] : [])] };
+      : id === 'N14' ? [niijima, negozi] : id === 'L26' ? [qimranut] : id === 'A12' ? [takemi, takemiRoyal] : [])] };
 };
 
 export const GRUPPI_FRASI_CONDIZIONI: readonly GruppoFraseCondizioni[] = [
@@ -100,7 +102,7 @@ export const GRUPPI_FRASI_CONDIZIONI: readonly GruppoFraseCondizioni[] = [
   g('A09 E', 'lavoro-rafflesia', 'Fascino Rango 2', 'Fascino almeno 2.', 'condizioni'),
   g('A10 R', 'sfida-pesca-guardiano-ichigaya', 'Guardiano: Perizia Rango 4; Boss: dopo cattura del Guardiano, Perizia Rango 5', 'Ricerca aperta sulle condizioni di incontro e cattura e sulle soglie. Nessuna nuova attività o evento è proposto come già approvato.'),
   g('A11 R', 'videogioco-star-forneus', 'Incluso nel Set per retrogaming (Negozio usati Yumenoshima, Yongen-Jaya, dal 5 giugno)', 'Sistema installato, titolo incluso senza secondo acquisto; bonifica 124.', 'condizioni'),
-  g('A12 R', 'esperimenti-clinici-takemi', "Legato al Confidente dell'Eremita (Takemi)", 'Takemi è Morte; primo esperimento e attività successiva al rango 1 vanno distinti.'),
+  g('A12 R', 'esperimenti-clinici-takemi', "Legato al Confidente dell'Eremita (Takemi)", 'Fonte unica Tae Takemi (Morte): requisiti del primo incontro dal 18 aprile e passaggi successivi nella scheda del Confidente, distinti dalla farmacia dal 16 aprile. Nessuna condizione o Dote generica nell’attività. La conferma riguarda il raccordo corrente, non garantisce il calendario o il beneficio del rango8; i due esiti storici135 sono separati.', 'eredita'),
   g('A13 R', 'sala-giochi-gun-about-akihabara', "Legato al Confidente della Torre (Shinya Oda); avviabile dal 4 settembre tramite la richiesta Mementos 'I baro non vincono mai'", 'Shinya 1 e dal 4 settembre, senza richiedere vittoria già ottenuta nella Richiesta.', 'condizioni'),
   g('A14 E', 'curry-leblanc', 'Rango 4 del Confidente di Sojiro', 'Sojiro almeno rango 4.', 'condizioni'),
   g('A15 M', 'allenamento-palestra-protein-lovers', 'Rango 5 di Ryuji oppure Rango 8 di Ann', 'Ereditare la sede; bonifica 124 della copia identica.', 'eredita'),

@@ -7,10 +7,11 @@ import { normalizzaRequisitoSpillo } from '../../../../shared/condizioniSpillo';
 import { normalizzaVociEffetto, type VoceEffetto } from '../../../../shared/effettiCatalogo';
 import { descriviEffetto, type EffettoOggetto } from '../../../../shared/effettiOggetto';
 import { tracciamentoPerTipo } from '../../../../shared/attivita';
+import { campiAutonomiAttivitaConfidente } from '../../../../shared/attivitaConfidente';
 import { leggiGiorniQuiz, normalizzaQuiz, type QuizAttivita } from '../../../../shared/quizAttivita';
 import { normalizzaCostoScambio } from '../../../../shared/catalogo';
 import type { TipoCatalogo } from '../../../types';
-import { jsonDi, numeroDi, senzaTemporanei, testoDi, testoOnull, verificatoDi, type Dati, type DefinizioneModulo } from './base';
+import { jsonDi, jsonSenzaPerdite, numeroDi, senzaTemporanei, testoDi, testoOnull, verificatoDi, type Dati, type DefinizioneModulo } from './base';
 
 export interface ProgrammaPunti { nome: string; unita: string; calcolo: 'manuale' | 'rango-cliente' }
 /** Un piatto del menu di un luogo (L5, R5-07). */
@@ -132,7 +133,16 @@ function attivitaCon(tipoFisso?: 'videogioco'): DefinizioneModulo {
       const tipo = tipoFisso ?? (testoDi(e?.dati.tipo) || 'altro');
       const quiz = normalizzaQuiz(jsonDi<unknown>(e?.dati.quiz_json, null));
       return {
-        nome: testoDi(e?.dati.nome), tipo, fascia: testoDi(e?.dati.fascia) || 'entrambe',
+        nome: testoDi(e?.dati.nome), tipo, fascia: e ? testoOnull(e.dati.fascia) : 'entrambe',
+        confidente_chiave: testoOnull(e?.dati.confidente_chiave),
+        _confidenteIniziale: testoOnull(e?.dati.confidente_chiave),
+        _fonteConfidente: e?.dati._fonteConfidente ?? null,
+        _dotiStoriche: e?.dati.doti_json ?? [],
+        _effettiRaw: e?.dati.effetti_json ?? null, _quizRaw: e?.dati.quiz_json ?? null,
+        _effettiDaRisolvere: !jsonSenzaPerdite(e?.dati.effetti_json, normalizzaVociEffetto),
+        _quizDaRisolvere: !jsonSenzaPerdite(e?.dati.quiz_json, normalizzaQuiz),
+        sblocco: e?.dati.sblocco ?? null,
+        paga: e?.dati.paga ?? null, premi: e?.dati.premi ?? null, altri_effetti: e?.dati.altri_effetti ?? null,
         sede_chiave: (e?.dati.sede_chiave as string | null) ?? null, luogo_chiave: (e?.dati.luogo_chiave as string | null) ?? null,
         costo: numeroDi(e?.dati.costo), paga_yen: numeroDi(e?.dati.paga_yen), paga_massima: numeroDi(e?.dati.paga_massima),
         sessioni: numeroDi(e?.dati.sessioni) ?? (tipo === 'videogioco' ? 1 : null),
@@ -145,11 +155,15 @@ function attivitaCon(tipoFisso?: 'videogioco'): DefinizioneModulo {
     },
     // con la guida del quiz i giorni devono essere giorni del mese
     valido: (d) => testoDi(d.nome).trim().length > 0 && (d.tipo !== 'videogioco' || (numeroDi(d.sessioni) ?? 0) >= 1)
-      && (!d.quiz_json || leggiGiorniQuiz(testoDi(d._giorniQuiz)) !== null),
+      && !d._effettiDaRisolvere && !d._quizDaRisolvere
+      && (!d.quiz_json || leggiGiorniQuiz(testoDi(d._giorniQuiz)) !== null)
+      && (!testoOnull(d.confidente_chiave) || campiAutonomiAttivitaConfidente({ ...d, fascia: testoOnull(d.fascia), doti_json: d.doti_json ?? d._dotiStoriche },
+        !!d._confidenteIniziale && d.confidente_chiave === d._confidenteIniziale).length === 0),
     prepara: (d) => {
       const quiz = d.quiz_json as QuizAttivita | null;
       return {
         ...senzaTemporanei(d), nome: testoDi(d.nome).trim(), costo: numeroDi(d.costo), sessioni: numeroDi(d.sessioni), dettagli: testoOnull(d.dettagli),
+        confidente_chiave: testoOnull(d.confidente_chiave), fascia: testoOnull(d.fascia),
         paga_yen: d.tipo === 'lavoro' ? numeroDi(d.paga_yen) : null, paga_massima: d.tipo === 'lavoro' ? numeroDi(d.paga_massima) : null,
         tracciamento: d.tipo === 'videogioco' ? 'sessioni' : testoDi(d.tracciamento) || tracciamentoPerTipo(testoDi(d.tipo)),
         // righe vuote e spazi li toglie il server (normalizzaQuiz); un quiz senza domanda né elementi vale «nessun quiz»

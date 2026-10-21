@@ -271,7 +271,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   'GET /api/compendio/attivita': {
     sommario: 'Attività, lavori, libri e film',
     descrizione: 'Attività visibili, lavori separati, libri e film con posizioni ed effetti; le attività con quiz ne portano la guida. Dopo M7 libri, film e attività videogioco leggono nome e alias dal catalogo e prezzi dalle offerte; senza prezzo di vendita la copia della guida è solo `notaPrezzo`. Con `?partita=` avanzamenti, disponibilità e conteggi. Chiavi, effetti e progressi delle letture restano quelli delle voci originali.',
-    risposta: '`AttivitaTutteDto`',
+    risposta: '`AttivitaTutteDto`. Le attività con confidenteChiave dichiarano fonteConfidente: identità e link canonici, giorni/fasce/avvertenze della fonte, requisiti del rango1 e del prossimo rango esatto (anche senza requisiti), Doti per passaggio. Disponibilità e condizioni autonome sono null, Doti/effetti generici vuoti. Nessuna partita: prossimoPasso e rangoAttuale null; rango10: nessun prossimo passo. Un conflitto non diventa disponibilità positiva.',
     errori: [PARTITA_NON_TROVATA],
   },
   'GET /api/compendio/libri': {

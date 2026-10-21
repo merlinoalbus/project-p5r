@@ -1,4 +1,5 @@
 import type { RequisitoSpillo } from './condizioniSpillo.js';
+import type { FonteConfidenteAttivitaDto } from './types.js';
 
 export type TabellaRiconciliazione = 'luogo' | 'negozio' | 'attivita' | 'articolo';
 export type AzioneRiconciliazione = 'conferma-corrente' | 'applica-proposta' | 'mantieni-nota';
@@ -49,6 +50,9 @@ export interface RigaRiconciliazioneDto {
   esitoFonte: 'presente-identica' | 'mutata' | 'nuova' | 'assente';
   esitoFormula: 'coincide' | 'diversa' | 'non-confrontabile' | 'da-ricercare';
   auditMigrazioni: Array<{ migrazione: number; esito: 'applicata' | 'gia-corretta' | 'esclusa'; motivo: string }>;
+  /** A12: fonte corrente distinta dai due esiti storici della135. Nessuna disponibilità o bonifica inferita. */
+  fonteConfidente?: FonteConfidenteAttivitaDto | null;
+  statoAuditConfidente?: 'assente' | 'illeggibile' | 'leggibile';
   decisione: (DecisioneCondizioni & { daRiconfermare: boolean; storico: DecisioneCondizioni[] }) | null;
   azioniConsentite: AzioneRiconciliazione[];
   improntaFonte: string;

@@ -117,8 +117,9 @@ export function verificaEffetti(grezzi: unknown[]): EffettoAzione[] {
           : prepared("SELECT 1 FROM attivita WHERE chiave = ? AND tipo = 'videogioco' AND nascosto = 0").get(e.chiave);
       if (!esiste) throw httpErrors.badRequest('effetto-inesistente', `La lettura «${e.chiave}» non esiste nella guida.`);
     } else if (e.tipo === 'turno') {
-      const a = prepared('SELECT tipo, tracciamento FROM attivita WHERE chiave = ? AND nascosto = 0').get(e.attivita) as { tipo: string; tracciamento: string } | undefined;
+      const a = prepared('SELECT tipo, tracciamento, confidente_chiave FROM attivita WHERE chiave = ? AND nascosto = 0').get(e.attivita) as { tipo: string; tracciamento: string; confidente_chiave: string | null } | undefined;
       if (!a) throw httpErrors.badRequest('effetto-inesistente', `L'attività «${e.attivita}» non esiste nella guida.`);
+      if (a.confidente_chiave) throw httpErrors.conflict('attivita-fonte-confidente', 'L’attività collegata a un Confidente non genera un turno autonomo.');
       if ((eTracciamentoAttivita(a.tracciamento) ? a.tracciamento : tracciamentoPerTipo(a.tipo)) !== 'svolta') {
         throw httpErrors.badRequest('effetto-non-valido', `L'attività «${e.attivita}» non si conta per volte: non ha turni.`);
       }
@@ -151,7 +152,7 @@ export function elenchiAzione(): ElenchiAzioneDto {
   const voci = (sql: string) => prepared(sql).all() as Array<{ chiave: string; nome: string; dettaglio?: string | null }>;
   /** Le stesse righe senza `dettaglio` quando è vuoto o nullo, così il campo compare solo se ha un valore. */
   const pulite = (r: Array<{ chiave: string; nome: string; dettaglio?: string | null }>) => r.map((x) => ({ chiave: x.chiave, nome: x.nome, ...(x.dettaglio ? { dettaglio: x.dettaglio } : {}) }));
-  const attivita = prepared(`SELECT chiave,titolo_corrente AS nome,tipo,tracciamento FROM (${titoliLettura('attivita', 'WHERE l.nascosto = 0 ORDER BY l.ordine')})`).all() as Array<{ chiave: string; nome: string; tipo: string; tracciamento: string }>;
+  const attivita = prepared(`SELECT chiave,titolo_corrente AS nome,tipo,tracciamento,confidente_chiave FROM (${titoliLettura('attivita', 'WHERE l.nascosto = 0 ORDER BY l.ordine')})`).all() as Array<{ chiave: string; nome: string; tipo: string; tracciamento: string; confidente_chiave: string | null }>;
   return {
     confidenti: (prepared('SELECT chiave, nome, arcana FROM confidente ORDER BY ordine').all() as Array<{ chiave: string; nome: string; arcana: string }>).map((c) => ({ chiave: c.chiave, nome: c.nome, dettaglio: t('arcana', c.arcana) })),
     dungeon: pulite(voci('SELECT chiave, nome FROM dungeon ORDER BY ordine')),
@@ -159,7 +160,7 @@ export function elenchiAzione(): ElenchiAzioneDto {
     libri: pulite(voci(`SELECT chiave,titolo_corrente AS nome,${catalogoOggettiDisponibile() ? 'NULL' : 'dove'} AS dettaglio FROM (${titoliLettura('libro', 'WHERE l.nascosto = 0 ORDER BY l.ordine')})`)),
     film: pulite(voci(`SELECT chiave,titolo_corrente AS nome,CASE dove WHEN 'cinema' THEN 'Cinema' ELSE 'DVD' END AS dettaglio FROM (${titoliLettura('film', 'WHERE l.nascosto = 0 ORDER BY l.ordine')})`)),
     videogiochi: attivita.filter((a) => a.tipo === 'videogioco').map((a) => ({ chiave: a.chiave, nome: a.nome })),
-    attivita: attivita.map((a) => ({ chiave: a.chiave, nome: a.nome, turni: (eTracciamentoAttivita(a.tracciamento) ? a.tracciamento : tracciamentoPerTipo(a.tipo)) === 'svolta' })),
+    attivita: attivita.map((a) => ({ chiave: a.chiave, nome: a.nome, turni: !a.confidente_chiave && (eTracciamentoAttivita(a.tracciamento) ? a.tracciamento : tracciamentoPerTipo(a.tipo)) === 'svolta' })),
     negozi: pulite(voci('SELECT chiave, nome, luogo AS dettaglio FROM negozio WHERE nascosto = 0 ORDER BY ordine')),
     doti: pulite(voci('SELECT chiave, nome FROM dote_sociale ORDER BY ordine')),
   };

@@ -30,6 +30,8 @@ import { catalogoOggettiDisponibile, riferimentoOggetto, oggettiPerFonte } from 
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { normalizzaCostoScambio } from '../../shared/catalogo.js';
 import { aggiornaOggetto, creaOggetto } from './catalogoOggettiScritture.js';
+import { fonteConfidenteAttivita } from './fonteConfidenteAttivitaService.js';
+import { verificaAttivitaConfidente, verificaCampiAttivitaConfidente } from './vincoliAttivitaConfidente.js';
 
 /** Colonne scrivibili dall'utente, per tabella: quello che il modulo dell'interfaccia mostra e che i pacchetti trasportano. */
 // Dalla voce 5 (2026-09-12) il negozio non ha più `sblocco`, `fonte` e `condizioni_json` fra i campi
@@ -43,7 +45,7 @@ const CAMPI: Record<TipoCatalogo, readonly string[]> = {
   articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'nome_it', 'categoria', 'per', 'prezzo', 'quantita', 'oggetto_fonte', 'oggetto_chiave', 'catalogo_chiave', 'costo_json', 'effetto_json', 'effetto', 'statistiche', 'nota', 'verificato'],
   libro: ['condizioni_json', 'nome', 'nome_it', 'dove', 'prezzo', 'dote', 'note', 'sblocca', 'effetto_json', 'effetti_json', 'sessioni', 'dettagli', 'verificato'],
   film: ['condizioni_json', 'nome', 'nome_it', 'dove', 'dote', 'note', 'note_successive', 'effetti_json', 'prezzo', 'sessioni', 'dettagli', 'verificato'],
-  attivita: ['condizioni_json', 'nome', 'tipo', 'luogo', 'luogo_chiave', 'sede_chiave', 'fascia', 'costo', 'sblocco', 'sessioni', 'doti_json', 'altri_effetti', 'regole', 'premi', 'paga', 'paga_yen', 'paga_massima', 'dettagli', 'effetti_json', 'tracciamento', 'quiz_json', 'verificato'],
+  attivita: ['confidente_chiave', 'condizioni_json', 'nome', 'tipo', 'luogo', 'luogo_chiave', 'sede_chiave', 'fascia', 'costo', 'sblocco', 'sessioni', 'doti_json', 'altri_effetti', 'regole', 'premi', 'paga', 'paga_yen', 'paga_massima', 'dettagli', 'effetti_json', 'tracciamento', 'quiz_json', 'verificato'],
   // L5 (R5-07, un modulo solo): orari strutturati (null = regola dell'app), Area, sblocco, Confidenti e piatti; `quando`/`giorni_json` non si
   // leggono più (restano scrivibili per i pacchetti di prima)
   luogo: ['condizioni_json', 'quartiere_chiave', 'tipo', 'nome', 'cosa_offre', 'quando', 'giorni_json', 'orari_json', 'area_chiave', 'sblocco', 'confidenti_json', 'piatti_json', 'note', 'verificato'],
@@ -112,6 +114,7 @@ function chiaveCondivisa(tipo: TipoCatalogo, chiave: string): string {
 function dto(tipo: TipoCatalogo, r: Riga): ElementoCatalogoDto {
   const dati: Record<string, unknown> = {};
   for (const c of campiDisponibili(tipo)) dati[c] = r[c] ?? null;
+  if (tipo === 'attivita') dati._fonteConfidente = fonteConfidenteAttivita(r);
   if (tipo === 'articolo' && 'costo_json' in r) dati.costo_json = r.costo_json;
   const oggetto = typeof r.catalogo_chiave === 'string' ? riferimentoOggetto(r.catalogo_chiave) : null;
   if (categoriaLettura(tipo, r) && oggetto) {
@@ -278,6 +281,8 @@ const eVoceDerivabile = (v: VoceEffetto) => v.effetto.famiglia === 'dote' && !(v
  *  un'attività nuova, e `effetti_json` sempre normalizzato (illeggibile → lista vuota). Non tocca l'oggetto ricevuto. */
 function normalizzaScrittura(tipo: TipoCatalogo, dati: Record<string, unknown>, esistente: Riga | null): Record<string, unknown> {
   const d = { ...dati };
+  const collegata = tipo === 'attivita' && (d.confidente_chiave !== undefined ? d.confidente_chiave : esistente?.confidente_chiave) != null;
+  if (collegata) verificaCampiAttivitaConfidente({ ...esistente, ...d }, esistente);
   if (catalogoOggettiDisponibile() && categoriaLettura(tipo, { ...esistente, ...d })) {
     delete d.prezzo;
     if (tipo === 'attivita') delete d.costo;
@@ -304,7 +309,7 @@ function normalizzaScrittura(tipo: TipoCatalogo, dati: Record<string, unknown>, 
     const q = prepared('SELECT quartiere_chiave FROM luogo WHERE chiave = ?').get(d.sede_chiave) as { quartiere_chiave: string } | undefined;
     if (q) d.luogo_chiave = q.quartiere_chiave;
   }
-  const campi = CAMPI_EFFETTI[tipo] ?? [];
+  const campi = collegata ? [] : CAMPI_EFFETTI[tipo] ?? [];
   if (campi.length && d.effetti_json === undefined && campi.some((c) => c in d)) {
     const cambiati = !esistente || campi.some((c) => c in d && (d[c] ?? null) !== (esistente[c] ?? null));
     if (cambiati) {
@@ -314,8 +319,8 @@ function normalizzaScrittura(tipo: TipoCatalogo, dati: Record<string, unknown>, 
       d.effetti_json = JSON.stringify(normalizzaVociEffetto([...vociDaiCampiVecchi(tipo, campiVecchi), ...attuali.filter((v) => !eVoceDerivabile(v))]));
     }
   }
-  if (tipo === 'attivita' && d.tracciamento === undefined && typeof d.tipo === 'string' && !esistente) d.tracciamento = tracciamentoPerTipo(d.tipo);
-  if (typeof d.effetti_json === 'string') { try { d.effetti_json = JSON.stringify(normalizzaVociEffetto(JSON.parse(d.effetti_json))); } catch { d.effetti_json = '[]'; } }
+  if (tipo === 'attivita' && d.tracciamento === undefined && typeof d.tipo === 'string' && !esistente) d.tracciamento = collegata ? 'nessuno' : tracciamentoPerTipo(d.tipo);
+  if (!collegata && typeof d.effetti_json === 'string') { try { d.effetti_json = JSON.stringify(normalizzaVociEffetto(JSON.parse(d.effetti_json))); } catch { d.effetti_json = '[]'; } }
   return d;
 }
 
@@ -423,6 +428,7 @@ function creaElementoNellaTransazione(tipo: TipoCatalogo, grezzi: Record<string,
   if (grezzi.condizioni_json != null) grezzi = { ...grezzi, condizioni_json: verificaFormulaCompleta(grezzi.condizioni_json, 'creazione') };
   verificaRiferimenti(tipo, grezzi);
   const dati = normalizzaScrittura(tipo, grezzi, null);
+  if (tipo === 'attivita') verificaAttivitaConfidente(getDb(), dati);
   const nome = tipo === 'articolo' && typeof dati.catalogo_chiave === 'string' ? riferimentoOggetto(dati.catalogo_chiave)?.nome ?? ''
     : typeof dati[PROFILO[tipo].campoNome] === 'string' ? String(dati[PROFILO[tipo].campoNome]).trim() : '';
   if (!nome) throw httpErrors.badRequest('nome-mancante', `${PROFILO[tipo].etichettaCampoNome} è obbligatorio.`);
@@ -457,6 +463,7 @@ function creaElementoNellaTransazione(tipo: TipoCatalogo, grezzi: Record<string,
   if (PROFILO[tipo].haVerificato) valori.verificato = dati.verificato === false ? 0 : 1;
   const extra = PROFILO[tipo].haVerificato ? ', verificato' : '';
   const extraVal = PROFILO[tipo].haVerificato ? ', @verificato' : '';
+  if (tipo === 'attivita') verificaAttivitaConfidente(getDb(), valori);
   prepared(`INSERT INTO ${TABELLA[tipo]} (${colonne.join(', ')}${extra}) VALUES (${colonne.map((c) => `@${c}`).join(', ')}${extraVal})`).run(valori);
   assicuraIdentitaLettura(tipo, chiave, nome);
   return dto(tipo, riga(tipo, chiave));
@@ -464,6 +471,12 @@ function creaElementoNellaTransazione(tipo: TipoCatalogo, grezzi: Record<string,
 
 /** Modifica una riga: quella del seed viene «adottata» dall'utente conservando l'originale in `seed_json`. */
 export function aggiornaElemento(tipo: TipoCatalogo, chiave: string, grezzi: Record<string, unknown>): ElementoCatalogoDto {
+  const elemento = getDb().transaction(() => aggiornaElementoNellaTransazione(tipo, chiave, grezzi))();
+  invalidaCacheDiGioco();
+  return elemento;
+}
+
+function aggiornaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string, grezzi: Record<string, unknown>): ElementoCatalogoDto {
   if (tipo === 'negozio' && typeof grezzi.sblocco_json === 'string') verificaCondizioni(JSON.parse(grezzi.sblocco_json));
   chiave = chiaveCondivisa(tipo, chiave);
   if (tipo === 'articolo' && typeof grezzi.negozio_chiave === 'string') grezzi = { ...grezzi, negozio_chiave: chiaveCondivisa('negozio', grezzi.negozio_chiave) };
@@ -471,6 +484,7 @@ export function aggiornaElemento(tipo: TipoCatalogo, chiave: string, grezzi: Rec
   if (typeof grezzi.condizioni_json === 'string') verificaCondizioni(JSON.parse(grezzi.condizioni_json));
   verificaRiferimenti(tipo, grezzi, r);
   const dati = normalizzaScrittura(tipo, grezzi, r);
+  if (tipo === 'attivita') verificaAttivitaConfidente(getDb(), { ...r, ...dati }, r);
   const lettura = categoriaLettura(tipo, { ...r, ...dati });
   const titolo = lettura && typeof dati.nome === 'string' ? dati.nome.trim() : null;
   if (lettura && catalogoOggettiDisponibile()) {
@@ -493,7 +507,6 @@ export function aggiornaElemento(tipo: TipoCatalogo, chiave: string, grezzi: Rec
       if (titolo && typeof aggiornata.catalogo_chiave === 'string') aggiornaOggetto(aggiornata.catalogo_chiave, { nome: titolo });
     }
   })();
-  invalidaCacheDiGioco();
   return dto(tipo, riga(tipo, chiave));
 }
 
@@ -561,6 +574,10 @@ function ripristinaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string):
   if (r.seed_json !== null && (fotografia === null || typeof fotografia !== 'object' || Array.isArray(fotografia))) condizioniDaDefinire('ripristino', 'fotografia-non-valida');
   const originale = fotografia as Record<string, unknown> | null;
   if (!originale) throw httpErrors.badRequest('riga-del-seed', 'Questa riga arriva dai dati della guida e non è stata modificata: non c\'è nulla da ripristinare. Usa «Nascondi» se non vuoi vederla.');
+  const conservaFonteConfidente = tipo === 'attivita' && r.confidente_chiave != null && !('confidente_chiave' in originale);
+  if (conservaFonteConfidente) {
+    for (const c of ['fascia', 'condizioni_json', 'effetti_json', 'tracciamento', 'sessioni', 'quiz_json', 'costo', 'sblocco', 'paga_yen', 'paga_massima', 'paga', 'premi', 'altri_effetti', 'doti_json']) originale[c] = r[c];
+  }
   const daProsaRip = PROFILO[tipo].condizioniDa;
   if (daProsaRip && originale.condizioni_json == null) originale.condizioni_json = condizioniCompleteDaProsa(tipo, String(r.chiave), originale, 'ripristino');
   else if (originale.condizioni_json != null) originale.condizioni_json = verificaFormulaCompleta(originale.condizioni_json, 'ripristino');
@@ -577,7 +594,7 @@ function ripristinaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string):
   // ricavano le chiavi, come ha fatto la migrazione; senza nemmeno la frase, nessuna limitazione.
   const predefinito = (c: string): unknown => c === 'verificato' ? 1 : c === 'giorni_json' ? JSON.stringify(giorniDallaFrase(typeof originale.giorni === 'string' ? originale.giorni : null).giorni) : null;
   // Un'istantanea anteriore a L5/M7 non azzera orari, Area o il legame canonico aggiunti dopo.
-  const campiSuccessivi = new Set(['orari_json', 'area_chiave', 'eccezione_orari_json', 'sblocco_json', 'catalogo_chiave', 'costo_json']);
+  const campiSuccessivi = new Set(['orari_json', 'area_chiave', 'eccezione_orari_json', 'sblocco_json', 'catalogo_chiave', 'costo_json', 'confidente_chiave']);
   const campi = campiDisponibili(tipo).filter((c) => c in originale || !campiSuccessivi.has(c));
   if (tipo === 'articolo' && campi.includes('catalogo_chiave') && typeof originale.catalogo_chiave === 'string'
     && !prepared('SELECT 1 FROM catalogo_oggetto WHERE chiave = ?').get(originale.catalogo_chiave)) {
@@ -592,7 +609,10 @@ function ripristinaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string):
   }
   const set = campi.map((c) => `${c} = @${c}`);
   const valori: Record<string, unknown> = { chiave, ...Object.fromEntries(campi.map((c) => [c, originale[c] ?? predefinito(c)])) };
+  if (tipo === 'attivita') verificaAttivitaConfidente(getDb(), { ...r, ...valori }, r);
   verificaTipoVideogioco(tipo, r, originale.tipo ?? r.tipo);
   prepared(`UPDATE ${TABELLA[tipo]} SET ${set.join(', ')}, origine = 'seed', nascosto = 0, seed_json = NULL, updated_at = NULL WHERE chiave = @chiave`).run(valori);
-  return dto(tipo, riga(tipo, chiave));
+  const risultato = dto(tipo, riga(tipo, chiave));
+  if (conservaFonteConfidente) risultato.avvisi = ['La fotografia precede il collegamento al Confidente: fonte, requisiti e campi operativi correnti sono stati conservati. Gli altri valori sono stati ripristinati.'];
+  return risultato;
 }

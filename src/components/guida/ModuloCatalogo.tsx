@@ -11,7 +11,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CondizioniEditor } from './CondizioniEditor';
-import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../../shared/condizioniSpillo';
+import { normalizzaCondizioniSpillo, normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../../shared/condizioniSpillo';
 import { aggiornaElementoCatalogo, creaElementoCatalogo, eliminaElementoCatalogo, eliminaNelCestino, isApiError, nascondiElementoCatalogo, ripristinaElementoCatalogo } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { Modal } from '../shared/Modal';
@@ -19,6 +19,7 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { NOME_TIPO_CATALOGO, tipoCatalogoDi, type TipoModulo } from '../../utils/catalogo';
 import { MODULI, type Dati } from './moduli';
+import { jsonDi, jsonSenzaPerdite } from './moduli/base';
 import type { ElementoCatalogoDto } from '../../types';
 
 interface Props {
@@ -45,10 +46,14 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
   const [dati, setDati] = useState<Dati>(() => modulo.iniziali(elemento ?? null, negozioChiave));
   /** Unisce una modifica parziale ai dati del modulo. */
   const imposta = (patch: Dati) => setDati((d) => ({ ...d, ...patch }));
-  const [condizioni, setCondizioni] = useState<RequisitoSpillo[]>(() => { try { return JSON.parse(String(elemento?.dati.condizioni_json ?? '[]')) as RequisitoSpillo[]; } catch { return []; } });
+  const [condizioni, setCondizioni] = useState<RequisitoSpillo[]>(() => normalizzaCondizioniSpillo(jsonDi(elemento?.dati.condizioni_json, [])));
+  const [condizioniDaRisolvere, setCondizioniDaRisolvere] = useState(() => !jsonSenzaPerdite(elemento?.dati.condizioni_json, normalizzaCondizioniSpillo));
   const [condizioniScelte, setCondizioniScelte] = useState(!nuovo);
+  const impostaCondizioni = (v: RequisitoSpillo[]) => { setCondizioni(v); setCondizioniScelte(true); setCondizioniDaRisolvere(false); };
+  // Il modulo delle attività deve vedere le condizioni effettivamente inviate, non una copia iniziale.
+  const datiModulo = tipo === 'attivita' ? { ...dati, condizioni_json: condizioni, _condizioniDaRisolvere: condizioniDaRisolvere } : dati;
   const [erroreSalvataggio, setErroreSalvataggio] = useState<string | null>(null);
-  const regoleValide = !modulo.conCondizioni || condizioni.every((c) => normalizzaRequisitoSpillo(c) !== null);
+  const regoleValide = !modulo.conCondizioni || (!condizioniDaRisolvere && condizioni.every((c) => normalizzaRequisitoSpillo(c) !== null));
   const [occupato, setOccupato] = useState(false);
   const nome = tipoModulo === 'videogioco' ? { singolare: 'Videogioco', nuovo: 'Nuovo videogioco' } : NOME_TIPO_CATALOGO[tipo];
   const lettura = tipo === 'libro' || tipo === 'film' || tipoModulo === 'videogioco' || dati.tipo === 'videogioco';
@@ -59,7 +64,7 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
     setOccupato(true);
     setErroreSalvataggio(null);
     try {
-      const corpo: Dati = modulo.prepara(dati);
+      const corpo: Dati = modulo.prepara(datiModulo);
       if (modulo.conCondizioni && (!nuovo || condizioniScelte)) corpo.condizioni_json = condizioni;
       else if (nuovo) delete corpo.condizioni_json;
       if (nuovo) {
@@ -91,8 +96,9 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
     setOccupato(true);
     setErroreSalvataggio(null);
     try {
-      await ripristinaElementoCatalogo(tipo, elemento.chiave);
+      const ripristinato = await ripristinaElementoCatalogo(tipo, elemento.chiave);
       notifica('success', 'Ripristinati i valori della guida.');
+      if (ripristinato.avvisi?.length) notifica('warning', ripristinato.avvisi.join(' '), 12000);
       onSalvato();
     } catch (err) {
       const messaggio = err instanceof Error ? err.message : 'Operazione fallita.';
@@ -169,7 +175,7 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
           {!nuovo && (nelCestino || (elemento.origine === 'utente' && !elemento.modificata)) && (
             <button type="button" className="btn btn-danger" disabled={occupato} onClick={() => (nelCestino ? setEliminazione({ riepilogo: null }) : void elimina())}>Elimina</button>
           )}
-          <button type="button" className="btn btn-primary" disabled={occupato || !regoleValide || !modulo.valido(dati)} onClick={() => void salva()}>Salva</button>
+          <button type="button" className="btn btn-primary" disabled={occupato || !regoleValide || !modulo.valido(datiModulo)} onClick={() => void salva()}>Salva</button>
         </>
       }
     >
@@ -185,19 +191,24 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
         {lettura && <p className="m-0 text-[12px] text-text-muted">Il titolo appartiene all’oggetto: cambiarlo aggiorna tutti i riferimenti. Il prezzo si modifica nell’offerta del negozio.
           {catalogoCasa && <> <Link to={catalogoCasa} onClick={onChiudi} className="touch inline-flex items-center">Apri l’oggetto per ripristinare il titolo o vedere le offerte</Link>.</>}
         </p>}
-        <Componente dati={dati} imposta={imposta} elemento={elemento ?? null} nuovo={nuovo} disabilitato={occupato} negozioChiave={negozioChiave} />
+        <Componente dati={datiModulo} imposta={imposta} impostaCondizioni={impostaCondizioni} elemento={elemento ?? null} nuovo={nuovo} disabilitato={occupato} negozioChiave={negozioChiave} />
         {/* Le condizioni valgono per quel che compare e sparisce col procedere della partita. Una
             domanda in classe e una riga del cruciverba hanno già il loro giorno, che è la
             condizione; il negozio ha gli orari, e lo sblocco della merce sta sugli articoli. */}
         {modulo.conCondizioni && <>
-          <CondizioniEditor condizioni={condizioni} onCambia={(v) => { setCondizioni(v); setCondizioniScelte(true); }} disabilitato={occupato} />
+          {condizioniDaRisolvere && <div className="flex flex-col gap-2 rounded-md border border-warning p-3 text-sm">
+            <p role="alert" className="m-0">Le condizioni salvate contengono parti che l’editor non sa rappresentare. Il salvataggio resta bloccato finché non scegli esplicitamente come risolverle.</p>
+            <p className="m-0 whitespace-pre-wrap break-all">{String(elemento?.dati.condizioni_json)}</p>
+            <button type="button" className="btn btn-secondary min-h-11 self-start" disabled={occupato} onClick={() => impostaCondizioni(condizioni)}>Usa le condizioni leggibili qui sotto e scarta le altre parti</button>
+          </div>}
+          <CondizioniEditor condizioni={condizioni} onCambia={impostaCondizioni} disabilitato={occupato || condizioniDaRisolvere} />
           {nuovo && condizioni.length === 0 && <div className="space-y-2 text-sm">
             <p>{condizioniScelte ? 'Hai scelto di non aggiungere condizioni proprie.' : 'Le condizioni proprie non sono ancora state scelte. Una frase non interamente compresa richiederà una tua scelta prima del salvataggio.'}</p>
             {!condizioniScelte && <button type="button" className="btn btn-secondary min-h-11" disabled={occupato} onClick={() => setCondizioniScelte(true)}>Nessuna condizione propria</button>}
           </div>}
         </>}
         {erroreSalvataggio && <p role="alert" className="m-0 text-sm text-error">{erroreSalvataggio} La finestra resta aperta.</p>}
-        {!regoleValide && <p role="alert" className="m-0 text-[13px] text-error">Completa o rimuovi i gruppi vuoti prima di salvare.</p>}
+        {!regoleValide && <p role="alert" className="m-0 text-[13px] text-error">Risolvi le parti non leggibili e completa o rimuovi i gruppi vuoti prima di salvare.</p>}
         <div className="flex flex-wrap items-center justify-between gap-2">
           {modulo.conVerificato
             ? <label className="flex items-center gap-2 text-[13px] touch" title="Il dato è confermato: senza la spunta compare come «da fonte secondaria»">

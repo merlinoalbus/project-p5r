@@ -6,6 +6,8 @@ import { condizioneSpillo } from '../schemas/mappe.js';
 import { aggiornaElemento } from './catalogoService.js';
 import { nomiCondizioni } from './condizioni/nomiCondizioni.js';
 import { invitiCheAprono, tuttiGliInviti } from './condizioni/condizioneEffettiva.js';
+import { fonteConfidenteAttivita } from './fonteConfidenteAttivitaService.js';
+import { condizioneDelRequisito, type RigaRequisito } from './semaforiService.js';
 import { descriviOrari, descriviOrariDelLuogo, leggiOrari, orariDelLuogo } from '../../shared/orariNegozio.js';
 import { descriviRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { GRUPPI_FRASI_CONDIZIONI, REVISIONE_RICONCILIAZIONE, type GruppoFraseCondizioni } from '../../shared/riconciliazioneCondizioniManifest.js';
@@ -15,6 +17,8 @@ import type { DecisioneCondizioni, DecisioneCondizioniInput, DipendenzaRiconcili
 type Riga = Record<string, unknown>;
 const TABELLE = ['luogo', 'negozio', 'attivita', 'articolo'] as const;
 const PREFISSO = 'riconciliazione-condizioni/';
+const ATTIVITA_TAKEMI = 'esperimenti-clinici-takemi';
+const AUDIT_TAKEMI = 'rettifica-attivita-takemi-135';
 const stringa = (x: unknown): string | null => typeof x === 'string' ? x : null;
 const record = (x: unknown): Riga | null => x !== null && typeof x === 'object' && !Array.isArray(x) ? x as Riga : null;
 function canonico(x: unknown): unknown {
@@ -40,6 +44,7 @@ const conf = (confidente: string, rango: number): RequisitoSpillo => ({ tipo: 'c
 /** Solo formule INTERE con fonte e forma precedente attestate. Le altre proposte restano leggibili, senza scrittura presunta. */
 function proposta(g: GruppoFraseCondizioni, chiave: string): Proposta | null {
   // Confronti soltanto informativi: prima vuoto impedisce di applicare una parte delle bonifiche atomiche130/134.
+  if (g.id === 'A12' && chiave === ATTIVITA_TAKEMI) return { dopo: [], prima: [], identita: { chiave: ATTIVITA_TAKEMI, confidente_chiave: 'takemi' } };
   if (g.id === 'L26') return { dopo: [data('05-07')], prima: [], identita: {
     chiave: 'mementos/ingresso-mementos', quartiere_chiave: 'mementos', origine: 'seed', nascosto: 0,
     ordine: 0, tipo: 'trasporto', nome: 'Ingresso ai Memento',
@@ -115,6 +120,24 @@ function proposta(g: GruppoFraseCondizioni, chiave: string): Proposta | null {
   if (pieni[g.id]) return { dopo: pieni[g.id], prima: [], identita: { negozio_chiave: chiave.split('/')[0] } };
   return null;
 }
+
+/** Sola proiezione dei due esiti, senza prima-immagini. La fonte corrente non dimostra che la migrazione sia passata. */
+function auditTakemi(r: Riga | undefined): { stato: NonNullable<RigaRiconciliazioneDto['statoAuditConfidente']>; righe: RigaRiconciliazioneDto['auditMigrazioni'] } {
+  const a = record(decodifica(r?.json));
+  const attivita = record(a?.attivita), beneficio = record(a?.beneficio);
+  const valido = a?.versione === 1 && attivita?.chiave === ATTIVITA_TAKEMI && beneficio?.confidente === 'takemi' && beneficio.rango === 8
+    && typeof attivita.esito === 'string' && ['rettificata', 'gia-corretta', 'assente', 'esclusa'].includes(attivita.esito)
+    && typeof beneficio.esito === 'string' && ['aggiunto', 'gia-corretto', 'escluso'].includes(beneficio.esito)
+    && typeof attivita.motivo === 'string' && !!attivita.motivo.trim() && typeof beneficio.motivo === 'string' && !!beneficio.motivo.trim();
+  if (!valido || !attivita || !beneficio) {
+    const stato = r ? 'illeggibile' : 'assente';
+    return { stato, righe: [] };
+  }
+  return { stato: 'leggibile', righe: [
+    { migrazione: 135, esito: attivita.esito === 'rettificata' ? 'applicata' : attivita.esito === 'gia-corretta' ? 'gia-corretta' : 'esclusa', motivo: `Attività: esito originale135 ${attivita.esito}. ${attivita.motivo}` },
+    { migrazione: 135, esito: beneficio.esito === 'aggiunto' ? 'applicata' : beneficio.esito === 'gia-corretto' ? 'gia-corretta' : 'esclusa', motivo: `Beneficio verso rango8: esito originale135 ${beneficio.esito}. ${beneficio.motivo}` },
+  ] };
+}
 interface Registro { attuale: DecisioneCondizioni; storico: DecisioneCondizioni[] }
 function decisione(x: unknown): x is DecisioneCondizioni {
   const r = record(x);
@@ -155,6 +178,23 @@ function fotografia(): { dto: RiconciliazioneCondizioniDto; proposte: Map<string
   };
   const dati = leggiTabella('dati_guida');
   const aud = [123, 124].map((n) => ({ n, valore: record(decodifica(dati.get(n === 123 ? 'bonifica-condizioni-letture-123' : 'bonifica-condizioni-attivita-124')?.json)) }));
+  // PK composte: array ordinati dedicati, senza la mappa chiave/id di leggiTabella.
+  const fontiConfidenti = new Map<string, { raw: Riga; requisiti: Riga[]; guida: Riga[] }>();
+  const fotografaConfidente = (k: string) => {
+    const gia = fontiConfidenti.get(k); if (gia) return gia;
+    const leggi = (tabella: string, ordine: string) => {
+      const presente = !!db.prepare("SELECT 1 FROM main.sqlite_master WHERE type='table' AND name=?").get(tabella);
+      const righe = presente ? db.prepare(`SELECT * FROM main.${tabella} WHERE ${tabella === 'confidente' ? 'chiave' : 'confidente_chiave'}=? ORDER BY ${ordine}`).all(k) as Riga[] : [];
+      return { presente, righe };
+    };
+    const identita = leggi('confidente', 'chiave');
+    const disponibilita = leggi('confidente_disponibilita', 'confidente_chiave');
+    const requisiti = leggi('confidente_requisito', 'rango,indice');
+    const guida = leggi('confidente_requisito_guida', 'rango,indice');
+    const benefici = leggi('confidente_dote_incontro', 'verso_rango');
+    const f = { raw: { identita, disponibilita, requisiti, guida, benefici }, requisiti: requisiti.righe, guida: guida.righe };
+    fontiConfidenti.set(k, f); return f;
+  };
   const registri = new Map<string, Registro>();
   const proposte = new Map<string, Proposta>();
   const manifest = new Map<string, GruppoFraseCondizioni>();
@@ -172,6 +212,9 @@ function fotografia(): { dto: RiconciliazioneCondizioniDto; proposte: Map<string
     const campoFrase = id.slice(ultimoSeparatore + 1);
     const g = manifest.get(id);
     const r = leggiTabella(tabella).get(chiave);
+    const a12 = g?.id === 'A12' && tabella === 'attivita' && chiave === ATTIVITA_TAKEMI;
+    const fonteConfidente = a12 && r ? fonteConfidenteAttivita(r) : null;
+    const auditConfidente = a12 ? auditTakemi(dati.get(AUDIT_TAKEMI)) : null;
     const campo = tabella === 'negozio' ? 'sblocco_json' : 'condizioni_json';
     const dipendenze = new Map<string, unknown>();
     const fontiEreditate: DipendenzaRiconciliazione[] = [];
@@ -237,8 +280,24 @@ function fotografia(): { dto: RiconciliazioneCondizioniDto; proposte: Map<string
       // Articoli e attività possono avere un legame al Catalogo che determina l'identità mostrata.
       if (typeof r.catalogo_chiave === 'string') acquisisci('catalogo_oggetto', r.catalogo_chiave, false);
     }
+    if (a12) {
+      for (const k of new Set(['takemi', ...(typeof r?.confidente_chiave === 'string' ? [r.confidente_chiave] : [])])) {
+        const f = fotografaConfidente(k);
+        dipendenze.set(`fonte-confidente:${k}`, f.raw);
+        for (const requisito of [...f.requisiti, ...f.guida]) {
+          let c: RequisitoSpillo | null = null;
+          try { c = condizioneDelRequisito(requisito as unknown as RigaRequisito); } catch { /* il RAW resta nell'impronta */ }
+          if (!c) dipendenzeIncomplete = true;
+          else riferimenti(c);
+        }
+      }
+      // Anche l'assenza e il RAW illeggibile fanno parte del CAS: non si firma una fonte troncata.
+      dipendenze.set(`audit:${AUDIT_TAKEMI}`, { presente: dati.has(AUDIT_TAKEMI), raw: dati.get(AUDIT_TAKEMI) ?? null });
+    }
     const proprie = r ? formula(r[campo]) : { valore: null, testo: [], errore: 'Oggetto assente: condizioni non disponibili.' };
-    const p = g ? proposta(g, chiave) : null;
+    const fonteA12Valida = a12 && r?.confidente_chiave === 'takemi' && fonteConfidente?.chiave === 'takemi' && fonteConfidente.stato === 'collegato'
+      && !fonteConfidente.campiIncompatibili.length && !proprie.errore && proprie.valore?.length === 0 && !dipendenzeIncomplete;
+    const p = g && (!a12 || fonteA12Valida) ? proposta(g, chiave) : null;
     const contestoProposta = p?.contesto ? leggiTabella(p.contesto.tabella).get(p.contesto.chiave) : null;
     const propostaValida = p && r && Object.entries(p.identita).every(([k, v]) => json(r[k]) === json(v))
       && (!p.contesto || (contestoProposta && Object.entries(p.contesto.identita).every(([k, v]) => json(contestoProposta[k]) === json(v))));
@@ -252,7 +311,8 @@ function fotografia(): { dto: RiconciliazioneCondizioniDto; proposte: Map<string
     const precedente = reg?.attuale;
     const azioni: RigaRiconciliazioneDto['azioniConsentite'] = [];
     if (r) azioni.push('mantieni-nota');
-    if (r && g && esitoFonte === 'presente-identica' && !proprie.errore && !dipendenzeIncomplete && !fontiEreditate.some((f) => f.mancante || f.formula?.errore)) {
+    const fraseRaccordataA12 = fonteA12Valida && r?.sblocco === null;
+    if (r && g && (esitoFonte === 'presente-identica' || fraseRaccordataA12) && !proprie.errore && !dipendenzeIncomplete && !fontiEreditate.some((f) => f.mancante || f.formula?.errore)) {
       if (propostaValida || g.analisi === 'solo-nota') azioni.push('conferma-corrente');
       // Nessuna riscrittura verso un listino condiviso implicito; resta raggiungibile l'editor ordinario.
       const negozio = tabella === 'articolo' ? leggiTabella('negozio').get(String(r.negozio_chiave)) : r;
@@ -261,6 +321,7 @@ function fotografia(): { dto: RiconciliazioneCondizioniDto; proposte: Map<string
       }
     }
     const auditMigrazioni: RigaRiconciliazioneDto['auditMigrazioni'] = [];
+    if (auditConfidente) auditMigrazioni.push(...auditConfidente.righe);
     const origineAudit = `${tabella}:${chiave}`;
     for (const a of aud) {
       const arr = (campoAudit: string) => Array.isArray(a.valore?.[campoAudit]) ? a.valore[campoAudit] as unknown[] : [];
@@ -294,6 +355,7 @@ function fotografia(): { dto: RiconciliazioneCondizioniDto; proposte: Map<string
       analisi: g?.analisi ?? 'ricerca', propostaTesto: g?.propostaTesto ?? 'Nuova frase rispetto al censimento pubblico: richiede una proposta documentata.',
       fonti: g?.fonti ?? [], destinazione: g ? { tabella, chiave, campo } : null, condizioniProprie: proprie, fontiEreditate,
       formulaProposta: p ? formula(p.dopo) : null, esitoFonte, esitoFormula, auditMigrazioni,
+      ...(a12 ? { fonteConfidente, statoAuditConfidente: auditConfidente!.stato } : {}),
       decisione: precedente ? { ...precedente, daRiconfermare: precedente.improntaFonte !== improntaFonte, storico: reg!.storico } : null,
       azioniConsentite: azioni, improntaFonte, revisioneAttesa: impronta({ improntaFonte, registro: reg }) });
   }

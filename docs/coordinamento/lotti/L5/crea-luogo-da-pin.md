@@ -2,6 +2,8 @@
 
 ## Perimetro e stato
 
+Aggiornamento17:25Z: correttivo `817c06bb`, pipeline78 riuscita; tre anteprime reali API200 con percorsi pubblici e valori proposti esatti. Il revisore ha osservato autonomamente l’anteprima1466 completa e chiuso con Annulla; il coordinatore ha osservato anche1486 con la domenica e la nota sulla regola app. Gate del solo flusso fino all’anteprima approvato. Consenso ai tre richiesto, ancora pendente; nessuna creazione applicata. Il controllo finale dei dati seguirà l’applicazione autorizzata.
+
 M5 §7.9 originale a `43ad8889` richiede un elenco approvato prima di trasformare i pin commerciali personali. I [23 residui](residui-23.md) restano distinti: qui si prepara soltanto il gesto ordinario necessario ai tre luoghi documentati. Nessuna migrazione, applicazione automatica, fusione, nuovo pin, offerta o avanzamento.
 
 Il revisore distinto `audit_documenti_originali` ha approvato prima il disegno, poi il codice BE e FE in sola lettura, compreso l'ultimo delta lint. La Regia ha comunicato typecheck, lint e build tutti con uscita 0. Pubblicazione e osservazioni dell'anteprima dopo il rilascio restano alla Regia. Il gate statico non certifica il comportamento runtime o i dati correnti e non sostituisce il consenso specifico dell'utente. Le tre applicazioni restano ferme.

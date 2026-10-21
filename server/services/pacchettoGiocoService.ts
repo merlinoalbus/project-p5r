@@ -35,6 +35,7 @@ import { occupaIstanza } from './lucchettoIstanza.js';
 import { conCartellaDiLavoro, copiaDiSicurezza, installaDatabase, riapriIstanza, statoIstanza, tornaAllaCopiaDiSicurezza, verificaDatabase } from './impostazioniService.js';
 import type { AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, FaseImportazionePacchetto, OrfanoPartiteDto, StatoImportazionePacchettoDto } from '../../shared/types.js';
 import { ESTENSIONI_PACCHETTO, copiaDalDeposito, elencaDeposito as elencaCartella, percorsoNelDeposito } from './depositoService.js';
+import { verificaCollegamentiAttivitaImportati } from './vincoliAttivitaConfidente.js';
 
 /** Intestazione di ogni file SQLite 3. */
 const FIRMA_SQLITE = 'SQLite format 3\0';
@@ -265,6 +266,7 @@ function anteprimaDalDatabase(db: Database.Database, byte: number, nome?: string
   const versioneSchema = db.pragma('main.user_version', { simple: true }) as number;
   const codice = versioneSchemaCodice();
   const istanza = getDb();
+  verificaCollegamentiAttivitaImportati(db, istanza);
   const attuali = conteggiTabelle(istanza, 'main');
   const nelPacchetto = conteggiTabelle(db, 'main');
   const differenze = Object.keys(nelPacchetto).filter((t) => t in attuali && attuali[t] !== nelPacchetto[t]).map((t) => ({ tabella: t, istanza: attuali[t], pacchetto: nelPacchetto[t] }));

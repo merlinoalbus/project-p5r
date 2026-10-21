@@ -5,6 +5,8 @@
 import { SCHEMI_CATALOGO, SCHEMI_CATALOGO_PARZIALI } from '../../schemas/catalogo.js';
 import type { DescrizioniArea } from '../tipi.js';
 
+const CONFLITTI_FONTE_CONFIDENTE = [[409, 'confidente-attivita-mancante'], [409, 'attivita-confidente-conflitto'], [409, 'attivita-confidente-storia']] as const;
+
 /** Le descrizioni delle rotte di `/api/catalogo` (`routes/catalogo.ts`); il corpo di creazione e modifica dipende da `:tipo`. */
 export const DESCRIZIONI_CATALOGO: DescrizioniArea = {
   'GET /api/catalogo': {
@@ -32,7 +34,7 @@ export const DESCRIZIONI_CATALOGO: DescrizioniArea = {
     descrizione: 'Il corpo si valida con lo schema del tipo scelto da `:tipo` (400 `validation-error` con i dettagli). Il nome (la domanda per una domanda in classe, l\'indizio per il cruciverba) è obbligatorio salvo un\'offerta collegata tramite `catalogo_chiave`: nome, categoria, destinatario, effetto e statistiche arrivano allora dall\'oggetto e non vengono copiati nei campi storici dell\'offerta. La chiave nasce dal nome come `u-<slug>`, annidata sotto il negozio per gli articoli e sotto il quartiere per i luoghi, con un suffisso numerico se già presa. Negozio, quartiere, sede e Confidente citati devono esistere; le condizioni devono citare chiavi esistenti. Dopo M7 `costo_json` ammette fiori o oggetti da cedere per chiave e quantità, senza nomi copiati: uno scambio esplicito azzera il prezzo in yen a null, non a zero. Un costo null usa `prezzo`; prima di M7 un nuovo collegamento/costo strutturato risponde 409. Una riga aggiunta dall\'utente nasce verificata, salvo `verificato: false` esplicito.',
     risposta: 'La riga creata: `ElementoCatalogoDto`. Se la formula è omessa, la conversione della prosa deve essere completa: altrimenti 409 `condizioni-da-definire`, senza INSERT né identità orfane. Un array vuoto inviato esplicitamente vale come scelta di nessuna condizione propria; NULL non costituisce tale scelta. I dettagli del conflitto contengono operazione, campi e motivo classificato, senza testo o fotografia della fonte.',
     corpo: { perParametro: 'tipo', varianti: SCHEMI_CATALOGO },
-    errori: [[400, 'validation-error'], [400, 'nome-mancante'], [400, 'negozio-sconosciuto'], [400, 'quartiere-sconosciuto'], [400, 'luogo-sconosciuto'], [400, 'confidente-sconosciuto'], [400, 'oggetto-sconosciuto'], [400, 'oggetto-costo-sconosciuto'], [409, 'catalogo-non-disponibile'], [409, 'condizioni-da-definire'], [404, 'condizione-non-trovata']],
+    errori: [[400, 'validation-error'], [400, 'nome-mancante'], [400, 'negozio-sconosciuto'], [400, 'quartiere-sconosciuto'], [400, 'luogo-sconosciuto'], [400, 'confidente-sconosciuto'], [400, 'oggetto-sconosciuto'], [400, 'oggetto-costo-sconosciuto'], [409, 'catalogo-non-disponibile'], [409, 'condizioni-da-definire'], [404, 'condizione-non-trovata'], ...CONFLITTI_FONTE_CONFIDENTE],
   },
   'GET /api/catalogo/:tipo/:chiave': {
     sommario: 'Una riga qualunque del catalogo, anche della guida, per il modulo di modifica',
@@ -42,9 +44,9 @@ export const DESCRIZIONI_CATALOGO: DescrizioniArea = {
   'PUT /api/catalogo/:tipo/:chiave': {
     sommario: 'Corregge una riga del catalogo: i campi assenti restano',
     descrizione: 'Il corpo si valida con lo schema parziale del tipo scelto da `:tipo` (400 `validation-error`). Una riga della guida corretta passa all\'utente e conserva l\'originale. Riferimenti e condizioni si verificano come alla creazione; una chiave inesistente è un 404 con codice `<tipo>-non-trovato`. Per le offerte col catalogo i campi d\'identità non si riscrivono; omettere `catalogo_chiave` e `costo_json` conserva collegamento e costo. Un oggetto già collegato/nascosto resta conservabile, ma una nuova scelta deve essere disponibile. I vecchi corpi fonte/chiave sono risolti soltanto tramite quel riferimento esatto. Le offerte storiche senza catalogo restano modificabili col loro nome. Le scritture invalidano le cache dei nomi; non riscrivono acquisti o diario.',
-    risposta: 'La riga aggiornata: `ElementoCatalogoDto`',
+    risposta: 'La riga aggiornata: `ElementoCatalogoDto`. Per attività confidente_chiave nullable collega una fonte esplicita per chiave. Omissione conserva il FK; null lo rimuove senza riattivare vecchi effetti. La riga completa viene validata nella TX: campi autonomi incompatibili o storia generica in una partita producono409, senza azzeramenti impliciti. Il RAW legacy delle Doti già collegato e invariato non viene convertito in effetti. dati._fonteConfidente espone la guida corrente in sola lettura.',
     corpo: { perParametro: 'tipo', varianti: SCHEMI_CATALOGO_PARZIALI },
-    errori: [[400, 'validation-error'], [400, 'nome-mancante'], [400, 'negozio-sconosciuto'], [400, 'quartiere-sconosciuto'], [400, 'luogo-sconosciuto'], [400, 'confidente-sconosciuto'], [400, 'oggetto-sconosciuto'], [400, 'oggetto-costo-sconosciuto'], [409, 'catalogo-non-disponibile'], [409, 'videogioco-con-avanzamento'], [404, 'condizione-non-trovata']],
+    errori: [[400, 'validation-error'], [400, 'nome-mancante'], [400, 'negozio-sconosciuto'], [400, 'quartiere-sconosciuto'], [400, 'luogo-sconosciuto'], [400, 'confidente-sconosciuto'], [400, 'oggetto-sconosciuto'], [400, 'oggetto-costo-sconosciuto'], [409, 'catalogo-non-disponibile'], [409, 'videogioco-con-avanzamento'], [404, 'condizione-non-trovata'], ...CONFLITTI_FONTE_CONFIDENTE],
   },
   'PUT /api/catalogo/:tipo/:chiave/nascosta': {
     sommario: 'Nasconde o rimostra una riga del catalogo',
@@ -62,6 +64,6 @@ export const DESCRIZIONI_CATALOGO: DescrizioniArea = {
     descrizione: 'Rimette sulla riga i valori della guida (`seed_json`), la rende di nuovo della guida e visibile. Non elimina mai. Un\'istantanea anteriore a L5/M7 non azzera orari, Area, collegamento o costo aggiunti dopo; prima di M7 non legge né scrive le colonne nuove. Se l\'oggetto dell\'istantanea non esiste più risponde 409 prima della scrittura: va rimesso dal cestino. 400 `creata-da-te` per una riga creata dall\'utente, 400 `riga-del-seed` per una riga della guida mai corretta.',
     senzaCorpo: true,
     risposta: 'La riga ripristinata, `ElementoCatalogoDto`. Fotografia e formula vengono lette e validate nella stessa transazione della scrittura. Se la formula storica è assente o NULL, la prosa deve essere convertibile per intero. Fotografia illeggibile, formula malformata o conversione incompleta producono 409 `condizioni-da-definire`, conservando riga, snapshot, origine, visibilità e progressi. Una formula valida già fotografata, anche vuota, non viene rigenerata dalla prosa.',
-    errori: [[400, 'creata-da-te'], [400, 'riga-del-seed'], [409, 'oggetto-originale-mancante'], [409, 'videogioco-con-avanzamento'], [409, 'condizioni-da-definire']],
+    errori: [[400, 'creata-da-te'], [400, 'riga-del-seed'], [409, 'oggetto-originale-mancante'], [409, 'videogioco-con-avanzamento'], [409, 'condizioni-da-definire'], ...CONFLITTI_FONTE_CONFIDENTE],
   },
 };

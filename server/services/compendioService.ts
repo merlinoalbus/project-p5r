@@ -7,8 +7,8 @@ import { fonteNodoGuida } from '../../shared/riferimentiCatalogoGuida.js';
 import { httpErrors } from '../utils/httpError.js';
 import { extra, mappaAmbito, t, tOpz, vociAmbito } from './traduzioniService.js';
 import { corrispondeRicerca } from '../../shared/testo.js';
-import { leggiVociEffetto } from '../../shared/effettiCatalogo.js';
-import { descriviEffettoAzione, type DoteNote } from '../../shared/effettiAzione.js';
+import type { DoteNote } from '../../shared/effettiAzione.js';
+import { dotiIncontro } from './dotiIncontroConfidente.js';
 import { invitiDelConfidente } from './inviti.js';
 import { catalogoOggettiDisponibile, materialiDelleRicette, offerteBaseDegliOggetti, oggettiConChiavi, oggettiPerFonte, ricompensePerFonte, riferimentiListiniScambi } from './catalogoOggettiLetture.js';
 import { datiGuida, type Congelato } from './datiGuida.js';
@@ -420,17 +420,6 @@ export function elencaOggetti(f: { q?: string; categoria?: string } = {}): Ogget
   });
   const q = f.q;
   return q ? dto.filter((o) => corrispondeRicerca(q, o.nome, o.nomeIt, ...(o.nomiAltri ?? []))) : dto;
-}
-
-/** La Dote che il Confidente dà a ogni incontro verso ciascun rango da 1 a 10 (`confidente_dote_incontro`, migrazione 088). */
-function dotiIncontro(chiave: string): ConfidenteDettaglioDto['dotiIncontro'] {
-  const righe = new Map((prepared('SELECT verso_rango, effetti_json FROM confidente_dote_incontro WHERE confidente_chiave = ?').all(chiave) as Array<{ verso_rango: number; effetti_json: string | null }>)
-    .map((r) => [r.verso_rango, r.effetti_json]));
-  return Array.from({ length: 10 }, (_, i) => i + 1).map((rango) => {
-    const doti = leggiVociEffetto(righe.get(rango) ?? null).filter((v) => v.effetto.famiglia === 'dote')
-      .map((v) => ({ dote: (v.effetto as { dote: string }).dote as DoteNote['dote'], note: Math.min(3, Math.max(1, (v.effetto as { note: number }).note)) as 1 | 2 | 3 }));
-    return { rango, doti, testo: doti.map((d) => descriviEffettoAzione({ tipo: 'dote', ...d })).join(' · ') };
-  });
 }
 
 /** Cambia la Dote a ogni incontro dei ranghi indicati (gli altri restano): voci «dote» al posto di quelle che il rango aveva. */

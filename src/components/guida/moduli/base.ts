@@ -12,6 +12,7 @@
 
 import type { ComponentType } from 'react';
 import type { ElementoCatalogoDto } from '../../../types';
+import type { RequisitoSpillo } from '../../../../shared/condizioniSpillo';
 
 export type Dati = Record<string, unknown>;
 
@@ -19,6 +20,8 @@ export interface PropsModulo {
   dati: Dati;
   /** Aggiorna alcuni campi (fusione con i valori correnti). */
   imposta: (patch: Dati) => void;
+  /** Le condizioni appartengono al guscio: un gesto esplicito può aggiornarle insieme ai campi. */
+  impostaCondizioni?: (condizioni: RequisitoSpillo[]) => void;
   elemento: ElementoCatalogoDto | null;
   nuovo: boolean;
   disabilitato: boolean;
@@ -49,6 +52,16 @@ export function jsonDi<T>(v: unknown, altrimenti: T): T {
   if (v === null || v === undefined || v === '') return altrimenti;
   if (typeof v !== 'string') return v as T;
   try { return JSON.parse(v) as T; } catch { return altrimenti; }
+}
+/** Un editor normalizzato non deve cancellare parti del RAW senza una scelta esplicita. */
+export function jsonSenzaPerdite(raw: unknown, normalizza: (v: unknown) => unknown): boolean {
+  if (raw == null) return true;
+  const canonico = (v: unknown) => JSON.stringify(v, (_k, x: unknown) => x && typeof x === 'object' && !Array.isArray(x)
+    ? Object.fromEntries(Object.entries(x).sort(([a], [b]) => a.localeCompare(b))) : x);
+  try {
+    const v: unknown = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    return canonico(v) === canonico(normalizza(v));
+  } catch { return false; }
 }
 /** Toglie i valori temporanei (`_…`). */
 export function senzaTemporanei(dati: Dati): Dati {

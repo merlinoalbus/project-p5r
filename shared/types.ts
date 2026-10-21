@@ -1779,7 +1779,28 @@ export interface QuartiereDettaglioDto {
   sbloccoCondizione?: SbloccoDto;
 }
 
+/** Fonte unica della guida di un'attività che introduce un Confidente. I semafori valutano soltanto i
+ * requisiti del prossimo rango; giorni, fasce e avvertenze non costituiscono un calendario duplicato. */
+export interface FonteConfidenteAttivitaDto {
+  stato: 'collegato' | 'non-risolto' | 'conflitto';
+  chiave: string;
+  nome: string | null;
+  arcana: string | null;
+  arcanaNome: string | null;
+  casa: string;
+  disponibilitaFonte: { giorni: string[]; fasce: string[]; luogo: string; note: string } | null;
+  avvio: RequisitiConfidenteDto['ranghi'][number] | null;
+  rangoAttuale: number | null;
+  prossimoPasso: { rango: number; requisiti: RequisitiConfidenteDto['ranghi'][number]['requisiti']; disponibilitaRequisiti: DisponibilitaDto | null } | null;
+  dotiPerPassaggio: ConfidenteDettaglioDto['dotiIncontro'];
+  campiIncompatibili: string[];
+  avvisi: string[];
+}
+
 export interface AttivitaDto {
+  /** Assenti soltanto nei DTO precedenti alla135; il server corrente li emette sempre, anche null. */
+  confidenteChiave?: string | null;
+  fonteConfidente?: FonteConfidenteAttivitaDto | null;
   /** Identità soltanto per le attività che sono videogiochi; i turni restano legati all'attività. */
   catalogo?: RiferimentoOggettoDto | null;
   nomiAltri?: string[];
@@ -3052,6 +3073,8 @@ export type TipoCatalogo = (typeof TIPI_CATALOGO)[number];
 
 /** Una riga del catalogo con la sua provenienza: creata dall'utente, corretta sopra il seed, o nascosta. */
 export interface ElementoCatalogoDto {
+  /** Informazioni su un ripristino che conserva campi introdotti dopo la fotografia. */
+  avvisi?: string[];
   tipo: TipoCatalogo;
   chiave: string;
   nome: string;

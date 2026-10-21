@@ -32,7 +32,9 @@ import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
-import { formattaYen, haDote, pagaTesto } from '../utils/letture';
+import { formattaYen, pagaTesto } from '../utils/letture';
+import { haDoteAttivita } from '../../shared/attivitaConfidente';
+import { FonteConfidenteAttivita } from '../components/confidenti/FonteConfidenteAttivita';
 import { PulsanteGuidaQuiz } from '../components/guida/GuidaQuiz';
 import { eGiornoDelQuiz } from '../../shared/quizAttivita';
 
@@ -71,6 +73,7 @@ function Attivita({ a, onCambiata, mappaAperta, onMappa }: { a: AttivitaDto; onC
         {sugg.evidenziato('attivita', a.chiave) && <TargaSuggerito motivo={sugg.motivo('attivita', a.chiave)} compatta />}
         {a.fascia && <span className="chip">{NOME_FASCIA_ATTIVITA[a.fascia] ?? a.fascia}</span>}
         <Effetti testi={a.effettiTesto} />
+        {a.confidenteChiave && <span className="chip">Confidente: {a.fonteConfidente?.nome ?? a.confidenteChiave}</span>}
         <ChipDisponibilita disponibilita={a.disponibilita ?? undefined} compatto />
         {!a.verificato && <span className="chip text-[11px]" title="Dato da fonte secondaria">da fonte secondaria</span>}
       </button>
@@ -86,7 +89,8 @@ function Attivita({ a, onCambiata, mappaAperta, onMappa }: { a: AttivitaDto; onC
       {aperta && (
         <div className="flex flex-col gap-1">
           {a.dettagli && <p className="m-0 whitespace-pre-line">{a.dettagli}</p>}
-          {a.effettiTesto.length === 0 && <p className="m-0 text-text-muted">Nessun effetto dichiarato.</p>}
+          {a.fonteConfidente && <FonteConfidenteAttivita fonte={a.fonteConfidente} />}
+          {!a.confidenteChiave && a.effettiTesto.length === 0 && <p className="m-0 text-text-muted">Nessun effetto dichiarato.</p>}
           {/* La mappa si apre una per volta in tutta la pagina. */}
           {mappaAperta
             ? <div className="flex flex-col gap-1">
@@ -128,8 +132,8 @@ export function AttivitaPage() {
   const [conMappa, setConMappa] = useState<string | null>(null);
   const d = dati.dati;
   // I videogiochi hanno la loro pagina, con i round e i contenuti che sbloccano.
-  const attivitaVisibili = useMemo(() => (d?.attivita ?? []).filter((a) => a.tipo !== 'videogioco' && (!dote || haDote(a.effetti, dote))), [d, dote]);
-  const lavoriVisibili = useMemo(() => (d?.lavori ?? []).filter((a) => !dote || haDote(a.effetti, dote)), [d, dote]);
+  const attivitaVisibili = useMemo(() => (d?.attivita ?? []).filter((a) => a.tipo !== 'videogioco' && (!dote || haDoteAttivita(a, dote))), [d, dote]);
+  const lavoriVisibili = useMemo(() => (d?.lavori ?? []).filter((a) => !dote || haDoteAttivita(a, dote)), [d, dote]);
   if (params.get('scheda') === 'libri') return <Navigate to="/guida/libri" replace />;
   if (params.get('scheda') === 'film') return <Navigate to="/guida/film" replace />;
   return (

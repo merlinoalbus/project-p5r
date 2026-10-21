@@ -38,6 +38,7 @@ import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { riallineaStati } from './mappe/statiGuida.js';
 import { eBloccoGuidaCatalogo, ripristinaPuntatoriGuida } from '../../shared/riferimentiCatalogoGuida.js';
 import { normalizzaCostoScambio } from '../../shared/catalogo.js';
+import { verificaAttivitaConfidente } from './vincoliAttivitaConfidente.js';
 import type { ContenutoCestinoDto, EsitoRipristinoCestinoDto, MotivoSaltataCestinoDto, SaltataCestinoDto, TipoCestino, VoceCestinoDto } from '../../shared/types.js';
 
 type Schema = 'main' | 'utente';
@@ -339,9 +340,17 @@ export function ripristinaDalCestino(id: number): EsitoRipristinoCestinoDto {
   };
   const occupate: string[] = [];
   const daVerificare: Array<{ schema: Schema; tabella: string; riga: Riga }> = [];
+  const attivitaPrecedenti = new Map<string, Record<string, unknown> | null>();
 
   db.transaction(() => {
     for (const p of passi) {
+      if (p.schema === 'main' && p.tabella === 'attivita') {
+        const fonte = p.prima ?? p.dopo;
+        if (typeof fonte?.chiave === 'string' && !attivitaPrecedenti.has(fonte.chiave)) {
+          const ora = db.prepare('SELECT * FROM main.attivita WHERE chiave=?').get(fonte.chiave) as Record<string, unknown> | undefined;
+          attivitaPrecedenti.set(fonte.chiave, ora ?? (fonte.confidente_chiave != null ? fonte : null));
+        }
+      }
       const s = struttura(p.schema, p.tabella);
       const riferimento = p.prima ?? p.dopo!;
       const descrivi = (riga: Riga) => s ? s.chiave.map((c) => String(riga[c] ?? '')).join(' · ') : '';
@@ -362,7 +371,10 @@ export function ripristinaDalCestino(id: number): EsitoRipristinoCestinoDto {
           return true;
         } catch (err) {
           const codice = codiceSqlite(err);
-          if (codice === 'SQLITE_CONSTRAINT_FOREIGNKEY') { salta(p.tabella, 'legame-mancante', descrivi(riga)); return false; }
+          if (codice === 'SQLITE_CONSTRAINT_FOREIGNKEY') {
+            if (p.schema === 'main' && p.tabella === 'attivita' && riga.confidente_chiave != null) throw httpErrors.conflict('cestino-confidente-mancante', 'Il Confidente dell’attività da ripristinare non è presente: nessun dato è stato rimesso.');
+            salta(p.tabella, 'legame-mancante', descrivi(riga)); return false;
+          }
           if (codice === 'SQLITE_CONSTRAINT_PRIMARYKEY' || codice === 'SQLITE_CONSTRAINT_UNIQUE') {
             if (p.schema === 'main' && !DERIVATE.has(p.tabella)) occupate.push(`${etichettaTabella(p.tabella)}: ${descrivi(riga)}`);
             else salta(p.tabella, 'cambiata-dopo', descrivi(riga));
@@ -423,6 +435,10 @@ export function ripristinaDalCestino(id: number): EsitoRipristinoCestinoDto {
       throw httpErrors.conflict('cestino-chiavi-occupate',
         `Non si può rimettere «${r.nome}»: ${occupate.length === 1 ? 'una riga ha' : `${occupate.length} righe hanno`} la chiave ormai presa da qualcosa creato dopo (${occupate.slice(0, 5).join('; ')}${occupate.length > 5 ? '; …' : ''}).`,
         { occupate });
+    }
+    for (const [chiave, prima] of attivitaPrecedenti) {
+      const ora = db.prepare('SELECT * FROM main.attivita WHERE chiave=?').get(chiave) as Record<string, unknown> | undefined;
+      if (ora) verificaAttivitaConfidente(db, ora, prima);
     }
     // Controllo finale della transazione: tutti gli oggetti del registro sono ormai tornati.
     // I JSON e i puntatori fra i due database non hanno foreign key SQLite; in errore

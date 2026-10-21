@@ -13,13 +13,13 @@ export const DESCRIZIONI_CONDIZIONI: DescrizioniArea = {
   },
   'GET /api/condizioni/riconciliazione': {
     sommario: 'Frasi da riconciliare con condizioni, fonti e decisioni',
-    descrizione: 'Censimento completo delle 201 identità storiche e delle nuove frasi correnti, comprese righe mutate, assenti e nascoste. Separa requisiti propri e fonti ereditate, proposte documentate e ricerca ancora aperta. Le bonifiche 123/124 sono proiettate senza prima-immagini. Nessuna scrittura durante la lettura. Ogni riga espone improntaFonte e revisioneAttesa distinta per il controllo concorrente.',
+    descrizione: 'Censimento completo delle 201 identità storiche e delle nuove frasi correnti, comprese righe mutate, assenti e nascoste. Separa requisiti propri e fonti ereditate, proposte documentate e ricerca ancora aperta. Proietta audit123/124/130/134 e, per A12, i due esiti135 distinti con stato assente/illeggibile/leggibile, senza prima-immagini. La fonte corrente Confidente non dimostra l’applicazione della bonifica. A12 confronta una proposta vuota soltanto informativa: nessuna Applica. Il CAS include RAW canonici ordinati del Confidente, disponibilità, requisiti e guida, benefici e audit anche assenti/vuoti. Nessuna scrittura durante la lettura. Ogni riga espone improntaFonte e revisioneAttesa distinta per il controllo concorrente.',
     risposta: '`RiconciliazioneCondizioniDto` (shared/riconciliazioneCondizioni.ts)',
     errori: [[409, 'decisione-illeggibile']],
   },
   'POST /api/condizioni/riconciliazione/decisioni': {
     sommario: 'Conferma una resa, applica una proposta ammessa o conserva la frase come nota',
-    descrizione: 'Corpo chiuso id/azione/revisioneAttesa. Le formule provengono esclusivamente dal manifest server. La transazione rilegge fonte, dipendenze e precedente decisione; una revisione obsoleta risponde 409. La scrittura ordinaria e il record decisionale sono atomici. Tutte le revisioni precedenti restano conservate; Mantieni nota non elimina condizioni e non chiude la ricerca fattuale. Nessun cambiamento del database alla semplice lettura.',
+    descrizione: 'Corpo chiuso id/azione/revisioneAttesa. Le formule provengono esclusivamente dal manifest server. La transazione rilegge fonte, dipendenze e precedente decisione; una revisione obsoleta risponde409. La scrittura ordinaria e il record decisionale sono atomici. A12 ammette conferma della fonte corrente anche dopo la rimozione della vecchia frase soltanto sulla chiave esatta, con sbloccoSQLNULL, FKtakemi, fonte collegata e campi propri neutri. Nessuna applicazione della proposta vuota, nessuna garanzia sul calendario o beneficio8, nessuna estensione ad altre frasi mutate. Tutte le revisioni precedenti restano conservate; Mantieni nota non elimina condizioni e non chiude la ricerca fattuale. Nessun cambiamento del database alla semplice lettura.',
     risposta: '`RiconciliazioneCondizioniDto` aggiornato',
     errori: [[404, 'frase-non-trovata'], [409, 'riconciliazione-obsoleta'], [409, 'decisione-non-ammessa'], [409, 'proposta-incompleta'], [409, 'decisione-illeggibile']],
   },
@@ -65,8 +65,8 @@ export const DESCRIZIONI_CONDIZIONI: DescrizioniArea = {
   'PUT /api/condizioni/partite/:partita/attivita/:chiave': {
     sommario: 'Porta il contatore delle volte svolte di un\'attività al valore indicato',
     descrizione: 'Registra o toglie turni dell\'attività fino a `volte`; vale solo per le attività che si contano per volte svolte. Le Doti sociali non si toccano: la risposta dice in `daSegnare` che cosa danno i turni aggiunti (o davano quelli tolti), da segnare a mano.',
-    risposta: '`ProgressiPartitaDto` aggiornato, con `daSegnare` (elenco di `DoteDaSegnareDto`)',
-    errori: [[404, 'partita-non-trovata'], [404, 'attivita-non-trovata'], [400, 'attivita-non-conteggiabile']],
+    risposta: '`ProgressiPartitaDto` aggiornato, con `daSegnare` (elenco di `DoteDaSegnareDto`). Una fonte Confidente rifiuta nuovi incrementi con409; riduzioni e annullamenti della storia preesistente restano possibili e usano le fotografie dei vecchi turni, senza ricalcolare premi.',
+    errori: [[404, 'partita-non-trovata'], [404, 'attivita-non-trovata'], [400, 'attivita-non-conteggiabile'], [409, 'attivita-fonte-confidente']],
   },
   'PUT /api/condizioni/partite/:partita/punti-negozio/:chiave': {
     sommario: 'Imposta i punti accumulati in un negozio con programma punti manuale',

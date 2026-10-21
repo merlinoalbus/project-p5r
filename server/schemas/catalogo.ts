@@ -188,6 +188,7 @@ const quizJson = z.object({
 
 /** Campi di un'attivita' (compresi lavori e videogiochi) scrivibili dall'utente. */
 const datiAttivitaBase = z.object({
+  confidente_chiave: z.string().trim().min(1).max(80).nullable().optional(),
   verificato: z.boolean().optional(),
   condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
