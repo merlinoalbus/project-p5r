@@ -23,6 +23,8 @@ import { aggiornaCopiaPezzoMappa, aggiornaImmagineSpillo, aggiornaMappa, aggiorn
 import { bodyAggiornaCopiaPezzo, bodyAggiornaMappa, bodyAggiornaPezzo, bodyCreaCopiaPezzo, bodyAggiornaSpillo, bodyCreaPezzo, bodyAreeMappa, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, bodyPresentazioneMappa, bodyRiordinaMappe, bodyStanzaMappa, paramsCopiaPezzo, paramsMappa, paramsPezzo, paramsSpillo, queryDidascalia, queryEsporta, queryGuidaMappa, queryImmagineMappa, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
 import { guidaDellaPlanimetria } from '../services/dungeonService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { precondizioneRaccordoSpillo, type DatiAggiornaSpillo } from '../services/mappe/mappeService.js';
+import { queryPrecondizioneRaccordo } from '../schemas/mappe.js';
 
 const router = Router();
 // Chiave libera ma limitata: un indirizzo scritto a mano che non corrisponde a nulla resta un 404 «mappa-non-trovata», non un 400.
@@ -144,8 +146,15 @@ router.post('/:chiave/spilli', validate({ params: paramsMappa, body: bodyCreaSpi
 router.post('/:chiave/passaggi', validate({ params: paramsMappa, body: bodyCreaPassaggio }), (req, res) => {
   res.status(201).json(creaPassaggio(String(req.params.chiave), (req.body as { destinazione: string }).destinazione));
 });
+/** Impronta volatile per collegare un pin personale senza alterarne gli altri campi. */
+router.get('/spilli/:id/precondizione-raccordo', (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+}, validate({ params: paramsSpillo, query: queryPrecondizioneRaccordo }), (req, res) => {
+  res.json(precondizioneRaccordoSpillo(Number(req.params.id), String(req.query.luogo)));
+});
 router.put('/spilli/:id', validate({ params: paramsSpillo, body: bodyAggiornaSpillo }), (req, res) => {
-  res.json(aggiornaSpillo(Number(req.params.id), req.body as DatiSpillo & { mappa?: string }));
+  res.json(aggiornaSpillo(Number(req.params.id), req.body as DatiAggiornaSpillo));
 });
 router.delete('/spilli/:id', validate({ params: paramsSpillo }), (req, res) => {
   eliminaSpillo(Number(req.params.id));

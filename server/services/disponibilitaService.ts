@@ -23,6 +23,7 @@ import { statoPartitaSemafori, type StatoPartitaSemafori } from './semaforiServi
 import { ARCHI_STORIA, ordineGioco, dataSbloccoQuartiere, type ContatoreChiave, type NomiCondizioni } from '../../shared/condizioniSpillo.js';
 import { modelloAvanzamento, statiDellaPartita, statoDelPin, vociFatte, type ModelloAvanzamento, type StatiDellaPartita } from './mappe/statiGuida.js';
 import { vociPersonaCatturate } from './catturePersona.js';
+import { sessioniVideogioco } from './sessioniVideogioco.js';
 import type { pinCitato } from './condizioni/nomiCondizioni.js';
 import type { RigaInvito } from './condizioni/condizioneEffettiva.js';
 import { valutaInsieme, valutaInsiemeSpillo, type RequisitoDisponibilita } from './condizioni/valutatore.js';
@@ -123,6 +124,8 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
   /** Il conteggio `n` della query, che riceve come unico parametro la partita. */
   const conta = (sql: string): number => (prepared(sql).get(partitaId) as { n: number }).n;
   const contatori = new Map<ContatoreChiave, number>([
+    ['videogiochi-giocati', sessioniVideogioco(partitaId).giocate.size],
+    ['film-con-una-visione', conta('SELECT COUNT(*) AS n FROM progresso_film_partita p JOIN film f ON f.chiave = p.film_chiave WHERE p.partita_id = ? AND p.avanzamento >= 1')],
     ['film-completati', conta('SELECT COUNT(*) AS n FROM progresso_film_partita p JOIN film f ON f.chiave = p.film_chiave WHERE p.partita_id = ? AND p.avanzamento >= f.sessioni')],
     ['videogiochi-completati', conta("SELECT COUNT(*) AS n FROM progresso_videogioco_partita p JOIN attivita a ON a.chiave = p.videogioco_chiave WHERE p.partita_id = ? AND a.tipo = 'videogioco' AND p.avanzamento >= a.sessioni")],
     ['libri-letti', conta('SELECT COUNT(*) AS n FROM progresso_libro_partita p JOIN libro l ON l.chiave = p.libro_chiave WHERE p.partita_id = ? AND p.avanzamento >= l.sessioni')],

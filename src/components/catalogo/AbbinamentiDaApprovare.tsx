@@ -43,7 +43,7 @@ function ElencoAbbinamenti({ proposte, titolo, onCambiato }: Props & { proposte:
   const [occupato, setOccupato] = useState(false);
   const [errore, setErrore] = useState<string | null>(null);
   const [quantitaMateriale, setQuantitaMateriale] = useState('');
-  const richiedeQuantita = !!conferma && !conferma.scarta && conferma.proposta.rigaTipo === 'ricetta' && conferma.proposta.quantita === null;
+  const richiedeQuantita = !!conferma && !conferma.scarta && ['ricetta', 'voce'].includes(conferma.proposta.rigaTipo) && conferma.proposta.quantita === null;
   const quantitaValida = /^\d+$/.test(quantitaMateriale) && Number.isSafeInteger(Number(quantitaMateriale)) && Number(quantitaMateriale) > 0 && Number(quantitaMateriale) <= 999999;
   const [gestite, setGestite] = useState<{ fonte: readonly PropostaAbbinamentoDto[]; chiavi: Set<string> }>({ fonte: proposte, chiavi: new Set() });
   // Una nuova lettura del server è autorevole, anche dopo il ripristino di una fusione dal cestino.
@@ -141,7 +141,7 @@ function ElencoAbbinamenti({ proposte, titolo, onCambiato }: Props & { proposte:
         {conferma.scarta ? <p className="m-0">Scarti questa proposta, non le altre alternative. Il testo e i collegamenti attuali non cambiano.</p>
           : <><p className="m-0 break-words">{conferma.proposta.rigaTipo === 'catalogo' ? 'Destinazione della fusione' : 'Oggetto scelto'}: <strong>{conferma.oggetto?.nome}</strong></p>
             <EffettiDellaProposta proposta={conferma.proposta} />
-            {richiedeQuantita && <label className="flex flex-col gap-1">Quantità del materiale<input className="input touch" type="number" min={1} max={999999} step={1} value={quantitaMateriale} onChange={(e) => setQuantitaMateriale(e.target.value)} /><span className="text-text-secondary">La fonte non la indica: serve una quantità verificata per collegare il materiale.</span></label>}
+            {richiedeQuantita && <label className="flex flex-col gap-1">Quantità da collegare<input className="input touch" type="number" min={1} max={999999} step={1} value={quantitaMateriale} onChange={(e) => setQuantitaMateriale(e.target.value)} /><span className="text-text-secondary">La fonte non la indica: serve una quantità verificata per collegare l’oggetto.</span></label>}
             {conferma.proposta.rigaTipo === 'catalogo' && <p className="m-0 text-warning">I collegamenti passano all’oggetto scelto e l’identità di origine viene rimossa. La fusione si può annullare dal Cestino nelle Impostazioni; nessuna fusione avviene aprendo questa finestra.</p>}
             <p className="m-0">Le altre alternative dello stesso gruppo saranno scartate. {conferma.proposta.rigaTipo === 'catalogo'
               ? 'La fusione trasferisce i riferimenti dell’identità di origine; non segna raccolte, acquisti o letture.'

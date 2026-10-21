@@ -1815,6 +1815,9 @@ export interface AttivitaDto {
   /** Il luogo della città dove si svolge (migrazione 072). */
   sedeChiave: string | null;
   sedeNome: string | null;
+  /** Orari ereditati dalla sede, con origine dichiarata; null senza sede risolta. */
+  orariSede?: OrariDelLuogo | null;
+  orariSedeTesto?: string | null;
   verificato: boolean;
   /** La disponibilità scritta dalla guida, tradotta in regola (migrazione 052): «dal 18 aprile»,
    *  «dal 24 aprile», «5 giugno, evento con Ryuji». Null dove la guida non dice niente. */
@@ -1937,6 +1940,8 @@ export interface VideogiocoDto extends AttivitaDto {
   totaleRound: number;
   progresso: number;
   iniziato: boolean;
+  /** Compatibilità dei DTO precedenti: il server attuale lo emette sempre. Non conta i round. */
+  sessioneDichiarata?: boolean;
   fatto: boolean;
 }
 

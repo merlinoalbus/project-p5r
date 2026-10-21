@@ -35,6 +35,9 @@ export interface AuditCatalogo {
   manifestAssenti: Array<{ tipo: string; chiave: string; impronta: string }>;
   risultatiConFonti: Array<RiferimentoAuditCatalogo & { fonti: string[]; fontiContesto: string[]; dati: unknown }>;
   limiti: string[];
+  /** Appendice distinta: presente soltanto nelle future conversioni che censiscono i residui delle voci. */
+  residuiVoci?: Array<{ voce: string; lacune: Array<{ campo: string; motivo: string;
+    locatori?: Array<{ campo: string; inizio: number; fine: number; testo: string }> }> }>;
 }
 
 /** Condivisa con il generatore del manifest. Le stringhe JSON non vengono reinterpretate. */

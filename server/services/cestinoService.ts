@@ -109,6 +109,7 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   luogo: ['luogo', 'luoghi'], negozio: ['negozio', 'negozi'], articolo: ['articolo', 'articoli'], attivita: ['attività', 'attività'],
   marcatore_luogo: ['segnaposto di un luogo', 'segnaposto dei luoghi'],
   acquisto_partita: ['acquisto nelle partite', 'acquisti nelle partite'], punti_negozio_partita: ['punti di un negozio nelle partite', 'punti dei negozi nelle partite'],
+  sessione_videogioco_partita: ['dichiarazione di sessione giocata', 'dichiarazioni di sessione giocata'],
 };
 
 /** Il nome per l'utente di `quante` righe di una tabella (al singolare per una sola). */

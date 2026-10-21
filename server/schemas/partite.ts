@@ -194,6 +194,7 @@ export const bodyMeteo = z.object({ giorno: meteoFascia, sera: meteoFascia }).st
 export const bodyAcquisto = z.object({ articolo: z.string().min(1).max(200), fatto: z.boolean(), sede: z.string().min(1).max(300).optional() });
 export const bodyCruciverba = z.object({ data: dataGioco, fatto: z.boolean() });
 const chiaveLettura = z.string().min(1).max(160);
+export const bodySessioneVideogioco = z.object({ chiave: chiaveLettura, dichiarata: z.boolean() }).strict();
 export const bodyLettura = z.union([
   z.object({ tipo: z.literal('videogioco'), chiave: chiaveLettura, fatto: z.boolean(), avanzamento: z.never().optional() }).strict(),
   z.object({ tipo: z.literal('videogioco'), chiave: chiaveLettura, avanzamento: z.number().int().nonnegative(), fatto: z.never().optional() }).strict(),

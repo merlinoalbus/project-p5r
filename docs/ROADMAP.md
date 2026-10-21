@@ -2,6 +2,10 @@
 
 Legenda stato: ✅ fatto e validato · 🔄 in corso · ⏳ fatto, in attesa di validazione · ⬜ da fare.
 
+**21/10 11:12Z — blocco pronto al rilascio:**123–126/027, pagina approvabileR6, GET97 e CAS approvati staticamente e registrati localmente; typecheck/lint/build verdi. Nessuna nuova migrazione locale o test. Helper raccordiL5 inattivo, consenso specifico non acquisito. Dopo il rilascio si leggono rendiconti e nodi correnti e si completano i residui; nessuna chiusura globale di L5–L7 o implementazione L8.
+
+**21/10 10:36Z — bonifica precedente a L8 ancora in corso:**123 e124/T2/R5-02 approvati staticamente, non registrati o eseguiti; Carta125/parser e Ambulante126 al riesame. Mancante e da completare la superficie approvabile R6-19/31. Inventari e fonti correnti L5–L7 in riconciliazione, con limiti espliciti. Pubblicato1de1ccba/pipeline67/schema122-26; controlli verdi solo intermedi. Nessun codice L8 o test. Le note precedenti sono cronologia, non chiusura dei residui.
+
 **Ripresa 21/10 07:43Z:** bonifica L5–L7 pubblicata in `e0ea995e`, pipeline #66 riuscita; p5s schema122/26, catalogo e audit osservati. Confronto GET protetto identico prima/dopo (Diario255, Kamoshida169, Madarame226,611pinutente). Proposte e conferme funzionali restano aperte. L8 in piano concreto e revisione della soluzione; nessuna implementazione ancora. Seguono L9–L11. Il checkpoint 07:30Z sotto precede il rilascio.
 
 **Ripresa 21/10 07:30Z:** bonifica integrata L5–L7 approvata staticamente da agente distinto contro gli originali; registrate migrazioni121/122/utente026 e API del catalogo. Typecheck/lint/build finali verdi; rilascio in preparazione, nessuna migrazione locale o test eseguiti. Proposte umane e aggregati della riconciliazione restano espliciti. Seguono L8–L11; L8 attualmente in analisi readonly. Stato operativo e pubblicazione in `coordinamento/STATO-ATTUALE.md`.

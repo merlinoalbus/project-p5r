@@ -28,8 +28,11 @@ export interface ContestoConversione {
   negozio?: string | null;
   /** Confidente che gestisce il negozio: «Rango Confidente 3» senza nome si riferisce a lui. */
   confidenteNegozio?: string | null;
-  /** Chiave della riga che si sta convertendo: «tutti gli altri libri di Jinbocho» la esclude. */
+  /** Identità della fonte; può essere un articolo, distinta dalla chiave del libro. */
   chiaveCorrente?: string | null;
+  tabellaCorrente?: string;
+  /** Solo un legame univoco: mai ricavata dal nome o dall'ultimo segmento della fonte. */
+  libroCorrente?: string | null;
   richiesta?: (nome: string) => string | null;
   libro?: (nome: string) => string | null;
   film?: (nome: string) => string | null;
@@ -190,10 +193,13 @@ function regola(t: string, ctx: ContestoConversione): RequisitoSpillo[] | null {
   if ((m = t.match(/^dopo aver letto (?:il libro )?'([^']+)'(?: \(.*\))?$/))) { const k = ctx.libro?.(m[1]); return k ? [{ tipo: 'lettura', categoria: 'libro', chiave: k }] : null; }
   if ((m = t.match(/^dopo aver letto (?:il libro )?([a-z' ]+?)(?: \([a-z ,]+\))?$/)) && !/tutti/.test(t)) { const k = ctx.libro?.(m[1]); return k ? [{ tipo: 'lettura', categoria: 'libro', chiave: k }] : null; }
   if (/^dopo aver letto tutti (?:gli altri )?(?:i )?libri di jinbocho$/.test(t)) {
-    const libri = (ctx.libriJinbocho?.() ?? []).filter((k) => k !== ctx.chiaveCorrente);
+    const tutti = ctx.libriJinbocho?.() ?? [];
+    const altri = t.includes('gli altri');
+    if (altri && (!ctx.libroCorrente || !tutti.includes(ctx.libroCorrente))) return null;
+    const libri = altri ? tutti.filter((k) => k !== ctx.libroCorrente) : tutti;
     return libri.length ? [tutte(libri.map((k): RequisitoSpillo => ({ tipo: 'lettura', categoria: 'libro', chiave: k })))] : null;
   }
-  if (/^dopo la prima visione di un film\/dvd$/.test(t) || /^dopo essere andati al cinema o aver visto un dvd almeno una volta$/.test(t)) return [{ tipo: 'contatore', cosa: 'film-completati', almeno: 1 }];
+  if (/^dopo la prima visione di un film\/dvd$/.test(t) || /^dopo essere andati al cinema o aver visto un dvd almeno una volta$/.test(t)) return [{ tipo: 'contatore', cosa: 'film-con-una-visione', almeno: 1 }];
   if (/^dopo il completamento di un videogioco$/.test(t)) return [{ tipo: 'contatore', cosa: 'videogiochi-completati', almeno: 1 }];
 
   // — attività ed eventi —
@@ -246,6 +252,8 @@ function converti(testo: string, ctx: ContestoConversione, scartate: string[]): 
   const mansarda = t.match(/^solo se la mansarda del leblanc non viene pulita \(altrimenti si ottiene dopo aver pulito la mansarda del leblanc, dal (\d{1,2}) ([a-z]+)\)$/);
   if (mansarda) {
     const d = data(mansarda[1], mansarda[2]);
+    // La fonte articolo descrive l'offerta in vendita; il ritrovamento è una via distinta.
+    if (d && ctx.tabellaCorrente === 'articolo') return [{ tipo: 'non', condizione: { tipo: 'evento', evento: 'mansarda-pulita' } }];
     if (d) return [almenoUna([{ tipo: 'non', condizione: { tipo: 'evento', evento: 'mansarda-pulita' } }, tutte([{ tipo: 'evento', evento: 'mansarda-pulita' }, { tipo: 'data', dal: d }])])];
   }
   // Congiunzioni: «;», «,», «: », « e » (non dentro parentesi)

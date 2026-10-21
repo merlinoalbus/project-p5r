@@ -1,12 +1,13 @@
 import type { FilmDto, LibroDto, OggettoDettaglioDto, VideogiocoDto } from '../../types';
 import { useCodaProgresso } from '../../hooks/useCodaProgresso';
-import { impostaProgressoFilm, impostaProgressoLibro, impostaProgressoVideogioco } from '../../services/api';
+import { impostaProgressoFilm, impostaProgressoLibro } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { avvisaDotiDaSegnare } from '../../utils/dotiDaSegnare';
 import { ChipDisponibilita } from '../guida/ChipDisponibilita';
 import { ComandiProgressoLettura } from '../guida/ComandiProgressoLettura';
 import { NotaPuntiDote } from '../shared/NotaPuntiDote';
 import { Link } from 'react-router-dom';
+import { ComandiVideogioco } from '../guida/ComandiVideogioco';
 
 type Lettura = NonNullable<OggettoDettaglioDto['lettura']>;
 type Voce = LibroDto | FilmDto | VideogiocoDto;
@@ -52,6 +53,12 @@ export function LetturaDellOggetto({ lettura, partitaId, onSalvata }: { lettura:
     return <Avanzamento voce={film} titolo={film.nomeIt ?? film.nome} tipo={film.dove === 'cinema' ? 'cinema' : 'dvd'} totale={film.totaleSessioni}
       partitaId={partitaId} invia={impostaProgressoFilm} onSalvata={(voce) => onSalvata({ ...lettura, voce })} />;
   }
-  return <Avanzamento voce={lettura.voce} titolo={lettura.voce.nome} tipo="videogioco" totale={lettura.voce.totaleRound}
-    partitaId={partitaId} invia={impostaProgressoVideogioco} onSalvata={(voce) => onSalvata({ ...lettura, voce })} />;
+  return <>
+    <ChipDisponibilita disponibilita={lettura.voce.disponibilita ?? undefined} />
+    {lettura.voce.orariSedeTesto && <p className="m-0 text-xs text-text-secondary">Orari della sede: {lettura.voce.orariSedeTesto}</p>}
+    <ComandiVideogioco key={`${partitaId}:${lettura.voce.chiave}`} gioco={lettura.voce} partitaId={partitaId} onSalvata={(voce) => onSalvata({ ...lettura, voce })} />
+    {!!lettura.voce.effettiTesto.length && <ul className="m-0 pl-5 text-[13px]">{lettura.voce.effettiTesto.map((e, i) => <li key={i}>{e}</li>)}</ul>}
+    {lettura.voce.dettagli && <p className="m-0 whitespace-pre-line text-[13px] text-text-secondary">{lettura.voce.dettagli}</p>}
+    {partitaId !== null ? <NotaPuntiDote cosa="i round completati" /> : <p className="m-0 text-[13px] text-text-muted">Attiva una partita per registrare sessioni e round.</p>}
+  </>;
 }

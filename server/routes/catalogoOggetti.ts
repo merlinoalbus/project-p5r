@@ -7,6 +7,7 @@ import { confermaPropostaOggetto, elencaProposteOggetti, impostaLegameOggetto, s
 import { verificaPartita } from '../services/verificaPartita.js';
 import { z as schema } from 'zod';
 import { auditConversioneCatalogo } from '../services/auditCatalogoService.js';
+import { censimentoScambiCatalogo } from '../services/censimentoScambiCatalogoService.js';
 import { ripristinaCostoRegalo } from '../services/costoRegaloService.js';
 import { bodyLegameOggetto, bodyNuovoOggetto, bodyOggetto, bodyPropostaOggetto, paramsOggetto, queryCatalogoOggetti, queryProposteOggetto,
   type DatiCatalogoOggetto, type DatiLegameOggetto, type DatiPropostaOggetto } from '../schemas/catalogoOggetti.js';
@@ -17,6 +18,9 @@ const chiave = (params: Record<string, unknown>) => `${String(params.categoria)}
 
 // Le rotte letterali precedono categoria/slug: «proposte/conferma» non è un oggetto chiamato «conferma».
 router.get('/audit', (_req, res) => { res.json(auditConversioneCatalogo()); });
+router.get('/censimento-scambi', (_req, res) => {
+  res.set('Cache-Control', 'no-store'); res.json(censimentoScambiCatalogo());
+});
 router.post('/regali/:confidente/:ordine/ripristina-costo', validate({
   params: schema.object({ confidente: schema.string().min(1).max(120), ordine: schema.coerce.number().int().nonnegative() }),
   body: schema.object({ costoAttuale: schema.string().max(6000).nullable() }).strict(),

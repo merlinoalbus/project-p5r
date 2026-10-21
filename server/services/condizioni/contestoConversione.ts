@@ -66,10 +66,31 @@ export function contestoConversione(db: Database.Database): ContestoConversione 
 }
 
 /** Il contesto di una riga del catalogo: il negozio e chi lo gestisce, per «grado cliente», «punti negozio» e «Rango Confidente 3». */
-export function contestoRiga(db: Database.Database, base: ContestoConversione, riga: { tabella: string; chiave: string; negozio_chiave?: unknown; confidente_chiave?: unknown }): ContestoConversione {
+export function contestoRiga(db: Database.Database, base: ContestoConversione, riga: { tabella: string; chiave: string; negozio_chiave?: unknown; confidente_chiave?: unknown; catalogo_chiave?: unknown }): ContestoConversione {
   const negozio = riga.tabella === 'negozio' ? riga.chiave : riga.tabella === 'articolo' && typeof riga.negozio_chiave === 'string' ? riga.negozio_chiave : null;
   const confidente = riga.tabella === 'negozio'
     ? (typeof riga.confidente_chiave === 'string' ? riga.confidente_chiave : null)
     : negozio && haTabella(db, 'negozio') ? ((db.prepare('SELECT confidente_chiave FROM negozio WHERE chiave = ?').get(negozio) as { confidente_chiave: string | null } | undefined)?.confidente_chiave ?? null) : null;
-  return { ...base, negozio, confidenteNegozio: confidente, chiaveCorrente: riga.chiave };
+  let libroCorrente: string | null = null;
+  if (riga.tabella === 'libro' && haTabella(db, 'libro') && db.prepare('SELECT 1 FROM libro WHERE chiave = ?').get(riga.chiave)) libroCorrente = riga.chiave;
+  if (riga.tabella === 'articolo' && haTabella(db, 'articolo') && haTabella(db, 'libro')) {
+    const colArticolo = new Set((db.prepare('PRAGMA main.table_info(articolo)').all() as Array<{ name: string }>).map((c) => c.name));
+    const colLibro = new Set((db.prepare('PRAGMA main.table_info(libro)').all() as Array<{ name: string }>).map((c) => c.name));
+    if (colArticolo.has('catalogo_chiave') && colLibro.has('catalogo_chiave')) {
+      // Un null esplicito è una rimozione del legame: non si ripiega sulla vecchia riga.
+      const catalogo = riga.catalogo_chiave !== undefined ? riga.catalogo_chiave
+        : (db.prepare('SELECT catalogo_chiave FROM articolo WHERE chiave = ?').get(riga.chiave) as { catalogo_chiave: string | null } | undefined)?.catalogo_chiave;
+      if (typeof catalogo === 'string') {
+        const libri = db.prepare('SELECT chiave FROM libro WHERE catalogo_chiave = ?').all(catalogo) as Array<{ chiave: string }>;
+        if (libri.length === 1) libroCorrente = libri[0].chiave;
+      }
+    } else if (!colArticolo.has('catalogo_chiave') && !colLibro.has('catalogo_chiave') && (db.pragma('main.user_version', { simple: true }) as number) < 121) {
+      // Unica corrispondenza storica attestata dalla fonte pubblica, prima delle FK L7.
+      // Nessuna deduzione dal nome, nessun fallback per FK moderne assenti o ambigue.
+      const r = colArticolo.has('origine') ? db.prepare('SELECT origine FROM articolo WHERE chiave = ?').get(riga.chiave) as { origine: string } | undefined : undefined;
+      if (riga.catalogo_chiave === undefined && riga.chiave === 'libreria-nagiuri/comprendere-il-cuore' && r?.origine === 'seed'
+        && db.prepare('SELECT 1 FROM libro WHERE chiave = ?').get('comprendere-il-cuore')) libroCorrente = 'comprendere-il-cuore';
+    }
+  }
+  return { ...base, negozio, confidenteNegozio: confidente, chiaveCorrente: riga.chiave, tabellaCorrente: riga.tabella, libroCorrente };
 }

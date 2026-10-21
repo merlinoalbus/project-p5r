@@ -68,6 +68,7 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
   { tabella: 'progresso_libro_partita', colonna: 'libro_chiave', entita: 'libro', tabellaGioco: 'libro', colonnaGioco: 'chiave' },
   { tabella: 'progresso_film_partita', colonna: 'film_chiave', entita: 'film', tabellaGioco: 'film', colonnaGioco: 'chiave' },
   { tabella: 'progresso_videogioco_partita', colonna: 'videogioco_chiave', entita: 'videogioco', tabellaGioco: 'attivita', colonnaGioco: 'chiave', filtroGioco: "tipo = 'videogioco'" },
+  { tabella: 'sessione_videogioco_partita', colonna: 'videogioco_chiave', entita: 'videogioco giocato', tabellaGioco: 'attivita', colonnaGioco: 'chiave', filtroGioco: "tipo = 'videogioco'" },
   { tabella: 'lettura_partita', colonna: 'chiave', entita: 'libro', tabellaGioco: 'libro', colonnaGioco: 'chiave', filtro: "tipo = 'libro'" },
   { tabella: 'lettura_partita', colonna: 'chiave', entita: 'film', tabellaGioco: 'film', colonnaGioco: 'chiave', filtro: "tipo = 'film'" },
   { tabella: 'effetto_lettura_partita', colonna: 'chiave', entita: 'libro', tabellaGioco: 'libro', colonnaGioco: 'chiave', filtro: "tipo = 'libro'" },

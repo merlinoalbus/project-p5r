@@ -162,3 +162,83 @@ Percorso corrente: `dati_guida.battaglia` → `server/services/battagliaService.
 La lettura ha coperto tutte le celle del workbook e tutti gli elementi del JSON originale e degli allegati recuperati. Non è stata eseguita una nuova certificazione linguistica di ogni abbinamento semantico di `neg-mappa`: le corrispondenze medie/basse e le varianti restano evidenza da trattare esplicitamente. Nessuna prova runtime, migrazione, verifica layout o certificazione dei dati live. Le quantità oggi osservate descrivono gli ingressi letti; l'istanza migrata dovrà produrre il proprio inventario senza perdere righe aggiuntive.
 
 Il passo successivo è il riesame distinto del piano integrato L8, inclusi cardinalità delle attestazioni, varianti e matrice delle provenienze. Questo documento non autorizza l'implementazione e non dichiara soddisfatti R8-07a…f.
+
+## Addendum operativo — preparazione successiva al rilascio `1de1ccba`
+
+Stato dell'addendum: disegno concreto proposto al revisore, nessun codice L8 scritto. Il gate tecnico P3 già ricevuto approva conservazione delle attestazioni/versioni/celle, alternative, priorità Royal, varianti e gestione R230; non certifica una futura implementazione. L'avvio resta subordinato al via libera del coordinatore dopo i residui precedenti.
+
+### A. Ingressi disponibili, derivati ancora da produrre
+
+Disponibilità dei seguenti file riconfermata dopo il rilascio. Gli allegati recuperati sono presenti nell'area di lavoro privata, i cui percorsi non sono riprodotti nel repository.
+
+| Ingresso | Disponibile | Trattamento previsto |
+|---|---|---|
+| `server/db/dati/negoziazione-domande.json` | Sì, già versionato | Conservare identico; ingresso app originale, non sostituirlo con le righe normalizzate |
+| `guida/G-021-negoziazione.md` | Sì, già versionato | Conservare il documento storico; estrarre rese, esempi, coordinate e note nei derivati con provenienza |
+| `royal.xlsx` | Sì, 69.197 byte | Sorgente prioritaria delle celle Royal, inclusi stili; esportare il contenuto pubblico, non proprietà del file o percorsi locali |
+| `royal.md` | Sì, 456.058 byte | Evidenza della legenda e della corrispondenza delle 277 tabelle; non necessario come duplicato operativo completo |
+| `tableConverter.py` | Sì, 8.569 byte | Evidenza della codifica dei colori; non eseguirlo né importarlo nel backend |
+| `neg-mappa.json` | Sì, 21.580 byte | Conservare tutte le associazioni, ordini, null, certezze e note come ingresso storico |
+| `neg-diff.json` | Sì, 53.580 byte sul file recuperato | Conservare il resoconto originale; A19 e altre rettifiche sono registrate separatamente, non riscritte come se appartenessero all'originale |
+| JSON runtime di negoziazione | Da leggere sulla connessione della futura migrazione | Ingresso privato distinto; nessun contenuto o impronta privata esportato in git |
+
+Nuovi file di dati previsti, non ancora generati:
+
+- `server/db/dati/negoziazione-royal.json`: versione del formato, attribuzione/URL pubblico, hash del workbook e tutte le 277 righe. Ogni risposta conserva indice e testo originale; ogni cella conserva coordinata, valore grezzo, colore e provenienza indicata dalla fonte. Anche le celle vuote restano nell'inventario di copertura. Le alternative normalizzate sono derivate dal grezzo, non lo sostituiscono.
+- `server/db/dati/negoziazione-abbinamenti.json`: copia pubblicabile del mapping e del diff recuperati, con le rispettive identità di fonte; sezione separata delle rettifiche/riserve documentate in questo contratto. Nessuna applicazione automatica dell'abbinamento basso A87, dei segmenti ambigui A101/A218 o di valori `ordine=null`.
+- `server/db/dati/negoziazione-rese-it.json`: testi italiani per identità della variante/risposta, con autore/origine della resa e coordinate della fonte. Le 49 rese già in G-021 vengono attribuite a G-021; eventuali nuove rese prodotte nel lotto sono `resa-app` con provenienza L8, non attribuite retroattivamente all'Esperto o al gioco. Per R230 i due testi assenti rimangono assenti, non traduzioni delle parentesi.
+
+Nessun derivato deve contenere `data/gioco.db`, dati di partita, metadati personali del workbook o copie di altri blocchi della guida. Gli hash ammessi nei dati pubblici identificano soltanto gli ingressi pubblici. L'estrazione di celle è preparazione di dati: nessuno script riscrive file TypeScript/TSX o modifica sorgenti esistenti. La composizione dei nuovi file di dati avverrà soltanto dopo il via libera e con inventario riga per riga riesaminabile.
+
+### B. Tabelle proposte e cardinalità
+
+La separazione fra famiglia e variante evita di fondere risposte incompatibili sotto una sola domanda. È un affinamento del disegno M8 necessario per R125/R126 e per le varianti incorporate dell'app; non introduce un secondo catalogo operativo. Il revisore distinto ha approvato questo disegno, mantenendo fermo l'avvio L8 fino al via libera del coordinatore.
+
+Vincoli precisati dal gate: i campi `fonte`, `versione_fonte`, `localizzatore` e `alternativa` del vincolo univoco delle attestazioni sono tutti `NOT NULL`; l'alternativa ha indice deterministico anche per l'esito singolo. Un esito principale proveniente dalle 304 celle `unconfirmed` rimane etichettato ereditato da P5/non confermato, mai «verificato Royal»: la priorità della raccolta non cancella lo stato della fonte o il conflitto. Per raggruppare duplicati si confrontano anche insieme delle risposte e corrispondenze documentate, non il solo testo della domanda.
+
+| Tabella | Identità e campi essenziali | Responsabilità |
+|---|---|---|
+| `negoziazione_domanda` | `chiave` PK, `ordine` | Famiglia di domande dimostrate equivalenti. La semplice somiglianza non assegna la famiglia; una variante senza relazione dimostrata ha una famiglia autonoma |
+| `negoziazione_variante` | `chiave` PK, `domanda_chiave` FK, `testo`, `testo_originale`, `testo_origine`, `fonte`, `versione_fonte`, `localizzatore`, `ordine`, `note_json` | Una versione concreta della domanda, con il proprio insieme ordinato di risposte. Testi e note sorgente non vengono persi nella famiglia |
+| `negoziazione_risposta` | `chiave` PK, `variante_chiave` FK, `testo` nullable, `testo_originale`, `testo_origine`, `testo_disponibile`, `ordine`, `corrispondenze_json` | Una posizione risposta. Corrispondenze esplicite verso altre risposte per chiave, certezza e fonte; nessuna identità per solo testo e nessuna inferenza dalla posizione |
+| `negoziazione_verdetto` | `chiave` PK, `risposta_chiave` FK, `umore`, `esito`, `incerto`, `fonte`, `versione_fonte`, `localizzatore`, `alternativa`, `valore_grezzo`, `colore_grezzo`, `origine_indicata_fonte` | Un'attestazione atomica. Vincolo univoco su fonte/versione/localizzatore/alternativa; non su risposta/umore/fonte. Il servizio calcola principali/alternative senza cancellare attestazioni |
+| `negoziazione_umore` | `umore` PK, `nome`, `descrizione`, `esempi_json`, `da_evitare_json`, `fonte`, `versione_fonte` | Le quattro carte con esempi collegati quando attestati; i contenuti precedenti restano nella fotografia d'importazione e nel dettaglio delle rettifiche |
+| `negoziazione_importazione` | `chiave` PK, `versione_formato`, `fonti_json`, `input_runtime_json`, `rapporto_json` | Fotografia e riconciliazione dell'importazione effettiva, immutabili. L'ingresso runtime resta soltanto nel DB; questa tabella non alimenta le risposte al posto delle tabelle operative |
+
+`corrispondenze_json` contiene oggetti con chiavi risposta esplicite, non testi usati come puntatori. Import e lettore verificano che tutte le destinazioni esistano. Nel perimetro P3 non è prevista una API di cancellazione/fusione di domande: se sarà introdotta, deve trattare questi riferimenti e la fotografia storica separatamente.
+
+I cinque gruppi di duplicati app esatti confluiscono nella stessa famiglia visibile, conservando le versioni e le coordinate dei loro verdetti. Tutte le 277 righe Royal rimangono varianti identificabili, comprese le nove non elencate fra le nuove domande. Una relazione dubbia non impone una famiglia comune. Il numero di famiglie non è usato come soglia artificiale di conformità.
+
+Le corrispondenze di risposta attestano quali alternative sono confrontabili. Il calcolo dell'esito principale raccoglie solo Royal realmente collegato a quella risposta/variante; non raccoglie tutte le risposte di una famiglia e non applica un esito di R196 a un testo esclusivo di R216. Con più esiti Royal restituisce discordanza; senza Royal documentato conserva gli esiti app. Il DTO separa sempre identità della risposta mostrata, attestazioni pertinenti e testo dell'eventuale risposta corrispondente. Per i testi app compositi non attribuibili mantiene la discordanza e le varianti consultabili, senza scegliere un segmento.
+
+### C. File di implementazione e ownership
+
+| File | Intervento previsto |
+|---|---|
+| `shared/negoziazione.ts` nuovo | Contratti degli ingressi, umori/esiti, provenienze, domanda/famiglia/variante, risposta, attestazione, valutazione e rapporto di copertura |
+| `server/db/migrations/schemaNegoziazione.ts` nuovo | DDL delle sei tabelle e vincoli, chiamato dalla futura migrazione L8 dentro il suo perimetro transazionale |
+| `server/db/migrations/importaNegoziazione.ts` nuovo | Preflight degli ingressi, conversione conservativa, scrittura operativa e fotografia/rapporto; nessuna connessione propria né migrazione lanciata durante lo sviluppo |
+| `server/db/migrations/fontiNegoziazione.ts` nuovo | Lettura dei soli file pubblici versionati e adattamento tipizzato; nessun riferimento all'area privata recuperata |
+| `server/services/negoziazioneService.ts` nuovo | Unico lettore per corpus, umori e valutazioni principali/alternative; rapporto readonly dalla fotografia e dai riferimenti operativi |
+| `server/schemas/negoziazione.ts` nuovo | Parametri di umore/Ombra/ricerca con vocabolario esplicito; nessuna scelta di umore sconosciuto |
+| `src/services/api/negoziazione.ts` nuovo | Client dei due endpoint dedicati, tipizzato sul contratto condiviso |
+| `src/components/guida/RisposteNegoziazione.tsx` esistente | Consultazione per umore/Ombra, ricerca su tutto il corpus/varianti, identità React stabili, esiti immediati e fonti discordanti visibili |
+| `src/components/guida/RapportoNegoziazione.tsx` nuovo | Consultazione readonly di copertura, rettifiche e discordanze senza esportazione automatica dei dati runtime |
+| `src/utils/negoziazione.ts` esistente | Ricerca e presentazione sul nuovo contratto; rimozione della selezione del primo verdetto tramite `find` |
+| `src/pages/BattagliaPage.tsx`, sola sezione negoziazione | Collegamento al corpus unico e parametri URL, senza toccare la sezione Ombre assegnata all'altro esecutore |
+| `server/services/battagliaService.ts`, solo proiezione negoziazione | Le vecchie domande JSON non sono più restituite come catalogo operativo; note e sezioni generali rimangono, integrate con il lettore unico |
+| `shared/types.ts`, solo tipi negoziazione | Sostituzione del vecchio contratto e import dei tipi condivisi; nessun cambiamento ai tipi Ombra senza coordinamento |
+
+Integrazioni condivise da concordare prima dell'edit: `server/routes/compendio.ts`, descrizioni/registrazione OpenAPI, registrazione della migrazione L8, export dei client se richiesto dal barrel, `NOTICE`, pagina Ombra e suoi collegamenti. Il numero della migrazione non viene assunto dal nome degli helper: il coordinatore compone lo schema/import dopo aver verificato la sequenza effettiva. La modifica della personalità/negoziabilità delle Ombre appartiene al relativo esecutore; P3 consuma quel contratto senza dedurlo dai nomi Shadow del foglio.
+
+### D. Ordine concreto della conversione e della consegna
+
+1. Preparare gli ingressi pubblici e le rese mancanti; riesaminare copertura e attribuzioni prima di usarli come dati di migrazione. Conservare gli originali e distinguere rettifiche nuove.
+2. Definire tipi e schema; riconoscere lo schema atteso. In presenza di tabelle omonime parziali/incompatibili interrompere prima delle scritture, senza DROP o riparazione automatica. Nessun helper si attiva importando il modulo.
+3. Sulla connessione della futura migrazione, leggere la sola sezione runtime di negoziazione e costruire in memoria l'inventario completo. Abbinare al baseline soltanto righe la cui identità/contenuto è dimostrato; conservare autonomamente modifiche o righe nuove, con provenienza runtime e senza presumere che siano erronee.
+4. Costruire tutte le chiavi di famiglia/variante/risposta/attestazione e la matrice delle corrispondenze prima degli INSERT. Verificare riferimenti, ordini e copertura di ogni posizione/cella, comprese assenze e multi-esito. Non usare i vecchi totali come sostituto della matrice.
+5. Creare e popolare le tabelle nella transazione della migrazione; salvare fotografia e rapporto nella stessa transazione. Nessun contenuto runtime nei log o file pubblici. Conservare il precedente JSON guida come fonte storica e far cessare la sua lettura operativa delle domande tramite il servizio unico.
+6. Integrare API, pagina Battaglia e pagina Ombra sullo stesso lettore. `umore`, `ombra`, ricerca e variante devono mantenere un'identità nella navigazione; il cambio Ombra aggiorna la selezione, senza dipendere soltanto dallo stato iniziale del componente.
+7. Tre riesami statici propri: preservazione e roundtrip/import; semantica delle fonti e varianti; contratto/consumatori/layout. Typecheck, lint e build centralizzati; nessun test, migrazione locale o avvio di servizi da parte dell'esecutore P3. Riesame distinto end-to-end prima della consegna integrata.
+
+La paginazione eventuale riguarda la presentazione, non la ricerca né la copertura del corpus. Le varianti necessarie per distinguere una risposta discordante sono visibili insieme alla domanda; non si nascondono dietro una scelta automatica. La vista principale richiede umore → domanda oppure ricerca diretta, senza aggiungere un passaggio obbligatorio per ottenere l'esito. Le informazioni di provenienza possono essere approfondite senza togliere l'avviso di discordanza immediato.

@@ -23,6 +23,8 @@ import { nomiCondizioni, nomiCondizioniMemo, pinConStato, vociCitabili } from '.
 import { tuttiGliInviti } from '../services/condizioni/condizioneEffettiva.js';
 import { apertureDalDiario, apertureDichiarabili } from '../services/apertureDedaliService.js';
 import { censimentoLuoghiCondizioni } from '../services/censimentoLuoghiCondizioniService.js';
+import { riconciliazioneCondizioni, decidiCondizioni } from '../services/riconciliazioneCondizioniService.js';
+import type { DecisioneCondizioniInput } from '../../shared/riconciliazioneCondizioni.js';
 import { statoAlGiorno, statoDisponibilitaPartita } from '../services/disponibilitaService.js';
 import { valutazione } from '../services/condizioni/valutatore.js';
 import { condizioneSpillo } from '../schemas/mappe.js';
@@ -44,6 +46,20 @@ const chiave = z.string().regex(/^[a-z0-9][a-z0-9-]{0,119}$/);
 router.get('/censimento', (_req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   res.json(censimentoLuoghiCondizioni());
+});
+
+router.get('/riconciliazione', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(riconciliazioneCondizioni());
+});
+
+router.post('/riconciliazione/decisioni', validate({ body: z.object({
+  id: z.string().min(1).max(400),
+  azione: z.enum(['conferma-corrente', 'applica-proposta', 'mantieni-nota']),
+  revisioneAttesa: z.string().regex(/^[a-f0-9]{64}$/),
+}).strict() }), (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(decidiCondizioni(req.body as DecisioneCondizioniInput));
 });
 
 /** I negozi con il loro programma punti (null se non ne hanno). */

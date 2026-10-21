@@ -157,9 +157,15 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   },
   'PUT /api/partite/:id/letture': {
     sommario: 'Avanza o completa un libro, un film o un videogioco',
-    descrizione: 'Imposta l\'avanzamento (sessioni lette, visioni, sessioni di gioco) oppure `fatto` (vero = al totale, falso = a zero). L\'avanzamento è un intero fra 0 e il totale; al cinema non c\'è tetto e ogni visione conta. Raggiunto il totale la lettura è completata: evento `lettura` nello storico la prima volta e registro delle Doti che il conseguimento dà; tornare sotto il totale le toglie dal registro. Un elemento non ancora disponibile nella partita non si avanza (409). Le Doti non si toccano: la risposta dice in `daSegnare` che cosa segnare (o togliere) a mano.',
+    descrizione: 'Imposta l\'avanzamento (sessioni lette, visioni, round completati) oppure `fatto` (vero = al totale, falso = a zero). L\'avanzamento è un intero fra 0 e il totale; al cinema non c\'è tetto e ogni visione conta. Raggiunto il totale la lettura è completata: evento `lettura` nello storico la prima volta e registro delle Doti che il conseguimento dà; tornare sotto il totale le toglie dal registro. Un aumento richiede disponibilità (409); diminuzioni e richieste identiche restano ammesse anche quando i requisiti sono cambiati. Per i videogiochi la disponibilità include sede e requisiti propri. Le Doti non si toccano: la risposta dice in `daSegnare` che cosa segnare (o togliere) a mano.',
     risposta: '`LibroDto`, `FilmDto` o `VideogiocoDto` secondo il tipo, con `daSegnare` (elenco di `DoteDaSegnareDto`) quando il registro cambia',
     errori: [PARTITA, [404, 'lettura-non-trovata'], [400, 'avanzamento-non-valido'], [409, 'lettura-non-disponibile']],
+  },
+  'PUT /api/partite/:id/sessione-videogioco': {
+    sommario: 'Dichiara almeno una sessione giocata, senza modificare i round',
+    descrizione: 'Imposta o toglie la dichiarazione manuale del titolo. Almeno un round positivo resta una prova indipendente di sessione giocata. Una nuova dichiarazione richiede disponibilità e titolo visibile; la rimozione è ammessa anche per un titolo esistente nascosto. Operazione idempotente, senza effetti sulle Doti, turni o completamenti.',
+    risposta: '`VideogiocoDto` aggiornato, con `sessioneDichiarata` e `iniziato` calcolato dalle due fonti',
+    errori: [PARTITA, [404, 'lettura-non-trovata'], [409, 'lettura-non-disponibile']],
   },
   'PUT /api/partite/:id/richieste': {
     sommario: 'Stato di una Richiesta dei Memento',

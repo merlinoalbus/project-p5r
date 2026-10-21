@@ -48,12 +48,16 @@ export type RangoCliente = (typeof RANGHI_CLIENTE)[number]['chiave'];
 /** I contatori che la partita sa calcolare da sola dai progressi segnati. */
 export const CONTATORI = [
   { chiave: 'film-completati', nome: 'Film o DVD completati' }, { chiave: 'videogiochi-completati', nome: 'Videogiochi completati' }, { chiave: 'libri-letti', nome: 'Libri letti' },
+  { chiave: 'film-con-una-visione', nome: 'Film o DVD con almeno una visione' },
+  { chiave: 'videogiochi-giocati', nome: 'Videogiochi con almeno una sessione giocata' },
 ] as const;
 export type ContatoreChiave = (typeof CONTATORI)[number]['chiave'];
 /** Gli eventi di storia. Quelli con `membro` sono «entra in squadra»: **si calcolano** dalla squadra della
  *  partita (`membro_squadra_partita.in_squadra`) e non si segnano a mano; niente date canoniche. */
 export const EVENTI_STORIA = [
   { chiave: 'mansarda-pulita', nome: 'Mansarda del Leblanc pulita' },
+  { chiave: 'laptop-riparato', nome: 'Laptop del Leblanc riparato' },
+  { chiave: 'sistema-videogiochi-installato', nome: 'Sistema per videogiochi installato al tavolo del Leblanc' },
   { chiave: 'evento-makoto', nome: 'Evento con Makoto (entra in squadra)', membro: 'makoto' },
   { chiave: 'evento-futaba', nome: 'Evento con Futaba (entra in squadra)', membro: 'futaba' },
   { chiave: 'evento-haru', nome: 'Evento con Haru (entra in squadra)', membro: 'haru' },

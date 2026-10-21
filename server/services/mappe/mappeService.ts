@@ -8,6 +8,7 @@
 // ============================================================
 
 import { calcolaCollezioniImmagini } from './collezioniImmagini.js';
+import { improntaRaccordoPin, richiestaRaccordoPin, type PrecondizioneRaccordoPinDto } from './precondizioneRaccordoPin.js';
 import { isDeepStrictEqual } from 'node:util';
 import { RETTIFICHE_NOMI_SEED } from './rettificheNomiSeed.js';
 import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMappe.js';
@@ -1329,6 +1330,7 @@ export function eliminaCopiaPezzoMappa(id: number): { pezzoEliminato: boolean } 
 }
 
 export interface DatiSpillo { soloPosizione?: boolean; destinazione?: DestinazioneSpillo | null; tipo?: TipoSpillo; nome?: string; descrizione?: string; x?: number; y?: number; riferimento?: { tipo: TipoRiferimento; chiave: string } | null; collezionabile?: boolean; ordine?: number; condizioni?: RequisitoSpillo[] | null }
+export type DatiAggiornaSpillo = DatiSpillo & { mappa?: string; riferimentoLuogo?: string; revisioneRaccordoAttesa?: string };
 
 /** L'etichetta con cui si scarta lo stato di un pin o di una voce della guida citato fuori dalle condizioni dei pin. */
 const SOLO_PIN = 'Stato di un pin o di una voce della guida (solo nelle condizioni dei pin)';
@@ -1500,16 +1502,36 @@ export function creaSpillo(mappaChiave: string, dati: DatiSpillo & { tipo: TipoS
   })();
 }
 
+/** Sola lettura coerente: restituisce solo il token, senza fotografia né effetti sulle relazioni. */
+export function precondizioneRaccordoSpillo(id: number, luogo: string): PrecondizioneRaccordoPinDto {
+  const db = getDb();
+  return db.transaction(() => {
+    const r = db.prepare('SELECT * FROM spillo WHERE id = ?').get(id) as RigaSpillo | undefined;
+    if (!r) throw httpErrors.notFound('spillo-non-trovato', `Lo spillo ${id} non esiste.`);
+    return { revisioneRaccordoAttesa: improntaRaccordoPin(db, r, luogo) };
+  })();
+}
+
 /**
  * Aggiorna uno spillo in una transazione: i campi assenti restano. Una scheda della guida senza mappa non accetta coordinate,
  * mappa né destinazione; su una planimetria un riferimento «punto» diventa una voce in più del pin (098), e spostando il pin su un'altra
  * mappa le sue voci devono restare del Palazzo. Un riferimento non più ammesso dal tipo cade; condizioni e giri fra pin si
  * verificano. Uno spillo del seed modificato diventa dell'utente e ricorda la sua identità di seed per il reseed.
  */
-export function aggiornaSpillo(id: number, dati: DatiSpillo & { mappa?: string }): SpilloDto | SchedaContenutoGuidaDto {
+export function aggiornaSpillo(id: number, dati: DatiAggiornaSpillo): SpilloDto | SchedaContenutoGuidaDto {
   return getDb().transaction(() => {
   const r = prepared('SELECT * FROM spillo WHERE id = ?').get(id) as RigaSpillo | undefined;
   if (!r) throw httpErrors.notFound('spillo-non-trovato', `Lo spillo ${id} non esiste.`);
+
+  if (Object.prototype.hasOwnProperty.call(dati, 'revisioneRaccordoAttesa') || Object.prototype.hasOwnProperty.call(dati, 'riferimentoLuogo')) {
+    const raccordo = richiestaRaccordoPin(dati);
+    const attuale = improntaRaccordoPin(getDb(), r, raccordo.riferimentoLuogo);
+    if (attuale !== raccordo.revisioneRaccordoAttesa) throw httpErrors.conflict('raccordo-precondizione-cambiata', 'Il pin, i suoi collegamenti o il luogo sono cambiati dopo la lettura. Rileggi la proposta prima di collegare.');
+    // Ramo deliberatamente separato dalle normalizzazioni dell'editor: anche NULL e [] raw,
+    // voci, immagini, destinazione, origine, nome e coordinate restano esattamente quelli letti.
+    prepared("UPDATE spillo SET riferimento_tipo = 'luogo', riferimento_chiave = ?, updated_at = ? WHERE id = ?").run(raccordo.riferimentoLuogo, nowIso(), id);
+    return elementoSpilloDto(prepared('SELECT * FROM spillo WHERE id = ?').get(id) as RigaSpillo);
+  }
 
   if(r.area_guida_chiave && ['x','y','mappa','destinazione'].some(k=>Object.prototype.hasOwnProperty.call(dati,k)))throw httpErrors.badRequest('contenuto-non-spaziale','Una scheda guida non accetta coordinate o destinazioni.');
   if (dati.tipo && !(TIPI_SPILLO as readonly string[]).includes(dati.tipo)) throw httpErrors.badRequest('tipo-non-valido', 'Tipo di spillo non ammesso.');

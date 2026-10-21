@@ -361,7 +361,8 @@ function ordineSuccessivo(tipo: TipoCatalogo, dati: Record<string, unknown>): nu
 
 function verificaTipoVideogioco(tipo: TipoCatalogo, attuale: Riga, nuovoTipo: unknown): void {
   if (tipo !== 'attivita' || attuale.tipo !== 'videogioco' || nuovoTipo === 'videogioco') return;
-  if (typeof attuale.catalogo_chiave === 'string' || prepared('SELECT 1 FROM progresso_videogioco_partita WHERE videogioco_chiave = ? LIMIT 1').get(attuale.chiave)) {
+  if (typeof attuale.catalogo_chiave === 'string' || prepared('SELECT 1 FROM progresso_videogioco_partita WHERE videogioco_chiave = ? LIMIT 1').get(attuale.chiave)
+    || prepared('SELECT 1 FROM sessione_videogioco_partita WHERE videogioco_chiave = ? LIMIT 1').get(attuale.chiave)) {
     throw httpErrors.conflict('videogioco-con-avanzamento', 'Questa attività è un videogioco collegato al catalogo o a progressi registrati. Il cambio di tipo li renderebbe incoerenti: nessun dato è stato cambiato.');
   }
 }
@@ -389,7 +390,7 @@ export function creaElemento(tipo: TipoCatalogo, grezzi: Record<string, unknown>
   const colonne = ['chiave', 'ordine', ...compilate, 'origine', 'nascosto', 'updated_at'];
   const daProsa = PROFILO[tipo].condizioniDa;
   if (daProsa && valori.condizioni_json === undefined) {
-    valori.condizioni_json = JSON.stringify(migraTestiCondizioni(daProsa(dati), contestoRiga(getDb(), contestoConversione(getDb()), { tabella: tipo, chiave, negozio_chiave: dati.negozio_chiave, confidente_chiave: dati.confidente_chiave })));
+    valori.condizioni_json = JSON.stringify(migraTestiCondizioni(daProsa(dati), contestoRiga(getDb(), contestoConversione(getDb()), { tabella: tipo, chiave, negozio_chiave: dati.negozio_chiave, confidente_chiave: dati.confidente_chiave, catalogo_chiave: dati.catalogo_chiave })));
     colonne.push('condizioni_json');
   }
   // **Quel che aggiungi tu e' verificato: la fonte sei tu.**
@@ -503,7 +504,7 @@ export function ripristinaElemento(tipo: TipoCatalogo, chiave: string): Elemento
   const originale = r.seed_json ? (JSON.parse(r.seed_json) as Record<string, unknown>) : null;
   if (!originale) throw httpErrors.badRequest('riga-del-seed', 'Questa riga arriva dai dati della guida e non è stata modificata: non c\'è nulla da ripristinare. Usa «Nascondi» se non vuoi vederla.');
   const daProsaRip = PROFILO[tipo].condizioniDa;
-  if (daProsaRip && originale.condizioni_json == null) originale.condizioni_json = JSON.stringify(migraTestiCondizioni(daProsaRip(originale), contestoRiga(getDb(), contestoConversione(getDb()), { tabella: tipo, chiave: String(r.chiave), negozio_chiave: originale.negozio_chiave, confidente_chiave: originale.confidente_chiave })));
+  if (daProsaRip && originale.condizioni_json == null) originale.condizioni_json = JSON.stringify(migraTestiCondizioni(daProsaRip(originale), contestoRiga(getDb(), contestoConversione(getDb()), { tabella: tipo, chiave: String(r.chiave), negozio_chiave: originale.negozio_chiave, confidente_chiave: originale.confidente_chiave, catalogo_chiave: originale.catalogo_chiave })));
   // **Un'istantanea vecchia non conosce i campi aggiunti dopo.** `seed_json` conserva la riga com'era
   // il giorno in cui l'hai corretta: se da allora la tabella ha guadagnato una colonna — `verificato`
   // e' entrata fra i campi salvati con la stellina delle righe tue — quel campo nell'istantanea non

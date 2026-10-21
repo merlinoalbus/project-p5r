@@ -18,10 +18,19 @@
 import type { AppDatabase } from './dbService.js';
 
 /** Le tabelle che vivono nel file delle partite, in ordine alfabetico. */
-export const TABELLE_UTENTE = ["acquisto_partita","attivita_svolta_partita","cestino_partite","ciclo_salvato","compendio_partita","confidente_partita","cruciverba_partita","domanda_partita","dote_sociale_partita","effetto_lettura_partita","evento_partita","evento_storia_partita","incontro_confidente_partita","lettura_partita","membro_squadra_partita","meteo_partita","obiettivo_partita","partita","persona_posseduta","persona_posseduta_skill","piano_salvato","progresso_film_partita","progresso_libro_partita","progresso_videogioco_partita","punti_negozio_partita","punto_partita","regalo_partita","requisito_partita","richiesta_partita","spillo_partita","spunta_voce_partita","timbri_dedalo_partita","trofeo_partita","turno_partita"] as const;
+export const TABELLE_UTENTE = ["acquisto_partita","attivita_svolta_partita","cestino_partite","ciclo_salvato","compendio_partita","confidente_partita","cruciverba_partita","domanda_partita","dote_sociale_partita","effetto_lettura_partita","evento_partita","evento_storia_partita","incontro_confidente_partita","lettura_partita","membro_squadra_partita","meteo_partita","obiettivo_partita","partita","persona_posseduta","persona_posseduta_skill","piano_salvato","progresso_film_partita","progresso_libro_partita","progresso_videogioco_partita","punti_negozio_partita","punto_partita","regalo_partita","requisito_partita","richiesta_partita","sessione_videogioco_partita","spillo_partita","spunta_voce_partita","timbri_dedalo_partita","trofeo_partita","turno_partita"] as const;
+
+/** Nessuna FK fra i due file: i riferimenti ai giochi si controllano con RIFERIMENTI_PARTITE. */
+export const DDL_SESSIONE_VIDEOGIOCO = `CREATE TABLE IF NOT EXISTS utente.sessione_videogioco_partita (
+  partita_id INTEGER NOT NULL REFERENCES partita(id) ON DELETE CASCADE,
+  videogioco_chiave TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  PRIMARY KEY (partita_id, videogioco_chiave)
+)`;
 
 /** DDL idempotente (IF NOT EXISTS) delle tabelle e degli indici delle partite, schema «utente». */
 export const DDL_UTENTE: readonly string[] = [
+  DDL_SESSIONE_VIDEOGIOCO,
   "CREATE TABLE IF NOT EXISTS utente.acquisto_partita (\n  partita_id       INTEGER NOT NULL REFERENCES partita(id) ON DELETE CASCADE,\n  articolo_chiave  TEXT NOT NULL,\n  updated_at       TEXT NOT NULL,\n  PRIMARY KEY (partita_id, articolo_chiave)\n);",
   "CREATE TABLE IF NOT EXISTS utente.attivita_svolta_partita (\n        partita_id INTEGER NOT NULL REFERENCES partita(id) ON DELETE CASCADE,\n        attivita_chiave TEXT NOT NULL,\n        volte INTEGER NOT NULL CHECK (volte >= 0),\n        updated_at TEXT NOT NULL,\n        PRIMARY KEY (partita_id, attivita_chiave)\n      );",
   "CREATE TABLE IF NOT EXISTS utente.cestino_partite (\n      uid             TEXT PRIMARY KEY,\n      registro_json   TEXT NOT NULL,\n      eliminato_il    TEXT NOT NULL\n    );",

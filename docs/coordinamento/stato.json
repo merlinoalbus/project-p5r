@@ -1,14 +1,14 @@
 {
   "obiettivo": "Lotti L0–L11 della razionalizzazione completati sul branch newreview, pubblicati e funzionanti su p5s",
-  "aggiornato": "2026-10-21T09:21:00Z",
-  "mandatoCorrente": "Bonificare e rilasciare tutti i difetti, completare implementazioni parziali e poi L8-L11. Bonifica integrata L5-L7 pubblicata e0ea995e, pipeline66 riuscita; p5s122/26 osservato. Prima del codiceL8 si completano inventari correnti/proposteL5-L6: GET mirato readonly approvato dal revisore, implementazione in corso senza copieDB/partite/immagini. L8 piano tecnico P1-P3/P6 approvato, P4modello favorevole con gateDDLpendente, P5decisioni cartografiche da chiudere. Zero test e nessuna implementazioneL8.",
+  "aggiornato": "2026-10-21T11:12:00Z",
+  "mandatoCorrente": "Bonificare e rilasciare tutti i difetti, completare implementazioni parziali e poi L8-L11. Blocco123-126/027, pagina R6-19/31, GET97 e CAS approvati staticamente e registrati localmente, nessuna esecuzione locale. Typecheck99280/lint28078/build88584 verdi. Rilascio in preparazione; pubblicato ancora1de1ccba/pipeline67/schema122-26. Otto raccordi L5 inattivi: consenso specifico elenco non acquisito. L26, pesca, Confidenti e riconciliazioni restano aperti. Zero test, nessuna copia DB o implementazione L8.",
   "verificaConsegne": "Disposizione utente del 21/10: ogni consegna richiede un agente distinto che acceda direttamente alla specifica originale in modo avversariale. Sola lettura, evidenze requisito/codice, copertura e limiti espliciti, esito motivato. Rilievi da risolvere e riesaminare o sottoporre all'utente. Supera il precedente divieto di verificatori; resta zero test.",
-  "auditSpecifiche": "Gate finale codice e attivazione L5-L7 APPROVATO STATICAMENTE contro originali43ad8889 e decisioni successive: nessun rilievo bloccante noto residuo nei percorsi esaminati. Chiusi snapshot/costi/cestino, proposte obsolete, audit immutabile e categorie letture. Proposte umane previste e riconciliazioni aggregate restano esplicite, senza certificazione dei singoli abbinamenti, dati/runtime/layout.",
-  "salvataggioAudit": "Dossier, codice e coordinamento L5-L7 committati e pubblicati in e0ea995e39782bb4a459e82d3dd6686a40a22ffd. Aggiornamento post-rilascio e pianoL8 locali da includere nella prossima consegna. Nessun dato privato salvato.",
+  "auditSpecifiche": "Gate distinti statici contro originali43ad8889 approvati per123/124/T2/R5-02,125/126/parser/snapshot/ledger, GET97, pagina operativa R6-19/31, CAS e registri123-126/027. Raccordi L5 inattivi senza consenso specifico. Dossier Confidenti approvato come disegno circoscritto; nessuna approvazione globale, delle singole interpretazioni, dei dati o del runtime/layout.",
+  "salvataggioAudit": "Bonifica L5-L7 in e0ea995e; censimento readonly, coordinamento post-rilascio e piani L8 pubblicati in 1de1ccba887f533a43c7ef6fe36524ac0264c249. Pipeline67 riuscita. Riconciliazioni correnti e aggiornamenti successivi ancora in lavorazione. Nessun dato privato salvato.",
   "revisioneRimozioni": "Precedente approvazione limitata alle due rimozioni UI; non certifica runtime o chiusura L6. La nuova disposizione richiede verifica indipendente e avversariale delle consegne.",
-  "controlliLocali": "Dopo attivazione: typecheck39444, lint29880 e build41169 exit0. Tre riesami propri e gate distinto finale approvati. Diffcheck e controllo privacy verdi. Nessun test o migrazione locale. Pipeline66success; GETp5s dopo rilascio schema122/26: Diario255voci in54giorni, Kamoshida169, Madarame226,611pinutente in43planimetrie identici ai campi rilevati prima. PerimetroAPI, non interoDB. Catalogo e audit caricati, nessun errore console osservato. Nessuna impronta privata nel repo. Asserzioni test storico non aggiornate né eseguite: non certificanoL7.",
+  "controlliLocali": "Typecheck99280/build88584 exit0; lint28078 exit0 dopo il solo delta di dichiarazione CAS riesaminato e approvato. Tre riesami propri, gate statici distinti e registri123-126/027 approvati. Nessun test o migrazione locale. Riferimento GET prima delle bonifiche: Diario255/54giorni,Kamoshida169,Madarame226,611pinutente/43mappe; solo in memoria, nessuna impronta privata nel repo. Attesi confronto dopo rilascio e lettura esiti di riga.",
   "censimentoCatalogo": "Manifest ricostruito shared/l7-fonti-ricostruite.json, seconda revisione dei campi e formato schemaVersion 1: 2.430 fonti pubbliche dal pacchetto schema 93, precedente al locale 120. Non è l7-proposte.json originale né prova equivalenza. Input runtime e risultati solo nel DB della singola istanza, audit-catalogo-121. Fonti aggregate e sottoelementi non riconciliati restano decisioni aperte visibili; A7-04 non integralmente chiuso. Dettagli in lotti/L7/ricostruzione-input.md.",
-  "decisioneRichiesta": "Nessuna nuova approvazione generale richiesta: mandato implementazione esplicito e tre soluzioni approvate. Scelta delegata identità: nessun abbinamento solo per nome, equivalenza documentata prima di una fusione approvata; associazioni e riferimenti preservati. Proposte mancanti da ricostruire senza dichiararne equivalenza. Diario nella visita Memento già scelto, senza conteggio; OR Asakusa/Importa/guida già decisi.",
+  "decisioneRichiesta": "Nessuna approvazione generale richiesta per implementare il mandato. Otto raccordi L5 richiedono invece consenso specifico dell'elenco per M5§7.9; helper inattivo, proposta concreta documentata, seguito AreaVenditore ancora da preparare. Nessun abbinamento solo per nome o fusione non approvata. Diario nella visita Memento già scelto, senza conteggio; OR Asakusa/Importa/guida già decisi.",
   "fasi": [
     "requisiti",
     "dati",
@@ -25,7 +25,7 @@
   ],
   "p5s": {
     "url": "https://p5s.nasmerlinoalbus.cloud/",
-    "stato": "Pubblicato e0ea995e39782bb4a459e82d3dd6686a40a22ffd, pipeline #66 (39563033231) success. Healthok schema122, partite26. Catalogo1300oggetti e audit2739fonti/3254risultati osservati;478fonti daesaminare,86proposteoperative. Nessuna proposta confermata. Dati protetti nel perimetroGET identici prima/dopo. Prove funzionali/layout utente e riconciliazioni ancora aperte."
+    "stato": "Pubblicato1de1ccba887f533a43c7ef6fe36524ac0264c249, pipeline67(39577244857)success. Healthok schema122, censimento v1 disponibile senza tagli/colonne assenti;201frasi storiche identiche. Audit2739fonti/3254risultati,376fonti aggregate da riconciliare,86proposte pendenti;confermate0/scartate0 letti dall'esecutore L7. Nessuna proposta confermata dall'assistente. Proiezioni protette GET identiche prima/dopo.123-126/027 registrate nel codice locale, non ancora pubblicate o eseguite su p5s."
   },
   "lotti": [
     {
@@ -132,7 +132,7 @@
       "id": "L5",
       "titolo": "Luoghi, negozi, orari",
       "dipende": "L2",
-      "nota": "Bonifiche A56-01..08 APPROVATE staticamente e pubblicate e0ea995e con L6-L7, pipeline66success, p5s122/26. Dati protetti API identici prima/dopo. Inventari e conferme funzionali/layout aperti; nessuna certificazione globale.",
+      "nota": "Pubblicato1de1ccba/pipeline67/schema122-26. R5-02 attività dalla sede e CAS personale approvati staticamente, pronti al rilascio. Inventario51luoghi senzaArea,31pin candidati e181residui; otto raccordi proposti ma inattivi senza consenso specifico, seguito AreaVenditore da preparare.1486ChioscoSucchi distinto da1487KiyasuKu. Dati protetti GET rilevati prima del prossimo rilascio; nessuna chiusura globale.",
       "fasi": {
         "requisiti": "fatta",
         "dati": "fatta",
@@ -152,7 +152,7 @@
       "id": "L6",
       "titolo": "Condizioni uniche",
       "dipende": "L5",
-      "nota": "Bonifiche pubblicate e0ea995e, pipeline66success; p5s schema122. Fonte finestra-palazzo distinta da arco, gate statico distinto approvato. Diario/Palazzi/pin protetti API identici. Inventario R6-19 e conformità integrale non certificati. OR Asakusa già deciso; calendario derivato previsto in L9.",
+      "nota": "123/124/T2/R5-02 e tabella vuota027 approvati staticamente e registrati localmente, mai eseguiti in locale. Pagina R6-19/31 implementata e approvata:201identità/147gruppi, tre gesti distinti, CAS, note/storico; non approva le interpretazioni. L26/pesca/Confidenti e varianti aperti. Controlli verdi, rilascio in preparazione; pubblicato1de1ccba/pipeline67/schema122-26.",
       "fasi": {
         "requisiti": "fatta",
         "dati": "fatta",
@@ -172,7 +172,7 @@
       "id": "L7",
       "titolo": "Oggetti",
       "dipende": "L6",
-      "nota": "Pubblicato e0ea995e, pipeline66success, p5s122/26. Codice/attivazione e DiarioA7-03 approvati staticamente; snapshot/proposte obsolete/costi/cestino corretti e riesaminati. Audit2739fonti/3254risultati leggibile;478fonti daesaminare e86proposteoperative non approvate automaticamente. Manifest2430fontipubbliche non equivalente all'inputperduto. Conferme funzionali/layout e dati restano aperte; nessuna chiusura integrale.",
+      "nota": "Pubblicato1de1ccba/pipeline67/schema122-26.125CartaMedia/126FascinoAmbulante/parser/ledger/versioni snapshot e GET97 approvati staticamente; registri locali attivi, rilascio in preparazione. Dossier1164fonti/1902sottoelementi e confronto279fonti/246legami non chiudono376aggregati. Dopo rilascio leggere97nodi e rendiconti;86proposte precedenti pendenti, nessuna approvazione automatica o globale.",
       "fasi": {
         "requisiti": "fatta",
         "dati": "fatta",

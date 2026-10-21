@@ -6,6 +6,18 @@ import type { DescrizioniArea } from '../tipi.js';
 
 /** Le descrizioni delle rotte di `/api/condizioni` (`routes/condizioni.ts`). */
 export const DESCRIZIONI_CONDIZIONI: DescrizioniArea = {
+  'GET /api/condizioni/riconciliazione': {
+    sommario: 'Frasi da riconciliare con condizioni, fonti e decisioni',
+    descrizione: 'Censimento completo delle 201 identità storiche e delle nuove frasi correnti, comprese righe mutate, assenti e nascoste. Separa requisiti propri e fonti ereditate, proposte documentate e ricerca ancora aperta. Le bonifiche 123/124 sono proiettate senza prima-immagini. Nessuna scrittura durante la lettura. Ogni riga espone improntaFonte e revisioneAttesa distinta per il controllo concorrente.',
+    risposta: '`RiconciliazioneCondizioniDto` (shared/riconciliazioneCondizioni.ts)',
+    errori: [[409, 'decisione-illeggibile']],
+  },
+  'POST /api/condizioni/riconciliazione/decisioni': {
+    sommario: 'Conferma una resa, applica una proposta ammessa o conserva la frase come nota',
+    descrizione: 'Corpo chiuso id/azione/revisioneAttesa. Le formule provengono esclusivamente dal manifest server. La transazione rilegge fonte, dipendenze e precedente decisione; una revisione obsoleta risponde 409. La scrittura ordinaria e il record decisionale sono atomici. Tutte le revisioni precedenti restano conservate; Mantieni nota non elimina condizioni e non chiude la ricerca fattuale. Nessun cambiamento del database alla semplice lettura.',
+    risposta: '`RiconciliazioneCondizioniDto` aggiornato',
+    errori: [[404, 'frase-non-trovata'], [409, 'riconciliazione-obsoleta'], [409, 'decisione-non-ammessa'], [409, 'proposta-incompleta'], [409, 'decisione-illeggibile']],
+  },
   'GET /api/condizioni/censimento': {
     sommario: 'Inventario corrente di frasi, condizioni, orari e collegamenti dei luoghi',
     descrizione: 'Lettura mirata per gli inventari L5/L6, nello stesso perimetro delle API esistenti. Include le righe nascoste e distingue frasi e orari storici, condizioni proprie salvate, collegamenti strutturati e dati derivati. I JSON mantengono il valore originale e la diagnosi di lettura: un valore illeggibile non diventa una lista vuota. Il contesto di sedi e pin permette di distinguere passaggi, riferimenti indiretti validi, assenze e riferimenti orfani; null non significa automaticamente difetto. Nessuna conversione, scrittura, lettura delle partite, copia del database o immagine. Risposta coerente fra le sezioni e intestazione Cache-Control: no-store. Il risultato descrive i dati correnti; non approva le proposte né prova l’equivalenza storica delle migrazioni.',

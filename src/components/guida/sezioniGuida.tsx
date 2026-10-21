@@ -18,6 +18,7 @@ const DIM = 30;
 
 /** Ordine di visualizzazione nell'indice della Guida. */
 export const SEZIONI_GUIDA: SezioneGuida[] = [
+  { chiave: 'condizioni', to: '/guida/condizioni/riconciliazione', titolo: 'Frasi e condizioni', descrizione: 'Confronta frasi della guida, condizioni attuali e proposte; conserva le note e approva ogni voce con le sue fonti', icona: <IconBook size={DIM} /> },
   { chiave: 'percorso', to: '/guida/percorso', titolo: 'Guida giorno per giorno', descrizione: 'Cosa fare oggi, di giorno e di sera: Confidenti, Palazzi, Doti, acquisti, avvisi sulle scadenze; giorno corrente e azioni spuntabili', icona: <IconStar size={DIM} /> },
   { chiave: 'domande', to: '/guida/domande', titolo: 'Domande in classe ed esami', descrizione: 'Risposte corrette per data, prossime domande, spunta «fatta»', icona: <IconBook size={DIM} /> },
   { chiave: 'cruciverba', to: '/guida/cruciverba', titolo: 'Cruciverba di Leblanc', descrizione: '38 cruciverba con indizio e risposta (+1 nota di Conoscenza), spunta «risolto»', icona: <IconBook size={DIM} /> },

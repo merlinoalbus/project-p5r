@@ -1,6 +1,8 @@
 // Conversione dei cataloghi di L7. Solo la migrazione 121 usa questo modulo.
 import type { AppDatabase } from '../dbService.js';
-import { contenutoNominativo121, separaNomi121 } from './contenutiOggetti121.js';
+import { separaNomi121 } from './contenutiOggetti121.js';
+import { riconciliaContenutiPerIdentita, selezionaContenutiVoce, type LacunaContenuto } from './contenutiOggetti.js';
+import { salvaSnapshotProposta, snapshotFonteProposta, type ChiaveProposta } from '../../services/snapshotProposteOggetti.js';
 import { donatoreOggetto121, FONTE_PREMI_ESAMI_121, PREMI_ESAMI_121, premioSfida121 } from './premiOggetti121.js';
 import { scambiJose121 } from './scambiJose121.js';
 import { FONTE_GACHAPON_121, scambiGachapon121 } from './scambiGachapon121.js';
@@ -236,10 +238,14 @@ export function popolaCatalogo121(db: AppDatabase): void {
   const contenuti = db.prepare(`SELECT p.chiave,p.tipo,p.nome,p.fonte,p.dettagli_json,a.dungeon_chiave
     FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave
     ORDER BY p.chiave`).all() as Riga[];
+  const residuiVoci: Array<{ voce: string; lacune: LacunaContenuto[] }> = [];
   for (const r of contenuti) {
     const protetto = ['kamoshida', 'madarame'].includes(testo(r.dungeon_chiave)) || r.fonte === 'utente';
     const certi = new Map<string, QuantitaCollegata>();
-    const contenuto = contenutoNominativo121({ tipo: testo(r.tipo), nome: testo(r.nome), dettagli_json: r.dettagli_json });
+    const gruppiPropostiV2 = new Set<string>();
+    const contenuto = riconciliaContenutiPerIdentita(selezionaContenutiVoce({ tipo: testo(r.tipo), nome: testo(r.nome), dettagli_json: r.dettagli_json }, (nome) => perNome.has(norm(nome))),
+      (parte) => trova(parte.nome, parte.categoria).map((o) => o.chiave));
+    if (contenuto.lacune.length && r.tipo !== 'volonta') residuiVoci.push({ voce: testo(r.chiave), lacune: contenuto.lacune });
     // «volonta» è il tipo strutturale della raccolta del Seme. I nomi, anche incompleti
     // o distinti soltanto dal luogo/colore, restano quelli della voce senza inventare equivalenze.
     if (r.tipo === 'volonta' && testo(r.nome)) {
@@ -248,21 +254,35 @@ export function popolaCatalogo121(db: AppDatabase): void {
       else db.prepare('INSERT OR IGNORE INTO voce_oggetto(voce_chiave,catalogo_chiave,quantita,ordine) VALUES (?,?,1,0)').run(r.chiave, o.chiave);
       continue;
     }
-    for (const [ordine, parte] of parti(contenuto).entries()) {
+    for (const parte of contenuto.parti) {
+      const ordine = parte.ordine;
       const candidati = trova(parte.nome, parte.categoria);
       // G-034: un nome del contenuto non già presente non autorizza una traduzione o una fusione.
       // La nuova identità conserva il nome attestato e la provenienza; sui Palazzi protetti resta proposta.
-      if (!candidati.length) candidati.push(crea(parte.categoria ?? (r.tipo === 'volonta' ? 'chiave' : 'altro'), parte.nome,
+      if (!candidati.length && !parte.daVerificare) candidati.push(crea(parte.categoria ?? 'altro', parte.nome,
         'guida', `contenuto/${r.chiave}/${ordine}`, { descrizione: parte.nota ?? '' }));
-      if (protetto || candidati.length !== 1) proponi('voce', testo(r.chiave), candidati,
-        protetto ? 'Forziere del lavoro da preservare: anche l’abbinamento esatto richiede il tuo sì. Il testo della voce resta invariato.'
-          : 'Il contenuto ha più corrispondenze: scegli l’oggetto prima di collegarlo.', parte.quantita, candidati.length === 1 ? 'certa' : 'da-verificare', `${parte.categoria ?? ''}:${norm(parte.nome)}`, parte.nota);
-      else accumula(certi, candidati[0].chiave, { ...parte, ordine });
+      const nota = [parte.nota, `Attestazioni: ${JSON.stringify(parte.locatori)}`].filter(Boolean).join('\n');
+      if (protetto || candidati.length !== 1 || parte.quantita === null || parte.daVerificare) {
+        const gruppo = `${parte.categoria ?? ''}:${norm(parte.nome)}`;
+        proponi('voce', testo(r.chiave), candidati,
+          parte.quantita === null ? 'La fonte nomina il contenuto senza una quantità numerica: indica una quantità verificata prima di collegarlo.'
+            : protetto ? 'Contenuto del lavoro da preservare: anche l’abbinamento esatto richiede il tuo sì. Il testo della voce resta invariato.'
+              : 'Contenuto o variante da verificare: scegli l’oggetto prima di collegarlo.',
+          parte.quantita, candidati.length === 1 && !parte.daVerificare ? 'certa' : 'da-verificare', gruppo, nota);
+        gruppiPropostiV2.add(gruppo);
+      } else accumula(certi, candidati[0].chiave, { quantita: parte.quantita, ordine, nota });
     }
     // Alias diversi possono risolvere la stessa identità: la PK non deve scartare il secondo quantitativo.
     for (const [chiave, parte] of certi) db.prepare('INSERT OR IGNORE INTO voce_oggetto(voce_chiave,catalogo_chiave,quantita,ordine,nota) VALUES (?,?,?,?,?)')
       .run(r.chiave, chiave, parte.quantita, parte.ordine, parte.nota);
+    for (const gruppo of gruppiPropostiV2) {
+      for (const p of db.prepare("SELECT * FROM proposta_abbinamento WHERE riga_tipo = 'voce' AND riga_chiave = ? AND gruppo = ? AND fonte_snapshot_json IS NULL").all(r.chiave, gruppo) as ChiaveProposta[]) {
+        salvaSnapshotProposta(db, p, snapshotFonteProposta(db, p, 2));
+      }
+    }
   }
+  db.prepare("INSERT OR IGNORE INTO dati_guida(chiave,json) VALUES ('audit-contenuti-voci-121',?)")
+    .run(JSON.stringify({ versione: 1, fonti: residuiVoci }));
   const ricompensa = db.prepare('INSERT OR IGNORE INTO ricompensa_oggetto(fonte_tipo,fonte_chiave,catalogo_chiave,quantita,ordine,nota) VALUES (?,?,?,?,?,?)');
   for (const r of db.prepare('SELECT * FROM richiesta ORDER BY ordine').all() as Riga[]) {
     const premi = json(r.ricompense_json);

@@ -25,6 +25,7 @@ function destinazione(grigi: DisponibilitaDto['requisiti']): string {
     case 'dote': return '/partita?scheda=doti';
     case 'persona-arcano': case 'persona-abilita': return '/partita?scheda=scorta';
     case 'richiesta': return '/guida/richieste';
+    case 'evento': case 'contatore': return '/partita?scheda=progressi';
     default: return '/partita?scheda=oggi';
   }
 }
@@ -47,8 +48,11 @@ export function ChipDisponibilita({ disponibilita: d, compatto }: { disponibilit
   const motivi = motiviDisponibilita(d);
   if (d.stato === 'bloccato') {
     return (
+      <span className="inline-flex flex-wrap items-center gap-1">
       <span className={`chip chip--icona chip--bloccata ${compatto ? 'text-[11px]' : ''}`} title={motivi} role="img" aria-label={`Non ancora disponibile: ${motivi}`}>
         <IconaAzione chiave="bloccato" dimensione={compatto ? 12 : 14} />Non ancora
+      </span>
+      {proprie.some((r) => r.tipo === 'evento' && r.stato !== 'verde') && <Link to="/partita?scheda=progressi" className="touch inline-flex items-center text-xs">Segna in Progressi</Link>}
       </span>
     );
   }

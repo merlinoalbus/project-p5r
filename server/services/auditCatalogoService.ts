@@ -17,6 +17,11 @@ const formatoAudit = z.object({
   risultatiConFonti: z.array(riferimento.extend({ fonti: z.array(z.string()), fontiContesto: z.array(z.string()), dati: z.unknown() })),
   limiti: z.array(z.string()),
 });
+const formatoResidui = z.object({ versione: z.literal(1), fonti: z.array(z.object({
+  voce: z.string(), lacune: z.array(z.object({ campo: z.string(), motivo: z.string(), locatori: z.array(z.object({
+    campo: z.string(), inizio: z.number().int().nonnegative(), fine: z.number().int().nonnegative(), testo: z.string(),
+  })).optional() })),
+})) });
 
 /** Fotografia degli esiti della 121: non certifica le modifiche fatte in seguito nel catalogo. */
 export function auditConversioneCatalogo(): AuditCatalogo | null {
@@ -26,5 +31,12 @@ export function auditConversioneCatalogo(): AuditCatalogo | null {
   try { v = JSON.parse(r.json); } catch { throw httpErrors.conflict('audit-catalogo-illeggibile', 'Il riepilogo della conversione non è leggibile.'); }
   const esito = formatoAudit.safeParse(v);
   if (!esito.success) throw httpErrors.conflict('audit-catalogo-incompatibile', 'Il riepilogo della conversione ha un formato non supportato.');
-  return esito.data;
+  const residui = prepared("SELECT json FROM dati_guida WHERE chiave = 'audit-contenuti-voci-121'").get() as { json: string } | undefined;
+  if (!residui) return esito.data;
+  let aggiunta: unknown;
+  try { aggiunta = JSON.parse(residui.json); } catch { throw httpErrors.conflict('audit-catalogo-illeggibile', 'Il rendiconto dei contenuti da verificare non è leggibile.'); }
+  const validati = formatoResidui.safeParse(aggiunta);
+  if (!validati.success) throw httpErrors.conflict('audit-catalogo-incompatibile', 'Il rendiconto dei contenuti da verificare ha un formato non supportato.');
+  // Nessuna modifica del JSON storico: l'appendice è soltanto una proiezione nella risposta.
+  return { ...esito.data, residuiVoci: validati.data.fonti };
 }

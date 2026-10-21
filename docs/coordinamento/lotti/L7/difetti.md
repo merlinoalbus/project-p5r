@@ -1,5 +1,7 @@
 # L7 — difetti e mancanze dell'implementazione locale
 
+**21/10 11:12Z — integrazione approvata staticamente, al rilascio:**125 CartaMedia con proposta a quantità ignota,126 FascinoAmbulante con firme seed esatte, parser e snapshot versionate, ledger futuro distinto dall'audit121 immutabile e GETreadonly delle97fonti Jose/scambi approvati dal revisore distinto. Registri locali attivi; nessuna migrazione locale eseguita, nessun test o approvazione delle proposte. Typecheck99280/lint28078/build88584 verdi. Dopo rilascio: lettura dei97nodi e degli esiti di riga. Dossier e confronto279fonti/246legami non certificano tutte le interpretazioni né chiudono376aggregati. Otto casi assenti non ricreati; scelte precedenti e varianti preservate.
+
 **Stato corrente 21/10 07:43Z:** bonifica L7 e attivazione integrata approvate staticamente dal revisore distinto e pubblicate in `e0ea995e`, pipeline #66 riuscita. p5s schema122/26; catalogo/audit caricati senza salvataggi. Typecheck `39444`, lint `29880`, build `41169` exit0 dopo attivazione. Nessun test o migrazione locale. Dati protetti GET identici prima/dopo; non certifica l'intero DB, tutti gli abbinamenti o scritture/layout. Proposte umane e limiti A7-04 restano aperti. Le righe storiche sotto che indicano migrazioni non attive sono superate per la sola pubblicazione.
 
 | Rilievo corrente | Stato e limite |

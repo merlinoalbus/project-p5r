@@ -50,7 +50,7 @@ const ETICHETTA: Record<Gruppo, { titolo: string; categoria: 'libri' | 'film' | 
 
 /** Una voce: nome, barra di avanzamento con il conteggio (senza totale per le visioni al cinema),
  * «Non ancora» se bloccata e mai iniziata, e i pulsanti −/+; il «+» si spegne al tetto o se la voce
- * è bloccata e ancora a zero. */
+ * è bloccata. Il decremento rimane disponibile anche dopo un cambiamento dei requisiti. */
 function Riga({ v, unita, occupato, onCambia }: { v: Voce; unita: string; occupato: boolean; onCambia: (v: Voce, n: number) => void }) {
   const percentuale = v.totale > 0 ? Math.round((v.progresso / v.totale) * 100) : 0;
   return (
@@ -67,7 +67,7 @@ function Riga({ v, unita, occupato, onCambia }: { v: Voce; unita: string; occupa
       </span>
       <span className="flex shrink-0 gap-1">
         <button type="button" className="btn btn-ghost touch !px-2" disabled={occupato || v.progresso === 0} onClick={() => onCambia(v, v.progresso - 1)} aria-label={`Togli a ${v.nome}`}>−</button>
-        <button type="button" className="btn btn-ghost touch !px-2" disabled={occupato || (!v.senzaTetto && v.progresso >= v.totale) || (v.bloccata && v.progresso === 0)} title={v.bloccata && v.progresso === 0 ? `Non ancora: ${v.motivo}` : undefined} onClick={() => onCambia(v, v.progresso + 1)} aria-label={`Aggiungi a ${v.nome}`}>+</button>
+        <button type="button" className="btn btn-ghost touch !px-2" disabled={occupato || (!v.senzaTetto && v.progresso >= v.totale) || v.bloccata} title={v.bloccata ? `Non ancora: ${v.motivo}` : undefined} onClick={() => onCambia(v, v.progresso + 1)} aria-label={`Aggiungi a ${v.nome}`}>+</button>
       </span>
     </li>
   );

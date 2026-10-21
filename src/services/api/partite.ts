@@ -93,9 +93,24 @@ export const impostaAcquisto = (id: number, articolo: string, fatto: boolean, se
 export const impostaCruciverba = (id: number, data: string, fatto: boolean): Promise<CruciverbaDto> => apiPut(`/partite/${id}/cruciverba`, { data, fatto });
 
 /** Libro letto / film visto nella partita. */
-export const impostaLettura = (id: number, tipo: TipoLettura, chiave: string, fatto: boolean): Promise<LibroDto | FilmDto | VideogiocoDto> => apiPut(`/partite/${id}/letture`, { tipo, chiave, fatto });
+export const impostaLettura = (id: number, tipo: TipoLettura, chiave: string, fatto: boolean): Promise<LibroDto | FilmDto | VideogiocoDto> => tipo === 'videogioco'
+  ? serializzaVideogioco(id, chiave, () => apiPut(`/partite/${id}/letture`, { tipo, chiave, fatto }))
+  : apiPut(`/partite/${id}/letture`, { tipo, chiave, fatto });
+/** Sessione e round dello stesso titolo condividono l'ordine delle richieste anche fra viste diverse. */
+const codeVideogioco = new Map<string, Promise<unknown>>();
+function serializzaVideogioco<T>(id: number, chiave: string, scrivi: () => Promise<T>): Promise<T> {
+  const k = `${id}:${chiave}`;
+  const precedente = codeVideogioco.get(k) ?? Promise.resolve();
+  const prossimo = precedente.catch(() => undefined).then(scrivi);
+  codeVideogioco.set(k, prossimo);
+  const libera = () => { if (codeVideogioco.get(k) === prossimo) codeVideogioco.delete(k); };
+  void prossimo.then(libera, libera);
+  return prossimo;
+}
 /** Registra l'avanzamento di un videogioco nella partita (stessa rotta delle letture, tipo «videogioco»). */
-export const impostaProgressoVideogioco =(id: number, chiave: string, avanzamento: number): Promise<VideogiocoDto> => apiPut(`/partite/${id}/letture`, { tipo: 'videogioco', chiave, avanzamento });
+export const impostaProgressoVideogioco =(id: number, chiave: string, avanzamento: number): Promise<VideogiocoDto> => serializzaVideogioco(id, chiave, () => apiPut(`/partite/${id}/letture`, { tipo: 'videogioco', chiave, avanzamento }));
+/** Dichiara una sessione anche senza round vinti; non cambia il progresso. */
+export const impostaSessioneVideogioco = (id: number, chiave: string, dichiarata: boolean): Promise<VideogiocoDto> => serializzaVideogioco(id, chiave, () => apiPut(`/partite/${id}/sessione-videogioco`, { chiave, dichiarata }));
 /** Registra quante sessioni di un libro sono state completate. */
 export const impostaProgressoLibro = (id: number, chiave: string, avanzamento: number): Promise<LibroDto> => apiPut(`/partite/${id}/letture`, { tipo: 'libro', chiave, avanzamento });
 /** Registra sessioni DVD o visioni al cinema; queste ultime possono superare uno. */

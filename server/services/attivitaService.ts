@@ -27,6 +27,8 @@ import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
 import { eGiornoDelQuiz, leggiQuiz, type QuizAttivita } from '../../shared/quizAttivita.js';
 import { catalogoOggettiDisponibile, negoziPerFonte, oggettiPerFonte } from './catalogoOggettiLetture.js';
+import { sessioniVideogioco } from './sessioniVideogioco.js';
+import { disponibilitaAttivita, sediAttivita, type SediAttivita } from './disponibilitaAttivita.js';
 
 type CatalogoLetture = Map<string, CatalogoOggettoDto>;
 /** I prezzi copiati dalla guida non sono offerte. Gli avanzamenti non dipendono da questi campi. */
@@ -65,11 +67,6 @@ function effettiDto(json: string | null, libro = false): { effetti: VoceEffettoD
 interface RigaPosizioneLibro { libro_chiave: string; tipo: LibroDto['posizioni'][number]['tipo']; chiave: string; etichetta: string }
 interface RigaPosizioneFilm { film_chiave: string; tipo: FilmDto['posizioni'][number]['tipo']; chiave: string; etichetta: string; ruolo: FilmDto['posizioni'][number]['ruolo'] }
 
-/** Nome di ogni luogo della città, per la sede delle attività. */
-function nomiLuoghi(): Map<string, string> {
-  return new Map((prepared('SELECT chiave, nome FROM luogo').all() as Array<{ chiave: string; nome: string }>).map((l) => [l.chiave, l.nome]));
-}
-
 /** Gli articoli collegati a libri e videogiochi (migrazione 073): dove si compra ciascuno. */
 function articoliCollegati(fonte: 'libri' | 'videogiochi'): Map<string, LibroDto['negozi']> {
   if (catalogoOggettiDisponibile()) return negoziPerFonte(fonte === 'libri' ? 'libro' : 'videogioco');
@@ -85,7 +82,7 @@ function articoliCollegati(fonte: 'libri' | 'videogiochi'): Map<string, LibroDto
 /** Una riga di `attivita` come DTO: Doti dal JSON, effetti dichiarati con le loro frasi, nome della sede risolto da `sedi`,
  *  tracciamento ricondotto a quello del tipo quando il valore è fuori catalogo, la guida del quiz (105, null se manca o è
  *  illeggibile) e la disponibilità valutata se c'è lo stato della partita. */
-const attivitaDto = (r: RigaAttivita, sedi: Map<string, string>, st: StatoDisponibilita | null = null, catalogo: CatalogoLetture = new Map()): AttivitaDto => {
+const attivitaDto = (r: RigaAttivita, sedi: SediAttivita, st: StatoDisponibilita | null = null, catalogo: CatalogoLetture = new Map()): AttivitaDto => {
   const oggetto = r.tipo === 'videogioco' ? catalogo.get(r.chiave) : undefined;
   const { prezzo, ...identita } = datiCatalogoLettura(oggetto, r.costo);
   return {
@@ -93,12 +90,12 @@ const attivitaDto = (r: RigaAttivita, sedi: Map<string, string>, st: StatoDispon
     doti: JSON.parse(r.doti_json) as AttivitaDto['doti'], altriEffetti: r.altri_effetti, regole: r.regole, premi: r.premi, paga: r.paga,
     pagaYen: r.paga_yen, pagaMassima: r.paga_massima, dettagli: r.dettagli, ...effettiDto(r.effetti_json),
     tracciamento: eTracciamentoAttivita(r.tracciamento) ? r.tracciamento : tracciamentoPerTipo(r.tipo), quiz: leggiQuiz(r.quiz_json),
-    sedeChiave: r.sede_chiave, sedeNome: r.sede_chiave ? (sedi.get(r.sede_chiave) ?? null) : null,
+    sedeChiave: r.sede_chiave, sedeNome: r.sede_chiave ? (sedi.luoghi.get(r.sede_chiave)?.nome ?? null) : null,
     verificato: r.verificato === 1,
-    ...conDisponibilita(r.condizioni_json, st),
+    ...disponibilitaAttivita(r, st, sedi),
   };
 };
-interface StatoLetture { fatti: Set<string>; progressiLibri: Map<string, number>; progressiFilm: Map<string, number>; progressiVideogiochi: Map<string, number> }
+interface StatoLetture { fatti: Set<string>; progressiLibri: Map<string, number>; progressiFilm: Map<string, number>; progressiVideogiochi: Map<string, number>; sessioniVideogioco: ReturnType<typeof sessioniVideogioco> }
 /** Il libro che cambia le regole di tutti gli altri, **da lì in avanti**: «Lettura rapida» raddoppia
  *  quanto rende un pomeriggio, non è retroattivo (le sessioni già lette restano quelle). */
 const CHIAVE_LETTURA_RAPIDA = 'lettura-rapida';
@@ -173,28 +170,48 @@ const filmDto = (r: RigaFilm, stato: StatoLetture, posizioni: Map<string, FilmDt
 /** Lo stato delle letture di una partita: fruizioni completate (`tipo/chiave`) e avanzamenti di libri, film e videogiochi.
  *  Senza partita restituisce uno stato vuoto; con partita ne verifica prima l'esistenza. */
 function letturePartita(partitaId: number | undefined): StatoLetture {
-  if (partitaId === undefined) return { fatti: new Set(), progressiLibri: new Map(), progressiFilm: new Map(), progressiVideogiochi: new Map() };
+  if (partitaId === undefined) return { fatti: new Set(), progressiLibri: new Map(), progressiFilm: new Map(), progressiVideogiochi: new Map(), sessioniVideogioco: sessioniVideogioco() };
   verificaPartita(partitaId);
   const fatti = new Set((prepared('SELECT tipo, chiave FROM lettura_partita WHERE partita_id = ?').all(partitaId) as Array<{ tipo: string; chiave: string }>).map((r) => `${r.tipo}/${r.chiave}`));
   const progressiLibri = new Map((prepared('SELECT libro_chiave, avanzamento FROM progresso_libro_partita WHERE partita_id = ?').all(partitaId) as Array<{ libro_chiave: string; avanzamento: number }>).map((r) => [r.libro_chiave, r.avanzamento]));
   const progressiFilm = new Map((prepared('SELECT film_chiave, avanzamento FROM progresso_film_partita WHERE partita_id = ?').all(partitaId) as Array<{ film_chiave: string; avanzamento: number }>).map((r) => [r.film_chiave, r.avanzamento]));
   const progressiVideogiochi = new Map((prepared('SELECT videogioco_chiave, avanzamento FROM progresso_videogioco_partita WHERE partita_id = ?').all(partitaId) as Array<{ videogioco_chiave: string; avanzamento: number }>).map((r) => [r.videogioco_chiave, r.avanzamento]));
-  return { fatti, progressiLibri, progressiFilm, progressiVideogiochi };
+  return { fatti, progressiLibri, progressiFilm, progressiVideogiochi, sessioniVideogioco: sessioniVideogioco(partitaId) };
 }
 
-/** Un videogioco (riga di `attivita` di tipo «videogioco») come DTO: i round sono le sessioni (almeno uno), l'avanzamento è
- *  limitato fra 0 e il totale, iniziato dal primo round e completato al raggiungimento del totale. */
-const videogiocoDto = (r: RigaAttivita, stato: StatoLetture, sedi: Map<string, string>, negozi: Map<string, LibroDto['negozi']>, st: StatoDisponibilita | null = null, catalogo: CatalogoLetture = new Map()): VideogiocoDto => {
+/** Un videogioco come DTO: avanzamento limitato ai round del titolo, iniziato da una sessione dichiarata o da un round,
+ * completato soltanto al raggiungimento del totale. La dichiarazione non aggiunge round. */
+const videogiocoDto = (r: RigaAttivita, stato: StatoLetture, sedi: SediAttivita, negozi: Map<string, LibroDto['negozi']>, st: StatoDisponibilita | null = null, catalogo: CatalogoLetture = new Map()): VideogiocoDto => {
   const totaleRound = Math.max(r.sessioni ?? 1, 1);
   const progresso = Math.min(Math.max(stato.progressiVideogiochi.get(r.chiave) ?? 0, 0), totaleRound);
-  return { ...attivitaDto(r, sedi, st, catalogo), tipo: 'videogioco', negozi: negozi.get(r.chiave) ?? [], totaleRound, progresso, iniziato: progresso > 0, fatto: progresso >= totaleRound };
+  return { ...attivitaDto(r, sedi, st, catalogo), tipo: 'videogioco', negozi: negozi.get(r.chiave) ?? [], totaleRound, progresso,
+    iniziato: stato.sessioniVideogioco.giocate.has(r.chiave), sessioneDichiarata: stato.sessioniVideogioco.dichiarate.has(r.chiave), fatto: progresso >= totaleRound };
 };
+
+/** Registra soltanto che si è giocata una sessione, anche senza vincere un round. Togliere la dichiarazione è sempre possibile. */
+export function impostaSessioneVideogioco(partitaId: number, chiave: string, dichiarata: boolean): VideogiocoDto {
+  verificaPartita(partitaId);
+  const r = prepared(`SELECT * FROM attivita WHERE chiave = ? AND tipo = 'videogioco'${dichiarata ? ' AND nascosto = 0' : ''}`).get(chiave) as RigaAttivita | undefined;
+  if (!r) throw httpErrors.notFound('lettura-non-trovata', `Il videogioco '${chiave}' non esiste.`);
+  const presente = !!prepared('SELECT 1 FROM sessione_videogioco_partita WHERE partita_id = ? AND videogioco_chiave = ?').get(partitaId, chiave);
+  const st = statoDisponibilitaPartita(partitaId);
+  if (dichiarata && !presente && disponibilitaAttivita(r, st).disponibilita?.stato === 'bloccato') {
+    throw httpErrors.conflict('lettura-non-disponibile', 'Il videogioco non è ancora disponibile nella partita.');
+  }
+  if (presente !== dichiarata) getDb().transaction(() => {
+    const adesso = nowIso();
+    if (dichiarata) prepared('INSERT INTO sessione_videogioco_partita (partita_id, videogioco_chiave, updated_at) VALUES (?, ?, ?) ON CONFLICT(partita_id, videogioco_chiave) DO NOTHING').run(partitaId, chiave, adesso);
+    else prepared('DELETE FROM sessione_videogioco_partita WHERE partita_id = ? AND videogioco_chiave = ?').run(partitaId, chiave);
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
+  })();
+  return videogiocoDto(r, letturePartita(partitaId), sediAttivita(), articoliCollegati('videogiochi'), statoDisponibilitaPartita(partitaId), oggettiPerFonte('videogioco'));
+}
 
 /** I videogiochi non nascosti, con il loro stato nella partita (se c'è) e i totali: iniziati, completati, round fatti e round da fare. */
 export function videogiochiTutti(partitaId?: number): VideogiochiDto {
   const stato = letturePartita(partitaId);
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
-  const sedi = nomiLuoghi(); const negozi = articoliCollegati('videogiochi');
+  const sedi = sediAttivita(); const negozi = articoliCollegati('videogiochi');
   const catalogo = oggettiPerFonte('videogioco');
   const videogiochi = (prepared("SELECT * FROM attivita WHERE tipo='videogioco' AND nascosto = 0 ORDER BY ordine").all() as RigaAttivita[]).map((r) => videogiocoDto(r, stato, sedi, negozi, st, catalogo));
   return { videogiochi, iniziati: videogiochi.filter((v) => v.iniziato).length, completati: videogiochi.filter((v) => v.fatto).length, roundFatti: videogiochi.reduce((n, v) => n + v.progresso, 0), roundObiettivo: videogiochi.reduce((n, v) => n + v.totaleRound, 0) };
@@ -288,7 +305,7 @@ export function quizVoceDto(chiave: string, a: AttivitaConQuiz, giorno: string |
 /** Le attività (lavori compresi) che si svolgono in un luogo (`sede_chiave`), non nascoste, nell'ordine; con la partita la disponibilità (L5, pagina del luogo). */
 export function attivitaDellaSede(sede: string, partitaId?: number): AttivitaDto[] {
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
-  const sedi = nomiLuoghi();
+  const sedi = sediAttivita();
   const catalogo = oggettiPerFonte('videogioco');
   return (prepared('SELECT * FROM attivita WHERE nascosto = 0 AND sede_chiave = ? ORDER BY ordine').all(sede) as RigaAttivita[]).map((r) => attivitaDto(r, sedi, st, catalogo));
 }
@@ -296,7 +313,7 @@ export function attivitaDellaSede(sede: string, partitaId?: number): AttivitaDto
 export function attivitaTutte(partitaId?: number): AttivitaTutteDto {
   const stato = letturePartita(partitaId);
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
-  const sedi = nomiLuoghi();
+  const sedi = sediAttivita();
   const catalogoGiochi = oggettiPerFonte('videogioco');
   const attivita = (prepared('SELECT * FROM attivita WHERE nascosto = 0 ORDER BY ordine').all() as RigaAttivita[]).map((r) => attivitaDto(r, sedi, st, catalogoGiochi));
   const libri = elencoLibri(partitaId, stato, st);
@@ -383,7 +400,9 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
     throw httpErrors.badRequest('avanzamento-non-valido', senzaMassimo ? "L'avanzamento deve essere un intero non negativo." : `L'avanzamento deve essere un intero fra 0 e ${totale}.`);
   }
   const st = statoDisponibilitaPartita(partitaId);
-  if (richiesto > 0 && conDisponibilita(riga.condizioni_json, st).disponibilita?.stato === 'bloccato') {
+  const precedente = avanzamentoLettura(partitaId, tipo, chiave).avanzamento;
+  const disponibilita = tipo === 'videogioco' ? disponibilitaAttivita(riga as RigaAttivita, st) : conDisponibilita(riga.condizioni_json, st);
+  if (richiesto > precedente && disponibilita.disponibilita?.stato === 'bloccato') {
     throw httpErrors.conflict('lettura-non-disponibile', `'${nomeCorrente}' non è ancora disponibile nella partita: la condizione di sblocco non è soddisfatta.`);
   }
   const registroPrima = puntiRegistrati(partitaId, tipo, chiave);
@@ -439,7 +458,8 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
   const stato = letturePartita(partitaId);
   // che cosa il conseguimento dà (o, disfatto, dava): da segnare a mano nelle Doti
   const daSegnare = daSegnareFra(registroPrima, puntiRegistrati(partitaId, tipo, chiave));
-  const dto = tipo === 'libro' ? libroDto(riga as RigaLibro, stato, posizioniLibri(), articoliCollegati('libri'), null, postiApertiDaiLibri(), catalogo) : tipo === 'film' ? filmDto(riga as RigaFilm, stato, posizioniFilm(), null, catalogo, negoziPerFonte('film')) : videogiocoDto(riga as RigaAttivita, stato, nomiLuoghi(), articoliCollegati('videogiochi'), null, catalogo);
+  const statoDopo = statoDisponibilitaPartita(partitaId);
+  const dto = tipo === 'libro' ? libroDto(riga as RigaLibro, stato, posizioniLibri(), articoliCollegati('libri'), statoDopo, postiApertiDaiLibri(), catalogo) : tipo === 'film' ? filmDto(riga as RigaFilm, stato, posizioniFilm(), statoDopo, catalogo, negoziPerFonte('film')) : videogiocoDto(riga as RigaAttivita, stato, sediAttivita(), articoliCollegati('videogiochi'), statoDopo, catalogo);
   return daSegnare.length ? { ...dto, daSegnare } : dto;
 }
 

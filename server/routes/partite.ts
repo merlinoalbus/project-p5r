@@ -20,7 +20,8 @@ import { impostaDomandaFatta } from '../services/domandeService.js';
 import { impostaStatoPunto } from '../services/dungeonService.js';
 import { impostaStatoRichiesta } from '../services/richiesteService.js';
 import { impostaTimbri } from '../services/timbriService.js';
-import { impostaLettura } from '../services/attivitaService.js';
+import { impostaLettura, impostaSessioneVideogioco } from '../services/attivitaService.js';
+import { bodySessioneVideogioco } from '../schemas/partite.js';
 import { impostaMembro, impostaYen, squadraPartita } from '../services/squadraService.js';
 import { impostaCruciverba } from '../services/cruciverbaService.js';
 import { impostaAcquisto } from '../services/negoziService.js';
@@ -159,6 +160,11 @@ router.put('/:id/letture', validate({ params: paramsPartita, body: bodyLettura }
   const b = req.body as { tipo: 'libro' | 'film' | 'videogioco'; chiave: string; fatto?: boolean; avanzamento?: number };
   const modifica = b.avanzamento === undefined ? { fatto: b.fatto as boolean } : { avanzamento: b.avanzamento };
   res.json(impostaLettura(Number(req.params.id), b.tipo, b.chiave, modifica));
+});
+
+router.put('/:id/sessione-videogioco', validate({ params: paramsPartita, body: bodySessioneVideogioco }), (req, res) => {
+  const b = req.body as { chiave: string; dichiarata: boolean };
+  res.json(impostaSessioneVideogioco(Number(req.params.id), b.chiave, b.dichiarata));
 });
 router.put('/:id/richieste', validate({ params: paramsPartita, body: bodyStatoRichiesta }), (req, res) => {
   const b = req.body as { richiesta: string; stato: 'accettata' | 'completata' | null };

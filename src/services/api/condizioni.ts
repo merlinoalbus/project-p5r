@@ -5,6 +5,11 @@
 import { apiGet, apiPost, apiPut } from './_helpers';
 import type { ElenchiRegoleDto, PinConStatoDto, ProgressiPartitaDto, RispostaValutaCondizioniDto, VoceCitabileDto } from '../../types';
 import type { Condizione } from '../../../shared/condizioniSpillo';
+import type { DecisioneCondizioniInput, RiconciliazioneCondizioniDto } from '../../../shared/riconciliazioneCondizioni';
+
+export const getRiconciliazioneCondizioni = (): Promise<RiconciliazioneCondizioniDto> => apiGet('/condizioni/riconciliazione');
+export const decidiRiconciliazioneCondizioni = (input: DecisioneCondizioniInput): Promise<RiconciliazioneCondizioniDto> =>
+  apiPost('/condizioni/riconciliazione/decisioni', input);
 
 /** Anteprima delle condizioni: il client mostra l'esito del valutatore unico del server. */
 export const valutaCondizioni = (condizioni: Condizione[], partita: number, giorno?: string): Promise<RispostaValutaCondizioniDto> =>

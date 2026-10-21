@@ -2,9 +2,14 @@
 import type { DescrizioniArea } from '../tipi.js';
 
 export const DESCRIZIONI_CATALOGO_OGGETTI: DescrizioniArea = {
+  'GET /api/catalogo-oggetti/censimento-scambi': {
+    sommario: 'Censimento corrente delle sole fonti Jose e scambi della guida',
+    descrizione: 'Sola lettura coerente in transazione; Cache-Control no-store. Proietta jose.scambi (nome, effetto, costo, requisito, fonte) e oggetti-guida.scambi (venditore, fonte, offerte ricevi/dai/note/fonte), con percorsi e UID soltanto quando esistono. Stati assente, null, vuoto, valido, malformato e non-supportato distinti. Un JSON radice illeggibile non viene esposto; proprietà estranee e valori strutturati inattesi sono esclusi. Nessuna partita, immagine o snapshot. completo indica assenza di taglio delle righe proiettate, non correttezza semantica. Non interpreta prosa né modifica dati.',
+    risposta: 'CensimentoScambiCatalogoDto, versione 1',
+  },
   'GET /api/catalogo-oggetti/audit': {
     sommario: 'Censimento ricostruito e risultati effettivi della conversione del catalogo',
-    descrizione: 'Legge la fotografia privata dell’istanza registrata dalla migrazione 121. Fonti, esiti, motivi, riferimenti ai risultati e alle proposte, ingressi nuovi o cambiati rispetto al manifest pubblico. La granularità per fonte aggregata non prova l’abbinamento di ogni contenuto. Non è il file preliminare di proposte perduto né una certificazione del catalogo dopo modifiche successive. Prima della conversione risponde null. Nessuna scrittura.',
+    descrizione: 'Legge la fotografia privata dell’istanza registrata dalla migrazione 121. Fonti, esiti, motivi, riferimenti ai risultati e alle proposte, ingressi nuovi o cambiati rispetto al manifest pubblico. Quando presente, proietta separatamente residuiVoci dal rendiconto delle future conversioni: fonte, campo, motivo e locatori dei contenuti da verificare, senza riscrivere la fotografia 121. La granularità per fonte aggregata non prova l’abbinamento di ogni contenuto. Non è il file preliminare di proposte perduto né una certificazione del catalogo dopo modifiche successive. Prima della conversione risponde null. Nessuna scrittura.',
     risposta: 'AuditCatalogo oppure null',
     errori: [[409, 'audit-catalogo-illeggibile'], [409, 'audit-catalogo-incompatibile']],
   },

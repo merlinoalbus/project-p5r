@@ -11,7 +11,7 @@ import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { datiGuida } from './datiGuida.js';
 import { nomiCondizioni } from './condizioni/nomiCondizioni.js';
 import { fonteRicompensaOggetto, fontiRicompenseOggetti, type FonteRicompensaOggetto } from './fontiRicompenseOggetti.js';
-import { fratelliValidi, salvaSnapshotProposta, snapshotFonteProposta, verificaSnapshotProposta } from './snapshotProposteOggetti.js';
+import { fratelliValidi, salvaSnapshotProposta, snapshotConVersioneSalvata, verificaSnapshotProposta } from './snapshotProposteOggetti.js';
 
 type Riga = Record<string, unknown>;
 interface Proposta {
@@ -132,7 +132,7 @@ function leggiProposta(d: DatiPropostaOggetto): Proposta {
   if (!righe.length && !d.gruppo) righe = prepared(base).all(d.riga_tipo, d.riga_chiave, d.catalogo_chiave) as Proposta[];
   if (!righe.length) throw httpErrors.notFound('proposta-non-trovata', 'La proposta non esiste più.');
   if (righe.length > 1) throw httpErrors.conflict('gruppo-proposta-richiesto', 'La voce ha più contenuti: scegli il gruppo della proposta.');
-  if (righe[0].quantita === null ? !(eProdottoRicetta(righe[0]) || righe[0].riga_tipo === 'ricetta') : !Number.isSafeInteger(righe[0].quantita) || righe[0].quantita < 1) throw httpErrors.conflict('quantita-proposta-non-valida', 'La quantità della proposta non è valida.');
+  if (righe[0].quantita === null ? !(eProdottoRicetta(righe[0]) || ['ricetta', 'voce'].includes(righe[0].riga_tipo)) : !Number.isSafeInteger(righe[0].quantita) || righe[0].quantita < 1) throw httpErrors.conflict('quantita-proposta-non-valida', 'La quantità della proposta non è valida.');
   return righe[0];
 }
 function marca(p: Pick<Proposta, 'riga_tipo' | 'riga_chiave' | 'gruppo' | 'catalogo_chiave'>, stato: Proposta['stato']): void {
@@ -268,7 +268,7 @@ export function confermaPropostaOggetto(dati: DatiPropostaOggetto): { confermata
     else {
       applicaLegame({ ...dati, catalogo_chiave: p.catalogo_chiave, gruppo: p.gruppo, quantita: p.quantita, nota: p.nota, togli: false }, modificaDellaProposta(p), true);
       dopo();
-      for (const f of fratelli) salvaSnapshotProposta(getDb(), f, snapshotFonteProposta(getDb(), f));
+      for (const f of fratelli) salvaSnapshotProposta(getDb(), f, snapshotConVersioneSalvata(getDb(), f));
     }
   })();
   invalidaCacheDiGioco();
@@ -300,8 +300,9 @@ export function impostaLegameOggetto(input: DatiLegameOggetto): { salvato: true 
       gruppo: originale?.gruppo ?? dati.gruppo, catalogo_chiave: dati.catalogo_chiave, modifica_json: originale?.modifica_json ?? null };
     const dopo = () => {
       if (!p) return;
-      prepared(`INSERT OR IGNORE INTO proposta_abbinamento(riga_tipo,riga_chiave,gruppo,catalogo_chiave,quantita,motivo,certezza,stato,modifica_json,nota,updated_at)
-        VALUES (?,?,?,?,?,?,'certa','da-approvare',?,?,?)`).run(p.riga_tipo, p.riga_chiave, p.gruppo, p.catalogo_chiave, dati.quantita, 'Oggetto scelto dall’utente', p.modifica_json, dati.nota ?? null, nowIso());
+      prepared(`INSERT OR IGNORE INTO proposta_abbinamento(riga_tipo,riga_chiave,gruppo,catalogo_chiave,quantita,motivo,certezza,stato,modifica_json,nota,fonte_snapshot_json,updated_at)
+        VALUES (?,?,?,?,?,?,'certa','da-approvare',?,?,?,?)`).run(p.riga_tipo, p.riga_chiave, p.gruppo, p.catalogo_chiave, dati.quantita, 'Oggetto scelto dall’utente', p.modifica_json, dati.nota ?? null,
+          originale?.fonte_snapshot_json ?? null, nowIso());
       if (originale?.quantita === null && dati.quantita !== null) prepared(`UPDATE proposta_abbinamento SET quantita = ?,
         nota = COALESCE(nota || char(10),'') || 'Quantità indicata dall’utente alla conferma.'
         WHERE riga_tipo = ? AND riga_chiave = ? AND gruppo = ? AND catalogo_chiave = ?`)
@@ -313,7 +314,7 @@ export function impostaLegameOggetto(input: DatiLegameOggetto): { salvato: true 
       fondiOggetti(dati.riga_chiave, dati.catalogo_chiave, dopo);
     } else {
       applicaLegame(dati, modifica, !!originale); dopo();
-      for (const f of fratelli) salvaSnapshotProposta(getDb(), f, snapshotFonteProposta(getDb(), f));
+      for (const f of fratelli) salvaSnapshotProposta(getDb(), f, snapshotConVersioneSalvata(getDb(), f));
     }
   })();
   invalidaCacheDiGioco();

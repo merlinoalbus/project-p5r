@@ -40,13 +40,14 @@ function RiepilogoAudit() {
   const [pagina, setPagina] = useState(0);
   const [risultato, setRisultato] = useState<string | null>(null);
   const audit = dati.dati;
+  const fontiConResidui = useMemo(() => new Set(audit?.residuiVoci?.map((r) => r.voce) ?? []), [audit]);
   const output = useMemo(() => risultato ? audit?.risultatiConFonti.find((r) => r.id === risultato) : undefined, [audit, risultato]);
   const fonti = useMemo(() => {
     const testo = normalizzaTesto(q);
     const ids = output ? new Set([...output.fonti, ...output.fontiContesto]) : null;
-    return (audit?.fonti ?? []).filter((f) => (!ids || ids.has(f.id)) && (ids || !soloDecisioni || f.decisione)
+    return (audit?.fonti ?? []).filter((f) => (!ids || ids.has(f.id)) && (ids || !soloDecisioni || f.decisione || (f.tipo === 'voce' && fontiConResidui.has(f.chiave)))
       && (!testo || normalizzaTesto(`${nomeFonte(f)} ${f.tipo} ${f.chiave} ${f.motivo}`).includes(testo)));
-  }, [audit, q, soloDecisioni, output]);
+  }, [audit, q, soloDecisioni, output, fontiConResidui]);
   const ultima = Math.max(0, Math.ceil(fonti.length / OGGETTI_PER_PAGINA) - 1);
   const corrente = Math.min(pagina, ultima);
   const scegliRisultato = (id: string) => { setRisultato(id); setQ(''); setPagina(0); };
@@ -68,6 +69,12 @@ function RiepilogoAudit() {
       <ul className="m-0 p-0 list-none flex min-w-0 flex-col gap-2">{fonti.slice(corrente * OGGETTI_PER_PAGINA, (corrente + 1) * OGGETTI_PER_PAGINA).map((f) => <li key={f.id} className="min-w-0 border border-border-light rounded-lg p-2 text-sm break-words">
         <strong>{nomeFonte(f)}</strong><span className="block text-xs">{ETICHETTE[f.tipo] ?? f.tipo} · {ESITO[f.esito]}</span>
         <p className="m-0 mt-1 text-xs">{f.motivo}</p>
+        {audit.residuiVoci?.filter((r) => f.tipo === 'voce' && r.voce === f.chiave).map((r) => <details key={r.voce}>
+          <summary className="touch">Contenuti da verificare ({r.lacune.length})</summary>
+          <p className="m-0 text-xs">La conversione ha conservato queste parti senza attribuire oggetti o quantità. Apri la voce per un collegamento esplicito.</p>
+          <ul className="pl-4 text-xs">{r.lacune.map((l, i) => <li key={`${l.campo}/${i}`}><strong>{l.campo}</strong>: {l.motivo}
+            {l.locatori?.map((p, j) => <span key={j} className="block break-words">{p.testo} <span className="text-text-muted">({p.inizio}–{p.fine})</span></span>)}</li>)}</ul>
+        </details>)}
         {(f.nuova || f.mutata) && <p className="m-0 text-xs text-text-muted">{f.nuova ? 'Fonte aggiunta rispetto al pacchetto pubblico di riferimento.' : 'Fonte modificata rispetto al pacchetto pubblico di riferimento.'}</p>}
         {!!f.risultati.length && <details><summary className="touch">Risultati attribuiti ({f.risultati.length})</summary><Riferimenti righe={f.risultati} suRisultato={scegliRisultato} /></details>}
         {!!f.proposte.length && <details><summary className="touch">Proposte ({f.proposte.length})</summary><Riferimenti righe={f.proposte} suRisultato={scegliRisultato} /><Link className="touch inline-flex items-center text-primary" to="/guida/oggetti?scheda=catalogo">Apri gli abbinamenti da approvare</Link></details>}
