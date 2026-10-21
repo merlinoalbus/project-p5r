@@ -2,7 +2,7 @@
 // API catalogo — righe aggiunte o corrette dall'utente (Fase 16.1)
 // ============================================================
 
-import type { ElementoCatalogoDto, OggettoSelezionabileDto, RiepilogoCatalogoDto, TipoCatalogo } from '../../types';
+import type { ElementoCatalogoDto, CatalogoOggettoDto, RiepilogoCatalogoDto, TipoCatalogo } from '../../types';
 import { apiDelete, apiGet, apiPost, apiPut, queryString } from './_helpers';
 
 /** Quante righe l'utente ha aggiunto, corretto o nascosto, per tipo. */
@@ -20,7 +20,7 @@ export const getElementoCatalogo = (tipo: TipoCatalogo, chiave: string): Promise
  *
  * Chi mette qualcosa in vendita cerca «Il magnifico ladro», non «libro»: la categoria arriva con
  * l'oggetto scelto invece di doverla indovinare prima. */
-export const getTuttiGliOggetti = (): Promise<OggettoSelezionabileDto[]> => apiGet('/catalogo/oggetti');
+export const getTuttiGliOggetti = (): Promise<CatalogoOggettoDto[]> => apiGet('/catalogo-oggetti');
 
 /** Crea una riga dell'utente nel catalogo del tipo; risponde con la riga creata. */
 export const creaElementoCatalogo = (tipo: TipoCatalogo, dati: Record<string, unknown>): Promise<ElementoCatalogoDto> =>

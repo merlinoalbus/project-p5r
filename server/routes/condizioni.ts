@@ -21,6 +21,7 @@ import { validate } from '../middleware/validate.js';
 import { giocabili } from '../services/squadraService.js';
 import { nomiCondizioni, nomiCondizioniMemo, pinConStato, vociCitabili } from '../services/condizioni/nomiCondizioni.js';
 import { tuttiGliInviti } from '../services/condizioni/condizioneEffettiva.js';
+import { apertureDalDiario, apertureDichiarabili } from '../services/apertureDedaliService.js';
 import { statoAlGiorno, statoDisponibilitaPartita } from '../services/disponibilitaService.js';
 import { valutazione } from '../services/condizioni/valutatore.js';
 import { condizioneSpillo } from '../schemas/mappe.js';
@@ -53,6 +54,7 @@ function attivitaConteggiabili() {
 
 router.get('/elenchi', (_req, res) => {
   const elenchi: ElenchiRegoleDto = {
+    allerte: prepared('SELECT DISTINCT chiave,nome FROM allerta_meteo ORDER BY nome').all() as NonNullable<ElenchiRegoleDto['allerte']>,
     articoli: prepared('SELECT a.chiave, COALESCE(a.nome_it, a.nome) AS nome, n.nome AS gruppo FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave WHERE a.nascosto = 0 AND n.nascosto = 0 ORDER BY n.nome, nome').all() as ElenchiRegoleDto['articoli'],
     letture: prepared("SELECT chiave, COALESCE(nome_it, nome) AS nome, 'libro' AS categoria FROM libro WHERE nascosto = 0 UNION ALL SELECT chiave, COALESCE(nome_it, nome), 'film' FROM film WHERE nascosto = 0 ORDER BY nome").all() as ElenchiRegoleDto['letture'],
     arcani: prepared('SELECT DISTINCT arcana AS chiave, arcana AS nome FROM persona ORDER BY arcana').all() as ElenchiRegoleDto['arcani'],
@@ -92,6 +94,8 @@ function progressi(id: number): ProgressiPartitaDto {
   const st = statoDisponibilitaPartita(id);
   const nomiSquadra = new Map(giocabili().map((p) => [p.chiave, p.nome]));
   const eventiManuali = new Map((prepared('SELECT evento_chiave, avvenuto FROM evento_storia_partita WHERE partita_id = ?').all(id) as Array<{ evento_chiave: string; avvenuto: number }>).map((r) => [r.evento_chiave, r.avvenuto === 1]));
+  const dalDiario = apertureDalDiario(id);
+  const nomiAperture = new Map(apertureDichiarabili().map((a) => [a.chiave, a.nome]));
   const svolte = new Map((prepared('SELECT attivita_chiave, volte FROM attivita_svolta_partita WHERE partita_id = ?').all(id) as Array<{ attivita_chiave: string; volte: number }>).map((r) => [r.attivita_chiave, r.volte]));
   const punti = new Map((prepared('SELECT negozio_chiave, punti FROM punti_negozio_partita WHERE partita_id = ?').all(id) as Array<{ negozio_chiave: string; punti: number }>).map((r) => [r.negozio_chiave, r.punti]));
   const negozi = negoziConProgramma();
@@ -100,7 +104,10 @@ function progressi(id: number): ProgressiPartitaDto {
   return {
     eventi: EVENTI_STORIA.map((e) => {
       const membro = membroDellEvento(e.chiave);
-      if (!membro) return { chiave: e.chiave, nome: e.nome, origine: 'manuale' as const, avvenuto: eventiManuali.get(e.chiave) ?? false, ...(serveA.has(e.chiave) ? { serveA: serveA.get(e.chiave) } : {}) };
+      if (!membro) return { chiave: e.chiave, nome: nomiAperture.get(e.chiave) ?? e.nome, origine: 'manuale' as const,
+        avvenuto: (eventiManuali.get(e.chiave) ?? false) || dalDiario.has(e.chiave), manuale: eventiManuali.get(e.chiave) ?? false,
+        ...(nomiAperture.has(e.chiave) ? { dalDiario: dalDiario.has(e.chiave), visiteDiario: dalDiario.get(e.chiave) ?? [] } : {}),
+        ...(serveA.has(e.chiave) ? { serveA: serveA.get(e.chiave) } : {}) };
       // Tre stati, come i semafori: in squadra, dichiarato fuori, non ancora segnato.
       const avvenuto = st.membriSquadra.has(membro) ? true : st.membriFuoriSquadra.has(membro) ? false : null;
       return { chiave: e.chiave, nome: e.nome, origine: 'calcolato' as const, avvenuto, membro, membroNome: nomiSquadra.get(membro) ?? membro };

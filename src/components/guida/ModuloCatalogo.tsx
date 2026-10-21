@@ -9,6 +9,7 @@
 // ============================================================
 
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { CondizioniEditor } from './CondizioniEditor';
 import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../../shared/condizioniSpillo';
 import { aggiornaElementoCatalogo, creaElementoCatalogo, eliminaElementoCatalogo, eliminaNelCestino, isApiError, nascondiElementoCatalogo, ripristinaElementoCatalogo } from '../../services/api';
@@ -48,6 +49,8 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
   const regoleValide = !modulo.conCondizioni || condizioni.every((c) => normalizzaRequisitoSpillo(c) !== null);
   const [occupato, setOccupato] = useState(false);
   const nome = tipoModulo === 'videogioco' ? { singolare: 'Videogioco', nuovo: 'Nuovo videogioco' } : NOME_TIPO_CATALOGO[tipo];
+  const lettura = tipo === 'libro' || tipo === 'film' || tipoModulo === 'videogioco' || dati.tipo === 'videogioco';
+  const catalogoCasa = typeof elemento?.dati._catalogoCasa === 'string' ? elemento.dati._catalogoCasa : null;
 
   /** Prepara il corpo col modulo del tipo (più le condizioni, se previste) e crea o aggiorna l'elemento; a buon fine notifica e avvisa il genitore. */
   const salva = async () => {
@@ -60,7 +63,7 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
         notifica('success', `${nome.singolare} «${e.nome}» aggiunto: resta anche quando i dati della guida vengono aggiornati.`);
       } else {
         await aggiornaElementoCatalogo(tipo, elemento.chiave, corpo);
-        notifica('success', `${nome.singolare} corretto: «Ripristina» rimette i dati della guida.`);
+        notifica('success', lettura ? `${nome.singolare} corretto. Il titolo si ripristina dalla pagina dell’oggetto.` : `${nome.singolare} corretto: «Ripristina» rimette i dati della guida.`);
       }
       onSalvato();
     } catch (err) {
@@ -149,7 +152,7 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
         <>
           <button type="button" className="btn btn-secondary" onClick={onChiudi}>Annulla</button>
           {!nuovo && elemento.modificata && (
-            <button type="button" className="btn btn-secondary" disabled={occupato} onClick={() => void ripristina()}>Ripristina i valori della guida</button>
+            <button type="button" className="btn btn-secondary" disabled={occupato} onClick={() => void ripristina()}>{lettura ? 'Ripristina i dati di lettura' : 'Ripristina i valori della guida'}</button>
           )}
           {!nuovo && (nelCestino || (elemento.origine === 'utente' && !elemento.modificata)) && (
             <button type="button" className="btn btn-danger" disabled={occupato} onClick={() => (nelCestino ? setEliminazione({ riepilogo: null }) : void elimina())}>Elimina</button>
@@ -162,11 +165,14 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
         {!nuovo && (
           <p className="m-0 text-[12px] text-text-muted">
             {elemento.origine === 'utente' && !elemento.modificata && 'Riga aggiunta da te.'}
-            {elemento.modificata && 'Riga della guida corretta da te: «Ripristina i valori della guida» rimette i dati originali.'}
+            {elemento.modificata && (lettura ? 'Il ripristino riguarda sessioni, effetti e condizioni della lettura.' : 'Riga della guida corretta da te: «Ripristina i valori della guida» rimette i dati originali.')}
             {elemento.origine === 'seed' && !elemento.modificata && 'Riga dei dati della guida: salvando, la correzione resterà anche dopo gli aggiornamenti.'}
             {elemento.nascosta && ' Attualmente nascosta.'}
           </p>
         )}
+        {lettura && <p className="m-0 text-[12px] text-text-muted">Il titolo appartiene all’oggetto: cambiarlo aggiorna tutti i riferimenti. Il prezzo si modifica nell’offerta del negozio.
+          {catalogoCasa && <> <Link to={catalogoCasa} onClick={onChiudi} className="touch inline-flex items-center">Apri l’oggetto per ripristinare il titolo o vedere le offerte</Link>.</>}
+        </p>}
         <Componente dati={dati} imposta={imposta} elemento={elemento ?? null} nuovo={nuovo} disabilitato={occupato} negozioChiave={negozioChiave} />
         {/* Le condizioni valgono per quel che compare e sparisce col procedere della partita. Una
             domanda in classe e una riga del cruciverba hanno già il loro giorno, che è la

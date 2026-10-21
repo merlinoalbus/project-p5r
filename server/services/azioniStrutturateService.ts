@@ -15,11 +15,20 @@ import { httpErrors } from '../utils/httpError.js';
 import { t } from './traduzioniService.js';
 import { destinazionePalazzo } from './palazziService.js';
 import { postoDelPin } from './mappe/nomiDeiPosti.js';
+import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
 import { descriviEffettoAzione, normalizzaEffettiAzione, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
-import type { ConfidentePartitaDto, ElenchiAzioneDto, RiferimentoAzioneDto, StatoAzioneDto } from '../../shared/types.js';
+import type { ConfidentePartitaDto, ElenchiAzioneDto, StatoAzioneDto } from '../../shared/types.js';
 
 const TIPI_RIFERIMENTO = new Set<string>(TIPI_RIFERIMENTO_AZIONE.map((r) => r.chiave));
+
+/** Le chiavi di lettura restano quelle originali; il titolo corrente segue anche una fonte confluita. */
+function titoliLettura(tabella: 'libro' | 'film' | 'attivita', coda = ''): string {
+  const originale = tabella === 'attivita' ? 'l.nome' : 'COALESCE(l.nome_it,l.nome)';
+  if (!catalogoOggettiDisponibile()) return `SELECT l.*,${originale} AS titolo_corrente FROM ${tabella} l ${coda}`;
+  return `SELECT l.*,COALESCE(c.nome,${originale}) AS titolo_corrente FROM ${tabella} l
+    LEFT JOIN catalogo_oggetto c ON c.chiave = l.catalogo_chiave ${tabella === 'attivita' ? "AND l.tipo = 'videogioco'" : ''} ${coda}`;
+}
 
 /** Il minimo di un'azione (della guida o dell'utente) che stato e mappa leggono. */
 export interface AzioneClassificata { tipo: string; riferimento: { tipo: string; chiave: string } | null; rangoAtteso: number | null; /** MM-GG della voce, se è di un giorno. */ giorno?: string }
@@ -77,18 +86,20 @@ export function nomeRiferimento(rif: { tipo: string; chiave: string }, opz: { an
   if (!TIPI_RIFERIMENTO.has(rif.tipo)) throw httpErrors.badRequest('riferimento-non-valido', `Non si collega un'azione a «${rif.tipo}».`);
   const visibile = opz.ancheNascosti ? '' : ' AND nascosto = 0';
   const riga = ((): { nome: string } | undefined => {
-    switch (rif.tipo as RiferimentoAzioneDto['tipo']) {
+    switch (rif.tipo) {
       case 'confidente': {
         const c = prepared('SELECT nome, arcana FROM confidente WHERE chiave = ?').get(rif.chiave) as { nome: string; arcana: string } | undefined;
         return c ? { nome: `${c.nome} - ${t('arcana', c.arcana)}` } : undefined;
       }
       case 'dungeon': return prepared('SELECT nome FROM dungeon WHERE chiave = ?').get(rif.chiave) as { nome: string } | undefined;
       case 'richiesta': return prepared('SELECT nome FROM richiesta WHERE chiave = ?').get(rif.chiave) as { nome: string } | undefined;
-      case 'libro': return prepared(`SELECT COALESCE(nome_it, nome) AS nome FROM libro WHERE chiave = ?${visibile}`).get(rif.chiave) as { nome: string } | undefined;
-      case 'film': return prepared(`SELECT COALESCE(nome_it, nome) AS nome FROM film WHERE chiave = ?${visibile}`).get(rif.chiave) as { nome: string } | undefined;
-      case 'attivita': return prepared(`SELECT nome FROM attivita WHERE chiave = ?${visibile}`).get(rif.chiave) as { nome: string } | undefined;
+      case 'libro': case 'film': case 'attivita': {
+        const r = prepared(titoliLettura(rif.tipo, `WHERE l.chiave = ?${opz.ancheNascosti ? '' : ' AND l.nascosto = 0'}`)).get(rif.chiave) as { titolo_corrente: string } | undefined;
+        return r ? { nome: r.titolo_corrente } : undefined;
+      }
       case 'negozio': return prepared(`SELECT nome FROM negozio WHERE chiave = ?${visibile}`).get(rif.chiave) as { nome: string } | undefined;
       case 'dote': return prepared('SELECT nome FROM dote_sociale WHERE chiave = ?').get(rif.chiave) as { nome: string } | undefined;
+      default: return undefined;
     }
   })();
   if (!riga) throw httpErrors.badRequest('riferimento-inesistente', `Il collegamento «${rif.tipo}: ${rif.chiave}» non esiste nella guida.`);
@@ -121,10 +132,10 @@ export function nomiEffetti(): NomiEffettiAzione {
   /** Esegue la query (che deve dare `chiave` e `nome`) e ne fa un oggetto chiave → nome. */
   const mappa = (sql: string) => Object.fromEntries((prepared(sql).all() as Array<{ chiave: string; nome: string }>).map((r) => [r.chiave, r.nome]));
   return {
-    libri: mappa('SELECT chiave, COALESCE(nome_it, nome) AS nome FROM libro'),
-    film: mappa('SELECT chiave, COALESCE(nome_it, nome) AS nome FROM film'),
-    videogiochi: mappa("SELECT chiave, nome FROM attivita WHERE tipo = 'videogioco'"),
-    attivita: mappa('SELECT chiave, nome FROM attivita'),
+    libri: mappa(`SELECT chiave,titolo_corrente AS nome FROM (${titoliLettura('libro')})`),
+    film: mappa(`SELECT chiave,titolo_corrente AS nome FROM (${titoliLettura('film')})`),
+    videogiochi: mappa(`SELECT chiave,titolo_corrente AS nome FROM (${titoliLettura('attivita', "WHERE l.tipo = 'videogioco'")})`),
+    attivita: mappa(`SELECT chiave,titolo_corrente AS nome FROM (${titoliLettura('attivita')})`),
   };
 }
 
@@ -140,13 +151,13 @@ export function elenchiAzione(): ElenchiAzioneDto {
   const voci = (sql: string) => prepared(sql).all() as Array<{ chiave: string; nome: string; dettaglio?: string | null }>;
   /** Le stesse righe senza `dettaglio` quando è vuoto o nullo, così il campo compare solo se ha un valore. */
   const pulite = (r: Array<{ chiave: string; nome: string; dettaglio?: string | null }>) => r.map((x) => ({ chiave: x.chiave, nome: x.nome, ...(x.dettaglio ? { dettaglio: x.dettaglio } : {}) }));
-  const attivita = prepared('SELECT chiave, nome, tipo, tracciamento FROM attivita WHERE nascosto = 0 ORDER BY ordine').all() as Array<{ chiave: string; nome: string; tipo: string; tracciamento: string }>;
+  const attivita = prepared(`SELECT chiave,titolo_corrente AS nome,tipo,tracciamento FROM (${titoliLettura('attivita', 'WHERE l.nascosto = 0 ORDER BY l.ordine')})`).all() as Array<{ chiave: string; nome: string; tipo: string; tracciamento: string }>;
   return {
     confidenti: (prepared('SELECT chiave, nome, arcana FROM confidente ORDER BY ordine').all() as Array<{ chiave: string; nome: string; arcana: string }>).map((c) => ({ chiave: c.chiave, nome: c.nome, dettaglio: t('arcana', c.arcana) })),
     dungeon: pulite(voci('SELECT chiave, nome FROM dungeon ORDER BY ordine')),
     richieste: pulite(voci('SELECT chiave, nome, committente AS dettaglio FROM richiesta ORDER BY ordine')),
-    libri: pulite(voci('SELECT chiave, COALESCE(nome_it, nome) AS nome, dove AS dettaglio FROM libro WHERE nascosto = 0 ORDER BY ordine')),
-    film: pulite(voci("SELECT chiave, COALESCE(nome_it, nome) AS nome, CASE dove WHEN 'cinema' THEN 'Cinema' ELSE 'DVD' END AS dettaglio FROM film WHERE nascosto = 0 ORDER BY ordine")),
+    libri: pulite(voci(`SELECT chiave,titolo_corrente AS nome,${catalogoOggettiDisponibile() ? 'NULL' : 'dove'} AS dettaglio FROM (${titoliLettura('libro', 'WHERE l.nascosto = 0 ORDER BY l.ordine')})`)),
+    film: pulite(voci(`SELECT chiave,titolo_corrente AS nome,CASE dove WHEN 'cinema' THEN 'Cinema' ELSE 'DVD' END AS dettaglio FROM (${titoliLettura('film', 'WHERE l.nascosto = 0 ORDER BY l.ordine')})`)),
     videogiochi: attivita.filter((a) => a.tipo === 'videogioco').map((a) => ({ chiave: a.chiave, nome: a.nome })),
     attivita: attivita.map((a) => ({ chiave: a.chiave, nome: a.nome, turni: (eTracciamentoAttivita(a.tracciamento) ? a.tracciamento : tracciamentoPerTipo(a.tipo)) === 'svolta' })),
     negozi: pulite(voci('SELECT chiave, nome, luogo AS dettaglio FROM negozio WHERE nascosto = 0 ORDER BY ordine')),

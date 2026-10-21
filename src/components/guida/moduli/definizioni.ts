@@ -3,11 +3,13 @@
 // ============================================================
 
 import { ORARI_SEMPRE, normalizzaOrari } from '../../../../shared/orariNegozio';
+import { normalizzaRequisitoSpillo } from '../../../../shared/condizioniSpillo';
 import { normalizzaVociEffetto, type VoceEffetto } from '../../../../shared/effettiCatalogo';
 import { descriviEffetto, type EffettoOggetto } from '../../../../shared/effettiOggetto';
 import { tracciamentoPerTipo } from '../../../../shared/attivita';
 import { leggiGiorniQuiz, normalizzaQuiz, type QuizAttivita } from '../../../../shared/quizAttivita';
-import type { OggettoSelezionabileDto, TipoCatalogo } from '../../../types';
+import { normalizzaCostoScambio } from '../../../../shared/catalogo';
+import type { TipoCatalogo } from '../../../types';
 import { jsonDi, numeroDi, senzaTemporanei, testoDi, testoOnull, verificatoDi, type Dati, type DefinizioneModulo } from './base';
 
 export interface ProgrammaPunti { nome: string; unita: string; calcolo: 'manuale' | 'rango-cliente' }
@@ -19,6 +21,7 @@ export const negozio: DefinizioneModulo = {
   conCondizioni: false,
   conVerificato: false,
   iniziali: (e) => ({
+    sblocco_json: jsonDi(e?.dati.sblocco_json, []),
     nome: testoDi(e?.dati.nome), tipo: testoDi(e?.dati.tipo) || 'altro',
     sede_chiave: (e?.dati.sede_chiave as string | null) ?? null, luogo_chiave: (e?.dati.luogo_chiave as string | null) ?? null,
     luogo: testoDi(e?.dati.luogo), gestore: testoDi(e?.dati.gestore), confidente_chiave: (e?.dati.confidente_chiave as string | null) ?? null,
@@ -29,7 +32,9 @@ export const negozio: DefinizioneModulo = {
   }),
   valido: (d) => {
     const p = d.programma_punti_json as ProgrammaPunti | null;
-    return testoDi(d.nome).trim().length > 0 && (p === null || (p.nome.trim().length > 0 && p.unita.trim().length > 0));
+    const condizioni = d.sblocco_json;
+    return Array.isArray(condizioni) && condizioni.every((c) => normalizzaRequisitoSpillo(c) !== null)
+      && testoDi(d.nome).trim().length > 0 && (p === null || (p.nome.trim().length > 0 && p.unita.trim().length > 0));
   },
   prepara: (d) => {
     const p = d.programma_punti_json as ProgrammaPunti | null;
@@ -49,24 +54,38 @@ export const articolo: DefinizioneModulo = {
     nome: testoDi(e?.dati.nome), categoria: testoDi(e?.dati.categoria) || 'altro',
     prezzo: numeroDi(e?.dati.prezzo), quantita: numeroDi(e?.dati.quantita), per: (e?.dati.per as string | null) ?? null,
     oggetto_fonte: (e?.dati.oggetto_fonte as string | null) ?? null, oggetto_chiave: (e?.dati.oggetto_chiave as string | null) ?? null,
+    catalogo_chiave: (e?.dati.catalogo_chiave as string | null) ?? null,
+    costo_json: e?.dati.costo_json ?? null,
+    _costoIniziale: e?.dati.costo_json ?? null, _costoModificato: false,
+    _tipoCosto: e?.dati.costo_json == null ? 'yen' : normalizzaCostoScambio(e.dati.costo_json)?.tipo ?? 'non-leggibile',
     effetto_json: jsonDi<EffettoOggetto | null>(e?.dati.effetto_json, null), statistiche: testoDi(e?.dati.statistiche), nota: testoDi(e?.dati.nota),
     verificato: verificatoDi(e),
-    // Una riga esistente senza collegamento è «a mano» fin dall'apertura; una nuova aspetta la scelta.
-    _collegato: null, _aMano: !!e && !e.dati.oggetto_fonte,
+    // Il nome storico resta solo per le offerte esistenti non collegate: non si copia dal catalogo.
+    _esistente: !!e, _aMano: !!e && !e.dati.catalogo_chiave,
+    _catalogoIniziale: (e?.dati.catalogo_chiave as string | null) ?? null,
   }),
-  // Salvabile con un oggetto collegato, con un legame salvato che l'archivio non ha più (si conserva,
-  // non si scollega in silenzio), o a mano con un nome.
-  valido: (d) => (d._collegato !== null && d._collegato !== undefined) || (d._aMano !== true && !!d.oggetto_fonte && !!d.oggetto_chiave) || (d._aMano === true && testoDi(d.nome).trim().length > 0),
+  // Un collegamento non disponibile resta salvabile senza modificarlo; una nuova offerta sceglie un'identità.
+  valido: (d) => (!!testoDi(d.catalogo_chiave).trim() || (d._esistente === true && d._aMano === true && testoDi(d.nome).trim().length > 0))
+    && (d._costoModificato !== true || d.costo_json == null || normalizzaCostoScambio(d.costo_json) !== null),
   prepara: (d) => {
-    const collegato = (d._collegato as OggettoSelezionabileDto | null) ?? null;
-    const legame = collegato ? { fonte: collegato.fonte, chiave: collegato.chiave } : (d._aMano !== true && d.oggetto_fonte && d.oggetto_chiave ? { fonte: d.oggetto_fonte, chiave: d.oggetto_chiave } : null);
-    const effetto = legame ? null : ((d.effetto_json as EffettoOggetto | null) ?? null);
-    return {
-      ...senzaTemporanei(d), nome: testoDi(d.nome).trim(), prezzo: numeroDi(d.prezzo), quantita: numeroDi(d.quantita), per: testoOnull(d.per), nota: testoOnull(d.nota),
-      oggetto_fonte: legame?.fonte ?? null, oggetto_chiave: legame?.chiave ?? null,
-      // La dichiarazione e la frase che ne discende, così la ricerca per testo la trova.
-      effetto_json: effetto, effetto: effetto ? descriviEffetto(effetto) : null, statistiche: legame ? null : testoOnull(d.statistiche),
-    };
+    const chiave = testoOnull(d.catalogo_chiave);
+    const corpo: Dati = { negozio_chiave: d.negozio_chiave, quantita: numeroDi(d.quantita), nota: testoOnull(d.nota), verificato: d.verificato };
+    if (d.costo_json == null) corpo.prezzo = numeroDi(d.prezzo);
+    if (d._costoModificato === true) {
+      const costo = normalizzaCostoScambio(d.costo_json);
+      if (d.costo_json != null && !costo) throw new Error('Completa il costo dello scambio prima di salvare.');
+      corpo.costo_json = costo;
+      if (costo) corpo.prezzo = null;
+    }
+    // Non rispedire un legame immutato evita di rifiutare la correzione della nota se l'oggetto è stato nascosto.
+    if (chiave !== d._catalogoIniziale) corpo.catalogo_chiave = chiave;
+    if (!chiave) {
+      const effetto = (d.effetto_json as EffettoOggetto | null) ?? null;
+      Object.assign(corpo, { nome: testoDi(d.nome).trim(), categoria: d.categoria, per: testoOnull(d.per),
+        oggetto_fonte: d.oggetto_fonte ?? null, oggetto_chiave: d.oggetto_chiave ?? null,
+        effetto_json: effetto, effetto: effetto ? descriviEffetto(effetto) : null, statistiche: testoOnull(d.statistiche) });
+    }
+    return corpo;
   },
 };
 

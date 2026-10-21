@@ -22,6 +22,7 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { NOME_TIPO_ATTIVITA } from '../../../shared/attivita';
 import { formattaYen } from '../../utils/letture';
 import { avvisaDotiDaSegnare } from '../../utils/dotiDaSegnare';
+import { dataGiocoTesto } from '../../utils/dateGioco';
 
 /** Il testo di un errore: il messaggio se è un `Error`, altrimenti il valore convertito in stringa. */
 function messaggio(err: unknown): string { return err instanceof Error ? err.message : String(err); }
@@ -120,15 +121,20 @@ export function ProgressiPartita({ partitaId }: { partitaId: number }) {
                   {manuali.map((e) => (
                     <li key={e.chiave}>
                       <label className="progressi-partita__riga touch">
-                        <input type="checkbox" className="w-5 h-5" checked={e.avvenuto === true} disabled={occupato === e.chiave} onChange={(ev) => void salva(e.chiave, () => impostaEventoStoria(partitaId, e.chiave, ev.target.checked))} />
+                        <input type="checkbox" className="w-5 h-5" checked={e.manuale ?? e.avvenuto === true} aria-label={e.visiteDiario ? `Registrazione manuale: ${e.nome}` : e.nome} disabled={occupato === e.chiave} onChange={(ev) => void salva(e.chiave, () => impostaEventoStoria(partitaId, e.chiave, ev.target.checked))} />
                         {/* a che cosa serve segnarlo: il rango del Confidente che lo aspetta, lo stesso
                             dato del «Condizione soddisfatta» nella sua scheda */}
                         <span className="min-w-0 flex-1">
                           <span className="block">{e.nome}</span>
+                          {e.visiteDiario && <span className="block text-[11px] text-text-muted">Questa casella indica soltanto la registrazione manuale. Le aperture delle visite si correggono dal Diario.</span>}
                           {e.serveA && e.serveA.length > 0 && <span className="block text-[11px] text-text-muted">Sblocca: {e.serveA.join(' · ')}</span>}
                         </span>
                         <span className={`shrink-0 text-[11px] ${e.avvenuto ? 'text-success' : 'text-text-muted'}`}>{e.avvenuto ? 'avvenuto' : 'non ancora'}</span>
                       </label>
+                      {!!e.visiteDiario?.length && <div className="flex flex-wrap items-center gap-2 pl-7 text-xs">
+                        <span>Dichiarato nel Diario:</span>
+                        {e.visiteDiario.map((v) => <Link key={v.uid} className="touch text-primary inline-flex items-center" to={`/guida/percorso/${v.giorno}?voce=${encodeURIComponent(v.uid)}`}>Visita del {dataGiocoTesto(v.giorno)}</Link>)}
+                      </div>}
                     </li>
                   ))}
                 </ul>

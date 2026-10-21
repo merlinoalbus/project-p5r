@@ -8,6 +8,7 @@ import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
 import { datiGuida, type Congelato } from './datiGuida.js';
 import type { CompletamentoDto, TrofeoDto } from '../../shared/types.js';
+import { ricompensePerFonte } from './catalogoOggettiLetture.js';
 
 interface RigaTrofeo { chiave: string; ordine: number; nome: string; nome_en: string | null; tipo: TrofeoDto['tipo']; descrizione: string; come: string; mancabile: number | null; quando: string | null; fonte: string; verificato: number }
 type SeedCompletamento = Omit<CompletamentoDto, 'trofei' | 'ottenuti'>;
@@ -28,7 +29,9 @@ export function completamento(partitaId?: number): Congelato<CompletamentoDto> {
   if (!seed) throw httpErrors.notFound('completamento-non-disponibile', 'I dati di completamento non sono caricati.');
   const ottenuti = ottenutiPartita(partitaId);
   const trofei = (prepared('SELECT * FROM trofeo ORDER BY ordine').all() as RigaTrofeo[]).map((r) => dto(r, ottenuti));
-  return { ...seed, trofei, ottenuti: trofei.filter((t) => t.ottenuto).length };
+  const premi = ricompensePerFonte('covo');
+  const covo = { ...seed.covo, premi: seed.covo.premi.map((p) => ({ ...p, oggettiRicompensa: premi.get(p.nome) ?? [] })) };
+  return { ...seed, covo, trofei, ottenuti: trofei.filter((t) => t.ottenuto).length };
 }
 
 /** Segna (o toglie) un trofeo come ottenuto nella partita; evento alla prima spunta. */

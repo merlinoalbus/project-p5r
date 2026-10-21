@@ -15,6 +15,7 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 // quando un Palazzo è concluso lo decide `palazziService` (Tesoro e boss finale: mai la data)
 import { statoPalazzi } from './palazziService.js';
 import { EVENTI_STORIA, condizioneConTesto, dataLeggibile, normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { eventiEffettivi } from './apertureDedaliService.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { type MeteoPartita } from '../../shared/meteoPartita.js';
 import { meteoOra } from './meteoService.js';
@@ -58,7 +59,7 @@ export interface StatoPartitaSemafori {
   personeConAbilitaId?: Set<string>;
   /** L6: gli inviti dei Confidenti registrati nella partita (`utente.invito_partita`): le condizioni `invito`. */
   invitiRegistrati?: Set<string>;
-  /** Gli eventi di storia segnati come avvenuti (Partita → Progressi): i requisiti `evento` li leggono da qui. */
+  /** Eventi manuali e aperture dichiarate nelle visite del Diario: i requisiti `evento` leggono il loro insieme. */
   eventi: Set<string>;
   /** Non più letto (R6-01b: niente conferme a mano); resta nel tipo finché c'è `requisito_partita` (L11). */
   conferme?: Set<string>;
@@ -89,7 +90,7 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   // nasce li') perche' il Ladro risultasse in squadra: si accendeva per sbaglio e non si poteva spegnere.
   const membriSquadra = new Set((prepared('SELECT personaggio_chiave FROM membro_squadra_partita WHERE partita_id = ? AND in_squadra = 1').all(partitaId) as Array<{ personaggio_chiave: string }>).map((r) => r.personaggio_chiave));
   const membriFuoriSquadra = new Set((prepared('SELECT personaggio_chiave FROM membro_squadra_partita WHERE partita_id = ? AND in_squadra = 0').all(partitaId) as Array<{ personaggio_chiave: string }>).map((r) => r.personaggio_chiave));
-  const eventi = new Set((prepared('SELECT evento_chiave FROM evento_storia_partita WHERE partita_id = ? AND avvenuto = 1').all(partitaId) as Array<{ evento_chiave: string }>).map((r) => r.evento_chiave));
+  const eventi = eventiEffettivi(partitaId);
   // i Palazzi letti una volta: conclusi (Tesoro e boss finale, §8.10) col perché, gli altri con quel che manca al furto
   const palazzi = statoPalazzi(partitaId);
   // un Palazzo con la regola del boss dei Memento (Iweleth, §8.15) non entra negli effetti di Palazzo

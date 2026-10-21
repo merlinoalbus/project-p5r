@@ -107,9 +107,9 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   },
   'PUT /api/partite/:id/confidenti/:chiave/regali': {
     sommario: 'Segna un regalo consegnato a un Confidente',
-    descrizione: 'Segna (o toglie) il regalo, indicato per nome, come consegnato al Confidente nella partita. Segnarlo due volte non crea doppioni. Non tocca i punti del Confidente e non scrive nello storico.',
+    descrizione: 'Segna (o toglie) la consegna al Confidente con `catalogo` (chiave stabile). Il vecchio campo `regalo` (nome) resta accettato in alternativa, risolto soltanto se univoco. Riconosce la stessa consegna anche dopo una rinomina, senza duplicarla né riscriverne nome storico e data. Togliere la spunta rimuove le righe equivalenti di quella consegna. La risposta conserva `regaliFatti` (nomi storici) e aggiunge `regaliFattiCatalogo` (chiavi). Non tocca i punti del Confidente e non scrive nello storico.',
     risposta: '`ConfidentePartitaDto` aggiornato',
-    errori: [PARTITA, [404, 'confidente-non-trovato'], [400, 'regalo-vuoto']],
+    errori: [PARTITA, [404, 'confidente-non-trovato'], [404, 'oggetto-non-trovato'], [400, 'regalo-vuoto'], [409, 'catalogo-non-disponibile'], [409, 'oggetto-nascosto'], [409, 'regalo-omonimo']],
   },
 
   // ---- Trofei, giornata, meteo e attività ----
@@ -121,9 +121,9 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   },
   'PUT /api/partite/:id/percorso': {
     sommario: 'Spunta o toglie un\'azione della giornata',
-    descrizione: 'Spunta (o toglie) un\'azione della guida giorno per giorno, indicata dal suo `uid`. Alla spunta applica ciò che l\'azione produce (letture, turni, punti del Confidente con `noteRisposta`) e lo registra nello storico (`percorso`); una seconda spunta non riapplica nulla. Togliere la spunta annulla gli effetti registrati (le letture restano: si disfano dalla loro pagina). Eventi, scadenze e promemoria non si spuntano (400). Se la spunta completa tutte le azioni del giorno corrente della partita, la partita passa al giorno dopo, di giorno, con un evento nello storico; togliere una spunta non torna indietro.',
+    descrizione: 'Spunta (o toglie) un\'azione della guida giorno per giorno, indicata dal suo `uid`. Alla prima spunta applica letture, turni e punti del Confidente con `noteRisposta`. `apertureDedali`, opzionale, dichiara le aperture nella visita strutturata ai Memento: nessuna apertura si deduce da data o numero di visite. Su spunta già presente il campo assente conserva le dichiarazioni, un array le sostituisce e [] le rimuove, senza riapplicare altri effetti, cambiare fatta_at o riscrivere lo storico. Se il riferimento della voce è cambiato sono ammesse soltanto le aperture già dichiarate, per poterle rimuovere. Togliere la spunta annulla i suoi effetti (le letture restano); altre visite e registrazioni manuali rimangono indipendenti. Eventi, scadenze e promemoria non si spuntano ex novo (400), ma una spunta storica conserva il gesto di rimozione. Solo una prima spunta che completa il giorno corrente fa avanzare la partita; una modifica delle aperture non cambia il giorno.',
     risposta: '`AzionePercorsoDto` della voce; con `giornoAvanzato` (`GiornoAvanzatoDto`) quando la partita è passata al giorno dopo',
-    errori: [PARTITA, [404, 'voce-non-trovata'], [400, 'voce-non-spuntabile']],
+    errori: [PARTITA, [404, 'voce-non-trovata'], [400, 'voce-non-spuntabile'], [400, 'apertura-dedalo-non-ammessa']],
   },
   'PUT /api/partite/:id/giorno': {
     sommario: 'Imposta il giorno corrente della partita',
@@ -145,9 +145,9 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   },
   'PUT /api/partite/:id/acquisti': {
     sommario: 'Segna un articolo acquistato o ottenuto',
-    descrizione: 'Segna (o toglie) l\'articolo di un negozio come acquistato nella partita. Segnare un articolo non disponibile nella partita (condizioni di sblocco non soddisfatte) risponde 409; togliere il segno è sempre possibile. L\'evento `acquisto` va nello storico solo alla prima spunta.',
-    risposta: '`ArticoloDto` con stato e disponibilità nella partita',
-    errori: [PARTITA, [404, 'articolo-non-trovato'], [409, 'articolo-non-disponibile']],
+    descrizione: 'Segna (o toglie) l\'articolo di un negozio come acquistato nella partita. `sede` è la chiave opzionale del luogo effettivo per un listino condiviso: deve essere la sede principale o una sede aggiuntiva registrata, e ne usa presenza e orari. Una sede estranea risponde 400. Segnare un articolo non disponibile risponde 409; togliere il segno resta possibile. Le vecchie chiavi dei duplicati esatti risolvono il listino condiviso senza riscrivere gli acquisti storici; una spunta già presente non crea una seconda riga né un nuovo evento. L\'evento `acquisto` va nello storico solo alla prima spunta.',
+    risposta: '`ArticoloDto` con stato e disponibilità nella partita e gli eventuali ricevuti del baratto. La spunta è dell’offerta, non assegna tutti i premi alternativi, non consuma capsule/fiori né conta gli scambi ripetuti di Mothman; non cambia le regole degli acquisti prima di L10.',
+    errori: [PARTITA, [404, 'articolo-non-trovato'], [409, 'articolo-non-disponibile'], [400, 'sede-listino-non-valida']],
   },
   'PUT /api/partite/:id/cruciverba': {
     sommario: 'Segna un cruciverba di Leblanc risolto',
@@ -202,7 +202,7 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   'GET /api/partite/:id/suggerimenti': {
     sommario: 'Che cosa evidenziare per le azioni ancora da fare oggi',
     descrizione: 'Dalle azioni non ancora spuntate del giorno corrente della partita (escluse quelle bloccate dai requisiti) raccoglie le chiavi da evidenziare nell\'app — Confidenti, personaggi, Palazzi e aree, libri, film, articoli e negozi, attività, Richieste, luoghi e quartieri, Doti, mappe e spilli — con il motivo di ognuna. Senza giorno corrente, o con un giorno fuori dal percorso, gli elenchi sono vuoti.',
-    risposta: '`SuggerimentiOggiDto`',
+    risposta: '`SuggerimentiOggiDto`; dopo M7 le offerte di libri/film/videogiochi si trovano per fonte/chiave del catalogo, non dal titolo o dai suoi slug. Gli altri criteri dei suggerimenti e lo stato del diario restano invariati.',
     errori: [PARTITA],
   },
   'PUT /api/partite/:id/spilli/:spilloId': {

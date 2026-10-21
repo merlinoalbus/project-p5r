@@ -1,5 +1,19 @@
 # L6 — copertura della ripresa dopo il rilascio
 
+## Aggiornamento della bonifica locale L5–L7
+
+Il mandato successivo all'audit richiede correzione e completamento prima del rilascio unico. A56-01…08 hanno un'attuazione locale, descritta in [difetti L6](difetti.md), dopo gate distinto sulla soluzione. Il successivo riesame statico dell'implementazione è approvato dopo le correzioni richieste su esito ignoto e fonte effettiva degli sblocchi; il codice non è pubblicato. Non è approvazione integrale dei requisiti dati/runtime.
+
+- **Sblocco e navigazione:** FK quartiere effettiva, inviti coerenti, condizioni dei pin condivise con «Luoghi qui», negozi con sblocco aggiuntivo distinto dai dati legacy, link Confidente corretti.
+- **Libri:** influenza positiva esatta sulla formula AND/OR/NON, avvisi non operandi, effetto storico escluso dalla presentazione; nessuna cancellazione degli effetti nei dati.
+- **Finestre:** riferimento `finestra-palazzo` distinto da `arco`; selezione ricorsiva del giorno; migrazione 122 conservativa di copie guida riconosciute e immagini pertinenti del cestino. Condizioni utente/adottate conservate integralmente; esclusioni rendicontate quando sarà applicata.
+- **Controlli realmente effettuati:** tre riletture statiche dell'esecutore, typecheck integrato exit 0 durante il lavoro e lint mirato senza errori/avvisi. Nessun test, DB modificato, migrazione eseguita o gesto funzionale.
+- **Ancora da chiudere:** typecheck/lint/build finali integrati; inventari correnti R5/R6-19 e riscontro delle esclusioni effettive, preservazione prima/dopo, pubblicazione/pipeline e osservazione del sito. Le righe P/NV dell'audit non diventano conformi con questa nota.
+
+La migrazione 122 è predisposta dopo M7=121 e non viene attivata da questa sottoattività. Le sezioni seguenti restano evidenza storica, non stato della nuova consegna.
+
+**Nota corrente del 21 ottobre:** questo documento conserva la copertura storica della correzione dei testi, poi pubblicata in `c025154a`. Il nuovo audit indipendente ha accertato A56-01…08: vedere [rapporto e limiti](../../audit-conformita-2026-10-21.md). I verdi e le osservazioni su Asakusa sotto non costituiscono approvazione integrale di L6.
+
 Riscontro del 2026-10-21 locale (2026-10-20 UTC), base pubblicata `63e12734` e correzione delle tre viste nella consegna corrente su `newreview`. Questo documento distingue lettura del codice, riscontro pubblico e prove funzionali: non certifica L6 completo. Typecheck/lint/build della correzione riusciti; pipeline e browser della nuova consegna da seguire dopo il push, senza un commit successivo di soli documenti per registrare il suo stesso hash.
 
 ## Evidenza del rilascio

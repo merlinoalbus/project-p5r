@@ -15,25 +15,29 @@ import { verificaPartita } from './verificaPartita.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type StatoDisponibilita } from './disponibilitaService.js';
 import { registraEvento } from './storicoService.js';
 import { attivitaConQuiz, quizVoceDto } from './attivitaService.js';
-import { risolviOggettoCollegato } from './oggettiSelezionabili.js';
+import { catalogoOggettiDisponibile, costoOggetto, oggettiConChiavi, ricompensePerFonte } from './catalogoOggettiLetture.js';
+import { categoriaDelListino, normalizzaNomeOggetto } from '../../shared/catalogo.js';
+import { trasformazioniDiJose } from './trasformazioniOggetti.js';
+import { descriviVoceEffetto, leggiVociEffetto } from '../../shared/effettiCatalogo.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { descriviOrari, descriviOrariDelLuogo, leggiOrari, orariComeCondizioni, orariDelLuogo, type OrariNegozio } from '../../shared/orariNegozio.js';
 import { condizioniDiSblocco } from './sbloccoLuoghi.js';
-import type { ArticoloDto, NegozioDettaglioDto, NegozioRiassuntoDto, RicercaArticoliDto } from '../../shared/types.js';
+import { articoloDelListino, articoliEquivalenti, lettureListiniCondivisi, listinoDelNegozio, type LettureListiniCondivisi } from './listiniCondivisi.js';
+import type { ArticoloDto, CatalogoOggettoDto, NegozioDettaglioDto, NegozioRiassuntoDto, RicercaArticoliDto } from '../../shared/types.js';
 
 /** L5: quel che serve alla presenza di un negozio, letto con la riga: la sua eccezione d'orario e orari e sblocco della sede. */
-interface PresenzaRiga { orari_json: string | null; eccezione_orari_json?: string | null; sede_chiave: string | null; sede_orari_json?: string | null; sede_condizioni_json?: string | null }
+interface PresenzaRiga { sblocco_json?: string | null; orari_json: string | null; eccezione_orari_json?: string | null; sede_chiave: string | null; sede_orari_json?: string | null; sede_condizioni_json?: string | null }
 interface RigaNegozio extends PresenzaRiga { condizioni_json: string | null; orari_json: string | null; sede_chiave: string | null; sede_nome?: string | null; programma_punti_json: string | null; chiave: string; ordine: number; nome: string; luogo: string; luogo_chiave: string | null; tipo: string; gestore: string | null; confidente_chiave: string | null; orari: string | null; sblocco: string | null; note: string | null; fonte: string; confidente_nome?: string | null; quartiere_nome?: string | null; articoli?: number; verificati?: number }
-interface RigaArticolo { condizioni_json: string | null; oggetto_fonte: string | null; oggetto_chiave: string | null; quantita: number | null; chiave: string; negozio_chiave: string; negozio_confidente?: string | null; negozio_orari?: string | null;
+interface RigaArticolo { catalogo_chiave?: string | null; costo_json?: string | null; condizioni_json: string | null; oggetto_fonte: string | null; oggetto_chiave: string | null; quantita: number | null; chiave: string; negozio_chiave: string; negozio_confidente?: string | null; negozio_orari?: string | null;
   /** L5: eccezione d'orario e sede del negozio, con orari e sblocco della sede. */
-  negozio_eccezione?: string | null; negozio_sede?: string | null; sede_orari_json?: string | null; sede_condizioni_json?: string | null; ordine: number; nome: string; nome_it: string | null; categoria: string; per: string | null; prezzo: number | null; effetto: string | null; statistiche: string | null; disponibile_dal: string | null; condizione: string | null; nota: string | null; fonte: string; verificato: number; negozio_nome?: string }
+  negozio_sblocco?: string | null; negozio_eccezione?: string | null; negozio_sede?: string | null; sede_orari_json?: string | null; sede_condizioni_json?: string | null; ordine: number; nome: string; nome_it: string | null; categoria: string; per: string | null; prezzo: number | null; effetto: string | null; statistiche: string | null; disponibile_dal: string | null; condizione: string | null; nota: string | null; fonte: string; verificato: number; negozio_nome?: string }
 
 // L5: con la sede vengono anche i suoi orari e il suo sblocco (`l.orari_json`, `l.condizioni_json`): sono la presenza del negozio
 const SQL_NEGOZIO = `SELECT n.*, c.nome AS confidente_nome, q.nome AS quartiere_nome, l.nome AS sede_nome, l.orari_json AS sede_orari_json, l.condizioni_json AS sede_condizioni_json,
   (SELECT COUNT(*) FROM articolo a WHERE a.negozio_chiave = n.chiave AND a.nascosto = 0) AS articoli, (SELECT COUNT(*) FROM articolo a WHERE a.negozio_chiave = n.chiave AND a.verificato = 1 AND a.nascosto = 0) AS verificati
   FROM negozio n LEFT JOIN confidente c ON c.chiave = n.confidente_chiave LEFT JOIN quartiere q ON q.chiave = n.luogo_chiave LEFT JOIN luogo l ON l.chiave = n.sede_chiave`;
 const SQL_ARTICOLO = `SELECT a.*, n.nome AS negozio_nome, n.confidente_chiave AS negozio_confidente, n.orari_json AS negozio_orari, n.eccezione_orari_json AS negozio_eccezione,
-  n.sede_chiave AS negozio_sede, l.orari_json AS sede_orari_json, l.condizioni_json AS sede_condizioni_json
+  n.sblocco_json AS negozio_sblocco, n.sede_chiave AS negozio_sede, l.orari_json AS sede_orari_json, l.condizioni_json AS sede_condizioni_json
   FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave LEFT JOIN luogo l ON l.chiave = n.sede_chiave`;
 
 // Il testo di una condizione si genera con i nomi della Guida, non con le chiavi: «Articolo ottenuto: Laptop rotto», non «yumenoshima/laptop-rotto».
@@ -56,7 +60,13 @@ function orariDelNegozio(r: PresenzaRiga): { orari: OrariNegozio; testo: string 
 function condizioniPresenza(r: PresenzaRiga, orari: OrariNegozio) {
   const nomi = nomiCondizioniMemo();
   const sblocco = r.sede_chiave ? condizioniDiSblocco({ chiave: r.sede_chiave, condizioni_json: r.sede_condizioni_json ?? null }) : [];
-  return [...sblocco.map((c) => condizioneConTesto(c, nomi)), ...regoleOrari(orari)];
+  return [...sblocco.map((c) => condizioneConTesto(c, nomi)), ...regole(r.sblocco_json ?? null), ...regoleOrari(orari)];
+}
+
+/** Presenza senza caricare il listino: usata anche dalla navigazione dell'Area. */
+export function disponibilitaDelNegozio(chiave: string, st: StatoDisponibilita) {
+  const r = prepared(`${SQL_NEGOZIO} WHERE n.chiave = ? AND n.nascosto = 0`).get(chiave) as RigaNegozio | undefined;
+  return r ? valutaRequisiti(condizioniPresenza(r, orariDelNegozio(r).orari), st) : undefined;
 }
 
 /** La pagina del luogo in cui il negozio ha la sede, aperta sulla sua sezione; null senza sede. */
@@ -99,7 +109,7 @@ function riassunto(r: RigaNegozio, st?: StatoDisponibilita): NegozioRiassuntoDto
  *  orari (marcati `daNegozio`), il resto è dell'articolo (compreso lo sblocco che era del negozio). */
 function disponibilitaArticolo(r: RigaArticolo, st: StatoDisponibilita) {
   // L5: la presenza del negozio è quella della sede (sblocco e orari, o l'eccezione del negozio)
-  const presenza: PresenzaRiga = { orari_json: r.negozio_orari ?? null, eccezione_orari_json: r.negozio_eccezione ?? null, sede_chiave: r.negozio_sede ?? null, sede_orari_json: r.sede_orari_json ?? null, sede_condizioni_json: r.sede_condizioni_json ?? null };
+  const presenza: PresenzaRiga = { sblocco_json: r.negozio_sblocco ?? null, orari_json: r.negozio_orari ?? null, eccezione_orari_json: r.negozio_eccezione ?? null, sede_chiave: r.negozio_sede ?? null, sede_orari_json: r.sede_orari_json ?? null, sede_condizioni_json: r.sede_condizioni_json ?? null };
   const negozio = condizioniPresenza(presenza, orariDelNegozio(presenza).orari).map((c) => ({ ...c, testo: 'Negozio: ' + c.testo }));
   const esito = valutaRequisiti([...negozio, ...regole(r.condizioni_json)], st);
   return { ...esito, requisiti: esito.requisiti.map((q, i) => (i < negozio.length ? { ...q, daNegozio: true } : q)) };
@@ -109,15 +119,35 @@ function disponibilitaArticolo(r: RigaArticolo, st: StatoDisponibilita) {
  * Un articolo collegato non ha una descrizione propria: nome, effetto, statistiche e «per chi»
  * vengono dall'oggetto a ogni lettura. Se il collegamento punta a qualcosa che non c'e' piu' si
  * torna a quel che la riga ha di suo, invece di mostrare una scheda vuota. */
-function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponibilita): ArticoloDto {
-  const collegato = risolviOggettoCollegato(r.oggetto_fonte, r.oggetto_chiave);
-  return { condizioni: regole(r.condizioni_json), chiave: r.chiave, negozioChiave: r.negozio_chiave, negozioNome: r.negozio_nome ?? '',
-    nome: collegato?.nome ?? r.nome, nomeIt: collegato?.nomeIt ?? r.nome_it,
-    categoria: (collegato?.categoria ?? r.categoria) as ArticoloDto['categoria'],
-    per: collegato?.per ?? r.per, prezzo: r.prezzo,
-    effetto: collegato?.effetto ?? r.effetto, statistiche: collegato?.statistiche ?? r.statistiche,
+function identitaArticoli(righe: readonly RigaArticolo[]): Map<string, CatalogoOggettoDto> | undefined {
+  return catalogoOggettiDisponibile() ? oggettiConChiavi(righe.flatMap((r) => r.catalogo_chiave ? [r.catalogo_chiave] : [])) : undefined;
+}
+
+function statisticheDelCatalogo(o: CatalogoOggettoDto): string | null {
+  if (typeof o.statistiche?.testo === 'string') return o.statistiche.testo || null;
+  const voci = leggiVociEffetto(JSON.stringify(o.statistiche?.effetti ?? []));
+  const pezzi = voci.map((v) => descriviVoceEffetto(v));
+  if (typeof o.statistiche?.sessioni === 'number' && o.statistiche.sessioni > 1) pezzi.push(`${o.statistiche.sessioni} sessioni`);
+  return pezzi.join(' · ') || null;
+}
+
+function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponibilita, catalogo?: Map<string, CatalogoOggettoDto>, ricevuti: NonNullable<ArticoloDto['ricevuti']> = []): ArticoloDto {
+  const oggetto = r.catalogo_chiave ? catalogo?.get(r.catalogo_chiave) : undefined;
+  const costo = costoOggetto(r.costo_json ?? null);
+  const acquistiRegistrati = articoliEquivalenti(r.chiave, lettureListiniCondivisi()).filter((chiave) => acquistati.has(chiave)).map((articolo) => {
+    const origine = prepared('SELECT n.nome FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave WHERE a.chiave = ?').get(articolo) as { nome: string } | undefined;
+    return { articolo, negozioNome: origine?.nome ?? 'Offerta precedente' };
+  });
+  return { ricevuti, condizioni: regole(r.condizioni_json), chiave: r.chiave, negozioChiave: r.negozio_chiave, negozioNome: r.negozio_nome ?? '', sedeChiave: r.negozio_sede ?? null,
+    catalogo: oggetto ? { chiave: oggetto.chiave, nome: oggetto.nome, casa: oggetto.casa } : null,
+    nomiAltri: oggetto?.nomiAltri ?? [], nomeOriginale: oggetto?.nomeOriginale ?? null, costo, costoDaVerificare: r.costo_json != null && costo === null,
+    nome: oggetto?.nome ?? (r.nome || 'Oggetto da collegare'), nomeIt: oggetto?.nome ?? (r.nome_it || null),
+    categoria: oggetto ? categoriaDelListino(oggetto.categoria, oggetto.sottocategoria) : r.categoria as ArticoloDto['categoria'],
+    per: oggetto ? (typeof oggetto.statistiche?.per === 'string' ? oggetto.statistiche.per : null) : r.per, prezzo: r.prezzo,
+    effetto: oggetto ? oggetto.effetto || null : r.effetto, statistiche: oggetto ? statisticheDelCatalogo(oggetto) : r.statistiche,
     quantita: r.quantita, oggettoFonte: r.oggetto_fonte, oggettoChiave: r.oggetto_chiave,
-    disponibileDal: r.disponibile_dal, condizione: r.condizione, nota: r.nota, verificato: r.verificato === 1, acquistato: acquistati.has(r.chiave), ...(st ? { disponibilita: disponibilitaArticolo(r, st) } : {}) };
+    disponibileDal: r.disponibile_dal, condizione: r.condizione, nota: r.nota, verificato: r.verificato === 1,
+    acquistato: acquistiRegistrati.length > 0, acquistiRegistrati, ...(st ? { disponibilita: disponibilitaArticolo(r, st) } : {}) };
 }
 
 /** Le chiavi degli articoli segnati come acquistati nella partita; insieme vuoto senza partita (con partita ne verifica l'esistenza). */
@@ -130,12 +160,14 @@ function acquistiPartita(partitaId: number | undefined): Set<string> {
 /** Negozi in ordine con conteggi canonici dell'intero catalogo; con la partita, la presenza dagli orari. */
 export function elencaNegozi(partitaId?: number): NegozioRiassuntoDto[] {
   const st = partitaId === undefined ? undefined : statoDisponibilitaPartita(partitaId);
+  const listini = lettureListiniCondivisi();
   return (prepared(`${SQL_NEGOZIO} WHERE n.nascosto = 0 ORDER BY n.ordine`).all() as RigaNegozio[])
+    .filter((r) => !listini.negozi.has(r.chiave))
     .map((r) => riassunto(r, st));
 }
 
 /** Lo stato della partita già calcolato da chi chiama: una mappa con molti negozi lo passa invece di farlo ricalcolare per ogni pin. */
-export interface ContestoNegozio { st: StatoDisponibilita; acquistati: Set<string> }
+export interface ContestoNegozio { st?: StatoDisponibilita; acquistati?: Set<string>; listini?: LettureListiniCondivisi }
 
 /** Gli acquisti segnati nella partita (con la verifica della partita), per costruire un `ContestoNegozio`. */
 export function acquistiDellaPartita(partitaId: number): Set<string> {
@@ -144,18 +176,43 @@ export function acquistiDellaPartita(partitaId: number): Set<string> {
 
 /** La scheda di un negozio non nascosto con i suoi articoli non nascosti, nell'ordine; con la partita, acquisti e
  *  disponibilità (presi da `contesto` se chi chiama li ha già). 404 se il negozio non c'è o è nascosto. */
-export function dettaglioNegozio(chiave: string, partitaId?: number, contesto?: ContestoNegozio): NegozioDettaglioDto {
-  const n = prepared(`${SQL_NEGOZIO} WHERE n.nascosto = 0 AND n.chiave = ?`).get(chiave) as RigaNegozio | undefined;
-  if (!n) throw httpErrors.notFound('negozio-non-trovato', `Il negozio '${chiave}' non esiste.`);
+export function dettaglioNegozio(chiave: string, partitaId?: number, contesto?: ContestoNegozio, sede?: string): NegozioDettaglioDto {
+  const listini = contesto?.listini ?? lettureListiniCondivisi();
+  const origine = prepared(`${SQL_NEGOZIO} WHERE n.nascosto = 0 AND n.chiave = ?`).get(chiave) as RigaNegozio | undefined;
+  if (!origine) throw httpErrors.notFound('negozio-non-trovato', `Il negozio '${chiave}' non esiste.`);
+  const canonica = listinoDelNegozio(chiave, listini);
+  const principale = canonica === chiave ? origine : prepared(`${SQL_NEGOZIO} WHERE n.nascosto = 0 AND n.chiave = ?`).get(canonica) as RigaNegozio | undefined;
+  if (!principale) throw httpErrors.notFound('negozio-non-trovato', 'Il listino condiviso non è disponibile.');
+  const n = negozioNellaSede(principale, sede, listini);
   // lo stato della partita (rilievo P1 della verifica): dal contesto se c'è, altrimenti calcolato qui
-  const acquistati = partitaId !== undefined && contesto ? contesto.acquistati : acquistiPartita(partitaId);
+  const acquistati = partitaId === undefined ? new Set<string>() : contesto?.acquistati ?? acquistiPartita(partitaId);
   const st = partitaId === undefined ? undefined : contesto?.st ?? statoDisponibilitaPartita(partitaId);
   const riepilogo = riassunto(n, st);
-  const articoli = (prepared(`${SQL_ARTICOLO} WHERE a.nascosto = 0 AND a.negozio_chiave = ? ORDER BY a.ordine`).all(chiave) as RigaArticolo[]).map((r) => articoloDto(r, acquistati, st));
+  const righeArticoli = prepared(`${SQL_ARTICOLO} WHERE a.nascosto = 0 AND a.negozio_chiave = ? ORDER BY a.ordine`).all(canonica) as RigaArticolo[];
+  const catalogo = identitaArticoli(righeArticoli);
+  const ricevuti = ricompensePerFonte('articolo', righeArticoli.map((r) => r.chiave));
+  const articoli = righeArticoli.map((r) => articoloDto(conSede(r, n), acquistati, st, catalogo, ricevuti.get(r.chiave)));
   const conteggi = { articoli: n.articoli ?? 0, verificati: n.verificati ?? 0 };
   // la guida del quiz dei lavori che si fanno qui (richiesta dell'utente, 2026-10-17: il quiz dei codici a barre al Triple Seven)
   const quiz = n.sede_chiave ? [...attivitaConQuiz()].filter(([, a]) => a.sede === n.sede_chiave).map(([c, a]) => quizVoceDto(c, a, st?.dataGioco ?? null)) : [];
-  return { ...riepilogo, ...conteggi, note: n.note, articoliElenco: articoli, acquistati: articoli.filter((a) => a.acquistato).length, quiz };
+  return { ...riepilogo, ...conteggi, note: n.note, articoliElenco: articoli, acquistati: articoli.filter((a) => a.acquistato).length, quiz,
+    ...(n.chiave === 'jose' ? { trasformazioni: trasformazioniDiJose(st) } : {}) };
+}
+
+/** Stesso listino, presenza della sede scelta: Shibuya non eredita gli orari della scuola. */
+function negozioNellaSede(n: RigaNegozio, sede: string | undefined, listini: LettureListiniCondivisi): RigaNegozio {
+  if (!sede || sede === n.sede_chiave) return n;
+  if (!listini.sedi.some((s) => s.negozio === n.chiave && s.luogo === sede)) throw httpErrors.badRequest('sede-listino-non-valida', 'Il listino non appartiene al luogo indicato.');
+  const l = prepared(`SELECT l.chiave,l.nome,l.quartiere_chiave,l.orari_json,l.condizioni_json,q.nome AS quartiere_nome
+    FROM luogo l JOIN quartiere q ON q.chiave = l.quartiere_chiave WHERE l.chiave = ? AND l.nascosto = 0`).get(sede) as
+    { chiave: string; nome: string; quartiere_chiave: string; orari_json: string | null; condizioni_json: string | null; quartiere_nome: string } | undefined;
+  if (!l) throw httpErrors.notFound('luogo-non-trovato', 'La sede del listino non è disponibile.');
+  return { ...n, sede_chiave: l.chiave, sede_nome: l.nome, luogo_chiave: l.quartiere_chiave, quartiere_nome: l.quartiere_nome,
+    sede_orari_json: l.orari_json, sede_condizioni_json: l.condizioni_json };
+}
+
+function conSede(r: RigaArticolo, n: RigaNegozio): RigaArticolo {
+  return { ...r, negozio_sblocco: n.sblocco_json, negozio_sede: n.sede_chiave, sede_orari_json: n.sede_orari_json, sede_condizioni_json: n.sede_condizioni_json };
 }
 
 export interface FiltroArticoli {
@@ -172,17 +229,43 @@ export interface FiltroArticoli {
 
 /** Ricerca degli articoli in tutti i negozi per testo, categorie e destinatario; con la partita anche per stato d'acquisto e disponibilità (massimo 300 risultati, totale calcolato prima del limite). */
 export function ricercaArticoli(filtro: FiltroArticoli, partitaId?: number): RicercaArticoliDto {
+  const listini = lettureListiniCondivisi();
   const acquistati = acquistiPartita(partitaId);
   const st = partitaId === undefined ? undefined : statoDisponibilitaPartita(partitaId);
   const cond: string[] = ['a.nascosto = 0', 'n.nascosto = 0']; const par: unknown[] = [];
-  if (filtro.q) { cond.push('(a.nome LIKE ? OR a.nome_it LIKE ? OR a.effetto LIKE ? OR n.nome LIKE ?)'); const like = `%${filtro.q}%`; par.push(like, like, like, like); }
+  const conCatalogo = catalogoOggettiDisponibile();
+  if (filtro.q && !conCatalogo) { cond.push('(a.nome LIKE ? OR a.nome_it LIKE ? OR a.effetto LIKE ? OR n.nome LIKE ?)'); const like = `%${filtro.q}%`; par.push(like, like, like, like); }
   const categorie = [...new Set([...(filtro.categorie ?? []), ...(filtro.categoria ? [filtro.categoria] : [])])];
-  if (categorie.length) { cond.push(`a.categoria IN (${categorie.map(() => '?').join(',')})`); par.push(...categorie); }
-  if (filtro.per) { cond.push("(a.per = ? OR a.per = 'tutti')"); par.push(filtro.per); }
+  if (categorie.length && !conCatalogo) { cond.push(`a.categoria IN (${categorie.map(() => '?').join(',')})`); par.push(...categorie); }
+  if (filtro.per && !conCatalogo) { cond.push("(a.per = ? OR a.per = 'tutti')"); par.push(filtro.per); }
   const righe = prepared(`${SQL_ARTICOLO} WHERE ${cond.join(' AND ')} ORDER BY n.ordine, a.ordine`).all(...par) as RigaArticolo[];
+  const catalogo = identitaArticoli(righe);
+  const ricevuti = ricompensePerFonte('articolo', righe.map((r) => r.chiave));
   // «Rango Confidente 3» senza nome è il Confidente del negozio: la ricerca deve valutarlo come la scheda.
   // Stato e disponibilità si filtrano dopo la valutazione: sono fatti della partita, non colonne.
-  let valutati = righe.map((r) => articoloDto(r, acquistati, st));
+  const sediValutate = new Map<string, RigaNegozio>();
+  let valutati = righe.filter((r) => !listini.articoli.has(r.chiave)).map((r) => {
+    const sedi = listini.sedi.filter((s) => s.negozio === r.negozio_chiave);
+    if (st && sedi.length > 0 && disponibilitaArticolo(r, st).stato !== 'disponibile') {
+      for (const sede of sedi) {
+        const k = `${sede.negozio}\0${sede.luogo}`;
+        let n = sediValutate.get(k);
+        if (!n) {
+          const principale = prepared(`${SQL_NEGOZIO} WHERE n.chiave = ?`).get(sede.negozio) as RigaNegozio;
+          n = negozioNellaSede(principale, sede.luogo, listini); sediValutate.set(k, n);
+        }
+        const variante = conSede(r, n);
+        if (disponibilitaArticolo(variante, st).stato === 'disponibile') return articoloDto(variante, acquistati, st, catalogo, ricevuti.get(r.chiave));
+      }
+    }
+    return articoloDto(r, acquistati, st, catalogo, ricevuti.get(r.chiave));
+  });
+  if (conCatalogo) {
+    const q = normalizzaNomeOggetto(filtro.q ?? '');
+    valutati = valutati.filter((a) => (!q || [a.nome, a.nomeIt ?? '', a.nomeOriginale ?? '', ...(a.nomiAltri ?? []), ...(a.ricevuti?.map((r) => r.nome) ?? []),
+      ...(a.costo?.tipo === 'oggetti' ? a.costo.oggetti.map((o) => o.nome ?? '') : []), a.effetto ?? '', a.negozioNome].some((v) => normalizzaNomeOggetto(v).includes(q)))
+      && (!categorie.length || categorie.includes(a.categoria)) && (!filtro.per || a.per === filtro.per || a.per === 'tutti'));
+  }
   if (partitaId !== undefined && filtro.stato) valutati = valutati.filter((a) => (filtro.stato === 'acquistati' ? a.acquistato : !a.acquistato));
   // «Disponibili» = tutte le condizioni vere. Un «ignoto» — una condizione che la partita non sa
   // verificare — sta con i bloccati: in una guida che dice «questo c'è adesso» un forse vale un no.
@@ -191,19 +274,29 @@ export function ricercaArticoli(filtro: FiltroArticoli, partitaId?: number): Ric
 }
 
 /** Segna (o toglie) un articolo come acquistato/ottenuto nella partita; evento alla prima spunta. */
-export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto: boolean): ArticoloDto {
+export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto: boolean, sede?: string): ArticoloDto {
   verificaPartita(partitaId);
-  const r = prepared(`${SQL_ARTICOLO} WHERE a.chiave = ?`).get(articoloChiave) as RigaArticolo | undefined;
-  if (!r) throw httpErrors.notFound('articolo-non-trovato', `L'articolo '${articoloChiave}' non esiste.`);
+  const listini = lettureListiniCondivisi();
+  const canonica = articoloDelListino(articoloChiave, listini);
+  if (!prepared('SELECT 1 FROM articolo WHERE chiave = ?').get(articoloChiave)) throw httpErrors.notFound('articolo-non-trovato', `L'articolo '${articoloChiave}' non esiste.`);
+  const riga = prepared(`${SQL_ARTICOLO} WHERE a.chiave = ?`).get(canonica) as RigaArticolo | undefined;
+  if (!riga) throw httpErrors.notFound('articolo-non-trovato', `L'articolo '${articoloChiave}' non esiste.`);
+  const negozio = prepared(`${SQL_NEGOZIO} WHERE n.chiave = ?`).get(riga.negozio_chiave) as RigaNegozio;
+  // Togliere una spunta resta possibile anche da una scheda vecchia, dopo che la sede aggiuntiva è stata rimossa.
+  const sedeDaUsare = !fatto && sede && sede !== negozio.sede_chiave && !listini.sedi.some((s) => s.negozio === negozio.chiave && s.luogo === sede) ? undefined : sede;
+  const r = conSede(riga, negozioNellaSede(negozio, sedeDaUsare, listini));
   const st = statoDisponibilitaPartita(partitaId);
+  const catalogo = identitaArticoli([r]);
+  const ricevuti = ricompensePerFonte('articolo', [r.chiave]).get(r.chiave);
+  const prodotto = articoloDto(r, new Set(), st, catalogo, ricevuti);
   if (fatto && disponibilitaArticolo(r, st).stato !== 'disponibile') throw httpErrors.conflict('articolo-non-disponibile', `L'articolo '${articoloChiave}' non e disponibile nella partita corrente.`);
   const adesso = nowIso();
   getDb().transaction(() => {
     const era = !!prepared('SELECT 1 FROM acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').get(partitaId, articoloChiave);
-    if (fatto) prepared('INSERT INTO acquisto_partita (partita_id, articolo_chiave, updated_at) VALUES (?, ?, ?) ON CONFLICT(partita_id, articolo_chiave) DO UPDATE SET updated_at = excluded.updated_at').run(partitaId, articoloChiave, adesso);
-    else prepared('DELETE FROM acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').run(partitaId, articoloChiave);
-    if (fatto && !era) registraEvento(partitaId, 'acquisto', `Acquistato: ${r.nome_it ?? r.nome}`, `${r.negozio_nome ?? r.negozio_chiave}${r.prezzo !== null ? ` · ${r.prezzo.toLocaleString('it-IT')} ¥` : ''}${r.per ? ` · per ${r.per}` : ''}.`, { articolo: articoloChiave });
+    if (fatto && !era) prepared('INSERT INTO acquisto_partita (partita_id, articolo_chiave, updated_at) VALUES (?, ?, ?)').run(partitaId, articoloChiave, adesso);
+    else if (!fatto) prepared('DELETE FROM acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').run(partitaId, articoloChiave);
+    if (fatto && !era) registraEvento(partitaId, 'acquisto', `Acquistato: ${prodotto.nomeIt ?? prodotto.nome}`, `${r.negozio_nome ?? r.negozio_chiave}${r.costo_json != null ? ' · Scambio' : r.prezzo !== null ? ` · ${r.prezzo.toLocaleString('it-IT')} ¥` : ''}${prodotto.per ? ` · per ${prodotto.per}` : ''}.`, { articolo: articoloChiave });
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
-  return articoloDto(r, new Set(fatto ? [articoloChiave] : []), st);
+  return articoloDto(r, acquistiPartita(partitaId), statoDisponibilitaPartita(partitaId), catalogo, ricevuti);
 }

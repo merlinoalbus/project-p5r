@@ -2,9 +2,8 @@
 // ModuloNegozio — nome, tipo a tessere, sede in città, gestore e Confidente, orari come valori, programma punti
 // ============================================================
 //
-// Niente sblocco, niente condizioni, niente fonte: la presenza del negozio sono i suoi orari
-// (migrazione 069), e quel che sblocca la merce sta sugli articoli (070). La sede è un luogo della
-// città (072) e porta con sé il quartiere. Il programma punti (076) si dichiara solo dove esiste.
+// Sede, eccezione di orario e sblocco proprio (122). Le vecchie condizioni trasferite agli articoli (070)
+// restano storiche: non vengono riattivate dal nuovo editor. Il programma punti si dichiara dove esiste.
 // ============================================================
 
 import { useCarica } from '../../../hooks/useCarica';
@@ -18,6 +17,8 @@ import { ORARI_SEMPRE, type OrariNegozio } from '../../../../shared/orariNegozio
 import { testoDi, type PropsModulo } from './base';
 import { Blocco, Campo, Griglia } from './campi';
 import type { ProgrammaPunti } from './definizioni';
+import { CondizioniEditor } from '../CondizioniEditor';
+import type { RequisitoSpillo } from '../../../../shared/condizioniSpillo';
 
 const OPZIONI_TIPO = Object.entries(NOME_TIPO_NEGOZIO).map(([chiave, nome]) => ({ chiave, nome }));
 
@@ -55,6 +56,11 @@ export function ModuloNegozio({ dati, imposta, disabilitato }: PropsModulo) {
           Il negozio ha orari suoi, diversi da quelli del luogo
         </label>
         {eccezione && <OrariEditor valore={eccezione} onCambia={(o) => imposta({ eccezione_orari_json: o })} disabilitato={disabilitato} />}
+      </fieldset>
+      <fieldset className="regole-editor flex flex-col gap-2">
+        <legend>Sblocco del negozio</legend>
+        <p className="m-0 text-[12px] text-text-muted">Il luogo deve essere sbloccato. Aggiungi qui le eventuali condizioni proprie del negozio; lasciando vuoto valgono quelle della sede.</p>
+        <CondizioniEditor condizioni={(dati.sblocco_json as RequisitoSpillo[] | undefined) ?? []} onCambia={(sblocco_json) => imposta({ sblocco_json })} disabilitato={disabilitato} />
       </fieldset>
       <fieldset className="regole-editor flex flex-col gap-2">
         <legend>Programma punti</legend>

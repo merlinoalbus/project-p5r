@@ -16,6 +16,7 @@ import type { OrariDelLuogo, OrariNegozio } from './orariNegozio.js';
 import type { VoceEffetto } from './effettiCatalogo.js';
 import type { DoteChiave } from './doti.js';
 import type { CategoriaArticolo } from './articoli.js';
+import type { CategoriaOggetto } from './catalogo.js';
 import type { CategoriaLettura, DoteNote, EffettoAzione } from './effettiAzione.js';
 import type { MeteoPartita } from './meteoPartita.js';
 import type { CarattereVoce } from './caratteriVoce.js';
@@ -119,6 +120,9 @@ export interface PersonaDettaglioDto extends PersonaRiassuntoDto {
   /** Nomi italiani degli oggetti da esecuzione (dalla guida), null se non abbinati. */
   oggettoNomeIt: string | null;
   oggettoAllarmeNomeIt: string | null;
+  /** Oggetti d'esecuzione risolti per ID della fonte, senza abbinamenti per somiglianza. */
+  oggettoCatalogo?: RiferimentoOggettoDto | null;
+  oggettoAllarmeCatalogo?: RiferimentoOggettoDto | null;
   trattoDettaglio: SkillRiassuntoDto | null;
   skill: SkillAppresaDto[];
   areeMementos: Array<{ chiave: string; nome: string }>;
@@ -164,6 +168,8 @@ export interface FontDto {
 }
 
 export interface OggettoDto {
+  catalogo?: RiferimentoOggettoDto | null;
+  nomiAltri?: string[];
   id: number;
   nome: string;
   /** Nome italiano dell'equipaggiamento (dalla guida), null se non abbinato. */
@@ -286,6 +292,17 @@ export interface DialogoConfidenteDto {
 }
 
 export interface RegaloConfidenteDto {
+  /** Ripristina esclusivamente la rettifica storica del costo, con anteprima del valore salvato. */
+  ripristinoCosto?: { ordine: number; precedente: string; attuale: string | null };
+  /** Nome della guida conservato per riconoscere le consegne storiche non ancora collegate. */
+  nomeStorico?: string;
+  catalogo?: RiferimentoOggettoDto | null;
+  prezzo?: number | null;
+  prezzoMassimo?: number | null;
+  listinoCollegato?: boolean;
+  offerte?: OffertaOggettoDto[];
+  /** Prosa storica, distinta dal prezzo attuale del listino. */
+  nota?: string | null;
   nome: string;
   dove: string | null;
   costo: string | null;
@@ -300,6 +317,8 @@ export interface ConfidenteDettaglioDto extends ConfidenteDto {
   dialoghi: DialogoConfidenteDto[];
   regali: RegaloConfidenteDto[];
   regaliSconsigliati: string[];
+  /** Oggetti ricevuti dal Confidente, distinti dai regali che gli si possono consegnare. */
+  oggettiRicompensa?: RicompensaOggettoDto[];
   disponibilita: { giorni: string[]; fasce: string[]; luogo: string; sbloccoData: string; sbloccoRequisiti: string; note: string };
   noteGenerali: string;
   fonti: string[];
@@ -655,6 +674,8 @@ export interface ConfidentePartitaDto extends ConfidenteDto {
   bloccato: { rango: number; motivi: string[] } | null;
   /** Regali già consegnati in questa partita (nomi). */
   regaliFatti: string[];
+  /** Identità consegnate; i nomi storici sopra non vengono riscritti dopo una rinomina. */
+  regaliFattiCatalogo?: string[];
   note: string;
   /** Semafori dei ranghi superiori a quello attuale (Fase 12.3), in ordine di rango. */
   semafori: SemaforiRangoDto[];
@@ -946,6 +967,7 @@ export interface DomandaDto {
   /** `domanda` = il quesito, quando la riga ne raccoglie più d'uno (gli esami, migrazione 078). */
   risposte: Array<{ ordine: number | null; testo: string; domanda?: string }>;
   ricompensa: string;
+  oggettiRicompensa?: RicompensaOggettoDto[];
   note: string;
   fonte: string;
   /** Segnata come fatta nella partita (false senza partita). */
@@ -959,6 +981,7 @@ export interface EsameDto {
   dataRisultati: string | null;
   domande: Array<{ data: string; ordine: number; domanda: string; risposta: string }>;
   note: string;
+  oggettiRicompensa?: RicompensaOggettoDto[];
 }
 
 /** Una Dote che il gioco dà (o, disfacendo un conseguimento, toglie): da segnare **a mano** nella scheda Doti — l'app non
@@ -985,16 +1008,23 @@ export interface DomandeDto {
 
 // ---- Oggetti della guida (Fase 10.2) ----
 
+interface IdentitaOggettoGuida {
+  catalogo?: RiferimentoOggettoDto | null;
+  nomiAltri?: string[];
+  notaPrezzo?: string | null;
+}
 export interface OggettiGuidaDto {
-  /** `articolo` e `negozi` vengono dal crosswalk versionato: sono le chiavi con cui la riga arriva alla mappa. Un oggetto venduto in più posti li elenca tutti, perché sceglierne uno vorrebbe dire mandare l'utente nel posto sbagliato più spesso che in quello giusto. */
+  /** Dopo M7 il catalogo fornisce identità e offerte per chiave; il crosswalk resta soltanto prima di M7. */
   /** L5 (M24): `posto` è il nome del posto dell'articolo (la sede del negozio che lo vende), `postiNegozi` quello di ogni negozio
    *  di `negozi` (la sede, altrimenti il nome del negozio), per il gesto che li apre. Assenti valgono come «nessun nome». */
-  consumabili: Array<{ nome: string; nomeEn: string | null; categoria: 'cura' | 'sp' | 'stato' | 'battaglia' | 'esplorazione' | 'altro'; effetto: string; dove: string; prezzo: number | null; fonte: string; verificato: boolean; articolo?: string; negozi?: string[]; posto?: string | null; postiNegozi?: Record<string, string> }>;
-  chiaveEMateriali: Array<{ nome: string; nomeEn: string | null; tipo: 'chiave' | 'materiale'; uso: string; dove: string; fonte: string; verificato: boolean; articolo?: string; negozi?: string[]; posto?: string | null; postiNegozi?: Record<string, string> }>;
-  fabbricazione: { introduzione: string; sblocco: string; regole: string[]; fonte: string; ricette: Array<{ attrezzo: string; effetto: string; materiali: Array<{ nome: string; quantita: number | null }>; prodotti: number | null; sblocco: string | null; fonte: string; verificato: boolean }> };
+  consumabili: Array<IdentitaOggettoGuida & { nome: string; nomeEn: string | null; categoria: 'cura' | 'sp' | 'stato' | 'battaglia' | 'esplorazione' | 'altro'; effetto: string; dove: string; prezzo: number | null; fonte: string; verificato: boolean; articolo?: string; negozi?: string[]; posto?: string | null; postiNegozi?: Record<string, string> }>;
+  chiaveEMateriali: Array<IdentitaOggettoGuida & { nome: string; nomeEn: string | null; tipo: 'chiave' | 'materiale'; uso: string; dove: string; fonte: string; verificato: boolean; articolo?: string; negozi?: string[]; posto?: string | null; postiNegozi?: Record<string, string> }>;
+  fabbricazione: { introduzione: string; sblocco: string; regole: string[]; fonte: string; ricette: Array<{ attrezzo: string; effetto: string; materiali: Array<{ nome: string; quantita: number | null }>; prodotti: number | null; sblocco: string | null; fonte: string; verificato: boolean; prodottiCatalogo?: RicompensaOggettoDto[]; materialiCatalogo?: ContenutoOggettoDto[] }> };
   personalizzazioneArmi: { introduzione: string; requisiti: string; costi: string; effetti: Array<{ nome: string; effetto: string; costo: string | null }>; progressioneConfidente: unknown[]; note: string | null; fonte: string };
-  abiti: { introduzione: string; elenco: Array<{ nome: string; per: string; dove: string; fonte: string }>; lavanderia: { dove: string; costo: string; regole: string[]; fonte: string } };
+  abiti: { introduzione: string; elenco: Array<IdentitaOggettoGuida & { nome: string; per: string; dove: string; fonte: string }>; lavanderia: { dove: string; costo: string; regole: string[]; fonte: string } };
   scambi: Array<{ venditore: string; dove: string; quando: string; offerte: Array<{ ricevi: string; dai: string; note: string | null }>; fonte: string; verificato: boolean }>;
+  /** Dopo M7 gli scambi aprono il listino esistente, non una seconda tabella commerciale. Testi precedenti nelle note del negozio. */
+  listiniScambi?: Array<{ chiave: string; nome: string; posto: string | null; casa: string; offerte: number }>;
 }
 
 // ---- Personaggi senza spoiler (Fase 10.3) ----
@@ -1038,6 +1068,7 @@ export interface BattagliaSfidaDto {
   nemici: string[];
   punteggi: string | null;
   ricompense: string[];
+  oggettiRicompensa?: RicompensaOggettoDto[];
   strategia: string;
   livelloConsigliato: string | null;
   fonte: string;
@@ -1056,6 +1087,7 @@ export interface BossSegretoDto {
   debolezze: string[];
   strategia: string[];
   ricompense: string[];
+  oggettiRicompensa?: RicompensaOggettoDto[];
   /** Statistiche riportate dalla guida (HP, SP, PE, denaro, bottino), se note. */
   statistiche: Record<string, string | number> | null;
   /** Nota di trasparenza sull'inclusione della voce. */
@@ -1094,7 +1126,7 @@ export interface CompletamentoDto {
   trofei: TrofeoDto[];
   ottenuti: number;
   finali: Array<{ chiave: string; nome: string; condizioni: string[]; date: string[]; descrizione: string; fonte: string }>;
-  covo: { introduzione: string; medaglie: string; sfide: Array<{ nome: string; requisito: string; medaglie: number | null }>; premi: Array<{ nome: string; costo: number | null; sblocco: string | null; effetto: string | null }>; fonte: string };
+  covo: { introduzione: string; medaglie: string; sfide: Array<{ nome: string; requisito: string; medaglie: number | null }>; premi: Array<{ nome: string; costo: number | null; sblocco: string | null; effetto: string | null; oggettiRicompensa?: RicompensaOggettoDto[] }>; fonte: string };
   dlc: Array<{ nome: string; contenuto: string; note: string | null; fonte: string }>;
   meteo: Array<{ condizione: string; effetti: string[]; fonte: string }>;
   nuovaPartitaPlus: { trasferito: string[]; nonTrasferito: string[]; note: string; fonte: string };
@@ -1130,6 +1162,9 @@ export interface EffettiAzioneDto {
   incontro?: IncontroConfidenteDto;
   /** Turni registrati dalla spunta (`ordine` del turno nell'attività): togliendo la spunta si toglie quel turno e i suoi punti. */
   turni?: Array<{ attivita: string; nome: string; ordine: number; doti: Array<{ chiave: string; nome: string; delta: number; note: number }> }>;
+  /** Aperture dichiarate dall'utente durante questa visita ai Memento. Valgono finché resta la spunta;
+   *  altre visite o registrazioni manuali dello stesso evento restano indipendenti. Nessuna data presunta. */
+  apertureDedali?: Array<{ chiave: string; nome: string }>;
 }
 
 export interface RiferimentoAzioneDto {
@@ -1180,6 +1215,11 @@ export type GenereVoce = 'azione' | 'evento' | 'scadenza' | 'promemoria';
  * una fascia arrivano nel loro ordine esatto.
  */
 export interface AzionePercorsoDto {
+  /** Solo sulle visite strutturate ai Memento: eventi di apertura dichiarabili alla spunta, con i nomi correnti dei dedali. */
+  apertureDedali?: Array<{ chiave: string; nome: string }>;
+  /** Solo riferimenti strutturati già presenti: nessuna riscrittura del testo o classificazione per somiglianza. */
+  oggettoRiferimento?: RiferimentoOggettoDto | null;
+  oggettiCitati?: RiferimentoOggettoDto[];
   /** Identità stabile: le spunte delle partite si agganciano a questa. */
   uid: string;
   /** Giorno del calendario di gioco ('MM-GG'); «giorno» e non «data» per l'envelope `{ data }` delle risposte. */
@@ -1417,6 +1457,17 @@ export interface DisponibilitaDto {
 }
 
 export interface ArticoloDto {
+  /** Registrazioni effettive sulle singole offerte: l'annullamento riguarda solo la chiave scelta. */
+  acquistiRegistrati?: Array<{ articolo: string; negozioNome: string }>;
+  /** Risultati collegati di un baratto; una sola offerta/spunta, senza oggetti-bundle fittizi. */
+  ricevuti?: RicompensaOggettoDto[];
+  nomiAltri?: string[];
+  nomeOriginale?: string | null;
+  costoDaVerificare?: boolean;
+  /** Sede effettiva per acquistare da un listino condiviso, senza ereditare la presenza della sede principale. */
+  sedeChiave?: string | null;
+  catalogo?: RiferimentoOggettoDto | null;
+  costo?: CostoOggettoDto | null;
   condizioni?: CondizioneSpilloDto[];
   chiave: string;
   negozioChiave: string;
@@ -1445,6 +1496,7 @@ export interface ArticoloDto {
 }
 
 export interface NegozioDettaglioDto extends NegozioRiassuntoDto {
+  trasformazioni?: TrasformazioneOggettoDto[];
   note: string | null;
   articoliElenco: ArticoloDto[];
   acquistati: number;
@@ -1563,6 +1615,8 @@ export interface AreaRiassuntoDto {
 }
 /** Un luogo, negozio, attività o Confidente segnato con un pin su una planimetria dell'Area. */
 export interface ElementoAreaDto { tipo: 'luogo' | 'negozio' | 'attivita' | 'confidente'; chiave: string; nome: string; spillo: number; planimetria: string;
+  /** Esito delle condizioni del pin e della presenza, uguale al visore. */
+  disponibilita?: DisponibilitaDto;
   /** L5: la presenza del luogo (o della sede del negozio) con la funzione unica; assente per Confidenti e attività senza sede. */
   presenza?: PresenzaLuogoDto;
   /** L5: la pagina del luogo (per un negozio con sede, la sua sezione `#negozio-<k>`), o null. */
@@ -1726,6 +1780,10 @@ export interface QuartiereDettaglioDto {
 }
 
 export interface AttivitaDto {
+  /** Identità soltanto per le attività che sono videogiochi; i turni restano legati all'attività. */
+  catalogo?: RiferimentoOggettoDto | null;
+  nomiAltri?: string[];
+  notaPrezzo?: string | null;
   chiave: string;
   nome: string;
   tipo: 'mini-gioco' | 'lavoro' | 'studio' | 'lettura' | 'film' | 'dvd' | 'videogioco' | 'allenamento' | 'cibo' | 'sfida' | 'altro';
@@ -1766,6 +1824,9 @@ export interface AttivitaDto {
 }
 
 export interface LibroDto {
+  catalogo?: RiferimentoOggettoDto | null;
+  nomiAltri?: string[];
+  notaPrezzo?: string | null;
   /** Solo nella risposta di un avanzamento: le Doti che il conseguimento dà (o toglie), da segnare nelle Doti. */
   daSegnare?: DoteDaSegnareDto[];
   chiave: string;
@@ -1819,6 +1880,10 @@ export interface LibriDto {
 }
 
 export interface FilmDto {
+  catalogo?: RiferimentoOggettoDto | null;
+  nomiAltri?: string[];
+  notaPrezzo?: string | null;
+  negozi?: LibroDto['negozi'];
   /** Solo nella risposta di un avanzamento: le Doti che la visione dà (o toglie), da segnare nelle Doti. */
   daSegnare?: DoteDaSegnareDto[];
   chiave: string;
@@ -1863,6 +1928,7 @@ export interface FilmDvdDto {
 }
 
 export interface VideogiocoDto extends AttivitaDto {
+  catalogo?: RiferimentoOggettoDto | null;
   /** Solo nella risposta di un avanzamento: le Doti che il gioco completato dà (o toglie), da segnare nelle Doti. */
   daSegnare?: DoteDaSegnareDto[];
   tipo: 'videogioco';
@@ -1953,6 +2019,8 @@ export interface BattagliaDto {
 export type StatoRichiesta = 'accettata' | 'completata';
 
 export interface RichiestaDto {
+  /** I testi storici restano in `ricompense`; questi sono i legami per chiave. */
+  oggettiRicompensa?: RicompensaOggettoDto[];
   chiave: string;
   nome: string;
   committente: string;
@@ -1981,6 +2049,8 @@ export interface JoseDto {
   timbri: { descrizione: string } | string | null;
   bossSegreto: { nome: string; condizione: string } | null;
   scambi: Array<{ nome: string; effetto: string; costo: number | string; requisito: string }>;
+  /** Dopo M7 è il listino corrente L5; null se rimosso/nascosto. Assente soltanto prima della conversione. */
+  listino?: NegozioDettaglioDto | null;
 }
 
 export interface RichiesteDto {
@@ -2013,6 +2083,8 @@ export interface CitazioniRichiestaDto {
 export type StatoPunto = 'ottenuto' | 'esaurito';
 
 export interface PuntoInteresseDto {
+  contenuto?: ContenutoOggettoDto[];
+  proposteContenuto?: PropostaAbbinamentoDto[];
   chiave: string;
   ordine: number;
   tipo: 'sicura' | 'porta' | 'meccanismo' | 'forziere' | 'forziere-chiuso' | 'volonta' | 'puzzle' | 'miniboss' | 'boss' | 'ombra-sciagura' | 'persona' | 'oggetto' | 'scorciatoia' | 'storia' | 'trama' | 'altro';
@@ -2473,7 +2545,7 @@ export interface DettaglioSpilloDto {
     orariTesto?: string; presenza?: PresenzaLuogoDto; casa?: string; negozi?: Array<{ chiave: string; nome: string; casa: string }> };
   negozio?: { chiave: string; nome: string; tipo: string; disponibilita?: DisponibilitaDto;
     /** L5: la sezione del negozio nella pagina della sede, o null. */
-    sedeCasa?: string | null; articoli: Array<{ chiave: string; nome: string; categoria: string; prezzo: number | null; disponibileDal: string | null; comprato: boolean; disponibilita?: DisponibilitaDto }> } | null;
+    sedeCasa?: string | null; sedeChiave?: string | null; articoli: Array<{ chiave: string; nome: string; categoria: string; prezzo: number | null; disponibileDal: string | null; comprato: boolean; disponibilita?: DisponibilitaDto; catalogo?: RiferimentoOggettoDto | null; costo?: CostoOggettoDto | null; costoDaVerificare?: boolean; ricevuti?: RicompensaOggettoDto[] }> } | null;
   confidente?: { chiave: string; nome: string; arcanaNome: string };
   richiesta?: { chiave: string; nome: string; stato: string | null };
 }
@@ -2908,6 +2980,8 @@ export interface LuogoOpzioneDto { chiave: string; nome: string; tipo: string; q
  * esistevano solo nel client, con le rotte che rispondevano senza tipo: una divergenza non si vedeva (rilievo R6").
  */
 export interface ElenchiRegoleDto {
+  /** L7: allerte effettivamente presenti nel calendario, per la condizione meteo «senza allerta». */
+  allerte?: Array<{ chiave: string; nome: string }>;
   articoli: Array<{ chiave: string; nome: string; gruppo: string }>;
   letture: Array<{ chiave: string; nome: string; categoria: 'libro' | 'film' }>;
   arcani: Array<{ chiave: string; nome: string }>;
@@ -2953,7 +3027,9 @@ export interface ManifestImmaginiDto {
 export interface ProgressiPartitaDto {
   /** `calcolato`: dalla squadra (tre stati: sì, no, non segnato); `manuale`: la spunta. */
   /** `serveA`: i ranghi dei Confidenti che l'evento sblocca, dai requisiti (es. «Sojiro Sakura, rango 3»). */
-  eventi: Array<{ chiave: string; nome: string; origine: 'manuale' | 'calcolato'; avvenuto: boolean | null; membro?: string; membroNome?: string; serveA?: string[] }>;
+  eventi: Array<{ chiave: string; nome: string; origine: 'manuale' | 'calcolato'; avvenuto: boolean | null; membro?: string; membroNome?: string; serveA?: string[]; dalDiario?: boolean;
+    /** Contributo manuale distinto dall'esito effettivo (che include le dichiarazioni delle visite). */
+    manuale?: boolean; visiteDiario?: Array<{ uid: string; giorno: string }> }>;
   /** Le sole attività che si contano per volte svolte; `effettiTurno`: che cosa dà un turno («1° turno: Gentilezza, 2 note»). */
   attivita: Array<{ chiave: string; nome: string; tipo: string; volte: number; effettiTurno: string[] }>;
   /** Dopo un + o − del contatore: le Doti che i turni aggiunti danno (o quelli tolti davano), da segnare a mano nelle Doti. */
@@ -2968,27 +3044,6 @@ export interface ProgressiPartitaDto {
 /** I timbri raccolti in un'area di un dedalo dei Memento (099; `area` è la chiave dell'area del dedalo), per partita. */
 export interface TimbriDedaloDto { area: string; raccolti: number; totale: number | null; completato: boolean }
 export type TipoCatalogo = (typeof TIPI_CATALOGO)[number];
-
-/** Un oggetto che l'app già conosce, offerto a chi mette un articolo in vendita.
- *
- * Serve a non ribattere a mano quel che l'archivio ha già, e soprattutto a **dire** che l'articolo
- * del negozio e l'oggetto della guida sono la stessa cosa: finora quel legame lo indovinava un
- * ponte per nome, che su 355 oggetti e 575 articoli ne aggancia 121. */
-export interface OggettoSelezionabileDto {
-  /** Identificatore stabile dentro la sua `fonte`: con `fonte` forma il collegamento. */
-  chiave: string;
-  /** La categoria d'articolo che compete all'oggetto: sceglierlo la imposta da sé. */
-  categoria: string;
-  nome: string;
-  nomeIt: string | null;
-  effetto: string | null;
-  statistiche: string | null;
-  /** Vincolo di equipaggiamento, che nel modulo è «Per chi». */
-  per: string | null;
-  prezzo: number | null;
-  /** L'archivio da cui viene, mostrato a chi sceglie. */
-  fonte: 'equipaggiamento' | 'guida' | 'libri' | 'film' | 'videogiochi';
-}
 
 /** Una riga del catalogo con la sua provenienza: creata dall'utente, corretta sopra il seed, o nascosta. */
 export interface ElementoCatalogoDto {
@@ -3013,7 +3068,111 @@ export interface RiepilogoCatalogoDto {
 /** Che cosa è stato eliminato: un'area della guida di un Palazzo, una voce della guida, una planimetria, un'area di un dedalo, un'Area
  *  con le sue planimetrie (`area-fisica`, L2: il quartiere o la città che la contiene). */
 /** `richiesta` (L6, R6-04): una Richiesta eliminata va nel cestino; le condizioni che la citano restano e danno «Richiesta eliminata». */
-export type TipoCestino = 'area' | 'voce' | 'mappa' | 'area-dedalo' | 'area-fisica' | 'luogo' | 'negozio' | 'richiesta';
+export type TipoCestino = 'area' | 'voce' | 'mappa' | 'area-dedalo' | 'area-fisica' | 'luogo' | 'negozio' | 'richiesta' | 'oggetto';
+
+// ---- L7: catalogo unico. I riferimenti non contengono prezzi: il prezzo appartiene all'offerta. ----
+
+export interface RiferimentoOggettoDto { chiave: string; nome: string; casa: string }
+export interface ContenutoOggettoDto extends RiferimentoOggettoDto { quantita: number; nota: string | null }
+/** La guida può nominare il prodotto di una ricetta senza dichiararne la resa. Non equivale a una unità. */
+export interface RicompensaOggettoDto extends Omit<ContenutoOggettoDto, 'quantita'> { quantita: number | null }
+export type CostoOggettoDto = { tipo: 'fiori'; importo: number }
+  | { tipo: 'oggetti'; oggetti: Array<{ chiave: string; quantita: number; nome?: string; casa?: string }> };
+
+export interface CatalogoOggettoDto extends RiferimentoOggettoDto {
+  categoria: CategoriaOggetto;
+  sottocategoria: string | null;
+  nomiAltri: string[];
+  nomeOriginale: string | null;
+  effetto: string;
+  descrizione: string;
+  statistiche: Record<string, unknown> | null;
+  fonte: { tipo: 'equipaggiamento' | 'guida' | 'libro' | 'film' | 'videogioco' | 'listino' | 'utente'; chiave: string | null };
+  origine: 'seed' | 'utente';
+  modificato: boolean;
+  nascosto: boolean;
+  prezzoMinimo: number | null;
+}
+
+export type DatiNuovoOggettoDto = Pick<CatalogoOggettoDto, 'categoria' | 'nome'> & Partial<Pick<CatalogoOggettoDto,
+  'sottocategoria' | 'nomiAltri' | 'nomeOriginale' | 'effetto' | 'descrizione' | 'statistiche'>>;
+export interface SceltaAbbinamentoOggettoDto {
+  riga_tipo: TipoPropostaOggetto; riga_chiave: string; catalogo_chiave: string | null; gruppo?: string;
+}
+export interface DatiLegameOggettoDto extends Omit<SceltaAbbinamentoOggettoDto, 'catalogo_chiave'> {
+  catalogo_chiave: string;
+  quantita?: number | null; nota?: string | null; togli?: boolean;
+  precedente_catalogo_chiave?: string; proposta_catalogo_chiave?: string | null;
+}
+
+export interface OffertaOggettoDto {
+  acquistiRegistrati: Array<{ articolo: string; negozioNome: string }>;
+  articolo: string;
+  negozio: string;
+  negozioNome: string;
+  sedeCasa: string | null;
+  sedeChiave: string | null;
+  sedeNome: string | null;
+  prezzo: number | null;
+  costo: CostoOggettoDto | null;
+  costoDaVerificare: boolean;
+  condizioni: CondizioneSpilloDto[];
+  presenza: DisponibilitaDto | null;
+  disponibilita: DisponibilitaDto | null;
+  disponibileOggi: boolean | null;
+  acquistato: boolean;
+  nota: string | null;
+}
+
+export interface OggettoDettaglioDto extends CatalogoOggettoDto {
+  trasformazioni: TrasformazioneOggettoDto[];
+  inVendita: OffertaOggettoDto[];
+  regalo: Array<{ confidente: string; nome: string; gradimento: string | null; casa: string; regalato: boolean; sconsigliato: boolean }>;
+  forzieri: Array<{
+    voce: string; voceNome: string; palazzo: string; palazzoNome: string;
+    infiltrazione: string; infiltrazioneNome: string; area: string | null; areaNome: string | null; quantita: number;
+    casa: string; stato: 'preso' | 'non-piu-ottenibile' | 'da-prendere' | 'da-jose' | 'da-verificare' | null;
+    jose: { casa: string; nota: string } | null;
+  }>;
+  ricompense: Array<RicompensaOggettoDto & { fonteTipo: string; fonteChiave: string; fonteNome: string; fonteCasa: string | null; costo?: CostoOggettoDto | null; costoDaVerificare?: boolean; prezzo?: number | null }>;
+  scambi: OffertaOggettoDto[];
+  ricette: Array<{ chiave: string; nome: string; quantita: number; casa: string; prodotti: RicompensaOggettoDto[]; nomeStorico: string }>;
+  lettura: { tipo: 'libro'; voce: LibroDto; letturaRapida: boolean } | { tipo: 'film'; voce: FilmDto } | { tipo: 'videogioco'; voce: VideogiocoDto } | null;
+  partita: { acquistato: boolean; regalato: boolean; letto: boolean } | null;
+}
+
+export interface TrasformazioneOggettoDto {
+  palazzo: string;
+  palazzoNome: string;
+  cristallo: RiferimentoOggettoDto | null;
+  anello: RiferimentoOggettoDto | null;
+  soloNuovaPartitaPlus: boolean;
+  palazzoConcluso: boolean | null;
+  nuovaPartitaPlus: boolean | null;
+  fonte: string;
+}
+
+export const TIPI_PROPOSTA_OGGETTO = ['articolo', 'regalo', 'voce', 'ricompensa', 'ricetta', 'catalogo'] as const;
+export type TipoPropostaOggetto = (typeof TIPI_PROPOSTA_OGGETTO)[number];
+export interface PropostaAbbinamentoDto {
+  rigaTipo: TipoPropostaOggetto;
+  rigaChiave: string;
+  /** Alternative dello stesso contenuto, non degli altri oggetti nella stessa voce/ricetta. */
+  gruppo: string;
+  rigaNome: string;
+  testoAttuale: string;
+  catalogo: RiferimentoOggettoDto | null;
+  categoria: CategoriaOggetto | null;
+  quantita: number | null;
+  motivo: string;
+  certezza: 'certa' | 'probabile' | 'da-verificare';
+  /** Nota del contenuto/premio, da conservare anche confermando un'alternativa. */
+  nota?: string | null;
+  stato: 'da-approvare' | 'confermata' | 'scartata';
+  /** Rettifiche di listino (Tanaka) visibili prima del gesto, mai applicate dalla migrazione. */
+  modifica: { azione: 'collega' | 'nascondi' | 'crea'; prezzo?: number; condizioni?: Condizione[]; condizioniTesto?: string[]; ruolo?: 'costo';
+    nomeOfferta?: string; costo?: CostoOggettoDto; ricevuti?: RicompensaOggettoDto[]; notaOfferta?: string } | null;
+}
 
 /** Quante righe di una tabella se ne sono andate con l'eliminazione, con il nome per l'utente. */
 export interface ContenutoCestinoDto {

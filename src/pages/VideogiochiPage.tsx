@@ -24,11 +24,12 @@ import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
 import { AssetImg } from '../components/shared/AssetImg';
 import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
+import { ComandiProgressoLettura } from '../components/guida/ComandiProgressoLettura';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione, IconaSegno, type ChiaveSegno } from '../components/shared/IconaAzione';
-import { bloccata, formattaYen, motivoBlocco, prezzoChip } from '../utils/letture';
+import { formattaYen, prezzoChip } from '../utils/letture';
 import type { VideogiocoDto } from '../types';
 
 /** Un numero di riepilogo in una carta: il valore in grande e sotto l'etichetta col suo segno. */
@@ -49,8 +50,6 @@ function Numero({ valore, etichetta, segno }: { valore: number | string; etichet
  */
 function Scheda({ g, partitaId, occupato, progresso, onCambia, onCorretto, onPosizione }: { g: VideogiocoDto; partitaId: number | null; occupato: boolean; progresso: number; onCambia: (g: VideogiocoDto, passo: number) => void; onCorretto: () => void; onPosizione: () => void }) {
   const totale = g.totaleRound;
-  const percentuale = totale > 0 ? Math.round((progresso / totale) * 100) : 0;
-  const nonAncora = bloccata(g.disponibilita);
   return (
     <li className={`card relative flex min-w-0 flex-col gap-3 overflow-hidden ${g.fatto ? 'border-success/50' : ''}`}>
       <div className="flex items-start gap-3">
@@ -59,7 +58,7 @@ function Scheda({ g, partitaId, occupato, progresso, onCambia, onCorretto, onPos
         <AssetImg nome={`attivita/${g.chiave}`} alt="" decorativa className="shrink-0 rounded-md object-contain" style={{ width: 56, height: 56 }}
           fallback={<span className="shrink-0"><IconaCategoria categoria="minigiochi" dimensione={44} /></span>} />
         <div className="min-w-0 flex-1">
-          <h3 className="m-0 text-lg leading-tight">{g.nome}</h3>
+          <h3 className="m-0 text-lg leading-tight">{g.catalogo ? <Link className="touch inline-flex items-center" to={g.catalogo.casa}>{g.nome}</Link> : g.nome}</h3>
           <p className="m-0 text-xs text-text-secondary">{g.sedeNome ?? g.luogo}</p>
         </div>
         <span className="flex flex-col items-end gap-1">
@@ -68,28 +67,8 @@ function Scheda({ g, partitaId, occupato, progresso, onCambia, onCorretto, onPos
         </span>
       </div>
 
-      <div>
-        <div className="mb-1 flex justify-between text-xs text-text-secondary">
-          <span>{progresso} di {totale} round</span>
-          <span className="tabular-nums">{percentuale}%</span>
-        </div>
-        <div className="visore-mappa__progresso" role="progressbar" aria-label={`Progresso ${g.nome}`} aria-valuemin={0} aria-valuemax={totale} aria-valuenow={progresso}>
-          <span className="visore-mappa__progresso-barra" style={{ width: `${percentuale}%` }} />
-        </div>
-      </div>
-
-      {/* Il gesto è il round: due pulsanti larghi uguali. Con il gioco non ancora disponibile il «+»
-          resta spento e il motivo sta sotto. */}
-      {partitaId && (
-        <div className="grid grid-cols-2 gap-2" role="group" aria-label={`Avanzamento ${g.nome}`}>
-          <PulsanteVisivo tono="secondario" icona={<IconaAzione chiave="meno" dimensione={20} />} titolo="Togli"
-            disabled={progresso === 0} onClick={() => onCambia(g, -1)} aria-label={`Togli un round a ${g.nome}`} />
-          <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Round"
-            disabled={progresso >= totale || (nonAncora && progresso === 0)} onClick={() => onCambia(g, +1)} aria-label={`Aggiungi un round a ${g.nome}`} />
-          {nonAncora && progresso === 0 && <p className="col-span-2 m-0 text-xs text-text-secondary" role="note">Non ancora giocabile: {motivoBlocco(g.disponibilita)}</p>}
-          {occupato && <span className="col-span-2 text-center text-xs text-text-muted" role="status">Salvataggio…</span>}
-        </div>
-      )}
+      <ComandiProgressoLettura titolo={g.nome} tipo="videogioco" progresso={progresso} totale={totale}
+        partita={partitaId !== null} occupato={occupato} disponibilita={g.disponibilita} onCambia={(valore) => onCambia(g, valore - progresso)} />
 
       <dl className="dl-scheda m-0 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm">
         <dt className="text-text-muted">Che cosa fa</dt>
@@ -97,6 +76,7 @@ function Scheda({ g, partitaId, occupato, progresso, onCambia, onCorretto, onPos
         {g.negozi.length > 0 && <><dt className="text-text-muted">In vendita da</dt><dd className="m-0 flex flex-wrap gap-1">{g.negozi.map((n) => <Link key={n.articolo} to={`/guida/negozi/${encodeURIComponent(n.negozio)}`} className="chip chip--attivo touch no-underline">{n.negozioNome}{prezzoChip(n.prezzo)}</Link>)}</dd></>}
         {g.negozi.length === 0 && g.costo !== null && g.costo > 0 && <><dt className="text-text-muted">Costo</dt><dd className="m-0">{formattaYen(g.costo)}</dd></>}
       </dl>
+      {g.notaPrezzo && <p className="m-0 text-xs text-text-secondary">{g.notaPrezzo}</p>}
       {g.dettagli && <p className="m-0 whitespace-pre-line text-xs text-text-secondary">{g.dettagli}</p>}
       <div className="mt-auto flex flex-wrap items-center gap-2">
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="posizione" dimensione={20} />}
@@ -136,7 +116,7 @@ export function VideogiochiPage() {
   });
 
   const q = ricerca.trim().toLocaleLowerCase('it');
-  const visibili = useMemo(() => giochi.filter((g) => !q || `${g.nome} ${g.sedeNome ?? ''} ${g.luogo} ${g.effettiTesto.join(' ')}`.toLocaleLowerCase('it').includes(q)), [giochi, q]);
+  const visibili = useMemo(() => giochi.filter((g) => !q || `${g.nome} ${(g.nomiAltri ?? []).join(' ')} ${g.sedeNome ?? ''} ${g.luogo} ${g.effettiTesto.join(' ')}`.toLocaleLowerCase('it').includes(q)), [giochi, q]);
   const daFare = visibili.filter((g) => !g.fatto);
   const fatti = visibili.filter((g) => g.fatto);
   const roundFatti = giochi.reduce((s, g) => s + g.progresso, 0);

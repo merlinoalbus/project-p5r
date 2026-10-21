@@ -16,6 +16,8 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
+import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
+import { ArticoliTabella } from '../components/guida/ArticoliTabella';
 import { Selettore } from '../components/shared/Selettore';
 import { Segmenti } from '../components/shared/Segmenti';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
@@ -126,7 +128,10 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
       </div>
 
       {r.confidente && <span className="text-[12px] text-text-secondary">Confidente: <strong className="text-text">{r.confidente.nome}</strong>{r.confidente.rango ? ` · rango ${r.confidente.rango}` : ''}</span>}
-      {r.ricompense.length > 0 && <span className="line-clamp-2 text-[12px] text-text-secondary" title={r.ricompense.join(', ')}><span className="text-text-muted">Ricompense:</span> {r.ricompense.join(', ')}</span>}
+      {!!r.oggettiRicompensa?.length && <div className="min-w-0 text-[12px]"><span className="text-text-muted">Ricompense:</span><OggettiCollegati oggetti={r.oggettiRicompensa} /></div>}
+      {r.ricompense.length > 0 && (r.oggettiRicompensa?.length
+        ? <details className="text-[12px] text-text-secondary"><summary className="touch">Indicazioni della guida sulle ricompense</summary><p className="m-0 whitespace-pre-line">{r.ricompense.join(', ')}</p></details>
+        : <span className="text-[12px] text-text-secondary"><span className="text-text-muted">Ricompense indicate dalla guida:</span> {r.ricompense.join(', ')}</span>)}
 
       <button type="button" className="touch self-start text-[12px] text-text-muted underline decoration-dotted underline-offset-2" aria-expanded={aperta} onClick={() => setAperta((a) => !a)}>
         {aperta ? 'Nascondi i dettagli' : 'Dettagli'}
@@ -266,7 +271,16 @@ export function RichiestePage() {
                   </div>}
                 </div>
               </SezioneConFregio>
-              {d.jose.scambi.length > 0 && (
+              {d.jose.listino !== undefined ? (
+                <SezioneConFregio chiave="jose-scambi" forma="banda" disposizione="fascia" aria-label="Scambi con Jose">
+                  <h3 className="m-0 font-display text-[15px] uppercase leading-none">Che cosa dà, e per quanti fiori</h3>
+                  {d.jose.listino ? <>
+                    <CollegamentoVisivo to={`/guida/negozi/${encodeURIComponent(d.jose.listino.chiave)}`} icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={`Apri il listino di ${d.jose.listino.nome}`} compatto />
+                    <p className="m-0 text-[12px] text-text-muted">Le aperture effettive dei dedali si segnano in Partita → Progressi. Costi, requisiti e acquisti sono gli stessi del listino.</p>
+                    <ArticoliTabella articoli={d.jose.listino.articoliElenco} partitaId={partitaId} onCambiato={() => void dati.ricarica()} />
+                  </> : <p className="m-0 text-[13px] text-text-muted">Il listino di Jose è stato rimosso o nascosto. Le indicazioni della guida restano conservate.</p>}
+                </SezioneConFregio>
+              ) : d.jose.scambi.length > 0 && (
                 <SezioneConFregio chiave="jose-scambi" forma="banda" disposizione="fascia" aria-label="Scambi con Jose">
                   <h3 className="m-0 font-display text-[15px] uppercase leading-none">Che cosa dà, e per quanti fiori</h3>
                   <div className="area-scorrevole-x">

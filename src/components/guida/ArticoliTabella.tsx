@@ -14,6 +14,10 @@ import { NOME_CATEGORIA_ARTICOLO } from '../../utils/negozi';
 import type { ArticoloDto } from '../../types';
 import { ChipDisponibilita } from './ChipDisponibilita';
 import { descriviRequisitoSpillo } from '../../../shared/condizioniSpillo';
+import { CostoDellOggetto } from '../catalogo/CostoDellOggetto';
+import { OggettiCollegati } from '../catalogo/OggettiCollegati';
+import { ContenutoDellaVoce } from '../catalogo/ContenutoDellaVoce';
+import { AcquistiOfferta } from '../catalogo/AcquistiOfferta';
 
 interface Props {
   articoli: ArticoloDto[];
@@ -21,6 +25,7 @@ interface Props {
   mostraNegozio?: boolean;
   onCambiato: (a: ArticoloDto) => void;
   onModifica?: (a: ArticoloDto) => void;
+  onContenutoCambiato?: () => void | Promise<void>;
 }
 
 /**
@@ -28,25 +33,26 @@ interface Props {
  * del negozio se `mostraNegozio`, prezzo, chip di disponibilità, spunta «Acquistato» (solo con partita), pulsante
  * «Modifica» se c'è `onModifica` e un riquadro di dettagli con nome originale, requisiti, effetto e nota.
  */
-function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica }: Omit<Props, 'articoli'> & { a: ArticoloDto }) {
+function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica, onContenutoCambiato }: Omit<Props, 'articoli'> & { a: ArticoloDto }) {
   const [occupato, setOccupato] = useState(false);
   const nome = a.nomeIt ?? a.nome;
-  const acquistoBloccato = a.disponibilita !== undefined && a.disponibilita.stato !== 'disponibile' && !a.acquistato;
+  const acquistoBloccato = a.disponibilita !== undefined && a.disponibilita.stato !== 'disponibile';
   /** Segna o toglie l'acquisto nella partita e passa al genitore l'articolo aggiornato; l'errore va in notifica. */
-  const cambia = async (fatto: boolean) => {
+  const cambia = async (articolo: string, fatto: boolean) => {
     setOccupato(true);
-    try { onCambiato(await impostaAcquisto(partitaId!, a.chiave, fatto)); }
+    try { onCambiato(await impostaAcquisto(partitaId!, articolo, fatto, a.sedeChiave)); }
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); }
     finally { setOccupato(false); }
   };
   return <li className={`catalogo-prodotto${a.acquistato ? ' catalogo-prodotto--acquistato' : ''}`}>
     <div className="catalogo-prodotto__nome">
-      <strong className={a.acquistato ? 'line-through' : ''}>{nome}</strong>
+      <strong className={a.acquistato ? 'line-through' : ''}>{a.catalogo ? <Link to={a.catalogo.casa} className="touch inline-flex items-center">{nome}</Link> : nome}</strong>
       <span className="catalogo-prodotto__meta">{NOME_CATEGORIA_ARTICOLO[a.categoria] ?? a.categoria}{a.per && <> · <span>{a.per}</span></>}</span>
       {a.statistiche && <span className="text-text-secondary">{a.statistiche}</span>}
+      {!!a.ricevuti?.length && <div className="flex min-w-0 flex-col gap-1"><span>Si riceve:</span><OggettiCollegati oggetti={a.ricevuti} /></div>}
       {mostraNegozio && <Link to={`/guida/mondo/articolo/${encodeURIComponent(a.chiave)}`} className="touch inline-flex items-center">{a.negozioNome}</Link>}
     </div>
-    <div className="catalogo-prodotto__prezzo"><span className="catalogo-prodotto__etichetta">Prezzo</span><strong>{a.prezzo !== null ? `${a.prezzo.toLocaleString('it-IT')} ¥` : 'Non indicato'}</strong></div>
+    <div className="catalogo-prodotto__prezzo"><span className="catalogo-prodotto__etichetta">Costo</span><strong><CostoDellOggetto costo={a.costo ?? null} prezzo={a.prezzo} daVerificare={a.costoDaVerificare} /></strong></div>
     {/* La colonna dice **se si può comprare**, e basta: c'era anche «2 requisiti · apri
         Dettagli», che è un'istruzione scritta a mano dove serve un comando. Il numero è finito
         dov'è il suo posto, cioè sulla riga dei Dettagli, che i requisiti li elenca davvero. */}
@@ -54,17 +60,21 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica }: Omit<
     <div className="catalogo-prodotto__azioni">
       {/* Una cosa sola: la spunta. «Non ancora acquistabile» stava sia qui sia nella pastiglia
           accanto, e la stessa frase due volte sulla stessa riga sembra due informazioni. */}
-      {partitaId && <label className="touch flex items-center gap-2" title={acquistoBloccato ? 'Non ancora acquistabile: mancano dei requisiti' : undefined}><input type="checkbox" className="w-5 h-5" checked={a.acquistato} disabled={occupato || acquistoBloccato} onChange={e => void cambia(e.target.checked)} aria-label={`${nome} acquistato`} />Acquistato</label>}
+      {partitaId && <AcquistiOfferta articolo={a.chiave} nome={nome} registrati={a.acquistiRegistrati ?? []}
+        acquistato={a.acquistato} bloccato={acquistoBloccato} occupato={occupato} onCambia={(chiave, fatto) => void cambia(chiave, fatto)} />}
       {onModifica && <button type="button" className="btn btn-ghost btn-sm touch" onClick={() => onModifica(a)} aria-label={`Correggi ${nome}`}>Modifica</button>}
     </div>
     <details className="catalogo-prodotto__dettagli">
       <summary className="touch">Dettagli{a.condizioni?.length ? ` · ${a.condizioni.length} ${a.condizioni.length === 1 ? 'requisito' : 'requisiti'}` : ''}{!a.verificato ? ' · fonte secondaria' : ''}</summary>
       <dl>
-        {a.nomeIt && a.nomeIt !== a.nome && <><dt>Nome originale</dt><dd>{a.nome}</dd></>}
+        {(a.nomeOriginale || (a.nomeIt && a.nomeIt !== a.nome)) && <><dt>Nome originale</dt><dd>{a.nomeOriginale ?? a.nome}</dd></>}
         <dt>Disponibilità</dt><dd>{a.disponibilita?.requisiti.length ? <ul>{a.disponibilita.requisiti.map((r,i)=><li key={i}>{r.testo} — {r.dettaglio}</li>)}</ul> : a.condizioni?.length ? <ul>{a.condizioni.map((r,i)=><li key={i}>{r.tipo === 'avviso' ? descriviRequisitoSpillo(r) : r.testo}</li>)}</ul> : 'Nessun requisito'}</dd>
         <dt>Effetto</dt><dd>{a.effetto || 'Non indicato'}</dd>
         {a.nota && <><dt>Nota</dt><dd>{a.nota}</dd></>}
       </dl>
+      {onModifica && onContenutoCambiato && !a.catalogo && <ContenutoDellaVoce
+        fonte={{ tipo: 'ricompensa', chiave: `articolo/${a.chiave}` }} contenuto={a.ricevuti ?? []}
+        onCambiato={async () => { await onContenutoCambiato(); }} />}
     </details>
   </li>;
 }

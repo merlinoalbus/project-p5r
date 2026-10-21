@@ -12,6 +12,7 @@ import { FASCE_ATTIVITA, TIPI_ATTIVITA, TRACCIAMENTI_ATTIVITA } from '../../shar
 import { normalizzaEffettoOggetto, type EffettoOggetto } from '../../shared/effettiOggetto.js';
 import { TIPI_LUOGO } from '../../shared/tipiLuogo.js';
 import { LIMITI_QUIZ, normalizzaQuiz } from '../../shared/quizAttivita.js';
+import { LIMITI_COSTO_OGGETTO } from '../../shared/catalogo.js';
 
 /** Le chiavi di un elenco di costanti, nella forma di tupla non vuota che `z.enum` richiede. */
 const chiaviDi = <T extends { chiave: string }>(elenco: readonly T[]) => elenco.map((e) => e.chiave) as [string, ...string[]];
@@ -47,6 +48,11 @@ const effettiJson = z.array(voceEffetto).max(20).transform((v) => JSON.stringify
 
 /** Un testo con gli spazi ai capi tolti e lungo al massimo `max` caratteri. */
 const testo = (max: number) => z.string().trim().max(max);
+export const costoScambio = z.discriminatedUnion('tipo', [
+  z.object({ tipo: z.literal('fiori'), importo: z.number().int().min(0).max(LIMITI_COSTO_OGGETTO.fiori) }).strict(),
+  z.object({ tipo: z.literal('oggetti'), oggetti: z.array(z.object({ chiave: testo(600).min(1), quantita: z.number().int().min(1).max(LIMITI_COSTO_OGGETTO.quantita) }).strict())
+    .min(1).max(LIMITI_COSTO_OGGETTO.componenti).refine((v) => new Set(v.map((o) => o.chiave)).size === v.length, 'Ogni oggetto ceduto va indicato una sola volta.') }).strict(),
+]);
 
 /** I tipi accettati nel percorso. Erano scritti a mano e sono rimasti indietro quando il catalogo
  *  si e' esteso: un `POST /catalogo/libro` rispondeva «atteso negozio|articolo» pur essendo tutto
@@ -55,9 +61,10 @@ export const paramsTipoCatalogo = z.object({ tipo: z.enum(TIPI_CATALOGO) });
 export const paramsElementoCatalogo = paramsTipoCatalogo.extend({ chiave: z.string().min(1).max(200) });
 
 /** Campi di un negozio scrivibili dall'utente (le colonne della tabella, in snake_case come nel servizio). */
-// Dalla voce 5 (2026-09-12) il negozio non ha condizioni proprie: la sua disponibilità sono gli orari e le condizioni stanno sugli
-// articoli (`CAMPI.negozio` in catalogoService). Lo schema non accetta più un campo che il servizio avrebbe scartato in silenzio.
+// Le condizioni storiche del negozio furono trasferite agli articoli (070). Lo sblocco proprio di L6 usa il campo nuovo sblocco_json.
 export const datiNegozio = z.object({
+  /** Condizioni proprie aggiuntive alla sede; il vecchio condizioni_json resta storico (070). */
+  sblocco_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
   luogo: testo(200).default(''),
   luogo_chiave: z.string().max(80).nullable().optional(),
@@ -83,13 +90,13 @@ export const datiArticolo = z.object({
   verificato: z.boolean().optional(),
   condizioni_json: z.array(condizioneSpillo).max(20).transform(v=>JSON.stringify(v)).optional(),
   negozio_chiave: z.string().min(1).max(200),
-  nome: testo(160).min(1),
+  nome: testo(160).min(1).optional(),
   nome_it: testo(160).nullable().optional(),
   // Le categorie di un articolo sono i tipi di cosa che un negozio può vendere, e le prime nove non
   // li coprivano: libri, DVD e videogiochi finivano in «altro», e i quattro consumabili che l'app
   // distingue dappertutto — cura, SP, battaglia, stato — sparivano dentro «consumabile».
   // L'elenco sta in `shared/articoli.ts`.
-  categoria: categoriaArticolo.default('altro'),
+  categoria: categoriaArticolo.optional(),
   per: testo(80).nullable().optional(),
   prezzo: z.number().int().min(0).max(9_999_999).nullable().optional(),
   // Quante se ne possono comprare. `null` non e' zero: zero direbbe «nessuna», null dice «limite
@@ -97,8 +104,10 @@ export const datiArticolo = z.object({
   quantita: z.number().int().min(0).max(9_999).nullable().optional(),
   // Il collegamento all'oggetto: l'archivio e la sua chiave. Da qui l'articolo legge nome, effetto,
   // statistiche e «per chi» invece di tenerne una copia propria.
-  oggetto_fonte: z.enum(['equipaggiamento', 'guida', 'libri', 'film', 'videogiochi']).nullable().optional(),
+  oggetto_fonte: z.enum(['equipaggiamento', 'guida', 'libri', 'film', 'videogiochi', 'catalogo']).nullable().optional(),
   oggetto_chiave: testo(200).nullable().optional(),
+  catalogo_chiave: z.string().trim().min(1).max(600).nullable().optional(),
+  costo_json: costoScambio.nullable().optional().transform((v) => v == null ? v : JSON.stringify(v)),
   // Restano per l'articolo **generico**, quello che nessun archivio conosce e che nasce dentro il
   // negozio. Per un articolo collegato non si scrivono: la lettura li prende dall'oggetto.
   // La dichiarazione strutturata (shared/effettiOggetto). `effetto` resta la frase che ne discende:

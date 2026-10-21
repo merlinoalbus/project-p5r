@@ -74,7 +74,7 @@ export const confermaRequisitoConfidente = (id: number, chiave: string, rango: n
   apiPut(`/partite/${id}/confidenti/${chiave}/requisiti`, { rango, indice, confermato });
 /** Spunta (o riapre) una voce della giornata nella partita, per identità: applica i suoi effetti (con le note ottenute, se è un
  *  incontro con un Confidente) e dice se la partita è passata al giorno dopo. */
-export const impostaAzionePercorso = (id: number, uid: string, fatta: boolean, noteRisposta?: 1 | 2 | 3): Promise<AzionePercorsoDto> => apiPut(`/partite/${id}/percorso`, { uid, fatta, ...(noteRisposta ? { noteRisposta } : {}) });
+export const impostaAzionePercorso = (id: number, uid: string, fatta: boolean, noteRisposta?: 1 | 2 | 3, apertureDedali?: string[]): Promise<AzionePercorsoDto> => apiPut(`/partite/${id}/percorso`, { uid, fatta, ...(noteRisposta ? { noteRisposta } : {}), ...(apertureDedali !== undefined ? { apertureDedali } : {}) });
 /** Giorno corrente della partita (calendario di gioco); la risposta porta anche la partita aggiornata da riportare nello store. */
 export const impostaGiornoCorrente = (id: number, data: string): Promise<GiornoCorrenteDto> => apiPut(`/partite/${id}/giorno`, { data });
 /** Il meteo di un giorno nella partita, di giorno e di sera. */
@@ -87,7 +87,7 @@ export const impostaMeteoGiorno = (id: number, data: string, mod: { giorno?: Met
 export const getSuggerimenti = (id: number): Promise<SuggerimentiOggiDto> => apiGet(`/partite/${id}/suggerimenti`);
 
 /** Articolo acquistato/ottenuto (o riaperto) nella partita. */
-export const impostaAcquisto = (id: number, articolo: string, fatto: boolean): Promise<ArticoloDto> => apiPut(`/partite/${id}/acquisti`, { articolo, fatto });
+export const impostaAcquisto = (id: number, articolo: string, fatto: boolean, sede?: string | null): Promise<ArticoloDto> => apiPut(`/partite/${id}/acquisti`, { articolo, fatto, ...(sede ? { sede } : {}) });
 
 /** Cruciverba risolto (o riaperto) nella partita. */
 export const impostaCruciverba = (id: number, data: string, fatto: boolean): Promise<CruciverbaDto> => apiPut(`/partite/${id}/cruciverba`, { data, fatto });
@@ -121,6 +121,9 @@ export const impostaDomandaFatta = (id: number, domandaId: number, fatta: boolea
 /** Regalo consegnato (o no) a un Confidente nella partita. */
 export const impostaRegaloFatto = (id: number, chiave: string, regalo: string, fatto: boolean): Promise<ConfidentePartitaDto> =>
   apiPut(`/partite/${id}/confidenti/${encodeURIComponent(chiave)}/regali`, { regalo, fatto });
+/** Stesso gesto, con l'identità stabile anziché una copia del nome. */
+export const impostaRegaloOggettoFatto = (id: number, chiave: string, catalogo: string, fatto: boolean): Promise<ConfidentePartitaDto> =>
+  apiPut(`/partite/${id}/confidenti/${encodeURIComponent(chiave)}/regali`, { catalogo, fatto });
 
 /** Il compendio personale della partita: le Persona registrate con la loro istantanea. */
 export const getCompendioPartita = (id: number): Promise<CompendioPartitaDto[]> => apiGet(`/partite/${id}/compendio`);

@@ -22,8 +22,9 @@ import { casaDellArea, casaDellaMappa, contestoAree, type ContestoAree } from '.
 import { statoDisponibilitaPartita, valutaRequisiti, valutaRequisitiSpillo, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { dettaglioNegozio, acquistiDellaPartita } from './negoziService.js';
+import { lettureListiniCondivisi, listinoDelNegozio, type LettureListiniCondivisi } from './listiniCondivisi.js';
 import { attivitaDellaSede } from './attivitaService.js';
-import { condizioneConTesto, descriviRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { condizioneConTesto, descriviRequisitoSpillo, leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 
 export { condizioniDiSblocco } from './sbloccoLuoghi.js';
 import { descriviGiorni, descriviOrari, descriviOrariDelLuogo, leggiGiorni, leggiOrari, orariComeCondizioni, orariDelLuogo, type OrariDelLuogo, type OrariNegozio } from '../../shared/orariNegozio.js';
@@ -41,6 +42,7 @@ interface PinDelLuogo { spillo: number; mappa: string; mappaNome: string; casa: 
 
 /** Le letture che servono ai luoghi di una risposta, fatte una volta. */
 export interface LettureLuoghi {
+  listini?: LettureListiniCondivisi;
   st: StatoDisponibilita | null;
   nomiConfidenti: Map<string, string>;
   nomiQuartieri: Map<string, string>;
@@ -53,13 +55,16 @@ export interface LettureLuoghi {
   /** Tutti i luoghi (anche nascosti: un pin può citarne uno), per chiave. */
   righe: Map<string, RigaLuogo>;
   /** Sede, eccezione d'orario e quartiere (`luogo_chiave`) di ogni negozio. */
-  sediNegozi: Map<string, { sede: string | null; eccezione: string | null; quartiere: string | null; nome: string }>;
+  sediNegozi: Map<string, { sede: string | null; eccezione: string | null; quartiere: string | null; nome: string; sblocco: string | null }>;
 }
 
 /** Raggruppa le righe per sede, conservandone l'ordine. */
 function perSede(righe: Array<{ sede: string; chiave: string; nome: string }>): Map<string, Array<{ chiave: string; nome: string }>> {
   const out = new Map<string, Array<{ chiave: string; nome: string }>>();
-  for (const r of righe) (out.get(r.sede) ?? out.set(r.sede, []).get(r.sede)!).push({ chiave: r.chiave, nome: r.nome });
+  for (const r of righe) {
+    const elenco = out.get(r.sede) ?? out.set(r.sede, []).get(r.sede)!;
+    if (!elenco.some((n) => n.chiave === r.chiave)) elenco.push({ chiave: r.chiave, nome: r.nome });
+  }
   return out;
 }
 
@@ -89,16 +94,22 @@ function pinDeiLuoghi(aree: ContestoAree, luogo?: string): Map<string, PinDelLuo
  *  chi chiama, se lo passa). */
 export function lettureLuoghi(partitaId?: number, luogo?: string, stDato?: StatoDisponibilita | null): LettureLuoghi {
   const aree = contestoAree();
+  const listini = lettureListiniCondivisi();
+  const negozi = prepared('SELECT sede_chiave AS sede, chiave, nome FROM negozio WHERE nascosto = 0 ORDER BY ordine').all() as Array<{ sede: string | null; chiave: string; nome: string }>;
+  const nomiNegozi = new Map(negozi.map((n) => [n.chiave, n.nome]));
+  const sedi = [...negozi.flatMap((n) => n.sede !== null && !listini.negozi.has(n.chiave) ? [{ ...n, sede: n.sede }] : []),
+    ...listini.sedi.map((s) => ({ sede: s.luogo, chiave: listinoDelNegozio(s.negozio, listini), nome: nomiNegozi.get(listinoDelNegozio(s.negozio, listini)) ?? '' }))];
   const conEccezione = (prepared('PRAGMA table_info(negozio)').all() as Array<{ name: string }>).some((c) => c.name === 'eccezione_orari_json');
   return {
+    listini,
     st: stDato !== undefined ? stDato : partitaId === undefined ? null : statoDisponibilitaPartita(partitaId),
     righe: new Map((prepared('SELECT * FROM luogo').all() as RigaLuogo[]).map((r) => [r.chiave, r])),
-    sediNegozi: new Map((prepared(`SELECT chiave, nome, sede_chiave, luogo_chiave, ${conEccezione ? 'eccezione_orari_json' : 'NULL AS eccezione_orari_json'} FROM negozio`).all() as
-      Array<{ chiave: string; nome: string; sede_chiave: string | null; luogo_chiave: string | null; eccezione_orari_json: string | null }>)
-      .map((n) => [n.chiave, { sede: n.sede_chiave, eccezione: n.eccezione_orari_json, quartiere: n.luogo_chiave, nome: n.nome }])),
+    sediNegozi: new Map((prepared(`SELECT chiave, nome, sede_chiave, luogo_chiave, sblocco_json, ${conEccezione ? 'eccezione_orari_json' : 'NULL AS eccezione_orari_json'} FROM negozio`).all() as
+      Array<{ chiave: string; nome: string; sede_chiave: string | null; luogo_chiave: string | null; eccezione_orari_json: string | null; sblocco_json: string | null }>)
+      .map((n) => [n.chiave, { sede: n.sede_chiave, eccezione: n.eccezione_orari_json, quartiere: n.luogo_chiave, nome: n.nome, sblocco: n.sblocco_json }])),
     nomiConfidenti: new Map((prepared('SELECT chiave, nome FROM confidente').all() as Array<{ chiave: string; nome: string }>).map((c) => [c.chiave, c.nome])),
     nomiQuartieri: aree.nomiQuartieri.size ? aree.nomiQuartieri : new Map((prepared('SELECT chiave, nome FROM quartiere').all() as Array<{ chiave: string; nome: string }>).map((q) => [q.chiave, q.nome])),
-    negozi: perSede(prepared('SELECT sede_chiave AS sede, chiave, nome FROM negozio WHERE nascosto = 0 AND sede_chiave IS NOT NULL ORDER BY ordine').all() as Array<{ sede: string; chiave: string; nome: string }>),
+    negozi: perSede(sedi),
     attivita: perSede(prepared('SELECT sede_chiave AS sede, chiave, nome FROM attivita WHERE nascosto = 0 AND sede_chiave IS NOT NULL ORDER BY ordine').all() as Array<{ sede: string; chiave: string; nome: string }>),
     inviti: invitiPerSblocco(),
     aree,
@@ -127,8 +138,8 @@ export function presenzaDelLuogo(condizioni: RequisitoSpillo[], orari: OrariNego
 }
 
 /** La presenza di un negozio con sede: lo sblocco del luogo e l'orario del negozio (la sua eccezione, o quello del luogo). */
-export function presenzaDelNegozio(sede: RigaLuogo, eccezioneJson: string | null, l: Pick<LettureLuoghi, 'inviti' | 'st'>): PresenzaLuogoDto {
-  return presenzaDelLuogo(condizioniDiSblocco(sede, l.inviti), eccezioneJson ? leggiOrari(eccezioneJson) : orariDelLuogo(sede.orari_json), l.st);
+export function presenzaDelNegozio(sede: RigaLuogo, eccezioneJson: string | null, l: Pick<LettureLuoghi, 'inviti' | 'st'>, sbloccoJson: string | null = null): PresenzaLuogoDto {
+  return presenzaDelLuogo([...condizioniDiSblocco(sede, l.inviti), ...leggiCondizioniSalvate(sbloccoJson)], eccezioneJson ? leggiOrari(eccezioneJson) : orariDelLuogo(sede.orari_json), l.st);
 }
 
 /** Il luogo come DTO (§3.1): negozi e attività dalle sedi, Confidenti con il nome, condizioni con il testo, area, orari e presenza dal luogo,
@@ -176,27 +187,33 @@ export interface LuogoDelPin { luogo: RigaLuogo; presenza: PresenzaLuogoDto; not
  * negozio con l'eccezione del negozio), la nota del pin (il suo nome o la sua descrizione, se diversi da quelli del luogo: mai persi) e la
  * pagina del luogo (per un negozio la sua sezione). Null per gli altri pin e per un negozio senza sede.
  */
-export function luogoDelPin(s: { riferimento_tipo: string | null; riferimento_chiave: string | null; nome: string; descrizione: string | null }, l: LettureLuoghi): LuogoDelPin | null {
+export function luogoDelPin(s: { uid?: string | null; riferimento_tipo: string | null; riferimento_chiave: string | null; nome: string; descrizione: string | null }, l: LettureLuoghi): LuogoDelPin | null {
   if (!s.riferimento_tipo || !s.riferimento_chiave) return null;
   let luogo: RigaLuogo | undefined;
   let eccezione: string | null = null;
+  let sbloccoNegozio: string | null = null;
   let casa: string;
   if (s.riferimento_tipo === 'luogo' || s.riferimento_tipo === 'attivita') {
     luogo = l.righe.get(s.riferimento_chiave);
     if (!luogo) return null;
     casa = casaDelLuogo(luogo.chiave);
   } else if (s.riferimento_tipo === 'negozio') {
-    const n = l.sediNegozi.get(s.riferimento_chiave);
-    luogo = n?.sede ? l.righe.get(n.sede) : undefined;
+    const listino = l.listini ? listinoDelNegozio(s.riferimento_chiave, l.listini) : s.riferimento_chiave;
+    const n = l.sediNegozi.get(listino);
+    const sede = s.uid ? l.listini?.pin.get(s.uid) : undefined;
+    const chiaveSede = sede?.negozio === s.riferimento_chiave ? sede.luogo : n?.sede;
+    luogo = chiaveSede ? l.righe.get(chiaveSede) : undefined;
     if (!n || !luogo) return null;
     eccezione = n.eccezione;
-    casa = `${casaDelLuogo(luogo.chiave)}#negozio-${encodeURIComponent(s.riferimento_chiave)}`;
+    sbloccoNegozio = n.sblocco;
+    casa = `${casaDelLuogo(luogo.chiave)}#negozio-${encodeURIComponent(listino)}`;
   } else return null;
   const orari = eccezione ? leggiOrari(eccezione) : orariDelLuogo(luogo.orari_json ?? null);
-  const presenza = presenzaDelLuogo(condizioniDiSblocco(luogo, l.inviti), orari, l.st);
+  const presenza = presenzaDelLuogo([...condizioniDiSblocco(luogo, l.inviti), ...leggiCondizioniSalvate(sbloccoNegozio)], orari, l.st);
   const descrizione = (s.descrizione ?? '').trim();
   if (s.riferimento_tipo === 'negozio') {
-    const nomeNegozio = l.sediNegozi.get(s.riferimento_chiave)!.nome;
+    const listino = l.listini ? listinoDelNegozio(s.riferimento_chiave, l.listini) : s.riferimento_chiave;
+    const nomeNegozio = l.sediNegozi.get(listino)?.nome ?? l.sediNegozi.get(s.riferimento_chiave)!.nome;
     const notaNome = s.nome.trim() && s.nome.trim() !== nomeNegozio.trim() ? `«${s.nome.trim()}»` : null;
     return { luogo, presenza, notaPin: notaNome, soloEventi: luogo.solo_eventi_confidente ?? null, casa, nome: nomeNegozio, descrizione };
   }
@@ -245,8 +262,8 @@ export function dettaglioLuogo(quartiere: string, luogo: string, partitaId?: num
   if (partitaId !== undefined) verificaPartita(partitaId);
   const l = lettureLuoghi(partitaId, chiave);
   const dto = luogoDto(r, l);
-  const contesto = partitaId !== undefined && l.st ? { st: l.st, acquistati: acquistiDellaPartita(partitaId) } : undefined;
-  const listini = (l.negozi.get(chiave) ?? []).map((n) => dettaglioNegozio(n.chiave, partitaId, contesto));
+  const contesto = { listini: l.listini, ...(partitaId !== undefined && l.st ? { st: l.st, acquistati: acquistiDellaPartita(partitaId) } : {}) };
+  const listini = (l.negozi.get(chiave) ?? []).map((n) => dettaglioNegozio(n.chiave, partitaId, contesto, chiave));
   const arcani = new Map((prepared('SELECT chiave, arcana FROM confidente').all() as Array<{ chiave: string; arcana: string }>).map((c) => [c.chiave, c.arcana]));
   const nomi = nomiCondizioniMemo();
   // lo sblocco in parole, dalla condizione (le condizioni dell'elenco valgono tutte insieme; un gruppo «almeno una» ha la sua frase)

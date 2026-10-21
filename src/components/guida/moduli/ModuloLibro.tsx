@@ -20,7 +20,6 @@ export function ModuloLibro({ dati, imposta, disabilitato }: PropsModulo) {
     <div className="flex flex-col gap-3">
       <Griglia>
         <Campo nome="nome" etichetta="Titolo del libro" dati={dati} imposta={imposta} disabilitato={disabilitato} max={160} largo />
-        <Campo nome="prezzo" etichetta="Prezzo in yen" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Vuoto o 0 se è gratis" />
         <Campo nome="sessioni" etichetta="Sessioni di lettura" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Quante volte va letto per finirlo" />
         <Campo nome="dettagli" etichetta="Dettagli" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} />
       </Griglia>

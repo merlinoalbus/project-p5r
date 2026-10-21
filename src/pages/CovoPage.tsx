@@ -32,6 +32,7 @@ import { IconaAzione, IconaSegno, type ChiaveSegno } from '../components/shared/
 import { Link } from 'react-router-dom';
 import { COVO_AREA } from '../utils/covo';
 import type { CompletamentoDto } from '../types';
+import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
 
 type Covo = CompletamentoDto['covo'];
 
@@ -91,7 +92,7 @@ export function CovoPage() {
   const covo = dati.dati?.covo;
   const q = ricerca.trim().toLocaleLowerCase('it');
   const sfide = useMemo(() => (covo?.sfide ?? []).filter((s) => !q || `${s.nome} ${s.requisito}`.toLocaleLowerCase('it').includes(q)), [covo, q]);
-  const premi = useMemo(() => (covo?.premi ?? []).filter((p) => !q || `${p.nome} ${p.sblocco ?? ''} ${p.effetto ?? ''}`.toLocaleLowerCase('it').includes(q)), [covo, q]);
+  const premi = useMemo(() => (covo?.premi ?? []).filter((p) => !q || `${p.nome} ${p.sblocco ?? ''} ${p.effetto ?? ''} ${(p.oggettiRicompensa ?? []).map((o) => o.nome).join(' ')}`.toLocaleLowerCase('it').includes(q)), [covo, q]);
   const c = covo ? conti(covo) : null;
 
   return (
@@ -99,7 +100,7 @@ export function CovoPage() {
       {covo && c && (
         <div className="flex flex-col gap-4">
           <IntestazionePagina titolo="Covo dei Ladri"
-            sottotitolo={`L'area bonus di Royal, con la sua valuta: ${covo.sfide.length} sfide che danno Medaglie P e ${covo.premi.length} premi che le spendono.`} />
+            sottotitolo={`L'area bonus di Royal: ${covo.sfide.length} sfide, contenuti acquistabili con Medaglie P e ricompense finali.`} />
           {/* le planimetrie del Covo sono un'Area di Yongen-Jaya (L2, D2): le due pagine si collegano nei due sensi */}
           {/* un bersaglio da toccare: almeno 48 px di altezza a ogni larghezza (LAY2-6, gemello di LAY2-2) */}
           <Link to={COVO_AREA.pagina} className="card card--cliccabile touch no-underline text-text flex min-h-12 items-center gap-2 py-2 self-start">
@@ -165,10 +166,11 @@ export function CovoPage() {
                 : <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0">
                     {premi.map((p) => (
                       <li key={p.nome} className="flex flex-col gap-0.5 py-2 text-[13px]">
-                        <span className="flex items-start justify-between gap-3">
-                          <span className="font-semibold">{p.nome}</span>
-                          <span className="shrink-0 tabular-nums text-[12px] text-text-muted">{p.costo !== null ? medaglie(p.costo) : 'prezzo non dichiarato'}</span>
-                        </span>
+                        <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
+                          <div className="min-w-0 flex-1">{p.oggettiRicompensa?.length ? <OggettiCollegati oggetti={p.oggettiRicompensa} /> : <span className="font-semibold">{p.nome}</span>}</div>
+                          {p.costo !== null && <span className="shrink-0 tabular-nums text-[12px] text-text-muted">{medaglie(p.costo)}</span>}
+                        </div>
+                        {!!p.oggettiRicompensa?.length && <span className="text-[12px] text-text-muted">Voce della guida: {p.nome}</span>}
                         {p.effetto && <span className="text-text-secondary">{p.effetto}</span>}
                         {p.sblocco && <span className="text-[12px] text-text-muted">Si sblocca: {p.sblocco}</span>}
                       </li>

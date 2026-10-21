@@ -25,10 +25,10 @@ export function tuttiGliInviti(): RigaInvito[] {
   return prepared('SELECT * FROM confidente_invito ORDER BY confidente_chiave, data').all() as RigaInvito[];
 }
 
-/** Il quartiere di un posto: la prima parte della chiave di un luogo, il quartiere di un'Area del mondo (null per le Aree della città). */
+/** Il quartiere di un posto dalle relazioni effettive, anche dopo una ricollocazione (null per le Aree della città). */
 function quartiereDelPosto(tipo: RigaInvito['apre_tipo'], chiave: string): string | null {
   if (tipo === 'quartiere') return chiave;
-  if (tipo === 'luogo') return chiave.split('/')[0] ?? null;
+  if (tipo === 'luogo') return (prepared('SELECT quartiere_chiave FROM luogo WHERE chiave = ?').get(chiave) as { quartiere_chiave: string | null } | undefined)?.quartiere_chiave ?? null;
   return (prepared('SELECT quartiere_chiave FROM area WHERE chiave = ?').get(chiave) as { quartiere_chiave: string | null } | undefined)?.quartiere_chiave ?? null;
 }
 

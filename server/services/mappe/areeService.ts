@@ -31,9 +31,12 @@ import { casaDellArea, casaDellaMappa, conAree, contenitoreDi, contestoAree, typ
 import { lettureLuoghi, luoghiDellArea, luogoDelPin } from '../luoghiService.js';
 import { condizioneEffettivaQuartiere } from '../condizioni/condizioneEffettiva.js';
 import { elencaInviti } from '../inviti.js';
-import { condizioneConTesto, descriviRequisitoSpillo, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
+import { condizioneConTesto, descriviRequisitoSpillo, leggiCondizioniSalvate, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { nomiCondizioniMemo } from '../condizioni/nomiCondizioni.js';
-import { cosaManca, valutaInsieme } from '../condizioni/valutatore.js';
+import { cosaManca, valutaInsieme, valutaInsiemeSpillo } from '../condizioni/valutatore.js';
+import { conPresenzaPin, conDisponibilitaNegozio, senzaIngressoConcluso } from './disponibilitaPin.js';
+import { palazzoDiIngresso, palazzoDiOgniMappa } from '../palazziService.js';
+import { disponibilitaDelNegozio } from '../negoziService.js';
 import { statoDisponibilitaPartita } from '../disponibilitaService.js';
 import { areaDisponibilePerPartita } from './disponibilitaAree.js';
 import type { AreaDettaglioDto, AreaRiassuntoDto, ElementoAreaDto, MappaDaCollocareDto, PlanimetriaAreaDto, RuoloImmagine, SbloccoDto } from '../../../shared/types.js';
@@ -231,27 +234,36 @@ export function dettaglioArea(contenitore: ContenitoreRotta, chiave: string, slu
       numeroSpilli: ctx.spilli.get(p.chiave) ?? 0, immagineUrl: img ? urlCaricata(img) : null, asset: p.asset, ruoloImmagine: p.ruolo_immagine };
   });
   const segnaposti = planimetrie.map(() => '?').join(', ');
-  const pin = planimetrie.length === 0 ? [] : prepared(`SELECT id, nome, mappa_chiave, riferimento_tipo, riferimento_chiave FROM spillo WHERE mappa_chiave IN (${segnaposti})
+  const pin = planimetrie.length === 0 ? [] : prepared(`SELECT id, uid, nome, mappa_chiave, riferimento_tipo, riferimento_chiave, condizioni_json, seed_identita_json FROM spillo WHERE mappa_chiave IN (${segnaposti})
     AND riferimento_tipo IN ('luogo', 'negozio', 'attivita', 'confidente', 'mappa') AND riferimento_chiave IS NOT NULL ORDER BY mappa_chiave, ordine, id`).all(...proprie) as
-    Array<{ id: number; nome: string; mappa_chiave: string; riferimento_tipo: ElementoAreaDto['tipo'] | 'mappa'; riferimento_chiave: string }>;
+    Array<{ id: number; uid: string | null; nome: string; mappa_chiave: string; riferimento_tipo: ElementoAreaDto['tipo'] | 'mappa'; riferimento_chiave: string; condizioni_json: string | null; seed_identita_json: string | null }>;
   const elementi: ElementoAreaDto[] = [];
   const vicine: AreaDettaglioDto['vicine'] = [];
   const viste = new Set<string>();
   // L5: la presenza dei luoghi (e delle sedi dei negozi) con la funzione unica, la loro pagina, e i pin di negozi di un altro quartiere
   const luoghi = lettureLuoghi(partitaId);
+  const palazzi = luoghi.st?.palazziConclusi.size ? palazzoDiOgniMappa() : new Map<string, string>();
+  const destinazioni = palazzi.size ? new Map((prepared('SELECT spillo_id,mappa_chiave FROM spillo_destinazione WHERE mappa_chiave IS NOT NULL').all() as Array<{ spillo_id: number; mappa_chiave: string }>).map((r) => [r.spillo_id, r.mappa_chiave])) : new Map<number, string>();
   const quartiereArea = a.quartiere_chiave;
   for (const s of pin) {
     if (s.riferimento_tipo !== 'mappa') {
       const nome = (prepared(NOMI_ELEMENTI[s.riferimento_tipo]).get(s.riferimento_chiave) as { nome: string } | undefined)?.nome;
       if (!nome) continue;
-      const lp = luogoDelPin({ riferimento_tipo: s.riferimento_tipo, riferimento_chiave: s.riferimento_chiave, nome, descrizione: null }, luoghi);
+      const lp = luogoDelPin({ uid: s.uid, riferimento_tipo: s.riferimento_tipo, riferimento_chiave: s.riferimento_chiave, nome, descrizione: null }, luoghi);
       // un luogo solo per gli eventi di un Confidente non sta mai in «Luoghi qui» (R5-20f)
       if (lp?.soloEventi) continue;
       // un pin agganciato a un negozio di un altro quartiere (la sua sede): da rivedere, col nome del pin, nessun cambio senza il sì
       const sedeNegozio = s.riferimento_tipo === 'negozio' ? luoghi.sediNegozi.get(s.riferimento_chiave) : undefined;
-      const quartiereSede = sedeNegozio?.sede ? luoghi.righe.get(sedeNegozio.sede)?.quartiere_chiave ?? sedeNegozio.quartiere : sedeNegozio?.quartiere ?? null;
+      const quartiereSede = lp?.luogo.quartiere_chiave ?? (sedeNegozio?.sede ? luoghi.righe.get(sedeNegozio.sede)?.quartiere_chiave ?? sedeNegozio.quartiere : sedeNegozio?.quartiere ?? null);
       const altroQuartiere = !!quartiereArea && !!sedeNegozio && !!quartiereSede && quartiereSede !== quartiereArea;
+      const nomi = nomiCondizioniMemo();
+      const delPin = luoghi.st ? valutaInsiemeSpillo(leggiCondizioniSalvate(s.condizioni_json).map((c) => condizioneConTesto(c, nomi)), luoghi.st, nomi) : undefined;
+      const presenzaPin = !luoghi.st ? undefined : lp ? conPresenzaPin(delPin, lp.presenza, lp.luogo.nome)
+        : s.riferimento_tipo === 'negozio' ? conDisponibilitaNegozio(delPin, disponibilitaDelNegozio(s.riferimento_chiave, luoghi.st)) : delPin;
+      const palazzo = palazzoDiIngresso(s, destinazioni.get(s.id) ?? null, palazzi);
+      const disponibilita = palazzo ? senzaIngressoConcluso(presenzaPin, nomi.dungeon?.[palazzo] ?? palazzo, luoghi.st?.palazziConclusi.get(palazzo)) : presenzaPin;
       elementi.push({ tipo: s.riferimento_tipo, chiave: s.riferimento_chiave, nome: altroQuartiere ? s.nome : nome, spillo: s.id, planimetria: chiaveMappa(s.mappa_chiave),
+        ...(disponibilita ? { disponibilita } : {}),
         ...(lp ? { presenza: lp.presenza, casa: lp.casa } : { casa: null }), ...(altroQuartiere ? { daRivedere: 'negozio-altro-quartiere' as const } : {}) });
       continue;
     }

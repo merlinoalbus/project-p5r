@@ -27,9 +27,11 @@ export interface CollegamentoAzione {
 /** Scheda collegata a un'azione (Confidente con le risposte, dungeon, Richieste, libri…), se ricavabile. Per un Palazzo, se c'è
  *  una regola d'atterraggio per il giorno della voce, la sua planimetria (centrata sul pin d'arrivo), come l'icona della mappa
  *  di Tokyo (scelta dell'utente, 2026-10-04). */
-export function collegamentoAzione(a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento' | 'riferimentoTesto' | 'atterraggio'> & Partial<Pick<AzionePercorsoDto, 'uid' | 'infiltrazioni' | 'infiltrazioneDaAprire' | 'infiltrazioniDelPalazzo' | 'propostaInfiltrazioni'>>): CollegamentoAzione | null {
+export function collegamentoAzione(a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento' | 'riferimentoTesto' | 'atterraggio'> & Partial<Pick<AzionePercorsoDto, 'uid' | 'infiltrazioni' | 'infiltrazioneDaAprire' | 'infiltrazioniDelPalazzo' | 'propostaInfiltrazioni' | 'oggettoRiferimento' | 'oggettiCitati'>>): CollegamentoAzione | null {
   const r = a.riferimento;
   const testo = a.riferimentoTesto;
+  if (a.oggettoRiferimento) return { href: a.oggettoRiferimento.casa, etichetta: a.oggettoRiferimento.nome };
+  if (!r && ['libro', 'dvd'].includes(a.tipo) && a.oggettiCitati?.length === 1) return { href: a.oggettiCitati[0].casa, etichetta: a.oggettiCitati[0].nome };
   if (r) {
     switch (r.tipo) {
       case 'confidente': return { href: `/confidenti/${r.chiave}`, etichetta: testo ?? 'Scheda Confidente' };
@@ -86,6 +88,7 @@ export function descriviEffetti(e: EffettiAzioneDto, opz: { senzaDoti?: boolean 
   for (const t of e.turni ?? []) parti.push(`${t.nome}: turno ${t.ordine}${doti(t.doti, ' (', ')')}`);
   if (e.incontro) parti.push(e.incontro.giaContato ? `Incontro con ${e.incontro.nome} già contato` : `Incontro con ${e.incontro.nome}${doti(e.incontro.doti, ': ', '')}`);
   if (e.confidente) parti.push(`${e.confidente.nome} +${e.confidente.punti} punti`);
+  for (const a of e.apertureDedali ?? []) parti.push(a.nome);
   return parti.join(' · ');
 }
 

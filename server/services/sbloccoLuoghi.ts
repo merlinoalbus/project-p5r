@@ -11,14 +11,18 @@
 
 import { conGliInviti, invitiCheAprono, tuttiGliInviti, type RigaInvito } from './condizioni/condizioneEffettiva.js';
 import { leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { prepared } from '../db/dbService.js';
 
 /** Gli inviti dei Confidenti, letti una volta per chi valuta molti luoghi (un elenco, una mappa). */
 export function invitiPerSblocco(): RigaInvito[] {
   return tuttiGliInviti();
 }
 
-/** Le condizioni di sblocco di un luogo: quelle della riga, in OR con gli inviti che lo aprono (`inviti` letti da chi chiama; senza, si
- *  leggono qui). */
-export function condizioniDiSblocco(r: { chiave: string; condizioni_json: string | null }, inviti: readonly RigaInvito[] = tuttiGliInviti()): RequisitoSpillo[] {
-  return conGliInviti(leggiCondizioniSalvate(r.condizioni_json), invitiCheAprono('luogo', r.chiave, inviti));
+/** Presenza fisica: quartiere AND (condizioni proprie OR inviti). `luogo{}` conserva invece lo sblocco intrinseco usato dai quartieri. */
+export function condizioniDiSblocco(r: { chiave: string; condizioni_json: string | null; quartiere_chiave?: string | null }, inviti: readonly RigaInvito[] = tuttiGliInviti()): RequisitoSpillo[] {
+  const quartiere = r.quartiere_chiave ?? (prepared('SELECT quartiere_chiave FROM luogo WHERE chiave = ?').get(r.chiave) as { quartiere_chiave: string | null } | undefined)?.quartiere_chiave;
+  // La presenza fisica richiede il quartiere. Il riferimento intrinseco `luogo` nel valutatore resta separato:
+  // alcuni quartieri si aprono proprio grazie al loro ritrovo e includerli lì creerebbe un ciclo.
+  return [...(quartiere ? [{ tipo: 'quartiere' as const, quartiere }] : []),
+    ...conGliInviti(leggiCondizioniSalvate(r.condizioni_json), invitiCheAprono('luogo', r.chiave, inviti))];
 }

@@ -21,6 +21,7 @@ import type { ElementoCatalogoDto } from '../types';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { urlLuogo } from '../utils/citta';
 import { PulsanteGuidaQuiz } from '../components/guida/GuidaQuiz';
+import { TestoRipiegabile } from '../components/shared/TestoRipiegabile';
 
 /**
  * Scheda di un negozio presa dalla chiave nell'URL: carica il negozio per la partita attiva
@@ -81,7 +82,6 @@ export function NegozioPage() {
             {n.disponibilita && n.disponibilita.stato !== 'disponibile' && n.disponibilita.requisiti.length > 0 && (
               <ul className="m-0 pl-4 text-[13px] text-text-secondary">{n.disponibilita.requisiti.map((r, i) => <li key={i}>{r.testo} — {r.dettaglio}</li>)}</ul>
             )}
-            {n.note && <p className="m-0 text-[13px] text-text-secondary">{n.note}</p>}
             <div className="flex flex-wrap gap-1.5 mt-1">
               <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Aggiungi un articolo" dettaglio="a questo negozio" onClick={() => { setElementoArticolo(null); setModulo('articolo'); }} />
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Correggi il negozio" onClick={() => { void getElementoCatalogo('negozio', chiave).then((e) => { setElementoNegozio(e); setModulo('negozio'); }).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Caricamento fallito.')); }} />
@@ -90,6 +90,10 @@ export function NegozioPage() {
             {modulo === 'negozio' && elementoNegozio && <ModuloCatalogo tipo="negozio" elemento={elementoNegozio} onChiudi={() => setModulo(null)} onSalvato={salvato} />}
             <p className="m-0 text-[12px] text-text-muted">{n.articoli} articoli{n.verificati < n.articoli ? ` (${n.articoli - n.verificati} da fonte secondaria)` : ''}{partitaId ? ` · ${n.acquistati} acquistati nella partita «${attiva?.nome}»` : ' · attiva una partita per segnare gli acquisti'}.</p>
           </div>
+          {n.note && <section className="card flex min-w-0 flex-col gap-1" aria-label="Note del negozio">
+            <h2 className="m-0 text-[15px] font-semibold">Note del negozio</h2>
+            <TestoRipiegabile key={n.chiave} testo={n.note} massimo={140} className="min-w-0 whitespace-pre-line break-words text-[13px] text-text-secondary" />
+          </section>}
           {/* Due colonne su schermo largo: la mappa da una parte, la merce dall'altra; sotto i 1024 px una colonna. */}
           <div className="negozio-corpo">
             <div className="negozio-mappa">

@@ -26,6 +26,8 @@ import type { AreaDungeonDto, DivergenzaDto, DungeonDettaglioDto, PuntoInteresse
 import type { DivergenzaDaVerificare } from './FinestraDaVerificare';
 import { CampoCorrezione, CorrezioneGuida } from './CorrezioneGuida';
 import { DettagliPunto } from './DettagliPunto';
+import { AbbinamentiDellaVoce } from '../catalogo/AbbinamentiDaApprovare';
+import { ContenutoDellaVoce } from '../catalogo/ContenutoDellaVoce';
 import { EditorDettagli } from './EditorDettagli';
 import { dettagliDaRighe, etichetteRipetute, righeDaDettagli, type RigaDettaglio } from '../../utils/dettagliVoce';
 import { Selettore } from '../shared/Selettore';
@@ -383,7 +385,9 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
         {aperto && (
           <div className="flex flex-col gap-1.5 pl-5">
             {p.descrizione && <p className="m-0 whitespace-pre-wrap text-text-secondary">{p.descrizione}</p>}
-            <DettagliPunto d={p.dettagli} />
+            <DettagliPunto d={p.dettagli} contenuto={p.contenuto} />
+            {!!p.proposteContenuto?.length && <AbbinamentiDellaVoce proposte={p.proposteContenuto} onCambiato={onRicarica} />}
+            <ContenutoDellaVoce key={p.chiave} voce={p.chiave} contenuto={p.contenuto ?? []} onCambiato={onRicarica} disabilitato={occupato} />
             {p.carattere && <p className="m-0 text-[11px] text-text-muted">{SPIEGAZIONE_CARATTERE[p.carattere]}</p>}
             {conPassi && <p className="m-0 text-[11px] text-text-muted">Risolto quando i suoi passi sono fatti: segnarlo li segna tutti, riaprirlo li riapre. I pin stanno sui passi.</p>}
             {p.daVerificare && partitaId && (() => {

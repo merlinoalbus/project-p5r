@@ -36,6 +36,7 @@ import { DaRivedereVoce, InfiltrazioniVoce } from './InfiltrazioniVoce';
 import { chiedeNote } from '../../utils/azioneStrutturata';
 import { seGiornoAvanzato } from '../../utils/giornoAvanzato';
 import { TrasferisciVoci } from './TrasferisciVoci';
+import { ApertureVisitaRegistrata, SceltaApertureVisita } from './ApertureVisita';
 
 /** La fascia opposta: giorno ↔ sera. */
 const altraFascia = (f: FasciaGioco): FasciaGioco => (f === 'giorno' ? 'sera' : 'giorno');
@@ -67,18 +68,27 @@ export function Azione({ a, partitaId, onCambiata, onSullaMappa, evidenziata, ge
   const [occupato, setOccupato] = useState(false);
   // Azione «tempo con un Confidente»: alla spunta l'app chiede quante note (1–3) si sono ottenute (scelta A, 2 preselezionato).
   const [chiediNote, setChiediNote] = useState(false);
+  const [chiediAperture, setChiediAperture] = useState(false);
+  const [noteVisita, setNoteVisita] = useState<{ note?: 1 | 2 | 3; senzaPunti: boolean }>({ senzaPunti: false });
   /**
    * Spunta o toglie l'azione nella partita. Se spuntandola servono le note e non sono ancora arrivate (né si è scelto
    * di non dare punti), apre prima la scelta delle note e si ferma. Altrimenti salva, passa al genitore l'azione
    * aggiornata, invalida i suggerimenti, notifica gli effetti della spunta e controlla se il giorno è avanzato.
    */
-  const cambia = async (fatta: boolean, noteRisposta?: 1 | 2 | 3, senzaPunti = false) => {
+  const cambia = async (fatta: boolean, noteRisposta?: 1 | 2 | 3, senzaPunti = false, aperture?: string[]) => {
     if (!partitaId) return;
     if (fatta && chiedeNote(a) && noteRisposta === undefined && !senzaPunti) { setChiediNote(true); return; }
+    if (fatta && !a.fatta && a.apertureDedali?.length && aperture === undefined) {
+      setNoteVisita({ note: noteRisposta, senzaPunti });
+      setChiediNote(false);
+      setChiediAperture(true);
+      return;
+    }
     setChiediNote(false);
     setOccupato(true);
     try {
-      const agg = await impostaAzionePercorso(partitaId, a.uid, fatta, noteRisposta);
+      const agg = await impostaAzionePercorso(partitaId, a.uid, fatta, noteRisposta, aperture);
+      setChiediAperture(false);
       onCambiata(agg);
       // spuntando (o riaprendo) un'azione cambia cosa il giorno suggerisce: l'alone dorato si aggiorna da solo
       useSuggerimentiStore.getState().invalida();
@@ -91,7 +101,7 @@ export function Azione({ a, partitaId, onCambiata, onSullaMappa, evidenziata, ge
   const stato = a.fatta ? null : a.stato;
   const classeStato = stato?.tipo === 'consigliata' ? 'azione--consigliata' : stato?.tipo === 'bloccata' ? 'azione--bloccata' : '';
   return (
-    <li className={`azione flex flex-wrap items-start gap-2 py-1.5 ${a.fatta ? 'opacity-60' : ''} ${classeStato} ${evidenziata ? 'azione--evidenziata' : ''}`} aria-current={evidenziata ? 'true' : undefined}>
+    <li id={`voce-${a.uid}`} className={`azione flex flex-wrap items-start gap-2 py-1.5 ${classeStato} ${evidenziata ? 'azione--evidenziata' : ''}`} aria-current={evidenziata ? 'true' : undefined}>
       {/* il bersaglio è l'etichetta, non il quadratino: 44 px senza cambiarne l'aspetto */}
       {partitaId && <label className="touch flex items-start justify-center shrink-0 -my-1 pr-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 mt-2 shrink-0" checked={a.fatta} disabled={occupato || bloccata} onChange={(e) => void cambia(e.target.checked)} aria-label={`Fatto: ${a.azione.slice(0, 60)}`} /></label>}
       <ImmagineAzione a={a} />
@@ -102,6 +112,8 @@ export function Azione({ a, partitaId, onCambiata, onSullaMappa, evidenziata, ge
         {/* L3 (§4.4): il campo «Infiltrazioni» delle voci di Palazzo, accanto al cartellino del Palazzo */}
         <InfiltrazioniVoce a={a} partitaId={partitaId} onCambiata={onCambiata} />
         {chiediNote && <SceltaNote occupato={occupato} onScegli={(n) => void cambia(true, n ?? undefined, n === null)} onAnnulla={() => setChiediNote(false)} />}
+        {chiediAperture && <SceltaApertureVisita a={a} occupato={occupato} onConferma={(c) => void cambia(true, noteVisita.note, noteVisita.senzaPunti, c)} onAnnulla={() => setChiediAperture(false)} />}
+        {a.fatta && a.apertureDedali?.length && partitaId ? <ApertureVisitaRegistrata a={a} partitaId={partitaId} onCambiata={onCambiata} bloccata={bloccata || occupato} /> : null}
       </div>
       {gesti && onMenu && <PulsanteMenuVoce voce={a.azione} aperto={menuAperto} onCambia={onMenu} disabled={occupato || bloccata} />}
       {gesti && menuAperto && <GestiVoce gesti={gesti} disabled={occupato || bloccata} etichetta={`Gesti per: ${a.azione.slice(0, 60)}`} voce={a.uid} />}
@@ -274,7 +286,8 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
           : (
             <ul className="m-0 p-0 list-none divide-y divide-border-light" aria-label={f === 'giorno' ? 'Azioni di giorno' : 'Azioni di sera'}>
               {voci.map((v, i) => eEvento(v)
-                ? <VoceEvento key={v.uid} e={v} gesti={gesti(v, i, voci.length)} occupato={occupato} {...menuDi(v.uid)} />
+                ? <VoceEvento key={v.uid} e={v} gesti={gesti(v, i, voci.length)} occupato={occupato} {...menuDi(v.uid)}
+                    dichiarazioni={partitaId && v.effetti?.apertureDedali?.length ? <ApertureVisitaRegistrata a={v} partitaId={partitaId} onCambiata={onAggiorna} bloccata={occupato} /> : undefined} />
                 : <Azione key={v.uid} a={v} partitaId={partitaId} onCambiata={onAggiorna} onSullaMappa={onSullaMappa} evidenziata={azioneEvidenziata === v.uid}
                     gesti={gesti(v, i, voci.length)} bloccata={occupato} {...menuDi(v.uid)} />)}
             </ul>

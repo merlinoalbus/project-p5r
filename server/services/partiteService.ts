@@ -13,6 +13,7 @@ import { verificaObiettivi } from './obiettiviService.js';
 import { requisitoBloccante, semaforiConfidente } from './semaforiService.js';
 import { statoDisponibilitaPartita } from './disponibilitaService.js';
 import { meteoOra } from './meteoService.js';
+import { regaliDellaPartita, scriviRegaloPartita, type SceltaRegalo } from './regaliPartita.js';
 import type {
   CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, EffettiAzioneDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto,
   SemaforiRangoDto, SkillRiassuntoDto,
@@ -272,12 +273,13 @@ export function ranghiConfidenti(partitaId: number): Map<string, number> {
 }
 
 /** I regali consegnati, per Confidente, in una lettura sola (prima una query per Confidente: rilievo P1' della verifica). */
-function regaliFatti(partitaId: number, chiave?: string): Map<string, string[]> {
-  const righe = (chiave === undefined
-    ? prepared('SELECT confidente_chiave, regalo FROM regalo_partita WHERE partita_id = ? ORDER BY fatto_at').all(partitaId)
-    : prepared('SELECT confidente_chiave, regalo FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ? ORDER BY fatto_at').all(partitaId, chiave)) as Array<{ confidente_chiave: string; regalo: string }>;
-  const perConfidente = new Map<string, string[]>();
-  for (const r of righe) { const l = perConfidente.get(r.confidente_chiave) ?? []; l.push(r.regalo); perConfidente.set(r.confidente_chiave, l); }
+function regaliFatti(partitaId: number, chiave?: string): Map<string, { nomi: string[]; catalogo: string[] }> {
+  const perConfidente = new Map<string, { nomi: string[]; catalogo: string[] }>();
+  for (const r of regaliDellaPartita(partitaId, chiave)) {
+    const l = perConfidente.get(r.confidente) ?? { nomi: [], catalogo: [] };
+    l.nomi.push(r.nome); if (r.catalogo && !l.catalogo.includes(r.catalogo)) l.catalogo.push(r.catalogo);
+    perConfidente.set(r.confidente, l);
+  }
   return perConfidente;
 }
 
@@ -287,7 +289,7 @@ function regaliFatti(partitaId: number, chiave?: string): Map<string, string[]> 
  * stava in una cache di modulo con la firma su `partita.updated_at`, che alcune scritture (i collegamenti alla guida) non toccano:
  * semafori vecchi.
  */
-function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi: Map<string, number>, regali: Map<string, string[]>): ConfidentePartitaDto[] {
+function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi: Map<string, number>, regali: Map<string, { nomi: string[]; catalogo: string[] }>): ConfidentePartitaDto[] {
   // L6: un requisito è una condizione del vocabolario unico (anche una lettura, un luogo, un invito): lo stato è quello completo del
   // valutatore, con i ranghi di TUTTI i Confidenti
   const stato = { ...statoDisponibilitaPartita(partitaId), ranghiConfidenti: ranghi };
@@ -298,7 +300,7 @@ function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi
       punti: c.punti, puntiNecessari: c.rango >= 10 ? null : c.punti_necessari,
       mancanti: c.rango >= 10 || c.punti_necessari === null ? null : round2(Math.max(0, c.punti_necessari - c.punti)),
       personaArcanoInScorta: c.in_scorta === 1,
-      regaliFatti: regali.get(c.chiave) ?? [],
+      regaliFatti: regali.get(c.chiave)?.nomi ?? [], regaliFattiCatalogo: regali.get(c.chiave)?.catalogo ?? [],
       note: c.note, semafori, updatedAt: c.updated_at,
       bloccato: bloccoRango(semafori, c.rango + 1),
     };
@@ -325,15 +327,12 @@ export function confidente(partitaId: number, chiave: string): ConfidentePartita
 }
 
 /** Segna un regalo come consegnato (o non consegnato) al Confidente nella partita. */
-export function impostaRegaloFatto(partitaId: number, chiave: string, regalo: string, fatto: boolean): ConfidentePartitaDto {
+export function impostaRegaloFatto(partitaId: number, chiave: string, regalo: SceltaRegalo, fatto: boolean): ConfidentePartitaDto {
   rigaPartita(partitaId);
   if (!prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(chiave)) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${chiave}' non esiste.`);
-  const nome = regalo.trim();
-  if (!nome) throw httpErrors.badRequest('regalo-vuoto', 'Indica il nome del regalo.');
   const adesso = nowIso();
   getDb().transaction(() => {
-    if (fatto) prepared('INSERT OR IGNORE INTO regalo_partita (partita_id, confidente_chiave, regalo, fatto_at) VALUES (?, ?, ?, ?)').run(partitaId, chiave, nome, adesso);
-    else prepared('DELETE FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ? AND regalo = ?').run(partitaId, chiave, nome);
+    scriviRegaloPartita(partitaId, chiave, regalo, fatto);
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
   return confidente(partitaId, chiave);

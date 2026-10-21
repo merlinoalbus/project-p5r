@@ -19,6 +19,7 @@ import { useAssetStore } from '../stores/assetStore';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
+import { AbbinamentiDaApprovare } from '../components/catalogo/AbbinamentiDaApprovare';
 
 /** Impostazioni dell'app. */
 export function ImpostazioniPage() {
@@ -66,6 +67,7 @@ export function ImpostazioniPage() {
       <ImmaginiCaricate />
       <TraduzioniEditor />
       <MieiDati />
+      <AbbinamentiDaApprovare />
       <Cestino />
       <PacchettoGioco />
       <BackupIstanza />

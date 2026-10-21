@@ -68,7 +68,20 @@ export const EVENTI_STORIA = [
   { chiave: 'pietra-sacra-comprata', nome: 'Pietra Sacra comprata da Chihaya' },
   { chiave: 'chiamata-kawakami-pagata', nome: 'Chiamata a Kawakami pagata' },
   { chiave: 'oratore-shibuya-ascoltato', nome: 'Oratore di Shibuya ascoltato' },
+  // Aperture dichiarate nella visita ai Memento del Diario, mai dedotte dalla data o dal completamento delle aree.
+  // `dedalo` collega il fatto alla scheda esistente; Jose usa sette di questi nove fatti.
+  { chiave: 'dedalo-qimranut-aperto', nome: 'Dedalo di Qimranut aperto', dedalo: 'mementos-01-qimranut' },
+  { chiave: 'dedalo-aiyatsbus-aperto', nome: 'Dedalo di Aiyatsbus aperto', dedalo: 'mementos-02-aiyatsbus' },
+  { chiave: 'dedalo-chemdah-aperto', nome: 'Dedalo di Chemdah aperto', dedalo: 'mementos-03-chemdah' },
+  { chiave: 'dedalo-kaitul-aperto', nome: 'Dedalo di Kaitul aperto', dedalo: 'mementos-04-kaitul' },
+  { chiave: 'dedalo-akzeriyyuth-aperto', nome: 'Dedalo di Akzeriyyuth aperto', dedalo: 'mementos-05-akzeriyyuth' },
+  { chiave: 'dedalo-adyeshach-aperto', nome: 'Dedalo di Adyeshach aperto', dedalo: 'mementos-06-adyeshach' },
+  { chiave: 'dedalo-sheriruth-aperto', nome: 'Dedalo di Sheriruth aperto', dedalo: 'mementos-07-sheriruth' },
+  { chiave: 'dedalo-iweleth-aperto', nome: 'Dedalo di Iweleth aperto', dedalo: 'mementos-08-iweleth' },
+  { chiave: 'dedalo-daat-aperto', nome: 'Dedalo di Da’at aperto', dedalo: 'mementos-09-daat' },
 ] as const;
+/** Le aperture selezionabili nella visita: riferimenti ai nove dedali esistenti, non un secondo elenco di avanzamenti. */
+export const APERTURE_DEDALI = EVENTI_STORIA.flatMap((e) => 'dedalo' in e ? [{ chiave: e.chiave, nome: e.nome, dedalo: e.dedalo }] : []);
 /** Il Ladro che fa avvenire l'evento, o null se l'evento si segna a mano. */
 export function membroDellEvento(chiave: string): string | null {
   const e = EVENTI_STORIA.find((x) => x.chiave === chiave);
@@ -86,6 +99,8 @@ export type RequisitoSpillo =
   | { tipo: 'fascia'; fascia: 'giorno' | 'sera' }
   | { tipo: 'piove' }
   | { tipo: 'meteo'; condizione: 'non-piove' }
+  /** L7: le allerte hanno giorni e fasce nel calendario; non si duplicano le loro date nelle offerte. */
+  | { tipo: 'meteo'; condizione: 'senza-allerta'; allerta: string }
   | { tipo: 'giorno-settimana'; giorni: string[] }
   | { tipo: 'stagione'; stagione: string }
   | { tipo: 'quartiere'; quartiere: string }
@@ -99,6 +114,8 @@ export type RequisitoSpillo =
   | { tipo: 'avviso'; testo: string }
   /** L'arco della storia è arrivato almeno a questo Palazzo: lo dice la data di gioco, perché il gioco li impone in ordine. */
   | { tipo: 'arco'; dungeon: string }
+  /** La finestra attuale del Palazzo, incluse entrambe le estremità; distinta dall'arco che vale anche dopo. */
+  | { tipo: 'finestra-palazzo'; dungeon: string }
   // — progressi —
   | { tipo: 'palazzo'; dungeon: string }
   | { tipo: 'dote'; dote: string; rango: number }
@@ -158,7 +175,7 @@ const CONDIZIONI_PER_GRUPPO = 20;
  * guida** (2026-10-11), che ne è il fratello: chi la scrive vuole il pin solo prima, o solo dopo, quel passo della guida.
  */
 export const CONDIZIONI_DI_PRESENZA = [
-  'data', 'intervallo', 'fascia', 'piove', 'meteo', 'giorno-settimana', 'stagione', 'quartiere', 'arco', 'spillo', 'voce-guida',
+  'data', 'intervallo', 'finestra-palazzo', 'fascia', 'piove', 'meteo', 'giorno-settimana', 'stagione', 'quartiere', 'arco', 'spillo', 'voce-guida',
   // L6: dire se un posto c'è (un quartiere aperto dal suo ritrovo, un luogo aperto da un invito) è presenza come la data
   'da-subito', 'luogo', 'invito',
 ] as const;
@@ -245,6 +262,7 @@ export function dataLeggibile(d: string): string {
 
 /** Nomi da mostrare al posto delle chiavi: chi li ha li passa, altrimenti resta la chiave. */
 export interface NomiCondizioni {
+  allerte?: Record<string, string>;
   articoli?: Record<string, string>;
   letture?: Record<string, string>;
   confidenti?: Record<string, string>;
@@ -283,7 +301,7 @@ export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni
     case 'intervallo': return r.dal === r.al ? `solo il ${dataLeggibile(r.dal)}` : `solo dal ${dataLeggibile(r.dal)} al ${dataLeggibile(r.al)}`;
     case 'fascia': return `solo di ${r.fascia}`;
     case 'piove': return 'solo nei giorni di pioggia';
-    case 'meteo': return 'non disponibile in caso di pioggia';
+    case 'meteo': return r.condizione === 'senza-allerta' ? `non disponibile con ${nomi.allerte?.[r.allerta] ?? r.allerta}` : 'non disponibile in caso di pioggia';
     case 'giorno-settimana': return `solo ${congiunzione(r.giorni.map((g) => GIORNI_SETTIMANA.find((x) => x.chiave === g)?.nome ?? g))}`;
     case 'stagione': return `solo in ${r.stagione}`;
     case 'quartiere': return `da quando si sblocca ${nomi.quartieri?.[r.quartiere] ?? r.quartiere}`;
@@ -292,6 +310,7 @@ export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni
     case 'invito': return `dopo ${nomi.inviti?.[r.invito] ?? `l’invito ${r.invito}`}`;
     case 'avviso': return `Avviso: ${r.testo}`;
     case 'arco': return `dall'arco del ${nomePalazzo(r.dungeon, nomi)}`;
+    case 'finestra-palazzo': return `durante la finestra del ${nomePalazzo(r.dungeon, nomi)}`;
     case 'palazzo': return `dopo il ${nomePalazzo(r.dungeon, nomi)}`;
     case 'dote': return `${nomeDote(r.dote)} Rango ${r.rango}`;
     case 'confidente': return `Rango Confidente ${nomi.confidenti?.[r.confidente] ?? r.confidente} ${r.rango}`;
@@ -361,7 +380,11 @@ export function normalizzaRequisitoSpillo(x: unknown, profondita = 0): Requisito
     case 'intervallo': { const dal = testoPulito(o.dal, 5); const al = testoPulito(o.al, 5); return dal && al && dataValida(dal) && dataValida(al) && ordineGioco(dal) <= ordineGioco(al) ? { tipo: 'intervallo', dal, al } : null; }
     case 'fascia': return o.fascia === 'giorno' || o.fascia === 'sera' ? { tipo: 'fascia', fascia: o.fascia } : null;
     case 'piove': return { tipo: 'piove' };
-    case 'meteo': return o.condizione === 'non-piove' ? { tipo: 'meteo', condizione: 'non-piove' } : null;
+    case 'meteo': {
+      if (o.condizione === 'non-piove') return { tipo: 'meteo', condizione: 'non-piove' };
+      const allerta = chiavePulita(o.allerta, 120);
+      return o.condizione === 'senza-allerta' && allerta ? { tipo: 'meteo', condizione: 'senza-allerta', allerta } : null;
+    }
     case 'giorno-settimana': {
       if (!Array.isArray(o.giorni)) return null;
       const giorni = GIORNI_SETTIMANA.map((g) => g.chiave).filter((g) => (o.giorni as unknown[]).includes(g));
@@ -376,6 +399,7 @@ export function normalizzaRequisitoSpillo(x: unknown, profondita = 0): Requisito
     // R6-01b: un «manuale» di un pacchetto vecchio diventa un avviso con lo stesso testo (non blocca mai)
     case 'manuale': { const testo = testoPulito(o.testo ?? o.descrizione, 300); return testo ? { tipo: 'avviso', testo } : null; }
     case 'arco': { const dungeon = chiavePulita(o.dungeon, 60); return dungeon && (ARCHI_STORIA as readonly string[]).includes(dungeon) ? { tipo: 'arco', dungeon } : null; }
+    case 'finestra-palazzo': { const dungeon = chiavePulita(o.dungeon, 60); return dungeon && PALAZZI_CONDIZIONE.some((p) => p.chiave === dungeon) ? { tipo: 'finestra-palazzo', dungeon } : null; }
     case 'palazzo': { const dungeon = chiavePulita(o.dungeon, 60); return dungeon ? { tipo: 'palazzo', dungeon } : null; }
     case 'dote': { const dote = testoPulito(o.dote, 20); const rango = intero(o.rango, 1, 5); return dote && eDote(dote) && rango ? { tipo: 'dote', dote, rango } : null; }
     case 'confidente': { const confidente = chiavePulita(o.confidente, 60); const rango = intero(o.rango, 1, 10); return confidente && rango ? { tipo: 'confidente', confidente, rango } : null; }

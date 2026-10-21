@@ -53,6 +53,8 @@ export function versioneSchemaCodice(): number {
  */
 interface Riferimento {
   tabella: string; colonna: string; entita: string; tabellaGioco: string; colonnaGioco: string;
+  /** Riferimento introdotto dopo le prime versioni del file delle partite. */
+  colonnaOpzionale?: boolean;
   /** Condizione sulle righe delle partite (es. il tipo di lettura). */
   filtro?: string;
   /** Condizione sulle righe di gioco che valgono come destinazione (es. le attività che sono videogiochi). */
@@ -97,6 +99,7 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
   { tabella: 'trofeo_partita', colonna: 'trofeo_chiave', entita: 'trofeo', tabellaGioco: 'trofeo', colonnaGioco: 'chiave' },
   { tabella: 'confidente_partita', colonna: 'confidente_chiave', entita: 'Confidente', tabellaGioco: 'confidente', colonnaGioco: 'chiave' },
   { tabella: 'regalo_partita', colonna: 'confidente_chiave', entita: 'Confidente', tabellaGioco: 'confidente', colonnaGioco: 'chiave' },
+  { tabella: 'regalo_partita', colonna: 'catalogo_chiave', entita: 'oggetto', tabellaGioco: 'catalogo_oggetto', colonnaGioco: 'chiave', colonnaOpzionale: true },
   { tabella: 'requisito_partita', colonna: 'confidente_chiave', entita: 'Confidente', tabellaGioco: 'confidente', colonnaGioco: 'chiave' },
   { tabella: 'incontro_confidente_partita', colonna: 'confidente_chiave', entita: 'Confidente', tabellaGioco: 'confidente', colonnaGioco: 'chiave' },
   { tabella: 'persona_posseduta', colonna: 'persona_id', entita: 'Persona', tabellaGioco: 'persona', colonnaGioco: 'id' },
@@ -140,6 +143,7 @@ export function orfaniPartite(db: Database.Database, schemaGioco = 'main', schem
   const out: OrfanoPartiteDto[] = [];
   for (const r of RIFERIMENTI_PARTITE) {
     if (!utente.has(r.tabella)) continue;
+    if (r.colonnaOpzionale && !(db.prepare(`PRAGMA "${schemaUtente}".table_info("${r.tabella}")`).all() as Array<{ name: string }>).some((c) => c.name === r.colonna)) continue;
     const dove = `"${schemaUtente}"."${r.tabella}" WHERE "${r.colonna}" IS NOT NULL${r.filtro ? ` AND ${r.filtro}` : ''}`;
     const manca = !gioco.has(r.tabellaGioco);
     const condizione = manca ? '' : ` AND "${r.colonna}" NOT IN (SELECT "${r.colonnaGioco}" FROM "${schemaGioco}"."${r.tabellaGioco}" WHERE "${r.colonnaGioco}" IS NOT NULL${r.filtroGioco ? ` AND ${r.filtroGioco}` : ''})`;

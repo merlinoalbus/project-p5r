@@ -36,7 +36,6 @@ export function ModuloFilm({ dati, imposta, disabilitato }: PropsModulo) {
         <Blocco largo>
           <SelettoreIcone compatto etichetta="Dove si vede" valore={testoDi(dati.dove)} opzioni={OPZIONI_DOVE} disabilitato={disabilitato} onCambia={cambiaDove} />
         </Blocco>
-        <Campo nome="prezzo" etichetta="Prezzo in yen" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} />
         {cinema
           ? <p className="editor-mappa__campo m-0 justify-center text-[12px] text-text-muted">Al cinema un film si completa in una visione.</p>
           : <Campo nome="sessioni" etichetta="Visioni per completarlo" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Un DVD di solito 2" />}

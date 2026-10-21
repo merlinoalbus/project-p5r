@@ -1,5 +1,43 @@
 # L6 — riscontri sul codice e richieste successive
 
+## Bonifica locale successiva all'audit — da riesaminare e rilasciare
+
+Il mandato successivo chiede la bonifica e il completamento di L5–L7 con rilascio unico. La soluzione ha ricevuto il gate distinto prima delle modifiche; dopo l'implementazione e le correzioni richieste, `audit_documenti_originali` ha **approvato il riesame statico A56-01…08**. Non è una certificazione del runtime o dei DB reali, né l'approvazione globale di L6/L7.
+
+| Rilievo | Attuazione locale |
+|---|---|
+| A56-01/02/03 | Quartiere dalla FK anche negli inviti; composizione della presenza condivisa fra Area/visore; tre link Confidente corretti. Dettagli in [difetti L5](../L5/difetti.md). |
+| A56-04 | `shared/dipendenzeCondizioni.ts`: influenza positiva della lettura con cofattori booleani, ROBDD e ricerca esatta di soddisfacibilità quando il budget di memoria del diagramma è raggiunto. Nessun risultato omesso per soglia. Avvisi rimossi come operandi anche sotto OR/NON; contraddizioni e negazioni non generano un falso «Apre». Cache riferita alla formula immutata. |
+| A56-05 | `sblocco_json` aggiuntivo del negozio, distinto dalle condizioni storiche della 070; editor, schema, riferimenti, consumatori e snapshot/import aggiornati. |
+| A56-06 | Nuovo tipo `finestra-palazzo` con vocabolario/editor/descrizione/valutatore e controllo dei riferimenti. Legge le colonne del Palazzo; `arco` mantiene la propria semantica. La 122 converte solo copie esatte su passaggi della guida con provenienza riconosciuta; pin utente/adottati e casi ambigui restano intatti. Visita mirata delle immagini di spillo nel cestino, senza riscritture generiche. Il generatore dei passaggi usa il riferimento unico. |
+| A56-07 | `copreIlGiorno` percorre AND/OR/NON annidati; foglie non temporali indeterminate, avvisi non operandi. Solo il falso esclude un candidato. Date/intervalli e nuovo riferimento finestra condividono il significato usato dal valutatore. Destinazione unica metro/diario conservata. |
+| A56-08 | Gli effetti visibili dei libri escludono `sblocca-luogo` tramite helper condiviso, senza cancellare dati. Anche i campi API storici `sbloccaLuogo` derivano ora da `apre`, non dall'effetto vecchio. Integrazione del lettore catalogo L7 coordinata separatamente. |
+
+Migrazione `122_bonifica_luoghi_condizioni.ts` predisposta per essere applicata dopo M7=121; **non registrata né eseguita da questo esecutore**. Il resoconto delle conversioni/esclusioni è progettato nella voce `dati_guida.bonifica-finestre-122` del DB dell'istanza, con riferimenti alle righe e motivi: nessuna misura sui dati attuali è inventata, nessun contenuto personale viene commesso.
+
+Tre riesami propri svolti: semantica/cicli/avvisi; provenienza e conservazione di condizioni/snapshot/import/cestino; consumatori, editor, DTO e presentazione. Typecheck integrato eseguito con exit 0 durante il lavoro e lint mirato senza avvisi; controlli finali globali, revisione avversariale dell'implementazione, pubblicazione e osservazione p5s restano da completare. Zero test, nessuna esecuzione di migrazioni, nessuna prova in scrittura.
+
+R6-19 rimane da completare con inventario corrente e riconciliazione delle fonti; il vecchio elenco storico non diventa una prova per effetto della bonifica. I requisiti dati/runtime della matrice rimangono aperti. I confini originari di calendario L9 e gesti Diario L10 non sono una nuova riduzione del mandato L8–L11.
+
+Prima lettura distinta dell'implementazione: recepiti il criterio `ignoto` per la visibilità dell'Area e la composizione delle condizioni proprie con gli inviti prima di calcolare i libri che aprono i posti. Non si confonde un invito registrato con le condizioni attuali che consentono di registrarlo.
+
+Esito distinto successivo: verificati staticamente helper ROBDD→SAT e avvisi, vocabolario/editor/proiezione della finestra, migrazione 122 e immagini del cestino con guardie di provenienza, sblocco negozi e roundtrip di schema/modulo/lettori/import/ripristino. Nessun ulteriore blocco sui rilievi A56. Restano controlli globali e verifiche di rilascio del coordinatore; gli acquisti L7 e il filtro della presentazione generale del Catalogo sono sotto responsabilità dell'esecutore L7.
+
+## Audit indipendente del 21 ottobre — esito sul codice pubblicato precedente
+
+L6 pubblicato in `c025154a` **non è integralmente conforme**. Lorentz e seconda passata distinta confermano i rilievi; nessuna correzione applicata nell'audit.
+
+| Rilievo | Stato |
+|---|---|
+| A56-01/02/03 — quartiere nella presenza, condizioni pin/elenco, link al Confidente | Aperti, condivisi con L5. |
+| A56-04 — «Apre» include letture sotto NON | Bug semantico aperto. |
+| A56-05 — sblocco proprio negozi non modificabile né valutato | Omissione aperta. |
+| A56-06 — copie finestre lasciate nella migrazione 118 | Scostamento aperto; non autorizza conversione indiscriminata ad `arco` che cambi gli esiti. |
+| A56-07 — selezione ingresso ignora date annidate | Limite funzionale aperto, controesempio statico. |
+| A56-08 — effetto storico «Sblocca» ancora mostrato dai libri | Nuovo rilievo della seconda passata, aperto. |
+
+Specifiche originali `43ad8889`, evidenze su codice pubblicato e limiti nel [rapporto di audit](../../audit-conformita-2026-10-21.md). Le note successive sono storia del precedente rilascio, non certificazione del codice corrente o della conservazione completa dei dati.
+
 ## Collegamenti frontend — riscontro aggiornato
 
 La mancanza iniziale di F1–F5 è stata affrontata e pubblicata in `63e12734`: anteprima server e tipi nell'editor, inviti nelle tre viste, editor dei requisiti, lettura degli sblocchi e disponibilità del server in città/metro. Pipeline #64 riuscita e scheda Asakusa osservata dopo il rilascio. Non dichiarare L6 completo: restano descrizioni residue, copertura completa da dimostrare e prove funzionali dell'utente (`copertura-ripresa.md`). Le sezioni sulle modifiche locali sotto documentano il lavoro poi incluso nel rilascio.

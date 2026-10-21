@@ -46,6 +46,7 @@ interface Elenchi { base: ElenchiCondizioni; extra: ElenchiRegole; spilli: PinCo
 /** Le voci offerte per ogni tipo di campo: dalla Guida quando dipendono dai dati, fisse altrimenti. */
 function opzioniPer(tipo: TipoCampo, e: Elenchi): OpzioneRicerca[] {
   switch (tipo) {
+    case 'allerta': return e.extra.allerte ?? [];
     case 'fascia': return [{ chiave: 'giorno', nome: 'giorno' }, { chiave: 'sera', nome: 'sera' }];
     case 'stagione': return STAGIONI.map((s) => ({ chiave: s.chiave, nome: s.nome }));
     case 'quartiere': return e.extra.quartieri ?? e.base.quartieri.map((q) => ({ chiave: q.chiave, nome: q.nome }));
@@ -176,7 +177,7 @@ function Riga({ condizione, negata, onCambia, onRimuovi, elenchi, nomi, disabili
   const testo = descriviRequisitoSpillo(condizione, nomi);
   if (def.soloLettura) {
     const invito = condizione.tipo === 'invito' ? elenchi.extra.inviti?.find((i) => i.chiave === condizione.invito) : undefined;
-    return <div className="condizione-riga" role="note"><span>{negata ? `Non: ${testo}` : testo}</span>{invito && <Link className="touch inline-flex items-center" to={`/guida/confidenti/${encodeURIComponent(invito.confidente)}`}>Gestisci dal Confidente</Link>}<span className="condizione-origine">{def.origine}</span></div>;
+    return <div className="condizione-riga" role="note"><span>{negata ? `Non: ${testo}` : testo}</span>{invito && <Link className="touch inline-flex items-center" to={`/confidenti/${encodeURIComponent(invito.confidente)}`}>Gestisci dal Confidente</Link>}<span className="condizione-origine">{def.origine}</span></div>;
   }
   return (
     <div className={`condizione-riga ${negata ? 'condizione-riga--negata' : ''}`} role="group" aria-label={`Condizione: ${negata ? 'non ' : ''}${testo}`}>
@@ -271,7 +272,7 @@ export function CondizioniEditor({ condizioni, onCambia, elenchi, disabilitato, 
     const e = dati.dati;
     /** Da un elenco di voci a un dizionario chiave → nome. */
     const mappa = (o: Array<{ chiave: string; nome: string }>) => Object.fromEntries(o.map((x) => [x.chiave, x.nome]));
-    return { ...nomiDaElenchi(e.base ?? ELENCHI_VUOTI), luoghi: mappa(e.extra.luoghi ?? []), inviti: mappa(e.extra.inviti ?? []), persone: mappa(e.extra.persone), abilita: mappa(e.extra.abilita), articoli: mappa(e.extra.articoli), letture: mappa(e.extra.letture), attivita: mappa(e.extra.attivita), negozi: mappa(e.extra.negozi), squadra: mappa(e.extra.squadra),
+    return { ...nomiDaElenchi(e.base ?? ELENCHI_VUOTI), allerte: mappa(e.extra.allerte ?? []), luoghi: mappa(e.extra.luoghi ?? []), inviti: mappa(e.extra.inviti ?? []), persone: mappa(e.extra.persone), abilita: mappa(e.extra.abilita), articoli: mappa(e.extra.articoli), letture: mappa(e.extra.letture), attivita: mappa(e.extra.attivita), negozi: mappa(e.extra.negozi), squadra: mappa(e.extra.squadra),
       spilli: Object.fromEntries(e.spilli.map((p) => [p.chiave, { nome: p.nome, tipo: p.tipo, mappa: p.gruppo, parola: p.parola }])),
       voci: Object.fromEntries(e.voci.map((v) => [v.chiave, { nome: v.nome, posto: v.gruppo }])) };
   }, [dati.dati]);

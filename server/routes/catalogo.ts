@@ -10,7 +10,8 @@ import { eliminaNelCestino } from '../services/luoghiScritture.js';
 
 /** La conferma di un'eliminazione con contenuti (L5, luoghi e negozi). */
 const queryConferma = z.object({ conferma: z.enum(['0', '1']).optional() });
-import { oggettiSelezionabili, tuttiGliOggettiSelezionabili } from '../services/oggettiSelezionabili.js';
+import { elencaCatalogoOggetti } from '../services/catalogoOggettiLetture.js';
+import { categoriaDelListino } from '../../shared/catalogo.js';
 import { SCHEMI_CATALOGO, SCHEMI_CATALOGO_PARZIALI, bodyNascondi, paramsElementoCatalogo, paramsTipoCatalogo, queryNascosti } from '../schemas/catalogo.js';
 import { httpErrors } from '../utils/httpError.js';
 import type { TipoCatalogo } from '../../shared/types.js';
@@ -42,7 +43,8 @@ router.get('/', (_req, res) => {
  * quindi registrata dopo questa rotta non verrebbe mai raggiunta — `oggetti-di` finirebbe dentro
  * `tipo` e la validazione risponderebbe «tipo di catalogo sconosciuto». */
 router.get('/oggetti-di/:categoria', validate({ params: z.object({ categoria: z.string().min(1).max(80) }) }), (req, res) => {
-  res.json(oggettiSelezionabili(String(req.params.categoria)));
+  const categoria = String(req.params.categoria);
+  res.json(elencaCatalogoOggetti().filter((o) => o.categoria === categoria || categoriaDelListino(o.categoria, o.sottocategoria) === categoria));
 });
 
 /** **Tutto** quello che l'app conosce, senza filtro di categoria.
@@ -50,7 +52,7 @@ router.get('/oggetti-di/:categoria', validate({ params: z.object({ categoria: z.
  * Un negozio non vende una categoria, vende una cosa: chi compila cerca «Il magnifico ladro», non
  * «libro». La categoria arriva con l'oggetto scelto, invece di doverla indovinare prima. */
 router.get('/oggetti', (_req, res) => {
-  res.json(tuttiGliOggettiSelezionabili());
+  res.json(elencaCatalogoOggetti());
 });
 
 /** Le righe toccate dall'utente; con `?nascosti=1` le sole nascoste (pagina «Rimossi»), anche di un solo negozio. */

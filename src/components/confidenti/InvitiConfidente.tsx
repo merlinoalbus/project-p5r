@@ -29,7 +29,7 @@ export function InvitiConfidente({ filtro, onCambiato }: { filtro: Omit<NonNulla
       : dati.caricamento && !dati.dati ? <p className="m-0 text-[13px]" role="status">Caricamento degli inviti…</p>
         : <ul className="m-0 flex list-none flex-col gap-3 p-0">{dati.dati?.map((invito) => <li key={invito.chiave} className="flex flex-col gap-1 text-[13px]">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <Link className="touch inline-flex items-center" to={`/guida/confidenti/${encodeURIComponent(invito.confidente)}`}>{invito.confidenteNome}</Link>
+            <Link className="touch inline-flex items-center" to={`/confidenti/${encodeURIComponent(invito.confidente)}`}>{invito.confidenteNome}</Link>
             {invito.data && <span>{dataLeggibile(invito.data)}</span>}
             <span>Apre: {invito.apre.casa ? <Link to={invito.apre.casa} className="touch inline-flex items-center">{invito.apre.nome}</Link> : invito.apre.nome}</span>
           </div>

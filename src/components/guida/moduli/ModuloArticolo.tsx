@@ -1,49 +1,54 @@
 // ============================================================
-// ModuloArticolo — prima si sceglie l'oggetto; se non c'è, si inserisce a mano con categoria a tessere ed effetto dichiarato
+// ModuloArticolo — l'offerta sceglie un'identità del catalogo, senza copiarne nome o proprietà
 // ============================================================
 //
-// Con un oggetto collegato nome, categoria, effetto e statistiche vengono da lui e qui non si
-// digitano: resta il prezzo, la quantità, il destinatario, la nota e le condizioni di sblocco
-// (che dal 2026-09 stanno sull'articolo, non sul negozio). Senza collegamento si scrive tutto, e
-// l'effetto si dichiara per famiglia. Un collegamento salvato che l'archivio non ha più si
-// segnala e si conserva: non si scollega in silenzio.
+// Prezzo, limite d'acquisto, nota e condizioni sono dell'offerta. Le righe storiche senza
+// identità restano modificabili a mano; le nuove scelgono un oggetto. Una scelta non più
+// disponibile viene segnalata e conservata, mai cancellata durante il caricamento.
 // ============================================================
 
+import { Link } from 'react-router-dom';
+import { CATEGORIA_OGGETTO } from '../../../../shared/catalogo';
+import { SceltaNelCatalogo } from '../../catalogo/SceltaCatalogoOggetto';
+import { useCarica } from '../../../hooks/useCarica';
+import { getCatalogoOggetti } from '../../../services/api/catalogoOggetti';
 import { Selettore } from '../../shared/Selettore';
 import { SelettoreIcone } from '../../shared/SelettoreIcone';
 import { EditorEffetto } from '../EditorEffetto';
-import { SceltaOggetto } from '../SceltaOggetto';
 import { NOME_CATEGORIA_ARTICOLO, PERSONAGGI } from '../../../utils/negozi';
 import type { EffettoOggetto } from '../../../../shared/effettiOggetto';
-import type { OggettoSelezionabileDto } from '../../../types';
-import { numeroDi, testoDi, type PropsModulo } from './base';
+import { testoDi, type PropsModulo } from './base';
 import { Blocco, Campo, Griglia } from './campi';
 import { useNomiPerEffetti } from './nomiPerEffetti';
+import { CostoOfferta } from './CostoOfferta';
 
 const OPZIONI_CATEGORIA = Object.entries(NOME_CATEGORIA_ARTICOLO).map(([chiave, nome]) => ({ chiave, nome }));
 const OPZIONI_PER = [{ chiave: 'tutti', nome: 'Tutti' }, ...PERSONAGGI.map((p) => ({ chiave: p, nome: p }))];
 
-/**
- * I campi di un articolo. In cima la scelta dell'oggetto: collegandolo copia fonte, chiave, nome e categoria (e il suo
- * prezzo, se l'articolo non ne ha uno); scollegandolo o scegliendo «a mano» azzera il collegamento. Solo a mano
- * compaiono nome, categoria a tessere, effetto dichiarato e statistiche; prezzo, quantità, destinatario e nota ci
- * sono sempre. Per una riga esistente l'oggetto collegato si ritrova nell'archivio appena arriva.
- */
+/** Il selettore comune risolve anche gli alias; i dati risolti servono solo all'anteprima. */
 export function ModuloArticolo({ dati, imposta, disabilitato, nuovo }: PropsModulo) {
-  const collegato = (dati._collegato as OggettoSelezionabileDto | null) ?? null;
-  const aMano = dati._aMano === true;
-  const nomi = useNomiPerEffetti(aMano && !collegato);
+  const chiave = testoDi(dati.catalogo_chiave);
+  const elenco = useCarica(() => getCatalogoOggetti(), []);
+  const catalogo = { oggetti: elenco.dati, caricamento: elenco.caricamento, errore: elenco.errore, onRicarica: () => void elenco.ricarica() };
+  const collegato = elenco.dati?.find((o) => o.chiave === chiave);
+  const aMano = !chiave && !nuovo && dati._aMano === true;
+  const nomi = useNomiPerEffetti(aMano);
   return (
     <div className="flex flex-col gap-3">
-      <SceltaOggetto collegato={collegato} aMano={aMano} disabilitato={disabilitato}
-        collegamento={nuovo ? undefined : { fonte: (dati.oggetto_fonte as string | null) ?? null, chiave: (dati.oggetto_chiave as string | null) ?? null }}
-        onArchivio={(o) => { if (o && !collegato) imposta({ _collegato: o }); }}
-        onCollega={(o) => imposta({ _collegato: o, _aMano: false, oggetto_fonte: o.fonte, oggetto_chiave: o.chiave, nome: o.nome, categoria: o.categoria, prezzo: numeroDi(dati.prezzo) ?? o.prezzo })}
-        onScollega={() => imposta({ _collegato: null, _aMano: true, oggetto_fonte: null, oggetto_chiave: null })}
-        onAMano={() => imposta({ _aMano: true, oggetto_fonte: null, oggetto_chiave: null })} />
-      {aMano && !collegato && (
+      <SceltaNelCatalogo {...catalogo} valore={chiave} disabilitato={disabilitato}
+        onScegli={(o) => imposta({ catalogo_chiave: o.chiave, _aMano: false })} />
+      {collegato && <div className="flex min-w-0 flex-col gap-1 text-[13px]">
+        <Link className="touch inline-flex items-center self-start" to={collegato.casa}>{collegato.nome}</Link>
+        <span className="text-text-muted">{CATEGORIA_OGGETTO[collegato.categoria].nome}</span>
+        {collegato.effetto && <p className="m-0 whitespace-pre-wrap">{collegato.effetto}</p>}
+      </div>}
+      {chiave && !nuovo && <button type="button" className="btn btn-ghost touch self-start" disabled={disabilitato}
+        onClick={() => imposta({ catalogo_chiave: null, _aMano: true, oggetto_fonte: null, oggetto_chiave: null })}>Scollega l’oggetto</button>}
+      <p className="m-0 text-[12px] text-text-muted">Nome, categoria ed effetto si modificano nel catalogo dell’oggetto. Qui cambi solo la sua offerta nel negozio.</p>
+      {aMano && (
         <Griglia>
-          <Campo nome="nome" etichetta="Nome dell'articolo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={160} largo />
+          <Blocco largo><p className="m-0 text-[13px]">Questa offerta non ha un oggetto collegato. Puoi conservarne i dati storici o scegliere un’identità dal catalogo; scollegare non copia il nome dell’oggetto.</p></Blocco>
+          <Campo nome="nome" etichetta="Nome dell’offerta non collegata" dati={dati} imposta={imposta} disabilitato={disabilitato} max={160} largo />
           <Blocco largo>
             <SelettoreIcone compatto etichetta="Categoria" valore={testoDi(dati.categoria) || 'altro'} opzioni={OPZIONI_CATEGORIA} disabilitato={disabilitato} onCambia={(categoria) => imposta({ categoria })} />
           </Blocco>
@@ -54,14 +59,14 @@ export function ModuloArticolo({ dati, imposta, disabilitato, nuovo }: PropsModu
             </fieldset>
           </Blocco>
           <Campo nome="statistiche" etichetta="Statistiche" dati={dati} imposta={imposta} disabilitato={disabilitato} max={400} aiuto="Per esempio: Attacco 120 · Precisione 90" largo />
+          <Blocco>
+            <Selettore etichetta="Per chi" valore={testoDi(dati.per)} vuoto="Non indicato" ricerca="mai" disabilitato={disabilitato} opzioni={OPZIONI_PER} onCambia={(k) => imposta({ per: k || null })} />
+          </Blocco>
         </Griglia>
       )}
+      <CostoOfferta dati={dati} imposta={imposta} disabilitato={disabilitato} catalogo={catalogo} />
       <Griglia>
-        <Campo nome="prezzo" etichetta="Prezzo in yen" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} />
         <Campo nome="quantita" etichetta="Quante se ne possono comprare" tipo="numero" dati={dati} imposta={imposta} disabilitato={disabilitato} aiuto="Vuoto = nessun limite dichiarato" />
-        <Blocco>
-          <Selettore etichetta="Per chi" valore={testoDi(dati.per)} vuoto="Non indicato" ricerca="mai" disabilitato={disabilitato} opzioni={OPZIONI_PER} onCambia={(k) => imposta({ per: k || null })} />
-        </Blocco>
         <Campo nome="nota" etichetta="Nota" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={600} />
       </Griglia>
     </div>

@@ -18,6 +18,7 @@ import mappeRouter from './mappe.js';
 import fontRouter from './font.js';
 import impostazioniRouter from './impostazioni.js';
 import catalogoRouter from './catalogo.js';
+import catalogoOggettiRouter from './catalogoOggetti.js';
 import condizioniRouter from './condizioni.js';
 import areeRouter from './aree.js';
 import luoghiRouter from './luoghi.js';
@@ -33,6 +34,7 @@ export const ROUTER_DI_AREA: ReadonlyArray<readonly [string, Router]> = [
   ['/api/font', fontRouter],
   ['/api/impostazioni', impostazioniRouter],
   ['/api/catalogo', catalogoRouter],
+  ['/api/catalogo-oggetti', catalogoOggettiRouter],
   ['/api/condizioni', condizioniRouter],
   ['/api/aree', areeRouter],
   ['/api/luoghi', luoghiRouter],

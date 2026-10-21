@@ -3,18 +3,76 @@
 // ============================================================
 
 import { getDb, prepared } from '../db/dbService.js';
+import { fonteNodoGuida } from '../../shared/riferimentiCatalogoGuida.js';
 import { httpErrors } from '../utils/httpError.js';
 import { extra, mappaAmbito, t, tOpz, vociAmbito } from './traduzioniService.js';
 import { corrispondeRicerca } from '../../shared/testo.js';
 import { leggiVociEffetto } from '../../shared/effettiCatalogo.js';
 import { descriviEffettoAzione, type DoteNote } from '../../shared/effettiAzione.js';
 import { invitiDelConfidente } from './inviti.js';
+import { catalogoOggettiDisponibile, materialiDelleRicette, offerteBaseDegliOggetti, oggettiConChiavi, oggettiPerFonte, ricompensePerFonte, riferimentiListiniScambi } from './catalogoOggettiLetture.js';
+import { datiGuida, type Congelato } from './datiGuida.js';
+import { costoPrecedenteRegalo } from './costoRegaloService.js';
+import { postoDellArticolo, postoDelNegozio } from './mappe/nomiDeiPosti.js';
 import type {
   AffinitaDto, ArcanaDto, ConfidenteDettaglioDto, ConfidenteDto, CostoSkillDto, GlossarioDto, OggettoDto, PersonaDettaglioDto,
-  PersonaRiassuntoDto, RegoleFusioneDto, RicettaSpecialeDto, SkillAppresaDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
+  CatalogoOggettoDto, OggettiGuidaDto, PersonaRiassuntoDto, RegoleFusioneDto, RicettaSpecialeDto, SkillAppresaDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
 } from '../../shared/types.js';
 
 // ---- Righe DB ----
+
+/** L'API storica conserva le sezioni della guida, ma dopo M7 non usa il crosswalk per dare identità agli oggetti. */
+export function oggettiGuida(): Congelato<OggettiGuidaDto> {
+  const dati = datiGuida<OggettiGuidaDto>('oggetti-guida');
+  if (!dati) throw httpErrors.notFound('oggetti-non-disponibili', 'I dati degli oggetti della guida non sono caricati.');
+  if (!catalogoOggettiDisponibile()) {
+    const ponte = datiGuida<{ abbinamenti: Array<{ nome: string; articolo?: string; negozi: string[] }> }>('oggetti-crosswalk');
+    if (!ponte) return dati;
+    const per = new Map(ponte.abbinamenti.map((a) => [a.nome, a]));
+    const lega = <V extends { nome: string }>(v: V): V => {
+      const a = per.get(v.nome); if (!a) return v;
+      if (a.articolo) return { ...v, articolo: a.articolo, posto: postoDellArticolo(a.articolo) };
+      const postiNegozi: Record<string, string> = {};
+      for (const n of a.negozi) { const p = postoDelNegozio(n); if (p) postiNegozi[n] = p; }
+      return { ...v, negozi: a.negozi, postiNegozi };
+    };
+    return { ...dati, consumabili: dati.consumabili.map(lega), chiaveEMateriali: dati.chiaveEMateriali.map(lega) };
+  }
+  const catalogo = oggettiPerFonte('guida');
+  const offerte = new Map<string, Array<{ chiave: string; negozio: string }>>();
+  for (const a of prepared(`SELECT a.catalogo_chiave,a.chiave,a.negozio_chiave FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave
+    WHERE a.catalogo_chiave IS NOT NULL AND a.nascosto = 0 AND n.nascosto = 0 AND a.articolo_condiviso IS NULL ORDER BY n.ordine,a.ordine,a.chiave`).all() as Array<{ catalogo_chiave: string; chiave: string; negozio_chiave: string }>) {
+    const v = offerte.get(a.catalogo_chiave) ?? []; v.push({ chiave: a.chiave, negozio: a.negozio_chiave }); offerte.set(a.catalogo_chiave, v);
+  }
+  const identita = (o: CatalogoOggettoDto) => ({ catalogo: { chiave: o.chiave, nome: o.nome, casa: o.casa }, nome: o.nome, nomiAltri: o.nomiAltri });
+  const legami = (o: CatalogoOggettoDto) => {
+    const righe = offerte.get(o.chiave) ?? []; const articolo = righe.length === 1 ? righe[0].chiave : undefined;
+    const negozi = [...new Set(righe.map((a) => a.negozio))]; const postiNegozi: Record<string, string> = {};
+    for (const n of negozi) { const p = postoDelNegozio(n); if (p) postiNegozi[n] = p; }
+    return { articolo, posto: articolo ? postoDellArticolo(articolo) : null, negozi, postiNegozi };
+  };
+  const prodotti = ricompensePerFonte('ricetta'); const materiali = materialiDelleRicette();
+  return { ...dati,
+    scambi: [], listiniScambi: riferimentiListiniScambi(),
+    consumabili: dati.consumabili.flatMap((v) => {
+      const o = catalogo.get(fonteNodoGuida('consumabili', v)); if (!o || o.nascosto) return [];
+      const categorie = ['cura', 'sp', 'stato', 'battaglia', 'esplorazione', 'altro'];
+      return [{ ...v, ...identita(o), ...legami(o), nomeEn: o.nomeOriginale, effetto: o.effetto,
+        categoria: (o.sottocategoria && categorie.includes(o.sottocategoria) ? o.sottocategoria : 'altro') as OggettiGuidaDto['consumabili'][number]['categoria'],
+        prezzo: o.prezzoMinimo, notaPrezzo: o.prezzoMinimo === null && v.prezzo !== null ? `Prezzo citato nella guida: ${v.prezzo.toLocaleString('it-IT')} ¥, non ricavato da una vendita.` : null }];
+    }),
+    chiaveEMateriali: dati.chiaveEMateriali.flatMap((v) => {
+      const o = catalogo.get(fonteNodoGuida('chiave-e-materiali', v)); if (!o || o.nascosto) return [];
+      return [{ ...v, ...identita(o), ...legami(o), nomeEn: o.nomeOriginale, uso: o.effetto, tipo: o.categoria === 'materiale' ? 'materiale' as const : 'chiave' as const }];
+    }),
+    fabbricazione: { ...dati.fabbricazione, ricette: dati.fabbricazione.ricette.map((r) => ({ ...r,
+      prodottiCatalogo: prodotti.get(r.attrezzo) ?? [], materialiCatalogo: materiali.get(r.attrezzo) ?? [] })) },
+    abiti: { ...dati.abiti, elenco: dati.abiti.elenco.flatMap((v) => {
+      const o = catalogo.get(fonteNodoGuida('abiti', v)); if (!o || o.nascosto) return [];
+      return [{ ...v, ...identita(o), per: typeof o.statistiche?.per === 'string' ? o.statistiche.per : '' }];
+    }) },
+  };
+}
 
 interface RigaPersona {
   id: number; nome: string; arcana: string; livello: number; eredita: string | null; speciale: number; rara: number; dlc: number;
@@ -266,9 +324,15 @@ export function dettaglioPersona(id: number): PersonaDettaglioDto {
   const negoz = prepared('SELECT negoziazione FROM skill WHERE negoziazione LIKE ? LIMIT 1').get(`%(${r.nome})`) as { negoziazione: string } | undefined;
   const titolo = negoz?.negoziazione.replace(/\s*\([^)]*\)\s*$/, '') ?? null;
   const aree = (JSON.parse(r.aree_mementos_json) as string[]).map((a) => ({ chiave: a, nome: t('areaMementos', a) }));
-  /** Descrizione italiana di un oggetto dato il nome canonico; null se l'oggetto non è nel catalogo. */
+  // Il nome del dataset individua il suo ID; dopo M7 identità e descrizione vengono dal catalogo anche dopo una fusione.
+  const originali = prepared('SELECT id,nome,descrizione FROM oggetto WHERE nome IN (?,?)').all(r.oggetto, r.oggetto_allarme) as Array<Pick<RigaOggetto, 'id' | 'nome' | 'descrizione'>>;
+  const perNome = new Map(originali.map((o) => [o.nome, o]));
+  const catalogoEsecuzione = oggettiPerFonte('equipaggiamento', originali.map((o) => String(o.id)));
+  const identitaEsecuzione = (nome: string) => { const o = perNome.get(nome); return o ? catalogoEsecuzione.get(String(o.id)) : undefined; };
+  const normale = identitaEsecuzione(r.oggetto); const allarme = identitaEsecuzione(r.oggetto_allarme);
   const descrizioneOggetto = (nome: string): string | null => {
-    const o = prepared('SELECT descrizione FROM oggetto WHERE nome = ?').get(nome) as { descrizione: string } | undefined;
+    const c = identitaEsecuzione(nome); if (c) return c.effetto;
+    const o = perNome.get(nome);
     return o ? t('descrizioneOggetto', o.descrizione) : null;
   };
   return {
@@ -276,7 +340,9 @@ export function dettaglioPersona(id: number): PersonaDettaglioDto {
     nota: r.nota, notaNome: tOpz('notaPersona', r.nota),
     oggetto: r.oggetto, oggettoAllarme: r.oggetto_allarme, oggettoECarta: r.oggetto_e_carta === 1,
     oggettoDescrizione: descrizioneOggetto(r.oggetto), oggettoAllarmeDescrizione: descrizioneOggetto(r.oggetto_allarme),
-    oggettoNomeIt: tOpz('oggetto', r.oggetto), oggettoAllarmeNomeIt: tOpz('oggetto', r.oggetto_allarme),
+    oggettoNomeIt: normale?.nome ?? tOpz('oggetto', r.oggetto), oggettoAllarmeNomeIt: allarme?.nome ?? tOpz('oggetto', r.oggetto_allarme),
+    oggettoCatalogo: normale ? { chiave: normale.chiave, nome: normale.nome, casa: normale.casa } : null,
+    oggettoAllarmeCatalogo: allarme ? { chiave: allarme.chiave, nome: allarme.nome, casa: allarme.casa } : null,
     trattoDettaglio: trattoRiga ? skillRiassunto(trattoRiga) : null,
     skill, areeMementos: aree, pianiMementos: r.piani_mementos,
     ricettaSpeciale: ricetta, ingredienteDi, dlcSet, carteDaEsecuzione: carte,
@@ -343,12 +409,17 @@ export function elencaOggetti(f: { q?: string; categoria?: string } = {}): Ogget
     par.push(f.categoria);
   }
   const where = cond.length ? `WHERE ${cond.join(' AND ')}` : '';
-  const dto: OggettoDto[] = (getDb().prepare(`SELECT * FROM oggetto ${where} ORDER BY categoria, nome`).all(...par) as RigaOggetto[]).map((o) => ({
-    id: o.id, nome: o.nome, nomeIt: tOpz('oggetto', o.nome), categoria: o.categoria, categoriaNome: t('tipoOggetto', o.categoria),
-    vincolo: o.vincolo, vincoloNome: tOpz('vincoloOggetto', o.vincolo), descrizione: o.descrizione, descrizioneNome: t('descrizioneOggetto', o.descrizione),
-  }));
+  const righe = getDb().prepare(`SELECT * FROM oggetto ${where} ORDER BY categoria, nome`).all(...par) as RigaOggetto[];
+  const catalogo = oggettiPerFonte('equipaggiamento', righe.map((o) => String(o.id)));
+  const dto: OggettoDto[] = righe.map((o) => {
+    const c = catalogo.get(String(o.id));
+    return { id: o.id, nome: o.nome, nomeIt: c?.nome ?? tOpz('oggetto', o.nome), categoria: o.categoria, categoriaNome: t('tipoOggetto', o.categoria),
+      vincolo: o.vincolo, vincoloNome: c ? typeof c.statistiche?.per === 'string' ? c.statistiche.per : null : tOpz('vincoloOggetto', o.vincolo),
+      descrizione: o.descrizione, descrizioneNome: c?.effetto ?? t('descrizioneOggetto', o.descrizione),
+      catalogo: c ? { chiave: c.chiave, nome: c.nome, casa: c.casa } : null, nomiAltri: c?.nomiAltri ?? [] };
+  });
   const q = f.q;
-  return q ? dto.filter((o) => corrispondeRicerca(q, o.nome, o.nomeIt)) : dto;
+  return q ? dto.filter((o) => corrispondeRicerca(q, o.nome, o.nomeIt, ...(o.nomiAltri ?? []))) : dto;
 }
 
 /** La Dote che il Confidente dà a ogni incontro verso ciascun rango da 1 a 10 (`confidente_dote_incontro`, migrazione 088). */
@@ -382,12 +453,31 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
   const abilita = (prepared('SELECT rango, nome, descrizione FROM confidente_abilita WHERE confidente_chiave = ? ORDER BY rango, ordine').all(chiave) as Array<{ rango: number; nome: string; descrizione: string }>);
   const dialoghi = (prepared('SELECT id, rango, etichetta, note, scelte_json FROM confidente_dialogo WHERE confidente_chiave = ? ORDER BY ordine').all(chiave) as Array<{ id: number; rango: number | null; etichetta: string; note: string; scelte_json: string }>)
     .map((d) => ({ id: d.id, rango: d.rango, etichetta: d.etichetta, note: d.note, scelte: (JSON.parse(d.scelte_json) as Array<Record<string, unknown>>).map((s) => ({ ordine: (s.ordine as number | null) ?? null, testo: String(s.testo ?? ''), punti: (s.punti as number | null) ?? null, puntiTesto: (s.puntiTesto as string | null) ?? null, romantica: s.romantica === true, avviso: (s.avviso as string | null) ?? null })) }));
-  const regali = prepared('SELECT nome, dove, costo, effetto, sconsigliato FROM confidente_regalo WHERE confidente_chiave = ? ORDER BY ordine').all(chiave) as Array<{ nome: string; dove: string | null; costo: string | null; effetto: string | null; sconsigliato: number }>;
+  const conCatalogo = catalogoOggettiDisponibile();
+  const righeRegali = prepared(`SELECT ordine,nome,dove,costo,effetto,sconsigliato,${conCatalogo ? 'catalogo_chiave,nota,seed_json' : 'NULL AS catalogo_chiave,NULL AS nota,NULL AS seed_json'} FROM confidente_regalo WHERE confidente_chiave = ? ORDER BY ordine`).all(chiave) as Array<{ ordine: number; nome: string; dove: string | null; costo: string | null; effetto: string | null; sconsigliato: number; catalogo_chiave: string | null; nota: string | null; seed_json: string | null }>;
+  const chiaviRegali = righeRegali.flatMap((g) => g.catalogo_chiave ? [g.catalogo_chiave] : []);
+  const oggettiRegali = oggettiConChiavi(chiaviRegali); const offerteRegali = offerteBaseDegliOggetti(chiaviRegali);
+  const regali = righeRegali.map((g) => {
+    const precedente = costoPrecedenteRegalo(g.seed_json, chiave, g.ordine, g.nome);
+    const oggetto = g.catalogo_chiave ? oggettiRegali.get(g.catalogo_chiave) : undefined;
+    const catalogo = oggetto ? { chiave: oggetto.chiave, nome: oggetto.nome, casa: oggetto.casa } : null;
+    const offerte = g.catalogo_chiave ? offerteRegali.get(g.catalogo_chiave) ?? [] : [];
+    const prezzi = offerte.flatMap((o) => o.costo === null && !o.costoDaVerificare && o.prezzo !== null ? [o.prezzo] : []);
+    const prezzo = prezzi.length ? Math.min(...prezzi) : null; const prezzoMassimo = prezzi.length ? Math.max(...prezzi) : null;
+    const scambi = [...new Set(offerte.flatMap((o) => o.costoDaVerificare ? ['Scambio da correggere nel negozio'] : o.costo?.tipo === 'fiori' ? [`Scambio: ${o.costo.importo} fiori`]
+      : o.costo?.tipo === 'oggetti' ? [`Scambio: ${o.costo.oggetti.map((v) => `${v.quantita} × ${v.nome ?? 'oggetto da collegare'}`).join(', ')}`] : []))];
+    const costoYen = prezzo === null ? null : prezzo === prezzoMassimo ? `${prezzo.toLocaleString('it-IT')} ¥` : `Da ${prezzo.toLocaleString('it-IT')} a ${prezzoMassimo!.toLocaleString('it-IT')} ¥`;
+    return { ...g, ...(precedente !== null && precedente !== g.costo ? { ripristinoCosto: { ordine: g.ordine, precedente, attuale: g.costo } } : {}), nomeStorico: g.nome, nome: catalogo?.nome ?? g.nome, catalogo, prezzo, prezzoMassimo, listinoCollegato: offerte.length > 0,
+      dove: offerte.length ? [...new Set(offerte.map((o) => `${o.negozioNome}${o.sedeNome ? ` (${o.sedeNome})` : ''}`))].join(' · ') : g.dove,
+      costo: offerte.length ? [costoYen, ...scambi].filter(Boolean).join(' · ') || 'Costo non indicato nel listino' : g.costo,
+      nota: [...new Set([g.nota, offerte.length && (g.dove || g.costo) ? `Indicazioni della guida: ${[g.dove, g.costo].filter(Boolean).join(' · ')}` : null].filter((v): v is string => !!v))].join('\n') || null };
+  });
   const disp = prepared('SELECT * FROM confidente_disponibilita WHERE confidente_chiave = ?').get(chiave) as { giorni_json: string; fasce_json: string; luogo: string; sblocco_data: string; sblocco_requisiti: string; note: string; note_generali: string; fonti_json: string } | undefined;
   return {
     ...c, arcanaNome: t('arcana', c.arcana), abilita, dialoghi, dotiIncontro: dotiIncontro(chiave),
-    regali: regali.filter((g) => g.sconsigliato === 0).map(({ nome, dove, costo, effetto }) => ({ nome, dove, costo, effetto })),
+    regali: regali.filter((g) => g.sconsigliato === 0).map(({ nome, nomeStorico, dove, costo, effetto, catalogo, prezzo, prezzoMassimo, listinoCollegato, nota, ripristinoCosto }) => ({ nome, nomeStorico, dove, costo, effetto, catalogo, prezzo, prezzoMassimo, listinoCollegato, nota, ripristinoCosto })),
     regaliSconsigliati: regali.filter((g) => g.sconsigliato === 1).map((g) => g.nome),
+    oggettiRicompensa: ricompensePerFonte('confidente', [chiave]).get(chiave) ?? [],
     disponibilita: disp ? { giorni: JSON.parse(disp.giorni_json) as string[], fasce: JSON.parse(disp.fasce_json) as string[], luogo: disp.luogo, sbloccoData: disp.sblocco_data, sbloccoRequisiti: disp.sblocco_requisiti, note: disp.note } : { giorni: [], fasce: [], luogo: '', sbloccoData: '', sbloccoRequisiti: '', note: '' },
     noteGenerali: disp?.note_generali ?? '', fonti: disp ? (JSON.parse(disp.fonti_json) as string[]) : [],
     // L6: gli inviti del Confidente, con ciò che aprono (lo stato della partita lo dà `GET /api/compendio/inviti`)

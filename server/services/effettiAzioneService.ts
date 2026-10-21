@@ -22,6 +22,8 @@ import { annullaIncontro, registraIncontro, type MomentoIncontro } from './incon
 export interface OpzioniSpunta {
   /** Note della risposta al Confidente (1–3) quando l'azione è un incontro con un Confidente; assente = nessun punto. */
   noteRisposta?: 1 | 2 | 3;
+  /** Scelte esplicite della visita, validate da giornataService; assente preserva quelle già registrate. */
+  apertureDedali?: string[];
 }
 
 /** Ciò che serve dell'azione: il tipo e il collegamento dicono se è un incontro, `produce` il resto. `momento` (giorno, fascia,
@@ -32,6 +34,7 @@ export interface AzioneConEffetti {
   produce: EffettoAzione[];
   rangoAtteso?: number | null;
   momento?: MomentoIncontro;
+  apertureDedali?: EffettiAzioneDto['apertureDedali'];
 }
 
 /** Le visioni al cinema di un film già contate dalle spunte della partita (voci della giornata). */
@@ -88,8 +91,8 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
       confidente = { chiave: c.chiave, nome: c.nome, noteRisposta: opz.noteRisposta, punti: Math.round((agg.punti - prima) * 100) / 100, bonusArcano: c.personaArcanoInScorta };
     }
   }
-  if (!doti.length && !confidente && !letture.length && !turni.length && !incontro) return null;
-  return { doti, confidente, ...(letture.length ? { letture } : {}), ...(turni.length ? { turni } : {}), ...(incontro ? { incontro } : {}) };
+  if (!doti.length && !confidente && !letture.length && !turni.length && !incontro && !a.apertureDedali?.length) return null;
+  return { doti, confidente, ...(letture.length ? { letture } : {}), ...(turni.length ? { turni } : {}), ...(incontro ? { incontro } : {}), ...(a.apertureDedali?.length ? { apertureDedali: a.apertureDedali } : {}) };
 }
 
 /** Toglie esattamente ciò che la spunta aveva applicato: punti del Confidente, i turni registrati e l'incontro (le Doti no). */
@@ -112,5 +115,6 @@ export function descriviEffettiApplicati(e: EffettiAzioneDto): string {
   for (const t of e.turni ?? []) parti.push(`${t.nome}: turno ${t.ordine}${t.doti.length ? ` (${t.doti.map((d) => `${d.nome} +${d.delta}`).join(', ')})` : ''}`);
   if (e.incontro) parti.push(descriviIncontro(e.incontro));
   if (e.confidente) parti.push(`${e.confidente.nome} +${e.confidente.punti} punti (${e.confidente.noteRisposta} ${e.confidente.noteRisposta === 1 ? 'nota' : 'note'}${e.confidente.bonusArcano ? ', bonus arcano' : ''})`);
+  for (const a of e.apertureDedali ?? []) parti.push(a.nome);
   return parti.join(', ');
 }

@@ -36,6 +36,8 @@ import { getDb, nowIso, type AppDatabase } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { riallineaStati } from './mappe/statiGuida.js';
+import { eBloccoGuidaCatalogo, ripristinaPuntatoriGuida } from '../../shared/riferimentiCatalogoGuida.js';
+import { normalizzaCostoScambio } from '../../shared/catalogo.js';
 import type { ContenutoCestinoDto, EsitoRipristinoCestinoDto, MotivoSaltataCestinoDto, SaltataCestinoDto, TipoCestino, VoceCestinoDto } from '../../shared/types.js';
 
 type Schema = 'main' | 'utente';
@@ -71,6 +73,7 @@ const RADICE: Record<TipoElementoCestino, { tabella: string; colonna: string }> 
   negozio: { tabella: 'negozio', colonna: 'chiave' },
   // L6 (R6-04): una Richiesta dei Mementos; le condizioni che la citano restano (per chiave) e danno «Richiesta eliminata»
   richiesta: { tabella: 'richiesta', colonna: 'chiave' },
+  oggetto: { tabella: 'catalogo_oggetto', colonna: 'chiave' },
 };
 
 /**
@@ -78,6 +81,10 @@ const RADICE: Record<TipoElementoCestino, { tabella: string; colonna: string }> 
  * «7 voci della guida»); le altre tabelle col loro nome.
  */
 const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
+  catalogo_oggetto: ['oggetto', 'oggetti'], voce_oggetto: ['contenuto collegato', 'contenuti collegati'],
+  ricompensa_oggetto: ['ricompensa collegata', 'ricompense collegate'], ricetta_materiale: ['materiale collegato', 'materiali collegati'],
+  proposta_abbinamento: ['proposta di abbinamento', 'proposte di abbinamento'],
+  negozio_luogo_extra: ['sede del listino', 'sedi del listino'], negozio_sede_spillo: ['sede confermata di un pin', 'sedi confermate dei pin'],
   dungeon_area: ['infiltrazione', 'infiltrazioni'], punto_interesse: ['voce della guida', 'voci della guida'],
   marcatore_mappa: ['segnaposto di una voce', 'segnaposto delle voci'], spillo: ['pin', 'pin'], spillo_voce: ['collegamento pin-voce', 'collegamenti pin-voce'],
   spillo_immagine: ['schermata di un pin', 'schermate dei pin'], spillo_destinazione: ['destinazione di un pin', 'destinazioni dei pin'],
@@ -330,6 +337,7 @@ export function ripristinaDalCestino(id: number): EsitoRipristinoCestinoDto {
     saltate.set(k, s);
   };
   const occupate: string[] = [];
+  const daVerificare: Array<{ schema: Schema; tabella: string; riga: Riga }> = [];
 
   db.transaction(() => {
     for (const p of passi) {
@@ -340,13 +348,18 @@ export function ripristinaDalCestino(id: number): EsitoRipristinoCestinoDto {
       // solo le colonne che la tabella ha ancora (una migrazione dopo l'eliminazione può averne tolte)
       const colonne = s.colonne.filter((c) => c in riferimento);
       const su = `${p.schema}.${virgolette(p.tabella)}`;
-      const dove = s.chiave.map((c) => `${virgolette(c)} = ?`).join(' AND ');
+      const dove = s.chiave.map((c) => `${virgolette(c)} IS ?`).join(' AND ');
       const leggi = (riga: Riga): Riga | null => {
         const v = db.prepare(`SELECT ${colonne.map(virgolette).join(', ')} FROM ${su} WHERE ${dove}`).get(...s.chiave.map((c) => deserializza(riga[c] ?? null))) as Record<string, unknown> | undefined;
         return v ? Object.fromEntries(colonne.map((c) => [c, serializza(v[c])])) : null;
       };
       const esegui = (sql: string, valori: unknown[], riga: Riga): boolean => {
-        try { db.prepare(sql).run(...valori); rimesse++; return true; } catch (err) {
+        try {
+          db.prepare(sql).run(...valori); rimesse++;
+          if (p.prima) daVerificare.push({ schema: p.schema, tabella: p.tabella, riga: p.prima });
+          if (p.dopo) daVerificare.push({ schema: p.schema, tabella: p.tabella, riga: p.dopo });
+          return true;
+        } catch (err) {
           const codice = codiceSqlite(err);
           if (codice === 'SQLITE_CONSTRAINT_FOREIGNKEY') { salta(p.tabella, 'legame-mancante', descrivi(riga)); return false; }
           if (codice === 'SQLITE_CONSTRAINT_PRIMARYKEY' || codice === 'SQLITE_CONSTRAINT_UNIQUE') {
@@ -375,7 +388,24 @@ export function ripristinaDalCestino(id: number): EsitoRipristinoCestinoDto {
         // (anche cambiato dopo) resta com'è. Una colonna cambiata dall'eliminazione e poi di nuovo da altro resta, e si dice.
         const cambiate = colonne.filter((c) => !stesso(prima[c], dopo[c]));
         const daRimettere = cambiate.filter((c) => stesso(ora[c], dopo[c]));
-        if (cambiate.some((c) => !stesso(ora[c], dopo[c]) && !stesso(ora[c], prima[c]))) salta(p.tabella, 'cambiata-dopo', descrivi(dopo));
+        // Una fusione cambia puntatori nel JSON della guida, non il testo. Un edit successivo
+        // di un altro campo non deve impedire il ripristino del solo riferimento interessato.
+        let jsonGestito = false;
+        if (r.tipo === 'oggetto' && p.tabella === 'dati_guida' && eBloccoGuidaCatalogo(prima.chiave) && cambiate.includes('json')
+          && typeof prima.json === 'string' && typeof dopo.json === 'string' && typeof ora.json === 'string'
+          && !stesso(ora.json, dopo.json)) {
+          let esito: ReturnType<typeof ripristinaPuntatoriGuida> | undefined;
+          try { esito = ripristinaPuntatoriGuida(JSON.parse(prima.json) as unknown, JSON.parse(dopo.json) as unknown, JSON.parse(ora.json) as unknown); }
+          catch { salta(p.tabella, 'cambiata-dopo', descrivi(dopo)); }
+          if (esito) {
+            const ripristinato = JSON.stringify(esito.valore);
+            if (ripristinato !== ora.json) esegui(`UPDATE ${su} SET json = ? WHERE ${dove}`,
+              [ripristinato, ...s.chiave.map((c) => deserializza(dopo[c] ?? null))], dopo);
+            if (esito.conflitti) salta(p.tabella, 'cambiata-dopo', descrivi(dopo));
+          }
+          jsonGestito = true;
+        }
+        if (cambiate.some((c) => !(jsonGestito && c === 'json') && !stesso(ora[c], dopo[c]) && !stesso(ora[c], prima[c]))) salta(p.tabella, 'cambiata-dopo', descrivi(dopo));
         if (daRimettere.length) {
           esegui(`UPDATE ${su} SET ${daRimettere.map((c) => `${virgolette(c)} = ?`).join(', ')} WHERE ${dove}`,
             [...daRimettere.map((c) => deserializza(prima[c])), ...s.chiave.map((c) => deserializza(dopo[c] ?? null))], dopo);
@@ -392,6 +422,58 @@ export function ripristinaDalCestino(id: number): EsitoRipristinoCestinoDto {
       throw httpErrors.conflict('cestino-chiavi-occupate',
         `Non si può rimettere «${r.nome}»: ${occupate.length === 1 ? 'una riga ha' : `${occupate.length} righe hanno`} la chiave ormai presa da qualcosa creato dopo (${occupate.slice(0, 5).join('; ')}${occupate.length > 5 ? '; …' : ''}).`,
         { occupate });
+    }
+    // Controllo finale della transazione: tutti gli oggetti del registro sono ormai tornati.
+    // I JSON e i puntatori fra i due database non hanno foreign key SQLite; in errore
+    // l'intero gesto torna indietro e il registro resta recuperabile nel cestino.
+    if (db.prepare("SELECT 1 FROM main.sqlite_master WHERE type='table' AND name='catalogo_oggetto'").get()) {
+      const esiste = db.prepare('SELECT 1 FROM main.catalogo_oggetto WHERE chiave = ?');
+      const richiedi = (chiave: unknown) => {
+        if (typeof chiave === 'string' && !esiste.get(chiave)) throw httpErrors.conflict('cestino-oggetto-mancante',
+          'Un riferimento da ripristinare cita un oggetto non più presente. Ripristina prima quell’oggetto: questo elemento resta nel cestino.', { oggetto: chiave });
+      };
+      const costo = (valore: unknown) => {
+        if (valore == null) return;
+        const c = normalizzaCostoScambio(valore);
+        if (!c) throw httpErrors.conflict('cestino-costo-non-valido', 'Un costo da ripristinare non è leggibile. L’elemento resta nel cestino.');
+        if (c.tipo === 'oggetti') for (const o of c.oggetti) richiedi(o.chiave);
+      };
+      const parseJson = (v: unknown): unknown => {
+        if (v == null) return null;
+        try { if (typeof v === 'string') return JSON.parse(v) as unknown; }
+        catch { /* l'errore non cancella il registro */ }
+        throw httpErrors.conflict('cestino-json-non-valido', 'Un riferimento strutturato da ripristinare non è leggibile. L’elemento resta nel cestino.');
+      };
+      const parse = (v: unknown): Record<string, unknown> => {
+        const o = parseJson(v);
+        if (o == null) return {};
+        if (typeof o === 'object' && !Array.isArray(o)) return o as Record<string, unknown>;
+        throw httpErrors.conflict('cestino-json-non-valido', 'Un riferimento strutturato da ripristinare non è leggibile. L’elemento resta nel cestino.');
+      };
+      const nodiGuida = (v: unknown): void => {
+        if (!v || typeof v !== 'object') return;
+        if (Array.isArray(v)) { for (const x of v) nodiGuida(x); return; }
+        const o = v as Record<string, unknown>; richiedi(o.catalogoChiave);
+        for (const x of Object.values(o)) nodiGuida(x);
+      };
+      for (const v of daVerificare) {
+        if (!['articolo', 'regalo_partita', 'dati_guida', 'proposta_abbinamento'].includes(v.tabella)) continue;
+        const s = struttura(v.schema, v.tabella); if (!s) continue;
+        const ora = db.prepare(`SELECT * FROM ${v.schema}.${virgolette(v.tabella)} WHERE ${s.chiave.map((c) => `${virgolette(c)} IS ?`).join(' AND ')}`)
+          .get(...s.chiave.map((c) => deserializza(v.riga[c] ?? null))) as Record<string, unknown> | undefined;
+        if (!ora) continue;
+        richiedi(ora.catalogo_chiave);
+        if (v.tabella === 'articolo') { costo(ora.costo_json); const seed = parse(ora.seed_json); richiedi(seed.catalogo_chiave); costo(seed.costo_json); }
+        if (v.tabella === 'dati_guida' && eBloccoGuidaCatalogo(ora.chiave)) nodiGuida(parseJson(ora.json));
+        if (v.tabella === 'proposta_abbinamento') {
+          const modifica = parse(ora.modifica_json); costo(modifica.costo);
+          if (Array.isArray(modifica.ricevuti)) for (const x of modifica.ricevuti) {
+            if (!x || typeof x !== 'object' || typeof (x as Record<string, unknown>).chiave !== 'string') throw httpErrors.conflict('cestino-json-non-valido', 'Un risultato da ripristinare non è leggibile. L’elemento resta nel cestino.');
+            richiedi((x as Record<string, unknown>).chiave);
+          }
+          if (modifica.prima && typeof modifica.prima === 'object') { const prima = modifica.prima as Record<string, unknown>; richiedi(prima.catalogo_chiave); costo(prima.costo_json); }
+        }
+      }
     }
     const radice = RADICE[r.tipo];
     if (!db.prepare(`SELECT 1 FROM main.${virgolette(radice.tabella)} WHERE ${virgolette(radice.colonna)} = ?`).get(r.chiave)) {

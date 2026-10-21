@@ -5,6 +5,7 @@
 import { z } from 'zod';
 import { dataGioco, idParam, livello, uidVoce } from './comuni.js';
 import { METEO_PARTITA, type MeteoPartita } from '../../shared/meteoPartita.js';
+import { APERTURE_DEDALI } from '../../shared/condizioniSpillo.js';
 
 export const difficolta = z.enum(['sicura', 'facile', 'normale', 'difficile', 'spietata']);
 
@@ -177,7 +178,11 @@ export const bodyAggiornaCiclo = z.object({ nome: z.string().max(80).optional(),
 export const paramsPartitaCiclo = z.object({ id: idParam, cicloId: idParam });
 export const bodyTrofeo = z.object({ trofeo: z.string().min(1).max(120), ottenuto: z.boolean() });
 /** Spunta di una voce della giornata, per uid (le 32 cifre esadecimali di `voce_giornata.uid`). */
-export const bodyAzionePercorso = z.object({ uid: uidVoce, fatta: z.boolean(), noteRisposta: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional() });
+export const bodyAzionePercorso = z.object({
+  uid: uidVoce, fatta: z.boolean(), noteRisposta: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional(),
+  apertureDedali: z.array(z.string().refine((c) => APERTURE_DEDALI.some((a) => a.chiave === c), 'Apertura di dedalo non riconosciuta.'))
+    .max(APERTURE_DEDALI.length).refine((c) => new Set(c).size === c.length, 'Un dedalo si dichiara una sola volta nella visita.').optional(),
+}).refine((d) => d.fatta || !d.apertureDedali?.length, 'Le aperture si dichiarano quando si registra la visita, non quando si toglie la spunta.');
 export const bodyGiornoCorrente = z.object({ data: dataGioco });
 
 // ---- Meteo della partita ----
@@ -186,7 +191,7 @@ export const paramsPartitaData = z.object({ id: idParam, data: dataGioco });
 const meteoFascia = z.enum(METEO_PARTITA.map((m) => m.chiave) as [MeteoPartita, ...MeteoPartita[]]).nullable().optional();
 export const bodyMeteo = z.object({ giorno: meteoFascia, sera: meteoFascia }).strict()
   .refine((b) => b.giorno !== undefined || b.sera !== undefined, { message: 'Indica il meteo del giorno («giorno») o della sera («sera»).' });
-export const bodyAcquisto = z.object({ articolo: z.string().min(1).max(200), fatto: z.boolean() });
+export const bodyAcquisto = z.object({ articolo: z.string().min(1).max(200), fatto: z.boolean(), sede: z.string().min(1).max(300).optional() });
 export const bodyCruciverba = z.object({ data: dataGioco, fatto: z.boolean() });
 const chiaveLettura = z.string().min(1).max(160);
 export const bodyLettura = z.union([
@@ -201,7 +206,9 @@ export const bodyStatoRichiesta = z.object({ richiesta: z.string().min(1).max(12
 export const bodyStatoPunto = z.object({ punto: z.string().min(1).max(200), stato: z.enum(['ottenuto', 'esaurito']).nullable() });
 export const bodyDomandaFatta = z.object({ fatta: z.boolean(), conoscenza: z.boolean().optional() });
 export const paramsPartitaDomanda = z.object({ id: idParam, domandaId: idParam });
-export const bodyRegalo = z.object({ regalo: z.string().min(1).max(120), fatto: z.boolean() });
+export const bodyRegalo = z.object({
+  regalo: z.string().trim().min(1).max(120).optional(), catalogo: z.string().trim().min(1).max(600).optional(), fatto: z.boolean(),
+}).refine((v) => (v.regalo !== undefined) !== (v.catalogo !== undefined), 'Indica il regalo per chiave oppure per nome, non entrambi.');
 export const paramsPartitaEvento = z.object({ id: idParam, eventoId: idParam });
 export const bodyEliminaEventi = z.object({ ids: z.array(z.number().int().positive()).min(1).max(500) });
 export const bodyAggiornaPosseduta = z.object(campiPosseduta);

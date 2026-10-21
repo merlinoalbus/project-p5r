@@ -1,12 +1,11 @@
 // ============================================================
-// OggettiPage — consumabili, oggetti chiave e materiali, fabbricazione, personalizzazione delle armi, abiti e lavanderia, scambi (Fase 10.2)
+// OggettiPage — catalogo unico e sezioni della guida, con gli indirizzi storici conservati
 // ============================================================
 
 import { useMemo, useState } from 'react';
 import { Fonte, VoceTesto } from '../components/shared/VoceFonte';
-import { Selettore } from '../components/shared/Selettore';
 import { Link, useSearchParams } from 'react-router-dom';
-import { getOggetti, getOggettiGuida } from '../services/api';
+import { getOggettiGuida } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
@@ -18,89 +17,24 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
 import { IconaScheda } from '../components/shared/IconaAzione';
 import { RitrattoPersonaggio } from '../components/guida/RitrattoPersonaggio';
-import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
+import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
+import { CatalogoOggetti } from '../components/catalogo/CatalogoOggetti';
+import type { GruppoOggetto } from '../../shared/catalogo';
 
-/** Le sette schede, con la figura che ciascuna mostra sopra la propria etichetta.
- *
- * `categoria` per quelle che sono davvero una famiglia di oggetti (i consumabili, gli
- * equipaggiamenti, i materiali, gli abiti); `scheda` per le due che sono un'attività e non una
- * famiglia — la personalizzazione da Iwai e gli scambi coi venditori speciali. */
+/** Un catalogo per le identità; le sezioni della guida sulle attività restano accessibili. */
 const SCHEDE = [
-  ['consumabili', 'Consumabili', 'categoria', 'cura'],
-  ['equipaggiamento', 'Equipaggiamento', 'categoria', 'armi'],
-  ['chiave', 'Chiave e materiali', 'categoria', 'oggetti-chiave'],
+  ['catalogo', 'Catalogo', 'categoria', 'oggetti'],
   ['fabbricazione', 'Fabbricazione', 'categoria', 'materiali'],
   ['armi', 'Personalizzazione armi', 'scheda', 'personalizzazione'],
   ['abiti', 'Abiti e lavanderia', 'categoria', 'abiti'],
   ['scambi', 'Scambi', 'scheda', 'scambi'],
 ] as const;
 type Scheda = (typeof SCHEDE)[number][0];
-const NOME_CATEGORIA: Record<string, string> = { cura: 'Cura HP', sp: 'Recupero SP', stato: 'Stati alterati', battaglia: 'Battaglia', esplorazione: 'Esplorazione', altro: 'Altro' };
+const GRUPPO_STORICO: Readonly<Record<string, GruppoOggetto>> = { consumabili: 'consumabili', equipaggiamento: 'equipaggiamento', chiave: 'materiali' };
 
 /** Il segno «da fonte secondaria» accanto a una voce non verificata sulla guida italiana; niente se la voce è verificata. */
 function Secondaria({ v }: { v: boolean }) {
   return v ? null : <span className="chip text-[11px]" title="Dato da fonte secondaria, non dalla guida italiana">da fonte secondaria</span>;
-}
-
-/** La cella di una categoria o di un tipo: **la figura**, non la parola ripetuta.
- *
- * Duecento righe con scritto «Cura HP» accanto alla stessa identica icona sono duecento volte la
- * stessa informazione detta due volte, e una colonna larga il doppio del necessario. Il nome resta
- * dove serve: nel titolo al passaggio del mouse, per chi legge con uno screen reader, e in chiaro
- * sotto i 640 px, dove la tabella diventa una scheda e l'icona da sola sarebbe un indovinello. */
-function CellaCategoria({ categoria, nome }: { categoria: string; nome: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5" title={nome}>
-      <IconaCategoria categoria={categoria} dimensione={24} etichetta={nome} />
-      <span className="sm:hidden">{nome}</span>
-    </span>
-  );
-}
-
-/** Tabella dei consumabili con ricerca (nome italiano e inglese, effetto, dove) e filtro per categoria, offerta solo fra le categorie presenti; il «dove» porta alla mappa dell'articolo o dei negozi che lo vendono. */
-function SchedaConsumabili({ d }: { d: OggettiGuidaDto }) {
-  const [q, setQ] = useState('');
-  const [categoria, setCategoria] = useState('');
-  const visibili = useMemo(() => { const n = normalizzaTesto(q); return d.consumabili.filter((x) => (!categoria || x.categoria === categoria) && (!n || normalizzaTesto(`${x.nome} ${x.nomeEn ?? ''} ${x.effetto} ${x.dove}`).includes(n))); }, [d, q, categoria]);
-  return (
-    <div className="flex flex-col gap-2 text-[13px]">
-      <div className="flex flex-wrap gap-1.5 items-center">
-        <div className="flex-1 min-w-[200px]"><CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca un oggetto, un effetto o dove si trova…" /></div>
-        <Selettore compatto etichetta="Categoria" valore={categoria} vuoto="Tutte le categorie" opzioni={Object.entries(NOME_CATEGORIA).filter(([k]) => d.consumabili.some((x) => x.categoria === k)).map(([k, n]) => ({ chiave: k, nome: n }))} onCambia={setCategoria} />
-      </div>
-      <p className="m-0 text-[12px] text-text-muted">{visibili.length} oggetti su {d.consumabili.length}.</p>
-      <div className="area-scorrevole-x">
-        <table className="tabella tabella--adattiva text-[12px]">
-          <thead><tr><th>Oggetto</th><th>Categoria</th><th>Effetto</th><th>Dove</th><th>Prezzo</th></tr></thead>
-          <tbody>{visibili.map((x) => <tr key={`${x.nome}-${x.categoria}`}><td data-etichetta="Oggetto"><strong>{x.nome}</strong>{x.nomeEn && x.nomeEn !== x.nome && <span className="text-text-muted"> ({x.nomeEn})</span>} <Secondaria v={x.verificato} /></td><td data-etichetta="Categoria"><CellaCategoria categoria={x.categoria} nome={NOME_CATEGORIA[x.categoria] ?? x.categoria} /></td><td data-etichetta="Effetto">{x.effetto}</td><td data-etichetta="Dove">{x.dove || '—'}{x.articolo ? <> <CollegamentoMappa tipo="articolo" chiave={x.articolo} testo={x.posto ?? 'Sulla mappa'} compatto /></>
-                : x.negozi?.map((n) => <span key={n}> <CollegamentoMappa tipo="negozio" chiave={n} testo={x.postiNegozi?.[n] ?? 'Sulla mappa'} compatto /></span>)}</td><td data-etichetta="Prezzo" className="tabular-nums whitespace-nowrap">{x.prezzo !== null ? `${x.prezzo.toLocaleString('it-IT')} ¥` : '—'}</td></tr>)}</tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-/** Tabella degli oggetti chiave e dei materiali con ricerca (nome, uso, dove) e filtro per tipo; il «dove» porta alla mappa come nei consumabili. */
-function SchedaChiave({ d }: { d: OggettiGuidaDto }) {
-  const [q, setQ] = useState('');
-  const [tipo, setTipo] = useState('');
-  const visibili = useMemo(() => { const n = normalizzaTesto(q); return d.chiaveEMateriali.filter((x) => (!tipo || x.tipo === tipo) && (!n || normalizzaTesto(`${x.nome} ${x.nomeEn ?? ''} ${x.uso} ${x.dove}`).includes(n))); }, [d, q, tipo]);
-  return (
-    <div className="flex flex-col gap-2 text-[13px]">
-      <div className="flex flex-wrap gap-1.5 items-center">
-        <div className="flex-1 min-w-[200px]"><CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca un oggetto chiave o un materiale…" /></div>
-        <Selettore compatto etichetta="Tipo" valore={tipo} vuoto="Chiave e materiali" opzioni={[{ chiave: 'chiave', nome: 'Oggetti chiave' }, { chiave: 'materiale', nome: 'Materiali' }]} onCambia={setTipo} />
-      </div>
-      <p className="m-0 text-[12px] text-text-muted">{visibili.length} voci su {d.chiaveEMateriali.length}.</p>
-      <div className="area-scorrevole-x">
-        <table className="tabella tabella--adattiva text-[12px]">
-          <thead><tr><th>Oggetto</th><th>Tipo</th><th>Uso</th><th>Dove</th></tr></thead>
-          <tbody>{visibili.map((x) => <tr key={`${x.nome}-${x.tipo}`}><td data-etichetta="Oggetto"><strong>{x.nome}</strong>{x.nomeEn && x.nomeEn !== x.nome && <span className="text-text-muted"> ({x.nomeEn})</span>} <Secondaria v={x.verificato} /></td><td data-etichetta="Tipo"><CellaCategoria categoria={x.tipo === 'chiave' ? 'oggetti-chiave' : 'materiali'} nome={x.tipo === 'chiave' ? 'Oggetto chiave' : 'Materiale'} /></td><td data-etichetta="Uso">{x.uso}</td><td data-etichetta="Dove">{x.dove || '—'}{x.articolo ? <> <CollegamentoMappa tipo="articolo" chiave={x.articolo} testo={x.posto ?? 'Sulla mappa'} compatto /></>
-                : x.negozi?.map((n) => <span key={n}> <CollegamentoMappa tipo="negozio" chiave={n} testo={x.postiNegozi?.[n] ?? 'Sulla mappa'} compatto /></span>)}</td></tr>)}</tbody>
-        </table>
-      </div>
-    </div>
-  );
 }
 
 /** La fabbricazione degli attrezzi: introduzione, sblocco, regole e fonte, poi la tabella delle ricette con i materiali e le loro quantità. */
@@ -119,7 +53,14 @@ function SchedaFabbricazione({ d }: { d: OggettiGuidaDto }) {
           {/* Niente colonna «Prodotti»: la guida non la compila per **nessuna** ricetta, quindi
               era una colonna di trattini — larghezza tolta a «Materiali», che invece serve. */}
           <thead><tr><th>Attrezzo</th><th>Effetto</th><th>Materiali</th><th>Sblocco</th></tr></thead>
-          <tbody>{f.ricette.map((r) => <tr key={r.attrezzo}><td data-etichetta="Attrezzo"><strong>{r.attrezzo}</strong> <Secondaria v={r.verificato} /></td><td data-etichetta="Effetto">{r.effetto}</td><td data-etichetta="Materiali">{r.materiali.map((m) => `${m.nome}${m.quantita !== null ? ` ×${m.quantita}` : ''}`).join(', ') || '—'}</td><td data-etichetta="Sblocco">{r.sblocco ?? '—'}</td></tr>)}</tbody>
+          <tbody>{f.ricette.map((r) => <tr key={r.attrezzo}>
+            <td data-etichetta="Attrezzo">{r.prodottiCatalogo?.length ? <OggettiCollegati oggetti={r.prodottiCatalogo} /> : <><strong>Prodotto non collegato</strong><span className="block text-text-muted">Nome nella fonte: {r.attrezzo}</span></>} <Secondaria v={r.verificato} /></td>
+            <td data-etichetta="Effetto">{r.effetto}</td>
+            <td data-etichetta="Materiali">{!!r.materialiCatalogo?.length && <OggettiCollegati oggetti={r.materialiCatalogo} />}
+              {r.materialiCatalogo?.length ? <details><summary className="touch">Materiali indicati dalla guida</summary><span>{r.materiali.map((m) => `${m.nome}${m.quantita !== null ? ` ×${m.quantita}` : ''}`).join(', ') || '—'}</span></details>
+                : r.materiali.map((m) => `${m.nome}${m.quantita !== null ? ` ×${m.quantita}` : ''}`).join(', ') || '—'}
+            </td><td data-etichetta="Sblocco">{r.sblocco ?? '—'}</td>
+          </tr>)}</tbody>
         </table>
       </div>
     </div>
@@ -159,7 +100,7 @@ function SchedaArmi({ d }: { d: OggettiGuidaDto }) {
 /** Gli abiti: introduzione, la carta della lavanderia e la tabella degli abiti con ricerca (nome, personaggio, dove) e il ritratto di chi li indossa. */
 function SchedaAbiti({ d }: { d: OggettiGuidaDto }) {
   const [q, setQ] = useState('');
-  const visibili = useMemo(() => { const n = normalizzaTesto(q); return d.abiti.elenco.filter((x) => !n || normalizzaTesto(`${x.nome} ${x.per} ${x.dove}`).includes(n)); }, [d, q]);
+  const visibili = useMemo(() => { const n = normalizzaTesto(q); return d.abiti.elenco.filter((x) => !n || normalizzaTesto(`${x.nome} ${(x.nomiAltri ?? []).join(' ')} ${x.per} ${x.dove}`).includes(n)); }, [d, q]);
   return (
     <div className="flex flex-col gap-2 text-[13px]">
       {d.abiti.introduzione && <p className="m-0 text-text-secondary">{d.abiti.introduzione}</p>}
@@ -175,87 +116,27 @@ function SchedaAbiti({ d }: { d: OggettiGuidaDto }) {
       <div className="area-scorrevole-x">
         <table className="tabella tabella--adattiva text-[12px]">
           <thead><tr><th>Abito</th><th>Per</th><th>Dove</th></tr></thead>
-          <tbody>{visibili.map((x) => <tr key={`${x.nome}-${x.per}`}><td data-etichetta="Abito"><strong>{x.nome}</strong></td><td data-etichetta="Per"><RitrattoPersonaggio chi={x.per} /></td><td data-etichetta="Dove">{x.dove}</td></tr>)}</tbody>
+          <tbody>{visibili.map((x) => <tr key={x.catalogo?.chiave ?? `${x.nome}-${x.per}`}><td data-etichetta="Abito"><strong>{x.catalogo ? <Link to={x.catalogo.casa} className="touch inline-flex items-center">{x.nome}</Link> : x.nome}</strong></td><td data-etichetta="Per"><RitrattoPersonaggio chi={x.per} /></td><td data-etichetta="Dove">{x.dove}</td></tr>)}</tbody>
         </table>
       </div>
     </div>
   );
 }
 
-/** Come si legge il vincolo di un equipaggiamento, in una frase che i ritratti sanno risolvere.
- *
- * Il dataset dice `Men`, `Women`, `Unisex` o un nome proprio, e la traduzione ne fa «Solo uomini»,
- * «Solo donne», «Unisex», «Solo Ann». Le prime due bastano ai ritratti; «Unisex» no, perché non
- * nomina nessuno: negli abiti del gioco vuol dire uomini **e** donne, cioè tutti tranne Morgana,
- * che ha i suoi. Il pezzo senza vincolo non passa di qui: lo mette chiunque, e si scrive. */
-function chiLoUsa(vincolo: string, vincoloNome: string | null): string {
-  if (vincolo === 'Unisex') return 'Uomini e donne';
-  return vincoloNome ?? vincolo;
-}
-
-/** Armi, protezioni e accessori: 223 pezzi che l'app aveva già tradotti e non mostrava a nessuno.
- *
- * I dati c'erano — nomi italiani, effetti, chi può equipaggiarli — e l'API `/compendio/oggetti`
- * pure, ma **nessuna pagina la chiamava**: il sottotitolo di questa pagina rimandava al Compendio,
- * dove non c'erano. Era il buco della 5.2 sul lato armi/protezioni/accessori.
- *
- * Si carica solo quando si apre la scheda: sono 223 righe che non servono a chi cerca un
- * consumabile. */
-function SchedaEquipaggiamento() {
-  const dati = useCarica(() => getOggetti(), []);
-  const [q, setQ] = useState('');
-  const [categoria, setCategoria] = useState('');
-  const [per, setPer] = useState('');
-  const tutti = useMemo(() => dati.dati ?? [], [dati.dati]);
-  const categorie = useMemo(() => [...new Map(tutti.map((o) => [o.categoria, o.categoriaNome])).entries()], [tutti]);
-  const vincoli = useMemo(() => [...new Map(tutti.filter((o) => o.vincolo).map((o) => [o.vincolo!, o.vincoloNome ?? o.vincolo!])).entries()].sort((a, b) => a[1].localeCompare(b[1], 'it')), [tutti]);
-  const visibili = useMemo(() => {
-    const n = normalizzaTesto(q);
-    return tutti.filter((o) => (!categoria || o.categoria === categoria)
-      && (!per || (per === 'nessuno' ? o.vincolo === null : o.vincolo === per))
-      && (!n || normalizzaTesto(`${o.nomeIt ?? ''} ${o.nome} ${o.descrizioneNome} ${o.descrizione}`).includes(n)));
-  }, [tutti, q, categoria, per]);
-  return (
-    <PageState isLoading={dati.caricamento && !dati.dati} error={dati.errore} onRetry={() => void dati.ricarica()}>
-      <div className="flex flex-col gap-2 text-[13px]">
-        <p className="m-0 text-text-secondary">
-          Quel che si indossa e si impugna: {tutti.length} pezzi con il loro effetto e chi può equipaggiarli.
-          Dove si comprano e a che prezzo sta in <Link to="/guida/negozi" className="text-primary">Negozi e inventario</Link>.
-        </p>
-        <div className="flex flex-wrap items-center gap-1.5">
-          <div className="min-w-[200px] flex-1"><CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca un'arma, un effetto…" /></div>
-          <Selettore compatto etichetta="Tipo" valore={categoria} vuoto="Tutti i tipi" opzioni={categorie.map(([k, n]) => ({ chiave: k, nome: n }))} onCambia={setCategoria} />
-          <Selettore compatto etichetta="Per chi" valore={per} vuoto="Per chiunque" opzioni={[{ chiave: 'nessuno', nome: 'Senza vincolo' }, ...vincoli.map(([k, n]) => ({ chiave: k, nome: n }))]} onCambia={setPer} />
-        </div>
-        <p className="m-0 text-[12px] text-text-muted" role="status">{visibili.length} pezzi su {tutti.length}.</p>
-        <div className="area-scorrevole-x">
-          <table className="tabella tabella--adattiva text-[12px]">
-            <thead><tr><th>Equipaggiamento</th><th>Tipo</th><th>Per</th><th>Effetto</th></tr></thead>
-            <tbody>{visibili.map((o) => (
-              <tr key={o.id}>
-                <td data-etichetta="Equipaggiamento"><strong>{o.nomeIt ?? o.nome}</strong>{o.nomeIt && o.nomeIt !== o.nome && <span className="text-text-muted"> ({o.nome})</span>}</td>
-                <td data-etichetta="Tipo"><CellaCategoria categoria={o.categoria.toLowerCase()} nome={o.categoriaNome} /></td>
-                {/* Senza vincolo non si mettono i dieci volti: sarebbero la stessa fila ripetuta su
-                    125 accessori — 1474 immagini in pagina alla prima prova — e non direbbero
-                    niente. Le facce servono a far vedere **la restrizione**: così la colonna si
-                    scorre e le righe con i volti sono quelle che riguardano qualcuno in
-                    particolare. */}
-                <td data-etichetta="Per">{o.vincolo
-                  ? <RitrattoPersonaggio chi={chiLoUsa(o.vincolo, o.vincoloNome)} dimensione={20} />
-                  : <span className="text-text-muted">Tutti</span>}</td>
-                <td data-etichetta="Effetto">{o.descrizioneNome}</td>
-              </tr>
-            ))}</tbody>
-          </table>
-        </div>
-        {visibili.length === 0 && tutti.length > 0 && <p className="m-0 text-[12px] text-text-muted" role="status">Nessun pezzo con questi filtri.</p>}
-      </div>
-    </PageState>
-  );
-}
-
 /** Gli scambi dei venditori speciali, una carta per venditore con la tabella di quel che si riceve e si dà; Jose è escluso e resta solo il rimando alle Richieste dei Mementos. */
 function SchedaScambi({ d }: { d: OggettiGuidaDto }) {
+  if (d.listiniScambi !== undefined) return <div className="flex min-w-0 flex-col gap-2 text-[13px]">
+    <p className="m-0 text-text-secondary">Ogni venditore ha un solo listino: lì trovi oggetti, costi, requisiti e gestione. Le indicazioni della guida precedente sono conservate nelle note del negozio, non come offerte aggiuntive.</p>
+    {d.listiniScambi.length ? <ul className="m-0 grid list-none gap-2 p-0 md:grid-cols-2">
+      {d.listiniScambi.map((n) => <li key={n.chiave} className="card flex min-w-0 flex-col items-start gap-2">
+        <h2 className="m-0 break-words text-[15px] font-semibold">{n.nome}</h2>
+        {n.posto && <span className="text-text-secondary">{n.posto}</span>}
+        <span className="text-[12px] text-text-muted">{n.offerte} {n.offerte === 1 ? 'offerta nel listino' : 'offerte nel listino'}</span>
+        <Link to={n.casa} className="btn btn-secondary touch max-w-full whitespace-normal">Apri il listino di {n.nome}</Link>
+      </li>)}
+    </ul> : <p className="m-0 text-text-muted">Nessun listino visibile.</p>}
+    {d.listiniScambi.some((n) => n.chiave === 'jose') && <p className="m-0 text-[12px] text-text-muted">Fiori e timbri di Jose restano consultabili nelle <Link to="/guida/richieste?foglio=jose" className="touch inline-flex items-center">Richieste dei Mementos</Link>.</p>}
+  </div>;
   // **Jose sta nelle Richieste dei Mementos**, dove ha il suo foglio con i fiori, i timbri e la
   // tabella degli scambi. Ripeterlo qui era la stessa bottega scritta due volte in due pagine
   // diverse, e prima o poi due volte diverse: qui resta il rimando, che dice dov'è.
@@ -286,42 +167,40 @@ function SchedaScambi({ d }: { d: OggettiGuidaDto }) {
 }
 
 /**
- * Pagina degli oggetti: carica una volta i dati della guida sugli oggetti, sceglie la scheda dal
- * parametro `scheda` dell'URL (i consumabili quando manca o non è valido) e mostra la barra delle
- * sette schede con la scheda attiva sotto; l'equipaggiamento carica i suoi dati da sé.
+ * Catalogo unico e sezioni della guida. I vecchi indirizzi delle tre liste aprono il gruppo
+ * equivalente dello stesso catalogo; non si mantengono copie parallele delle identità.
  */
 export function OggettiPage() {
-  useDocumentTitle('Oggetti, materiali e fabbricazione');
-  const dati = useCarica(() => getOggettiGuida(), []);
+  useDocumentTitle('Catalogo degli oggetti');
   const [params, setParams] = useSearchParams();
-  const scheda = (SCHEDE.some(([k]) => k === params.get('scheda')) ? params.get('scheda') : 'consumabili') as Scheda;
-  const d = dati.dati;
+  const richiesta = params.get('scheda') ?? '';
+  const scheda = (SCHEDE.some(([k]) => k === richiesta) ? richiesta : 'catalogo') as Scheda;
   return (
-    <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
-      {d && (
-        <div className="flex flex-col gap-3">
-          <IntestazionePagina titolo="Oggetti, materiali e fabbricazione" sottotitolo={<>{d.consumabili.length} consumabili, {d.chiaveEMateriali.length} oggetti chiave e materiali, {d.fabbricazione.ricette.length} ricette degli attrezzi da infiltrazione, la personalizzazione delle armi da Iwai, {d.abiti.elenco.length} abiti con la lavanderia e gli scambi dei venditori speciali. Armi, protezioni e accessori hanno la loro scheda qui accanto; i prezzi dei negozi stanno in Negozi e inventario.</>} />
+        <div className="flex min-w-0 flex-col gap-3">
+          <IntestazionePagina compatta titolo="Oggetti" sottotitolo="Un solo catalogo con nomi, effetti, vendite e collegamenti. Fabbricazione, personalizzazione, lavanderia e scambi restano nelle loro sezioni." />
           <FilaScorrevole role="tablist" aria-label="Sezioni">
-            {/* L'immagine sopra la parola: sette pastiglie di solo testo si leggevano tutte
-                uguali, ed è il rilievo dell'utente sul rapporto fra grafica e testo. */}
             {SCHEDE.map(([k, l, tipo, icona]) => (
               <button key={k} type="button" role="tab" aria-selected={scheda === k} title={l}
                 className={`piastrella-scheda touch ${scheda === k ? 'piastrella-scheda--attiva' : ''}`}
-                onClick={() => setParams(k === 'consumabili' ? {} : { scheda: k }, { replace: true })}>
+                onClick={() => setParams((prima) => { const dopo = new URLSearchParams(prima); if (k === 'catalogo') dopo.delete('scheda'); else dopo.set('scheda', k); return dopo; }, { replace: true })}>
                 {tipo === 'categoria' ? <IconaCategoria categoria={icona} dimensione={28} /> : <IconaScheda chiave={icona} dimensione={28} />}
                 <span>{l}</span>
               </button>
             ))}
           </FilaScorrevole>
-          {scheda === 'consumabili' && <SchedaConsumabili d={d} />}
-          {scheda === 'equipaggiamento' && <SchedaEquipaggiamento />}
-          {scheda === 'chiave' && <SchedaChiave d={d} />}
-          {scheda === 'fabbricazione' && <SchedaFabbricazione d={d} />}
-          {scheda === 'armi' && <SchedaArmi d={d} />}
-          {scheda === 'abiti' && <SchedaAbiti d={d} />}
-          {scheda === 'scambi' && <SchedaScambi d={d} />}
+          {scheda === 'catalogo' ? <CatalogoOggetti gruppoIniziale={GRUPPO_STORICO[richiesta]} /> : <SezioniDellaGuida scheda={scheda} />}
         </div>
-      )}
-    </PageState>
   );
+}
+
+/** Le sezioni conservate si caricano solo quando aperte, senza rallentare o bloccare il catalogo. */
+function SezioniDellaGuida({ scheda }: { scheda: Exclude<Scheda, 'catalogo'> }) {
+  const dati = useCarica(() => getOggettiGuida(), []);
+  const d = dati.dati;
+  return <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>{d && <>
+    {scheda === 'fabbricazione' && <SchedaFabbricazione d={d} />}
+    {scheda === 'armi' && <SchedaArmi d={d} />}
+    {scheda === 'abiti' && <SchedaAbiti d={d} />}
+    {scheda === 'scambi' && <SchedaScambi d={d} />}
+  </>}</PageState>;
 }

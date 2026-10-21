@@ -18,6 +18,7 @@ import { righeDelGiorno, spuntePartita, voceBase } from './giornataService.js';
 import type { SuggerimentiOggiDto } from '../../shared/types.js';
 import { CHIAVI_DOTI } from '../../shared/doti.js';
 import { datiGuida, type Congelato } from './datiGuida.js';
+import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
 
 const RE_DOTE_GUADAGNO = new RegExp(`(?:(${CHIAVI_DOTI.join('|')})\\s*\\+\\s*\\d)|(?:aumenta(?:no)?\\s+(?:la\\s+|il\\s+)?(${CHIAVI_DOTI.join('|')}))`, 'gi');
 
@@ -92,9 +93,27 @@ function aggiungiNegozio(r: Raccolta, chiaveNegozio: string): void {
   if (sp) r.spilli.add(sp.id);
 }
 
-/** Indice degli articoli a scaffale per nome ridotto a chiave: serve a collegare un libro o un film al negozio che lo vende. */
+/** Dopo M7 le offerte sono indicizzate per fonte/chiave, mai per somiglianza del titolo. */
 function indiceArticoli(): Map<string, Array<{ chiave: string; negozio: string }>> {
   const mappa = new Map<string, Array<{ chiave: string; negozio: string }>>();
+  if (catalogoOggettiDisponibile()) {
+    const righe = prepared(`SELECT f.fonte_tipo,f.fonte_chiave,a.chiave,a.negozio_chiave FROM (
+      SELECT 'libro' AS fonte_tipo,chiave AS fonte_chiave,catalogo_chiave FROM libro
+      UNION ALL SELECT 'film',chiave,catalogo_chiave FROM film
+      UNION ALL SELECT 'videogioco',chiave,catalogo_chiave FROM attivita WHERE tipo = 'videogioco') f
+      JOIN catalogo_oggetto c ON c.chiave = f.catalogo_chiave
+      JOIN articolo a ON a.catalogo_chiave = c.chiave JOIN negozio n ON n.chiave = a.negozio_chiave
+      WHERE f.fonte_tipo IN ('libro','film','videogioco')
+        AND c.nascosto = 0 AND a.nascosto = 0 AND n.nascosto = 0 AND a.articolo_condiviso IS NULL`).all() as Array<{
+          fonte_tipo: string; fonte_chiave: string; chiave: string; negozio_chiave: string;
+        }>;
+    for (const r of righe) {
+      const k = `${r.fonte_tipo}/${r.fonte_chiave}`; const elenco = mappa.get(k) ?? [];
+      elenco.push({ chiave: r.chiave, negozio: r.negozio_chiave }); mappa.set(k, elenco);
+    }
+    return mappa;
+  }
+  // Compatibilità prima della registrazione di M7; non viene usata sui dati convertiti.
   const righe = prepared('SELECT chiave, negozio_chiave, nome, nome_it FROM articolo').all() as Array<{ chiave: string; negozio_chiave: string; nome: string; nome_it: string | null }>;
   for (const a of righe) {
     for (const nome of [a.nome, a.nome_it]) {
@@ -160,6 +179,7 @@ export function suggerimentiOggi(partitaId: number): SuggerimentiOggiDto {
     .filter((a) => statoAzione(a, conf).tipo !== 'bloccata');
   const r = nuovaRaccolta();
   const motivi: SuggerimentiOggiDto['motivi'] = [];
+  const conCatalogo = catalogoOggettiDisponibile();
   let articoli: Map<string, Array<{ chiave: string; negozio: string }>> | null = null;
   /** Annota perché una chiave è suggerita: categoria, chiave, testo dell'azione e fascia. */
   const segna = (categoria: string, chiave: string, azione: string, fascia: 'giorno' | 'sera') => motivi.push({ categoria, chiave, azione, fascia });
@@ -193,7 +213,8 @@ export function suggerimentiOggi(partitaId: number): SuggerimentiOggiDto {
       for (const chiaveLuogo of [...luoghiPerTesto(riga?.dove), ...luoghiPerTesto(a.azione)]) aggiungiLuogo(r, chiaveLuogo);
       // 30 libri su 46 sono anche articoli a scaffale: acceso il libro si accende l'articolo e il negozio che lo vende
       if (!articoli) articoli = indiceArticoli();
-      for (const art of [...(articoli.get(rif.chiave) ?? []), ...(riga ? articoli.get(slug(riga.nome)) ?? [] : [])]) {
+      const offerte = conCatalogo ? articoli.get(`${rif.tipo}/${rif.chiave}`) ?? [] : [...(articoli.get(rif.chiave) ?? []), ...(riga ? articoli.get(slug(riga.nome)) ?? [] : [])];
+      for (const art of offerte) {
         r.articoli.add(art.chiave);
         aggiungiNegozio(r, art.negozio);
       }
@@ -207,8 +228,12 @@ export function suggerimentiOggi(partitaId: number): SuggerimentiOggiDto {
       r.attivita.add(rif.chiave);
       segna('attivita', rif.chiave, a.azione, a.fascia);
       // `attivita.luogo_chiave` è il quartiere che ospita l'attività
-      const att = prepared('SELECT luogo_chiave FROM attivita WHERE chiave = ?').get(rif.chiave) as { luogo_chiave: string | null } | undefined;
+      const att = prepared('SELECT luogo_chiave,tipo FROM attivita WHERE chiave = ?').get(rif.chiave) as { luogo_chiave: string | null; tipo: string } | undefined;
       if (att?.luogo_chiave) { r.quartieri.add(att.luogo_chiave); r.mappe.add(`citta-${att.luogo_chiave}`); }
+      if (conCatalogo && att?.tipo === 'videogioco') {
+        if (!articoli) articoli = indiceArticoli();
+        for (const art of articoli.get(`videogioco/${rif.chiave}`) ?? []) { r.articoli.add(art.chiave); aggiungiNegozio(r, art.negozio); }
+      }
     } else if (rif?.tipo === 'dote') {
       r.doti.add(rif.chiave);
       segna('doti', rif.chiave, a.azione, a.fascia);

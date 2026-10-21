@@ -21,6 +21,7 @@ import { conCestino } from './cestinoService.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { creaElemento } from './catalogoService.js';
 import { dettaglioLuogo } from './luoghiService.js';
+import { lettureListiniCondivisi, listinoDelNegozio, negoziEquivalenti } from './listiniCondivisi.js';
 import { spilloPerLuogo } from '../../shared/tipiLuogo.js';
 import type { LuogoDettaglioDto } from '../../shared/types.js';
 import type { OrariNegozio } from '../../shared/orariNegozio.js';
@@ -93,8 +94,10 @@ export interface RiepilogoEliminazione { pin: number; negozi: number; attivita: 
 function riepilogo(tipo: 'luogo' | 'negozio', chiave: string): RiepilogoEliminazione {
   const n = (sql: string, ...p: unknown[]) => (prepared(sql).get(...p) as { n: number }).n;
   if (tipo === 'luogo') {
+    const listini = lettureListiniCondivisi();
+    const extra = listini.sedi.filter((s) => s.luogo === chiave && !(prepared('SELECT 1 FROM negozio WHERE chiave = ? AND sede_chiave = ?').get(s.negozio, chiave))).length;
     return { pin: n("SELECT COUNT(*) AS n FROM spillo WHERE riferimento_tipo IN ('luogo', 'attivita') AND riferimento_chiave = ?", chiave),
-      negozi: n('SELECT COUNT(*) AS n FROM negozio WHERE sede_chiave = ?', chiave), attivita: n('SELECT COUNT(*) AS n FROM attivita WHERE sede_chiave = ?', chiave),
+      negozi: n('SELECT COUNT(*) AS n FROM negozio WHERE sede_chiave = ?', chiave) + extra, attivita: n('SELECT COUNT(*) AS n FROM attivita WHERE sede_chiave = ?', chiave),
       articoli: 0, acquisti: 0, punti: 0 };
   }
   return { pin: n("SELECT COUNT(*) AS n FROM spillo WHERE riferimento_tipo = 'negozio' AND riferimento_chiave = ?", chiave), negozi: 0, attivita: 0,
@@ -108,10 +111,16 @@ function riepilogo(tipo: 'luogo' | 'negozio', chiave: string): RiepilogoEliminaz
  * con contenuti → 409 `luogo-con-contenuti` / `negozio-con-acquisti` col riepilogo; con la conferma (o senza contenuti) va nel cestino.
  */
 export function eliminaNelCestino(tipo: 'luogo' | 'negozio', chiave: string, conferma: boolean): { esito: 'eliminata'; elemento: null; riepilogo: RiepilogoEliminazione } {
+  const listini = lettureListiniCondivisi();
+  if (tipo === 'negozio') chiave = listinoDelNegozio(chiave, listini);
+  const negozi = tipo === 'negozio' ? negoziEquivalenti(chiave, listini) : [];
   const r = prepared(`SELECT chiave, nome, ${tipo === 'luogo' ? 'quartiere_chiave' : 'luogo_chiave'} AS quartiere FROM ${tipo} WHERE chiave = ?`).get(chiave) as { chiave: string; nome: string; quartiere: string | null } | undefined;
   if (!r) throw httpErrors.notFound(`${tipo}-non-trovato`, `${tipo === 'luogo' ? 'Il luogo' : 'Il negozio'} '${chiave}' non esiste.`);
-  const conti = riepilogo(tipo, chiave);
-  const contenuti = tipo === 'luogo' ? conti.pin + conti.negozi + conti.attivita : conti.articoli + conti.acquisti + conti.punti + conti.pin;
+  const conti = tipo === 'luogo' ? riepilogo(tipo, chiave) : negozi.map((k) => riepilogo('negozio', k)).reduce((a, b) => ({
+    pin: a.pin + b.pin, negozi: a.negozi + b.negozi, attivita: a.attivita + b.attivita,
+    articoli: a.articoli + b.articoli, acquisti: a.acquisti + b.acquisti, punti: a.punti + b.punti,
+  }), { pin: 0, negozi: negozi.length - 1, attivita: 0, articoli: 0, acquisti: 0, punti: 0 });
+  const contenuti = tipo === 'luogo' ? conti.pin + conti.negozi + conti.attivita : conti.articoli + conti.acquisti + conti.punti + conti.pin + conti.negozi;
   if (!conferma && contenuti > 0) {
     throw httpErrors.conflict(tipo === 'luogo' ? 'luogo-con-contenuti' : 'negozio-con-acquisti', `«${r.nome}» ha dei contenuti: conferma per metterlo nel cestino.`, { ...conti });
   }
@@ -127,13 +136,15 @@ export function eliminaNelCestino(tipo: 'luogo' | 'negozio', chiave: string, con
       prepared('DELETE FROM marcatore_luogo WHERE luogo_chiave = ?').run(chiave);
       prepared('DELETE FROM luogo WHERE chiave = ?').run(chiave);
     } else {
-      // il negozio con articoli, acquisti e punti delle partite; i pin restano, senza riferimento
-      prepared('DELETE FROM utente.acquisto_partita WHERE articolo_chiave IN (SELECT chiave FROM articolo WHERE negozio_chiave = ?)').run(chiave);
-      prepared('DELETE FROM utente.punti_negozio_partita WHERE negozio_chiave = ?').run(chiave);
-      prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'negozio' AND riferimento_chiave = ?").run(chiave);
-      prepared("DELETE FROM mappa_entita WHERE entita_tipo = 'negozio' AND entita_chiave = ?").run(chiave);
-      prepared('DELETE FROM articolo WHERE negozio_chiave = ?').run(chiave);
-      prepared('DELETE FROM negozio WHERE chiave = ?').run(chiave);
+      // Anche i duplicati archiviati vanno nello stesso cestino, col riepilogo già confermato: non devono riapparire dopo il SET NULL della FK.
+      for (const k of negozi) {
+        prepared('DELETE FROM utente.acquisto_partita WHERE articolo_chiave IN (SELECT chiave FROM articolo WHERE negozio_chiave = ?)').run(k);
+        prepared('DELETE FROM utente.punti_negozio_partita WHERE negozio_chiave = ?').run(k);
+        prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'negozio' AND riferimento_chiave = ?").run(k);
+        prepared("DELETE FROM mappa_entita WHERE entita_tipo = 'negozio' AND entita_chiave = ?").run(k);
+        prepared('DELETE FROM articolo WHERE negozio_chiave = ?').run(k);
+        prepared('DELETE FROM negozio WHERE chiave = ?').run(k);
+      }
     }
   })());
   invalidaCacheDiGioco();

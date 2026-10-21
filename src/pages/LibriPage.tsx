@@ -29,8 +29,9 @@ import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
 import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
+import { ComandiProgressoLettura } from '../components/guida/ComandiProgressoLettura';
 import { NOME_DOTE } from '../utils/citta';
-import { STATI_LETTURA, bloccata, formattaYen, haDote, motivoBlocco, passaStato, prezzoChip, type StatoLettura } from '../utils/letture';
+import { STATI_LETTURA, formattaYen, haDote, passaStato, prezzoChip, type StatoLettura } from '../utils/letture';
 import type { LibroDto } from '../types';
 
 /**
@@ -78,7 +79,7 @@ export function LibriPage() {
     return (dati.dati?.libri ?? []).filter((l) => {
       const progresso = valoreDi(l);
       // Nella ricerca entra anche il testo «dove» della guida: per i libri senza negozio né posizione (premi, eventi) è l'unica indicazione.
-      if (q && !`${l.nome} ${l.nomeIt ?? ''} ${l.negozi.map((n) => n.negozioNome).join(' ')} ${l.dove} ${l.effettiTesto.join(' ')}`.toLocaleLowerCase('it').includes(q)) return false;
+      if (q && !`${l.nome} ${l.nomeIt ?? ''} ${(l.nomiAltri ?? []).join(' ')} ${l.negozi.map((n) => n.negozioNome).join(' ')} ${l.dove} ${l.effettiTesto.join(' ')}`.toLocaleLowerCase('it').includes(q)) return false;
       if (dote && !haDote(l.effetti, dote)) return false;
       return passaStato(stato, progresso, l.fatto);
     });
@@ -98,33 +99,21 @@ export function LibriPage() {
     const progresso = valoreDi(libro);
     // «Lettura rapida» non tocca il libro stesso: è il pomeriggio che rende il doppio.
     const passo = d?.letturaRapida && libro.chiave !== 'lettura-rapida' ? 2 : 1;
-    const percentuale = Math.round((progresso / libro.totaleSessioni) * 100);
     const titolo = libro.nomeIt ?? libro.nome;
-    const nonAncora = bloccata(libro.disponibilita);
     // Dove si compra: i negozi collegati (con il prezzo) e i luoghi che non sono negozi.
     const negoziCollegati = new Set(libro.negozi.map((n) => n.negozio));
     const altrePosizioni = libro.posizioni.filter((p) => !(p.tipo === 'negozio' && negoziCollegati.has(p.chiave)));
     return <li key={libro.chiave} className={`card relative flex min-w-0 flex-col gap-3 overflow-hidden ${libro.fatto ? 'border-success/50' : ''}`}>
       <div className="flex items-start gap-3">
         <IconaCategoria categoria="libri" dimensione={44} />
-        <div className="min-w-0 flex-1"><h2 className="m-0 text-lg leading-tight">{titolo}</h2></div>
+        <div className="min-w-0 flex-1"><h2 className="m-0 text-lg leading-tight">{libro.catalogo ? <Link className="touch inline-flex items-center" to={libro.catalogo.casa}>{titolo}</Link> : titolo}</h2></div>
         <span className="flex flex-col items-end gap-1">
           <span className={`chip ${libro.fatto ? 'chip--attivo' : ''}`}>{libro.fatto ? 'Completato' : progresso ? 'In corso' : 'Da leggere'}</span>
           <ChipDisponibilita disponibilita={libro.disponibilita ?? undefined} compatto />
         </span>
       </div>
-      <div><div className="mb-1 flex justify-between text-xs text-text-secondary"><span>{progresso} di {libro.totaleSessioni} sessioni</span><span>{percentuale}%</span></div><div className="visore-mappa__progresso" role="progressbar" aria-label={`Progresso ${titolo}`} aria-valuemin={0} aria-valuemax={libro.totaleSessioni} aria-valuenow={progresso}><span className="visore-mappa__progresso-barra" style={{ width: `${percentuale}%` }} /></div></div>
-      {/* Il gesto è la sessione: due pulsanti larghi uguali. Con il libro non ancora disponibile il
-          «+» resta spento e il motivo sta sotto, così non si registra una lettura che il gioco non
-          permette (il server la rifiuterebbe comunque). */}
-      {partitaId && <div className="grid grid-cols-2 gap-2" role="group" aria-label={`Avanzamento ${titolo}`}>
-        <PulsanteVisivo tono="secondario" icona={<IconaAzione chiave="meno" dimensione={20} />} titolo="Togli"
-          disabled={progresso === 0} onClick={() => accoda(libro, Math.max(progresso - passo, 0))} aria-label={`Togli una sessione a ${titolo}`} />
-        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Sessione"
-          disabled={progresso >= libro.totaleSessioni || (nonAncora && progresso === 0)} onClick={() => accoda(libro, Math.min(progresso + passo, libro.totaleSessioni))} aria-label={`Aggiungi una sessione a ${titolo}`} />
-        {nonAncora && progresso === 0 && <p className="col-span-2 m-0 text-xs text-text-secondary" role="note">Non ancora leggibile: {motivoBlocco(libro.disponibilita)}</p>}
-        {coda.occupato(libro) && <span className="col-span-2 text-center text-xs text-text-muted" role="status">Salvataggio…</span>}
-      </div>}
+      <ComandiProgressoLettura titolo={titolo} tipo="libro" progresso={progresso} totale={libro.totaleSessioni}
+        partita={partitaId !== null} occupato={coda.occupato(libro)} disponibilita={libro.disponibilita} passo={passo} onCambia={(valore) => accoda(libro, valore)} />
       <dl className="dl-scheda m-0 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm">
         <dt className="text-text-muted">Dove</dt>
         <dd className="m-0 flex flex-wrap gap-1">
@@ -138,6 +127,7 @@ export function LibriPage() {
         {(libro.apre?.length ?? 0) > 0 && <><dt className="text-text-muted">Apre</dt><dd className="m-0 flex flex-wrap gap-2">{libro.apre!.map((posto) => posto.casa ? <Link key={`${posto.tipo}:${posto.chiave}`} className="touch inline-flex items-center" to={posto.casa}>{posto.nome}</Link> : <span key={`${posto.tipo}:${posto.chiave}`}>{posto.nome}</span>)}</dd></>}
         {libro.negozi.length === 0 && libro.prezzo !== null && <><dt className="text-text-muted">Prezzo</dt><dd className="m-0">{libro.prezzo === 0 ? 'Gratis' : formattaYen(libro.prezzo)}</dd></>}
       </dl>
+      {libro.notaPrezzo && <p className="m-0 text-xs text-text-secondary">{libro.notaPrezzo}</p>}
       {libro.dettagli && <p className="m-0 text-xs text-text-secondary">{libro.dettagli}</p>}
       <div className="mt-auto flex flex-wrap items-center gap-2">
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo="Mostra posizione"

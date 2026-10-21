@@ -16,7 +16,7 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { LARGHEZZA_TENDINA, SOGLIA_RICERCA, TETTO_VOCI } from '../../utils/selettore';
 import { piatto } from '../../utils/testo';
 
-export interface OpzioneSelettore { chiave: string; nome: string; dettaglio?: string; gruppo?: string }
+export interface OpzioneSelettore { chiave: string; nome: string; dettaglio?: string; gruppo?: string; testoRicerca?: string }
 
 export interface PropsSelettore {
   etichetta: string;
@@ -59,7 +59,8 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
 
   const { filtrate, tagliate } = useMemo(() => {
     const q = conRicerca ? piatto(testo.trim()) : '';
-    const base = q ? tutte.filter((o) => piatto(o.nome).includes(q) || (o.dettaglio ? piatto(o.dettaglio).includes(q) : false) || (o.gruppo ? piatto(o.gruppo).includes(q) : false)) : tutte;
+    const base = q ? tutte.filter((o) => piatto(o.nome).includes(q) || (o.dettaglio ? piatto(o.dettaglio).includes(q) : false)
+      || (o.gruppo ? piatto(o.gruppo).includes(q) : false) || (o.testoRicerca ? piatto(o.testoRicerca).includes(q) : false)) : tutte;
     return { filtrate: base.slice(0, TETTO_VOCI), tagliate: base.length > TETTO_VOCI };
   }, [tutte, testo, conRicerca]);
 

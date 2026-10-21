@@ -13,6 +13,7 @@ import { ElementiRimossi } from '../guida/ElementiRimossi';
 import { FiltriArticoli } from '../guida/FiltriArticoli';
 import { FILTRO_VUOTO, categoriePresenti, destinatariPresenti, filtraArticoli, type FiltroArticoli as Filtro } from '../../utils/articoli';
 import type { ArticoloDto, NegozioDettaglioDto } from '../../types';
+import { TrasformazioniDiJose } from '../catalogo/TrasformazioniDiJose';
 
 type Articolo = ArticoloDto;
 
@@ -40,11 +41,12 @@ export function ListinoNegozio({ negozio, partitaId, versione, onModifica, onCam
   const visibili = useMemo(() => filtraArticoli(articoli, filtro, partitaId !== null), [articoli, filtro, partitaId]);
   return (
     <>
+      <TrasformazioniDiJose trasformazioni={negozio.trasformazioni ?? []} />
       {articoli.length > 0 && (
         <FiltriArticoli filtro={filtro} onCambia={setFiltro} categorie={categorie} destinatari={destinatari} conPartita={partitaId !== null} />
       )}
       {articoli.length === 0 ? <p className="m-0 text-[13px] text-text-muted">Nessun articolo acquistabile confermato per questo luogo.</p>
-        : <div className="negozio-elenco"><ArticoliTabella onModifica={(a) => onModifica(a.chiave)} articoli={visibili} partitaId={partitaId} onCambiato={onCambiato} /></div>}
+        : <div className="negozio-elenco"><ArticoliTabella onModifica={(a) => onModifica(a.chiave)} articoli={visibili} partitaId={partitaId} onCambiato={onCambiato} onContenutoCambiato={onRipristinato} /></div>}
       {/* Gli articoli nascosti di questo negozio, con il ripristino in un tocco: la pagina «Rimossi» li ha tutti. */}
       <ElementiRimossi tipo="articolo" negozio={negozio.chiave} versione={versione} onRipristinato={onRipristinato} />
     </>

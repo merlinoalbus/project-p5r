@@ -19,7 +19,7 @@ import { uidValido } from './spilli.js';
 
 /** Come si sceglie un valore: da quale elenco, o che numero. */
 export type TipoCampo =
-  | 'data' | 'fascia' | 'giorni' | 'stagione'
+  | 'data' | 'fascia' | 'giorni' | 'stagione' | 'allerta'
   | 'quartiere' | 'arco' | 'palazzo'
   | 'dote' | 'rango5' | 'confidente' | 'rango10' | 'membro' | 'richiesta'
   | 'libro' | 'film' | 'articolo'
@@ -58,7 +58,10 @@ export const STATI_PARTITA: readonly DefinizioneStato[] = [
     { chiave: 'tra', nome: 'tra', campi: [campo('dal', 'data', 'Dal'), campo('al', 'data', 'Al')] },
   ] },
   { chiave: 'fascia', nome: 'Momento della giornata', gruppo: 'Calendario e mondo', origine: 'Partita → Oggi', operatori: [{ chiave: 'e', nome: 'è', campi: [campo('fascia', 'fascia', 'Momento')] }] },
-  { chiave: 'meteo', nome: 'Meteo', gruppo: 'Calendario e mondo', origine: 'calendario di gioco', operatori: [{ chiave: 'piove', nome: 'piove', campi: [] }, { chiave: 'non-piove', nome: 'non piove', campi: [] }] },
+  { chiave: 'meteo', nome: 'Meteo', gruppo: 'Calendario e mondo', origine: 'calendario di gioco', operatori: [
+    { chiave: 'piove', nome: 'piove', campi: [] }, { chiave: 'non-piove', nome: 'non piove', campi: [] },
+    { chiave: 'senza-allerta', nome: 'senza questa allerta', campi: [campo('allerta', 'allerta', 'Allerta meteo')] },
+  ] },
   { chiave: 'giorno-settimana', nome: 'Giorno della settimana', gruppo: 'Calendario e mondo', origine: 'calendario di gioco', operatori: [{ chiave: 'in', nome: 'è uno di', campi: [campo('giorni', 'giorni', 'Giorni')] }] },
   { chiave: 'stagione', nome: 'Stagione', gruppo: 'Calendario e mondo', origine: 'calendario di gioco', operatori: [{ chiave: 'e', nome: 'è', campi: [campo('stagione', 'stagione', 'Stagione')] }] },
   // L6: sempre vera, per i quartieri aperti dall'inizio del gioco
@@ -67,6 +70,7 @@ export const STATI_PARTITA: readonly DefinizioneStato[] = [
   // L6: il luogo è sbloccato (lo sblocco, non gli orari): un quartiere si apre se lo è il suo ritrovo
   { chiave: 'luogo', nome: 'Luogo', gruppo: 'Calendario e mondo', origine: 'sblocco del luogo (pagina del luogo)', operatori: [{ chiave: 'sbloccato', nome: 'sbloccato', campi: [campo('luogo', 'luogo', 'Luogo')] }] },
   { chiave: 'arco', nome: 'Arco della storia', gruppo: 'Calendario e mondo', origine: 'data di gioco', operatori: [{ chiave: 'almeno', nome: 'arrivato almeno a', campi: [campo('dungeon', 'arco', 'Palazzo')] }] },
+  { chiave: 'finestra-palazzo', nome: 'Finestra del Palazzo', gruppo: 'Calendario e mondo', origine: 'finestra nella scheda del Palazzo', operatori: [{ chiave: 'durante', nome: 'durante', campi: [campo('dungeon', 'palazzo', 'Palazzo')] }] },
   // — Storia e progressi —
   // «concluso» (L4 §8.10, R6-16b): Tesoro e boss finale; il 100% della raccolta non sblocca nulla (G-026). La chiave dell'operatore resta
   // quella di prima, così le scelte salvate nell'editor non cambiano
@@ -111,7 +115,7 @@ export const STATI_PARTITA: readonly DefinizioneStato[] = [
 export const STATO_DEL_TIPO: Record<Exclude<TipoCondizione, 'gruppo' | 'non'>, string> = {
   data: 'data-gioco', intervallo: 'data-gioco', fascia: 'fascia', piove: 'meteo', meteo: 'meteo', 'giorno-settimana': 'giorno-settimana',
   stagione: 'stagione', quartiere: 'quartiere', 'da-subito': 'da-subito', luogo: 'luogo', invito: 'invito', avviso: 'avviso', arco: 'arco',
-  palazzo: 'palazzo', dote: 'dote', confidente: 'confidente', squadra: 'squadra', richiesta: 'richiesta', lettura: 'libro', articolo: 'articolo',
+  'finestra-palazzo': 'finestra-palazzo', palazzo: 'palazzo', dote: 'dote', confidente: 'confidente', squadra: 'squadra', richiesta: 'richiesta', lettura: 'libro', articolo: 'articolo',
   attivita: 'attivita', 'rango-cliente': 'rango-cliente', 'punti-negozio': 'punti-negozio', evento: 'evento', contatore: 'contatore',
   'persona-arcano': 'persona-arcano', 'persona-abilita': 'persona-abilita', spillo: 'spillo', 'voce-guida': 'voce-guida',
 };
@@ -167,7 +171,9 @@ export function costruisciCondizione(scelta: SceltaCondizione): RequisitoSpillo 
       return dataValida(al) && ordineGioco(dal) <= ordineGioco(al) ? { tipo: 'intervallo', dal, al } : null;
     }
     case 'fascia': return v.fascia === 'giorno' || v.fascia === 'sera' ? { tipo: 'fascia', fascia: v.fascia } : null;
-    case 'meteo': return scelta.operatore === 'piove' ? { tipo: 'piove' } : { tipo: 'meteo', condizione: 'non-piove' };
+    case 'meteo': return scelta.operatore === 'piove' ? { tipo: 'piove' }
+      : scelta.operatore === 'senza-allerta' ? (s(v.allerta) ? { tipo: 'meteo', condizione: 'senza-allerta', allerta: s(v.allerta) } : null)
+        : { tipo: 'meteo', condizione: 'non-piove' };
     case 'giorno-settimana': {
       const giorni = GIORNI_SETTIMANA.map((g) => g.chiave).filter((g) => Array.isArray(v.giorni) && v.giorni.includes(g));
       return giorni.length > 0 && giorni.length < 7 ? { tipo: 'giorno-settimana', giorni } : null;
@@ -180,6 +186,7 @@ export function costruisciCondizione(scelta: SceltaCondizione): RequisitoSpillo 
     // Nell'editor gli spazi in coda servono per scrivere la parola seguente; la normalizzazione avviene al salvataggio.
     case 'avviso': { const testo = s(v.testo).slice(0, 300); return testo.trim() ? { tipo: 'avviso', testo } : null; }
     case 'arco': return (ARCHI_STORIA as readonly string[]).includes(s(v.dungeon)) ? { tipo: 'arco', dungeon: s(v.dungeon) } : null;
+    case 'finestra-palazzo': return PALAZZI_CONDIZIONE.some((p) => p.chiave === s(v.dungeon)) ? { tipo: 'finestra-palazzo', dungeon: s(v.dungeon) } : null;
     case 'palazzo': return s(v.dungeon) ? { tipo: 'palazzo', dungeon: s(v.dungeon) } : null;
     case 'dote': return eDote(v.dote) && n(v.rango) >= 1 && n(v.rango) <= 5 ? { tipo: 'dote', dote: s(v.dote), rango: n(v.rango) } : null;
     case 'confidente': return s(v.confidente) && n(v.rango) >= 1 && n(v.rango) <= 10 ? { tipo: 'confidente', confidente: s(v.confidente), rango: n(v.rango) } : null;
@@ -209,7 +216,8 @@ export function scomponiCondizione(c: RequisitoSpillo): SceltaCondizione | null 
     case 'intervallo': return c.dal === c.al ? { stato: 'data-gioco', operatore: 'il', valori: { dal: c.dal } } : { stato: 'data-gioco', operatore: 'tra', valori: { dal: c.dal, al: c.al } };
     case 'fascia': return { stato: 'fascia', operatore: 'e', valori: { fascia: c.fascia } };
     case 'piove': return { stato: 'meteo', operatore: 'piove', valori: {} };
-    case 'meteo': return { stato: 'meteo', operatore: 'non-piove', valori: {} };
+    case 'meteo': return c.condizione === 'senza-allerta' ? { stato: 'meteo', operatore: 'senza-allerta', valori: { allerta: c.allerta } }
+      : { stato: 'meteo', operatore: 'non-piove', valori: {} };
     case 'giorno-settimana': return { stato: 'giorno-settimana', operatore: 'in', valori: { giorni: c.giorni } };
     case 'stagione': return { stato: 'stagione', operatore: 'e', valori: { stagione: c.stagione } };
     case 'quartiere': return { stato: 'quartiere', operatore: 'sbloccato', valori: { quartiere: c.quartiere } };
@@ -218,6 +226,7 @@ export function scomponiCondizione(c: RequisitoSpillo): SceltaCondizione | null 
     case 'invito': return { stato: 'invito', operatore: 'registrato', valori: { invito: c.invito } };
     case 'avviso': return { stato: 'avviso', operatore: 'testo', valori: { testo: c.testo } };
     case 'arco': return { stato: 'arco', operatore: 'almeno', valori: { dungeon: c.dungeon } };
+    case 'finestra-palazzo': return { stato: 'finestra-palazzo', operatore: 'durante', valori: { dungeon: c.dungeon } };
     case 'palazzo': return { stato: 'palazzo', operatore: 'completato', valori: { dungeon: c.dungeon } };
     case 'dote': return { stato: 'dote', operatore: 'almeno', valori: { dote: c.dote, rango: c.rango } };
     case 'confidente': return { stato: 'confidente', operatore: 'almeno', valori: { confidente: c.confidente, rango: c.rango } };

@@ -29,6 +29,7 @@ import { ListinoNegozio } from '../components/negozi/ListinoNegozio';
 import { ModuloCatalogo } from '../components/guida/ModuloCatalogo';
 import { CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { PulsanteGuidaQuiz } from '../components/guida/GuidaQuiz';
+import { TestoRipiegabile } from '../components/shared/TestoRipiegabile';
 import { COLORE_TIPO_LUOGO, NOME_TIPO_LUOGO, ancoraNegozio } from '../utils/citta';
 import { NOME_TIPO_NEGOZIO } from '../utils/negozi';
 import { definizioneTipoLuogo } from '../../shared/tipiLuogo';
@@ -145,7 +146,7 @@ export function LuogoPage() {
                         {n.quiz.map((q) => <PulsanteGuidaQuiz key={q.attivita} voce={q} />)}
                         {n.programmaPunti && <span><strong className="text-text">Programma punti:</strong> {n.programmaPunti.nome} ({n.programmaPunti.unita}{n.programmaPunti.calcolo === 'rango-cliente' ? ', dal rango cliente' : ', si segnano a mano'})</span>}
                       </div>
-                      {n.note && <p className="m-0 text-[13px] text-text-secondary">{n.note}</p>}
+                      {n.note && <TestoRipiegabile key={n.chiave} testo={n.note} massimo={140} className="min-w-0 whitespace-pre-line break-words text-[13px] text-text-secondary" />}
                       <p className="m-0 text-[12px] text-text-muted">{n.articoli} articoli{n.verificati < n.articoli ? ` (${n.articoli - n.verificati} da fonte secondaria)` : ''}{partitaId ? ` · ${n.acquistati} acquistati nella partita «${attiva?.nome}»` : ' · attiva una partita per segnare gli acquisti'}.</p>
                       <div className="flex flex-wrap gap-1.5">
                         <button type="button" className="btn btn-secondary btn-sm touch" onClick={() => setModulo({ negozio: n.chiave, elemento: null })}>Aggiungi un articolo</button>

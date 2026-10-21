@@ -17,7 +17,7 @@ import { categoriaSpillo, spilloPerPunto } from '../../../shared/spilli.js';
 import { spilloPerLuogo } from '../../../shared/tipiLuogo.js';
 import { assegnaUidMancanti } from './identitaSpillo.js';
 import { riconciliaAreeGuida } from './organizzazioneMappe.js';
-import { finestraDaDate, unisci } from './presenzaEntita.js';
+import { unisci } from './presenzaEntita.js';
 import { sincronizzaPercorsiMappe } from './percorsiMappe.js';
 import { leggiCondizioniSalvate } from '../../../shared/condizioniSpillo.js';
 
@@ -134,7 +134,7 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
     : [];
   if (colonneDungeon.includes('finestra_dal') && colonneDungeon.includes('finestra_al')) {
     for (const f of db.prepare('SELECT chiave, finestra_dal, finestra_al FROM dungeon WHERE finestra_dal IS NOT NULL').all() as Array<{ chiave: string; finestra_dal: string | null; finestra_al: string | null }>) {
-      finestrePerDungeon.set(f.chiave, finestraDaDate(f.finestra_dal, f.finestra_al));
+      finestrePerDungeon.set(f.chiave, [{ tipo: 'finestra-palazzo', dungeon: f.chiave }]);
     }
   }
   let conSblocco = 0;

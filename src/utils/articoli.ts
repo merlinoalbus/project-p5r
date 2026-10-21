@@ -45,7 +45,8 @@ export function filtraArticoli(articoli: ArticoloDto[], f: FiltroArticoli, conPa
   const q = piatto(f.q.trim());
   const categorie = new Set(f.categorie);
   return articoli.filter((a) => {
-    if (q && !`${piatto(a.nome)} ${piatto(a.nomeIt)} ${piatto(a.effetto)} ${piatto(a.negozioNome)}`.includes(q)) return false;
+    if (q && ![a.nome, a.nomeIt, a.effetto, a.negozioNome, ...(a.ricevuti ?? []).map((r) => r.nome),
+      ...(a.costo?.tipo === 'oggetti' ? a.costo.oggetti.map((o) => o.nome ?? '') : [])].map(piatto).join(' ').includes(q)) return false;
     if (categorie.size && !categorie.has(a.categoria)) return false;
     if (f.per && a.per !== f.per && a.per !== 'tutti') return false;
     if (conPartita && f.stato !== 'tutti' && (f.stato === 'acquistati') !== a.acquistato) return false;

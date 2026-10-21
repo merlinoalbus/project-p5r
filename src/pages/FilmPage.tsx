@@ -9,6 +9,7 @@
 // ============================================================
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { descriviRequisitoSpillo } from '../../shared/condizioniSpillo';
 import { Selettore } from '../components/shared/Selettore';
 import { Segmenti } from '../components/shared/Segmenti';
@@ -27,11 +28,12 @@ import { NotaPuntiDote } from '../components/shared/NotaPuntiDote';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
 import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
+import { ComandiProgressoLettura } from '../components/guida/ComandiProgressoLettura';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { NOME_DOTE } from '../utils/citta';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione, IconaSegno } from '../components/shared/IconaAzione';
-import { STATI_LETTURA, bloccata, formattaYen, haDote, motivoBlocco, passaStato, type StatoLettura } from '../utils/letture';
+import { STATI_LETTURA, formattaYen, haDote, passaStato, type StatoLettura } from '../utils/letture';
 import type { FilmDto, FilmDvdDto } from '../types';
 
 type SupportoFiltro = 'tutti' | 'cinema' | 'dvd';
@@ -91,7 +93,7 @@ export function FilmPage() {
     const q = ricerca.trim().toLocaleLowerCase('it');
     return (dati.dati?.film ?? []).filter((f) => {
       const progresso = progressoDi(f);
-      if (q && !`${f.nome} ${f.nomeIt ?? ''} ${f.effettiTesto.join(' ')} ${f.dettagli ?? ''}`.toLocaleLowerCase('it').includes(q)) return false;
+      if (q && !`${f.nome} ${f.nomeIt ?? ''} ${(f.nomiAltri ?? []).join(' ')} ${f.effettiTesto.join(' ')} ${f.dettagli ?? ''}`.toLocaleLowerCase('it').includes(q)) return false;
       if (supporto !== 'tutti' && f.dove !== supporto) return false;
       if (dote && !haDote(f.effetti, dote)) return false;
       return passaStato(stato, progresso, completatoCon(f, progresso));
@@ -112,34 +114,27 @@ export function FilmPage() {
     const iniziato = progresso > 0;
     const completato = completatoCon(film, progresso);
     const cinema = film.dove === 'cinema';
-    const percentuale = cinema ? Number(iniziato) * 100 : Math.round((progresso / film.totaleSessioni) * 100);
-    const nonAncora = bloccata(film.disponibilita);
     const quando = (film.condizioni ?? []).map((c) => c.tipo === 'avviso' ? descriviRequisitoSpillo(c) : c.testo).join(' · ');
     return <li key={film.chiave} className={`card relative flex min-w-0 flex-col gap-3 overflow-hidden ${completato ? 'border-success/50' : ''}`}>
       <div className="flex items-start gap-3">
         {/* Il disco per i DVD, la pellicola per il cinema: la figura dice dove si guarda. */}
         <IconaCategoria categoria={cinema ? 'film' : 'dvd'} dimensione={44} etichetta={cinema ? 'Al cinema' : 'In DVD'} />
-        <div className="min-w-0 flex-1"><h2 className="m-0 text-lg leading-tight">{titolo}</h2><p className="m-0 text-xs text-text-secondary">{cinema ? 'Cinema' : 'DVD'}{quando ? ` · ${quando}` : ''}</p></div>
+        <div className="min-w-0 flex-1"><h2 className="m-0 text-lg leading-tight">{film.catalogo ? <Link className="touch inline-flex items-center" to={film.catalogo.casa}>{titolo}</Link> : titolo}</h2><p className="m-0 text-xs text-text-secondary">{cinema ? 'Cinema' : 'DVD'}{quando ? ` · ${quando}` : ''}</p></div>
         <span className="flex flex-col items-end gap-1">
           <span className={`chip ${completato ? 'chip--attivo' : ''}`}>{completato ? 'Completato' : iniziato ? 'In corso' : cinema ? 'Da vedere' : 'Da iniziare'}</span>
           <ChipDisponibilita disponibilita={film.disponibilita ?? undefined} compatto />
         </span>
       </div>
-      <div><div className="mb-1 flex justify-between text-xs text-text-secondary"><span>{cinema ? `${progresso} ${progresso === 1 ? 'visione' : 'visioni'}` : `${progresso} di ${film.totaleSessioni} sessioni`}</span>{!cinema && <span>{percentuale}%</span>}</div><div className="visore-mappa__progresso" role="progressbar" aria-label={`Progresso ${titolo}`} aria-valuemin={0} aria-valuemax={cinema ? Math.max(1, progresso) : film.totaleSessioni} aria-valuenow={progresso}><span className="visore-mappa__progresso-barra" style={{ width: `${percentuale}%` }} /></div></div>
-      {/* Due pulsanti larghi uguali: il gesto è la visione. Al cinema non c'è tetto (le rivisioni
-          contano); con il titolo non ancora disponibile il «+» resta spento e il motivo sta sotto. */}
-      {partitaId && <div className="grid grid-cols-2 gap-2" role="group" aria-label={`Avanzamento ${titolo}`}>
-        <PulsanteVisivo tono="secondario" icona={<IconaAzione chiave="meno" dimensione={20} />} titolo="Togli" disabled={progresso === 0} onClick={() => accoda(film, progresso - 1)} aria-label={`Togli una ${cinema ? 'visione' : 'sessione'} a ${titolo}`} />
-        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo={cinema ? 'Visione' : 'Sessione'} disabled={(!cinema && progresso >= film.totaleSessioni) || (nonAncora && progresso === 0)} onClick={() => accoda(film, progresso + 1)} aria-label={`Aggiungi una ${cinema ? 'visione' : 'sessione'} a ${titolo}`} />
-        {nonAncora && progresso === 0 && <p className="col-span-2 m-0 text-xs text-text-secondary" role="note">Non ancora {cinema ? 'in programmazione' : 'disponibile'}: {motivoBlocco(film.disponibilita)}</p>}
-        {coda.occupato(film) && <span className="col-span-2 text-center text-xs text-text-muted" role="status">Salvataggio…</span>}
-      </div>}
+      <ComandiProgressoLettura titolo={titolo} tipo={cinema ? 'cinema' : 'dvd'} progresso={progresso} totale={film.totaleSessioni}
+        partita={partitaId !== null} occupato={coda.occupato(film)} disponibilita={film.disponibilita} onCambia={(valore) => accoda(film, valore)} />
       <dl className="dl-scheda m-0 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm">
         <dt className="text-text-muted">Che cosa fa</dt>
         <dd className="m-0">{film.effettiTesto.length ? <ul className="m-0 list-none p-0">{film.effettiTesto.map((t, i) => <li key={i}>{t}</li>)}</ul> : 'Nessun effetto dichiarato'}</dd>
         {!cinema && <><dt className="text-text-muted">Visioni</dt><dd className="m-0">{film.totaleSessioni} per completarlo</dd></>}
-        {film.prezzo !== null && <><dt className="text-text-muted">Prezzo</dt><dd className="m-0">{formattaYen(film.prezzo)}</dd></>}
+        {!!film.negozi?.length && <><dt className="text-text-muted">In vendita da</dt><dd className="m-0 flex flex-wrap gap-1">{film.negozi.map((n) => <Link key={n.articolo} to={`/guida/negozi/${encodeURIComponent(n.negozio)}`} className="chip chip--attivo touch no-underline">{n.negozioNome}{n.prezzo === null ? '' : ` · ${formattaYen(n.prezzo)}`}</Link>)}</dd></>}
+        {!film.negozi?.length && film.prezzo !== null && <><dt className="text-text-muted">Prezzo</dt><dd className="m-0">{formattaYen(film.prezzo)}</dd></>}
       </dl>
+      {film.notaPrezzo && <p className="m-0 text-xs text-text-secondary">{film.notaPrezzo}</p>}
       {film.dettagli && <p className="m-0 text-xs text-text-secondary">{film.dettagli}</p>}
       <div className="mt-auto flex flex-wrap items-center gap-2">
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo="Mostra posizione"

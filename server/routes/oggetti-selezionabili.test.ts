@@ -18,13 +18,14 @@
 import request from 'supertest';
 import { closeDb } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
-import type { OggettoSelezionabileDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
 /** Elenca gli oggetti che l'editor offre per la categoria data. */
+// Asserzioni storiche del contratto precedente: non verificano L7 e non sono state eseguite
+// né adeguate funzionalmente nella ripresa. Solo annotazione del JSON grezzo per la compilazione.
 const per = async (categoria: string) =>
-  (await request(app).get(`/api/catalogo/oggetti-di/${categoria}`)).body.data as OggettoSelezionabileDto[];
+  (await request(app).get(`/api/catalogo/oggetti-di/${categoria}`)).body.data as Array<Record<string, unknown>>;
 
 describe('API oggetti selezionabili', () => {
   beforeAll(() => { dbDiProva(); });

@@ -13,8 +13,10 @@ import { verificaPartita } from './verificaPartita.js';
 import { datiGuida, type Congelato } from './datiGuida.js';
 import { registraEvento } from './storicoService.js';
 import { conCestino } from './cestinoService.js';
-import type { CitazioniRichiestaDto, JoseDto, RichiestaDto, RichiesteDto, StatoRichiesta } from '../../shared/types.js';
+import type { CitazioniRichiestaDto, JoseDto, RicompensaOggettoDto, RichiestaDto, RichiesteDto, StatoRichiesta } from '../../shared/types.js';
 import { slug } from '../../shared/slug.js';
+import { catalogoOggettiDisponibile, ricompensePerFonte } from './catalogoOggettiLetture.js';
+import { dettaglioNegozio } from './negoziService.js';
 
 interface RigaRichiesta { chiave: string; ordine: number; nome: string; committente: string; disponibile_dal: string; scadenza: string; area: string; area_chiave: string | null; area_nome: string | null; area_ordine: number | null; piano: string; bersaglio_json: string; ricompense_json: string; confidente_chiave: string | null; confidente_rango: number | null; note: string; fonte: string; confidente_nome: string | null; area_dedalo_chiave: string | null; area_dedalo_nome: string | null }
 
@@ -22,10 +24,11 @@ const SQL = 'SELECT r.*, c.nome AS confidente_nome, a.nome AS area_nome, a.ordin
 
 /** Una Richiesta come DTO: bersaglio e ricompense dai JSON, Confidente collegato (con il nome, o la chiave se manca),
  *  dedalo e stato nella partita (null se non è segnata). */
-function dto(r: RigaRichiesta, stati: Map<string, StatoRichiesta>): RichiestaDto {
+function dto(r: RigaRichiesta, stati: Map<string, StatoRichiesta>, premi = ricompensePerFonte('richiesta', [r.chiave])): RichiestaDto {
   return {
     chiave: r.chiave, nome: r.nome, committente: r.committente, disponibileDal: r.disponibile_dal, scadenza: r.scadenza, area: r.area, areaChiave: r.area_chiave, piano: r.piano,
     bersaglio: JSON.parse(r.bersaglio_json) as RichiestaDto['bersaglio'], ricompense: JSON.parse(r.ricompense_json) as string[],
+    oggettiRicompensa: premi.get(r.chiave) ?? [],
     confidente: r.confidente_chiave ? { chiave: r.confidente_chiave, nome: r.confidente_nome ?? r.confidente_chiave, rango: r.confidente_rango } : null,
     areaNome: r.area_nome, areaOrdine: r.area_ordine, areaDedalo: r.area_dedalo_chiave, areaDedaloNome: r.area_dedalo_nome,
     note: r.note, fonte: r.fonte, stato: stati.get(r.chiave) ?? null,
@@ -44,7 +47,9 @@ function statiPartita(partitaId: number | undefined): Map<string, StatoRichiesta
 export function richieste(partitaId?: number): Congelato<RichiesteDto> {
   const stati = statiPartita(partitaId);
   // prima per dedalo (le richieste senza dedalo in coda), poi per area del dedalo (le da collocare in coda) e per ordine della guida
-  const lista = (prepared(`${SQL} ORDER BY (a.ordine IS NULL), a.ordine, (ad.ordine IS NULL), ad.ordine, r.ordine`).all() as RigaRichiesta[]).map((r) => dto(r, stati));
+  const righe = prepared(`${SQL} ORDER BY (a.ordine IS NULL), a.ordine, (ad.ordine IS NULL), ad.ordine, r.ordine`).all() as RigaRichiesta[];
+  const premi: Map<string, RicompensaOggettoDto[]> = ricompensePerFonte('richiesta', righe.map((r) => r.chiave));
+  const lista = righe.map((r) => dto(r, stati, premi));
   const dedali: RichiesteDto['dedali'] = [];
   for (const r of lista) {
     if (!r.areaChiave || !r.areaNome || r.areaOrdine === null) continue;
@@ -53,7 +58,10 @@ export function richieste(partitaId?: number): Congelato<RichiesteDto> {
     d.totale += 1;
     if (r.stato === 'completata') d.completate += 1;
   }
-  return { richieste: lista, jose: datiGuida<JoseDto>('jose'), dedali, completate: lista.filter((r) => r.stato === 'completata').length, totale: lista.length, collocazioni: collocazioni() };
+  const fonteJose = datiGuida<JoseDto>('jose');
+  const jose = fonteJose && catalogoOggettiDisponibile() ? { ...fonteJose, scambi: [],
+    listino: prepared("SELECT 1 FROM negozio WHERE chiave = 'jose' AND nascosto = 0").get() ? dettaglioNegozio('jose', partitaId) : null } : fonteJose;
+  return { richieste: lista, jose, dedali, completate: lista.filter((r) => r.stato === 'completata').length, totale: lista.length, collocazioni: collocazioni() };
 }
 
 /** Tutti i dedali dei Memento, nell'ordine di percorrenza, con le loro aree (099): dove il modulo può mettere una Richiesta. */

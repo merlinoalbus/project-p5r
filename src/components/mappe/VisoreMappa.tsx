@@ -29,12 +29,13 @@ import { AssetImg } from '../shared/AssetImg';
 import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
 import { ChipDisponibilita } from '../guida/ChipDisponibilita';
+import { CostoDellOggetto } from '../catalogo/CostoDellOggetto';
+import { OggettiCollegati } from '../catalogo/OggettiCollegati';
 import { CondizioniSpilloElenco } from './CondizioniSpillo';
 import { ProveNativeSpillo } from './ProveNativeSpillo';
 import type { DivergenzaDaVerificare } from '../guida/FinestraDaVerificare';
 import { GuidaNelVisore } from './GuidaNelVisore';
 import type { ImmagineSpilloDto } from '../../types';
-import { formattaYen } from '../../utils/punti';
 import { useSuggerimenti } from '../../stores/suggerimentiStore';
 import { descrizioneImmagineMappa, nomeFiglieMappa, nomeTipoMappa, titoloMappeVicine } from '../../utils/vocabolarioMappe';
 
@@ -1195,15 +1196,16 @@ function MerceNelPopup({ negozio, spillo, partitaId, occupato, onAcquisto }: { n
         : (
           <ul className="spillo-popup__merce m-0 p-0 list-none flex flex-col">
             {disponibili.map((a) => (
-              <li key={a.chiave} className={`flex items-center gap-2 py-1 border-b border-border text-[12px] ${a.comprato ? 'opacity-60' : ''}`}>
+              <li key={a.chiave} className="flex flex-wrap items-center gap-2 py-1 border-b border-border text-[12px]">
                 {/* L'etichetta attorno alla casella è il bersaglio: era l'unica casella dell'app a
                     non averla, e restava un quadratino di 20 px (trovata cercando nel codice, non
                     nelle misure: il criterio dice di misurare l'etichetta, e qui non c'era). */}
                 {partitaId && onAcquisto
                   ? <label className="touch flex items-center justify-center shrink-0 -my-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 shrink-0" checked={a.comprato} disabled={occupato} aria-label={`${a.nome} comprato`} onChange={(e) => void onAcquisto(spillo, a.chiave, e.target.checked)} /></label>
                   : <span className="w-5 shrink-0 text-center">{a.comprato ? '✓' : ''}</span>}
-                <span className={`min-w-0 flex-1 truncate ${a.comprato ? 'line-through' : ''}`} title={`${a.nome} · ${a.categoria}`}>{a.nome}</span>
-                <span className="tabular-nums shrink-0 text-text-secondary">{a.prezzo !== null ? formattaYen(a.prezzo) : '—'}</span>
+                <div className="min-w-0 flex-1 break-words"><span className={a.comprato ? 'line-through' : ''} title={`${a.nome} · ${a.categoria}`}>{a.catalogo ? <Link to={a.catalogo.casa} className="touch inline-flex items-center">{a.nome}</Link> : a.nome}</span>
+                  {!!a.ricevuti?.length && <OggettiCollegati oggetti={a.ricevuti} />}</div>
+                <span className="min-w-0 max-w-full tabular-nums text-text-secondary"><CostoDellOggetto costo={a.costo ?? null} prezzo={a.prezzo} daVerificare={a.costoDaVerificare} /></span>
               </li>
             ))}
           </ul>
@@ -1379,24 +1381,25 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
                   Qui ogni articolo e' una riga: nome e categoria in alto, prezzo e stato sotto. */}
               <ul className="visore-mappa__merce m-0 list-none p-0" aria-label={`Articoli di ${negozio.nome}`}>
                 {articoliVisibili.map((a) => (
-                  <li key={a.chiave} className={`visore-mappa__merce-riga ${a.comprato ? 'opacity-60' : ''}`}>
+                  <li key={a.chiave} className="visore-mappa__merce-riga">
                     {acquistabile
                       ? <label className="touch flex items-center justify-center shrink-0 -my-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 shrink-0" checked={a.comprato} disabled={occupato}
                           onChange={(e) => void onAcquisto!(s, a.chiave, e.target.checked)} aria-label={`${a.nome} comprato`} /></label>
                       : <span className="w-5 shrink-0 text-center" role="img" aria-label={a.comprato ? 'comprato' : 'non comprato'}>{a.comprato ? '✓' : ''}</span>}
-                    <span className="min-w-0 flex-1">
+                    <div className="min-w-0 flex-1">
                       <span className={`block text-[13px] leading-tight ${a.comprato ? 'line-through' : ''}`}>
-                        {a.nome}<span className="text-text-muted no-underline"> · {a.categoria}</span>
+                        {a.catalogo ? <Link to={a.catalogo.casa} className="touch inline-flex items-center">{a.nome}</Link> : a.nome}<span className="text-text-muted no-underline"> · {a.categoria}</span>
                       </span>
+                      {!!a.ricevuti?.length && <OggettiCollegati oggetti={a.ricevuti} />}
                       <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-text-secondary">
-                        <span className="tabular-nums">{a.prezzo !== null ? formattaYen(a.prezzo) : 'prezzo non indicato'}</span>
+                        <span className="tabular-nums"><CostoDellOggetto costo={a.costo ?? null} prezzo={a.prezzo} daVerificare={a.costoDaVerificare} /></span>
                         {/* «sempre» si dice solo quando e' vero: accanto a un cartellino che avvisa
                             del contrario era una contraddizione scritta due volte sulla stessa riga. */}
                         {a.disponibilita && a.disponibilita.stato !== 'disponibile'
                           ? <ChipDisponibilita disponibilita={a.disponibilita} compatto />
                           : <span>{disponibilita(a)}</span>}
                       </span>
-                    </span>
+                    </div>
                   </li>
                 ))}
               </ul>

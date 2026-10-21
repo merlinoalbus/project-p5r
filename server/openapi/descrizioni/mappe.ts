@@ -86,7 +86,7 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
   'GET /api/mappe/:chiave/guida': {
     sommario: 'Le voci della guida che stanno sulla planimetria, per il visore',
     descrizione: 'L3 «planimetria della voce» (decisione dell\'utente), sola lettura. Una voce di un Palazzo sta sulla planimetria se ha almeno un pin su di lei, oppure se non ha pin e la sua planimetria è lei: l\'aggancio fatto a mano (`PUT /api/compendio/punti/:chiave` con `planimetria`), altrimenti la planimetria 1 della sua infiltrazione (l\'iniziale della prima Area toccata, o la predefinita della prima Area del Palazzo). Una voce spostata a mano compare dove l\'ha messa l\'utente anche se la sua infiltrazione non tocca la planimetria. Un Enigma compare se ci sta almeno uno dei suoi passi, e ogni passo segue la propria regola. Le voci sono raggruppate per infiltrazione (nell\'ordine) e poi per ordine, nella forma di `PuntoInteresseDto` con `planimetria`, i pin con `uid`, `mappa` e `nome` (per centrarli) e, con `partita`, lo stato di quella partita. Il client non filtra da sé. I Memento non hanno planimetrie.',
-    risposta: '`GuidaDellaPlanimetriaDto`',
+    risposta: '`GuidaDellaPlanimetriaDto`; dopo M7 le voci includono contenuto per chiave e proposteContenuto pendenti, con nomi correnti e quantità. Il testo dettagli.contenuto resta nota della guida, senza sincronizzazione con il legame o nuove regole di stato. Le proposte richiedono un gesto esplicito, non vengono applicate da questa lettura.',
     errori: [[404, 'mappa-non-trovata'], [404, 'partita-non-trovata']],
   },
   'PUT /api/mappe/:chiave': {

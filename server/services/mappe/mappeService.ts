@@ -28,6 +28,7 @@ import { giocabili } from '../squadraService.js';
 import { nomiCondizioni, pinCitato } from '../condizioni/nomiCondizioni.js';
 import { statoDisponibilitaPartita, valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilitaService.js';
 import { palazzoDiIngresso, palazzoDiOgniMappa } from '../palazziService.js';
+import { conPresenzaPin, conDisponibilitaNegozio, senzaIngressoConcluso } from './disponibilitaPin.js';
 import { ePersonaDeiMemento, erroreCatturaNelCompendio } from '../catturePersona.js';
 import { allineaEnigmaDellaVoce, allineaRaccoltoDelPin, allineaStatiPunto, erroreVoceDelPin, pinDelPuntoGuida, quanteVociDelPin, scriviStatoVoce, segnaPassiDellEnigma, vociDelPin } from './collegamentiGuida.js';
 import { conDivergenze, conStatoPerInfiltrazione, effettiDelGestoDto, modelloAvanzamento, riallineaStati, segnaIlPin, statiDellaPartita, statoDelPin, type ModelloAvanzamento, type StatiDellaPartita } from './statiGuida.js';
@@ -254,7 +255,7 @@ function percorsoDi(r: RigaMappa, aree: ContestoAree = contestoAree()): Array<{ 
  * lo stato della partita, luogo o attività con il negozio che vi ha sede, negozio, Confidente con immagine, richiesta con lo
  * stato. Null se manca il riferimento, se l'entità non esiste o se il tipo non ha un dettaglio.
  */
-function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | null, ctx: ContestoSpilli = {}): DettaglioSpilloDto | null {
+function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | null, ctx: ContestoSpilli = {}, sedeScelta?: string): DettaglioSpilloDto | null {
   if (!tipo || !chiave) return null;
   const partitaId = ctx.partitaId;
   switch (tipo) {
@@ -294,7 +295,7 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
       const luoghi = luoghiDi(ctx);
       const casa = casaDelLuogo(l.chiave);
       const sedi = luoghi.negozi.get(l.chiave) ?? [];
-      const negozio = sedi[0] ? negozioDettaglio(sedi[0].chiave, ctx) : null;
+      const negozio = sedi[0] ? negozioDettaglio(sedi[0].chiave, ctx, chiave) : null;
       const riga = luoghi.righe.get(l.chiave);
       const orari = orariDelLuogo(riga?.orari_json ?? null);
       return { tipo, luogo: { chiave: l.chiave, quartiere: l.quartiere_chiave, tipo: l.tipo, nome: l.nome, cosaOffre: l.cosa_offre, quando: l.quando,
@@ -302,10 +303,10 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
         negozi: sedi.map((n) => ({ chiave: n.chiave, nome: n.nome, casa: `${casa}#negozio-${encodeURIComponent(n.chiave)}` })) }, negozio };
     }
     case 'negozio': {
-      const n = negozioDettaglio(chiave, ctx);
+      const n = negozioDettaglio(chiave, ctx, sedeScelta);
       if (!n) return null;
-      const sede = luoghiDi(ctx).sediNegozi.get(chiave)?.sede ?? null;
-      return { tipo: 'negozio', negozio: { ...n, sedeCasa: sede ? `${casaDelLuogo(sede)}#negozio-${encodeURIComponent(chiave)}` : null } };
+      const sede = sedeScelta ?? n.sedeChiave ?? null;
+      return { tipo: 'negozio', negozio: { ...n, sedeCasa: sede ? `${casaDelLuogo(sede)}#negozio-${encodeURIComponent(n.chiave)}` : null } };
     }
     case 'confidente': {
       const c = prepared('SELECT chiave, nome, arcana FROM confidente WHERE chiave = ?').get(chiave) as { chiave: string; nome: string; arcana: string } | undefined;
@@ -325,20 +326,20 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
 }
 
 /** Il negozio nella scheda di uno spillo: disponibilità e articoli (con «comprato» per la partita); null se il negozio non c'è più. */
-function negozioDettaglio(chiave: string, ctx: ContestoSpilli): NonNullable<DettaglioSpilloDto['negozio']> | null {
+function negozioDettaglio(chiave: string, ctx: ContestoSpilli, sede?: string): NonNullable<DettaglioSpilloDto['negozio']> | null {
   // lo stato della partita è già nel contesto della risposta: prima ogni pin di negozio lo ricalcolava da capo (rilievo P1);
   // gli acquisti si leggono alla prima occorrenza e restano per gli altri pin
   const partitaId = ctx.partitaId;
-  const contesto = partitaId !== undefined && ctx.st ? { st: ctx.st, acquistati: (ctx.acquistati ??= acquistiDellaPartita(partitaId)) } : undefined;
+  const contesto = { listini: luoghiDi(ctx).listini, ...(partitaId !== undefined && ctx.st ? { st: ctx.st, acquistati: (ctx.acquistati ??= acquistiDellaPartita(partitaId)) } : {}) };
   let n: ReturnType<typeof dettaglioNegozio>;
   try {
-    n = dettaglioNegozio(chiave, partitaId, contesto);
+    n = dettaglioNegozio(chiave, partitaId, contesto, sede);
   } catch (err) {
     // un pin che cita un negozio tolto resta un pin senza negozio; ogni altro errore (SQL, partita inesistente) deve vedersi
     if (err instanceof HttpError && err.code === 'negozio-non-trovato') return null;
     throw err;
   }
-  return { chiave: n.chiave, nome: n.nome, tipo: n.tipo, disponibilita: n.disponibilita, articoli: n.articoliElenco.map((a) => ({ chiave: a.chiave, nome: a.nomeIt ?? a.nome, categoria: a.categoria, prezzo: a.prezzo, disponibileDal: a.disponibileDal, comprato: a.acquistato, disponibilita: a.disponibilita })) };
+  return { chiave: n.chiave, nome: n.nome, tipo: n.tipo, sedeChiave: n.sedeChiave, disponibilita: n.disponibilita, articoli: n.articoliElenco.map((a) => ({ chiave: a.chiave, nome: a.nomeIt ?? a.nome, categoria: a.categoria, prezzo: a.prezzo, disponibileDal: a.disponibileDal, comprato: a.acquistato, disponibilita: a.disponibilita, catalogo: a.catalogo, costo: a.costo, costoDaVerificare: a.costoDaVerificare, ricevuti: a.ricevuti })) };
 }
 
 /** Vero se la tabella `spillo` dello schema corrente ha la colonna `nome` (le colonne aggiunte dalle migrazioni, per esempio
@@ -392,12 +393,7 @@ function luoghiDi(ctx: ContestoSpilli): LettureLuoghi {
  */
 function conPresenzaDelLuogo(esito: DisponibilitaDto | undefined, lp: LuogoDelPin, ctx: ContestoSpilli): DisponibilitaDto | undefined {
   if (!ctx.st) return esito;
-  const base = esito ?? { stato: 'disponibile' as const, requisiti: [] };
-  const chiuso = lp.soloEventi
-    ? `Solo durante gli eventi di ${luoghiDi(ctx).nomiConfidenti.get(lp.soloEventi) ?? lp.soloEventi}`
-    : lp.presenza.sbloccato === false || lp.presenza.aperto === false ? lp.presenza.testo : null;
-  if (!chiuso) return base;
-  return { stato: 'bloccato', requisiti: [...base.requisiti, { indice: base.requisiti.length, tipo: 'luogo', testo: `${lp.luogo.nome}: ${chiuso}`, stato: 'rosso', dettaglio: chiuso, manuale: false, confermato: false }] };
+  return conPresenzaPin(esito, lp.presenza, lp.luogo.nome, lp.soloEventi ? luoghiDi(ctx).nomiConfidenti.get(lp.soloEventi) ?? lp.soloEventi : null);
 }
 interface AvanzamentoSpilli { m: ModelloAvanzamento; s: StatiDellaPartita | null; contesto: string | null; palazziVeri: Set<string>; mappePalazzo: Map<string, string> }
 
@@ -439,10 +435,7 @@ function senzaIngressoAPalazzoConcluso(esito: DisponibilitaDto | undefined, r: R
   const perche = dungeon ? ctx.st.palazziConclusi.get(dungeon) : undefined;
   if (!dungeon || !perche) return esito;
   const nome = (ctx.nomi ?? nomiCondizioni()).dungeon?.[dungeon] ?? dungeon;
-  return {
-    stato: 'bloccato',
-    requisiti: [...esito.requisiti, { indice: esito.requisiti.length, tipo: 'palazzo', testo: `${nome} non ancora concluso`, stato: 'rosso', dettaglio: `${nome}: concluso (${perche}), non ci si entra più`, manuale: false, confermato: false }],
-  };
+  return senzaIngressoConcluso(esito, nome, perche);
 }
 
 /** Condizioni salvate nello spillo (JSON) → elenco normalizzato; un JSON rovinato vale come nessuna condizione. */
@@ -483,10 +476,7 @@ function conNegozioVivo(esito: DisponibilitaDto | undefined, dettaglio: Dettagli
   // `dettaglioRiferimento`. Cercandolo per tipo, questa funzione non avrebbe fatto niente su
   // nessuno spillo dell'atlante — e sarebbe passata verde, perché non rompere non è funzionare.
   const negozio = dettaglio?.negozio?.disponibilita;
-  if (!esito || !negozio) return esito ?? negozio;
-  const peggiore = esito.stato === 'bloccato' || negozio.stato === 'bloccato' ? 'bloccato'
-    : esito.stato === 'ignoto' || negozio.stato === 'ignoto' ? 'ignoto' : 'disponibile';
-  return { stato: peggiore, requisiti: [...esito.requisiti, ...negozio.requisiti.map((r, i) => ({ ...r, indice: esito.requisiti.length + i, testo: `Negozio: ${r.testo}` }))] };
+  return conDisponibilitaNegozio(esito, negozio);
 }
 
 type DettagliSpillo = Omit<SpilloDto, 'mappaChiave' | 'x' | 'y' | 'destinazione' | 'destinazioneNonDisponibile'>;
@@ -497,7 +487,8 @@ type DettagliSpillo = Omit<SpilloDto, 'mappaChiave' | 'x' | 'y' | 'destinazione'
  * per l'ingresso di un Palazzo completato. Un pin «solo posizione» disponibile non porta la disponibilità.
  */
 function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo {
-  const dettaglio = dettaglioRiferimento(r.riferimento_tipo, r.riferimento_chiave, ctx);
+  const lp = r.riferimento_tipo === 'luogo' || r.riferimento_tipo === 'negozio' || r.riferimento_tipo === 'attivita' ? luogoDelPin(r, luoghiDi(ctx)) : null;
+  const dettaglio = dettaglioRiferimento(r.riferimento_tipo, r.riferimento_chiave, ctx, lp?.luogo.chiave);
   // le voci della guida del pin (098): le sue righe di `spillo_voce`, o il riferimento «punto» degli elementi senza mappa di prima
   const voci = vociDelPin(r.id).flatMap((chiave) => {
     const v = dettaglio?.tipo === 'punto' && dettaglio.punto?.chiave === chiave ? dettaglio.punto : (dettaglioRiferimento('punto', chiave, ctx)?.punto ?? null);
@@ -522,7 +513,6 @@ function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo
   // traduce nel nome il valutatore stesso (`valutaRequisito`): tradurla anche qui era un secondo passaggio inutile (rilievo R6).
   // L5: un pin di luogo (o di un negozio con sede) vale quanto il luogo adesso, con la presenza unica; gli altri pin di negozio (senza sede)
   // restano con gli orari del negozio (`conNegozioVivo`)
-  const lp = r.riferimento_tipo === 'luogo' || r.riferimento_tipo === 'negozio' || r.riferimento_tipo === 'attivita' ? luogoDelPin(r, luoghiDi(ctx)) : null;
   const valutate = ctx.st ? valutaRequisitiSpillo(condizioni, ctx.st, nomi) : undefined;
   const esitoCondizioni = lp ? conPresenzaDelLuogo(valutate, lp, ctx) : conNegozioVivo(valutate, dettaglio);
   // Una condizione di visibilità è **assoluta** (decisione dell'utente, 2026-10-09: «se ci sta una condizione di visibilità
@@ -1378,7 +1368,7 @@ function condizioniConChiaviEsistenti(condizioni: RequisitoSpillo[] | null | und
     else if(c.tipo==='lettura'){cosa=c.categoria;chiave=c.chiave;ok=!!prepared('SELECT 1 FROM '+c.categoria+' WHERE chiave=?').get(chiave);}
     else if(c.tipo==='persona-arcano'){cosa='Arcano';chiave=c.arcano;ok=!!prepared('SELECT 1 FROM persona WHERE arcana=?').get(chiave);}
     else if(c.tipo==='persona-abilita'){cosa='Persona o abilità';chiave=c.persona;ok=!!prepared('SELECT 1 FROM persona WHERE nome=?').get(c.persona)&&!!prepared('SELECT 1 FROM skill WHERE nome=?').get(c.abilita);}
-    else if (c.tipo === 'palazzo') { cosa = 'Palazzo'; chiave = c.dungeon; ok = !!prepared("SELECT 1 FROM dungeon WHERE chiave = ? AND tipo = 'palazzo'").get(c.dungeon); }
+    else if (c.tipo === 'palazzo' || c.tipo === 'finestra-palazzo') { cosa = 'Palazzo'; chiave = c.dungeon; ok = !!prepared("SELECT 1 FROM dungeon WHERE chiave = ? AND tipo = 'palazzo'").get(c.dungeon); }
     else if (c.tipo === 'confidente') { cosa = 'Confidente'; chiave = c.confidente; ok = !!prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(c.confidente); }
     else if (c.tipo === 'richiesta') { cosa = 'Richiesta'; chiave = c.richiesta; ok = !!prepared('SELECT 1 FROM richiesta WHERE chiave = ?').get(c.richiesta); }
     else if (c.tipo === 'quartiere') {

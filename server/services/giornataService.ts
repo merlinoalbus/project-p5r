@@ -28,6 +28,8 @@ import { attivitaConQuiz, quizVoceDto, type AttivitaConQuiz } from './attivitaSe
 import { conLegami } from './mappe/legamiInfiltrazioni.js';
 import { puntoDescrittivo } from '../../shared/spilli.js';
 import type { EsitoRevisioneVoce } from '../../shared/types.js';
+import { riferimentiOggettiPerFonti } from './catalogoOggettiLetture.js';
+import { apertureDichiarabili, apertureNegliEffetti, eVisitaMemento, verificaApertureScelte } from './apertureDedaliService.js';
 
 export interface RigaVoce {
   uid: string; data: string; fascia: string; ordine: number; genere: string; azione: string; note: string | null; tipo: string;
@@ -79,6 +81,8 @@ export function voceBase(r: RigaVoce): VoceBase {
 }
 
 interface Contesto { fatte: Map<string, EffettiAzioneDto | null>; conf: Map<string, ConfidentePartitaDto> | null; nomi: NomiEffettiAzione; quiz: Map<string, AttivitaConQuiz>;
+  oggetti: ReturnType<typeof riferimentiOggettiPerFonti>;
+  aperture: ReturnType<typeof apertureDichiarabili>;
   /** La partita (L3: per l'infiltrazione che «Entra» apre). */
   partita?: number }
 
@@ -98,8 +102,15 @@ function quizDellaVoce(v: VoceBase, quiz: Contesto['quiz']): QuizVoceDto[] {
 function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   const v = voceBase(r);
   const spuntabile = v.genere === 'azione';
+  const aperture = eVisitaMemento(v) ? ctx.aperture : apertureNegliEffetti(ctx.fatte.get(r.uid));
+  const fonte = v.riferimento?.tipo === 'attivita' ? 'videogioco' : v.riferimento?.tipo;
+  const oggettoRiferimento = fonte && v.riferimento ? ctx.oggetti.get(`${fonte}/${v.riferimento.chiave}`) ?? null : null;
+  const oggettiCitati = new Map(oggettoRiferimento ? [[oggettoRiferimento.chiave, oggettoRiferimento]] : []);
+  for (const e of v.produce) if (e.tipo === 'lettura') {
+    const o = ctx.oggetti.get(`${e.categoria}/${e.chiave}`); if (o) oggettiCitati.set(o.chiave, o);
+  }
   return {
-    ...v, produceTesto: testoEffetti(v.produce, ctx.nomi),
+    ...v, ...(aperture.length ? { apertureDedali: aperture } : {}), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], produceTesto: testoEffetti(v.produce, ctx.nomi),
     fatta: spuntabile && ctx.fatte.has(r.uid), effetti: ctx.fatte.get(r.uid) ?? null,
     stato: ctx.conf && spuntabile ? statoAzione(v, ctx.conf) : null, mappa: mappaAzione(v),
     // il Palazzo collegato: dove si atterra il giorno della voce (scelta dell'utente, 2026-10-04). L6 (R6-17): la destinazione unica, la stessa
@@ -300,6 +311,8 @@ export function vociDelGiorno(data: string, partitaId?: number, conf?: Map<strin
     fatte: spuntePartita(partitaId, data),
     conf: conf ?? (partitaId !== undefined ? new Map(confidenti(partitaId).map((c) => [c.chiave, c])) : null),
     nomi: nomiEffetti(), quiz: attivitaConQuiz(), partita: partitaId,
+    oggetti: riferimentiOggettiPerFonti(['libro', 'film', 'videogioco']),
+    aperture: apertureDichiarabili(),
   };
   return righeDelGiorno(data).map((r) => voceDto(r, ctx));
 }
@@ -519,13 +532,24 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
   verificaPartita(partitaId);
   const r = rigaVoce(uid);
   const v = voceBase(r);
-  if (v.genere !== 'azione') throw httpErrors.badRequest('voce-non-spuntabile', 'Un evento, una scadenza o un promemoria non si spuntano.');
   const adesso = nowIso();
   getDb().transaction(() => {
     const precedente = prepared('SELECT effetti_json FROM spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').get(partitaId, uid) as { effetti_json: string | null } | undefined;
+    // Una voce storica riclassificata conserva l'accesso alla rimozione delle proprie dichiarazioni.
+    if (v.genere !== 'azione' && !precedente) throw httpErrors.badRequest('voce-non-spuntabile', 'Un evento, una scadenza o un promemoria non si spuntano.');
     if (fatta) {
-      if (precedente) return; // già spuntata: niente punti una seconda volta
-      const effetti = applicaEffettiAzione(partitaId, { ...v, momento: { data: r.data, fascia: v.fascia, origine: 'azione' } }, opz);
+      const effettiPrima = precedente?.effetti_json ? JSON.parse(precedente.effetti_json) as EffettiAzioneDto : null;
+      const aperture = opz.apertureDedali === undefined ? undefined : verificaApertureScelte(opz.apertureDedali,
+        eVisitaMemento(v) ? apertureDichiarabili() : apertureNegliEffetti(effettiPrima));
+      if (precedente) {
+        if (aperture === undefined) return; // idempotente: non riapplica punti, letture o turni
+        // Mantiene tutti gli altri campi, anche quelli aggiunti da versioni successive. fatta_at e storico non cambiano.
+        const effetti = { ...(effettiPrima ?? { doti: [], confidente: null }), apertureDedali: aperture };
+        prepared('UPDATE spunta_voce_partita SET effetti_json = ? WHERE partita_id = ? AND voce_uid = ?').run(JSON.stringify(effetti), partitaId, uid);
+        prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
+        return;
+      }
+      const effetti = applicaEffettiAzione(partitaId, { ...v, apertureDedali: aperture, momento: { data: r.data, fascia: v.fascia, origine: 'azione' } }, opz);
       prepared('INSERT INTO spunta_voce_partita (partita_id, voce_uid, fatta_at, effetti_json) VALUES (?, ?, ?, ?)').run(partitaId, uid, adesso, effetti ? JSON.stringify(effetti) : null);
       const dett = [`${v.fascia === 'sera' ? 'Sera' : 'Giorno'} · ${v.tipo}${v.riferimentoTesto ? ` · ${v.riferimentoTesto}` : ''}`];
       if (effetti) dett.push(descriviEffettiApplicati(effetti));

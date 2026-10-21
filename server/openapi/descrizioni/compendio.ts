@@ -72,8 +72,8 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/confidenti/:chiave': {
     sommario: 'Scheda completa di un Confidente',
-    descrizione: 'Abilità per rango, dialoghi con le scelte (punti, risposte romantiche, avvisi), Dote al passaggio di rango per i ranghi da 1 a 10 (`dotiIncontro`), regali consigliati e sconsigliati, disponibilità (giorni, fasce, luogo, sblocco), note generali e fonti. Dati di gioco, senza stato di partita.',
-    risposta: '`ConfidenteDettaglioDto`',
+    descrizione: 'Abilità per rango, dialoghi con le scelte (punti, risposte romantiche, avvisi), Dote al passaggio di rango per i ranghi da 1 a 10 (`dotiIncontro`), regali consigliati e sconsigliati, disponibilità, note e fonti. I regali collegati leggono nome dal catalogo, prezzo minimo/massimo e dove dai listini visibili, comprese le sedi aggiuntive. `nomeStorico` e `nota` conservano le indicazioni precedenti; senza offerte il costo resta indicazione della guida (`listinoCollegato: false`), non un prezzo di vendita corrente. Dati di gioco, senza stato di partita né disponibilità commerciale presunta.',
+    risposta: '`ConfidenteDettaglioDto`; dopo M7 aggiunge oggettiRicompensa per chiave, con quantità, nota delle condizioni e casa. Sono doni ricevuti dal Confidente, separati dai regali graditi da consegnare; nessun ottenimento o rango viene registrato dalla lettura.',
     errori: [[404, 'confidente-non-trovato']],
   },
   'PUT /api/compendio/confidenti/:chiave/doti-incontro': {
@@ -86,8 +86,8 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   // ---- Blocchi della guida (dati_guida) ----
   'GET /api/compendio/oggetti-guida': {
     sommario: 'Oggetti della guida: consumabili, chiave e materiali, fabbricazione, abiti, scambi',
-    descrizione: 'Il blocco `oggetti-guida` della guida. Se è caricato anche il crosswalk `oggetti-crosswalk`, le voci di consumabili e oggetti chiave/materiali abbinate per nome ricevono `articolo` (la chiave dell\'articolo del catalogo) oppure, se non c\'è un articolo, `negozi`; le voci non abbinate restano invariate.',
-    risposta: '`OggettiGuidaDto`',
+    descrizione: 'Mantiene le sezioni storiche della guida. Dopo M7, consumabili, chiave/materiali e abiti leggono nome/alias/riferimento dal catalogo per la chiave della fonte; offerte e prezzo derivano dai listini, vecchi prezzi senza vendita solo come nota. Ricette con prodottiCatalogo e materialiCatalogo, nomi/quantità dai legami; resa non dichiarata della ricetta resta null, non una unità. JSON guida conservato; personalizzazione, lavanderia e prosa degli scambi restano distinti. Il crosswalk per nome è usato solo prima di M7.',
+    risposta: '`OggettiGuidaDto`; dopo M7 scambi è vuoto e listiniScambi elenca chiave/nome corrente, sede, numero delle offerte visibili e casa del negozio. Il collegamento storico del negozio risolve la sua sede L5. Nessun listino duplicato, prezzo o acquisto calcolato dal testo della guida; indicazioni precedenti conservate nelle note del negozio e nel suo ripristino. Prima di M7 il contratto storico resta invariato.',
     errori: [[404, 'oggetti-non-disponibili']],
   },
   'GET /api/compendio/personaggi': {
@@ -98,14 +98,14 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/sfide': {
     sommario: 'Battaglie Sfida, boss segreti, Magnate, tratti e quiz TV',
-    descrizione: 'Il blocco `sfide` della guida, restituito così com\'è.',
+    descrizione: 'Guida alle sfide, con oggettiRicompensa di Battaglie Sfida e boss segreti letti in blocco dal catalogo dopo M7. Testi, punteggi, requisiti, PE, yen e premi del Covo restano indicazioni originali separate, non identità di oggetti inventate. Nessun ottenimento automatico.',
     risposta: '`SfideDto`',
     errori: [[404, 'sfide-non-disponibili']],
   },
   'GET /api/compendio/completamento': {
     sommario: 'Trofei e sezioni di completamento della guida',
     descrizione: 'Trofei in ordine con le sezioni di consultazione (finali, Covo dei Ladri, DLC, meteo, Nuova Partita+, differenze di Royal, gestione del tempo). Con `?partita=` ogni trofeo dice se è ottenuto e `ottenuti` li conta; senza, sono tutti non ottenuti.',
-    risposta: '`CompletamentoDto`',
+    risposta: '`CompletamentoDto`; dopo M7 le righe del Covo possono aggiungere oggettiRicompensa per chiave. Arredi e gallerie non diventano oggetti di inventario. I due premi finali mantengono requisiti e ritiro in nota, senza presumerli ottenuti.',
     errori: [[404, 'completamento-non-disponibile'], PARTITA_NON_TROVATA],
   },
   'GET /api/compendio/battaglia': {
@@ -185,13 +185,13 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/negozi/:chiave': {
     sommario: 'Scheda di un negozio con i suoi articoli',
-    descrizione: 'Il negozio (se non nascosto) con note e articoli non nascosti nell\'ordine. Un articolo collegato a un oggetto ne legge nome, categoria, effetto, statistiche e destinatario. Con `?partita=` ogni articolo dice se è acquistato e se è disponibile (requisiti del negozio e dell\'articolo valutati sulla partita) e `acquistati` li conta. `quiz` porta la guida del quiz dei lavori che si fanno nella sede del negozio (il Triple Seven), con `oggi` vero se il giorno corrente della partita è un giorno del quiz.',
-    risposta: '`NegozioDettaglioDto`',
+    descrizione: 'Il negozio visibile con note e offerte visibili in ordine. Con M7, `catalogo` è il riferimento stabile: nome, categoria, effetto, statistiche e destinatario vengono da quella identità; senza legame valgono i campi della riga. Prezzo e `costo` restano sulla vendita: fiori/oggetti negli scambi, yen altrimenti; un costo illeggibile dà `costoDaVerificare`, non una vendita gratuita. Con `?partita=` arrivano acquisti e disponibilità, conteggio acquistati e guida del quiz dei lavori della sede. Le chiavi degli acquisti restano quelle storiche.',
+    risposta: '`NegozioDettaglioDto`; i baratti composti hanno ricevuti con identità, quantità e note letti in blocco, un solo costo e una sola spunta. Non esiste un oggetto-bundle; le alternative di Mothman restano annotate e non sono dedotte dalla spunta.',
     errori: [[404, 'negozio-non-trovato'], PARTITA_NON_TROVATA],
   },
   'GET /api/compendio/articoli': {
     sommario: 'Ricerca degli articoli in tutti i negozi',
-    descrizione: '`q` cerca (LIKE) su nome, nome italiano, effetto e nome del negozio; `categoria` e `categorie` (separate da virgola, le sconosciute si ignorano) si uniscono; `per` tiene gli articoli per quel destinatario e quelli per «tutti». Solo con `?partita=` valgono `stato` (acquistati / da-acquistare) e `disponibilita` (disponibili / bloccati: una condizione che la partita non sa verificare conta come bloccata). Ordine: negozio, poi articolo. Al massimo 300 risultati; `totale` è contato prima del limite.',
+    descrizione: 'Con M7, `q` cerca nel nome corrente, nome originale, alias ed effetto del catalogo, nome del negozio e nomi correnti degli oggetti ceduti/ricevuti nei baratti; categorie e destinatario si filtrano sui valori correnti, non sulle copie vecchie della vendita. Prima di M7 conserva il lettore precedente. `categoria` e `categorie` si uniscono; `per` include «tutti». Solo con `?partita=` valgono stato acquistati/da-acquistare e disponibilità (ignoto conta come bloccato). Una sede aggiuntiva aperta può rendere acquistabile il listino comune. Ordine negozio/offerta, massimo 300 risultati; totale prima del limite.',
     risposta: '`RicercaArticoliDto`',
     errori: [PARTITA_NON_TROVATA],
   },
@@ -252,25 +252,25 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/attivita': {
     sommario: 'Attività, lavori, libri e film',
-    descrizione: 'Le righe non nascoste: attività del tempo libero e lavori separati, libri e film con posizioni ed effetti; un\'attività con un quiz ne porta la guida (`quiz`: giorni del mese, domanda, risposta per elemento, premi per esito; il Triple Seven ha quella dei codici a barre). Con `?partita=` arrivano letture e avanzamenti della partita, la disponibilità di ogni voce e i conteggi di libri letti e film visti.',
+    descrizione: 'Attività visibili, lavori separati, libri e film con posizioni ed effetti; le attività con quiz ne portano la guida. Dopo M7 libri, film e attività videogioco leggono nome e alias dal catalogo e prezzi dalle offerte; senza prezzo di vendita la copia della guida è solo `notaPrezzo`. Con `?partita=` avanzamenti, disponibilità e conteggi. Chiavi, effetti e progressi delle letture restano quelli delle voci originali.',
     risposta: '`AttivitaTutteDto`',
     errori: [PARTITA_NON_TROVATA],
   },
   'GET /api/compendio/libri': {
     sommario: 'Libri con i totali di lettura',
-    descrizione: 'I libri non nascosti in ordine, con posizioni e negozi dove si comprano. Con `?partita=` ogni libro porta avanzamento e disponibilità, e i totali dicono libri finiti, sessioni lette e da leggere e se vale «Lettura rapida».',
+    descrizione: 'Libri visibili in ordine, con posizioni e offerte. Dopo M7 `catalogo`, titolo e alias vengono dalla identità unica e `prezzo` dal minimo delle vendite in yen visibili; il vecchio prezzo senza offerta è soltanto `notaPrezzo`. Con `?partita=` avanzamento e disponibilità, libri finiti, sessioni fatte/totali e Lettura rapida. Le chiavi di avanzamento non cambiano.',
     risposta: '`LibriDto`',
     errori: [PARTITA_NON_TROVATA],
   },
   'GET /api/compendio/film': {
     sommario: 'Film e DVD con i totali di visione',
-    descrizione: 'I film non nascosti in ordine, con posizioni ed effetti. Con `?partita=` ogni film porta avanzamento e disponibilità; le sessioni di completamento contano ogni film fino al suo totale, mentre `visioniRegistrate` conta anche le visioni al cinema oltre il totale.',
+    descrizione: 'Film/DVD visibili con posizioni ed effetti. Dopo M7 titolo, alias e riferimento sono canonici, `negozi` segue le offerte e `prezzo` le vendite in yen; i costi citati nella guida senza prezzo di vendita sono note, non offerte. Con `?partita=` avanzamento e disponibilità; completamento limitato al totale, visioni al cinema senza tetto. Chiavi ed effetti originali invariati.',
     risposta: '`FilmDvdDto`',
     errori: [PARTITA_NON_TROVATA],
   },
   'GET /api/compendio/videogiochi': {
     sommario: 'Videogiochi con i totali dei round',
-    descrizione: 'Le attività di tipo videogioco non nascoste, con negozi e round totali (almeno uno). Con `?partita=` ogni videogioco porta avanzamento (limitato al totale) e disponibilità; i totali dicono iniziati, completati, round fatti e round da fare.',
+    descrizione: 'Attività videogioco visibili, con offerte e round totali (almeno uno). Dopo M7 titolo/alias/riferimento vengono dal catalogo; il costo di acquisto viene dalle offerte, quello della guida senza vendita resta nota. Con `?partita=` avanzamento limitato al totale, disponibilità e conteggi. Chiavi dei progressi ed effetti originali invariati.',
     risposta: '`VideogiochiDto`',
     errori: [PARTITA_NON_TROVATA],
   },
@@ -284,7 +284,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   // ---- Richieste, calendario, domande ----
   'GET /api/compendio/richieste': {
     sommario: 'Richieste dei Mementos con i dati di Jose e i dedali',
-    descrizione: 'Le Richieste ordinate per dedalo (quelle senza dedalo in coda) e poi per ordine della guida, i dati di Jose e i dedali nell\'ordine di percorrenza con totale e completate. Con `?partita=` ogni Richiesta porta il suo stato (accettata, completata o null).',
+    descrizione: 'Richieste ordinate per dedalo e ordine della guida, dati di Jose e dedali con totali/completate. Con `?partita=` stato accettata/completata/null. Dopo M7 oggettiRicompensa porta identità, quantità e collegamento dal catalogo, letti in blocco; ricompense conserva i testi della guida, indipendenti dai legami. Jose.listino legge il normale dettaglio del negozio, con costo in fiori, requisiti e acquisti della partita; scambi è vuoto, non una seconda tabella commerciale. Listino null se rimosso/nascosto, proprietà assente prima di M7. Le aperture dei dedali sono eventi effettivi segnabili in Progressi, non date dedotte; la lettura non registra aperture, acquisti o ricompense ottenute.',
     risposta: '`RichiesteDto`',
     errori: [PARTITA_NON_TROVATA],
   },
@@ -297,7 +297,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   'GET /api/compendio/domande': {
     sommario: 'Domande in classe ed esami',
     descrizione: 'Tutte le domande in ordine di anno scolastico (aprile → marzo) e, a pari data, di guida; gli esami con date e domande e i premi. Con `?partita=` ogni domanda dice se è fatta e `prossime` sono le domande non fatte della prima data da oggi in poi.',
-    risposta: '`DomandeDto`',
+    risposta: '`DomandeDto`; dopo M7 domande ed esami aggiungono oggettiRicompensa dai legami del catalogo. I punti Dote restano testo, non oggetti; gli accessori degli esami indicano ritiro e requisiti senza inferire il piazzamento o un ottenimento della partita.',
     errori: [PARTITA_NON_TROVATA],
   },
 
@@ -311,7 +311,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   'GET /api/compendio/dungeon/:chiave': {
     sommario: 'Scheda completa di un Palazzo o dei Memento',
     descrizione: 'Riassunto, note e fonti, aree in ordine con le loro planimetrie e i punti della guida (marcatore e pin collegati); per i Memento il dedalo di ogni area con le sue aree (099: dettagli, timbri, Richieste, conteggio degli elementi e completamento) e le Richieste da collocare, per i Palazzi l\'elenco di tutte le planimetrie. `illustrazione` è l\'immagine caricata sulla radice `dungeon-<chiave>` (URL versionato), con `asset` sempre null: l\'asset della radice è lo stemma, che la scheda mostra già come segno (L1). Con `?partita=` arrivano lo stato dei punti, i collezionabili presi e `personeCatturate` (le Persona registrate nel compendio della partita: nei Memento le «catturate», 2026-10-12); senza, `presi` e `personeCatturate` sono null. Le voci Persona dei dedali portano `areeDedalo` (101). Da L4 («Avanzamento unico»), per i Palazzi: il completamento con la funzione unica (`completamento`: oggetti permanenti, Tesoro, boss finale, `concluso` e `completato` del §8.10; per infiltrazione, planimetria e Area del Palazzo), le voci con carattere, oggetto, «da verificare», `condivise` e lo stato con cui risultano (§8.11: una voce con pin è fatta quando lo sono tutti i suoi pin, con `avanzamento` k/N e il segno di ogni pin in `pin[].fatto`), `daVerificare` (quante divergenze), `schedeDaSistemare` (le schede senza mappa né voce); `raccolta` resta l\'elenco dei collezionabili, con lo stato del pin di L4. `?infiltrazione=` è l\'infiltrazione guardata: il contesto dei pin di rigenerabili di più infiltrazioni (senza, quella in corso). I Memento restano come prima.',
-    risposta: '`DungeonDettaglioDto`',
+    risposta: '`DungeonDettaglioDto`; dopo M7 ogni voce aggiunge contenuto (identità, quantità, nota e casa) e proposteContenuto pendenti, letti in blocco. Sono distinti da dettagli.contenuto e dallo stato L4. Nessuna modifica a pin, testo o avanzamento durante la lettura; le proposte richiedono conferma esplicita.',
     errori: [[404, 'dungeon-non-trovato'], PARTITA_NON_TROVATA],
   },
   'GET /api/compendio/dungeon/:chiave/copie': {

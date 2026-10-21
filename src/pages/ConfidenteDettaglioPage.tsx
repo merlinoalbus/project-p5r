@@ -3,8 +3,8 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { getConfidenteDettaglio, getConfidentiPartita, getRequisitiConfidente, impostaRegaloFatto, confermaRequisitoConfidente } from '../services/api';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { getConfidenteDettaglio, getConfidentiPartita, getRequisitiConfidente, impostaRegaloFatto, impostaRegaloOggettoFatto, confermaRequisitoConfidente } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -15,12 +15,15 @@ import { SemaforiRango } from '../components/partita/SemaforiRango';
 import { EditorRequisiti } from '../components/confidenti/EditorRequisiti';
 import { InvitiConfidente } from '../components/confidenti/InvitiConfidente';
 import { IconChevronLeft } from '../components/shared/icons';
-import type { DialogoConfidenteDto } from '../types';
+import type { DialogoConfidenteDto, RegaloConfidenteDto } from '../types';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
 import { DotiIncontro } from '../components/partita/DotiIncontro';
 import { sitoDellaFonte } from '../utils/fonti';
+import { SceltaRegalo } from '../components/catalogo/SceltaRegalo';
+import { RipristinoCostoRegalo } from '../components/catalogo/RipristinoCostoRegalo';
+import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
 
 /** Un dialogo di rango: scelte in ordine, con le migliori evidenziate (punti massimi), le romantiche e gli avvisi. */
 export function DialogoRango({ d, aperto, onToggle }: { d: DialogoConfidenteDto; aperto: boolean; onToggle: () => void }) {
@@ -78,6 +81,12 @@ export function ConfidenteDettaglioPage() {
   const [aperti, setAperti] = useState<Record<number, true>>({});
   const mio = useMemo(() => (stato.dati ?? []).find((x) => x.chiave === chiave) ?? null, [stato.dati, chiave]);
   const regaliFatti = useMemo(() => new Set(mio?.regaliFatti ?? []), [mio]);
+  const regaliCatalogoFatti = useMemo(() => new Set(mio?.regaliFattiCatalogo ?? []), [mio]);
+  const [regaloInCorso, setRegaloInCorso] = useState(false);
+  const [sceltaRegaloPer, setSceltaRegaloPer] = useState<string | null>(null);
+  const bersaglioRegalo = `${chiave}:${attiva?.id ?? ''}`;
+  const regaloConsegnato = (g: RegaloConfidenteDto): boolean => g.catalogo && mio?.regaliFattiCatalogo !== undefined
+    ? regaliCatalogoFatti.has(g.catalogo.chiave) : regaliFatti.has(g.nomeStorico ?? g.nome);
   const prossimo = mio ? mio.rango + 1 : null;
 
   const [confermaInCorso, setConfermaInCorso] = useState(false);
@@ -105,14 +114,18 @@ export function ConfidenteDettaglioPage() {
   };
 
   /** Segna un regalo come consegnato o no nella partita attiva, rilegge lo stato della partita e notifica l'esito (anche l'errore). */
-  const segnaRegalo = async (nome: string, fatto: boolean) => {
-    if (!attiva) return;
+  const segnaRegalo = async (g: RegaloConfidenteDto, fatto: boolean) => {
+    if (!attiva || regaloInCorso) return;
+    setRegaloInCorso(true);
     try {
-      await impostaRegaloFatto(attiva.id, chiave, nome, fatto);
+      if (g.catalogo) await impostaRegaloOggettoFatto(attiva.id, chiave, g.catalogo.chiave, fatto);
+      else await impostaRegaloFatto(attiva.id, chiave, g.nomeStorico ?? g.nome, fatto);
       await stato.ricarica();
-      notifica('info', fatto ? `Regalo «${nome}» segnato come consegnato.` : `Regalo «${nome}» segnato come non consegnato.`);
+      notifica('info', fatto ? `Regalo «${g.nome}» segnato come consegnato.` : `Regalo «${g.nome}» segnato come non consegnato.`);
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
+    } finally {
+      setRegaloInCorso(false);
     }
   };
 
@@ -199,24 +212,38 @@ export function ConfidenteDettaglioPage() {
 
           <section className="card flex flex-col gap-2">
             <h2 className="m-0 text-[15px] font-semibold">Regali graditi</h2>
+            {attiva && c.regali.some((g) => g.catalogo) && <button type="button" className="btn btn-secondary touch self-start" disabled={regaloInCorso || stato.caricamento} onClick={() => setSceltaRegaloPer(bersaglioRegalo)}>Scegli un regalo</button>}
+            {attiva && sceltaRegaloPer === bersaglioRegalo && <SceltaRegalo key={bersaglioRegalo} partita={attiva.id} confidente={chiave} nomeConfidente={c.nome} regali={c.regali} consegnati={mio?.regaliFattiCatalogo ?? []}
+              onChiudi={() => setSceltaRegaloPer(null)} onSalvato={() => {
+                setSceltaRegaloPer((corrente) => corrente === bersaglioRegalo ? null : corrente);
+                void stato.ricarica(); notifica('info', 'Regalo segnato come consegnato. I punti non cambiano.');
+              }} />}
             {c.regali.length === 0 ? <p className="m-0 text-[13px] text-text-muted">Questo Confidente non accetta regali.</p> : (
               <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light" aria-label="Regali">
                 {c.regali.map((g, i) => (
                   <li key={i} className="py-1.5 flex flex-wrap items-center gap-2 text-[13px]">
                     {attiva && (
                       <label className="flex items-center gap-1.5 touch">
-                        <input type="checkbox" className="w-5 h-5" checked={regaliFatti.has(g.nome)} onChange={(e) => void segnaRegalo(g.nome, e.target.checked)} aria-label={`Regalo ${g.nome} consegnato`} />
+                        <input type="checkbox" className="w-5 h-5" disabled={regaloInCorso || stato.caricamento} checked={regaloConsegnato(g)} onChange={(e) => void segnaRegalo(g, e.target.checked)} aria-label={`Regalo ${g.nome} consegnato`} />
                       </label>
                     )}
-                    <strong className={regaliFatti.has(g.nome) ? 'line-through text-text-muted' : ''}>{g.nome}</strong>
+                    <strong className={regaloConsegnato(g) ? 'line-through text-text-muted' : ''}>{g.catalogo ? <Link to={g.catalogo.casa} className="touch inline-flex items-center">{g.nome}</Link> : g.nome}</strong>
                     {g.effetto && <span className="chip">{g.effetto}</span>}
-                    <span className="text-text-secondary">{[g.dove, g.costo].filter(Boolean).join(' · ')}</span>
+                    <span className="text-text-secondary">{g.catalogo && g.listinoCollegato === false ? 'Indicazioni della guida: ' : ''}{[g.dove, g.costo].filter(Boolean).join(' · ')}</span>
+                    {g.nota && <span className="w-full whitespace-pre-line text-[12px] text-text-muted">{g.nota}</span>}
+                    <RipristinoCostoRegalo confidente={chiave} regalo={g} onSalvato={ricarica} />
                   </li>
                 ))}
               </ul>
             )}
             {c.regaliSconsigliati.length > 0 && <p className="m-0 text-[12px] text-text-muted">Sconsigliati: {c.regaliSconsigliati.join(', ')}.</p>}
           </section>
+
+          {!!c.oggettiRicompensa?.length && <section className="card flex min-w-0 flex-col gap-2" aria-label="Oggetti ricevuti dal Confidente">
+            <h2 className="m-0 text-[15px] font-semibold">Oggetti ricevuti</h2>
+            <p className="m-0 text-[12px] text-text-muted">Doni del Confidente secondo la guida, con le rispettive condizioni. Non sono i regali da consegnargli e non risultano automaticamente ottenuti.</p>
+            <OggettiCollegati oggetti={c.oggettiRicompensa} />
+          </section>}
 
           {c.fonti.length > 0 && (
             <p className="m-0 text-[11px] text-text-muted">Fonti: {c.fonti.map((f, i) => {

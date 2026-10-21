@@ -25,6 +25,7 @@ import type { DomandaDto, DomandeDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { piatto } from '../utils/testo';
+import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
 
 const NOME_TIPO: Record<DomandaDto['tipo'], string> = { classe: 'In classe', 'esame-medio': 'Esame di metà semestre', 'esame-finale': 'Esame di fine semestre', tv: 'Quiz in TV', altro: 'Altro' };
 type FiltroTipo = 'tutte' | 'classe' | 'esami' | 'tv';
@@ -63,7 +64,7 @@ function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: D
     }
   };
   return (
-    <li id={evidenzia ? ancoraData(d.data) : undefined} className={`py-2 flex gap-3 text-[13px] scroll-mt-20 ${evidenzia ? 'bg-primary-bg rounded-md px-2' : ''} ${d.fatta ? 'opacity-70' : ''}`}>
+    <li id={evidenzia ? ancoraData(d.data) : undefined} className={`py-2 flex gap-3 text-[13px] scroll-mt-20 ${evidenzia ? 'bg-primary-bg rounded-md px-2' : ''}`}>
       {partitaId && (
         <label className="flex items-start pt-0.5 touch">
           <input type="checkbox" className="w-5 h-5" checked={d.fatta} disabled={occupato} onChange={(e) => void segna(e.target.checked)} aria-label={`Domanda del ${dataGiocoTesto(d.data)} fatta`} />
@@ -78,6 +79,7 @@ function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: D
           {d.ricompensa && <span className="text-[12px] text-text-muted">{d.ricompensa}</span>}
         </div>
         <div className={d.fatta ? 'line-through' : ''}>{d.domanda}</div>
+        {!!d.oggettiRicompensa?.length && <OggettiCollegati oggetti={d.oggettiRicompensa} />}
         {/* Le risposte giuste, nell'ordine; per gli esami accanto a ogni risposta c'è il suo quesito. */}
         <ol className="m-0 p-0 list-none flex flex-col gap-0.5" aria-label="Risposte corrette">
           {d.risposte.map((r, i) => <li key={i}>{r.domanda && <span className="text-text-secondary">{r.domanda} → </span>}<span className="text-primary font-semibold">{d.risposte.length > 1 && !r.domanda ? `${i + 1}. ` : !r.domanda ? '→ ' : ''}{r.testo}</span></li>)}
@@ -153,10 +155,13 @@ export function DomandePage() {
             <p className="m-0 text-[12px] text-text-muted">Date, risultati e premi. Le domande di ogni esame stanno nell’elenco per data, con il quesito accanto a ogni risposta.</p>
             <ul className="m-0 p-0 list-none flex flex-col gap-1 text-[13px]">
               {d.esami.map((e) => (
-                <li key={e.chiave} className="flex flex-wrap items-center gap-2">
-                  <strong>{e.nome}</strong>
-                  <span className="text-text-muted">{e.date.map(dataGiocoTesto).join(', ')}{e.dataRisultati ? ` · risultati il ${dataGiocoTesto(e.dataRisultati)}` : ''}</span>
+                <li key={e.chiave} className="flex min-w-0 flex-col gap-1 py-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <strong>{e.nome}</strong>
+                    <span className="text-text-muted">{e.date.map(dataGiocoTesto).join(', ')}{e.dataRisultati ? ` · risultati il ${dataGiocoTesto(e.dataRisultati)}` : ''}</span>
+                  </div>
                   {e.note && <span className="text-[12px] text-text-muted">{e.note}</span>}
+                  {!!e.oggettiRicompensa?.length && <OggettiCollegati oggetti={e.oggettiRicompensa} />}
                 </li>
               ))}
             </ul>

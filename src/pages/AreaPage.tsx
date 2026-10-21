@@ -258,7 +258,8 @@ function Contenuto({ area: a, indirizzoContenitore, nomeContenitore, ricarica }:
 }
 
 /** Un luogo chiuso adesso o non ancora sbloccato (L5 §2): fuori dai menu, salvo «Mostra anche i non ancora disponibili» o se è il pin chiesto. */
-const chiusoAdesso = (e: ElementoAreaDto) => !!e.presenza && (e.presenza.sbloccato === false || e.presenza.aperto === false);
+const chiusoAdesso = (e: ElementoAreaDto) => !!e.disponibilita && e.disponibilita.stato !== 'disponibile' || !!e.presenza && (e.presenza.sbloccato === false || e.presenza.aperto === false);
+const motivoChiusura = (e: ElementoAreaDto) => e.disponibilita?.requisiti.filter((r) => r.bloccante !== false && r.stato !== 'verde').map((r) => r.dettaglio || r.testo).join(' · ') || e.presenza?.testo;
 
 /** Il pannello del visore: «Luoghi qui» (tocco = seleziona il pin, e il collegamento alla pagina del luogo) e «Aree vicine».
  *  L5 (F3): i luoghi chiusi adesso o non ancora sbloccati spariscono, come nel visore, con lo stesso interruttore; quelli solo per gli eventi
@@ -279,12 +280,12 @@ function PannelloArea({ area, elementi, onSeleziona, nonDisponibili, pinChiesto,
           : <ul className="m-0 flex list-none flex-col gap-1 p-0">
             {visibili.map((e) => <li key={`${e.tipo}:${e.chiave}:${e.spillo}`} className="flex flex-col gap-0.5">
               <div className="flex items-center justify-between gap-2">
-                <button type="button" className={`visore-mappa__azione-testo touch text-left ${chiusoAdesso(e) ? 'opacity-60' : ''}`} onClick={() => onSeleziona(e.spillo)} title={e.presenza?.testo}>{e.nome}</button>
+                <button type="button" className="visore-mappa__azione-testo touch text-left" onClick={() => onSeleziona(e.spillo)} title={motivoChiusura(e)}>{e.nome}</button>
                 {/* L5: la pagina del luogo (per un negozio con sede, la sua sezione) */}
                 <Link className="text-[12px] touch inline-flex items-center" to={e.casa ?? schedaElemento(e)} aria-label={`Scheda di ${e.nome}`}>Scheda</Link>
               </div>
               {(chiusoAdesso(e) || e.daRivedere) && <div className="flex flex-wrap gap-1">
-                {chiusoAdesso(e) && <span className="chip chip--bloccata text-[11px]">{e.presenza?.sbloccato === false ? 'Non ancora nel mondo' : 'Chiuso adesso'}</span>}
+                {chiusoAdesso(e) && <span className="chip chip--bloccata text-[11px]" title={motivoChiusura(e)}>{e.presenza?.sbloccato === false ? 'Non ancora nel mondo' : e.presenza?.aperto === false ? 'Chiuso adesso' : e.disponibilita?.stato === 'ignoto' ? 'Disponibilità da verificare' : 'Condizioni del pin non soddisfatte'}</span>}
                 {e.daRivedere === 'negozio-altro-quartiere' && <span className="chip chip--oro text-[11px]" title="Il pin è agganciato a un negozio di un altro quartiere: si sistema dall'editor della planimetria">Da rivedere · negozio di un altro quartiere</span>}
               </div>}
             </li>)}

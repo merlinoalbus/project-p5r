@@ -8,6 +8,7 @@
 // ============================================================
 
 import { IconaCategoria } from './IconaCategoria';
+import type { ReactNode } from 'react';
 import { GestiVoce, PulsanteMenuVoce, type GestoVoce } from './MenuVoce';
 import { NOME_TIPO_EVENTO } from '../../utils/percorso';
 import type { AzionePercorsoDto, GenereVoce } from '../../types';
@@ -21,12 +22,13 @@ interface Props {
   onMenu: (aperto: boolean) => void;
   gesti: GestoVoce[];
   occupato: boolean;
+  dichiarazioni?: ReactNode;
 }
 
 /** Evento, scadenza o promemoria: niente spunta (è qualcosa che succede, non da fare), cartellino del genere, menu dei gesti. */
-export function VoceEvento({ e, menuAperto, onMenu, gesti, occupato }: Props) {
+export function VoceEvento({ e, menuAperto, onMenu, gesti, occupato, dichiarazioni }: Props) {
   return (
-    <li className="azione flex flex-wrap items-start gap-2 py-1.5">
+    <li id={`voce-${e.uid}`} className="azione flex flex-wrap items-start gap-2 py-1.5">
       <IconaCategoria categoria={ICONA_EVENTO[e.genere]} dimensione={40} />
       <div className="flex flex-col gap-0.5 text-[13px] min-w-0 flex-1">
         <span>{e.azione}</span>
@@ -34,6 +36,7 @@ export function VoceEvento({ e, menuAperto, onMenu, gesti, occupato }: Props) {
           <span className={`chip text-[11px] ${e.genere === 'scadenza' ? 'chip--oro' : 'chip--attivo'}`}>{NOME_TIPO_EVENTO[e.genere]}</span>
           {e.note && <span className="text-[12px] text-text-secondary">{e.note}</span>}
         </span>
+        {dichiarazioni}
       </div>
       <PulsanteMenuVoce voce={e.azione} aperto={menuAperto} onCambia={onMenu} disabled={occupato} />
       {menuAperto && <GestiVoce gesti={gesti} disabled={occupato} etichetta={`Gesti per: ${e.azione.slice(0, 60)}`} voce={e.uid} />}

@@ -8,13 +8,13 @@ import type { DescrizioniArea } from '../tipi.js';
 export const DESCRIZIONI_CONDIZIONI: DescrizioniArea = {
   'POST /api/condizioni/valuta': {
     sommario: 'Valuta condizioni sulla partita corrente o su un giorno scelto',
-    descrizione: 'Valuta ogni condizione e l’insieme in AND con il valutatore unico del server. `partita` identifica la partita e `giorno`, se presente, sposta solo il giorno di valutazione senza modificare la partita; la risposta distingue vero, falso, avviso e riferimento non più valido, con il testo e ciò che manca.',
+    descrizione: 'Valuta ogni condizione e l’insieme in AND con il valutatore unico del server. `partita` identifica la partita e `giorno`, se presente, sposta solo il giorno di valutazione senza modificare la partita; la risposta distingue vero, falso, avviso e riferimento non più valido, con il testo e ciò che manca. La variante `meteo{condizione: senza-allerta, allerta}` legge le allerte del calendario nella data e fascia correnti, senza duplicarne le date nelle condizioni; un riferimento mancante resta da verificare, non diventa disponibile.',
     risposta: '`RispostaValutaCondizioniDto`',
     errori: [[400, 'giorno-non-valido'], [404, 'partita-non-trovata']],
   },
   'GET /api/condizioni/elenchi': {
     sommario: 'Elenchi chiusi da cui l\'editor delle condizioni sceglie i valori',
-    descrizione: 'Articoli (con il nome del negozio come gruppo), libri e film, arcani, Persona, abilità, Ladri giocabili, attività che si contano per volte svolte, negozi con il tipo di programma punti (`manuale`, `rango-cliente` o null), eventi di storia (con `calcolato` vero per quelli «entra in squadra», che non si segnano a mano) e contatori. Righe nascoste di articoli, negozi, letture e attività escluse: nell\'editor non si scrive, si sceglie.',
+    descrizione: 'Articoli (con il nome del negozio come gruppo), libri e film, arcani, Persona, abilità, Ladri giocabili, attività che si contano per volte svolte, negozi con il tipo di programma punti (`manuale`, `rango-cliente` o null), eventi di storia (con `calcolato` vero per quelli «entra in squadra», che non si segnano a mano), contatori e allerte meteo effettivamente presenti nel calendario. Righe nascoste di articoli, negozi, letture e attività escluse: nell\'editor non si scrive, si sceglie.',
     risposta: '`ElenchiRegoleDto`',
   },
   'GET /api/condizioni/spilli': {
@@ -29,13 +29,13 @@ export const DESCRIZIONI_CONDIZIONI: DescrizioniArea = {
   },
   'GET /api/condizioni/partite/:partita/progressi': {
     sommario: 'Progressi di una partita usati dalle condizioni: calcolati e da segnare a mano',
-    descrizione: 'Completi anche dove non c\'è ancora una riga (valori a zero o falsi). Calcolati dalla partita: gli eventi «entra in squadra» (tre stati: in squadra, dichiarato fuori, non ancora segnato), il grado cliente dei negozi che ce l\'hanno (dalla spesa segnata, con la prossima soglia) e i contatori. Da segnare: gli eventi manuali (con i ranghi dei Confidenti che li richiedono in `serveA`), le volte svolte delle attività contate per volte, i punti dei negozi con programma manuale.',
+    descrizione: 'Completi anche dove non c\'è ancora una riga (valori a zero o falsi). Calcolati dalla partita: gli eventi «entra in squadra» (tre stati: in squadra, dichiarato fuori, non ancora segnato), il grado cliente dei negozi che ce l\'hanno (dalla spesa segnata, con la prossima soglia) e i contatori. Gli eventi manuali riportano i ranghi dei Confidenti che li richiedono in `serveA`. Per le nove aperture dei dedali, `avvenuto` unisce la dichiarazione manuale (`manuale`) e quelle delle visite spuntate nel Diario (`dalDiario`, `visiteDiario`); sette di queste aperture sono usate dal listino di Jose. Le aperture non sono dedotte da calendario, stato dei forzieri o percentuali del dedalo. Restano da segnare le volte svolte delle attività e i punti dei negozi con programma manuale.',
     risposta: '`ProgressiPartitaDto`',
     errori: [[404, 'partita-non-trovata']],
   },
   'PUT /api/condizioni/partite/:partita/eventi/:chiave': {
     sommario: 'Segna o toglie un evento di storia manuale nella partita',
-    descrizione: 'Scrive lo stesso dato del «Condizione soddisfatta» dei Confidenti; evento e data di modifica della partita cambiano insieme, in una transazione. Un evento «entra in squadra» si calcola dalla squadra della partita (Partita → Denaro e squadra) e qui è rifiutato con 400.',
+    descrizione: 'Scrive nel registro esistente degli eventi manuali, usato anche dal «Condizione soddisfatta» dei Confidenti e dalle aperture dei dedali. Togliere una dichiarazione manuale non rimuove quelle registrate nelle visite del Diario: la risposta mostra lo stato effettivo e le sue provenienze. Evento e data di modifica della partita cambiano insieme, in una transazione. Non cambia lo stato del dedalo né registra acquisti. Un evento «entra in squadra» si calcola dalla squadra della partita (Partita → Denaro e squadra) e qui è rifiutato con 400.',
     risposta: '`ProgressiPartitaDto` aggiornato',
     errori: [[404, 'partita-non-trovata'], [404, 'evento-non-trovato'], [400, 'evento-calcolato']],
   },

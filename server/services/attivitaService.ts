@@ -14,15 +14,29 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
-import type { AttivitaDto, AttivitaTutteDto, CondizioneSpilloDto, DisponibilitaDto, DoteDaSegnareDto, FilmDto, FilmDvdDto, LibroDto, LibriDto, QuizVoceDto, TipoLettura, VideogiocoDto, VideogiochiDto, VoceEffettoDto } from '../../shared/types.js';
+import type { AttivitaDto, AttivitaTutteDto, CatalogoOggettoDto, CondizioneSpilloDto, DisponibilitaDto, DoteDaSegnareDto, FilmDto, FilmDvdDto, LibroDto, LibriDto, QuizVoceDto, TipoLettura, VideogiocoDto, VideogiochiDto, VoceEffettoDto } from '../../shared/types.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
 import { nomeDote, puntiDaNote } from './partiteService.js';
-import { condizioneConTesto, foglieCondizione, leggiCondizioniSalvate, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { condizioneConTesto, leggiCondizioniSalvate, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { libriCheSbloccano } from '../../shared/dipendenzeCondizioni.js';
+import { effettiVisibiliDelLibro } from '../../shared/effettiLibro.js';
+import { conGliInviti, invitiCheAprono, tuttiGliInviti } from './condizioni/condizioneEffettiva.js';
 import { casaDelLuogo } from './luoghiService.js';
 import { descriviVoceEffetto, dotiDaEffetti, leggiVociEffetto, type VoceEffetto } from '../../shared/effettiCatalogo.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
 import { eGiornoDelQuiz, leggiQuiz, type QuizAttivita } from '../../shared/quizAttivita.js';
+import { catalogoOggettiDisponibile, negoziPerFonte, oggettiPerFonte } from './catalogoOggettiLetture.js';
+
+type CatalogoLetture = Map<string, CatalogoOggettoDto>;
+/** I prezzi copiati dalla guida non sono offerte. Gli avanzamenti non dipendono da questi campi. */
+function datiCatalogoLettura(oggetto: CatalogoOggettoDto | undefined, prezzoGuida: number | null, cinema = false) {
+  return { catalogo: oggetto ? { chiave: oggetto.chiave, nome: oggetto.nome, casa: oggetto.casa } : null,
+    nomiAltri: oggetto ? [...new Set([...oggetto.nomiAltri, ...(oggetto.nomeOriginale ? [oggetto.nomeOriginale] : [])])] : [],
+    prezzo: oggetto ? oggetto.prezzoMinimo : prezzoGuida,
+    notaPrezzo: oggetto && oggetto.prezzoMinimo === null && prezzoGuida !== null
+      ? `${cinema ? 'Costo della visione indicato nella guida' : 'Prezzo indicato nella guida'}: ${prezzoGuida.toLocaleString('it-IT')} ¥. Non è un prezzo di vendita ricavato dai listini.` : null };
+}
 
 interface RigaAttivita { chiave: string; ordine: number; nome: string; tipo: string; luogo: string; luogo_chiave: string | null; sede_chiave: string | null; fascia: string | null; costo: number | null; sblocco: string | null; sessioni: number | null; doti_json: string; altri_effetti: string | null; regole: string; premi: string | null; paga: string | null; paga_yen: number | null; paga_massima: number | null; dettagli: string | null; effetti_json: string | null; tracciamento: string; quiz_json: string | null; fonte: string; verificato: number; condizioni_json: string | null }
 interface RigaLibro { effetti_json: string | null; chiave: string; ordine: number; nome: string; nome_it: string | null; dove: string; prezzo: number | null; disponibile_dal: string | null; dote: string | null; note: number | null; sblocca: string | null; sessioni: number | null; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
@@ -40,8 +54,9 @@ function conDisponibilita(condizioniJson: string | null, st: StatoDisponibilita 
 }
 
 /** Gli effetti dichiarati con la loro frase, i nomi di quartieri e attività risolti dal database. */
-function effettiDto(json: string | null): { effetti: VoceEffettoDto[]; effettiTesto: string[] } {
-  const voci = leggiVociEffetto(json);
+function effettiDto(json: string | null, libro = false): { effetti: VoceEffettoDto[]; effettiTesto: string[] } {
+  const lette = leggiVociEffetto(json);
+  const voci = libro ? effettiVisibiliDelLibro(lette) : lette;
   const nomi = nomiCondizioniMemo();
   const effetti = voci.map((v) => ({ ...v, testo: descriviVoceEffetto(v, { luoghi: nomi.quartieri, attivita: nomi.attivita, condizioni: nomi }) }));
   return { effetti, effettiTesto: effetti.map((e) => e.testo) };
@@ -57,6 +72,7 @@ function nomiLuoghi(): Map<string, string> {
 
 /** Gli articoli collegati a libri e videogiochi (migrazione 073): dove si compra ciascuno. */
 function articoliCollegati(fonte: 'libri' | 'videogiochi'): Map<string, LibroDto['negozi']> {
+  if (catalogoOggettiDisponibile()) return negoziPerFonte(fonte === 'libri' ? 'libro' : 'videogioco');
   const out = new Map<string, LibroDto['negozi']>();
   for (const a of prepared('SELECT a.chiave, a.oggetto_chiave, a.prezzo, n.chiave AS negozio, n.nome AS negozio_nome FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave WHERE a.oggetto_fonte = ? AND a.nascosto = 0 AND n.nascosto = 0 ORDER BY n.ordine, a.ordine').all(fonte) as Array<{ chiave: string; oggetto_chiave: string; prezzo: number | null; negozio: string; negozio_nome: string }>) {
     const elenco = out.get(a.oggetto_chiave) ?? [];
@@ -69,15 +85,19 @@ function articoliCollegati(fonte: 'libri' | 'videogiochi'): Map<string, LibroDto
 /** Una riga di `attivita` come DTO: Doti dal JSON, effetti dichiarati con le loro frasi, nome della sede risolto da `sedi`,
  *  tracciamento ricondotto a quello del tipo quando il valore è fuori catalogo, la guida del quiz (105, null se manca o è
  *  illeggibile) e la disponibilità valutata se c'è lo stato della partita. */
-const attivitaDto = (r: RigaAttivita, sedi: Map<string, string>, st: StatoDisponibilita | null = null): AttivitaDto => ({
-  chiave: r.chiave, nome: r.nome, tipo: r.tipo as AttivitaDto['tipo'], luogo: r.luogo, luogoChiave: r.luogo_chiave, fascia: r.fascia as AttivitaDto['fascia'], costo: r.costo, sblocco: r.sblocco, sessioni: r.sessioni,
-  doti: JSON.parse(r.doti_json) as AttivitaDto['doti'], altriEffetti: r.altri_effetti, regole: r.regole, premi: r.premi, paga: r.paga,
-  pagaYen: r.paga_yen, pagaMassima: r.paga_massima, dettagli: r.dettagli, ...effettiDto(r.effetti_json),
-  tracciamento: eTracciamentoAttivita(r.tracciamento) ? r.tracciamento : tracciamentoPerTipo(r.tipo), quiz: leggiQuiz(r.quiz_json),
-  sedeChiave: r.sede_chiave, sedeNome: r.sede_chiave ? (sedi.get(r.sede_chiave) ?? null) : null,
-  verificato: r.verificato === 1,
-  ...conDisponibilita(r.condizioni_json, st),
-});
+const attivitaDto = (r: RigaAttivita, sedi: Map<string, string>, st: StatoDisponibilita | null = null, catalogo: CatalogoLetture = new Map()): AttivitaDto => {
+  const oggetto = r.tipo === 'videogioco' ? catalogo.get(r.chiave) : undefined;
+  const { prezzo, ...identita } = datiCatalogoLettura(oggetto, r.costo);
+  return {
+    chiave: r.chiave, nome: oggetto?.nome ?? r.nome, ...identita, tipo: r.tipo as AttivitaDto['tipo'], luogo: r.luogo, luogoChiave: r.luogo_chiave, fascia: r.fascia as AttivitaDto['fascia'], costo: prezzo, sblocco: r.sblocco, sessioni: r.sessioni,
+    doti: JSON.parse(r.doti_json) as AttivitaDto['doti'], altriEffetti: r.altri_effetti, regole: r.regole, premi: r.premi, paga: r.paga,
+    pagaYen: r.paga_yen, pagaMassima: r.paga_massima, dettagli: r.dettagli, ...effettiDto(r.effetti_json),
+    tracciamento: eTracciamentoAttivita(r.tracciamento) ? r.tracciamento : tracciamentoPerTipo(r.tipo), quiz: leggiQuiz(r.quiz_json),
+    sedeChiave: r.sede_chiave, sedeNome: r.sede_chiave ? (sedi.get(r.sede_chiave) ?? null) : null,
+    verificato: r.verificato === 1,
+    ...conDisponibilita(r.condizioni_json, st),
+  };
+};
 interface StatoLetture { fatti: Set<string>; progressiLibri: Map<string, number>; progressiFilm: Map<string, number>; progressiVideogiochi: Map<string, number> }
 /** Il libro che cambia le regole di tutti gli altri, **da lì in avanti**: «Lettura rapida» raddoppia
  *  quanto rende un pomeriggio, non è retroattivo (le sessioni già lette restano quelle). */
@@ -88,27 +108,17 @@ const haLetturaRapida = (stato: StatoLetture) => stato.fatti.has(`libro/${CHIAVE
 const totaleLibro = (r: RigaLibro) => Math.max(r.sessioni ?? 1, 1);
 
 /**
- * Il quartiere che un libro apre, letto dagli effetti dichiarati (voce «sblocca-luogo»); il nome lo risolve il server. Il vecchio
- * `libro.effetto_json` non si legge più come ripiego (rilievo R6'): è vuoto in tutti i 46 libri, e il catalogo, se lo riceve,
- * lo converte già in `effetti_json` (`normalizzaScrittura`).
- */
-function luogoSbloccato(effettiJson: string | null): { sbloccaLuogo: string | null; sbloccaLuogoNome: string | null } {
-  let luogo: string | null = null;
-  for (const v of leggiVociEffetto(effettiJson)) if (v.effetto.famiglia === 'sblocca-luogo') { luogo = v.effetto.luogo; break; }
-  if (!luogo) return { sbloccaLuogo: null, sbloccaLuogoNome: null };
-  const q = prepared('SELECT nome FROM quartiere WHERE chiave = ?').get(luogo) as { nome: string } | undefined;
-  return { sbloccaLuogo: luogo, sbloccaLuogoNome: q?.nome ?? null };
-}
-/**
  * L6 (R6-11): i posti che ogni libro apre, **calcolati** dalle condizioni dei luoghi e dei quartieri che citano `lettura{libro}` (a
  * qualunque profondità: «il libro oppure Ann al rango 10» apre lo stesso). Non dalla frase `libro.sblocca` (nota) né dall'effetto
  * «sblocca-luogo»: così un libro apre davvero quel che dice la sua scheda.
  */
 function postiApertiDaiLibri(): Map<string, NonNullable<LibroDto['apre']>> {
   const out = new Map<string, NonNullable<LibroDto['apre']>>();
+  const inviti = tuttiGliInviti();
   /** Aggiunge il posto ai libri citati dalle sue condizioni. */
   const aggiungi = (json: string | null, posto: NonNullable<LibroDto['apre']>[number]) => {
-    const libri = new Set(leggiCondizioniSalvate(json).flatMap(foglieCondizione).flatMap((c) => (c.tipo === 'lettura' && c.categoria === 'libro' ? [c.chiave] : [])));
+    const effettive = conGliInviti(leggiCondizioniSalvate(json), invitiCheAprono(posto.tipo, posto.chiave, inviti));
+    const libri = libriCheSbloccano(effettive);
     for (const l of libri) { const v = out.get(l) ?? []; v.push(posto); out.set(l, v); }
   };
   const conQuartieri = (prepared("SELECT name FROM pragma_table_info('quartiere')").all() as Array<{ name: string }>).some((c) => c.name === 'condizioni_json');
@@ -125,16 +135,20 @@ function postiApertiDaiLibri(): Map<string, NonNullable<LibroDto['apre']>> {
 
 /** Un libro come DTO con il suo stato nella partita: sessioni totali, avanzamento limitato fra 0 e il totale (pieno se il
  *  libro risulta letto), quartiere che apre, negozi che lo vendono, posizioni e disponibilità. */
-const libroDto = (r: RigaLibro, stato: StatoLetture, posizioni: Map<string, LibroDto['posizioni']>, negozi: Map<string, LibroDto['negozi']>, st: StatoDisponibilita | null = null, apre: Map<string, NonNullable<LibroDto['apre']>> = new Map()): LibroDto => {
+const libroDto = (r: RigaLibro, stato: StatoLetture, posizioni: Map<string, LibroDto['posizioni']>, negozi: Map<string, LibroDto['negozi']>, st: StatoDisponibilita | null = null, apre: Map<string, NonNullable<LibroDto['apre']>> = new Map(), catalogo: CatalogoLetture = new Map()): LibroDto => {
+  const oggetto = catalogo.get(r.chiave);
   const totaleSessioni = totaleLibro(r);
   const grezzo = stato.progressiLibri.get(r.chiave) ?? 0;
   // «Finito» resta un fatto registrato, non dedotto dal conteggio: se una correzione dei dati
   // abbassa le sessioni, il libro non diventa letto da solo. L'unica soglia che vale da sola è
   // «Lettura rapida», che è un fatto della partita, riallineato esplicitamente in `impostaLettura`.
   const fatto = stato.fatti.has(`libro/${r.chiave}`);
+  const posti = apre.get(r.chiave) ?? [];
+  // Compatibilità dei vecchi campi API: stessa fonte calcolata, mai l'effetto storico.
+  const quartiere = posti.find((p) => p.tipo === 'quartiere');
   return {
-    chiave: r.chiave, nome: r.nome, nomeIt: r.nome_it, dove: r.dove, prezzo: r.prezzo, disponibileDal: r.disponibile_dal, dote: r.dote as LibroDto['dote'], note: r.note, sblocca: r.sblocca, ...luogoSbloccato(r.effetti_json), apre: apre.get(r.chiave) ?? [], sessioni: r.sessioni, dettagli: r.dettagli,
-    ...effettiDto(r.effetti_json), negozi: negozi.get(r.chiave) ?? [],
+    chiave: r.chiave, nome: oggetto?.nome ?? r.nome, nomeIt: oggetto?.nome ?? r.nome_it, dove: r.dove, ...datiCatalogoLettura(oggetto, r.prezzo), disponibileDal: r.disponibile_dal, dote: r.dote as LibroDto['dote'], note: r.note, sblocca: r.sblocca, sbloccaLuogo: quartiere?.chiave ?? null, sbloccaLuogoNome: quartiere?.nome ?? null, apre: posti, sessioni: r.sessioni, dettagli: r.dettagli,
+    ...effettiDto(r.effetti_json, true), negozi: negozi.get(r.chiave) ?? [],
     verificato: r.verificato === 1,
     posizioni: posizioni.get(r.chiave) ?? [], totaleSessioni, progresso: fatto ? totaleSessioni : Math.min(Math.max(grezzo, 0), totaleSessioni), fatto,
     ...conDisponibilita(r.condizioni_json, st),
@@ -142,13 +156,14 @@ const libroDto = (r: RigaLibro, stato: StatoLetture, posizioni: Map<string, Libr
 };
 /** Un film come DTO con il suo stato nella partita. Il DVD ha un tetto (le sessioni) ed è finito quando lo raggiunge; al
  *  cinema le visioni non hanno tetto e il film conta come visto dalla prima. */
-const filmDto = (r: RigaFilm, stato: StatoLetture, posizioni: Map<string, FilmDto['posizioni']>, st: StatoDisponibilita | null = null): FilmDto => {
+const filmDto = (r: RigaFilm, stato: StatoLetture, posizioni: Map<string, FilmDto['posizioni']>, st: StatoDisponibilita | null = null, catalogo: CatalogoLetture = new Map(), negozi: Map<string, LibroDto['negozi']> = new Map()): FilmDto => {
+  const oggetto = catalogo.get(r.chiave);
   const totaleSessioni = Math.max(r.sessioni, 1);
   const grezzo = Math.max(stato.progressiFilm.get(r.chiave) ?? 0, 0);
   const progresso = r.dove === 'dvd' ? Math.min(grezzo, totaleSessioni) : grezzo;
   const iniziato = progresso > 0;
   return {
-    chiave: r.chiave, nome: r.nome, nomeIt: r.nome_it, dove: r.dove, dote: r.dote as FilmDto['dote'], note: r.note, noteSuccessive: r.note_successive, prezzo: r.prezzo, dettagli: r.dettagli,
+    chiave: r.chiave, nome: oggetto?.nome ?? r.nome, nomeIt: oggetto?.nome ?? r.nome_it, ...datiCatalogoLettura(oggetto, r.prezzo, r.dove === 'cinema'), negozi: negozi.get(r.chiave) ?? [], dove: r.dove, dote: r.dote as FilmDto['dote'], note: r.note, noteSuccessive: r.note_successive, dettagli: r.dettagli,
     ...effettiDto(r.effetti_json), verificato: r.verificato === 1,
     posizioni: posizioni.get(r.chiave) ?? [], totaleSessioni, progresso, iniziato, fatto: r.dove === 'cinema' ? iniziato : progresso >= totaleSessioni,
     ...conDisponibilita(r.condizioni_json, st),
@@ -169,10 +184,10 @@ function letturePartita(partitaId: number | undefined): StatoLetture {
 
 /** Un videogioco (riga di `attivita` di tipo «videogioco») come DTO: i round sono le sessioni (almeno uno), l'avanzamento è
  *  limitato fra 0 e il totale, iniziato dal primo round e completato al raggiungimento del totale. */
-const videogiocoDto = (r: RigaAttivita, stato: StatoLetture, sedi: Map<string, string>, negozi: Map<string, LibroDto['negozi']>, st: StatoDisponibilita | null = null): VideogiocoDto => {
+const videogiocoDto = (r: RigaAttivita, stato: StatoLetture, sedi: Map<string, string>, negozi: Map<string, LibroDto['negozi']>, st: StatoDisponibilita | null = null, catalogo: CatalogoLetture = new Map()): VideogiocoDto => {
   const totaleRound = Math.max(r.sessioni ?? 1, 1);
   const progresso = Math.min(Math.max(stato.progressiVideogiochi.get(r.chiave) ?? 0, 0), totaleRound);
-  return { ...attivitaDto(r, sedi, st), tipo: 'videogioco', negozi: negozi.get(r.chiave) ?? [], totaleRound, progresso, iniziato: progresso > 0, fatto: progresso >= totaleRound };
+  return { ...attivitaDto(r, sedi, st, catalogo), tipo: 'videogioco', negozi: negozi.get(r.chiave) ?? [], totaleRound, progresso, iniziato: progresso > 0, fatto: progresso >= totaleRound };
 };
 
 /** I videogiochi non nascosti, con il loro stato nella partita (se c'è) e i totali: iniziati, completati, round fatti e round da fare. */
@@ -180,7 +195,8 @@ export function videogiochiTutti(partitaId?: number): VideogiochiDto {
   const stato = letturePartita(partitaId);
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
   const sedi = nomiLuoghi(); const negozi = articoliCollegati('videogiochi');
-  const videogiochi = (prepared("SELECT * FROM attivita WHERE tipo='videogioco' AND nascosto = 0 ORDER BY ordine").all() as RigaAttivita[]).map((r) => videogiocoDto(r, stato, sedi, negozi, st));
+  const catalogo = oggettiPerFonte('videogioco');
+  const videogiochi = (prepared("SELECT * FROM attivita WHERE tipo='videogioco' AND nascosto = 0 ORDER BY ordine").all() as RigaAttivita[]).map((r) => videogiocoDto(r, stato, sedi, negozi, st, catalogo));
   return { videogiochi, iniziati: videogiochi.filter((v) => v.iniziato).length, completati: videogiochi.filter((v) => v.fatto).length, roundFatti: videogiochi.reduce((n, v) => n + v.progresso, 0), roundObiettivo: videogiochi.reduce((n, v) => n + v.totaleRound, 0) };
 }
 
@@ -215,7 +231,8 @@ function elencoLibri(partitaId: number | undefined, stato: StatoLetture = lettur
   const posizioni = posizioniLibri();
   const negozi = articoliCollegati('libri');
   const apre = postiApertiDaiLibri();
-  return (prepared('SELECT * FROM libro WHERE nascosto = 0 ORDER BY ordine').all() as RigaLibro[]).map((r) => libroDto(r, stato, posizioni, negozi, st, apre));
+  const catalogo = oggettiPerFonte('libro');
+  return (prepared('SELECT * FROM libro WHERE nascosto = 0 ORDER BY ordine').all() as RigaLibro[]).map((r) => libroDto(r, stato, posizioni, negozi, st, apre, catalogo));
 }
 
 /** I libri non nascosti con i totali della partita: libri finiti, sessioni lette e da leggere, e se vale «Lettura rapida». */
@@ -236,7 +253,8 @@ export function filmDvdTutti(partitaId?: number): FilmDvdDto {
   const stato = letturePartita(partitaId);
   const posizioni = posizioniFilm();
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
-  const film = (prepared('SELECT * FROM film WHERE nascosto = 0 ORDER BY ordine').all() as RigaFilm[]).map((r) => filmDto(r, stato, posizioni, st));
+  const catalogo = oggettiPerFonte('film'); const negozi = negoziPerFonte('film');
+  const film = (prepared('SELECT * FROM film WHERE nascosto = 0 ORDER BY ordine').all() as RigaFilm[]).map((r) => filmDto(r, stato, posizioni, st, catalogo, negozi));
   return {
     film,
     iniziati: film.filter((f) => f.iniziato).length,
@@ -271,17 +289,20 @@ export function quizVoceDto(chiave: string, a: AttivitaConQuiz, giorno: string |
 export function attivitaDellaSede(sede: string, partitaId?: number): AttivitaDto[] {
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
   const sedi = nomiLuoghi();
-  return (prepared('SELECT * FROM attivita WHERE nascosto = 0 AND sede_chiave = ? ORDER BY ordine').all(sede) as RigaAttivita[]).map((r) => attivitaDto(r, sedi, st));
+  const catalogo = oggettiPerFonte('videogioco');
+  return (prepared('SELECT * FROM attivita WHERE nascosto = 0 AND sede_chiave = ? ORDER BY ordine').all(sede) as RigaAttivita[]).map((r) => attivitaDto(r, sedi, st, catalogo));
 }
 
 export function attivitaTutte(partitaId?: number): AttivitaTutteDto {
   const stato = letturePartita(partitaId);
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
   const sedi = nomiLuoghi();
-  const attivita = (prepared('SELECT * FROM attivita WHERE nascosto = 0 ORDER BY ordine').all() as RigaAttivita[]).map((r) => attivitaDto(r, sedi, st));
+  const catalogoGiochi = oggettiPerFonte('videogioco');
+  const attivita = (prepared('SELECT * FROM attivita WHERE nascosto = 0 ORDER BY ordine').all() as RigaAttivita[]).map((r) => attivitaDto(r, sedi, st, catalogoGiochi));
   const libri = elencoLibri(partitaId, stato, st);
   const posizioni = posizioniFilm();
-  const film = (prepared('SELECT * FROM film WHERE nascosto = 0 ORDER BY ordine').all() as RigaFilm[]).map((r) => filmDto(r, stato, posizioni, st));
+  const catalogoFilm = oggettiPerFonte('film'); const negoziFilm = negoziPerFonte('film');
+  const film = (prepared('SELECT * FROM film WHERE nascosto = 0 ORDER BY ordine').all() as RigaFilm[]).map((r) => filmDto(r, stato, posizioni, st, catalogoFilm, negoziFilm));
   return { attivita: attivita.filter((a) => a.tipo !== 'lavoro'), lavori: attivita.filter((a) => a.tipo === 'lavoro'), libri, film, libriLetti: libri.filter((l) => l.fatto).length, filmVisti: film.filter((f) => f.iniziato).length };
 }
 
@@ -352,6 +373,8 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
   verificaPartita(partitaId);
   const riga = (tipo === 'libro' ? prepared('SELECT * FROM libro WHERE chiave = ? AND nascosto = 0').get(chiave) : tipo === 'film' ? prepared('SELECT * FROM film WHERE chiave = ? AND nascosto = 0').get(chiave) : prepared("SELECT * FROM attivita WHERE chiave = ? AND tipo='videogioco' AND nascosto = 0").get(chiave)) as RigaLibro | RigaFilm | RigaAttivita | undefined;
   if (!riga) throw httpErrors.notFound('lettura-non-trovata', `${tipo === 'libro' ? 'Il libro' : tipo === 'film' ? 'Il film' : 'Il videogioco'} '${chiave}' non esiste.`);
+  const catalogo = oggettiPerFonte(tipo);
+  const nomeCorrente = catalogo.get(chiave)?.nome ?? (tipo === 'libro' ? (riga as RigaLibro).nome_it ?? riga.nome : riga.nome);
   const adesso = nowIso();
   const totale = tipo === 'libro' ? totaleLibro(riga as RigaLibro) : Math.max((riga as RigaFilm | RigaAttivita).sessioni ?? 1, 1);
   const richiesto = 'avanzamento' in modifica ? modifica.avanzamento : modifica.fatto ? totale : 0;
@@ -361,7 +384,7 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
   }
   const st = statoDisponibilitaPartita(partitaId);
   if (richiesto > 0 && conDisponibilita(riga.condizioni_json, st).disponibilita?.stato === 'bloccato') {
-    throw httpErrors.conflict('lettura-non-disponibile', `'${riga.nome}' non è ancora disponibile nella partita: la condizione di sblocco non è soddisfatta.`);
+    throw httpErrors.conflict('lettura-non-disponibile', `'${nomeCorrente}' non è ancora disponibile nella partita: la condizione di sblocco non è soddisfatta.`);
   }
   const registroPrima = puntiRegistrati(partitaId, tipo, chiave);
   getDb().transaction(() => {
@@ -393,7 +416,7 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
     if (registrato && !era) {
       const doti = noteDelConseguimento(riga, false, st);
       const dote = doti.length ? ` · Dote: ${doti.map((d) => `${d.dote} (${d.note} ${d.note === 1 ? 'nota' : 'note'})`).join(', ')}` : '';
-      const titolo = tipo === 'libro' ? (riga as RigaLibro).nome_it ?? riga.nome : riga.nome;
+      const titolo = nomeCorrente;
       const etichetta = tipo === 'libro' ? 'Libro letto' : tipo === 'film' ? 'Film visto' : 'Videogioco completato';
       const dove = tipo === 'libro' ? (riga as RigaLibro).dove : tipo === 'film' ? ((riga as RigaFilm).dove === 'cinema' ? 'Cinema' : 'DVD') : (riga as RigaAttivita).luogo;
       registraEvento(partitaId, 'lettura', `${etichetta}: ${titolo}`, `${dove}${dote}.`, { tipo, chiave });
@@ -416,7 +439,7 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
   const stato = letturePartita(partitaId);
   // che cosa il conseguimento dà (o, disfatto, dava): da segnare a mano nelle Doti
   const daSegnare = daSegnareFra(registroPrima, puntiRegistrati(partitaId, tipo, chiave));
-  const dto = tipo === 'libro' ? libroDto(riga as RigaLibro, stato, posizioniLibri(), articoliCollegati('libri'), null, postiApertiDaiLibri()) : tipo === 'film' ? filmDto(riga as RigaFilm, stato, posizioniFilm()) : videogiocoDto(riga as RigaAttivita, stato, nomiLuoghi(), articoliCollegati('videogiochi'));
+  const dto = tipo === 'libro' ? libroDto(riga as RigaLibro, stato, posizioniLibri(), articoliCollegati('libri'), null, postiApertiDaiLibri(), catalogo) : tipo === 'film' ? filmDto(riga as RigaFilm, stato, posizioniFilm(), null, catalogo, negoziPerFonte('film')) : videogiocoDto(riga as RigaAttivita, stato, nomiLuoghi(), articoliCollegati('videogiochi'), null, catalogo);
   return daSegnare.length ? { ...dto, daSegnare } : dto;
 }
 
@@ -424,7 +447,7 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
 export function avanzamentoLettura(partitaId: number, tipo: TipoLettura, chiave: string): { avanzamento: number; totale: number | null; nome: string } {
   const riga = (tipo === 'libro' ? prepared('SELECT * FROM libro WHERE chiave = ? AND nascosto = 0').get(chiave) : tipo === 'film' ? prepared('SELECT * FROM film WHERE chiave = ? AND nascosto = 0').get(chiave) : prepared("SELECT * FROM attivita WHERE chiave = ? AND tipo='videogioco' AND nascosto = 0").get(chiave)) as RigaLibro | RigaFilm | RigaAttivita | undefined;
   if (!riga) throw httpErrors.notFound('lettura-non-trovata', `${tipo === 'libro' ? 'Il libro' : tipo === 'film' ? 'Il film' : 'Il videogioco'} '${chiave}' non esiste.`);
-  const nome = tipo === 'libro' ? (riga as RigaLibro).nome_it ?? riga.nome : riga.nome;
+  const nome = oggettiPerFonte(tipo).get(chiave)?.nome ?? (tipo === 'libro' ? (riga as RigaLibro).nome_it ?? riga.nome : riga.nome);
   if (tipo === 'libro') {
     const totale = totaleLibro(riga as RigaLibro);
     const letto = !!prepared("SELECT 1 FROM lettura_partita WHERE partita_id = ? AND tipo = 'libro' AND chiave = ?").get(partitaId, chiave);

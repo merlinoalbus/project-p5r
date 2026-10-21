@@ -214,7 +214,7 @@ export function ConfidentiPartita({ partitaId }: Props) {
                 )}
                 {c.rango === 10 && <p className="m-0 text-[13px] text-text-muted">Rango massimo raggiunto.</p>}
                 {c.semafori.length > 0 && c.rango < 10 && (
-                  <SemaforiRango semafori={c.semafori[0]} compatto occupato={occ} onConferma={(rango, r, confermato) => void conferma(c, rango, r.indice, confermato)} onCorreggi={(rango) => navigate(`/guida/confidenti/${encodeURIComponent(c.chiave)}?requisiti=${rango}`)} />
+                  <SemaforiRango semafori={c.semafori[0]} compatto occupato={occ} onConferma={(rango, r, confermato) => void conferma(c, rango, r.indice, confermato)} onCorreggi={(rango) => navigate(`/confidenti/${encodeURIComponent(c.chiave)}?requisiti=${rango}`)} />
                 )}
                 {aPunti && (
                   <div className="flex flex-col gap-1.5">

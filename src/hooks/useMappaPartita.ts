@@ -127,7 +127,7 @@ export function useMappaPartita(chiave: string, partitaId: number | null, opz: {
     if (!partitaId || !s.dettaglio?.negozio) return;
     const negozio = s.dettaglio.negozio;
     try {
-      const a = await impostaAcquisto(partitaId, articoloChiave, fatto);
+      const a = await impostaAcquisto(partitaId, articoloChiave, fatto, negozio.sedeChiave);
       aggiorna({ ...s, dettaglio: { ...s.dettaglio!, negozio: { ...negozio, articoli: negozio.articoli.map((x) => (x.chiave === a.chiave ? { ...x, comprato: a.acquistato } : x)) } } });
       notifica('success', fatto ? `«${a.nomeIt ?? a.nome}» segnato come comprato.` : `«${a.nomeIt ?? a.nome}» riaperto.`);
       opz.onCambiato?.();

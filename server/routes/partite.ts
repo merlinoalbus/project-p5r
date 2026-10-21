@@ -116,8 +116,8 @@ router.put('/:id/confidenti/:chiave/requisiti', validate({ params: paramsPartita
   res.json(confidente(Number(req.params.id), String(req.params.chiave)));
 });
 router.put('/:id/confidenti/:chiave/regali', validate({ params: paramsPartitaChiave, body: bodyRegalo }), (req, res) => {
-  const b = req.body as { regalo: string; fatto: boolean };
-  res.json(impostaRegaloFatto(Number(req.params.id), String(req.params.chiave), b.regalo, b.fatto));
+  const b = req.body as { regalo?: string; catalogo?: string; fatto: boolean };
+  res.json(impostaRegaloFatto(Number(req.params.id), String(req.params.chiave), b.catalogo === undefined ? b.regalo! : { catalogo: b.catalogo }, b.fatto));
 });
 
 router.put('/:id/trofei', validate({ params: paramsPartita, body: bodyTrofeo }), (req, res) => {
@@ -125,10 +125,11 @@ router.put('/:id/trofei', validate({ params: paramsPartita, body: bodyTrofeo }),
   res.json(impostaTrofeo(Number(req.params.id), b.trofeo, b.ottenuto));
 });
 router.put('/:id/percorso', validate({ params: paramsPartita, body: bodyAzionePercorso }), (req, res) => {
-  const b = req.body as { uid: string; fatta: boolean; noteRisposta?: 1 | 2 | 3 };
-  const azione = spuntaVoce(Number(req.params.id), b.uid, b.fatta, { noteRisposta: b.noteRisposta });
+  const b = req.body as { uid: string; fatta: boolean; noteRisposta?: 1 | 2 | 3; apertureDedali?: string[] };
+  const giaFatta = !!prepared('SELECT 1 FROM spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').get(Number(req.params.id), b.uid);
+  const azione = spuntaVoce(Number(req.params.id), b.uid, b.fatta, { noteRisposta: b.noteRisposta, apertureDedali: b.apertureDedali });
   // l'ultima attività del giorno corrente spuntata: la partita passa al giorno dopo (togliere la spunta non torna indietro)
-  const giornoAvanzato = b.fatta ? avanzaSeGiornoCompleto(Number(req.params.id), azione.giorno) : null;
+  const giornoAvanzato = b.fatta && !giaFatta ? avanzaSeGiornoCompleto(Number(req.params.id), azione.giorno) : null;
   res.json(giornoAvanzato ? { ...azione, giornoAvanzato } : azione);
 });
 router.put('/:id/giorno', validate({ params: paramsPartita, body: bodyGiornoCorrente }), (req, res) => {
@@ -146,8 +147,8 @@ router.put('/:id/meteo/:data', validate({ params: paramsPartitaData, body: bodyM
   res.json({ meteo, partita: leggiPartita(Number(req.params.id)) });
 });
 router.put('/:id/acquisti', validate({ params: paramsPartita, body: bodyAcquisto }), (req, res) => {
-  const b = req.body as { articolo: string; fatto: boolean };
-  res.json(impostaAcquisto(Number(req.params.id), b.articolo, b.fatto));
+  const b = req.body as { articolo: string; fatto: boolean; sede?: string };
+  res.json(impostaAcquisto(Number(req.params.id), b.articolo, b.fatto, b.sede));
 });
 
 router.put('/:id/cruciverba', validate({ params: paramsPartita, body: bodyCruciverba }), (req, res) => {

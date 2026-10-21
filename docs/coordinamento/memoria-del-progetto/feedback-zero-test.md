@@ -8,6 +8,8 @@ metadata:
   modified: 2026-10-20T18:28:58.102Z
 ---
 
+**Aggiornamento 2026-10-21:** l'utente richiede ora un agente distinto che verifichi ogni consegna accedendo alla specifica originale in modo avversariale. Il divieto storico di verificatori sotto è superato da [questa disposizione](feedback-verifica-avversariale.md); resta il divieto di scrivere/eseguire test. Non riattivare cicli di collaudo o prove sui dati.
+
 L'utente, il 2026-10-20 verso le 18:35Z, dopo i ritardi e gli errori nella chiusura di L3: «finisci di implementare tutto», «zero test», «i test poi li faccio io».
 
 **Why:** il giro collaudo → quattro tester → validatore rallentava molto, e non ha comunque intercettato la mancanza che l'utente ha trovato da solo. L'utente preferisce provare lui sull'app pubblicata.

@@ -1,6 +1,8 @@
 # Indice della memoria — project-p5r
 
-- [Commit e pubblicazione a fine lotto](feedback-commit-fine-lotto.md) — decisione più recente: un solo commit/push a fine lotto; «Importa» da backup locale e guida del visore confermati
+- [Verifica avversariale delle consegne](feedback-verifica-avversariale.md) — dal 21/10 agente distinto, lettura diretta delle specifiche originali e confronto con il codice; supera il divieto di verificatori, resta zero test
+
+- [Commit e pubblicazione a fine lotto](feedback-commit-fine-lotto.md) — decisione del 20 ottobre; il prompt diretto del 21 ottobre richiede il salvataggio alla fermata, applicato alla consegna documentale dell'audit; «Importa» e guida del visore confermati
 
 - [Modifiche dirette ai file](feedback-modifiche-dirette.md) — niente patch né script (Python o tsx) che scrivono sorgenti, dati o documenti
 - [Flusso di lavoro dei lotti](project-flusso-di-lavoro-p5r.md) — worktree main, ramo lavoro/…, validatore emulato in sola lettura, PR + merge + solo main

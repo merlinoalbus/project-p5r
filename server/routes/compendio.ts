@@ -25,18 +25,18 @@ import { giornoPercorso, indicePercorso } from '../services/percorsoService.js';
 import { elenchiAzione } from '../services/azioniStrutturateService.js';
 import { aggiornaVoce, creaVoce, eliminaVoce, impostaInfiltrazioniVoce, rivediVoce, spostaVoce, trasferisciVoci, vocePercorso } from '../services/giornataService.js';
 import { completamento } from '../services/completamentoService.js';
+import { sfide } from '../services/sfideService.js';
 import { datiGuida } from '../services/datiGuida.js';
-import { postoDellArticolo, postoDelNegozio } from '../services/mappe/nomiDeiPosti.js';
 import { httpErrors } from '../utils/httpError.js';
 import { impostaAtterraggi, impostaFinestra, type RegolaAtterraggio } from '../services/atterraggioPalazziService.js';
-import type { DatiVoceGiornata, EsitoRevisioneVoce, OggettiGuidaDto, PersonaggiDto, SfideDto, SpostaPuntiInArea, TrasferisciVociGiornata } from '../../shared/types.js';
+import type { DatiVoceGiornata, EsitoRevisioneVoce, PersonaggiDto, SpostaPuntiInArea, TrasferisciVociGiornata } from '../../shared/types.js';
 import { validate } from '../middleware/validate.js';
 import { bodyAggiornaVoce, bodyDotiIncontro, bodyRivistaVoce, bodyNuovaVoce, bodySpostaVoce, bodyTrasferisciVoci, paramsGiornoGuida, paramsId, paramsVoceGiornata, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
 import type { DoteNote } from '../../shared/effettiAzione.js';
 import { categoriaArticolo, dataGioco, idParam } from '../schemas/comuni.js';
 import { eCategoriaArticolo } from '../../shared/articoli.js';
 import {
-  dettaglioPersona, dettaglioSkill, elencaArcani, dettaglioConfidente, impostaDotiIncontro, elencaConfidenti, elencaOggetti, elencaPersona, elencaSkill, glossario, regoleFusione, terminiGlossario,
+  dettaglioPersona, dettaglioSkill, elencaArcani, dettaglioConfidente, impostaDotiIncontro, elencaConfidenti, elencaOggetti, elencaPersona, elencaSkill, glossario, oggettiGuida, regoleFusione, terminiGlossario,
 } from '../services/compendioService.js';
 
 const queryDomande = z.object({ partita: idParam.optional() });
@@ -96,26 +96,7 @@ router.get('/confidenti', (_req, res) => {
   res.json(elencaConfidenti());
 });
 router.get('/oggetti-guida', (_req, res) => {
-  const dati = datiGuida<OggettiGuidaDto>('oggetti-guida');
-  if (!dati) throw httpErrors.notFound('oggetti-non-disponibili', 'I dati degli oggetti della guida non sono caricati.');
-  // Gli oggetti della guida hanno solo un nome; il crosswalk versionato dice quali di essi sono
-  // anche articoli del catalogo, e per quelli la riga può arrivare alla mappa. Gli altri no, e va
-  // bene così: un abbinamento incerto porterebbe nel posto sbagliato.
-  const ponte = datiGuida<{ abbinamenti: Array<{ nome: string; articolo?: string; negozi: string[] }> }>('oggetti-crosswalk');
-  if (!ponte) { res.json(dati); return; }
-  // i dati della guida sono condivisi e congelati (`datiGuida`): le voci collegate si costruiscono nuove, non si modificano
-  const per = new Map(ponte.abbinamenti.map((a) => [a.nome, a]));
-  /** La voce con il suo collegamento dal crosswalk: l'articolo del catalogo se c'è, altrimenti i negozi; invariata se il nome non è abbinato. */
-  // L5 (M24): con il nome del posto (la sede del negozio), che il gesto mostra al posto di «Sulla mappa»
-  const lega = <V extends { nome: string }>(v: V): V => {
-    const a = per.get(v.nome);
-    if (!a) return v;
-    if (a.articolo) return { ...v, articolo: a.articolo, posto: postoDellArticolo(a.articolo) };
-    const postiNegozi: Record<string, string> = {};
-    for (const n of a.negozi) { const p = postoDelNegozio(n); if (p) postiNegozi[n] = p; }
-    return { ...v, negozi: a.negozi, postiNegozi };
-  };
-  res.json({ ...dati, consumabili: dati.consumabili?.map(lega), chiaveEMateriali: dati.chiaveEMateriali?.map(lega) });
+  res.json(oggettiGuida());
 });
 router.get('/personaggi', (_req, res) => {
   const dati = datiGuida<PersonaggiDto>('personaggi');
@@ -123,9 +104,7 @@ router.get('/personaggi', (_req, res) => {
   res.json(dati);
 });
 router.get('/sfide', (_req, res) => {
-  const dati = datiGuida<SfideDto>('sfide');
-  if (!dati) throw httpErrors.notFound('sfide-non-disponibili', 'I dati delle sfide non sono caricati.');
-  res.json(dati);
+  res.json(sfide());
 });
 router.get('/completamento', validate({ query: queryDomande }), (req, res) => {
   res.json(completamento((req.query as unknown as { partita?: number }).partita));

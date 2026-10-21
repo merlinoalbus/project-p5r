@@ -43,6 +43,8 @@ import { vociDiOgniPin, vociGestite } from './mappe/voceDelPin.js';
 import { contaOggetti, modelloAvanzamento, oggettiDelleVoci, statiDellaPartita, statoDelPin, voceFatta, type ModelloAvanzamento, type StatiDellaPartita } from './mappe/statiGuida.js';
 import { palazzoCompletato, palazzoConcluso, type CompletamentoPalazzo } from '../../shared/completamentoGuida.js';
 import { radiceDelPalazzo, SQL_RADICE_PALAZZO, SQL_SOTTOALBERO } from './mappe/alberoMappe.js';
+import { palazzoDiIngresso } from './mappe/ingressoPalazzo.js';
+export { palazzoDiIngresso } from './mappe/ingressoPalazzo.js';
 
 /** Le mappe di ogni Palazzo: l'albero sotto la radice `dungeon-<chiave>` (mappa → Palazzo). */
 export function palazzoDiOgniMappa(): Map<string, string> {
@@ -225,13 +227,6 @@ export function palazziConclusi(partitaId: number): Map<string, string> {
  * Kamoshida» sulla Shujin oggi è un punto sensibile senza riferimento, ma la sua identità di seed dice ancora che
  * era il passaggio verso `dungeon-kamoshida` (rilievo della revisione). Senza collegamento vale quella.
  */
-export function palazzoDiIngresso(spillo: { mappa_chiave: string | null; riferimento_tipo: string | null; riferimento_chiave: string | null; seed_identita_json?: string | null }, destinazione: string | null, palazzi: Map<string, string>): string | null {
-  const verso = spillo.riferimento_tipo === 'mappa' && spillo.riferimento_chiave ? spillo.riferimento_chiave : destinazione ?? versoDiSeed(spillo.seed_identita_json);
-  if (!verso) return null;
-  const dungeon = palazzi.get(verso);
-  if (!dungeon) return null;
-  return spillo.mappa_chiave && palazzi.get(spillo.mappa_chiave) === dungeon ? null : dungeon;
-}
 
 /**
  * Dove si entra in un Palazzo (o nei Memento), per «Sulla mappa» di una voce collegata al dungeon (scelta dell'utente,
@@ -282,18 +277,9 @@ export function atterraggioDelPalazzo(dungeon: string, giorno?: string | null): 
   return d ? { mappa: chiaveMappa(d.chiave), spillo: d.spilloId } : null;
 }
 
-/** Le condizioni di data dello spillo (in cima, cioè in AND) reggono quel giorno? Le altre non si guardano: qui conta solo
+/** Le condizioni temporali dello spillo, anche annidate, reggono quel giorno? Le altre restano indeterminate: qui conta solo
  *  scegliere fra più ingressi quello del giorno, non dire se adesso si entra (quello lo dice la mappa). */
 function apertoIl(json: string | null, giorno: string): boolean {
   // L6: la stessa lettura delle date del valutatore unico (`copreIlGiorno`)
   return copreIlGiorno(leggiCondizioniSalvate(json), giorno);
-}
-
-/** La mappa a cui portava lo spillo quando è nato dal seed (`seed_identita_json.riferimento`), se era una mappa. */
-function versoDiSeed(json: string | null | undefined): string | null {
-  if (!json) return null;
-  try {
-    const identita = JSON.parse(json) as { riferimento?: { tipo?: string; chiave?: string } | null };
-    return identita.riferimento?.tipo === 'mappa' && identita.riferimento.chiave ? identita.riferimento.chiave : null;
-  } catch { return null; }
 }

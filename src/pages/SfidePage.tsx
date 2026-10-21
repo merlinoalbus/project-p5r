@@ -17,6 +17,7 @@ import type { SfideDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AssetImg } from '../components/shared/AssetImg';
 import { IconaScheda } from '../components/shared/IconaAzione';
+import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
 
 const SCHEDE = [
   ['battaglie', 'Battaglie Sfida', 'sfide-battaglia'], ['boss', 'Boss segreti', 'boss'],
@@ -46,7 +47,8 @@ function SchedaBattaglie({ d }: { d: SfideDto }) {
           <VoceTesto titolo="Regole">{s.regole}</VoceTesto>
           <Elenco titolo="Nemici" voci={s.nemici} />
           {s.punteggi && <VoceTesto titolo="Punteggi">{s.punteggi}</VoceTesto>}
-          <Elenco titolo="Ricompense" voci={s.ricompense} />
+          {!!s.oggettiRicompensa?.length && <OggettiCollegati oggetti={s.oggettiRicompensa} />}
+          <Elenco titolo={s.oggettiRicompensa?.length ? 'Indicazioni della guida' : 'Ricompense'} voci={s.ricompense} />
           {s.strategia && <VoceTesto titolo="Strategia">{s.strategia}</VoceTesto>}
           <Fonte url={s.fonte} />
         </section>
@@ -69,7 +71,8 @@ function SchedaBoss({ d }: { d: SfideDto }) {
           {b.debolezze.length > 0 && <VoceTesto titolo="Debolezze">{b.debolezze.join(', ')}</VoceTesto>}
           {b.resistenze.length > 0 && <VoceTesto titolo="Resistenze">{b.resistenze.join(', ')}</VoceTesto>}
           <Elenco titolo="Strategia" voci={b.strategia} />
-          <Elenco titolo="Ricompense" voci={b.ricompense} />
+          {!!b.oggettiRicompensa?.length && <OggettiCollegati oggetti={b.oggettiRicompensa} />}
+          <Elenco titolo={b.oggettiRicompensa?.length ? 'Indicazioni della guida' : 'Ricompense'} voci={b.ricompense} />
           {b.statistiche && <VoceTesto titolo="Statistiche">{Object.entries(b.statistiche).map(([k, v]) => `${k.toUpperCase()} ${v}`).join(' · ')}</VoceTesto>}
           {b.nota && <p className="m-0 text-[12px] text-text-muted">{b.nota}</p>}
           <Fonte url={b.fonte} />

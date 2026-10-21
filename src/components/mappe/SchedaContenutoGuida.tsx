@@ -29,7 +29,7 @@ export function SchedaContenutoGuida({ spillo, partitaId, onChiudi, onCambiato }
     <SchedaSpillo spillo={spillo} partitaId={partitaId} occupato={occupato} nonSpaziale onChiudi={onChiudi}
       onRaccolto={(s, valore) => esegui(() => impostaSpilloRaccolto(partitaId!, s.id, valore))}
       onStatoPunto={(_s, voce, stato) => esegui(() => impostaStatoPunto(partitaId!, voce, stato))}
-      onAcquisto={(_s, articolo, fatto) => esegui(() => impostaAcquisto(partitaId!, articolo, fatto))} />
+      onAcquisto={(s, articolo, fatto) => esegui(() => impostaAcquisto(partitaId!, articolo, fatto, s.dettaglio?.negozio?.sedeChiave))} />
     <button type="button" className="btn" disabled={occupato} onClick={() => setModifica(v => !v)}>{modifica ? 'Chiudi modifica' : 'Modifica contenuto'}</button>
     {modifica && <EditorContenuto key={spillo.id} spillo={spillo} occupato={occupato} esegui={esegui} />}
   </div>;

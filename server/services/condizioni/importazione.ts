@@ -31,14 +31,18 @@ const TABELLE_CONDIZIONI = ['quartiere', 'luogo', 'negozio', 'articolo', 'attivi
 function convertiSnapshotCatalogo(valore: unknown, origine: string, conversioni: string[]): unknown {
   if (!valore || typeof valore !== 'object' || Array.isArray(valore)) return valore;
   const snapshot = valore as Record<string, unknown>;
-  const json = snapshot.condizioni_json;
-  if (typeof json !== 'string' || !json.includes('"manuale"')) return valore;
-  let condizioni: unknown;
-  try { condizioni = JSON.parse(json); }
-  catch { throw httpErrors.badRequest('condizioni-legacy-non-convertibili', `Condizioni illeggibili nello snapshot ${origine}: importazione interrotta.`); }
-  const n = conversioni.length;
-  const dopo = convertiManualiImportati(condizioni, `${origine}.condizioni_json`, conversioni);
-  return conversioni.length > n ? { ...snapshot, condizioni_json: JSON.stringify(dopo) } : valore;
+  const risultato = { ...snapshot };
+  for (const campo of ['condizioni_json', 'sblocco_json']) {
+    const json = snapshot[campo];
+    if (typeof json !== 'string' || !json.includes('"manuale"')) continue;
+    let condizioni: unknown;
+    try { condizioni = JSON.parse(json); }
+    catch { throw httpErrors.badRequest('condizioni-legacy-non-convertibili', `Condizioni illeggibili nello snapshot ${origine}: importazione interrotta.`); }
+    const n = conversioni.length;
+    const dopo = convertiManualiImportati(condizioni, `${origine}.${campo}`, conversioni);
+    if (conversioni.length > n) risultato[campo] = JSON.stringify(dopo);
+  }
+  return risultato;
 }
 
 /** Aggiorna i soli vecchi `manuale` rimasti dopo le migrazioni. La migrazione 090 mantiene quindi la precedenza per i fatti che
@@ -50,7 +54,7 @@ export function convertiCondizioniDatabaseImportato(db: AppDatabase): string[] {
     for (const tabella of TABELLE_CONDIZIONI) {
       if (!tabelle.has(tabella)) continue;
       const colonne = db.prepare(`PRAGMA main.table_info("${tabella}")`).all() as Array<{ name: string }>;
-      for (const colonna of ['condizioni_json', 'condizioni_guida_json', 'seed_json'] as const) {
+      for (const colonna of ['condizioni_json', 'sblocco_json', 'condizioni_guida_json', 'seed_json'] as const) {
         if (!colonne.some((c) => c.name === colonna)) continue;
         const righe = db.prepare(`SELECT rowid AS id, "${colonna}" AS json FROM main."${tabella}" WHERE "${colonna}" IS NOT NULL`).all() as Array<{ id: number; json: string }>;
         const scrivi = db.prepare(`UPDATE main."${tabella}" SET "${colonna}" = ? WHERE rowid = ?`);

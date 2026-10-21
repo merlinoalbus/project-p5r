@@ -22,7 +22,7 @@ import { PulsanteGuidaQuiz } from './GuidaQuiz';
 /** Ciò che i cartellini di una riga d'azione leggono. */
 // L3: le infiltrazioni della voce servono a «Entra» (il cartellino del Palazzo apre l'infiltrazione giusta, `collegamentoAzione`)
 export type AzioneMostrata = Pick<AzionePercorsoDto, 'azione' | 'tipo' | 'riferimento' | 'riferimentoTesto' | 'rangoAtteso' | 'note' | 'produceTesto' | 'fatta' | 'effetti' | 'stato' | 'mappa' | 'atterraggio' | 'quiz'>
-  & Partial<Pick<AzionePercorsoDto, 'uid' | 'infiltrazioni' | 'infiltrazioneDaAprire' | 'infiltrazioniDelPalazzo' | 'propostaInfiltrazioni'>>;
+  & Partial<Pick<AzionePercorsoDto, 'uid' | 'infiltrazioni' | 'infiltrazioneDaAprire' | 'infiltrazioniDelPalazzo' | 'propostaInfiltrazioni' | 'oggettoRiferimento' | 'oggettiCitati'>>;
 
 /** L'immagine della riga: il ritratto del Confidente, l'emblema del Palazzo o l'icona del tipo. */
 export function ImmagineAzione({ a }: { a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento' | 'riferimentoTesto'> }) {
@@ -47,6 +47,7 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa }: PropsCartelli
   const apriAccanto = link?.atterraggio && onApriMappa ? link.atterraggio : null;
   return (
     <span className="flex flex-wrap items-center gap-1.5">
+      {a.oggettiCitati?.filter((o) => o.casa !== link?.href).map((o) => <Link key={o.chiave} to={o.casa} className="chip touch no-underline">{o.nome}</Link>)}
       <span className="chip text-[11px]">{NOME_TIPO_AZIONE[a.tipo] ?? a.tipo}</span>
       {link ? <Link to={link.href} className="chip chip--attivo no-underline text-[11px]"
         onClick={apriAccanto ? (e) => { if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) { e.preventDefault(); onApriMappa!(apriAccanto); } } : undefined}>{link.etichetta}</Link>

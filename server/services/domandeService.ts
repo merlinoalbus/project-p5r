@@ -9,6 +9,7 @@ import { registraEvento } from './storicoService.js';
 import { nomeDote, puntiDaNote } from './partiteService.js';
 import { ordineGioco } from '../../shared/condizioniSpillo.js';
 import type { DomandaDto, DomandeDto, EsameDto } from '../../shared/types.js';
+import { ricompensePerFonte } from './catalogoOggettiLetture.js';
 
 interface RigaDomanda { id: number; chiave: string | null; ordine: number; data: string; tipo: DomandaDto['tipo']; chi: string; domanda: string; risposte_json: string; ricompensa: string; note: string; fonte: string }
 
@@ -23,14 +24,15 @@ export function indiceGiornoScolastico(data: string): number {
 }
 
 /** Una domanda come DTO: risposte dal JSON, `fatta` se il suo id è fra quelli segnati nella partita. */
-function domandaDto(r: RigaDomanda, fatte: Set<number>): DomandaDto {
-  return { id: r.id, chiave: r.chiave ?? null, data: r.data, tipo: r.tipo, chi: r.chi, domanda: r.domanda, risposte: JSON.parse(r.risposte_json) as DomandaDto['risposte'], ricompensa: r.ricompensa, note: r.note, fonte: r.fonte, fatta: fatte.has(r.id) };
+function domandaDto(r: RigaDomanda, fatte: Set<number>, oggettiRicompensa: NonNullable<DomandaDto['oggettiRicompensa']>): DomandaDto {
+  return { id: r.id, chiave: r.chiave ?? null, data: r.data, tipo: r.tipo, chi: r.chi, domanda: r.domanda, risposte: JSON.parse(r.risposte_json) as DomandaDto['risposte'], ricompensa: r.ricompensa, oggettiRicompensa, note: r.note, fonte: r.fonte, fatta: fatte.has(r.id) };
 }
 
 /** Gli esami in ordine, con date e domande lette dai rispettivi JSON. */
 function esami(): EsameDto[] {
+  const premi = ricompensePerFonte('esame');
   return (prepared('SELECT chiave, nome, date_json, data_risultati, domande_json, note FROM esame ORDER BY ordine').all() as Array<{ chiave: string; nome: string; date_json: string; data_risultati: string | null; domande_json: string; note: string }>)
-    .map((e) => ({ chiave: e.chiave, nome: e.nome, date: JSON.parse(e.date_json) as string[], dataRisultati: e.data_risultati, domande: JSON.parse(e.domande_json) as EsameDto['domande'], note: e.note }));
+    .map((e) => ({ chiave: e.chiave, nome: e.nome, date: JSON.parse(e.date_json) as string[], dataRisultati: e.data_risultati, domande: JSON.parse(e.domande_json) as EsameDto['domande'], note: e.note, oggettiRicompensa: premi.get(e.chiave) ?? [] }));
 }
 
 /** Tutte le domande in ordine di data, con lo stato «fatta» della partita (se indicata) e le prossime rispetto alla data di gioco. */
@@ -45,7 +47,8 @@ export function domande(partitaId?: number): DomandeDto {
   }
   // ordine di calendario scolastico (aprile → marzo) e, a pari data, ordine del seed: le voci aggiunte in coda al seed (quiz TV) restano al loro giorno
   const righe = (prepared('SELECT * FROM domanda ORDER BY ordine').all() as RigaDomanda[]).sort((x, y) => indiceGiornoScolastico(x.data) - indiceGiornoScolastico(y.data) || x.ordine - y.ordine);
-  const tutte = righe.map((r) => domandaDto(r, fatte));
+  const premiDomande = ricompensePerFonte('domanda', righe.flatMap((r) => r.chiave ? [r.chiave] : []));
+  const tutte = righe.map((r) => domandaDto(r, fatte, r.chiave ? premiDomande.get(r.chiave) ?? [] : []));
   const oggi = dataGioco ? indiceGiornoScolastico(dataGioco) : null;
   // le domande non fatte della **prima** data da oggi in poi (una o due): il prossimo appuntamento
   const daFare = oggi === null ? [] : tutte.filter((d) => !d.fatta && indiceGiornoScolastico(d.data) >= oggi);

@@ -2,9 +2,9 @@
 // PercorsoPage — guida giorno per giorno: cosa fare oggi (giorno e sera), dove, con chi, avvisi; azioni spuntabili e giorno corrente della partita (Fase 7.5b)
 // ============================================================
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Selettore } from '../components/shared/Selettore';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { getPercorsoGiorno, getPercorsoIndice, impostaGiornoCorrente } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -30,6 +30,8 @@ import { GiornoGuida } from '../components/guida/GiornoGuida';
  */
 export function PercorsoPage() {
   const { data: dataParam } = useParams();
+  const [parametri] = useSearchParams();
+  const voceDaMostrare = parametri.get('voce') ?? undefined;
   const navigate = useNavigate();
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = attiva?.id ?? null;
@@ -37,6 +39,10 @@ export function PercorsoPage() {
   const data = dataParam ?? indice.dati?.dataCorrente ?? indice.dati?.giorni[0]?.giorno ?? null;
   const giorno = useCarica(() => (data ? getPercorsoGiorno(data, partitaId ?? undefined) : Promise.resolve(null)), [data, partitaId]);
   const g = giorno.dati;
+  const giornoCaricato = g?.giorno;
+  useEffect(() => {
+    if (giornoCaricato && voceDaMostrare) document.getElementById(`voce-${voceDaMostrare}`)?.scrollIntoView({ block: 'center' });
+  }, [giornoCaricato, voceDaMostrare]);
   useDocumentTitle(g ? `${dataGiocoTesto(g.giorno)} — Guida giorno per giorno` : 'Guida giorno per giorno');
   const [occupatoGiorno, setOccupatoGiorno] = useState(false);
   const mesi = useMemo(() => [...new Set((indice.dati?.giorni ?? []).map((x) => x.giorno.slice(0, 2)))], [indice.dati]);
@@ -78,7 +84,7 @@ export function PercorsoPage() {
             {partitaId && g.dataCorrente !== g.giorno && <button type="button" className="btn btn-primary btn-sm touch ml-auto" disabled={occupatoGiorno} onClick={() => void segnaCorrente()}>Segna come giorno corrente</button>}
             {partitaId && g.dataCorrente === g.giorno && <span className="chip chip--attivo ml-auto">Oggi nella partita</span>}
           </div>
-          <GiornoGuida onGiornataModificata={async () => { await Promise.all([giorno.ricarica(), indice.ricarica()]); }} g={g} partitaId={partitaId} onAggiorna={aggiorna} onSullaMappa={(m) => navigate(`/guida/mappe/${encodeURIComponent(m.chiave)}${m.spilloId ? `?spillo=${m.spilloId}` : ''}`)} fasciaCorrente={partitaId && g.dataCorrente === g.giorno ? attiva?.fasciaGioco ?? 'giorno' : null} />
+          <GiornoGuida onGiornataModificata={async () => { await Promise.all([giorno.ricarica(), indice.ricarica()]); }} g={g} partitaId={partitaId} onAggiorna={aggiorna} azioneEvidenziata={voceDaMostrare} onSullaMappa={(m) => navigate(`/guida/mappe/${encodeURIComponent(m.chiave)}${m.spilloId ? `?spillo=${m.spilloId}` : ''}`)} fasciaCorrente={partitaId && g.dataCorrente === g.giorno ? attiva?.fasciaGioco ?? 'giorno' : null} />
         </div>
       )}
     </PageState>

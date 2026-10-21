@@ -14,6 +14,7 @@
 // ============================================================
 
 import { prepared } from '../../db/dbService.js';
+import { nellaFinestraPalazzo } from './finestrePalazzi.js';
 import { t } from '../traduzioniService.js';
 import { nomiCondizioniMemo, pinCitato } from './nomiCondizioni.js';
 import { condizioneDelLuogo, condizioneEffettivaQuartiere, tuttiGliInviti, type RigaInvito } from './condizioneEffettiva.js';
@@ -171,6 +172,13 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
       const dentro = oggi >= ordineGioco(r.dal) && oggi <= ordineGioco(r.al);
       return esito('data', dentro ? 'verde' : 'rosso', r.dal === r.al ? (dentro ? `Solo il ${dataLeggibile(r.dal)}: è oggi` : `Solo il ${dataLeggibile(r.dal)}, oggi è il ${dataLeggibile(st.dataGioco)}`) : dentro ? `Nel periodo dal ${dataLeggibile(r.dal)} al ${dataLeggibile(r.al)} (oggi ${dataLeggibile(st.dataGioco)})` : `Solo dal ${dataLeggibile(r.dal)} al ${dataLeggibile(r.al)}, oggi è il ${dataLeggibile(st.dataGioco)}`);
     }
+    case 'finestra-palazzo': {
+      if (!st.dataGioco) return esito('data', 'rosso', 'Il giorno corrente della partita non è impostato');
+      const aperta = nellaFinestraPalazzo(r.dungeon, st.dataGioco);
+      return esito('data', aperta === null ? 'grigio' : aperta ? 'verde' : 'rosso', aperta === null
+        ? `Finestra di ${nomePalazzo(r.dungeon)} non disponibile: correggi la scheda del Palazzo`
+        : `${nomePalazzo(r.dungeon)}: ${aperta ? 'dentro' : 'fuori'} la finestra del Palazzo`);
+    }
     case 'arco': {
       if (!st.arcoCorrente) return esito('arco', 'rosso', 'Il giorno corrente della partita non è impostato: la condizione non risulta soddisfatta (Partita → Oggi)');
       const ok = ARCHI_STORIA.indexOf(st.arcoCorrente as typeof ARCHI_STORIA[number]) >= ARCHI_STORIA.indexOf(r.dungeon as typeof ARCHI_STORIA[number]);
@@ -184,6 +192,13 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
       return esito('meteo', ok ? 'verde' : 'rosso', ok ? come.charAt(0).toUpperCase() + come.slice(1) : `Solo con la pioggia: ${come}`);
     }
     case 'meteo': {
+      if (r.condizione === 'senza-allerta') {
+        const nome = nomi().allerte?.[r.allerta];
+        if (!nome) return esito('meteo', 'grigio', 'Allerta meteo non presente nel calendario: correggi la condizione.');
+        if (!st.dataGioco || !st.fasciaGioco) return esito('meteo', 'grigio', 'Data o momento della giornata non impostati: impossibile verificare l’allerta.');
+        const presente = !!prepared('SELECT 1 FROM allerta_meteo WHERE data = ? AND fascia = ? AND chiave = ?').get(st.dataGioco, st.fasciaGioco, r.allerta);
+        return esito('meteo', presente ? 'rosso' : 'verde', presente ? `${nome}: non disponibile nella fascia corrente.` : `${nome}: assente nella fascia corrente.`);
+      }
       // Senza meteo (né segnato né nella guida) non si sa: da controllare, ma non si blocca per un dato che manca (scelta dell'utente,
       // 2026-09-30). Col meteo, conta quello della fascia in cui si è: «Sereno/Pioggia» di sera è pioggia.
       if (!st.meteoOra) return { ...esito('meteo', 'grigio', 'Il meteo di oggi non è segnato: controllalo nel gioco o segnalo in Partita → Oggi (non blocca)'), bloccante: false };
@@ -371,10 +386,23 @@ export function valutazione(c: RequisitoSpillo, st: StatoValutazione, nomi: Nomi
 
 /**
  * Le condizioni di data reggono quel giorno? Senza partita: per scegliere, fra più ingressi o più regole d'atterraggio, quella del giorno.
- * Solo `data` e `intervallo` in cima (in AND) contano; le altre non si guardano: qui non si dice se adesso si entra (lo dice la mappa).
+ * Date, intervalli e finestre contano a ogni profondità; le altre foglie restano indeterminate. Non sostituisce l'accessibilità della mappa.
  */
 export function copreIlGiorno(condizioni: readonly RequisitoSpillo[], giorno: string): boolean {
   const oggi = ordineGioco(giorno);
-  return condizioni.every((c) => c.tipo === 'data' ? oggi >= ordineGioco(c.dal)
-    : c.tipo === 'intervallo' ? oggi >= ordineGioco(c.dal) && oggi <= ordineGioco(c.al) : true);
+  // undefined = avviso non operando; null = condizione non temporale, dunque indeterminata.
+  const valuta = (c: RequisitoSpillo): boolean | null | undefined => {
+    if (c.tipo === 'avviso') return undefined;
+    if (c.tipo === 'da-subito') return true;
+    if (c.tipo === 'data') return oggi >= ordineGioco(c.dal);
+    if (c.tipo === 'intervallo') return oggi >= ordineGioco(c.dal) && oggi <= ordineGioco(c.al);
+    if (c.tipo === 'finestra-palazzo') return nellaFinestraPalazzo(c.dungeon, giorno);
+    if (c.tipo === 'non') { const v = valuta(c.condizione); return typeof v === 'boolean' ? !v : v; }
+    if (c.tipo !== 'gruppo') return null;
+    const esiti = c.condizioni.map(valuta).filter((v) => v !== undefined);
+    if (!esiti.length) return c.condizioni.length ? undefined : true;
+    if (c.modo === 'tutte') return esiti.includes(false) ? false : esiti.includes(null) ? null : true;
+    return esiti.includes(true) ? true : esiti.includes(null) ? null : false;
+  };
+  return condizioni.every((c) => valuta(c) !== false);
 }

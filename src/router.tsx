@@ -52,6 +52,7 @@ const CovoPage = pigra(() => import('./pages/CovoPage'), 'CovoPage');
 const SfidePage = pigra(() => import('./pages/SfidePage'), 'SfidePage');
 const PersonaggiPage = pigra(() => import('./pages/PersonaggiPage'), 'PersonaggiPage');
 const OggettiPage = pigra(() => import('./pages/OggettiPage'), 'OggettiPage');
+const OggettoPage = pigra(() => import('./pages/OggettoPage'), 'OggettoPage');
 const NegozioPage = pigra(() => import('./pages/NegozioPage'), 'NegozioPage');
 const RimossiPage = pigra(() => import('./pages/RimossiPage'), 'RimossiPage');
 const PartitaPage = pigra(() => import('./pages/PartitaPage'), 'PartitaPage');
@@ -100,6 +101,7 @@ export const router = createBrowserRouter([
       { path: 'guida/sfide', element: <SfidePage /> },
       { path: 'guida/personaggi', element: <PersonaggiPage /> },
       { path: 'guida/oggetti', element: <OggettiPage /> },
+      { path: 'guida/oggetto/:categoria/:slug', element: <OggettoPage /> },
       { path: 'guida/percorso', element: <PercorsoPage /> },
       { path: 'guida/percorso/:data', element: <PercorsoPage /> },
       { path: 'guida/negozi', element: <NegoziPage /> },
