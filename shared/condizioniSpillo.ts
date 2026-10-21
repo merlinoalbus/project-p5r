@@ -57,6 +57,8 @@ export type ContatoreChiave = (typeof CONTATORI)[number]['chiave'];
 export const EVENTI_STORIA = [
   { chiave: 'mansarda-pulita', nome: 'Mansarda del Leblanc pulita' },
   { chiave: 'laptop-riparato', nome: 'Laptop del Leblanc riparato' },
+  { chiave: 'niijima-banco-soci-accessibile', nome: 'Banco della lobby dei soci di Niijima raggiunto e utilizzabile' },
+  { chiave: 'niijima-banco-alte-accessibile', nome: 'Banco della lobby delle puntate alte di Niijima raggiunto e utilizzabile' },
   { chiave: 'sistema-videogiochi-installato', nome: 'Sistema per videogiochi installato al tavolo del Leblanc' },
   { chiave: 'evento-makoto', nome: 'Evento con Makoto (entra in squadra)', membro: 'makoto' },
   { chiave: 'evento-futaba', nome: 'Evento con Futaba (entra in squadra)', membro: 'futaba' },

@@ -34,11 +34,34 @@ function casa(tabella: string, chiave: string): string | null {
   if (tabella === 'attivita') return '/guida/attivita';
   return null;
 }
-interface Proposta { dopo: RequisitoSpillo[]; prima: RequisitoSpillo[][]; identita: Riga }
+interface Proposta { dopo: RequisitoSpillo[]; prima: RequisitoSpillo[][]; identita: Riga; contesto?: { tabella: 'quartiere'; chiave: string; identita: Riga } }
 const data = (dal: string): RequisitoSpillo => ({ tipo: 'data', dal });
 const conf = (confidente: string, rango: number): RequisitoSpillo => ({ tipo: 'confidente', confidente, rango });
 /** Solo formule INTERE con fonte e forma precedente attestate. Le altre proposte restano leggibili, senza scrittura presunta. */
 function proposta(g: GruppoFraseCondizioni, chiave: string): Proposta | null {
+  // Confronti soltanto informativi: prima vuoto impedisce di applicare una parte delle bonifiche atomiche130/134.
+  if (g.id === 'L26') return { dopo: [data('05-07')], prima: [], identita: {
+    chiave: 'mementos/ingresso-mementos', quartiere_chiave: 'mementos', origine: 'seed', nascosto: 0,
+    ordine: 0, tipo: 'trasporto', nome: 'Ingresso ai Memento',
+    cosa_offre: 'Accesso al dungeon procedurale dei Memento tramite la metropolitana di Shibuya; qui si ricevono e completano le richieste dei cittadini.',
+    quando: null, giorni: null, sblocco: 'dopo il primo Palazzo (Kamoshida)', confidenti_json: '[]',
+    attivita_json: '["richieste secondarie"]', negozio: null, piatti_json: null, note: null,
+    fonte: 'https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/', verificato: 0, giorni_json: '[]',
+    area_chiave: null, orari_json: null, solo_eventi_confidente: null, fonte_condizioni_json: null,
+  }, contesto: { tabella: 'quartiere', chiave: 'mementos', identita: {
+    chiave: 'mementos', sblocco: null, sblocco_data: null, fonte: 'https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/',
+    condizioni_json: null, condizioni_guida_json: null, fonte_condizioni_json: null, fonte_condizioni_guida_json: null,
+  } } };
+  if (g.id === 'N14') return { dopo: [
+    { tipo: 'finestra-palazzo', dungeon: 'niijima' },
+    { tipo: 'non', condizione: { tipo: 'palazzo', dungeon: 'niijima' } },
+    { tipo: 'gruppo', modo: 'almeno-una', condizioni: [
+      { tipo: 'evento', evento: 'niijima-banco-soci-accessibile' },
+      { tipo: 'evento', evento: 'niijima-banco-alte-accessibile' },
+    ] },
+  ], prima: [], identita: { chiave: 'negozio-palazzo-niijima', origine: 'seed', nascosto: 0,
+    sede_chiave: null, luogo_chiave: null, condizioni_json: '[]', seed_json: null, listino_condiviso: null,
+    orari_json: '{"giorni":[],"fasce":[],"chiusoConPioggia":false,"nota":"solo durante l’esplorazione del Palazzo"}', eccezione_orari_json: null } };
   if (g.id === 'A08') return { dopo: [data('04-09')], prima: [[{ tipo: 'intervallo', dal: '04-09', al: '05-20' }]],
     identita: { tipo: 'studio', sede_chiave: 'shujin-academy/biblioteca-shujin' } };
   if (g.id === 'A13') return { dopo: [conf('shinya', 1), data('09-04')],
@@ -216,7 +239,9 @@ function fotografia(): { dto: RiconciliazioneCondizioniDto; proposte: Map<string
     }
     const proprie = r ? formula(r[campo]) : { valore: null, testo: [], errore: 'Oggetto assente: condizioni non disponibili.' };
     const p = g ? proposta(g, chiave) : null;
-    const propostaValida = p && r && Object.entries(p.identita).every(([k, v]) => json(r[k]) === json(v));
+    const contestoProposta = p?.contesto ? leggiTabella(p.contesto.tabella).get(p.contesto.chiave) : null;
+    const propostaValida = p && r && Object.entries(p.identita).every(([k, v]) => json(r[k]) === json(v))
+      && (!p.contesto || (contestoProposta && Object.entries(p.contesto.identita).every(([k, v]) => json(contestoProposta[k]) === json(v))));
     const frase = stringa(r?.[campoFrase]);
     const esitoFonte = !r ? 'assente' : !g ? 'nuova' : frase === g.fraseStorica ? 'presente-identica' : 'mutata';
     const esitoFormula = !g || g.analisi === 'ricerca' ? 'da-ricercare' : !p || !propostaValida || proprie.errore ? 'non-confrontabile'
@@ -244,6 +269,21 @@ function fotografia(): { dto: RiconciliazioneCondizioniDto; proposte: Map<string
       for (const v of arr('escluse')) {
         const e = record(v);
         if (e?.origine === origineAudit) auditMigrazioni.push({ migrazione: a.n, esito: 'esclusa', motivo: String(e.motivo ?? 'Dati preservati.') });
+      }
+    }
+    // Gli audit puntuali non certificano la formula corrente: esito storico e confronto restano separati.
+    // Nessuna decisione dell'utente viene creata o riscritta per la sola presenza del rendiconto.
+    const auditPuntuale = g?.id === 'L26' ? { numero: 130, chiave: 'rettifica-ingresso-memento-130', bersaglio: 'luogo' }
+      : g?.id === 'N14' ? { numero: 134, chiave: 'rettifica-banchi-niijima-134', bersaglio: 'negozio' } : null;
+    if (auditPuntuale) {
+      const a = record(decodifica(dati.get(auditPuntuale.chiave)?.json));
+      const esiti = auditPuntuale.numero === 130 ? ['rettificata', 'gia-corretta', 'assente', 'personale', 'conflitto']
+        : ['applicata', 'gia-corretta', 'assente', 'esclusa'];
+      if (a?.versione === 1 && a[auditPuntuale.bersaglio] === chiave && typeof a.esito === 'string'
+        && esiti.includes(a.esito) && typeof a.motivo === 'string') {
+        auditMigrazioni.push({ migrazione: auditPuntuale.numero,
+          esito: a.esito === 'rettificata' || a.esito === 'applicata' ? 'applicata' : a.esito === 'gia-corretta' ? 'gia-corretta' : 'esclusa',
+          motivo: `Esito originale${auditPuntuale.numero}: ${a.esito}. ${a.motivo}` });
       }
     }
     const canonicoOggetto = typeof r?.catalogo_chiave === 'string' ? leggiTabella('catalogo_oggetto').get(r.catalogo_chiave) : null;

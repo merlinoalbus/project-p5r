@@ -1,7 +1,7 @@
 import type { AnalisiRiconciliazione, FonteRiconciliazione, TabellaRiconciliazione } from './riconciliazioneCondizioni.js';
 
 /** Trascrizione esplicita del censimento pubblico: mai parsing di Markdown o formule ricavate dalla prosa. */
-export const REVISIONE_RICONCILIAZIONE = '2026-10-21.1';
+export const REVISIONE_RICONCILIAZIONE = '2026-10-21.2';
 export interface GruppoFraseCondizioni {
   id: string;
   classeStorica: 'M' | 'E' | 'R';
@@ -18,13 +18,17 @@ const specifica = { titolo: 'Specifiche originali L6', url: 'https://github.com/
 const matrice = { titolo: 'Riconciliazione e prove pubbliche', url: 'https://github.com/merlinoalbus/project-p5r/blob/newreview/docs/coordinamento/lotti/L6/riconciliazione-corrente.md' };
 const libri = { titolo: 'AGS — Libri', url: 'https://www.allgamestaff.it/persona-5-royal/libri/' };
 const giochi = { titolo: 'AGS — Videogiochi', url: 'https://www.allgamestaff.it/persona-5-royal/videogiochi/' };
+const niijima = { titolo: 'AGS — Banchi e progressione del Palazzo di Niijima', url: 'https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/' };
+const negozi = { titolo: 'AGS — Offerte dei due banchi', url: 'https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/' };
+const qimranut = { titolo: 'AGS — Primo ingresso guidato nei Memento', url: 'https://www.allgamestaff.it/persona-5-royal/dedalo-di-qimranut/' };
 const g = (codice: string, chiavi: string, fraseStorica: string, propostaTesto: string, analisi: AnalisiRiconciliazione = 'ricerca'): GruppoFraseCondizioni => {
   const [id, classe] = codice.split(' ');
   const tabella: TabellaRiconciliazione = id[0] === 'L' ? 'luogo' : id[0] === 'N' ? 'negozio' : id[0] === 'A' ? 'attivita' : 'articolo';
   return { id, classeStorica: classe as GruppoFraseCondizioni['classeStorica'], tabella, chiavi: chiavi.split(';'),
     campoFrase: tabella === 'articolo' ? 'condizione' : 'sblocco', fraseStorica, propostaTesto, analisi,
     notaDaConservare: 'Conservare integralmente la frase nella sua provenienza. La nota storica non sostituisce i requisiti strutturati.',
-    fonti: [specifica, matrice, ...(['I38', 'I41', 'I73'].includes(id) ? [libri] : ['A04', 'A06', 'A11', 'I43'].includes(id) ? [giochi] : [])] };
+    fonti: [specifica, matrice, ...(['I38', 'I41', 'I73'].includes(id) ? [libri] : ['A04', 'A06', 'A11', 'I43'].includes(id) ? [giochi]
+      : id === 'N14' ? [niijima, negozi] : id === 'L26' ? [qimranut] : [])] };
 };
 
 export const GRUPPI_FRASI_CONDIZIONI: readonly GruppoFraseCondizioni[] = [
@@ -53,7 +57,7 @@ export const GRUPPI_FRASI_CONDIZIONI: readonly GruppoFraseCondizioni[] = [
   g('L23 M', 'kanda-jinbocho/chiesa-kanda', 'dal 28 giugno; Fascino Rango 3 per il primo incontro (consigliato 2 luglio)', 'Sede dal 28 giugno; Fascino riguarda Hifumi.', 'condizioni'),
   g('L24 M', 'yongen-jaya/venditore-patate-dolci', 'dal 9 ottobre', 'Dal 9 ottobre; meteo distinto negli orari della sede.', 'condizioni'),
   g('L25 E', 'shibuya/scarlet', 'disponibile una volta raggiunta Shibuya nella storia', 'Eredità del quartiere; nessun nuovo evento identificato.', 'eredita'),
-  g('L26 R', 'mementos/ingresso-mementos', 'dopo il primo Palazzo (Kamoshida)', 'Primo accesso il 7 maggio: proposta conservativa della sola data 05-09 → 05-07 sulla forma attestata; nessun nuovo evento di apertura richiesto.'),
+  g('L26 R', 'mementos/ingresso-mementos', 'dopo il primo Palazzo (Kamoshida)', 'Primo ingresso guidato dal 7 maggio: confronto della formula intera e del quartiere attestati in130, senza nuovi eventi. Il rendiconto130 descrive soltanto la rettifica storica; varianti correnti restano da esaminare.', 'condizioni'),
   g('L27 M', 'roppongi/okumura-foods-hq', "durante l'infiltrazione al Palazzo di Okumura", 'Confrontare fonte G-031 e accesso libero; nessuna fine di intervallo inventata.'),
   g('L28 E', 'shibuya/rafflesia', 'lavoro part-time: Fascino Rango 2 (Interessante)', 'Fascino 2 sul lavoro Rafflesia, non sul luogo.', 'solo-nota'),
   g('L29 M', 'asakusa/tokyo-skytree', 'lettura del libro «Shitamachi rinato»', 'Lettura Shitamachi rinato; quartiere e ritrovo distinti.', 'condizioni'),
@@ -80,7 +84,7 @@ export const GRUPPI_FRASI_CONDIZIONI: readonly GruppoFraseCondizioni[] = [
   g('N11 R', 'tanaka-affari-loschi', 'Disponibile dal primo ottobre: richiede il Laptop rotto (Yumenoshima, in vendita dal primo settembre) riparato con il Set di strumenti da PC (Akiba, Akihabara)', 'Laptop riparato dichiarato esplicitamente; bonifica coordinata con le venti offerte. Acquisti e data non provano la riparazione.', 'condizioni'),
   g('N12 E', 'akiba', 'Disponibile dal primo settembre', 'Verificare apertura commerciale distinta da quella del quartiere.'),
   g('N13 M', 'vestiti-usati-kichijoji;stoneon;cartoleria-mitsubachi', 'Disponibile dalla domenica 5 giugno, quando si sblocca Kichijoji', 'Ereditare quartiere e sede; domenica descrive la data, non apertura esclusiva.', 'eredita'),
-  g('N14 R', 'negozio-palazzo-niijima', "Durante l'arco del Palazzo di Niijima (Casinò)", 'Verificare finestra commerciale e progressione delle lobby; arco e finestra-palazzo non sono equivalenti.'),
+  g('N14 R', 'negozio-palazzo-niijima', "Durante l'arco del Palazzo di Niijima (Casinò)", 'Finestra unica di Niijima, Palazzo non concluso e almeno un banco dichiarato raggiunto e utilizzabile. Le sei offerte distinguono il proprio banco e ne ereditano la finestra. Il confronto riguarda la formula del negozio; il rendiconto134 descrive separatamente l’intero blocco e le eventuali esclusioni.', 'condizioni'),
   g('N15 M', 'mantra-ganda', "Richiede il Rango Confidente Gemelle 3 (sblocco dell'Isolamento)", 'Ereditare Gemelle 3 dalla sede.', 'eredita'),
   g('N16 M', 'venditore-ambulante', 'Solo dal lunedì al venerdì, di sera; non disponibile in caso di pioggia', 'Orari della sede: feriali, sera, non piove.', 'eredita'),
   g('N17 M', 'chiesa-kanda', 'Solo la domenica', 'Eccezione commerciale domenica, distinta dalla sede.', 'eredita'),
