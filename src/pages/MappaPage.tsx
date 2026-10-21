@@ -522,6 +522,7 @@ function DettaglioMappa({ chiave, partitaId }: { chiave: string; partitaId: numb
           onRaccolto={raccolto}
           onStatoPunto={statoPunto}
           onAcquisto={acquisto}
+          onAcquistiCambiati={ricarica}
           onChiudi={() => navigate(ritornoMappe() ?? '/guida/mappe')}
           ritorno={<TornaAllaPartita partitaId={partitaId} />}
           azioni={<>{mappa.entita && <Link className="btn btn-secondary touch" to={schedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave)}>{titoloSchedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave, mappa.nome)}</Link>}<CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={titoloModificaMappa(mappa)} /></>}

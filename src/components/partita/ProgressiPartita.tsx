@@ -23,6 +23,8 @@ import { NOME_TIPO_ATTIVITA } from '../../../shared/attivita';
 import { formattaYen } from '../../utils/letture';
 import { avvisaDotiDaSegnare } from '../../utils/dotiDaSegnare';
 import { dataGiocoTesto } from '../../utils/dateGioco';
+import { DaApplicare } from './DaApplicare';
+import { RegistroAcquistiPartita } from './RegistroAcquistiPartita';
 
 /** Il testo di un errore: il messaggio se è un `Error`, altrimenti il valore convertito in stringa. */
 function messaggio(err: unknown): string { return err instanceof Error ? err.message : String(err); }
@@ -62,6 +64,8 @@ export function ProgressiPartita({ partitaId }: { partitaId: number }) {
     <PageState isLoading={dati.caricamento && !p} error={dati.errore} onRetry={dati.ricarica}>
       {p && (
         <div className="flex flex-col gap-4">
+          <DaApplicare key={partitaId} partitaId={partitaId} onCambiato={async () => { setStato(null); await dati.ricarica(); }} />
+          <RegistroAcquistiPartita key={`acquisti:${partitaId}`} partitaId={partitaId} onCambiato={async () => { setStato(null); await dati.ricarica(); }} />
           <section className="flex flex-col gap-2" aria-labelledby="progressi-calcolati">
             <h2 id="progressi-calcolati" className="m-0 font-display text-[17px] uppercase leading-none">Calcolati dalla partita</h2>
             <p className="m-0 text-[12px] text-text-muted">Sola lettura: l’app li ricava da quel che hai già segnato altrove. Le condizioni leggono da qui.</p>

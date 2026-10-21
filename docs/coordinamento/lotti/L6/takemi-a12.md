@@ -1,5 +1,14 @@
 # A12 — l’attività dei test rimanda alla fonte Confidente
 
+**18:47Z — CONSEGNATA nel perimetro A12/135 + R6, gate finale distinto APPROVATO.**
+Principale e679ac8a/pipeline79 e correttivo UI8d111ced/pipeline80 (`39654227575`) riusciti.
+Typecheck53028, lint76056 e build53346 sullo snapshot esatto del correttivo tutti exit0. P5s135/27.
+Il coordinatore ha osservato il nuovo requisito18aprile distinto dal testo conservato15; il revisore,
+in modo autonomo, scheda/editor/R6/riepilogo con lo stesso componente e il messaggio corretto della fonte.
+Nessun campo modificato o gesto salvato nel browser. I due esiti135 rimangono separati e il beneficio8 visibile.
+Le prove sui dati restano quelle del coordinatore riportate sotto, non misurazioni autonome del revisore.
+Questa chiusura non comprende le altre richieste L6/L7, il calendario globale L9 o I71/Aojiru.
+
 **18:24Z — esiti reali135:** e679ac8a/pipeline79 riuscita; p5s135/27, attività rettificata e beneficio8 aggiunto.
 Confronto readonly: soltanto cinque campi dell’attività cambiati;38tabelle utente,998vociDiario/1913spilli/316mappe,
 identità/requisiti/disponibilitàTakemi e primi sette benefici identici. Nuovo8: Coraggio1nota. R6-31 conserva201ID,

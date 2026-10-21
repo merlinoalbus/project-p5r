@@ -15,6 +15,31 @@ const PARTITA_NON_TROVATA = [404, 'partita-non-trovata'] as const;
 
 /** Le descrizioni delle rotte montate sotto `/api/compendio` (`server/routes/compendio.ts`). */
 export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
+  'GET /api/compendio/percorso/voci/:uid/effetti': {
+    sommario: 'Fonte unica degli effetti ordinati di una voce',
+    descrizione: 'Legge UID stabili, ordine e origine di ciascun effetto. Lo stato legacy-da-correggere conserva il RAW completo e il motivo: una configurazione non convertibile non viene trattata come vuota.',
+    risposta: '`StatoEffettiVoceDto` con revisione CAS', errori: [[404,'voce-non-trovata']],
+  },
+  'PUT /api/compendio/percorso/voci/:uid/effetti': {
+    sommario: 'Modifica esplicitamente l’intero insieme degli effetti',
+    descrizione: 'Corpo strict {revisioneEffettiAttesa,effetti:[{uid,effetto}]}. UID null crea un effetto nuovo. I tre tipi legacy e acquisto passano da un unico writer. La rimozione di un effetto non cancella fotografie o decisioni personali; le spunte precedenti non vengono rieseguite e ricevono proposte storiche distinte.',
+    risposta: '`StatoEffettiVoceDto`', errori: [[409,'effetti-cambiati']],
+  },
+  'GET /api/compendio/percorso/effetti/proposte': {
+    sommario: 'Raccordi documentati degli effetti del Diario',
+    descrizione: 'Proposte identificate sulla voce e sui suoi effetti reali, con fonte/motivo e stato corrente. Nessun matching nominale automatico, nessuna conversione di vecchie Doti in consumazioni.',
+    risposta: '`PropostaEffettoVoceDto[]`',
+  },
+  'POST /api/compendio/percorso/effetti/proposte/:id/anteprima': {
+    sommario: 'Rivedi conferma o scarto di un raccordo del Diario',
+    descrizione: 'Corpo strict RichiestaAnteprimaDecisioneEffettoVoce. Mostra fonte completa e numero delle partite già spuntate, senza toccarne Doti, yen o check.',
+    risposta: '`AnteprimaDecisioneEffettoVoceDto`', errori: [[409,'proposta-cambiata']],
+  },
+  'POST /api/compendio/percorso/effetti/proposte/:id/decisione': {
+    sommario: 'Decidi il raccordo degli effetti con CAS',
+    descrizione: 'Corpo dell’anteprima più revisionePropostaAttesa. La decisione aggiorna solo il canone mediante il writer unico; per check preesistenti crea proposte personali esplicite. Operazione ID/payload idempotente, nessuna riscrittura delle ricevute storiche.',
+    risposta: '`StatoEffettiVoceDto` dopo la decisione', errori: [[409,'proposta-cambiata'],[409,'operazione-diversa']],
+  },
   // ---- Compendio: arcani, glossario, regole di fusione ----
   'GET /api/compendio/arcani': {
     sommario: 'Elenco degli arcani nell\'ordine di gioco',
@@ -160,13 +185,13 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   'GET /api/compendio/percorso/voci/:uid': {
     sommario: 'Una voce della giornata per uid (sola lettura, L3 UX3-1)',
     descrizione: 'La voce com\'è nel suo giorno (`giorno`, fascia, campi del §3.1: insieme delle infiltrazioni, proposta, `infiltrazioneDaAprire`), con `?partita=` anche il suo stato nella partita. La scheda del Palazzo aperta da una voce (`?daVoce=`) la legge per dire da quale proposta viene.',
-    risposta: '`AzionePercorsoDto`',
+    risposta: '`AzionePercorsoDto`, con effettiVoce (fonte completa/CAS) e ricevuteEffetti separate dal formato legacy',
     errori: [[404, 'voce-non-trovata'], PARTITA_NON_TROVATA],
   },
   'PUT /api/compendio/percorso/voci/:uid': {
     sommario: 'Modifica una voce della giornata (canone, per tutte le partite)',
     descrizione: 'Si cambiano solo i campi inviati (almeno uno): testo, note (null o vuote le tolgono), genere, fascia, posto nella fascia, tipo, collegamento, rango atteso, effetti. Un collegamento o degli effetti nuovi si verificano; quelli che la voce ha già passano come sono. Cambiando fascia la voce va al posto chiesto o in fondo e la fascia vecchia si ricompatta. Un\'azione che diventa evento perde le spunte, ma se in qualche partita è spuntata con effetti la modifica si rifiuta (409). L3: `infiltrazioni` (da solo, 400 `infiltrazioni-da-sole` con altri campi) è l\'insieme ordinato delle infiltrazioni della voce, anche vuoto: solo del Palazzo della voce, la stessa ammessa più volte ma non di seguito; scrive solo il legame, niente della voce. `?partita=` facoltativo, come per la creazione.',
-    risposta: 'La voce aggiornata, `AzionePercorsoDto`',
+    risposta: 'La voce aggiornata, `AzionePercorsoDto`. effettiVoce:{effetti:[{uid,effetto}],revisioneEffettiAttesa} salva canone e campi voce nella medesima transazione. Mutuamente esclusivo con produce legacy; senza entrambi, la fonte resta intatta. La creazione usa uid:null senza token fittizio.',
     errori: [[400, 'voce-vuota'], [400, 'riferimento-non-valido'], [400, 'riferimento-inesistente'], [400, 'effetto-non-valido'], [400, 'effetto-inesistente'], [400, 'infiltrazioni-da-sole'], [400, 'voce-senza-palazzo'], [400, 'infiltrazione-inesistente'], [400, 'infiltrazione-di-un-altro-palazzo'], [400, 'infiltrazione-ripetuta-di-seguito'], [404, 'voce-non-trovata'], PARTITA_NON_TROVATA, [409, 'voce-con-effetti']],
   },
   'POST /api/compendio/percorso/voci/:uid/rivista': {
@@ -189,9 +214,9 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'DELETE /api/compendio/percorso/voci/:uid': {
     sommario: 'Elimina una voce della giornata, per tutte le partite',
-    descrizione: 'La voce esce dalla guida per sempre, con le sue spunte senza effetti, e la fascia si ricompatta. Se in qualche partita è spuntata con effetti l\'eliminazione si rifiuta (409) nominando le partite: va prima tolta la spunta in ciascuna, così gli effetti si annullano.',
+    descrizione: 'La voce, la fonte degli effetti e le spunte entrano nel cestino comune. Il motore annulla esattamente le ricevute e le sole provenienze possedute, in tutte le partite, prima della cancellazione; un registro non leggibile provoca rollback. I delta Doti/yen restano proposte esplicite, senza applicazione automatica. La fascia si ricompatta e il ripristino recupera il posto relativo ai vicini.',
     risposta: 'Nessun contenuto (204)',
-    errori: [[404, 'voce-non-trovata'], [409, 'voce-con-effetti']],
+    errori: [[404, 'voce-non-trovata'], [409, 'ricevuta-spunta-illeggibile']],
   },
 
   // ---- Negozi e articoli ----

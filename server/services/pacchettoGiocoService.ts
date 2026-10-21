@@ -65,6 +65,12 @@ interface Riferimento {
 }
 export const RIFERIMENTI_PARTITE: Riferimento[] = [
   { tabella: 'acquisto_partita', colonna: 'articolo_chiave', entita: 'articolo', tabellaGioco: 'articolo', colonnaGioco: 'chiave' },
+  { tabella: 'acquisto_registrato', colonna: 'articolo_chiave', entita: 'articolo della consumazione (fotografia conservata)', tabellaGioco: 'articolo', colonnaGioco: 'chiave' },
+  { tabella: 'acquisto_provenienza', colonna: 'voce_uid', entita: 'voce della fonte di acquisto', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
+  { tabella: 'acquisto_provenienza', colonna: 'effetto_uid', entita: 'effetto della fonte di acquisto', tabellaGioco: 'voce_effetto', colonnaGioco: 'uid' },
+  { tabella: 'effetto_applicato', colonna: 'voce_uid', entita: 'voce della ricevuta (fotografia conservata)', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
+  { tabella: 'effetto_applicato', colonna: 'effetto_uid', entita: 'effetto della ricevuta (fotografia conservata)', tabellaGioco: 'voce_effetto', colonnaGioco: 'uid', filtro: "tipo <> 'contesto'" },
+  { tabella: 'da_applicare', colonna: 'voce_uid', entita: 'voce della proposta personale', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
   { tabella: 'punti_negozio_partita', colonna: 'negozio_chiave', entita: 'negozio', tabellaGioco: 'negozio', colonnaGioco: 'chiave' },
   { tabella: 'progresso_libro_partita', colonna: 'libro_chiave', entita: 'libro', tabellaGioco: 'libro', colonnaGioco: 'chiave' },
   { tabella: 'progresso_film_partita', colonna: 'film_chiave', entita: 'film', tabellaGioco: 'film', colonnaGioco: 'chiave' },

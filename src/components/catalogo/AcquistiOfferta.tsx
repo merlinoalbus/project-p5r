@@ -1,11 +1,15 @@
 import type { ArticoloDto } from '../../types';
+import { eOffertaAojiru, type StatoAcquistiArticoloDto } from '../../../shared/acquisti';
+import { ConsumiAojiru } from './ConsumiAojiru';
 
 /** La spunta è della singola offerta; lo stato condiviso conserva tutte le registrazioni originarie. */
-export function AcquistiOfferta({ articolo, nome, registrati, acquistato, bloccato, occupato, onCambia }: {
+export function AcquistiOfferta({ articolo, nome, registrati, acquistato, bloccato, occupato, onCambia, partitaId, acquisti, onRileggi }: {
   articolo: string; nome: string; registrati: NonNullable<ArticoloDto['acquistiRegistrati']>;
   acquistato: boolean; bloccato: boolean; occupato: boolean;
   onCambia: (articolo: string, fatto: boolean) => void;
+  partitaId?: number; acquisti?: StatoAcquistiArticoloDto; onRileggi?: () => void | Promise<void>;
 }) {
+  if (partitaId !== undefined && eOffertaAojiru({ chiave: articolo })) return <ConsumiAojiru key={`${partitaId}:${articolo}`} partitaId={partitaId} stato={acquisti} onCambiato={onRileggi ?? (() => undefined)} />;
   const qui = registrati.some((r) => r.articolo === articolo);
   const altri = registrati.filter((r) => r.articolo !== articolo);
   return <div className="flex flex-col gap-1">

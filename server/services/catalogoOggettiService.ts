@@ -40,7 +40,7 @@ export function offerteDellOggetto(chiave: string, partita?: number): OffertaOgg
       return { articolo: r.chiave, negozio: n.chiave, negozioNome: n.nome, sedeCasa: n.sedeCasa ?? null, sedeChiave: n.sedeChiave ?? null, sedeNome: n.sedeNome ?? null,
         prezzo: r.prezzo, costo, costoDaVerificare: r.costo_json !== null && costo === null, condizioni: a.condizioni ?? [],
         presenza: n.disponibilita ?? null, disponibilita, disponibileOggi: partita === undefined ? null : disponibilita?.stato === 'disponibile',
-        acquistato: a.acquistato, acquistiRegistrati: a.acquistiRegistrati ?? [], nota: r.nota };
+        acquistato: a.acquistato, acquistiRegistrati: a.acquistiRegistrati ?? [], acquisti: a.acquisti, nota: r.nota };
     });
   });
 }

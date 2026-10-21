@@ -341,7 +341,7 @@ function negozioDettaglio(chiave: string, ctx: ContestoSpilli, sede?: string): N
     if (err instanceof HttpError && err.code === 'negozio-non-trovato') return null;
     throw err;
   }
-  return { chiave: n.chiave, nome: n.nome, tipo: n.tipo, sedeChiave: n.sedeChiave, disponibilita: n.disponibilita, articoli: n.articoliElenco.map((a) => ({ chiave: a.chiave, nome: a.nomeIt ?? a.nome, categoria: a.categoria, prezzo: a.prezzo, disponibileDal: a.disponibileDal, comprato: a.acquistato, disponibilita: a.disponibilita, catalogo: a.catalogo, costo: a.costo, costoDaVerificare: a.costoDaVerificare, ricevuti: a.ricevuti })) };
+  return { chiave: n.chiave, nome: n.nome, tipo: n.tipo, sedeChiave: n.sedeChiave, disponibilita: n.disponibilita, articoli: n.articoliElenco.map((a) => ({ chiave: a.chiave, nome: a.nomeIt ?? a.nome, categoria: a.categoria, prezzo: a.prezzo, disponibileDal: a.disponibileDal, comprato: a.acquistato, acquisti: a.acquisti, disponibilita: a.disponibilita, catalogo: a.catalogo, costo: a.costo, costoDaVerificare: a.costoDaVerificare, ricevuti: a.ricevuti })) };
 }
 
 /** Vero se la tabella `spillo` dello schema corrente ha la colonna `nome` (le colonne aggiunte dalle migrazioni, per esempio

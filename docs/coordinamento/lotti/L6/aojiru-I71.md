@@ -1,13 +1,14 @@
-# I71 — Aojiru: soluzione approvata, implementazione non avviata
+# I71 — Aojiru: soluzione approvata, implementazione in corso
 
-Data: 2026-10-21. Stato: **SOLUZIONE APPROVATA, NON IMPLEMENTATA**.
+Data: 2026-10-21. Stato: **SOLUZIONE APPROVATA, IMPLEMENTAZIONE IN CORSO; GATE CODICE APERTO**.
 
 Questo dossier raccoglie il contratto trasmesso in quattro parti e le sei
 integrazioni richieste dal revisore indipendente, che ha approvato integralmente
 il gate della soluzione. Non costituisce un consuntivo di implementazione.
 Numeri assegnati dalla Regia: **gioco 136, partite 028**; 135 appartiene ad A12.
-Ownership di questa fase: soltanto il presente documento. Nessuna migrazione,
-prova, simulazione, scrittura ai database o modifica del codice è stata eseguita.
+La Regia ha autorizzato l'implementazione dopo la pubblicazione135. Il contratto
+approvato precede il codice: le sezioni di soluzione restano la sua base di confronto.
+Nessuna migrazione locale, prova, simulazione o scrittura ai database è stata eseguita.
 
 ## 1. Mandato e perimetro
 
@@ -247,6 +248,45 @@ Una vecchia spunta usa **sempre il receipt già memorizzato**:
   documento e del dato, nessun reset o stato zero inventato.
 
 ## 6. Proposte: saldo e cicli completi — integrazione 2
+
+### Precisazione attuativa: versioni e sostituzione
+
+L'UID identifica il nodo: gli effetti invariati e i duplicati distinti mantengono
+il proprio UID anche nel riordino. Una modifica mantiene l'UID e cambia la
+versione descritta dalla configurazione e dal receipt. Non si abbina un nodo
+per nome o somiglianza. La sostituzione di una versione già applicata produce
+una proposta esplicita con prima/dopo e ID del receipt precedente.
+
+Il consenso ritira la versione precedente e applica la nuova nella medesima
+transazione. Per una Dote della stessa causa B resta derivato dalle decisioni:
+si propone T nuovo meno B. Un acquisto ritira soltanto la provenienza posseduta
+dal nodo, riconcilia il vecchio fatto e registra o collega il nuovo; eventuali
+altre fonti del fatto precedente restano attive.
+
+Le nuove spunte conservano ricevute legacy per nodo, attribuite dall'ordine
+effettivamente eseguito in un'unica chiamata al dominio legacy, e fotografie
+delle risorse turno/lettura nominate. Se la lettura è avanzata o ridotta, il
+turno è cambiato o il suo ordine è stato riusato successivamente, la sostituzione
+restituisce 409 prima delle mutazioni. Non ripristina una fotografia sopra lo
+stato corrente. Una vecchia spunta senza sidecar attribuibile rende la
+sostituzione non applicabile/da riconciliare: non diventa un'aggiunta implicita.
+Un effetto distinto si aggiunge con gesto esplicito e UID nuovo.
+
+Il receipt precedente resta immutato nei contenuti; `sostituita_da` e il puntatore
+inverso del successivo descrivono una catena validata. L'undo globale esclude
+soltanto le porzioni legacy dimostrate già ritirate, per non annullarle due volte.
+L'annullo integrale registra inoltre l'identità della spunta (`fatta_at` e RAW
+del receipt) come ricevuta di contesto già annullata: il ripristino di quella
+stessa spunta non può annullare una seconda volta risorse successive. Il contesto
+di incontro e questi annulli hanno tipo esplicito `contesto`, senza fabbricare
+un nodo canonico Dote inesistente. Malformazioni o catene incoerenti danno 409.
+
+Per applicare una proposta di effetto non acquisto il payload non contiene
+campi Aojiru; acquisto completo e token sono obbligatori solo per il tipo
+acquisto. La chiamata legacy storica riguarda il solo effetto selezionato,
+senza rieseguire incontro o intera spunta. Le richieste di una nuova spunta
+possono includere tutte le consumazioni con le rispettive anteprime: i token
+sono verificati tutti prima della prima mutazione e il gruppo è atomico.
 
 La chiave di beneficio è `(partita, UUID acquisto, tipo, chiave, unità)`.
 Si distinguono due quantità:
@@ -632,7 +672,132 @@ consegna I71 o completamento del lotto L10.
 Tre riesami propri del contratto: fonti/unità; ingressi di scrittura e compatibilità
 dei receipt; cicli/saldi, proprietà, orfani e ripristini. Eventuali rilievi del
 revisore vanno integrati prima dell'implementazione. Il prossimo gate riguarda
-il codice concreto; i controlli A12 mantengono per ora fermi i sorgenti I71.
+il codice concreto; dopo il rilascio A12 i sorgenti I71 sono in lavorazione.
 Controlli integrati e
 riscontri dopo rilascio restano distinti da questo gate documentale; nessun
 test è autorizzato da questo documento.
+
+## 15. Innesti concretizzati e limiti della consegna
+
+Ownership separate: nuovi shared/servizi/schema e136/028 al collega incaricato;
+servizi esistenti, DTO additivi e rotte all'integratore; interfaccia e client alla
+Regia. Nessun punto I71/L10 è dichiarato concluso in questa fase.
+
+- Articoli, offerte del Catalogo e pin espongono `acquisti`; disponibilità e
+  spesa usano il lettore unico. La fotografia della richiesta viene riusata,
+  senza cache globale e senza rileggere tutti gli acquisti per ogni articolo.
+- Il Diario espone `effettiVoce` e `ricevuteEffetti`, lasciando `produce` come
+  proiezione di compatibilità. `effettiVoce` nella creazione/modifica ordinaria
+  salva atomico con la voce: creazione con UID null e senza token; modifica con
+  lista completa e CAS. Non si inviano contemporaneamente le due fonti.
+- Prima spunta: motore unico e eventuali acquisti già rivisti nella stessa TX;
+  spunta presente: nessuna riesecuzione. Raccordo storico: soltanto l'effetto
+  selezionato, senza ripetere l'incontro del Confidente. Ricevute legacy
+  validate senza eliminare campi aggiuntivi della fotografia.
+- Cancellazioni di voce e negozio passano dal cestino e dai writer di dominio.
+  La conferma negozio include consumazioni, provenienze, proposte e ricevute.
+  La partita viene fotografata prima delle cascate, senza inversi ad altre partite.
+- Cestino unificato soltanto con `?partite=1`: il vecchio GET/DELETE senza query
+  continua a vedere/svuotare il solo cestino storico. Le voci personali usano
+  riferimento utente/UID e id null; la presenza legacy ha radice composita
+  partita/articolo, distinta dalla provenienza UUID. I registri privati non
+  entrano nel pacchetto di gioco e nessun RAW del cestino è esposto dall'elenco.
+- Nel restore non-partita si conservano decisioni, ricevute, operazioni e
+  checkpoint correnti; si ripristinano le identità/fonti e si riconcilia T−B.
+  Nel restore della partita torna il blocco completo e la partita attiva
+  corrente resta tale. Registro illeggibile o identità divergente: rollback409.
+- La sostituzione del pacchetto rileva riferimenti logici nuovi e conserva
+  fatti/receipt orfani. Le ricevute esplicite di contesto non sono falsamente
+  considerate effetti canonici mancanti.
+- Il registro client delle operazioni usa `sessionStorage` versionato della
+  sola scheda: payload, ID e CAS restano immutabili prima dell'invio; il recupero
+  dei sei gesti è esplicito. La prima spunta si recupera soltanto con rilettura
+  dello stato, senza reinvio automatico. Le riletture dello storage rilevano
+  pendenti rimossi o cambiati e un successo già ricevuto resta noto anche se
+  la sua ricevuta non può essere persistita dal browser. Il gate di questi
+  innesti rimane distinto da quello del nucleo.
+- Il delta R6 I71 informativo è stato approvato dal revisore: `ricerca` resta;
+  nessuna nuova Conferma/Applica. Regola e fonti Royal, compatibilità tecnica
+  con il gesto e audit136 sono piani distinti. Audit assente/illeggibile non
+  produce un falso esito; versione1 e le due chiavi letterali sono validate,
+  con RAW/presenza nel CAS, mai dati di partita.
+
+Riesami statici e gate codice integrato sono ancora da completare. Typecheck,
+lint, build, pipeline e osservazione dopo rilascio restano compiti della Regia;
+questo dossier non ne anticipa l'esito e non autorizza test.
+
+## 16. Rilievi della prima lettura del nucleo
+
+Il gate codice complessivo non è ancora approvato. Le correzioni dei quattro
+rilievi seguenti sono state rilette e approvate staticamente dal revisore:
+
+- Il POST acquisto ordinario accetta solo fonte manuale. Il Diario usa il motore
+  per avere receipt/versione; anche l'anteprima valida variante e Fortuna della
+  fonte. L'annullo richiede gli ID di provenienza posseduti dai receipt.
+- La proposta storica firma il JSON semantico dell'effetto, senza ordine della
+  lista né differenze di serializzazione. Un riordino non la rende stale.
+- Enum e quantità sono validati senza coercizione di array/stringhe; un RAW
+  malformato resta fallback. Lo scanner richiede operazione D/U/I stringa esatta.
+- La ricostruzione del cestino136 rifiuta DDL, vincoli, indici o trigger diversi
+  dal caso121 noto prima del DROP; confronta righe integrali e sequenza.
+
+Il contratto mirato del raccordo storico `sostituisceDoti` è stato approvato,
+implementato e riletto con **P1 APPROVATO STATICAMENTE** nel relativo perimetro.
+Assorbe soltanto sidecar Dote puri
+e di versione esatta, rileggendo nella TX B netto e fotografie. Il ritiro di T
+avviene anche con q=0; per stessa Dote rialloca −q/+q con contropartite e audit
+privati reciproci, senza mutare il saldo corrente. Il B del fatto destinatario
+si conserva e si somma: le prove comprendono tutte le attribuzioni precedenti
+di entrambe le cause. Variante diversa conserva inverse/positive esplicite.
+Le ricevute collegate da `assorbita_da` e dal riferimento inverso partecipano a
+validazione, CAS e undo; restore e modifiche non riaprono il nodo rivendicato.
+Nessun nuovo trasferimento nei cicli annullo/ripristino. Senza sidecar provato,
+B non nullo o altre promesse attive ambigue bloccano il raccordo; il caso ammesso
+resta da dichiarare. I cinque rilievi del primo gate del nucleo sono chiusi
+staticamente nel perimetro esaminato. Il delta Storico è un gate separato;
+questo esito non è un'approvazione runtime o globale di I71.
+Nessuna applicazione dei dati o esecuzione di migrazioni è avvenuta durante
+queste correzioni.
+
+## 17. Delta Storico delle fonti
+
+Soluzione circoscritta approvata dal revisore, implementata e con gate codice
+congiunto **APPROVATO STATICAMENTE**. I nuovi eventi del writer hanno il marker esplicito
+`acquistoV1:{formato:1,azione}`; non si modifica o classifica alcun evento legacy.
+Il writer rimuove gli eventi di registrazione posseduti prima di eliminare una
+fonte manuale, una fonte del Diario o le fonti degli articoli eliminati. L'helper
+dello Storico verifica nella stessa TX partita, fonte, fatto e ricevuta/journal
+esatti; eventi altrui e altri tipi di azione rimangono. Replay e GET non creano
+eventi. Il cestino fotografa i DELETE: il ripristino riporta gli eventi originali
+soltanto se le guardie del dominio e le decisioni successive lo permettono,
+senza rigenerarli o cambiare timestamp/identità. Nessun test o DB write eseguito.
+
+## 18. Interfaccia, riesami e preparazione del rilascio
+
+Il registro degli acquisti in Progressi legge tutti i fatti, le fonti e le
+presenze legacy della partita anche senza offerta corrente. Gli annulli usano
+le stesse anteprime e gli stessi writer; nessun oggetto viene ricreato.
+Le proposte mostrano identità di partita/causa/consumazione/voce/effetto e
+ricevuta precedente. Il dettaglio del registro riletto separatamente è
+dichiarato corrente; il consenso finale mostra il payload della propria
+anteprima, comprese variante/Fortuna osservate, momento, nuova/collega con UUID
+e rapporto legacy. Le riallocazioni interne sono distinte dalle dichiarazioni
+personali. `ancheChiuse=1` rende consultabile lo storico già previsto dall’API.
+
+La prima spunta si blocca se il GET rileva già fatta, errore, caricamento o
+configurazione diversa. Un avviso nella medesima anteprima segnala altre
+consumazioni della stessa data, senza inventare una quota o imporre un blocco.
+Il registro di scheda conserva il payload prima della rete, mantiene esiti
+noti anche se lo storage fallisce e non ripete una prima spunta incerta:
+verifica soltanto le ricevute esatte. Il primo400 validation-error pre-handler
+è un rifiuto certo; persistere un rifiuto già acquisito non invia RPC.
+
+Tre riesami propri completati su identità e fonti, transazioni/replay e
+consumatori/conservazione. Revisore distinto: gate statico integrato I71
+approvato; Galaxy ha riletto gli originali43ad8889 e approvato il rilascio nel
+perimetro FE/integrazioni esaminato, chiudendo F71-01…05. Typecheck12581,
+lint40007 e build18606 exit0 dopo gli ultimi delta. Nessun test.
+Baseline reale135/27 readonly conservata solo in RAM:38tabelle utente,
+998voci Diario/1913spilli/316mappe/3cestino; DDL del cestino coincide con la
+guardia136, due indici e nessun trigger. Rilascio, osservazioni e confronto
+dopo136/028 ancora da acquisire: non è una consegna runtime o la chiusura L10.

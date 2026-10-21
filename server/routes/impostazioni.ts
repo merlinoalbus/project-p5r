@@ -22,7 +22,7 @@ import fs from 'node:fs';
 import { copiaDatabase, copiaIstanza, elencaDepositoBackup, ripristinaIstanzaDaDeposito, statoIstanza } from '../services/impostazioniService.js';
 import { depositaCopia } from '../services/depositoService.js';
 import { anteprimaPacchettoDaDeposito, elencaDeposito, importaPacchettoDaDeposito, statoImportazione } from '../services/pacchettoGiocoService.js';
-import { elencoCestino, eliminaDalCestino, ripristinaDalCestino, svuotaCestino } from '../services/cestinoService.js';
+import { elencoCestino, elencoCestinoUnificato, eliminaDalCestino, eliminaCestinoPrivato, ripristinaDalCestino, ripristinaCestinoPrivato, svuotaCestino, svuotaCestinoUnificato } from '../services/cestinoService.js';
 import { paramsId } from '../schemas/compendio.js';
 
 const router = Router();
@@ -114,8 +114,18 @@ router.get('/istanza/gioco/importazione', (_req, res) => {
 });
 
 /* ---- Il cestino (2026-10-16): aree, voci, planimetrie e aree dei dedali eliminate, da rimettere o togliere per sempre ---- */
-router.get('/cestino', (_req, res) => {
-  res.json(elencoCestino());
+const queryCestino = z.object({ partite: z.literal('1').optional() }).strict();
+router.get('/cestino', validate({ query: queryCestino }), (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(req.query.partite === '1' ? elencoCestinoUnificato() : elencoCestino());
+});
+const paramsCestinoPrivato = z.object({ uid: z.string().regex(/^[0-9a-f]{32}$/) }).strict();
+router.post('/cestino/partite/:uid/ripristina', validate({ params: paramsCestinoPrivato }), (req, res) => {
+  res.json(ripristinaCestinoPrivato(String(req.params.uid)));
+});
+router.delete('/cestino/partite/:uid', validate({ params: paramsCestinoPrivato }), (req, res) => {
+  eliminaCestinoPrivato(String(req.params.uid));
+  res.status(204).end();
 });
 router.post('/cestino/:id/ripristina', validate({ params: paramsId }), (req, res) => {
   res.json(ripristinaDalCestino(Number(req.params.id)));
@@ -124,8 +134,8 @@ router.delete('/cestino/:id', validate({ params: paramsId }), (req, res) => {
   eliminaDalCestino(Number(req.params.id));
   res.status(204).end();
 });
-router.delete('/cestino', (_req, res) => {
-  res.json(svuotaCestino());
+router.delete('/cestino', validate({ query: queryCestino }), (req, res) => {
+  res.json(req.query.partite === '1' ? svuotaCestinoUnificato() : svuotaCestino());
 });
 
 export default router;

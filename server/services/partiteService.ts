@@ -14,6 +14,7 @@ import { requisitoBloccante, semaforiConfidente } from './semaforiService.js';
 import { statoDisponibilitaPartita } from './disponibilitaService.js';
 import { meteoOra } from './meteoService.js';
 import { regaliDellaPartita, scriviRegaloPartita, type SceltaRegalo } from './regaliPartita.js';
+import { conCestinoPrivato } from './cestinoService.js';
 import type {
   CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, EffettiAzioneDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto,
   SemaforiRangoDto, SkillRiassuntoDto,
@@ -149,14 +150,17 @@ export function attivaPartita(id: number): PartitaDto {
 /** Elimina una partita (404 se non esiste); se era l'attiva, diventa attiva la più recente fra quelle che restano. */
 export function eliminaPartita(id: number): void {
   const r = rigaPartita(id);
-  getDb().transaction(() => {
+  conCestinoPrivato({ tipo: 'partita', chiave: String(id), nome: r.nome, partitaId: id }, () => {
+    // La FK fonte→fatto è RESTRICT: le provenienze vanno annotate e rimosse prima
+    // del padre, senza affidarsi all'ordine delle cascate di SQLite.
+    prepared('DELETE FROM utente.acquisto_provenienza WHERE partita_id=?').run(id);
     prepared('DELETE FROM partita WHERE id = ?').run(id);
     if (r.attiva === 1) {
       // Promuove la partita più recente, se ne resta una.
       const altra = prepared('SELECT id FROM partita ORDER BY updated_at DESC LIMIT 1').get() as { id: number } | undefined;
       if (altra) prepared('UPDATE partita SET attiva = 1 WHERE id = ?').run(altra.id);
     }
-  })();
+  });
 }
 
 // ---- Doti sociali ----

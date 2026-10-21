@@ -9,6 +9,7 @@
 // ============================================================
 
 import { condizioneConTesto, leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { createHash } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
@@ -23,6 +24,8 @@ import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { descriviOrari, descriviOrariDelLuogo, leggiOrari, orariComeCondizioni, orariDelLuogo, type OrariNegozio } from '../../shared/orariNegozio.js';
 import { condizioniDiSblocco } from './sbloccoLuoghi.js';
 import { articoloDelListino, articoliEquivalenti, lettureListiniCondivisi, listinoDelNegozio, type LettureListiniCondivisi } from './listiniCondivisi.js';
+import { acquistiArticolo, chiaviArticoliOttenuti } from './acquistiService.js';
+import { eOffertaAojiru } from '../../shared/acquisti.js';
 import type { ArticoloDto, CatalogoOggettoDto, NegozioDettaglioDto, NegozioRiassuntoDto, RicercaArticoliDto } from '../../shared/types.js';
 
 /** L5: quel che serve alla presenza di un negozio, letto con la riga: la sua eccezione d'orario e orari e sblocco della sede. */
@@ -134,7 +137,9 @@ function statisticheDelCatalogo(o: CatalogoOggettoDto): string | null {
 function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponibilita, catalogo?: Map<string, CatalogoOggettoDto>, ricevuti: NonNullable<ArticoloDto['ricevuti']> = []): ArticoloDto {
   const oggetto = r.catalogo_chiave ? catalogo?.get(r.catalogo_chiave) : undefined;
   const costo = costoOggetto(r.costo_json ?? null);
-  const acquistiRegistrati = articoliEquivalenti(r.chiave, lettureListiniCondivisi()).filter((chiave) => acquistati.has(chiave)).map((articolo) => {
+  const acquisti = st?.partitaId === undefined ? undefined : acquistiArticolo(st.partitaId, r.chiave, st.acquisti);
+  const acquistiRegistrati = articoliEquivalenti(r.chiave, lettureListiniCondivisi()).filter((chiave) => st?.partitaId !== undefined
+    && (chiave === r.chiave ? acquisti : acquistiArticolo(st.partitaId, chiave, st.acquisti))?.presenzaStorica != null).map((articolo) => {
     const origine = prepared('SELECT n.nome FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave WHERE a.chiave = ?').get(articolo) as { nome: string } | undefined;
     return { articolo, negozioNome: origine?.nome ?? 'Offerta precedente' };
   });
@@ -147,14 +152,15 @@ function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponi
     effetto: oggetto ? oggetto.effetto || null : r.effetto, statistiche: oggetto ? statisticheDelCatalogo(oggetto) : r.statistiche,
     quantita: r.quantita, oggettoFonte: r.oggetto_fonte, oggettoChiave: r.oggetto_chiave,
     disponibileDal: r.disponibile_dal, condizione: r.condizione, nota: r.nota, verificato: r.verificato === 1,
-    acquistato: acquistiRegistrati.length > 0, acquistiRegistrati, ...(st ? { disponibilita: disponibilitaArticolo(r, st) } : {}) };
+    acquistato: acquisti?.acquistato === true || articoliEquivalenti(r.chiave, lettureListiniCondivisi()).some(k => acquistati.has(k)), acquistiRegistrati, acquisti,
+    ...(st ? { disponibilita: disponibilitaArticolo(r, st) } : {}) };
 }
 
 /** Le chiavi degli articoli segnati come acquistati nella partita; insieme vuoto senza partita (con partita ne verifica l'esistenza). */
 function acquistiPartita(partitaId: number | undefined): Set<string> {
   if (partitaId === undefined) return new Set();
   verificaPartita(partitaId);
-  return new Set((prepared('SELECT articolo_chiave FROM acquisto_partita WHERE partita_id = ?').all(partitaId) as Array<{ articolo_chiave: string }>).map((r) => r.articolo_chiave));
+  return chiaviArticoliOttenuti(partitaId);
 }
 
 /** Negozi in ordine con conteggi canonici dell'intero catalogo; con la partita, la presenza dagli orari. */
@@ -174,6 +180,28 @@ export function acquistiDellaPartita(partitaId: number): Set<string> {
   return acquistiPartita(partitaId);
 }
 
+/** Porta del dominio acquisti: legge il momento corrente, senza fingere di ricostruire progressi passati.
+ * Mappe e insiemi dello stato entrano interamente nella revisione, non vengono ridotti a oggetti vuoti. */
+export function disponibilitaAcquistoCorrente(partitaId: number, articolo: string, sede?: string) {
+  verificaPartita(partitaId);
+  const listini = lettureListiniCondivisi();
+  const chiave = articoloDelListino(articolo, listini);
+  const r = prepared(`${SQL_ARTICOLO} WHERE a.chiave = ? AND a.nascosto=0 AND n.nascosto=0`).get(chiave) as RigaArticolo | undefined;
+  if (!r) throw httpErrors.notFound('articolo-non-trovato', 'L’offerta da valutare non esiste.');
+  const negozio = prepared(`${SQL_NEGOZIO} WHERE n.chiave = ?`).get(r.negozio_chiave) as RigaNegozio | undefined;
+  if (!negozio) throw httpErrors.notFound('negozio-non-trovato', 'Il negozio dell’offerta non esiste.');
+  const fonte = conSede(r, negozioNellaSede(negozio, sede, listini));
+  const stato = statoDisponibilitaPartita(partitaId);
+  const canonico = (v: unknown): unknown => {
+    if (v instanceof Map) return [...v].map(([k, x]) => [canonico(k), canonico(x)]).sort((a, b) => JSON.stringify(a[0]).localeCompare(JSON.stringify(b[0])));
+    if (v instanceof Set) return [...v].map(canonico).sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+    if (Array.isArray(v)) return v.map(canonico);
+    if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).sort(([a], [b]) => a.localeCompare(b)).map(([k, x]) => [k, canonico(x)]));
+    return v;
+  };
+  return { disponibilita: disponibilitaArticolo(fonte, stato), revisione: createHash('sha256').update(JSON.stringify(canonico({ fonte, negozio, stato }))).digest('hex') };
+}
+
 /** La scheda di un negozio non nascosto con i suoi articoli non nascosti, nell'ordine; con la partita, acquisti e
  *  disponibilità (presi da `contesto` se chi chiama li ha già). 404 se il negozio non c'è o è nascosto. */
 export function dettaglioNegozio(chiave: string, partitaId?: number, contesto?: ContestoNegozio, sede?: string): NegozioDettaglioDto {
@@ -185,8 +213,8 @@ export function dettaglioNegozio(chiave: string, partitaId?: number, contesto?: 
   if (!principale) throw httpErrors.notFound('negozio-non-trovato', 'Il listino condiviso non è disponibile.');
   const n = negozioNellaSede(principale, sede, listini);
   // lo stato della partita (rilievo P1 della verifica): dal contesto se c'è, altrimenti calcolato qui
-  const acquistati = partitaId === undefined ? new Set<string>() : contesto?.acquistati ?? acquistiPartita(partitaId);
   const st = partitaId === undefined ? undefined : contesto?.st ?? statoDisponibilitaPartita(partitaId);
+  const acquistati = partitaId === undefined ? new Set<string>() : contesto?.acquistati ?? st?.articoliOttenuti ?? acquistiPartita(partitaId);
   const riepilogo = riassunto(n, st);
   const righeArticoli = prepared(`${SQL_ARTICOLO} WHERE a.nascosto = 0 AND a.negozio_chiave = ? ORDER BY a.ordine`).all(canonica) as RigaArticolo[];
   const catalogo = identitaArticoli(righeArticoli);
@@ -230,8 +258,8 @@ export interface FiltroArticoli {
 /** Ricerca degli articoli in tutti i negozi per testo, categorie e destinatario; con la partita anche per stato d'acquisto e disponibilità (massimo 300 risultati, totale calcolato prima del limite). */
 export function ricercaArticoli(filtro: FiltroArticoli, partitaId?: number): RicercaArticoliDto {
   const listini = lettureListiniCondivisi();
-  const acquistati = acquistiPartita(partitaId);
   const st = partitaId === undefined ? undefined : statoDisponibilitaPartita(partitaId);
+  const acquistati = st?.articoliOttenuti ?? new Set<string>();
   const cond: string[] = ['a.nascosto = 0', 'n.nascosto = 0']; const par: unknown[] = [];
   const conCatalogo = catalogoOggettiDisponibile();
   if (filtro.q && !conCatalogo) { cond.push('(a.nome LIKE ? OR a.nome_it LIKE ? OR a.effetto LIKE ? OR n.nome LIKE ?)'); const like = `%${filtro.q}%`; par.push(like, like, like, like); }
@@ -289,6 +317,12 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
   const catalogo = identitaArticoli([r]);
   const ricevuti = ricompensePerFonte('articolo', [r.chiave]).get(r.chiave);
   const prodotto = articoloDto(r, new Set(), st, catalogo, ricevuti);
+  if (eOffertaAojiru({ chiave: r.chiave, catalogoChiave: r.catalogo_chiave })) {
+    if (fatto && acquistiArticolo(partitaId, articoloChiave).presenzaStorica) return articoloDto(r, acquistiPartita(partitaId), st, catalogo, ricevuti);
+    throw httpErrors.conflict(fatto ? 'consumazione-aojiru-richiesta' : 'rimozione-presenza-legacy-richiesta',
+      fatto ? 'Per Aojiru registra una consumazione o collega una fonte: una nuova spunta non ne dichiara quantità o variante.'
+        : 'Rimuovi la sola presenza storica dal riepilogo con anteprima e conferma. Le consumazioni restano distinte.', { articolo: articoloChiave });
+  }
   if (fatto && disponibilitaArticolo(r, st).stato !== 'disponibile') throw httpErrors.conflict('articolo-non-disponibile', `L'articolo '${articoloChiave}' non e disponibile nella partita corrente.`);
   const adesso = nowIso();
   getDb().transaction(() => {

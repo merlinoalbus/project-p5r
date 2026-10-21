@@ -13,6 +13,7 @@ import { BackupIstanza } from '../components/impostazioni/BackupIstanza';
 import { PacchettoGioco } from '../components/impostazioni/PacchettoGioco';
 import { MieiDati } from '../components/impostazioni/MieiDati';
 import { Cestino } from '../components/impostazioni/Cestino';
+import { GestiPartita } from '../components/partita/GestiPartita';
 import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import { usePreferenzeStore } from '../stores/preferenzeStore';
 import { useAssetStore } from '../stores/assetStore';
@@ -69,6 +70,7 @@ export function ImpostazioniPage() {
       <MieiDati />
       <AbbinamentiDaApprovare />
       <Cestino />
+      <GestiPartita mostraVuoto />
       <PacchettoGioco />
       <BackupIstanza />
       <section className="card flex flex-col gap-3" aria-labelledby="titolo-documentazione-api">

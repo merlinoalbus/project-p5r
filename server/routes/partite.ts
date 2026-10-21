@@ -24,7 +24,11 @@ import { impostaLettura, impostaSessioneVideogioco } from '../services/attivitaS
 import { bodySessioneVideogioco } from '../schemas/partite.js';
 import { impostaMembro, impostaYen, squadraPartita } from '../services/squadraService.js';
 import { impostaCruciverba } from '../services/cruciverbaService.js';
-import { impostaAcquisto } from '../services/negoziService.js';
+import { impostaAcquisto, disponibilitaAcquistoCorrente } from '../services/negoziService.js';
+import { leggiAcquistiPartita, anteprimaRegistrazioneAcquisto, registraAcquisto, anteprimaAnnullaProvenienza, annullaProvenienzaAcquisto, anteprimaRimozionePresenzaLegacy, rimuoviPresenzaLegacy } from '../services/acquistiService.js';
+import { leggiPropostePartita, anteprimaDecisioneProposte, decidiProposte } from '../services/propostePartitaService.js';
+import { conCestinoPrivato } from '../services/cestinoService.js';
+import { bodyAnteprimaAcquisto, bodyRegistraAcquisto, bodyAnteprimaAnnullaProvenienza, bodyAnnullaProvenienza, bodyAnteprimaRimozioneLegacy, bodyRimozioneLegacy, bodyAnteprimaDecisioneProposte, bodyDecisioneProposte } from '../schemas/acquisti.js';
 import { confermaRequisito } from '../services/semaforiService.js';
 import { aggiornaConfidenteDallaPagina } from '../services/incontriService.js';
 import { impostaRaccolto } from '../services/mappe/mappeService.js';
@@ -33,7 +37,7 @@ import { suggerimentiOggi } from '../services/suggerimentiService.js';
 import { bodyRaccolto } from '../schemas/mappe.js';
 import { idParam } from '../schemas/comuni.js';
 import { avanzaSeGiornoCompleto, impostaGiornoCorrente } from '../services/percorsoService.js';
-import { spuntaVoce } from '../services/giornataService.js';
+import { spuntaVoce, applicaEffettoStoricoDiario } from '../services/giornataService.js';
 import { annullaInvito, registraInvito } from '../services/inviti.js';
 import { impostaTrofeo } from '../services/completamentoService.js';
 import { t } from '../services/traduzioniService.js';
@@ -45,6 +49,52 @@ import {
 } from '../services/partiteService.js';
 
 const router = Router();
+const porteAcquisti = { valutaCorrente: disponibilitaAcquistoCorrente };
+
+router.get('/:id/acquisti', validate({ params: paramsPartita }), (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(leggiAcquistiPartita(Number(req.params.id)));
+});
+router.post('/:id/acquisti/anteprima', validate({ params: paramsPartita, body: bodyAnteprimaAcquisto }), (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(anteprimaRegistrazioneAcquisto(Number(req.params.id), req.body, porteAcquisti));
+});
+router.post('/:id/acquisti/registrazioni', validate({ params: paramsPartita, body: bodyRegistraAcquisto }), (req, res) => {
+  res.status(201).json(registraAcquisto(Number(req.params.id), req.body, porteAcquisti));
+});
+router.post('/:id/acquisti/provenienze/annullo/anteprima', validate({ params: paramsPartita, body: bodyAnteprimaAnnullaProvenienza }), (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(anteprimaAnnullaProvenienza(Number(req.params.id), req.body));
+});
+router.post('/:id/acquisti/provenienze/annullo', validate({ params: paramsPartita, body: bodyAnnullaProvenienza }), (req, res) => {
+  const partitaId = Number(req.params.id);
+  res.json(conCestinoPrivato({ tipo: 'fonte-acquisto', chiave: String(req.body.provenienzaId), nome: 'Fonte di acquisto', partitaId },
+    () => annullaProvenienzaAcquisto(partitaId, req.body)));
+});
+router.post('/:id/acquisti/legacy/rimozione/anteprima', validate({ params: paramsPartita, body: bodyAnteprimaRimozioneLegacy }), (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(anteprimaRimozionePresenzaLegacy(Number(req.params.id), req.body));
+});
+router.post('/:id/acquisti/legacy/rimozione', validate({ params: paramsPartita, body: bodyRimozioneLegacy }), (req, res) => {
+  const partitaId = Number(req.params.id);
+  res.json(conCestinoPrivato({ tipo: 'fonte-acquisto', chiave: `legacy:${String(req.body.articolo)}`, nome: 'Presenza storica di acquisto', partitaId },
+    () => rimuoviPresenzaLegacy(partitaId, req.body)));
+});
+router.get('/:id/da-applicare', validate({ params: paramsPartita, query: z.object({ ancheChiuse: z.literal('1').optional() }).strict() }), (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(leggiPropostePartita(Number(req.params.id), { ancheChiuse: req.query.ancheChiuse === '1' }));
+});
+router.post('/:id/da-applicare/anteprima', validate({ params: paramsPartita, body: bodyAnteprimaDecisioneProposte }), (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(anteprimaDecisioneProposte(Number(req.params.id), req.body));
+});
+router.post('/:id/da-applicare/decisioni', validate({ params: paramsPartita, body: bodyDecisioneProposte }), (req, res) => {
+  res.json(decidiProposte(Number(req.params.id), req.body, {
+    applicaDote: (id, chiave, delta) => { aggiornaDote(id, chiave, { delta }); },
+    applicaYen: (id, delta) => { impostaYen(id, { delta }); },
+    applicaEffettoStorico: applicaEffettoStoricoDiario,
+  }));
+});
 
 // ---- Partite ----
 router.get('/', (_req, res) => {
@@ -126,9 +176,9 @@ router.put('/:id/trofei', validate({ params: paramsPartita, body: bodyTrofeo }),
   res.json(impostaTrofeo(Number(req.params.id), b.trofeo, b.ottenuto));
 });
 router.put('/:id/percorso', validate({ params: paramsPartita, body: bodyAzionePercorso }), (req, res) => {
-  const b = req.body as { uid: string; fatta: boolean; noteRisposta?: 1 | 2 | 3; apertureDedali?: string[] };
+  const b = req.body as z.infer<typeof bodyAzionePercorso>;
   const giaFatta = !!prepared('SELECT 1 FROM spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').get(Number(req.params.id), b.uid);
-  const azione = spuntaVoce(Number(req.params.id), b.uid, b.fatta, { noteRisposta: b.noteRisposta, apertureDedali: b.apertureDedali });
+  const azione = spuntaVoce(Number(req.params.id), b.uid, b.fatta, { noteRisposta: b.noteRisposta, apertureDedali: b.apertureDedali, acquisti: b.acquisti });
   // l'ultima attività del giorno corrente spuntata: la partita passa al giorno dopo (togliere la spunta non torna indietro)
   const giornoAvanzato = b.fatta && !giaFatta ? avanzaSeGiornoCompleto(Number(req.params.id), azione.giorno) : null;
   res.json(giornoAvanzato ? { ...azione, giornoAvanzato } : azione);

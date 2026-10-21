@@ -11,6 +11,16 @@ import type { DescrizioniArea } from '../tipi.js';
  * per nome. Importazione e ripristino condividono un lucchetto: una sola sostituzione dei file alla volta (409 `importazione-in-corso`).
  */
 export const DESCRIZIONI_IMPOSTAZIONI: DescrizioniArea = {
+  'POST /api/impostazioni/cestino/partite/:uid/ripristina': {
+    sommario: 'Ripristina una partita o fonte dal cestino personale per UID',
+    descrizione: 'Il registro resta esclusivamente nel file utente. Ripristino atomico, identità divergenti o registro incoerente causano rollback409. Fonte/negozio/voce conservano decisioni e movimenti successivi e riconciliano T−B senza applicare delta; l’intera partita recupera il proprio blocco e saldo originali. Nessun nuovo UUID o fusione.',
+    risposta: '`EsitoRipristinoCestinoDto`', senzaCorpo: true, errori: [[404,'cestino-non-trovato'],[409,'cestino-non-ripristinabile']],
+  },
+  'DELETE /api/impostazioni/cestino/partite/:uid': {
+    sommario: 'Elimina definitivamente una sola voce personale del cestino',
+    descrizione: 'Identità UID, nessun ID main. Elimina solo la fotografia, senza modificare dati di gioco o applicare nuovi delta.',
+    risposta: 'Nessun contenuto (204)', errori: [[404,'cestino-non-trovato']],
+  },
   'GET /api/impostazioni/istanza': {
     sommario: 'Stato dell\'istanza: versioni dello schema, dimensioni dei database, immagini, caratteri, partite',
     descrizione: 'Versione dell\'app e degli schemi (dati di gioco e partite), nome e dimensione dei due file di database (zero se l\'istanza tiene il database in memoria), immagini con contenuto nel database e loro peso, caratteri caricati, numero di partite e di copie di sicurezza in `data/backups` (copie dell\'avvio e copie fatte prima di un ripristino). `vuota` è vero se non ci sono Persona; `completo` è vero se il database ha immagini (pacchetto completo importato).',
@@ -69,7 +79,7 @@ export const DESCRIZIONI_IMPOSTAZIONI: DescrizioniArea = {
   'GET /api/impostazioni/cestino': {
     sommario: 'Gli elementi del cestino: aree, voci della guida, planimetrie e aree dei dedali eliminate, dalla più recente',
     descrizione: 'Ogni eliminazione di un\'infiltrazione, di una voce, di una planimetria o di un\'area di un dedalo finisce qui con tutto quel che si è portata via (cascate comprese, immagini dei pin e delle mappe comprese, stato nelle partite). Per ogni elemento: tipo, chiave, nome, dove stava (`contesto`), quando, le righe tolte per tabella con il nome per l\'utente (`contenuto`), la parte nelle partite (`nessuna`, `presente`, o `mancante` se il file delle partite è stato sostituito dopo) e il peso del registro in byte.',
-    risposta: 'Elenco di `VoceCestinoDto`',
+    risposta: 'Senza query: `VoceCestinoDto[]` legacy; con ?partite=1: `VoceCestinoUnificatoDto[]`, riferimento main/id oppure utente/UID, con id null soltanto per questi ultimi. Nessun RAW del registro nella risposta.',
   },
   'POST /api/impostazioni/cestino/:id/ripristina': {
     sommario: 'Rimette un elemento del cestino com\'era, ed esce dal cestino',
@@ -86,7 +96,7 @@ export const DESCRIZIONI_IMPOSTAZIONI: DescrizioniArea = {
   },
   'DELETE /api/impostazioni/cestino': {
     sommario: 'Svuota il cestino',
-    descrizione: 'Toglie per sempre ogni elemento del cestino, comprese le parti delle partite rimaste senza la loro riga nel file di gioco (dopo una sostituzione del pacchetto). I dati di gioco e le partite non cambiano.',
+    descrizione: 'Senza query conserva i cestini personali autonomi, invisibili al client storico. Con ?partite=1 svuota esplicitamente entrambi i cestini in una transazione. I dati di gioco, i saldi e le ricevute correnti non cambiano.',
     risposta: '`{ eliminati }`: quanti elementi c\'erano',
   },
   'GET /api/impostazioni/istanza/gioco/importazione': {

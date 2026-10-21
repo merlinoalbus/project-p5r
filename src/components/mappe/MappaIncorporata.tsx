@@ -168,6 +168,7 @@ function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, classN
         onRaccolto={raccolto}
         onStatoPunto={statoPunto}
         onAcquisto={acquisto}
+        onAcquistiCambiati={async () => { await ricarica(); onCambiato?.(); }}
         onDaVerificare={partitaId ? setDaVerificare : undefined}
         onContesto={partitaId ? (k) => setSceltaContesto({ di: infiltrazione, infiltrazione: k }) : undefined}
         onChiudi={intero ? () => setIntero(false) : undefined}

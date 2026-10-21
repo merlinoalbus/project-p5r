@@ -9,6 +9,7 @@ import { IconChevronLeft, IconChevronRight } from '../shared/icons';
 import { MeteoGiornata } from './MeteoGiornata';
 import { dataGiocoTesto } from '../../utils/dateGioco';
 import type { Oggi } from '../../hooks/useOggi';
+import { DaApplicare } from './DaApplicare';
 
 interface Props {
   oggi: Oggi;
@@ -62,6 +63,7 @@ export function OggiGuida({ oggi, riempi }: Props) {
         )}
       </div>
       <div className={riempi ? 'md:min-h-0 md:area-scorrevole md:p-1' : ''}>
+        {oggi.partitaId !== null && <div className="mb-2"><DaApplicare key={oggi.partitaId} partitaId={oggi.partitaId} onCambiato={() => oggi.ricarica()} /></div>}
         <GiornoGuida onGiornataModificata={() => oggi.ricarica()} g={g} partitaId={oggi.partitaId} onAggiorna={oggi.aggiornaAzione} onSullaMappa={oggi.sullaMappa} azioneEvidenziata={oggi.mappa.azione} compatto fasciaCorrente={g.dataCorrente === g.giorno ? oggi.fascia : null} />
       </div>
     </div>

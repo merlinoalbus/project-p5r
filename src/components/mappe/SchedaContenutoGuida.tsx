@@ -27,6 +27,7 @@ export function SchedaContenutoGuida({ spillo, partitaId, onChiudi, onCambiato }
   return <div>
     {errore && <p role="alert">{errore}</p>}
     <SchedaSpillo spillo={spillo} partitaId={partitaId} occupato={occupato} nonSpaziale onChiudi={onChiudi}
+      onAcquistiCambiati={onCambiato}
       onRaccolto={(s, valore) => esegui(() => impostaSpilloRaccolto(partitaId!, s.id, valore))}
       onStatoPunto={(_s, voce, stato) => esegui(() => impostaStatoPunto(partitaId!, voce, stato))}
       onAcquisto={(s, articolo, fatto) => esegui(() => impostaAcquisto(partitaId!, articolo, fatto, s.dettaglio?.negozio?.sedeChiave))} />

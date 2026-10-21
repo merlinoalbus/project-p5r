@@ -5,6 +5,7 @@
 import { z } from 'zod';
 import { boolQuery, dataGioco, dote, idParam, livello, testoRicerca, uidVoce } from './comuni.js';
 import { TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type TipoAzione, type TipoRiferimentoAzione } from '../../shared/effettiAzione.js';
+import { bodySalvaEffettiVoce } from './acquisti.js';
 
 export const paramsId = z.object({ id: idParam });
 
@@ -41,6 +42,8 @@ const campiAzioneStrutturata = {
   rangoAtteso: z.number().int().min(1).max(10).nullable().optional(),
   // la descrizione è solo documentazione (OpenAPI): ogni voce la normalizza il servizio con le regole di shared/effettiAzione.ts
   produce: z.array(z.unknown().meta({ description: 'Un effetto `EffettoAzione` (shared/effettiAzione.ts): `{ tipo: "dote", dote, note }`, `{ tipo: "lettura", categoria, chiave, almeno }` oppure `{ tipo: "turno", attivita, doti? }`.' })).max(20).optional(),
+  revisioneEffettiAttesa: z.string().regex(/^[0-9a-f]{64}$/).optional(),
+  effettiVoce: bodySalvaEffettiVoce.partial({ revisioneEffettiAttesa: true }).strict().optional(),
 };
 /** Una voce della giornata (azione della guida, cosa da fare, evento): canone, per tutte le partite. */
 export const paramsVoceGiornata = z.object({ uid: uidVoce });
@@ -54,12 +57,16 @@ const campiVoce = {
   posizione: z.number().int().min(0).max(500).optional(),
   ...campiAzioneStrutturata,
 };
-export const bodyNuovaVoce = z.object({ ...campiVoce, azione: z.string().trim().min(1).max(2000) });
+export const bodyNuovaVoce = z.object({ ...campiVoce, azione: z.string().trim().min(1).max(2000) })
+  .refine(b => b.produce === undefined || b.effettiVoce === undefined, 'Invia un’unica fonte degli effetti.')
+  .refine(b => b.effettiVoce === undefined || (b.effettiVoce.revisioneEffettiAttesa === undefined && b.effettiVoce.effetti.every(e => e.uid === null)), 'Una voce nuova non ha token o UID effetti preesistenti.');
 export const bodyAggiornaVoce = z.object({
   ...campiVoce,
   /** L3: l'insieme ordinato delle infiltrazioni della voce (anche vuoto = «nessuna»); si manda da solo. */
   infiltrazioni: z.array(z.string().trim().min(1).max(200)).max(50).optional(),
 })
+  .refine(b => b.produce === undefined || b.effettiVoce === undefined, 'Invia un’unica fonte degli effetti.')
+  .refine(b => b.effettiVoce === undefined || !!b.effettiVoce.revisioneEffettiAttesa, 'Ricarica la revisione della fonte prima di modificarla.')
   .refine((b) => Object.values(b).some((v) => v !== undefined), { message: 'Indica almeno un campo da cambiare (testo, note, genere, fascia, posizione, tipo, collegamento, rango atteso, effetti o infiltrazioni).' });
 /** L3 §1.4: l'esito di «da rivedere» su una voce. */
 export const bodyRivistaVoce = z.object({ esito: z.enum(['tieni', 'rimetti', 'fatto']) });

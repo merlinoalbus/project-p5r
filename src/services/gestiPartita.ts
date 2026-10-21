@@ -1,0 +1,320 @@
+import { useEffect } from 'react';
+import { create } from 'zustand';
+import { z } from 'zod';
+import { CHIAVI_DOTI } from '../../shared/doti';
+import type { RichiestaRegistraAcquisto, RichiestaAnnullaProvenienza, RichiestaRimozioneLegacy, RicevutaOperazioneAcquistoDto } from '../../shared/acquisti';
+import type { RichiestaDecisioneProposte, RicevutaDecisioneProposteDto, RiferimentoPropostaPartita } from '../../shared/propostePartita';
+import type { AzionePercorsoDto } from '../../shared/types';
+import type { RichiestaDecisioneEffettoVoce, StatoEffettiVoceDto } from '../../shared/effettiVoce';
+import { apiGet, apiPost, apiPut, isApiError } from './api/_helpers';
+import { notifica } from '../stores/notificationStore';
+
+const CHIAVE = 'p5r.gesti-partita.v1';
+const uid = z.string().regex(/^[0-9a-f]{32}$/), token = z.string().regex(/^[0-9a-f]{64}$/);
+const intero = z.number().int().safe(), positivo = intero.positive();
+const chiave = z.string().min(1).max(200).refine(s => s.trim() === s);
+const fonte = z.discriminatedUnion('tipo', [z.object({ tipo: z.literal('manuale') }).strict(), z.object({ tipo: z.literal('diario'), voceUid: uid, effettoUid: uid }).strict()]);
+const nuovoAcquisto = z.object({
+  operazioneId: uid, articolo: chiave,
+  momento: z.object({ giorno: z.string().regex(/^\d{2}-\d{2}$/), fascia: z.enum(['giorno','sera']), ordine: intero.min(0).max(1_000_000) }).strict(),
+  variante: z.enum(CHIAVI_DOTI), fortuna: z.boolean().nullable(), fonte,
+  scelta: z.discriminatedUnion('tipo', [z.object({ tipo: z.literal('nuova') }).strict(), z.object({ tipo: z.literal('collega'), acquistoId: uid }).strict()]),
+  rapportoLegacy: z.object({ tipo: z.enum(['rappresenta','ulteriore']), firma: token }).strict().nullable(),
+}).strict();
+const registra = nuovoAcquisto.extend({ revisioneAcquistiAttesa: token }).strict();
+const annulla = z.object({ operazioneId: uid, provenienzaId: uid, revisioneAcquistiAttesa: token }).strict();
+const rimuovi = z.object({ operazioneId: uid, articolo: chiave, revisioneAcquistiAttesa: token }).strict();
+const ref = z.object({ id: positivo, uid }).strict();
+const refs = z.array(ref).min(1).max(100).refine(v => new Set(v.map(r => `${r.id}:${r.uid}`)).size === v.length && new Set(v.map(r => r.id)).size === v.length && new Set(v.map(r => r.uid)).size === v.length);
+const decisione = z.discriminatedUnion('tipo', [
+  z.object({ tipo: z.literal('applica'), proposte: refs }).strict(),
+  z.object({ tipo: z.literal('scarta'), proposte: refs }).strict(),
+  z.object({ tipo: z.literal('non-conteggiata'), proposte: refs }).strict(),
+  z.object({ tipo: z.literal('ignota'), proposte: refs }).strict(),
+  z.object({ tipo: z.literal('gia-conteggiata'), proposta: ref, quantita: positivo.max(9_999_999) }).strict(),
+  z.object({ tipo: z.literal('applica-effetto'), proposta: ref, acquisto: nuovoAcquisto.optional(), revisioneAcquistiAttesa: token.optional() }).strict()
+    .refine(v => (v.acquisto === undefined) === (v.revisioneAcquistiAttesa === undefined)),
+]);
+const decidi = z.object({ operazioneId: uid, decisione, revisioneProposteAttesa: token }).strict();
+const doteNote = z.object({ dote: z.enum(CHIAVI_DOTI), note: z.union([z.literal(1),z.literal(2),z.literal(3)]) }).strict();
+const effetto = z.discriminatedUnion('tipo', [
+  doteNote.extend({ tipo: z.literal('dote') }).strict(),
+  z.object({ tipo: z.literal('lettura'), categoria: z.enum(['libro','film','videogioco']), chiave, almeno: positivo.nullable() }).strict(),
+  z.object({ tipo: z.literal('turno'), attivita: chiave, doti: z.array(doteNote).min(1).max(20).optional() }).strict(),
+  z.object({ tipo: z.literal('acquisto'), articolo: chiave, variante: z.enum(CHIAVI_DOTI).nullable(), fortuna: z.boolean().nullable(), sostituisceDoti: z.array(uid).max(20).refine(v => new Set(v).size === v.length) }).strict(),
+]);
+const decisioneEffetto = z.object({ operazioneId: uid, decisione: z.enum(['conferma','scarta']), effetto: effetto.optional(), revisionePropostaAttesa: token }).strict()
+  .refine(v => v.decisione === 'conferma' ? v.effetto !== undefined : v.effetto === undefined);
+const spunta = z.object({ uid, fatta: z.literal(true), noteRisposta: z.union([z.literal(1),z.literal(2),z.literal(3)]).optional(),
+  apertureDedali: z.array(z.string().min(1).max(200)).max(100).refine(a => new Set(a).size === a.length).optional(),
+  acquisti: z.array(registra).min(1).max(100).refine(a => new Set(a.map(r => r.operazioneId)).size === a.length),
+}).strict().refine(v => v.acquisti.every(r => r.fonte.tipo === 'diario' && r.fonte.voceUid === v.uid));
+const bersaglioSchema = z.object({ etichetta: z.string().min(1).max(500), articolo: chiave.optional(), voceUid: uid.optional(), effettoUid: uid.optional() }).strict();
+export type BersaglioGestoPartita = z.infer<typeof bersaglioSchema>;
+export type CorpoSpuntaAcquisti = Omit<z.infer<typeof spunta>, 'uid'>;
+const payload = z.discriminatedUnion('tipo', [
+  z.object({ tipo: z.literal('acquisto'), dati: registra }).strict(),
+  z.object({ tipo: z.literal('annullo-fonte'), dati: annulla }).strict(),
+  z.object({ tipo: z.literal('rimozione-legacy'), dati: rimuovi }).strict(),
+  z.object({ tipo: z.literal('decisione-proposte'), dati: decidi }).strict(),
+  z.object({ tipo: z.literal('spunta-acquisti'), dati: spunta }).strict(),
+  z.object({ tipo: z.literal('decisione-effetto-voce'), propostaId: z.string().min(1).max(200), dati: decisioneEffetto }).strict(),
+]);
+type Payload = z.infer<typeof payload>;
+type Ricevuta = RicevutaOperazioneAcquistoDto | RicevutaDecisioneProposteDto | AzionePercorsoDto | StatoEffettiVoceDto;
+const baseRecord = z.object({ id: z.string().min(1).max(100), partitaId: positivo.nullable(), operazioneId: uid, bersaglio: bersaglioSchema,
+  payload, stato: z.enum(['invio','incerto','riuscita','rifiutata']), creatoIl: z.string(), aggiornatoIl: z.string(),
+  errore: z.string().nullable(), ricevuta: z.unknown().nullable(), ricevutaPersistita: z.boolean(),
+}).strict();
+export interface GestoPartita extends Omit<z.infer<typeof baseRecord>, 'ricevuta'> { ricevuta: Ricevuta | null }
+export interface ScopeGestoPartita { articolo?: string; provenienzaId?: string; voceUid?: string; proposte?: RiferimentoPropostaPartita[] }
+export interface StatoGestiPartita { gesti: readonly GestoPartita[]; erroreArchivio: string | null; versionePerPartita: Readonly<Record<number, number>>; versioneGuida: number }
+const store = create<StatoGestiPartita>(() => ({ gesti: [], erroreArchivio: null, versionePerPartita: {}, versioneGuida: 0 }));
+let caricato = false, ultimoRaw: string | null = null;
+const inVolo = new Set<string>();
+const copia = <T,>(v: T): T => JSON.parse(JSON.stringify(v)) as T;
+function immutabile<T>(v: T): T { if (v && typeof v === 'object') { Object.values(v).forEach(immutabile); Object.freeze(v); } return v; }
+const uguali = (a: unknown, b: unknown): boolean => {
+  const ordina = (v: unknown): unknown => Array.isArray(v) ? v.map(ordina) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).filter(([,x]) => x !== undefined).sort(([x],[y]) => x.localeCompare(y)).map(([k,x]) => [k,ordina(x)])) : v;
+  return JSON.stringify(ordina(a)) === JSON.stringify(ordina(b));
+};
+const erroreTesto = (e: unknown) => e instanceof Error ? e.message : 'Operazione non riuscita.';
+function bloccaArchivio(e: unknown): Error {
+  const messaggio = `Registro dei gesti non disponibile: ${erroreTesto(e)}. Nessun nuovo invio è consentito; il contenuto non viene cancellato.`;
+  store.setState({ erroreArchivio: messaggio });
+  return new Error(messaggio);
+}
+const refsDecisione = (d: RichiestaDecisioneProposte['decisione']) => 'proposte' in d ? d.proposte : [d.proposta];
+const idOperazione = (p: Payload) => p.tipo === 'spunta-acquisti' ? p.dati.acquisti[0]!.operazioneId : p.dati.operazioneId;
+const identitaGesto = (partitaId: number | null, operazioneId: string) => `${partitaId === null ? 'guida' : partitaId}:${operazioneId}`;
+const operazioni = (p: Payload): string[] => p.tipo === 'spunta-acquisti' ? p.dati.acquisti.map(a => a.operazioneId)
+  : p.tipo === 'decisione-proposte' && p.dati.decisione.tipo === 'applica-effetto' && p.dati.decisione.acquisto ? [p.dati.operazioneId, p.dati.decisione.acquisto.operazioneId] : [idOperazione(p)];
+function ambiti(p: Payload, b: BersaglioGestoPartita): string[] {
+  const a = new Set<string>();
+  if (b.articolo) a.add(`articolo:${b.articolo}`);
+  if (b.voceUid) a.add(`voce:${b.voceUid}`);
+  if (p.tipo === 'acquisto' || p.tipo === 'rimozione-legacy') a.add(`articolo:${p.dati.articolo}`);
+  if (p.tipo === 'acquisto' && p.dati.fonte.tipo === 'diario') a.add(`voce:${p.dati.fonte.voceUid}`);
+  if (p.tipo === 'annullo-fonte') a.add(`fonte:${p.dati.provenienzaId}`);
+  if (p.tipo === 'decisione-proposte') {
+    refsDecisione(p.dati.decisione).forEach(r => a.add(`proposta:${r.id}:${r.uid}`));
+    if (p.dati.decisione.tipo === 'applica-effetto' && p.dati.decisione.acquisto) {
+      const x = p.dati.decisione.acquisto; a.add(`articolo:${x.articolo}`);
+      if (x.fonte.tipo === 'diario') a.add(`voce:${x.fonte.voceUid}`);
+    }
+  }
+  if (p.tipo === 'spunta-acquisti') { a.add(`voce:${p.dati.uid}`); p.dati.acquisti.forEach(r => a.add(`articolo:${r.articolo}`)); }
+  if (p.tipo === 'decisione-effetto-voce') a.add(`candidato:${p.propostaId}`);
+  return [...a];
+}
+const pendente = (g: GestoPartita) => g.stato === 'invio' || g.stato === 'incerto' || !g.ricevutaPersistita;
+const schemaRicevutaAcquisto = z.object({ operazioneId: uid, partitaId: positivo, esito: z.enum(['registrata','fonte-collegata','gia-collegata','fonte-rimossa','presenza-rimossa']), acquistoId: uid.nullable(), provenienzaId: uid.nullable(), articolo: chiave, creataIl: z.string().min(1) }).strict();
+const movimento = z.object({ tipo: z.enum(['dote','yen']), chiave: z.string(), prima: intero, delta: intero, dopo: intero }).strict().refine(v => v.prima + v.delta === v.dopo);
+const schemaRicevutaDecisione = z.object({ operazioneId: uid, partitaId: positivo, decisione: z.enum(['applica','scarta','non-conteggiata','ignota','gia-conteggiata','applica-effetto']), proposte: refs, movimenti: z.array(movimento), decisaIl: z.string().min(1) }).strict();
+function corrispondeAcquisto(x: unknown, partita: number, r: RichiestaRegistraAcquisto): boolean {
+  const v = schemaRicevutaAcquisto.safeParse(x);
+  return v.success && v.data.operazioneId === r.operazioneId && v.data.partitaId === partita && v.data.articolo === r.articolo
+    && ['registrata','fonte-collegata','gia-collegata'].includes(v.data.esito) && v.data.acquistoId !== null && v.data.provenienzaId !== null
+    && (r.scelta.tipo !== 'collega' || v.data.acquistoId === r.scelta.acquistoId);
+}
+/** Prova esclusivamente gli ID delle ricevute, anche se in seguito annullate; non ripete il PUT. */
+function ricevutaSpuntaValida(x: unknown, g: GestoPartita): x is AzionePercorsoDto {
+  if (g.payload.tipo !== 'spunta-acquisti' || g.partitaId === null || !x || typeof x !== 'object') return false;
+  const v = x as AzionePercorsoDto, richieste = g.payload.dati.acquisti, partitaId = g.partitaId;
+  if (v.uid !== g.payload.dati.uid || typeof v.fatta !== 'boolean' || !Array.isArray(v.ricevuteEffetti)) return false;
+  return richieste.every(r => {
+    const f = r.fonte;
+    return f.tipo === 'diario' && v.ricevuteEffetti!.some(e => e && e.formato === 1 && e.tipo === 'acquisto' && e.partitaId === g.partitaId
+    && e.voceUid === f.voceUid && e.effettoUid === f.effettoUid && e.chiave === r.articolo
+    && e.ricevuta && corrispondeAcquisto(e.ricevuta.operazione, partitaId, r)
+    && (e.ricevuta.operazione as RicevutaOperazioneAcquistoDto).acquistoId === e.ricevuta.acquistoId
+    && (e.ricevuta.operazione as RicevutaOperazioneAcquistoDto).provenienzaId === e.ricevuta.provenienzaId);
+  });
+}
+const schemaStatoEffetti = z.object({
+  voceUid: uid, stato: z.enum(['convertita','legacy-da-correggere']),
+  effetti: z.array(z.object({ uid, ordine: intero.min(0), effetto, origine: z.enum(['seed','regola','utente']) }).strict())
+    .refine(v => new Set(v.map(e => e.uid)).size === v.length && new Set(v.map(e => e.ordine)).size === v.length),
+  rawLegacy: z.string(), motivo: z.string().nullable(), revisione: token,
+}).strict();
+function validaRicevuta(x: unknown, g: GestoPartita): Ricevuta {
+  const p = g.payload;
+  if (p.tipo === 'decisione-effetto-voce') {
+    const v = schemaStatoEffetti.safeParse(x);
+    if (v.success && g.partitaId === null && v.data.voceUid === g.bersaglio.voceUid
+      && (p.dati.decisione === 'scarta' || (v.data.stato === 'convertita' && v.data.effetti.some(e => uguali(e.effetto, p.dati.effetto))))) return v.data;
+  } else if (p.tipo === 'spunta-acquisti') { if (ricevutaSpuntaValida(x, g)) return x; }
+  else if (p.tipo === 'decisione-proposte') {
+    const v = schemaRicevutaDecisione.safeParse(x);
+    if (v.success && v.data.operazioneId === g.operazioneId && v.data.partitaId === g.partitaId && v.data.decisione === p.dati.decisione.tipo
+      && uguali(v.data.proposte, refsDecisione(p.dati.decisione))) return v.data;
+  } else if (g.partitaId !== null) {
+    const v = schemaRicevutaAcquisto.safeParse(x);
+    if (v.success && v.data.operazioneId === g.operazioneId && v.data.partitaId === g.partitaId) {
+      if (p.tipo === 'acquisto' && corrispondeAcquisto(v.data, g.partitaId, p.dati)) return v.data;
+      if (p.tipo === 'annullo-fonte' && v.data.esito === 'fonte-rimossa' && v.data.provenienzaId === p.dati.provenienzaId && v.data.acquistoId !== null && (!g.bersaglio.articolo || v.data.articolo === g.bersaglio.articolo)) return v.data;
+      if (p.tipo === 'rimozione-legacy' && v.data.esito === 'presenza-rimossa' && v.data.articolo === p.dati.articolo && v.data.provenienzaId === null && v.data.acquistoId === null) return v.data;
+    }
+  }
+  throw new Error('La risposta non contiene una ricevuta canonica della medesima operazione: esito da verificare.');
+}
+function validaRecord(x: unknown): GestoPartita {
+  const r = baseRecord.parse(x), g = r as GestoPartita;
+  if ((r.payload.tipo === 'decisione-effetto-voce') !== (r.partitaId === null) || (r.partitaId === null && !r.bersaglio.voceUid)
+    || r.operazioneId !== idOperazione(r.payload) || r.id !== identitaGesto(r.partitaId, r.operazioneId) || (r.stato === 'riuscita') !== (r.ricevuta !== null)
+    || (r.ricevutaPersistita && r.stato !== 'riuscita' && r.stato !== 'rifiutata')) throw new Error('Identità o stato di un gesto non riconoscibili.');
+  if (r.ricevuta !== null) validaRicevuta(r.ricevuta, g);
+  return immutabile(copia(g));
+}
+function scrivi(gesti: readonly GestoPartita[]): void {
+  try {
+    const storage = window.sessionStorage;
+    if (storage.getItem(CHIAVE) !== ultimoRaw) throw new Error('Il contenuto della scheda è cambiato esternamente.');
+    const raw = JSON.stringify({ versione: 1, gesti });
+    storage.setItem(CHIAVE, raw);
+    if (storage.getItem(CHIAVE) !== raw) throw new Error('La persistenza non è stata confermata.');
+    ultimoRaw = raw;
+  } catch (e) { throw bloccaArchivio(e); }
+  store.setState({ gesti: immutabile(copia(gesti)), erroreArchivio: null });
+}
+export function caricaRegistroGestiPartita(): void {
+  if (caricato) return;
+  caricato = true;
+  const esitiNoti = store.getState().gesti.filter(g => (g.stato === 'riuscita' || g.stato === 'rifiutata') && !g.ricevutaPersistita);
+  const pendentiNoti = store.getState().gesti.filter(g => pendente(g) || inVolo.has(g.id));
+  try {
+    ultimoRaw = window.sessionStorage.getItem(CHIAVE);
+    const letti = ultimoRaw === null ? [] : z.object({ versione: z.literal(1), gesti: z.array(z.unknown()) }).strict().parse(JSON.parse(ultimoRaw)).gesti.map(validaRecord);
+    if (new Set(letti.map(g => g.id)).size !== letti.length) throw new Error('ID di gesto duplicati.');
+    const ids = letti.flatMap(g => operazioni(g.payload).map(id => identitaGesto(g.partitaId, id)));
+    if (new Set(ids).size !== ids.length) throw new Error('Un identificativo di operazione appartiene a più gesti.');
+    for (const noto of pendentiNoti) {
+      const letto = letti.find(g => g.id === noto.id);
+      if (!letto || !uguali(letto.payload, noto.payload) || !uguali(letto.bersaglio, noto.bersaglio)) throw new Error('Un gesto pendente è assente o cambiato nel registro conservato: nessuna sovrascrittura.');
+    }
+    const gesti = letti.map(g => {
+      const nota = esitiNoti.find(n => n.id === g.id);
+      if (nota) {
+        if (!uguali(nota.payload, g.payload) || !uguali(nota.bersaglio, g.bersaglio)) throw new Error('Il gesto conservato diverge dalla ricevuta già acquisita.');
+        return nota;
+      }
+      return g.stato === 'invio' ? { ...g, stato: 'incerto' as const, errore: 'La scheda è stata ricaricata durante l’invio: verifica esplicitamente questa operazione.' } : g;
+    });
+    if (esitiNoti.some(n => !gesti.some(g => g.id === n.id))) throw new Error('Manca il gesto dell’esito già acquisito: nessuna sovrascrittura.');
+    store.setState({ gesti: immutabile(gesti), erroreArchivio: null });
+    if (letti.some(g => g.stato === 'invio')) scrivi(gesti);
+  } catch (e) { bloccaArchivio(e); }
+}
+export function useGestiPartita(): StatoGestiPartita {
+  const stato = store();
+  useEffect(caricaRegistroGestiPartita, []);
+  return stato;
+}
+/** Solo una mutazione esplicita segnala chi deve ricaricare; il servizio non legge contesti attivi né fa refresh. */
+export function segnalaMutazioneEffetti(partitaId: number | null): void {
+  if (partitaId === null) { store.setState(s => ({ versioneGuida: s.versioneGuida + 1 })); return; }
+  positivo.parse(partitaId);
+  store.setState(s => ({ versionePerPartita: { ...s.versionePerPartita, [partitaId]: (s.versionePerPartita[partitaId] ?? 0) + 1 } }));
+}
+export function gestoPendenteNelloScope(partitaId: number | null, scope: ScopeGestoPartita): GestoPartita | null {
+  const a = [scope.articolo && `articolo:${scope.articolo}`, scope.provenienzaId && `fonte:${scope.provenienzaId}`, scope.voceUid && `voce:${scope.voceUid}`,
+    ...(scope.proposte ?? []).map(r => `proposta:${r.id}:${r.uid}`)].filter((s): s is string => !!s);
+  return store.getState().gesti.find(g => g.partitaId === partitaId && pendente(g) && ambiti(g.payload, g.bersaglio).some(k => a.includes(k))) ?? null;
+}
+const cambia = (g: GestoPartita) => scrivi(store.getState().gesti.map(x => x.id === g.id ? g : x));
+const scopeTesto = (g: GestoPartita) => `${g.partitaId === null ? 'Guida' : `Partita ${g.partitaId}`} · ${g.bersaglio.etichetta} · operazione ${g.operazioneId}`;
+async function invia(g: GestoPartita, recupero = false): Promise<Ricevuta> {
+  if (inVolo.has(g.id)) throw new Error('Questa operazione è ancora in invio.');
+  if (g.stato === 'riuscita' && g.ricevuta !== null) { if (!g.ricevutaPersistita) cambia({ ...g, ricevutaPersistita: true }); return g.ricevuta; }
+  if (g.stato === 'rifiutata') throw new Error('Questa richiesta è già stata rifiutata: non viene ripetuta.');
+  if (store.getState().erroreArchivio) throw new Error(store.getState().erroreArchivio!);
+  const inInvio = { ...g, stato: 'invio' as const, errore: null, aggiornatoIl: new Date().toISOString() };
+  cambia(inInvio); // Deve riuscire PRIMA di qualunque richiesta.
+  inVolo.add(g.id);
+  let risposta: Ricevuta | null = null;
+  try {
+    const prefisso = `/partite/${g.partitaId}`, p = g.payload, opzioni = { maxRetries: 0, silent: true };
+    let x: unknown;
+    if (p.tipo === 'decisione-effetto-voce') x = await apiPost(`/compendio/percorso/effetti/proposte/${encodeURIComponent(p.propostaId)}/decisione`, p.dati, opzioni);
+    else if (p.tipo === 'spunta-acquisti') x = recupero
+      ? await apiGet(`/compendio/percorso/voci/${p.dati.uid}?partita=${g.partitaId}`, opzioni)
+      : await apiPut(`${prefisso}/percorso`, p.dati, opzioni);
+    else {
+      const percorso = p.tipo === 'acquisto' ? '/acquisti/registrazioni' : p.tipo === 'annullo-fonte' ? '/acquisti/provenienze/annullo'
+        : p.tipo === 'rimozione-legacy' ? '/acquisti/legacy/rimozione' : '/da-applicare/decisioni';
+      x = await apiPost(prefisso + percorso, p.dati, opzioni);
+    }
+    risposta = validaRicevuta(x, g);
+    const riuscita = { ...g, stato: 'riuscita' as const, ricevuta: risposta, ricevutaPersistita: true, errore: null, aggiornatoIl: new Date().toISOString() };
+    try { cambia(riuscita); }
+    catch {
+      store.setState(s => ({ gesti: immutabile(s.gesti.map(x => x.id === g.id ? { ...riuscita, ricevutaPersistita: false } : x)) }));
+      notifica('warning', `${scopeTesto(g)}: successo ricevuto; ricevuta non salvata nella scheda. Conserva questa scheda e recupera lo stesso gesto.`, 0);
+    }
+    segnalaMutazioneEffetti(g.partitaId);
+    notifica('success', `${scopeTesto(g)}: ${recupero && p.tipo === 'spunta-acquisti' ? 'ricevute della transazione riscontrate; controlla lo stato attuale della spunta.' : 'operazione riuscita.'}`, 8000);
+    return risposta;
+  } catch (e) {
+    if (risposta !== null) return risposta; // Una ricevuta acquisita non diventa «creazione fallita».
+    // Un errore del recupero non prova che il primo invio non abbia committato.
+    const rifiuto = !recupero && isApiError(e) && (g.payload.tipo === 'spunta-acquisti'
+      ? e.status === 400 && e.code === 'validation-error' // Il middleware rifiuta prima dell’handler e della transazione.
+      : e.status >= 400 && e.status < 500 && e.status !== 408 && e.code !== 'http-error');
+    const fallita = { ...g, stato: rifiuto ? 'rifiutata' as const : 'incerto' as const, errore: erroreTesto(e), ricevutaPersistita: rifiuto, aggiornatoIl: new Date().toISOString() };
+    try { cambia(fallita); } catch { store.setState(s => ({ gesti: immutabile(s.gesti.map(x => x.id === g.id ? { ...fallita, ricevutaPersistita: false } : x)) })); }
+    notifica(rifiuto ? 'error' : 'warning', `${scopeTesto(g)}: ${rifiuto ? 'richiesta rifiutata' : 'esito da verificare'}. ${erroreTesto(e)}`, 0);
+    throw e;
+  } finally { inVolo.delete(g.id); }
+}
+async function esegui(partitaId: number | null, richiesta: Payload, bersaglio: BersaglioGestoPartita): Promise<Ricevuta> {
+  caricaRegistroGestiPartita();
+  if (store.getState().erroreArchivio) throw new Error(store.getState().erroreArchivio!);
+  positivo.nullable().parse(partitaId);
+  const p = payload.parse(copia(richiesta)), b = bersaglioSchema.parse(copia(bersaglio)), op = idOperazione(p), id = identitaGesto(partitaId, op);
+  if ((p.tipo === 'decisione-effetto-voce') !== (partitaId === null) || (partitaId === null && !b.voceUid)) throw new Error('Ambito guida o identità della voce non coerenti.');
+  const old = store.getState().gesti.find(g => g.id === id);
+  if (old) {
+    if (!uguali(old.payload, p) || !uguali(old.bersaglio, b)) throw new Error('Lo stesso ID appartiene a un payload o bersaglio differente.');
+    return invia(old, true);
+  }
+  const nuoviIds = operazioni(p);
+  if (new Set(nuoviIds).size !== nuoviIds.length || store.getState().gesti.some(g => g.partitaId === partitaId && operazioni(g.payload).some(id => nuoviIds.includes(id)))) throw new Error('Un identificativo di operazione è già conservato in un altro gesto: nessun nuovo invio.');
+  const nuoviAmbiti = ambiti(p, b);
+  if (store.getState().gesti.some(g => g.partitaId === partitaId && pendente(g) && ambiti(g.payload, g.bersaglio).some(k => nuoviAmbiti.includes(k)))) {
+    throw new Error('Esiste già un gesto da verificare per questo bersaglio: recupera quello conservato, senza crearne un altro.');
+  }
+  const adesso = new Date().toISOString();
+  const g: GestoPartita = immutabile({ id, partitaId, operazioneId: op, bersaglio: b, payload: p, stato: 'incerto', creatoIl: adesso, aggiornatoIl: adesso, errore: null, ricevuta: null, ricevutaPersistita: false });
+  scrivi([...store.getState().gesti, g]);
+  return invia(g);
+}
+export const eseguiAcquistoConRegistro = (id: number, dati: RichiestaRegistraAcquisto, bersaglio: BersaglioGestoPartita): Promise<RicevutaOperazioneAcquistoDto> => esegui(id, { tipo: 'acquisto', dati }, bersaglio) as Promise<RicevutaOperazioneAcquistoDto>;
+export const annullaFonteConRegistro = (id: number, dati: RichiestaAnnullaProvenienza, bersaglio: BersaglioGestoPartita): Promise<RicevutaOperazioneAcquistoDto> => esegui(id, { tipo: 'annullo-fonte', dati }, bersaglio) as Promise<RicevutaOperazioneAcquistoDto>;
+export const rimuoviLegacyConRegistro = (id: number, dati: RichiestaRimozioneLegacy, bersaglio: BersaglioGestoPartita): Promise<RicevutaOperazioneAcquistoDto> => esegui(id, { tipo: 'rimozione-legacy', dati }, bersaglio) as Promise<RicevutaOperazioneAcquistoDto>;
+export const decidiProposteConRegistro = (id: number, dati: RichiestaDecisioneProposte, bersaglio: BersaglioGestoPartita): Promise<RicevutaDecisioneProposteDto> => esegui(id, { tipo: 'decisione-proposte', dati }, bersaglio) as Promise<RicevutaDecisioneProposteDto>;
+export const decidiEffettoVoceConRegistro = (idProposta: string, dati: RichiestaDecisioneEffettoVoce, bersaglio: BersaglioGestoPartita & { voceUid: string }): Promise<StatoEffettiVoceDto> => esegui(null, { tipo: 'decisione-effetto-voce', propostaId: idProposta, dati }, bersaglio) as Promise<StatoEffettiVoceDto>;
+export function eseguiSpuntaAcquistiConRegistro(id: number, voceUid: string, dati: CorpoSpuntaAcquisti, bersaglio: BersaglioGestoPartita): Promise<AzionePercorsoDto> {
+  if ('uid' in dati) return Promise.reject(new Error('L’identità della voce si passa una sola volta, separata dal corpo.'));
+  return esegui(id, { tipo: 'spunta-acquisti', dati: { ...dati, uid: voceUid } }, bersaglio) as Promise<AzionePercorsoDto>;
+}
+/** Solo azione esplicita: verbi/percorso immutabili; la prima spunta consente soltanto la verifica readonly. */
+export function riprendiGestoPartita(id: string): Promise<Ricevuta | null> {
+  caricaRegistroGestiPartita();
+  const g = store.getState().gesti.find(x => x.id === id);
+  if (!g) return Promise.reject(new Error('Il gesto non è presente in questa scheda.'));
+  if (g.stato === 'rifiutata') {
+    try {
+      if (!g.ricevutaPersistita) cambia({ ...g, ricevutaPersistita: true });
+      return Promise.resolve(null); // Salva soltanto l’esito noto, senza richieste di rete.
+    } catch (e) { return Promise.reject(e); }
+  }
+  return invia(g, true);
+}
+export function archiviaGestoPartita(id: string): void {
+  caricaRegistroGestiPartita();
+  const g = store.getState().gesti.find(x => x.id === id);
+  if (!g || pendente(g) || inVolo.has(id)) throw new Error('Una richiesta pendente non si elimina dal registro.');
+  scrivi(store.getState().gesti.filter(x => x.id !== id));
+}
+/** Rilettura manuale, mai reset; permette di recuperare dopo un blocco di accesso allo storage. */
+export function rileggiRegistroGestiPartita(): void { caricato = false; caricaRegistroGestiPartita(); }

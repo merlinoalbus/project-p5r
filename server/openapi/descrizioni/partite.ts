@@ -10,6 +10,56 @@ const PARTITA = [404, 'partita-non-trovata'] as const;
 
 /** Le descrizioni delle rotte montate da `server/routes/partite.ts` sotto `/api/partite`. */
 export const DESCRIZIONI_PARTITE: DescrizioniArea = {
+  'GET /api/partite/:id/acquisti': {
+    sommario: 'Presenze storiche e consumazioni confermate della partita',
+    descrizione: 'Lettura unica di presenza legacy, fatti UUID, provenienze, spesa e rotazione registrata. Una presenza non diventa una consumazione; i fatti senza fonti sono inattivi. Orfani e lacune restano espliciti. Nessuna mutazione o inferenza dal calendario.',
+    risposta: '`StatoAcquistiDto`', errori: [PARTITA],
+  },
+  'POST /api/partite/:id/acquisti/anteprima': {
+    sommario: 'Rivedi una consumazione Aojiru o il collegamento ad un fatto esistente',
+    descrizione: 'Corpo strict `NuovaRegistrazioneAcquisto`: operazioneId, articolo, momento, variante, fortuna nullable, fonte, scelta nuova/collega e rapportoLegacy nullable. Rilegge identità, fonti e spesa. Al momento corrente valuta disponibilità reale; per momenti storici verifica solo calendario provato e dichiara i progressi non ricostruibili. Non applica Doti o yen.',
+    risposta: '`AnteprimaRegistrazioneAcquistoDto`, incluso revisioneAcquistiAttesa', errori: [PARTITA, [409,'acquisti-cambiati']],
+  },
+  'POST /api/partite/:id/acquisti/registrazioni': {
+    sommario: 'Conferma il fatto o la provenienza già rivisti',
+    descrizione: 'Aggiunge al corpo dell’anteprima revisioneAcquistiAttesa. Il POST pubblico accetta soltanto fonte manuale; la fonte Diario passa dal motore della prima spunta o dalla decisione sulla proposta storica. Replay del medesimo ID/payload prima del CAS; un ID con payload diverso è conflitto. Un unico writer atomico conserva la presenza legacy, registra o collega UUID e prepara le proposte esplicite dei benefici. Nessuna nuova spunta, turno o fascia consumata.',
+    risposta: '`RicevutaOperazioneAcquistoDto` (201); dettaglio e refresh separati', errori: [PARTITA, [409,'acquisti-cambiati'], [409,'operazione-diversa']],
+  },
+  'POST /api/partite/:id/acquisti/provenienze/annullo/anteprima': {
+    sommario: 'Rivedi la rimozione di una sola provenienza',
+    descrizione: 'Corpo strict {operazioneId,provenienzaId}. Mostra il fatto, le fonti indipendenti e se si tratta dell’ultima. Ammessa anche per fonte orfana, mediante fotografia registrata.',
+    risposta: '`AnteprimaRimozioneAcquistoDto`', errori: [PARTITA, [404,'provenienza-non-trovata']],
+  },
+  'POST /api/partite/:id/acquisti/provenienze/annullo': {
+    sommario: 'Rimuovi una provenienza nel cestino personale',
+    descrizione: 'Corpo dell’anteprima più revisioneAcquistiAttesa. Rimuove solo la fonte scelta; conserva UUID del fatto e ricevute. L’ultima fonte rende il fatto inattivo e propone gli inversi dovuti senza applicarli. Registro recuperabile soltanto nel file utente.',
+    risposta: '`RicevutaOperazioneAcquistoDto`', errori: [PARTITA, [409,'acquisti-cambiati']],
+  },
+  'POST /api/partite/:id/acquisti/legacy/rimozione/anteprima': {
+    sommario: 'Rivedi la rimozione della presenza legacy esatta',
+    descrizione: 'Corpo strict {operazioneId,articolo}. La fotografia della tuple comprende la presenza orfana e non richiede che l’offerta esista ancora. Non riguarda consumazioni o provenienze indipendenti.',
+    risposta: '`AnteprimaRimozioneAcquistoDto`', errori: [PARTITA, [404,'presenza-non-trovata']],
+  },
+  'POST /api/partite/:id/acquisti/legacy/rimozione': {
+    sommario: 'Rimuovi la sola presenza legacy nel cestino personale',
+    descrizione: 'Corpo dell’anteprima più revisioneAcquistiAttesa. CAS della tuple RAW e operazione idempotente. Il ripristino rimette soltanto la presenza, senza data, quantità o consumazioni inventate.',
+    risposta: '`RicevutaOperazioneAcquistoDto`', errori: [PARTITA, [409,'presenza-cambiata']],
+  },
+  'GET /api/partite/:id/da-applicare': {
+    sommario: 'Proposte personali dei delta o raccordi ancora da decidere',
+    descrizione: 'Array semplice. Con ancheChiuse=1 include decisioni precedenti. Lettura senza applicazioni; unità, T dovuto, B già attribuito, fonti orfane, impedimenti e storia restano distinti.',
+    risposta: '`PropostaPartitaDto[]`', errori: [PARTITA],
+  },
+  'POST /api/partite/:id/da-applicare/anteprima': {
+    sommario: 'Rivedi una decisione esplicita e i movimenti esatti',
+    descrizione: 'Corpo strict RichiestaAnteprimaDecisioneProposte con ID operazione e decisione discriminata. Per gruppi Dote o yen mostra prima/delta/dopo, senza saturazione e senza scritture. Già conteggiato, non conteggiato e ignoto sono dichiarazioni diverse.',
+    risposta: '`AnteprimaDecisioneProposteDto`', errori: [PARTITA, [409,'proposta-non-applicabile']],
+  },
+  'POST /api/partite/:id/da-applicare/decisioni': {
+    sommario: 'Registra una decisione con CAS e ricevuta idempotente',
+    descrizione: 'Corpo dell’anteprima più revisioneProposteAttesa. Replay ID/payload prima del CAS. Applica usa esclusivamente i mutatori canonici Doti/yen e registra il delta effettivo; scarta conserva la scelta umana. Un raccordo storico usa il motore Diario, senza rieseguire la spunta. Nessun aggiornamento automatico dei progressi dal solo GET.',
+    risposta: '`RicevutaDecisioneProposteDto`', errori: [PARTITA, [409,'proposte-cambiate'], [409,'operazione-diversa']],
+  },
   // ---- Partite ----
   'GET /api/partite': {
     sommario: 'Elenco delle partite',
@@ -47,7 +97,7 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   },
   'DELETE /api/partite/:id': {
     sommario: 'Elimina una partita',
-    descrizione: 'Cancella la partita e, a cascata, tutto il suo avanzamento nel file delle partite (Doti, Confidenti, scorta, storico…). Se era l\'attiva, diventa attiva la modificata più di recente fra quelle che restano. Non si può annullare.',
+    descrizione: 'Mette l’intero blocco della partita nel cestino personale per UID prima delle cascate, comprese provenienze, fatti, decisioni e ricevute. Non crea inversi per altre partite. Se era attiva, attiva la più recente rimasta. Il ripristino recupera il medesimo saldo senza riapplicare benefici e conserva la partita attiva corrente.',
     risposta: 'Nessun contenuto (204)',
     errori: [PARTITA],
   },

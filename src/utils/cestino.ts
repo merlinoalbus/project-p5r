@@ -7,7 +7,7 @@
 // parole ovunque; la sezione del cestino usa i nomi dei tipi e dei motivi.
 // ============================================================
 
-import type { ContenutoCestinoDto, MotivoSaltataCestinoDto, TipoCestino, VoceCestinoDto } from '../types';
+import type { ContenutoCestinoDto, MotivoSaltataCestinoDto, TipoCestino, VoceCestinoUnificatoDto } from '../types';
 
 /** La frase delle conferme di eliminazione: dove finisce l'elemento e come tornarlo indietro. */
 export const NEL_CESTINO = 'Finisce nel cestino (Impostazioni → Cestino): da lì la rimetti com’era.';
@@ -25,6 +25,9 @@ export const NOME_TIPO_CESTINO: Record<TipoCestino, string> = {
   // L6: una Richiesta dei Mementos
   richiesta: 'Richiesta',
   oggetto: 'Oggetto',
+  'voce-diario': 'Voce del Diario',
+  partita: 'Partita',
+  'fonte-acquisto': 'Registrazione d’acquisto',
 };
 
 /**
@@ -62,11 +65,17 @@ const PAROLE_CONTENUTO: ReadonlyArray<{ tabelle: readonly string[]; uno: string;
   { tabelle: ['immagine', 'spillo_immagine'], uno: 'immagine', molti: 'immagini' },
   { tabelle: ['richiesta'], uno: 'Richiesta', molti: 'Richieste' },
   { tabelle: ['punto_partita', 'spillo_partita', 'spunta_voce_partita', 'timbri_dedalo_partita'], uno: 'segno nelle partite', molti: 'segni nelle partite' },
+  { tabelle: ['voce_giornata'], uno: 'voce del Diario', molti: 'voci del Diario' },
+  { tabelle: ['acquisto_partita'], uno: 'presenza d’acquisto precedente', molti: 'presenze d’acquisto precedenti' },
+  { tabelle: ['acquisto_registrato'], uno: 'consumazione', molti: 'consumazioni' },
+  { tabelle: ['acquisto_provenienza'], uno: 'fonte d’acquisto', molti: 'fonti d’acquisto' },
+  { tabelle: ['da_applicare'], uno: 'proposta da applicare', molti: 'proposte da applicare' },
+  { tabelle: ['effetto_applicato'], uno: 'ricevuta degli effetti', molti: 'ricevute degli effetti' },
 ];
 
 /** Il contenuto di un elemento del cestino detto per chi gioca: l'elemento stesso escluso (la sua riga c'è sempre), i dettagli
  *  interni tolti, le tabelle della stessa cosa sommate. */
-export function contenutoLeggibile(v: Pick<VoceCestinoDto, 'tipo' | 'contenuto'>): Array<{ etichetta: string; quante: number }> {
+export function contenutoLeggibile(v: Pick<VoceCestinoUnificatoDto, 'tipo' | 'contenuto'>): Array<{ etichetta: string; quante: number }> {
   const conti = new Map(v.contenuto.map((c: ContenutoCestinoDto) => [c.tabella, c.quante]));
   // la riga dell'elemento non è «quel che si porta via»: un'area eliminata non «si porta via 1 area»
   const radice = RADICE_CESTINO[v.tipo];
@@ -78,10 +87,10 @@ export function contenutoLeggibile(v: Pick<VoceCestinoDto, 'tipo' | 'contenuto'>
 }
 
 /** La tabella dell'elemento stesso, per tipo (la stessa regola del server). */
-const RADICE_CESTINO: Record<TipoCestino, string> = { area: 'dungeon_area', voce: 'punto_interesse', mappa: 'mappa', 'area-dedalo': 'area_dedalo', 'area-fisica': 'area', luogo: 'luogo', negozio: 'negozio', richiesta: 'richiesta', oggetto: 'catalogo_oggetto' };
+const RADICE_CESTINO: Record<TipoCestino, string> = { area: 'dungeon_area', voce: 'punto_interesse', mappa: 'mappa', 'area-dedalo': 'area_dedalo', 'area-fisica': 'area', luogo: 'luogo', negozio: 'negozio', richiesta: 'richiesta', oggetto: 'catalogo_oggetto', 'voce-diario': 'voce_giornata', partita: 'partita', 'fonte-acquisto': 'acquisto_provenienza' };
 
 /** Come si presenta un elemento: «Area di Shibuya: Sottopasso» (il posto da cui viene, se c'è), poi «con 2 planimetrie e 1 pin». */
-export function descrizioneElementoCestino(v: Pick<VoceCestinoDto, 'tipo' | 'nome' | 'contesto' | 'contenuto'>): { titolo: string; con: string | null } {
+export function descrizioneElementoCestino(v: Pick<VoceCestinoUnificatoDto, 'tipo' | 'nome' | 'contesto' | 'contenuto'>): { titolo: string; con: string | null } {
   const tipo = NOME_TIPO_CESTINO[v.tipo];
   // il contesto è il posto (il quartiere, il Palazzo, il dedalo) o una nota come «fusa in …»: solo un nome diventa «di <posto>»
   const posto = v.contesto && !/[«»]/.test(v.contesto) ? v.contesto : null;

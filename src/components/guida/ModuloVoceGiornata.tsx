@@ -22,6 +22,7 @@ import { NOME_GENERE } from '../../utils/percorso';
 import { EditorAzioneStrutturata } from './EditorAzioneStrutturata';
 import { STRUTTURA_VUOTA, campiCompleti, strutturaDi } from '../../utils/azioneStrutturata';
 import type { AzionePercorsoDto, DatiVoceGiornata, FasciaGioco, GenereVoce } from '../../types';
+import { segnalaMutazioneEffetti } from '../../services/gestiPartita';
 
 export type SoggettoVoce =
   | { tipo: 'nuova'; fascia: FasciaGioco }
@@ -67,10 +68,11 @@ export function ModuloVoceGiornata({ soggetto, giorno, voci, partitaId, onChiudi
     const fascia = voce?.fascia ?? (soggetto.tipo === 'nuova' ? soggetto.fascia : 'giorno');
     return {
       genere: (voce?.genere ?? 'azione') as GenereVoce, testo: voce?.azione ?? '', note: voce?.note ?? '', fascia,
-      posizione: postoIniziale(fascia), struttura: voce && voce.genere === 'azione' ? strutturaDi(voce) : STRUTTURA_VUOTA,
+      posizione: postoIniziale(fascia), struttura: voce ? strutturaDi(voce) : STRUTTURA_VUOTA,
     };
   });
   const [occupato, setOccupato] = useState(false);
+  const scrittura = useRef(false);
   /** Unisce una modifica parziale ai campi del modulo. */
   const imposta = (p: Partial<typeof campi>) => setCampi((c) => ({ ...c, ...p }));
   const azione = campi.genere === 'azione';
@@ -83,26 +85,37 @@ export function ModuloVoceGiornata({ soggetto, giorno, voci, partitaId, onChiudi
    */
   const salva = async () => {
     const testo = campi.testo.trim();
-    if (!testo) return;
+    if (!testo || scrittura.current) return;
     const note = campi.note.trim();
     const s = campi.struttura;
     // il posto si manda quando la voce è nuova, cambia fascia o si sposta; altrimenti resta dov'è
     const spostata = !voce || voce.fascia !== campi.fascia || posto !== postoIniziale(campi.fascia);
+    const canoniciModificati = s.effettiVoce !== undefined && (!voce || s.fonteEffetti?.stato !== 'convertita' || JSON.stringify(s.effettiVoce) !== JSON.stringify(s.fonteEffetti.effetti.map(({ uid, effetto }) => ({ uid, effetto }))));
+    const produceModificato = !s.fonteEffetti && s.effettiVoce === undefined && (!voce || JSON.stringify(s.produce) !== JSON.stringify(voce.produce));
     const dati: DatiVoceGiornata = {
       genere: campi.genere, azione: testo, note: note || null, fascia: campi.fascia,
       ...(spostata ? { posizione: posto } : {}),
-      ...(azione ? { tipo: s.tipo, riferimento: s.riferimento, rangoAtteso: s.rangoAtteso, produce: s.produce } : {}),
+      ...(azione ? { tipo: s.tipo, riferimento: s.riferimento, rangoAtteso: s.rangoAtteso,
+        ...(canoniciModificati ? { effettiVoce: { effetti: s.effettiVoce!, ...(s.fonteEffetti ? { revisioneEffettiAttesa: s.fonteEffetti.revisione } : {}) } } : {}),
+        ...(produceModificato ? { produce: s.produce } : {}),
+      } : {}),
     };
+    scrittura.current = true;
     setOccupato(true);
+    let registrata = false;
     try {
       if (voce) await aggiornaVoceGiornata(voce.uid, dati, partitaId ?? undefined);
       else await creaVoceGiornata(giorno, dati, partitaId ?? undefined);
+      registrata = true;
+      segnalaMutazioneEffetti(null);
       await onSalvato();
       notifica('success', voce ? 'Voce modificata nella guida, per tutte le partite.' : 'Voce aggiunta alla guida, per tutte le partite.');
       onChiudi();
     } catch (err) {
-      notifica('error', err instanceof Error ? err.message : 'Salvataggio non riuscito.');
+      notifica('error', `${registrata ? 'Voce salvata; aggiornamento della pagina non riuscito: ' : ''}${err instanceof Error ? err.message : 'Salvataggio non riuscito.'}`);
+      if (registrata) onChiudi();
     } finally {
+      scrittura.current = false;
       setOccupato(false);
     }
   };
@@ -112,7 +125,7 @@ export function ModuloVoceGiornata({ soggetto, giorno, voci, partitaId, onChiudi
       aperta
       larga={azione}
       titolo={voce ? 'Modifica la voce della giornata' : 'Aggiungi alla giornata'}
-      onChiudi={onChiudi}
+      onChiudi={() => { if (!occupato) onChiudi(); }}
       azioni={(
         <div className="flex flex-wrap justify-end gap-1.5 w-full">
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" disabled={occupato} onClick={onChiudi} />
@@ -121,7 +134,7 @@ export function ModuloVoceGiornata({ soggetto, giorno, voci, partitaId, onChiudi
         </div>
       )}
     >
-      <form id="modulo-voce-giornata" className="flex flex-col gap-3" onSubmit={(e) => { e.preventDefault(); void salva(); }}>
+      <form id="modulo-voce-giornata" className="flex flex-col gap-3" inert={occupato} onSubmit={(e) => { e.preventDefault(); void salva(); }}>
         <Segmenti etichetta="Che cosa è" valore={campi.genere} opzioni={GENERI} onCambia={(g) => imposta({ genere: g })} />
         <label className="flex flex-col gap-1 text-[13px] text-text-secondary">{azione ? 'Che cosa fare' : 'Che cosa succede'}
           <textarea className="form-input" rows={righe(campi.testo, 3, 24)} maxLength={2000} value={campi.testo} autoFocus onChange={(e) => imposta({ testo: e.target.value })}
@@ -136,7 +149,7 @@ export function ModuloVoceGiornata({ soggetto, giorno, voci, partitaId, onChiudi
         {azione && <EditorAzioneStrutturata valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} />}
         <p className="m-0 text-[12px] text-text-muted">
           La modifica cambia la guida per tutte le partite ed entra nel pacchetto di gioco che esporti.
-          {voce?.fatta ? ' Questa voce è già spuntata: gli effetti nuovi valgono dalla prossima spunta; le Doti le segni tu, e restano come sono.' : ''}
+          {voce?.fatta ? ' Questa voce è già spuntata: le modifiche agli effetti diventano proposte in «Da applicare», senza rieseguire la spunta né modificare subito Doti e yen.' : ''}
         </p>
       </form>
     </Modal>

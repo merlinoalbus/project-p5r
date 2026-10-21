@@ -35,6 +35,7 @@ function Offerta({ offerta: o, nome, partitaId, onCambiata }: { offerta: Offerta
       </details>}
     </div></td>
     {partitaId !== null && <td data-etichetta="Acquisto"><AcquistiOfferta articolo={o.articolo} nome={nome}
+      partitaId={partitaId} acquisti={o.acquisti} onRileggi={onCambiata}
       registrati={o.acquistiRegistrati} acquistato={o.acquistato} occupato={occupato}
       bloccato={o.disponibilita !== null && o.disponibilita.stato !== 'disponibile'} onCambia={(chiave, fatto) => void cambia(chiave, fatto)} />
       {occupato && <span role="status" className="text-[12px] text-text-muted">Salvataggio…</span>}</td>}

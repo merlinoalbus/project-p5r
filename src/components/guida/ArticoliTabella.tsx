@@ -8,7 +8,8 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { impostaAcquisto } from '../../services/api';
+import { getNegozio, impostaAcquisto } from '../../services/api';
+import { eOffertaAojiru } from '../../../shared/acquisti';
 import { notifica } from '../../stores/notificationStore';
 import { NOME_CATEGORIA_ARTICOLO } from '../../utils/negozi';
 import type { ArticoloDto } from '../../types';
@@ -36,6 +37,7 @@ interface Props {
 function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica, onContenutoCambiato }: Omit<Props, 'articoli'> & { a: ArticoloDto }) {
   const [occupato, setOccupato] = useState(false);
   const nome = a.nomeIt ?? a.nome;
+  const ripetibile = eOffertaAojiru({ chiave: a.chiave, catalogoChiave: a.catalogo?.chiave });
   const acquistoBloccato = a.disponibilita !== undefined && a.disponibilita.stato !== 'disponibile';
   /** Segna o toglie l'acquisto nella partita e passa al genitore l'articolo aggiornato; l'errore va in notifica. */
   const cambia = async (articolo: string, fatto: boolean) => {
@@ -44,9 +46,9 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica, onConte
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); }
     finally { setOccupato(false); }
   };
-  return <li className={`catalogo-prodotto${a.acquistato ? ' catalogo-prodotto--acquistato' : ''}`}>
+  return <li className={`catalogo-prodotto${a.acquistato && !ripetibile ? ' catalogo-prodotto--acquistato' : ''}`}>
     <div className="catalogo-prodotto__nome">
-      <strong className={a.acquistato ? 'line-through' : ''}>{a.catalogo ? <Link to={a.catalogo.casa} className="touch inline-flex items-center">{nome}</Link> : nome}</strong>
+      <strong className={a.acquistato && !ripetibile ? 'line-through' : ''}>{a.catalogo ? <Link to={a.catalogo.casa} className="touch inline-flex items-center">{nome}</Link> : nome}</strong>
       <span className="catalogo-prodotto__meta">{NOME_CATEGORIA_ARTICOLO[a.categoria] ?? a.categoria}{a.per && <> · <span>{a.per}</span></>}</span>
       {a.statistiche && <span className="text-text-secondary">{a.statistiche}</span>}
       {!!a.ricevuti?.length && <div className="flex min-w-0 flex-col gap-1"><span>Si riceve:</span><OggettiCollegati oggetti={a.ricevuti} /></div>}
@@ -61,6 +63,12 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica, onConte
       {/* Una cosa sola: la spunta. «Non ancora acquistabile» stava sia qui sia nella pastiglia
           accanto, e la stessa frase due volte sulla stessa riga sembra due informazioni. */}
       {partitaId && <AcquistiOfferta articolo={a.chiave} nome={nome} registrati={a.acquistiRegistrati ?? []}
+        partitaId={partitaId} acquisti={a.acquisti} onRileggi={async () => {
+          const aggiornato = await getNegozio(a.negozioChiave, partitaId);
+          const articolo = aggiornato.articoliElenco.find((x) => x.chiave === a.chiave);
+          if (!articolo) throw new Error('Operazione registrata; l’articolo non è più presente nel listino.');
+          onCambiato(articolo); await onContenutoCambiato?.();
+        }}
         acquistato={a.acquistato} bloccato={acquistoBloccato} occupato={occupato} onCambia={(chiave, fatto) => void cambia(chiave, fatto)} />}
       {onModifica && <button type="button" className="btn btn-ghost btn-sm touch" onClick={() => onModifica(a)} aria-label={`Correggi ${nome}`}>Modifica</button>}
     </div>

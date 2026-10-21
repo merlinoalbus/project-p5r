@@ -80,7 +80,7 @@ export const creaVoceGiornata = (data: string, dati: DatiVoceGiornata, partita?:
   apiPost(`/compendio/percorso/${data}/voci${queryString({ partita })}`, dati);
 /** Modifica una voce: testo, note, genere, fascia, posto, tipo, collegamento, rango atteso, effetti. */
 export const aggiornaVoceGiornata = (uid: string, dati: DatiVoceGiornata, partita?: number): Promise<AzionePercorsoDto> =>
-  apiPut(`/compendio/percorso/voci/${uid}${queryString({ partita })}`, dati);
+  apiPut(`/compendio/percorso/voci/${uid}${queryString({ partita })}`, dati, { maxRetries: 0 });
 /** L3 (§4.4): l'insieme ordinato delle infiltrazioni di una voce di Palazzo (anche vuoto = «nessuna»). Va da solo, senza altri campi:
  *  non tocca nient'altro della voce. */
 export const impostaInfiltrazioniVoce = (uid: string, infiltrazioni: string[], partita?: number): Promise<AzionePercorsoDto> =>
@@ -99,8 +99,8 @@ export const spostaVoceGiornata = (uid: string, verso: -1 | 1, partita?: number)
  *  da sola, una copia ripetuta creerebbe due volte le voci. */
 export const trasferisciVociGiornata = (dati: TrasferisciVociGiornata, partita?: number): Promise<VociTrasferiteDto> =>
   apiPost(`/compendio/percorso/voci/trasferisci${queryString({ partita })}`, dati);
-/** Elimina una voce dalla guida (409 se in una partita è spuntata con effetti: prima si toglie la spunta). */
-export const eliminaVoceGiornata = (uid: string): Promise<void> => apiDelete(`/compendio/percorso/voci/${uid}`);
+/** Rimozione atomica nel Cestino con spunte, fonti e ricevute; nessun secondo invio automatico. */
+export const eliminaVoceGiornata = (uid: string): Promise<void> => apiDelete(`/compendio/percorso/voci/${uid}`, { maxRetries: 0 });
 /** Elenco dei negozi; con `partita` ogni negozio porta la disponibilità alla data corrente (sblocco del negozio). */
 export const getNegozi = (partita?: number): Promise<NegozioRiassuntoDto[]> => apiGet(`/compendio/negozi${queryString({ partita })}`);
 /** Scheda di un negozio con gli articoli (acquisti della partita se indicata). */

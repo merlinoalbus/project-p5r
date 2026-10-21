@@ -1,0 +1,66 @@
+import { useState } from 'react';
+import { ARTICOLO_AOJIRU, ORDINE_AOJIRU } from '../../../shared/acquisti';
+import { nomeDote, type DoteChiave } from '../../../shared/doti';
+import type { EffettoVoce, RichiestaSalvaEffettiVoce } from '../../../shared/effettiVoce';
+import type { ElenchiAzioneDto } from '../../types';
+import type { CampiStrutturati } from '../../utils/azioneStrutturata';
+import { Selettore } from '../shared/Selettore';
+import { RigaEffettoVoceLegacy } from './RigaEffettoVoceLegacy';
+
+type Acquisto = Extract<EffettoVoce, { tipo: 'acquisto' }>;
+type Righe = RichiestaSalvaEffettiVoce['effetti'];
+
+/** Configura il legame della guida; il consumo reale viene dichiarato separatamente nella partita. */
+export function CampiAcquistoEffetto({ effetto, righe, onCambia }: { effetto: Acquisto; righe: Righe; onCambia: (e: Acquisto) => void }) {
+  const doti = righe.filter((r) => r.uid !== null && r.effetto.tipo === 'dote');
+  return <div className="flex min-w-0 flex-col gap-2">
+    <Selettore etichetta="Offerta collegata" valore={effetto.articolo} opzioni={[{ chiave: ARTICOLO_AOJIRU, nome: 'Succo Aojiru · KiyasuKu' }, ...(effetto.articolo && effetto.articolo !== ARTICOLO_AOJIRU ? [{ chiave: effetto.articolo, nome: `${effetto.articolo} · riferimento conservato` }] : [])]} onCambia={(a) => onCambia({ ...effetto, articolo: a })} />
+    <Selettore etichetta="Variante indicata dalla guida" valore={effetto.variante ?? ''} vuoto="Da osservare nella partita" opzioni={ORDINE_AOJIRU.map((d) => ({ chiave: d, nome: nomeDote(d) }))} onCambia={(d) => onCambia({ ...effetto, variante: d ? d as DoteChiave : null })} />
+    <Selettore etichetta="Fortuna indicata dalla guida" valore={effetto.fortuna === null ? 'ignota' : effetto.fortuna ? 'si' : 'no'} opzioni={[{ chiave: 'ignota', nome: 'Non dichiarata' }, { chiave: 'no', nome: 'Assente' }, { chiave: 'si', nome: 'Attiva sulla stessa Dote' }]} onCambia={(f) => onCambia({ ...effetto, fortuna: f === 'ignota' ? null : f === 'si' })} />
+    {!!doti.length && <fieldset className="m-0 flex flex-col gap-1 border border-border p-2"><legend>Doti già presenti che questo acquisto sostituisce</legend>
+      <p className="m-0 text-[12px]">Seleziona solo i premi della stessa consumazione: rimangono conservati, ma il nuovo effetto evita di attribuirli una seconda volta.</p>
+      {doti.map((r) => <label key={r.uid} className="touch flex items-center gap-2"><input className="h-5 w-5" type="checkbox" checked={effetto.sostituisceDoti.includes(r.uid!)} onChange={(e) => onCambia({ ...effetto, sostituisceDoti: e.target.checked ? [...effetto.sostituisceDoti, r.uid!] : effetto.sostituisceDoti.filter((id) => id !== r.uid) })} />{r.effetto.tipo === 'dote' ? `${nomeDote(r.effetto.dote)} · ${r.effetto.note} ${r.effetto.note === 1 ? 'nota' : 'note'}` : ''}</label>)}
+    </fieldset>}
+    <p className="m-0 text-[12px] text-text-secondary">Domenica, 5.000 yen, nessun tempo. La variante iniziale e Fortuna non sono dedotte dal nome della voce o dalla data. L’acquisto effettivo richiede la tua osservazione nella partita.</p>
+  </div>;
+}
+
+/** Lista unica con identità per effetto: riordinare non cambia UID e non riscrive gli effetti storici. */
+export function EditorEffettiVoce({ valore, elenchi, onCambia }: { valore: CampiStrutturati; elenchi: ElenchiAzioneDto; onCambia: (v: CampiStrutturati) => void }) {
+  const [tipoNuovo, setTipoNuovo] = useState<EffettoVoce['tipo']>('dote');
+  const [errore, setErrore] = useState<string | null>(null);
+  const righe = valore.effettiVoce;
+  const imposta = (effettiVoce: Righe) => { setErrore(null); onCambia({ ...valore, effettiVoce }); };
+  const cambia = (i: number, effetto: EffettoVoce) => imposta((righe ?? []).map((r, j) => j === i ? { ...r, effetto } : r));
+  const togli = (i: number) => {
+    const uid = righe?.[i]?.uid;
+    if (uid && righe?.some((r) => r.effetto.tipo === 'acquisto' && r.effetto.sostituisceDoti.includes(uid))) { setErrore('Questa Dote è indicata come sostituita da un acquisto. Rivedi prima quel collegamento.'); return; }
+    imposta((righe ?? []).filter((_, j) => i !== j));
+  };
+  const sposta = (i: number, verso: -1 | 1) => {
+    if (!righe || i + verso < 0 || i + verso >= righe.length) return;
+    const nuove = [...righe]; [nuove[i], nuove[i + verso]] = [nuove[i + verso], nuove[i]]; imposta(nuove);
+  };
+  if (!righe) return <div className="flex flex-col gap-2 text-[13px]">
+    <p role="alert" className="m-0 text-warning">Gli effetti originari non sono convertibili integralmente: {valore.fonteEffetti?.motivo ?? 'formato non riconosciuto'}. Modificare solo testo e posizione li conserva.</p>
+    <pre className="m-0 whitespace-pre-wrap break-all rounded border border-border p-2 text-[12px]">{valore.fonteEffetti?.rawLegacy}</pre>
+    <button type="button" className="btn btn-secondary touch self-start" onClick={() => imposta([])}>Ricostruisci esplicitamente l’intera lista degli effetti</button>
+    <p className="m-0 text-[12px]">La ricostruzione parte da una lista vuota da compilare. Il dato originario resta nel registro delle modifiche.</p>
+  </div>;
+  return <div className="flex min-w-0 flex-col gap-2 text-[13px]">
+    <strong>Effetti della voce</strong>
+    {!righe.length && <p className="m-0">Nessun effetto configurato.</p>}
+    <ul className="m-0 flex list-none flex-col gap-2 p-0">{righe.map((r, i) => r.effetto.tipo === 'acquisto' ? <li key={r.uid ?? `nuovo-${i}`} className="flex flex-col gap-2 rounded border border-border p-2">
+      <div className="flex flex-wrap items-center gap-2"><strong>Effetto {i + 1}: acquisto</strong><button type="button" className="btn btn-ghost touch" onClick={() => togli(i)}>Togli</button><button type="button" className="btn btn-ghost touch" disabled={i === 0} onClick={() => sposta(i, -1)}>Su</button><button type="button" className="btn btn-ghost touch" disabled={i === righe.length - 1} onClick={() => sposta(i, 1)}>Giù</button></div>
+      <CampiAcquistoEffetto effetto={r.effetto} righe={righe} onCambia={(e) => cambia(i, e)} />
+    </li> : <RigaEffettoVoceLegacy key={r.uid ?? `nuovo-${i}`} effetto={r.effetto} numero={i + 1} elenchi={elenchi} onCambia={(e) => cambia(i, e)} onTogli={() => togli(i)} onSposta={(verso) => sposta(i, verso)} primo={i === 0} ultimo={i === righe.length - 1} />)}</ul>
+    {righe.length < 100 && <div className="flex flex-wrap items-end gap-2"><Selettore etichetta="Effetto da aggiungere" valore={tipoNuovo} opzioni={[{ chiave: 'dote', nome: 'Dote' }, { chiave: 'lettura', nome: 'Lettura o gioco' }, { chiave: 'turno', nome: 'Turno di attività' }, { chiave: 'acquisto', nome: 'Acquisto Aojiru' }]} onCambia={(t) => setTipoNuovo(t as EffettoVoce['tipo'])} />
+      <button type="button" className="btn btn-secondary touch" onClick={() => {
+        const effetto: EffettoVoce = tipoNuovo === 'acquisto' ? { tipo: 'acquisto', articolo: ARTICOLO_AOJIRU, variante: null, fortuna: null, sostituisceDoti: [] } : tipoNuovo === 'lettura' ? { tipo: 'lettura', categoria: 'libro', chiave: '', almeno: null } : tipoNuovo === 'turno' ? { tipo: 'turno', attivita: '' } : { tipo: 'dote', dote: 'fascino', note: 2 };
+        imposta([...righe, { uid: null, effetto }]);
+      }}>Aggiungi l’effetto scelto</button>
+    </div>}
+    {errore && <p role="alert" className="m-0 text-error">{errore}</p>}
+    <p className="m-0 text-[12px] text-text-secondary">Su una voce già fatta, gli effetti aggiunti o modificati diventano proposte da rivedere in «Da applicare». Le ricevute della spunta rimangono distinte dalla configurazione corrente.</p>
+  </div>;
+}

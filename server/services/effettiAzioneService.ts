@@ -18,8 +18,37 @@ import type { EffettoAzione } from '../../shared/effettiAzione.js';
 import { aggiornaConfidente, annullaEffetti, confidente as confidenteDellaPartita, nomeDote, puntiDaNote } from './partiteService.js';
 import { avanzamentoLettura, haAnimaDaCineasta, impostaLettura, registraTurno, togliTurno } from './attivitaService.js';
 import { annullaIncontro, registraIncontro, type MomentoIncontro } from './incontriService.js';
+import { z } from 'zod';
+import { httpErrors } from '../utils/httpError.js';
+import type { RichiestaRegistraAcquisto } from '../../shared/acquisti.js';
+
+const numeroReceipt = z.number().finite();
+const chiaveReceipt = z.string().min(1);
+const doteReceipt = z.object({ chiave: chiaveReceipt, nome: z.string(), delta: numeroReceipt,
+  note: numeroReceipt.optional(), cinema: z.boolean().optional() }).passthrough();
+const schemaRicevutaLegacy = z.object({
+  doti: z.array(doteReceipt),
+  confidente: z.object({ chiave: chiaveReceipt, nome: z.string(), noteRisposta: z.union([z.literal(1),z.literal(2),z.literal(3)]),
+    punti: numeroReceipt, bonusArcano: z.boolean() }).passthrough().nullable(),
+  letture: z.array(z.object({ categoria: z.enum(['libro','film','videogioco']), chiave: chiaveReceipt, nome: z.string(),
+    prima: z.number().int().nonnegative(), dopo: z.number().int().nonnegative(), doti: z.array(doteReceipt).optional(), visione: z.boolean().optional() }).passthrough()).optional(),
+  turni: z.array(z.object({ attivita: chiaveReceipt, nome: z.string(), ordine: z.number().int().positive(), doti: z.array(doteReceipt) }).passthrough()).optional(),
+  incontro: z.object({ id: z.number().int().positive().nullable(), marcato: z.number().int().positive().nullable(), confidente: chiaveReceipt,
+    nome: z.string(), verso: z.number().int().min(1).max(10), passaggio: z.boolean(), giaContato: z.boolean(), doti: z.array(doteReceipt) }).passthrough().optional(),
+  apertureDedali: z.array(z.object({ chiave: chiaveReceipt, nome: z.string() }).passthrough()).optional(),
+}).passthrough();
+/** Valida senza ricostruire o scartare campi della fotografia storica. */
+export function leggiRicevutaEffettiAzione(raw: string | null): EffettiAzioneDto | null {
+  if (raw === null) return null;
+  let x: unknown;
+  try { x = JSON.parse(raw) as unknown; } catch { x = undefined; }
+  if (!schemaRicevutaLegacy.safeParse(x).success) throw httpErrors.conflict('ricevuta-spunta-illeggibile', 'La ricevuta storica della spunta non è riconoscibile: nessun effetto viene rieseguito, azzerato o annullato.');
+  return x as EffettiAzioneDto;
+}
 
 export interface OpzioniSpunta {
+  /** Osservazioni di consumo già riviste, atomiche con la nuova spunta. */
+  acquisti?: RichiestaRegistraAcquisto[];
   /** Note della risposta al Confidente (1–3) quando l'azione è un incontro con un Confidente; assente = nessun punto. */
   noteRisposta?: 1 | 2 | 3;
   /** Scelte esplicite della visita, validate da giornataService; assente preserva quelle già registrate. */
@@ -42,7 +71,7 @@ function visioniDalleSpunte(partitaId: number, chiave: string): number {
   const righe = prepared('SELECT effetti_json FROM spunta_voce_partita WHERE partita_id = ? AND effetti_json LIKE ?').all(partitaId, `%${chiave}%`) as Array<{ effetti_json: string }>;
   let n = 0;
   for (const r of righe) {
-    const e = JSON.parse(r.effetti_json) as EffettiAzioneDto;
+    const e = leggiRicevutaEffettiAzione(r.effetti_json)!;
     n += (e.letture ?? []).filter((l) => l.visione && l.categoria === 'film' && l.chiave === chiave).length;
   }
   return n;
@@ -97,6 +126,7 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
 
 /** Toglie esattamente ciò che la spunta aveva applicato: punti del Confidente, i turni registrati e l'incontro (le Doti no). */
 export function annullaEffettiAzione(partitaId: number, e: EffettiAzioneDto): void {
+  if (!schemaRicevutaLegacy.safeParse(e).success) throw httpErrors.conflict('ricevuta-spunta-illeggibile', 'La ricevuta storica non è riconoscibile: nessun annullo è stato eseguito.');
   annullaEffetti(partitaId, e);
   for (const t of e.turni ?? []) togliTurno(partitaId, t.attivita, t.ordine);
   if (e.incontro) annullaIncontro(partitaId, e.incontro);

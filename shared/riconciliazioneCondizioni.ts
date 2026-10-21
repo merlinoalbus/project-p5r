@@ -53,6 +53,9 @@ export interface RigaRiconciliazioneDto {
   /** A12: fonte corrente distinta dai due esiti storici della135. Nessuna disponibilità o bonifica inferita. */
   fonteConfidente?: FonteConfidenteAttivitaDto | null;
   statoAuditConfidente?: 'assente' | 'illeggibile' | 'leggibile';
+  /** I71: compatibilità tecnica con il gesto, distinta da identità canonica, disponibilità ed esito della136. */
+  informazioneAcquisto?: { tipo: 'aojiru'; regola: string; compatibilitaTecnicaRegistrazione: boolean; motivi: string[] };
+  statoAuditAcquisto?: 'assente' | 'illeggibile' | 'leggibile';
   decisione: (DecisioneCondizioni & { daRiconfermare: boolean; storico: DecisioneCondizioni[] }) | null;
   azioniConsentite: AzioneRiconciliazione[];
   improntaFonte: string;

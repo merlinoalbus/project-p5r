@@ -13,7 +13,7 @@
 // ============================================================
 
 import { useState } from 'react';
-import { eliminaDalCestino, getCestino, ripristinaDalCestino, svuotaCestino } from '../../services/api';
+import { eliminaDalCestinoUnificato, getCestinoUnificato, ripristinaDalCestinoUnificato, svuotaCestinoUnificato } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { byteTesto } from '../../utils/byte';
@@ -21,13 +21,15 @@ import { contenutoLeggibile, descrizioneElementoCestino, motivoSaltata, NOME_TIP
 import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
-import type { EsitoRipristinoCestinoDto, VoceCestinoDto } from '../../types';
+import type { EsitoRipristinoCestinoDto, VoceCestinoUnificatoDto } from '../../types';
+import { usePartitaStore } from '../../stores/partitaStore';
+import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
 
 /** Data e ora di un'eliminazione, all'italiana. */
 const quando = (iso: string): string => new Date(iso).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' });
 
 /** Un elemento del cestino: che cos'era, dove, quando, che cosa si è portato via; «Rimetti» ed «Elimina per sempre». */
-function ElementoCestino({ v, occupato, onRimetti, onElimina }: { v: VoceCestinoDto; occupato: boolean; onRimetti: () => void; onElimina: () => void }) {
+function ElementoCestino({ v, occupato, onRimetti, onElimina }: { v: VoceCestinoUnificatoDto; occupato: boolean; onRimetti: () => void; onElimina: () => void }) {
   // «Area di Shibuya: Sottopasso», poi «con 2 planimetrie, 14 pin e 3 immagini»: le parole di chi gioca, senza le tabelle interne (UX2-12)
   const { titolo, con } = descrizioneElementoCestino(v);
   const contenuto = contenutoLeggibile(v);
@@ -79,9 +81,9 @@ function EsitoRipristino({ esito }: { esito: EsitoRipristinoCestinoDto }) {
 
 /** La sezione «Cestino» delle Impostazioni. */
 export function Cestino() {
-  const elenco = useCarica(() => getCestino(), []);
+  const elenco = useCarica(() => getCestinoUnificato(), []);
   const [occupato, setOccupato] = useState(false);
-  const [daEliminare, setDaEliminare] = useState<VoceCestinoDto | null>(null);
+  const [daEliminare, setDaEliminare] = useState<VoceCestinoUnificatoDto | null>(null);
   const [svuotare, setSvuotare] = useState(false);
   const [esito, setEsito] = useState<EsitoRipristinoCestinoDto | null>(null);
   const voci = elenco.dati ?? [];
@@ -95,19 +97,21 @@ export function Cestino() {
       setOccupato(false);
     }
   };
-  const rimetti = (v: VoceCestinoDto) => esegui(async () => {
-    const e = await ripristinaDalCestino(v.id);
+  const rimetti = (v: VoceCestinoUnificatoDto) => esegui(async () => {
+    const e = await ripristinaDalCestinoUnificato(v);
     if (e.saltate.length > 0 || e.partiteMancanti) setEsito(e);
     else notifica('success', `Di nuovo al suo posto: «${v.nome}».`);
+    useSuggerimentiStore.getState().invalida();
+    await usePartitaStore.getState().carica();
   });
-  const elimina = (v: VoceCestinoDto) => esegui(async () => {
+  const elimina = (v: VoceCestinoUnificatoDto) => esegui(async () => {
     setDaEliminare(null);
-    await eliminaDalCestino(v.id);
+    await eliminaDalCestinoUnificato(v);
     notifica('success', `Eliminazione definitiva dal cestino: «${v.nome}».`);
   });
   const svuota = () => esegui(async () => {
     setSvuotare(false);
-    const { eliminati } = await svuotaCestino();
+    const { eliminati } = await svuotaCestinoUnificato();
     notifica('success', eliminati === 1 ? 'Cestino svuotato: tolto per sempre 1 elemento.' : `Cestino svuotato: tolti per sempre ${eliminati} elementi.`);
   });
 
@@ -119,7 +123,7 @@ export function Cestino() {
           <p className="m-0 text-[13px] text-text-secondary">
             {/* le aree del mondo ci finiscono da L2 (UX2-12) */}
             Le aree dei quartieri e della città, le planimetrie, le infiltrazioni dei Palazzi, le voci della guida e le aree dei dedali
-            eliminate, con tutto quel che si sono portate via (pin e segni delle partite compresi). «Rimetti» le riporta com’erano; quel che
+            eliminate, le partite e le singole fonti d’acquisto, con tutto quel che si sono portate via (pin e segni delle partite compresi). «Rimetti» le riporta com’erano; quel che
             hai cambiato dopo resta com’è. Il cestino si svuota solo a mano: aree e planimetrie ci portano anche le loro immagini.
           </p>
           {voci.length > 0 && <span className="text-[12px] text-text-muted">{voci.length === 1 ? '1 elemento' : `${voci.length} elementi`} · {byteTesto(peso)}</span>}
@@ -131,7 +135,7 @@ export function Cestino() {
       {elenco.dati && voci.length === 0 && <p className="m-0 text-[13px] text-text-muted">Il cestino è vuoto.</p>}
       {voci.length > 0 && (
         <ul className="m-0 flex list-none flex-col gap-2 p-0" aria-label="Elementi del cestino">
-          {voci.map((v) => <ElementoCestino key={v.id} v={v} occupato={occupato} onRimetti={() => void rimetti(v)} onElimina={() => setDaEliminare(v)} />)}
+          {voci.map((v) => <ElementoCestino key={v.id === null ? `utente:${v.riferimento.uid}` : `gioco:${v.id}`} v={v} occupato={occupato} onRimetti={() => void rimetti(v)} onElimina={() => setDaEliminare(v)} />)}
         </ul>
       )}
 

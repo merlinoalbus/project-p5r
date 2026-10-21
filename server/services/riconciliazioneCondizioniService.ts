@@ -11,6 +11,7 @@ import { condizioneDelRequisito, type RigaRequisito } from './semaforiService.js
 import { descriviOrari, descriviOrariDelLuogo, leggiOrari, orariDelLuogo } from '../../shared/orariNegozio.js';
 import { descriviRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { GRUPPI_FRASI_CONDIZIONI, REVISIONE_RICONCILIAZIONE, type GruppoFraseCondizioni } from '../../shared/riconciliazioneCondizioniManifest.js';
+import { ARTICOLO_AOJIRU, CATALOGO_AOJIRU, PREZZO_AOJIRU, eOffertaAojiru } from '../../shared/acquisti.js';
 import type { DecisioneCondizioni, DecisioneCondizioniInput, DipendenzaRiconciliazione, FormulaRiconciliazione, RigaRiconciliazioneDto,
   RiconciliazioneCondizioniDto, TabellaRiconciliazione } from '../../shared/riconciliazioneCondizioni.js';
 
@@ -138,6 +139,24 @@ function auditTakemi(r: Riga | undefined): { stato: NonNullable<RigaRiconciliazi
     { migrazione: 135, esito: beneficio.esito === 'aggiunto' ? 'applicata' : beneficio.esito === 'gia-corretto' ? 'gia-corretta' : 'esclusa', motivo: `Beneficio verso rango8: esito originale135 ${beneficio.esito}. ${beneficio.motivo}` },
   ] };
 }
+function auditAojiru(righe: Riga[]): { stato: NonNullable<RigaRiconciliazioneDto['statoAuditAcquisto']>; righe: RigaRiconciliazioneDto['auditMigrazioni'] } {
+  if (!righe.length) return { stato: 'assente', righe: [] };
+  const a = righe[0];
+  const campi = ['id','versione','articolo_chiave','catalogo_chiave','esito','motivo','prima_json','dopo_json','creato_il'];
+  const prima = record(decodifica(a?.prima_json)), dopo = record(decodifica(a?.dopo_json));
+  const valido = righe.length === 1 && a?.id === 1 && a.versione === 1 && a.articolo_chiave === ARTICOLO_AOJIRU && a.catalogo_chiave === CATALOGO_AOJIRU
+    && Object.keys(a).length === campi.length && campi.every(c => c in a)
+    && typeof a.esito === 'string' && ['rettificata','gia-corretta','assente','esclusa'].includes(a.esito)
+    && typeof a.motivo === 'string' && !!a.motivo.trim() && typeof a.creato_il === 'string'
+    && prima !== null && Object.keys(prima).length === 2 && 'articolo' in prima && 'catalogo' in prima
+    && (prima.articolo === null || record(prima.articolo)?.chiave === ARTICOLO_AOJIRU)
+    && (prima.catalogo === null || record(prima.catalogo)?.chiave === CATALOGO_AOJIRU)
+    && typeof dopo?.effetto === 'string' && !!dopo.effetto.trim();
+  if (!valido || !a) return { stato: 'illeggibile', righe: [] };
+  return { stato: 'leggibile', righe: [{ migrazione: 136,
+    esito: a.esito === 'rettificata' ? 'applicata' : a.esito === 'gia-corretta' ? 'gia-corretta' : 'esclusa',
+    motivo: `Articolo e testo del catalogo: esito originale136 ${String(a.esito)}. ${String(a.motivo)}` }] };
+}
 interface Registro { attuale: DecisioneCondizioni; storico: DecisioneCondizioni[] }
 function decisione(x: unknown): x is DecisioneCondizioni {
   const r = record(x);
@@ -177,6 +196,8 @@ function fotografia(): { dto: RiconciliazioneCondizioniDto; proposte: Map<string
     return { valore: risultato.data, testo: risultato.data.length ? risultato.data.map((c) => descriviRequisitoSpillo(c, nomi)) : ['Nessuna condizione propria'], errore: null };
   };
   const dati = leggiTabella('dati_guida');
+  const tabellaAuditAojiruPresente = !!db.prepare("SELECT 1 FROM main.sqlite_master WHERE type='table' AND name='audit_aojiru_136'").get();
+  const righeAuditAojiru = tabellaAuditAojiruPresente ? db.prepare('SELECT * FROM main.audit_aojiru_136 ORDER BY id').all() as Riga[] : [];
   const aud = [123, 124].map((n) => ({ n, valore: record(decodifica(dati.get(n === 123 ? 'bonifica-condizioni-letture-123' : 'bonifica-condizioni-attivita-124')?.json)) }));
   // PK composte: array ordinati dedicati, senza la mappa chiave/id di leggiTabella.
   const fontiConfidenti = new Map<string, { raw: Riga; requisiti: Riga[]; guida: Riga[] }>();
@@ -213,6 +234,21 @@ function fotografia(): { dto: RiconciliazioneCondizioniDto; proposte: Map<string
     const g = manifest.get(id);
     const r = leggiTabella(tabella).get(chiave);
     const a12 = g?.id === 'A12' && tabella === 'attivita' && chiave === ATTIVITA_TAKEMI;
+    const i71 = g?.id === 'I71' && tabella === 'articolo' && chiave === ARTICOLO_AOJIRU;
+    const auditAcquisto = i71 ? auditAojiru(righeAuditAojiru) : null;
+    const motiviAcquisto: string[] = [];
+    if (i71) {
+      if (!r) motiviAcquisto.push('Offerta assente: nessuna ricreazione.');
+      else {
+        if (!eOffertaAojiru({ chiave, catalogoChiave: r.catalogo_chiave as string | null })) motiviAcquisto.push('Il collegamento non rientra nel predicato tecnico del gesto Aojiru.');
+        if (r.catalogo_chiave == null) motiviAcquisto.push('Catalogo non risolto: NULL è tecnicamente ammesso dal gesto, non dimostra un’identità canonica.');
+        if (r.prezzo !== PREZZO_AOJIRU || r.costo_json != null || r.articolo_condiviso != null) motiviAcquisto.push('Prezzo, costo o condivisione divergono dal gesto di registrazione riconosciuto.');
+      }
+    }
+    const informazioneAcquisto = i71 ? { tipo: 'aojiru' as const,
+      regola: 'Domenica; 5000 yen e 2 punti interni (1 nota) di base. Fascino → Perizia → Coraggio → Gentilezza → Conoscenza: la rotazione avanza con le consumazioni confermate, senza calendario assoluto. Fortuna e precedente conteggio restano dichiarazioni esplicite.',
+      compatibilitaTecnicaRegistrazione: !!r && eOffertaAojiru({ chiave, catalogoChiave: r.catalogo_chiave as string | null }) && r.prezzo === PREZZO_AOJIRU && r.costo_json == null && r.articolo_condiviso == null,
+      motivi: motiviAcquisto } : undefined;
     const fonteConfidente = a12 && r ? fonteConfidenteAttivita(r) : null;
     const auditConfidente = a12 ? auditTakemi(dati.get(AUDIT_TAKEMI)) : null;
     const campo = tabella === 'negozio' ? 'sblocco_json' : 'condizioni_json';
@@ -294,6 +330,10 @@ function fotografia(): { dto: RiconciliazioneCondizioniDto; proposte: Map<string
       // Anche l'assenza e il RAW illeggibile fanno parte del CAS: non si firma una fonte troncata.
       dipendenze.set(`audit:${AUDIT_TAKEMI}`, { presente: dati.has(AUDIT_TAKEMI), raw: dati.get(AUDIT_TAKEMI) ?? null });
     }
+    if (i71) {
+      dipendenze.set('audit:aojiru-136', { presente: tabellaAuditAojiruPresente, righe: righeAuditAojiru });
+      acquisisci('catalogo_oggetto', CATALOGO_AOJIRU, false);
+    }
     const proprie = r ? formula(r[campo]) : { valore: null, testo: [], errore: 'Oggetto assente: condizioni non disponibili.' };
     const fonteA12Valida = a12 && r?.confidente_chiave === 'takemi' && fonteConfidente?.chiave === 'takemi' && fonteConfidente.stato === 'collegato'
       && !fonteConfidente.campiIncompatibili.length && !proprie.errore && proprie.valore?.length === 0 && !dipendenzeIncomplete;
@@ -305,7 +345,10 @@ function fotografia(): { dto: RiconciliazioneCondizioniDto; proposte: Map<string
     const esitoFonte = !r ? 'assente' : !g ? 'nuova' : frase === g.fraseStorica ? 'presente-identica' : 'mutata';
     const esitoFormula = !g || g.analisi === 'ricerca' ? 'da-ricercare' : !p || !propostaValida || proprie.errore ? 'non-confrontabile'
       : json(proprie.valore) === json(p.dopo) ? 'coincide' : 'diversa';
-    const improntaFonte = impronta({ revisione: REVISIONE_RICONCILIAZIONE, g: g ?? null, r: r ?? null, dipendenze: [...dipendenze].sort(([a], [b]) => a.localeCompare(b)), proposta: p });
+    // Il delta informativo I71 non riapre le altre decisioni: per esse la
+    // fotografia resta identica alla revisione precedente, comprese le sue fonti.
+    const revisioneFonte = i71 ? REVISIONE_RICONCILIAZIONE : '2026-10-21.3';
+    const improntaFonte = impronta({ revisione: revisioneFonte, g: g ?? null, r: r ?? null, dipendenze: [...dipendenze].sort(([a], [b]) => a.localeCompare(b)), proposta: p });
     const reg = registro(dati.get(PREFISSO + id)?.json);
     if (reg) registri.set(id, reg);
     const precedente = reg?.attuale;
@@ -322,6 +365,7 @@ function fotografia(): { dto: RiconciliazioneCondizioniDto; proposte: Map<string
     }
     const auditMigrazioni: RigaRiconciliazioneDto['auditMigrazioni'] = [];
     if (auditConfidente) auditMigrazioni.push(...auditConfidente.righe);
+    if (auditAcquisto) auditMigrazioni.push(...auditAcquisto.righe);
     const origineAudit = `${tabella}:${chiave}`;
     for (const a of aud) {
       const arr = (campoAudit: string) => Array.isArray(a.valore?.[campoAudit]) ? a.valore[campoAudit] as unknown[] : [];
@@ -356,6 +400,7 @@ function fotografia(): { dto: RiconciliazioneCondizioniDto; proposte: Map<string
       fonti: g?.fonti ?? [], destinazione: g ? { tabella, chiave, campo } : null, condizioniProprie: proprie, fontiEreditate,
       formulaProposta: p ? formula(p.dopo) : null, esitoFonte, esitoFormula, auditMigrazioni,
       ...(a12 ? { fonteConfidente, statoAuditConfidente: auditConfidente!.stato } : {}),
+      ...(i71 ? { informazioneAcquisto, statoAuditAcquisto: auditAcquisto!.stato } : {}),
       decisione: precedente ? { ...precedente, daRiconfermare: precedente.improntaFonte !== improntaFonte, storico: reg!.storico } : null,
       azioniConsentite: azioni, improntaFonte, revisioneAttesa: impronta({ improntaFonte, registro: reg }) });
   }

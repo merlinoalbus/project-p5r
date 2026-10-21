@@ -8,7 +8,7 @@
 // è tutto del backend, che legge dal mount.
 // ============================================================
 
-import type { AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, EsitoRipristinoCestinoDto, EsitoRipristinoDto, StatoImportazionePacchettoDto, StatoIstanzaDto, VoceCestinoDto } from '../../types';
+import type { AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, EsitoRipristinoCestinoDto, EsitoRipristinoDto, StatoImportazionePacchettoDto, StatoIstanzaDto, VoceCestinoDto, VoceCestinoUnificatoDto } from '../../types';
 import { API_BASE_URL } from '../../utils/constants';
 import { httpFetch } from './_httpClient';
 import { ApiError, apiDelete, apiGet, apiPost, apiPut } from './_helpers';
@@ -90,3 +90,13 @@ export const eliminaDalCestino = (id: number): Promise<void> => apiDelete(`/impo
 
 /** Svuota il cestino. */
 export const svuotaCestino = (): Promise<{ eliminati: number }> => apiDelete('/impostazioni/cestino', { maxRetries: 0 });
+
+/** Il nuovo client richiede anche gli elementi personali; gli indirizzi storici conservano il contratto precedente. */
+export const getCestinoUnificato = (): Promise<VoceCestinoUnificatoDto[]> => apiGet('/impostazioni/cestino?partite=1');
+export const svuotaCestinoUnificato = (): Promise<{ eliminati: number }> => apiDelete('/impostazioni/cestino?partite=1', { maxRetries: 0 });
+export const ripristinaDalCestinoUnificato = (v: VoceCestinoUnificatoDto): Promise<EsitoRipristinoCestinoDto> => v.id === null
+  ? apiPost(`/impostazioni/cestino/partite/${encodeURIComponent(v.riferimento.uid)}/ripristina`, undefined, { maxRetries: 0 })
+  : ripristinaDalCestino(v.id);
+export const eliminaDalCestinoUnificato = (v: VoceCestinoUnificatoDto): Promise<void> => v.id === null
+  ? apiDelete(`/impostazioni/cestino/partite/${encodeURIComponent(v.riferimento.uid)}`, { maxRetries: 0 })
+  : eliminaDalCestino(v.id);

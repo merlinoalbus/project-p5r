@@ -18,6 +18,8 @@ import { arrivoSpillo, nomeDellaMeta, nomeMetaSpillo, type NavigaMappa } from '.
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type Ref } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
+import { eOffertaAojiru } from '../../../shared/acquisti';
+import { ConsumiAojiru } from '../catalogo/ConsumiAojiru';
 import type { MappaDto, SpilloDto, VoceDelPinDto } from '../../types';
 import { DEFINIZIONI_SPILLO, TIPI_SPILLO, categoriaSpillo, parolaDelloStato, puntoDescrittivo, ritornoDelloStato, statoDelPin, type TipoSpillo } from '../../../shared/spilli';
 import { useImmagineMappa } from '../../hooks/useImmagineMappa';
@@ -84,6 +86,7 @@ interface Props {
   onStatoPunto?: (spillo: SpilloDto, voce: string, stato: StatoPuntoMappa) => Promise<void> | void;
   /** Acquisto (o riapertura) di un articolo del negozio collegato allo spillo. */
   onAcquisto?: (spillo: SpilloDto, articoloChiave: string, fatto: boolean) => Promise<void> | void;
+  onAcquistiCambiati?: () => Promise<void> | void;
   /** L4 (§4.2): apre la finestra «Da verificare» di un pin fatto con una voce non fatta (la apre chi monta il visore). */
   onDaVerificare?: (d: DivergenzaDaVerificare) => void;
   /** L4 §4.2 (§1.4): l'infiltrazione di contesto scelta nel popup di un pin di voci di più infiltrazioni; chi ospita il visore rilegge la
@@ -260,7 +263,7 @@ function disponibilita(a: { disponibileDal: string | null }): string {
  * condizioni della partita sono nascosti salvo richiesta esplicita, i raccolti salvo «mostra
  * raccolti». Con `editor` il clic e il trascinamento passano agli strumenti dell'editor;
  * `selezioneIniziale` e `puntoIniziale` fissano l'inquadratura d'apertura una volta per mappa. */
-export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onDaVerificare, onContesto, onChiudi, etichettaChiudi, incorporato, azioni, ritorno, editor, vistaGiornoCorrente, pannello, contenutiPannello, intestazione, className, selezioneIniziale, rivelaSelezione, puntoIniziale, scelta, pannelloIniziale, onPannello, titolo, senzaVicine, guida, popupIniziale = true, nonDisponibili }: Props) {
+export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onAcquistiCambiati, onDaVerificare, onContesto, onChiudi, etichettaChiudi, incorporato, azioni, ritorno, editor, vistaGiornoCorrente, pannello, contenutiPannello, intestazione, className, selezioneIniziale, rivelaSelezione, puntoIniziale, scelta, pannelloIniziale, onPannello, titolo, senzaVicine, guida, popupIniziale = true, nonDisponibili }: Props) {
   const sugg = useSuggerimenti();
   const tela = useRef<HTMLDivElement | null>(null);
   const [dim, setDim] = useState<Dimensioni>({ w: 0, h: 0 });
@@ -809,7 +812,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
           {pannello ?? <>
           {contenutiPannello}
           {selezionato && (
-            <SchedaSpillo key={selezionato.id} ref={schedaRef} spillo={selezionato} partitaId={partitaId} occupato={occupato} onNaviga={onNaviga} onRaccolto={onRaccolto ? cambiaRaccolto : undefined} onStatoPunto={onStatoPunto ? cambiaStatoPunto : undefined} onAcquisto={onAcquisto ? cambiaAcquisto : undefined} onChiudi={() => seleziona(null)} onCentra={() => centraSu(selezionato)} />
+            <SchedaSpillo key={`${partitaId}:${selezionato.id}`} ref={schedaRef} spillo={selezionato} partitaId={partitaId} occupato={occupato} onNaviga={onNaviga} onRaccolto={onRaccolto ? cambiaRaccolto : undefined} onStatoPunto={onStatoPunto ? cambiaStatoPunto : undefined} onAcquisto={onAcquisto ? cambiaAcquisto : undefined} onAcquistiCambiati={onAcquistiCambiati} onChiudi={() => seleziona(null)} onCentra={() => centraSu(selezionato)} />
           )}
           {!senzaVicine && (mappa.genitore || mappa.figli.length > 0) && (
             <section className="visore-mappa__sezione">
@@ -1033,7 +1036,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                     2026-09-11): uno spostamento porta altrove; uno spillo di città mostra la merce del
                     negozio disponibile adesso (o l'attività, o il Confidente); un consumabile si segna
                     fatto; un informativo dice e basta. */}
-                {categoriaSpillo(selezionato.tipo) === 'citta' && selezionato.dettaglio?.negozio && <MerceNelPopup negozio={selezionato.dettaglio.negozio} spillo={selezionato} partitaId={partitaId} occupato={occupato} onAcquisto={onAcquisto ? cambiaAcquisto : undefined} />}
+                {categoriaSpillo(selezionato.tipo) === 'citta' && selezionato.dettaglio?.negozio && <MerceNelPopup negozio={selezionato.dettaglio.negozio} spillo={selezionato} partitaId={partitaId} occupato={occupato} onAcquisto={onAcquisto ? cambiaAcquisto : undefined} onAcquistiCambiati={onAcquistiCambiati} />}
                 <div className="flex flex-wrap gap-1">
                   {categoriaSpillo(selezionato.tipo) === 'spostamento' && <NavigazioneSpillo spillo={selezionato} partitaId={partitaId} onNaviga={onNaviga} nomeMappa={selezionato.destinazioneNomi?.mappa} nomeSpillo={selezionato.destinazioneNomi?.spillo ?? undefined} />}
                   {/* un pin con uno stato (un consumabile, un meccanismo, una porta…: `statoDelPin`, 2026-10-03), e anche un pin senza
@@ -1182,7 +1185,7 @@ function sistemaEtichette(t: HTMLElement): void {
 type NegozioNelPopup = NonNullable<NonNullable<SpilloDto['dettaglio']>['negozio']>;
 
 /** La merce del negozio **disponibile adesso**, dentro il popup dello spillo di città: nome, prezzo e la casella «comprato» con la partita. */
-function MerceNelPopup({ negozio, spillo, partitaId, occupato, onAcquisto }: { negozio: NegozioNelPopup; spillo: SpilloDto; partitaId: number | null; occupato: boolean; onAcquisto?: (spillo: SpilloDto, articoloChiave: string, fatto: boolean) => Promise<void> }) {
+function MerceNelPopup({ negozio, spillo, partitaId, occupato, onAcquisto, onAcquistiCambiati }: { negozio: NegozioNelPopup; spillo: SpilloDto; partitaId: number | null; occupato: boolean; onAcquisto?: (spillo: SpilloDto, articoloChiave: string, fatto: boolean) => Promise<void>; onAcquistiCambiati?: () => void | Promise<void> }) {
   const disponibili = negozio.articoli.filter((a) => a.disponibilita === undefined || a.disponibilita.stato === 'disponibile');
   const bloccati = negozio.articoli.length - disponibili.length;
   return (
@@ -1200,12 +1203,13 @@ function MerceNelPopup({ negozio, spillo, partitaId, occupato, onAcquisto }: { n
                 {/* L'etichetta attorno alla casella è il bersaglio: era l'unica casella dell'app a
                     non averla, e restava un quadratino di 20 px (trovata cercando nel codice, non
                     nelle misure: il criterio dice di misurare l'etichetta, e qui non c'era). */}
-                {partitaId && onAcquisto
+                {!eOffertaAojiru({ chiave: a.chiave }) && partitaId && onAcquisto
                   ? <label className="touch flex items-center justify-center shrink-0 -my-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 shrink-0" checked={a.comprato} disabled={occupato} aria-label={`${a.nome} comprato`} onChange={(e) => void onAcquisto(spillo, a.chiave, e.target.checked)} /></label>
                   : <span className="w-5 shrink-0 text-center">{a.comprato ? '✓' : ''}</span>}
-                <div className="min-w-0 flex-1 break-words"><span className={a.comprato ? 'line-through' : ''} title={`${a.nome} · ${a.categoria}`}>{a.catalogo ? <Link to={a.catalogo.casa} className="touch inline-flex items-center">{a.nome}</Link> : a.nome}</span>
+                <div className="min-w-0 flex-1 break-words"><span className={a.comprato && !eOffertaAojiru({ chiave: a.chiave }) ? 'line-through' : ''} title={`${a.nome} · ${a.categoria}`}>{a.catalogo ? <Link to={a.catalogo.casa} className="touch inline-flex items-center">{a.nome}</Link> : a.nome}</span>
                   {!!a.ricevuti?.length && <OggettiCollegati oggetti={a.ricevuti} />}</div>
                 <span className="min-w-0 max-w-full tabular-nums text-text-secondary"><CostoDellOggetto costo={a.costo ?? null} prezzo={a.prezzo} daVerificare={a.costoDaVerificare} /></span>
+                {partitaId !== null && onAcquistiCambiati && eOffertaAojiru({ chiave: a.chiave }) && <div className="w-full"><ConsumiAojiru key={`${partitaId}:${spillo.id}:${a.chiave}`} partitaId={partitaId} stato={a.acquisti} onCambiato={onAcquistiCambiati} /></div>}
               </li>
             ))}
           </ul>
@@ -1294,12 +1298,13 @@ interface PropsScheda<T extends SpilloDto | SchedaContenutoGuidaDto> {
   onRaccolto?: (spillo: T, raccolto: boolean) => Promise<void>;
   onStatoPunto?: (spillo: T, voce: string, stato: StatoPuntoMappa) => Promise<void>;
   onAcquisto?: (spillo: T, articoloChiave: string, fatto: boolean) => Promise<void>;
+  onAcquistiCambiati?: () => void | Promise<void>;
   onChiudi: () => void;
   onCentra?: () => void;
 }
 
 /** Scheda dello spillo selezionato: descrizione, entità collegata e azioni. */
-export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ ref, spillo: s, partitaId, occupato, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onChiudi, onCentra, nonSpaziale = false }: PropsScheda<T>) {
+export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ ref, spillo: s, partitaId, occupato, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onAcquistiCambiati, onChiudi, onCentra, nonSpaziale = false }: PropsScheda<T>) {
   const acquistabile = Boolean(partitaId && onAcquisto);
   const d = s.dettaglio;
   const negozio = d?.negozio ?? null;
@@ -1382,12 +1387,12 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
               <ul className="visore-mappa__merce m-0 list-none p-0" aria-label={`Articoli di ${negozio.nome}`}>
                 {articoliVisibili.map((a) => (
                   <li key={a.chiave} className="visore-mappa__merce-riga">
-                    {acquistabile
+                    {acquistabile && !eOffertaAojiru({ chiave: a.chiave })
                       ? <label className="touch flex items-center justify-center shrink-0 -my-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 shrink-0" checked={a.comprato} disabled={occupato}
                           onChange={(e) => void onAcquisto!(s, a.chiave, e.target.checked)} aria-label={`${a.nome} comprato`} /></label>
                       : <span className="w-5 shrink-0 text-center" role="img" aria-label={a.comprato ? 'comprato' : 'non comprato'}>{a.comprato ? '✓' : ''}</span>}
                     <div className="min-w-0 flex-1">
-                      <span className={`block text-[13px] leading-tight ${a.comprato ? 'line-through' : ''}`}>
+                      <span className={`block text-[13px] leading-tight ${a.comprato && !eOffertaAojiru({ chiave: a.chiave }) ? 'line-through' : ''}`}>
                         {a.catalogo ? <Link to={a.catalogo.casa} className="touch inline-flex items-center">{a.nome}</Link> : a.nome}<span className="text-text-muted no-underline"> · {a.categoria}</span>
                       </span>
                       {!!a.ricevuti?.length && <OggettiCollegati oggetti={a.ricevuti} />}
@@ -1399,6 +1404,7 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
                           ? <ChipDisponibilita disponibilita={a.disponibilita} compatto />
                           : <span>{disponibilita(a)}</span>}
                       </span>
+                      {partitaId !== null && onAcquistiCambiati && eOffertaAojiru({ chiave: a.chiave }) && <ConsumiAojiru key={`${partitaId}:${s.id}:${a.chiave}`} partitaId={partitaId} stato={a.acquisti} onCambiato={onAcquistiCambiati} />}
                     </div>
                   </li>
                 ))}

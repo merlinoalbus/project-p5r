@@ -1,7 +1,7 @@
 import type { AnalisiRiconciliazione, FonteRiconciliazione, TabellaRiconciliazione } from './riconciliazioneCondizioni.js';
 
 /** Trascrizione esplicita del censimento pubblico: mai parsing di Markdown o formule ricavate dalla prosa. */
-export const REVISIONE_RICONCILIAZIONE = '2026-10-21.3';
+export const REVISIONE_RICONCILIAZIONE = '2026-10-21.4';
 export interface GruppoFraseCondizioni {
   id: string;
   classeStorica: 'M' | 'E' | 'R';
@@ -23,6 +23,8 @@ const negozi = { titolo: 'AGS — Offerte dei due banchi', url: 'https://www.all
 const qimranut = { titolo: 'AGS — Primo ingresso guidato nei Memento', url: 'https://www.allgamestaff.it/persona-5-royal/dedalo-di-qimranut/' };
 const takemi = { titolo: 'AGS Royal — Tae Takemi, requisiti e passaggi di rango', url: 'https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-tae-takemi-morte/' };
 const takemiRoyal = { titolo: 'GameFAQs Royal — Death, beneficio del passaggio8', url: 'https://gamefaqs.gamespot.com/ps4/260936-persona-5-royal/faqs/78212/death' };
+const aojiruRoyal = { titolo: 'Megaten Database Royal — Aojiru e punti delle note', url: 'https://aqiu384.github.io/megaten-database/p5r/overworld.html' };
+const aojiruRotazione = { titolo: 'GameFAQs Royal — Aojiru Rotation', url: 'https://gamefaqs.gamespot.com/ps4/260936-persona-5-royal/faqs/78212/how-to-use' };
 const g = (codice: string, chiavi: string, fraseStorica: string, propostaTesto: string, analisi: AnalisiRiconciliazione = 'ricerca'): GruppoFraseCondizioni => {
   const [id, classe] = codice.split(' ');
   const tabella: TabellaRiconciliazione = id[0] === 'L' ? 'luogo' : id[0] === 'N' ? 'negozio' : id[0] === 'A' ? 'attivita' : 'articolo';
@@ -30,7 +32,7 @@ const g = (codice: string, chiavi: string, fraseStorica: string, propostaTesto: 
     campoFrase: tabella === 'articolo' ? 'condizione' : 'sblocco', fraseStorica, propostaTesto, analisi,
     notaDaConservare: 'Conservare integralmente la frase nella sua provenienza. La nota storica non sostituisce i requisiti strutturati.',
     fonti: [specifica, matrice, ...(['I38', 'I41', 'I73'].includes(id) ? [libri] : ['A04', 'A06', 'A11', 'I43'].includes(id) ? [giochi]
-      : id === 'N14' ? [niijima, negozi] : id === 'L26' ? [qimranut] : id === 'A12' ? [takemi, takemiRoyal] : [])] };
+      : id === 'N14' ? [niijima, negozi] : id === 'L26' ? [qimranut] : id === 'A12' ? [takemi, takemiRoyal] : id === 'I71' ? [aojiruRoyal, aojiruRotazione] : [])] };
 };
 
 export const GRUPPI_FRASI_CONDIZIONI: readonly GruppoFraseCondizioni[] = [
@@ -178,7 +180,7 @@ export const GRUPPI_FRASI_CONDIZIONI: readonly GruppoFraseCondizioni[] = [
   g('I68 E', 'big-bang-burger/panino-terrestre', 'solo in primavera', 'Stagione primavera.', 'condizioni'),
   g('I69 M', 'chiesa-kanda/vino-della-grazia;chiesa-kanda/acqua-battesimale', 'solo la domenica', 'Ereditare eccezione commerciale domenica, senza nuova copia.', 'eredita'),
   g('I70 E', 'friggitoria-hagoromo/katsu-a-pezzettoni', 'solo la domenica sera', 'Domenica e sera sulla singola offerta.', 'condizioni'),
-  g('I71 R', 'chiosco-kiyasuku/succo-aojiru', 'solo la domenica, salvo eccezioni (rotazione settimanale fissa)', 'Rotazione dipendente dagli acquisti precedenti, non calendario assoluto. Chiosco dei succhi distinto da KiyasuKu.'),
+  g('I71 R', 'chiosco-kiyasuku/succo-aojiru', 'solo la domenica, salvo eccezioni (rotazione settimanale fissa)', 'Domenica nelle condizioni; rotazione dipendente dalle consumazioni confermate, distinta dalla presenza legacy. Regola informativa e audit136 separati: nessun calendario assoluto o conferma automatica. Chiosco dei succhi distinto da KiyasuKu.'),
   g('I72 E', 'taisho-store/natto-rugiadoso;prossimo-asso/frullato-iperproteico', 'solo nei giorni di pioggia', 'Pioggia sulla singola offerta.', 'condizioni'),
   g('I73 R', 'libreria-taiheido/il-pensiero-sociale;libreria-taiheido/esplorando-yoncha-4', 'solo se la mansarda del Leblanc non viene pulita (altrimenti si ottiene dopo aver pulito la mansarda del Leblanc, dal 18 aprile)', 'Vendita dal 25 novembre se mansarda non pulita; ritrovamento separato dal 18 aprile.', 'condizioni'),
 ];

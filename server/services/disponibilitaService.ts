@@ -24,6 +24,8 @@ import { ARCHI_STORIA, ordineGioco, dataSbloccoQuartiere, type ContatoreChiave, 
 import { modelloAvanzamento, statiDellaPartita, statoDelPin, vociFatte, type ModelloAvanzamento, type StatiDellaPartita } from './mappe/statiGuida.js';
 import { vociPersonaCatturate } from './catturePersona.js';
 import { sessioniVideogioco } from './sessioniVideogioco.js';
+import { leggiAcquistiPartita, chiaviArticoliOttenuti, spesaAcquistiPerNegozio } from './acquistiService.js';
+import type { StatoAcquistiDto } from '../../shared/acquisti.js';
 import type { pinCitato } from './condizioni/nomiCondizioni.js';
 import type { RigaInvito } from './condizioni/condizioneEffettiva.js';
 import { valutaInsieme, valutaInsiemeSpillo, type RequisitoDisponibilita } from './condizioni/valutatore.js';
@@ -44,6 +46,8 @@ export interface SbloccoQuartiere { nome: string; dal: string | null }
 /** Stato della partita per la disponibilità: quello dei semafori dei Confidenti più tutto ciò che le condizioni chiedono. */
 export interface StatoDisponibilita extends StatoPartitaSemafori {
   partitaId?: number;
+  /** Fotografia della singola richiesta, condivisa con i reader dei listini; nessuna cache globale. */
+  acquisti?: StatoAcquistiDto;
   articoliOttenuti: Set<string>;
   /** «libro/chiave», «film/chiave». */
   letture: Set<string>;
@@ -130,13 +134,14 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
     ['videogiochi-completati', conta("SELECT COUNT(*) AS n FROM progresso_videogioco_partita p JOIN attivita a ON a.chiave = p.videogioco_chiave WHERE p.partita_id = ? AND a.tipo = 'videogioco' AND p.avanzamento >= a.sessioni")],
     ['libri-letti', conta('SELECT COUNT(*) AS n FROM progresso_libro_partita p JOIN libro l ON l.chiave = p.libro_chiave WHERE p.partita_id = ? AND p.avanzamento >= l.sessioni')],
   ]);
+  const acquisti = leggiAcquistiPartita(partitaId);
   return {
-    ...st, partitaId,
-    articoliOttenuti: new Set((prepared('SELECT articolo_chiave FROM acquisto_partita WHERE partita_id = ?').all(partitaId) as Array<{ articolo_chiave: string }>).map((a) => a.articolo_chiave)),
+    ...st, partitaId, acquisti,
+    articoliOttenuti: chiaviArticoliOttenuti(partitaId, acquisti),
     letture: new Set((prepared('SELECT tipo, chiave FROM lettura_partita WHERE partita_id = ?').all(partitaId) as Array<{ tipo: string; chiave: string }>).map((a) => a.tipo + '/' + a.chiave)),
     contatori,
     attivitaSvolte: new Map((prepared('SELECT attivita_chiave, volte FROM attivita_svolta_partita WHERE partita_id = ?').all(partitaId) as Array<{ attivita_chiave: string; volte: number }>).map((r) => [r.attivita_chiave, r.volte])),
-    spesaPerNegozio: new Map((prepared('SELECT a.negozio_chiave AS negozio, COALESCE(SUM(a.prezzo), 0) AS spesa FROM acquisto_partita q JOIN articolo a ON a.chiave = q.articolo_chiave WHERE q.partita_id = ? GROUP BY a.negozio_chiave').all(partitaId) as Array<{ negozio: string; spesa: number }>).map((r) => [r.negozio, r.spesa])),
+    spesaPerNegozio: spesaAcquistiPerNegozio(partitaId, acquisti),
     puntiNegozio: new Map((prepared('SELECT negozio_chiave, punti FROM punti_negozio_partita WHERE partita_id = ?').all(partitaId) as Array<{ negozio_chiave: string; punti: number }>).map((r) => [r.negozio_chiave, r.punti])),
     giornoSettimana: giornoDellaSettimana(st.dataGioco),
     sbloccoQuartieri: sbloccoQuartieri(),

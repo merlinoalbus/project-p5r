@@ -244,6 +244,6 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
 /** Il riepilogo del 409 a parole: «2 pin, 1 negozio, 14 articoli, 3 acquisti nelle partite» (solo le voci non a zero). */
 function testoRiepilogo(d: Record<string, unknown> | undefined): string {
   if (!d) return '';
-  const voci: Array<[string, string, string]> = [['pin', 'pin', 'pin'], ['negozi', 'negozio', 'negozi'], ['attivita', 'attività', 'attività'], ['articoli', 'articolo', 'articoli'], ['acquisti', 'acquisto nelle partite', 'acquisti nelle partite'], ['punti', 'riga di punti nelle partite', 'righe di punti nelle partite']];
+  const voci: Array<[string, string, string]> = [['pin', 'pin', 'pin'], ['negozi', 'negozio', 'negozi'], ['attivita', 'attività', 'attività'], ['articoli', 'articolo', 'articoli'], ['acquisti', 'presenza d’acquisto nelle partite', 'presenze d’acquisto nelle partite'], ['punti', 'riga di punti nelle partite', 'righe di punti nelle partite'], ['consumazioni', 'consumazione', 'consumazioni'], ['provenienze', 'fonte d’acquisto', 'fonti d’acquisto'], ['proposte', 'proposta da applicare', 'proposte da applicare'], ['ricevute', 'ricevuta degli effetti', 'ricevute degli effetti']];
   return voci.filter(([k]) => typeof d[k] === 'number' && (d[k] as number) > 0).map(([k, uno, molti]) => `${d[k] as number} ${(d[k] as number) === 1 ? uno : molti}`).join(', ');
 }

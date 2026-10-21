@@ -9,8 +9,7 @@
 // evento sono la stessa cosa: tipo, collegamento verificato, rango atteso, effetti della spunta; eventi, scadenze e
 // promemoria si mostrano ma non si spuntano. L'ordine è `ordine` 0, 1, 2… dentro la fascia, senza buchi.
 // Le spunte stanno nel file delle partite (`spunta_voce_partita`) e si agganciano all'uid, che non cambia spostando,
-// correggendo o cambiando fascia. Eliminare una voce la toglie dalla guida con le sue spunte; se in qualche partita è
-// spuntata con effetti si rifiuta, perché quegli effetti resterebbero applicati senza più una spunta da cui disfarli.
+// correggendo o cambiando fascia. Eliminare una voce passa dal cestino e annulla le sue fonti attraverso il motore unico.
 // ============================================================
 
 import { randomBytes } from 'node:crypto';
@@ -22,7 +21,7 @@ import { confidenti } from './partiteService.js';
 import { applicaEffettiAzione, annullaEffettiAzione, descriviEffettiApplicati, type OpzioniSpunta } from './effettiAzioneService.js';
 import { mappaAzione, nomeRiferimento, nomiEffetti, statoAzione, testoEffetti, verificaEffetti } from './azioniStrutturateService.js';
 import { atterraggioDelPalazzo } from './palazziService.js';
-import { normalizzaEffettiAzione, TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
+import { TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
 import type { AzionePercorsoDto, ConfidentePartitaDto, DatiVoceGiornata, EffettiAzioneDto, FasciaGioco, GenereVoce, QuizVoceDto, RiferimentoAzioneDto, TrasferisciVociGiornata, VociTrasferiteDto } from '../../shared/types.js';
 import { attivitaConQuiz, quizVoceDto, type AttivitaConQuiz } from './attivitaService.js';
 import { conLegami } from './mappe/legamiInfiltrazioni.js';
@@ -30,6 +29,13 @@ import { puntoDescrittivo } from '../../shared/spilli.js';
 import type { EsitoRevisioneVoce } from '../../shared/types.js';
 import { riferimentiOggettiPerFonti } from './catalogoOggettiLetture.js';
 import { apertureDichiarabili, apertureNegliEffetti, eVisitaMemento, verificaApertureScelte } from './apertureDedaliService.js';
+import { leggiEffettiVoce, salvaEffettiVoce, inizializzaEffettiVoce, copiaEffettiVoce, preparaRimozioneEffettiVoce, applicaEffettiVoce, annullaEffettiVoce, leggiRicevuteEffettiVoce, applicaEffettoStorico } from './motoreDiario.js';
+import { normalizzaEffettiVoce, type EffettoLegacyVoce } from '../../shared/effettiVoce.js';
+import { conCestino, type ViciniCestino } from './cestinoService.js';
+import { leggiRicevutaEffettiAzione } from './effettiAzioneService.js';
+import { disponibilitaAcquistoCorrente } from './negoziService.js';
+import type { NuovaRegistrazioneAcquisto } from '../../shared/acquisti.js';
+import type { PropostaPartitaDto } from '../../shared/propostePartita.js';
 
 export interface RigaVoce {
   uid: string; data: string; fascia: string; ordine: number; genere: string; azione: string; note: string | null; tipo: string;
@@ -55,9 +61,9 @@ function tipoDi(r: RigaVoce): AzionePercorsoDto['tipo'] {
 function riferimentoDi(r: RigaVoce): RiferimentoAzioneDto | null {
   return r.riferimento_tipo && r.riferimento_chiave && TIPI_RIF.has(r.riferimento_tipo) ? { tipo: r.riferimento_tipo as RiferimentoAzioneDto['tipo'], chiave: r.riferimento_chiave } : null;
 }
-/** Gli effetti della spunta salvati nella voce, normalizzati; un JSON illeggibile non ne dà nessuno. */
+/** Proiezione di compatibilità dei soli tre tipi legacy: la fonte completa resta nel DTO. */
 function produceDi(r: RigaVoce): EffettoAzione[] {
-  try { return normalizzaEffettiAzione(JSON.parse(r.produce_json)); } catch { return []; }
+  return leggiEffettiVoce(r.uid).effetti.flatMap(e => e.effetto.tipo === 'acquisto' ? [] : [e.effetto]);
 }
 /** Il nome del collegamento: quello salvato (la guida lo scrive a modo suo), altrimenti quello dell'elemento. */
 function nomeDi(r: RigaVoce, rif: RiferimentoAzioneDto | null): string | null {
@@ -110,7 +116,8 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
     const o = ctx.oggetti.get(`${e.categoria}/${e.chiave}`); if (o) oggettiCitati.set(o.chiave, o);
   }
   return {
-    ...v, ...(aperture.length ? { apertureDedali: aperture } : {}), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], produceTesto: testoEffetti(v.produce, ctx.nomi),
+    ...v, effettiVoce: leggiEffettiVoce(r.uid), ricevuteEffetti: ctx.partita === undefined ? [] : leggiRicevuteEffettiVoce(ctx.partita, r.uid),
+    ...(aperture.length ? { apertureDedali: aperture } : {}), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], produceTesto: testoEffetti(v.produce, ctx.nomi),
     fatta: spuntabile && ctx.fatte.has(r.uid), effetti: ctx.fatte.get(r.uid) ?? null,
     stato: ctx.conf && spuntabile ? statoAzione(v, ctx.conf) : null, mappa: mappaAzione(v),
     // il Palazzo collegato: dove si atterra il giorno della voce (scelta dell'utente, 2026-10-04). L6 (R6-17): la destinazione unica, la stessa
@@ -301,7 +308,7 @@ export function spuntePartita(partitaId: number | undefined, data?: string): Map
   const righe = (data === undefined
     ? prepared('SELECT voce_uid, effetti_json FROM spunta_voce_partita WHERE partita_id = ?').all(partitaId)
     : prepared('SELECT s.voce_uid, s.effetti_json FROM spunta_voce_partita s JOIN voce_giornata v ON v.uid = s.voce_uid WHERE s.partita_id = ? AND v.data = ?').all(partitaId, data)) as Array<{ voce_uid: string; effetti_json: string | null }>;
-  return new Map(righe.map((r) => [r.voce_uid, r.effetti_json ? (JSON.parse(r.effetti_json) as EffettiAzioneDto) : null]));
+  return new Map(righe.map((r) => [r.voce_uid, leggiRicevutaEffettiAzione(r.effetti_json)]));
 }
 
 /** Le voci di un giorno per l'interfaccia, con lo stato nella partita se indicata. `conf`: i Confidenti, se chi chiama li ha già. */
@@ -351,6 +358,7 @@ function compatta(data: string, fascia: string): void {
 /** Collegamento ed effetti da salvare: quelli nuovi si verificano (devono puntare a elementi che esistono), quelli che la voce ha
  *  già passano come sono (correggere una nota non fallisce se il catalogo ha nascosto il libro collegato). */
 function struttura(d: DatiVoceGiornata, r?: RigaVoce): { riferimento?: { tipo: string; chiave: string; testo: string | null } | null; produce?: EffettoAzione[] } {
+  if (d.produce !== undefined && d.effettiVoce !== undefined) throw httpErrors.badRequest('fonti-effetti-concorrenti', 'Invia una sola fonte degli effetti.');
   const out: { riferimento?: { tipo: string; chiave: string; testo: string | null } | null; produce?: EffettoAzione[] } = {};
   if (d.riferimento !== undefined) {
     if (d.riferimento === null) {
@@ -365,9 +373,15 @@ function struttura(d: DatiVoceGiornata, r?: RigaVoce): { riferimento?: { tipo: s
     }
   }
   if (d.produce !== undefined) {
-    const normalizzati = normalizzaEffettiAzione(d.produce);
-    const stessi = r && normalizzati.length === d.produce.length && JSON.stringify(normalizzati) === JSON.stringify(produceDi(r));
-    out.produce = stessi ? normalizzati : verificaEffetti(d.produce);
+    const completa = normalizzaEffettiVoce(d.produce);
+    if (!completa || completa.some(e => e.tipo === 'acquisto')) throw httpErrors.badRequest('effetti-voce-non-validi', 'Gli effetti non sono una lista legacy completa e riconoscibile. Usa l’editor degli effetti.');
+    if (r) {
+      const fonte = leggiEffettiVoce(r.uid);
+      if (fonte.stato !== 'convertita') throw httpErrors.conflict('effetti-legacy-da-correggere', 'La fonte storica non è convertibile: correggila esplicitamente nell’editor completo degli effetti.');
+      if (JSON.stringify(completa) === JSON.stringify(produceDi(r))) return out;
+      throw httpErrors.conflict('effetti-completi-richiesti', 'Per modificare gli effetti di una voce esistente invia la lista canonica completa con UID e revisione: la posizione non identifica un effetto.');
+    }
+    out.produce = verificaEffetti(d.produce);
   }
   return out;
 }
@@ -395,9 +409,14 @@ export function creaVoce(data: string, d: DatiVoceGiornata, partitaId?: number):
   const uid = randomBytes(16).toString('hex');
   const adesso = nowIso();
   getDb().transaction(() => {
+    if (d.effettiVoce && (d.effettiVoce.revisioneEffettiAttesa !== undefined || d.effettiVoce.effetti.some(e => e.uid !== null))) {
+      throw httpErrors.badRequest('fonte-nuova-non-valida', 'Una nuova voce non può reclamare token o UID di effetti preesistenti.');
+    }
+    if (genere !== 'azione' && d.effettiVoce?.effetti.length) throw httpErrors.badRequest('effetti-solo-azione', 'Solo un’azione può avere effetti della spunta.');
     prepared(`INSERT INTO voce_giornata (uid, data, fascia, ordine, genere, azione, note, tipo, riferimento_tipo, riferimento_chiave, riferimento_testo, rango_atteso, produce_json, indice_guida, created_at, updated_at)
       VALUES (?, ?, ?, 1000000, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`).run(uid, data, fascia, genere, azione, noteValide(d.note) ?? null, genere === 'azione' ? d.tipo ?? 'altro' : 'altro',
       riferimento?.tipo ?? null, riferimento?.chiave ?? null, riferimento?.testo ?? null, d.rangoAtteso ?? null, JSON.stringify(genere === 'azione' ? produce ?? [] : []), adesso, adesso);
+    inizializzaEffettiVoce(uid, genere === 'azione' ? d.effettiVoce?.effetti.map(e => e.effetto) ?? produce ?? [] : [], 'utente');
     posiziona(data, fascia, uid, d.posizione);
   })();
   return vociDelGiorno(data, partitaId).find((v) => v.uid === uid)!;
@@ -410,20 +429,27 @@ export function aggiornaVoce(uid: string, d: DatiVoceGiornata, partitaId?: numbe
   const azione = testoValido(d.azione);
   const genere: GenereVoce = d.genere ?? genereDi(r);
   const fascia: FasciaGioco = d.fascia ?? fasciaDi(r);
-  const { riferimento, produce } = struttura(d, r);
+  const { riferimento } = struttura(d, r);
   getDb().transaction(() => {
+    if (d.effettiVoce) {
+      if (!d.effettiVoce.revisioneEffettiAttesa) throw httpErrors.conflict('revisione-effetti-richiesta', 'Ricarica la fonte prima di modificare gli effetti.');
+      if (genere !== 'azione' && d.effettiVoce.effetti.length) throw httpErrors.badRequest('effetti-solo-azione', 'Solo un’azione può avere effetti della spunta.');
+      salvaEffettiVoce(uid, { effetti: d.effettiVoce.effetti, revisioneEffettiAttesa: d.effettiVoce.revisioneEffettiAttesa });
+    }
     if (genere !== 'azione' && genereDi(r) === 'azione') {
       // un'azione diventa evento: non si spunta più. Con effetti applicati in una partita no (andrebbero persi senza poterli
       // disfare); senza effetti le sue spunte non servono più e se ne vanno
       const conEffetti = partiteConEffetti(uid);
       if (conEffetti.length) throw httpErrors.conflict('voce-con-effetti', `Questa azione è spuntata con effetti in ${conEffetti.map((n) => `«${n}»`).join(', ')}: togli prima la spunta, poi cambiala in evento.`);
       prepared('DELETE FROM spunta_voce_partita WHERE voce_uid = ?').run(uid);
+      const fonte = leggiEffettiVoce(uid);
+      if (fonte.stato !== 'convertita' || fonte.effetti.length) throw httpErrors.conflict('voce-con-effetti-configurati', 'Rimuovi esplicitamente gli effetti dall’editor prima di trasformare l’azione in evento.');
     }
     prepared(`UPDATE voce_giornata SET azione = ?, note = ?, genere = ?, fascia = ?, tipo = ?, riferimento_tipo = ?, riferimento_chiave = ?, riferimento_testo = ?, rango_atteso = ?, produce_json = ?, updated_at = ? WHERE uid = ?`).run(
       azione ?? r.azione, d.note === undefined ? r.note : noteValide(d.note), genere, fascia, genere === 'azione' ? d.tipo ?? r.tipo : 'altro',
       riferimento === undefined ? r.riferimento_tipo : riferimento?.tipo ?? null, riferimento === undefined ? r.riferimento_chiave : riferimento?.chiave ?? null,
       riferimento === undefined ? r.riferimento_testo : riferimento?.testo ?? null, d.rangoAtteso === undefined ? r.rango_atteso : d.rangoAtteso,
-      genere !== 'azione' ? '[]' : produce === undefined ? r.produce_json : JSON.stringify(produce), nowIso(), uid);
+      r.produce_json, nowIso(), uid);
     if (fascia !== fasciaDi(r)) {
       // cambia fascia: al posto chiesto, altrimenti in fondo alla fascia nuova; la vecchia si ricompatta
       prepared('UPDATE voce_giornata SET ordine = 1000000 WHERE uid = ?').run(uid);
@@ -485,6 +511,7 @@ export function trasferisciVoci(t: TrasferisciVociGiornata, partitaId?: number):
         prepared(`INSERT INTO voce_giornata (uid, data, fascia, ordine, genere, azione, note, tipo, riferimento_tipo, riferimento_chiave, riferimento_testo, rango_atteso, produce_json, indice_guida, created_at, updated_at)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`).run(uid, t.giorno, t.fascia, ordine, r.genere, r.azione, r.note, r.tipo,
           r.riferimento_tipo, r.riferimento_chiave, r.riferimento_testo, r.rango_atteso, r.produce_json, adesso, adesso);
+        copiaEffettiVoce(r.uid, uid);
         arrivate.push(uid);
       }
     });
@@ -494,24 +521,21 @@ export function trasferisciVoci(t: TrasferisciVociGiornata, partitaId?: number):
   return { giorno: t.giorno, fascia: t.fascia, uid: arrivate, voci: vociDelGiorno(t.giorno, partitaId) };
 }
 
-/** Le partite in cui la voce è spuntata con effetti (punti del Confidente, turni, visioni): finché ci sono non la si elimina. */
+/** Storia attiva che impedisce di togliere la spuntabilità senza il proprio gesto di annullo. */
 function partiteConEffetti(uid: string): string[] {
-  return (prepared(`SELECT p.nome FROM spunta_voce_partita s JOIN partita p ON p.id = s.partita_id
-    WHERE s.voce_uid = ? AND s.effetti_json IS NOT NULL ORDER BY p.nome`).all(uid) as Array<{ nome: string }>).map((r) => r.nome);
+  return (prepared(`SELECT p.nome FROM utente.partita p WHERE
+    EXISTS(SELECT 1 FROM utente.spunta_voce_partita s WHERE s.partita_id=p.id AND s.voce_uid=? AND s.effetti_json IS NOT NULL)
+    OR EXISTS(SELECT 1 FROM utente.effetto_applicato e WHERE e.partita_id=p.id AND e.voce_uid=? AND e.annullato_il IS NULL)
+    OR EXISTS(SELECT 1 FROM utente.acquisto_provenienza a WHERE a.partita_id=p.id AND a.voce_uid=?) ORDER BY p.nome`).all(uid, uid, uid) as Array<{ nome: string }>).map((r) => r.nome);
 }
 
-/**
- * Elimina una voce dalla guida (per sempre, per tutte le partite: scelta dell'utente, «Rimuovi» elimina). Se in qualche partita
- * è spuntata con effetti si rifiuta (409) dicendo dove: gli effetti vanno annullati togliendo prima la spunta, altrimenti
- * resterebbero applicati senza più una spunta da cui disfarli. Le spunte senza effetti se ne vanno con la voce.
- */
+/** Elimina nel cestino comune, conservando tutte le fotografie; il motore annulla una sola volta ciascuna fonte. */
 export function eliminaVoce(uid: string): void {
   const r = rigaVoce(uid);
-  getDb().transaction(() => {
-    const conEffetti = partiteConEffetti(uid);
-    if (conEffetti.length) {
-      throw httpErrors.conflict('voce-con-effetti', `Questa voce è spuntata con effetti in ${conEffetti.length === 1 ? 'una partita' : `${conEffetti.length} partite`} (${conEffetti.map((n) => `«${n}»`).join(', ')}): togli prima la spunta in ciascuna per annullarne gli effetti, poi eliminala.`);
-    }
+  const sorelle = righeDelGiorno(r.data).filter(v => v.fascia === r.fascia).map(v => v.uid), posto = sorelle.indexOf(uid);
+  const vicini = { prima: sorelle[posto - 1] ?? null, dopo: sorelle[posto + 1] ?? null };
+  conCestino({ tipo: 'voce-diario', chiave: uid, nome: r.azione, contesto: `${r.data} · ${r.fascia}`, vicini }, () => {
+    preparaRimozioneEffettiVoce(uid, { annullaLegacy: annullaEffettiAzione });
     prepared('DELETE FROM voce_giornata WHERE uid = ?').run(uid);
     prepared('DELETE FROM spunta_voce_partita WHERE voce_uid = ?').run(uid);
     // L3: l'insieme d'infiltrazioni e la proposta della voce se ne vanno con lei (la chiave è l'uid, senza vincolo)
@@ -520,7 +544,15 @@ export function eliminaVoce(uid: string): void {
       prepared('DELETE FROM proposta_infiltrazione_voce WHERE voce_uid = ?').run(uid);
     }
     compatta(r.data, r.fascia);
-  })();
+  });
+}
+
+/** Rientro relativo ai vicini superstiti, attraverso lo stesso writer dell'ordine ordinario. */
+export function ripristinaOrdineVoce(uid: string, vicini: ViciniCestino | null): void {
+  const r = rigaVoce(uid);
+  const altre = righeDelGiorno(r.data).filter(v => v.uid !== uid && v.fascia === r.fascia).map(v => v.uid);
+  const dopo = vicini?.dopo == null ? -1 : altre.indexOf(vicini.dopo), prima = vicini?.prima == null ? -1 : altre.indexOf(vicini.prima);
+  posiziona(r.data, fasciaDi(r), uid, dopo >= 0 ? dopo : prima >= 0 ? prima + 1 : Math.min(r.ordine, altre.length));
 }
 
 /**
@@ -538,10 +570,11 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
     // Una voce storica riclassificata conserva l'accesso alla rimozione delle proprie dichiarazioni.
     if (v.genere !== 'azione' && !precedente) throw httpErrors.badRequest('voce-non-spuntabile', 'Un evento, una scadenza o un promemoria non si spuntano.');
     if (fatta) {
-      const effettiPrima = precedente?.effetti_json ? JSON.parse(precedente.effetti_json) as EffettiAzioneDto : null;
+      const effettiPrima = leggiRicevutaEffettiAzione(precedente?.effetti_json ?? null);
       const aperture = opz.apertureDedali === undefined ? undefined : verificaApertureScelte(opz.apertureDedali,
         eVisitaMemento(v) ? apertureDichiarabili() : apertureNegliEffetti(effettiPrima));
       if (precedente) {
+        if (opz.acquisti?.length) throw httpErrors.conflict('spunta-gia-presente', 'La spunta esiste già: collega il consumo attraverso la proposta storica o il gesto di acquisto, senza rieseguire la voce.');
         if (aperture === undefined) return; // idempotente: non riapplica punti, letture o turni
         // Mantiene tutti gli altri campi, anche quelli aggiunti da versioni successive. fatta_at e storico non cambiano.
         const effetti = { ...(effettiPrima ?? { doti: [], confidente: null }), apertureDedali: aperture };
@@ -549,16 +582,29 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
         prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
         return;
       }
-      const effetti = applicaEffettiAzione(partitaId, { ...v, apertureDedali: aperture, momento: { data: r.data, fascia: v.fascia, origine: 'azione' } }, opz);
+      const { effettiLegacy: effetti } = applicaEffettiVoce(partitaId, uid, {
+        applicaLegacy: (id, produce: EffettoLegacyVoce[]) => applicaEffettiAzione(id, { ...v, produce, apertureDedali: aperture, momento: { data: r.data, fascia: v.fascia, origine: 'azione' } }, opz),
+        annullaLegacy: annullaEffettiAzione,
+      }, { acquisti: opz.acquisti, porteAcquisti: { valutaCorrente: disponibilitaAcquistoCorrente }, spuntaFattaIl: adesso });
       prepared('INSERT INTO spunta_voce_partita (partita_id, voce_uid, fatta_at, effetti_json) VALUES (?, ?, ?, ?)').run(partitaId, uid, adesso, effetti ? JSON.stringify(effetti) : null);
       const dett = [`${v.fascia === 'sera' ? 'Sera' : 'Giorno'} · ${v.tipo}${v.riferimentoTesto ? ` · ${v.riferimentoTesto}` : ''}`];
       if (effetti) dett.push(descriviEffettiApplicati(effetti));
       registraEvento(partitaId, 'percorso', `Percorso ${r.data}: ${v.azione.slice(0, 80)}${v.azione.length > 80 ? '…' : ''}`, `${dett.join(' · ')}.`, { data: r.data, voce: uid, tipo: v.tipo, riferimento: v.riferimento, effetti });
     } else {
-      if (precedente?.effetti_json) annullaEffettiAzione(partitaId, JSON.parse(precedente.effetti_json) as EffettiAzioneDto);
+      annullaEffettiVoce(partitaId, uid, leggiRicevutaEffettiAzione(precedente?.effetti_json ?? null), { applicaLegacy: () => null, annullaLegacy: annullaEffettiAzione });
       prepared('DELETE FROM spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').run(partitaId, uid);
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
   return vociDelGiorno(r.data, partitaId).find((x) => x.uid === uid)!;
+}
+
+/** Il raccordo successivo a una spunta non riapplica gli incontri o gli altri effetti legacy. */
+export function applicaEffettoStoricoDiario(partitaId: number, proposta: PropostaPartitaDto, acquisto?: NuovaRegistrazioneAcquisto, tokenAcquisti?: string): void {
+  applicaEffettoStorico(partitaId, proposta, acquisto, tokenAcquisti, {
+    // Solo gli effetti selezionati dal motore: niente contesto Confidente o
+    // riesecuzione dell'intera voce già spuntata.
+    applicaLegacy: (id, produce) => applicaEffettiAzione(id, { tipo: 'altro', riferimento: null, produce }),
+    annullaLegacy: annullaEffettiAzione,
+  }, { valutaCorrente: disponibilitaAcquistoCorrente });
 }

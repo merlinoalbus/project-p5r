@@ -27,6 +27,8 @@ import { dettaglioNegozio, elencaNegozi, ricercaArticoli } from '../services/neg
 import { giornoPercorso, indicePercorso } from '../services/percorsoService.js';
 import { elenchiAzione } from '../services/azioniStrutturateService.js';
 import { aggiornaVoce, creaVoce, eliminaVoce, impostaInfiltrazioniVoce, rivediVoce, spostaVoce, trasferisciVoci, vocePercorso } from '../services/giornataService.js';
+import { leggiEffettiVoce, salvaEffettiVoce, elencaProposteEffettiVoce, anteprimaDecisioneEffettoVoce, decidiPropostaEffettoVoce } from '../services/motoreDiario.js';
+import { bodySalvaEffettiVoce, bodyAnteprimaDecisioneEffettoVoce, bodyDecisioneEffettoVoce } from '../schemas/acquisti.js';
 import { completamento } from '../services/completamentoService.js';
 import { sfide } from '../services/sfideService.js';
 import { datiGuida } from '../services/datiGuida.js';
@@ -55,6 +57,26 @@ const queryArticoli = z.object({
 });
 const queryCalendario = z.object({ partita: idParam.optional(), mese: z.string().regex(/^(0[1-9]|1[0-2])$/).optional() });
 const router = Router();
+
+router.get('/percorso/voci/:uid/effetti', validate({ params: paramsVoceGiornata }), (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(leggiEffettiVoce(String(req.params.uid)));
+});
+router.put('/percorso/voci/:uid/effetti', validate({ params: paramsVoceGiornata, body: bodySalvaEffettiVoce }), (req, res) => {
+  res.json(salvaEffettiVoce(String(req.params.uid), req.body));
+});
+router.get('/percorso/effetti/proposte', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(elencaProposteEffettiVoce());
+});
+const paramsPropostaEffetto = z.object({ id: z.string().min(1).max(200) }).strict();
+router.post('/percorso/effetti/proposte/:id/anteprima', validate({ params: paramsPropostaEffetto, body: bodyAnteprimaDecisioneEffettoVoce }), (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(anteprimaDecisioneEffettoVoce(String(req.params.id), req.body));
+});
+router.post('/percorso/effetti/proposte/:id/decisione', validate({ params: paramsPropostaEffetto, body: bodyDecisioneEffettoVoce }), (req, res) => {
+  res.json(decidiPropostaEffettoVoce(String(req.params.id), req.body));
+});
 
 router.get('/arcani', (_req, res) => {
   res.json(elencaArcani());

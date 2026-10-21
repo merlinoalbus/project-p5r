@@ -39,7 +39,11 @@ import { riallineaStati } from './mappe/statiGuida.js';
 import { eBloccoGuidaCatalogo, ripristinaPuntatoriGuida } from '../../shared/riferimentiCatalogoGuida.js';
 import { normalizzaCostoScambio } from '../../shared/catalogo.js';
 import { verificaAttivitaConfidente } from './vincoliAttivitaConfidente.js';
-import type { ContenutoCestinoDto, EsitoRipristinoCestinoDto, MotivoSaltataCestinoDto, SaltataCestinoDto, TipoCestino, VoceCestinoDto } from '../../shared/types.js';
+import { preparaRipristinoAcquisti, verificaRipristinoAcquisti, riconciliaAcquistiDopoRipristino } from './acquistiService.js';
+import { riconciliaEffettiDopoRipristino } from './motoreDiario.js';
+import { ripristinaOrdineVoce } from './giornataService.js';
+import { azioneEventoAcquistoV1 } from './storicoService.js';
+import type { ContenutoCestinoDto, EsitoRipristinoCestinoDto, MotivoSaltataCestinoDto, SaltataCestinoDto, TipoCestino, VoceCestinoDto, VoceCestinoUnificatoDto } from '../../shared/types.js';
 
 type Schema = 'main' | 'utente';
 type Operazione = 'D' | 'U' | 'I';
@@ -53,10 +57,11 @@ interface Passo { seq: number; tabella: string; op: Operazione; prima?: Riga; do
 export interface ViciniCestino { prima: string | null; dopo: string | null }
 
 /** I tipi di elemento che il server mette nel cestino (da L5, migrazione 115, anche il luogo e il negozio). */
-export type TipoElementoCestino = TipoCestino;
+export type TipoElementoCestino = Exclude<TipoCestino, 'partita' | 'fonte-acquisto'>;
 
 /** L'elemento che si elimina, per l'elenco del cestino; `vicini` per rimetterlo al suo posto (aree, voci). */
 export interface ElementoCestino { tipo: TipoElementoCestino; chiave: string; nome: string; contesto?: string; vicini?: ViciniCestino }
+export interface ElementoCestinoPrivato { tipo: 'partita' | 'fonte-acquisto'; chiave: string; nome: string; contesto?: string; partitaId: number }
 
 /** Le tabelle del cestino stesso non si registrano. */
 const ESCLUSE: Record<Schema, ReadonlySet<string>> = { main: new Set(['cestino']), utente: new Set(['cestino_partite']) };
@@ -75,6 +80,7 @@ const RADICE: Record<TipoElementoCestino, { tabella: string; colonna: string }> 
   // L6 (R6-04): una Richiesta dei Mementos; le condizioni che la citano restano (per chiave) e danno «Richiesta eliminata»
   richiesta: { tabella: 'richiesta', colonna: 'chiave' },
   oggetto: { tabella: 'catalogo_oggetto', colonna: 'chiave' },
+  'voce-diario': { tabella: 'voce_giornata', colonna: 'uid' },
 };
 
 /**
@@ -111,6 +117,13 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   marcatore_luogo: ['segnaposto di un luogo', 'segnaposto dei luoghi'],
   acquisto_partita: ['acquisto nelle partite', 'acquisti nelle partite'], punti_negozio_partita: ['punti di un negozio nelle partite', 'punti dei negozi nelle partite'],
   sessione_videogioco_partita: ['dichiarazione di sessione giocata', 'dichiarazioni di sessione giocata'],
+  voce_giornata: ['voce del Diario', 'voci del Diario'], voce_effetto: ['effetto della voce', 'effetti della voce'],
+  voce_effetto_transizione: ['provenienza degli effetti', 'provenienze degli effetti'],
+  proposta_effetto_voce: ['raccordo degli effetti', 'raccordi degli effetti'], operazione_effetti_voce: ['decisione sugli effetti', 'decisioni sugli effetti'],
+  acquisto_registrato: ['consumazione registrata', 'consumazioni registrate'], acquisto_provenienza: ['fonte di acquisto', 'fonti di acquisto'],
+  acquisto_operazione: ['ricevuta di acquisto', 'ricevute di acquisto'], effetto_applicato: ['ricevuta di un effetto', 'ricevute degli effetti'],
+  da_applicare: ['proposta personale', 'proposte personali'], movimento_yen: ['movimento di denaro', 'movimenti di denaro'],
+  proposta_operazione: ['decisione personale', 'decisioni personali'], beneficio_ciclo: ['stato del beneficio', 'stati dei benefici'],
 };
 
 /** Il nome per l'utente di `quante` righe di una tabella (al singolare per una sola). */
@@ -146,6 +159,7 @@ function tabelle(db: AppDatabase, schema: Schema): string[] {
 
 /** Le colonne di una tabella e quelle della sua chiave primaria (nell'ordine della chiave); null se la tabella non c'è più. */
 function strutturaTabella(db: AppDatabase, schema: Schema, tabella: string): { colonne: string[]; chiave: string[] } | null {
+  if (!db.prepare(`SELECT 1 FROM ${schema}.sqlite_master WHERE type='table' AND name=?`).get(tabella)) return null;
   const info = db.prepare('SELECT name, pk FROM pragma_table_info(?, ?) ORDER BY cid').all(tabella, schema) as Array<{ name: string; pk: number }>;
   if (info.length === 0) return null;
   const chiave = info.filter((c) => c.pk > 0).sort((a, b) => a.pk - b.pk).map((c) => c.name);
@@ -189,7 +203,7 @@ let registrando = false;
  * registro con l'elemento. Se `opera` fallisce non resta niente (né l'eliminazione né il registro). Chiamata dentro un'altra
  * registrazione, esegue solo `opera`: le sue righe finiscono nel registro di quella di fuori.
  */
-export function conCestino<T>(elemento: ElementoCestino, opera: () => T): T {
+export function conCestino<T>(elemento: ElementoCestino | ElementoCestinoPrivato, opera: () => T): T {
   if (registrando) return opera();
   const db = getDb();
   const passi: Array<Omit<Passo, 'seq'> & { schema: Schema }> = [];
@@ -244,13 +258,25 @@ export function conCestino<T>(elemento: ElementoCestino, opera: () => T): T {
   }
 }
 
+/** La registrazione usa lo stesso writer dei trigger, ma i metadati personali restano soltanto in utente. */
+export function conCestinoPrivato<T>(elemento: ElementoCestinoPrivato, opera: () => T): T {
+  return conCestino(elemento, opera);
+}
+
 /** Mette nel cestino l'elemento con il suo registro, diviso fra i due file (stesso `uid`). */
-function salvaNelCestino(db: AppDatabase, elemento: ElementoCestino, passi: ReadonlyArray<Omit<Passo, 'seq'> & { schema: Schema }>): void {
+function salvaNelCestino(db: AppDatabase, elemento: ElementoCestino | ElementoCestinoPrivato, passi: ReadonlyArray<Omit<Passo, 'seq'> & { schema: Schema }>): void {
   const uid = randomBytes(16).toString('hex');
   const adesso = nowIso();
   const numerati = passi.map((p, seq) => ({ ...p, seq }));
   const diSchema = (schema: Schema): Passo[] => numerati.filter((p) => p.schema === schema).map(({ schema: _s, ...p }) => p);
   const gioco = diSchema('main'), partite = diSchema('utente');
+  if ('partitaId' in elemento) {
+    if (gioco.length) throw httpErrors.conflict('cestino-privato-schema', 'Una rimozione personale ha coinvolto dati di gioco: transazione annullata.');
+    if (!partite.length) return;
+    db.prepare('INSERT INTO utente.cestino_partite(uid,registro_json,eliminato_il,tipo,chiave,nome,contesto,partita_id,riepilogo_json,formato) VALUES (?,?,?,?,?,?,?,?,?,1)')
+      .run(uid, JSON.stringify(partite), adesso, elemento.tipo, elemento.chiave, elemento.nome, elemento.contesto ?? '', elemento.partitaId, JSON.stringify(riepilogo(db, 'utente', partite)));
+    return;
+  }
   db.prepare('INSERT INTO main.cestino (uid, tipo, chiave, nome, contesto, riepilogo_json, registro_json, con_partite, vicini_json, eliminato_il) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
     .run(uid, elemento.tipo, elemento.chiave, elemento.nome, elemento.contesto ?? '', JSON.stringify(riepilogo(db, 'main', gioco)), JSON.stringify(gioco), partite.length ? 1 : 0,
       elemento.vicini ? JSON.stringify(elemento.vicini) : null, adesso);
@@ -300,11 +326,61 @@ export function elencoCestino(): VoceCestinoDto[] {
   });
 }
 
+interface RigaCestinoPrivato { uid: string; registro_json: string; eliminato_il: string; tipo: 'partita' | 'fonte-acquisto'; chiave: string; nome: string; contesto: string | null; partita_id: number; riepilogo_json: string; formato: number }
+function verificaMetadatiPrivati(r: RigaCestinoPrivato): void {
+  if (r.formato !== 1 || !['partita', 'fonte-acquisto'].includes(r.tipo) || typeof r.chiave !== 'string' || typeof r.nome !== 'string'
+    || !Number.isSafeInteger(r.partita_id) || r.partita_id < 1 || !/^[0-9a-f]{32}$/.test(r.uid)
+    || typeof r.registro_json !== 'string' || typeof r.riepilogo_json !== 'string' || typeof r.eliminato_il !== 'string'
+    || !(r.contesto === null || typeof r.contesto === 'string')
+    || (r.tipo === 'partita' ? r.chiave !== String(r.partita_id) : !/^[0-9a-f]{32}$/.test(r.chiave) && !(r.chiave.startsWith('legacy:') && r.chiave.length > 7))) {
+    throw httpErrors.conflict('cestino-privato-illeggibile', 'I metadati del cestino personale non sono riconoscibili: dati conservati.');
+  }
+}
+export function elencoCestinoUnificato(): VoceCestinoUnificatoDto[] {
+  const righe: VoceCestinoUnificatoDto[] = elencoCestino().map(r => ({ ...r, riferimento: { schema: 'main' as const, id: r.id } }));
+  for (const r of getDb().prepare('SELECT * FROM utente.cestino_partite WHERE tipo IS NOT NULL').iterate() as Iterable<RigaCestinoPrivato>) {
+    verificaMetadatiPrivati(r);
+    let conti: unknown;
+    try { conti = JSON.parse(r.riepilogo_json) as unknown; } catch { conti = null; }
+    if (!conti || typeof conti !== 'object' || Array.isArray(conti) || Object.values(conti).some(n => !Number.isSafeInteger(n) || Number(n) < 0)) {
+      throw httpErrors.conflict('cestino-privato-illeggibile', 'Il riepilogo del cestino personale non è riconoscibile: dati conservati.');
+    }
+    const contenuto = Object.entries(conti).map(([tabella, quante]) => ({ tabella, quante: Number(quante), etichetta: etichettaTabella(tabella, Number(quante)) }));
+    righe.push({ id: null, riferimento: { schema: 'utente', uid: r.uid }, tipo: r.tipo, chiave: r.chiave, nome: r.nome,
+      contesto: r.contesto ?? '', eliminatoIl: r.eliminato_il, contenuto, partite: 'presente', byte: Buffer.byteLength(r.registro_json, 'utf8') });
+  }
+  return righe.sort((a, b) => b.eliminatoIl.localeCompare(a.eliminatoIl));
+}
+
 // ---- Rimettere ----
 
 /** Un errore di vincolo di SQLite, per codice. */
 function codiceSqlite(err: unknown): string | null {
   return err && typeof err === 'object' && 'code' in err && typeof (err as { code: unknown }).code === 'string' ? (err as { code: string }).code : null;
+}
+
+/** Un registro illeggibile non autorizza un reverse parziale o un reset. */
+function leggiPassiCestino(raw: string, schema: Schema): Passo[] {
+  const errore = () => httpErrors.conflict('cestino-registro-illeggibile', 'Il registro del cestino non è riconoscibile: nessun dato è stato rimesso o cancellato.');
+  let x: unknown;
+  try { x = JSON.parse(raw) as unknown; } catch { throw errore(); }
+  if (!Array.isArray(x)) throw errore();
+  const valore = (v: unknown): v is Valore => v === null || typeof v === 'string' || (typeof v === 'number' && Number.isFinite(v))
+    || (!!v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length === 1 && '$blob' in v && typeof v.$blob === 'string'
+      && Buffer.from(v.$blob, 'base64').toString('base64') === v.$blob);
+  const riga = (v: unknown): v is Riga => !!v && typeof v === 'object' && !Array.isArray(v) && Object.values(v).every(valore);
+  for (const p of x) {
+    if (!p || typeof p !== 'object' || Array.isArray(p)) throw errore();
+    const o = p as Record<string, unknown>;
+    if (!Number.isSafeInteger(o.seq) || Number(o.seq) < 0 || typeof o.tabella !== 'string' || !o.tabella.length
+      || typeof o.op !== 'string' || !['D','U','I'].includes(o.op) || Object.keys(o).some(k => !['seq','tabella','op','prima','dopo'].includes(k))) throw errore();
+    if (o.op === 'D' ? !riga(o.prima) || 'dopo' in o : o.op === 'I' ? !riga(o.dopo) || 'prima' in o : !riga(o.prima) || !riga(o.dopo)) throw errore();
+    const s = strutturaTabella(getDb(), schema, o.tabella);
+    for (const lato of [o.prima, o.dopo]) if (riga(lato) && s) {
+      for (const chiave of s.chiave) if (!(chiave in lato) || (typeof lato[chiave] === 'number' && !Number.isSafeInteger(lato[chiave]))) throw errore();
+    }
+  }
+  return x as Passo[];
 }
 
 /**
@@ -316,10 +392,47 @@ export function ripristinaDalCestino(id: number): EsitoRipristinoCestinoDto {
   const r = db.prepare('SELECT * FROM main.cestino WHERE id = ?').get(id) as RigaCestino | undefined;
   if (!r) throw httpErrors.notFound('cestino-non-trovato', 'L’elemento non è più nel cestino.');
   const parteP = db.prepare('SELECT registro_json FROM utente.cestino_partite WHERE uid = ?').get(r.uid) as { registro_json: string } | undefined;
+  return ripristinaRegistro({ ...r, tipo: r.tipo as TipoCestino }, parteP);
+}
+
+/** L'identità dei cestini personali è l'UID del file utente, mai un ID del file di gioco. */
+export function ripristinaCestinoPrivato(uid: string): EsitoRipristinoCestinoDto {
+  const db = getDb();
+  const r = db.prepare('SELECT * FROM utente.cestino_partite WHERE uid=? AND tipo IS NOT NULL').get(uid) as RigaCestinoPrivato | undefined;
+  if (!r) throw httpErrors.notFound('cestino-non-trovato', 'L’elemento personale non è più nel cestino.');
+  verificaMetadatiPrivati(r);
+  return ripristinaRegistro({ id: null, uid: r.uid, tipo: r.tipo, chiave: r.chiave, nome: r.nome,
+    registro_json: '[]', con_partite: 1, vicini_json: null, partitaId: r.partita_id }, r);
+}
+
+const DURATURE_ACQUISTI = new Set(['da_applicare', 'movimento_yen', 'acquisto_operazione', 'proposta_operazione', 'effetto_applicato', 'beneficio_ciclo']);
+interface IdentitaRipristino { id: number | null; uid: string; tipo: TipoCestino; chiave: string; nome: string; registro_json: string; con_partite: number; vicini_json: string | null; partitaId?: number }
+function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: string }): EsitoRipristinoCestinoDto {
+  const db = getDb();
+  const fontePrivataUuid = r.id === null && r.tipo === 'fonte-acquisto' && !r.chiave.startsWith('legacy:');
   const passi = [
-    ...(JSON.parse(r.registro_json) as Passo[]).map((p) => ({ ...p, schema: 'main' as Schema })),
-    ...(parteP ? (JSON.parse(parteP.registro_json) as Passo[]).map((p) => ({ ...p, schema: 'utente' as Schema })) : []),
+    ...leggiPassiCestino(r.registro_json, 'main').map((p) => ({ ...p, schema: 'main' as Schema })),
+    ...(parteP ? leggiPassiCestino(parteP.registro_json, 'utente').map((p) => ({ ...p, schema: 'utente' as Schema })) : []),
   ].sort((a, b) => b.seq - a.seq);
+  if (new Set(passi.map(p => p.seq)).size !== passi.length) throw httpErrors.conflict('cestino-registro-illeggibile', 'Il registro contiene posizioni duplicate: nessun reverse è stato eseguito.');
+  if (r.id === null) {
+    const radici = passi.filter(p => p.schema === 'utente' && p.op === 'D' && (
+      r.tipo === 'partita' ? p.tabella === 'partita' && p.prima?.id === r.partitaId
+        : r.chiave.startsWith('legacy:') ? p.tabella === 'acquisto_partita' && p.prima?.partita_id === r.partitaId && p.prima?.articolo_chiave === r.chiave.slice(7)
+          : p.tabella === 'acquisto_provenienza' && p.prima?.id === r.chiave && p.prima?.partita_id === r.partitaId));
+    if (radici.length !== 1) throw httpErrors.conflict('cestino-identita-privata-incoerente', 'Il registro non descrive un’unica eliminazione dell’identità personale indicata: dati conservati.');
+    for (const p of passi) for (const lato of [p.prima, p.dopo]) if (lato && typeof lato.partita_id === 'number' && lato.partita_id !== r.partitaId) {
+      throw httpErrors.conflict('cestino-partita-diversa', 'Il registro personale contiene dati di un’altra partita: ripristino annullato.');
+    }
+    for (const p of passi) if (p.tabella === 'partita' && (p.prima ?? p.dopo)?.id !== r.partitaId) {
+      // La sola promozione dell'altra partita avvenuta durante DELETE è nota:
+      // rimettendo l'eliminata non modifica chi è attivo adesso.
+      if (r.tipo !== 'partita' || p.op !== 'U' || !p.prima || !p.dopo || p.prima.id !== p.dopo.id
+        || Object.keys(p.prima).some(c => c !== 'attiva' && !stesso(p.prima![c], p.dopo![c]))) {
+        throw httpErrors.conflict('cestino-partita-diversa', 'Una modifica a un’altra partita non appartiene a questo ripristino.');
+      }
+    }
+  }
   // l'eliminazione aveva una parte nelle partite che non c'è più (file delle partite sostituito dopo): si rimettono i dati di gioco
   const partiteMancanti = !!r.con_partite && !parteP;
 
@@ -343,7 +456,31 @@ export function ripristinaDalCestino(id: number): EsitoRipristinoCestinoDto {
   const attivitaPrecedenti = new Map<string, Record<string, unknown> | null>();
 
   db.transaction(() => {
+    const partitaIds = new Set<number>(), acquistoIds = new Set<string>(), voceUids = new Set<string>();
+    for (const p of passi) for (const lato of [p.prima, p.dopo]) if (lato) {
+      if (p.schema === 'utente') {
+        if (typeof lato.partita_id === 'number') partitaIds.add(lato.partita_id);
+        if (p.tabella === 'partita' && typeof lato.id === 'number') partitaIds.add(lato.id);
+        if (p.tabella === 'acquisto_registrato' && typeof lato.id === 'string') acquistoIds.add(lato.id);
+        if (typeof lato.acquisto_id === 'string') acquistoIds.add(lato.acquisto_id);
+      }
+      if (typeof lato.voce_uid === 'string') voceUids.add(lato.voce_uid);
+      if (p.schema === 'main' && p.tabella === 'voce_giornata' && typeof lato.uid === 'string') voceUids.add(lato.uid);
+    }
+    if (r.id === null && !fontePrivataUuid) {
+      const tabella = r.tipo === 'partita' ? 'partita' : 'acquisto_provenienza';
+      const presente = r.tipo === 'fonte-acquisto' && r.chiave.startsWith('legacy:')
+        ? db.prepare('SELECT 1 FROM utente.acquisto_partita WHERE partita_id=? AND articolo_chiave=?').get(r.partitaId, r.chiave.slice(7))
+        : db.prepare(`SELECT 1 FROM utente.${tabella} WHERE id=?`).get(r.chiave);
+      if (presente) throw httpErrors.conflict('cestino-chiave-personale-occupata',
+        'L’identità personale da ripristinare è già presente: nessuna fusione o sovrascrittura è stata eseguita.');
+    }
+    const attivaPrima = r.tipo === 'partita' ? db.prepare('SELECT id FROM utente.partita WHERE attiva=1').get() as { id: number } | undefined : undefined;
+    const contestoAcquisti = preparaRipristinoAcquisti({ tipoCestino: r.tipo, partitaIds: [...partitaIds], acquistoIds: [...acquistoIds] });
     for (const p of passi) {
+      // La storia dei delta avvenuti dopo l'eliminazione vince. Il dominio ricalcola
+      // T−B dopo aver rimesso identità e fonti, senza rieseguire movimenti o premi.
+      if (r.tipo !== 'partita' && p.schema === 'utente' && DURATURE_ACQUISTI.has(p.tabella)) continue;
       if (p.schema === 'main' && p.tabella === 'attivita') {
         const fonte = p.prima ?? p.dopo;
         if (typeof fonte?.chiave === 'string' && !attivitaPrecedenti.has(fonte.chiave)) {
@@ -353,8 +490,20 @@ export function ripristinaDalCestino(id: number): EsitoRipristinoCestinoDto {
       }
       const s = struttura(p.schema, p.tabella);
       const riferimento = p.prima ?? p.dopo!;
+      const identitaImmutabile = fontePrivataUuid && p.schema === 'utente' && p.op === 'D'
+        && ['acquisto_registrato', 'acquisto_provenienza'].includes(p.tabella);
+      const eventoAcquisto = p.schema === 'utente' && p.op === 'D' && p.tabella === 'evento_partita'
+        && azioneEventoAcquistoV1(riferimento.dati_json) !== null;
+      // L'eccezione UUID non può usare una proiezione parziale né valori di default:
+      // anche JSON, legami e metadati devono coincidere esattamente con la fotografia.
+      if ((identitaImmutabile || eventoAcquisto) && (!s || Object.keys(riferimento).length !== s.colonne.length || s.colonne.some(c => !(c in riferimento)))) {
+        throw httpErrors.conflict('cestino-fotografia-acquisto-incompleta', 'Lo schema e la fotografia integrale personale non coincidono: ripristino annullato, cestino conservato.');
+      }
       const descrivi = (riga: Riga) => s ? s.chiave.map((c) => String(riga[c] ?? '')).join(' · ') : '';
-      if (!s) { salta(p.tabella, 'non-esiste-piu', descrivi(riferimento)); continue; }
+      if (!s) {
+        if (r.tipo === 'partita') throw httpErrors.conflict('cestino-schema-partita-incompleto', 'Una tabella del blocco personale non esiste più: il ripristino completo è stato annullato.');
+        salta(p.tabella, 'non-esiste-piu', descrivi(riferimento)); continue;
+      }
       // solo le colonne che la tabella ha ancora (una migrazione dopo l'eliminazione può averne tolte)
       const colonne = s.colonne.filter((c) => c in riferimento);
       const su = `${p.schema}.${virgolette(p.tabella)}`;
@@ -372,11 +521,12 @@ export function ripristinaDalCestino(id: number): EsitoRipristinoCestinoDto {
         } catch (err) {
           const codice = codiceSqlite(err);
           if (codice === 'SQLITE_CONSTRAINT_FOREIGNKEY') {
+            if (r.tipo === 'partita') throw httpErrors.conflict('cestino-legami-partita-incompleti', 'Un legame del blocco personale non è ripristinabile: intera transazione annullata.');
             if (p.schema === 'main' && p.tabella === 'attivita' && riga.confidente_chiave != null) throw httpErrors.conflict('cestino-confidente-mancante', 'Il Confidente dell’attività da ripristinare non è presente: nessun dato è stato rimesso.');
             salta(p.tabella, 'legame-mancante', descrivi(riga)); return false;
           }
           if (codice === 'SQLITE_CONSTRAINT_PRIMARYKEY' || codice === 'SQLITE_CONSTRAINT_UNIQUE') {
-            if (p.schema === 'main' && !DERIVATE.has(p.tabella)) occupate.push(`${etichettaTabella(p.tabella)}: ${descrivi(riga)}`);
+            if ((p.schema === 'main' && !DERIVATE.has(p.tabella)) || r.tipo === 'partita' || (p.schema === 'utente' && ['acquisto_registrato','acquisto_provenienza'].includes(p.tabella))) occupate.push(`${etichettaTabella(p.tabella)}: ${descrivi(riga)}`);
             else salta(p.tabella, 'cambiata-dopo', descrivi(riga));
             return false;
           }
@@ -384,11 +534,14 @@ export function ripristinaDalCestino(id: number): EsitoRipristinoCestinoDto {
         }
       };
       if (p.op === 'D') {
-        const prima = p.prima!;
+        const prima = r.tipo === 'partita' && p.schema === 'utente' && p.tabella === 'partita' && attivaPrima
+          ? { ...p.prima!, attiva: 0 } : p.prima!;
         const ora = leggi(prima);
         if (ora) {
           if (uguali(ora, prima, colonne)) continue;
-          if (p.schema === 'main' && !DERIVATE.has(p.tabella)) occupate.push(`${etichettaTabella(p.tabella)}: ${descrivi(prima)}`);
+          if (identitaImmutabile) throw httpErrors.conflict('cestino-uuid-acquisto-divergente', 'Lo stesso UUID personale ha identità o contenuto immutabile diverso: nessuna fusione o sovrascrittura, intero ripristino annullato.');
+          if (eventoAcquisto) throw httpErrors.conflict('cestino-evento-acquisto-divergente', 'L’ID dell’evento di acquisto contiene uno storico diverso: nessuna sovrascrittura, intero ripristino annullato.');
+          if ((p.schema === 'main' && !DERIVATE.has(p.tabella)) || r.tipo === 'partita' || (p.schema === 'utente' && ['acquisto_registrato','acquisto_provenienza'].includes(p.tabella))) occupate.push(`${etichettaTabella(p.tabella)}: ${descrivi(prima)}`);
           else salta(p.tabella, 'cambiata-dopo', descrivi(prima));
           continue;
         }
@@ -399,7 +552,7 @@ export function ripristinaDalCestino(id: number): EsitoRipristinoCestinoDto {
         if (!ora) { if (!leggi(prima)) salta(p.tabella, 'non-esiste-piu', descrivi(dopo)); continue; }
         // colonna per colonna: torna com'era ciò che l'eliminazione aveva cambiato e nessuno ha toccato dopo; il resto della riga
         // (anche cambiato dopo) resta com'è. Una colonna cambiata dall'eliminazione e poi di nuovo da altro resta, e si dice.
-        const cambiate = colonne.filter((c) => !stesso(prima[c], dopo[c]));
+        const cambiate = colonne.filter((c) => !stesso(prima[c], dopo[c]) && !(r.tipo === 'partita' && p.schema === 'utente' && p.tabella === 'partita' && c === 'attiva'));
         const daRimettere = cambiate.filter((c) => stesso(ora[c], dopo[c]));
         // Una fusione cambia puntatori nel JSON della guida, non il testo. Un edit successivo
         // di un altro campo non deve impedire il ripristino del solo riferimento interessato.
@@ -492,15 +645,28 @@ export function ripristinaDalCestino(id: number): EsitoRipristinoCestinoDto {
         }
       }
     }
-    const radice = RADICE[r.tipo];
-    if (!db.prepare(`SELECT 1 FROM main.${virgolette(radice.tabella)} WHERE ${virgolette(radice.colonna)} = ?`).get(r.chiave)) {
+    const radice = r.tipo === 'partita' ? { schema: 'utente', tabella: 'partita', colonna: 'id' }
+      : r.tipo === 'fonte-acquisto' ? { schema: 'utente', tabella: 'acquisto_provenienza', colonna: 'id' }
+        : { schema: 'main', ...RADICE[r.tipo] };
+    const radicePresente = r.tipo === 'fonte-acquisto' && r.chiave.startsWith('legacy:')
+      ? db.prepare('SELECT 1 FROM utente.acquisto_partita WHERE partita_id=? AND articolo_chiave=?').get(r.partitaId, r.chiave.slice(7))
+      : db.prepare(`SELECT 1 FROM ${radice.schema}.${virgolette(radice.tabella)} WHERE ${virgolette(radice.colonna)} = ?`).get(r.chiave);
+    if (!radicePresente) {
       throw httpErrors.conflict('cestino-non-ripristinabile', `Non si può rimettere «${r.nome}»: ciò che la conteneva non c'è più.`);
     }
-    dopoRipristino.get(r.tipo)?.(r.chiave, r.vicini_json ? JSON.parse(r.vicini_json) as ViciniCestino : null, [...saltate.values()]);
+    verificaRipristinoAcquisti(contestoAcquisti);
+    if (r.tipo !== 'partita') for (const partita of partitaIds) {
+      if (!db.prepare('SELECT 1 FROM utente.partita WHERE id=?').get(partita)) continue;
+      riconciliaAcquistiDopoRipristino(partita, [...acquistoIds]);
+      riconciliaEffettiDopoRipristino(partita, [...voceUids]);
+    }
+    const vicini = r.vicini_json ? JSON.parse(r.vicini_json) as ViciniCestino : null;
+    if (r.tipo === 'voce-diario') ripristinaOrdineVoce(r.chiave, vicini);
+    else if (r.tipo !== 'partita' && r.tipo !== 'fonte-acquisto') dopoRipristino.get(r.tipo)?.(r.chiave, vicini, [...saltate.values()]);
     // L4 (§8.11): lo specchio delle voci con pin si rifà con la funzione unica — quel che è cambiato dopo l'eliminazione (un pin
     // segnato o tolto) vince, come per le altre righe delle partite
     riallineaStati(db, null, nowIso());
-    db.prepare('DELETE FROM main.cestino WHERE id = ?').run(r.id);
+    if (r.id !== null) db.prepare('DELETE FROM main.cestino WHERE id = ?').run(r.id);
     db.prepare('DELETE FROM utente.cestino_partite WHERE uid = ?').run(r.uid);
   })();
   invalidaCacheDiGioco();
@@ -527,7 +693,22 @@ export function svuotaCestino(): { eliminati: number } {
   const db = getDb();
   return db.transaction(() => {
     const eliminati = db.prepare('DELETE FROM main.cestino').run().changes;
-    db.prepare('DELETE FROM utente.cestino_partite').run();
+    db.prepare('DELETE FROM utente.cestino_partite WHERE tipo IS NULL').run();
     return { eliminati };
+  })();
+}
+
+export function eliminaCestinoPrivato(uid: string): void {
+  if (!getDb().prepare('DELETE FROM utente.cestino_partite WHERE uid=? AND tipo IS NOT NULL').run(uid).changes) {
+    throw httpErrors.notFound('cestino-non-trovato', 'L’elemento personale non è più nel cestino.');
+  }
+}
+export function svuotaCestinoUnificato(): { eliminati: number } {
+  const db = getDb();
+  return db.transaction(() => {
+    const privati = (db.prepare('SELECT COUNT(*) AS n FROM utente.cestino_partite WHERE tipo IS NOT NULL').get() as { n: number }).n;
+    const legacy = svuotaCestino();
+    db.prepare('DELETE FROM utente.cestino_partite WHERE tipo IS NOT NULL').run();
+    return { eliminati: legacy.eliminati + privati };
   })();
 }

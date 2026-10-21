@@ -23,6 +23,8 @@ import type { CarattereVoce } from './caratteriVoce.js';
 import type { CompletamentoPalazzo } from './completamentoGuida.js';
 import type { QuizAttivita } from './quizAttivita.js';
 import type { Osservazione, Statistiche } from './statistiche.js';
+import type { StatoAcquistiArticoloDto } from './acquisti.js';
+import type { StatoEffettiVoceDto, ReceiptEffettoVoceDto, RichiestaSalvaEffettiVoce } from './effettiVoce.js';
 
 /** Risposta di salute del backend. */
 export interface HealthDto {
@@ -1235,6 +1237,10 @@ export interface AzionePercorsoDto {
   note: string | null;
   /** Che cosa produce la spunta (`shared/effettiAzione.ts`): dato strutturato e modificabile; le note sono solo testo. */
   produce: EffettoAzione[];
+  /** Fonte unica ordinata degli effetti; il RAW non convertibile resta visibile e non diventa una lista vuota. */
+  effettiVoce?: StatoEffettiVoceDto;
+  /** Ricevute del nuovo formato, separate dalla fotografia legacy della spunta. */
+  ricevuteEffetti?: ReceiptEffettoVoceDto[];
   /** Gli effetti di `produce` in parole, con i nomi di libri, film e attività («Zorro, il fuorilegge: completato»). */
   produceTesto: string[];
   /** Fatta nella partita. */
@@ -1314,6 +1320,10 @@ export interface DatiVoceGiornata {
   rangoAtteso?: number | null;
   /** Effetti della spunta (solo per un'azione). */
   produce?: EffettoAzione[];
+  /** CAS della fonte unica, richiesto quando si modificano gli effetti di una voce già presente. */
+  revisioneEffettiAttesa?: string;
+  /** Creazione: UID null e nessun token; modifica: fonte completa e token obbligatorio. */
+  effettiVoce?: { effetti: RichiestaSalvaEffettiVoce['effetti']; revisioneEffettiAttesa?: string };
   /** Posto nella fascia, da 0 (in cima); oltre l'ultimo = in fondo. Omesso: in fondo creando, dov'era modificando (in fondo alla
    *  fascia nuova se cambia fascia). */
   posizione?: number;
@@ -1457,6 +1467,8 @@ export interface DisponibilitaDto {
 }
 
 export interface ArticoloDto {
+  /** Presenza legacy distinta dai fatti confermati e dalle loro fonti; nessuna quantità dedotta dalla spunta. */
+  acquisti?: StatoAcquistiArticoloDto;
   /** Registrazioni effettive sulle singole offerte: l'annullamento riguarda solo la chiave scelta. */
   acquistiRegistrati?: Array<{ articolo: string; negozioNome: string }>;
   /** Risultati collegati di un baratto; una sola offerta/spunta, senza oggetti-bundle fittizi. */
@@ -2463,6 +2475,8 @@ export interface EventoPartitaDto {
   titolo: string;
   dettaglio: string;
   dati: Record<string, unknown>;
+  /** Riferimenti espliciti del log, mai conteggi: eliminare un evento non annulla il fatto. */
+  acquistoRegistrato?: { id: string; fonteId: string | null; operazioneId: string | null; presente: boolean; fontePresente: boolean | null };
   personaId: number | null;
   personaNome: string | null;
   personaNomeIt: string | null;
@@ -2571,7 +2585,7 @@ export interface DettaglioSpilloDto {
     orariTesto?: string; presenza?: PresenzaLuogoDto; casa?: string; negozi?: Array<{ chiave: string; nome: string; casa: string }> };
   negozio?: { chiave: string; nome: string; tipo: string; disponibilita?: DisponibilitaDto;
     /** L5: la sezione del negozio nella pagina della sede, o null. */
-    sedeCasa?: string | null; sedeChiave?: string | null; articoli: Array<{ chiave: string; nome: string; categoria: string; prezzo: number | null; disponibileDal: string | null; comprato: boolean; disponibilita?: DisponibilitaDto; catalogo?: RiferimentoOggettoDto | null; costo?: CostoOggettoDto | null; costoDaVerificare?: boolean; ricevuti?: RicompensaOggettoDto[] }> } | null;
+    sedeCasa?: string | null; sedeChiave?: string | null; articoli: Array<{ chiave: string; nome: string; categoria: string; prezzo: number | null; disponibileDal: string | null; comprato: boolean; acquisti?: StatoAcquistiArticoloDto; disponibilita?: DisponibilitaDto; catalogo?: RiferimentoOggettoDto | null; costo?: CostoOggettoDto | null; costoDaVerificare?: boolean; ricevuti?: RicompensaOggettoDto[] }> } | null;
   confidente?: { chiave: string; nome: string; arcanaNome: string };
   richiesta?: { chiave: string; nome: string; stato: string | null };
 }
@@ -3096,7 +3110,7 @@ export interface RiepilogoCatalogoDto {
 /** Che cosa è stato eliminato: un'area della guida di un Palazzo, una voce della guida, una planimetria, un'area di un dedalo, un'Area
  *  con le sue planimetrie (`area-fisica`, L2: il quartiere o la città che la contiene). */
 /** `richiesta` (L6, R6-04): una Richiesta eliminata va nel cestino; le condizioni che la citano restano e danno «Richiesta eliminata». */
-export type TipoCestino = 'area' | 'voce' | 'mappa' | 'area-dedalo' | 'area-fisica' | 'luogo' | 'negozio' | 'richiesta' | 'oggetto';
+export type TipoCestino = 'area' | 'voce' | 'mappa' | 'area-dedalo' | 'area-fisica' | 'luogo' | 'negozio' | 'richiesta' | 'oggetto' | 'voce-diario' | 'partita' | 'fonte-acquisto';
 
 // ---- L7: catalogo unico. I riferimenti non contengono prezzi: il prezzo appartiene all'offerta. ----
 
@@ -3134,6 +3148,7 @@ export interface DatiLegameOggettoDto extends Omit<SceltaAbbinamentoOggettoDto, 
 }
 
 export interface OffertaOggettoDto {
+  acquisti?: StatoAcquistiArticoloDto;
   acquistiRegistrati: Array<{ articolo: string; negozioNome: string }>;
   articolo: string;
   negozio: string;
@@ -3225,6 +3240,11 @@ export interface VoceCestinoDto {
   /** Quanto pesa il registro, in byte: le immagini dei pin e delle mappe ci stanno dentro. */
   byte: number;
 }
+
+/** La risposta storica rimane invariata; il client nuovo richiede esplicitamente anche il cestino privato. */
+export type VoceCestinoUnificatoDto =
+  | (VoceCestinoDto & { riferimento?: { schema: 'main'; id: number } })
+  | (Omit<VoceCestinoDto, 'id' | 'tipo'> & { id: null; tipo: 'partita' | 'fonte-acquisto'; riferimento: { schema: 'utente'; uid: string } });
 
 /** Perché una riga non è stata rimessa com'era: cambiata dopo l'eliminazione, non c'è più, o punta a qualcosa che non c'è più. */
 export type MotivoSaltataCestinoDto = 'cambiata-dopo' | 'non-esiste-piu' | 'legame-mancante';
