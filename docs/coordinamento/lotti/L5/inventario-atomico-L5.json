@@ -1,0 +1,3904 @@
+{
+  "versione": 1,
+  "lettura": "2026-10-22T20:16:01Z",
+  "schema": 137,
+  "specifica": "43ad8889",
+  "perimetro": "Inventario operativo, non copia dei database. Solo chiavi/ID già pubblici e indicatori; nessun nome o testo personale. Origine: GET censimento readonly p5s, gerarchia Tokyo completa o Area appartenente a quartiere.",
+  "totali": {
+    "luoghiTotali": 98,
+    "luoghiPubblici": 93,
+    "luoghiPubbliciSenzaArea": 44,
+    "negoziTotali": 62,
+    "negoziPubblici": 61,
+    "pinMondo": 295,
+    "pinPubblici": 294,
+    "pinAggiuntivoNonPubblico": 1,
+    "senzaLuogoPubblici": 200,
+    "nomiDiscordanti": 32
+  },
+  "limiti": [
+    "Le relazioni risolte non certificano correttezza semantica, disponibilita o conservazione integrale delle note.",
+    "Un pin aggiuntivo non pubblico e risolto: identita e contenuti esclusi da Git, singola azione riservata al censimento locale.",
+    "I32nomi discordanti e le note per pin non sono32bug: richiedono riscontro conservativo individuale."
+  ],
+  "luoghi": [
+    {
+      "chiave": "akihabara/akiba-electronics",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "akihabara/akindo",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "akihabara/distributori-akihabara",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "akihabara/gachapon-akihabara",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "akihabara/maid-cafe-akihabara",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "akihabara/sala-giochi-akihabara",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "akihabara/super-baron",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "akihabara/tokobushiya",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "asakusa/asakusa-hangout",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "asakusa/tokyo-skytree",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "harajuku/harajuku-hangout",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "harajuku/takenoko-street",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "ichigaya/laghetto-ichigaya",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "ikebukuro/planetario-ikebukuro",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "inokashira-park/inokashira-hangout",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "kanda-jinbocho/chiesa-kanda",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "kanda-jinbocho/nagiuri",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "kichijoji/hagoromo",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "kichijoji/houraku",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "kichijoji/jazz-jin",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "kichijoji/kichijoji-galleria-kasumi",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "kichijoji/mantra-ganda",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "kichijoji/mealport",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "kichijoji/mercante-sakai",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "kichijoji/mitsubachi",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "kichijoji/penguin-sniper",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "kichijoji/stoneon",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "kichijoji/vecchio-tempio-kichijoji",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "kichijoji/vestiti-usati-kichijoji",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "maihama/destinyland",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "meiji-shrine/meiji-shrine-hangout",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "mementos/ingresso-mementos",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "mementos/negozio-jose",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "nakano/nakano-broadway",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "odaiba/odaiba-seaside-park",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "ogikubo/ogikubo-ramen",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "roppongi/okumura-foods-hq",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/37-gradi",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/aohige",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/big-bang-burger",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/body-chop",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/diner",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/distributore-sottopasso",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/high-sense",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/kiyasuku",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/ore-no-beko",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/prossimo-asso",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/protein-lovers",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/rafflesia",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/rocinante",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/sala-giochi-shibuya",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/scarlet",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/stazione-piazza-shibuya",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/stazione-shibuya",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/taiheido",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/taisho-store",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/triple-seven",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/tsurukame",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/underground-mall-lovers",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/untouchable",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/venditore-ambulante",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/yon-germain",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shinagawa/shinagawa-acquario",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shinjuku/chihaya-stand",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shinjuku/cinema-cult9",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shinjuku/crossroads",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shinjuku/fioraio-sukebe",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shinjuku/hinokuniya",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shinjuku/mran-mran",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shujin-academy/aula-shujin",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shujin-academy/biblioteca-shujin",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shujin-academy/cancello-shujin",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shujin-academy/corridoio-2-piano-shujin",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shujin-academy/distributori-shujin",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shujin-academy/infermeria-shujin",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shujin-academy/negozio-scolastico",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "suidobashi/dome-town",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "tsukishima/tsukishima-monjayaki",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "ueno/museo-ueno",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "yokohama-chinatown/chinatown-hangout",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "yongen-jaya/bagno-pubblico",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "yongen-jaya/batting-cage-yongen",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "yongen-jaya/cinema-yongen",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "yongen-jaya/clinica-takemi",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "yongen-jaya/distributore-bagno-pubblico",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "yongen-jaya/distributore-tabaccaio",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "yongen-jaya/lavanderia-yongen",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "yongen-jaya/leblanc",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "yongen-jaya/negozio-usato-yumenoshima",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "yongen-jaya/sakura-residence",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": true
+    },
+    {
+      "chiave": "yongen-jaya/stazione-yongen-jaya",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "yongen-jaya/super-muramasa",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "yongen-jaya/venditore-patate-dolci",
+      "esito": "collocazione-da-risolvere",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/distributore-tornello-ginza",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/distributori-central-street",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/u-banco-della-lotteria-di-shibuya",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/u-chiosco-dei-succhi-del-sottopasso",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    },
+    {
+      "chiave": "shibuya/u-cinema-di-shibuya",
+      "esito": "relazione-presente-non-certificata",
+      "soloEventi": false
+    }
+  ],
+  "negozi": [
+    {
+      "chiave": "37-gradi-celsius",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "akiba",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "akindo",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "big-bang-burger",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "body-chop",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "cartoleria-mitsubachi",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "chiesa-kanda",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "chiosco-kiyasuku",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "clinica-takemi",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "crossroads",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "discount-rocinante",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "distributore-akihabara-1",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "distributore-akihabara-2",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "distributore-akihabara-3",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "distributore-akihabara-4",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "distributore-akihabara-5",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "distributore-akihabara-6",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "distributore-shibuya-sala-giochi",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "distributore-shibuya-sottopasso",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "distributore-shujin-cancello-1",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "distributore-shujin-cancello-2",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "distributore-shujin-cortile",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "distributore-shujin-edificio",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "distributore-yongen-bagno",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "distributore-yongen-tabaccaio",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "farmacia-aohige",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "fioraio-sukebe",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "fiorista-rafflesia",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "friggitoria-hagoromo",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "gachapon-akihabara",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "high-sense",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "hinokuniya",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "home-shopping-tv",
+      "esito": "sede-online-da-definire"
+    },
+    {
+      "chiave": "leblanc",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "libreria-nagiuri",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "libreria-taiheido",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "mantra-ganda",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "mealport",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "mercante-sakai",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "mran-mran",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "negozio-palazzo-niijima",
+      "esito": "eccezione-prevista-sede-palazzo"
+    },
+    {
+      "chiave": "negozio-scolastico",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "panetteria-yon-germain",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "penguin-sniper",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "prossimo-asso",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "stoneon",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "street-food-houraku",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "super-baron",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "super-muramasa",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "taisho-store",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "tanaka-affari-loschi",
+      "esito": "sede-online-da-definire"
+    },
+    {
+      "chiave": "tempio-kichijoji",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "tokobushiya",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "triple-seven",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "tsurukame-diamond",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "u-biblioteca-scolastica",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "untouchable",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "venditore-ambulante",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "venditore-patate-dolci",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "vestiti-usati-kichijoji",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "yumenoshima",
+      "esito": "relazione-presente-non-certificata"
+    },
+    {
+      "chiave": "jose",
+      "esito": "negozio-itinerante-memento-da-riscontrare"
+    }
+  ],
+  "pinSenzaLuogo": [
+    {
+      "id": 258,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 259,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 260,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 261,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 262,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 263,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 264,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 272,
+      "tipo": "distributore",
+      "esito": "intervento-censito",
+      "motivo": "Identità nei19residui distinti già in lista; non duplicare la stessa bonifica."
+    },
+    {
+      "id": 273,
+      "tipo": "distributore",
+      "esito": "intervento-censito",
+      "motivo": "Identità nei19residui distinti già in lista; non duplicare la stessa bonifica."
+    },
+    {
+      "id": 274,
+      "tipo": "distributore",
+      "esito": "intervento-censito",
+      "motivo": "Identità nei19residui distinti già in lista; non duplicare la stessa bonifica."
+    },
+    {
+      "id": 275,
+      "tipo": "distributore",
+      "esito": "intervento-censito",
+      "motivo": "Identità nei19residui distinti già in lista; non duplicare la stessa bonifica."
+    },
+    {
+      "id": 285,
+      "tipo": "scala",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Collegamento fra piani: non sede di attività."
+    },
+    {
+      "id": 289,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 304,
+      "tipo": "scala",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Collegamento fra piani: non sede di attività."
+    },
+    {
+      "id": 315,
+      "tipo": "punto-sensibile",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Punto di interazione, eccezione M5§7.9."
+    },
+    {
+      "id": 336,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 337,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 339,
+      "tipo": "distributore",
+      "esito": "intervento-censito",
+      "motivo": "Identità nei19residui distinti già in lista; non duplicare la stessa bonifica."
+    },
+    {
+      "id": 344,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 345,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 347,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 348,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 349,
+      "tipo": "culto",
+      "esito": "funzione-da-riscontrare",
+      "motivo": "Nessuna trasformazione in luogo senza prova della funzione."
+    },
+    {
+      "id": 350,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 359,
+      "tipo": "distributore",
+      "esito": "intervento-censito",
+      "motivo": "Identità nei19residui distinti già in lista; non duplicare la stessa bonifica."
+    },
+    {
+      "id": 361,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 362,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 364,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 365,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 366,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 367,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 368,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 369,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 370,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 371,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 372,
+      "tipo": "uscita",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Uscita di navigazione, non sede."
+    },
+    {
+      "id": 373,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 374,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 375,
+      "tipo": "attivita",
+      "esito": "intervento-censito",
+      "motivo": "Identità nei19residui distinti già in lista; non duplicare la stessa bonifica."
+    },
+    {
+      "id": 376,
+      "tipo": "attivita",
+      "esito": "intervento-censito",
+      "motivo": "Identità nei19residui distinti già in lista; non duplicare la stessa bonifica."
+    },
+    {
+      "id": 377,
+      "tipo": "attivita",
+      "esito": "intervento-censito",
+      "motivo": "Identità nei19residui distinti già in lista; non duplicare la stessa bonifica."
+    },
+    {
+      "id": 378,
+      "tipo": "attivita",
+      "esito": "intervento-censito",
+      "motivo": "Identità nei19residui distinti già in lista; non duplicare la stessa bonifica."
+    },
+    {
+      "id": 379,
+      "tipo": "attivita",
+      "esito": "intervento-censito",
+      "motivo": "Identità nei19residui distinti già in lista; non duplicare la stessa bonifica."
+    },
+    {
+      "id": 380,
+      "tipo": "attivita",
+      "esito": "intervento-censito",
+      "motivo": "Identità nei19residui distinti già in lista; non duplicare la stessa bonifica."
+    },
+    {
+      "id": 381,
+      "tipo": "attivita",
+      "esito": "intervento-censito",
+      "motivo": "Identità nei19residui distinti già in lista; non duplicare la stessa bonifica."
+    },
+    {
+      "id": 382,
+      "tipo": "attivita",
+      "esito": "intervento-censito",
+      "motivo": "Identità nei19residui distinti già in lista; non duplicare la stessa bonifica."
+    },
+    {
+      "id": 383,
+      "tipo": "attivita",
+      "esito": "intervento-censito",
+      "motivo": "Identità nei19residui distinti già in lista; non duplicare la stessa bonifica."
+    },
+    {
+      "id": 384,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 385,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 386,
+      "tipo": "negozio",
+      "esito": "intervento-censito",
+      "motivo": "Identità nei19residui distinti già in lista; non duplicare la stessa bonifica."
+    },
+    {
+      "id": 387,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 388,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 389,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 390,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 391,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 392,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 393,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 394,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 395,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1457,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1460,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1461,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1463,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1464,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1477,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1478,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1480,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1482,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1483,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1488,
+      "tipo": "cercalavoro",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Informazione sui lavori, non sede di lavoro."
+    },
+    {
+      "id": 1489,
+      "tipo": "cercalavoro",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Informazione sui lavori, non sede di lavoro."
+    },
+    {
+      "id": 1501,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1502,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1544,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1545,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1550,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1553,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1554,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1555,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 1556,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1557,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1558,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 1559,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1564,
+      "tipo": "distributore",
+      "esito": "intervento-censito",
+      "motivo": "Identità nei19residui distinti già in lista; non duplicare la stessa bonifica."
+    },
+    {
+      "id": 1565,
+      "tipo": "distributore",
+      "esito": "intervento-censito",
+      "motivo": "Identità nei19residui distinti già in lista; non duplicare la stessa bonifica."
+    },
+    {
+      "id": 1566,
+      "tipo": "distributore",
+      "esito": "intervento-censito",
+      "motivo": "Identità nei19residui distinti già in lista; non duplicare la stessa bonifica."
+    },
+    {
+      "id": 1569,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1572,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1614,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1615,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1616,
+      "tipo": "punto-sensibile",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Punto di interazione, eccezione M5§7.9."
+    },
+    {
+      "id": 1625,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1626,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1627,
+      "tipo": "uscita",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Uscita di navigazione, non sede."
+    },
+    {
+      "id": 1628,
+      "tipo": "uscita",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Uscita di navigazione, non sede."
+    },
+    {
+      "id": 1629,
+      "tipo": "uscita",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Uscita di navigazione, non sede."
+    },
+    {
+      "id": 1630,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1631,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1632,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1633,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1634,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1635,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1637,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1638,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1639,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1640,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1641,
+      "tipo": "casa",
+      "esito": "funzione-da-riscontrare",
+      "motivo": "Nessuna trasformazione in luogo senza prova della funzione."
+    },
+    {
+      "id": 1642,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1643,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1644,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1645,
+      "tipo": "treno",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Trasporto, non sede."
+    },
+    {
+      "id": 1646,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1647,
+      "tipo": "treno",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Trasporto, non sede."
+    },
+    {
+      "id": 1648,
+      "tipo": "treno",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Trasporto, non sede."
+    },
+    {
+      "id": 1649,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1650,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1651,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1652,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1653,
+      "tipo": "treno",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Trasporto, non sede."
+    },
+    {
+      "id": 1654,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1655,
+      "tipo": "treno",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Trasporto, non sede."
+    },
+    {
+      "id": 1656,
+      "tipo": "ingresso-palazzo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Ingresso del Palazzo, dominio distinto dalle sedi cittadine."
+    },
+    {
+      "id": 1669,
+      "tipo": "scala",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Collegamento fra piani: non sede di attività."
+    },
+    {
+      "id": 1670,
+      "tipo": "scala",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Collegamento fra piani: non sede di attività."
+    },
+    {
+      "id": 1671,
+      "tipo": "scala",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Collegamento fra piani: non sede di attività."
+    },
+    {
+      "id": 1672,
+      "tipo": "terme",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Eccezione scolastica prevista da M5§7.9, non terme cittadine."
+    },
+    {
+      "id": 1673,
+      "tipo": "terme",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Eccezione scolastica prevista da M5§7.9, non terme cittadine."
+    },
+    {
+      "id": 1674,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1675,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 1677,
+      "tipo": "scala",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Collegamento fra piani: non sede di attività."
+    },
+    {
+      "id": 1680,
+      "tipo": "terme",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Eccezione scolastica prevista da M5§7.9, non terme cittadine."
+    },
+    {
+      "id": 1681,
+      "tipo": "terme",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Eccezione scolastica prevista da M5§7.9, non terme cittadine."
+    },
+    {
+      "id": 1682,
+      "tipo": "punto-sensibile",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Punto di interazione, eccezione M5§7.9."
+    },
+    {
+      "id": 1683,
+      "tipo": "punto-sensibile",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Punto di interazione, eccezione M5§7.9."
+    },
+    {
+      "id": 1684,
+      "tipo": "punto-sensibile",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Punto di interazione, eccezione M5§7.9."
+    },
+    {
+      "id": 1685,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1686,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1687,
+      "tipo": "scala",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Collegamento fra piani: non sede di attività."
+    },
+    {
+      "id": 1688,
+      "tipo": "scala",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Collegamento fra piani: non sede di attività."
+    },
+    {
+      "id": 1689,
+      "tipo": "scala",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Collegamento fra piani: non sede di attività."
+    },
+    {
+      "id": 1690,
+      "tipo": "scala",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Collegamento fra piani: non sede di attività."
+    },
+    {
+      "id": 1691,
+      "tipo": "scala",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Collegamento fra piani: non sede di attività."
+    },
+    {
+      "id": 1692,
+      "tipo": "scala",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Collegamento fra piani: non sede di attività."
+    },
+    {
+      "id": 1693,
+      "tipo": "scala",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Collegamento fra piani: non sede di attività."
+    },
+    {
+      "id": 1694,
+      "tipo": "scala",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Collegamento fra piani: non sede di attività."
+    },
+    {
+      "id": 1695,
+      "tipo": "scala",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Collegamento fra piani: non sede di attività."
+    },
+    {
+      "id": 1696,
+      "tipo": "scala",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Collegamento fra piani: non sede di attività."
+    },
+    {
+      "id": 1697,
+      "tipo": "terme",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Eccezione scolastica prevista da M5§7.9, non terme cittadine."
+    },
+    {
+      "id": 1698,
+      "tipo": "terme",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Eccezione scolastica prevista da M5§7.9, non terme cittadine."
+    },
+    {
+      "id": 1699,
+      "tipo": "punto-sensibile",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Punto di interazione, eccezione M5§7.9."
+    },
+    {
+      "id": 1700,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 1701,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 1702,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 1703,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 1704,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 1705,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 1706,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 1707,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 1708,
+      "tipo": "nota",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Annotazione: preservare contenuto, non creare un luogo."
+    },
+    {
+      "id": 1709,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1710,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1711,
+      "tipo": "scala",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Collegamento fra piani: non sede di attività."
+    },
+    {
+      "id": 1712,
+      "tipo": "scala",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Collegamento fra piani: non sede di attività."
+    },
+    {
+      "id": 1713,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1714,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1715,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1716,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1725,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1726,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1727,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1728,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1729,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1730,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1731,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1747,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1748,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1749,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1750,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1751,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1752,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1753,
+      "tipo": "confidente",
+      "esito": "funzione-da-riscontrare",
+      "motivo": "R5-20: verificare funzionamento del pin Confidente e appartenenza a un luogo; il solo tipo non e una esclusione autorizzata da M5§7.9."
+    },
+    {
+      "id": 1754,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1755,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1756,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1757,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1758,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1761,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1762,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1763,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1764,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1765,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1766,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1767,
+      "tipo": "confidente",
+      "esito": "funzione-da-riscontrare",
+      "motivo": "R5-20: verificare funzionamento del pin Confidente e appartenenza a un luogo; il solo tipo non e una esclusione autorizzata da M5§7.9."
+    },
+    {
+      "id": 1770,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1771,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1772,
+      "tipo": "dialogo",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Interazione/dialogo, non sede."
+    },
+    {
+      "id": 1773,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1774,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 1775,
+      "tipo": "passaggio",
+      "esito": "esclusione-da-luogo-motivata",
+      "motivo": "Transito: non richiede una sede; verificare separatamente destinazione."
+    },
+    {
+      "id": 2022,
+      "tipo": "velluto",
+      "esito": "funzione-da-riscontrare",
+      "motivo": "Nessuna trasformazione in luogo senza prova della funzione."
+    }
+  ],
+  "pinConLuogo": [
+    {
+      "id": 208,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 209,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 210,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 211,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 212,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 213,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 214,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 215,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 216,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 217,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 218,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 220,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 221,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 222,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 225,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 226,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 227,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 228,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 229,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 230,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 231,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 232,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 233,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 234,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 265,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 266,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 267,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 268,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 269,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 270,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 271,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 290,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 291,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 292,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 293,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 334,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 346,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 351,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 352,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 353,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 354,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 355,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 356,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 357,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 358,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 360,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 363,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 1466,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 1486,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 1487,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1494,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 1515,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1516,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1517,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1518,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1519,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1520,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1521,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1522,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1523,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1524,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1525,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1526,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 1527,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 1530,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 1536,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 1537,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 1538,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 1539,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 1540,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 1541,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 1542,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 1546,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1547,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 1548,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 1560,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1561,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 1562,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 1563,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1567,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1584,
+      "esito": "discordanza-geografica",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 1585,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1586,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1587,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1588,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1589,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1590,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1591,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1592,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1593,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": false
+    },
+    {
+      "id": 1759,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 1760,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 1768,
+      "esito": "relazione-presente-non-certificata",
+      "nomeDiscordante": true
+    },
+    {
+      "id": 1769,
+      "esito": "discordanza-geografica",
+      "nomeDiscordante": true
+    }
+  ],
+  "azioni": [
+    {
+      "id": "L5-AREA-akihabara/distributori-akihabara",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: akihabara/distributori-akihabara",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-asakusa/asakusa-hangout",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: asakusa/asakusa-hangout",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-asakusa/tokyo-skytree",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: asakusa/tokyo-skytree",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-harajuku/harajuku-hangout",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: harajuku/harajuku-hangout",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-harajuku/takenoko-street",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: harajuku/takenoko-street",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-ichigaya/laghetto-ichigaya",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: ichigaya/laghetto-ichigaya",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-ikebukuro/planetario-ikebukuro",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: ikebukuro/planetario-ikebukuro",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-inokashira-park/inokashira-hangout",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: inokashira-park/inokashira-hangout",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-kanda-jinbocho/chiesa-kanda",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: kanda-jinbocho/chiesa-kanda",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-kanda-jinbocho/nagiuri",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: kanda-jinbocho/nagiuri",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-kichijoji/kichijoji-galleria-kasumi",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: kichijoji/kichijoji-galleria-kasumi",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-kichijoji/mercante-sakai",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: kichijoji/mercante-sakai",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-maihama/destinyland",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: maihama/destinyland",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-meiji-shrine/meiji-shrine-hangout",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: meiji-shrine/meiji-shrine-hangout",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-mementos/ingresso-mementos",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: mementos/ingresso-mementos",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-mementos/negozio-jose",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: mementos/negozio-jose",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-nakano/nakano-broadway",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: nakano/nakano-broadway",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-odaiba/odaiba-seaside-park",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: odaiba/odaiba-seaside-park",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-ogikubo/ogikubo-ramen",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: ogikubo/ogikubo-ramen",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-roppongi/okumura-foods-hq",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: roppongi/okumura-foods-hq",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-shibuya/37-gradi",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: shibuya/37-gradi",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-shibuya/high-sense",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: shibuya/high-sense",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-shibuya/prossimo-asso",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: shibuya/prossimo-asso",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-shibuya/stazione-shibuya",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: shibuya/stazione-shibuya",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-shibuya/taisho-store",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: shibuya/taisho-store",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-shibuya/tsurukame",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: shibuya/tsurukame",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-shibuya/underground-mall-lovers",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: shibuya/underground-mall-lovers",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-shinagawa/shinagawa-acquario",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: shinagawa/shinagawa-acquario",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-shinjuku/chihaya-stand",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: shinjuku/chihaya-stand",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-shujin-academy/aula-shujin",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: shujin-academy/aula-shujin",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-shujin-academy/corridoio-2-piano-shujin",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: shujin-academy/corridoio-2-piano-shujin",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-shujin-academy/distributori-shujin",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: shujin-academy/distributori-shujin",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-shujin-academy/infermeria-shujin",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: shujin-academy/infermeria-shujin",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-shujin-academy/negozio-scolastico",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: shujin-academy/negozio-scolastico",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-suidobashi/dome-town",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: suidobashi/dome-town",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-tsukishima/tsukishima-monjayaki",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: tsukishima/tsukishima-monjayaki",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-ueno/museo-ueno",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: ueno/museo-ueno",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-yokohama-chinatown/chinatown-hangout",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: yokohama-chinatown/chinatown-hangout",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-yongen-jaya/batting-cage-yongen",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: yongen-jaya/batting-cage-yongen",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-yongen-jaya/distributore-bagno-pubblico",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: yongen-jaya/distributore-bagno-pubblico",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-yongen-jaya/sakura-residence",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: yongen-jaya/sakura-residence",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Luogo solo-eventi: preservare la distinzione."
+    },
+    {
+      "id": "L5-AREA-yongen-jaya/stazione-yongen-jaya",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: yongen-jaya/stazione-yongen-jaya",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-yongen-jaya/super-muramasa",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: yongen-jaya/super-muramasa",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-AREA-yongen-jaya/venditore-patate-dolci",
+      "lotto": "L5",
+      "titolo": "Definire collocazione o esclusione motivata: yongen-jaya/venditore-patate-dolci",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Area attuale NULL, censimento22ottobre/schema137. Cercare prova geografica e vincoli del contesto; NULL non è automaticamente un bug. Nessuna assegnazione alla sola Area disponibile. Conservare pin e note; eventuale proposta richiede consenso quando prescritto."
+    },
+    {
+      "id": "L5-NOME-PIN-268",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 268 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-269",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 269 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-290",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 290 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-291",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 291 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-292",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 292 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-293",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 293 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-334",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 334 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-346",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 346 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-360",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 360 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-363",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 363 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-1466",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 1466 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-1486",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 1486 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-1494",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 1494 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-1526",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 1526 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-1527",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 1527 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-1530",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 1530 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-1536",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 1536 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-1537",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 1537 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-1538",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 1538 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-1539",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 1539 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-1540",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 1540 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-1541",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 1541 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-1542",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 1542 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-1547",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 1547 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-1548",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 1548 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-1561",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 1561 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-1562",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 1562 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-1584",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 1584 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-1759",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 1759 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-1760",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 1760 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-1768",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 1768 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOME-PIN-1769",
+      "lotto": "L5",
+      "titolo": "Riconciliare nome proprio del pin 1769 con la fonte Luogo",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Discordanza testuale rilevata readonly senza pubblicare testi personali. Verificare presentazione canonica e conservazione come nota; nessuna rinomina automatica."
+    },
+    {
+      "id": "L5-NOTA-PIN-208",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 208",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-209",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 209",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-210",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 210",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-211",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 211",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-212",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 212",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-213",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 213",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-214",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 214",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-215",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 215",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-216",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 216",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-217",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 217",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-218",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 218",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-220",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 220",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-221",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 221",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-222",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 222",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-225",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 225",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-226",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 226",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-227",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 227",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-228",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 228",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-229",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 229",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-230",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 230",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-231",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 231",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-232",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 232",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-233",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 233",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-234",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 234",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-265",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 265",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-266",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 266",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-267",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 267",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-268",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 268",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-269",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 269",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-270",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 270",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-271",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 271",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-290",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 290",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-291",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 291",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-292",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 292",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-293",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 293",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-334",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 334",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-346",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 346",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-351",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 351",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-352",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 352",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-353",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 353",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-354",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 354",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-355",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 355",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-356",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 356",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-357",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 357",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-358",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 358",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-360",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 360",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-363",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 363",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1466",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1466",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1486",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1486",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1487",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1487",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1494",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1494",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1515",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1515",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1516",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1516",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1517",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1517",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1518",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1518",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1519",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1519",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1520",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1520",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1521",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1521",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1522",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1522",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1523",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1523",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1524",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1524",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1525",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1525",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1526",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1526",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1527",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1527",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1530",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1530",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1536",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1536",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1537",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1537",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1538",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1538",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1539",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1539",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1540",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1540",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1541",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1541",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1542",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1542",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1546",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1546",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1547",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1547",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1548",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1548",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1560",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1560",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1561",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1561",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1562",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1562",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1563",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1563",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1567",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1567",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1584",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1584",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1585",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1585",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1586",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1586",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1587",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1587",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1588",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1588",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1589",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1589",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1590",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1590",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1591",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1591",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1592",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1592",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1593",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1593",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1759",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1759",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1760",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1760",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1768",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1768",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-NOTA-PIN-1769",
+      "lotto": "L5",
+      "titolo": "Verificare conservazione e accesso alla nota del pin 1769",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Il censimento strutturale non esporta descrizioni personali: riscontro per singolo pin necessario, nessuna nota eliminata o pubblicata. Non dichiarare il vincolo soddisfatto dalla sola FK."
+    },
+    {
+      "id": "L5-LISTINO-PIN-1584",
+      "lotto": "L5",
+      "titolo": "Risolvere discordanza geografica e listino del pin 1584",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Risolve ancora il luogo aggregato Shujin fuori quartiere. Cercare prova dell'inventario della macchina, senza dedurre dalla posizione o dal nome; consenso su proposta documentata."
+    },
+    {
+      "id": "L5-LISTINO-PIN-1769",
+      "lotto": "L5",
+      "titolo": "Risolvere discordanza geografica e listino del pin 1769",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Risolve ancora il luogo aggregato Shujin fuori quartiere. Cercare prova dell'inventario della macchina, senza dedurre dalla posizione o dal nome; consenso su proposta documentata."
+    },
+    {
+      "id": "L5-SEDE-tanaka-affari-loschi",
+      "lotto": "L5",
+      "titolo": "Definire sede funzionale online di tanaka-affari-loschi",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Sede attuale NULL. Originali prevedono proposta, non assegnazione automatica a Leblanc; mantenere distinta l'offerta dal luogo fisico."
+    },
+    {
+      "id": "L5-SEDE-home-shopping-tv",
+      "lotto": "L5",
+      "titolo": "Definire sede funzionale online di home-shopping-tv",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Sede attuale NULL. Originali prevedono proposta, non assegnazione automatica a Leblanc; mantenere distinta l'offerta dal luogo fisico."
+    },
+    {
+      "id": "L5-PIN-PERSONALE-UNICO",
+      "lotto": "L5",
+      "titolo": "Riscontrare il singolo pin aggiuntivo dell'utente già risolto",
+      "stato": "da-riscontrare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Censimento: un pin non presente nel pacchetto pubblico93. Identità e contenuti esclusi da Git; individuazione nel censimento locale dell'app, nessuna conversione o modifica automatica."
+    },
+    {
+      "id": "L5-FUNZIONE-PIN-349",
+      "lotto": "L5",
+      "titolo": "Definire funzione del pin senza luogo 349 (culto)",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Nessuna trasformazione in luogo senza prova della funzione. Verificare originale M5§7.9 prima di proporre un intervento."
+    },
+    {
+      "id": "L5-FUNZIONE-PIN-1641",
+      "lotto": "L5",
+      "titolo": "Definire funzione del pin senza luogo 1641 (casa)",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Nessuna trasformazione in luogo senza prova della funzione. Verificare originale M5§7.9 prima di proporre un intervento."
+    },
+    {
+      "id": "L5-FUNZIONE-PIN-2022",
+      "lotto": "L5",
+      "titolo": "Definire funzione del pin senza luogo 2022 (velluto)",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Nessuna trasformazione in luogo senza prova della funzione. Verificare originale M5§7.9 prima di proporre un intervento."
+    },
+    {
+      "id": "L5-SEDE-jose",
+      "lotto": "L5",
+      "titolo": "Definire la sede funzionale del negozio itinerante Jose nei Memento",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/inventario-atomico-L5.json",
+      "criterio": "Distinguere sede del negozio itinerante, luogo dei Memento e sblocco dei dedali; non confondere con Jose386 nel Covo o inventare sede cittadina fissa."
+    },
+    {
+      "id": "L5-CONFIDENTE-PIN-1753",
+      "lotto": "L5",
+      "titolo": "Riscontrare funzionamento e appartenenza a luogo del pin Confidente 1753",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/requisiti.md",
+      "criterio": "R5-20: verificare funzionamento del pin Confidente e appartenenza a un luogo; il solo tipo non e una esclusione autorizzata da M5§7.9. Non convertire o modificare il pin senza soluzione documentata."
+    },
+    {
+      "id": "L5-CONFIDENTE-PIN-1767",
+      "lotto": "L5",
+      "titolo": "Riscontrare funzionamento e appartenenza a luogo del pin Confidente 1767",
+      "stato": "da-fare",
+      "fonte": "lotti/L5/requisiti.md",
+      "criterio": "R5-20: verificare funzionamento del pin Confidente e appartenenza a un luogo; il solo tipo non e una esclusione autorizzata da M5§7.9. Non convertire o modificare il pin senza soluzione documentata."
+    }
+  ],
+  "assenzePubbliche": [
+    {
+      "id": 223,
+      "esito": "assente-non-ricreare"
+    },
+    {
+      "id": 224,
+      "esito": "assente-non-ricreare"
+    },
+    {
+      "id": 1636,
+      "esito": "rimozione-approvata-consegnata-non-riaprire"
+    }
+  ]
+}

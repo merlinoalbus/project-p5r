@@ -1,5 +1,11 @@
 # Richieste dell'utente ancora aperte (elenco di controllo del PM)
 
+**22 ottobre,20:51Z — quattro punti chiusi con PASS distinti entro i rispettivi10min:** INV-L5,INV-L7,INV-SCOMP e baseline preventiva A10. Regia con azioni individuali e padri integrali separati; acquisizioni ancora necessarie esplicitamente aperte. Ora commit/push newreview per A10, poi pipeline e verifiche conservative readonly del pubblicato. B01/B02 risolti nel codice; nessuna chiusura globale L5–L11.
+
+**22 ottobre,20:22Z — INV-L5 chiuso entro10min con PASS distinto.** Censimento aggiornato e azioni per identità visibili in Regia; nessuna bonifica dati applicata. Segue INV-L7, poi scomposizione dei requisiti compositi; la lista complessiva non è ancora dichiarata completa.
+
+**22 ottobre — utente: «ti ho segnalato ad Openai ... riprendi».** Revocata l'attesa, ripresa sul padre incompleto REGIA-LISTA: figli INV-L5 (ora in corso), INV-L7 e INV-SCOMP, ciascuno con risultato distinto e limite10min. Nuovo censimento L5 corrente trasformato in azioni per identità; gate distinto ancora necessario prima della chiusura. Nessuna reinterpretazione della segnalazione o riduzione del mandato complessivo.
+
 **22 ottobre — REGIA-LISTA non chiuso al limite10min.** Galaxy approva UI/persistenza, respinge completezza/atomicità: censimento L5/L7 e scomposizione dei requisiti compositi ancora aperti. L6 riletto readonly:201record,23esiti da-ricercare aggiunti individualmente senza definirli bug. Arresto richiesto dall'utente e attesa del suo riscontro sulla segnalazione; nessun punto successivo iniziato. B01/B02 chiusi nel codice e A10 PASS statico integrato; rilascio aperto.
 
 **22 ottobre — B01/B02 chiusi nel codice con PASS Galaxy e PASS statico integrato A10.** Typecheck6151/lint38004/build84257 exit0. Pubblicazione/conservazione reale/runtime ancora aperti. Lista della Regia visibile e in revisione; i requisiti già pubblicati di L5–L7 sono riferimenti di copertura separati, non nuovi bug. La ricognizione corrente dei residui e la suddivisione dei requisiti compositi restano necessarie per l'elenco atomico completo richiesto.
