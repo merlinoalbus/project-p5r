@@ -72,11 +72,25 @@ function estendiProposte(db: AppDatabase): void {
   if (schema.some(o => o.name === 'da_applicare_pesca_029')) errore('nome temporaneo già occupato');
   const colonne = (db.prepare('PRAGMA utente.table_info(da_applicare)').all() as Array<{ name: string }>).map(c => c.name);
   const prima = firmaTabella(db, 'da_applicare', colonne), epoca = sequenza(db);
+  // DROP TABLE rimuove anche le statistiche degli indici. Gli stessi dati e
+  // indici vengono ricostruiti: conserviamo tutte le statistiche già presenti,
+  // con rowid e tipi SQLite originali, senza crearne o ricalcolarne altre.
+  const statistiche = ['sqlite_stat1', 'sqlite_stat2', 'sqlite_stat3', 'sqlite_stat4']
+    .filter(nome => schema.some(o => o.type === 'table' && o.name === nome))
+    .map(nome => {
+      const campi = ['rowid', ...(db.prepare('SELECT name FROM pragma_table_info(?,?) ORDER BY cid').all(nome, 'utente') as Array<{ name: string }>).map(c => c.name)];
+      const righe = db.prepare(`SELECT ${campi.map(q).join(',')} FROM utente.${q(nome)} WHERE tbl='da_applicare' ORDER BY rowid`).raw().safeIntegers(true).all() as unknown[][];
+      return { nome, campi, righe };
+    });
   db.exec(`${ddlPropostePesca029('utente.da_applicare_pesca_029', true)};
     INSERT INTO utente.da_applicare_pesca_029 (${colonne.map(q).join(',')}) SELECT ${colonne.map(q).join(',')} FROM utente.da_applicare;
     DROP TABLE utente.da_applicare;
     ALTER TABLE utente.da_applicare_pesca_029 RENAME TO da_applicare;`);
   for (const [, ddl] of INDICI_PROPOSTE_029) db.exec(ddl.replace('INDEX ', 'INDEX utente.'));
+  for (const { nome, campi, righe } of statistiche) {
+    const inserisci = db.prepare(`INSERT INTO utente.${q(nome)} (${campi.map(q).join(',')}) VALUES (${campi.map(() => '?').join(',')})`);
+    for (const riga of righe) inserisci.run(...riga);
+  }
   db.prepare("DELETE FROM utente.sqlite_sequence WHERE name='da_applicare'").run();
   // sequenza() ha già verificato gli interi sicuri: BigInt conserva INTEGER anche
   // in seq, priva di affinità; better-sqlite3 legherebbe Number come REAL.

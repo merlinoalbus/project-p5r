@@ -1,5 +1,7 @@
 # Richieste dell'utente ancora aperte (elenco di controllo del PM)
 
+**23 ottobre,00:08 italiana — ripresa esplicitamente autorizzata dal blocco p5s.** A10-DATI unico attivo fino00:14:44; causa sqlite_stat1 identificata. Soluzione conserva statistiche originali stat1..4 e tutte guardie; controlli typecheck/lint/build verdi, gate/rilascio/conservazione finale pendenti. Nessuna chiusura di A10 o dei lotti.
+
 **22 ottobre,21:03Z — correttivo029 approvato staticamente da Galaxy.** Typecheck26485/lint65378/build99089 verdi, nessun test. Push correttivo necessario; A10-DATI ancora aperto.
 
 **22 ottobre,21:02Z — A10-DATI aperto, scadenza21:09Z.** Backend in riavvio dopo rollback029:46tabelleutente identiche; main138 applicato. Correzione binding contatore BigInt approvata dal reviewer e applicata, controlli/rilascio correttivo pendenti. Nessuna chiusura del punto finché non riparte e conserva i dati.
