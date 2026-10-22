@@ -1,10 +1,10 @@
 {
   "obiettivo": "Completare i lotti L0–L11 della razionalizzazione sul ramo newreview e pubblicarli funzionanti su p5s",
-  "aggiornato": "2026-10-22T21:03:00Z",
+  "aggiornato": "2026-10-22T21:09:00Z",
   "cruscotto": {
     "adesso": {
-      "attivita": "A10-DATI aperto:029 rollback per binding Number/REAL in sqlite_sequence. Tutte46tabelleutente identiche. SoluzioneBigInt approvata; typecheck/build verdi, lint e gate delta in corso; rilascio correttivo necessario.",
-      "stato": "Un solo punto in corso: A10-DATI. Avvio20:59UTC; scadenza21:09UTC.",
+      "attivita": "ARRESTO al limite A10-DATI. Correttivo e45a1d53/pipeline85 verdi e attivato, ma backend ancora in riavvio: nuova guardia righe/epoca, non piu sqlite_sequence. Nessun PASS dati finale; main138/utente28 ultimo riscontro. Attesa riscontro utente.",
+      "stato": "Fermo al limite21:09UTC richiesto. A10-DATI incompleto; A10-BROWSER non iniziato.",
       "responsabile": "Coordinatore implementa in sequenza; Galaxy verifica in sola lettura. Nessun esecutore parallelo attivo.",
       "prossimaConsegna": "Completare i gruppi residui dei lotti: Covo e distributori L5, pesca/condizioni L6 e catalogo/scambi L7; predisporre le decisioni concrete riservate all'utente. Nessun lotto dichiarato concluso per il solo rilascio137."
     },
@@ -622,7 +622,7 @@
         "id": "A10-DATI",
         "lotto": "L6",
         "titolo": "Confrontare dati e schema138/029 dopo il rilascio",
-        "stato": "in-corso",
+        "stato": "incompleto",
         "fonte": "lotti/L6/pesca-A10-contratto.md",
         "criterio": "Conservazione tabelle e sole differenze previste."
       },

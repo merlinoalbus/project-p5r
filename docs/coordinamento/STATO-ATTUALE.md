@@ -252,3 +252,6 @@ Mandato dell'utente: completare la razionalizzazione in lotti L0–L11 sul ramo 
 
 ## Elenco «da rivedere» per l'utente
 Vedi `rapporto-finale.md`.
+
+## Checkpoint21:09Z - arresto richiesto al limite A10-DATI
+Correttivo e45a1d53/pipeline85 riusciti e backend aggiornato. Resta riavvio: guardia righe/epoca di una tabella ancora da identificare; errore sqlite_sequence non piu presente. Nessun PASS dati finale. Ultima fotografia main138/utente28 con46tabelleutente identiche. A10-DATI incompleto, browser non iniziato. Attesa riscontro utente, nessun ulteriore lavoro applicativo.

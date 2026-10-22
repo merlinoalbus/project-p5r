@@ -160,3 +160,5 @@ Regola del PM: un lotto si dichiara completo solo quando ogni richiesta che lo r
 3. ogni voce di ogni infiltrazione compare in almeno una planimetria, oppure è dichiarata con il motivo;
 4. segna, riapri, spostamento a mano, collega e scollega pin: la voce compare e sparisce nelle planimetrie giuste, su una copia con ripristino;
 5. le 6 misure su tutti i Palazzi.
+
+Checkpoint21:09Z: A10-DATI incompleto al limite10min; backend p5s ancora in riavvio dopo correttivo e45a1d53/pipeline85 riusciti. Nuovo blocco di conservazione ancora da identificare. Arresto e attesa riscontro utente; nessun PASS finale o chiusura lotto.
