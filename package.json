@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Compagno di gioco per Persona 5 Royal: compendio, motore di fusione, tracking partita",
   "engines": {
-    "node": ">=22.13"
+    "node": "^22.23.4 || ^24.22.1 || ^26.12.1"
   },
   "scripts": {
     "dev": "npx concurrently -n fe,be -c blue,green \"npm:dev:client\" \"npm:dev:server\"",
