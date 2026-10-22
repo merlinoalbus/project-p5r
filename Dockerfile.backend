@@ -5,7 +5,7 @@
 #   1. build: typecheck del BE — l'immagine è gated su tsc pulito
 #   2. deps: npm ci --omit=dev (better-sqlite3 compilato qui se manca
 #      il prebuild musl per l'ABI corrente) + smoke test del binding
-#   3. runtime: node:24-alpine (LTS) SENZA toolchain, utente non-root,
+#   3. runtime: node:24.22.1-alpine (LTS, patch di sicurezza 2026-10-21) SENZA toolchain, utente non-root,
 #      /data pre-creata e chown-ata (il named volume eredita
 #      l'ownership del mountpoint alla prima creazione)
 #
@@ -21,7 +21,7 @@
 # ============================================================
 
 # ---- Stage 1: type-check gate ----
-FROM node:24-alpine AS build
+FROM node:24.22.1-alpine AS build
 WORKDIR /app
 RUN apk add --no-cache python3 make g++
 COPY package.json package-lock.json ./
@@ -33,7 +33,7 @@ COPY scripts/ ./scripts/
 RUN npx tsc -b tsconfig.server.json
 
 # ---- Stage 2: production deps ----
-FROM node:24-alpine AS deps
+FROM node:24.22.1-alpine AS deps
 WORKDIR /app
 RUN apk add --no-cache python3 make g++
 COPY package.json package-lock.json ./
@@ -42,7 +42,7 @@ RUN npm ci --omit=dev && npm cache clean --force
 RUN node -e "new (require('better-sqlite3'))(':memory:').close()"
 
 # ---- Stage 3: runtime (nessun toolchain) ----
-FROM node:24-alpine
+FROM node:24.22.1-alpine
 WORKDIR /app
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup \
  && mkdir -p /data && chown appuser:appgroup /data

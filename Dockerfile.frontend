@@ -3,7 +3,7 @@
 # ============================================================
 
 # ---- Stage 1: build ----
-FROM node:24-alpine AS build
+FROM node:24.22.1-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 # Senza gli script d'installazione: l'unico che conti qui era la compilazione di better-sqlite3, che il frontend non usa

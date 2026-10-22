@@ -25,6 +25,12 @@ import { runMigrations } from './db/migrationRunner.js';
 import { createApp } from './bootstrap.js';
 
 import { assicuraPacchettoIniziale, regoleAllAvvio } from './services/pacchetto/pacchettoGioco.js';
+import { verificaRuntimeNode } from './utils/nodeRuntime.js';
+
+// Le linee Node interessate dall'advisory di sicurezza del 2026-10-21 devono
+// essere almeno alle rispettive release correttive prima di avviare il backend.
+verificaRuntimeNode(process.versions.node);
+
 /** Quanto può durare la RICEZIONE di una richiesta, corpo compreso.
  *
  * Node ne concede 300 secondi (`requestTimeout`) e il limite riguarda solo la richiesta ancora in arrivo, non il lavoro
