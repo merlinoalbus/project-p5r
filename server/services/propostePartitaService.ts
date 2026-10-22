@@ -7,6 +7,8 @@ import type { NuovaRegistrazioneAcquisto } from '../../shared/acquisti.js';
 import type { EffettoVoceDto } from '../../shared/effettiVoce.js';
 import { normalizzaEffettoVoce } from '../../shared/effettiVoce.js';
 import type { AnteprimaDecisioneProposteDto, DecisioneProposte, MovimentoPropostoDto, PropostaPartitaDto, RicevutaDecisioneProposteDto, RichiestaAnteprimaDecisioneProposte, RichiestaDecisioneProposte, SaldoBeneficioDto } from '../../shared/propostePartita.js';
+import { deltaCertoPesca, type IntervalloBeneficioPesca, type NuovaSessionePesca } from '../../shared/pesca.js';
+import { targetBeneficiPesca, leggiPescaPartita, fotografiaPesca } from './pescaLetture.js';
 
 export const nuovoUid = (): string => randomBytes(16).toString('hex');
 export function jsonCanonico(v: unknown): string {
@@ -34,8 +36,8 @@ export function leggiOggettoRegistro(raw:string,contesto='registro'):Record<stri
   const x=leggiJsonRegistro<unknown>(raw,contesto);if(!x||typeof x!=='object'||Array.isArray(x))throw httpErrors.conflict('registro-non-valido',`Il ${contesto} non contiene un oggetto riconoscibile: nessun dato viene azzerato.`);return x as Record<string,unknown>;
 }
 
-type Causa = { tipo: 'acquisto' | 'voce'; chiave: string };
-interface Beneficio { tipo: 'dote' | 'yen'; chiave: string; delta: number; motivo: string; fortunaIgnota?: boolean; storica?: boolean }
+type Causa = { tipo: 'acquisto' | 'voce' | 'pesca'; chiave: string };
+interface Beneficio { tipo: 'dote' | 'yen' | 'punti-pesca'; chiave: string; delta: number; motivo: string; fortunaIgnota?: boolean; storica?: boolean; intervallo?: IntervalloBeneficioPesca }
 interface Target extends Beneficio { attiva: boolean }
 interface RigaProposta {
   id: number; uid: string; partita_id: number; voce_uid: string | null; causa_tipo: Causa['tipo']; causa_chiave: string;
@@ -45,15 +47,23 @@ interface RigaProposta {
   applicazione_json: string | null; creata_il: string; decisa_il: string | null;
 }
 const righeCausa = (p: number, c: Causa): RigaProposta[] => prepared('SELECT * FROM utente.da_applicare WHERE partita_id=? AND causa_tipo=? AND causa_chiave=? ORDER BY id').all(p,c.tipo,c.chiave) as RigaProposta[];
-const causaDi = (r: RigaProposta): Causa => {if((r.causa_tipo==='voce'&&!/^[0-9a-f]{32}:[0-9a-f]{32}$/.test(r.causa_chiave))||(r.causa_tipo==='acquisto'&&!/^[0-9a-f]{32}$/.test(r.causa_chiave)))throw httpErrors.conflict('causa-incoerente','Il registro contiene un’identità di causa non riconoscibile.');return { tipo: r.causa_tipo, chiave: r.causa_chiave };};
+const causaDi = (r: RigaProposta): Causa => {if((r.causa_tipo==='voce'&&!/^[0-9a-f]{32}:[0-9a-f]{32}$/.test(r.causa_chiave))||(['acquisto','pesca'].includes(r.causa_tipo)&&!/^[0-9a-f]{32}$/.test(r.causa_chiave)))throw httpErrors.conflict('causa-incoerente','Il registro contiene un’identità di causa non riconoscibile.');return { tipo: r.causa_tipo, chiave: r.causa_chiave };};
 export const verificaBeneficio = (v: unknown): Beneficio => {
   if (!v || typeof v !== 'object' || Array.isArray(v)) throw httpErrors.conflict('beneficio-non-valido', 'La ricevuta del beneficio non è valida.');
   const b = v as Record<string, unknown>;
-  if ((b.tipo !== 'dote' && b.tipo !== 'yen') || typeof b.chiave !== 'string' || !Number.isSafeInteger(b.delta) || (b.tipo === 'dote' && !eDote(b.chiave))) throw httpErrors.conflict('beneficio-non-valido', 'La ricevuta del beneficio ha identità o unità incoerenti.');
-  return { tipo: b.tipo, chiave: b.chiave, delta: b.delta as number, motivo: typeof b.motivo === 'string' ? b.motivo : 'Effetto confermato', fortunaIgnota: b.fortunaIgnota === true, storica: b.storica === true };
+  if ((b.tipo !== 'dote' && b.tipo !== 'yen' && b.tipo !== 'punti-pesca') || typeof b.chiave !== 'string' || !Number.isSafeInteger(b.delta) || (b.tipo === 'dote' && !eDote(b.chiave))) throw httpErrors.conflict('beneficio-non-valido', 'La ricevuta del beneficio ha identità o unità incoerenti.');
+  let intervallo:IntervalloBeneficioPesca|undefined;
+  if(b.intervallo!==undefined){const i=b.intervallo as IntervalloBeneficioPesca;if(!i||!Number.isSafeInteger(i.minimo)||(i.massimo!==null&&(!Number.isSafeInteger(i.massimo)||i.massimo<i.minimo)))throw httpErrors.conflict('beneficio-non-valido','Intervallo del beneficio non riconoscibile.');intervallo=i;}
+  return { tipo: b.tipo, chiave: b.chiave, delta: b.delta as number, motivo: typeof b.motivo === 'string' ? b.motivo : 'Effetto confermato', fortunaIgnota: b.fortunaIgnota === true, storica: b.storica === true,...(intervallo?{intervallo}:{}) };
 };
 
 function targetCausa(partita: number, causa: Causa): Target[] {
+  if(causa.tipo==='pesca'){
+    const attuali=targetBeneficiPesca(partita,causa.chiave),insieme=new Map<string,Target>();
+    for(const r of righeCausa(partita,causa)){const b=verificaBeneficio(leggiOggettoRegistro(r.dati_json,'proposta pesca').beneficio);insieme.set(`${b.tipo}\0${b.chiave}`,{...b,attiva:false});}
+    for(const b of attuali)insieme.set(`${b.tipo}\0${b.chiave}`,b);
+    return [...insieme.values()];
+  }
   if (causa.tipo === 'acquisto') {
     const a = prepared('SELECT dati_json,prezzo_yen FROM utente.acquisto_registrato WHERE partita_id=? AND id=?').get(partita,causa.chiave) as { dati_json: string; prezzo_yen: number } | undefined;
     if (a) {
@@ -114,16 +124,20 @@ function saldo(partita: number, causa: Causa, t: Target): SaldoBeneficioDto {
       }
       if(app.decisione==='trasferimento')verificaCoppiaTrasferimento(partita,r,app,documento);
       if(r.tipo==='yen'&&r.delta_applicato!==0){const m=prepared('SELECT prima,delta,dopo,operazione_id,causa_tipo,causa_chiave FROM utente.movimento_yen WHERE partita_id=? AND proposta_uid=?').get(partita,r.uid) as {prima:number;delta:number;dopo:number;operazione_id:string;causa_tipo:string;causa_chiave:string}|undefined;const movimento=app.movimento as Record<string,unknown>|null;if(!m||!movimento||m.prima!==movimento.prima||m.delta!==r.delta_applicato||m.dopo!==movimento.dopo||m.dopo!==m.prima+m.delta||m.operazione_id!==app.operazioneId||m.causa_tipo!==r.causa_tipo||m.causa_chiave!==r.causa_chiave)throw httpErrors.conflict('saldo-yen-incoerente','Il movimento yen non coincide con la propria ricevuta.');}
+      if(r.tipo==='punti-pesca'&&r.delta_applicato!==0){const m=prepared("SELECT prima,delta,dopo,operazione_id,causa_tipo,causa_chiave FROM utente.movimento_punti_pesca WHERE partita_id=? AND proposta_uid=? AND tipo='proposta'").get(partita,r.uid) as {prima:number;delta:number;dopo:number;operazione_id:string;causa_tipo:string;causa_chiave:string}|undefined;const movimento=app.movimento as Record<string,unknown>|null;if(!m||!movimento||m.prima!==movimento.prima||m.delta!==r.delta_applicato||m.dopo!==movimento.dopo||m.dopo!==m.prima+m.delta||m.operazione_id!==app.operazioneId||m.causa_tipo!==r.causa_tipo||m.causa_chiave!==r.causa_chiave)throw httpErrors.conflict('pesca-saldo-incoerente','Il movimento punti pesca non coincide con la decisione durevole.');}
       attribuito += r.delta_applicato + r.delta_riconosciuto;
       if(!Number.isSafeInteger(attribuito))throw httpErrors.conflict('saldo-incoerente','Il saldo non è rappresentabile esattamente.');
     }
   }
   const checkpoint = prepared('SELECT * FROM utente.beneficio_ciclo WHERE partita_id=? AND causa_tipo=? AND causa_chiave=? AND tipo=? AND chiave=?').get(partita,causa.tipo,causa.chiave,t.tipo,t.chiave) as Record<string,unknown> | undefined;
-  const dovuto = t.attiva ? t.delta : 0;
-  return { dovuto,attribuito,differenza:dovuto-attribuito,ciclo:Number(checkpoint?.ciclo ?? 1),revisione:improntaDato({causa,t,righe,checkpoint:checkpoint ?? null}) };
+  const intervallo=t.intervallo?(t.attiva?t.intervallo:{minimo:0,massimo:0}):undefined;
+  const dovuto = intervallo ? intervallo.minimo===intervallo.massimo?intervallo.minimo:null : t.attiva ? t.delta : 0;
+  return { dovuto,attribuito,differenza:intervallo?deltaCertoPesca(intervallo,attribuito):dovuto!-attribuito,ciclo:Number(checkpoint?.ciclo ?? 1),revisione:improntaDato({causa,t,righe,checkpoint:checkpoint ?? null}),...(intervallo?{intervallo,residuoIgnoto:intervallo.minimo!==intervallo.massimo}:{}) };
 }
+const firmaTarget=(t:Target):string=>improntaDato({attiva:t.attiva,tipo:t.tipo,chiave:t.chiave,delta:t.delta,...(t.intervallo?{intervallo:t.intervallo}:{})});
 
 interface ProvaTrasferimento {
+  destinazioneTipo?: 'pesca';
   versione:1;ricevutaOrigine:string;ricevutaDestinazione:string;causaOrigine:string;acquistoDestinazione:string;
   dote:DoteChiave;quantita:number;primaOrigine:number;primaDestinazione:number;
   attribuzioniOrigine:Array<{id:number;uid:string;applicato:number;riconosciuto:number}>;
@@ -134,8 +148,10 @@ function verificaCoppiaTrasferimento(p:number,r:RigaProposta,app:Record<string,u
   if(!prova||prova.versione!==1||!eDote(prova.dote)||!Number.isSafeInteger(prova.quantita)||prova.quantita<=0||!Number.isSafeInteger(prova.primaOrigine)||prova.primaOrigine!==prova.quantita||!Number.isSafeInteger(prova.primaDestinazione)||prova.primaDestinazione<0||r.tipo!=='dote'||r.chiave!==prova.dote||r.unita!=='punti-interni'||r.delta_applicato!==0||!c||!Number.isSafeInteger(c.id)||typeof c.uid!=='string'||c.uid===r.uid||documento.decisione!=='trasferimento'||jsonCanonico(documento.trasferimento)!==jsonCanonico(prova))throw httpErrors.conflict('trasferimento-incoerente','Il trasferimento non dimostra quantità, unità e contropartita.');
   const altra=prepared('SELECT * FROM utente.da_applicare WHERE partita_id=? AND id=? AND uid=?').get(p,c.id,c.uid) as RigaProposta|undefined;
   const altraApp=altra?.applicazione_json?leggiOggettoRegistro(altra.applicazione_json,'contropartita'):null;
-  const origine=r.causa_tipo==='voce'&&r.causa_chiave===prova.causaOrigine,destinazione=r.causa_tipo==='acquisto'&&r.causa_chiave===prova.acquistoDestinazione;
-  if(!altra||!altraApp||(!origine&&!destinazione)||altra.stato!=='applicata'||altra.chiusa_da!=='causa'||r.chiusa_da!=='causa'||altra.tipo!=='dote'||altra.chiave!==r.chiave||altra.unita!==r.unita||altra.delta_applicato!==0||altra.delta_riconosciuto!==-r.delta_riconosciuto||r.delta!==r.delta_riconosciuto||altra.delta!==altra.delta_riconosciuto||r.delta_riconosciuto!==(origine?-prova.quantita:prova.quantita)||altra.causa_tipo!==(origine?'acquisto':'voce')||altra.causa_chiave!==(origine?prova.acquistoDestinazione:prova.causaOrigine)||altraApp.operazioneId!==app.operazioneId||altraApp.decisione!=='trasferimento'||altraApp.deltaApplicato!==0||altraApp.deltaRiconosciuto!==altra.delta_riconosciuto||jsonCanonico(altraApp.contropartita)!==jsonCanonico({id:r.id,uid:r.uid})||jsonCanonico(altraApp.trasferimento)!==jsonCanonico(prova)||!Array.isArray(documento.proposte)||documento.proposte.length!==2||!documento.proposte.some((x)=>jsonCanonico(x)===jsonCanonico({id:altra.id,uid:altra.uid})))throw httpErrors.conflict('trasferimento-incoerente','Manca una metà reciproca del trasferimento: saldo conservato.');
+  const tipoDestinazione=prova.destinazioneTipo??'acquisto';
+  if(tipoDestinazione!=='acquisto'&&tipoDestinazione!=='pesca')throw httpErrors.conflict('trasferimento-incoerente','Tipo della causa destinataria non riconoscibile.');
+  const origine=r.causa_tipo==='voce'&&r.causa_chiave===prova.causaOrigine,destinazione=r.causa_tipo===tipoDestinazione&&r.causa_chiave===prova.acquistoDestinazione;
+  if(!altra||!altraApp||(!origine&&!destinazione)||altra.stato!=='applicata'||altra.chiusa_da!=='causa'||r.chiusa_da!=='causa'||altra.tipo!=='dote'||altra.chiave!==r.chiave||altra.unita!==r.unita||altra.delta_applicato!==0||altra.delta_riconosciuto!==-r.delta_riconosciuto||r.delta!==r.delta_riconosciuto||altra.delta!==altra.delta_riconosciuto||r.delta_riconosciuto!==(origine?-prova.quantita:prova.quantita)||altra.causa_tipo!==(origine?tipoDestinazione:'voce')||altra.causa_chiave!==(origine?prova.acquistoDestinazione:prova.causaOrigine)||altraApp.operazioneId!==app.operazioneId||altraApp.decisione!=='trasferimento'||altraApp.deltaApplicato!==0||altraApp.deltaRiconosciuto!==altra.delta_riconosciuto||jsonCanonico(altraApp.contropartita)!==jsonCanonico({id:r.id,uid:r.uid})||jsonCanonico(altraApp.trasferimento)!==jsonCanonico(prova)||!Array.isArray(documento.proposte)||documento.proposte.length!==2||!documento.proposte.some((x)=>jsonCanonico(x)===jsonCanonico({id:altra.id,uid:altra.uid})))throw httpErrors.conflict('trasferimento-incoerente','Manca una metà reciproca del trasferimento: saldo conservato.');
   const verificaPrima=(refs:ProvaTrasferimento['attribuzioniOrigine'],causa:Causa,atteso:number):void=>{
     if(!Array.isArray(refs)||refs.some((x)=>!x||typeof x!=='object')||new Set(refs.map((x)=>x.uid)).size!==refs.length)throw httpErrors.conflict('trasferimento-incoerente','La fotografia delle attribuzioni non è integra.');
     let totale=0;
@@ -146,22 +162,26 @@ function verificaCoppiaTrasferimento(p:number,r:RigaProposta,app:Record<string,u
     const anteriori=righeCausa(p,causa).filter((x)=>x.id<Math.min(r.id,altra.id)&&x.tipo==='dote'&&x.chiave===prova.dote&&x.stato==='applicata');
     if(totale!==atteso||jsonCanonico(anteriori.map((x)=>({id:x.id,uid:x.uid,applicato:x.delta_applicato,riconosciuto:x.delta_riconosciuto})))!==jsonCanonico(refs))throw httpErrors.conflict('trasferimento-incoerente','La prova non copre B netto precedente per intero.');
   };
-  verificaPrima(prova.attribuzioniOrigine,{tipo:'voce',chiave:prova.causaOrigine},prova.primaOrigine);verificaPrima(prova.attribuzioniDestinazione,{tipo:'acquisto',chiave:prova.acquistoDestinazione},prova.primaDestinazione);
+  verificaPrima(prova.attribuzioniOrigine,{tipo:'voce',chiave:prova.causaOrigine},prova.primaOrigine);verificaPrima(prova.attribuzioniDestinazione,{tipo:tipoDestinazione,chiave:prova.acquistoDestinazione},prova.primaDestinazione);
   const ro=prepared('SELECT * FROM utente.effetto_applicato WHERE partita_id=? AND id=?').get(p,prova.ricevutaOrigine) as Record<string,unknown>|undefined,rd=prepared('SELECT * FROM utente.effetto_applicato WHERE partita_id=? AND id=?').get(p,prova.ricevutaDestinazione) as Record<string,unknown>|undefined;
   const prima=ro?leggiOggettoRegistro(String(ro.prima_json),'versione assorbita'):null,nuova=rd?leggiOggettoRegistro(String(rd.ricevuta_json),'acquisto assorbente'):null;
   const vecchia=prima?.effetto as {tipo?:unknown;dote?:unknown}|undefined;
-  if(!ro||!rd||ro.tipo!=='dote'||rd.tipo!=='acquisto'||!ro.annullato_il||ro.sostituita_da!==null||ro.assorbita_da!==rd.id||`${String(ro.voce_uid)}:${String(ro.effetto_uid)}`!==prova.causaOrigine||ro.voce_uid!==rd.voce_uid||vecchia?.tipo!=='dote'||vecchia.dote!==prova.dote||nuova?.acquistoId!==prova.acquistoDestinazione||!Array.isArray(nuova.assorbeRicevute)||nuova.assorbeRicevute.filter((id)=>id===ro.id).length!==1)throw httpErrors.conflict('trasferimento-incoerente','Le ricevute non provano l’assorbimento dichiarato.');
-  const fatto=prepared('SELECT dati_json FROM utente.acquisto_registrato WHERE partita_id=? AND id=?').get(p,prova.acquistoDestinazione) as {dati_json:string}|undefined;
-  if(!fatto||leggiOggettoRegistro(fatto.dati_json,'consumazione').variante!==prova.dote)throw httpErrors.conflict('trasferimento-incoerente','Il destinatario non corrisponde alla Dote del fatto.');
+  const versioneCorretta=tipoDestinazione==='pesca'?(ro?.tipo==='dote'&&vecchia?.tipo==='dote'&&vecchia.dote==='perizia'||ro?.tipo==='turno'&&vecchia?.tipo==='turno')&&prova.dote==='perizia':ro?.tipo==='dote'&&vecchia?.tipo==='dote'&&vecchia.dote===prova.dote;
+  if(!ro||!rd||!versioneCorretta||rd.tipo!==tipoDestinazione||!ro.annullato_il||ro.sostituita_da!==null||ro.assorbita_da!==rd.id||`${String(ro.voce_uid)}:${String(ro.effetto_uid)}`!==prova.causaOrigine||ro.voce_uid!==rd.voce_uid||(tipoDestinazione==='pesca'?nuova?.sessioneId:nuova?.acquistoId)!==prova.acquistoDestinazione||!Array.isArray(nuova?.assorbeRicevute)||nuova.assorbeRicevute.filter((id:unknown)=>id===ro.id).length!==1)throw httpErrors.conflict('trasferimento-incoerente','Le ricevute non provano l’assorbimento dichiarato.');
+  if(tipoDestinazione==='pesca'){
+    const op=nuova?.operazione as Record<string,unknown>|undefined;
+    const journal=op&&typeof op.operazioneId==='string'?prepared('SELECT ricevuta_json FROM utente.pesca_operazione WHERE partita_id=? AND operazione_id=?').get(p,op.operazioneId) as {ricevuta_json:string}|undefined:undefined;
+    if(!journal||op?.sessioneId!==prova.acquistoDestinazione||jsonCanonico(leggiOggettoRegistro(journal.ricevuta_json,'operazione pesca destinataria'))!==jsonCanonico(op))throw httpErrors.conflict('trasferimento-incoerente','Il journal durevole non prova la sessione destinataria, anche se eliminata.');
+  }else{const fatto=prepared('SELECT dati_json FROM utente.acquisto_registrato WHERE partita_id=? AND id=?').get(p,prova.acquistoDestinazione) as {dati_json:string}|undefined;if(!fatto||leggiOggettoRegistro(fatto.dati_json,'consumazione').variante!==prova.dote)throw httpErrors.conflict('trasferimento-incoerente','Il destinatario non corrisponde alla Dote del fatto.');}
 }
 export function saldoDoteVoce(p:number,voce:string,effetto:string,dote:DoteChiave):SaldoBeneficioDto {
   const causa:Causa={tipo:'voce',chiave:`${voce}:${effetto}`},t=targetCausa(p,causa).find((t)=>t.tipo==='dote'&&t.chiave===dote)??{tipo:'dote' as const,chiave:dote,delta:0,attiva:false,motivo:'Causa senza beneficio attribuito.'};
   return saldo(p,causa,t);
 }
 /** Rialloca soltanto attribuzioni provate: nessuna scrittura al valore corrente della Dote. */
-export function trasferisciAttribuzioneDote(p:number,voce:string,effetto:string,ricevutaOrigine:string,ricevutaDestinazione:string,acquisto:string,dote:DoteChiave,qAtteso:number):void {
+export function trasferisciAttribuzioneDote(p:number,voce:string,effetto:string,ricevutaOrigine:string,ricevutaDestinazione:string,acquisto:string,dote:DoteChiave,qAtteso:number,destinazioneTipo:'acquisto'|'pesca'='acquisto'):void {
   if(!getDb().inTransaction)throw new Error('Il trasferimento richiede la transazione del raccordo.');
-  const causaOld:Causa={tipo:'voce',chiave:`${voce}:${effetto}`},causaNew:Causa={tipo:'acquisto',chiave:acquisto};
+  const causaOld:Causa={tipo:'voce',chiave:`${voce}:${effetto}`},causaNew:Causa={tipo:destinazioneTipo,chiave:acquisto};
   const old=targetCausa(p,causaOld).find((t)=>t.tipo==='dote'&&t.chiave===dote)??{tipo:'dote' as const,chiave:dote,delta:0,attiva:false,motivo:'Dote ritirata.'},q=saldo(p,causaOld,old).attribuito;
   if(!Number.isSafeInteger(q)||q<0||q!==qAtteso||old.attiva)throw httpErrors.conflict('attribuzione-cambiata','B o la causa precedente sono cambiati prima del raccordo.');
   const nuova=targetCausa(p,causaNew).find((t)=>t.tipo==='dote');
@@ -169,7 +189,7 @@ export function trasferisciAttribuzioneDote(p:number,voce:string,effetto:string,
   if(nuova.chiave===dote&&q>0){
     const bNew=saldo(p,causaNew,nuova).attribuito;if(!Number.isSafeInteger(bNew)||bNew<0||!Number.isSafeInteger(bNew+q))throw httpErrors.conflict('attribuzione-incoerente','B dell’acquisto non è integro.');
     const fotografia=(c:Causa)=>righeCausa(p,c).filter((x)=>x.tipo==='dote'&&x.chiave===dote&&x.stato==='applicata').map((x)=>({id:x.id,uid:x.uid,applicato:x.delta_applicato,riconosciuto:x.delta_riconosciuto}));
-    const prova:ProvaTrasferimento={versione:1,ricevutaOrigine,ricevutaDestinazione,causaOrigine:causaOld.chiave,acquistoDestinazione:acquisto,dote,quantita:q,primaOrigine:q,primaDestinazione:bNew,attribuzioniOrigine:fotografia(causaOld),attribuzioniDestinazione:fotografia(causaNew)};
+    const prova:ProvaTrasferimento={versione:1,...(destinazioneTipo==='pesca'?{destinazioneTipo}:{}),ricevutaOrigine,ricevutaDestinazione,causaOrigine:causaOld.chiave,acquistoDestinazione:acquisto,dote,quantita:q,primaOrigine:q,primaDestinazione:bNew,attribuzioniOrigine:fotografia(causaOld),attribuzioniDestinazione:fotografia(causaNew)};
     const op=createHash('sha256').update(`trasferimento\0${ricevutaOrigine}\0${ricevutaDestinazione}`).digest('hex').slice(0,32),adesso=nowIso(),uidOld=nuovoUid(),uidNew=nuovoUid();
     if(prepared('SELECT 1 FROM utente.proposta_operazione WHERE partita_id=? AND operazione_id=?').get(p,op))throw httpErrors.conflict('trasferimento-gia-registrato','Il trasferimento esiste già: nessuna seconda attribuzione.');
     const inserisci=(c:Causa,t:Target,delta:number,uid:string,ciclo:number):number=>Number(prepared(`INSERT INTO utente.da_applicare(uid,partita_id,voce_uid,causa_tipo,causa_chiave,tipo,chiave,unita,ciclo,revisione_causa,delta,dati_json,motivo,stato,verifica,chiusa_da,motivo_chiusura,delta_applicato,delta_riconosciuto,creata_il,decisa_il) VALUES(?,?,?,?,?,'dote',?,'punti-interni',?,?,?,?,'Attribuzione riallocata dal raccordo esplicito: saldo Dote invariato.','applicata','non-conteggiata','causa','beneficio-riallocato',0,?,?,?)`).run(uid,p,c.tipo==='voce'?voce:null,c.tipo,c.chiave,dote,ciclo,improntaDato({attiva:t.attiva,tipo:t.tipo,chiave:t.chiave,delta:t.delta}),delta,jsonCanonico({beneficio:t,trasferimento:prova}),delta,adesso,adesso).lastInsertRowid);
@@ -186,7 +206,7 @@ export function trasferisciAttribuzioneDote(p:number,voce:string,effetto:string,
 export function riconciliaBeneficiCausa(partita: number, causa: Causa): void {
   const adesso = nowIso();
   for (const t of targetCausa(partita,causa)) {
-    const firma = improntaDato({attiva:t.attiva,tipo:t.tipo,chiave:t.chiave,delta:t.delta});
+    const firma = firmaTarget(t);
     const prima = prepared('SELECT ciclo,attiva,impronta_target FROM utente.beneficio_ciclo WHERE partita_id=? AND causa_tipo=? AND causa_chiave=? AND tipo=? AND chiave=?').get(partita,causa.tipo,causa.chiave,t.tipo,t.chiave) as {ciclo:number;attiva:number;impronta_target:string}|undefined;
     const ciclo = prima ? prima.ciclo + ((!prima.attiva && t.attiva) || (prima.attiva && t.attiva && prima.impronta_target !== firma) ? 1 : 0) : 1;
     prepared(`INSERT INTO utente.beneficio_ciclo(partita_id,causa_tipo,causa_chiave,tipo,chiave,ciclo,attiva,impronta_target,updated_at) VALUES(?,?,?,?,?,?,?,?,?)
@@ -201,11 +221,15 @@ export function riconciliaBeneficiCausa(partita: number, causa: Causa): void {
     if (rs.some((r) => r.stato === 'scartata' && r.chiusa_da === 'utente' && r.ciclo === ciclo && r.revisione_causa === firma && r.delta === s.differenza)) continue;
     const dati = {beneficio:t,fortunaIgnota:t.fortunaIgnota === true};
     prepared(`INSERT INTO utente.da_applicare(uid,partita_id,voce_uid,causa_tipo,causa_chiave,tipo,chiave,unita,ciclo,revisione_causa,delta,dati_json,motivo,verifica,creata_il)
-      VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(nuovoUid(),partita,causa.tipo === 'voce' ? causa.chiave.split(':')[0] : null,causa.tipo,causa.chiave,t.tipo,t.chiave,t.tipo === 'yen' ? 'yen' : 'punti-interni',ciclo,firma,s.differenza,jsonCanonico(dati),s.dovuto === 0 ? 'Proposta inversa: ultima fonte rimossa.' : t.motivo,t.storica ? 'da-dichiarare' : 'non-conteggiata',adesso);
+      VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(nuovoUid(),partita,causa.tipo === 'voce' ? causa.chiave.split(':')[0] : null,causa.tipo,causa.chiave,t.tipo,t.chiave,t.tipo === 'yen' ? 'yen' : t.tipo==='punti-pesca'?'punti-pesca':'punti-interni',ciclo,firma,s.differenza,jsonCanonico(dati),s.dovuto === 0 ? 'Proposta inversa: ultima fonte rimossa.' : t.motivo,t.storica ? 'da-dichiarare' : 'non-conteggiata',adesso);
   }
 }
 export const riconciliaBeneficiAcquisto = (p:number,id:string):void => riconciliaBeneficiCausa(p,{tipo:'acquisto',chiave:id});
 export const riconciliaBeneficiVoce = (p:number,voce:string,effetto:string):void => riconciliaBeneficiCausa(p,{tipo:'voce',chiave:`${voce}:${effetto}`});
+export const riconciliaBeneficiPesca = (p:number,id:string):void => riconciliaBeneficiCausa(p,{tipo:'pesca',chiave:id});
+export function beneficiPescaDto(p:number,id:string):import('../../shared/pesca.js').BeneficioPescaDto[] {
+  const c:Causa={tipo:'pesca',chiave:id};return targetCausa(p,c).map(t=>{const s=saldo(p,c,t);return {causa:id,tipo:t.tipo,chiave:t.chiave,unita:t.tipo==='dote'?'punti-interni':t.tipo,intervallo:s.intervallo??{minimo:s.dovuto!,massimo:s.dovuto!},attribuito:s.attribuito,deltaCerto:s.differenza,residuoIgnoto:s.residuoIgnoto??false,motivo:t.motivo};});
+}
 
 export function creaPropostaEffettoStorico(partita:number,voce:string,effetto:string,precedente?:EffettoVoceDto):void {
   const e = prepared('SELECT dati_json,ordine FROM main.voce_effetto WHERE voce_uid=? AND uid=?').get(voce,effetto) as {dati_json:string;ordine:number}|undefined;
@@ -261,13 +285,14 @@ function dto(r:RigaProposta):PropostaPartitaDto {
     const target=targetCausa(r.partita_id,causa).find((t)=>t.tipo===r.tipo&&t.chiave===r.chiave);
     if(!target) throw httpErrors.conflict('proposta-incoerente','La proposta non ha una descrizione del proprio beneficio.');
     s=saldo(r.partita_id,causa,target);
-    if(s.differenza!==r.delta || r.revisione_causa!==improntaDato({attiva:target.attiva,tipo:target.tipo,chiave:target.chiave,delta:target.delta})) impedimenti.push('La causa o il saldo sono cambiati: rivedere la proposta.');
+    if(s.differenza!==r.delta || r.revisione_causa!==firmaTarget(target)) impedimenti.push('La causa o il saldo sono cambiati: rivedere la proposta.');
     if(r.tipo==='dote'&&!prepared('SELECT 1 FROM main.dote_sociale WHERE chiave=?').get(r.chiave)) {orfana=true;impedimenti.push('La Dote destinataria non esiste.');}
     if(r.verifica!=='non-conteggiata') impedimenti.push('Dichiara prima se questa quantità è già stata conteggiata.');
     if(causa.tipo==='acquisto') {
       const a=prepared('SELECT articolo_chiave FROM utente.acquisto_registrato WHERE partita_id=? AND id=?').get(r.partita_id,causa.chiave) as {articolo_chiave:string}|undefined;
       orfana=orfana||!a||!prepared('SELECT 1 FROM main.articolo WHERE chiave=?').get(a.articolo_chiave);
-    } else orfana=orfana||!prepared('SELECT 1 FROM main.voce_giornata WHERE uid=?').get(r.voce_uid);
+    } else if(causa.tipo==='voce')orfana=orfana||!prepared('SELECT 1 FROM main.voce_giornata WHERE uid=?').get(r.voce_uid);
+    else orfana=orfana||!prepared('SELECT 1 FROM utente.pesca_sessione WHERE partita_id=? AND id=? UNION ALL SELECT 1 FROM utente.pesca_acquisto_esca WHERE partita_id=? AND id=?').get(r.partita_id,causa.chiave,r.partita_id,causa.chiave);
   }
   return {id:r.id,uid:r.uid,partitaId:r.partita_id,tipo:r.tipo,chiave:r.chiave,causa,unita:r.unita,delta:r.delta,stato:r.stato,verifica:r.verifica,motivo:r.motivo,chiusaDa:r.chiusa_da,motivoChiusura:r.motivo_chiusura,deltaApplicato:r.delta_applicato,deltaRiconosciuto:r.delta_riconosciuto,saldo:s,dote:eDote(r.chiave)?r.chiave:null,orfana,applicabile:r.stato==='aperta'&&impedimenti.length===0,impedimenti,creataIl:r.creata_il,decisaIl:r.decisa_il,dati};
 }
@@ -279,10 +304,12 @@ export function leggiPropostePartita(partita:number,opz:{ancheChiuse?:boolean}={
 export interface PortePropostePartita {
   applicaDote:(partitaId:number,chiave:DoteChiave,delta:number)=>void;
   applicaYen:(partitaId:number,delta:number)=>void;
-  applicaEffettoStorico?:(partitaId:number,proposta:PropostaPartitaDto,acquisto:NuovaRegistrazioneAcquisto|undefined,revisioneAcquistiAttesa:string|undefined)=>void;
+  applicaPuntiPesca?:(partitaId:number,delta:number)=>void;
+  applicaEffettoStorico?:(partitaId:number,proposta:PropostaPartitaDto,acquisto:NuovaRegistrazioneAcquisto|undefined,revisioneAcquistiAttesa:string|undefined,pesca?:NuovaSessionePesca,revisionePescaAttesa?:string)=>void;
 }
-function valore(partita:number,tipo:'dote'|'yen',chiave:string):number {
+function valore(partita:number,tipo:'dote'|'yen'|'punti-pesca',chiave:string):number {
   if(tipo==='yen')return (prepared('SELECT yen FROM utente.partita WHERE id=?').get(partita) as {yen:number}).yen;
+  if(tipo==='punti-pesca'){const saldo=(prepared('SELECT saldo FROM utente.punti_pesca_partita WHERE partita_id=?').get(partita) as {saldo:number|null}|undefined)?.saldo;if(saldo==null)throw httpErrors.conflict('pesca-saldo-ignoto','Dichiara il saldo punti pesca osservato prima di applicare un movimento.');return saldo;}
   return (prepared('SELECT punti FROM utente.dote_sociale_partita WHERE partita_id=? AND dote_chiave=?').get(partita,chiave) as {punti:number}|undefined)?.punti??0;
 }
 function riferimenti(d:DecisioneProposte) {return 'proposte' in d?d.proposte:[d.proposta];}
@@ -302,11 +329,13 @@ function prepara(partita:number,r:RichiestaAnteprimaDecisioneProposte):Anteprima
       if(p.tipo==='effetto-voce'||!p.applicabile)throw httpErrors.conflict('proposta-non-applicabile',p.impedimenti.join(' ')||'Questa proposta richiede il raccordo esplicito.');
       const k=`${p.tipo}\0${p.chiave}`,v=virtuali.get(k)??{tipo:p.tipo,chiave:p.chiave,prima:valore(partita,p.tipo,p.chiave),delta:0,dopo:0};
       v.delta+=p.delta;v.dopo=v.prima+v.delta;
-      if(v.dopo<0||v.dopo>(p.tipo==='yen'?9_999_999:999))throw httpErrors.conflict('valore-fuori-limiti','Il delta approvato supererebbe i limiti; nessuna saturazione automatica.');
+      if(v.dopo<0||v.dopo>(p.tipo==='yen'?9_999_999:p.tipo==='punti-pesca'?999_999_999:999))throw httpErrors.conflict('valore-fuori-limiti','Il delta approvato supererebbe i limiti; nessuna saturazione automatica.');
       virtuali.set(k,v);
     } else if(r.decisione.tipo==='applica-effetto') {
       if(p.tipo!=='effetto-voce'||!p.applicabile)throw httpErrors.conflict('effetto-non-applicabile','Il raccordo della spunta non è più applicabile.');
       const effetto=p.dati.effetto as {tipo?:string}|undefined;
+      if(effetto?.tipo==='pesca'){if(!r.decisione.pesca||!r.decisione.revisionePescaAttesa||r.decisione.acquisto!==undefined||r.decisione.revisioneAcquistiAttesa!==undefined)throw httpErrors.badRequest('pesca-richiesta','La pesca richiede sessione completa e token, senza un acquisto alternativo.');}
+      else if(r.decisione.pesca!==undefined||r.decisione.revisionePescaAttesa!==undefined)throw httpErrors.badRequest('pesca-inattesa','Questo effetto non dichiara una visita di pesca.');
       if(effetto?.tipo==='acquisto'){if(!r.decisione.acquisto||!r.decisione.revisioneAcquistiAttesa)throw httpErrors.badRequest('acquisto-richiesto','Una consumazione richiede acquisto completo e token.');}
       else if(r.decisione.acquisto!==undefined||r.decisione.revisioneAcquistiAttesa!==undefined)throw httpErrors.badRequest('acquisto-inatteso','Questo effetto non è un acquisto.');
     } else if(r.decisione.tipo!=='scarta'&&p.tipo==='effetto-voce')throw httpErrors.badRequest('decisione-non-valida','Il già conteggiato si dichiara sulla proposta Dote o yen, dopo il raccordo.');
@@ -317,7 +346,11 @@ function prepara(partita:number,r:RichiestaAnteprimaDecisioneProposte):Anteprima
     const uid=p.dati.voceUid;
     return {proposta:p.uid,ricevute:prepared('SELECT * FROM utente.effetto_applicato WHERE partita_id=? AND voce_uid=? ORDER BY id').all(partita,uid),proposteVoce:prepared('SELECT * FROM utente.da_applicare WHERE partita_id=? AND (voce_uid=? OR causa_chiave LIKE ?) ORDER BY id').all(partita,uid,`${String(uid)}:%`)};
   });
-  return {richiesta:r,proposte,movimenti,revisioneProposteAttesa:improntaDato({r,righe,proposte,movimenti,raccordi})};
+  const sceltaPesca=r.decisione.tipo==='applica-effetto'?r.decisione.pesca?.scelta:undefined;
+  const fotografiaSessionePesca=sceltaPesca?.tipo==='collega'?leggiPescaPartita(partita,id=>beneficiPescaDto(partita,id)).sessioni.find(s=>s.id===sceltaPesca.sessioneId):undefined;
+  if(sceltaPesca?.tipo==='collega'&&!fotografiaSessionePesca)throw httpErrors.conflict('pesca-sessione-assente','La sessione scelta non è presente nell’anteprima della decisione.');
+  const fotoPesca=r.decisione.tipo==='applica-effetto'&&r.decisione.pesca?fotografiaPesca(partita):undefined;
+  return {richiesta:r,proposte,movimenti,...(fotografiaSessionePesca?{fotografiaSessionePesca}:{}),revisioneProposteAttesa:improntaDato({r,righe,proposte,movimenti,raccordi,fotoPesca})};
 }
 export function anteprimaDecisioneProposte(partita:number,r:RichiestaAnteprimaDecisioneProposte):AnteprimaDecisioneProposteDto {return getDb().transaction(()=>prepara(partita,r))();}
 export function decidiProposte(partita:number,r:RichiestaDecisioneProposte,porte?:PortePropostePartita):RicevutaDecisioneProposteDto {
@@ -328,7 +361,7 @@ export function decidiProposte(partita:number,r:RichiestaDecisioneProposte,porte
     if(replay){
       if(replay.payload_json!==payload)throw httpErrors.conflict('operazione-diversa','Questo ID appartiene a un’altra decisione.');
       const ricevuta=leggiOggettoRegistro(replay.ricevuta_json,'ricevuta operazione');
-      if(ricevuta.operazioneId!==r.operazioneId||ricevuta.partitaId!==partita||ricevuta.decisione!==r.decisione.tipo||jsonCanonico(ricevuta.proposte)!==jsonCanonico(riferimenti(r.decisione))||!Array.isArray(ricevuta.movimenti)||typeof ricevuta.decisaIl!=='string'||ricevuta.movimenti.some((x)=>!x||typeof x!=='object'||!['dote','yen'].includes(String((x as Record<string,unknown>).tipo))||!Number.isInteger((x as Record<string,unknown>).prima)||!Number.isInteger((x as Record<string,unknown>).delta)||!Number.isInteger((x as Record<string,unknown>).dopo)||Number((x as Record<string,unknown>).prima)+Number((x as Record<string,unknown>).delta)!==Number((x as Record<string,unknown>).dopo)))throw httpErrors.conflict('ricevuta-operazione-incoerente','La ricevuta della decisione non coincide con la propria identità o catena.');
+      if(ricevuta.operazioneId!==r.operazioneId||ricevuta.partitaId!==partita||ricevuta.decisione!==r.decisione.tipo||jsonCanonico(ricevuta.proposte)!==jsonCanonico(riferimenti(r.decisione))||!Array.isArray(ricevuta.movimenti)||typeof ricevuta.decisaIl!=='string'||ricevuta.movimenti.some((x)=>!x||typeof x!=='object'||!['dote','yen','punti-pesca'].includes(String((x as Record<string,unknown>).tipo))||!Number.isInteger((x as Record<string,unknown>).prima)||!Number.isInteger((x as Record<string,unknown>).delta)||!Number.isInteger((x as Record<string,unknown>).dopo)||Number((x as Record<string,unknown>).prima)+Number((x as Record<string,unknown>).delta)!==Number((x as Record<string,unknown>).dopo)))throw httpErrors.conflict('ricevuta-operazione-incoerente','La ricevuta della decisione non coincide con la propria identità o catena.');
       return ricevuta as unknown as RicevutaDecisioneProposteDto;
     }
     const p=prepara(partita,richiesta);
@@ -336,7 +369,7 @@ export function decidiProposte(partita:number,r:RichiestaDecisioneProposte,porte
     const adesso=nowIso();
     if(r.decisione.tipo==='applica') {
       if(!porte)throw httpErrors.conflict('dominio-non-collegato','Il mutatore canonico non è disponibile.');
-      for(const m of p.movimenti){if(m.tipo==='yen')porte.applicaYen(partita,m.delta);else {if(!eDote(m.chiave))throw httpErrors.conflict('dote-non-valida','Dote non valida.');porte.applicaDote(partita,m.chiave,m.delta);}if(valore(partita,m.tipo,m.chiave)!==m.dopo)throw httpErrors.conflict('delta-non-applicato','Il dominio non ha applicato il delta esatto approvato.');}
+      for(const m of p.movimenti){if(m.tipo==='yen')porte.applicaYen(partita,m.delta);else if(m.tipo==='punti-pesca'){if(!porte.applicaPuntiPesca)throw httpErrors.conflict('dominio-non-collegato','Il saldo punti pesca non è collegato.');porte.applicaPuntiPesca(partita,m.delta);}else {if(!eDote(m.chiave))throw httpErrors.conflict('dote-non-valida','Dote non valida.');porte.applicaDote(partita,m.chiave,m.delta);}if(valore(partita,m.tipo,m.chiave)!==m.dopo)throw httpErrors.conflict('delta-non-applicato','Il dominio non ha applicato il delta esatto approvato.');}
     }
     const cause=new Map<string,Causa>(),cursori=new Map(p.movimenti.map((m)=>[`${m.tipo}\0${m.chiave}`,m.prima]));
     for(const item of p.proposte){
@@ -349,14 +382,15 @@ export function decidiProposte(partita:number,r:RichiestaDecisioneProposte,porte
         else if(r.decisione.tipo==='gia-conteggiata')deltaRiconosciuto=Math.sign(q.delta)*r.decisione.quantita;
         else if(r.decisione.tipo==='applica-effetto'){
           if(!porte?.applicaEffettoStorico)throw httpErrors.conflict('dominio-non-collegato','Il raccordo canonico non è disponibile.');
-          porte.applicaEffettoStorico(partita,item,r.decisione.acquisto,r.decisione.revisioneAcquistiAttesa);
+          porte.applicaEffettoStorico(partita,item,r.decisione.acquisto,r.decisione.revisioneAcquistiAttesa,r.decisione.pesca,r.decisione.revisionePescaAttesa);
         }
         const gruppo=p.movimenti.find((m)=>m.tipo===q.tipo&&m.chiave===q.chiave),k=`${q.tipo}\0${q.chiave}`,prima=cursori.get(k);
         const movimento=gruppo&&prima!==undefined?{tipo:gruppo.tipo,chiave:gruppo.chiave,prima,delta:deltaApplicato,dopo:prima+deltaApplicato}:null;
         if(movimento)cursori.set(k,movimento.dopo);
-        const app={operazioneId:r.operazioneId,decisione:r.decisione.tipo,deltaApplicato,deltaRiconosciuto,movimento,creataIl:adesso};
+        const app={operazioneId:r.operazioneId,decisione:r.decisione.tipo,deltaApplicato,deltaRiconosciuto,movimento,creataIl:adesso,...(item.causa.tipo==='pesca'?{intervalloOsservato:item.saldo?.intervallo??null,componente:r.decisione.tipo==='gia-conteggiata'?'attribuzione-dichiarata':q.tipo==='dote'&&deltaApplicato>0&&item.saldo?.residuoIgnoto?'base-certa':'delta-certo'}:{})};
         if(prepared("UPDATE utente.da_applicare SET stato='applicata',chiusa_da='utente',delta_applicato=?,delta_riconosciuto=?,applicazione_json=?,decisa_il=? WHERE id=? AND uid=? AND stato='aperta'").run(deltaApplicato,deltaRiconosciuto,jsonCanonico(app),adesso,q.id,q.uid).changes!==1)throw httpErrors.conflict('proposta-cambiata','La proposta è cambiata durante la decisione.');
         if(q.tipo==='yen'&&deltaApplicato!==0){const m=movimento!;prepared('INSERT INTO utente.movimento_yen(id,partita_id,proposta_uid,causa_tipo,causa_chiave,prima,delta,dopo,operazione_id,creato_il) VALUES(?,?,?,?,?,?,?,?,?,?)').run(nuovoUid(),partita,q.uid,q.causa_tipo,q.causa_chiave,m.prima,deltaApplicato,m.prima+deltaApplicato,r.operazioneId,adesso);}
+        if(q.tipo==='punti-pesca'&&deltaApplicato!==0){const m=movimento!;prepared("INSERT INTO utente.movimento_punti_pesca(id,partita_id,proposta_uid,operazione_id,tipo,causa_tipo,causa_chiave,prima,delta,dopo,creato_il) VALUES(?,?,?,?,'proposta',?,?,?,?,?,?)").run(nuovoUid(),partita,q.uid,r.operazioneId,q.causa_tipo,q.causa_chiave,m.prima,deltaApplicato,m.dopo,adesso);}
       }
       if(q.tipo!=='effetto-voce')cause.set(`${q.causa_tipo}\0${q.causa_chiave}`,causaDi(q));
     }

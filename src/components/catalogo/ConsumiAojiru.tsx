@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ARTICOLO_AOJIRU, ORDINE_AOJIRU,
@@ -63,15 +63,16 @@ interface PreparazioneProps {
   titoloConferma?: string;
   esitoConferma?: string;
   confermaScrive?: boolean;
+  invalidazioneAnteprima?: number;
   onRecuperato?: () => void | Promise<void>;
   onConferma: (richiesta: RichiestaRegistraAcquisto) => Promise<void>;
 }
 
 /** Lo stesso gesto esplicito serve per acquisto manuale, prima spunta e raccordo di una spunta già fatta. */
-export function PreparazioneAcquistoAojiru({ partitaId, fonte, articolo = ARTICOLO_AOJIRU, giorno, fascia = 'giorno', stato, titoloConferma = 'Registra la consumazione', esitoConferma = 'Consumazione registrata.', confermaScrive = true, onRecuperato, onConferma }: PreparazioneProps) {
+export function PreparazioneAcquistoAojiru({ partitaId, fonte, articolo = ARTICOLO_AOJIRU, giorno, fascia = 'giorno', stato, titoloConferma = 'Registra la consumazione', esitoConferma = 'Consumazione registrata.', confermaScrive = true, invalidazioneAnteprima = 0, onRecuperato, onConferma }: PreparazioneProps) {
   useGestiPartita();
   const pendente = gestoPendenteNelloScope(partitaId, { articolo, ...(fonte.tipo === 'diario' ? { voceUid: fonte.voceUid } : {}) });
-  const registro = useCarica(() => leggiAcquistiRegistrati(partitaId), [partitaId]);
+  const registro = useCarica(() => leggiAcquistiRegistrati(partitaId), [partitaId, invalidazioneAnteprima]);
   const [campi, setCampi] = useState(() => ({ giorno: giorno ?? '', fascia, ordine: '1', variante: '' as '' | DoteChiave, fortuna: 'ignota', scelta: '', rapporto: '' }));
   const [anteprima, setAnteprima] = useState<AnteprimaRegistrazioneAcquistoDto | null>(null);
   const [occupato, setOccupato] = useState(false);
@@ -79,9 +80,16 @@ export function PreparazioneAcquistoAojiru({ partitaId, fonte, articolo = ARTICO
   const [incerto, setIncerto] = useState(false);
   const [confermato, setConfermato] = useState(false);
   const [attestato, setAttestato] = useState(false);
+  const [epocaAnteprima, setEpocaAnteprima] = useState(invalidazioneAnteprima);
+  if (epocaAnteprima !== invalidazioneAnteprima) {
+    setEpocaAnteprima(invalidazioneAnteprima); setAnteprima(null); setAttestato(false); setConfermato(false); setErrore(null); setIncerto(false); setOccupato(false);
+  }
   const blocco = useRef(false);
   const vivo = useRef(true);
-  useEffect(() => { vivo.current = true; return () => { vivo.current = false; }; }, []);
+  const contesto = JSON.stringify([partitaId, articolo, fonte, invalidazioneAnteprima]);
+  const contestoRef = useRef('');
+  useLayoutEffect(() => { vivo.current = true; contestoRef.current = contesto; return () => { vivo.current = false; contestoRef.current = ''; }; }, [contesto]);
+  const attiva = () => vivo.current && contestoRef.current === contesto;
   const presenza = registro.dati?.presenzeStoriche.find((p) => p.articolo === articolo) ?? null;
   const registrazioni = registro.dati?.registrazioni.filter((r) => r.identita.articolo === articolo) ?? [];
   const altreStessoGiorno = (anteprima?.acquisti.registrazioni ?? registrazioni).filter(r => r.attiva && r.momento.giorno === (anteprima?.nuovo.momento.giorno ?? campi.giorno)
@@ -102,25 +110,25 @@ export function PreparazioneAcquistoAojiru({ partitaId, fonte, articolo = ARTICO
         scelta: campi.scelta ? { tipo: 'collega', acquistoId: campi.scelta } : { tipo: 'nuova' },
         rapportoLegacy: presenza ? { tipo: campi.rapporto as 'rappresenta' | 'ulteriore', firma: presenza.firma } : null,
       });
-      if (vivo.current) setAnteprima(a);
-    } catch (e) { if (vivo.current) setErrore(messaggio(e)); }
-    finally { blocco.current = false; if (vivo.current) setOccupato(false); }
+      if (attiva()) setAnteprima(a);
+    } catch (e) { if (attiva()) setErrore(messaggio(e)); }
+    finally { blocco.current = false; if (attiva()) setOccupato(false); }
   };
   const conferma = async () => {
     if (!anteprima || !attestato || blocco.current || confermato) return;
     blocco.current = true; setOccupato(true); setErrore(null);
     try {
       await onConferma({ ...anteprima.nuovo, revisioneAcquistiAttesa: anteprima.revisioneAcquistiAttesa });
-      if (vivo.current) { setConfermato(true); setIncerto(false); }
+      if (attiva()) { setConfermato(true); setIncerto(false); }
     } catch (e) {
-      if (vivo.current) {
+      if (attiva()) {
         const dubbio = confermaScrive && !!gestoPendenteNelloScope(partitaId, { articolo, ...(fonte.tipo === 'diario' ? { voceUid: fonte.voceUid } : {}) }); setIncerto(dubbio); setErrore(messaggio(e));
         if (!dubbio) { setAnteprima(null); setAttestato(false); await registro.ricarica(); }
       }
-    } finally { blocco.current = false; if (vivo.current) setOccupato(false); }
+    } finally { blocco.current = false; if (attiva()) setOccupato(false); }
   };
   if (confermato) return <p role="status" className="m-0 text-success">{esitoConferma}</p>;
-  if (pendente) return <div className="flex flex-col gap-2"><p role="status" className="m-0 text-warning">Esiste un’operazione ancora da risolvere per questa fonte. Nessuna nuova registrazione viene inviata.</p><GestiPartita partitaId={partitaId} onCambiato={async () => { if (vivo.current) await onRecuperato?.(); }} /></div>;
+  if (pendente) return <div className="flex flex-col gap-2"><p role="status" className="m-0 text-warning">Esiste un’operazione ancora da risolvere per questa fonte. Nessuna nuova registrazione viene inviata.</p><GestiPartita partitaId={partitaId} onCambiato={async () => { if (attiva()) await onRecuperato?.(); }} /></div>;
   return <div className="flex min-w-0 flex-col gap-3 text-[13px]">
     <p className="m-0">Domenica · 5.000 yen · nessun tempo consumato. La base è 2 punti interni (1 nota); con Fortuna della stessa Dote sono 3 (2 note). Senza dichiarazione su Fortuna il totale resta ignoto.</p>
     {stato?.aojiru && <p className="m-0">{stato.aojiru.varianteAttesa ? `Prossima variante prevista: ${nomeDote(stato.aojiru.varianteAttesa)}.` : 'Variante iniziale da osservare.'} {stato.aojiru.nota}</p>}

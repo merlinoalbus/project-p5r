@@ -16,6 +16,8 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { statoPalazzi } from './palazziService.js';
 import { EVENTI_STORIA, condizioneConTesto, dataLeggibile, normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { eventiEffettivi } from './apertureDedaliService.js';
+import { EVENTI_PESCA } from '../../shared/pesca.js';
+import { leggiFattiPesca } from './pescaLetture.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { type MeteoPartita } from '../../shared/meteoPartita.js';
 import { meteoOra } from './meteoService.js';
@@ -29,6 +31,8 @@ export interface RigaRequisito { confidente_chiave: string; rango: number; indic
 
 /** Stato della partita letto una volta per tutti i Confidenti. */
 export interface StatoPartitaSemafori {
+  fattiPesca?: Map<string, 'avvenuto'|'non-avvenuto'|'ignoto'>;
+  contestoPesca?: import('../../shared/pesca.js').OsservazionePesca;
   doti: Map<string, number>;
   arcaniInScorta: Set<string>;
   /** Coppie «persona|abilità» (minuscole) presenti nella scorta: per i requisiti scritti per nome (pacchetti di prima). */
@@ -91,12 +95,13 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   const membriSquadra = new Set((prepared('SELECT personaggio_chiave FROM membro_squadra_partita WHERE partita_id = ? AND in_squadra = 1').all(partitaId) as Array<{ personaggio_chiave: string }>).map((r) => r.personaggio_chiave));
   const membriFuoriSquadra = new Set((prepared('SELECT personaggio_chiave FROM membro_squadra_partita WHERE partita_id = ? AND in_squadra = 0').all(partitaId) as Array<{ personaggio_chiave: string }>).map((r) => r.personaggio_chiave));
   const eventi = eventiEffettivi(partitaId);
+  const fattiPesca=new Map(leggiFattiPesca(partitaId,dataGioco&&fasciaGioco?{giorno:dataGioco,fascia:fasciaGioco,ordineVisita:Number.MAX_SAFE_INTEGER}:undefined,true).map(f=>[f.evento,f.valore]));
   // i Palazzi letti una volta: conclusi (Tesoro e boss finale, §8.10) col perché, gli altri con quel che manca al furto
   const palazzi = statoPalazzi(partitaId);
   // un Palazzo con la regola del boss dei Memento (Iweleth, §8.15) non entra negli effetti di Palazzo
   const palazziConclusi = new Map([...palazzi].flatMap(([k, s]) => (s.concluso && !s.senzaEffetti ? [[k, s.concluso] as [string, string]] : [])));
   const palazziMancanze = new Map([...palazzi].flatMap(([k, s]) => (s.mancaPerConcludere && !s.senzaEffetti ? [[k, s.mancaPerConcludere] as [string, string]] : [])));
-  return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, personeConAbilitaId, palazziConclusi, palazziMancanze, richiesteCompletate: richieste, richiesteEsistenti, nomiRichieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOra: meteoOra(partitaId, dataGioco, fasciaGioco), eventi, invitiRegistrati };
+  return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, personeConAbilitaId, palazziConclusi, palazziMancanze, richiesteCompletate: richieste, richiesteEsistenti, nomiRichieste, ranghiConfidenti, membriSquadra, membriFuoriSquadra, dataGioco, fasciaGioco, meteoOra: meteoOra(partitaId, dataGioco, fasciaGioco), eventi, invitiRegistrati, fattiPesca };
 }
 
 // L'ordine del calendario di gioco e i nomi dei Palazzi vengono da `shared/condizioniSpillo.ts`: qui erano riscritti a mano
@@ -138,6 +143,7 @@ export function semaforiConfidente(chiave: string, rangoAttuale: number, st: Sta
 
 /** Segna (o toglie) un evento di storia della partita: lo stesso dato dell'interruttore di Partita → Progressi. */
 export function impostaEventoStoria(partitaId: number, evento: string, avvenuto: boolean): void {
+  if(EVENTI_PESCA.includes(evento as typeof EVENTI_PESCA[number]))throw httpErrors.conflict('pesca-fatto-dedicato','Questo fatto usa fonti temporali nel registro della pesca, distinguendo ignoto e falso.');
   prepared('INSERT INTO evento_storia_partita (partita_id, evento_chiave, avvenuto, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, evento_chiave) DO UPDATE SET avvenuto = excluded.avvenuto, updated_at = excluded.updated_at').run(partitaId, evento, avvenuto ? 1 : 0, nowIso());
 }
 

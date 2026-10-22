@@ -41,6 +41,9 @@ import { eBloccoGuidaCatalogo, ripristinaPuntatoriGuida } from '../../shared/rif
 import { normalizzaCostoScambio } from '../../shared/catalogo.js';
 import { verificaAttivitaConfidente } from './vincoliAttivitaConfidente.js';
 import { preparaRipristinoAcquisti, verificaRipristinoAcquisti, riconciliaAcquistiDopoRipristino } from './acquistiService.js';
+import { radiceCestinoPesca, riconciliaPescaDopoRipristino, TIPI_CESTINO_PESCA } from './pescaRipristino.js';
+import { verificaAttivitaPesca } from './vincoliAttivitaPesca.js';
+import { eventoPescaMarcato } from './pescaStorico.js';
 import { riconciliaEffettiDopoRipristino } from './motoreDiario.js';
 import { ripristinaOrdineVoce } from './giornataService.js';
 import { azioneEventoAcquistoV1 } from './storicoService.js';
@@ -58,11 +61,11 @@ interface Passo { seq: number; tabella: string; op: Operazione; prima?: Riga; do
 export interface ViciniCestino { prima: string | null; dopo: string | null }
 
 /** I tipi di elemento che il server mette nel cestino (da L5, migrazione 115, anche il luogo e il negozio). */
-export type TipoElementoCestino = Exclude<TipoCestino, 'partita' | 'fonte-acquisto'>;
+export type TipoElementoCestino = Exclude<TipoCestino, 'partita' | 'fonte-acquisto'|'fonte-pesca'|'sessione-pesca'|'osservazione-pesca'>;
 
 /** L'elemento che si elimina, per l'elenco del cestino; `vicini` per rimetterlo al suo posto (aree, voci). */
 export interface ElementoCestino { tipo: TipoElementoCestino; chiave: string; nome: string; contesto?: string; vicini?: ViciniCestino }
-export interface ElementoCestinoPrivato { tipo: 'partita' | 'fonte-acquisto'; chiave: string; nome: string; contesto?: string; partitaId: number }
+export interface ElementoCestinoPrivato { tipo: 'partita' | 'fonte-acquisto'|'fonte-pesca'|'sessione-pesca'|'osservazione-pesca'; chiave: string; nome: string; contesto?: string; partitaId: number }
 
 /** Le tabelle del cestino stesso non si registrano. */
 const ESCLUSE: Record<Schema, ReadonlySet<string>> = { main: new Set(['cestino']), utente: new Set(['cestino_partite']) };
@@ -332,13 +335,13 @@ export function elencoCestino(): VoceCestinoDto[] {
   });
 }
 
-interface RigaCestinoPrivato { uid: string; registro_json: string; eliminato_il: string; tipo: 'partita' | 'fonte-acquisto'; chiave: string; nome: string; contesto: string | null; partita_id: number; riepilogo_json: string; formato: number }
+interface RigaCestinoPrivato { uid: string; registro_json: string; eliminato_il: string; tipo: ElementoCestinoPrivato['tipo']; chiave: string; nome: string; contesto: string | null; partita_id: number; riepilogo_json: string; formato: number }
 function verificaMetadatiPrivati(r: RigaCestinoPrivato): void {
-  if (r.formato !== 1 || !['partita', 'fonte-acquisto'].includes(r.tipo) || typeof r.chiave !== 'string' || typeof r.nome !== 'string'
+  if (r.formato !== 1 || !['partita', 'fonte-acquisto',...TIPI_CESTINO_PESCA].includes(r.tipo) || typeof r.chiave !== 'string' || typeof r.nome !== 'string'
     || !Number.isSafeInteger(r.partita_id) || r.partita_id < 1 || !/^[0-9a-f]{32}$/.test(r.uid)
     || typeof r.registro_json !== 'string' || typeof r.riepilogo_json !== 'string' || typeof r.eliminato_il !== 'string'
     || !(r.contesto === null || typeof r.contesto === 'string')
-    || (r.tipo === 'partita' ? r.chiave !== String(r.partita_id) : !/^[0-9a-f]{32}$/.test(r.chiave) && !(r.chiave.startsWith('legacy:') && r.chiave.length > 7))) {
+    || (r.tipo === 'partita' ? r.chiave !== String(r.partita_id) : TIPI_CESTINO_PESCA.includes(r.tipo as typeof TIPI_CESTINO_PESCA[number]) ? !radiceCestinoPesca(r.tipo,r.chiave) : !/^[0-9a-f]{32}$/.test(r.chiave) && !(r.chiave.startsWith('legacy:') && r.chiave.length > 7))) {
     throw httpErrors.conflict('cestino-privato-illeggibile', 'I metadati del cestino personale non sono riconoscibili: dati conservati.');
   }
 }
@@ -411,11 +414,12 @@ export function ripristinaCestinoPrivato(uid: string): EsitoRipristinoCestinoDto
     registro_json: '[]', con_partite: 1, vicini_json: null, partitaId: r.partita_id }, r);
 }
 
-const DURATURE_ACQUISTI = new Set(['da_applicare', 'movimento_yen', 'acquisto_operazione', 'proposta_operazione', 'effetto_applicato', 'beneficio_ciclo']);
+const DURATURE_ACQUISTI = new Set(['da_applicare', 'movimento_yen', 'acquisto_operazione', 'proposta_operazione', 'effetto_applicato', 'beneficio_ciclo','pesca_operazione','pesca_quota_storica','movimento_punti_pesca','punti_pesca_partita']);
 interface IdentitaRipristino { id: number | null; uid: string; tipo: TipoCestino; chiave: string; nome: string; registro_json: string; con_partite: number; vicini_json: string | null; partitaId?: number }
 function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: string }): EsitoRipristinoCestinoDto {
   const db = getDb();
   const fontePrivataUuid = r.id === null && r.tipo === 'fonte-acquisto' && !r.chiave.startsWith('legacy:');
+  const radicePesca=r.id===null?radiceCestinoPesca(r.tipo,r.chiave):null;
   const passi = [
     ...leggiPassiCestino(r.registro_json, 'main').map((p) => ({ ...p, schema: 'main' as Schema })),
     ...(parteP ? leggiPassiCestino(parteP.registro_json, 'utente').map((p) => ({ ...p, schema: 'utente' as Schema })) : []),
@@ -425,6 +429,7 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
     const radici = passi.filter(p => p.schema === 'utente' && p.op === 'D' && (
       r.tipo === 'partita' ? p.tabella === 'partita' && p.prima?.id === r.partitaId
         : r.chiave.startsWith('legacy:') ? p.tabella === 'acquisto_partita' && p.prima?.partita_id === r.partitaId && p.prima?.articolo_chiave === r.chiave.slice(7)
+          : radicePesca ? p.tabella===radicePesca.tabella&&p.prima?.id===radicePesca.id&&p.prima?.partita_id===r.partitaId
           : p.tabella === 'acquisto_provenienza' && p.prima?.id === r.chiave && p.prima?.partita_id === r.partitaId));
     if (radici.length !== 1) throw httpErrors.conflict('cestino-identita-privata-incoerente', 'Il registro non descrive un’unica eliminazione dell’identità personale indicata: dati conservati.');
     for (const p of passi) for (const lato of [p.prima, p.dopo]) if (lato && typeof lato.partita_id === 'number' && lato.partita_id !== r.partitaId) {
@@ -474,7 +479,7 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
       if (typeof lato.voce_uid === 'string') voceUids.add(lato.voce_uid);
       if (p.schema === 'main' && p.tabella === 'voce_giornata' && typeof lato.uid === 'string') voceUids.add(lato.uid);
     }
-    if (r.id === null && !fontePrivataUuid) {
+    if (r.id === null && !fontePrivataUuid && !radicePesca) {
       const tabella = r.tipo === 'partita' ? 'partita' : 'acquisto_provenienza';
       const presente = r.tipo === 'fonte-acquisto' && r.chiave.startsWith('legacy:')
         ? db.prepare('SELECT 1 FROM utente.acquisto_partita WHERE partita_id=? AND articolo_chiave=?').get(r.partitaId, r.chiave.slice(7))
@@ -498,9 +503,10 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
       const s = struttura(p.schema, p.tabella);
       const riferimento = p.prima ?? p.dopo!;
       const identitaImmutabile = fontePrivataUuid && p.schema === 'utente' && p.op === 'D'
-        && ['acquisto_registrato', 'acquisto_provenienza'].includes(p.tabella);
+        && ['acquisto_registrato', 'acquisto_provenienza'].includes(p.tabella)
+        || !!radicePesca&&p.schema==='utente'&&p.op==='D'&&p.tabella.startsWith('pesca_');
       const eventoAcquisto = p.schema === 'utente' && p.op === 'D' && p.tabella === 'evento_partita'
-        && azioneEventoAcquistoV1(riferimento.dati_json) !== null;
+        && (azioneEventoAcquistoV1(riferimento.dati_json) !== null || eventoPescaMarcato(riferimento.dati_json));
       const radicePin = r.tipo === 'pin' && p.schema === 'main' && p.tabella === 'spillo';
       // L'eccezione UUID non può usare una proiezione parziale né valori di default:
       // anche JSON, legami e metadati devono coincidere esattamente con la fotografia.
@@ -530,12 +536,12 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
         } catch (err) {
           const codice = codiceSqlite(err);
           if (codice === 'SQLITE_CONSTRAINT_FOREIGNKEY') {
-            if (r.tipo === 'partita') throw httpErrors.conflict('cestino-legami-partita-incompleti', 'Un legame del blocco personale non è ripristinabile: intera transazione annullata.');
+            if (r.tipo === 'partita'||radicePesca) throw httpErrors.conflict('cestino-legami-partita-incompleti', 'Un legame del blocco personale non è ripristinabile: intera transazione annullata.');
             if (p.schema === 'main' && p.tabella === 'attivita' && riga.confidente_chiave != null) throw httpErrors.conflict('cestino-confidente-mancante', 'Il Confidente dell’attività da ripristinare non è presente: nessun dato è stato rimesso.');
             salta(p.tabella, 'legame-mancante', descrivi(riga)); return false;
           }
           if (codice === 'SQLITE_CONSTRAINT_PRIMARYKEY' || codice === 'SQLITE_CONSTRAINT_UNIQUE') {
-            if ((p.schema === 'main' && !DERIVATE.has(p.tabella)) || r.tipo === 'partita' || (p.schema === 'utente' && ['acquisto_registrato','acquisto_provenienza'].includes(p.tabella))) occupate.push(`${etichettaTabella(p.tabella)}: ${descrivi(riga)}`);
+            if ((p.schema === 'main' && !DERIVATE.has(p.tabella)) || r.tipo === 'partita' || radicePesca || (p.schema === 'utente' && ['acquisto_registrato','acquisto_provenienza'].includes(p.tabella))) occupate.push(`${etichettaTabella(p.tabella)}: ${descrivi(riga)}`);
             else salta(p.tabella, 'cambiata-dopo', descrivi(riga));
             return false;
           }
@@ -558,6 +564,7 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
       } else if (p.op === 'U') {
         const prima = p.prima!, dopo = p.dopo!;
         const ora = leggi(dopo);
+        if(radicePesca&&(!ora||!uguali(ora,dopo,colonne)&&!uguali(ora,prima,colonne)))throw httpErrors.conflict('pesca-cestino-cambiato','Il blocco della pesca è cambiato dopo la rimozione: nessun ripristino parziale o sovrascrittura.');
         if (!ora) { if (!leggi(prima)) salta(p.tabella, 'non-esiste-piu', descrivi(dopo)); continue; }
         // colonna per colonna: torna com'era ciò che l'eliminazione aveva cambiato e nessuno ha toccato dopo; il resto della riga
         // (anche cambiato dopo) resta com'è. Una colonna cambiata dall'eliminazione e poi di nuovo da altro resta, e si dice.
@@ -601,6 +608,7 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
     for (const [chiave, prima] of attivitaPrecedenti) {
       const ora = db.prepare('SELECT * FROM main.attivita WHERE chiave=?').get(chiave) as Record<string, unknown> | undefined;
       if (ora) verificaAttivitaConfidente(db, ora, prima);
+      if (ora) verificaAttivitaPesca(db,ora,prima);
     }
     // Controllo finale della transazione: tutti gli oggetti del registro sono ormai tornati.
     // I JSON e i puntatori fra i due database non hanno foreign key SQLite; in errore
@@ -656,22 +664,25 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
     }
     const radice = r.tipo === 'partita' ? { schema: 'utente', tabella: 'partita', colonna: 'id' }
       : r.tipo === 'fonte-acquisto' ? { schema: 'utente', tabella: 'acquisto_provenienza', colonna: 'id' }
-        : { schema: 'main', ...RADICE[r.tipo] };
+      : radicePesca?{schema:'utente',tabella:radicePesca.tabella,colonna:'id'}
+        : { schema: 'main', ...RADICE[r.tipo as TipoElementoCestino] };
     const radicePresente = r.tipo === 'fonte-acquisto' && r.chiave.startsWith('legacy:')
       ? db.prepare('SELECT 1 FROM utente.acquisto_partita WHERE partita_id=? AND articolo_chiave=?').get(r.partitaId, r.chiave.slice(7))
-      : db.prepare(`SELECT 1 FROM ${radice.schema}.${virgolette(radice.tabella)} WHERE ${virgolette(radice.colonna)} = ?`).get(r.chiave);
+      : db.prepare(`SELECT 1 FROM ${radice.schema}.${virgolette(radice.tabella)} WHERE ${virgolette(radice.colonna)} = ?`).get(radicePesca?.id??r.chiave);
     if (!radicePresente) {
       throw httpErrors.conflict('cestino-non-ripristinabile', `Non si può rimettere «${r.nome}»: ciò che la conteneva non c'è più.`);
     }
     if (contestoAcquisti) verificaRipristinoAcquisti(contestoAcquisti);
+    if(r.tipo==='partita'&&r.partitaId!==undefined)riconciliaPescaDopoRipristino(r.partitaId,true);
     if (r.tipo !== 'partita' && r.tipo !== 'pin') for (const partita of partitaIds) {
       if (!db.prepare('SELECT 1 FROM utente.partita WHERE id=?').get(partita)) continue;
       riconciliaAcquistiDopoRipristino(partita, [...acquistoIds]);
       riconciliaEffettiDopoRipristino(partita, [...voceUids]);
+      riconciliaPescaDopoRipristino(partita);
     }
     const vicini = r.vicini_json ? JSON.parse(r.vicini_json) as ViciniCestino : null;
     if (r.tipo === 'voce-diario') ripristinaOrdineVoce(r.chiave, vicini);
-    else if (r.tipo !== 'partita' && r.tipo !== 'fonte-acquisto') dopoRipristino.get(r.tipo)?.(r.chiave, vicini, [...saltate.values()]);
+    else if (r.tipo !== 'partita' && r.tipo !== 'fonte-acquisto'&&!radicePesca) dopoRipristino.get(r.tipo as TipoElementoCestino)?.(r.chiave, vicini, [...saltate.values()]);
     // L4 (§8.11): lo specchio delle voci con pin si rifà con la funzione unica — quel che è cambiato dopo l'eliminazione (un pin
     // segnato o tolto) vince, come per le altre righe delle partite
     const pinRipristinato = r.tipo === 'pin' ? db.prepare('SELECT id FROM main.spillo WHERE uid=?').get(r.chiave) as { id: number } | undefined : undefined;

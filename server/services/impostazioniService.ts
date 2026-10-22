@@ -29,6 +29,7 @@ import { runMigrations, type Migration } from '../db/migrationRunner.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { occupaIstanza } from './lucchettoIstanza.js';
 import { verificaCollegamentiAttivitaImportati } from './vincoliAttivitaConfidente.js';
+import { verificaCollegamentiPescaImportati } from './vincoliAttivitaPesca.js';
 import { migrations } from '../db/migrations/index.js';
 import { migrazioniUtente } from '../db/migrazioniUtente/index.js';
 import { assorbiImmaginiSuDisco } from './pacchetto/pacchettoGioco.js';
@@ -326,6 +327,7 @@ export function riapriIstanza(): void {
   const db = initDb();
   runMigrations(db);
   verificaCollegamentiAttivitaImportati(db);
+  verificaCollegamentiPescaImportati(db);
   assorbiImmaginiSuDisco(db);
   invalidaCacheDiGioco();
 }

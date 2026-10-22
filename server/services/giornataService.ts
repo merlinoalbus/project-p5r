@@ -63,7 +63,7 @@ function riferimentoDi(r: RigaVoce): RiferimentoAzioneDto | null {
 }
 /** Proiezione di compatibilità dei soli tre tipi legacy: la fonte completa resta nel DTO. */
 function produceDi(r: RigaVoce): EffettoAzione[] {
-  return leggiEffettiVoce(r.uid).effetti.flatMap(e => e.effetto.tipo === 'acquisto' ? [] : [e.effetto]);
+  return leggiEffettiVoce(r.uid).effetti.flatMap(e => e.effetto.tipo === 'acquisto'||e.effetto.tipo==='pesca' ? [] : [e.effetto]);
 }
 /** Il nome del collegamento: quello salvato (la guida lo scrive a modo suo), altrimenti quello dell'elemento. */
 function nomeDi(r: RigaVoce, rif: RiferimentoAzioneDto | null): string | null {
@@ -574,7 +574,7 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
       const aperture = opz.apertureDedali === undefined ? undefined : verificaApertureScelte(opz.apertureDedali,
         eVisitaMemento(v) ? apertureDichiarabili() : apertureNegliEffetti(effettiPrima));
       if (precedente) {
-        if (opz.acquisti?.length) throw httpErrors.conflict('spunta-gia-presente', 'La spunta esiste già: collega il consumo attraverso la proposta storica o il gesto di acquisto, senza rieseguire la voce.');
+        if (opz.acquisti?.length||opz.pesche?.length) throw httpErrors.conflict('spunta-gia-presente', 'La spunta esiste già: collega il fatto attraverso la proposta storica, senza rieseguire la voce.');
         if (aperture === undefined) return; // idempotente: non riapplica punti, letture o turni
         // Mantiene tutti gli altri campi, anche quelli aggiunti da versioni successive. fatta_at e storico non cambiano.
         const effetti = { ...(effettiPrima ?? { doti: [], confidente: null }), apertureDedali: aperture };
@@ -585,7 +585,7 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
       const { effettiLegacy: effetti } = applicaEffettiVoce(partitaId, uid, {
         applicaLegacy: (id, produce: EffettoLegacyVoce[]) => applicaEffettiAzione(id, { ...v, produce, apertureDedali: aperture, momento: { data: r.data, fascia: v.fascia, origine: 'azione' } }, opz),
         annullaLegacy: annullaEffettiAzione,
-      }, { acquisti: opz.acquisti, porteAcquisti: { valutaCorrente: disponibilitaAcquistoCorrente }, spuntaFattaIl: adesso });
+      }, { acquisti: opz.acquisti, pesche:opz.pesche, porteAcquisti: { valutaCorrente: disponibilitaAcquistoCorrente }, spuntaFattaIl: adesso });
       prepared('INSERT INTO spunta_voce_partita (partita_id, voce_uid, fatta_at, effetti_json) VALUES (?, ?, ?, ?)').run(partitaId, uid, adesso, effetti ? JSON.stringify(effetti) : null);
       const dett = [`${v.fascia === 'sera' ? 'Sera' : 'Giorno'} · ${v.tipo}${v.riferimentoTesto ? ` · ${v.riferimentoTesto}` : ''}`];
       if (effetti) dett.push(descriviEffettiApplicati(effetti));
@@ -600,11 +600,11 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
 }
 
 /** Il raccordo successivo a una spunta non riapplica gli incontri o gli altri effetti legacy. */
-export function applicaEffettoStoricoDiario(partitaId: number, proposta: PropostaPartitaDto, acquisto?: NuovaRegistrazioneAcquisto, tokenAcquisti?: string): void {
+export function applicaEffettoStoricoDiario(partitaId: number, proposta: PropostaPartitaDto, acquisto?: NuovaRegistrazioneAcquisto, tokenAcquisti?: string,pesca?:import('../../shared/pesca.js').NuovaSessionePesca,tokenPesca?:string): void {
   applicaEffettoStorico(partitaId, proposta, acquisto, tokenAcquisti, {
     // Solo gli effetti selezionati dal motore: niente contesto Confidente o
     // riesecuzione dell'intera voce già spuntata.
     applicaLegacy: (id, produce) => applicaEffettiAzione(id, { tipo: 'altro', riferimento: null, produce }),
     annullaLegacy: annullaEffettiAzione,
-  }, { valutaCorrente: disponibilitaAcquistoCorrente });
+  }, { valutaCorrente: disponibilitaAcquistoCorrente },pesca,tokenPesca);
 }

@@ -3,6 +3,7 @@
 // ============================================================
 
 import { Router } from 'express';
+import { applicaDeltaPuntiPesca } from '../services/pescaService.js';
 import { z } from 'zod';
 import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
@@ -93,6 +94,7 @@ router.post('/:id/da-applicare/decisioni', validate({ params: paramsPartita, bod
     applicaDote: (id, chiave, delta) => { aggiornaDote(id, chiave, { delta }); },
     applicaYen: (id, delta) => { impostaYen(id, { delta }); },
     applicaEffettoStorico: applicaEffettoStoricoDiario,
+    applicaPuntiPesca: applicaDeltaPuntiPesca,
   }));
 });
 
@@ -178,7 +180,7 @@ router.put('/:id/trofei', validate({ params: paramsPartita, body: bodyTrofeo }),
 router.put('/:id/percorso', validate({ params: paramsPartita, body: bodyAzionePercorso }), (req, res) => {
   const b = req.body as z.infer<typeof bodyAzionePercorso>;
   const giaFatta = !!prepared('SELECT 1 FROM spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').get(Number(req.params.id), b.uid);
-  const azione = spuntaVoce(Number(req.params.id), b.uid, b.fatta, { noteRisposta: b.noteRisposta, apertureDedali: b.apertureDedali, acquisti: b.acquisti });
+  const azione = spuntaVoce(Number(req.params.id), b.uid, b.fatta, { noteRisposta: b.noteRisposta, apertureDedali: b.apertureDedali, acquisti: b.acquisti, pesche:b.pesche });
   // l'ultima attività del giorno corrente spuntata: la partita passa al giorno dopo (togliere la spunta non torna indietro)
   const giornoAvanzato = b.fatta && !giaFatta ? avanzaSeGiornoCompleto(Number(req.params.id), azione.giorno) : null;
   res.json(giornoAvanzato ? { ...azione, giornoAvanzato } : azione);

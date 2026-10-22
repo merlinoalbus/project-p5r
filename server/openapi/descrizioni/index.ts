@@ -21,6 +21,7 @@ import { DESCRIZIONI_MAPPE } from './mappe.js';
 import { DESCRIZIONI_PARTITE } from './partite.js';
 import { DESCRIZIONI_SISTEMA } from './sistema.js';
 import { DESCRIZIONI_TRADUZIONI } from './traduzioni.js';
+import { DESCRIZIONI_PESCA } from './pesca.js';
 
 /** Le aree dell'API, per prefisso di montaggio (`sistema` per le rotte dell'app): diventano i tag del documento. */
 export const AREE: Readonly<Record<string, AreaApi>> = {
@@ -37,6 +38,8 @@ export const AREE: Readonly<Record<string, AreaApi>> = {
   '/api/condizioni': { nome: 'Condizioni', descrizione: 'Gli elenchi chiusi e la normalizzazione delle condizioni di disponibilità e visibilità.' },
   '/api/aree': { nome: 'Aree del mondo', descrizione: 'Le Aree dei quartieri e della città (Città → Quartiere → Area → Planimetrie): pagina, creazione, versioni, ordine, ripristino, eliminazione nel cestino, planimetrie da collocare.' },
   '/api/luoghi': { nome: 'Luoghi', descrizione: 'I luoghi della città come fonte (L5): posizionarli su una planimetria con il loro pin e collocarli in un\'Area del quartiere.' },
+  '/api/pesca':{nome:'Regole della pesca',descrizione:'Regola della guida modificabile, profili sufficienti e fonti.'},
+  '/api/partite/:id/pesca':{nome:'Pesca della partita',descrizione:'Visite, osservazioni, fatti temporali, fonti e contabilità esplicita della pesca.'},
   sistema: { nome: 'Sistema', descrizione: 'Salute del server, configurazione pubblica, questa documentazione.' },
 };
 
@@ -45,6 +48,7 @@ export const DESCRIZIONI: DescrizioniArea = {
   ...DESCRIZIONI_COMPENDIO,
   ...DESCRIZIONI_TRADUZIONI,
   ...DESCRIZIONI_PARTITE,
+  ...DESCRIZIONI_PESCA,
   ...DESCRIZIONI_IMMAGINI,
   ...DESCRIZIONI_FUSIONE,
   ...DESCRIZIONI_MAPPE,

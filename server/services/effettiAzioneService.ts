@@ -47,6 +47,7 @@ export function leggiRicevutaEffettiAzione(raw: string | null): EffettiAzioneDto
 }
 
 export interface OpzioniSpunta {
+  pesche?: import('../../shared/pesca.js').RichiestaRegistraSessionePesca[];
   /** Osservazioni di consumo già riviste, atomiche con la nuova spunta. */
   acquisti?: RichiestaRegistraAcquisto[];
   /** Note della risposta al Confidente (1–3) quando l'azione è un incontro con un Confidente; assente = nessun punto. */

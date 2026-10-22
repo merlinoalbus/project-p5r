@@ -30,8 +30,9 @@ import { catalogoOggettiDisponibile, negoziPerFonte, oggettiPerFonte } from './c
 import { sessioniVideogioco } from './sessioniVideogioco.js';
 import { disponibilitaAttivita, sediAttivita, type SediAttivita } from './disponibilitaAttivita.js';
 import { fonteConfidenteAttivita } from './fonteConfidenteAttivitaService.js';
+import { leggiRegolaPesca } from './regolePescaService.js';
 
-interface RigaAttivita { confidente_chiave: string | null }
+interface RigaAttivita { confidente_chiave: string | null; pesca_regola_chiave?: string | null; pesca_ruolo?: 'visita'|'obiettivi'|null }
 
 type CatalogoLetture = Map<string, CatalogoOggettoDto>;
 /** I prezzi copiati dalla guida non sono offerte. Gli avanzamenti non dipendono da questi campi. */
@@ -90,6 +91,7 @@ const attivitaDto = (r: RigaAttivita, sedi: SediAttivita, st: StatoDisponibilita
   const { prezzo, ...identita } = datiCatalogoLettura(oggetto, r.costo);
   const fonteConfidente = fonteConfidenteAttivita({ ...r }, st);
   return {
+    pesca: r.pesca_regola_chiave && r.pesca_ruolo ? { regola: leggiRegolaPesca(r.pesca_regola_chiave), ruolo: r.pesca_ruolo } : null,
     confidenteChiave: r.confidente_chiave ?? null, fonteConfidente,
     chiave: r.chiave, nome: oggetto?.nome ?? r.nome, ...identita, tipo: r.tipo as AttivitaDto['tipo'], luogo: r.luogo, luogoChiave: r.luogo_chiave, fascia: r.fascia as AttivitaDto['fascia'], costo: prezzo, sblocco: r.sblocco, sessioni: r.sessioni,
     doti: fonteConfidente ? [] : JSON.parse(r.doti_json) as AttivitaDto['doti'], altriEffetti: r.altri_effetti, regole: r.regole, premi: r.premi, paga: r.paga,
@@ -201,6 +203,7 @@ export function impostaSessioneVideogioco(partitaId: number, chiave: string, dic
   if (!r) throw httpErrors.notFound('lettura-non-trovata', `Il videogioco '${chiave}' non esiste.`);
   const presente = !!prepared('SELECT 1 FROM sessione_videogioco_partita WHERE partita_id = ? AND videogioco_chiave = ?').get(partitaId, chiave);
   if (r.confidente_chiave && dichiarata && !presente) throw httpErrors.conflict('attivita-fonte-confidente', 'Questa attività rimanda al Confidente: registra l’incontro nella sua scheda.');
+  if(r.pesca_regola_chiave&&dichiarata&&!presente)throw httpErrors.conflict('attivita-fonte-pesca','Questa attività usa la sessione di pesca, senza una dichiarazione di videogioco.');
   const st = statoDisponibilitaPartita(partitaId);
   if (dichiarata && !presente && disponibilitaAttivita(r, st).disponibilita?.stato === 'bloccato') {
     throw httpErrors.conflict('lettura-non-disponibile', 'Il videogioco non è ancora disponibile nella partita.');
@@ -342,6 +345,7 @@ export function haAnimaDaCineasta(partitaId: number): boolean {
  * («piove») conta solo se la partita le soddisfa in quel momento. */
 function noteDelConseguimento(riga: RigaLibro | RigaFilm | RigaAttivita, successiva: boolean, st: StatoDisponibilita): Array<{ dote: string; note: 1 | 2 | 3 }> {
   if ('confidente_chiave' in riga && riga.confidente_chiave != null) return [];
+  if('pesca_regola_chiave'in riga&&riga.pesca_regola_chiave!=null)return [];
   const voci: VoceEffetto[] = leggiVociEffetto(riga.effetti_json);
   const nomi = nomiCondizioniMemo();
   return dotiDaEffetti(voci, { successiva })
@@ -410,6 +414,7 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
   const st = statoDisponibilitaPartita(partitaId);
   const precedente = avanzamentoLettura(partitaId, tipo, chiave).avanzamento;
   if (tipo === 'videogioco' && (riga as RigaAttivita).confidente_chiave && richiesto > precedente) throw httpErrors.conflict('attivita-fonte-confidente', 'Questa attività rimanda al Confidente: non si avanza per sessioni.');
+  if(tipo==='videogioco'&&(riga as RigaAttivita).pesca_regola_chiave&&richiesto>precedente)throw httpErrors.conflict('attivita-fonte-pesca','Questa attività usa il registro della pesca; nessun avanzamento generico viene aggiunto.');
   const disponibilita = tipo === 'videogioco' ? disponibilitaAttivita(riga as RigaAttivita, st) : conDisponibilita(riga.condizioni_json, st);
   if (richiesto > precedente && disponibilita.disponibilita?.stato === 'bloccato') {
     throw httpErrors.conflict('lettura-non-disponibile', `'${nomeCorrente}' non è ancora disponibile nella partita: la condizione di sblocco non è soddisfatta.`);
@@ -501,9 +506,13 @@ export function avanzamentoLettura(partitaId: number, tipo: TipoLettura, chiave:
 // contatore, il turno si conta da una parte sola.
 
 /** L'attività contata per volte (`tracciamento = 'svolta'`), o un errore che dice perché no. */
-function attivitaConTurni(chiave: string, soloRiduzione = false): RigaAttivita {
+function attivitaConTurni(chiave: string, soloRiduzione = false, pescaAutorizzata = false): RigaAttivita {
   const riga = prepared('SELECT * FROM attivita WHERE chiave = ?').get(chiave) as RigaAttivita | undefined;
   if (!riga) throw httpErrors.notFound('attivita-non-trovata', `L'attività '${chiave}' non esiste.`);
+  if(riga.pesca_regola_chiave){
+    if(soloRiduzione || pescaAutorizzata && riga.pesca_ruolo==='visita')return riga;
+    throw httpErrors.conflict('attivita-fonte-pesca','Questa attività usa il registro della pesca: registra la visita con il gesto dedicato, senza un secondo turno generico.');
+  }
   if (riga.confidente_chiave) {
     if (soloRiduzione) return riga;
     throw httpErrors.conflict('attivita-fonte-confidente', 'Questa attività rimanda al Confidente: registra l’incontro nella sua scheda, senza aggiungere un turno generico.');
@@ -536,8 +545,8 @@ export interface TurnoRegistrato {
  * stato della partita già calcolato da chi registra più turni di fila (P5'): il turno ne aggiorna il conto delle volte, l'unica
  * parte dello stato che un turno cambia, così ogni turno vede quel che vedrebbe ricalcolandolo.
  */
-export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ dote: string; note: 1 | 2 | 3 }>, st?: StatoDisponibilita): TurnoRegistrato {
-  const riga = attivitaConTurni(chiave);
+export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ dote: string; note: 1 | 2 | 3 }>, st?: StatoDisponibilita, interno?:{pescaAutorizzata:true}): TurnoRegistrato {
+  const riga = attivitaConTurni(chiave,false,interno?.pescaAutorizzata===true);
   const adesso = nowIso();
   return getDb().transaction(() => {
     const prima = volteSvolte(partitaId, chiave);
@@ -565,8 +574,8 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
 /** Toglie un turno con i punti che aveva dato: quello di `ordine` (la spunta che lo aveva registrato), solo se c'è
  *  ancora — il contatore può averlo già tolto, e `volte` non deve scendere due volte —, oppure l'ultimo (il contatore):
  *  l'ultimo registrato, o uno di quelli contati prima del registro, che non hanno punti da restituire. */
-export function togliTurno(partitaId: number, chiave: string, ordine?: number): void {
-  attivitaConTurni(chiave, true);
+export function togliTurno(partitaId: number, chiave: string, ordine?: number, interno?:{pescaAutorizzata:true}): void {
+  if(!interno?.pescaAutorizzata)attivitaConTurni(chiave, true);
   const adesso = nowIso();
   getDb().transaction(() => {
     const prima = volteSvolte(partitaId, chiave);
@@ -575,6 +584,9 @@ export function togliTurno(partitaId: number, chiave: string, ordine?: number): 
       : (prepared('SELECT MAX(ordine) AS m FROM turno_partita WHERE partita_id = ? AND attivita_chiave = ?').get(partitaId, chiave) as { m: number | null }).m;
     if (ordine !== undefined && bersaglio === null) return;
     if (bersaglio !== null) {
+      const collegata=prepared('SELECT s.* FROM utente.pesca_sessione s JOIN utente.turno_partita t ON t.uid=s.turno_uid WHERE t.partita_id=? AND t.attivita_chiave=? AND t.ordine=?').get(partitaId,chiave,bersaglio) as {id:string;origine_turno:string}|undefined;
+      if(collegata&&collegata.origine_turno==='creato'&&!interno?.pescaAutorizzata)throw httpErrors.conflict('pesca-turno-posseduto','Il turno è posseduto dal registro della pesca: rimuovi la fonte o la sessione con la relativa anteprima.');
+      if(collegata)prepared('UPDATE utente.pesca_sessione SET turno_revocato_il=? WHERE partita_id=? AND id=?').run(adesso,partitaId,collegata.id);
       // il turno esce dal registro; le Doti restano come sono (si segnano a mano)
       prepared("DELETE FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = 'attivita' AND chiave = ? AND ordine = ?").run(partitaId, chiave, bersaglio);
       prepared('DELETE FROM turno_partita WHERE partita_id = ? AND attivita_chiave = ? AND ordine = ?').run(partitaId, chiave, bersaglio);

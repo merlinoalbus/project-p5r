@@ -56,6 +56,9 @@ export interface RigaRiconciliazioneDto {
   /** I71: compatibilità tecnica con il gesto, distinta da identità canonica, disponibilità ed esito della136. */
   informazioneAcquisto?: { tipo: 'aojiru'; regola: string; compatibilitaTecnicaRegistrazione: boolean; motivi: string[] };
   statoAuditAcquisto?: 'assente' | 'illeggibile' | 'leggibile';
+  fontePesca?: {regola:import('./pesca.js').RegolaPescaDto;ruolo:'visita'|'obiettivi'}|null;
+  statoAuditPesca?: 'assente'|'illeggibile'|'leggibile';
+  informazionePesca?: {tipo:'ichigaya';compatibilitaTecnicaRegistrazione:boolean;motivi:string[]};
   decisione: (DecisioneCondizioni & { daRiconfermare: boolean; storico: DecisioneCondizioni[] }) | null;
   azioniConsentite: AzioneRiconciliazione[];
   improntaFonte: string;

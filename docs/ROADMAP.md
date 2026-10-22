@@ -2,7 +2,9 @@
 
 Legenda stato: ✅ fatto e validato · 🔄 in corso · ⏳ fatto, in attesa di validazione · ⬜ da fare.
 
-**21/10 20:12Z — avanzamento dei correttivi:** I71 rilasciato in814b17d8, pipeline81/schema136-28, e tre schede luogo collegate ai pin esistenti consegnate dopo il consenso specifico. Gate finali distinti limitati ai rispettivi perimetri osservati; L10 non è concluso. Rimozione recuperabile137 pronta al rilascio con gate statici e typecheck/lint/build verdi; il pin1636 autorizzato è ancora presente fino alla pubblicazione. Restano residui L5–L7, quindi L8–L11 nel mandato; nessuna chiusura globale. Stato operativo e dossier puntuali in `coordinamento/`.
+**21/10 21:12Z — A10 locale in implementazione:** fonte pesca, registro/Diario/Progressi/editor scritti; migrazioni138/029 approvate staticamente e registrate, non eseguite. Gate integrato, correzioni backend, controlli finali e rilascio ancora da completare. Ultima consegna389387be/pipeline82; nessuna chiusura anticipata di L5–L7 o di L8–L11.
+
+**21/10 20:26Z — avanzamento dei correttivi:**137 rilasciata in389387be, pipeline82 riuscita/schema137-28;1636 realmente rimosso e conservato integralmente nel Cestino, confronto conservativo e PASS finale Galaxy nel solo perimetro. I71 e tre schede luogo già consegnati nei rispettivi perimetri; L10 non è concluso. Restano19candidati della popolazione23 e gli altri residui L5–L7, quindi L8–L11 nel mandato; nessuna chiusura globale. Stato operativo e dossier puntuali in `coordinamento/`.
 
 **21/10 11:12Z — blocco pronto al rilascio:**123–126/027, pagina approvabileR6, GET97 e CAS approvati staticamente e registrati localmente; typecheck/lint/build verdi. Nessuna nuova migrazione locale o test. Helper raccordiL5 inattivo, consenso specifico non acquisito. Dopo il rilascio si leggono rendiconti e nodi correnti e si completano i residui; nessuna chiusura globale di L5–L7 o implementazione L8.
 

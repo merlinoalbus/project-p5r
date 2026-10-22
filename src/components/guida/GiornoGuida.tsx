@@ -14,7 +14,7 @@
 // diventano righe da spuntare, e «Copia in…» / «Sposta in…» le mandano in un altro giorno e fascia (`TrasferisciVoci`).
 // ============================================================
 
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { aggiornaVoceGiornata, eliminaVoceGiornata, impostaAzionePercorso, spostaVoceGiornata } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { avvisoSpunta } from '../../utils/percorso';
@@ -39,6 +39,7 @@ import { TrasferisciVoci } from './TrasferisciVoci';
 import { ApertureVisitaRegistrata, SceltaApertureVisita } from './ApertureVisita';
 import { PreparaAcquistiVoce } from './PreparaAcquistiVoce';
 import type { RichiestaRegistraAcquisto } from '../../../shared/acquisti';
+import type { RichiestaRegistraSessionePesca } from '../../../shared/pesca';
 import { descriviEffettoVoce } from '../../../shared/effettiVoce';
 import { eseguiSpuntaAcquistiConRegistro, gestoPendenteNelloScope, segnalaMutazioneEffetti, useGestiPartita } from '../../services/gestiPartita';
 
@@ -68,14 +69,19 @@ interface PropsAzione {
 }
 
 /** Una riga d'azione della giornata (della guida o aggiunta): spunta, immagine dell'entità, testo, tipo, collegamento, stato, note, gesti. */
-export function Azione({ a, partitaId, onCambiata, onSullaMappa, evidenziata, gesti, menuAperto = false, onMenu, bloccata }: PropsAzione) {
+export function Azione(props: PropsAzione) {
+  const { a, partitaId } = props;
+  const contesto = JSON.stringify([partitaId, a.uid, a.fatta, a.giorno, a.fascia, a.genere, a.azione, a.tipo, a.riferimento, a.rangoAtteso, a.effettiVoce?.revisione]);
+  return <AzioneNelContesto key={contesto} {...props} />;
+}
+function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata, gesti, menuAperto = false, onMenu, bloccata }: PropsAzione) {
   const [occupato, setOccupato] = useState(false);
   const [chiediAcquisti, setChiediAcquisti] = useState<{ noteRisposta?: 1 | 2 | 3; senzaPunti: boolean; aperture?: string[] } | null>(null);
   const vivo = useRef(true);
   const scrittura = useRef(false);
-  useEffect(() => { vivo.current = true; return () => { vivo.current = false; }; }, []);
+  useLayoutEffect(() => { vivo.current = true; return () => { vivo.current = false; }; }, []);
   useGestiPartita();
-  const pendente = partitaId !== null ? gestoPendenteNelloScope(partitaId, { voceUid: a.uid }) : null;
+  const pendente = partitaId !== null ? gestoPendenteNelloScope(partitaId, { voceUid: a.uid, ...(a.effettiVoce?.effetti.some(e => e.effetto.tipo === 'pesca') ? { pesca: true } : {}) }) : null;
   // Azione «tempo con un Confidente»: alla spunta l'app chiede quante note (1–3) si sono ottenute (scelta A, 2 preselezionato).
   const [chiediNote, setChiediNote] = useState(false);
   const [chiediAperture, setChiediAperture] = useState(false);
@@ -85,9 +91,9 @@ export function Azione({ a, partitaId, onCambiata, onSullaMappa, evidenziata, ge
    * di non dare punti), apre prima la scelta delle note e si ferma. Altrimenti salva, passa al genitore l'azione
    * aggiornata, invalida i suggerimenti, notifica gli effetti della spunta e controlla se il giorno è avanzato.
    */
-  const cambia = async (fatta: boolean, noteRisposta?: 1 | 2 | 3, senzaPunti = false, aperture?: string[], acquisti?: RichiestaRegistraAcquisto[]) => {
+  const cambia = async (fatta: boolean, noteRisposta?: 1 | 2 | 3, senzaPunti = false, aperture?: string[], acquisti?: RichiestaRegistraAcquisto[], pesche?: RichiestaRegistraSessionePesca[]) => {
     if (!partitaId || scrittura.current) return;
-    if (pendente) { if (acquisti) throw new Error('Questa voce ha già un’operazione da verificare nel registro.'); return; }
+    if (pendente) { if (acquisti || pesche) throw new Error('Questa voce ha già un’operazione da verificare nel registro.'); return; }
     if (fatta && chiedeNote(a) && noteRisposta === undefined && !senzaPunti) { setChiediNote(true); return; }
     if (fatta && !a.fatta && a.apertureDedali?.length && aperture === undefined) {
       setNoteVisita({ note: noteRisposta, senzaPunti });
@@ -95,14 +101,14 @@ export function Azione({ a, partitaId, onCambiata, onSullaMappa, evidenziata, ge
       setChiediAperture(true);
       return;
     }
-    if (fatta && !a.fatta && a.effettiVoce?.effetti.some((e) => e.effetto.tipo === 'acquisto') && acquisti === undefined) {
+    if (fatta && !a.fatta && a.effettiVoce?.effetti.some((e) => e.effetto.tipo === 'acquisto' || e.effetto.tipo === 'pesca') && acquisti === undefined && pesche === undefined) {
       setChiediNote(false); setChiediAperture(false); setChiediAcquisti({ noteRisposta, senzaPunti, aperture }); return;
     }
     setChiediNote(false);
     scrittura.current = true;
     setOccupato(true);
     try {
-      const agg = acquisti ? await eseguiSpuntaAcquistiConRegistro(partitaId, a.uid, { fatta: true, ...(noteRisposta ? { noteRisposta } : {}), ...(aperture ? { apertureDedali: aperture } : {}), acquisti }, { etichetta: `Spunta Diario: ${a.azione}`, voceUid: a.uid }) : await impostaAzionePercorso(partitaId, a.uid, fatta, noteRisposta, aperture);
+      const agg = acquisti || pesche ? await eseguiSpuntaAcquistiConRegistro(partitaId, a.uid, { fatta: true, ...(noteRisposta ? { noteRisposta } : {}), ...(aperture ? { apertureDedali: aperture } : {}), ...(acquisti?.length ? { acquisti } : {}), ...(pesche?.length ? { pesche } : {}) }, { etichetta: `Spunta Diario: ${a.azione}`, voceUid: a.uid }) : await impostaAzionePercorso(partitaId, a.uid, fatta, noteRisposta, aperture);
       segnalaMutazioneEffetti(partitaId);
       if (!vivo.current) return;
       setChiediAperture(false);
@@ -117,7 +123,7 @@ export function Azione({ a, partitaId, onCambiata, onSullaMappa, evidenziata, ge
       seGiornoAvanzato(agg);
     } catch (err) {
       if (vivo.current) notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
-      if (acquisti) throw err;
+      if (acquisti || pesche) throw err;
     } finally { scrittura.current = false; if (vivo.current) setOccupato(false); }
   };
   const stato = a.fatta ? null : a.stato;
@@ -135,9 +141,9 @@ export function Azione({ a, partitaId, onCambiata, onSullaMappa, evidenziata, ge
         <InfiltrazioniVoce a={a} partitaId={partitaId} onCambiata={onCambiata} />
         {a.effettiVoce?.stato === 'legacy-da-correggere' && <p role="alert" className="m-0 text-warning">Effetti da correggere: {a.effettiVoce.motivo}. Il dato originario resta visibile nell’editor.</p>}
         {pendente && <p role="status" className="m-0 text-warning">Operazione da verificare nel registro dei gesti: questa voce non viene rispuntata.</p>}
-        {a.effettiVoce?.effetti.filter((e) => e.effetto.tipo === 'acquisto').map((e) => <span key={e.uid}>{descriviEffettoVoce(e.effetto)}</span>)}
-        {!!a.ricevuteEffetti?.length && <details><summary className="touch">Ricevute degli effetti della spunta</summary><ul className="m-0 pl-4">{a.ricevuteEffetti.map((r) => <li key={r.id}>{r.tipo === 'acquisto' ? 'Consumazione' : r.tipo === 'contesto' ? 'Incontro e contesto della spunta' : r.tipo === 'dote' ? 'Dote' : r.tipo === 'lettura' ? 'Lettura o gioco' : 'Turno'} · {new Date(r.applicatoIl).toLocaleString('it-IT')} · {r.annullatoIl ? 'annullata' : 'attiva'}</li>)}</ul></details>}
-        {chiediAcquisti && partitaId !== null && <PreparaAcquistiVoce key={`${partitaId}:${a.uid}:${a.effettiVoce?.revisione}`} a={a} partitaId={partitaId} onRileggi={onCambiata} onChiudi={() => setChiediAcquisti(null)} onConferma={(richieste) => cambia(true, chiediAcquisti.noteRisposta, chiediAcquisti.senzaPunti, chiediAcquisti.aperture, richieste)} />}
+        {a.effettiVoce?.effetti.filter((e) => e.effetto.tipo === 'acquisto' || e.effetto.tipo === 'pesca').map((e) => <span key={e.uid}>{descriviEffettoVoce(e.effetto)}</span>)}
+        {!!a.ricevuteEffetti?.length && <details><summary className="touch">Ricevute degli effetti della spunta</summary><ul className="m-0 pl-4">{a.ricevuteEffetti.map((r) => <li key={r.id}>{r.tipo === 'acquisto' ? 'Consumazione' : r.tipo === 'pesca' ? 'Sessione di pesca' : r.tipo === 'contesto' ? 'Incontro e contesto della spunta' : r.tipo === 'dote' ? 'Dote' : r.tipo === 'lettura' ? 'Lettura o gioco' : 'Turno'} · {new Date(r.applicatoIl).toLocaleString('it-IT')} · {r.annullatoIl ? 'annullata' : 'attiva'}</li>)}</ul></details>}
+        {chiediAcquisti && partitaId !== null && <PreparaAcquistiVoce key={`${partitaId}:${a.uid}:${a.effettiVoce?.revisione}`} a={a} partitaId={partitaId} onRileggi={onCambiata} onChiudi={() => setChiediAcquisti(null)} onConferma={(richieste, pesche) => cambia(true, chiediAcquisti.noteRisposta, chiediAcquisti.senzaPunti, chiediAcquisti.aperture, richieste, pesche)} />}
         {chiediNote && <SceltaNote occupato={occupato} onScegli={(n) => void cambia(true, n ?? undefined, n === null)} onAnnulla={() => setChiediNote(false)} />}
         {chiediAperture && <SceltaApertureVisita a={a} occupato={occupato} onConferma={(c) => void cambia(true, noteVisita.note, noteVisita.senzaPunti, c)} onAnnulla={() => setChiediAperture(false)} />}
         {a.fatta && a.apertureDedali?.length && partitaId ? <ApertureVisitaRegistrata a={a} partitaId={partitaId} onCambiata={onCambiata} bloccata={bloccata || occupato} /> : null}

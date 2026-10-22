@@ -12,6 +12,9 @@ import { descriviOrari, descriviOrariDelLuogo, leggiOrari, orariDelLuogo } from 
 import { descriviRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { GRUPPI_FRASI_CONDIZIONI, REVISIONE_RICONCILIAZIONE, type GruppoFraseCondizioni } from '../../shared/riconciliazioneCondizioniManifest.js';
 import { ARTICOLO_AOJIRU, CATALOGO_AOJIRU, PREZZO_AOJIRU, eOffertaAojiru } from '../../shared/acquisti.js';
+import { ATTIVITA_PESCA, SFIDA_PESCA, REGOLA_PESCA } from '../../shared/pesca.js';
+import { leggiRegolaPesca, rigaRegolaPesca } from './regolePescaService.js';
+import { campiAutonomiAttivitaPesca } from '../../shared/attivitaPesca.js';
 import type { DecisioneCondizioni, DecisioneCondizioniInput, DipendenzaRiconciliazione, FormulaRiconciliazione, RigaRiconciliazioneDto,
   RiconciliazioneCondizioniDto, TabellaRiconciliazione } from '../../shared/riconciliazioneCondizioni.js';
 
@@ -157,6 +160,14 @@ function auditAojiru(righe: Riga[]): { stato: NonNullable<RigaRiconciliazioneDto
     esito: a.esito === 'rettificata' ? 'applicata' : a.esito === 'gia-corretta' ? 'gia-corretta' : 'esclusa',
     motivo: `Articolo e testo del catalogo: esito originale136 ${String(a.esito)}. ${String(a.motivo)}` }] };
 }
+function auditPesca(righe:Riga[]):{stato:NonNullable<RigaRiconciliazioneDto['statoAuditPesca']>;righe:RigaRiconciliazioneDto['auditMigrazioni']} {
+  if(!righe.length)return {stato:'assente',righe:[]};
+  const a=righe[0]!,campi=['id','versione','regola_chiave','esito','motivo','attivita_json','prima_json','dopo_json','copertura_json','creato_il'];
+  const att=decodifica(a.attivita_json),prima=decodifica(a.prima_json),dopo=decodifica(a.dopo_json),copertura=record(decodifica(a.copertura_json));
+  const esiti=['rettificata','gia-corretta','assente','esclusa'];
+  if(righe.length!==1||Object.keys(a).length!==campi.length||campi.some(c=>!(c in a))||a.id!==1||a.versione!==1||a.regola_chiave!==REGOLA_PESCA||!esiti.includes(String(a.esito))||typeof a.motivo!=='string'||typeof a.creato_il!=='string'||!Number.isFinite(Date.parse(a.creato_il))||!Array.isArray(att)||att.length!==2||att.some((x,i)=>{const r=record(x);return !r||Object.keys(r).length!==3||r.chiave!==[ATTIVITA_PESCA,SFIDA_PESCA][i]||!esiti.includes(String(r.esito))||typeof r.motivo!=='string';})||!Array.isArray(prima)||prima.length!==2||prima.some(r=>r!==null&&!record(r))||!Array.isArray(dopo)||dopo.length!==2||dopo.some(r=>r!==null&&!record(r))||!copertura||Object.keys(copertura).length!==4||typeof copertura.leggibile!=='boolean'||['registri','passi','pertinenti'].some(c=>!Number.isSafeInteger(copertura[c])||Number(copertura[c])<0))return {stato:'illeggibile',righe:[]};
+  return {stato:'leggibile',righe:att.map((x,i)=>{const r=record(x)!;return {migrazione:138,esito:r.esito==='rettificata'?'applicata':r.esito==='gia-corretta'?'gia-corretta':'esclusa',motivo:`${i===0?'Visita A02':'Obiettivi A10'}: esito originale138 ${String(r.esito)}. ${String(r.motivo)}`};})};
+}
 interface Registro { attuale: DecisioneCondizioni; storico: DecisioneCondizioni[] }
 function decisione(x: unknown): x is DecisioneCondizioni {
   const r = record(x);
@@ -198,6 +209,8 @@ function fotografia(): { dto: RiconciliazioneCondizioniDto; proposte: Map<string
   const dati = leggiTabella('dati_guida');
   const tabellaAuditAojiruPresente = !!db.prepare("SELECT 1 FROM main.sqlite_master WHERE type='table' AND name='audit_aojiru_136'").get();
   const righeAuditAojiru = tabellaAuditAojiruPresente ? db.prepare('SELECT * FROM main.audit_aojiru_136 ORDER BY id').all() as Riga[] : [];
+  const tabellaAuditPescaPresente=!!db.prepare("SELECT 1 FROM main.sqlite_master WHERE type='table' AND name='audit_pesca_138'").get();
+  const righeAuditPesca=tabellaAuditPescaPresente?db.prepare('SELECT * FROM main.audit_pesca_138 ORDER BY id').all() as Riga[]:[];
   const aud = [123, 124].map((n) => ({ n, valore: record(decodifica(dati.get(n === 123 ? 'bonifica-condizioni-letture-123' : 'bonifica-condizioni-attivita-124')?.json)) }));
   // PK composte: array ordinati dedicati, senza la mappa chiave/id di leggiTabella.
   const fontiConfidenti = new Map<string, { raw: Riga; requisiti: Riga[]; guida: Riga[] }>();
@@ -235,6 +248,13 @@ function fotografia(): { dto: RiconciliazioneCondizioniDto; proposte: Map<string
     const r = leggiTabella(tabella).get(chiave);
     const a12 = g?.id === 'A12' && tabella === 'attivita' && chiave === ATTIVITA_TAKEMI;
     const i71 = g?.id === 'I71' && tabella === 'articolo' && chiave === ARTICOLO_AOJIRU;
+    const a10=g?.id==='A10'&&tabella==='attivita'&&chiave===SFIDA_PESCA;
+    const fontePesca=a10&&r?.pesca_regola_chiave===REGOLA_PESCA&&r.pesca_ruolo==='obiettivi'?{regola:leggiRegolaPesca(),ruolo:'obiettivi' as const}:null;
+    const motiviPesca=a10?campiAutonomiAttivitaPesca(r??{}):[];
+    if(a10&&!fontePesca)motiviPesca.push('L’attività non rimanda al profilo canonico degli obiettivi.');
+    if(a10&&fontePesca?.regola.stato!=='collegata')motiviPesca.push('La regola della guida non è leggibile o presente.');
+    const informazionePesca=a10?{tipo:'ichigaya' as const,compatibilitaTecnicaRegistrazione:!!fontePesca&&fontePesca.regola.stato==='collegata'&&!motiviPesca.length,motivi:motiviPesca}:undefined;
+    const auditFontePesca=a10?auditPesca(righeAuditPesca):null;
     const auditAcquisto = i71 ? auditAojiru(righeAuditAojiru) : null;
     const motiviAcquisto: string[] = [];
     if (i71) {
@@ -253,6 +273,7 @@ function fotografia(): { dto: RiconciliazioneCondizioniDto; proposte: Map<string
     const auditConfidente = a12 ? auditTakemi(dati.get(AUDIT_TAKEMI)) : null;
     const campo = tabella === 'negozio' ? 'sblocco_json' : 'condizioni_json';
     const dipendenze = new Map<string, unknown>();
+    if(a10){dipendenze.set('pesca:regola',rigaRegolaPesca());dipendenze.set('pesca:audit138',{presente:tabellaAuditPescaPresente,righe:righeAuditPesca});dipendenze.set('pesca:visita',leggiTabella('attivita').get(ATTIVITA_PESCA)??null);}
     const fontiEreditate: DipendenzaRiconciliazione[] = [];
     const viste = new Set<string>();
     const mostrate = new Set<string>();
@@ -366,6 +387,7 @@ function fotografia(): { dto: RiconciliazioneCondizioniDto; proposte: Map<string
     const auditMigrazioni: RigaRiconciliazioneDto['auditMigrazioni'] = [];
     if (auditConfidente) auditMigrazioni.push(...auditConfidente.righe);
     if (auditAcquisto) auditMigrazioni.push(...auditAcquisto.righe);
+    if(auditFontePesca)auditMigrazioni.push(...auditFontePesca.righe);
     const origineAudit = `${tabella}:${chiave}`;
     for (const a of aud) {
       const arr = (campoAudit: string) => Array.isArray(a.valore?.[campoAudit]) ? a.valore[campoAudit] as unknown[] : [];
@@ -401,6 +423,7 @@ function fotografia(): { dto: RiconciliazioneCondizioniDto; proposte: Map<string
       formulaProposta: p ? formula(p.dopo) : null, esitoFonte, esitoFormula, auditMigrazioni,
       ...(a12 ? { fonteConfidente, statoAuditConfidente: auditConfidente!.stato } : {}),
       ...(i71 ? { informazioneAcquisto, statoAuditAcquisto: auditAcquisto!.stato } : {}),
+      ...(a10?{fontePesca,informazionePesca,statoAuditPesca:auditFontePesca!.stato}:{}),
       decisione: precedente ? { ...precedente, daRiconfermare: precedente.improntaFonte !== improntaFonte, storico: reg!.storico } : null,
       azioniConsentite: azioni, improntaFonte, revisioneAttesa: impronta({ improntaFonte, registro: reg }) });
   }

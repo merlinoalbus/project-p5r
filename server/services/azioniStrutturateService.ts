@@ -117,9 +117,10 @@ export function verificaEffetti(grezzi: unknown[]): EffettoAzione[] {
           : prepared("SELECT 1 FROM attivita WHERE chiave = ? AND tipo = 'videogioco' AND nascosto = 0").get(e.chiave);
       if (!esiste) throw httpErrors.badRequest('effetto-inesistente', `La lettura «${e.chiave}» non esiste nella guida.`);
     } else if (e.tipo === 'turno') {
-      const a = prepared('SELECT tipo, tracciamento, confidente_chiave FROM attivita WHERE chiave = ? AND nascosto = 0').get(e.attivita) as { tipo: string; tracciamento: string; confidente_chiave: string | null } | undefined;
+      const a = prepared('SELECT tipo, tracciamento, confidente_chiave,pesca_regola_chiave FROM attivita WHERE chiave = ? AND nascosto = 0').get(e.attivita) as { tipo: string; tracciamento: string; confidente_chiave: string | null;pesca_regola_chiave:string|null } | undefined;
       if (!a) throw httpErrors.badRequest('effetto-inesistente', `L'attività «${e.attivita}» non esiste nella guida.`);
       if (a.confidente_chiave) throw httpErrors.conflict('attivita-fonte-confidente', 'L’attività collegata a un Confidente non genera un turno autonomo.');
+      if(a.pesca_regola_chiave)throw httpErrors.conflict('attivita-fonte-pesca','L’attività collegata alla pesca richiede il suo effetto canonico, senza un secondo turno generico.');
       if ((eTracciamentoAttivita(a.tracciamento) ? a.tracciamento : tracciamentoPerTipo(a.tipo)) !== 'svolta') {
         throw httpErrors.badRequest('effetto-non-valido', `L'attività «${e.attivita}» non si conta per volte: non ha turni.`);
       }

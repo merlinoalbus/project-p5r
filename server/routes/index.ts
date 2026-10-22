@@ -22,6 +22,8 @@ import catalogoOggettiRouter from './catalogoOggetti.js';
 import condizioniRouter from './condizioni.js';
 import areeRouter from './aree.js';
 import luoghiRouter from './luoghi.js';
+import regolePescaRouter from './regolePesca.js';
+import pescaRouter from './pesca.js';
 
 /** I router di area con il loro prefisso, nell'ordine di montaggio. */
 export const ROUTER_DI_AREA: ReadonlyArray<readonly [string, Router]> = [
@@ -38,4 +40,6 @@ export const ROUTER_DI_AREA: ReadonlyArray<readonly [string, Router]> = [
   ['/api/condizioni', condizioniRouter],
   ['/api/aree', areeRouter],
   ['/api/luoghi', luoghiRouter],
+  ['/api/pesca', regolePescaRouter],
+  ['/api/partite/:id/pesca', pescaRouter],
 ];

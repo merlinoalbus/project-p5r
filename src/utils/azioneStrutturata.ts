@@ -5,6 +5,8 @@
 import type { EffettoAzione, TipoAzione, TipoRiferimentoAzione } from '../../shared/effettiAzione';
 import type { AzionePercorsoDto } from '../types';
 import type { EffettoVoce, RichiestaSalvaEffettiVoce, StatoEffettiVoceDto } from '../../shared/effettiVoce';
+import { normalizzaEffettoVoce } from '../../shared/effettiVoce';
+import { eAttivitaPesca } from '../../shared/pesca';
 
 /** I campi strutturati di un'azione; il collegamento può essere a metà (tipo scelto, elemento no) finché si modifica. */
 export interface CampiStrutturati {
@@ -33,5 +35,14 @@ export function chiedeNote(a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento'>): 
 export function campiCompleti(c: CampiStrutturati): boolean {
   if (c.riferimento && !c.riferimento.chiave) return false;
   const completi = (e: EffettoVoce) => e.tipo === 'lettura' ? !!e.chiave : e.tipo === 'turno' ? !!e.attivita && (e.doti === undefined || e.doti.length > 0) : e.tipo === 'acquisto' ? !!e.articolo : true;
-  return c.effettiVoce ? c.effettiVoce.every((e) => completi(e.effetto)) : c.fonteEffetti ? true : c.produce.every(completi);
+  if (!c.effettiVoce) return c.fonteEffetti ? true : c.produce.every(completi);
+  const sostituiti = new Set(c.effettiVoce.flatMap(r => r.effetto.tipo === 'acquisto' ? r.effetto.sostituisceDoti : []));
+  return c.effettiVoce.every(({ effetto }) => {
+    if (!completi(effetto)) return false;
+    if (effetto.tipo !== 'pesca') return true;
+    if (!normalizzaEffettoVoce(effetto)) return false;
+    return effetto.sostituisceTurni.every(id => c.effettiVoce!.some(r => r.uid === id && r.effetto.tipo === 'turno' && eAttivitaPesca(r.effetto.attivita)))
+      && effetto.sostituisceDoti.every(id => c.effettiVoce!.some(r => r.uid === id && r.effetto.tipo === 'dote' && r.effetto.dote === 'perizia'))
+      && [...effetto.sostituisceTurni, ...effetto.sostituisceDoti].every(id => { if (sostituiti.has(id)) return false; sostituiti.add(id); return true; });
+  });
 }

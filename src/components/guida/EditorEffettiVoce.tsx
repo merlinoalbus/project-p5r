@@ -6,9 +6,28 @@ import type { ElenchiAzioneDto } from '../../types';
 import type { CampiStrutturati } from '../../utils/azioneStrutturata';
 import { Selettore } from '../shared/Selettore';
 import { RigaEffettoVoceLegacy } from './RigaEffettoVoceLegacy';
+import { ATTIVITA_PESCA, REGOLA_PESCA, eAttivitaPesca, type EffettoPescaVoce } from '../../../shared/pesca';
 
 type Acquisto = Extract<EffettoVoce, { tipo: 'acquisto' }>;
 type Righe = RichiestaSalvaEffettiVoce['effetti'];
+
+/** I riferimenti indicano effetti esistenti per UID, mai righe ricostruite dal loro nome. */
+export function EditorEffettoPescaVoce({ effetto, righe, onCambia }: { effetto: EffettoPescaVoce; righe: Righe; onCambia: (e: EffettoPescaVoce) => void }) {
+  const turni = righe.filter(r => r.uid !== null && r.effetto.tipo === 'turno' && eAttivitaPesca(r.effetto.attivita));
+  const doti = righe.filter(r => r.uid !== null && r.effetto.tipo === 'dote' && r.effetto.dote === 'perizia');
+  const gruppo = (tipo: 'sostituisceTurni' | 'sostituisceDoti', candidati: Righe, titolo: string) => <fieldset className="m-0 flex min-w-0 flex-col gap-1 border border-border p-2"><legend>{titolo}</legend>
+    {!candidati.length && !effetto[tipo].length && <p className="m-0 text-[12px]">Nessun effetto esistente da raccordare.</p>}
+    {candidati.map(r => <label key={r.uid} className="touch flex min-w-0 items-start gap-2"><input className="h-5 w-5 shrink-0" type="checkbox" checked={effetto[tipo].includes(r.uid!)} onChange={e => onCambia({ ...effetto, [tipo]: e.target.checked ? [...effetto[tipo], r.uid!] : effetto[tipo].filter(id => id !== r.uid) })} /><span className="min-w-0 break-words">{r.effetto.tipo === 'turno' ? 'Turno di pesca già presente' : r.effetto.tipo === 'dote' ? `Perizia · ${r.effetto.note} ${r.effetto.note === 1 ? 'nota' : 'note'}` : ''}<code className="block break-all text-[11px]">{r.uid}</code></span></label>)}
+    {effetto[tipo].filter(id => !candidati.some(r => r.uid === id)).map(id => <div key={id} className="flex min-w-0 flex-wrap items-center gap-2 text-warning"><span className="min-w-0 break-all">Riferimento conservato non più compatibile: {id}</span><button type="button" className="btn btn-ghost touch" onClick={() => onCambia({ ...effetto, [tipo]: effetto[tipo].filter(x => x !== id) })}>Togli questo collegamento</button></div>)}
+  </fieldset>;
+  return <div className="flex min-w-0 flex-col gap-2">
+    <Selettore etichetta="Regola di pesca" valore={effetto.regola} opzioni={[{ chiave: REGOLA_PESCA, nome: 'Ichigaya · Persona 5 Royal' }]} onCambia={v => { if (v === REGOLA_PESCA) onCambia({ ...effetto, regola: v }); }} />
+    <Selettore etichetta="Attività della visita" valore={effetto.attivita} opzioni={[{ chiave: ATTIVITA_PESCA, nome: 'Pesca al laghetto di Ichigaya' }]} onCambia={v => { if (v === ATTIVITA_PESCA) onCambia({ ...effetto, attivita: v }); }} />
+    {gruppo('sostituisceTurni', turni, 'Turni già presenti della stessa visita')}
+    {gruppo('sostituisceDoti', doti, 'Premi Perizia già presenti della stessa visita')}
+    <p className="m-0 text-[12px] text-text-secondary">Collega soltanto effetti della medesima visita. La sessione osservata evita un secondo turno o premio; catture, riscossione e beneficio finale si dichiarano nella partita. Gli effetti nuovi acquisiscono l’UID al salvataggio: salvali prima di usarli come riferimenti.</p>
+  </div>;
+}
 
 /** Configura il legame della guida; il consumo reale viene dichiarato separatamente nella partita. */
 export function CampiAcquistoEffetto({ effetto, righe, onCambia }: { effetto: Acquisto; righe: Righe; onCambia: (e: Acquisto) => void }) {
@@ -34,7 +53,7 @@ export function EditorEffettiVoce({ valore, elenchi, onCambia }: { valore: Campi
   const cambia = (i: number, effetto: EffettoVoce) => imposta((righe ?? []).map((r, j) => j === i ? { ...r, effetto } : r));
   const togli = (i: number) => {
     const uid = righe?.[i]?.uid;
-    if (uid && righe?.some((r) => r.effetto.tipo === 'acquisto' && r.effetto.sostituisceDoti.includes(uid))) { setErrore('Questa Dote è indicata come sostituita da un acquisto. Rivedi prima quel collegamento.'); return; }
+    if (uid && righe?.some((r) => (r.effetto.tipo === 'acquisto' && r.effetto.sostituisceDoti.includes(uid)) || (r.effetto.tipo === 'pesca' && [...r.effetto.sostituisceTurni, ...r.effetto.sostituisceDoti].includes(uid)))) { setErrore('Questo effetto è indicato come sostituito da un acquisto o da una sessione di pesca. Rivedi prima quel collegamento.'); return; }
     imposta((righe ?? []).filter((_, j) => i !== j));
   };
   const sposta = (i: number, verso: -1 | 1) => {
@@ -50,13 +69,13 @@ export function EditorEffettiVoce({ valore, elenchi, onCambia }: { valore: Campi
   return <div className="flex min-w-0 flex-col gap-2 text-[13px]">
     <strong>Effetti della voce</strong>
     {!righe.length && <p className="m-0">Nessun effetto configurato.</p>}
-    <ul className="m-0 flex list-none flex-col gap-2 p-0">{righe.map((r, i) => r.effetto.tipo === 'acquisto' ? <li key={r.uid ?? `nuovo-${i}`} className="flex flex-col gap-2 rounded border border-border p-2">
-      <div className="flex flex-wrap items-center gap-2"><strong>Effetto {i + 1}: acquisto</strong><button type="button" className="btn btn-ghost touch" onClick={() => togli(i)}>Togli</button><button type="button" className="btn btn-ghost touch" disabled={i === 0} onClick={() => sposta(i, -1)}>Su</button><button type="button" className="btn btn-ghost touch" disabled={i === righe.length - 1} onClick={() => sposta(i, 1)}>Giù</button></div>
-      <CampiAcquistoEffetto effetto={r.effetto} righe={righe} onCambia={(e) => cambia(i, e)} />
+    <ul className="m-0 flex list-none flex-col gap-2 p-0">{righe.map((r, i) => r.effetto.tipo === 'acquisto' || r.effetto.tipo === 'pesca' ? <li key={r.uid ?? `nuovo-${i}`} className="flex flex-col gap-2 rounded border border-border p-2">
+      <div className="flex flex-wrap items-center gap-2"><strong>Effetto {i + 1}: {r.effetto.tipo === 'pesca' ? 'sessione di pesca' : 'acquisto'}</strong><button type="button" className="btn btn-ghost touch" onClick={() => togli(i)}>Togli</button><button type="button" className="btn btn-ghost touch" disabled={i === 0} onClick={() => sposta(i, -1)}>Su</button><button type="button" className="btn btn-ghost touch" disabled={i === righe.length - 1} onClick={() => sposta(i, 1)}>Giù</button></div>
+      {r.effetto.tipo === 'pesca' ? <EditorEffettoPescaVoce effetto={r.effetto} righe={righe} onCambia={e => cambia(i, e)} /> : <CampiAcquistoEffetto effetto={r.effetto} righe={righe} onCambia={(e) => cambia(i, e)} />}
     </li> : <RigaEffettoVoceLegacy key={r.uid ?? `nuovo-${i}`} effetto={r.effetto} numero={i + 1} elenchi={elenchi} onCambia={(e) => cambia(i, e)} onTogli={() => togli(i)} onSposta={(verso) => sposta(i, verso)} primo={i === 0} ultimo={i === righe.length - 1} />)}</ul>
-    {righe.length < 100 && <div className="flex flex-wrap items-end gap-2"><Selettore etichetta="Effetto da aggiungere" valore={tipoNuovo} opzioni={[{ chiave: 'dote', nome: 'Dote' }, { chiave: 'lettura', nome: 'Lettura o gioco' }, { chiave: 'turno', nome: 'Turno di attività' }, { chiave: 'acquisto', nome: 'Acquisto Aojiru' }]} onCambia={(t) => setTipoNuovo(t as EffettoVoce['tipo'])} />
+    {righe.length < 100 && <div className="flex flex-wrap items-end gap-2"><Selettore etichetta="Effetto da aggiungere" valore={tipoNuovo} opzioni={[{ chiave: 'dote', nome: 'Dote' }, { chiave: 'lettura', nome: 'Lettura o gioco' }, { chiave: 'turno', nome: 'Turno di attività' }, { chiave: 'acquisto', nome: 'Acquisto Aojiru' }, { chiave: 'pesca', nome: 'Sessione di pesca osservata' }]} onCambia={(t) => setTipoNuovo(t as EffettoVoce['tipo'])} />
       <button type="button" className="btn btn-secondary touch" onClick={() => {
-        const effetto: EffettoVoce = tipoNuovo === 'acquisto' ? { tipo: 'acquisto', articolo: ARTICOLO_AOJIRU, variante: null, fortuna: null, sostituisceDoti: [] } : tipoNuovo === 'lettura' ? { tipo: 'lettura', categoria: 'libro', chiave: '', almeno: null } : tipoNuovo === 'turno' ? { tipo: 'turno', attivita: '' } : { tipo: 'dote', dote: 'fascino', note: 2 };
+        const effetto: EffettoVoce = tipoNuovo === 'pesca' ? { tipo: 'pesca', regola: REGOLA_PESCA, attivita: ATTIVITA_PESCA, sostituisceTurni: [], sostituisceDoti: [] } : tipoNuovo === 'acquisto' ? { tipo: 'acquisto', articolo: ARTICOLO_AOJIRU, variante: null, fortuna: null, sostituisceDoti: [] } : tipoNuovo === 'lettura' ? { tipo: 'lettura', categoria: 'libro', chiave: '', almeno: null } : tipoNuovo === 'turno' ? { tipo: 'turno', attivita: '' } : { tipo: 'dote', dote: 'fascino', note: 2 };
         imposta([...righe, { uid: null, effetto }]);
       }}>Aggiungi l’effetto scelto</button>
     </div>}

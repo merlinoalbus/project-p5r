@@ -37,6 +37,7 @@ import { haDoteAttivita } from '../../shared/attivitaConfidente';
 import { FonteConfidenteAttivita } from '../components/confidenti/FonteConfidenteAttivita';
 import { PulsanteGuidaQuiz } from '../components/guida/GuidaQuiz';
 import { eGiornoDelQuiz } from '../../shared/quizAttivita';
+import { FontePescaAttivita } from '../components/pesca/FontePescaAttivita';
 
 const SCHEDE = [['attivita', 'Attività'], ['lavori', 'Lavori']] as const;
 type Scheda = (typeof SCHEDE)[number][0];
@@ -74,6 +75,7 @@ function Attivita({ a, onCambiata, mappaAperta, onMappa }: { a: AttivitaDto; onC
         {a.fascia && <span className="chip">{NOME_FASCIA_ATTIVITA[a.fascia] ?? a.fascia}</span>}
         <Effetti testi={a.effettiTesto} />
         {a.confidenteChiave && <span className="chip">Confidente: {a.fonteConfidente?.nome ?? a.confidenteChiave}</span>}
+        {a.pesca && <span className="chip">{a.pesca.ruolo === 'visita' ? 'Registro delle visite di pesca' : 'Obiettivi della visita di pesca'}</span>}
         <ChipDisponibilita disponibilita={a.disponibilita ?? undefined} compatto />
         {!a.verificato && <span className="chip text-[11px]" title="Dato da fonte secondaria">da fonte secondaria</span>}
       </button>
@@ -82,15 +84,20 @@ function Attivita({ a, onCambiata, mappaAperta, onMappa }: { a: AttivitaDto; onC
         {(a.sedeChiave || a.luogoChiave || a.luogo) && <span><strong className="text-text">Dove:</strong> {a.sedeChiave && a.luogoChiave ? <Link to={urlLuogo(a.sedeChiave)}>{a.sedeNome ?? a.sedeChiave}</Link> : a.luogoChiave ? <Link to={`/guida/citta/${a.luogoChiave}`}>{a.luogo || a.luogoChiave}</Link> : a.luogo}</span>}
         {a.orariSedeTesto && <span><strong className="text-text">Orari della sede:</strong> {a.orariSedeTesto}</span>}
         <CollegamentoMappa tipo="attivita" chiave={a.chiave} compatto />
-        {a.costo !== null && a.costo > 0 && <span><strong className="text-text">Costo:</strong> {formattaYen(a.costo)}</span>}
+        {!a.pesca && a.costo !== null && a.costo > 0 && <span><strong className="text-text">Costo:</strong> {formattaYen(a.costo)}</span>}
+        {a.pesca?.regola.dati && <span><strong className="text-text">Quota della visita:</strong> giorno {formattaYen(a.pesca.regola.dati.quote.giorno)}, sera {formattaYen(a.pesca.regola.dati.quote.sera)}</span>}
         {paga && <span><strong className="text-text">Paga:</strong> {paga}</span>}
         {a.quiz && <PulsanteGuidaQuiz voce={{ attivita: a.chiave, nome: a.nome, quiz: a.quiz, oggi: giorno !== null && eGiornoDelQuiz(a.quiz, giorno) }} />}
       </div>
       {aperta && (
         <div className="flex flex-col gap-1">
-          {a.dettagli && <p className="m-0 whitespace-pre-line">{a.dettagli}</p>}
+          {a.dettagli && <div className="flex min-w-0 flex-col gap-1">
+            {a.pesca && <strong className="text-xs text-text-secondary">Nota salvata nell’attività; la regola corrente è nella fonte comune qui sotto.</strong>}
+            <p className="m-0 whitespace-pre-line">{a.dettagli}</p>
+          </div>}
           {a.fonteConfidente && <FonteConfidenteAttivita fonte={a.fonteConfidente} />}
-          {!a.confidenteChiave && a.effettiTesto.length === 0 && <p className="m-0 text-text-muted">Nessun effetto dichiarato.</p>}
+          {a.pesca && <FontePescaAttivita fonte={a.pesca} onCambiata={onCambiata} />}
+          {!a.confidenteChiave && !a.pesca && a.effettiTesto.length === 0 && <p className="m-0 text-text-muted">Nessun effetto dichiarato.</p>}
           {/* La mappa si apre una per volta in tutta la pagina. */}
           {mappaAperta
             ? <div className="flex flex-col gap-1">

@@ -1,7 +1,7 @@
 import type { AnalisiRiconciliazione, FonteRiconciliazione, TabellaRiconciliazione } from './riconciliazioneCondizioni.js';
 
 /** Trascrizione esplicita del censimento pubblico: mai parsing di Markdown o formule ricavate dalla prosa. */
-export const REVISIONE_RICONCILIAZIONE = '2026-10-21.4';
+export const REVISIONE_RICONCILIAZIONE = '2026-10-21.5';
 export interface GruppoFraseCondizioni {
   id: string;
   classeStorica: 'M' | 'E' | 'R';
@@ -25,6 +25,8 @@ const takemi = { titolo: 'AGS Royal — Tae Takemi, requisiti e passaggi di rang
 const takemiRoyal = { titolo: 'GameFAQs Royal — Death, beneficio del passaggio8', url: 'https://gamefaqs.gamespot.com/ps4/260936-persona-5-royal/faqs/78212/death' };
 const aojiruRoyal = { titolo: 'Megaten Database Royal — Aojiru e punti delle note', url: 'https://aqiu384.github.io/megaten-database/p5r/overworld.html' };
 const aojiruRotazione = { titolo: 'GameFAQs Royal — Aojiru Rotation', url: 'https://gamefaqs.gamespot.com/ps4/260936-persona-5-royal/faqs/78212/how-to-use' };
+const pescaRoyal={titolo:'Omoteura Royal — Pesca a Ichigaya',url:'https://omoteura.com/persona5/the-royal/spot-ichigaya.html'};
+const pescaWiki={titolo:'Wiki Royal — Pesca e specie speciali',url:'https://wikiwiki.jp/persona5r/%E9%87%A3%E3%82%8A'};
 const g = (codice: string, chiavi: string, fraseStorica: string, propostaTesto: string, analisi: AnalisiRiconciliazione = 'ricerca'): GruppoFraseCondizioni => {
   const [id, classe] = codice.split(' ');
   const tabella: TabellaRiconciliazione = id[0] === 'L' ? 'luogo' : id[0] === 'N' ? 'negozio' : id[0] === 'A' ? 'attivita' : 'articolo';
@@ -32,7 +34,7 @@ const g = (codice: string, chiavi: string, fraseStorica: string, propostaTesto: 
     campoFrase: tabella === 'articolo' ? 'condizione' : 'sblocco', fraseStorica, propostaTesto, analisi,
     notaDaConservare: 'Conservare integralmente la frase nella sua provenienza. La nota storica non sostituisce i requisiti strutturati.',
     fonti: [specifica, matrice, ...(['I38', 'I41', 'I73'].includes(id) ? [libri] : ['A04', 'A06', 'A11', 'I43'].includes(id) ? [giochi]
-      : id === 'N14' ? [niijima, negozi] : id === 'L26' ? [qimranut] : id === 'A12' ? [takemi, takemiRoyal] : id === 'I71' ? [aojiruRoyal, aojiruRotazione] : [])] };
+      : id === 'N14' ? [niijima, negozi] : id === 'L26' ? [qimranut] : id === 'A12' ? [takemi, takemiRoyal] : id === 'I71' ? [aojiruRoyal, aojiruRotazione] : id==='A10'?[pescaRoyal,pescaWiki]:[])] };
 };
 
 export const GRUPPI_FRASI_CONDIZIONI: readonly GruppoFraseCondizioni[] = [
@@ -102,7 +104,7 @@ export const GRUPPI_FRASI_CONDIZIONI: readonly GruppoFraseCondizioni[] = [
   g('A07 E', 'tempio-vecchio-kichijoji', 'Dal 6 giugno', 'Dal 6 giugno, distinto dal quartiere aperto il 5.', 'condizioni'),
   g('A08 R', 'studio-biblioteca-scuola', 'Disponibile fino al 20 maggio secondo allgamestaff.it (poi sostituito da altre attivita in biblioteca)', 'Conservare inizio 9 aprile, eliminare solo fine 20 maggio dalla forma attestata; cambia il bonus, non la disponibilità.', 'condizioni'),
   g('A09 E', 'lavoro-rafflesia', 'Fascino Rango 2', 'Fascino almeno 2.', 'condizioni'),
-  g('A10 R', 'sfida-pesca-guardiano-ichigaya', 'Guardiano: Perizia Rango 4; Boss: dopo cattura del Guardiano, Perizia Rango 5', 'Ricerca aperta sulle condizioni di incontro e cattura e sulle soglie. Nessuna nuova attività o evento è proposto come già approvato.'),
+  g('A10 R', 'sfida-pesca-guardiano-ichigaya', 'Guardiano: Perizia Rango 4; Boss: dopo cattura del Guardiano, Perizia Rango 5', 'Fonte unica modificabile della pesca: comparsa, via sufficiente di cattura e cattura osservata restano distinte. I profili dipendono dal contesto temporale, dalle risorse osservate e dal tentativo residuo; i casi non documentati restano da verificare. Beneficio finale e costo dell’esca in punti pesca sono separati dalla cattura. Audit138 A02 e A10 distinto dalla compatibilità tecnica corrente; nessuna Conferma o Applica aggiunta.'),
   g('A11 R', 'videogioco-star-forneus', 'Incluso nel Set per retrogaming (Negozio usati Yumenoshima, Yongen-Jaya, dal 5 giugno)', 'Sistema installato, titolo incluso senza secondo acquisto; bonifica 124.', 'condizioni'),
   g('A12 R', 'esperimenti-clinici-takemi', "Legato al Confidente dell'Eremita (Takemi)", 'Fonte unica Tae Takemi (Morte): requisiti del primo incontro dal 18 aprile e passaggi successivi nella scheda del Confidente, distinti dalla farmacia dal 16 aprile. Nessuna condizione o Dote generica nell’attività. La conferma riguarda il raccordo corrente, non garantisce il calendario o il beneficio del rango8; i due esiti storici135 sono separati.', 'eredita'),
   g('A13 R', 'sala-giochi-gun-about-akihabara', "Legato al Confidente della Torre (Shinya Oda); avviabile dal 4 settembre tramite la richiesta Mementos 'I baro non vincono mai'", 'Shinya 1 e dal 4 settembre, senza richiedere vittoria già ottenuta nella Richiesta.', 'condizioni'),

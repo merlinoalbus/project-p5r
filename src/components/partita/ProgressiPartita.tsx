@@ -25,6 +25,8 @@ import { avvisaDotiDaSegnare } from '../../utils/dotiDaSegnare';
 import { dataGiocoTesto } from '../../utils/dateGioco';
 import { DaApplicare } from './DaApplicare';
 import { RegistroAcquistiPartita } from './RegistroAcquistiPartita';
+import { RegistroPesca } from '../pesca/RegistroPesca';
+import { ATTIVITA_PESCA, EVENTI_PESCA, SFIDA_PESCA } from '../../../shared/pesca';
 
 /** Il testo di un errore: il messaggio se è un `Error`, altrimenti il valore convertito in stringa. */
 function messaggio(err: unknown): string { return err instanceof Error ? err.message : String(err); }
@@ -40,7 +42,10 @@ function Pallino({ stato }: { stato: boolean | null }) {
  * grado cliente e i contatori; da segnare gli eventi di storia (casella), le volte di ogni attività
  * e i punti dei negozi a passi di dieci (−/+). Ogni risposta del server sostituisce tutti i
  * progressi mostrati. */
-export function ProgressiPartita({ partitaId }: { partitaId: number }) {
+export function ProgressiPartita(props: { partitaId: number }) {
+  return <ProgressiPartitaNelContesto key={props.partitaId} {...props} />;
+}
+function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
   const dati = useCarica(() => getProgressiPartita(partitaId), [partitaId]);
   const [occupato, setOccupato] = useState<string | null>(null);
   const [stato, setStato] = useState<Progressi | null>(null);
@@ -58,7 +63,7 @@ export function ProgressiPartita({ partitaId }: { partitaId: number }) {
     }).catch((e) => notifica('error', messaggio(e))).finally(() => setOccupato(null));
   };
   const calcolati = p?.eventi.filter((e) => e.origine === 'calcolato') ?? [];
-  const manuali = p?.eventi.filter((e) => e.origine === 'manuale') ?? [];
+  const manuali = p?.eventi.filter((e) => e.origine === 'manuale' && !EVENTI_PESCA.some(chiave => chiave === e.chiave)) ?? [];
 
   return (
     <PageState isLoading={dati.caricamento && !p} error={dati.errore} onRetry={dati.ricarica}>
@@ -66,6 +71,7 @@ export function ProgressiPartita({ partitaId }: { partitaId: number }) {
         <div className="flex flex-col gap-4">
           <DaApplicare key={partitaId} partitaId={partitaId} onCambiato={async () => { setStato(null); await dati.ricarica(); }} />
           <RegistroAcquistiPartita key={`acquisti:${partitaId}`} partitaId={partitaId} onCambiato={async () => { setStato(null); await dati.ricarica(); }} />
+          <RegistroPesca key={`pesca:${partitaId}`} partitaId={partitaId} onCambiato={async () => { setStato(null); await dati.ricarica(); }} />
           <section className="flex flex-col gap-2" aria-labelledby="progressi-calcolati">
             <h2 id="progressi-calcolati" className="m-0 font-display text-[17px] uppercase leading-none">Calcolati dalla partita</h2>
             <p className="m-0 text-[12px] text-text-muted">Sola lettura: l’app li ricava da quel che hai già segnato altrove. Le condizioni leggono da qui.</p>
@@ -158,7 +164,7 @@ export function ProgressiPartita({ partitaId }: { partitaId: number }) {
                       <span className="condizione-numero" role="group" aria-label={`Volte: ${a.nome}`}>
                         <button type="button" className="touch" aria-label={`${a.nome}: una volta in meno`} disabled={occupato === a.chiave || a.volte <= 0} onClick={() => void salva(a.chiave, () => impostaAttivitaSvolta(partitaId, a.chiave, a.volte - 1))}><IconaAzione chiave="meno" dimensione={16} /></button>
                         <span className="condizione-numero__valore">{a.volte}</span>
-                        <button type="button" className="touch" aria-label={`${a.nome}: una volta in più`} disabled={occupato === a.chiave || a.volte >= 999} onClick={() => void salva(a.chiave, () => impostaAttivitaSvolta(partitaId, a.chiave, a.volte + 1))}><IconaAzione chiave="piu" dimensione={16} /></button>
+                        {a.chiave === ATTIVITA_PESCA || a.chiave === SFIDA_PESCA ? <a className="touch inline-flex items-center px-2 text-[12px]" href="#pesca">Registra la visita osservata</a> : <button type="button" className="touch" aria-label={`${a.nome}: una volta in più`} disabled={occupato === a.chiave || a.volte >= 999} onClick={() => void salva(a.chiave, () => impostaAttivitaSvolta(partitaId, a.chiave, a.volte + 1))}><IconaAzione chiave="piu" dimensione={16} /></button>}
                       </span>
                     </li>
                   ))}

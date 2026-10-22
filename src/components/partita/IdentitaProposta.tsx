@@ -13,7 +13,14 @@ export function IdentitaProposta({ proposta: p, registrazioni, erroreRegistro, c
   const [voce, uidEffetto] = p.causa.tipo === 'voce' ? p.causa.chiave.split(':') : [];
   return <div className="flex min-w-0 flex-col gap-1 break-words text-[12px]">
     <code className="break-all">Partita {p.partitaId} · proposta {p.id}/{p.uid}</code>
-    <code className="break-all">{p.causa.tipo === 'acquisto' ? 'Consumazione' : 'Voce ed effetto'}: {p.causa.chiave}</code>
+    <code className="break-all">{p.causa.tipo === 'acquisto' ? 'Consumazione' : p.causa.tipo === 'pesca' ? 'Fonte della pesca' : 'Voce ed effetto'}: {p.causa.chiave}</code>
+    {p.causa.tipo === 'pesca' && <>
+      <span>Identità conservata della causa; una sessione o un acquisto esca rimangono distinguibili anche se la fonte è stata rimossa.</span>
+      {typeof p.dati.sessioneId === 'string' && <code className="break-all">Sessione {p.dati.sessioneId}</code>}
+      {typeof p.dati.acquistoEscaId === 'string' && <code className="break-all">Acquisto esca {p.dati.acquistoEscaId}</code>}
+      {typeof p.dati.giorno === 'string' && <span>Giorno osservato: {p.dati.giorno}{p.dati.fascia === 'giorno' || p.dati.fascia === 'sera' ? ` · ${p.dati.fascia}` : ''}</span>}
+      <Link className="touch self-start" to="/partita?scheda=progressi#pesca">Apri il registro della pesca nei Progressi</Link>
+    </>}
     {p.causa.tipo === 'acquisto' && <>
       {caricamentoRegistro ? <span role="status">Rilettura del dettaglio della consumazione…</span> : erroreRegistro ? <span role="alert" className="text-error">Dettaglio corrente non leggibile: {erroreRegistro}. L’identità conservata resta quella indicata sopra.</span> : fatto ? <details><summary className="touch">Dettaglio corrente del registro, distinto dall’anteprima</summary><DettagliConsumo acquisto={fatto} /></details> : <span className="text-warning">Il fatto non è presente nel registro letto. Nessuna identità viene dedotta dal nome.</span>}
     </>}

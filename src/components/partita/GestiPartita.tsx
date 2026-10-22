@@ -5,9 +5,15 @@ const nomi: Record<GestoPartita['payload']['tipo'], string> = {
   acquisto: 'Registrazione acquisto', 'annullo-fonte': 'Rimozione fonte', 'rimozione-legacy': 'Rimozione presenza storica',
   'decisione-proposte': 'Decisione sulle proposte', 'spunta-acquisti': 'Spunta con consumazioni',
   'decisione-effetto-voce': 'Decisione su un effetto della guida',
+  pesca: 'Operazione sulla pesca',
 };
+export interface EsitoRecuperoGestoPartita {
+  operazioneId: string;
+  payload: GestoPartita['payload'];
+  ricevuta: GestoPartita['ricevuta'];
+}
 /** Registro della sola scheda: include partite non attive e bersagli ormai eliminati. */
-export function GestiPartita({ partitaId, onCambiato, mostraVuoto = false, contestoChiave }: { partitaId?: number; onCambiato?: (partitaId: number | null) => void | Promise<void>; mostraVuoto?: boolean; contestoChiave?: string }) {
+export function GestiPartita({ partitaId, onCambiato, mostraVuoto = false, contestoChiave }: { partitaId?: number; onCambiato?: (partitaId: number | null, esito?: EsitoRecuperoGestoPartita) => void | Promise<void>; mostraVuoto?: boolean; contestoChiave?: string }) {
   const { gesti, erroreArchivio } = useGestiPartita();
   const [errore, setErrore] = useState<string | null>(null);
   const callback = useRef(onCambiato);
@@ -22,9 +28,9 @@ export function GestiPartita({ partitaId, onCambiato, mostraVuoto = false, conte
     const origine = { ...contesto.current, onCambiato: callback.current };
     setErrore(null);
     try {
-      await riprendiGestoPartita(g.id);
+      const ricevuta = await riprendiGestoPartita(g.id);
       // La ricevuta e la notifica sono già nel registro anche se questa vista è scomparsa.
-      if (contesto.current.vivo && contesto.current.generazione === origine.generazione && contesto.current.partitaId === origine.partitaId && contesto.current.contestoChiave === origine.contestoChiave) await origine.onCambiato?.(g.partitaId);
+      if (contesto.current.vivo && contesto.current.generazione === origine.generazione && contesto.current.partitaId === origine.partitaId && contesto.current.contestoChiave === origine.contestoChiave) await origine.onCambiato?.(g.partitaId, { operazioneId: g.operazioneId, payload: g.payload, ricevuta });
     } catch (e) {
       if (contesto.current.vivo && contesto.current.generazione === origine.generazione) setErrore(e instanceof Error ? e.message : 'Recupero non riuscito.');
     }
@@ -59,14 +65,19 @@ export function GestiPartita({ partitaId, onCambiato, mostraVuoto = false, conte
             {g.payload.tipo === 'annullo-fonte' && <><dt>Fonte da togliere</dt><dd className="m-0 break-all">{g.payload.dati.provenienzaId}</dd></>}
             {g.payload.tipo === 'rimozione-legacy' && <><dt>Presenza storica da togliere</dt><dd className="m-0">{g.payload.dati.articolo}</dd></>}
             {g.payload.tipo === 'decisione-proposte' && <><dt>Decisione</dt><dd className="m-0">{g.payload.dati.decisione.tipo} · {'proposte' in g.payload.dati.decisione ? g.payload.dati.decisione.proposte.map(p => `${p.id}/${p.uid}`).join(', ') : `${g.payload.dati.decisione.proposta.id}/${g.payload.dati.decisione.proposta.uid}`}</dd></>}
-            {g.payload.tipo === 'spunta-acquisti' && <><dt>Consumazioni della prima spunta</dt><dd className="m-0">{g.payload.dati.acquisti.map(a => `${a.articolo} · ${a.variante} · ${a.operazioneId}`).join('; ')}</dd></>}
+            {g.payload.tipo === 'spunta-acquisti' && <>
+              {!!g.payload.dati.acquisti?.length && <><dt>Consumazioni della prima spunta</dt><dd className="m-0">{g.payload.dati.acquisti.map(a => `${a.articolo} · ${a.variante} · ${a.operazioneId}`).join('; ')}</dd></>}
+              {!!g.payload.dati.pesche?.length && <><dt>Sessioni di pesca della prima spunta</dt><dd className="m-0">{g.payload.dati.pesche.map(p => `${p.momento.giorno} · ${p.momento.fascia} · visita ${p.momento.ordineVisita} · operazione ${p.operazioneId} · effetto ${p.fonte.tipo === 'diario' ? p.fonte.effettoUid : 'fonte incompatibile'}`).join('; ')}</dd></>}
+            </>}
+            {g.payload.tipo === 'pesca' && <><dt>Azione e bersaglio originali</dt><dd className="m-0 break-all">{g.payload.dati.azione} · {g.payload.dati.bersaglio ?? 'nuovo fatto nella partita indicata'}</dd><dt>Richiesta conservata</dt><dd className="m-0"><pre className="m-0 whitespace-pre-wrap break-all text-[11px]">{JSON.stringify(g.payload.dati.richiesta, null, 2)}</pre></dd></>}
             {g.payload.tipo === 'decisione-effetto-voce' && <><dt>Candidato e decisione</dt><dd className="m-0 break-all">{g.payload.propostaId} · {g.payload.dati.decisione}</dd></>}
           </dl>
         </details>
         {g.errore && <p className="m-0 break-words text-warning">{g.errore}</p>}
-        {attuale && <span>Ricevute dei consumi riscontrate. Stato della voce osservato: {attuale.fatta ? 'fatta' : 'non fatta'}; eventuali annullamenti successivi restano validi.</span>}
+        {attuale && <span>Ricevute delle osservazioni riscontrate. Stato della voce osservato: {attuale.fatta ? 'fatta' : 'non fatta'}; eventuali annullamenti successivi restano validi.</span>}
+        {g.payload.tipo === 'pesca' && g.ricevuta && 'sessioneId' in g.ricevuta && <span>Ricevuta della pesca: {g.ricevuta.esito} · {g.ricevuta.sessioneId ? `sessione ${g.ricevuta.sessioneId}` : g.ricevuta.fattoFonteId ? `fonte ${g.ricevuta.fattoFonteId}` : g.ricevuta.acquistoEscaId ? `acquisto esca ${g.ricevuta.acquistoEscaId}` : 'saldo osservato'}.</span>}
         {g.stato === 'incerto' && readonly && <span>La verifica legge soltanto la voce e le ricevute per ogni ID originale. Non ripete la spunta o i suoi effetti. Se la voce non esiste più o manca una ricevuta, resta da verificare.</span>}
-        {g.stato === 'incerto' && !readonly && <span>Il recupero ripresenta soltanto lo stesso identificativo e lo stesso payload conservato.</span>}
+        {g.stato === 'incerto' && !readonly && <span>{g.payload.tipo === 'pesca' ? 'Il recupero cerca prima la ricevuta per l’ID originale; se il server ne conferma l’assenza, ripresenta lo stesso POST canonico.' : 'Il recupero ripresenta soltanto lo stesso identificativo e lo stesso payload conservato.'}</span>}
         <div className="flex flex-wrap gap-2">
           {!risolta && !rifiutata && <button type="button" className="btn btn-secondary btn-sm touch" disabled={inCorso || (erroreArchivio !== null && g.stato !== 'riuscita' && g.stato !== 'rifiutata')} onClick={() => void recupera(g)}>
             {inCorso ? 'In corso…' : g.stato === 'riuscita' ? 'Salva la ricevuta già acquisita' : g.stato === 'rifiutata' ? 'Salva il rifiuto già acquisito' : readonly ? 'Verifica le ricevute senza ripetere la spunta' : 'Recupera la stessa operazione'}

@@ -8,6 +8,7 @@ import { apiDelete, apiGet, apiPatch, apiPost, apiPut, queryString } from './_he
 import type { DivergenzaDto, MeteoGiornoDto, VideogiocoDto } from '../../types';
 import type { MeteoPartita } from '../../../shared/meteoPartita';
 import type { RichiestaRegistraAcquisto } from '../../../shared/acquisti';
+import type { RichiestaRegistraSessionePesca } from '../../../shared/pesca';
 
 /** Campi modificabili di una partita. */
 export interface DatiPartita {
@@ -75,7 +76,7 @@ export const confermaRequisitoConfidente = (id: number, chiave: string, rango: n
   apiPut(`/partite/${id}/confidenti/${chiave}/requisiti`, { rango, indice, confermato });
 /** Spunta (o riapre) una voce della giornata nella partita, per identità: applica i suoi effetti (con le note ottenute, se è un
  *  incontro con un Confidente) e dice se la partita è passata al giorno dopo. */
-export const impostaAzionePercorso = (id: number, uid: string, fatta: boolean, noteRisposta?: 1 | 2 | 3, apertureDedali?: string[], acquisti?: RichiestaRegistraAcquisto[]): Promise<AzionePercorsoDto> => apiPut(`/partite/${id}/percorso`, { uid, fatta, ...(noteRisposta ? { noteRisposta } : {}), ...(apertureDedali !== undefined ? { apertureDedali } : {}), ...(acquisti !== undefined ? { acquisti } : {}) }, { maxRetries: 0 });
+export const impostaAzionePercorso = (id: number, uid: string, fatta: boolean, noteRisposta?: 1 | 2 | 3, apertureDedali?: string[], acquisti?: RichiestaRegistraAcquisto[], pesche?: RichiestaRegistraSessionePesca[]): Promise<AzionePercorsoDto> => apiPut(`/partite/${id}/percorso`, { uid, fatta, ...(noteRisposta ? { noteRisposta } : {}), ...(apertureDedali !== undefined ? { apertureDedali } : {}), ...(acquisti !== undefined ? { acquisti } : {}), ...(pesche !== undefined ? { pesche } : {}) }, { maxRetries: 0 });
 /** Giorno corrente della partita (calendario di gioco); la risposta porta anche la partita aggiornata da riportare nello store. */
 export const impostaGiornoCorrente = (id: number, data: string): Promise<GiornoCorrenteDto> => apiPut(`/partite/${id}/giorno`, { data });
 /** Il meteo di un giorno nella partita, di giorno e di sera. */

@@ -29,6 +29,9 @@ export const NOME_TIPO_CESTINO: Record<TipoCestino, string> = {
   'voce-diario': 'Voce del Diario',
   partita: 'Partita',
   'fonte-acquisto': 'Registrazione d’acquisto',
+  'fonte-pesca': 'Fonte della visita di pesca',
+  'sessione-pesca': 'Visita di pesca',
+  'osservazione-pesca': 'Osservazione di pesca',
 };
 
 /**
@@ -70,17 +73,27 @@ const PAROLE_CONTENUTO: ReadonlyArray<{ tabelle: readonly string[]; uno: string;
   { tabelle: ['acquisto_partita'], uno: 'presenza d’acquisto precedente', molti: 'presenze d’acquisto precedenti' },
   { tabelle: ['acquisto_registrato'], uno: 'consumazione', molti: 'consumazioni' },
   { tabelle: ['acquisto_provenienza'], uno: 'fonte d’acquisto', molti: 'fonti d’acquisto' },
+  { tabelle: ['pesca_sessione'], uno: 'visita di pesca', molti: 'visite di pesca' },
+  { tabelle: ['pesca_osservazione'], uno: 'osservazione di pesca', molti: 'osservazioni di pesca' },
+  { tabelle: ['pesca_cattura'], uno: 'cattura', molti: 'catture' },
+  { tabelle: ['pesca_provenienza'], uno: 'fonte della visita di pesca', molti: 'fonti delle visite di pesca' },
+  { tabelle: ['pesca_fatto_fonte'], uno: 'fonte di un fatto di pesca', molti: 'fonti dei fatti di pesca' },
+  { tabelle: ['pesca_acquisto_esca'], uno: 'acquisto di esche', molti: 'acquisti di esche' },
+  { tabelle: ['punti_pesca_partita'], uno: 'saldo di punti pesca', molti: 'saldi di punti pesca' },
+  { tabelle: ['movimento_punti_pesca'], uno: 'movimento di punti pesca', molti: 'movimenti di punti pesca' },
+  { tabelle: ['pesca_quota_storica'], uno: 'raccordo a una visita precedente', molti: 'raccordi a visite precedenti' },
+  { tabelle: ['turno_partita'], uno: 'turno d’attività', molti: 'turni d’attività' },
   { tabelle: ['da_applicare'], uno: 'proposta da applicare', molti: 'proposte da applicare' },
   { tabelle: ['effetto_applicato'], uno: 'ricevuta degli effetti', molti: 'ricevute degli effetti' },
 ];
 
 /** Il contenuto di un elemento del cestino detto per chi gioca: l'elemento stesso escluso (la sua riga c'è sempre), i dettagli
  *  interni tolti, le tabelle della stessa cosa sommate. */
-export function contenutoLeggibile(v: Pick<VoceCestinoUnificatoDto, 'tipo' | 'contenuto'>): Array<{ etichetta: string; quante: number }> {
+export function contenutoLeggibile(v: Pick<VoceCestinoUnificatoDto, 'tipo' | 'chiave' | 'contenuto'>): Array<{ etichetta: string; quante: number }> {
   const conti = new Map(v.contenuto.map((c: ContenutoCestinoDto) => [c.tabella, c.quante]));
   // la riga dell'elemento non è «quel che si porta via»: un'area eliminata non «si porta via 1 area»
-  const radice = RADICE_CESTINO[v.tipo];
-  if (conti.has(radice)) conti.set(radice, (conti.get(radice) ?? 1) - 1);
+  const radice = radiceCestino(v);
+  if (radice !== null && conti.has(radice)) conti.set(radice, (conti.get(radice) ?? 1) - 1);
   return PAROLE_CONTENUTO
     .map((p) => ({ p, quante: p.tabelle.reduce((s, t) => s + (conti.get(t) ?? 0), 0) }))
     .filter((x) => x.quante > 0)
@@ -88,11 +101,22 @@ export function contenutoLeggibile(v: Pick<VoceCestinoUnificatoDto, 'tipo' | 'co
 }
 
 /** La tabella dell'elemento stesso, per tipo (la stessa regola del server). */
-const RADICE_CESTINO: Record<TipoCestino, string> = { area: 'dungeon_area', voce: 'punto_interesse', mappa: 'mappa', pin: 'spillo', 'area-dedalo': 'area_dedalo', 'area-fisica': 'area', luogo: 'luogo', negozio: 'negozio', richiesta: 'richiesta', oggetto: 'catalogo_oggetto', 'voce-diario': 'voce_giornata', partita: 'partita', 'fonte-acquisto': 'acquisto_provenienza' };
+const RADICE_CESTINO: Record<Exclude<TipoCestino, 'osservazione-pesca'>, string> = { area: 'dungeon_area', voce: 'punto_interesse', mappa: 'mappa', pin: 'spillo', 'area-dedalo': 'area_dedalo', 'area-fisica': 'area', luogo: 'luogo', negozio: 'negozio', richiesta: 'richiesta', oggetto: 'catalogo_oggetto', 'voce-diario': 'voce_giornata', partita: 'partita', 'fonte-acquisto': 'acquisto_provenienza', 'fonte-pesca': 'pesca_provenienza', 'sessione-pesca': 'pesca_sessione' };
+
+/** Le due osservazioni autonome condividono il tipo Cestino, non la tabella radice. */
+function radiceCestino(v: Pick<VoceCestinoUnificatoDto, 'tipo' | 'chiave'>): string | null {
+  if (v.tipo !== 'osservazione-pesca') return RADICE_CESTINO[v.tipo];
+  if (/^fatto:[0-9a-f]{32}$/.test(v.chiave)) return 'pesca_fatto_fonte';
+  if (/^esca:[0-9a-f]{32}$/.test(v.chiave)) return 'pesca_acquisto_esca';
+  // Un'identità sconosciuta non giustifica sottrarre righe dal riepilogo.
+  return null;
+}
 
 /** Come si presenta un elemento: «Area di Shibuya: Sottopasso» (il posto da cui viene, se c'è), poi «con 2 planimetrie e 1 pin». */
-export function descrizioneElementoCestino(v: Pick<VoceCestinoUnificatoDto, 'tipo' | 'nome' | 'contesto' | 'contenuto'>): { titolo: string; con: string | null } {
-  const tipo = NOME_TIPO_CESTINO[v.tipo];
+export function descrizioneElementoCestino(v: Pick<VoceCestinoUnificatoDto, 'tipo' | 'chiave' | 'nome' | 'contesto' | 'contenuto'>): { titolo: string; con: string | null } {
+  const radice = radiceCestino(v);
+  const tipo = v.tipo === 'osservazione-pesca' && radice === 'pesca_fatto_fonte' ? 'Fatto di pesca'
+    : v.tipo === 'osservazione-pesca' && radice === 'pesca_acquisto_esca' ? 'Acquisto di esche' : NOME_TIPO_CESTINO[v.tipo];
   // il contesto è il posto (il quartiere, il Palazzo, il dedalo) o una nota come «fusa in …»: solo un nome diventa «di <posto>»
   const posto = v.contesto && !/[«»]/.test(v.contesto) ? v.contesto : null;
   const parti = contenutoLeggibile(v).map((c) => `${c.quante.toLocaleString('it-IT')} ${c.etichetta}`);

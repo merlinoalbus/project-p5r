@@ -1,5 +1,11 @@
 # L5 — difetti accertati nell'audit del 21 ottobre 2026
 
+## 21/10 20:24Z —1636 rimosso, esito reale acquisito
+
+137 pubblicata in389387be, pipeline82 riuscita. Prima della rimozione, confronto46tabelle utente e95main identico; Cestino e sequenza preservati. Singolo DELETE204 con UID/CAS freschi e nessuna dipendenza. Dopo: solo spillo/cestino diversi, riga originale integrale conservata in una radice pin, altri dati confrontati identici. Coordinatore e Galaxy: Pin Lavoro part-time con Rimetti/schema137; Galaxy osserva anche l’assenza sulla Banchina e tre pin rimanenti. Gate finale distinto PASS, nessun errore/warn nelle nuove schede. Nessun restore o test. Dettagli in rimozione-pin-1636.md.
+
+Rettifica dell’istruttoria19: Jose386 ha tipo negozio improprio ma riferimentoNULL e nessuna sede, confermati da lettura corrente. Non trattarlo come falso raccordo commerciale attivo e non inventare uno scollegamento.
+
 ## 21/10 19:55Z — tre schede applicate e approvate nel perimetro
 
 Consenso esplicito alle tre schede collegate ricevuto; API ordinaria pubblicata,

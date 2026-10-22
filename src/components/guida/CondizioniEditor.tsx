@@ -67,6 +67,12 @@ function opzioniPer(tipo: TipoCampo, e: Elenchi): OpzioneRicerca[] {
     case 'rango-cliente': return RANGHI_CLIENTE.map((r) => ({ chiave: r.chiave, nome: r.nome, dettaglio: r.spesa ? `da ¥${r.spesa.toLocaleString('it-IT')}` : undefined }));
     case 'evento': return e.extra.eventi.length ? e.extra.eventi : EVENTI_STORIA.map((x) => ({ chiave: x.chiave, nome: x.nome }));
     case 'contatore': return e.extra.contatori.length ? e.extra.contatori : CONTATORI.map((x) => ({ chiave: x.chiave, nome: x.nome }));
+    case 'dato-pesca': return [
+      { chiave: 'esca-speciale', nome: 'Esca speciale posseduta nella visita' },
+      { chiave: 'tentativo-residuo', nome: 'Tentativi ancora disponibili nella visita' },
+      { chiave: 'guardiano-catturato', nome: 'Guardiano catturato nella visita' },
+      { chiave: 'boss-catturato', nome: 'Boss catturato nella visita' },
+    ];
     case 'arcano': return e.extra.arcani;
     case 'persona': return e.extra.persone;
     case 'abilita': return e.extra.abilita;

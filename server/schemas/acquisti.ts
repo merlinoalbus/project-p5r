@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import { dataGioco, dote, idParam, uidVoce } from './comuni.js';
+import { bodyAnteprimaSessionePesca } from './pesca.js';
+import { ATTIVITA_PESCA, REGOLA_PESCA } from '../../shared/pesca.js';
 
 const uid = z.string().regex(/^[0-9a-f]{32}$/,'Identità non valida.');
 const revisione = z.string().regex(/^[0-9a-f]{64}$/,'Revisione non valida.');
@@ -31,7 +33,7 @@ const decisione = z.discriminatedUnion('tipo',[
   z.object({tipo:z.literal('non-conteggiata'),proposte:z.array(riferimentoProposta).min(1).max(100)}).strict(),
   z.object({tipo:z.literal('ignota'),proposte:z.array(riferimentoProposta).min(1).max(100)}).strict(),
   z.object({tipo:z.literal('gia-conteggiata'),proposta:riferimentoProposta,quantita:z.number().int().positive().max(9_999_999)}).strict(),
-  z.object({tipo:z.literal('applica-effetto'),proposta:riferimentoProposta,acquisto:bodyAnteprimaAcquisto.optional(),revisioneAcquistiAttesa:revisione.optional()}).strict(),
+  z.object({tipo:z.literal('applica-effetto'),proposta:riferimentoProposta,acquisto:bodyAnteprimaAcquisto.optional(),revisioneAcquistiAttesa:revisione.optional(),pesca:bodyAnteprimaSessionePesca.optional(),revisionePescaAttesa:revisione.optional()}).strict(),
 ]);
 export const bodyAnteprimaDecisioneProposte = z.object({operazioneId:uid,decisione}).strict();
 export const bodyDecisioneProposte = bodyAnteprimaDecisioneProposte.extend({revisioneProposteAttesa:revisione}).strict();
@@ -41,6 +43,7 @@ export const effettoVoce = z.discriminatedUnion('tipo',[
   z.object({tipo:z.literal('lettura'),categoria:z.enum(['libro','film','videogioco']),chiave,almeno:z.number().int().positive().nullable()}).strict(),
   z.object({tipo:z.literal('turno'),attivita:chiave,doti:z.array(doteNote).min(1).max(20).optional()}).strict(),
   z.object({tipo:z.literal('acquisto'),articolo:chiave,variante:dote.nullable(),fortuna:z.boolean().nullable(),sostituisceDoti:z.array(uid).max(20).refine((x)=>new Set(x).size===x.length,'Gli effetti sostituiti devono essere distinti.')}).strict(),
+  z.object({tipo:z.literal('pesca'),regola:z.literal(REGOLA_PESCA),attivita:z.literal(ATTIVITA_PESCA),sostituisceTurni:z.array(uid).max(20),sostituisceDoti:z.array(uid).max(20)}).strict(),
 ]);
 export const bodySalvaEffettiVoce = z.object({revisioneEffettiAttesa:revisione,effetti:z.array(z.object({uid:uid.nullable(),effetto:effettoVoce}).strict()).max(100)}).strict();
 export const bodyAnteprimaDecisioneEffettoVoce = z.object({operazioneId:uid,decisione:z.enum(['conferma','scarta']),effetto:effettoVoce.optional()}).strict();

@@ -36,6 +36,7 @@ import { conCartellaDiLavoro, copiaDiSicurezza, installaDatabase, riapriIstanza,
 import type { AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, FaseImportazionePacchetto, OrfanoPartiteDto, StatoImportazionePacchettoDto } from '../../shared/types.js';
 import { ESTENSIONI_PACCHETTO, copiaDalDeposito, elencaDeposito as elencaCartella, percorsoNelDeposito } from './depositoService.js';
 import { verificaCollegamentiAttivitaImportati } from './vincoliAttivitaConfidente.js';
+import { verificaCollegamentiPescaImportati } from './vincoliAttivitaPesca.js';
 
 /** Intestazione di ogni file SQLite 3. */
 const FIRMA_SQLITE = 'SQLite format 3\0';
@@ -64,6 +65,9 @@ interface Riferimento {
   partita?: string;
 }
 export const RIFERIMENTI_PARTITE: Riferimento[] = [
+  {tabella:'pesca_sessione',colonna:'attivita_chiave',entita:'attività della visita di pesca (fotografia conservata)',tabellaGioco:'attivita',colonnaGioco:'chiave'},
+  {tabella:'pesca_provenienza',colonna:'voce_uid',entita:'voce della fonte di pesca',tabellaGioco:'voce_giornata',colonnaGioco:'uid'},
+  {tabella:'pesca_provenienza',colonna:'effetto_uid',entita:'effetto della fonte di pesca',tabellaGioco:'voce_effetto',colonnaGioco:'uid'},
   { tabella: 'acquisto_partita', colonna: 'articolo_chiave', entita: 'articolo', tabellaGioco: 'articolo', colonnaGioco: 'chiave' },
   { tabella: 'acquisto_registrato', colonna: 'articolo_chiave', entita: 'articolo della consumazione (fotografia conservata)', tabellaGioco: 'articolo', colonnaGioco: 'chiave' },
   { tabella: 'acquisto_provenienza', colonna: 'voce_uid', entita: 'voce della fonte di acquisto', tabellaGioco: 'voce_giornata', colonnaGioco: 'uid' },
@@ -273,6 +277,7 @@ function anteprimaDalDatabase(db: Database.Database, byte: number, nome?: string
   const codice = versioneSchemaCodice();
   const istanza = getDb();
   verificaCollegamentiAttivitaImportati(db, istanza);
+  verificaCollegamentiPescaImportati(db, istanza);
   const attuali = conteggiTabelle(istanza, 'main');
   const nelPacchetto = conteggiTabelle(db, 'main');
   const differenze = Object.keys(nelPacchetto).filter((t) => t in attuali && attuali[t] !== nelPacchetto[t]).map((t) => ({ tabella: t, istanza: attuali[t], pacchetto: nelPacchetto[t] }));

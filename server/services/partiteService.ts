@@ -154,6 +154,7 @@ export function eliminaPartita(id: number): void {
     // La FK fonte→fatto è RESTRICT: le provenienze vanno annotate e rimosse prima
     // del padre, senza affidarsi all'ordine delle cascate di SQLite.
     prepared('DELETE FROM utente.acquisto_provenienza WHERE partita_id=?').run(id);
+    prepared('DELETE FROM utente.pesca_provenienza WHERE partita_id=?').run(id);
     prepared('DELETE FROM partita WHERE id = ?').run(id);
     if (r.attiva === 1) {
       // Promuove la partita più recente, se ne resta una.

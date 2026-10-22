@@ -35,6 +35,7 @@ export const TIPI_EVENTO = [
   'lettura',
   'cruciverba',
   'acquisto',
+  'pesca',
   'percorso',
   'trofeo',
   'denaro',
@@ -45,6 +46,7 @@ export type TipoEvento = (typeof TIPI_EVENTO)[number];
 
 /** Etichetta italiana e gruppo di ogni tipo (i gruppi guidano i filtri dell'interfaccia). */
 export const ETICHETTE_EVENTO: Readonly<Record<TipoEvento, { nome: string; gruppo: 'partita' | 'doti' | 'confidenti' | 'persona' | 'velluto' | 'obiettivi' | 'dungeon' }>> = {
+  pesca:{nome:'Pesca a Ichigaya',gruppo:'partita'},
   'partita-creata': { nome: 'Partita creata', gruppo: 'partita' },
   'livello-protagonista': { nome: 'Livello del protagonista', gruppo: 'partita' },
   allarme: { nome: 'Allarme delle fusioni', gruppo: 'velluto' },

@@ -28,6 +28,7 @@ export function campiAutonomiAttivitaConfidente(d: Record<string, unknown>, conD
 
 /** La ricerca per Dote guarda i benefici canonici dei passaggi, senza copiarli negli effetti dell'attività. */
 export function haDoteAttivita(a: AttivitaDto, dote: string): boolean {
+  if(a.pesca)return a.pesca.regola.stato==='collegata'&&dote==='perizia';
   return a.confidenteChiave
     ? !!a.fonteConfidente?.dotiPerPassaggio.some((r) => r.doti.some((d) => d.dote === dote))
     : a.effetti.some((v) => v.effetto.famiglia === 'dote' && v.effetto.dote === dote);

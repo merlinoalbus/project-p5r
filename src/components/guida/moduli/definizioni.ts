@@ -8,6 +8,7 @@ import { normalizzaVociEffetto, type VoceEffetto } from '../../../../shared/effe
 import { descriviEffetto, type EffettoOggetto } from '../../../../shared/effettiOggetto';
 import { tracciamentoPerTipo } from '../../../../shared/attivita';
 import { campiAutonomiAttivitaConfidente } from '../../../../shared/attivitaConfidente';
+import { campiAutonomiAttivitaPesca } from '../../../../shared/attivitaPesca';
 import { leggiGiorniQuiz, normalizzaQuiz, type QuizAttivita } from '../../../../shared/quizAttivita';
 import { normalizzaCostoScambio } from '../../../../shared/catalogo';
 import type { TipoCatalogo } from '../../../types';
@@ -137,6 +138,9 @@ function attivitaCon(tipoFisso?: 'videogioco'): DefinizioneModulo {
         confidente_chiave: testoOnull(e?.dati.confidente_chiave),
         _confidenteIniziale: testoOnull(e?.dati.confidente_chiave),
         _fonteConfidente: e?.dati._fonteConfidente ?? null,
+        pesca_regola_chiave: e?.dati.pesca_regola_chiave ?? null,
+        pesca_ruolo: e?.dati.pesca_ruolo ?? null,
+        _fontePesca: e?.dati._fontePesca ?? null,
         _dotiStoriche: e?.dati.doti_json ?? [],
         _effettiRaw: e?.dati.effetti_json ?? null, _quizRaw: e?.dati.quiz_json ?? null,
         _effettiDaRisolvere: !jsonSenzaPerdite(e?.dati.effetti_json, normalizzaVociEffetto),
@@ -157,6 +161,8 @@ function attivitaCon(tipoFisso?: 'videogioco'): DefinizioneModulo {
     valido: (d) => testoDi(d.nome).trim().length > 0 && (d.tipo !== 'videogioco' || (numeroDi(d.sessioni) ?? 0) >= 1)
       && !d._effettiDaRisolvere && !d._quizDaRisolvere
       && (!d.quiz_json || leggiGiorniQuiz(testoDi(d._giorniQuiz)) !== null)
+      && (!testoOnull(d.pesca_regola_chiave) ? !testoOnull(d.pesca_ruolo) : (d.tipo !== 'videogioco' && !testoOnull(d.confidente_chiave) && (d.pesca_ruolo === 'visita' || d.pesca_ruolo === 'obiettivi')
+        && campiAutonomiAttivitaPesca({ ...d, fascia: testoOnull(d.fascia), doti_json: d.doti_json ?? d._dotiStoriche }).length === 0))
       && (!testoOnull(d.confidente_chiave) || campiAutonomiAttivitaConfidente({ ...d, fascia: testoOnull(d.fascia), doti_json: d.doti_json ?? d._dotiStoriche },
         !!d._confidenteIniziale && d.confidente_chiave === d._confidenteIniziale).length === 0),
     prepara: (d) => {
@@ -164,6 +170,7 @@ function attivitaCon(tipoFisso?: 'videogioco'): DefinizioneModulo {
       return {
         ...senzaTemporanei(d), nome: testoDi(d.nome).trim(), costo: numeroDi(d.costo), sessioni: numeroDi(d.sessioni), dettagli: testoOnull(d.dettagli),
         confidente_chiave: testoOnull(d.confidente_chiave), fascia: testoOnull(d.fascia),
+        pesca_regola_chiave: testoOnull(d.pesca_regola_chiave), pesca_ruolo: testoOnull(d.pesca_ruolo),
         paga_yen: d.tipo === 'lavoro' ? numeroDi(d.paga_yen) : null, paga_massima: d.tipo === 'lavoro' ? numeroDi(d.paga_massima) : null,
         tracciamento: d.tipo === 'videogioco' ? 'sessioni' : testoDi(d.tracciamento) || tracciamentoPerTipo(testoDi(d.tipo)),
         // righe vuote e spazi li toglie il server (normalizzaQuiz); un quiz senza domanda né elementi vale «nessun quiz»

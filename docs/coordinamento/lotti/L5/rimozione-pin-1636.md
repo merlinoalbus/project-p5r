@@ -2,23 +2,22 @@
 
 ## Stato della consegna
 
-Checkpoint del 21 ottobre 2026, prima della pubblicazione della 137. L'utente ha
-ordinato la rimozione del pin 1636: il consenso è già acquisito e non occorre una
-nuova domanda. **Il pin è ancora presente e nessuna rimozione è stata applicata.**
+**Conclusa il21ottobre2026 nel solo perimetro1636.** Rilascio
+`389387be631f665e781d7e7a7b9e3cc42e771819`, pipeline82
+[`39668626532`](https://github.com/merlinoalbus/project-p5r/actions/runs/39668626532)
+riuscita, p5s137/28. Singolo DELETE204 dopo fotografia UID/CAS fresca:
+il pin è assente dalla Banchina e conservato nel Cestino con fotografia integrale.
+Gate finale Galaxy PASS dopo osservazione autonoma Cestino/Banchina.
 
-La versione pubblicata resta `814b17d8`, pipeline 81 `39662850767` riuscita,
-schema 136/28. Il codice BE/FE della rimozione recuperabile e la migrazione 137
-sono completi; due gate statici distinti PASS e tre riesami propri conclusi.
-Il coordinatore comunica typecheck 2245, lint 38912 e build 62830 con exit 0.
-Questi esiti non attestano ancora rilascio, migrazione live, rimozione o restore.
+Typecheck2245, lint38912 e build62830 exit0, tre riesami propri e due gate statici
+distinti prima del rilascio. Nessun test o ripristino del pin esercitato.
 
 Le tre schede collegate ai pin 1466/1486/1526 sono una consegna separata,
 approvata dall'utente e applicata con CAS freschi senza nuovi pin. Confronto
 readonly positivo delle 46 tabelle utente e degli altri dati dichiarati;
 osservazione autonoma Galaxy di schede, Area e visore con gate finale positivo.
-Dei 23 candidati di [residui-23.md](residui-23.md) restano **20**, incluso 1636.
-Non sono il totale deduplicato dei difetti L5. La rimozione futura di 1636
-porterà questa popolazione a 19 solo dopo un esito effettivamente acquisito.
+Dei23candidati di [residui-23.md](residui-23.md) restano **19**, escluso1636.
+Non sono il totale deduplicato dei difetti L5; il lotto resta aperto.
 
 ## Mandato e confine
 
@@ -31,7 +30,7 @@ La lettura mirata del bersaglio e le baselines sono attribuite al coordinatore;
 nessuna riga RAW, UID effettivo, immagine o copia di database viene salvata in
 questo dossier. La preparazione documentale non ha effettuato API writer.
 
-## Contratto implementato nel codice locale
+## Contratto implementato e pubblicato
 
 ### Anteprima e identità
 
@@ -101,7 +100,25 @@ Il precedente conteggio diagnostico di una riga è stato smentito dal COUNT e
 dall'iterazione mirata: non è prova di una cancellazione. La baseline compatta
 lo supera senza trasportare i registri RAW, rimasti integri nell'istanza.
 
-## Gate acquisiti e passaggi ancora aperti
+## Esiti reali e gate finale
+
+Confronto readonly della Regia prima/dopo137:46tabelle utente e95main identiche,
+compresi998vociDiario/1913pin/316mappe/3vecchiCestino, epoca e indici. Solo il
+DDL del Cestino estende i tipi ammessi. Dati e impronte solo RAM, nessun DB copiato.
+
+L’anteprima corrente del1636 coincide con il consenso, tutti i conteggi sono zero
+e non richiede riallineamento. Un solo invio acquisisce204, nessun retry.
+Confronto successivo:46utente identiche e95main diverse solo in spillo/cestino;
+altri1912pin/998vociDiario/316mappe e tre registri Cestino precedenti identici.
+Una nuova radice pin contiene un unico passo D su spillo con la riga originale
+integrale, nessuna parte utente; epoca AUTOINCREMENT incrementata di uno.
+
+Il coordinatore e Galaxy osservano in schede indipendenti la voce Pin Lavoro
+part-time nel Cestino,505byte, Rimetti disponibile e schema137. Galaxy raggiunge
+la Banchina: tre pin (due passaggi e stazione), nessun Lavoro part-time, senza
+ricerca o interruttori che lo occultino. Console error/warn vuota nelle due nuove
+schede osservate. Nessun Rimetti/Elimina/Svuota premuto. I confronti DB sono prove
+della Regia; osservazioni UI indipendenti e PASS finale sono di Galaxy.
 
 | Passaggio | Esito a questo checkpoint |
 |---|---|
@@ -109,11 +126,10 @@ lo supera senza trasportare i registri RAW, rimasti integri nell'istanza.
 | Soluzione e codice BE/FE | Due gate statici distinti PASS, comunicati dal coordinatore |
 | Tre riesami propri | Conclusi, comunicati dal coordinatore |
 | Typecheck/lint/build | 2245/38912/62830, tutti exit 0 |
-| Pubblicazione e pipeline 137 | Non ancora eseguite |
-| Migrazione live e confronto con baseline fresca | Da acquisire |
-| Rimozione autorizzata con fotografia fresca | Non applicata; pin ancora presente |
-| Osservazione distinta del risultato e recuperabilità | Da acquisire sul pubblicato |
+| Pubblicazione e pipeline137 |389387be, pipeline82 riuscita |
+| Migrazione live e confronto con baseline fresca |137/28, conservazione positiva nel perimetro sopra |
+| Rimozione autorizzata con fotografia fresca | Singolo204, pin assente e fotografia integrale nel Cestino |
+| Osservazione distinta del risultato e recuperabilità | PASS finale Galaxy, Cestino/Rimetti e Banchina osservati senza scritture |
 
-Nessun test scritto o eseguito in questa attività. Il passaggio successivo è
-del coordinatore: pubblicazione, pipeline, osservazione e applicazione già
-autorizzata. Nessun esito futuro è anticipato e il lotto L5 resta aperto.
+Nessun test scritto o eseguito, nessun restore esercitato. Questo consuntivo
+chiude la richiesta di rimozione1636; non certifica il resto L5.

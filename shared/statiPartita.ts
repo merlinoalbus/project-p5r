@@ -24,7 +24,7 @@ export type TipoCampo =
   | 'dote' | 'rango5' | 'confidente' | 'rango10' | 'membro' | 'richiesta'
   | 'libro' | 'film' | 'articolo'
   | 'attivita' | 'volte' | 'negozio-con-gradi' | 'rango-cliente' | 'negozio-con-punti' | 'punti'
-  | 'evento' | 'contatore' | 'almeno'
+  | 'evento' | 'contatore' | 'almeno' | 'dato-pesca'
   | 'arcano' | 'persona' | 'abilita'
   | 'spillo' | 'voce-guida'
   // L6: un luogo (scelto per nome, salvato per chiave), un invito di un Confidente, il testo di un avviso
@@ -51,6 +51,10 @@ export interface DefinizioneStato {
 const campo = (nome: string, tipo: TipoCampo, etichetta: string): CampoCondizione => ({ nome, tipo, etichetta });
 
 export const STATI_PARTITA: readonly DefinizioneStato[] = [
+  {chiave:'pesca-sessione',nome:'Osservazione della visita di pesca',gruppo:'Storia e progressi',origine:'Registro della pesca; ignota senza una visita nel contesto',operatori:[
+    {chiave:'si',nome:'è attestato',campi:[campo('dato','dato-pesca','Osservazione')]},
+    {chiave:'no',nome:'è attestato il contrario',campi:[campo('dato','dato-pesca','Osservazione')]},
+  ]},
   // — Calendario e mondo —
   { chiave: 'data-gioco', nome: 'Data di gioco', gruppo: 'Calendario e mondo', origine: 'Partita → Oggi', operatori: [
     { chiave: 'dal', nome: 'dal', campi: [campo('dal', 'data', 'Data')] },
@@ -117,6 +121,7 @@ export const STATO_DEL_TIPO: Record<Exclude<TipoCondizione, 'gruppo' | 'non'>, s
   stagione: 'stagione', quartiere: 'quartiere', 'da-subito': 'da-subito', luogo: 'luogo', invito: 'invito', avviso: 'avviso', arco: 'arco',
   'finestra-palazzo': 'finestra-palazzo', palazzo: 'palazzo', dote: 'dote', confidente: 'confidente', squadra: 'squadra', richiesta: 'richiesta', lettura: 'libro', articolo: 'articolo',
   attivita: 'attivita', 'rango-cliente': 'rango-cliente', 'punti-negozio': 'punti-negozio', evento: 'evento', contatore: 'contatore',
+  'pesca-sessione':'pesca-sessione',
   'persona-arcano': 'persona-arcano', 'persona-abilita': 'persona-abilita', spillo: 'spillo', 'voce-guida': 'voce-guida',
 };
 
@@ -146,6 +151,7 @@ export function valorePredefinito(tipo: TipoCampo): string | number | string[] {
     case 'rango-cliente': return RANGHI_CLIENTE[1].chiave;
     case 'punti': return 50;
     case 'evento': return EVENTI_STORIA[0].chiave;
+    case 'dato-pesca': return 'esca-speciale';
     case 'contatore': return CONTATORI[0].chiave;
     case 'almeno': return 1;
     case 'testo': return 'Da controllare nel gioco';
@@ -193,6 +199,7 @@ export function costruisciCondizione(scelta: SceltaCondizione): RequisitoSpillo 
     case 'squadra': return s(v.membro) ? { tipo: 'squadra', membro: s(v.membro) } : null;
     case 'richiesta': return s(v.richiesta) ? { tipo: 'richiesta', richiesta: s(v.richiesta) } : null;
     case 'evento': return EVENTI_STORIA.some((e) => e.chiave === v.evento) ? { tipo: 'evento', evento: s(v.evento) } : null;
+    case 'pesca-sessione': return ['esca-speciale','tentativo-residuo','guardiano-catturato','boss-catturato'].includes(s(v.dato))&&['si','no'].includes(scelta.operatore)?{tipo:'pesca-sessione',dato:s(v.dato) as 'esca-speciale'|'tentativo-residuo'|'guardiano-catturato'|'boss-catturato',valore:scelta.operatore==='si'}:null;
     case 'contatore': return CONTATORI.some((c) => c.chiave === v.cosa) && n(v.almeno) >= 1 ? { tipo: 'contatore', cosa: s(v.cosa) as ContatoreChiave, almeno: n(v.almeno) } : null;
     case 'libro': return s(v.chiave) ? { tipo: 'lettura', categoria: 'libro', chiave: s(v.chiave) } : null;
     case 'film': return s(v.chiave) ? { tipo: 'lettura', categoria: 'film', chiave: s(v.chiave) } : null;
@@ -233,6 +240,7 @@ export function scomponiCondizione(c: RequisitoSpillo): SceltaCondizione | null 
     case 'squadra': return { stato: 'squadra', operatore: 'in-squadra', valori: { membro: c.membro } };
     case 'richiesta': return { stato: 'richiesta', operatore: 'completata', valori: { richiesta: c.richiesta } };
     case 'evento': return { stato: 'evento', operatore: 'avvenuto', valori: { evento: c.evento } };
+    case 'pesca-sessione': return {stato:'pesca-sessione',operatore:c.valore?'si':'no',valori:{dato:c.dato}};
     case 'contatore': return { stato: 'contatore', operatore: 'almeno', valori: { cosa: c.cosa, almeno: c.almeno } };
     case 'lettura': return { stato: c.categoria, operatore: c.categoria === 'libro' ? 'letto' : 'visto', valori: { chiave: c.chiave } };
     case 'attivita': return { stato: 'attivita', operatore: 'svolta', valori: { attivita: c.attivita, volte: c.volte } };

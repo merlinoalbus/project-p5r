@@ -30,6 +30,11 @@
   li + li { margin-top: 5px; }
   .passo { border-top: 1px solid var(--bordo); padding-top: 8px; }
   .elenco-chiusi { color: var(--verde); }
+  .piano { padding-left: 30px; }
+  .piano > li { padding: 10px; border-bottom: 1px solid var(--bordo); overflow-wrap: anywhere; }
+  .piano .attiva { border: 2px solid var(--blu); background: var(--bg3); }
+  .piano .chiusa { border-left: 3px solid var(--verde); }
+  .criterio { white-space: pre-wrap; overflow-wrap: anywhere; }
   .conteggi { margin-top: 12px; color: var(--testo2); font-size: 12px; }
   .scorre { overflow-x: auto; overscroll-behavior-x: contain; }
   table { border-collapse: separate; border-spacing: 3px; width: 100%; min-width: 640px; }
@@ -72,6 +77,10 @@
 </header>
 <p id="errore" class="errore" role="alert" hidden></p>
 <main>
+  <section class="card largo" aria-labelledby="titolo-piano">
+    <h2 id="titolo-piano">Sequenza dei punti</h2>
+    <div id="piano-atomico"></div>
+  </section>
   <section class="card" aria-labelledby="titolo-adesso">
     <h2 id="titolo-adesso">Adesso</h2>
     <div id="adesso"></div>
@@ -146,6 +155,15 @@
     const scroll = { x: window.scrollX, y: window.scrollY, matrice: document.getElementById('scorrimento-matrice').scrollLeft };
     const fasi = stringhe(r.fasi), lotti = elenco(r.lotti).map(oggetto), c = oggetto(r.cruscotto);
     const adesso = oggetto(c.adesso), consegna = oggetto(c.ultimaConsegna), decisioni = oggetto(c.decisioni);
+    const piano = oggetto(r.pianoAtomico), voci = elenco(piano.voci).map(oggetto);
+    const statiPiano = { 'chiuso-codice': 'Chiuso nel codice · da pubblicare', 'in-corso': 'IN CORSO', 'incompleto': 'INCOMPLETO · fermo', 'da-fare': 'Da fare', 'da-riscontrare': 'Copertura da riscontrare', 'attesa-utente': 'Attesa decisione utente', 'riservato-utente': 'Riservato all’utente · escluso per l’agente', 'chiuso': 'Chiuso' };
+    const conteggiPiano = Object.entries(statiPiano).map(([s, nome]) => `${nome}: ${voci.filter(v => v.stato === s).length}`).join(' · ');
+    document.getElementById('piano-atomico').innerHTML = `<p>${esc(piano.nota)}</p><p><b>${esc(conteggiPiano)}</b></p>`
+      + `<p>Limite per punto: ${esc(piano.limiteMinuti)} minuti. Una sola attività in corso; nessuna chiusura senza verifica distinta.</p>`
+      + (stringhe(piano.coperturaMancante).length ? `<details id="piano-copertura" open><summary>Copertura ancora da completare: non è un totale certificato dei residui</summary>${lista(piano.coperturaMancante)}</details>` : '')
+      + `<ol class="piano">${voci.map((v, i) => `<li class="${v.stato === 'in-corso' ? 'attiva' : v.stato === 'chiuso-codice' || v.stato === 'chiuso' ? 'chiusa' : ''}"><details id="piano-voce-${i}"><summary><span class="stato">${esc(statiPiano[v.stato] || v.stato)}</span> ${esc(v.id)} · ${esc(v.lotto)} · ${esc(v.titolo)}</summary><p class="criterio">${esc(v.criterio)}</p><p class="nota">Fonte: ${esc(v.fonte)}</p></details></li>`).join('')}</ol>`
+      + `<details id="piano-requisiti"><summary>Copertura requisiti L5–L7: ${elenco(piano.requisitiCopertura).length} riferimenti da riconciliare con le consegne, esclusi dal conteggio delle azioni</summary>${elenco(piano.requisitiCopertura).map(oggetto).map(v => `<p><b>${esc(v.id)}</b> · ${esc(v.titolo)}</p><p class="nota">${esc(v.fonte)}</p>`).join('')}</details>`
+      + `<details id="piano-frasi"><summary>Frasi L6: ${elenco(piano.frasiCopertura).length} identità censite; il sottoinsieme aperto va riscontrato sui dati correnti</summary>${elenco(piano.frasiCopertura).map(oggetto).map(v => `<p><b>${esc(v.id)}</b> · ${esc(v.chiavi)}</p><p class="nota">${esc(v.fonte)} · ${esc(v.criterio)}</p>`).join('')}</details>`;
     document.getElementById('obiettivo').textContent = testo(r.obiettivo);
     document.getElementById('adesso').innerHTML = `<p class="attivita-corrente">${esc(testo(adesso.attivita) || testo(r.mandatoCorrente))}</p>`
       + `<dl>${riga('Stato', adesso.stato, 'adesso-stato')}${riga('Responsabile', adesso.responsabile, 'adesso-responsabile')}`

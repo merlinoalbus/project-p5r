@@ -1,4 +1,5 @@
 import { eDote, nomeDote, type DoteChiave } from './doti.js';
+import { ATTIVITA_PESCA, REGOLA_PESCA, type EffettoPescaVoce } from './pesca.js';
 
 export type CategoriaLetturaVoce = 'libro' | 'film' | 'videogioco';
 export interface DoteNoteVoce { dote: DoteChiave; note: 1 | 2 | 3 }
@@ -6,7 +7,7 @@ export type EffettoLegacyVoce =
   | { tipo: 'dote'; dote: DoteChiave; note: 1 | 2 | 3 }
   | { tipo: 'lettura'; categoria: CategoriaLetturaVoce; chiave: string; almeno: number | null }
   | { tipo: 'turno'; attivita: string; doti?: DoteNoteVoce[] };
-export type EffettoVoce = EffettoLegacyVoce | {
+export type EffettoVoce = EffettoLegacyVoce | EffettoPescaVoce | {
   tipo: 'acquisto'; articolo: string; variante: DoteChiave | null;
   fortuna: boolean | null; sostituisceDoti: string[];
 };
@@ -42,9 +43,15 @@ const oggetto = (x: unknown): Record<string, unknown> | null => x && typeof x ==
 const nota = (x: unknown): x is 1 | 2 | 3 => x === 1 || x === 2 || x === 3;
 export function normalizzaEffettoVoce(x: unknown): EffettoVoce | null {
   const o = oggetto(x); if (!o) return null;
-  const campi: Record<string, readonly string[]> = { dote: ['tipo','dote','note'], lettura: ['tipo','categoria','chiave','almeno'], turno: ['tipo','attivita','doti'], acquisto: ['tipo','articolo','variante','fortuna','sostituisceDoti'] };
+  const campi: Record<string, readonly string[]> = { dote: ['tipo','dote','note'], lettura: ['tipo','categoria','chiave','almeno'], turno: ['tipo','attivita','doti'], acquisto: ['tipo','articolo','variante','fortuna','sostituisceDoti'], pesca: ['tipo','regola','attivita','sostituisceTurni','sostituisceDoti'] };
   if (typeof o.tipo!=='string'||!Object.hasOwn(campi,o.tipo)||Object.keys(o).some((k) => !campi[o.tipo as string]!.includes(k))) return null;
   if (o.tipo === 'dote') return eDote(o.dote) && nota(o.note) ? { tipo: 'dote', dote: o.dote, note: o.note } : null;
+  if (o.tipo === 'pesca') {
+    const ids = (v: unknown): v is string[] => Array.isArray(v) && v.every(x => typeof x === 'string' && /^[0-9a-f]{32}$/.test(x)) && new Set(v).size === v.length;
+    if (o.regola !== REGOLA_PESCA || o.attivita !== ATTIVITA_PESCA || !ids(o.sostituisceTurni) || !ids(o.sostituisceDoti)
+      || o.sostituisceTurni.some(x => (o.sostituisceDoti as string[]).includes(x))) return null;
+    return { tipo: 'pesca', regola: REGOLA_PESCA, attivita: ATTIVITA_PESCA, sostituisceTurni: [...o.sostituisceTurni].sort(), sostituisceDoti: [...o.sostituisceDoti].sort() };
+  }
   if (o.tipo === 'lettura') {
     if (typeof o.categoria!=='string'||!['libro', 'film', 'videogioco'].includes(o.categoria) || typeof o.chiave !== 'string' || !o.chiave.trim()) return null;
     const almeno = o.almeno == null ? null : Number.isSafeInteger(o.almeno) && (o.almeno as number) >= 1 ? o.almeno as number : undefined;
@@ -75,5 +82,6 @@ export function descriviEffettoVoce(e: EffettoVoce): string {
   if (e.tipo === 'dote') return `${nomeDote(e.dote)}: ${e.note} ${e.note === 1 ? 'nota' : 'note'}`;
   if (e.tipo === 'lettura') return `${e.chiave}: ${e.almeno === null ? 'completato' : `almeno ${e.almeno}`}`;
   if (e.tipo === 'turno') return `Turno: ${e.attivita}`;
+  if (e.tipo === 'pesca') return 'Pesca a Ichigaya: sessione osservata';
   return `Acquisto: ${e.articolo}${e.variante ? ` · ${nomeDote(e.variante)}` : ' · variante da dichiarare'}${e.fortuna === null ? ' · Fortuna non dichiarata' : e.fortuna ? ' · con Fortuna' : ''}`;
 }

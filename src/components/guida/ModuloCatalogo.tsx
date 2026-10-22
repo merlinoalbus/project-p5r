@@ -51,8 +51,9 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
   const [condizioniScelte, setCondizioniScelte] = useState(!nuovo);
   const impostaCondizioni = (v: RequisitoSpillo[]) => { setCondizioni(v); setCondizioniScelte(true); setCondizioniDaRisolvere(false); };
   // Il modulo delle attività deve vedere le condizioni effettivamente inviate, non una copia iniziale.
-  const datiModulo = tipo === 'attivita' ? { ...dati, condizioni_json: condizioni, _condizioniDaRisolvere: condizioniDaRisolvere } : dati;
+  const datiModulo = tipo === 'attivita' ? { ...dati, condizioni_json: condizioni, _condizioniDaRisolvere: condizioniDaRisolvere, _condizioniRaw: elemento?.dati.condizioni_json ?? null } : dati;
   const fonteConfidente = tipo === 'attivita' && typeof dati.confidente_chiave === 'string' && dati.confidente_chiave.length > 0;
+  const fontePesca = tipo === 'attivita' && typeof dati.pesca_regola_chiave === 'string' && dati.pesca_regola_chiave.length > 0;
   const [erroreSalvataggio, setErroreSalvataggio] = useState<string | null>(null);
   const regoleValide = !modulo.conCondizioni || (!condizioniDaRisolvere && condizioni.every((c) => normalizzaRequisitoSpillo(c) !== null));
   const [occupato, setOccupato] = useState(false);
@@ -62,11 +63,12 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
 
   /** Prepara il corpo col modulo del tipo (più le condizioni, se previste) e crea o aggiorna l'elemento; a buon fine notifica e avvisa il genitore. */
   const salva = async () => {
+    if (occupato || !regoleValide || !modulo.valido(datiModulo)) return;
     setOccupato(true);
     setErroreSalvataggio(null);
     try {
       const corpo: Dati = modulo.prepara(datiModulo);
-      if (modulo.conCondizioni && (!nuovo || condizioniScelte)) corpo.condizioni_json = condizioni;
+      if (modulo.conCondizioni && (!nuovo || condizioniScelte || fontePesca)) corpo.condizioni_json = condizioni;
       else if (nuovo) delete corpo.condizioni_json;
       if (nuovo) {
         const e = await creaElementoCatalogo(tipo, corpo);
@@ -202,10 +204,11 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
             <p className="m-0 whitespace-pre-wrap break-all">{String(elemento?.dati.condizioni_json)}</p>
             <button type="button" className="btn btn-secondary min-h-11 self-start" disabled={occupato} onClick={() => impostaCondizioni(condizioni)}>Usa le condizioni leggibili qui sotto e scarta le altre parti</button>
           </div>}
-          {fonteConfidente && !condizioniDaRisolvere && condizioni.length === 0
-            ? <p className="m-0 text-sm">Condizioni proprie dell’attività: nessuna. Disponibilità e requisiti vengono dalla fonte Confidente.</p>
+          {(fonteConfidente || fontePesca) && !condizioniDaRisolvere && condizioni.length === 0
+            ? <p className="m-0 text-sm">Condizioni proprie dell’attività: nessuna. {fontePesca ? 'L’ingresso dipende dalla sede; profili, vie documentate e casi ignoti vengono dalla fonte pesca.' : 'Disponibilità e requisiti vengono dalla fonte Confidente.'}</p>
             : <CondizioniEditor condizioni={condizioni} onCambia={impostaCondizioni} disabilitato={occupato || condizioniDaRisolvere} />}
-          {nuovo && !fonteConfidente && condizioni.length === 0 && <div className="space-y-2 text-sm">
+          {fontePesca && !!condizioni.length && <div className="flex flex-col gap-2 text-sm"><p role="alert" className="m-0 text-warning">La fonte pesca richiede l’eredità della sede e dei profili. Le condizioni proprie mostrate devono essere rimosse con un gesto esplicito prima di salvare.</p><button type="button" className="btn btn-secondary touch self-start" disabled={occupato || condizioniDaRisolvere} onClick={() => impostaCondizioni([])}>Rimuovi queste condizioni proprie e usa la fonte pesca</button></div>}
+          {nuovo && !fonteConfidente && !fontePesca && condizioni.length === 0 && <div className="space-y-2 text-sm">
             <p>{condizioniScelte ? 'Hai scelto di non aggiungere condizioni proprie.' : 'Le condizioni proprie non sono ancora state scelte. Una frase non interamente compresa richiederà una tua scelta prima del salvataggio.'}</p>
             {!condizioniScelte && <button type="button" className="btn btn-secondary min-h-11" disabled={occupato} onClick={() => setCondizioniScelte(true)}>Nessuna condizione propria</button>}
           </div>}

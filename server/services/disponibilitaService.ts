@@ -17,6 +17,7 @@
 // ============================================================
 
 import { getDb, prepared } from '../db/dbService.js';
+import { leggiFattiPesca } from './pescaLetture.js';
 import { dotiSociali, ranghiConfidenti } from './partiteService.js';
 import { finestreDungeon, type FinestraDungeon } from './datiGuida.js';
 import { statoPartitaSemafori, type StatoPartitaSemafori } from './semaforiService.js';
@@ -156,7 +157,7 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
 /** Lo stesso stato a un altro giorno di gioco (l'anteprima dell'editor, `POST /api/condizioni/valuta` con `giorno`): data, giorno della
  *  settimana e arco si ricalcolano, le memorie degli esiti ripartono vuote; tutto il resto della partita resta com'è. */
 export function statoAlGiorno(st: StatoDisponibilita, giorno: string): StatoDisponibilita {
-  return { ...st, dataGioco: giorno, giornoSettimana: giornoDellaSettimana(giorno), arcoCorrente: arcoAllaData(giorno, finestreDungeon()), esitiPosti: new Map(), postiInCorso: new Set() };
+  return { ...st, dataGioco: giorno, fattiPesca: st.partitaId===undefined?undefined:new Map(leggiFattiPesca(st.partitaId,{giorno,fascia:st.fasciaGioco??'giorno',ordineVisita:Number.MAX_SAFE_INTEGER}).map(f=>[f.evento,f.valore])), giornoSettimana: giornoDellaSettimana(giorno), arcoCorrente: arcoAllaData(giorno, finestreDungeon()), esitiPosti: new Map(), postiInCorso: new Set() };
 }
 
 /** I pin segnati in una partita: la stessa regola del «raccolto» che il visore mostra (`mappeService.dettagliSpillo`), cioè lo stato del

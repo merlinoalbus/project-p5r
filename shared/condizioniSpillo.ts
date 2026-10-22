@@ -55,6 +55,9 @@ export type ContatoreChiave = (typeof CONTATORI)[number]['chiave'];
 /** Gli eventi di storia. Quelli con `membro` sono «entra in squadra»: **si calcolano** dalla squadra della
  *  partita (`membro_squadra_partita.in_squadra`) e non si segnano a mano; niente date canoniche. */
 export const EVENTI_STORIA = [
+  { chiave: 'guardiano-ichigaya-catturato', nome: 'Guardiano di Ichigaya catturato' },
+  { chiave: 'boss-ichigaya-catturato', nome: 'Boss di Ichigaya catturato' },
+  { chiave: 'terzo-semestre-avviato', nome: 'Terzo semestre avviato' },
   { chiave: 'mansarda-pulita', nome: 'Mansarda del Leblanc pulita' },
   { chiave: 'laptop-riparato', nome: 'Laptop del Leblanc riparato' },
   { chiave: 'niijima-banco-soci-accessibile', nome: 'Banco della lobby dei soci di Niijima raggiunto e utilizzabile' },
@@ -138,6 +141,7 @@ export type RequisitoSpillo =
   /** Punti fedeltà di un negozio (Partita → Progressi). */
   | { tipo: 'punti-negozio'; negozio: string; punti: number }
   | { tipo: 'evento'; evento: string }
+  | { tipo: 'pesca-sessione'; dato: 'esca-speciale'|'tentativo-residuo'|'guardiano-catturato'|'boss-catturato'; valore: boolean }
   | { tipo: 'contatore'; cosa: ContatoreChiave; almeno: number }
   // — scorta —
   | { tipo: 'persona-arcano'; arcano: string }
@@ -328,6 +332,7 @@ export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni
     case 'rango-cliente': return `grado cliente ${RANGHI_CLIENTE.find((x) => x.chiave === r.rango)?.nome ?? r.rango} da ${nomi.negozi?.[r.negozio] ?? r.negozio}`;
     case 'punti-negozio': return `almeno ${r.punti} punti negozio da ${nomi.negozi?.[r.negozio] ?? r.negozio}`;
     case 'evento': return EVENTI_STORIA.find((e) => e.chiave === r.evento)?.nome ?? r.evento;
+    case 'pesca-sessione': return `Nella visita di pesca: ${r.dato==='esca-speciale'?'esca speciale posseduta':r.dato==='tentativo-residuo'?'un tentativo ancora disponibile':r.dato==='guardiano-catturato'?'Guardiano già catturato':'Boss già catturato'}${r.valore?'':' (no)'}`;
     case 'contatore': return `${CONTATORI.find((c) => c.chiave === r.cosa)?.nome ?? r.cosa}: almeno ${r.almeno}`;
     case 'persona-arcano': return 'Persona in scorta dell’Arcano ' + r.arcano;
     case 'persona-abilita': return `${nomi.persone?.[r.persona] ?? r.persona} in scorta con ${nomi.abilita?.[r.abilita] ?? r.abilita}`;
@@ -417,6 +422,7 @@ export function normalizzaRequisitoSpillo(x: unknown, profondita = 0): Requisito
     case 'rango-cliente': { const negozio = chiavePulita(o.negozio, 120); const rango = testoPulito(o.rango, 20); return negozio && rango && RANGHI_CLIENTE.some((x) => x.chiave === rango) ? { tipo: 'rango-cliente', negozio, rango: rango as RangoCliente } : null; }
     case 'punti-negozio': { const negozio = chiavePulita(o.negozio, 120); const punti = intero(o.punti, 1, 999999); return negozio && punti ? { tipo: 'punti-negozio', negozio, punti } : null; }
     case 'evento': { const evento = chiavePulita(o.evento, 60); return evento && EVENTI_STORIA.some((e) => e.chiave === evento) ? { tipo: 'evento', evento } : null; }
+    case 'pesca-sessione': return ['esca-speciale','tentativo-residuo','guardiano-catturato','boss-catturato'].includes(String(o.dato))&&typeof o.valore==='boolean'?{tipo:'pesca-sessione',dato:o.dato as 'esca-speciale'|'tentativo-residuo'|'guardiano-catturato'|'boss-catturato',valore:o.valore}:null;
     case 'contatore': { const cosa = testoPulito(o.cosa, 40); const almeno = intero(o.almeno, 1, 9999); return cosa && CONTATORI.some((c) => c.chiave === cosa) && almeno ? { tipo: 'contatore', cosa: cosa as ContatoreChiave, almeno } : null; }
     case 'persona-arcano': { const arcano = testoPulito(o.arcano, 80); return arcano ? { tipo: 'persona-arcano', arcano } : null; }
     case 'persona-abilita': { const persona = testoPulito(o.persona, 120), abilita = testoPulito(o.abilita, 120); return persona && abilita ? { tipo: 'persona-abilita', persona, abilita } : null; }

@@ -26,6 +26,7 @@ import { sqlPersonaDeiMemento } from '../catturePersona.js';
 import type { DisponibilitaDto, EsitoCondizione, RequisitoRango, SemaforoRequisitoDto, ValutazioneCondizioneDto } from '../../../shared/types.js';
 import type { StatoDisponibilita } from '../disponibilitaService.js';
 import type { StatoPartitaSemafori } from '../semaforiService.js';
+import { EVENTI_PESCA } from '../../../shared/pesca.js';
 
 /** Lo stato che il valutatore legge: quello dei semafori, con quel che serve alle condizioni del catalogo e dei pin quando c'è (chi valuta
  *  solo requisiti di rango può passare lo stato dei semafori: quel che manca vale «niente», mai un errore). */
@@ -257,6 +258,10 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
     }
     case 'evento': {
       const nome = EVENTI_STORIA.find((e) => e.chiave === r.evento)?.nome ?? r.evento;
+      if(EVENTI_PESCA.includes(r.evento as typeof EVENTI_PESCA[number])){
+        const valore=st.fattiPesca?.get(r.evento)??'ignoto';
+        return esito('evento',valore==='ignoto'?'grigio':valore==='avvenuto'?'verde':'rosso',`${nome}: ${valore==='ignoto'?'non attestato per questo momento':valore==='avvenuto'?'avvenuto secondo le fonti temporali':'non ancora avvenuto al limite osservato'}`);
+      }
       const membro = membroDellEvento(r.evento);
       if (membro) {
         // «In squadra» è booleano (2026-09-13): chi non è segnato non è in squadra; il rimando alla scheda resta nel dettaglio
@@ -267,6 +272,11 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
       // in un requisito di rango l'evento si segna dal Confidente: «da segnare», non un blocco (il «Condizione soddisfatta» lo scrive)
       if (opz.comeRequisito) return { ...base, tipo: 'evento', confermato: ok, stato: ok ? 'verde' : 'grigio', dettaglio: ok ? `${nome}: segnato` : `${nome}: da segnare, qui o in Partita → Progressi`, manuale: true };
       return esito('evento', ok ? 'verde' : 'rosso', ok ? `${nome}: avvenuto` : `${nome}: non ancora segnato (Partita → Progressi)`);
+    }
+    case 'pesca-sessione': {
+      const o=st.contestoPesca;if(!o)return esito('pesca-sessione','grigio','Questa condizione richiede il contesto di una visita di pesca.');
+      const v=r.dato==='esca-speciale'?o.escaSpecialePosseduta:r.dato==='tentativo-residuo'?o.rangoPeriziaOsservato===null||o.tentativiConsumati===null?null:o.rangoPeriziaOsservato+2-o.tentativiConsumati>0:o.catture===null?null:o.catture.some(c=>c.specie===(r.dato==='guardiano-catturato'?'guardiano':'boss'));
+      return esito('pesca-sessione',v===null?'grigio':v===r.valore?'verde':'rosso',v===null?'Osservazione della visita ignota.':descriviRequisitoSpillo(r));
     }
     case 'contatore': {
       const v = st.contatori?.get(r.cosa) ?? 0;
