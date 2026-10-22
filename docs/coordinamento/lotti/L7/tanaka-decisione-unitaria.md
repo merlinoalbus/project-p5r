@@ -1,5 +1,13 @@
 # L7 — Tanaka e risoluzione dei raccordi documentali
 
+## Preparazione corrente23ottobre2026,00:50 italiana
+
+Fotografia readonly22:46:07Z:20offerte visibili e28proposte, tutte daapprovare; nessuna confermata/scartata. Nessun dato o consenso applicato. Il confronto nell'app è preparatorio: espone20offerte correnti,18Royal proposte e tutte le tuple pertinenti nei tre stati. Le assenze/righe aggiunte sono dichiarate, non ricreate. Il manifestpubblico `shared/tanakaConfronto.json` usa esclusivamente le identità documentate e il listinoG034(6senza grado/4Nero/4Oscurità/4Caos).
+
+**Correzione del piano proposto sotto:** l'originale prescrive10chiavi conservate+8offerte nuove e10nascoste; la diversa proposta di18nuove identità commerciali non era approvata. Il confronto conserva la proposta originale senza applicarla. Le due corrispondenze possibili e la famigliaGemme→6Magatama restano esplicite; non diventano equivalenze accertate.
+
+**Non è ancora una decisione applicabile né una chiusuraR7-13b.** Prima del consenso unico rimangonoL7-TANAKA-STORICO,SNAPSHOT,NOTA e la transazione unitaria conCAS/ricevuta/ripristino/import-export. La fonte dice «oltre»10.000/50.000/100.000, il valutatore usa>=: il confine resta da risolvere. Il pannello non offre conferme individuali e mostra le condizioni dei vecchi payload separatamente dal corrente post124. La procedura individuale preesistente non realizza il piano unitario.
+
 ## Riscontro distinto del21ottobre2026
 
 Codice letto:389387be; specifica originale43ad8889, R7-13b/19/22.

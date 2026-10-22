@@ -1,5 +1,7 @@
 # Richieste dell'utente ancora aperte (elenco di controllo del PM)
 
+**23 ottobre,00:50 italiana — L5-SUCCHI chiuso con PASS distinto.** Punto attivoTANAKA-UNITA: confronto readonly nell'app20correnti/18Royal/28proposte, nessuna decisione commerciale. R7-13b non chiuso; storico,snapshot,nota e conferma atomica ancora da completare. Limite00:54:30.
+
 **23 ottobre,00:39 italiana — A10-BROWSER chiuso con PASS distinto entrolimite.** OraL5-SUCCHI: separazione corrente confermata; correzione etichettaR5-11 PASSstatico,controlli verdi,pubblicazione e riscontro live pendenti. Scadenza00:45. Nessun trasferimento offerte/acquisti,altri residui aperti.
 
 **23 ottobre,00:30 italiana — A10-BROWSER ancora aperto per A10-BR01.** Difetto visivo indipendentemente rilevato e confermato: classeCSS dei numeri. Correzione minima applicata; controlli/rilascio/riscontro pubblicato ancora richiesti. Nessuna prova in scrittura o chiusura globale.

@@ -1,10 +1,10 @@
 {
   "obiettivo": "Completare i lotti L0–L11 della razionalizzazione sul ramo newreview e pubblicarli funzionanti su p5s",
-  "aggiornato": "2026-10-22T22:39:20Z",
+  "aggiornato": "2026-10-22T22:53:25Z",
   "cruscotto": {
     "adesso": {
-      "attivita": "L5-SUCCHI: pin/luoghi distinti e offerta storica invariata. Correzione etichetta negozio dal DTO corrente PASS statico Galaxy;typecheck37171/lint9705/build86807 verdi. Rilascio e riscontro finale entro00:45.",
-      "stato": "Unico punto L5-SUCCHI. Avvio00:35 italiana23ott; scadenza00:45.",
+      "attivita": "Tanaka: preparazione confronto readonly20/18/28 PASS statico Galaxy; T-UNITA-01 corretto, typecheck97123/lint4889/build38451 verdi. Pubblicazione in corso; CI e browser ancora aperti, limite00:54:30.",
+      "stato": "Unico punto L7-TANAKA-UNITA. Avvio00:44:30 italiana23ott; scadenza00:54:30.",
       "responsabile": "Coordinatore implementa in sequenza; Galaxy verifica in sola lettura. Nessun esecutore parallelo attivo.",
       "prossimaConsegna": "Completare i gruppi residui dei lotti: Covo e distributori L5, pesca/condizioni L6 e catalogo/scambi L7; predisporre le decisioni concrete riservate all'utente. Nessun lotto dichiarato concluso per il solo rilascio137."
     },
@@ -51,7 +51,6 @@
         "titolo": "Condizioni uniche",
         "stato": "In corso",
         "cosaManca": [
-          "A10: B01/B02 chiusi nel codice e PASS statico integrato Galaxy. Typecheck6151/lint38004/build84257 exit0. Migrazioni138/029 non applicate; pubblicazione, conservazione reale e osservazione runtime restano aperte.",
           "I71 Aojiru è rilasciato con consumazioni e provenienze, schema 136/28; l'audit della rettifica è osservato, mentre la ricerca R6 resta aperta. Writer, replay, undo e restore non sono stati esercitati: non trasformare il gate readonly in copertura di quei gesti. Niijima 134 è già consegnato.",
           "Completare gli esiti della riconciliazione delle frasi: 201 righe osservate dopo 136, ricerca ancora aperta. Il precedente conteggio di 23 da ricercare appartiene alla lettura dopo 135 e non viene presentato come un nuovo conteggio dopo 136."
         ],
@@ -639,15 +638,15 @@
         "id": "L5-SUCCHI",
         "lotto": "L5",
         "titolo": "Riscontrare separazione Chiosco succhi/KiyasuKu nei consumatori",
-        "stato": "in-corso",
+        "stato": "chiuso",
         "fonte": "lotti/L5/riconciliazione-corrente.md",
-        "criterio": "Nessun trasferimento di offerte o acquisti."
+        "criterio": "PASS Galaxy: pin1486/1487 distinti; offerte/acquisti non trasferiti. Nome corrente daFK nel componente condiviso,993108c0/pipeline39866562354 e browser indipendente positivi. Non chiude L5."
       },
       {
         "id": "L7-TANAKA-UNITA",
         "lotto": "L7",
         "titolo": "Predisporre unica decisione20correnti affiancati ai18Royal",
-        "stato": "da-fare",
+        "stato": "in-corso",
         "fonte": "lotti/L7/tanaka-decisione-unitaria.md",
         "criterio": "Nessuna conferma frammentata."
       },
@@ -674,6 +673,38 @@
         "stato": "da-fare",
         "fonte": "lotti/L7/tanaka-decisione-unitaria.md",
         "criterio": "Nota effettivamente consultabile."
+      },
+      {
+        "id": "L7-TANAKA-TRANSAZIONE",
+        "lotto": "L7",
+        "titolo": "Conferma atomica Tanaka20/18 con CAS completo",
+        "stato": "da-fare",
+        "fonte": "lotti/L7/tanaka-decisione-unitaria.md",
+        "criterio": "Obbligo originale da completare con gate distinto prima del consenso/applicazione; nessun dato personale nel repository."
+      },
+      {
+        "id": "L7-TANAKA-RICEVUTA",
+        "lotto": "L7",
+        "titolo": "Ricevuta e recupero idempotente della decisione Tanaka",
+        "stato": "da-fare",
+        "fonte": "lotti/L7/tanaka-decisione-unitaria.md",
+        "criterio": "Obbligo originale da completare con gate distinto prima del consenso/applicazione; nessun dato personale nel repository."
+      },
+      {
+        "id": "L7-TANAKA-RIPRISTINO",
+        "lotto": "L7",
+        "titolo": "Ripristino unitario conservativo della decisione Tanaka",
+        "stato": "da-fare",
+        "fonte": "lotti/L7/tanaka-decisione-unitaria.md",
+        "criterio": "Obbligo originale da completare con gate distinto prima del consenso/applicazione; nessun dato personale nel repository."
+      },
+      {
+        "id": "L7-TANAKA-IMPORT",
+        "lotto": "L7",
+        "titolo": "Import export coerenti del piano e delle fotografie Tanaka",
+        "stato": "da-fare",
+        "fonte": "lotti/L7/tanaka-decisione-unitaria.md",
+        "criterio": "Obbligo originale da completare con gate distinto prima del consenso/applicazione; nessun dato personale nel repository."
       },
       {
         "id": "L7-TANAKA-CONSENSO",

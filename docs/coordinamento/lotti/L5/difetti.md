@@ -1,5 +1,9 @@
 # L5 — difetti accertati nell'audit del 21 ottobre 2026
 
+## 23ottobre — L5-SUCCHI e nome corrente degli effetti: PASS
+
+Pin1486/1487 e relative schede distinti osservati su138; offertaAojiru e acquisti non trasferiti. Eliminata l'etichetta fissa nell'editor: titolo corrente dalDTO articolo e negozio dallaFK reale, componente condiviso con gli abbinamenti.993108c0/pipeline39866562354 riuscita; typecheck37171/lint9705/build86807 verdi; Galaxy verifica indipendentemente codice/CI/etichetta pubblicata. Nessuna modifica della voce o spunta. Il raccordo commerciale non viene deciso da questo riscontro; L5 resta aperto.
+
 ## 21/10 20:24Z —1636 rimosso, esito reale acquisito
 
 137 pubblicata in389387be, pipeline82 riuscita. Prima della rimozione, confronto46tabelle utente e95main identico; Cestino e sequenza preservati. Singolo DELETE204 con UID/CAS freschi e nessuna dipendenza. Dopo: solo spillo/cestino diversi, riga originale integrale conservata in una radice pin, altri dati confrontati identici. Coordinatore e Galaxy: Pin Lavoro part-time con Rimetti/schema137; Galaxy osserva anche l’assenza sulla Banchina e tre pin rimanenti. Gate finale distinto PASS, nessun errore/warn nelle nuove schede. Nessun restore o test. Dettagli in rimozione-pin-1636.md.

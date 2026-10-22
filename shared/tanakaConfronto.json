@@ -1,0 +1,173 @@
+{
+  "versione": 1,
+  "fonte": "G-034 e L7 dati §11.1 / modifiche §2 alla revisione43ad8889",
+  "negozio": "tanaka-affari-loschi",
+  "chiaviCorrenti": [
+    "tanaka-affari-loschi/nirvana-ring",
+    "tanaka-affari-loschi/black-stone",
+    "tanaka-affari-loschi/five-inch-nail",
+    "tanaka-affari-loschi/condenser-lens",
+    "tanaka-affari-loschi/inspired-hand-mirror",
+    "tanaka-affari-loschi/gemme-elementali",
+    "tanaka-affari-loschi/hercules-anklet",
+    "tanaka-affari-loschi/heros-eyepatch",
+    "tanaka-affari-loschi/black-robe",
+    "tanaka-affari-loschi/magic-rosary",
+    "tanaka-affari-loschi/black-kogatana",
+    "tanaka-affari-loschi/atom-match",
+    "tanaka-affari-loschi/retribution-mirror",
+    "tanaka-affari-loschi/holy-cloth",
+    "tanaka-affari-loschi/ouija-board",
+    "tanaka-affari-loschi/dispel-ring",
+    "tanaka-affari-loschi/model-gun",
+    "tanaka-affari-loschi/roland-medal",
+    "tanaka-affari-loschi/homunculus",
+    "tanaka-affari-loschi/crown-of-salvation"
+  ],
+  "royal": [
+    {
+      "chiave": "tanaka-affari-loschi/five-inch-nail",
+      "nome": "Chiodo ossidato",
+      "catalogo": "consumabile/chiodo-ossidato",
+      "prezzo": 5000,
+      "grado": "iniziale",
+      "rapporto": "Corrispondenza soltanto possibile"
+    },
+    {
+      "chiave": "tanaka-affari-loschi/inspired-hand-mirror",
+      "nome": "Spec. senso spirit.",
+      "catalogo": "consumabile/spec-senso-spirit-2",
+      "prezzo": 5000,
+      "grado": "iniziale",
+      "rapporto": "Corrispondenza soltanto possibile"
+    },
+    {
+      "chiave": "tanaka-affari-loschi/gemme-elementali",
+      "nome": "Magatama infernale",
+      "catalogo": "consumabile/magatama-infernale",
+      "prezzo": 6000,
+      "grado": "iniziale",
+      "rapporto": "Famiglia di sei Magatama; non sei equivalenze"
+    },
+    {
+      "chiave": "tanaka-affari-loschi/magatama-ciclonico",
+      "nome": "Magatama ciclonico",
+      "catalogo": "consumabile/magatama-ciclonico",
+      "prezzo": 6000,
+      "grado": "iniziale",
+      "rapporto": "Nuova offerta proposta"
+    },
+    {
+      "chiave": "tanaka-affari-loschi/magatama-del-gelo",
+      "nome": "Magatama del gelo",
+      "catalogo": "consumabile/magatama-del-gelo",
+      "prezzo": 6000,
+      "grado": "iniziale",
+      "rapporto": "Nuova offerta proposta"
+    },
+    {
+      "chiave": "tanaka-affari-loschi/magatama-elettrico",
+      "nome": "Magatama elettrico",
+      "catalogo": "consumabile/magatama-elettrico",
+      "prezzo": 6000,
+      "grado": "iniziale",
+      "rapporto": "Nuova offerta proposta"
+    },
+    {
+      "chiave": "tanaka-affari-loschi/magatama-divino",
+      "nome": "Magatama divino",
+      "catalogo": "consumabile/magatama-divino",
+      "prezzo": 6000,
+      "grado": "nero",
+      "rapporto": "Nuova offerta proposta"
+    },
+    {
+      "chiave": "tanaka-affari-loschi/magatama-esplosivo",
+      "nome": "Magatama esplosivo",
+      "catalogo": "consumabile/magatama-esplosivo",
+      "prezzo": 6000,
+      "grado": "nero",
+      "rapporto": "Nuova offerta proposta"
+    },
+    {
+      "chiave": "tanaka-affari-loschi/black-robe",
+      "nome": "Veste nera",
+      "catalogo": "materiale/veste-nera",
+      "prezzo": 500,
+      "grado": "nero",
+      "rapporto": "Abbinamento proposto"
+    },
+    {
+      "chiave": "tanaka-affari-loschi/spec-spirit-oscuro",
+      "nome": "Spec. spirit. oscuro",
+      "catalogo": "consumabile/spec-spirit-oscuro",
+      "prezzo": 5000,
+      "grado": "nero",
+      "rapporto": "Nuova offerta proposta"
+    },
+    {
+      "chiave": "tanaka-affari-loschi/black-kogatana",
+      "nome": "Kogatana nera",
+      "catalogo": "materiale/kogatana-nera",
+      "prezzo": 1000,
+      "grado": "oscuro",
+      "rapporto": "Abbinamento proposto"
+    },
+    {
+      "chiave": "tanaka-affari-loschi/holy-cloth",
+      "nome": "Sacra Sindone",
+      "catalogo": "consumabile/sacra-sindone",
+      "prezzo": 10000,
+      "grado": "oscuro",
+      "rapporto": "Abbinamento proposto"
+    },
+    {
+      "chiave": "tanaka-affari-loschi/ouija-board",
+      "nome": "Tavola Ouija",
+      "catalogo": "consumabile/tavola-ouija",
+      "prezzo": 10000,
+      "grado": "oscuro",
+      "rapporto": "Abbinamento proposto"
+    },
+    {
+      "chiave": "tanaka-affari-loschi/fotocamera-spirituale",
+      "nome": "Fotocamera spirituale",
+      "catalogo": "consumabile/fotocamera-spirituale",
+      "prezzo": 5000,
+      "grado": "oscuro",
+      "rapporto": "Nuova offerta proposta"
+    },
+    {
+      "chiave": "tanaka-affari-loschi/model-gun",
+      "nome": "Replica d'arma",
+      "catalogo": "materiale/replica-darma",
+      "prezzo": 1000,
+      "grado": "caos",
+      "rapporto": "Abbinamento proposto"
+    },
+    {
+      "chiave": "tanaka-affari-loschi/homunculus",
+      "nome": "Homunculus",
+      "catalogo": "consumabile/homunculus",
+      "prezzo": 5000,
+      "grado": "caos",
+      "rapporto": "Abbinamento proposto"
+    },
+    {
+      "chiave": "tanaka-affari-loschi/crown-of-salvation",
+      "nome": "Corona della salvezza",
+      "catalogo": "accessorio/corona-della-salvezza-2",
+      "prezzo": 990000,
+      "grado": "caos",
+      "rapporto": "Abbinamento proposto"
+    },
+    {
+      "chiave": "tanaka-affari-loschi/maschera-sorridente",
+      "nome": "Maschera sorridente",
+      "catalogo": "consumabile/maschera-sorridente",
+      "prezzo": 5000,
+      "grado": "caos",
+      "rapporto": "Nuova offerta proposta"
+    }
+  ]
+}
