@@ -1,5 +1,13 @@
 # Richieste dell'utente ancora aperte (elenco di controllo del PM)
 
+**22 ottobre,21:03Z — correttivo029 approvato staticamente da Galaxy.** Typecheck26485/lint65378/build99089 verdi, nessun test. Push correttivo necessario; A10-DATI ancora aperto.
+
+**22 ottobre,21:02Z — A10-DATI aperto, scadenza21:09Z.** Backend in riavvio dopo rollback029:46tabelleutente identiche; main138 applicato. Correzione binding contatore BigInt approvata dal reviewer e applicata, controlli/rilascio correttivo pendenti. Nessuna chiusura del punto finché non riparte e conserva i dati.
+
+**22 ottobre,20:59Z — A10-CI chiuso con PASS autonomo entro10min.** Pipeline84/39852910716 riuscita sullo SHA pubblicato, inclusi verify e due build. Ora A10-DATI fino21:09Z: confronto readonly conservativo, poi osservazione browser ancora separata.
+
+**22 ottobre,20:57Z — A10-PUSH chiuso con PASS distinto entro10min.** d043ab6e su newreview; pipeline39852910716 in corso dopo gate verde. Punto attivo A10-CI fino21:07Z; conservazione dopo e osservazione ancora aperte. Nessuna chiusura globale dei lotti.
+
 **22 ottobre,20:51Z — quattro punti chiusi con PASS distinti entro i rispettivi10min:** INV-L5,INV-L7,INV-SCOMP e baseline preventiva A10. Regia con azioni individuali e padri integrali separati; acquisizioni ancora necessarie esplicitamente aperte. Ora commit/push newreview per A10, poi pipeline e verifiche conservative readonly del pubblicato. B01/B02 risolti nel codice; nessuna chiusura globale L5–L11.
 
 **22 ottobre,20:22Z — INV-L5 chiuso entro10min con PASS distinto.** Censimento aggiornato e azioni per identità visibili in Regia; nessuna bonifica dati applicata. Segue INV-L7, poi scomposizione dei requisiti compositi; la lista complessiva non è ancora dichiarata completa.

@@ -78,7 +78,9 @@ function estendiProposte(db: AppDatabase): void {
     ALTER TABLE utente.da_applicare_pesca_029 RENAME TO da_applicare;`);
   for (const [, ddl] of INDICI_PROPOSTE_029) db.exec(ddl.replace('INDEX ', 'INDEX utente.'));
   db.prepare("DELETE FROM utente.sqlite_sequence WHERE name='da_applicare'").run();
-  if (epoca.length) db.prepare("INSERT INTO utente.sqlite_sequence(rowid,name,seq) VALUES(?,'da_applicare',?)").run(epoca[0]!.rowid, epoca[0]!.seq);
+  // sequenza() ha già verificato gli interi sicuri: BigInt conserva INTEGER anche
+  // in seq, priva di affinità; better-sqlite3 legherebbe Number come REAL.
+  if (epoca.length) db.prepare("INSERT INTO utente.sqlite_sequence(rowid,name,seq) VALUES(?,'da_applicare',?)").run(BigInt(epoca[0]!.rowid), BigInt(epoca[0]!.seq));
   const dopo = oggetti(db).find(o => o.type === 'table' && o.name === 'da_applicare')?.sql;
   if (!dopo || normalizzaDDL(dopo) !== normalizzaDDL(ddlPropostePesca029('da_applicare', true))
     || firmaTabella(db, 'da_applicare', colonne) !== prima || JSON.stringify(sequenza(db)) !== JSON.stringify(epoca)) errore('righe, DDL o epoca delle proposte non conservate integralmente');

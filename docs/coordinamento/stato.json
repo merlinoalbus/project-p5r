@@ -1,10 +1,10 @@
 {
   "obiettivo": "Completare i lotti L0–L11 della razionalizzazione sul ramo newreview e pubblicarli funzionanti su p5s",
-  "aggiornato": "2026-10-22T20:51:24Z",
+  "aggiornato": "2026-10-22T21:03:00Z",
   "cruscotto": {
     "adesso": {
-      "attivita": "A10-BASELINE chiuso con PASS Galaxy. Pubblicazione A10 su newreview in corso: codice203c213c e aggiornamenti di piano/Regia. Seguono pipeline, conservazione dopo e osservazione.",
-      "stato": "Un solo punto in corso: A10-PUSH. Avvio20:51UTC; massimo10min.",
+      "attivita": "A10-DATI aperto:029 rollback per binding Number/REAL in sqlite_sequence. Tutte46tabelleutente identiche. SoluzioneBigInt approvata; typecheck/build verdi, lint e gate delta in corso; rilascio correttivo necessario.",
+      "stato": "Un solo punto in corso: A10-DATI. Avvio20:59UTC; scadenza21:09UTC.",
       "responsabile": "Coordinatore implementa in sequenza; Galaxy verifica in sola lettura. Nessun esecutore parallelo attivo.",
       "prossimaConsegna": "Completare i gruppi residui dei lotti: Covo e distributori L5, pesca/condizioni L6 e catalogo/scambi L7; predisporre le decisioni concrete riservate all'utente. Nessun lotto dichiarato concluso per il solo rilascio137."
     },
@@ -606,23 +606,23 @@
         "id": "A10-PUSH",
         "lotto": "L6",
         "titolo": "Pubblicare A10 su newreview con documenti allineati",
-        "stato": "in-corso",
+        "stato": "chiuso",
         "fonte": "lotti/L6/pesca-A10-contratto.md",
-        "criterio": "Commit/push dopo gate statico e controlli verdi."
+        "criterio": "PASS Galaxy: SHA d043ab6e verificato sul ref remoto newreview; main separato. Non certifica deploy o dati."
       },
       {
         "id": "A10-CI",
         "lotto": "L6",
         "titolo": "Seguire la pipeline dello SHA A10 fino al risultato",
-        "stato": "da-fare",
+        "stato": "chiuso",
         "fonte": "lotti/L6/pesca-A10-contratto.md",
-        "criterio": "Pipeline riuscita sullo SHA pubblicato."
+        "criterio": "PASS Galaxy autonomo: pipeline84/39852910716 SUCCESS sullo SHA d043ab6e; verify e due build verdi. Deploy e dati distinti."
       },
       {
         "id": "A10-DATI",
         "lotto": "L6",
         "titolo": "Confrontare dati e schema138/029 dopo il rilascio",
-        "stato": "da-fare",
+        "stato": "in-corso",
         "fonte": "lotti/L6/pesca-A10-contratto.md",
         "criterio": "Conservazione tabelle e sole differenze previste."
       },
