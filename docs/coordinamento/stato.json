@@ -1,10 +1,10 @@
 {
   "obiettivo": "Completare i lotti L0–L11 della razionalizzazione sul ramo newreview e pubblicarli funzionanti su p5s",
-  "aggiornato": "2026-10-22T22:08:35Z",
+  "aggiornato": "2026-10-22T22:14:44Z",
   "cruscotto": {
     "adesso": {
-      "attivita": "Correttivo statistiche029 PASS statico Galaxy; typecheck22655/lint62387/build92310 verdi. Pubblicazione correttiva in corso; conservazione finale e avvio da riscontrare.",
-      "stato": "A10-DATI unico attivo. Ripresa00:04:44 italiana23ott; scadenza00:14:44.",
+      "attivita": "p5s ripristinato:1df53389/pipeline87 riusciti, running0riavvii/health200/schema138-29. Confronti46utente/statistiche/DDL conformi. Arresto al limite: verdetto finale Galaxy non ricevuto entro00:14:44; A10-DATI ancora aperto, browser non avviato.",
+      "stato": "Fermo al limite richiesto. Servizio ripristinato; attesa gate finale e riscontro utente prima di procedere.",
       "responsabile": "Coordinatore implementa in sequenza; Galaxy verifica in sola lettura. Nessun esecutore parallelo attivo.",
       "prossimaConsegna": "Completare i gruppi residui dei lotti: Covo e distributori L5, pesca/condizioni L6 e catalogo/scambi L7; predisporre le decisioni concrete riservate all'utente. Nessun lotto dichiarato concluso per il solo rilascio137."
     },
@@ -622,7 +622,7 @@
         "id": "A10-DATI",
         "lotto": "L6",
         "titolo": "Confrontare dati e schema138/029 dopo il rilascio",
-        "stato": "in-corso",
+        "stato": "incompleto",
         "fonte": "lotti/L6/pesca-A10-contratto.md",
         "criterio": "Conservazione tabelle e sole differenze previste."
       },

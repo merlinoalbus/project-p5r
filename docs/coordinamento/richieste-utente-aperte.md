@@ -1,5 +1,7 @@
 # Richieste dell'utente ancora aperte (elenco di controllo del PM)
 
+**23 ottobre,00:14:44 italiana — p5s ripristinato, A10-DATI ancora aperto per gate finale.** Correttivo1df53389/pipeline87 riuscito eattivato;schema138/29,health200,running0riavvii. Tutti confronti conservativi dichiarati inSTATO risultano conformi, evidenze inviate aGalaxy prima dellimite ma verdictfinale non ricevuto entro00:14:44. Arresto richiesto; browser e punti successivi noniniziati.
+
 **23 ottobre,00:08 italiana — ripresa esplicitamente autorizzata dal blocco p5s.** A10-DATI unico attivo fino00:14:44; causa sqlite_stat1 identificata. Soluzione conserva statistiche originali stat1..4 e tutte guardie; controlli typecheck/lint/build verdi, gate/rilascio/conservazione finale pendenti. Nessuna chiusura di A10 o dei lotti.
 
 **22 ottobre,21:03Z — correttivo029 approvato staticamente da Galaxy.** Typecheck26485/lint65378/build99089 verdi, nessun test. Push correttivo necessario; A10-DATI ancora aperto.
