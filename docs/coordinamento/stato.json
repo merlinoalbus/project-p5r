@@ -1,10 +1,10 @@
 {
   "obiettivo": "Completare i lotti L0–L11 della razionalizzazione sul ramo newreview e pubblicarli funzionanti su p5s",
-  "aggiornato": "2026-10-22T22:53:25Z",
+  "aggiornato": "2026-10-22T22:54:30Z",
   "cruscotto": {
     "adesso": {
-      "attivita": "Tanaka: preparazione confronto readonly20/18/28 PASS statico Galaxy; T-UNITA-01 corretto, typecheck97123/lint4889/build38451 verdi. Pubblicazione in corso; CI e browser ancora aperti, limite00:54:30.",
-      "stato": "Unico punto L7-TANAKA-UNITA. Avvio00:44:30 italiana23ott; scadenza00:54:30.",
+      "attivita": "ARRESTO al limite00:54:30: Tanaka confronto readonly f2c7a7ea PASS statico e controlli97123/4889/38451 verdi; pipeline39868190114 in corso, browser non osservato. Punto incompleto; A10-BROWSER e L5-SUCCHI chiusi con PASS sul pubblicato.",
+      "stato": "Fermo al limite richiesto; attesa riscontro utente. Nessun consenso o modifica del listino Tanaka.",
       "responsabile": "Coordinatore implementa in sequenza; Galaxy verifica in sola lettura. Nessun esecutore parallelo attivo.",
       "prossimaConsegna": "Completare i gruppi residui dei lotti: Covo e distributori L5, pesca/condizioni L6 e catalogo/scambi L7; predisporre le decisioni concrete riservate all'utente. Nessun lotto dichiarato concluso per il solo rilascio137."
     },
@@ -646,7 +646,7 @@
         "id": "L7-TANAKA-UNITA",
         "lotto": "L7",
         "titolo": "Predisporre unica decisione20correnti affiancati ai18Royal",
-        "stato": "in-corso",
+        "stato": "incompleto",
         "fonte": "lotti/L7/tanaka-decisione-unitaria.md",
         "criterio": "Nessuna conferma frammentata."
       },

@@ -1,5 +1,7 @@
 # Richieste dell'utente ancora aperte (elenco di controllo del PM)
 
+**23 ottobre,00:54:30 italiana — arresto al limiteTanaka-UNITA.** f2c7a7ea pubblicato con PASS statico/controlli verdi; pipeline39868190114 in corso,browser non osservato,punto incompleto. A10-BROWSER eL5-SUCCHI chiusi con PASS finali. Attesa riscontro utente; nessuna confermaTanaka o operazione sui dati eseguita.
+
 **23 ottobre,00:50 italiana — L5-SUCCHI chiuso con PASS distinto.** Punto attivoTANAKA-UNITA: confronto readonly nell'app20correnti/18Royal/28proposte, nessuna decisione commerciale. R7-13b non chiuso; storico,snapshot,nota e conferma atomica ancora da completare. Limite00:54:30.
 
 **23 ottobre,00:39 italiana — A10-BROWSER chiuso con PASS distinto entrolimite.** OraL5-SUCCHI: separazione corrente confermata; correzione etichettaR5-11 PASSstatico,controlli verdi,pubblicazione e riscontro live pendenti. Scadenza00:45. Nessun trasferimento offerte/acquisti,altri residui aperti.
