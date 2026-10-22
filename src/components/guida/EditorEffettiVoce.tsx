@@ -7,6 +7,9 @@ import type { CampiStrutturati } from '../../utils/azioneStrutturata';
 import { Selettore } from '../shared/Selettore';
 import { RigaEffettoVoceLegacy } from './RigaEffettoVoceLegacy';
 import { ATTIVITA_PESCA, REGOLA_PESCA, eAttivitaPesca, type EffettoPescaVoce } from '../../../shared/pesca';
+import { getElementoCatalogo } from '../../services/api/catalogo';
+import { useCarica } from '../../hooks/useCarica';
+import { useGestiPartita } from '../../services/gestiPartita';
 
 type Acquisto = Extract<EffettoVoce, { tipo: 'acquisto' }>;
 type Righe = RichiestaSalvaEffettiVoce['effetti'];
@@ -31,9 +34,19 @@ export function EditorEffettoPescaVoce({ effetto, righe, onCambia }: { effetto: 
 
 /** Configura il legame della guida; il consumo reale viene dichiarato separatamente nella partita. */
 export function CampiAcquistoEffetto({ effetto, righe, onCambia }: { effetto: Acquisto; righe: Righe; onCambia: (e: Acquisto) => void }) {
+  const gesti = useGestiPartita();
+  const offerta = useCarica(async () => {
+    const articolo = await getElementoCatalogo('articolo', ARTICOLO_AOJIRU);
+    const chiaveNegozio = articolo.dati.negozio_chiave;
+    if (typeof chiaveNegozio !== 'string' || !chiaveNegozio) throw new Error('Il negozio dell’offerta collegata non è disponibile.');
+    const negozio = await getElementoCatalogo('negozio', chiaveNegozio);
+    return `${articolo.nome} · ${negozio.nome}`;
+  }, [gesti.versioneGuida]);
   const doti = righe.filter((r) => r.uid !== null && r.effetto.tipo === 'dote');
   return <div className="flex min-w-0 flex-col gap-2">
-    <Selettore etichetta="Offerta collegata" valore={effetto.articolo} opzioni={[{ chiave: ARTICOLO_AOJIRU, nome: 'Succo Aojiru · KiyasuKu' }, ...(effetto.articolo && effetto.articolo !== ARTICOLO_AOJIRU ? [{ chiave: effetto.articolo, nome: `${effetto.articolo} · riferimento conservato` }] : [])]} onCambia={(a) => onCambia({ ...effetto, articolo: a })} />
+    <Selettore etichetta="Offerta collegata" valore={effetto.articolo} opzioni={[{ chiave: ARTICOLO_AOJIRU, nome: offerta.dati ?? `${ARTICOLO_AOJIRU} · ${offerta.caricamento ? 'lettura del nome corrente' : 'nome non disponibile'}` }, ...(effetto.articolo && effetto.articolo !== ARTICOLO_AOJIRU ? [{ chiave: effetto.articolo, nome: `${effetto.articolo} · riferimento conservato` }] : [])]} onCambia={(a) => onCambia({ ...effetto, articolo: a })} />
+    {offerta.errore && <p role="alert" className="m-0 text-warning">{offerta.errore} Il riferimento dell’effetto resta conservato.</p>}
+    <p className="m-0 text-[12px] text-text-secondary">L’offerta conserva la propria identità commerciale e i suoi acquisti. La scheda distinta del Chiosco dei succhi non trasferisce questa offerta.</p>
     <Selettore etichetta="Variante indicata dalla guida" valore={effetto.variante ?? ''} vuoto="Da osservare nella partita" opzioni={ORDINE_AOJIRU.map((d) => ({ chiave: d, nome: nomeDote(d) }))} onCambia={(d) => onCambia({ ...effetto, variante: d ? d as DoteChiave : null })} />
     <Selettore etichetta="Fortuna indicata dalla guida" valore={effetto.fortuna === null ? 'ignota' : effetto.fortuna ? 'si' : 'no'} opzioni={[{ chiave: 'ignota', nome: 'Non dichiarata' }, { chiave: 'no', nome: 'Assente' }, { chiave: 'si', nome: 'Attiva sulla stessa Dote' }]} onCambia={(f) => onCambia({ ...effetto, fortuna: f === 'ignota' ? null : f === 'si' })} />
     {!!doti.length && <fieldset className="m-0 flex flex-col gap-1 border border-border p-2"><legend>Doti già presenti che questo acquisto sostituisce</legend>

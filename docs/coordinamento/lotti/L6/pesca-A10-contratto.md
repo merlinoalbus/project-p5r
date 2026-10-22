@@ -438,6 +438,8 @@ Controesempi da coprire nel riesame: tentativo fallito≠cattura; stessa visita 
 
 ## 14. Implementazione in corso e gate statici (21 ottobre, 21:12Z)
 
+**Consegna23ottobre:** gate statici integrati, conservazione138/029 e browserreadonly hanno ricevuto PASS distinti. Il servizio è ripristinato dopo correzioni conservative della029 (tipoINTEGER del contatore e statisticheSQLite1..4 preservate). Il rilievo visivoA10-BR01 è corretto e osservato su91d12aa5/pipeline39865491697. Registro/fonte/editor caricano senzaerrori osservati, nessuna osservazione/premio inventati. Scritture,recupero e ripristino non esercitati; il PASS non copre ogni viewport o l'interoL6/L10. Le note cronologiche sotto non rappresentano lo stato corrente dei gate già acquisiti.
+
 **Aggiornamento22ottobre:** nucleo e integrazione approvati staticamente da Galaxy dopo B01/B02; typecheck6151/lint38004/build84257 exit0. B01 uniforma turniA02/A10 e respinge altri turni; B02 distingue fonti non datate note ora dalla proiezione storica. Baseline preventiva finale137/28 acquisita readonly soltantoRAM e procedura approvata:95main/46utente, RAW target e DDL029 coerenti, Cestino4registri/1281passi/0pertinenti,dipendenza124valida. Pubblicazione in corso; confronto dopo138/029 e osservazione reale ancora aperti. Le note cronologiche sotto sono superate per questi soli esiti.
 
 La soluzione è stata approvata dal revisore distinto sulle specifiche originali e sulle fonti della matrice. Questo paragrafo registra l'implementazione successiva: non sostituisce i requisiti né certifica la consegna.

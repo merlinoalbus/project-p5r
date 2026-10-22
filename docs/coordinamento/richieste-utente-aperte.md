@@ -1,5 +1,7 @@
 # Richieste dell'utente ancora aperte (elenco di controllo del PM)
 
+**23 ottobre,00:39 italiana — A10-BROWSER chiuso con PASS distinto entrolimite.** OraL5-SUCCHI: separazione corrente confermata; correzione etichettaR5-11 PASSstatico,controlli verdi,pubblicazione e riscontro live pendenti. Scadenza00:45. Nessun trasferimento offerte/acquisti,altri residui aperti.
+
 **23 ottobre,00:30 italiana — A10-BROWSER ancora aperto per A10-BR01.** Difetto visivo indipendentemente rilevato e confermato: classeCSS dei numeri. Correzione minima applicata; controlli/rilascio/riscontro pubblicato ancora richiesti. Nessuna prova in scrittura o chiusura globale.
 
 **23 ottobre,00:29 italiana — ripresa autorizzata da A10-BROWSER.** PASS finale distinto A10-DATI acquisito e registrato; browser readonly di fonte/registro/editor osservato dal coordinatore, passata Galaxy in corso. Limite00:37:35, nessun writer o suite. Altri punti e lotti restano aperti.

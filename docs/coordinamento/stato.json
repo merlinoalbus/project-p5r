@@ -1,10 +1,10 @@
 {
   "obiettivo": "Completare i lotti L0–L11 della razionalizzazione sul ramo newreview e pubblicarli funzionanti su p5s",
-  "aggiornato": "2026-10-22T22:30:30Z",
+  "aggiornato": "2026-10-22T22:39:20Z",
   "cruscotto": {
     "adesso": {
-      "attivita": "A10-BR01: campi numerici senza riquadro; correzione classe form-input PASS statico Galaxy, typecheck6215/lint35122/build30424 verdi. Rilascio FE e osservazione finale in corso nello stesso A10-BROWSER.",
-      "stato": "Unico punto A10-BROWSER. Avvio00:27:35 italiana23ott; scadenza00:37:35.",
+      "attivita": "L5-SUCCHI: pin/luoghi distinti e offerta storica invariata. Correzione etichetta negozio dal DTO corrente PASS statico Galaxy;typecheck37171/lint9705/build86807 verdi. Rilascio e riscontro finale entro00:45.",
+      "stato": "Unico punto L5-SUCCHI. Avvio00:35 italiana23ott; scadenza00:45.",
       "responsabile": "Coordinatore implementa in sequenza; Galaxy verifica in sola lettura. Nessun esecutore parallelo attivo.",
       "prossimaConsegna": "Completare i gruppi residui dei lotti: Covo e distributori L5, pesca/condizioni L6 e catalogo/scambi L7; predisporre le decisioni concrete riservate all'utente. Nessun lotto dichiarato concluso per il solo rilascio137."
     },
@@ -22,6 +22,7 @@
       "verifica": "Prima del DELETE:46utente e95main identiche dopo137. Dopo:sole spillo/cestino diverse,46utente e altri1912pin/998Diario/316mappe/3vecchiCestino identici; riga originale integrale nel Cestino, epoca+1. Galaxy osserva autonomamente Cestino/Rimetti e assenza sulla Banchina: PASS finale. Restore non esercitato; nessun test o chiusura globale L5."
     },
     "chiusi": [
+      "Rilascio A10: migrazioni138/29, conservazione dati e browser readonly con PASS distinti. Correttivo91d12aa5/pipeline39865491697, A10-BR01 chiuso. Scritture/recupero/ripristino non esercitati; non chiude L6 o L10.",
       "Tre schede L5 collegate ai pin1466/1486/1526 consegnate;1636 rimosso nel Cestino con fotografia integrale e PASS finale Galaxy. Dei23candidati restano19, non19bug identici o il totale L5.",
       "I71: consumi/provenienze, ricevute e proposte del Diario rilasciati814b17d8, pipeline81/schema136-28; gate finale positivo sulle pagine osservate e conservazione nei confronti dichiarati. Resto L10 e ricerca R6 aperti.",
       "A12/Takemi135 e raccordo R6: fonte canonica, beneficio8 e testi coerenti; pipeline79/80 riuscite e gate finale distinto approvato sul pubblicato. Non chiude il calendario globale o gli altri residui L6.",
@@ -630,15 +631,15 @@
         "id": "A10-BROWSER",
         "lotto": "L6",
         "titolo": "Osservare registro pesca, fonte attivita ed editor su p5s",
-        "stato": "in-corso",
+        "stato": "chiuso",
         "fonte": "lotti/L6/pesca-A10-contratto.md",
-        "criterio": "Runtime readonly e gate distinto sul pubblicato."
+        "criterio": "PASS Galaxy autonomo entro limite: registro/fonte/editor e campi numerici corretti su91d12aa5,pipeline39865491697 riuscita. Nessun writer esercitato; non certifica tutti viewport o interi lotti."
       },
       {
         "id": "L5-SUCCHI",
         "lotto": "L5",
         "titolo": "Riscontrare separazione Chiosco succhi/KiyasuKu nei consumatori",
-        "stato": "da-riscontrare",
+        "stato": "in-corso",
         "fonte": "lotti/L5/riconciliazione-corrente.md",
         "criterio": "Nessun trasferimento di offerte o acquisti."
       },
