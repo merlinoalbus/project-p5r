@@ -1,10 +1,10 @@
 {
   "obiettivo": "Completare i lotti L0–L11 della razionalizzazione sul ramo newreview e pubblicarli funzionanti su p5s",
-  "aggiornato": "2026-10-22T22:14:44Z",
+  "aggiornato": "2026-10-22T22:30:30Z",
   "cruscotto": {
     "adesso": {
-      "attivita": "p5s ripristinato:1df53389/pipeline87 riusciti, running0riavvii/health200/schema138-29. Confronti46utente/statistiche/DDL conformi. Arresto al limite: verdetto finale Galaxy non ricevuto entro00:14:44; A10-DATI ancora aperto, browser non avviato.",
-      "stato": "Fermo al limite richiesto. Servizio ripristinato; attesa gate finale e riscontro utente prima di procedere.",
+      "attivita": "A10-BR01: campi numerici senza riquadro; correzione classe form-input PASS statico Galaxy, typecheck6215/lint35122/build30424 verdi. Rilascio FE e osservazione finale in corso nello stesso A10-BROWSER.",
+      "stato": "Unico punto A10-BROWSER. Avvio00:27:35 italiana23ott; scadenza00:37:35.",
       "responsabile": "Coordinatore implementa in sequenza; Galaxy verifica in sola lettura. Nessun esecutore parallelo attivo.",
       "prossimaConsegna": "Completare i gruppi residui dei lotti: Covo e distributori L5, pesca/condizioni L6 e catalogo/scambi L7; predisporre le decisioni concrete riservate all'utente. Nessun lotto dichiarato concluso per il solo rilascio137."
     },
@@ -622,15 +622,15 @@
         "id": "A10-DATI",
         "lotto": "L6",
         "titolo": "Confrontare dati e schema138/029 dopo il rilascio",
-        "stato": "incompleto",
+        "stato": "chiuso",
         "fonte": "lotti/L6/pesca-A10-contratto.md",
-        "criterio": "Conservazione tabelle e sole differenze previste."
+        "criterio": "PASS Galaxy finale sulle prove entro22:13:45Z; verdetto dopo precedente limite. Ripresa autorizzata23ott: servizio138/29 ripristinato, conservazione eDDL conformi nei perimetri dichiarati."
       },
       {
         "id": "A10-BROWSER",
         "lotto": "L6",
         "titolo": "Osservare registro pesca, fonte attivita ed editor su p5s",
-        "stato": "da-fare",
+        "stato": "in-corso",
         "fonte": "lotti/L6/pesca-A10-contratto.md",
         "criterio": "Runtime readonly e gate distinto sul pubblicato."
       },

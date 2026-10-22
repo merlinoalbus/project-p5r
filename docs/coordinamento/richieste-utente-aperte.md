@@ -1,5 +1,9 @@
 # Richieste dell'utente ancora aperte (elenco di controllo del PM)
 
+**23 ottobre,00:30 italiana — A10-BROWSER ancora aperto per A10-BR01.** Difetto visivo indipendentemente rilevato e confermato: classeCSS dei numeri. Correzione minima applicata; controlli/rilascio/riscontro pubblicato ancora richiesti. Nessuna prova in scrittura o chiusura globale.
+
+**23 ottobre,00:29 italiana — ripresa autorizzata da A10-BROWSER.** PASS finale distinto A10-DATI acquisito e registrato; browser readonly di fonte/registro/editor osservato dal coordinatore, passata Galaxy in corso. Limite00:37:35, nessun writer o suite. Altri punti e lotti restano aperti.
+
 **23 ottobre,00:14:44 italiana — p5s ripristinato, A10-DATI ancora aperto per gate finale.** Correttivo1df53389/pipeline87 riuscito eattivato;schema138/29,health200,running0riavvii. Tutti confronti conservativi dichiarati inSTATO risultano conformi, evidenze inviate aGalaxy prima dellimite ma verdictfinale non ricevuto entro00:14:44. Arresto richiesto; browser e punti successivi noniniziati.
 
 **23 ottobre,00:08 italiana — ripresa esplicitamente autorizzata dal blocco p5s.** A10-DATI unico attivo fino00:14:44; causa sqlite_stat1 identificata. Soluzione conserva statistiche originali stat1..4 e tutte guardie; controlli typecheck/lint/build verdi, gate/rilascio/conservazione finale pendenti. Nessuna chiusura di A10 o dei lotti.

@@ -35,7 +35,7 @@ export function NumeroOsservatoPesca({ etichetta, valore, onCambia, minimo = 0, 
 }) {
   return <label className="flex min-w-0 flex-col gap-1 text-[13px]">
     <span>{etichetta}</span>
-    <input className="input min-h-11 w-full" type="number" inputMode="numeric" min={minimo} max={massimo} step={1}
+    <input className="form-input min-h-11 w-full" type="number" inputMode="numeric" min={minimo} max={massimo} step={1}
       value={valore ?? ''} disabled={disabilitato} aria-description="Lascia vuoto se il valore non è noto."
       onChange={e => {
         if (e.target.value === '') { onCambia(null); return; }
