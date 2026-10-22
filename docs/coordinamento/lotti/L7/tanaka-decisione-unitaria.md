@@ -1,5 +1,9 @@
 # L7 — Tanaka e risoluzione dei raccordi documentali
 
+## Checkpoint23ottobre2026,01:09 italiana
+
+Confronto preparatorio20/18/28 pubblicato e osservato con PASS finale distinto; pipeline39868190114 e39868308688 riuscite. Questo chiude soltantoL7-TANAKA-UNITA. STORICO resta aperto senza codice o migrazione applicati: causa confermata nel calcolo legacy e contratto completo in [tanaka-storico-contratto.md](tanaka-storico-contratto.md), da implementare e verificare integralmente. La proposta di archivio separato deve preservare il piano originale10chiavi+8nuove, senza imporre18nuove identità commerciali. Nessun consenso o modifica commerciale eseguiti.
+
 ## Preparazione corrente23ottobre2026,00:50 italiana
 
 Fotografia readonly22:46:07Z:20offerte visibili e28proposte, tutte daapprovare; nessuna confermata/scartata. Nessun dato o consenso applicato. Il confronto nell'app è preparatorio: espone20offerte correnti,18Royal proposte e tutte le tuple pertinenti nei tre stati. Le assenze/righe aggiunte sono dichiarate, non ricreate. Il manifestpubblico `shared/tanakaConfronto.json` usa esclusivamente le identità documentate e il listinoG034(6senza grado/4Nero/4Oscurità/4Caos).

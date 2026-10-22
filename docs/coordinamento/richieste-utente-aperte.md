@@ -1,5 +1,7 @@
 # Richieste dell'utente ancora aperte (elenco di controllo del PM)
 
+**23 ottobre,01:09 italiana — checkpoint richiesto; STORICO aperto.** Ripresa autorizzata dall'utente. TANAKA-UNITA chiuso con PASS finale soltanto per il confronto preparatorio20/18/28 pubblicato e osservato; pipeline39868190114 e39868308688 riuscite. STORICO confermato nel lettore legacy: una variazione del prezzo cambia il contributo pregresso. Soluzione documentata con prova immutabile, generazioni e copertura di Cestino/import; nessuna implementazione o migrazione eseguita. Restano codice completo, tre riesami, gate distinto, controlli, pubblicazione e conservazione verificata. Nessun consenso Tanaka acquisito o applicato; R7-13b e resto del mandato L5–L11 invariati. Nessun punto successivo iniziato.
+
 **23 ottobre,00:54:30 italiana — arresto al limiteTanaka-UNITA.** f2c7a7ea pubblicato con PASS statico/controlli verdi; pipeline39868190114 in corso,browser non osservato,punto incompleto. A10-BROWSER eL5-SUCCHI chiusi con PASS finali. Attesa riscontro utente; nessuna confermaTanaka o operazione sui dati eseguita.
 
 **23 ottobre,00:50 italiana — L5-SUCCHI chiuso con PASS distinto.** Punto attivoTANAKA-UNITA: confronto readonly nell'app20correnti/18Royal/28proposte, nessuna decisione commerciale. R7-13b non chiuso; storico,snapshot,nota e conferma atomica ancora da completare. Limite00:54:30.
