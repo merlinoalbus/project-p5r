@@ -17,18 +17,15 @@
 // - non è una superficie di approvazione: mostra la scheda, con ciò che la scheda già dice dello stato della partita.
 // ============================================================
 
-import { Suspense, lazy, useCallback, useEffect, useLayoutEffect, useMemo, useRef, type ComponentType, type KeyboardEvent as TastoReact, type MouseEvent, type ReactNode } from 'react';
+import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, type KeyboardEvent as TastoReact, type MouseEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { resolvePath, useLocation, useNavigate, type NavigateOptions, type To } from 'react-router-dom';
 import { Spinner } from '../shared/PageState';
+import { ErroreInRiquadro } from '../shared/ErrorePagina';
+import { pigra } from '../../utils/pagineLazy';
 import { IconChevronLeft, IconClose } from '../shared/icons';
 import { ApriPannelloContext, SchedaCorrenteContext, type ApriPannello, type SchedaCorrente } from './contestoScheda';
 import { conSchedaNelPannello, profonditaDaStato, schedaDaParametri, statoConProfondita, trovaScheda, type SchedaTrovata } from '../../utils/pannelloScheda';
-
-/** Una pagina caricata alla prima apertura (stessi pezzi del router, che le condivide). */
-function pigra<M, P extends object = object>(carica: () => Promise<M>, nome: keyof M) {
-  return lazy(async () => ({ default: (await carica())[nome] as unknown as ComponentType<P> }));
-}
 
 /** Le pagine che mostrano un elemento di un elenco (libri, film, attività, Richieste) ricevono la chiave dell'elemento. */
 interface PropsElemento { soloChiave?: string }
@@ -47,15 +44,15 @@ const RichiestePage = pigra<typeof import('../../pages/RichiestePage'), PropsEle
 function ContenutoScheda({ scheda }: { scheda: SchedaTrovata }) {
   const solo = scheda.elemento ?? undefined;
   switch (scheda.tipo) {
-    case 'confidente': return <ConfidenteDettaglioPage />;
-    case 'dungeon': return <DungeonDettaglioPage />;
-    case 'negozio': return <NegozioPage />;
-    case 'luogo': return <LuogoPage />;
-    case 'oggetto': return <OggettoPage />;
-    case 'libro': return <LibriPage soloChiave={solo} />;
-    case 'film': return <FilmPage soloChiave={solo} />;
-    case 'attivita': return <AttivitaPage soloChiave={solo} />;
-    case 'richiesta': return <RichiestePage soloChiave={solo} />;
+    case 'confidente': return <ConfidenteDettaglioPage.Componente />;
+    case 'dungeon': return <DungeonDettaglioPage.Componente />;
+    case 'negozio': return <NegozioPage.Componente />;
+    case 'luogo': return <LuogoPage.Componente />;
+    case 'oggetto': return <OggettoPage.Componente />;
+    case 'libro': return <LibriPage.Componente soloChiave={solo} />;
+    case 'film': return <FilmPage.Componente soloChiave={solo} />;
+    case 'attivita': return <AttivitaPage.Componente soloChiave={solo} />;
+    case 'richiesta': return <RichiestePage.Componente soloChiave={solo} />;
   }
 }
 
@@ -180,11 +177,15 @@ function Pannello({ scheda, profondita, onChiudi }: PropsPannello) {
         </div>
         <div ref={corpo} className="pannello-scheda__corpo" onClickCapture={intercetta}>
           <SchedaCorrenteContext.Provider value={corrente}>
-            <Suspense fallback={<div className="flex justify-center py-10"><Spinner size={36} /></div>}>
-              {/* come nel router: la stessa route con parametri diversi è la stessa pagina (non si rimonta, lo spostamento fra infiltrazioni o
-                  planimetrie non ricarica tutto); un'altra route, o un altro elemento di un elenco, è un'altra pagina */}
-              <ContenutoScheda key={`${scheda.modello}|${scheda.elemento ?? ''}`} scheda={scheda} />
-            </Suspense>
+            {/* UI-ASSET-01: se il file di una pagina non c'è più (rilascio durante l'uso) l'errore resta NEL pannello: il diario sotto, con le
+                sue bozze, non si tocca. La `key` riparte con la scheda: passando a un'altra scheda l'errore di prima non resta addosso. */}
+            <ErroreInRiquadro key={`${scheda.modello}|${scheda.elemento ?? ''}`}>
+              <Suspense fallback={<div className="flex justify-center py-10"><Spinner size={36} /></div>}>
+                {/* come nel router: la stessa route con parametri diversi è la stessa pagina (non si rimonta, lo spostamento fra infiltrazioni o
+                    planimetrie non ricarica tutto); un'altra route, o un altro elemento di un elenco, è un'altra pagina */}
+                <ContenutoScheda key={`${scheda.modello}|${scheda.elemento ?? ''}`} scheda={scheda} />
+              </Suspense>
+            </ErroreInRiquadro>
           </SchedaCorrenteContext.Provider>
         </div>
       </div>
