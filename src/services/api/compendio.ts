@@ -7,6 +7,10 @@ import type {
 import { apiDelete, apiPut, apiPost, apiGet, queryString } from './_helpers';
 import type { AzionePercorsoDto, DatiVoceGiornata, ElenchiAzioneDto, EsitoRevisioneVoce, PuntiCopiatiDto, PuntiSpostatiDto, SpostaPuntiInArea, TrasferisciVociGiornata, VideogiochiDto, VociTrasferiteDto } from '../../types';
 import type { DoteNote } from '../../../shared/effettiAzione';
+import type { DisponibilitaConfidenteDto, DisponibilitaStrutturata } from '../../../shared/disponibilitaStrutturata';
+
+/** I campi che il PUT accetta (tutti facoltativi) più le chiavi dei luoghi. */
+export type ModificaDisponibilitaStrutturata = Partial<Pick<DisponibilitaStrutturata, 'modo' | 'giorni' | 'fasce' | 'eccezioni' | 'dal' | 'motivoSenzaLuogo'>> & { luoghi?: string[] };
 import type { CarattereVoce } from '../../../shared/caratteriVoce';
 import type { Condizione } from '../../../shared/condizioniSpillo';
 import type { InvitoDto, RequisitiConfidenteDto } from '../../types';
@@ -239,6 +243,16 @@ export const impostaDotiIncontro = (chiave: string, ranghi: Array<{ rango: numbe
   apiPut(`/compendio/confidenti/${encodeURIComponent(chiave)}/doti-incontro`, { ranghi });
 /** Elenco dei Confidenti del compendio. */
 export const getConfidenti =(): Promise<ConfidenteDto[]> => apiGet('/compendio/confidenti');
+/** R9-01 (F4): la disponibilità strutturata di un Confidente; con la partita anche se è disponibile adesso. */
+export const getDisponibilitaStrutturata = (chiave: string, partita?: number): Promise<DisponibilitaConfidenteDto> =>
+  apiGet(`/compendio/confidenti/${encodeURIComponent(chiave)}/disponibilita-strutturata${queryString({ partita })}`);
+/** Scrive la struttura (campi parziali: quelli assenti restano) e i luoghi del Confidente (le chiavi in più si aggiungono, quelle in meno si tolgono). */
+export const salvaDisponibilitaStrutturata = (chiave: string, dati: ModificaDisponibilitaStrutturata): Promise<DisponibilitaConfidenteDto> =>
+  apiPut(`/compendio/confidenti/${encodeURIComponent(chiave)}/disponibilita-strutturata`, dati, { maxRetries: 0 });
+/** «Ripristina»: la struttura torna come la dà la fonte (i luoghi si ripristinano dal luogo). */
+export const ripristinaDisponibilitaStrutturata = (chiave: string): Promise<DisponibilitaConfidenteDto> =>
+  apiPost(`/compendio/confidenti/${encodeURIComponent(chiave)}/disponibilita-strutturata/ripristina`, {}, { maxRetries: 0 });
+
 /** Tutti i luoghi della città, come voci da scegliere (la sede di un negozio o di un'attività). */
 export const getLuoghi = (): Promise<LuogoOpzioneDto[]> => apiGet('/compendio/luoghi');
 

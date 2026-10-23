@@ -19,6 +19,7 @@ import { SemaforiRango } from '../components/partita/SemaforiRango';
 import { EditorRequisiti } from '../components/confidenti/EditorRequisiti';
 import { InvitiConfidente } from '../components/confidenti/InvitiConfidente';
 import { EditorDisponibilita } from '../components/confidenti/EditorDisponibilita';
+import { DisponibilitaStrutturataScheda, EditorDisponibilitaStrutturata } from '../components/confidenti/DisponibilitaStrutturata';
 import { IconChevronLeft } from '../components/shared/icons';
 import type { DialogoConfidenteDto, RegaloConfidenteDto } from '../types';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
@@ -112,6 +113,9 @@ export function ConfidenteDettaglioPage() {
     if (rango === null) p.delete('requisiti'); else p.set('requisiti', String(rango));
     setParams(p, { replace: true });
   };
+  // R9-01 (F4): l'editor della disponibilità strutturata; `versioneDisponibilita` rilegge la scheda dopo un salvataggio
+  const [disponibilitaAperta, setDisponibilitaAperta] = useState(false);
+  const [versioneDisponibilita, setVersioneDisponibilita] = useState(0);
   const informazioniAperte = params.get('informazioni') === '1';
   const setInformazioniAperte = (aperta: boolean) => {
     const p = new URLSearchParams(params);
@@ -177,8 +181,12 @@ export function ConfidenteDettaglioPage() {
                 <CollegamentoMappa tipo="confidente" chiave={c.chiave} compatto />
               </div>
               <div className="text-[13px] text-text-secondary flex flex-col gap-1">
-                <span><strong className="text-text">Dove:</strong> {c.disponibilita.luogo || '—'}</span>
-                <span><strong className="text-text">Quando:</strong> {c.disponibilita.giorni.join(', ') || '—'}{c.disponibilita.fasce.length ? ` · ${c.disponibilita.fasce.join(', ')}` : ''}</span>
+                {c.disponibilitaStrutturata
+                  ? <DisponibilitaStrutturataScheda chiave={c.chiave} partita={attiva?.id} versione={versioneDisponibilita} onModifica={() => setDisponibilitaAperta(true)} />
+                  : <>
+                    <span><strong className="text-text">Dove:</strong> {c.disponibilita.luogo || '—'}</span>
+                    <span><strong className="text-text">Quando:</strong> {c.disponibilita.giorni.join(', ') || '—'}{c.disponibilita.fasce.length ? ` · ${c.disponibilita.fasce.join(', ')}` : ''}</span>
+                  </>}
                 <span><strong className="text-text">Sblocco:</strong> {requisiti.caricamento ? 'Caricamento…' : requisiti.errore ? 'Requisiti non disponibili' : requisiti.dati?.ranghi.find((r) => r.rango === 1)?.requisiti.map((r) => r.descrizione).join(' · ') || 'Disponibile dall’inizio'}</span>
                 {c.disponibilita.note && <span>{c.disponibilita.note}</span>}
               </div>
@@ -290,6 +298,7 @@ export function ConfidenteDettaglioPage() {
       {rangoDaModificare !== null && c && <EditorRequisiti key={`${c.chiave}:${rangoDaModificare}`} confidente={{ chiave: c.chiave, nome: c.nome }} rangoIniziale={rangoDaModificare}
         onChiudi={() => setRangoDaModificare(null)} onSalvato={async () => { await Promise.all([ricarica(), stato.ricarica(), requisiti.ricarica()]); }} />}
     </PageState>
+    {disponibilitaAperta && c && <EditorDisponibilitaStrutturata key={`struttura:${chiave}`} chiave={chiave} nome={c.nome} onChiudi={() => setDisponibilitaAperta(false)} onSalvato={async () => { setVersioneDisponibilita((v) => v + 1); await ricarica(); }} />}
     {informazioniAperte && <EditorDisponibilita key={chiave} chiave={chiave} onChiudi={() => setInformazioniAperte(false)} onSalvato={ricarica} />}
     </>
   );
