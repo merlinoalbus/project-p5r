@@ -18,6 +18,7 @@ import { HttpError, httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { conVoceDellaSpunta, registraEvento, revocaEventiDellaVoce } from './storicoService.js';
 import { confidenti } from './partiteService.js';
+import { eGiornoFestivo, verdettoDelConfidente } from './disponibilitaStrutturataService.js';
 import { applicaEffettiAzione, annullaEffettiAzione, descriviEffettiApplicati, type OpzioniSpunta } from './effettiAzioneService.js';
 import { mappaAzione, nomeRiferimento, nomiEffetti, statoAzione, testoEffetti, verificaEffetti } from './azioniStrutturateService.js';
 import { atterraggioDelPalazzo, palazziConclusi } from './palazziService.js';
@@ -129,6 +130,18 @@ function quizDellaVoce(v: VoceBase, quiz: Contesto['quiz'], fonte: StatoEffettiV
   });
 }
 
+/**
+ * R9-03: l'avviso di disponibilità di una voce d'incontro. Il Confidente è valutato al giorno e alla fascia della voce, con il rango che la voce
+ * porta (`rango_atteso`); il meteo non c'è (la voce non è un momento della partita), quindi la pioggia non produce avvisi. Solo un avviso,
+ * mai un blocco; le voci non si spostano né si riscrivono.
+ */
+function avvisiDisponibilitaDellaVoce(r: RigaVoce): Pick<AzionePercorsoDto, 'avvisiDisponibilita'> {
+  if (r.genere !== 'azione' || r.riferimento_tipo !== 'confidente' || !r.riferimento_chiave) return {};
+  const esito = verdettoDelConfidente(r.riferimento_chiave, { data: r.data, fascia: fasciaDi(r), festivo: eGiornoFestivo(r.data), piove: false, rango: r.rango_atteso !== null ? r.rango_atteso - 1 : null });
+  if (!esito || esito.stato !== 'non-disponibile' || (esito.causa !== 'giorno' && esito.causa !== 'fascia' && esito.causa !== 'dal')) return {};
+  return { avvisiDisponibilita: [{ tipo: esito.causa === 'fascia' ? 'fuori-fascia' : 'fuori-giorno', testo: esito.motivo }] };
+}
+
 /** La voce per l'interfaccia: i campi della guida più la frase degli effetti, la spunta e i suoi effetti nella partita,
  *  il semaforo (solo per le azioni, e solo se ci sono i Confidenti della partita), la mappa collegata e la guida del quiz. */
 function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
@@ -159,7 +172,7 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   const daApplicare = ctx.partita === undefined ? 0 : (prepared(`SELECT COUNT(*) FROM utente.da_applicare WHERE partita_id=? AND stato='aperta' AND (voce_uid=? OR (causa_tipo='acquisto' AND causa_chiave IN (SELECT acquisto_id FROM utente.acquisto_provenienza WHERE partita_id=? AND voce_uid=?)))`).pluck().get(ctx.partita, r.uid, ctx.partita, r.uid) as number);
   return {
     ...v, effettiVoce: fonte, ricevuteEffetti, ...(daApplicare > 0 ? { daApplicare } : {}),
-    ...(aperture.length ? { apertureDedali: aperture } : {}), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], produceTesto: spuntabile ? testoEffettiDellaFonte(fonte, ctx.nomi) : [],
+    ...(aperture.length ? { apertureDedali: aperture } : {}), ...avvisiDisponibilitaDellaVoce(r), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], produceTesto: spuntabile ? testoEffettiDellaFonte(fonte, ctx.nomi) : [],
     fatta: spuntabile && ctx.fatte.has(r.uid), effetti: ctx.fatte.get(r.uid) ?? null,
     stato: ctx.conf && spuntabile ? statoAzione(v, ctx.conf, ctx.partita) : null, mappa: mappaAzione(v),
     // il Palazzo collegato: dove si atterra il giorno della voce (scelta dell'utente, 2026-10-04). L6 (R6-17): la destinazione unica, la stessa

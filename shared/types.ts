@@ -1284,6 +1284,8 @@ export interface AzionePercorsoDto {
   /** Solo riferimenti strutturati già presenti: nessuna riscrittura del testo o classificazione per somiglianza. */
   oggettoRiferimento?: RiferimentoOggettoDto | null;
   oggettiCitati?: RiferimentoOggettoDto[];
+  /** Solo sulle voci d'incontro con un Confidente che, al giorno o alla fascia della voce, non è disponibile (R9-03): un avviso, mai un blocco. */
+  avvisiDisponibilita?: Array<{ tipo: 'fuori-giorno' | 'fuori-fascia'; testo: string }>;
   /** Identità stabile: le spunte delle partite si agganciano a questa. */
   uid: string;
   /** Giorno del calendario di gioco ('MM-GG'); «giorno» e non «data» per l'envelope `{ data }` delle risposte. */
