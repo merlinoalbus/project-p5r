@@ -9,6 +9,7 @@ import { z as schema } from 'zod';
 import { auditConversioneCatalogo } from '../services/auditCatalogoService.js';
 import { censimentoScambiCatalogo } from '../services/censimentoScambiCatalogoService.js';
 import { ripristinaCostoRegalo } from '../services/costoRegaloService.js';
+import { confrontoTanaka } from '../services/tanakaSnapshotService.js';
 import { bodyLegameOggetto, bodyNuovoOggetto, bodyOggetto, bodyPropostaOggetto, paramsOggetto, queryCatalogoOggetti, queryProposteOggetto,
   type DatiCatalogoOggetto, type DatiLegameOggetto, type DatiPropostaOggetto } from '../schemas/catalogoOggetti.js';
 
@@ -18,6 +19,9 @@ const chiave = (params: Record<string, unknown>) => `${String(params.categoria)}
 
 // Le rotte letterali precedono categoria/slug: «proposte/conferma» non è un oggetto chiamato «conferma».
 router.get('/audit', (_req, res) => { res.json(auditConversioneCatalogo()); });
+router.get('/confronto-tanaka', (_req, res) => {
+  res.set('Cache-Control', 'no-store'); res.json(confrontoTanaka());
+});
 router.get('/censimento-scambi', (_req, res) => {
   res.set('Cache-Control', 'no-store'); res.json(censimentoScambiCatalogo());
 });

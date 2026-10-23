@@ -1,6 +1,6 @@
 # L7-TANAKA-STORICO — contratto conservativo da implementare
 
-23 ottobre 2026, 07:32 italiana. Codice completo approvato staticamente da Galaxy; punto aperto fino a rilascio, conservazione e osservazione. Nessuna migrazione030 applicata al momento di questa nota.
+23 ottobre 2026, 07:53 italiana. **STORICO chiuso con PASS finale circoscritto** dopo correzioneST-R01, rilascio030, conservazione completa e osservazione readonly. Il contratto sotto e i checkpoint intermedi restano la storia verificabile dell'implementazione.
 
 ## Difetto accertato e fonti
 
@@ -56,3 +56,11 @@ Baseline reale readonly05:29:23–27Z: main138/utente29,100/59 tabelle incluse q
 a2038c83, pipeline39906575442 SUCCESS. All'aggiornamento automatico il backend rifiuta le fotografie e p5s mostra502: il confronto dell'allowlist usava `articolo,catalogo,nome,negozio,negozioNome`, mentre l'ordine effettivo di `Object.keys().sort()` è `articolo,catalogo,negozio,negozioNome,nome`. Il solo letterale viene corretto, mantenendo esattamente gli stessi cinque campi e tutte le altre guardie. Soluzione e delta esatto approvati staticamente da Galaxy; il difetto era sfuggito anche al suo gate precedente, che non costituiva copertura runtime.
 
 Diagnostica readonly isolata:7foto, tutte le firme di prova/tuple valide, prezzi e generazione1 coerenti; solo il confronto errato delle chiavi era falso. Confronto completo05:43:32–36Z con baseline05:29: tutte100tabelle main e59utente preesistenti identiche, incluse quelle di sistema,FK0/0. Utente resta29: la030è annullata, associazioni assenti, bootstrap append-only durevole conservato. Nessun restore, cancellazione o rigenerazione della prova. STORICO resta aperto fino al correttivo pubblicato e al riscontro reale riuscito.
+
+## Chiusura verificata
+
+Correttivo49c036c8, pipeline39907548119 SUCCESS; CI verificata autonomamente da Galaxy. Watchtower avvia backend05:49:05Z efrontend05:49:06Z, running/0riavvii; health200 e hash del sorgente attivo uguale al freeze corretto. Schema138/30.
+
+Confronti readonly05:49:30–34Z e finale dopo i browser05:52:50–54Z: tutte100tabelle main e59utente preesistenti identiche alla baseline05:29, comprese quelle di sistema. Main senza alcun cambio di schema o dato. Nel solo utente: quattro nuove tabelle, sei trigger di immutabilità e relativi indici; rimosso soltanto l'indice unico RAW e aggiunto l'indice di ricerca previsto. Nessun vecchio DDL diverso. Sette tuple personali identiche, sette fotografie e marcatore identici al bootstrap precedente al fallimento, sette associazioni esatte; identità, contributi e provenienza conformi al prima. Totali per negozio identici con contributi congelati, valutatore dei gradi invariato;FK0/0. Impronte e dati personali soloRAM del coordinatore; nessuna prova attribuita al revisore che non l'abbia acquisita.
+
+Entrambi osservano readonly il registro con sette presenze e generazione1, provenienza di continuità e distinzione esplicita dal prezzo pagato; il prezzo ignoto con contributozero non è dichiarato gratuito. Console del coordinatore dopo ripresa e del revisore senza warn/error. Galaxy emette **PASS finale circoscrittoSTORICO**. Limiti: nessun writer, ripristino, import o replay esercitato; screenshot del revisore indisponibili per timeout, nessuna sua certificazione in pixel o globale del layout. Nessuna modifica del listinoTanaka o consenso commerciale; non chiudeL7.

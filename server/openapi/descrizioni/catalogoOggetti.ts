@@ -2,6 +2,11 @@
 import type { DescrizioniArea } from '../tipi.js';
 
 export const DESCRIZIONI_CATALOGO_OGGETTI: DescrizioniArea = {
+  'GET /api/catalogo-oggetti/confronto-tanaka': {
+    sommario: 'Confronto unitario readonly fra storico121, fonti correnti e proposta Royal',
+    descrizione: 'Unica transazione, no-store. Include offerte assenti/nascoste/aggiunte/collisioni e proposte in tutti gli stati, senza aggiornare tuple, fotografie o stati. Riconciliazione124 solo diagnostica con formule intere, provenienza seed, rendiconto esatto e confronto integrale degli altri campi e legami. Candidate Royal dal manifest18 con solo grado proprio e sblocco corrente del negozio separato; non equivalgono a consenso o conferma applicabile. revisione è un hash della lettura, non una ricevuta commerciale. Conferma e scelta alternativa individuali delle fonti Tanaka rispondono409 tanaka-decisione-unitaria-richiesta; scarto esplicito resta disponibile.',
+    risposta: 'ConfrontoTanakaDto, versione1',
+  },
   'GET /api/catalogo-oggetti/censimento-scambi': {
     sommario: 'Fonti correnti Jose/scambi e raccordi documentali alle offerte e proposte',
     descrizione: 'Sola lettura coerente in transazione; Cache-Control no-store. Proietta jose.scambi (nome, effetto, costo, requisito, fonte) e oggetti-guida.scambi (venditore, fonte, offerte ricevi/dai/note/fonte), con percorsi e UID soltanto quando esistono. Stati assente, null, vuoto, valido, malformato e non-supportato distinti. Il registro 132 deve corrispondere integralmente al manifest dei 97 percorsi e target espliciti. Per ogni fonte ricontrolla RAW e metadati correnti contro la fotografia registrata: una fonte mutata non viene ricollegata per nome. Destinazioni correnti, costi, formule, risultati e proposte di tutti gli stati sono letti per chiavi; raccordoDocumentale indica soltanto il rinvio documentato, mai equivalenza semantica o approvazione. Le copie sintetiche restano archivi con divergenze esplicite, non nuove offerte. Le fonti attese assenti sono esposte in fontiMancanti; le nuove restano fuori-manifest. Registro mancante o incompatibile diagnosticato senza sovrascriverlo. Nessun RAW privato del registro, partita o immagine viene restituito. completo indica assenza di taglio delle righe proiettate, non correttezza semantica. Non interpreta prosa né modifica dati.',

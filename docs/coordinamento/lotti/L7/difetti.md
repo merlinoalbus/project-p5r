@@ -1,5 +1,9 @@
 # L7 — difetti e mancanze dell'implementazione locale
 
+**23/10 08:12 italiana — SNAPSHOT approvato staticamente, al rilascio:** chiusi nel delta SNAP-F01(apertura query su componente già montato),F02(aggiramento via proposta ricompensa),F03(formule/payload non riconosciuti),F04(personalizzazioni catalogo/negozio consultabili). Typecheck34050/lint4156/build57426 exit0, tre riesami propri e PASS finale statico Galaxy. Nessuna migrazione o modifica28proposte; conservazione e browser pubblicato ancora aperti. Non chiudeR7-13b oL7.
+
+**23/10 07:53 italiana — STORICO eST-R01 chiusi con PASS finale circoscritto:** 49c036c8/pipeline39907548119 SUCCESS,138/30 operativo; tutte159tabelle preesistenti e sette prove conservate nel confronto finale, stessi contributi eFK0/0. Registro e console osservati autonomamente da Galaxy, limiti in `tanaka-storico-contratto.md`. Nessun writer/restore/import esercitato o listinoTanaka rettificato.
+
 **ST-R01,23/10 07:44 italiana:** primo rilascioSTORICO con pipelineverde ma backend502; allowlist con ordine errato nel confronto delle chiavi. Corretto il solo letterale, delta approvato staticamente; guardie e dati intatti. Tutte159tabelle preesistenti identiche nel confronto completo05:43,7foto integre conservate,030rollback. Correttivo ancora da osservare sul pubblicato: punto aperto, nessunPASSruntime.
 
 **23/10 07:32 italiana — STORICO al rilascio, non ancora chiuso:** archivio generazionale e bootstrap pre-main/030, lettore congelato, writer/Cestino/import e consenso con prova completa approvati staticamente da Galaxy dopo chiusuraST-F01/02/03. Typecheck63945/lint28604/build1052 exit0; nessun test o migrazione locale. Baseline privatareadonly138/29 acquisita; seguono pipeline, aggiornamento automatico e confronto conservativo. Dettaglio in `tanaka-storico-contratto.md`. Nessuna rettifica del listinoTanaka o soglie applicata.

@@ -1,5 +1,9 @@
 # Architettura — project-p5r
 
+**23/10 — SNAPSHOT Tanaka in revisione:** GET readonly `catalogo-oggetti/confronto-tanaka` con TX unica e no-store separa fotografia121, fonte corrente e candidate Royal documentali. Attribuzione124 soltanto con rendiconto e formule intere/provenienza/coincidenza integrale degli altri campi e legami. Nessuna scrittura o migrazione; guardiaBE comune vieta conferma/alternativa/legame individualeTanaka, anche via fonte ricompensa. Revisionehash della lettura distinta da futuroCAS/ricevuta. Nessun writer commerciale unitario ancora attivo.
+
+**23/10 07:53 italiana — continuità acquisti rilasciata:**030 attiva su138/30, correttivo49c036c8/pipeline39907548119 riuscita. Conservazione di tutte le tabelle preesistenti e delle sette prove originali confermata; lettore del pubblicato osservato con PASS finale circoscritto. Writer/restore/import non esercitati. Il paragrafo «al rilascio» sotto descrive il checkpoint precedente.
+
 **23/10 — continuità acquisti, al rilascio030:** quattro strutture personali separano prova immutabile, marcatore del bootstrap, associazione attiva e raccordo fatto/generazione. Il bootstrap append-only precede ogni migrazione main solo quando030 è pending, senza anticipare la versione; la030 adotta la prova esatta senza rivalutare prezzi. Il lettore usa contributi congelati e deduplicaI71 per generazione; il Cestino ripristina solo l'ultima generazione e non riavvolge gli archivi. Backup/import li trasportano con validazione e provenienza esplicita. Codice approvato staticamente; conservazione e pubblicato ancora da osservare. Contratto in `coordinamento/lotti/L7/tanaka-storico-contratto.md`.
 
 Le sezioni §1–§8 e quelle senza data conservano anche descrizioni della verifica del 4 ottobre 2026: non sono tutte lo stato corrente.

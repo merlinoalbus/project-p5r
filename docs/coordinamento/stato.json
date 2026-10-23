@@ -1,27 +1,28 @@
 {
   "obiettivo": "Completare i lotti L0–L11 della razionalizzazione sul ramo newreview e pubblicarli funzionanti su p5s",
-  "aggiornato": "2026-10-23T05:43:36Z",
+  "aggiornato": "2026-10-23T06:12:00Z",
   "cruscotto": {
     "adesso": {
-      "attivita": "STORICO aperto: p5s502 al primo avvio. ST-R01 identificato nell'ordine dell'allowlist; correttivo minimo PASS statico Galaxy, senza rimuovere guardie. Pipeline39906575442 del primo rilascio riuscita.",
-      "stato": "Correttivo in pubblicazione. Readonly05:43: tutte159tabelle preesistenti identiche alla baseline,7foto integre conservate,utente29/030rollback,FK0/0. Nessun restore o punto successivo; limite10min revocato.",
+      "attivita": "SNAPSHOT al rilascio con PASS statico finaleGalaxy dopoSNAP-F01…04 corretti; typecheck34050/lint4156/build57426 verdi, tre riesami propri. SeguonoCI/conservazione/browser; nessuna migrazione o modifica proposte.",
+      "stato": "Unico punto attivo L7-TANAKA-SNAPSHOT. Tanaka2/9punti chiusi; consenso commerciale e restoL7 aperti. Limite10min revocato.",
       "responsabile": "Coordinatore implementa in sequenza; Galaxy verifica in sola lettura. Nessun esecutore parallelo attivo.",
       "prossimaConsegna": "Completare i gruppi residui dei lotti: Covo e distributori L5, pesca/condizioni L6 e catalogo/scambi L7; predisporre le decisioni concrete riservate all'utente. Nessun lotto dichiarato concluso per il solo rilascio137."
     },
     "ultimaConsegna": {
-      "titolo": "Rimozione recuperabile del pin1636 conclusa",
-      "commit": "389387be",
+      "titolo": "STORICO: contributi acquisti e generazioni conservati",
+      "commit": "49c036c8",
       "pipeline": {
-        "testo": "Pipeline82 riuscita",
-        "url": "https://github.com/merlinoalbus/project-p5r/actions/runs/39668626532"
+        "testo": "Pipeline39907548119 riuscita",
+        "url": "https://github.com/merlinoalbus/project-p5r/actions/runs/39907548119"
       },
       "istanza": {
-        "testo": "p5s operativo, schema137/28",
+        "testo": "p5s operativo, schema138/30",
         "url": "https://p5s.nasmerlinoalbus.cloud"
       },
-      "verifica": "Prima del DELETE:46utente e95main identiche dopo137. Dopo:sole spillo/cestino diverse,46utente e altri1912pin/998Diario/316mappe/3vecchiCestino identici; riga originale integrale nel Cestino, epoca+1. Galaxy osserva autonomamente Cestino/Rimetti e assenza sulla Banchina: PASS finale. Restore non esercitato; nessun test o chiusura globale L5."
+      "verifica": "PASS finale circoscritto Galaxy: registro con7prove e console senza errori. Confronto coordinatore05:52: tutte100main+59utente preesistenti identiche,7foto e marcatore bootstrap intatti,7associazioni esatte, stessi totali congelati eFK0/0. Writer/restore/import non esercitati; nessuna certificazione visuale o chiusuraL7."
     },
     "chiusi": [
+      "STORICO:030 e correttivo49c036c8 rilasciati, contributi e generazioni conservati; PASS finale circoscritto Galaxy, registro readonly e dati preservati. Nessun consenso/listinoTanaka modificato, writer/restore/import non esercitati.",
       "Rilascio A10: migrazioni138/29, conservazione dati e browser readonly con PASS distinti. Correttivo91d12aa5/pipeline39865491697, A10-BR01 chiuso. Scritture/recupero/ripristino non esercitati; non chiude L6 o L10.",
       "Tre schede L5 collegate ai pin1466/1486/1526 consegnate;1636 rimosso nel Cestino con fotografia integrale e PASS finale Galaxy. Dei23candidati restano19, non19bug identici o il totale L5.",
       "I71: consumi/provenienze, ricevute e proposte del Diario rilasciati814b17d8, pipeline81/schema136-28; gate finale positivo sulle pagine osservate e conservazione nei confronti dichiarati. Resto L10 e ricerca R6 aperti.",
@@ -399,7 +400,7 @@
       "nome": "Coordinatore — implementazione e rilascio",
       "fase": "be, fe, regia",
       "stato": "al lavoro",
-      "attivita": "L7-TANAKA-STORICO: codice approvato staticamente e pubblicato a2038c83; seguono pipeline, aggiornamento automatico e conservazione readonly. Limite10min revocato."
+      "attivita": "STORICO chiuso con PASS finale e dati conservati; oraL7-TANAKA-SNAPSHOT. Limite10min revocato, implementazione in sequenza."
     },
     {
       "nome": "Esecutore L5/L6",
@@ -429,7 +430,7 @@
       "nome": "Revisore indipendente",
       "fase": "validazione",
       "stato": "al lavoro",
-      "attivita": "Galaxy: PASS statico STORICO dopo chiusuraST-F01/02/03; gate finale del pubblicato e dei dati ancora necessario. Nessun test o writer."
+      "attivita": "Galaxy: PASS finale circoscritto STORICO sul pubblicato; i dati sono evidenze del coordinatore. Prossimo gate su SNAPSHOT, nessun test o writer."
     }
   ],
   "notaSessioniStoriche": "Le righe seguenti sono il registro del precedente team, non lo stato live delle sessioni o dei servizi. Nessuna sessione precedente è stata riaperta o gestita durante questo audit.",
@@ -654,15 +655,15 @@
         "id": "L7-TANAKA-STORICO",
         "lotto": "L7",
         "titolo": "Proteggere spesa e rango dai cambi prezzo Tanaka",
-        "stato": "in-corso",
+        "stato": "chiuso",
         "fonte": "lotti/L7/tanaka-decisione-unitaria.md",
-        "criterio": "Aperto per ST-R01: primo avvio502 nonostante CIverde. Correzione minima allowlist approvata staticamente,7foto e159tabelle preesistenti preservate nel confronto05:43. Completare correttivo/030/conservazione/browser e gate finale prima della chiusura. Nessun consensoTanaka, limite10min revocato."
+        "criterio": "PASS finale circoscritto Galaxy:49c036c8/pipeline39907548119 SUCCESS,138/30 operativo;159tabelle precedenti e7prove intatte,7associazioni e stessi totali,FK0/0; registro readonly e console osservati. Writer/restore/import non esercitati, nessun consensoTanaka o chiusuraL7."
       },
       {
         "id": "L7-TANAKA-SNAPSHOT",
         "lotto": "L7",
         "titolo": "Riconciliare fotografie121 e condizioni124",
-        "stato": "da-fare",
+        "stato": "in-corso",
         "fonte": "lotti/L7/tanaka-decisione-unitaria.md",
         "criterio": "Nessuna reintroduzione delle condizioni precedenti."
       },

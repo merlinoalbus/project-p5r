@@ -83,6 +83,7 @@ function ElencoAbbinamenti({ proposte, titolo, onCambiato, scelta: sceltaIndicat
   const esegui = async () => {
     if (!conferma || occupato) return;
     const { proposta: p, oggetto, scarta } = conferma;
+    if (!scarta && p.decisioneUnitaria) return;
     if (!scarta && (!oggetto || (richiedeQuantita && !quantitaValida))) return;
     const corpo = { riga_tipo: p.rigaTipo, riga_chiave: p.rigaChiave, gruppo: p.gruppo, catalogo_chiave: p.catalogo?.chiave ?? null };
     setOccupato(true); setErrore(null);
@@ -139,9 +140,10 @@ function ElencoAbbinamenti({ proposte, titolo, onCambiato, scelta: sceltaIndicat
             {altro && p.modifica?.ricevuti === undefined && <SceltaCatalogoOggetto valore={scelta?.chiave ?? ''} disabilitato={occupato} escludi={fusione ? [p.rigaChiave] : undefined}
               etichetta="Scegli l’oggetto corretto" onScegli={setScelta} />}
             <div className="flex flex-wrap gap-2">
-              <button type="button" className={`btn touch ${fusione ? 'btn-danger' : 'btn-primary'}`} disabled={occupato || !oggetto || (altro && !scelta)}
+              {p.decisioneUnitaria ? <Link className="btn btn-secondary touch" to="/guida/oggetti?tanaka=1">Apri il confronto unitario Tanaka</Link> : <button type="button" className={`btn touch ${fusione ? 'btn-danger' : 'btn-primary'}`} disabled={occupato || !oggetto || (altro && !scelta)}
                 onClick={() => { setErrore(null); setQuantitaMateriale(''); setConferma({ proposta: p, oggetto, scarta: false }); }}>{fusione ? 'Unisci gli oggetti…' : nascondi ? 'Conferma nascondimento…' : 'Conferma…'}</button>
-              {!nascondi && p.modifica?.ricevuti === undefined && <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={() => { setAlternativa(altro ? null : k); setScelta(null); }}>{altro ? 'Annulla la scelta' : 'Scegli un altro oggetto'}</button>}
+              }
+              {!p.decisioneUnitaria && !nascondi && p.modifica?.ricevuti === undefined && <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={() => { setAlternativa(altro ? null : k); setScelta(null); }}>{altro ? 'Annulla la scelta' : 'Scegli un altro oggetto'}</button>}
               <button type="button" className="btn btn-ghost touch" disabled={occupato} onClick={() => { setErrore(null); setConferma({ proposta: p, oggetto: p.catalogo, scarta: true }); }}>Scarta…</button>
             </div>
           </article>;

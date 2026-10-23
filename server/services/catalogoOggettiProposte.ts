@@ -12,6 +12,7 @@ import { datiGuida } from './datiGuida.js';
 import { nomiCondizioni } from './condizioni/nomiCondizioni.js';
 import { fonteRicompensaOggetto, fontiRicompenseOggetti, type FonteRicompensaOggetto } from './fontiRicompenseOggetti.js';
 import { fratelliValidi, salvaSnapshotProposta, snapshotConVersioneSalvata, verificaSnapshotProposta } from './snapshotProposteOggetti.js';
+import { fonteTanaka, vietaConfermaTanaka } from './tanakaSnapshotService.js';
 
 type Riga = Record<string, unknown>;
 interface Proposta {
@@ -107,6 +108,7 @@ export function elencaProposteOggetti(filtro: { riga_tipo?: TipoPropostaOggetto;
     return { rigaTipo: p.riga_tipo, rigaChiave: p.riga_chiave, gruppo: p.gruppo, rigaNome: fonte.nome, testoAttuale: fonte.testo,
       catalogo: p.catalogo_chiave === null ? null : { chiave: p.catalogo_chiave, nome: p.catalogo_nome!, casa: casaOggetto(p.catalogo_chiave) }, categoria: eCategoriaOggetto(p.categoria) ? p.categoria : null,
       quantita: p.quantita, motivo: p.motivo, certezza: p.certezza, stato: p.stato, nota: p.nota,
+      ...(fonteTanaka(p) ? { decisioneUnitaria: 'tanaka' as const } : {}),
       modifica: m ? { azione: m.azione, ...(m.prezzo !== undefined ? { prezzo: m.prezzo } : {}), ...(m.condizioni ? { condizioni: m.condizioni, condizioniTesto: m.condizioni.map((c) => descriviRequisitoSpillo(c, nomi)) } : {}), ...(m.ruolo ? { ruolo: m.ruolo } : {}),
         ...(m.nome_offerta ? { nomeOfferta: m.nome_offerta } : {}), ...(m.nota_offerta ? { notaOfferta: m.nota_offerta } : {}),
         ...(m.costo ? { costo: costoOggetto(JSON.stringify(m.costo), riferimenti)! } : {}),
@@ -257,6 +259,7 @@ function applicaLegame(d: LegameCompleto, m: Modifica | null, additivo = false):
 export function confermaPropostaOggetto(dati: DatiPropostaOggetto): { confermata: true } {
   getDb().transaction(() => {
     const p = leggiProposta(dati);
+    vietaConfermaTanaka(p);
     if (p.stato === 'confermata') return;
     if (p.stato === 'scartata') throw httpErrors.conflict('proposta-scartata', 'Questa proposta è già stata scartata. Collega la fonte a mano se vuoi modificarla.');
     if (p.catalogo_chiave === null) throw httpErrors.conflict('proposta-senza-oggetto', 'Scegli un oggetto prima di confermare la proposta.');
@@ -284,12 +287,14 @@ export function scartaPropostaOggetto(dati: DatiPropostaOggetto): { scartata: tr
 
 export function impostaLegameOggetto(input: DatiLegameOggetto): { salvato: true } {
   getDb().transaction(() => {
+    vietaConfermaTanaka(input);
     if (input.togli && input.proposta_catalogo_chiave !== undefined) throw httpErrors.badRequest('gesti-legame-distinti', 'Rimozione e scelta alternativa sono due gesti distinti.');
     const conservaContenuto = ['voce', 'ricompensa', 'ricetta'].includes(input.riga_tipo) && input.precedente_catalogo_chiave === input.catalogo_chiave;
     // La quantità/nota di un contenuto già collegato resta modificabile anche se l'identità è nascosta;
     // applicaLegame verificherà l'esistenza del legame precedente prima di qualsiasi scrittura.
     rigaOggetto(input.catalogo_chiave, input.togli || conservaContenuto);
     const originale = input.proposta_catalogo_chiave !== undefined ? leggiProposta({ ...input, catalogo_chiave: input.proposta_catalogo_chiave }) : null;
+    if (originale) vietaConfermaTanaka(originale);
     const dati: LegameCompleto = { ...input, quantita: input.quantita !== undefined ? input.quantita : originale ? originale.quantita : eProdottoRicetta(input) ? null : 1,
       ...(input.nota === undefined && originale ? { nota: originale.nota } : {}) };
     if (originale && originale.stato !== 'da-approvare') throw httpErrors.conflict('proposta-gia-gestita', 'La proposta è già stata gestita: rileggi il gruppo.');

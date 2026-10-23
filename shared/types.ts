@@ -3199,6 +3199,8 @@ export interface TrasformazioneOggettoDto {
 export const TIPI_PROPOSTA_OGGETTO = ['articolo', 'regalo', 'voce', 'ricompensa', 'ricetta', 'catalogo'] as const;
 export type TipoPropostaOggetto = (typeof TIPI_PROPOSTA_OGGETTO)[number];
 export interface PropostaAbbinamentoDto {
+  /** Richiede il confronto completo: conferma e scelta alternativa individuali vietate. */
+  decisioneUnitaria?: 'tanaka';
   rigaTipo: TipoPropostaOggetto;
   rigaChiave: string;
   /** Alternative dello stesso contenuto, non degli altri oggetti nella stessa voce/ricetta. */

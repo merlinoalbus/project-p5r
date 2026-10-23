@@ -1,5 +1,9 @@
 # Roadmap — project-p5r
 
+**23/10 08:12 italiana — SNAPSHOT al rilascio:** confronto121/corrente/Royal in unicaTX e guardie alle conferme individuali con PASS statico finale Galaxy dopo quattro rilievi corretti. Controlli verdi, tre riesami propri, nessun test/migrazione/scrittura commerciale. RestanoCI, conservazione e browser per chiudereSNAPSHOT; STORICO consegnato, restoTanaka/L5–L11 aperto.
+
+**23/10 07:53 italiana — L7-TANAKA-STORICO chiuso con PASS finale circoscritto:**49c036c8/pipeline39907548119 SUCCESS,138/30 operativo; dati preesistenti, sette prove e totali conservati; registro osservato. Writer/restore/import non esercitati. Ora SNAPSHOT121/124; Tanaka2/9punti chiusi, nessun consenso commerciale o chiusuraL7. Gli altri residui L5–L11 restano aperti.
+
 **23/10 07:32 italiana — L7-TANAKA-STORICO al rilascio:** migrazione030 e bootstrap pre-main, conteggio congelato/generazioni/Cestino/import e consenso con prova completa approvati staticamente; typecheck/lint/build verdi. Punto ancora aperto fino al confronto conservativo e all'osservazione del pubblicato. TANAKA-UNITA già chiuso come preparazione; listino e consenso commerciale invariati. Limite10min revocato dall'utente. L5–L11 restano nel mandato, senza chiusure globali.
 
 Legenda stato: ✅ fatto e validato · 🔄 in corso · ⏳ fatto, in attesa di validazione · ⬜ da fare.

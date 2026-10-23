@@ -1,5 +1,15 @@
 # L7 — Tanaka e risoluzione dei raccordi documentali
 
+## Checkpoint23ottobre2026 — SNAPSHOT in revisione, STORICO consegnato
+
+**08:12 italiana:** PASS statico finale Galaxy dopo SNAP-F01…04. Corrette apertura già montata da query, fallback per ricompensa e seconda guardia sull'originale, parsing rigoroso delle formule/payload prima degli esiti, personalizzazioni/incompatibilità del catalogo e consultazione completa del negozio. Tre riesami propri: conservazione/provenienza, tutti gli ingressi del writer, trasporto/rendering/query/assenze. Controlli finali typecheck34050/lint4156/build57426 exit0. Nessun test o backend locale; punto al rilascio, conservazione/runtime ancora da osservare. I controlli67795/78552/47726 sotto sono la prima passata precedente ai quattro correttivi.
+
+Il checkpoint01:09 sotto è storico: STORICO è ora chiuso con PASS finale circoscritto sul correttivo49c036c8, pipeline39907548119 riuscita e schema138/30. Le159tabelle preesistenti e le sette prove originali risultano conservate; limiti writer/restore/import non esercitati dichiarati nel contrattoSTORICO.
+
+SNAPSHOT implementato localmente dopo PASS della soluzione: `tanakaSnapshotService.ts` legge in una sola transazione le offerte attese/correnti, anche nascoste/assenti/collisioni, tutte le proposte nei tre stati, il rendiconto124 e le identità del catalogo. Conserva RAW, tuple e stati121 senza migrazioni. La diagnostica124 richiede formula intera, provenienza seed e rapporto della voce esatta, oltre al confronto completo degli altri campi e collegamenti. Una creazione con fonte assente non acquisisce validità dal solo snapshot coincidente. Le candidate documentaliRoyal hanno soltanto il grado proprio, con sblocco corrente del negozio separato: non sono un consenso né un writer unitario già implementato. La revisione hash identifica la lettura, non una ricevuta commerciale.
+
+Guardia backend comune sulle conferme e sui legami, anche senza puntatore alla proposta e per ricompensa di articoloTanaka; UI rinvia al confronto senza conferme o alternative individuali. Lo scarto esplicito preesistente resta disponibile; nessuno scarto viene riaperto. Typecheck67795, lint78552 e build47726 exit0; nessun test o backend locale avviato. Tre riesami propri su conservazione, guardie e trasporto/rendering; gate distinto sul delta e rilascio ancora da completare. Nessun consenso o dato commerciale cambiato.
+
 ## Checkpoint23ottobre2026,01:09 italiana
 
 Confronto preparatorio20/18/28 pubblicato e osservato con PASS finale distinto; pipeline39868190114 e39868308688 riuscite. Questo chiude soltantoL7-TANAKA-UNITA. STORICO resta aperto senza codice o migrazione applicati: causa confermata nel calcolo legacy e contratto completo in [tanaka-storico-contratto.md](tanaka-storico-contratto.md), da implementare e verificare integralmente. La proposta di archivio separato deve preservare il piano originale10chiavi+8nuove, senza imporre18nuove identità commerciali. Nessun consenso o modifica commerciale eseguiti.
