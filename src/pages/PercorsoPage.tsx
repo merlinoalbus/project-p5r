@@ -19,7 +19,6 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { GiornoGuida } from '../components/guida/GiornoGuida';
-import { AbbinamentiEffettiVoce } from '../components/guida/AbbinamentiEffettiVoce';
 import { GestiPartita } from '../components/partita/GestiPartita';
 
 /**
@@ -87,7 +86,6 @@ export function PercorsoPage() {
             {partitaId && g.dataCorrente === g.giorno && <span className="chip chip--attivo ml-auto">Oggi nella partita</span>}
           </div>
           <GestiPartita contestoChiave={`${partitaId}:${data}`} onCambiato={async () => { await Promise.all([giorno.ricarica(), indice.ricarica()]); }} />
-          <AbbinamentiEffettiVoce onCambiato={async () => { await Promise.all([giorno.ricarica(), indice.ricarica()]); }} />
           <GiornoGuida onGiornataModificata={async () => { await Promise.all([giorno.ricarica(), indice.ricarica()]); }} g={g} partitaId={partitaId} onAggiorna={aggiorna} azioneEvidenziata={voceDaMostrare} onSullaMappa={(m) => navigate(`/guida/mappe/${encodeURIComponent(m.chiave)}${m.spilloId ? `?spillo=${m.spilloId}` : ''}`)} fasciaCorrente={partitaId && g.dataCorrente === g.giorno ? attiva?.fasciaGioco ?? 'giorno' : null} />
         </div>
       )}

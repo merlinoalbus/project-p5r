@@ -90,7 +90,7 @@ function verificaFonte(partita:number,r:NuovaRegistrazioneAcquisto):{raw:unknown
   if(!e)throw httpErrors.conflict('fonte-non-presente','La voce o l’effetto di origine non sono più presenti.');
   const d=leggiOggettoRegistro(String(e.dati_json),'effetto di origine'),effetto=normalizzaEffettoVoce(d);
   if(!effetto||effetto.tipo!=='acquisto'||e.tipo!=='acquisto'||effetto.articolo!==r.articolo)throw httpErrors.conflict('fonte-diversa','La voce non dichiara questo acquisto.');
-  if((effetto.variante!==null&&effetto.variante!==r.variante)||(effetto.fortuna!==null&&effetto.fortuna!==r.fortuna))throw httpErrors.conflict('osservazione-diversa','Variante o Fortuna divergono dall’effetto canonico confermato.');
+  if(effetto.variante!==null&&effetto.variante!==r.variante)throw httpErrors.conflict('osservazione-diversa','La variante diverge dall’effetto canonico confermato.');
   const old=prepared('SELECT id,acquisto_id FROM utente.acquisto_provenienza WHERE partita_id=? AND voce_uid=? AND effetto_uid=?').get(partita,r.fonte.voceUid,r.fonte.effettoUid) as {id:string;acquisto_id:string}|undefined;
   if(old&&(r.scelta.tipo!=='collega'||r.scelta.acquistoId!==old.acquisto_id)){
     const receipt=prepared('SELECT prima_json,ricevuta_json FROM utente.effetto_applicato WHERE partita_id=? AND voce_uid=? AND effetto_uid=? AND annullato_il IS NULL').get(partita,r.fonte.voceUid,r.fonte.effettoUid) as {prima_json:string;ricevuta_json:string}|undefined;

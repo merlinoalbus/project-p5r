@@ -7,9 +7,9 @@ export type EffettoLegacyVoce =
   | { tipo: 'dote'; dote: DoteChiave; note: 1 | 2 | 3 }
   | { tipo: 'lettura'; categoria: CategoriaLetturaVoce; chiave: string; almeno: number | null }
   | { tipo: 'turno'; attivita: string; doti?: DoteNoteVoce[] };
+/** L'acquisto non porta più la Fortuna (R10-10/2): è lo stato della partita, letto quando si registra il consumo. */
 export type EffettoVoce = EffettoLegacyVoce | EffettoPescaVoce | {
-  tipo: 'acquisto'; articolo: string; variante: DoteChiave | null;
-  fortuna: boolean | null; sostituisceDoti: string[];
+  tipo: 'acquisto'; articolo: string; variante: DoteChiave | null; sostituisceDoti: string[];
 };
 export interface EffettoVoceDto { uid: string; ordine: number; effetto: EffettoVoce; origine: 'seed' | 'regola' | 'utente' }
 export interface StatoEffettiVoceDto {
@@ -66,9 +66,10 @@ export function normalizzaEffettoVoce(x: unknown): EffettoVoce | null {
     return { tipo: 'turno', attivita: o.attivita.trim(), doti };
   }
   if (o.tipo === 'acquisto') {
-    if (typeof o.articolo !== 'string' || !o.articolo.trim() || !(o.variante === null || eDote(o.variante)) || !(o.fortuna === null || typeof o.fortuna === 'boolean')) return null;
+    // `fortuna` resta una chiave tollerata (righe e ricevute di prima la portano) ma non fa più parte dell'effetto: si scarta
+    if (typeof o.articolo !== 'string' || !o.articolo.trim() || !(o.variante === null || eDote(o.variante)) || !(o.fortuna === undefined || o.fortuna === null || typeof o.fortuna === 'boolean')) return null;
     if (!Array.isArray(o.sostituisceDoti) || o.sostituisceDoti.some((s) => typeof s !== 'string' || !/^[0-9a-f]{32}$/.test(s)) || new Set(o.sostituisceDoti).size !== o.sostituisceDoti.length) return null;
-    return { tipo: 'acquisto', articolo: o.articolo.trim(), variante: o.variante, fortuna: o.fortuna, sostituisceDoti: [...o.sostituisceDoti as string[]].sort() };
+    return { tipo: 'acquisto', articolo: o.articolo.trim(), variante: o.variante, sostituisceDoti: [...o.sostituisceDoti as string[]].sort() };
   }
   return null;
 }
@@ -83,5 +84,5 @@ export function descriviEffettoVoce(e: EffettoVoce): string {
   if (e.tipo === 'lettura') return `${e.chiave}: ${e.almeno === null ? 'completato' : `almeno ${e.almeno}`}`;
   if (e.tipo === 'turno') return `Turno: ${e.attivita}`;
   if (e.tipo === 'pesca') return 'Pesca a Ichigaya: sessione osservata';
-  return `Acquisto: ${e.articolo}${e.variante ? ` · ${nomeDote(e.variante)}` : ' · variante da dichiarare'}${e.fortuna === null ? ' · Fortuna non dichiarata' : e.fortuna ? ' · con Fortuna' : ''}`;
+  return `Acquisto: ${e.articolo}${e.variante ? ` · ${nomeDote(e.variante)}` : ' · variante da dichiarare'}`;
 }

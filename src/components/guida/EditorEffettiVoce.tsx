@@ -48,12 +48,11 @@ export function CampiAcquistoEffetto({ effetto, righe, onCambia }: { effetto: Ac
     {offerta.errore && <p role="alert" className="m-0 text-warning">{offerta.errore} Il riferimento dell’effetto resta conservato.</p>}
     <p className="m-0 text-[12px] text-text-secondary">L’offerta conserva la propria identità commerciale e i suoi acquisti. La scheda distinta del Chiosco dei succhi non trasferisce questa offerta.</p>
     <Selettore etichetta="Variante indicata dalla guida" valore={effetto.variante ?? ''} vuoto="Da osservare nella partita" opzioni={ORDINE_AOJIRU.map((d) => ({ chiave: d, nome: nomeDote(d) }))} onCambia={(d) => onCambia({ ...effetto, variante: d ? d as DoteChiave : null })} />
-    <Selettore etichetta="Fortuna indicata dalla guida" valore={effetto.fortuna === null ? 'ignota' : effetto.fortuna ? 'si' : 'no'} opzioni={[{ chiave: 'ignota', nome: 'Non dichiarata' }, { chiave: 'no', nome: 'Assente' }, { chiave: 'si', nome: 'Attiva sulla stessa Dote' }]} onCambia={(f) => onCambia({ ...effetto, fortuna: f === 'ignota' ? null : f === 'si' })} />
     {!!doti.length && <fieldset className="m-0 flex flex-col gap-1 border border-border p-2"><legend>Doti già presenti che questo acquisto sostituisce</legend>
       <p className="m-0 text-[12px]">Seleziona solo i premi della stessa consumazione: rimangono conservati, ma il nuovo effetto evita di attribuirli una seconda volta.</p>
       {doti.map((r) => <label key={r.uid} className="touch flex items-center gap-2"><input className="h-5 w-5" type="checkbox" checked={effetto.sostituisceDoti.includes(r.uid!)} onChange={(e) => onCambia({ ...effetto, sostituisceDoti: e.target.checked ? [...effetto.sostituisceDoti, r.uid!] : effetto.sostituisceDoti.filter((id) => id !== r.uid) })} />{r.effetto.tipo === 'dote' ? `${nomeDote(r.effetto.dote)} · ${r.effetto.note} ${r.effetto.note === 1 ? 'nota' : 'note'}` : ''}</label>)}
     </fieldset>}
-    <p className="m-0 text-[12px] text-text-secondary">Domenica, 5.000 yen, nessun tempo. La variante iniziale e Fortuna non sono dedotte dal nome della voce o dalla data. L’acquisto effettivo richiede la tua osservazione nella partita.</p>
+    <p className="m-0 text-[12px] text-text-secondary">Domenica, 5.000 yen, nessun tempo. La variante non è dedotta dal nome della voce o dalla data, se la guida non la dice. La Fortuna non si indica qui: la legge dallo stato della partita.</p>
   </div>;
 }
 
@@ -88,7 +87,7 @@ export function EditorEffettiVoce({ valore, elenchi, onCambia }: { valore: Campi
     </li> : <RigaEffettoVoceLegacy key={r.uid ?? `nuovo-${i}`} effetto={r.effetto} numero={i + 1} elenchi={elenchi} onCambia={(e) => cambia(i, e)} onTogli={() => togli(i)} onSposta={(verso) => sposta(i, verso)} primo={i === 0} ultimo={i === righe.length - 1} />)}</ul>
     {righe.length < 100 && <div className="flex flex-wrap items-end gap-2"><Selettore etichetta="Effetto da aggiungere" valore={tipoNuovo} opzioni={[{ chiave: 'dote', nome: 'Dote' }, { chiave: 'lettura', nome: 'Lettura o gioco' }, { chiave: 'turno', nome: 'Turno di attività' }, { chiave: 'acquisto', nome: 'Acquisto Aojiru' }, { chiave: 'pesca', nome: 'Sessione di pesca osservata' }]} onCambia={(t) => setTipoNuovo(t as EffettoVoce['tipo'])} />
       <button type="button" className="btn btn-secondary touch" onClick={() => {
-        const effetto: EffettoVoce = tipoNuovo === 'pesca' ? { tipo: 'pesca', regola: REGOLA_PESCA, attivita: ATTIVITA_PESCA, sostituisceTurni: [], sostituisceDoti: [] } : tipoNuovo === 'acquisto' ? { tipo: 'acquisto', articolo: ARTICOLO_AOJIRU, variante: null, fortuna: null, sostituisceDoti: [] } : tipoNuovo === 'lettura' ? { tipo: 'lettura', categoria: 'libro', chiave: '', almeno: null } : tipoNuovo === 'turno' ? { tipo: 'turno', attivita: '' } : { tipo: 'dote', dote: 'fascino', note: 2 };
+        const effetto: EffettoVoce = tipoNuovo === 'pesca' ? { tipo: 'pesca', regola: REGOLA_PESCA, attivita: ATTIVITA_PESCA, sostituisceTurni: [], sostituisceDoti: [] } : tipoNuovo === 'acquisto' ? { tipo: 'acquisto', articolo: ARTICOLO_AOJIRU, variante: null, sostituisceDoti: [] } : tipoNuovo === 'lettura' ? { tipo: 'lettura', categoria: 'libro', chiave: '', almeno: null } : tipoNuovo === 'turno' ? { tipo: 'turno', attivita: '' } : { tipo: 'dote', dote: 'fascino', note: 2 };
         imposta([...righe, { uid: null, effetto }]);
       }}>Aggiungi l’effetto scelto</button>
     </div>}

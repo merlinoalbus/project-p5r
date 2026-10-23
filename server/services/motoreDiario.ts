@@ -219,7 +219,7 @@ function porzioniLegacy(effetti:EffettoVoceDto[],legacy:EffettiAzioneDto|null):M
 }
 function registraConsumo(p:number,uid:string,e:EffettoVoceDto,r:RichiestaRegistraAcquisto,porte?:PorteDisponibilitaAcquisto,nuovaSpunta=false,opz:{id?:string;sostituisceRicevuta?:string;assorbeRicevute?:string[];generazione?:string}={}):ReceiptEffettoVoceDto {
   if(e.effetto.tipo!=='acquisto'||r.fonte.tipo!=='diario'||r.fonte.voceUid!==uid||r.fonte.effettoUid!==e.uid||r.articolo!==e.effetto.articolo)throw httpErrors.conflict('fonte-acquisto-diversa','La richiesta non appartiene a questo effetto del Diario.');
-  if((e.effetto.variante!==null&&e.effetto.variante!==r.variante)||(e.effetto.fortuna!==null&&e.effetto.fortuna!==r.fortuna))throw httpErrors.conflict('osservazione-diversa','Variante o Fortuna divergono dall’effetto confermato: correggi esplicitamente la fonte.');
+  if(e.effetto.variante!==null&&e.effetto.variante!==r.variante)throw httpErrors.conflict('osservazione-diversa','La variante diverge dall’effetto confermato: correggi esplicitamente la fonte.');
   if(prepared('SELECT 1 FROM utente.acquisto_operazione WHERE partita_id=? AND operazione_id=?').get(p,r.operazioneId))throw httpErrors.conflict('operazione-diario-gia-conclusa','L’operazione d’acquisto è già conclusa: rileggi lo stato della spunta o della proposta. La sua ricevuta storica non viene riutilizzata per una nuova applicazione.');
   const ricevuta=registraAcquistoNellaTransazione(p,r,porte,{nuovaSpunta});
   if(!ricevuta.acquistoId||!ricevuta.provenienzaId)throw httpErrors.conflict('ricevuta-acquisto-assente','La registrazione non ha prodotto una provenienza identificabile.');
