@@ -13,6 +13,7 @@ import './tailwind.css';
 import App from './App.tsx';
 import { useConfigStore } from './stores/configStore';
 import { tuttePrecarica } from './router';
+import { precaricaPagineScheda } from './components/scheda/pagineScheda';
 import { avviaControlloVersione } from './utils/versioneApp';
 import { precaricaInBackground } from './utils/pagineLazy';
 import type { AppConfigDto } from './types';
@@ -83,7 +84,7 @@ async function boot(): Promise<void> {
 
   // UI-ASSET-01: avviso «nuova versione» e precarico in tempo morto di tutte le pagine (solo nella build: in sviluppo i file non hanno hash)
   avviaControlloVersione();
-  if (import.meta.env.PROD) precaricaInBackground(tuttePrecarica);
+  if (import.meta.env.PROD) precaricaInBackground([...tuttePrecarica, ...precaricaPagineScheda]);
 }
 
 void boot();

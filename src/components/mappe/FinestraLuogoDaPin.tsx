@@ -10,6 +10,7 @@ import { Modal } from '../shared/Modal';
 import { SelettoreIcone } from '../shared/SelettoreIcone';
 import { OrariEditor } from '../guida/OrariEditor';
 import { IconaSpillo } from './IconaSpillo';
+import { useBozzaSporca } from '../../utils/bozzeSporche';
 
 interface Props {
   spillo: SpilloDto;
@@ -62,6 +63,9 @@ export function FinestraLuogoDaPin({ spillo, mappa, partita, mappaRiletta, caric
   const riletturaAutomatica = useRef(false);
   const identita = useRef({ id: spillo.id, uid: spillo.uid, mappa });
   const bozza = JSON.stringify({ nome, tipo, cosaOffre, orari });
+  // i valori con cui si apre la finestra: nessun falso positivo all'apertura; dopo la creazione (ricevuta) i dati sono salvati e la bozza non c'è più
+  const [bozzaIniziale] = useState(bozza);
+  useBozzaSporca('luogo-da-pin', `luogo da pin «${spillo.nome}»`, ricevuta === null && fase !== 'creato' && bozza !== bozzaIniziale);
   const valida = nome.trim().length > 0 && nome.trim().length <= 160 && tipo !== null && cosaOffre.length <= 600;
   const occupato = fase === 'anteprima' || fase === 'salvataggio' || lettura !== null;
   const bloccoEsito = ricevuta !== null || (fase === 'incerto' && !riscontro?.libero);

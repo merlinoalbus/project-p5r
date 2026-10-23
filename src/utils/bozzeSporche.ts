@@ -17,6 +17,17 @@ const sporche = new Map<string, string>();
 const guardia = (e: BeforeUnloadEvent) => {
   if (sporche.size) { e.preventDefault(); e.returnValue = ''; }
 };
+let guardiaAttiva = false;
+
+/**
+ * Toglie la guardia `beforeunload`: si chiama subito prima di un `reload()` già confermato dall'utente (nostra finestra «Aggiorna comunque»),
+ * così il browser non chiede una seconda conferma. Una bozza segnalata dopo la riattiva.
+ */
+export function disattivaGuardiaBozze(): void {
+  if (!guardiaAttiva) return;
+  window.removeEventListener('beforeunload', guardia);
+  guardiaAttiva = false;
+}
 
 /**
  * Segnala che il form ha modifiche non salvate (`sporca`) e lo toglie dal registro quando si salva, si annulla o si smonta.
@@ -28,10 +39,10 @@ export function useBozzaSporca(chiave: string, etichetta: string, sporca: boolea
     if (!sporca) return;
     const k = `${chiave}#${istanza}`;
     sporche.set(k, etichetta);
-    if (sporche.size === 1) window.addEventListener('beforeunload', guardia);
+    if (!guardiaAttiva) { window.addEventListener('beforeunload', guardia); guardiaAttiva = true; }
     return () => {
       sporche.delete(k);
-      if (!sporche.size) window.removeEventListener('beforeunload', guardia);
+      if (!sporche.size) disattivaGuardiaBozze();
     };
   }, [chiave, etichetta, sporca, istanza]);
 }

@@ -22,23 +22,14 @@ import { createPortal } from 'react-dom';
 import { resolvePath, useLocation, useNavigate, type NavigateOptions, type To } from 'react-router-dom';
 import { Spinner } from '../shared/PageState';
 import { ErroreInRiquadro } from '../shared/ErrorePagina';
-import { pigra } from '../../utils/pagineLazy';
+import {
+  AttivitaPage, ConfidenteDettaglioPage, DungeonDettaglioPage, FilmPage, LibriPage, LuogoPage, NegozioPage, OggettoPage, RichiestePage,
+} from './pagineScheda';
 import { IconChevronLeft, IconClose } from '../shared/icons';
 import { ApriPannelloContext, SchedaCorrenteContext, type ApriPannello, type SchedaCorrente } from './contestoScheda';
 import { conSchedaNelPannello, profonditaDaStato, schedaDaParametri, statoConProfondita, trovaScheda, type SchedaTrovata } from '../../utils/pannelloScheda';
 
-/** Le pagine che mostrano un elemento di un elenco (libri, film, attività, Richieste) ricevono la chiave dell'elemento. */
-interface PropsElemento { soloChiave?: string }
-
-const ConfidenteDettaglioPage = pigra(() => import('../../pages/ConfidenteDettaglioPage'), 'ConfidenteDettaglioPage');
-const DungeonDettaglioPage = pigra(() => import('../../pages/DungeonDettaglioPage'), 'DungeonDettaglioPage');
-const NegozioPage = pigra(() => import('../../pages/NegozioPage'), 'NegozioPage');
-const LuogoPage = pigra(() => import('../../pages/LuogoPage'), 'LuogoPage');
-const OggettoPage = pigra(() => import('../../pages/OggettoPage'), 'OggettoPage');
-const LibriPage = pigra<typeof import('../../pages/LibriPage'), PropsElemento>(() => import('../../pages/LibriPage'), 'LibriPage');
-const FilmPage = pigra<typeof import('../../pages/FilmPage'), PropsElemento>(() => import('../../pages/FilmPage'), 'FilmPage');
-const AttivitaPage = pigra<typeof import('../../pages/AttivitaPage'), PropsElemento>(() => import('../../pages/AttivitaPage'), 'AttivitaPage');
-const RichiestePage = pigra<typeof import('../../pages/RichiestePage'), PropsElemento>(() => import('../../pages/RichiestePage'), 'RichiestePage');
+// le pagine pigre del pannello stanno in `pagineScheda` (il precarico in tempo morto le importa)
 
 /** La pagina che corrisponde alla scheda: le stesse del menù; per gli elenchi, filtrate sull'elemento. */
 function ContenutoScheda({ scheda }: { scheda: SchedaTrovata }) {

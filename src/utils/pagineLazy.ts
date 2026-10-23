@@ -23,6 +23,9 @@ export function eErroreDiChunk(e: unknown): boolean {
   return /Failed to fetch dynamically imported module|error loading dynamically imported module|Importing a module script failed|Unable to preload CSS|ChunkLoadError/i.test(m);
 }
 
+/** Senza rete un `import()` fallito non vuol dire che l'app sia stata aggiornata. */
+export const senzaRete = (): boolean => typeof navigator !== 'undefined' && navigator.onLine === false;
+
 /** Un solo ritentativo: un file tolto dal server non torna, e il browser può tenere in memoria anche il fallimento di un `import()`. */
 const ATTESE_MS = [600];
 

@@ -14,8 +14,8 @@ export function AvvisoNuovaVersione() {
   const motivo = useVersioneStore((s) => (s.nuovaVersione ? s.motivo : null));
   if (!motivo) return null;
   return (
-    <div className="flex items-center gap-3 px-3 lg:px-5 min-h-[44px] shrink-0 bg-bg-secondary border-b border-warning text-[14px]" role="status">
-      <span className="flex-1 min-w-0 truncate text-text">
+    <div className="flex items-center gap-3 px-3 py-1 lg:px-5 min-h-[44px] shrink-0 bg-bg-secondary border-b border-warning text-[14px]" role="status">
+      <span className="flex-1 min-w-0 line-clamp-2 break-words leading-tight text-text">
         {motivo === 'chunk'
           ? "L'app è stata aggiornata: questa pagina non si apre finché non aggiorni."
           : "È disponibile una nuova versione dell'app."}

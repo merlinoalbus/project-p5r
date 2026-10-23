@@ -6,7 +6,7 @@
 
 import { Component, type ReactNode, type ErrorInfo } from 'react';
 import { useAssetStore } from '../../stores/assetStore';
-import { bozzeSporche } from '../../utils/bozzeSporche';
+import { bozzeSporche, disattivaGuardiaBozze } from '../../utils/bozzeSporche';
 
 interface Props {
   children: ReactNode;
@@ -40,6 +40,7 @@ export class ErrorBoundary extends Component<Props, State> {
     const sporche = bozzeSporche();
     if (sporche.length && !window.confirm(`Hai modifiche non salvate in: ${sporche.join(', ')}. Se ricarichi ora si perdono. Ricaricare comunque?`)) return;
     this.setState({ hasError: false, error: null });
+    disattivaGuardiaBozze(); // già confermato qui sopra: niente seconda finestra del browser
     window.location.reload();
   };
 

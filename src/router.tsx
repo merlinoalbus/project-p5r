@@ -21,7 +21,7 @@ import { SchermataAvvio } from './components/shared/SchermataAvvio';
 import { HomePage } from './pages/HomePage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { useVersioneStore } from './stores/versioneStore';
-import { eErroreDiChunk, pigra as pigraBase, type PaginaPigra } from './utils/pagineLazy';
+import { eErroreDiChunk, pigra as pigraBase, senzaRete, type PaginaPigra } from './utils/pagineLazy';
 
 /** I `precarica` di tutte le pagine, nell'ordine in cui sono dichiarate: `main.tsx` li importa in tempo morto. */
 const precaricamenti: Array<() => Promise<void>> = [];
@@ -88,6 +88,8 @@ const pagina = (path: string, p: PaginaPigra): RouteObject => ({
       return null; // un `loader` non può restituire `undefined`
     } catch (e) {
       if (!eErroreDiChunk(e)) throw e;
+      // da offline il fallimento non dice che l'app sia stata aggiornata: niente striscia «nuova versione», `ErrorePagina` dice «Sei offline»
+      if (senzaRete()) throw e;
       useVersioneStore.getState().segnala('chunk');
       // durante un `loader` la posizione registrata dal router è ancora quella di prima; se anche l'indirizzo del browser è ancora quello
       // (un clic su un collegamento, non un Indietro/Avanti) si torna lì con una sostituzione, senza aggiungere voci di cronologia

@@ -9,7 +9,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { Modal } from './Modal';
-import { bozzeSporche } from '../../utils/bozzeSporche';
+import { bozzeSporche, disattivaGuardiaBozze } from '../../utils/bozzeSporche';
 
 interface Props {
   className?: string;
@@ -34,7 +34,7 @@ export function PulsanteAggiornaApp({ className = 'btn btn-primary btn-sm touch'
         azioni={(
           <>
             <button type="button" className="btn btn-secondary touch" onClick={() => setElenco(null)}>Resta qui</button>
-            <button type="button" className="btn btn-primary touch" onClick={() => window.location.reload()}>Aggiorna comunque</button>
+            <button type="button" className="btn btn-primary touch" onClick={() => { disattivaGuardiaBozze(); window.location.reload(); }}>Aggiorna comunque</button>
           </>
         )}
       >
