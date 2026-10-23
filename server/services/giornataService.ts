@@ -390,8 +390,10 @@ export function ingressiConclusiNascosti(partitaId: number): Array<{ uid: string
   const conclusi = palazziConclusi(partitaId);
   if (conclusi.size === 0 || !conLegami()) return [];
   const righe = prepared(`SELECT v.uid AS uid, v.data AS data, v.riferimento_chiave AS palazzo FROM voce_giornata v
+    JOIN giorno_percorso g ON g.data = v.data
     LEFT JOIN spunta_voce_partita s ON s.voce_uid = v.uid AND s.partita_id = ?
-    WHERE v.genere = 'azione' AND v.riferimento_tipo = 'dungeon' AND v.data > ? AND v.data > ? AND s.voce_uid IS NULL
+    WHERE v.genere = 'azione' AND v.riferimento_tipo = 'dungeon' AND s.voce_uid IS NULL
+      AND g.ordine > (SELECT ordine FROM giorno_percorso WHERE data = ?) AND g.ordine > (SELECT ordine FROM giorno_percorso WHERE data = ?)
       AND (EXISTS (SELECT 1 FROM voce_infiltrazione i WHERE i.voce_uid = v.uid) OR EXISTS (SELECT 1 FROM proposta_infiltrazione_voce p WHERE p.voce_uid = v.uid))`)
     .all(partitaId, giorno, ULTIMO_GIORNO_VALIDATO) as Array<{ uid: string; data: string; palazzo: string }>;
   return righe.filter((r) => conclusi.has(r.palazzo)).map(({ uid, data }) => ({ uid, data }));
