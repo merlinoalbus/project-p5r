@@ -17,12 +17,23 @@ export const PUNTI_USCITA = 10;
 /** Moltiplicatore con una Persona dello stesso arcano. */
 export const MOLTIPLICATORE_ARCANO = 1.5;
 
-/** Come si calcolano i punti di un incontro; il Confidente conta solo per il bonus degli esami. */
+/** I sette Confidenti che ricevono il moltiplicatore dell'esame (G-016c, corretta da G-020 con Ann): gli altri non lo hanno mai. */
+export const CONFIDENTI_CON_BONUS_ESAME: readonly string[] = ['ryuji', 'ann', 'makoto', 'haru', 'sojiro', 'kawakami', 'kasumi'];
+/** Dove ci si è piazzati all'ultimo esame; vale fino ai risultati dell'esame successivo. */
+export type PiazzamentoEsame = 'primo' | 'primi-10' | 'altro';
+/** Moltiplicatore per piazzamento: primo in classifica ×1,5, nei primi 10 ×1,2, altrove nessuno. */
+export const MOLTIPLICATORE_ESAME: Readonly<Record<PiazzamentoEsame, number>> = { primo: 1.5, 'primi-10': 1.2, altro: 1 };
+
+/** Come si calcolano i punti di un incontro; `confidente` e `piazzamento` contano solo per il bonus degli esami. */
 export interface IngressoPuntiConfidente {
+  /** Chiave del Confidente: il bonus dell'esame vale solo per i sette di `CONFIDENTI_CON_BONUS_ESAME`. */
+  confidente?: string;
   noteRisposta?: 1 | 2 | 3;
   regalo?: boolean;
   uscita?: boolean;
   bonusArcano?: boolean;
+  /** Il piazzamento all'ultimo esame; senza (non ancora registrato) nessun moltiplicatore. */
+  piazzamento?: PiazzamentoEsame | null;
 }
 
 const arrotonda2 = (n: number): number => Math.round(n * 100) / 100;
@@ -32,7 +43,12 @@ export function puntiBase(i: IngressoPuntiConfidente): number {
   return i.regalo ? PUNTI_REGALO : i.uscita ? PUNTI_USCITA : i.noteRisposta !== undefined ? i.noteRisposta * PUNTI_PER_NOTA : 0;
 }
 
-/** I punti di un incontro, ai centesimi. */
+/** Il moltiplicatore dell'esame per quel Confidente: 1 per chi non è fra i sette o senza piazzamento registrato. */
+export function moltiplicatoreEsame(confidente: string | undefined, piazzamento: PiazzamentoEsame | null | undefined): number {
+  return confidente !== undefined && piazzamento && CONFIDENTI_CON_BONUS_ESAME.includes(confidente) ? MOLTIPLICATORE_ESAME[piazzamento] : 1;
+}
+
+/** I punti di un incontro, ai centesimi: base × (arcano ×1,5) × (esame, solo per i sette). */
 export function puntiConfidente(i: IngressoPuntiConfidente): number {
-  return arrotonda2(puntiBase(i) * (i.bonusArcano ? MOLTIPLICATORE_ARCANO : 1));
+  return arrotonda2(puntiBase(i) * (i.bonusArcano ? MOLTIPLICATORE_ARCANO : 1) * moltiplicatoreEsame(i.confidente, i.piazzamento));
 }
