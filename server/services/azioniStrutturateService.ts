@@ -33,13 +33,22 @@ function titoliLettura(tabella: 'libro' | 'film' | 'attivita', coda = ''): strin
 /** Il minimo di un'azione (della guida o dell'utente) che stato e mappa leggono. */
 export interface AzioneClassificata { tipo: string; riferimento: { tipo: string; chiave: string } | null; rangoAtteso: number | null; /** MM-GG della voce, se è di un giorno. */ giorno?: string }
 
+/** R10-17/4: se il passaggio a quel rango è stato segnato a mano dalla pagina Confidenti, la voce del Diario lo dice (con il giorno di gioco
+ *  in cui è stato segnato); altrimenti niente. Lettura soltanto. */
+function correzioneARango(partitaId: number | undefined, confidente: string, rango: number): string {
+  if (partitaId === undefined) return '';
+  const r = prepared("SELECT data, fascia FROM incontro_confidente_partita WHERE partita_id = ? AND confidente_chiave = ? AND passaggio = 1 AND verso_rango = ? AND origine = 'pagina' ORDER BY id DESC LIMIT 1")
+    .get(partitaId, confidente, rango) as { data: string; fascia: string } | undefined;
+  return r ? ` — segnato a mano dalla pagina Confidenti${r.data ? ` il ${r.data}${r.fascia ? ` (${r.fascia})` : ''}` : ''}` : '';
+}
+
 /** Stato dell'azione nella partita (12.4): per gli incontri con un Confidente valuta i semafori del rango atteso (o del prossimo). */
-export function statoAzione(a: AzioneClassificata, conf: Map<string, ConfidentePartitaDto>): StatoAzioneDto {
+export function statoAzione(a: AzioneClassificata, conf: Map<string, ConfidentePartitaDto>, partitaId?: number): StatoAzioneDto {
   if (a.tipo !== 'confidente' || a.riferimento?.tipo !== 'confidente') return { tipo: 'neutra', motivo: null };
   const c = conf.get(a.riferimento.chiave);
   if (!c) return { tipo: 'neutra', motivo: null };
   const atteso = a.rangoAtteso ?? null;
-  if (atteso !== null && c.rango >= atteso) return { tipo: 'neutra', motivo: `rango ${atteso} già raggiunto` };
+  if (atteso !== null && c.rango >= atteso) return { tipo: 'neutra', motivo: `rango ${atteso} già raggiunto${correzioneARango(partitaId, c.chiave, atteso)}` };
   if (!c.sbloccato && (atteso ?? 1) > 1) return { tipo: 'bloccata', motivo: 'Confidente non ancora sbloccato nella partita' };
   const obiettivo = atteso ?? c.rango + 1;
   // Solo il semaforo del rango obiettivo: un rango senza requisiti e libero (non si ripiega sul rango successivo).

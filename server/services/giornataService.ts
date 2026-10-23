@@ -150,7 +150,7 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
     ...v, effettiVoce: fonte, ricevuteEffetti, ...(daApplicare > 0 ? { daApplicare } : {}),
     ...(aperture.length ? { apertureDedali: aperture } : {}), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], produceTesto: spuntabile ? testoEffettiDellaFonte(fonte, ctx.nomi) : [],
     fatta: spuntabile && ctx.fatte.has(r.uid), effetti: ctx.fatte.get(r.uid) ?? null,
-    stato: ctx.conf && spuntabile ? statoAzione(v, ctx.conf) : null, mappa: mappaAzione(v),
+    stato: ctx.conf && spuntabile ? statoAzione(v, ctx.conf, ctx.partita) : null, mappa: mappaAzione(v),
     // il Palazzo collegato: dove si atterra il giorno della voce (scelta dell'utente, 2026-10-04). L6 (R6-17): la destinazione unica, la stessa
     // della metro e del campo `mappa` (la regola d'atterraggio del giorno, o l'ingresso del Palazzo)
     atterraggio: v.riferimento?.tipo === 'dungeon' ? atterraggioDelPalazzo(v.riferimento.chiave, v.giorno) : null,
