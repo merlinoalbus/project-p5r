@@ -9,21 +9,18 @@ import { IconChevronLeft, IconChevronRight } from '../shared/icons';
 import { MeteoGiornata } from './MeteoGiornata';
 import { dataGiocoTesto } from '../../utils/dateGioco';
 import type { Oggi } from '../../hooks/useOggi';
-import { DaApplicare } from './DaApplicare';
 
 interface Props {
   oggi: Oggi;
   /** Scorre nel proprio riquadro invece di allungare la pagina (schermate senza scorrimento). */
   riempi?: boolean;
-  /** Non mostra il pannello «Da applicare»: in Home non è autorizzato (utente, 2026-10-23); resta in Partita (`ProgressiPartita`). */
-  senzaDaApplicare?: boolean;
 }
 
 /** La colonna della guida del giorno, sullo stato condiviso `oggi`: frecce fra i giorni, «Segna
  * come giorno corrente» (o la targa «Oggi nella partita»), «Vai a oggi», collegamento alla guida
  * completa, la riga fascia + meteo della fascia attiva, e la `GiornoGuida` compatta (con i tag delle allerte del giorno)
  * (con `riempi` scorre nel proprio riquadro). Senza giorno o indice caricati non mostra nulla. */
-export function OggiGuida({ oggi, riempi, senzaDaApplicare }: Props) {
+export function OggiGuida({ oggi, riempi }: Props) {
   const { giorno: g, indice } = oggi;
   if (!g || !indice) return null;
   return (
@@ -65,7 +62,6 @@ export function OggiGuida({ oggi, riempi, senzaDaApplicare }: Props) {
         )}
       </div>
       <div className={riempi ? 'md:min-h-0 md:area-scorrevole md:p-1' : ''}>
-        {!senzaDaApplicare && oggi.partitaId !== null && <div className="mb-2"><DaApplicare key={oggi.partitaId} partitaId={oggi.partitaId} onCambiato={() => oggi.ricarica()} /></div>}
         <GiornoGuida onGiornataModificata={() => oggi.ricarica()} g={g} partitaId={oggi.partitaId} onAggiorna={oggi.aggiornaAzione} onSullaMappa={oggi.sullaMappa} azioneEvidenziata={oggi.mappa.azione} compatto fasciaCorrente={g.dataCorrente === g.giorno ? oggi.fascia : null} />
       </div>
     </div>

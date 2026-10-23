@@ -163,7 +163,7 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
       <section className="home-oggi flex flex-col gap-1.5" aria-label="Oggi nella partita">
         <h2 className="m-0 font-display text-[19px] uppercase shrink-0">Oggi</h2>
         {/* L5 (LAY5-1): l'area interna della guida solo dove c'è altezza (da 1024 × 1150); altrove la guida cresce con la pagina */}
-        <div className={riempi ? 'flex-1 min-h-0 riempi-figli' : undefined}>{guidaPronta ? <OggiGuida oggi={oggiHome} riempi={riempi} senzaDaApplicare /> : statoOggi}</div>
+        <div className={riempi ? 'flex-1 min-h-0 riempi-figli' : undefined}>{guidaPronta ? <OggiGuida oggi={oggiHome} riempi={riempi} /> : statoOggi}</div>
       </section>
       )}
 
