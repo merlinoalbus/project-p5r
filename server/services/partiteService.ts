@@ -307,6 +307,11 @@ function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi
   // L6: un requisito è una condizione del vocabolario unico (anche una lettura, un luogo, un invito): lo stato è quello completo del
   // valutatore, con i ranghi di TUTTI i Confidenti
   const stato = { ...statoDisponibilitaPartita(partitaId), ranghiConfidenti: ranghi };
+  // i Confidenti con almeno un regalo gradito collegato al catalogo (senza catalogo di oggetti la colonna non c'è: nessuno)
+  const conRegaliCatalogo = new Set<string>();
+  try {
+    for (const r of prepared('SELECT DISTINCT confidente_chiave FROM confidente_regalo WHERE catalogo_chiave IS NOT NULL AND sconsigliato = 0').all() as Array<{ confidente_chiave: string }>) conRegaliCatalogo.add(r.confidente_chiave);
+  } catch { /* catalogo degli oggetti non disponibile */ }
   return righe.map((c) => {
     const semafori = semaforiConfidente(c.chiave, c.rango, stato);
     return {
@@ -314,7 +319,7 @@ function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi
       punti: c.punti, puntiNecessari: c.rango >= 10 ? null : c.punti_necessari,
       mancanti: c.rango >= 10 || c.punti_necessari === null ? null : round2(Math.max(0, c.punti_necessari - c.punti)),
       personaArcanoInScorta: c.in_scorta === 1,
-      regaliFatti: regali.get(c.chiave)?.nomi ?? [], regaliFattiCatalogo: regali.get(c.chiave)?.catalogo ?? [],
+      regaliFatti: regali.get(c.chiave)?.nomi ?? [], regaliFattiCatalogo: regali.get(c.chiave)?.catalogo ?? [], haRegaliCatalogo: conRegaliCatalogo.has(c.chiave),
       note: c.note, semafori, updatedAt: c.updated_at,
       bloccato: bloccoRango(semafori, c.rango + 1),
     };

@@ -688,6 +688,8 @@ export interface ConfidentePartitaDto extends ConfidenteDto {
   regaliFatti: string[];
   /** Identità consegnate; i nomi storici sopra non vengono riscritti dopo una rinomina. */
   regaliFattiCatalogo?: string[];
+  /** Il Confidente ha regali graditi collegati a un oggetto del catalogo: solo allora la finestra «Regala» ha oggetti da scegliere. */
+  haRegaliCatalogo?: boolean;
   note: string;
   /** Semafori dei ranghi superiori a quello attuale (Fase 12.3), in ordine di rango. */
   semafori: SemaforiRangoDto[];

@@ -11,7 +11,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { aggiornaConfidente, getConfidentiPartita, confermaRequisitoConfidente } from '../../services/api';
+import { aggiornaConfidente, annullaRegaloOggetto, getConfidentiPartita, confermaRequisitoConfidente } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';
@@ -64,8 +64,10 @@ export function ConfidentiPartita({ partitaId }: Props) {
   const [invito, setInvito] = useState(false);
   // Bonus arcano per card: predefinito dalla scorta, modificabile a mano (chiave → valore forzato).
   const [bonusForzato, setBonusForzato] = useState<Record<string, boolean>>({});
-  // Ultimo incremento per card, per il pulsante "Annulla ultimo".
-  const [ultimo, setUltimo] = useState<Record<string, number>>({});
+  // Gli incrementi di ogni card, dal più vecchio al più recente, per «Annulla ultimo»: annulla l'ultimo, poi resta quello di prima.
+  // Un regalo consegnato dalla finestra «Regala» porta il suo oggetto: si annulla con la sua consegna (punti compresi).
+  const [ultimo, setUltimo] = useState<Record<string, Array<{ punti: number; regalo?: string }>>>({});
+  const cimaDi = (chiave: string) => ultimo[chiave]?.[ultimo[chiave].length - 1];
   // Il Confidente a cui si sta regalando (finestra unica «Regala»).
   const [regaloPer, setRegaloPer] = useState<string | null>(null);
 
@@ -76,7 +78,7 @@ export function ConfidentiPartita({ partitaId }: Props) {
    * di punti ricorda l'aumento per «Annulla ultimo» (azzerato se i punti calano o il rango cambia);
    * avvisa delle Doti da segnare per l'incontro e annuncia quando la soglia del rango successivo è
    * appena stata raggiunta. Restituisce il Confidente aggiornato, o `null` in caso di errore. */
-  const salva = async (chiave: string, cambio: ModificaConfidente): Promise<ConfidentePartitaDto | null> => {
+  const salva = async (chiave: string, cambio: ModificaConfidente, mantieniPila = false): Promise<ConfidentePartitaDto | null> => {
     if (!dati) return null;
     setOccupato(chiave);
     try {
@@ -86,10 +88,10 @@ export function ConfidentiPartita({ partitaId }: Props) {
       imposta((correnti) => correnti.map((c) => (c.chiave === chiave ? agg : c)));
       if (prima && cambio.rango === undefined && cambio.punti === undefined) {
         const delta = Math.round((agg.punti - prima.punti) * 100) / 100;
-        if (delta > 0) setUltimo((u) => ({ ...u, [chiave]: delta }));
-        else if (delta < 0) setUltimo((u) => ({ ...u, [chiave]: 0 }));
+        if (delta > 0) setUltimo((u) => ({ ...u, [chiave]: [...(u[chiave] ?? []), { punti: delta }] }));
+        else if (delta < 0 && !mantieniPila) setUltimo((u) => ({ ...u, [chiave]: [] }));
       }
-      if (prima && agg.rango !== prima.rango) setUltimo((u) => ({ ...u, [chiave]: 0 }));
+      if (prima && agg.rango !== prima.rango) setUltimo((u) => ({ ...u, [chiave]: [] }));
       // la Dote del passaggio di rango: il passaggio l'ha registrata (o, scendendo, tolta); una risposta registra l'incontro
       // senza Dote (dal 2026-10-17). Le Doti si segnano a mano: l'avviso la ricorda
       avvisaDotiDaSegnare(agg.doteIncontro, `Incontro con ${agg.nome}`);
@@ -100,6 +102,31 @@ export function ConfidentiPartita({ partitaId }: Props) {
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
       return null;
+    } finally {
+      setOccupato(null);
+    }
+  };
+
+  /** «Annulla ultimo»: toglie l'ultima azione (un regalo con la sua consegna, o i punti dell'incremento); poi resta disponibile quella di prima. */
+  const annullaUltimo = async (c: ConfidentePartitaDto) => {
+    const cima = cimaDi(c.chiave);
+    if (!cima) return;
+    const togli = () => setUltimo((u) => ({ ...u, [c.chiave]: (u[c.chiave] ?? []).slice(0, -1) }));
+    if (!cima.regalo) {
+      const agg = await salva(c.chiave, { deltaPunti: -cima.punti }, true);
+      if (agg) togli();
+      return;
+    }
+    setOccupato(c.chiave);
+    try {
+      const esito = await annullaRegaloOggetto(partitaId, c.chiave, cima.regalo);
+      imposta((correnti) => correnti.map((x) => (x.chiave === c.chiave ? esito.confidente : x)));
+      // se il rango è cambiato i punti di prima non valgono più: la pila riparte da zero, altrimenti resta l'azione precedente
+      if (esito.confidente.rango !== c.rango) setUltimo((u) => ({ ...u, [c.chiave]: [] }));
+      else togli();
+      notifica('success', `Regalo annullato per ${c.nome}.`);
+    } catch (err) {
+      notifica('error', err instanceof Error ? err.message : 'Annullamento non riuscito.');
     } finally {
       setOccupato(null);
     }
@@ -249,10 +276,13 @@ export function ConfidentiPartita({ partitaId }: Props) {
                       })}
                     </div>
                     <div className="flex flex-wrap gap-1.5">
-                      {/* R10-18: «Regala» apre la finestra unica (oggetto del catalogo → punti, consegna, acquisto), non più un +50 senza oggetto */}
-                      <PulsanteVisivo className="flex-1 min-w-[120px]" icona={<IconaAzione chiave="regalo" dimensione={24} />} titolo="Regala" dettaglio={`+${formattaPunti(anteprimaPunti(50, bonus, esame, invito))} punti`} disabled={occ} onClick={() => setRegaloPer(c.chiave)} aria-label={`${c.nome}: regala un oggetto (${formattaPunti(anteprimaPunti(50, bonus, esame, invito))} punti)`} />
+                      {/* R10-18: con regali collegati al catalogo «Regala» apre la finestra unica (oggetto → punti, consegna, acquisto);
+                          senza, resta il regalo con i punti subito, come prima: nessuna capacità si perde */}
+                      {c.haRegaliCatalogo
+                        ? <PulsanteVisivo className="flex-1 min-w-[120px]" icona={<IconaAzione chiave="regalo" dimensione={24} />} titolo="Regala" dettaglio={`+${formattaPunti(anteprimaPunti(50, bonus, esame, invito))} punti`} disabled={occ} onClick={() => setRegaloPer(c.chiave)} aria-label={`${c.nome}: regala un oggetto (${formattaPunti(anteprimaPunti(50, bonus, esame, invito))} punti)`} />
+                        : <PulsanteVisivo className="flex-1 min-w-[120px]" icona={<IconaAzione chiave="regalo" dimensione={24} />} titolo="Regalo" dettaglio={`+${formattaPunti(anteprimaPunti(50, bonus, esame, invito))} punti`} disabled={occ} onClick={() => void salva(c.chiave, { regalo: true, bonusArcano: bonus, esame: esame ?? undefined, invito })} aria-label={`${c.nome}: regalo gradito (${formattaPunti(anteprimaPunti(50, bonus, esame, invito))} punti)`} />}
                       <PulsanteVisivo className="flex-1 min-w-[120px]" icona={<IconaAzione chiave="uscita" dimensione={24} />} titolo="Uscita" dettaglio={`+${formattaPunti(anteprimaPunti(10, bonus, esame, invito))} punti`} disabled={occ} onClick={() => void salva(c.chiave, { uscita: true, bonusArcano: bonus, esame: esame ?? undefined, invito })} aria-label={`${c.nome}: uscita insieme (${formattaPunti(anteprimaPunti(10, bonus, esame, invito))} punti)`} />
-                      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla-ultimo" dimensione={20} />} titolo={`Annulla ultimo${ultimo[c.chiave] > 0 ? ` (−${formattaPunti(ultimo[c.chiave])})` : ''}`} disabled={occ || !(ultimo[c.chiave] > 0)} onClick={() => void salva(c.chiave, { deltaPunti: -(ultimo[c.chiave] ?? 0) })} aria-label={`${c.nome}: annulla l'ultimo incremento`} />
+                      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla-ultimo" dimensione={20} />} titolo={`Annulla ultimo${cimaDi(c.chiave) ? ` (${cimaDi(c.chiave)!.regalo ? 'regalo ' : ''}−${formattaPunti(cimaDi(c.chiave)!.punti)})` : ''}`} disabled={occ || !cimaDi(c.chiave)} onClick={() => void annullaUltimo(c)} aria-label={`${c.nome}: annulla ${cimaDi(c.chiave)?.regalo ? 'l\'ultimo regalo' : 'l\'ultimo incremento'}`} />
                     </div>
                   </div>
                 )}
@@ -278,8 +308,10 @@ export function ConfidentiPartita({ partitaId }: Props) {
           onFatto={(esito) => {
             setRegaloPer(null);
             imposta((correnti) => correnti.map((x) => (x.chiave === c.chiave ? esito.confidente : x)));
-            // i punti del regalo si tolgono annullando la consegna (scheda del Confidente), non con «Annulla ultimo»
-            setUltimo((u) => ({ ...u, [c.chiave]: 0 }));
+            // «Annulla ultimo» annulla questo regalo con la sua consegna (l'oggetto è quello appena aggiunto ai regali fatti), poi resta
+            // disponibile l'azione di prima; se il rango è cambiato i punti di prima non valgono più e la pila riparte
+            const nuovoOggetto = (esito.confidente.regaliFattiCatalogo ?? []).find((k) => !(c.regaliFattiCatalogo ?? []).includes(k));
+            setUltimo((u) => ({ ...u, [c.chiave]: esito.confidente.rango !== c.rango || !nuovoOggetto ? [] : [...(u[c.chiave] ?? []), { punti: esito.punti, regalo: nuovoOggetto }] }));
             notifica('success', `Regalo consegnato a ${c.nome}${esito.punti > 0 ? `: +${formattaPunti(esito.punti)} punti` : ''}${esito.acquistato ? ' · segnato anche comprato' : ''}.`);
             if (esito.confidente.puntiNecessari !== null && esito.confidente.puntiNecessari > 0 && esito.confidente.mancanti === 0 && (c.mancanti ?? 1) > 0) {
               notifica('success', `${c.nome}: punti sufficienti per il rango ${esito.confidente.rango + 1}! Passa del tempo insieme per salire di rango.`);
