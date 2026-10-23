@@ -9,6 +9,7 @@ import { CHIAVI_STATISTICHE, origineStima, statisticheStimate, type Osservazione
 import { t } from './traduzioniService.js';
 import { skillDto, skillRiassunti } from './compendioService.js';
 import { registraEvento } from './storicoService.js';
+import { cambiaGiornoPartita } from './giornoPartitaService.js';
 import { fortunaSu } from './fortunaService.js';
 import { moltiplicaFortuna } from '../../shared/fortuna.js';
 import { verificaObiettivi } from './obiettiviService.js';
@@ -120,9 +121,14 @@ export function creaPartita(dati: DatiPartita & { nome: string; attiva?: boolean
 export function aggiornaPartita(id: number, dati: DatiPartita): PartitaDto {
   const r = rigaPartita(id);
   return getDb().transaction(() => {
+    // il giorno di gioco cambia solo dalla regola unica (R10-16): giorno esistente, fascia a «giorno», storico. Una fascia scelta
+    // nella stessa richiesta vince sul ritorno a «giorno» del giorno nuovo.
+    const giornoIndicato = dati.dataGioco !== undefined;
+    if (giornoIndicato) cambiaGiornoPartita(id, dati.dataGioco ?? null);
+    const dopo = giornoIndicato ? rigaPartita(id) : r;
     prepared(`UPDATE partita SET nome = ?, note = ?, livello_protagonista = ?, data_gioco = ?, fascia_gioco = ?, difficolta = ?, nuova_partita_plus = ?, dlc_posseduti_json = ?, allarme_attivo = ?, updated_at = ? WHERE id = ?`).run(
       dati.nome ?? r.nome, dati.note ?? r.note, dati.livelloProtagonista ?? r.livello_protagonista,
-      dati.dataGioco === undefined ? r.data_gioco : dati.dataGioco, dati.fasciaGioco ?? r.fascia_gioco, dati.difficolta ?? r.difficolta,
+      dopo.data_gioco, dati.fasciaGioco ?? dopo.fascia_gioco, dati.difficolta ?? r.difficolta,
       dati.nuovaPartitaPlus === undefined ? r.nuova_partita_plus : dati.nuovaPartitaPlus ? 1 : 0,
       dati.dlcPosseduti ? JSON.stringify(dati.dlcPosseduti) : r.dlc_posseduti_json,
       dati.allarmeAttivo === undefined ? r.allarme_attivo : dati.allarmeAttivo ? 1 : 0, nowIso(), id,
