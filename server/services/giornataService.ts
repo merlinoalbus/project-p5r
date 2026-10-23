@@ -22,7 +22,7 @@ import { applicaEffettiAzione, annullaEffettiAzione, descriviEffettiApplicati, t
 import { mappaAzione, nomeRiferimento, nomiEffetti, statoAzione, testoEffetti, verificaEffetti } from './azioniStrutturateService.js';
 import { atterraggioDelPalazzo, palazziConclusi } from './palazziService.js';
 import { TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
-import type { AzionePercorsoDto, ConfidentePartitaDto, DatiVoceGiornata, EffettiAzioneDto, FasciaGioco, GenereVoce, QuizVoceDto, RiferimentoAzioneDto, TrasferisciVociGiornata, VociTrasferiteDto } from '../../shared/types.js';
+import type { AzionePercorsoDto, ConfidentePartitaDto, DatiVoceGiornata, DialogoVoceDto, EffettiAzioneDto, FasciaGioco, GenereVoce, QuizVoceDto, RiferimentoAzioneDto, TrasferisciVociGiornata, VociTrasferiteDto } from '../../shared/types.js';
 import { attivitaConQuiz, quizVoceDto, type AttivitaConQuiz } from './attivitaService.js';
 import { conLegami } from './mappe/legamiInfiltrazioni.js';
 import { puntoDescrittivo } from '../../shared/spilli.js';
@@ -169,7 +169,23 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
     // L3: il campo «Infiltrazioni» (solo per le voci di un Palazzo) e lo stato «da rivedere» (solo se c'è)
     ...campiInfiltrazioni(r, ctx.partita),
     ...campiRevisione(r),
+    ...campoDialogo(v),
   };
+}
+
+/**
+ * R10-11/C: il dialogo del passaggio di rango di una voce di Confidente (`rangoAtteso`), dalle scelte di `confidente_dialogo` (L9). Sola
+ * lettura: è la proposta che la spunta mostra accanto alle note; i punti li dà solo la scelta dell'utente. Senza riga di dialogo, nessun campo.
+ */
+function campoDialogo(v: VoceBase): { dialogo?: DialogoVoceDto } {
+  if (v.tipo !== 'confidente' || v.riferimento?.tipo !== 'confidente' || v.rangoAtteso === null) return {};
+  const r = prepared('SELECT note, scelte_json FROM confidente_dialogo WHERE confidente_chiave = ? AND rango = ?').get(v.riferimento.chiave, v.rangoAtteso) as { note: string; scelte_json: string } | undefined;
+  if (!r) return {};
+  let scelte: Array<{ ordine: number; testo: string; punti: number | null; puntiTesto: string | null; romantica: boolean; avviso: string | null }>;
+  try { scelte = JSON.parse(r.scelte_json) as typeof scelte; } catch { return {}; }
+  if (!Array.isArray(scelte) || scelte.length === 0) return {};
+  return { dialogo: { confidente: v.riferimento.chiave, rango: v.rangoAtteso, note: r.note,
+    scelte: scelte.map((s) => ({ ordine: s.ordine, testo: s.testo, note: s.punti === 1 || s.punti === 2 || s.punti === 3 ? s.punti : null, puntiTesto: s.puntiTesto ?? null, romantica: !!s.romantica, avviso: s.avviso ?? null })) } };
 }
 
 // ---- L3: il campo «Infiltrazioni» delle voci di Palazzo (lotti/L3/modifiche.md §2.1.6, §3.4, §4.4) ----

@@ -14,7 +14,7 @@ import { NOME_TIPO_AZIONE, collegamentoAzione, descriviEffetti } from '../../uti
 import { conRitornoDiario } from '../../utils/ritornoDiario';
 import { trovaScheda } from '../../utils/pannelloScheda';
 import { useApriPannello } from '../scheda/contestoScheda';
-import type { AzionePercorsoDto } from '../../types';
+import type { AzionePercorsoDto, DialogoVoceDto } from '../../types';
 import { IconaCategoria } from './IconaCategoria';
 import { EmblemaDungeon } from './EmblemaDungeon';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
@@ -105,10 +105,26 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa }: PropsCartelli
   );
 }
 
-/** «Quante note hai ottenuto?»: ♪, ♪♪, ♪♪♪, nessun punto, annulla. */
-export function SceltaNote({ occupato, onScegli, onAnnulla }: { occupato: boolean; onScegli: (note: 1 | 2 | 3 | null) => void; onAnnulla: () => void }) {
+/** «Quante note hai ottenuto?»: ♪, ♪♪, ♪♪♪, nessun punto, annulla. Con il dialogo del rango (R10-11/C) le scelte stanno sopra: toccarne una
+ *  dà le sue note (o nessun punto), come toccare le note; le scelte dal valore incerto (amicizia/amore) si leggono soltanto. */
+export function SceltaNote({ occupato, onScegli, onAnnulla, dialogo }: { occupato: boolean; onScegli: (note: 1 | 2 | 3 | null) => void; onAnnulla: () => void; dialogo?: DialogoVoceDto }) {
   return (
     <span className="flex flex-wrap items-center gap-1.5 text-[12px]" role="group" aria-label="Note ottenute con il Confidente">
+      {dialogo && (
+        <span className="flex w-full flex-col gap-1" role="group" aria-label={`Scelte del dialogo, rango ${dialogo.rango}`}>
+          <span className="text-text-secondary">Scelte del dialogo (rango {dialogo.rango})</span>
+          <span className="flex flex-wrap gap-1.5">
+            {dialogo.scelte.map((s) => {
+              const valore = s.note !== null ? '♪'.repeat(s.note) : s.puntiTesto && /^\+?0\b|da evitare/.test(s.puntiTesto) ? '0' : s.puntiTesto ?? '';
+              const toccabile = s.note !== null || s.puntiTesto === null || /^\+?0\b|da evitare/.test(s.puntiTesto);
+              const etichetta = `${s.testo}${valore ? ` ${valore}` : ''}`;
+              return toccabile
+                ? <button key={s.ordine} type="button" className="chip touch" disabled={occupato} onClick={() => onScegli(s.note)} title={s.avviso ?? undefined} aria-label={`${s.testo}: ${s.note !== null ? `${s.note} ${s.note === 1 ? 'nota' : 'note'}` : 'nessun punto'}`}>{etichetta}</button>
+                : <span key={s.ordine} className="chip text-text-muted" title={s.avviso ?? 'Il valore dipende dalla scelta (amicizia o amore): usa le note qui sotto.'}>{etichetta}</span>;
+            })}
+          </span>
+        </span>
+      )}
       <span className="text-text-secondary">Quante note hai ottenuto?</span>
       {([1, 2, 3] as const).map((n) => (
         <button key={n} type="button" className={`chip touch ${n === 2 ? 'chip--attivo' : ''}`} disabled={occupato} onClick={() => onScegli(n)} aria-label={`${n} ${n === 1 ? 'nota' : 'note'}`}>{'♪'.repeat(n)}</button>

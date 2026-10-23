@@ -1250,6 +1250,14 @@ export type GenereVoce = 'azione' | 'evento' | 'scadenza' | 'promemoria';
  * aggiunti dall'utente sono la stessa cosa e sono canone, per tutte le partite (richiesta dell'utente, 2026-09-30). Le voci di
  * una fascia arrivano nel loro ordine esatto.
  */
+/** Il dialogo di un rango di un Confidente (`confidente_dialogo`): le scelte con le note che danno (1-3; null = nessuna nota o non documentata). */
+export interface DialogoVoceDto {
+  confidente: string;
+  rango: number;
+  note: string;
+  scelte: Array<{ ordine: number; testo: string; note: 1 | 2 | 3 | null; puntiTesto: string | null; romantica: boolean; avviso: string | null }>;
+}
+
 export interface AzionePercorsoDto {
   /** Solo sulle visite strutturate ai Memento: eventi di apertura dichiarabili alla spunta, con i nomi correnti dei dedali. */
   apertureDedali?: Array<{ chiave: string; nome: string }>;
@@ -1277,6 +1285,8 @@ export interface AzionePercorsoDto {
   ricevuteEffetti?: ReceiptEffettoVoceDto[];
   /** Quante proposte di punti aspettano una decisione per questa voce nella partita: se > 0 la voce mostra il pulsante «Applica» (BON-01). */
   daApplicare?: number;
+  /** R10-11/C: il dialogo del passaggio di rango della voce (voce di un Confidente con `rangoAtteso`), dalle scelte di L9: solo una proposta, i punti li dà la scelta dell'utente alla spunta. */
+  dialogo?: DialogoVoceDto;
   /** Gli effetti di `produce` in parole, con i nomi di libri, film e attività («Zorro, il fuorilegge: completato»). */
   produceTesto: string[];
   /** Fatta nella partita. */
