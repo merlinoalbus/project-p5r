@@ -74,7 +74,13 @@ function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzi
       const nome = (prepared('SELECT COALESCE(nome_it, nome) AS nome FROM articolo WHERE chiave = ?').get(e.articolo) as { nome: string } | undefined)?.nome;
       return nome ? descriviEffettoVoce(e).replace(e.articolo, nome) : descriviEffettoVoce(e);
     }
-    return testoEffetti([e], nomi)[0]!;
+    const testo = testoEffetti([e], nomi)[0]!;
+    // R10-06: la paga del turno è un promemoria (gli yen si cambiano a mano), mai una proposta
+    if (e.tipo === 'turno') {
+      const paga = prepared('SELECT paga_yen, paga_massima FROM attivita WHERE chiave = ?').get(e.attivita) as { paga_yen: number | null; paga_massima: number | null } | undefined;
+      if (paga?.paga_yen) return `${testo} · paga ¥${paga.paga_yen.toLocaleString('it-IT')}${paga.paga_massima && paga.paga_massima > paga.paga_yen ? ` (fino a ¥${paga.paga_massima.toLocaleString('it-IT')})` : ''}: cambiali tu a mano`;
+    }
+    return testo;
   });
 }
 /** Il nome del collegamento: quello salvato (la guida lo scrive a modo suo), altrimenti quello dell'elemento. */
