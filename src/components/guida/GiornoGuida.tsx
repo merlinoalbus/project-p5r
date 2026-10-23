@@ -14,7 +14,8 @@
 // diventano righe da spuntare, e «Copia in…» / «Sposta in…» le mandano in un altro giorno e fascia (`TrasferisciVoci`).
 // ============================================================
 
-import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import { aggiornaVoceGiornata, eliminaVoceGiornata, impostaAzionePercorso, spostaVoceGiornata } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { avvisoSpunta } from '../../utils/percorso';
@@ -174,6 +175,14 @@ interface Conferma { titolo: string; testo: ReactNode; scelte: Array<{ titolo: s
 
 /** Scheda del giorno e voci di giorno e di sera, nel loro ordine, modificabili. */
 export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, onSullaMappa, azioneEvidenziata, compatto, fasciaCorrente }: Props) {
+  // R10-27: tornando da una scheda (indietro, o «Esci» del Palazzo) l'indirizzo porta `#voce-<uid>`: la voce si porta in vista una volta
+  // per giorno mostrato. Qui e non nella riga, che si rimonta a ogni spunta e riprenderebbe a scorrere.
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (!hash.startsWith('#voce-')) return;
+    const el = document.getElementById(hash.slice(1));
+    if (el && typeof el.scrollIntoView === 'function') el.scrollIntoView({ block: 'center' });
+  }, [g.giorno, hash]);
   const [occupato, setOccupato] = useState(false);
   const [menu, setMenu] = useState<string | null>(null);
   const [soggetto, setSoggetto] = useState<SoggettoVoce | null>(null);

@@ -8,7 +8,8 @@
 // mostra con questi pezzi; eventi, scadenze e promemoria hanno la loro riga (`VoceEvento` in VociAgenda).
 // ============================================================
 
-import { Link } from 'react-router-dom';
+import type { MouseEvent } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { NOME_TIPO_AZIONE, collegamentoAzione, descriviEffetti } from '../../utils/percorso';
 import type { AzionePercorsoDto } from '../../types';
 import { IconaCategoria } from './IconaCategoria';
@@ -45,12 +46,24 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa }: PropsCartelli
   const stato = a.fatta ? null : a.stato;
   // l'atterraggio di un Palazzo si apre nella mappa accanto, se c'è (un clic semplice: con un modificatore resta un collegamento)
   const apriAccanto = link?.atterraggio && onApriMappa ? link.atterraggio : null;
+  // R10-27 (decisione del PM del 2026-10-23: niente pannello, si naviga alla scheda): partendo da una voce, la voce attuale della
+  // cronologia prende l'ancora `#voce-<uid>`, così «indietro» riporta alla stessa pagina (Home, Percorso, Partita › Oggi) sulla stessa voce
+  const posizione = useLocation();
+  const navigate = useNavigate();
+  const uid = (a as { uid?: string }).uid;
+  const ricordaVoce = (e: MouseEvent<HTMLElement>) => {
+    if (!uid || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    navigate({ pathname: posizione.pathname, search: posizione.search, hash: `#voce-${uid}` }, { replace: true, state: posizione.state });
+  };
   return (
     <span className="flex flex-wrap items-center gap-1.5">
-      {a.oggettiCitati?.filter((o) => o.casa !== link?.href).map((o) => <Link key={o.chiave} to={o.casa} className="chip touch no-underline">{o.nome}</Link>)}
+      {a.oggettiCitati?.filter((o) => o.casa !== link?.href).map((o) => <Link key={o.chiave} to={o.casa} onClick={ricordaVoce} className="chip touch no-underline">{o.nome}</Link>)}
       <span className="chip text-[11px]">{NOME_TIPO_AZIONE[a.tipo] ?? a.tipo}</span>
       {link ? <Link to={link.href} className="chip chip--attivo no-underline text-[11px]"
-        onClick={apriAccanto ? (e) => { if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) { e.preventDefault(); onApriMappa!(apriAccanto); } } : undefined}>{link.etichetta}</Link>
+        onClick={(e) => {
+          if (apriAccanto && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) { e.preventDefault(); onApriMappa!(apriAccanto); return; }
+          ricordaVoce(e);
+        }}>{link.etichetta}</Link>
         : a.riferimentoTesto && <span className="chip text-[11px]">{a.riferimentoTesto}</span>}
       {a.mappa && onSullaMappa && (
         <button type="button" className="chip chip--icona touch text-[11px]" onClick={onSullaMappa} aria-label={`${a.mappa.posto ? `Apri in ${a.mappa.posto}` : 'Sulla mappa'}: ${a.azione.slice(0, 60)}`}>
