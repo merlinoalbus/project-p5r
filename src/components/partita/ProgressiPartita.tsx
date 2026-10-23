@@ -139,6 +139,9 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
                         </span>
                         <span className={`shrink-0 text-[11px] ${e.avvenuto ? 'text-success' : 'text-text-muted'}`}>{e.avvenuto ? 'avvenuto' : 'non ancora'}</span>
                       </label>
+                      {!!e.daVoci?.length && <div className="flex flex-wrap items-center gap-x-2 pl-7 text-[11px] text-text-muted">
+                        {e.daVoci.map((v) => <Link key={v.uid} className="touch text-primary inline-flex items-center" to={`/guida/percorso/${v.giorno}?voce=${encodeURIComponent(v.uid)}`}>da: voce del {v.giorno.slice(3)}/{v.giorno.slice(0, 2)} · {v.testo.length > 60 ? `${v.testo.slice(0, 60)}…` : v.testo}</Link>)}
+                      </div>}
                       {!!e.visiteDiario?.length && <div className="flex flex-wrap items-center gap-2 pl-7 text-xs">
                         <span>Dichiarato nel Diario:</span>
                         {e.visiteDiario.map((v) => <Link key={v.uid} className="touch text-primary inline-flex items-center" to={`/guida/percorso/${v.giorno}?voce=${encodeURIComponent(v.uid)}`}>Visita del {dataGiocoTesto(v.giorno)}</Link>)}

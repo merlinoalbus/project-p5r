@@ -108,6 +108,11 @@ function progressi(id: number): ProgressiPartitaDto {
   const nomiSquadra = new Map(giocabili().map((p) => [p.chiave, p.nome]));
   const eventiManuali = new Map((prepared('SELECT evento_chiave, avvenuto FROM evento_storia_partita WHERE partita_id = ?').all(id) as Array<{ evento_chiave: string; avvenuto: number }>).map((r) => [r.evento_chiave, r.avvenuto === 1]));
   const dalDiario = apertureDalDiario(id);
+  // R10-22/3: da quale voce del Diario viene un evento di storia (l'effetto «storia» della spunta, ancora attiva)
+  const dalleVoci = new Map<string, Array<{ uid: string; giorno: string; testo: string }>>();
+  for (const r of prepared("SELECT s.chiave, v.uid, v.data AS giorno, v.azione AS testo FROM effetto_stato_voce s JOIN main.voce_giornata v ON v.uid = s.voce_uid WHERE s.partita_id = ? AND s.tipo = 'storia' ORDER BY v.data, v.fascia, v.ordine").all(id) as Array<{ chiave: string; uid: string; giorno: string; testo: string }>) {
+    dalleVoci.set(r.chiave, [...(dalleVoci.get(r.chiave) ?? []), { uid: r.uid, giorno: r.giorno, testo: r.testo }]);
+  }
   const nomiAperture = new Map(apertureDichiarabili().map((a) => [a.chiave, a.nome]));
   const svolte = new Map((prepared('SELECT attivita_chiave, volte FROM attivita_svolta_partita WHERE partita_id = ?').all(id) as Array<{ attivita_chiave: string; volte: number }>).map((r) => [r.attivita_chiave, r.volte]));
   const punti = new Map((prepared('SELECT negozio_chiave, punti FROM punti_negozio_partita WHERE partita_id = ?').all(id) as Array<{ negozio_chiave: string; punti: number }>).map((r) => [r.negozio_chiave, r.punti]));
@@ -120,6 +125,7 @@ function progressi(id: number): ProgressiPartitaDto {
       if (!membro) return { chiave: e.chiave, nome: nomiAperture.get(e.chiave) ?? e.nome, origine: 'manuale' as const,
         avvenuto: (eventiManuali.get(e.chiave) ?? false) || dalDiario.has(e.chiave), manuale: eventiManuali.get(e.chiave) ?? false,
         ...(nomiAperture.has(e.chiave) ? { dalDiario: dalDiario.has(e.chiave), visiteDiario: dalDiario.get(e.chiave) ?? [] } : {}),
+        ...(dalleVoci.has(e.chiave) ? { daVoci: dalleVoci.get(e.chiave) } : {}),
         ...(serveA.has(e.chiave) ? { serveA: serveA.get(e.chiave) } : {}) };
       // Tre stati, come i semafori: in squadra, dichiarato fuori, non ancora segnato.
       const avvenuto = st.membriSquadra.has(membro) ? true : st.membriFuoriSquadra.has(membro) ? false : null;

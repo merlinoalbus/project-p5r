@@ -3111,7 +3111,9 @@ export interface ProgressiPartitaDto {
   /** `serveA`: i ranghi dei Confidenti che l'evento sblocca, dai requisiti (es. «Sojiro Sakura, rango 3»). */
   eventi: Array<{ chiave: string; nome: string; origine: 'manuale' | 'calcolato'; avvenuto: boolean | null; membro?: string; membroNome?: string; serveA?: string[]; dalDiario?: boolean;
     /** Contributo manuale distinto dall'esito effettivo (che include le dichiarazioni delle visite). */
-    manuale?: boolean; visiteDiario?: Array<{ uid: string; giorno: string }> }>;
+    manuale?: boolean; visiteDiario?: Array<{ uid: string; giorno: string }>;
+    /** Le voci del Diario la cui spunta ha segnato l'evento (R10-22/3): giorno e testo, per la riga «da: voce del 09/04 · …». */
+    daVoci?: Array<{ uid: string; giorno: string; testo: string }> }>;
   /** Le sole attività che si contano per volte svolte; `effettiTurno`: che cosa dà un turno («1° turno: Gentilezza, 2 note»). */
   attivita: Array<{ chiave: string; nome: string; tipo: string; volte: number; effettiTurno: string[] }>;
   /** Dopo un + o − del contatore: le Doti che i turni aggiunti danno (o quelli tolti davano), da segnare a mano nelle Doti. */
