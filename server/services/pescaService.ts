@@ -33,13 +33,20 @@ function fortunaDallaPartita(p:number,giorno:string):boolean|null {
 /**
  * La Fortuna dichiarata dal client non si prende per buona: deve coincidere con lo stato della partita; se lo stato non sa niente di quel
  * giorno (un giorno passato) non si dichiara a mano: resta quella già registrata (correzione di una visita) o ignota (visita nuova).
+ * La correzione di una visita già registrata (`registrata` diverso da `undefined`, anche `null` = ignota) tiene la Fortuna registrata per
+ * quella visita: lo stato di oggi non la riscrive (altrimenti, accesa la Fortuna dopo la visita, la correzione non uscirebbe dal 409);
+ * il confronto con lo stato vale solo per le visite nuove.
  */
-function verificaFortunaDallaPartita(p:number,giorno:string,valore:boolean|null,registrata:boolean|null):void {
+function verificaFortunaDallaPartita(p:number,giorno:string,valore:boolean|null,registrata:boolean|null|undefined):void {
+  if(registrata!==undefined){
+    if(valore!==registrata)throw httpErrors.conflict('pesca-fortuna-non-attestata','La Fortuna di una visita già registrata non si cambia dalla correzione: resta quella registrata.',{registrata});
+    return;
+  }
   const atteso=fortunaDallaPartita(p,giorno);
   if(atteso!==null&&valore!==atteso)throw httpErrors.conflict('pesca-fortuna-diversa-dallo-stato','La Fortuna di quel giorno la dice la partita: il valore dichiarato non coincide.',{atteso});
-  if(atteso===null&&valore!==registrata)throw httpErrors.conflict('pesca-fortuna-non-attestata','La partita non ricorda la Fortuna di quel giorno: non si dichiara a mano.');
+  if(atteso===null&&valore!==null)throw httpErrors.conflict('pesca-fortuna-non-attestata','La partita non ricorda la Fortuna di quel giorno: non si dichiara a mano.');
 }
-function controllaOsservazione(p:number,r:NuovaSessionePesca,registrata:boolean|null=null):void {
+function controllaOsservazione(p:number,r:NuovaSessionePesca,registrata?:boolean|null):void {
   verificaFortunaDallaPartita(p,r.momento.giorno,r.osservazione.fortuna.attiva,registrata);
   if(r.osservazione.fortuna.giorno!==r.momento.giorno)throw httpErrors.conflict('pesca-fortuna-altro-giorno','Fortuna deve riferirsi al giorno della visita, anche quando è ignota.');
   if(r.osservazione.finale.tipo==='uscita-dopo-riscossione'&&!r.osservazione.finale.riscossioneUid)throw httpErrors.conflict('pesca-riscossione-senza-identita','La riscossione finale osservata richiede un’identità esplicita.');
@@ -90,7 +97,7 @@ function prepara(p:number,azione:AzioneOperazionePesca,r:InputOperazionePesca,be
     if(st.regola.stato!=='collegata'||!st.regola.dati)throw httpErrors.conflict('pesca-regola-assente','La regola corrente non è riconoscibile. Nessuna visita viene ricostruita.');
     const a=prepared('SELECT pesca_regola_chiave,pesca_ruolo FROM main.attivita WHERE chiave=?').get(ATTIVITA_PESCA) as {pesca_regola_chiave:string|null;pesca_ruolo:string|null}|undefined;
     if(a?.pesca_regola_chiave!==REGOLA_PESCA||a.pesca_ruolo!=='visita')throw httpErrors.conflict('pesca-attivita-non-collegata','L’attività non rimanda alla regola canonica della visita.');
-    controllaOsservazione(p,input,input.scelta.tipo==='collega'?osservazioneDto(osservazioneCorrente(sessione(p,input.scelta.sessioneId).id)).dati.fortuna.attiva:null);verificaFonte(p,input);verificaTurno(input,st);
+    controllaOsservazione(p,input,input.scelta.tipo==='collega'?osservazioneDto(osservazioneCorrente(sessione(p,input.scelta.sessioneId).id)).dati.fortuna.attiva:undefined);verificaFonte(p,input);verificaTurno(input,st);
     if(input.scelta.tipo==='nuova')verificaRangoFotografato(p,input.momento,input.osservazione);
     verificaIdentitaCatture(input.osservazione,input.scelta.tipo==='collega'?input.scelta.sessioneId:null);
     verificaFattiOsservazione(p,input.momento,input.osservazione,input.scelta.tipo==='collega'?input.scelta.sessioneId:undefined);
