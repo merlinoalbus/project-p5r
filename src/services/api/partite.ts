@@ -7,6 +7,7 @@ import type {
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut, queryString } from './_helpers';
 import type { DivergenzaDto, MeteoGiornoDto, VideogiocoDto } from '../../types';
 import type { MeteoPartita } from '../../../shared/meteoPartita';
+import type { FortunaPartitaDto } from '../../../shared/fortuna';
 import type { RichiestaRegistraAcquisto } from '../../../shared/acquisti';
 import type { RichiestaRegistraSessionePesca } from '../../../shared/pesca';
 
@@ -60,6 +61,11 @@ export const getDoti = (id: number): Promise<DoteSocialePartitaDto[]> => apiGet(
 /** Modifica a mano una Dote sociale: punti assoluti, differenza o note viste in gioco (mai sotto zero); risponde con la Dote aggiornata. */
 export const aggiornaDote =(id: number, chiave: string, mod: ModificaDote): Promise<DoteSocialePartitaDto> =>
   apiPatch(`/partite/${id}/doti/${encodeURIComponent(chiave)}`, mod);
+
+/** La Fortuna del giorno: la Dote scelta e se è ancora accesa (si spegne al cambio di giorno). */
+export const getFortuna = (id: number): Promise<FortunaPartitaDto> => apiGet(`/partite/${id}/fortuna`);
+/** Accende la Fortuna sulla Dote scelta per il resto del giorno, o la spegne (`null`). */
+export const impostaFortuna = (id: number, dote: string | null): Promise<FortunaPartitaDto> => apiPut(`/partite/${id}/fortuna`, { dote });
 
 /** I Confidenti con lo stato nella partita (rango, punti, sblocco). */
 export const getConfidentiPartita =(id: number): Promise<ConfidentePartitaDto[]> => apiGet(`/partite/${id}/confidenti`);

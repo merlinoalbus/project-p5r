@@ -7,6 +7,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
 import { nomeDote, puntiDaNote } from './partiteService.js';
+import { fortunaSu } from './fortunaService.js';
 import type { CruciverbaDto, CruciverbaTuttiDto } from '../../shared/types.js';
 import { indiceGiornoScolastico } from './domandeService.js';
 
@@ -51,5 +52,5 @@ export function impostaCruciverba(partitaId: number, data: string, fatto: boolea
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
   const esito = dto(r, new Set(fatto ? [data] : []));
-  return nuovo ? { ...esito, daSegnare: [{ chiave: 'conoscenza', nome: nomeDote('conoscenza'), delta: puntiDaNote(1), note: 1 }] } : esito;
+  return nuovo ? { ...esito, daSegnare: [{ chiave: 'conoscenza', nome: nomeDote('conoscenza'), delta: puntiDaNote(1, false, fortunaSu(partitaId, 'conoscenza')), note: 1 }] } : esito;
 }

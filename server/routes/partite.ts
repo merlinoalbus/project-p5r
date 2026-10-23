@@ -9,7 +9,7 @@ import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { validate } from '../middleware/validate.js';
 import {
-  bodyAggiornaPartita, bodyAggiornaPosseduta, bodyAggiungiPosseduta, bodyCompendio, bodyConfidente, bodyCreaPartita, bodyDote,
+  bodyAggiornaPartita, bodyAggiornaPosseduta, bodyAggiungiPosseduta, bodyCompendio, bodyConfidente, bodyCreaPartita, bodyDote, bodyFortuna,
   bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyAcquisto, bodyAzionePercorso, bodyTrofeo, bodyCruciverba, bodyGiornoCorrente, bodyLettura, bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, paramsPartitaDomanda, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico, bodyEliminaEventi, bodyRequisito, bodyYen, bodyMembroSquadra, bodyMeteo, paramsPartitaData } from '../schemas/partite.js';
 import { impostaMeteo, meteoDelGiorno } from '../services/meteoService.js';
 import type { MeteoPartita } from '../../shared/meteoPartita.js';
@@ -40,6 +40,7 @@ import { idParam } from '../schemas/comuni.js';
 import { avanzaSeGiornoCompleto, impostaGiornoCorrente } from '../services/percorsoService.js';
 import { spuntaVoce, applicaEffettoStoricoDiario } from '../services/giornataService.js';
 import { annullaInvito, registraInvito } from '../services/inviti.js';
+import { impostaFortuna, leggiFortuna } from '../services/fortunaService.js';
 import { impostaTrofeo } from '../services/completamentoService.js';
 import { t } from '../services/traduzioniService.js';
 import { eliminaEventi, eliminaEvento, storico } from '../services/storicoService.js';
@@ -128,6 +129,13 @@ router.get('/:id/doti', validate({ params: paramsPartita }), (req, res) => {
 });
 router.patch('/:id/doti/:chiave', validate({ params: paramsPartitaChiave, body: bodyDote }), (req, res) => {
   res.json(aggiornaDote(Number(req.params.id), String(req.params.chiave), req.body));
+});
+
+router.get('/:id/fortuna', validate({ params: paramsPartita }), (req, res) => {
+  res.json(leggiFortuna(Number(req.params.id)));
+});
+router.put('/:id/fortuna', validate({ params: paramsPartita, body: bodyFortuna }), (req, res) => {
+  res.json(impostaFortuna(Number(req.params.id), req.body.dote));
 });
 
 // ---- Denaro del gruppo e livelli dei Ladri ----

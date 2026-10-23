@@ -17,6 +17,7 @@ import { registraEvento } from './storicoService.js';
 import type { AttivitaDto, AttivitaTutteDto, CatalogoOggettoDto, CondizioneSpilloDto, DisponibilitaDto, DoteDaSegnareDto, FilmDto, FilmDvdDto, LibroDto, LibriDto, QuizVoceDto, TipoLettura, VideogiocoDto, VideogiochiDto, VoceEffettoDto } from '../../shared/types.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
 import { nomeDote, puntiDaNote } from './partiteService.js';
+import { fortunaSu } from './fortunaService.js';
 import { condizioneConTesto, leggiCondizioniSalvate, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { libriCheSbloccano } from '../../shared/dipendenzeCondizioni.js';
 import { effettiVisibiliDelLibro } from '../../shared/effettiLibro.js';
@@ -362,7 +363,7 @@ function applicaEffettiLettura(partitaId: number, tipo: TipoLettura, chiave: str
   const ordine = ((prepared('SELECT MAX(ordine) AS m FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ?').get(partitaId, tipo, chiave) as { m: number | null }).m ?? 0) + 1;
   const cinema = tipo === 'film' && haAnimaDaCineasta(partitaId);
   for (const n of doti) {
-    const punti = puntiDaNote(n.note, tipo === 'libro', false, cinema);
+    const punti = puntiDaNote(n.note, tipo === 'libro', fortunaSu(partitaId, n.dote), cinema);
     prepared('INSERT INTO effetto_lettura_partita (partita_id, tipo, chiave, ordine, dote_chiave, punti, note, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
       .run(partitaId, tipo, chiave, ordine, n.dote, punti, n.note, adesso);
   }
@@ -561,7 +562,7 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
     const daApplicare = doti ?? noteDelConseguimento(riga, ordine > 1, st ?? statoDisponibilitaPartita(partitaId));
     const applicate: TurnoRegistrato['doti'] = [];
     for (const d of daApplicare) {
-      const punti = puntiDaNote(d.note, false);
+      const punti = puntiDaNote(d.note, false, fortunaSu(partitaId, d.dote));
       prepared("INSERT INTO effetto_lettura_partita (partita_id, tipo, chiave, ordine, dote_chiave, punti, note, updated_at) VALUES (?, 'attivita', ?, ?, ?, ?, ?, ?)")
         .run(partitaId, chiave, ordine, d.dote, punti, d.note, adesso);
       applicate.push({ chiave: d.dote, nome: nomeDote(d.dote), delta: punti, note: d.note });

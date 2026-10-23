@@ -182,7 +182,9 @@ describe('API', () => {
     expect((await request(app).patch(`/api/partite/${id}/doti/coraggio`).send({ note: 2 })).body.data.punti).toBe(5);
     expect((await request(app).patch(`/api/partite/${id}/doti/coraggio`).send({ note: 3 })).body.data.punti).toBe(10);
     expect((await request(app).patch(`/api/partite/${id}/doti/coraggio`).send({ note: 3, libro: true })).body.data.punti).toBe(17);
-    const fortuna = await request(app).patch(`/api/partite/${id}/doti/coraggio`).send({ note: 2, fortuna: true });
+    // la Fortuna è lo stato della partita: si accende sulla Dote, poi i punti di quella Dote valgono ×1,5
+    expect((await request(app).put(`/api/partite/${id}/fortuna`).send({ dote: 'coraggio' })).body.data).toMatchObject({ attiva: true, dote: 'coraggio' });
+    const fortuna = await request(app).patch(`/api/partite/${id}/doti/coraggio`).send({ note: 2 });
     expect(fortuna.body.data.punti).toBe(21); // 17 + floor(3 × 1,5) = 17 + 4
     expect(fortuna.body.data).toMatchObject({ rango: 2, nomeRango: 'Audace', mancanti: 17 });
     const massimo = await request(app).patch(`/api/partite/${id}/doti/perizia`).send({ punti: 90 });

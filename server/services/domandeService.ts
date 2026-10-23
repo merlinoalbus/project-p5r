@@ -7,6 +7,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { partitaNonTrovata, verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
 import { nomeDote, puntiDaNote } from './partiteService.js';
+import { fortunaSu } from './fortunaService.js';
 import { ordineGioco } from '../../shared/condizioniSpillo.js';
 import type { DomandaDto, DomandeDto, EsameDto } from '../../shared/types.js';
 import { ricompensePerFonte } from './catalogoOggettiLetture.js';
@@ -78,5 +79,5 @@ export function impostaDomandaFatta(partitaId: number, domandaId: number, fatta:
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
   const esito = domande(partitaId);
-  return nuova && conoscenza ? { ...esito, daSegnare: [{ chiave: 'conoscenza', nome: nomeDote('conoscenza'), delta: puntiDaNote(1), note: 1 }] } : esito;
+  return nuova && conoscenza ? { ...esito, daSegnare: [{ chiave: 'conoscenza', nome: nomeDote('conoscenza'), delta: puntiDaNote(1, false, fortunaSu(partitaId, 'conoscenza')), note: 1 }] } : esito;
 }

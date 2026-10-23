@@ -3,7 +3,7 @@
 // ============================================================
 
 import { z } from 'zod';
-import { dataGioco, idParam, livello, uidVoce } from './comuni.js';
+import { dataGioco, dote, idParam, livello, uidVoce } from './comuni.js';
 import { METEO_PARTITA, type MeteoPartita } from '../../shared/meteoPartita.js';
 import { APERTURE_DEDALI } from '../../shared/condizioniSpillo.js';
 import { bodyRegistraAcquisto } from './acquisti.js';
@@ -37,10 +37,12 @@ export const bodyDote = z
     delta: z.number().int().min(-999).max(999).optional(),
     note: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional(),
     libro: z.boolean().optional(),
-    fortuna: z.boolean().optional(),
     cinema: z.boolean().optional(),
   })
   .refine((v) => v.punti !== undefined || v.delta !== undefined || v.note !== undefined, { message: 'Indicare punti, delta oppure note.' });
+
+/** La Fortuna del giorno: la Dote scelta, oppure `null` per spegnerla. */
+export const bodyFortuna = z.object({ dote: dote.nullable() }).strict();
 
 export const bodyConfidente = z
   .object({

@@ -4,14 +4,15 @@
 //
 // Nel gioco ogni azione mostra 1–3 note: 1 nota = 2 punti, 2 note = 3, 3 note = 5
 // (7 con libri a resa maggiorata); «Anima da cineasta» (Royal) alza di uno scalino film e DVD;
-// la lettura della fortuna di Chihaya moltiplica ×1,5 (per difetto), per ultima.
-// La conversione la fa il backend (`note`, `libro`, `fortuna`, `cinema`).
+// la Fortuna di Chihaya (stato della partita: la Dote scelta, per il resto del giorno) moltiplica ×1,5 (per difetto), per ultima.
+// La conversione la fa il backend (`note`, `libro`, `cinema`; la Fortuna la legge dallo stato della partita).
 // La stella (Fase 11.2) mostra l'avanzamento continuo di ogni dote: ranghi completati
 // più la quota verso il prossimo; toccare un vertice porta alla scheda della dote.
 // ============================================================
 
 import { useState, type ReactNode } from 'react';
-import { aggiornaDote, getDoti } from '../../services/api';
+import { aggiornaDote, getDoti, getFortuna, impostaFortuna } from '../../services/api';
+import { moltiplicaFortuna } from '../../../shared/fortuna';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';
@@ -36,14 +37,16 @@ function puntiAnteprima(note: 1 | 2 | 3, libro: boolean, fortuna: boolean, cinem
   let scalino = note === 3 && libro ? 4 : note;
   if (cinema) scalino = Math.min(4, scalino + 1);
   const base = PUNTI_SCALINO[scalino - 1];
-  return fortuna ? Math.floor(base * 1.5) : base;
+  return fortuna ? moltiplicaFortuna(base) : base;
 }
 
 /** Stella delle Doti con schede compatte: incremento a note, rango attuale e distanza dal rango successivo. */
 export function DotiSociali({ partitaId }: Props) {
   const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => getDoti(partitaId), [partitaId]);
   const [occupata, setOccupata] = useState<string | null>(null);
-  const [fortuna, setFortuna] = useState(false);
+  // la Fortuna è lo stato della partita (la Dote e il giorno), non un'impostazione di questa schermata
+  const fortuna = useCarica(() => getFortuna(partitaId), [partitaId]);
+  const [scegliFortuna, setScegliFortuna] = useState(false);
   const [libro, setLibro] = useState(false);
   const [cinema, setCinema] = useState(false);
   const [selezionata, setSelezionata] = useState<string | null>(null);
@@ -66,6 +69,21 @@ export function DotiSociali({ partitaId }: Props) {
       setOccupata(null);
     }
   };
+
+  /** Accende la Fortuna sulla Dote scelta, o la spegne (`null`): lo stato resta sul server e lascia un evento nello storico. */
+  const cambiaFortuna = async (dote: string | null) => {
+    setOccupata('fortuna');
+    try {
+      const nuova = await impostaFortuna(partitaId, dote);
+      fortuna.imposta(nuova);
+      setScegliFortuna(false);
+    } catch (err) {
+      notifica('error', err instanceof Error ? err.message : 'Non sono riuscito a cambiare la Fortuna.');
+    } finally {
+      setOccupata(null);
+    }
+  };
+  const fortunaAttiva = fortuna.dati?.attiva === true ? fortuna.dati.dote : null;
 
   /** Dal vertice della stella: seleziona la Dote e ne porta in vista la scheda. */
   const vaiAllaDote = (chiave: string) => {
@@ -90,11 +108,18 @@ export function DotiSociali({ partitaId }: Props) {
           <div className="w-full flex flex-col items-center gap-1.5" role="group" aria-label="Modificatori delle note">
             <span className="text-[11px] font-semibold uppercase tracking-[.06em] text-text-muted">Modificatori · valgono per tutte le note</span>
             <div className="flex flex-wrap justify-center gap-2">
-              <PulsanteVisivo disposizione="colonna" attivo={fortuna} icona={<IconaAzione chiave="fortuna" dimensione={48} />} titolo="Fortuna ×1,5" dettaglio="lettura di Chihaya" onClick={() => setFortuna((v) => !v)} aria-label="Fortuna ×1,5: lettura della fortuna di Chihaya" title="Lettura della fortuna di Chihaya: punti ×1,5 (per difetto)" />
+              <PulsanteVisivo disposizione="colonna" attivo={fortunaAttiva !== null || scegliFortuna} disabled={occupata === 'fortuna' || !fortuna.dati} icona={<IconaAzione chiave="fortuna" dimensione={48} />} titolo="Fortuna ×1,5" dettaglio={fortunaAttiva ? `su ${dati?.find((d) => d.chiave === fortunaAttiva)?.nome ?? fortunaAttiva}, per oggi` : 'lettura di Chihaya'} onClick={() => { if (fortunaAttiva) void cambiaFortuna(null); else setScegliFortuna((v) => !v); }} aria-label="Fortuna ×1,5: lettura della fortuna di Chihaya" title="Lettura della fortuna di Chihaya: i punti della Dote scelta valgono ×1,5 (per difetto) per il resto del giorno" />
               <PulsanteVisivo disposizione="colonna" attivo={libro} icona={<IconaAzione chiave="libro" dimensione={48} />} titolo="Libro" dettaglio="3 note = 7 punti" onClick={() => setLibro((v) => !v)} aria-label="Libro: 3 note valgono 7 punti" title="Libri a resa maggiorata: 3 note valgono 7 punti" />
               <PulsanteVisivo disposizione="colonna" attivo={cinema} icona={<IconaAzione chiave="esegui" dimensione={48} />} titolo="Anima da cineasta" dettaglio="film e DVD +1 scalino" onClick={() => setCinema((v) => !v)} aria-label="Anima da cineasta: film e DVD salgono di uno scalino (2→3, 3→5, 5→7)" title="Libro «Anima da cineasta» (Royal): guardando film e DVD i punti salgono di uno scalino, prima del ×1,5 di Chihaya" />
             </div>
           </div>
+          {scegliFortuna && <div className="flex flex-col items-center gap-1.5" role="group" aria-label="Dote della Fortuna">
+            <span className="text-[12px] text-text-secondary">Su quale Dote hai ricevuto la Fortuna? Vale per il resto di oggi.</span>
+            <div className="flex flex-wrap justify-center gap-1.5">
+              {(dati ?? []).map((d) => <button key={d.chiave} type="button" className="btn btn-secondary btn-sm touch" disabled={occupata === 'fortuna'} onClick={() => void cambiaFortuna(d.chiave)}>{d.nome}</button>)}
+            </div>
+          </div>}
+          {fortuna.dati?.scaduta && !scegliFortuna && <p className="m-0 text-[12px] text-text-muted text-center">La Fortuna di un altro giorno è finita: se ne hai una nuova, riaccendila.</p>}
           <p className="m-0 text-[12px] text-text-muted text-center">Tocca un vertice per andare alla dote.</p>
         </section>
         <ul className="m-0 p-0 list-none flex flex-col gap-2 min-w-0 md:min-h-0 md:area-scorrevole md:p-1">
@@ -111,11 +136,11 @@ export function DotiSociali({ partitaId }: Props) {
                         type="button"
                         className="btn btn-primary btn-nota min-w-[64px]"
                         disabled={occupata === d.chiave}
-                        onClick={() => void modifica(d.chiave, { note: n, libro, fortuna, cinema })}
-                        aria-label={`${d.nome}: aggiungi ${n} ${n === 1 ? 'nota' : 'note'} (${puntiAnteprima(n, libro, fortuna, cinema)} punti)`}
+                        onClick={() => void modifica(d.chiave, { note: n, libro, cinema })}
+                        aria-label={`${d.nome}: aggiungi ${n} ${n === 1 ? 'nota' : 'note'} (${puntiAnteprima(n, libro, fortunaAttiva === d.chiave, cinema)} punti)`}
                       >
                         <span aria-hidden="true">{'♪'.repeat(n)}</span>
-                        <span className="text-[13px] opacity-90">+{puntiAnteprima(n, libro, fortuna, cinema)}</span>
+                        <span className="text-[13px] opacity-90">+{puntiAnteprima(n, libro, fortunaAttiva === d.chiave, cinema)}</span>
                       </button>
                     ))}
                     <button type="button" className="btn btn-secondary btn-nota min-w-[46px]" disabled={occupata === d.chiave || d.punti === 0} onClick={() => void modifica(d.chiave, { delta: -1 })} aria-label={`${d.nome}: togli un punto`}>−1</button>

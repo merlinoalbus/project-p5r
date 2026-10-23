@@ -111,9 +111,21 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   },
   'PATCH /api/partite/:id/doti/:chiave': {
     sommario: 'Segna i punti di una Dote sociale',
-    descrizione: 'Imposta i punti (`punti`), li incrementa (`delta`) o aggiunge le `note` viste nel gioco, convertite in punti come nel gioco (con `libro`, `fortuna` e `cinema` per gli scalini maggiorati); `punti` vince su `note`, che vince su `delta`. I punti non scendono mai sotto zero. È l\'unico modo in cui i punti delle Doti cambiano: spunte, letture, incontri, domande e cruciverba dicono che cosa il gioco dà ma non le toccano. Un cambio di rango va nello storico (`dote-rango`).',
+    descrizione: 'Imposta i punti (`punti`), li incrementa (`delta`) o aggiunge le `note` viste nel gioco, convertite in punti come nel gioco (con `libro` e `cinema` per gli scalini maggiorati; il ×1,5 della Fortuna lo legge dallo stato della partita, `PUT /fortuna`); `punti` vince su `note`, che vince su `delta`. I punti non scendono mai sotto zero. È l\'unico modo in cui i punti delle Doti cambiano: spunte, letture, incontri, domande e cruciverba dicono che cosa il gioco dà ma non le toccano. Un cambio di rango va nello storico (`dote-rango`).',
     risposta: '`DoteSocialePartitaDto` della Dote aggiornata',
     errori: [PARTITA, [404, 'dote-non-trovata']],
+  },
+  'GET /api/partite/:id/fortuna': {
+    sommario: 'La Fortuna del giorno',
+    descrizione: 'Lo stato della Fortuna di Chihaya: la Dote scelta, il giorno in cui è stata accesa e se vale ancora (si spegne da sola al cambio di giorno della partita).',
+    risposta: '`FortunaPartitaDto`',
+    errori: [PARTITA],
+  },
+  'PUT /api/partite/:id/fortuna': {
+    sommario: 'Accende o spegne la Fortuna',
+    descrizione: 'Corpo `{ dote }` con la Dote scelta, oppure `{ dote: null }` per spegnerla. Da quel momento, fino al cambio di giorno, i punti di quella Dote (note, voci del Diario, letture, incontri, domande) valgono ×1,5 per difetto. Ogni cambio lascia un evento `fortuna` nello storico.',
+    risposta: '`FortunaPartitaDto` aggiornato',
+    errori: [PARTITA, [400, 'dote-non-valida']],
   },
 
   // ---- Denaro del gruppo e livelli dei Ladri ----

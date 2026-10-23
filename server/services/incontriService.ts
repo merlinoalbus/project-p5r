@@ -28,6 +28,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { aggiornaConfidente, nomeDote, puntiDaNote } from './partiteService.js';
+import { fortunaSu } from './fortunaService.js';
 import { leggiVociEffetto } from '../../shared/effettiCatalogo.js';
 import type { ConfidentePartitaDto, IncontroConfidenteDto, ModificaConfidente } from '../../shared/types.js';
 
@@ -52,8 +53,8 @@ function dotiDellIncontro(confidente: string, verso: number): Array<{ dote: stri
 }
 
 /** La Dote del passaggio al rango `verso`, come la ricorda l'incontro (nome e punti dalle note). */
-function dotiDelPassaggio(confidente: string, verso: number): IncontroConfidenteDto['doti'] {
-  return dotiDellIncontro(confidente, verso).map((d) => ({ chiave: d.dote, nome: nomeDote(d.dote), delta: puntiDaNote(d.note, false), note: d.note }));
+function dotiDelPassaggio(partitaId: number, confidente: string, verso: number): IncontroConfidenteDto['doti'] {
+  return dotiDellIncontro(confidente, verso).map((d) => ({ chiave: d.dote, nome: nomeDote(d.dote), delta: puntiDaNote(d.note, false, fortunaSu(partitaId, d.dote)), note: d.note }));
 }
 
 /** Il rango del Confidente nella partita (0 se non ha ancora una riga). */
@@ -88,7 +89,7 @@ export function registraIncontro(partitaId: number, confidente: string, momento:
     const semplice = nelMomento.find((r) => r.passaggio === 0);
     if (semplice) {
       const giaData = (JSON.parse(semplice.doti_json) as unknown[]).length > 0;
-      const doti = giaData ? [] : dotiDelPassaggio(confidente, verso);
+      const doti = giaData ? [] : dotiDelPassaggio(partitaId, confidente, verso);
       prepared('UPDATE incontro_confidente_partita SET passaggio = 1, verso_rango = ?, doti_json = ? WHERE id = ?').run(verso, giaData ? semplice.doti_json : JSON.stringify(doti), semplice.id);
       return { ...base, id: null, marcato: semplice.id, giaContato: giaData, doti };
     }
@@ -97,7 +98,7 @@ export function registraIncontro(partitaId: number, confidente: string, momento:
     return { ...base, id: null, marcato: null, giaContato: true };
   }
   // la Dote si registra e si ricorda solo per un passaggio di rango; le Doti si segnano a mano (`aggiornaDote`)
-  const doti = passaggio ? dotiDelPassaggio(confidente, verso) : [];
+  const doti = passaggio ? dotiDelPassaggio(partitaId, confidente, verso) : [];
   const id = Number(prepared(`INSERT INTO incontro_confidente_partita (partita_id, confidente_chiave, data, fascia, verso_rango, passaggio, origine, doti_json, created_at, punti_prima)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(partitaId, confidente, momento.data, momento.fascia, verso, passaggio ? 1 : 0, momento.origine, JSON.stringify(doti), nowIso(), puntiPrima).lastInsertRowid);
   return { ...base, id, marcato: null, giaContato: false, doti };

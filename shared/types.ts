@@ -641,8 +641,6 @@ export interface ModificaDote {
   note?: 1 | 2 | 3;
   /** 3 note da libro a resa maggiorata (7 punti invece di 5). */
   libro?: boolean;
-  /** Moltiplicatore ×1,5 (lettura della fortuna di Chihaya), arrotondato per difetto. */
-  fortuna?: boolean;
   /** «Anima da cineasta» (Royal): film e DVD salgono di uno scalino (2→3, 3→5, 5→7), prima del ×1,5. */
   cinema?: boolean;
 }

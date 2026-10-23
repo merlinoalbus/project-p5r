@@ -16,6 +16,7 @@ import { prepared } from '../db/dbService.js';
 import type { EffettiAzioneDto, IncontroConfidenteDto, RiferimentoAzioneDto } from '../../shared/types.js';
 import type { EffettoAzione } from '../../shared/effettiAzione.js';
 import { aggiornaConfidente, annullaEffetti, confidente as confidenteDellaPartita, nomeDote, puntiDaNote } from './partiteService.js';
+import { fortunaSu } from './fortunaService.js';
 import { avanzamentoLettura, haAnimaDaCineasta, impostaLettura, registraTurno, togliTurno } from './attivitaService.js';
 import { annullaIncontro, registraIncontro, type MomentoIncontro } from './incontriService.js';
 import { z } from 'zod';
@@ -90,7 +91,7 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
   for (const e of a.produce) {
     if (e.tipo === 'dote') {
       // le Doti si segnano a mano (`aggiornaDote`): qui si dice che cosa il gioco dà, e lo si ricorda
-      const punti = puntiDaNote(e.note, false, false, cinema);
+      const punti = puntiDaNote(e.note, false, fortunaSu(partitaId, e.dote), cinema);
       doti.push({ chiave: e.dote, nome: nomeDote(e.dote), delta: punti, note: e.note, cinema });
     } else if (e.tipo === 'lettura') {
       const stato = avanzamentoLettura(partitaId, e.categoria, e.chiave);

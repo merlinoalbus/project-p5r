@@ -9,6 +9,8 @@ import { CHIAVI_STATISTICHE, origineStima, statisticheStimate, type Osservazione
 import { t } from './traduzioniService.js';
 import { skillDto, skillRiassunti } from './compendioService.js';
 import { registraEvento } from './storicoService.js';
+import { fortunaSu } from './fortunaService.js';
+import { moltiplicaFortuna } from '../../shared/fortuna.js';
 import { verificaObiettivi } from './obiettiviService.js';
 import { requisitoBloccante, semaforiConfidente } from './semaforiService.js';
 import { statoDisponibilitaPartita } from './disponibilitaService.js';
@@ -171,14 +173,14 @@ const PUNTI_SCALINO = [2, 3, 5, 7] as const;
 
 /**
  * Punti per numero di note. Il libro a resa maggiorata porta le 3 note al quarto scalino (7); «Anima da cineasta» (Royal) alza
- * di UNO scalino i punti di film e DVD (2→3, 3→5, 5→7); la lettura della fortuna di Chihaya moltiplica per 1,5 per difetto,
- * dopo il cinema (2→3, 3→4, 5→7, 7→10).
+ * di UNO scalino i punti di film e DVD (2→3, 3→5, 5→7); la Fortuna della Dote (stato della partita, `fortunaService`) moltiplica
+ * per 1,5 per difetto, dopo il cinema (2→3, 3→4, 5→7, 7→10).
  */
 export function puntiDaNote(note: 1 | 2 | 3, libro = false, fortuna = false, cinema = false): number {
   let scalino = note === 3 && libro ? 4 : note;
   if (cinema) scalino = Math.min(4, scalino + 1);
   const base = PUNTI_SCALINO[scalino - 1];
-  return fortuna ? Math.floor(base * 1.5) : base;
+  return fortuna ? moltiplicaFortuna(base) : base;
 }
 
 /** I ranghi di una Dote sociale in ordine, con il nome italiano e la soglia di punti. */
@@ -225,7 +227,8 @@ export function aggiornaDote(partitaId: number, chiave: string, mod: ModificaDot
   const dote = prepared('SELECT chiave FROM dote_sociale WHERE chiave = ?').get(chiave);
   if (!dote) throw httpErrors.notFound('dote-non-trovata', `La dote sociale '${chiave}' non esiste.`);
   const attuale = (prepared('SELECT punti FROM dote_sociale_partita WHERE partita_id = ? AND dote_chiave = ?').get(partitaId, chiave) as { punti: number } | undefined)?.punti ?? 0;
-  const incremento = mod.note !== undefined ? puntiDaNote(mod.note, mod.libro, mod.fortuna, mod.cinema) : (mod.delta ?? 0);
+  // la Fortuna non arriva più dal chiamante: è lo stato della partita (R10-10/2), letto qui per la Dote che si sta segnando
+  const incremento = mod.note !== undefined ? puntiDaNote(mod.note, mod.libro, fortunaSu(partitaId, chiave), mod.cinema) : (mod.delta ?? 0);
   const nuovo = Math.max(0, mod.punti !== undefined ? mod.punti : attuale + incremento);
   const ranghi = ranghiDote(chiave);
   const prima = progressoDote(attuale, ranghi);
