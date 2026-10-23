@@ -5,6 +5,7 @@
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { partitaNonTrovata } from './verificaPartita.js';
+import { assicuraNonDelGruppo } from './personeDelGruppo.js';
 import { CHIAVI_STATISTICHE, origineStima, statisticheStimate, type Osservazione, type Statistiche } from '../../shared/statistiche.js';
 import { t } from './traduzioniService.js';
 import { skillDto, skillRiassunti } from './compendioService.js';
@@ -554,6 +555,7 @@ function testoBonusRegistrazione(bonus: Statistiche): string {
 export function registraPersona(partitaId: number, personaId: number, opz: { istantanea?: Istantanea; livello?: number | null; dati?: Record<string, unknown> } = {}): { nuova: boolean; aggiornata: boolean } {
   const persona = prepared('SELECT nome FROM persona WHERE id = ?').get(personaId) as { nome: string } | undefined;
   if (!persona) throw httpErrors.notFound('persona-non-trovata', `La Persona ${personaId} non esiste.`);
+  assicuraNonDelGruppo(personaId);
   const adesso = nowIso();
   const gia = prepared('SELECT livello_registrato FROM compendio_partita WHERE partita_id = ? AND persona_id = ? AND registrata = 1').get(partitaId, personaId) as { livello_registrato: number | null } | undefined;
   if (opz.istantanea) {
@@ -586,6 +588,7 @@ export function registraPersona(partitaId: number, personaId: number, opz: { ist
 export function aggiornaCompendio(partitaId: number, personaId: number, dati: { registrata: boolean; livelloRegistrato?: number | null }): CompendioPartitaDto[] {
   rigaPartita(partitaId);
   if (!prepared('SELECT 1 FROM persona WHERE id = ?').get(personaId)) throw httpErrors.notFound('persona-non-trovata', `La Persona ${personaId} non esiste.`);
+  assicuraNonDelGruppo(personaId);
   return getDb().transaction(() => {
     if (!dati.registrata) {
       prepared('DELETE FROM compendio_partita WHERE partita_id = ? AND persona_id = ?').run(partitaId, personaId);
@@ -709,6 +712,7 @@ export function aggiungiPosseduta(partitaId: number, personaId: number, dati: Da
   rigaPartita(partitaId);
   const p = prepared('SELECT id, nome, arcana, livello FROM persona WHERE id = ?').get(personaId) as { id: number; nome: string; arcana: string; livello: number } | undefined;
   if (!p) throw httpErrors.notFound('persona-non-trovata', `La Persona ${personaId} non esiste.`);
+  assicuraNonDelGruppo(personaId);
   if (prepared('SELECT 1 FROM persona_posseduta WHERE partita_id = ? AND persona_id = ?').get(partitaId, personaId)) {
     throw httpErrors.conflict('persona-gia-posseduta', 'Questa Persona è già nella scorta della partita.');
   }

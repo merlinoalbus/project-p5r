@@ -20,7 +20,7 @@ vi.mock('../../services/api', (vero) => moduloApi(vero, {
 function persona(id: number, nome: string, arcana: string, livello: number, extra: Partial<PersonaRiassuntoDto> = {}): PersonaRiassuntoDto {
   return {
     id, nome, nomeIt: nome, arcana, arcanaNome: arcana, livello, eredita: null, ereditaNome: null, speciale: false, rara: false, dlc: false, richiedeConfidenteMax: false,
-    tratto: '', statistiche: { forza: 1, magia: 1, resistenza: 1, agilita: 1, fortuna: 1 }, affinita: [], ...extra,
+    tratto: '', statistiche: { forza: 1, magia: 1, resistenza: 1, agilita: 1, fortuna: 1 }, affinita: [], delParty: false, personaggio: null, forma: null, ...extra,
   };
 }
 /** Riduce un riassunto di Persona alla forma usata nelle ricette di fusione, conservandone i flag speciale/rara/dlc. */

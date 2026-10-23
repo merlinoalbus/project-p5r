@@ -85,6 +85,12 @@ export interface PersonaRiassuntoDto {
   tratto: string;
   statistiche: StatisticheDto;
   affinita: AffinitaDto[];
+  /** Forma di una Persona del gruppo dei Ladri (mai fondibile, mai nella scorta): L8, R8-20. */
+  delParty: boolean;
+  /** Chiave del personaggio (Joker per Arsène e Satanael, il membro per le forme del gruppo), null per le altre Persona. */
+  personaggio: string | null;
+  /** 1ª, 2ª o 3ª forma; null fuori dal gruppo (Arsène e Satanael non hanno forme). */
+  forma: number | null;
 }
 
 export interface CostoSkillDto {
@@ -109,9 +115,13 @@ export interface SkillRiassuntoDto {
   effettoNome: string;
 }
 
-/** Skill appresa da una Persona (con livello di apprendimento). */
+/** Come una Persona impara una skill: a un livello, già dall'inizio (livello 0), con il risveglio, con i ranghi del Confidente, con la 3ª forma. */
+export type ModoApprendimento = 'livello' | 'iniziale' | 'risveglio' | 'rango' | 'terza-forma';
+
+/** Skill appresa da una Persona (con livello di apprendimento; `livello` è null per le skill che non si imparano a un livello). */
 export interface SkillAppresaDto extends SkillRiassuntoDto {
-  livello: number;
+  livello: number | null;
+  modo: ModoApprendimento;
 }
 
 export interface RicettaSpecialeDto {
@@ -126,9 +136,15 @@ export interface PersonaDettaglioDto extends PersonaRiassuntoDto {
   fonteDescrizione: string;
   nota: string | null;
   notaNome: string | null;
-  oggetto: string;
-  oggettoAllarme: string;
+  /** Oggetti d'esecuzione: null per le forme del gruppo, che non si eseguono. */
+  oggetto: string | null;
+  oggettoAllarme: string | null;
   oggettoECarta: boolean;
+  /** Solo forme del gruppo: la 1ª forma della catena (radice) e il predecessore diretto (Ervardo deriva da Loki). */
+  formaDi: { id: number; nome: string; nomeIt: string } | null;
+  derivaDa: { id: number; nome: string; nomeIt: string } | null;
+  /** Solo forme 2 e 3: la condizione con cui si ottiene, nel vocabolario unico delle condizioni (JSON già interpretato). */
+  formaCondizioni: unknown;
   oggettoDescrizione: string | null;
   oggettoAllarmeDescrizione: string | null;
   /** Nomi italiani degli oggetti da esecuzione (dalla guida), null se non abbinati. */
@@ -161,7 +177,7 @@ export interface SkillDettaglioDto extends SkillRiassuntoDto {
   negoziazioneNome: string | null;
   unica: string | null;
   unicaNome: string | null;
-  persone: Array<{ id: number; nome: string; arcana: string; arcanaNome: string; livelloPersona: number; livello: number }>;
+  persone: Array<{ id: number; nome: string; arcana: string; arcanaNome: string; livelloPersona: number; livello: number | null }>;
   fontiEsecuzione: Array<{ id: number; nome: string }>;
 }
 

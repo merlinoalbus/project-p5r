@@ -18,6 +18,8 @@ export const queryPersona = z.object({
   rara: boolQuery,
   speciale: boolQuery,
   skill: z.string().trim().min(1).max(80).optional(),
+  /** Include le forme delle Persona del gruppo (L8): le usa solo il compendio. */
+  delGruppo: boolQuery,
 });
 export type QueryPersona = z.infer<typeof queryPersona>;
 

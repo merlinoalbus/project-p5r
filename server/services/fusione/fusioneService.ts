@@ -6,6 +6,7 @@ import { prepared } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { partitaNonTrovata } from '../verificaPartita.js';
 import { t } from '../traduzioniService.js';
+import { assicuraNonDelGruppo } from '../personeDelGruppo.js';
 import type { EreditaFusioneDto, EsitoFusioneDto, NodoPianoDto, PersonaFusioneDto, PianiFusioneDto, RicercaSkillDto, RicettaFusioneDto, RicetteFusioneDto, SkillEreditaDto } from '../../../shared/types.js';
 import { analisiEredita, copre, elementoEreditabile, skillAlLivello, skillPerId, skillPosseduta, tipoEredita, type IngredienteEredita, type SkillEredita } from './eredita.js';
 import { SBLOCCHI_GEMELLE, moltiplicatoreExpConfidente, prezzoScontato, sblocchiGemelle, scontoRegistro } from '../../../shared/bonusVelluto.js';
@@ -41,9 +42,9 @@ export function contestoDa(opz: OpzioniContesto): { ctx: Contesto; dlcPosseduti:
 
 /** Percentuale di completamento del compendio personale (Persona non DLC registrate) e sconto del Registro. */
 export function scontoPartita(partitaId: number | undefined): { registrate: number; totale: number; percentuale: number; sconto: number } {
-  const totale = (prepared('SELECT COUNT(*) AS n FROM persona WHERE dlc = 0').get() as { n: number }).n;
+  const totale = (prepared('SELECT COUNT(*) AS n FROM persona WHERE dlc = 0 AND del_party = 0').get() as { n: number }).n;
   if (partitaId === undefined) return { registrate: 0, totale, percentuale: 0, sconto: 0 };
-  const registrate = (prepared('SELECT COUNT(*) AS n FROM compendio_partita cp JOIN persona p ON p.id = cp.persona_id WHERE cp.partita_id = ? AND cp.registrata = 1 AND p.dlc = 0').get(partitaId) as { n: number }).n;
+  const registrate = (prepared('SELECT COUNT(*) AS n FROM compendio_partita cp JOIN persona p ON p.id = cp.persona_id WHERE cp.partita_id = ? AND cp.registrata = 1 AND p.dlc = 0 AND p.del_party = 0').get(partitaId) as { n: number }).n;
   const percentuale = totale > 0 ? Math.floor((registrate / totale) * 100) : 0;
   return { registrate, totale, percentuale, sconto: scontoRegistro(percentuale) };
 }
@@ -107,7 +108,10 @@ function ricettaDto(r: RicettaFusione): RicettaFusioneDto {
 /** La Persona del motore per id, oppure un 404 `persona-non-trovata`. */
 export function personaOErrore(id: number): PersonaFusione {
   const p = personaFusione(id);
-  if (!p) throw httpErrors.notFound('persona-non-trovata', `La Persona ${id} non esiste.`);
+  if (!p) {
+    assicuraNonDelGruppo(id);
+    throw httpErrors.notFound('persona-non-trovata', `La Persona ${id} non esiste.`);
+  }
   return p;
 }
 
@@ -253,9 +257,9 @@ function motivoNessunPiano(target: PersonaFusione, ctx: Contesto, skillRichieste
   for (const sk of skillRichieste) {
     const inScorta = [...(disp.skillScorta?.entries() ?? [])].some(([, set]) => set.has(sk.id));
     if (inScorta) continue;
-    const fonti = prepared('SELECT p.nome, p.livello FROM persona_skill ps JOIN persona p ON p.id = ps.persona_id WHERE ps.skill_id = ? AND ps.livello <= p.livello ORDER BY p.livello').all(sk.id) as Array<{ nome: string; livello: number }>;
+    const fonti = prepared('SELECT p.nome, p.livello FROM persona_skill ps JOIN persona p ON p.id = ps.persona_id WHERE ps.skill_id = ? AND p.del_party = 0 AND ps.livello <= p.livello ORDER BY p.livello').all(sk.id) as Array<{ nome: string; livello: number }>;
     if (fonti.length === 0) {
-      const tardive = prepared('SELECT p.nome, ps.livello FROM persona_skill ps JOIN persona p ON p.id = ps.persona_id WHERE ps.skill_id = ? ORDER BY ps.livello LIMIT 3').all(sk.id) as Array<{ nome: string; livello: number }>;
+      const tardive = prepared('SELECT p.nome, ps.livello FROM persona_skill ps JOIN persona p ON p.id = ps.persona_id WHERE ps.skill_id = ? AND p.del_party = 0 ORDER BY ps.livello LIMIT 3').all(sk.id) as Array<{ nome: string; livello: number }>;
       return { codice: 'skill-senza-fonte', testo: `Nessuna Persona conosce ${sk.nomeIt} già al livello base: si impara salendo di livello${tardive.length ? ` (${tardive.map((x) => `${t('persona', x.nome)} al livello ${x.livello}`).join(', ')})` : ''}. Portane una in scorta con la skill appresa e riprova.` };
     }
     if (livelloMax !== null && fonti[0].livello > livelloMax) {

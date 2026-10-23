@@ -16,7 +16,7 @@ import { AffinitaGriglia } from '../components/compendio/AffinitaGriglia';
 import { StatisticheBarre } from '../components/compendio/StatisticheBarre';
 import { ElementoChip } from '../components/compendio/ElementoChip';
 import { IconChevronLeft } from '../components/shared/icons';
-import type { RicettaSpecialeDto } from '../types';
+import type { RicettaSpecialeDto, SkillAppresaDto } from '../types';
 import { CHIAVI_STATISTICHE, MASSIMO_STATISTICA, NOMI_STATISTICHE, statistichePerLivello } from '../../shared/statistiche';
 import { slug } from '../../shared/slug';
 import { useAsset } from '../stores/assetStore';
@@ -31,6 +31,13 @@ import { Modal } from '../components/shared/Modal';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 
+
+/** Come si impara una skill: «Innata», «Liv. N», oppure — per le forme del gruppo — con il risveglio, i ranghi del Confidente o la 3ª forma. */
+function etichettaApprendimento(s: SkillAppresaDto): string {
+  if (s.livello === 0) return 'Innata';
+  if (s.livello !== null) return `Liv. ${s.livello}`;
+  return s.modo === 'risveglio' ? 'Risveglio' : s.modo === 'terza-forma' ? '3ª forma' : 'Rango';
+}
 
 /** Ricetta speciale come riga di tasselli (stessa resa delle ricette di fusione: 14.10). */
 function Ricetta({ r }: { r: RicettaSpecialeDto }) {
@@ -174,6 +181,12 @@ export function PersonaDettaglioPage() {
                   </div>
                   <div className="text-[13px] text-text-secondary flex flex-wrap gap-x-4 gap-y-1">
                     <span>Eredità: <strong className="text-text">{p.ereditaNome ?? '—'}</strong></span>
+                    {p.delParty && (
+                      <span>
+                        Persona del gruppo: <strong className="text-text">{p.forma}ª forma</strong>
+                        {p.derivaDa && <> — deriva da <Link to={`/compendio/persona/${p.derivaDa.id}`} className="touch inline-flex items-center text-primary">{p.derivaDa.nomeIt}</Link></>}
+                      </span>
+                    )}
                     {p.notaNome && <span className="text-warning">{p.notaNome}</span>}
                     {p.areeMementos.length > 0 && (
                       <span>Mementos: <strong className="text-text">{p.areeMementos.map((a) => a.nome).join(', ')}</strong>{p.pianiMementos ? ` — ${p.pianiMementos}` : ''}</span>
@@ -212,7 +225,7 @@ export function PersonaDettaglioPage() {
                 didascalia={livelloScelto > p.livello ? `Stima al livello ${livelloScelto}: +3 punti per livello ripartiti in proporzione alle statistiche base (livello ${p.livello}); in gioco la ripartizione varia.` : `Statistiche base al livello ${p.livello}.`}
               />
               </div>
-              {attiva && !p.rara && (
+              {attiva && !p.rara && !p.delParty && (
                 <div className="flex items-center gap-2 flex-wrap mt-1">
                   <button type="button" className="btn btn-primary" disabled={occupato} onClick={() => void aggiungi()}>
                     Aggiungi alla scorta al livello {livelloScelto}
@@ -243,7 +256,7 @@ export function PersonaDettaglioPage() {
             <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light">
               {p.skill.map((s) => (
                 <li key={s.id} className="py-2 flex items-start gap-3">
-                  <span className={`w-14 shrink-0 text-[12px] font-bold ${s.livello === 0 ? 'text-primary' : 'text-text-secondary'}`}>{s.livello === 0 ? 'Innata' : `Liv. ${s.livello}`}</span>
+                  <span className={`${p.delParty ? 'w-20' : 'w-14'} shrink-0 text-[12px] font-bold ${s.livello === 0 ? 'text-primary' : 'text-text-secondary'}`}>{etichettaApprendimento(s)}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <Link to={`/skill/${s.id}`} className="touch inline-flex items-center font-semibold no-underline text-text hover:text-primary">{s.nomeIt}</Link>
@@ -271,7 +284,7 @@ export function PersonaDettaglioPage() {
             </section>
           )}
 
-          <SezioneFusione personaId={p.id} rara={p.rara} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} />
+          {!p.delParty && <SezioneFusione personaId={p.id} rara={p.rara} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} />}
 
           {(p.ricettaSpeciale || p.ingredienteDi.length > 0) && (
             <section className="card flex flex-col gap-3">
@@ -291,6 +304,7 @@ export function PersonaDettaglioPage() {
             </section>
           )}
 
+          {!p.delParty && (
           <section className="card">
             <h2 className="m-0 mb-2 text-[15px] font-semibold">Esecuzione (Stanza di Velluto)</h2>
             <dl className="dl-scheda m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[13px]">
@@ -306,6 +320,7 @@ export function PersonaDettaglioPage() {
               )}
             </dl>
           </section>
+          )}
           </div>
           </div>
         </div>

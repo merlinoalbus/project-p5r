@@ -6,6 +6,7 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
+import { assicuraNonDelGruppo } from './personeDelGruppo.js';
 import { skillDto } from './compendioService.js';
 import { registraEvento } from './storicoService.js';
 import type { AvanzamentoPianoDto, NodoPianoDto, PassoPianoDto, PianoFusioneDto, PianoSalvatoDto, SkillRiassuntoDto } from '../../shared/types.js';
@@ -107,6 +108,7 @@ function verificaAlbero(n: NodoPianoDto, profondita = 0): void {
   if (n.modo === 'fusione' && n.figli.length < 2) throw httpErrors.badRequest('piano-non-valido', 'Una fusione richiede almeno due ingredienti.');
   if (n.modo !== 'fusione' && n.figli.length > 0) throw httpErrors.badRequest('piano-non-valido', 'Una foglia non può avere ingredienti.');
   if (!prepared('SELECT 1 FROM persona WHERE id = ?').get(n.persona.id)) throw httpErrors.notFound('persona-non-trovata', `La Persona ${n.persona.id} non esiste.`);
+  assicuraNonDelGruppo(n.persona.id);
   for (const f of n.figli) verificaAlbero(f, profondita + 1);
 }
 
@@ -126,6 +128,7 @@ export function salvaPiano(partitaId: number, dati: DatiPianoSalvato): PianoSalv
   verificaPartita(partitaId);
   const persona = prepared('SELECT nome FROM persona WHERE id = ?').get(dati.personaId) as { nome: string } | undefined;
   if (!persona) throw httpErrors.notFound('persona-non-trovata', `La Persona ${dati.personaId} non esiste.`);
+  assicuraNonDelGruppo(dati.personaId);
   if (!dati.piano || !dati.piano.radice) throw httpErrors.badRequest('piano-non-valido', 'Piano mancante.');
   if (dati.piano.radice.persona.id !== dati.personaId) throw httpErrors.badRequest('piano-non-valido', 'La radice del piano non corrisponde alla Persona indicata.');
   verificaAlbero(dati.piano.radice);

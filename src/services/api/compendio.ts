@@ -40,6 +40,8 @@ export interface FiltriPersona {
   rara?: boolean;
   speciale?: boolean;
   skill?: string;
+  /** Include le forme delle Persona del gruppo: solo il compendio le mostra, i selettori della partita no. */
+  delGruppo?: boolean;
 }
 
 /** Glossario dei codici del compendio con la resa italiana (arcani, elementi, affinità, statistiche, Doti sociali…). */

@@ -28,7 +28,7 @@ const aff = (elemento: string, codice: string): AffinitaDto => ({ elemento, elem
  *  sovrascrive i campi. */
 const persona = (id: number, nome: string, livello: number, extra: Partial<PersonaRiassuntoDto> = {}): PersonaRiassuntoDto => ({
   id, nome, nomeIt: nome, arcana: 'Fool', arcanaNome: 'Matto', livello, eredita: null, ereditaNome: null, speciale: false, rara: false, dlc: false, richiedeConfidenteMax: false, tratto: '',
-  statistiche: { forza: 2, magia: 2, resistenza: 2, agilita: 3, fortuna: 1 }, affinita: [], ...extra,
+  statistiche: { forza: 2, magia: 2, resistenza: 2, agilita: 3, fortuna: 1 }, affinita: [], delParty: false, personaggio: null, forma: null, ...extra,
 });
 /** I nomi delle Persona nelle tessere a schermo, nell'ordine mostrato: la prima parte (prima della virgola)
  *  dell'`aria-label` del collegamento di ogni voce con id `persona-…`. */

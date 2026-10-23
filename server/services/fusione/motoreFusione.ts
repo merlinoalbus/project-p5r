@@ -70,7 +70,7 @@ registraCacheDiGioco(invalidaMotoreFusione);
 function caricaSnapshot(): Snapshot {
   if (snapshot) return snapshot;
   const righe = prepared(`SELECT p.id, p.nome, p.arcana, p.livello, p.speciale, p.rara, p.dlc, d.set_id
-    FROM persona p LEFT JOIN dlc_set_persona d ON d.persona_id = p.id ORDER BY p.livello, p.nome`).all() as Array<{ id: number; nome: string; arcana: string; livello: number; speciale: number; rara: number; dlc: number; set_id: number | null }>;
+    FROM persona p LEFT JOIN dlc_set_persona d ON d.persona_id = p.id WHERE p.del_party = 0 ORDER BY p.livello, p.nome`).all() as Array<{ id: number; nome: string; arcana: string; livello: number; speciale: number; rara: number; dlc: number; set_id: number | null }>;
   const persone: PersonaFusione[] = righe.map((r) => ({ id: r.id, nome: r.nome, arcana: r.arcana, livello: r.livello, speciale: r.speciale === 1, rara: r.rara === 1, dlc: r.dlc === 1, dlcSet: r.set_id }));
   const perId = new Map(persone.map((p) => [p.id, p]));
   const tabella = new Map<string, Map<string, string>>();

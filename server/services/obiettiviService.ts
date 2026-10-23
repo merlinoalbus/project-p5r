@@ -10,6 +10,7 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
+import { assicuraNonDelGruppo } from './personeDelGruppo.js';
 import { skillDto } from './compendioService.js';
 import { registraEvento } from './storicoService.js';
 import type { ObiettivoDto, SkillRiassuntoDto, StatoObiettivo } from '../../shared/types.js';
@@ -99,6 +100,7 @@ export function creaObiettivo(partitaId: number, personaId: number, dati: DatiOb
   verificaPartita(partitaId);
   const persona = prepared('SELECT nome FROM persona WHERE id = ?').get(personaId) as { nome: string } | undefined;
   if (!persona) throw httpErrors.notFound('persona-non-trovata', `La Persona ${personaId} non esiste.`);
+  assicuraNonDelGruppo(personaId);
   if (prepared("SELECT 1 FROM obiettivo_partita WHERE partita_id = ? AND persona_id = ? AND stato = 'aperto'").get(partitaId, personaId)) {
     throw httpErrors.conflict('obiettivo-gia-aperto', 'C\'è già un obiettivo aperto per questa Persona: modificalo invece di crearne un altro.');
   }

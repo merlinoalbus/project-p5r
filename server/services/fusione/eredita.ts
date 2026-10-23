@@ -58,14 +58,15 @@ function carica(): SnapshotEredita {
     skill.set(r.id, { id: r.id, nome: r.nome, elemento: r.elemento, unica: r.unica !== null });
   }
   const apprese = new Map<number, Array<{ skill: SkillEredita; livello: number }>>();
-  for (const r of prepared('SELECT persona_id, skill_id, livello FROM persona_skill ORDER BY persona_id, livello, skill_id').all() as Array<{ persona_id: number; skill_id: number; livello: number }>) {
+  // Le forme del gruppo non fondono e non ereditano: fuori dall'istantanea (e con loro le righe senza livello).
+  for (const r of prepared('SELECT ps.persona_id, ps.skill_id, ps.livello FROM persona_skill ps JOIN persona p ON p.id = ps.persona_id WHERE p.del_party = 0 AND ps.livello IS NOT NULL ORDER BY ps.persona_id, ps.livello, ps.skill_id').all() as Array<{ persona_id: number; skill_id: number; livello: number }>) {
     const s = skill.get(r.skill_id);
     if (!s) continue;
     apprese.set(r.persona_id, [...(apprese.get(r.persona_id) ?? []), { skill: s, livello: r.livello }]);
   }
   const tratto = new Map<number, SkillEredita | null>();
   const tipo = new Map<number, string | null>();
-  for (const r of prepared('SELECT p.id, p.eredita, s.id AS tratto_id FROM persona p LEFT JOIN skill s ON s.nome = p.tratto AND s.elemento = \'trait\'').all() as Array<{ id: number; eredita: string | null; tratto_id: number | null }>) {
+  for (const r of prepared('SELECT p.id, p.eredita, s.id AS tratto_id FROM persona p LEFT JOIN skill s ON s.nome = p.tratto AND s.elemento = \'trait\' WHERE p.del_party = 0').all() as Array<{ id: number; eredita: string | null; tratto_id: number | null }>) {
     tipo.set(r.id, r.eredita);
     tratto.set(r.id, r.tratto_id !== null ? skill.get(r.tratto_id) ?? null : null);
   }

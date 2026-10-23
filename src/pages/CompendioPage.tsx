@@ -55,7 +55,7 @@ export function CompendioPage() {
   const glossario = useGlossarioStore((s) => s.glossario);
   const vista = usePreferenzeStore((s) => s.vistaPersona);
   const impostaVista = usePreferenzeStore((s) => s.impostaVistaPersona);
-  const { dati, caricamento, errore, ricarica } = useCarica(() => getPersone(), []);
+  const { dati, caricamento, errore, ricarica } = useCarica(() => getPersone({ delGruppo: true }), []);
   const [params, setParams] = useSearchParams();
 
   const q = params.get('q') ?? '';
@@ -104,7 +104,7 @@ export function CompendioPage() {
       && (!arcana || p.arcana === arcana)
       && p.livello >= Math.min(livelloMin, livelloMax) && p.livello <= Math.max(livelloMin, livelloMax)
       && (mostraDlc || !p.dlc)
-      && (!soloCatturabili || (!p.speciale && !p.rara && !p.dlc))
+      && (!soloCatturabili || (!p.speciale && !p.rara && !p.dlc && !p.delParty))
       && (!elemento || p.affinita.some((a) => a.elemento === elemento && (!codice || a.codice === codice)))
       && (!immagine || (immagine === 'con') === (conImmagine?.has(p.nome) ?? false)),
     );
