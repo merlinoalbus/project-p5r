@@ -5,7 +5,7 @@
 import type {
   CompendioPartitaDto, ConfidentePartitaDto, OsservazioneStatisticheDto, Difficolta, DoteSocialePartitaDto, FasciaGioco, ModificaConfidente, ModificaDote, PartitaDto, AnteprimaFusioneDto, CicloSalvatoDto, DomandeDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, ObiettivoDto, PersonaPossedutaDto, ArticoloDto, AzionePercorsoDto, CruciverbaDto, FilmDto, GiornoCorrenteDto, LibroDto, PuntoInteresseDto, RichiestaDto, TipoLettura, StatoPunto, StatoRichiesta, TrofeoDto, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto, SuggerimentoIsolamentoDto, SuggerimentiOggiDto, SquadraPartitaDto, TimbriDedaloDto } from '../../types';
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut, queryString } from './_helpers';
-import type { DivergenzaDto, MeteoGiornoDto, VideogiocoDto } from '../../types';
+import type { DivergenzaDto, EsitoRegaloDto, MeteoGiornoDto, RichiestaRegalo, VideogiocoDto } from '../../types';
 import type { MeteoPartita } from '../../../shared/meteoPartita';
 import type { FortunaPartitaDto } from '../../../shared/fortuna';
 import type { RichiestaRegistraAcquisto } from '../../../shared/acquisti';
@@ -147,6 +147,11 @@ export const impostaRegaloFatto = (id: number, chiave: string, regalo: string, f
 /** Stesso gesto, con l'identità stabile anziché una copia del nome. */
 export const impostaRegaloOggettoFatto = (id: number, chiave: string, catalogo: string, fatto: boolean): Promise<ConfidentePartitaDto> =>
   apiPut(`/partite/${id}/confidenti/${encodeURIComponent(chiave)}/regali`, { catalogo, fatto });
+
+/** R10-18: l'azione unica «Regala» — l'oggetto del catalogo (per chiave) dà i punti, registra la consegna e, se richiesto, segna comprato l'articolo. */
+export const regalaOggetto = (id: number, richiesta: RichiestaRegalo): Promise<EsitoRegaloDto> => apiPost(`/partite/${id}/regali`, richiesta);
+/** R10-18: toglie la consegna con ciò che l'azione aveva fatto (punti, acquisto segnato, evento). */
+export const annullaRegaloOggetto = (id: number, confidente: string, catalogo: string): Promise<EsitoRegaloDto> => apiPost(`/partite/${id}/regali/annulla`, { confidente, catalogo });
 
 /** Il compendio personale della partita: le Persona registrate con la loro istantanea. */
 export const getCompendioPartita = (id: number): Promise<CompendioPartitaDto[]> => apiGet(`/partite/${id}/compendio`);

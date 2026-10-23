@@ -30,6 +30,7 @@ import { useSuggerimenti } from '../../stores/suggerimentiStore';
 import { classiSuggerito } from '../../utils/suggerimenti';
 import { TargaSuggerito } from '../shared/Suggerito';
 import { avvisaDotiDaSegnare } from '../../utils/dotiDaSegnare';
+import { SceltaRegalo } from '../catalogo/SceltaRegalo';
 
 interface Props {
   partitaId: number;
@@ -65,6 +66,8 @@ export function ConfidentiPartita({ partitaId }: Props) {
   const [bonusForzato, setBonusForzato] = useState<Record<string, boolean>>({});
   // Ultimo incremento per card, per il pulsante "Annulla ultimo".
   const [ultimo, setUltimo] = useState<Record<string, number>>({});
+  // Il Confidente a cui si sta regalando (finestra unica «Regala»).
+  const [regaloPer, setRegaloPer] = useState<string | null>(null);
 
   /** Bonus arcano della card: quello forzato a mano, altrimenti la presenza in scorta di una Persona dello stesso arcano. */
   const bonusArcanoDi = (c: ConfidentePartitaDto) => bonusForzato[c.chiave] ?? c.personaArcanoInScorta;
@@ -246,7 +249,8 @@ export function ConfidentiPartita({ partitaId }: Props) {
                       })}
                     </div>
                     <div className="flex flex-wrap gap-1.5">
-                      <PulsanteVisivo className="flex-1 min-w-[120px]" icona={<IconaAzione chiave="regalo" dimensione={24} />} titolo="Regalo" dettaglio={`+${formattaPunti(anteprimaPunti(50, bonus, esame, invito))} punti`} disabled={occ} onClick={() => void salva(c.chiave, { regalo: true, bonusArcano: bonus, esame: esame ?? undefined, invito })} aria-label={`${c.nome}: regalo gradito (${formattaPunti(anteprimaPunti(50, bonus, esame, invito))} punti)`} />
+                      {/* R10-18: «Regala» apre la finestra unica (oggetto del catalogo → punti, consegna, acquisto), non più un +50 senza oggetto */}
+                      <PulsanteVisivo className="flex-1 min-w-[120px]" icona={<IconaAzione chiave="regalo" dimensione={24} />} titolo="Regala" dettaglio={`+${formattaPunti(anteprimaPunti(50, bonus, esame, invito))} punti`} disabled={occ} onClick={() => setRegaloPer(c.chiave)} aria-label={`${c.nome}: regala un oggetto (${formattaPunti(anteprimaPunti(50, bonus, esame, invito))} punti)`} />
                       <PulsanteVisivo className="flex-1 min-w-[120px]" icona={<IconaAzione chiave="uscita" dimensione={24} />} titolo="Uscita" dettaglio={`+${formattaPunti(anteprimaPunti(10, bonus, esame, invito))} punti`} disabled={occ} onClick={() => void salva(c.chiave, { uscita: true, bonusArcano: bonus, esame: esame ?? undefined, invito })} aria-label={`${c.nome}: uscita insieme (${formattaPunti(anteprimaPunti(10, bonus, esame, invito))} punti)`} />
                       <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla-ultimo" dimensione={20} />} titolo={`Annulla ultimo${ultimo[c.chiave] > 0 ? ` (−${formattaPunti(ultimo[c.chiave])})` : ''}`} disabled={occ || !(ultimo[c.chiave] > 0)} onClick={() => void salva(c.chiave, { deltaPunti: -(ultimo[c.chiave] ?? 0) })} aria-label={`${c.nome}: annulla l'ultimo incremento`} />
                     </div>
@@ -266,6 +270,22 @@ export function ConfidentiPartita({ partitaId }: Props) {
         </section>
         );
       })}
+      {regaloPer && (() => {
+        const c = (dati ?? []).find((x) => x.chiave === regaloPer);
+        if (!c) return null;
+        return <SceltaRegalo key={c.chiave} partita={partitaId} confidente={c.chiave} nomeConfidente={c.nome} stato={c} bonusArcano={bonusArcanoDi(c)} esame={esame} invito={invito}
+          onChiudi={() => setRegaloPer(null)}
+          onFatto={(esito) => {
+            setRegaloPer(null);
+            imposta((correnti) => correnti.map((x) => (x.chiave === c.chiave ? esito.confidente : x)));
+            // i punti del regalo si tolgono annullando la consegna (scheda del Confidente), non con «Annulla ultimo»
+            setUltimo((u) => ({ ...u, [c.chiave]: 0 }));
+            notifica('success', `Regalo consegnato a ${c.nome}${esito.punti > 0 ? `: +${formattaPunti(esito.punti)} punti` : ''}${esito.acquistato ? ' · segnato anche comprato' : ''}.`);
+            if (esito.confidente.puntiNecessari !== null && esito.confidente.puntiNecessari > 0 && esito.confidente.mancanti === 0 && (c.mancanti ?? 1) > 0) {
+              notifica('success', `${c.nome}: punti sufficienti per il rango ${esito.confidente.rango + 1}! Passa del tempo insieme per salire di rango.`);
+            }
+          }} />;
+      })()}
       <Modal
         titolo={modifica ? `Note — ${modifica.nome}` : 'Note'}
         aperta={modifica !== null}

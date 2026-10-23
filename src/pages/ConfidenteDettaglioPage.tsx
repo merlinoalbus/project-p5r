@@ -4,7 +4,8 @@
 
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { getConfidenteDettaglio, getConfidentiPartita, getRequisitiConfidente, impostaRegaloFatto, impostaRegaloOggettoFatto, confermaRequisitoConfidente } from '../services/api';
+import { getConfidenteDettaglio, getConfidentiPartita, getRequisitiConfidente, impostaRegaloFatto, annullaRegaloOggetto, confermaRequisitoConfidente } from '../services/api';
+import { formattaPunti } from '../utils/punti';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -85,6 +86,8 @@ export function ConfidenteDettaglioPage() {
   const regaliCatalogoFatti = useMemo(() => new Set(mio?.regaliFattiCatalogo ?? []), [mio]);
   const [regaloInCorso, setRegaloInCorso] = useState(false);
   const [sceltaRegaloPer, setSceltaRegaloPer] = useState<string | null>(null);
+  /** L'oggetto già scelto quando «Regala» si apre da una riga dell'elenco (vuoto dal pulsante in alto). */
+  const [regaloIniziale, setRegaloIniziale] = useState('');
   const bersaglioRegalo = `${chiave}:${attiva?.id ?? ''}`;
   const regaloConsegnato = (g: RegaloConfidenteDto): boolean => g.catalogo && mio?.regaliFattiCatalogo !== undefined
     ? regaliCatalogoFatti.has(g.catalogo.chiave) : regaliFatti.has(g.nomeStorico ?? g.nome);
@@ -124,13 +127,19 @@ export function ConfidenteDettaglioPage() {
     }
   };
 
-  /** Segna un regalo come consegnato o no nella partita attiva, rilegge lo stato della partita e notifica l'esito (anche l'errore). */
+  /** Un regalo del catalogo si dà con «Regala» (azione unica: punti, consegna, acquisto) e qui si annulla con ciò che aveva fatto; un regalo
+   *  senza oggetto collegato resta la vecchia spunta per nome. Rilegge lo stato della partita e notifica l'esito (anche l'errore). */
   const segnaRegalo = async (g: RegaloConfidenteDto, fatto: boolean) => {
     if (!attiva || regaloInCorso) return;
     setRegaloInCorso(true);
     try {
-      if (g.catalogo) await impostaRegaloOggettoFatto(attiva.id, chiave, g.catalogo.chiave, fatto);
-      else await impostaRegaloFatto(attiva.id, chiave, g.nomeStorico ?? g.nome, fatto);
+      if (g.catalogo) {
+        const esito = await annullaRegaloOggetto(attiva.id, chiave, g.catalogo.chiave);
+        await stato.ricarica();
+        notifica('info', `Consegna di «${g.nome}» annullata${esito.punti < 0 ? `: −${formattaPunti(-esito.punti)} punti` : ''}${esito.acquistato ? ' e acquisto tolto' : ''}.`);
+        return;
+      }
+      await impostaRegaloFatto(attiva.id, chiave, g.nomeStorico ?? g.nome, fatto);
       await stato.ricarica();
       notifica('info', fatto ? `Regalo «${g.nome}» segnato come consegnato.` : `Regalo «${g.nome}» segnato come non consegnato.`);
     } catch (err) {
@@ -225,17 +234,21 @@ export function ConfidenteDettaglioPage() {
 
           <section className="card flex flex-col gap-2">
             <h2 className="m-0 text-[15px] font-semibold">Regali graditi</h2>
-            {attiva && c.regali.some((g) => g.catalogo) && <button type="button" className="btn btn-secondary touch self-start" disabled={regaloInCorso || stato.caricamento} onClick={() => setSceltaRegaloPer(bersaglioRegalo)}>Scegli un regalo</button>}
-            {attiva && sceltaRegaloPer === bersaglioRegalo && <SceltaRegalo key={bersaglioRegalo} partita={attiva.id} confidente={chiave} nomeConfidente={c.nome} regali={c.regali} consegnati={mio?.regaliFattiCatalogo ?? []}
-              onChiudi={() => setSceltaRegaloPer(null)} onSalvato={() => {
+            {attiva && c.regali.some((g) => g.catalogo) && <button type="button" className="btn btn-secondary touch self-start" disabled={regaloInCorso || stato.caricamento} onClick={() => { setRegaloIniziale(''); setSceltaRegaloPer(bersaglioRegalo); }}>Regala</button>}
+            {attiva && sceltaRegaloPer === bersaglioRegalo && <SceltaRegalo key={`${bersaglioRegalo}:${regaloIniziale}`} partita={attiva.id} confidente={chiave} nomeConfidente={c.nome} regali={c.regali} stato={mio} oggettoIniziale={regaloIniziale}
+              onChiudi={() => setSceltaRegaloPer(null)} onFatto={(esito) => {
                 setSceltaRegaloPer((corrente) => corrente === bersaglioRegalo ? null : corrente);
-                void stato.ricarica(); notifica('info', 'Regalo segnato come consegnato. I punti non cambiano.');
+                void stato.ricarica();
+                notifica('success', `Regalo consegnato a ${c.nome}${esito.punti > 0 ? `: +${formattaPunti(esito.punti)} punti` : ''}${esito.acquistato ? ' · segnato anche comprato' : ''}.`);
               }} />}
             {c.regali.length === 0 ? <p className="m-0 text-[13px] text-text-muted">Questo Confidente non accetta regali.</p> : (
               <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light" aria-label="Regali">
                 {c.regali.map((g, i) => (
                   <li key={i} className="py-1.5 flex flex-wrap items-center gap-2 text-[13px]">
-                    {attiva && (
+                    {attiva && g.catalogo && (regaloConsegnato(g)
+                      ? <button type="button" className="btn btn-ghost btn-sm touch" disabled={regaloInCorso || stato.caricamento} onClick={() => void segnaRegalo(g, false)} aria-label={`Annulla la consegna di ${g.nome}`}>Annulla consegna</button>
+                      : <button type="button" className="btn btn-secondary btn-sm touch" disabled={regaloInCorso || stato.caricamento} onClick={() => { setRegaloIniziale(g.catalogo!.chiave); setSceltaRegaloPer(bersaglioRegalo); }} aria-label={`Regala ${g.nome}`}>Regala</button>)}
+                    {attiva && !g.catalogo && (
                       <label className="flex items-center gap-1.5 touch">
                         <input type="checkbox" className="w-5 h-5" disabled={regaloInCorso || stato.caricamento} checked={regaloConsegnato(g)} onChange={(e) => void segnaRegalo(g, e.target.checked)} aria-label={`Regalo ${g.nome} consegnato`} />
                       </label>

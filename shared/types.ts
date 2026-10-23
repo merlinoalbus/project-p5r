@@ -721,6 +721,25 @@ export interface ModificaConfidente {
   note?: string;
 }
 
+/** R10-18: l'azione unica «Regala». Si sceglie l'oggetto del catalogo (per chiave); dà i punti (50 di base, con i moltiplicatori, solo dove il
+ *  Confidente ne conta), registra la consegna e, con `acquisto`, segna anche comprato l'articolo scelto (un'offerta dell'oggetto). */
+export interface RichiestaRegalo {
+  confidente: string;
+  /** Chiave dell'oggetto nel catalogo. */
+  catalogo: string;
+  bonusArcano?: boolean;
+  esame?: BonusEsame;
+  invito?: boolean;
+  acquisto?: { articolo: string; sede?: string };
+}
+
+/** L'esito di «Regala»: il Confidente aggiornato, i punti dati (0 dove non contano) e l'articolo segnato comprato (null se nessuno). */
+export interface EsitoRegaloDto {
+  confidente: ConfidentePartitaDto;
+  punti: number;
+  acquistato: string | null;
+}
+
 export interface CompendioPartitaDto {
   personaId: number;
   nome: string;

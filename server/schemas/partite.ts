@@ -216,6 +216,13 @@ export const paramsPartitaDomanda = z.object({ id: idParam, domandaId: idParam }
 export const bodyRegalo = z.object({
   regalo: z.string().trim().min(1).max(120).optional(), catalogo: z.string().trim().min(1).max(600).optional(), fatto: z.boolean(),
 }).refine((v) => (v.regalo !== undefined) !== (v.catalogo !== undefined), 'Indica il regalo per chiave oppure per nome, non entrambi.');
+/** R10-18: l'azione unica «Regala» (oggetto per chiave del catalogo, moltiplicatori dei punti, acquisto da segnare insieme). */
+export const bodyRegala = z.object({
+  confidente: z.string().trim().min(1).max(60), catalogo: z.string().trim().min(1).max(600),
+  bonusArcano: z.boolean().optional(), esame: z.enum(['primo', 'top10']).optional(), invito: z.boolean().optional(),
+  acquisto: z.object({ articolo: z.string().min(1).max(200), sede: z.string().min(1).max(300).optional() }).strict().optional(),
+}).strict();
+export const bodyAnnullaRegalo = z.object({ confidente: z.string().trim().min(1).max(60), catalogo: z.string().trim().min(1).max(600) }).strict();
 export const paramsPartitaEvento = z.object({ id: idParam, eventoId: idParam });
 export const bodyEliminaEventi = z.object({ ids: z.array(z.number().int().positive()).min(1).max(500) });
 export const bodyAggiornaPosseduta = z.object(campiPosseduta);

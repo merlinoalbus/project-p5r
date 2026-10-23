@@ -10,7 +10,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { validate } from '../middleware/validate.js';
 import {
   bodyAggiornaPartita, bodyAggiornaPosseduta, bodyAggiungiPosseduta, bodyCompendio, bodyConfidente, bodyCreaPartita, bodyDote, bodyFortuna,
-  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyAcquisto, bodyAzionePercorso, bodyTrofeo, bodyCruciverba, bodyGiornoCorrente, bodyLettura, bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, paramsPartitaDomanda, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico, bodyEliminaEventi, bodyRequisito, bodyYen, bodyMembroSquadra, bodyMeteo, paramsPartitaData } from '../schemas/partite.js';
+  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyAcquisto, bodyAzionePercorso, bodyTrofeo, bodyCruciverba, bodyGiornoCorrente, bodyLettura, bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, bodyRegala, bodyAnnullaRegalo, paramsPartitaDomanda, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico, bodyEliminaEventi, bodyRequisito, bodyYen, bodyMembroSquadra, bodyMeteo, paramsPartitaData } from '../schemas/partite.js';
 import { impostaMeteo, meteoDelGiorno } from '../services/meteoService.js';
 import type { MeteoPartita } from '../../shared/meteoPartita.js';
 import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, obiettivi } from '../services/obiettiviService.js';
@@ -32,6 +32,8 @@ import { conCestinoPrivato } from '../services/cestinoService.js';
 import { bodyAnteprimaAcquisto, bodyRegistraAcquisto, bodyAnteprimaAnnullaProvenienza, bodyAnnullaProvenienza, bodyAnteprimaRimozioneLegacy, bodyRimozioneLegacy, bodyAnteprimaDecisioneProposte, bodyDecisioneProposte } from '../schemas/acquisti.js';
 import { confermaRequisito } from '../services/semaforiService.js';
 import { aggiornaConfidenteDallaPagina } from '../services/incontriService.js';
+import { annullaRegalo, regala } from '../services/regaloAzioneService.js';
+import type { RichiestaRegalo } from '../../shared/types.js';
 import { impostaRaccolto } from '../services/mappe/mappeService.js';
 import { elencoDivergenze, togliFattoAlPin } from '../services/divergenzeService.js';
 import { suggerimentiOggi } from '../services/suggerimentiService.js';
@@ -179,6 +181,14 @@ router.put('/:id/confidenti/:chiave/requisiti', validate({ params: paramsPartita
 router.put('/:id/confidenti/:chiave/regali', validate({ params: paramsPartitaChiave, body: bodyRegalo }), (req, res) => {
   const b = req.body as { regalo?: string; catalogo?: string; fatto: boolean };
   res.json(impostaRegaloFatto(Number(req.params.id), String(req.params.chiave), b.catalogo === undefined ? b.regalo! : { catalogo: b.catalogo }, b.fatto));
+});
+/** R10-18: «Regala» è un'azione sola (oggetto del catalogo per chiave → punti, consegna, eventuale acquisto, storico) e si annulla identica. */
+router.post('/:id/regali', validate({ params: paramsPartita, body: bodyRegala }), (req, res) => {
+  res.status(201).json(regala(Number(req.params.id), req.body as RichiestaRegalo));
+});
+router.post('/:id/regali/annulla', validate({ params: paramsPartita, body: bodyAnnullaRegalo }), (req, res) => {
+  const b = req.body as { confidente: string; catalogo: string };
+  res.json(annullaRegalo(Number(req.params.id), b.confidente, b.catalogo));
 });
 
 router.put('/:id/trofei', validate({ params: paramsPartita, body: bodyTrofeo }), (req, res) => {

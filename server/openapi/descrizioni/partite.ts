@@ -173,6 +173,18 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
     risposta: '`ConfidentePartitaDto` aggiornato',
     errori: [PARTITA, [404, 'confidente-non-trovato'], [404, 'oggetto-non-trovato'], [400, 'regalo-vuoto'], [409, 'catalogo-non-disponibile'], [409, 'oggetto-nascosto'], [409, 'regalo-omonimo']],
   },
+  'POST /api/partite/:id/regali': {
+    sommario: 'Regala un oggetto a un Confidente (azione unica)',
+    descrizione: 'Corpo strict {confidente, catalogo (chiave dell\'oggetto), bonusArcano?, esame?, invito?, acquisto?: {articolo, sede?}}. In una sola transazione: l\'oggetto deve essere fra i regali graditi del Confidente e non già consegnato; dà i punti (50 di base per i moltiplicatori scelti) solo dove il Confidente ne conta (rango 1–9 con punti necessari); registra la consegna per chiave ricordando punti, rango e momento di gioco; con `acquisto` segna anche comprato quell\'articolo (un\'offerta dell\'oggetto, la stessa `impostaAcquisto` dei Negozi); scrive l\'evento `regalo` nello storico. Tutto o niente. I yen restano un promemoria: nessun movimento.',
+    risposta: '`EsitoRegaloDto` (201): il `ConfidentePartitaDto` aggiornato, i punti dati e l\'articolo segnato comprato',
+    errori: [PARTITA, [404, 'confidente-non-trovato'], [404, 'oggetto-non-trovato'], [400, 'acquisto-non-dell-oggetto'], [409, 'oggetto-nascosto'], [409, 'regalo-non-gradito'], [409, 'regalo-gia-consegnato'], [409, 'articolo-non-disponibile']],
+  },
+  'POST /api/partite/:id/regali/annulla': {
+    sommario: 'Annulla un regalo e ciò che aveva fatto',
+    descrizione: 'Corpo strict {confidente, catalogo}. Toglie la consegna e, se l\'azione «Regala» l\'aveva fatto, i punti (solo se il Confidente è ancora allo stesso rango: cambiando rango ripartono da zero), l\'acquisto che aveva segnato e l\'evento nello storico. Una consegna senza memoria dell\'azione (data prima della migrazione utente 035 o col vecchio PUT) si toglie e basta.',
+    risposta: '`EsitoRegaloDto`: i punti sono negativi se ne sono stati tolti',
+    errori: [PARTITA, [404, 'confidente-non-trovato'], [404, 'regalo-non-trovato']],
+  },
 
   // ---- Trofei, giornata, meteo e attività ----
   'PUT /api/partite/:id/trofei': {

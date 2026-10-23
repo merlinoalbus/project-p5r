@@ -14,7 +14,9 @@ import { CostoDellOggetto } from '../components/catalogo/CostoDellOggetto';
 import { ModuloOggetto } from '../components/catalogo/ModuloOggetto';
 import { Modal } from '../components/shared/Modal';
 import { notifica } from '../stores/notificationStore';
-import { impostaRegaloOggettoFatto } from '../services/api/partite';
+import { annullaRegaloOggetto } from '../services/api/partite';
+import { SceltaRegalo } from '../components/catalogo/SceltaRegalo';
+import { formattaPunti } from '../utils/punti';
 import { TrasformazioniDiJose } from '../components/catalogo/TrasformazioniDiJose';
 import { PosizioniDellaLettura } from '../components/catalogo/PosizioniDellaLettura';
 
@@ -36,16 +38,21 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
   const [azione, setAzione] = useState<'modifica' | 'elimina' | 'ripristina' | null>(null);
   const [occupato, setOccupato] = useState(false);
   const [regaloInCorso, setRegaloInCorso] = useState(false);
-  const regala = async (confidente: string, fatto: boolean) => {
+  /** R10-18: il Confidente a cui si sta regalando questo oggetto (finestra unica «Regala»). */
+  const [regalaA, setRegalaA] = useState<{ chiave: string; nome: string } | null>(null);
+  /** «Regala» apre la finestra unica (punti, consegna, eventuale acquisto); «Togli consegna» annulla ciò che l'azione aveva fatto. */
+  const regala = async (confidente: string, nome: string, fatto: boolean) => {
     if (!o || partitaId === null || regaloInCorso || occupato) return;
+    if (fatto) { setRegalaA({ chiave: confidente, nome }); return; }
     setRegaloInCorso(true);
     try {
-      await impostaRegaloOggettoFatto(partitaId, confidente, o.chiave, fatto);
+      const esito = await annullaRegaloOggetto(partitaId, confidente, o.chiave);
       dati.imposta((corrente) => {
-        const regalo = corrente.regalo.map((r) => r.confidente === confidente ? { ...r, regalato: fatto } : r);
+        const regalo = corrente.regalo.map((r) => r.confidente === confidente ? { ...r, regalato: false } : r);
         return { ...corrente, regalo, partita: corrente.partita ? { ...corrente.partita, regalato: regalo.some((r) => r.regalato) } : null };
       });
-      notifica('info', fatto ? 'Regalo segnato come consegnato. I punti non cambiano.' : 'Consegna del regalo rimossa. I punti non cambiano.');
+      notifica('info', `Consegna annullata${esito.punti < 0 ? `: −${formattaPunti(-esito.punti)} punti` : ''}${esito.acquistato ? ' e acquisto tolto' : ''}.`);
+      if (esito.acquistato) void dati.ricarica();
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Consegna non aggiornata.');
     } finally { setRegaloInCorso(false); }
@@ -107,7 +114,7 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
               {r.gradimento && <span className="text-[13px] text-text-secondary">{r.gradimento}</span>}
               {r.sconsigliato && <span className="chip">Sconsigliato</span>}
               {r.regalato && <span className="chip chip--attivo">Regalato</span>}
-              {partitaId !== null && (!r.sconsigliato || r.regalato) && <button type="button" className="btn btn-secondary touch" disabled={regaloInCorso || occupato || dati.caricamento} onClick={() => void regala(r.confidente, !r.regalato)}>{r.regalato ? 'Togli consegna' : 'Regala'}</button>}
+              {partitaId !== null && (!r.sconsigliato || r.regalato) && <button type="button" className="btn btn-secondary touch" disabled={regaloInCorso || occupato || dati.caricamento} onClick={() => void regala(r.confidente, r.nome, !r.regalato)}>{r.regalato ? 'Togli consegna' : 'Regala'}</button>}
             </li>)}</ul> : <p className="m-0 text-[13px] text-text-secondary">Nessun regalo gradito collegato.</p>}
           </section>
           <section className="card order-5 flex min-w-0 flex-col gap-3 xl:order-none" aria-labelledby="dove-si-trova">
@@ -131,6 +138,17 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
           </section>
         </div>
       </div>
+      {regalaA && partitaId !== null && <SceltaRegalo key={`${regalaA.chiave}:${o.chiave}`} partita={partitaId} confidente={regalaA.chiave} nomeConfidente={regalaA.nome} ammessi={[o.chiave]} oggettoIniziale={o.chiave}
+        onChiudi={() => setRegalaA(null)} onFatto={(esito) => {
+          const confidente = regalaA.chiave;
+          setRegalaA(null);
+          dati.imposta((corrente) => {
+            const regalo = corrente.regalo.map((r) => r.confidente === confidente ? { ...r, regalato: true } : r);
+            return { ...corrente, regalo, partita: corrente.partita ? { ...corrente.partita, regalato: true } : null };
+          });
+          if (esito.acquistato) void dati.ricarica();
+          notifica('success', `Regalo consegnato a ${regalaA.nome}${esito.punti > 0 ? `: +${formattaPunti(esito.punti)} punti` : ''}${esito.acquistato ? ' · segnato anche comprato' : ''}.`);
+        }} />}
       {azione === 'modifica' && <ModuloOggetto key={o.chiave} oggetto={o} onChiudi={() => setAzione(null)} onSalvato={() => { setAzione(null); void dati.ricarica(); }} />}
       {(azione === 'elimina' || azione === 'ripristina') && <Modal aperta titolo={azione === 'elimina' ? `Elimina «${o.nome}»` : `Ripristina «${o.nome}»`} onChiudi={() => { if (!occupato) setAzione(null); }}
         azioni={<><button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={() => setAzione(null)}>Annulla</button><button type="button" className="btn btn-primary touch" disabled={occupato} onClick={() => void conferma()}>{occupato ? 'Attendi…' : 'Conferma'}</button></>}>

@@ -41,5 +41,6 @@ import { utente031 } from './031_yen_solo_promemoria.js';
 import { utente032 } from './032_fortuna_della_partita.js';
 import { utente033 } from './033_aojiru_proposte_gia_nel_saldo.js';
 import { utente034 } from './034_fortuna_da_voce.js';
+import { utente035 } from './035_regalo_con_punti_e_acquisto.js';
 
-export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006, utente007, utente008, utente009, utente010, utente011, utente012, utente013, utente014, utente015, utente016, utente017, utente018, utente019, utente020, utente021, utente022, utente023, utente024, utente025, utente026, utente027, utente028, utente029, utente030, utente031, utente032, utente033, utente034];
+export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006, utente007, utente008, utente009, utente010, utente011, utente012, utente013, utente014, utente015, utente016, utente017, utente018, utente019, utente020, utente021, utente022, utente023, utente024, utente025, utente026, utente027, utente028, utente029, utente030, utente031, utente032, utente033, utente034, utente035];
