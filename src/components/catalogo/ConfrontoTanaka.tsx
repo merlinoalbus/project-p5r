@@ -5,6 +5,7 @@ import { useCarica } from '../../hooks/useCarica';
 import { PageState } from '../shared/PageState';
 import { descriviRequisitoSpillo } from '../../../shared/condizioniSpillo';
 import { NoteStoricheOfferta } from './NoteStoricheOfferta';
+import { DecisioneTanaka } from './DecisioneTanaka';
 
 const yen = (n: unknown) => typeof n !== 'number' ? 'Prezzo non indicato' : `${n.toLocaleString('it-IT')} ¥`;
 const gradi: Record<string, string> = { iniziale: 'Nessun grado', nero: 'Nero', oscuro: 'Oscurità', caos: 'Caos' };
@@ -36,7 +37,7 @@ function DatiConfronto() {
   return <PageState isLoading={dati.caricamento && !c} error={dati.errore} onRetry={() => void dati.ricarica()}>
     {c && <div className="card flex min-w-0 flex-col gap-3">
       <h2 className="m-0 text-[18px]">Tanaka · preparazione di una sola decisione</h2>
-      <p className="m-0">Questo confronto non applica proposte. Le conferme individuali e la scelta alternativa sono bloccate. La spesa storica è protetta e la nota documentale Homunculus è consultabile; prima del consenso unico restano transazione atomica, ricevuta, ripristino e importazione.</p>
+      <p className="m-0">Questo confronto non applica proposte. Le conferme individuali e la scelta alternativa sono bloccate. La spesa storica è protetta e la nota documentale Homunculus è consultabile. La decisione unitaria, con anteprima, conferma, ricevuta e ripristino, è nella sezione «Decisione unitaria» qui sotto.</p>
       <p className="m-0 text-warning">Fonte: gradi oltre 10.000 / 50.000 / 100.000 ¥. L’app valuta attualmente anche la soglia esatta: questo confine resta da risolvere. Gemme elementali e sei Magatama non sono sei identità automaticamente equivalenti.</p>
       <p className="m-0">Proposta originale: conservare 10 chiavi, nascondere 10 offerte e aggiungerne 8, dopo il consenso. Stati già gestiti, personalizzazioni e collisioni richiedono una risoluzione esplicita. Nessuna fotografia o proposta originale viene aggiornata.</p>
       {!c.negozio && <p className="m-0 text-warning">Negozio assente: nessuna ricreazione automatica.</p>}
@@ -72,6 +73,7 @@ function DatiConfronto() {
         <Dettaglio titolo="Fonte corrente confrontata nella stessa lettura" valore={p.fonteCorrente} />
       </li>)}</ul></details>
       <Dettaglio titolo="Rendiconto della bonifica 124" valore={c.rapporto124} />
+      <DecisioneTanaka onCambiato={() => void dati.ricarica()} />
       <p className="m-0 break-all text-[11px]">Revisione della lettura: {c.revisione}. Non è una ricevuta, un consenso o una conferma applicabile.</p>
       <p className="m-0 text-[12px]">Fonte documentale: {manifest.fonte}. Le candidate Royal sono proposte documentali separate dallo storico: nessuna formula personalizzata viene semplificata o sostituita.</p>
     </div>}
