@@ -34,9 +34,20 @@ import { pulisciMiniatureOrfane } from '../miniatureService.js';
  *  spilli non identificati, luoghi legati alla planimetria omonima, spilli dei luoghi allineati
  *  al catalogo dei tipi, immagini rimaste su disco assorbite nel database. Tutte idempotenti. */
 export function regoleAllAvvio(db: AppDatabase): { spilliTradotti: number; luoghiCollegati: number; spilliRiallineati: number; spilliIdentificati: number; immaginiAssorbite: number; miniatureOrfane: number } {
-  // le miniature (108) senza la loro sorgente, o di un'altra versione, se ne vanno dopo l'assorbimento delle immagini (L1)
-  const regole = { spilliTradotti: traduciNomiSpilli(db), luoghiCollegati: collegaLuoghiAllePlanimetrie(db), spilliRiallineati: riallineaSpilliLuoghi(db), spilliIdentificati: assegnaUidMancanti(db), immaginiAssorbite: assorbiImmaginiSuDisco(db) };
-  return { ...regole, miniatureOrfane: pulisciMiniatureOrfane(db) };
+  // Non bloccanti (decisione dell'utente: «il server deve partire»): ogni regola gira da sola, un errore si registra col nome della
+  // regola e vale 0, e le altre girano lo stesso. Che cosa fanno non cambia.
+  const prova = (nome: string, regola: () => number): number => {
+    try { return regola(); } catch (err) { logger.error({ regola: nome, err }, 'regola sui dati all\'avvio fallita: l\'avvio prosegue'); return 0; }
+  };
+  return {
+    spilliTradotti: prova('traduciNomiSpilli', () => traduciNomiSpilli(db)),
+    luoghiCollegati: prova('collegaLuoghiAllePlanimetrie', () => collegaLuoghiAllePlanimetrie(db)),
+    spilliRiallineati: prova('riallineaSpilliLuoghi', () => riallineaSpilliLuoghi(db)),
+    spilliIdentificati: prova('assegnaUidMancanti', () => assegnaUidMancanti(db)),
+    immaginiAssorbite: prova('assorbiImmaginiSuDisco', () => assorbiImmaginiSuDisco(db)),
+    // le miniature (108) senza la loro sorgente, o di un'altra versione, se ne vanno dopo l'assorbimento delle immagini (L1)
+    miniatureOrfane: prova('pulisciMiniatureOrfane', () => pulisciMiniatureOrfane(db)),
+  };
 }
 
 /**
