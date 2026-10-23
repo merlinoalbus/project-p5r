@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
+import { moltiplicaFortuna } from '../../shared/fortuna.js';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
@@ -72,7 +73,7 @@ function targetCausa(partita: number, causa: Causa): Target[] {
       const attiva = !!prepared('SELECT 1 FROM utente.acquisto_provenienza WHERE partita_id=? AND acquisto_id=? LIMIT 1').get(partita,causa.chiave);
       // Gli yen non sono più una proposta (BON-12): si cambiano a mano, la proposta Dote porta il promemoria della spesa.
       return [
-        { tipo:'dote',chiave:d.variante,delta:d.fortuna === true ? 3 : 2,motivo:d.fortuna === null ? 'Aojiru: sola base certa di 2 punti; bonus Fortuna non attestato.' : 'Dote della consumazione Aojiru confermata.',fortunaIgnota:d.fortuna === null,storica:true,attiva },
+        { tipo:'dote',chiave:d.variante,delta:d.fortuna === true ? moltiplicaFortuna(2) : 2,motivo:d.fortuna === null ? 'Aojiru: sola base certa di 2 punti; bonus Fortuna non attestato.' : 'Dote della consumazione Aojiru confermata.',fortunaIgnota:d.fortuna === null,storica:true,attiva },
         ...righeCausa(partita,causa).filter((r)=>r.tipo==='yen'&&r.stato==='aperta'&&r.delta_applicato===0&&r.delta_riconosciuto===0).map((r):Target=>({...verificaBeneficio(leggiOggettoRegistro(r.dati_json,'proposta').beneficio),attiva:false})),
       ];
     }

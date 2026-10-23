@@ -8,6 +8,7 @@
 //   1. il giorno deve esistere nel percorso (404 `giorno-non-trovato`); solo la data tolta (`null`) salta il controllo;
 //   2. un giorno nuovo comincia di mattina: la fascia torna a «giorno»; rimarcare lo stesso giorno non cambia nulla;
 //   3. il cambio entra nello storico, nella stessa transazione;
+//   3b. la Fortuna di Chihaya accesa finisce (`chiudiFortunaPerCambioGiorno`), nella stessa transazione;
 //   4. i suggerimenti del giorno si leggono dalla data di gioco (`suggerimentiOggi`): non hanno copia da aggiornare lato server, e il
 //      client li rilegge a ogni partita restituita con un giorno diverso (`aggiornaLocale` in `partitaStore`).
 // ============================================================
@@ -16,6 +17,7 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
+import { chiudiFortunaPerCambioGiorno } from './fortunaService.js';
 
 /** Come si presenta il cambio nello storico: titolo e dettaglio di default se la strada non ne ha di suoi. */
 export interface DescrizioneCambioGiorno {
@@ -47,6 +49,7 @@ export function cambiaGiornoPartita(partitaId: number, data: string | null, desc
       descrizione.dettaglio ?? (data ? `La partita passa da ${da ?? 'nessun giorno'} al ${data}, di giorno.` : `Il giorno di gioco ${da ?? ''} è stato tolto.`),
       { da, a: data },
     );
+    chiudiFortunaPerCambioGiorno(partitaId);
     return { cambiato: true, da, a: data };
   })();
 }

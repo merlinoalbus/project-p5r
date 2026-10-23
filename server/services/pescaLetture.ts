@@ -1,5 +1,6 @@
 import { ATTIVITA_PESCA, EVENTI_PESCA, nomeEventoPesca, type AcquistoEscaPescaDto, type BeneficioPescaDto, type EventoPesca, type FattoPescaDto, type FonteFattoPescaDto, type IntervalloBeneficioPesca, type MomentoPesca, type OsservazionePescaDto, type SessionePescaDto, type StatoPescaDto, type ValoreFattoPesca } from '../../shared/pesca.js';
 import { ordineGioco } from '../../shared/condizioniSpillo.js';
+import { moltiplicaFortuna } from '../../shared/fortuna.js';
 import { profiliPesca } from './profiliPescaService.js';
 import { prepared } from '../db/dbService.js';
 import { schemaDefinizioneRegolaPesca, schemaMomentoPesca, schemaOsservazionePesca } from '../schemas/pesca.js';
@@ -87,8 +88,9 @@ export function targetBeneficiPesca(p:number,causa:string):TargetBeneficioPesca[
     // Il prezzo/base applicabile è fotografato nel gesto, mai sostituito da una modifica futura della guida.
     const dati=identitaSessione(s).regola;
     const attiva=fontiPesca(p).some(f=>f.sessione_id===s.id);
-    const max=dati.beneficioPerizia.puntiBase+dati.beneficioPerizia.bonusFortuna;
-    const perizia:IntervalloBeneficioPesca=o.perizia.esito==='non-ricevuta'?{minimo:0,massimo:0}:o.perizia.esito==='ignota'?{minimo:0,massimo:max}:{minimo:dati.beneficioPerizia.puntiBase+(o.fortuna.attiva===true?dati.beneficioPerizia.bonusFortuna:0),massimo:o.fortuna.attiva===false?dati.beneficioPerizia.puntiBase:max};
+    // il ×1,5 della Fortuna è il lettore unico (`moltiplicaFortuna`): `bonusFortuna` della regola resta nel dato ma non si legge più
+    const base=dati.beneficioPerizia.puntiBase,max=moltiplicaFortuna(base);
+    const perizia:IntervalloBeneficioPesca=o.perizia.esito==='non-ricevuta'?{minimo:0,massimo:0}:o.perizia.esito==='ignota'?{minimo:0,massimo:max}:{minimo:o.fortuna.attiva===true?max:base,massimo:o.fortuna.attiva===false?base:max};
     // BON-12: la quota della visita non è più una proposta di yen: gli yen si cambiano a mano, qui resta solo il promemoria nel motivo
     const quota=dati.quote[s.fascia];
     return [{tipo:'dote',chiave:'perizia',delta:perizia.minimo,intervallo:perizia,attiva,storica:true,motivo:`Perizia finale osservata, distinta dalla cattura. L’intervallo conserva il bonus Fortuna ignoto. Promemoria: la quota della visita (${quota.toLocaleString('it-IT')} yen) non si applica da qui, cambia tu gli yen.`}];

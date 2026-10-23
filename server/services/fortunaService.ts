@@ -2,10 +2,11 @@
 // fortunaService — la Fortuna di Chihaya come stato della partita (R10-10/2)
 // ============================================================
 //
-// Una riga per partita: la Dote scelta e il giorno di gioco in cui si è accesa. Vale solo quel giorno: se la data della partita
-// cambia, la Fortuna risulta spenta (la riga resta finché non si riaccende o si spegne a mano). Lo leggono, con lo stesso ×1,5 per
-// difetto (`moltiplicaFortuna`), le Doti, le voci del Diario, l'Aojiru e la pesca. Si accende dall'interruttore delle Doti o da una
-// voce del Diario con la lettura; ogni cambio lascia un evento nello storico.
+// Una riga per partita: la Dote scelta e il giorno di gioco in cui si è accesa. Vale solo quel giorno. Si spegne davvero quando il
+// giorno cambia: `cambiaGiornoPartita` (la regola unica del cambio giorno) chiama `chiudiFortunaPerCambioGiorno`, che toglie la riga e
+// lascia un evento; tornare poi a quel giorno non la riaccende. Per sicurezza `leggiFortuna` considera accesa solo una riga del
+// giorno corrente. La leggono, con lo stesso ×1,5 per difetto (`moltiplicaFortuna`), le Doti, le voci del Diario, l'Aojiru e la
+// pesca. Si accende dall'interruttore delle Doti o da una voce del Diario con l'effetto «fortuna»; ogni cambio lascia un evento.
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
@@ -86,4 +87,12 @@ export function spegniFortunaDaVoce(partitaId: number, voceUid: string): void {
     prepared('DELETE FROM utente.fortuna_partita WHERE partita_id = ?').run(partitaId);
     registraEvento(partitaId, 'fortuna', 'Fortuna spenta', `Tolta la spunta della voce che l’aveva accesa su ${nomeDote(riga.dote)}.`, { dote: riga.dote, voce: voceUid });
   }
+}
+
+/** Il giorno di gioco è cambiato: la Fortuna accesa finisce (la riga si toglie, con un evento). Chiamata da `cambiaGiornoPartita`. */
+export function chiudiFortunaPerCambioGiorno(partitaId: number): void {
+  const riga = prepared('SELECT dote FROM utente.fortuna_partita WHERE partita_id = ?').get(partitaId) as { dote: string } | undefined;
+  if (!riga) return;
+  prepared('DELETE FROM utente.fortuna_partita WHERE partita_id = ?').run(partitaId);
+  registraEvento(partitaId, 'fortuna', 'Fortuna finita', `Era accesa su ${eDote(riga.dote) ? nomeDote(riga.dote) : riga.dote}: con il nuovo giorno non vale più.`, { dote: riga.dote });
 }
