@@ -39,12 +39,6 @@ router.delete('/', validate({ query: queryRimozioneImmagini }), (req, res) => {
   res.json({ eliminate: eliminaImmaginiAmbito(q.ambito, { eliminaPezzi: q.eliminaPezzi === '1' }) });
 });
 
-router.get('/:ambito/:chiave', validate({ params: paramsImmagine }), (req, res) => {
-  const img = leggiImmagine(String(req.params.ambito), String(req.params.chiave));
-  if (!img) throw httpErrors.notFound('immagine-non-trovata', `Nessuna immagine per ${String(req.params.ambito)}/${String(req.params.chiave)}.`);
-  res.json(img);
-});
-
 router.get('/:ambito/:chiave/file', validate({ params: paramsImmagine, query: queryFileImmagine }), async (req, res) => {
   const { v, l } = req.query as { v?: string; l?: string };
   // la larghezza della miniatura (L1, variante «miniature»): solo le misure ammesse, ogni altro valore è un 400 (un URL inventato

@@ -14,11 +14,6 @@ export const DESCRIZIONI_CATALOGO: DescrizioniArea = {
     descrizione: 'Per ognuno degli otto tipi (negozio, articolo, libro, film, attività, luogo, domanda, cruciverba): righe create dall\'utente, righe della guida corrette, righe nascoste e totale della tabella. È il riepilogo della sezione «Catalogo» delle Impostazioni.',
     risposta: '`RiepilogoCatalogoDto`',
   },
-  'GET /api/catalogo/oggetti-di/:categoria': {
-    sommario: 'Oggetti già noti all\'app di una categoria d\'articolo, da agganciare a un negozio',
-    descrizione: 'Indirizzo storico mantenuto sul contratto del catalogo unico, filtrato per categoria d’articolo. Restituisce identità canoniche con chiave, provenienza e proprietà correnti, senza un DTO o un selettore parallelo. La categoria arma comprende anche le armi da fuoco.',
-    risposta: 'Elenco di `CatalogoOggettoDto`',
-  },
   'GET /api/catalogo/oggetti': {
     sommario: 'Tutti gli oggetti che l\'app conosce, senza filtro di categoria',
     descrizione: 'Indirizzo storico del catalogo unico: identità visibili di ogni categoria, con nomi e proprietà canonici. La selezione e i salvataggi usano la chiave del catalogo.',

@@ -57,12 +57,6 @@ export function elencaPartite(): PartitaDto[] {
   return (prepared('SELECT * FROM partita ORDER BY attiva DESC, updated_at DESC').all() as RigaPartita[]).map(partitaDto);
 }
 
-/** La partita attiva, o null se non ce n'è nessuna. */
-export function partitaAttiva(): PartitaDto | null {
-  const r = prepared('SELECT * FROM partita WHERE attiva = 1').get() as RigaPartita | undefined;
-  return r ? partitaDto(r) : null;
-}
-
 /** Una partita per id (404 se non esiste). */
 export function leggiPartita(id: number): PartitaDto {
   return partitaDto(rigaPartita(id));

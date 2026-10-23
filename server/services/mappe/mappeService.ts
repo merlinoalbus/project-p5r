@@ -51,8 +51,8 @@ import { assegnaAreePalazzi110 } from '../../db/migrations/110_aree_dei_palazzi.
 import { conLegami, impostaLegamiInfiltrazione, infiltrazioniDellaMappa, infiltrazioniDelleMappe } from './legamiInfiltrazioni.js';
 import { senzaGergo } from '../../../shared/nomiMappe.js';
 import { ammetteCondizioni, categoriaSpillo, gruppoConteggioSpillo, sqlVoceDescrittiva, DEFINIZIONI_SPILLO, GRUPPI_CONTEGGIO_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
-import type { AreaPacchetto, LegamePacchetto, CondizioneSpilloDto, ConteggiAlberoDto, ConteggiPinDto, CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, DatiPezzoMappa, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto } from '../../../shared/types.js';
-import { aggiornaCopia, aggiornaPezzo, confermaPezzi, conPezzi, copiaDto, creaCopia, creaPezzo, eliminaCopia, eliminaPezziDellaMappa, eliminaPezzo, pezziDellaMappa, pezziNellImmagine, pezziPerPacchetto, pezzoDto, righeCopie, rigaCopia, rigaPezzo, quanteCopie, quantiPezzi, schemaPezziPacchetto, sostituisciPezzi, type DimensioniMappa, type PezzoDaImportare } from './pezziMappa.js';
+import type { AreaPacchetto, LegamePacchetto, CondizioneSpilloDto, ConteggiAlberoDto, ConteggiPinDto, CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto } from '../../../shared/types.js';
+import { aggiornaCopia, confermaPezzi, conPezzi, copiaDto, creaCopia, creaPezzo, eliminaCopia, eliminaPezziDellaMappa, eliminaPezzo, pezziDellaMappa, pezziNellImmagine, pezziPerPacchetto, pezzoDto, righeCopie, rigaCopia, rigaPezzo, quanteCopie, quantiPezzi, schemaPezziPacchetto, sostituisciPezzi, type DimensioniMappa, type PezzoDaImportare } from './pezziMappa.js';
 
 interface RigaMappa { chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null; larghezza: number | null; altezza: number | null; entita_tipo: string | null; entita_chiave: string | null; origine: 'seed' | 'utente'; note: string; updated_at: string; ruolo_immagine: RuoloImmagine; nome_rivisto?: number;
   /** L'Area della planimetria e la sua versione (109, L2); assenti su uno schema di prima. */
@@ -1300,12 +1300,6 @@ export function creaPezzoMappa(chiave: string, dati: DatiNuovoPezzoMappa): Pezzo
   verificaCondizioni(dati.copia?.condizioni, true);
   const dim = dimensioniDellaMappa(r);
   return pezzoPerEditor(getDb().transaction(() => creaPezzo(r.chiave, dim, dati).id)());
-}
-
-/** Corregge un ritaglio (404 se non c'è): nome, zona, ordine; i campi assenti restano. */
-export function aggiornaPezzoMappa(id: number, dati: DatiPezzoMappa): PezzoMappaDto {
-  const p = rigaPezzo(id);
-  return pezzoPerEditor(aggiornaPezzo(id, dimensioniDellaMappa(rigaMappa(p.mappa_chiave)), dati).id);
 }
 
 /** Elimina un pezzo con tutte le sue copie (404 se non c'è): la sua zona torna visibile nell'immagine di base. */

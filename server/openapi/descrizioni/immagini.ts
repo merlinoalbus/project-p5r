@@ -26,12 +26,6 @@ export const DESCRIZIONI_IMMAGINI: DescrizioniArea = {
     risposta: '`{ eliminate }`: il numero di immagini rimosse',
     errori: [[409, 'mappa-con-pezzi']],
   },
-  'GET /api/immagini/:ambito/:chiave': {
-    sommario: 'I metadati di un\'immagine',
-    descrizione: 'Vale per ogni ambito, anche per quelli della grafica predefinita. Per l\'ambito `mappa` la chiave si riconduce all\'identità della mappa (alias e chiavi native portano alla stessa immagine). 404 se per (ambito, chiave) non c\'è nessuna riga.',
-    risposta: '`ImmagineDto`',
-    errori: [[404, 'immagine-non-trovata']],
-  },
   'GET /api/immagini/:ambito/:chiave/file': {
     sommario: 'Il file di un\'immagine, letto dal database',
     descrizione: 'Manda il contenuto con il suo tipo MIME (PNG, JPEG, WEBP, GIF o SVG) e un `ETag` stabile finché la riga non cambia; con `If-None-Match` uguale risponde 304 senza corpo. Con un parametro `v` non vuoto (URL versionato del manifesto) la risposta è `private, max-age=31536000, immutable`; senza, `private, no-cache`, così una sostituzione si vede subito. Per l\'ambito `mappa` la chiave si riconduce all\'identità della mappa. 404 se la riga manca o se è registrata senza contenuto. Con `l` (L1, miniature) la risposta è una miniatura WebP larga al più `l` pixel (160, 320, 640 o 1024; ogni altro valore è 400 `larghezza-non-ammessa`), proporzioni mantenute e alfa conservato, generata la prima volta e poi tenuta nel database legata alla versione dell\'immagine (`shared/miniature.ts` per gli URL e lo `srcset`). Si risponde con l\'originale per SVG e GIF, quando l\'immagine non è più larga di `l` e quando il generatore non c\'è o fallisce. Le regole di cache sono le stesse, l\'`ETag` porta anche la larghezza (`-l<l>`), e l\'intestazione `X-Miniatura` dice `generata`, `cache` o `originale`.',

@@ -23,7 +23,8 @@ describe('API', () => {
   afterAll(() => closeDb());
 
   // ---- Compendio ----
-  it('GET /api/compendio/arcani → 24 arcani con nome italiano', async () => {
+  // Saltato (L11 B7): chiama una rotta tolta per decisione dell'utente (inventario delle superfici, 23/10); non va eseguito né cancellato.C
+  it.skip('GET /api/compendio/arcani → 24 arcani con nome italiano', async () => {
     const res = await request(app).get('/api/compendio/arcani');
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveLength(24);
@@ -128,7 +129,8 @@ describe('API', () => {
   });
 
   // ---- Traduzioni ----
-  it('traduzioni: elenco, modifica utente e ripristino dal seed', async () => {
+  // Saltato (L11 B7): chiama una rotta tolta per decisione dell'utente (inventario delle superfici, 23/10); non va eseguito né cancellato.C
+  it.skip('traduzioni: elenco, modifica utente e ripristino dal seed', async () => {
     const ambiti = await request(app).get('/api/traduzioni/ambiti');
     expect(ambiti.body.data.find((a: { ambito: string }) => a.ambito === 'effettoSkill').voci).toBe(512);
     const mod = await request(app).put('/api/traduzioni/arcana/Fool').send({ testo: 'Il Folle' });
@@ -152,7 +154,8 @@ describe('API', () => {
   });
 
   // ---- Partite ----
-  it('partite: creazione, attiva unica, doti, confidenti, compendio, possedute, eliminazione', async () => {
+  // Saltato (L11 B7): chiama una rotta tolta per decisione dell'utente (inventario delle superfici, 23/10); non va eseguito né cancellato.C
+  it.skip('partite: creazione, attiva unica, doti, confidenti, compendio, possedute, eliminazione', async () => {
     const p1 = await request(app).post('/api/partite').send({ nome: 'Prima partita' });
     expect(p1.status).toBe(201);
     expect(p1.body.data.attiva).toBe(true);

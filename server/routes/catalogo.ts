@@ -11,7 +11,6 @@ import { eliminaNelCestino } from '../services/luoghiScritture.js';
 /** La conferma di un'eliminazione con contenuti (L5, luoghi e negozi). */
 const queryConferma = z.object({ conferma: z.enum(['0', '1']).optional() });
 import { elencaCatalogoOggetti } from '../services/catalogoOggettiLetture.js';
-import { categoriaDelListino } from '../../shared/catalogo.js';
 import { SCHEMI_CATALOGO, SCHEMI_CATALOGO_PARZIALI, bodyNascondi, paramsElementoCatalogo, paramsTipoCatalogo, queryNascosti } from '../schemas/catalogo.js';
 import { httpErrors } from '../utils/httpError.js';
 import type { TipoCatalogo } from '../../shared/types.js';
@@ -35,16 +34,6 @@ function corpoPerTipo(tipo: TipoCatalogo, corpo: unknown, parziale: boolean): Re
 /** Quante righe l'utente ha aggiunto, corretto o nascosto, per tipo. */
 router.get('/', (_req, res) => {
   res.json(riepilogoCatalogo());
-});
-
-/** Quello che l'app già sa di una categoria, pronto da agganciare a un negozio invece di riscriverlo.
- *
- * **Sta prima di `/:tipo`, e non è un dettaglio di stile**: `/:tipo` accetta qualunque parola,
- * quindi registrata dopo questa rotta non verrebbe mai raggiunta — `oggetti-di` finirebbe dentro
- * `tipo` e la validazione risponderebbe «tipo di catalogo sconosciuto». */
-router.get('/oggetti-di/:categoria', validate({ params: z.object({ categoria: z.string().min(1).max(80) }) }), (req, res) => {
-  const categoria = String(req.params.categoria);
-  res.json(elencaCatalogoOggetti().filter((o) => o.categoria === categoria || categoriaDelListino(o.categoria, o.sottocategoria) === categoria));
 });
 
 /** **Tutto** quello che l'app conosce, senza filtro di categoria.

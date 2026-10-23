@@ -27,7 +27,8 @@ const app = createApp();
 const per = async (categoria: string) =>
   (await request(app).get(`/api/catalogo/oggetti-di/${categoria}`)).body.data as Array<Record<string, unknown>>;
 
-describe('API oggetti selezionabili', () => {
+  // Saltato (L11 B7): chiama una rotta tolta per decisione dell'utente (inventario delle superfici, 23/10); non va eseguito né cancellato.C
+describe.skip('API oggetti selezionabili', () => {
   beforeAll(() => { dbDiProva(); });
   afterAll(() => closeDb());
 

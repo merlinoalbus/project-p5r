@@ -41,11 +41,6 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     risposta: '`StatoEffettiVoceDto` dopo la decisione', errori: [[409,'proposta-cambiata'],[409,'operazione-diversa']],
   },
   // ---- Compendio: arcani, glossario, regole di fusione ----
-  'GET /api/compendio/arcani': {
-    sommario: 'Elenco degli arcani nell\'ordine di gioco',
-    descrizione: 'Gli arcani della tabella `arcana` ordinati per `ordine`, ciascuno con il numero (null dove il gioco non lo assegna) e il nome italiano preso dalle traduzioni.',
-    risposta: 'Elenco di `ArcanaDto`',
-  },
   'GET /api/compendio/glossario': {
     sommario: 'Glossario dei codici del compendio con la resa italiana',
     descrizione: 'Serve al frontend per tradurre i codici: arcani, elementi delle skill, elementi e sigle delle affinità, affinità, tipi di eredità, statistiche con sigla, tipi e vincoli degli oggetti, aree di Mementos e Doti sociali nell\'ordine di gioco. La sigla vuota indica che la traduzione non ne ha una.',

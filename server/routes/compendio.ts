@@ -47,7 +47,7 @@ import type { DoteNote } from '../../shared/effettiAzione.js';
 import { categoriaArticolo, dataGioco, idParam } from '../schemas/comuni.js';
 import { eCategoriaArticolo } from '../../shared/articoli.js';
 import {
-  dettaglioPersona, dettaglioSkill, elencaArcani, dettaglioConfidente, impostaDotiIncontro, elencaConfidenti, elencaOggetti, elencaPersona, elencaSkill, glossario, oggettiGuida, regoleFusione, terminiGlossario,
+  dettaglioPersona, dettaglioSkill, dettaglioConfidente, impostaDotiIncontro, elencaConfidenti, elencaOggetti, elencaPersona, elencaSkill, glossario, oggettiGuida, regoleFusione, terminiGlossario,
 } from '../services/compendioService.js';
 
 const queryDomande = z.object({ partita: idParam.optional() });
@@ -82,10 +82,6 @@ router.post('/percorso/effetti/proposte/:id/anteprima', validate({ params: param
 });
 router.post('/percorso/effetti/proposte/:id/decisione', validate({ params: paramsPropostaEffetto, body: bodyDecisioneEffettoVoce }), (req, res) => {
   res.json(decidiPropostaEffettoVoce(String(req.params.id), req.body));
-});
-
-router.get('/arcani', (_req, res) => {
-  res.json(elencaArcani());
 });
 
 router.get('/glossario', (_req, res) => {

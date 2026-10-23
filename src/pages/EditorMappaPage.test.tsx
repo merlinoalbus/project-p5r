@@ -22,7 +22,7 @@ aggiungiImmagineSpillo: vi.fn(), aggiornaImmagineSpillo: vi.fn(), eliminaImmagin
   // le voci della guida di un pin (098): quelle collegabili e il collegamento (lo stesso della guida)
   getVociCollegabili: vi.fn(), collegaPinAlPunto: vi.fn(),
   // i pezzi della planimetria (102) e le loro copie (103)
-  creaPezzoMappa: vi.fn(), aggiornaPezzoMappa: vi.fn(), eliminaPezzoMappa: vi.fn(), creaCopiaPezzoMappa: vi.fn(), aggiornaCopiaPezzoMappa: vi.fn(), eliminaCopiaPezzoMappa: vi.fn(),
+  creaPezzoMappa: vi.fn(), eliminaPezzoMappa: vi.fn(), creaCopiaPezzoMappa: vi.fn(), aggiornaCopiaPezzoMappa: vi.fn(), eliminaCopiaPezzoMappa: vi.fn(),
 }));
 vi.mock('../services/api', (vero) => moduloApi(vero, {
   ...api,
@@ -619,7 +619,6 @@ describe('EditorMappaPage', () => {
     expect(form.getByRole('button', { name: /Aggiungi copia/ })).toBeDisabled();
     fireEvent.click(form.getByRole('button', { name: 'Salva copia' }));
     await waitFor(() => expect(api.aggiornaCopiaPezzoMappa).toHaveBeenCalledWith(41, { etichetta: 'Ingresso', posizione: { x: 311, y: 199 }, rotazione: 90, specchio: { orizzontale: true, verticale: false }, condizioni: [], nomePezzo: 'Muro del ponte' }));
-    expect(api.aggiornaPezzoMappa).not.toHaveBeenCalled();
     // a 90° l'ingombro è 40 × 120: la X non va oltre 1000 − 40, la Y oltre 500 − 120
     fireEvent.change(form.getByRole('spinbutton', { name: 'X' }), { target: { value: '5000' } });
     expect(form.getByRole('spinbutton', { name: 'X' })).toHaveAttribute('max', '960');
@@ -720,7 +719,6 @@ describe('EditorMappaPage', () => {
     expect(document.querySelector<HTMLElement>(`[data-copia="${'5'.repeat(32)}"]`)!.style.left).toBe('700px');
     fireEvent.pointerUp(tela, { pointerId: 1, clientX: 30, clientY: 5 });
     await waitFor(() => expect(api.aggiornaCopiaPezzoMappa).toHaveBeenCalledWith(41, { posizione: { x: 320, y: 195 } }));
-    expect(api.aggiornaPezzoMappa).not.toHaveBeenCalled();
   });
 
   it('sostituire l\'immagine di una mappa con dei pezzi chiede conferma (409): confermando si ricarica con «eliminaPezzi»', async () => {

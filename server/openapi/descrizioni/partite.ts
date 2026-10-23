@@ -66,21 +66,10 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
     descrizione: 'Tutte le partite salvate: prima quella attiva, poi le altre dalla modificata più di recente. Ogni partita porta anche il meteo del momento (`meteoOra`), calcolato sul giorno e sulla fascia correnti.',
     risposta: 'Elenco di `PartitaDto`',
   },
-  'GET /api/partite/attiva': {
-    sommario: 'La partita attiva',
-    descrizione: 'La partita segnata come attiva, quella su cui lavora l\'app. Non averne nessuna non è un errore: la risposta è `null`.',
-    risposta: '`PartitaDto` della partita attiva, oppure `null`',
-  },
   'POST /api/partite': {
     sommario: 'Crea una partita',
     descrizione: 'Crea la partita in una transazione. Diventa l\'attiva (togliendo il segno alle altre) se è la prima o se il corpo chiede `attiva: true`. I campi assenti prendono i valori predefiniti: protagonista al livello 1, giorno corrente il primo del percorso della guida, fascia «giorno», difficoltà normale, nessun DLC. Nascono anche le righe delle Doti sociali a zero e dei Confidenti non sbloccati, e l\'evento `partita-creata` nello storico.',
     risposta: '`PartitaDto` della partita creata',
-  },
-  'GET /api/partite/:id': {
-    sommario: 'Una partita',
-    descrizione: 'La partita indicata, con il meteo del momento (`meteoOra`).',
-    risposta: '`PartitaDto`',
-    errori: [PARTITA],
   },
   'PUT /api/partite/:id': {
     sommario: 'Aggiorna i dati di una partita',

@@ -19,8 +19,8 @@ import { validate } from '../middleware/validate.js';
 import { scaricaPiantaQuartiere } from '../services/cittaService.js';
 import express from 'express';
 import { MAX_BYTE_IMMAGINE } from '../services/immaginiService.js';
-import { aggiornaCopiaPezzoMappa, aggiornaImmagineSpillo, aggiornaMappa, aggiornaPezzoMappa, creaCopiaPezzoMappa, creaPezzoMappa, eliminaCopiaPezzoMappa, eliminaPezzoMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, conteggiAlbero, creaMappa, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaAreeMappa, impostaImmagineMappa, impostaStanzaMappa, mappaPerEntita, aggiornaPresentazioneMappa, riordinaMappe, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
-import { bodyAggiornaCopiaPezzo, bodyAggiornaMappa, bodyAggiornaPezzo, bodyCreaCopiaPezzo, bodyAggiornaSpillo, bodyCreaPezzo, bodyAreeMappa, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, bodyPresentazioneMappa, bodyRiordinaMappe, bodyStanzaMappa, paramsCopiaPezzo, paramsMappa, paramsPezzo, paramsSpillo, queryDidascalia, queryEsporta, queryGerarchia, queryGuidaMappa, queryImmagineMappa, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
+import { aggiornaCopiaPezzoMappa, aggiornaImmagineSpillo, aggiornaMappa, creaCopiaPezzoMappa, creaPezzoMappa, eliminaCopiaPezzoMappa, eliminaPezzoMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, conteggiAlbero, creaMappa, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaAreeMappa, impostaImmagineMappa, impostaStanzaMappa, aggiornaPresentazioneMappa, riordinaMappe, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
+import { bodyAggiornaCopiaPezzo, bodyAggiornaMappa, bodyCreaCopiaPezzo, bodyAggiornaSpillo, bodyCreaPezzo, bodyAreeMappa, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, bodyPresentazioneMappa, bodyRiordinaMappe, bodyStanzaMappa, paramsCopiaPezzo, paramsMappa, paramsPezzo, paramsSpillo, queryDidascalia, queryEsporta, queryGerarchia, queryGuidaMappa, queryImmagineMappa, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
 import { guidaDellaPlanimetria } from '../services/dungeonService.js';
 import { gerarchiaMappe } from '../services/mappe/gerarchiaMappe.js';
 import { httpErrors } from '../utils/httpError.js';
@@ -84,13 +84,6 @@ router.post('/importa', validate({ body: bodyImporta }), (req, res) => {
 router.get('/riferimenti', validate({ query: queryRiferimenti }), (req, res) => {
   const q = req.query as unknown as { tipo: Parameters<typeof cercaRiferimenti>[0]; q: string; limite?: number };
   res.json(cercaRiferimenti(q.tipo, q.q ?? '', q.limite));
-});
-
-/** Mappa collegata a un'entità della guida (quartiere, area, dungeon). */
-router.get('/entita/:tipo/:chiave', validate({ params: z.object({ tipo: z.string().min(1).max(40), chiave: z.string().min(1).max(200) }) }), (req, res) => {
-  const m = mappaPerEntita(String(req.params.tipo), String(req.params.chiave));
-  if (!m) throw httpErrors.notFound('mappa-non-trovata', 'Nessuna mappa collegata a questa entità.');
-  res.json(m);
 });
 
 /** Ordine logico delle planimetrie di un Palazzo (o dei figli di una qualsiasi mappa): l'elenco è l'ordine. */
@@ -179,9 +172,6 @@ router.delete('/spilli/:id', validate({ params: paramsSpillo, body: bodyRimozion
  *  più copie (103). Il pezzo nasce con la sua prima copia; eliminata l'ultima copia se ne va anche il pezzo. */
 router.post('/:chiave/pezzi', validate({ params: paramsMappa, body: bodyCreaPezzo }), (req, res) => {
   res.status(201).json(creaPezzoMappa(String(req.params.chiave), req.body as Parameters<typeof creaPezzoMappa>[1]));
-});
-router.put('/pezzi/:id', validate({ params: paramsPezzo, body: bodyAggiornaPezzo }), (req, res) => {
-  res.json(aggiornaPezzoMappa(Number(req.params.id), req.body as Parameters<typeof aggiornaPezzoMappa>[1]));
 });
 router.delete('/pezzi/:id', validate({ params: paramsPezzo }), (req, res) => {
   eliminaPezzoMappa(Number(req.params.id));

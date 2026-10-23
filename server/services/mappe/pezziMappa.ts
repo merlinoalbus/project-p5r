@@ -21,7 +21,7 @@ import { getDb, nowIso, prepared } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { condizioneConTesto, leggiCondizioniSalvate, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilitaService.js';
-import type { CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, DatiPezzoMappa, PezzoMappaDto, PezzoPacchetto, RotazionePezzo } from '../../../shared/types.js';
+import type { CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, PezzoMappaDto, PezzoPacchetto, RotazionePezzo } from '../../../shared/types.js';
 import { ingombroPezzo } from '../../../shared/pezziMappa.js';
 
 /** Il ritaglio (102, senza la posa dalla 103). */
@@ -256,26 +256,6 @@ export function creaPezzo(mappa: string, dim: DimensioniMappa, dati: DatiNuovoPe
   inserisciCopia(pezzo, copia, adesso);
   toccaMappa(mappa, adesso);
   return pezzo;
-}
-
-/**
- * Corregge un ritaglio: i campi assenti restano; un nome vuoto lascia quello di prima. Cambiando la zona si riverifica sull'immagine
- * anche l'ingombro di ogni copia (la dimensione è quella della zona).
- */
-export function aggiornaPezzo(id: number, dim: DimensioniMappa, dati: DatiPezzoMappa): RigaPezzo {
-  const r = rigaPezzo(id);
-  const sorgente = dati.sorgente ?? { x: r.sorgente_x, y: r.sorgente_y, larghezza: r.larghezza, altezza: r.altezza };
-  if (dati.sorgente) {
-    verificaZona(sorgente, dim);
-    righeCopie(id).forEach((c, i) => verificaPosa(sorgente, { posizione: { x: c.x, y: c.y }, rotazione: c.rotazione }, dim, `La copia ${i + 1} del pezzo`));
-  }
-  const adesso = nowIso();
-  getDb().transaction(() => {
-    prepared('UPDATE pezzo_mappa SET nome = ?, sorgente_x = ?, sorgente_y = ?, larghezza = ?, altezza = ?, ordine = ?, updated_at = ? WHERE id = ?')
-      .run(dati.nome?.trim() || r.nome, sorgente.x, sorgente.y, sorgente.larghezza, sorgente.altezza, dati.ordine ?? r.ordine, adesso, id);
-    toccaMappa(r.mappa_chiave, adesso);
-  })();
-  return rigaPezzo(id);
 }
 
 /** Elimina un ritaglio con tutte le sue copie (404 se non c'è): la sua zona torna visibile nell'immagine di base. */

@@ -2,7 +2,7 @@
 // API mappe a livelli e spilli (Fase 13): albero, dettaglio con stato della partita, editor, esportazione/importazione
 // ============================================================
 
-import type { ConteggiAlberoDto, CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, DatiPezzoMappa, DestinazioneSpillo, EsportazioneMappeDto, GerarchiaMappeDto, GuidaDellaPlanimetriaDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto, VoceCollegabileDto } from '../../types';
+import type { ConteggiAlberoDto, CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, DestinazioneSpillo, EsportazioneMappeDto, GerarchiaMappeDto, GuidaDellaPlanimetriaDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto, VoceCollegabileDto } from '../../types';
 import type { RequisitoSpillo } from '../../../shared/condizioniSpillo';
 import type { TipoMappa, TipoRiferimento, TipoSpillo } from '../../../shared/spilli';
 import type { PrecondizioneRimozionePinDto, RichiestaRimozionePin } from '../../../shared/rimozionePin';
@@ -57,8 +57,6 @@ export const caricaImmagineMappa = (chiave: string, file: File, opz: { eliminaPe
 
 /** Ritaglia un pezzo dalla zona scelta (102), in pixel dell'immagine, con la sua prima copia (103): senza posizione resta dove stava. */
 export const creaPezzoMappa = (mappa: string, dati: DatiNuovoPezzoMappa): Promise<PezzoMappaDto> => apiPost(`/mappe/${encodeURIComponent(mappa)}/pezzi`, dati);
-/** Corregge il ritaglio di un pezzo (nome, zona, ordine): i campi assenti restano. */
-export const aggiornaPezzoMappa = (id: number, dati: DatiPezzoMappa): Promise<PezzoMappaDto> => apiPut(`/mappe/pezzi/${id}`, dati);
 /** Elimina un pezzo con tutte le sue copie: la sua zona torna visibile nell'immagine di base. */
 export const eliminaPezzoMappa = (id: number): Promise<void> => apiDelete(`/mappe/pezzi/${id}`);
 /** Aggiunge una copia di un pezzo (103): un'altra posa dello stesso ritaglio, con posizione, rotazione, specchio e condizioni proprie. */

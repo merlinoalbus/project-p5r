@@ -54,7 +54,8 @@ describe('pezzi delle planimetrie', () => {
   });
   afterAll(() => closeDb());
 
-  it('crea un pezzo dalla zona scelta con la sua prima copia: senza posizione sta dove stava, senza nome «Pezzo N»; la copia si sposta, si ruota, si specchia; il pezzo si rinomina', async () => {
+  // Saltato (L11 B7): chiama una rotta tolta per decisione dell'utente (inventario delle superfici, 23/10); non va eseguito né cancellato.C
+  it.skip('crea un pezzo dalla zona scelta con la sua prima copia: senza posizione sta dove stava, senza nome «Pezzo N»; la copia si sposta, si ruota, si specchia; il pezzo si rinomina', async () => {
     const r = await crea({ sorgente: { x: 100, y: 900, larghezza: 120, altezza: 40 } });
     expect(r.status, JSON.stringify(r.body)).toBe(201);
     const p = r.body.data as PezzoMappaDto;
@@ -82,7 +83,8 @@ describe('pezzi delle planimetrie', () => {
     expect((await scheda()).pezzi.map((x) => x.nome)).toEqual(['Muro della sala', 'Pezzo 2']);
   });
 
-  it('un pezzo si posa in più copie: ognuna con posizione, rotazione, specchio ed etichetta propri; la zona resta una', async () => {
+  // Saltato (L11 B7): chiama una rotta tolta per decisione dell'utente (inventario delle superfici, 23/10); non va eseguito né cancellato.C
+  it.skip('un pezzo si posa in più copie: ognuna con posizione, rotazione, specchio ed etichetta propri; la zona resta una', async () => {
     const muro = (await scheda()).pezzi.find((p) => p.nome === 'Muro della sala')!;
     // senza posizione la copia sta sulla zona d'origine, e va in fondo alle copie
     const c2 = await aggiungiCopia(muro.id, {});
@@ -116,7 +118,8 @@ describe('pezzi delle planimetrie', () => {
     expect((await aggiungiCopia(muro.id, { etichetta: 'x'.repeat(500) })).status).toBe(400);
   });
 
-  it('zona e ingombro di ogni copia devono stare nell\'immagine (2048×1024), anche ruotati; le forme sbagliate si rifiutano', async () => {
+  // Saltato (L11 B7): chiama una rotta tolta per decisione dell'utente (inventario delle superfici, 23/10); non va eseguito né cancellato.C
+  it.skip('zona e ingombro di ogni copia devono stare nell\'immagine (2048×1024), anche ruotati; le forme sbagliate si rifiutano', async () => {
     expect(await codice(crea({ sorgente: { x: 2000, y: 0, larghezza: 49, altezza: 10 } }))).toEqual([400, 'pezzo-fuori-immagine']);
     expect(await codice(crea({ sorgente: { x: 0, y: 1000, larghezza: 10, altezza: 25 } }))).toEqual([400, 'pezzo-fuori-immagine']);
     // la zona esce anche quando la copia è posata dentro

@@ -65,12 +65,6 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
     descrizione: 'Cerca nel nome o nella chiave (senza distinzione di maiuscole) le entità del tipo indicato: mappe, negozi, punti della guida, luoghi, Confidenti, richieste, attività (fra i luoghi di tipo attività, servizio o scuola). Per le mappe ogni parola deve comparire nel nome con il percorso o nella chiave, accenti esclusi. Per un luogo (L5) `dettaglio` è il posto, «Quartiere › Area» (il solo quartiere se è da collocare). Al più `limite` risultati (30 se non indicato).',
     risposta: 'Elenco di `{ tipo, chiave, nome, dettaglio }`',
   },
-  'GET /api/mappe/entita/:tipo/:chiave': {
-    sommario: 'La mappa collegata a un\'entità della guida (quartiere, area, Palazzo…)',
-    descrizione: 'Cerca la mappa che ha l\'entità come propria o fra le entità legate. Risponde solo se la mappa è esattamente una: nessuna o più d\'una sono un 404.',
-    risposta: '`MappaRiassuntoDto`',
-    errori: [[404, 'mappa-non-trovata']],
-  },
   'PUT /api/mappe/ordine': {
     sommario: 'Riscrive l\'ordine delle mappe elencate (riordino per trascinamento)',
     descrizione: 'L\'elenco è il nuovo ordine. Le chiavi si raggruppano per il loro genitore effettivo e ogni gruppo di sorelle si rinumera da 0, con le elencate in testa e le altre in coda nell\'ordine che avevano, in una transazione. Con `genitore` le chiavi devono stare nel suo sottoalbero (lui escluso); `genitore: null` ammette qualunque mappa.',
@@ -167,12 +161,6 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
     descrizione: 'I pezzi (migrazione 102, 2026-10-14) sono zone rettangolari dell\'immagine scelte nell\'editor: la zona (`sorgente`, in pixel dell\'immagine) è sempre cancellata dall\'immagine di base. Dalla 103 (2026-10-15) il pezzo è il ritaglio e si posa in una o più copie: questa rotta crea il ritaglio con la prima copia (`copia`, facoltativa), della stessa dimensione della zona, posata in `posizione` (angolo in alto a sinistra dell\'ingombro; senza, dove stava la zona), specchiata (`specchio`, prima) e ruotata (`rotazione` 0/90/180/270 in senso orario, poi), con un\'`etichetta` facoltativa. Le condizioni della copia sono quelle dei pin (anche lo stato di un altro pin o di una voce della guida): con la partita la copia si vede quando valgono. Zona e ingombro devono stare nell\'immagine, le cui dimensioni sono quelle salvate o lette dall\'immagine mostrata. Senza nome il pezzo si chiama «Pezzo N»; nasce in fondo ai pezzi della mappa.',
     risposta: 'Il pezzo creato: `PezzoMappaDto` con `copie` (senza esito delle condizioni)',
     errori: [[404, 'mappa-non-trovata'], [409, 'mappa-senza-immagine'], [400, 'pezzo-fuori-immagine'], [400, 'condizione-non-valida'], [404, 'condizione-non-trovata']],
-  },
-  'PUT /api/mappe/pezzi/:id': {
-    sommario: 'Corregge il ritaglio di un pezzo della planimetria',
-    descrizione: 'Si cambiano solo i campi inviati (nome vuoto = invariato): nome, zona (`sorgente`), ordine fra i pezzi della mappa. Cambiando la zona si riverificano sull\'immagine la zona e l\'ingombro di ogni copia. Posizione, rotazione, specchio, etichetta e condizioni sono delle copie (`PUT /api/mappe/pezzi/copie/:id`).',
-    risposta: 'Il pezzo aggiornato: `PezzoMappaDto` con `copie` (senza esito delle condizioni)',
-    errori: [[404, 'pezzo-non-trovato'], [409, 'mappa-senza-immagine'], [400, 'pezzo-fuori-immagine']],
   },
   'DELETE /api/mappe/pezzi/:id': {
     sommario: 'Elimina un pezzo della planimetria con tutte le sue copie',

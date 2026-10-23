@@ -50,7 +50,7 @@ import { eliminaEventi, eliminaEvento, storico } from '../services/storicoServic
 import type { TipoEvento } from '../../shared/eventi.js';
 import {
   aggiornaCompendio, aggiornaDote, aggiornaPartita, aggiornaPosseduta, aggiungiPosseduta, attivaPartita, compendioPartita, registraPossedutaNelCompendio,
-  confidente, confidenti, creaPartita, dotiSociali, elencaPartite, eliminaPartita, impostaRegaloFatto, leggiPartita, partitaAttiva, personePossedute, rimuoviPosseduta,
+  confidente, confidenti, creaPartita, dotiSociali, elencaPartite, eliminaPartita, impostaRegaloFatto, leggiPartita, personePossedute, rimuoviPosseduta,
 } from '../services/partiteService.js';
 
 const router = Router();
@@ -106,14 +106,8 @@ router.post('/:id/da-applicare/decisioni', validate({ params: paramsPartita, bod
 router.get('/', (_req, res) => {
   res.json(elencaPartite());
 });
-router.get('/attiva', (_req, res) => {
-  res.json(partitaAttiva());
-});
 router.post('/', validate({ body: bodyCreaPartita }), (req, res) => {
   res.status(201).json(creaPartita(req.body));
-});
-router.get('/:id', validate({ params: paramsPartita }), (req, res) => {
-  res.json(leggiPartita(Number(req.params.id)));
 });
 router.put('/:id', validate({ params: paramsPartita, body: bodyAggiornaPartita }), (req, res) => {
   res.json(aggiornaPartita(Number(req.params.id), req.body));

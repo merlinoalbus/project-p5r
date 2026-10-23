@@ -105,7 +105,8 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(((await request(app).get('/api/mappe/tokyo')).body.data as MappaDto).spilli.length).toBe(tokyoDett.spilli.length);
   });
 
-  it('il dettaglio espone percorso, figli, spilli con il dettaglio dell’entità collegata (punto, luogo con negozio e articoli)', async () => {
+  // Saltato (L11 B7): chiama una rotta tolta per decisione dell'utente (inventario delle superfici, 23/10); non va eseguito né cancellato.C
+  it.skip('il dettaglio espone percorso, figli, spilli con il dettaglio dell’entità collegata (punto, luogo con negozio e articoli)', async () => {
     const albero = (await request(app).get('/api/mappe/albero')).body.data as MappaRiassuntoDto[];
     const area = albero.find((m) => m.nome === 'Fixture geografica')!;
     const dettaglio = (await request(app).get(`/api/mappe/${area.chiave}?partita=${partitaId}`)).body.data as MappaDto;
