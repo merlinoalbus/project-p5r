@@ -2338,6 +2338,8 @@ export interface AreaDungeonDto {
   ordine: number;
   nome: string;
   descrizione: string;
+  /** L8 (B7): per il dedalo in cui è confluito un Palazzo (Iweleth), le sue planimetrie come archivio in sola lettura. Assente per gli altri dedali (la loro risposta non cambia). */
+  archivio?: ArchivioDelPalazzoDto;
   // `mappa: boolean` (un'immagine caricata con la chiave dell'infiltrazione, la vecchia «pianta pubblicata dalla guida», tolta il
   // 2026-09-18) è uscito col lotto L1 (2026-10-20): nessuna vista lo leggeva più, e l'immagine di un posto è quella delle sue
   // planimetrie, dal risolutore unico (`immagineMappa.ts`).
@@ -2528,7 +2530,22 @@ export interface PiantaAreaDto {
   alternative: Array<{ url: string; pagina: string | null; fonte: string }>;
 }
 
+/**
+ * L8 (B7, R8-16): l'archivio del «Palazzo» di Iweleth dentro il suo dedalo. Le planimetrie del Palazzo si consultano da qui, in sola lettura, per
+ * l'area del dedalo a cui appartengono (`mappa_dedalo`); quelle senza un'area certa (Corridoi IV e V) stanno in fondo, dichiarate.
+ */
+export interface ArchivioDelPalazzoDto {
+  /** Il dungeon che confluisce (la riga tecnica `iweleth`) e il suo nome. */
+  dungeon: string;
+  nome: string;
+  planimetrie: Array<{ chiave: string; nome: string; areaDedalo: string | null; areaNome: string | null; nota: string }>;
+  /** Quante voci del Palazzo sono diventate Trama del dedalo e quante Persona doppie puntano alla voce del dedalo (nessuna si perde). */
+  voci: { convertite: number; doppie: number };
+}
+
 export interface DungeonDettaglioDto extends Omit<DungeonRiassuntoDto, 'aree'> {
+  /** L8 (B7): questa scheda è l'archivio di un dedalo dei Memento (Iweleth): la pagina porta al dedalo. */
+  confluisceIn?: { dungeon: string; dedalo: string; nome: string };
   note: string;
   fonti: string[];
   aree: AreaDungeonDto[];

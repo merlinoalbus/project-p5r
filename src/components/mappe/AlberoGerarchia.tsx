@@ -116,7 +116,7 @@ function Segni({ nodo }: { nodo: NodoGerarchiaDto }) {
   return <>
     {nodo.daVerificare && <span className="chip chip--attivo text-[11px]" title="Nessuna fonte colloca questa area: decidi se tenerla o rimuoverla">Da verificare</span>}
     {nodo.disponibile === false && <span className="chip text-[11px]" title={nodo.bloccoMotivo ?? undefined}>Non ancora aperto</span>}
-    {nodo.dedalo && <span className="chip text-[11px]" title={`${nodo.nome} si comporta da dedalo: sta fra i Palazzi finché non ha il suo ramo fra i Memento`}>Dedalo</span>}
+    {nodo.dedalo && <span className="chip text-[11px]" title={`${nodo.nome} è un dedalo dei Memento: qui restano le sue planimetrie come archivio, le aree e le voci stanno nel dedalo`}>Dedalo</span>}
   </>;
 }
 

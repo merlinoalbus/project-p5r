@@ -142,8 +142,8 @@ export const RADICI_TOKYO: Record<string, Collocazione> = {
   'dungeon-niijima': { x: 74, y: 5, scala: 4.2 },
   'dungeon-shido': { x: 84, y: 5, scala: 4.2 },
   'dungeon-maruki': { x: 93, y: 5, scala: 4.2 },
-  'dungeon-iweleth': { x: 93, y: 17, scala: 4.2 },
-  // i Memento, che col Meta-Nav si aprono da ovunque: accanto a Iweleth, nello stesso gruppo
+  // (Iweleth non ha più un posto suo: dal lotto L8 è un dedalo dei Memento, `radiciMetaverso` non lo propone come radice)
+  // i Memento, che col Meta-Nav si aprono da ovunque: sul bordo, sotto i cinque Palazzi del Meta-Nav
   'dungeon-mementos': { x: 82.5, y: 17, scala: 4.2 },
 };
 

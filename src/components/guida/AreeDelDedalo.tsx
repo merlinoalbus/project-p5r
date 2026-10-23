@@ -35,6 +35,7 @@ import { SpuntaCompletata, TestoCompletata } from './SpuntaCompletata';
 import { ModuloRichiesta } from './ModuloRichiesta';
 import { ModuloPersona } from './ModuloPersona';
 import { PersoneDellArea } from './PersoneDellArea';
+import { ArchivioDelPalazzo } from './ArchivioDelPalazzo';
 import { TimbriDellArea } from './TimbriDellArea';
 import { ElencoRichieste, DA_COLLOCARE } from './ElencoRichieste';
 import { TramaDellArea } from './TramaDellArea';
@@ -241,6 +242,9 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, onApriPozzo, par
           </div>
         </div>
       )}
+
+      {/* L8 (B7): il Palazzo confluito in questo dedalo (Iweleth): le sue planimetrie come archivio in sola lettura */}
+      {dedalo.archivio && <ArchivioDelPalazzo archivio={dedalo.archivio} />}
 
       {/* ---- Gli attrezzi del dedalo, in «Modifica la guida» ---- */}
       {!modifica && daCollocare.length > 0 && <p className="m-0 text-[11px] text-text-muted">{daCollocare.length === 1 ? '1 Richiesta del dedalo non sta' : `${daCollocare.length} Richieste del dedalo non stanno`} in nessuna area e non {daCollocare.length === 1 ? 'conta' : 'contano'}: si colloca in «Modifica la guida».</p>}

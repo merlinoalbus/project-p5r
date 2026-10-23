@@ -53,7 +53,8 @@ function opzioniPer(tipo: TipoCampo, e: Elenchi): OpzioneRicerca[] {
     case 'luogo': return e.extra.luoghi ?? [];
     case 'invito': return e.extra.inviti ?? [];
     case 'arco': return ARCHI_STORIA.map((d) => ({ chiave: d, nome: nomePalazzo(d) }));
-    case 'palazzo': { const p = e.base.dungeon.filter((d) => d.tipo === 'palazzo'); return (p.length ? p : PALAZZI_CONDIZIONE).map((d) => ({ chiave: d.chiave, nome: d.nome })); }
+    // L8 (R8-19b): Iweleth è un dedalo dei Memento, non un Palazzo che si conclude: non si propone più (le condizioni già scritte restano leggibili)
+    case 'palazzo': { const p = e.base.dungeon.filter((d) => d.tipo === 'palazzo' && d.regolaBoss !== 'memento'); return (p.length ? p : PALAZZI_CONDIZIONE.filter((d) => d.chiave !== 'iweleth')).map((d) => ({ chiave: d.chiave, nome: d.nome })); }
     case 'dote': return DOTI_SOCIALI.map((d) => ({ chiave: d.chiave, nome: d.nome }));
     case 'confidente': return e.base.confidenti.map((c) => ({ chiave: c.chiave, nome: c.nome, dettaglio: c.arcana }));
     case 'membro': return e.extra.squadra;

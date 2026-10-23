@@ -1,0 +1,48 @@
+// ============================================================
+// ArchivioDelPalazzo — le planimetrie del «Palazzo» confluito in un dedalo (Iweleth), in sola lettura (L8, B7, R8-16)
+// ============================================================
+//
+// Iweleth esiste solo come dedalo dei Memento (decisione D3): le sue aree e le sue voci stanno nel dedalo, le planimetrie del vecchio
+// Palazzo restano consultabili da qui, raggruppate per l'area del dedalo a cui appartengono. Nessun secondo percorso operativo: ogni voce è
+// un collegamento al visore della planimetria. Le planimetrie senza un'area certa (Corridoi IV e V) stanno in fondo, dichiarate.
+// ============================================================
+
+import { Link } from 'react-router-dom';
+import type { ArchivioDelPalazzoDto } from '../../types';
+
+interface Props { archivio: ArchivioDelPalazzoDto }
+
+/** L'archivio in una sezione chiusa: titolo, conto, e le planimetrie per area del dedalo con il loro link. */
+export function ArchivioDelPalazzo({ archivio }: Props) {
+  const gruppi = new Map<string, { nome: string; mappe: ArchivioDelPalazzoDto['planimetrie'] }>();
+  for (const p of archivio.planimetrie) {
+    const k = p.areaDedalo ?? '';
+    const g = gruppi.get(k) ?? { nome: p.areaNome ?? 'Senza un’area certa nel dedalo', mappe: [] };
+    g.mappe = [...g.mappe, p];
+    gruppi.set(k, g);
+  }
+  const elenco = [...gruppi.entries()].sort(([a], [b]) => (a === '' ? 1 : b === '' ? -1 : 0));
+  return (
+    <details className="rounded-lg border border-border-light p-2.5 text-[13px]" aria-label="Archivio del Palazzo">
+      <summary className="touch cursor-pointer font-semibold">Archivio del Palazzo di {archivio.nome.replace(/^Dedalo di /, '')} · {archivio.planimetrie.length} planimetrie</summary>
+      <div className="flex flex-col gap-2 pt-2">
+        <p className="m-0 text-[12px] text-text-muted">
+          Le aree e le voci sono nel dedalo ({archivio.voci.convertite} voci sono diventate Trama, {archivio.voci.doppie} Persona doppie puntano a quelle del dedalo: nessuna si è persa).
+          Qui restano, in sola lettura, le planimetrie del vecchio Palazzo.
+        </p>
+        {elenco.map(([k, g]) => (
+          <section key={k || 'senza-area'} className="flex flex-col gap-1" aria-label={g.nome}>
+            <h4 className="m-0 text-[11px] font-semibold uppercase tracking-wide text-text-muted">{g.nome}</h4>
+            <ul className="m-0 flex list-none flex-col p-0">
+              {g.mappe.map((m) => (
+                <li key={m.chiave}>
+                  <Link to={`/guida/mappe/${m.chiave}`} className="touch inline-flex min-h-11 items-center text-[13px]" title={m.nota || undefined}>{m.nome.replace(/^Dedalo di Iweleth › /, '')}</Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+    </details>
+  );
+}

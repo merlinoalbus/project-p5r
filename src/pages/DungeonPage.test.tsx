@@ -67,17 +67,17 @@ describe('DungeonPage', () => {
     expect(screen.getByText('4 da verificare')).toBeInTheDocument();
   });
 
-  it('è l’elenco dei Palazzi: Iweleth sì, i Memento no', async () => {
+  it('è l’elenco dei Palazzi: né i Memento né Iweleth, che dal lotto L8 è un dedalo dei Memento', async () => {
     // La prova sta qui e non nel backend perché il filtro è una scelta di questa sezione: l’API
-    // continua a servire i Memento a chi li chiede (la loro pagina, l’editor delle condizioni).
-    // Iweleth invece resta, ed è il punto: è un Dedalo, ma si visita per aree come un Palazzo.
+    // continua a servire i Memento e la riga tecnica di Iweleth (`regolaBoss = 'memento'`) a chi li chiede.
     getDungeons.mockResolvedValue([
       dungeon({}),
-      dungeon({ chiave: 'iweleth', ordine: 8, nome: 'Dedalo di Iweleth', sovrano: 'Yaldabaoth', gestiti: null }),
+      dungeon({ chiave: 'iweleth', ordine: 8, nome: 'Dedalo di Iweleth', sovrano: 'Yaldabaoth', gestiti: null, regolaBoss: 'memento' }),
       dungeon({ chiave: 'mementos', tipo: 'mementos', ordine: 10, nome: 'Memento', sovrano: 'Il pubblico', gestiti: null }),
     ]);
     render(<MemoryRouter><DungeonPage /></MemoryRouter>);
-    expect(await screen.findByRole('link', { name: /Dedalo di Iweleth/ })).toHaveAttribute('href', '/guida/dungeon/iweleth');
+    expect(await screen.findByRole('list', { name: 'Palazzi' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Dedalo di Iweleth/ })).toBeNull();
     expect(screen.queryByRole('link', { name: /^Memento/ })).toBeNull();
     expect(screen.queryByText('Memento')).toBeNull();
     // Il filtro è **per inclusione**: passa `tipo === 'palazzo'`, non «tutto tranne i Memento».

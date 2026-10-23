@@ -192,6 +192,12 @@ export function DungeonDettaglioPage() {
   const dati = useCarica(() => getDungeon(chiave, partitaId ?? undefined), [chiave, partitaId]);
   useDocumentTitle(dati.dati ? dati.dati.nome : 'Palazzo');
   const d = dati.dati;
+  // L8 (B7, R8-16): un Palazzo confluito in un dedalo (Iweleth) non ha una casa sua: l'indirizzo vecchio porta al dedalo, dove stanno le aree, le voci e
+  // le planimetrie come archivio. Nessun link rotto dai percorsi di prima.
+  const confluisceIn = d?.confluisceIn;
+  useEffect(() => {
+    if (confluisceIn) navigate(`/guida/dungeon/${confluisceIn.dungeon}?area=${encodeURIComponent(confluisceIn.dedalo)}`, { replace: true });
+  }, [confluisceIn, navigate]);
   const memento = d?.tipo === 'mementos';
   // L4 (§4.3): le divergenze conservate «da verificare» del Palazzo nella partita; si chiedono solo quando la scheda dice che ce ne sono
   const quanteDaVerificare = !memento ? d?.daVerificare ?? 0 : 0;
@@ -702,7 +708,7 @@ export function DungeonDettaglioPage() {
   };
 
   return (
-    <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
+    <PageState isLoading={(dati.caricamento && !d) || !!confluisceIn} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && area && (
         // **Da 1024 px il Palazzo sta in una schermata** (richiesta dell'utente, 2026-09-29): «componenti che
         // sforano la pagina… aggiungendo una scrollbar di pagina che non è accettabile… tutti i componenti devono

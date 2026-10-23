@@ -38,18 +38,24 @@
 
 import type { DungeonRiassuntoDto } from '../types';
 
-/** I soli Palazzi (Iweleth compreso, che è registrato `palazzo` perché si visita come loro).
- *
- * È l'elenco della sezione «Palazzi», dove conta poter aprire le aree una per una. */
-export function soloPalazzi<T extends Pick<DungeonRiassuntoDto, 'tipo'>>(dungeon: T[]): T[] {
-  return dungeon.filter((d) => d.tipo === 'palazzo');
+/** Vero per un Palazzo che esiste solo come dedalo dei Memento (`regola_boss = 'memento'`: Iweleth, L8 R8-16): la riga tecnica resta per le
+ *  planimetrie e i legami, ma non è un Palazzo da visitare né una radice a sé sulla mappa. */
+export function eDedaloDeiMemento<T extends Pick<DungeonRiassuntoDto, 'tipo' | 'regolaBoss'>>(d: T): boolean {
+  return d.tipo === 'palazzo' && d.regolaBoss === 'memento';
 }
 
-/** Le radici del Metaverso che la mappa di Tokyo mostra: i Palazzi **e** i Memento.
+/** I soli Palazzi. Iweleth non c'è più: dal lotto L8 vive nel dedalo dei Memento (`regolaBoss = 'memento'`), dove si trovano le sue aree.
+ *
+ * È l'elenco della sezione «Palazzi», dove conta poter aprire le aree una per una. */
+export function soloPalazzi<T extends Pick<DungeonRiassuntoDto, 'tipo' | 'regolaBoss'>>(dungeon: T[]): T[] {
+  return dungeon.filter((d) => d.tipo === 'palazzo' && !eDedaloDeiMemento(d));
+}
+
+/** Le radici del Metaverso che la mappa di Tokyo mostra: i Palazzi **e** i Memento (Iweleth è un dedalo dei Memento, non una radice).
  *
  * È l'elenco di «dove posso andare», non di «cosa posso visitare per aree». La mappa poi tiene
  * solo quelle che hanno una collocazione dichiarata in `collocazioneTokyo.ts` e sono dentro la
  * loro finestra: qui si decide *chi può* comparire, lì *dove* e *quando*. */
-export function radiciMetaverso<T extends Pick<DungeonRiassuntoDto, 'tipo'>>(dungeon: T[]): T[] {
-  return dungeon.filter((d) => d.tipo === 'palazzo' || d.tipo === 'mementos');
+export function radiciMetaverso<T extends Pick<DungeonRiassuntoDto, 'tipo' | 'regolaBoss'>>(dungeon: T[]): T[] {
+  return dungeon.filter((d) => (d.tipo === 'palazzo' && !eDedaloDeiMemento(d)) || d.tipo === 'mementos');
 }

@@ -28,8 +28,8 @@ import { soloPalazzi } from '../utils/palazzi';
 import { anelloPalazzo, livelloPalazzo } from '../utils/completamentoPalazzo';
 
 /**
- * Elenco dei Palazzi: carica i dungeon per la partita attiva tenendo solo i Palazzi (Iweleth
- * compreso, i Memento esclusi) e li mostra come carte che aprono la scheda, con emblema, anello
+ * Elenco dei Palazzi: carica i dungeon per la partita attiva tenendo solo i Palazzi (i Memento e
+ * Iweleth, che dal lotto L8 è un dedalo dei Memento, esclusi) e li mostra come carte che aprono la scheda, con emblema, anello
  * dei collezionabili presi (solo se la partita ha un conteggio e c'è qualcosa da raccogliere),
  * suggerimento del giorno, arcano, sovrano, date in breve, livello consigliato e conteggi.
  */
@@ -42,7 +42,7 @@ export function DungeonPage() {
     <PageState isLoading={dati.caricamento && !dati.dati} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {dati.dati && (
         <div className="flex flex-col gap-4">
-          <IntestazionePagina titolo="Palazzi" sottotitolo="I nove Palazzi e il Dedalo di Iweleth: infiltrazioni e punti di interesse dalla guida allgamestaff (sicure, forzieri, Volontà, enigmi, mini-boss e boss con debolezze). Con una partita attiva segni ciò che hai ottenuto o esaurito; le planimetrie portano gli spilli preposizionati." />
+          <IntestazionePagina titolo="Palazzi" sottotitolo="I Palazzi (Iweleth è un dedalo dei Memento): infiltrazioni e punti di interesse dalla guida allgamestaff (sicure, forzieri, Volontà, enigmi, mini-boss e boss con debolezze). Con una partita attiva segni ciò che hai ottenuto o esaurito; le planimetrie portano gli spilli preposizionati." />
           <ul className="m-0 p-0 list-none grid grid-cols-1 md:grid-cols-2 gap-3" aria-label="Palazzi">
             {dati.dati.map((d) => {
               // L4 (§1.5, §8.10): l'anello conta gli oggetti permanenti (numeri del server); il segno dice «Concluso» o «Completato»

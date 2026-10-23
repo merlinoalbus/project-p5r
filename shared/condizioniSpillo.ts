@@ -23,6 +23,8 @@ import { statoDelTipo, uidValido } from './spilli.js';
 import { congiunzione } from './testo.js';
 import { eDote, nomeDote } from './doti.js';
 
+/** I Palazzi che una condizione può citare. `iweleth` resta per leggere e validare le condizioni già scritte (`finestra-palazzo`, l'apertura del dedalo), ma
+ *  dal lotto L8 è un dedalo dei Memento: l'editor non lo propone più come «Palazzo concluso» (nessun effetto di Palazzo dipende da lui, R8-19b). */
 export const PALAZZI_CONDIZIONE = [
   { chiave: 'kamoshida', nome: 'Palazzo di Kamoshida' }, { chiave: 'madarame', nome: 'Palazzo di Madarame' }, { chiave: 'kaneshiro', nome: 'Palazzo di Kaneshiro' },
   { chiave: 'futaba', nome: 'Palazzo di Futaba' }, { chiave: 'okumura', nome: 'Palazzo di Okumura' }, { chiave: 'niijima', nome: 'Palazzo di Niijima' },
