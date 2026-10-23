@@ -69,6 +69,11 @@ function produceDi(fonte: StatoEffettiVoceDto): EffettoAzione[] {
 /** La frase di ogni effetto della fonte unica, anche acquisto e pesca, con i nomi degli elementi («Il gioco dà: …»). */
 function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione): string[] {
   return fonte.effetti.map(({ effetto: e }) => {
+    if (e.tipo === 'articolo') {
+      // l'articolo comprato e il suo prezzo come promemoria: gli yen si cambiano a mano
+      const a = prepared('SELECT COALESCE(nome_it, nome) AS nome, prezzo FROM articolo WHERE chiave = ?').get(e.articolo) as { nome: string; prezzo: number | null } | undefined;
+      return a ? `Acquisto: ${a.nome}${a.prezzo ? ` · ¥${a.prezzo.toLocaleString('it-IT')}: cambiali tu a mano` : ''}` : descriviEffettoVoce(e);
+    }
     if (e.tipo === 'pesca' || e.tipo === 'fortuna' || eEffettoDiStato(e)) return descriviEffettoVoce(e);
     if (e.tipo === 'acquisto') {
       const nome = (prepared('SELECT COALESCE(nome_it, nome) AS nome FROM articolo WHERE chiave = ?').get(e.articolo) as { nome: string } | undefined)?.nome;
