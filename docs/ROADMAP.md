@@ -1,5 +1,7 @@
 # Roadmap — project-p5r
 
+**23/10 08:44 italiana — NOTA chiuso, lavoro fermo per ordineutente:**2e856938/CI39912246213 SUCCESS ePASS finale distinto suquattroviste;163tabelle eDDL invariati,nessuntest/writer/pixel. Tanaka4/9punti chiusi,TRANSAZIONE non avviato;consenso/R7-13b/L7 erestoL5–L11aperti. Ripresa solosunuovarichiestaumana. RegolaRoyal prioritaria registrata.
+
 **23/10 — SNAPSHOT chiuso, NOTA al rilascio:**5b00327a/CI39910122517 e PASS finale distinto chiudono il soloSNAPSHOT preparatorio. NOTA implementata e approvata staticamente, controlli verdi; pubblicato e conservazione ancora da osservare. DopoNOTA stop esplicito dell'utente, TRANSAZIONE non avviata. In ogni discrepanza prevale sempre il dato di Persona5Royal, nuova regola diretta.
 
 **23/10 08:12 italiana — SNAPSHOT al rilascio:** confronto121/corrente/Royal in unicaTX e guardie alle conferme individuali con PASS statico finale Galaxy dopo quattro rilievi corretti. Controlli verdi, tre riesami propri, nessun test/migrazione/scrittura commerciale. RestanoCI, conservazione e browser per chiudereSNAPSHOT; STORICO consegnato, restoTanaka/L5–L11 aperto.

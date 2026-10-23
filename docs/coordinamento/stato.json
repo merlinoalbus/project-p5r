@@ -1,27 +1,28 @@
 {
   "obiettivo": "Completare i lotti L0–L11 della razionalizzazione sul ramo newreview e pubblicarli funzionanti su p5s",
-  "aggiornato": "2026-10-23T06:33:00Z",
+  "aggiornato": "2026-10-23T06:44:00Z",
   "cruscotto": {
     "adesso": {
-      "attivita": "NOTA implementata con PASS staticoGalaxy e controlli verdi: fonteG034 versionata nei quattro consumatori eDTO/hash. Al rilascio; prevale sempre il datoRoyal,5000perHomunculus e120000solonota. Stop richiesto dopo questo punto.",
-      "stato": "Unico punto attivo L7-TANAKA-NOTA. Tanaka3/9chiusi; dopoNOTA fermarsi per ordineutente,senzaavviareTRANSAZIONE. Consenso/restoL7aperti;limite10minrevocato.",
+      "attivita": "NOTA chiuso con PASS finaleGalaxy su2e856938/CI39912246213 SUCCESS: quattroviste connotaG034/versione1 e consolevuota; tutte163tabelle eDDL invariati. Prevale sempre il datoRoyal. Lavoro fermo per ordineutente dopo questo punto.",
+      "stato": "FERMO PER ORDINE UTENTE. Tanaka4/9punti chiusi; nessun punto attivo. TRANSAZIONE non avviata; consenso eL7aperti. Riprendere soltanto su nuova richiesta.",
       "responsabile": "Coordinatore implementa in sequenza; Galaxy verifica in sola lettura. Nessun esecutore parallelo attivo.",
-      "prossimaConsegna": "Completare i gruppi residui dei lotti: Covo e distributori L5, pesca/condizioni L6 e catalogo/scambi L7; predisporre le decisioni concrete riservate all'utente. Nessun lotto dichiarato concluso per il solo rilascio137."
+      "prossimaConsegna": "Alla prossima ripresa richiesta dall'utente: L7-TANAKA-TRANSAZIONE, poi ricevuta/ripristino/import/consenso e gli altri residuiL5–L11. Nessun nuovo punto avviato dopoNOTA; nessun lotto globalmente concluso."
     },
     "ultimaConsegna": {
-      "titolo": "SNAPSHOT: fotografie121 e corrente124 riconciliati senza applicazioni individuali",
-      "commit": "5b00327a",
+      "titolo": "NOTA: discordanza Homunculus consultabile, riferimentoRoyal5000",
+      "commit": "2e856938",
       "pipeline": {
-        "testo": "Pipeline39910122517 riuscita",
-        "url": "https://github.com/merlinoalbus/project-p5r/actions/runs/39910122517"
+        "testo": "Pipeline39912246213 riuscita",
+        "url": "https://github.com/merlinoalbus/project-p5r/actions/runs/39912246213"
       },
       "istanza": {
         "testo": "p5s operativo, schema138/30",
         "url": "https://p5s.nasmerlinoalbus.cloud"
       },
-      "verifica": "PASS finale circoscrittoGalaxy:20offerte/18candidate/28proposte,20diagnosi124+8creazioni,rinvio stessa pagina e28comandi individuali sostituiti,consolevuota. Dati coordinatore06:18:main100/100 eutente62/63 tabelle invariati,solo sqlite_stat1 da36a40;DDL/versioni/7prove/binding/contributi invariati eFK0/0. Nessuntest,writer o verifica pixel;R7-13b/L7 ancora aperti."
+      "verifica": "PASS finale circoscrittoGalaxy:confronto/listino/offerta vecchia/paginaRoyal senzaofferte,notaG034versione1 leggibile,5000riferimentoRoyal e120000discordanza,consolewarn/error vuota. Confronto coordinatore06:43:18–22Z vs06:29:45–50Z:tutte100main+63utente tabelle inclsistema eDDL/versioni138/30 identiche;7RAW/foto/binding/contributi invariati,FK0/0. Nessuntest,writer o verifica pixel;R7-13b/L7 econsensoaperti."
     },
     "chiusi": [
+      "NOTA:2e856938/CI39912246213 SUCCESS,PASS finaleGalaxy sulle quattroviste econsolevuota,fonte/versione incluseDTO/hash. Tutte163tabelle eDDL invariati;prezzi/note personali intatti. OraSTOPumano,nonTRANSAZIONE.",
       "SNAPSHOT:5b00327a/pipeline39910122517 SUCCESS, lettura coerente121/corrente/Royal e guardie alle conferme individuali; PASS finale circoscrittoGalaxy. Nessuna modifica proposte o consenso commerciale.",
       "STORICO:030 e correttivo49c036c8 rilasciati, contributi e generazioni conservati; PASS finale circoscritto Galaxy, registro readonly e dati preservati. Nessun consenso/listinoTanaka modificato, writer/restore/import non esercitati.",
       "Rilascio A10: migrazioni138/29, conservazione dati e browser readonly con PASS distinti. Correttivo91d12aa5/pipeline39865491697, A10-BR01 chiuso. Scritture/recupero/ripristino non esercitati; non chiude L6 o L10.",
@@ -400,8 +401,8 @@
     {
       "nome": "Coordinatore — implementazione e rilascio",
       "fase": "be, fe, regia",
-      "stato": "al lavoro",
-      "attivita": "STORICO chiuso con PASS finale e dati conservati; oraL7-TANAKA-SNAPSHOT. Limite10min revocato, implementazione in sequenza."
+      "stato": "fermo per ordine utente",
+      "attivita": "SNAPSHOT eNOTA chiusi con PASSfinali e rilasciati. Stato salvato dopoNOTA;nessunTRANSAZIONE avviato,attendere nuova richiesta."
     },
     {
       "nome": "Esecutore L5/L6",
@@ -430,8 +431,8 @@
     {
       "nome": "Revisore indipendente",
       "fase": "validazione",
-      "stato": "al lavoro",
-      "attivita": "Galaxy: PASS finale circoscritto STORICO sul pubblicato; i dati sono evidenze del coordinatore. Prossimo gate su SNAPSHOT, nessun test o writer."
+      "stato": "concluso",
+      "attivita": "Galaxy:PASS finale circoscrittoNOTA su2e856938,dopoSNAPSHOT5b00327a. Quattroviste/CI/console osservati autonomamente;proveDBdelcoordinatore. Nessuntest/writer/pixel,oraSTOPumano."
     }
   ],
   "notaSessioniStoriche": "Le righe seguenti sono il registro del precedente team, non lo stato live delle sessioni o dei servizi. Nessuna sessione precedente è stata riaperta o gestita durante questo audit.",
@@ -672,9 +673,9 @@
         "id": "L7-TANAKA-NOTA",
         "lotto": "L7",
         "titolo": "Rendere visibile nota storica Homunculus120000",
-        "stato": "in-corso",
+        "stato": "chiuso",
         "fonte": "lotti/L7/tanaka-decisione-unitaria.md",
-        "criterio": "Nota effettivamente consultabile."
+        "criterio": "PASS finaleGalaxy su2e856938/CI39912246213 SUCCESS:notaG034versione1 leggibile in quattroviste eDTO/hash,consolevuota;5000riferimentoRoyal/120000discordanza. Tutte163tabelle/DDL e7prove invariati;nessuntest/writer/pixel. Stop dopoquestopunto richiestodall'utente."
       },
       {
         "id": "L7-TANAKA-TRANSAZIONE",

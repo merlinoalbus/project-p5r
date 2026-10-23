@@ -1,5 +1,7 @@
 # L7 — difetti e mancanze dell'implementazione locale
 
+**23/10 08:44 italiana — NOTA chiuso con PASS finale circoscritto:**2e856938/CI39912246213 SUCCESS,quattroviste econsole osservate autonomamente;fonteG034/versione1,5000Royal e120000discordanza. Tutte163tabelle/DDL/versioni138-30,7prove/binding/contributi invariati eFK0/0 nelle letturecoordinatore06:43vs06:29. Nessuntest/writer/pixel;futuriwriter/receipt/undo/import delpiano eR7-13b/L7aperti. OraSTOPumano dopoNOTA,nessunTRANSAZIONEavviato.
+
 **23/10 — NOTA in rilascio:** testoG034 leggibile e versionato in quattro consumatori, sempre nelDTO/hash del confronto, prezzi e note personali invariati. Helper perchiavi/provenienza senza fusioneRoyal/listino; nessuna migrazione. Tre riesami propri e PASS staticoGalaxy; typecheck57838/lint85334/build25325 exit0, build7437 exit0 dopochiarimentoRoyal. Conservazione/browserpubblicato ancora da acquisire. SNAPSHOT precedente chiuso su5b00327a/CI39910122517; nota non equivale a consenso/correzionecommercialeTanaka. Stop dopoNOTA richiesto dall'utente.
 
 **23/10 08:12 italiana — SNAPSHOT approvato staticamente, al rilascio:** chiusi nel delta SNAP-F01(apertura query su componente già montato),F02(aggiramento via proposta ricompensa),F03(formule/payload non riconosciuti),F04(personalizzazioni catalogo/negozio consultabili). Typecheck34050/lint4156/build57426 exit0, tre riesami propri e PASS finale statico Galaxy. Nessuna migrazione o modifica28proposte; conservazione e browser pubblicato ancora aperti. Non chiudeR7-13b oL7.

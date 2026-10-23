@@ -1,5 +1,13 @@
 # L7 — Tanaka e risoluzione dei raccordi documentali
 
+## NOTA consegnato23ottobre2026,08:44 italiana — STOP umano
+
+PASS finale circoscrittoGalaxy su2e856938,CI39912246213 SUCCESS. Backend/FE attivi06:37:04/06:40:14Z,health200 ehashnota coincidente. Quattroviste pubblicate lette autonomamente dal revisore: notaG034/versione1 nelconfronto,listinoDettagli,offerta delcatalogovecchio-2 eRoyal senzaofferte;5000riferimentoRoyal,120000discordanza documentale,prezzocorrente distinto. Consolewarn/error vuota,nessunwriter/editor/Scarta/test,nessuna certificazione pixel.
+
+ConfrontoDB delcoordinatore06:43:18–22Z controbaseline06:29:45–50Z:tutte100main+63utente tabelle(inclusesistema),DDL/versioni138/30 identiche;7RAW/foto/binding/contributi invariati,FK0/0. Ilrevisoreconsumaquesteevidenze,nonattribuisceasélettureDB. Nessuna migrazione,note personali/prezzi/proposte mutati o consenso acquisito.
+
+Questo chiudeNOTA,non R7-13b/L7. Tanaka4/9chiusi(UNITA,STORICO,SNAPSHOT,NOTA). RestanoTRANSAZIONE,RICEVUTA,RIPRISTINO,IMPORT,CONSENSO. **Perordine esplicito dell'utente il lavoro si ferma qui: nessun punto successivo avviato.** Alla nuova ripresa, il piano deve acquisire nota/versione/fonte mostrate, conservarle inricevuta/undo/import e completaregli altri criteri già documentati;Royal prevale sempre come dato di gioco,conprovenienzaverificata.
+
 ## NOTA23ottobre2026 — al rilascio, poi stop umano
 
 Nota documentaleG034 in `shared/tanakaNotaStorica.ts`, id/versione/fonte/testo separati dalle note personali e dai prezzi correnti/pagati. Associazione offerta perchiave+negozio e identitàRoyal perchiave+provenienza(`consumabile/homunculus`,guida,`consumabili/Homunculus`); nessuna fusione con l'attuale catalogo del listino`consumabile/homunculus-2`. Disponibile in Dettagli listino, offerte dell'oggetto, paginaRoyal anche senzaofferte, confronto corrente/Royal. Quest'ultimo la include nelDTO/hashdellalettura. Indipendente da proposte121 assenti/scartate, nessuna scritturaDB o migrazione.
