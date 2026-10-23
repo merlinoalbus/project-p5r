@@ -1142,8 +1142,9 @@
   .home-oggi { grid-area: oggi; min-width: 0; }
   .home-mappa { grid-area: mappa; min-width: 0; }
   @media (min-width: 768px) {
+    /* R10-24/4: la guida è larga almeno quanto la mappa (prima 1fr contro 1.2fr: a 1280 erano 458 px contro 550) */
     .home-griglia {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
       grid-template-areas: "carta carta" "oggi mappa";
       align-items: start;
     }
@@ -1154,12 +1155,12 @@
   @media (min-width: 1024px) {
     .home-mappa { position: sticky; top: 8px; }
   }
-  @media (min-width: 1360px) {
-    .home-griglia {
-      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-      grid-template-areas: "carta mappa" "oggi mappa";
-    }
-  }
+  /* R10-24/4: telefono e tablet verticale: guida e mappa sono due schede «Guida | Mappa» (stessa soglia di `aSchede` in `HomePage`) */
+  .home-schede { grid-area: schede; display: flex; gap: 6px; min-width: 0; }
+  .home-schede > .chip { flex: 1 1 0; justify-content: center; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .home-griglia--a-schede { grid-template-columns: minmax(0, 1fr); grid-template-areas: "carta" "schede" "contenuto"; }
+  .home-griglia--a-schede .home-oggi, .home-griglia--a-schede .home-mappa { grid-area: contenuto; }
+  .home-griglia--a-schede .home-mappa > :last-child { height: min(62dvh, 560px); min-height: 280px; }
   /* la disposizione che riempie la schermata (da 1024 × 1150): la guida del giorno in un'area interna alta almeno 400 px, la mappa fino in fondo */
   @media (min-width: 1024px) and (min-height: 1150px) {
     .home-griglia { grid-template-rows: auto minmax(0, 1fr); flex: 1 1 auto; min-height: 0; align-items: stretch; }
@@ -1201,44 +1202,41 @@
       transform: none; visibility: visible; transition: transform .2s ease, visibility 0s;
     }
   }
-  @media (min-width: 1024px) {
-    .home-griglia--mappa-chiusa {
-      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-      grid-template-areas: "carta oggi";
-      padding-right: 40px;
-    }
-    .home-griglia--mappa-chiusa .home-carta { padding-block: 8px; }
-  }
-  /* nella disposizione che riempie la schermata: carta e guida alte quanto la pagina; se la carta non ci stesse, scorre lei (accanto alla
-     guida, mai dentro). A pagina (LAY5-1) nessuna delle due scorre da sé */
-  @media (min-width: 1024px) and (min-height: 1150px) {
-    .home-griglia--mappa-chiusa { grid-template-rows: minmax(0, 1fr); }
-    .home-griglia--mappa-chiusa .home-carta { overflow-y: auto; overscroll-behavior: contain; }
-  }
-  @media (min-width: 768px) and (max-width: 1023px) {
+  /* R10-24/3: la scheda della partita è compatta e a tutta larghezza in ogni disposizione a colonne, quindi a mappa chiusa la guida
+     sta sotto la scheda, larga come la pagina (la linguetta non compare dove guida e mappa sono schede) */
+  @media (min-width: 768px) {
     .home-griglia--mappa-chiusa { grid-template-columns: minmax(0, 1fr); grid-template-areas: "carta" "oggi"; padding-right: 40px; }
-  }
-  /* sul telefono la mappa sta in fondo alla pagina: chiusa, al suo posto il pulsante per riaprirla */
-  @media (max-width: 767px) {
-    .home-griglia--mappa-chiusa .home-mappa--a-scomparsa { display: none; }
-    .home-linguetta { position: static; transform: none; flex-direction: row; justify-content: center; border: 1px solid var(--color-border); border-radius: 8px; padding: 10px; }
-    .home-linguetta__testo { writing-mode: horizontal-tb; transform: none; }
   }
   @media (prefers-reduced-motion: reduce) { .home-griglia--mappa-chiusa .home-mappa--a-scomparsa { transition: none; } }
 
-  /* ---- Carta della partita in Home: stella e tessere ----
-     La riga stella + tessere e in colonna sul telefono e in riga da 640 px. La larghezza della stella segue la finestra:
-     larghezza sul telefono, altezza da tablet in su (la Home deve restare in una schermata). */
+  /* ---- Scheda della partita in Home, compatta (R10-24/3, R10-24/5): al massimo il 20% dell'altezza della schermata ----
+     Da 768 px la stella è quadrata quanto la riga (la sua altezza segue la finestra, perché la scheda ne occupa una quota) e le Doti
+     le stanno accanto: titolo, una fila di sei tessere, una fila di Arcani. Sul telefono la riga è la sola colonna del corpo
+     (titolo con il pulsante «Stella», tessere in una fila che scorre, Arcani in una fila che scorre) e la stella, aperta con un tocco,
+     sta sotto. Le file orizzontali tengono il gesto dentro di sé (`overscroll-behavior`). Le etichette non vanno mai a capo a metà
+     parola: le tessere hanno la larghezza della parola più lunga e, se non ci stanno tutte, la fila scorre. */
   .home-carta { container-type: inline-size; }
-  .home-carta__riga { display: flex; flex-direction: column; align-items: center; gap: 12px; }
-  .home-carta__stella { width: min(58vw, 250px); }
-  @media (min-width: 640px) {
-    .home-carta__riga { flex-direction: row; gap: 20px; }
-    .home-carta__stella { width: min(32vw, 200px); }
+  .home-carta.card { padding: 8px 12px; }
+  .home-carta__riga { display: flex; align-items: center; gap: 14px; }
+  .home-carta__corpo { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1 1 auto; }
+  .home-carta__testa { display: flex; align-items: center; gap: 8px; min-width: 0; flex-wrap: nowrap; }
+  .home-carta__stella { display: block; flex: 0 0 auto; width: clamp(104px, 16vh, 132px); aspect-ratio: 1 / 1; }
+  /* il rientro lascia dentro il riquadro le targhette dei vertici, che escono dal poligono di circa un 15% della sua larghezza */
+  .home-carta__stella-interno { width: 100%; height: 100%; padding: 14%; box-sizing: border-box; }
+  .home-doti { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(max-content, 1fr); gap: 6px; max-width: 640px; min-width: 0;
+    overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; -ms-overflow-style: none; }
+  .home-doti::-webkit-scrollbar { display: none; }
+  .home-doti .kpi-tile--compatto { padding: 4px 10px; gap: 1px; }
+  .home-doti .kpi-label { white-space: nowrap; overflow-wrap: normal; hyphens: none; }
+  .home-fila { display: flex; flex-wrap: nowrap; align-items: center; gap: 6px; min-width: 0;
+    overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; -ms-overflow-style: none; }
+  .home-fila::-webkit-scrollbar { display: none; }
+  .home-fila > * { flex: 0 0 auto; white-space: nowrap; }
+  @media (max-width: 767px) {
+    .home-carta__riga { flex-direction: column; align-items: stretch; gap: 8px; }
+    .home-carta__stella { order: 2; align-self: center; width: min(64vw, 260px); }
+    .home-doti { max-width: none; }
   }
-  @media (min-width: 768px) { .home-carta__stella { width: clamp(150px, 20vh, 240px); } }
-  /* Desktop largo: la stella cresce con l'altezza ma non oltre il 55% della carta, cosi le tessere restano accanto */
-  @media (min-width: 1360px) { .home-carta__stella { width: max(230px, min(40vh, 50cqw, 420px)); } }
 
   /* ---- Fila di schede/filtri: una riga sola che scorre sul telefono, a capo dal tablet in su ----
      Dieci schede su 375 px andrebbero a capo quattro volte: qui scorrono in orizzontale, con la sfumatura ai bordi

@@ -90,6 +90,8 @@ export function StellaCinque({ assi, dimensione = 320, livelli = 5, onScegli, se
   const raggiValori = assi.map((_, i) => RAGGIO * (valori[i] ?? 0));
   const descrizione = assi.map((a) => `${a.etichetta}: ${Math.round(limita(a.valore) * 100)}%`).join(', ');
   const altezzaBadge = `${arrotonda((badgeAltezza / dimensione) * 100)}cqw`;
+  // la sovrapposizione scala come il badge: a `dimensione` px vale SOVRAPPOSIZIONE px, in un riquadro più piccolo resta in proporzione
+  const sovrapposizione = (SOVRAPPOSIZIONE / dimensione) * 100;
 
   return (
     <div className={`relative select-none ${className ?? ''}`} style={{ width: dimensione, maxWidth: '100%', aspectRatio: '1 / 1', containerType: 'inline-size' }}>
@@ -116,7 +118,7 @@ export function StellaCinque({ assi, dimensione = 320, livelli = 5, onScegli, se
         const dx = (x - CENTRO) / RAGGIO;
         const dy = (y - CENTRO) / RAGGIO;
         // La targhetta «incappuccia» il vertice: il suo bordo interno passa SOVRAPPOSIZIONE px oltre la punta, verso il centro.
-        const stile = { left: `${arrotonda(x)}%`, top: `${arrotonda(y)}%`, transform: `translate(calc(-50% + ${arrotonda(dx * 50)}% - ${arrotonda(dx * SOVRAPPOSIZIONE)}px), calc(-50% + ${arrotonda(dy * 50)}% - ${arrotonda(dy * SOVRAPPOSIZIONE)}px))` } as const;
+        const stile = { left: `${arrotonda(x)}%`, top: `${arrotonda(y)}%`, transform: `translate(calc(-50% + ${arrotonda(dx * 50)}% - ${arrotonda(dx * sovrapposizione)}cqw), calc(-50% + ${arrotonda(dy * 50)}% - ${arrotonda(dy * sovrapposizione)}cqw))` } as const;
         // Il tassello del rango sta sempre sul lato esterno (lontano dal centro): angolo destro/sinistro e alto/basso secondo dx/dy.
         const angoloTassello = { [dx >= 0 ? 'right' : 'left']: `calc(${altezzaBadge} * -0.22)`, [dy < 0 ? 'top' : 'bottom']: `calc(${altezzaBadge} * -0.2)` } as const;
         // Il badge scala con la larghezza reale del riquadro (unità di contenitore): stessa proporzione su ogni schermo.
