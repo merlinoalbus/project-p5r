@@ -249,6 +249,15 @@ function nascostoPerCondizioni(s: SpilloDto): boolean {
   return s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile';
 }
 
+/** Il motivo per cui uno spillo chiesto con `?spillo=` non è disponibile adesso (R10-28b): le condizioni non soddisfatte e, se non c'è
+ *  altro, quelle che la partita non sa verificare (stato «ignoto», prefisso «da verificare»), così la riga non resta senza motivo. */
+function motivoNonDisponibile(d: SpilloDto['disponibilita']): string {
+  const requisiti = d?.requisiti ?? [];
+  const rossi = requisiti.filter((r) => r.stato === 'rosso').map((r) => r.dettaglio || r.testo);
+  if (rossi.length > 0) return rossi.join(' · ');
+  return requisiti.filter((r) => r.stato === 'grigio').map((r) => `da verificare: ${r.dettaglio || r.testo}`).join(' · ');
+}
+
 /** Etichetta leggibile della disponibilità di un articolo: il dato porta già la preposizione («dal 18 aprile», «dopo Palazzo di Madarame», «solo in primavera»), come in ArticoliTabella. */
 function disponibilita(a: { disponibileDal: string | null }): string {
   return a.disponibileDal?.trim() || 'sempre';
@@ -1020,7 +1029,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 </div>
                 {/* L5 §2: lo spillo chiesto che adesso non c'è (chiuso, non ancora sbloccato): lo si dice, col motivo */}
                 {selezionato.id === spilloChiesto && nonDisponibile(selezionato) && (
-                  <p className="m-0 flex flex-wrap items-center gap-1.5 text-[12px]" role="status"><span className="chip chip--attivo text-[11px]">Non disponibile adesso</span><span className="text-text-secondary">{selezionato.presenza?.testo ?? selezionato.disponibilita?.requisiti.filter((r) => r.stato === 'rosso').map((r) => r.dettaglio || r.testo).join(' · ')}</span></p>
+                  <p className="m-0 flex flex-wrap items-center gap-1.5 text-[12px]" role="status"><span className="chip chip--attivo text-[11px]">Non disponibile adesso</span><span className="text-text-secondary">{selezionato.presenza?.testo ?? motivoNonDisponibile(selezionato.disponibilita)}</span></p>
                 )}
                 {selezionato.descrizione && <p className="m-0 text-[12px] text-text-secondary spillo-popup__testo">{selezionato.descrizione}</p>}
                 {/* L5: la descrizione propria del pin di un luogo, se diversa da quella del luogo */}
