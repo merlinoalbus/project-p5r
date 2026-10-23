@@ -36,10 +36,16 @@ function eventoDto(r: RigaEvento): EventoPartitaDto {
  * Registra un evento. Va chiamata dentro la transazione della modifica che lo genera (stessa connessione),
  * così evento e modifica sono atomici. Non verifica l'esistenza della partita: lo fa il chiamante.
  */
-export function registraEvento(partitaId: number, tipo: TipoEvento, titolo: string, dettaglio = '', dati: Record<string, unknown> = {}, personaId: number | null = null): number {
-  const info = prepared('INSERT INTO evento_partita (partita_id, tipo, titolo, dettaglio, dati_json, persona_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
-    .run(partitaId, tipo, titolo, dettaglio, JSON.stringify(dati), personaId, nowIso());
+export function registraEvento(partitaId: number, tipo: TipoEvento, titolo: string, dettaglio = '', dati: Record<string, unknown> = {}, personaId: number | null = null, voceUid: string | null = null): number {
+  const info = prepared('INSERT INTO evento_partita (partita_id, tipo, titolo, dettaglio, dati_json, persona_id, created_at, voce_uid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+    .run(partitaId, tipo, titolo, dettaglio, JSON.stringify(dati), personaId, nowIso(), voceUid);
   return Number(info.lastInsertRowid);
+}
+
+/** R10-22: togliere la spunta di una voce toglie dallo storico gli eventi che quella spunta ha registrato (legame esplicito `voce_uid`).
+ * Gli eventi storici, senza legame, non si toccano mai. Va chiamata dentro la transazione della modifica. */
+export function revocaEventiDellaVoce(partitaId: number, voceUid: string): number {
+  return prepared('DELETE FROM evento_partita WHERE partita_id = ? AND voce_uid = ?').run(partitaId, voceUid).changes;
 }
 
 type AzioneEventoAcquistoV1 = 'registra' | 'annulla-fonte' | 'rimuovi-legacy';

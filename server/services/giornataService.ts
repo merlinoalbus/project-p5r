@@ -16,7 +16,7 @@ import { randomBytes } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { HttpError, httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
-import { registraEvento } from './storicoService.js';
+import { registraEvento, revocaEventiDellaVoce } from './storicoService.js';
 import { confidenti } from './partiteService.js';
 import { applicaEffettiAzione, annullaEffettiAzione, descriviEffettiApplicati, type OpzioniSpunta } from './effettiAzioneService.js';
 import { mappaAzione, nomeRiferimento, nomiEffetti, statoAzione, testoEffetti, verificaEffetti } from './azioniStrutturateService.js';
@@ -689,10 +689,11 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
       prepared('INSERT INTO spunta_voce_partita (partita_id, voce_uid, fatta_at, effetti_json) VALUES (?, ?, ?, ?)').run(partitaId, uid, adesso, effetti ? JSON.stringify(effetti) : null);
       const dett = [`${v.fascia === 'sera' ? 'Sera' : 'Giorno'} · ${v.tipo}${v.riferimentoTesto ? ` · ${v.riferimentoTesto}` : ''}`];
       if (effetti) dett.push(descriviEffettiApplicati(effetti));
-      registraEvento(partitaId, 'percorso', `Percorso ${r.data}: ${v.azione.slice(0, 80)}${v.azione.length > 80 ? '…' : ''}`, `${dett.join(' · ')}.`, { data: r.data, voce: uid, tipo: v.tipo, riferimento: v.riferimento, effetti });
+      registraEvento(partitaId, 'percorso', `Percorso ${r.data}: ${v.azione.slice(0, 80)}${v.azione.length > 80 ? '…' : ''}`, `${dett.join(' · ')}.`, { data: r.data, voce: uid, tipo: v.tipo, riferimento: v.riferimento, effetti }, null, uid);
     } else {
       annullaEffettiVoce(partitaId, uid, leggiRicevutaEffettiAzione(precedente?.effetti_json ?? null), { applicaLegacy: () => null, annullaLegacy: annullaEffettiAzione });
       prepared('DELETE FROM spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').run(partitaId, uid);
+      revocaEventiDellaVoce(partitaId, uid); // R10-22: solo gli eventi col legame esplicito alla voce; gli eventi storici (voce_uid nullo) restano
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
