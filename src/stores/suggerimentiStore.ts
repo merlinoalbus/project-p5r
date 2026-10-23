@@ -51,6 +51,15 @@ export const useSuggerimentiStore = create<Stato>((set, get) => ({
   },
 }));
 
+// R10-16: il giorno (e la fascia) della partita cambiano da più strade (Oggi, Home, Calendario, Riepilogo, cambio automatico): i
+// suggerimenti si rileggono ogni volta che la partita attiva, a parità di id, arriva con un giorno o una fascia diversi, e non
+// dipendono più dal chiamante che si ricorda di invalidarli.
+usePartitaStore.subscribe((nuovo, prima) => {
+  const a = nuovo.attiva;
+  const p = prima.attiva;
+  if (a && p && a.id === p.id && (a.dataGioco !== p.dataGioco || a.fasciaGioco !== p.fasciaGioco)) useSuggerimentiStore.getState().invalida();
+});
+
 export interface Suggerimenti {
   /** True se l'entità è coinvolta in un'azione ancora da fare del giorno corrente. */
   evidenziato: (categoria: CategoriaSuggerita, chiave: string | number | null | undefined) => boolean;

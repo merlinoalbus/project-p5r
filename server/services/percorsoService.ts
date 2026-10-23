@@ -6,10 +6,10 @@
 // `voce_giornata` e le gestisce `giornataService`; qui la scheda del giorno, l'indice dei giorni e il giorno corrente.
 // ============================================================
 
-import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
-import { registraEvento } from './storicoService.js';
+import { cambiaGiornoPartita } from './giornoPartitaService.js';
 import type { GiornoAvanzatoDto, GiornoCorrenteDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../../shared/types.js';
 import { confidenti, leggiPartita } from './partiteService.js';
 import { conteggiGiornate, righeDelGiorno, spuntePartita, vociDelGiorno } from './giornataService.js';
@@ -73,18 +73,14 @@ export function avanzaSeGiornoCompleto(partitaId: number, data: string): GiornoA
   if (!azioni.every((a) => fatte.has(a.uid))) return null;
   const succ = prepared('SELECT data FROM giorno_percorso WHERE ordine > ? ORDER BY ordine ASC LIMIT 1').get(r.ordine) as { data: string } | undefined;
   if (!succ) return null;
-  getDb().transaction(() => {
-    prepared("UPDATE partita SET data_gioco = ?, fascia_gioco = 'giorno', updated_at = ? WHERE id = ?").run(succ.data, nowIso(), partitaId);
-    registraEvento(partitaId, 'percorso', `Giornata del ${data} completata`, `Tutte le attività del giorno sono fatte: la partita passa al ${succ.data}, di giorno.`, { da: data, a: succ.data });
-  })();
+  // la regola unica del cambio giorno (R10-16), con la sua descrizione nello storico
+  cambiaGiornoPartita(partitaId, succ.data, { titolo: `Giornata del ${data} completata`, dettaglio: `Tutte le attività del giorno sono fatte: la partita passa al ${succ.data}, di giorno.` });
   return { da: data, a: succ.data, partita: leggiPartita(partitaId) };
 }
 
 /** Imposta il giorno corrente della partita (data del calendario di gioco) e restituisce anche la partita aggiornata, così il client allinea lo store senza ricaricare l'elenco. */
 export function impostaGiornoCorrente(partitaId: number, data: string): GiornoCorrenteDto {
-  verificaPartita(partitaId);
-  if (!prepared('SELECT 1 FROM giorno_percorso WHERE data = ?').get(data)) throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso il ${data}.`);
-  // un giorno nuovo comincia di mattina: la fascia torna a «giorno»; rimarcare lo stesso giorno non la tocca
-  prepared("UPDATE partita SET data_gioco = ?, fascia_gioco = CASE WHEN data_gioco IS ? THEN fascia_gioco ELSE 'giorno' END, updated_at = ? WHERE id = ?").run(data, data, nowIso(), partitaId);
+  // giorno esistente, fascia a «giorno» se il giorno è nuovo (rimarcare lo stesso non la tocca), storico: la regola unica (R10-16)
+  cambiaGiornoPartita(partitaId, data);
   return { dataCorrente: data, partita: leggiPartita(partitaId) };
 }
