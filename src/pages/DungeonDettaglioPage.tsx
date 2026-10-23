@@ -209,7 +209,9 @@ export function DungeonDettaglioPage() {
     const perChiave = (k: string | null | undefined) => (k ? d.aree.find((a) => a.chiave === k) : undefined);
     if (memento) return perChiave(params.get('area')) ?? d.aree[0] ?? null;
     // «Entra» del diario senza infiltrazione scelta: la prima non completata del Palazzo, altrimenti la prima (§4.4)
-    if (richiestaInfiltrazione === 'in-corso') return d.aree.find((a) => !completate.has(a.chiave)) ?? d.aree[0] ?? null;
+    // R10-28a/4: lo stesso vale **senza alcun parametro** (la metro apre la scheda del Palazzo senza `?infiltrazione=`): prima la prima
+    // infiltrazione non completata, non la prima in assoluto. Un'area aperta per indirizzo (`/area/<slug>`) ha la sua regola, qui sotto.
+    if (richiestaInfiltrazione === 'in-corso' || (!richiestaInfiltrazione && !slug)) return d.aree.find((a) => !completate.has(a.chiave)) ?? d.aree[0] ?? null;
     const daIndirizzo = perChiave(richiestaInfiltrazione);
     if (daIndirizzo) return daIndirizzo;
     // arrivo su un'area senza infiltrazione: la prima infiltrazione che la tocca, altrimenti la prima del Palazzo
