@@ -93,7 +93,9 @@ export function confrontoTanaka(): ConfrontoTanakaDto {
       if (riferite.some(p => p.stato !== 'da-approvare')) rilievi.push('Proposta già gestita: non viene riaperta.');
       if (!negozio124) rilievi.push('Sblocco e provenienza del negozio non attestati dalla bonifica124.');
       if (!negozio || !formulaValida(negozio.condizioni_json) || !formulaValida(negozio.sblocco_json)) rilievi.push('Formula del negozio assente, illeggibile o non supportata.');
-      return { ...r, condizioni: grado(r.grado), catalogoCorrente: catalogoCorrente ?? null, rilievi, noteStoriche: noteStoricheDi('articolo', r.chiave) };
+      return { ...r, condizioni: grado(r.grado), catalogoCorrente: catalogoCorrente ?? null, rilievi,
+        // F6-2: lo stesso controllo delle offerte correnti (riga 80): la nota si mostra solo se l'offerta c'è ed è del negozio di Tanaka
+        noteStoriche: offerte.find(a => a.chiave === r.chiave)?.corrente?.negozio_chiave === manifest.negozio ? noteStoricheDi('articolo', r.chiave) : [] };
     });
     const proposte: ConfrontoTanakaDto['proposte'] = pertinenti.map(p => {
       const salvato = record(parse(p.fonte_snapshot_json));
