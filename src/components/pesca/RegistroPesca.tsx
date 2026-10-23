@@ -25,17 +25,22 @@ type Editor = { tipo: 'manuale' } | { tipo: 'osservazione'; sessione: SessionePe
   | { tipo: 'esca' } | { tipo: 'saldo' };
 interface GestoPronto { titolo: string; operazione: AnteprimaClientPesca }
 
+/** L'esito di un gesto sulla pesca, in parole (mai la sigla tecnica). */
+const ESITI_PESCA: Record<string, string> = {
+  'sessione-creata': 'visita registrata', 'fonte-collegata': 'fonte aggiunta alla visita', 'gia-collegata': 'la fonte era già collegata', 'osservazione-salvata': 'osservazione salvata',
+  'fonte-rimossa': 'fonte tolta', 'sessione-rimossa': 'visita tolta', 'fatto-registrato': 'fatto registrato', 'fatto-rimosso': 'fatto tolto',
+  'esca-acquistata': 'acquisto dell’esca registrato', 'acquisto-esca-rimosso': 'acquisto dell’esca tolto', 'punti-rettificati': 'punti pesca rettificati',
+};
+
 function FontiSessione({ sessione: s }: { sessione: SessionePescaDto }) {
   return <ul className="m-0 flex min-w-0 flex-col gap-2 pl-4">{s.fonti.map(f => <li key={f.id} className="break-words">
     <span>{f.fonte.tipo === 'manuale' ? 'Dichiarazione manuale' : 'Fonte del Diario'}{f.orfana ? ' · riferimento mancante' : ''}</span>
-    <code className="block break-all text-[11px]">Fonte {f.id}{f.generazione ? ` · generazione ${f.generazione}` : ''}</code>
-    {f.fonte.tipo === 'diario' && <Link className="touch inline-flex" to={`/guida/percorso/${s.momento.giorno}?voce=${encodeURIComponent(f.fonte.voceUid)}`}>Voce {f.fonte.voceUid} · effetto {f.fonte.effettoUid}</Link>}
+    {f.fonte.tipo === 'diario' && <Link className="touch inline-flex" to={`/guida/percorso/${s.momento.giorno}?voce=${encodeURIComponent(f.fonte.voceUid)}`}>Apri la voce del Diario · {quando(s.momento)}</Link>}
   </li>)}</ul>;
 }
 
 function FonteFatto({ fonte: f }: { fonte: FonteFattoPescaDto }) {
   return <div className="flex min-w-0 flex-col gap-1"><span>{valoreFatto(f.valore)} · {quando(f.momento)}</span>
-    <code className="break-all text-[11px]">Fonte {f.id}{f.sessioneId ? ` · sessione ${f.sessioneId}` : ''}{f.catturaId ? ` · cattura ${f.catturaId}` : ''}{f.provenienzaId ? ` · provenienza ${f.provenienzaId}` : ''}</code>
     {f.nota && <span className="whitespace-pre-wrap break-words">{f.nota}</span>}
   </div>;
 }
@@ -48,7 +53,7 @@ function BersaglioAnteprima({ dto, operazione: o }: { dto: AnteprimaOperazionePe
   return <>
     {s && <details open><summary className="touch">Visita e tutte le fonti fotografate</summary><p>{quando(s.momento)} · turno {s.turno.ordine} · {s.turno.origine}{s.turno.revocato ? ' · revocato' : ''}.</p><FontiSessione sessione={s} /><RiepilogoOsservazionePesca osservazione={s.osservazione.dati} /></details>}
     {f && <FonteFatto fonte={f} />}
-    {a && <p>Acquisto esca {a.id} · {quando(a.momento)} · quantità {a.quantita} · costo {a.costo.toLocaleString('it-IT')} punti pesca.</p>}
+    {a && <p>Acquisto esca · {quando(a.momento)} · quantità {a.quantita} · costo {a.costo.toLocaleString('it-IT')} punti pesca.</p>}
   </>;
 }
 
@@ -111,7 +116,7 @@ function ConfermaGestoPesca({ partitaId, pronto, onChiudi, onCambiato }: { parti
         {o.azione.startsWith('rimuovi-') && <p className="m-0">Il gesto conserva la fotografia nel Cestino. Le eventuali correzioni di Doti, yen e punti pesca si applicano dal pulsante sulla voce (gli yen li cambi tu a mano).</p>}
         {!ricevuta && <label className="touch flex items-start gap-2"><input type="checkbox" className="h-5 w-5 shrink-0" checked={attestato} disabled={occupato || !!pendente} onChange={e => setAttestato(e.target.checked)} /><span>Confermo il bersaglio e tutte le conseguenze mostrate per questa partita.</span></label>}
       </>}
-      {ricevuta && <p role="status" className="m-0 text-success">Operazione registrata · {ricevuta.esito} · {ricevuta.operazioneId}. Nessun nuovo invio da questa finestra.</p>}
+      {ricevuta && <p role="status" className="m-0 text-success">Registrato: {ESITI_PESCA[ricevuta.esito] ?? 'operazione completata'}. Nessun nuovo invio da questa finestra.</p>}
       {errore && <p role="alert" className="m-0 text-error">{errore}</p>}
       {rifiutata && <p role="alert" className="m-0 text-warning">Questa richiesta è stata rifiutata e non viene ripetuta. Torna ai dati conservati per correggerli e preparare una nuova anteprima.</p>}
       {pendente && <p role="alert" className="m-0 text-warning">Esito conservato da verificare nel registro dei gesti: usa il recupero dell’operazione originale.</p>}
@@ -194,12 +199,12 @@ function RegistroPescaNelContesto({ partitaId, onCambiato }: { partitaId: number
       <h3 className="m-0 text-[15px]">Visite osservate · {s.sessioni.length}</h3>
       {!s.sessioni.length && <p className="m-0 text-[13px]">Nessuna visita osservata registrata. Il conteggio precedente rimane distinto.</p>}
       <ul className="m-0 flex min-w-0 list-none flex-col gap-3 p-0">{s.sessioni.map(v => <li key={v.id} className="flex min-w-0 flex-col gap-2 border-t border-border pt-2 text-[13px]">
-        <strong>{quando(v.momento)} · {v.attiva ? 'fonti attive' : 'senza fonti attive'}{v.orfana ? ' · riferimento guida mancante' : ''}</strong><code className="break-all text-[11px]">Sessione {v.id} · attività {v.attivita}</code>
+        <strong>{quando(v.momento)} · {v.attiva ? 'fonti attive' : 'senza fonti attive'}{v.orfana ? ' · riferimento guida mancante' : ''}</strong>
         <span>Turno {v.turno.ordine} · {v.turno.origine === 'creato' ? 'creato da questa sessione' : v.turno.origine === 'raccordato' ? 'preesistente raccordato: non posseduto dalla sessione' : 'quota compresa nel conteggio storico'}{v.turno.revocato ? ' · turno revocato successivamente' : ''}.</span>
-        <details><summary className="touch">Fonti e provenienze</summary><FontiSessione sessione={v} /><div className="flex flex-wrap gap-2 pt-2">{v.fonti.map(f => <button type="button" className="btn btn-ghost touch" key={f.id} disabled={!!pendente} onClick={() => rimuovi('rimuovi-fonte', f.id, 'Rimuovi soltanto questa fonte della visita')}>Rivedi rimozione fonte {f.id.slice(0, 8)}</button>)}</div></details>
+        <details><summary className="touch">Fonti e provenienze</summary><FontiSessione sessione={v} /><div className="flex flex-wrap gap-2 pt-2">{v.fonti.map(f => <button type="button" className="btn btn-ghost touch" key={f.id} disabled={!!pendente} onClick={() => rimuovi('rimuovi-fonte', f.id, 'Rimuovi soltanto questa fonte della visita')}>Rivedi rimozione {f.fonte.tipo === 'manuale' ? 'della dichiarazione manuale' : 'della fonte del Diario'}</button>)}</div></details>
         <RiepilogoOsservazionePesca osservazione={v.osservazione.dati} /><ProfiliSessionePesca punto={v.punto} profili={v.profili} profiliPianificazione={v.profiliPianificazione} /><BeneficiPesca benefici={v.benefici} />
         {!!v.avvisi.length && <ul className="m-0 pl-4 text-warning">{v.avvisi.map((a, i) => <li key={i}>{a}</li>)}</ul>}
-        <details><summary className="touch">Revisioni dell’osservazione · {v.revisioni.length}</summary><ul className="m-0 flex min-w-0 list-none flex-col gap-2 p-0">{v.revisioni.map(r => <li className="border-t border-border pt-2" key={r.id}><strong>Versione {r.versione}{r.id === v.osservazione.id ? ' · corrente' : ''}</strong><code className="block break-all text-[11px]">Osservazione {r.id}{r.precedenteId ? ` · precedente ${r.precedenteId}` : ''}</code><RiepilogoOsservazionePesca osservazione={r.dati} /></li>)}</ul></details>
+        <details><summary className="touch">Revisioni dell’osservazione · {v.revisioni.length}</summary><ul className="m-0 flex min-w-0 list-none flex-col gap-2 p-0">{v.revisioni.map(r => <li className="border-t border-border pt-2" key={r.id}><strong>Versione {r.versione}{r.id === v.osservazione.id ? ' · corrente' : ''}</strong><RiepilogoOsservazionePesca osservazione={r.dati} /></li>)}</ul></details>
         <div className="flex flex-wrap gap-2"><button type="button" className="btn btn-secondary touch" disabled={!!pendente} onClick={() => setEditor({ tipo: 'osservazione', sessione: v })}>Correggi l’osservazione</button><button type="button" className="btn btn-ghost touch" disabled={!!pendente} onClick={() => rimuovi('rimuovi-sessione', v.id, 'Rimuovi la visita e tutte le sue fonti')}>Rivedi rimozione completa</button></div>
       </li>)}</ul>
       <h3 className="m-0 text-[15px]">Fatti canonici e fonti temporali</h3>
@@ -219,7 +224,7 @@ function RegistroPescaNelContesto({ partitaId, onCambiato }: { partitaId: number
       })}</ul>
       <h3 className="m-0 text-[15px]">Acquisti effettivi di esca · {s.acquistiEsca.length}</h3>
       {!s.acquistiEsca.length && <p className="m-0 text-[13px]">Nessun acquisto registrato; possesso e uso restano osservazioni delle visite.</p>}
-      <ul className="m-0 flex min-w-0 list-none flex-col gap-3 p-0">{s.acquistiEsca.map(a => <li key={a.id} className="flex min-w-0 flex-col gap-2 border-t border-border pt-2 text-[13px]"><strong>{quando(a.momento)} · {a.quantita} Boilie sospetto · {a.costo.toLocaleString('it-IT')} punti pesca{a.attivo ? '' : ' · rimosso'}</strong><code className="break-all text-[11px]">Acquisto esca {a.id}</code><BeneficiPesca benefici={a.benefici} />{a.attivo && <button type="button" className="btn btn-ghost touch self-start" disabled={!!pendente} onClick={() => rimuovi('rimuovi-acquisto-esca', a.id, 'Rimuovi questo acquisto di esca')}>Rivedi rimozione dell’acquisto</button>}</li>)}</ul>
+      <ul className="m-0 flex min-w-0 list-none flex-col gap-3 p-0">{s.acquistiEsca.map(a => <li key={a.id} className="flex min-w-0 flex-col gap-2 border-t border-border pt-2 text-[13px]"><strong>{quando(a.momento)} · {a.quantita} Boilie sospetto · {a.costo.toLocaleString('it-IT')} punti pesca{a.attivo ? '' : ' · rimosso'}</strong><BeneficiPesca benefici={a.benefici} />{a.attivo && <button type="button" className="btn btn-ghost touch self-start" disabled={!!pendente} onClick={() => rimuovi('rimuovi-acquisto-esca', a.id, 'Rimuovi questo acquisto di esca')}>Rivedi rimozione dell’acquisto</button>}</li>)}</ul>
       <Link className="touch self-start" to="/impostazioni">Apri il Cestino e i gesti conservati</Link>
       {editor && <CompilaGestoPesca key={editor.tipo === 'osservazione' ? `${editor.tipo}:${editor.sessione.id}:${editor.sessione.osservazione.id}` : editor.tipo === 'fatto' ? `${editor.tipo}:${editor.evento}` : editor.tipo} partitaId={partitaId} editor={editor} stato={s} aperta={pronto === null} onChiudi={() => setEditor(null)} onCambiato={cambiato} onPronto={setPronto} />}
     </>}

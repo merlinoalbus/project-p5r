@@ -286,7 +286,8 @@ export function gestoPendenteNelloScope(partitaId: number | null, scope: ScopeGe
   return store.getState().gesti.find(g => g.partitaId === partitaId && pendente(g) && ambiti(g.payload, g.bersaglio).some(k => a.includes(k))) ?? null;
 }
 const cambia = (g: GestoPartita) => scrivi(store.getState().gesti.map(x => x.id === g.id ? g : x));
-const scopeTesto = (g: GestoPartita) => `${g.partitaId === null ? 'Guida' : `Partita ${g.partitaId}`} · ${g.bersaglio.etichetta} · operazione ${g.operazioneId}`;
+/** Come si chiama il gesto nelle notifiche: solo parole (che cosa si stava facendo), mai identificativi tecnici (numero di partita, operazione). */
+const scopeTesto = (g: GestoPartita) => g.bersaglio.etichetta;
 async function invia(g: GestoPartita, recupero = false): Promise<Ricevuta> {
   if (inVolo.has(g.id)) throw new Error('Questa operazione è ancora in invio.');
   if (g.stato === 'riuscita' && g.ricevuta !== null) { if (!g.ricevutaPersistita) cambia({ ...g, ricevutaPersistita: true }); return g.ricevuta; }
