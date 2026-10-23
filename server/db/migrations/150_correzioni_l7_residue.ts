@@ -13,8 +13,9 @@
 //      · costo «Maschera del ladro» dell'Ofuda della magia (19–24/9): `regalo/maschera-del-ladro` (The Gamer: la Thief Mask si compra una
 //        volta a settimana al Discount Rocinante, 2.000 ¥); le due versioni accessorio vengono scartate.
 //   5. Carta abilità Media (voce di Madarame, Atrio): la 144 ha scritto quantità 1 e la nota diceva «indicata dall'utente alla conferma», che
-//      non è vero. La quantità resta 1: la guida AGS dice «una Carta abilità Media» (Samurai Gamers: «Media Skill Card», senza numero;
-//      nessuna fonte dà un numero esplicito, certezza media). Si corregge solo la nota della proposta, che ora dice da dove viene il valore.
+//      non è vero. La quantità resta 1: è ricavata dal singolare del testo della voce («Carta abilità Media.»), e la guida AGS dice «una Carta
+//      abilità Media» (Samurai Gamers: «Media Skill Card», senza numero; nessuna fonte dà un numero esplicito). Si corregge solo la nota della
+//      proposta, che ora dice da dove viene il valore; la provenienza resta anche nel registro (dati_guida).
 // Conservativa: ogni valore si scrive solo se è ancora esattamente quello atteso; nulla del lavoro dell'utente cambia. Idempotente.
 // Non tocca `partite.db`.
 // ============================================================
@@ -42,7 +43,7 @@ const PROPOSTE: ReadonlyArray<{ tipo: 'articolo'; riga: string; gruppo: string; 
 ];
 
 const NOTA_FALSA = 'Quantità indicata dall’utente alla conferma.';
-const NOTA_VERA = 'Quantità 1 dalla guida AGS del Palazzo di Madarame («una Carta abilità Media», miniboss dell’Atrio); nessuna fonte dà un numero esplicito, certezza media.';
+const NOTA_VERA = 'Quantità 1 ricavata dal singolare del testo della voce («Carta abilità Media.»), che la guida AGS del Palazzo di Madarame conferma con «una Carta abilità Media» (miniboss dell’Atrio); nessuna fonte dà un numero esplicito.';
 
 function identita(db: AppDatabase, adesso: string, esiti: Esito[]): void {
   for (const c of IDENTITA) {
@@ -100,7 +101,7 @@ function cartaMedia(db: AppDatabase, adesso: string, esiti: Esito[]): void {
   if (p.nota?.includes(NOTA_VERA)) { esiti.push({ voce, esito: 'gia-fatta' }); return; }
   if (!p.nota?.includes(NOTA_FALSA)) { esiti.push({ voce, esito: 'saltata', motivo: 'la nota non contiene la frase da correggere' }); return; }
   const r = db.prepare(`UPDATE main.proposta_abbinamento SET nota = ?, updated_at = ? WHERE ${dove} AND nota = ?`).run(p.nota.replace(NOTA_FALSA, NOTA_VERA), adesso, p.nota);
-  esiti.push(r.changes === 1 ? { voce, esito: 'applicata' } : { voce, esito: 'saltata', motivo: 'cambiata nel frattempo' });
+  esiti.push(r.changes === 1 ? { voce, esito: 'applicata', motivo: 'quantità dal singolare del testo della voce' } : { voce, esito: 'saltata', motivo: 'cambiata nel frattempo' });
 }
 
 export const migration150: Migration = {
