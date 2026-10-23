@@ -5,10 +5,11 @@
 import { prepared } from '../db/dbService.js';
 import { partitaNonTrovata } from './verificaPartita.js';
 import { indiceGiornoScolastico } from './domandeService.js';
-import { allerteDiOgniGiorno } from './meteoService.js';
+import { allerteDiOgniGiorno, testoMeteo } from './meteoService.js';
 import type { CalendarioDto, GiornoCalendarioDto, SettimanaGuidaDto } from '../../shared/types.js';
+import { giornoDellaSettimana } from '../../shared/date.js';
 
-interface RigaGiorno { data: string; ordine: number; giorno_settimana: string; meteo: string | null; tempo_libero_json: string | null; settimana: number | null }
+interface RigaGiorno { data: string; ordine: number; meteo_giorno: string | null; meteo_sera: string | null; nota_meteo: string | null; tempo_libero_json: string | null; settimana: number | null }
 interface RigaEvento { id: number; data: string; tipo: GiornoCalendarioDto['eventi'][number]['tipo']; titolo: string; dettaglio: string; fonte: string }
 type VoceCollegata = GiornoCalendarioDto['eventi'][number]['voci'][number];
 
@@ -31,12 +32,10 @@ export function eventiDellaVoce(uid: string): Array<{ id: number; data: string; 
     WHERE l.voce_uid = ? ORDER BY e.data, e.ordine`).all(uid) as Array<{ id: number; data: string; tipo: string; titolo: string; certezza: 'C' | 'D' }>;
 }
 
-const GIORNI: Record<string, string> = { Lunedi: 'Lunedì', Martedi: 'Martedì', Mercoledi: 'Mercoledì', Giovedi: 'Giovedì', Venerdi: 'Venerdì', Sabato: 'Sabato', Domenica: 'Domenica' };
-
-/** Un giorno del calendario come DTO: nome del giorno con l'accento (`GIORNI`, se noto), tempo libero dal JSON, gli eventi già raccolti per quella data e le sue allerte del gioco (2026-10-12). */
+/** Un giorno del calendario come DTO: il giorno della settimana calcolato dalla data (R9-16), tempo libero dal JSON, gli eventi già raccolti per quella data e le sue allerte del gioco (2026-10-12). */
 function giornoDto(g: RigaGiorno, eventi: RigaEvento[], allerte: GiornoCalendarioDto['allerte'], voci: Map<number, VoceCollegata[]>): GiornoCalendarioDto {
   return {
-    data: g.data, giornoSettimana: GIORNI[g.giorno_settimana] ?? g.giorno_settimana, meteo: g.meteo, settimana: g.settimana,
+    data: g.data, giornoSettimana: giornoDellaSettimana(g.data) ?? '', meteo: testoMeteo(g), settimana: g.settimana,
     tempoLibero: g.tempo_libero_json ? (JSON.parse(g.tempo_libero_json) as { giorno: boolean; sera: boolean }) : null,
     eventi: eventi.map((e) => ({ id: e.id, tipo: e.tipo, titolo: e.titolo, dettaglio: e.dettaglio, fonte: e.fonte, voci: voci.get(e.id) ?? [] })),
     allerte,
@@ -57,8 +56,8 @@ export function calendario(partitaId?: number, mese?: string): CalendarioDto {
     dataGioco = p.data_gioco;
   }
   const giorni = (mese
-    ? prepared("SELECT * FROM giorno_calendario WHERE substr(data, 1, 2) = ? ORDER BY ordine").all(mese)
-    : prepared('SELECT * FROM giorno_calendario ORDER BY ordine').all()) as RigaGiorno[];
+    ? prepared("SELECT * FROM giorno WHERE substr(data, 1, 2) = ? ORDER BY ordine").all(mese)
+    : prepared('SELECT * FROM giorno ORDER BY ordine').all()) as RigaGiorno[];
   const eventiTutti = prepared('SELECT * FROM evento_calendario ORDER BY data, ordine').all() as RigaEvento[];
   const perData = new Map<string, RigaEvento[]>();
   for (const e of eventiTutti) {
@@ -68,9 +67,9 @@ export function calendario(partitaId?: number, mese?: string): CalendarioDto {
   const allerte = allerteDiOgniGiorno();
   const voci = vociDegliEventi();
   const oggiIdx = dataGioco ? indiceGiornoScolastico(dataGioco) : null;
-  const oggiRiga = dataGioco ? (prepared('SELECT * FROM giorno_calendario WHERE data = ?').get(dataGioco) as RigaGiorno | undefined) : undefined;
+  const oggiRiga = dataGioco ? (prepared('SELECT * FROM giorno WHERE data = ?').get(dataGioco) as RigaGiorno | undefined) : undefined;
   // Giorni reali fra due date: differenza di `ordine` (i giorni del seed sono consecutivi), non l'indice di ordinamento mese×31+giorno.
-  const ordineDi = new Map((prepared('SELECT data, ordine FROM giorno_calendario').all() as Array<{ data: string; ordine: number }>).map((r) => [r.data, r.ordine]));
+  const ordineDi = new Map((prepared('SELECT data, ordine FROM giorno').all() as Array<{ data: string; ordine: number }>).map((r) => [r.data, r.ordine]));
   const oggiOrdine = dataGioco ? ordineDi.get(dataGioco) ?? null : null;
   const scadenze = oggiIdx === null || oggiOrdine === null ? [] : eventiTutti
     .filter((e) => (e.tipo === 'scadenza' || e.tipo === 'esame') && indiceGiornoScolastico(e.data) >= oggiIdx)
@@ -83,6 +82,6 @@ export function calendario(partitaId?: number, mese?: string): CalendarioDto {
     dataGioco,
     oggi: oggiRiga ? giornoDto(oggiRiga, perData.get(oggiRiga.data) ?? [], allerte.get(oggiRiga.data) ?? [], voci) : null,
     prossimeScadenze: scadenze,
-    mesi: (prepared('SELECT DISTINCT substr(data, 1, 2) AS m FROM giorno_calendario ORDER BY ordine').all() as Array<{ m: string }>).map((r) => r.m),
+    mesi: (prepared('SELECT DISTINCT substr(data, 1, 2) AS m FROM giorno ORDER BY ordine').all() as Array<{ m: string }>).map((r) => r.m),
   };
 }

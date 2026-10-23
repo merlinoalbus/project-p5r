@@ -16,11 +16,17 @@ import { verificaPartita } from './verificaPartita.js';
 import { ALLERTA_PIOGGIA, fasceDellaGuida, type MeteoPartita } from '../../shared/meteoPartita.js';
 import type { AllertaGiornoDto, FasciaGioco, MeteoFasciaDto, MeteoGiornoDto } from '../../shared/types.js';
 
-/** Il testo del meteo della guida per il giorno: il calendario, e il percorso dove il calendario tace. */
+/** Il meteo del giorno come testo, nelle due fasce («Sereno/Pioggia»; una sola parola se coincidono) con la nota fra parentesi (R9-15). */
+export function testoMeteo(g: { meteo_giorno: string | null; meteo_sera: string | null; nota_meteo: string | null }): string | null {
+  if (g.meteo_giorno === null && g.meteo_sera === null) return null;
+  const base = g.meteo_giorno === g.meteo_sera || g.meteo_sera === null ? g.meteo_giorno : g.meteo_giorno === null ? g.meteo_sera : `${g.meteo_giorno}/${g.meteo_sera}`;
+  return g.nota_meteo ? `${base} (${g.nota_meteo})` : base;
+}
+
+/** Il testo del meteo della guida per il giorno: dal giorno unico (R9-15), che ha già fuso calendario e percorso. */
 function testoMeteoGuida(data: string): string | null {
-  const r = prepared(`SELECT COALESCE(c.meteo, p.meteo) AS meteo FROM (SELECT ? AS data) d
-    LEFT JOIN giorno_calendario c ON c.data = d.data LEFT JOIN giorno_percorso p ON p.data = d.data`).get(data) as { meteo: string | null } | undefined;
-  return r?.meteo ?? null;
+  const r = prepared('SELECT meteo_giorno, meteo_sera, nota_meteo FROM giorno WHERE data = ?').get(data) as { meteo_giorno: string | null; meteo_sera: string | null; nota_meteo: string | null } | undefined;
+  return r ? testoMeteo(r) : null;
 }
 
 /** Il meteo segnato dall'utente nella partita per il giorno, fascia per fascia (null dove non ha segnato niente). */
@@ -93,7 +99,7 @@ export function meteoOra(partitaId: number, data: string | null, momento: Fascia
 /** Segna il meteo di un giorno: per ogni fascia indicata un meteo, o `null` per tornare a quello della guida. */
 export function impostaMeteo(partitaId: number, data: string, mod: { giorno?: MeteoPartita | null; sera?: MeteoPartita | null }): MeteoGiornoDto {
   verificaPartita(partitaId);
-  if (!prepared('SELECT 1 FROM giorno_calendario WHERE data = ?').get(data)) throw httpErrors.notFound('giorno-non-trovato', `Il ${data} non è un giorno del calendario di gioco.`);
+  if (!prepared('SELECT 1 FROM giorno WHERE data = ?').get(data)) throw httpErrors.notFound('giorno-non-trovato', `Il ${data} non è un giorno del calendario di gioco.`);
   const prima = scelto(partitaId, data);
   const giorno = mod.giorno === undefined ? prima.giorno : mod.giorno;
   const sera = mod.sera === undefined ? prima.sera : mod.sera;

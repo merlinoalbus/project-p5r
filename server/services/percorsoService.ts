@@ -14,6 +14,7 @@ import type { GiornoAvanzatoDto, GiornoCorrenteDto, PercorsoGiornoDto, PercorsoI
 import { confidenti, leggiPartita } from './partiteService.js';
 import { conteggiGiornate, righeDelGiorno, spuntePartita, vociDelGiorno } from './giornataService.js';
 import { allerteDelGiorno, meteoDelGiorno } from './meteoService.js';
+import { giornoDellaSettimana } from '../../shared/date.js';
 
 interface Riga { data: string; ordine: number; giorno_settimana: string; fase: string; trama: string; vincoli_json: string; meteo: string | null; avvisi_json: string; fonte: string; coperto: number }
 
@@ -22,6 +23,9 @@ function dataCorrente(partitaId: number | undefined): string | null {
   if (partitaId === undefined) return null;
   return (prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null } | undefined)?.data_gioco ?? null;
 }
+
+/** R9-16: il giorno della settimana si calcola dalla data; la guida del percorso lo mostra in sigla («sab»), come prima. */
+const sigla = (data: string): string | null => giornoDellaSettimana(data)?.slice(0, 3).toLowerCase() ?? null;
 
 /** Indice di tutti i giorni (leggero) con conteggi delle azioni e delle azioni fatte; giorno corrente della partita.
  *  Le azioni contate sono le voci che si spuntano (eventi, scadenze e promemoria no). */
@@ -32,7 +36,7 @@ export function indicePercorso(partitaId?: number): PercorsoIndiceDto {
   const giorni = righe.map((r) => {
     const c = conteggi.get(r.data) ?? { azioni: 0, fatte: 0 };
     return {
-      giorno: r.data, giornoSettimana: r.giorno_settimana, fase: r.fase, meteo: r.meteo, azioni: c.azioni, fatte: c.fatte,
+      giorno: r.data, giornoSettimana: sigla(r.data) ?? r.giorno_settimana, fase: r.fase, meteo: r.meteo, azioni: c.azioni, fatte: c.fatte,
       avvisi: (JSON.parse(r.avvisi_json) as string[]).length, coperto: r.coperto === 1,
     };
   });
@@ -49,7 +53,7 @@ export function giornoPercorso(data: string, partitaId?: number): PercorsoGiorno
   const prec = prepared('SELECT data FROM giorno_percorso WHERE ordine < ? ORDER BY ordine DESC LIMIT 1').get(r.ordine) as { data: string } | undefined;
   const succ = prepared('SELECT data FROM giorno_percorso WHERE ordine > ? ORDER BY ordine ASC LIMIT 1').get(r.ordine) as { data: string } | undefined;
   return {
-    giorno: r.data, giornoSettimana: r.giorno_settimana, fase: r.fase, trama: r.trama, vincoli: JSON.parse(r.vincoli_json) as string[], meteo: r.meteo, azioni, avvisi: JSON.parse(r.avvisi_json) as string[], fonte: r.fonte, coperto: r.coperto === 1,
+    giorno: r.data, giornoSettimana: sigla(r.data) ?? r.giorno_settimana, fase: r.fase, trama: r.trama, vincoli: JSON.parse(r.vincoli_json) as string[], meteo: r.meteo, azioni, avvisi: JSON.parse(r.avvisi_json) as string[], fonte: r.fonte, coperto: r.coperto === 1,
     precedente: prec?.data ?? null, successivo: succ?.data ?? null, dataCorrente: dataCorrente(partitaId), fatte: azioni.filter((a) => a.fatta).length,
     meteoPartita: partitaId ? meteoDelGiorno(partitaId, data) : null,
     allerte: allerteDelGiorno(data),

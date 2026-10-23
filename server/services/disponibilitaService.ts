@@ -32,13 +32,9 @@ import type { RigaInvito } from './condizioni/condizioneEffettiva.js';
 import { valutaInsieme, valutaInsiemeSpillo, type RequisitoDisponibilita } from './condizioni/valutatore.js';
 import type { DisponibilitaDto, SemaforoRequisitoDto } from '../../shared/types.js';
 import { lettureCompletate } from './lettureCompletate.js';
+import { giornoDellaSettimanaPiatto } from '../../shared/date.js';
 
 export type { RequisitoDisponibilita };
-
-/** Testo piatto: minuscolo, senza accenti, spazi normalizzati. */
-function piatto(testo: string): string {
-  return testo.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
-}
 
 // l'ordine del calendario di gioco (aprile → marzo) e la lettura della data di sblocco dei quartieri stanno nel modulo condiviso
 export { ordineGioco, dataSbloccoQuartiere };
@@ -106,8 +102,8 @@ export function arcoAllaData(dataGioco: string | null, finestre: ReadonlyMap<str
 /** Il giorno della settimana di una data di gioco, in minuscolo senza accenti («lunedi»), o null se il calendario non lo dice. */
 function giornoDellaSettimana(data: string | null): string | null {
   if (!data) return null;
-  const g = (prepared('SELECT giorno_settimana FROM giorno_calendario WHERE data = ?').get(data) as { giorno_settimana: string | null } | undefined)?.giorno_settimana ?? null;
-  return g ? piatto(g) : null;
+  // R9-16: il giorno della settimana si calcola dalla data; il giorno deve essere uno del calendario di gioco
+  return prepared('SELECT 1 FROM giorno WHERE data = ?').get(data) ? giornoDellaSettimanaPiatto(data) : null;
 }
 
 /** Lo stato della partita che serve al valutatore: quello dei semafori (ranghi dei Confidenti, Doti, data di gioco…) più

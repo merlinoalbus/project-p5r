@@ -4,6 +4,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { registraEvento, annullaEventiFonteAcquistoNellaTransazione } from './storicoService.js';
 import { eDote } from '../../shared/doti.js';
+import { giornoDellaSettimanaPiatto } from '../../shared/date.js';
 import { ARTICOLO_AOJIRU, PREZZO_AOJIRU, eOffertaAojiru, prossimaVarianteAojiru } from '../../shared/acquisti.js';
 import type { AnteprimaRegistrazioneAcquistoDto, AnteprimaRimozioneAcquistoDto, DatiConsumoAojiru, FonteAcquisto, IdentitaAcquisto, NuovaRegistrazioneAcquisto, PresenzaStoricaAcquistoDto, ProvenienzaAcquistoDto, RegistrazioneAcquistoDto, RicevutaOperazioneAcquistoDto, RichiestaAnnullaProvenienza, RichiestaAnteprimaAnnullaProvenienza, RichiestaAnteprimaRimozioneLegacy, RichiestaRegistraAcquisto, RichiestaRimozioneLegacy, StatoAcquistiArticoloDto, StatoAcquistiDto } from '../../shared/acquisti.js';
 import type { DisponibilitaDto } from '../../shared/types.js';
@@ -104,8 +105,8 @@ function preparaRegistrazione(partita:number,r:NuovaRegistrazioneAcquisto,porte?
   verificaPartita(partita);
   if(!eDote(r.variante)||!(r.fortuna===null||typeof r.fortuna==='boolean'))throw httpErrors.badRequest('consumo-non-valido','Variante e Fortuna devono essere dichiarate esplicitamente.');
   const o=offerta(r.articolo),fonte=verificaFonte(partita,r),stato=leggiAcquistiPartita(partita),acquisti=acquistiArticolo(partita,r.articolo,stato);
-  const g=prepared('SELECT giorno_settimana FROM main.giorno_calendario WHERE data=?').get(r.momento.giorno) as {giorno_settimana:string|null}|undefined;
-  if(!g||g.giorno_settimana?.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()!=='domenica')throw httpErrors.conflict('momento-non-compatibile','Il momento dichiarato non è una domenica del calendario: correggi il momento reale, la voce resta invariata.');
+  const g=prepared('SELECT 1 FROM main.giorno WHERE data=?').get(r.momento.giorno);
+  if(!g||giornoDellaSettimanaPiatto(r.momento.giorno)!=='domenica')throw httpErrors.conflict('momento-non-compatibile','Il momento dichiarato non è una domenica del calendario: correggi il momento reale, la voce resta invariata.');
   const p=prepared('SELECT data_gioco,fascia_gioco,updated_at FROM utente.partita WHERE id=?').get(partita) as {data_gioco:string|null;fascia_gioco:string;updated_at:string};
   const corrente=p.data_gioco===r.momento.giorno&&p.fascia_gioco===r.momento.fascia;
   let valutazione:unknown=null;
