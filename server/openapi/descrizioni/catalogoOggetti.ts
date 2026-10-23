@@ -45,24 +45,6 @@ export const DESCRIZIONI_CATALOGO_OGGETTI: DescrizioniArea = {
     senzaCorpo: true,
     errori: [[404, 'oggetto-non-trovato']],
   },
-  'GET /api/catalogo-oggetti/proposte': {
-    sommario: 'Elenca abbinamenti, rettifiche e fusioni da approvare',
-    descrizione: 'Filtri per tipo, chiave della riga e stato; lo stato predefinito è da-approvare. Ogni proposta mostra fonte/testo attuali, identità candidata, gruppo di alternative, quantità, nota del contenuto, motivo, certezza e rettifiche commerciali previste. Le fonti dei premi e delle voci sono lette in blocco. Una lettura non conferma né modifica la fonte. Un gruppo è un contenuto distinto, non l’insieme degli oggetti di tutta la voce.',
-    risposta: 'Elenco di PropostaAbbinamentoDto. Le proposte di baratto composto espongono nomeOfferta, costo per chiave, ricevuti con quantità/note e notaOfferta; riferimenti letti in blocco. La capsula candidata è quella da cedere, non un risultato o un oggetto-bundle.',
-    errori: [[409, 'categoria-proposta-non-valida'], [409, 'proposta-non-leggibile'], [409, 'proposta-non-valida']],
-  },
-  'POST /api/catalogo-oggetti/proposte/conferma': {
-    sommario: 'Conferma una proposta e le sole alternative del suo gruppo',
-    descrizione: 'Identifica tipo/chiave della riga, oggetto candidato e gruppo. Il corpo storico senza gruppo si accetta solo se non ambiguo. Applica in transazione e scarta solo gli altri candidati dello stesso gruppo; una conferma già applicata è idempotente. Conserva quantità e nota originali, compresa la quantità null del prodotto di ricetta. Un contenuto distinto può sommarsi a un legame già presente; la resa di ricetta non è additiva. Le note precedenti non vengono cancellate. Le rettifiche con confronto del valore precedente rifiutano una riga cambiata nel frattempo. La fusione passa dal cestino e non può perdere avanzamenti di letture distinte.',
-    risposta: '{ confermata: true }. Prima della conferma si confrontano fonte e collegamenti correnti con lo snapshot di generazione: una fonte cambiata o uno snapshot assente produce 409 fonte-cambiata-dopo-proposta. Un baratto composto crea in transazione una sola offerta con catalogo_chiave null e risultati in ricompensa_oggetto (fonte articolo); non scrive acquisti né contatori. Rifiuta chiavi occupate, risultati preesistenti o riferimenti non disponibili. Mothman conserva i premi come alternative annotate, non dedotte dalla spunta.',
-    errori: [[404, 'proposta-non-trovata'], [409, 'gruppo-proposta-richiesto'], [409, 'proposta-scartata'], [409, 'riga-cambiata-dopo-proposta'], [409, 'fonte-cambiata-dopo-proposta'], [409, 'fusione-letture-distinte'], [409, 'fusione-proposte-incompatibili'], [409, 'fusione-troppi-alias'], [409, 'fusione-costo-non-valido'], [409, 'articolo-proposta-occupato'], [409, 'risultati-proposta-occupati'], [409, 'baratto-proposta-incompatibile'], [409, 'fusione-proposta-non-valida'], [409, 'fusione-risultati-alternativi']],
-  },
-  'POST /api/catalogo-oggetti/proposte/scarta': {
-    sommario: 'Scarta una proposta senza applicarla alla fonte',
-    descrizione: 'Scarta soltanto il candidato identificato, non tutti gli oggetti della voce né le altre alternative. Una proposta già confermata non si può scartare per annullarne gli effetti: si modifica il legame o si usa il ripristino del cestino per una fusione.',
-    risposta: '{ scartata: true }',
-    errori: [[404, 'proposta-non-trovata'], [409, 'gruppo-proposta-richiesto'], [409, 'proposta-gia-confermata']],
-  },
   'PUT /api/catalogo-oggetti/legami': {
     sommario: 'Collega, sostituisce o toglie un riferimento per chiave',
     descrizione: 'Il tipo della riga distingue articolo, regalo, voce, materiale di ricetta, ricompensa e fusione di catalogo. Per una ricompensa la chiave della riga è tipoFonte/chiaveFonte; il Covo usa il nome completo della riga della guida. Quantità positive intere, oppure null solo per ricompensa di ricetta. Nota omessa conserva quella del legame; null manuale esplicito la cancella. precedente_catalogo_chiave richiede che il legame esista e non consente di sovrascrivere un altro contenuto già presente. proposta_catalogo_chiave sceglie un’alternativa preservando quantità/nota della proposta se omesse e risolve soltanto il gruppo scelto. Un’identità nascosta già collegata può essere conservata, non scelta come nuovo contenuto. Togliere e scegliere un’alternativa sono gesti distinti. Non sincronizza testo della guida, pin o avanzamento.',

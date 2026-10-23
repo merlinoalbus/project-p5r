@@ -275,13 +275,6 @@ export function confermaPropostaOggetto(dati: DatiPropostaOggetto): { confermata
   return { confermata: true };
 }
 
-export function scartaPropostaOggetto(dati: DatiPropostaOggetto): { scartata: true } {
-  const p = leggiProposta(dati);
-  if (p.stato === 'confermata') throw httpErrors.conflict('proposta-gia-confermata', 'La proposta è già applicata: cambia il legame o ripristina la fusione dal cestino.');
-  marca(p, 'scartata');
-  return { scartata: true };
-}
-
 export function impostaLegameOggetto(input: DatiLegameOggetto): { salvato: true } {
   getDb().transaction(() => {
     if (input.togli && input.proposta_catalogo_chiave !== undefined) throw httpErrors.badRequest('gesti-legame-distinti', 'Rimozione e scelta alternativa sono due gesti distinti.');

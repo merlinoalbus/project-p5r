@@ -45,10 +45,6 @@ export const queryCatalogoOggetti = z.object({
   categoria: z.enum(CATEGORIE_OGGETTO).optional(), q: z.string().trim().max(300).optional(),
   partita: z.coerce.number().int().positive().optional(), nascosti: z.enum(['1']).optional(),
 });
-export const queryProposteOggetto = z.object({
-  riga_tipo: z.enum(TIPI_PROPOSTA_OGGETTO).optional(), riga_chiave: chiave.optional(),
-  stato: z.enum(['da-approvare', 'confermata', 'scartata']).optional(),
-});
 export const bodyPropostaOggetto = z.object({ riga_tipo: z.enum(TIPI_PROPOSTA_OGGETTO), riga_chiave: chiave, catalogo_chiave: chiave.nullable(), gruppo: z.string().max(600).default('') }).strict();
 export const bodyLegameOggetto = bodyPropostaOggetto.extend({
   catalogo_chiave: chiave,

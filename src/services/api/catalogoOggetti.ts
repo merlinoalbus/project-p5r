@@ -1,5 +1,5 @@
 import type { CategoriaOggetto } from '../../../shared/catalogo';
-import type { CatalogoOggettoDto, DatiLegameOggettoDto, DatiNuovoOggettoDto, NotaStoricaOfferta, OggettoDettaglioDto, PropostaAbbinamentoDto, SceltaAbbinamentoOggettoDto, TipoPropostaOggetto } from '../../types';
+import type { CatalogoOggettoDto, DatiLegameOggettoDto, DatiNuovoOggettoDto, NotaStoricaOfferta, OggettoDettaglioDto } from '../../types';
 import { apiDelete, apiGet, apiPost, apiPut, queryString } from './_helpers';
 
 const percorso = (chiave: string) => `/catalogo-oggetti/${chiave.split('/').map(encodeURIComponent).join('/')}`;
@@ -11,10 +11,6 @@ export const creaOggettoCatalogo = (dati: DatiNuovoOggettoDto): Promise<Catalogo
 export const aggiornaOggettoCatalogo = (chiave: string, dati: Partial<DatiNuovoOggettoDto>): Promise<CatalogoOggettoDto> => apiPut(percorso(chiave), dati);
 export const ripristinaOggettoCatalogo = (chiave: string): Promise<CatalogoOggettoDto> => apiPost(`${percorso(chiave)}/ripristina`, {});
 export const eliminaOggettoCatalogo = (chiave: string): Promise<{ eliminato: true; chiave: string }> => apiDelete(percorso(chiave));
-export const getProposteOggetti = (filtro: { riga_tipo?: TipoPropostaOggetto; riga_chiave?: string; stato?: PropostaAbbinamentoDto['stato'] } = {}): Promise<PropostaAbbinamentoDto[]> =>
-  apiGet(`/catalogo-oggetti/proposte${queryString(filtro)}`);
-export const confermaAbbinamentoOggetto = (dati: SceltaAbbinamentoOggettoDto): Promise<{ confermata: true }> => apiPost('/catalogo-oggetti/proposte/conferma', dati);
-export const scartaAbbinamentoOggetto = (dati: SceltaAbbinamentoOggettoDto): Promise<{ scartata: true }> => apiPost('/catalogo-oggetti/proposte/scarta', dati);
 export const impostaLegameOggetto = (dati: DatiLegameOggettoDto): Promise<{ salvato: true }> => apiPut('/catalogo-oggetti/legami', dati);
 /** F6: modifica una nota storica della fonte; `testoAttuale` è quello mostrato (409 se nel frattempo è cambiato). */
 export const modificaNotaStorica = (chiave: string, dati: { testo: string; fonte: string; testoAttuale: string }): Promise<NotaStoricaOfferta> =>

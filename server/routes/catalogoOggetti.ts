@@ -3,13 +3,13 @@ import type { z } from 'zod';
 import { validate } from '../middleware/validate.js';
 import { dettaglioOggetto, elencaCatalogoOggetti } from '../services/catalogoOggettiService.js';
 import { aggiornaOggetto, creaOggetto, eliminaOggetto, ripristinaOggetto } from '../services/catalogoOggettiScritture.js';
-import { confermaPropostaOggetto, elencaProposteOggetti, impostaLegameOggetto, scartaPropostaOggetto } from '../services/catalogoOggettiProposte.js';
+import { impostaLegameOggetto } from '../services/catalogoOggettiProposte.js';
 import { verificaPartita } from '../services/verificaPartita.js';
 import { z as schema } from 'zod';
 import { ripristinaCostoRegalo } from '../services/costoRegaloService.js';
 import { modificaNotaStorica, ripristinaNotaStorica } from '../services/noteStoricheService.js';
-import { bodyLegameOggetto, bodyNuovoOggetto, bodyOggetto, bodyPropostaOggetto, paramsOggetto, queryCatalogoOggetti, queryProposteOggetto,
-  type DatiCatalogoOggetto, type DatiLegameOggetto, type DatiPropostaOggetto } from '../schemas/catalogoOggetti.js';
+import { bodyLegameOggetto, bodyNuovoOggetto, bodyOggetto, paramsOggetto, queryCatalogoOggetti,
+  type DatiCatalogoOggetto, type DatiLegameOggetto } from '../schemas/catalogoOggetti.js';
 
 const router = Router();
 type QueryCatalogo = z.infer<typeof queryCatalogoOggetti>;
@@ -33,15 +33,6 @@ router.put('/note-storiche/:chiave', validate({
 });
 router.post('/note-storiche/:chiave/ripristina', validate({ params: paramsNotaStorica, body: schema.object({ testoAttuale: schema.string().max(2000) }).strict() }), (req, res) => {
   res.json(ripristinaNotaStorica(String(req.params.chiave), (req.body as { testoAttuale: string }).testoAttuale));
-});
-router.get('/proposte', validate({ query: queryProposteOggetto }), (req, res) => {
-  res.json(elencaProposteOggetti(req.query as z.infer<typeof queryProposteOggetto>));
-});
-router.post('/proposte/conferma', validate({ body: bodyPropostaOggetto }), (req, res) => {
-  res.json(confermaPropostaOggetto(req.body as DatiPropostaOggetto));
-});
-router.post('/proposte/scarta', validate({ body: bodyPropostaOggetto }), (req, res) => {
-  res.json(scartaPropostaOggetto(req.body as DatiPropostaOggetto));
 });
 router.put('/legami', validate({ body: bodyLegameOggetto }), (req, res) => {
   res.json(impostaLegameOggetto(req.body as DatiLegameOggetto));

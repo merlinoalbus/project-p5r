@@ -8,7 +8,6 @@ import { PageState } from '../shared/PageState';
 import { CampoRicerca } from '../shared/CampoRicerca';
 import { Selettore } from '../shared/Selettore';
 import { ModuloOggetto } from './ModuloOggetto';
-import { AbbinamentiDaApprovare } from './AbbinamentiDaApprovare';
 
 const GRUPPI = Object.entries(GRUPPI_OGGETTO) as Array<[GruppoOggetto, string]>;
 const ORDINI = [{ chiave: 'nome', nome: 'Nome' }, { chiave: 'prezzo', nome: 'Prezzo minimo' }];
@@ -54,7 +53,6 @@ export function CatalogoOggetti({ gruppoIniziale = '' }: { gruppoIniziale?: Grup
   }, [dati.dati, q, gruppo, categoria, per, ordine]);
   return <PageState isLoading={dati.caricamento && !dati.dati} error={dati.errore} onRetry={() => void dati.ricarica()}>
     <section className="flex min-w-0 flex-col gap-3" aria-label="Catalogo degli oggetti">
-      <AbbinamentiDaApprovare onCambiato={dati.ricarica} />
       <div className="flex flex-wrap items-end gap-2">
         <div className="min-w-0 flex-1 basis-64"><CampoRicerca valore={q} onCambia={(v) => cambia('q', v)} segnaposto="Cerca un nome, un altro nome o un effetto…" /></div>
         <Selettore etichetta="Ordina per" valore={ordine} opzioni={ORDINI} ricerca="mai" onCambia={(v) => cambia('ordine', v === 'nome' ? '' : v)} />
