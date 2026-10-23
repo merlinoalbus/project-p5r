@@ -83,7 +83,7 @@ export interface DatiPartita {
 
 /** Primo giorno del percorso della guida ('MM-GG'): giorno corrente predefinito di una nuova partita. */
 function primoGiornoDelGioco(): string | null {
-  return (prepared('SELECT data FROM giorno_percorso ORDER BY ordine LIMIT 1').get() as { data: string } | undefined)?.data ?? null;
+  return (prepared('SELECT data FROM giorno ORDER BY ordine LIMIT 1').get() as { data: string } | undefined)?.data ?? null;
 }
 
 /**
@@ -417,7 +417,8 @@ export function aggiornaConfidente(partitaId: number, chiave: string, dati: Modi
   let riporto = 0;
   if (origine?.origine === 'diario' && rango > attuale.rango && dati.punti === undefined) {
     riporto = attuale.punti;
-    for (let r = attuale.rango; r < rango && riporto > 0; r++) { const soglia = sogliaAPunti(chiave, r); if (soglia > 0) riporto = Math.max(0, riporto - soglia); }
+    // si riporta solo l'eccedenza sulla soglia di un rango che sale a punti: un rango a evento non porta nulla (i suoi punti vecchi non contano)
+    for (let r = attuale.rango; r < rango && riporto > 0; r++) { const soglia = sogliaAPunti(chiave, r); riporto = soglia > 0 ? Math.max(0, riporto - soglia) : 0; }
     riporto = round2(riporto);
   }
   let punti = dati.punti !== undefined ? dati.punti : rango !== attuale.rango ? riporto : attuale.punti + incremento;
