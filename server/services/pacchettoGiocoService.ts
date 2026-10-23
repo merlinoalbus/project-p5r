@@ -28,6 +28,7 @@ import { logger } from '../utils/logger.js';
 import { httpErrors } from '../utils/httpError.js';
 import { closeDb, getDb, nowIso, resolveDbPath, resolvePartitePath } from '../db/dbService.js';
 import { verificaArchivioLegacy } from '../db/acquistiLegacy.js';
+import { avvisiImportazioneTanaka, statoTanakaDi } from './tanakaStatoListino.js';
 import { migrations } from '../db/migrations/index.js';
 import { regoleAllAvvio } from './pacchetto/pacchettoGioco.js';
 import { convertiCondizioniDatabaseImportato } from './condizioni/importazione.js';
@@ -295,6 +296,8 @@ function anteprimaDalDatabase(db: Database.Database, byte: number, nome?: string
     tabelleAssenti,
     immagini: { istanza: immaginiPiene(istanza, 'main'), pacchetto: immaginiPiene(db, 'main') },
     orfani: orfaniPartite(db, 'main', 'utente'),
+    // L7-TANAKA-IMPORT: che listino di Tanaka e che registro delle decisioni porta il pacchetto, rispetto all'istanza
+    tanaka: (() => { const i = statoTanakaDi(istanza), p = statoTanakaDi(db); return { istanza: i, pacchetto: p, avvisi: avvisiImportazioneTanaka(i, p) }; })(),
   };
 }
 
@@ -385,6 +388,9 @@ async function sostituisciDatiDiGioco(file: string): Promise<EsitoImportazionePa
     regoleAllAvvio(getDb());
     // L4 (§8.11): lo specchio delle voci con pin si rifà con la funzione unica sui legami nuovi (il segno dei pin, per uid, resta)
     getDb().transaction(() => riallineaStati(getDb(), null, nowIso()))();
+    // L7-TANAKA-IMPORT: il registro delle decisioni arriva integro, o si torna alla copia di sicurezza (un registro rotto non si installa)
+    const tanaka = statoTanakaDi(getDb());
+    if (!tanaka.registroIntegro) throw httpErrors.conflict('registro-tanaka-non-integro', `Il registro delle decisioni Tanaka del pacchetto non è integro: ${tanaka.problemi.join(' ')}`);
   } catch (err) {
     await tornaAllaCopiaDiSicurezza(salvataggio, err, 'importazione-fallita', 'Importazione del pacchetto');
   }

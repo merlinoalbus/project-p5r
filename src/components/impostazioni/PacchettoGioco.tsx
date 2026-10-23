@@ -109,9 +109,19 @@ function Anteprima({ a, origine }: { a: AnteprimaPacchettoDto; origine: string }
         <h3 className="m-0 text-[14px]">Riferimenti delle partite</h3>
         <ElencoOrfani orfani={a.orfani} quando="prima" />
       </div>
+      {a.tanaka && <div className="flex flex-col gap-1">
+        <h3 className="m-0 text-[14px]">Listino di Tanaka</h3>
+        <p className="m-0 text-text-muted">Ora: {LISTINO_TANAKA[a.tanaka.istanza.listino]}{a.tanaka.istanza.attiva ? ', decisione applicata' : ''} · nel backup: {LISTINO_TANAKA[a.tanaka.pacchetto.listino]}{a.tanaka.pacchetto.attiva ? ', decisione applicata' : ''} ({a.tanaka.pacchetto.decisioni} {a.tanaka.pacchetto.decisioni === 1 ? 'decisione' : 'decisioni'} nel registro). Gli acquisti delle partite non cambiano.</p>
+        {a.tanaka.avvisi.map((v) => <p key={v} className="m-0 text-warning">{v}</p>)}
+      </div>}
     </div>
   );
 }
+
+/** Il listino di Tanaka in parole (L7-TANAKA-IMPORT). */
+const LISTINO_TANAKA: Record<NonNullable<AnteprimaPacchettoDto['tanaka']>['istanza']['listino'], string> = {
+  precedente: 'le 20 offerte di prima', royal: 'le 18 offerte Royal', misto: 'un listino misto', assente: 'negozio assente',
+};
 
 /**
  * Card «Pacchetto di gioco» delle Impostazioni: stato dei dati di gioco dell'istanza (con gli avvisi se è vuota o

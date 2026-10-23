@@ -27,6 +27,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { closeDb, copiaSchema, getDb, initDb, resolveDbPath, resolvePartitePath } from '../db/dbService.js';
 import { runMigrations, type Migration } from '../db/migrationRunner.js';
 import { verificaArchivioLegacy, type OrigineContinuita } from '../db/acquistiLegacy.js';
+import { statoTanakaDi } from './tanakaStatoListino.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { occupaIstanza } from './lucchettoIstanza.js';
 import { verificaCollegamentiAttivitaImportati } from './vincoliAttivitaConfidente.js';
@@ -126,6 +127,11 @@ export async function conCartellaDiLavoro<T>(prefisso: string, lavoro: (dir: str
  */
 export async function copiaDatabase(quale: 'gioco' | 'partite' = 'gioco'): Promise<{ percorso: string; nome: string }> {
   verificaArchivioLegacy(getDb());
+  // L7-TANAKA-IMPORT: un registro delle decisioni Tanaka non integro non si esporta (lo si correggerebbe altrove senza saperlo)
+  if (quale === 'gioco') {
+    const tanaka = statoTanakaDi(getDb());
+    if (!tanaka.registroIntegro) throw httpErrors.conflict('registro-tanaka-non-integro', `Il registro delle decisioni Tanaka non è integro: ${tanaka.problemi.join(' ')}`);
+  }
   const percorso = path.join(cartellaTemporanea(), `esporta-${quale}-${timbro()}.db`);
   await copiaSchema(getDb(), percorso, quale === 'partite' ? 'utente' : 'main');
   return { percorso, nome: `project-p5r-${quale}-${timbro()}.db` };
@@ -518,6 +524,9 @@ async function ripristinaDaFileDiLavoro(file: string, lavoro: string): Promise<E
       }
     }
     riapriIstanza('continuita-importazione');
+    // L7-TANAKA-IMPORT: il registro delle decisioni Tanaka del backup arriva integro, o si torna alla copia di sicurezza
+    const tanaka = statoTanakaDi(getDb());
+    if (!tanaka.registroIntegro) throw httpErrors.conflict('registro-tanaka-non-integro', `Il registro delle decisioni Tanaka del backup non è integro: ${tanaka.problemi.join(' ')}`);
   } catch (err) {
     await tornaAllaCopiaDiSicurezza(salvataggio, err, 'ripristino-fallito', 'Ripristino');
   }

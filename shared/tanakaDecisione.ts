@@ -42,6 +42,19 @@ export interface AnteprimaPianoTanakaDto {
   noteStoriche: Array<{ id: string; testo: string; fonte: string; legame: string }>;
 }
 
+/** IMPORT: lo stato del listino di Tanaka e del registro delle decisioni in un file di gioco (istanza o pacchetto). */
+export interface StatoTanakaFileDto {
+  /** Il registro (migrazione 150) c'è. */
+  registro: boolean;
+  decisioni: number;
+  attiva: string | null;
+  listino: 'precedente' | 'royal' | 'misto' | 'assente';
+  noteStoriche: number;
+  /** Fotografie leggibili, versione nota, al più una decisione attiva, ripristini di decisioni esistenti. */
+  registroIntegro: boolean;
+  problemi: string[];
+}
+
 /** La ricevuta di una decisione confermata: il piano mostrato, l'archivio delle 20 offerte di prima, la fotografia di dopo, lo stato. */
 export interface RicevutaTanakaDto {
   operazioneId: string;

@@ -12,6 +12,7 @@ import type { TipoMappa, TipoRiferimento, TipoSpillo } from './spilli.js';
 import type { GiornoChiave } from './orariNegozio.js';
 import type { TipoLuogo } from './tipiLuogo.js';
 import type { Condizione, RequisitoSpillo } from './condizioniSpillo.js';
+import type { StatoTanakaFileDto } from './tanakaDecisione.js';
 import type { OrariDelLuogo, OrariNegozio } from './orariNegozio.js';
 import type { VoceEffetto } from './effettiCatalogo.js';
 import type { DoteChiave } from './doti.js';
@@ -2954,6 +2955,8 @@ export interface AnteprimaPacchettoDto {
   /** Immagini con contenuto, dentro l'uno e l'altro file. */
   immagini: { istanza: number; pacchetto: number };
   orfani: OrfanoPartiteDto[];
+  /** L7-TANAKA-IMPORT: il listino di Tanaka e il registro delle decisioni nell'istanza e nel pacchetto, con gli avvisi. */
+  tanaka?: { istanza: StatoTanakaFileDto; pacchetto: StatoTanakaFileDto; avvisi: string[] };
 }
 
 /** Un file depositato nella cartella d'appoggio, candidato all'importazione. */
