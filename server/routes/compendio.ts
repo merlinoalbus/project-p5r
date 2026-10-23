@@ -5,7 +5,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { domande } from '../services/domandeService.js';
-import { calendario } from '../services/calendarioService.js';
+import { calendario, eventiDellaVoce } from '../services/calendarioService.js';
 import { collegaSchedaAllaVoce, copieDelPalazzo, creaVoceDallaScheda, dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
 import { aggiornaRichiesta, citazioniRichiesta, collocaRichiesta, creaRichiesta, eliminaRichiesta, richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
@@ -375,6 +375,10 @@ router.delete('/punti/:chiave/pin/:spillo', validate({ params: paramsPinDelPunto
 router.get('/calendario', validate({ query: queryCalendario }), (req, res) => {
   const q = req.query as unknown as { partita?: number; mese?: string };
   res.json(calendario(q.partita, q.mese));
+});
+/** Gli eventi del calendario collegati a una voce del Diario (L9 R9-20), sola lettura. */
+router.get('/calendario/voci/:uid', validate({ params: paramsVoceGiornata }), (req, res) => {
+  res.json(eventiDellaVoce(String(req.params.uid)));
 });
 router.get('/domande', validate({ query: queryDomande }), (req, res) => {
   res.json(domande((req.query as unknown as { partita?: number }).partita));

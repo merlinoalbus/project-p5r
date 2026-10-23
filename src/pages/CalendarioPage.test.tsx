@@ -19,9 +19,9 @@ vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 const giorno = (data: string, gs: string, extra: Partial<GiornoCalendarioDto> = {}): GiornoCalendarioDto => ({ data, giornoSettimana: gs, meteo: 'Sereno', eventi: [], tempoLibero: null, settimana: 4, allerte: [], ...extra });
 const dati: CalendarioDto = {
   giorni: [
-    giorno('04-09', 'Sabato', { settimana: 0, eventi: [{ id: 1, tipo: 'storia', titolo: 'Inizio del gioco', dettaglio: 'Prologo', fonte: 'https://www.allgamestaff.it/x' }] }),
+    giorno('04-09', 'Sabato', { settimana: 0, eventi: [{ id: 1, tipo: 'storia', titolo: 'Inizio del gioco', dettaglio: 'Prologo', fonte: 'https://www.allgamestaff.it/x', voci: [] }] }),
     giorno('05-01', 'Domenica'),
-    giorno('05-11', 'Mercoledì', { eventi: [{ id: 2, tipo: 'esame', titolo: 'Esame di metà semestre', dettaglio: '', fonte: 'https://www.allgamestaff.it/y' }] }),
+    giorno('05-11', 'Mercoledì', { eventi: [{ id: 2, tipo: 'esame', titolo: 'Esame di metà semestre', dettaglio: '', fonte: 'https://www.allgamestaff.it/y', voci: [] }] }),
   ],
   settimane: [{ numero: 4, titolo: 'Settimana 4', periodo: '01/05 - 08/05', url: 'https://www.allgamestaff.it/s4', riassunto: 'Consigli della settimana quattro.', incertezze: '' }],
   dataGioco: '05-01',

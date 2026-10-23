@@ -54,6 +54,11 @@ function Giorno({ g, oggi, aperto, onToggle, onImposta }: { g: GiornoCalendarioD
             <div key={e.id} className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2 flex-wrap"><span className={`chip text-[11px] ${CLASSE_TIPO[e.tipo] ?? ''}`}>{NOME_TIPO[e.tipo] ?? e.tipo}</span><strong>{e.titolo}</strong></div>
               {e.dettaglio && <span className="text-text-secondary">{e.dettaglio}</span>}
+              {e.voci.map((v) => (
+                <Link key={v.uid} className="touch inline-flex items-center text-primary break-words" to={`/guida/percorso/${v.giorno}?voce=${encodeURIComponent(v.uid)}`}>
+                  Voce del Diario · {dataGiocoTesto(v.giorno)}: {v.azione.length > 70 ? `${v.azione.slice(0, 70)}…` : v.azione}
+                </Link>
+              ))}
               {e.fonte && <a href={e.fonte} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center">fonte</a>}
             </div>
           ))}

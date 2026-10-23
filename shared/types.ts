@@ -2477,7 +2477,9 @@ export interface GiornoCalendarioDto {
   data: string;
   giornoSettimana: string;
   meteo: string | null;
-  eventi: Array<{ id: number; tipo: 'storia' | 'scadenza' | 'sblocco' | 'esame' | 'festa' | 'vacanza' | 'consiglio' | 'meteo'; titolo: string; dettaglio: string; fonte: string }>;
+  eventi: Array<{ id: number; tipo: 'storia' | 'scadenza' | 'sblocco' | 'esame' | 'festa' | 'vacanza' | 'consiglio' | 'meteo'; titolo: string; dettaglio: string; fonte: string;
+    /** Le voci del Diario collegate all'evento (L9 R9-20): un collegamento per chiave, non una voce dell'evento. */
+    voci: Array<{ uid: string; giorno: string; fascia: 'giorno' | 'sera'; azione: string; certezza: 'C' | 'D' }> }>;
   tempoLibero: { giorno: boolean; sera: boolean } | null;
   /** Numero della «Soluzione per settimana» della guida. */
   settimana: number | null;
