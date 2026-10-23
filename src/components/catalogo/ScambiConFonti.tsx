@@ -10,7 +10,6 @@ import { CampoRicerca } from '../shared/CampoRicerca';
 import { PageState } from '../shared/PageState';
 import { Selettore } from '../shared/Selettore';
 import { CostoDellOggetto } from './CostoDellOggetto';
-import { ConfrontoTanaka } from './ConfrontoTanaka';
 
 const STATO_FONTE: Record<RaccordoScambioCensimento['statoFonte'], string> = {
   coincidente: 'Fonte coincidente con il riferimento documentato', 'cambiata-dopo-registrazione': 'Fonte cambiata dopo la registrazione',
@@ -52,7 +51,6 @@ const conflitto = (r: NodoScambioCensimento) => r.stato !== 'valido' || r.raccor
 export function ScambiConFonti() {
   const [aperto, setAperto] = useState(false);
   return <section className="flex min-w-0 flex-col gap-2" aria-label="Scambi e fonti correnti">
-    <ConfrontoTanaka />
     <button type="button" className="chip touch self-start" aria-expanded={aperto} onClick={() => setAperto(v => !v)}>Scambi e fonti correnti</button>
     {aperto && <ElencoScambi />}
   </section>;

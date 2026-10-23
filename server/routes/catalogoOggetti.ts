@@ -10,8 +10,6 @@ import { auditConversioneCatalogo } from '../services/auditCatalogoService.js';
 import { censimentoScambiCatalogo } from '../services/censimentoScambiCatalogoService.js';
 import { ripristinaCostoRegalo } from '../services/costoRegaloService.js';
 import { modificaNotaStorica, ripristinaNotaStorica } from '../services/noteStoricheService.js';
-import { confrontoTanaka } from '../services/tanakaSnapshotService.js';
-import { anteprimaPianoTanaka, confermaPianoTanaka, ricevuteTanaka, ripristinaPianoTanaka } from '../services/tanakaDecisioneService.js';
 import { bodyLegameOggetto, bodyNuovoOggetto, bodyOggetto, bodyPropostaOggetto, paramsOggetto, queryCatalogoOggetti, queryProposteOggetto,
   type DatiCatalogoOggetto, type DatiLegameOggetto, type DatiPropostaOggetto } from '../schemas/catalogoOggetti.js';
 
@@ -21,25 +19,6 @@ const chiave = (params: Record<string, unknown>) => `${String(params.categoria)}
 
 // Le rotte letterali precedono categoria/slug: «proposte/conferma» non è un oggetto chiamato «conferma».
 router.get('/audit', (_req, res) => { res.json(auditConversioneCatalogo()); });
-router.get('/confronto-tanaka', (_req, res) => {
-  res.set('Cache-Control', 'no-store'); res.json(confrontoTanaka());
-});
-/** L7-TANAKA: la decisione unitaria. Anteprima (sola lettura), conferma dell'utente con le revisioni mostrate (CAS, idempotente per
- *  operationId), ricevute e ripristino unitario. */
-const operazioneTanaka = schema.string().regex(/^[A-Za-z0-9._:-]{8,80}$/);
-router.get('/tanaka/piano', (_req, res) => {
-  res.set('Cache-Control', 'no-store'); res.json(anteprimaPianoTanaka());
-});
-router.post('/tanaka/piano/conferma', validate({ body: schema.object({ operazioneId: operazioneTanaka, revisioneConfronto: schema.string().regex(/^[0-9a-f]{64}$/), revisionePiano: schema.string().regex(/^[0-9a-f]{64}$/) }).strict() }), (req, res) => {
-  res.json(confermaPianoTanaka(req.body as { operazioneId: string; revisioneConfronto: string; revisionePiano: string }));
-});
-router.get('/tanaka/decisioni', (_req, res) => {
-  res.set('Cache-Control', 'no-store'); res.json(ricevuteTanaka());
-});
-router.post('/tanaka/decisioni/:decisione/ripristina', validate({ params: schema.object({ decisione: operazioneTanaka }), body: schema.object({ operazioneId: operazioneTanaka, revisioneStato: schema.string().regex(/^[0-9a-f]{64}$/) }).strict() }), (req, res) => {
-  const b = req.body as { operazioneId: string; revisioneStato: string };
-  res.json(ripristinaPianoTanaka({ operazioneId: b.operazioneId, decisioneId: String(req.params.decisione), revisioneStato: b.revisioneStato }));
-});
 router.get('/censimento-scambi', (_req, res) => {
   res.set('Cache-Control', 'no-store'); res.json(censimentoScambiCatalogo());
 });
