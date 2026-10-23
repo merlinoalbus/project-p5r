@@ -21,7 +21,20 @@ export interface FonteTolta {
 }
 
 /** Le strutture tolte; ogni migrazione di eliminazione vi aggiunge la sua voce (mai si tolgono voci). */
-export const FONTI_TOLTE: readonly FonteTolta[] = [];
+export const FONTI_TOLTE: readonly FonteTolta[] = [
+  {
+    schema: 'main', tabella: 'marcatore_mappa', colonna: null, tolta: 'L11 · migrazione 176',
+    sostituitaDa: 'i pin della guida (le schede dei punti sulle planimetrie): la posizione di una voce è quella della sua scheda',
+  },
+  {
+    schema: 'main', tabella: 'marcatore_luogo', colonna: null, tolta: 'L11 · migrazione 176',
+    sostituitaDa: 'i pin dei luoghi sulla mappa del quartiere; le posizioni di partenza restano nell’archivio «archivio-marcatori-e-piante-l11»',
+  },
+  {
+    schema: 'main', tabella: 'pianta_area', colonna: null, tolta: 'L11 · migrazione 176',
+    sostituitaDa: 'le planimetrie delle infiltrazioni (le piante non si scaricano più); URL, fonte e licenza restano nell’archivio «archivio-marcatori-e-piante-l11»',
+  },
+];
 
 export const tabellaTolta = (schema: string, tabella: string): FonteTolta | undefined =>
   FONTI_TOLTE.find((f) => f.schema === schema && f.tabella === tabella && f.colonna === null);
