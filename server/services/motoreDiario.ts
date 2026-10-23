@@ -184,7 +184,9 @@ function risorseLegacy(p:number,e:EffettiAzioneDto|null):unknown {
     turni:(e?.turni??[]).map((t)=>({attivita:t.attivita,ordine:t.ordine,turno:prepared('SELECT * FROM utente.turno_partita WHERE partita_id=? AND attivita_chiave=? AND ordine=?').get(p,t.attivita,t.ordine)??null,effetti:prepared("SELECT * FROM utente.effetto_lettura_partita WHERE partita_id=? AND tipo='attivita' AND chiave=? AND ordine=? ORDER BY dote_chiave").all(p,t.attivita,t.ordine)})),
     letture:(e?.letture??[]).map((l)=>{
       const progresso=l.categoria==='libro'?prepared('SELECT * FROM utente.progresso_libro_partita WHERE partita_id=? AND libro_chiave=?').get(p,l.chiave):l.categoria==='film'?prepared('SELECT * FROM utente.progresso_film_partita WHERE partita_id=? AND film_chiave=?').get(p,l.chiave):prepared('SELECT * FROM utente.progresso_videogioco_partita WHERE partita_id=? AND videogioco_chiave=?').get(p,l.chiave);
-      return {categoria:l.categoria,chiave:l.chiave,progresso:progresso??null,letto:prepared('SELECT * FROM utente.lettura_partita WHERE partita_id=? AND tipo=? AND chiave=?').get(p,l.categoria,l.chiave)??null,effetti:prepared('SELECT * FROM utente.effetto_lettura_partita WHERE partita_id=? AND tipo=? AND chiave=? ORDER BY ordine,dote_chiave').all(p,l.categoria,l.chiave)};
+      // R10-20: «letto» non si fotografa più dalla riga `lettura_partita` (specchio derivato): si calcola dall'avanzamento (`lettureCompletate`),
+      // che la fotografia contiene già in `progresso`
+      return {categoria:l.categoria,chiave:l.chiave,progresso:progresso??null,effetti:prepared('SELECT * FROM utente.effetto_lettura_partita WHERE partita_id=? AND tipo=? AND chiave=? ORDER BY ordine,dote_chiave').all(p,l.categoria,l.chiave)};
     }),
   };
 }
@@ -205,7 +207,9 @@ function risorseCompatibiliPesca(p:number,prima:unknown,ora:unknown):boolean {
     const raccordo=typeof nuovoUid==='string'&&provaUidTurnoPesca(p,t.attivita,t.ordine,old.turno,current);
     if(aggiuntaNulla||raccordo){if(Object.hasOwn(old.turno,'uid'))current.uid=old.turno.uid;else delete current.uid;}
   }
-  return jsonCanonico(prima)===jsonCanonico(b);
+  // le ricevute di prima portano anche `letto` (la riga dello specchio `lettura_partita`): non fa più parte della fotografia
+  const senzaLetto=(x:unknown):unknown=>{if(!x||typeof x!=='object')return x;const o=x as {letture?:unknown};if(!Array.isArray(o.letture))return x;return {...o,letture:o.letture.map((l)=>{if(!l||typeof l!=='object')return l;const {letto:_letto,...resto}=l as Record<string,unknown>;return resto;})};};
+  return jsonCanonico(senzaLetto(prima))===jsonCanonico(senzaLetto(b));
 }
 function porzioniLegacy(effetti:EffettoVoceDto[],legacy:EffettiAzioneDto|null):Map<string,EffettiAzioneDto> {
   const out=new Map<string,EffettiAzioneDto>();let d=0,l=0,t=0;
