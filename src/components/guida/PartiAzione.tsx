@@ -11,6 +11,7 @@
 import type { MouseEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { NOME_TIPO_AZIONE, collegamentoAzione, descriviEffetti } from '../../utils/percorso';
+import { conRitornoDiario } from '../../utils/ritornoDiario';
 import type { AzionePercorsoDto } from '../../types';
 import { IconaCategoria } from './IconaCategoria';
 import { EmblemaDungeon } from './EmblemaDungeon';
@@ -51,15 +52,17 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa }: PropsCartelli
   const posizione = useLocation();
   const navigate = useNavigate();
   const uid = (a as { uid?: string }).uid;
+  // R10-28: l'«Entra» in un Palazzo porta la pagina di partenza e la voce, perché la scheda possa dire «Esci» e riportarci qui
+  const partenza = `${posizione.pathname}${posizione.search}`;
   const ricordaVoce = (e: MouseEvent<HTMLElement>) => {
     if (!uid || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
     navigate({ pathname: posizione.pathname, search: posizione.search, hash: `#voce-${uid}` }, { replace: true, state: posizione.state });
   };
   return (
     <span className="flex flex-wrap items-center gap-1.5">
-      {a.oggettiCitati?.filter((o) => o.casa !== link?.href).map((o) => <Link key={o.chiave} to={o.casa} onClick={ricordaVoce} className="chip touch no-underline">{o.nome}</Link>)}
+      {a.oggettiCitati?.filter((o) => o.casa !== link?.href).map((o) => <Link key={o.chiave} to={conRitornoDiario(o.casa, partenza, uid)} onClick={ricordaVoce} className="chip touch no-underline">{o.nome}</Link>)}
       <span className="chip text-[11px]">{NOME_TIPO_AZIONE[a.tipo] ?? a.tipo}</span>
-      {link ? <Link to={link.href} className="chip chip--attivo no-underline text-[11px]"
+      {link ? <Link to={conRitornoDiario(link.href, partenza, uid)} className="chip chip--attivo no-underline text-[11px]"
         onClick={(e) => {
           if (apriAccanto && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) { e.preventDefault(); onApriMappa!(apriAccanto); return; }
           ricordaVoce(e);

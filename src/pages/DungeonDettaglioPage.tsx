@@ -57,6 +57,7 @@ import { nomeVersione } from '../utils/aree';
 import { anelloPalazzo, livelloPalazzo } from '../utils/completamentoPalazzo';
 import { centroAccessoMondo } from '../utils/accessoMondo';
 import { areeCompletate } from '../utils/completamentoAree';
+import { dimenticaEntrata, indirizzoDiUscita, istantaneaPalazzo, leggiEntrata, leggiRitornoDiario, ricordaEntrata, riepilogoUscita } from '../utils/ritornoDiario';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida';
 import { CampoCorrezione, CorrezioneGuida } from '../components/guida/CorrezioneGuida';
 import { AreeDelDedalo } from '../components/guida/AreeDelDedalo';
@@ -197,6 +198,24 @@ export function DungeonDettaglioPage() {
   const sezioneDaVerificare = useRef<HTMLDetailsElement>(null);
   // Le infiltrazioni completate nella partita (tutte le voci da segnare segnate, 2026-10-04): spunte, e `?infiltrazione=in-corso`.
   const completate = useMemo(() => areeCompletate(d?.aree ?? []), [d]);
+  // R10-28: aperta con «Entra» da una voce del diario (`&da=<pagina>&voce=<uid>`) la scheda mostra «Esci»; all'ingresso si fa l'istantanea
+  // con cui il riepilogo dell'uscita dice che cosa è avanzato (`utils/ritornoDiario.ts`)
+  const ritorno = useMemo(() => leggiRitornoDiario(params), [params]);
+  const pronto = !!d;
+  useEffect(() => {
+    if (!ritorno || !partitaId || !d) return;
+    ricordaEntrata(partitaId, ritorno.voce, istantaneaPalazzo(d, completate.size));
+    // solo al primo caricamento della scheda per quella voce: `ricordaEntrata` tiene la prima istantanea
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ritorno?.voce, partitaId, pronto]);
+  /** «Esci»: riepilogo in una notifica, poi si torna alla pagina di partenza sulla stessa voce. */
+  const esci = () => {
+    if (!ritorno || !d) return;
+    const entrata = partitaId ? leggiEntrata(partitaId, ritorno.voce) : null;
+    notifica('success', riepilogoUscita(d.nome, d, memento ? 0 : completate.size, memento ? 0 : d.aree.length, entrata), 10000);
+    if (partitaId) dimenticaEntrata(partitaId, ritorno.voce);
+    navigate(indirizzoDiUscita(ritorno));
+  };
   // L3 (§4.2): lo stato della scheda di un Palazzo ha due scelte, l'**infiltrazione** (I, `?infiltrazione=` o il vecchio `?area=`) e
   // l'**area** (A, `/area/<slug>`). I Memento restano come prima: il dedalo da `?area=` (R3-12; i campi delle aree per loro mancano).
   const areePalazzo = useMemo(() => d?.areePalazzo ?? [], [d]);
@@ -386,12 +405,14 @@ export function DungeonDettaglioPage() {
   const classeVisoreMappa = 'h-[min(64dvh,560px)] lg:h-[max(300px,min(41vh,560px))] xl:h-auto xl:min-h-fit xl:flex-1 xl:[--minimo-tela:240px]';
   const sceltaPin = collegamento ? { titolo: collegamento.nome, scelti: collegamento.scelti, occupato: collegamento.occupato, ricerca: ricercaPin, attenuaNascosti: true, onScegli: (s: { id: number; nome: string }) => collegamento.onScegli(s) } : undefined;
   /** Memento: apre un dedalo mettendolo nell'indirizzo (che perde gli altri parametri). */
-  const scegliArea = (k: string) => { setParams({ area: k }); };
+  const scegliArea = (k: string) => { setParams(ritorno ? { area: k, da: ritorno.da, voce: ritorno.voce } : { area: k }); };
   // ---- Palazzi (L3, §4.1–§4.2): l'area ha il suo indirizzo, l'infiltrazione va nei parametri ----
   const base = `/guida/dungeon/${encodeURIComponent(chiave)}`;
+  /** R10-28: muovendosi nella scheda (infiltrazione, area, planimetria) il ritorno al diario resta nell'indirizzo, così «Esci» non sparisce. */
+  const tieniRitorno = (q: URLSearchParams) => { if (ritorno) { q.set('da', ritorno.da); q.set('voce', ritorno.voce); } return q; };
   /** Apre l'area `s`, con l'infiltrazione e la versione date (se ci sono). */
   const apriArea = (s: string, infiltrazione?: string | null, planimetria?: string | null) => {
-    const q = new URLSearchParams();
+    const q = tieniRitorno(new URLSearchParams());
     if (infiltrazione) q.set('infiltrazione', infiltrazione);
     if (planimetria) q.set('planimetria', planimetria);
     const testo = q.toString();
@@ -403,7 +424,7 @@ export function DungeonDettaglioPage() {
     apriArea(s, area && a?.infiltrazioni?.some((x) => x.chiave === area.chiave) ? area.chiave : null);
   };
   /** Un'infiltrazione scelta (selettore, aree senza infiltrazione): si apre sulla sua prima area. */
-  const scegliInfiltrazione = (k: string) => navigate(`${base}?infiltrazione=${encodeURIComponent(k)}`);
+  const scegliInfiltrazione = (k: string) => navigate(`${base}?${tieniRitorno(new URLSearchParams({ infiltrazione: k })).toString()}`);
   /** Un'infiltrazione scelta dentro l'area aperta («Infiltrazioni in quest'area»): l'area e la versione restano. */
   const scegliInfiltrazioneQui = (k: string) => (areaFisica ? apriArea(areaFisica.slug, k, planimetriaScelta) : scegliInfiltrazione(k));
   /** Un'altra versione dell'area: cambia solo `?planimetria=` (sostituendo la voce della cronologia), come nella pagina dell'Area (L2). */
@@ -420,7 +441,7 @@ export function DungeonDettaglioPage() {
     const p = d?.planimetrie.find((x) => x.chiave === mappa);
     const a = p?.area ? areePalazzo.find((x) => x.chiave === p.area) : undefined;
     if (!a) return null;
-    const q = new URLSearchParams();
+    const q = tieniRitorno(new URLSearchParams());
     if (area && a.infiltrazioni?.some((x) => x.chiave === area.chiave)) q.set('infiltrazione', area.chiave);
     q.set('planimetria', mappa);
     return urlCasa(`${base}/area/${encodeURIComponent(a.slug)}?${q.toString()}`, arrivo);
@@ -489,7 +510,7 @@ export function DungeonDettaglioPage() {
       await eliminaAreaMondo(contenitorePalazzo, areaFisica.slug, true);
       notifica('success', `${areaFisica.nome} è nel cestino: da Impostazioni → Cestino la rimetti com’era.`);
       setFinestra(null);
-      navigate(area ? `${base}?infiltrazione=${encodeURIComponent(area.chiave)}` : base, { replace: true });
+      navigate(area ? `${base}?${tieniRitorno(new URLSearchParams({ infiltrazione: area.chiave })).toString()}` : `${base}${ritorno ? `?${tieniRitorno(new URLSearchParams()).toString()}` : ''}`, { replace: true });
       await dati.ricarica();
     } catch (err) { notifica('error', err instanceof Error ? err.message : 'Area non eliminata.'); }
     finally { setOccupato(false); }
@@ -751,7 +772,9 @@ export function DungeonDettaglioPage() {
                   <div className={`flex flex-wrap items-center gap-2 ${memento ? '' : 'max-lg:col-span-2 max-lg:row-start-1 max-lg:flex-nowrap'}`}>
                     {/* nei Palazzi solo l'icona (da 1024 px per R3-41, scelta 3 del PM; sotto per LAY3-5): il nome resta per chi non vede e nel
                         suggerimento */}
-                    <button type="button" className="btn btn-ghost btn-sm touch -ml-2 shrink-0" title="Indietro" onClick={() => navigate(-1)}><IconChevronLeft size={18} /><span className={memento ? '' : 'sr-only'}> Indietro</span></button>
+                    {ritorno
+                      ? <button type="button" className="btn btn-secondary btn-sm touch -ml-2 shrink-0" title="Esci dal Palazzo e torna alla voce del diario" onClick={esci}><IconChevronLeft size={18} /> Esci</button>
+                      : <button type="button" className="btn btn-ghost btn-sm touch -ml-2 shrink-0" title="Indietro" onClick={() => navigate(-1)}><IconChevronLeft size={18} /><span className={memento ? '' : 'sr-only'}> Indietro</span></button>}
                     <h1 className="titolo-display m-0 min-w-0 break-words">{d.nome}</h1>
                     {/* nei Memento la correzione della scheda è un comando per sistemare la guida: solo in «Modifica la guida» */}
                     {(!memento || modifica) && <CorrezioneGuida cosa={memento ? 'i Memento' : `il Palazzo «${d.nome}»`} etichetta="Correggi la scheda" classeEtichetta={memento ? undefined : 'sr-only'}
