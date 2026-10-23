@@ -173,6 +173,7 @@ import { migration161 } from './161_ranghi_con_modo.js';
 import { migration162 } from './162_vocabolario_elementi.js';
 import { migration163 } from './163_disponibilita_strutturata.js';
 import { migration164 } from './164_collegamenti_eventi_voci.js';
+import { migration165 } from './165_date_eventi_calendario_royal.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -188,5 +189,5 @@ export const migrations: Migration[] = [
   migration091, migration092, migration093, migration094, migration095, migration096, migration097, migration098, migration099, migration100,
   migration101, migration102, migration103, migration104, migration105, migration106, migration107, migration108, migration109, migration110,
   migration111, migration112, migration113, migration114, migration115, migration116, migration117, migration118, migration119, migration120,
-  migration121, migration122, migration123, migration124, migration125, migration126, migration127, migration128, migration129, migration130, migration131, migration132, migration133, migration134, migration135, migration136, migration137, migration138, migration139, migration140, migration141, migration142, migration143, migration144, migration145, migration146, migration147, migration148, migration149, migration150, migration151, migration152, migration153, migration154, migration155, migration156, migration157, migration158, migration159, migration160, migration161, migration162, migration163, migration164,
+  migration121, migration122, migration123, migration124, migration125, migration126, migration127, migration128, migration129, migration130, migration131, migration132, migration133, migration134, migration135, migration136, migration137, migration138, migration139, migration140, migration141, migration142, migration143, migration144, migration145, migration146, migration147, migration148, migration149, migration150, migration151, migration152, migration153, migration154, migration155, migration156, migration157, migration158, migration159, migration160, migration161, migration162, migration163, migration164, migration165,
 ];
