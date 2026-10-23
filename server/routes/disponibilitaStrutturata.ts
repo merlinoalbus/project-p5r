@@ -6,7 +6,8 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { validate } from '../middleware/validate.js';
 import { paramsChiaveGuida } from '../schemas/guidaDungeon.js';
-import { disponibilitaConfidente, ripristinaDisponibilita, salvaDisponibilita, type ModificaDisponibilita } from '../services/disponibilitaStrutturataService.js';
+import { disponibilitaConfidente } from '../services/disponibilitaStrutturataService.js';
+import { ripristinaDisponibilita, salvaDisponibilita, type ModificaDisponibilita } from '../services/disponibilitaStrutturataScritture.js';
 import { FASCE_DISPONIBILITA, GIORNI_DISPONIBILITA, MODI_DISPONIBILITA } from '../../shared/disponibilitaStrutturata.js';
 
 const router = Router();

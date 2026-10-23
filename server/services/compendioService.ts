@@ -13,6 +13,7 @@ import { invitiDelConfidente } from './inviti.js';
 import { catalogoOggettiDisponibile, materialiDelleRicette, offerteBaseDegliOggetti, oggettiConChiavi, oggettiPerFonte, ricompensePerFonte, riferimentiListiniScambi } from './catalogoOggettiLetture.js';
 import { datiGuida, type Congelato } from './datiGuida.js';
 import { costoPrecedenteRegalo } from './costoRegaloService.js';
+import { disponibilitaConfidente } from './disponibilitaStrutturataService.js';
 import { postoDellArticolo, postoDelNegozio } from './mappe/nomiDeiPosti.js';
 import type {
   AffinitaDto, ArcanaDto, ConfidenteDettaglioDto, ConfidenteDto, CostoSkillDto, GlossarioDto, OggettoDto, PersonaDettaglioDto,
@@ -485,6 +486,8 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
     noteGenerali: disp?.note_generali ?? '', fonti: disp ? (JSON.parse(disp.fonti_json) as string[]) : [],
     // L6: gli inviti del Confidente, con ciò che aprono (lo stato della partita lo dà `GET /api/compendio/inviti`)
     inviti: invitiDelConfidente(chiave),
+    // R9-01: la disponibilità strutturata (modo, giorni, fasce, eccezioni, luoghi per chiave); il testo sopra resta nelle note
+    ...(disp ? { disponibilitaStrutturata: disponibilitaConfidente(chiave) } : {}),
   };
 }
 

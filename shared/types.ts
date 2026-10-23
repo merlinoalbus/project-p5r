@@ -13,6 +13,7 @@ import type { GiornoChiave } from './orariNegozio.js';
 import type { TipoLuogo } from './tipiLuogo.js';
 import type { Condizione, RequisitoSpillo } from './condizioniSpillo.js';
 import type { StatoTanakaFileDto } from './tanakaDecisione.js';
+import type { DisponibilitaConfidenteDto } from './disponibilitaStrutturata.js';
 import type { OrariDelLuogo, OrariNegozio } from './orariNegozio.js';
 import type { VoceEffetto } from './effettiCatalogo.js';
 import type { DoteChiave } from './doti.js';
@@ -350,6 +351,8 @@ export interface ConfidenteDettaglioDto extends ConfidenteDto {
   /** Oggetti ricevuti dal Confidente, distinti dai regali che gli si possono consegnare. */
   oggettiRicompensa?: RicompensaOggettoDto[];
   disponibilita: { giorni: string[]; fasce: string[]; luogo: string; sbloccoData: string; sbloccoRequisiti: string; note: string };
+  /** R9-01: la disponibilità come dato strutturato (la fonte di ciò che l'app valuta), con i luoghi per chiave; il testo di `disponibilita` resta nelle note. */
+  disponibilitaStrutturata?: DisponibilitaConfidenteDto;
   noteGenerali: string;
   fonti: string[];
   /** L6: gli inviti del Confidente, con ciò che aprono (senza lo stato della partita: `GET /api/compendio/inviti?confidente=&partita=`). */
