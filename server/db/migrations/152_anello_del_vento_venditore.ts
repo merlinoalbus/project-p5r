@@ -7,7 +7,8 @@
 //   - Wind Ring: «+Garula, danno da vento medio a un solo nemico», non in vendita (guida AGS degli accessori: «Sedia elettrica su Kurama
 //     Tengu»; GameFAQs e Fandom concordano);
 //   - Anello del vento del Venditore ambulante: «Toccata e fuga: lancia in automatico Sukukaja dopo una Staffetta», 4.000 ¥, Fascino 5
-//     (stessa guida AGS, «Negozi: Venditore ambulante, Central Street, Shibuya»); in inglese «Wing Ring» (MegaTenWiki, da riscontrare).
+//     (stessa guida AGS, «Negozi: Venditore ambulante, Central Street, Shibuya»). Il nome inglese (forse «Wing Ring», da uno snippet di
+//     MegaTenWiki non verificabile) NON è nei dati: non è stato riscontrato su una fonte leggibile.
 // La guida italiana usa lo stesso nome per i due oggetti. NON si fondono: si documenta la differenza nell'identità del Venditore
 // (effetto e descrizione), con la riga di prima in `seed_json` come ogni modifica del catalogo dall'app. Nessun articolo, prezzo, condizione,
 // acquisto o legame cambia. Scrive solo se effetto e descrizione sono ancora vuoti. Idempotente. Non tocca `partite.db`.
@@ -18,7 +19,7 @@ import { logger } from '../../utils/logger.js';
 
 const CHIAVE = 'accessorio/anello-del-vento-2';
 const EFFETTO = 'Toccata e fuga: lancia in automatico Sukukaja dopo una Staffetta';
-const DESCRIZIONE = 'Non è il Wind Ring (+Garula), l’accessorio dell’equipaggiamento che si ottiene con la Sedia elettrica su Kurama Tengu: la guida italiana usa lo stesso nome per due oggetti. Questo è l’accessorio del Venditore ambulante (4.000 ¥, Fascino 5); in inglese «Wing Ring».';
+const DESCRIZIONE = 'Non è il Wind Ring (+Garula), l’accessorio dell’equipaggiamento che si ottiene con la Sedia elettrica su Kurama Tengu: la guida italiana usa lo stesso nome per due oggetti. Questo è l’accessorio del Venditore ambulante (4.000 ¥, Fascino 5).';
 const COLONNE = ['categoria', 'sottocategoria', 'nome', 'nomi_altri_json', 'nome_originale', 'effetto', 'descrizione', 'statistiche_json'] as const;
 
 export const migration152: Migration = {
