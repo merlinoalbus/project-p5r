@@ -149,7 +149,7 @@ export function ModuloVoceGiornata({ soggetto, giorno, voci, partitaId, onChiudi
         {azione && <EditorAzioneStrutturata valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} />}
         <p className="m-0 text-[12px] text-text-muted">
           La modifica cambia la guida per tutte le partite ed entra nel pacchetto di gioco che esporti.
-          {voce?.fatta ? ' Questa voce è già spuntata: le modifiche agli effetti diventano proposte in «Da applicare», senza rieseguire la spunta né modificare subito Doti e yen.' : ''}
+          {voce?.fatta ? ' Questa voce è già spuntata: le modifiche agli effetti compaiono come pulsante «Applica» sulla voce, senza rieseguire la spunta né modificare subito Doti e yen.' : ''}
         </p>
       </form>
     </Modal>

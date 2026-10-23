@@ -109,7 +109,7 @@ function ConfermaGestoPesca({ partitaId, pronto, onChiudi, onCambiato }: { parti
         {o.azione === 'rettifica-punti' && <p>Saldo osservato: {anteprima.dati.stato.saldoPunti === null ? 'ignoto' : anteprima.dati.stato.saldoPunti.toLocaleString('it-IT')} → {o.richiesta.saldoOsservato.toLocaleString('it-IT')} punti pesca. Le singole spese non vengono dichiarate già conteggiate.</p>}
         <ul className="m-0 pl-4">{anteprima.dati.conseguenze.map((c, i) => <li key={i}>{c}</li>)}</ul>
         <ProfiliSessionePesca punto={anteprima.dati.punto} profili={anteprima.dati.profili} profiliPianificazione={anteprima.dati.profiliPianificazione} /><BeneficiPesca benefici={anteprima.dati.benefici} />
-        {o.azione.startsWith('rimuovi-') && <p className="m-0">Il gesto conserva la fotografia nel Cestino. Le eventuali correzioni di Doti, yen e punti pesca restano decisioni distinte in «Da applicare».</p>}
+        {o.azione.startsWith('rimuovi-') && <p className="m-0">Il gesto conserva la fotografia nel Cestino. Le eventuali correzioni di Doti, yen e punti pesca si applicano dal pulsante sulla voce (gli yen li cambi tu a mano).</p>}
         {!ricevuta && <label className="touch flex items-start gap-2"><input type="checkbox" className="h-5 w-5 shrink-0" checked={attestato} disabled={occupato || !!pendente} onChange={e => setAttestato(e.target.checked)} /><span>Confermo il bersaglio e tutte le conseguenze mostrate per questa partita.</span></label>}
       </>}
       {ricevuta && <p role="status" className="m-0 text-success">Operazione registrata · {ricevuta.esito} · {ricevuta.operazioneId}. Nessun nuovo invio da questa finestra.</p>}

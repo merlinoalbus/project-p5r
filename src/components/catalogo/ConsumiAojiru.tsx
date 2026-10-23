@@ -174,7 +174,7 @@ export function PreparazioneAcquistoAojiru({ partitaId, fonte, articolo = ARTICO
       {anteprima.nuovo.rapportoLegacy?.valutazione && <ProvaPresenza valutazione={anteprima.nuovo.rapportoLegacy.valutazione} />}
       {!!altreStessoGiorno.length && <div role="alert" className="flex flex-col gap-1 text-warning"><strong>Forse è già registrato.</strong><span>Per il {dataGiocoTesto(anteprima.nuovo.momento.giorno)} ci sono già {altreStessoGiorno.length} consumi. Se è lo stesso, collega quello; se è un altro, puoi registrarlo.</span>{altreStessoGiorno.map(r => <DettagliConsumo key={r.id} acquisto={r} />)}</div>}
       {anteprima.disponibilita.motivi.map((m) => <p className="m-0 text-warning" key={m}>{m}</p>)}
-      <p className="m-0">Punti e yen non cambiano da soli: i punti passano da «Da applicare», gli yen li cambi tu a mano.</p>
+      <p className="m-0">Punti e yen non cambiano da soli: i punti li applichi dal pulsante sulla voce, gli yen li cambi tu a mano.</p>
       <label className="touch flex items-center gap-2"><input type="checkbox" className="h-5 w-5" checked={attestato} disabled={occupato || incerto} onChange={(e) => setAttestato(e.target.checked)} />Giorno, succo e vecchio segno sono giusti.</label>
       <div className="flex flex-wrap gap-2">
         <button type="button" className="btn btn-primary touch" disabled={occupato || !attestato} onClick={() => void conferma()}>{incerto ? 'Riprova' : titoloConferma}</button>
@@ -262,7 +262,7 @@ export function ConsumiAojiru({ partitaId, stato, onCambiato, registrabile = tru
       <button type="button" className="btn btn-ghost touch" disabled={occupato || incerto} onClick={() => setRimozione(null)}>Annulla</button>
       <button type="button" className="btn btn-primary touch" disabled={occupato} onClick={() => void rimuovi()}>{incerto ? 'Riprova' : 'Sì, toglilo'}</button>
     </>}>
-      <p>{rimozione?.provenienza ? 'Si toglie soltanto questa voce.' : 'Si toglie soltanto il vecchio segno «Acquistato».'} {rimozione?.anteprima.ultimaFonte ? 'È l’ultima voce che lo conferma: il consumo non conta più. Se serve correggere i punti, passa da «Da applicare».' : 'Le altre voci del consumo restano.'} Lo ritrovi nel Cestino.</p>
+      <p>{rimozione?.provenienza ? 'Si toglie soltanto questa voce.' : 'Si toglie soltanto il vecchio segno «Acquistato».'} {rimozione?.anteprima.ultimaFonte ? 'È l’ultima voce che lo conferma: il consumo non conta più. Se serve correggere i punti, compare il pulsante «Annulla» sulla voce.' : 'Le altre voci del consumo restano.'} Lo ritrovi nel Cestino.</p>
       {rimozione?.anteprima.acquisto && <DettagliConsumo acquisto={rimozione.anteprima.acquisto} fonteSelezionata={rimozione.provenienza} />}
       {rimozione?.anteprima.presenzaStorica && <div className="flex flex-col gap-1 break-words"><strong>Vecchio segno · {rimozione.anteprima.presenzaStorica.negozioNome}</strong><span>{rimozione.anteprima.presenzaStorica.orfana ? 'L’offerta non c’è più nel catalogo. ' : ''}Non dice quante volte, quando né quale succo.</span>{rimozione.anteprima.presenzaStorica.valutazione && <ProvaPresenza valutazione={rimozione.anteprima.presenzaStorica.valutazione} />}{rimozione.anteprima.presenzaStorica.rappresentataDa && <span>È già rappresentato da un consumo registrato.</span>}</div>}
       {errore && <p role="alert" className="text-error">{errore}</p>}

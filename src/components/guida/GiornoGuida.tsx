@@ -119,7 +119,7 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       // spuntando (o riaprendo) un'azione cambia cosa il giorno suggerisce: l'alone dorato si aggiorna da solo
       useSuggerimentiStore.getState().invalida();
       // che cosa è successo e, a parte, le Doti da segnare a mano (la spunta non le tocca)
-      if (agg.ricevuteEffetti?.length) notifica('success', fatta ? 'Spunta ed effetti registrati. Le variazioni Doti e yen sono in «Da applicare».' : 'Spunta rimossa usando le sue ricevute. Le correzioni ai saldi sono in «Da applicare».');
+      if (agg.ricevuteEffetti?.length) notifica('success', fatta ? 'Spunta ed effetti registrati. I punti li applichi dal pulsante sulla voce, gli yen li cambi tu.' : 'Spunta rimossa usando le sue ricevute. Le correzioni ai punti compaiono come pulsante «Annulla» sulla voce.');
       else if (fatta && agg.effetti) notifica('success', avvisoSpunta(agg.effetti), dotiDaSegnareDaEffetti(agg.effetti).length ? 7000 : undefined);
       // era l'ultima attività del giorno: la partita è passata al giorno dopo
       seGiornoAvanzato(agg);
@@ -143,7 +143,7 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
         <InfiltrazioniVoce a={a} partitaId={partitaId} onCambiata={onCambiata} />
         {a.effettiVoce?.stato === 'legacy-da-correggere' && <p role="alert" className="m-0 text-warning">Effetti da correggere: {a.effettiVoce.motivo}. Il dato originario resta visibile nell’editor.</p>}
         {pendente && <p role="status" className="m-0 text-warning">Operazione da verificare nel registro dei gesti: questa voce non viene rispuntata.</p>}
-        {/* BON-01: i punti della voce che aspettano una decisione, con «Applica» sulla voce (niente pannello «Da applicare») */}
+        {/* BON-01: i punti della voce che aspettano una decisione, con «Applica» sulla voce (nessun pannello a parte) */}
         {partitaId !== null && !!a.daApplicare && <DaApplicare partitaId={partitaId} voceUid={a.uid} onCambiato={async () => { onCambiata(await getVocePercorso(a.uid, partitaId)); }} />}
         {a.effettiVoce?.effetti.filter((e) => e.effetto.tipo === 'acquisto' || e.effetto.tipo === 'pesca' || e.effetto.tipo === 'fortuna').map((e) => <span key={e.uid}>{descriviEffettoVoce(e.effetto)}</span>)}
         {!!a.ricevuteEffetti?.length && <details><summary className="touch">Ricevute degli effetti della spunta</summary><ul className="m-0 pl-4">{a.ricevuteEffetti.map((r) => <li key={r.id}>{r.tipo === 'acquisto' ? 'Consumazione' : r.tipo === 'pesca' ? 'Sessione di pesca' : r.tipo === 'contesto' ? 'Incontro e contesto della spunta' : r.tipo === 'dote' ? 'Dote' : r.tipo === 'lettura' ? 'Lettura o gioco' : 'Turno'} · {new Date(r.applicatoIl).toLocaleString('it-IT')} · {r.annullatoIl ? 'annullata' : 'attiva'}</li>)}</ul></details>}
@@ -243,7 +243,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
     const che = { azione: ['la voce', 'Voce eliminata'], evento: ['l\'evento', 'Evento eliminato'], scadenza: ['la scadenza', 'Scadenza eliminata'], promemoria: ['il promemoria', 'Promemoria eliminato'] }[v.genere];
     chiedi({
       titolo: `Eliminare ${che[0]}?`,
-      testo: <>«{v.azione}» esce dalla guida per tutte le partite e finisce nel Cestino, con spunte, fonti e collegamenti da ripristinare. Le spunte e le fonti d’acquisto della voce vengono rimosse nello stesso gesto, usando le proprie ricevute; le altre fonti della consumazione rimangono. Le eventuali correzioni ai saldi Doti e yen si rivedono in «Da applicare».</>,
+      testo: <>«{v.azione}» esce dalla guida per tutte le partite e finisce nel Cestino, con spunte, fonti e collegamenti da ripristinare. Le spunte e le fonti d’acquisto della voce vengono rimosse nello stesso gesto, usando le proprie ricevute; le altre fonti della consumazione rimangono. Le eventuali correzioni ai saldi Doti e yen compaiono come pulsante sulla voce.</>,
       scelte: [{ titolo: 'Metti nel Cestino', tono: 'pericolo', icona: 'elimina', esegui: via, ok: `${che[1]} dalla guida e conservata nel Cestino.` }],
     });
   };

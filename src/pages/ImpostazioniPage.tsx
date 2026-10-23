@@ -69,7 +69,7 @@ export function ImpostazioniPage() {
       <TraduzioniEditor />
       <MieiDati />
       <Cestino />
-      <GestiPartita mostraVuoto />
+      <GestiPartita />
       <RimozioniConservate />
       <PacchettoGioco />
       <BackupIstanza />

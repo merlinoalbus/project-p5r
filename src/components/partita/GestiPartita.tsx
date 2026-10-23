@@ -66,7 +66,7 @@ export function GestiPartita({ partitaId, onCambiato, mostraVuoto = false, conte
       const readonly = g.payload.tipo === 'spunta-acquisti';
       return <li key={g.id} className="flex min-w-0 flex-col gap-1 border-t border-border pt-2 text-[13px]">
         <strong>{nomi[g.payload.tipo]} · {g.bersaglio.etichetta}</strong>
-        <span>{g.partitaId === null ? 'Guida' : `Partita ${g.partitaId}`} · {statoInParole(g)}</span>
+        <span>{statoInParole(g)}</span>
         {g.errore && <p className="m-0 break-words text-warning">{g.errore}</p>}
         {g.stato === 'incerto' && <span>{readonly ? 'Controllo solo che la voce e i suoi dati ci siano: non ripeto la spunta.' : 'Riprovando non si fa due volte la stessa cosa: se era già andata a buon fine, lo si vede subito.'}</span>}
         <div className="flex flex-wrap gap-2">

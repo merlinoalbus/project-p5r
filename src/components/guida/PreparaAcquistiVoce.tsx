@@ -63,7 +63,7 @@ export function PreparaAcquistiVoce({ a, partitaId, onChiudi, onConferma, onRile
       <details><summary className="touch">Tutti gli effetti della voce</summary><ul className="m-0 pl-4">{a.effettiVoce?.effetti.map((e) => <li key={e.uid}>{descriviEffettoVoce(e.effetto)}</li>)}</ul></details>
       {verifica.caricamento && <p role="status">Verifico la configurazione corrente della voce…</p>}
       {verifica.errore && <p role="alert" className="m-0 text-error">{verifica.errore}<button type="button" className="btn btn-ghost touch" disabled={occupato || incerto} onClick={() => void verifica.ricarica()}>Rileggi la voce conservando i dati</button></p>}
-      {verifica.dati?.fatta && <p role="alert" className="m-0 text-warning">Questa voce risulta già fatta: nessuna nuova spunta viene inviata. Mostra la voce aggiornata; gli eventuali effetti mancanti si rivedono in «Da applicare».</p>}
+      {verifica.dati?.fatta && <p role="alert" className="m-0 text-warning">Questa voce risulta già fatta: nessuna nuova spunta viene inviata. Mostra la voce aggiornata; gli eventuali effetti mancanti compaiono come pulsante «Applica» sulla voce.</p>}
       {cambiata && <p role="alert" className="m-0 text-warning">La voce è cambiata: nessuna spunta viene inviata.<button type="button" className="btn btn-secondary touch" onClick={() => { if (verifica.dati) { onRileggi(verifica.dati); onChiudi(); } }}>Mostra la voce aggiornata</button></p>}
       <fieldset className="m-0 flex min-w-0 flex-col gap-3 border-0 p-0" disabled={occupato || incerto || nonPronta}>
         {effetti.map((e, i) => <section className="flex flex-col gap-2 border-t border-border pt-2" key={`${e.uid}:${generazione}`}>
