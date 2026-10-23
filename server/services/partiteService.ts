@@ -18,6 +18,7 @@ import { statoDisponibilitaPartita } from './disponibilitaService.js';
 import { meteoOra } from './meteoService.js';
 import { regaliDellaPartita, scriviRegaloPartita, type SceltaRegalo } from './regaliPartita.js';
 import { conCestinoPrivato } from './cestinoService.js';
+import { puntiConfidente as puntiDelModulo } from '../../shared/puntiConfidenti.js';
 import type {
   CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, EffettiAzioneDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto,
   SemaforiRangoDto, SkillRiassuntoDto,
@@ -255,14 +256,20 @@ export function aggiornaDote(partitaId: number, chiave: string, mod: ModificaDot
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
 /**
- * Punti Confidente come nel gioco: ogni risposta vale 5/10/15 punti base (1–3 note), un regalo gradito 50,
- * un'uscita senza salto di rango 10; moltiplicatori cumulativi: Persona dello stesso arcano ×1,5,
- * esami (primo ×1,5, top 10 ×1,2), invito accettato subito via SMS ×1,2.
+ * Punti Confidente come nel gioco: il calcolo è del modulo unico `shared/puntiConfidenti.ts` (base 5/10/15, regalo 50, uscita 10;
+ * ×1,5 arcano, esame solo per i sette Confidenti, ×1,2 invito; intero a ogni passaggio). Il Confidente serve al bonus dell'esame.
  */
-export function puntiConfidente(mod: ModificaConfidente): number {
-  const base = mod.regalo ? 50 : mod.uscita ? 10 : mod.noteRisposta !== undefined ? mod.noteRisposta * 5 : 0;
-  const molt = (mod.bonusArcano ? 1.5 : 1) * (mod.esame === 'primo' ? 1.5 : mod.esame === 'top10' ? 1.2 : 1) * (mod.invito ? 1.2 : 1);
-  return round2(base * molt);
+export function puntiConfidente(mod: ModificaConfidente, confidente?: string): number {
+  return puntiDelModulo({
+    confidente, noteRisposta: mod.noteRisposta, regalo: mod.regalo, uscita: mod.uscita, bonusArcano: mod.bonusArcano, invito: mod.invito,
+    piazzamento: mod.esame === 'primo' ? 'primo' : mod.esame === 'top10' ? 'primi-10' : null,
+  });
+}
+
+/** La soglia in punti del rango per il Confidente: > 0 solo dove il rango sale a punti (`modo = 'punti'`, migrazione 161); 0 altrove. */
+function sogliaAPunti(chiave: string, rango: number): number {
+  const r = prepared('SELECT punti_necessari AS soglia, modo FROM confidente_rango WHERE confidente_chiave = ? AND rango = ?').get(chiave, rango) as { soglia: number | null; modo: string } | undefined;
+  return r && r.modo === 'punti' && r.soglia !== null && r.soglia > 0 ? r.soglia : 0;
 }
 
 interface RigaConfidentePartita { chiave: string; nome: string; arcana: string; ordine: number; sbloccato: number; rango: number; punti: number; note: string; updated_at: string | null; punti_necessari: number | null; in_scorta: number }
@@ -397,9 +404,17 @@ export function aggiornaConfidente(partitaId: number, chiave: string, dati: Modi
     if (!dati.forza) throw httpErrors.conflict('confidente-bloccato', `${attuale.nome}: rango ${r} non raggiungibile finché i requisiti non sono soddisfatti — ${blocco.motivi.join(' · ')}`, { rango: r, motivi: blocco.motivi });
     bloccoInfranto.push(blocco);
   }
-  // Punti verso il rango successivo: al cambio di rango ripartono da zero (nessun riporto, come nel gioco), salvo valore esplicito.
-  const incremento = (dati.deltaPunti ?? 0) + puntiConfidente(dati);
-  let punti = dati.punti !== undefined ? dati.punti : rango !== attuale.rango ? 0 : attuale.punti + incremento;
+  // Punti verso il rango successivo (R10-11, G-020 §4-5): i punti del motore si accumulano solo dove il rango sale a punti, anche oltre la
+  // soglia («evento pronto»: la soglia raggiunta non li ferma). Il passaggio di rango spuntato nel Diario porta avanti l'eccedenza sulla
+  // soglia; la correzione a mano dalla pagina imposta i valori e riparte da zero, senza riporto automatico. Un valore esplicito vince.
+  const incremento = (dati.deltaPunti ?? 0) + (sogliaAPunti(chiave, attuale.rango) > 0 ? puntiConfidente(dati, chiave) : 0);
+  let riporto = 0;
+  if (origine?.origine === 'diario' && rango > attuale.rango && dati.punti === undefined) {
+    riporto = attuale.punti;
+    for (let r = attuale.rango; r < rango && riporto > 0; r++) { const soglia = sogliaAPunti(chiave, r); if (soglia > 0) riporto = Math.max(0, riporto - soglia); }
+    riporto = round2(riporto);
+  }
+  let punti = dati.punti !== undefined ? dati.punti : rango !== attuale.rango ? riporto : attuale.punti + incremento;
   punti = round2(Math.max(0, punti));
   return getDb().transaction(() => {
     prepared(`INSERT INTO confidente_partita (partita_id, confidente_chiave, sbloccato, rango, punti, note, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -415,8 +430,8 @@ export function aggiornaConfidente(partitaId: number, chiave: string, dati: Modi
       const momento = prepared('SELECT data_gioco, fascia_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null; fascia_gioco: string | null } | undefined;
       const quando = momento?.data_gioco ? ` Giorno di gioco ${momento.data_gioco}${momento.fascia_gioco ? `, ${momento.fascia_gioco}` : ''}.` : '';
       registraEvento(partitaId, 'confidente-rango', `${attuale.nome} (${attuale.arcanaNome}): rango ${rango}${rango === 10 ? ' — massimo' : ''}`,
-        `Da rango ${attuale.rango}.${origine ? ` ${TESTO_ORIGINE_RANGO[origine.origine]}` : ''}${quando}`,
-        { confidente: chiave, da: attuale.rango, a: rango, ...(origine ? { origine: origine.origine, ...(origine.voce ? { voce: origine.voce } : {}) } : {}), ...(momento?.data_gioco ? { data: momento.data_gioco, fascia: momento.fascia_gioco } : {}) });
+        `Da rango ${attuale.rango}.${origine ? ` ${TESTO_ORIGINE_RANGO[origine.origine]}` : ''}${riporto > 0 ? ` Riporto di ${riporto} punti sul rango successivo.` : ''}${quando}`,
+        { confidente: chiave, da: attuale.rango, a: rango, ...(riporto > 0 ? { riporto } : {}), ...(origine ? { origine: origine.origine, ...(origine.voce ? { voce: origine.voce } : {}) } : {}), ...(momento?.data_gioco ? { data: momento.data_gioco, fascia: momento.fascia_gioco } : {}) });
     }
     return confidente(partitaId, chiave);
   })();
