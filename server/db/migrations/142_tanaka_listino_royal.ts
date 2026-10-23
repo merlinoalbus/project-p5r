@@ -14,6 +14,10 @@
 //   stesso oggetto, oppure «nascondi») risultano `confermata`; le altre `scartata`. La storia delle proposte resta.
 // - Grado come condizione: `rango-cliente` (Nero > 10.000, Oscuro > 50.000, Caos > 100.000 yen spesi, «oltre» nella fonte); iniziale = nessuna.
 // - Idempotente: se la decisione è già nel registro, non fa nulla. Se il negozio o un'identità del catalogo non c'è, non la ricrea.
+// - Precondizione (verificata PRIMA di scrivere): il piano dà esattamente le 18 offerte Royal attive solo se il negozio non ha altre offerte
+//   attive oltre alle 20 correnti e alle 18 Royal. Se ne ha, la migrazione NON scrive niente, registra un avviso nel log e una riga
+//   `tanaka-listino-royal-142` in `dati_guida` con il motivo, e l'avvio prosegue (mai un errore di avvio). Superata la precondizione, la
+//   scrittura sta in un solo punto di salvataggio dentro la transazione del runner.
 // ============================================================
 
 import { createHash } from 'node:crypto';
@@ -55,6 +59,8 @@ const ROYAL: ReadonlyArray<{ s: string; nome: string; catalogo: string; prezzo: 
 const condizioni = (g: Grado): string => JSON.stringify(g === 'iniziale' ? [] : [{ tipo: 'rango-cliente', negozio: NEGOZIO, rango: g }]);
 const sha = (v: unknown): string => createHash('sha256').update(JSON.stringify(v)).digest('hex');
 type Riga = Record<string, unknown>;
+/** Il piano, applicato, non darebbe le 18 offerte attive: il punto di salvataggio si annulla (mai un errore di avvio). */
+class PianoNonCoerente extends Error { constructor(readonly attive: number) { super(`offerte attive dopo il piano: ${attive}`); } }
 
 export const migration142: Migration = {
   id: 142,
@@ -74,6 +80,22 @@ export const migration142: Migration = {
     const catalogoPresente = (k: string) => !!db.prepare('SELECT 1 FROM main.catalogo_oggetto WHERE chiave = ?').get(k);
     const adesso = new Date().toISOString();
 
+    // 0. precondizione, verificata PRIMA di qualunque scrittura: il piano dà esattamente le 18 offerte Royal attive solo se il negozio non ha
+    //    altre offerte attive oltre a quelle del piano. Su un'istanza con altre offerte di Tanaka l'avvio non si ferma: non si scrive niente,
+    //    si registra un avviso nel log e una riga in `dati_guida` con il motivo (la decisione resta all'utente).
+    const nonApplicata = (motivo: string, dettagli: Record<string, unknown>): void => {
+      logger.warn({ motivo, ...dettagli }, '[migration142] listino di Tanaka NON portato ai dati Royal: nessuna offerta è stata cambiata');
+      if (tabella('dati_guida')) db.prepare('INSERT OR IGNORE INTO main.dati_guida (chiave, json) VALUES (?, ?)')
+        .run('tanaka-listino-royal-142', JSON.stringify({ versione: 1, applicata: false, motivo, attiveRoyalAttese: ROYAL.length, ...dettagli }));
+    };
+    const altreAttive = (db.prepare('SELECT chiave FROM main.articolo WHERE negozio_chiave = ? AND nascosto = 0 AND chiave NOT IN (SELECT value FROM json_each(?)) ORDER BY chiave')
+      .all(NEGOZIO, JSON.stringify(tutte)) as Array<{ chiave: string }>).map((r) => r.chiave);
+    if (occupate.length === 0 && altreAttive.length > 0) {
+      nonApplicata(`il negozio ha ${altreAttive.length} offerte attive oltre a quelle del piano: il risultato non sarebbe di ${ROYAL.length} offerte Royal`, { altreAttive });
+      return;
+    }
+
+    const applica = (): void => {
     // 1. archivio: la fotografia integrale di prima (offerte, legami, proposte pertinenti) nel registro immutabile
     const legami = db.prepare(`SELECT * FROM main.ricompensa_oggetto WHERE fonte_tipo = 'articolo' AND fonte_chiave IN (${tutte.map(() => '?').join(',')}) ORDER BY fonte_chiave, catalogo_chiave`).all(...tutte);
     const proposte = tabella('proposta_abbinamento')
@@ -127,10 +149,17 @@ export const migration142: Migration = {
     const dopo = { offerte: leggi(), legami, proposte: tabella('proposta_abbinamento')
       ? db.prepare(`SELECT * FROM main.proposta_abbinamento WHERE riga_tipo = 'articolo' AND riga_chiave IN (${tutte.map(() => '?').join(',')}) ORDER BY riga_chiave, gruppo, catalogo_chiave`).all(...tutte) : [] };
     const attive = (db.prepare('SELECT COUNT(*) AS n FROM main.articolo WHERE negozio_chiave = ? AND nascosto = 0').get(NEGOZIO) as { n: number }).n;
-    if (occupate.length === 0 && attive !== ROYAL.length) throw new Error(`Migrazione 142: dopo il piano le offerte attive di Tanaka sono ${attive}, non ${ROYAL.length}`);
+    // rete di sicurezza: la precondizione di sopra rende questo caso impossibile; se avvenisse comunque, il punto di salvataggio annulla tutto
+    if (occupate.length === 0 && attive !== ROYAL.length) throw new PianoNonCoerente(attive);
     db.prepare(`INSERT INTO main.decisione_tanaka (operazione_id, versione, negozio_chiave, revisione_confronto, revisione_piano, piano_json, prima_json, dopo_json, confermata_il)
       VALUES (?, 1, ?, 'migrazione-142', ?, ?, ?, ?, ?)`).run(OPERAZIONE, NEGOZIO, sha(piano), JSON.stringify(piano),
       JSON.stringify({ offerte: prima, legami, proposte }), JSON.stringify(dopo), adesso);
     logger.info({ aggiornate, create, nascoste, confermate, scartate, attive }, '[migration142] listino di Tanaka portato ai dati Royal');
+    };
+    // tutta la scrittura sta in un solo punto di salvataggio dentro la transazione del runner: o c'è tutta o non c'è niente
+    try { db.transaction(applica)(); } catch (e) {
+      if (!(e instanceof PianoNonCoerente)) throw e;
+      nonApplicata(`dopo il piano le offerte attive di Tanaka sarebbero ${e.attive}, non ${ROYAL.length}: piano annullato`, { attiveDopoIlPiano: e.attive });
+    }
   },
 };
