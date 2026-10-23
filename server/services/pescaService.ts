@@ -6,6 +6,7 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { bodyAnteprimaAcquistoEsca, bodyAnteprimaFattoPesca, bodyAnteprimaOsservazionePesca, bodyAnteprimaRettificaPuntiPesca, bodyAnteprimaRimozionePesca, bodyAnteprimaSessionePesca } from '../schemas/pesca.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
+import { leggiFortuna } from './fortunaService.js';
 import { registraTurno, togliTurno } from './attivitaService.js';
 import { beneficiPescaDto, riconciliaBeneficiPesca } from './propostePartitaService.js';
 import { fattiPesca, fontiPesca, fotografiaPesca, leggiPescaPartita, momentoSessione, osservazioneCorrente, osservazioneDto, sessioniPesca, confrontaMomentiPesca, puntoOsservazionePesca, valoreFattoPesca, type RigaSessionePesca } from './pescaLetture.js';
@@ -23,7 +24,23 @@ function richiestaValida(azione:AzioneOperazionePesca,r:InputOperazionePesca):vo
   const schema=azione==='registra-sessione'?bodyAnteprimaSessionePesca:azione==='salva-osservazione'?bodyAnteprimaOsservazionePesca:azione==='registra-fatto'?bodyAnteprimaFattoPesca:azione==='acquista-esca'?bodyAnteprimaAcquistoEsca:azione==='rettifica-punti'?bodyAnteprimaRettificaPuntiPesca:bodyAnteprimaRimozionePesca;
   if(!schema.safeParse(r).success)throw httpErrors.badRequest('pesca-richiesta-non-valida','Il gesto deve contenere tutti e soltanto i campi previsti.');
 }
-function controllaOsservazione(r:NuovaSessionePesca):void {
+/** La Fortuna sulla Perizia in quel giorno, dallo stato della partita (R10-10/2): true/false se lo stato lo dice, null se non lo sa. */
+function fortunaDallaPartita(p:number,giorno:string):boolean|null {
+  const f=leggiFortuna(p),oggi=(prepared('SELECT data_gioco FROM utente.partita WHERE id=?').get(p) as {data_gioco:string|null}).data_gioco;
+  if(f.dote!==null&&f.giorno===giorno)return f.dote==='perizia';
+  return giorno===oggi?false:null;
+}
+/**
+ * La Fortuna dichiarata dal client non si prende per buona: deve coincidere con lo stato della partita; se lo stato non sa niente di quel
+ * giorno (un giorno passato) non si dichiara a mano: resta quella già registrata (correzione di una visita) o ignota (visita nuova).
+ */
+function verificaFortunaDallaPartita(p:number,giorno:string,valore:boolean|null,registrata:boolean|null):void {
+  const atteso=fortunaDallaPartita(p,giorno);
+  if(atteso!==null&&valore!==atteso)throw httpErrors.conflict('pesca-fortuna-diversa-dallo-stato','La Fortuna di quel giorno la dice la partita: il valore dichiarato non coincide.',{atteso});
+  if(atteso===null&&valore!==registrata)throw httpErrors.conflict('pesca-fortuna-non-attestata','La partita non ricorda la Fortuna di quel giorno: non si dichiara a mano.');
+}
+function controllaOsservazione(p:number,r:NuovaSessionePesca,registrata:boolean|null=null):void {
+  verificaFortunaDallaPartita(p,r.momento.giorno,r.osservazione.fortuna.attiva,registrata);
   if(r.osservazione.fortuna.giorno!==r.momento.giorno)throw httpErrors.conflict('pesca-fortuna-altro-giorno','Fortuna deve riferirsi al giorno della visita, anche quando è ignota.');
   if(r.osservazione.finale.tipo==='uscita-dopo-riscossione'&&!r.osservazione.finale.riscossioneUid)throw httpErrors.conflict('pesca-riscossione-senza-identita','La riscossione finale osservata richiede un’identità esplicita.');
 }
@@ -73,13 +90,13 @@ function prepara(p:number,azione:AzioneOperazionePesca,r:InputOperazionePesca,be
     if(st.regola.stato!=='collegata'||!st.regola.dati)throw httpErrors.conflict('pesca-regola-assente','La regola corrente non è riconoscibile. Nessuna visita viene ricostruita.');
     const a=prepared('SELECT pesca_regola_chiave,pesca_ruolo FROM main.attivita WHERE chiave=?').get(ATTIVITA_PESCA) as {pesca_regola_chiave:string|null;pesca_ruolo:string|null}|undefined;
     if(a?.pesca_regola_chiave!==REGOLA_PESCA||a.pesca_ruolo!=='visita')throw httpErrors.conflict('pesca-attivita-non-collegata','L’attività non rimanda alla regola canonica della visita.');
-    controllaOsservazione(input);verificaFonte(p,input);verificaTurno(input,st);
+    controllaOsservazione(p,input,input.scelta.tipo==='collega'?osservazioneDto(osservazioneCorrente(sessione(p,input.scelta.sessioneId).id)).dati.fortuna.attiva:null);verificaFonte(p,input);verificaTurno(input,st);
     if(input.scelta.tipo==='nuova')verificaRangoFotografato(p,input.momento,input.osservazione);
     verificaIdentitaCatture(input.osservazione,input.scelta.tipo==='collega'?input.scelta.sessioneId:null);
     verificaFattiOsservazione(p,input.momento,input.osservazione,input.scelta.tipo==='collega'?input.scelta.sessioneId:undefined);
     conseguenze.push(input.scelta.tipo==='collega'?'Aggiunge soltanto una fonte alla visita già registrata.':input.turno.tipo==='nuovo'?'Registra esattamente un nuovo turno A02.':'Raccorda una visita già conteggiata senza aumentare il contatore.','Catture e Perizia restano osservazioni separate. I benefici e le spese diventano proposte, senza modifiche automatiche alle Doti o al denaro.');
   }else if(azione==='salva-osservazione'){
-    const s=sessione(p,bersaglio!);controllaOsservazione({momento:momentoSessione(s),osservazione:(r as {osservazione:OsservazionePesca}).osservazione} as NuovaSessionePesca);verificaFattiOsservazione(p,momentoSessione(s),(r as {osservazione:OsservazionePesca}).osservazione,s.id);
+    const s=sessione(p,bersaglio!);controllaOsservazione(p,{momento:momentoSessione(s),osservazione:(r as {osservazione:OsservazionePesca}).osservazione} as NuovaSessionePesca,osservazioneDto(osservazioneCorrente(s.id)).dati.fortuna.attiva);verificaFattiOsservazione(p,momentoSessione(s),(r as {osservazione:OsservazionePesca}).osservazione,s.id);
     verificaRangoFotografato(p,momentoSessione(s),(r as {osservazione:OsservazionePesca}).osservazione,osservazioneDto(osservazioneCorrente(s.id)).dati);
     verificaIdentitaCatture((r as {osservazione:OsservazionePesca}).osservazione,s.id);
     conseguenze.push('Conserva la revisione precedente; aggiorna soltanto i fatti derivati dalle fonti della sessione e le proposte pertinenti. Un valore divenuto ignoto non annulla un beneficio già provato.');

@@ -142,7 +142,7 @@ function CompilaGestoPesca({ partitaId, editor, stato, aperta, onChiudi, onPront
       onConferma={r => { const { revisionePescaAttesa, ...richiesta } = r; return eseguiPescaConRegistro(partitaId, { azione: 'registra-sessione', richiesta, bersaglio: null, revisionePescaAttesa }, { etichetta: titolo, pesca: true }); }} onCambiato={onCambiato} /> : <form className="flex min-w-0 flex-col gap-3 text-[13px]" onSubmit={prepara}><fieldset className="m-0 flex min-w-0 flex-col gap-3 border-0 p-0" disabled={!!pendente}>
       {editor.tipo === 'osservazione' && osservazione && <>
         <p className="m-0">{quando(editor.sessione.momento)} · versione {editor.sessione.osservazione.versione}. La correzione conserva l’identità della visita e il turno, coinvolgendo tutte le fonti mostrate.</p><FontiSessione sessione={editor.sessione} />
-        <OsservazionePescaForm valore={osservazione} onCambia={setOsservazione} />
+        <OsservazionePescaForm partitaId={partitaId} valore={osservazione} onCambia={setOsservazione} />
       </>}
       {editor.tipo === 'fatto' && <>
         <Selettore etichetta="Fatto osservato" valore={valore} vuoto="Dichiara l’esito" opzioni={[{ chiave: 'avvenuto', nome: 'Avvenuto' }, { chiave: 'non-avvenuto', nome: 'Non avvenuto al momento indicato' }, { chiave: 'ignoto', nome: 'Ignoto' }]} onCambia={v => setValore(v as ValoreFattoPesca)} />
