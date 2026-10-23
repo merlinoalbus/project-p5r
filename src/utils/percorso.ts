@@ -86,7 +86,10 @@ export function descriviEffetti(e: EffettiAzioneDto, opz: { senzaDoti?: boolean 
   const parti = opz.senzaDoti ? [] : e.doti.map((d) => `${d.nome} +${d.delta}${d.note ? ` (${'♪'.repeat(d.note)}${d.cinema ? ' + Anima da cineasta' : ''})` : ''}`);
   for (const l of e.letture ?? []) parti.push(`${l.dopo > l.prima ? `${l.nome} ${l.prima} → ${l.dopo}` : `${l.nome} già a ${l.prima}`}${doti(l.doti ?? [], ' (', ')')}`);
   for (const t of e.turni ?? []) parti.push(`${t.nome}: turno ${t.ordine}${doti(t.doti, ' (', ')')}`);
-  if (e.incontro) parti.push(e.incontro.giaContato ? `Incontro con ${e.incontro.nome} già contato` : `Incontro con ${e.incontro.nome}${doti(e.incontro.doti, ': ', '')}`);
+  if (e.incontro) {
+    const rango = e.incontro.rango ? ` · rango ${e.incontro.rango.da} → ${e.incontro.rango.a}` : '';
+    parti.push((e.incontro.giaContato ? `Incontro con ${e.incontro.nome} già contato` : `Incontro con ${e.incontro.nome}${doti(e.incontro.doti, ': ', '')}`) + rango);
+  }
   if (e.confidente) parti.push(`${e.confidente.nome} +${e.confidente.punti} punti`);
   for (const a of e.apertureDedali ?? []) parti.push(a.nome);
   return parti.join(' · ');

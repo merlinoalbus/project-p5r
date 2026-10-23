@@ -115,6 +115,12 @@ function togliRiga(_partitaId: number, r: RigaIncontro): Array<{ chiave: string;
  *  Un passaggio al rango R che la partita ha comunque raggiunto (alzato dalla pagina Confidenti mentre la spunta c'era, e lì
  *  «già contato») non si toglie: resta come incontro della pagina, con le sue Doti. */
 export function annullaIncontro(partitaId: number, inc: IncontroConfidenteDto): void {
+  // R10-17: se la spunta aveva alzato il rango e il Confidente è ancora lì, il rango (e i punti, lo sblocco) tornano com'erano; poi il
+  // passaggio si toglie come sempre (ora il rango è sotto il passaggio). Se nel frattempo il rango è cambiato (alzato ancora, o abbassato a
+  // mano dalla pagina) non si tocca: vale la correzione a mano, e il passaggio resta o se ne va come prima.
+  if (inc.rango && rangoAttuale(partitaId, inc.confidente) === inc.rango.a) {
+    aggiornaConfidente(partitaId, inc.confidente, { rango: inc.rango.da, punti: inc.rango.punti, ...(inc.rango.da === 0 ? { sbloccato: inc.rango.sbloccato } : {}) }, { origine: 'diario-tolto' });
+  }
   if (inc.id !== null) {
     const r = prepared('SELECT * FROM incontro_confidente_partita WHERE id = ? AND partita_id = ?').get(inc.id, partitaId) as RigaIncontro | undefined;
     if (!r) return;
@@ -138,7 +144,7 @@ export function aggiornaConfidenteDallaPagina(partitaId: number, chiave: string,
   return getDb().transaction(() => {
     const prima = rangoAttuale(partitaId, chiave);
     const puntiPrima = (prepared('SELECT punti FROM confidente_partita WHERE partita_id = ? AND confidente_chiave = ?').get(partitaId, chiave) as { punti: number } | undefined)?.punti ?? 0;
-    const dto = aggiornaConfidente(partitaId, chiave, dati);
+    const dto = aggiornaConfidente(partitaId, chiave, dati, { origine: 'pagina' });
     const partita = prepared('SELECT data_gioco, fascia_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null; fascia_gioco: string };
     const momento: MomentoIncontro = { data: partita.data_gioco ?? '', fascia: partita.fascia_gioco ?? '', origine: 'pagina' };
     const cambi: Array<{ chiave: string; nome: string; delta: number }> = [];

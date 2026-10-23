@@ -35,7 +35,8 @@ const schemaRicevutaLegacy = z.object({
     prima: z.number().int().nonnegative(), dopo: z.number().int().nonnegative(), doti: z.array(doteReceipt).optional(), visione: z.boolean().optional() }).passthrough()).optional(),
   turni: z.array(z.object({ attivita: chiaveReceipt, nome: z.string(), ordine: z.number().int().positive(), doti: z.array(doteReceipt) }).passthrough()).optional(),
   incontro: z.object({ id: z.number().int().positive().nullable(), marcato: z.number().int().positive().nullable(), confidente: chiaveReceipt,
-    nome: z.string(), verso: z.number().int().min(1).max(10), passaggio: z.boolean(), giaContato: z.boolean(), doti: z.array(doteReceipt) }).passthrough().optional(),
+    nome: z.string(), verso: z.number().int().min(1).max(10), passaggio: z.boolean(), giaContato: z.boolean(), doti: z.array(doteReceipt),
+    rango: z.object({ da: z.number().int().min(0).max(10), a: z.number().int().min(1).max(10), punti: numeroReceipt, sbloccato: z.boolean() }).passthrough().optional() }).passthrough().optional(),
   apertureDedali: z.array(z.object({ chiave: chiaveReceipt, nome: z.string() }).passthrough()).optional(),
 }).passthrough();
 /** Valida senza ricostruire o scartare campi della fotografia storica. */
@@ -111,6 +112,16 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
   let incontro: IncontroConfidenteDto | undefined;
   if (a.tipo === 'confidente' && a.riferimento?.tipo === 'confidente' && a.momento && prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(a.riferimento.chiave)) {
     incontro = registraIncontro(partitaId, a.riferimento.chiave, a.momento, a.rangoAtteso ?? null);
+    // R10-17: il passaggio spuntato nel Diario porta il rango del Confidente al rango atteso (senza abbassarlo mai). Il blocco dei
+    // semafori non ferma la spunta (la spunta del Diario non è mai stata bloccata): passa come «Segna comunque» e lo dice lo storico.
+    // Un passaggio già registrato (dalla pagina, da un'altra spunta) non cambia niente. La ricevuta ricorda com'era, per togliere la spunta.
+    if (incontro.passaggio && (incontro.id !== null || incontro.marcato !== null)) {
+      const prima = confidenteDellaPartita(partitaId, a.riferimento.chiave);
+      if (prima.rango < incontro.verso) {
+        aggiornaConfidente(partitaId, a.riferimento.chiave, { rango: incontro.verso, forza: true }, { origine: 'diario' });
+        incontro = { ...incontro, rango: { da: prima.rango, a: incontro.verso, punti: prima.punti, sbloccato: prima.sbloccato } };
+      }
+    }
   }
   let confidente: EffettiAzioneDto['confidente'] = null;
   if (a.tipo === 'confidente' && a.riferimento?.tipo === 'confidente' && opz.noteRisposta) {
@@ -136,8 +147,9 @@ export function annullaEffettiAzione(partitaId: number, e: EffettiAzioneDto): vo
 
 /** «Incontro con Tae Takemi: Coraggio +2», o «già contato» se quell'incontro (o quel passaggio di rango) c'era già. */
 function descriviIncontro(i: IncontroConfidenteDto): string {
-  if (i.giaContato) return `Incontro con ${i.nome} già contato`;
-  return `Incontro con ${i.nome}${i.doti.length ? `: ${i.doti.map((d) => `${d.nome} +${d.delta}`).join(', ')}` : ''}`;
+  const rango = i.rango ? `, rango ${i.rango.da} → ${i.rango.a}` : '';
+  if (i.giaContato) return `Incontro con ${i.nome} già contato${rango}`;
+  return `Incontro con ${i.nome}${i.doti.length ? `: ${i.doti.map((d) => `${d.nome} +${d.delta}`).join(', ')}` : ''}${rango}`;
 }
 
 /** La frase di ciò che la spunta ha fatto, per lo storico. Le Doti sono quelle che il gioco dà, da segnare a mano. */

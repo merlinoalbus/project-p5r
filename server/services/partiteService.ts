@@ -361,13 +361,21 @@ export function bloccoRango(semafori: SemaforiRangoDto[], rango: number): { rang
   return motivi.length > 0 ? { rango, motivi } : null;
 }
 
+/** Da dove viene un cambio di rango (R10-17): la pagina Confidenti (correzione a mano), la spunta del passaggio nel Diario o la spunta tolta. */
+export interface OrigineCambioRango { origine: 'pagina' | 'diario' | 'diario-tolto'; voce?: string }
+const TESTO_ORIGINE_RANGO: Record<OrigineCambioRango['origine'], string> = {
+  pagina: 'Segnato a mano dalla pagina Confidenti.',
+  diario: 'Passaggio spuntato nel Diario.',
+  'diario-tolto': 'Passaggio tolto dal Diario: il rango torna com\'era.',
+};
+
 /**
  * Aggiorna un Confidente nella partita: rango, sblocco, punti e note. Un rango sopra 0 vale sblocco; salire di rango (o
  * sbloccare) richiede i semafori pronti per ogni rango attraversato, salvo `forza`, che passa e lascia traccia nello storico
  * (409 altrimenti). I punti si impostano, oppure si sommano l'incremento esplicito e quelli calcolati da `puntiConfidente`;
  * al cambio di rango ripartono da zero. Sblocco e cambio di rango vanno nello storico.
  */
-export function aggiornaConfidente(partitaId: number, chiave: string, dati: ModificaConfidente): ConfidentePartitaDto {
+export function aggiornaConfidente(partitaId: number, chiave: string, dati: ModificaConfidente, origine?: OrigineCambioRango): ConfidentePartitaDto {
   // `confidente` controlla anche che partita e Confidente esistano (404)
   const attuale = confidente(partitaId, chiave);
   const rango = dati.rango ?? attuale.rango;
@@ -398,7 +406,12 @@ export function aggiornaConfidente(partitaId: number, chiave: string, dati: Modi
       registraEvento(partitaId, 'confidente-rango', `${attuale.nome}: rango ${b.rango} segnato nonostante i requisiti`, b.motivi.join(' · '), { confidente: chiave });
     }
     if (rango !== attuale.rango) {
-      registraEvento(partitaId, 'confidente-rango', `${attuale.nome} (${attuale.arcanaNome}): rango ${rango}${rango === 10 ? ' — massimo' : ''}`, `Da rango ${attuale.rango}.`, { confidente: chiave, da: attuale.rango, a: rango });
+      // R10-17/4: l'evento dice anche da dove viene il cambio e in quale giorno di gioco è stato segnato (dettaglio e dati)
+      const momento = prepared('SELECT data_gioco, fascia_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null; fascia_gioco: string | null } | undefined;
+      const quando = momento?.data_gioco ? ` Giorno di gioco ${momento.data_gioco}${momento.fascia_gioco ? `, ${momento.fascia_gioco}` : ''}.` : '';
+      registraEvento(partitaId, 'confidente-rango', `${attuale.nome} (${attuale.arcanaNome}): rango ${rango}${rango === 10 ? ' — massimo' : ''}`,
+        `Da rango ${attuale.rango}.${origine ? ` ${TESTO_ORIGINE_RANGO[origine.origine]}` : ''}${quando}`,
+        { confidente: chiave, da: attuale.rango, a: rango, ...(origine ? { origine: origine.origine, ...(origine.voce ? { voce: origine.voce } : {}) } : {}), ...(momento?.data_gioco ? { data: momento.data_gioco, fascia: momento.fascia_gioco } : {}) });
     }
     return confidente(partitaId, chiave);
   })();

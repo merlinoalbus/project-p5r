@@ -76,15 +76,20 @@ describe('API — gli incontri con un Confidente e la Dote del passaggio di rang
     expect(await coraggio(p)).toBe(0);
   });
 
-  it('prima la spunta dell\'azione del passaggio, poi il rango dalla pagina: una nota sola; togliere la spunta a rango raggiunto non la toglie', async () => {
+  it('prima la spunta dell\'azione del passaggio, poi il rango dalla pagina: una nota sola; R10-17: la spunta alza il rango e togliendola il rango torna indietro', async () => {
     const p = await nuovaPartita('Takemi spunta', '04-25');
     await pagina(p, { rango: 1 });
     const a = await azioneTakemi('04-25');
     const s = (await spunta(p, a.uid).expect(200)).body.data as AzionePercorsoDto;
-    expect(s.effetti?.incontro).toMatchObject({ verso: 2, passaggio: true, giaContato: false, doti: [{ chiave: 'coraggio', delta: 2, note: 1 }] });
+    expect(s.effetti?.incontro).toMatchObject({ verso: 2, passaggio: true, giaContato: false, doti: [{ chiave: 'coraggio', delta: 2, note: 1 }], rango: { da: 1, a: 2 } });
+    // R10-17: il passaggio spuntato nel Diario ha già portato Takemi al rango 2; la pagina non ha niente da aggiungere
+    const rangoDi = () => (prepared("SELECT rango FROM confidente_partita WHERE partita_id = ? AND confidente_chiave = 'takemi'").get(p) as { rango: number }).rango;
+    expect(rangoDi()).toBe(2);
     expect((await pagina(p, { rango: 2 })).doteIncontro).toEqual([]);
     await spunta(p, a.uid, false).expect(200);
-    expect(incontri(p)).toEqual([{ verso: 1, passaggio: 1, origine: 'pagina' }, { verso: 2, passaggio: 1, origine: 'pagina' }]);
+    // togliendo la spunta il passaggio e il rango tornano com'erano; resta solo il rango 1 segnato dalla pagina
+    expect(rangoDi()).toBe(1);
+    expect(incontri(p)).toEqual([{ verso: 1, passaggio: 1, origine: 'pagina' }]);
     expect(await coraggio(p)).toBe(0);
   });
 
@@ -129,7 +134,7 @@ describe('API — gli incontri con un Confidente e la Dote del passaggio di rang
     expect(s.effetti?.incontro).toMatchObject({ id: null, marcato: expect.any(Number), verso: 2, passaggio: true, giaContato: false, doti: [{ chiave: 'coraggio', delta: 2, note: 1 }] });
     const riga = "SELECT verso_rango AS verso, passaggio, origine, doti_json FROM incontro_confidente_partita WHERE partita_id = ? AND data = '04-25'";
     expect(prepared(riga).all(p)).toEqual([{ verso: 2, passaggio: 1, origine: 'pagina', doti_json: JSON.stringify([{ chiave: 'coraggio', nome: 'Coraggio', delta: 2, note: 1 }]) }]);
-    // il rango nella partita è ancora 1: togliendo la spunta l'incontro resta (le risposte ci sono state), torna semplice e senza Dote
+    // R10-17: la spunta ha portato il rango a 2; togliendola il rango torna a 1, l'incontro resta (le risposte ci sono state), torna semplice e senza Dote
     await spunta(p, a.uid, false).expect(200);
     expect(prepared(riga).all(p)).toEqual([{ verso: 2, passaggio: 0, origine: 'pagina', doti_json: '[]' }]);
     expect(await coraggio(p)).toBe(0);

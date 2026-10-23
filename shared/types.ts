@@ -1159,6 +1159,9 @@ export interface IncontroConfidenteDto {
   passaggio: boolean;
   giaContato: boolean;
   doti: Array<{ chiave: string; nome: string; delta: number; note: number }>;
+  /** R10-17: presente solo se questa spunta ha alzato il rango del Confidente (da → a, con i punti e lo sblocco di prima): togliendo la
+   *  spunta il rango torna a `da` e i punti a `punti`, se il Confidente è ancora al rango `a`. */
+  rango?: { da: number; a: number; punti: number; sbloccato: boolean };
 }
 
 export interface EffettiAzioneDto {
