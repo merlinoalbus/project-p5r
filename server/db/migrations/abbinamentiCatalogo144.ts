@@ -9,8 +9,10 @@
 //
 // Differenze volute rispetto ai servizi vivi:
 //   - NON scrive mai nello schema `utente` (le partite). Il gesto vivo della fusione sposta anche `regalo_partita.catalogo_chiave`;
-//     qui no: se una partita avesse un regalo che punta all'identità fusa, la lettura risolve la vecchia chiave verso la nuova tramite
-//     l'alias della fusione nel Cestino (riga `oggetto` con la chiave dell'identità fusa). Vedi la nota nella migrazione.
+//     qui no. NON esiste nessun alias che risolva la vecchia chiave verso la nuova: un `regalo_partita.catalogo_chiave` che puntasse
+//     all'identità fusa resterebbe sulla vecchia chiave (che sta nel Cestino, ripristinabile). Per le tre fusioni della 144 (accessori del
+//     Venditore ambulante, non regali) sulla copia di p5s le righe di `regalo_partita` con quelle chiavi sono 0 (e con `catalogo_chiave`
+//     valorizzato 0 in tutto): nessuna partita è toccata. Per un'altra fusione futura va controllato prima.
 //   - la rettifica di una proposta (`modifica_json`) si legge come JSON semplice con un controllo strutturale dei soli campi usati,
 //     senza lo schema zod vivo (che dipende da quello delle condizioni dei pin). Una rettifica che non passa il controllo si tratta come
 //     «non valida»: la proposta resta com'è, annotata nel log, come nel gesto vivo.
@@ -549,7 +551,7 @@ export function fondiOggetti144(db: AppDatabase, da: string, a: string, dopo?: (
     db.prepare('UPDATE articolo SET catalogo_chiave = ? WHERE catalogo_chiave = ?').run(a, da);
     db.prepare('UPDATE confidente_regalo SET catalogo_chiave = ? WHERE catalogo_chiave = ?').run(a, da);
     // `regalo_partita` (schema `utente`) NON si tocca: la migrazione di gioco non scrive nelle partite. I nomi storici e le date di
-    // consegna restano; la vecchia chiave si risolve verso la nuova con l'alias della fusione nel Cestino.
+    // consegna restano; nessun alias risolve la vecchia chiave (vedi l'intestazione): sulla copia di p5s nessuna riga la usa.
     trasferisciRiferimentiDelleProposte(db, da, a);
     trasferisciProposte(db, da, a);
     const nomi = new Map<string, string>();
