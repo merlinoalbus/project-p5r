@@ -14,13 +14,15 @@ describe('formattaPunti', () => {
 });
 
 describe('anteprimaPunti', () => {
-  it('replica la formula del backend: base × arcano × esami × invito, ai centesimi', () => {
-    expect(anteprimaPunti(5, false, null, false)).toBe(5);
-    expect(anteprimaPunti(5, true, null, false)).toBe(7.5);
-    expect(anteprimaPunti(10, true, null, false)).toBe(15);
-    expect(anteprimaPunti(15, true, null, false)).toBe(22.5);
-    expect(anteprimaPunti(50, true, 'top10', false)).toBe(90);
-    expect(anteprimaPunti(10, false, 'primo', true)).toBe(18);
-    expect(anteprimaPunti(5, true, 'primo', true)).toBe(13.5);
+  it('è il modulo del server: base × arcano × esame (solo i sette) × invito, interi a ogni passaggio', () => {
+    expect(anteprimaPunti({ noteRisposta: 1 })).toBe(5);
+    expect(anteprimaPunti({ noteRisposta: 1, bonusArcano: true })).toBe(7);
+    expect(anteprimaPunti({ noteRisposta: 2, bonusArcano: true })).toBe(15);
+    expect(anteprimaPunti({ noteRisposta: 3, bonusArcano: true })).toBe(22);
+    expect(anteprimaPunti({ confidente: 'ryuji', regalo: true, bonusArcano: true, piazzamento: 'primi-10' })).toBe(90);
+    expect(anteprimaPunti({ confidente: 'ryuji', uscita: true, piazzamento: 'primo', invito: true })).toBe(18);
+    // l'esame non vale per chi non è fra i sette; dove il rango non sale a punti l'anteprima dice 0 (come il server)
+    expect(anteprimaPunti({ confidente: 'takemi', noteRisposta: 1, piazzamento: 'primo' })).toBe(5);
+    expect(anteprimaPunti({ confidente: 'yoshida', noteRisposta: 2, contaPunti: false })).toBe(0);
   });
 });

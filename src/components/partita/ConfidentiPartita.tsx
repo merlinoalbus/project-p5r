@@ -11,7 +11,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { aggiornaConfidente, annullaRegaloOggetto, getConfidentiPartita, confermaRequisitoConfidente } from '../../services/api';
+import { aggiornaConfidente, annullaRegaloOggetto, getConfidentiPartita, confermaRequisitoConfidente, impostaPiazzamentoEsame } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';
@@ -20,7 +20,7 @@ import { Modal } from '../shared/Modal';
 import { AssetImg } from '../shared/AssetImg';
 import { AnelloAvanzamento } from '../shared/AnelloAvanzamento';
 import { slug } from '../../../shared/slug';
-import type { BonusEsame, ConfidentePartitaDto, ModificaConfidente } from '../../types';
+import type { ConfidentePartitaDto, ModificaConfidente } from '../../types';
 import { anteprimaPunti, formattaPunti } from '../../utils/punti';
 import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { SemaforiRango } from './SemaforiRango';
@@ -60,8 +60,18 @@ export function ConfidentiPartita({ partitaId }: Props) {
   const [modifica, setModifica] = useState<ConfidentePartitaDto | null>(null);
   const [note, setNote] = useState('');
   // Moltiplicatori globali (valgono per tutte le card finché l'utente non li cambia).
-  const [esame, setEsame] = useState<BonusEsame | null>(null);
+  // Il piazzamento agli esami sta nella partita (vale fino ai risultati dell'esame successivo): i pulsanti lo scrivono per l'esame che vale adesso.
   const [invito, setInvito] = useState(false);
+  const piazzamentoEsame = dati?.[0]?.piazzamentoEsame ?? null;
+  const scegliPiazzamento = (p: 'primo' | 'primi-10') => {
+    if (!piazzamentoEsame) return;
+    void impostaPiazzamentoEsame(partitaId, piazzamentoEsame.esame, piazzamentoEsame.piazzamento === p ? null : p)
+      .then(() => ricarica())
+      .catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Piazzamento non salvato.'));
+  };
+  /** L'anteprima dei punti: stesso modulo e stesse regole del server (piazzamento della partita, rango che sale a punti). */
+  const anteprima = (c: ConfidentePartitaDto, cosa: { noteRisposta?: 1 | 2 | 3; regalo?: boolean; uscita?: boolean }, bonus: boolean) =>
+    anteprimaPunti({ confidente: c.chiave, ...cosa, bonusArcano: bonus, invito, piazzamento: c.piazzamentoEsame?.piazzamento ?? null, contaPunti: c.contaPunti });
   // Bonus arcano per card: predefinito dalla scorta, modificabile a mano (chiave → valore forzato).
   const [bonusForzato, setBonusForzato] = useState<Record<string, boolean>>({});
   // Gli incrementi di ogni card, dal più vecchio al più recente, per «Annulla ultimo»: annulla l'ultimo, poi resta quello di prima.
@@ -157,8 +167,8 @@ export function ConfidentiPartita({ partitaId }: Props) {
       <div className="flex flex-col gap-1.5 mb-3" role="group" aria-label="Moltiplicatori dei punti">
         <span className="text-[11px] font-semibold uppercase tracking-[.06em] text-text-muted">Moltiplicatori · valgono per tutti i punti registrati</span>
         <div className="flex flex-wrap gap-2">
-          <PulsanteVisivo disposizione="colonna" attivo={esame === 'top10'} icona={<IconaAzione chiave="esame-top10" dimensione={48} />} titolo="Esami top 10" dettaglio="×1,2 con i compagni di scuola" onClick={() => setEsame((e) => (e === 'top10' ? null : 'top10'))} aria-label="Esami top 10 ×1,2" title="Fra i primi dieci agli ultimi esami: punti ×1,2 con i compagni di scuola fino all'esame successivo" />
-          <PulsanteVisivo disposizione="colonna" attivo={esame === 'primo'} icona={<IconaAzione chiave="esame-primo" dimensione={48} />} titolo="Esami 1º" dettaglio="×1,5 con i compagni di scuola" onClick={() => setEsame((e) => (e === 'primo' ? null : 'primo'))} aria-label="Esami 1º ×1,5" title="Primo del corso agli ultimi esami: punti ×1,5 con i compagni di scuola fino all'esame successivo" />
+          <PulsanteVisivo disposizione="colonna" attivo={piazzamentoEsame?.piazzamento === 'primi-10'} disabled={!piazzamentoEsame} icona={<IconaAzione chiave="esame-top10" dimensione={48} />} titolo="Esami top 10" dettaglio="×1,2 con i compagni di scuola" onClick={() => scegliPiazzamento('primi-10')} aria-label="Esami top 10 ×1,2" title={piazzamentoEsame ? `Fra i primi dieci agli ultimi esami (${piazzamentoEsame.nome}): punti ×1,2 per Ryuji, Ann, Makoto, Haru, Sojiro, Kawakami e Kasumi fino all'esame successivo` : 'I risultati del primo esame non sono ancora usciti'} />
+          <PulsanteVisivo disposizione="colonna" attivo={piazzamentoEsame?.piazzamento === 'primo'} disabled={!piazzamentoEsame} icona={<IconaAzione chiave="esame-primo" dimensione={48} />} titolo="Esami 1º" dettaglio="×1,5 con i compagni di scuola" onClick={() => scegliPiazzamento('primo')} aria-label="Esami 1º ×1,5" title={piazzamentoEsame ? `Primo del corso agli ultimi esami (${piazzamentoEsame.nome}): punti ×1,5 per Ryuji, Ann, Makoto, Haru, Sojiro, Kawakami e Kasumi fino all'esame successivo` : 'I risultati del primo esame non sono ancora usciti'} />
           <PulsanteVisivo disposizione="colonna" attivo={invito} icona={<IconaAzione chiave="sms" dimensione={48} />} titolo="Invito SMS" dettaglio="×1,2 su tutta l'uscita" onClick={() => setInvito((v) => !v)} aria-label="Invito SMS ×1,2" title="Invito accettato subito via SMS la sera prima: tutti i punti guadagnati durante l'uscita valgono ×1,2" />
         </div>
       </div>
@@ -267,9 +277,9 @@ export function ConfidentiPartita({ partitaId }: Props) {
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {([1, 2, 3] as const).map((n) => {
-                        const valore = anteprimaPunti(n * 5, bonus, esame, invito);
+                        const valore = anteprima(c, { noteRisposta: n }, bonus);
                         return (
-                          <button key={n} type="button" className="btn btn-primary btn-sm flex-1 min-w-[72px]" disabled={occ} onClick={() => void salva(c.chiave, { noteRisposta: n, bonusArcano: bonus, esame: esame ?? undefined, invito })} aria-label={`${c.nome}: risposta da ${n} ${n === 1 ? 'nota' : 'note'} (${formattaPunti(valore)} punti)`}>
+                          <button key={n} type="button" className="btn btn-primary btn-sm flex-1 min-w-[72px]" disabled={occ} onClick={() => void salva(c.chiave, { noteRisposta: n, bonusArcano: bonus, invito })} aria-label={`${c.nome}: risposta da ${n} ${n === 1 ? 'nota' : 'note'} (${formattaPunti(valore)} punti)`}>
                             <span aria-hidden="true">{'♪'.repeat(n)}</span> <span className="text-[12px] opacity-90">+{formattaPunti(valore)}</span>
                           </button>
                         );
@@ -279,9 +289,9 @@ export function ConfidentiPartita({ partitaId }: Props) {
                       {/* R10-18: con regali collegati al catalogo «Regala» apre la finestra unica (oggetto → punti, consegna, acquisto);
                           senza, resta il regalo con i punti subito, come prima: nessuna capacità si perde */}
                       {c.haRegaliCatalogo
-                        ? <PulsanteVisivo className="flex-1 min-w-[120px]" icona={<IconaAzione chiave="regalo" dimensione={24} />} titolo="Regala" dettaglio={`+${formattaPunti(anteprimaPunti(50, bonus, esame, invito))} punti`} disabled={occ} onClick={() => setRegaloPer(c.chiave)} aria-label={`${c.nome}: regala un oggetto (${formattaPunti(anteprimaPunti(50, bonus, esame, invito))} punti)`} />
-                        : <PulsanteVisivo className="flex-1 min-w-[120px]" icona={<IconaAzione chiave="regalo" dimensione={24} />} titolo="Regalo" dettaglio={`+${formattaPunti(anteprimaPunti(50, bonus, esame, invito))} punti`} disabled={occ} onClick={() => void salva(c.chiave, { regalo: true, bonusArcano: bonus, esame: esame ?? undefined, invito })} aria-label={`${c.nome}: regalo gradito (${formattaPunti(anteprimaPunti(50, bonus, esame, invito))} punti)`} />}
-                      <PulsanteVisivo className="flex-1 min-w-[120px]" icona={<IconaAzione chiave="uscita" dimensione={24} />} titolo="Uscita" dettaglio={`+${formattaPunti(anteprimaPunti(10, bonus, esame, invito))} punti`} disabled={occ} onClick={() => void salva(c.chiave, { uscita: true, bonusArcano: bonus, esame: esame ?? undefined, invito })} aria-label={`${c.nome}: uscita insieme (${formattaPunti(anteprimaPunti(10, bonus, esame, invito))} punti)`} />
+                        ? <PulsanteVisivo className="flex-1 min-w-[120px]" icona={<IconaAzione chiave="regalo" dimensione={24} />} titolo="Regala" dettaglio={`+${formattaPunti(anteprima(c, { regalo: true }, bonus))} punti`} disabled={occ} onClick={() => setRegaloPer(c.chiave)} aria-label={`${c.nome}: regala un oggetto (${formattaPunti(anteprima(c, { regalo: true }, bonus))} punti)`} />
+                        : <PulsanteVisivo className="flex-1 min-w-[120px]" icona={<IconaAzione chiave="regalo" dimensione={24} />} titolo="Regalo" dettaglio={`+${formattaPunti(anteprima(c, { regalo: true }, bonus))} punti`} disabled={occ} onClick={() => void salva(c.chiave, { regalo: true, bonusArcano: bonus, invito })} aria-label={`${c.nome}: regalo gradito (${formattaPunti(anteprima(c, { regalo: true }, bonus))} punti)`} />}
+                      <PulsanteVisivo className="flex-1 min-w-[120px]" icona={<IconaAzione chiave="uscita" dimensione={24} />} titolo="Uscita" dettaglio={`+${formattaPunti(anteprima(c, { uscita: true }, bonus))} punti`} disabled={occ} onClick={() => void salva(c.chiave, { uscita: true, bonusArcano: bonus, invito })} aria-label={`${c.nome}: uscita insieme (${formattaPunti(anteprima(c, { uscita: true }, bonus))} punti)`} />
                       <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla-ultimo" dimensione={20} />} titolo={`Annulla ultimo${cimaDi(c.chiave) ? ` (${cimaDi(c.chiave)!.regalo ? 'regalo ' : ''}−${formattaPunti(cimaDi(c.chiave)!.punti)})` : ''}`} disabled={occ || !cimaDi(c.chiave)} onClick={() => void annullaUltimo(c)} aria-label={`${c.nome}: annulla ${cimaDi(c.chiave)?.regalo ? 'l\'ultimo regalo' : 'l\'ultimo incremento'}`} />
                     </div>
                   </div>
@@ -303,7 +313,7 @@ export function ConfidentiPartita({ partitaId }: Props) {
       {regaloPer && (() => {
         const c = (dati ?? []).find((x) => x.chiave === regaloPer);
         if (!c) return null;
-        return <SceltaRegalo key={c.chiave} partita={partitaId} confidente={c.chiave} nomeConfidente={c.nome} stato={c} bonusArcano={bonusArcanoDi(c)} esame={esame} invito={invito}
+        return <SceltaRegalo key={c.chiave} partita={partitaId} confidente={c.chiave} nomeConfidente={c.nome} stato={c} bonusArcano={bonusArcanoDi(c)} invito={invito}
           onChiudi={() => setRegaloPer(null)}
           onFatto={(esito) => {
             setRegaloPer(null);

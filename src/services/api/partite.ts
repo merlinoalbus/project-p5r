@@ -75,6 +75,10 @@ export const getConfidentiPartita =(id: number): Promise<ConfidentePartitaDto[]>
 export const aggiornaConfidente = (id: number, chiave: string, dati: ModificaConfidente): Promise<ConfidentePartitaDto> =>
   apiPut(`/partite/${id}/confidenti/${encodeURIComponent(chiave)}`, dati, { maxRetries: 0 });
 
+/** Il piazzamento agli esami (R9-08): lo legge il server per i punti dei sette Confidenti; `null` lo toglie. Idempotente. */
+export const impostaPiazzamentoEsame = (id: number, esame: string, piazzamento: 'primo' | 'primi-10' | 'altro' | null): Promise<unknown> =>
+  apiPut(`/partite/${id}/esami/${encodeURIComponent(esame)}/piazzamento`, { piazzamento });
+
 /** Trofeo ottenuto (o tolto) nella partita. */
 export const impostaTrofeo = (id: number, trofeo: string, ottenuto: boolean): Promise<TrofeoDto> => apiPut(`/partite/${id}/trofei`, { trofeo, ottenuto });
 /** Conferma (o revoca) a mano un requisito non verificabile di un rango del Confidente. */

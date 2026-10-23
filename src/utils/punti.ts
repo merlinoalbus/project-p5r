@@ -1,8 +1,8 @@
 // ============================================================
-// Punti dei Confidenti — formato e anteprima (stessa formula del backend `puntiConfidente`)
+// Punti dei Confidenti — formato e anteprima (la formula è quella del server: `shared/puntiConfidenti.ts`)
 // ============================================================
 
-import type { BonusEsame } from '../types';
+import { puntiConfidente, type IngressoPuntiConfidente } from '../../shared/puntiConfidenti';
 
 /** Formato italiano dei punti: interi senza decimali, altrimenti fino a due (7,5). */
 export function formattaPunti(n: number): string {
@@ -14,8 +14,11 @@ export function formattaYen(n: number): string {
   return `${n.toLocaleString('it-IT')} ¥`;
 }
 
-/** Anteprima dei punti: base × (Persona dello stesso arcano 1,5) × (esami 1,5 | 1,2) × (invito 1,2), ai centesimi. */
-export function anteprimaPunti(base: number, bonusArcano: boolean, esame: BonusEsame | null, invito: boolean): number {
-  const molt = (bonusArcano ? 1.5 : 1) * (esame === 'primo' ? 1.5 : esame === 'top10' ? 1.2 : 1) * (invito ? 1.2 : 1);
-  return Math.round(base * molt * 100) / 100;
+/**
+ * Anteprima dei punti: lo stesso modulo del server (base, ×1,5 arcano, esame solo per i sette Confidenti col piazzamento della partita, ×1,2 invito,
+ * intero a ogni passaggio) e lo stesso controllo del rango: dove i punti non contano (`contaPunti === false`, un rango a evento) il server non somma, e
+ * l'anteprima dice 0.
+ */
+export function anteprimaPunti(i: IngressoPuntiConfidente & { contaPunti?: boolean }): number {
+  return i.contaPunti === false ? 0 : puntiConfidente(i);
 }

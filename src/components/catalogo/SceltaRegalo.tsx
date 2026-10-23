@@ -9,7 +9,7 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import type { BonusEsame, CatalogoOggettoDto, ConfidentePartitaDto, EsitoRegaloDto, OffertaOggettoDto, RegaloConfidenteDto } from '../../types';
+import type { CatalogoOggettoDto, ConfidentePartitaDto, EsitoRegaloDto, OffertaOggettoDto, RegaloConfidenteDto } from '../../types';
 import { getConfidenteDettaglio, getConfidentiPartita } from '../../services/api';
 import { regalaOggetto } from '../../services/api/partite';
 import { getOggettoCatalogo } from '../../services/api/catalogoOggetti';
@@ -31,7 +31,6 @@ interface Props {
   stato?: ConfidentePartitaDto | null;
   /** I moltiplicatori dei punti scelti da chi apre; senza, il bonus dell'arcano segue la scorta. */
   bonusArcano?: boolean;
-  esame?: BonusEsame | null;
   invito?: boolean;
   /** L'oggetto già scelto (un regalo toccato in elenco, la scheda dell'oggetto). */
   oggettoIniziale?: string;
@@ -49,7 +48,7 @@ function etichettaOfferta(o: OffertaOggettoDto): string {
 }
 
 /** «Regala a …»: scelta dell'oggetto fra i regali graditi, punti previsti, eventuale acquisto da segnare insieme. */
-export function SceltaRegalo({ partita, confidente, nomeConfidente, regali, ammessi: ammessiDati, stato, bonusArcano, esame = null, invito = false, oggettoIniziale = '', onChiudi, onFatto }: Props) {
+export function SceltaRegalo({ partita, confidente, nomeConfidente, regali, ammessi: ammessiDati, stato, bonusArcano, invito = false, oggettoIniziale = '', onChiudi, onFatto }: Props) {
   const dettaglio = useCarica(() => (regali || ammessiDati ? Promise.resolve(null) : getConfidenteDettaglio(confidente)), [confidente, !!regali, !!ammessiDati]);
   const lettoStato = useCarica(() => (stato !== undefined ? Promise.resolve(null) : getConfidentiPartita(partita).then((l) => l.find((c) => c.chiave === confidente) ?? null)), [partita, confidente, stato !== undefined]);
   const sc = stato !== undefined ? stato : lettoStato.dati;
@@ -75,7 +74,9 @@ export function SceltaRegalo({ partita, confidente, nomeConfidente, regali, amme
 
   const conPunti = !!sc && sc.rango > 0 && sc.rango < 10 && (sc.puntiNecessari ?? 0) > 0;
   const bonus = bonusArcano ?? sc?.personaArcanoInScorta ?? false;
-  const punti = anteprimaPunti(50, bonus, esame, invito);
+  // il piazzamento agli esami lo dà la partita (stesso calcolo del server), non una scelta di questa finestra
+  const piazzamento = sc?.piazzamentoEsame?.piazzamento ?? null;
+  const punti = anteprimaPunti({ confidente, regalo: true, bonusArcano: bonus, invito, piazzamento });
   const valido = chiave !== '' && ammessi.includes(chiave) && !giaConsegnato && !oggetto.caricamento;
 
   const scegli = (o: CatalogoOggettoDto) => { setChiave(o.chiave); setVuoleAcquisto(null); setOffertaScelta(''); setErrore(''); };
@@ -84,7 +85,7 @@ export function SceltaRegalo({ partita, confidente, nomeConfidente, regali, amme
     setOccupato(true); setErrore('');
     try {
       const esito = await regalaOggetto(partita, {
-        confidente, catalogo: chiave, bonusArcano: bonus, ...(esame ? { esame } : {}), ...(invito ? { invito } : {}),
+        confidente, catalogo: chiave, bonusArcano: bonus, ...(invito ? { invito } : {}),
         ...(segna && offerta ? { acquisto: { articolo: offerta.articolo, ...(offerta.sedeChiave ? { sede: offerta.sedeChiave } : {}) } } : {}),
       });
       onFatto(esito);
@@ -103,7 +104,7 @@ export function SceltaRegalo({ partita, confidente, nomeConfidente, regali, amme
       {chiave !== '' && !giaConsegnato && (
         <p className="m-0 text-[13px] text-text-secondary" role="status">
           {conPunti
-            ? <>Dà <strong className="text-text">+{formattaPunti(punti)} punti</strong> a {nomeConfidente} (50 di base{bonus || esame || invito ? ' con i moltiplicatori attivi' : ''}).</>
+            ? <>Dà <strong className="text-text">+{formattaPunti(punti)} punti</strong> a {nomeConfidente} (50 di base{bonus || (piazzamento && piazzamento !== 'altro') || invito ?' con i moltiplicatori attivi' : ''}).</>
             : <>Nessun punto: al rango attuale di {nomeConfidente} i punti non contano. Si registra solo la consegna.</>}
         </p>
       )}
