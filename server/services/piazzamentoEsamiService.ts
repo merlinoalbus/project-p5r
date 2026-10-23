@@ -31,6 +31,11 @@ export function piazzamentiDellaPartita(partitaId: number): PiazzamentoEsameDto[
  * non è stato segnato niente, nessuno (non vale quello dell'esame precedente); senza data di gioco, nessuno.
  */
 export function piazzamentoCorrente(partitaId: number): PiazzamentoEsame | null {
+  return esameCorrente(partitaId)?.piazzamento ?? null;
+}
+
+/** L'esame che vale adesso (l'ultimo con i risultati già usciti alla data di gioco) col piazzamento segnato; null prima del primo esame o senza data di gioco. */
+export function esameCorrente(partitaId: number): PiazzamentoEsameDto | null {
   const p = prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null } | undefined;
   if (!p?.data_gioco) return null;
   const oggi = ordineGioco(p.data_gioco);
@@ -39,7 +44,7 @@ export function piazzamentoCorrente(partitaId: number): PiazzamentoEsame | null 
   const ultimo = usciti[usciti.length - 1];
   if (!ultimo) return null;
   const r = prepared('SELECT piazzamento FROM esame_piazzamento_partita WHERE partita_id = ? AND esame_chiave = ?').get(partitaId, ultimo.chiave) as { piazzamento: PiazzamentoEsame } | undefined;
-  return r?.piazzamento ?? null;
+  return { esame: ultimo.chiave, nome: ultimo.nome, dataRisultati: ultimo.data_risultati, piazzamento: r?.piazzamento ?? null };
 }
 
 /** Segna (o, con null, toglie) il piazzamento di un esame nella partita. */

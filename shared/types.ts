@@ -698,6 +698,10 @@ export interface ConfidentePartitaDto extends ConfidenteDto {
   mancanti: number | null;
   /** True se nella scorta della partita c'è almeno una Persona dello stesso arcano (bonus ×1,5 nel gioco). */
   personaArcanoInScorta: boolean;
+  /** R10-11: i punti del motore contano per questo Confidente adesso (rango da 1 a 9 che sale a punti); altrove l'anteprima dà 0 e il server non somma. */
+  contaPunti?: boolean;
+  /** R10-11: l'esame che vale adesso (l'ultimo con i risultati usciti alla data di gioco) col piazzamento segnato nella partita, uguale per tutti i Confidenti; null prima del primo esame. Il server prende il piazzamento da qui, mai dal client. */
+  piazzamentoEsame?: { esame: string; nome: string; dataRisultati: string | null; piazzamento: 'primo' | 'primi-10' | 'altro' | null } | null;
   /** Blocco del rango successivo: requisiti non verdi (né confermati) del semaforo; null se libero. Il server rifiuta gli aumenti di rango bloccati. */
   bloccato: { rango: number; motivi: string[] } | null;
   /** Regali già consegnati in questa partita (nomi). */

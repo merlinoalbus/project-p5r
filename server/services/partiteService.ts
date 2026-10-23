@@ -19,7 +19,8 @@ import { statoDisponibilitaPartita } from './disponibilitaService.js';
 import { meteoOra } from './meteoService.js';
 import { regaliDellaPartita, scriviRegaloPartita, type SceltaRegalo } from './regaliPartita.js';
 import { conCestinoPrivato } from './cestinoService.js';
-import { puntiConfidente as puntiDelModulo } from '../../shared/puntiConfidenti.js';
+import { puntiConfidente as puntiDelModulo, type PiazzamentoEsame } from '../../shared/puntiConfidenti.js';
+import { esameCorrente, piazzamentoCorrente } from './piazzamentoEsamiService.js';
 import type {
   CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, EffettiAzioneDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto,
   SemaforiRangoDto, SkillRiassuntoDto,
@@ -258,13 +259,11 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 
 /**
  * Punti Confidente come nel gioco: il calcolo è del modulo unico `shared/puntiConfidenti.ts` (base 5/10/15, regalo 50, uscita 10;
- * ×1,5 arcano, esame solo per i sette Confidenti, ×1,2 invito; intero a ogni passaggio). Il Confidente serve al bonus dell'esame.
+ * ×1,5 arcano, esame solo per i sette Confidenti, ×1,2 invito; intero a ogni passaggio). Il Confidente e il piazzamento all'ultimo esame
+ * (`piazzamentoCorrente` della partita, mai il client: il campo `esame` della richiesta non conta più) servono al bonus dell'esame.
  */
-export function puntiConfidente(mod: ModificaConfidente, confidente?: string): number {
-  return puntiDelModulo({
-    confidente, noteRisposta: mod.noteRisposta, regalo: mod.regalo, uscita: mod.uscita, bonusArcano: mod.bonusArcano, invito: mod.invito,
-    piazzamento: mod.esame === 'primo' ? 'primo' : mod.esame === 'top10' ? 'primi-10' : null,
-  });
+export function puntiConfidente(mod: ModificaConfidente, confidente?: string, piazzamento: PiazzamentoEsame | null = null): number {
+  return puntiDelModulo({ confidente, noteRisposta: mod.noteRisposta, regalo: mod.regalo, uscita: mod.uscita, bonusArcano: mod.bonusArcano, invito: mod.invito, piazzamento });
 }
 
 /** La soglia in punti del rango per il Confidente: > 0 solo dove il rango sale a punti (`modo = 'punti'`, migrazione 161); 0 altrove. */
@@ -320,6 +319,7 @@ function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi
   // L6: un requisito è una condizione del vocabolario unico (anche una lettura, un luogo, un invito): lo stato è quello completo del
   // valutatore, con i ranghi di TUTTI i Confidenti
   const stato = { ...statoDisponibilitaPartita(partitaId), ranghiConfidenti: ranghi };
+  const esame = esameCorrente(partitaId);
   // i Confidenti con almeno un regalo gradito collegato al catalogo (senza catalogo di oggetti la colonna non c'è: nessuno)
   const conRegaliCatalogo = new Set<string>();
   try {
@@ -332,6 +332,8 @@ function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi
       punti: c.punti, puntiNecessari: c.rango >= 10 ? null : c.punti_necessari,
       mancanti: c.rango >= 10 || c.punti_necessari === null ? null : round2(Math.max(0, c.punti_necessari - c.punti)),
       personaArcanoInScorta: c.in_scorta === 1,
+      // R10-11: l'anteprima dei punti sta dietro le stesse regole del server: il rango sale a punti? e dov'è il piazzamento all'ultimo esame
+      contaPunti: c.rango > 0 && c.rango < 10 && sogliaAPunti(c.chiave, c.rango) > 0, piazzamentoEsame: esame,
       regaliFatti: regali.get(c.chiave)?.nomi ?? [], regaliFattiCatalogo: regali.get(c.chiave)?.catalogo ?? [], haRegaliCatalogo: conRegaliCatalogo.has(c.chiave),
       note: c.note, semafori, updatedAt: c.updated_at,
       bloccato: bloccoRango(semafori, c.rango + 1),
@@ -413,7 +415,7 @@ export function aggiornaConfidente(partitaId: number, chiave: string, dati: Modi
   // Punti verso il rango successivo (R10-11, G-020 §4-5): i punti del motore si accumulano solo dove il rango sale a punti, anche oltre la
   // soglia («evento pronto»: la soglia raggiunta non li ferma). Il passaggio di rango spuntato nel Diario porta avanti l'eccedenza sulla
   // soglia; la correzione a mano dalla pagina imposta i valori e riparte da zero, senza riporto automatico. Un valore esplicito vince.
-  const incremento = (dati.deltaPunti ?? 0) + (sogliaAPunti(chiave, attuale.rango) > 0 ? puntiConfidente(dati, chiave) : 0);
+  const incremento = (dati.deltaPunti ?? 0) + (sogliaAPunti(chiave, attuale.rango) > 0 ? puntiConfidente(dati, chiave, piazzamentoCorrente(partitaId)) : 0);
   let riporto = 0;
   if (origine?.origine === 'diario' && rango > attuale.rango && dati.punti === undefined) {
     riporto = attuale.punti;
