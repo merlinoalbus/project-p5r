@@ -98,7 +98,9 @@ export function voceBase(r: RigaVoce, fonte: StatoEffettiVoceDto = leggiEffettiV
   };
 }
 
-interface Contesto { fatte: Map<string, EffettiAzioneDto | null>; conf: Map<string, ConfidentePartitaDto> | null; nomi: NomiEffettiAzione; quiz: Map<string, AttivitaConQuiz>;
+interface Contesto { fatte: Map<string, EffettiAzioneDto | null>;
+  /** Le voci spuntate con la ricevuta illeggibile, col motivo (F3-1): risultano «da correggere». */
+  illeggibili: Map<string, string>; conf: Map<string, ConfidentePartitaDto> | null; nomi: NomiEffettiAzione; quiz: Map<string, AttivitaConQuiz>;
   oggetti: ReturnType<typeof riferimentiOggettiPerFonti>;
   aperture: ReturnType<typeof apertureDichiarabili>;
   /** La partita (L3: per l'infiltrazione che «Entra» apre). */
@@ -130,6 +132,9 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
       fonte = { ...fonte, stato: 'legacy-da-correggere', effetti: [], motivo: e.message };
     }
   }
+  // F3-1: la ricevuta storica della spunta illeggibile isola la voce, non la giornata
+  const ricevutaRotta = ctx.illeggibili.get(r.uid);
+  if (ricevutaRotta !== undefined) fonte = { ...fonte, stato: 'legacy-da-correggere', effetti: [], motivo: ricevutaRotta };
   const v = voceBase(r, fonte);
   const spuntabile = v.genere === 'azione';
   const aperture = eVisitaMemento(v) ? ctx.aperture : apertureNegliEffetti(ctx.fatte.get(r.uid));
@@ -328,18 +333,38 @@ export function righeDelGiorno(data: string): RigaVoce[] {
 
 /** Le spunte della partita sulle voci di un giorno (o di tutti i giorni), con gli effetti che hanno applicato. */
 export function spuntePartita(partitaId: number | undefined, data?: string): Map<string, EffettiAzioneDto | null> {
-  if (partitaId === undefined) return new Map();
+  return leggiSpunte(partitaId, data).fatte;
+}
+
+/**
+ * Le spunte con la ricevuta degli effetti. F3: una ricevuta illeggibile (409 di `leggiRicevutaEffettiAzione`) non fa saltare la giornata:
+ * la spunta resta (la voce è fatta), senza effetti, e il motivo va in `illeggibili`, così quella voce risulta «da correggere» e le altre si
+ * vedono e funzionano. Non si tocca niente: i dati restano com'erano. Le scritture (spunta, annulla) continuano a leggere in modo rigido.
+ */
+function leggiSpunte(partitaId: number | undefined, data?: string): { fatte: Map<string, EffettiAzioneDto | null>; illeggibili: Map<string, string> } {
+  const fatte = new Map<string, EffettiAzioneDto | null>();
+  const illeggibili = new Map<string, string>();
+  if (partitaId === undefined) return { fatte, illeggibili };
   const righe = (data === undefined
     ? prepared('SELECT voce_uid, effetti_json FROM spunta_voce_partita WHERE partita_id = ?').all(partitaId)
     : prepared('SELECT s.voce_uid, s.effetti_json FROM spunta_voce_partita s JOIN voce_giornata v ON v.uid = s.voce_uid WHERE s.partita_id = ? AND v.data = ?').all(partitaId, data)) as Array<{ voce_uid: string; effetti_json: string | null }>;
-  return new Map(righe.map((r) => [r.voce_uid, leggiRicevutaEffettiAzione(r.effetti_json)]));
+  for (const r of righe) {
+    try { fatte.set(r.voce_uid, leggiRicevutaEffettiAzione(r.effetti_json)); }
+    catch (e) {
+      if (!(e instanceof HttpError) || e.status !== 409) throw e;
+      fatte.set(r.voce_uid, null);
+      illeggibili.set(r.voce_uid, e.message);
+    }
+  }
+  return { fatte, illeggibili };
 }
 
 /** Le voci di un giorno per l'interfaccia, con lo stato nella partita se indicata. `conf`: i Confidenti, se chi chiama li ha già. */
 export function vociDelGiorno(data: string, partitaId?: number, conf?: Map<string, ConfidentePartitaDto> | null): AzionePercorsoDto[] {
   if (partitaId !== undefined) verificaPartita(partitaId);
+  const spunte = leggiSpunte(partitaId, data);
   const ctx: Contesto = {
-    fatte: spuntePartita(partitaId, data),
+    fatte: spunte.fatte, illeggibili: spunte.illeggibili,
     conf: conf ?? (partitaId !== undefined ? new Map(confidenti(partitaId).map((c) => [c.chiave, c])) : null),
     nomi: nomiEffetti(), quiz: attivitaConQuiz(), partita: partitaId,
     oggetti: riferimentiOggettiPerFonti(['libro', 'film', 'videogioco']),
