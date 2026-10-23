@@ -399,8 +399,9 @@ function daSegnareFra(prima: Map<string, number>, dopo: Map<string, number>): Do
 }
 
 /**
- * Registra una lettura/visione. `lettura_partita` contiene soltanto fruizioni completate: libri,
- * film e DVD entrano quando l'avanzamento raggiunge il rispettivo totale. Una riga non ancora
+ * Registra una lettura/visione. L'unico contatore è l'avanzamento; «letto» si calcola da lì (`lettureCompletate`): libri,
+ * film e DVD risultano completi quando l'avanzamento raggiunge il rispettivo totale (la tabella `lettura_partita` non si scrive più
+ * e nessuno la legge: resta com'era nei dati di prima). Una riga non ancora
  * disponibile nella partita non si può avanzare (409): la guida dice «non ancora», e segnare una
  * lettura che il gioco non permette falserebbe i progressi.
  */
@@ -451,12 +452,6 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
       prepared('DELETE FROM progresso_videogioco_partita WHERE partita_id = ? AND videogioco_chiave = ?').run(partitaId, chiave);
     }
     const registrato = richiesto >= totale;
-    // Specchio di compatibilità, DERIVATO dallo stesso contatore: nessun lettore di questo servizio lo legge più; lo legge ancora il motore del
-    // Diario (`motoreDiario.ts`, di FE). Va tolto quando quel lettore passa al calcolo (`lettureCompletate`). Non è un secondo contatore.
-    if (tipo === 'libro' || tipo === 'film') {
-      if (registrato) prepared('INSERT INTO lettura_partita (partita_id, tipo, chiave, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, tipo, chiave) DO UPDATE SET updated_at = excluded.updated_at').run(partitaId, tipo, chiave, adesso);
-      else prepared('DELETE FROM lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ?').run(partitaId, tipo, chiave);
-    }
     if (registrato && !era) {
       const doti = noteDelConseguimento(riga, false, st);
       const dote = doti.length ? ` · Dote: ${doti.map((d) => `${d.dote} (${d.note} ${d.note === 1 ? 'nota' : 'note'})`).join(', ')}` : '';
