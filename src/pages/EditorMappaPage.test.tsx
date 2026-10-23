@@ -813,7 +813,9 @@ describe('EditorMappaPage', () => {
     expect(scheda.getByRole('link', { name: 'Aggiungi area / planimetria dalla pagina del quartiere' })).toHaveAttribute('href', '/guida/citta/shibuya');
   });
 
-  it('fuori dal mondo (un Palazzo) «Nuova mappa» e il form completo restano', async () => {
+  // SUPERATO da L11/B5 (R11-14/1, D1): in un Palazzo «Nuova mappa» è tolta (il server la rifiutava sempre, 409 `usa-aggiungi-area`) e al suo posto
+  // c'è il collegamento «Aggiungi area / planimetria dalla scheda del Palazzo»; resta solo per la radice dei Memento. Non eseguito (zero test).
+  it.skip('fuori dal mondo (un Palazzo) «Nuova mappa» e il form completo restano', async () => {
     api.getMappa.mockResolvedValue({ ...base, chiave: 'palazzo-di-kamoshida', nome: 'Palazzo di Kamoshida', tipo: 'palazzo', genitore: null, entita: { tipo: 'dungeon', chiave: 'kamoshida' }, casa: '/guida/dungeon/kamoshida' });
     montaConArrivo('/guida/mappe/palazzo-di-kamoshida/modifica');
     fireEvent.click(await screen.findByRole('button', { name: 'Collegamenti' }));

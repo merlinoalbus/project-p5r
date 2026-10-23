@@ -31,8 +31,12 @@ export function haCasaPropria(mappa: { casa: string }): boolean {
 /** La pagina da cui si aggiungono aree e planimetrie accanto a una mappa del mondo (L2, `modifiche.md` §4.6, EditorMappaPage): il
  *  quartiere dell'Area (con «Aggiungi area», e da lì l'Area con «Aggiungi planimetria»); per un'Area della città, che un quartiere
  *  non ce l'ha, la sua pagina («Aggiungi planimetria»); per Tokyo la città, da cui si sceglie il quartiere; per un quartiere la sua
- *  pagina. Null fuori dal mondo. */
+ *  pagina. Da L11 B5 anche per i Palazzi (la scheda del Palazzo). Null altrove (la radice dei Memento). */
 export function paginaPerAggiungere(mappa: { casa: string; tipo: string; area?: { casa: string; contenitore: { tipo: string; chiave: string } } | null }): { href: string; testo: string } | null {
+  // L11 B5 (R11-14/1): in un Palazzo «Nuova mappa» il server la rifiuta sempre (409 `usa-aggiungi-area`): come nel mondo si aggiunge dalla
+  // scheda del Palazzo (area e planimetria), e il collegamento prende il posto del pulsante. Fuori dal mondo e dai Palazzi (la radice dei Memento) null.
+  const scheda = /^\/guida\/dungeon\/[^/?#]+/.exec(mappa.casa);
+  if (scheda) return { href: scheda[0], testo: 'Aggiungi area / planimetria dalla scheda del Palazzo' };
   if (!eMappaDelMondo(mappa)) return null;
   const area = mappa.area;
   if (area?.contenitore.tipo === 'quartiere') return { href: `/guida/citta/${encodeURIComponent(area.contenitore.chiave)}`, testo: 'Aggiungi area / planimetria dalla pagina del quartiere' };
