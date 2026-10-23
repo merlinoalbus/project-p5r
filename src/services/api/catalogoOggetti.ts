@@ -1,7 +1,7 @@
 import type { CategoriaOggetto } from '../../../shared/catalogo';
 import type { CensimentoScambiCatalogoDto } from '../../../shared/censimentoScambiCatalogo';
 import type { ConfrontoTanakaDto } from '../../../shared/tanakaSnapshot';
-import type { CatalogoOggettoDto, DatiLegameOggettoDto, DatiNuovoOggettoDto, OggettoDettaglioDto, PropostaAbbinamentoDto, SceltaAbbinamentoOggettoDto, TipoPropostaOggetto } from '../../types';
+import type { CatalogoOggettoDto, DatiLegameOggettoDto, DatiNuovoOggettoDto, NotaStoricaOfferta, OggettoDettaglioDto, PropostaAbbinamentoDto, SceltaAbbinamentoOggettoDto, TipoPropostaOggetto } from '../../types';
 import { apiDelete, apiGet, apiPost, apiPut, queryString } from './_helpers';
 
 const percorso = (chiave: string) => `/catalogo-oggetti/${chiave.split('/').map(encodeURIComponent).join('/')}`;
@@ -21,3 +21,9 @@ export const getProposteOggetti = (filtro: { riga_tipo?: TipoPropostaOggetto; ri
 export const confermaAbbinamentoOggetto = (dati: SceltaAbbinamentoOggettoDto): Promise<{ confermata: true }> => apiPost('/catalogo-oggetti/proposte/conferma', dati);
 export const scartaAbbinamentoOggetto = (dati: SceltaAbbinamentoOggettoDto): Promise<{ scartata: true }> => apiPost('/catalogo-oggetti/proposte/scarta', dati);
 export const impostaLegameOggetto = (dati: DatiLegameOggettoDto): Promise<{ salvato: true }> => apiPut('/catalogo-oggetti/legami', dati);
+/** F6: modifica una nota storica della fonte; `testoAttuale` è quello mostrato (409 se nel frattempo è cambiato). */
+export const modificaNotaStorica = (chiave: string, dati: { testo: string; fonte: string; testoAttuale: string }): Promise<NotaStoricaOfferta> =>
+  apiPut(`/catalogo-oggetti/note-storiche/${encodeURIComponent(chiave)}`, dati);
+/** F6: la nota torna come la dà la guida. */
+export const ripristinaNotaStorica = (chiave: string, testoAttuale: string): Promise<NotaStoricaOfferta> =>
+  apiPost(`/catalogo-oggetti/note-storiche/${encodeURIComponent(chiave)}/ripristina`, { testoAttuale });

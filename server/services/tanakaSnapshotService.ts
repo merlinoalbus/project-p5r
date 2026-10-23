@@ -7,7 +7,7 @@ import { getDb } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { condizioneSpillo } from '../schemas/mappe.js';
 import { rettificaPropostaOggetto } from '../schemas/catalogoOggetti.js';
-import { noteStoricheOfferta } from '../../shared/tanakaNotaStorica.js';
+import { noteStoricheDi } from './noteStoricheService.js';
 import { snapshotFonteProposta, type ChiaveProposta } from './snapshotProposteOggetti.js';
 
 type Riga = Record<string, unknown>;
@@ -76,7 +76,8 @@ export function confrontoTanaka(): ConfrontoTanakaDto {
       if (corrente?.origine !== undefined && corrente.origine !== 'seed') rilievi.push('Personalizzazione corrente: nessuna sostituzione automatica.');
       if (corrente && !formulaValida(corrente.condizioni_json)) rilievi.push('Formula corrente illeggibile o non supportata: conflitto da risolvere.');
       return { chiave, corrente: corrente ?? null, collegamenti, rilievi,
-        noteStoriche: corrente ? noteStoricheOfferta(chiave, String(corrente.negozio_chiave)) : [] };
+        // F6: la nota storica è un dato legato all'offerta (migrazione 139), solo finché l'offerta è del negozio di Tanaka
+        noteStoriche: corrente && corrente.negozio_chiave === manifest.negozio ? noteStoricheDi('articolo', chiave) : [] };
     });
     const royal = manifest.royal.map(r => {
       const catalogoCorrente = db.prepare('SELECT chiave,nome,categoria,nascosto,origine,fonte_tipo,fonte_chiave FROM catalogo_oggetto WHERE chiave = ?').get(r.catalogo) as Riga | undefined;
@@ -92,7 +93,7 @@ export function confrontoTanaka(): ConfrontoTanakaDto {
       if (riferite.some(p => p.stato !== 'da-approvare')) rilievi.push('Proposta già gestita: non viene riaperta.');
       if (!negozio124) rilievi.push('Sblocco e provenienza del negozio non attestati dalla bonifica124.');
       if (!negozio || !formulaValida(negozio.condizioni_json) || !formulaValida(negozio.sblocco_json)) rilievi.push('Formula del negozio assente, illeggibile o non supportata.');
-      return { ...r, condizioni: grado(r.grado), catalogoCorrente: catalogoCorrente ?? null, rilievi, noteStoriche: noteStoricheOfferta(r.chiave, manifest.negozio) };
+      return { ...r, condizioni: grado(r.grado), catalogoCorrente: catalogoCorrente ?? null, rilievi, noteStoriche: noteStoricheDi('articolo', r.chiave) };
     });
     const proposte: ConfrontoTanakaDto['proposte'] = pertinenti.map(p => {
       const salvato = record(parse(p.fonte_snapshot_json));

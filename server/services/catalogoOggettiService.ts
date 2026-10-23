@@ -15,7 +15,7 @@ import { lettureListiniCondivisi } from './listiniCondivisi.js';
 import { regaliDellaPartita } from './regaliPartita.js';
 import { fontiRicompenseOggetti } from './fontiRicompenseOggetti.js';
 import { trasformazioniDiJose } from './trasformazioniOggetti.js';
-import { noteStoricheCatalogo } from '../../shared/tanakaNotaStorica.js';
+import { noteStoricheDi } from './noteStoricheService.js';
 
 export { elencaCatalogoOggetti } from './catalogoOggettiLetture.js';
 
@@ -126,7 +126,8 @@ export function dettaglioOggetto(chiave: string, partita?: number): OggettoDetta
     const voce = videogiochiTutti(partita).videogiochi.find((v) => v.chiave === videogioco.chiave);
     if (voce) lettura = { tipo: 'videogioco', voce };
   }
-  return { ...oggetto, noteStoriche: noteStoricheCatalogo(riga), inVendita, regalo, forzieri: forzieriDellOggetto(chiave, partita), ricompense: ricompenseDellOggetto(chiave),
+  // F6: la nota storica della fonte è un dato (migrazione 139), legato all'oggetto del catalogo
+  return { ...oggetto, noteStoriche: noteStoricheDi('catalogo', riga.chiave), inVendita, regalo, forzieri: forzieriDellOggetto(chiave, partita), ricompense: ricompenseDellOggetto(chiave),
     trasformazioni: trasformazioniDiJose(partita === undefined ? undefined : statoDisponibilitaPartita(partita), chiave),
     scambi: inVendita.filter((o) => o.costo !== null || o.costoDaVerificare), ricette, lettura,
     partita: partita === undefined ? null : { acquistato: inVendita.some((o) => o.acquistato), regalato: regalati.size > 0, letto: lettura?.voce.fatto ?? false } };

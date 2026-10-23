@@ -1,5 +1,5 @@
 import type { RequisitoSpillo } from './condizioniSpillo.js';
-import type { NotaStoricaOfferta } from './tanakaNotaStorica.js';
+import type { NotaStoricaOfferta } from './types.js';
 
 /** Revisione della sola lettura: non è una ricevuta né un consenso commerciale. */
 export interface ConfrontoTanakaDto {

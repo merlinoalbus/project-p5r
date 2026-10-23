@@ -10,7 +10,6 @@
 
 import type { TipoMappa, TipoRiferimento, TipoSpillo } from './spilli.js';
 import type { GiornoChiave } from './orariNegozio.js';
-import type { NotaStoricaOfferta } from './tanakaNotaStorica.js';
 import type { TipoLuogo } from './tipiLuogo.js';
 import type { Condizione, RequisitoSpillo } from './condizioniSpillo.js';
 import type { OrariDelLuogo, OrariNegozio } from './orariNegozio.js';
@@ -32,6 +31,17 @@ export interface HealthDto {
   status: 'ok' | 'degraded';
   timestamp: string;
   db: { ok: boolean; userVersion?: number; error?: string };
+}
+
+/** F6: una nota storica della fonte (discordanza documentale, G-034), non una fotografia dei prezzi pagati o dell'istanza importata. Vive
+ *  in `nota_storica` (migrazione 139), si modifica dall'app e torna al valore della guida con «Ripristina». */
+export interface NotaStoricaOfferta {
+  id: string;
+  versione: number;
+  fonte: string;
+  testo: string;
+  /** Testo o fonte diversi da come li dà la guida (si può ripristinare). */
+  modificata?: boolean;
 }
 
 // ---- Compendio ----

@@ -9,6 +9,7 @@ import { z as schema } from 'zod';
 import { auditConversioneCatalogo } from '../services/auditCatalogoService.js';
 import { censimentoScambiCatalogo } from '../services/censimentoScambiCatalogoService.js';
 import { ripristinaCostoRegalo } from '../services/costoRegaloService.js';
+import { modificaNotaStorica, ripristinaNotaStorica } from '../services/noteStoricheService.js';
 import { confrontoTanaka } from '../services/tanakaSnapshotService.js';
 import { bodyLegameOggetto, bodyNuovoOggetto, bodyOggetto, bodyPropostaOggetto, paramsOggetto, queryCatalogoOggetti, queryProposteOggetto,
   type DatiCatalogoOggetto, type DatiLegameOggetto, type DatiPropostaOggetto } from '../schemas/catalogoOggetti.js';
@@ -30,6 +31,18 @@ router.post('/regali/:confidente/:ordine/ripristina-costo', validate({
   body: schema.object({ costoAttuale: schema.string().max(6000).nullable() }).strict(),
 }), (req, res) => {
   res.json(ripristinaCostoRegalo(String(req.params.confidente), Number(req.params.ordine), (req.body as { costoAttuale: string | null }).costoAttuale));
+});
+/** F6: le note storiche della fonte (migrazione 139). Modifica (PUT) e «Ripristina» al valore della guida (POST …/ripristina); il testo
+ *  attuale è una precondizione (409 se è cambiato nel frattempo). */
+const paramsNotaStorica = schema.object({ chiave: schema.string().regex(/^[a-z0-9][a-z0-9-]{0,119}$/) });
+router.put('/note-storiche/:chiave', validate({
+  params: paramsNotaStorica,
+  body: schema.object({ testo: schema.string().min(1).max(2000), fonte: schema.string().min(1).max(500), testoAttuale: schema.string().max(2000) }).strict(),
+}), (req, res) => {
+  res.json(modificaNotaStorica(String(req.params.chiave), req.body as { testo: string; fonte: string; testoAttuale: string }));
+});
+router.post('/note-storiche/:chiave/ripristina', validate({ params: paramsNotaStorica, body: schema.object({ testoAttuale: schema.string().max(2000) }).strict() }), (req, res) => {
+  res.json(ripristinaNotaStorica(String(req.params.chiave), (req.body as { testoAttuale: string }).testoAttuale));
 });
 router.get('/proposte', validate({ query: queryProposteOggetto }), (req, res) => {
   res.json(elencaProposteOggetti(req.query as z.infer<typeof queryProposteOggetto>));
