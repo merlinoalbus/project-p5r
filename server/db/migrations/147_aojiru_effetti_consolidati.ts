@@ -12,10 +12,13 @@
 // esistenti) non si tocca. L'effetto nasce con origine «regola» e senza `fortuna`: la Fortuna è lo stato della partita (R10-10/2).
 //
 // Il campo `fortuna: null` si toglie anche dai candidati e dagli effetti di acquisto che lo portano. Un effetto con una ricevuta o con
-// un consumo che ne dipende non si riscrive (le ricevute confrontano il suo testo esatto); le proposte «effetto della voce» che lo
-// citano (aperte o decise) si riallineano: copia dell'effetto e impronta della configurazione, così restano applicabili.
-// Niente viene cancellato; nessun avanzamento delle partite cambia (le partite che avevano già spuntato quelle voci non ricevono
-// proposte nuove: i loro punti sono già nel saldo). Ogni consolidamento lascia la riga del registro delle operazioni. Idempotente.
+// un consumo che ne dipende non si riscrive (le ricevute confrontano il suo testo esatto). Questa migrazione scrive SOLO in `main`
+// (legge `utente` per riconoscere gli effetti usati, non scrive): le proposte «effetto della voce» che citano un effetto ripulito
+// (copia dell'effetto e impronta della configurazione) le riallinea la migrazione utente 038, che gira dopo di lei.
+// Niente viene cancellato; nessun avanzamento delle partite cambia. Nessuna proposta nasce per le spunte già date: sui dati di p5s i
+// 20 effetti Aojiru hanno solo 5 spunte (Partita 1: 04-24, 05-01, 05-08, 05-29; Partita 2: 04-24), tutte con la loro proposta già
+// aperta (tranne la prima, chiusa «già nel saldo» dalla 033), quindi il pulsante sulla voce compare per le quattro dopo il 30/09.
+// Ogni consolidamento lascia la riga del registro delle operazioni. Idempotente.
 // ============================================================
 
 import { createHash } from 'node:crypto';
@@ -62,17 +65,6 @@ export const migration147: Migration = {
     const usatoDaUnaPartita = (voce: string, effetto: string): boolean =>
       (esiste(db, 'utente', 'effetto_applicato') && !!db.prepare('SELECT 1 FROM utente.effetto_applicato WHERE voce_uid=? AND effetto_uid=? LIMIT 1').get(voce, effetto))
       || (esiste(db, 'utente', 'acquisto_provenienza') && !!db.prepare('SELECT 1 FROM utente.acquisto_provenienza WHERE voce_uid=? AND effetto_uid=? LIMIT 1').get(voce, effetto));
-    // le proposte «effetto della voce» (aperte o già decise) portano la copia dell'effetto e l'impronta della sua configurazione come
-    // revisione: tolta la chiave si riscrivono entrambe, così restano valide (e quelle chiuse «già nel saldo» non si riaprono)
-    const riallineaProposte = (voce: string, effetto: string, nuovo: Record<string, unknown>) => {
-      if (!esiste(db, 'utente', 'da_applicare')) return;
-      const firma = impronta(nuovo);
-      for (const r of db.prepare("SELECT id, dati_json FROM utente.da_applicare WHERE causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce'").all(`${voce}:${effetto}`) as Array<{ id: number; dati_json: string }>) {
-        const dati = oggetto(r.dati_json);
-        if (dati) dati.effetto = nuovo;
-        db.prepare('UPDATE utente.da_applicare SET revisione_causa=?, dati_json=? WHERE id=?').run(firma, canonico(dati ?? {}), r.id);
-      }
-    };
     const riallineaTransizione = (voce: string) => {
       const effetti = (db.prepare('SELECT dati_json FROM main.voce_effetto WHERE voce_uid=? ORDER BY ordine').all(voce) as Array<{ dati_json: string }>).map((r) => oggetto(r.dati_json));
       db.prepare('UPDATE main.voce_effetto_transizione SET impronta=?, aggiornata_il=? WHERE voce_uid=?').run(impronta(effetti), adesso, voce);
@@ -91,7 +83,6 @@ export const migration147: Migration = {
       if (!d || !('fortuna' in d) || d.fortuna !== null || usatoDaUnaPartita(r.voce_uid, r.uid)) continue;
       delete d.fortuna;
       db.prepare('UPDATE main.voce_effetto SET dati_json=?, updated_at=? WHERE uid=?').run(canonico(d), adesso, r.uid);
-      riallineaProposte(r.voce_uid, r.uid, d);
       riallineaTransizione(r.voce_uid); tolti++;
     }
 
