@@ -805,7 +805,9 @@ export function rimuoviPosseduta(partitaId: number, possedutaId: number, motivo?
   const r = prepared(`${SQL_POSSEDUTA} WHERE pp.id = ? AND pp.partita_id = ?`).get(possedutaId, partitaId) as RigaPosseduta | undefined;
   if (!r) throw httpErrors.notFound('posseduta-non-trovata', `La Persona posseduta ${possedutaId} non esiste in questa partita.`);
   getDb().transaction(() => {
-    prepared('DELETE FROM persona_posseduta WHERE id = ?').run(possedutaId);
+    // R10-23/2: la riga (con le sue skill, a cascata) va nel Cestino privato; evento e data di modifica restano fuori dalla registrazione
+    conCestinoPrivato({ tipo: 'persona-scorta', chiave: String(possedutaId), nome: t('persona', r.nome), contesto: `Livello ${r.livello}`, partitaId },
+      () => prepared('DELETE FROM persona_posseduta WHERE id = ?').run(possedutaId));
     registraEvento(partitaId, 'persona-rimossa', `${t('persona', r.nome)} rimossa dalla scorta`, `Era al livello ${r.livello}${motivo ? ` · ${motivo}` : ''}.`, { livello: r.livello, motivo: motivo ?? null }, r.persona_id);
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
   })();
