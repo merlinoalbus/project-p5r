@@ -9,7 +9,7 @@
 //   - sposta 1584 al listino del bagno di Yongen e 1769 al listino Nastea, con la sua sede a Central Street;
 //   - passa il pin 386 (Jose nel Covo) da `negozio` a `dialogo`: è la guida all'ingresso, non vende;
 //   - dà una sede funzionale a Tanaka e all'Home Shopping (Leblanc) e a Jose (negozio dei Memento).
-// Il pin 1753 (Ann al 2° piano della Shujin) va nel Cestino con il gesto ordinario dell'app: lo snapshot del Cestino non si riscrive qui.
+// Il pin 1753 (Ann al 2° piano della Shujin) non è di questa migrazione: lo porta nel Cestino la 145, con il formato del Cestino congelato.
 //
 // Conservativa: ogni pin si cambia solo se corrisponde ancora a identità e valore attesi (id, tipo, planimetria, origine, riferimento di
 // partenza); ogni sede solo se è ancora vuota; un luogo eliminato (Cestino) o dell'utente non si ricrea né si occupa. Nessun listino è
