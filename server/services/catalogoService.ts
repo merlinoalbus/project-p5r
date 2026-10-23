@@ -28,6 +28,7 @@ import { tracciamentoPerTipo } from '../../shared/attivita.js';
 import { articoloDelListino, lettureListiniCondivisi, listinoDelNegozio } from './listiniCondivisi.js';
 import { catalogoOggettiDisponibile, riferimentoOggetto, oggettiPerFonte } from './catalogoOggettiLetture.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
+import { conCestino } from './cestinoService.js';
 import { normalizzaCostoScambio } from '../../shared/catalogo.js';
 import { aggiornaOggetto, creaOggetto } from './catalogoOggettiScritture.js';
 import { fonteConfidenteAttivita } from './fonteConfidenteAttivitaService.js';
@@ -557,11 +558,12 @@ function staccaDalleMappe(tipo: TipoCatalogo, chiave: string): void {
 export function eliminaElemento(tipo: TipoCatalogo, chiave: string): { esito: 'eliminata' | 'ripristinata'; elemento: ElementoCatalogoDto | null } {
   const r = riga(tipo, chiave);
   if (r.origine === 'utente' && r.seed_json === null) {
-    getDb().transaction(() => {
+    // R10-23/3: l'eliminazione passa dal Cestino (si rimette dalla sezione Cestino), non è più una cancellazione a mano
+    conCestino({ tipo, chiave, nome: dto(tipo, r).nome }, () => getDb().transaction(() => {
       // gli articoli di un negozio creato dall'utente se ne vanno con lui (chiave esterna a cascata)
       prepared(`DELETE FROM ${TABELLA[tipo]} WHERE chiave = ?`).run(chiave);
       staccaDalleMappe(tipo, chiave);
-    })();
+    })());
     invalidaCacheDiGioco();
     return { esito: 'eliminata', elemento: null };
   }

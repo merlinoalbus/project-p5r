@@ -85,6 +85,13 @@ const RADICE: Record<TipoElementoCestino, { tabella: string; colonna: string }> 
   // L6 (R6-04): una Richiesta dei Mementos; le condizioni che la citano restano (per chiave) e danno «Richiesta eliminata»
   richiesta: { tabella: 'richiesta', colonna: 'chiave' },
   oggetto: { tabella: 'catalogo_oggetto', colonna: 'chiave' },
+  // R10-23/3: le righe del catalogo create dall'utente (articoli, libri, film, attività, domande, cruciverba) non si cancellano più a mano
+  articolo: { tabella: 'articolo', colonna: 'chiave' },
+  libro: { tabella: 'libro', colonna: 'chiave' },
+  film: { tabella: 'film', colonna: 'chiave' },
+  attivita: { tabella: 'attivita', colonna: 'chiave' },
+  domanda: { tabella: 'domanda', colonna: 'chiave' },
+  cruciverba: { tabella: 'cruciverba', colonna: 'chiave' },
   'voce-diario': { tabella: 'voce_giornata', colonna: 'uid' },
   pin: { tabella: 'spillo', colonna: 'uid' },
 };
