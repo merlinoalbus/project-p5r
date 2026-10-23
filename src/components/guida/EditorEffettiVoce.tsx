@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ARTICOLO_AOJIRU, ORDINE_AOJIRU } from '../../../shared/acquisti';
 import { DOTI_SOCIALI, nomeDote, type DoteChiave } from '../../../shared/doti';
-import type { EffettoVoce, RichiestaSalvaEffettiVoce } from '../../../shared/effettiVoce';
+import { eEffettoDiStato, type EffettoDiStatoVoce, type EffettoVoce, type RichiestaSalvaEffettiVoce } from '../../../shared/effettiVoce';
 import type { ElenchiAzioneDto } from '../../types';
 import type { CampiStrutturati } from '../../utils/azioneStrutturata';
 import { Selettore } from '../shared/Selettore';
@@ -57,6 +57,22 @@ export function CampiAcquistoEffetto({ effetto, righe, onCambia }: { effetto: Ac
 }
 
 /** Lista unica con identità per effetto: riordinare non cambia UID e non riscrive gli effetti storici. */
+const NOME_EFFETTO_STATO: Record<EffettoDiStatoVoce['tipo'], string> = { storia: 'evento di storia', domanda: 'domanda o esame', cruciverba: 'cruciverba', richiesta: 'Richiesta completata' };
+
+/** L'oggetto citato dall'effetto, per chiave; il server rifiuta una chiave che non esiste. Spuntando la voce lo stato si segna, togliendo la spunta torna com'era. */
+function CampoEffettoDiStato({ effetto, onCambia }: { effetto: EffettoDiStatoVoce; onCambia: (e: EffettoDiStatoVoce) => void }) {
+  const campo = effetto.tipo === 'storia' ? { etichetta: 'Evento di storia (chiave)', valore: effetto.evento, aiuto: 'Per esempio «mansarda-pulita»: la stessa chiave che usano i requisiti.' }
+    : effetto.tipo === 'domanda' ? { etichetta: 'Numero della domanda', valore: String(effetto.domanda), aiuto: 'Il numero che la domanda ha in «Domande in classe, esami e quiz in TV».' }
+      : effetto.tipo === 'cruciverba' ? { etichetta: 'Data del cruciverba (MM-GG)', valore: effetto.data, aiuto: 'Il giorno del cruciverba, per esempio 02-01.' }
+        : { etichetta: 'Richiesta (chiave)', valore: effetto.richiesta, aiuto: 'La chiave della Richiesta nell’elenco delle Richieste.' };
+  const cambia = (v: string): void => onCambia(effetto.tipo === 'storia' ? { tipo: 'storia', evento: v } : effetto.tipo === 'domanda' ? { tipo: 'domanda', domanda: Math.max(1, Math.trunc(Number(v)) || 1) }
+    : effetto.tipo === 'cruciverba' ? { tipo: 'cruciverba', data: v } : { tipo: 'richiesta', richiesta: v });
+  return <>
+    <label className="flex flex-col gap-1">{campo.etichetta}<input className="form-input" type={effetto.tipo === 'domanda' ? 'number' : 'text'} min={1} value={campo.valore} onChange={(ev) => cambia(ev.target.value)} /></label>
+    <p className="m-0 text-[12px] text-text-secondary">{campo.aiuto} Spuntando la voce lo stato si segna; togliendo la spunta torna com’era. Nessuna Dote cambia da sola.</p>
+  </>;
+}
+
 export function EditorEffettiVoce({ valore, elenchi, onCambia }: { valore: CampiStrutturati; elenchi: ElenchiAzioneDto; onCambia: (v: CampiStrutturati) => void }) {
   const [tipoNuovo, setTipoNuovo] = useState<EffettoVoce['tipo']>('dote');
   const [errore, setErrore] = useState<string | null>(null);
@@ -81,18 +97,19 @@ export function EditorEffettiVoce({ valore, elenchi, onCambia }: { valore: Campi
   return <div className="flex min-w-0 flex-col gap-2 text-[13px]">
     <strong>Effetti della voce</strong>
     {!righe.length && <p className="m-0">Nessun effetto configurato.</p>}
-    <ul className="m-0 flex list-none flex-col gap-2 p-0">{righe.map((r, i) => r.effetto.tipo === 'acquisto' || r.effetto.tipo === 'pesca' || r.effetto.tipo === 'fortuna' ? <li key={r.uid ?? `nuovo-${i}`} className="flex flex-col gap-2 rounded border border-border p-2">
-      <div className="flex flex-wrap items-center gap-2"><strong>Effetto {i + 1}: {r.effetto.tipo === 'pesca' ? 'sessione di pesca' : r.effetto.tipo === 'fortuna' ? 'Fortuna di Chihaya' : 'acquisto'}</strong><button type="button" className="btn btn-ghost touch" onClick={() => togli(i)}>Togli</button><button type="button" className="btn btn-ghost touch" disabled={i === 0} onClick={() => sposta(i, -1)}>Su</button><button type="button" className="btn btn-ghost touch" disabled={i === righe.length - 1} onClick={() => sposta(i, 1)}>Giù</button></div>
+    <ul className="m-0 flex list-none flex-col gap-2 p-0">{righe.map((r, i) => r.effetto.tipo === 'acquisto' || r.effetto.tipo === 'pesca' || r.effetto.tipo === 'fortuna' || eEffettoDiStato(r.effetto) ? <li key={r.uid ?? `nuovo-${i}`} className="flex flex-col gap-2 rounded border border-border p-2">
+      <div className="flex flex-wrap items-center gap-2"><strong>Effetto {i + 1}: {r.effetto.tipo === 'pesca' ? 'sessione di pesca' : r.effetto.tipo === 'fortuna' ? 'Fortuna di Chihaya' : eEffettoDiStato(r.effetto) ? NOME_EFFETTO_STATO[r.effetto.tipo] : 'acquisto'}</strong><button type="button" className="btn btn-ghost touch" onClick={() => togli(i)}>Togli</button><button type="button" className="btn btn-ghost touch" disabled={i === 0} onClick={() => sposta(i, -1)}>Su</button><button type="button" className="btn btn-ghost touch" disabled={i === righe.length - 1} onClick={() => sposta(i, 1)}>Giù</button></div>
       {r.effetto.tipo === 'pesca' ? <EditorEffettoPescaVoce effetto={r.effetto} righe={righe} onCambia={e => cambia(i, e)} />
         : r.effetto.tipo === 'fortuna' ? <>
           <Selettore etichetta="Dote della Fortuna" valore={r.effetto.dote} opzioni={DOTI_SOCIALI.map((d) => ({ chiave: d.chiave, nome: d.nome }))} onCambia={(d) => cambia(i, { tipo: 'fortuna', dote: d as DoteChiave })} />
           <p className="m-0 text-[12px] text-text-secondary">Spuntando la voce la Fortuna si accende su questa Dote per il resto del giorno; togliendo la spunta si spegne.</p>
         </>
+          : eEffettoDiStato(r.effetto) ? <CampoEffettoDiStato effetto={r.effetto} onCambia={(e) => cambia(i, e)} />
           : <CampiAcquistoEffetto effetto={r.effetto} righe={righe} onCambia={(e) => cambia(i, e)} />}
     </li> : <RigaEffettoVoceLegacy key={r.uid ?? `nuovo-${i}`} effetto={r.effetto} numero={i + 1} elenchi={elenchi} onCambia={(e) => cambia(i, e)} onTogli={() => togli(i)} onSposta={(verso) => sposta(i, verso)} primo={i === 0} ultimo={i === righe.length - 1} />)}</ul>
-    {righe.length < 100 && <div className="flex flex-wrap items-end gap-2"><Selettore etichetta="Effetto da aggiungere" valore={tipoNuovo} opzioni={[{ chiave: 'dote', nome: 'Dote' }, { chiave: 'lettura', nome: 'Lettura o gioco' }, { chiave: 'turno', nome: 'Turno di attività' }, { chiave: 'acquisto', nome: 'Acquisto Aojiru' }, { chiave: 'pesca', nome: 'Sessione di pesca osservata' }, { chiave: 'fortuna', nome: 'Fortuna di Chihaya' }]} onCambia={(t) => setTipoNuovo(t as EffettoVoce['tipo'])} />
+    {righe.length < 100 && <div className="flex flex-wrap items-end gap-2"><Selettore etichetta="Effetto da aggiungere" valore={tipoNuovo} opzioni={[{ chiave: 'dote', nome: 'Dote' }, { chiave: 'lettura', nome: 'Lettura o gioco' }, { chiave: 'turno', nome: 'Turno di attività' }, { chiave: 'acquisto', nome: 'Acquisto Aojiru' }, { chiave: 'pesca', nome: 'Sessione di pesca osservata' }, { chiave: 'fortuna', nome: 'Fortuna di Chihaya' }, { chiave: 'storia', nome: 'Evento di storia' }, { chiave: 'domanda', nome: 'Domanda o esame' }, { chiave: 'cruciverba', nome: 'Cruciverba' }, { chiave: 'richiesta', nome: 'Richiesta completata' }]} onCambia={(t) => setTipoNuovo(t as EffettoVoce['tipo'])} />
       <button type="button" className="btn btn-secondary touch" onClick={() => {
-        const effetto: EffettoVoce = tipoNuovo === 'fortuna' ? { tipo: 'fortuna', dote: 'coraggio' } : tipoNuovo === 'pesca' ? { tipo: 'pesca', regola: REGOLA_PESCA, attivita: ATTIVITA_PESCA, sostituisceTurni: [], sostituisceDoti: [] } : tipoNuovo === 'acquisto' ? { tipo: 'acquisto', articolo: ARTICOLO_AOJIRU, variante: null, sostituisceDoti: [] } : tipoNuovo === 'lettura' ? { tipo: 'lettura', categoria: 'libro', chiave: '', almeno: null } : tipoNuovo === 'turno' ? { tipo: 'turno', attivita: '' } : { tipo: 'dote', dote: 'fascino', note: 2 };
+        const effetto: EffettoVoce = tipoNuovo === 'storia' ? { tipo: 'storia', evento: '' } : tipoNuovo === 'domanda' ? { tipo: 'domanda', domanda: 1 } : tipoNuovo === 'cruciverba' ? { tipo: 'cruciverba', data: '' } : tipoNuovo === 'richiesta' ? { tipo: 'richiesta', richiesta: '' } : tipoNuovo === 'fortuna' ? { tipo: 'fortuna', dote: 'coraggio' } : tipoNuovo === 'pesca' ? { tipo: 'pesca', regola: REGOLA_PESCA, attivita: ATTIVITA_PESCA, sostituisceTurni: [], sostituisceDoti: [] } : tipoNuovo === 'acquisto' ? { tipo: 'acquisto', articolo: ARTICOLO_AOJIRU, variante: null, sostituisceDoti: [] } : tipoNuovo === 'lettura' ? { tipo: 'lettura', categoria: 'libro', chiave: '', almeno: null } : tipoNuovo === 'turno' ? { tipo: 'turno', attivita: '' } : { tipo: 'dote', dote: 'fascino', note: 2 };
         imposta([...righe, { uid: null, effetto }]);
       }}>Aggiungi l’effetto scelto</button>
     </div>}

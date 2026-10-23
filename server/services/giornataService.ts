@@ -30,7 +30,7 @@ import type { EsitoRevisioneVoce } from '../../shared/types.js';
 import { riferimentiOggettiPerFonti } from './catalogoOggettiLetture.js';
 import { apertureDichiarabili, apertureNegliEffetti, eVisitaMemento, verificaApertureScelte } from './apertureDedaliService.js';
 import { leggiEffettiVoce, leggiEffettiVocePerMostrare, salvaEffettiVoce, inizializzaEffettiVoce, copiaEffettiVoce, preparaRimozioneEffettiVoce, applicaEffettiVoce, annullaEffettiVoce, leggiRicevuteEffettiVoce, applicaEffettoStorico } from './motoreDiario.js';
-import { descriviEffettoVoce, normalizzaEffettiVoce, type EffettoLegacyVoce, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
+import { descriviEffettoVoce, eEffettoDiStato, normalizzaEffettiVoce, type EffettoLegacyVoce, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import { conCestino, type ViciniCestino } from './cestinoService.js';
 import { leggiRicevutaEffettiAzione } from './effettiAzioneService.js';
 import { disponibilitaAcquistoCorrente } from './negoziService.js';
@@ -64,12 +64,12 @@ function riferimentoDi(r: RigaVoce): RiferimentoAzioneDto | null {
 /** Proiezione di compatibilità dei soli tre tipi legacy (dote, lettura, turno) della fonte unica `voce_effetto`: la fonte completa resta
  *  nel DTO (`effettiVoce`). `produce_json` non si legge più (un solo punto di modifica: l'editor degli effetti). */
 function produceDi(fonte: StatoEffettiVoceDto): EffettoAzione[] {
-  return fonte.effetti.flatMap(e => e.effetto.tipo === 'acquisto'||e.effetto.tipo==='pesca'||e.effetto.tipo==='fortuna' ? [] : [e.effetto]);
+  return fonte.effetti.flatMap(e => e.effetto.tipo === 'acquisto'||e.effetto.tipo==='pesca'||e.effetto.tipo==='fortuna'||eEffettoDiStato(e.effetto) ? [] : [e.effetto]);
 }
 /** La frase di ogni effetto della fonte unica, anche acquisto e pesca, con i nomi degli elementi («Il gioco dà: …»). */
 function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione): string[] {
   return fonte.effetti.map(({ effetto: e }) => {
-    if (e.tipo === 'pesca' || e.tipo === 'fortuna') return descriviEffettoVoce(e);
+    if (e.tipo === 'pesca' || e.tipo === 'fortuna' || eEffettoDiStato(e)) return descriviEffettoVoce(e);
     if (e.tipo === 'acquisto') {
       const nome = (prepared('SELECT COALESCE(nome_it, nome) AS nome FROM articolo WHERE chiave = ?').get(e.articolo) as { nome: string } | undefined)?.nome;
       return nome ? descriviEffettoVoce(e).replace(e.articolo, nome) : descriviEffettoVoce(e);

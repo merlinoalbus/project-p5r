@@ -3,13 +3,14 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { HttpError, httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { eDote } from '../../shared/doti.js';
-import { normalizzaEffettoVoce, normalizzaEffettiVoce } from '../../shared/effettiVoce.js';
+import { eEffettoDiStato, normalizzaEffettoVoce, normalizzaEffettiVoce } from '../../shared/effettiVoce.js';
 import type { AnteprimaDecisioneEffettoVoceDto, EffettoLegacyVoce, EffettoVoce, EffettoVoceDto, PropostaEffettoVoceDto, ReceiptEffettoVoceDto, RichiestaAnteprimaDecisioneEffettoVoce, RichiestaDecisioneEffettoVoce, RichiestaSalvaEffettiVoce, StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import type { NuovaRegistrazioneAcquisto, RichiestaRegistraAcquisto } from '../../shared/acquisti.js';
 import type { EffettiAzioneDto } from '../../shared/types.js';
 import type { PropostaPartitaDto } from '../../shared/propostePartita.js';
 import { annullaFontiDiarioNellaTransazione, anteprimaRegistrazioneAcquisto, registraAcquistoNellaTransazione, verificaOffertaConsumo, type PorteDisponibilitaAcquisto } from './acquistiService.js';
 import { accendiFortunaDaVoce, spegniFortunaDaVoce } from './fortunaService.js';
+import { applicaEffettiDiStato, annullaEffettiDiStato, verificaEffettoDiStato } from './effettiDiStatoService.js';
 import { creaPropostaEffettoStorico, improntaDato, jsonCanonico, leggiJsonRegistro, leggiPropostePartita, nuovoUid, riconciliaBeneficiVoce, verificaBeneficio, saldoDoteVoce, trasferisciAttribuzioneDote } from './propostePartitaService.js';
 import { leggiRicevutaEffettiAzione } from './effettiAzioneService.js';
 import { verificaEffetti } from './azioniStrutturateService.js';
@@ -60,8 +61,8 @@ export function leggiEffettiVocePerMostrare(uid:string):StatoEffettiVoceDto {
     return {voceUid:uid,stato:'legacy-da-correggere',effetti:[],rawLegacy:t?.raw_json??'[]',motivo:e.message,revisione:improntaDato({uid,errore:e.code,raw:t?.raw_json??null})};
   }
 }
-const chiaveEffetto=(e:EffettoVoce):string|null=>e.tipo==='acquisto'?e.articolo:e.tipo==='dote'||e.tipo==='fortuna'?e.dote:e.tipo==='lettura'?e.chiave:e.attivita;
-function verificaNuovoEffetto(e:EffettoVoce):void {if(e.tipo==='fortuna')return;if(e.tipo==='acquisto')verificaOffertaConsumo(e.articolo);else if(e.tipo==='pesca'){if(e.attivita!==ATTIVITA_PESCA||e.regola!==REGOLA_PESCA||leggiRegolaPesca(e.regola).stato!=='collegata')throw httpErrors.conflict('pesca-regola-assente','La fonte della pesca non è collegata a una regola leggibile.');}else verificaEffetti([e]);}
+const chiaveEffetto=(e:EffettoVoce):string|null=>e.tipo==='acquisto'?e.articolo:e.tipo==='dote'||e.tipo==='fortuna'?e.dote:e.tipo==='lettura'?e.chiave:e.tipo==='storia'?e.evento:e.tipo==='domanda'?String(e.domanda):e.tipo==='cruciverba'?e.data:e.tipo==='richiesta'?e.richiesta:e.attivita;
+function verificaNuovoEffetto(e:EffettoVoce):void {if(e.tipo==='fortuna')return;if(eEffettoDiStato(e)){verificaEffettoDiStato(e);return;}if(e.tipo==='acquisto')verificaOffertaConsumo(e.articolo);else if(e.tipo==='pesca'){if(e.attivita!==ATTIVITA_PESCA||e.regola!==REGOLA_PESCA||leggiRegolaPesca(e.regola).stato!=='collegata')throw httpErrors.conflict('pesca-regola-assente','La fonte della pesca non è collegata a una regola leggibile.');}else verificaEffetti([e]);}
 function verificaLista(effetti:EffettoVoceDto[]):void {
   const ids=new Set<string>(),rivendicati=new Set<string>();
   for(const e of effetti){if(!/^[0-9a-f]{32}$/.test(e.uid)||ids.has(e.uid))throw httpErrors.badRequest('identita-effetto-non-valida','Gli UID degli effetti devono essere distinti.');ids.add(e.uid);}
@@ -305,7 +306,7 @@ export function applicaEffettiVoce(p:number,uid:string,porte:PorteEffettiLegacy,
   for(const e of consumi){const richiesta=richieste.find((r)=>r.fonte.tipo==='diario'&&r.fonte.effettoUid===e.uid)!;const {revisioneAcquistiAttesa:_prima,...nuovo}=richiesta;const token=anteprimaRegistrazioneAcquisto(p,nuovo,opz.porteAcquisti).revisioneAcquistiAttesa;receiptNuovi.push(registraConsumo(p,uid,e,{...nuovo,revisioneAcquistiAttesa:token},opz.porteAcquisti,true,{generazione}));}
   for(const e of pesche){const r=richiestePesca.find(r=>r.fonte.tipo==='diario'&&r.fonte.effettoUid===e.uid)!;const {revisionePescaAttesa:_prima,...input}=r;receiptNuovi.push(registraPesca(p,uid,e,{...input,revisionePescaAttesa:anteprimaPesca(p,'registra-sessione',input).revisionePescaAttesa},generazione,true));}
   const sostituite=new Set([...consumi.flatMap((e)=>e.effetto.tipo==='acquisto'?e.effetto.sostituisceDoti:[]),...pesche.flatMap(e=>e.effetto.tipo==='pesca'?[...e.effetto.sostituisceDoti,...e.effetto.sostituisceTurni]:[])]);
-  const legacy=stato.effetti.filter((e):e is EffettoVoceDto&{effetto:EffettoLegacyVoce}=>e.effetto.tipo!=='acquisto'&&e.effetto.tipo!=='pesca'&&e.effetto.tipo!=='fortuna'&&!sostituite.has(e.uid));
+  const legacy=stato.effetti.filter((e):e is EffettoVoceDto&{effetto:EffettoLegacyVoce}=>e.effetto.tipo!=='acquisto'&&e.effetto.tipo!=='pesca'&&e.effetto.tipo!=='fortuna'&&!eEffettoDiStato(e.effetto)&&!sostituite.has(e.uid));
   const effettiLegacy=porte.applicaLegacy(p,legacy.map((e)=>e.effetto)),porzioni=porzioniLegacy(legacy,effettiLegacy),spunta={fattaIl:opz.spuntaFattaIl,raw:effettiLegacy?JSON.stringify(effettiLegacy):null};
   for(const e of legacy){const segmento=porzioni.get(e.uid)!;receiptNuovi.push(registraRicevuta(p,uid,e,{benefici:beneficiLegacy(segmento,false),legacy:segmento,risorse:risorseLegacy(p,segmento),gestitaDaSpunta:true,spunta},true));}
   if(effettiLegacy&&(effettiLegacy.confidente||effettiLegacy.incontro||effettiLegacy.apertureDedali?.length)){
@@ -314,6 +315,8 @@ export function applicaEffettiVoce(p:number,uid:string,porte:PorteEffettiLegacy,
   }
   // la lettura della buona sorte: la spunta accende la Fortuna sulla Dote dell'effetto (si spegne togliendo la spunta o al cambio di giorno)
   for(const e of stato.effetti)if(e.effetto.tipo==='fortuna')accendiFortunaDaVoce(p,uid,e.effetto.dote);
+  // gli effetti «segna lo stato» (evento di storia, domanda, cruciverba, Richiesta): stessi setter delle pagine, con il «prima» ricordato
+  applicaEffettiDiStato(p,uid,stato.effetti.flatMap((e)=>eEffettoDiStato(e.effetto)?[{uid:e.uid,effetto:e.effetto}]:[]));
   return {effettiLegacy,receiptNuovi,proposte:leggiPropostePartita(p)};
 }
 
@@ -355,7 +358,7 @@ export function applicaEffettoStorico(p:number,proposta:PropostaPartitaDto,acqui
     for(const a of assorbimentiPesca)trasferisciAttribuzioneDote(p,uid,a.ricevuta.effettoUid,a.ricevuta.id,nuova.id,String(nuova.ricevuta.sessioneId),'perizia',a.q,'pesca');
     leggiRicevuteEffettiVoce(p,uid);return;
   }
-  if(e.effetto.tipo==='fortuna')throw httpErrors.conflict('raccordo-non-valido','La Fortuna vale per il giorno della spunta: non si applica a una spunta già fatta.');
+  if(e.effetto.tipo==='fortuna'||eEffettoDiStato(e.effetto))throw httpErrors.conflict('raccordo-non-valido','Questo effetto si applica spuntando la voce: non si raccorda a una spunta già fatta.');
   const legacy=porte.applicaLegacy(p,[e.effetto]);
   registraRicevuta(p,uid,e,{benefici:beneficiLegacy(legacy,true),legacy,risorse:risorseLegacy(p,legacy),gestitaDaSpunta:false,...(attiva?{sostituisceRicevuta:attiva.id}:{})},true,{id:nuovaRicevuta});
 }
@@ -400,6 +403,7 @@ export function annullaEffettiVoce(p:number,uid:string,legacy:EffettiAzioneDto|n
     prepared("INSERT INTO utente.effetto_applicato(id,partita_id,voce_uid,effetto_uid,effetto_ordine,formato,tipo,chiave,prima_json,ricevuta_json,creato,applicato_il,annullato_il) VALUES(?,?,?,?,0,1,'contesto',NULL,NULL,?,0,?,?)").run(id,p,uid,effettoUid,jsonCanonico({voceUid:uid,effettoUid,benefici:[],annulloLegacyIntegrale:true,spunta:identitaSpunta}),adesso,adesso);
   }
   spegniFortunaDaVoce(p,uid);
+  annullaEffettiDiStato(p,uid);
   prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='non-piu-dovuta',decisa_il=? WHERE partita_id=? AND voce_uid=? AND tipo='effetto-voce' AND stato='aperta'").run(nowIso(),p,uid);
 }
 export function preparaRimozioneEffettiVoce(uid:string,porte:Pick<PorteEffettiLegacy,'annullaLegacy'>):void {
