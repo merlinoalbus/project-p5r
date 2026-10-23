@@ -33,7 +33,7 @@ import { nomiCondizioni, pinCitato } from '../condizioni/nomiCondizioni.js';
 import { statoDisponibilitaPartita, valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilitaService.js';
 import { palazzoDiIngresso, palazzoDiOgniMappa } from '../palazziService.js';
 import { conPresenzaPin, conDisponibilitaNegozio, senzaIngressoConcluso } from './disponibilitaPin.js';
-import { ePersonaDeiMemento, erroreCatturaNelCompendio } from '../catturePersona.js';
+import { eVoceDiCattura, erroreCatturaNelCompendio } from '../catturePersona.js';
 import { allineaEnigmaDellaVoce, allineaRaccoltoDelPin, allineaStatiPunto, erroreVoceDelPin, pinDelPuntoGuida, quanteVociDelPin, scriviStatoVoce, segnaPassiDellEnigma, vociDelPin } from './collegamentiGuida.js';
 import { conDivergenze, conStatoPerInfiltrazione, effettiDelGestoDto, modelloAvanzamento, riallineaStati, segnaIlPin, statiDellaPartita, statoDelPin, type ModelloAvanzamento, type StatiDellaPartita } from './statiGuida.js';
 import { pinCitati, verificaGiro } from './condizioniTraPin.js';
@@ -1428,8 +1428,8 @@ function verificaRiferimento(rif: { tipo: TipoRiferimento; chiave: string } | nu
   if (rif.tipo === 'punto' && !(attuale?.tipo === 'punto' && attuale.chiave === rif.chiave)) {
     const p = prepared('SELECT nome, tipo, area_dedalo_chiave FROM punto_interesse WHERE chiave = ?').get(rif.chiave) as { nome: string; tipo: string; area_dedalo_chiave: string | null };
     if (puntoDescrittivo(p.tipo, p.area_dedalo_chiave)) throw httpErrors.badRequest('punto-descrittivo', `«${p.nome}» è una voce descrittiva della guida: non ha pin.`);
-    // una Persona dei Memento si cattura nel compendio (2026-10-12, `catturePersona.ts`)
-    if (ePersonaDeiMemento(rif.chiave)) throw erroreCatturaNelCompendio(p.nome, 'collegare');
+    // una Persona da catturare (dedali e Palazzi) si cattura nel compendio (2026-10-12, `catturePersona.ts`; L8)
+    if (eVoceDiCattura(rif.chiave)) throw erroreCatturaNelCompendio(p.nome, 'collegare');
   }
 }
 
@@ -1679,8 +1679,8 @@ export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: b
     if (!vociDelModello || vociDelModello.altre.length === 0) { prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId); return; }
     // le voci del pin che si segnano (una o più, 098): una voce descrittiva della guida non ha stato (2026-10-01), il raccolto del
     // pin non la segna
-    // (né una Persona dei Memento, che si cattura nel compendio, 2026-10-12: un collegamento rimasto da prima non la segna)
-    const voci = vociDelModello.altre.filter((voce) => !ePersonaDeiMemento(voce));
+    // (né una Persona da catturare, che si cattura nel compendio, 2026-10-12; L8: un collegamento rimasto da prima non la segna)
+    const voci = vociDelModello.altre.filter((voce) => !eVoceDiCattura(voce));
     /** Vero se la voce ha uno stato nella partita. */
     const segnata = (voce: string) => !!prepared('SELECT 1 FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partitaId, voce);
     if (voci.length > 1) {

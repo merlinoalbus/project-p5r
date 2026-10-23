@@ -2276,6 +2276,8 @@ export interface PuntoInteresseDto {
   /** Per una Persona di un dedalo (migrazione 101): le aree del dedalo in cui si incontra, in ordine di area (una Persona sta in
    *  più aree; la sua `areaDedalo` è null). Vuoto per le altre voci. */
   areeDedalo: string[];
+  /** L8 (B6): per una voce Persona collegata a un'Ombra, l'Ombra; `catturabile` falso (Babau/Bugs) = l'incontro non espone il gesto di cattura. Assente per le altre voci. */
+  ombra?: { chiave: string; nome: string; catturabile: boolean };
   // ---- L4 «Avanzamento unico» (§3.1): presenti per le voci dei Palazzi, assenti per i dedali dei Memento (risposta invariata, R4-30) ----
   /** Il carattere effettivo (la scelta dell'utente o la regola, `shared/caratteriVoce.ts`); null per le Persona (L8). Con L4 `stato` è
    *  lo stato con cui la voce risulta: per una permanente anche da un'altra voce del suo oggetto (fatta nella 2 → fatta nella 4). */

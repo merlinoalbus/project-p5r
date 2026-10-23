@@ -22,7 +22,7 @@ import { ARCHI_STORIA, CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, condizioneConTe
 import { guastaLAperto, nomeMeteo, piove } from '../../../shared/meteoPartita.js';
 import { nomeDote } from '../../../shared/doti.js';
 import { puntoDescrittivo } from '../../../shared/spilli.js';
-import { sqlPersonaDeiMemento } from '../catturePersona.js';
+import { sqlVoceDiCattura } from '../catturePersona.js';
 import type { DisponibilitaDto, EsitoCondizione, RequisitoRango, SemaforoRequisitoDto, ValutazioneCondizioneDto } from '../../../shared/types.js';
 import type { StatoDisponibilita } from '../disponibilitaService.js';
 import type { StatoPartitaSemafori } from '../semaforiService.js';
@@ -42,7 +42,7 @@ export interface OpzioniValutazione { nomi?: NomiCondizioni; comeRequisito?: boo
 const STAGIONE_PER_MESE: Record<number, string> = { 4: 'primavera', 5: 'primavera', 6: 'estate', 7: 'estate', 8: 'estate', 9: 'autunno', 10: 'autunno', 11: 'autunno', 12: 'inverno', 1: 'inverno', 2: 'inverno', 3: 'primavera' };
 
 /** Una voce della guida citata da una condizione: il nome e il tipo (una descrittiva non ha stato). */
-interface VoceCitata { nome: string; tipo: string; area_dedalo_chiave: string | null; persona_dei_memento: number }
+interface VoceCitata { nome: string; tipo: string; area_dedalo_chiave: string | null; di_cattura: number }
 
 /** `pinCitato` con la memoria dello stato della richiesta, se lo stato ce l'ha. */
 function pinCitatoNelloStato(uid: string, st: StatoValutazione): ReturnType<typeof pinCitato> {
@@ -54,7 +54,7 @@ function pinCitatoNelloStato(uid: string, st: StatoValutazione): ReturnType<type
 /** La voce della guida citata da una condizione, con la memoria dello stato della richiesta se lo stato ce l'ha; null se non c'è. */
 function voceCitataNelloStato(chiave: string, st: StatoValutazione): VoceCitata | null {
   /** La voce dal database: nome e tipo, o null. */
-  const leggi = () => (prepared(`SELECT p.nome, p.tipo, p.area_dedalo_chiave, ${sqlPersonaDeiMemento('p')} AS persona_dei_memento FROM punto_interesse p WHERE p.chiave = ?`).get(chiave) as VoceCitata | undefined) ?? null;
+  const leggi = () => (prepared(`SELECT p.nome, p.tipo, p.area_dedalo_chiave, ${sqlVoceDiCattura('p')} AS di_cattura FROM punto_interesse p WHERE p.chiave = ?`).get(chiave) as VoceCitata | undefined) ?? null;
   if (!st.vociCitate) return leggi();
   if (!st.vociCitate.has(chiave)) st.vociCitate.set(chiave, leggi());
   return st.vociCitate.get(chiave)!;
@@ -336,8 +336,8 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
       // diventata descrittiva («Altro»): non ha più uno stato, quindi la condizione è grigia (da correggere nell'editor), non rossa
       if (puntoDescrittivo(v.tipo, v.area_dedalo_chiave)) return esito('voce-guida', 'grigio', `«${v.nome}» è diventata una voce descrittiva, senza stato: correggi la condizione nell’editor della mappa`);
       const segnata = st.vociSegnate?.has(r.voce) ?? false;
-      // una Persona dei Memento è «segnata» se è catturata, cioè registrata nel compendio della partita (2026-10-12)
-      const parola = v.persona_dei_memento === 1 ? (segnata ? 'catturata (nel compendio)' : 'non catturata (non è nel compendio)') : segnata ? 'segnata' : 'non segnata';
+      // una Persona da catturare (dedali e Palazzi) è «segnata» se è catturata, cioè registrata nel compendio della partita (2026-10-12; L8)
+      const parola = v.di_cattura === 1 ? (segnata ? 'catturata (nel compendio)' : 'non catturata (non è nel compendio)') : segnata ? 'segnata' : 'non segnata';
       return esito('voce-guida', segnata === r.segnata ? 'verde' : 'rosso', `«${v.nome}»: ${parola}`);
     }
   }

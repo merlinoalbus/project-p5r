@@ -263,10 +263,10 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
     errori: [PARTITA],
   },
   'PUT /api/partite/:id/compendio/:personaId': {
-    sommario: 'Registra o toglie a mano una Persona dal compendio',
-    descrizione: 'Con `registrata: false` cancella la riga del compendio. Con `registrata: true` scrive solo il livello registrato: una riga nuova nasce senza bonus né skill, una riga esistente tiene il resto dell\'istantanea. La prima registrazione va nello storico (`compendio-registrata`).',
+    sommario: 'Registra o toglie a mano una Persona dal compendio (la strada unica della cattura)',
+    descrizione: 'Con `registrata: false` cancella la riga del compendio. Con `registrata: true` scrive solo il livello registrato: una riga nuova nasce senza bonus né skill, una riga esistente tiene il resto dell\'istantanea. La prima registrazione va nello storico (`compendio-registrata`). È anche il gesto di cattura di un Palazzo, di un dedalo dei Memento, della Battaglia e della pagina Ombra (L8): con `ombra` (la chiave dell\'Ombra dell\'incontro) il server controlla che l\'Ombra sia di quella Persona e catturabile — Babau/Bugs e le non reclutabili non si catturano dall\'incontro (400 `ombra-non-catturabile`), la loro Persona si registra dal compendio o per fusione.',
     risposta: 'Il compendio aggiornato: elenco di `CompendioPartitaDto`',
-    errori: [PARTITA, [404, 'persona-non-trovata']],
+    errori: [PARTITA, [404, 'persona-non-trovata'], [404, 'ombra-non-trovata'], [400, 'ombra-e-persona-discordi'], [400, 'ombra-non-catturabile']],
   },
   'GET /api/partite/:id/suggerimenti': {
     sommario: 'Che cosa evidenziare per le azioni ancora da fare oggi',

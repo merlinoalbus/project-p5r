@@ -30,7 +30,7 @@ import { timbriPartita } from './timbriService.js';
 import { slug } from '../../shared/slug.js';
 import { indiceMaschere, personaDellaMaschera, type IndiceMaschere } from './maschere.js';
 import { contenutiDelleVoci } from './catalogoOggettiLetture.js';
-import { ePersonaDeiMemento, erroreCatturaNelCompendio, vociPersonaCatturate } from './catturePersona.js';
+import { eVoceDiCattura, erroreCatturaNelCompendio, vociDiCattura, vociPersonaCatturate, type VoceDiCattura } from './catturePersona.js';
 import { eliminaImmaginiDeiPin } from './mappe/mappeService.js';
 import { areeDelleInfiltrazioni, conLegami, impostaLegamiInfiltrazione, infiltrazioniDelleAree, planimetrieDelleInfiltrazioni, staccaInfiltrazioneDalleVoci, type AreaDellInfiltrazione } from './mappe/legamiInfiltrazioni.js';
 import { areeDelPalazzo } from './mappe/areeService.js';
@@ -65,12 +65,16 @@ function planimetriaDto(pl: PlanimetrieDelleVoci, voce: string): PlanimetriaDell
  * volta, per una voce sola lo si costruisce qui. Con `avanzamento` (le voci dei Palazzi, L4 §3.1) porta anche carattere, oggetto
  * e «da verificare»; le voci dei dedali dei Memento restano come prima (R4-30).
  */
-function puntoDto(r: RigaPunto, stato: StatoPunto | null, marcatore: { x: number; y: number } | null, pin: PinDelPuntoDto[], letture?: { maschere: IndiceMaschere; areePersone: Map<string, string[]>; contenuti?: ReturnType<typeof contenutiDelleVoci> }, avanzamento?: AvanzamentoVoce): PuntoInteresseDto {
+function puntoDto(r: RigaPunto, stato: StatoPunto | null, marcatore: { x: number; y: number } | null, pin: PinDelPuntoDto[], letture?: { maschere: IndiceMaschere; areePersone: Map<string, string[]>; contenuti?: ReturnType<typeof contenutiDelleVoci>; cattura?: ReadonlyMap<string, VoceDiCattura> }, avanzamento?: AvanzamentoVoce): PuntoInteresseDto {
   const dettagli = JSON.parse(r.dettagli_json) as Record<string, unknown>;
-  const persona = r.tipo === 'persona' ? personaDellaMaschera(letture?.maschere ?? indiceMaschere(), dettagli.maschera) : null;
+  // L8 (B6): la Persona di una voce da catturare è quella della sua maschera, altrimenti quella della sua Ombra (le voci dei Palazzi non hanno maschera)
+  const idx = letture?.maschere ?? indiceMaschere();
+  const cattura = r.tipo === 'persona' ? (letture?.cattura ?? vociDiCattura(idx, [r.chiave])).get(r.chiave) ?? null : null;
+  const persona = r.tipo === 'persona' ? cattura?.persona ?? personaDellaMaschera(idx, dettagli.maschera) : null;
   const areeDedalo = r.tipo === 'persona' ? (letture?.areePersone ?? areeDellePersone(r.chiave)).get(r.chiave) ?? [] : [];
   const contenuto = (letture?.contenuti ?? contenutiDelleVoci([r.chiave])).get(r.chiave) ?? [];
-  const base: PuntoInteresseDto = { chiave: r.chiave, ordine: r.ordine, tipo: r.tipo, nome: r.nome, descrizione: r.descrizione, esauribile: r.esauribile === 1, dettagli, contenuto, fonte: r.fonte, stato, marcatore, pin, contenitore: r.contenitore_chiave ?? null, areaDedalo: r.area_dedalo_chiave ?? null, persona, areeDedalo };
+  const base: PuntoInteresseDto = { chiave: r.chiave, ordine: r.ordine, tipo: r.tipo, nome: r.nome, descrizione: r.descrizione, esauribile: r.esauribile === 1, dettagli, contenuto, fonte: r.fonte, stato, marcatore, pin, contenitore: r.contenitore_chiave ?? null, areaDedalo: r.area_dedalo_chiave ?? null, persona, areeDedalo,
+    ...(cattura?.ombra ? { ombra: cattura.ombra } : {}) };
   if (!avanzamento || r.area_dedalo_chiave) return base;
   const { m, s } = avanzamento;
   const v = m.voci.get(r.chiave);
@@ -378,7 +382,10 @@ export function dettaglioDungeon(chiave: string, partitaId?: number, contesto: s
   const marc = marcatori();
   const pinPunti = pinDeiPunti();
   const chiaviContenuti = (prepared('SELECT p.chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = ?').all(chiave) as Array<{ chiave: string }>).map((p) => p.chiave);
-  const letture = { maschere: indiceMaschere(), areePersone: areeDellePersone(), contenuti: contenutiDelleVoci(chiaviContenuti) };
+  const maschere = indiceMaschere();
+  // L8 (B6): le voci Persona da catturare (dedali e Palazzi), lette una volta, con la loro Persona e la loro Ombra
+  const cattura = vociDiCattura(maschere);
+  const letture = { maschere, areePersone: areeDellePersone(), contenuti: contenutiDelleVoci(chiaviContenuti), cattura };
   const native = mappeDelleAree(chiave);
   // L4: il modello e gli stati della partita, una volta per la scheda; il contesto dei pin di rigenerabili è l'infiltrazione guardata
   // (`?infiltrazione=`), altrimenti quella in corso
@@ -386,16 +393,16 @@ export function dettaglioDungeon(chiave: string, partitaId?: number, contesto: s
   const segni = partitaId === undefined ? undefined : segniPartita(partitaId, contesto, m);
   const raccolta = r.tipo === 'mementos' ? null : raccoltaMappe(chiave, partitaId, segni);
   const dedali = r.tipo === 'mementos' ? lettureDedali(chiave, partitaId, stati) : null;
-  // lo stato di una Persona dei Memento è la sua cattura nel compendio (2026-10-12, `catturePersona.ts`), non `punto_partita`
-  const catturate = r.tipo === 'mementos' && partitaId !== undefined ? vociPersonaCatturate(partitaId) : new Set<string>();
+  // lo stato di una Persona da catturare (dedali e Palazzi, L8 R8-12/R8-14) è la sua cattura nel compendio (2026-10-12, `catturePersona.ts`), non `punto_partita`
+  const catturate = partitaId !== undefined ? vociPersonaCatturate(partitaId, cattura) : new Set<string>();
   // L3: le Aree toccate da ogni infiltrazione. Solo nei Palazzi: per i Memento i campi nuovi non si emettono e la risposta resta
   // identica byte per byte a quella di prima (R3-12; difetto NR3-1, decisione del PM del 2026-10-20)
   const palazzo = r.tipo === 'palazzo';
   const avanzamento: AvanzamentoVoce | undefined = palazzo ? { m, s: segni?.s ?? null, pl: letturePlanimetrieDelleVoci(getDb()) } : undefined;
   /** Lo stato da mostrare di una voce: nessuno per una descrittiva (uno rimasto da prima si ignora, senza cancellarlo); per una
-   *  Persona dei Memento «ottenuto» se catturata; nei Palazzi (L4) quello con cui risulta (§8.11: dai suoi pin, se ne ha). */
+   *  Persona da catturare «ottenuto» se catturata; nei Palazzi (L4) quello con cui risulta (§8.11: dai suoi pin, se ne ha). */
   const statoDi = (p: RigaPunto): StatoPunto | null => (puntoDescrittivo(p.tipo, p.area_dedalo_chiave) ? null
-    : r.tipo === 'mementos' && p.tipo === 'persona' ? (catturate.has(p.chiave) ? 'ottenuto' : null)
+    : p.tipo === 'persona' && cattura.has(p.chiave) ? (catturate.has(p.chiave) ? 'ottenuto' : null)
     : avanzamento && !p.area_dedalo_chiave ? statoL4(avanzamento, p.chiave) : stati.get(p.chiave) ?? null);
   const areeToccate = palazzo ? areeDelleInfiltrazioni(chiave) : new Map<string, AreaDellInfiltrazione[]>();
   const aree = (prepared('SELECT * FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine').all(chiave) as RigaArea[]).map((a): AreaDungeonDto => ({
@@ -444,14 +451,18 @@ export function guidaDellaPlanimetria(chiave: string, partitaId?: number): Guida
   const avanzamento: AvanzamentoVoce = { m, s: partitaId === undefined ? null : statiDellaPartita(db, m, partitaId), pl };
   const marc = marcatori();
   const pinPunti = pinDeiPunti();
-  const letture = { maschere: indiceMaschere(), areePersone: new Map<string, string[]>(), contenuti: contenutiDelleVoci(qui) };
+  const maschere = indiceMaschere();
+  const cattura = vociDiCattura(maschere, [...qui]);
+  const catturate = partitaId !== undefined ? vociPersonaCatturate(partitaId, cattura) : new Set<string>();
+  const letture = { maschere, areePersone: new Map<string, string[]>(), contenuti: contenutiDelleVoci(qui), cattura };
   const righe = (prepared(`SELECT p.*, a.nome AS infiltrazione_nome, a.ordine AS infiltrazione_ordine FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave
     ORDER BY a.ordine, a.chiave, p.ordine, p.chiave`).all() as Array<RigaPunto & { infiltrazione_nome: string; infiltrazione_ordine: number }>).filter((r) => qui.has(r.chiave));
   const infiltrazioni: GuidaDellaPlanimetriaDto['infiltrazioni'] = [];
   for (const r of righe) {
     let gruppo = infiltrazioni.at(-1);
     if (gruppo?.chiave !== r.area_chiave) infiltrazioni.push(gruppo = { chiave: r.area_chiave, nome: r.infiltrazione_nome, ordine: r.infiltrazione_ordine, voci: [] });
-    const stato = puntoDescrittivo(r.tipo, r.area_dedalo_chiave) ? null : statoL4(avanzamento, r.chiave);
+    // una Persona da catturare: lo stato è la cattura nel compendio (L8), come nella scheda del Palazzo
+    const stato = puntoDescrittivo(r.tipo, r.area_dedalo_chiave) ? null : cattura.has(r.chiave) ? (catturate.has(r.chiave) ? 'ottenuto' as const : null) : statoL4(avanzamento, r.chiave);
     gruppo.voci.push(puntoDto(r, stato, marc.get(r.chiave) ?? null, pinPunti.get(r.chiave) ?? [], letture, avanzamento));
   }
   return { mappa: chiaveMappa(mappa), palazzo: palazzoDellaMappa(mappa), infiltrazioni };
@@ -480,7 +491,7 @@ export function impostaStatoPunto(partitaId: number, puntoChiave: string, stato:
   if (stato !== null && puntoDescrittivo(p.tipo, p.area_dedalo_chiave)) throw httpErrors.badRequest('punto-descrittivo', `«${p.nome}» è una voce descrittiva della guida: si legge, non si segna.`);
   // una Persona dei Memento si cattura nel compendio, non ha uno stato suo (2026-10-12, `catturePersona.ts`); azzerarla resta
   // possibile, per ripulire
-  if (stato !== null && ePersonaDeiMemento(puntoChiave)) throw erroreCatturaNelCompendio(p.nome, 'segnare');
+  if (stato !== null && eVoceDiCattura(puntoChiave)) throw erroreCatturaNelCompendio(p.nome, 'segnare');
   // «Esaurito» solo per una voce esauribile (L4 §1.6, R4-07): prima il server lo accettava su qualunque voce. Le voci dei dedali dei
   // Memento restano come prima (R4-30)
   if (stato === 'esaurito' && p.esauribile !== 1 && !p.area_dedalo_chiave) throw httpErrors.badRequest('voce-non-esauribile', `«${p.nome}» non è esauribile: si segna «ottenuto».`);

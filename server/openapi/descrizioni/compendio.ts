@@ -154,7 +154,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/ombre': {
     sommario: 'Elenco delle Ombre (L8)',
-    descrizione: 'Le Ombre per nome: chiave stabile, nome italiano (e i nomi alternativi, che la ricerca trova), Persona del compendio o nessuna (non reclutabile), personalità (le quattro del gioco o «sconosciuta»), se la Persona si ottiene dall\'incontro (`reclutabile`, `catturabile`) e se ha una negoziazione (`negoziabile`, null se non verificata). Filtri: `q` (nome, nomi alternativi, Persona), `dungeon` (Palazzo o Memento d\'incontro), `personalita`, `persona`. `?partita=` verifica solo che la partita esista.',
+    descrizione: 'Le Ombre per nome: chiave stabile, nome italiano (e i nomi alternativi, che la ricerca trova), Persona del compendio o nessuna (non reclutabile), personalità (le quattro del gioco o «sconosciuta»), se la Persona si ottiene dall\'incontro (`reclutabile`, `catturabile`) e se ha una negoziazione (`negoziabile`, null se non verificata). Filtri: `q` (nome, nomi alternativi, Persona), `dungeon` (Palazzo o Memento d\'incontro), `personalita`, `persona`. Ogni Ombra porta le debolezze e le altre affinità (dalla Persona del compendio, con le sole differenze proprie dell\'Ombra: nessuna copia) e i luoghi d\'incontro. Con `?partita=` ogni Ombra dice se la sua Persona è registrata (`registrata`) e ogni luogo se è ancora raggiungibile (`raggiungibile`: falso solo per un Palazzo concluso).',
     risposta: '`OmbraSchedaDto[]`',
     errori: [PARTITA_NON_TROVATA],
   },
@@ -178,7 +178,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/ombre/:chiave': {
     sommario: 'Scheda di un\'Ombra (L8)',
-    descrizione: 'Nome, nomi alternativi, Persona, personalità, affinità (quelle della Persona nel compendio, con le proprie dell\'Ombra dove differiscono, `proprie`: solo le 4 eccezioni di G-019 e le non reclutabili; per queste ultime solo gli elementi noti), dove si incontra (Palazzo e infiltrazione, Memento e dedalo con le aree: unione della guida alla Battaglia, delle voci dei Palazzi e delle voci dei dedali) e le voci della guida che la descrivono. Con `?partita=` dice se la sua Persona è registrata nel compendio della partita.',
+    descrizione: 'Nome, nomi alternativi, Persona, personalità, affinità (quelle della Persona nel compendio, con le proprie dell\'Ombra dove differiscono, `proprie`: solo le 4 eccezioni di G-019 e le non reclutabili; per queste ultime solo gli elementi noti), dove si incontra (Palazzo e infiltrazione, Memento e dedalo con le aree: unione della guida alla Battaglia, delle voci dei Palazzi e delle voci dei dedali) e le voci della guida che la descrivono. Con `?partita=` dice se la sua Persona è registrata nel compendio della partita, quali luoghi sono ancora raggiungibili e dove si cattura ancora (`raggiungibilita`, R8-15b: un Palazzo concluso è sparito dopo il furto; Iweleth e i Memento non spariscono mai).',
     risposta: '`OmbraDettaglioDto`',
     errori: [[404, 'ombra-non-trovata'], PARTITA_NON_TROVATA],
   },

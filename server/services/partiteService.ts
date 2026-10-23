@@ -6,6 +6,7 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { partitaNonTrovata } from './verificaPartita.js';
 import { assicuraNonDelGruppo } from './personeDelGruppo.js';
+import { verificaCatturaDaIncontro } from './catturePersona.js';
 import { CHIAVI_STATISTICHE, origineStima, statisticheStimate, type Osservazione, type Statistiche } from '../../shared/statistiche.js';
 import { t } from './traduzioniService.js';
 import { skillDto, skillRiassunti } from './compendioService.js';
@@ -582,16 +583,18 @@ export function registraPersona(partitaId: number, personaId: number, opz: { ist
  * la riga; registrare passa da `registraPersona` (solo il livello, senza bonus né skill, e senza toccare una registrazione che c'è
  * già). Restituisce il compendio aggiornato.
  */
-export function aggiornaCompendio(partitaId: number, personaId: number, dati: { registrata: boolean; livelloRegistrato?: number | null }): CompendioPartitaDto[] {
+export function aggiornaCompendio(partitaId: number, personaId: number, dati: { registrata: boolean; livelloRegistrato?: number | null; ombra?: string }): CompendioPartitaDto[] {
   rigaPartita(partitaId);
   if (!prepared('SELECT 1 FROM persona WHERE id = ?').get(personaId)) throw httpErrors.notFound('persona-non-trovata', `La Persona ${personaId} non esiste.`);
   assicuraNonDelGruppo(personaId);
+  // L8 (R8-12/13): il gesto che viene da un incontro (Palazzo, dedalo, Battaglia, pagina Ombra) vale solo per un'Ombra catturabile di quella Persona
+  if (dati.registrata && dati.ombra !== undefined) verificaCatturaDaIncontro(dati.ombra, personaId);
   return getDb().transaction(() => {
     if (!dati.registrata) {
       prepared('DELETE FROM compendio_partita WHERE partita_id = ? AND persona_id = ?').run(partitaId, personaId);
     } else {
-      // Registrazione manuale (senza esemplare in scorta): livello, senza bonus né skill (l'evocazione usa le innate).
-      registraPersona(partitaId, personaId, { livello: dati.livelloRegistrato ?? null });
+      // Registrazione manuale o cattura da un incontro (senza esemplare in scorta): livello, senza bonus né skill (l'evocazione usa le innate).
+      registraPersona(partitaId, personaId, { livello: dati.livelloRegistrato ?? null, ...(dati.ombra !== undefined ? { dati: { ombra: dati.ombra } } : {}) });
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
     return compendioPartita(partitaId);

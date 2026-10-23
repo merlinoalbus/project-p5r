@@ -68,6 +68,8 @@ export const bodyRequisito = z.object({ rango: z.number().min(1).max(10), indice
 export const bodyCompendio = z.object({
   registrata: z.boolean(),
   livelloRegistrato: livello.nullable().optional(),
+  /** L8: la registrazione viene da un incontro con quest'Ombra (Palazzo, dedalo, Battaglia, pagina Ombra): il server controlla che sia catturabile. */
+  ombra: z.string().min(1).max(160).optional(),
 });
 
 const bonusStatistiche = z.object({

@@ -72,7 +72,7 @@ export interface StatoDisponibilita extends StatoPartitaSemafori {
    *  uno stato a mano (test): senza, nessuna voce è segnata. */
   vociSegnate?: Set<string>;
   /** Le voci citate dalle condizioni già lette in questa richiesta (chiave → voce, null se non c'è), come `pinCitati`. */
-  vociCitate?: Map<string, { nome: string; tipo: string; area_dedalo_chiave: string | null; persona_dei_memento: number } | null>;
+  vociCitate?: Map<string, { nome: string; tipo: string; area_dedalo_chiave: string | null; di_cattura: number } | null>;
   /** L6: gli inviti dei Confidenti (`confidente_invito`), letti la prima volta che una condizione li chiede. */
   inviti?: RigaInvito[];
   /** L6: gli esiti dei posti già valutati in questa richiesta («quartiere:harajuku», «luogo:harajuku/takenoko-street») e quelli in corso

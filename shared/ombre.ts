@@ -28,6 +28,25 @@ export interface OmbraLuogoDto {
   fonti: Array<'battaglia' | 'voce' | 'dedalo' | 'utente'>;
   /** Il link alla guida del posto. */
   casa: string;
+  /**
+   * Con una partita: l'incontro è ancora raggiungibile? Falso solo per un Palazzo concluso (L4 R4-22, G-026: dopo il furto sparisce);
+   * i Memento e i dedali, Iweleth compreso, restano sempre raggiungibili. Null senza partita.
+   */
+  raggiungibile: boolean | null;
+  /** Il perché di un incontro non più raggiungibile («Tesoro e boss finale»). */
+  motivoNonRaggiungibile?: string;
+}
+
+/** Un'affinità che non è «normale» (resiste, annulla, riflette, assorbe) di un'Ombra. */
+export interface OmbraResistenzaDto { elemento: string; codice: string }
+
+/** Se e dove un'Ombra si cattura ancora in una partita (R8-15b, G-026). */
+export interface OmbraRaggiungibilitaDto {
+  /** `si` = c'è un incontro raggiungibile; `no` = tutti gli incontri sono in Palazzi conclusi e la Persona non si ottiene altrimenti; `solo-fusione` = come `no`, ma la Persona è fondibile;
+   *  `ignoto` = la guida non dice dove si incontra; `non-catturabile` = l'incontro non espone la cattura (Babau/Bugs, non reclutabili). */
+  stato: 'si' | 'no' | 'solo-fusione' | 'ignoto' | 'non-catturabile';
+  /** La frase da mostrare. */
+  testo: string;
 }
 
 /** Un'Ombra in elenco. */
@@ -50,6 +69,14 @@ export interface OmbraSchedaDto {
   livello: number | null;
   origine: 'seed' | 'utente';
   casa: string;
+  /** Le chiavi degli elementi a cui è debole: le affinità della Persona con sopra le differenze dell'Ombra (R8-08); vuoto se non se ne conoscono. */
+  debolezze: string[];
+  /** Le altre affinità non normali (resiste, annulla, riflette, assorbe), nello stesso ordine degli elementi. */
+  resistenze: OmbraResistenzaDto[];
+  /** Dove si incontra: una sola fonte (R8-05), uniti per posto. */
+  luoghi: OmbraLuogoDto[];
+  /** La Persona è registrata nel compendio della partita (null senza partita o senza Persona). */
+  registrata: boolean | null;
 }
 
 /** La scheda di un'Ombra. */
@@ -58,12 +85,11 @@ export interface OmbraDettaglioDto extends OmbraSchedaDto {
   affinita: Array<AffinitaDto & { proprie: boolean }>;
   /** Vero se l'Ombra ha affinità proprie (eccezione o non reclutabile). */
   affinitaProprie: boolean;
-  luoghi: OmbraLuogoDto[];
+  /** Con una partita e una Persona catturabile: dove si cattura ancora; null altrimenti. */
+  raggiungibilita: OmbraRaggiungibilitaDto | null;
   /** Le voci Persona della guida che la descrivono. */
   voci: Array<{ chiave: string; nome: string; dungeon: string; infiltrazione: string }>;
   note: string;
-  /** La Persona è registrata nel compendio della partita (null senza partita o senza Persona). */
-  registrata: boolean | null;
 }
 
 /** Il rapporto della migrazione che ha creato le Ombre: conteggi e elenco di ciò che richiede una decisione. */
