@@ -139,7 +139,6 @@ export function eliminaNelCestino(tipo: 'luogo' | 'negozio', chiave: string, con
       prepared('UPDATE attivita SET sede_chiave = NULL WHERE sede_chiave = ?').run(chiave);
       prepared("DELETE FROM mappa_entita WHERE entita_tipo = 'luogo' AND entita_chiave = ?").run(chiave);
       prepared("UPDATE mappa SET entita_tipo = NULL, entita_chiave = NULL WHERE entita_tipo = 'luogo' AND entita_chiave = ?").run(chiave);
-      prepared('DELETE FROM marcatore_luogo WHERE luogo_chiave = ?').run(chiave);
       prepared('DELETE FROM luogo WHERE chiave = ?').run(chiave);
     } else {
       const articoli = negozi.flatMap(k => (prepared('SELECT chiave FROM main.articolo WHERE negozio_chiave=?').all(k) as Array<{ chiave: string }>).map(a => a.chiave));

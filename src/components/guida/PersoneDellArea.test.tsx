@@ -15,7 +15,7 @@ vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
 /** Una voce Persona del dedalo che si incontra nell'area «Banchina». */
 const voce = (chiave: string, nome: string, persona: PuntoInteresseDto['persona'], extra: Partial<PuntoInteresseDto> = {}): PuntoInteresseDto => ({
-  chiave, ordine: 0, tipo: 'persona', nome, descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null, areaDedalo: null, persona, areeDedalo: ['q-1'], ...extra,
+  chiave, ordine: 0, tipo: 'persona', nome, descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, pin: [], contenitore: null, areaDedalo: null, persona, areeDedalo: ['q-1'], ...extra,
 });
 const pixie = voce('q/4', 'Ragazza seducente', { id: 7, nome: 'Pixie', nomeIt: 'Pixie' }, { dettagli: { maschera: 'Pixie', deboleA: 'Ghiaccio, Vento' }, descrizione: 'Ombra presente nel Dedalo.' });
 const bicorno = voce('q/5', 'Bestia bicorne', { id: 9, nome: 'Bicorn', nomeIt: 'Bicorno' }, { dettagli: { maschera: 'Bicorno', deboleA: '-' } });

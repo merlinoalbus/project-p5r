@@ -19,7 +19,7 @@ const compendio = [persona(7, 'Pixie', 'Pixie'), persona(9, 'Bicorn', 'Bicorno')
 /** La voce «Ragazza seducente» (Pixie) dell'area «Banchina», con i dettagli dell'Ombra. */
 const voce: PuntoInteresseDto = {
   chiave: 'q/4', ordine: 4, tipo: 'persona', nome: 'Ragazza seducente', descrizione: 'Ombra del dedalo', esauribile: false, dettagli: { maschera: 'Pixie', deboleA: 'Ghiaccio' }, fonte: '',
-  stato: null, marcatore: null, pin: [], contenitore: null, areaDedalo: null, persona: { id: 7, nome: 'Pixie', nomeIt: 'Pixie' }, areeDedalo: ['q-1'],
+  stato: null, pin: [], contenitore: null, areaDedalo: null, persona: { id: 7, nome: 'Pixie', nomeIt: 'Pixie' }, areeDedalo: ['q-1'],
 };
 const aree = [{ chiave: 'q-1', nome: 'Banchina' }, { chiave: 'q-2', nome: 'Treno' }, { chiave: 'q-3', nome: 'Binari' }];
 

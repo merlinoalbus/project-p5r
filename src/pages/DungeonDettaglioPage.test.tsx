@@ -80,7 +80,7 @@ const palazzo = (partita: boolean): DungeonDettaglioDto => ({
   aree: [
     area({ mappe: [{ chiave: 'm-cancello', nome: 'Palazzo di Kamoshida › Cancello', n: 2, presi: partita ? 1 : null, spilli: [spillo(1, partita ? true : null), spillo(2, partita ? false : null)], area: 'dungeon/kamoshida/cancello' }],
       areePalazzo: [{ chiave: 'dungeon/kamoshida/cancello', slug: 'cancello', nome: 'Cancello', planimetriaIniziale: 'm-cancello' }],
-      punti: [{ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null, areaDedalo: null, persona: null, areeDedalo: [] }] }),
+      punti: [{ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, pin: [], contenitore: null, areaDedalo: null, persona: null, areeDedalo: [] }] }),
     area({ chiave: 'k-02', ordine: 1, nome: 'Torre', punti: [], areePalazzo: [] }),
     area({ chiave: 'k-03', ordine: 2, nome: 'Cortile', mappe: [{ chiave: 'm-cortile', nome: 'Palazzo di Kamoshida › Cortile', n: 0, presi: partita ? 0 : null, spilli: [], area: 'dungeon/kamoshida/cortile' }],
       areePalazzo: [{ chiave: 'dungeon/kamoshida/cortile', slug: 'cortile', nome: 'Cortile', planimetriaIniziale: 'm-cortile' }] }),
@@ -116,9 +116,9 @@ const mementos = (): DungeonDettaglioDto => ({
   ...palazzo(true), chiave: 'mementos', tipo: 'mementos', nome: 'Memento', raccolta: { totale: 10, presi: 1, mappe: 2, mappeComplete: 1 }, planimetrie: [],
   aree: [
     area({ chiave: 'mementos-02-aiyatsbus', nome: 'Dedalo di Aiyatsbus', dedalo: { aree: [areaDedalo({ chiave: 'aiy-1', timbri: { totale: 8, raccolti: 1 }, richieste: [{ chiave: 'bulli', nome: 'Bullismo sui bulli', stato: null }], elementi: { totale: 10, fatti: 1 }, completata: false })], daCollocare: [], obiettivi: { totale: 10, fatti: 1 }, completato: false },
-      punti: [{ chiave: 'p2', ordine: 0, tipo: 'trama', nome: 'Jose alla banchina', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null, areaDedalo: 'aiy-1', persona: null, areeDedalo: [] },
+      punti: [{ chiave: 'p2', ordine: 0, tipo: 'trama', nome: 'Jose alla banchina', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: null, pin: [], contenitore: null, areaDedalo: 'aiy-1', persona: null, areeDedalo: [] },
         // una Persona: in cima all'area, fuori dal conto (2026-10-11)
-        { chiave: 'p3', ordine: 1, tipo: 'persona', nome: 'Ragazza seducente', descrizione: '', esauribile: false, dettagli: { maschera: 'Pixie', deboleA: 'Ghiaccio' }, fonte: '', stato: null, marcatore: null, pin: [], contenitore: null, areaDedalo: null, persona: { id: 7, nome: 'Pixie', nomeIt: 'Pixie' }, areeDedalo: ['aiy-1'] }] }),
+        { chiave: 'p3', ordine: 1, tipo: 'persona', nome: 'Ragazza seducente', descrizione: '', esauribile: false, dettagli: { maschera: 'Pixie', deboleA: 'Ghiaccio' }, fonte: '', stato: null, pin: [], contenitore: null, areaDedalo: null, persona: { id: 7, nome: 'Pixie', nomeIt: 'Pixie' }, areeDedalo: ['aiy-1'] }] }),
     area({ chiave: 'mementos-01-qimranut', ordine: 1, nome: 'Dedalo di Qimranut', dedalo: { aree: [areaDedalo({ chiave: 'qim-1' })], daCollocare: [], obiettivi: { totale: 0, fatti: 0 }, completato: true } }),
   ],
 });
@@ -168,7 +168,7 @@ it('in un Palazzo la colonna elenca i collezionabili delle planimetrie e «Racco
   // una sicura senza pin è una voce «da collegare»
   expect(screen.getByText(/Guida dell’infiltrazione · 1 voce · 1 da collegare/)).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: /Sicura del cancello/ }));
-  impostaStatoPunto.mockResolvedValue({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', marcatore: null, pin: [] });
+  impostaStatoPunto.mockResolvedValue({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', pin: [] });
   fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' }));
   await waitFor(() => expect(impostaStatoPunto).toHaveBeenCalledWith(4, 'p1', 'ottenuto'));
   // un punto della guida può contare sulle planimetrie: la raccolta si rilegge dal server (terza lettura: la seconda è dopo il raccolto)
@@ -186,7 +186,7 @@ it('due riletture sovrapposte: la risposta vecchia che arriva dopo non sovrascri
   let risolviVecchia: (v: DungeonDettaglioDto) => void = () => {};
   getDungeon.mockResolvedValueOnce(palazzo(true)).mockImplementationOnce(() => new Promise<DungeonDettaglioDto>((r) => { risolviVecchia = r; })).mockResolvedValueOnce(dopo);
   impostaSpilloRaccolto.mockResolvedValue({});
-  impostaStatoPunto.mockResolvedValue({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', marcatore: null, pin: [], contenitore: null, areaDedalo: null });
+  impostaStatoPunto.mockResolvedValue({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', pin: [], contenitore: null, areaDedalo: null });
   monta('kamoshida');
   const colonna = await screen.findByRole('complementary', { name: 'Da raccogliere in Cancello' });
   fireEvent.click(within(colonna).getByRole('checkbox', { name: 'Forziere 2 di Cancello aperto' }));
@@ -474,7 +474,7 @@ describe('DungeonDettaglioPage — due gesti ravvicinati (B3")', () => {
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' })); }); // in volo
     await act(async () => { fireEvent.click(colonna.getByRole('checkbox', { name: 'Forziere 2 di Cancello aperto' })); }); // arriva subito
     expect(anello('Palazzo di Kamoshida')).toHaveAttribute('aria-valuenow', '50');
-    await act(async () => { rispondiStato({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', marcatore: null, pin: [], contenitore: null, areaDedalo: null }); });
+    await act(async () => { rispondiStato({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', pin: [], contenitore: null, areaDedalo: null }); });
     expect(anello('Palazzo di Kamoshida')).toHaveAttribute('aria-valuenow', '50');
     expect(screen.getByRole('button', { name: 'Anche le segnate (1)' })).toBeInTheDocument();
   });
@@ -483,7 +483,7 @@ describe('DungeonDettaglioPage — due gesti ravvicinati (B3")', () => {
     getDungeon.mockResolvedValueOnce(palazzo(true)).mockImplementation(() => new Promise(() => {}));
     let rispondiRaccolto!: (v: unknown) => void;
     impostaSpilloRaccolto.mockImplementation(() => new Promise((ok) => { rispondiRaccolto = ok; }));
-    impostaStatoPunto.mockResolvedValue({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', marcatore: null, pin: [], contenitore: null, areaDedalo: null });
+    impostaStatoPunto.mockResolvedValue({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', pin: [], contenitore: null, areaDedalo: null });
     monta('kamoshida');
     const colonna = within(await screen.findByRole('complementary', { name: 'Da raccogliere in Cancello' }));
     await act(async () => { fireEvent.click(colonna.getByRole('checkbox', { name: 'Forziere 2 di Cancello aperto' })); }); // in volo
@@ -928,7 +928,7 @@ it('dopo «Ottenuto» la scheda dice le altre voci segnate dal gesto («Segnate 
   getDungeon.mockResolvedValue(palazzo(true));
   monta('kamoshida');
   fireEvent.click(await screen.findByRole('button', { name: /Sicura del cancello/ }));
-  impostaStatoPunto.mockResolvedValue({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', marcatore: null, pin: [],
+  impostaStatoPunto.mockResolvedValue({ chiave: 'p1', ordine: 0, tipo: 'sicura', nome: 'Sicura del cancello', descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato: 'ottenuto', pin: [],
     effetti: { segnate: [{ chiave: 'k3-sicura', nome: 'Sicura del cortile', infiltrazione: { chiave: 'k-03', nome: 'Cortile' } }], riaperte: [] } });
   fireEvent.click(screen.getByRole('button', { name: 'Ottenuto' }));
   await waitFor(() => expect(notifica).toHaveBeenCalledWith('info', 'Segnate anche: Sicura del cortile — 3ª infiltrazione.'));
@@ -1340,7 +1340,7 @@ const palazzoConPiuAree = (): DungeonDettaglioDto => {
 
 /** Una voce della guida con lo stato dato, nell'area indicata (per la spunta delle aree completate). */
 const voceGuida = (chiave: string, tipo: PuntoInteresseDto['tipo'], stato: PuntoInteresseDto['stato']): PuntoInteresseDto =>
-  ({ chiave, ordine: 0, tipo, nome: chiave, descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato, marcatore: null, pin: [], contenitore: null, areaDedalo: null, persona: null, areeDedalo: [] });
+  ({ chiave, ordine: 0, tipo, nome: chiave, descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato, pin: [], contenitore: null, areaDedalo: null, persona: null, areeDedalo: [] });
 
 describe('spunta delle aree completate (scelta dell’utente, 2026-10-04)', () => {
   /** Il Palazzo con più aree, con le voci date per area (le altre restano come sono). */

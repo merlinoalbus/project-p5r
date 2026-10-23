@@ -21,7 +21,7 @@ vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
 
 /** Una voce della guida nell'area del dedalo data. */
 const voce = (chiave: string, nome: string, areaDedalo: string, stato: PuntoInteresseDto['stato'] = null): PuntoInteresseDto => ({
-  chiave, ordine: 0, tipo: 'trama', nome, descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato, marcatore: null, pin: [], contenitore: null, areaDedalo, persona: null, areeDedalo: [],
+  chiave, ordine: 0, tipo: 'trama', nome, descrizione: '', esauribile: false, dettagli: {}, fonte: '', stato, pin: [], contenitore: null, areaDedalo, persona: null, areeDedalo: [],
 });
 /** Una voce Persona del dedalo, nelle aree date. */
 const persona = (chiave: string, id: number, nome: string, aree: string[]): PuntoInteresseDto => ({

@@ -117,7 +117,7 @@ export function dettaglioQuartiere(chiave: string, partitaId?: number): Quartier
   const q = prepared('SELECT * FROM quartiere WHERE chiave = ?').get(chiave) as RigaQuartiere | undefined;
   if (!q) throw httpErrors.notFound('quartiere-non-trovato', `Il quartiere '${chiave}' non esiste.`);
   // L5: il luogo è la fonte (orari, presenza, area, pin) con le letture e il DTO unici di `luoghiService`; con la partita ogni luogo sa se, a
-  // quel punto del gioco, esiste già ed è aperto. `marcatore_luogo` non si legge più (i pin coprono le posizioni, R5-19).
+  // quel punto del gioco, esiste già ed è aperto. Le posizioni dei luoghi sono i loro pin (R5-19; i vecchi segnaposto sono archiviati, L11).
   const letture = lettureLuoghi(partitaId);
   const luoghi = luoghiDelQuartiere(chiave, letture);
   const p = prepared('SELECT * FROM pianta_quartiere WHERE quartiere_chiave = ?').get(chiave) as RigaPiantaQ | undefined;

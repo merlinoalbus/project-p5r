@@ -85,19 +85,16 @@ export function contenutiMappa(chiave: string, partitaId?:number): ContenutiMapp
 
 /**
  * L4 (§2.3): le voci di un'infiltrazione di un Palazzo come punti dei contenuti della guida — tutte, nell'ordine della guida, con i passi
- * degli Enigmi sotto il loro Enigma; con lo stato con cui risultano nella partita, il carattere e, per una voce senza pin che ha
- * assorbito una scheda senza mappa, la posizione di quella («da collocare», `marcatore_mappa`).
+ * degli Enigmi sotto il loro Enigma; con lo stato con cui risultano nella partita e il carattere.
  */
 function vociDelPalazzo(infiltrazione: string, a: { m: ModelloAvanzamento; s: StatiDellaPartita | null }): PuntoGuidaMappaDto[] {
-  const voci = prepared(`SELECT p.chiave, p.nome, p.descrizione, p.tipo, p.esauribile, mm.x, mm.y,
-      EXISTS(SELECT 1 FROM spillo_voce sv JOIN spillo s ON s.id = sv.spillo_id WHERE sv.voce_chiave = p.chiave AND s.mappa_chiave IS NOT NULL) AS con_pin
-    FROM punto_interesse p LEFT JOIN marcatore_mappa mm ON mm.punto_chiave = p.chiave WHERE p.area_chiave = ? ORDER BY p.ordine, p.chiave`).all(infiltrazione) as Array<{ chiave: string; nome: string; descrizione: string; tipo: string; esauribile: number; x: number | null; y: number | null; con_pin: number }>;
+  const voci = prepared('SELECT p.chiave, p.nome, p.descrizione, p.tipo, p.esauribile FROM punto_interesse p WHERE p.area_chiave = ? ORDER BY p.ordine, p.chiave')
+    .all(infiltrazione) as Array<{ chiave: string; nome: string; descrizione: string; tipo: string; esauribile: number }>;
   return conPassiDentro(voci.map((p): PuntoGuidaMappaDto => ({
     id: 'punto:' + p.chiave, nome: p.nome, descrizione: p.descrizione, tipo: p.tipo, riferimento: { tipo: 'punto', chiave: p.chiave },
     collezionabile: p.esauribile === 1 && categoriaSpillo(spilloPerPunto(p.tipo)) === 'consumabile', soloPosizione: false, ruolo: 'punto',
     ...(a.s ? { stato: statoDellaVoce(a.m, a.s, p.chiave) } : {}),
     carattere: a.m.voci.get(p.chiave)?.carattere ?? null, esauribile: p.esauribile === 1,
-    posizioneDaCollocare: p.con_pin === 0 && p.x !== null && p.y !== null ? { x: p.x, y: p.y } : null,
   })));
 }
 

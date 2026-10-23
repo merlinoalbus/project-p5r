@@ -1832,8 +1832,6 @@ export interface LuogoDto {
   note: string | null;
   /** false = dato da fonte secondaria, non confermato sulla guida italiana. */
   verificato: boolean;
-  /** Posizione dello spillo sulla mappa del quartiere (percentuali), se fissato. */
-  marcatore: { x: number; y: number } | null;
   /** La regola di **presenza** del luogo, quando ce n'è una scritta in `dati_guida` (voce `sblocco-luoghi`).
    *
    * `sblocco` qui sopra è la prosa della guida — «lettura del libro “Shitamachi rinato”» — e
@@ -2260,8 +2258,6 @@ export interface PuntoInteresseDto {
   fonte: string;
   /** Stato nella partita (null = da gestire o senza partita). */
   stato: StatoPunto | null;
-  /** Posizione dello spillo sulla mappa dell'area (percentuali), se fissato. */
-  marcatore: { x: number; y: number } | null;
   /** I pin delle planimetrie collegati al punto (2026-10-01): lo stato del punto è il loro. Vuoto = non collegato. */
   pin: PinDelPuntoDto[];
   /** L'Enigma di cui la voce è un passo (095), o null. I passi stanno nella stessa area, ordinati fra loro; l'Enigma che ne ha

@@ -22,7 +22,7 @@ import { illustrazioneDellaMappa } from './mappe/immagineMappa.js';
 import { completamentoDegliOggetti, contaOggetti, effettiDelGestoDto, modelloAvanzamento, oggettiDelleMappe, oggettiDelleVoci, pinFattoPerLaVoce, riallineaStati, type SegniAggiunti, statiDellaPartita, statoDelPin, statoDellaVoce, voceDelGestoDto, vociCheCondividonoIPin, vociDellInfiltrazione, type ModelloAvanzamento, type StatiDellaPartita } from './mappe/statiGuida.js';
 import { infiltrazioneCompletata } from '../../shared/completamentoGuida.js';
 import { carattereDaTipo, type CarattereVoce } from '../../shared/caratteriVoce.js';
-import type { AreaDedaloDto, AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, GruppoCopieDto, GuidaDellaPlanimetriaDto, PinDelPuntoDto, PlanimetriaDellaVoceDto, SchedaDaSistemareDto, PuntiCopiatiDto, PuntiSpostatiDto, PuntoInteresseDto, RichiestaDelDedaloDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta, VoceCollegabileDto } from '../../shared/types.js';
+import type { AreaDedaloDto, ArchivioDelPalazzoDto, AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, GruppoCopieDto, GuidaDellaPlanimetriaDto, PinDelPuntoDto, PlanimetriaDellaVoceDto, SchedaDaSistemareDto, PuntiCopiatiDto, PuntiSpostatiDto, PuntoInteresseDto, RichiestaDelDedaloDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta, VoceCollegabileDto } from '../../shared/types.js';
 import { contoAreaDedalo, contoDedalo, tipoDelDedalo } from '../../shared/dedali.js';
 import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
 import { DEFINIZIONI_SPILLO, puntoDescrittivo, puntoEnigma, sqlVoceDescrittiva, type TipoSpillo } from '../../shared/spilli.js';
@@ -65,7 +65,7 @@ function planimetriaDto(pl: PlanimetrieDelleVoci, voce: string): PlanimetriaDell
  * volta, per una voce sola lo si costruisce qui. Con `avanzamento` (le voci dei Palazzi, L4 §3.1) porta anche carattere, oggetto
  * e «da verificare»; le voci dei dedali dei Memento restano come prima (R4-30).
  */
-function puntoDto(r: RigaPunto, stato: StatoPunto | null, marcatore: { x: number; y: number } | null, pin: PinDelPuntoDto[], letture?: { maschere: IndiceMaschere; areePersone: Map<string, string[]>; contenuti?: ReturnType<typeof contenutiDelleVoci>; cattura?: ReadonlyMap<string, VoceDiCattura> }, avanzamento?: AvanzamentoVoce): PuntoInteresseDto {
+function puntoDto(r: RigaPunto, stato: StatoPunto | null, pin: PinDelPuntoDto[], letture?: { maschere: IndiceMaschere; areePersone: Map<string, string[]>; contenuti?: ReturnType<typeof contenutiDelleVoci>; cattura?: ReadonlyMap<string, VoceDiCattura> }, avanzamento?: AvanzamentoVoce): PuntoInteresseDto {
   const dettagli = JSON.parse(r.dettagli_json) as Record<string, unknown>;
   // L8 (B6): la Persona di una voce da catturare è quella della sua maschera, altrimenti quella della sua Ombra (le voci dei Palazzi non hanno maschera)
   const idx = letture?.maschere ?? indiceMaschere();
@@ -73,7 +73,7 @@ function puntoDto(r: RigaPunto, stato: StatoPunto | null, marcatore: { x: number
   const persona = r.tipo === 'persona' ? cattura?.persona ?? personaDellaMaschera(idx, dettagli.maschera) : null;
   const areeDedalo = r.tipo === 'persona' ? (letture?.areePersone ?? areeDellePersone(r.chiave)).get(r.chiave) ?? [] : [];
   const contenuto = (letture?.contenuti ?? contenutiDelleVoci([r.chiave])).get(r.chiave) ?? [];
-  const base: PuntoInteresseDto = { chiave: r.chiave, ordine: r.ordine, tipo: r.tipo, nome: r.nome, descrizione: r.descrizione, esauribile: r.esauribile === 1, dettagli, contenuto, fonte: r.fonte, stato, marcatore, pin, contenitore: r.contenitore_chiave ?? null, areaDedalo: r.area_dedalo_chiave ?? null, persona, areeDedalo,
+  const base: PuntoInteresseDto = { chiave: r.chiave, ordine: r.ordine, tipo: r.tipo, nome: r.nome, descrizione: r.descrizione, esauribile: r.esauribile === 1, dettagli, contenuto, fonte: r.fonte, stato, pin, contenitore: r.contenitore_chiave ?? null, areaDedalo: r.area_dedalo_chiave ?? null, persona, areeDedalo,
     ...(cattura?.ombra ? { ombra: cattura.ombra } : {}) };
   if (!avanzamento || r.area_dedalo_chiave) return base;
   const { m, s } = avanzamento;
@@ -108,6 +108,28 @@ function areeDellePersone(voce?: string): Map<string, string[]> {
   return m;
 }
 
+/**
+ * L8 (B7, R8-16): gli archivi dei «Palazzi» confluiti in un dedalo dei Memento (oggi Iweleth), per la chiave del dedalo: le planimetrie del Palazzo
+ * per l'area del dedalo a cui appartengono (`mappa_dedalo`) e quante voci sono diventate Trama o punteggiano la voce del dedalo (`voce_confluenza`).
+ * Vuoto su uno schema senza la 175.
+ */
+const tabellaConfluenza = (): boolean => !!prepared("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = 'dedalo_confluenza'").get();
+
+function archiviDeiDedali(): Map<string, ArchivioDelPalazzoDto> {
+  const out = new Map<string, ArchivioDelPalazzoDto>();
+  if (!tabellaConfluenza()) return out;
+  for (const c of prepared('SELECT c.dungeon_chiave, c.dedalo_chiave, d.nome FROM dedalo_confluenza c JOIN dungeon d ON d.chiave = c.dungeon_chiave').all() as Array<{ dungeon_chiave: string; dedalo_chiave: string; nome: string }>) {
+    const mappe = prepared(`SELECT m.mappa_chiave, m.area_dedalo_chiave, m.nota, ad.nome AS area_nome FROM mappa_dedalo m JOIN mappa x ON x.chiave = m.mappa_chiave
+      LEFT JOIN area_dedalo ad ON ad.chiave = m.area_dedalo_chiave ORDER BY COALESCE(ad.ordine, 9999), m.mappa_chiave`).all() as Array<{ mappa_chiave: string; area_dedalo_chiave: string | null; nota: string; area_nome: string | null }>;
+    const voci = prepared("SELECT COALESCE(SUM(azione = 'convertita'), 0) AS convertite, COALESCE(SUM(azione = 'doppia'), 0) AS doppie FROM voce_confluenza").get() as { convertite: number; doppie: number };
+    out.set(c.dedalo_chiave, {
+      dungeon: c.dungeon_chiave, nome: c.nome, voci,
+      planimetrie: mappe.map((m) => ({ chiave: chiaveMappa(m.mappa_chiave), nome: nomePercorso(m.mappa_chiave), areaDedalo: m.area_dedalo_chiave, areaNome: m.area_nome, nota: m.nota })),
+    });
+  }
+  return out;
+}
+
 /** Lo stato di ogni punto della guida segnato dalla partita (chiave → stato); vuota senza partita, 404 se la partita non esiste. */
 function statiPartita(partitaId: number | undefined): Map<string, StatoPunto> {
   if (partitaId === undefined) return new Map();
@@ -128,11 +150,6 @@ function pinDeiPunti(punto?: string): Map<string, PinDelPuntoDto[]> {
     out.set(r.voce, elenco);
   }
   return out;
-}
-
-/** Le posizioni dei marcatori dei punti della guida sulla mappa (`marcatore_mappa`): chiave del punto → coordinate. */
-function marcatori(): Map<string, { x: number; y: number }> {
-  return new Map((prepared('SELECT punto_chiave, x, y FROM marcatore_mappa').all() as Array<{ punto_chiave: string; x: number; y: number }>).map((r) => [r.punto_chiave, { x: r.x, y: r.y }]));
 }
 
 /**
@@ -372,14 +389,13 @@ function planimetrieDelPalazzo(dungeonChiave: string, raccolta: RaccoltaDungeon,
 
 /**
  * La scheda completa di un Palazzo o dei Memento (404 se non esiste): riassunto, note e fonti, aree con le loro planimetrie
- * native e i collezionabili raccolti, punti della guida con stato, marcatore e pin collegati; per i Memento il dedalo di ogni
+ * native e i collezionabili raccolti, punti della guida con stato e pin collegati; per i Memento il dedalo di ogni
  * area (timbri e richieste), per i Palazzi l'elenco delle planimetrie. Le letture comuni si fanno una volta per tutta la scheda.
  */
 export function dettaglioDungeon(chiave: string, partitaId?: number, contesto: string | null = null): DungeonDettaglioDto {
   const r = prepared('SELECT * FROM dungeon WHERE chiave = ?').get(chiave) as RigaDungeon | undefined;
   if (!r) throw httpErrors.notFound('dungeon-non-trovato', `Il dungeon '${chiave}' non esiste.`);
   const stati = statiPartita(partitaId);
-  const marc = marcatori();
   const pinPunti = pinDeiPunti();
   const chiaviContenuti = (prepared('SELECT p.chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = ?').all(chiave) as Array<{ chiave: string }>).map((p) => p.chiave);
   const maschere = indiceMaschere();
@@ -393,6 +409,9 @@ export function dettaglioDungeon(chiave: string, partitaId?: number, contesto: s
   const segni = partitaId === undefined ? undefined : segniPartita(partitaId, contesto, m);
   const raccolta = r.tipo === 'mementos' ? null : raccoltaMappe(chiave, partitaId, segni);
   const dedali = r.tipo === 'mementos' ? lettureDedali(chiave, partitaId, stati) : null;
+  const archivi = r.tipo === 'mementos' ? archiviDeiDedali() : new Map<string, ArchivioDelPalazzoDto>();
+  // L8 (B7): un Palazzo confluito in un dedalo (Iweleth) rimanda al dedalo: la sua scheda è un archivio, non una casa
+  const confluenza = tabellaConfluenza() ? (prepared('SELECT c.dedalo_chiave, a.dungeon_chiave, a.nome FROM dedalo_confluenza c JOIN dungeon_area a ON a.chiave = c.dedalo_chiave WHERE c.dungeon_chiave = ?').get(chiave) as { dedalo_chiave: string; dungeon_chiave: string; nome: string } | undefined) : undefined;
   // lo stato di una Persona da catturare (dedali e Palazzi, L8 R8-12/R8-14) è la sua cattura nel compendio (2026-10-12, `catturePersona.ts`), non `punto_partita`
   const catturate = partitaId !== undefined ? vociPersonaCatturate(partitaId, cattura) : new Set<string>();
   // L3: le Aree toccate da ogni infiltrazione. Solo nei Palazzi: per i Memento i campi nuovi non si emettono e la risposta resta
@@ -413,8 +432,10 @@ export function dettaglioDungeon(chiave: string, partitaId?: number, contesto: s
     }),
     ...(palazzo ? { areePalazzo: (areeToccate.get(a.chiave) ?? []).map((x) => ({ chiave: x.chiave, slug: x.slug, nome: x.nome, planimetriaIniziale: x.planimetriaIniziale ? chiaveMappa(x.planimetriaIniziale) : null })) } : {}),
     punti: (prepared('SELECT * FROM punto_interesse WHERE area_chiave = ? ORDER BY ordine, chiave').all(a.chiave) as RigaPunto[])
-      .map((p) => puntoDto(p, statoDi(p), marc.get(p.chiave) ?? null, pinPunti.get(p.chiave) ?? [], letture, avanzamento)),
+      .map((p) => puntoDto(p, statoDi(p), pinPunti.get(p.chiave) ?? [], letture, avanzamento)),
     dedalo: dedali ? dedaloDto(a.chiave, dedali) : null,
+    // L8 (B7): l'archivio del Palazzo confluito in questo dedalo (Iweleth); assente per gli altri, la loro risposta non cambia
+    ...(archivi.has(a.chiave) ? { archivio: archivi.get(a.chiave) } : {}),
     // L4 (§1.5): l'infiltrazione con la funzione unica (oggetti permanenti delle sue voci; senza niente da contare mai completata)
     ...(palazzo ? { completamento: completamentoInfiltrazione(m, segni?.s ?? null, a.chiave) } : {}),
   }));
@@ -428,6 +449,7 @@ export function dettaglioDungeon(chiave: string, partitaId?: number, contesto: s
   const areePalazzo = palazzo && raccolta ? areeDelPalazzo(chiave, raccolta.perMappa, partitaId !== undefined, { m, s: segni?.s ?? null, oggettiPerMappa }) : null;
   return { ...riassunto(r, stati, partitaId, statoPalazzi(partitaId, m), { raccolta, segni, m }), note: r.note, fonti: JSON.parse(r.fonti_json) as string[], aree, planimetrie, atterraggi: elencaAtterraggi(chiave), personeCatturate,
     illustrazione: illustrazioneDellaMappa(radiceDelPalazzo(chiave)),
+    ...(confluenza ? { confluisceIn: { dungeon: confluenza.dungeon_chiave, dedalo: confluenza.dedalo_chiave, nome: confluenza.nome } } : {}),
     ...(areePalazzo ? { areePalazzo } : {}),
     // L4 (§2.3, §4.3): le schede senza mappa né voce, da sistemare
     ...(palazzo ? { schedeDaSistemare: schedeDaSistemare(chiave) } : {}) };
@@ -449,7 +471,6 @@ export function guidaDellaPlanimetria(chiave: string, partitaId?: number): Guida
   const qui = new Set([...pl.voci.keys()].filter((k) => planimetrieDellaVoce(pl, k).has(mappa)));
   const m = modelloAvanzamento(db);
   const avanzamento: AvanzamentoVoce = { m, s: partitaId === undefined ? null : statiDellaPartita(db, m, partitaId), pl };
-  const marc = marcatori();
   const pinPunti = pinDeiPunti();
   const maschere = indiceMaschere();
   const cattura = vociDiCattura(maschere, [...qui]);
@@ -463,7 +484,7 @@ export function guidaDellaPlanimetria(chiave: string, partitaId?: number): Guida
     if (gruppo?.chiave !== r.area_chiave) infiltrazioni.push(gruppo = { chiave: r.area_chiave, nome: r.infiltrazione_nome, ordine: r.infiltrazione_ordine, voci: [] });
     // una Persona da catturare: lo stato è la cattura nel compendio (L8), come nella scheda del Palazzo
     const stato = puntoDescrittivo(r.tipo, r.area_dedalo_chiave) ? null : cattura.has(r.chiave) ? (catturate.has(r.chiave) ? 'ottenuto' as const : null) : statoL4(avanzamento, r.chiave);
-    gruppo.voci.push(puntoDto(r, stato, marc.get(r.chiave) ?? null, pinPunti.get(r.chiave) ?? [], letture, avanzamento));
+    gruppo.voci.push(puntoDto(r, stato, pinPunti.get(r.chiave) ?? [], letture, avanzamento));
   }
   return { mappa: chiaveMappa(mappa), palazzo: palazzoDellaMappa(mappa), infiltrazioni };
 }
@@ -514,7 +535,7 @@ export function impostaStatoPunto(partitaId: number, puntoChiave: string, stato:
   // L4: per una voce dei Palazzi lo stato con cui risulta adesso (§8.11: dai suoi pin) e i campi di L4, con le altre voci che il gesto
   // ha segnato o riaperto («Segnate anche: …», «Riapre anche: …»)
   const avanzamento = avanzamentoDellaVoce(p, partitaId);
-  const dto = puntoDto(p, avanzamento ? statoL4(avanzamento, puntoChiave) : stato, marcatori().get(puntoChiave) ?? null, pinDeiPunti(puntoChiave).get(puntoChiave) ?? [], undefined, avanzamento);
+  const dto = puntoDto(p, avanzamento ? statoL4(avanzamento, puntoChiave) : stato, pinDeiPunti(puntoChiave).get(puntoChiave) ?? [], undefined, avanzamento);
   return avanzamento ? { ...dto, effetti: effettiDelGestoDto(db, effetti) } : dto;
 }
 
@@ -751,17 +772,11 @@ function eliminaAreaInTransazione(chiaveArea: string, a: RigaArea): void {
 
 /**
  * I riferimenti all'area che vivono dentro testi JSON, dove nessun vincolo li segue (rilievo della revisione):
- * le piante delle altre aree che dicevano di coprirla, le Ombre della Battaglia che ci costruiscono il
+ * le Ombre della Battaglia che ci costruiscono il
  * collegamento «?area=» (con l'area sparita la scheda aprirebbe in silenzio la prima), e la spiegazione
  * delle mappe assenti. Il nome dell'area sulle Ombre resta: è quel che dice la guida.
  */
 function ripulisciRiferimentiTestuali(chiaveArea: string): void {
-  if (tabellaGioco('pianta_area')) {
-    for (const r of prepared("SELECT area_chiave, copre_aree_json FROM pianta_area WHERE copre_aree_json LIKE ?").all(`%"${chiaveArea}"%`) as Array<{ area_chiave: string; copre_aree_json: string }>) {
-      const copre = (JSON.parse(r.copre_aree_json) as string[]).filter((k) => k !== chiaveArea);
-      prepared('UPDATE pianta_area SET copre_aree_json = ? WHERE area_chiave = ?').run(JSON.stringify(copre), r.area_chiave);
-    }
-  }
   if (!tabellaGioco('dati_guida')) return;
   // qui si riscrive `dati_guida`: chi chiama (`eliminaArea`) butta la copia in memoria a transazione chiusa
   const battaglia = prepared("SELECT json FROM dati_guida WHERE chiave = 'battaglia'").get() as { json: string } | undefined;
@@ -964,7 +979,7 @@ function verificaAltraAreaDelPalazzo(p: RigaPunto, dedalo: boolean, contenitore:
 
 /**
  * Quel che segue una voce passata in un'altra area (dentro la transazione di chi chiama): la chiave resta (stati delle partite,
- * pin delle planimetrie, marcatore e condizioni la citano per chiave); i passi di un Enigma la seguono; le schede della guida
+ * pin delle planimetrie e condizioni la citano per chiave); i passi di un Enigma la seguono; le schede della guida
  * senza mappa (pin con il riferimento «punto» alla voce o a un suo passo, nell'area di prima) passano con lei, altrimenti
  * resterebbero nell'area che ha lasciato.
  */
@@ -1226,7 +1241,7 @@ function planimetriaScelta(voce: { nome: string; area_chiave: string; chiave: st
 function leggiPunto(puntoChiave: string): PuntoInteresseDto {
   const r = prepared('SELECT * FROM punto_interesse WHERE chiave = ?').get(puntoChiave) as RigaPunto | undefined;
   if (!r) throw httpErrors.notFound('punto-non-trovato', `Il punto '${puntoChiave}' non esiste.`);
-  return puntoDto(r, null, marcatori().get(puntoChiave) ?? null, pinDeiPunti(puntoChiave).get(puntoChiave) ?? [], undefined, avanzamentoDellaVoce(r, null));
+  return puntoDto(r, null, pinDeiPunti(puntoChiave).get(puntoChiave) ?? [], undefined, avanzamentoDellaVoce(r, null));
 }
 
 /** I campi di L4 per una voce sola (le risposte delle modifiche): solo per le voci dei Palazzi; con la partita, i suoi stati. */
@@ -1412,7 +1427,7 @@ export function creaPunto(chiaveArea: string, dati: DatiPunto & { nome: string; 
 
 /**
  * Quello che un punto della guida lascia nel resto dei dati, tolto prima di lui (dentro la transazione di chi chiama): gli stati
- * delle partite, il marcatore, il «raccolto» degli elementi della guida senza mappa che lo citano; i pin delle planimetrie tengono
+ * delle partite, il «raccolto» degli elementi della guida senza mappa che lo citano; i pin delle planimetrie tengono
  * il loro «raccolto» (lo stato vive nei pin, 2026-10-01) e perdono solo il collegamento — se hanno altre voci (098), seguono
  * quelle. Lo usano `eliminaPunto` ed `eliminaArea`,
  * che prima lo scriveva una seconda volta riga per riga (rilievo R4 della verifica, 2026-10-03).
@@ -1422,7 +1437,6 @@ function staccaPunto(puntoChiave: string): void {
   const mPrima = modelloAvanzamento(getDb());
   prepared('DELETE FROM punto_partita WHERE punto_chiave = ?').run(puntoChiave);
   if (tabellaUtente('divergenza_partita')) prepared('DELETE FROM divergenza_partita WHERE voce_chiave = ?').run(puntoChiave);
-  prepared('DELETE FROM marcatore_mappa WHERE punto_chiave = ?').run(puntoChiave);
   prepared("DELETE FROM spillo_partita WHERE spillo_uid IN (SELECT uid FROM spillo WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ? AND mappa_chiave IS NULL AND uid IS NOT NULL)").run(puntoChiave);
   prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ?").run(puntoChiave);
   // i pin perdono il collegamento a questa voce (le altre restano), e in ogni partita seguono quelle che gli restano (dedali)
@@ -1582,8 +1596,8 @@ function schedaDaSistemare(id: number): RigaScheda {
 }
 
 /**
- * «Collega a una voce»: la scheda diventa la voce data (del suo Palazzo), che la assorbe — la posizione della scheda diventa la posizione
- * da collocare della voce, se non ne ha una. Nessuno stato si trasferisce (R4-12). Restituisce la voce.
+ * «Collega a una voce»: la scheda diventa la voce data (del suo Palazzo), che la assorbe — la posizione resta sulla scheda (il pin
+ * collegato alla voce, L11). Nessuno stato si trasferisce (R4-12). Restituisce la voce.
  */
 export function collegaSchedaAllaVoce(id: number, voce: string): PuntoInteresseDto {
   const s = schedaDaSistemare(id);
@@ -1591,10 +1605,7 @@ export function collegaSchedaAllaVoce(id: number, voce: string): PuntoInteresseD
   if (!v) throw httpErrors.notFound('punto-non-trovato', `La voce '${voce}' non esiste.`);
   const palazzo = (prepared('SELECT dungeon_chiave FROM dungeon_area WHERE chiave = ?').get(s.area_guida_chiave) as { dungeon_chiave: string }).dungeon_chiave;
   if (v.dungeon_chiave !== palazzo) throw httpErrors.badRequest('voce-di-un-altro-palazzo', `La voce non è del Palazzo della scheda «${s.nome}».`);
-  getDb().transaction(() => {
-    prepared("UPDATE spillo SET riferimento_tipo = 'punto', riferimento_chiave = ?, updated_at = ? WHERE id = ?").run(voce, nowIso(), id);
-    prepared("INSERT INTO marcatore_mappa (punto_chiave, x, y, updated_at, origine) VALUES (?, ?, ?, ?, 'utente') ON CONFLICT(punto_chiave) DO NOTHING").run(voce, s.x, s.y, nowIso());
-  })();
+  prepared("UPDATE spillo SET riferimento_tipo = 'punto', riferimento_chiave = ?, updated_at = ? WHERE id = ?").run(voce, nowIso(), id);
   return leggiPunto(voce);
 }
 

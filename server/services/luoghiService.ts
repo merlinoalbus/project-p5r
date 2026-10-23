@@ -161,7 +161,6 @@ export function luogoDto(r: RigaLuogo, l: LettureLuoghi): LuogoDto {
     chiave: r.chiave, ordine: r.ordine, tipo: r.tipo as LuogoDto['tipo'], nome: r.nome, cosaOffre: r.cosa_offre, quando, giorni, giorniTesto: descriviGiorni(giorni), sblocco: r.sblocco,
     confidenti, attivita: l.attivita.get(r.chiave) ?? [], negozi, negozio: negozi[0]?.chiave ?? null, origine: r.origine === 'utente' ? 'utente' : 'seed',
     piatti: r.piatti_json ? (JSON.parse(r.piatti_json) as LuogoDto['piatti']) : null, note: r.note, verificato: r.verificato === 1,
-    marcatore: null,
     condizioni,
     disponibilita: condizioni && l.st ? valutaRequisiti(condizioni as RequisitoDisponibilita[], l.st) : null,
     quartiere: r.quartiere_chiave, quartiereNome: l.nomiQuartieri.get(r.quartiere_chiave) ?? r.quartiere_chiave,
