@@ -19,7 +19,8 @@ import { ElementoChip } from '../components/compendio/ElementoChip';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
 import { RisposteNegoziazione } from '../components/guida/RisposteNegoziazione';
 import { SezioneConFregio } from '../components/shared/FregioSezione';
-import { chiaveElementoDaTesto } from '../utils/elementiGuida';
+import { chiaveElementoDaTesto, nomeCanonicoNelTesto } from '../utils/elementiGuida';
+import { NOME_ELEMENTO } from '../../shared/elementi';
 
 /** Le cinque schede, ognuna con la sua icona.
  *
@@ -54,15 +55,16 @@ function Dati({ children, colonne = 3 }: { children: ReactNode; colonne?: 2 | 3 
   return <div className={`grid gap-1.5 sm:grid-cols-2 ${colonne === 3 ? 'xl:grid-cols-3' : ''}`}>{children}</div>;
 }
 
-/** Debolezza o resistenza della guida: chip dell'elemento con icona se riconosciuto, altrimenti chip testuale (il testo resta quello della guida). */
+/** Debolezza o resistenza della guida: chip dell'elemento con icona se riconosciuto (col nome del vocabolario unico, R8-20c: «Tuono (respinge)» si mostra «Elettricità (Riflette)»), altrimenti chip testuale col testo della guida. */
 function ChipElementoGuida({ testo }: { testo: string }) {
   const chiave = chiaveElementoDaTesto(testo);
-  return chiave ? <ElementoChip elemento={chiave} nome={testo} piccolo /> : <span className="chip">{testo}</span>;
+  return chiave ? <ElementoChip elemento={chiave} nome={nomeCanonicoNelTesto(testo)} piccolo /> : <span className="chip">{testo}</span>;
 }
 
-/** Elemento base di una debolezza/resistenza («Tuono (dimezza)» → «Tuono»). */
+/** Elemento base di una debolezza/resistenza, col nome del vocabolario unico («Tuono (dimezza)» → «Elettricità»); un testo che non è un elemento resta com'è, senza la nota. */
 function elementoBase(v: string): string {
-  return v.replace(/\s*\(.*\)\s*$/, '').trim();
+  const chiave = chiaveElementoDaTesto(v);
+  return chiave ? NOME_ELEMENTO[chiave] : v.replace(/\s*\(.*\)\s*$/, '').trim();
 }
 
 /**

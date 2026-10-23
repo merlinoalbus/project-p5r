@@ -8,12 +8,14 @@
 
 import { normalizzaTesto } from './testo';
 import type { EsitoRisposta, NegoziazioneDomandaDto, TrattoOmbra } from '../types';
+import { NOME_PERSONALITA } from '../../shared/elementi';
 
+/** I nomi delle personalità vengono dal vocabolario unico (`shared/elementi.ts`, R8-20c); qui restano solo i colori. */
 export const TRATTI_OMBRA: Array<{ chiave: TrattoOmbra; nome: string; colore: string }> = [
-  { chiave: 'giocosa', nome: 'Giocosa', colore: '#f5c542' },
-  { chiave: 'timida', nome: 'Timida', colore: '#6fb3ff' },
-  { chiave: 'irritabile', nome: 'Irritabile', colore: '#ff6b57' },
-  { chiave: 'cupa', nome: 'Cupa', colore: '#b48cff' },
+  { chiave: 'giocosa', nome: NOME_PERSONALITA.giocosa, colore: '#f5c542' },
+  { chiave: 'timida', nome: NOME_PERSONALITA.timida, colore: '#6fb3ff' },
+  { chiave: 'irritabile', nome: NOME_PERSONALITA.irritabile, colore: '#ff6b57' },
+  { chiave: 'cupa', nome: NOME_PERSONALITA.cupa, colore: '#b48cff' },
 ];
 
 export const NOME_TRATTO = Object.fromEntries(TRATTI_OMBRA.map((t) => [t.chiave, t.nome])) as Record<TrattoOmbra, string>;

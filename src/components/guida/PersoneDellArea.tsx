@@ -22,6 +22,7 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { ModuloPersona } from './ModuloPersona';
 import { SezioneDellArea } from './SezioneDellArea';
 import type { PuntoInteresseDto } from '../../types';
+import { elencoCanonicoNelTesto } from '../../utils/elementiGuida';
 
 interface Props {
   /** Le voci Persona che si incontrano nell'area, nell'ordine della guida. */
@@ -46,7 +47,7 @@ interface Props {
 /** Le debolezze dell'Ombra scritte dalla guida, se ci sono («-» = nessuna nota). */
 const debolezze = (p: PuntoInteresseDto): string | null => {
   const d = p.dettagli.deboleA;
-  return typeof d === 'string' && d.trim() && d.trim() !== '-' ? d.trim() : null;
+  return typeof d === 'string' && d.trim() && d.trim() !== '-' ? elencoCanonicoNelTesto(d.trim()) : null;
 };
 
 /** Il segno «catturata» nell'angolo della piastrella; la riserva è una spunta su un tondo verde. */

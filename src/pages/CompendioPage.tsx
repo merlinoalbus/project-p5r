@@ -23,18 +23,14 @@ import { chiaviPresenti } from '../components/shared/immaginiCache';
 import { ricordaUltimaPersona, ultimaPersonaVista } from '../utils/ultimaPersona';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
+import { ELEMENTI_AFFINITA, ESITI_AFFINITA } from '../../shared/elementi';
 
 type Ordine = 'livello' | 'nome' | 'arcana';
 type Immagine = '' | 'con' | 'senza';
 
 /** Elementi e codici delle affinità mostrati nei filtri quando il glossario non è ancora disponibile. */
-const ELEMENTI_PREDEFINITI: Array<{ chiave: string; nome: string }> = [
-  { chiave: 'phys', nome: 'Fisico' }, { chiave: 'gun', nome: 'Arma da fuoco' }, { chiave: 'fire', nome: 'Fuoco' }, { chiave: 'ice', nome: 'Ghiaccio' }, { chiave: 'electric', nome: 'Elettricità' },
-  { chiave: 'wind', nome: 'Vento' }, { chiave: 'psy', nome: 'Psichico' }, { chiave: 'nuclear', nome: 'Nucleare' }, { chiave: 'bless', nome: 'Sacro' }, { chiave: 'curse', nome: 'Oscurità' },
-];
-const CODICI_PREDEFINITI: Array<{ chiave: string; nome: string }> = [
-  { chiave: 'wk', nome: 'Debole' }, { chiave: 'rs', nome: 'Resiste' }, { chiave: 'nu', nome: 'Annulla' }, { chiave: 'rp', nome: 'Riflette' }, { chiave: 'ab', nome: 'Assorbe' },
-];
+const ELEMENTI_PREDEFINITI: Array<{ chiave: string; nome: string }> = ELEMENTI_AFFINITA.map((e) => ({ chiave: e.chiave, nome: e.nome }));
+const CODICI_PREDEFINITI: Array<{ chiave: string; nome: string }> = ESITI_AFFINITA.filter((e) => e.codice !== '-').map((e) => ({ chiave: e.codice, nome: e.nome }));
 
 /** Legge un livello da un parametro dell'URL o da un campo: lo accetta solo se è un intero fra 1 e 99, altrimenti restituisce il predefinito. */
 const livelloValido = (v: string | null, predefinito: number): number => {
