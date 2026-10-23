@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { dataGioco, dote, idParam, uidVoce } from './comuni.js';
 import { bodyAnteprimaSessionePesca } from './pesca.js';
 import { ATTIVITA_PESCA, REGOLA_PESCA } from '../../shared/pesca.js';
+import { schemaValutazionePresenza } from '../../shared/valutazioneAcquisto.js';
 
 const uid = z.string().regex(/^[0-9a-f]{32}$/,'Identità non valida.');
 const revisione = z.string().regex(/^[0-9a-f]{64}$/,'Revisione non valida.');
@@ -16,7 +17,7 @@ const fonte = z.discriminatedUnion('tipo',[
 const scelta = z.discriminatedUnion('tipo',[
   z.object({tipo:z.literal('nuova')}).strict(),z.object({tipo:z.literal('collega'),acquistoId:uid}).strict(),
 ]);
-const rapportoLegacy = z.object({tipo:z.enum(['rappresenta','ulteriore']),firma:revisione}).strict().nullable();
+const rapportoLegacy = z.object({tipo:z.enum(['rappresenta','ulteriore']),firma:revisione,valutazione:schemaValutazionePresenza.optional()}).strict().nullable();
 const acquisto = {
   operazioneId:uid,articolo:chiave,momento,variante:dote,fortuna:z.boolean().nullable(),fonte,scelta,rapportoLegacy,
 };

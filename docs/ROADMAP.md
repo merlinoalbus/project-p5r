@@ -1,5 +1,7 @@
 # Roadmap — project-p5r
 
+**23/10 07:32 italiana — L7-TANAKA-STORICO al rilascio:** migrazione030 e bootstrap pre-main, conteggio congelato/generazioni/Cestino/import e consenso con prova completa approvati staticamente; typecheck/lint/build verdi. Punto ancora aperto fino al confronto conservativo e all'osservazione del pubblicato. TANAKA-UNITA già chiuso come preparazione; listino e consenso commerciale invariati. Limite10min revocato dall'utente. L5–L11 restano nel mandato, senza chiusure globali.
+
 Legenda stato: ✅ fatto e validato · 🔄 in corso · ⏳ fatto, in attesa di validazione · ⬜ da fare.
 
 **21/10 21:12Z — A10 locale in implementazione:** fonte pesca, registro/Diario/Progressi/editor scritti; migrazioni138/029 approvate staticamente e registrate, non eseguite. Gate integrato, correzioni backend, controlli finali e rilascio ancora da completare. Ultima consegna389387be/pipeline82; nessuna chiusura anticipata di L5–L7 o di L8–L11.

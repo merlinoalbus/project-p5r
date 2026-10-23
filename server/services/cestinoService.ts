@@ -33,6 +33,7 @@
 
 import { randomBytes } from 'node:crypto';
 import { getDb, nowIso, type AppDatabase } from '../db/dbService.js';
+import { ARCHIVI_LEGACY_IMMUTABILI, verificaArchivioLegacy, verificaCestinoLegacy } from '../db/acquistiLegacy.js';
 import { httpErrors } from '../utils/httpError.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { modelloAvanzamento, riallineaStati } from './mappe/statiGuida.js';
@@ -68,7 +69,7 @@ export interface ElementoCestino { tipo: TipoElementoCestino; chiave: string; no
 export interface ElementoCestinoPrivato { tipo: 'partita' | 'fonte-acquisto'|'fonte-pesca'|'sessione-pesca'|'osservazione-pesca'; chiave: string; nome: string; contesto?: string; partitaId: number }
 
 /** Le tabelle del cestino stesso non si registrano. */
-const ESCLUSE: Record<Schema, ReadonlySet<string>> = { main: new Set(['cestino']), utente: new Set(['cestino_partite']) };
+const ESCLUSE: Record<Schema, ReadonlySet<string>> = { main: new Set(['cestino']), utente: new Set(['cestino_partite', ...ARCHIVI_LEGACY_IMMUTABILI]) };
 
 /** La riga che è l'elemento: se dopo il ripristino non c'è, non si è rimesso niente. */
 const RADICE: Record<TipoElementoCestino, { tabella: string; colonna: string }> = {
@@ -468,6 +469,7 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
 
   db.transaction(() => {
     if (r.tipo === 'pin') verificaRegistroCestinoPin(db, passi, r.chiave);
+    verificaCestinoLegacy(db, passi);
     const partitaIds = new Set<number>(), acquistoIds = new Set<string>(), voceUids = new Set<string>();
     for (const p of passi) for (const lato of [p.prima, p.dopo]) if (lato) {
       if (p.schema === 'utente') {
@@ -673,6 +675,7 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
       throw httpErrors.conflict('cestino-non-ripristinabile', `Non si può rimettere «${r.nome}»: ciò che la conteneva non c'è più.`);
     }
     if (contestoAcquisti) verificaRipristinoAcquisti(contestoAcquisti);
+    verificaArchivioLegacy(db);
     if(r.tipo==='partita'&&r.partitaId!==undefined)riconciliaPescaDopoRipristino(r.partitaId,true);
     if (r.tipo !== 'partita' && r.tipo !== 'pin') for (const partita of partitaIds) {
       if (!db.prepare('SELECT 1 FROM utente.partita WHERE id=?').get(partita)) continue;

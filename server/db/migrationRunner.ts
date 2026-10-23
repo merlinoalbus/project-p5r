@@ -18,6 +18,7 @@ import type { AppDatabase } from './dbService.js';
 import { logger } from '../utils/logger.js';
 import { migrations as allMigrations } from './migrations/index.js';
 import { migrazioniUtente as allUtente } from './migrazioniUtente/index.js';
+import { preparaContinuitaLegacy, verificaArchivioLegacy, type OrigineContinuita } from './acquistiLegacy.js';
 
 /** Contratto minimo di una migrazione SQLite append-only. */
 export interface Migration {
@@ -69,7 +70,15 @@ function applica(db: AppDatabase, schema: 'main' | 'utente', list: Migration[]):
 }
 
 /** Le migrazioni dei dati di gioco (`main`), poi quelle delle partite (`utente`). */
-export function runMigrations(db: AppDatabase, list: Migration[] = allMigrations, listaUtente: Migration[] = allUtente): void {
+export function runMigrations(db: AppDatabase, list: Migration[] = allMigrations, listaUtente: Migration[] = allUtente, origine: OrigineContinuita = 'continuita-migrazione'): void {
+  const continuita = listaUtente.some(m => m.id === 30 && m.name === 'continuita_acquisti');
+  if (continuita) {
+    // Solo append alla prova durevole, prima che il main possa cambiare prezzi/identità.
+    // Nessun bump anticipato: la 030 ordinaria adotta il bootstrap dopo le sue dipendenze.
+    if ((db.pragma('utente.user_version', { simple: true }) as number) < 30) preparaContinuitaLegacy(db, origine);
+    else verificaArchivioLegacy(db);
+  }
   applica(db, 'main', list);
   applica(db, 'utente', listaUtente);
+  if (continuita) verificaArchivioLegacy(db);
 }

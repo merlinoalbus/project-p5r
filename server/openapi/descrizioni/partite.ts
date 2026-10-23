@@ -12,12 +12,12 @@ const PARTITA = [404, 'partita-non-trovata'] as const;
 export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   'GET /api/partite/:id/acquisti': {
     sommario: 'Presenze storiche e consumazioni confermate della partita',
-    descrizione: 'Lettura unica di presenza legacy, fatti UUID, provenienze, spesa e rotazione registrata. Una presenza non diventa una consumazione; i fatti senza fonti sono inattivi. Orfani e lacune restano espliciti. Nessuna mutazione o inferenza dal calendario.',
+    descrizione: 'Lettura unica di presenza legacy, fatti UUID, provenienze, spesa e rotazione registrata. Dalla migrazione utente030 la spesa delle presenze usa la valutazione durevole della generazione, mai il prezzo corrente del catalogo. Provenienza e contributo di continuità sono distinti dal prezzo realmente pagato. Una presenza non diventa una consumazione; i fatti senza fonti sono inattivi. Orfani e lacune restano espliciti. Nessuna mutazione o inferenza dal calendario.',
     risposta: '`StatoAcquistiDto`', errori: [PARTITA],
   },
   'POST /api/partite/:id/acquisti/anteprima': {
     sommario: 'Rivedi una consumazione Aojiru o il collegamento ad un fatto esistente',
-    descrizione: 'Corpo strict `NuovaRegistrazioneAcquisto`: operazioneId, articolo, momento, variante, fortuna nullable, fonte, scelta nuova/collega e rapportoLegacy nullable. Rilegge identità, fonti e spesa. Al momento corrente valuta disponibilità reale; per momenti storici verifica solo calendario provato e dichiara i progressi non ricostruibili. Non applica Doti o yen.',
+    descrizione: 'Corpo strict `NuovaRegistrazioneAcquisto`: operazioneId, articolo, momento, variante, fortuna nullable, fonte, scelta nuova/collega e rapportoLegacy nullable. In presenza di una spunta legacy, rapportoLegacy contiene la valutazione completa mostrata (UUID, generazione, identità, contributo, prezzo noto o ignoto e provenienza): una prova assente o diversa causa409 prima della preparazione. Rilegge identità, fonti e spesa. Al momento corrente valuta disponibilità reale; per momenti storici verifica solo calendario provato e dichiara i progressi non ricostruibili. Non applica Doti o yen.',
     risposta: '`AnteprimaRegistrazioneAcquistoDto`, incluso revisioneAcquistiAttesa', errori: [PARTITA, [409,'acquisti-cambiati']],
   },
   'POST /api/partite/:id/acquisti/registrazioni': {

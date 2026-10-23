@@ -36,5 +36,6 @@ import { utente026 } from './026_regali_per_catalogo.js';
 import { utente027 } from './027_sessione_videogioco.js';
 import { utente028 } from './028_acquisti_e_proposte.js';
 import { utente029 } from './029_pesca.js';
+import { utente030 } from './030_continuita_acquisti.js';
 
-export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006, utente007, utente008, utente009, utente010, utente011, utente012, utente013, utente014, utente015, utente016, utente017, utente018, utente019, utente020, utente021, utente022, utente023, utente024, utente025, utente026, utente027, utente028, utente029];
+export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006, utente007, utente008, utente009, utente010, utente011, utente012, utente013, utente014, utente015, utente016, utente017, utente018, utente019, utente020, utente021, utente022, utente023, utente024, utente025, utente026, utente027, utente028, utente029, utente030];

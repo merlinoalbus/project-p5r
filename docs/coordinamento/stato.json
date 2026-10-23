@@ -1,10 +1,10 @@
 {
   "obiettivo": "Completare i lotti L0–L11 della razionalizzazione sul ramo newreview e pubblicarli funzionanti su p5s",
-  "aggiornato": "2026-10-22T23:09:00Z",
+  "aggiornato": "2026-10-23T05:32:14Z",
   "cruscotto": {
     "adesso": {
-      "attivita": "Checkpoint sul blocco L7-TANAKA-STORICO: causa e contratto conservativo documentati; implementazione ancora mancante. Tanaka-UNITA chiuso soltanto come preparazione pubblicata e osservata.",
-      "stato": "Arresto al checkpoint richiesto; STORICO aperto. Avvio01:01:30, limite01:11:30 italiana23ott. Nessun punto successivo iniziato.",
+      "attivita": "L7-TANAKA-STORICO al rilascio: bootstrap/030, contributi congelati, generazioni/Cestino/import e prova nel consenso. PASS statico Galaxy dopoST-F01/02/03; controlli finali verdi.",
+      "stato": "Unico punto attivo STORICO; limite10min revocato. Baseline readonly138/29 acquisita, rilascio e conservazione dopo030 pendenti. Nessuna chiusura del punto o consensoTanaka.",
       "responsabile": "Coordinatore implementa in sequenza; Galaxy verifica in sola lettura. Nessun esecutore parallelo attivo.",
       "prossimaConsegna": "Completare i gruppi residui dei lotti: Covo e distributori L5, pesca/condizioni L6 e catalogo/scambi L7; predisporre le decisioni concrete riservate all'utente. Nessun lotto dichiarato concluso per il solo rilascio137."
     },
@@ -654,9 +654,9 @@
         "id": "L7-TANAKA-STORICO",
         "lotto": "L7",
         "titolo": "Proteggere spesa e rango dai cambi prezzo Tanaka",
-        "stato": "da-fare",
+        "stato": "in-corso",
         "fonte": "lotti/L7/tanaka-decisione-unitaria.md",
-        "criterio": "Aperto: causa confermata; contratto in lotti/L7/tanaka-storico-contratto.md. Nessun codice/migrazione applicati. Mancano implementazione integrale, CAS/generazioni/Cestino/import, tre riesami, gate distinto, controlli e rilascio. Checkpoint richiesto prima del limite01:11:30."
+        "criterio": "Codice completo PASS statico Galaxy dopoST-F01/02/03; tre riesami e typecheck63945/lint28604/build1052 exit0. Baseline readonly138/29 acquisita. Rilascio, conservazione e browser dopo030 necessari prima della chiusura; nessun consensoTanaka. Limite10min revocato."
       },
       {
         "id": "L7-TANAKA-SNAPSHOT",

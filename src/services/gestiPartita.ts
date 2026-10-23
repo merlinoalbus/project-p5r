@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { create } from 'zustand';
 import { z } from 'zod';
 import { CHIAVI_DOTI } from '../../shared/doti';
+import { schemaValutazionePresenza } from '../../shared/valutazioneAcquisto';
 import type { RichiestaRegistraAcquisto, RichiestaAnnullaProvenienza, RichiestaRimozioneLegacy, RicevutaOperazioneAcquistoDto } from '../../shared/acquisti';
 import type { RichiestaDecisioneProposte, RicevutaDecisioneProposteDto, RiferimentoPropostaPartita } from '../../shared/propostePartita';
 import type { AzionePercorsoDto } from '../../shared/types';
@@ -22,7 +23,7 @@ const nuovoAcquisto = z.object({
   momento: z.object({ giorno: z.string().regex(/^\d{2}-\d{2}$/), fascia: z.enum(['giorno','sera']), ordine: intero.min(0).max(1_000_000) }).strict(),
   variante: z.enum(CHIAVI_DOTI), fortuna: z.boolean().nullable(), fonte,
   scelta: z.discriminatedUnion('tipo', [z.object({ tipo: z.literal('nuova') }).strict(), z.object({ tipo: z.literal('collega'), acquistoId: uid }).strict()]),
-  rapportoLegacy: z.object({ tipo: z.enum(['rappresenta','ulteriore']), firma: token }).strict().nullable(),
+  rapportoLegacy: z.object({ tipo: z.enum(['rappresenta','ulteriore']), firma: token, valutazione: schemaValutazionePresenza.optional() }).strict().nullable(),
 }).strict();
 const registra = nuovoAcquisto.extend({ revisioneAcquistiAttesa: token }).strict();
 const annulla = z.object({ operazioneId: uid, provenienzaId: uid, revisioneAcquistiAttesa: token }).strict();

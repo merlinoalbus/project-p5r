@@ -11,6 +11,8 @@
 import { condizioneConTesto, leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { createHash } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { nuovaValutazioneLegacy } from '../db/acquistiLegacy.js';
+import { conCestinoPrivato } from './cestinoService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type StatoDisponibilita } from './disponibilitaService.js';
@@ -327,8 +329,13 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
   const adesso = nowIso();
   getDb().transaction(() => {
     const era = !!prepared('SELECT 1 FROM acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').get(partitaId, articoloChiave);
-    if (fatto && !era) prepared('INSERT INTO acquisto_partita (partita_id, articolo_chiave, updated_at) VALUES (?, ?, ?)').run(partitaId, articoloChiave, adesso);
-    else if (!fatto) prepared('DELETE FROM acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').run(partitaId, articoloChiave);
+    if (fatto && !era) {
+      prepared('INSERT INTO acquisto_partita (partita_id, articolo_chiave, updated_at) VALUES (?, ?, ?)').run(partitaId, articoloChiave, adesso);
+      nuovaValutazioneLegacy(getDb(), { partita_id: partitaId, articolo_chiave: articoloChiave, updated_at: adesso });
+    }
+    else if (!fatto && era) conCestinoPrivato({ tipo: 'fonte-acquisto', chiave: `legacy:${articoloChiave}`, nome: `Presenza storica: ${prodotto.nomeIt ?? prodotto.nome}`, partitaId }, () => {
+      prepared('DELETE FROM acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').run(partitaId, articoloChiave);
+    });
     if (fatto && !era) registraEvento(partitaId, 'acquisto', `Acquistato: ${prodotto.nomeIt ?? prodotto.nome}`, `${r.negozio_nome ?? r.negozio_chiave}${r.costo_json != null ? ' · Scambio' : r.prezzo !== null ? ` · ${r.prezzo.toLocaleString('it-IT')} ¥` : ''}${prodotto.per ? ` · per ${prodotto.per}` : ''}.`, { articolo: articoloChiave });
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();

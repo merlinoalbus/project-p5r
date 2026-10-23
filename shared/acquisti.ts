@@ -1,4 +1,5 @@
 import type { DoteChiave } from './doti.js';
+import type { ValutazionePresenza } from './valutazioneAcquisto.js';
 
 export const ARTICOLO_AOJIRU = 'chiosco-kiyasuku/succo-aojiru';
 export const CATALOGO_AOJIRU = 'consumabile/succo-aojiru';
@@ -15,7 +16,7 @@ export function prossimaVarianteAojiru(v: AojiruVariante): AojiruVariante {
 }
 export interface MomentoAcquisto { giorno: string; fascia: 'giorno' | 'sera'; ordine: number }
 export type FonteAcquisto = { tipo: 'manuale' } | { tipo: 'diario'; voceUid: string; effettoUid: string };
-export type RapportoPresenzaLegacy = null | { tipo: 'rappresenta' | 'ulteriore'; firma: string };
+export type RapportoPresenzaLegacy = null | { tipo: 'rappresenta' | 'ulteriore'; firma: string; valutazione?: ValutazionePresenza };
 export interface NuovaRegistrazioneAcquisto {
   operazioneId: string; articolo: string; momento: MomentoAcquisto;
   variante: AojiruVariante; fortuna: FortunaAojiru; fonte: FonteAcquisto;
@@ -30,8 +31,12 @@ export interface RegistrazioneAcquistoDto {
   id: string; partitaId: number; identita: IdentitaAcquisto; momento: MomentoAcquisto; prezzoYen: number;
   consumo: DatiConsumoAojiru; legacyFirma: string | null; attiva: boolean;
   provenienze: ProvenienzaAcquistoDto[]; creataIl: string; orfana: boolean;
+  legacyValutazioneId?: string | null;
 }
-export interface PresenzaStoricaAcquistoDto { articolo: string; negozioNome: string; firma: string; rappresentataDa: string | null; orfana: boolean }
+export interface PresenzaStoricaAcquistoDto {
+  articolo: string; negozioNome: string; firma: string; rappresentataDa: string | null; orfana: boolean;
+  valutazione?: ValutazionePresenza;
+}
 export interface StatoAcquistiArticoloDto {
   articolo: string; acquistato: boolean; presenzaStorica: PresenzaStoricaAcquistoDto | null;
   registrazioni: RegistrazioneAcquistoDto[];

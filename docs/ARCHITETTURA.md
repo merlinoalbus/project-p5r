@@ -1,5 +1,7 @@
 # Architettura — project-p5r
 
+**23/10 — continuità acquisti, al rilascio030:** quattro strutture personali separano prova immutabile, marcatore del bootstrap, associazione attiva e raccordo fatto/generazione. Il bootstrap append-only precede ogni migrazione main solo quando030 è pending, senza anticipare la versione; la030 adotta la prova esatta senza rivalutare prezzi. Il lettore usa contributi congelati e deduplicaI71 per generazione; il Cestino ripristina solo l'ultima generazione e non riavvolge gli archivi. Backup/import li trasportano con validazione e provenienza esplicita. Codice approvato staticamente; conservazione e pubblicato ancora da osservare. Contratto in `coordinamento/lotti/L7/tanaka-storico-contratto.md`.
+
 Le sezioni §1–§8 e quelle senza data conservano anche descrizioni della verifica del 4 ottobre 2026: non sono tutte lo stato corrente.
 In particolare schema 99/utente 18 e presenza del luogo derivata dal primo negozio sono descrizioni storiche precedenti a L5/L6.
 Per lo stato del 21 ottobre valgono codice, registri delle migrazioni e rapporto di audit, con i difetti dichiarati; le note L7 sono bozze.

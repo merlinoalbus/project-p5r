@@ -27,6 +27,7 @@ import Database from 'better-sqlite3';
 import { logger } from '../utils/logger.js';
 import { httpErrors } from '../utils/httpError.js';
 import { closeDb, getDb, nowIso, resolveDbPath, resolvePartitePath } from '../db/dbService.js';
+import { verificaArchivioLegacy } from '../db/acquistiLegacy.js';
 import { migrations } from '../db/migrations/index.js';
 import { regoleAllAvvio } from './pacchetto/pacchettoGioco.js';
 import { convertiCondizioniDatabaseImportato } from './condizioni/importazione.js';
@@ -371,6 +372,7 @@ async function sostituisciDatiDiGioco(file: string): Promise<EsitoImportazionePa
   if (!anteprima.importabile) throw httpErrors.badRequest('pacchetto-troppo-nuovo', anteprima.motivo ?? 'Il pacchetto non è importabile.');
   avanza('copia-di-sicurezza');
   const salvataggio = await copiaDiSicurezza();
+  verificaArchivioLegacy(getDb());
   closeDb();
   let condizioniConvertite: string[] = [];
   try {

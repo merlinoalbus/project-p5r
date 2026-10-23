@@ -26,6 +26,7 @@ import { logger } from '../utils/logger.js';
 import { httpErrors } from '../utils/httpError.js';
 import { closeDb, copiaSchema, getDb, initDb, resolveDbPath, resolvePartitePath } from '../db/dbService.js';
 import { runMigrations, type Migration } from '../db/migrationRunner.js';
+import { verificaArchivioLegacy, type OrigineContinuita } from '../db/acquistiLegacy.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { occupaIstanza } from './lucchettoIstanza.js';
 import { verificaCollegamentiAttivitaImportati } from './vincoliAttivitaConfidente.js';
@@ -124,6 +125,7 @@ export async function conCartellaDiLavoro<T>(prefisso: string, lavoro: (dir: str
  * Usa l'online backup di better-sqlite3, sicuro con il WAL attivo e senza bloccare le scritture.
  */
 export async function copiaDatabase(quale: 'gioco' | 'partite' = 'gioco'): Promise<{ percorso: string; nome: string }> {
+  verificaArchivioLegacy(getDb());
   const percorso = path.join(cartellaTemporanea(), `esporta-${quale}-${timbro()}.db`);
   await copiaSchema(getDb(), percorso, quale === 'partite' ? 'utente' : 'main');
   return { percorso, nome: `project-p5r-${quale}-${timbro()}.db` };
@@ -323,9 +325,9 @@ function rimuoviDatabase(dbPath: string): void {
 }
 
 /** Riapre la connessione e riporta l'app in servizio: migrazioni, immagini rimaste su disco (backup di prima della 079), cache in memoria. */
-export function riapriIstanza(): void {
+export function riapriIstanza(origine: OrigineContinuita = 'continuita-migrazione'): void {
   const db = initDb();
-  runMigrations(db);
+  runMigrations(db, undefined, undefined, origine);
   verificaCollegamentiAttivitaImportati(db);
   verificaCollegamentiPescaImportati(db);
   assorbiImmaginiSuDisco(db);
@@ -490,6 +492,9 @@ async function ripristinaDaFileDiLavoro(file: string, lavoro: string): Promise<E
   }
 
   const salvataggio = await copiaDiSicurezza();
+  // Il solo gioco entrante non deve rivalutare le presenze sul catalogo nuovo.
+  // Le fotografie sono già durevoli; l'assenza/incoerenza impedisce la sostituzione.
+  verificaArchivioLegacy(getDb());
   closeDb();
   try {
     if (unico) {
@@ -512,7 +517,7 @@ async function ripristinaDaFileDiLavoro(file: string, lavoro: string): Promise<E
         }
       }
     }
-    riapriIstanza();
+    riapriIstanza('continuita-importazione');
   } catch (err) {
     await tornaAllaCopiaDiSicurezza(salvataggio, err, 'ripristino-fallito', 'Ripristino');
   }

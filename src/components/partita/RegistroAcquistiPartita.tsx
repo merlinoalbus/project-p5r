@@ -20,7 +20,7 @@ export function RegistroAcquistiPartita({ partitaId, onCambiato }: { partitaId: 
         const registrazioni = registro.dati!.registrazioni.filter(r => r.identita.articolo === articolo);
         const presenzaStorica = registro.dati!.presenzeStoriche.find(p => p.articolo === articolo) ?? null;
         return <section key={articolo} className="flex min-w-0 flex-col gap-2 border-t border-border pt-2">
-          <h3 className="m-0 break-words text-[14px]">{registrazioni[0]?.identita.nome ?? articolo}</h3>
+          <h3 className="m-0 break-words text-[14px]">{registrazioni[0]?.identita.nome ?? presenzaStorica?.valutazione?.nome ?? articolo}</h3>
           <ConsumiAojiru key={`${partitaId}:${articolo}`} partitaId={partitaId} registrabile={false} stato={{ articolo, acquistato: registrazioni.some(r => r.attiva) || !!presenzaStorica, presenzaStorica, registrazioni, aojiru: null }} onCambiato={async () => { await registro.ricarica(); await onCambiato?.(); }} />
         </section>;
       })}
