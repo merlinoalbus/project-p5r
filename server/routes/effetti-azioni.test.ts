@@ -20,6 +20,7 @@ import { utente007 } from '../db/migrazioniUtente/007_effetti_delle_azioni.js';
 import { utente015 } from '../db/migrazioniUtente/015_giornata_canone.js';
 import { DDL_UTENTE_STORICHE } from '../db/schemaUtente.js';
 import { orfaniPartite } from '../services/pacchettoGiocoService.js';
+import { letturaCompletata } from '../services/lettureCompletate.js';
 import type { AzionePercorsoDto, DoteSocialePartitaDto, EffettiAzioneDto, PercorsoGiornoDto, ProgressiPartitaDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
 
@@ -54,7 +55,7 @@ describe('API — effetti strutturati delle azioni della guida', () => {
   /** Stato del libro nella partita `p`: sessioni di lettura registrate (0 se nessuna) e se risulta letto. */
   const libro = (p: number, chiave: string) => ({
     avanzamento: (prepared('SELECT avanzamento FROM progresso_libro_partita WHERE partita_id = ? AND libro_chiave = ?').get(p, chiave) as { avanzamento: number } | undefined)?.avanzamento ?? 0,
-    letto: !!prepared("SELECT 1 FROM lettura_partita WHERE partita_id = ? AND tipo = 'libro' AND chiave = ?").get(p, chiave),
+    letto: letturaCompletata(p, 'libro', chiave), // R10-20: letto = avanzamento al totale (lettura_partita non si scrive più)
   });
   /** Legge il percorso del giorno `data` (senza partita) e restituisce l'azione della guida al posto `indice`. */
   const azione = async (data: string, indice: number) => ((await request(app).get(`/api/compendio/percorso/${data}`)).body.data as PercorsoGiornoDto).azioni.find((a) => a.uid === uidDi(data, indice))!;

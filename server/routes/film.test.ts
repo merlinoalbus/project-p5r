@@ -6,6 +6,7 @@ import request from 'supertest';
 import { closeDb, getDb } from '../db/dbService.js';
 import { ricaricaPacchetto } from '../services/pacchetto/pacchettoGioco.js';
 import { statoDisponibilitaPartita, valutaRequisiti } from '../services/disponibilitaService.js';
+import { letturaCompletata } from '../services/lettureCompletate.js';
 import { createApp } from '../bootstrap.js';
 import type { AttivitaTutteDto, FilmDto, FilmDvdDto, StoricoDto } from '../../shared/types.js';
 import { migraTestiCondizioni } from '../../shared/migraCondizioni.js';
@@ -37,10 +38,11 @@ describe('API Film e DVD', () => {
     const url = `/api/partite/${id}/letture`;
     let f = (await request(app).put(url).send({ tipo: 'film', chiave: 'dvd-wraith', avanzamento: 1 })).body.data as FilmDto;
     expect(f).toMatchObject({ progresso: 1, totaleSessioni: 2, iniziato: true, fatto: false });
-    expect(getDb().prepare("SELECT chiave FROM lettura_partita WHERE partita_id=? AND tipo='film'").all(id)).toEqual([]);
+    // R10-20: «visto» si calcola dall'avanzamento; lettura_partita non si scrive più
+    expect(letturaCompletata(id, 'film', 'dvd-wraith')).toBe(false);
     f = (await request(app).put(url).send({ tipo: 'film', chiave: 'dvd-wraith', avanzamento: 2 })).body.data as FilmDto;
     expect(f).toMatchObject({ progresso: 2, iniziato: true, fatto: true });
-    expect(getDb().prepare("SELECT chiave FROM lettura_partita WHERE partita_id=? AND tipo='film'").all(id)).toEqual([{ chiave: 'dvd-wraith' }]);
+    expect(letturaCompletata(id, 'film', 'dvd-wraith')).toBe(true);
     const d = (await request(app).get(`/api/compendio/film?partita=${id}`)).body.data as FilmDvdDto;
     expect(d).toMatchObject({ iniziati: 1, completati: 1, sessioniCompletamentoFatte: 2, visioniRegistrate: 2 });
   });
