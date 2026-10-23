@@ -31,3 +31,7 @@ Gli abbinamenti voce → effetto (R10-12/13/14) non sono stati scritti: sono pro
 - `niijima-banco-soci-accessibile` / `niijima-banco-alte-accessibile`: solo la voce 11-14 «Palazzo di Niijima: Lobby del Piano Puntate Alte…» è vicina; non basta a dire che il banco è raggiunto.
 - altre chiamate a Kawakami (07-08, 09-01, 11-14): l'evento è uno solo e lo segna già la voce 06-08.
 - R10-09/5 (voce cumulativa dei cruciverba 02-01): l'effetto `cruciverba` c'è; serve confermare la voce 02-01 e l'elenco delle date rimaste.
+
+## Aggiornamento (migrazioni 155-157, ricerca sulle fonti Royal)
+Risolti sulle fonti (AllGameStaff, Samurai Gamers): oratore di Shibuya = voce 05-09 sera (certezza alta sulla data, media sulla fascia); sistema videogiochi = voce 06-10 sera (certezza media, una fonte). Non risolvibili: biliardo rango tecnico 3 (Perizia 3 + Stecca jump, nessuna data), banchi di Niijima (le fonti descrivono una sola cassa, nella lobby dei soci, raggiungibile l'11-13), cumulativo cruciverba 02-01 (il 02-01 non è un giorno di cruciverba nelle fonti).
+Nuovo effetto `articolo` (R10-01/6, R10-08): `effettiDiStatoService` + `impostaAcquisto`; migrazione 156 (31 articoli su 24 voci); 157: 44 domande e 33 cruciverba per data; 155: 2 eventi. Provate sulla copia p5s: effetti `storia` 9, `articolo` 31, `domanda` 44, `cruciverba` 33; nessuna voce modificata dalle tre; spunte identiche; secondo avvio invariato.
