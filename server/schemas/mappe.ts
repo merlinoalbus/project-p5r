@@ -36,6 +36,8 @@ export const bodyImmagineSpillo = z.object({ didascalia: z.string().max(300).opt
 export const queryMappa = z.object({ partita: idParam.optional(), infiltrazione: z.string().min(1).max(160).optional() });
 /** L3 «planimetria della voce»: le voci della guida sulla planimetria, con lo stato della partita se indicata. */
 export const queryGuidaMappa = z.object({ partita: idParam.optional() });
+/** L11 B5: la gerarchia dei luoghi; con la partita quartieri e Aree del mondo dicono se sono già aperti. */
+export const queryGerarchia = z.object({ partita: idParam.optional() });
 /** Sostituire l'immagine di una mappa con dei pezzi (102): `eliminaPezzi=1` conferma che se ne vanno con l'immagine di prima. */
 export const queryImmagineMappa = z.object({ eliminaPezzi: z.enum(['0', '1']).optional() });
 export const bodyCreaMappa = z.object({

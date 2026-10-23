@@ -625,7 +625,7 @@ export interface DatiMappa { nome?: string; tipo?: TipoMappa; genitore?: string 
  *  dalla rotta omonima (`GET /api/mappe/albero` non arriverebbe mai alla mappa «albero»). `struttura-server.test.ts` verifica che
  *  l'elenco copra tutte le rotte del router. */
 export const CHIAVI_MAPPA_RISERVATE: ReadonlySet<string> = new Set([
-  'accesso', 'albero', 'contenuti', 'entita', 'esporta', 'importa', 'ordine', 'piante-citta',
+  'accesso', 'albero', 'contenuti', 'entita', 'esporta', 'gerarchia', 'importa', 'ordine', 'piante-citta',
   'pezzi', 'riferimenti', 'risolvi', 'spilli',
 ]);
 

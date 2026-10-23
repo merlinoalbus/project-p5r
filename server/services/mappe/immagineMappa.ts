@@ -52,10 +52,17 @@ export function urlCaricata(c: ImmagineCaricata): string {
  * l'illustrazione è solo la caricata. Mappa inesistente → nessuna illustrazione.
  */
 export function illustrazioneDellaMappa(chiave: string, db: AppDatabase = getDb(), caricate?: Map<string, string>): IllustrazioneDto {
-  const r = db.prepare('SELECT chiave, immagine_chiave, asset, ruolo_immagine FROM mappa WHERE chiave = ?').get(chiave) as
-    { chiave: string; immagine_chiave: string | null; asset: string | null; ruolo_immagine: string | null } | undefined;
+  const r = db.prepare('SELECT chiave, immagine_chiave, asset, ruolo_immagine FROM mappa WHERE chiave = ?').get(chiave) as RigaPerIllustrazione | undefined;
   if (!r) return { immagineUrl: null, asset: null };
-  const caricata = caricataDellaMappa(r, caricate ?? immaginiCaricateDelleMappe(db));
+  return illustrazioneDaRiga(r, caricate ?? immaginiCaricateDelleMappe(db));
+}
+
+/** I campi di una riga di `mappa` che servono all'illustrazione. */
+export interface RigaPerIllustrazione { chiave: string; immagine_chiave: string | null; asset: string | null; ruolo_immagine: string | null }
+
+/** La parte pura di `illustrazioneDellaMappa`: la stessa regola su una riga già letta (le risposte con molte mappe non fanno una query per nodo). */
+export function illustrazioneDaRiga(r: RigaPerIllustrazione, caricate: Map<string, string>): IllustrazioneDto {
+  const caricata = caricataDellaMappa(r, caricate);
   return { immagineUrl: caricata ? urlCaricata(caricata) : null, asset: r.ruolo_immagine === 'emblema' ? null : r.asset };
 }
 

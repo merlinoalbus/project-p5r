@@ -2,7 +2,7 @@
 // API mappe a livelli e spilli (Fase 13): albero, dettaglio con stato della partita, editor, esportazione/importazione
 // ============================================================
 
-import type { ConteggiAlberoDto, CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, DatiPezzoMappa, DestinazioneSpillo, EsportazioneMappeDto, GuidaDellaPlanimetriaDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto, VoceCollegabileDto } from '../../types';
+import type { ConteggiAlberoDto, CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, DatiPezzoMappa, DestinazioneSpillo, EsportazioneMappeDto, GerarchiaMappeDto, GuidaDellaPlanimetriaDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto, VoceCollegabileDto } from '../../types';
 import type { RequisitoSpillo } from '../../../shared/condizioniSpillo';
 import type { TipoMappa, TipoRiferimento, TipoSpillo } from '../../../shared/spilli';
 import type { PrecondizioneRimozionePinDto, RichiestaRimozionePin } from '../../../shared/rimozionePin';
@@ -16,6 +16,9 @@ export interface DatiSpilloApi { soloPosizione?: boolean; destinazione?: Destina
 export const getAlberoMappe = (partita?: number): Promise<MappaRiassuntoDto[]> => apiGet(`/mappe/albero${queryString({ partita })}`);
 /** E2 (L3): i pin di tutto l'albero nei tre gruppi (contenuto, passaggi, note), contati dal server: il totale dell'indice delle Mappe. */
 export const getConteggiAlbero = (): Promise<ConteggiAlberoDto> => apiGet('/mappe/albero/conteggi');
+
+/** L11 B5: la gerarchia dei luoghi (Città › Quartieri › Aree › Planimetrie, Città › Palazzi › Aree › Planimetrie), con casa e conteggi di ogni nodo. */
+export const getGerarchiaMappe = (partita?: number): Promise<GerarchiaMappeDto> => apiGet(`/mappe/gerarchia${queryString({ partita })}`);
 
 /** Mappa con percorso, figli e spilli; con `partita` include lo stato «raccolto» e i dettagli della partita (articoli comprati, punti). */
 export const getMappa = (chiave: string, partita?: number, infiltrazione?: string): Promise<MappaDto> =>

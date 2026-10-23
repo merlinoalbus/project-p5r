@@ -20,8 +20,9 @@ import { scaricaPiantaQuartiere } from '../services/cittaService.js';
 import express from 'express';
 import { MAX_BYTE_IMMAGINE } from '../services/immaginiService.js';
 import { aggiornaCopiaPezzoMappa, aggiornaImmagineSpillo, aggiornaMappa, aggiornaPezzoMappa, creaCopiaPezzoMappa, creaPezzoMappa, eliminaCopiaPezzoMappa, eliminaPezzoMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, conteggiAlbero, creaMappa, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaAreeMappa, impostaImmagineMappa, impostaStanzaMappa, mappaPerEntita, aggiornaPresentazioneMappa, riordinaMappe, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
-import { bodyAggiornaCopiaPezzo, bodyAggiornaMappa, bodyAggiornaPezzo, bodyCreaCopiaPezzo, bodyAggiornaSpillo, bodyCreaPezzo, bodyAreeMappa, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, bodyPresentazioneMappa, bodyRiordinaMappe, bodyStanzaMappa, paramsCopiaPezzo, paramsMappa, paramsPezzo, paramsSpillo, queryDidascalia, queryEsporta, queryGuidaMappa, queryImmagineMappa, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
+import { bodyAggiornaCopiaPezzo, bodyAggiornaMappa, bodyAggiornaPezzo, bodyCreaCopiaPezzo, bodyAggiornaSpillo, bodyCreaPezzo, bodyAreeMappa, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, bodyPresentazioneMappa, bodyRiordinaMappe, bodyStanzaMappa, paramsCopiaPezzo, paramsMappa, paramsPezzo, paramsSpillo, queryDidascalia, queryEsporta, queryGerarchia, queryGuidaMappa, queryImmagineMappa, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
 import { guidaDellaPlanimetria } from '../services/dungeonService.js';
+import { gerarchiaMappe } from '../services/mappe/gerarchiaMappe.js';
 import { httpErrors } from '../utils/httpError.js';
 import { precondizioneRaccordoSpillo, type DatiAggiornaSpillo } from '../services/mappe/mappeService.js';
 import { queryPrecondizioneRaccordo } from '../schemas/mappe.js';
@@ -51,6 +52,11 @@ router.post('/piante-citta/:quartiere/scarica', validate({ params: z.object({ qu
 /** Albero completo delle mappe (riassunti con genitore e conteggi; ogni nodo con i conteggi dei pin del suo sottoalbero, E2 di L3). */
 router.get('/albero', validate({ query: queryMappa }), (req, res) => {
   res.json(elencaMappe((req.query as unknown as { partita?: number }).partita));
+});
+
+/** L11 B5: la gerarchia dei luoghi (Città › Quartieri › Aree › Planimetrie, Città › Palazzi › Aree › Planimetrie) con casa e conteggi di ogni nodo. */
+router.get('/gerarchia', validate({ query: queryGerarchia }), (req, res) => {
+  res.json(gerarchiaMappe((req.query as unknown as { partita?: number }).partita));
 });
 
 /** I conteggi dei pin della radice dell'indice delle Mappe: tutto l'albero nei tre gruppi (E2 di L3). */

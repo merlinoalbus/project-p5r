@@ -41,6 +41,12 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
     descrizione: 'I pin di tutto l\'albero delle mappe (Memento esclusi, come in `GET /api/mappe/albero`) in `conteggiPin` `{ contenuto, passaggi, note }`, con la regola unica `gruppoConteggioSpillo` (E2 di L3). La somma dei tre è la somma dei `numeroSpilli` dell\'albero. È la radice dell\'indice: l\'albero è una lista piatta con più radici (Tokyo e i Palazzi), e il client non somma.',
     risposta: '`ConteggiAlberoDto`',
   },
+  'GET /api/mappe/gerarchia': {
+    sommario: 'La gerarchia dei luoghi: Città, quartieri, Palazzi, Aree e planimetrie, con conteggi e casa di ogni nodo',
+    descrizione: 'L\'albero dell\'indice `/guida/mappe` (L11). Radice: la città (Tokyo) con i quartieri, le Aree della città da verificare e i Palazzi (Iweleth compreso, con `dedalo: true`); in fondo «Da collocare» (le planimetrie senza Area, con lo stesso contenuto di `GET /api/aree/da-collocare`). Quartiere › Area › planimetrie (versioni); Palazzo › Area › planimetrie, con le infiltrazioni che toccano ogni Area in `accanto` e quelle senza Area in `senzaArea`. Ogni nodo porta la sua `casa` (l\'unica pagina che lo mostra) e i `conteggi` calcolati dal server: ogni oggetto una volta sola, e i pin di un\'Area contano per oggetto (riferimento, poi voci collegate, poi pin) e non per versione. `totali` sono i numeri dell\'intestazione. Con `partita` quartieri e Aree del mondo dicono se sono già aperti (`disponibile`, `bloccoMotivo`): nessun nodo è nascosto. I Memento non ci sono.',
+    risposta: '`GerarchiaMappeDto`',
+    errori: [[404, 'partita-non-trovata']],
+  },
   'GET /api/mappe/esporta': {
     sommario: 'Pacchetto JSON delle mappe da scaricare: tutte o un luogo con le sue discendenti',
     descrizione: 'Mappe, spilli (con le schermate in base64) e immagini di base dell\'istanza in base64: è lo stesso formato che `POST /api/mappe/importa` accetta. Con `radice` solo quella mappa e le sue discendenti. `asset` (e `assetOriginale`, uguale) è l\'asset dichiarato dalla mappa se esiste, altrimenti null (L1: prima `mappe/<chiave>` per convenzione). Con la radice di un Palazzo nel pacchetto (L3, O3-1) `aree` e `legami` portano tutte le sue Aree, anche quelle senza planimetrie. La risposta ha `Content-Disposition: attachment` con il nome `mappe-<radice|tutte>.json`.',

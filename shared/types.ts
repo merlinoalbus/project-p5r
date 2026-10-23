@@ -1722,6 +1722,58 @@ export interface MappaDaCollocareDto { chiave: string; nome: string;
   /** La chiave pubblica del genitore (FUN2-9 di L2): «Colloca» propone il quartiere con `mappaChiave` uguale. */
   genitore: string | null;
   genitoreNome: string | null; numeroSpilli: number; immagineUrl: string | null; asset: string | null }
+
+// ---- La gerarchia dei luoghi (L11 B5): Città › Quartieri › Aree › Planimetrie e Città › Palazzi › Aree › Planimetrie ----
+
+/** I tipi di nodo. `memento`, `dedalo` e `area-dedalo` sono per B6 (Memento › Dedali › Aree): B5 non li produce, ma il tipo c'è già. */
+export type TipoNodoGerarchia = 'citta' | 'quartiere' | 'area' | 'planimetria' | 'palazzo' | 'infiltrazione' | 'memento' | 'dedalo' | 'area-dedalo' | 'da-collocare';
+
+/** Quel che un nodo contiene, contato dal server (E1, E2, E6): ogni cosa una volta sola, mai sommata dal client. I campi assenti non hanno senso per quel nodo. */
+export interface ConteggiNodoDto {
+  quartieri?: number; palazzi?: number; aree?: number; planimetrie?: number; infiltrazioni?: number;
+  /** I pin: «contenuto» sono i pin veri, «passaggi» e «note» si dicono accanto. Nell'Area ogni oggetto conta una volta (riferimento, poi voci collegate, poi pin). */
+  pin: ConteggiPinDto;
+}
+
+/** Un nodo dell'albero. La `chiave` è quella del suo oggetto: il quartiere, il dungeon, l'Area (la sua chiave piena), la planimetria (chiave pubblica della mappa), l'infiltrazione. */
+export interface NodoGerarchiaDto {
+  tipo: TipoNodoGerarchia;
+  chiave: string;
+  /** Il nome da mostrare: quello del posto, mai «Mappa». */
+  nome: string;
+  /** La casa: l'unica pagina che mostra l'oggetto (calcolata dal server, `casaMappa.ts`). Null solo per «Da collocare», che è un contenitore. */
+  casa: string | null;
+  /** Solo area: lo slug (serve a «Colloca»). */
+  slug?: string;
+  /** Solo città, quartiere, Palazzo: la chiave pubblica della mappa che li illustra (per «Colloca»). */
+  mappa?: string;
+  /** La miniatura col risolutore unico di L1; null per il Palazzo (il segno lo disegna il FE) e per i contenitori. */
+  immagine: IllustrazioneDto | null;
+  conteggi: ConteggiNodoDto;
+  /** Area in attesa della scelta dell'utente (lo staff di Tokyo). */
+  daVerificare?: boolean;
+  /** Quartiere e Area del mondo con una partita: già aperto? (`null` senza partita). Mai nascosto: si segna. */
+  disponibile?: boolean | null;
+  bloccoMotivo?: string | null;
+  /** Palazzo che si comporta da dedalo (`regola_boss='memento'`: oggi Iweleth). Il FE scrive «Dedalo» accanto al nome. */
+  dedalo?: boolean;
+  /** Solo planimetria: la versione dentro l'Area. */
+  versione?: { etichetta: string | null; ordine: number; predefinita: boolean };
+  /** I nodi sotto: quartieri, aree della città e Palazzi sotto Tokyo; aree sotto un quartiere o un Palazzo; planimetrie sotto un'Area. */
+  figli: NodoGerarchiaDto[];
+  /** Solo area di un Palazzo: le infiltrazioni che la toccano, accanto (tipo `infiltrazione`, senza figli). */
+  accanto?: NodoGerarchiaDto[];
+  /** Solo Palazzo: le infiltrazioni che non toccano nessuna Area. */
+  senzaArea?: NodoGerarchiaDto[];
+  /** Solo «Da collocare»: le planimetrie senza Area, nella forma che «Colloca» già usa. */
+  daCollocare?: MappaDaCollocareDto[];
+}
+
+/** `GET /api/mappe/gerarchia`: le radici (Tokyo, e in fondo «Da collocare») e i totali dell'intestazione. */
+export interface GerarchiaMappeDto {
+  radici: NodoGerarchiaDto[];
+  totali: { citta: number; quartieri: number; areeMondo: number; planimetrieMondo: number; palazzi: number; areePalazzi: number; planimetriePalazzi: number; infiltrazioni: number; daCollocare: number; pin: ConteggiPinDto };
+}
 export interface QuartiereRiassuntoDto {
   mappaChiave?:string;
   ingresso?:IngressoQuartiereDto|null;

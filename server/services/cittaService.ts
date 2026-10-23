@@ -43,7 +43,7 @@ const NON_UN_QUARTIERE = new Set(['mementos']);
 /** Se il quartiere, al punto in cui è la partita, esiste già nel mondo. **Solo il rosso nasconde**:
  *  un dubbio non toglie un quartiere dalla mappa. Per il quartiere, che è una destinazione radice,
  *  il rango di un Confidente decide se ci puoi arrivare (decisione dell'utente, 7 settembre 2026). */
-function disponibilitaQuartiere(chiave: string, st: StatoDisponibilita | null): { disponibile: boolean; bloccoMotivo: string | null } {
+export function disponibilitaQuartiere(chiave: string, st: StatoDisponibilita | null): { disponibile: boolean; bloccoMotivo: string | null } {
   if (!st) return { disponibile: true, bloccoMotivo: null };
   // L6 (R6-08, R6-09): dopo la migrazione 118 questa è l'unica fonte runtime;
   // la prosa della guida resta nota e non viene più interpretata come condizione.
