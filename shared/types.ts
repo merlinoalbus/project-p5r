@@ -2142,7 +2142,6 @@ export type StatoPunto = 'ottenuto' | 'esaurito';
 
 export interface PuntoInteresseDto {
   contenuto?: ContenutoOggettoDto[];
-  proposteContenuto?: PropostaAbbinamentoDto[];
   chiave: string;
   ordine: number;
   tipo: 'sicura' | 'porta' | 'meccanismo' | 'forziere' | 'forziere-chiuso' | 'volonta' | 'puzzle' | 'miniboss' | 'boss' | 'ombra-sciagura' | 'persona' | 'oggetto' | 'scorciatoia' | 'storia' | 'trama' | 'altro';

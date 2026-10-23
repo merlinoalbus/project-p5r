@@ -34,7 +34,7 @@ export const AREE: Readonly<Record<string, AreaApi>> = {
   '/api/font': { nome: 'Caratteri', descrizione: 'I caratteri tipografici caricati dall\'utente.' },
   '/api/impostazioni': { nome: 'Impostazioni e istanza', descrizione: 'Stato dell\'istanza, backup e ripristino, pacchetto di gioco, cartella d\'appoggio.' },
   '/api/catalogo': { nome: 'Catalogo', descrizione: 'Le righe dei dati della guida aggiunte, corrette o nascoste dall\'utente.' },
-  '/api/catalogo-oggetti': { nome: 'Catalogo degli oggetti', descrizione: 'Identità degli oggetti, fonti, offerte, contenuti, proposte da approvare, ripristini e riepilogo della conversione.' },
+  '/api/catalogo-oggetti': { nome: 'Catalogo degli oggetti', descrizione: 'Identità degli oggetti, fonti, offerte, contenuti, legami, ripristini e riepilogo della conversione.' },
   '/api/condizioni': { nome: 'Condizioni', descrizione: 'Gli elenchi chiusi e la normalizzazione delle condizioni di disponibilità e visibilità.' },
   '/api/aree': { nome: 'Aree del mondo', descrizione: 'Le Aree dei quartieri e della città (Città → Quartiere → Area → Planimetrie): pagina, creazione, versioni, ordine, ripristino, eliminazione nel cestino, planimetrie da collocare.' },
   '/api/luoghi': { nome: 'Luoghi', descrizione: 'I luoghi della città come fonte (L5): posizionarli su una planimetria con il loro pin e collocarli in un\'Area del quartiere.' },

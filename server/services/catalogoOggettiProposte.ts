@@ -5,7 +5,7 @@ import { leggiCondizioniSalvate, descriviRequisitoSpillo } from '../../shared/co
 import type { PropostaAbbinamentoDto, TipoPropostaOggetto, OggettiGuidaDto } from '../../shared/types.js';
 import { rettificaPropostaOggetto as modificaSchema, type DatiLegameOggetto, type DatiPropostaOggetto, type RettificaPropostaOggetto as Modifica } from '../schemas/catalogoOggetti.js';
 import { httpErrors } from '../utils/httpError.js';
-import { catalogoOggettiDisponibile, costoOggetto, oggettiConChiavi, rigaOggetto } from './catalogoOggettiLetture.js';
+import { costoOggetto, oggettiConChiavi, rigaOggetto } from './catalogoOggettiLetture.js';
 import { fondiOggetti } from './catalogoOggettiFusione.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { datiGuida } from './datiGuida.js';
@@ -112,17 +112,6 @@ export function elencaProposteOggetti(filtro: { riga_tipo?: TipoPropostaOggetto;
         ...(m.costo ? { costo: costoOggetto(JSON.stringify(m.costo), riferimenti)! } : {}),
         ...(m.ricevuti ? { ricevuti: m.ricevuti.map((o) => ({ ...o, nome: riferimenti.get(o.chiave)?.nome ?? 'Oggetto non più disponibile', casa: casaOggetto(o.chiave) })) } : {}) } : null };
   });
-}
-
-/** Una lettura delle proposte per la scheda/planimetria, senza richieste separate per ogni voce. */
-export function proposteContenutiDelleVoci(voci: Iterable<string>): Map<string, PropostaAbbinamentoDto[]> {
-  const out = new Map<string, PropostaAbbinamentoDto[]>();
-  const chiavi = [...new Set(voci)];
-  if (!chiavi.length || !catalogoOggettiDisponibile()) return out;
-  for (const p of elencaProposteOggetti({ riga_tipo: 'voce', voci: chiavi })) {
-    const r = out.get(p.rigaChiave) ?? []; r.push(p); out.set(p.rigaChiave, r);
-  }
-  return out;
 }
 
 function leggiProposta(d: DatiPropostaOggetto): Proposta {

@@ -30,7 +30,6 @@ import { timbriPartita } from './timbriService.js';
 import { slug } from '../../shared/slug.js';
 import { indiceMaschere, personaDellaMaschera, type IndiceMaschere } from './maschere.js';
 import { contenutiDelleVoci } from './catalogoOggettiLetture.js';
-import { proposteContenutiDelleVoci } from './catalogoOggettiProposte.js';
 import { ePersonaDeiMemento, erroreCatturaNelCompendio, vociPersonaCatturate } from './catturePersona.js';
 import { eliminaImmaginiDeiPin } from './mappe/mappeService.js';
 import { areeDelleInfiltrazioni, conLegami, impostaLegamiInfiltrazione, infiltrazioniDelleAree, planimetrieDelleInfiltrazioni, staccaInfiltrazioneDalleVoci, type AreaDellInfiltrazione } from './mappe/legamiInfiltrazioni.js';
@@ -66,13 +65,12 @@ function planimetriaDto(pl: PlanimetrieDelleVoci, voce: string): PlanimetriaDell
  * volta, per una voce sola lo si costruisce qui. Con `avanzamento` (le voci dei Palazzi, L4 §3.1) porta anche carattere, oggetto
  * e «da verificare»; le voci dei dedali dei Memento restano come prima (R4-30).
  */
-function puntoDto(r: RigaPunto, stato: StatoPunto | null, marcatore: { x: number; y: number } | null, pin: PinDelPuntoDto[], letture?: { maschere: IndiceMaschere; areePersone: Map<string, string[]>; contenuti?: ReturnType<typeof contenutiDelleVoci>; proposte?: ReturnType<typeof proposteContenutiDelleVoci> }, avanzamento?: AvanzamentoVoce): PuntoInteresseDto {
+function puntoDto(r: RigaPunto, stato: StatoPunto | null, marcatore: { x: number; y: number } | null, pin: PinDelPuntoDto[], letture?: { maschere: IndiceMaschere; areePersone: Map<string, string[]>; contenuti?: ReturnType<typeof contenutiDelleVoci> }, avanzamento?: AvanzamentoVoce): PuntoInteresseDto {
   const dettagli = JSON.parse(r.dettagli_json) as Record<string, unknown>;
   const persona = r.tipo === 'persona' ? personaDellaMaschera(letture?.maschere ?? indiceMaschere(), dettagli.maschera) : null;
   const areeDedalo = r.tipo === 'persona' ? (letture?.areePersone ?? areeDellePersone(r.chiave)).get(r.chiave) ?? [] : [];
   const contenuto = (letture?.contenuti ?? contenutiDelleVoci([r.chiave])).get(r.chiave) ?? [];
-  const proposteContenuto = (letture?.proposte ?? proposteContenutiDelleVoci([r.chiave])).get(r.chiave) ?? [];
-  const base: PuntoInteresseDto = { chiave: r.chiave, ordine: r.ordine, tipo: r.tipo, nome: r.nome, descrizione: r.descrizione, esauribile: r.esauribile === 1, dettagli, contenuto, proposteContenuto, fonte: r.fonte, stato, marcatore, pin, contenitore: r.contenitore_chiave ?? null, areaDedalo: r.area_dedalo_chiave ?? null, persona, areeDedalo };
+  const base: PuntoInteresseDto = { chiave: r.chiave, ordine: r.ordine, tipo: r.tipo, nome: r.nome, descrizione: r.descrizione, esauribile: r.esauribile === 1, dettagli, contenuto, fonte: r.fonte, stato, marcatore, pin, contenitore: r.contenitore_chiave ?? null, areaDedalo: r.area_dedalo_chiave ?? null, persona, areeDedalo };
   if (!avanzamento || r.area_dedalo_chiave) return base;
   const { m, s } = avanzamento;
   const v = m.voci.get(r.chiave);
@@ -380,7 +378,7 @@ export function dettaglioDungeon(chiave: string, partitaId?: number, contesto: s
   const marc = marcatori();
   const pinPunti = pinDeiPunti();
   const chiaviContenuti = (prepared('SELECT p.chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = ?').all(chiave) as Array<{ chiave: string }>).map((p) => p.chiave);
-  const letture = { maschere: indiceMaschere(), areePersone: areeDellePersone(), contenuti: contenutiDelleVoci(chiaviContenuti), proposte: proposteContenutiDelleVoci(chiaviContenuti) };
+  const letture = { maschere: indiceMaschere(), areePersone: areeDellePersone(), contenuti: contenutiDelleVoci(chiaviContenuti) };
   const native = mappeDelleAree(chiave);
   // L4: il modello e gli stati della partita, una volta per la scheda; il contesto dei pin di rigenerabili è l'infiltrazione guardata
   // (`?infiltrazione=`), altrimenti quella in corso
@@ -446,7 +444,7 @@ export function guidaDellaPlanimetria(chiave: string, partitaId?: number): Guida
   const avanzamento: AvanzamentoVoce = { m, s: partitaId === undefined ? null : statiDellaPartita(db, m, partitaId), pl };
   const marc = marcatori();
   const pinPunti = pinDeiPunti();
-  const letture = { maschere: indiceMaschere(), areePersone: new Map<string, string[]>(), contenuti: contenutiDelleVoci(qui), proposte: proposteContenutiDelleVoci(qui) };
+  const letture = { maschere: indiceMaschere(), areePersone: new Map<string, string[]>(), contenuti: contenutiDelleVoci(qui) };
   const righe = (prepared(`SELECT p.*, a.nome AS infiltrazione_nome, a.ordine AS infiltrazione_ordine FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave
     ORDER BY a.ordine, a.chiave, p.ordine, p.chiave`).all() as Array<RigaPunto & { infiltrazione_nome: string; infiltrazione_ordine: number }>).filter((r) => qui.has(r.chiave));
   const infiltrazioni: GuidaDellaPlanimetriaDto['infiltrazioni'] = [];

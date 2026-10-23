@@ -15,7 +15,7 @@ const router = Router();
 type QueryCatalogo = z.infer<typeof queryCatalogoOggetti>;
 const chiave = (params: Record<string, unknown>) => `${String(params.categoria)}/${String(params.slug)}`;
 
-// Le rotte letterali precedono categoria/slug: «proposte/conferma» non è un oggetto chiamato «conferma».
+// Le rotte letterali («regali/…», «note-storiche/…», «legami») precedono categoria/slug: non sono oggetti chiamati come loro.
 router.post('/regali/:confidente/:ordine/ripristina-costo', validate({
   params: schema.object({ confidente: schema.string().min(1).max(120), ordine: schema.coerce.number().int().nonnegative() }),
   body: schema.object({ costoAttuale: schema.string().max(6000).nullable() }).strict(),
