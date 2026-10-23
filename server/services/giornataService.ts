@@ -30,7 +30,7 @@ import type { EsitoRevisioneVoce } from '../../shared/types.js';
 import { riferimentiOggettiPerFonti } from './catalogoOggettiLetture.js';
 import { apertureDichiarabili, apertureNegliEffetti, eVisitaMemento, verificaApertureScelte } from './apertureDedaliService.js';
 import { leggiEffettiVoce, salvaEffettiVoce, inizializzaEffettiVoce, copiaEffettiVoce, preparaRimozioneEffettiVoce, applicaEffettiVoce, annullaEffettiVoce, leggiRicevuteEffettiVoce, applicaEffettoStorico } from './motoreDiario.js';
-import { normalizzaEffettiVoce, type EffettoLegacyVoce } from '../../shared/effettiVoce.js';
+import { descriviEffettoVoce, normalizzaEffettiVoce, type EffettoLegacyVoce, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import { conCestino, type ViciniCestino } from './cestinoService.js';
 import { leggiRicevutaEffettiAzione } from './effettiAzioneService.js';
 import { disponibilitaAcquistoCorrente } from './negoziService.js';
@@ -61,9 +61,21 @@ function tipoDi(r: RigaVoce): AzionePercorsoDto['tipo'] {
 function riferimentoDi(r: RigaVoce): RiferimentoAzioneDto | null {
   return r.riferimento_tipo && r.riferimento_chiave && TIPI_RIF.has(r.riferimento_tipo) ? { tipo: r.riferimento_tipo as RiferimentoAzioneDto['tipo'], chiave: r.riferimento_chiave } : null;
 }
-/** Proiezione di compatibilità dei soli tre tipi legacy: la fonte completa resta nel DTO. */
-function produceDi(r: RigaVoce): EffettoAzione[] {
-  return leggiEffettiVoce(r.uid).effetti.flatMap(e => e.effetto.tipo === 'acquisto'||e.effetto.tipo==='pesca' ? [] : [e.effetto]);
+/** Proiezione di compatibilità dei soli tre tipi legacy (dote, lettura, turno) della fonte unica `voce_effetto`: la fonte completa resta
+ *  nel DTO (`effettiVoce`). `produce_json` non si legge più (un solo punto di modifica: l'editor degli effetti). */
+function produceDi(fonte: StatoEffettiVoceDto): EffettoAzione[] {
+  return fonte.effetti.flatMap(e => e.effetto.tipo === 'acquisto'||e.effetto.tipo==='pesca' ? [] : [e.effetto]);
+}
+/** La frase di ogni effetto della fonte unica, anche acquisto e pesca, con i nomi degli elementi («Il gioco dà: …»). */
+function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione): string[] {
+  return fonte.effetti.map(({ effetto: e }) => {
+    if (e.tipo === 'pesca') return descriviEffettoVoce(e);
+    if (e.tipo === 'acquisto') {
+      const nome = (prepared('SELECT COALESCE(nome_it, nome) AS nome FROM articolo WHERE chiave = ?').get(e.articolo) as { nome: string } | undefined)?.nome;
+      return nome ? descriviEffettoVoce(e).replace(e.articolo, nome) : descriviEffettoVoce(e);
+    }
+    return testoEffetti([e], nomi)[0]!;
+  });
 }
 /** Il nome del collegamento: quello salvato (la guida lo scrive a modo suo), altrimenti quello dell'elemento. */
 function nomeDi(r: RigaVoce, rif: RiferimentoAzioneDto | null): string | null {
@@ -78,11 +90,11 @@ export interface VoceBase { uid: string; giorno: string; fascia: FasciaGioco; ge
 
 /** La voce con i soli campi della guida, con i valori fuori catalogo ricondotti a quelli predefiniti; gli effetti li ha
  *  solo un'azione (eventi, scadenze e promemoria non si spuntano). */
-export function voceBase(r: RigaVoce): VoceBase {
+export function voceBase(r: RigaVoce, fonte: StatoEffettiVoceDto = leggiEffettiVoce(r.uid)): VoceBase {
   const riferimento = riferimentoDi(r);
   return {
     uid: r.uid, giorno: r.data, fascia: fasciaDi(r), genere: genereDi(r), azione: r.azione, tipo: tipoDi(r), riferimento, riferimentoTesto: nomeDi(r, riferimento),
-    rangoAtteso: r.rango_atteso, note: r.note, produce: genereDi(r) === 'azione' ? produceDi(r) : [],
+    rangoAtteso: r.rango_atteso, note: r.note, produce: genereDi(r) === 'azione' ? produceDi(fonte) : [],
   };
 }
 
@@ -95,8 +107,9 @@ interface Contesto { fatte: Map<string, EffettiAzioneDto | null>; conf: Map<stri
 /** La guida del quiz delle attività di cui la voce registra un turno o a cui è collegata (richiesta dell'utente, 2026-10-17:
  *  «quando è previsto lavoro al Convenience Store deve essere consultabile la guida»), una volta sola per attività, con
  *  `oggi` vero se il giorno della voce è uno dei giorni del quiz. */
-function quizDellaVoce(v: VoceBase, quiz: Contesto['quiz']): QuizVoceDto[] {
-  const chiavi = [...v.produce.flatMap((e) => (e.tipo === 'turno' ? [e.attivita] : [])), ...(v.riferimento?.tipo === 'attivita' ? [v.riferimento.chiave] : [])];
+function quizDellaVoce(v: VoceBase, quiz: Contesto['quiz'], fonte: StatoEffettiVoceDto): QuizVoceDto[] {
+  // le attività dei turni (e della pesca) dalla fonte unica degli effetti
+  const chiavi = [...fonte.effetti.flatMap(({ effetto: e }) => (e.tipo === 'turno' || e.tipo === 'pesca' ? [e.attivita] : [])), ...(v.riferimento?.tipo === 'attivita' ? [v.riferimento.chiave] : [])];
   return [...new Set(chiavi)].flatMap((c) => {
     const q = quiz.get(c);
     return q ? [quizVoceDto(c, q, v.giorno)] : [];
@@ -106,24 +119,26 @@ function quizDellaVoce(v: VoceBase, quiz: Contesto['quiz']): QuizVoceDto[] {
 /** La voce per l'interfaccia: i campi della guida più la frase degli effetti, la spunta e i suoi effetti nella partita,
  *  il semaforo (solo per le azioni, e solo se ci sono i Confidenti della partita), la mappa collegata e la guida del quiz. */
 function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
-  const v = voceBase(r);
+  // la fonte unica degli effetti, letta una volta: frase, quiz, oggetti citati e DTO la condividono
+  const fonte = leggiEffettiVoce(r.uid);
+  const v = voceBase(r, fonte);
   const spuntabile = v.genere === 'azione';
   const aperture = eVisitaMemento(v) ? ctx.aperture : apertureNegliEffetti(ctx.fatte.get(r.uid));
-  const fonte = v.riferimento?.tipo === 'attivita' ? 'videogioco' : v.riferimento?.tipo;
-  const oggettoRiferimento = fonte && v.riferimento ? ctx.oggetti.get(`${fonte}/${v.riferimento.chiave}`) ?? null : null;
+  const fonteOggetto = v.riferimento?.tipo === 'attivita' ? 'videogioco' : v.riferimento?.tipo;
+  const oggettoRiferimento = fonteOggetto && v.riferimento ? ctx.oggetti.get(`${fonteOggetto}/${v.riferimento.chiave}`) ?? null : null;
   const oggettiCitati = new Map(oggettoRiferimento ? [[oggettoRiferimento.chiave, oggettoRiferimento]] : []);
-  for (const e of v.produce) if (e.tipo === 'lettura') {
+  for (const { effetto: e } of fonte.effetti) if (e.tipo === 'lettura') {
     const o = ctx.oggetti.get(`${e.categoria}/${e.chiave}`); if (o) oggettiCitati.set(o.chiave, o);
   }
   return {
-    ...v, effettiVoce: leggiEffettiVoce(r.uid), ricevuteEffetti: ctx.partita === undefined ? [] : leggiRicevuteEffettiVoce(ctx.partita, r.uid),
-    ...(aperture.length ? { apertureDedali: aperture } : {}), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], produceTesto: testoEffetti(v.produce, ctx.nomi),
+    ...v, effettiVoce: fonte, ricevuteEffetti: ctx.partita === undefined ? [] : leggiRicevuteEffettiVoce(ctx.partita, r.uid),
+    ...(aperture.length ? { apertureDedali: aperture } : {}), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], produceTesto: spuntabile ? testoEffettiDellaFonte(fonte, ctx.nomi) : [],
     fatta: spuntabile && ctx.fatte.has(r.uid), effetti: ctx.fatte.get(r.uid) ?? null,
     stato: ctx.conf && spuntabile ? statoAzione(v, ctx.conf) : null, mappa: mappaAzione(v),
     // il Palazzo collegato: dove si atterra il giorno della voce (scelta dell'utente, 2026-10-04). L6 (R6-17): la destinazione unica, la stessa
     // della metro e del campo `mappa` (la regola d'atterraggio del giorno, o l'ingresso del Palazzo)
     atterraggio: v.riferimento?.tipo === 'dungeon' ? atterraggioDelPalazzo(v.riferimento.chiave, v.giorno) : null,
-    quiz: quizDellaVoce(v, ctx.quiz),
+    quiz: quizDellaVoce(v, ctx.quiz, fonte),
     // L3: il campo «Infiltrazioni» (solo per le voci di un Palazzo) e lo stato «da rivedere» (solo se c'è)
     ...campiInfiltrazioni(r, ctx.partita),
     ...campiRevisione(r),
@@ -378,7 +393,7 @@ function struttura(d: DatiVoceGiornata, r?: RigaVoce): { riferimento?: { tipo: s
     if (r) {
       const fonte = leggiEffettiVoce(r.uid);
       if (fonte.stato !== 'convertita') throw httpErrors.conflict('effetti-legacy-da-correggere', 'La fonte storica non è convertibile: correggila esplicitamente nell’editor completo degli effetti.');
-      if (JSON.stringify(completa) === JSON.stringify(produceDi(r))) return out;
+      if (JSON.stringify(completa) === JSON.stringify(produceDi(fonte))) return out;
       throw httpErrors.conflict('effetti-completi-richiesti', 'Per modificare gli effetti di una voce esistente invia la lista canonica completa con UID e revisione: la posizione non identifica un effetto.');
     }
     out.produce = verificaEffetti(d.produce);
@@ -413,9 +428,10 @@ export function creaVoce(data: string, d: DatiVoceGiornata, partitaId?: number):
       throw httpErrors.badRequest('fonte-nuova-non-valida', 'Una nuova voce non può reclamare token o UID di effetti preesistenti.');
     }
     if (genere !== 'azione' && d.effettiVoce?.effetti.length) throw httpErrors.badRequest('effetti-solo-azione', 'Solo un’azione può avere effetti della spunta.');
-    prepared(`INSERT INTO voce_giornata (uid, data, fascia, ordine, genere, azione, note, tipo, riferimento_tipo, riferimento_chiave, riferimento_testo, rango_atteso, produce_json, indice_guida, created_at, updated_at)
-      VALUES (?, ?, ?, 1000000, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`).run(uid, data, fascia, genere, azione, noteValide(d.note) ?? null, genere === 'azione' ? d.tipo ?? 'altro' : 'altro',
-      riferimento?.tipo ?? null, riferimento?.chiave ?? null, riferimento?.testo ?? null, d.rangoAtteso ?? null, JSON.stringify(genere === 'azione' ? produce ?? [] : []), adesso, adesso);
+    // gli effetti vanno solo in `voce_effetto` (`inizializzaEffettiVoce`): `produce_json` resta col suo valore predefinito, non si scrive più
+    prepared(`INSERT INTO voce_giornata (uid, data, fascia, ordine, genere, azione, note, tipo, riferimento_tipo, riferimento_chiave, riferimento_testo, rango_atteso, indice_guida, created_at, updated_at)
+      VALUES (?, ?, ?, 1000000, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`).run(uid, data, fascia, genere, azione, noteValide(d.note) ?? null, genere === 'azione' ? d.tipo ?? 'altro' : 'altro',
+      riferimento?.tipo ?? null, riferimento?.chiave ?? null, riferimento?.testo ?? null, d.rangoAtteso ?? null, adesso, adesso);
     inizializzaEffettiVoce(uid, genere === 'azione' ? d.effettiVoce?.effetti.map(e => e.effetto) ?? produce ?? [] : [], 'utente');
     posiziona(data, fascia, uid, d.posizione);
   })();
@@ -445,11 +461,12 @@ export function aggiornaVoce(uid: string, d: DatiVoceGiornata, partitaId?: numbe
       const fonte = leggiEffettiVoce(uid);
       if (fonte.stato !== 'convertita' || fonte.effetti.length) throw httpErrors.conflict('voce-con-effetti-configurati', 'Rimuovi esplicitamente gli effetti dall’editor prima di trasformare l’azione in evento.');
     }
-    prepared(`UPDATE voce_giornata SET azione = ?, note = ?, genere = ?, fascia = ?, tipo = ?, riferimento_tipo = ?, riferimento_chiave = ?, riferimento_testo = ?, rango_atteso = ?, produce_json = ?, updated_at = ? WHERE uid = ?`).run(
+    // `produce_json` non si scrive più: gli effetti li salva `salvaEffettiVoce` in `voce_effetto`
+    prepared(`UPDATE voce_giornata SET azione = ?, note = ?, genere = ?, fascia = ?, tipo = ?, riferimento_tipo = ?, riferimento_chiave = ?, riferimento_testo = ?, rango_atteso = ?, updated_at = ? WHERE uid = ?`).run(
       azione ?? r.azione, d.note === undefined ? r.note : noteValide(d.note), genere, fascia, genere === 'azione' ? d.tipo ?? r.tipo : 'altro',
       riferimento === undefined ? r.riferimento_tipo : riferimento?.tipo ?? null, riferimento === undefined ? r.riferimento_chiave : riferimento?.chiave ?? null,
       riferimento === undefined ? r.riferimento_testo : riferimento?.testo ?? null, d.rangoAtteso === undefined ? r.rango_atteso : d.rangoAtteso,
-      r.produce_json, nowIso(), uid);
+      nowIso(), uid);
     if (fascia !== fasciaDi(r)) {
       // cambia fascia: al posto chiesto, altrimenti in fondo alla fascia nuova; la vecchia si ricompatta
       prepared('UPDATE voce_giornata SET ordine = 1000000 WHERE uid = ?').run(uid);
@@ -508,9 +525,10 @@ export function trasferisciVoci(t: TrasferisciVociGiornata, partitaId?: number):
         arrivate.push(r.uid);
       } else {
         const uid = randomBytes(16).toString('hex');
-        prepared(`INSERT INTO voce_giornata (uid, data, fascia, ordine, genere, azione, note, tipo, riferimento_tipo, riferimento_chiave, riferimento_testo, rango_atteso, produce_json, indice_guida, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`).run(uid, t.giorno, t.fascia, ordine, r.genere, r.azione, r.note, r.tipo,
-          r.riferimento_tipo, r.riferimento_chiave, r.riferimento_testo, r.rango_atteso, r.produce_json, adesso, adesso);
+        // la copia porta gli effetti nella fonte unica (`copiaEffettiVoce`), non in `produce_json`
+        prepared(`INSERT INTO voce_giornata (uid, data, fascia, ordine, genere, azione, note, tipo, riferimento_tipo, riferimento_chiave, riferimento_testo, rango_atteso, indice_guida, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`).run(uid, t.giorno, t.fascia, ordine, r.genere, r.azione, r.note, r.tipo,
+          r.riferimento_tipo, r.riferimento_chiave, r.riferimento_testo, r.rango_atteso, adesso, adesso);
         copiaEffettiVoce(r.uid, uid);
         arrivate.push(uid);
       }

@@ -27,8 +27,10 @@ export interface PorteEffettiLegacy {
   annullaLegacy:(partitaId:number,ricevuta:EffettiAzioneDto)=>void;
 }
 const righeEffetti=(uid:string):RigaEffetto[]=>prepared('SELECT * FROM main.voce_effetto WHERE voce_uid=? ORDER BY ordine').all(uid) as RigaEffetto[];
-function voce(uid:string):{uid:string;data:string;fascia:'giorno'|'sera';ordine:number;azione:string;produce_json:string;genere:string} {
-  const v=prepared('SELECT uid,data,fascia,ordine,azione,produce_json,genere FROM main.voce_giornata WHERE uid=?').get(uid) as ReturnType<typeof voce>|undefined;
+// `voce_giornata.produce_json` non si legge più (F2: un solo punto di modifica, la fonte `voce_effetto`): il RAW storico che la fonte
+// conserva è quello del registro di transizione (`raw_json`, copiato dalla 136), e una voce nuova nasce senza RAW ('[]').
+function voce(uid:string):{uid:string;data:string;fascia:'giorno'|'sera';ordine:number;azione:string;genere:string} {
+  const v=prepared('SELECT uid,data,fascia,ordine,azione,genere FROM main.voce_giornata WHERE uid=?').get(uid) as ReturnType<typeof voce>|undefined;
   if(!v)throw httpErrors.notFound('voce-non-trovata','La voce del Diario non è più presente.');return v;
 }
 function effettoDto(r:RigaEffetto):EffettoVoceDto {
@@ -37,11 +39,11 @@ function effettoDto(r:RigaEffetto):EffettoVoceDto {
   return {uid:r.uid,ordine:r.ordine,effetto,origine:r.origine};
 }
 export function leggiEffettiVoce(uid:string):StatoEffettiVoceDto {
-  const v=voce(uid),t=prepared('SELECT * FROM main.voce_effetto_transizione WHERE voce_uid=?').get(uid) as Transizione|undefined,rs=righeEffetti(uid);
+  voce(uid);const t=prepared('SELECT * FROM main.voce_effetto_transizione WHERE voce_uid=?').get(uid) as Transizione|undefined,rs=righeEffetti(uid);
   if(!t)throw httpErrors.conflict('transizione-assente','La voce non ha un registro di transizione: nessun RAW viene interpretato implicitamente.');
   const effetti=rs.map(effettoDto);
   if(t.stato==='legacy-da-correggere'&&effetti.length)throw httpErrors.conflict('transizione-incoerente','La fonte fallback contiene anche effetti canonici.');
-  return {voceUid:uid,stato:t.stato,effetti,rawLegacy:t.raw_json,motivo:t.motivo,revisione:improntaDato({uid,rawAttuale:v.produce_json,t,rs})};
+  return {voceUid:uid,stato:t.stato,effetti,rawLegacy:t.raw_json,motivo:t.motivo,revisione:improntaDato({uid,rawAttuale:t.raw_json,t,rs})};
 }
 const chiaveEffetto=(e:EffettoVoce):string|null=>e.tipo==='acquisto'?e.articolo:e.tipo==='dote'?e.dote:e.tipo==='lettura'?e.chiave:e.attivita;
 function verificaNuovoEffetto(e:EffettoVoce):void {if(e.tipo==='acquisto')verificaOffertaConsumo(e.articolo);else if(e.tipo==='pesca'){if(e.attivita!==ATTIVITA_PESCA||e.regola!==REGOLA_PESCA||leggiRegolaPesca(e.regola).stato!=='collegata')throw httpErrors.conflict('pesca-regola-assente','La fonte della pesca non è collegata a una regola leggibile.');}else verificaEffetti([e]);}
@@ -71,7 +73,7 @@ export function inizializzaEffettiVoce(uid:string,elenco:EffettoVoce[],origine:E
   if(v.genere!=='azione'&&validi.length)throw httpErrors.conflict('voce-non-spuntabile','Soltanto un’azione può avere effetti eseguibili.');
   for(const e of validi)verificaNuovoEffetto(e);
   if(prepared('SELECT 1 FROM main.voce_effetto_transizione WHERE voce_uid=?').get(uid))throw httpErrors.conflict('effetti-gia-inizializzati','La voce possiede già la propria fonte.');
-  scriviLista(uid,validi.map((effetto,ordine)=>({uid:nuovoUid(),ordine,effetto,origine})),v.produce_json);
+  scriviLista(uid,validi.map((effetto,ordine)=>({uid:nuovoUid(),ordine,effetto,origine})),'[]');
 }
 export function salvaEffettiVoce(uid:string,r:RichiestaSalvaEffettiVoce):StatoEffettiVoceDto {
   return getDb().transaction(()=>{
