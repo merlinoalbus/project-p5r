@@ -18,7 +18,7 @@ import type { AppDatabase } from './dbService.js';
 import { logger } from '../utils/logger.js';
 import { migrations as allMigrations } from './migrations/index.js';
 import { migrazioniUtente as allUtente } from './migrazioniUtente/index.js';
-import { preparaContinuitaLegacy, verificaArchivioLegacy, type OrigineContinuita } from './acquistiLegacy.js';
+import { preparaContinuitaLegacy, type OrigineContinuita } from './acquistiLegacy.js';
 
 /** Contratto minimo di una migrazione SQLite append-only. */
 export interface Migration {
@@ -76,9 +76,10 @@ export function runMigrations(db: AppDatabase, list: Migration[] = allMigrations
     // Solo append alla prova durevole, prima che il main possa cambiare prezzi/identità.
     // Nessun bump anticipato: la 030 ordinaria adotta il bootstrap dopo le sue dipendenze.
     if ((db.pragma('utente.user_version', { simple: true }) as number) < 30) preparaContinuitaLegacy(db, origine);
-    else verificaArchivioLegacy(db);
   }
   applica(db, 'main', list);
   applica(db, 'utente', listaUtente);
-  if (continuita) verificaArchivioLegacy(db);
+  // La verifica dell'archivio storico degli acquisti gira solo dentro la migrazione utente 030 che lo crea (`completaContinuitaLegacy`),
+  // non a ogni avvio: un archivio che non torna non deve impedire al server di partire (decisione dell'utente: «va bene che giri solo
+  // la prima volta»). Le operazioni che lo toccano (cestino, importazione) la richiamano da sé.
 }
