@@ -9,6 +9,8 @@ import { calendario, eventiDellaVoce } from '../services/calendarioService.js';
 import { collegaSchedaAllaVoce, copieDelPalazzo, creaVoceDallaScheda, dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
 import { aggiornaRichiesta, citazioniRichiesta, collocaRichiesta, creaRichiesta, eliminaRichiesta, richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
+import { dettaglioOmbra, elencaOmbre, verificaOmbre } from '../services/ombreService.js';
+import { paramsOmbra, queryOmbra, queryOmbre, type QueryOmbre } from '../schemas/ombre.js';
 import { aggiornaArea, aggiornaAreaDedalo, aggiornaDungeon, ripristinaDungeon, aggiornaPunto, collegaPinAlPunto, copiaPuntiInArea, creaArea, impostaAreePalazzoInfiltrazione, creaAreaDedalo, creaPunto, eliminaArea, eliminaAreaDedalo, eliminaPunto, spostaAreaDedalo, spostaPunto, spostaPuntiInArea } from '../services/dungeonService.js';
 import { bodyArea, bodyAreaDedalo, bodyAreePalazzoInfiltrazione, bodyAtterraggi, bodyCollocaRichiesta, bodyDungeon, bodyFinestraDungeon, bodyNuovaArea, bodyNuovaAreaDedalo, bodyNuovaRichiesta, bodyNuovoPunto, bodyPunto, bodyRequisitoRichiesta, bodyRichiesta, bodySpostaPunto, bodySpostaPuntiInArea, paramsChiaveGuida, paramsPinDelPunto, paramsRequisitoConfidente, querySchedaDungeon, bodyCreaVoceDallaScheda, bodyCollegaSchedaAllaVoce } from '../schemas/guidaDungeon.js';
 import { correggiRequisitoRichiesta, impostaRequisitiRango, requisitiDelConfidente, ripristinaRequisitiRango, togliRequisitoRichiesta } from '../services/requisitiConfidentiService.js';
@@ -247,6 +249,16 @@ router.get('/videogiochi', validate({ query: queryDomande }), (req, res) => {
 });
 router.get('/battaglia', (_req, res) => {
   res.json(battaglia());
+});
+/* ---- Le Ombre (L8): l'entità nuova, sola lettura. «verifica» prima di «:chiave», che altrimenti la prenderebbe. ---- */
+router.get('/ombre', validate({ query: queryOmbre }), (req, res) => {
+  res.json(elencaOmbre(req.query as unknown as QueryOmbre));
+});
+router.get('/ombre/verifica', (_req, res) => {
+  res.json(verificaOmbre());
+});
+router.get('/ombre/:chiave', validate({ params: paramsOmbra, query: queryOmbra }), (req, res) => {
+  res.json(dettaglioOmbra(String(req.params.chiave), (req.query as unknown as { partita?: number }).partita));
 });
 router.get('/richieste', validate({ query: queryDomande }), (req, res) => {
   res.json(richieste((req.query as unknown as { partita?: number }).partita));

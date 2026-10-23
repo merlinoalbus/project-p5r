@@ -120,7 +120,7 @@ function skillRiassunto(r: RigaSkill): SkillRiassuntoDto {
 }
 
 /** Le affinità di una Persona (elemento → codice), lette da sole. */
-function codiciAffinita(personaId: number): Map<string, string> {
+export function codiciAffinita(personaId: number): Map<string, string> {
   const righe = prepared('SELECT elemento, codice FROM persona_affinita WHERE persona_id = ?').all(personaId) as Array<{ elemento: string; codice: string }>;
   return new Map(righe.map((r) => [r.elemento, r.codice]));
 }
@@ -145,7 +145,7 @@ function codiciAffinitaDi(ids: readonly number[]): Map<number, Map<string, strin
  * Le affinità per l'API, una per ogni elemento nell'ordine dell'ambito `elementoAffinita`: gli elementi che la Persona
  * non ha in tabella valgono «-» (neutra); nome e sigla dell'elemento e del codice vengono dalle traduzioni.
  */
-function affinitaDi(perElemento: Map<string, string>): AffinitaDto[] {
+export function affinitaDi(perElemento: Map<string, string>): AffinitaDto[] {
   const ordine = vociAmbito('elementoAffinita');
   return ordine.map((e) => {
     const codice = perElemento.get(e.chiave) ?? '-';

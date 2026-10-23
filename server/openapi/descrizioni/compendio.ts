@@ -157,6 +157,24 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     risposta: '`BattagliaDto`',
     errori: [[404, 'battaglia-non-disponibile']],
   },
+  'GET /api/compendio/ombre': {
+    sommario: 'Elenco delle Ombre (L8)',
+    descrizione: 'Le Ombre per nome: chiave stabile, nome italiano (e i nomi alternativi, che la ricerca trova), Persona del compendio o nessuna (non reclutabile), personalità (le quattro del gioco o «sconosciuta»), se la Persona si ottiene dall\'incontro (`reclutabile`, `catturabile`) e se ha una negoziazione (`negoziabile`, null se non verificata). Filtri: `q` (nome, nomi alternativi, Persona), `dungeon` (Palazzo o Memento d\'incontro), `personalita`, `persona`. `?partita=` verifica solo che la partita esista.',
+    risposta: '`OmbraSchedaDto[]`',
+    errori: [PARTITA_NON_TROVATA],
+  },
+  'GET /api/compendio/ombre/verifica': {
+    sommario: 'Conteggi delle Ombre e rapporto della migrazione',
+    descrizione: 'Sola lettura. I conteggi misurati ora (Ombre, con e senza Persona, non catturabili, luoghi, voci collegate, aree dei dedali, per personalità) e il rapporto scritto dalla migrazione che ha creato le Ombre: righe della Battaglia corrette, Ombre con lo stesso nome e personalità diverse, possibili doppioni, voci che non sono Ombre, Ombre senza il nome della guida, personalità completate da G-021. Non c\'è nulla da approvare dall\'interfaccia: sono le decisioni che spettano all\'utente.',
+    risposta: '`OmbreVerificaDto`',
+    errori: [],
+  },
+  'GET /api/compendio/ombre/:chiave': {
+    sommario: 'Scheda di un\'Ombra (L8)',
+    descrizione: 'Nome, nomi alternativi, Persona, personalità, affinità (quelle della Persona nel compendio, con le proprie dell\'Ombra dove differiscono, `proprie`: solo le 4 eccezioni di G-019 e le non reclutabili; per queste ultime solo gli elementi noti), dove si incontra (Palazzo e infiltrazione, Memento e dedalo con le aree: unione della guida alla Battaglia, delle voci dei Palazzi e delle voci dei dedali) e le voci della guida che la descrivono. Con `?partita=` dice se la sua Persona è registrata nel compendio della partita.',
+    risposta: '`OmbraDettaglioDto`',
+    errori: [[404, 'ombra-non-trovata'], PARTITA_NON_TROVATA],
+  },
 
   // ---- Guida giorno per giorno ----
   'GET /api/compendio/percorso': {

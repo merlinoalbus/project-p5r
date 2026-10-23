@@ -121,6 +121,8 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   punto_partita: ['spunta di una voce nelle partite', 'spunte delle voci nelle partite'], spillo_partita: ['stato di un pin nelle partite', 'stati dei pin nelle partite'],
   timbri_dedalo_partita: ['conteggio dei timbri nelle partite', 'conteggi dei timbri nelle partite'],
   spunta_voce_partita: ['spunta del diario nelle partite', 'spunte del diario nelle partite'],
+  // L8 (migrazione 166): le Ombre
+  ombra_luogo: ['luogo d’incontro di un’Ombra', 'luoghi d’incontro delle Ombre'], ombra_voce: ['collegamento voce-Ombra', 'collegamenti voce-Ombra'],
   // L4 (utente 022)
   divergenza_partita: ['divergenza da verificare nelle partite', 'divergenze da verificare nelle partite'],
   // L4 (§8.11, utente 023)
