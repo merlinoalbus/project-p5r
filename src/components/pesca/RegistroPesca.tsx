@@ -97,7 +97,6 @@ function ConfermaGestoPesca({ partitaId, pronto, onChiudi, onCambiato }: { parti
         try { await onCambiato(); }
         catch (e) { if (vivo.current) setErrore(`Esito del recupero acquisito; aggiornamento della vista non riuscito: ${erroreTesto(e)}`); }
       }} />
-      <code className="break-all text-[11px]">Partita {partitaId} · operazione {o.richiesta.operazioneId}{o.bersaglio ? ` · bersaglio ${o.bersaglio}` : ''}</code>
       {anteprima.caricamento && !anteprima.dati && <p role="status">Preparo il riepilogo corrente…</p>}
       {anteprima.errore && <p role="alert" className="text-error">{anteprima.errore}<button type="button" className="btn btn-ghost touch" disabled={occupato || !!pendente || !!ricevuta} onClick={() => { setAttestato(false); void anteprima.ricarica(); }}>Rileggi l’anteprima</button></p>}
       {anteprima.dati && <>
