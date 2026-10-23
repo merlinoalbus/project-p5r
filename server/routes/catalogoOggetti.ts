@@ -6,8 +6,6 @@ import { aggiornaOggetto, creaOggetto, eliminaOggetto, ripristinaOggetto } from 
 import { confermaPropostaOggetto, elencaProposteOggetti, impostaLegameOggetto, scartaPropostaOggetto } from '../services/catalogoOggettiProposte.js';
 import { verificaPartita } from '../services/verificaPartita.js';
 import { z as schema } from 'zod';
-import { auditConversioneCatalogo } from '../services/auditCatalogoService.js';
-import { censimentoScambiCatalogo } from '../services/censimentoScambiCatalogoService.js';
 import { ripristinaCostoRegalo } from '../services/costoRegaloService.js';
 import { modificaNotaStorica, ripristinaNotaStorica } from '../services/noteStoricheService.js';
 import { bodyLegameOggetto, bodyNuovoOggetto, bodyOggetto, bodyPropostaOggetto, paramsOggetto, queryCatalogoOggetti, queryProposteOggetto,
@@ -18,10 +16,6 @@ type QueryCatalogo = z.infer<typeof queryCatalogoOggetti>;
 const chiave = (params: Record<string, unknown>) => `${String(params.categoria)}/${String(params.slug)}`;
 
 // Le rotte letterali precedono categoria/slug: «proposte/conferma» non è un oggetto chiamato «conferma».
-router.get('/audit', (_req, res) => { res.json(auditConversioneCatalogo()); });
-router.get('/censimento-scambi', (_req, res) => {
-  res.set('Cache-Control', 'no-store'); res.json(censimentoScambiCatalogo());
-});
 router.post('/regali/:confidente/:ordine/ripristina-costo', validate({
   params: schema.object({ confidente: schema.string().min(1).max(120), ordine: schema.coerce.number().int().nonnegative() }),
   body: schema.object({ costoAttuale: schema.string().max(6000).nullable() }).strict(),

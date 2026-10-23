@@ -1,11 +1,8 @@
 import type { CategoriaOggetto } from '../../../shared/catalogo';
-import type { CensimentoScambiCatalogoDto } from '../../../shared/censimentoScambiCatalogo';
 import type { CatalogoOggettoDto, DatiLegameOggettoDto, DatiNuovoOggettoDto, NotaStoricaOfferta, OggettoDettaglioDto, PropostaAbbinamentoDto, SceltaAbbinamentoOggettoDto, TipoPropostaOggetto } from '../../types';
 import { apiDelete, apiGet, apiPost, apiPut, queryString } from './_helpers';
 
 const percorso = (chiave: string) => `/catalogo-oggetti/${chiave.split('/').map(encodeURIComponent).join('/')}`;
-
-export const getScambiConFonti = (): Promise<CensimentoScambiCatalogoDto> => apiGet('/catalogo-oggetti/censimento-scambi');
 
 export const getCatalogoOggetti = (filtro: { categoria?: CategoriaOggetto; q?: string; partita?: number; nascosti?: boolean } = {}): Promise<CatalogoOggettoDto[]> =>
   apiGet(`/catalogo-oggetti${queryString({ ...filtro, nascosti: filtro.nascosti ? '1' : undefined })}`);
