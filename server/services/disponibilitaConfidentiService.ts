@@ -120,9 +120,8 @@ function mostra(db: AppDatabase, chiave: string, s: Stato): EditorInformazioniCo
   if (!c) throw httpErrors.notFound('confidente-non-trovato', 'Il Confidente non esiste.');
   const d = decodifica(s.raw);
   return { confidente: c, correnteRaw: s.raw, ...d, revisioneAttesa: revisioneAttesa(chiave, s),
-    proposta: chiave === 'makoto' ? { id: 'makoto-calendario-v1', titolo: 'Calendario informativo di Makoto', fonti: FONTI_MAKOTO,
-      applicabile: s.raw !== null && d.errori.length === 0, motivo: s.raw && uguali(s.raw, MAKOTO_PUBBLICO)
-        ? 'Riga coincidente con la fotografia pubblica attestata.' : 'Variante corrente: la proposta ne conserva integralmente il testo nelle note e nello storico; applicazione soltanto esplicita.' } : null,
+    // BON-10: le disponibilità sono consolidate dalla migrazione 163 (strutturate, fonte G-036): nessuna proposta da applicare; l'editor resta.
+    proposta: null,
     bonifica: s.registro?.bonifica ?? null,
     versioni: s.registro ? [...(s.registro.iniziale ? [{ id: 0, data: null, azione: 'fotografia iniziale', motivo: 'Valori prima della prima revisione registrata.', raw: s.registro.iniziale, errori: decodifica(s.registro.iniziale).errori }] : []),
       ...s.registro.revisioni.map(r => ({ id: r.id, data: r.data, azione: r.azione, motivo: r.motivo, raw: r.dopo, errori: decodifica(r.dopo).errori }))] : [] };
@@ -132,8 +131,8 @@ function prepara(db: AppDatabase, chiave: string, s: Stato, input: AzioneInforma
   if (revisioneAttesa(chiave, s) !== input.revisioneAttesa) throw httpErrors.conflict('informazioni-confidente-obsolete', 'Informazioni o storico cambiati. La bozza resta disponibile: rileggi i dati prima di procedere.');
   let dopo: InformazioniConfidenteRaw;
   if (input.azione === 'applica-proposta') {
-    if (chiave !== 'makoto' || !s.raw) throw httpErrors.conflict('proposta-disponibilita-inapplicabile', 'Questa proposta non è applicabile al Confidente corrente.');
-    dopo = dopoProposta(s.raw);
+    // BON-10: non c'è più alcuna proposta da applicare (dati consolidati dalla migrazione 163).
+    throw httpErrors.conflict('proposta-disponibilita-inapplicabile', 'Le disponibilità sono già consolidate: non c’è alcuna proposta da applicare.');
   } else if (input.azione === 'ripristina-versione') {
     const v = input.versione === 0 ? s.registro?.iniziale : s.registro?.revisioni.find(r => r.id === input.versione)?.dopo;
     if (!v) throw httpErrors.conflict('versione-disponibilita-assente', 'La versione scelta non esiste nello storico.');
