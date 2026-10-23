@@ -11,11 +11,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Modal } from '../shared/Modal';
-import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { AnteprimaMappa } from './AnteprimaMappa';
-import { aggiornaAreaMondo, collocaPlanimetria, eliminaAreaMondo, getAreeCitta, getDaCollocare, getQuartiere, isApiError } from '../../services/api';
+import { FinestraCollocaPlanimetria } from './FinestraCollocaPlanimetria';
+import { aggiornaAreaMondo, eliminaAreaMondo, getAreeCitta, getDaCollocare, isApiError } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { NEL_CESTINO } from '../../utils/cestino';
@@ -105,52 +105,8 @@ export function AreeDellaCitta({ quartieri }: { quartieri: QuartiereRiassuntoDto
           <p className="m-0 text-text-secondary">{NEL_CESTINO}</p>
         </div>
       </Modal>
-      {daCollocare && <CollocaPlanimetria mappa={daCollocare} quartieri={quartieri} onChiudi={() => setDaCollocare(null)}
+      {daCollocare && <FinestraCollocaPlanimetria mappa={daCollocare} contenitori={quartieri.map((q) => ({ tipo: 'quartiere' as const, chiave: q.chiave, nome: q.nome, mappa: q.mappaChiave }))} onChiudi={() => setDaCollocare(null)}
         onCollocata={async () => { setDaCollocare(null); await sciolte.ricarica(); }} />}
     </>
-  );
-}
-
-/** La finestra «Colloca»: il quartiere, poi un'area esistente o una nuova (col nome), e l'etichetta della versione. */
-function CollocaPlanimetria({ mappa, quartieri, onChiudi, onCollocata }: { mappa: MappaDaCollocareDto; quartieri: QuartiereRiassuntoDto[]; onChiudi: () => void; onCollocata: () => Promise<void> }) {
-  // si propone il quartiere a cui la planimetria è appesa (la mappa del quartiere è il suo genitore); solo se il genitore non è un
-  // quartiere (Tokyo) il primo dell'elenco (FUN2-9: per una planimetria di Kichijoji proponeva Yongen-Jaya)
-  const [quartiere, setQuartiere] = useState(() => quartieri.find((q) => q.mappaChiave === mappa.genitore)?.chiave ?? quartieri[0]?.chiave ?? '');
-  const [area, setArea] = useState('');
-  const [nuova, setNuova] = useState('');
-  const [etichetta, setEtichetta] = useState('');
-  const [occupato, setOccupato] = useState(false);
-  const dettaglio = useCarica(() => (quartiere ? getQuartiere(quartiere) : Promise.resolve(null)), [quartiere]);
-  const NUOVA = '__nuova__';
-  const pronto = !!quartiere && (area === NUOVA ? !!nuova.trim() : !!area) && !occupato;
-  const salva = async () => {
-    if (!pronto) return;
-    setOccupato(true);
-    try {
-      await collocaPlanimetria({ mappa: mappa.chiave, quartiere, ...(area === NUOVA ? { nuova: { nome: nuova.trim() } } : { area }), etichetta: etichetta.trim() || undefined });
-      notifica('success', `${mappa.nome} collocata.`);
-      await onCollocata();
-    } catch (err) {
-      notifica('error', err instanceof Error ? err.message : 'Planimetria non collocata.');
-    } finally { setOccupato(false); }
-  };
-  return (
-    <Modal titolo={`Colloca ${mappa.nome}`} aperta onChiudi={onChiudi}
-      azioni={<>
-        <button type="button" className="btn btn-secondary touch" onClick={onChiudi}>Annulla</button>
-        <button type="button" className="btn btn-primary touch" disabled={!pronto} onClick={() => void salva()}>Colloca</button>
-      </>}>
-      <div className="flex flex-col gap-3">
-        <Selettore etichetta="Quartiere" valore={quartiere} opzioni={quartieri.map((q) => ({ chiave: q.chiave, nome: q.nome }))} onCambia={(k) => { setQuartiere(k); setArea(''); }} />
-        <Selettore etichetta="Area" valore={area} segnaposto="Scegli un’area" disabilitato={!dettaglio.dati}
-          opzioni={[...(dettaglio.dati?.aree ?? []).map((a) => ({ chiave: a.slug, nome: a.nome })), { chiave: NUOVA, nome: 'Un’area nuova…' }]} onCambia={setArea} />
-        {area === NUOVA && <label className="flex flex-col gap-1 text-[13px] font-semibold">Nome dell’area nuova
-          <input className="form-input touch" value={nuova} maxLength={80} onChange={(e) => setNuova(e.target.value)} />
-        </label>}
-        <label className="flex flex-col gap-1 text-[13px] font-semibold">Etichetta della planimetria (facoltativa)
-          <input className="form-input touch" value={etichetta} maxLength={80} onChange={(e) => setEtichetta(e.target.value)} />
-        </label>
-      </div>
-    </Modal>
   );
 }

@@ -22,7 +22,7 @@ export const SEZIONI_GUIDA: SezioneGuida[] = [
   { chiave: 'domande', to: '/guida/domande', titolo: 'Domande in classe ed esami', descrizione: 'Risposte corrette per data, prossime domande, spunta «fatta»', icona: <IconBook size={DIM} /> },
   { chiave: 'cruciverba', to: '/guida/cruciverba', titolo: 'Cruciverba di Leblanc', descrizione: '38 cruciverba con indizio e risposta (+1 nota di Conoscenza), spunta «risolto»', icona: <IconBook size={DIM} /> },
   { chiave: 'calendario', to: '/guida/calendario', titolo: 'Calendario di gioco', descrizione: 'Meteo, eventi, scadenze dei Palazzi, consigli per settimana', icona: <IconStar size={DIM} /> },
-  { chiave: 'mappe', to: '/guida/mappe', titolo: 'Mappe', descrizione: 'Tokyo, quartieri con le loro aree e Palazzi: mappe a livelli con spilli, collezionabili raccolti, negozi ed editor', icona: <IconMappa size={DIM} /> },
+  { chiave: 'mappe', to: '/guida/mappe', titolo: 'Luoghi della guida', descrizione: 'Città e Palazzi con le loro aree: l\'albero di tutti i luoghi, con le planimetrie e i pin', icona: <IconMappa size={DIM} /> },
   { chiave: 'dungeon', to: '/guida/dungeon', titolo: 'Palazzi', descrizione: 'Infiltrazioni, punti di interesse, boss e mappe interattive con avanzamento; il Dedalo di Iweleth sta qui, i Memento hanno la loro pagina', icona: <IconMask size={DIM} /> },
   // I Memento hanno una pagina propria da quando non stanno più nell'elenco dei Palazzi — non si
   // visitano per aree, i piani sono generati a ogni discesa — ma ci si arrivava solo passando per

@@ -135,7 +135,9 @@ describe('MappaPage', () => {
     expect(screen.queryByRole('link', { name: /^Torna alla partita/ })).toBeNull();
   });
 
-  it('aperta direttamente, «Chiudi» porta all’elenco delle mappe come prima', async () => {
+  // SUPERATO da L11/B5 (R11-11): `/guida/mappe` è l'albero dei «Luoghi della guida» (`IndiceLuoghi`); il vecchio indice a radici e pannello non c'è più
+  // (i sette casi che seguono, fino a UX3-7, e LAY2-5, idem). Non eseguiti (zero test).
+  it.skip('SUPERATO da L11/B5: aperta direttamente, «Chiudi» porta all’elenco delle mappe come prima', async () => {
     // nessuna pagina prima: si parte da fuori dalle mappe (annotazione cancellata) e si apre la mappa col primo caricamento
     annotaNavigazione(null, '/home');
     annotaNavigazione(null, '/guida/mappe/citta-shibuya');
@@ -144,7 +146,7 @@ describe('MappaPage', () => {
     expect(await screen.findByRole('button', { name: /^Tokyo/ })).toBeInTheDocument();
   });
 
-  it('l’indice apre una radice nel pannello e ne mostra le mappe', async () => {
+  it.skip('SUPERATO da L11/B5: l’indice apre una radice nel pannello e ne mostra le mappe', async () => {
     monta('/guida/mappe');
     // Le radici sono **scelte**, non collegamenti: aprono il pannello a fianco. Finché non se ne
     // sceglie una, delle mappe contenute non c'è traccia nella pagina — prima stavano tutte lì,
@@ -166,7 +168,7 @@ describe('MappaPage', () => {
 
   // R1 (L2, decisione del PM): il segno «Da verificare» si vede nell'indice senza aprire niente — sulla carta di Tokyo nella griglia, un
   // chip «1 da verificare» che porta all'area dello staff; la carta resta il pulsante che apre il pannello
-  it('R1: la carta di Tokyo dice «1 da verificare» senza aprire niente, e il chip porta all’area da verificare', async () => {
+  it.skip('SUPERATO da L11/B5: R1: la carta di Tokyo dice «1 da verificare» senza aprire niente, e il chip porta all’area da verificare', async () => {
     const staff = (chiave: string, versioneOrdine: number) => riassunto({ chiave, nome: 'Area riservata allo staff', tipo: 'area', genitore: 'tokyo',
       area: { chiave: 'citta/tokyo/staff', contenitore: { tipo: 'citta', chiave: 'tokyo', nome: 'Tokyo' }, slug: 'staff', nome: 'Area riservata allo staff', versioneEtichetta: null, versioneOrdine, predefinita: versioneOrdine === 0, casa: '/guida/citta/tokyo/staff', daVerificare: true } });
     getAlberoMappe.mockResolvedValue([...albero, staff('staff', 0), staff('staff-ovest', 1)]);
@@ -186,7 +188,7 @@ describe('MappaPage', () => {
 
   // E4 (analisi dell'Elenco delle mappe, L2): la carta di Tokyo conta quartieri e aree, non le righe di `mappa` («52 mappe» = 23 quartieri
   // + 29 planimetrie); le versioni di un'Area contano una volta
-  it('E4: la carta di Tokyo dice «N quartieri · N aree», non le mappe', async () => {
+  it.skip('SUPERATO da L11/B5: E4: la carta di Tokyo dice «N quartieri · N aree», non le mappe', async () => {
     const area = (chiave: string, slug: string, nome: string, genitore: string, versioneOrdine: number) => riassunto({ chiave, nome, tipo: 'area', genitore,
       area: { chiave: `citta/${genitore}/${slug}`, contenitore: { tipo: 'quartiere', chiave: genitore, nome: genitore }, slug, nome, versioneEtichetta: null, versioneOrdine, predefinita: versioneOrdine === 0, casa: `/guida/citta/${genitore}/${slug}` } });
     getAlberoMappe.mockResolvedValue([...albero, area('sottopasso', 'sottopasso', 'Sottopasso', 'citta-shibuya', 0), area('sottopasso-est', 'sottopasso', 'Sottopasso', 'citta-shibuya', 1), area('diner', 'diner', 'Diner', 'citta-shibuya', 0)]);
@@ -200,7 +202,7 @@ describe('MappaPage', () => {
 
   // E2 (L3, deciso dall'utente): l'indice conta i pin di contenuto e, accanto, passaggi e note; i numeri vengono dal server
   // (`conteggiPin` di ogni nodo, `/albero/conteggi` per tutto l'albero), il FE non somma
-  it('E2: intestazione «N pin · più N passaggi e N note» e carte coi soli pin di contenuto, dal server', async () => {
+  it.skip('SUPERATO da L11/B5: E2: intestazione «N pin · più N passaggi e N note» e carte coi soli pin di contenuto, dal server', async () => {
     getAlberoMappe.mockResolvedValue(albero.map((m) => (m.chiave === 'tokyo' ? { ...m, conteggiPin: { contenuto: 9, passaggi: 4, note: 2 } }
       : m.chiave === 'dungeon-kamoshida' ? { ...m, conteggiPin: { contenuto: 3, passaggi: 1, note: 1 } } : m)));
     getConteggiAlbero.mockResolvedValue({ conteggiPin: { contenuto: 819, passaggi: 695, note: 228 } });
@@ -216,7 +218,7 @@ describe('MappaPage', () => {
 
   // UX3-8 (L3, segnalazione dell'utente: «ho aggiunto una planimetria di prova» e non la trovava): un'Area o planimetria con un nome
   // vero resta nella griglia anche senza pin, con «nessun pin»; il gruppo chiuso è solo per i fogli dell'estrazione senza nome e senza pin
-  it('UX3-8: la planimetria senza pin con un nome vero sta nella griglia; chiusi solo i fogli dell’estrazione senza nome', async () => {
+  it.skip('SUPERATO da L11/B5: UX3-8: la planimetria senza pin con un nome vero sta nella griglia; chiusi solo i fogli dell’estrazione senza nome', async () => {
     const tecnico = 'Palazzo di Kamoshida — Immagini native che nessun campo usa';
     getAlberoMappe.mockResolvedValue([...albero.slice(0, 3), { ...albero[3], ordine: 0 },
       riassunto({ chiave: 'foglio-con-pin', nome: tecnico, tipo: 'area', genitore: 'dungeon-kamoshida', numeroSpilli: 3, ordine: 1 }),
@@ -242,7 +244,7 @@ describe('MappaPage', () => {
 
   // UX2-15 (L2, segnalazione dell'utente): in Mappe una sola barra, quella della pagina. Il pannello del luogo non ha riquadri scorrevoli
   // suoi: né la griglia delle planimetrie né l'«Elenco completo», che crescono con la pagina
-  it('UX2-15: il pannello del luogo non ha riquadri scorrevoli, né nella griglia né nell’«Elenco completo»', async () => {
+  it.skip('SUPERATO da L11/B5: UX2-15: il pannello del luogo non ha riquadri scorrevoli, né nella griglia né nell’«Elenco completo»', async () => {
     monta('/guida/mappe');
     fireEvent.click(await screen.findByRole('button', { name: /^Tokyo/ }));
     const pannello = screen.getByRole('region', { name: 'Dentro Tokyo' });
@@ -253,7 +255,7 @@ describe('MappaPage', () => {
 
   // UX3-7 (L3, scelta (a) del FE): il titolo dell'elenco dice quel che c'è sotto — le aree di un Palazzo, i quartieri con le aree di
   // Tokyo —, non «con tutti i livelli», che prometteva versioni che sotto non ci sono
-  it('UX3-7: l’elenco sotto la griglia si chiama come quel che contiene', async () => {
+  it.skip('SUPERATO da L11/B5: UX3-7: l’elenco sotto la griglia si chiama come quel che contiene', async () => {
     monta('/guida/mappe');
     fireEvent.click(await screen.findByRole('button', { name: /^Palazzo di Kamoshida/ }));
     const pannello = within(screen.getByRole('region', { name: 'Dentro Palazzo di Kamoshida' }));
@@ -388,7 +390,7 @@ it('anche un alias che risolve a Tokyo finisce sulla mappa della Città',async()
   expect(getMappa).not.toHaveBeenCalled();
 });
 
-it('LAY2-5: da 1024 px lo spazio fra intestazione ed elenco è 12 px (a 1024×690 l’indice sforava di 3 px)', async () => {
+it.skip('SUPERATO da L11/B5: LAY2-5: da 1024 px lo spazio fra intestazione ed elenco è 12 px (a 1024×690 l’indice sforava di 3 px)', async () => {
   getAlberoMappe.mockResolvedValue(albero);
   monta('/guida/mappe');
   const elenco = await screen.findByRole('list', { name: 'Mappe' });
