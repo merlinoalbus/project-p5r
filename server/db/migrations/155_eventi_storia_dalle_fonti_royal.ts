@@ -6,8 +6,11 @@
 //   - `oratore-shibuya-ascoltato`: il primo ascolto del discorso di Yoshida è la sera del 9 maggio, in Piazza della Stazione di Shibuya
 //     (il 10 maggio, rango 1, è l'incontro successivo). Fonti: AllGameStaff, pagina «Rango Confidente di Yoshida (Sole)» e soluzione
 //     della settimana 5 (https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-yoshida-sole/); Samurai Gamers, walkthrough
-//     di maggio (https://samurai-gamers.com/persona-5/may-walkthrough/): «5/9 lunedì, di sera a Station Square» e «5/10 rango 1». Voce
-//     05-09 sera «Visita a Yoshida in Piazza Stazione: avvio del Confidente».
+//     di maggio di Persona 5 ROYAL (https://samurai-gamers.com/persona-5/p5r-may-walkthrough/, edizione finale, in inglese; la stessa data nella
+//     vecchia edizione https://samurai-gamers.com/?p=254825): la sera del 5/9 «Shibuya Station Square» da Yoshida, il Confidente compare come
+//     «Sun Confidant Flag: Rank 0» (tutte le scelte +0) e il rango 1 è il 10 maggio. Conferma data, luogo e avvio del Confidente; la parola
+//     «discorso» è della guida italiana. (La pagina del base, /persona-5/may-walkthrough/, è di Persona 5 e non vale come fonte Royal.)
+//     Voce 05-09 sera «Visita a Yoshida in Piazza Stazione: avvio del Confidente».
 // NON è collegato `sistema-videogiochi-installato` (voce 06-10 «Collegare la console TV in camera»): la sola fonte con le date è la
 // guida italiana (TV CRT dalla mansarda il 18 aprile, Set retrogaming dal 5 giugno); Samurai Gamers conferma il meccanismo (TV e console
 // dal negozio dell'usato di Yongen-Jaya) ma non le date, e le pagine di Fandom e GameFAQs non si sono potute leggere. Finché non c'è una
