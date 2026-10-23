@@ -45,8 +45,11 @@ export function indicePercorso(partitaId?: number): PercorsoIndiceDto {
 
 /** Scheda di un giorno con le voci nel loro ordine (fatte nella partita), giorno precedente e successivo. */
 export function giornoPercorso(data: string, partitaId?: number): PercorsoGiornoDto {
-  const r = prepared('SELECT * FROM giorno_percorso WHERE data = ?').get(data) as Riga | undefined;
-  if (!r) throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso il ${data}.`);
+  const base = prepared('SELECT * FROM giorno_percorso WHERE data = ?').get(data) as Riga | undefined;
+  if (!base) throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso il ${data}.`);
+  // R9-15/R9-19: trama e vincoli del giorno sono quelli del giorno unico (modificabile dall'editor); il resto è del percorso
+  const unico = prepared('SELECT trama, vincoli_json FROM giorno WHERE data = ?').get(data) as { trama: string; vincoli_json: string } | undefined;
+  const r: Riga = unico ? { ...base, trama: unico.trama, vincoli_json: unico.vincoli_json } : base;
   if (partitaId !== undefined) verificaPartita(partitaId);
   const conf = partitaId ? new Map(confidenti(partitaId).map((c) => [c.chiave, c])) : null;
   const azioni = vociDelGiorno(data, partitaId, conf, true);

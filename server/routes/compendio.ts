@@ -6,6 +6,8 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { domande } from '../services/domandeService.js';
 import { calendario, eventiDellaVoce } from '../services/calendarioService.js';
+import { aggiornaGiorno, leggiGiorno, ripristinaGiorno } from '../services/giorniService.js';
+import { METEO_GIORNO, type ModificaGiorno } from '../../shared/giorno.js';
 import { collegaSchedaAllaVoce, copieDelPalazzo, creaVoceDallaScheda, dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
 import { aggiornaRichiesta, citazioniRichiesta, collocaRichiesta, creaRichiesta, eliminaRichiesta, richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
@@ -442,6 +444,27 @@ router.delete('/confidenti/:chiave/requisiti/:rango/:indice', validate({ params:
 /** La Dote a ogni incontro, rango per rango (dato di gioco, come gli effetti di libri e attività). */
 router.put('/confidenti/:chiave/doti-incontro', validate({ params: paramsChiaveGuida, body: bodyDotiIncontro }), (req, res) => {
   res.json(impostaDotiIncontro(String(req.params.chiave), (req.body as { ranghi: Array<{ rango: number; doti: DoteNote[] }> }).ranghi));
+});
+
+// ---- Il giorno di gioco modificabile (L9 R9-19): meteo nelle due fasce, nota, trama e vincoli, con «Ripristina» ----
+const paramsGiorno = z.object({ data: z.string().regex(/^\d{2}-\d{2}$/) });
+const bodyGiorno = z.object({
+  meteoGiorno: z.enum(METEO_GIORNO).nullable().optional(),
+  meteoSera: z.enum(METEO_GIORNO).nullable().optional(),
+  notaMeteo: z.string().max(200).nullable().optional(),
+  meteoDaVerificare: z.boolean().optional(),
+  trama: z.string().max(4000).optional(),
+  vincoli: z.array(z.string().max(500)).max(30).optional(),
+}).strict();
+router.get('/giorni/:data', validate({ params: paramsGiorno }), (req, res) => {
+  res.json(leggiGiorno(String(req.params.data)));
+});
+router.put('/giorni/:data', validate({ params: paramsGiorno, body: bodyGiorno }), (req, res) => {
+  res.json(aggiornaGiorno(String(req.params.data), req.body as ModificaGiorno));
+});
+/** «Ripristina»: il giorno torna come lo dà la guida. */
+router.post('/giorni/:data/ripristina', validate({ params: paramsGiorno }), (req, res) => {
+  res.json(ripristinaGiorno(String(req.params.data)));
 });
 
 export default router;
