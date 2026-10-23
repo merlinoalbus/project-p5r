@@ -4,9 +4,11 @@
 //
 // I candidati «Aojiru» del Diario (`proposta_effetto_voce` aperte) aspettavano una conferma una per una. Si consolidano qui, dalla
 // rotazione del succo e dal nome che la guida stessa scrive nella voce:
-//   Bellezza → Fascino · Vitalità → Perizia · Disgustoso → Coraggio · Onsen (termale) → Gentilezza · Frutti di mare → Conoscenza.
-// Il succo è «certo» solo se la voce nomina un solo sapore di questa lista; altrimenti l'effetto nasce senza variante (resta da
-// indicare quando si registra il consumo) e il motivo del candidato lo dice. Una voce che ha già un effetto Aojiru (le conferme
+//   Bellezza → Fascino · Vitalità (energizzante) → Perizia · Disgustoso → Coraggio · Onsen (termale) → Gentilezza ·
+//   Frutti di mare (alghe) → Conoscenza.
+// Il succo è «certo» se la voce nomina un solo sapore di questa lista, o se la data è una delle domeniche date per certe dalle fonti
+// Royal (e il testo, se nomina un sapore, concorda); altrimenti l'effetto nasce senza variante (resta da indicare quando si registra
+// il consumo) e il motivo del candidato lo dice. Una voce che ha già un effetto Aojiru (le conferme
 // esistenti) non si tocca. L'effetto nasce con origine «regola» e senza `fortuna`: la Fortuna è lo stato della partita (R10-10/2).
 //
 // Il campo `fortuna: null` si toglie anche dai candidati e dagli effetti di acquisto che lo portano, ma un effetto già usato da una
@@ -21,9 +23,18 @@ import type { Migration } from '../migrationRunner.js';
 import { logger } from '../../utils/logger.js';
 
 const ARTICOLO = 'chiosco-kiyasuku/succo-aojiru';
+// Il nome del sapore come lo scrive la guida italiana. «alghe» (frutti di mare) e «energizzante» (vitalità) sono i nomi che le voci già
+// confermate usano per Conoscenza e Perizia.
 const SAPORI: ReadonlyArray<readonly [RegExp, string]> = [
-  [/bellezza/, 'fascino'], [/vitalit[aà]/, 'perizia'], [/disgustos/, 'coraggio'], [/onsen|termal/, 'gentilezza'], [/frutti di mare/, 'conoscenza'],
+  [/bellezza/, 'fascino'], [/vitalit[aà]|energizzante/, 'perizia'], [/disgustos/, 'coraggio'], [/onsen|termal/, 'gentilezza'], [/frutti di mare|alghe/, 'conoscenza'],
 ];
+// Le domeniche che le fonti Royal (AllGameStaff, ricerca del 23/10) danno per certe. Servono solo per le voci senza il nome del sapore,
+// e come controllo di quelle che lo hanno: un testo che contraddice la data lascia la voce senza variante. Le altre domeniche non si
+// ricavano dalla rotazione: le fonti divergono sulle settimane saltate.
+const DATE_CERTE: Readonly<Record<string, string>> = {
+  '04-24': 'fascino', '06-05': 'fascino', '07-31': 'fascino', '09-25': 'fascino', '11-06': 'fascino', '01-22': 'fascino',
+  '05-08': 'coraggio', '06-26': 'coraggio', '10-09': 'coraggio', '11-27': 'coraggio',
+};
 
 /** JSON con le chiavi in ordine, come `jsonCanonico` dei registri (la copia è congelata qui). */
 function canonico(v: unknown): string {
@@ -76,14 +87,17 @@ export const migration147: Migration = {
     const candidati = db.prepare("SELECT id, voce_uid, dati_json, motivo FROM main.proposta_effetto_voce WHERE tipo='acquisto' AND stato='aperta' ORDER BY voce_uid, id").all() as Array<{ id: string; voce_uid: string; dati_json: string; motivo: string }>;
     for (const c of candidati) {
       const d = oggetto(c.dati_json);
-      const voce = db.prepare('SELECT genere, azione FROM main.voce_giornata WHERE uid=?').get(c.voce_uid) as { genere: string; azione: string } | undefined;
+      const voce = db.prepare('SELECT genere, azione, data FROM main.voce_giornata WHERE uid=?').get(c.voce_uid) as { genere: string; azione: string; data: string } | undefined;
       const transizione = db.prepare('SELECT stato FROM main.voce_effetto_transizione WHERE voce_uid=?').get(c.voce_uid) as { stato: string } | undefined;
       if (!d || d.articolo !== ARTICOLO || !voce || voce.genere !== 'azione' || transizione?.stato !== 'convertita') { saltati++; continue; }
       const presenti = db.prepare('SELECT uid, tipo, dati_json FROM main.voce_effetto WHERE voce_uid=? ORDER BY ordine').all(c.voce_uid) as Array<{ uid: string; tipo: string; dati_json: string }>;
       if (presenti.some((e) => e.tipo === 'acquisto' && oggetto(e.dati_json)?.articolo === ARTICOLO)) { saltati++; continue; }
       const testo = voce.azione.toLowerCase();
       const varianti = new Set(SAPORI.filter(([re]) => re.test(testo)).map(([, dote]) => dote));
-      const variante = varianti.size === 1 ? [...varianti][0]! : null;
+      const dalTesto = varianti.size === 1 ? [...varianti][0]! : null;
+      const dallaData = DATE_CERTE[voce.data] ?? null;
+      // il testo e la data certa devono concordare; se solo uno parla vale quello, se si contraddicono la voce resta senza variante
+      const variante = dalTesto !== null && dallaData !== null && dalTesto !== dallaData ? null : dalTesto ?? dallaData;
       const sostituisce = Array.isArray(d.sostituisceDoti) ? d.sostituisceDoti : [];
       const effetto = { tipo: 'acquisto', articolo: ARTICOLO, variante, sostituisceDoti: sostituisce };
       const ordine = ((db.prepare('SELECT MAX(ordine) AS m FROM main.voce_effetto WHERE voce_uid=?').get(c.voce_uid) as { m: number | null }).m ?? -1) + 1;
