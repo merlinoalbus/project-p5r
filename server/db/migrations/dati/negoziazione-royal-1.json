@@ -1,0 +1,167 @@
+{
+  "parte": 1,
+  "da_R": 0,
+  "a_R": 39,
+  "domande": [
+    {"R":0,"ombre":["Fuu-ki","Bicorn","Hanuman","Anubis"],"q":"A bad rep spreads like wildfire. If I were you, I'd quit all this nonsense. What's the point?","risposte":[
+      {"n":1,"t":"You're right.","c":["O","G","G","G"]},
+      {"n":2,"t":"I don't care.","c":["G","-","-","o"]},
+      {"n":3,"t":"I don't know any other way.","c":["G","o","b","g"]}]},
+    {"R":1,"ombre":["Isis","Queen_Mab","Sarasvati"],"q":"After all, isn't it not pitiable when one denies one's own feelings?","risposte":[
+      {"n":1,"t":"It is a difficult topic.","c":["G","-","-","-"]},
+      {"n":2,"t":"But the outcome is clear.","c":["-","-","-","-"]},
+      {"n":3,"t":"It's mature to admit defeat.","c":["-","G","-","o"]}]},
+    {"R":2,"ombre":["Jatayu","Kali","Rangda","Skadi","Alilat"],"q":"After confronting me like this... Are you that kind of human too?","risposte":[
+      {"n":1,"t":"That's not my style.","c":["O","G","-","-"]},
+      {"n":2,"t":"What's wrong with that?","c":["-","B","G","-"]},
+      {"n":3,"t":"So what?","c":["G","G","-","-"]}]},
+    {"R":3,"ombre":["Kurama_Tengu","Barong","Nebiros","Oberon","Skadi"],"q":"Ah, it's a shame. If I'd taken this seriously from the start, I wouldn't be in this sorry state.","risposte":[
+      {"n":1,"t":"Then get serious now.","c":["g","O","-","-"]},
+      {"n":2,"t":"Making excuses?","c":["o","G","-","-"]},
+      {"n":3,"t":"I wasn't trying either.","c":["b","O","G","G"]}]},
+    {"R":4,"ombre":["Obariyon","Agathion","Onmoraki","Cait_Sith"],"q":"Ain't people your age suppose'ta be out on dates and stuff instead?","risposte":[
+      {"n":1,"t":"Right after this, kid.","c":["-","-","O","G"]},
+      {"n":2,"t":"Such a rude little boy...","c":["-","O","-","O"]},
+      {"n":3,"t":"Dating's not important.","c":["G","G","G","G"]}]},
+    {"R":5,"ombre":["Oberon","Dionysus"],"q":"And if that's the case, why don't you just stop this futile endeavor? It's meaningless...","risposte":[
+      {"n":1,"t":"You have a point there...","c":["-","-","-","-"]},
+      {"n":2,"t":"I can't stop.","c":["-","G","-","-"]},
+      {"n":3,"t":"I'll find meaning in it.","c":["-","-","-","G"]}]},
+    {"R":6,"ombre":["Bicorn","Atavaka","Fuu-ki","Ippon-Datara","Forneus","Chernobog","Mara","Fafnir","Hanuman"],"q":"Are all the kids these days doin' stuff like this?","risposte":[
+      {"n":1,"t":"Yeah, we sure are.","c":["B","G","G","-"]},
+      {"n":2,"t":"No, I thought this up myself.","c":["O","G","O","G"]},
+      {"n":3,"t":"Want to join in?","c":["O","B","G","-"]}]},
+    {"R":7,"ombre":["Kodama","Obariyon","Sudama"],"q":"Are you bored?","risposte":[
+      {"n":1,"t":"Yes, I'm bored.","c":["-","O","-","-"]},
+      {"n":2,"t":"I'm actually pretty busy.","c":["-","G","-","G"]},
+      {"n":3,"t":"I never thought about it.","c":["g","G","O","-"]}]},
+    {"R":8,"ombre":["Onmoraki","Kodama"],"q":"Are you fighting to help or protect the world or something?","risposte":[
+      {"n":1,"t":"That's right.","c":["-","-","o","-"]},
+      {"n":2,"t":"I won't tell you.","c":["G","-","-","-"]},
+      {"n":3,"t":"It pays the bills.","c":["B","-","-","G"]}]},
+    {"R":9,"ombre":["Andras","Narcissus","Barong","Oberon","Nebiros","Baal","Mithras"],"q":"As far as you're concerned, what kind of person was I to you?","risposte":[
+      {"n":1,"t":"My rival.","c":["o","G","G","O"]},
+      {"n":2,"t":"Nobody, really.","c":["b","B","B","G"]},
+      {"n":3,"t":"It doesn't matter.","c":["G","O","O","-"]}]},
+    {"R":10,"ombre":[],"q":"...But be-hee-fore all that, let's enjoy a little chat, ho!","risposte":[
+      {"n":1,"t":"All right, I suppose.","c":["g","-","-","-"]},
+      {"n":2,"t":"There's no need for that.","c":["-","-","-","-"]},
+      {"n":3,"t":"[...]","c":["-","-","-","-"]}]},
+    {"R":11,"ombre":["Pixie","Lilim","Hua_Po"],"q":"But before you do, do something funny. What can you do?","risposte":[
+      {"n":1,"t":"Impressions.","c":["-","G","-","-"]},
+      {"n":2,"t":"Making funny faces.","c":["-","B","G","-"]},
+      {"n":3,"t":"Nothing.","c":["G","-","-","-"]}]},
+    {"R":12,"ombre":["Sarasvati","Titania","Queen_Mab"],"q":"But is it fair to my kind if only I find such happiness, leaving them all behind?","risposte":[
+      {"n":1,"t":"I think so.","c":["O","b","-","-"]},
+      {"n":2,"t":"They can all come.","c":["-","-","-","G"]},
+      {"n":3,"t":"Your kind?","c":["b","-","-","-"]}]},
+    {"R":13,"ombre":["Dakini","Kali","Skadi","Alilat","Rangda"],"q":"But I've been around the block, so I know--there's something else you want from me, isn't there?","risposte":[
+      {"n":1,"t":"Nope.","c":["-","G","-","-"]},
+      {"n":2,"t":"I just love the elderly.","c":["-","-","G","G"]},
+      {"n":3,"t":"I just want you to die happy.","c":["G","B","-","-"]}]},
+    {"R":14,"ombre":["King_Frost"],"q":"But I've got a catch phrase that I'm famous for.","risposte":[
+      {"n":1,"t":"Hee-ho!","c":["-","-","-","o"]},
+      {"n":2,"t":"Hee-haw!","c":["-","-","-","G"]},
+      {"n":3,"t":"Personaaa!","c":["-","-","-","-"]}]},
+    {"R":15,"ombre":["Leanan_Sidhe","High_Pixie","Titania","Silky","Isis","Queen_Mab"],"q":"But this way of life in this world is all I've ever known.","risposte":[
+      {"n":1,"t":"It's not meaningless.","c":["G","G","G","O"]},
+      {"n":2,"t":"There are other ways to live.","c":["O","o","-","O"]},
+      {"n":3,"t":"You had a good run.","c":["G","-","-","G"]}]},
+    {"R":16,"ombre":["Koppa_Tengu","Kurama_Tengu","Anzu","Dionysus","Cu_Chulainn","Andras","Mokoi","Mithras","Oberon"],"q":"But what if I ripped your body apart? ...What color blood would come pouring out?","risposte":[
+      {"n":1,"t":"Red.","c":["-","G","G","B"]},
+      {"n":2,"t":"Green.","c":["-","O","B","G"]},
+      {"n":3,"t":"I don't bleed or cry.","c":["G","B","b","-"]}]},
+    {"R":17,"ombre":[],"q":"Can you sacrifice yourself in order to demonstrate your adoration of our Father?","risposte":[
+      {"n":1,"t":"I can.","c":["-","-","-","-"]},
+      {"n":2,"t":"I can't.","c":["-","-","-","-"]},
+      {"n":3,"t":"I don't adore him.","c":["-","g","-","-"]}]},
+    {"R":18,"ombre":["Archangel","Power","Throne","Melchizedek","Dominion"],"q":"Can you sacrifice yourself in order to demonstrate your veneration of our Father?","risposte":[
+      {"n":1,"t":"I can certainly try.","c":["O","-","G","G"]},
+      {"n":2,"t":"No can do.","c":["O","G","-","-"]},
+      {"n":3,"t":"What's veneration?","c":["-","O","-","G"]}]},
+    {"R":19,"ombre":["High_Pixie","Apsaras","Valkyrie","Isis","Silky","Leanan_Sidhe"],"q":"Care to explain yourself? I certainly hope you have a good reason for this boorish treatment.","risposte":[
+      {"n":1,"t":"That would take a while.","c":["O","B","G","G"]},
+      {"n":2,"t":"There's no need to explain.","c":["G","o","B","-"]},
+      {"n":3,"t":"Just shut up...","c":["-","G","-","O"]}]},
+    {"R":20,"ombre":["Rakshasa","Take-Minakata","Choronzon","Girimehkala","Kumbhanda","Orobas","Kaiwan","Black_Ooze"],"q":"C'mon, what's with the mask? Kinda cringy, don'tcha think?","risposte":[
+      {"n":1,"t":"Sure is.","c":["G","O","G","O"]},
+      {"n":2,"t":"Shut up...","c":["G","B","-","O"]},
+      {"n":3,"t":"I'm secretly a kid.","c":["O","G","O","G"]}]},
+    {"R":21,"ombre":[],"q":"Confess your sins.","risposte":[
+      {"n":1,"t":"I apologize.","c":["-","-","-","-"]},
+      {"n":2,"t":"I think... I was wrong.","c":["-","-","-","-"]},
+      {"n":3,"t":"No chance.","c":["-","g","-","-"]}]},
+    {"R":22,"ombre":["Lamia","Yaksini","Nekomata"],"q":"Could this be what humans call a proposal...?","risposte":[
+      {"n":1,"t":"I'm surprised you knew.","c":["B","O","-","G"]},
+      {"n":2,"t":"No, it's not.","c":["B","G","-","-"]},
+      {"n":3,"t":"That's a myth.","c":["G","B","-","-"]}]},
+    {"R":23,"ombre":["Oni","Eligor","Anubis","Atavaka","Oni","Abaddon","Belphegor","Bicorn"],"q":"Couldn't ya at least make me a cup of tea or somethin'? Hell, that'd be real polite.","risposte":[
+      {"n":1,"t":"So sorry.","c":["-","O","G","B"]},
+      {"n":2,"t":"Brew your own.","c":["-","G","-","G"]},
+      {"n":3,"t":"I'm not known for being polite.","c":["G","G","-","B"]}]},
+    {"R":24,"ombre":["Koppa_Tengu","Oberon","Naga","Mithras"],"q":"Did I just see your hand shaking? Isn't your guilt tormenting you?","risposte":[
+      {"n":1,"t":"It's just a chill.","c":["b","-","-","-"]},
+      {"n":2,"t":"Yeah, I can't take it...","c":["O","-","-","G"]},
+      {"n":3,"t":"Shut up.","c":["G","-","-","-"]}]},
+    {"R":25,"ombre":["Black_Ooze","Kumbhanda","Macabre","Orobas","Rakshasa","Girimehkala"],"q":"Did I... lose?","risposte":[
+      {"n":1,"t":"Yup...","c":["O","b","-","O"]},
+      {"n":2,"t":"Not sure yet.","c":["G","g","-","-"]},
+      {"n":3,"t":"Nah, you totally won.","c":["B","B","G","G"]}]},
+    {"R":26,"ombre":["Onmoraki","Sudama","Kodama"],"q":"Didn't you feel like that when you were a kid, too?","risposte":[
+      {"n":1,"t":"It's not so bad-olescent.","c":["G","O","O","-"]},
+      {"n":2,"t":"Being a kid is tough.","c":["O","G","G","G"]},
+      {"n":3,"t":"I don't remember.","c":["G","-","-","-"]}]},
+    {"R":27,"ombre":["Lamia","Kushinada"],"q":"Do you have a dish you're good at?","risposte":[
+      {"n":1,"t":"Fried rice.","c":["O","-","-","g"]},
+      {"n":2,"t":"Mystery meat.","c":["B","-","-","g"]},
+      {"n":3,"t":"What are you saying?","c":["G","-","-","-"]}]},
+    {"R":28,"ombre":["Kikuri-Hime","Succubus"],"q":"Do you have a lot of friends? Ever feel like the things they do are annoying?","risposte":[
+      {"n":1,"t":"Sometimes.","c":["-","o","G","o"]},
+      {"n":2,"t":"No.","c":["O","-","-","-"]},
+      {"n":3,"t":"I have no friends.","c":["-","g","-","g"]}]},
+    {"R":29,"ombre":["Archangel","Melchizedek","Dominion","Power"],"q":"Do you know what I speak of?","risposte":[
+      {"n":1,"t":"Sin...?","c":["-","B","-","G"]},
+      {"n":2,"t":"Please tell me.","c":["-","O","G","-"]},
+      {"n":3,"t":"I've done nothing wrong.","c":["-","G","-","-"]}]},
+    {"R":30,"ombre":["Archangel","Power","Dominion","Throne"],"q":"Do you seek friendly competition with a beloved neighbor? Or have you come to destroy a hated foe?","risposte":[
+      {"n":1,"t":"You're a beloved neighbor.","c":["-","GOOD / OK?","G","G"],"multi_non_confermate":[1]},
+      {"n":2,"t":"You're a loathsome foe.","c":["-","o","-","-"]},
+      {"n":3,"t":"You sound preachy.","c":["G","B","-","G"]}]},
+    {"R":31,"ombre":["Throne"],"q":"Do you...think of me as a charlatan?","risposte":[
+      {"n":1,"t":"I don't think that.","c":["B","-","-","-"]},
+      {"n":2,"t":"I think of you as a foe.","c":["-","-","-","-"]},
+      {"n":3,"t":"You're not one?","c":["-","-","-","-"]}]},
+    {"R":32,"ombre":["Obariyon","Kodama","Onmoraki"],"q":"Do you think they really mean it all the time?","risposte":[
+      {"n":1,"t":"Yes.","c":["-","G","O","-"]},
+      {"n":2,"t":"No, but they say it anyway.","c":["-","-","G","-"]},
+      {"n":3,"t":"I'm cuter than most kids.","c":["G","-","-","G"]}]},
+    {"R":33,"ombre":["Narcissus","Mithras","Oberon","Kurama_Tengu"],"q":"Doesn't what you're doing bother your conscience?","risposte":[
+      {"n":1,"t":"Now that you mention it...","c":["G","-","G","-"]},
+      {"n":2,"t":"...Nope","c":["-","G","-","-"]},
+      {"n":3,"t":"I'm past such things.","c":["-","-","-","-"]}]},
+    {"R":34,"ombre":["Fuu-ki","Hanuman","Anubis","Forneus","Abaddon","Chernobog","Oni","Ippon-Datara","Bicorn"],"q":"Don't take this the wrong way, but man... Bein' a carefree kid sure must be nice.","risposte":[
+      {"n":1,"t":"I want to be a kid forever.","c":["B","O","G","O"]},
+      {"n":2,"t":"I prefer being an adult.","c":["O","G","-","-"]},
+      {"n":3,"t":"I wish I was still a baby.","c":["b","-","-","G"]}]},
+    {"R":35,"ombre":["Queen_Mab","Apsaras","Parvati","Valkyrie","Norn","Kurama_Tengu","Titania"],"q":"Don't you think expecting your would-be victim to be receptive to your words is unreasonable?","risposte":[
+      {"n":1,"t":"I do.","c":["O","G","O","-"]},
+      {"n":2,"t":"I don't.","c":["-","G","-","-"]},
+      {"n":3,"t":"Don't worry about it.","c":["G","-","G","G"]}]},
+    {"R":36,"ombre":["Kali","Rangda"],"q":"Don't you think it's sad that slang and sayings can grow old and get outdated?","risposte":[
+      {"n":1,"t":"That is sad.","c":["b","-","-","-"]},
+      {"n":2,"t":"I don't think so.","c":["-","G","-","-"]},
+      {"n":3,"t":"That just proves you're old.","c":["G","-","-","-"]}]},
+    {"R":37,"ombre":["Melchizedek","Throne"],"q":"For you to force me to prostrate myself, as one who only seeks your well-being... Is there anything more irrational?","risposte":[
+      {"n":1,"t":"My apologies.","c":["O","-","-","-"]},
+      {"n":2,"t":"I don't want salvation.","c":["-","G","-","-"]},
+      {"n":3,"t":"Shut up.","c":["-","B","-","-"]}]},
+    {"R":38,"ombre":["Kodama","Obariyon","Sudama"],"q":"Guess what I want you to read me before you tuck me into bed!","risposte":[
+      {"n":1,"t":"An animal book","c":["G","-","G","B"]},
+      {"n":2,"t":"A story about a Yakuza","c":["-","B","-","G"]},
+      {"n":3,"t":"I have no idea","c":["-","G","-","-"]}]},
+    {"R":39,"ombre":["Andras","Dionysus","Mokoi","Kurama_Tengu","Mithras","Narcissus","Barong"],"q":"Had I known things would turn out like this, I'd wish I had found the courage to ask that girl out...","risposte":[
+      {"n":1,"t":"It's not too late.","c":["G","-","G","B"]},
+      {"n":2,"t":"You never had a chance.","c":["B","G","-","-"]},
+      {"n":3,"t":"I'll make sure she's happy.","c":["O","-","-","G"]}]}
+  ]
+}

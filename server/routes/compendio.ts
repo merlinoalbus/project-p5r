@@ -13,6 +13,8 @@ import { aggiornaRichiesta, citazioniRichiesta, collocaRichiesta, creaRichiesta,
 import { battaglia } from '../services/battagliaService.js';
 import { dettaglioOmbra, elencaOmbre, verificaOmbre } from '../services/ombreService.js';
 import { paramsOmbra, queryOmbra, queryOmbre, type QueryOmbre } from '../schemas/ombre.js';
+import { negoziazione, verificaNegoziazione } from '../services/negoziazioneService.js';
+import { queryNegoziazione, type QueryNegoziazione } from '../schemas/negoziazione.js';
 import { aggiornaArea, aggiornaAreaDedalo, aggiornaDungeon, ripristinaDungeon, aggiornaPunto, collegaPinAlPunto, copiaPuntiInArea, creaArea, impostaAreePalazzoInfiltrazione, creaAreaDedalo, creaPunto, eliminaArea, eliminaAreaDedalo, eliminaPunto, spostaAreaDedalo, spostaPunto, spostaPuntiInArea } from '../services/dungeonService.js';
 import { bodyArea, bodyAreaDedalo, bodyAreePalazzoInfiltrazione, bodyAtterraggi, bodyCollocaRichiesta, bodyDungeon, bodyFinestraDungeon, bodyNuovaArea, bodyNuovaAreaDedalo, bodyNuovaRichiesta, bodyNuovoPunto, bodyPunto, bodyRequisitoRichiesta, bodyRichiesta, bodySpostaPunto, bodySpostaPuntiInArea, paramsChiaveGuida, paramsPinDelPunto, paramsRequisitoConfidente, querySchedaDungeon, bodyCreaVoceDallaScheda, bodyCollegaSchedaAllaVoce } from '../schemas/guidaDungeon.js';
 import { correggiRequisitoRichiesta, impostaRequisitiRango, requisitiDelConfidente, ripristinaRequisitiRango, togliRequisitoRichiesta } from '../services/requisitiConfidentiService.js';
@@ -261,6 +263,13 @@ router.get('/ombre/verifica', (_req, res) => {
 });
 router.get('/ombre/:chiave', validate({ params: paramsOmbra, query: queryOmbra }), (req, res) => {
   res.json(dettaglioOmbra(String(req.params.chiave), (req.query as unknown as { partita?: number }).partita));
+});
+/* ---- La negoziazione per umore (L8, B5): il lettore unico, sola lettura. «verifica» è una rotta propria, non un parametro. ---- */
+router.get('/negoziazione', validate({ query: queryNegoziazione }), (req, res) => {
+  res.json(negoziazione(req.query as unknown as QueryNegoziazione));
+});
+router.get('/negoziazione/verifica', (_req, res) => {
+  res.json(verificaNegoziazione());
 });
 router.get('/richieste', validate({ query: queryDomande }), (req, res) => {
   res.json(richieste((req.query as unknown as { partita?: number }).partita));

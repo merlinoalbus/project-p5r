@@ -169,6 +169,18 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     risposta: '`OmbreVerificaDto`',
     errori: [],
   },
+  'GET /api/compendio/negoziazione': {
+    sommario: 'Negoziazione per umore: domande, risposte ed esiti (L8)',
+    descrizione: 'Il lettore unico della negoziazione. Ogni domanda raccoglie le sue varianti (Royal, file originale dell\'app, eventuali ritocchi); ogni risposta porta, per ogni umore richiesto, una cella: `principale` (l\'esito Royal quando è documentato), `alternative` (quando la fonte si contraddice: celle multi-esito di Royal, esiti dell\'app discordanti dove Royal non dice nulla), `altre` (gli esiti dell\'app, sempre conservati) e `divergenza`. `nonConfermata` avvisa che l\'esito viene dalla classe «unconfirmed» di Royal (ereditato da P5, non confermato). Una cella senza esito (`senza-dato`) resta tale: non è un esito neutro. Una risposta dell\'app legata con sicurezza a una Royal non ripete le celle (`celle` vuote, `celleDa` = la risposta Royal): i suoi esiti sono fra le `altre` di quella cella; le domande composte e l\'abbinamento a bassa certezza (A87) restano con le sole attestazioni dell\'app. Filtri: `umore` (cupa, irritabile, timida, giocosa), oppure `ombra` (la chiave dell\'Ombra: vale la sua personalità valida; sconosciuta o non negoziabile = nessun umore e nessuna domanda, mai una personalità dedotta dal nome), `q` (testo su domande e risposte, anche nell\'originale inglese). Senza `umore` né `ombra`, tutti e quattro gli umori. Le rese italiane delle domande nuove sono rese dell\'Esperto, non il testo del gioco (`testoOrigine`).',
+    risposta: '`NegoziazioneDto`',
+    errori: [[400, 'umore-e-ombra-discordi'], [404, 'ombra-non-trovata'], [404, 'negoziazione-non-disponibile']],
+  },
+  'GET /api/compendio/negoziazione/verifica': {
+    sommario: 'Conteggi della negoziazione rimisurati e rapporto dell\'importazione',
+    descrizione: 'Sola lettura. I conteggi rifatti ora sulle righe (domande, varianti, risposte, celle Royal per umore, attestazioni dell\'app confrontate con Royal, contraddizioni, rettifiche, domande senza risposta buona), il confronto voce per voce con le misure del contratto (un riscontro, non una soglia) e il rapporto scritto dall\'importazione della migrazione 172 con l\'impronta degli ingressi e gli elenchi consultabili. Non c\'è nulla da approvare dall\'interfaccia.',
+    risposta: '`NegoziazioneVerificaDto`',
+    errori: [[404, 'negoziazione-non-disponibile']],
+  },
   'GET /api/compendio/ombre/:chiave': {
     sommario: 'Scheda di un\'Ombra (L8)',
     descrizione: 'Nome, nomi alternativi, Persona, personalità, affinità (quelle della Persona nel compendio, con le proprie dell\'Ombra dove differiscono, `proprie`: solo le 4 eccezioni di G-019 e le non reclutabili; per queste ultime solo gli elementi noti), dove si incontra (Palazzo e infiltrazione, Memento e dedalo con le aree: unione della guida alla Battaglia, delle voci dei Palazzi e delle voci dei dedali) e le voci della guida che la descrivono. Con `?partita=` dice se la sua Persona è registrata nel compendio della partita.',
