@@ -372,18 +372,22 @@ const ULTIMO_GIORNO_VALIDATO = '06-01';
 
 /**
  * R10-28c/2: dopo il «concluso» di un Palazzo (Tesoro e boss finale, `palazziConclusi`) la voce che porta al suo ingresso non si propone più
- * nei giorni successivi. Sono nascoste le voci di azione col riferimento a quel Palazzo, NON ancora spuntate nella partita, dei giorni dopo
- * il giorno corrente della partita (la conclusione è già avvenuta); mai quelle del diario validato (04-01..06-01) e mai una voce spuntata.
- * Lettura soltanto: nessun dato cambia. Senza giorno corrente o senza Palazzi conclusi, nessuna voce è nascosta.
+ * nei giorni successivi. Sono nascoste SOLO le voci d'ingresso o d'infiltrazione: quelle di azione col riferimento a quel Palazzo e con
+ * almeno un'infiltrazione o una proposta d'infiltrazione collegata (cioè le voci da cui si «Entra»); NON ancora spuntate nella partita, dei
+ * giorni dopo il giorno corrente (la conclusione è già avvenuta); mai quelle del diario validato (04-01..06-01) e mai una voce spuntata.
+ * Le altre voci del Palazzo (per esempio la lettera di sfida di Kaneshiro, senza infiltrazioni) restano.
+ * Lettura soltanto: nessun dato cambia. Senza giorno corrente, senza Palazzi conclusi o senza le tabelle delle infiltrazioni (L3), nessuna
+ * voce è nascosta.
  */
 export function ingressiConclusiNascosti(partitaId: number): Array<{ uid: string; data: string }> {
   const giorno = (prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null } | undefined)?.data_gioco;
   if (!giorno) return [];
   const conclusi = palazziConclusi(partitaId);
-  if (conclusi.size === 0) return [];
+  if (conclusi.size === 0 || !conLegami()) return [];
   const righe = prepared(`SELECT v.uid AS uid, v.data AS data, v.riferimento_chiave AS palazzo FROM voce_giornata v
     LEFT JOIN spunta_voce_partita s ON s.voce_uid = v.uid AND s.partita_id = ?
-    WHERE v.genere = 'azione' AND v.riferimento_tipo = 'dungeon' AND v.data > ? AND v.data > ? AND s.voce_uid IS NULL`)
+    WHERE v.genere = 'azione' AND v.riferimento_tipo = 'dungeon' AND v.data > ? AND v.data > ? AND s.voce_uid IS NULL
+      AND (EXISTS (SELECT 1 FROM voce_infiltrazione i WHERE i.voce_uid = v.uid) OR EXISTS (SELECT 1 FROM proposta_infiltrazione_voce p WHERE p.voce_uid = v.uid))`)
     .all(partitaId, giorno, ULTIMO_GIORNO_VALIDATO) as Array<{ uid: string; data: string; palazzo: string }>;
   return righe.filter((r) => conclusi.has(r.palazzo)).map(({ uid, data }) => ({ uid, data }));
 }
