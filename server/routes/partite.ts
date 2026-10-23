@@ -18,6 +18,7 @@ import { aggiornaPianoSalvato, eliminaPianoSalvato, pianiSalvati, salvaPiano } f
 import { anteprimaFusione, eseguiForca, eseguiFusione, eseguiIsolamento, skillResistenzaIsolamento } from '../services/operazioniVellutoService.js';
 import { aggiornaCiclo, avanzaCiclo, cicliSalvati, eliminaCiclo, salvaCiclo } from '../services/cicliSalvatiService.js';
 import { impostaDomandaFatta } from '../services/domandeService.js';
+import { impostaPiazzamentoEsame, piazzamentiDellaPartita } from '../services/piazzamentoEsamiService.js';
 import { impostaStatoPunto } from '../services/dungeonService.js';
 import { impostaStatoRichiesta } from '../services/richiesteService.js';
 import { impostaTimbri } from '../services/timbriService.js';
@@ -255,6 +256,14 @@ router.put('/:id/punti', validate({ params: paramsPartita, body: bodyStatoPunto 
 router.put('/:id/domande/:domandaId', validate({ params: paramsPartitaDomanda, body: bodyDomandaFatta }), (req, res) => {
   const b = req.body as { fatta: boolean; conoscenza?: boolean };
   res.json(impostaDomandaFatta(Number(req.params.id), Number(req.params.domandaId), b.fatta, b.conoscenza === true));
+});
+
+// ---- Piazzamento agli esami (L9 R9-08): vale per il moltiplicatore dei sette Confidenti fino all'esame successivo ----
+router.get('/:id/esami/piazzamenti', validate({ params: paramsPartita }), (req, res) => {
+  res.json(piazzamentiDellaPartita(Number(req.params.id)));
+});
+router.put('/:id/esami/:esame/piazzamento', validate({ params: z.object({ id: paramsPartita.shape.id, esame: z.string().min(1).max(60) }), body: z.object({ piazzamento: z.enum(['primo', 'primi-10', 'altro']).nullable() }).strict() }), (req, res) => {
+  res.json(impostaPiazzamentoEsame(Number(req.params.id), String(req.params.esame), (req.body as { piazzamento: 'primo' | 'primi-10' | 'altro' | null }).piazzamento));
 });
 
 // ---- Compendio personale ----
