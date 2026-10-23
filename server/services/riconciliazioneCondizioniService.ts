@@ -71,6 +71,20 @@ function proposta(g: GruppoFraseCondizioni, chiave: string): Proposta | null {
   ], prima: [], identita: { chiave: 'negozio-palazzo-niijima', origine: 'seed', nascosto: 0,
     sede_chiave: null, luogo_chiave: null, condizioni_json: '[]', seed_json: null, listino_condiviso: null,
     orari_json: '{"giorni":[],"fasce":[],"chiusoConPioggia":false,"nota":"solo durante l’esplorazione del Palazzo"}', eccezione_orari_json: null } };
+  // L6-RIC (ripresa del 23 ottobre): voci concluse con la loro fonte, confronto della formula intera senza applicazione (`prima` vuota).
+  // A10: la pesca ha la sua regola canonica (138), l'attività degli obiettivi non ha condizioni proprie, come A12 con la scheda del Confidente.
+  if (g.id === 'A10' && chiave === SFIDA_PESCA) return { dopo: [], prima: [], identita: { chiave: SFIDA_PESCA, pesca_regola_chiave: REGOLA_PESCA, pesca_ruolo: 'obiettivi' } };
+  // L21: Jose compare la prima volta dopo la Richiesta «Un ex piuttosto appiccicoso» (G-029); la comparsa casuale successiva non è uno sblocco.
+  if (g.id === 'L21') return { dopo: [{ tipo: 'richiesta', richiesta: 'un-ex-piuttosto-appiccicoso' }], prima: [], identita: { chiave: 'mementos/negozio-jose', quartiere_chiave: 'mementos' } };
+  // L27: prima visita alla sede Okumura il 15 settembre (G-031, certezza alta); nessuna fine dell'intervallo inventata.
+  if (g.id === 'L27') return { dopo: [data('09-15')], prima: [], identita: { chiave: 'roppongi/okumura-foods-hq', quartiere_chiave: 'roppongi' } };
+  // L03: libro «Parchi divertimento» (premio della Richiesta «Non siamo i tuoi schiavi», AGS Libri) oppure l'evento di trama dell'11 ottobre.
+  if (g.id === 'L03') return { dopo: [{ tipo: 'gruppo', modo: 'almeno-una', condizioni: [{ tipo: 'lettura', categoria: 'libro', chiave: 'parchi-divertimento' }, data('10-11')] }],
+    prima: [], identita: { chiave: 'maihama/destinyland', quartiere_chiave: 'maihama' } };
+  // A17: la prima sfida (Comet Burger) chiede Coraggio, Conoscenza e Perizia 2 (AGS, Samurai Gamers, Final Weapon Royal); le soglie 3 e 4 e
+  // l'ordine delle sfide stanno sugli articoli I52–I54.
+  if (g.id === 'A17') return { dopo: ['coraggio', 'conoscenza', 'perizia'].map((dote): RequisitoSpillo => ({ tipo: 'dote', dote, rango: 2 })),
+    prima: [], identita: { chiave: 'sfida-big-bang-burger', sede_chiave: 'shibuya/big-bang-burger' } };
   if (g.id === 'A08') return { dopo: [data('04-09')], prima: [[{ tipo: 'intervallo', dal: '04-09', al: '05-20' }]],
     identita: { tipo: 'studio', sede_chiave: 'shujin-academy/biblioteca-shujin' } };
   if (g.id === 'A13') return { dopo: [conf('shinya', 1), data('09-04')],
@@ -111,6 +125,13 @@ function proposta(g: GruppoFraseCondizioni, chiave: string): Proposta | null {
     I68: [data('04-18'), { tipo: 'stagione', stagione: 'primavera' }],
     I70: [{ tipo: 'quartiere', quartiere: 'kichijoji' }, data('06-05'), giorni(['domenica']), { tipo: 'fascia', fascia: 'sera' }],
     I72: [...(chiave === 'prossimo-asso/frullato-iperproteico' ? [data('04-18')] : []), { tipo: 'piove' }],
+    // L6-RIC: tre scambi di Sakai con la finestra della fonte AGS (scambi, oggetti curiosi); la DATA 06-12 è ridondante e resta com'è.
+    // Costo dell'oggetto e identità del risultato sono del baratto (L7), non della condizione.
+    I12: [data('06-12'), { tipo: 'intervallo', dal: '06-26', al: '07-02' }],
+    I60: [data('06-12'), { tipo: 'intervallo', dal: '01-22', al: '02-02' }],
+    I61: [data('06-12'), { tipo: 'intervallo', dal: '06-12', al: '06-17' }],
+    // L6-RIC: l'Aojiru si vende solo la domenica (megaten database Royal); la rotazione delle Doti resta informativa (136).
+    I71: [giorni(['domenica'])],
   };
   const dateTv: Record<string, string> = { I14: '05-01', I15: '12-11', I16: '11-13', I17: '08-14', I18: '01-15', I19: '05-15', I20: '06-19',
     I21: '10-02', I22: '01-22', I23: '05-22', I24: '04-24', I25: '09-25', I26: '06-26', I27: '11-27', I28: '01-29',
