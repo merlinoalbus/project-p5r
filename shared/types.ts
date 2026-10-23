@@ -1251,6 +1251,8 @@ export interface AzionePercorsoDto {
   effettiVoce?: StatoEffettiVoceDto;
   /** Ricevute del nuovo formato, separate dalla fotografia legacy della spunta. */
   ricevuteEffetti?: ReceiptEffettoVoceDto[];
+  /** Quante proposte di punti aspettano una decisione per questa voce nella partita: se > 0 la voce mostra il pulsante «Applica» (BON-01). */
+  daApplicare?: number;
   /** Gli effetti di `produce` in parole, con i nomi di libri, film e attività («Zorro, il fuorilegge: completato»). */
   produceTesto: string[];
   /** Fatta nella partita. */

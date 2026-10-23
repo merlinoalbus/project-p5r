@@ -16,7 +16,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { aggiornaVoceGiornata, eliminaVoceGiornata, impostaAzionePercorso, spostaVoceGiornata } from '../../services/api';
+import { aggiornaVoceGiornata, eliminaVoceGiornata, getVocePercorso, impostaAzionePercorso, spostaVoceGiornata } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { avvisoSpunta } from '../../utils/percorso';
 import { dotiDaSegnareDaEffetti } from '../../utils/dotiDaSegnare';
@@ -39,6 +39,7 @@ import { seGiornoAvanzato } from '../../utils/giornoAvanzato';
 import { TrasferisciVoci } from './TrasferisciVoci';
 import { ApertureVisitaRegistrata, SceltaApertureVisita } from './ApertureVisita';
 import { PreparaAcquistiVoce } from './PreparaAcquistiVoce';
+import { DaApplicare } from '../partita/DaApplicare';
 import type { RichiestaRegistraAcquisto } from '../../../shared/acquisti';
 import type { RichiestaRegistraSessionePesca } from '../../../shared/pesca';
 import { descriviEffettoVoce } from '../../../shared/effettiVoce';
@@ -142,6 +143,8 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
         <InfiltrazioniVoce a={a} partitaId={partitaId} onCambiata={onCambiata} />
         {a.effettiVoce?.stato === 'legacy-da-correggere' && <p role="alert" className="m-0 text-warning">Effetti da correggere: {a.effettiVoce.motivo}. Il dato originario resta visibile nell’editor.</p>}
         {pendente && <p role="status" className="m-0 text-warning">Operazione da verificare nel registro dei gesti: questa voce non viene rispuntata.</p>}
+        {/* BON-01: i punti della voce che aspettano una decisione, con «Applica» sulla voce (niente pannello «Da applicare») */}
+        {partitaId !== null && !!a.daApplicare && <DaApplicare partitaId={partitaId} voceUid={a.uid} onCambiato={async () => { onCambiata(await getVocePercorso(a.uid, partitaId)); }} />}
         {a.effettiVoce?.effetti.filter((e) => e.effetto.tipo === 'acquisto' || e.effetto.tipo === 'pesca').map((e) => <span key={e.uid}>{descriviEffettoVoce(e.effetto)}</span>)}
         {!!a.ricevuteEffetti?.length && <details><summary className="touch">Ricevute degli effetti della spunta</summary><ul className="m-0 pl-4">{a.ricevuteEffetti.map((r) => <li key={r.id}>{r.tipo === 'acquisto' ? 'Consumazione' : r.tipo === 'pesca' ? 'Sessione di pesca' : r.tipo === 'contesto' ? 'Incontro e contesto della spunta' : r.tipo === 'dote' ? 'Dote' : r.tipo === 'lettura' ? 'Lettura o gioco' : 'Turno'} · {new Date(r.applicatoIl).toLocaleString('it-IT')} · {r.annullatoIl ? 'annullata' : 'attiva'}</li>)}</ul></details>}
         {chiediAcquisti && partitaId !== null && <PreparaAcquistiVoce key={`${partitaId}:${a.uid}:${a.effettiVoce?.revisione}`} a={a} partitaId={partitaId} onRileggi={onCambiata} onChiudi={() => setChiediAcquisti(null)} onConferma={(richieste, pesche) => cambia(true, chiediAcquisti.noteRisposta, chiediAcquisti.senzaPunti, chiediAcquisti.aperture, richieste, pesche)} />}

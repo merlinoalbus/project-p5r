@@ -11,6 +11,8 @@ export interface PropostaPartitaDto extends RiferimentoPropostaPartita {
   causa: { tipo: 'acquisto' | 'voce' | 'pesca'; chiave: string };
   /** Il testo della voce del Diario da cui nasce la proposta (null se non ce n'è una o non c'è più). */
   voceTesto?: string | null;
+  /** La voce del Diario a cui si aggancia il pulsante «Applica» (null se la proposta non nasce da una voce). */
+  voceUid?: string | null;
   /** Gli yen non si applicano (BON-12): la proposta Dote di un consumo porta la spesa come promemoria da cambiare a mano. */
   promemoriaYen?: number | null;
   unita: 'punti-interni' | 'yen' | 'punti-pesca' | 'azione';

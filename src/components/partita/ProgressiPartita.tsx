@@ -23,7 +23,6 @@ import { NOME_TIPO_ATTIVITA } from '../../../shared/attivita';
 import { formattaYen } from '../../utils/letture';
 import { avvisaDotiDaSegnare } from '../../utils/dotiDaSegnare';
 import { dataGiocoTesto } from '../../utils/dateGioco';
-import { DaApplicare } from './DaApplicare';
 import { RegistroAcquistiPartita } from './RegistroAcquistiPartita';
 import { RegistroPesca } from '../pesca/RegistroPesca';
 import { ATTIVITA_PESCA, EVENTI_PESCA, SFIDA_PESCA } from '../../../shared/pesca';
@@ -69,7 +68,6 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
     <PageState isLoading={dati.caricamento && !p} error={dati.errore} onRetry={dati.ricarica}>
       {p && (
         <div className="flex flex-col gap-4">
-          <DaApplicare key={partitaId} partitaId={partitaId} onCambiato={async () => { setStato(null); await dati.ricarica(); }} />
           <RegistroAcquistiPartita key={`acquisti:${partitaId}`} partitaId={partitaId} onCambiato={async () => { setStato(null); await dati.ricarica(); }} />
           <RegistroPesca key={`pesca:${partitaId}`} partitaId={partitaId} onCambiato={async () => { setStato(null); await dati.ricarica(); }} />
           <section className="flex flex-col gap-2" aria-labelledby="progressi-calcolati">

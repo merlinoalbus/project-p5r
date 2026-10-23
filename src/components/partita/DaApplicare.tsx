@@ -27,11 +27,14 @@ const dicituraDecisione: Record<DecisioneProposte['tipo'], string> = {
 };
 const canonico = (v: unknown): unknown => Array.isArray(v) ? v.map(canonico) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => a.localeCompare(b)).map(([k, x]) => [k, canonico(x)])) : v;
 
-/** Coda durevole unica per Oggi, Home e Progressi: nessun saldo cambia senza una decisione esplicita. */
-export function DaApplicare(props: { partitaId: number; onCambiato?: () => void | Promise<void> }) {
-  return <DaApplicareNelContesto key={props.partitaId} {...props} />;
+/**
+ * I punti di una voce spuntata che non sono ancora nella partita, con il pulsante «Applica» sulla voce (BON-01): nessun pannello a
+ * parte. Nessun saldo cambia senza una decisione esplicita (D6). Senza proposte aperte né decise per la voce non mostra niente.
+ */
+export function DaApplicare(props: { partitaId: number; voceUid: string; onCambiato?: () => void | Promise<void> }) {
+  return <DaApplicareNelContesto key={`${props.partitaId}:${props.voceUid}`} {...props} />;
 }
-function DaApplicareNelContesto({ partitaId, onCambiato }: { partitaId: number; onCambiato?: () => void | Promise<void> }) {
+function DaApplicareNelContesto({ partitaId, voceUid, onCambiato }: { partitaId: number; voceUid: string; onCambiato?: () => void | Promise<void> }) {
   const gesti = useGestiPartita();
   const elenco = useCarica(() => getDaApplicare(partitaId), [partitaId, gesti.versionePerPartita[partitaId] ?? 0, gesti.versioneGuida]);
   const registro = useCarica(() => leggiAcquistiRegistrati(partitaId), [partitaId, gesti.versionePerPartita[partitaId] ?? 0, gesti.versioneGuida]);
@@ -39,7 +42,6 @@ function DaApplicareNelContesto({ partitaId, onCambiato }: { partitaId: number; 
   const doti = useCarica(() => getDoti(partitaId), [partitaId, gesti.versionePerPartita[partitaId] ?? 0, gesti.versioneGuida]);
   const puntiDote = (chiave: string | null): number | null => (chiave ? doti.dati?.find((d) => d.chiave === chiave)?.punti ?? null : null);
   const identita = (p: PropostaPartitaDto) => <IdentitaProposta proposta={p} registrazioni={registro.dati?.registrazioni ?? null} erroreRegistro={registro.errore} caricamentoRegistro={registro.caricamento} />;
-  const [selezionate, setSelezionate] = useState<Set<string>>(new Set());
   const [anteprima, setAnteprima] = useState<AnteprimaDecisioneProposteDto | null>(null);
   const [daDichiarare, setDaDichiarare] = useState<PropostaPartitaDto | null>(null);
   const [quantita, setQuantita] = useState('');
@@ -51,8 +53,22 @@ function DaApplicareNelContesto({ partitaId, onCambiato }: { partitaId: number; 
   const blocco = useRef(false);
   const vivo = useRef(true);
   useLayoutEffect(() => { vivo.current = true; return () => { vivo.current = false; }; }, []);
-  const aperte = (elenco.dati ?? []).filter((p) => p.stato === 'aperta');
-  const scelte = aperte.filter((p) => selezionate.has(p.uid));
+  const dellaVoce = (elenco.dati ?? []).filter((p) => p.voceUid === voceUid || p.dati.voceUid === voceUid);
+  const aperte = dellaVoce.filter((p) => p.stato === 'aperta');
+  /** Annulla il non ancora contato e applica: chi preme «Applica» dice implicitamente che i punti non sono ancora nel saldo. */
+  const applica = async (p: PropostaPartitaDto) => {
+    if (blocco.current) return;
+    if (p.verifica !== 'non-conteggiata') {
+      blocco.current = true; setOccupato(true); setErrore(null); setRicevuta(null);
+      try {
+        const a = await anteprimaDecisioneProposte(partitaId, { operazioneId: crypto.randomUUID().replaceAll('-', ''), decisione: { tipo: 'non-conteggiata', proposte: [riferimento(p)] } });
+        await decidiProposteConRegistro(partitaId, { ...a.richiesta, revisioneProposteAttesa: a.revisioneProposteAttesa }, { etichetta: 'Punti non ancora contati' });
+        await elenco.ricarica();
+      } catch (e) { if (vivo.current) setErrore(testoErrore(e)); return; }
+      finally { blocco.current = false; if (vivo.current) setOccupato(false); }
+    }
+    chiedi({ tipo: 'applica', proposte: [riferimento(p)] });
+  };
   const prepara = async (decisione: DecisioneProposte) => {
     if (blocco.current) return;
     blocco.current = true; setOccupato(true); setErrore(null); setRicevuta(null);
@@ -80,7 +96,7 @@ function DaApplicareNelContesto({ partitaId, onCambiato }: { partitaId: number; 
       registrata = true;
       if (vivo.current) {
         setRicevuta(r.proposte.length === 1 ? 'Fatto.' : `Fatto: ${r.proposte.length} voci decise.`);
-        setAnteprima(null); setIncerto(false); setSelezionate(new Set());
+        setAnteprima(null); setIncerto(false);
       }
       useSuggerimentiStore.getState().invalida();
       if (!vivo.current) return;
@@ -102,24 +118,15 @@ function DaApplicareNelContesto({ partitaId, onCambiato }: { partitaId: number; 
   const effettoConsumo = consumo ? normalizzaEffettoVoce(consumo.dati.effetto) : null;
   const uidVoce = consumo && typeof consumo.dati.voceUid === 'string' ? consumo.dati.voceUid : null;
   const uidEffetto = consumo && typeof consumo.dati.effettoUid === 'string' ? consumo.dati.effettoUid : null;
-  return <section className="card flex min-w-0 flex-col gap-2" aria-label="Da applicare alla partita">
+  if (elenco.dati && !dellaVoce.length && !anteprima && !consumo && !daDichiarare && !ricevuta) return null;
+  return <section className="flex min-w-0 flex-col gap-2 rounded border border-border p-2" aria-label="Punti da applicare per questa voce">
     <GestiPartita partitaId={partitaId} onCambiato={async () => { if (vivo.current) { setAnteprima(null); setIncerto(false); await elenco.ricarica(); await onCambiato?.(); } }} />
-    <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="m-0 font-display text-[17px] uppercase">Da applicare{aperte.length > 0 ? ` · ${aperte.length}` : ''}</h2><button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => void elenco.ricarica()}>Aggiorna</button></div>
-    <p className="m-0 text-[12px] text-text-secondary">Voci che hai spuntato e i cui punti non sono ancora nella partita. Decidi tu cosa aggiungere: niente cambia da solo.</p>
-    {elenco.caricamento && !elenco.dati && <p role="status" className="m-0 text-[13px]">Caricamento…</p>}
+    {elenco.caricamento && !elenco.dati && <p role="status" className="m-0 text-[13px]">Un attimo…</p>}
     {elenco.errore && <p role="alert" className="m-0 text-error">{elenco.errore}</p>}
-    {elenco.dati && !aperte.length && <p className="m-0 text-[13px]">Niente da applicare: i punti delle voci spuntate sono tutti a posto.</p>}
     {!!aperte.length && <>
-      <div className="flex flex-wrap items-center gap-2 text-[12px]">
-        <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => setSelezionate(new Set(aperte.slice(0, 100).map((p) => p.uid)))}>Seleziona tutte</button>
-        <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato || !scelte.length} onClick={() => setSelezionate(new Set())}>Togli la selezione</button>
-        <button type="button" className="btn btn-secondary btn-sm touch" disabled={occupato || !scelte.length || scelte.some((p) => !p.applicabile || p.tipo === 'effetto-voce')} onClick={() => chiedi({ tipo: 'applica', proposte: scelte.map(riferimento) })}>Aggiungi i punti selezionati</button>
-        <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato || !scelte.length} onClick={() => chiedi({ tipo: 'scarta', proposte: scelte.map(riferimento) })}>Scarta quelli selezionati</button>
-      </div>
       <ul className="m-0 flex list-none flex-col gap-2 p-0">{aperte.map((p) => {
         const e = normalizzaEffettoVoce(p.dati.effetto);
-        return <li key={p.uid} className="flex min-w-0 flex-col gap-1 border-t border-border pt-2 text-[13px]">
-          <label className="touch flex items-center gap-2"><input type="checkbox" className="h-5 w-5" disabled={occupato || (!selezionate.has(p.uid) && scelte.length >= 100)} checked={selezionate.has(p.uid)} onChange={(ev) => setSelezionate((s) => { const n = new Set(s); if (ev.target.checked) n.add(p.uid); else n.delete(p.uid); return n; })} /><strong>{titolo(p)}</strong></label>
+        return <li key={p.uid} className="flex min-w-0 flex-col gap-1 text-[13px]">
           {(() => {
             // «Fascino 50 → 52»: cosa cambia, con i punti di adesso quando si conoscono (R10-10/4)
             const prima = p.tipo === 'dote' ? puntiDote(p.dote) : null;
@@ -127,31 +134,31 @@ function DaApplicareNelContesto({ partitaId, onCambiato }: { partitaId: number; 
           })()}
           <span>{p.motivo}</span>
           {!!p.promemoriaYen && <span className="rounded border border-border p-2 text-[12px]">Promemoria: questo consumo è costato ¥{p.promemoriaYen.toLocaleString('it-IT')}. L’app non tocca i tuoi yen: cambiali tu a mano.</span>}
-          {identita(p)}
           {p.orfana && <span className="text-warning">La voce o il consumo da cui nasce non c’è più.</span>}
-          {p.tipo !== 'effetto-voce' && p.verifica !== 'non-conteggiata' && <div className="flex flex-col gap-1 rounded border border-border p-2">
-            <strong>{p.verifica === 'ignota' ? 'Hai detto che non sai se questi punti sono già nel saldo.' : 'Questi punti sono già nel tuo saldo?'}</strong>
-            <span className="text-[12px] text-text-secondary">{p.verifica === 'ignota' ? 'Per aggiungerli serve saperlo: controlla nel gioco e rispondi.' : 'Serve per non contarli due volte.'}</span>
-            <div className="flex flex-wrap gap-1.5">
-              <button type="button" className="btn btn-secondary btn-sm touch" disabled={occupato} onClick={() => chiedi({ tipo: 'non-conteggiata', proposte: [riferimento(p)] })}>No, non ancora</button>
-              <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => { setDaDichiarare(p); setQuantita(''); }}>Sì, già contati…</button>
-              {p.verifica !== 'ignota' && <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => chiedi({ tipo: 'ignota', proposte: [riferimento(p)] })}>Non lo so</button>}
-            </div>
-          </div>}
-          {!!p.impedimenti.filter((i) => p.verifica === 'non-conteggiata' || !i.startsWith('Prima indica')).length && <ul className="m-0 pl-4 text-warning">{p.impedimenti.filter((i) => p.verifica === 'non-conteggiata' || !i.startsWith('Prima indica')).map((i) => <li key={i}>{i}</li>)}</ul>}
-          <div className="flex flex-wrap gap-1.5">
-            {p.tipo === 'effetto-voce' ? <button type="button" className="btn btn-secondary btn-sm touch" disabled={occupato || !p.applicabile || !!gestoPendenteNelloScope(partitaId, { proposte: [riferimento(p)] })} onClick={() => {
-              if (e?.tipo === 'acquisto' || e?.tipo === 'pesca') setConsumo(p);
-              else chiedi({ tipo: 'applica-effetto', proposta: riferimento(p) });
-            }}>Completa l’effetto</button> : <>
-              <button type="button" className="btn btn-primary btn-sm touch" disabled={occupato || !p.applicabile} onClick={() => chiedi({ tipo: 'applica', proposte: [riferimento(p)] })}>Aggiungi i punti</button>
-            </>}
-            <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => chiedi({ tipo: 'scarta', proposte: [riferimento(p)] })}>Scarta</button>
-          </div>
+          {(() => {
+            // «Applica» non chiede più «già nel saldo?»: premerlo dice che i punti non sono ancora contati; chi li ha già contati lo dice a parte
+            const soloVerifica = p.impedimenti.every((i) => i.startsWith('Prima indica'));
+            const altri = p.impedimenti.filter((i) => !i.startsWith('Prima indica'));
+            const inverso = p.delta < 0;
+            const etichetta = `${inverso ? 'Annulla' : 'Applica'} ${nome(p)}${p.tipo === 'effetto-voce' ? '' : ` ${p.delta > 0 ? '+' : ''}${p.delta}`}`;
+            return <>
+              {!!altri.length && <ul className="m-0 pl-4 text-warning">{altri.map((i) => <li key={i}>{i}</li>)}</ul>}
+              <div className="flex flex-wrap gap-1.5">
+                {p.tipo === 'effetto-voce' ? <button type="button" className="btn btn-primary btn-sm touch" disabled={occupato || !p.applicabile || !!gestoPendenteNelloScope(partitaId, { proposte: [riferimento(p)] })} onClick={() => {
+                  if (e?.tipo === 'acquisto' || e?.tipo === 'pesca') setConsumo(p);
+                  else chiedi({ tipo: 'applica-effetto', proposta: riferimento(p) });
+                }}>{e?.tipo === 'acquisto' && e.variante ? `Applica ${nomeDote(e.variante)}` : 'Completa l’effetto'}</button> : <>
+                  <button type="button" className="btn btn-primary btn-sm touch" disabled={occupato || !(p.applicabile || (soloVerifica && !p.orfana))} onClick={() => void applica(p)}>{etichetta}</button>
+                  {!inverso && <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => { setDaDichiarare(p); setQuantita(''); }}>Sono già nel saldo…</button>}
+                </>}
+                <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => chiedi({ tipo: 'scarta', proposte: [riferimento(p)] })}>Lascia stare</button>
+              </div>
+            </>;
+          })()}
         </li>;
       })}</ul>
     </>}
-    {!!elenco.dati?.some((p) => p.stato !== 'aperta') && <details><summary className="touch text-[13px]">Già decise</summary><ul className="m-0 flex flex-col gap-2 pl-4 text-[12px]">{elenco.dati.filter((p) => p.stato !== 'aperta').map((p) => <li key={p.uid}><strong>{titolo(p)}</strong> · {nome(p)} · {p.stato === 'applicata' ? (p.deltaApplicato !== 0 ? `aggiunti ${p.deltaApplicato > 0 ? '+' : ''}${p.deltaApplicato}` : 'applicata') : p.motivoChiusura === 'gia-nel-saldo' ? 'già nel tuo saldo' : p.chiusaDa === 'causa' ? 'non più dovuta' : 'scartata'}{p.deltaRiconosciuto !== 0 && p.motivoChiusura !== 'beneficio-riallocato' ? ` · già contati ${p.deltaRiconosciuto}` : ''}</li>)}</ul></details>}
+    {dellaVoce.some((p) => p.stato !== 'aperta') && <details><summary className="touch text-[13px]">Già deciso</summary><ul className="m-0 flex flex-col gap-2 pl-4 text-[12px]">{dellaVoce.filter((p) => p.stato !== 'aperta').map((p) => <li key={p.uid}>{nome(p)} ·{p.stato === 'applicata' ? (p.deltaApplicato !== 0 ? `aggiunti ${p.deltaApplicato > 0 ? '+' : ''}${p.deltaApplicato}` : 'applicata') : p.motivoChiusura === 'gia-nel-saldo' ? 'già nel tuo saldo' : p.chiusaDa === 'causa' ? 'non più dovuta' : 'scartata'}{p.deltaRiconosciuto !== 0 && p.motivoChiusura !== 'beneficio-riallocato' ? ` · già contati ${p.deltaRiconosciuto}` : ''}</li>)}</ul></details>}
     {ricevuta && <p role="status" className="m-0 text-[13px] text-success">{ricevuta}</p>}
     {errore && <p role="alert" className="m-0 text-[13px] text-error">{errore}</p>}
     <Modal aperta={daDichiarare !== null} titolo="Quanti punti hai già contato?" onChiudi={() => { if (!occupato) setDaDichiarare(null); }} azioni={<>

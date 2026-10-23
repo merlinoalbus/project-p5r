@@ -144,8 +144,10 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   for (const { effetto: e } of fonte.effetti) if (e.tipo === 'lettura') {
     const o = ctx.oggetti.get(`${e.categoria}/${e.chiave}`); if (o) oggettiCitati.set(o.chiave, o);
   }
+  // BON-01: le proposte di punti ancora aperte di questa voce (quelle della voce e quelle del consumo che la voce ha confermato)
+  const daApplicare = ctx.partita === undefined ? 0 : (prepared(`SELECT COUNT(*) FROM utente.da_applicare WHERE partita_id=? AND stato='aperta' AND (voce_uid=? OR (causa_tipo='acquisto' AND causa_chiave IN (SELECT acquisto_id FROM utente.acquisto_provenienza WHERE partita_id=? AND voce_uid=?)))`).pluck().get(ctx.partita, r.uid, ctx.partita, r.uid) as number);
   return {
-    ...v, effettiVoce: fonte, ricevuteEffetti,
+    ...v, effettiVoce: fonte, ricevuteEffetti, ...(daApplicare > 0 ? { daApplicare } : {}),
     ...(aperture.length ? { apertureDedali: aperture } : {}), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], produceTesto: spuntabile ? testoEffettiDellaFonte(fonte, ctx.nomi) : [],
     fatta: spuntabile && ctx.fatte.has(r.uid), effetti: ctx.fatte.get(r.uid) ?? null,
     stato: ctx.conf && spuntabile ? statoAzione(v, ctx.conf) : null, mappa: mappaAzione(v),
@@ -386,6 +388,10 @@ export function ingressiConclusiNascosti(partitaId: number): Array<{ uid: string
  */
 export function vociDelGiorno(data: string, partitaId?: number, conf?: Map<string, ConfidentePartitaDto> | null, nascondiIngressiConclusi = false): AzionePercorsoDto[] {
   if (partitaId !== undefined) verificaPartita(partitaId);
+  if (nascondiIngressiConclusi && partitaId !== undefined) {
+    const nascoste = new Set(ingressiConclusiNascosti(partitaId).map((v) => v.uid));
+    if (nascoste.size > 0) return vociDelGiorno(data, partitaId, conf).filter((v) => !nascoste.has(v.uid));
+  }
   const spunte = leggiSpunte(partitaId, data);
   const ctx: Contesto = {
     fatte: spunte.fatte, illeggibili: spunte.illeggibili,
