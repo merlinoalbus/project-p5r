@@ -6,17 +6,32 @@
 // iniziale, editor delle mappe, fusione e impostazioni compresi. Restano subito pronte solo la home, che è la pagina d'arrivo, e
 // la pagina «non trovata». Il `Suspense` sta nel layout, attorno all'`Outlet`: la cornice dell'app c'è subito, e cambiando pagina
 // React Router (che naviga in una transizione) tiene a schermo quella di prima finché la nuova non è arrivata.
+//
+// UI-ASSET-01 (vecchio chunk durante il rilascio, bozze preservate): ogni pagina caricata alla prima visita ha un `loader` che scarica il
+// suo file PRIMA di cambiare pagina. React Router tiene a schermo la pagina di prima finché i `loader` non finiscono: se il file non
+// c'è più sul server (l'app è stata rilasciata mentre la scheda era aperta) si resta sulla pagina di prima, con le sue bozze, e compare
+// la striscia «nuova versione». Il precarico in tempo morto (`tuttePrecarica`, avviato da `main.tsx`) rende rarissimo il caso.
+// Le route hanno un `ErrorBoundary` in italiano: un errore di una pagina non cancella più tutto il layout.
 // ============================================================
 
-import { lazy, type ComponentType } from 'react';
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter, Navigate, replace, type RouteObject } from 'react-router-dom';
 import { MainLayout } from './components/layout/MainLayout';
+import { ErrorePagina } from './components/shared/ErrorePagina';
+import { SchermataAvvio } from './components/shared/SchermataAvvio';
 import { HomePage } from './pages/HomePage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { useVersioneStore } from './stores/versioneStore';
+import { eErroreDiChunk, pigra as pigraBase, type PaginaPigra } from './utils/pagineLazy';
+
+/** I `precarica` di tutte le pagine, nell'ordine in cui sono dichiarate: `main.tsx` li importa in tempo morto. */
+const precaricamenti: Array<() => Promise<void>> = [];
+export const tuttePrecarica: ReadonlyArray<() => Promise<void>> = precaricamenti;
 
 /** Una pagina caricata alla prima visita: il modulo la esporta per nome, `lazy` vuole l'export predefinito. */
-function pigra<M>(carica: () => Promise<M>, nome: keyof M) {
-  return lazy(async () => ({ default: (await carica())[nome] as ComponentType }));
+function pigra<M>(carica: () => Promise<M>, nome: keyof M): PaginaPigra {
+  const p = pigraBase(carica, nome);
+  precaricamenti.push(p.precarica);
+  return p;
 }
 
 const CompendioPage = pigra(() => import('./pages/CompendioPage'), 'CompendioPage');
@@ -57,60 +72,95 @@ const NegozioPage = pigra(() => import('./pages/NegozioPage'), 'NegozioPage');
 const PartitaPage = pigra(() => import('./pages/PartitaPage'), 'PartitaPage');
 const ImpostazioniPage = pigra(() => import('./pages/ImpostazioniPage'), 'ImpostazioniPage');
 
+/**
+ * Una route a pagina caricata alla prima visita: il `loader` scarica il file PRIMA di cambiare pagina. Se non arriva (errore di chunk), si
+ * resta dov'eri: `throw replace(...)` verso la posizione di prima (la pagina con le sue bozze non si smonta mai) e la striscia «nuova versione».
+ * Il caso senza «pagina di prima» (primo caricamento, o un Indietro del browser che ha già cambiato l'indirizzo) lo prende `ErrorePagina`.
+ * `shouldRevalidate: () => false`: il `loader` non si riesegue a ogni cambio di `?query` della stessa pagina.
+ */
+const pagina = (path: string, p: PaginaPigra): RouteObject => ({
+  path,
+  element: <p.Componente />,
+  shouldRevalidate: () => false,
+  loader: async () => {
+    try {
+      await p.precarica();
+      return null; // un `loader` non può restituire `undefined`
+    } catch (e) {
+      if (!eErroreDiChunk(e)) throw e;
+      useVersioneStore.getState().segnala('chunk');
+      // durante un `loader` la posizione registrata dal router è ancora quella di prima; se anche l'indirizzo del browser è ancora quello
+      // (un clic su un collegamento, non un Indietro/Avanti) si torna lì con una sostituzione, senza aggiungere voci di cronologia
+      const prima = router.state.location;
+      const stessa = prima.pathname === window.location.pathname && prima.search === window.location.search;
+      if (stessa && router.state.initialized) throw replace(prima.pathname + prima.search + prima.hash);
+      throw e;
+    }
+  },
+});
+
 /** Albero delle route applicative. */
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <MainLayout />,
+    HydrateFallback: SchermataAvvio,
+    ErrorBoundary: ErrorePagina,
     children: [
-      { index: true, element: <Navigate to="/home" replace /> },
-      { path: 'home', element: <HomePage /> },
-      { path: 'compendio', element: <CompendioPage /> },
-      { path: 'compendio/persona/:id', element: <PersonaDettaglioPage /> },
-      { path: 'compendio/glossario', element: <GlossarioPage /> },
-      { path: 'skill', element: <SkillPage /> },
-      { path: 'skill/:id', element: <SkillDettaglioPage /> },
-      { path: 'fusione', element: <FusionePage /> },
-      { path: 'partita', element: <PartitaPage /> },
-      { path: 'confidenti/:chiave', element: <ConfidenteDettaglioPage /> },
-      { path: 'guida', element: <GuidaPage /> },
-      { path: 'guida/domande', element: <DomandePage /> },
-      { path: 'guida/calendario', element: <CalendarioPage /> },
-      { path: 'guida/dungeon', element: <DungeonPage /> },
-      { path: 'guida/dungeon/:chiave', element: <DungeonDettaglioPage /> },
-      // L3: la casa di un'Area del Palazzo è la scheda stessa, con l'area aperta (`?infiltrazione=`, `?planimetria=`, `?spillo=`…)
-      { path: 'guida/dungeon/:chiave/area/:slug', element: <DungeonDettaglioPage /> },
-      { path: 'guida/richieste', element: <RichiestePage /> },
-      { path: 'guida/battaglia', element: <BattagliaPage /> },
-      { path: 'guida/mappe', element: <MappaPage /> },
-      { path: 'guida/mondo/:tipo/:chiave', element: <AccessoMondoPage /> },
-      { path: 'guida/mappe/:chiave', element: <MappaPage /> },
-      { path: 'guida/mappe/:chiave/modifica', element: <EditorMappaPage /> },
-      { path: 'guida/citta', element: <CittaPage /> },
-      { path: 'guida/citta/:chiave', element: <QuartierePage /> },
-      // L2: la pagina di un'Area del mondo (e delle aree della città: `tokyo` come contenitore)
-      { path: 'guida/citta/:chiave/:area', element: <AreaPage /> },
-      { path: 'guida/attivita', element: <AttivitaPage /> },
-      { path: 'guida/libri', element: <LibriPage /> },
-      { path: 'guida/film', element: <FilmPage /> },
-      { path: 'guida/videogiochi', element: <VideogiochiPage /> },
-      { path: 'guida/cruciverba', element: <CruciverbaPage /> },
-      { path: 'guida/completamento', element: <CompletamentoPage /> },
-      { path: 'guida/covo', element: <CovoPage /> },
-      { path: 'guida/sfide', element: <SfidePage /> },
-      { path: 'guida/personaggi', element: <PersonaggiPage /> },
-      { path: 'guida/oggetti', element: <OggettiPage /> },
-      { path: 'guida/oggetto/:categoria/:slug', element: <OggettoPage /> },
-      { path: 'guida/percorso', element: <PercorsoPage /> },
-      { path: 'guida/percorso/:data', element: <PercorsoPage /> },
-      { path: 'guida/negozi', element: <NegoziPage /> },
-      { path: 'guida/negozi/:chiave', element: <NegozioPage /> },
-      // L5: la pagina del luogo, fonte unica di orari, presenza, negozi e pin
-      { path: 'guida/luogo/:quartiere/:luogo', element: <LuogoPage /> },
-      // R10-23/4: i «Rimossi» sono ora i «Nascosti dalla guida» del Cestino, in Impostazioni (il vecchio indirizzo porta lì)
-      { path: 'guida/rimossi', element: <Navigate to="/impostazioni#nascosti" replace /> },
-      { path: 'impostazioni', element: <ImpostazioniPage /> },
-      { path: '*', element: <NotFoundPage /> },
+      {
+        // route senza percorso: l'`ErrorBoundary` sta DENTRO `MainLayout`, così l'errore di una pagina lascia menu e barra e si può andare altrove
+        ErrorBoundary: ErrorePagina,
+        children: [
+          { index: true, element: <Navigate to="/home" replace /> },
+          { path: 'home', element: <HomePage /> },
+          pagina('compendio', CompendioPage),
+          pagina('compendio/persona/:id', PersonaDettaglioPage),
+          pagina('compendio/glossario', GlossarioPage),
+          pagina('skill', SkillPage),
+          pagina('skill/:id', SkillDettaglioPage),
+          pagina('fusione', FusionePage),
+          pagina('partita', PartitaPage),
+          pagina('confidenti/:chiave', ConfidenteDettaglioPage),
+          pagina('guida', GuidaPage),
+          pagina('guida/domande', DomandePage),
+          pagina('guida/calendario', CalendarioPage),
+          pagina('guida/dungeon', DungeonPage),
+          pagina('guida/dungeon/:chiave', DungeonDettaglioPage),
+          // L3: la casa di un'Area del Palazzo è la scheda stessa, con l'area aperta (`?infiltrazione=`, `?planimetria=`, `?spillo=`…)
+          pagina('guida/dungeon/:chiave/area/:slug', DungeonDettaglioPage),
+          pagina('guida/richieste', RichiestePage),
+          pagina('guida/battaglia', BattagliaPage),
+          pagina('guida/mappe', MappaPage),
+          pagina('guida/mondo/:tipo/:chiave', AccessoMondoPage),
+          pagina('guida/mappe/:chiave', MappaPage),
+          pagina('guida/mappe/:chiave/modifica', EditorMappaPage),
+          pagina('guida/citta', CittaPage),
+          pagina('guida/citta/:chiave', QuartierePage),
+          // L2: la pagina di un'Area del mondo (e delle aree della città: `tokyo` come contenitore)
+          pagina('guida/citta/:chiave/:area', AreaPage),
+          pagina('guida/attivita', AttivitaPage),
+          pagina('guida/libri', LibriPage),
+          pagina('guida/film', FilmPage),
+          pagina('guida/videogiochi', VideogiochiPage),
+          pagina('guida/cruciverba', CruciverbaPage),
+          pagina('guida/completamento', CompletamentoPage),
+          pagina('guida/covo', CovoPage),
+          pagina('guida/sfide', SfidePage),
+          pagina('guida/personaggi', PersonaggiPage),
+          pagina('guida/oggetti', OggettiPage),
+          pagina('guida/oggetto/:categoria/:slug', OggettoPage),
+          pagina('guida/percorso', PercorsoPage),
+          pagina('guida/percorso/:data', PercorsoPage),
+          pagina('guida/negozi', NegoziPage),
+          pagina('guida/negozi/:chiave', NegozioPage),
+          // L5: la pagina del luogo, fonte unica di orari, presenza, negozi e pin
+          pagina('guida/luogo/:quartiere/:luogo', LuogoPage),
+          // R10-23/4: i «Rimossi» sono ora i «Nascosti dalla guida» del Cestino, in Impostazioni (il vecchio indirizzo porta lì)
+          { path: 'guida/rimossi', element: <Navigate to="/impostazioni#nascosti" replace /> },
+          pagina('impostazioni', ImpostazioniPage),
+          { path: '*', element: <NotFoundPage /> },
+        ],
+      },
     ],
   },
 ]);
