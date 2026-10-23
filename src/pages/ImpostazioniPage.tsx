@@ -13,6 +13,7 @@ import { BackupIstanza } from '../components/impostazioni/BackupIstanza';
 import { PacchettoGioco } from '../components/impostazioni/PacchettoGioco';
 import { MieiDati } from '../components/impostazioni/MieiDati';
 import { Cestino } from '../components/impostazioni/Cestino';
+import { NascostiDallaGuida } from '../components/impostazioni/NascostiDallaGuida';
 import { GestiPartita } from '../components/partita/GestiPartita';
 import { RimozioniConservate } from '../components/impostazioni/RimozioniConservate';
 import { ImmagineEntita } from '../components/shared/ImmagineEntita';
@@ -69,6 +70,7 @@ export function ImpostazioniPage() {
       <TraduzioniEditor />
       <MieiDati />
       <Cestino />
+      <NascostiDallaGuida />
       <GestiPartita />
       <RimozioniConservate />
       <PacchettoGioco />

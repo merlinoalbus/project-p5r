@@ -8,7 +8,7 @@
 // è tutto del backend, che legge dal mount.
 // ============================================================
 
-import type { AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, EsitoRipristinoCestinoDto, EsitoRipristinoDto, StatoImportazionePacchettoDto, StatoIstanzaDto, VoceCestinoDto, VoceCestinoUnificatoDto } from '../../types';
+import type { ElementoCatalogoDto, AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, EsitoRipristinoCestinoDto, EsitoRipristinoDto, StatoImportazionePacchettoDto, StatoIstanzaDto, VoceCestinoDto, VoceCestinoUnificatoDto } from '../../types';
 import { API_BASE_URL } from '../../utils/constants';
 import { httpFetch } from './_httpClient';
 import { ApiError, apiDelete, apiGet, apiPost, apiPut } from './_helpers';
@@ -78,8 +78,11 @@ export const statoImportazionePacchetto = (): Promise<StatoImportazionePacchetto
 // Rimettere ed eliminare per sempre non si ripetono da soli (`maxRetries: 0`): una seconda richiesta partita dopo una risposta
 // persa troverebbe l'elemento già uscito dal cestino.
 
+/** R10-23/4: le righe della guida nascoste dagli elenchi (negozi, articoli, libri, film, attività, luoghi, domande, cruciverba), per rimetterle. */
+export const getNascostiDallaGuida = (): Promise<ElementoCatalogoDto[]> => apiGet('/impostazioni/cestino/nascosti');
+
 /** Gli elementi del cestino, dal più recente. */
-export const getCestino = (): Promise<VoceCestinoDto[]> => apiGet('/impostazioni/cestino');
+export const getCestino =(): Promise<VoceCestinoDto[]> => apiGet('/impostazioni/cestino');
 
 /** Rimette un elemento del cestino com'era (esce dal cestino). */
 export const ripristinaDalCestino = (id: number): Promise<EsitoRipristinoCestinoDto> =>

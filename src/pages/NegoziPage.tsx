@@ -93,7 +93,7 @@ export function NegoziPage() {
           <IntestazionePagina titolo="Negozi e inventario" sottotitolo={<>{listaVisibile.length} {listaVisibile.length === 1 ? 'negozio o punto di acquisto' : 'negozi e punti di acquisto'} con {totaleArticoliVisibili} {totaleArticoliVisibili === 1 ? 'articolo' : 'articoli'}: armi, protezioni, accessori, oggetti, regali, cibo, libri, film e videogiochi con prezzi e requisiti. Cerca un articolo in tutti i negozi o apri un negozio.</>} />
           <div className="flex flex-wrap justify-start gap-1.5 sm:justify-end sm:-mt-2">
             <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Aggiungi un negozio" dettaglio="resta dopo gli aggiornamenti" onClick={() => setNuovoNegozio(true)} />
-            <Link to="/guida/rimossi" className="btn btn-ghost btn-sm touch no-underline">Rimossi</Link>
+            <Link to="/impostazioni#nascosti" className="btn btn-ghost btn-sm touch no-underline">Nascosti dalla guida</Link>
           </div>
           {nuovoNegozio && <ModuloCatalogo tipo="negozio" onChiudi={() => setNuovoNegozio(false)} onSalvato={() => { setNuovoNegozio(false); void negozi.ricarica(); }} />}
           <FiltriArticoli filtro={filtro} onCambia={cambiaFiltro} conPartita={partitaId !== null} segnaposto="Cerca un articolo (nome, effetto) o un negozio…" />

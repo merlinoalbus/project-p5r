@@ -144,9 +144,6 @@ export const impostaDomandaFatta = (id: number, domandaId: number, fatta: boolea
 /** Regalo consegnato (o no) a un Confidente nella partita. */
 export const impostaRegaloFatto = (id: number, chiave: string, regalo: string, fatto: boolean): Promise<ConfidentePartitaDto> =>
   apiPut(`/partite/${id}/confidenti/${encodeURIComponent(chiave)}/regali`, { regalo, fatto });
-/** Stesso gesto, con l'identità stabile anziché una copia del nome. */
-export const impostaRegaloOggettoFatto = (id: number, chiave: string, catalogo: string, fatto: boolean): Promise<ConfidentePartitaDto> =>
-  apiPut(`/partite/${id}/confidenti/${encodeURIComponent(chiave)}/regali`, { catalogo, fatto });
 
 /** R10-18: l'azione unica «Regala» — l'oggetto del catalogo (per chiave) dà i punti, registra la consegna e, se richiesto, segna comprato l'articolo. */
 export const regalaOggetto = (id: number, richiesta: RichiestaRegalo): Promise<EsitoRegaloDto> => apiPost(`/partite/${id}/regali`, richiesta);

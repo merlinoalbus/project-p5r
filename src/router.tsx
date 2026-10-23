@@ -54,7 +54,6 @@ const PersonaggiPage = pigra(() => import('./pages/PersonaggiPage'), 'Personaggi
 const OggettiPage = pigra(() => import('./pages/OggettiPage'), 'OggettiPage');
 const OggettoPage = pigra(() => import('./pages/OggettoPage'), 'OggettoPage');
 const NegozioPage = pigra(() => import('./pages/NegozioPage'), 'NegozioPage');
-const RimossiPage = pigra(() => import('./pages/RimossiPage'), 'RimossiPage');
 const PartitaPage = pigra(() => import('./pages/PartitaPage'), 'PartitaPage');
 const ImpostazioniPage = pigra(() => import('./pages/ImpostazioniPage'), 'ImpostazioniPage');
 
@@ -108,7 +107,8 @@ export const router = createBrowserRouter([
       { path: 'guida/negozi/:chiave', element: <NegozioPage /> },
       // L5: la pagina del luogo, fonte unica di orari, presenza, negozi e pin
       { path: 'guida/luogo/:quartiere/:luogo', element: <LuogoPage /> },
-      { path: 'guida/rimossi', element: <RimossiPage /> },
+      // R10-23/4: i «Rimossi» sono ora i «Nascosti dalla guida» del Cestino, in Impostazioni (il vecchio indirizzo porta lì)
+      { path: 'guida/rimossi', element: <Navigate to="/impostazioni#nascosti" replace /> },
       { path: 'impostazioni', element: <ImpostazioniPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],

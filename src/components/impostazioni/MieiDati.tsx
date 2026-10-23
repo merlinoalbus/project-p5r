@@ -7,7 +7,6 @@
 // ============================================================
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { getCatalogo, getRiepilogoCatalogo } from '../../services/api';
 import { NOME_TIPO_CATALOGO } from '../../utils/catalogo';
 import { useCarica } from '../../hooks/useCarica';
@@ -36,7 +35,7 @@ export function MieiDati() {
       <p className="m-0 text-[13px] text-text-secondary">
         Le righe che hai aggiunto o corretto tu sopra i dati della guida. Restano anche quando i dati vengono ricaricati:
         «Ripristina dalla guida» rimette l'originale, e le righe che hai aggiunto tu si eliminano dallo stesso pulsante.
-        Le righe nascoste dagli elenchi stanno in <Link to="/guida/rimossi">Rimossi</Link>, con il ripristino in un tocco.
+        Le righe nascoste dagli elenchi stanno in <a href="#nascosti">Nascosti dalla guida</a>, qui sotto nel Cestino, con il ripristino in un tocco.
       </p>
       {riepilogo.errore && <p className="m-0 text-[13px] text-error">{riepilogo.errore}</p>}
       {totale === 0 && !riepilogo.caricamento && (
