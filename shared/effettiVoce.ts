@@ -21,8 +21,10 @@ export type EffettoDiStatoVoce =
   | { tipo: 'cruciverba'; data: string }
   | { tipo: 'richiesta'; richiesta: string }
   /** Un articolo di un negozio segnato come comprato (qualunque offerta tranne l'Aojiru, che ha i suoi consumi). */
-  | { tipo: 'articolo'; articolo: string };
-export const eEffettoDiStato = (e: { tipo: string }): e is EffettoDiStatoVoce => e.tipo === 'storia' || e.tipo === 'domanda' || e.tipo === 'cruciverba' || e.tipo === 'richiesta' || e.tipo === 'articolo';
+  | { tipo: 'articolo'; articolo: string }
+  /** L'invito di un Confidente avvenuto (R10-11i): `invito` è la chiave di `confidente_invito` («makoto/07-30»); si registra solo con le condizioni vere. */
+  | { tipo: 'invito'; invito: string };
+export const eEffettoDiStato = (e: { tipo: string }): e is EffettoDiStatoVoce => e.tipo === 'storia' || e.tipo === 'domanda' || e.tipo === 'cruciverba' || e.tipo === 'richiesta' || e.tipo === 'articolo' || e.tipo === 'invito';
 /** La lettura della buona sorte di Chihaya: spuntando la voce si accende la Fortuna sulla Dote scelta, per il resto del giorno (R10-10/2). */
 export interface EffettoFortunaVoce { tipo: 'fortuna'; dote: DoteChiave }
 export interface EffettoVoceDto { uid: string; ordine: number; effetto: EffettoVoce; origine: 'seed' | 'regola' | 'utente' }
@@ -57,13 +59,14 @@ const oggetto = (x: unknown): Record<string, unknown> | null => x && typeof x ==
 const nota = (x: unknown): x is 1 | 2 | 3 => x === 1 || x === 2 || x === 3;
 export function normalizzaEffettoVoce(x: unknown): EffettoVoce | null {
   const o = oggetto(x); if (!o) return null;
-  const campi: Record<string, readonly string[]> = { dote: ['tipo','dote','note'], lettura: ['tipo','categoria','chiave','almeno'], turno: ['tipo','attivita','doti'], acquisto: ['tipo','articolo','variante','fortuna','sostituisceDoti'], pesca: ['tipo','regola','attivita','sostituisceTurni','sostituisceDoti'], fortuna: ['tipo','dote'], storia: ['tipo','evento'], domanda: ['tipo','domanda'], cruciverba: ['tipo','data'], richiesta: ['tipo','richiesta'], articolo: ['tipo','articolo'] };
+  const campi: Record<string, readonly string[]> = { dote: ['tipo','dote','note'], lettura: ['tipo','categoria','chiave','almeno'], turno: ['tipo','attivita','doti'], acquisto: ['tipo','articolo','variante','fortuna','sostituisceDoti'], pesca: ['tipo','regola','attivita','sostituisceTurni','sostituisceDoti'], fortuna: ['tipo','dote'], storia: ['tipo','evento'], domanda: ['tipo','domanda'], cruciverba: ['tipo','data'], richiesta: ['tipo','richiesta'], articolo: ['tipo','articolo'], invito: ['tipo','invito'] };
   if (typeof o.tipo!=='string'||!Object.hasOwn(campi,o.tipo)||Object.keys(o).some((k) => !campi[o.tipo as string]!.includes(k))) return null;
   if (o.tipo === 'dote') return eDote(o.dote) && nota(o.note) ? { tipo: 'dote', dote: o.dote, note: o.note } : null;
   if (o.tipo === 'fortuna') return eDote(o.dote) ? { tipo: 'fortuna', dote: o.dote } : null;
   if (o.tipo === 'storia') return typeof o.evento === 'string' && /^[a-z0-9][a-z0-9._:/-]{0,79}$/i.test(o.evento.trim()) ? { tipo: 'storia', evento: o.evento.trim() } : null;
   if (o.tipo === 'domanda') return Number.isSafeInteger(o.domanda) && (o.domanda as number) >= 1 ? { tipo: 'domanda', domanda: o.domanda as number } : null;
   if (o.tipo === 'cruciverba') return typeof o.data === 'string' && /^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(o.data) ? { tipo: 'cruciverba', data: o.data } : null;
+  if (o.tipo === 'invito') return typeof o.invito === 'string' && /^[a-z0-9-]+\/(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(o.invito.trim()) ? { tipo: 'invito', invito: o.invito.trim() } : null;
   if (o.tipo === 'articolo') return typeof o.articolo === 'string' && /^[a-z0-9][a-z0-9._:/-]{0,119}$/i.test(o.articolo.trim()) ? { tipo: 'articolo', articolo: o.articolo.trim() } : null;
   if (o.tipo === 'richiesta') return typeof o.richiesta === 'string' && /^[a-z0-9][a-z0-9._:/-]{0,79}$/i.test(o.richiesta.trim()) ? { tipo: 'richiesta', richiesta: o.richiesta.trim() } : null;
   if (o.tipo === 'pesca') {
@@ -109,6 +112,7 @@ export function descriviEffettoVoce(e: EffettoVoce): string {
   if (e.tipo === 'domanda') return `Segna la domanda ${e.domanda} come fatta`;
   if (e.tipo === 'cruciverba') return `Segna il cruciverba del ${e.data} come risolto`;
   if (e.tipo === 'articolo') return `Segna come comprato: ${e.articolo}`;
+  if (e.tipo === 'invito') return `Registra l'invito avvenuto: ${e.invito}`;
   if (e.tipo === 'richiesta') return `Segna la Richiesta «${e.richiesta}» come completata`;
   return `Acquisto: ${e.articolo}${e.variante ? ` · ${nomeDote(e.variante)}` : ' · variante da dichiarare'}`;
 }

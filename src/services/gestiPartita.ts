@@ -53,6 +53,7 @@ const effetto = z.discriminatedUnion('tipo', [
   z.object({ tipo: z.literal('cruciverba'), data: z.string().regex(/^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/) }).strict(),
   z.object({ tipo: z.literal('richiesta'), richiesta: chiave }).strict(),
   z.object({ tipo: z.literal('articolo'), articolo: chiave }).strict(),
+  z.object({ tipo: z.literal('invito'), invito: z.string().regex(/^[a-z0-9-]+\/(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/) }).strict(),
 ]);
 const decisioneEffetto = z.object({ operazioneId: uid, decisione: z.enum(['conferma','scarta']), effetto: effetto.optional(), revisionePropostaAttesa: token }).strict()
   .refine(v => v.decisione === 'conferma' ? v.effetto !== undefined : v.effetto === undefined);
