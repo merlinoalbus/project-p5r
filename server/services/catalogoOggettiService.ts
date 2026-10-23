@@ -15,6 +15,7 @@ import { lettureListiniCondivisi } from './listiniCondivisi.js';
 import { regaliDellaPartita } from './regaliPartita.js';
 import { fontiRicompenseOggetti } from './fontiRicompenseOggetti.js';
 import { trasformazioniDiJose } from './trasformazioniOggetti.js';
+import { noteStoricheCatalogo } from '../../shared/tanakaNotaStorica.js';
 
 export { elencaCatalogoOggetti } from './catalogoOggettiLetture.js';
 
@@ -40,7 +41,7 @@ export function offerteDellOggetto(chiave: string, partita?: number): OffertaOgg
       return { articolo: r.chiave, negozio: n.chiave, negozioNome: n.nome, sedeCasa: n.sedeCasa ?? null, sedeChiave: n.sedeChiave ?? null, sedeNome: n.sedeNome ?? null,
         prezzo: r.prezzo, costo, costoDaVerificare: r.costo_json !== null && costo === null, condizioni: a.condizioni ?? [],
         presenza: n.disponibilita ?? null, disponibilita, disponibileOggi: partita === undefined ? null : disponibilita?.stato === 'disponibile',
-        acquistato: a.acquistato, acquistiRegistrati: a.acquistiRegistrati ?? [], acquisti: a.acquisti, nota: r.nota };
+        acquistato: a.acquistato, acquistiRegistrati: a.acquistiRegistrati ?? [], acquisti: a.acquisti, nota: r.nota, noteStoriche: a.noteStoriche };
     });
   });
 }
@@ -125,7 +126,7 @@ export function dettaglioOggetto(chiave: string, partita?: number): OggettoDetta
     const voce = videogiochiTutti(partita).videogiochi.find((v) => v.chiave === videogioco.chiave);
     if (voce) lettura = { tipo: 'videogioco', voce };
   }
-  return { ...oggetto, inVendita, regalo, forzieri: forzieriDellOggetto(chiave, partita), ricompense: ricompenseDellOggetto(chiave),
+  return { ...oggetto, noteStoriche: noteStoricheCatalogo(riga), inVendita, regalo, forzieri: forzieriDellOggetto(chiave, partita), ricompense: ricompenseDellOggetto(chiave),
     trasformazioni: trasformazioniDiJose(partita === undefined ? undefined : statoDisponibilitaPartita(partita), chiave),
     scambi: inVendita.filter((o) => o.costo !== null || o.costoDaVerificare), ricette, lettura,
     partita: partita === undefined ? null : { acquistato: inVendita.some((o) => o.acquistato), regalato: regalati.size > 0, letto: lettura?.voce.fatto ?? false } };

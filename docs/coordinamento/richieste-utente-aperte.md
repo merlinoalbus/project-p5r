@@ -1,5 +1,9 @@
 # Richieste dell'utente ancora aperte (elenco di controllo del PM)
 
+**23 ottobre — NOTA al rilascio; fermarsi dopo questo task.** NotaG034 versionata nei quattro consumatori, DTO/hash incluso e note/prezzi personali intatti, PASS staticoGalaxy e controlli verdi. Segue solo riesame del chiarimentoRoyal/rilascio/conservazione/browser; nessuna aperturaTRANSAZIONE. Regola esplicita dell'utente: prevale sempre il datoRoyal in caso di discrepanza. PerHomunculus riferimentoRoyal5000,120000nota storica; gli altri requisiti e consensi restano aperti.
+
+**23 ottobre,08:23 italiana — SNAPSHOT chiuso con PASS finale circoscrittoGalaxy.**5b00327a/pipeline39910122517 SUCCESS;20/18/28 e rinvio verificati indipendentemente,consolevuota. Datioperativi e proposte invariati;solo sqlite_stat1 cambiata da36a40,non tutte163tabelle identiche. Nessunwriter/test/pixel;restanoR7-13b,consenso ealtri6puntiTanaka. OraNOTA(unico attivo),Tanaka3/9chiusi;nessun nuovo via richiesto.
+
 **23 ottobre,08:12 italiana — SNAPSHOT pronto al rilascio, ancora aperto.** PASS statico finale distinto dopo SNAP-F01…04; typecheck34050/lint4156/build57426 verdi e tre riesami propri conclusi. Nessuna migrazione o dato commerciale cambiato. Restano esitoCI, conservazione e browser pubblicato; segueNOTA dopo il gate finale. Nessun consenso commerciale acquisito.
 
 **23 ottobre — SNAPSHOT in revisione distinta.** Codice locale completo della lettura coerente121/corrente/Royal e delle guardie contro conferme Tanaka individuali obsolete; nessuna migrazione o modifica delle proposte. Typecheck/lint/build verdi, nessun test. Restano gate del delta, rilascio e osservazione prima di chiudere il punto; Tanaka2/9chiusi, consenso commerciale e altri residui invariati. Limite10min revocato, sequenza autorizzata senza nuovi via.

@@ -1,5 +1,7 @@
 # Architettura — project-p5r
 
+**23/10 — NOTA Homunculus al rilascio:** fonteG034 canonica versionata in modulo condiviso, campoDTO `noteStoriche` distinto da`nota`. I lettori di listino/offerte/oggettoRoyal la proiettano perchiave e provenienza; il confrontoTanaka la include nella revisionehash. Nessun prezzo copiato nel calcolo o datoDB modificato. FonteRoyal5000 prioritaria,120000discordanza storica. La futura transazione/ricevuta dovrà acquisire la nota mostrata; conservazione nei futuri undo/import del piano resta aperta.
+
 **23/10 — SNAPSHOT Tanaka in revisione:** GET readonly `catalogo-oggetti/confronto-tanaka` con TX unica e no-store separa fotografia121, fonte corrente e candidate Royal documentali. Attribuzione124 soltanto con rendiconto e formule intere/provenienza/coincidenza integrale degli altri campi e legami. Nessuna scrittura o migrazione; guardiaBE comune vieta conferma/alternativa/legame individualeTanaka, anche via fonte ricompensa. Revisionehash della lettura distinta da futuroCAS/ricevuta. Nessun writer commerciale unitario ancora attivo.
 
 **23/10 07:53 italiana — continuità acquisti rilasciata:**030 attiva su138/30, correttivo49c036c8/pipeline39907548119 riuscita. Conservazione di tutte le tabelle preesistenti e delle sette prove originali confermata; lettore del pubblicato osservato con PASS finale circoscritto. Writer/restore/import non esercitati. Il paragrafo «al rilascio» sotto descrive il checkpoint precedente.

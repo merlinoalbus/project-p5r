@@ -1,5 +1,7 @@
 # Indice della memoria — project-p5r
 
+- [Prevale sempre Persona5Royal](project-priorita-royal.md) — istruzione diretta23/10: app perRoyal; in caso di discrepanza prevale sempre il datoRoyal documentato
+
 - [Verifica avversariale delle consegne](feedback-verifica-avversariale.md) — dal 21/10 agente distinto, lettura diretta delle specifiche originali e confronto con il codice; supera il divieto di verificatori, resta zero test
 
 - [Commit e pubblicazione a fine lotto](feedback-commit-fine-lotto.md) — decisione del 20 ottobre; il prompt diretto del 21 ottobre richiede il salvataggio alla fermata, applicato alla consegna documentale dell'audit; «Importa» e guida del visore confermati

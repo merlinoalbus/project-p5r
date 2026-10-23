@@ -1,5 +1,17 @@
 # L7 — Tanaka e risoluzione dei raccordi documentali
 
+## NOTA23ottobre2026 — al rilascio, poi stop umano
+
+Nota documentaleG034 in `shared/tanakaNotaStorica.ts`, id/versione/fonte/testo separati dalle note personali e dai prezzi correnti/pagati. Associazione offerta perchiave+negozio e identitàRoyal perchiave+provenienza(`consumabile/homunculus`,guida,`consumabili/Homunculus`); nessuna fusione con l'attuale catalogo del listino`consumabile/homunculus-2`. Disponibile in Dettagli listino, offerte dell'oggetto, paginaRoyal anche senzaofferte, confronto corrente/Royal. Quest'ultimo la include nelDTO/hashdellalettura. Indipendente da proposte121 assenti/scartate, nessuna scritturaDB o migrazione.
+
+PASS staticoGalaxy, typecheck57838/lint85334/build25325 exit0 e tre riesami propri su identità/provenienza, conservazione e trasporto/rendering/hash. Testo aggiornato dopo i controlli soltanto per il chiarimento diretto «prevale sempre il datoRoyal»: riferimentoHomunculus5000,120000nota. Resta da osservare pubblicato/conservazione; nessuna ricevuta/undo/import del piano già implementati. Baseline privatareadonly06:29:45–50Z. L'utente chiede lo stop dopo NOTA: non avviare TRANSAZIONE.
+
+## ConsegnaSNAPSHOT23ottobre2026,08:23 italiana
+
+PASS finale circoscrittoGalaxy su5b00327a, CI39910122517 SUCCESS. Backend/FE attivi06:16:15/16Z,health200/hashservizio coincidente. Browser indipendente:20correnti/18candidate/28proposte,20rettifiche124 provate e8creazioni da riconciliare;foto121/corrente/Royal separati,28rinvii senza confermeindividuali,chiusura/rinvio sulla stessa pagina econsolevuota. Nessuna verifica pixel, test o writer.
+
+Confronto readonly del coordinatore06:18:44–48Z controbaseline06:06:29–33Z:100/100tabelle main e62/63utente identiche,sola sqlite_stat1 da36a40;DDL/versioni138/30 identici,7RAW/prove/binding/contributi invariati,FK0/0. PRAGMAoptimize già previsto inchiusura spiega la variazione delle statistiche,non una modifica dei progressi. Il revisore consuma queste prove e non si attribuisce le lettureDB. Questo chiude soltantoSNAPSHOT preparatorio;Tanaka3/9chiusi, segueNOTA. Consenso/transazione/ricevuta/ripristino/import restano aperti.
+
 ## Checkpoint23ottobre2026 — SNAPSHOT in revisione, STORICO consegnato
 
 **08:12 italiana:** PASS statico finale Galaxy dopo SNAP-F01…04. Corrette apertura già montata da query, fallback per ricompensa e seconda guardia sull'originale, parsing rigoroso delle formule/payload prima degli esiti, personalizzazioni/incompatibilità del catalogo e consultazione completa del negozio. Tre riesami propri: conservazione/provenienza, tutti gli ingressi del writer, trasporto/rendering/query/assenze. Controlli finali typecheck34050/lint4156/build57426 exit0. Nessun test o backend locale; punto al rilascio, conservazione/runtime ancora da osservare. I controlli67795/78552/47726 sotto sono la prima passata precedente ai quattro correttivi.

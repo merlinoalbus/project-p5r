@@ -4,6 +4,8 @@ Formato: data · decisione · motivazione · chi (U = utente, IA = assistente su
 
 | Data | Decisione | Motivazione | Chi |
 |---|---|---|---|
+| 2026-10-23 | L'app è per Persona 5 Royal: in caso di discrepanza prevale sempre il dato di Royal | Istruzione esplicita dell'utente; nessun compromesso con i dati della versione originale, provenienza Royal da documentare | U |
+| 2026-10-23 | Completare L7-TANAKA-NOTA con verifica e rilascio, poi fermarsi senza avviare TRANSAZIONE | «Finito il prossimo task fermati», ricevuto durante NOTA già avviato | U |
 | 2026-10-23 | Riprendere senza il limite di dieci minuti per punto; restano sequenza e verifica distinta prima delle chiusure | richiesta esplicita «Riprendi senza limite dei 10 minuti» | U |
 | 2026-10-21 | Equipaggiamento dataset/listini: nessun abbinamento fondato soltanto sul nome; identità distinte finché equivalenza documentata, con eventuale fusione sottoposta all'approvazione prevista. Conservare associazioni esplicite e riferimenti esistenti | risposta dell'utente «la soluzione migliore» alla domanda sul conflitto R7-03b / M7 §2: delega alla valutazione tecnica. G-024 documenta differenze nel campione; revisore distinto favorevole alla regola, non alla conversione ancora da progettare | assistente su delega dell'utente, non scelta testuale dell'utente |
 | 2026-10-21 | Asakusa: il quartiere si apre se vale Ann rango 7 **oppure** Skytree aperto dal libro «Shitamachi rinato»; basta una condizione | chiarimento esplicito dell'utente; OR già presente nella migrazione 118, nessuna nuova migrazione | U |

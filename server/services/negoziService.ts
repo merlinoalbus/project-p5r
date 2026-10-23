@@ -28,6 +28,7 @@ import { condizioniDiSblocco } from './sbloccoLuoghi.js';
 import { articoloDelListino, articoliEquivalenti, lettureListiniCondivisi, listinoDelNegozio, type LettureListiniCondivisi } from './listiniCondivisi.js';
 import { acquistiArticolo, chiaviArticoliOttenuti } from './acquistiService.js';
 import { eOffertaAojiru } from '../../shared/acquisti.js';
+import { noteStoricheOfferta } from '../../shared/tanakaNotaStorica.js';
 import type { ArticoloDto, CatalogoOggettoDto, NegozioDettaglioDto, NegozioRiassuntoDto, RicercaArticoliDto } from '../../shared/types.js';
 
 /** L5: quel che serve alla presenza di un negozio, letto con la riga: la sua eccezione d'orario e orari e sblocco della sede. */
@@ -154,6 +155,7 @@ function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponi
     effetto: oggetto ? oggetto.effetto || null : r.effetto, statistiche: oggetto ? statisticheDelCatalogo(oggetto) : r.statistiche,
     quantita: r.quantita, oggettoFonte: r.oggetto_fonte, oggettoChiave: r.oggetto_chiave,
     disponibileDal: r.disponibile_dal, condizione: r.condizione, nota: r.nota, verificato: r.verificato === 1,
+    noteStoriche: noteStoricheOfferta(r.chiave, r.negozio_chiave),
     acquistato: acquisti?.acquistato === true || articoliEquivalenti(r.chiave, lettureListiniCondivisi()).some(k => acquistati.has(k)), acquistiRegistrati, acquisti,
     ...(st ? { disponibilita: disponibilitaArticolo(r, st) } : {}) };
 }

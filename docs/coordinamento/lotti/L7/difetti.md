@@ -1,5 +1,7 @@
 # L7 — difetti e mancanze dell'implementazione locale
 
+**23/10 — NOTA in rilascio:** testoG034 leggibile e versionato in quattro consumatori, sempre nelDTO/hash del confronto, prezzi e note personali invariati. Helper perchiavi/provenienza senza fusioneRoyal/listino; nessuna migrazione. Tre riesami propri e PASS staticoGalaxy; typecheck57838/lint85334/build25325 exit0, build7437 exit0 dopochiarimentoRoyal. Conservazione/browserpubblicato ancora da acquisire. SNAPSHOT precedente chiuso su5b00327a/CI39910122517; nota non equivale a consenso/correzionecommercialeTanaka. Stop dopoNOTA richiesto dall'utente.
+
 **23/10 08:12 italiana — SNAPSHOT approvato staticamente, al rilascio:** chiusi nel delta SNAP-F01(apertura query su componente già montato),F02(aggiramento via proposta ricompensa),F03(formule/payload non riconosciuti),F04(personalizzazioni catalogo/negozio consultabili). Typecheck34050/lint4156/build57426 exit0, tre riesami propri e PASS finale statico Galaxy. Nessuna migrazione o modifica28proposte; conservazione e browser pubblicato ancora aperti. Non chiudeR7-13b oL7.
 
 **23/10 07:53 italiana — STORICO eST-R01 chiusi con PASS finale circoscritto:** 49c036c8/pipeline39907548119 SUCCESS,138/30 operativo; tutte159tabelle preesistenti e sette prove conservate nel confronto finale, stessi contributi eFK0/0. Registro e console osservati autonomamente da Galaxy, limiti in `tanaka-storico-contratto.md`. Nessun writer/restore/import esercitato o listinoTanaka rettificato.

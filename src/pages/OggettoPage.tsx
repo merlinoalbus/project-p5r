@@ -9,6 +9,7 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { PageState } from '../components/shared/PageState';
 import { LetturaDellOggetto } from '../components/catalogo/LetturaDellOggetto';
 import { OfferteDellOggetto } from '../components/catalogo/OfferteDellOggetto';
+import { NoteStoricheOfferta } from '../components/catalogo/NoteStoricheOfferta';
 import { CostoDellOggetto } from '../components/catalogo/CostoDellOggetto';
 import { ModuloOggetto } from '../components/catalogo/ModuloOggetto';
 import { Modal } from '../components/shared/Modal';
@@ -84,6 +85,7 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
             {o.nomeOriginale && <p className="m-0 text-[13px] text-text-secondary">Nome originale: {o.nomeOriginale}</p>}
             {o.effetto && <p className="m-0 whitespace-pre-line text-[13px]">{o.effetto}</p>}
             {o.descrizione && <p className="m-0 whitespace-pre-line text-[13px] text-text-secondary">{o.descrizione}</p>}
+            <NoteStoricheOfferta note={o.noteStoriche} />
             {!o.effetto && !o.descrizione && <p className="m-0 text-[13px] text-text-muted">Nessun effetto o descrizione dichiarato.</p>}
             {o.statistiche && <dl className="m-0 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-[13px]">{Object.entries(o.statistiche).filter(([k, v]) => k !== 'effetti' && v !== null && (typeof v === 'number' || typeof v === 'string')).map(([k, v]) =>
               <div key={k} className="contents"><dt className="text-text-muted">{k === 'per' ? 'Per chi' : k === 'testo' ? 'Statistiche' : k === 'sessioni' ? 'Sessioni' : k}</dt><dd className="m-0 break-words">{String(v)}</dd></div>)}</dl>}

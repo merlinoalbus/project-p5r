@@ -1,27 +1,28 @@
 {
   "obiettivo": "Completare i lotti L0–L11 della razionalizzazione sul ramo newreview e pubblicarli funzionanti su p5s",
-  "aggiornato": "2026-10-23T06:12:00Z",
+  "aggiornato": "2026-10-23T06:33:00Z",
   "cruscotto": {
     "adesso": {
-      "attivita": "SNAPSHOT al rilascio con PASS statico finaleGalaxy dopoSNAP-F01…04 corretti; typecheck34050/lint4156/build57426 verdi, tre riesami propri. SeguonoCI/conservazione/browser; nessuna migrazione o modifica proposte.",
-      "stato": "Unico punto attivo L7-TANAKA-SNAPSHOT. Tanaka2/9punti chiusi; consenso commerciale e restoL7 aperti. Limite10min revocato.",
+      "attivita": "NOTA implementata con PASS staticoGalaxy e controlli verdi: fonteG034 versionata nei quattro consumatori eDTO/hash. Al rilascio; prevale sempre il datoRoyal,5000perHomunculus e120000solonota. Stop richiesto dopo questo punto.",
+      "stato": "Unico punto attivo L7-TANAKA-NOTA. Tanaka3/9chiusi; dopoNOTA fermarsi per ordineutente,senzaavviareTRANSAZIONE. Consenso/restoL7aperti;limite10minrevocato.",
       "responsabile": "Coordinatore implementa in sequenza; Galaxy verifica in sola lettura. Nessun esecutore parallelo attivo.",
       "prossimaConsegna": "Completare i gruppi residui dei lotti: Covo e distributori L5, pesca/condizioni L6 e catalogo/scambi L7; predisporre le decisioni concrete riservate all'utente. Nessun lotto dichiarato concluso per il solo rilascio137."
     },
     "ultimaConsegna": {
-      "titolo": "STORICO: contributi acquisti e generazioni conservati",
-      "commit": "49c036c8",
+      "titolo": "SNAPSHOT: fotografie121 e corrente124 riconciliati senza applicazioni individuali",
+      "commit": "5b00327a",
       "pipeline": {
-        "testo": "Pipeline39907548119 riuscita",
-        "url": "https://github.com/merlinoalbus/project-p5r/actions/runs/39907548119"
+        "testo": "Pipeline39910122517 riuscita",
+        "url": "https://github.com/merlinoalbus/project-p5r/actions/runs/39910122517"
       },
       "istanza": {
         "testo": "p5s operativo, schema138/30",
         "url": "https://p5s.nasmerlinoalbus.cloud"
       },
-      "verifica": "PASS finale circoscritto Galaxy: registro con7prove e console senza errori. Confronto coordinatore05:52: tutte100main+59utente preesistenti identiche,7foto e marcatore bootstrap intatti,7associazioni esatte, stessi totali congelati eFK0/0. Writer/restore/import non esercitati; nessuna certificazione visuale o chiusuraL7."
+      "verifica": "PASS finale circoscrittoGalaxy:20offerte/18candidate/28proposte,20diagnosi124+8creazioni,rinvio stessa pagina e28comandi individuali sostituiti,consolevuota. Dati coordinatore06:18:main100/100 eutente62/63 tabelle invariati,solo sqlite_stat1 da36a40;DDL/versioni/7prove/binding/contributi invariati eFK0/0. Nessuntest,writer o verifica pixel;R7-13b/L7 ancora aperti."
     },
     "chiusi": [
+      "SNAPSHOT:5b00327a/pipeline39910122517 SUCCESS, lettura coerente121/corrente/Royal e guardie alle conferme individuali; PASS finale circoscrittoGalaxy. Nessuna modifica proposte o consenso commerciale.",
       "STORICO:030 e correttivo49c036c8 rilasciati, contributi e generazioni conservati; PASS finale circoscritto Galaxy, registro readonly e dati preservati. Nessun consenso/listinoTanaka modificato, writer/restore/import non esercitati.",
       "Rilascio A10: migrazioni138/29, conservazione dati e browser readonly con PASS distinti. Correttivo91d12aa5/pipeline39865491697, A10-BR01 chiuso. Scritture/recupero/ripristino non esercitati; non chiude L6 o L10.",
       "Tre schede L5 collegate ai pin1466/1486/1526 consegnate;1636 rimosso nel Cestino con fotografia integrale e PASS finale Galaxy. Dei23candidati restano19, non19bug identici o il totale L5.",
@@ -663,15 +664,15 @@
         "id": "L7-TANAKA-SNAPSHOT",
         "lotto": "L7",
         "titolo": "Riconciliare fotografie121 e condizioni124",
-        "stato": "in-corso",
+        "stato": "chiuso",
         "fonte": "lotti/L7/tanaka-decisione-unitaria.md",
-        "criterio": "Nessuna reintroduzione delle condizioni precedenti."
+        "criterio": "PASS finale circoscrittoGalaxy su5b00327a/pipeline39910122517:20/18/28 e20diagnosi124+8creazioni,guardieBE/UI e rinvio osservati,consolevuota;RAW/stati/proposte e datioperativi invariati. Sola sqlite_stat1 aggiornata;nessunwriter/test/verificapixel,nessunconsenso o chiusuraR7-13b."
       },
       {
         "id": "L7-TANAKA-NOTA",
         "lotto": "L7",
         "titolo": "Rendere visibile nota storica Homunculus120000",
-        "stato": "da-fare",
+        "stato": "in-corso",
         "fonte": "lotti/L7/tanaka-decisione-unitaria.md",
         "criterio": "Nota effettivamente consultabile."
       },

@@ -4,6 +4,7 @@ import { getConfrontoTanaka } from '../../services/api/catalogoOggetti';
 import { useCarica } from '../../hooks/useCarica';
 import { PageState } from '../shared/PageState';
 import { descriviRequisitoSpillo } from '../../../shared/condizioniSpillo';
+import { NoteStoricheOfferta } from './NoteStoricheOfferta';
 
 const yen = (n: unknown) => typeof n !== 'number' ? 'Prezzo non indicato' : `${n.toLocaleString('it-IT')} ¥`;
 const gradi: Record<string, string> = { iniziale: 'Nessun grado', nero: 'Nero', oscuro: 'Oscurità', caos: 'Caos' };
@@ -35,7 +36,7 @@ function DatiConfronto() {
   return <PageState isLoading={dati.caricamento && !c} error={dati.errore} onRetry={() => void dati.ricarica()}>
     {c && <div className="card flex min-w-0 flex-col gap-3">
       <h2 className="m-0 text-[18px]">Tanaka · preparazione di una sola decisione</h2>
-      <p className="m-0">Questo confronto non applica proposte. Le conferme individuali e la scelta alternativa sono bloccate. La spesa storica è protetta; prima del consenso unico restano nota Homunculus, transazione atomica, ricevuta, ripristino e importazione.</p>
+      <p className="m-0">Questo confronto non applica proposte. Le conferme individuali e la scelta alternativa sono bloccate. La spesa storica è protetta e la nota documentale Homunculus è consultabile; prima del consenso unico restano transazione atomica, ricevuta, ripristino e importazione.</p>
       <p className="m-0 text-warning">Fonte: gradi oltre 10.000 / 50.000 / 100.000 ¥. L’app valuta attualmente anche la soglia esatta: questo confine resta da risolvere. Gemme elementali e sei Magatama non sono sei identità automaticamente equivalenti.</p>
       <p className="m-0">Proposta originale: conservare 10 chiavi, nascondere 10 offerte e aggiungerne 8, dopo il consenso. Stati già gestiti, personalizzazioni e collisioni richiedono una risoluzione esplicita. Nessuna fotografia o proposta originale viene aggiornata.</p>
       {!c.negozio && <p className="m-0 text-warning">Negozio assente: nessuna ricreazione automatica.</p>}
@@ -49,6 +50,7 @@ function DatiConfronto() {
             <strong>{testo(a.corrente?.nome_it ?? a.corrente?.nome ?? 'Offerta assente')}</strong> · {yen(a.corrente?.prezzo)}
             <code className="block break-all text-[11px]">{a.chiave}</code>
             {a.rilievi.map(r => <p key={r} className="m-0 text-[12px] text-warning">{r}</p>)}
+            <NoteStoricheOfferta note={a.noteStoriche} />
             <Dettaglio titolo="Condizioni correnti dell’offerta" valore={a.corrente?.condizioni_json} />
             <Dettaglio titolo="Fonte corrente e collegamenti" valore={{ fonte: a.corrente, collegamenti: a.collegamenti }} />
           </li>)}</ul>
@@ -57,6 +59,7 @@ function DatiConfronto() {
           <strong>{r.nome}</strong> · {yen(r.prezzo)} · {gradi[r.grado]}<code className="block break-all text-[11px]">{r.chiave}</code>
           <p className="m-0 text-[12px]">{r.rapporto}</p><span className="break-all text-[11px]">Catalogo proposto: {r.catalogo}</span>
           <Dettaglio titolo="Identità corrente del catalogo proposta" valore={r.catalogoCorrente} />
+          <NoteStoricheOfferta note={r.noteStoriche} />
           <p className="m-0 text-[12px]">Condizioni proprie aggiornate: {r.condizioni.length ? r.condizioni.map(v => descriviRequisitoSpillo(v)).join(' · ') : 'Nessun grado'}. Lo sblocco si legge dal negozio corrente.</p>
           {r.rilievi.map(v => <p key={v} className="m-0 text-[12px] text-warning">{v}</p>)}
         </li>)}</ul></section>

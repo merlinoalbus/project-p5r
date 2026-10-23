@@ -8,6 +8,7 @@ import { ChipDisponibilita } from '../guida/ChipDisponibilita';
 import { descriviRequisitoSpillo } from '../../../shared/condizioniSpillo';
 import { CostoDellOggetto } from './CostoDellOggetto';
 import { AcquistiOfferta } from './AcquistiOfferta';
+import { NoteStoricheOfferta } from './NoteStoricheOfferta';
 
 function Offerta({ offerta: o, nome, partitaId, onCambiata }: { offerta: OffertaOggettoDto; nome: string; partitaId: number | null; onCambiata: () => void | Promise<void> }) {
   const [occupato, setOccupato] = useState(false);
@@ -22,7 +23,7 @@ function Offerta({ offerta: o, nome, partitaId, onCambiata }: { offerta: Offerta
   const casa = o.sedeCasa ? `${o.sedeCasa.split('#')[0]}#${ancoraNegozio(o.negozio)}` : `/guida/negozi/${encodeURIComponent(o.negozio)}`;
   return <tr>
     <td data-etichetta="Negozio"><Link to={casa} className="touch inline-flex items-center">{o.negozioNome}</Link>{o.sedeNome && <span className="block text-[12px] text-text-secondary">{o.sedeNome}</span>}</td>
-    <td data-etichetta="Costo"><CostoDellOggetto costo={o.costo} prezzo={o.prezzo} daVerificare={o.costoDaVerificare} /></td>
+    <td data-etichetta="Costo"><CostoDellOggetto costo={o.costo} prezzo={o.prezzo} daVerificare={o.costoDaVerificare} /><NoteStoricheOfferta note={o.noteStoriche} /></td>
     <td data-etichetta="Oggi"><div className="flex flex-col items-start gap-1">
       <span className="text-[12px] text-text-secondary">{o.presenza === null ? 'Attiva una partita per la presenza' : o.presenza.stato === 'disponibile' ? 'Aperto adesso' : 'Presenza: vedi requisiti'}</span>
       {o.disponibileOggi === true && <span className="chip chip--attivo">Disponibile oggi</span>}

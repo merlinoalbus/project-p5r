@@ -19,6 +19,7 @@ import { CostoDellOggetto } from '../catalogo/CostoDellOggetto';
 import { OggettiCollegati } from '../catalogo/OggettiCollegati';
 import { ContenutoDellaVoce } from '../catalogo/ContenutoDellaVoce';
 import { AcquistiOfferta } from '../catalogo/AcquistiOfferta';
+import { NoteStoricheOfferta } from '../catalogo/NoteStoricheOfferta';
 
 interface Props {
   articoli: ArticoloDto[];
@@ -79,6 +80,7 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica, onConte
         <dt>Disponibilità</dt><dd>{a.disponibilita?.requisiti.length ? <ul>{a.disponibilita.requisiti.map((r,i)=><li key={i}>{r.testo} — {r.dettaglio}</li>)}</ul> : a.condizioni?.length ? <ul>{a.condizioni.map((r,i)=><li key={i}>{r.tipo === 'avviso' ? descriviRequisitoSpillo(r) : r.testo}</li>)}</ul> : 'Nessun requisito'}</dd>
         <dt>Effetto</dt><dd>{a.effetto || 'Non indicato'}</dd>
         {a.nota && <><dt>Nota</dt><dd>{a.nota}</dd></>}
+        {!!a.noteStoriche?.length && <><dt>Nota storica della fonte</dt><dd><NoteStoricheOfferta note={a.noteStoriche} /></dd></>}
       </dl>
       {onModifica && onContenutoCambiato && !a.catalogo && <ContenutoDellaVoce
         fonte={{ tipo: 'ricompensa', chiave: `articolo/${a.chiave}` }} contenuto={a.ricevuti ?? []}

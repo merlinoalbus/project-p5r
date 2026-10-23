@@ -10,6 +10,7 @@
 
 import type { TipoMappa, TipoRiferimento, TipoSpillo } from './spilli.js';
 import type { GiornoChiave } from './orariNegozio.js';
+import type { NotaStoricaOfferta } from './tanakaNotaStorica.js';
 import type { TipoLuogo } from './tipiLuogo.js';
 import type { Condizione, RequisitoSpillo } from './condizioniSpillo.js';
 import type { OrariDelLuogo, OrariNegozio } from './orariNegozio.js';
@@ -1467,6 +1468,8 @@ export interface DisponibilitaDto {
 }
 
 export interface ArticoloDto {
+  /** Discordanze documentali, separate dalla nota personale e dal prezzo corrente. */
+  noteStoriche?: NotaStoricaOfferta[];
   /** Presenza legacy distinta dai fatti confermati e dalle loro fonti; nessuna quantità dedotta dalla spunta. */
   acquisti?: StatoAcquistiArticoloDto;
   /** Registrazioni effettive sulle singole offerte: l'annullamento riguarda solo la chiave scelta. */
@@ -3149,6 +3152,7 @@ export interface DatiLegameOggettoDto extends Omit<SceltaAbbinamentoOggettoDto, 
 }
 
 export interface OffertaOggettoDto {
+  noteStoriche?: NotaStoricaOfferta[];
   acquisti?: StatoAcquistiArticoloDto;
   acquistiRegistrati: Array<{ articolo: string; negozioNome: string }>;
   articolo: string;
@@ -3169,6 +3173,7 @@ export interface OffertaOggettoDto {
 }
 
 export interface OggettoDettaglioDto extends CatalogoOggettoDto {
+  noteStoriche?: NotaStoricaOfferta[];
   trasformazioni: TrasformazioneOggettoDto[];
   inVendita: OffertaOggettoDto[];
   regalo: Array<{ confidente: string; nome: string; gradimento: string | null; casa: string; regalato: boolean; sconsigliato: boolean }>;
