@@ -1858,6 +1858,8 @@ export interface AttivitaDto {
   effettiTesto: string[];
   /** Come la partita conta l'attività: per niente, per volte svolte o per sessioni. */
   tracciamento: 'nessuno' | 'svolta' | 'sessioni';
+  /** R10-27/3: quante volte l'attività risulta svolta nella partita (solo se contata per volte e con una partita); assente altrimenti. */
+  volteSvolte?: number;
   /** La guida del quiz (migrazione 105: i codici a barre del Triple Seven); null se l'attività non ne ha. */
   quiz: QuizAttivita | null;
   /** Il luogo della città dove si svolge (migrazione 072). */

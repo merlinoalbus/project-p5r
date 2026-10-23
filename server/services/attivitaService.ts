@@ -91,13 +91,16 @@ const attivitaDto = (r: RigaAttivita, sedi: SediAttivita, st: StatoDisponibilita
   const oggetto = r.tipo === 'videogioco' ? catalogo.get(r.chiave) : undefined;
   const { prezzo, ...identita } = datiCatalogoLettura(oggetto, r.costo);
   const fonteConfidente = fonteConfidenteAttivita({ ...r }, st);
+  const tracciamento = eTracciamentoAttivita(r.tracciamento) ? r.tracciamento : tracciamentoPerTipo(r.tipo);
   return {
+    // R10-27/3: lo stato della partita nella scheda, come nelle schede di Confidente e Palazzo (volte svolte, dal contatore unico)
+    ...(st && !fonteConfidente && tracciamento === 'svolta' ? { volteSvolte: st.attivitaSvolte.get(r.chiave) ?? 0 } : {}),
     pesca: r.pesca_regola_chiave && r.pesca_ruolo ? { regola: leggiRegolaPesca(r.pesca_regola_chiave), ruolo: r.pesca_ruolo } : null,
     confidenteChiave: r.confidente_chiave ?? null, fonteConfidente,
     chiave: r.chiave, nome: oggetto?.nome ?? r.nome, ...identita, tipo: r.tipo as AttivitaDto['tipo'], luogo: r.luogo, luogoChiave: r.luogo_chiave, fascia: r.fascia as AttivitaDto['fascia'], costo: prezzo, sblocco: r.sblocco, sessioni: r.sessioni,
     doti: fonteConfidente ? [] : JSON.parse(r.doti_json) as AttivitaDto['doti'], altriEffetti: r.altri_effetti, regole: r.regole, premi: r.premi, paga: r.paga,
     pagaYen: r.paga_yen, pagaMassima: r.paga_massima, dettagli: r.dettagli, ...effettiDto(fonteConfidente ? null : r.effetti_json),
-    tracciamento: eTracciamentoAttivita(r.tracciamento) ? r.tracciamento : tracciamentoPerTipo(r.tipo), quiz: leggiQuiz(r.quiz_json),
+    tracciamento, quiz: leggiQuiz(r.quiz_json),
     sedeChiave: r.sede_chiave, sedeNome: r.sede_chiave ? (sedi.luoghi.get(r.sede_chiave)?.nome ?? null) : null,
     verificato: r.verificato === 1,
     ...(fonteConfidente ? { fascia: null, sblocco: null, doti: [], effetti: [], effettiTesto: [], tracciamento: 'nessuno' as const,

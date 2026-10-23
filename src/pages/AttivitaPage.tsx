@@ -77,6 +77,7 @@ function Attivita({ a, onCambiata, mappaAperta, onMappa }: { a: AttivitaDto; onC
         {a.confidenteChiave && <span className="chip">Confidente: {a.fonteConfidente?.nome ?? a.confidenteChiave}</span>}
         {a.pesca && <span className="chip">{a.pesca.ruolo === 'visita' ? 'Registro delle visite di pesca' : 'Obiettivi della visita di pesca'}</span>}
         <ChipDisponibilita disponibilita={a.disponibilita ?? undefined} compatto />
+        {a.volteSvolte !== undefined && <span className={`chip ${a.volteSvolte > 0 ? 'chip--attivo' : ''}`} title="Quante volte risulta svolta nella partita attiva">{a.volteSvolte === 0 ? 'Mai svolta' : `Svolta ${a.volteSvolte} ${a.volteSvolte === 1 ? 'volta' : 'volte'}`}</span>}
         {!a.verificato && <span className="chip text-[11px]" title="Dato da fonte secondaria">da fonte secondaria</span>}
       </button>
       <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-text-secondary">
