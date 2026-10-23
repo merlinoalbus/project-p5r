@@ -21,7 +21,8 @@ import { ArticoliTabella } from '../components/guida/ArticoliTabella';
 import { Selettore } from '../components/shared/Selettore';
 import { Segmenti } from '../components/shared/Segmenti';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
-import { useSearchParams } from 'react-router-dom';
+// R10-27: la scheda si mostra anche nel pannello sopra il diario; questo hook, fuori dal pannello, è quello di react-router-dom
+import { useSearchParams } from '../components/scheda/routerScheda';
 import { getRichieste, impostaStatoRichiesta } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -166,7 +167,8 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
  * dati correnti e ricalcola le completate in tutto e per dedalo. Il foglio di Jose mostra fiori,
  * timbri, boss segreto e la tabella degli scambi.
  */
-export function RichiestePage() {
+export function RichiestePage({ soloChiave }: { soloChiave?: string } = {}) {
+  // R10-27: nel pannello sopra il diario `soloChiave` mostra la Richiesta citata dalla voce, senza intestazione, riepilogo e filtri
   useDocumentTitle('Richieste dei Mementos');
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = attiva?.id ?? null;
@@ -203,6 +205,18 @@ export function RichiestePage() {
     return { ...attuale, richieste, completate: richieste.filter((x) => x.stato === 'completata').length, dedali: attuale.dedali.map((x) => ({ ...x, completate: richieste.filter((y) => y.areaChiave === x.chiave && y.stato === 'completata').length })) };
   });
   const filtriAttivi = !!q || !!dedalo || accettazione !== 'tutte' || completamento !== 'tutte';
+
+  if (soloChiave) {
+    const richiesta = d?.richieste.find((x) => x.chiave === soloChiave) ?? null;
+    return (
+      <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
+        {d && (richiesta
+          ? <ul className="m-0 list-none p-0" aria-label="Richiesta"><Richiesta r={richiesta} partitaId={partitaId} onCambiata={aggiorna} onModifica={() => setModulo({ chiave: richiesta.chiave })} /></ul>
+          : <p className="m-0 text-sm text-text-muted" role="status">Questa Richiesta non è nel catalogo.</p>)}
+        {modulo && <ModuloRichiesta chiave={modulo.chiave} onChiudi={() => setModulo(null)} onCambiata={() => dati.ricarica()} />}
+      </PageState>
+    );
+  }
 
   return (
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>

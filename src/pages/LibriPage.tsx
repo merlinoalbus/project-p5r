@@ -42,7 +42,9 @@ import type { LibroDto } from '../types';
  * libro che invia una richiesta per volta e aggiorna i conteggi. «Mostra posizione» apre il
  * pannello con la mappa del luogo scelto e ci scorre.
  */
-export function LibriPage() {
+export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
+  // R10-27: nel pannello sopra il diario `soloChiave` mostra il libro citato dalla voce, nell'elenco filtrato su di lui (senza intestazione,
+  // riepilogo e filtri: sono dell'elenco, e il libro è uno)
   useDocumentTitle('Libri');
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = attiva?.id ?? null;
@@ -77,13 +79,14 @@ export function LibriPage() {
   const visibili = useMemo(() => {
     const q = ricerca.trim().toLocaleLowerCase('it');
     return (dati.dati?.libri ?? []).filter((l) => {
+      if (soloChiave && l.chiave !== soloChiave) return false;
       const progresso = valoreDi(l);
       // Nella ricerca entra anche il testo «dove» della guida: per i libri senza negozio né posizione (premi, eventi) è l'unica indicazione.
       if (q && !`${l.nome} ${l.nomeIt ?? ''} ${(l.nomiAltri ?? []).join(' ')} ${l.negozi.map((n) => n.negozioNome).join(' ')} ${l.dove} ${l.effettiTesto.join(' ')}`.toLocaleLowerCase('it').includes(q)) return false;
       if (dote && !haDote(l.effetti, dote)) return false;
       return passaStato(stato, progresso, l.fatto);
     });
-  }, [dati.dati, valoreDi, ricerca, stato, dote]);
+  }, [dati.dati, valoreDi, ricerca, stato, dote, soloChiave]);
 
   const libroSelezionato = dati.dati?.libri.find((l) => l.chiave === selezionato) ?? null;
   const posizione = libroSelezionato?.posizioni[fonteSelezionata] ?? null;
@@ -91,8 +94,9 @@ export function LibriPage() {
     if (libroSelezionato) pannelloRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
   }, [libroSelezionato]);
   const d = dati.dati;
-  const daFare = visibili.filter((l) => !l.fatto);
-  const fatti = visibili.filter((l) => l.fatto);
+  // il libro della voce si vede anche se già completato: non finisce nella piega dei completati
+  const daFare = soloChiave ? visibili : visibili.filter((l) => !l.fatto);
+  const fatti = soloChiave ? [] : visibili.filter((l) => l.fatto);
 
   /** La scheda di un libro: la stessa nei due gruppi, scritta una volta sola. */
   const scheda = (libro: LibroDto) => {
@@ -139,6 +143,7 @@ export function LibriPage() {
 
   return <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
     {d && <div className="flex flex-col gap-4">
+      {!soloChiave && <>
       <IntestazionePagina titolo="Libri" sottotitolo={partitaId
         ? <>Segna ogni sessione letta nella partita «{attiva?.nome}». Gli effetti si applicano quando il volume è completato.</>
         : <>I {d.libri.length} libri di Persona 5 Royal, con sessioni, effetti e dove si comprano. Attiva una partita per registrarne l’avanzamento.</>} />
@@ -170,6 +175,7 @@ export function LibriPage() {
           <Segmenti etichetta="Stato lettura" valore={stato} opzioni={STATI_LETTURA} onCambia={setStato} />
         </div>
       </section>
+      </>}
 
       {libroSelezionato && <section ref={pannelloRef} className="flex scroll-mt-20 flex-col gap-2" aria-label={`Posizione di ${libroSelezionato.nomeIt ?? libroSelezionato.nome}`}>
         <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="m-0">Dove ottenere “{libroSelezionato.nomeIt ?? libroSelezionato.nome}”</h2><button type="button" className="btn btn-ghost btn-sm touch" onClick={() => setSelezionato(null)}>Chiudi</button></div>
@@ -177,15 +183,15 @@ export function LibriPage() {
         {posizione ? <DoveSiTrova tipo={posizione.tipo} chiave={posizione.chiave} titolo={posizione.etichetta} altezza={300} /> : <div className="card"><h3 className="m-0 text-base">Posizione non disponibile</h3><p className="mb-0 text-sm text-text-secondary">Questo libro si ottiene come ricompensa o evento e non ha un punto territoriale verificato.</p></div>}
       </section>}
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      {!soloChiave && <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="m-0 text-sm text-text-secondary">{visibili.length} libri mostrati{fatti.length > 0 ? ` · ${daFare.length} da leggere` : ''}</p>
         <AggiungiAlCatalogo tipo="libro" titolo="Aggiungi un libro" onSalvato={() => void dati.ricarica()} />
-      </div>
+      </div>}
       {/* Da leggere e completati separati, con i completati chiusi: in partita si guarda cosa manca. */}
-      <ul className="m-0 grid list-none gap-3 p-0 md:grid-cols-2 xl:grid-cols-3" aria-label="Libri da leggere">
+      <ul className={`m-0 grid list-none gap-3 p-0 ${soloChiave ? '' : 'md:grid-cols-2 xl:grid-cols-3'}`} aria-label="Libri da leggere">
         {daFare.map(scheda)}
       </ul>
-      {daFare.length === 0 && <p className="m-0 text-sm text-text-muted" role="status">Nessun libro da leggere con questi filtri.</p>}
+      {daFare.length === 0 && <p className="m-0 text-sm text-text-muted" role="status">{soloChiave ? 'Questo libro non è nel catalogo.' : 'Nessun libro da leggere con questi filtri.'}</p>}
       {fatti.length > 0 && <section className="flex flex-col gap-3" aria-label="Libri completati">
         <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="completati" dimensione={20} />}
           titolo={`${mostraFatti ? 'Nascondi' : 'Mostra'} i completati`} dettaglio={fatti.length}

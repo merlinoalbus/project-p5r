@@ -48,7 +48,9 @@ const nomeFilm = (film: FilmDto) => film.nomeIt ?? film.nome;
  * da una coda per titolo che invia una richiesta per volta e aggiorna i conteggi della pagina;
  * «Mostra posizione» apre, sopra gli elenchi, il pannello con la mappa del luogo scelto e ci scorre.
  */
-export function FilmPage() {
+export function FilmPage({ soloChiave }: { soloChiave?: string } = {}) {
+  // R10-27: nel pannello sopra il diario `soloChiave` mostra il titolo citato dalla voce, nell'elenco filtrato su di lui (senza intestazione,
+  // riepilogo e filtri: sono dell'elenco, e il titolo è uno)
   useDocumentTitle('Film e DVD');
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = attiva?.id ?? null;
@@ -92,20 +94,22 @@ export function FilmPage() {
   const visibili = useMemo(() => {
     const q = ricerca.trim().toLocaleLowerCase('it');
     return (dati.dati?.film ?? []).filter((f) => {
+      if (soloChiave && f.chiave !== soloChiave) return false;
       const progresso = progressoDi(f);
       if (q && !`${f.nome} ${f.nomeIt ?? ''} ${(f.nomiAltri ?? []).join(' ')} ${f.effettiTesto.join(' ')} ${f.dettagli ?? ''}`.toLocaleLowerCase('it').includes(q)) return false;
       if (supporto !== 'tutti' && f.dove !== supporto) return false;
       if (dote && !haDote(f.effetti, dote)) return false;
       return passaStato(stato, progresso, completatoCon(f, progresso));
     });
-  }, [dati.dati, progressoDi, ricerca, stato, supporto, dote]);
+  }, [dati.dati, progressoDi, ricerca, stato, supporto, dote, soloChiave]);
 
   const filmSelezionato = dati.dati?.film.find((f) => f.chiave === selezionato) ?? null;
   const posizione = filmSelezionato?.posizioni[posizioneSelezionata] ?? null;
   useEffect(() => { if (filmSelezionato) pannelloRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' }); }, [filmSelezionato]);
   const d = dati.dati;
-  const daFare = visibili.filter((f) => !completatoCon(f, progressoDi(f)));
-  const fatti = visibili.filter((f) => completatoCon(f, progressoDi(f)));
+  // il titolo della voce si vede anche se già completato: non finisce nella piega dei completati
+  const daFare = soloChiave ? visibili : visibili.filter((f) => !completatoCon(f, progressoDi(f)));
+  const fatti = soloChiave ? [] : visibili.filter((f) => completatoCon(f, progressoDi(f)));
 
   /** La scheda di un titolo: la stessa nei due gruppi, quindi scritta una volta sola. */
   const scheda = (film: FilmDto) => {
@@ -146,6 +150,7 @@ export function FilmPage() {
 
   return <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
     {d && <div className="flex flex-col gap-4">
+      {!soloChiave && <>
       <IntestazionePagina titolo="Film e DVD" sottotitolo={partitaId
         ? <>Registra visioni e sessioni nella partita «{attiva?.nome}». Al cinema una visione basta e rivedere può valere ancora; un DVD si completa in più sessioni.</>
         : <>I {d.film.length} titoli al cinema e in DVD di Persona 5 Royal, con quando si vedono, che cosa danno e dove. Attiva una partita per registrarne le visioni.</>} />
@@ -170,6 +175,7 @@ export function FilmPage() {
           <Segmenti etichetta="Stato visione" valore={stato} opzioni={STATI_LETTURA} onCambia={setStato} />
         </div>
       </section>
+      </>}
 
       {filmSelezionato && <section ref={pannelloRef} className="flex scroll-mt-20 flex-col gap-2" aria-label={`Posizione di ${nomeFilm(filmSelezionato)}`}>
         <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="m-0">Dove vedere “{nomeFilm(filmSelezionato)}”</h2><button type="button" className="btn btn-ghost btn-sm touch" onClick={() => setSelezionato(null)}>Chiudi</button></div>
@@ -177,14 +183,14 @@ export function FilmPage() {
         {posizione ? <DoveSiTrova tipo={posizione.tipo} chiave={posizione.chiave} titolo={posizione.etichetta} altezza={300} /> : <div className="card"><h3 className="m-0 text-base">Posizione non disponibile</h3><p className="mb-0 text-sm text-text-secondary">Non esiste ancora un punto territoriale verificato per questo titolo.</p></div>}
       </section>}
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      {!soloChiave && <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="m-0 text-sm text-text-secondary">{visibili.length} titoli mostrati{fatti.length > 0 ? ` · ${daFare.length} da vedere` : ''}</p>
         <AggiungiAlCatalogo tipo="film" titolo="Aggiungi un film o un DVD" onSalvato={() => void dati.ricarica()} />
-      </div>
-      <ul className="m-0 grid list-none gap-3 p-0 md:grid-cols-2 xl:grid-cols-3" aria-label="Film e DVD da vedere">
+      </div>}
+      <ul className={`m-0 grid list-none gap-3 p-0 ${soloChiave ? '' : 'md:grid-cols-2 xl:grid-cols-3'}`} aria-label="Film e DVD da vedere">
         {daFare.map(scheda)}
       </ul>
-      {daFare.length === 0 && <p className="m-0 text-sm text-text-muted" role="status">Nessun titolo da vedere con questi filtri.</p>}
+      {daFare.length === 0 && <p className="m-0 text-sm text-text-muted" role="status">{soloChiave ? 'Questo titolo non è nel catalogo.' : 'Nessun titolo da vedere con questi filtri.'}</p>}
       {fatti.length > 0 && <section className="flex flex-col gap-3" aria-label="Film e DVD completati">
         <button type="button" className="btn btn-ghost btn-sm touch self-start" aria-expanded={mostraFatti} onClick={() => setMostraFatti((v) => !v)}>
           {mostraFatti ? 'Nascondi' : 'Mostra'} i completati · {fatti.length}

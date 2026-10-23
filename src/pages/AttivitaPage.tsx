@@ -10,7 +10,10 @@
 import { useMemo, useState } from 'react';
 import { Selettore } from '../components/shared/Selettore';
 import { opzioniDaNomi } from '../utils/selettore';
-import { Link, Navigate, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+// R10-27: la scheda si mostra anche nel pannello sopra il diario; questi sono quelli di react-router-dom, tranne dentro il pannello
+import { useSearchParams } from '../components/scheda/routerScheda';
+import { Navigate } from '../components/scheda/NavigateScheda';
 import { getAttivita } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -55,8 +58,8 @@ function Effetti({ testi }: { testi: string[] }) {
  * partita). Aperta mostra i dettagli, la mappa se è quella aperta nella pagina, il comando per mostrarla o nasconderla e
  * la correzione della voce (che ricarica tramite `onCambiata`).
  */
-function Attivita({ a, onCambiata, mappaAperta, onMappa }: { a: AttivitaDto; onCambiata: () => void; mappaAperta: boolean; onMappa: () => void }) {
-  const [aperta, setAperta] = useState(false);
+function Attivita({ a, onCambiata, mappaAperta, onMappa, apertaIniziale = false }: { a: AttivitaDto; onCambiata: () => void; mappaAperta: boolean; onMappa: () => void; apertaIniziale?: boolean }) {
+  const [aperta, setAperta] = useState(apertaIniziale);
   const sugg = useSuggerimenti();
   const paga = pagaTesto(a.pagaYen, a.pagaMassima);
   // il giorno corrente della partita accende «Oggi c'è il quiz» sul pulsante della guida
@@ -128,7 +131,9 @@ function Attivita({ a, onCambiata, mappaAperta, onMappa }: { a: AttivitaDto; onC
  * pagine), filtra per Dote ed esclude i videogiochi, che hanno una pagina propria. Tiene aperta
  * una sola mappa per volta e offre l'aggiunta di una voce al catalogo.
  */
-export function AttivitaPage() {
+export function AttivitaPage({ soloChiave }: { soloChiave?: string } = {}) {
+  // R10-27: nel pannello sopra il diario `soloChiave` mostra l'attività (o il lavoro) citata dalla voce, aperta, senza l'intestazione, le
+  // schede e il filtro dell'elenco
   useDocumentTitle('Attività e Doti sociali');
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = attiva?.id ?? null;
@@ -144,6 +149,17 @@ export function AttivitaPage() {
   const lavoriVisibili = useMemo(() => (d?.lavori ?? []).filter((a) => !dote || haDoteAttivita(a, dote)), [d, dote]);
   if (params.get('scheda') === 'libri') return <Navigate to="/guida/libri" replace />;
   if (params.get('scheda') === 'film') return <Navigate to="/guida/film" replace />;
+  if (soloChiave) {
+    // i videogiochi hanno la loro pagina nell'elenco, ma l'elemento citato si cerca fra tutti
+    const elemento = [...(d?.attivita ?? []), ...(d?.lavori ?? [])].find((x) => x.chiave === soloChiave) ?? null;
+    return (
+      <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
+        {d && (elemento
+          ? <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Attività"><Attivita a={elemento} apertaIniziale onCambiata={() => void dati.ricarica()} mappaAperta={conMappa === elemento.chiave} onMappa={() => setConMappa((x) => (x === elemento.chiave ? null : elemento.chiave))} /></ul>
+          : <p className="m-0 text-sm text-text-muted" role="status">Questa attività non è nel catalogo.</p>)}
+      </PageState>
+    );
+  }
   return (
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
