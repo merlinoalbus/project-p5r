@@ -22,8 +22,7 @@
 
 import type { Migration } from '../migrationRunner.js';
 import type { AppDatabase } from '../dbService.js';
-import { getDb } from '../dbService.js';
-import { confermaPropostaOggetto } from '../../services/catalogoOggettiProposte.js';
+import { confermaProposta144 } from './abbinamentiCatalogo144.js';
 import { logger } from '../../utils/logger.js';
 
 type Esito = { voce: string; esito: 'applicata' | 'gia-fatta' | 'saltata'; motivo?: string };
@@ -75,8 +74,7 @@ function mothman(db: AppDatabase, adesso: string, esiti: Esito[]): void {
 }
 
 function proposte(db: AppDatabase, esiti: Esito[]): void {
-  // il gesto di conferma lavora sulla connessione condivisa: se non è questa, non si procede (mai su un'altra base)
-  if (getDb() !== db) { esiti.push({ voce: 'proposte di Sakai', esito: 'saltata', motivo: 'connessione diversa da quella condivisa' }); return; }
+  // la conferma usa la copia congelata del gesto (abbinamentiCatalogo144.ts), sulla connessione della migrazione: nessun servizio vivo
   const stato = db.prepare('SELECT stato FROM main.proposta_abbinamento WHERE riga_tipo = ? AND riga_chiave = ? AND gruppo = ? AND catalogo_chiave = ?');
   for (const p of PROPOSTE) {
     const voce = `proposta ${p.riga} → ${p.scelta}`;
@@ -85,7 +83,7 @@ function proposte(db: AppDatabase, esiti: Esito[]): void {
     if (s.stato === 'confermata') { esiti.push({ voce, esito: 'gia-fatta' }); continue; }
     if (s.stato !== 'da-approvare') { esiti.push({ voce, esito: 'saltata', motivo: `proposta ${s.stato}` }); continue; }
     try {
-      confermaPropostaOggetto({ riga_tipo: p.tipo, riga_chiave: p.riga, gruppo: p.gruppo, catalogo_chiave: p.scelta });
+      confermaProposta144(db, { riga_tipo: p.tipo, riga_chiave: p.riga, gruppo: p.gruppo, catalogo_chiave: p.scelta });
       esiti.push({ voce, esito: 'applicata' });
     } catch (e) {
       esiti.push({ voce, esito: 'saltata', motivo: e instanceof Error ? e.message : String(e) });
