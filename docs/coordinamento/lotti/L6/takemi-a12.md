@@ -53,7 +53,7 @@ in quel momento. Senza partita il prossimo passo è assente; a rango10 non viene
 ## Scritture selettive135
 
 Append `attivita.confidente_chiave` nullable, FK `confidente(chiave) ON DELETE RESTRICT` e indice.
-Manifest pubblico integrale in `server/db/migrations/135_takemi_manifest.ts`, da lettura readonly/fileMustExist
+Manifest pubblico integrale in `server/db/migrations/takemiManifest135.ts` (fino al 2026-10-23 `135_takemi_manifest.ts`), da lettura readonly/fileMustExist
 di `pacchetto/gioco.db`93. Nessun valore dell’istanza privata è inserito nel manifest.
 
 La firma dell’attività confronta tutte le colonne93: `chiave`, `ordine`, `nome`, `tipo`, `luogo`,

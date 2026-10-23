@@ -1,7 +1,7 @@
 import type { AppDatabase } from '../dbService.js';
 import type { Migration } from '../migrationRunner.js';
 import { storiaGenericaAttivita } from '../../services/vincoliAttivitaConfidente.js';
-import { ATTIVITA_TAKEMI_PRIMA_135, ATTIVITA_TAKEMI_DOPO_135, IDENTITA_TAKEMI_93, BENEFICI_TAKEMI_93, BENEFICIO_TAKEMI_RAW_93, FONTI_TAKEMI_135 } from './135_takemi_manifest.js';
+import { ATTIVITA_TAKEMI_PRIMA_135, ATTIVITA_TAKEMI_DOPO_135, IDENTITA_TAKEMI_93, BENEFICI_TAKEMI_93, BENEFICIO_TAKEMI_RAW_93, FONTI_TAKEMI_135 } from './takemiManifest135.js';
 
 type Riga = Record<string, unknown>;
 const AUDIT = 'rettifica-attivita-takemi-135';
