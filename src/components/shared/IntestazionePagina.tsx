@@ -11,6 +11,7 @@ import { Fragment, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { AssetImg } from './AssetImg';
 import { IconChevronLeft } from './icons';
+import { useInPannello } from '../scheda/contestoScheda';
 
 interface Indietro {
   etichetta: string;
@@ -47,7 +48,11 @@ function tasselliTitolo(titolo: ReactNode): ReactNode {
 }
 
 /** Intestazione di pagina con titolo a tasselli e spazio per sottotitolo, azioni e illustrazione. */
-export function IntestazionePagina({ titolo, sottotitolo, azioni, illustrazione, indietro, children, compatta, className }: Props) {
+export function IntestazionePagina({ titolo, sottotitolo, azioni, illustrazione, indietro: indietroPagina, children, compatta: compattaPagina, className }: Props) {
+  // R10-27: nel pannello sopra il diario l'intestazione è compatta, senza illustrazione e senza «indietro» (la testa del pannello ha il suo)
+  const nelPannello = useInPannello();
+  const indietro = nelPannello ? undefined : indietroPagina;
+  const compatta = nelPannello || compattaPagina;
   return (
     <header className={`intestazione ${compatta ? 'intestazione--compatta' : ''} ${className ?? ''}`}>
       {indietro && (indietro.to ? (
@@ -62,7 +67,7 @@ export function IntestazionePagina({ titolo, sottotitolo, azioni, illustrazione,
           {children}
         </div>
         {azioni && <div className="flex items-center gap-2 flex-wrap">{azioni}</div>}
-        {illustrazione && <AssetImg nome={illustrazione} alt="" decorativa className="intestazione__illustrazione" fallback={null} />}
+        {illustrazione && !nelPannello && <AssetImg nome={illustrazione} alt="" decorativa className="intestazione__illustrazione" fallback={null} />}
       </div>
     </header>
   );

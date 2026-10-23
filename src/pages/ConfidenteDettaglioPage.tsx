@@ -3,7 +3,10 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+// R10-27: la scheda si mostra anche nel pannello sopra il diario; questi hook, fuori dal pannello, sono quelli di react-router-dom
+import { useNavigate, useParams, useSearchParams } from '../components/scheda/routerScheda';
+import { useInPannello } from '../components/scheda/contestoScheda';
 import { getConfidenteDettaglio, getConfidentiPartita, getRequisitiConfidente, impostaRegaloFatto, annullaRegaloOggetto, confermaRequisitoConfidente } from '../services/api';
 import { formattaPunti } from '../utils/punti';
 import { useCarica } from '../hooks/useCarica';
@@ -75,6 +78,8 @@ export function ConfidenteDettaglioPage() {
   const { chiave = '' } = useParams();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
+  // R10-27: nel pannello sopra il diario la scheda si legge e basta: i semafori non si confermano né si correggono da lì
+  const nelPannello = useInPannello();
   const attiva = usePartitaStore((s) => s.attiva);
   const { dati: c, caricamento, errore, ricarica } = useCarica(() => getConfidenteDettaglio(chiave), [chiave]);
   const stato = useCarica(() => (attiva ? getConfidentiPartita(attiva.id) : Promise.resolve(null)), [attiva, chiave]);
@@ -155,7 +160,7 @@ export function ConfidenteDettaglioPage() {
     <PageState isLoading={caricamento} error={errore || erroreInformativo} onRetry={() => void ricarica()}>
       {c && !erroreInformativo && (
         <div className="flex flex-col gap-4">
-          <button type="button" className="btn btn-ghost self-start -ml-2" onClick={() => navigate(-1)}><IconChevronLeft size={18} /> Indietro</button>
+          {!nelPannello && <button type="button" className="btn btn-ghost self-start -ml-2" onClick={() => navigate(-1)}><IconChevronLeft size={18} /> Indietro</button>}
           <header className="card flex items-center gap-3">
             <ImmagineEntita ambito="confidente" chiave={c.chiave} etichetta={c.nome} dimensione={64} forma="carta" modificabile />
             <div className="flex-1 min-w-0 flex flex-col gap-2">
@@ -184,7 +189,7 @@ export function ConfidenteDettaglioPage() {
             <section className="card flex flex-col gap-2 border-primary">
               <h2 className="m-0 text-[15px] font-semibold">Prossimo passo: rango {prossimo}</h2>
               {mio && mio.semafori.length > 0 && mio.semafori[0].rango <= prossimo && (
-                <SemaforiRango semafori={mio.semafori[0]} occupato={confermaInCorso} onConferma={(rango, r, confermato) => void conferma(rango, r.indice, confermato)} onCorreggi={(rango) => setRangoDaModificare(rango)} />
+                <SemaforiRango semafori={mio.semafori[0]} occupato={confermaInCorso} onConferma={nelPannello ? undefined : (rango, r, confermato) => void conferma(rango, r.indice, confermato)} onCorreggi={nelPannello ? undefined : (rango) => setRangoDaModificare(rango)} />
               )}
               <ul className="m-0 p-0 list-none flex flex-col gap-2">
                 {c.dialoghi.filter((d) => d.rango !== null && d.rango > (mio?.rango ?? 0) && d.rango <= prossimo).map((d) => (
@@ -197,7 +202,7 @@ export function ConfidenteDettaglioPage() {
           {mio && mio.semafori.length > 1 && (
             <section className="card flex flex-col gap-3">
               <h2 className="m-0 text-[15px] font-semibold">Requisiti dei ranghi successivi</h2>
-              {mio.semafori.slice(1).map((sr) => <SemaforiRango key={sr.rango} semafori={sr} compatto occupato={confermaInCorso} onConferma={(rango, r, confermato) => void conferma(rango, r.indice, confermato)} onCorreggi={(rango) => setRangoDaModificare(rango)} />)}
+              {mio.semafori.slice(1).map((sr) => <SemaforiRango key={sr.rango} semafori={sr} compatto occupato={confermaInCorso} onConferma={nelPannello ? undefined : (rango, r, confermato) => void conferma(rango, r.indice, confermato)} onCorreggi={nelPannello ? undefined : (rango) => setRangoDaModificare(rango)} />)}
             </section>
           )}
           <section id="requisiti" className="card flex scroll-mt-20 flex-col gap-2">

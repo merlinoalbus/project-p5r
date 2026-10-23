@@ -20,6 +20,7 @@ import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { GiornoGuida } from '../components/guida/GiornoGuida';
 import { GestiPartita } from '../components/partita/GestiPartita';
+import { ProviderPannelloScheda } from '../components/scheda/PannelloScheda';
 
 /**
  * Guida giorno per giorno: carica l'indice dei giorni per la partita attiva e il giorno preso
@@ -74,6 +75,8 @@ export function PercorsoPage() {
   return (
     <PageState isLoading={(indice.caricamento && !indice.dati) || (giorno.caricamento && !g)} error={indice.errore ?? giorno.errore} onRetry={() => { void indice.ricarica(); void giorno.ricarica(); }}>
       {indice.dati && g && (
+        // R10-27: nella Guida › Giorno per giorno la scheda di un oggetto citato da una voce si apre in un pannello sopra il diario
+        <ProviderPannelloScheda>
         <div className="flex flex-col gap-3">
           <IntestazionePagina titolo="Guida giorno per giorno" sottotitolo={<>Percorso al 100% dalla soluzione allgamestaff: trama del giorno, cosa fare di giorno e di sera, con chi e dove, avvisi sulle scadenze. {indice.dati.giorniCoperti} giorni con azioni su {indice.dati.totaleGiorni}.{partitaId ? (indice.dati.dataCorrente ? ` Giorno corrente della partita «${attiva?.nome}»: ${dataGiocoTesto(indice.dati.dataCorrente)}.` : ' Imposta il giorno corrente per ritrovare subito il punto in cui sei.') : ' Attiva una partita per spuntare le azioni e fissare il giorno corrente.'}</>} />
           <div className="flex flex-wrap items-center gap-1.5">
@@ -88,6 +91,7 @@ export function PercorsoPage() {
           <GestiPartita contestoChiave={`${partitaId}:${data}`} onCambiato={async () => { await Promise.all([giorno.ricarica(), indice.ricarica()]); }} />
           <GiornoGuida onGiornataModificata={async () => { await Promise.all([giorno.ricarica(), indice.ricarica()]); }} g={g} partitaId={partitaId} onAggiorna={aggiorna} azioneEvidenziata={voceDaMostrare} onSullaMappa={(m) => navigate(`/guida/mappe/${encodeURIComponent(m.chiave)}${m.spilloId ? `?spillo=${m.spilloId}` : ''}`)} fasciaCorrente={partitaId && g.dataCorrente === g.giorno ? attiva?.fasciaGioco ?? 'giorno' : null} />
         </div>
+        </ProviderPannelloScheda>
       )}
     </PageState>
   );

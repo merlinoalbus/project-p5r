@@ -3,7 +3,11 @@
 // ============================================================
 
 import { useState } from 'react';
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+// R10-27: la scheda si mostra anche nel pannello sopra il diario; questi sono quelli di react-router-dom, tranne dentro il pannello
+import { useNavigate, useParams } from '../components/scheda/routerScheda';
+import { Navigate } from '../components/scheda/NavigateScheda';
+import { useInPannello } from '../components/scheda/contestoScheda';
 import { getElementoCatalogo, getNegozio } from '../services/api';
 import { notifica } from '../stores/notificationStore';
 import { useCarica } from '../hooks/useCarica';
@@ -33,6 +37,7 @@ import { TestoRipiegabile } from '../components/shared/TestoRipiegabile';
 export function NegozioPage() {
   const { chiave = '' } = useParams();
   const navigate = useNavigate();
+  const nelPannello = useInPannello();
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = attiva?.id ?? null;
   // giorno corrente e fascia della giornata decidono la disponibilità: al cambio si ricarica
@@ -59,7 +64,7 @@ export function NegozioPage() {
     <PageState isLoading={dati.caricamento && !n} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {n && (
         <div className="negozio-pagina flex flex-col gap-3">
-          <button type="button" className="btn btn-ghost btn-sm self-start touch" onClick={() => navigate('/guida/negozi')}><IconChevronLeft size={16} /> Negozi</button>
+          {!nelPannello && <button type="button" className="btn btn-ghost btn-sm self-start touch" onClick={() => navigate('/guida/negozi')}><IconChevronLeft size={16} /> Negozi</button>}
           <div className="flex flex-col gap-1">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="titolo-display m-0">{n.nome}</h1>

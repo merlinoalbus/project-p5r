@@ -11,7 +11,9 @@
 // ============================================================
 
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+// R10-27: la scheda si mostra anche nel pannello sopra il diario; questi hook, fuori dal pannello, sono quelli di react-router-dom
+import { useLocation, useParams } from '../components/scheda/routerScheda';
 import { getArea, getElementoCatalogo, getLuogo, getQuartiere } from '../services/api';
 import { FinestraAggiungiLuogo } from '../components/mappe/FinestraAggiungiLuogo';
 import { FinestraColloca } from '../components/mappe/FinestraColloca';

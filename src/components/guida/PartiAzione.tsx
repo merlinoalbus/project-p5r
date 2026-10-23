@@ -12,6 +12,8 @@ import type { MouseEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { NOME_TIPO_AZIONE, collegamentoAzione, descriviEffetti } from '../../utils/percorso';
 import { conRitornoDiario } from '../../utils/ritornoDiario';
+import { trovaScheda } from '../../utils/pannelloScheda';
+import { useApriPannello } from '../scheda/contestoScheda';
 import type { AzionePercorsoDto } from '../../types';
 import { IconaCategoria } from './IconaCategoria';
 import { EmblemaDungeon } from './EmblemaDungeon';
@@ -47,10 +49,13 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa }: PropsCartelli
   const stato = a.fatta ? null : a.stato;
   // l'atterraggio di un Palazzo si apre nella mappa accanto, se c'è (un clic semplice: con un modificatore resta un collegamento)
   const apriAccanto = link?.atterraggio && onApriMappa ? link.atterraggio : null;
-  // R10-27 (decisione del PM del 2026-10-23: niente pannello, si naviga alla scheda): partendo da una voce, la voce attuale della
-  // cronologia prende l'ancora `#voce-<uid>`, così «indietro» riporta alla stessa pagina (Home, Percorso, Partita › Oggi) sulla stessa voce
+  // R10-27. Nella Home e nella Guida › Giorno per giorno (dove il diario ha il pannello, `useApriPannello`) un clic semplice sull'oggetto
+  // di una voce apre la sua scheda in un pannello sopra il diario: la pagina non cambia, quindi chiudendo si torna alla stessa voce e alla
+  // stessa posizione di scorrimento. Dove il pannello non c'è (Partita › Oggi, che non cambia) il cartellino navigherebbe alla scheda e
+  // la voce attuale della cronologia prende l'ancora `#voce-<uid>`, così «indietro» riporta alla stessa pagina sulla stessa voce
   const posizione = useLocation();
   const navigate = useNavigate();
+  const apriPannello = useApriPannello();
   const uid = (a as { uid?: string }).uid;
   // R10-28: l'«Entra» in un Palazzo porta la pagina di partenza e la voce, perché la scheda possa dire «Esci» e riportarci qui
   const partenza = `${posizione.pathname}${posizione.search}`;
@@ -58,13 +63,24 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa }: PropsCartelli
     if (!uid || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
     navigate({ pathname: posizione.pathname, search: posizione.search, hash: `#voce-${uid}` }, { replace: true, state: posizione.state });
   };
+  /** Con il pannello e un clic semplice: apre la scheda dell'indirizzo sopra il diario e dice che il clic è servito. */
+  const apriSopra = (e: MouseEvent<HTMLElement>, indirizzo: string): boolean => {
+    if (!apriPannello || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return false;
+    if (!trovaScheda(indirizzo)) return false;
+    e.preventDefault();
+    apriPannello(indirizzo, e.currentTarget);
+    return true;
+  };
   return (
     <span className="flex flex-wrap items-center gap-1.5">
-      {a.oggettiCitati?.filter((o) => o.casa !== link?.href).map((o) => <Link key={o.chiave} to={conRitornoDiario(o.casa, partenza, uid)} onClick={ricordaVoce} className="chip touch no-underline">{o.nome}</Link>)}
+      {a.oggettiCitati?.filter((o) => o.casa !== link?.href).map((o) => <Link key={o.chiave} to={conRitornoDiario(o.casa, partenza, uid)}
+        onClick={(e) => { if (!apriSopra(e, o.casa)) ricordaVoce(e); }} className="chip touch no-underline">{o.nome}</Link>)}
       <span className="chip text-[11px]">{NOME_TIPO_AZIONE[a.tipo] ?? a.tipo}</span>
       {link ? <Link to={conRitornoDiario(link.href, partenza, uid)} className="chip chip--attivo no-underline text-[11px]"
         onClick={(e) => {
           if (apriAccanto && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) { e.preventDefault(); onApriMappa!(apriAccanto); return; }
+          // il Palazzo porta con sé la pagina di partenza e la voce (R10-28): nel pannello la scheda dice «Esci» e riporta alla voce
+          if (apriSopra(e, conRitornoDiario(link.scheda ?? link.href, partenza, uid))) return;
           ricordaVoce(e);
         }}>{link.etichetta}</Link>
         : a.riferimentoTesto && <span className="chip text-[11px]">{a.riferimentoTesto}</span>}

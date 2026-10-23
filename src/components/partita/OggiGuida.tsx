@@ -7,6 +7,7 @@ import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { IconChevronLeft, IconChevronRight } from '../shared/icons';
 import { MeteoGiornata } from './MeteoGiornata';
+import { ProviderPannelloScheda } from '../scheda/PannelloScheda';
 import { dataGiocoTesto } from '../../utils/dateGioco';
 import type { Oggi } from '../../hooks/useOggi';
 
@@ -14,16 +15,19 @@ interface Props {
   oggi: Oggi;
   /** Scorre nel proprio riquadro invece di allungare la pagina (schermate senza scorrimento). */
   riempi?: boolean;
+  /** R10-27: toccando un oggetto citato da una voce, la sua scheda si apre in un pannello sopra il diario (la Home). Senza, i cartellini
+   *  navigano alla scheda come sempre: la scheda «Oggi» della Partita non cambia (decisione dell'utente, 2026-10-23). */
+  pannello?: boolean;
 }
 
 /** La colonna della guida del giorno, sullo stato condiviso `oggi`: frecce fra i giorni, «Segna
  * come giorno corrente» (o la targa «Oggi nella partita»), «Vai a oggi», collegamento alla guida
  * completa, la riga fascia + meteo della fascia attiva, e la `GiornoGuida` compatta (con i tag delle allerte del giorno)
  * (con `riempi` scorre nel proprio riquadro). Senza giorno o indice caricati non mostra nulla. */
-export function OggiGuida({ oggi, riempi }: Props) {
+export function OggiGuida({ oggi, riempi, pannello }: Props) {
   const { giorno: g, indice } = oggi;
   if (!g || !indice) return null;
-  return (
+  const colonna = (
     <div className={`flex flex-col gap-2 min-w-0 ${riempi ? 'md:min-h-0' : ''}`}>
       <div className="flex flex-wrap items-center gap-1.5 shrink-0">
         <button type="button" className="btn btn-secondary btn-sm touch" disabled={!g.precedente} onClick={() => oggi.vaiAlGiorno(g.precedente)} aria-label="Giorno precedente"><IconChevronLeft size={16} /></button>
@@ -66,4 +70,5 @@ export function OggiGuida({ oggi, riempi }: Props) {
       </div>
     </div>
   );
+  return pannello ? <ProviderPannelloScheda>{colonna}</ProviderPannelloScheda> : colonna;
 }

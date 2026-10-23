@@ -6,6 +6,7 @@ import type { AzionePercorsoDto, EffettiAzioneDto, GenereVoce } from '../types';
 import { TIPI_AZIONE } from '../../shared/effettiAzione';
 import { dotiDaSegnareDaEffetti, promemoriaDoti } from './dotiDaSegnare';
 import { urlMappa } from './navigazioneMappa';
+import { indirizzoElemento } from './pannelloScheda';
 
 /** I generi di una voce della giornata: un'azione si spunta, gli altri si mostrano. */
 export const NOME_GENERE: Record<GenereVoce, string> = { azione: 'Cosa da fare', evento: 'Evento', scadenza: 'Scadenza', promemoria: 'Promemoria' };
@@ -22,6 +23,9 @@ export interface CollegamentoAzione {
   etichetta: string;
   /** Il collegamento porta alla planimetria d'atterraggio di un Palazzo (non alla sua scheda): chi mostra la mappa accanto la può aprire lì. */
   atterraggio?: { chiave: string; spilloId: number | null };
+  /** R10-27: dove il diario con il pannello apre la scheda dell'oggetto, se diverso da `href`. Libri, film, attività e Richieste non hanno una
+   *  pagina per singolo elemento: l'elenco (`href`) resta il collegamento di sempre, il pannello mostra quell'elemento nell'elenco filtrato. */
+  scheda?: string;
 }
 
 /** Scheda collegata a un'azione (Confidente con le risposte, dungeon, Richieste, libri…), se ricavabile. Per un Palazzo, se c'è
@@ -55,10 +59,10 @@ export function collegamentoAzione(a: Pick<AzionePercorsoDto, 'tipo' | 'riferime
         }
         return { href: `/guida/dungeon/${r.chiave}${a.infiltrazioniDelPalazzo ? '?infiltrazione=in-corso' : ''}`, etichetta: testo ?? 'Palazzo' };
       }
-      case 'richiesta': return { href: '/guida/richieste', etichetta: testo ?? 'Richieste dei Mementos' };
-      case 'libro': return { href: '/guida/libri', etichetta: testo ?? 'Libri' };
-      case 'film': return { href: '/guida/film', etichetta: testo ?? 'Film e DVD' };
-      case 'attivita': return { href: '/guida/attivita', etichetta: testo ?? 'Attività' };
+      case 'richiesta': return { href: '/guida/richieste', etichetta: testo ?? 'Richieste dei Mementos', scheda: indirizzoElemento('/guida/richieste', r.chiave) };
+      case 'libro': return { href: '/guida/libri', etichetta: testo ?? 'Libri', scheda: indirizzoElemento('/guida/libri', r.chiave) };
+      case 'film': return { href: '/guida/film', etichetta: testo ?? 'Film e DVD', scheda: indirizzoElemento('/guida/film', r.chiave) };
+      case 'attivita': return { href: '/guida/attivita', etichetta: testo ?? 'Attività', scheda: indirizzoElemento('/guida/attivita', r.chiave) };
       case 'negozio': return { href: `/guida/negozi/${r.chiave}`, etichetta: testo ?? 'Negozio' };
       case 'dote': return { href: '/guida/attivita', etichetta: testo ?? 'Doti sociali' };
       default: return null;

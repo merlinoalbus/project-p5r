@@ -311,6 +311,88 @@
     border-top: 1px solid var(--color-border);
   }
 
+  /* ---- Pannello della scheda sopra il diario (R10-27, decisione dell'utente del 2026-10-23) ----
+     Toccando un oggetto citato da una voce del diario, la sua scheda si apre in un livello sopra la pagina: la pagina sotto non cambia e non
+     scorre, quindi chiudendo si torna alla stessa posizione. Sul telefono (< 1024 px) è un **foglio dal basso**, alto 92% dello schermo
+     (l'altezza non cambia fra il caricamento e la scheda pronta); da 1024 px un **pannello a destra** a tutta altezza (640 px, da 1280 px fino
+     a 1080 px: le pagine hanno le colonne dei breakpoint della finestra, qui hanno lo spazio che si aspettano). Sta sotto le finestre
+     (`--z-modal-overlay`) e sopra la barra di navigazione e le tendine del telefono. Scorre solo `.pannello-scheda__corpo`, da solo, con il
+     gesto contenuto; la testa (indietro, tipo di scheda, chiudi) resta ferma. */
+  .pannello-scheda {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-popover);
+    display: flex;
+    align-items: flex-end;
+    justify-content: stretch;
+    background: rgba(0, 0, 0, 0.6);
+    animation: fade-in 0.15s ease-out;
+  }
+  .pannello-scheda__foglio {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: min(92dvh, calc(100dvh - 24px));
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-bottom: none;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
+    padding-bottom: env(safe-area-inset-bottom);
+    animation: slide-up 0.18s ease-out;
+  }
+  .pannello-scheda__foglio:focus { outline: none; }
+  .pannello-scheda__testa {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: none;
+    padding: 4px 8px 4px 12px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .pannello-scheda__etichetta {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-family: var(--font-display, inherit);
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-secondary);
+  }
+  .pannello-scheda__corpo {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 12px;
+    overflow-y: auto;
+    overscroll-behavior: contain; /* il gesto resta nel pannello: il diario sotto è fermo */
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--color-primary) 75%, transparent) transparent;
+  }
+  @keyframes pannello-entra {
+    from { transform: translateX(32px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  @media (min-width: 1024px) {
+    .pannello-scheda { align-items: stretch; justify-content: flex-end; }
+    .pannello-scheda__foglio {
+      width: min(640px, 100vw);
+      height: 100%;
+      border: none;
+      border-left: 1px solid var(--color-border);
+      border-radius: 0;
+      box-shadow: -8px 0 32px rgba(0, 0, 0, 0.5);
+      padding-bottom: 0;
+      animation: pannello-entra 0.18s ease-out;
+    }
+    .pannello-scheda__corpo { padding: 16px; }
+  }
+  @media (min-width: 1280px) {
+    .pannello-scheda__foglio { width: min(1080px, 88vw); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pannello-scheda, .pannello-scheda__foglio { animation: none; }
+  }
+
   /* ---- Campi form ---- */
   .form-label {
     font-size: 12px;
