@@ -5,7 +5,7 @@
 // Le migrazioni non importano i servizi vivi (F5): questo modulo riproduce, con il formato che oggi produce l'app, la rimozione
 // di UN pin che ha una sola riga da registrare — la sua. È la sequenza di `eliminaSpillo` (mappeService) dentro `conCestino`
 // (cestinoService) per un pin senza immagini, voci, destinazioni, sedi, stati nelle partite o altri figli:
-//   riga del Cestino  = { tipo 'pin', chiave = uid del pin, nome, contesto «Quartiere › Area», riepilogo {"spillo":1},
+//   riga del Cestino  = { tipo 'pin', chiave = uid del pin, nome, contesto = `nomePercorso(mappa_chiave)` (il nome di `mappa_percorso`), riepilogo {"spillo":1},
 //                         registro [{ tabella:'spillo', op:'D', prima:<riga intera>, seq:0 }], con_partite 0, vicini NULL };
 //   si scrive PRIMA la fotografia, poi si toglie il pin.
 // Se il pin ha qualunque altro dato collegato, o non è più quello atteso, non si fa nulla: il registro non descriverebbe tutto
@@ -64,12 +64,14 @@ export function rimuoviPinNelCestino(db: AppDatabase, atteso: PinAtteso): EsitoR
   if (db.prepare("SELECT 1 FROM main.cestino WHERE tipo = 'pin' AND chiave = ?").get(atteso.uid)) return { esito: 'saltata', motivo: 'il pin ha già una riga nel Cestino' };
   const collegate = righeCollegate(db, atteso.id, atteso.uid);
   if (collegate.length) return { esito: 'saltata', motivo: `il pin ha dati collegati (${collegate.join(', ')}): serve la rimozione ordinaria dell'app` };
-  const contesto = db.prepare(`SELECT q.nome || ' › ' || a.nome AS testo FROM main.mappa m JOIN main.area a ON a.chiave = m.area_chiave
-    JOIN main.quartiere q ON q.chiave = a.quartiere_chiave WHERE m.chiave = ?`).get(atteso.mappa) as { testo: string } | undefined;
+  // Il contesto è quello dell'app: `nomePercorso(mappa_chiave)`, cioè il nome di `mappa_percorso`; la chiave stessa se la mappa non ha un percorso.
+  const haPercorsi = !!db.prepare("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = 'mappa_percorso'").get();
+  const percorso = haPercorsi ? db.prepare('SELECT nome FROM main.mappa_percorso WHERE mappa_chiave = ?').get(atteso.mappa) as { nome: string } | undefined : undefined;
+  const contesto = percorso?.nome ?? atteso.mappa;
   const registro = [{ tabella: 'spillo', op: 'D', prima: riga, seq: 0 }];
   db.prepare(`INSERT INTO main.cestino (uid, tipo, chiave, nome, contesto, riepilogo_json, registro_json, con_partite, vicini_json, eliminato_il)
     VALUES (?, 'pin', ?, ?, ?, ?, ?, 0, NULL, ?)`)
-    .run(randomBytes(16).toString('hex'), atteso.uid, String(riga.nome), contesto?.testo ?? '', JSON.stringify({ spillo: 1 }), JSON.stringify(registro), new Date().toISOString());
+    .run(randomBytes(16).toString('hex'), atteso.uid, String(riga.nome), contesto, JSON.stringify({ spillo: 1 }), JSON.stringify(registro), new Date().toISOString());
   if (db.prepare('DELETE FROM main.spillo WHERE id = ? AND uid IS ?').run(atteso.id, atteso.uid).changes !== 1) throw new Error('rimozione del pin: l\'identità non coincide più, transazione annullata');
   return { esito: 'rimosso' };
 }
