@@ -1,5 +1,6 @@
 import type { AppDatabase } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
+import { colonneCompatibili } from '../../db/fontiTolte.js';
 
 interface PassoPin { schema: 'main' | 'utente'; tabella: string; op: 'D' | 'U' | 'I'; prima?: Record<string, unknown>; dopo?: Record<string, unknown> }
 const errore = () => httpErrors.conflict('cestino-pin-registro-incoerente', 'Il registro non descrive la sola rimozione recuperabile del pin e dei suoi stati: transazione annullata, dati conservati.');
@@ -15,7 +16,8 @@ export function verificaRegistroCestinoPin(db: AppDatabase, passi: readonly Pass
   const radice = radici[0]!.prima!, id = radice.id;
   if (typeof id !== 'number' || !Number.isSafeInteger(id) || id < 1) throw errore();
   const colonne = (db.prepare('PRAGMA main.table_info(spillo)').all() as Array<{ name: string }>).map(c => c.name);
-  if (!colonne.length || Object.keys(radice).length !== colonne.length || colonne.some(c => !Object.hasOwn(radice, c))) throw errore();
+  // R11-06: stretto per le colonne non dichiarate, tollerante solo con quelle dichiarate tolte (registro delle fonti tolte)
+  if (!colonne.length || !colonneCompatibili('main', 'spillo', Object.keys(radice), colonne)) throw errore();
   const linkImmagini = passi.filter(p => p.schema === 'main' && p.tabella === 'spillo_immagine' && p.op === 'D' && p.prima?.spillo_id === id);
   const chiaviImmagini = new Set(linkImmagini.flatMap(p => typeof p.prima?.immagine_chiave === 'string' ? [p.prima.immagine_chiave] : []));
   const immagini = new Set(passi.filter(p => p.schema === 'main' && p.tabella === 'immagine' && p.op === 'D' && p.prima?.ambito === 'spillo'
@@ -25,7 +27,7 @@ export function verificaRegistroCestinoPin(db: AppDatabase, passi: readonly Pass
     // dopo la cattura: anche immagini, metadati e stati devono restare integrali.
     if (!db.prepare(`SELECT 1 FROM ${p.schema}.sqlite_master WHERE type='table' AND name=?`).get(p.tabella)) throw errore();
     const campi = (db.prepare('SELECT name FROM pragma_table_info(?,?) ORDER BY cid').all(p.tabella, p.schema) as Array<{ name: string }>).map(c => c.name);
-    if (!campi.length || [p.prima, p.dopo].some(r => r && (Object.keys(r).length !== campi.length || campi.some(c => !Object.hasOwn(r, c))))) throw errore();
+    if (!campi.length || [p.prima, p.dopo].some(r => r && !colonneCompatibili(p.schema, p.tabella, Object.keys(r), campi))) throw errore();
     if (p.schema === 'utente') {
       if (!['punto_partita', 'spillo_partita', 'divergenza_partita', 'spillo_partita_infiltrazione'].includes(p.tabella)
         || (p.tabella === 'divergenza_partita' && p.op !== 'D')

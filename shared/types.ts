@@ -3005,6 +3005,8 @@ export interface AnteprimaPacchettoDto {
   differenze: Array<{ tabella: string; istanza: number; pacchetto: number }>;
   /** Tabelle dell'istanza assenti nel pacchetto (le migrazioni le ricreano vuote). */
   tabelleAssenti: string[];
+  /** R11-05/3: le strutture del pacchetto che questa versione non usa più (sempre popolato dal server); non si importano e restano nella copia di sicurezza. */
+  scarti?: ScartoPacchettoDto[];
   /** Immagini con contenuto, dentro l'uno e l'altro file. */
   immagini: { istanza: number; pacchetto: number };
   orfani: OrfanoPartiteDto[];
@@ -3053,8 +3055,27 @@ export interface StatoImportazionePacchettoDto {
   ultima: { operazione: string; riuscita: boolean; conclusaIl: string; messaggio: string; esito: EsitoImportazionePacchettoDto | null } | null;
 }
 
+/** Una struttura del backup che questa versione non usa più: all'importazione si scarta, e resta nella copia di sicurezza (R11-05/3). */
+export interface ScartoPacchettoDto {
+  tipo: 'tabella' | 'colonna';
+  tabella: string;
+  /** Il nome leggibile della tabella (quello del cestino). */
+  etichetta: string;
+  colonna: string | null;
+  /** Righe della tabella, o righe con un valore informativo nella colonna. */
+  righe: number;
+  /** Dove vive ora il dato (registro delle fonti tolte); null se la struttura non è dichiarata. */
+  sostituitaDa: string | null;
+  /** Falso: struttura non più nell'app senza una voce nel registro (probabilmente rinominata). */
+  spiegata: boolean;
+}
+
 /** Esito dell'importazione: che cosa è cambiato e quali riferimenti delle partite sono rimasti orfani. */
 export interface EsitoImportazionePacchettoDto {
+  /** R11-05/3: le strutture del backup che questa versione non usa più (sempre popolato dal server). */
+  scarti?: ScartoPacchettoDto[];
+  /** Nome della cartella della copia di sicurezza, dove sta anche `riepilogo-scarti.json`. */
+  riepilogoSalvatoIn?: string;
   copiaDiSicurezza: string;
   versioneSchemaPacchetto: number;
   versioneSchema: number;
@@ -3323,7 +3344,7 @@ export type VoceCestinoUnificatoDto =
   | (Omit<VoceCestinoDto, 'id' | 'tipo'> & { id: null; tipo: 'partita' | 'fonte-acquisto'|'fonte-pesca'|'sessione-pesca'|'osservazione-pesca'|'persona-scorta'; riferimento: { schema: 'utente'; uid: string } });
 
 /** Perché una riga non è stata rimessa com'era: cambiata dopo l'eliminazione, non c'è più, o punta a qualcosa che non c'è più. */
-export type MotivoSaltataCestinoDto = 'cambiata-dopo' | 'non-esiste-piu' | 'legame-mancante';
+export type MotivoSaltataCestinoDto = 'cambiata-dopo' | 'non-esiste-piu' | 'legame-mancante' | 'colonna-rimossa' | 'tabella-rimossa';
 
 /** Le righe non rimesse di una tabella, per motivo, con qualche chiave d'esempio. */
 export interface SaltataCestinoDto {
@@ -3332,6 +3353,10 @@ export interface SaltataCestinoDto {
   motivo: MotivoSaltataCestinoDto;
   quante: number;
   esempi: string[];
+  /** R11-06: per `colonna-rimossa`, le colonne che l'app non conserva più e che il ripristino non ha potuto rimettere. */
+  colonne?: string[];
+  /** R11-06: dove vive ora il dato (dal registro delle fonti tolte), se la struttura è dichiarata tolta. */
+  sostituitaDa?: string | null;
 }
 
 /** Esito di un ripristino dal cestino. */

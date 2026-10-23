@@ -51,6 +51,9 @@ const MOTIVO_SALTATA_CESTINO: Record<MotivoSaltataCestinoDto, readonly [uno: str
   'cambiata-dopo': ['con modifiche fatte dopo l’eliminazione: le modifiche restano', 'con modifiche fatte dopo l’eliminazione: le modifiche restano'],
   'non-esiste-piu': ['che nel frattempo non c’è più', 'che nel frattempo non ci sono più'],
   'legame-mancante': ['che punta a qualcosa eliminato dopo: non torna', 'che puntano a qualcosa eliminato dopo: non tornano'],
+  // R11-06: il dato che l'app non conserva più non può tornare; la riga torna senza quel dato, o non torna se la tabella non c'è più
+  'colonna-rimossa': ['con un dato che l’app non conserva più: la riga è tornata senza', 'con un dato che l’app non conserva più: le righe sono tornate senza'],
+  'tabella-rimossa': ['che l’app non conserva più: non torna', 'che l’app non conserva più: non tornano'],
 };
 
 /** Il motivo per `quante` righe saltate. */

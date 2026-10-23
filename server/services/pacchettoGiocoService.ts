@@ -28,6 +28,8 @@ import { logger } from '../utils/logger.js';
 import { httpErrors } from '../utils/httpError.js';
 import { closeDb, getDb, nowIso, resolveDbPath, resolvePartitePath } from '../db/dbService.js';
 import { verificaArchivioLegacy } from '../db/acquistiLegacy.js';
+import { colonnaTolta, tabellaTolta } from '../db/fontiTolte.js';
+import { etichettaTabella } from './cestinoService.js';
 import { avvisiImportazioneTanaka, statoTanakaDi } from './tanakaStatoListino.js';
 import { migrations } from '../db/migrations/index.js';
 import { regoleAllAvvio } from './pacchetto/pacchettoGioco.js';
@@ -35,7 +37,7 @@ import { convertiCondizioniDatabaseImportato } from './condizioni/importazione.j
 import { riallineaStati } from './mappe/statiGuida.js';
 import { occupaIstanza } from './lucchettoIstanza.js';
 import { conCartellaDiLavoro, copiaDiSicurezza, installaDatabase, riapriIstanza, statoIstanza, tornaAllaCopiaDiSicurezza, verificaDatabase } from './impostazioniService.js';
-import type { AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, FaseImportazionePacchetto, OrfanoPartiteDto, StatoImportazionePacchettoDto } from '../../shared/types.js';
+import type { AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, FaseImportazionePacchetto, OrfanoPartiteDto, ScartoPacchettoDto, StatoImportazionePacchettoDto } from '../../shared/types.js';
 import { ESTENSIONI_PACCHETTO, copiaDalDeposito, elencaDeposito as elencaCartella, percorsoNelDeposito } from './depositoService.js';
 import { verificaCollegamentiAttivitaImportati } from './vincoliAttivitaConfidente.js';
 import { verificaCollegamentiPescaImportati } from './vincoliAttivitaPesca.js';
@@ -130,6 +132,41 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
 /** I nomi delle tabelle di uno schema in ordine alfabetico, escluse quelle interne di SQLite (`sqlite_%`). */
 function tabelleDi(db: Database.Database, schema: string): string[] {
   return (db.prepare(`SELECT name FROM "${schema}".sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name`).all() as Array<{ name: string }>).map((r) => r.name);
+}
+
+/** Una riga conta, in una colonna, se il valore non è NULL né uno di '', '[]', '{}', '0', 'null' (valore informativo). */
+const informativo = (c: string): string => `"${c}" IS NOT NULL AND CAST("${c}" AS TEXT) NOT IN ('', '[]', '{}', '0', 'null')`;
+
+/** Tabelle e colonne di uno schema `main`. */
+function strutturaDi(db: Database.Database): Map<string, string[]> {
+  const out = new Map<string, string[]>();
+  for (const t of tabelleDi(db, 'main')) out.set(t, (db.prepare('SELECT name FROM pragma_table_info(?)').all(t) as Array<{ name: string }>).map((c) => c.name));
+  return out;
+}
+
+/**
+ * R11-05/3: le strutture del pacchetto (tabelle e colonne) che l'istanza — già migrata al codice corrente, lo schema di arrivo — non ha più, con le righe che
+ * porterebbero. Quelle dichiarate nel registro delle fonti tolte dicono dove vive ora il dato; le altre sono «non spiegate» (probabili rinomine).
+ * Sola lettura su entrambi i database; una tabella vuota o una colonna senza valori informativi non si segnala.
+ */
+export function scartiDelPacchetto(pacchetto: Database.Database, istanza: Database.Database): ScartoPacchettoDto[] {
+  const dentro = strutturaDi(pacchetto), qui = strutturaDi(istanza), out: ScartoPacchettoDto[] = [];
+  for (const [tabella, colonne] of dentro) {
+    if (!qui.has(tabella)) {
+      const tolta = tabellaTolta('main', tabella);
+      const righe = (pacchetto.prepare(`SELECT COUNT(*) AS n FROM main."${tabella}"`).get() as { n: number }).n;
+      if (righe > 0) out.push({ tipo: 'tabella', tabella, etichetta: etichettaTabella(tabella), colonna: null, righe, sostituitaDa: tolta?.sostituitaDa ?? null, spiegata: !!tolta });
+      continue;
+    }
+    const oggi = qui.get(tabella)!;
+    for (const colonna of colonne.filter((c) => !oggi.includes(c))) {
+      if (colonna === 'contenuto') continue; // BLOB: non si scandisce
+      const righe = (pacchetto.prepare(`SELECT COUNT(*) AS n FROM main."${tabella}" WHERE ${informativo(colonna)}`).get() as { n: number }).n;
+      const dichiarata = colonnaTolta('main', tabella, colonna);
+      if (righe > 0) out.push({ tipo: 'colonna', tabella, etichetta: etichettaTabella(tabella), colonna, righe, sostituitaDa: dichiarata?.sostituitaDa ?? null, spiegata: !!dichiarata });
+    }
+  }
+  return out.sort((a, b) => Number(b.spiegata) - Number(a.spiegata) || a.tabella.localeCompare(b.tabella));
 }
 
 /** Righe per tabella di uno schema. */
@@ -294,6 +331,7 @@ function anteprimaDalDatabase(db: Database.Database, byte: number, nome?: string
     motivo: importabile ? null : `Il pacchetto ha lo schema ${versioneSchema}, più nuovo di quello che questa versione dell'app sa leggere (${codice}): aggiorna l'app prima di importarlo.`,
     differenze,
     tabelleAssenti,
+    scarti: scartiDelPacchetto(db, istanza),
     immagini: { istanza: immaginiPiene(istanza, 'main'), pacchetto: immaginiPiene(db, 'main') },
     orfani: orfaniPartite(db, 'main', 'utente'),
     // L7-TANAKA-IMPORT: che listino di Tanaka e che registro delle decisioni porta il pacchetto, rispetto all'istanza
@@ -375,6 +413,14 @@ async function sostituisciDatiDiGioco(file: string): Promise<EsitoImportazionePa
   if (!anteprima.importabile) throw httpErrors.badRequest('pacchetto-troppo-nuovo', anteprima.motivo ?? 'Il pacchetto non è importabile.');
   avanza('copia-di-sicurezza');
   const salvataggio = await copiaDiSicurezza();
+  // R11-05/3: il riepilogo di ciò che si scarta resta accanto alla copia di sicurezza (la memoria del servizio si perde al riavvio); non blocca mai l'importazione
+  let riepilogoSalvatoIn: string | undefined;
+  try {
+    await fsp.writeFile(path.join(salvataggio, 'riepilogo-scarti.json'), JSON.stringify({ quando: nowIso(), versionePacchetto: anteprima.versioneSchema, versioneSchemaIstanza: anteprima.versioneSchemaIstanza, scarti: anteprima.scarti ?? [] }, null, 2), 'utf8');
+    riepilogoSalvatoIn = path.basename(salvataggio);
+  } catch (err) {
+    logger.warn({ err: err instanceof Error ? err.message : String(err) }, 'riepilogo degli scarti non salvato nella copia di sicurezza');
+  }
   verificaArchivioLegacy(getDb());
   closeDb();
   let condizioniConvertite: string[] = [];
@@ -408,6 +454,8 @@ async function sostituisciDatiDiGioco(file: string): Promise<EsitoImportazionePa
     immagini,
     orfani,
     condizioniConvertite,
+    scarti: anteprima.scarti ?? [],
+    ...(riepilogoSalvatoIn ? { riepilogoSalvatoIn } : {}),
     stato: statoIstanza(),
   };
 }

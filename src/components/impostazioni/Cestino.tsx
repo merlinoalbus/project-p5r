@@ -62,19 +62,24 @@ function EsitoRipristino({ esito }: { esito: EsitoRipristinoCestinoDto }) {
     <div className="flex flex-col gap-2 text-[13px]">
       <p className="m-0">«{esito.nome}»: di nuovo al suo posto, con {esito.rimesse.toLocaleString('it-IT')} righe rimesse com’erano.</p>
       {esito.partiteMancanti && <p className="m-0 text-warning">Il file delle partite è stato sostituito dopo l’eliminazione: le spunte e gli stati delle partite non sono tornati.</p>}
-      {esito.saltate.length > 0 && (
-        <>
-          <p className="m-0">Quel che hai cambiato dopo l’eliminazione non è stato sovrascritto:</p>
+      {([
+        { titolo: 'Quel che hai cambiato dopo l’eliminazione non è stato sovrascritto:', righe: esito.saltate.filter((s) => s.motivo !== 'colonna-rimossa' && s.motivo !== 'tabella-rimossa') },
+        { titolo: 'Quel che l’app non conserva più non è tornato:', righe: esito.saltate.filter((s) => s.motivo === 'colonna-rimossa' || s.motivo === 'tabella-rimossa') },
+      ]).filter((g) => g.righe.length > 0).map((g) => (
+        <div key={g.titolo} className="flex flex-col gap-2">
+          <p className="m-0">{g.titolo}</p>
           <ul className="m-0 flex flex-col gap-1 pl-4">
-            {esito.saltate.map((s) => (
+            {g.righe.map((s) => (
               <li key={`${s.tabella}|${s.motivo}`}>
                 <span className="font-semibold">{s.quante.toLocaleString('it-IT')} {s.etichetta}</span> {motivoSaltata(s.motivo, s.quante)}
+                {s.colonne && s.colonne.length > 0 && <span className="block text-[12px] text-text-muted">dato non conservato: {s.colonne.map((c) => <code key={c}>{c} </code>)}</span>}
+                {s.sostituitaDa && <span className="block text-[12px] text-text-muted">ora: {s.sostituitaDa}</span>}
                 {s.esempi.length > 0 && <span className="block break-words text-[12px] text-text-muted">{s.esempi.join(', ')}{s.quante > s.esempi.length ? ', …' : ''}</span>}
               </li>
             ))}
           </ul>
-        </>
-      )}
+        </div>
+      ))}
     </div>
   );
 }

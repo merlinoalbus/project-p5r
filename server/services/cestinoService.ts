@@ -35,6 +35,7 @@ import { randomBytes } from 'node:crypto';
 import { getDb, nowIso, type AppDatabase } from '../db/dbService.js';
 import { ARCHIVI_LEGACY_IMMUTABILI, verificaArchivioLegacy, verificaCestinoLegacy } from '../db/acquistiLegacy.js';
 import { httpErrors } from '../utils/httpError.js';
+import { colonnaTolta, colonneCompatibili, tabellaTolta } from '../db/fontiTolte.js';
 import { invalidaCacheDiGioco } from './cacheDiGioco.js';
 import { modelloAvanzamento, riallineaStati } from './mappe/statiGuida.js';
 import { verificaRegistroCestinoPin } from './mappe/registroCestinoPin.js';
@@ -139,6 +140,13 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   acquisto_operazione: ['ricevuta di acquisto', 'ricevute di acquisto'], effetto_applicato: ['ricevuta di un effetto', 'ricevute degli effetti'],
   da_applicare: ['proposta personale', 'proposte personali'], movimento_yen: ['movimento di denaro', 'movimenti di denaro'],
   proposta_operazione: ['decisione personale', 'decisioni personali'], beneficio_ciclo: ['stato del beneficio', 'stati dei benefici'],
+  // R11-06: nomi leggibili per le righe saltate di tabelle tolte o recenti (le etichette delle tabelle tolte non si ripuliscono mai)
+  lettura_partita: ['lettura completata nelle partite', 'letture completate nelle partite'], requisito_partita: ['requisito confermato nelle partite', 'requisiti confermati nelle partite'],
+  giorno_calendario: ['giorno del calendario', 'giorni del calendario'], giorno_percorso: ['giorno del percorso', 'giorni del percorso'],
+  pianta_quartiere: ['pianta di un quartiere', 'piante dei quartieri'],
+  ombra: ['Ombra', 'Ombre'], giorno: ['giorno del gioco', 'giorni del gioco'], evento_calendario_voce: ['collegamento evento-voce', 'collegamenti evento-voce'],
+  fortuna_partita: ['stato della Fortuna nelle partite', 'stati della Fortuna nelle partite'], effetto_stato_voce: ['stato segnato da una voce nelle partite', 'stati segnati dalle voci nelle partite'],
+  esame_piazzamento_partita: ['piazzamento a un esame nelle partite', 'piazzamenti agli esami nelle partite'],
 };
 
 /** Il nome per l'utente di `quante` righe di una tabella (al singolare per una sola). */
@@ -164,6 +172,9 @@ export function registraRipristinoCestino(tipo: TipoElementoCestino, fn: DopoRip
 // ---- Le colonne e le chiavi delle tabelle ----
 
 const virgolette = (nome: string): string => `"${nome.replace(/"/g, '""')}"`;
+
+/** Un valore della fotografia conta se non è vuoto: né NULL né '', '[]', '{}', '0', 'null' (una colonna tolta con un valore così non è una perdita). */
+const valoreInformativo = (v: Valore | undefined): boolean => v !== undefined && v !== null && !['', '[]', '{}', '0', 'null'].includes(typeof v === 'object' ? 'blob' : String(v));
 const stringa = (testo: string): string => `'${testo.replace(/'/g, "''")}'`;
 
 /** Le tabelle di uno schema da registrare. */
@@ -468,11 +479,13 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
   };
   let rimesse = 0;
   const saltate = new Map<string, SaltataCestinoDto>();
-  const salta = (tabella: string, motivo: MotivoSaltataCestinoDto, chiave: string) => {
+  const salta = (tabella: string, motivo: MotivoSaltataCestinoDto, chiave: string, colonne?: string[], sostituitaDa?: string | null) => {
     const k = `${tabella}|${motivo}`;
     const s = saltate.get(k) ?? { tabella, etichetta: etichettaTabella(tabella), motivo, quante: 0, esempi: [] };
     s.quante++;
-    if (s.esempi.length < 5) s.esempi.push(chiave);
+    if (chiave !== '' && s.esempi.length < 5) s.esempi.push(chiave);
+    if (colonne?.length) s.colonne = [...new Set([...(s.colonne ?? []), ...colonne])];
+    if (sostituitaDa) s.sostituitaDa = sostituitaDa;
     saltate.set(k, s);
   };
   const occupate: string[] = [];
@@ -524,17 +537,24 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
       const radicePin = r.tipo === 'pin' && p.schema === 'main' && p.tabella === 'spillo';
       // L'eccezione UUID non può usare una proiezione parziale né valori di default:
       // anche JSON, legami e metadati devono coincidere esattamente con la fotografia.
-      if ((identitaImmutabile || eventoAcquisto || radicePin) && (!s || Object.keys(riferimento).length !== s.colonne.length || s.colonne.some(c => !(c in riferimento)))) {
+      // R11-06: resta stretto per le colonne non dichiarate; tollera solo quelle dichiarate tolte (registro delle fonti tolte)
+      if ((identitaImmutabile || eventoAcquisto || radicePin) && (!s || !colonneCompatibili(p.schema, p.tabella, Object.keys(riferimento), s.colonne))) {
         if (radicePin) throw httpErrors.conflict('cestino-pin-registro-incoerente', 'La fotografia integrale del pin non coincide con lo schema corrente: ripristino annullato, cestino conservato.');
         throw httpErrors.conflict('cestino-fotografia-acquisto-incompleta', 'Lo schema e la fotografia integrale personale non coincidono: ripristino annullato, cestino conservato.');
       }
       const descrivi = (riga: Riga) => s ? s.chiave.map((c) => String(riga[c] ?? '')).join(' · ') : '';
       if (!s) {
+        // R11-06: una tabella dichiarata tolta (o sparita) non è un errore, nemmeno nel blocco di una partita: la riga non torna e il motivo lo dice
+        const tolta = tabellaTolta(p.schema, p.tabella);
+        if (tolta) { salta(p.tabella, 'tabella-rimossa', '', undefined, tolta.sostituitaDa); continue; }
         if (r.tipo === 'partita') throw httpErrors.conflict('cestino-schema-partita-incompleto', 'Una tabella del blocco personale non esiste più: il ripristino completo è stato annullato.');
         salta(p.tabella, 'non-esiste-piu', descrivi(riferimento)); continue;
       }
       // solo le colonne che la tabella ha ancora (una migrazione dopo l'eliminazione può averne tolte)
       const colonne = s.colonne.filter((c) => c in riferimento);
+      // R11-06: si segnala solo la perdita reale delle colonne tolte: con un valore (eliminazione di una riga), o che l'eliminazione aveva cambiato (modifica)
+      const perse = Object.keys(riferimento).filter((c) => !s.colonne.includes(c) && (p.op === 'D' ? valoreInformativo(riferimento[c]) : p.op === 'U' ? (p.prima?.[c] ?? null) !== (p.dopo?.[c] ?? null) : false));
+      if (perse.length) salta(p.tabella, 'colonna-rimossa', descrivi(riferimento), perse, colonnaTolta(p.schema, p.tabella, perse[0]!)?.sostituitaDa);
       const su = `${p.schema}.${virgolette(p.tabella)}`;
       const dove = s.chiave.map((c) => `${virgolette(c)} IS ?`).join(' AND ');
       const leggi = (riga: Riga): Riga | null => {

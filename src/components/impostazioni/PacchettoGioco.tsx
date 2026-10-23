@@ -24,7 +24,7 @@ import { byteTesto } from '../../utils/byte';
 import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
-import type { AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, OrfanoPartiteDto } from '../../types';
+import type { AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, OrfanoPartiteDto, ScartoPacchettoDto } from '../../types';
 import { Selettore } from '../shared/Selettore';
 import { BarraInvio } from './BarraInvio';
 import { salvaFile } from '../../utils/salvaFile';
@@ -72,6 +72,34 @@ function ElencoOrfani({ orfani, quando }: { orfani: OrfanoPartiteDto[]; quando: 
   );
 }
 
+/** R11-05/3: le strutture del backup che questa versione non usa più. Nessuna scelta da fare: non si importano e restano nella copia di sicurezza. */
+function ElencoScarti({ scarti, quando, copia }: { scarti: ScartoPacchettoDto[]; quando: 'prima' | 'dopo'; copia?: string }) {
+  if (scarti.length === 0) return <p className="m-0 text-[13px] text-success">{quando === 'prima' ? 'Il pacchetto non porta strutture che questa versione non usa più.' : 'Nessuna struttura del pacchetto è stata scartata.'}</p>;
+  const spiegati = scarti.filter((s) => s.spiegata), altri = scarti.filter((s) => !s.spiegata);
+  const riga = (s: ScartoPacchettoDto) => (
+    <li key={`${s.tabella}.${s.colonna ?? ''}`} className="flex flex-col gap-0.5 rounded border border-border px-2 py-1">
+      <span>
+        <strong>{numero(s.righe)}</strong> {s.tipo === 'tabella' ? s.etichetta : <>righe con un valore in <code>{s.colonna}</code></>}
+        <span className="text-text-muted"> · {s.tipo === 'tabella' ? `tabella ${s.tabella}` : `tabella ${s.tabella}`}</span>
+      </span>
+      {s.sostituitaDa && <span className="text-text-secondary">ora: {s.sostituitaDa}</span>}
+    </li>
+  );
+  return (
+    <div className="flex flex-col gap-1">
+      <p className="m-0 text-[13px] text-warning">{quando === 'prima' ? 'Non vengono importati; restano nella copia di sicurezza:' : 'Scartato nell’importazione:'}</p>
+      <ul className="m-0 p-0 list-none flex flex-col gap-1 text-[13px]" aria-label="Strutture scartate">{spiegati.map(riga)}</ul>
+      {altri.length > 0 && (
+        <>
+          <p className="m-0 text-[13px] text-text-secondary">Strutture non più nell’app (probabilmente rinominate):</p>
+          <ul className="m-0 p-0 list-none flex flex-col gap-1 text-[13px]" aria-label="Strutture scartate non spiegate">{altri.map(riga)}</ul>
+        </>
+      )}
+      {quando === 'dopo' && copia && <p className="m-0 text-[13px] text-text-muted">Nulla è perso: i dati sono nella copia di sicurezza <code>{copia}</code>.</p>}
+    </div>
+  );
+}
+
 /** Che cosa cambierebbe importando: versioni, tabelle, immagini, orfani. */
 function Anteprima({ a, origine }: { a: AnteprimaPacchettoDto; origine: string }) {
   const daApplicare = a.versioneSchema < a.versioneSchemaCodice ? a.versioneSchemaCodice - a.versioneSchema : 0;
@@ -105,6 +133,10 @@ function Anteprima({ a, origine }: { a: AnteprimaPacchettoDto; origine: string }
         )}
         {a.tabelleAssenti.length > 0 && <p className="m-0 text-text-muted">Non nel backup (le migrazioni le ricreano vuote): {a.tabelleAssenti.join(', ')}.</p>}
       </div>
+      {a.scarti !== undefined && <div className="flex flex-col gap-1">
+        <h3 className="m-0 text-[14px]">Cosa questa versione non usa più</h3>
+        <ElencoScarti scarti={a.scarti} quando="prima" />
+      </div>}
       <div className="flex flex-col gap-1">
         <h3 className="m-0 text-[14px]">Riferimenti delle partite</h3>
         <ElencoOrfani orfani={a.orfani} quando="prima" />
@@ -353,6 +385,7 @@ export function PacchettoGioco() {
               Copia di sicurezza: <code>{esito.copiaDiSicurezza}</code>. Le partite sono {numero(esito.stato.partite)}, intatte.
             </p>
             <ElencoOrfani orfani={esito.orfani} quando="dopo" />
+            {esito.scarti !== undefined && <section aria-label="Strutture scartate"><h3 className="m-0 text-[14px]">Scartato nell’importazione</h3><ElencoScarti scarti={esito.scarti} quando="dopo" copia={esito.riepilogoSalvatoIn ?? esito.copiaDiSicurezza} /></section>}
             {!!esito.condizioniConvertite?.length && <section aria-label="Condizioni recuperate dal backup">
               <h3 className="m-0 text-[14px]">Vecchie condizioni recuperate come avvisi</h3>
               <p className="m-0 text-text-secondary">Non bloccano la disponibilità. Le altre condizioni non sono state riscritte da questo recupero.</p>
