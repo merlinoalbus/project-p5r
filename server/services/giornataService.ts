@@ -14,7 +14,7 @@
 
 import { randomBytes } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { httpErrors } from '../utils/httpError.js';
+import { HttpError, httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
 import { confidenti } from './partiteService.js';
@@ -29,7 +29,7 @@ import { puntoDescrittivo } from '../../shared/spilli.js';
 import type { EsitoRevisioneVoce } from '../../shared/types.js';
 import { riferimentiOggettiPerFonti } from './catalogoOggettiLetture.js';
 import { apertureDichiarabili, apertureNegliEffetti, eVisitaMemento, verificaApertureScelte } from './apertureDedaliService.js';
-import { leggiEffettiVoce, salvaEffettiVoce, inizializzaEffettiVoce, copiaEffettiVoce, preparaRimozioneEffettiVoce, applicaEffettiVoce, annullaEffettiVoce, leggiRicevuteEffettiVoce, applicaEffettoStorico } from './motoreDiario.js';
+import { leggiEffettiVoce, leggiEffettiVocePerMostrare, salvaEffettiVoce, inizializzaEffettiVoce, copiaEffettiVoce, preparaRimozioneEffettiVoce, applicaEffettiVoce, annullaEffettiVoce, leggiRicevuteEffettiVoce, applicaEffettoStorico } from './motoreDiario.js';
 import { descriviEffettoVoce, normalizzaEffettiVoce, type EffettoLegacyVoce, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import { conCestino, type ViciniCestino } from './cestinoService.js';
 import { leggiRicevutaEffettiAzione } from './effettiAzioneService.js';
@@ -90,7 +90,7 @@ export interface VoceBase { uid: string; giorno: string; fascia: FasciaGioco; ge
 
 /** La voce con i soli campi della guida, con i valori fuori catalogo ricondotti a quelli predefiniti; gli effetti li ha
  *  solo un'azione (eventi, scadenze e promemoria non si spuntano). */
-export function voceBase(r: RigaVoce, fonte: StatoEffettiVoceDto = leggiEffettiVoce(r.uid)): VoceBase {
+export function voceBase(r: RigaVoce, fonte: StatoEffettiVoceDto = leggiEffettiVocePerMostrare(r.uid)): VoceBase {
   const riferimento = riferimentoDi(r);
   return {
     uid: r.uid, giorno: r.data, fascia: fasciaDi(r), genere: genereDi(r), azione: r.azione, tipo: tipoDi(r), riferimento, riferimentoTesto: nomeDi(r, riferimento),
@@ -119,8 +119,17 @@ function quizDellaVoce(v: VoceBase, quiz: Contesto['quiz'], fonte: StatoEffettiV
 /** La voce per l'interfaccia: i campi della guida più la frase degli effetti, la spunta e i suoi effetti nella partita,
  *  il semaforo (solo per le azioni, e solo se ci sono i Confidenti della partita), la mappa collegata e la guida del quiz. */
 function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
-  // la fonte unica degli effetti, letta una volta: frase, quiz, oggetti citati e DTO la condividono
-  const fonte = leggiEffettiVoce(r.uid);
+  // la fonte unica degli effetti, letta una volta: frase, quiz, oggetti citati e DTO la condividono. F3: una voce con la fonte o le
+  // ricevute incoerenti risulta «da correggere» col motivo, da sola: le altre voci del giorno si vedono e funzionano
+  let fonte = leggiEffettiVocePerMostrare(r.uid);
+  let ricevuteEffetti: ReturnType<typeof leggiRicevuteEffettiVoce> = [];
+  if (ctx.partita !== undefined) {
+    try { ricevuteEffetti = leggiRicevuteEffettiVoce(ctx.partita, r.uid); }
+    catch (e) {
+      if (!(e instanceof HttpError) || e.status !== 409) throw e;
+      fonte = { ...fonte, stato: 'legacy-da-correggere', effetti: [], motivo: e.message };
+    }
+  }
   const v = voceBase(r, fonte);
   const spuntabile = v.genere === 'azione';
   const aperture = eVisitaMemento(v) ? ctx.aperture : apertureNegliEffetti(ctx.fatte.get(r.uid));
@@ -131,7 +140,7 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
     const o = ctx.oggetti.get(`${e.categoria}/${e.chiave}`); if (o) oggettiCitati.set(o.chiave, o);
   }
   return {
-    ...v, effettiVoce: fonte, ricevuteEffetti: ctx.partita === undefined ? [] : leggiRicevuteEffettiVoce(ctx.partita, r.uid),
+    ...v, effettiVoce: fonte, ricevuteEffetti,
     ...(aperture.length ? { apertureDedali: aperture } : {}), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], produceTesto: spuntabile ? testoEffettiDellaFonte(fonte, ctx.nomi) : [],
     fatta: spuntabile && ctx.fatte.has(r.uid), effetti: ctx.fatte.get(r.uid) ?? null,
     stato: ctx.conf && spuntabile ? statoAzione(v, ctx.conf) : null, mappa: mappaAzione(v),

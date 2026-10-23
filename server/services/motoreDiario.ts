@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
-import { httpErrors } from '../utils/httpError.js';
+import { HttpError, httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { eDote } from '../../shared/doti.js';
 import { normalizzaEffettoVoce, normalizzaEffettiVoce } from '../../shared/effettiVoce.js';
@@ -44,6 +44,20 @@ export function leggiEffettiVoce(uid:string):StatoEffettiVoceDto {
   const effetti=rs.map(effettoDto);
   if(t.stato==='legacy-da-correggere'&&effetti.length)throw httpErrors.conflict('transizione-incoerente','La fonte fallback contiene anche effetti canonici.');
   return {voceUid:uid,stato:t.stato,effetti,rawLegacy:t.raw_json,motivo:t.motivo,revisione:improntaDato({uid,rawAttuale:t.raw_json,t,rs})};
+}
+/**
+ * F3: la fonte degli effetti per **mostrare** una voce del Diario. Se la voce non ha il registro di transizione o la fonte è incoerente
+ * (409 di `leggiEffettiVoce`), solo quella voce risulta «da correggere» con il motivo, senza effetti eseguibili: le altre voci del giorno
+ * si vedono e funzionano. Scritture e spunte continuano a usare `leggiEffettiVoce` e restano rifiutate su quella voce finché non la si
+ * corregge. Gli altri errori (voce assente) passano com'erano.
+ */
+export function leggiEffettiVocePerMostrare(uid:string):StatoEffettiVoceDto {
+  try {return leggiEffettiVoce(uid);}
+  catch(e){
+    if(!(e instanceof HttpError)||e.status!==409)throw e;
+    const t=prepared('SELECT raw_json FROM main.voce_effetto_transizione WHERE voce_uid=?').get(uid) as {raw_json:string}|undefined;
+    return {voceUid:uid,stato:'legacy-da-correggere',effetti:[],rawLegacy:t?.raw_json??'[]',motivo:e.message,revisione:improntaDato({uid,errore:e.code,raw:t?.raw_json??null})};
+  }
 }
 const chiaveEffetto=(e:EffettoVoce):string|null=>e.tipo==='acquisto'?e.articolo:e.tipo==='dote'?e.dote:e.tipo==='lettura'?e.chiave:e.attivita;
 function verificaNuovoEffetto(e:EffettoVoce):void {if(e.tipo==='acquisto')verificaOffertaConsumo(e.articolo);else if(e.tipo==='pesca'){if(e.attivita!==ATTIVITA_PESCA||e.regola!==REGOLA_PESCA||leggiRegolaPesca(e.regola).stato!=='collegata')throw httpErrors.conflict('pesca-regola-assente','La fonte della pesca non è collegata a una regola leggibile.');}else verificaEffetti([e]);}
