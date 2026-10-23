@@ -20,7 +20,7 @@ import { registraEvento } from './storicoService.js';
 import { confidenti } from './partiteService.js';
 import { applicaEffettiAzione, annullaEffettiAzione, descriviEffettiApplicati, type OpzioniSpunta } from './effettiAzioneService.js';
 import { mappaAzione, nomeRiferimento, nomiEffetti, statoAzione, testoEffetti, verificaEffetti } from './azioniStrutturateService.js';
-import { atterraggioDelPalazzo } from './palazziService.js';
+import { atterraggioDelPalazzo, palazziConclusi } from './palazziService.js';
 import { TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
 import type { AzionePercorsoDto, ConfidentePartitaDto, DatiVoceGiornata, EffettiAzioneDto, FasciaGioco, GenereVoce, QuizVoceDto, RiferimentoAzioneDto, TrasferisciVociGiornata, VociTrasferiteDto } from '../../shared/types.js';
 import { attivitaConQuiz, quizVoceDto, type AttivitaConQuiz } from './attivitaService.js';
@@ -359,8 +359,32 @@ function leggiSpunte(partitaId: number | undefined, data?: string): { fatte: Map
   return { fatte, illeggibili };
 }
 
-/** Le voci di un giorno per l'interfaccia, con lo stato nella partita se indicata. `conf`: i Confidenti, se chi chiama li ha già. */
-export function vociDelGiorno(data: string, partitaId?: number, conf?: Map<string, ConfidentePartitaDto> | null): AzionePercorsoDto[] {
+/** Ultimo giorno del diario validato (R10-29): le sue voci non cambiano mai per nessun filtro. */
+const ULTIMO_GIORNO_VALIDATO = '06-01';
+
+/**
+ * R10-28c/2: dopo il «concluso» di un Palazzo (Tesoro e boss finale, `palazziConclusi`) la voce che porta al suo ingresso non si propone più
+ * nei giorni successivi. Sono nascoste le voci di azione col riferimento a quel Palazzo, NON ancora spuntate nella partita, dei giorni dopo
+ * il giorno corrente della partita (la conclusione è già avvenuta); mai quelle del diario validato (04-01..06-01) e mai una voce spuntata.
+ * Lettura soltanto: nessun dato cambia. Senza giorno corrente o senza Palazzi conclusi, nessuna voce è nascosta.
+ */
+export function ingressiConclusiNascosti(partitaId: number): Array<{ uid: string; data: string }> {
+  const giorno = (prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null } | undefined)?.data_gioco;
+  if (!giorno) return [];
+  const conclusi = palazziConclusi(partitaId);
+  if (conclusi.size === 0) return [];
+  const righe = prepared(`SELECT v.uid AS uid, v.data AS data, v.riferimento_chiave AS palazzo FROM voce_giornata v
+    LEFT JOIN spunta_voce_partita s ON s.voce_uid = v.uid AND s.partita_id = ?
+    WHERE v.genere = 'azione' AND v.riferimento_tipo = 'dungeon' AND v.data > ? AND v.data > ? AND s.voce_uid IS NULL`)
+    .all(partitaId, giorno, ULTIMO_GIORNO_VALIDATO) as Array<{ uid: string; data: string; palazzo: string }>;
+  return righe.filter((r) => conclusi.has(r.palazzo)).map(({ uid, data }) => ({ uid, data }));
+}
+
+/**
+ * Le voci di un giorno per l'interfaccia, con lo stato nella partita se indicata. `conf`: i Confidenti, se chi chiama li ha già.
+ * `nascondiIngressiConclusi` (R10-28c/2): solo per l'elenco mostrato; chi cerca una voce per uid (spunta, modifica) non lo usa.
+ */
+export function vociDelGiorno(data: string, partitaId?: number, conf?: Map<string, ConfidentePartitaDto> | null, nascondiIngressiConclusi = false): AzionePercorsoDto[] {
   if (partitaId !== undefined) verificaPartita(partitaId);
   const spunte = leggiSpunte(partitaId, data);
   const ctx: Contesto = {
@@ -379,7 +403,10 @@ export function conteggiGiornate(partitaId?: number): Map<string, { azioni: numb
     ? prepared("SELECT data, COUNT(*) AS azioni, 0 AS fatte FROM voce_giornata WHERE genere = 'azione' GROUP BY data").all()
     : prepared(`SELECT v.data AS data, COUNT(*) AS azioni, COUNT(s.voce_uid) AS fatte FROM voce_giornata v
         LEFT JOIN spunta_voce_partita s ON s.voce_uid = v.uid AND s.partita_id = ? WHERE v.genere = 'azione' GROUP BY v.data`).all(partitaId)) as Array<{ data: string; azioni: number; fatte: number }>;
-  return new Map(righe.map((r) => [r.data, { azioni: r.azioni, fatte: r.fatte }]));
+  const conteggi = new Map(righe.map((r) => [r.data, { azioni: r.azioni, fatte: r.fatte }]));
+  // R10-28c/2: le voci d'ingresso nascoste dall'elenco non contano fra le azioni del giorno (non sono mai fatte)
+  if (partitaId !== undefined) for (const v of ingressiConclusiNascosti(partitaId)) { const c = conteggi.get(v.data); if (c && c.azioni > 0) c.azioni -= 1; }
+  return conteggi;
 }
 
 /** La riga della voce con quell'uid; 404 se non esiste. */

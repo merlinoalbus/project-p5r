@@ -45,7 +45,7 @@ export function giornoPercorso(data: string, partitaId?: number): PercorsoGiorno
   if (!r) throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso il ${data}.`);
   if (partitaId !== undefined) verificaPartita(partitaId);
   const conf = partitaId ? new Map(confidenti(partitaId).map((c) => [c.chiave, c])) : null;
-  const azioni = vociDelGiorno(data, partitaId, conf);
+  const azioni = vociDelGiorno(data, partitaId, conf, true);
   const prec = prepared('SELECT data FROM giorno_percorso WHERE ordine < ? ORDER BY ordine DESC LIMIT 1').get(r.ordine) as { data: string } | undefined;
   const succ = prepared('SELECT data FROM giorno_percorso WHERE ordine > ? ORDER BY ordine ASC LIMIT 1').get(r.ordine) as { data: string } | undefined;
   return {
