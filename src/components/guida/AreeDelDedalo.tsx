@@ -20,7 +20,8 @@
 // ============================================================
 
 import { useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useSearchParams } from '../scheda/routerScheda';
 import { creaAreaDedalo, eliminaAreaDedalo, aggiornaAreaDedalo, spostaAreaDedalo } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { LIMITI_GUIDA } from '../../../shared/limitiGuida';
