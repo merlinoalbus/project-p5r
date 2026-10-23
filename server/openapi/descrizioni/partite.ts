@@ -168,10 +168,10 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
     errori: [PARTITA, [404, 'requisito-non-trovato'], [400, 'requisito-non-confermabile'], [404, 'evento-non-trovato'], [404, 'confidente-non-trovato']],
   },
   'PUT /api/partite/:id/confidenti/:chiave/regali': {
-    sommario: 'Segna un regalo consegnato a un Confidente',
-    descrizione: 'Segna (o toglie) la consegna al Confidente con `catalogo` (chiave stabile). Il vecchio campo `regalo` (nome) resta accettato in alternativa, risolto soltanto se univoco. Riconosce la stessa consegna anche dopo una rinomina, senza duplicarla né riscriverne nome storico e data. Togliere la spunta rimuove le righe equivalenti di quella consegna. La risposta conserva `regaliFatti` (nomi storici) e aggiunge `regaliFattiCatalogo` (chiavi). Non tocca i punti del Confidente e non scrive nello storico.',
+    sommario: 'Segna un regalo consegnato a un Confidente (riga per nome)',
+    descrizione: 'Dal R10-18 il campo `catalogo` è rifiutato con 400 `usa-regala`: il regalo di un oggetto del catalogo è l\'azione `POST /api/partite/:id/regali` (annullabile con `/regali/annulla`). Resta il campo `regalo` (nome), per le righe senza oggetto collegato, risolto soltanto se univoco. Descrizione precedente: segna (o toglie) la consegna al Confidente con `catalogo` (chiave stabile). Riconosce la stessa consegna anche dopo una rinomina, senza duplicarla né riscriverne nome storico e data. Togliere la spunta rimuove le righe equivalenti di quella consegna. La risposta conserva `regaliFatti` (nomi storici) e aggiunge `regaliFattiCatalogo` (chiavi). Non tocca i punti del Confidente e non scrive nello storico.',
     risposta: '`ConfidentePartitaDto` aggiornato',
-    errori: [PARTITA, [404, 'confidente-non-trovato'], [404, 'oggetto-non-trovato'], [400, 'regalo-vuoto'], [409, 'catalogo-non-disponibile'], [409, 'oggetto-nascosto'], [409, 'regalo-omonimo']],
+    errori: [PARTITA, [404, 'confidente-non-trovato'], [400, 'usa-regala'], [404, 'oggetto-non-trovato'], [400, 'regalo-vuoto'], [409, 'catalogo-non-disponibile'], [409, 'oggetto-nascosto'], [409, 'regalo-omonimo']],
   },
   'POST /api/partite/:id/regali': {
     sommario: 'Regala un oggetto a un Confidente (azione unica)',

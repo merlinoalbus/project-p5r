@@ -180,7 +180,10 @@ router.put('/:id/confidenti/:chiave/requisiti', validate({ params: paramsPartita
 });
 router.put('/:id/confidenti/:chiave/regali', validate({ params: paramsPartitaChiave, body: bodyRegalo }), (req, res) => {
   const b = req.body as { regalo?: string; catalogo?: string; fatto: boolean };
-  res.json(impostaRegaloFatto(Number(req.params.id), String(req.params.chiave), b.catalogo === undefined ? b.regalo! : { catalogo: b.catalogo }, b.fatto));
+  // N5/R10-18: il regalo di un oggetto del catalogo è l'azione unica «Regala» (punti, consegna, eventuale acquisto, storico, annullabile):
+  // questa strada accetta solo le righe per nome, senza oggetto collegato, e non può più scavalcarla.
+  if (b.catalogo !== undefined) throw httpErrors.badRequest('usa-regala', 'Il regalo di un oggetto del catalogo è l’azione «Regala»: usa POST /api/partite/:id/regali (e POST /api/partite/:id/regali/annulla per annullare).');
+  res.json(impostaRegaloFatto(Number(req.params.id), String(req.params.chiave), b.regalo!, b.fatto));
 });
 /** R10-18: «Regala» è un'azione sola (oggetto del catalogo per chiave → punti, consegna, eventuale acquisto, storico) e si annulla identica. */
 router.post('/:id/regali', validate({ params: paramsPartita, body: bodyRegala }), (req, res) => {
