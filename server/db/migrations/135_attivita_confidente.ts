@@ -1,6 +1,6 @@
 import type { AppDatabase } from '../dbService.js';
 import type { Migration } from '../migrationRunner.js';
-import { storiaGenericaAttivita } from '../../services/vincoliAttivitaConfidente.js';
+import { storiaGenericaAttivita135 } from './storiaAttivita135.js';
 import { ATTIVITA_TAKEMI_PRIMA_135, ATTIVITA_TAKEMI_DOPO_135, IDENTITA_TAKEMI_93, BENEFICI_TAKEMI_93, BENEFICIO_TAKEMI_RAW_93, FONTI_TAKEMI_135 } from './takemiManifest135.js';
 
 type Riga = Record<string, unknown>;
@@ -58,7 +58,7 @@ export const migration135: Migration = {
       const identita = db.prepare('SELECT * FROM main.confidente WHERE chiave=?').get('takemi') as Riga | undefined;
       const identitaValida = identica(identita, IDENTITA_TAKEMI_93);
       const attivita = db.prepare('SELECT * FROM main.attivita WHERE chiave=?').get(ATTIVITA_TAKEMI_PRIMA_135.chiave) as Riga | undefined;
-      const storia = storiaGenericaAttivita(db, ATTIVITA_TAKEMI_PRIMA_135.chiave);
+      const storia = storiaGenericaAttivita135(db, ATTIVITA_TAKEMI_PRIMA_135.chiave);
       let esitoAttivita = 'esclusa';
       let motivoAttivita = 'Firma completa, identità, fotografie o storia non conformi: conservata senza modifiche.';
       if (identitaValida && identica(attivita, ATTIVITA_TAKEMI_DOPO_135)) { esitoAttivita = 'gia-corretta'; motivoAttivita = 'Record interamente conforme alla baseline135.'; }

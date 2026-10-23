@@ -1,5 +1,5 @@
 import type { Migration } from '../migrationRunner.js';
-import { fotografieIngressoMemento } from '../../services/fotografieIngressoMementoService.js';
+import { fotografieIngressoMemento130 } from './ingressoMemento130.js';
 
 const CHIAVE = 'mementos/ingresso-mementos';
 const PRIMA = '[{"tipo":"data","dal":"05-09"}]';
@@ -67,7 +67,7 @@ export const migration130: Migration = {
       }
       // Stessa scansione del GET, ma sul DB e dentro la transazione del chiamante.
       // Il confronto storico09 nel DTO non è usato come firma mutante:07 è gestito esplicitamente sopra.
-      const fotografie = fotografieIngressoMemento(db);
+      const fotografie = fotografieIngressoMemento130(db);
       if (fotografie.copertura.stato !== 'leggibile' || fotografie.cestino.stato !== 'presente'
         || fotografie.copertura.passiPertinenti !== 0 || fotografie.cestino.lati.length !== 0) {
         registra('conflitto', 'Copertura del cestino incerta o fotografie pertinenti presenti: nessun contenuto riscritto.'); return;
