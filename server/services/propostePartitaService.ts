@@ -287,14 +287,16 @@ function dto(r:RigaProposta):PropostaPartitaDto {
     s=saldo(r.partita_id,causa,target);
     if(s.differenza!==r.delta || r.revisione_causa!==firmaTarget(target)) impedimenti.push('La causa o il saldo sono cambiati: rivedere la proposta.');
     if(r.tipo==='dote'&&!prepared('SELECT 1 FROM main.dote_sociale WHERE chiave=?').get(r.chiave)) {orfana=true;impedimenti.push('La Dote destinataria non esiste.');}
-    if(r.verifica!=='non-conteggiata') impedimenti.push('Dichiara prima se questa quantità è già stata conteggiata.');
+    if(r.verifica!=='non-conteggiata') impedimenti.push('Prima indica se questi punti sono già nel saldo.');
     if(causa.tipo==='acquisto') {
       const a=prepared('SELECT articolo_chiave FROM utente.acquisto_registrato WHERE partita_id=? AND id=?').get(r.partita_id,causa.chiave) as {articolo_chiave:string}|undefined;
       orfana=orfana||!a||!prepared('SELECT 1 FROM main.articolo WHERE chiave=?').get(a.articolo_chiave);
     } else if(causa.tipo==='voce')orfana=orfana||!prepared('SELECT 1 FROM main.voce_giornata WHERE uid=?').get(r.voce_uid);
     else orfana=orfana||!prepared('SELECT 1 FROM utente.pesca_sessione WHERE partita_id=? AND id=? UNION ALL SELECT 1 FROM utente.pesca_acquisto_esca WHERE partita_id=? AND id=?').get(r.partita_id,causa.chiave,r.partita_id,causa.chiave);
   }
-  return {id:r.id,uid:r.uid,partitaId:r.partita_id,tipo:r.tipo,chiave:r.chiave,causa,unita:r.unita,delta:r.delta,stato:r.stato,verifica:r.verifica,motivo:r.motivo,chiusaDa:r.chiusa_da,motivoChiusura:r.motivo_chiusura,deltaApplicato:r.delta_applicato,deltaRiconosciuto:r.delta_riconosciuto,saldo:s,dote:eDote(r.chiave)?r.chiave:null,orfana,applicabile:r.stato==='aperta'&&impedimenti.length===0,impedimenti,creataIl:r.creata_il,decisaIl:r.decisa_il,dati};
+  // R10-10/4: il testo della voce del Diario da cui nasce la proposta, per dirlo all'utente in parole (non solo il suo identificativo)
+  const voceTesto=r.voce_uid?((prepared('SELECT azione FROM main.voce_giornata WHERE uid=?').get(r.voce_uid) as {azione:string}|undefined)?.azione??null):null;
+  return {id:r.id,uid:r.uid,partitaId:r.partita_id,tipo:r.tipo,chiave:r.chiave,causa,voceTesto,unita:r.unita,delta:r.delta,stato:r.stato,verifica:r.verifica,motivo:r.motivo,chiusaDa:r.chiusa_da,motivoChiusura:r.motivo_chiusura,deltaApplicato:r.delta_applicato,deltaRiconosciuto:r.delta_riconosciuto,saldo:s,dote:eDote(r.chiave)?r.chiave:null,orfana,applicabile:r.stato==='aperta'&&impedimenti.length===0,impedimenti,creataIl:r.creata_il,decisaIl:r.decisa_il,dati};
 }
 export function leggiPropostePartita(partita:number,opz:{ancheChiuse?:boolean}={}):PropostaPartitaDto[] {
   verificaPartita(partita);

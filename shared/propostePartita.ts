@@ -8,7 +8,10 @@ export interface RiferimentoPropostaPartita { id: number; uid: string }
 export interface SaldoBeneficioDto { dovuto: number | null; attribuito: number; differenza: number; ciclo: number; revisione: string; intervallo?: IntervalloBeneficioPesca; residuoIgnoto?: boolean }
 export interface PropostaPartitaDto extends RiferimentoPropostaPartita {
   partitaId: number; tipo: 'dote' | 'yen' | 'punti-pesca' | 'effetto-voce'; chiave: string;
-  causa: { tipo: 'acquisto' | 'voce' | 'pesca'; chiave: string }; unita: 'punti-interni' | 'yen' | 'punti-pesca' | 'azione';
+  causa: { tipo: 'acquisto' | 'voce' | 'pesca'; chiave: string };
+  /** Il testo della voce del Diario da cui nasce la proposta (null se non ce n'è una o non c'è più). */
+  voceTesto?: string | null;
+  unita: 'punti-interni' | 'yen' | 'punti-pesca' | 'azione';
   delta: number; stato: StatoPropostaPartita; verifica: VerificaConteggioProposta;
   motivo: string; chiusaDa: 'utente' | 'causa' | null; motivoChiusura: string | null;
   deltaApplicato: number; deltaRiconosciuto: number; saldo: SaldoBeneficioDto | null;

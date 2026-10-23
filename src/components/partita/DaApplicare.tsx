@@ -1,9 +1,9 @@
 import { useLayoutEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import type { AnteprimaDecisioneProposteDto, DecisioneProposte, PropostaPartitaDto } from '../../../shared/propostePartita';
-import { descriviEffettoVoce, normalizzaEffettoVoce } from '../../../shared/effettiVoce';
+import { normalizzaEffettoVoce } from '../../../shared/effettiVoce';
 import { nomeDote } from '../../../shared/doti';
-import { anteprimaDecisioneProposte, getDaApplicare, leggiAcquistiRegistrati } from '../../services/api';
+import { anteprimaDecisioneProposte, getDaApplicare, getDoti, leggiAcquistiRegistrati } from '../../services/api';
+import { dataLeggibile } from '../../../shared/condizioniSpillo';
 import { useCarica } from '../../hooks/useCarica';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
@@ -19,6 +19,12 @@ const testoErrore = (e: unknown) => e instanceof Error ? e.message : 'Operazione
 const unita = (u: PropostaPartitaDto['unita']) => u === 'punti-interni' ? 'punti interni' : u === 'yen' ? 'yen' : u === 'punti-pesca' ? 'punti pesca' : 'azione';
 const valore = (p: PropostaPartitaDto) => `${p.delta > 0 ? '+' : ''}${p.delta.toLocaleString('it-IT')} ${unita(p.unita)}`;
 const nome = (p: PropostaPartitaDto) => p.dote ? nomeDote(p.dote) : p.tipo === 'yen' ? 'Denaro' : p.tipo === 'punti-pesca' ? 'Punti pesca' : 'Effetto della voce';
+/** Il titolo della proposta: il giorno e il testo della voce da cui nasce («18 aprile · Hai bevuto un Aojiru»). */
+const titolo = (p: PropostaPartitaDto) => [typeof p.dati.giorno === 'string' ? dataLeggibile(p.dati.giorno) : null, p.voceTesto ?? null].filter(Boolean).join(' · ') || 'Voce del Diario';
+const dicituraDecisione: Record<DecisioneProposte['tipo'], string> = {
+  applica: 'Aggiungi i punti', scarta: 'Scarta', 'non-conteggiata': 'Segna come non ancora contati', ignota: 'Segna come «non so»',
+  'gia-conteggiata': 'Segna come già contati', 'applica-effetto': 'Applica l’effetto',
+};
 const canonico = (v: unknown): unknown => Array.isArray(v) ? v.map(canonico) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => a.localeCompare(b)).map(([k, x]) => [k, canonico(x)])) : v;
 
 /** Coda durevole unica per Oggi, Home e Progressi: nessun saldo cambia senza una decisione esplicita. */
@@ -29,6 +35,9 @@ function DaApplicareNelContesto({ partitaId, onCambiato }: { partitaId: number; 
   const gesti = useGestiPartita();
   const elenco = useCarica(() => getDaApplicare(partitaId), [partitaId, gesti.versionePerPartita[partitaId] ?? 0, gesti.versioneGuida]);
   const registro = useCarica(() => leggiAcquistiRegistrati(partitaId), [partitaId, gesti.versionePerPartita[partitaId] ?? 0, gesti.versioneGuida]);
+  // i punti attuali delle Doti, per dire «Fascino 50 → 52» (R10-10/4); si rileggono quando la partita cambia
+  const doti = useCarica(() => getDoti(partitaId), [partitaId, gesti.versionePerPartita[partitaId] ?? 0, gesti.versioneGuida]);
+  const puntiDote = (chiave: string | null): number | null => (chiave ? doti.dati?.find((d) => d.chiave === chiave)?.punti ?? null : null);
   const identita = (p: PropostaPartitaDto) => <IdentitaProposta proposta={p} registrazioni={registro.dati?.registrazioni ?? null} erroreRegistro={registro.errore} caricamentoRegistro={registro.caricamento} />;
   const [selezionate, setSelezionate] = useState<Set<string>>(new Set());
   const [anteprima, setAnteprima] = useState<AnteprimaDecisioneProposteDto | null>(null);
@@ -70,7 +79,7 @@ function DaApplicareNelContesto({ partitaId, onCambiato }: { partitaId: number; 
       const r = await decidiProposteConRegistro(partitaId, { ...anteprima.richiesta, revisioneProposteAttesa: anteprima.revisioneProposteAttesa }, { etichetta: `Decisione su ${anteprima.proposte.length} proposte`, ...(riguardaPesca ? { pesca: true } : {}) });
       registrata = true;
       if (vivo.current) {
-        setRicevuta(`Decisione registrata per ${r.proposte.length} ${r.proposte.length === 1 ? 'proposta' : 'proposte'} · operazione ${r.operazioneId}.`);
+        setRicevuta(r.proposte.length === 1 ? 'Fatto.' : `Fatto: ${r.proposte.length} voci decise.`);
         setAnteprima(null); setIncerto(false); setSelezionate(new Set());
       }
       useSuggerimentiStore.getState().invalida();
@@ -96,54 +105,61 @@ function DaApplicareNelContesto({ partitaId, onCambiato }: { partitaId: number; 
   return <section className="card flex min-w-0 flex-col gap-2" aria-label="Da applicare alla partita">
     <GestiPartita partitaId={partitaId} onCambiato={async () => { if (vivo.current) { setAnteprima(null); setIncerto(false); await elenco.ricarica(); await onCambiato?.(); } }} />
     <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="m-0 font-display text-[17px] uppercase">Da applicare{aperte.length > 0 ? ` · ${aperte.length}` : ''}</h2><button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => void elenco.ricarica()}>Aggiorna</button></div>
-    <p className="m-0 text-[12px] text-text-secondary">Doti, yen, punti pesca ed effetti di voci già fatte: rivedi e decidi. Le dichiarazioni «già conteggiato», «non conteggiato» e «ignoto» restano distinte dalle modifiche eseguite dall’app.</p>
+    <p className="m-0 text-[12px] text-text-secondary">Voci che hai spuntato e i cui punti non sono ancora nella partita. Decidi tu cosa aggiungere: niente cambia da solo.</p>
     {elenco.caricamento && !elenco.dati && <p role="status" className="m-0 text-[13px]">Caricamento…</p>}
     {elenco.errore && <p role="alert" className="m-0 text-error">{elenco.errore}</p>}
-    {elenco.dati && !aperte.length && <p className="m-0 text-[13px]">Nessuna proposta aperta.</p>}
+    {elenco.dati && !aperte.length && <p className="m-0 text-[13px]">Niente da applicare: i punti delle voci spuntate sono tutti a posto.</p>}
     {!!aperte.length && <>
       <div className="flex flex-wrap items-center gap-2 text-[12px]">
-        <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => setSelezionate(new Set(aperte.slice(0, 100).map((p) => p.uid)))}>Seleziona fino a 100 proposte</button>
+        <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => setSelezionate(new Set(aperte.slice(0, 100).map((p) => p.uid)))}>Seleziona tutte</button>
         <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato || !scelte.length} onClick={() => setSelezionate(new Set())}>Togli la selezione</button>
-        <button type="button" className="btn btn-secondary btn-sm touch" disabled={occupato || !scelte.length || scelte.some((p) => !p.applicabile || p.tipo === 'effetto-voce')} onClick={() => chiedi({ tipo: 'applica', proposte: scelte.map(riferimento) })}>Rivedi e applica la selezione</button>
-        <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato || !scelte.length} onClick={() => chiedi({ tipo: 'scarta', proposte: scelte.map(riferimento) })}>Rivedi e scarta la selezione</button>
+        <button type="button" className="btn btn-secondary btn-sm touch" disabled={occupato || !scelte.length || scelte.some((p) => !p.applicabile || p.tipo === 'effetto-voce')} onClick={() => chiedi({ tipo: 'applica', proposte: scelte.map(riferimento) })}>Aggiungi i punti selezionati</button>
+        <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato || !scelte.length} onClick={() => chiedi({ tipo: 'scarta', proposte: scelte.map(riferimento) })}>Scarta quelli selezionati</button>
       </div>
       <ul className="m-0 flex list-none flex-col gap-2 p-0">{aperte.map((p) => {
         const e = normalizzaEffettoVoce(p.dati.effetto);
         return <li key={p.uid} className="flex min-w-0 flex-col gap-1 border-t border-border pt-2 text-[13px]">
-          <label className="touch flex items-center gap-2"><input type="checkbox" className="h-5 w-5" disabled={occupato || (!selezionate.has(p.uid) && scelte.length >= 100)} checked={selezionate.has(p.uid)} onChange={(ev) => setSelezionate((s) => { const n = new Set(s); if (ev.target.checked) n.add(p.uid); else n.delete(p.uid); return n; })} /><strong>{nome(p)} · {valore(p)}</strong></label>
+          <label className="touch flex items-center gap-2"><input type="checkbox" className="h-5 w-5" disabled={occupato || (!selezionate.has(p.uid) && scelte.length >= 100)} checked={selezionate.has(p.uid)} onChange={(ev) => setSelezionate((s) => { const n = new Set(s); if (ev.target.checked) n.add(p.uid); else n.delete(p.uid); return n; })} /><strong>{titolo(p)}</strong></label>
+          {(() => {
+            // «Fascino 50 → 52»: cosa cambia, con i punti di adesso quando si conoscono (R10-10/4)
+            const prima = p.tipo === 'dote' ? puntiDote(p.dote) : null;
+            return <span className="text-[14px]"><strong>{nome(p)}</strong>{p.tipo !== 'effetto-voce' && <>: {prima !== null ? <>{prima} → <strong>{prima + p.delta}</strong> punti</> : <strong>{valore(p)}</strong>}</>}</span>;
+          })()}
           <span>{p.motivo}</span>
           {identita(p)}
-          {e && <span>{descriviEffettoVoce(e)}</span>}
-          {p.dati.sostituzione === true && <div className="flex flex-col gap-1"><strong>Sostituzione di una versione precedente</strong><span>Prima: {normalizzaEffettoVoce(p.dati.versionePrecedente) ? descriviEffettoVoce(normalizzaEffettoVoce(p.dati.versionePrecedente)!) : 'Versione precedente non riconciliata.'}</span><span>Dopo: {e ? descriviEffettoVoce(e) : 'Configurazione non leggibile.'}</span><span>Viene ritirata soltanto la porzione precedente provata dalla sua ricevuta; gli altri effetti della spunta restano invariati.</span></div>}
-          {p.saldo && <span>{p.saldo.intervallo ? <>Obiettivo osservato: [{p.saldo.intervallo.minimo}, {p.saldo.intervallo.massimo === null ? 'limite superiore ignoto' : p.saldo.intervallo.massimo}]</> : <>Obiettivo: {p.saldo.dovuto === null ? 'ignoto' : p.saldo.dovuto}</>}; già attribuito o riconosciuto: {p.saldo.attribuito}; differenza certa: {p.saldo.differenza} {unita(p.unita)}.{p.saldo.residuoIgnoto ? ' La parte incerta resta da chiarire: non produce attribuzioni o restituzioni presunte.' : ''}</span>}
-          <span>Conteggio precedente: {p.verifica === 'da-dichiarare' ? 'da dichiarare' : p.verifica === 'non-conteggiata' ? 'non conteggiato' : 'ignoto'}{p.orfana ? ' · riferimento non più disponibile' : ''}.</span>
-          {!!p.impedimenti.length && <ul className="m-0 pl-4 text-warning">{p.impedimenti.map((i) => <li key={i}>{i}</li>)}</ul>}
-          {typeof p.dati.giorno === 'string' && typeof p.dati.voceUid === 'string' && <Link className="touch self-start" to={`/guida/percorso/${p.dati.giorno}?voce=${encodeURIComponent(p.dati.voceUid)}`}>Apri la voce del Diario</Link>}
+          {p.orfana && <span className="text-warning">La voce o il consumo da cui nasce non c’è più.</span>}
+          {p.tipo !== 'effetto-voce' && p.verifica !== 'non-conteggiata' && <div className="flex flex-col gap-1 rounded border border-border p-2">
+            <strong>{p.verifica === 'ignota' ? 'Hai detto che non sai se questi punti sono già nel saldo.' : 'Questi punti sono già nel tuo saldo?'}</strong>
+            <span className="text-[12px] text-text-secondary">{p.verifica === 'ignota' ? 'Per aggiungerli serve saperlo: controlla nel gioco e rispondi.' : 'Serve per non contarli due volte.'}</span>
+            <div className="flex flex-wrap gap-1.5">
+              <button type="button" className="btn btn-secondary btn-sm touch" disabled={occupato} onClick={() => chiedi({ tipo: 'non-conteggiata', proposte: [riferimento(p)] })}>No, non ancora</button>
+              <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => { setDaDichiarare(p); setQuantita(''); }}>Sì, già contati…</button>
+              {p.verifica !== 'ignota' && <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => chiedi({ tipo: 'ignota', proposte: [riferimento(p)] })}>Non lo so</button>}
+            </div>
+          </div>}
+          {!!p.impedimenti.filter((i) => p.verifica === 'non-conteggiata' || !i.startsWith('Prima indica')).length && <ul className="m-0 pl-4 text-warning">{p.impedimenti.filter((i) => p.verifica === 'non-conteggiata' || !i.startsWith('Prima indica')).map((i) => <li key={i}>{i}</li>)}</ul>}
           <div className="flex flex-wrap gap-1.5">
             {p.tipo === 'effetto-voce' ? <button type="button" className="btn btn-secondary btn-sm touch" disabled={occupato || !p.applicabile || !!gestoPendenteNelloScope(partitaId, { proposte: [riferimento(p)] })} onClick={() => {
               if (e?.tipo === 'acquisto' || e?.tipo === 'pesca') setConsumo(p);
               else chiedi({ tipo: 'applica-effetto', proposta: riferimento(p) });
-            }}>Rivedi l’effetto</button> : <>
-              <button type="button" className="btn btn-secondary btn-sm touch" disabled={occupato || !p.applicabile} onClick={() => chiedi({ tipo: 'applica', proposte: [riferimento(p)] })}>Rivedi e applica</button>
-              <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => { setDaDichiarare(p); setQuantita(''); }}>Già conteggiato…</button>
-              <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => chiedi({ tipo: 'non-conteggiata', proposte: [riferimento(p)] })}>Non conteggiato</button>
-              <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => chiedi({ tipo: 'ignota', proposte: [riferimento(p)] })}>Non lo so</button>
+            }}>Completa l’effetto</button> : <>
+              <button type="button" className="btn btn-primary btn-sm touch" disabled={occupato || !p.applicabile} onClick={() => chiedi({ tipo: 'applica', proposte: [riferimento(p)] })}>Aggiungi i punti</button>
             </>}
-            <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => chiedi({ tipo: 'scarta', proposte: [riferimento(p)] })}>Rivedi e scarta</button>
+            <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => chiedi({ tipo: 'scarta', proposte: [riferimento(p)] })}>Scarta</button>
           </div>
         </li>;
       })}</ul>
     </>}
-    {!!elenco.dati?.some((p) => p.stato !== 'aperta') && <details><summary className="touch text-[13px]">Decisioni già registrate</summary><ul className="m-0 flex flex-col gap-2 pl-4 text-[12px]">{elenco.dati.filter((p) => p.stato !== 'aperta').map((p) => <li key={p.uid}>{nome(p)} · {p.stato === 'applicata' ? 'applicata' : p.chiusaDa === 'causa' ? 'non più dovuta' : 'scartata'} · {p.motivo}{p.deltaApplicato !== 0 ? ` · movimento dell’app ${p.deltaApplicato > 0 ? '+' : ''}${p.deltaApplicato}` : ''}{p.deltaRiconosciuto !== 0 ? p.motivoChiusura === 'beneficio-riallocato' ? ` · riallocazione dell’attribuzione ${p.deltaRiconosciuto > 0 ? '+' : ''}${p.deltaRiconosciuto}, saldo invariato` : ` · quantità dichiarata già conteggiata ${p.deltaRiconosciuto}` : ''}{p.motivoChiusura ? ` · ${p.motivoChiusura}` : ''}{identita(p)}</li>)}</ul></details>}
+    {!!elenco.dati?.some((p) => p.stato !== 'aperta') && <details><summary className="touch text-[13px]">Già decise</summary><ul className="m-0 flex flex-col gap-2 pl-4 text-[12px]">{elenco.dati.filter((p) => p.stato !== 'aperta').map((p) => <li key={p.uid}><strong>{titolo(p)}</strong> · {nome(p)} · {p.stato === 'applicata' ? (p.deltaApplicato !== 0 ? `aggiunti ${p.deltaApplicato > 0 ? '+' : ''}${p.deltaApplicato}` : 'applicata') : p.chiusaDa === 'causa' ? 'non più dovuta' : 'scartata'}{p.deltaRiconosciuto !== 0 && p.motivoChiusura !== 'beneficio-riallocato' ? ` · già contati ${p.deltaRiconosciuto}` : ''}</li>)}</ul></details>}
     {ricevuta && <p role="status" className="m-0 text-[13px] text-success">{ricevuta}</p>}
     {errore && <p role="alert" className="m-0 text-[13px] text-error">{errore}</p>}
-    <Modal aperta={daDichiarare !== null} titolo="Quantità già conteggiata personalmente" onChiudi={() => { if (!occupato) setDaDichiarare(null); }} azioni={<>
+    <Modal aperta={daDichiarare !== null} titolo="Quanti punti hai già contato?" onChiudi={() => { if (!occupato) setDaDichiarare(null); }} azioni={<>
       <button type="button" className="btn btn-ghost touch" disabled={occupato} onClick={() => setDaDichiarare(null)}>Annulla</button>
-      <button type="button" className="btn btn-primary touch" disabled={occupato || !Number.isInteger(Number(quantita)) || Number(quantita) <= 0 || Number(quantita) > 9_999_999} onClick={() => { if (daDichiarare) chiedi({ tipo: 'gia-conteggiata', proposta: riferimento(daDichiarare), quantita: Number(quantita) }); }}>Rivedi la dichiarazione</button>
+      <button type="button" className="btn btn-primary touch" disabled={occupato || !Number.isInteger(Number(quantita)) || Number(quantita) <= 0 || Number(quantita) > 9_999_999} onClick={() => { if (daDichiarare) chiedi({ tipo: 'gia-conteggiata', proposta: riferimento(daDichiarare), quantita: Number(quantita) }); }}>Avanti</button>
     </>}>
-      <p>Indica la quantità esatta già inclusa nel saldo di {daDichiarare ? nome(daDichiarare) : ''}. Questa dichiarazione non aggiunge punti o denaro. Se non conosci la quantità, scegli «Non lo so».</p>
+      <p>Scrivi quanti punti di {daDichiarare ? nome(daDichiarare) : ''} sono già nel tuo saldo per questa voce. Non aggiungo niente: serve solo a non contarli due volte. Se non lo sai, scegli «Non lo so».</p>
       {daDichiarare && identita(daDichiarare)}
-      <label className="flex flex-col gap-1">Quantità ({daDichiarare ? unita(daDichiarare.unita) : ''})<input type="number" className="form-input" min={1} max={9_999_999} step={1} value={quantita} onChange={(e) => setQuantita(e.target.value)} /></label>
+      <label className="flex flex-col gap-1">Punti già contati ({daDichiarare ? unita(daDichiarare.unita) : ''})<input type="number" className="form-input" min={1} max={9_999_999} step={1} value={quantita} onChange={(e) => setQuantita(e.target.value)} /></label>
       {errore && <p role="alert" className="text-error">{errore}</p>}
     </Modal>
     <Modal aperta={consumo !== null} titolo={effettoConsumo?.tipo === 'pesca' ? 'Completa la pesca della voce già fatta' : 'Completa l’acquisto della voce già fatta'} onChiudi={() => { if (!occupato) setConsumo(null); }} larga>
@@ -159,23 +175,19 @@ function DaApplicareNelContesto({ partitaId, onCambiato }: { partitaId: number; 
           await prepara({ tipo: 'applica-effetto', proposta: riferimento(consumo), acquisto, revisioneAcquistiAttesa });
         }} /> : <p role="alert">La proposta non contiene una fonte osservabile leggibile. Rileggi la coda; nessun dato viene ricostruito per somiglianza.</p>}
     </Modal>
-    <Modal aperta={anteprima !== null} titolo="Riepilogo della decisione" onChiudi={() => { if (!occupato && !incerto) setAnteprima(null); }} azioni={<>
+    <Modal aperta={anteprima !== null} titolo="Confermi?" onChiudi={() => { if (!occupato && !incerto) setAnteprima(null); }} azioni={<>
       <button type="button" className="btn btn-ghost touch" disabled={occupato || incerto} onClick={() => setAnteprima(null)}>Annulla</button>
-      <button type="button" className="btn btn-primary touch" disabled={occupato} onClick={() => void conferma()}>{incerto ? 'Verifica la stessa operazione' : 'Conferma questa decisione'}</button>
+      <button type="button" className="btn btn-primary touch" disabled={occupato} onClick={() => void conferma()}>{incerto ? 'Riprova' : 'Conferma'}</button>
     </>}>
       {anteprima && <div className="flex flex-col gap-2 text-[13px]">
-        <strong>Decisione: {({ applica: 'Applica', scarta: 'Scarta', 'non-conteggiata': 'Dichiara non conteggiato', ignota: 'Dichiara ignoto', 'gia-conteggiata': 'Dichiara già conteggiato', 'applica-effetto': 'Applica soltanto l’effetto indicato' } as const)[anteprima.richiesta.decisione.tipo]}</strong>
-        <ul className="m-0 pl-4">{anteprima.proposte.map((p) => <li key={p.uid}>{nome(p)} · {valore(p)} · {p.motivo}{identita(p)}</li>)}</ul>
+        <strong>{dicituraDecisione[anteprima.richiesta.decisione.tipo]}</strong>
+        <ul className="m-0 pl-4">{anteprima.proposte.map((p) => <li key={p.uid}>{titolo(p)} · {nome(p)} {valore(p)}</li>)}</ul>
         {anteprima.richiesta.decisione.tipo === 'applica-effetto' && anteprima.richiesta.decisione.acquisto && <RiepilogoConsumoPreparato consumo={anteprima.richiesta.decisione.acquisto} />}
         {anteprima.richiesta.decisione.tipo === 'applica-effetto' && anteprima.richiesta.decisione.pesca && <RiepilogoSessionePreparata richiesta={anteprima.richiesta.decisione.pesca} sessioneFotografata={anteprima.fotografiaSessionePesca} />}
-        {anteprima.proposte.filter((p) => p.dati.sostituzione === true).map((p) => {
-          const prima = normalizzaEffettoVoce(p.dati.versionePrecedente), dopo = normalizzaEffettoVoce(p.dati.effetto);
-          return <p key={p.uid} className="m-0">Sostituzione — prima: {prima ? descriviEffettoVoce(prima) : 'non riconciliato'}; dopo: {dopo ? descriviEffettoVoce(dopo) : 'non leggibile'}. Si applica soltanto la differenza riconciliata.</p>;
-        })}
-        {anteprima.movimenti.length ? <ul className="m-0 pl-4">{anteprima.movimenti.map((m, i) => <li key={`${m.tipo}:${m.chiave}:${i}`}>{m.tipo === 'yen' ? 'Denaro' : m.tipo === 'punti-pesca' ? 'Punti pesca' : nomeDote(m.chiave)}: {m.prima.toLocaleString('it-IT')} → {m.dopo.toLocaleString('it-IT')} ({m.delta > 0 ? '+' : ''}{m.delta} {m.tipo === 'yen' ? 'yen' : m.tipo === 'punti-pesca' ? 'punti pesca' : 'punti interni'})</li>)}</ul> : <p className="m-0">Nessuna modifica immediata ai saldi Doti, yen e punti pesca.</p>}
-        {anteprima.richiesta.decisione.tipo === 'gia-conteggiata' && <p className="m-0">Quantità riconosciuta: {anteprima.richiesta.decisione.quantita}. È una dichiarazione personale, distinta dai movimenti eseguiti dall’app.</p>}
+        {anteprima.movimenti.length ? <ul className="m-0 pl-4">{anteprima.movimenti.map((m, i) => <li key={`${m.tipo}:${m.chiave}:${i}`}><strong>{m.tipo === 'yen' ? 'Denaro' : m.tipo === 'punti-pesca' ? 'Punti pesca' : nomeDote(m.chiave)}: {m.prima.toLocaleString('it-IT')} → {m.dopo.toLocaleString('it-IT')}</strong> ({m.delta > 0 ? '+' : ''}{m.delta} {m.tipo === 'yen' ? 'yen' : m.tipo === 'punti-pesca' ? 'punti pesca' : 'punti'})</li>)}</ul> : <p className="m-0">Non cambia nessun punteggio.</p>}
+        {anteprima.richiesta.decisione.tipo === 'gia-conteggiata' && <p className="m-0">Segno che {anteprima.richiesta.decisione.quantita} punti sono già nel tuo saldo: non ne aggiungo altri.</p>}
         {errore && <p role="alert" className="m-0 text-error">{errore}</p>}
-        {incerto && <p role="alert" className="m-0 text-warning">Esito incerto: la verifica ripresenta la medesima decisione con il medesimo identificativo. Non viene creata una seconda operazione.</p>}
+        {incerto && <p role="alert" className="m-0 text-warning">Non è sicuro che sia andata a buon fine. «Riprova» ripete la stessa operazione una volta sola: se era già riuscita, non si duplica.</p>}
         {incerto && <GestiPartita partitaId={partitaId} onCambiato={async () => { if (vivo.current) { setAnteprima(null); setIncerto(false); await elenco.ricarica(); await onCambiato?.(); } }} />}
       </div>}
     </Modal>
