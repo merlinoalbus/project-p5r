@@ -7,7 +7,7 @@
 //   `modo`                 'settimanale' (giorni e fasce fissi), 'su-messaggio' (Kasumi), 'stanza-velluto' (Gemelle), 'trama' (Igor, Morgana, Sae);
 //   `giorni_settimana_json` ["lun", …, "dom", "festivi"] (vuoto per chi non ha giorni fissi);
 //   `fasce_orarie_json`    ["giorno", "sera"];
-//   `eccezioni_json`       [{ "tipo": "pioggia", "effetto": "non-disponibile" | "richiesta", "ranghi"?: [..] },
+//   `eccezioni_json`       [{ "tipo": "pioggia", "effetto": "non-disponibile", "ranghi"?: [..] },
 //                           { "tipo": "dopo-rango", "giorni": 2, "effetto": "non-disponibile" },
 //                           { "tipo": "fascia-rango", "rango": 7, "fasce": ["sera"] }];
 //   `dal`                  'MM-GG' da cui è disponibile, se diverso dallo sblocco (Gemelle 05-18);
@@ -27,7 +27,7 @@ const FONTE = 'G-036';
 type Giorno = 'lun' | 'mar' | 'mer' | 'gio' | 'ven' | 'sab' | 'dom' | 'festivi';
 const TUTTI: Giorno[] = ['lun', 'mar', 'mer', 'gio', 'ven', 'sab', 'dom'];
 const NOME_GIORNO: Record<Giorno, string> = { lun: 'Lunedì', mar: 'Martedì', mer: 'Mercoledì', gio: 'Giovedì', ven: 'Venerdì', sab: 'Sabato', dom: 'Domenica', festivi: 'festivi' };
-type Eccezione = { tipo: 'pioggia'; effetto: 'non-disponibile' | 'richiesta'; ranghi?: number[] }
+type Eccezione = { tipo: 'pioggia'; effetto: 'non-disponibile'; ranghi?: number[] }
   | { tipo: 'dopo-rango'; giorni: number; effetto: 'non-disponibile' }
   | { tipo: 'fascia-rango'; rango: number; fasce: string[] };
 interface Struttura {
@@ -42,7 +42,7 @@ const STRUTTURE: Record<string, Struttura> = {
   ann: { modo: 'settimanale', giorni: ['lun', 'mar', 'mer', 'ven', 'dom'], fasce: ['giorno'], eccezioni: [pioggia([3, 4, 5, 7, 9, 10])] },
   haru: { modo: 'settimanale', giorni: ['lun', 'mar', 'mer', 'gio', 'ven', 'sab'], fasce: ['giorno'], eccezioni: [pioggia()] },
   makoto: { modo: 'settimanale', giorni: ['mar', 'gio', 'sab', 'dom'], fasce: ['giorno'], eccezioni: [pioggia([2, 9])] },
-  yusuke: { modo: 'settimanale', giorni: TUTTI, fasce: ['giorno'], eccezioni: [pioggia([4, 6, 9]), { tipo: 'pioggia', effetto: 'richiesta', ranghi: [8] }] },
+  yusuke: { modo: 'settimanale', giorni: TUTTI, fasce: ['giorno'], eccezioni: [pioggia([4, 6, 9])] },
   futaba: { modo: 'settimanale', giorni: ['mer', 'gio', 'sab', 'dom'], fasce: ['giorno'], eccezioni: [pioggia()] },
   kasumi: { modo: 'su-messaggio', giorni: [], fasce: [], eccezioni: [] },
   gemelle: { modo: 'stanza-velluto', giorni: [], fasce: [], eccezioni: [], dal: '05-18', senzaLuogo: 'Si incontrano alla Stanza di Velluto, senza luogo nel mondo: si arriva dal cancello vicino al Negozio Softair (G-016d).' },
