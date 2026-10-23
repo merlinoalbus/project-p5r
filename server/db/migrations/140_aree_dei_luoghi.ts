@@ -3,9 +3,9 @@
 // ============================================================
 //
 // La 115 ha dato l'Area ai luoghi che avevano un pin su una planimetria di un'Area; 44 luoghi sono rimasti senza. La proposta
-// `docs/coordinamento/lotti/L5/proposta-aree-44-luoghi.md`, approvata per intero dall'utente, ne colloca 23 (16 certi e 7 incerti
-// approvati) e ne esclude 21, che restano senza Area (quartieri senza planimetrie, Memento, Nagiuri, Odaiba Seaside Park,
-// distributori della Shujin, stazione di Shibuya).
+// `docs/coordinamento/lotti/L5/proposta-aree-44-luoghi.md`, approvata per intero dall'utente, ne colloca 21 (14 certi e 7 incerti
+// approvati) e ne esclude 23, che restano senza Area: 17 luoghi dei quartieri senza planimetrie, più 6 (i due Memento, Nagiuri,
+// Odaiba Seaside Park, i distributori della Shujin, la stazione di Shibuya).
 //
 // Conservativa: scrive l'Area solo dove `area_chiave` è ancora NULL (una scelta fatta dall'app non si tocca). L'Area si cerca dentro
 // il quartiere del luogo, per slug o, in mancanza, per nome; se il luogo o l'Area non ci sono (eliminati, nel Cestino) si salta senza
