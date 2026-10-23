@@ -2,7 +2,7 @@
 // 156 — le voci d'acquisto che nominano senza ambiguità l'articolo lo segnano comprato (R10-01/6, R10-08, R10-12)
 // ============================================================
 //
-// Delle 100 voci d'acquisto del Diario, 24 dicono nel testo quale articolo si compra e da un solo negozio: ogni nome citato è un
+// Delle 100 voci d'acquisto del Diario, 23 (31 articoli in tutto) dicono nel testo quale articolo si compra e da un solo negozio: ogni nome citato è un
 // articolo di quel negozio, il prezzo scritto nella voce (se c'è) è quello dell'articolo, e il testo non è una vendita, un'offerta
 // opzionale, un set di televendita né una ricompensa. Ognuna riceve un effetto «articolo» per ogni articolo citato (origine «regola»):
 // spuntare la voce lo segna comprato con la regola unica del negozio (`impostaAcquisto`: se l'articolo non è ancora disponibile
