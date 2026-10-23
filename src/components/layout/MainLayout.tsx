@@ -22,6 +22,8 @@ import { usePartitaStore } from '../../stores/partitaStore';
 import { useAsset, useAssetStore } from '../../stores/assetStore';
 import { useFontStore } from '../../stores/fontStore';
 import { sfondoPerPercorso } from './sfondi';
+import { RicercaGlobale } from '../ricerca/RicercaGlobale';
+import { useScorciatoiaRicerca } from '../../hooks/useScorciatoiaRicerca';
 
 /** Struttura principale con navigazione adattiva, contenuto route e overlay globali. */
 export function MainLayout() {
@@ -35,6 +37,9 @@ export function MainLayout() {
     void caricaAsset();
     void caricaFont();
   }, [caricaGlossario, caricaPartite, caricaAsset, caricaFont]);
+
+  // il tasto «/» apre la ricerca globale da ogni pagina (non mentre si scrive in un campo)
+  useScorciatoiaRicerca();
 
   // Sfondo ripetibile, sfondo a tema della sezione (con variante Allarme in Fusione) e icona del sito dagli asset predefiniti (se presenti).
   const sfondo = useAsset('sfondi/pattern-nero');
@@ -83,6 +88,8 @@ export function MainLayout() {
       {/* cambiato il giorno della partita, il meteo del giorno nuovo */}
       <MeteoAlCambioGiorno />
       <ToastContainer />
+      {/* L11 B4: la ricerca globale, aperta dal pulsante della Topbar o dal tasto «/» */}
+      <RicercaGlobale />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { APP_NAME } from '../../utils/constants';
 import { VOCI_NAV } from './navigazione';
 import { PartitaSelettore } from './PartitaSelettore';
+import { PulsanteCerca } from '../ricerca/PulsanteCerca';
 import { IconGear, IconStar } from '../shared/icons';
 import { AssetImg } from '../shared/AssetImg';
 
@@ -15,7 +16,7 @@ export function Topbar() {
   const sezione = VOCI_NAV.find((v) => location.pathname.startsWith(v.to));
 
   return (
-    <header className="flex items-center gap-2 lg:gap-3 px-3 lg:px-5 h-[60px] lg:h-[68px] bg-bg-secondary border-b border-border shrink-0">
+    <header className="flex items-center gap-1 sm:gap-2 lg:gap-3 px-3 lg:px-5 h-[60px] lg:h-[68px] bg-bg-secondary border-b border-border shrink-0">
       {/* `touch`: il logo e' il collegamento alla Home ed e' su ogni pagina, ma misurava 104x36 —
           quattro pixel sotto il minimo che il progetto si e' dato per i bersagli tattili. */}
       <Link to="/home" className="touch flex items-center gap-2 no-underline text-text shrink-0" aria-label={`${APP_NAME} — Home`}>
@@ -39,6 +40,8 @@ export function Topbar() {
       )}
       <div className="flex-1 min-w-0" />
       <PartitaSelettore />
+      {/* L11 B4 (R11-07/2): la ricerca si raggiunge da ogni pagina e a ogni larghezza; la barra in basso ha già il tetto di cinque voci */}
+      <PulsanteCerca />
       <Link
         to="/guida"
         className="touch lg:hidden flex items-center justify-center rounded-md text-text-secondary hover:text-text"
