@@ -20,6 +20,7 @@ import { config } from './config.js';
 import { getRequestLogger, requestContextMiddleware } from './middleware/requestContext.js';
 import { responseShapeMiddleware } from './middleware/responseShape.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { indiceRicercaDopoScritture } from './middleware/indiceRicerca.js';
 import { httpErrors } from './utils/httpError.js';
 import { getDb } from './db/dbService.js';
 import { ROUTER_DI_AREA } from './routes/index.js';
@@ -43,6 +44,8 @@ export function createApp(): Express {
   app.use(express.json({ limit: '5mb' }));
 
   // ---- Router di area ----
+  // l'indice della ricerca si svuota dopo ogni scrittura riuscita sui dati di gioco (prima dei router: vede ogni risposta)
+  app.use('/api', indiceRicercaDopoScritture);
   for (const [prefisso, router] of ROUTER_DI_AREA) app.use(prefisso, router);
 
   // ---- Health ----
