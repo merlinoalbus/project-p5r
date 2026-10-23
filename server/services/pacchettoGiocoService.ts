@@ -385,7 +385,7 @@ async function sostituisciDatiDiGioco(file: string): Promise<EsitoImportazionePa
     riapriIstanza();
     condizioniConvertite = convertiCondizioniDatabaseImportato(getDb());
     // le stesse regole dell'avvio sui dati nuovi (l'assorbimento delle immagini su disco, già fatto da riapriIstanza, qui non trova nulla)
-    regoleAllAvvio(getDb());
+    regoleAllAvvio(getDb(), 'rigido'); // un errore qui riporta alla copia di sicurezza (solo all'avvio le regole sono tolleranti)
     // L4 (§8.11): lo specchio delle voci con pin si rifà con la funzione unica sui legami nuovi (il segno dei pin, per uid, resta)
     getDb().transaction(() => riallineaStati(getDb(), null, nowIso()))();
     // L7-TANAKA-IMPORT: il registro delle decisioni arriva integro, o si torna alla copia di sicurezza (un registro rotto non si installa)

@@ -30,16 +30,24 @@ import { assegnaUidMancanti } from '../mappe/identitaSpillo.js';
 import { assorbiFileDelleRighe } from '../../db/migrations/079_immagini_nel_database.js';
 import { pulisciMiniatureOrfane } from '../miniatureService.js';
 
+/** L'esito delle regole sui dati: i conteggi (0 se la regola è fallita) e i nomi delle regole fallite (solo in modo tollerante). */
+export interface EsitoRegoleAvvio { spilliTradotti: number; luoghiCollegati: number; spilliRiallineati: number; spilliIdentificati: number; immaginiAssorbite: number; miniatureOrfane: number; regoleFallite: string[] }
+
 /** Le regole sui dati che ogni avvio riapplica (non c'è più un seed da ricaricare): nomi degli
  *  spilli non identificati, luoghi legati alla planimetria omonima, spilli dei luoghi allineati
- *  al catalogo dei tipi, immagini rimaste su disco assorbite nel database. Tutte idempotenti. */
-export function regoleAllAvvio(db: AppDatabase): { spilliTradotti: number; luoghiCollegati: number; spilliRiallineati: number; spilliIdentificati: number; immaginiAssorbite: number; miniatureOrfane: number } {
-  // Non bloccanti (decisione dell'utente: «il server deve partire»): ogni regola gira da sola, un errore si registra col nome della
-  // regola e vale 0, e le altre girano lo stesso. Che cosa fanno non cambia.
+ *  al catalogo dei tipi, immagini rimaste su disco assorbite nel database. Tutte idempotenti.
+ *
+ *  Una sola implementazione, due modi (R-1): `'tollerante'` è quello dell'avvio (decisione dell'utente: «il server deve partire»):
+ *  ogni regola gira da sola, un errore si registra col nome della regola, vale 0 ed entra in `regoleFallite`, e le altre girano lo
+ *  stesso. `'rigido'` (predefinito) è quello di importazione e caricamento del pacchetto: il primo errore si rilancia, così
+ *  l'operazione torna alla copia di sicurezza come prima. Che cosa fanno le regole non cambia. */
+export function regoleAllAvvio(db: AppDatabase, modo: 'rigido' | 'tollerante' = 'rigido'): EsitoRegoleAvvio {
+  const regoleFallite: string[] = [];
   const prova = (nome: string, regola: () => number): number => {
-    try { return regola(); } catch (err) { logger.error({ regola: nome, err }, 'regola sui dati all\'avvio fallita: l\'avvio prosegue'); return 0; }
+    if (modo === 'rigido') return regola();
+    try { return regola(); } catch (err) { regoleFallite.push(nome); logger.error({ regola: nome, err }, 'regola sui dati all\'avvio fallita: l\'avvio prosegue'); return 0; }
   };
-  return {
+  const esito = {
     spilliTradotti: prova('traduciNomiSpilli', () => traduciNomiSpilli(db)),
     luoghiCollegati: prova('collegaLuoghiAllePlanimetrie', () => collegaLuoghiAllePlanimetrie(db)),
     spilliRiallineati: prova('riallineaSpilliLuoghi', () => riallineaSpilliLuoghi(db)),
@@ -48,6 +56,7 @@ export function regoleAllAvvio(db: AppDatabase): { spilliTradotti: number; luogh
     // le miniature (108) senza la loro sorgente, o di un'altra versione, se ne vanno dopo l'assorbimento delle immagini (L1)
     miniatureOrfane: prova('pulisciMiniatureOrfane', () => pulisciMiniatureOrfane(db)),
   };
+  return { ...esito, regoleFallite };
 }
 
 /**
@@ -170,7 +179,7 @@ export function caricaPacchetto(db: AppDatabase, percorso: string = percorsoPacc
     db.prepare('DETACH DATABASE pacchetto').run();
   }
   runMigrations(db);
-  regoleAllAvvio(db);
+  regoleAllAvvio(db, 'rigido');
   invalidaCacheDiGioco();
   return { tabelle, righe, versione };
 }

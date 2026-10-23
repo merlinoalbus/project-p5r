@@ -64,8 +64,11 @@ try {
   // aggiornamento passano dall'importazione in Impostazioni, che sostituisce il file.
   // Restano le regole sui dati che si rifanno a ogni avvio. Gli spilli che l'estrazione non ha
   // saputo identificare portano il nome giapponese dello sprite, e un pacchetto lo riporterebbe.
-  const regole = regoleAllAvvio(initDb());
-  if (Object.values(regole).some((n) => n > 0)) logger.info(regole, 'regole sui dati applicate all\'avvio');
+  // R-1/R-3: all'avvio le regole sono tolleranti (il server deve partire) e un errore non si confonde con «niente da fare»: il nome della
+  // regola fallita finisce in `regoleFallite`, e in questo caso il log lo dice sempre. Importazione e caricamento usano il modo rigido.
+  const { regoleFallite, ...regole } = regoleAllAvvio(initDb(), 'tollerante');
+  if (regoleFallite.length) logger.warn({ regoleFallite, ...regole }, 'regole sui dati all\'avvio: alcune sono fallite (l\'avvio prosegue)');
+  else if (Object.values(regole).some((n) => n > 0)) logger.info(regole, 'regole sui dati applicate all\'avvio');
 } catch (err) {
   console.error('[project-p5r] FATALE: regole sui dati all\'avvio fallite:', err);
   process.exit(1);
