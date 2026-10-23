@@ -1,10 +1,13 @@
 import { isDeepStrictEqual } from 'node:util';
 import type { Migration } from '../migrationRunner.js';
-import type { RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
-import { condizioneSpillo } from '../../schemas/mappe.js';
+import { z } from 'zod';
+import { normalizzaRequisitoSpillo, type RequisitoSpillo } from './condizioniSpillo126.js';
 import { snapshotFonteProposta } from './snapshotProposte121.js';
 
 type Riga = Record<string, unknown>;
+/** F5-1: lo schema delle condizioni com'era quando la 126 l'ha usato (copia di `server/schemas/mappe.ts`), sul vocabolario congelato. */
+const condizioneSpillo = z.custom<RequisitoSpillo>(v => normalizzaRequisitoSpillo(v) !== null, 'Condizione non valida')
+  .transform(v => normalizzaRequisitoSpillo(v)!);
 const AUDIT = 'audit-bonifica-catalogo-126';
 const FONTE = 'https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/';
 const OFFERTE = [

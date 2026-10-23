@@ -1,6 +1,6 @@
 # L7 — nuovo censimento delle fonti e riconciliazione runtime
 
-Stato al 21 ottobre 2026, 07:17Z. Questo documento accompagna il [manifest pubblico ricostruito](../../../../shared/l7-fonti-ricostruite.json) e l'audit predisposto nella migrazione 121. **Non è il documento preliminare `l7-proposte.json`, che non è stato ritrovato, e non ne dimostra l'equivalenza.**
+Stato al 21 ottobre 2026, 07:17Z. Questo documento accompagna il [manifest pubblico ricostruito](../../../../server/db/migrations/l7-fonti-ricostruite121.json) e l'audit predisposto nella migrazione 121. **Non è il documento preliminare `l7-proposte.json`, che non è stato ritrovato, e non ne dimostra l'equivalenza.**
 
 Il manifest deriva esclusivamente da `pacchetto/gioco.db`, già tracciato nel repository pubblico: schema 93, SHA-256 `113d09a15ba62127e6cc93b291605bf8fe5db6db641a16aefd635f76a539d5ba`. Contiene 2.430 identità sorgente e impronte, senza i testi sorgente. Le righe dichiarate di origine utente sono escluse dalla pubblicazione. La seconda revisione dei campi improntati conserva il formato `schemaVersion: 1`; «seconda revisione» non significa schema 2.
 

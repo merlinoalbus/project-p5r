@@ -4,7 +4,7 @@ Preparazione del 21 ottobre 2026. **Non è un rapporto sui dati correnti di p5s 
 
 ## Fonti, metodo e unità di conto
 
-La sola base dati letta è `pacchetto/gioco.db`, schema 93, già tracciata pubblicamente, con l'impronta riportata in `shared/l7-fonti-ricostruite.json`. Apertura SQLite `mode=ro`, sole letture. Codice confrontato a `1de1ccba`, soprattutto `catalogoOggetti121.ts`, `contenutiOggetti121.ts`, `premiOggetti121.ts`, `scambiJose121.ts` e `scambiGachapon121.ts`. Il requisito originale è L7 a `43ad8889`: R7-10/11/12/12b/13/13b/14 e preservazione R7-19…22. La successiva istruzione «zero test» prevale sulla vecchia frase R7-23.
+La sola base dati letta è `pacchetto/gioco.db`, schema 93, già tracciata pubblicamente, con l'impronta riportata in `server/db/migrations/l7-fonti-ricostruite121.json` (spostato da `shared/` il 2026-10-23: lo usa solo la migrazione 121). Apertura SQLite `mode=ro`, sole letture. Codice confrontato a `1de1ccba`, soprattutto `catalogoOggetti121.ts`, `contenutiOggetti121.ts`, `premiOggetti121.ts`, `scambiJose121.ts` e `scambiGachapon121.ts`. Il requisito originale è L7 a `43ad8889`: R7-10/11/12/12b/13/13b/14 e preservazione R7-19…22. La successiva istruzione «zero test» prevale sulla vecchia frase R7-23.
 
 Ogni fonte ha identità manifest, campi censiti ed elementi con ruolo, testo/valore osservato, quantità esplicita, locatore e disposizione proposta. Gli intervalli `[inizio,fine)` si riferiscono ai punti di codice Unicode della stringa JSON decodificata. `null` nella quantità significa che la fonte non la dichiara: la quantità 1 usata dal codice non diventa un dato osservato.
 
