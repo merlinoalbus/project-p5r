@@ -70,9 +70,10 @@ function targetCausa(partita: number, causa: Causa): Target[] {
       const d = leggiOggettoRegistro(a.dati_json,'consumo');
       if (d.regola !== 'aojiru' || d.versione !== 1 || !eDote(d.variante) || !(d.fortuna === null || typeof d.fortuna === 'boolean')||a.prezzo_yen!==5000||Object.keys(d).some((k)=>!['regola','versione','variante','fortuna'].includes(k))) throw httpErrors.conflict('consumo-non-valido','I dati della consumazione non sono validi.');
       const attiva = !!prepared('SELECT 1 FROM utente.acquisto_provenienza WHERE partita_id=? AND acquisto_id=? LIMIT 1').get(partita,causa.chiave);
+      // Gli yen non sono più una proposta (BON-12): si cambiano a mano, la proposta Dote porta il promemoria della spesa.
       return [
         { tipo:'dote',chiave:d.variante,delta:d.fortuna === true ? 3 : 2,motivo:d.fortuna === null ? 'Aojiru: sola base certa di 2 punti; bonus Fortuna non attestato.' : 'Dote della consumazione Aojiru confermata.',fortunaIgnota:d.fortuna === null,storica:true,attiva },
-        { tipo:'yen',chiave:'',delta:-a.prezzo_yen,motivo:'Spesa della consumazione confermata, da applicare esplicitamente.',storica:true,attiva },
+        ...righeCausa(partita,causa).filter((r)=>r.tipo==='yen'&&r.stato==='aperta'&&r.delta_applicato===0&&r.delta_riconosciuto===0).map((r):Target=>({...verificaBeneficio(leggiOggettoRegistro(r.dati_json,'proposta').beneficio),attiva:false})),
       ];
     }
   } else {
@@ -296,7 +297,9 @@ function dto(r:RigaProposta):PropostaPartitaDto {
   }
   // R10-10/4: il testo della voce del Diario da cui nasce la proposta, per dirlo all'utente in parole (non solo il suo identificativo)
   const voceTesto=r.voce_uid?((prepared('SELECT azione FROM main.voce_giornata WHERE uid=?').get(r.voce_uid) as {azione:string}|undefined)?.azione??null):null;
-  return {id:r.id,uid:r.uid,partitaId:r.partita_id,tipo:r.tipo,chiave:r.chiave,causa,voceTesto,unita:r.unita,delta:r.delta,stato:r.stato,verifica:r.verifica,motivo:r.motivo,chiusaDa:r.chiusa_da,motivoChiusura:r.motivo_chiusura,deltaApplicato:r.delta_applicato,deltaRiconosciuto:r.delta_riconosciuto,saldo:s,dote:eDote(r.chiave)?r.chiave:null,orfana,applicabile:r.stato==='aperta'&&impedimenti.length===0,impedimenti,creataIl:r.creata_il,decisaIl:r.decisa_il,dati};
+  // BON-12: la spesa del consumo non è una proposta; la proposta Dote la porta come promemoria (gli yen si cambiano a mano)
+  const promemoriaYen=r.tipo==='dote'&&causa.tipo==='acquisto'?((prepared('SELECT prezzo_yen FROM utente.acquisto_registrato WHERE partita_id=? AND id=?').get(r.partita_id,causa.chiave) as {prezzo_yen:number}|undefined)?.prezzo_yen??null):null;
+  return {id:r.id,uid:r.uid,partitaId:r.partita_id,tipo:r.tipo,chiave:r.chiave,causa,voceTesto,promemoriaYen,unita:r.unita,delta:r.delta,stato:r.stato,verifica:r.verifica,motivo:r.motivo,chiusaDa:r.chiusa_da,motivoChiusura:r.motivo_chiusura,deltaApplicato:r.delta_applicato,deltaRiconosciuto:r.delta_riconosciuto,saldo:s,dote:eDote(r.chiave)?r.chiave:null,orfana,applicabile:r.stato==='aperta'&&impedimenti.length===0,impedimenti,creataIl:r.creata_il,decisaIl:r.decisa_il,dati};
 }
 export function leggiPropostePartita(partita:number,opz:{ancheChiuse?:boolean}={}):PropostaPartitaDto[] {
   verificaPartita(partita);
@@ -328,10 +331,11 @@ function prepara(partita:number,r:RichiestaAnteprimaDecisioneProposte):Anteprima
   const proposte=righe.map(dto), virtuali=new Map<string,MovimentoPropostoDto>();
   for(const p of proposte) {
     if(r.decisione.tipo==='applica') {
+      if(p.tipo==='yen')throw httpErrors.conflict('yen-a-mano','Gli yen si cambiano a mano: non c’è niente da applicare.');
       if(p.tipo==='effetto-voce'||!p.applicabile)throw httpErrors.conflict('proposta-non-applicabile',p.impedimenti.join(' ')||'Questa proposta richiede il raccordo esplicito.');
       const k=`${p.tipo}\0${p.chiave}`,v=virtuali.get(k)??{tipo:p.tipo,chiave:p.chiave,prima:valore(partita,p.tipo,p.chiave),delta:0,dopo:0};
       v.delta+=p.delta;v.dopo=v.prima+v.delta;
-      if(v.dopo<0||v.dopo>(p.tipo==='yen'?9_999_999:p.tipo==='punti-pesca'?999_999_999:999))throw httpErrors.conflict('valore-fuori-limiti','Il delta approvato supererebbe i limiti; nessuna saturazione automatica.');
+      if(v.dopo<0||v.dopo>(p.tipo==='punti-pesca'?999_999_999:999))throw httpErrors.conflict('valore-fuori-limiti','Il delta approvato supererebbe i limiti; nessuna saturazione automatica.');
       virtuali.set(k,v);
     } else if(r.decisione.tipo==='applica-effetto') {
       if(p.tipo!=='effetto-voce'||!p.applicabile)throw httpErrors.conflict('effetto-non-applicabile','Il raccordo della spunta non è più applicabile.');

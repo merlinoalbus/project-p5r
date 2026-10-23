@@ -126,6 +126,7 @@ function DaApplicareNelContesto({ partitaId, onCambiato }: { partitaId: number; 
             return <span className="text-[14px]"><strong>{nome(p)}</strong>{p.tipo !== 'effetto-voce' && <>: {prima !== null ? <>{prima} → <strong>{prima + p.delta}</strong> punti</> : <strong>{valore(p)}</strong>}</>}</span>;
           })()}
           <span>{p.motivo}</span>
+          {!!p.promemoriaYen && <span className="rounded border border-border p-2 text-[12px]">Promemoria: questo consumo è costato ¥{p.promemoriaYen.toLocaleString('it-IT')}. L’app non tocca i tuoi yen: cambiali tu a mano.</span>}
           {identita(p)}
           {p.orfana && <span className="text-warning">La voce o il consumo da cui nasce non c’è più.</span>}
           {p.tipo !== 'effetto-voce' && p.verifica !== 'non-conteggiata' && <div className="flex flex-col gap-1 rounded border border-border p-2">
