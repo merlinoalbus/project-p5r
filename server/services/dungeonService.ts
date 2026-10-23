@@ -22,7 +22,7 @@ import { illustrazioneDellaMappa } from './mappe/immagineMappa.js';
 import { completamentoDegliOggetti, contaOggetti, effettiDelGestoDto, modelloAvanzamento, oggettiDelleMappe, oggettiDelleVoci, pinFattoPerLaVoce, riallineaStati, type SegniAggiunti, statiDellaPartita, statoDelPin, statoDellaVoce, voceDelGestoDto, vociCheCondividonoIPin, vociDellInfiltrazione, type ModelloAvanzamento, type StatiDellaPartita } from './mappe/statiGuida.js';
 import { infiltrazioneCompletata } from '../../shared/completamentoGuida.js';
 import { carattereDaTipo, type CarattereVoce } from '../../shared/caratteriVoce.js';
-import type { AreaDedaloDto, AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, GruppoCopieDto, GuidaDellaPlanimetriaDto, PinDelPuntoDto, PlanimetriaDellaVoceDto, SchedaDaSistemareDto, PuntiCopiatiDto, PuntiSpostatiDto, PuntoInteresseDto, RichiestaDelDedaloDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta, VoceCollegabileDto } from '../../shared/types.js';
+import type { AreaDedaloDto, ArchivioDelPalazzoDto, AreaDungeonDto, DedaloDto, DungeonDettaglioDto, DungeonRiassuntoDto, GruppoCopieDto, GuidaDellaPlanimetriaDto, PinDelPuntoDto, PlanimetriaDellaVoceDto, SchedaDaSistemareDto, PuntiCopiatiDto, PuntiSpostatiDto, PuntoInteresseDto, RichiestaDelDedaloDto, SpilloRaccoltaDto, StatoPunto, StatoRichiesta, VoceCollegabileDto } from '../../shared/types.js';
 import { contoAreaDedalo, contoDedalo, tipoDelDedalo } from '../../shared/dedali.js';
 import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
 import { DEFINIZIONI_SPILLO, puntoDescrittivo, puntoEnigma, sqlVoceDescrittiva, type TipoSpillo } from '../../shared/spilli.js';
@@ -106,6 +106,28 @@ function areeDellePersone(voce?: string): Map<string, string[]> {
   const m = new Map<string, string[]>();
   for (const x of righe) m.set(x.voce_chiave, [...(m.get(x.voce_chiave) ?? []), x.area_dedalo_chiave]);
   return m;
+}
+
+/**
+ * L8 (B7, R8-16): gli archivi dei «Palazzi» confluiti in un dedalo dei Memento (oggi Iweleth), per la chiave del dedalo: le planimetrie del Palazzo
+ * per l'area del dedalo a cui appartengono (`mappa_dedalo`) e quante voci sono diventate Trama o punteggiano la voce del dedalo (`voce_confluenza`).
+ * Vuoto su uno schema senza la 175.
+ */
+const tabellaConfluenza = (): boolean => !!prepared("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = 'dedalo_confluenza'").get();
+
+function archiviDeiDedali(): Map<string, ArchivioDelPalazzoDto> {
+  const out = new Map<string, ArchivioDelPalazzoDto>();
+  if (!tabellaConfluenza()) return out;
+  for (const c of prepared('SELECT c.dungeon_chiave, c.dedalo_chiave, d.nome FROM dedalo_confluenza c JOIN dungeon d ON d.chiave = c.dungeon_chiave').all() as Array<{ dungeon_chiave: string; dedalo_chiave: string; nome: string }>) {
+    const mappe = prepared(`SELECT m.mappa_chiave, m.area_dedalo_chiave, m.nota, ad.nome AS area_nome FROM mappa_dedalo m JOIN mappa x ON x.chiave = m.mappa_chiave
+      LEFT JOIN area_dedalo ad ON ad.chiave = m.area_dedalo_chiave ORDER BY COALESCE(ad.ordine, 9999), m.mappa_chiave`).all() as Array<{ mappa_chiave: string; area_dedalo_chiave: string | null; nota: string; area_nome: string | null }>;
+    const voci = prepared("SELECT COALESCE(SUM(azione = 'convertita'), 0) AS convertite, COALESCE(SUM(azione = 'doppia'), 0) AS doppie FROM voce_confluenza").get() as { convertite: number; doppie: number };
+    out.set(c.dedalo_chiave, {
+      dungeon: c.dungeon_chiave, nome: c.nome, voci,
+      planimetrie: mappe.map((m) => ({ chiave: chiaveMappa(m.mappa_chiave), nome: nomePercorso(m.mappa_chiave), areaDedalo: m.area_dedalo_chiave, areaNome: m.area_nome, nota: m.nota })),
+    });
+  }
+  return out;
 }
 
 /** Lo stato di ogni punto della guida segnato dalla partita (chiave → stato); vuota senza partita, 404 se la partita non esiste. */
@@ -387,6 +409,9 @@ export function dettaglioDungeon(chiave: string, partitaId?: number, contesto: s
   const segni = partitaId === undefined ? undefined : segniPartita(partitaId, contesto, m);
   const raccolta = r.tipo === 'mementos' ? null : raccoltaMappe(chiave, partitaId, segni);
   const dedali = r.tipo === 'mementos' ? lettureDedali(chiave, partitaId, stati) : null;
+  const archivi = r.tipo === 'mementos' ? archiviDeiDedali() : new Map<string, ArchivioDelPalazzoDto>();
+  // L8 (B7): un Palazzo confluito in un dedalo (Iweleth) rimanda al dedalo: la sua scheda è un archivio, non una casa
+  const confluenza = tabellaConfluenza() ? (prepared('SELECT c.dedalo_chiave, a.dungeon_chiave, a.nome FROM dedalo_confluenza c JOIN dungeon_area a ON a.chiave = c.dedalo_chiave WHERE c.dungeon_chiave = ?').get(chiave) as { dedalo_chiave: string; dungeon_chiave: string; nome: string } | undefined) : undefined;
   // lo stato di una Persona da catturare (dedali e Palazzi, L8 R8-12/R8-14) è la sua cattura nel compendio (2026-10-12, `catturePersona.ts`), non `punto_partita`
   const catturate = partitaId !== undefined ? vociPersonaCatturate(partitaId, cattura) : new Set<string>();
   // L3: le Aree toccate da ogni infiltrazione. Solo nei Palazzi: per i Memento i campi nuovi non si emettono e la risposta resta
@@ -409,6 +434,8 @@ export function dettaglioDungeon(chiave: string, partitaId?: number, contesto: s
     punti: (prepared('SELECT * FROM punto_interesse WHERE area_chiave = ? ORDER BY ordine, chiave').all(a.chiave) as RigaPunto[])
       .map((p) => puntoDto(p, statoDi(p), pinPunti.get(p.chiave) ?? [], letture, avanzamento)),
     dedalo: dedali ? dedaloDto(a.chiave, dedali) : null,
+    // L8 (B7): l'archivio del Palazzo confluito in questo dedalo (Iweleth); assente per gli altri, la loro risposta non cambia
+    ...(archivi.has(a.chiave) ? { archivio: archivi.get(a.chiave) } : {}),
     // L4 (§1.5): l'infiltrazione con la funzione unica (oggetti permanenti delle sue voci; senza niente da contare mai completata)
     ...(palazzo ? { completamento: completamentoInfiltrazione(m, segni?.s ?? null, a.chiave) } : {}),
   }));
@@ -422,6 +449,7 @@ export function dettaglioDungeon(chiave: string, partitaId?: number, contesto: s
   const areePalazzo = palazzo && raccolta ? areeDelPalazzo(chiave, raccolta.perMappa, partitaId !== undefined, { m, s: segni?.s ?? null, oggettiPerMappa }) : null;
   return { ...riassunto(r, stati, partitaId, statoPalazzi(partitaId, m), { raccolta, segni, m }), note: r.note, fonti: JSON.parse(r.fonti_json) as string[], aree, planimetrie, atterraggi: elencaAtterraggi(chiave), personeCatturate,
     illustrazione: illustrazioneDellaMappa(radiceDelPalazzo(chiave)),
+    ...(confluenza ? { confluisceIn: { dungeon: confluenza.dungeon_chiave, dedalo: confluenza.dedalo_chiave, nome: confluenza.nome } } : {}),
     ...(areePalazzo ? { areePalazzo } : {}),
     // L4 (§2.3, §4.3): le schede senza mappa né voce, da sistemare
     ...(palazzo ? { schedeDaSistemare: schedeDaSistemare(chiave) } : {}) };
