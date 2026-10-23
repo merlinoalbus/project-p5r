@@ -16,7 +16,7 @@ import { randomBytes } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { HttpError, httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
-import { registraEvento, revocaEventiDellaVoce } from './storicoService.js';
+import { conVoceDellaSpunta, registraEvento, revocaEventiDellaVoce } from './storicoService.js';
 import { confidenti } from './partiteService.js';
 import { applicaEffettiAzione, annullaEffettiAzione, descriviEffettiApplicati, type OpzioniSpunta } from './effettiAzioneService.js';
 import { mappaAzione, nomeRiferimento, nomiEffetti, statoAzione, testoEffetti, verificaEffetti } from './azioniStrutturateService.js';
@@ -684,10 +684,11 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
         prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
         return;
       }
-      const { effettiLegacy: effetti } = applicaEffettiVoce(partitaId, uid, {
+      // R10-22: gli eventi che i setter scrivono mentre la spunta applica i suoi effetti portano il legame con la voce e si revocano togliendola
+      const { effettiLegacy: effetti } = conVoceDellaSpunta(uid, () => applicaEffettiVoce(partitaId, uid, {
         applicaLegacy: (id, produce: EffettoLegacyVoce[]) => applicaEffettiAzione(id, { ...v, produce, apertureDedali: aperture, momento: { data: r.data, fascia: v.fascia, origine: 'azione' } }, opz),
         annullaLegacy: annullaEffettiAzione,
-      }, { acquisti: opz.acquisti, pesche:opz.pesche, porteAcquisti: { valutaCorrente: disponibilitaAcquistoCorrente }, spuntaFattaIl: adesso });
+      }, { acquisti: opz.acquisti, pesche:opz.pesche, porteAcquisti: { valutaCorrente: disponibilitaAcquistoCorrente }, spuntaFattaIl: adesso }));
       prepared('INSERT INTO spunta_voce_partita (partita_id, voce_uid, fatta_at, effetti_json) VALUES (?, ?, ?, ?)').run(partitaId, uid, adesso, effetti ? JSON.stringify(effetti) : null);
       const dett = [`${v.fascia === 'sera' ? 'Sera' : 'Giorno'} · ${v.tipo}${v.riferimentoTesto ? ` · ${v.riferimentoTesto}` : ''}`];
       if (effetti) dett.push(descriviEffettiApplicati(effetti));

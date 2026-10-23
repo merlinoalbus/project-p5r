@@ -2,6 +2,7 @@
 // storicoService — registrazione e lettura degli eventi della partita (Fase 5.1)
 // ============================================================
 
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
@@ -37,10 +38,18 @@ function eventoDto(r: RigaEvento): EventoPartitaDto {
  * così evento e modifica sono atomici. Non verifica l'esistenza della partita: lo fa il chiamante.
  */
 export function registraEvento(partitaId: number, tipo: TipoEvento, titolo: string, dettaglio = '', dati: Record<string, unknown> = {}, personaId: number | null = null, voceUid: string | null = null): number {
+  // R10-22: gli eventi che i setter condivisi (domanda, cruciverba, Richiesta, acquisto, lettura…) scrivono mentre una spunta applica i suoi
+  // effetti portano il legame con la voce, anche se il setter non lo conosce: togliendo la spunta si revocano
+  const legame = voceUid ?? voceDellaSpunta.getStore() ?? null;
   const info = prepared('INSERT INTO evento_partita (partita_id, tipo, titolo, dettaglio, dati_json, persona_id, created_at, voce_uid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
-    .run(partitaId, tipo, titolo, dettaglio, JSON.stringify(dati), personaId, nowIso(), voceUid);
+    .run(partitaId, tipo, titolo, dettaglio, JSON.stringify(dati), personaId, nowIso(), legame);
   return Number(info.lastInsertRowid);
 }
+
+/** La voce la cui spunta sta applicando i suoi effetti: ciò che si registra nel frattempo le appartiene (`registraEvento`). */
+const voceDellaSpunta = new AsyncLocalStorage<string>();
+/** Esegue `f` come applicazione degli effetti della spunta di `voceUid`: gli eventi registrati dentro `f` portano il suo `voce_uid`. */
+export const conVoceDellaSpunta = <T>(voceUid: string, f: () => T): T => voceDellaSpunta.run(voceUid, f);
 
 /** R10-22: togliere la spunta di una voce toglie dallo storico gli eventi che quella spunta ha registrato (legame esplicito `voce_uid`).
  * Gli eventi storici, senza legame, non si toccano mai. Va chiamata dentro la transazione della modifica. */
