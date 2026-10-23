@@ -548,13 +548,16 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
         const tolta = tabellaTolta(p.schema, p.tabella);
         if (tolta) { salta(p.tabella, 'tabella-rimossa', '', undefined, tolta.sostituitaDa); continue; }
         if (r.tipo === 'partita') throw httpErrors.conflict('cestino-schema-partita-incompleto', 'Una tabella del blocco personale non esiste più: il ripristino completo è stato annullato.');
-        salta(p.tabella, 'non-esiste-piu', descrivi(riferimento)); continue;
+        // una tabella sparita senza dichiarazione è comunque «la tabella non c'è più», non una riga cambiata dopo: stesso motivo, senza «ora:»
+        salta(p.tabella, 'tabella-rimossa', ''); continue;
       }
       // solo le colonne che la tabella ha ancora (una migrazione dopo l'eliminazione può averne tolte)
       const colonne = s.colonne.filter((c) => c in riferimento);
-      // R11-06: si segnala solo la perdita reale delle colonne tolte: con un valore (eliminazione di una riga), o che l'eliminazione aveva cambiato (modifica)
-      const perse = Object.keys(riferimento).filter((c) => !s.colonne.includes(c) && (p.op === 'D' ? valoreInformativo(riferimento[c]) : p.op === 'U' ? (p.prima?.[c] ?? null) !== (p.dopo?.[c] ?? null) : false));
-      if (perse.length) salta(p.tabella, 'colonna-rimossa', descrivi(riferimento), perse, colonnaTolta(p.schema, p.tabella, perse[0]!)?.sostituitaDa);
+      // R11-06: si segnala solo la perdita reale delle colonne tolte: con un valore (eliminazione di una riga), o che l'eliminazione aveva cambiato (modifica);
+      // e solo quando la riga è tornata davvero (`esegui` andato a buon fine): una riga già presente, sparita o con un legame mancante non è «tornata senza»
+      const perse = Object.keys(riferimento).filter((c) => !s.colonne.includes(c) && (p.op === 'D' ? valoreInformativo(riferimento[c]) : p.op === 'U' ? !stesso(p.prima?.[c], p.dopo?.[c]) : false));
+      const sostituite = [...new Set(perse.flatMap((c) => colonnaTolta(p.schema, p.tabella, c)?.sostituitaDa ?? []))].join('; ');
+      const segnalaPerse = () => { if (perse.length) salta(p.tabella, 'colonna-rimossa', descrivi(riferimento), perse, sostituite || null); };
       const su = `${p.schema}.${virgolette(p.tabella)}`;
       const dove = s.chiave.map((c) => `${virgolette(c)} IS ?`).join(' AND ');
       const leggi = (riga: Riga): Riga | null => {
@@ -563,7 +566,7 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
       };
       const esegui = (sql: string, valori: unknown[], riga: Riga): boolean => {
         try {
-          db.prepare(sql).run(...valori); rimesse++;
+          db.prepare(sql).run(...valori); rimesse++; segnalaPerse();
           if (p.prima) daVerificare.push({ schema: p.schema, tabella: p.tabella, riga: p.prima });
           if (p.dopo) daVerificare.push({ schema: p.schema, tabella: p.tabella, riga: p.dopo });
           return true;

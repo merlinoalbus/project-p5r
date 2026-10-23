@@ -80,19 +80,19 @@ function ElencoScarti({ scarti, quando, copia }: { scarti: ScartoPacchettoDto[];
     <li key={`${s.tabella}.${s.colonna ?? ''}`} className="flex flex-col gap-0.5 rounded border border-border px-2 py-1">
       <span>
         <strong>{numero(s.righe)}</strong> {s.tipo === 'tabella' ? s.etichetta : <>righe con un valore in <code>{s.colonna}</code></>}
-        <span className="text-text-muted"> · {s.tipo === 'tabella' ? `tabella ${s.tabella}` : `tabella ${s.tabella}`}</span>
+        <span className="text-text-muted"> · tabella {s.tabella}</span>
       </span>
       {s.sostituitaDa && <span className="text-text-secondary">ora: {s.sostituitaDa}</span>}
     </li>
   );
   return (
     <div className="flex flex-col gap-1">
-      <p className="m-0 text-[13px] text-warning">{quando === 'prima' ? 'Non vengono importati; restano nella copia di sicurezza:' : 'Scartato nell’importazione:'}</p>
-      <ul className="m-0 p-0 list-none flex flex-col gap-1 text-[13px]" aria-label="Strutture scartate">{spiegati.map(riga)}</ul>
+      <p className="m-0 text-[13px] text-warning">{quando === 'prima' ? 'Non vengono importati; restano nella copia di sicurezza:' : 'Non sono stati importati:'}</p>
+      {spiegati.length > 0 && <ul className={`m-0 p-0 list-none flex flex-col gap-1 text-[13px] ${spiegati.length > 8 ? 'area-scorrevole max-h-[min(40vh,320px)]' : ''}`} aria-label="Strutture scartate">{spiegati.map(riga)}</ul>}
       {altri.length > 0 && (
         <>
           <p className="m-0 text-[13px] text-text-secondary">Strutture non più nell’app (probabilmente rinominate):</p>
-          <ul className="m-0 p-0 list-none flex flex-col gap-1 text-[13px]" aria-label="Strutture scartate non spiegate">{altri.map(riga)}</ul>
+          <ul className={`m-0 p-0 list-none flex flex-col gap-1 text-[13px] ${altri.length > 8 ? 'area-scorrevole max-h-[min(40vh,320px)]' : ''}`} aria-label="Strutture scartate non spiegate">{altri.map(riga)}</ul>
         </>
       )}
       {quando === 'dopo' && copia && <p className="m-0 text-[13px] text-text-muted">Nulla è perso: i dati sono nella copia di sicurezza <code>{copia}</code>.</p>}

@@ -135,7 +135,9 @@ function tabelleDi(db: Database.Database, schema: string): string[] {
 }
 
 /** Una riga conta, in una colonna, se il valore non è NULL né uno di '', '[]', '{}', '0', 'null' (valore informativo). */
-const informativo = (c: string): string => `"${c}" IS NOT NULL AND CAST("${c}" AS TEXT) NOT IN ('', '[]', '{}', '0', 'null')`;
+/** Un nome di tabella o colonna tra virgolette, con le virgolette interne raddoppiate: un backup con un nome strano non deve far fallire l'anteprima. */
+const virgolette = (nome: string): string => `"${nome.replace(/"/g, '""')}"`;
+const informativo = (c: string): string => `${virgolette(c)} IS NOT NULL AND CAST(${virgolette(c)} AS TEXT) NOT IN ('', '[]', '{}', '0', 'null')`;
 
 /** Tabelle e colonne di uno schema `main`. */
 function strutturaDi(db: Database.Database): Map<string, string[]> {
@@ -154,14 +156,14 @@ export function scartiDelPacchetto(pacchetto: Database.Database, istanza: Databa
   for (const [tabella, colonne] of dentro) {
     if (!qui.has(tabella)) {
       const tolta = tabellaTolta('main', tabella);
-      const righe = (pacchetto.prepare(`SELECT COUNT(*) AS n FROM main."${tabella}"`).get() as { n: number }).n;
+      const righe = (pacchetto.prepare(`SELECT COUNT(*) AS n FROM main.${virgolette(tabella)}`).get() as { n: number }).n;
       if (righe > 0) out.push({ tipo: 'tabella', tabella, etichetta: etichettaTabella(tabella), colonna: null, righe, sostituitaDa: tolta?.sostituitaDa ?? null, spiegata: !!tolta });
       continue;
     }
     const oggi = qui.get(tabella)!;
     for (const colonna of colonne.filter((c) => !oggi.includes(c))) {
       if (colonna === 'contenuto') continue; // BLOB: non si scandisce
-      const righe = (pacchetto.prepare(`SELECT COUNT(*) AS n FROM main."${tabella}" WHERE ${informativo(colonna)}`).get() as { n: number }).n;
+      const righe = (pacchetto.prepare(`SELECT COUNT(*) AS n FROM main.${virgolette(tabella)} WHERE ${informativo(colonna)}`).get() as { n: number }).n;
       const dichiarata = colonnaTolta('main', tabella, colonna);
       if (righe > 0) out.push({ tipo: 'colonna', tabella, etichetta: etichettaTabella(tabella), colonna, righe, sostituitaDa: dichiarata?.sostituitaDa ?? null, spiegata: !!dichiarata });
     }
@@ -172,7 +174,7 @@ export function scartiDelPacchetto(pacchetto: Database.Database, istanza: Databa
 /** Righe per tabella di uno schema. */
 function conteggiTabelle(db: Database.Database, schema: string): Record<string, number> {
   const out: Record<string, number> = {};
-  for (const t of tabelleDi(db, schema)) out[t] = (db.prepare(`SELECT COUNT(*) AS n FROM "${schema}"."${t}"`).get() as { n: number }).n;
+  for (const t of tabelleDi(db, schema)) out[t] = (db.prepare(`SELECT COUNT(*) AS n FROM "${schema}".${virgolette(t)}`).get() as { n: number }).n;
   return out;
 }
 
@@ -416,7 +418,7 @@ async function sostituisciDatiDiGioco(file: string): Promise<EsitoImportazionePa
   // R11-05/3: il riepilogo di ciò che si scarta resta accanto alla copia di sicurezza (la memoria del servizio si perde al riavvio); non blocca mai l'importazione
   let riepilogoSalvatoIn: string | undefined;
   try {
-    await fsp.writeFile(path.join(salvataggio, 'riepilogo-scarti.json'), JSON.stringify({ quando: nowIso(), versionePacchetto: anteprima.versioneSchema, versioneSchemaIstanza: anteprima.versioneSchemaIstanza, scarti: anteprima.scarti ?? [] }, null, 2), 'utf8');
+    await fsp.writeFile(path.join(salvataggio, 'riepilogo-scarti.json'), JSON.stringify({ quando: nowIso(), versionePacchetto: anteprima.versioneSchema, versioneSchema: anteprima.versioneSchemaIstanza, scarti: anteprima.scarti ?? [] }, null, 2), 'utf8');
     riepilogoSalvatoIn = path.basename(salvataggio);
   } catch (err) {
     logger.warn({ err: err instanceof Error ? err.message : String(err) }, 'riepilogo degli scarti non salvato nella copia di sicurezza');
