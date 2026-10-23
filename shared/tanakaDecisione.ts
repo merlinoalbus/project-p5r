@@ -44,7 +44,7 @@ export interface AnteprimaPianoTanakaDto {
 
 /** IMPORT: lo stato del listino di Tanaka e del registro delle decisioni in un file di gioco (istanza o pacchetto). */
 export interface StatoTanakaFileDto {
-  /** Il registro (migrazione 150) c'è. */
+  /** Il registro (migrazione 141) c'è. */
   registro: boolean;
   decisioni: number;
   attiva: string | null;

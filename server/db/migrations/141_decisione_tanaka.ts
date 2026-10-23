@@ -1,5 +1,5 @@
 // ============================================================
-// 150 — il registro della decisione unitaria Tanaka (L7-TANAKA-TRANSAZIONE, RICEVUTA, RIPRISTINO; lotti/L7/tanaka-decisione-unitaria.md)
+// 141 — il registro della decisione unitaria Tanaka (L7-TANAKA-TRANSAZIONE, RICEVUTA, RIPRISTINO; lotti/L7/tanaka-decisione-unitaria.md)
 // ============================================================
 //
 // Il listino di Tanaka passa dalle 20 offerte correnti alle 18 Royal (G-034) con una sola decisione dell'utente: 10 chiavi conservate e
@@ -15,8 +15,8 @@
 
 import type { Migration } from '../migrationRunner.js';
 
-export const migration150: Migration = {
-  id: 150,
+export const migration141: Migration = {
+  id: 141,
   name: 'decisione_tanaka',
   up(db) {
     db.exec(`CREATE TABLE IF NOT EXISTS main.decisione_tanaka (

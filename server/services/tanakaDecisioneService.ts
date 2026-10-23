@@ -95,7 +95,7 @@ function calcolaPiano(): AnteprimaPianoTanakaDto {
     righe.push({ chiave: r.chiave, destinazione: 'crea', rapporto: r.rapporto, prima: valori(offerte[r.chiave] ?? null), dopo: valoriRoyal(r, condizioniRoyal.get(r.chiave) ?? []) });
   }
   const blocchi: string[] = [];
-  if (!conRegistro()) blocchi.push('Il registro delle decisioni (migrazione 150) non c’è in questo file di gioco.');
+  if (!conRegistro()) blocchi.push('Il registro delle decisioni (migrazione 141) non c’è in questo file di gioco.');
   if (!confronto.negozio) blocchi.push('Il negozio di Tanaka non c’è: nessuna ricreazione automatica.');
   // per le 8 offerte da creare l'assenza è l'atteso, non un blocco (il confronto la segnala perché non le ricrea da sé)
   const daCreare = new Set(manifest.royal.filter((r) => !chiaviCorrenti.includes(r.chiave)).map((r) => r.chiave));

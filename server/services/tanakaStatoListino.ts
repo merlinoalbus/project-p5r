@@ -3,7 +3,7 @@
 // ============================================================
 //
 // Puro: lavora su qualunque connessione (l'istanza, un pacchetto aperto in sola lettura per l'anteprima dell'importazione, la copia da
-// esportare) e non scrive niente. Serve a import, export e ripristino dell'istanza: il registro delle decisioni (migrazione 150) e le note
+// esportare) e non scrive niente. Serve a import, export e ripristino dell'istanza: il registro delle decisioni (migrazione 141) e le note
 // storiche (139) stanno in gioco.db e viaggiano col file; qui si controlla che arrivino integri e si dice che listino portano.
 //   - `precedente`: attive le 20 offerte correnti di prima; `royal`: attive le 18 Royal coi prezzi del manifesto; `misto`: altro (anche
 //     un listino mezzo pre e mezzo post decisione); `assente`: il negozio non c'è.
