@@ -277,7 +277,12 @@ interface RigaConfidentePartita { chiave: string; nome: string; arcana: string; 
 /** I Confidenti con lo stato nella partita; con `chiave`, quel Confidente solo. */
 function righeConfidenti(partitaId: number, chiave?: string): RigaConfidentePartita[] {
   const sql = `SELECT c.chiave, c.nome, c.arcana, c.ordine, COALESCE(cp.sbloccato, 0) AS sbloccato, COALESCE(cp.rango, 0) AS rango, COALESCE(cp.punti, 0) AS punti,
-      COALESCE(cp.note, '') AS note, cp.updated_at, cr.punti_necessari,
+      COALESCE(cp.note, '') AS note, cp.updated_at,
+      -- R6 sulla 161: Igor, Morgana, Sae, Gemelle e Mishima hanno righe di ranghi solo per il loro modo; senza ranghi a punti né a evento la soglia resta
+      -- «nessuna» (NULL), come prima che le righe esistessero («Progressione senza punti…»). Gli altri ranghi a soglia 0 restano 0.
+      CASE WHEN cr.modo IN ('automatico', 'richieste', 'velluto')
+        AND NOT EXISTS (SELECT 1 FROM confidente_rango x WHERE x.confidente_chiave = c.chiave AND x.modo IN ('punti', 'evento'))
+        THEN NULL ELSE cr.punti_necessari END AS punti_necessari,
       EXISTS (SELECT 1 FROM persona_posseduta pp JOIN persona p ON p.id = pp.persona_id WHERE pp.partita_id = ? AND p.arcana = c.arcana) AS in_scorta
     FROM confidente c
     LEFT JOIN confidente_partita cp ON cp.confidente_chiave = c.chiave AND cp.partita_id = ?
