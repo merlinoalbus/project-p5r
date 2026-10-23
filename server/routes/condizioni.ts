@@ -24,8 +24,6 @@ import { tuttiGliInviti } from '../services/condizioni/condizioneEffettiva.js';
 import { apertureDalDiario, apertureDichiarabili } from '../services/apertureDedaliService.js';
 import { censimentoLuoghiCondizioni } from '../services/censimentoLuoghiCondizioniService.js';
 import { fotografieIngressoMemento } from '../services/fotografieIngressoMementoService.js';
-import { riconciliazioneCondizioni, decidiCondizioni } from '../services/riconciliazioneCondizioniService.js';
-import type { DecisioneCondizioniInput } from '../../shared/riconciliazioneCondizioni.js';
 import { statoAlGiorno, statoDisponibilitaPartita } from '../services/disponibilitaService.js';
 import { valutazione } from '../services/condizioni/valutatore.js';
 import { condizioneSpillo } from '../schemas/mappe.js';
@@ -52,20 +50,6 @@ router.get('/censimento', (_req, res) => {
 router.get('/censimento/fotografie-ingresso-memento', (_req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   res.json(fotografieIngressoMemento());
-});
-
-router.get('/riconciliazione', (_req, res) => {
-  res.setHeader('Cache-Control', 'no-store');
-  res.json(riconciliazioneCondizioni());
-});
-
-router.post('/riconciliazione/decisioni', validate({ body: z.object({
-  id: z.string().min(1).max(400),
-  azione: z.enum(['conferma-corrente', 'applica-proposta', 'mantieni-nota']),
-  revisioneAttesa: z.string().regex(/^[a-f0-9]{64}$/),
-}).strict() }), (req, res) => {
-  res.setHeader('Cache-Control', 'no-store');
-  res.json(decidiCondizioni(req.body as DecisioneCondizioniInput));
 });
 
 /** I negozi con il loro programma punti (null se non ne hanno). */

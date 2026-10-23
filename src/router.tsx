@@ -29,7 +29,6 @@ const ConfidenteDettaglioPage = pigra(() => import('./pages/ConfidenteDettaglioP
 const DomandePage = pigra(() => import('./pages/DomandePage'), 'DomandePage');
 const CalendarioPage = pigra(() => import('./pages/CalendarioPage'), 'CalendarioPage');
 const GuidaPage = pigra(() => import('./pages/GuidaPage'), 'GuidaPage');
-const RiconciliazioneCondizioniPage = pigra(() => import('./pages/RiconciliazioneCondizioniPage'), 'RiconciliazioneCondizioniPage');
 const DungeonPage = pigra(() => import('./pages/DungeonPage'), 'DungeonPage');
 const DungeonDettaglioPage = pigra(() => import('./pages/DungeonDettaglioPage'), 'DungeonDettaglioPage');
 const RichiestePage = pigra(() => import('./pages/RichiestePage'), 'RichiestePage');
@@ -76,7 +75,6 @@ export const router = createBrowserRouter([
       { path: 'partita', element: <PartitaPage /> },
       { path: 'confidenti/:chiave', element: <ConfidenteDettaglioPage /> },
       { path: 'guida', element: <GuidaPage /> },
-      { path: 'guida/condizioni/riconciliazione', element: <RiconciliazioneCondizioniPage /> },
       { path: 'guida/domande', element: <DomandePage /> },
       { path: 'guida/calendario', element: <CalendarioPage /> },
       { path: 'guida/dungeon', element: <DungeonPage /> },
