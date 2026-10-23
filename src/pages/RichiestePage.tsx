@@ -24,6 +24,7 @@ import { CampoRicerca } from '../components/shared/CampoRicerca';
 // R10-27: la scheda si mostra anche nel pannello sopra il diario; questo hook, fuori dal pannello, è quello di react-router-dom
 import { useSearchParams } from '../components/scheda/routerScheda';
 import { getRichieste, impostaStatoRichiesta } from '../services/api';
+import { PARAMETRO_ELEMENTO } from '../../shared/ricerca';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -206,13 +207,22 @@ export function RichiestePage({ soloChiave }: { soloChiave?: string } = {}) {
   });
   const filtriAttivi = !!q || !!dedalo || accettazione !== 'tutte' || completamento !== 'tutte';
 
-  if (soloChiave) {
-    const richiesta = d?.richieste.find((x) => x.chiave === soloChiave) ?? null;
+  // L11 B4 (R11-07/3): l'indirizzo `?elemento=<chiave>` apre la stessa vista anche come pagina (è la «casa» di una Richiesta nella ricerca
+  // globale); nel pannello il parametro è quello della scheda, che coincide con `soloChiave`
+  const solo = soloChiave ?? params.get(PARAMETRO_ELEMENTO) ?? undefined;
+  if (solo) {
+    const richiesta = d?.richieste.find((x) => x.chiave === solo) ?? null;
     return (
       <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
-        {d && (richiesta
-          ? <ul className="m-0 list-none p-0" aria-label="Richiesta"><Richiesta r={richiesta} partitaId={partitaId} onCambiata={aggiorna} onModifica={() => setModulo({ chiave: richiesta.chiave })} /></ul>
-          : <p className="m-0 text-sm text-text-muted" role="status">Questa Richiesta non è nel catalogo.</p>)}
+        {d && (
+          <div className="flex flex-col gap-2">
+            {/* fuori dal pannello l'elemento è una pagina: si può tornare all'elenco (il nome della cosa, mai «Torna») */}
+            {!soloChiave && <CollegamentoVisivo to="/guida/richieste" tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Tutte le Richieste" />}
+            {richiesta
+              ? <ul className="m-0 list-none p-0" aria-label="Richiesta"><Richiesta r={richiesta} partitaId={partitaId} onCambiata={aggiorna} onModifica={() => setModulo({ chiave: richiesta.chiave })} /></ul>
+              : <p className="m-0 text-sm text-text-muted" role="status">Questa Richiesta non è nel catalogo.</p>}
+          </div>
+        )}
         {modulo && <ModuloRichiesta chiave={modulo.chiave} onChiudi={() => setModulo(null)} onCambiata={() => dati.ricarica()} />}
       </PageState>
     );

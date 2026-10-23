@@ -32,7 +32,8 @@ import { TargaSuggerito } from '../components/shared/Suggerito';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
 import { AssetImg } from '../components/shared/AssetImg';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
-import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
+import { PulsanteVisivo, CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
+import { PARAMETRO_ELEMENTO } from '../../shared/ricerca';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { formattaYen, pagaTesto } from '../utils/letture';
@@ -149,14 +150,23 @@ export function AttivitaPage({ soloChiave }: { soloChiave?: string } = {}) {
   const lavoriVisibili = useMemo(() => (d?.lavori ?? []).filter((a) => !dote || haDoteAttivita(a, dote)), [d, dote]);
   if (params.get('scheda') === 'libri') return <Navigate to="/guida/libri" replace />;
   if (params.get('scheda') === 'film') return <Navigate to="/guida/film" replace />;
-  if (soloChiave) {
+  // L11 B4 (R11-07/3): l'indirizzo `?elemento=<chiave>` apre la stessa vista anche come pagina (è la «casa» di un'attività nella ricerca globale);
+  // nel pannello il parametro è quello della scheda, che coincide con `soloChiave`
+  const solo = soloChiave ?? params.get(PARAMETRO_ELEMENTO) ?? undefined;
+  if (solo) {
     // i videogiochi hanno la loro pagina nell'elenco, ma l'elemento citato si cerca fra tutti
-    const elemento = [...(d?.attivita ?? []), ...(d?.lavori ?? [])].find((x) => x.chiave === soloChiave) ?? null;
+    const elemento = [...(d?.attivita ?? []), ...(d?.lavori ?? [])].find((x) => x.chiave === solo) ?? null;
     return (
       <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
-        {d && (elemento
-          ? <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Attività"><Attivita a={elemento} apertaIniziale onCambiata={() => void dati.ricarica()} mappaAperta={conMappa === elemento.chiave} onMappa={() => setConMappa((x) => (x === elemento.chiave ? null : elemento.chiave))} /></ul>
-          : <p className="m-0 text-sm text-text-muted" role="status">Questa attività non è nel catalogo.</p>)}
+        {d && (
+          <div className="flex flex-col gap-2">
+            {/* fuori dal pannello l'elemento è una pagina: si può tornare all'elenco (il nome della cosa, mai «Torna») */}
+            {!soloChiave && <CollegamentoVisivo to="/guida/attivita" tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Tutte le attività" />}
+            {elemento
+              ? <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Attività"><Attivita a={elemento} apertaIniziale onCambiata={() => void dati.ricarica()} mappaAperta={conMappa === elemento.chiave} onMappa={() => setConMappa((x) => (x === elemento.chiave ? null : elemento.chiave))} /></ul>
+              : <p className="m-0 text-sm text-text-muted" role="status">Questa attività non è nel catalogo.</p>}
+          </div>
+        )}
       </PageState>
     );
   }

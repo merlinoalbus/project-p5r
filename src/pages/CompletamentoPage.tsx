@@ -10,6 +10,7 @@ import { useSearchParams } from 'react-router-dom';
 import { getCompletamento, impostaTrofeo } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import { useElementoDaIndirizzo } from '../hooks/useElementoDaIndirizzo';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
@@ -53,7 +54,7 @@ function Trofeo({ t, partitaId, onCambiato }: { t: TrofeoDto; partitaId: number 
     try { onCambiato(await impostaTrofeo(partitaId, t.chiave, ottenuto)); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
   };
   return (
-    <li className={`card flex min-w-0 flex-col gap-2 text-[13px] ${t.ottenuto ? 'opacity-60' : ''}`} style={{ borderLeft: `3px solid ${colore}` }}>
+    <li id={`elemento-${t.chiave}`} className={`card flex min-w-0 flex-col gap-2 text-[13px] ${t.ottenuto ? 'opacity-60' : ''}`} style={{ borderLeft: `3px solid ${colore}` }}>
       <div className="flex items-start gap-2.5">
         <span aria-hidden className="mt-0.5 shrink-0" style={{ color: colore }}><IconMedaglia size={28} /></span>
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -104,6 +105,8 @@ export function CompletamentoPage() {
   const [tipo, setTipo] = useState('');
   const [soloDaFare, setSoloDaFare] = useState(false);
   const d = dati.dati;
+  // L11 B4 (R11-07/3): `?elemento=<chiave>` (la «casa» di un trofeo nella ricerca globale) porta in vista il trofeo e lo evidenzia
+  useElementoDaIndirizzo(!!d && scheda === 'trofei', scheda);
   const trofeiVisibili = useMemo(() => (d?.trofei ?? []).filter((t) => (!tipo || t.tipo === tipo) && (!soloDaFare || !t.ottenuto)), [d, tipo, soloDaFare]);
   // dai dati correnti: la riga arriva dopo un `await`, e due spunte ravvicinate non devono annullarsi
   const aggiorna = (t: TrofeoDto) => dati.imposta((attuale) => { const trofei = attuale.trofei.map((x) => (x.chiave === t.chiave ? t : x)); return { ...attuale, trofei, ottenuti: trofei.filter((x) => x.ottenuto).length } as CompletamentoDto; });

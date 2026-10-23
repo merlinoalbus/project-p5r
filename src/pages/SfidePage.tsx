@@ -9,6 +9,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { getSfide } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import { useElementoDaIndirizzo } from '../hooks/useElementoDaIndirizzo';
 import { PageState } from '../components/shared/PageState';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
@@ -42,7 +43,7 @@ function SchedaBattaglie({ d }: { d: SfideDto }) {
         <Fonte url={b.fonte} />
       </section>
       {b.elenco.map((s) => (
-        <section key={s.chiave} className="card flex flex-col gap-1">
+        <section key={s.chiave} id={`elemento-${s.chiave}`} className="card flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2"><h2 className="m-0 text-[15px] font-semibold">{s.nomeIt ?? s.nome}</h2>{s.nomeIt && s.nomeIt !== s.nome && <span className="text-text-muted text-[12px]">({s.nome})</span>}{s.livelloConsigliato && <span className="chip">livello {s.livelloConsigliato}</span>}{!s.verificato && <span className="chip text-[11px]">da fonte secondaria</span>}</div>
           <VoceTesto titolo="Regole">{s.regole}</VoceTesto>
           <Elenco titolo="Nemici" voci={s.nemici} />
@@ -62,7 +63,7 @@ function SchedaBoss({ d }: { d: SfideDto }) {
   return (
     <div className="flex flex-col gap-2 text-[13px]">
       {d.bossSegreti.map((b) => (
-        <section key={b.chiave} className="card flex flex-col gap-1">
+        <section key={b.chiave} id={`elemento-${b.chiave}`} className="card flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">{(b.chiave === 'gemelle-custodi' ? ['caroline', 'justine'] : [b.chiave]).map((k) => <AssetImg key={k} nome={`personaggi/${k}`} alt="" decorativa className="h-16 w-auto object-contain" fallback={null} />)}<h2 className="m-0 text-[15px] font-semibold">{b.nome}</h2>{b.livelloConsigliato && <span className="chip">livello {b.livelloConsigliato}</span>}{!b.verificato && <span className="chip text-[11px]">da fonte secondaria</span>}</div>
           <VoceTesto titolo="Dove">{b.dove}</VoceTesto>
           <VoceTesto titolo="Quando">{b.quando}</VoceTesto>
@@ -139,6 +140,8 @@ export function SfidePage() {
   const [params, setParams] = useSearchParams();
   const scheda = (SCHEDE.some(([k]) => k === params.get('scheda')) ? params.get('scheda') : 'battaglie') as Scheda;
   const d = dati.dati;
+  // L11 B4 (R11-07/3): `?scheda=<scheda>&elemento=<chiave>` (la «casa» di una sfida nella ricerca globale) porta in vista la carta e la evidenzia
+  useElementoDaIndirizzo(!!d, scheda);
   return (
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
