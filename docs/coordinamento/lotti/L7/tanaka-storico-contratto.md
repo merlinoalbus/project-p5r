@@ -50,3 +50,9 @@ Tre riesami propri completati: callgraph e fonte066; percorsi di rimozione/ripri
 Riesame avversariale: **ST-F01** confronto «ulteriore» senza generazione; **ST-F02** prova non esposta nel consenso/preselezione; **ST-F03** rimozione normale senza Cestino. Tutti corretti e chiusi staticamente da Galaxy, PASS statico finale ricevuto. Non è un PASS globaleL7 o consensoTanaka.
 
 Baseline reale readonly05:29:23–27Z: main138/utente29,100/59 tabelle incluse quelle di sistema,7presenze,0fatti attivi,0Cestini con acquisti,FK0/0. Impronte e tuple solo in memoria privata. Rilascio e confronto dopo030 ancora necessari prima di chiudere STORICO.
+
+## Incidente del primo rilascio — ST-R01
+
+a2038c83, pipeline39906575442 SUCCESS. All'aggiornamento automatico il backend rifiuta le fotografie e p5s mostra502: il confronto dell'allowlist usava `articolo,catalogo,nome,negozio,negozioNome`, mentre l'ordine effettivo di `Object.keys().sort()` è `articolo,catalogo,negozio,negozioNome,nome`. Il solo letterale viene corretto, mantenendo esattamente gli stessi cinque campi e tutte le altre guardie. Soluzione e delta esatto approvati staticamente da Galaxy; il difetto era sfuggito anche al suo gate precedente, che non costituiva copertura runtime.
+
+Diagnostica readonly isolata:7foto, tutte le firme di prova/tuple valide, prezzi e generazione1 coerenti; solo il confronto errato delle chiavi era falso. Confronto completo05:43:32–36Z con baseline05:29: tutte100tabelle main e59utente preesistenti identiche, incluse quelle di sistema,FK0/0. Utente resta29: la030è annullata, associazioni assenti, bootstrap append-only durevole conservato. Nessun restore, cancellazione o rigenerazione della prova. STORICO resta aperto fino al correttivo pubblicato e al riscontro reale riuscito.

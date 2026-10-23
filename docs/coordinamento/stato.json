@@ -1,10 +1,10 @@
 {
   "obiettivo": "Completare i lotti L0–L11 della razionalizzazione sul ramo newreview e pubblicarli funzionanti su p5s",
-  "aggiornato": "2026-10-23T05:32:14Z",
+  "aggiornato": "2026-10-23T05:43:36Z",
   "cruscotto": {
     "adesso": {
-      "attivita": "L7-TANAKA-STORICO al rilascio: bootstrap/030, contributi congelati, generazioni/Cestino/import e prova nel consenso. PASS statico Galaxy dopoST-F01/02/03; controlli finali verdi.",
-      "stato": "Unico punto attivo STORICO; limite10min revocato. Baseline readonly138/29 acquisita, rilascio e conservazione dopo030 pendenti. Nessuna chiusura del punto o consensoTanaka.",
+      "attivita": "STORICO aperto: p5s502 al primo avvio. ST-R01 identificato nell'ordine dell'allowlist; correttivo minimo PASS statico Galaxy, senza rimuovere guardie. Pipeline39906575442 del primo rilascio riuscita.",
+      "stato": "Correttivo in pubblicazione. Readonly05:43: tutte159tabelle preesistenti identiche alla baseline,7foto integre conservate,utente29/030rollback,FK0/0. Nessun restore o punto successivo; limite10min revocato.",
       "responsabile": "Coordinatore implementa in sequenza; Galaxy verifica in sola lettura. Nessun esecutore parallelo attivo.",
       "prossimaConsegna": "Completare i gruppi residui dei lotti: Covo e distributori L5, pesca/condizioni L6 e catalogo/scambi L7; predisporre le decisioni concrete riservate all'utente. Nessun lotto dichiarato concluso per il solo rilascio137."
     },
@@ -399,7 +399,7 @@
       "nome": "Coordinatore — implementazione e rilascio",
       "fase": "be, fe, regia",
       "stato": "al lavoro",
-      "attivita": "Ripresa autorizzata: INV-L5 per singola identita corrente; in attesa del gate distinto prima di chiuderlo."
+      "attivita": "L7-TANAKA-STORICO: codice approvato staticamente e pubblicato a2038c83; seguono pipeline, aggiornamento automatico e conservazione readonly. Limite10min revocato."
     },
     {
       "nome": "Esecutore L5/L6",
@@ -429,7 +429,7 @@
       "nome": "Revisore indipendente",
       "fase": "validazione",
       "stato": "al lavoro",
-      "attivita": "Galaxy: gate readonly INV-L5. B01/B02 e statico A10 restano approvati."
+      "attivita": "Galaxy: PASS statico STORICO dopo chiusuraST-F01/02/03; gate finale del pubblicato e dei dati ancora necessario. Nessun test o writer."
     }
   ],
   "notaSessioniStoriche": "Le righe seguenti sono il registro del precedente team, non lo stato live delle sessioni o dei servizi. Nessuna sessione precedente è stata riaperta o gestita durante questo audit.",
@@ -538,8 +538,8 @@
     "Le future proposte che richiedono una scelta saranno presentate con istruttoria completa; non sono già approvate. Gli otto raccordi e la scelta tecnica sulle identità dataset/listini sono già decisi."
   ],
   "pianoAtomico": {
-    "nota": "Azioni individuali e fonti della sequenza. Requisiti integrali conservati come padri, esclusi dal conteggio delle azioni. Censimenti e codici di rilievo non equivalgono a bug o autorizzazioni. INV-SCOMP al gate: non dichiarata ancora completa.",
-    "limiteMinuti": 10,
+    "nota": "Azioni individuali e fonti della sequenza. Requisiti integrali conservati come padri, esclusi dal conteggio delle azioni. Censimenti e codici di rilievo non equivalgono a bug o autorizzazioni. INV-SCOMP approvato; resta da riscontrare la copertura delle singole consegne.",
+    "limiteMinuti": null,
     "coperturaMancante": [
       "INV-L5 approvato: identita correnti e azioni individuali censite; bonifica semantica ancora aperta.",
       "L6: riletti readonly201record correnti,200fonti identiche/1mutata;23esiti da-ricercare ora in lista per identita. Non sono23bug;147gruppi/201chiavi restano nei riferimenti.",
@@ -592,7 +592,7 @@
         "titolo": "Mostrare elenco sequenziale per ID con stato e fonte, una sola voce attiva",
         "stato": "incompleto",
         "fonte": "richieste-utente-aperte.md",
-        "criterio": "Padre aperto: INV-L5, INV-L7 e INV-SCOMP da completare con gate distinto."
+        "criterio": "Padre aperto per il riscontro della copertura delle consegne. I figli INV-L5, INV-L7 e INV-SCOMP sono già chiusi con gate distinti; i censimenti non equivalgono a bonifiche o consensi."
       },
       {
         "id": "A10-BASELINE",
@@ -656,7 +656,7 @@
         "titolo": "Proteggere spesa e rango dai cambi prezzo Tanaka",
         "stato": "in-corso",
         "fonte": "lotti/L7/tanaka-decisione-unitaria.md",
-        "criterio": "Codice completo PASS statico Galaxy dopoST-F01/02/03; tre riesami e typecheck63945/lint28604/build1052 exit0. Baseline readonly138/29 acquisita. Rilascio, conservazione e browser dopo030 necessari prima della chiusura; nessun consensoTanaka. Limite10min revocato."
+        "criterio": "Aperto per ST-R01: primo avvio502 nonostante CIverde. Correzione minima allowlist approvata staticamente,7foto e159tabelle preesistenti preservate nel confronto05:43. Completare correttivo/030/conservazione/browser e gate finale prima della chiusura. Nessun consensoTanaka, limite10min revocato."
       },
       {
         "id": "L7-TANAKA-SNAPSHOT",
