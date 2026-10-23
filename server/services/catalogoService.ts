@@ -22,7 +22,7 @@ import { contestoConversione, contestoRiga } from './condizioni/contestoConversi
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { HttpError, httpErrors } from '../utils/httpError.js';
 import { slug } from '../../shared/slug.js';
-import type { ElementoCatalogoDto, RiepilogoCatalogoDto, TipoCatalogo } from '../../shared/types.js';
+import { TIPI_CATALOGO, type ElementoCatalogoDto, type RiepilogoCatalogoDto, type TipoCatalogo } from '../../shared/types.js';
 import { normalizzaVociEffetto, type VoceEffetto } from '../../shared/effettiCatalogo.js';
 import { tracciamentoPerTipo } from '../../shared/attivita.js';
 import { articoloDelListino, lettureListiniCondivisi, listinoDelNegozio } from './listiniCondivisi.js';
@@ -356,6 +356,15 @@ export function elencaNascosti(tipo: TipoCatalogo, filtro: { negozio?: string } 
   const par = perNegozio ? [filtro.negozio] : [];
   const righe = prepared(`SELECT * FROM ${TABELLA[tipo]} WHERE nascosto = 1${perNegozio} ORDER BY ${per}`).all(...par) as Riga[];
   return righe.map((r) => dto(tipo, r));
+}
+
+/**
+ * R10-23/4: tutte le righe nascoste dalla guida, di ogni tipo del catalogo, in un solo elenco: è la sezione «Nascosti dalla guida» del
+ * Cestino (la vecchia pagina «Rimossi» ne è una vista). Si rimettono con lo stesso gesto di prima, `PUT /api/catalogo/:tipo/:chiave/nascosta`.
+ * Sola lettura; nasconde = flag `nascosto` (la riga resta nei dati), non è un'eliminazione.
+ */
+export function elencaTuttiNascosti(): ElementoCatalogoDto[] {
+  return TIPI_CATALOGO.flatMap((tipo) => elencaNascosti(tipo));
 }
 
 /** Una riga qualunque del catalogo (anche del seed), per il modulo di modifica. */

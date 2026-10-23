@@ -23,6 +23,7 @@ import { copiaDatabase, copiaIstanza, elencaDepositoBackup, ripristinaIstanzaDaD
 import { depositaCopia } from '../services/depositoService.js';
 import { anteprimaPacchettoDaDeposito, elencaDeposito, importaPacchettoDaDeposito, statoImportazione } from '../services/pacchettoGiocoService.js';
 import { elencoCestino, elencoCestinoUnificato, eliminaDalCestino, eliminaCestinoPrivato, ripristinaDalCestino, ripristinaCestinoPrivato, svuotaCestino, svuotaCestinoUnificato } from '../services/cestinoService.js';
+import { elencaTuttiNascosti } from '../services/catalogoService.js';
 import { paramsId } from '../schemas/compendio.js';
 
 const router = Router();
@@ -118,6 +119,11 @@ const queryCestino = z.object({ partite: z.literal('1').optional() }).strict();
 router.get('/cestino', validate({ query: queryCestino }), (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   res.json(req.query.partite === '1' ? elencoCestinoUnificato() : elencoCestino());
+});
+/** R10-23/4: la sezione «Nascosti dalla guida» del Cestino (ciò che era «Rimossi»): le righe nascoste di ogni tipo del catalogo. Sola lettura. */
+router.get('/cestino/nascosti', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(elencaTuttiNascosti());
 });
 const paramsCestinoPrivato = z.object({ uid: z.string().regex(/^[0-9a-f]{32}$/) }).strict();
 router.post('/cestino/partite/:uid/ripristina', validate({ params: paramsCestinoPrivato }), (req, res) => {
