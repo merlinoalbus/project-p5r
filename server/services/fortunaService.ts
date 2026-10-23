@@ -45,11 +45,45 @@ export function impostaFortuna(partitaId: number, dote: DoteChiave | null): Fort
       registraEvento(partitaId, 'fortuna', 'Fortuna spenta', prima.dote ? `Era accesa su ${nomeDote(prima.dote)}.` : '', { dote: prima.dote });
     } else {
       const oggi = (prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null }).data_gioco;
-      prepared('INSERT INTO utente.fortuna_partita (partita_id, dote, giorno, acceso_il) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id) DO UPDATE SET dote = excluded.dote, giorno = excluded.giorno, acceso_il = excluded.acceso_il')
+      prepared('INSERT INTO utente.fortuna_partita (partita_id, dote, giorno, acceso_il) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id) DO UPDATE SET dote = excluded.dote, giorno = excluded.giorno, acceso_il = excluded.acceso_il, da_voce = NULL, prima_json = NULL')
         .run(partitaId, dote, oggi, nowIso());
       registraEvento(partitaId, 'fortuna', `Fortuna accesa su ${nomeDote(dote)}`, oggi ? `Per il resto del giorno (${dataLeggibile(oggi)}): i punti di questa Dote valgono ×1,5.` : 'I punti di questa Dote valgono ×1,5 finché non la spegni.', { dote, giorno: oggi });
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
   })();
   return leggiFortuna(partitaId);
+}
+
+const giornoDellaPartita = (partitaId: number): string | null => (prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null }).data_gioco;
+
+/**
+ * La voce del Diario con la lettura della buona sorte (effetto «fortuna»): la spunta accende la Fortuna sulla Dote dell'effetto per il
+ * giorno di adesso, ricordando la voce e lo stato di prima. Gira nella transazione della spunta (`applicaEffettiVoce`).
+ */
+export function accendiFortunaDaVoce(partitaId: number, voceUid: string, dote: DoteChiave): void {
+  const prima = leggiFortuna(partitaId);
+  const riga = prepared('SELECT da_voce, prima_json FROM utente.fortuna_partita WHERE partita_id = ?').get(partitaId) as { da_voce: string | null; prima_json: string | null } | undefined;
+  // rispuntando la stessa voce lo stato «di prima» resta quello originale
+  const memoria = riga?.da_voce === voceUid ? riga.prima_json : prima.attiva && prima.dote ? JSON.stringify({ dote: prima.dote, giorno: prima.giorno }) : null;
+  const oggi = giornoDellaPartita(partitaId);
+  prepared('INSERT INTO utente.fortuna_partita (partita_id, dote, giorno, acceso_il, da_voce, prima_json) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(partita_id) DO UPDATE SET dote = excluded.dote, giorno = excluded.giorno, acceso_il = excluded.acceso_il, da_voce = excluded.da_voce, prima_json = excluded.prima_json')
+    .run(partitaId, dote, oggi, nowIso(), voceUid, memoria);
+  const testo = (prepared('SELECT azione FROM main.voce_giornata WHERE uid = ?').get(voceUid) as { azione: string } | undefined)?.azione;
+  registraEvento(partitaId, 'fortuna', `Fortuna accesa su ${nomeDote(dote)}`, `${testo ? `Dalla voce «${testo}». ` : ''}${oggi ? `Per il resto del giorno (${dataLeggibile(oggi)}): i punti di questa Dote valgono ×1,5.` : 'I punti di questa Dote valgono ×1,5 finché non la spegni.'}`, { dote, giorno: oggi, voce: voceUid });
+}
+
+/** Togliendo la spunta della voce che l'aveva accesa, la Fortuna torna com'era (accesa su un'altra Dote lo stesso giorno, oppure spenta). */
+export function spegniFortunaDaVoce(partitaId: number, voceUid: string): void {
+  const riga = prepared('SELECT dote, prima_json FROM utente.fortuna_partita WHERE partita_id = ? AND da_voce = ?').get(partitaId, voceUid) as { dote: string; prima_json: string | null } | undefined;
+  if (!riga) return;
+  let prima: { dote?: unknown; giorno?: unknown } | null;
+  try { prima = riga.prima_json ? JSON.parse(riga.prima_json) as { dote?: unknown; giorno?: unknown } : null; } catch { prima = null; }
+  const oggi = giornoDellaPartita(partitaId);
+  if (prima && eDote(prima.dote) && (prima.giorno ?? null) === oggi) {
+    prepared('UPDATE utente.fortuna_partita SET dote = ?, giorno = ?, da_voce = NULL, prima_json = NULL WHERE partita_id = ?').run(prima.dote, oggi, partitaId);
+    registraEvento(partitaId, 'fortuna', `Fortuna di nuovo su ${nomeDote(prima.dote)}`, 'Tolta la spunta della voce che l’aveva accesa su un’altra Dote.', { dote: prima.dote, giorno: oggi, voce: voceUid });
+  } else {
+    prepared('DELETE FROM utente.fortuna_partita WHERE partita_id = ?').run(partitaId);
+    registraEvento(partitaId, 'fortuna', 'Fortuna spenta', `Tolta la spunta della voce che l’aveva accesa su ${nomeDote(riga.dote)}.`, { dote: riga.dote, voce: voceUid });
+  }
 }

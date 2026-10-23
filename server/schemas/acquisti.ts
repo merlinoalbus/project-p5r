@@ -45,6 +45,7 @@ export const effettoVoce = z.discriminatedUnion('tipo',[
   z.object({tipo:z.literal('turno'),attivita:chiave,doti:z.array(doteNote).min(1).max(20).optional()}).strict(),
   z.object({tipo:z.literal('acquisto'),articolo:chiave,variante:dote.nullable(),fortuna:z.boolean().nullable().optional(),sostituisceDoti:z.array(uid).max(20).refine((x)=>new Set(x).size===x.length,'Gli effetti sostituiti devono essere distinti.')}).strict(),
   z.object({tipo:z.literal('pesca'),regola:z.literal(REGOLA_PESCA),attivita:z.literal(ATTIVITA_PESCA),sostituisceTurni:z.array(uid).max(20),sostituisceDoti:z.array(uid).max(20)}).strict(),
+  z.object({tipo:z.literal('fortuna'),dote}).strict(),
 ]);
 export const bodySalvaEffettiVoce = z.object({revisioneEffettiAttesa:revisione,effetti:z.array(z.object({uid:uid.nullable(),effetto:effettoVoce}).strict()).max(100)}).strict();
 export const bodyAnteprimaDecisioneEffettoVoce = z.object({operazioneId:uid,decisione:z.enum(['conferma','scarta']),effetto:effettoVoce.optional()}).strict();

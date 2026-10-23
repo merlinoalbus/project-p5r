@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ARTICOLO_AOJIRU, ORDINE_AOJIRU } from '../../../shared/acquisti';
-import { nomeDote, type DoteChiave } from '../../../shared/doti';
+import { DOTI_SOCIALI, nomeDote, type DoteChiave } from '../../../shared/doti';
 import type { EffettoVoce, RichiestaSalvaEffettiVoce } from '../../../shared/effettiVoce';
 import type { ElenchiAzioneDto } from '../../types';
 import type { CampiStrutturati } from '../../utils/azioneStrutturata';
@@ -81,17 +81,22 @@ export function EditorEffettiVoce({ valore, elenchi, onCambia }: { valore: Campi
   return <div className="flex min-w-0 flex-col gap-2 text-[13px]">
     <strong>Effetti della voce</strong>
     {!righe.length && <p className="m-0">Nessun effetto configurato.</p>}
-    <ul className="m-0 flex list-none flex-col gap-2 p-0">{righe.map((r, i) => r.effetto.tipo === 'acquisto' || r.effetto.tipo === 'pesca' ? <li key={r.uid ?? `nuovo-${i}`} className="flex flex-col gap-2 rounded border border-border p-2">
-      <div className="flex flex-wrap items-center gap-2"><strong>Effetto {i + 1}: {r.effetto.tipo === 'pesca' ? 'sessione di pesca' : 'acquisto'}</strong><button type="button" className="btn btn-ghost touch" onClick={() => togli(i)}>Togli</button><button type="button" className="btn btn-ghost touch" disabled={i === 0} onClick={() => sposta(i, -1)}>Su</button><button type="button" className="btn btn-ghost touch" disabled={i === righe.length - 1} onClick={() => sposta(i, 1)}>Giù</button></div>
-      {r.effetto.tipo === 'pesca' ? <EditorEffettoPescaVoce effetto={r.effetto} righe={righe} onCambia={e => cambia(i, e)} /> : <CampiAcquistoEffetto effetto={r.effetto} righe={righe} onCambia={(e) => cambia(i, e)} />}
+    <ul className="m-0 flex list-none flex-col gap-2 p-0">{righe.map((r, i) => r.effetto.tipo === 'acquisto' || r.effetto.tipo === 'pesca' || r.effetto.tipo === 'fortuna' ? <li key={r.uid ?? `nuovo-${i}`} className="flex flex-col gap-2 rounded border border-border p-2">
+      <div className="flex flex-wrap items-center gap-2"><strong>Effetto {i + 1}: {r.effetto.tipo === 'pesca' ? 'sessione di pesca' : r.effetto.tipo === 'fortuna' ? 'Fortuna di Chihaya' : 'acquisto'}</strong><button type="button" className="btn btn-ghost touch" onClick={() => togli(i)}>Togli</button><button type="button" className="btn btn-ghost touch" disabled={i === 0} onClick={() => sposta(i, -1)}>Su</button><button type="button" className="btn btn-ghost touch" disabled={i === righe.length - 1} onClick={() => sposta(i, 1)}>Giù</button></div>
+      {r.effetto.tipo === 'pesca' ? <EditorEffettoPescaVoce effetto={r.effetto} righe={righe} onCambia={e => cambia(i, e)} />
+        : r.effetto.tipo === 'fortuna' ? <>
+          <Selettore etichetta="Dote della Fortuna" valore={r.effetto.dote} opzioni={DOTI_SOCIALI.map((d) => ({ chiave: d.chiave, nome: d.nome }))} onCambia={(d) => cambia(i, { tipo: 'fortuna', dote: d as DoteChiave })} />
+          <p className="m-0 text-[12px] text-text-secondary">Spuntando la voce la Fortuna si accende su questa Dote per il resto del giorno; togliendo la spunta si spegne.</p>
+        </>
+          : <CampiAcquistoEffetto effetto={r.effetto} righe={righe} onCambia={(e) => cambia(i, e)} />}
     </li> : <RigaEffettoVoceLegacy key={r.uid ?? `nuovo-${i}`} effetto={r.effetto} numero={i + 1} elenchi={elenchi} onCambia={(e) => cambia(i, e)} onTogli={() => togli(i)} onSposta={(verso) => sposta(i, verso)} primo={i === 0} ultimo={i === righe.length - 1} />)}</ul>
-    {righe.length < 100 && <div className="flex flex-wrap items-end gap-2"><Selettore etichetta="Effetto da aggiungere" valore={tipoNuovo} opzioni={[{ chiave: 'dote', nome: 'Dote' }, { chiave: 'lettura', nome: 'Lettura o gioco' }, { chiave: 'turno', nome: 'Turno di attività' }, { chiave: 'acquisto', nome: 'Acquisto Aojiru' }, { chiave: 'pesca', nome: 'Sessione di pesca osservata' }]} onCambia={(t) => setTipoNuovo(t as EffettoVoce['tipo'])} />
+    {righe.length < 100 && <div className="flex flex-wrap items-end gap-2"><Selettore etichetta="Effetto da aggiungere" valore={tipoNuovo} opzioni={[{ chiave: 'dote', nome: 'Dote' }, { chiave: 'lettura', nome: 'Lettura o gioco' }, { chiave: 'turno', nome: 'Turno di attività' }, { chiave: 'acquisto', nome: 'Acquisto Aojiru' }, { chiave: 'pesca', nome: 'Sessione di pesca osservata' }, { chiave: 'fortuna', nome: 'Fortuna di Chihaya' }]} onCambia={(t) => setTipoNuovo(t as EffettoVoce['tipo'])} />
       <button type="button" className="btn btn-secondary touch" onClick={() => {
-        const effetto: EffettoVoce = tipoNuovo === 'pesca' ? { tipo: 'pesca', regola: REGOLA_PESCA, attivita: ATTIVITA_PESCA, sostituisceTurni: [], sostituisceDoti: [] } : tipoNuovo === 'acquisto' ? { tipo: 'acquisto', articolo: ARTICOLO_AOJIRU, variante: null, sostituisceDoti: [] } : tipoNuovo === 'lettura' ? { tipo: 'lettura', categoria: 'libro', chiave: '', almeno: null } : tipoNuovo === 'turno' ? { tipo: 'turno', attivita: '' } : { tipo: 'dote', dote: 'fascino', note: 2 };
+        const effetto: EffettoVoce = tipoNuovo === 'fortuna' ? { tipo: 'fortuna', dote: 'coraggio' } : tipoNuovo === 'pesca' ? { tipo: 'pesca', regola: REGOLA_PESCA, attivita: ATTIVITA_PESCA, sostituisceTurni: [], sostituisceDoti: [] } : tipoNuovo === 'acquisto' ? { tipo: 'acquisto', articolo: ARTICOLO_AOJIRU, variante: null, sostituisceDoti: [] } : tipoNuovo === 'lettura' ? { tipo: 'lettura', categoria: 'libro', chiave: '', almeno: null } : tipoNuovo === 'turno' ? { tipo: 'turno', attivita: '' } : { tipo: 'dote', dote: 'fascino', note: 2 };
         imposta([...righe, { uid: null, effetto }]);
       }}>Aggiungi l’effetto scelto</button>
     </div>}
     {errore && <p role="alert" className="m-0 text-error">{errore}</p>}
-    <p className="m-0 text-[12px] text-text-secondary">Su una voce già fatta, gli effetti aggiunti o modificati diventano proposte da rivedere in «Da applicare». Le ricevute della spunta rimangono distinte dalla configurazione corrente.</p>
+    <p className="m-0 text-[12px] text-text-secondary">Su una voce già fatta, gli effetti aggiunti o modificati compaiono come pulsante «Applica» sulla voce. Le ricevute della spunta rimangono distinte dalla configurazione corrente.</p>
   </div>;
 }

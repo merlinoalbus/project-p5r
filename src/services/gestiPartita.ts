@@ -47,6 +47,7 @@ const effetto = z.discriminatedUnion('tipo', [
   z.object({ tipo: z.literal('turno'), attivita: chiave, doti: z.array(doteNote).min(1).max(20).optional() }).strict(),
   z.object({ tipo: z.literal('acquisto'), articolo: chiave, variante: z.enum(CHIAVI_DOTI).nullable(), fortuna: z.boolean().nullable().optional(), sostituisceDoti: z.array(uid).max(20).refine(v => new Set(v).size === v.length) }).strict(),
   schemaEffettoGestoPesca,
+  z.object({ tipo: z.literal('fortuna'), dote: z.enum(CHIAVI_DOTI) }).strict(),
 ]);
 const decisioneEffetto = z.object({ operazioneId: uid, decisione: z.enum(['conferma','scarta']), effetto: effetto.optional(), revisionePropostaAttesa: token }).strict()
   .refine(v => v.decisione === 'conferma' ? v.effetto !== undefined : v.effetto === undefined);

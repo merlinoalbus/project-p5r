@@ -64,12 +64,12 @@ function riferimentoDi(r: RigaVoce): RiferimentoAzioneDto | null {
 /** Proiezione di compatibilità dei soli tre tipi legacy (dote, lettura, turno) della fonte unica `voce_effetto`: la fonte completa resta
  *  nel DTO (`effettiVoce`). `produce_json` non si legge più (un solo punto di modifica: l'editor degli effetti). */
 function produceDi(fonte: StatoEffettiVoceDto): EffettoAzione[] {
-  return fonte.effetti.flatMap(e => e.effetto.tipo === 'acquisto'||e.effetto.tipo==='pesca' ? [] : [e.effetto]);
+  return fonte.effetti.flatMap(e => e.effetto.tipo === 'acquisto'||e.effetto.tipo==='pesca'||e.effetto.tipo==='fortuna' ? [] : [e.effetto]);
 }
 /** La frase di ogni effetto della fonte unica, anche acquisto e pesca, con i nomi degli elementi («Il gioco dà: …»). */
 function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione): string[] {
   return fonte.effetti.map(({ effetto: e }) => {
-    if (e.tipo === 'pesca') return descriviEffettoVoce(e);
+    if (e.tipo === 'pesca' || e.tipo === 'fortuna') return descriviEffettoVoce(e);
     if (e.tipo === 'acquisto') {
       const nome = (prepared('SELECT COALESCE(nome_it, nome) AS nome FROM articolo WHERE chiave = ?').get(e.articolo) as { nome: string } | undefined)?.nome;
       return nome ? descriviEffettoVoce(e).replace(e.articolo, nome) : descriviEffettoVoce(e);

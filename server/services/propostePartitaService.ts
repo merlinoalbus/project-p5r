@@ -235,6 +235,8 @@ export function beneficiPescaDto(p:number,id:string):import('../../shared/pesca.
 export function creaPropostaEffettoStorico(partita:number,voce:string,effetto:string,precedente?:EffettoVoceDto):void {
   const e = prepared('SELECT dati_json,ordine FROM main.voce_effetto WHERE voce_uid=? AND uid=?').get(voce,effetto) as {dati_json:string;ordine:number}|undefined;
   if (!e || !prepared('SELECT 1 FROM utente.spunta_voce_partita WHERE partita_id=? AND voce_uid=?').get(partita,voce)) return;
+  // la Fortuna vale per il giorno della spunta: su una spunta già fatta non c'è niente da applicare dopo
+  if (leggiJsonRegistro<{tipo?:string}>(e.dati_json,'configurazione effetto').tipo === 'fortuna') return;
   const rivendicato=(prepared("SELECT dati_json FROM main.voce_effetto WHERE voce_uid=? AND tipo='acquisto'").all(voce) as Array<{dati_json:string}>).filter((r)=>{
     const acquisto=normalizzaEffettoVoce(leggiJsonRegistro(r.dati_json,'raccordo canonico'));
     if(!acquisto||acquisto.tipo!=='acquisto')throw httpErrors.conflict('raccordo-canonico-incoerente','La configurazione di acquisto non è riconoscibile.');
