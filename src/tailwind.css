@@ -1162,8 +1162,8 @@
   .home-griglia--a-schede .home-oggi, .home-griglia--a-schede .home-mappa { grid-area: contenuto; }
   .home-griglia--a-schede .home-mappa > :last-child { height: min(62dvh, 560px); min-height: 280px; }
   /* la disposizione che riempie la schermata (da 1024 × 1150): la guida del giorno in un'area interna alta almeno 400 px, la mappa fino in fondo */
-  /* R10-24: la disposizione che riempie è una classe (`--riempi`) e non più solo una soglia: la mette `OggiPartita` quando lo chiede la
-     Home (da 1024 × 1150) o la Partita (sempre, da 768 px in su; sotto le schede non riempiono) */
+  /* R10-24: la disposizione che riempie è una classe (`--riempi`) e non più solo una soglia: la mette `OggiHome` da 1024 × 1150, dove
+     non ci sono le schede */
   @media (min-width: 768px) {
     .home-griglia--riempi { grid-template-rows: auto minmax(0, 1fr); flex: 1 1 auto; min-height: 0; align-items: stretch; }
     .home-griglia--riempi .home-oggi { min-height: 0; }
@@ -1176,14 +1176,6 @@
   @media (min-width: 1024px) and (min-height: 1150px) {
     .home-griglia--riempi .home-oggi { min-height: 400px; }
   }
-  /* senza la scheda della partita (la scheda «Oggi» della Partita) non c'è la riga alta: guida e mappa sono l'unica riga */
-  .home-griglia--senza-testa { grid-template-areas: "oggi" "mappa"; }
-  @media (min-width: 768px) {
-    .home-griglia--senza-testa { grid-template-areas: "oggi mappa"; }
-    .home-griglia--senza-testa.home-griglia--riempi { grid-template-rows: minmax(0, 1fr); }
-    .home-griglia--senza-testa.home-griglia--mappa-chiusa { grid-template-areas: "oggi"; }
-  }
-  .home-griglia--senza-testa.home-griglia--a-schede { grid-template-areas: "schede" "contenuto"; }
 
   /* ---- Mappa della Home a scomparsa (richiesta dell'utente, 2026-09-30) ----
      «Nascondi la mappa» la chiude in una linguetta sul bordo destro e la sua parte di pagina va a carta e guida: da 1024 px

@@ -1,5 +1,5 @@
 // ============================================================
-// HomePage — cruscotto: la scheda della partita compatta sopra `OggiPartita` (guida del giorno e mappa navigabile); accessi rapidi solo senza partita
+// HomePage — cruscotto: la scheda della partita compatta sopra `OggiHome` (guida del giorno e mappa navigabile); accessi rapidi solo senza partita
 // ============================================================
 //
 // Guida e mappa non sono più composte qui: la Home incorpora lo stesso componente della scheda «Oggi» della Partita (R10-24). La scheda
@@ -7,7 +7,7 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { OggiPartita } from '../components/partita/OggiPartita';
+import { OggiHome } from '../components/partita/OggiHome';
 import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
@@ -52,7 +52,7 @@ function AccessiRapidi() {
   );
 }
 
-/** Cruscotto della partita attiva: la scheda della partita (stella, Doti, Scorta, Arcani) sopra `OggiPartita`, lo stesso componente della
+/** Cruscotto della partita attiva: la scheda della partita (stella, Doti, Scorta, Arcani) sopra `OggiHome`, che compone gli stessi pezzi della
  * scheda «Oggi» della Partita, con la stessa guida, la stessa mappa e lo stesso centro. */
 function HomeConPartita({ partita }: { partita: PartitaDto }) {
   const doti = useCarica(() => getDoti(partita.id), [partita.id]);
@@ -122,8 +122,8 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
       </div>
   );
 
-  // R10-24: la Home incorpora lo stesso componente della scheda «Oggi» della Partita, con la scheda della partita come testa
-  return <OggiPartita partita={partita} testa={testa} />;
+  // R10-24: la Home compone gli stessi pezzi della scheda «Oggi» della Partita (stessa guida, stessa mappa, stesso centro) con la scheda della partita come testa
+  return <OggiHome partita={partita} testa={testa} />;
 }
 
 /** Pagina iniziale con lo stato della partita attiva e gli accessi rapidi. */
