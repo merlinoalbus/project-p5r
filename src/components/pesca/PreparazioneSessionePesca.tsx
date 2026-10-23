@@ -154,7 +154,7 @@ export function PreparazioneSessionePesca({ partitaId, giorno, fascia, fonte, on
           ...((stato?.contatore.quoteNonRappresentate ?? 0) > 0 ? [{ chiave: 'storico', nome: 'Quota già compresa nel vecchio conteggio', dettaglio: 'Nessun incremento' }] : [])]}
         onCambia={v => { invalida(); setSceltaTurno(v); }} />}
       {sessione && !turno() && <p role="alert" className="m-0 text-warning">Il turno originale non è disponibile o è stato revocato. Il collegamento non ricrea il passato.</p>}
-      <OsservazionePescaForm valore={osservazione} disabilitato={disabilitato || !!sessione} onCambia={o => { invalida(); setOsservazione(o); }} />
+      <OsservazionePescaForm partitaId={sessione ? undefined : partitaId} valore={osservazione} disabilitato={disabilitato || !!sessione} onCambia={o => { invalida(); setOsservazione(o); }} />
       {!!sessione && <p className="m-0 text-text-secondary">Le osservazioni della visita collegata sono conservate. Per correggerle usa la revisione della sessione nel registro pesca.</p>}
     </fieldset>
     {!anteprima && !confermato && <button type="button" className="btn btn-secondary touch self-start" disabled={disabilitato || !momentoPescaCompleto(momento) || !turno() || stato?.regola.stato !== 'collegata'} onClick={() => void prepara()}>Rivedi questa visita</button>}

@@ -1,5 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { OsservazionePesca, SpeciePesca } from '../../../shared/pesca';
+import { getFortuna } from '../../services/api';
+import { useCarica } from '../../hooks/useCarica';
+import { usePartitaStore } from '../../stores/partitaStore';
+import { fortunaDelConsumo } from '../../utils/fortunaConsumo';
 import { Selettore } from '../shared/Selettore';
 import { MeteoOsservatoPesca, NumeroOsservatoPesca, RangoPeriziaOsservato, SceltaOsservata } from './CampiPesca';
 
@@ -9,11 +13,20 @@ const SPECIE: Array<{ chiave: SpeciePesca; nome: string }> = [
 ];
 
 /** Dati osservati della visita: nessun premio, cattura o rango è dedotto dal contatore. */
-export function OsservazionePescaForm({ valore: o, onCambia, disabilitato = false }: {
+export function OsservazionePescaForm({ valore: o, onCambia, disabilitato = false, partitaId }: {
   valore: OsservazionePesca; onCambia: (v: OsservazionePesca) => void; disabilitato?: boolean;
+  /** Con la partita, la Fortuna della Perizia si legge dal suo stato (`leggiFortuna`) invece di chiederla: per una nuova visita. */
+  partitaId?: number;
 }) {
   const [specie, setSpecie] = useState<SpeciePesca | ''>('');
   const cambia = (v: Partial<OsservazionePesca>) => onCambia({ ...o, ...v });
+  const fortuna = useCarica(() => (partitaId === undefined ? Promise.resolve(null) : getFortuna(partitaId)), [partitaId]);
+  const oggi = usePartitaStore((s) => (partitaId !== undefined && s.attiva?.id === partitaId ? s.attiva.dataGioco : null));
+  // La Fortuna di quel giorno sulla Perizia: dallo stato della partita. Un valore già dichiarato non si riscrive mai.
+  const dalloStato = partitaId === undefined ? null : fortunaDelConsumo(fortuna.dati, o.fortuna.giorno, 'perizia', oggi);
+  useEffect(() => {
+    if (!disabilitato && partitaId !== undefined && o.fortuna.attiva === null && dalloStato !== null) onCambia({ ...o, fortuna: { ...o.fortuna, attiva: dalloStato } });
+  }, [disabilitato, partitaId, o, dalloStato, onCambia]);
   return <fieldset className="m-0 flex min-w-0 flex-col gap-3 border-0 p-0" disabled={disabilitato}>
     <div className="grid min-w-0 gap-3 sm:grid-cols-2">
       <RangoPeriziaOsservato valore={o.rangoPeriziaOsservato} disabilitato={disabilitato}
@@ -59,9 +72,11 @@ export function OsservazionePescaForm({ valore: o, onCambia, disabilitato = fals
       <Selettore etichetta="Beneficio Perizia effettivamente riconosciuto" valore={o.perizia.esito} disabilitato={disabilitato}
         opzioni={[{ chiave: 'ignota', nome: 'Non lo so' }, { chiave: 'ricevuta', nome: 'Ricevuto' }, { chiave: 'non-ricevuta', nome: 'Non ricevuto' }]}
         onCambia={v => cambia({ perizia: { esito: v as OsservazionePesca['perizia']['esito'] } })} />
-      <SceltaOsservata etichetta="Fortuna sulla Perizia attiva nella data della visita" valore={o.fortuna.attiva} disabilitato={disabilitato}
-        onCambia={attiva => cambia({ fortuna: { ...o.fortuna, attiva } })} />
+      {partitaId === undefined
+        ? <SceltaOsservata etichetta="Fortuna sulla Perizia attiva nella data della visita" valore={o.fortuna.attiva} disabilitato={disabilitato}
+          onCambia={attiva => cambia({ fortuna: { ...o.fortuna, attiva } })} />
+        : <p className="m-0 text-[13px]">Fortuna sulla Perizia in quel giorno: <strong>{o.fortuna.attiva === null ? 'non nota (la partita non la ricorda)' : o.fortuna.attiva ? 'accesa' : 'non accesa'}</strong>. La leggo dalla partita, non devi dirmela.</p>}
     </div>
-    <p className="m-0 text-[12px] text-text-secondary">Una cattura non prova il beneficio finale. Doti, yen e punti pesca richiedono una proposta e una decisione esplicita; nessun saldo cambia con questa sola dichiarazione.</p>
+    <p className="m-0 text-[12px] text-text-secondary">Una cattura non prova il beneficio finale. Le Doti si applicano dal pulsante sulla voce, gli yen della quota sono solo un promemoria da cambiare a mano; nessun saldo cambia con questa sola dichiarazione.</p>
   </fieldset>;
 }
