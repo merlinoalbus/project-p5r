@@ -219,7 +219,7 @@ export function riconciliaBeneficiCausa(partita: number, causa: Causa): void {
     if (aperta && aperta.delta === s.differenza && aperta.revisione_causa === firma && aperta.ciclo === ciclo && s.differenza !== 0) continue;
     if (aperta) prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='non-piu-dovuta',decisa_il=? WHERE id=? AND stato='aperta'").run(adesso,aperta.id);
     if (s.differenza === 0) continue;
-    if (rs.some((r) => r.stato === 'scartata' && r.chiusa_da === 'utente' && r.ciclo === ciclo && r.revisione_causa === firma && r.delta === s.differenza)) continue;
+    if (rs.some((r) => r.stato === 'scartata' && (r.chiusa_da === 'utente' || r.motivo_chiusura === 'gia-nel-saldo') && r.ciclo === ciclo && r.revisione_causa === firma && r.delta === s.differenza)) continue;
     const dati = {beneficio:t,fortunaIgnota:t.fortunaIgnota === true};
     prepared(`INSERT INTO utente.da_applicare(uid,partita_id,voce_uid,causa_tipo,causa_chiave,tipo,chiave,unita,ciclo,revisione_causa,delta,dati_json,motivo,verifica,creata_il)
       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(nuovoUid(),partita,causa.tipo === 'voce' ? causa.chiave.split(':')[0] : null,causa.tipo,causa.chiave,t.tipo,t.chiave,t.tipo === 'yen' ? 'yen' : t.tipo==='punti-pesca'?'punti-pesca':'punti-interni',ciclo,firma,s.differenza,jsonCanonico(dati),s.dovuto === 0 ? 'Proposta inversa: ultima fonte rimossa.' : t.motivo,t.storica ? 'da-dichiarare' : 'non-conteggiata',adesso);
