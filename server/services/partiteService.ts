@@ -511,25 +511,62 @@ function scriviIstantanea(partitaId: number, personaId: number, i: Istantanea, a
     .run(partitaId, personaId, i.livello, i.bonus.forza, i.bonus.magia, i.bonus.resistenza, i.bonus.agilita, i.bonus.fortuna, JSON.stringify(i.skillIds), i.trattoSkillId, i.carica ? 1 : 0, ...colonneOsservate(i.osservate), adesso);
 }
 
+/** Il testo dei bonus dell'esemplare per l'evento di registrazione («con bonus FR +1 MA +2»), vuoto se sono tutti zero. */
+function testoBonusRegistrazione(bonus: Statistiche): string {
+  const dati = CHIAVI_STATISTICHE.filter((k) => bonus[k] !== 0);
+  return dati.length ? ` con bonus ${dati.map((k) => `${SIGLE[k]} ${bonus[k] > 0 ? '+' : ''}${bonus[k]}`).join(' ')}` : '';
+}
+
+/**
+ * R10-19 (L8 P2): l'UNICA strada con cui una Persona entra o si aggiorna nel compendio della partita. La usano la registrazione a mano
+ * (Compendio personale), l'aggiunta alla scorta (anche il risultato di fusione e del Velluto), «Registra» dell'esemplare in scorta e,
+ * con L8, la cattura. Va chiamata dentro la transazione di chi la usa: l'evento nello storico si scrive una volta, qui.
+ *  - con `istantanea` (esemplare in scorta, valori reali): sostituisce l'istantanea COMPLETA (livello, bonus, skill, tratto, carica,
+ *    valori osservati); l'evento dice «registrata» la prima volta e «aggiornata» le volte dopo;
+ *  - senza istantanea: inserisce solo se serve (livello indicato, nessun bonus né skill) e NON tocca un'istantanea che c'è già; un
+ *    `livello` esplicito su una Persona già registrata aggiorna solo il livello, mai lo azzera (prima il PUT lo riportava a NULL).
+ */
+export function registraPersona(partitaId: number, personaId: number, opz: { istantanea?: Istantanea; livello?: number | null; dati?: Record<string, unknown> } = {}): { nuova: boolean; aggiornata: boolean } {
+  const persona = prepared('SELECT nome FROM persona WHERE id = ?').get(personaId) as { nome: string } | undefined;
+  if (!persona) throw httpErrors.notFound('persona-non-trovata', `La Persona ${personaId} non esiste.`);
+  const adesso = nowIso();
+  const gia = prepared('SELECT livello_registrato FROM compendio_partita WHERE partita_id = ? AND persona_id = ? AND registrata = 1').get(partitaId, personaId) as { livello_registrato: number | null } | undefined;
+  if (opz.istantanea) {
+    const i = opz.istantanea;
+    scriviIstantanea(partitaId, personaId, i, adesso);
+    registraEvento(partitaId, 'compendio-registrata', `${t('persona', persona.nome)} ${gia ? 'aggiornata' : 'registrata'} nel compendio`, `Al livello ${i.livello}${testoBonusRegistrazione(i.bonus)}.`,
+      { livello: i.livello, bonus: i.bonus, skillIds: i.skillIds, ...opz.dati }, personaId);
+    return { nuova: !gia, aggiornata: !!gia };
+  }
+  if (gia) {
+    if (opz.livello != null && opz.livello !== gia.livello_registrato) {
+      prepared('UPDATE compendio_partita SET livello_registrato = ?, updated_at = ? WHERE partita_id = ? AND persona_id = ?').run(opz.livello, adesso, partitaId, personaId);
+    }
+    return { nuova: false, aggiornata: false };
+  }
+  registraEvento(partitaId, 'compendio-registrata', `${t('persona', persona.nome)} registrata nel compendio`, opz.livello ? `Al livello ${opz.livello}.` : '', { livello: opz.livello ?? null, ...opz.dati }, personaId);
+  // Una riga di compendio può esistere non registrata: si completa senza toccare ciò che c'è (bonus, skill, valori osservati).
+  prepared(`INSERT INTO compendio_partita (partita_id, persona_id, registrata, livello_registrato, bonus_forza, bonus_magia, bonus_resistenza, bonus_agilita, bonus_fortuna, skill_ids_json, tratto_skill_id, carica, updated_at)
+    VALUES (?, ?, 1, ?, 0, 0, 0, 0, 0, NULL, NULL, 0, ?)
+    ON CONFLICT(partita_id, persona_id) DO UPDATE SET registrata = 1, livello_registrato = COALESCE(excluded.livello_registrato, compendio_partita.livello_registrato), updated_at = excluded.updated_at`)
+    .run(partitaId, personaId, opz.livello ?? null, adesso);
+  return { nuova: true, aggiornata: false };
+}
+
 /**
  * Registra o toglie a mano una Persona dal compendio della partita (404 per partita o Persona inesistenti). Togliere cancella
- * la riga; registrare scrive solo il livello (una riga nuova nasce senza bonus né skill) e, la prima volta, l'evento nello
- * storico. Restituisce il compendio aggiornato.
+ * la riga; registrare passa da `registraPersona` (solo il livello, senza bonus né skill, e senza toccare una registrazione che c'è
+ * già). Restituisce il compendio aggiornato.
  */
 export function aggiornaCompendio(partitaId: number, personaId: number, dati: { registrata: boolean; livelloRegistrato?: number | null }): CompendioPartitaDto[] {
   rigaPartita(partitaId);
-  const persona = prepared('SELECT nome FROM persona WHERE id = ?').get(personaId) as { nome: string } | undefined;
-  if (!persona) throw httpErrors.notFound('persona-non-trovata', `La Persona ${personaId} non esiste.`);
-  const giaRegistrata = !!prepared('SELECT 1 FROM compendio_partita WHERE partita_id = ? AND persona_id = ? AND registrata = 1').get(partitaId, personaId);
+  if (!prepared('SELECT 1 FROM persona WHERE id = ?').get(personaId)) throw httpErrors.notFound('persona-non-trovata', `La Persona ${personaId} non esiste.`);
   return getDb().transaction(() => {
     if (!dati.registrata) {
       prepared('DELETE FROM compendio_partita WHERE partita_id = ? AND persona_id = ?').run(partitaId, personaId);
     } else {
-      if (!giaRegistrata) registraEvento(partitaId, 'compendio-registrata', `${t('persona', persona.nome)} registrata nel compendio`, dati.livelloRegistrato ? `Al livello ${dati.livelloRegistrato}.` : '', { livello: dati.livelloRegistrato ?? null }, personaId);
-      // Registrazione manuale (senza esemplare in scorta): istantanea di livello, senza bonus né skill (l'evocazione usa le innate).
-      prepared(`INSERT INTO compendio_partita (partita_id, persona_id, registrata, livello_registrato, bonus_forza, bonus_magia, bonus_resistenza, bonus_agilita, bonus_fortuna, skill_ids_json, tratto_skill_id, carica, updated_at)
-        VALUES (?, ?, 1, ?, 0, 0, 0, 0, 0, NULL, NULL, 0, ?)
-        ON CONFLICT(partita_id, persona_id) DO UPDATE SET registrata = 1, livello_registrato = excluded.livello_registrato, updated_at = excluded.updated_at`).run(partitaId, personaId, dati.livelloRegistrato ?? null, nowIso());
+      // Registrazione manuale (senza esemplare in scorta): livello, senza bonus né skill (l'evocazione usa le innate).
+      registraPersona(partitaId, personaId, { livello: dati.livelloRegistrato ?? null });
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
     return compendioPartita(partitaId);
@@ -671,12 +708,10 @@ export function aggiungiPosseduta(partitaId: number, personaId: number, dati: Da
     skillIds.forEach((sid, i) => prepared('INSERT INTO persona_posseduta_skill (posseduta_id, slot, skill_id) VALUES (?, ?, ?)').run(id, i + 1, sid));
     const giaRegistrata = !!prepared('SELECT 1 FROM compendio_partita WHERE partita_id = ? AND persona_id = ? AND registrata = 1').get(partitaId, personaId);
     registraEvento(partitaId, 'persona-aggiunta', `${t('persona', p.nome)} (${t('arcana', p.arcana)}) aggiunta alla scorta`, `Livello ${livello}${dati.origine ? ` · ${dati.origine}` : ''}.`, { livello, skillIds, origine: dati.origine ?? null }, personaId);
-    // Ottenere una Persona la registra nel compendio (come in gioco): l'istantanea è lo stato con cui entra in scorta.
-    // L'evocazione dal Registro non tocca l'istantanea (ne è la copia).
-    if (!dati.daRegistro) {
-      if (!giaRegistrata) registraEvento(partitaId, 'compendio-registrata', `${t('persona', p.nome)} registrata nel compendio`, `Al livello ${livello}.`, { livello }, personaId);
-      scriviIstantanea(partitaId, personaId, { livello, bonus, osservate, skillIds, trattoSkillId, carica }, adesso);
-    }
+    // Ottenere una Persona la registra nel compendio (come in gioco): l'istantanea è lo stato con cui entra in scorta, attraverso l'unica
+    // strada `registraPersona` (R10-19). L'evocazione dal Registro non tocca l'istantanea (ne è la copia); una Persona già registrata non
+    // vede riscritta la sua istantanea da un nuovo esemplare (L8 P2: la riscrittura è il gesto esplicito «Registra»).
+    if (!dati.daRegistro && !giaRegistrata) registraPersona(partitaId, personaId, { istantanea: { livello, bonus, osservate, skillIds, trattoSkillId, carica } });
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
     verificaObiettivi(partitaId, personaId);
     return possedutaPerId(id)!;
@@ -692,9 +727,7 @@ export function registraPossedutaNelCompendio(partitaId: number, possedutaId: nu
   return getDb().transaction(() => {
     const skillIds = (prepared('SELECT skill_id FROM persona_posseduta_skill WHERE posseduta_id = ? ORDER BY slot').all(r.id) as Array<{ skill_id: number }>).map((x) => x.skill_id);
     const bonus = { forza: r.bonus_forza, magia: r.bonus_magia, resistenza: r.bonus_resistenza, agilita: r.bonus_agilita, fortuna: r.bonus_fortuna };
-    const prima = istantaneaCompendio(partitaId, r.persona_id);
-    scriviIstantanea(partitaId, r.persona_id, { livello: r.livello, bonus, osservate: osservateDaRiga(r), skillIds, trattoSkillId: r.tratto_skill_id, carica: r.carica === 1 }, adesso);
-    registraEvento(partitaId, 'compendio-registrata', `${t('persona', r.nome)} ${prima ? 'aggiornata' : 'registrata'} nel compendio`, `Al livello ${r.livello}${CHIAVI_STATISTICHE.some((k) => bonus[k] !== 0) ? ` con bonus ${CHIAVI_STATISTICHE.filter((k) => bonus[k] !== 0).map((k) => `${SIGLE[k]} ${bonus[k] > 0 ? '+' : ''}${bonus[k]}`).join(' ')}` : ''}.`, { livello: r.livello, bonus, skillIds, possedutaId: r.id }, r.persona_id);
+    registraPersona(partitaId, r.persona_id, { istantanea: { livello: r.livello, bonus, osservate: osservateDaRiga(r), skillIds, trattoSkillId: r.tratto_skill_id, carica: r.carica === 1 }, dati: { possedutaId: r.id } });
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
     return compendioPartita(partitaId);
   })();
