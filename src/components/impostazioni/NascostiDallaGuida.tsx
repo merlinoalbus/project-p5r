@@ -8,6 +8,8 @@
 // elenchi» è lo stesso gesto di sempre (`PUT /api/catalogo/:tipo/:chiave/nascosta`).
 // ============================================================
 
+import { useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useCarica } from '../../hooks/useCarica';
 import { getNascostiDallaGuida, getNegozi, nascondiElementoCatalogo } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
@@ -28,8 +30,26 @@ export function NascostiDallaGuida() {
       .then(() => { notifica('success', `«${nome}» è di nuovo negli elenchi.`); void elenco.ricarica(); })
       .catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Ripristino fallito.'));
   };
+  // Con `#nascosti` nell'indirizzo la pagina scorre fino a qui. Le sezioni sopra si caricano dopo e spostano la pagina: finché l'utente non
+  // scorre da sé (rotella, tocco, tastiera) o non passano alcuni secondi, a ogni cambio di altezza si scorre di nuovo alla sezione.
+  const { hash, key } = useLocation();
+  const sezione = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = sezione.current;
+    if (hash !== '#nascosti' || !el) return;
+    const vai = () => el.scrollIntoView?.({ block: 'start' });
+    vai();
+    let attivo = true;
+    const basta = () => { attivo = false; osservatore?.disconnect(); };
+    const osservatore = typeof ResizeObserver === 'function' && el.parentElement ? new ResizeObserver(() => { if (attivo) vai(); }) : null;
+    if (el.parentElement) osservatore?.observe(el.parentElement);
+    const fine = window.setTimeout(basta, 4000);
+    const eventi = ['wheel', 'touchstart', 'keydown', 'pointerdown'] as const;
+    for (const e of eventi) window.addEventListener(e, basta, { passive: true, once: true });
+    return () => { window.clearTimeout(fine); basta(); for (const e of eventi) window.removeEventListener(e, basta); };
+  }, [hash, key]);
   return (
-    <section id="nascosti" className="card flex flex-col gap-3" aria-labelledby="titolo-nascosti">
+    <section ref={sezione} id="nascosti" className="card flex flex-col gap-3" aria-labelledby="titolo-nascosti">
       <div className="flex flex-col gap-1">
         <h2 id="titolo-nascosti" className="m-0 text-[15px] font-semibold">Nascosti dalla guida{elenco.dati ? <span className="text-text-muted"> · {righe.length}</span> : null}</h2>
         <p className="m-0 text-[13px] text-text-secondary">Le righe che hai nascosto dagli elenchi restano nei dati: qui le rimetti con un tocco.</p>
