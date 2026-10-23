@@ -17,7 +17,7 @@ const comeTesto = (v: string | string[] | undefined) => Array.isArray(v) ? v.joi
 /** Legge il proprio endpoint: rimane accessibile anche quando il dettaglio non riesce a decodificare un vecchio JSON. */
 export function EditorDisponibilita({ chiave, onChiudi, onSalvato }: { chiave: string; onChiudi: () => void; onSalvato: () => void | Promise<void> }) {
   const dati = useCarica(() => getInformazioniConfidente(chiave), [chiave]);
-  const [modalita, setModalita] = useState<'proposta' | 'manuale' | 'storico'>('proposta');
+  const [modalita, setModalita] = useState<'manuale' | 'storico'>('manuale');
   const [patch, setPatch] = useState<Partial<InformazioniConfidente>>({});
   const [creazione, setCreazione] = useState<InformazioniConfidente>(vuoti);
   const [motivo, setMotivo] = useState('');
@@ -48,10 +48,7 @@ export function EditorDisponibilita({ chiave, onChiudi, onSalvato }: { chiave: s
   const prepara = async () => {
     if (!c || occupato) return;
     let azione: AzioneInformazioniConfidente;
-    if (modalita === 'proposta') {
-      if (!c.proposta?.applicabile) return;
-      azione = { azione: 'applica-proposta', proposta: c.proposta.id, revisioneAttesa: c.revisioneAttesa };
-    } else if (modalita === 'storico') {
+    if (modalita === 'storico') {
       if (versione === null) return;
       azione = { azione: 'ripristina-versione', versione, revisioneAttesa: c.revisioneAttesa };
     } else azione = nuova
@@ -78,35 +75,28 @@ export function EditorDisponibilita({ chiave, onChiudi, onSalvato }: { chiave: s
     } catch (e) { setErrore(e instanceof Error ? e.message : 'Salvataggio non riuscito.'); }
     finally { setOccupato(false); }
   };
-  const ammessa = !!c && !dati.caricamento && !dati.errore && (modalita === 'proposta' ? !!c.proposta?.applicabile
-    : modalita === 'storico' ? versione !== null : motivo.trim().length > 0 && (nuova || Object.keys(patch).length > 0));
+  const ammessa = !!c && !dati.caricamento && !dati.errore && (modalita === 'storico' ? versione !== null : motivo.trim().length > 0 && (nuova || Object.keys(patch).length > 0));
   return <Modal aperta larga titolo={`Informazioni di ${c?.confidente.nome ?? chiave}`} onChiudi={() => { if (!occupato) onChiudi(); }} azioni={
     <div className="flex flex-wrap justify-end gap-2 w-full">
       <button type="button" className="btn btn-ghost touch" disabled={occupato} onClick={onChiudi}>Chiudi</button>
       <button type="button" className="btn btn-secondary touch" disabled={occupato || dati.caricamento} onClick={() => { invalidaAnteprima(); void dati.ricarica(); }}>Rileggi corrente</button>
       <button type="button" className="btn btn-secondary touch" disabled={occupato || !ammessa} onClick={() => void prepara()}>Mostra anteprima</button>
       {preparata && <button type="button" className="btn btn-primary touch" disabled={occupato || preparata.input.revisioneAttesa !== c?.revisioneAttesa} onClick={() => void salva()}>
-        {modalita === 'storico' ? 'Ripristina questa versione' : modalita === 'manuale' ? nuova ? 'Crea informazioni' : 'Salva i campi selezionati' : 'Applica la proposta completa'}
+        {modalita === 'storico' ? 'Ripristina questa versione' : nuova ? 'Crea informazioni' : 'Salva i campi selezionati'}
       </button>}
     </div>
   }>
     <div className="flex flex-col gap-3 min-w-0">
-      <p className="m-0 text-[13px] text-text-secondary">Informazioni della guida, comuni alle partite. Non cambiano i requisiti operativi del rango 1, i semafori o i progressi. Le note precedenti della proposta sono conservate obbligatoriamente.</p>
+      <p className="m-0 text-[13px] text-text-secondary">Informazioni della guida, comuni alle partite. Non cambiano i requisiti operativi del rango 1, i semafori o i progressi.</p>
       {dati.caricamento && <p role="status">Lettura delle informazioni…</p>}
       {(errore || dati.errore) && <p className="m-0 text-error whitespace-pre-wrap" role="alert">{errore || dati.errore} La bozza resta disponibile.</p>}
       {c && <>
         {c.errori.length > 0 && <ul className="text-warning m-0 pl-5">{c.errori.map(e => <li key={e}>{e}</li>)}</ul>}
         {c.bonifica && <p className="m-0 text-[12px] text-text-muted">Bonifica iniziale: {c.bonifica.esito}. {c.bonifica.motivo}</p>}
         <div className="flex flex-wrap gap-2" aria-label="Tipo di modifica">
-          <button type="button" className={`btn touch ${modalita === 'proposta' ? 'btn-primary' : 'btn-secondary'}`} disabled={occupato} onClick={() => cambiaModalita('proposta')}>Proposta documentata</button>
           <button type="button" className={`btn touch ${modalita === 'manuale' ? 'btn-primary' : 'btn-secondary'}`} disabled={occupato} onClick={() => cambiaModalita('manuale')}>{nuova ? 'Creazione esplicita' : 'Modifica manuale'}</button>
           <button type="button" className={`btn touch ${modalita === 'storico' ? 'btn-primary' : 'btn-secondary'}`} disabled={occupato} onClick={() => cambiaModalita('storico')}>Storico e ripristino</button>
         </div>
-        {modalita === 'proposta' && (c.proposta ? <>
-          <h3 className="m-0 text-[15px]">{c.proposta.titolo}</h3><p className="m-0 text-[13px]">{c.proposta.motivo}</p>
-          <p className="m-0 text-[13px]">Giorni proposti: martedì, giovedì, sabato e domenica, di giorno. Conoscenza 3; data informativa lasciata vuota perché la prima data possibile non è attestata da questa rettifica. Papessa in scorta è un consiglio per l’affinità. Le date dell’itinerario e i requisiti precedenti saranno riportati integralmente nelle note come storico.</p>
-          <p className="m-0 text-[12px]">Fonti: {c.proposta.fonti.map((f, i) => <span key={f}>{i > 0 && ' · '}<a className="text-primary break-words" href={f} target="_blank" rel="noreferrer">AGS</a></span>)}</p>
-        </> : <p className="m-0">Nessuna proposta documentata per questo Confidente. La modifica manuale è disponibile.</p>)}
         {modalita === 'manuale' && <>
           <p className="m-0 text-[13px]">{nuova ? 'La riga non esiste: la creazione richiede una scelta esplicita per tutti gli otto campi, anche vuoti.' : 'Seleziona soltanto i campi da cambiare. Gli altri restano esattamente come sono, anche se contengono dati storici illeggibili.'}</p>
           <label className="flex flex-col gap-1 text-[13px]">Motivo della modifica
