@@ -116,7 +116,7 @@ function Segni({ nodo }: { nodo: NodoGerarchiaDto }) {
   return <>
     {nodo.daVerificare && <span className="chip chip--attivo text-[11px]" title="Nessuna fonte colloca questa area: decidi se tenerla o rimuoverla">Da verificare</span>}
     {nodo.disponibile === false && <span className="chip text-[11px]" title={nodo.bloccoMotivo ?? undefined}>Non ancora aperto</span>}
-    {nodo.dedalo && <span className="chip text-[11px]" title="Il Dedalo di Iweleth: sta fra i Palazzi finché non ha il suo ramo fra i Memento">Dedalo</span>}
+    {nodo.dedalo && <span className="chip text-[11px]" title={`${nodo.nome} si comporta da dedalo: sta fra i Palazzi finché non ha il suo ramo fra i Memento`}>Dedalo</span>}
   </>;
 }
 
@@ -155,7 +155,7 @@ function Riga({ nodo, livello, ctx, totali }: { nodo: NodoGerarchiaDto; livello:
     <li className="min-w-0">
       <div className="flex items-center">
         {corpo
-          ? <button type="button" className="touch inline-flex w-11 shrink-0 items-center justify-center text-text-muted" aria-expanded={aperto} aria-controls={idCorpo(nodo)}
+          ? <button type="button" className="touch inline-flex w-11 shrink-0 items-center justify-center text-text-muted" aria-expanded={aperto} aria-controls={aperto ? idCorpo(nodo) : undefined}
               aria-label={`${aperto ? 'Chiudi' : 'Apri'} ${nodo.nome}`} onClick={() => ctx.alterna(k)}><span aria-hidden>{aperto ? '▾' : '▸'}</span></button>
           : <span className="w-11 shrink-0" aria-hidden />}
         {nodo.casa

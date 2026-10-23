@@ -57,12 +57,12 @@ export function contenitoreDi(a: RigaArea, ctx: ContestoAree): ContenitoreAreaDt
  * Palazzo (L3) la scheda del Palazzo con l'Area aperta, `/guida/dungeon/<palazzo>/area/<slug>`. Con `?planimetria=<chiave pubblica>`
  * se si vuole una versione che non è la predefinita. Null solo per una riga senza contenitore (il CHECK della tabella lo esclude).
  */
-export function casaDellArea(a: RigaArea, planimetria?: string | null): string | null {
+export function casaDellArea(a: RigaArea, planimetria?: string | null, chiavePubblica: (identita: string) => string = (i) => chiaveMappa(i)): string | null {
   const contenitore = a.citta_chiave ?? a.quartiere_chiave;
   const base = contenitore ? `/guida/citta/${encodeURIComponent(contenitore)}/${encodeURIComponent(a.slug)}`
     : a.dungeon_chiave ? `/guida/dungeon/${encodeURIComponent(a.dungeon_chiave)}/area/${encodeURIComponent(a.slug)}` : null;
   if (!base) return null;
-  return planimetria && planimetria !== a.planimetria_predefinita ? `${base}?planimetria=${encodeURIComponent(chiaveMappa(planimetria))}` : base;
+  return planimetria && planimetria !== a.planimetria_predefinita ? `${base}?planimetria=${encodeURIComponent(chiavePubblica(planimetria))}` : base;
 }
 
 /** La casa di un Palazzo (L3): la sua scheda. I Memento non hanno una scheda di Palazzo: restano nel visore. */

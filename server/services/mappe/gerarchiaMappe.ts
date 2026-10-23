@@ -21,7 +21,7 @@ import { statoDisponibilitaPartita } from '../disponibilitaService.js';
 import { disponibilitaQuartiere } from '../cittaService.js';
 import { casaDelPalazzo, casaDellArea, casaDellaMappa, conAree, contestoAree, type RigaArea } from './casaMappa.js';
 import { illustrazioneDaRiga, immaginiCaricateDelleMappe, type RigaPerIllustrazione } from './immagineMappa.js';
-import { chiaveMappa } from './percorsiMappe.js';
+import { chiaviPubblicheDelleMappe } from './percorsiMappe.js';
 import { radiceDelPalazzo } from './alberoMappe.js';
 import { infiltrazioniDelleAree, type InfiltrazioneDellArea } from './legamiInfiltrazioni.js';
 import { mappeDaCollocare } from './areeService.js';
@@ -35,7 +35,7 @@ const SQL_PALAZZI = "d.tipo = 'palazzo'";
 const vuoti = (): ConteggiPinDto => ({ contenuto: 0, passaggi: 0, note: 0 });
 const somma = (a: ConteggiPinDto, b: ConteggiPinDto): void => { for (const g of GRUPPI_CONTEGGIO_SPILLO) a[g] += b[g]; };
 
-interface RigaQuartiereG { chiave: string; nome: string; mappa_interna: string; immagine_chiave: string | null; asset: string | null; ruolo_immagine: string | null }
+interface RigaQuartiereG { chiave: string; nome: string; mappa_interna: string; mappa_presente: string | null; immagine_chiave: string | null; asset: string | null; ruolo_immagine: string | null }
 interface RigaPalazzoG { chiave: string; nome: string; regola_boss: string | null }
 interface RigaPlanimetriaG extends RigaPerIllustrazione {
   nome: string; area_chiave: string; versione_etichetta: string | null; versione_ordine: number;
@@ -77,7 +77,7 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
   const caricate = immaginiCaricateDelleMappe();
 
   // ---- letture, una volta per richiesta ----
-  const quartieri = (conAree() ? prepared(`SELECT q.chiave, q.nome, 'citta-' || q.chiave AS mappa_interna, m.immagine_chiave, m.asset, m.ruolo_immagine
+  const quartieri = (conAree() ? prepared(`SELECT q.chiave, q.nome, 'citta-' || q.chiave AS mappa_interna, m.chiave AS mappa_presente, m.immagine_chiave, m.asset, m.ruolo_immagine
       FROM quartiere q LEFT JOIN mappa m ON m.chiave = 'citta-' || q.chiave WHERE q.chiave <> 'mementos' ORDER BY q.ordine, q.chiave`).all() : []) as RigaQuartiereG[];
   const palazzi = (conAree() ? prepared(`SELECT d.chiave, d.nome, d.regola_boss FROM dungeon d WHERE ${SQL_PALAZZI} ORDER BY d.ordine, d.chiave`).all() : []) as RigaPalazzoG[];
   const aree = (conAree() ? prepared('SELECT * FROM area ORDER BY ordine, slug').all() : []) as RigaArea[];
@@ -91,6 +91,10 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
   const infiltrazioniDeiPalazzi = (palazzi.length === 0 ? [] : prepared(`SELECT chiave, nome, ordine, dungeon_chiave FROM dungeon_area
       WHERE dungeon_chiave IN (${palazzi.map(() => '?').join(',')}) ORDER BY ordine, chiave`).all(...palazzi.map((p) => p.chiave))) as Array<InfiltrazioneDellArea & { dungeon_chiave: string }>;
   const daCollocare = mappeDaCollocare();
+  // i percorsi pubblici di tutte le mappe e l'elenco di quelle che esistono, in due letture: nessuna query per nodo
+  const pubbliche = chiaviPubblicheDelleMappe();
+  const chiaveMappa = (identita: string): string => pubbliche.get(identita) ?? identita;
+  const mappeEsistenti = new Set((prepared('SELECT chiave FROM mappa').all() as Array<{ chiave: string }>).map((r) => r.chiave));
 
   const areaDellaMappa = new Map(planimetrie.map((p) => [p.chiave, p.area_chiave]));
   const { propri, perArea } = contaPin(pin, areaDellaMappa);
@@ -102,7 +106,7 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
 
   const nodoPlanimetria = (a: RigaArea, p: RigaPlanimetriaG, indice: number): NodoGerarchiaDto => ({
     tipo: 'planimetria', chiave: chiaveMappa(p.chiave), nome: p.versione_etichetta?.trim() || `Planimetria ${indice + 1}`,
-    casa: casaDellArea(a, p.chiave) ?? casaDellaMappa({ chiave: p.chiave, tipo: 'luogo', entita_tipo: null, entita_chiave: null, area_chiave: a.chiave }, ctx),
+    casa: casaDellArea(a, p.chiave, chiaveMappa) ?? casaDellaMappa({ chiave: p.chiave, tipo: 'luogo', entita_tipo: null, entita_chiave: null, area_chiave: a.chiave }, ctx),
     immagine: illustrazioneDaRiga(p, caricate),
     conteggi: { pin: pinPropri(p.chiave) },
     versione: { etichetta: p.versione_etichetta, ordine: p.versione_ordine, predefinita: a.planimetria_predefinita === p.chiave },
@@ -144,8 +148,10 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
     const disp = disponibilitaQuartiere(q.chiave, st);
     const stato = partitaId === undefined ? null : disp.disponibile;
     const figliArea = areeDelQuartiere(q.chiave).map((a) => nodoArea(a, stato, disp.disponibile ? null : disp.bloccoMotivo));
+    // `mappa` solo se la mappa del quartiere esiste: «Colloca» non deve ricevere una chiave che non porta a nulla
     return {
-      tipo: 'quartiere', chiave: q.chiave, nome: q.nome, casa: `/guida/citta/${encodeURIComponent(q.chiave)}`, mappa: chiaveMappa(q.mappa_interna),
+      tipo: 'quartiere', chiave: q.chiave, nome: q.nome, casa: `/guida/citta/${encodeURIComponent(q.chiave)}`,
+      ...(q.mappa_presente ? { mappa: chiaveMappa(q.mappa_interna) } : {}),
       immagine: illustrazioneDaRiga({ chiave: q.mappa_interna, immagine_chiave: q.immagine_chiave, asset: q.asset, ruolo_immagine: q.ruolo_immagine }, caricate),
       conteggi: conteggiContenitore(q.mappa_interna, figliArea),
       disponibile: stato, bloccoMotivo: partitaId === undefined ? null : disp.bloccoMotivo,
@@ -164,7 +170,8 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
     const proprie = infiltrazioniDeiPalazzi.filter((i) => i.dungeon_chiave === d.chiave);
     const senzaArea = proprie.filter((i) => !conInfiltrazione.has(i.chiave)).map((i) => nodoInfiltrazione(i, d.chiave));
     const nodo: NodoGerarchiaDto = {
-      tipo: 'palazzo', chiave: d.chiave, nome: d.nome, casa: casaDelPalazzo(d.chiave), mappa: chiaveMappa(radice),
+      tipo: 'palazzo', chiave: d.chiave, nome: d.nome, casa: casaDelPalazzo(d.chiave),
+      ...(mappeEsistenti.has(radice) ? { mappa: chiaveMappa(radice) } : {}),
       immagine: null,
       conteggi: { ...conteggiContenitore(radice, figliArea), infiltrazioni: proprie.length },
       figli: figliArea,
@@ -182,7 +189,8 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
   const conta = (nodi: NodoGerarchiaDto[]): number => nodi.reduce((n, a) => n + (a.conteggi.planimetrie ?? 0), 0);
   const infiltrazioniTotali = nodiPalazzi.reduce((n, p) => n + (p.conteggi.infiltrazioni ?? 0), 0);
   const tokyo: NodoGerarchiaDto = {
-    tipo: 'citta', chiave: 'tokyo', nome: 'Tokyo', casa: '/guida/citta', mappa: chiaveMappa('tokyo'),
+    tipo: 'citta', chiave: 'tokyo', nome: 'Tokyo', casa: '/guida/citta',
+    ...(mappeEsistenti.has('tokyo') ? { mappa: chiaveMappa('tokyo') } : {}),
     immagine: righeTokyo ? illustrazioneDaRiga(righeTokyo, caricate) : { immagineUrl: null, asset: null },
     conteggi: { quartieri: nodiQuartieri.length, palazzi: nodiPalazzi.length, aree: areeMondo.length + areePalazzi.length, planimetrie: conta(areeMondo) + conta(areePalazzi), infiltrazioni: infiltrazioniTotali, pin: pinTokyo },
     figli: [...nodiQuartieri, ...nodiAreeCitta, ...nodiPalazzi],

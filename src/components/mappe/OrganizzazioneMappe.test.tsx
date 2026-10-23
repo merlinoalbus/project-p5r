@@ -10,9 +10,13 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { scegliVoce, valoreSelettore, vociSelettore } from '../../../test/selettore';
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom';
 import type { MappaRiassuntoDto } from '../../types';
+import type { FC } from 'react';
 import { MappaIncorporata } from './MappaIncorporata';
 import { RisolviMappa } from './RisolviMappa';
 import { ContenutiGuidaMappa } from './ContenutiGuidaMappa';
+// Segnaposto locale tipizzato, SOLO perché il file compili: `AlberoLuoghi` è stato eliminato da L11/B5 (decisione del PM del 24/10). I casi che
+// lo usano sono `it.skip` e non si eseguono; i corpi originali sono conservati qui sotto.
+const AlberoLuoghi: FC<{ mappe: MappaRiassuntoDto[]; genitore?: string; espandibile?: boolean }> = () => null;
 const api = vi.hoisted(() => ({risolviMappa:vi.fn(),getContenutiMappa:vi.fn(),getMappa:vi.fn()}));
 vi.mock('../../services/api', (vero) => moduloApi(vero, api));
 /** Riassunto minimo di una mappa di tipo «luogo» con la chiave, il genitore e il nome dati (nome predefinito = chiave), senza immagine né spilli. */
@@ -20,13 +24,76 @@ function m(chiave:string,genitore:string|null,nome=chiave):MappaRiassuntoDto { r
 /** Rotta di arrivo dei test: scrive a schermo percorso e query dell'indirizzo corrente, per verificare dove ha portato un reindirizzamento. */
 function Indirizzo(){ const p=useLocation();return <div>{p.pathname}{p.search}</div>; }
 beforeEach(()=>{vi.resetAllMocks();usePreferenzeStore.setState({graficaPredefinita:true});useAssetStore.setState({manifest:null,caricato:true,mancanti:{}});});
-// SUPERATI da L11/B5 (R11-11, R11-12/5): `AlberoLuoghi` è eliminato e l'indice è l'albero della gerarchia (`AlberoGerarchia`, dal server). Corpi
-// originali tolti per compilare; non eseguiti (zero test).
-it.skip('SUPERATO da L11/B5: rende ogni profondità e mantiene distinti gli omonimi senza icone di passaggio',()=>{});
-it.skip('SUPERATO da L11/B5: L2 (2026-10-20): le versioni di un’Area sono una voce sola col nome dell’Area, verso la sua casa, e il gruppo si chiama «Aree di …»',()=>{});
-it.skip('SUPERATO da L11/B5: FUN2-7: aperto Tokyo, il gruppo di un quartiere si chiama «Aree di …» e conta le aree, non le planimetrie',()=>{});
-it.skip('SUPERATO da L11/B5: R1: nell’indice un’area da verificare porta il segno «Da verificare», come nella pagina Area',()=>{});
-it.skip('SUPERATO da L11/B5: E5 ed E7: ogni riga dell’Elenco dice i suoi pin con la stessa parola; l’Area da verificare sta nel gruppo «Da verificare»',()=>{});
+// Saltati (L11 B5): il vecchio albero dei luoghi non esiste più, decisione del PM del 24/10 (l'indice è l'albero della gerarchia,
+// `AlberoGerarchia`, dal server). Corpi originali ripristinati, non eseguiti (zero test).
+it.skip('rende ogni profondità e mantiene distinti gli omonimi senza icone di passaggio',()=>{
+  render(<MemoryRouter><AlberoLuoghi mappe={[m('tokyo',null),m('scuola','tokyo'),m('edificio','scuola'),m('piano','edificio','Primo piano'),m('palazzo',null),m('altro','palazzo','Primo piano')]} /></MemoryRouter>);
+  const nomi=screen.getAllByRole('link',{name:'Primo piano'});expect(nomi).toHaveLength(2);
+  expect(nomi.map(n=>n.getAttribute('href'))).toEqual(['/guida/mappe/piano','/guida/mappe/altro']);
+  expect(screen.getAllByRole('link')).toHaveLength(6);
+});
+it.skip('L2 (2026-10-20): le versioni di un’Area sono una voce sola col nome dell’Area, verso la sua casa, e il gruppo si chiama «Aree di …»',()=>{
+  const area=(versioneOrdine:number,predefinita:boolean)=>({chiave:'citta/shibuya/sottopasso',contenitore:{tipo:'quartiere' as const,chiave:'shibuya',nome:'Shibuya'},slug:'sottopasso',nome:'Sottopasso',versioneEtichetta:null,versioneOrdine,predefinita,casa:'/guida/citta/shibuya/sottopasso'});
+  const quartiere={...m('shibuya','tokyo','Shibuya'),tipo:'quartiere' as const,casa:'/guida/citta/shibuya'};
+  const v1={...m('shibuya-sottopasso','shibuya','Sottopasso'),numeroSpilli:3,area:area(0,true),casa:'/guida/citta/shibuya/sottopasso'};
+  const v2={...m('shibuya-sottopasso-speciale','shibuya','Sottopasso Speciale'),numeroSpilli:2,area:area(1,false),casa:'/guida/citta/shibuya/sottopasso?planimetria=shibuya-sottopasso-speciale'};
+  render(<MemoryRouter><AlberoLuoghi genitore="shibuya" mappe={[quartiere,v2,v1,m('shibuya-diner','shibuya','Diner')]}/></MemoryRouter>);
+  const gruppo=screen.getByRole('list',{name:'Aree di Shibuya'});
+  const voce=within(gruppo).getByRole('link',{name:/^Sottopasso/});
+  expect(voce).toHaveAttribute('href','/guida/citta/shibuya/sottopasso');
+  // E5: il conteggio accanto alla voce, con la parola dell'indice
+  expect(voce.parentElement).toHaveTextContent('2 versioni · 5 pin');
+  expect(within(gruppo).queryByRole('link',{name:/Speciale/})).toBeNull();
+  expect(within(gruppo).getAllByRole('link')).toHaveLength(2);
+});
+it.skip('FUN2-7: aperto Tokyo, il gruppo di un quartiere si chiama «Aree di …» e conta le aree, non le planimetrie',()=>{
+  const area=(slug:string,nome:string,versioneOrdine:number)=>({chiave:`citta/yongen-jaya/${slug}`,contenitore:{tipo:'quartiere' as const,chiave:'yongen-jaya',nome:'Yongen-Jaya'},slug,nome,versioneEtichetta:null,versioneOrdine,predefinita:versioneOrdine===0,casa:`/guida/citta/yongen-jaya/${slug}`});
+  const quartiere={...m('yongen-jaya','tokyo','Yongen-Jaya'),tipo:'quartiere' as const};
+  const covo=[0,1,2].map(i=>({...m(`covo-${i}`,'yongen-jaya','Covo'),area:area('covo-dei-ladri','Covo dei Ladri',i)}));
+  render(<MemoryRouter><AlberoLuoghi genitore="tokyo" espandibile mappe={[{...m('tokyo',null,'Tokyo'),tipo:'citta'},quartiere,{...m('vicoli','yongen-jaya','Vicoli'),area:area('vicoli','Vicoli',0)},...covo]}/></MemoryRouter>);
+  expect(screen.getByText('Aree di Yongen-Jaya (2)')).toBeInTheDocument();
+});
+// R1 (validatore L2, giro 1): l'area dello staff di Tokyo, in attesa della scelta dell'utente, porta il segno «Da verificare» anche
+// nell'indice, con lo stesso aspetto della pagina Area e delle Aree della città; le altre aree no
+it.skip('R1: nell’indice un’area da verificare porta il segno «Da verificare», come nella pagina Area',()=>{
+  const area=(slug:string,nome:string,daVerificare:boolean)=>({chiave:`citta/tokyo/${slug}`,contenitore:{tipo:'citta' as const,chiave:'tokyo',nome:'Tokyo'},slug,nome,versioneEtichetta:null,versioneOrdine:0,predefinita:true,casa:`/guida/citta/tokyo/${slug}`,daVerificare});
+  render(<MemoryRouter><AlberoLuoghi genitore="tokyo" mappe={[{...m('tokyo',null,'Tokyo'),tipo:'citta'},{...m('staff','tokyo','Area riservata allo staff'),area:area('staff','Area riservata allo staff',true)},{...m('torre','tokyo','Torre'),area:area('torre','Torre',false)}]}/></MemoryRouter>);
+  const staff=screen.getByRole('link',{name:/^Area riservata allo staff/});
+  const segno=within(staff.parentElement!).getByText('Da verificare');
+  expect(segno).toHaveClass('chip','chip--attivo','text-[11px]');
+  expect(segno).toHaveAttribute('title','Nessuna fonte colloca questa area: decidi se tenerla o rimuoverla');
+  expect(within(screen.getByRole('link',{name:/^Torre/}).parentElement!).queryByText('Da verificare')).toBeNull();
+});
+// E5 (analisi dell'Elenco delle mappe, L2): lo stesso conteggio e la stessa parola su ogni riga — Area con più versioni, Area con una
+// versione, quartiere —; dal rilascio di L3 la parola è «pin». E7: l'Area da verificare (lo staff) non sta fra i quartieri ma in un
+// gruppo «Da verificare» di Tokyo, accanto all'elenco dei quartieri e non dentro
+it.skip('E5 ed E7: ogni riga dell’Elenco dice i suoi pin con la stessa parola; l’Area da verificare sta nel gruppo «Da verificare»',()=>{
+  const area=(slug:string,nome:string,genitore:string,versioneOrdine:number,daVerificare=false)=>({chiave:`citta/${genitore}/${slug}`,contenitore:{tipo:(genitore==='tokyo'?'citta':'quartiere') as 'citta'|'quartiere',chiave:genitore,nome:genitore},slug,nome,versioneEtichetta:null,versioneOrdine,predefinita:versioneOrdine===0,casa:`/guida/citta/${genitore}/${slug}`,daVerificare});
+  const tokyo={...m('tokyo',null,'Tokyo'),tipo:'citta' as const};
+  const shibuya={...m('citta-shibuya','tokyo','Shibuya'),tipo:'quartiere' as const,numeroSpilli:4};
+  const ueno={...m('citta-ueno','tokyo','Ueno'),tipo:'quartiere' as const,numeroSpilli:1};
+  const staff=[0,1].map(i=>({...m(`staff-${i}`,'tokyo','Area riservata allo staff'),numeroSpilli:0,area:area('staff','Area riservata allo staff','tokyo',i,true)}));
+  const sottopasso=[0,1].map(i=>({...m(`sottopasso-${i}`,'citta-shibuya','Sottopasso'),numeroSpilli:3+i,area:area('sottopasso','Sottopasso','citta-shibuya',i)}));
+  const diner={...m('diner','citta-shibuya','Diner'),numeroSpilli:1,area:area('diner','Diner','citta-shibuya',0)};
+  render(<MemoryRouter><AlberoLuoghi genitore="tokyo" mappe={[tokyo,shibuya,ueno,...staff,...sottopasso,diner]}/></MemoryRouter>);
+  // ogni riga col suo conteggio, una sola parola (accanto al collegamento, che si chiama come il posto)
+  const riga=(nome:string)=>screen.getByRole('link',{name:nome}).parentElement!;
+  expect(riga('Shibuya')).toHaveTextContent(/^Shibuya4 pin$/);
+  expect(riga('Ueno')).toHaveTextContent(/^Ueno1 pin$/);
+  expect(riga('Sottopasso')).toHaveTextContent(/^Sottopasso2 versioni · 7 pin$/);
+  expect(riga('Diner')).toHaveTextContent(/^Diner1 pin$/);
+  expect(document.body).not.toHaveTextContent(/spill/);
+  // lo staff non è fra i quartieri: i quartieri di Tokyo sono esattamente Shibuya e Ueno (le voci di primo livello dell'elenco), e il
+  // gruppo «Da verificare» sta fuori dall'elenco dei quartieri, con lo staff e nient'altro
+  const quartieri=screen.getByRole('list',{name:'Quartieri di Tokyo'});
+  const vociDeiQuartieri=[...quartieri.children].map(li=>li.querySelector('a')?.textContent);
+  expect(vociDeiQuartieri).toEqual(['Shibuya','Ueno']);
+  expect(within(quartieri).queryByRole('link',{name:'Area riservata allo staff'})).toBeNull();
+  const daVerificare=screen.getByRole('list',{name:'Da verificare'});
+  expect(quartieri.contains(daVerificare)).toBe(false);
+  expect(within(daVerificare).getAllByRole('link').map(a=>a.textContent)).toEqual(['Area riservata allo staff']);
+  expect(within(daVerificare).getByRole('link',{name:'Area riservata allo staff'}).parentElement).toHaveTextContent('2 versioni · nessun pin');
+});
 it('un vecchio URL editoriale apre la sezione del palazzo e non carica una planimetria falsa',async()=>{
   api.risolviMappa.mockResolvedValue({tipo:'guida',area:'castello/biblioteca',dungeon:'castello',mappaPalazzo:'palazzo',nome:'Biblioteca'});
   const child=vi.fn(()=> <div>Planimetria falsa</div>);
@@ -94,8 +161,17 @@ it('il selettore mostra alternative senza default e cambia il contesto esplicita
   vista.rerender(<SelettoreContestoMappa mappa={mappa} selezione="errato" onCambia={onCambia}/>);
   expect(screen.getByRole('status')).toHaveTextContent('non appartiene');expect(valoreSelettore('Nome secondo il contesto')).toBe('Mostra tutti i nomi');
 });
-// SUPERATO da L11/B5: `AlberoLuoghi` è eliminato; il Covo è un'Area di Yongen-Jaya con le sue cinque versioni come planimetrie dell'albero. Non eseguito.
-it.skip('SUPERATO da L11/B5: il Covo presenta cinque immagini selezionabili sotto un solo luogo, senza piani inventati',()=>{});
+// Saltato (L11 B5): il vecchio albero dei luoghi non esiste più, decisione del PM del 24/10 (il Covo è un'Area di Yongen-Jaya con le sue cinque
+// versioni come planimetrie dell'albero). Corpo originale ripristinato, non eseguito.
+it.skip('il Covo presenta cinque immagini selezionabili sotto un solo luogo, senza piani inventati',()=>{
+  const immagini=Array.from({length:5},(_,i)=>({...m(`immagine-${i}`,'covo',`tecnico-${i}`),immagineUrl:`/immagine-${i}.png`,gruppoImmagini:{id:'covo',nome:'Covo dei Ladri',ordine:i}}));
+  render(<MemoryRouter><AlberoLuoghi mappe={[m('covo',null,'Covo dei Ladri'),...immagini]}/></MemoryRouter>);
+  expect(screen.getAllByRole('link',{name:'Covo dei Ladri'})).toHaveLength(1);
+  const gruppo=screen.getByRole('list',{name:'Immagini di Covo dei Ladri'});
+  expect(within(gruppo).getAllByRole('link')).toHaveLength(5);
+  expect(within(gruppo).getByRole('link',{name:'Immagine 5 di 5'})).toHaveAttribute('href','/guida/mappe/immagine-4');
+  expect(screen.queryByText(/tecnico-/)).not.toBeInTheDocument();
+});
 
 it.each([{larghezza:null,altezza:null},{larghezza:0,altezza:600},{larghezza:800,altezza:0}])('il riquadro con emblema e dimensioni $larghezza/$altezza apre il luogo senza falsa planimetria',async dimensioni=>{
   api.risolviMappa.mockResolvedValue({tipo:'mappa',mappa:'palazzo'});
@@ -141,5 +217,11 @@ it('il contesto senza titolo rimane selezionato e non è segnalato come estraneo
   expect(screen.queryByRole('list')).not.toBeInTheDocument();
   expect(screen.queryByRole('status')).not.toBeInTheDocument();
 });
-// SUPERATO da L11/B5: `AlberoLuoghi` è eliminato; i nomi dei nodi dell'albero li dà il server (`NodoGerarchiaDto.nome`). Non eseguito.
-it.skip('SUPERATO da L11/B5: il nodo parziale dell’albero usa il padre verificato senza mostrare titolo noto come universale',()=>{});
+// Saltato (L11 B5): il vecchio albero dei luoghi non esiste più, decisione del PM del 24/10 (i nomi dei nodi li dà il server, `NodoGerarchiaDto.nome`).
+// Corpo originale ripristinato, non eseguito.
+it.skip('il nodo parziale dell’albero usa il padre verificato senza mostrare titolo noto come universale',()=>{
+  render(<MemoryRouter><AlberoLuoghi mappe={[m('padre',null,'Palazzo di Madarame'),{...m('risorsa','padre','Area 4 — RMAP 153'),genitoreNome:'Palazzo di Madarame',contesti:[{id:'normale',nome:'Ripostiglio',campo:'F153_004_00',texpack:102},{id:'safe',nome:null,campo:'F153_051_00',texpack:103}]}]}/></MemoryRouter>);
+  expect(screen.getByRole('link',{name:'Palazzo di Madarame — Planimetria'})).toHaveAttribute('href','/guida/mappe/risorsa');
+  expect(screen.queryByRole('link',{name:'Ripostiglio'})).not.toBeInTheDocument();
+  expect(screen.queryByText(/RMAP/)).not.toBeInTheDocument();
+});

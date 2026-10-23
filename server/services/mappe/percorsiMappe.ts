@@ -53,6 +53,15 @@ export function chiaveMappa(identita:string,db:AppDatabase=getDb()):string {
   if(!haPercorsi(db))return identita;
   return (stmt(db,'SELECT chiave FROM mappa_percorso WHERE mappa_chiave=?').get(identita) as {chiave:string}|undefined)?.chiave??identita;
 }
+/**
+ * Il percorso pubblico di TUTTE le mappe con un percorso, in una sola lettura: per chi risolve centinaia di chiavi in una richiesta
+ * (l'indice dei luoghi) senza una query per nodo. Una mappa senza percorso non c'è nella tabella: `chiaveMappa` darebbe l'identità stessa.
+ */
+export function chiaviPubblicheDelleMappe(db:AppDatabase=getDb()):Map<string,string> {
+  if(!haPercorsi(db))return new Map();
+  const righe=stmt(db,'SELECT mappa_chiave, chiave FROM mappa_percorso').all() as Array<{mappa_chiave:string;chiave:string}>;
+  return new Map(righe.map(r=>[r.mappa_chiave,r.chiave]));
+}
 /** Il nome completo di una mappa con i genitori significativi («Palazzo › Piano»); la chiave stessa se non c'è un percorso. */
 export function nomePercorso(identita:string,db:AppDatabase=getDb()):string {
   return (stmt(db,'SELECT nome FROM mappa_percorso WHERE mappa_chiave=?').get(identita) as {nome:string}|undefined)?.nome??identita;
