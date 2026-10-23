@@ -31,6 +31,7 @@ import type { pinCitato } from './condizioni/nomiCondizioni.js';
 import type { RigaInvito } from './condizioni/condizioneEffettiva.js';
 import { valutaInsieme, valutaInsiemeSpillo, type RequisitoDisponibilita } from './condizioni/valutatore.js';
 import type { DisponibilitaDto, SemaforoRequisitoDto } from '../../shared/types.js';
+import { lettureCompletate } from './lettureCompletate.js';
 
 export type { RequisitoDisponibilita };
 
@@ -139,7 +140,8 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
   return {
     ...st, partitaId, acquisti,
     articoliOttenuti: chiaviArticoliOttenuti(partitaId, acquisti),
-    letture: new Set((prepared('SELECT tipo, chiave FROM lettura_partita WHERE partita_id = ?').all(partitaId) as Array<{ tipo: string; chiave: string }>).map((a) => a.tipo + '/' + a.chiave)),
+    // R10-20: libri letti e film visti si calcolano dall'avanzamento (una sola definizione di «letto»)
+    letture: lettureCompletate(partitaId),
     contatori,
     attivitaSvolte: new Map((prepared('SELECT attivita_chiave, volte FROM attivita_svolta_partita WHERE partita_id = ?').all(partitaId) as Array<{ attivita_chiave: string; volte: number }>).map((r) => [r.attivita_chiave, r.volte])),
     spesaPerNegozio: spesaAcquistiPerNegozio(partitaId, acquisti),

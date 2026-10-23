@@ -28,6 +28,7 @@ import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
 import { eGiornoDelQuiz, leggiQuiz, type QuizAttivita } from '../../shared/quizAttivita.js';
 import { catalogoOggettiDisponibile, negoziPerFonte, oggettiPerFonte } from './catalogoOggettiLetture.js';
+import { avanzamentoCompleto, lettureCompletate, letturaCompletata } from './lettureCompletate.js';
 import { sessioniVideogioco } from './sessioniVideogioco.js';
 import { disponibilitaAttivita, sediAttivita, type SediAttivita } from './disponibilitaAttivita.js';
 import { fonteConfidenteAttivita } from './fonteConfidenteAttivitaService.js';
@@ -184,7 +185,8 @@ const filmDto = (r: RigaFilm, stato: StatoLetture, posizioni: Map<string, FilmDt
 function letturePartita(partitaId: number | undefined): StatoLetture {
   if (partitaId === undefined) return { fatti: new Set(), progressiLibri: new Map(), progressiFilm: new Map(), progressiVideogiochi: new Map(), sessioniVideogioco: sessioniVideogioco() };
   verificaPartita(partitaId);
-  const fatti = new Set((prepared('SELECT tipo, chiave FROM lettura_partita WHERE partita_id = ?').all(partitaId) as Array<{ tipo: string; chiave: string }>).map((r) => `${r.tipo}/${r.chiave}`));
+  // R10-20: «letto» si calcola dall'avanzamento (una sola definizione), non dalla tabella `lettura_partita`
+  const fatti = lettureCompletate(partitaId);
   const progressiLibri = new Map((prepared('SELECT libro_chiave, avanzamento FROM progresso_libro_partita WHERE partita_id = ?').all(partitaId) as Array<{ libro_chiave: string; avanzamento: number }>).map((r) => [r.libro_chiave, r.avanzamento]));
   const progressiFilm = new Map((prepared('SELECT film_chiave, avanzamento FROM progresso_film_partita WHERE partita_id = ?').all(partitaId) as Array<{ film_chiave: string; avanzamento: number }>).map((r) => [r.film_chiave, r.avanzamento]));
   const progressiVideogiochi = new Map((prepared('SELECT videogioco_chiave, avanzamento FROM progresso_videogioco_partita WHERE partita_id = ?').all(partitaId) as Array<{ videogioco_chiave: string; avanzamento: number }>).map((r) => [r.videogioco_chiave, r.avanzamento]));
@@ -339,7 +341,7 @@ export function attivitaTutte(partitaId?: number): AttivitaTutteDto {
 
 /** Vero se la partita ha letto «Anima da cineasta» (Royal): i punti di film e DVD salgono di uno scalino. La usano anche gli effetti delle azioni (K1). */
 export function haAnimaDaCineasta(partitaId: number): boolean {
-  return !!prepared("SELECT 1 FROM lettura_partita WHERE partita_id = ? AND tipo = 'libro' AND chiave = 'anima-da-cineasta'").get(partitaId);
+  return letturaCompletata(partitaId, 'libro', 'anima-da-cineasta');
 }
 
 /** Le note che un conseguimento dà, Dote per Dote, dagli effetti dichiarati.
@@ -430,9 +432,12 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
     const confermatoPrima = tipo === 'film'
       ? ((prepared('SELECT avanzamento FROM progresso_film_partita WHERE partita_id = ? AND film_chiave = ?').get(partitaId, chiave) as { avanzamento: number } | undefined)?.avanzamento ?? 0)
       : 0;
-    const era = tipo === 'videogioco'
-      ? !!prepared('SELECT 1 FROM progresso_videogioco_partita WHERE partita_id = ? AND videogioco_chiave = ? AND avanzamento >= ?').get(partitaId, chiave, totale)
-      : !!prepared('SELECT 1 FROM lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ?').get(partitaId, tipo, chiave);
+    // «Era già completa» si calcola dall'avanzamento di prima, per tutti e tre i tipi (R10-20: una sola definizione)
+    const avanzamentoPrima = tipo === 'libro'
+      ? ((prepared('SELECT avanzamento FROM progresso_libro_partita WHERE partita_id = ? AND libro_chiave = ?').get(partitaId, chiave) as { avanzamento: number } | undefined)?.avanzamento ?? 0)
+      : tipo === 'film' ? confermatoPrima
+        : ((prepared('SELECT avanzamento FROM progresso_videogioco_partita WHERE partita_id = ? AND videogioco_chiave = ?').get(partitaId, chiave) as { avanzamento: number } | undefined)?.avanzamento ?? 0);
+    const era = avanzamentoCompleto(avanzamentoPrima, totale);
     if (tipo === 'libro') {
       if (richiesto > 0) prepared('INSERT INTO progresso_libro_partita (partita_id, libro_chiave, avanzamento, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, libro_chiave) DO UPDATE SET avanzamento = excluded.avanzamento, updated_at = excluded.updated_at').run(partitaId, chiave, richiesto, adesso);
       else prepared('DELETE FROM progresso_libro_partita WHERE partita_id = ? AND libro_chiave = ?').run(partitaId, chiave);
@@ -446,6 +451,8 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
       prepared('DELETE FROM progresso_videogioco_partita WHERE partita_id = ? AND videogioco_chiave = ?').run(partitaId, chiave);
     }
     const registrato = richiesto >= totale;
+    // Specchio di compatibilità, DERIVATO dallo stesso contatore: nessun lettore di questo servizio lo legge più; lo legge ancora il motore del
+    // Diario (`motoreDiario.ts`, di FE). Va tolto quando quel lettore passa al calcolo (`lettureCompletate`). Non è un secondo contatore.
     if (tipo === 'libro' || tipo === 'film') {
       if (registrato) prepared('INSERT INTO lettura_partita (partita_id, tipo, chiave, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, tipo, chiave) DO UPDATE SET updated_at = excluded.updated_at').run(partitaId, tipo, chiave, adesso);
       else prepared('DELETE FROM lettura_partita WHERE partita_id = ? AND tipo = ? AND chiave = ?').run(partitaId, tipo, chiave);
@@ -488,9 +495,8 @@ export function avanzamentoLettura(partitaId: number, tipo: TipoLettura, chiave:
   const nome = oggettiPerFonte(tipo).get(chiave)?.nome ?? (tipo === 'libro' ? (riga as RigaLibro).nome_it ?? riga.nome : riga.nome);
   if (tipo === 'libro') {
     const totale = totaleLibro(riga as RigaLibro);
-    const letto = !!prepared("SELECT 1 FROM lettura_partita WHERE partita_id = ? AND tipo = 'libro' AND chiave = ?").get(partitaId, chiave);
     const r = prepared('SELECT avanzamento FROM progresso_libro_partita WHERE partita_id = ? AND libro_chiave = ?').get(partitaId, chiave) as { avanzamento: number } | undefined;
-    return { avanzamento: letto ? Math.max(totale, r?.avanzamento ?? 0) : r?.avanzamento ?? 0, totale, nome };
+    return { avanzamento: r?.avanzamento ?? 0, totale, nome };
   }
   if (tipo === 'film') {
     const r = prepared('SELECT avanzamento FROM progresso_film_partita WHERE partita_id = ? AND film_chiave = ?').get(partitaId, chiave) as { avanzamento: number } | undefined;
