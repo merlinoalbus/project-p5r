@@ -67,6 +67,8 @@ export interface AzioneConEffetti {
   rangoAtteso?: number | null;
   momento?: MomentoIncontro;
   apertureDedali?: EffettiAzioneDto['apertureDedali'];
+  /** La voce porta l'effetto «invito avvenuto» di questo Confidente (R10-11k): i punti dell'incontro valgono ×1,2 (invito accettato subito). */
+  invito?: boolean;
 }
 
 /** Le visioni al cinema di un film già contate dalle spunte della partita (voci della giornata). */
@@ -129,7 +131,7 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
     const c = prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(a.riferimento.chiave) ? confidenteDellaPartita(partitaId, a.riferimento.chiave) : undefined;
     if (c && c.rango > 0 && c.rango < 10) {
       const prima = c.punti;
-      const agg = aggiornaConfidente(partitaId, c.chiave, { noteRisposta: opz.noteRisposta, bonusArcano: c.personaArcanoInScorta });
+      const agg = aggiornaConfidente(partitaId, c.chiave, { noteRisposta: opz.noteRisposta, bonusArcano: c.personaArcanoInScorta, ...(a.invito ? { invito: true } : {}) });
       confidente = { chiave: c.chiave, nome: c.nome, noteRisposta: opz.noteRisposta, punti: Math.round((agg.punti - prima) * 100) / 100, bonusArcano: c.personaArcanoInScorta };
     }
   }

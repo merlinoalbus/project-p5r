@@ -173,6 +173,12 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   };
 }
 
+/** R10-11k: la voce ha l'effetto «invito avvenuto» del Confidente a cui è collegata (la chiave dell'invito comincia con «confidente/»): ×1,2 ai punti. */
+function haInvitoDelConfidente(voceUid: string, riferimento: RiferimentoAzioneDto | null): boolean {
+  if (riferimento?.tipo !== 'confidente') return false;
+  return !!prepared("SELECT 1 FROM voce_effetto WHERE voce_uid = ? AND tipo = 'invito' AND chiave LIKE ?").get(voceUid, `${riferimento.chiave}/%`);
+}
+
 /**
  * R10-11/C: il dialogo del passaggio di rango di una voce di Confidente (`rangoAtteso`), dalle scelte di `confidente_dialogo` (L9). Sola
  * lettura: è la proposta che la spunta mostra accanto alle note; i punti li dà solo la scelta dell'utente. Senza riga di dialogo, nessun campo.
@@ -702,7 +708,7 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
       }
       // R10-22: gli eventi che i setter scrivono mentre la spunta applica i suoi effetti portano il legame con la voce e si revocano togliendola
       const { effettiLegacy: effetti } = conVoceDellaSpunta(uid, () => applicaEffettiVoce(partitaId, uid, {
-        applicaLegacy: (id, produce: EffettoLegacyVoce[]) => applicaEffettiAzione(id, { ...v, produce, apertureDedali: aperture, momento: { data: r.data, fascia: v.fascia, origine: 'azione' } }, opz),
+        applicaLegacy: (id, produce: EffettoLegacyVoce[]) => applicaEffettiAzione(id, { ...v, produce, apertureDedali: aperture, invito: haInvitoDelConfidente(uid, v.riferimento), momento: { data: r.data, fascia: v.fascia, origine: 'azione' } }, opz),
         annullaLegacy: annullaEffettiAzione,
       }, { acquisti: opz.acquisti, pesche:opz.pesche, porteAcquisti: { valutaCorrente: disponibilitaAcquistoCorrente }, spuntaFattaIl: adesso }));
       prepared('INSERT INTO spunta_voce_partita (partita_id, voce_uid, fatta_at, effetti_json) VALUES (?, ?, ?, ?)').run(partitaId, uid, adesso, effetti ? JSON.stringify(effetti) : null);
