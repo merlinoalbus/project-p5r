@@ -108,9 +108,11 @@ function progressi(id: number): ProgressiPartitaDto {
   const nomiSquadra = new Map(giocabili().map((p) => [p.chiave, p.nome]));
   const eventiManuali = new Map((prepared('SELECT evento_chiave, avvenuto FROM evento_storia_partita WHERE partita_id = ?').all(id) as Array<{ evento_chiave: string; avvenuto: number }>).map((r) => [r.evento_chiave, r.avvenuto === 1]));
   const dalDiario = apertureDalDiario(id);
-  // R10-22/3: da quale voce del Diario viene un evento di storia (l'effetto «storia» della spunta, ancora attiva)
+  // R10-22/3: da quale voce del Diario viene un evento di storia (l'effetto «storia» della spunta, ancora attiva), e solo se la voce l'ha
+  // segnato davvero: se l'evento era già segnato prima della spunta (`prima.gia`) non è stata la voce
+
   const dalleVoci = new Map<string, Array<{ uid: string; giorno: string; testo: string }>>();
-  for (const r of prepared("SELECT s.chiave, v.uid, v.data AS giorno, v.azione AS testo FROM effetto_stato_voce s JOIN main.voce_giornata v ON v.uid = s.voce_uid WHERE s.partita_id = ? AND s.tipo = 'storia' ORDER BY v.data, v.fascia, v.ordine").all(id) as Array<{ chiave: string; uid: string; giorno: string; testo: string }>) {
+  for (const r of prepared("SELECT s.chiave, v.uid, v.data AS giorno, v.azione AS testo FROM effetto_stato_voce s JOIN main.voce_giornata v ON v.uid = s.voce_uid WHERE s.partita_id = ? AND s.tipo = 'storia' AND json_extract(s.prima_json, '$.gia') = 0 ORDER BY v.data, v.fascia, v.ordine").all(id) as Array<{ chiave: string; uid: string; giorno: string; testo: string }>) {
     dalleVoci.set(r.chiave, [...(dalleVoci.get(r.chiave) ?? []), { uid: r.uid, giorno: r.giorno, testo: r.testo }]);
   }
   const nomiAperture = new Map(apertureDichiarabili().map((a) => [a.chiave, a.nome]));
