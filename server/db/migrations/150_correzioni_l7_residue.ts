@@ -8,10 +8,12 @@
 //      Come ogni modifica di un'offerta dall'app, la riga di prima si conserva in `seed_json` (se vuoto) e passa a origine `utente`.
 //   3. Mothman muschiato (baratto del Gachapon): cinque scambi con Replica d'arma, poi Balsamo vitale DAL 6° scambio (AGS: «dopo cinque
 //      scambi»); la nota diceva «dal 5° scambio». Il testo di prima resta nella nota.
-//   4. Decisioni dell'utente del 23/10 sulle ultime due proposte di Sakai (passano dal gesto ordinario di conferma, come la 144):
-//      · Distintivo dell'angelo: Crystal Skull R (+6) = `accessorio/distintivo-dellangelo-2` (l'altra versione viene scartata);
-//      · costo «Maschera del ladro» dell'Ofuda della magia (19–24/9): `regalo/maschera-del-ladro` (The Gamer: la Thief Mask si compra una
-//        volta a settimana al Discount Rocinante, 2.000 ¥); le due versioni accessorio vengono scartate.
+//   4. Le ultime due proposte di Sakai (passano dalla copia congelata del gesto di conferma, come la 144), con le decisioni dell'utente:
+//      · Distintivo dell'angelo: risposta dell'utente del 23/10 alla domanda, «Crystal Skull R (+6)» = `accessorio/distintivo-dellangelo-2`
+//        (l'altra versione viene scartata);
+//      · costo «Maschera del ladro» dell'Ofuda della magia (19–24/9): l'utente ha detto «sempre vale la versione royal. In ogni caso verifica
+//        tu quale chiedere sakai»; la verifica del PM sulla fonte The Gamer dice che la Thief Mask si compra una volta a settimana al Discount
+//        Rocinante, a 2.000 ¥, quindi `regalo/maschera-del-ladro`; le due versioni accessorio vengono scartate.
 //   5. Carta abilità Media (voce di Madarame, Atrio): la 144 ha scritto quantità 1 e la nota diceva «indicata dall'utente alla conferma», che
 //      non è vero. La quantità resta 1: è ricavata dal singolare del testo della voce («Carta abilità Media.»), e la guida AGS dice «una Carta
 //      abilità Media» (Samurai Gamers: «Media Skill Card», senza numero; nessuna fonte dà un numero esplicito). Si corregge solo la nota della
