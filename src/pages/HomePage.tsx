@@ -1,32 +1,25 @@
 // ============================================================
-// HomePage — cruscotto in una schermata: Doti e guida del giorno a sinistra, mappa navigabile a destra (accessi rapidi solo senza partita)
+// HomePage — cruscotto: la scheda della partita compatta sopra `OggiPartita` (guida del giorno e mappa navigabile); accessi rapidi solo senza partita
 // ============================================================
 //
-// Su desktop e tablet la pagina riempie l'area di lettura senza scorrimento (`.home`): scorrono solo l'elenco delle azioni del giorno
-// e il pannello della mappa. Su mobile le colonne si impilano e la pagina scorre normalmente.
+// Guida e mappa non sono più composte qui: la Home incorpora lo stesso componente della scheda «Oggi» della Partita (R10-24). La scheda
+// della partita (stella, Doti, Scorta, Arcani) è la `testa` che gli passa.
 // ============================================================
 
 import { useMemo, useState } from 'react';
+import { OggiPartita } from '../components/partita/OggiPartita';
 import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
-import { useOggi } from '../hooks/useOggi';
 import { getDoti, getPossedute } from '../services/api';
 import { usePartitaStore } from '../stores/partitaStore';
-import { usePreferenzeStore } from '../stores/preferenzeStore';
-import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
-import { IconaAzione } from '../components/shared/IconaAzione';
 import { IconBolt, IconBook, IconFusion, IconMask, IconStar } from '../components/shared/icons';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { StellaCinque } from '../components/shared/StellaCinque';
 import { AssetImg } from '../components/shared/AssetImg';
 import { IconMaschera } from '../components/shared/iconeGuida';
-import { Spinner } from '../components/shared/PageState';
-import { OggiGuida } from '../components/partita/OggiGuida';
-import { OggiMappa } from '../components/partita/OggiMappa';
 import { slug } from '../../shared/slug';
 import { avanzamentoDote } from '../utils/doti';
-import { useNomeDelPosto } from '../hooks/useNomeDelPosto';
 import { useMedia } from '../hooks/useMedia';
 import type { PartitaDto } from '../types';
 
@@ -59,11 +52,11 @@ function AccessiRapidi() {
   );
 }
 
-/** Cruscotto della partita attiva: Doti e guida del giorno a sinistra, mappa a tutta altezza a destra. */
+/** Cruscotto della partita attiva: la scheda della partita (stella, Doti, Scorta, Arcani) sopra `OggiPartita`, lo stesso componente della
+ * scheda «Oggi» della Partita, con la stessa guida, la stessa mappa e lo stesso centro. */
 function HomeConPartita({ partita }: { partita: PartitaDto }) {
   const doti = useCarica(() => getDoti(partita.id), [partita.id]);
   const scorta = useCarica(() => getPossedute(partita.id), [partita.id]);
-  const oggi = useOggi(partita.id);
   // Arcani con almeno una Persona in scorta: i Confidenti di quell'arcano ricevono il bonus ×1,5 sui punti.
   const arcaniInScorta = useMemo(() => {
     const visti = new Map<string, string>();
@@ -71,36 +64,12 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
     return [...visti.entries()].map(([chiave, nome]) => ({ chiave, nome }));
   }, [scorta.dati]);
 
-  // La mappa a scomparsa (richiesta dell'utente, 2026-09-30): chiusa, resta una linguetta sul bordo destro e carta e
-  // guida prendono la sua parte di pagina; il tocco sulla linguetta la riapre, col mouse il passaggio la fa uscire sopra
-  // il contenuto. «Sulla mappa» di un'azione la riapre da sé: l'azione vuole mostrarla.
-  const mappaChiusa = usePreferenzeStore((s) => s.mappaHomeChiusa);
-  const impostaMappaChiusa = usePreferenzeStore((s) => s.impostaMappaHomeChiusa);
-  const [schedaMappa, impostaSchedaMappa] = useState(false);
-  const oggiHome = useMemo(() => ({
-    ...oggi,
-    sullaMappa: (m: Parameters<typeof oggi.sullaMappa>[0], voce: string | null) => { impostaMappaChiusa(false); impostaSchedaMappa(true); oggi.sullaMappa(m, voce); },
-  }), [oggi, impostaMappaChiusa]);
-
-  const guidaPronta = Boolean(oggi.indice && oggi.giorno);
-  // L5 §4.4b (M1): la linguetta porta il nome del posto mostrato, mai «Mappa»
-  const nomePosto = useNomeDelPosto(oggi.mappa.chiave);
-  // L5 (LAY5-1): la stessa soglia della regola `@media` della Home in `tailwind.css`
-  const riempi = useMedia('(min-width: 1024px) and (min-height: 1150px)');
-  // R10-24/4: telefono e tablet verticale non hanno posto per due colonne: guida e mappa sono due schede «Guida | Mappa»
-  // (stessa soglia di `.home-griglia--a-schede` in `tailwind.css`); la mappa a scomparsa e la linguetta restano dove le colonne ci sono.
-  const aSchede = useMedia('(max-width: 767px), (max-width: 1023px) and (orientation: portrait)');
   // R10-24/3: sul telefono le Doti sono una fila di tessere e la stella si apre con un tocco
   const telefono = useMedia('(max-width: 767px)');
   const [stellaAperta, impostaStellaAperta] = useState(false);
   const mostraStella = Boolean(doti.dati && doti.dati.length > 0) && (!telefono || stellaAperta);
-  const chiusa = mappaChiusa && guidaPronta && !aSchede;
-  const statoOggi = oggi.errore
-    ? <p className="m-0 text-[13px] text-text-secondary" role="alert">Guida del giorno non disponibile: {oggi.errore}</p>
-    : <div className="flex items-center justify-center py-6" aria-busy="true"><Spinner /></div>;
 
-  return (
-    <div className={`home-griglia ${chiusa ? 'home-griglia--mappa-chiusa' : ''} ${aSchede ? 'home-griglia--a-schede' : ''}`}>
+  const testa = (
       <div className="home-carta card">
         <div className="home-carta__riga">
           {mostraStella && doti.dati && (
@@ -151,41 +120,10 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
           </div>
         </div>
       </div>
-
-      {aSchede && guidaPronta && (
-        <div className="home-schede" role="tablist" aria-label="Guida o mappa">
-          <button type="button" role="tab" aria-selected={!schedaMappa} className={`chip touch ${!schedaMappa ? 'chip--attivo' : ''}`} onClick={() => impostaSchedaMappa(false)}>Guida</button>
-          <button type="button" role="tab" aria-selected={schedaMappa} className={`chip touch ${schedaMappa ? 'chip--attivo' : ''}`} onClick={() => impostaSchedaMappa(true)}>{nomePosto ? `Mappa · ${nomePosto}` : 'Mappa'}</button>
-        </div>
-      )}
-
-      {!(aSchede && schedaMappa && guidaPronta) && (
-      <section className="home-oggi flex flex-col gap-1.5" aria-label="Oggi nella partita">
-        <h2 className="m-0 font-display text-[19px] uppercase shrink-0">Oggi</h2>
-        {/* L5 (LAY5-1): l'area interna della guida solo dove c'è altezza (da 1024 × 1150); altrove la guida cresce con la pagina */}
-        <div className={riempi ? 'flex-1 min-h-0 riempi-figli' : undefined}>{guidaPronta ? <OggiGuida oggi={oggiHome} riempi={riempi} /> : statoOggi}</div>
-      </section>
-      )}
-
-      {guidaPronta && mappaChiusa && !aSchede && (
-        <button type="button" className="home-linguetta touch" onClick={() => impostaMappaChiusa(false)} aria-label={nomePosto ? `Mostra ${nomePosto}` : 'Mostra la mappa'} title={`Mostra ${nomePosto ?? 'la mappa'} (col mouse basta passarci sopra)`}>
-          <IconaAzione chiave="mappa" dimensione={20} /><span className="home-linguetta__testo">{nomePosto ?? '…'}</span>
-        </button>
-      )}
-      {guidaPronta && (!aSchede || schedaMappa) && (
-        <div className={`home-mappa ${chiusa ? 'home-mappa--a-scomparsa' : ''}`}>
-          {!aSchede && (
-            <div className="home-mappa__barra">
-              {mappaChiusa
-                ? <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Tieni aperta" onClick={() => impostaMappaChiusa(false)} />
-                : <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Nascondi la mappa" onClick={() => impostaMappaChiusa(true)} />}
-            </div>
-          )}
-          <OggiMappa oggi={oggiHome} riempi />
-        </div>
-      )}
-    </div>
   );
+
+  // R10-24: la Home incorpora lo stesso componente della scheda «Oggi» della Partita, con la scheda della partita come testa
+  return <OggiPartita partita={partita} testa={testa} />;
 }
 
 /** Pagina iniziale con lo stato della partita attiva e gli accessi rapidi. */
