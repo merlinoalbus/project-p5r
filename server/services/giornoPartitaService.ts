@@ -39,7 +39,7 @@ export function cambiaGiornoPartita(partitaId: number, data: string | null, desc
     const da = (prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null }).data_gioco;
     // lo stesso giorno non è un cambio: nemmeno il controllo (un salvataggio del Riepilogo rimanda la data com'è)
     if (da === data) return { cambiato: false, da, a: data };
-    if (data !== null && !prepared('SELECT 1 FROM giorno_percorso WHERE data = ?').get(data)) {
+    if (data !== null && !prepared('SELECT 1 FROM giorno WHERE data = ?').get(data)) {
       throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso il ${data}.`);
     }
     prepared("UPDATE partita SET data_gioco = ?, fascia_gioco = 'giorno', updated_at = ? WHERE id = ?").run(data, nowIso(), partitaId);

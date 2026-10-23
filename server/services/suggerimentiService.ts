@@ -169,7 +169,7 @@ export function suggerimentiOggi(partitaId: number): SuggerimentiOggiDto {
   };
   const data = partita.data_gioco;
   if (!data) return vuoto;
-  if (!prepared('SELECT 1 FROM giorno_percorso WHERE data = ?').get(data)) return { ...vuoto, giorno: data };
+  if (!prepared('SELECT 1 FROM giorno WHERE data = ?').get(data)) return { ...vuoto, giorno: data };
 
   const fatte = spuntePartita(partitaId, data);
   // Un'azione bloccata dai requisiti non è un suggerimento: la si esclude come fa la Guida (`statoAzione`).

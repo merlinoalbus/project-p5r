@@ -358,7 +358,7 @@ export function rivediVoce(uid: string, esito: EsitoRevisioneVoce, partitaId?: n
 
 /** 404 se la data non è un giorno del percorso. */
 function giornoEsiste(data: string): void {
-  if (!prepared('SELECT 1 FROM giorno_percorso WHERE data = ?').get(data)) throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso il ${data}.`);
+  if (!prepared('SELECT 1 FROM giorno WHERE data = ?').get(data)) throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso il ${data}.`);
 }
 
 /** Le voci di un giorno nel loro ordine: prima di giorno, poi di sera. */
@@ -412,10 +412,10 @@ export function ingressiConclusiNascosti(partitaId: number): Array<{ uid: string
   const conclusi = palazziConclusi(partitaId);
   if (conclusi.size === 0 || !conLegami()) return [];
   const righe = prepared(`SELECT v.uid AS uid, v.data AS data, v.riferimento_chiave AS palazzo FROM voce_giornata v
-    JOIN giorno_percorso g ON g.data = v.data
+    JOIN giorno g ON g.data = v.data
     LEFT JOIN spunta_voce_partita s ON s.voce_uid = v.uid AND s.partita_id = ?
     WHERE v.genere = 'azione' AND v.riferimento_tipo = 'dungeon' AND s.voce_uid IS NULL
-      AND g.ordine > (SELECT ordine FROM giorno_percorso WHERE data = ?) AND g.ordine > (SELECT ordine FROM giorno_percorso WHERE data = ?)
+      AND g.ordine > (SELECT ordine FROM giorno WHERE data = ?) AND g.ordine > (SELECT ordine FROM giorno WHERE data = ?)
       AND (EXISTS (SELECT 1 FROM voce_infiltrazione i WHERE i.voce_uid = v.uid) OR EXISTS (SELECT 1 FROM proposta_infiltrazione_voce p WHERE p.voce_uid = v.uid))`)
     .all(partitaId, giorno, ULTIMO_GIORNO_VALIDATO) as Array<{ uid: string; data: string; palazzo: string }>;
   return righe.filter((r) => conclusi.has(r.palazzo)).map(({ uid, data }) => ({ uid, data }));
@@ -611,7 +611,7 @@ export function trasferisciVoci(t: TrasferisciVociGiornata, partitaId?: number):
   if (partitaId !== undefined) verificaPartita(partitaId);
   giornoEsiste(t.giorno);
   const righe = t.uid.map(rigaVoce);
-  const ordineGiorno = new Map((prepared('SELECT data, ordine FROM giorno_percorso').all() as Array<{ data: string; ordine: number }>).map((r) => [r.data, r.ordine]));
+  const ordineGiorno = new Map((prepared('SELECT data, ordine FROM giorno').all() as Array<{ data: string; ordine: number }>).map((r) => [r.data, r.ordine]));
   // l'ordine che avevano: giorno, poi le voci di giorno prima di quelle di sera, poi il posto nella fascia
   righe.sort((a, b) => (ordineGiorno.get(a.data) ?? 0) - (ordineGiorno.get(b.data) ?? 0) || (fasciaDi(a) === fasciaDi(b) ? 0 : fasciaDi(a) === 'giorno' ? -1 : 1) || a.ordine - b.ordine || a.uid.localeCompare(b.uid));
   const adesso = nowIso();

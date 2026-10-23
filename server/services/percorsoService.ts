@@ -13,10 +13,13 @@ import { cambiaGiornoPartita } from './giornoPartitaService.js';
 import type { GiornoAvanzatoDto, GiornoCorrenteDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../../shared/types.js';
 import { confidenti, leggiPartita } from './partiteService.js';
 import { conteggiGiornate, righeDelGiorno, spuntePartita, vociDelGiorno } from './giornataService.js';
-import { allerteDelGiorno, meteoDelGiorno } from './meteoService.js';
+import { allerteDelGiorno, meteoDelGiorno, testoMeteo } from './meteoService.js';
 import { giornoDellaSettimana } from '../../shared/date.js';
 
-interface Riga { data: string; ordine: number; giorno_settimana: string; fase: string; trama: string; vincoli_json: string; meteo: string | null; avvisi_json: string; fonte: string; coperto: number }
+interface Riga { data: string; ordine: number; fase: string; trama: string; vincoli_json: string; meteo: string | null; avvisi_json: string; fonte: string; coperto: number }
+/** Una riga di `giorno` (R9-15) come la vede il percorso: il meteo è il testo del giorno unico, lo stesso del calendario. */
+interface RigaGiorno extends Omit<Riga, 'meteo'> { meteo_giorno: string | null; meteo_sera: string | null; nota_meteo: string | null }
+const comeRiga = ({ meteo_giorno, meteo_sera, nota_meteo, ...r }: RigaGiorno): Riga => ({ ...r, meteo: testoMeteo({ meteo_giorno, meteo_sera, nota_meteo }) });
 
 /** La data di gioco della partita ('MM-GG'); null senza partita, se la partita non esiste o se la data non è impostata. */
 function dataCorrente(partitaId: number | undefined): string | null {
@@ -32,11 +35,12 @@ const sigla = (data: string): string | null => giornoDellaSettimana(data)?.slice
 export function indicePercorso(partitaId?: number): PercorsoIndiceDto {
   if (partitaId !== undefined) verificaPartita(partitaId);
   const conteggi = conteggiGiornate(partitaId);
-  const righe = prepared('SELECT data, ordine, giorno_settimana, fase, meteo, avvisi_json, coperto FROM giorno_percorso ORDER BY ordine').all() as Array<Pick<Riga, 'data' | 'ordine' | 'giorno_settimana' | 'fase' | 'meteo' | 'avvisi_json' | 'coperto'>>;
+  const righe = (prepared('SELECT data, ordine, fase, meteo_giorno, meteo_sera, nota_meteo, avvisi_json, coperto FROM giorno ORDER BY ordine').all() as Array<Pick<RigaGiorno, 'data' | 'ordine' | 'fase' | 'meteo_giorno' | 'meteo_sera' | 'nota_meteo' | 'avvisi_json' | 'coperto'>>)
+    .map(({ meteo_giorno, meteo_sera, nota_meteo, ...r }) => ({ ...r, meteo: testoMeteo({ meteo_giorno, meteo_sera, nota_meteo }) }));
   const giorni = righe.map((r) => {
     const c = conteggi.get(r.data) ?? { azioni: 0, fatte: 0 };
     return {
-      giorno: r.data, giornoSettimana: sigla(r.data) ?? r.giorno_settimana, fase: r.fase, meteo: r.meteo, azioni: c.azioni, fatte: c.fatte,
+      giorno: r.data, giornoSettimana: sigla(r.data) ?? '', fase: r.fase, meteo: r.meteo, azioni: c.azioni, fatte: c.fatte,
       avvisi: (JSON.parse(r.avvisi_json) as string[]).length, coperto: r.coperto === 1,
     };
   });
@@ -45,18 +49,17 @@ export function indicePercorso(partitaId?: number): PercorsoIndiceDto {
 
 /** Scheda di un giorno con le voci nel loro ordine (fatte nella partita), giorno precedente e successivo. */
 export function giornoPercorso(data: string, partitaId?: number): PercorsoGiornoDto {
-  const base = prepared('SELECT * FROM giorno_percorso WHERE data = ?').get(data) as Riga | undefined;
-  if (!base) throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso il ${data}.`);
-  // R9-15/R9-19: trama e vincoli del giorno sono quelli del giorno unico (modificabile dall'editor); il resto è del percorso
-  const unico = prepared('SELECT trama, vincoli_json FROM giorno WHERE data = ?').get(data) as { trama: string; vincoli_json: string } | undefined;
-  const r: Riga = unico ? { ...base, trama: unico.trama, vincoli_json: unico.vincoli_json } : base;
+  // R9-15: il giorno è uno solo (modificabile dall'editor, R9-19): trama, vincoli e meteo sono gli stessi del calendario
+  const grezza = prepared('SELECT * FROM giorno WHERE data = ?').get(data) as RigaGiorno | undefined;
+  if (!grezza) throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso il ${data}.`);
+  const r = comeRiga(grezza);
   if (partitaId !== undefined) verificaPartita(partitaId);
   const conf = partitaId ? new Map(confidenti(partitaId).map((c) => [c.chiave, c])) : null;
   const azioni = vociDelGiorno(data, partitaId, conf, true);
-  const prec = prepared('SELECT data FROM giorno_percorso WHERE ordine < ? ORDER BY ordine DESC LIMIT 1').get(r.ordine) as { data: string } | undefined;
-  const succ = prepared('SELECT data FROM giorno_percorso WHERE ordine > ? ORDER BY ordine ASC LIMIT 1').get(r.ordine) as { data: string } | undefined;
+  const prec = prepared('SELECT data FROM giorno WHERE ordine < ? ORDER BY ordine DESC LIMIT 1').get(r.ordine) as { data: string } | undefined;
+  const succ = prepared('SELECT data FROM giorno WHERE ordine > ? ORDER BY ordine ASC LIMIT 1').get(r.ordine) as { data: string } | undefined;
   return {
-    giorno: r.data, giornoSettimana: sigla(r.data) ?? r.giorno_settimana, fase: r.fase, trama: r.trama, vincoli: JSON.parse(r.vincoli_json) as string[], meteo: r.meteo, azioni, avvisi: JSON.parse(r.avvisi_json) as string[], fonte: r.fonte, coperto: r.coperto === 1,
+    giorno: r.data, giornoSettimana: sigla(r.data) ?? '', fase: r.fase, trama: r.trama, vincoli: JSON.parse(r.vincoli_json) as string[], meteo: r.meteo, azioni, avvisi: JSON.parse(r.avvisi_json) as string[], fonte: r.fonte, coperto: r.coperto === 1,
     precedente: prec?.data ?? null, successivo: succ?.data ?? null, dataCorrente: dataCorrente(partitaId), fatte: azioni.filter((a) => a.fatta).length,
     meteoPartita: partitaId ? meteoDelGiorno(partitaId, data) : null,
     allerte: allerteDelGiorno(data),
@@ -72,13 +75,13 @@ export function giornoPercorso(data: string, partitaId?: number): PercorsoGiorno
  */
 export function avanzaSeGiornoCompleto(partitaId: number, data: string): GiornoAvanzatoDto | null {
   if (dataCorrente(partitaId) !== data) return null;
-  const r = prepared('SELECT ordine FROM giorno_percorso WHERE data = ?').get(data) as { ordine: number } | undefined;
+  const r = prepared('SELECT ordine FROM giorno WHERE data = ?').get(data) as { ordine: number } | undefined;
   if (!r) return null;
   const azioni = righeDelGiorno(data).filter((v) => v.genere === 'azione');
   if (azioni.length === 0) return null;
   const fatte = spuntePartita(partitaId, data);
   if (!azioni.every((a) => fatte.has(a.uid))) return null;
-  const succ = prepared('SELECT data FROM giorno_percorso WHERE ordine > ? ORDER BY ordine ASC LIMIT 1').get(r.ordine) as { data: string } | undefined;
+  const succ = prepared('SELECT data FROM giorno WHERE ordine > ? ORDER BY ordine ASC LIMIT 1').get(r.ordine) as { data: string } | undefined;
   if (!succ) return null;
   // la regola unica del cambio giorno (R10-16), con la sua descrizione nello storico
   cambiaGiornoPartita(partitaId, succ.data, { titolo: `Giornata del ${data} completata`, dettaglio: `Tutte le attività del giorno sono fatte: la partita passa al ${succ.data}, di giorno.` });
