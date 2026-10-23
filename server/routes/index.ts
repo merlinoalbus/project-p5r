@@ -10,6 +10,7 @@
 
 import type { Router } from 'express';
 import compendioRouter from './compendio.js';
+import disponibilitaStrutturataRouter from './disponibilitaStrutturata.js';
 import traduzioniRouter from './traduzioni.js';
 import partiteRouter from './partite.js';
 import immaginiRouter from './immagini.js';
@@ -28,6 +29,7 @@ import pescaRouter from './pesca.js';
 /** I router di area con il loro prefisso, nell'ordine di montaggio. */
 export const ROUTER_DI_AREA: ReadonlyArray<readonly [string, Router]> = [
   ['/api/compendio', compendioRouter],
+  ['/api/compendio', disponibilitaStrutturataRouter],
   ['/api/traduzioni', traduzioniRouter],
   ['/api/partite', partiteRouter],
   ['/api/immagini', immaginiRouter],
