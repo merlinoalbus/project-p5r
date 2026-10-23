@@ -2,7 +2,7 @@ import { isDeepStrictEqual } from 'node:util';
 import type { Migration } from '../migrationRunner.js';
 import type { RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { condizioneSpillo } from '../../schemas/mappe.js';
-import { snapshotFonteProposta } from '../../services/snapshotProposteOggetti.js';
+import { snapshotFonteProposta } from './snapshotProposte121.js';
 
 type Riga = Record<string, unknown>;
 const AUDIT = 'audit-bonifica-catalogo-126';

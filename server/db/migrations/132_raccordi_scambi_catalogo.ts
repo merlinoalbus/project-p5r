@@ -1,6 +1,6 @@
 import type { Migration } from '../migrationRunner.js';
 import { CHIAVE_RACCORDI_SCAMBI_132, esitoFonteScambio132, fotografiaFonteScambio132, layoutNodoScambio132,
-  leggiBlocchiScambiRaw, MANIFEST_SCAMBI_132, VERSIONE_RACCORDI_SCAMBI_132, type RegistroRaccordiScambi132 } from '../../services/raccordiScambiCatalogoRegistro.js';
+  leggiBlocchiScambiRaw, MANIFEST_SCAMBI_132, VERSIONE_RACCORDI_SCAMBI_132, type RegistroRaccordiScambi132 } from './raccordiScambiCatalogo132Registro.js';
 
 /** Raccordi documentali espliciti: nessuna offerta, proposta, fusione o stato della partita viene modificato. */
 export const migration132: Migration = {

@@ -2,11 +2,11 @@
 import type { AppDatabase } from '../dbService.js';
 import { separaNomi121 } from './contenutiOggetti121.js';
 import { riconciliaContenutiPerIdentita, selezionaContenutiVoce, type LacunaContenuto } from './contenutiOggetti.js';
-import { salvaSnapshotProposta, snapshotFonteProposta, type ChiaveProposta } from '../../services/snapshotProposteOggetti.js';
+import { salvaSnapshotProposta, snapshotFonteProposta, type ChiaveProposta } from './snapshotProposte121.js';
 import { donatoreOggetto121, FONTE_PREMI_ESAMI_121, PREMI_ESAMI_121, premioSfida121 } from './premiOggetti121.js';
 import { scambiJose121 } from './scambiJose121.js';
 import { FONTE_GACHAPON_121, scambiGachapon121 } from './scambiGachapon121.js';
-import { nodiCatalogoGuida } from '../../../shared/riferimentiCatalogoGuida.js';
+import { nodiCatalogoGuida } from './riferimentiCatalogoGuida121.js';
 
 type Riga = Record<string, unknown>;
 interface Oggetto {

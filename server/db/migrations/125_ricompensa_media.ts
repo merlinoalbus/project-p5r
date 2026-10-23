@@ -1,7 +1,7 @@
 import type { Migration } from '../migrationRunner.js';
 import type { AppDatabase } from '../dbService.js';
 import { selezionaContenutiVoce } from './contenutiOggetti.js';
-import { snapshotFonteProposta } from '../../services/snapshotProposteOggetti.js';
+import { snapshotFonteProposta } from './snapshotProposte121.js';
 import { ammettiQuantitaIgnotaVoce125 } from './quantitaProposte125.js';
 
 const VOCE = 'madarame-06-sala-del-tesoro-atrio/4';

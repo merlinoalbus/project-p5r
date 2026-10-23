@@ -1,8 +1,8 @@
 // Il documento preliminare originale non è disponibile: questo è un NUOVO censimento.
 // L'input privato vive solo nel database dell'utente, mai nel manifest pubblico.
 import { createHash } from 'node:crypto';
-import manifestJson from '../../../shared/l7-fonti-ricostruite.json' with { type: 'json' };
-import { inputImprontaCatalogo, type AuditCatalogo, type FonteAuditCatalogo, type RiferimentoAuditCatalogo } from '../../../shared/auditCatalogo.js';
+import manifestJson from './l7-fonti-ricostruite121.json' with { type: 'json' };
+import { inputImprontaCatalogo, type AuditCatalogo, type FonteAuditCatalogo, type RiferimentoAuditCatalogo } from './auditCatalogoBase121.js';
 import type { AppDatabase } from '../dbService.js';
 import { donatoreOggetto121 } from './premiOggetti121.js';
 

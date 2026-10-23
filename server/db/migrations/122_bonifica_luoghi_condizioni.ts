@@ -1,5 +1,5 @@
 import type { Migration } from '../migrationRunner.js';
-import { palazzoDiIngresso } from '../../services/mappe/ingressoPalazzo.js';
+import { palazzoDiIngresso } from './ingressoPalazzo122.js';
 import { logger } from '../../utils/logger.js';
 
 type RigaPin = { id: number; origine: string; tipo: string; mappa_chiave: string | null; riferimento_tipo: string | null; riferimento_chiave: string | null; seed_identita_json: string | null; condizioni_json: string | null };

@@ -6,7 +6,7 @@ import { popolaCatalogo121 } from './catalogoOggetti121.js';
 import { condividiListini121 } from './listiniCondivisi121.js';
 import { conservaNoteScambi121 } from './noteScambi121.js';
 import { censisciFontiCatalogo121, salvaAuditCatalogo121 } from './auditCatalogo121.js';
-import { catturaSnapshotProposte121 } from '../../services/snapshotProposteOggetti.js';
+import { catturaSnapshotProposte121 } from './snapshotProposte121.js';
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS catalogo_oggetto (
