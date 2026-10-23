@@ -14,6 +14,7 @@ import { CondizioniEditor } from './CondizioniEditor';
 import { normalizzaCondizioniSpillo, normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../../shared/condizioniSpillo';
 import { aggiornaElementoCatalogo, creaElementoCatalogo, eliminaElementoCatalogo, eliminaNelCestino, isApiError, nascondiElementoCatalogo, ripristinaElementoCatalogo } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
+import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -50,6 +51,10 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
   const [condizioniDaRisolvere, setCondizioniDaRisolvere] = useState(() => !jsonSenzaPerdite(elemento?.dati.condizioni_json, normalizzaCondizioniSpillo));
   const [condizioniScelte, setCondizioniScelte] = useState(!nuovo);
   const impostaCondizioni = (v: RequisitoSpillo[]) => { setCondizioni(v); setCondizioniScelte(true); setCondizioniDaRisolvere(false); };
+  // dati e condizioni com'erano all'apertura: se sono cambiati e non salvati la bozza è sporca (per «Aggiorna» e la chiusura della scheda del browser)
+  const statoModulo = JSON.stringify({ dati, condizioni });
+  const [statoIniziale] = useState(statoModulo);
+  useBozzaSporca('modulo-catalogo', nuovo ? `nuovo elemento (${tipo})` : `modifica di «${elemento.nome}»`, statoModulo !== statoIniziale);
   // Il modulo delle attività deve vedere le condizioni effettivamente inviate, non una copia iniziale.
   const datiModulo = tipo === 'attivita' ? { ...dati, condizioni_json: condizioni, _condizioniDaRisolvere: condizioniDaRisolvere, _condizioniRaw: elemento?.dati.condizioni_json ?? null } : dati;
   const fonteConfidente = tipo === 'attivita' && typeof dati.confidente_chiave === 'string' && dati.confidente_chiave.length > 0;

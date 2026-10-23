@@ -22,6 +22,7 @@ import { useState, type ReactNode } from 'react';
 import { notifica } from '../../stores/notificationStore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { useBozzaSporca } from '../../utils/bozzeSporche';
 
 interface PropsCampo {
   etichetta: string;
@@ -82,6 +83,9 @@ export function CorrezioneGuida<T extends Record<string, string>>({ cosa, inizia
   });
   const [occupato, setOccupato] = useState(false);
   const [conferma, setConferma] = useState(false);
+  // modulo aperto con un testo cambiato e non ancora salvato: «Aggiorna» e la chiusura della scheda lo nominano e chiedono conferma
+  const modificato = bozza !== null && JSON.stringify(bozza.corrente) !== JSON.stringify(bozza.partenza);
+  useBozzaSporca('correzione-guida', `correzione «${cosa}»`, modificato);
   /** Chiude il modulo: scarta la bozza e l'eventuale richiesta di conferma dell'eliminazione. */
   const chiudi = () => { setBozza(null); setConferma(false); onChiudi?.(); };
 
@@ -106,7 +110,6 @@ export function CorrezioneGuida<T extends Record<string, string>>({ cosa, inizia
       </button>
     );
   }
-  const modificato = JSON.stringify(bozza.corrente) !== JSON.stringify(bozza.partenza);
   return (
     <form className="flex w-full flex-col gap-2 rounded-md border border-border-light bg-white/[0.04] px-2 py-2"
       aria-label={`Correggi ${cosa}`} onSubmit={(e) => { e.preventDefault(); void salva(); }}>

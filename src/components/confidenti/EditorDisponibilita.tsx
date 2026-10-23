@@ -4,6 +4,7 @@ import { Selettore } from '../shared/Selettore';
 import { useCarica } from '../../hooks/useCarica';
 import { anteprimaInformazioniConfidente, getInformazioniConfidente, salvaInformazioniConfidente } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
+import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { CAMPI_INFORMAZIONI_CONFIDENTE, ETICHETTE_INFORMAZIONI_CONFIDENTE } from '../../../shared/disponibilitaConfidenti';
 import type { AnteprimaInformazioniConfidenteDto, AzioneInformazioniConfidente, CampoInformazioniConfidente, InformazioniConfidente, InformazioniConfidenteRaw, SalvaInformazioniConfidente } from '../../../shared/disponibilitaConfidenti';
 
@@ -75,6 +76,9 @@ export function EditorDisponibilita({ chiave, onChiudi, onSalvato }: { chiave: s
     } catch (e) { setErrore(e instanceof Error ? e.message : 'Salvataggio non riuscito.'); }
     finally { setOccupato(false); }
   };
+  // valori scelti e non ancora salvati (dopo il salvataggio `patch` si svuota e `nuova` diventa falso): per «Aggiorna» e la chiusura della scheda del browser
+  useBozzaSporca('editor-disponibilita', `informazioni di ${c?.confidente.nome ?? chiave}`,
+    !!c && modalita === 'manuale' && (nuova ? JSON.stringify(creazione) !== JSON.stringify(vuoti()) : Object.keys(patch).length > 0));
   const ammessa = !!c && !dati.caricamento && !dati.errore && (modalita === 'storico' ? versione !== null : motivo.trim().length > 0 && (nuova || Object.keys(patch).length > 0));
   return <Modal aperta larga titolo={`Informazioni di ${c?.confidente.nome ?? chiave}`} onChiudi={() => { if (!occupato) onChiudi(); }} azioni={
     <div className="flex flex-wrap justify-end gap-2 w-full">

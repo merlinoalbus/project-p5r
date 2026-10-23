@@ -18,6 +18,7 @@
 import { useEffect, useState } from 'react';
 import { getMappa, impostaAtterraggiDungeon, impostaFinestraDungeon } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
+import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { ordineGioco } from '../../../shared/condizioniSpillo';
 import { dataGiocoConArticolo } from '../../utils/dateGioco';
 import { nomeSenzaPalazzo } from '../../utils/gruppiPlanimetrie';
@@ -114,6 +115,9 @@ function FinestraAtterraggio({ d, onSalvato, onChiudi }: { d: DungeonDettaglioDt
   const finestraCambiata = !d.finestra || d.finestra.dal !== finestraNuova.dal || d.finestra.al !== finestraNuova.al;
   const finestraRovesciata = finestraNuova.al !== null && ordineGioco(finestraNuova.al) < ordineGioco(finestraNuova.dal);
   const regoleCambiate = JSON.stringify(regole.map(regolaPerServer)) !== JSON.stringify(d.atterraggi.map((r) => ({ dal: r.dal, al: r.al, mappa: r.mappa, spillo: r.spillo })));
+  // la finestra «quando compare» toccata rispetto ai dati salvati (senza finestra salvata, rispetto ai valori di partenza) o le regole cambiate: bozza sporca
+  const finestraToccata = dal !== partenzaDal || senzaFine !== !d.finestra?.al || (!senzaFine && al !== d.finestra?.al);
+  useBozzaSporca('atterraggio-tokyo', `«Sulla mappa di Tokyo» del Palazzo ${d.nome}`, finestraToccata || regoleCambiate);
   const rovesciate = regole.filter((r) => r.quando === 'intervallo' && ordineGioco(r.al) < ordineGioco(r.dal)).map((r) => regole.indexOf(r) + 1);
   const opzioniMappa = d.planimetrie.map((p) => ({ chiave: p.chiave, nome: nomeSenzaPalazzo(p.nome) }));
   // dove si atterra oggi: la regola che il server ha scelto per il giorno della partita

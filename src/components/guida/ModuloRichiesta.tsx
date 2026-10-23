@@ -21,6 +21,7 @@ import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { CampoCorrezione } from './CorrezioneGuida';
+import { useBozzaSporca } from '../../utils/bozzeSporche';
 import type { CitazioniRichiestaDto, RichiestaDto, RichiesteDto } from '../../types';
 
 const R = LIMITI_GUIDA.richiesta;
@@ -90,7 +91,10 @@ function Campi({ richiesta, iniziale, collocazioni, confidenti, onChiudi, onCamb
   richiesta: RichiestaDto | null; iniziale: { dedalo?: string | null; areaDedalo?: string | null }; collocazioni: RichiesteDto['collocazioni'];
   confidenti: Array<{ chiave: string; nome: string; dettaglio: string }>; onChiudi: () => void; onCambiata: () => void | Promise<void>;
 }) {
-  const [b, setB] = useState<Bozza>(() => bozzaDa(richiesta, iniziale));
+  // la bozza di partenza è anche il metro per capire se c'è qualcosa di non salvato (per «Aggiorna» e la chiusura della scheda del browser)
+  const [partenza] = useState<Bozza>(() => bozzaDa(richiesta, iniziale));
+  const [b, setB] = useState<Bozza>(partenza);
+  useBozzaSporca('modulo-richiesta', richiesta ? `modifica della Richiesta «${richiesta.nome}»` : 'nuova Richiesta', JSON.stringify(b) !== JSON.stringify(partenza));
   const [occupato, setOccupato] = useState(false);
   const [citazioni, setCitazioni] = useState<CitazioniRichiestaDto | null>(null);
   /** Cambia alcuni campi della bozza. */

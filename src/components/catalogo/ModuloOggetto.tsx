@@ -4,6 +4,7 @@ import type { CatalogoOggettoDto, DatiNuovoOggettoDto } from '../../types';
 import { aggiornaOggettoCatalogo, creaOggettoCatalogo } from '../../services/api/catalogoOggetti';
 import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
+import { useBozzaSporca } from '../../utils/bozzeSporche';
 
 interface Props { oggetto?: CatalogoOggettoDto; onChiudi: () => void; onSalvato: (oggetto: CatalogoOggettoDto) => void }
 
@@ -21,6 +22,10 @@ export function ModuloOggetto({ oggetto, onChiudi, onSalvato }: Props) {
   const [per, setPer] = useState(typeof oggetto?.statistiche?.per === 'string' ? oggetto.statistiche.per : '');
   const [occupato, setOccupato] = useState(false);
   const [errore, setErrore] = useState<string | null>(null);
+  // i campi com'erano all'apertura: se sono cambiati e non salvati la bozza è sporca (per «Aggiorna» e la chiusura della scheda del browser)
+  const statoModulo = JSON.stringify({ categoria, nome, sottocategoria, originale, altri, effetto, descrizione, statistiche, per });
+  const [statoIniziale] = useState(statoModulo);
+  useBozzaSporca('modulo-oggetto', oggetto ? `modifica di «${oggetto.nome}»` : 'nuovo oggetto', statoModulo !== statoIniziale);
   const equipaggiamento = CATEGORIA_OGGETTO[categoria].gruppo === 'equipaggiamento';
   const salva = async (e: FormEvent) => {
     e.preventDefault();

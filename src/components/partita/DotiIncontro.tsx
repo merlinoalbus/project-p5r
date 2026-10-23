@@ -15,6 +15,7 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { RigaDote } from '../guida/RigaDote';
 import { impostaDotiIncontro } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
+import { useBozzaSporca } from '../../utils/bozzeSporche';
 import type { DoteNote } from '../../../shared/effettiAzione';
 import type { ConfidenteDettaglioDto } from '../../types';
 
@@ -31,12 +32,18 @@ interface Props {
 export function DotiIncontro({ confidente, rangoPartita, onSalvato }: Props) {
   const [aperta, setAperta] = useState(false);
   const [bozza, setBozza] = useState<Array<{ rango: number; doti: DoteNote[] }>>([]);
+  // la bozza com'era all'apertura: finestra aperta con Doti cambiate e non salvate = bozza sporca (per «Aggiorna» e la chiusura della scheda del browser)
+  const [partenza, setPartenza] = useState('');
+  useBozzaSporca('doti-incontro', `Doti al passaggio di rango di ${confidente.nome}`, aperta && JSON.stringify(bozza) !== partenza);
   const [occupato, setOccupato] = useState(false);
   const verso = rangoPartita === null ? null : Math.min(10, rangoPartita + 1);
   const conDoti = confidente.dotiIncontro.filter((r) => r.doti.length > 0);
 
   /** Apre la finestra con una bozza copiata dai dati del Confidente, così le modifiche non toccano l'originale finché non si salva. */
-  const apri = () => { setBozza(confidente.dotiIncontro.map((r) => ({ rango: r.rango, doti: r.doti.map((d) => ({ ...d })) }))); setAperta(true); };
+  const apri = () => {
+    const copia = confidente.dotiIncontro.map((r) => ({ rango: r.rango, doti: r.doti.map((d) => ({ ...d })) }));
+    setBozza(copia); setPartenza(JSON.stringify(copia)); setAperta(true);
+  };
   /** Sostituisce nella bozza le Doti di un rango. */
   const cambiaRango = (rango: number, doti: DoteNote[]) => setBozza((b) => b.map((r) => (r.rango === rango ? { ...r, doti } : r)));
   /** Salva l'intera bozza, avvisa `onSalvato` e chiude la finestra; in caso di errore la finestra resta aperta. */

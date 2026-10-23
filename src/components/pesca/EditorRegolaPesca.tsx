@@ -3,6 +3,7 @@ import type { DefinizioneRegolaPesca, RegolaPescaDto, ViaRegolaPesca } from '../
 import { salvaRegolaPesca } from '../../services/api/pesca';
 import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
+import { useBozzaSporca } from '../../utils/bozzeSporche';
 
 const righe = (s: string) => s.split('\n').map(v => v.trim()).filter(Boolean);
 const urlValido = (s: string) => { try { return ['https:', 'http:'].includes(new URL(s).protocol); } catch { return false; } };
@@ -23,6 +24,10 @@ export function EditorRegolaPesca({ regola, onChiudi, onSalvata }: { regola: Reg
   const [occupato, setOccupato] = useState(false), [salvata, setSalvata] = useState(false), [errore, setErrore] = useState<string | null>(null);
   const [conferma, setConferma] = useState(false);
   const blocco = useRef(false), viva = useRef(true);
+  // la bozza com'era all'apertura è il metro per capire se c'è qualcosa di non salvato (per «Aggiorna» e la chiusura della scheda del browser)
+  const statoBozza = JSON.stringify({ nome, fonti, numeri, vie });
+  const [statoIniziale] = useState(statoBozza);
+  useBozzaSporca('editor-regola-pesca', 'regola della pesca', !salvata && statoBozza !== statoIniziale);
   useLayoutEffect(() => { viva.current = true; return () => { viva.current = false; }; }, []);
   const cambia = () => { setConferma(false); setErrore(null); };
   const modificaVia = (i: number, patch: Partial<ViaBozza>) => { cambia(); setVie(v => v.map((x, j) => j === i ? { ...x, ...patch } : x)); };
