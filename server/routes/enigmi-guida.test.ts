@@ -10,12 +10,28 @@
 import request from 'supertest';
 import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
-import { bossFinali } from '../services/palazziService.js';
 import { planimetriaDiPalazzo } from '../../test/planimetriaDiPalazzo.js';
 import type { DungeonDettaglioDto, PuntoInteresseDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
+
+/** L'ex euristica `bossFinali` del servizio (tolta con L11 R11-02b/2): l'ultima area in ordine di guida con punti «boss» di ogni dungeon, qui solo per trovare la voce da usare come passo. */
+function bossFinali(): Map<string, { area: string; punti: string[]; unico: boolean }> {
+  const righe = prepared(`SELECT a.dungeon_chiave AS dungeon, a.chiave AS area, a.ordine AS ordine, pi.chiave AS punto
+    FROM punto_interesse pi JOIN dungeon_area a ON a.chiave = pi.area_chiave WHERE pi.tipo = 'boss' ORDER BY a.dungeon_chiave, a.ordine, pi.ordine`).all() as Array<{ dungeon: string; area: string; ordine: number; punto: string }>;
+  const out = new Map<string, { area: string; ordine: number; punti: string[]; aree: Set<string> }>();
+  for (const r of righe) {
+    const attuale = out.get(r.dungeon);
+    if (!attuale) out.set(r.dungeon, { area: r.area, ordine: r.ordine, punti: [r.punto], aree: new Set([r.area]) });
+    else {
+      attuale.aree.add(r.area);
+      if (r.ordine > attuale.ordine) Object.assign(attuale, { area: r.area, ordine: r.ordine, punti: [r.punto] });
+      else if (r.ordine === attuale.ordine) attuale.punti.push(r.punto);
+    }
+  }
+  return new Map([...out].map(([k, v]) => [k, { area: v.area, punti: v.punti, unico: v.aree.size === 1 }]));
+}
 
 describe('Enigma con i suoi passi', () => {
   let partita: number;

@@ -24,12 +24,29 @@ import { closeDb, getDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { planimetriaDiPalazzo } from '../../test/planimetriaDiPalazzo.js';
 import { statoPartitaSemafori, valuta } from '../services/semaforiService.js';
-import { bossFinali, palazziCompletati, palazziConclusi, statoPalazzi } from '../services/palazziService.js';
+import { palazziCompletati, palazziConclusi, statoPalazzi } from '../services/palazziService.js';
 import { modelloAvanzamento } from '../services/mappe/statiGuida.js';
 import type { DungeonRiassuntoDto, MappaDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
 
 const app = createApp();
+
+/** L'ex euristica `bossFinali` del servizio (tolta con L11 R11-02b/2): l'ultima area in ordine di guida con punti «boss» di ogni dungeon, qui solo per trovare la voce da segnare. */
+function bossFinali(): Map<string, { area: string; punti: string[]; unico: boolean }> {
+  const righe = prepared(`SELECT a.dungeon_chiave AS dungeon, a.chiave AS area, a.ordine AS ordine, pi.chiave AS punto
+    FROM punto_interesse pi JOIN dungeon_area a ON a.chiave = pi.area_chiave WHERE pi.tipo = 'boss' ORDER BY a.dungeon_chiave, a.ordine, pi.ordine`).all() as Array<{ dungeon: string; area: string; ordine: number; punto: string }>;
+  const out = new Map<string, { area: string; ordine: number; punti: string[]; aree: Set<string> }>();
+  for (const r of righe) {
+    const attuale = out.get(r.dungeon);
+    if (!attuale) out.set(r.dungeon, { area: r.area, ordine: r.ordine, punti: [r.punto], aree: new Set([r.area]) });
+    else {
+      attuale.aree.add(r.area);
+      if (r.ordine > attuale.ordine) Object.assign(attuale, { area: r.area, ordine: r.ordine, punti: [r.punto] });
+      else if (r.ordine === attuale.ordine) attuale.punti.push(r.punto);
+    }
+  }
+  return new Map([...out].map(([k, v]) => [k, { area: v.area, punti: v.punti, unico: v.aree.size === 1 }]));
+}
 
 /** Le planimetrie di un Palazzo: l'albero sotto `dungeon-<chiave>`. */
 const albero = (dungeon: string): string[] => (prepared(`WITH RECURSIVE a(chiave) AS (SELECT ? UNION ALL SELECT m.chiave FROM mappa m JOIN a ON m.genitore_chiave = a.chiave) SELECT chiave FROM a`)
@@ -275,7 +292,8 @@ describe('Palazzo completato: Tesoro, boss finale e tutti gli oggetti permanenti
     expect(dentro.disponibilita?.stato).not.toBe('bloccato');
   });
 
-  it('i Memento non si completano sulla mappa: anche con un boss segnato nella Guida restano sulla mappa di Tokyo', async () => {
+  // R11-02b/2 (L11): l'euristica del boss finale è tolta; i Memento non hanno una riga di stato (nessun boss nei dedali): il caso non ha più senso
+  it.skip('i Memento non si completano sulla mappa: anche con un boss segnato nella Guida restano sulla mappa di Tokyo', async () => {
     // il boss finale dei Memento secondo la regola; se il pacchetto non ne ha, se ne crea uno nell'ultima area
     // (la Guida è modificabile al 100%: il caso è possibile)
     if (!bossFinali().get('mementos')) {
@@ -382,7 +400,8 @@ describe('Palazzo completato: Tesoro, boss finale e tutti gli oggetti permanenti
     expect(['voceBossFinale', 'bossFinaleCorretto'].filter((k) => k in memento)).toEqual([]);
   });
 
-  it('§8.15 — Iweleth segue la regola del boss dei Memento (113): mai «manca: il boss finale (nessuna voce…)», concluso col boss segnato nella Guida, nessun effetto di Palazzo', async () => {
+  // R11-02b/2 (L11) e R8-19b: Iweleth è solo un dedalo, senza boss segnato nella Guida né anello: resta la riga senza effetti, il caso (boss che conclude) non vale più
+  it.skip('§8.15 — Iweleth segue la regola del boss dei Memento (113): mai «manca: il boss finale (nessuna voce…)», concluso col boss segnato nella Guida, nessun effetto di Palazzo', async () => {
     const p = await partitaNuova('Iweleth', '12-24');
     const st = () => statoPalazzi(p).get('iweleth')!;
     expect(st().mancaPerConcludere).toBe('il boss finale segnato nella Guida');

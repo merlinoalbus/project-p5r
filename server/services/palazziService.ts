@@ -10,7 +10,7 @@
 // entrambe valide le condizioni sono in AND non in OR», poi «Tesoro + boss + raccolto tutto») servono **tutte e tre**:
 // - il **Tesoro del Palazzo**: lo spillo «Tesoro del Palazzo» raccolto. Un Palazzo senza quello spillo sulle planimetrie
 //   non si completa finché non lo si mette con l'editor;
-// - il **boss finale** sconfitto: il suo spillo raccolto sulla mappa, o il boss segnato nella Guida. Prima il boss bastava
+// - il **boss finale** sconfitto: il suo spillo raccolto sulla mappa, o la sua voce segnata nella Guida. Prima il boss bastava
 //   da solo, ma si può affrontare più volte dentro un Palazzo (rilievo dell'utente);
 // - **tutto il raccolto**: il 100% della scheda del Palazzo, con la sua stessa regola. Da L4 (2026-10-20, «Avanzamento unico») è
 //   «tutti gli oggetti permanenti» della guida del Palazzo, con la funzione unica `shared/completamentoGuida.ts`; il Tesoro e il boss
@@ -25,8 +25,8 @@
 // (`dungeon.voce_boss_finale`, migrazione 112, «Modifica › Boss finale» della scheda): fatto quando è fatta quella voce (§8.11: dai suoi
 // pin, se ne ha), e nessun altro pin `boss` conta. Prima un'euristica (le voci `boss` dell'ultima infiltrazione, ne bastava una; in un
 // Palazzo con boss in una sola infiltrazione qualunque pin `boss`, anche quello del tutorial di Kamoshida). Senza voce dichiarata il
-// Palazzo non si conclude.
-// I Memento non hanno planimetrie: restano completati dal boss finale segnato nella Guida, come prima (`bossFinali`, la regola di prima).
+// Palazzo non si conclude. L'euristica è tolta (L11, R11-02b/2): né i Memento (i dedali ammettono solo Persona e Trama, nessun «boss») né
+// Iweleth (solo un dedalo, L8 B7) hanno un boss finale da segnare: non si completano e non hanno un anello (la loro riga, se c'è, è senza effetti).
 //
 // Il boss finale della Guida **non si segna più da solo** raccogliendo il Tesoro o il boss (scelta dell'utente del
 // 2026-10-04, «Togli l'automatismo»: il segno automatico del 2026-09-30 faceva risultare il boss sconfitto senza che
@@ -39,7 +39,7 @@ import { leggiCondizioniSalvate } from '../../shared/condizioniSpillo.js';
 import { copreIlGiorno } from './condizioni/valutatore.js';
 import { atterraggioDelGiorno } from './atterraggioPalazziService.js';
 import { chiaveMappa, idMappa } from './mappe/percorsiMappe.js';
-import { vociDiOgniPin, vociGestite } from './mappe/voceDelPin.js';
+import { vociDiOgniPin } from './mappe/voceDelPin.js';
 import { contaOggetti, modelloAvanzamento, oggettiDelleVoci, statiDellaPartita, statoDelPin, voceFatta, type ModelloAvanzamento, type StatiDellaPartita } from './mappe/statiGuida.js';
 import { palazzoCompletato, palazzoConcluso, type CompletamentoPalazzo } from '../../shared/completamentoGuida.js';
 import { radiceDelPalazzo, SQL_RADICE_PALAZZO, SQL_SOTTOALBERO } from './mappe/alberoMappe.js';
@@ -55,27 +55,6 @@ export function palazzoDiOgniMappa(): Map<string, string> {
       SELECT m.chiave, a.dungeon FROM mappa m JOIN albero a ON m.genitore_chiave = a.chiave
     ) SELECT chiave, dungeon FROM albero`).all() as Array<{ chiave: string; dungeon: string }>;
   return new Map(righe.map((r) => [r.chiave, r.dungeon]));
-}
-
-/** Il boss finale di un Palazzo: l'area e i suoi punti «boss»; `unico` se nessun'altra area ha boss (niente intermedi). */
-export interface BossFinale { area: string; punti: string[]; unico: boolean }
-
-/** Il boss finale di ogni dungeon con la regola di prima: l'ultima area (in ordine di guida) con punti «boss», e quei punti. Da L4 §8.14
- *  la usano solo i Memento (il boss segnato nella Guida); i Palazzi hanno la loro voce dichiarata (`vociBossFinale`). */
-export function bossFinali(): Map<string, BossFinale> {
-  const righe = prepared(`SELECT a.dungeon_chiave AS dungeon, a.chiave AS area, a.ordine AS ordine, pi.chiave AS punto
-    FROM punto_interesse pi JOIN dungeon_area a ON a.chiave = pi.area_chiave WHERE pi.tipo = 'boss' ORDER BY a.dungeon_chiave, a.ordine, pi.ordine`).all() as Array<{ dungeon: string; area: string; ordine: number; punto: string }>;
-  const out = new Map<string, { area: string; ordine: number; punti: string[]; aree: Set<string> }>();
-  for (const r of righe) {
-    const attuale = out.get(r.dungeon);
-    if (!attuale) out.set(r.dungeon, { area: r.area, ordine: r.ordine, punti: [r.punto], aree: new Set([r.area]) });
-    else {
-      attuale.aree.add(r.area);
-      if (r.ordine > attuale.ordine) Object.assign(attuale, { area: r.area, ordine: r.ordine, punti: [r.punto] });
-      else if (r.ordine === attuale.ordine) attuale.punti.push(r.punto);
-    }
-  }
-  return new Map([...out].map(([k, v]) => [k, { area: v.area, punti: v.punti, unico: v.aree.size === 1 }]));
 }
 
 /** La voce del boss finale dichiarata per ogni Palazzo (`dungeon.voce_boss_finale`, migrazione 112; L4 §8.14); vuota su uno schema
@@ -107,8 +86,8 @@ function collezionabiliPerPalazzo(palazzi: Map<string, string>): Map<string, Spi
 /**
  * Un Palazzo nella partita, sui due livelli del §8.10 (decisione dell'utente del 2026-10-20): `concluso` (Tesoro e boss finale: gli
  * effetti) col perché, o null, e `mancaPerConcludere`; `completato` (concluso e tutti gli oggetti permanenti: anello, percentuale e
- * segno «Completato») col perché, o null, e `manca`. Da L4 anche i numeri della funzione unica (`completamento`). Per i Memento i
- * due livelli coincidono (il boss finale segnato nella Guida, R4-30).
+ * segno «Completato») col perché, o null, e `manca`. Da L4 anche i numeri della funzione unica (`completamento`). I Memento non hanno
+ * una riga (non si completano, R4-30) e Iweleth ne ha una senza effetti.
  */
 export interface StatoPalazzo { concluso: string | null; mancaPerConcludere: string | null; completato: string | null; manca: string | null; completamento?: CompletamentoPalazzo;
   /** L4 §8.15: un Palazzo con la regola del boss dei Memento (Iweleth, R8-19b) non entra negli effetti di Palazzo (ingressi, mappa di Tokyo,
@@ -160,49 +139,21 @@ function valutaPalazzo(dungeon: string, spilli: SpilloCollezionabile[], voceBoss
   };
 }
 
-/** I Palazzi (e i Memento) della partita: completati col perché, o che cosa manca. Senza partita (`partitaId` assente) i soli numeri
+/** I Palazzi della partita: completati col perché, o che cosa manca. Senza partita (`partitaId` assente) i soli numeri
  *  dei Palazzi. `m` lo passa chi l'ha già letto. */
 export function statoPalazzi(partitaId: number | undefined, m: ModelloAvanzamento = modelloAvanzamento(getDb())): Map<string, StatoPalazzo> {
   const out = new Map<string, StatoPalazzo>();
-  const finali = bossFinali();
   const s = partitaId === undefined ? null : statiDellaPartita(getDb(), m, partitaId);
-  // i Memento con la regola di prima (R4-30): il boss finale segnato nella Guida
-  const puntiGestiti = partitaId === undefined ? new Set<string>() : vociGestite(partitaId);
-  const tipi = new Map((prepared('SELECT chiave, tipo FROM dungeon').all() as Array<{ chiave: string; tipo: string }>).map((r) => [r.chiave, r.tipo]));
+  const tipi =new Map((prepared('SELECT chiave, tipo FROM dungeon').all() as Array<{ chiave: string; tipo: string }>).map((r) => [r.chiave, r.tipo]));
   const palazzi = palazzoDiOgniMappa();
   const collezionabili = collezionabiliPerPalazzo(palazzi);
   const vociBoss = vociBossFinale();
   const colBossDellaGuida = palazziColBossDellaGuida();
-  const motivo = 'boss finale segnato nella Guida';
   for (const [dungeon, tipo] of tipi) {
-    if (tipo === 'mementos') {
-      if (partitaId === undefined) continue;
-      // niente planimetrie: il boss finale segnato nella Guida, come prima del 2026-10-04
-      const finale = finali.get(dungeon);
-      const segnato = !!finale && finale.punti.some((p) => puntiGestiti.has(p));
-      out.set(dungeon, segnato ? { concluso: motivo, mancaPerConcludere: null, completato: motivo, manca: null }
-        : { concluso: null, mancaPerConcludere: 'il boss finale segnato nella Guida', completato: null, manca: 'il boss finale segnato nella Guida' });
-      continue;
-    }
-    if (colBossDellaGuida.has(dungeon)) {
-      // L4 §8.15 (Iweleth, R8-19b): il boss con la regola dei Memento (segnato nella Guida), il Tesoro non conta; i numeri dell'anello
-      // restano quelli della funzione unica; nessun effetto di Palazzo
-      const base = valutaPalazzo(dungeon, collezionabili.get(dungeon) ?? [], undefined, m, s);
-      if (!s) { out.set(dungeon, { ...base, senzaEffetti: true }); continue; }
-      const finale = finali.get(dungeon);
-      const segnato = !!finale && finale.punti.some((p) => puntiGestiti.has(p));
-      const c = base.completamento!;
-      const fatti = c.fatti ?? 0;
-      const completato = segnato && c.oggetti > 0 && fatti >= c.oggetti;
-      out.set(dungeon, {
-        concluso: segnato ? motivo : null, mancaPerConcludere: segnato ? null : 'il boss finale segnato nella Guida',
-        completato: completato ? `${motivo} e tutti gli oggetti permanenti (${fatti}/${c.oggetti})` : null,
-        manca: completato ? null : [!segnato ? 'il boss finale segnato nella Guida' : null, fatti < c.oggetti || c.oggetti === 0 ? `tutti gli oggetti permanenti (${fatti}/${c.oggetti})` : null].filter(Boolean).join(', '),
-        completamento: { ...c, boss: segnato, concluso: segnato, completato },
-        senzaEffetti: true,
-      });
-      continue;
-    }
+    // i Memento non si completano (R4-30): nessuna riga, i lettori che la cercano non trovano niente da concludere
+    if (tipo === 'mementos') continue;
+    // Iweleth (R8-19b, L8 B7): solo un dedalo; resta la marca tecnica `regola_boss`, senza boss finale, anello né effetti di Palazzo
+    if (colBossDellaGuida.has(dungeon)) { out.set(dungeon, { concluso: null, mancaPerConcludere: null, completato: null, manca: null, senzaEffetti: true }); continue; }
     out.set(dungeon, valutaPalazzo(dungeon, collezionabili.get(dungeon) ?? [], vociBoss.get(dungeon), m, s));
   }
   return out;
