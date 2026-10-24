@@ -493,7 +493,7 @@ describe('EditorMappaPage', () => {
     expect(Boolean(regione.queryByRole('button',{name:'Crea passaggio verso Luogo B'}))).toBe(caso!=='esplicita');
   });
 
-  // Saltato (L11 R11-14): «Nuova mappa» generica non esiste più, decisione dell'utente (verifica finale di L2/L3); non va eseguito né cancellato.C
+  // Saltato (L11 R11-14): «Nuova mappa» generica non esiste più, decisione dell'utente (verifica finale di L2/L3); non va eseguito né cancellato.
   it.skip('«Nuova mappa» (15.24): chiede il passaggio sul genitore (preselezionato) e il ritorno (a scelta) e li passa all’API', async () => {
     api.creaMappa.mockResolvedValue({ ...base, chiave: 'bar-nuovo', nome: 'Bar nuovo', genitore: 'citta-shibuya' });
     monta();
@@ -526,7 +526,7 @@ describe('EditorMappaPage', () => {
     expect((riaperta.getByRole('checkbox', { name: /passaggio di ritorno/ }) as HTMLInputElement).checked).toBe(false);
   });
 
-  // Saltato (L11 R11-14): «Nuova mappa» generica non esiste più, decisione dell'utente (verifica finale di L2/L3); non va eseguito né cancellato.C
+  // Saltato (L11 R11-14): «Nuova mappa» generica non esiste più, decisione dell'utente (verifica finale di L2/L3); non va eseguito né cancellato.
   it.skip('nomi uguali nella stessa mappa impediscono la creazione, senza una chiave da inserire',async()=>{
     api.getAlberoMappe.mockResolvedValue([riassunto({chiave:'citta-shibuya-vicolo',nome:'Vicolo',tipo:'luogo',genitore:'citta-shibuya'})]);
     monta();fireEvent.click(await screen.findByRole('button',{name:'Collegamenti'}));fireEvent.click(await screen.findByRole('button',{name:/Nuova mappa/}));

@@ -59,7 +59,7 @@ export function PersonaDellaPartita({ partitaId }: Props) {
     const c = istantaneaPer.get(personaId);
     const registrata = !!c && c.registrata;
     const esemplare = postedutaPer.get(personaId);
-    return { registrata, datata: registrata && !!esemplare && statoIstantanea(esemplare, c) === 'da-aggiornare' };
+    return { registrata, datata: registrata && !!esemplare && (c?.livelloRegistrato == null || statoIstantanea(esemplare, c) === 'da-aggiornare') };
   };
 
   const arcani = useMemo(() => {
@@ -79,7 +79,8 @@ export function PersonaDellaPartita({ partitaId }: Props) {
       const c = istantaneaPer.get(p.id);
       const registrata = !!c && c.registrata;
       const esemplare = postedutaPer.get(p.id);
-      const datata = registrata && !!esemplare && statoIstantanea(esemplare, c) === 'da-aggiornare';
+      // registrata senza livello (la riga c'è ma non porta la fotografia): come per la Scorta, «Registrazione da aggiornare» con «Registra»
+      const datata = registrata && !!esemplare && (c?.livelloRegistrato == null || statoIstantanea(esemplare, c) === 'da-aggiornare');
       if (registrazione === 'registrate' && !registrata) return false;
       if (registrazione === 'non-registrate' && registrata) return false;
       if (registrazione === 'da-aggiornare' && !datata) return false;
