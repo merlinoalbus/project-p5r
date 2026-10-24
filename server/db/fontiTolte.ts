@@ -118,6 +118,10 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     schema: 'main', tabella: 'pianta_quartiere', colonna: null, tolta: 'L11 · migrazione 210',
     sostituitaDa: 'l’immagine dell’illustrazione del quartiere nel database (caricata, o la grafica predefinita «mappe/citta-…»); lo scarico dalla guida non esiste più; URL, pagina, fonte e licenza restano nell’archivio «archivio-pianta-quartiere-l11»',
   },
+  ...(['libro', 'film', 'articolo'] as const).map((tabella): FonteTolta => ({
+    schema: 'main', tabella, colonna: 'nome_it', tolta: 'L11 · migrazione 215',
+    sostituitaDa: 'il nome del catalogo degli oggetti (`catalogo_oggetto.nome`), con l’inglese fra i nomi alternativi; i valori restano nell’archivio «archivio-frasi-l11»',
+  })),
   {
     schema: 'utente', tabella: 'lettura_partita', colonna: null, tolta: 'L11 · migrazione utente 43',
     sostituitaDa: 'l’avanzamento di libri e film (`progresso_libro_partita`, `progresso_film_partita`): «letto» si calcola da lì',
