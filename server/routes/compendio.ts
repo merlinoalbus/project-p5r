@@ -34,7 +34,7 @@ import { attivitaTutte, filmDvdTutti, videogiochiTutti, libriTutti } from '../se
 import { cruciverba } from '../services/cruciverbaService.js';
 import { dettaglioNegozio, elencaNegozi, ricercaArticoli } from '../services/negoziService.js';
 import { giornoPercorso, indicePercorso } from '../services/percorsoService.js';
-import { elenchiAzione } from '../services/azioniStrutturateService.js';
+import { elenchiAzione, elenchiEffettiVoce } from '../services/azioniStrutturateService.js';
 import { aggiornaVoce, creaVoce, eliminaVoce, impostaInfiltrazioniVoce, rivediVoce, spostaVoce, trasferisciVoci, vocePercorso } from '../services/giornataService.js';
 import { salvaEffettiVoce, elencaProposteEffettiVoce, anteprimaDecisioneEffettoVoce, decidiPropostaEffettoVoce } from '../services/motoreDiario.js';
 import { bodySalvaEffettiVoce, bodyAnteprimaDecisioneEffettoVoce, bodyDecisioneEffettoVoce } from '../schemas/acquisti.js';
@@ -144,6 +144,10 @@ router.get('/percorso/:data', validate({ params: z.object({ data: dataGioco }), 
 /** Gli elenchi per classificare, collegare e dare effetti a un'azione della giornata. */
 router.get('/percorso-elenchi', (_req, res) => {
   res.json(elenchiAzione());
+});
+/** Gli oggetti che gli effetti di una voce citano con una chiave interna (articoli, domande, cruciverba, inviti, Persona), per sceglierli per nome. */
+router.get('/percorso-elenchi-effetti', (_req, res) => {
+  res.json(elenchiEffettiVoce());
 });
 // Le voci della giornata sono canone (file di gioco, per tutte le partite): aggiungere al posto esatto, modificare (anche
 // fascia e posto), spostare di un passo, eliminare. `?partita=` facoltativo: la risposta porta lo stato nella partita.

@@ -15,12 +15,11 @@ function effettoNuovo(tipo: EffettoAzione['tipo']): EffettoAzione {
 }
 
 /** I tre tipi storici conservano gli stessi controlli sia nella vecchia lista sia nella fonte con UID. */
-export function RigaEffettoVoceLegacy({ effetto, elenchi, onCambia, onTogli, numero, onSposta, primo, ultimo }: { effetto: EffettoAzione; elenchi: ElenchiAzioneDto; onCambia: (e: EffettoAzione) => void; onTogli: () => void; numero: number; onSposta?: (verso: -1 | 1) => void; primo?: boolean; ultimo?: boolean }) {
+export function RigaEffettoVoceLegacy({ effetto, elenchi, onCambia, onTogli, numero }: { effetto: EffettoAzione; elenchi: ElenchiAzioneDto; onCambia: (e: EffettoAzione) => void; onTogli: () => void; numero: number }) {
   return <li className="flex flex-col gap-2 rounded border border-border p-2">
     <div className="flex flex-wrap items-end gap-2">
       <Selettore className="min-w-[10rem] flex-1" etichetta={`Effetto ${numero}`} valore={effetto.tipo} opzioni={TIPI_EFFETTO_AZIONE.map((t) => ({ chiave: t.chiave, nome: t.nome }))} onCambia={(v) => { if (v !== effetto.tipo) onCambia(effettoNuovo(v as EffettoAzione['tipo'])); }} />
       <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" aria-label={`Togli l'effetto ${numero}`} onClick={onTogli} />
-      {onSposta && <><button type="button" className="btn btn-ghost touch" disabled={primo} onClick={() => onSposta(-1)} aria-label={`Sposta su l’effetto ${numero}`}>Su</button><button type="button" className="btn btn-ghost touch" disabled={ultimo} onClick={() => onSposta(1)} aria-label={`Sposta giù l’effetto ${numero}`}>Giù</button></>}
     </div>
     {effetto.tipo === 'dote' && <RigaDote etichetta="Dote" dote={{ dote: effetto.dote, note: effetto.note }} onCambia={(d) => onCambia({ tipo: 'dote', ...d })} />}
     {effetto.tipo === 'lettura' && <div className="flex flex-wrap items-end gap-2">

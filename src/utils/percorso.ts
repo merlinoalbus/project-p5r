@@ -8,11 +8,11 @@ import { dotiDaSegnareDaEffetti, promemoriaDoti } from './dotiDaSegnare';
 import { urlMappa } from './navigazioneMappa';
 import { indirizzoElemento } from './pannelloScheda';
 
-/** I generi di una voce della giornata: un'azione si spunta, gli altri si mostrano. */
-export const NOME_GENERE: Record<GenereVoce, string> = { azione: 'Cosa da fare', evento: 'Evento', scadenza: 'Scadenza', promemoria: 'Promemoria' };
+/** I generi di una voce della giornata: una cosa da fare si spunta, un promemoria si legge soltanto. */
+export const NOME_GENERE: Record<GenereVoce, string> = { azione: 'Cosa da fare', promemoria: 'Promemoria' };
 
 /** Etichette dei generi che si mostrano e non si spuntano (il cartellino della voce). */
-export const NOME_TIPO_EVENTO: Record<Exclude<GenereVoce, 'azione'>, string> = { evento: NOME_GENERE.evento, scadenza: NOME_GENERE.scadenza, promemoria: NOME_GENERE.promemoria };
+export const NOME_TIPO_EVENTO: Record<Exclude<GenereVoce, 'azione'>, string> = { promemoria: NOME_GENERE.promemoria };
 
 /** Etichette dei tipi di azione: un elenco solo, quello condiviso con il server (`TIPI_AZIONE`). */
 export const NOME_TIPO_AZIONE: Record<string, string> = Object.fromEntries(TIPI_AZIONE.map((t) => [t.chiave, t.nome]));

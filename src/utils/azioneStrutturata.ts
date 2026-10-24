@@ -31,10 +31,27 @@ export function chiedeNote(a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento'>): 
   return a.tipo === 'confidente' && a.riferimento?.tipo === 'confidente';
 }
 
+/** Un effetto con tutto scelto? Appena aggiunto, l'oggetto che cita non c'è ancora (chiave vuota o numero 0): si salva solo quando c'è. */
+export function effettoCompleto(e: EffettoVoce): boolean {
+  switch (e.tipo) {
+    case 'lettura': return !!e.chiave;
+    case 'turno': return !!e.attivita && (e.doti === undefined || e.doti.length > 0);
+    case 'acquisto': return !!e.articolo;
+    case 'storia': return !!e.evento;
+    case 'domanda': return e.domanda >= 1;
+    case 'cruciverba': return !!e.data;
+    case 'richiesta': return !!e.richiesta;
+    case 'articolo': return !!e.articolo;
+    case 'invito': return !!e.invito;
+    case 'persona': return e.persona >= 1;
+    default: return true;
+  }
+}
+
 /** Un collegamento o un effetto ancora da completare ha la chiave vuota: si salva solo quando tutto è scelto. */
 export function campiCompleti(c: CampiStrutturati): boolean {
   if (c.riferimento && !c.riferimento.chiave) return false;
-  const completi = (e: EffettoVoce) => e.tipo === 'lettura' ? !!e.chiave : e.tipo === 'turno' ? !!e.attivita && (e.doti === undefined || e.doti.length > 0) : e.tipo === 'acquisto' ? !!e.articolo : true;
+  const completi = effettoCompleto;
   if (!c.effettiVoce) return c.fonteEffetti ? true : c.produce.every(completi);
   const sostituiti = new Set(c.effettiVoce.flatMap(r => r.effetto.tipo === 'acquisto' ? r.effetto.sostituisceDoti : []));
   return c.effettiVoce.every(({ effetto }) => {

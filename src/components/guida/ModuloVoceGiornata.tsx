@@ -5,22 +5,30 @@
 // Una finestra sola per le due situazioni, così i campi restano gli stessi ovunque:
 //   nuova  dal pulsante «Aggiungi» di «Di giorno» / «Di sera»
 //   voce   una voce che c'è già (della guida o aggiunta): dal 2026-09-30 sono la stessa cosa, canone della guida
-// Ogni voce ha un genere (cosa da fare, evento, scadenza, promemoria: solo la prima si spunta), testo, note, fascia e il suo
-// **posto** nella fascia (richiesta dell'utente: «devo fare un ordinamento esatto»): l'elenco della fascia con la voce al suo
-// posto, che si sposta con ↑ / ↓. Una cosa da fare ha anche tipo, collegamento, rango atteso ed effetti della spunta.
-// Ogni modifica vale per tutte le partite ed entra nel pacchetto di gioco che si esporta (non esiste più «solo in questa partita»).
+// Ridisegnata il 2026-10-24 (tavole approvate dall'utente): due soli generi — «Cosa da fare» (si spunta) e «Promemoria» (solo da
+// leggere, senza casella, né tipo né effetti) —; il tipo si sceglie da una griglia di icone e decide il collegamento; «Quale» si sceglie
+// guardando e porta con sé l'effetto della spunta, scritto come frase in «Spuntando succede»; gli effetti rari stanno in «Effetti
+// aggiuntivi», ripiegati in fondo. Su desktop due colonne (a sinistra che cosa è, a destra che cosa succede spuntandola e quando);
+// su tablet e telefono una colonna, nello stesso ordine, e sul telefono è il foglio dal basso di `Modal`. Scorre solo il corpo.
+// Ogni voce ha anche il suo **posto** nella fascia (richiesta dell'utente: «devo fare un ordinamento esatto»), che si cambia
+// trascinando o con ↑ / ↓. Ogni modifica vale per tutte le partite ed entra nel pacchetto di gioco che si esporta.
 // ============================================================
 
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Modal } from '../shared/Modal';
 import { Segmenti } from '../shared/Segmenti';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
-import { aggiornaVoceGiornata, creaVoceGiornata } from '../../services/api';
+import { aggiornaVoceGiornata, creaVoceGiornata, getElenchiAzione, getElenchiEffettiVoce } from '../../services/api';
+import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { NOME_GENERE } from '../../utils/percorso';
-import { EditorAzioneStrutturata } from './EditorAzioneStrutturata';
+import { SceltaTipoQuale, SpuntandoSuccede } from './EditorAzioneStrutturata';
+import { EffettiAggiuntivi } from './EffettiAggiuntivi';
+import { PostoVoce } from './PostoVoce';
+import type { ElenchiVoce } from '../../utils/opzioniEffetti';
 import { STRUTTURA_VUOTA, campiCompleti, strutturaDi } from '../../utils/azioneStrutturata';
+import { nomiEffettiDa } from '../../utils/effettoAutomatico';
 import type { AzionePercorsoDto, DatiVoceGiornata, FasciaGioco, GenereVoce } from '../../types';
 import { segnalaMutazioneEffetti } from '../../services/gestiPartita';
 
@@ -28,7 +36,7 @@ export type SoggettoVoce =
   | { tipo: 'nuova'; fascia: FasciaGioco }
   | { tipo: 'voce'; voce: AzionePercorsoDto };
 
-const GENERI: ReadonlyArray<{ chiave: GenereVoce; nome: string }> = (['azione', 'evento', 'scadenza', 'promemoria'] as const).map((g) => ({ chiave: g, nome: NOME_GENERE[g] }));
+const GENERI: ReadonlyArray<{ chiave: GenereVoce; nome: string }> = (['azione', 'promemoria'] as const).map((g) => ({ chiave: g, nome: NOME_GENERE[g] }));
 const FASCE: ReadonlyArray<{ chiave: FasciaGioco; nome: string }> = [{ chiave: 'giorno', nome: 'Di giorno' }, { chiave: 'sera', nome: 'Di sera' }];
 
 /** Le righe di un'area di testo perché il testo ci stia tutto anche sul telefono (~36 caratteri per riga nella finestra a 375 px):
@@ -47,10 +55,9 @@ interface Props {
 }
 
 /**
- * La finestra della voce: genere, testo e note (aree di testo che crescono col contenuto), fascia (cambiandola il
- * posto riparte da quello di partenza in quella fascia), posto esatto fra le altre voci e, per una cosa da fare, la
- * classificazione con gli effetti. «Salva»/«Aggiungi» è attivo solo con un testo e, per un'azione, con i campi
- * strutturati completi.
+ * La finestra della voce: genere, testo e note (aree di testo che crescono col contenuto), tipo e «Quale» con l'effetto che portano,
+ * fascia, posto esatto fra le altre voci ed effetti aggiuntivi. «Salva»/«Aggiungi» è attivo solo con un testo e, per una cosa da fare,
+ * con i collegamenti e gli effetti completi.
  */
 export function ModuloVoceGiornata({ soggetto, giorno, voci, partitaId, onChiudi, onSalvato }: Props) {
   const voce = soggetto.tipo === 'voce' ? soggetto.voce : null;
@@ -79,9 +86,17 @@ export function ModuloVoceGiornata({ soggetto, giorno, voci, partitaId, onChiudi
   const altre = altreDi(campi.fascia);
   const posto = Math.min(campi.posizione, altre.length);
 
+  const elenchiAzione = useCarica(getElenchiAzione, []);
+  const elenchiEffetti = useCarica(getElenchiEffettiVoce, []);
+  const elenchi = useMemo<ElenchiVoce | null>(() => (elenchiAzione.dati && elenchiEffetti.dati ? { azione: elenchiAzione.dati, effetti: elenchiEffetti.dati, giorno } : null), [elenchiAzione.dati, elenchiEffetti.dati, giorno]);
+  const nomi = useMemo(() => (elenchi ? nomiEffettiDa(elenchi.azione, elenchi.effetti) : null), [elenchi]);
+  const erroreElenchi = elenchiAzione.errore ?? elenchiEffetti.errore;
+  /** Una cosa da fare che diventa promemoria perde tipo, collegamento ed effetti. */
+  const perdeEffetti = !!voce && voce.genere === 'azione' && !azione;
+
   /**
    * Compone i dati della voce (testo e note ripuliti, note vuote come assenti; tipo, collegamento, rango ed effetti
-   * solo per un'azione), crea o aggiorna la voce, fa ricaricare la giornata, notifica e chiude. Senza testo non fa nulla.
+   * solo per una cosa da fare), crea o aggiorna la voce, fa ricaricare la giornata, notifica e chiude. Senza testo non fa nulla.
    */
   const salva = async () => {
     const testo = campi.testo.trim();
@@ -92,12 +107,16 @@ export function ModuloVoceGiornata({ soggetto, giorno, voci, partitaId, onChiudi
     const spostata = !voce || voce.fascia !== campi.fascia || posto !== postoIniziale(campi.fascia);
     const canoniciModificati = s.effettiVoce !== undefined && (!voce || s.fonteEffetti?.stato !== 'convertita' || JSON.stringify(s.effettiVoce) !== JSON.stringify(s.fonteEffetti.effetti.map(({ uid, effetto }) => ({ uid, effetto }))));
     const produceModificato = !s.fonteEffetti && s.effettiVoce === undefined && (!voce || JSON.stringify(s.produce) !== JSON.stringify(voce.produce));
+    // da cosa da fare a promemoria: il collegamento e gli effetti salvati si tolgono (il server rifiuta se una partita li ha già spuntati)
+    const effettiSalvati = s.fonteEffetti?.stato === 'convertita' && s.fonteEffetti.effetti.length > 0;
     const dati: DatiVoceGiornata = {
       genere: campi.genere, azione: testo, note: note || null, fascia: campi.fascia,
       ...(spostata ? { posizione: posto } : {}),
       ...(azione ? { tipo: s.tipo, riferimento: s.riferimento, rangoAtteso: s.rangoAtteso,
         ...(canoniciModificati ? { effettiVoce: { effetti: s.effettiVoce!, ...(s.fonteEffetti ? { revisioneEffettiAttesa: s.fonteEffetti.revisione } : {}) } } : {}),
         ...(produceModificato ? { produce: s.produce } : {}),
+      } : perdeEffetti ? { tipo: 'altro' as const, riferimento: null, rangoAtteso: null,
+        ...(effettiSalvati ? { effettiVoce: { effetti: [], revisioneEffettiAttesa: s.fonteEffetti!.revisione } } : {}),
       } : {}),
     };
     scrittura.current = true;
@@ -120,6 +139,35 @@ export function ModuloVoceGiornata({ soggetto, giorno, voci, partitaId, onChiudi
     }
   };
 
+  const colonnaSinistra = (
+    <div className="voce-colonna">
+      <div className="flex flex-col gap-1">
+        <Segmenti etichetta="Che cosa è" valore={campi.genere} opzioni={GENERI} onCambia={(g) => imposta({ genere: g })} />
+        <span className="text-[12px] text-text-muted">{azione ? 'Si spunta e può dare punti.' : 'Solo da leggere: compare in «Di giorno» o «Di sera» senza casella, e non ha tipo né effetti.'}</span>
+      </div>
+      <label className="flex flex-col gap-1 text-[13px] text-text-secondary">{azione ? 'Che cosa fare' : 'Che cosa succede'}
+        <textarea className="form-input" rows={righe(campi.testo, 3, 24)} maxLength={2000} value={campi.testo} autoFocus onChange={(e) => imposta({ testo: e.target.value })}
+          placeholder={azione ? 'es. Comprare il Set per retrogaming' : 'es. Domani esami: ripassare la sera prima'} />
+      </label>
+      <label className="flex flex-col gap-1 text-[13px] text-text-secondary">{azione ? 'Note' : 'Dettagli'}
+        <textarea className="form-input" rows={righe(campi.note, 2, 8)} maxLength={2000} value={campi.note} onChange={(e) => imposta({ note: e.target.value })} />
+      </label>
+      {azione && elenchi && <SceltaTipoQuale valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} />}
+    </div>
+  );
+
+  const colonnaDestra = (
+    <div className="voce-colonna">
+      {azione && elenchi && nomi && <SpuntandoSuccede valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} nomi={nomi} />}
+      {azione && !elenchi && !erroreElenchi && <p className="m-0 text-[12px] text-text-muted" role="status">Carico gli elenchi…</p>}
+      {azione && erroreElenchi && <p className="m-0 text-[12px] text-error" role="alert">Elenchi non disponibili: {erroreElenchi}</p>}
+      <Segmenti etichetta="Quando" valore={campi.fascia} opzioni={FASCE} onCambia={(f) => imposta({ fascia: f, posizione: postoIniziale(f) })} />
+      <PostoVoce altre={altre} posto={posto} testo={campi.testo.trim() || (voce ? voce.azione : 'La voce nuova')} fascia={campi.fascia} disabled={occupato}
+        onPosto={(n) => imposta({ posizione: Math.max(0, Math.min(altre.length, n)) })} />
+      {azione && elenchi && nomi && <EffettiAggiuntivi valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} nomi={nomi} />}
+    </div>
+  );
+
   return (
     <Modal
       aperta
@@ -135,68 +183,16 @@ export function ModuloVoceGiornata({ soggetto, giorno, voci, partitaId, onChiudi
       )}
     >
       <form id="modulo-voce-giornata" className="flex flex-col gap-3" inert={occupato} onSubmit={(e) => { e.preventDefault(); void salva(); }}>
-        <Segmenti etichetta="Che cosa è" valore={campi.genere} opzioni={GENERI} onCambia={(g) => imposta({ genere: g })} />
-        <label className="flex flex-col gap-1 text-[13px] text-text-secondary">{azione ? 'Che cosa fare' : 'Che cosa succede'}
-          <textarea className="form-input" rows={righe(campi.testo, 3, 24)} maxLength={2000} value={campi.testo} autoFocus onChange={(e) => imposta({ testo: e.target.value })}
-            placeholder={azione ? 'es. Comprare il Set per retrogaming' : 'es. Quiz televisivo al Leblanc'} />
-        </label>
-        <label className="flex flex-col gap-1 text-[13px] text-text-secondary">{azione ? 'Note' : 'Dettagli'}
-          <textarea className="form-input" rows={righe(campi.note, 2, 8)} maxLength={2000} value={campi.note} onChange={(e) => imposta({ note: e.target.value })} />
-        </label>
-        <Segmenti etichetta="Momento della giornata" valore={campi.fascia} opzioni={FASCE} onCambia={(f) => imposta({ fascia: f, posizione: postoIniziale(f) })} />
-        <Posto altre={altre} posto={posto} testo={campi.testo.trim() || (voce ? voce.azione : 'La voce nuova')} fascia={campi.fascia} disabled={occupato}
-          onSposta={(verso) => imposta({ posizione: Math.max(0, Math.min(altre.length, posto + verso)) })} />
-        {azione && <EditorAzioneStrutturata valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} />}
+        <div className={azione ? 'voce-colonne' : 'flex flex-col gap-3'}>
+          {colonnaSinistra}
+          {colonnaDestra}
+        </div>
+        {perdeEffetti && <p className="m-0 text-[12px] text-warning" role="status">Diventando un promemoria, la voce perde tipo, collegamento ed effetti della spunta.</p>}
         <p className="m-0 text-[12px] text-text-muted">
           La modifica cambia la guida per tutte le partite ed entra nel pacchetto di gioco che esporti.
           {voce?.fatta ? ' Questa voce è già spuntata: le modifiche agli effetti compaiono come pulsante «Applica» sulla voce, senza rieseguire la spunta né modificare subito Doti e yen.' : ''}
         </p>
       </form>
     </Modal>
-  );
-}
-
-interface PropsPosto {
-  /** Le altre voci della fascia, nel loro ordine. */
-  altre: AzionePercorsoDto[];
-  /** Il posto della voce fra le altre (0 = in cima, `altre.length` = in fondo). */
-  posto: number;
-  testo: string;
-  fascia: FasciaGioco;
-  disabled: boolean;
-  onSposta: (verso: -1 | 1) => void;
-}
-
-/** Il posto della voce nella fascia: l'elenco numerato con la voce evidenziata, che sale e scende di un posto per volta. */
-function Posto({ altre, posto, testo, fascia, disabled, onSposta }: PropsPosto) {
-  const elenco = altre.map((v) => ({ uid: v.uid, testo: v.azione, questa: false }));
-  elenco.splice(posto, 0, { uid: '', testo, questa: true });
-  const nome = fascia === 'giorno' ? 'di giorno' : 'di sera';
-  const gruppo = useRef<HTMLDivElement>(null);
-  /** Un passo; arrivati al bordo il pulsante premuto si spegne: il fuoco passa all'altro, così la tastiera non lo perde. */
-  const passo = (verso: -1 | 1) => {
-    onSposta(verso);
-    const alBordo = verso === -1 ? posto - 1 <= 0 : posto + 1 >= altre.length;
-    if (alBordo) setTimeout(() => gruppo.current?.querySelector<HTMLButtonElement>(`button[aria-label="${verso === -1 ? 'Sposta giù di un posto' : 'Sposta su di un posto'}"]`)?.focus());
-  };
-  return (
-    <div ref={gruppo} className="flex flex-col gap-1" role="group" aria-label={`Posto nella giornata, ${nome}`}>
-      <span className="text-[13px] text-text-secondary">Posto nella giornata ({nome}): {posto + 1} di {elenco.length}</span>
-      <ol className="m-0 p-0 list-none flex flex-col border border-border-light rounded-md overflow-hidden text-[13px]">
-        {elenco.map((r, i) => r.questa ? (
-          <li key="questa" className="flex items-center gap-2 px-2 py-1 bg-primary-bg font-semibold border-t border-border-light first:border-t-0" aria-current="true">
-            <span className="w-6 shrink-0 text-right tabular-nums">{i + 1}.</span>
-            <span className="flex-1 min-w-0 truncate">{r.testo}</span>
-            <PulsanteVisivo compatto tono="secondario" icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Su" disabled={disabled || posto === 0} onClick={() => passo(-1)} aria-label="Sposta su di un posto" />
-            <PulsanteVisivo compatto tono="secondario" icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Giù" disabled={disabled || posto === altre.length} onClick={() => passo(1)} aria-label="Sposta giù di un posto" />
-          </li>
-        ) : (
-          <li key={r.uid} className="flex items-center gap-2 px-2 py-1 text-text-muted border-t border-border-light first:border-t-0">
-            <span className="w-6 shrink-0 text-right tabular-nums">{i + 1}.</span>
-            <span className="flex-1 min-w-0 truncate">{r.testo}</span>
-          </li>
-        ))}
-      </ol>
-    </div>
   );
 }

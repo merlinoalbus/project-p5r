@@ -50,7 +50,7 @@ const campiAzioneStrutturata = {
 /** Una voce della giornata (azione della guida, cosa da fare, evento): canone, per tutte le partite. */
 export const paramsVoceGiornata = z.object({ uid: uidVoce });
 const campiVoce = {
-  genere: z.enum(['azione', 'evento', 'scadenza', 'promemoria']).optional(),
+  genere: z.enum(['azione', 'promemoria']).optional(),
   // la guida ha azioni fino a ~780 caratteri e note fino a ~820: il margine lascia scrivere senza tagliare
   azione: z.string().trim().min(1).max(2000).optional(),
   note: z.string().trim().max(2000).nullable().optional(),

@@ -49,12 +49,12 @@ export interface RigaVoce {
 
 const TIPI = new Set<string>(TIPI_AZIONE.map((t) => t.chiave));
 const TIPI_RIF = new Set<string>(TIPI_RIFERIMENTO_AZIONE.map((t) => t.chiave));
-const GENERI = new Set<GenereVoce>(['azione', 'evento', 'scadenza', 'promemoria']);
 
 /** La fascia della voce: «sera» se lo è, altrimenti «giorno». */
 const fasciaDi = (r: RigaVoce): FasciaGioco => (r.fascia === 'sera' ? 'sera' : 'giorno');
-/** Il genere della voce, ricondotto ad «azione» se il valore salvato non è uno di quelli noti. */
-const genereDi = (r: RigaVoce): GenereVoce => (GENERI.has(r.genere as GenereVoce) ? (r.genere as GenereVoce) : 'azione');
+/** Il genere della voce: «azione» (si spunta) o «promemoria». Un valore di prima dei due generi (evento, scadenza: il vincolo del
+ *  DB li ammette ancora, nessuna voce li usa) si legge come promemoria, che non si spunta; un valore ignoto resta «azione». */
+const genereDi = (r: RigaVoce): GenereVoce => (r.genere === 'promemoria' || r.genere === 'evento' || r.genere === 'scadenza' ? 'promemoria' : 'azione');
 /** Il tipo d'azione della voce, ricondotto ad «altro» se il valore salvato non è fra i tipi noti. */
 function tipoDi(r: RigaVoce): AzionePercorsoDto['tipo'] {
   return (TIPI.has(r.tipo) ? r.tipo : 'altro') as AzionePercorsoDto['tipo'];
