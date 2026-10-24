@@ -426,9 +426,9 @@ export function preparaRimozioneEffettiVoce(uid:string,porte:Pick<PorteEffettiLe
   }
   for(const r of prepared('SELECT DISTINCT partita_id FROM utente.punti_confidente_voce WHERE voce_uid=?').all(uid) as Array<{partita_id:number}>)togliEventiDellaVoce(r.partita_id,uid);
 }
-export function riconciliaEffettiDopoRipristino(p:number,uids:string[]):void {
+export function riconciliaEffettiDopoRipristino(p:number,uids:string[],confidentiNonRimessi:ReadonlySet<string>=new Set()):void {
   if(!getDb().inTransaction)throw new Error('Il ripristino richiede la transazione del cestino.');
-  riconciliaRegistroDopoRipristino(p,uids);
+  riconciliaRegistroDopoRipristino(p,uids,confidentiNonRimessi);
   const cause=prepared("SELECT DISTINCT causa_chiave FROM utente.da_applicare WHERE partita_id=? AND causa_tipo='voce' AND tipo<>'effetto-voce'").all(p) as Array<{causa_chiave:string}>;
   for(const c of cause){const [uid,e]=c.causa_chiave.split(':');if(uid&&e&&uids.includes(uid))riconciliaBeneficiVoce(p,uid,e);}
   // Una fotografia non riattiva i receipt durevoli già annullati. Una spunta ripristinata propone soltanto gli effetti mancanti.

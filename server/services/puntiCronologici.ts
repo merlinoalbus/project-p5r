@@ -101,6 +101,7 @@ export function ricalcola(partitaId: number, chiave: string): ConfidentePartitaD
     ORDER BY o_data, o_fascia, o_voce, o_sub, id`).all(partitaId, chiave, g.generazione) as Array<{ tipo: 'punti' | 'passaggio'; parametri_json: string }>;
   let rango = g.rango_base, punti = g.punti_base;
   for (const r of righe) {
+    if ((JSON.parse(r.parametri_json) as { neutro?: boolean }).neutro) continue; // segno di una spunta ripristinata i cui punti lo stato non contiene (N1)
     if (r.tipo === 'passaggio') {
       const { verso } = JSON.parse(r.parametri_json) as { verso: number };
       if (verso <= rango) continue;
@@ -187,21 +188,47 @@ export function nuovaGenerazione(partitaId: number, chiave: string): void {
     .run(s.rango, s.punti, s.sbloccato, nowIso(), partitaId, chiave);
 }
 
+interface RicevutaGrezza { confidente?: { chiave?: string } | null; incontro?: { confidente?: string; rango?: unknown } | null }
+/** Le sole parti della ricevuta della spunta che servono qui (il Confidente dei punti, quello del rango alzato); una ricevuta illeggibile dà nessuna. */
+function ricevutaGrezza(testo: string | null): RicevutaGrezza | null {
+  if (!testo) return null;
+  try { const v: unknown = JSON.parse(testo); return v && typeof v === 'object' ? v as RicevutaGrezza : null; } catch { return null; }
+}
+
 /**
- * Dopo il ripristino dal Cestino di una voce: il ripristino rimette la spunta e, con essa, le righe del registro, ma non è detto che abbia rimesso i
- * valori del Confidente (se nel frattempo sono cambiati a mano, restano i nuovi). Le righe senza spunta si cancellano (orfane); per le altre la base
- * riparte dai valori di adesso, e quelle righe non si ricalcolano più (la loro spunta si toglie con il vecchio annullo, dalla ricevuta). Così un
- * ricalcolo successivo non riporta mai punti che lo stato non contiene.
+ * Dopo il ripristino dal Cestino di una voce (N1): togliere una spunta non porta mai via punti che lo stato non contiene.
+ * Il ripristino rimette la spunta con la sua ricevuta e, se nessuno ha toccato il Confidente da allora, anche i suoi valori. Se invece i valori sono
+ * cambiati dopo l'eliminazione (un'altra spunta, una correzione a mano) il ripristino li lascia com'erano, e la ricevuta parlerebbe di punti o di un
+ * rango che lo stato non ha: togliendo la spunta il vecchio annullo toglierebbe punti di altre spunte. In quel caso (`saltati`: «partita|Confidente»
+ * non rimessi) le righe del registro tornate si cancellano e al loro posto si scrive un segno «neutro» nella generazione corrente: la voce risulta
+ * gestita dal registro, il ricalcolo non le dà alcun effetto e togliendo la spunta l'annullo non sottrae niente. Le righe senza spunta (orfane) si cancellano.
+ * Se i valori sono tornati, le righe restano com'erano (stessa generazione: il registro vale; altra generazione: inerti, vale l'annullo dalla ricevuta).
  */
-export function riconciliaRegistroDopoRipristino(partitaId: number, uids: readonly string[]): void {
+export function riconciliaRegistroDopoRipristino(partitaId: number, uids: readonly string[], saltati: ReadonlySet<string> = new Set()): void {
   for (const uid of uids) {
-    const chiavi = (prepared('SELECT DISTINCT confidente_chiave FROM utente.punti_confidente_voce WHERE partita_id = ? AND voce_uid = ?').all(partitaId, uid) as Array<{ confidente_chiave: string }>).map((r) => r.confidente_chiave);
-    if (chiavi.length === 0) continue;
-    if (!prepared('SELECT 1 FROM utente.spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').get(partitaId, uid)) {
-      prepared('DELETE FROM utente.punti_confidente_voce WHERE partita_id = ? AND voce_uid = ?').run(partitaId, uid);
+    const righe = prepared('SELECT DISTINCT confidente_chiave, tipo FROM utente.punti_confidente_voce WHERE partita_id = ? AND voce_uid = ?').all(partitaId, uid) as Array<{ confidente_chiave: string; tipo: 'punti' | 'passaggio' }>;
+    const spunta = prepared('SELECT effetti_json FROM utente.spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').get(partitaId, uid) as { effetti_json: string | null } | undefined;
+    if (!spunta) {
+      if (righe.length > 0) prepared('DELETE FROM utente.punti_confidente_voce WHERE partita_id = ? AND voce_uid = ?').run(partitaId, uid);
       continue;
     }
-    for (const chiave of chiavi) nuovaGenerazione(partitaId, chiave);
+    const ricevuta = ricevutaGrezza(spunta.effetti_json);
+    const toccati = new Map<string, { punti: boolean; passaggio: boolean }>();
+    const segna = (chiave: string | undefined, tipo: 'punti' | 'passaggio'): void => { if (chiave) toccati.set(chiave, { ...(toccati.get(chiave) ?? { punti: false, passaggio: false }), [tipo]: true }); };
+    if (ricevuta?.confidente?.chiave) segna(ricevuta.confidente.chiave, 'punti');
+    if (ricevuta?.incontro?.rango) segna(ricevuta.incontro.confidente, 'passaggio');
+    for (const r of righe) segna(r.confidente_chiave, r.tipo);
+    for (const [chiave, tipi] of toccati) {
+      if (!saltati.has(`${partitaId}|${chiave}`)) continue;
+      prepared('DELETE FROM utente.punti_confidente_voce WHERE partita_id = ? AND voce_uid = ? AND confidente_chiave = ?').run(partitaId, uid, chiave);
+      const generazione = generazioneCorrente(partitaId, chiave);
+      for (const tipo of ['punti', 'passaggio'] as const) {
+        if (!tipi[tipo]) continue;
+        prepared(`INSERT INTO utente.punti_confidente_voce (partita_id, confidente_chiave, voce_uid, generazione, tipo, o_data, o_fascia, o_voce, o_sub, parametri_json, creato_il)
+          VALUES (?, ?, ?, ?, ?, 0, 0, 0, ?, '{"neutro":true}', ?)`).run(partitaId, chiave, uid, generazione, tipo, tipo === 'passaggio' ? 0 : 1, nowIso());
+      }
+      rinfrescaChiavi(partitaId, chiave);
+    }
   }
 }
 

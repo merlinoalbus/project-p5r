@@ -719,7 +719,10 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
     if (r.tipo !== 'partita' && r.tipo !== 'pin') for (const partita of partitaIds) {
       if (!db.prepare('SELECT 1 FROM utente.partita WHERE id=?').get(partita)) continue;
       riconciliaAcquistiDopoRipristino(partita, [...acquistoIds]);
-      riconciliaEffettiDopoRipristino(partita, [...voceUids]);
+      // N1: i Confidenti i cui valori il ripristino NON ha rimesso (cambiati dopo l'eliminazione): le righe `confidente_partita` saltate, «partita · Confidente»
+      const confidentiNonRimessi = new Set([...saltate.values()].filter((s) => s.tabella === 'confidente_partita' && s.motivo === 'cambiata-dopo')
+        .flatMap((s) => s.esempi.map((e) => e.split(' · ')).filter((x) => x.length >= 2).map(([p, c]) => `${p}|${c}`)));
+      riconciliaEffettiDopoRipristino(partita, [...voceUids], confidentiNonRimessi);
       riconciliaPescaDopoRipristino(partita);
     }
     const vicini = r.vicini_json ? JSON.parse(r.vicini_json) as ViciniCestino : null;
