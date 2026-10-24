@@ -840,7 +840,7 @@ export interface PersonaPossedutaDto {
 export interface CapienzaScortaDto {
   /** Rango di Igor nella partita (0 se non ancora incontrato). */
   rangoIgor: number;
-  /** I posti disponibili al rango attuale; null se il rango non ha ancora raggiunto nessun gradino documentato. */
+  /** I posti disponibili al rango attuale; prima del primo gradino è il valore di partenza (`dati_guida.capienza-scorta`); null solo se quel valore manca nei dati. */
   capienza: number | null;
   /** Tutti i gradini documentati, dal rango più basso: a quel rango di Igor la capienza sale a `capienza`. */
   gradini: Array<{ rango: number; capienza: number; abilita: string }>;
