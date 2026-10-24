@@ -488,6 +488,11 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     risposta: '`CalendarioDto`',
     errori: [PARTITA_NON_TROVATA],
   },
+  'GET /api/compendio/calendario/voci/:uid': {
+    sommario: 'Gli eventi del calendario collegati a una voce del Diario',
+    descrizione: 'Sola lettura. Per l\'identificativo (`uid`) di una voce del Diario elenca gli eventi del calendario che la citano, in ordine di data e di posizione, ciascuno con la sua certezza (`C`, collegamento certo: sono i soli che la migrazione 164 ha scritto; il tipo ammette anche `D`). Una voce senza eventi collegati, o che non esiste, dà un elenco vuoto: nessun 404. Il collegamento è un dato di gioco (tabella `evento_calendario_voce`), lo stesso che il calendario mostra sotto ogni evento.',
+    risposta: 'Elenco di oggetti `{ id, data, tipo, titolo, certezza }` (un evento per riga)',
+  },
   'GET /api/compendio/domande': {
     sommario: 'Domande in classe ed esami',
     descrizione: 'Tutte le domande in ordine di anno scolastico (aprile → marzo) e, a pari data, di guida; gli esami con date e domande e i premi. Con `?partita=` ogni domanda dice se è fatta e `prossime` sono le domande non fatte della prima data da oggi in poi.',
@@ -598,6 +603,25 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     descrizione: 'Scelta dell\'utente «Si elimina e si avvisa»: in una transazione se ne vanno i suoi stati nelle partite; i pin e le azioni della giornata (`voce_giornata`) che la indicavano perdono il collegamento e restano; le condizioni e i requisiti che la citano restano e diventano grigi, da correggere.',
     risposta: 'Nessun contenuto (204)',
     errori: [[404, 'richiesta-non-trovata']],
+  },
+  'GET /api/compendio/confidenti/:chiave/requisiti': {
+    sommario: 'I requisiti di un Confidente, rango per rango',
+    descrizione: 'Per l\'editor della pagina del Confidente: sempre i ranghi da 1 a 10, anche quelli senza requisiti. Ogni requisito è una condizione del vocabolario unico, con la sua frase e la descrizione generata in italiano; `modificato` dice se il rango differisce dalla copia della guida (e quindi si può ripristinare). Dato di gioco: vale per tutte le partite.',
+    risposta: '`RequisitiConfidenteDto`',
+    errori: [[404, 'confidente-non-trovato']],
+  },
+  'PUT /api/compendio/confidenti/:chiave/requisiti/:rango': {
+    sommario: 'Sostituisce i requisiti di un rango di un Confidente',
+    descrizione: 'Corpo `{ requisiti: [{ condizione, testo? }] }` (al più 10): le condizioni del vocabolario unico al posto di quelle di adesso, vuoto per nessun requisito. La frase di ciascuno è `testo` oppure, se manca, la descrizione generata (un avviso tiene il proprio testo). Le conferme a mano delle partite sugli indici che spariscono se ne vanno con loro. Dato di gioco: vale per tutte le partite. Per correggere solo un requisito che cita una Richiesta c\'è la rotta con l\'indice.',
+    risposta: '`RequisitiConfidenteDto` aggiornato',
+    errori: [[404, 'confidente-non-trovato']],
+  },
+  'POST /api/compendio/confidenti/:chiave/requisiti/:rango/ripristina': {
+    sommario: 'Riporta i requisiti di un rango a come li dà la guida',
+    descrizione: 'Rimette nel rango le righe della copia della guida (tabella `confidente_requisito_guida`) e toglie le conferme a mano delle partite sugli indici che non esistono più nella guida. 409 se la copia della guida non è nel file di gioco.',
+    risposta: '`RequisitiConfidenteDto` aggiornato',
+    senzaCorpo: true,
+    errori: [[404, 'confidente-non-trovato'], [409, 'guida-non-disponibile']],
   },
   'PUT /api/compendio/confidenti/:chiave/requisiti/:rango/:indice': {
     sommario: 'Corregge un requisito di un Confidente che cita una Richiesta',

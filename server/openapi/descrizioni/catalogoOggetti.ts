@@ -8,6 +8,18 @@ export const DESCRIZIONI_CATALOGO_OGGETTI: DescrizioniArea = {
     risposta: '{ ripristinato: true }',
     errori: [[404, 'regalo-non-trovato'], [409, 'costo-regalo-senza-snapshot'], [409, 'costo-regalo-cambiato']],
   },
+  'PUT /api/catalogo-oggetti/note-storiche/:chiave': {
+    sommario: 'Modifica testo e fonte di una nota storica',
+    descrizione: 'Corpo strict `{ testo, fonte, testoAttuale }`: testo (fino a 2000 caratteri) e fonte (fino a 500) non possono essere vuoti dopo il trim, e `testoAttuale` è la precondizione, cioè il testo che la scheda ha letto. Se nel frattempo la nota è cambiata risponde 409 `nota-storica-cambiata` e non scrive. Una nota storica dice una discordanza della guida senza cambiare prezzi, acquisti o progressi delle partite; è un dato di gioco, letto da negozi, catalogo e confronto dei listini. La chiave è quella della nota (`nota_storica`), non dell\'oggetto.',
+    risposta: '`NotaStoricaOfferta` aggiornata, con `modificata` vero se differisce dalla guida',
+    errori: [[404, 'nota-storica-non-trovata'], [400, 'nota-storica-vuota'], [409, 'nota-storica-cambiata']],
+  },
+  'POST /api/catalogo-oggetti/note-storiche/:chiave/ripristina': {
+    sommario: 'Riporta una nota storica al valore della guida',
+    descrizione: 'Corpo strict `{ testoAttuale }`: testo e fonte tornano come li dà la guida (copia `seed_json`). `testoAttuale` è la precondizione: se la nota è cambiata dopo la lettura risponde 409 `nota-storica-cambiata`; 409 `nota-storica-senza-guida` se la copia della guida non è leggibile.',
+    risposta: '`NotaStoricaOfferta` ripristinata',
+    errori: [[404, 'nota-storica-non-trovata'], [409, 'nota-storica-cambiata'], [409, 'nota-storica-senza-guida']],
+  },
   'GET /api/catalogo-oggetti': {
     sommario: 'Catalogo unico degli oggetti con ricerca e filtro per categoria',
     descrizione: 'Identità per chiave stabile, nome italiano/originale, alias, categoria, effetto, descrizione, statistiche e provenienza. La ricerca q confronta nome, alias, nome originale ed effetto; categoria filtra la classificazione corrente. nascosti=1 include anche le identità nascoste, non soltanto quelle nascoste. Il prezzo minimo deriva dalle offerte visibili in yen, non dai costi di scambio. partita, se indicata, viene verificata ma non aggiunge uno stato di possesso al catalogo.',
