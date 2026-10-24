@@ -10,7 +10,9 @@
 //     (nome, forme, personaggio) né gli altri dati.
 //   - `skill` (525 righe, chiave = id): il costo (tipo e valore), l'effetto (il testo canonico della guida) e la sua resa italiana (`traduzione`, ambito
 //     `effettoSkill`, che vale per tutte le skill con lo stesso testo di effetto). Il nome della skill è la chiave delle traduzioni e delle Persona: non si corregge.
-//     La «potenza» non è un dato a sé nel modello: sta nel testo dell'effetto.
+//     La «potenza» non è un dato a sé nel modello: sta nel testo dell'effetto. Le Persona che la danno come carta con l'esecuzione (`skill_fonte_esecuzione`,
+//     R11-17/1) sono il campo `fonti`: l'elenco dei nomi si riscrive intero; la fotografia di una correzione fatta prima di questo campo non lo contiene e
+//     `ripristinoService` la completa con i valori di quel momento.
 // ============================================================
 
 import { prepared } from '../../db/dbService.js';
@@ -49,7 +51,7 @@ function leggiSkill(testo: string): SkillScritta {
 }
 
 const persona: DefRiga = {
-  modalita: 'riga', etichetta: 'Persona', tabella: 'persona', colonnaChiave: 'id',
+  modalita: 'riga', etichetta: 'Persona', tabella: 'persona', colonnaChiave: 'CAST(id AS TEXT)',
   chiavi: () => (prepared('SELECT CAST(id AS TEXT) FROM persona ORDER BY id').pluck().all() as string[]),
   esiste: (chiave) => !!prepared('SELECT 1 FROM persona WHERE id = ?').get(chiave),
   campi: () => [
@@ -94,8 +96,23 @@ interface RigaSkill { nome: string; costo_tipo: string; costo_valore: number; ef
 const rigaSkill = (chiave: string): RigaSkill => prepared('SELECT nome, costo_tipo, costo_valore, effetto FROM skill WHERE id = ?').get(chiave) as RigaSkill;
 const effettoIt = (effetto: string): string | null => (prepared("SELECT testo FROM traduzione WHERE ambito = 'effettoSkill' AND chiave = ?").pluck().get(effetto) as string | undefined) ?? null;
 
+/** Le Persona che danno la skill come carta con l'esecuzione (`skill_fonte_esecuzione`), per nome del dataset (R11-17/1). */
+const fontiDi = (chiave: string): string[] =>
+  prepared('SELECT p.nome FROM skill_fonte_esecuzione f JOIN persona p ON p.id = f.persona_id WHERE f.skill_id = ? ORDER BY p.nome').pluck().all(chiave) as string[];
+
+/** I nomi delle Persona → id: 404 se una non esiste, 400 se ne compare una due volte. */
+function idDeiNomiPersona(nomi: ValoreCampoCorrezione | undefined): number[] {
+  const ids = (Array.isArray(nomi) ? nomi : []).map((nome) => {
+    const id = prepared('SELECT id FROM persona WHERE nome = ?').pluck().get(nome) as number | undefined;
+    if (id === undefined) throw httpErrors.notFound('persona-non-trovata', `La Persona «${nome}» non esiste.`);
+    return id;
+  });
+  if (new Set(ids).size !== ids.length) throw httpErrors.badRequest('persona-ripetuta', 'Una Persona compare due volte nell\'elenco.', { campo: 'fonti' });
+  return ids;
+}
+
 const skill: DefRiga = {
-  modalita: 'riga', etichetta: 'Skill', tabella: 'skill', colonnaChiave: 'id',
+  modalita: 'riga', etichetta: 'Skill', tabella: 'skill', colonnaChiave: 'CAST(id AS TEXT)',
   chiavi: () => (prepared('SELECT CAST(id AS TEXT) FROM skill ORDER BY id').pluck().all() as string[]),
   esiste: (chiave) => !!prepared('SELECT 1 FROM skill WHERE id = ?').get(chiave),
   campi: () => [
@@ -103,12 +120,19 @@ const skill: DefRiga = {
     { p: 'costo_valore', e: 'Valore del costo', t: 'numero', max: 999 } as CampoDef,
     { p: 'effetto', e: 'Effetto (testo canonico)', t: 'testolungo', max: 600 } as CampoDef,
     { p: 'effetto_it', e: 'Effetto in italiano', t: 'testolungo', nullable: true, max: 600 } as CampoDef,
+    { p: 'fonti', e: 'Persona che la danno come carta con l’esecuzione (nome)', t: 'elenco' } as CampoDef,
   ],
   leggi: (chiave) => {
     const r = rigaSkill(chiave);
-    return { costo_tipo: r.costo_tipo, costo_valore: r.costo_valore, effetto: r.effetto, effetto_it: effettoIt(r.effetto) };
+    return { costo_tipo: r.costo_tipo, costo_valore: r.costo_valore, effetto: r.effetto, effetto_it: effettoIt(r.effetto), fonti: fontiDi(chiave) };
   },
   scrivi: (chiave, v) => {
+    if (v.fonti !== undefined) {
+      const ids = idDeiNomiPersona(v.fonti);
+      prepared('DELETE FROM skill_fonte_esecuzione WHERE skill_id = ?').run(chiave);
+      const inserisci = prepared('INSERT INTO skill_fonte_esecuzione (skill_id, persona_id) VALUES (?, ?)');
+      for (const id of ids) inserisci.run(chiave, id);
+    }
     const prima = rigaSkill(chiave);
     if (v.costo_tipo !== undefined) prepared('UPDATE skill SET costo_tipo = ? WHERE id = ?').run(str(v.costo_tipo), chiave);
     if (v.costo_valore !== undefined) prepared('UPDATE skill SET costo_valore = ? WHERE id = ?').run(num(v.costo_valore), chiave);
@@ -126,6 +150,7 @@ const skill: DefRiga = {
   valida: (_chiave, fusi) => {
     if (typeof fusi.costo_valore === 'number' && (!Number.isInteger(fusi.costo_valore) || fusi.costo_valore < 0)) throw httpErrors.badRequest('valore-non-valido', 'Valore del costo: serve un numero intero da 0 in su.', { campo: 'costo_valore' });
     if (typeof fusi.effetto === 'string' && fusi.effetto.trim() === '') throw httpErrors.badRequest('valore-non-valido', 'L\'effetto non può essere vuoto.', { campo: 'effetto' });
+    idDeiNomiPersona(fusi.fonti);
   },
 };
 

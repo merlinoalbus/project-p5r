@@ -15,6 +15,7 @@ import { sincronizzaPercorsiMappe } from '../mappe/percorsiMappe.js';
 import type { CampoDef } from './registro.js';
 import { DEFINIZIONI_CALENDARIO } from './righeCalendario.js';
 import { DEFINIZIONI_CONFIDENTI } from './righeConfidenti.js';
+import { DEFINIZIONI_DATI_VERI } from './righeDatiVeri.js';
 import { DEFINIZIONI_PERSONA } from './righePersona.js';
 import { DEFINIZIONI_OMBRA } from './righeOmbra.js';
 import { DEFINIZIONI_SCUOLA } from './righeScuola.js';
@@ -204,4 +205,4 @@ const trasformazione: DefRiga = {
   },
 };
 
-export const DEFINIZIONI_RIGA = { quartiere, trofeo, dote: doteSociale, trasformazione, ...DEFINIZIONI_CALENDARIO, ...DEFINIZIONI_SCUOLA, ...DEFINIZIONI_OMBRA, ...DEFINIZIONI_CONFIDENTI, ...DEFINIZIONI_PERSONA } as const;
+export const DEFINIZIONI_RIGA = { quartiere, trofeo, dote: doteSociale, trasformazione, ...DEFINIZIONI_CALENDARIO, ...DEFINIZIONI_SCUOLA, ...DEFINIZIONI_OMBRA, ...DEFINIZIONI_CONFIDENTI, ...DEFINIZIONI_PERSONA, ...DEFINIZIONI_DATI_VERI } as const;

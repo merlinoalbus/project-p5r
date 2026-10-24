@@ -33,6 +33,12 @@ const NOTE: Partial<Record<TipoModificabile, string>> = {
   persona: 'Le affinità della Persona si correggono dal loro editor; il nome e le forme non si correggono. Le skill si scrivono «nome @ livello» (0 = innata). Cambiare una skill o una statistica cambia anche le fusioni e le Ombre che la usano.',
   skill: 'La resa italiana dell’effetto vale per tutte le skill con lo stesso testo di effetto. Il nome della skill non si corregge: è la chiave delle traduzioni e delle Persona.',
   regalo: 'Il nome e l’effetto del regalo sono quelli dell’oggetto del catalogo (si correggono dal catalogo); i punti già dati nelle partite non cambiano.',
+  arcana: 'L’ordine dell’Arcano (la sua posizione nella tabella di fusione) e il suo nome italiano non si correggono da qui: il nome si corregge dalle traduzioni.',
+  'fusione-arcana': 'Vale per la coppia nella forma in cui sta in tabella (una sola volta, in qualunque ordine si fondano i due Arcani). Il motore di fusione usa subito il risultato nuovo.',
+  'fusione-speciale': 'La Persona risultato non si corregge: si scrivono gli ingredienti, nell’ordine della ricetta, con il nome della Persona nel dataset.',
+  tesoro: 'Lo spostamento di rango vale per la fusione del Demone con una Persona di quell’Arcano: più alto sposta verso l’alto, meno verso il basso.',
+  'eredita-tipo': 'Dice quali tipi di skill un tipo può ereditare nella fusione; l’ordine e i nomi delle colonne non si correggono.',
+  'dlc-set': 'Una Persona sta in un solo set. Il set non ha un nome: si riconosce dalle sue Persona.',
   'allerta-meteo': 'Vale per questo giorno: le condizioni delle partite che leggono l’allerta (per esempio «piove») seguono le fasce che scegli.',
 };
 
@@ -192,7 +198,8 @@ function correggiRiga(tipo: TipoModificabile, chiave: string, campi: Record<stri
   const fusi: Valori = { ...attuale, ...nuovi };
   def.valida?.(chiave, fusi);
   getDb().transaction(() => {
-    const seed: Valori = { ...(meta.seed ?? attuale) };
+    // la fotografia di una correzione fatta prima che il tipo avesse un campo non lo contiene: lo completa il valore di adesso, che per quel campo è ancora quello della guida
+    const seed: Valori = { ...attuale, ...(meta.seed ?? {}) };
     const traccia = soloTraccia(seed);
     def.scrivi(chiave, nuovi);
     def.propaga?.(chiave, attuale, fusi, { ripristino: false, traccia });
