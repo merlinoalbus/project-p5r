@@ -322,6 +322,10 @@ export interface DialogoConfidenteDto {
 }
 
 export interface RegaloConfidenteDto {
+  /** Posizione del regalo nella scheda del Confidente: con la chiave del Confidente è l'indirizzo `<confidente>:<ordine>` di `/api/correzioni/regalo`. */
+  ordine: number;
+  /** Il regalo è stato corretto (oggetto, dove, costo, sconsigliato o nota diversi da come li dà la guida): si può ripristinare. */
+  modificato: boolean;
   /** Ripristina esclusivamente la rettifica storica del costo, con anteprima del valore salvato. */
   ripristinoCosto?: { ordine: number; precedente: string; attuale: string | null };
   /** Nome della guida conservato per riconoscere le consegne storiche non ancora collegate. */
@@ -339,6 +343,13 @@ export interface RegaloConfidenteDto {
   effetto: string | null;
 }
 
+/** Un regalo sconsigliato (non dà punti): indirizzabile come gli altri (`ordine`) per correggerlo e ripristinarlo. */
+export interface RegaloSconsigliatoDto {
+  ordine: number;
+  nome: string;
+  modificato: boolean;
+}
+
 /** Scheda completa di un Confidente (Fase 6.1). */
 export interface ConfidenteDettaglioDto extends ConfidenteDto {
   abilita: Array<{ rango: number; nome: string; descrizione: string }>;
@@ -346,7 +357,7 @@ export interface ConfidenteDettaglioDto extends ConfidenteDto {
   dotiIncontro: Array<{ rango: number; doti: DoteNote[]; testo: string }>;
   dialoghi: DialogoConfidenteDto[];
   regali: RegaloConfidenteDto[];
-  regaliSconsigliati: string[];
+  regaliSconsigliati: RegaloSconsigliatoDto[];
   /** Oggetti ricevuti dal Confidente, distinti dai regali che gli si possono consegnare. */
   oggettiRicompensa?: RicompensaOggettoDto[];
   disponibilita: { giorni: string[]; fasce: string[]; luogo: string; sbloccoData: string; sbloccoRequisiti: string; note: string };

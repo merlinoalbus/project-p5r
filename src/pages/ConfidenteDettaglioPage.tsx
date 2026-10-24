@@ -285,7 +285,7 @@ export function ConfidenteDettaglioPage() {
                 ))}
               </ul>
             )}
-            {c.regaliSconsigliati.length > 0 && <p className="m-0 text-[12px] text-text-muted">Sconsigliati: {c.regaliSconsigliati.join(', ')}.</p>}
+            {c.regaliSconsigliati.length > 0 && <p className="m-0 text-[12px] text-text-muted">Sconsigliati: {c.regaliSconsigliati.map((s) => s.nome).join(', ')}.</p>}
           </section>
 
           {!!c.oggettiRicompensa?.length && <section className="card flex min-w-0 flex-col gap-2" aria-label="Oggetti ricevuti dal Confidente">

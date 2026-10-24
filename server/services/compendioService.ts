@@ -7,6 +7,7 @@ import { fonteNodoGuida } from '../../shared/riferimentiCatalogoGuida.js';
 import { httpErrors } from '../utils/httpError.js';
 import { extra, mappaAmbito, t, tOpz, vociAmbito } from './traduzioniService.js';
 import { corrispondeRicerca } from '../../shared/testo.js';
+import { uguali } from '../../shared/percorsoGuida.js';
 import type { DoteNote } from '../../shared/effettiAzione.js';
 import { dotiIncontro } from './dotiIncontroConfidente.js';
 import { invitiDelConfidente } from './inviti.js';
@@ -463,6 +464,16 @@ export function impostaDotiIncontro(chiave: string, ranghi: Array<{ rango: numbe
   return dettaglioConfidente(chiave);
 }
 
+/** Il regalo è corretto? Stessa regola del registro dei ripristini (R9-07/5): la fotografia `seed_json` ha almeno un valore diverso da quello della riga. */
+function regaloModificato(r: { catalogo_chiave: string | null; dove: string | null; costo: string | null; sconsigliato: number; nota: string | null; seed_json: string | null }): boolean {
+  if (!r.seed_json) return false;
+  let f: Record<string, unknown>;
+  try { f = JSON.parse(r.seed_json) as Record<string, unknown>; } catch { return false; }
+  if (typeof f.tipo === 'string') return false; // fotografia di prima della 212: non è la forma del registro
+  const attuali: Record<string, unknown> = { catalogo_chiave: r.catalogo_chiave, dove: r.dove, costo: r.costo, sconsigliato: r.sconsigliato === 1, nota: r.nota };
+  return Object.keys(attuali).some((p) => p in f && !uguali(f[p] ?? null, attuali[p] ?? null));
+}
+
 /** Scheda completa di un Confidente: abilità, dialoghi, regali, disponibilità (dal seed allgamestaff). */
 export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
   const c = prepared('SELECT chiave, nome, arcana, ordine FROM confidente WHERE chiave = ?').get(chiave) as { chiave: string; nome: string; arcana: string; ordine: number } | undefined;
@@ -484,7 +495,7 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
     const scambi = [...new Set(offerte.flatMap((o) => o.costoDaVerificare ? ['Scambio da correggere nel negozio'] : o.costo?.tipo === 'fiori' ? [`Scambio: ${o.costo.importo} fiori`]
       : o.costo?.tipo === 'oggetti' ? [`Scambio: ${o.costo.oggetti.map((v) => `${v.quantita} × ${v.nome ?? 'oggetto da collegare'}`).join(', ')}`] : []))];
     const costoYen = prezzo === null ? null : prezzo === prezzoMassimo ? `${prezzo.toLocaleString('it-IT')} ¥` : `Da ${prezzo.toLocaleString('it-IT')} a ${prezzoMassimo!.toLocaleString('it-IT')} ¥`;
-    return { ...g, ...(precedente !== null && precedente !== g.costo ? { ripristinoCosto: { ordine: g.ordine, precedente, attuale: g.costo } } : {}), nomeStorico: g.nome, nome: catalogo?.nome ?? g.nome, catalogo, prezzo, prezzoMassimo, listinoCollegato: offerte.length > 0,
+    return { ...g, modificato: regaloModificato(g), ...(precedente !== null && precedente !== g.costo ? { ripristinoCosto: { ordine: g.ordine, precedente, attuale: g.costo } } : {}), nomeStorico: g.nome, nome: catalogo?.nome ?? g.nome, catalogo, prezzo, prezzoMassimo, listinoCollegato: offerte.length > 0,
       dove: offerte.length ? [...new Set(offerte.map((o) => `${o.negozioNome}${o.sedeNome ? ` (${o.sedeNome})` : ''}`))].join(' · ') : g.dove,
       costo: offerte.length ? [costoYen, ...scambi].filter(Boolean).join(' · ') || 'Costo non indicato nel listino' : g.costo,
       nota: [...new Set([g.nota, offerte.length && (g.dove || g.costo) ? `Indicazioni della guida: ${[g.dove, g.costo].filter(Boolean).join(' · ')}` : null].filter((v): v is string => !!v))].join('\n') || null };
@@ -492,8 +503,8 @@ export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
   const disp = prepared('SELECT * FROM confidente_disponibilita WHERE confidente_chiave = ?').get(chiave) as { giorni_json: string; fasce_json: string; luogo: string; sblocco_data: string; sblocco_requisiti: string; note: string; note_generali: string; fonti_json: string } | undefined;
   return {
     ...c, arcanaNome: t('arcana', c.arcana), abilita, dialoghi, dotiIncontro: dotiIncontro(chiave),
-    regali: regali.filter((g) => g.sconsigliato === 0).map(({ nome, nomeStorico, dove, costo, effetto, catalogo, prezzo, prezzoMassimo, listinoCollegato, nota, ripristinoCosto }) => ({ nome, nomeStorico, dove, costo, effetto, catalogo, prezzo, prezzoMassimo, listinoCollegato, nota, ripristinoCosto })),
-    regaliSconsigliati: regali.filter((g) => g.sconsigliato === 1).map((g) => g.nome),
+    regali: regali.filter((g) => g.sconsigliato === 0).map(({ ordine, modificato, nome, nomeStorico, dove, costo, effetto, catalogo, prezzo, prezzoMassimo, listinoCollegato, nota, ripristinoCosto }) => ({ ordine, modificato, nome, nomeStorico, dove, costo, effetto, catalogo, prezzo, prezzoMassimo, listinoCollegato, nota, ripristinoCosto })),
+    regaliSconsigliati: regali.filter((g) => g.sconsigliato === 1).map((g) => ({ ordine: g.ordine, nome: g.nome, modificato: g.modificato })),
     oggettiRicompensa: ricompensePerFonte('confidente', [chiave]).get(chiave) ?? [],
     disponibilita: disp ? { giorni: JSON.parse(disp.giorni_json) as string[], fasce: JSON.parse(disp.fasce_json) as string[], luogo: disp.luogo, sbloccoData: disp.sblocco_data, sbloccoRequisiti: disp.sblocco_requisiti, note: disp.note } : { giorni: [], fasce: [], luogo: '', sbloccoData: '', sbloccoRequisiti: '', note: '' },
     noteGenerali: disp?.note_generali ?? '', fonti: disp ? (JSON.parse(disp.fonti_json) as string[]) : [],

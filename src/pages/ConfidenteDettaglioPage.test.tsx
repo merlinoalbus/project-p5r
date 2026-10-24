@@ -29,7 +29,7 @@ const dettaglio: ConfidenteDettaglioDto = {
     { id: 2, rango: 2, etichetta: '2', note: 'Richiede Coraggio 2.', scelte: [{ ordine: 1, testo: 'Voglio fare un test', punti: 3, puntiTesto: '+3', romantica: false, avviso: null }, { ordine: 2, testo: 'Vado via', punti: 0, puntiTesto: '+0', romantica: false, avviso: 'Da evitare' }] },
     { id: 3, rango: 9, etichetta: '9', note: '', scelte: [{ ordine: 1, testo: 'Ti amo', punti: 3, puntiTesto: '+3', romantica: true, avviso: null }] },
   ],
-  regali: [{ nome: 'Castella', dove: 'Taisho Store', costo: '1.500 ¥', effetto: '+2' }, { nome: 'Mini cactus', dove: null, costo: null, effetto: '+3' }],
+  regali: [{ ordine: 1, modificato: false, nome: 'Castella', dove: 'Taisho Store', costo: '1.500 ¥', effetto: '+2' }, { ordine: 2, modificato: false, nome: 'Mini cactus', dove: null, costo: null, effetto: '+3' }],
   regaliSconsigliati: [],
   disponibilita: { giorni: ['Lunedì', 'Martedì'], fasce: ['Giorno'], luogo: 'Clinica Takemi', sbloccoData: '18 aprile', sbloccoRequisiti: '', note: 'Anche con pioggia.' },
   noteGenerali: '', fonti: ['https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-tae-takemi-morte/'],
