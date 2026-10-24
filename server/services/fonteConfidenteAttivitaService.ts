@@ -6,6 +6,9 @@ import { requisitoBloccante, valuta, type RigaRequisito } from './semaforiServic
 import type { StatoDisponibilita } from './disponibilitaService.js';
 import { dotiIncontro } from './dotiIncontroConfidente.js';
 import { t } from './traduzioniService.js';
+import { disponibilitaConfidente } from './disponibilitaStrutturataService.js';
+
+const NOME_GIORNO = { lun: 'Lunedì', mar: 'Martedì', mer: 'Mercoledì', gio: 'Giovedì', ven: 'Venerdì', sab: 'Sabato', dom: 'Domenica', festivi: 'festivi' } as const;
 
 /** Proiezione della fonte corrente: nessun calendario o requisito risalvato nell'attività. */
 export function fonteConfidenteAttivita(r: Record<string, unknown>, st: StatoDisponibilita | null = null): FonteConfidenteAttivitaDto | null {
@@ -18,21 +21,20 @@ export function fonteConfidenteAttivita(r: Record<string, unknown>, st: StatoDis
     prossimoPasso: null, dotiPerPassaggio: [], campiIncompatibili, avvisi: [] };
   if (!c) return { ...base, avvisi: ['Il Confidente collegato non esiste: correggi il collegamento.'] };
   const ranghi = requisitiDelConfidente(chiave).ranghi;
-  const disp = prepared('SELECT giorni_json,fasce_json,luogo,note FROM confidente_disponibilita WHERE confidente_chiave = ?').get(chiave) as { giorni_json: string; fasce_json: string; luogo: string; note: string } | undefined;
-  const elenco = (raw: unknown): string[] | null => { try { if (typeof raw !== 'string') return null; const x: unknown = JSON.parse(raw); return Array.isArray(x) && x.every(v => typeof v === 'string') ? x as string[] : null; } catch { return null; } };
-  const giorni = disp ? elenco(disp.giorni_json) : null;
-  const fasce = disp ? elenco(disp.fasce_json) : null;
-  const fonteIlleggibile = !!disp && (giorni === null || fasce === null);
-  const avvisiFonte = disp ? [
-    ...(giorni === null ? ['I giorni nella fonte Confidente non sono leggibili: correggili nella fonte. Nessun calendario è stato ricostruito.'] : []),
-    ...(fasce === null ? ['Le fasce nella fonte Confidente non sono leggibili: correggile nella fonte. Nessun calendario è stato ricostruito.'] : []),
-  ] : ['La disponibilità del Confidente non è registrata nella fonte.'];
+  // N-1: la disponibilità si legge dalla fonte strutturata (R9-01), non dal testo libero; il testo resta nelle note
+  const disp = prepared('SELECT note FROM confidente_disponibilita WHERE confidente_chiave = ?').get(chiave) as { note: string } | undefined;
+  const struttura = disp ? disponibilitaConfidente(chiave) : null;
+  const giorni = struttura ? struttura.struttura.giorni.map(g => NOME_GIORNO[g]) : null;
+  const fasce = struttura ? struttura.struttura.fasce.map(f => (f === 'sera' ? 'sera' : 'giorno')) : null;
+  const luogo = struttura ? (struttura.luoghi.length ? struttura.luoghi.map(l => l.nome).join(', ') : struttura.struttura.motivoSenzaLuogo) : '';
+  const fonteIlleggibile = false;
+  const avvisiFonte = disp ? [] : ['La disponibilità del Confidente non è registrata nella fonte.'];
   const rangoAttuale = st ? st.ranghiConfidenti.get(chiave) ?? 0 : null;
   const passo = rangoAttuale !== null && rangoAttuale < 10 ? ranghi.find(q => q.rango === rangoAttuale + 1) : null;
   const semafori = st && passo ? (prepared('SELECT * FROM confidente_requisito WHERE confidente_chiave = ? AND rango = ? ORDER BY indice').all(chiave, passo.rango) as RigaRequisito[]).map(q => valuta(q, st)) : null;
   const bloccanti = semafori?.filter(requisitoBloccante) ?? [];
   return { ...base, stato: campiIncompatibili.length || fonteIlleggibile ? 'conflitto' : 'collegato', avvio: ranghi.find(q => q.rango === 1) ?? null, rangoAttuale,
-    disponibilitaFonte: disp && giorni !== null && fasce !== null ? { giorni, fasce, luogo: disp.luogo, note: disp.note } : null,
+    disponibilitaFonte: disp && giorni !== null && fasce !== null ? { giorni, fasce, luogo, note: disp.note } : null,
     prossimoPasso: passo ? { rango: passo.rango, requisiti: passo.requisiti, disponibilitaRequisiti: semafori && !campiIncompatibili.length && !fonteIlleggibile
       ? { stato: bloccanti.some(q => q.stato === 'rosso') ? 'bloccato' : bloccanti.some(q => q.stato === 'grigio') ? 'ignoto' : 'disponibile', requisiti: semafori } : null } : null,
     dotiPerPassaggio: dotiIncontro(chiave),
