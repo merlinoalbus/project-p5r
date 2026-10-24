@@ -28,9 +28,13 @@ import { mappeDaCollocare } from './areeService.js';
 
 /**
  * Il filtro dei Palazzi, in un solo punto (è quello di `utils/palazzi.ts`, `soloPalazzi`): quando Iweleth diventa solo un dedalo
- * (L8 B7) cambia questa riga e lui esce dai Palazzi da solo.
+ * (L8 B7, migrazione 175) esce dai Palazzi: i dungeon che confluiscono in un dedalo (`dedalo_confluenza`) non sono Palazzi, e il loro posto è il
+ * ramo dei Memento. Senza la tabella (schema precedente alla 175) vale il solo tipo.
  */
-const SQL_PALAZZI = "d.tipo = 'palazzo'";
+const sqlPalazzi = (): string => {
+  const confluenza = !!prepared("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = 'dedalo_confluenza'").get();
+  return confluenza ? "d.tipo = 'palazzo' AND d.chiave NOT IN (SELECT dungeon_chiave FROM dedalo_confluenza)" : "d.tipo = 'palazzo'";
+};
 
 const vuoti = (): ConteggiPinDto => ({ contenuto: 0, passaggi: 0, note: 0 });
 const somma = (a: ConteggiPinDto, b: ConteggiPinDto): void => { for (const g of GRUPPI_CONTEGGIO_SPILLO) a[g] += b[g]; };
@@ -79,7 +83,7 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
   // ---- letture, una volta per richiesta ----
   const quartieri = (conAree() ? prepared(`SELECT q.chiave, q.nome, 'citta-' || q.chiave AS mappa_interna, m.chiave AS mappa_presente, m.immagine_chiave, m.asset, m.ruolo_immagine
       FROM quartiere q LEFT JOIN mappa m ON m.chiave = 'citta-' || q.chiave WHERE q.chiave <> 'mementos' ORDER BY q.ordine, q.chiave`).all() : []) as RigaQuartiereG[];
-  const palazzi = (conAree() ? prepared(`SELECT d.chiave, d.nome, d.regola_boss FROM dungeon d WHERE ${SQL_PALAZZI} ORDER BY d.ordine, d.chiave`).all() : []) as RigaPalazzoG[];
+  const palazzi = (conAree() ? prepared(`SELECT d.chiave, d.nome, d.regola_boss FROM dungeon d WHERE ${sqlPalazzi()} ORDER BY d.ordine, d.chiave`).all() : []) as RigaPalazzoG[];
   const aree = (conAree() ? prepared('SELECT * FROM area ORDER BY ordine, slug').all() : []) as RigaArea[];
   const planimetrie = (conAree() ? prepared(`SELECT chiave, nome, immagine_chiave, asset, ruolo_immagine, area_chiave, versione_etichetta, versione_ordine
       FROM mappa WHERE area_chiave IS NOT NULL ORDER BY area_chiave, versione_ordine, chiave`).all() : []) as RigaPlanimetriaG[];

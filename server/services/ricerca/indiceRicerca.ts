@@ -85,6 +85,8 @@ export interface ContestoIndice {
   dungeon: Map<string, { nome: string; tipo: string }>;
   /** `dungeon_area` (infiltrazioni dei Palazzi e dedali dei Memento) per chiave. */
   dungeonArea: Map<string, { dungeon: string; nome: string }>;
+  /** I dungeon confluiti in un dedalo dei Memento (L8 B7, migrazione 175: oggi Iweleth): non sono Palazzi, e le loro infiltrazioni, Aree e planimetrie non si indicizzano (le mostra il dedalo). */
+  confluiti: Set<string>;
   sinonimi: SinonimiRicerca;
 }
 
@@ -256,7 +258,7 @@ const COSTRUTTORI: Record<TipoRicerca, CostruttoreTipo> = {
     return [{ tipo: 'citta', chiave: 'tokyo', nome: m?.nome ?? NOME_CITTA, casa: '/guida/citta', percorso: [], immagine: illustrazioneDi('tokyo', ctx) }];
   },
 
-  area: (ctx) => [...ctx.aree.aree.values()].sort((a, b) => a.ordine - b.ordine).map((a) => ({
+  area: (ctx) => [...ctx.aree.aree.values()].filter((a) => !(a.dungeon_chiave && ctx.confluiti.has(a.dungeon_chiave))).sort((a, b) => a.ordine - b.ordine).map((a) => ({
     tipo: 'area', chiave: a.chiave, nome: a.nome, casa: casaDellArea(a), percorso: percorsoDelContenitore(a, ctx),
     altri: ctx.sinonimi.sinonimi.get(chiaveSinonimo('area', a.chiave)), immagine: illustrazioneDellArea(a, ctx),
     segno: a.da_verificare === 1 ? 'da-verificare' : null,
@@ -267,7 +269,7 @@ const COSTRUTTORI: Record<TipoRicerca, CostruttoreTipo> = {
     const out: Bozza[] = [];
     for (const m of ctx.mappe.values()) {
       const a = m.area_chiave ? ctx.aree.aree.get(m.area_chiave) : undefined;
-      if (!a || a.planimetria_predefinita === m.chiave) continue;
+      if (!a || a.planimetria_predefinita === m.chiave || (a.dungeon_chiave && ctx.confluiti.has(a.dungeon_chiave))) continue;
       const nome = m.versione_etichetta ? `${a.nome} — ${m.versione_etichetta}` : m.nome;
       out.push({
         tipo: 'planimetria', chiave: m.chiave, nome, altri: [m.nome], casa: casaDellArea(a, m.chiave),
@@ -277,12 +279,12 @@ const COSTRUTTORI: Record<TipoRicerca, CostruttoreTipo> = {
     return out;
   },
 
-  palazzo: (ctx) => q<{ chiave: string; nome: string }>(ctx, 'SELECT chiave, nome FROM dungeon ORDER BY ordine').map((d) => ({
+  palazzo: (ctx) => q<{ chiave: string; nome: string }>(ctx, 'SELECT chiave, nome FROM dungeon ORDER BY ordine').filter((d) => !ctx.confluiti.has(d.chiave)).map((d) => ({
     tipo: 'palazzo', chiave: d.chiave, nome: d.nome, casa: casaDelPalazzo(d.chiave), percorso: percorsoDelDungeon(d.chiave, ctx),
     altri: ctx.sinonimi.sinonimi.get(chiaveSinonimo('palazzo', d.chiave)), immagine: immagineDelDungeon(d.chiave, ctx),
   })),
 
-  infiltrazione: (ctx) => [...ctx.dungeonArea.entries()].filter(([, a]) => ctx.dungeon.get(a.dungeon)?.tipo === 'palazzo').map(([chiave, a]) => ({
+  infiltrazione: (ctx) => [...ctx.dungeonArea.entries()].filter(([, a]) => ctx.dungeon.get(a.dungeon)?.tipo === 'palazzo' && !ctx.confluiti.has(a.dungeon)).map(([chiave, a]) => ({
     tipo: 'infiltrazione', chiave, nome: a.nome, casa: casaDellaAreaDungeon(a.dungeon, chiave, ctx),
     percorso: percorsoDellaAreaDungeon(a.dungeon, ctx), immagine: immagineDelDungeon(a.dungeon, ctx),
   })),
@@ -396,6 +398,8 @@ function contestoDi(db: AppDatabase): ContestoIndice {
     caricatePersona: new Map((db.prepare("SELECT chiave, created_at FROM immagine WHERE ambito = 'persona'").all() as Array<{ chiave: string; created_at: string }>).map((i) => [i.chiave, i.created_at])),
     dungeon: new Map((db.prepare('SELECT chiave, nome, tipo FROM dungeon').all() as Array<{ chiave: string; nome: string; tipo: string }>).map((d) => [d.chiave, { nome: d.nome, tipo: d.tipo }])),
     dungeonArea: new Map((db.prepare('SELECT chiave, dungeon_chiave, nome FROM dungeon_area ORDER BY dungeon_chiave, ordine').all() as Array<{ chiave: string; dungeon_chiave: string; nome: string }>).map((a) => [a.chiave, { dungeon: a.dungeon_chiave, nome: a.nome }])),
+    confluiti: new Set(db.prepare("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = 'dedalo_confluenza'").get()
+      ? (db.prepare('SELECT dungeon_chiave FROM dedalo_confluenza').all() as Array<{ dungeon_chiave: string }>).map((r) => r.dungeon_chiave) : []),
     sinonimi,
   };
 }

@@ -17,4 +17,4 @@ export const queryRicerca = z.object({
   tipi: elencoTipi.optional(),
   limite: z.coerce.number().int().min(1).max(LIMITE_MASSIMO_RICERCA).default(LIMITE_PREDEFINITO_RICERCA),
   partita: idParam.optional(),
-});
+}).strict();
