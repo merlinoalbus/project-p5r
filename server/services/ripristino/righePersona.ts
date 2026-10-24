@@ -176,10 +176,19 @@ const skill: DefRiga = {
     // la resa italiana sta in `traduzione` e vale per il testo dell'effetto: segue il testo nuovo
     const effetto = v.effetto !== undefined ? (str(v.effetto) ?? '') : prima.effetto;
     primaDellaScrittura = new Map();
-    if (v.effetto_it !== undefined || v.effetto !== undefined) {
+    // Senza una resa nuova (`effetto_it` non inviato) la riga che il testo nuovo ha già non si tocca: `traduzione` vale per il TESTO, quindi quella riga è la resa
+    // di chi ha già quel testo (un'altra skill, o questa stessa se il testo non è cambiato) e sovrascriverla o cancellarla cambierebbe la skill degli altri.
+    // Solo se il testo nuovo non ha ancora una resa, ci va quella del testo di prima. Una resa inviata uguale a quella che il testo ha già non scrive niente
+    // (il ripristino la rimanda: riscriverla porterebbe la riga a `fonte = 'utente'` con un'altra data).
+    const rigaDelTesto = leggiRigaTraduzione(effetto);
+    const resaInviata = v.effetto_it !== undefined ? (str(v.effetto_it) || null) : undefined;
+    const daScrivere = resaInviata !== undefined
+      ? resaInviata !== (rigaDelTesto?.testo ?? null)
+      : v.effetto !== undefined && rigaDelTesto === null;
+    if (daScrivere) {
       ricordaRiga(prima.effetto);
       ricordaRiga(effetto);
-      const it =v.effetto_it !== undefined ? str(v.effetto_it) : effettoIt(prima.effetto);
+      const it = resaInviata !== undefined ? resaInviata : effettoIt(prima.effetto);
       if (it === null || it === '') prepared("DELETE FROM traduzione WHERE ambito = 'effettoSkill' AND chiave = ?").run(effetto);
       else prepared("INSERT INTO traduzione (ambito, chiave, testo, fonte, updated_at) VALUES ('effettoSkill', ?, ?, 'utente', ?) ON CONFLICT(ambito, chiave) DO UPDATE SET testo = excluded.testo, fonte = 'utente', updated_at = excluded.updated_at")
         .run(effetto, it, new Date().toISOString());
