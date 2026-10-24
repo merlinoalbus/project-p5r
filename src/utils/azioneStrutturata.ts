@@ -7,7 +7,7 @@ import type { AzionePercorsoDto } from '../types';
 import type { EffettoVoce, RichiestaSalvaEffettiVoce, StatoEffettiVoceDto } from '../../shared/effettiVoce';
 import { normalizzaEffettoVoce } from '../../shared/effettiVoce';
 import { eAttivitaPesca } from '../../shared/pesca';
-import { indicePrincipale, riferimentoDaEffetto } from './effettoAutomatico';
+import { riferimentoDiApertura } from './effettoAutomatico';
 
 /** I campi strutturati di un'azione; il collegamento può essere a metà (tipo scelto, elemento no) finché si modifica. */
 export interface CampiStrutturati {
@@ -25,12 +25,10 @@ export const STRUTTURA_VUOTA: CampiStrutturati = { tipo: 'altro', riferimento: n
 export function strutturaDi(a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento' | 'rangoAtteso' | 'produce' | 'effettiVoce'>): CampiStrutturati {
   const effetti = a.effettiVoce?.stato === 'convertita' ? a.effettiVoce.effetti.map(({ uid, effetto }) => ({ uid, effetto })) : undefined;
   let riferimento: CampiStrutturati['riferimento'] = a.riferimento ? { tipo: a.riferimento.tipo, chiave: a.riferimento.chiave } : null;
-  // Voce salvata senza collegamento ma con il suo effetto principale: il collegamento si ricava dall'effetto, così «Quale» lo mostra
-  // scelto e cambiarlo riscrive quell'effetto (stesso UID) invece di aggiungerne un secondo.
-  if (!riferimento && effetti) {
-    const i = indicePrincipale(effetti, a.tipo, null);
-    if (i >= 0) riferimento = riferimentoDaEffetto(a.tipo, effetti[i].effetto);
-  }
+  // Voce salvata senza collegamento del suo genere (nullo, o di altro genere come un negozio su un lavoro) ma con UN SOLO effetto del
+  // genere del tipo: il collegamento si ricava da quell'effetto, così «Quale» lo mostra scelto e cambiarlo riscrive quell'effetto
+  // (stesso UID) invece di aggiungerne un secondo. Solo all'apertura: dopo un cambio di tipo il ripiego non si applica.
+  if (effetti) riferimento = riferimentoDiApertura(a.tipo, riferimento, effetti);
   return { tipo: a.tipo, riferimento, rangoAtteso: a.rangoAtteso, produce: a.produce ?? [],
     ...(a.effettiVoce ? { fonteEffetti: a.effettiVoce, ...(effetti ? { effettiVoce: effetti } : {}) } : {}) };
 }

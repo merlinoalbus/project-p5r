@@ -112,7 +112,11 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi }: Props & { 
   const eff: EffettoVoce | null = righe && i >= 0 ? righe[i].effetto : null;
   const frase = (t: string) => <p className="m-0 text-[13px] break-words">{t}</p>;
   const scrivi = (e: EffettoVoce | null) => onCambia(impostaPrincipale(valore, e));
-  const mancaQuale = (cosa: string) => frase(`Scegli ${cosa}: l’effetto della spunta si compila da solo.`);
+  /** Manca il principale: se la voce ha già effetti salvati, «si compila da solo» sarebbe falso (restano fra gli aggiuntivi, e quello che combacia con la scelta si adotta). */
+  const mancaQuale = (cosa: string) => frase(righe && righe.length > 0
+    ? `Scegli ${cosa}: gli effetti già salvati su questa voce restano, elencati negli effetti aggiuntivi qui sotto. Se la scelta produce un effetto automatico, lo riconosce fra quelli salvati o lo aggiunge.`
+    : valore.tipo === 'attivita' ? `Scegli ${cosa}: se è un videogioco l’effetto della spunta si compila da solo.`
+      : `Scegli ${cosa}: l’effetto della spunta si compila da solo.`);
   /** Voce con effetti salvati ma nessuno principale: la frase «registra solo che l’hai fatta» sarebbe falsa. */
   const soloAggiuntivi = 'Nessun effetto automatico dal collegamento: gli effetti salvati su questa voce sono quelli elencati negli effetti aggiuntivi qui sotto.';
 

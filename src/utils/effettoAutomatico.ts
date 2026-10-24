@@ -75,15 +75,20 @@ export function riferimentoDaEffetto(tipo: TipoAzione, e: EffettoVoce): Rif {
 }
 
 /**
- * Il posto, nella lista, dell'effetto principale (-1 se non c'è). Se la voce non ha un collegamento del genere del tipo (nullo, o di
- * altro genere come un negozio su un lavoro) e fra gli effetti salvati ce n'è UNO SOLO del genere del tipo, quello è il principale:
- * così non finisce fra gli aggiuntivi e «Quale» lo riscrive invece di duplicarlo.
+ * Il collegamento con cui si APRE una voce così com'è salvata: quello salvato se è del genere del tipo; altrimenti (nullo, o di altro
+ * genere come un negozio su un lavoro), se fra gli effetti salvati ce n'è UNO SOLO del genere del tipo, il collegamento che quell'effetto
+ * implica. Vale solo all'apertura (`strutturaDi`): dopo un cambio di tipo il collegamento azzerato resta azzerato, perciò un effetto
+ * salvato di un altro tipo non diventa mai «principale» e «Quale» non lo riscrive.
  */
+export function riferimentoDiApertura(tipo: TipoAzione, rif: Rif, righe: readonly RigaEffetto[]): Rif {
+  if (rif && rif.tipo === RIFERIMENTO_DI_TIPO[tipo]) return rif;
+  const candidati = righe.filter((r) => eDelGenere(tipo, r.effetto));
+  return candidati.length === 1 ? (riferimentoDaEffetto(tipo, candidati[0].effetto) ?? rif) : rif;
+}
+
+/** Il posto, nella lista, dell'effetto principale (-1 se non c'è): solo l'effetto esatto del collegamento corrente. */
 export function indicePrincipale(righe: readonly RigaEffetto[], tipo: TipoAzione, rif: Rif): number {
-  const esatto = righe.findIndex((r) => eDelCollegamento(tipo, rif, r.effetto));
-  if (esatto >= 0 || (rif && rif.tipo === RIFERIMENTO_DI_TIPO[tipo])) return esatto;
-  const candidati = righe.flatMap((r, i) => (eDelGenere(tipo, r.effetto) ? [i] : []));
-  return candidati.length === 1 ? candidati[0] : -1;
+  return righe.findIndex((r) => eDelCollegamento(tipo, rif, r.effetto));
 }
 
 /** L'effetto con cui nasce una voce quando si sceglie «Quale»; null se il tipo non ne ha o se l'effetto si sceglie nel riquadro (articolo, domanda, evento). */
@@ -113,7 +118,13 @@ export function cambiaCollegamento(s: CampiStrutturati, tipo: TipoAzione, rif: R
   const nuovo = effettoIniziale(tipo, rif, ctx);
   const i = indicePrincipale(righe, s.tipo, s.riferimento);
   let scritto = false;
-  if (i >= 0) {
+  // Un effetto già salvato che è proprio quello del nuovo collegamento (stessa Dote, stesso libro…) diventa il principale così com'è:
+  // niente effetto nuovo, niente riscrittura, note invariate. Se le chiavi uguali sono più d'una si adotta la prima, le altre restano.
+  const adottato = nuovo ? righe.findIndex((r, j) => j !== i && eDelCollegamento(tipo, rif, r.effetto)) : -1;
+  if (adottato >= 0) {
+    scritto = true;
+    if (i >= 0 && righe[i].uid === null) righe = righe.filter((_, j) => j !== i);
+  } else if (i >= 0) {
     if (righe[i].uid === null) righe = righe.filter((_, j) => j !== i);
     else if (nuovo && nuovo.tipo === righe[i].effetto.tipo) { righe[i] = { uid: righe[i].uid, effetto: nuovo }; scritto = true; }
   }
