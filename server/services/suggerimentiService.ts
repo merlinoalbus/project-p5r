@@ -195,7 +195,7 @@ export function suggerimentiOggi(partitaId: number): SuggerimentiOggiDto {
       r.confidenti.add(rif.chiave);
       segna('confidenti', rif.chiave, a.azione, a.fascia);
       for (const p of personaggiDiConfidente(rif.chiave)) { r.personaggi.add(p); segna('personaggi', p, a.azione, a.fascia); }
-      for (const l of prepared('SELECT chiave FROM luogo WHERE confidenti_json LIKE ?').all(`%"${rif.chiave}"%`) as Array<{ chiave: string }>) aggiungiLuogo(r, l.chiave);
+      for (const l of prepared('SELECT chiave FROM luogo WHERE nascosto = 0 AND confidenti_json LIKE ?').all(`%"${rif.chiave}"%`) as Array<{ chiave: string }>) aggiungiLuogo(r, l.chiave);
       const sp = prepared("SELECT id FROM spillo WHERE riferimento_tipo = 'confidente' AND riferimento_chiave = ? ORDER BY id LIMIT 1").get(rif.chiave) as { id: number } | undefined;
       if (sp) r.spilli.add(sp.id);
     } else if (rif?.tipo === 'dungeon') {

@@ -54,7 +54,9 @@ export function salvaDisponibilita(confidente: string, mod: ModificaDisponibilit
         if (attuali.has(k) === volute.has(k)) continue;
         const l = prepared('SELECT confidenti_json FROM luogo WHERE chiave = ?').get(k) as { confidenti_json: string } | undefined;
         if (!l) throw httpErrors.badRequest('luogo-non-trovato', `Il luogo '${k}' non esiste.`);
-        const elenco = (JSON.parse(l.confidenti_json) as string[]).filter((c) => c !== confidente);
+        let corrente: string[] = [];
+        try { const v = JSON.parse(l.confidenti_json) as unknown; if (Array.isArray(v)) corrente = v.filter((c): c is string => typeof c === 'string'); } catch { /* elenco vuoto o illeggibile: si riparte da vuoto */ }
+        const elenco = corrente.filter((c) => c !== confidente);
         if (volute.has(k)) elenco.push(confidente);
         aggiornaElemento('luogo', k, { confidenti_json: JSON.stringify(elenco) });
       }

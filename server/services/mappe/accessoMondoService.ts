@@ -92,7 +92,7 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
       // Un confidente si incontra in luoghi precisi, e il catalogo li elenca: sono quelli, non
       // una somiglianza di nome.
       if (tipo === 'confidente') {
-        for (const l of prepared("SELECT chiave FROM luogo WHERE confidenti_json IS NOT NULL AND EXISTS (SELECT 1 FROM json_each(luogo.confidenti_json) WHERE value = ?) ORDER BY chiave").all(chiave) as Array<{ chiave: string }>) {
+        for (const l of prepared("SELECT chiave FROM luogo WHERE nascosto = 0 AND confidenti_json IS NOT NULL AND EXISTS (SELECT 1 FROM json_each(luogo.confidenti_json) WHERE value = ?) ORDER BY chiave").all(chiave) as Array<{ chiave: string }>) {
           riferimenti.push({ tipo: 'luogo', chiave: l.chiave });
         }
       }
