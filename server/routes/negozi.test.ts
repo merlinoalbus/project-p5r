@@ -160,7 +160,7 @@ describe('API negozi e inventario', () => {
     const id = ((await request(app).post('/api/partite').send({ nome: 'Disponibilità', dataGioco: '12-15', fasciaGioco: 'sera' })).body.data as { id: number }).id;
     const scheda = (await request(app).get(`/api/compendio/negozi/clinica-takemi?partita=${id}`)).body.data as NegozioDettaglioDto;
     const catalogo = ((await request(app).get('/api/compendio/negozi/clinica-takemi')).body.data as NegozioDettaglioDto).articoliElenco;
-    const conRango = catalogo.filter((a) => /^Rango Confidente \d+$/.test(a.condizione ?? ''));
+    const conRango = catalogo.filter((a) => a.condizioni?.some((c) => c.tipo === 'confidente'));
     expect(conRango.length).toBeGreaterThan(0);
     expect(scheda.articoliElenco.some((a) => conRango.some((c) => c.chiave === a.chiave && a.disponibilita?.stato === 'bloccato'))).toBe(true);
     const ricerca = (await request(app).get(`/api/compendio/articoli?q=Takemedic&partita=${id}`)).body.data as RicercaArticoliDto;
