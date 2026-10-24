@@ -1,5 +1,5 @@
 // ============================================================
-// ModuloLuogo — un luogo della città: nome, tipo a tessere (l'icona dello spillo), quartiere, che cosa offre, quando, note, orari
+// ModuloLuogo — un luogo della città: nome, tipo a tessere (l'icona dello spillo), quartiere, che cosa offre, note, orari
 // ============================================================
 
 import { useCarica } from '../../../hooks/useCarica';
@@ -15,11 +15,10 @@ import { ORARI_SEMPRE, type OrariNegozio } from '../../../../shared/orariNegozio
 import { Blocco, Campo, Griglia } from './campi';
 
 const OPZIONI_TIPO: OpzioneIcone[] = TIPI_LUOGO.map((t) => ({ chiave: t.chiave, nome: t.nome, icona: <IconaSpillo tipo={t.icona} dimensione={28} /> }));
-const OPZIONI_QUANDO = [{ chiave: 'giorno', nome: 'Di giorno' }, { chiave: 'sera', nome: 'Di sera' }, { chiave: 'entrambe', nome: 'Giorno e sera' }];
 
 /**
  * I campi di un luogo: nome, tipo a tessere, quartiere (dai quartieri caricati; un valore salvato sconosciuto resta
- * in testa all'elenco, con «Riprova» se il caricamento fallisce), quando, che cosa offre e note; i giorni sono nel blocco degli orari.
+ * in testa all'elenco, con «Riprova» se il caricamento fallisce), che cosa offre e note; i giorni sono nel blocco degli orari.
  */
 export function ModuloLuogo({ dati, imposta, disabilitato }: PropsModulo) {
   const quartieri = useCarica(() => getQuartieri(), []);
@@ -34,9 +33,6 @@ export function ModuloLuogo({ dati, imposta, disabilitato }: PropsModulo) {
       <Blocco>
         <Selettore etichetta="Quartiere" valore={attuale} vuoto="Scegli il quartiere…" disabilitato={disabilitato || quartieri.caricamento} opzioni={opzioniQuartiere} onCambia={(k) => imposta({ quartiere_chiave: k })} />
         {quartieri.errore && <span role="alert" className="text-[11px] text-error">Impossibile caricare i quartieri. <button type="button" className="btn btn-sm touch" onClick={() => void quartieri.ricarica()}>Riprova</button></span>}
-      </Blocco>
-      <Blocco>
-        <Selettore etichetta="Quando" valore={testoDi(dati.quando)} vuoto="Non indicato" ricerca="mai" disabilitato={disabilitato} opzioni={OPZIONI_QUANDO} onCambia={(k) => imposta({ quando: k || null })} />
       </Blocco>
       <Campo nome="cosa_offre" etichetta="Che cosa offre" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={600} />
       <Campo nome="note" etichetta="Note" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} />

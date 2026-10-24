@@ -294,7 +294,7 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
     }
     case 'attivita':
     case 'luogo': {
-      const l = prepared('SELECT chiave, quartiere_chiave, tipo, nome, cosa_offre, quando FROM luogo WHERE chiave = ?').get(chiave) as { chiave: string; quartiere_chiave: string; tipo: string; nome: string; cosa_offre: string; quando: string | null } | undefined;
+      const l = prepared('SELECT chiave, quartiere_chiave, tipo, nome, cosa_offre FROM luogo WHERE chiave = ?').get(chiave) as { chiave: string; quartiere_chiave: string; tipo: string; nome: string; cosa_offre: string } | undefined;
       if (!l) return null;
       // L5: tutti i negozi della sede (prima solo il primo), ognuno con la sua sezione nella pagina del luogo; `negozio` resta il primo
       const luoghi = luoghiDi(ctx);
@@ -303,7 +303,7 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
       const negozio = sedi[0] ? negozioDettaglio(sedi[0].chiave, ctx, chiave) : null;
       const riga = luoghi.righe.get(l.chiave);
       const orari = orariDelLuogo(riga?.orari_json ?? null);
-      return { tipo, luogo: { chiave: l.chiave, quartiere: l.quartiere_chiave, tipo: l.tipo, nome: l.nome, cosaOffre: l.cosa_offre, quando: l.quando,
+      return { tipo, luogo: { chiave: l.chiave, quartiere: l.quartiere_chiave, tipo: l.tipo, nome: l.nome, cosaOffre: l.cosa_offre, quando: orari.fasce.length === 1 ? orari.fasce[0] : 'entrambe',
         orariTesto: descriviOrariDelLuogo(orari), presenza: presenzaDelLuogo(riga ? condizioniDiSblocco(riga, luoghi.inviti) : [], orari, luoghi.st), casa,
         negozi: sedi.map((n) => ({ chiave: n.chiave, nome: n.nome, casa: `${casa}#negozio-${encodeURIComponent(n.chiave)}` })) }, negozio };
     }

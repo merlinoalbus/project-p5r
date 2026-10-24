@@ -187,7 +187,7 @@ export const luogo: DefinizioneModulo = {
   conVerificato: true,
   iniziali: (e) => ({
     nome: testoDi(e?.dati.nome), tipo: testoDi(e?.dati.tipo) || 'altro', quartiere_chiave: testoDi(e?.dati.quartiere_chiave),
-    cosa_offre: testoDi(e?.dati.cosa_offre), quando: (e?.dati.quando as string | null) ?? null, note: testoDi(e?.dati.note),
+    cosa_offre: testoDi(e?.dati.cosa_offre), note: testoDi(e?.dati.note),
     verificato: verificatoDi(e),
     // ---- L5 (R5-07): un modulo solo per tutto il luogo ----
     // gli orari del luogo; null = la guida non li dà (regola dell'app, «giorno e sera»)

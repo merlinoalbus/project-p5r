@@ -232,7 +232,6 @@ const datiLuogo = z.object({
   tipo: z.enum(chiaviDi(TIPI_LUOGO)).default('altro'),
   nome: testo(160).min(1),
   cosa_offre: testo(600).default(''),
-  quando: z.enum(['giorno', 'sera', 'entrambe']).nullable().optional(),
   // ---- L5 (R5-07): un modulo solo per tutto il luogo ----
   /** Gli orari del luogo come valori; null = regola dell'app «giorno e sera» (la guida non dà orari). */
   orari_json: orariNegozio.nullable().optional().transform((v) => (v === null || v === undefined ? v : JSON.stringify(v))),

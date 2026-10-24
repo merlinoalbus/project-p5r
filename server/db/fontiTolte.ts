@@ -67,6 +67,10 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     sostituitaDa: 'gli orari del luogo (`orari_json`) e la disponibilità dei Confidenti; i valori restano nell’archivio «archivio-frasi-l11»',
   },
   {
+    schema: 'main', tabella: 'luogo', colonna: 'quando', tolta: 'L11 · migrazione 193',
+    sostituitaDa: 'gli orari del luogo (`orari_json`): il visore e la scheda mostrano l’orario ricavato dai dati; i valori (anche dei luoghi che divergevano) restano nell’archivio «archivio-frasi-l11»',
+  },
+  {
     schema: 'main', tabella: 'negozio', colonna: 'orari', tolta: 'L11 · migrazione 184',
     sostituitaDa: 'gli orari strutturati del negozio (`orari_json`): la frase era la sua copia esatta',
   },

@@ -13,7 +13,7 @@ beforeAll(()=>{dbDiProva();});
 afterAll(()=>{closeDb();});
 
 it('risolve Attività e luogo sullo stesso luogo conservando dettagli, condizioni e pacchetti',async()=>{
-  const luogo=getDb().prepare("SELECT chiave,quartiere_chiave,cosa_offre,quando FROM luogo WHERE tipo='attivita' LIMIT 1").get() as {chiave:string;quartiere_chiave:string;cosa_offre:string;quando:string|null};
+  const luogo=getDb().prepare("SELECT chiave,quartiere_chiave,cosa_offre FROM luogo WHERE tipo='attivita' LIMIT 1").get() as {chiave:string;quartiere_chiave:string;cosa_offre:string};
   expect(luogo).toBeTruthy();
   await request(app).post('/api/mappe').send({chiave:'attivita-narrative',nome:'Attività narrative',tipo:'luogo'}).expect(201);
   const partita=(await request(app).post('/api/partite').send({nome:'Verifica attività',fasciaGioco:'giorno'})).body.data.id as number;
@@ -21,7 +21,7 @@ it('risolve Attività e luogo sullo stesso luogo conservando dettagli, condizion
     const response=await request(app).post('/api/mappe/attivita-narrative/spilli').send({tipo:'attivita',nome:'Interazione '+tipo,x:20,y:30,riferimento:{tipo,chiave:luogo.chiave},condizioni:[{tipo:'fascia',fascia:'sera'}]});
     expect(response.status).toBe(201);
     const s=response.body.data as SpilloDto;
-    expect(s.dettaglio).toMatchObject({tipo,luogo:{chiave:luogo.chiave,quartiere:luogo.quartiere_chiave,cosaOffre:luogo.cosa_offre,quando:luogo.quando}});
+    expect(s.dettaglio).toMatchObject({tipo,luogo:{chiave:luogo.chiave,quartiere:luogo.quartiere_chiave,cosaOffre:luogo.cosa_offre,quando:expect.stringMatching(/^(giorno|sera|entrambe)$/)}});
   }
   /** Rilegge la mappa «attivita-narrative» con la partita di prova e ne restituisce gli spilli (con disponibilità calcolata). */
   const spilli=async()=>((await request(app).get(`/api/mappe/attivita-narrative?partita=${partita}`)).body.data as MappaDto).spilli;

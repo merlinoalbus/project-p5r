@@ -1069,7 +1069,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                     <CollegamentoVisivo to="/confidenti" tono="primario" compatto icona={<IconaSpillo tipo="confidente" dimensione={20} />} titolo="Confidenti" dettaglio="la pagina dei Confidenti" />
                   )}
                   {categoriaSpillo(selezionato.tipo) === 'citta' && (selezionato.dettaglio?.tipo === 'luogo' || selezionato.dettaglio?.tipo === 'attivita') && selezionato.dettaglio.luogo && !selezionato.dettaglio.luogo.casa && !selezionato.dettaglio.negozio && (
-                    <CollegamentoVisivo to={`/guida/citta/${encodeURIComponent(selezionato.dettaglio.luogo.quartiere)}`} tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={selezionato.dettaglio.luogo.nome} dettaglio={selezionato.dettaglio.luogo.quando ?? selezionato.dettaglio.luogo.cosaOffre ?? 'scheda del quartiere'} />
+                    <CollegamentoVisivo to={`/guida/citta/${encodeURIComponent(selezionato.dettaglio.luogo.quartiere)}`} tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={selezionato.dettaglio.luogo.nome} dettaglio={selezionato.dettaglio.luogo.orariTesto ?? selezionato.dettaglio.luogo.cosaOffre ?? 'scheda del quartiere'} />
                   )}
                   {(selezionato.dettaglio?.negozio || selezionato.voci.length > 0 || selezionato.dettaglio?.tipo === 'luogo' || selezionato.dettaglio?.tipo === 'confidente' || selezionato.dettaglio?.tipo === 'richiesta' || selezionato.immagini.length > 0) && (
                     <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Dettagli" onClick={apriScheda} />
