@@ -2003,11 +2003,10 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .progressi-riepilogo { display:grid; gap:8px; grid-template-columns:repeat(4, minmax(0, 1fr)); }
 @media (max-width: 639px) {
   .progressi-riepilogo { grid-template-columns:repeat(2, minmax(0, 1fr)); gap:6px; }
-  /* telefono: tessera bassa (nome + valore), il dettaglio resta nel title; scopo su una riga */
-  .progressi-tessera { gap:0; padding:6px 10px; }
+  /* telefono: tessera bassa (nome e valore sulla stessa riga, dettaglio breve sotto su una riga) */
+  .progressi-tessera { display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:baseline; column-gap:6px; row-gap:0; padding:6px 10px; }
   .progressi-tessera__valore { font-size:20px; }
-  .progressi-tessera__dettaglio { display:none; }
-  .progressi-scopo { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .progressi-tessera__dettaglio { grid-column:1 / -1; font-size:12px; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 }
 .progressi-tessera { display:flex; flex-direction:column; align-items:flex-start; gap:2px; min-width:0; min-height:44px; padding:10px 12px; text-align:left; border:1px solid var(--color-border); background:var(--color-bg-tertiary); color:var(--color-text); font:inherit; cursor:pointer; }
 .progressi-tessera:hover { border-color:var(--color-text-secondary); }

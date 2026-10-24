@@ -146,11 +146,14 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
     <PageState isLoading={dati.caricamento && !p} error={dati.errore} onRetry={dati.ricarica}>
       {p && (
         <div className="flex flex-col gap-3">
-          <p className="progressi-scopo m-0" title="Le cose fatte in gioco che sbloccano Confidenti, negozi e attività. Quello che l’app sa già lo vedi; quello che non può sapere lo segni tu.">Le cose fatte in gioco che sbloccano Confidenti, negozi e attività. Quello che l’app sa già lo vedi; quello che non può sapere lo segni tu.</p>
+          <p className="progressi-scopo m-0">
+            <span className="hidden sm:inline">Le cose fatte in gioco che sbloccano Confidenti, negozi e attività. Quello che l’app sa già lo vedi; quello che non può sapere lo segni tu.</span>
+            <span className="sm:hidden">Cosa hai sbloccato in gioco: l’app segna quello che sa, il resto lo segni tu.</span>
+          </p>Le cose fatte in gioco che sbloccano Confidenti, negozi e attività. Quello che l’app sa già lo vedi; quello che non può sapere lo segni tu.</p>
 
           <div className="progressi-riepilogo" role="tablist" aria-label="Argomenti dei progressi">
             {SEZIONI.map((s) => (
-              <button key={s.k} type="button" role="tab" id={`progressi-tab-${s.k}`} aria-selected={sezione === s.k} aria-controls="progressi-pannello" title={tessere[s.k].dettaglio} className={`progressi-tessera touch ${sezione === s.k ? 'progressi-tessera--attiva' : ''}`} onClick={() => scegli(s.k)}>
+              <button key={s.k} type="button" role="tab" id={`progressi-tab-${s.k}`} aria-selected={sezione === s.k} aria-controls="progressi-pannello" className={`progressi-tessera touch ${sezione === s.k ? 'progressi-tessera--attiva' : ''}`} onClick={() => scegli(s.k)}>
                 <span className="progressi-tessera__nome">{s.nome}</span>
                 <span className="progressi-tessera__valore">{tessere[s.k].valore}</span>
                 <span className="progressi-tessera__dettaglio">{tessere[s.k].dettaglio}</span>
