@@ -34,6 +34,30 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     schema: 'main', tabella: 'pianta_area', colonna: null, tolta: 'L11 · migrazione 176',
     sostituitaDa: 'le planimetrie delle infiltrazioni (le piante non si scaricano più); URL, fonte e licenza restano nell’archivio «archivio-marcatori-e-piante-l11»',
   },
+  {
+    schema: 'main', tabella: 'mappa', colonna: 'entita_tipo', tolta: 'L11 · migrazione 177',
+    sostituitaDa: 'la chiave e il tipo della mappa (il quartiere è «citta-…», il Palazzo o il dedalo «dungeon-…») e i legami dell’Area con le infiltrazioni',
+  },
+  {
+    schema: 'main', tabella: 'mappa', colonna: 'entita_chiave', tolta: 'L11 · migrazione 177',
+    sostituitaDa: 'la chiave e il tipo della mappa (il quartiere è «citta-…», il Palazzo o il dedalo «dungeon-…») e i legami dell’Area con le infiltrazioni',
+  },
+  {
+    schema: 'main', tabella: 'mappa_entita', colonna: null, tolta: 'L11 · migrazione 177',
+    sostituitaDa: 'i legami dell’Area con le infiltrazioni, la planimetria predefinita dell’Area per i luoghi e la chiave della mappa per quartieri e Palazzi; le righe non coperte restano nell’archivio «archivio-legami-e-presentazione-mappe-l11»',
+  },
+  {
+    schema: 'main', tabella: 'mappa_presentazione', colonna: 'gruppo_immagini_json', tolta: 'L11 · migrazione 177',
+    sostituitaDa: 'l’Area della planimetria (il nome della stanza) e la versione della mappa (etichetta e ordine); i gruppi non riproducibili restano nell’archivio «archivio-legami-e-presentazione-mappe-l11»',
+  },
+  {
+    schema: 'main', tabella: 'guida_mappa', colonna: null, tolta: 'L11 · migrazione 177',
+    sostituitaDa: 'il nome e la descrizione dell’infiltrazione (`dungeon_area`); i nomi che differivano restano nell’archivio «archivio-legami-e-presentazione-mappe-l11»; i nomi di prima delle infiltrazioni restano in `guida_alias`',
+  },
+  {
+    schema: 'main', tabella: 'organizzazione_mappa_esito', colonna: null, tolta: 'L11 · migrazione 177',
+    sostituitaDa: 'niente: la conversione delle vecchie mappe d’area in sezioni della guida è conclusa (la tabella era vuota)',
+  },
 ];
 
 export const tabellaTolta = (schema: string, tabella: string): FonteTolta | undefined =>
