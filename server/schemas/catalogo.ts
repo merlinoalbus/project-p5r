@@ -233,8 +233,6 @@ const datiLuogo = z.object({
   nome: testo(160).min(1),
   cosa_offre: testo(600).default(''),
   quando: z.enum(['giorno', 'sera', 'entrambe']).nullable().optional(),
-  /** Le chiavi dei giorni (migrazione 080); vuoto = nessuna limitazione. */
-  giorni_json: z.array(z.enum(GIORNI_SETTIMANA_CHIAVI)).max(7).transform((v) => JSON.stringify(GIORNI_SETTIMANA_CHIAVI.filter((g) => v.includes(g)))).optional(),
   // ---- L5 (R5-07): un modulo solo per tutto il luogo ----
   /** Gli orari del luogo come valori; null = regola dell'app «giorno e sera» (la guida non dà orari). */
   orari_json: orariNegozio.nullable().optional().transform((v) => (v === null || v === undefined ? v : JSON.stringify(v))),

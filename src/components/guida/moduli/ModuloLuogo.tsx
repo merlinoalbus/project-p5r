@@ -1,5 +1,5 @@
 // ============================================================
-// ModuloLuogo — un luogo della città: nome, tipo a tessere (l'icona dello spillo), quartiere, che cosa offre, quando, giorni a chip (migrazione 080), note
+// ModuloLuogo — un luogo della città: nome, tipo a tessere (l'icona dello spillo), quartiere, che cosa offre, quando, note, orari
 // ============================================================
 
 import { useCarica } from '../../../hooks/useCarica';
@@ -10,9 +10,8 @@ import { IconaSpillo } from '../../mappe/IconaSpillo';
 import { SelettoreIcone, type OpzioneIcone } from '../../shared/SelettoreIcone';
 import { TIPI_LUOGO } from '../../../../shared/tipiLuogo';
 import { testoDi, type PropsModulo } from './base';
-import { Interruttori, OrariEditor } from '../OrariEditor';
-import { ORARI_SEMPRE, type GiornoChiave, type OrariNegozio } from '../../../../shared/orariNegozio';
-import { GIORNI_SETTIMANA } from '../../../../shared/condizioniSpillo';
+import { OrariEditor } from '../OrariEditor';
+import { ORARI_SEMPRE, type OrariNegozio } from '../../../../shared/orariNegozio';
 import { Blocco, Campo, Griglia } from './campi';
 
 const OPZIONI_TIPO: OpzioneIcone[] = TIPI_LUOGO.map((t) => ({ chiave: t.chiave, nome: t.nome, icona: <IconaSpillo tipo={t.icona} dimensione={28} /> }));
@@ -20,7 +19,7 @@ const OPZIONI_QUANDO = [{ chiave: 'giorno', nome: 'Di giorno' }, { chiave: 'sera
 
 /**
  * I campi di un luogo: nome, tipo a tessere, quartiere (dai quartieri caricati; un valore salvato sconosciuto resta
- * in testa all'elenco, con «Riprova» se il caricamento fallisce), quando, che cosa offre, giorni (nessuno = tutti) e note.
+ * in testa all'elenco, con «Riprova» se il caricamento fallisce), quando, che cosa offre e note; i giorni sono nel blocco degli orari.
  */
 export function ModuloLuogo({ dati, imposta, disabilitato }: PropsModulo) {
   const quartieri = useCarica(() => getQuartieri(), []);
@@ -40,9 +39,6 @@ export function ModuloLuogo({ dati, imposta, disabilitato }: PropsModulo) {
         <Selettore etichetta="Quando" valore={testoDi(dati.quando)} vuoto="Non indicato" ricerca="mai" disabilitato={disabilitato} opzioni={OPZIONI_QUANDO} onCambia={(k) => imposta({ quando: k || null })} />
       </Blocco>
       <Campo nome="cosa_offre" etichetta="Che cosa offre" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={600} />
-      <Blocco largo>
-        <Interruttori<GiornoChiave> etichetta="Giorni (nessuno = tutti)" scelte={Array.isArray(dati.giorni_json) ? (dati.giorni_json as GiornoChiave[]) : []} opzioni={GIORNI_SETTIMANA} disabilitato={disabilitato} onCambia={(giorni_json) => imposta({ giorni_json })} />
-      </Blocco>
       <Campo nome="note" etichetta="Note" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} />
       {/* ---- L5 (R5-07): un modulo solo per tutto il luogo: orari, area, sblocco, Confidenti, piatti ---- */}
       <Blocco largo><CampiLuogoL5 dati={dati} imposta={imposta} disabilitato={disabilitato} /></Blocco>

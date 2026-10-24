@@ -187,7 +187,7 @@ export const luogo: DefinizioneModulo = {
   conVerificato: true,
   iniziali: (e) => ({
     nome: testoDi(e?.dati.nome), tipo: testoDi(e?.dati.tipo) || 'altro', quartiere_chiave: testoDi(e?.dati.quartiere_chiave),
-    cosa_offre: testoDi(e?.dati.cosa_offre), quando: (e?.dati.quando as string | null) ?? null, giorni_json: (jsonDi<unknown>(e?.dati.giorni_json, []) as unknown[]).filter((g): g is string => typeof g === 'string'), note: testoDi(e?.dati.note),
+    cosa_offre: testoDi(e?.dati.cosa_offre), quando: (e?.dati.quando as string | null) ?? null, note: testoDi(e?.dati.note),
     verificato: verificatoDi(e),
     // ---- L5 (R5-07): un modulo solo per tutto il luogo ----
     // gli orari del luogo; null = la guida non li dà (regola dell'app, «giorno e sera»)
@@ -201,7 +201,7 @@ export const luogo: DefinizioneModulo = {
   prepara: (d) => {
     const piatti = (d.piatti_json as PiattoLuogo[] | null) ?? null;
     return {
-      ...senzaTemporanei(d), nome: testoDi(d.nome).trim(), cosa_offre: testoDi(d.cosa_offre).trim(), giorni_json: Array.isArray(d.giorni_json) ? d.giorni_json : [], note: testoOnull(d.note),
+      ...senzaTemporanei(d), nome: testoDi(d.nome).trim(), cosa_offre: testoDi(d.cosa_offre).trim(), note: testoOnull(d.note),
       sblocco: testoOnull(d.sblocco), confidenti_json: Array.isArray(d.confidenti_json) ? d.confidenti_json : [],
       piatti_json: piatti && piatti.length > 0 ? piatti.map((p) => ({ nome: p.nome.trim(), prezzo: p.prezzo, effetto: p.effetto.trim() })) : null,
     };

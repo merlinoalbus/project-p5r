@@ -58,6 +58,22 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     schema: 'main', tabella: 'organizzazione_mappa_esito', colonna: null, tolta: 'L11 · migrazione 177',
     sostituitaDa: 'niente: la conversione delle vecchie mappe d’area in sezioni della guida è conclusa (la tabella era vuota)',
   },
+  {
+    schema: 'main', tabella: 'luogo', colonna: 'giorni', tolta: 'L11 · migrazione 184',
+    sostituitaDa: 'gli orari del luogo (`orari_json`) e la disponibilità dei Confidenti; le frasi restano nell’archivio «archivio-frasi-l11»',
+  },
+  {
+    schema: 'main', tabella: 'luogo', colonna: 'giorni_json', tolta: 'L11 · migrazione 184',
+    sostituitaDa: 'gli orari del luogo (`orari_json`) e la disponibilità dei Confidenti; i valori restano nell’archivio «archivio-frasi-l11»',
+  },
+  {
+    schema: 'main', tabella: 'negozio', colonna: 'orari', tolta: 'L11 · migrazione 184',
+    sostituitaDa: 'gli orari strutturati del negozio (`orari_json`): la frase era la sua copia esatta',
+  },
+  {
+    schema: 'main', tabella: 'negozio', colonna: 'sblocco', tolta: 'L11 · migrazione 184',
+    sostituitaDa: 'le condizioni di sblocco del negozio e della sua sede (`sblocco_json`, `condizioni_json`); le frasi restano nell’archivio «archivio-frasi-l11»',
+  },
 ];
 
 export const tabellaTolta = (schema: string, tabella: string): FonteTolta | undefined =>

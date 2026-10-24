@@ -27,12 +27,12 @@ import { attivitaDellaSede } from './attivitaService.js';
 import { condizioneConTesto, descriviRequisitoSpillo, leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 
 export { condizioniDiSblocco } from './sbloccoLuoghi.js';
-import { descriviGiorni, descriviOrari, descriviOrariDelLuogo, leggiGiorni, leggiOrari, orariComeCondizioni, orariDelLuogo, type OrariDelLuogo, type OrariNegozio } from '../../shared/orariNegozio.js';
+import { descriviGiorni, descriviOrari, descriviOrariDelLuogo, leggiOrari, orariComeCondizioni, orariDelLuogo, type OrariDelLuogo, type OrariNegozio } from '../../shared/orariNegozio.js';
 import type { LuogoDettaglioDto, LuogoDto, PresenzaLuogoDto } from '../../shared/types.js';
 
 /** Una riga di `luogo` (con le colonne della 115, assenti su uno schema di prima). */
 export interface RigaLuogo {
-  chiave: string; quartiere_chiave: string; ordine: number; tipo: string; nome: string; cosa_offre: string; quando: string | null; giorni_json: string;
+  chiave: string; quartiere_chiave: string; ordine: number; tipo: string; nome: string; cosa_offre: string; quando: string | null;
   sblocco: string | null; confidenti_json: string; piatti_json: string | null; note: string | null; fonte: string; verificato: number; origine: string;
   condizioni_json: string | null; seed_json?: string | null; area_chiave?: string | null; orari_json?: string | null; solo_eventi_confidente?: string | null;
 }
@@ -151,10 +151,9 @@ export function luogoDto(r: RigaLuogo, l: LettureLuoghi): LuogoDto {
   const condizioni = grezze.length ? grezze.map((c) => condizioneConTesto(c, nomi)) : null;
   const negozi = l.negozi.get(r.chiave) ?? [];
   const orari = orariDelLuogo(r.orari_json ?? null);
-  // `quando` e `giorni` per compatibilità: dagli orari del luogo, se la colonna c'è; su uno schema di prima quelli della riga
-  const conOrari = r.orari_json !== undefined;
-  const giorni = conOrari ? orari.giorni : leggiGiorni(r.giorni_json);
-  const quando = conOrari ? (orari.fasce.length === 1 ? orari.fasce[0] : 'entrambe') : (r.quando as LuogoDto['quando']);
+  // `quando` e `giorni` per compatibilità: dagli orari del luogo (l'unica fonte; i `giorni_json` del luogo non ci sono più, L11 migrazione 184)
+  const giorni = orari.giorni;
+  const quando = orari.fasce.length === 1 ? orari.fasce[0] : 'entrambe';
   const area = r.area_chiave ? l.aree.aree.get(r.area_chiave) : undefined;
   const pin = l.pin.get(r.chiave) ?? [];
   return {

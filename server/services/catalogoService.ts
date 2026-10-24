@@ -14,7 +14,6 @@
 // ============================================================
 
 import { verificaCondizioni } from './mappe/mappeService.js';
-import { giorniDallaFrase } from '../db/migrations/080_giorni_luogo_strutturati.js';
 import { convertiProsa } from '../../shared/migraCondizioni.js';
 import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { isDeepStrictEqual } from 'node:util';
@@ -49,9 +48,9 @@ const CAMPI: Record<TipoCatalogo, readonly string[]> = {
   libro: ['condizioni_json', 'nome', 'nome_it', 'dove', 'prezzo', 'dote', 'note', 'sblocca', 'effetto_json', 'effetti_json', 'sessioni', 'dettagli', 'verificato'],
   film: ['condizioni_json', 'nome', 'nome_it', 'dove', 'dote', 'note', 'note_successive', 'effetti_json', 'prezzo', 'sessioni', 'dettagli', 'verificato'],
   attivita: ['pesca_regola_chiave','pesca_ruolo','confidente_chiave', 'condizioni_json', 'nome', 'tipo', 'luogo', 'luogo_chiave', 'sede_chiave', 'fascia', 'costo', 'sblocco', 'sessioni', 'doti_json', 'altri_effetti', 'regole', 'premi', 'paga', 'paga_yen', 'paga_massima', 'dettagli', 'effetti_json', 'tracciamento', 'quiz_json', 'verificato'],
-  // L5 (R5-07, un modulo solo): orari strutturati (null = regola dell'app), Area, sblocco, Confidenti e piatti; `quando`/`giorni_json` non si
-  // leggono più (restano scrivibili per i pacchetti di prima)
-  luogo: ['condizioni_json', 'quartiere_chiave', 'tipo', 'nome', 'cosa_offre', 'quando', 'giorni_json', 'orari_json', 'area_chiave', 'sblocco', 'confidenti_json', 'piatti_json', 'note', 'verificato'],
+  // L5 (R5-07, un modulo solo): orari strutturati (null = regola dell'app), Area, sblocco, Confidenti e piatti; `quando` resta (lo legge il
+  // sottotitolo del collegamento del pin di un luogo); i `giorni_json` del luogo sono gli orari (L11, migrazione 184)
+  luogo: ['condizioni_json', 'quartiere_chiave', 'tipo', 'nome', 'cosa_offre', 'quando', 'orari_json', 'area_chiave', 'sblocco', 'confidenti_json', 'piatti_json', 'note', 'verificato'],
   domanda: ['data', 'tipo', 'chi', 'domanda', 'risposte_json', 'ricompensa', 'note', 'fonte'],
   cruciverba: ['data', 'indizio', 'risposta', 'risposta_en', 'fonte'],
 };
@@ -605,9 +604,8 @@ function ripristinaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string):
   // Il valore giusto e' quello che la riga aveva prima di essere adottata: una riga della guida e'
   // verificata, ed e' l'unico caso in cui si arriva qui.
   //
-  // Stessa cosa per `giorni_json` (migrazione 080): un'istantanea di prima porta la frase `giorni`, e da quella si
-  // ricavano le chiavi, come ha fatto la migrazione; senza nemmeno la frase, nessuna limitazione.
-  const predefinito = (c: string): unknown => c === 'verificato' ? 1 : c === 'giorni_json' ? JSON.stringify(giorniDallaFrase(typeof originale.giorni === 'string' ? originale.giorni : null).giorni) : null;
+  // (`giorni_json` e `giorni` del luogo non ci sono più, L11 migrazione 184: i giorni sono gli orari del luogo.)
+  const predefinito = (c: string): unknown => c === 'verificato' ? 1 : null;
   // Un'istantanea anteriore a L5/M7 non azzera orari, Area o il legame canonico aggiunti dopo.
   const campiSuccessivi = new Set(['orari_json', 'area_chiave', 'eccezione_orari_json', 'sblocco_json', 'catalogo_chiave', 'costo_json', 'confidente_chiave','pesca_regola_chiave','pesca_ruolo']);
   const campi = campiDisponibili(tipo).filter((c) => c in originale || !campiSuccessivi.has(c));
