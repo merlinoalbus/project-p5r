@@ -1570,10 +1570,11 @@ export interface ArticoloDto {
   oggettoFonte: string | null;
   oggettoChiave: string | null;
   disponibileDal: string | null;
-  condizione: string | null;
+  /** Non più valorizzato (L11, migrazione 187): la frase dell'offerta è nell'archivio, la condizione è in `condizioni`. */
+  condizione?: string | null;
   nota: string | null;
   verificato: boolean;
-  /** Solo con `partita`: valutazione di `disponibileDal` e `condizione` alla data corrente (stessi requisiti dei semafori). */
+  /** Solo con `partita`: valutazione delle `condizioni` (e di `disponibileDal`) alla data corrente (stessi requisiti dei semafori). */
   disponibilita?: DisponibilitaDto;
   /** Acquistato/ottenuto nella partita. */
   acquistato: boolean;
