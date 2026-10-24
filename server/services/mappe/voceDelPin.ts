@@ -31,11 +31,6 @@ export function vociDelPinSql(alias: string): string {
 export const VOCI_GESTITE_SQL = `SELECT pp.punto_chiave FROM punto_partita pp JOIN punto_interesse pi ON pi.chiave = pp.punto_chiave
   WHERE pp.partita_id = ? AND NOT ${sqlVoceDescrittiva('pi')}`;
 
-/** `VOCI_GESTITE_SQL` letta: l'insieme delle chiavi delle voci gestite nella partita. */
-export function vociGestite(partitaId: number): Set<string> {
-  return new Set((prepared(VOCI_GESTITE_SQL).all(partitaId) as Array<{ punto_chiave: string }>).map((r) => r.punto_chiave));
-}
-
 /** Le colonne di `spillo` e se c'è `spillo_voce`: chi legge durante le migrazioni può trovare lo schema di prima. */
 function schemaVoci(): { tabella: boolean; colonna: boolean } {
   const tabella = !!prepared("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = 'spillo_voce'").get();
@@ -72,13 +67,3 @@ export function fattoPerVoci(voci: readonly string[], gestite: ReadonlySet<strin
   return voci.length > 0 && voci.every((v) => gestite.has(v));
 }
 
-/** Gli uid dei pin fatti per le loro voci (`fattoPerVoci`), date le voci gestite di una partita. */
-export function uidFattiPerVoci(gestite: ReadonlySet<string>): Set<string> {
-  const voci = vociDiOgniPin(true);
-  const out = new Set<string>();
-  if (voci.size === 0) return out;
-  for (const r of prepared('SELECT id, uid FROM spillo WHERE uid IS NOT NULL').all() as Array<{ id: number; uid: string }>) {
-    if (fattoPerVoci(voci.get(r.id) ?? [], gestite)) out.add(r.uid);
-  }
-  return out;
-}
