@@ -336,7 +336,17 @@ export function attivitaTutte(partitaId?: number): AttivitaTutteDto {
   const posizioni = posizioniFilm();
   const catalogoFilm = oggettiPerFonte('film'); const negoziFilm = negoziPerFonte('film');
   const film = (prepared('SELECT * FROM film WHERE nascosto = 0 ORDER BY ordine').all() as RigaFilm[]).map((r) => filmDto(r, stato, posizioni, st, catalogoFilm, negoziFilm));
-  return { attivita: attivita.filter((a) => a.tipo !== 'lavoro'), lavori: attivita.filter((a) => a.tipo === 'lavoro'), libri, film, libriLetti: libri.filter((l) => l.fatto).length, filmVisti: film.filter((f) => f.iniziato).length };
+  return { attivita: attivita.filter((a) => a.tipo !== 'lavoro'), lavori: attivita.filter((a) => a.tipo === 'lavoro'), libri, film, libriLetti: libri.filter((l) => l.fatto).length, filmVisti: film.filter((f) => f.iniziato).length, noteCategorie: noteCategorieAttivita() };
+}
+
+/** Le note comuni a una categoria di attività (R9-14/1: la frase dei videogiochi sta qui una volta sola), per chiave di categoria. */
+function noteCategorieAttivita(): Record<string, string> {
+  const j = prepared("SELECT json FROM dati_guida WHERE chiave = 'note-categorie-attivita'").get() as { json: string } | undefined;
+  if (!j) return {};
+  try {
+    const v = JSON.parse(j.json) as Record<string, unknown>;
+    return Object.fromEntries(Object.entries(v).filter((e): e is [string, string] => typeof e[1] === 'string' && e[1].trim() !== ''));
+  } catch { return {}; }
 }
 
 /** Vero se la partita ha letto «Anima da cineasta» (Royal): i punti di film e DVD salgono di uno scalino. La usano anche gli effetti delle azioni (K1). */

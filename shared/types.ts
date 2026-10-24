@@ -2132,6 +2132,8 @@ export interface AttivitaTutteDto {
   libriLetti: number;
   /** Titoli con almeno una sessione/visione registrata, anche se non ancora completati. */
   filmVisti: number;
+  /** Le note comuni a una categoria di attività, per chiave di categoria (oggi `videogioco`): da mostrare una volta sopra l'elenco. */
+  noteCategorie?: Record<string, string>;
 }
 
 // ---- Aiuto in battaglia (Fase 7.3) ----
