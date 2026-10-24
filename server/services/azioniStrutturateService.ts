@@ -54,7 +54,9 @@ export function statoAzione(a: AzioneClassificata, conf: Map<string, ConfidenteP
   // Solo il semaforo del rango obiettivo: un rango senza requisiti e libero (non si ripiega sul rango successivo).
   const sem = c.semafori.find((s) => s.rango === obiettivo);
   if (!sem || sem.requisiti.length === 0) return { tipo: 'neutra', motivo: null };
-  const rossi = sem.requisiti.filter((r) => r.stato === 'rosso');
+  // un requisito non bloccante (`bloccante === false`: le avvertenze, e il semaforo «Giorno e fascia dell'incontro», che parla di oggi e non della data della voce)
+  // può essere rosso senza che la voce sia «Bloccata»: la disponibilità è sempre un avviso (nel Diario l'avviso «Fuori giorno» usa la data della voce)
+  const rossi = sem.requisiti.filter((r) => r.stato === 'rosso' && r.bloccante !== false);
   if (rossi.length > 0) return { tipo: 'bloccata', motivo: rossi.map((r) => (r.dettaglio ? `${r.testo} (${r.dettaglio})` : r.testo)).join(' · ') };
   if (sem.pronto || sem.requisiti.every((r) => r.stato === 'verde')) return { tipo: 'consigliata', motivo: `requisiti del rango ${sem.rango} soddisfatti` };
   // le avvertenze (`bloccante: false`) non sono «da confermare»: si controllano nel gioco e non fermano niente

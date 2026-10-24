@@ -137,10 +137,10 @@ export function semaforiConfidente(chiave: string, rangoAttuale: number, st: Sta
   const perRango = new Map<number, RigaRequisito[]>();
   for (const r of righe) { const l = perRango.get(r.rango) ?? []; l.push(r); perRango.set(r.rango, l); }
   const disponibilita = semaforoDisponibilita(chiave, rangoAttuale, st);
-  return [...perRango.entries()].map(([rango, lista], i) => {
+  return [...perRango.entries()].map(([rango, lista]) => {
     const requisiti = lista.map((r) => valuta(r, st));
-    // la disponibilità d'adesso riguarda il prossimo incontro: sta solo nel primo rango, in coda, e non blocca mai (R9-01)
-    if (i === 0 && disponibilita) requisiti.push(disponibilita);
+    // la disponibilità d'adesso riguarda il prossimo incontro (rango + 1, non il primo rango che ha requisiti): in coda, e non blocca mai (R9-01)
+    if (rango === rangoAttuale + 1 && disponibilita) requisiti.push(disponibilita);
     return { rango, requisiti, pronto: requisiti.filter(requisitoBloccante).every((q) => q.stato === 'verde') };
   });
 }
