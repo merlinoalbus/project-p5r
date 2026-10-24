@@ -57,6 +57,11 @@ export function revocaEventiDellaVoce(partitaId: number, voceUid: string): numbe
   return prepared('DELETE FROM evento_partita WHERE partita_id = ? AND voce_uid = ?').run(partitaId, voceUid).changes;
 }
 
+/** La voce viene eliminata (nel Cestino): i suoi eventi se ne vanno da ogni partita, e tornano con lei se la si ripristina (il registro del Cestino li ricorda). */
+export function revocaEventiDellaVoceInOgniPartita(voceUid: string): number {
+  return prepared('DELETE FROM utente.evento_partita WHERE voce_uid = ?').run(voceUid).changes;
+}
+
 type AzioneEventoAcquistoV1 = 'registra' | 'annulla-fonte' | 'rimuovi-legacy';
 const oggetto = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
 const eUid = (v: unknown): v is string => typeof v === 'string' && /^[0-9a-f]{32}$/.test(v);

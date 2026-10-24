@@ -16,7 +16,7 @@ import { randomBytes } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { HttpError, httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
-import { conVoceDellaSpunta, registraEvento, revocaEventiDellaVoce } from './storicoService.js';
+import { conVoceDellaSpunta, registraEvento, revocaEventiDellaVoce, revocaEventiDellaVoceInOgniPartita } from './storicoService.js';
 import { confidenti } from './partiteService.js';
 import { eGiornoFestivo, verdettoDelConfidente } from './disponibilitaStrutturataService.js';
 import { applicaEffettiAzione, annullaEffettiAzione, descriviEffettiApplicati, type OpzioniSpunta } from './effettiAzioneService.js';
@@ -694,6 +694,7 @@ export function eliminaVoce(uid: string): void {
     preparaRimozioneEffettiVoce(uid, { annullaLegacy: annullaEffettiAzione });
     prepared('DELETE FROM voce_giornata WHERE uid = ?').run(uid);
     prepared('DELETE FROM spunta_voce_partita WHERE voce_uid = ?').run(uid);
+    revocaEventiDellaVoceInOgniPartita(uid); // R10-22 (N5): come togliendo la spunta, gli eventi legati alla voce non restano nello Storico
     // L3: l'insieme d'infiltrazioni e la proposta della voce se ne vanno con lei (la chiave è l'uid, senza vincolo)
     if (conLegami()) {
       prepared('DELETE FROM voce_infiltrazione WHERE voce_uid = ?').run(uid);
