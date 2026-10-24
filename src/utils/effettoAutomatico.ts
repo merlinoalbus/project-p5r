@@ -28,8 +28,8 @@ export const contestoDa = (e: ElenchiAzioneDto): ContestoEffetti => ({
   turni: new Set(e.attivita.filter((a) => a.turni).map((a) => a.chiave)),
 });
 
-/** Il tipo di collegamento che il tipo della voce chiede; se la voce ha già un collegamento di altro genere, quello che ha. */
-export const tipoQuale = (tipo: TipoAzione, rif: Rif): TipoRiferimentoAzione | null => rif?.tipo ?? RIFERIMENTO_DI_TIPO[tipo];
+/** Il tipo di collegamento che il tipo della voce chiede; i tipi senza genere proprio mostrano quello del collegamento che hanno. */
+export const tipoQuale = (tipo: TipoAzione, rif: Rif): TipoRiferimentoAzione | null => RIFERIMENTO_DI_TIPO[tipo] ?? rif?.tipo ?? null;
 
 /** L'effetto è quello che tipo e collegamento della voce producono da soli? */
 export function eDelCollegamento(tipo: TipoAzione, rif: Rif, e: EffettoVoce): boolean {
@@ -75,20 +75,37 @@ export function riferimentoDaEffetto(tipo: TipoAzione, e: EffettoVoce): Rif {
 }
 
 /**
- * Il collegamento con cui si APRE una voce così com'è salvata: quello salvato se è del genere del tipo; altrimenti (nullo, o di altro
- * genere come un negozio su un lavoro), se fra gli effetti salvati ce n'è UNO SOLO del genere del tipo, il collegamento che quell'effetto
- * implica. Vale solo all'apertura (`strutturaDi`): dopo un cambio di tipo il collegamento azzerato resta azzerato, perciò un effetto
- * salvato di un altro tipo non diventa mai «principale» e «Quale» non lo riscrive.
+ * Il collegamento con cui si APRE una voce così com'è salvata: quello salvato, SEMPRE (un dato salvato non si cambia in silenzio, nemmeno
+ * un negozio su un lavoro o un'attività su una Dote); solo se è nullo e fra gli effetti salvati ce n'è UNO SOLO del genere del tipo, il
+ * collegamento che quell'effetto implica. Vale solo all'apertura (`strutturaDi`): dopo un cambio di tipo il collegamento azzerato resta
+ * azzerato, perciò un effetto salvato di un altro tipo non diventa mai «principale» e «Quale» non lo riscrive.
  */
 export function riferimentoDiApertura(tipo: TipoAzione, rif: Rif, righe: readonly RigaEffetto[]): Rif {
-  if (rif && rif.tipo === RIFERIMENTO_DI_TIPO[tipo]) return rif;
+  if (rif) return rif;
   const candidati = righe.filter((r) => eDelGenere(tipo, r.effetto));
   return candidati.length === 1 ? (riferimentoDaEffetto(tipo, candidati[0].effetto) ?? rif) : rif;
 }
 
-/** Il posto, nella lista, dell'effetto principale (-1 se non c'è): solo l'effetto esatto del collegamento corrente. */
-export function indicePrincipale(righe: readonly RigaEffetto[], tipo: TipoAzione, rif: Rif): number {
-  return righe.findIndex((r) => eDelCollegamento(tipo, rif, r.effetto));
+/**
+ * L'UID dell'effetto principale di una voce salvata con un collegamento di ALTRO genere (negozio su un lavoro, attività su una Dote):
+ * il collegamento resta com'è, ma se fra gli effetti salvati ce n'è UNO SOLO del genere del tipo, quello è il principale. Solo all'apertura.
+ */
+export function uidPrincipaleDiApertura(tipo: TipoAzione, rif: Rif, righe: readonly RigaEffetto[]): string | null {
+  if (!rif || rif.tipo === RIFERIMENTO_DI_TIPO[tipo]) return null;
+  const candidati = righe.filter((r) => eDelGenere(tipo, r.effetto));
+  return candidati.length === 1 ? candidati[0].uid : null;
+}
+
+/** Il collegamento salvato è di un genere diverso da quello che il tipo chiede (negozio su un lavoro, film su una Dote)? */
+export const eAltroGenere = (tipo: TipoAzione, rif: Rif): boolean => !!rif && !!RIFERIMENTO_DI_TIPO[tipo] && rif.tipo !== RIFERIMENTO_DI_TIPO[tipo];
+
+/**
+ * Il posto, nella lista, dell'effetto principale (-1 se non c'è): prima l'effetto esatto del collegamento corrente; se non c'è e la voce
+ * è stata aperta con un collegamento di altro genere (`uidPrincipale`), la riga con quell'UID.
+ */
+export function indicePrincipale(righe: readonly RigaEffetto[], tipo: TipoAzione, rif: Rif, uidPrincipale?: string | null): number {
+  const i = righe.findIndex((r) => eDelCollegamento(tipo, rif, r.effetto));
+  return i >= 0 || !uidPrincipale ? i : righe.findIndex((r) => r.uid === uidPrincipale);
 }
 
 /** L'effetto con cui nasce una voce quando si sceglie «Quale»; null se il tipo non ne ha o se l'effetto si sceglie nel riquadro (articolo, domanda, evento). */
@@ -112,11 +129,13 @@ export function effettoIniziale(tipo: TipoAzione, rif: Rif, ctx: ContestoEffetti
  * resta fra gli effetti aggiuntivi (mai cancellato in silenzio). Il rango atteso resta solo per un Confidente.
  */
 export function cambiaCollegamento(s: CampiStrutturati, tipo: TipoAzione, rif: Rif, ctx: ContestoEffetti): CampiStrutturati {
-  const base: CampiStrutturati = { ...s, tipo, riferimento: rif, rangoAtteso: tipo === 'confidente' && rif ? s.rangoAtteso : null };
+  // Cambiando tipo o collegamento l'indicazione d'apertura (`uidPrincipale`) non vale più: il vecchio principale si cerca ancora con essa
+  // qui sotto, ma il nuovo stato non la porta.
+  const base: CampiStrutturati = { ...s, tipo, riferimento: rif, rangoAtteso: tipo === 'confidente' && rif ? s.rangoAtteso : null, uidPrincipale: null };
   if (!s.effettiVoce) return base;
   let righe = [...s.effettiVoce];
   const nuovo = effettoIniziale(tipo, rif, ctx);
-  const i = indicePrincipale(righe, s.tipo, s.riferimento);
+  const i = indicePrincipale(righe, s.tipo, s.riferimento, s.uidPrincipale);
   let scritto = false;
   // Un effetto già salvato che è proprio quello del nuovo collegamento (stessa Dote, stesso libro…) diventa il principale così com'è:
   // niente effetto nuovo, niente riscrittura, note invariate. Se le chiavi uguali sono più d'una si adotta la prima, le altre restano.
@@ -135,7 +154,7 @@ export function cambiaCollegamento(s: CampiStrutturati, tipo: TipoAzione, rif: R
 /** Scrive l'effetto principale (lo crea se non c'è); `null` lo toglie. Il posto lo dà `indicePrincipale`. */
 export function impostaPrincipale(s: CampiStrutturati, effetto: EffettoVoce | null): CampiStrutturati {
   const righe = [...(s.effettiVoce ?? [])];
-  const i = indicePrincipale(righe, s.tipo, s.riferimento);
+  const i = indicePrincipale(righe, s.tipo, s.riferimento, s.uidPrincipale);
   if (effetto === null) return i < 0 ? s : { ...s, effettiVoce: righe.filter((_, j) => j !== i) };
   if (i >= 0) righe[i] = { uid: righe[i].uid, effetto }; else righe.push({ uid: null, effetto });
   return { ...s, effettiVoce: righe };
