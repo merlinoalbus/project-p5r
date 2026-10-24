@@ -208,6 +208,59 @@ export const DEFINIZIONI_BLOCCO: Partial<Record<TipoModificabile, DefBlocco>> = 
     campi: [L('dove', 'Dove si ottiene')],
   },
 
+  // ---- Aiuto in battaglia (R11-15/4): le sezioni di testo della guida; le tabelle (stati alterati, ranghi, coppie degli Speciali, Demoni del Tesoro) e gli URL delle fonti non si correggono ----
+  'battaglia-sezione': {
+    modalita: 'blocco', blocco: 'battaglia', etichetta: 'Sezione dell’Aiuto in battaglia', radice: [], campi: [],
+    varianti: {
+      sistema: {
+        etichetta: 'Sistema di battaglia', radice: ['sistema'],
+        campi: [
+          L('avvioScontro', 'Avvio dello scontro'), E('comandi', 'Comandi'),
+          L('esitiColpo/debole', 'Debole', { gruppo: 'Esiti del colpo' }), L('esitiColpo/critico', 'Critico', { gruppo: 'Esiti del colpo' }),
+          L('esitiColpo/tecnico', 'Tecnico', { gruppo: 'Esiti del colpo' }), L('esitiColpo/block', 'Block', { gruppo: 'Esiti del colpo' }),
+          L('esitiColpo/resiste', 'Resiste', { gruppo: 'Esiti del colpo' }),
+          L('unoMore', '1 More'), L('notaFineBattaglia', 'Nota di fine battaglia'),
+        ],
+      },
+      assalto: { etichetta: 'Rapina, Assalto e Parla', radice: ['assaltoEHoldUp'], campi: [L('rapina', 'Rapina'), L('assalto', 'Assalto'), L('holdUp', 'Parla')] },
+      staffetta: {
+        etichetta: 'Staffetta', radice: ['staffetta'],
+        campi: [L('cosaE', 'Che cos’è'), L('disponibilita', 'Disponibilità'), L('effetto', 'Effetto'), L('livelli', 'Livelli'), L('indicatoriVisivi', 'Indicatori'), L('moltiplicatori', 'Moltiplicatori'), L('effettoSpeciale', 'Catena completa')],
+      },
+      speciali: { etichetta: 'Speciali', radice: ['speciali'], campi: [L('meccanica', 'Meccanica'), L('attivazione', 'Attivazione'), L('proprietaDanno', 'Danno')] },
+      negoziazione: {
+        etichetta: 'Negoziazione: quando e come', radice: ['negoziazione'],
+        campi: [L('quandoSiPuoNegoziare', 'Quando si può negoziare'), L('comeVerificarePersonalita', 'Come verificare la personalità'), E('regole', 'Regole'), L('incertezze', 'Incertezze')],
+      },
+      sciagura: {
+        etichetta: 'Ombre sciagura', radice: ['ombreSciagura'],
+        campi: [
+          T('nomeOriginale', 'Nome originale'), L('cosaSono', 'Che cosa sono'), L('comeRiconoscerle', 'Come riconoscerle'), E('caratteristiche', 'Caratteristiche'),
+          L('comportamentoInBattaglia/turnoProprio', 'Nel loro turno', { gruppo: 'In battaglia' }), L('comportamentoInBattaglia/quandoAttaccate', 'Quando attaccate', { gruppo: 'In battaglia' }),
+          L('comportamentoInBattaglia/comeNeutralizzarle', 'Come neutralizzarle', { gruppo: 'In battaglia' }),
+          E('effettiStati/immobilizzanti', 'Stati che le immobilizzano', { gruppo: 'Stati' }), L('effettiStati/soggiogamento', 'Soggiogamento', { gruppo: 'Stati' }), L('effettiStati/furia', 'Furia', { gruppo: 'Stati' }),
+          L('esplosioneAllaSconfitta/descrizione', 'Descrizione', { gruppo: 'Esplosione alla sconfitta' }), L('esplosioneAllaSconfitta/potenza', 'Potenza', { gruppo: 'Esplosione alla sconfitta' }),
+          L('esplosioneAllaSconfitta/eccezioni', 'Eccezioni', { gruppo: 'Esplosione alla sconfitta' }),
+          L('ricompense', 'Ricompense'), L('doveCompaiono', 'Dove compaiono'), L('incertezze', 'Incertezze'),
+        ],
+      },
+      mietitore: {
+        etichetta: 'Mietitore', radice: ['mietitore'],
+        campi: [
+          T('categoria', 'Nome'), L('dove', 'Dove e quando'), L('comeSiManifesta', 'Segnali'), T('livelloConsigliato', 'Livello consigliato'), E('abilita', 'Abilità'), E('immunita', 'Immunità'),
+          E('debolezze', 'Debolezze', { nullable: true }), E('strategia', 'Strategia'), L('ricompense', 'Ricompense'),
+        ],
+      },
+      tesoro: {
+        etichetta: 'Demoni del Tesoro', radice: ['demoniTesoro'],
+        campi: [
+          T('categoria', 'Nome'), L('cosaSono', 'Che cosa sono'), L('comeCompaiono', 'Come compaiono'), L('primaComparsa', 'Prima comparsa'), L('comportamento', 'Comportamento'),
+          L('resistenzeGenerali', 'Resistenze'), E('tecnicheConsigliate', 'Tecniche consigliate'),
+        ],
+      },
+    },
+  },
+
   // ---- Jose ----
   jose: {
     modalita: 'blocco', blocco: 'jose', etichetta: 'Jose', radice: [], chiaveFissa: 'jose',

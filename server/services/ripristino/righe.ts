@@ -14,6 +14,7 @@ import { chiaveImmagineQuartiere } from '../cittaService.js';
 import { sincronizzaPercorsiMappe } from '../mappe/percorsiMappe.js';
 import type { CampoDef } from './registro.js';
 import { DEFINIZIONI_CALENDARIO } from './righeCalendario.js';
+import { DEFINIZIONI_OMBRA } from './righeOmbra.js';
 import { DEFINIZIONI_SCUOLA } from './righeScuola.js';
 
 export type Valori = Record<string, ValoreCampoCorrezione>;
@@ -27,6 +28,8 @@ export interface DefRiga {
   /** Tabella con le colonne `origine`, `seed_json`, `updated_at` e la colonna della chiave. */
   tabella: string;
   colonnaChiave: string;
+  /** La colonna `updated_at` della tabella è NOT NULL (l'Ombra, migrazione 166): senza correzione si rimette l'ora, non NULL. */
+  aggiornataSempre?: boolean;
   chiavi(): string[];
   esiste(chiave: string): boolean;
   campi(chiave: string): CampoDef[];
@@ -199,4 +202,4 @@ const trasformazione: DefRiga = {
   },
 };
 
-export const DEFINIZIONI_RIGA = { quartiere, trofeo, dote: doteSociale, trasformazione, ...DEFINIZIONI_CALENDARIO, ...DEFINIZIONI_SCUOLA } as const;
+export const DEFINIZIONI_RIGA = { quartiere, trofeo, dote: doteSociale, trasformazione, ...DEFINIZIONI_CALENDARIO, ...DEFINIZIONI_SCUOLA, ...DEFINIZIONI_OMBRA } as const;

@@ -29,6 +29,7 @@ const NOTE: Partial<Record<TipoModificabile, string>> = {
   quartiere: 'Il nome del quartiere si riflette anche nel nome della sua mappa e nei percorsi delle mappe (gli indirizzi di prima restano validi).',
   dote: 'Il rango mostrato nelle partite si ricalcola dai punti: cambiare una soglia sposta il rango senza toccare i punti già segnati.',
   'evento-calendario': 'La data e il tipo dell’evento non si correggono; le voci del Diario collegate restano collegate.',
+  ombra: 'Le affinità della Persona, la Persona abbinata e i luoghi d’incontro non si correggono da qui: le affinità si correggono dalla scheda della Persona. Qui le differenze proprie dell’Ombra.',
   'allerta-meteo': 'Vale per questo giorno: le condizioni delle partite che leggono l’allerta (per esempio «piove») seguono le fasce che scegli.',
 };
 
@@ -147,6 +148,7 @@ function scriviMetaRiga(def: DefRiga, chiave: string, seed: Valori | null, corre
   // le chiavi che iniziano con «~» sono la traccia delle propagazioni (non sono campi): non contano nel confronto
   const corretta = seed !== null && !Object.keys(seed).filter((p) => !p.startsWith('~')).every((p) => uguali(seed[p], correnti[p]));
   if (corretta) prepared(`UPDATE ${def.tabella} SET origine = 'utente', seed_json = ?, updated_at = ? WHERE ${def.colonnaChiave} = ?`).run(JSON.stringify(seed), nowIso(), chiave);
+  else if (def.aggiornataSempre) prepared(`UPDATE ${def.tabella} SET origine = 'seed', seed_json = NULL, updated_at = ? WHERE ${def.colonnaChiave} = ?`).run(nowIso(), chiave);
   else prepared(`UPDATE ${def.tabella} SET origine = 'seed', seed_json = NULL, updated_at = NULL WHERE ${def.colonnaChiave} = ?`).run(chiave);
 }
 
