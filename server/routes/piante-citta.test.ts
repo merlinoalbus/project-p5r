@@ -23,13 +23,15 @@ describe('Mappe dei quartieri', () => {
   });
   afterAll(async () => { await new Promise<void>((ok) => server.close(() => ok())); closeDb(); });
 
-  it('22 quartieri su 24 hanno una mappa collegata con credito; i luoghi espongono lo spillo (nullo se non posizionato)', async () => {
+  // Superato dal lotto L11 (R11-02/8, migrazione 210, decisione dell'utente del 24/10): `pianta_quartiere`, `QuartiereDettaglioDto.pianta` e
+  // `piantaAssente` non esistono più; le asserzioni non reggono e il test resta, da riscrivere sull'immagine del quartiere.
+  it.skip('22 quartieri su 24 hanno una mappa collegata con credito; i luoghi espongono lo spillo (nullo se non posizionato)', async () => {
     expect((getDb().prepare('SELECT COUNT(*) AS n FROM pianta_quartiere').get() as { n: number }).n).toBeGreaterThanOrEqual(20);
-    const s = (await request(app).get('/api/compendio/citta/shibuya')).body.data as QuartiereDettaglioDto;
+    const s = (await request(app).get('/api/compendio/citta/shibuya')).body.data as QuartiereDettaglioDto & { pianta?: unknown; piantaAssente?: unknown };
     expect(s.pianta).toMatchObject({ fonte: expect.stringContaining('fandom'), url: expect.stringContaining('static.wikia.nocookie.net') });
     expect(typeof s.mappa).toBe('boolean');
     expect(s.luoghi.every((l) => 'marcatore' in l)).toBe(true);
-    const i = (await request(app).get('/api/compendio/citta/ikebukuro')).body.data as QuartiereDettaglioDto;
+    const i = (await request(app).get('/api/compendio/citta/ikebukuro')).body.data as QuartiereDettaglioDto & { pianta?: unknown; piantaAssente?: unknown };
     expect(i.pianta).toBeNull();
     expect(i.piantaAssente).toBeTruthy();
   });
@@ -50,7 +52,8 @@ describe('Mappe dei quartieri', () => {
     getDb().prepare('DELETE FROM marcatore_luogo WHERE luogo_chiave = ?').run(luogo.chiave);
   });
 
-  it('scarica la mappa del quartiere nell\'istanza dall\'URL del seed e la registra come immagine «citta-<quartiere>»', async () => {
+  // Superato dal lotto L11 (R11-02/8, migrazione 210): la rotta di scarico e la tabella `pianta_quartiere` sono tolte su decisione dell'utente.
+  it.skip('scarica la mappa del quartiere nell\'istanza dall\'URL del seed e la registra come immagine «citta-<quartiere>»', async () => {
     getDb().prepare('UPDATE pianta_quartiere SET url = ? WHERE quartiere_chiave = ?').run(`http://127.0.0.1:${porta}/mappa.png`, 'shinjuku');
     const res = await request(app).post('/api/mappe/piante-citta/shinjuku/scarica');
     expect(res.status).toBe(201);

@@ -19,7 +19,7 @@ import { useLayoutEffect, useMemo, useRef, useState, type ChangeEvent, type Form
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
-import { aggiornaCopiaPezzoMappa, aggiornaElementoCatalogo, aggiornaMappa, aggiornaSpillo, getElementoCatalogo, creaCopiaPezzoMappa, creaPezzoMappa, eliminaCopiaPezzoMappa, eliminaPezzoMappa, isApiError, caricaImmagineMappa, cercaRiferimenti, collegaPinAlPunto, creaMappa, creaPassaggio, creaSpillo, eliminaMappa, esportaMappe, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, getVociCollegabili, importaMappe, scaricaPiantaQuartiere } from '../services/api';
+import { aggiornaCopiaPezzoMappa, aggiornaElementoCatalogo, aggiornaMappa, aggiornaSpillo, getElementoCatalogo, creaCopiaPezzoMappa, creaPezzoMappa, eliminaCopiaPezzoMappa, eliminaPezzoMappa, isApiError, caricaImmagineMappa, cercaRiferimenti, collegaPinAlPunto, creaMappa, creaPassaggio, creaSpillo, eliminaMappa, esportaMappe, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, getVociCollegabili, importaMappe } from '../services/api';
 import { notifica } from '../stores/notificationStore';
 import { usePartitaStore } from '../stores/partitaStore';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida';
@@ -273,20 +273,6 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
               })}
               avvisoMondo={avvisoMondo} onChiudiAvvisoMondo={() => setAvvisoMondo(null)}
               onImmagine={caricaImmagine}
-              onScaricaDallaGuida={() => esegui(async () => {
-                if (dati.radiceDi?.tipo !== 'quartiere') return;
-                const quartiere = dati.radiceDi.chiave;
-                try {
-                  await scaricaPiantaQuartiere(quartiere);
-                  notifica('success', 'Pianta scaricata dalla guida nella tua istanza.');
-                } catch (err) {
-                  // sulla mappa con pezzi la pianta scaricata sostituirebbe l'immagine da cui sono ritagliati: la stessa conferma del
-                  // caricamento di un file (L1, F5)
-                  if (!isApiError(err, 'mappa-con-pezzi')) throw err;
-                  setImmagineDaConfermare({ messaggio: err.message, sostituisci: () => scaricaPiantaQuartiere(quartiere, { eliminaPezzi: true }),
-                    ok: 'Pianta scaricata dalla guida; i pezzi ritagliati dall’immagine di prima sono stati eliminati.' });
-                }
-              })}
               onEliminaMappa={() => setConfermaEliminaMappa(true)}
               onCreaPassaggio={(destinazione) => esegui(async () => {
                 const s = await creaPassaggio(chiave, destinazione);
@@ -396,7 +382,6 @@ interface PropsPannello {
   avvisoMondo: { messaggio: string; aggiunta: { href: string; testo: string } | null } | null;
   onChiudiAvvisoMondo: () => void;
   onImmagine: (file: File) => Promise<void>;
-  onScaricaDallaGuida: () => Promise<void>;
   onEliminaMappa: () => void;
   /** Passaggio da questa mappa verso `destinazione` (figlia senza passaggio o genitore per il ritorno), 15.24. */
   onCreaPassaggio: (destinazione: string) => Promise<void>;
@@ -423,7 +408,6 @@ function PannelloEditor(p: PropsPannello) {
   const [sovrascrivi, setSovrascrivi] = useState(false);
   const {sezione,onSezione:setSezione} = p;
   // solo la pianta di un quartiere si scarica dalla guida: quella delle aree dei Palazzi non c'è più (rotta tolta il 2026-09-18)
-  const scaricabile = mappa.radiceDi?.tipo === 'quartiere';
   // l'immagine di base con la regola di ogni vista (`useImmagineMappa`, L1): la caricata, poi l'asset dichiarato se sta nel
   // manifesto degli asset — la stessa che il visore qui accanto mostra; prima l'editor la ricalcolava per conto suo
   const immagineDiBase = useImmagineMappa(mappa);
@@ -522,7 +506,6 @@ function PannelloEditor(p: PropsPannello) {
         <input ref={inputImmagine} type="file" accept="image/*" className="sr-only" aria-label="File dell'immagine di base" onChange={(e: ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) void p.onImmagine(f); e.target.value = ''; }} />
         <div className="flex flex-wrap gap-1.5">
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo={mappa.immagineUrl ? 'Sostituisci immagine' : 'Carica immagine'} disabled={occupato} onClick={() => inputImmagine.current?.click()} />
-          {scaricabile && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="url" dimensione={20} />} titolo="Scarica dalla guida" disabled={occupato} onClick={() => void p.onScaricaDallaGuida()} />}
         </div>
       </section>
 

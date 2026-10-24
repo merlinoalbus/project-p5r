@@ -15,12 +15,6 @@ export const getManifestoImmagini = (): Promise<ManifestImmaginiDto> => apiGet('
 /** Metadati (con URL del file, mai i byte) delle immagini di un ambito, o di tutti gli ambiti di caricamento se omesso. */
 export const getImmagini =(ambito?: AmbitoImmagine): Promise<ImmagineDto[]> => apiGet(`/immagini${queryString({ ambito })}`);
 
-/** Scarica nell'istanza la mappa del quartiere dalla fonte collegata (immagine mai nel repository). Le piante delle aree dei Palazzi
- *  non si scaricano più dalla guida (rotta tolta il 2026-09-18, «la pianta della guida esce di scena»). */
-export const scaricaPiantaQuartiere = (quartiere: string, opz: { eliminaPezzi?: boolean } = {}): Promise<{ quartiere: string; mime: string; byte: number; fonte: string; url: string }> =>
-  // su una mappa del quartiere con pezzi il server chiede conferma (L1, F5: 409 `mappa-con-pezzi`); `eliminaPezzi` la dà
-  apiPost(`/mappe/piante-citta/${encodeURIComponent(quartiere)}/scarica${queryString({ eliminaPezzi: opz.eliminaPezzi ? '1' : undefined })}`, {}, { timeoutMs: 60_000, maxRetries: 0 });
-
 /** URL del file di un'immagine. */
 export function urlImmagine(ambito: AmbitoImmagine, chiave: string): string {
   return `${API_BASE_URL}/immagini/${encodeURIComponent(ambito)}/${encodeURIComponent(chiave)}/file`;

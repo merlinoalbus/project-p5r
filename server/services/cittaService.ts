@@ -13,14 +13,11 @@ import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
 import type { IngressoQuartiereDto, LuogoOpzioneDto } from '../../shared/types.js';
 import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
-import type { ImmagineDto, PiantaAreaDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, SbloccoDto } from '../../shared/types.js';
+import type { QuartiereDettaglioDto, QuartiereRiassuntoDto, SbloccoDto } from '../../shared/types.js';
 import { lettureLuoghi, luoghiDaCollocare, luoghiDelQuartiere } from './luoghiService.js';
-import { importaImmagineDaUrl, leggiImmagine } from './immaginiService.js';
-import { mappaEsiste, scaricaImmagineMappa } from './mappe/mappeService.js';
 import { areeDelContenitore, numeroAreePerQuartiere } from './mappe/areeService.js';
 import { verificaIngressoNelQuartiere } from './mappe/casaMappa.js';
 import { illustrazioneDellaMappa, immaginiCaricateDelleMappe } from './mappe/immagineMappa.js';
-import { datiGuida } from './datiGuida.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
 import { condizioneEffettivaQuartiere, tuttiGliInviti } from './condizioni/condizioneEffettiva.js';
 import { cosaManca } from './condizioni/valutatore.js';
@@ -28,8 +25,6 @@ import { condizioneConTesto, descriviRequisitoSpillo, leggiCondizioniSalvate, no
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
 import { valutaInsieme } from './condizioni/valutatore.js';
 import { elencaInviti } from './inviti.js';
-
-interface RigaPiantaQ { quartiere_chiave: string; url: string; pagina: string | null; fonte: string; licenza: string; larghezza: number | null; altezza: number | null; note: string }
 
 /** Chiave dell'immagine (ambito «mappa») della mappa di un quartiere. */
 export const chiaveImmagineQuartiere = (quartiere: string): string => `citta-${quartiere}`;
@@ -120,16 +115,13 @@ export function dettaglioQuartiere(chiave: string, partitaId?: number): Quartier
   // quel punto del gioco, esiste già ed è aperto. Le posizioni dei luoghi sono i loro pin (R5-19; i vecchi segnaposto sono archiviati, L11).
   const letture = lettureLuoghi(partitaId);
   const luoghi = luoghiDelQuartiere(chiave, letture);
-  const p = prepared('SELECT * FROM pianta_quartiere WHERE quartiere_chiave = ?').get(chiave) as RigaPiantaQ | undefined;
-  const pianta: PiantaAreaDto | null = p ? { url: p.url, pagina: p.pagina, fonte: p.fonte, licenza: p.licenza, larghezza: p.larghezza, altezza: p.altezza, copertura: 'quartiere', note: p.note, alternative: [] } : null;
-  const assenti = datiGuida<Record<string, string>>('mappe-citta-assenti') ?? {};
   // L'immagine della mappa con la regola unica (L1): la caricata, registrata su `immagine_chiave` o con la chiave della mappa.
   const illustrazione = illustrazioneDellaMappa(chiaveImmagineQuartiere(chiave));
   const mappa = illustrazione.immagineUrl !== null;
   // le Aree del quartiere (L2), nel loro ordine, col passaggio sull'illustrazione e l'ingresso
   // (il contenitore scritto qui e non da `contenitoreDaRotta`: anche l'ingresso dei Memento ha la sua scheda, senza Aree)
   const aree = areeDelContenitore({ colonna: 'quartiere_chiave', chiave: q.chiave, mappa: chiaveImmagineQuartiere(q.chiave), nome: q.nome, rotta: 'citta', prefisso: `citta/${q.chiave}/`, tipoPlanimetria: 'luogo' }, partitaId);
-  return { chiave: q.chiave, nome: q.nome, sbloccoData: q.sblocco_data, sbloccoCondizione: sbloccoQuartiere(chiave, partitaId), mappaChiave: chiaveMappa(chiaveImmagineQuartiere(chiave)), ingresso: ingressoQuartiere(chiave), descrizione: q.descrizione, fonte: q.fonte, luoghi, mappa, illustrazione, aree, pianta, piantaAssente: pianta ? null : (assenti[chiave] ?? null),
+  return { chiave: q.chiave, nome: q.nome, sbloccoData: q.sblocco_data, sbloccoCondizione: sbloccoQuartiere(chiave, partitaId), mappaChiave: chiaveMappa(chiaveImmagineQuartiere(chiave)), ingresso: ingressoQuartiere(chiave), descrizione: q.descrizione, fonte: q.fonte, luoghi, mappa, illustrazione, aree,
     luoghiDaCollocare: luoghiDaCollocare(chiave, letture) };
 }
 
@@ -137,24 +129,6 @@ export function dettaglioQuartiere(chiave: string, partitaId?: number): Quartier
 export function elencaLuoghi(): LuogoOpzioneDto[] {
   return (prepared('SELECT l.chiave, l.nome, l.tipo, l.quartiere_chiave AS quartiere, q.nome AS quartiere_nome FROM luogo l JOIN quartiere q ON q.chiave = l.quartiere_chiave WHERE l.nascosto = 0 ORDER BY q.ordine, l.ordine').all() as Array<{ chiave: string; nome: string; tipo: string; quartiere: string; quartiere_nome: string }>)
     .map((r) => ({ chiave: r.chiave, nome: r.nome, tipo: r.tipo, quartiere: r.quartiere, quartiereNome: r.quartiere_nome }));
-}
-
-/**
- * Scarica nell'istanza la mappa del quartiere dall'URL della guida. Se la mappa del quartiere esiste passa dalla strada dell'editor
- * (L1, F5 del validatore): pezzi da confermare (409 `mappa-con-pezzi` senza `eliminaPezzi`), dimensioni e ruolo. L'origine della
- * mappa resta com'era: è la pianta pubblicata dai dati di gioco, scaricata da sola all'apertura del quartiere, non una scelta
- * dell'utente (una mappa del seed segnata «utente» non si aggiornerebbe più col pacchetto).
- */
-export async function scaricaPiantaQuartiere(quartiere: string, opz: { eliminaPezzi?: boolean } = {}): Promise<{ quartiere: string; mime: string; byte: number; fonte: string; url: string }> {
-  const p = prepared('SELECT * FROM pianta_quartiere WHERE quartiere_chiave = ?').get(quartiere) as RigaPiantaQ | undefined;
-  if (!p) throw httpErrors.notFound('pianta-non-disponibile', `Nessuna mappa collegata per il quartiere '${quartiere}'.`);
-  const chiave = chiaveImmagineQuartiere(quartiere);
-  let img: ImmagineDto;
-  if (mappaEsiste(chiave)) {
-    await scaricaImmagineMappa(chiave, p.url, { eliminaPezzi: opz.eliminaPezzi, dellUtente: false });
-    img = leggiImmagine('mappa', chiave)!;
-  } else img = await importaImmagineDaUrl('mappa', chiave, p.url);
-  return { quartiere, mime: img.mime, byte: img.byte, fonte: p.fonte, url: p.url };
 }
 
 /** Il punto d'ingresso del quartiere su una mappa (chiave pubblica e nome del percorso, posizione e zoom), o null se non è impostato. */

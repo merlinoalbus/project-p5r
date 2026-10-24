@@ -16,7 +16,6 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { boolQuery } from '../schemas/comuni.js';
 import { validate } from '../middleware/validate.js';
-import { scaricaPiantaQuartiere } from '../services/cittaService.js';
 import express from 'express';
 import { MAX_BYTE_IMMAGINE } from '../services/immaginiService.js';
 import { aggiornaCopiaPezzoMappa, aggiornaImmagineSpillo, aggiornaMappa, creaCopiaPezzoMappa, creaPezzoMappa, eliminaCopiaPezzoMappa, eliminaPezzoMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, conteggiAlbero, creaMappa, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaImmagineMappa, riordinaMappe, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
@@ -38,12 +37,6 @@ router.get('/contenuti/:chiave', validate({ params: paramsChiaveLibera, query: q
 /** Accesso comune ai luoghi da città, Palazzi, negozi e articoli. */
 router.get('/accesso/:tipo/:chiave', validate({ params: z.object({ tipo: z.enum(TIPI_ACCESSO_MONDO), chiave: z.string().min(1).max(200) }) }), (req, res) => {
   res.json(risolviAccessoMondo(req.params.tipo as TipoAccessoMondo, String(req.params.chiave)));
-});
-
-/** Scarica nell'istanza la mappa del quartiere dall'indirizzo collegato nei dati di gioco (`pianta_quartiere`). */
-// L1 (F5): sulla mappa del quartiere con pezzi la sostituzione chiede conferma (409 `mappa-con-pezzi`, `?eliminaPezzi=1`).
-router.post('/piante-citta/:quartiere/scarica', validate({ params: z.object({ quartiere: z.string().min(1).max(80) }), query: queryImmagineMappa }), async (req, res) => {
-  res.status(201).json(await scaricaPiantaQuartiere(String(req.params.quartiere), { eliminaPezzi: (req.query as { eliminaPezzi?: string }).eliminaPezzi === '1' }));
 });
 
 // ---- Mappe a livelli e spilli (Fase 13) ----

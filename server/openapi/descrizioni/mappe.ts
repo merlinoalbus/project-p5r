@@ -24,13 +24,6 @@ export const DESCRIZIONI_MAPPE: DescrizioniArea = {
     risposta: '`AccessoMondoDto`: `esito` (`unica`, `multipla`, `assente`), destinazioni con le loro provenienze ed eventuali sezioni della guida',
     errori: [[404, 'luogo-non-trovato'], [404, 'mappa-non-trovata']],
   },
-  'POST /api/mappe/piante-citta/:quartiere/scarica': {
-    sommario: 'Scarica nell\'istanza la mappa di un quartiere dall\'indirizzo registrato nei dati di gioco',
-    descrizione: 'Legge l\'indirizzo della pianta del quartiere, scarica l\'immagine e la salva nell\'ambito «mappa» con la chiave `citta-<quartiere>` (sostituendo quella che c\'era). La mappa del quartiere segue la strada dell\'editor (L1): dimensioni e ruolo dalla regola unica, e i pezzi ritagliati dall\'immagine di prima da confermare (409 `mappa-con-pezzi`, con `?eliminaPezzi=1` se ne vanno). L\'origine della mappa non cambia: è la pianta pubblicata dai dati di gioco, non una scelta dell\'utente. 404 se per il quartiere non è registrata nessuna pianta; 400 se lo scarico fallisce o il file supera il limite.',
-    risposta: '`{ quartiere, mime, byte, fonte, url }`',
-    senzaCorpo: true,
-    errori: [[404, 'pianta-non-disponibile'], [400, 'download-fallito'], [400, 'fonte-rifiuta'], [400, 'immagine-troppo-grande'], [400, 'formato-non-ammesso'], [409, 'mappa-con-pezzi']],
-  },
   'GET /api/mappe/albero': {
     sommario: 'Albero completo delle mappe, in forma piatta con il genitore',
     descrizione: 'Radici prima, poi per ordine e chiave. Ogni riassunto porta chiave pubblica, nome con il percorso, genitore, immagine dell\'istanza o asset predefinito, `radiceDi` (il quartiere o il Palazzo di cui la mappa è la radice, ricavato dalla chiave `citta-<q>` / `dungeon-<d>`), `versione` (etichetta e ordine dentro la stanza), presentazione e conteggi di spilli e figli. I Memento (pozzo e ingresso) non ci sono: si raggiungono dalla loro pagina. Da L3 (E2, decisione dell\'utente) ogni nodo porta `conteggiPin` `{ contenuto, passaggi, note }`: i pin suoi e di tutto quel che gli sta sotto nell\'albero, nei tre gruppi della regola unica `gruppoConteggioSpillo` (passaggi = categoria «spostamento» più le porte chiuse, note = la nota, contenuto = il resto). `numeroSpilli` resta: i pin della sola mappa, tutti. Il totale dell\'indice è in `GET /api/mappe/albero/conteggi`.',

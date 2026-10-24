@@ -25,7 +25,7 @@ import { Modal } from '../components/shared/Modal';
 import { urlCasa } from '../utils/navigazioneMappa';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { aggiornaSbloccoQuartiere, getQuartiere, isApiError, ripristinaSbloccoQuartiere, scaricaPiantaQuartiere } from '../services/api';
+import { aggiornaSbloccoQuartiere, getQuartiere, ripristinaSbloccoQuartiere } from '../services/api';
 import { MappaIncorporata } from '../components/mappe/MappaIncorporata';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -176,30 +176,8 @@ export function QuartierePage() {
   const [revisione, setRevisione] = useState(0);
   const mostraPin = (id: number) => { setPinChiesto(id); setRevisione((r) => r + 1); const p = new URLSearchParams(params); p.delete('ingresso'); p.set('spillo', String(id)); setParams(p, { replace: true }); };
   const [tipo, setTipo] = useState<string>('');
-  // Mappa pubblicata ma non ancora nell'istanza: scaricata appena il quartiere è aperto, poi il visore la usa come immagine di base
-  // Se la mappa ha dei pezzi ritagliati dall'immagine che mostra (L1, F5: 409 `mappa-con-pezzi`), lo scarico automatico non la
-  // sostituisce e non è un errore: la mappa ha già un'immagine con il lavoro dell'utente sopra. Sostituirla resta una scelta
-  // esplicita, dall'editor, con la conferma.
-  // Scaricata la pianta, il quartiere si rilegge (L1, rilievo G6 del validatore): il visore prende l'immagine nuova dalla sua
-  // `versione`, e senza rileggere l'intestazione restava sull'illustrazione di prima — due immagini diverse dello stesso quartiere
-  // fino a una ricarica. Rilettura silenziosa (la pagina resta a schermo); col quartiere che ora ha la sua immagine non si riscarica.
-  // L2: l'illustrazione si mostra sempre (prima, con un ingresso, al suo posto c'era la planimetria d'ingresso e lo scarico si saltava)
-  const download = useCarica(() => (q && !q.mappa && q.pianta
-    ? scaricaPiantaQuartiere(q.chiave)
-      .then((esito) => { void dati.ricarica(); return esito; })
-      .catch((err: unknown) => {
-        if (isApiError(err, 'mappa-con-pezzi')) return null;
-        // Un rifiuto (4xx: la fonte rifiuta lo scarico, 400 fonte-rifiuta — Fandom risponde 403 anche a un client onesto, LAY-2 —, o
-        // un indirizzo che non serve l'immagine) non passa riprovando: in questa visita non si ritenta e non c'è «Riprova»; si dice
-        // perché, con la pagina della fonte e l'invito a caricarla dall'editor. Rete e 5xx restano errori, con «Riprova».
-        if (isApiError(err) && err.status >= 400 && err.status < 500) return { rifiutata: err.message };
-        throw err;
-      })
-    : Promise.resolve(null)), [q?.chiave, q?.mappa, q?.pianta?.url]);
-  const scaricata = !!q && !!download.dati && 'quartiere' in download.dati && download.dati.quartiere === q.chiave;
-  const rifiuto = download.dati && 'rifiutata' in download.dati ? download.dati.rifiutata : null;
-  // l'errore da mostrare: il rifiuto della fonte (senza «Riprova») o un errore qualunque dello scarico (con «Riprova»)
-  const erroreScarico = rifiuto ?? download.errore;
+  // L11 (R11-02/8): l'illustrazione del quartiere si legge dalla sua immagine nel database (caricata o grafica predefinita); lo scarico
+  // dalla guida e la tabella `pianta_quartiere` non esistono più.
   // I tipi presenti, nell'ordine del catalogo (shared/tipiLuogo), non in quello in cui capitano.
   const tipi = useMemo(() => ordinaTipiLuogo((q?.luoghi ?? []).map((l) => l.tipo)), [q]);
   const visibili = useMemo(() => (q?.luoghi ?? []).filter((l) => !tipo || l.tipo === tipo), [q, tipo]);
@@ -253,19 +231,11 @@ export function QuartierePage() {
             {/* L'illustrazione del quartiere, con i suoi pin: i passaggi verso le aree e l'uscita verso Tokyo. Si apre adattata e
                 centrata (o sullo spillo dell'indirizzo); l'ingresso serve a chi arriva dalla metro, e ha la sua finestra. */}
             <section className="flex flex-col gap-1.5 xl:sticky xl:top-2" aria-label={`Illustrazione di ${q.nome}`}>
-              {q.mappaChiave && <MappaIncorporata chiave={q.mappaChiave} nome={q.nome} spilloIniziale={spillo} rivelaSpilloIniziale={spillo !== null && spillo === pinChiesto} versione={`${scaricata && download.dati && 'byte' in download.dati ? download.dati.byte : 0}-${revisione}`} classeVisore="visore-alto-quanto-immagine h-[min(56vh,460px)] md:h-[max(420px,min(64vh,740px))]" />}
+              {q.mappaChiave && <MappaIncorporata chiave={q.mappaChiave} nome={q.nome} spilloIniziale={spillo} rivelaSpilloIniziale={spillo !== null && spillo === pinChiesto} versione={`0-${revisione}`} classeVisore="visore-alto-quanto-immagine h-[min(56vh,460px)] md:h-[max(420px,min(64vh,740px))]" />}
               <div className="flex flex-wrap items-center gap-2 text-[12px] text-text-muted">
-                {q.pianta ? (
-                  // Se lo scarico non riesce lo si dice (prima restava «scaricata nella tua istanza» con un «Riprova» muto accanto)
-                  erroreScarico
-                    ? <span role="alert">Scaricamento non riuscito: {erroreScarico} L’illustrazione si vede sulla <a href={q.pianta.pagina ?? q.pianta.url} target="_blank" rel="noreferrer" className="credito">pagina della fonte</a> ({q.pianta.fonte}){rifiuto ? '.' : '; puoi riprovare o caricarne una tua dall’editor.'}</span>
-                    : <span>Illustrazione da <a href={q.pianta.pagina ?? q.pianta.url} target="_blank" rel="noreferrer" className="credito">{q.pianta.fonte}</a>, scaricata nella tua istanza al primo uso{download.caricamento && !scaricata ? ' (scaricamento in corso…)' : ''}. Pin e immagine si modificano dall’editor.</span>
-                ) : (
-                  <span>Nessuna illustrazione pubblicata per {q.nome}{q.piantaAssente ? `: ${q.piantaAssente}` : ''}: carica una tua immagine dall’editor (resta nella tua istanza).</span>
-                )}
-                {download.errore && !rifiuto && q.pianta && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void download.ricarica()} />}
-                {erroreScarico && q.pianta && q.mappaChiave && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Carica dall’editor"
-                  to={`/guida/mappe/${encodeURIComponent(q.mappaChiave)}/modifica?sezione=mappa`} />}
+                {q.illustrazione.immagineUrl || q.illustrazione.asset
+                  ? <span>Pin e immagine si modificano dall’editor.</span>
+                  : <span>Nessuna illustrazione per {q.nome}: carica una tua immagine dall’editor (resta nella tua istanza).</span>}
               </div>
             </section>
 

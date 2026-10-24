@@ -422,8 +422,9 @@ describe('EditorMappaPage', () => {
     fireEvent.change(form.getByLabelText('Nome'), { target: { value: 'Shibuya centro' } });
     fireEvent.click(form.getByRole('button', { name: 'Salva mappa' }));
     await waitFor(() => expect(api.aggiornaMappa).toHaveBeenCalledWith('citta-shibuya', { nome: 'Shibuya centro', tipo: 'quartiere', genitore: 'tokyo', ordine: 0, note: '' }));
-    // quartiere collegato alla guida: è offerto «Scarica dalla guida»; la sezione File esporta e importa il JSON delle mappe
-    expect(await screen.findByRole('button', { name: 'Scarica dalla guida' })).toBeInTheDocument();
+    // L11 (R11-02/8, migrazione 210): «Scarica dalla guida» non c'è più nemmeno sul quartiere (scarico tolto su decisione dell'utente);
+    // la sezione File esporta e importa il JSON delle mappe
+    expect(screen.queryByRole('button', { name: 'Scarica dalla guida' })).toBeNull();
     fireEvent.click(screen.getByRole('button',{name:'File'}));
     expect(screen.getByRole('button', { name: /^Esporta/ })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Esporta questo luogo/ })).toBeNull();
@@ -441,7 +442,8 @@ describe('EditorMappaPage', () => {
     await waitFor(() => expect(api.eliminaMappa).toHaveBeenCalledWith('citta-shibuya'));
   });
 
-  it('O9: su una planimetria d\'area «Scarica dalla guida» non c\'è (la rotta delle piante d\'area non esiste più); su un quartiere scarica la sua pianta', async () => {
+  // Superato dal lotto L11 (R11-02/8, migrazione 210): il pulsante e lo scarico della pianta del quartiere sono tolti su decisione dell'utente.
+  it.skip('O9: su una planimetria d\'area «Scarica dalla guida» non c\'è (la rotta delle piante d\'area non esiste più); su un quartiere scarica la sua pianta', async () => {
     api.getMappa.mockResolvedValue({ ...base, chiave: 'kamoshida-02', nome: 'Sala centrale', tipo: 'area', genitore: null, radiceDi: null });
     monta();
     fireEvent.click(await screen.findByRole('button', { name: 'Mappa' }));
@@ -741,7 +743,8 @@ describe('EditorMappaPage', () => {
     await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Sostituire l’immagine di base?' })).toBeNull());
   });
 
-  it('«Scarica dalla guida» su un quartiere con dei pezzi chiede la stessa conferma (L1, F5: 409): confermando scarica con «eliminaPezzi»', async () => {
+  // Superato dal lotto L11 (R11-02/8, migrazione 210): il pulsante e lo scarico della pianta del quartiere sono tolti su decisione dell'utente.
+  it.skip('«Scarica dalla guida» su un quartiere con dei pezzi chiede la stessa conferma (L1, F5: 409): confermando scarica con «eliminaPezzi»', async () => {
     useNotificationStore.setState({ notifications: [] });
     api.getMappa.mockResolvedValue({ ...conImmagine, pezzi: [pezzo] });
     api.scaricaPiantaQuartiere.mockRejectedValueOnce(new ApiError(409, 'mappa-con-pezzi', 'La mappa ha 1 pezzo ritagliato dall’immagine di prima: sostituendola verrà eliminato.', { pezzi: 1 }))

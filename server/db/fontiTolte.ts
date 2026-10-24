@@ -115,6 +115,10 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     sostituitaDa: 'il giorno unico (tabella `giorno`, L9): fase, trama, vincoli e avvisi; le azioni del percorso sono le voci del Diario e la copia storica resta nell’archivio «archivio-giorno-percorso-azioni-l11»',
   },
   {
+    schema: 'main', tabella: 'pianta_quartiere', colonna: null, tolta: 'L11 · migrazione 210',
+    sostituitaDa: 'l’immagine dell’illustrazione del quartiere nel database (caricata, o la grafica predefinita «mappe/citta-…»); lo scarico dalla guida non esiste più; URL, pagina, fonte e licenza restano nell’archivio «archivio-pianta-quartiere-l11»',
+  },
+  {
     schema: 'utente', tabella: 'lettura_partita', colonna: null, tolta: 'L11 · migrazione utente 43',
     sostituitaDa: 'l’avanzamento di libri e film (`progresso_libro_partita`, `progresso_film_partita`): «letto» si calcola da lì',
   },

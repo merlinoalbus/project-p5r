@@ -62,7 +62,8 @@ describe('L1 — strade dell’immagine di una mappa, illustrazioni, dimensioni 
     expect(riga(m.chiave)).toMatchObject({ immagine_chiave: m.chiave, larghezza: 64, altezza: 48, ruolo_immagine: 'planimetria-nativa', origine: 'utente' });
   });
 
-  it('F5 — scarico della pianta di un quartiere con pezzi: 409 senza conferma, poi con la conferma; l’origine della mappa non cambia (non è una scelta dell’utente)', async () => {
+  // Superato dal lotto L11 (R11-02/8, migrazione 210): lo scarico della pianta di un quartiere e `pianta_quartiere` sono tolti su decisione dell'utente.
+  it.skip('F5 — scarico della pianta di un quartiere con pezzi: 409 senza conferma, poi con la conferma; l’origine della mappa non cambia (non è una scelta dell’utente)', async () => {
     getDb().prepare('UPDATE pianta_quartiere SET url = ? WHERE quartiere_chiave = ?').run(`http://127.0.0.1:${porta}/shibuya.png`, 'shibuya');
     await request(app).put('/api/mappe/citta-shibuya/immagine').set('Content-Type', 'image/png').send(png(100, 100)).expect(200);
     await request(app).post('/api/mappe/citta-shibuya/pezzi').send({ nome: 'Insegna', sorgente: { x: 0, y: 0, larghezza: 10, altezza: 10 } }).expect(201);

@@ -302,7 +302,7 @@ describe('CittaPage — Aree della città (L2, 2026-10-20)', () => {
 describe('QuartierePage', () => {
   it('mostra la mappa del quartiere incorporata e i luoghi senza i pulsanti di posizionamento (ora nell’editor)', async () => {
     // `mappaChiave` la dà il backend (cittaService), non la costruisce la pagina: il mock deve dirla
-    const q: QuartiereDettaglioDto = { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', sblocco: null, fonte: '', descrizione: '', mappa: true, illustrazione: { immagineUrl: null, asset: null }, aree: [], pianta: null, piantaAssente: null,
+    const q: QuartiereDettaglioDto = { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', sblocco: null, fonte: '', descrizione: '', mappa: true, illustrazione: { immagineUrl: null, asset: null }, aree: [],
       luoghi: [{ chiave: 'shibuya/untouchable', ordine: 0, tipo: 'negozio', nome: 'Untouchable', cosaOffre: 'Armi', quando: 'entrambe', giorni: [], giorniTesto: '', sblocco: null, confidenti: [{ chiave: 'iwai', nome: 'Munehisa Iwai' }], attivita: [], negozi: [{ chiave: 'untouchable', nome: 'Untouchable' }], negozio: 'untouchable', origine: 'seed', piatti: null, note: null, verificato: true, marcatore: null, condizioni: null, disponibilita: null } as QuartiereDettaglioDto['luoghi'][number]] };
     api.getQuartiere.mockResolvedValue(q);
     api.getMappa.mockResolvedValue(mappa('citta-shibuya', 'Shibuya'));
@@ -337,7 +337,8 @@ describe('QuartierePage', () => {
     expect(senza.getByAltText('Sagoma di Shibuya sulla mappa di Tokyo')).toBeInTheDocument();
   });
 
-  it('lo scarico automatico della pianta su una mappa con pezzi (409 `mappa-con-pezzi`, L1 F5) non sostituisce niente e non mostra errori', async () => {
+  // Superato dal lotto L11 (R11-02/8, migrazione 210): lo scarico automatico della pianta all'apertura del quartiere non esiste più.
+  it.skip('lo scarico automatico della pianta su una mappa con pezzi (409 `mappa-con-pezzi`, L1 F5) non sostituisce niente e non mostra errori', async () => {
     const q = { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', sblocco: null, fonte: '', descrizione: '', mappa: false, illustrazione: { immagineUrl: null, asset: null }, aree: [],
       pianta: { url: 'https://esempio.test/shibuya.png', fonte: 'Guida', pagina: null }, piantaAssente: null, luoghi: [] } as unknown as QuartiereDettaglioDto;
     api.getQuartiere.mockResolvedValue(q);

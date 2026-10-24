@@ -24,7 +24,9 @@ const shibuya = (illustrazione: QuartiereDettaglioDto['illustrazione'], mappa: b
   pianta: { url: 'https://esempio.test/shibuya.png', fonte: 'Guida', pagina: null }, piantaAssente: null, luoghi: [], ingresso: null,
 } as unknown as QuartiereDettaglioDto);
 
-it('scaricata la pianta, il quartiere si rilegge: l’intestazione mostra l’immagine appena scaricata, come il visore', async () => {
+// Superato dal lotto L11 (R11-02/8, migrazione 210): lo scarico automatico della pianta all'apertura del quartiere non esiste più (i due test
+// restano, da riscrivere).
+it.skip('scaricata la pianta, il quartiere si rilegge: l’intestazione mostra l’immagine appena scaricata, come il visore', async () => {
   const caricata = { immagineUrl: '/api/immagini/mappa/citta-shibuya/file?v=2026-10-20T10%3A00%3A00.000Z', asset: 'mappe/citta-shibuya' };
   api.getQuartiere.mockResolvedValueOnce(shibuya({ immagineUrl: null, asset: null }, false)).mockResolvedValue(shibuya(caricata, true));
   api.scaricaPiantaQuartiere.mockResolvedValue({ quartiere: 'shibuya', mime: 'image/png', byte: 2407015, fonte: 'Guida', url: 'https://esempio.test/shibuya.png' });
@@ -39,7 +41,7 @@ it('scaricata la pianta, il quartiere si rilegge: l’intestazione mostra l’im
   expect(api.scaricaPiantaQuartiere).toHaveBeenCalledTimes(1);
 });
 
-it('uno scarico non riuscito o rifiutato per i pezzi non rilegge il quartiere', async () => {
+it.skip('uno scarico non riuscito o rifiutato per i pezzi non rilegge il quartiere', async () => {
   api.getQuartiere.mockReset().mockResolvedValue(shibuya({ immagineUrl: null, asset: null }, false));
   api.scaricaPiantaQuartiere.mockReset().mockRejectedValue(new Error('rete assente'));
   render(<MemoryRouter initialEntries={['/guida/citta/shibuya']}><Routes><Route path="/guida/citta/:chiave" element={<QuartierePage />} /></Routes></MemoryRouter>);

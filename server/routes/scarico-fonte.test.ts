@@ -31,7 +31,9 @@ describe('scarico da una fonte esterna (LAY-2)', () => {
   });
   afterAll(async () => { await new Promise<void>((ok) => server.close(() => ok())); closeDb(); });
 
-  it('la fonte riceve uno User-Agent che dice chi è (project-p5r con la versione), e nessun Referer', async () => {
+  // Superato dal lotto L11 (R11-02/8, migrazione 210): la rotta di scarico delle illustrazioni dei quartieri e `pianta_quartiere` sono tolte
+  // su decisione dell'utente; i test restano, da riscrivere sullo scarico da indirizzo (`/api/immagini/:ambito/:chiave/da-url`).
+  it.skip('la fonte riceve uno User-Agent che dice chi è (project-p5r con la versione), e nessun Referer', async () => {
     stato = 200;
     await request(app).post('/api/mappe/piante-citta/kichijoji/scarica').expect(201);
     expect(ricevute['user-agent']).toMatch(/^project-p5r\/\d+\.\d+\.\d+ \(/);
@@ -39,7 +41,7 @@ describe('scarico da una fonte esterna (LAY-2)', () => {
     expect(ricevute.referer).toBeUndefined();
   });
 
-  it('una fonte che rifiuta (403) è 400 `fonte-rifiuta` con la pagina della fonte, e l’immagine non cambia', async () => {
+  it.skip('una fonte che rifiuta (403) è 400 `fonte-rifiuta` con la pagina della fonte, e l’immagine non cambia', async () => {
     const prima = prepared("SELECT created_at FROM immagine WHERE ambito = 'mappa' AND chiave = 'citta-kichijoji'").pluck().get();
     stato = 403;
     const r = await request(app).post('/api/mappe/piante-citta/kichijoji/scarica');

@@ -1908,9 +1908,6 @@ export interface QuartiereDettaglioDto {
   illustrazione: IllustrazioneDto;
   /** Le Aree del quartiere, nel loro ordine (L2). */
   aree: AreaRiassuntoDto[];
-  /** Collegamento alla mappa pubblicata (null se nessuna fonte la offre). */
-  pianta: PiantaAreaDto | null;
-  piantaAssente: string | null;
   /** L5: i luoghi del quartiere senza Area (da collocare con «Colloca»), con l'area proposta se la migrazione ne ha dedotta una. */
   luoghiDaCollocare?: Array<LuogoDto & { areaProposta: { slug: string; nome: string } | null }>;
   /** L6: lo sblocco strutturato, come nel riassunto («Modifica sblocco» e «Ripristina» dalla pagina del quartiere). */
@@ -2512,20 +2509,6 @@ export interface AtterraggioPalazzoDto {
   spillo: number | null;
   /** Il nome del pin d'arrivo, o null. */
   spilloNome: string | null;
-}
-
-/** Pianta dell'area pubblicata da una guida: solo collegamento e credito; l'immagine si scarica nell'istanza al primo uso. */
-export interface PiantaAreaDto {
-  url: string;
-  pagina: string | null;
-  fonte: string;
-  licenza: string;
-  larghezza: number | null;
-  altezza: number | null;
-  /** «area» se la pianta è dell'area, «dungeon» se copre più aree, «quartiere» per le mappe della città. */
-  copertura: string;
-  note: string;
-  alternative: Array<{ url: string; pagina: string | null; fonte: string }>;
 }
 
 /**
