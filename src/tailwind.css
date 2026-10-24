@@ -1156,6 +1156,13 @@
   .card--cliccabile { cursor: pointer; }
   .card--cliccabile:hover { border-color: var(--color-primary); }
 
+  /* ---- Luoghi della guida: griglia di carte (3–4 colonne a 1280, 2–3 a 768, 1–2 a 375); scorre solo la pagina ---- */
+  .griglia-luoghi {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 12px;
+    margin: 0; padding: 0; list-style: none;
+  }
+  .griglia-luoghi > li { min-width: 0; display: flex; }
+
   /* ---- Fregio: l'illustrazione di una sezione, non il suo sfondo ----
    *
    * Prima stava **dietro** al testo, al 16% di opacità e sfumata: nascosta al punto che l'utente

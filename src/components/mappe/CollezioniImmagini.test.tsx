@@ -16,7 +16,7 @@ function m(chiave:string, genitore:string|null, nome:string, indice?:number, tot
   return {chiave,genitore,nome,nomeRivisto:false,tipo:'area',ordine:0,immagineUrl:`/${chiave}.png`,asset:null,radiceDi:null,versione:null,origine:'seed',numeroSpilli:0,numeroFigli:0,updatedAt:'',area:null,casa:`/guida/mappe/${chiave}`,...(indice?{immagineCollezione:{indice,totale,ambito}}:{})};
 }
 // Saltato (L11 B5): il vecchio albero dei luoghi non esiste più, decisione del PM del 24/10 (le famiglie di immagini non sono più nodi
-// dell'albero: l'albero dei luoghi è `AlberoGerarchia`). Corpo originale ripristinato, non eseguito (zero test).
+// dell'albero: i luoghi della guida sono `GrigliaLuoghi`). Corpo originale ripristinato, non eseguito (zero test).
 it.skip('una famiglia ha una intestazione e tutte le immagini indipendenti con anteprima',()=>{
   render(<MemoryRouter><AlberoLuoghi mappe={[m('palazzo',null,'Palazzo di Madarame'),m('b','palazzo','Museo, 2P',2),m('a','palazzo','Museo, 2P',1),m('c','palazzo','Museo, 2P',3)]}/></MemoryRouter>);
   expect(screen.getAllByRole('heading',{name:'Museo, 2P'})).toHaveLength(1);

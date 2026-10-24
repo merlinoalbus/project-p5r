@@ -135,7 +135,7 @@ describe('MappaPage', () => {
     expect(screen.queryByRole('link', { name: /^Torna alla partita/ })).toBeNull();
   });
 
-  // SUPERATO da L11/B5 (R11-11): `/guida/mappe` è l'albero dei «Luoghi della guida» (`IndiceLuoghi`); il vecchio indice a radici e pannello non c'è più
+  // SUPERATO da L11/B5 (R11-11): `/guida/mappe` sono i «Luoghi della guida» a schede e griglia (`IndiceLuoghi`); il vecchio indice a radici e pannello non c'è più
   // (i sette casi che seguono, fino a UX3-7, e LAY2-5, idem). Non eseguiti (zero test).
   it.skip('SUPERATO da L11/B5: aperta direttamente, «Chiudi» porta all’elenco delle mappe come prima', async () => {
     // nessuna pagina prima: si parte da fuori dalle mappe (annotazione cancellata) e si apre la mappa col primo caricamento

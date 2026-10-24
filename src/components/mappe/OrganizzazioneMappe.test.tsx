@@ -25,7 +25,7 @@ function m(chiave:string,genitore:string|null,nome=chiave):MappaRiassuntoDto { r
 function Indirizzo(){ const p=useLocation();return <div>{p.pathname}{p.search}</div>; }
 beforeEach(()=>{vi.resetAllMocks();usePreferenzeStore.setState({graficaPredefinita:true});useAssetStore.setState({manifest:null,caricato:true,mancanti:{}});});
 // Saltati (L11 B5): il vecchio albero dei luoghi non esiste più, decisione del PM del 24/10 (l'indice è l'albero della gerarchia,
-// `AlberoGerarchia`, dal server). Corpi originali ripristinati, non eseguiti (zero test).
+// `GrigliaLuoghi`, dal server). Corpi originali ripristinati, non eseguiti (zero test).
 it.skip('rende ogni profondità e mantiene distinti gli omonimi senza icone di passaggio',()=>{
   render(<MemoryRouter><AlberoLuoghi mappe={[m('tokyo',null),m('scuola','tokyo'),m('edificio','scuola'),m('piano','edificio','Primo piano'),m('palazzo',null),m('altro','palazzo','Primo piano')]} /></MemoryRouter>);
   const nomi=screen.getAllByRole('link',{name:'Primo piano'});expect(nomi).toHaveLength(2);
