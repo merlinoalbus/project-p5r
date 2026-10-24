@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
 import { useCarica } from '../../hooks/useCarica';
 import { anteprimaInformazioniConfidente, getInformazioniConfidente, salvaInformazioniConfidente } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
-import { useBozzaSporca } from '../../utils/bozzeSporche';
+import { AvvisoBozzaRipristinata } from '../shared/AvvisoBozzaRipristinata';
+import { leggiBozzaPersistente, scartaBozzaPersistente, useBozzaPersistente } from '../../utils/bozzeSporche';
 import { CAMPI_INFORMAZIONI_CONFIDENTE, ETICHETTE_INFORMAZIONI_CONFIDENTE } from '../../../shared/disponibilitaConfidenti';
 import type { AnteprimaInformazioniConfidenteDto, AzioneInformazioniConfidente, CampoInformazioniConfidente, InformazioniConfidente, InformazioniConfidenteRaw, SalvaInformazioniConfidente } from '../../../shared/disponibilitaConfidenti';
 
@@ -14,6 +15,26 @@ const COLONNE: Record<CampoInformazioniConfidente, keyof InformazioniConfidenteR
 };
 const vuoti = (): InformazioniConfidente => ({ giorni: [], fasce: [], luogo: '', sbloccoData: '', sbloccoRequisiti: '', note: '', noteGenerali: '', fonti: [] });
 const comeTesto = (v: string | string[] | undefined) => Array.isArray(v) ? v.join('\n') : v ?? '';
+
+/** Quel che si tiene in sessionStorage di una bozza: i campi scelti (modifica) o scritti (creazione) e il motivo. */
+interface StatoBozza { nuova: boolean; creazione: InformazioniConfidente; patch: Partial<InformazioniConfidente>; motivo: string }
+const CAMPI_ELENCO: readonly CampoInformazioniConfidente[] = ['giorni', 'fasce', 'fonti'];
+const elencoDiTesti = (x: unknown): x is string[] => Array.isArray(x) && x.every((v) => typeof v === 'string');
+/** Il valore di un campo ha il tipo del campo (elenco di testi per giorni, fasce e fonti, testo per gli altri)? */
+const valoreDelCampo = (campo: CampoInformazioniConfidente, x: unknown): boolean => (CAMPI_ELENCO.includes(campo) ? elencoDiTesti(x) : typeof x === 'string');
+/** Una bozza ritrovata vale solo con forma e tipi giusti: la creazione ha tutti gli otto campi, la modifica solo campi noti. */
+function validaBozzaInformazioni(dati: unknown): StatoBozza | null {
+  if (typeof dati !== 'object' || dati === null) return null;
+  const d = dati as Record<string, unknown>;
+  if (typeof d.nuova !== 'boolean' || typeof d.motivo !== 'string' || typeof d.creazione !== 'object' || d.creazione === null || typeof d.patch !== 'object' || d.patch === null || Array.isArray(d.patch)) return null;
+  const creazione = d.creazione as Record<string, unknown>;
+  const patch = d.patch as Record<string, unknown>;
+  if (!CAMPI_INFORMAZIONI_CONFIDENTE.every((campo) => valoreDelCampo(campo, creazione[campo]))) return null;
+  if (!Object.keys(patch).every((k) => (CAMPI_INFORMAZIONI_CONFIDENTE as readonly string[]).includes(k) && valoreDelCampo(k as CampoInformazioniConfidente, patch[k]))) return null;
+  const pulita: Record<string, unknown> = {};
+  for (const campo of CAMPI_INFORMAZIONI_CONFIDENTE) pulita[campo] = creazione[campo];
+  return { nuova: d.nuova, creazione: pulita as unknown as InformazioniConfidente, patch: patch as Partial<InformazioniConfidente>, motivo: d.motivo };
+}
 
 /** Legge il proprio endpoint: rimane accessibile anche quando il dettaglio non riesce a decodificare un vecchio JSON. */
 export function EditorDisponibilita({ chiave, onChiudi, onSalvato }: { chiave: string; onChiudi: () => void; onSalvato: () => void | Promise<void> }) {
@@ -28,6 +49,19 @@ export function EditorDisponibilita({ chiave, onChiudi, onSalvato }: { chiave: s
   const [preparata, setPreparata] = useState<{ input: SalvaInformazioniConfidente; anteprima: AnteprimaInformazioniConfidenteDto } | null>(null);
   const c = dati.dati;
   const nuova = c?.correnteRaw === null;
+  const chiaveBozza = `informazioni:${chiave}`;
+  // Con una copia ritrovata in sessionStorage (pagina ricaricata) i campi ripartono da lì, appena i dati sono letti: la revisione attesa (un'impronta
+  // della riga e del suo storico) è il metro, se le informazioni sono cambiate nel frattempo la copia si scarta. Si legge una volta sola, durante il
+  // render in cui arrivano i dati (stato aggiornato in render, ammesso da React quando è condizionato): così nessun render mostra prima i valori vecchi.
+  const [letta, setLetta] = useState(false);
+  const [ripristinata, setRipristinata] = useState(false);
+  if (c && !letta) {
+    setLetta(true);
+    const salvata = leggiBozzaPersistente(chiaveBozza, { revisione: c.revisioneAttesa, nuova }, validaBozzaInformazioni);
+    if (salvata && salvata.nuova === nuova) { setCreazione(salvata.creazione); setPatch(salvata.patch); setMotivo(salvata.motivo); setRipristinata(true); }
+  }
+  /** Chiude la finestra scartando la bozza (anche la copia in sessionStorage). */
+  const chiudi = () => { scartaBozzaPersistente(chiaveBozza); onChiudi(); };
   const invalidaAnteprima = () => { setPreparata(null); setErrore(null); };
   const cambiaModalita = (m: typeof modalita) => { setModalita(m); invalidaAnteprima(); };
 
@@ -69,6 +103,7 @@ export function EditorDisponibilita({ chiave, onChiudi, onSalvato }: { chiave: s
       // Un errore di rete mantiene questo stesso payload e UUID per una ripetizione idempotente.
       const esito = await salvaInformazioniConfidente(chiave, preparata.input);
       dati.imposta(esito.corrente);
+      scartaBozzaPersistente(chiaveBozza);
       setPreparata(null); setPatch({});
       notifica('success', esito.esito === 'gia-eseguita' ? `Operazione già eseguita (versione ${esito.versione}). Le informazioni correnti non sono state riscritte.`
         : esito.esito === 'invariata' ? 'Informazioni già coincidenti: nessuna modifica.' : 'Informazioni aggiornate. Requisiti e progressi invariati.');
@@ -77,12 +112,17 @@ export function EditorDisponibilita({ chiave, onChiudi, onSalvato }: { chiave: s
     finally { setOccupato(false); }
   };
   // valori scelti e non ancora salvati (dopo il salvataggio `patch` si svuota e `nuova` diventa falso): per «Aggiorna» e la chiusura della scheda del browser
-  useBozzaSporca('editor-disponibilita', `informazioni di ${c?.confidente.nome ?? chiave}`,
-    !!c && modalita === 'manuale' && (nuova ? JSON.stringify(creazione) !== JSON.stringify(vuoti()) : Object.keys(patch).length > 0));
+  const conCampiScelti = !!c && (nuova ? JSON.stringify(creazione) !== JSON.stringify(vuoti()) : Object.keys(patch).length > 0);
+  const statoBozza = useMemo<StatoBozza>(() => ({ nuova: !!nuova, creazione, patch, motivo }), [nuova, creazione, patch, motivo]);
+  // la copia segue i campi scelti, non la scheda aperta: passare a «Storico» e tornare indietro non la perde
+  useBozzaPersistente(chiaveBozza, `informazioni di ${c?.confidente.nome ?? chiave}`, statoBozza, { revisione: c?.revisioneAttesa ?? null, nuova: !!nuova },
+    { sporca: conCampiScelti, attiva: !!c && letta, sporcaRegistro: conCampiScelti && modalita === 'manuale' });
+  /** «Scarta» sulla bozza ripristinata: i campi tornano com'è la riga e la copia si cancella. */
+  const scarta = () => { scartaBozzaPersistente(chiaveBozza); setPatch({}); setCreazione(vuoti()); setMotivo(''); setPreparata(null); setRipristinata(false); };
   const ammessa = !!c && !dati.caricamento && !dati.errore && (modalita === 'storico' ? versione !== null : motivo.trim().length > 0 && (nuova || Object.keys(patch).length > 0));
-  return <Modal aperta larga titolo={`Informazioni di ${c?.confidente.nome ?? chiave}`} onChiudi={() => { if (!occupato) onChiudi(); }} azioni={
+  return <Modal aperta larga titolo={`Informazioni di ${c?.confidente.nome ?? chiave}`} onChiudi={() => { if (!occupato) chiudi(); }} azioni={
     <div className="flex flex-wrap justify-end gap-2 w-full">
-      <button type="button" className="btn btn-ghost touch" disabled={occupato} onClick={onChiudi}>Chiudi</button>
+      <button type="button" className="btn btn-ghost touch" disabled={occupato} onClick={chiudi}>Chiudi</button>
       <button type="button" className="btn btn-secondary touch" disabled={occupato || dati.caricamento} onClick={() => { invalidaAnteprima(); void dati.ricarica(); }}>Rileggi corrente</button>
       <button type="button" className="btn btn-secondary touch" disabled={occupato || !ammessa} onClick={() => void prepara()}>Mostra anteprima</button>
       {preparata && <button type="button" className="btn btn-primary touch" disabled={occupato || preparata.input.revisioneAttesa !== c?.revisioneAttesa} onClick={() => void salva()}>
@@ -95,6 +135,7 @@ export function EditorDisponibilita({ chiave, onChiudi, onSalvato }: { chiave: s
       {dati.caricamento && <p role="status">Lettura delle informazioni…</p>}
       {(errore || dati.errore) && <p className="m-0 text-error whitespace-pre-wrap" role="alert">{errore || dati.errore} La bozza resta disponibile.</p>}
       {c && <>
+        {ripristinata && conCampiScelti && <AvvisoBozzaRipristinata onScarta={scarta} />}
         {c.errori.length > 0 && <ul className="text-warning m-0 pl-5">{c.errori.map(e => <li key={e}>{e}</li>)}</ul>}
         {c.bonifica && <p className="m-0 text-[12px] text-text-muted">Bonifica iniziale: {c.bonifica.esito}. {c.bonifica.motivo}</p>}
         <div className="flex flex-wrap gap-2" aria-label="Tipo di modifica">
