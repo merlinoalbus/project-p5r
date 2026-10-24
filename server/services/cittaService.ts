@@ -5,7 +5,7 @@
 // Dalla voce 5 del piano «struttura, non frasi» (2026-09-12) un luogo è una riga del catalogo
 // (migrazione 071: origine, nascosto, condizioni_json) e i suoi negozi e le sue attività vengono
 // dalle **sedi** (`negozio.sede_chiave`, `attivita.sede_chiave`, migrazione 072), non più da
-// `luogo.negozio` e `luogo.attivita_json`, che non si leggono più. La regola di presenza sta sulla
+// `luogo.negozio` e `luogo.attivita_json`, che non si leggono più e ora non esistono più (L11, migrazione 187). La regola di presenza sta sulla
 // riga; il JSON `sblocco-luoghi` della guida resta il ripiego per un file ancora senza colonna.
 // ============================================================
 
@@ -34,7 +34,7 @@ interface RigaPiantaQ { quartiere_chiave: string; url: string; pagina: string | 
 /** Chiave dell'immagine (ambito «mappa») della mappa di un quartiere. */
 export const chiaveImmagineQuartiere = (quartiere: string): string => `citta-${quartiere}`;
 
-interface RigaQuartiere { sblocco_data: string | null; chiave: string; ordine: number; nome: string; sblocco: string | null; descrizione: string; fonte: string; condizioni_json?: string | null; fonte_condizioni_json?: string | null; condizioni_guida_json?: string | null; fonte_condizioni_guida_json?: string | null }
+interface RigaQuartiere { sblocco_data: string | null; chiave: string; ordine: number; nome: string; descrizione: string; fonte: string; condizioni_json?: string | null; fonte_condizioni_json?: string | null; condizioni_guida_json?: string | null; fonte_condizioni_guida_json?: string | null }
 
 /** «Entrata dei Memento» sta nella tabella dei quartieri, ma un quartiere non è: si raggiunge da
  *  `/guida/dungeon/mementos` e dalle richieste dei Memento. */
@@ -106,7 +106,7 @@ export function elencaQuartieri(partitaId?: number): QuartiereRiassuntoDto[] {
   const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
   const caricate = immaginiCaricateDelleMappe();
   const aree = numeroAreePerQuartiere();
-  return righe.map((q) => ({ chiave: q.chiave, nome: q.nome, sblocco: q.sblocco, sbloccoData: q.sblocco_data, sbloccoCondizione: sbloccoQuartiere(q.chiave, partitaId), mappaChiave: chiaveMappa(chiaveImmagineQuartiere(q.chiave)), ingresso: ingressoQuartiere(q.chiave), descrizione: q.descrizione, luoghi: q.luoghi, verificati: q.verificati,
+  return righe.map((q) => ({ chiave: q.chiave, nome: q.nome, sbloccoData: q.sblocco_data, sbloccoCondizione: sbloccoQuartiere(q.chiave, partitaId), mappaChiave: chiaveMappa(chiaveImmagineQuartiere(q.chiave)), ingresso: ingressoQuartiere(q.chiave), descrizione: q.descrizione, luoghi: q.luoghi, verificati: q.verificati,
     illustrazione: illustrazioneDellaMappa(chiaveImmagineQuartiere(q.chiave), undefined, caricate),
     aree: aree.get(q.chiave) ?? 0,
     ...disponibilitaQuartiere(q.chiave, st) }));
@@ -129,7 +129,7 @@ export function dettaglioQuartiere(chiave: string, partitaId?: number): Quartier
   // le Aree del quartiere (L2), nel loro ordine, col passaggio sull'illustrazione e l'ingresso
   // (il contenitore scritto qui e non da `contenitoreDaRotta`: anche l'ingresso dei Memento ha la sua scheda, senza Aree)
   const aree = areeDelContenitore({ colonna: 'quartiere_chiave', chiave: q.chiave, mappa: chiaveImmagineQuartiere(q.chiave), nome: q.nome, rotta: 'citta', prefisso: `citta/${q.chiave}/`, tipoPlanimetria: 'luogo' }, partitaId);
-  return { chiave: q.chiave, nome: q.nome, sblocco: q.sblocco, sbloccoData: q.sblocco_data, sbloccoCondizione: sbloccoQuartiere(chiave, partitaId), mappaChiave: chiaveMappa(chiaveImmagineQuartiere(chiave)), ingresso: ingressoQuartiere(chiave), descrizione: q.descrizione, fonte: q.fonte, luoghi, mappa, illustrazione, aree, pianta, piantaAssente: pianta ? null : (assenti[chiave] ?? null),
+  return { chiave: q.chiave, nome: q.nome, sbloccoData: q.sblocco_data, sbloccoCondizione: sbloccoQuartiere(chiave, partitaId), mappaChiave: chiaveMappa(chiaveImmagineQuartiere(chiave)), ingresso: ingressoQuartiere(chiave), descrizione: q.descrizione, fonte: q.fonte, luoghi, mappa, illustrazione, aree, pianta, piantaAssente: pianta ? null : (assenti[chiave] ?? null),
     luoghiDaCollocare: luoghiDaCollocare(chiave, letture) };
 }
 

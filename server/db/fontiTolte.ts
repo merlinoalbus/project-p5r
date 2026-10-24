@@ -86,6 +86,10 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     schema: 'main', tabella: 'articolo', colonna: 'condizione', tolta: 'L11 · migrazione 187',
     sostituitaDa: 'le condizioni dell’offerta (`condizioni_json`); le frasi restano nell’archivio «archivio-frasi-l11»',
   },
+  {
+    schema: 'main', tabella: 'quartiere', colonna: 'sblocco', tolta: 'L11 · migrazione 188',
+    sostituitaDa: 'la condizione di sblocco del quartiere (`condizioni_json`) con gli inviti dei Confidenti; le frasi della guida restano nell’archivio «archivio-frasi-l11»',
+  },
 ];
 
 export const tabellaTolta = (schema: string, tabella: string): FonteTolta | undefined =>

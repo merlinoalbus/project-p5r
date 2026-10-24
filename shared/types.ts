@@ -1793,21 +1793,20 @@ export interface QuartiereRiassuntoDto {
   sbloccoData?:string|null;
   chiave: string;
   nome: string;
-  sblocco: string | null;
+  /** Non più valorizzato (L11, migrazione 188): la frase della guida è nell'archivio, lo sblocco è `sbloccoCondizione`. */
+  sblocco?: string | null;
   descrizione: string;
   luoghi: number;
   verificati: number;
   /** Il quartiere è già nel mondo, al punto in cui è la partita?
    *
-   * Vero anche senza partita: senza non c'è niente da decidere. Le regole stanno in
-   * `dati_guida` (voce `sblocco-quartieri`) e non solo nella data: sette quartieri su ventitré ne hanno una, gli
-   * altri si aprono col rango di un Confidente, con un libro letto o durante un Palazzo — e sono
+   * Vero anche senza partita: senza non c'è niente da decidere. Le regole sono la condizione del quartiere (`condizioni_json`, con gli inviti):
+   * sette quartieri su ventitré hanno una data, gli altri si aprono col rango di un Confidente, con un libro letto o durante un Palazzo — e sono
    * chiusi lo stesso. La mappa di Tokyo mostra solo i quartieri disponibili. */
   disponibile?: boolean;
   /** Perché è chiuso, nelle parole del valutatore: «Yusuke: rango 1 di 3». Null se è aperto. */
   bloccoMotivo?: string | null;
-  /** L6 (R6-08): lo sblocco strutturato (`quartiere.condizioni_json` in OR con gli inviti), con la fonte e l'esito; `sblocco` resta la frase
-   *  della guida, come nota. */
+  /** L6 (R6-08): lo sblocco strutturato (`quartiere.condizioni_json` in OR con gli inviti), con la fonte e l'esito. */
   sbloccoCondizione?: SbloccoDto;
 }
 
@@ -1899,7 +1898,8 @@ export interface QuartiereDettaglioDto {
   sbloccoData?:string|null;
   chiave: string;
   nome: string;
-  sblocco: string | null;
+  /** Non più valorizzato (L11, migrazione 188): la frase della guida è nell'archivio, lo sblocco è `sbloccoCondizione`. */
+  sblocco?: string | null;
   descrizione: string;
   fonte: string;
   luoghi: LuogoDto[];
