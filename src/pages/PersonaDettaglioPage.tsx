@@ -14,6 +14,8 @@ import { PageState } from '../components/shared/PageState';
 import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import { AffinitaGriglia } from '../components/compendio/AffinitaGriglia';
 import { ModificaAffinita } from '../components/compendio/ModificaAffinita';
+import { ModificaGuida } from '../components/guida/ModificaGuida';
+import { campiPersona } from '../components/compendio/campiPersona';
 import { DoveSiIncontra } from '../components/compendio/DoveSiIncontra';
 import { StatisticheBarre } from '../components/compendio/StatisticheBarre';
 import { ElementoChip } from '../components/compendio/ElementoChip';
@@ -172,6 +174,7 @@ export function PersonaDettaglioPage() {
                     <h1 className="titolo-display m-0">{p.nomeIt}</h1>
                     <LivelloBadge livello={p.livello} grande />
                     {p.rara && <AssetImg nome={`ui/tesoro-${slug(p.nome)}`} alt="" decorativa className="h-12 w-12 object-contain drop-shadow" fallback={null} />}
+                    <ModificaGuida tipo="persona" chiave={String(p.id)} cosa={`la Persona «${p.nomeIt}»`} campiSpeciali={campiPersona(p.delParty)} onSalvato={() => void ricarica()} />
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
                     {p.nomeIt !== p.nome && <span className="chip" title="Nome nella localizzazione inglese">{p.nome}</span>}

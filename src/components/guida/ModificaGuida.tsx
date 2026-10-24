@@ -10,7 +10,7 @@
 // La bozza non salvata si segnala con `useBozzaSporca`.
 // ============================================================
 
-import { useState, type ReactNode } from 'react';
+import { Fragment, useState, type ReactNode } from 'react';
 import { uguali } from '../../../shared/percorsoGuida';
 import { correggiGuida, getSchedaCorrezione, ripristinaGuida } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
@@ -50,6 +50,14 @@ function validoCampo(c: CampoCorrezioneDto, v: ValoreCampoCorrezione | undefined
 
 const valoriDi = (s: SchedaCorrezioneDto): Bozza => Object.fromEntries(s.campi.map((c) => [c.percorso, c.valore]));
 
+/** Un campo che la pagina disegna a modo suo (per esempio l'elenco delle skill con i livelli) e/o controlla prima del salvataggio. */
+export interface EditorCampoSpeciale {
+  /** Sostituisce il campo standard; senza, il campo resta quello del tipo. */
+  disegna?: (campo: CampoCorrezioneDto, valore: ValoreCampoCorrezione | undefined, imposta: (v: ValoreCampoCorrezione) => void, occupato: boolean) => ReactNode;
+  /** Il motivo, in italiano, per cui il valore non si può salvare (`null` se va bene): blocca «Salva» (il server ricontrolla comunque). */
+  errore?: (valore: ValoreCampoCorrezione | undefined) => string | null;
+}
+
 export interface PropsModificaGuida {
   tipo: TipoModificabile;
   /** La chiave dell'oggetto come la pagina lo conosce (il nome, o la chiave dell'elenco). */
@@ -63,9 +71,11 @@ export interface PropsModificaGuida {
   /** Alla chiusura della finestra, se qualcosa è cambiato (salvato o rimesso): la pagina rilegge i suoi dati. */
   onSalvato: () => void;
   className?: string;
+  /** Campi disegnati o controllati dalla pagina, per percorso. */
+  campiSpeciali?: Record<string, EditorCampoSpeciale>;
 }
 
-export function ModificaGuida({ tipo, chiave, cosa, soloIcona, etichetta = 'Modifica', onSalvato, className = '' }: PropsModificaGuida) {
+export function ModificaGuida({ tipo, chiave, cosa, soloIcona, etichetta = 'Modifica', onSalvato, className = '', campiSpeciali }: PropsModificaGuida) {
   const [scheda, setScheda] = useState<SchedaCorrezioneDto | null>(null);
   const [bozza, setBozza] = useState<Bozza>({});
   const [occupato, setOccupato] = useState(false);
@@ -76,7 +86,7 @@ export function ModificaGuida({ tipo, chiave, cosa, soloIcona, etichetta = 'Modi
   const [rimesso, setRimesso] = useState(false);
 
   const cambiati = scheda ? scheda.campi.filter((c) => !uguali(bozza[c.percorso], c.valore)) : [];
-  const tuttiValidi = cambiati.every((c) => validoCampo(c, bozza[c.percorso]));
+  const tuttiValidi = cambiati.every((c) => validoCampo(c, bozza[c.percorso]) && !campiSpeciali?.[c.percorso]?.errore?.(bozza[c.percorso]));
   useBozzaSporca('modifica-guida', `modifica di ${cosa}`, cambiati.length > 0);
 
   /** Mette in finestra la scheda ricevuta e riparte dai suoi valori. */
@@ -137,6 +147,15 @@ export function ModificaGuida({ tipo, chiave, cosa, soloIcona, etichetta = 'Modi
   /** Un campo del modulo secondo il suo tipo. */
   const disegnaCampo = (c: CampoCorrezioneDto) => {
     const v = bozza[c.percorso];
+    const speciale = campiSpeciali?.[c.percorso];
+    if (speciale?.disegna) return <Fragment key={c.percorso}>{speciale.disegna(c, v, (nuovo) => imposta(c.percorso, nuovo), occupato)}</Fragment>;
+    const problema = speciale?.errore?.(v) ?? null;
+    if (problema && !uguali(v, c.valore)) return <Fragment key={c.percorso}>{campoStandard(c, v)}<p role="alert" className="m-0 text-[12px] text-error sm:col-span-2">{problema}</p></Fragment>;
+    return campoStandard(c, v);
+  };
+
+  /** Il campo secondo il suo tipo. */
+  const campoStandard = (c: CampoCorrezioneDto, v: ValoreCampoCorrezione | undefined) => {
     switch (c.tipo) {
       case 'elenco':
         return <CampoElenco key={c.percorso} etichetta={c.etichetta} voci={Array.isArray(v) ? v : []} disabilitato={occupato} onCambia={(voci) => imposta(c.percorso, voci)} />;
