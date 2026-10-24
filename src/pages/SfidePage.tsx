@@ -19,6 +19,7 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AssetImg } from '../components/shared/AssetImg';
 import { IconaScheda } from '../components/shared/IconaAzione';
 import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
+import { ModificaGuida } from '../components/guida/ModificaGuida';
 
 const SCHEDE = [
   ['battaglie', 'Battaglie Sfida', 'sfide-battaglia'], ['boss', 'Boss segreti', 'boss'],
@@ -32,19 +33,22 @@ function Elenco({ titolo, voci }: { titolo: string; voci: string[] }) {
 }
 
 /** Le Battaglie Sfida: introduzione, sblocco e regole generali, poi una carta per sfida con regole, nemici, punteggi, ricompense, strategia e fonte. */
-function SchedaBattaglie({ d }: { d: SfideDto }) {
+function SchedaBattaglie({ d, onModificato }: { d: SfideDto; onModificato: () => void }) {
   const b = d.battaglieSfida;
   return (
     <div className="flex flex-col gap-2 text-[13px]">
       <section className="card flex flex-col gap-1">
-        <p className="m-0">{b.introduzione}</p>
+        <div className="flex items-start gap-2">
+          <p className="m-0 min-w-0 flex-1">{b.introduzione}</p>
+          <ModificaGuida tipo="sfide-battaglie" chiave="battaglie" cosa="l’introduzione delle Battaglie Sfida" soloIcona onSalvato={onModificato} />
+        </div>
         {b.sblocco && <VoceTesto titolo="Sblocco">{b.sblocco}</VoceTesto>}
         {b.regoleGenerali && <VoceTesto titolo="Regole generali">{b.regoleGenerali}</VoceTesto>}
         <Fonte url={b.fonte} />
       </section>
       {b.elenco.map((s) => (
         <section key={s.chiave} id={`elemento-${s.chiave}`} className="card flex flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2"><h2 className="m-0 text-[15px] font-semibold">{s.nomeIt ?? s.nome}</h2>{s.nomeIt && s.nomeIt !== s.nome && <span className="text-text-muted text-[12px]">({s.nome})</span>}{s.livelloConsigliato && <span className="chip">livello {s.livelloConsigliato}</span>}{!s.verificato && <span className="chip text-[11px]">da fonte secondaria</span>}</div>
+          <div className="flex flex-wrap items-center gap-2"><h2 className="m-0 text-[15px] font-semibold">{s.nomeIt ?? s.nome}</h2>{s.nomeIt && s.nomeIt !== s.nome && <span className="text-text-muted text-[12px]">({s.nome})</span>}{s.livelloConsigliato && <span className="chip">livello {s.livelloConsigliato}</span>}{!s.verificato && <span className="chip text-[11px]">da fonte secondaria</span>}<ModificaGuida tipo="battaglia-sfida" chiave={s.chiave} cosa={`la Battaglia Sfida «${s.nomeIt ?? s.nome}»`} soloIcona className="ml-auto" onSalvato={onModificato} /></div>
           <VoceTesto titolo="Regole">{s.regole}</VoceTesto>
           <Elenco titolo="Nemici" voci={s.nemici} />
           {s.punteggi && <VoceTesto titolo="Punteggi">{s.punteggi}</VoceTesto>}
@@ -59,12 +63,12 @@ function SchedaBattaglie({ d }: { d: SfideDto }) {
 }
 
 /** I boss segreti, una carta ciascuno con il ritratto (le Gemelle Custodi ne hanno due, Caroline e Justine), dove, quando, requisiti, mosse, debolezze, resistenze, strategia, ricompense e statistiche; in fondo il rimando al Mietitore e ai Demoni del Tesoro. */
-function SchedaBoss({ d }: { d: SfideDto }) {
+function SchedaBoss({ d, onModificato }: { d: SfideDto; onModificato: () => void }) {
   return (
     <div className="flex flex-col gap-2 text-[13px]">
       {d.bossSegreti.map((b) => (
         <section key={b.chiave} id={`elemento-${b.chiave}`} className="card flex flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2">{(b.chiave === 'gemelle-custodi' ? ['caroline', 'justine'] : [b.chiave]).map((k) => <AssetImg key={k} nome={`personaggi/${k}`} alt="" decorativa className="h-16 w-auto object-contain" fallback={null} />)}<h2 className="m-0 text-[15px] font-semibold">{b.nome}</h2>{b.livelloConsigliato && <span className="chip">livello {b.livelloConsigliato}</span>}{!b.verificato && <span className="chip text-[11px]">da fonte secondaria</span>}</div>
+          <div className="flex flex-wrap items-center gap-2">{(b.chiave === 'gemelle-custodi' ? ['caroline', 'justine'] : [b.chiave]).map((k) => <AssetImg key={k} nome={`personaggi/${k}`} alt="" decorativa className="h-16 w-auto object-contain" fallback={null} />)}<h2 className="m-0 text-[15px] font-semibold">{b.nome}</h2>{b.livelloConsigliato && <span className="chip">livello {b.livelloConsigliato}</span>}{!b.verificato && <span className="chip text-[11px]">da fonte secondaria</span>}<ModificaGuida tipo="boss-segreto" chiave={b.chiave} cosa={`il boss segreto «${b.nome}»`} soloIcona className="ml-auto" onSalvato={onModificato} /></div>
           <VoceTesto titolo="Dove">{b.dove}</VoceTesto>
           <VoceTesto titolo="Quando">{b.quando}</VoceTesto>
           <Elenco titolo="Requisiti" voci={b.requisiti} />
@@ -89,13 +93,31 @@ function SchedaBoss({ d }: { d: SfideDto }) {
  * in camelCase diventa il titolo a parole, gli elenchi diventano elenchi puntati, gli oggetti
  * elenchi «chiave: valore» e i testi voci semplici; i campi vuoti si saltano.
  */
-function SchedaMagnate({ d }: { d: SfideDto }) {
+function SchedaMagnate({ d, onModificato }: { d: SfideDto; onModificato: () => void }) {
   const m = d.magnate;
   if (!m) return <p className="m-0 text-[13px] text-text-muted">Nessun dato su Magnate.</p>;
-  const campi: Array<[string, unknown]> = Object.entries(m).filter(([k]) => !['fonte', 'verificato'].includes(k));
+  // le sfide di Magnate sono un elenco di oggetti: si leggono (e si correggono) una per una, non come testo
+  const sfideMagnate = Array.isArray(m.sfide) ? (m.sfide as Array<{ nome: string; condizione: string; ricompensa: string }>) : [];
+  const campi: Array<[string, unknown]> = Object.entries(m).filter(([k]) => !['fonte', 'verificato', 'sfide'].includes(k));
   return (
     <section className="card flex flex-col gap-1 text-[13px]">
-      <h2 className="m-0 text-[15px] font-semibold">Magnate (gioco di carte)</h2>
+      <div className="flex items-start gap-2">
+        <h2 className="m-0 min-w-0 flex-1 text-[15px] font-semibold">Magnate (gioco di carte)</h2>
+        <ModificaGuida tipo="sfide-magnate" chiave="magnate" cosa="le regole di Magnate" soloIcona onSalvato={onModificato} />
+      </div>
+      {sfideMagnate.length > 0 && (
+        <div>
+          <strong>Sfide:</strong>
+          <ul className="m-0 flex list-none flex-col gap-1 p-0 pt-1">
+            {sfideMagnate.map((s) => (
+              <li key={s.nome} className="flex items-start gap-2">
+                <span className="min-w-0 flex-1"><strong>{s.nome}</strong>: {s.condizione} → {s.ricompensa}</span>
+                <ModificaGuida tipo="magnate-sfida" chiave={s.nome} cosa={`la sfida di Magnate «${s.nome}»`} soloIcona onSalvato={onModificato} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       {campi.map(([k, v]) => {
         const titolo = k.replace(/([A-Z])/g, ' $1').toLowerCase().replace(/^./, (c) => c.toUpperCase());
         if (Array.isArray(v)) return <Elenco key={k} titolo={titolo} voci={v.map((x) => (typeof x === 'string' ? x : JSON.stringify(x)))} />;
@@ -108,7 +130,7 @@ function SchedaMagnate({ d }: { d: SfideDto }) {
 }
 
 /** Tabella dei tratti delle Persona con ricerca (nome italiano e inglese, effetto, personaggio) e filtro per categoria, con le categorie ricavate dai tratti stessi. */
-function SchedaTratti({ d }: { d: SfideDto }) {
+function SchedaTratti({ d, onModificato }: { d: SfideDto; onModificato: () => void }) {
   const [q, setQ] = useState('');
   const [categoria, setCategoria] = useState('');
   const t = d.tratti;
@@ -116,7 +138,10 @@ function SchedaTratti({ d }: { d: SfideDto }) {
   const visibili = useMemo(() => { const n = normalizzaTesto(q); return t.elenco.filter((x) => (!categoria || x.categoria === categoria) && (!n || normalizzaTesto(`${x.nome} ${x.nomeEn ?? ''} ${x.effetto} ${x.personaggio ?? ''}`).includes(n))); }, [t, q, categoria]);
   return (
     <div className="flex flex-col gap-2 text-[13px]">
-      {t.introduzione && <p className="m-0 text-text-secondary">{t.introduzione}</p>}
+      <div className="flex items-start gap-2">
+        <p className="m-0 min-w-0 flex-1 text-text-secondary">{t.introduzione}</p>
+        <ModificaGuida tipo="sfide-tratti" chiave="tratti" cosa="l’introduzione dei tratti" soloIcona onSalvato={onModificato} />
+      </div>
       <div className="flex flex-wrap gap-1.5 items-center">
         <div className="flex-1 min-w-[200px]"><CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca un tratto o un effetto…" /></div>
         <Selettore compatto etichetta="Categoria" valore={categoria} vuoto="Tutte le categorie" opzioni={categorie.map((c) => ({ chiave: c, nome: c }))} onCambia={setCategoria} />
@@ -125,7 +150,7 @@ function SchedaTratti({ d }: { d: SfideDto }) {
       <div className="area-scorrevole-x">
         <table className="tabella tabella--adattiva text-[12px]">
           <thead><tr><th>Tratto</th><th>Effetto</th><th>Categoria</th><th>Di chi</th></tr></thead>
-          <tbody>{visibili.map((x) => <tr key={x.nome}><td data-etichetta="Tratto"><strong>{x.nome}</strong>{x.nomeEn && x.nomeEn !== x.nome && <span className="text-text-muted"> ({x.nomeEn})</span>}</td><td data-etichetta="Effetto">{x.effetto}</td><td data-etichetta="Categoria">{x.categoria ?? '—'}</td><td data-etichetta="Di chi">{x.personaggio ?? '—'}</td></tr>)}</tbody>
+          <tbody>{visibili.map((x) => <tr key={x.nome}><td data-etichetta="Tratto"><div className="flex items-start gap-1"><span className="min-w-0 flex-1"><strong>{x.nome}</strong>{x.nomeEn && x.nomeEn !== x.nome && <span className="text-text-muted"> ({x.nomeEn})</span>}</span><ModificaGuida tipo="tratto" chiave={x.nome} cosa={`il tratto «${x.nome}»`} soloIcona onSalvato={onModificato} /></div></td><td data-etichetta="Effetto">{x.effetto}</td><td data-etichetta="Categoria">{x.categoria ?? '—'}</td><td data-etichetta="Di chi">{x.personaggio ?? '—'}</td></tr>)}</tbody>
         </table>
       </div>
       <Fonte url={t.fonte} />
@@ -140,6 +165,8 @@ export function SfidePage() {
   const [params, setParams] = useSearchParams();
   const scheda = (SCHEDE.some(([k]) => k === params.get('scheda')) ? params.get('scheda') : 'battaglie') as Scheda;
   const d = dati.dati;
+  /** Dopo una correzione o un ripristino dei testi della guida (L11 · B11): la pagina rilegge i suoi dati. */
+  const ricarica = () => void dati.ricarica();
   // L11 B4 (R11-07/3): `?scheda=<scheda>&elemento=<chiave>` (la «casa» di una sfida nella ricerca globale) porta in vista la carta e la evidenzia
   useElementoDaIndirizzo(!!d, scheda);
   return (
@@ -156,10 +183,10 @@ export function SfidePage() {
               </button>
             ))}
           </FilaScorrevole>
-          {scheda === 'battaglie' && <SchedaBattaglie d={d} />}
-          {scheda === 'boss' && <SchedaBoss d={d} />}
-          {scheda === 'magnate' && <SchedaMagnate d={d} />}
-          {scheda === 'tratti' && <SchedaTratti d={d} />}
+          {scheda === 'battaglie' && <SchedaBattaglie d={d} onModificato={ricarica} />}
+          {scheda === 'boss' && <SchedaBoss d={d} onModificato={ricarica} />}
+          {scheda === 'magnate' && <SchedaMagnate d={d} onModificato={ricarica} />}
+          {scheda === 'tratti' && <SchedaTratti d={d} onModificato={ricarica} />}
         </div>
       )}
     </PageState>

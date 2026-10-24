@@ -21,6 +21,7 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { IconMedaglia } from '../components/shared/iconeGuida';
+import { ModificaGuida } from '../components/guida/ModificaGuida';
 
 // Il Covo dei Ladri non è più una linguetta qui: ha una pagina sua, `/guida/covo`. Non era un
 // capitolo dei trofei — è un'area con una valuta propria, 52 sfide che la guadagnano e 36 premi
@@ -44,7 +45,7 @@ const COLORE_TROFEO: Record<TrofeoDto['tipo'], string> = {
  * «Quando:» in grassetto dentro il testo: per trovare i quattro d'oro bisognava leggerle una per
  * una. Ora il metallo è un colore e una medaglia, «mancabile» è un avviso acceso — perché quello
  * è il dato che, ignorato, costa la partita — e i due testi hanno l'etichetta piccola sopra. */
-function Trofeo({ t, partitaId, onCambiato }: { t: TrofeoDto; partitaId: number | null; onCambiato: (t: TrofeoDto) => void }) {
+function Trofeo({ t, partitaId, onCambiato, onModificato }: { t: TrofeoDto; partitaId: number | null; onCambiato: (t: TrofeoDto) => void; onModificato: () => void }) {
   const [occupato, setOccupato] = useState(false);
   const colore = COLORE_TROFEO[t.tipo];
   /** Segna il trofeo come ottenuto o no nella partita (solo se c'è una partita), disattivando la spunta durante la richiesta; passa al genitore il trofeo aggiornato o notifica l'errore. */
@@ -61,6 +62,7 @@ function Trofeo({ t, partitaId, onCambiato }: { t: TrofeoDto; partitaId: number 
           <strong className={`text-[15px] leading-tight ${t.ottenuto ? 'line-through' : ''}`}>{t.nome}</strong>
           {t.nomeEn && t.nomeEn !== t.nome && <span className="text-[11px] text-text-muted">{t.nomeEn}</span>}
         </div>
+        <ModificaGuida tipo="trofeo" chiave={t.chiave} cosa={`il trofeo «${t.nome}»`} soloIcona onSalvato={onModificato} />
         {partitaId && (
           <label className="touch flex shrink-0 items-center gap-1.5 text-[12px]" title={`Segna «${t.nome}» come ottenuto`}>
             <input type="checkbox" className="h-5 w-5" checked={t.ottenuto} disabled={occupato} onChange={(e) => void cambia(e.target.checked)} aria-label={`Trofeo ${t.nome} ottenuto`} />
@@ -105,6 +107,8 @@ export function CompletamentoPage() {
   const [tipo, setTipo] = useState('');
   const [soloDaFare, setSoloDaFare] = useState(false);
   const d = dati.dati;
+  /** Dopo una correzione o un ripristino dei testi della guida (L11 · B11): la pagina rilegge i suoi dati. */
+  const ricarica = () => void dati.ricarica();
   // L11 B4 (R11-07/3): `?elemento=<chiave>` (la «casa» di un trofeo nella ricerca globale) porta in vista il trofeo e lo evidenzia
   useElementoDaIndirizzo(!!d && scheda === 'trofei', scheda);
   const trofeiVisibili = useMemo(() => (d?.trofei ?? []).filter((t) => (!tipo || t.tipo === tipo) && (!soloDaFare || !t.ottenuto)), [d, tipo, soloDaFare]);
@@ -152,14 +156,17 @@ export function CompletamentoPage() {
               </section>}
               {/* Una griglia: le schede sono corte e su uno schermo largo la colonna unica
                   lasciava due terzi di pagina vuoti per cinquantatré voci. */}
-              <ul className="m-0 grid list-none grid-cols-1 items-start gap-2 p-0 lg:grid-cols-2 2xl:grid-cols-3" aria-label="Trofei">{trofeiVisibili.map((t) => <Trofeo key={t.chiave} t={t} partitaId={partitaId} onCambiato={aggiorna} />)}</ul>
+              <ul className="m-0 grid list-none grid-cols-1 items-start gap-2 p-0 lg:grid-cols-2 2xl:grid-cols-3" aria-label="Trofei">{trofeiVisibili.map((t) => <Trofeo key={t.chiave} t={t} partitaId={partitaId} onCambiato={aggiorna} onModificato={ricarica} />)}</ul>
             </div>
           )}
           {scheda === 'finali' && (
             <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Finali">
               {d.finali.map((f) => (
                 <li key={f.chiave} className="card flex flex-col gap-1 text-[13px]">
-                  <h2 className="m-0 text-[15px] font-semibold">{f.nome}</h2>
+                  <div className="flex items-start gap-2">
+                    <h2 className="m-0 min-w-0 flex-1 text-[15px] font-semibold">{f.nome}</h2>
+                    <ModificaGuida tipo="finale" chiave={f.chiave} cosa={`il finale «${f.nome}»`} soloIcona onSalvato={ricarica} />
+                  </div>
                   {f.descrizione && <p className="m-0 text-text-secondary">{f.descrizione}</p>}
                   {f.condizioni.length > 0 && <ul className="m-0 pl-4">{f.condizioni.map((c) => <li key={c}>{c}</li>)}</ul>}
                   {f.date.length > 0 && <VoceTesto titolo="Date chiave">{f.date.join(' · ')}</VoceTesto>}
@@ -170,32 +177,41 @@ export function CompletamentoPage() {
           )}
           {scheda === 'dlc' && (
             <ul className="m-0 p-0 list-none flex flex-col gap-2 text-[13px]" aria-label="DLC">
-              {d.dlc.map((x) => <li key={x.nome} className="card flex flex-col gap-1"><strong className="text-[15px]">{x.nome}</strong><p className="m-0">{x.contenuto}</p>{x.note && <p className="m-0 text-text-muted">{x.note}</p>}<Fonte url={x.fonte} /></li>)}
+              {d.dlc.map((x) => <li key={x.nome} className="card flex flex-col gap-1"><div className="flex items-start gap-2"><strong className="min-w-0 flex-1 text-[15px]">{x.nome}</strong><ModificaGuida tipo="dlc" chiave={x.nome} cosa={`il contenuto «${x.nome}»`} soloIcona onSalvato={ricarica} /></div><p className="m-0">{x.contenuto}</p>{x.note && <p className="m-0 text-text-muted">{x.note}</p>}<Fonte url={x.fonte} /></li>)}
             </ul>
           )}
           {scheda === 'meteo' && (
             <ul className="m-0 p-0 list-none flex flex-col gap-2 text-[13px]" aria-label="Meteo">
-              {d.meteo.map((m) => <li key={m.condizione} className="card flex flex-col gap-1"><strong className="text-[15px]">{m.condizione}</strong><ul className="m-0 pl-4">{m.effetti.map((e) => <li key={e}>{e}</li>)}</ul><Fonte url={m.fonte} /></li>)}
+              {d.meteo.map((m) => <li key={m.condizione} className="card flex flex-col gap-1"><div className="flex items-start gap-2"><strong className="min-w-0 flex-1 text-[15px]">{m.condizione}</strong><ModificaGuida tipo="meteo" chiave={m.condizione} cosa={`il meteo «${m.condizione}»`} soloIcona onSalvato={ricarica} /></div><ul className="m-0 pl-4">{m.effetti.map((e) => <li key={e}>{e}</li>)}</ul><Fonte url={m.fonte} /></li>)}
             </ul>
           )}
           {scheda === 'ng' && (
             <div className="flex flex-col gap-2 text-[13px]">
               <section className="card flex flex-col gap-1">
-                <h2 className="m-0 text-[15px] font-semibold">Nuova Partita+</h2>
+                <div className="flex items-start gap-2">
+                  <h2 className="m-0 min-w-0 flex-1 text-[15px] font-semibold">Nuova Partita+</h2>
+                  <ModificaGuida tipo="completamento-sezione" chiave="ng" cosa="la sezione «Nuova Partita+»" soloIcona onSalvato={ricarica} />
+                </div>
                 {d.nuovaPartitaPlus.note && <p className="m-0 text-text-secondary">{d.nuovaPartitaPlus.note}</p>}
                 <VoceTesto titolo="Si trasferisce">{d.nuovaPartitaPlus.trasferito.join(' · ')}</VoceTesto>
                 <VoceTesto titolo="Non si trasferisce">{d.nuovaPartitaPlus.nonTrasferito.join(' · ')}</VoceTesto>
                 <Fonte url={d.nuovaPartitaPlus.fonte} />
               </section>
               <section className="card flex flex-col gap-1">
-                <h2 className="m-0 text-[15px] font-semibold">Differenze rispetto a Persona 5</h2>
+                <div className="flex items-start gap-2">
+                  <h2 className="m-0 min-w-0 flex-1 text-[15px] font-semibold">Differenze rispetto a Persona 5</h2>
+                  <ModificaGuida tipo="completamento-sezione" chiave="differenze" cosa="le differenze rispetto a Persona 5" soloIcona onSalvato={ricarica} />
+                </div>
                 <ul className="m-0 pl-4">{d.differenzeRoyal.map((x) => <li key={x}>{x}</li>)}</ul>
               </section>
             </div>
           )}
           {scheda === 'tempo' && (
             <section className="card flex flex-col gap-1 text-[13px]">
-              <h2 className="m-0 text-[15px] font-semibold">Fasce orarie e regole del tempo</h2>
+              <div className="flex items-start gap-2">
+                <h2 className="m-0 min-w-0 flex-1 text-[15px] font-semibold">Fasce orarie e regole del tempo</h2>
+                <ModificaGuida tipo="completamento-sezione" chiave="tempo" cosa="le fasce orarie e le regole del tempo" soloIcona onSalvato={ricarica} />
+              </div>
               <ul className="m-0 pl-4">{d.tempo.fasce.map((x) => <li key={x}>{x}</li>)}</ul>
               <h3 className="m-0 mt-1 text-[14px] font-semibold">Regole</h3>
               <ul className="m-0 pl-4">{d.tempo.regole.map((x) => <li key={x}>{x}</li>)}</ul>

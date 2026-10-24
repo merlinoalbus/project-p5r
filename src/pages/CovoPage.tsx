@@ -33,6 +33,7 @@ import { Link } from 'react-router-dom';
 import { COVO_AREA } from '../utils/covo';
 import type { CompletamentoDto } from '../types';
 import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
+import { ModificaGuida } from '../components/guida/ModificaGuida';
 
 type Covo = CompletamentoDto['covo'];
 
@@ -88,6 +89,8 @@ function Numero({ etichetta, valore, nota, tono = '', segno }: { etichetta: stri
 export function CovoPage() {
   useDocumentTitle('Covo dei Ladri');
   const dati = useCarica(() => getCompletamento(), []);
+  /** Dopo una correzione o un ripristino dei testi della guida (L11 · B11): la pagina rilegge i suoi dati. */
+  const ricarica = () => void dati.ricarica();
   const [ricerca, setRicerca] = useState('');
   const covo = dati.dati?.covo;
   const q = ricerca.trim().toLocaleLowerCase('it');
@@ -119,7 +122,10 @@ export function CovoPage() {
                   nota="medaglie per elemento" tono="bg-primary/10" segno="medaglie" />
               )}
             </div>
-            <p className="m-0 text-[13px] text-text-secondary">{covo.introduzione}</p>
+            <div className="flex items-start gap-2">
+              <p className="m-0 min-w-0 flex-1 text-[13px] text-text-secondary">{covo.introduzione}</p>
+              <ModificaGuida tipo="covo" chiave="covo" cosa="l’introduzione e le Medaglie P del Covo" soloIcona onSalvato={ricarica} />
+            </div>
             {/* La cautela va detta accanto ai numeri, non in fondo: chi legge «36 voci» a colpo
                 d'occhio conclude «36 cose da comprare», e sarebbe il conto sbagliato. */}
             <p className="m-0 text-[12px] text-text-muted">
@@ -154,6 +160,7 @@ export function CovoPage() {
                         {/* Il valore compare solo se c'è: oggi la guida non lo dichiara per
                             nessuna sfida, e una colonna di 52 trattini è rumore, non un dato. */}
                         {s.medaglie !== null && <span className="shrink-0 tabular-nums text-[12px] text-text-muted">{medaglie(s.medaglie)}</span>}
+                        <ModificaGuida tipo="covo-sfida" chiave={s.nome} cosa={`la sfida «${s.nome}»`} soloIcona onSalvato={ricarica} />
                       </li>
                     ))}
                   </ul>}
@@ -169,6 +176,7 @@ export function CovoPage() {
                         <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                           <div className="min-w-0 flex-1">{p.oggettiRicompensa?.length ? <OggettiCollegati oggetti={p.oggettiRicompensa} /> : <span className="font-semibold">{p.nome}</span>}</div>
                           {p.costo !== null && <span className="shrink-0 tabular-nums text-[12px] text-text-muted">{medaglie(p.costo)}</span>}
+                          <ModificaGuida tipo="covo-premio" chiave={p.nome} cosa={`il premio «${p.nome}»`} soloIcona onSalvato={ricarica} />
                         </div>
                         {!!p.oggettiRicompensa?.length && <span className="text-[12px] text-text-muted">Voce della guida: {p.nome}</span>}
                         {p.effetto && <span className="text-text-secondary">{p.effetto}</span>}
