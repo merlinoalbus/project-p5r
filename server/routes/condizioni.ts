@@ -72,7 +72,8 @@ router.get('/elenchi', (_req, res) => {
     letture: prepared("SELECT chiave, COALESCE(nome_it, nome) AS nome, 'libro' AS categoria FROM libro WHERE nascosto = 0 UNION ALL SELECT chiave, COALESCE(nome_it, nome), 'film' FROM film WHERE nascosto = 0 ORDER BY nome").all() as ElenchiRegoleDto['letture'],
     arcani: prepared('SELECT DISTINCT arcana AS chiave, arcana AS nome FROM persona ORDER BY arcana').all() as ElenchiRegoleDto['arcani'],
     // L6 (R6-03): Persona e abilità si scelgono per nome e si salvano per id
-    persone: prepared('SELECT CAST(id AS TEXT) AS chiave, nome FROM persona ORDER BY nome').all() as ElenchiRegoleDto['persone'],
+    // le 27 forme del gruppo (`del_party = 1`) non si portano nella scorta né si registrano: non sono Persona da citare in una condizione (R8-20)
+    persone: prepared('SELECT CAST(id AS TEXT) AS chiave, nome FROM persona WHERE del_party = 0 ORDER BY nome').all() as ElenchiRegoleDto['persone'],
     abilita: prepared('SELECT CAST(id AS TEXT) AS chiave, nome FROM skill ORDER BY nome').all() as ElenchiRegoleDto['abilita'],
     // I Ladri Fantasma per «in squadra»: chi sia la squadra lo dice il seed con `giocabile`.
     squadra: giocabili().map((p) => ({ chiave: p.chiave, nome: p.nome })),
