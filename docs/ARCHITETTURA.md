@@ -1,32 +1,16 @@
 # Architettura — project-p5r
 
-**23/10 08:44 italiana — NOTA rilasciata:**2e856938/CI39912246213 SUCCESS,quattroconsumatori osservati conPASS finaleGalaxy econsolevuota. NotaG034 versione1 inclusaDTO/hash,prezzi/note personali/proposte immutati;confronto163tabelle/DDL/versioni138-30 identico. Nessunwriter commerciale unitario,receipt/undo/import ancora implementato;STOPumano dopoNOTA.
+Documento di architettura dello stato corrente (ramo `newreview`, dopo i lotti L0–L11). Dove una cosa è cambiata, vale la
+sezione «Il modello finale» (§5 ter) e, in ogni caso, il codice: ogni sua affermazione cita un file reale.
 
-**23/10 — NOTA Homunculus al rilascio:** fonteG034 canonica versionata in modulo condiviso, campoDTO `noteStoriche` distinto da`nota`. I lettori di listino/offerte/oggettoRoyal la proiettano perchiave e provenienza; il confrontoTanaka la include nella revisionehash. Nessun prezzo copiato nel calcolo o datoDB modificato. FonteRoyal5000 prioritaria,120000discordanza storica. La futura transazione/ricevuta dovrà acquisire la nota mostrata; conservazione nei futuri undo/import del piano resta aperta.
-
-**23/10 — SNAPSHOT Tanaka in revisione:** GET readonly `catalogo-oggetti/confronto-tanaka` con TX unica e no-store separa fotografia121, fonte corrente e candidate Royal documentali. Attribuzione124 soltanto con rendiconto e formule intere/provenienza/coincidenza integrale degli altri campi e legami. Nessuna scrittura o migrazione; guardiaBE comune vieta conferma/alternativa/legame individualeTanaka, anche via fonte ricompensa. Revisionehash della lettura distinta da futuroCAS/ricevuta. Nessun writer commerciale unitario ancora attivo.
-
-**23/10 07:53 italiana — continuità acquisti rilasciata:**030 attiva su138/30, correttivo49c036c8/pipeline39907548119 riuscita. Conservazione di tutte le tabelle preesistenti e delle sette prove originali confermata; lettore del pubblicato osservato con PASS finale circoscritto. Writer/restore/import non esercitati. Il paragrafo «al rilascio» sotto descrive il checkpoint precedente.
-
-**23/10 — continuità acquisti, al rilascio030:** quattro strutture personali separano prova immutabile, marcatore del bootstrap, associazione attiva e raccordo fatto/generazione. Il bootstrap append-only precede ogni migrazione main solo quando030 è pending, senza anticipare la versione; la030 adotta la prova esatta senza rivalutare prezzi. Il lettore usa contributi congelati e deduplicaI71 per generazione; il Cestino ripristina solo l'ultima generazione e non riavvolge gli archivi. Backup/import li trasportano con validazione e provenienza esplicita. Codice approvato staticamente; conservazione e pubblicato ancora da osservare. Contratto in `coordinamento/lotti/L7/tanaka-storico-contratto.md`.
-
-Le sezioni §1–§8 e quelle senza data conservano anche descrizioni della verifica del 4 ottobre 2026: non sono tutte lo stato corrente.
-In particolare schema 99/utente 18 e presenza del luogo derivata dal primo negozio sono descrizioni storiche precedenti a L5/L6.
-Per lo stato del 21 ottobre valgono codice, registri delle migrazioni e rapporto di audit, con i difetti dichiarati; le note L7 sono bozze.
-Le sezioni intitolate con una fase («Fase 6.1», «Fase 13.2»…) o con una data sono il **registro** di quando una parte è
-nata: dicono come era fatta allora e quale scelta l'ha guidata. Dove una cosa è cambiata dopo, lo dice la sezione più recente.
-In particolare, quelle sezioni citano spesso i file del **seed JSON** (`data/seed/*.json`, caricati da `caricaSeed` al boot). Il
-seed è stato dismesso il 12 settembre 2026: quei dati oggi stanno nelle tabelle di `gioco.db` (o nei blocchi di `dati_guida`).
-La fonte corrente è il DB dell'istanza; «Importa» sostituisce esplicitamente il DB di gioco con un backup locale scelto dall'utente.
-I riferimenti a ricariche del pacchetto sono storia, non un'autorizzazione a sovrascrivere i dati di p5s.
+**Come si legge.** §1–§5 bis e §5 ter descrivono lo stato corrente. Le sezioni intitolate con una fase («Fase 6.1», «Fase 13.2»…)
+o con una data sono il **registro** di quando una parte è nata: dicono com'era fatta allora e quale scelta l'ha guidata. Possono
+nominare strutture oggi tolte (`mappa_entita`, `marcatore_mappa`, `pianta_area`, `giorno_calendario`, `giorno_percorso`,
+`lettura_partita`, `seed_meta`, `caricaSeed`, `ricaricaPacchetto`…): la tabella «Strutture tolte» di §5 ter dice dove vive oggi
+ciascun dato. Il seed JSON è stato dismesso il 12 settembre 2026; la fonte corrente è il DB dell'istanza, e «Importa» sostituisce
+esplicitamente il DB di gioco con un backup locale scelto dall'utente (nessuna unione).
 
 ## 1. Vista d'insieme
-
-**Stato corrente, audit del 21 ottobre:** le note L7 sotto descrivono bozze locali non rilasciate, non decisioni approvate. Il raccordo `catalogo_oggetto_fonte` è contestato dall'utente e ancora presente; l'apertura dei dedali va dichiarata dal Diario durante una visita Memento ed è incompleta. Ultimo typecheck documentato fallito, successivo ai verdi riportati sotto. Il codice L5/L6 pubblicato in `c025154a` presenta difetti e uno scostamento delle finestre: rapporto e limiti in `coordinamento/audit-conformita-2026-10-21.md`. Nessuna modifica del prodotto in questo audit.
-
-**Nota corrente L7, 21 ottobre 05:14Z — locale, non rilasciata.** I sei baratti Gachapon mancanti diventano proposte di creazione, non correzioni alla vendita della capsula casuale. Al sì un baratto è una sola offerta `articolo`, costo strutturato e risultati per chiave in `ricompensa_oggetto` (fonte `articolo`), senza nuova tabella, stato o oggetto-bundle. La proposta è ancorata alla capsula ceduta; il riepilogo mostra prima del gesto tutti i risultati e le note. I premi di Mothman sono alternative annotate, mai dedotte dalla spunta né assegnate insieme. `ArticoloDto.ricevuti` letto in blocco alimenta listino, ricerca, risposta dell'acquisto e visore. La pagina Oggetto risale al negozio e al costo/prezzo correnti; il collegamento non significa premio ottenuto. L'editor dei contenuti è riusato dal listino e resta disponibile anche dopo rimozione dell'ultimo risultato o cambio del costo; le guardie impediscono identità singola e risultati separati nello stesso articolo. Lo schema delle rettifiche è condiviso con la fusione, che segue i riferimenti anche nei metadati e snapshot delle proposte, senza raddoppiare quantità equivalenti o sommare alternative. Typecheck/lint/build verdi, non prova runtime; M7/router BE non attivi e nessuna proposta/scrittura sui dati applicata. Dettagli e lavoro residuo nel checkpoint L7.
-
-**Nota corrente L7, 21 ottobre 04:50Z — implementazione locale, non rilasciata.** Il negozio `jose` riusa `negozio`/`articolo` e il costo strutturato in fiori. La migrazione ancora non registrata prepara le 37 righe complete di `dati_guida.jose.scambi`, conservando la guida; non sostituisce negozi/offerte già corretti e non ricrea un negozio nel cestino o nascosto. I requisiti usano sette aperture effettive del catalogo `EVENTI_STORIA`: stesso registro/API/UI di Partita → Progressi, nessuna tabella di sblocco, data presunta o modifica al modello dei dedali. `richiesteService` compone il dettaglio del listino dal servizio esistente; `RichiestePage` usa ArticoliTabella e lo stesso acquisto. Dopo M7 il DTO Jose ha `listino` (null se rimosso/nascosto) e `scambi=[]`; prima di M7 conserva il contratto/vista storici. Le nuove API/M7 restano inattive fino all'integrazione dell'intero lotto. Typecheck/lint/build verdi, non prova runtime. Scelta della collocazione in Progressi comunicata dall'implementazione, non attribuita a una risposta dell'utente. Ritorni multipli dei baratti Gachapon ancora da integrare senza nuovi oggetti-bundle o acquisti duplicati.
 
 ```
  tablet / telefono / desktop
@@ -64,56 +48,27 @@ server/
   bootstrap.ts        factory Express: middleware in ordine, router di area (`routes/index.ts`, `ROUTER_DI_AREA`), health/config, documentazione (`/api/openapi.json`, `/api/docs`), 404, errorHandler
   config.ts           unica lettura delle env (BE_PORT/PORT, DATA_DIR, PACCHETTO_DIR, LOG_LEVEL)
   middleware/         requestContext (requestId + logger), responseShape ({data}), validate (zod; gli schemi restano leggibili con `schemiDiValidazione`), errorHandler
-  openapi/            documentazione dell'API (voce 5 della verifica completa): rotte.ts (rotte lette dalla pila dei router), documento.ts (OpenAPI 3.1 dagli schemi zod), descrizioni/ (registro in italiano, un file per area), pagina.ts (Swagger UI da `swagger-ui-dist`), openapi.test.ts (copertura e validità)
-  db/                 dbService (gioco.db + ATTACH partite.db, pragma, cache statement, copiaSchema), migrationRunner (user_version per file), backupService (7 copie di entrambi i file), schemaUtente.ts (DDL delle 33 tabelle delle partite), colonne.ts (haTabella/haColonna/aggiungiColonna per le migrazioni)
-  db/migrations/      dati di gioco: 001_compendio … 066 (le partite escono dal file), 067 (uid degli spilli), 068–078 (modello dati del catalogo: orari strutturati, condizioni sugli articoli, luogo catalogabile, sedi, collegamenti libri/videogiochi, effetti dichiarati, attività strutturate, programma punti, timbri dei dedali, domanda «tv»), 079 (immagini dentro gioco.db) … 095 (passi degli Enigmi), 096 (pulizia dello schema), 097 (atterraggio dei Palazzi dalla mappa di Tokyo), 098 (più voci della guida per pin: `spillo_voce`), 099 (aree dei dedali dei Memento: `area_dedalo`); registro in index.ts, `index.test.ts` pretende id consecutivi
-  db/migrazioniUtente/ partite: 001 schema (`schemaUtente.ts`, DDL attuale) … 015 (giornata come canone), 016 (indici), 017 (tolti i segni automatici del boss), 018 (timbri nelle aree dei dedali); registro in index.ts (sequenza separata, `PRAGMA utente.user_version`)
-  routes/             compendio (arcani, glossario, regole di fusione, persona, skill, oggetti, confidenti), traduzioni, partite (+ doti,
-                      confidenti, compendio personale, Persona possedute), immagini (PUT grezzo image/*, import da URL, file)
-  services/pacchetto/ pacchettoGioco.ts: primo avvio dal pacchetto (`assicuraPacchettoIniziale`), `caricaPacchetto`/`ricaricaPacchetto` (test), `regoleAllAvvio`
-  services/timbriService.ts  i timbri raccolti nei dedali dei Memento per partita (tetto della guida, evento al completamento; rifiutati dove la guida non dichiara il totale)
-                      Nota: quando una sede ospita più negozi (i distributori di Akihabara e della Shujin), il pin del luogo e la presenza
-                      del luogo seguono il **primo negozio per ordine** (`presenzaEntita.ts`, `mappeService.dettaglioRiferimento`): oggi hanno tutti gli stessi orari.
-  services/mappe/identitaSpillo.ts  uid degli spilli = impronta dell'identità (stesso spillo, stesso uid in ogni file)
-  services/           traduzioniService (cache in memoria, `t(ambito, chiave)`), compendioService, partiteService, immaginiService,
-                      fusione/motoreFusione.ts (motore puro su snapshot in memoria), fusione/alberoFusione.ts (piani
-                      ricorsivi) e fusione/fusioneService.ts (DTO)
+  openapi/            documentazione dell'API: rotte.ts (rotte lette dalla pila dei router), documento.ts (OpenAPI 3.1 dagli schemi zod), descrizioni/ (registro in italiano, un file per area), pagina.ts (Swagger UI da `swagger-ui-dist`), openapi.test.ts (copertura e validità)
+  db/                 dbService (gioco.db + ATTACH partite.db, pragma, cache statement, copiaSchema), migrationRunner (user_version per file), backupService (7 copie di avvio di entrambi i file), schemaUtente.ts (DDL di base delle tabelle delle partite; le successive vengono dalle migrazioni utente), colonne.ts (haTabella/haColonna/aggiungiColonna per le migrazioni), fontiTolte.ts (registro delle strutture eliminate, §5 ter), acquistiLegacy.ts e conversioneEffettiAzione.ts (conversioni dei dati di prima), dati/
+  db/migrations/      dati di gioco: 001 … 194 (registro in index.ts, append-only; `index.test.ts` pretende id consecutivi); i manifesti e i dati congelati delle migrazioni stanno accanto ai file (`*Manifest.ts`, `*.json`)
+  db/migrazioniUtente/ partite: 001 … 043 (registro in index.ts, sequenza separata, `PRAGMA utente.user_version`)
+  routes/             19 file, montati da `routes/index.ts` (`ROUTER_DI_AREA`): compendio, disponibilitaStrutturata e confidentiScritture (stesso prefisso del compendio), traduzioni, partite, immagini, fusione, mappe, font, impostazioni, catalogo, catalogoOggetti, condizioni, aree, luoghi, ricerca, regolePesca (`/api/pesca`), pesca (`/api/partite/:id/pesca`), correzioni
+  services/           un servizio per dominio (`*Service.ts`) e sei cartelle: `condizioni/` (valutatore unico), `fusione/` (motore), `mappe/` (gerarchia, case, immagini, pin), `pacchetto/` (primo avvio, `regoleAllAvvio`), `ricerca/` (indice e stato), `ripristino/` (registro dei blocchi correggibili)
   services/verificaPartita.ts  il 404 «partita-non-trovata» comune a tutti i servizi per partita
-  schemas/            zod: comuni (id, booleani ed elenchi da query, livello, data MM-GG, uid di una voce, Dote, categoria di articolo),
-                      compendio, catalogo, fusione, guidaDungeon, mappe, traduzioni, partite, immagini, font
-  utils/              logger, httpError
-shared/types.ts       tipi/costanti pure condivise FE/BE (nessun import Node); `RequisitoRango` = requisito di un rango di Confidente
-shared/doti.ts        le cinque Doti sociali (chiave, nome, ordine di `dote_sociale`): fonte unica di schemi, servizi e interfaccia
-shared/articoli.ts    le categorie di un articolo: fonte unica di tipo, schema del catalogo e ricerca degli articoli
-shared/orariNegozio.ts  OrariNegozio (giorni, fasce, chiusura con la pioggia, nota): normalizza, leggi, orariComeCondizioni, descriviOrari
-shared/effettiCatalogo.ts VoceEffetto (effetto dichiarato + ripetuto + condizioni) di libri, film e attività: normalizza, leggi, dotiDaEffetti, descriviVoceEffetto
-shared/attivita.ts    cataloghi delle attività: TIPI_ATTIVITA, FASCE_ATTIVITA, TRACCIAMENTI_ATTIVITA (nessuno | svolta | sessioni)
+  schemas/            zod condivisi dalle rotte (`validate({ params, query, body })`), uno per area
+  utils/              logger, httpError, nodeRuntime
+shared/               tipi e regole pure condivise FE/BE (nessun import Node): `types.ts` (DTO), `condizioniSpillo.ts` (vocabolario delle condizioni), `elementi.ts` (vocabolario degli elementi), `doti.ts`, `giorno.ts`, `date.ts`, `ricerca.ts`, `immaginiMappa.ts`, `miniature.ts`, `pesca.ts`, `ombre.ts`, `negoziazione.ts`, `effettiVoce.ts`, `propostePartita.ts`, `confidentiScritture.ts`…
 src/
   main.tsx            boot bloccante su GET /api/config → schermata d'errore HTML se il BE non risponde
-  router.tsx          react-router (createBrowserRouter)
+  router.tsx          react-router (createBrowserRouter): tabella delle pagine in §5 ter
   tailwind.css        tema P5R: token colore (bg/surface/primary rosso #e5352b, colori elemento), classi .btn/.touch/.tabella/.card/.chip
-  components/layout/  MainLayout (carica glossario e partite), Topbar (+ PartitaSelettore), Sidebar (≥lg), BottomNav (<lg), navigazione.tsx
-  components/shared/  ErrorBoundary, PageState/EmptyState/Spinner (illustrazione predefinita), Toast, icons, Modal (portal su body),
-                      CampoRicerca, ImmagineEntita (utente → asset predefinito → iniziali; mai ritagliata, tocco = ingrandimento,
-                      comandi carica/da URL/rimuovi nella finestra), AssetImg (asset con fallback)
-  components/compendio/ ElementoChip, AffinitaGriglia (completa e compatta), StatisticheBarre (nome, tacche, totale, differenza dalla base)
-  components/partita/ DotiSociali (note ♪/♪♪/♪♪♪, libro, ×1,5, ±1, rango e punti mancanti), ConfidentiPartita (rango ±, note ♪/♪♪/♪♪♪, regalo, uscita, bonus arcano dalla scorta,
-                      esami/invito, annulla ultimo, barra verso il rango successivo, sblocco, note, immagine personaggio + carta dell'arcano), ScortaPersona (aggiunta dal compendio,
-                      modifica livello/statistiche/skill), CompendioPersonale (spunte + completamento), RiepilogoPartita, NuovaPartitaModal
-  components/fusione/ SelettorePersona (ricerca con elenco), Calcolatore (A + B), RicettePersona (per ottenere / con, filtri, mostra altre), RicettaRiga,
-                      PianiFusione (albero ricorsivo con foglie scorta/Registro/cattura, opzioni, skill richieste con badge per nodo),
-                      PannelloEredita (slot, bacino, tratti), SelettoreSkill (scelta multi-skill con ricerca), CercaSkill (ricette valide per skill),
-                      PannelloVelluto (sconto/Allarme/Gemelle/ranghi), ForcaIsolamento (calcolatori Forca e Isolamento sulla scorta)
-  components/impostazioni/ GestionePartite, ImmaginiCaricate (rimozione per ambito o totale), CaratteriEditor, TraduzioniEditor
-  pages/              Home, Compendio (232 Persona, filtri client-side), PersonaDettaglio, Glossario (termini per categoria), Skill (525, filtri), SkillDettaglio,
-                      Fusione (due arcani, matrice 24×24, ricette speciali, Demoni del Tesoro), Partita (schede), Impostazioni, NotFound
-  stores/             configStore, notificationStore, glossarioStore (rese italiane, caricato una volta), partitaStore (partite + attiva),
-                      preferenzeStore (localStorage: grafica predefinita), assetStore (manifest unico: /asset/manifest.json per compendio e ui + /api/immagini/manifest per la grafica nel database; hook useAsset)
-  utils/              constants, elementi, punti (formato/anteprima punti Confidente), assetPredefiniti (chiavi manifest per entità)
+  components/         catalogo, compendio, confidenti, fusione, guida, impostazioni, layout (MainLayout, Topbar, Sidebar ≥lg, BottomNav <lg), mappe, negozi, partita, pesca, ricerca, scheda, shared
+  pages/              una per rotta (elenco in §5 ter)
+  stores/             configStore, notificationStore, glossarioStore, partitaStore (partite + attiva), preferenzeStore, assetStore (manifest unico: /asset/manifest.json + /api/immagini/manifest), fontStore, meteoStore, ricercaStore, suggerimentiStore, versioneStore
+  services/api/       client HTTP (`_httpClient`, `_helpers`) e una funzione per rotta, raccolte nel barrel `index.ts`
+  hooks/, utils/      useCarica, useDocumentTitle, useImmagineMappa, useNomeDelPosto, useScorciatoiaRicerca…; funzioni pure di presentazione
 vite/                 assetPredefiniti.ts — plugin: manifest degli asset in public/asset/ (dinamico in dev, emesso in build)
 public/asset/         asset grafici del compendio (persona, arcani) e dell'interfaccia (ui): tutto il resto della grafica vive nel database (079)
-  services/api/       _httpClient (timeout+retry), _helpers (envelope, ApiError, queryString), sistema, compendio, traduzioni, partite, immagini
-  hooks/, utils/      useDocumentTitle, useCarica (stato di caricamento derivato, senza setState negli effetti), constants, elementi (colori)
 pacchetto/            gioco.db iniziale (in git, senza immagini: copiato in DATA_DIR al primo avvio, usato dai test) e completo/gioco.db
                       (stesso file con le immagini dentro, ~311 MB, FUORI da git: si importa dall'app e sostituisce l'istanza); README.md
                       (`--da-istanza` per farne il dato predefinito dell'app dall'istanza locale). Il seed JSON e la sua pipeline sono stati
@@ -129,9 +84,8 @@ docs/                 documentazione di bordo e riferimenti di dominio
 3. `express.json({ limit: '5mb' })` (64 MB solo per `POST /api/mappe/importa`). **Niente CORS** (DECISIONI 2026-10-03): il
    frontend è sulla stessa origine (proxy Vite in sviluppo, nginx in produzione) e l'API non ha autenticazione, quindi un'altra
    origine non deve poterla chiamare dal browser dell'utente.
-4. Router di area (`ROUTER_DI_AREA` in `server/routes/index.ts`: compendio, traduzioni, partite, immagini, fusione, mappe, font, impostazioni,
-   catalogo, condizioni) con `validate({ params, query, body })` zod prima dell'handler (Express 5: `req.query` è
-   un getter, quindi il middleware fa shadowing sull'istanza).
+4. Router di area (`ROUTER_DI_AREA` in `server/routes/index.ts`, 19 montaggi: elenco in §3) con `validate({ params, query, body })` zod
+   prima dell'handler (Express 5: `req.query` è un getter, quindi il middleware fa shadowing sull'istanza).
 5. `/api/health` (stato DB + `user_version`; **503** se il DB non risponde, perché l'HEALTHCHECK di Docker guarda solo il codice),
    `/api/config` (valori pubblici per il boot FE), `/api/openapi.json` e `/api/docs` (documentazione, §5 bis).
 6. 404 JSON per `/api/*` sconosciute; `errorHandler` ultimo: `HttpError` → status+codice; errori 4xx di Express/body-parser (JSON malformato 400, corpo oltre il limite 413, percorso non decodificabile 400) e di `sendFile`/`download` (404 `not-found`, 403, 416) → envelope in italiano, con le intestazioni di una risposta JSON anche se la rotta stava per mandare un file; altro → 500 `internal-error` con un **messaggio fisso** (il dettaglio resta nel log, col `requestId`).
@@ -142,25 +96,15 @@ docs/                 documentazione di bordo e riferimenti di dominio
    ripetuti dopo una risposta persa sposterebbero o sommerebbero due volte.
 
 ## 5. Persistenza
-- **Due file, una connessione** (2026-09-12): `DATA_DIR/gioco.db` è `main` (compendio, guida, catalogo, mappe, indice immagini) e `DATA_DIR/partite.db` è attaccato come schema `utente` (le 33 tabelle delle partite, DDL in `server/db/schemaUtente.ts`). Le query restano senza prefisso (SQLite risolve il nome cercando in `main` e poi in `utente`); solo migrazioni e backup nominano lo schema. I vincoli fra i due file non sono applicati da SQLite: i riferimenti utente→gioco usano chiavi stabili (`spillo.uid`, migrazione 067: impronta SHA-256 dell'identità dello spillo — mappa, tipo, nome, posizione, riferimento — così un'istanza migrata in proprio e il pacchetto danno lo stesso uid allo stesso spillo; portato dai pacchetti mappe; `spillo_partita.spillo_uid`). Chi elimina uno spillo pulisce anche i suoi «raccolto». Il vecchio file unico `project-p5r.db` viene rinominato in `gioco.db` al primo avvio e la migrazione 066 sposta le partite nel loro file. Al primo avvio senza `gioco.db` il file arriva dal pacchetto (`pacchetto/gioco.db`).
+- **Due file, una connessione** (2026-09-12): `DATA_DIR/gioco.db` è `main` (compendio, guida, catalogo, mappe, immagini) e `DATA_DIR/partite.db` è attaccato come schema `utente` (le tabelle delle partite: DDL di base in `server/db/schemaUtente.ts`, le successive nelle migrazioni utente). Le query restano senza prefisso (SQLite risolve il nome cercando in `main` e poi in `utente`); solo migrazioni e backup nominano lo schema. I vincoli fra i due file non sono applicati da SQLite: i riferimenti utente→gioco usano chiavi stabili (`spillo.uid`, migrazione 067: impronta SHA-256 dell'identità dello spillo — mappa, tipo, nome, posizione, riferimento — così un'istanza migrata in proprio e il pacchetto danno lo stesso uid allo stesso spillo; portato dai pacchetti mappe; `spillo_partita.spillo_uid`). Chi elimina uno spillo pulisce anche i suoi «raccolto». Il vecchio file unico `project-p5r.db` viene rinominato in `gioco.db` al primo avvio e la migrazione 066 sposta le partite nel loro file. Al primo avvio senza `gioco.db` il file arriva dal pacchetto (`pacchetto/gioco.db`).
 - Connessione better-sqlite3, pragma `journal_mode=WAL` (su entrambi i file), `synchronous=NORMAL`, `busy_timeout=5000`, `foreign_keys=ON`.
 - Migrazioni versionate su `PRAGMA main.user_version` e `PRAGMA utente.user_version` (due sequenze append-only, `server/db/migrations/index.test.ts` pretende id consecutivi), ogni migrazione in una transazione, con `foreign_key_check` **dentro** la transazione prima di avanzare `user_version` (dal 2026-10-03, prima il controllo era dopo il commit). Il controllo si fa prima e dopo `up`: solo le violazioni **nuove**, introdotte da quella migrazione, la annullano (resta da applicare); quelle già presenti nel file si scrivono nel log come avviso e non bloccano l'avvio, che altrimenti si fermerebbe per sempre su un dato vecchio che nessuna migrazione tocca.
 - `prepared(sql)` tiene in cache uno statement per testo SQL, condiviso da tutto il server: chi lo prende lo rimette ogni volta in modalità normale (`pluck(false)`, `raw(false)`, `expand(false)` sugli statement di lettura), perché un `.pluck()` fatto da un chiamante cambiava lo statement anche per tutti gli altri.
 - Backup online (`copiaSchema`) di entrambi i file prima delle migrazioni a ogni boot, rotazione a 7 coppie in `data/backups/`; la copia dell'istanza (Impostazioni) porta `database/gioco.db` e `database/partite.db`, il ripristino accetta anche il vecchio `database/project-p5r.db`.
-- Il seed JSON non esiste più: i dati di gioco si aggiornano sostituendo `gioco.db` (import del pacchetto). `seed_meta`, la memoria dell'ultimo caricamento del seed, è uscita con la migrazione 096 (verifica completa, R3'), e con lei il campo `seed` dello stato dell'istanza.
-- Schema in due famiglie (nato con le migrazioni 001–004; oggi `main` è alla 099 e `utente` alla 018). Le righe qui sotto descrivono
-  il nucleo di allora; il caricamento era `caricaSeed` con l'hash in `seed_meta`, mentre oggi i dati di gioco arrivano con il
-  pacchetto (`caricaPacchetto` / importazione) e le immagini stanno nella tabella `immagine` di `gioco.db` (079):
-  - **dati di gioco** (`arcana`, `persona` + `persona_affinita` + `persona_skill`, `skill` + `skill_fonte_esecuzione`, `oggetto`,
-    `fusione_arcana`, `fusione_speciale` + `_ingrediente`, `tesoro` + `tesoro_modificatore`, `eredita_matrice`, `dlc_set` + `_persona`,
-    `confidente` + `confidente_rango` (punti necessari per rango, 0 = non a punti), `dote_sociale` + `dote_sociale_rango` (5 ranghi
-    con nome e soglia), `traduzione` (compresi gli ambiti `skill`, `persona`, `oggetto`, `termine` della localizzazione italiana ufficiale
-    dalla guida allgamestaff, vedi `docs/riferimenti/glossario-localizzazione.md`), `seed_meta`): caricati da `caricaSeed` al boot. Hash del contenuto del seed in
-    `seed_meta` → reseed solo quando il seed cambia; `persona`/`skill`/`oggetto`/`confidente` in UPSERT per chiave naturale
-    (id stabili, mai cancellazioni), relazioni di gioco svuotate e ricaricate, `traduzione` con `fonte='utente'` mai sovrascritta;
-  - **dati utente** (`partita` con indice parziale "una sola attiva", `compendio_partita`, `persona_posseduta` +
-    `persona_posseduta_skill` (8 slot), `confidente_partita` (sbloccato, rango 0–10, punti verso il rango successivo), `dote_sociale_partita` (punti cumulativi), `immagine`
-    per i file caricati in `DATA_DIR/immagini/`) sempre con `partita_id` e ON DELETE CASCADE.
+- Il seed JSON non esiste più: i dati di gioco si aggiornano sostituendo `gioco.db` (import da Impostazioni, §5 ter). `seed_meta` è uscita con la migrazione 096.
+- Due famiglie di dati, nate con le migrazioni 001–004 e cresciute fino alla 194 (gioco) e alla 043 (utente):
+  - **dati di gioco** in `main` (`arcana`, `persona` + `persona_affinita` + `persona_skill`, `skill`, `oggetto`, tabelle di fusione, `confidente` + `confidente_rango`, `dote_sociale` + `dote_sociale_rango`, `traduzione` con `fonte` `seed` o `utente`, e tutto il mondo e la guida di §5 ter). Le immagini stanno nella tabella `immagine` di `gioco.db` (079);
+  - **dati utente** in `utente` (`partita` con indice parziale «una sola attiva», `compendio_partita`, `persona_posseduta` + `persona_posseduta_skill`, `confidente_partita`, `dote_sociale_partita` e le tabelle delle migrazioni utente: inviti, acquisti e proposte, pesca, Fortuna, piazzamento agli esami, punti cronologici…), sempre con `partita_id` e ON DELETE CASCADE.
   - Statistiche per livello: `shared/statistiche.ts` — +3 punti per livello (regressione sul dataset: somma ≈ 10 + 3·L) ripartiti in
   proporzione alle statistiche base; il BE espone per ogni Persona posseduta `statistiche` (registrate dall'utente oppure stimate al livello) e
   `statisticheBaseLivello`; la scheda Persona ha il cursore del livello con stima e differenza.
@@ -308,17 +252,138 @@ servita dall'istanza (`swagger-ui-dist`, nessuna CDN: l'app si usa anche senza i
   Il documento le marca con `x-senza-prova`. Un plugin di Swagger UI toglie loro il pulsante, e un `requestInterceptor` le
   rifiuta comunque. È la scelta dell'utente del 2026-10-04 (DECISIONI).
 
-La tabella qui sotto è il riassunto storico dello step 0.4: l'elenco completo e aggiornato è quello di `/api/docs`.
+L'elenco completo e aggiornato delle rotte è quello di `/api/docs`; questo documento non ne ripete una tabella. Le aree (tag del documento)
+sono quelle di `AREE` in `server/openapi/descrizioni/index.ts`: compendio e guida, traduzioni, partite, immagini, fusione, mappe, caratteri,
+impostazioni e istanza, catalogo, catalogo degli oggetti, condizioni, Aree del mondo, luoghi, ricerca, regole della pesca, pesca della partita,
+correzioni alla guida e sistema. Gli indirizzi **del frontend** che oggi reindirizzano non sono rotte API e non compaiono nel documento: sono
+nella sezione «Indirizzi vecchi e redirect» di §5 ter. Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti da `traduzioniService`.
 
-| Area | Endpoint principali |
+## 5 ter. Il modello finale (dopo L0–L11)
+
+Ogni riga cita il file che la prova. Dove una tabella è «tolta», il dato vive nella struttura indicata in «Strutture tolte» (sotto).
+
+### Entità e fonti uniche
+| Entità | Fonte unica | Chi la legge e la scrive |
+|---|---|---|
+| Quartiere | `quartiere` (migrazione 015); ingresso in `quartiere_ingresso` (039) | `cittaService.ts`; pagine `CittaPage`, `QuartierePage` |
+| Area del mondo | `area` (109): contenitore `quartiere_chiave`, `dungeon_chiave` o `citta_chiave`; planimetria predefinita e `da_verificare` | `mappe/areeService.ts`, rotte `/api/aree` (`routes/aree.ts`); la casa in `mappe/casaMappa.ts` |
+| Planimetria | riga di `mappa` (027) con `area_chiave`, `versione_etichetta`, `versione_ordine` (109); immagine nell'ambito `mappa` di `immagine` | `mappeService.ts`, `areeService.ts`; il ruolo dell'immagine si deduce dal posto (§ risolutore d'immagine) |
+| Pin | `spillo` (027), con `uid` = impronta dell'identità (067, `mappe/identitaSpillo.ts`) | `mappeService.ts`; legami alle voci in `spillo_voce` (098) |
+| Palazzo | `dungeon` (013), le infiltrazioni in `dungeon_area`; le Aree del Palazzo sono righe di `area` con `dungeon_chiave` (110); legame infiltrazione↔Area in `infiltrazione_area` (110) | `palazziService.ts`, `mappe/legamiInfiltrazioni.ts`; pagina `DungeonDettaglioPage` |
+| Memento e dedalo | `area_dedalo` (099); Iweleth esiste come dedalo: `dedalo_confluenza` e `infiltrazione_dedalo` (175) | `dungeonService.ts`, `apertureDedaliService.ts`; ramo dell'albero in `mappe/gerarchiaMappe.ts` |
+| Luogo | `luogo` (015): `area_chiave`, `orari_json`, `solo_eventi_confidente` (115); gli orari scritti come frase sono tolti (184, 193) | `luoghiService.ts` (`presenzaDelLuogo` è la sola regola di presenza), `luoghiScritture.ts`; pagina `LuogoPage` |
+| Negozio e offerta | `negozio` e `articolo` (017); la sede è `negozio.sede_chiave` e `attivita.sede_chiave` (072); condizioni in `condizioni_json`; listini condivisi (121) | `negoziService.ts`, `listiniCondivisi.ts` |
+| Oggetto | `catalogo_oggetto` (121), unica identità; nota storica in `nota_storica` + `nota_storica_legame` (139) | `catalogoOggettiService.ts`, `catalogoOggettiScritture.ts`, `noteStoricheService.ts`; rotte `/api/catalogo-oggetti` |
+| Confidente | `confidente` + `confidente_rango` (con `modo` e `fonte`, 161); requisiti in `confidente_requisito` (copia della guida in `confidente_requisito_guida`, 119); disponibilità strutturata in `confidente_disponibilita` (163); inviti in `confidente_invito` (118) | `compendioService.ts`, `requisitiConfidentiService.ts`, `disponibilitaStrutturataService.ts`, `confidentiScritture.ts` |
+| Giorno | `giorno` (168): meteo in due fasce, tempo libero, settimana, trama, fase, vincoli; il giorno della settimana si calcola dalla data | `giorniService.ts`, `calendarioService.ts`, `giornoPartitaService.ts`; `shared/giorno.ts`, `shared/date.ts` |
+| Evento del calendario | `evento_calendario` (012) collegato per chiave alle voci del Diario in `evento_calendario_voce` (164) | `calendarioService.ts` (`eventiDellaVoce`) |
+| Voce del Diario | `voce_giornata` (092): `uid`, `data`, `fascia`, `ordine`, `genere`, azione | `giornataService.ts` (scrittura), `percorsoService.ts` (lettura), `motoreDiario.ts` (effetti) |
+| Persona (anche del gruppo) | `persona` (con `del_party`, `personaggio`, `forma`, `chiave_forma`: 169, 170) | `compendioService.ts`, `personeDelGruppo.ts` |
+| Ombra | `ombra`, `ombra_luogo`, `ombra_voce` (166) | `ombreService.ts`, `negoziazioneService.ts`; `shared/ombre.ts`, `shared/negoziazione.ts` |
+| Esame e domanda | `esame`, `esame_premi`, `domanda` (011); il piazzamento della partita in `utente.esame_piazzamento_partita` (utente 040) | `domandeService.ts`, `piazzamentoEsamiService.ts` |
+| Regola di pesca | `regola_pesca` (138); le visite della partita in `utente.pesca_*` (utente 029) | `regolePescaService.ts`, `pescaService.ts`, `profiliPescaService.ts` |
+| Correzione ai blocchi della guida | `correzione_dati_guida` (178); le righe correggibili tengono `origine`, `seed_json`, `updated_at` | `ripristinoService.ts` con il registro in `ripristino/registro.ts` e `ripristino/righe.ts`; rotte `/api/correzioni` |
+
+Regola trasversale: un dato ha **un** punto di modifica, letto da tutte le viste (nessuna copia a frase); le condizioni di
+disponibilità e visibilità sono sempre il vocabolario unico (sotto). Il dato di gioco vale per tutte le partite; quello di una
+partita sta in `utente` con `partita_id`.
+
+### Gerarchia del mondo e «casa»
+- Tre alberi, costruiti in una lettura sola da `mappe/gerarchiaMappe.ts` (`GET /api/mappe/gerarchia`): **Città › Quartiere › Area › Planimetrie**, **Città › Palazzo › Area › Planimetrie** (con le infiltrazioni accanto, `infiltrazione_area`) e **Memento › Dedalo › Area** (le aree del dedalo non hanno planimetrie). Iweleth sta una volta sola, come dedalo; le Aree e le planimetrie del suo vecchio Palazzo sono l'«Archivio del Palazzo» dentro il dedalo.
+- Ogni nodo porta la sua **casa**, l'indirizzo dell'unica pagina che lo mostra, calcolata dal server (`mappe/casaMappa.ts`: `casaDellaMappa`, `casaDellArea`, `casaDelPalazzo`, `casaDelDedalo`, `casaDeiMemento`) e trasportata nei DTO: il client non la ricostruisce. Le dieci mappe dei Memento senza Area sono foglie del nodo Memento, con il visore come casa.
+- L'indice `/guida/mappe` mostra quell'albero (`IndiceLuoghi` → `AlberoGerarchia`); `GET /api/aree/da-collocare` elenca le planimetrie senza posto, che si assegnano con `PUT /api/aree/colloca`.
+
+### Pagine (tabella delle rotte del frontend, `src/router.tsx`)
+| Indirizzo | Pagina |
 |---|---|
-| Compendio | `GET /api/compendio/arcani`, `/glossario`, `/termini` (glossario italiano ↔ inglese per categoria), `/fusione/regole`, `/persona?q&arcana&livelloMin&livelloMax&dlc&rara&speciale&skill`, `/persona/:id`, `/skill?q&elemento`, `/skill/:id`, `/oggetti?q&categoria`, `/confidenti` |
-| Traduzioni | `GET /api/traduzioni?ambito&q&soloUtente`, `GET /ambiti`, `PUT /:ambito/:chiave {testo}` (→ fonte utente), `DELETE /:ambito/:chiave` (ripristina il seed) |
-| Font (Fase 11.1) | `GET /api/font` (stato dei ruoli display/menu/decor), `GET /api/font/:ruolo/file`, `PUT /api/font/:ruolo` (file come corpo grezzo fino a 4 MB, formato TTF/OTF/WOFF/WOFF2 riconosciuto dalla firma), `DELETE /api/font/:ruolo`; file in `DATA_DIR/font/<ruolo>.<formato>`, nessuna tabella |
-| Partite | `GET/POST /api/partite`, `GET /attiva`, `GET/PUT/DELETE /:id`, `POST /:id/attiva`; `GET /:id/doti` (punti, rango, nomeRango, sogliaProssima, mancanti, ranghi[]), `PATCH /:id/doti/:chiave {punti|delta|note 1–3 + libro/fortuna}`; `GET /:id/confidenti` (punti, puntiNecessari, mancanti, personaArcanoInScorta), `PUT /:id/confidenti/:chiave {sbloccato,rango,punti|deltaPunti|noteRisposta 1–3|regalo|uscita + bonusArcano/esame/invito,note}`; `GET /:id/compendio`, `PUT /:id/compendio/:personaId`; `GET/POST /:id/persona`, `PUT/DELETE /:id/persona/:possedutaId` |
-| Fusione | `GET /api/fusione/fondi?a&b&partita|dlc` (esito con motivo), `GET /api/fusione/ricette/:personaId?partita|dlc&livelloMax&limite` (totale, totaleSenzaFiltri, ricette per costo), `GET /api/fusione/con/:personaId?…` (fusioni con la Persona come ingrediente), `GET /api/fusione/piani/:personaId?partita&profondita≤4&alternative≤10&catture&limitaLivello|livelloMax&skill=id,…(≤4)&slotFortunato` (piani ricorsivi con propagazione delle skill), `GET /api/fusione/velluto?partita` (sconto, Allarme, Gemelle, ranghi per arcano), `GET /api/fusione/eredita?a&b&partita&livelloA&livelloB` (slot, candidate, tratti), `GET /api/fusione/cerca-skill?skill=id,…(≤4)&risultato&partita&livelloMax&limite` (ricette che consentono le skill) |
-| Immagini | `GET /api/immagini?ambito`, `GET /:ambito/:chiave`, `GET /:ambito/:chiave/file`, `PUT /:ambito/:chiave` (corpo grezzo `image/*`, max 8 MB), `POST /:ambito/:chiave/da-url {url}`, `DELETE /api/immagini?ambito` (rimozione multipla, 12.1), `DELETE /:ambito/:chiave` |
-Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti da `traduzioniService`.
+| `/home` | `HomePage` |
+| `/compendio`, `/compendio/persona/:id`, `/compendio/glossario` | `CompendioPage`, `PersonaDettaglioPage`, `GlossarioPage` |
+| `/skill`, `/skill/:id` | `SkillPage`, `SkillDettaglioPage` |
+| `/fusione` | `FusionePage` |
+| `/partita` | `PartitaPage` |
+| `/confidenti/:chiave` | `ConfidenteDettaglioPage` |
+| `/guida` | `GuidaPage` (indice) |
+| `/guida/percorso`, `/guida/percorso/:data` | `PercorsoPage` (guida giorno per giorno, il Diario) |
+| `/guida/calendario`, `/guida/domande` | `CalendarioPage`, `DomandePage` |
+| `/guida/citta`, `/guida/citta/:chiave`, `/guida/citta/:chiave/:area` | `CittaPage`, `QuartierePage`, `AreaPage` |
+| `/guida/luogo/:quartiere/:luogo` | `LuogoPage` |
+| `/guida/dungeon`, `/guida/dungeon/:chiave`, `/guida/dungeon/:chiave/area/:slug` | `DungeonPage` (Palazzi), `DungeonDettaglioPage` (scheda del Palazzo o dei Memento, con il visore) |
+| `/guida/mappe`, `/guida/mappe/:chiave`, `/guida/mappe/:chiave/modifica` | `MappaPage` (indice o visore), `EditorMappaPage` |
+| `/guida/mondo/:tipo/:chiave` | `AccessoMondoPage` («Dove si trova») |
+| `/guida/richieste`, `/guida/battaglia`, `/guida/ombra/:chiave` | `RichiestePage`, `BattagliaPage`, `OmbraPage` |
+| `/guida/attivita`, `/guida/libri`, `/guida/film`, `/guida/videogiochi`, `/guida/cruciverba` | `AttivitaPage`, `LibriPage`, `FilmPage`, `VideogiochiPage`, `CruciverbaPage` |
+| `/guida/negozi`, `/guida/negozi/:chiave` | `NegoziPage`, `NegozioPage` |
+| `/guida/oggetti`, `/guida/oggetto/:categoria/:slug` | `OggettiPage` (catalogo), `OggettoPage` |
+| `/guida/completamento`, `/guida/covo`, `/guida/sfide`, `/guida/personaggi` | `CompletamentoPage`, `CovoPage`, `SfidePage`, `PersonaggiPage` |
+| `/impostazioni` | `ImpostazioniPage` |
+| qualunque altro | `NotFoundPage` |
+
+La ricerca globale non è una pagina: `RicercaGlobale` è montata in `MainLayout` e `PulsanteCerca` sta nella `Topbar`.
+
+### Indirizzi vecchi e redirect
+Sono indirizzi **del frontend** (non rotte API: nessun redirect lato server). Il redirect esiste nel codice indicato; la tabella dice dove.
+
+| Indirizzo vecchio | Destinazione | Dove sta |
+|---|---|---|
+| `/` | `/home` | `src/router.tsx` |
+| `/confidenti` | `/guida/personaggi` | `src/router.tsx` |
+| `/guida/dungeon/iweleth` e `/guida/dungeon/iweleth/area/:slug` | `/guida/dungeon/mementos?area=mementos-08-iweleth` (Iweleth è solo un dedalo) | `src/router.tsx` |
+| `/guida/rimossi` | `/impostazioni#nascosti` (i «Nascosti dalla guida» del Cestino) | `src/router.tsx` |
+| `/guida/mappe/tokyo` | `/guida/citta` | `src/pages/MappaPage.tsx` |
+| `/guida/mappe/<chiave>` quando la casa della mappa è un'altra pagina (quartiere, Area, scheda del Palazzo) | la casa, conservando `spillo`, `x`, `y`, `zoom`, `contesto`, `area` | `MappaPage.tsx` (`casaEQuesta`, `casaConArrivo` in `src/utils/navigazioneMappa.ts`) |
+| `/guida/mappe/<alias della guida>` (risposta `tipo: 'guida'` del risolutore) | la casa data dal server; senza casa, `/guida/mappe/<mappaPalazzo>?area=<area>` | `src/components/mappe/RisolviMappa.tsx`, che chiama `GET /api/mappe/risolvi/:chiave` |
+| `/guida/mondo/quartiere/<q>` | `/guida/citta/<q>` | `src/pages/AccessoMondoPage.tsx` |
+| `/guida/mondo/dungeon/<k>` | `/guida/dungeon/<k>?infiltrazione=in-corso` (per `mementos`, senza parametro) | `AccessoMondoPage.tsx` |
+| `/guida/mondo/<altro>/<chiave>` con una sola destinazione e senza contenuti della guida | `/guida/mappe/<mappa>` con `spillo` e coordinate (`urlDestinazioneMondo`, `shared/accessoMondo.ts`); altrimenti resta la pagina «Dove si trova» | `AccessoMondoPage.tsx` (`GET /api/mappe/accesso/:tipo/:chiave`) |
+| `/guida/dungeon/<k>?area=<infiltrazione>` | la stessa infiltrazione; se c'è anche `?infiltrazione=`, vince `infiltrazione` | `src/pages/DungeonDettaglioPage.tsx` (nei Memento `?area=` resta il dedalo) |
+| `/guida/negozi/<chiave>` di un negozio con sede | `/guida/luogo/<quartiere>/<luogo>#negozio-<chiave>` (`sedeCasa`); i negozi senza sede restano sulla loro pagina | `src/pages/NegozioPage.tsx` |
+| `/guida/attivita?scheda=libri` e `?scheda=film` | `/guida/libri`, `/guida/film` | `src/pages/AttivitaPage.tsx` |
+| `/guida/oggetti?scheda=consumabili`, `equipaggiamento`, `chiave` | non è un redirect: il catalogo si apre sul gruppo `consumabili`, `equipaggiamento`, `materiali` | `src/pages/OggettiPage.tsx` (`GRUPPO_STORICO`) |
+
+### Risolutore d'immagine (L1)
+- **Quale immagine**: una regola sola, nell'interfaccia `useImmagineMappa` (`src/hooks/useImmagineMappa.ts`): quella **caricata** nell'istanza vince ovunque, poi l'asset dichiarato della mappa, poi l'icona. Sul server `caricataDellaMappa` e `urlCaricata` (`mappe/immagineMappa.ts`) scelgono l'immagine caricata e danno l'URL sempre versionato (`?v=<data>`).
+- **Quale ruolo**: dedotto dal posto nella gerarchia, in `shared/immaginiMappa.ts` (`sqlRuoloDaGerarchia`): la radice (senza genitore) di tipo `palazzo` o `dedalo` ha l'`emblema`; senza immagine, `nessuna`; città e quartieri, `illustrazione-editoriale`; il resto, `planimetria-nativa`. `ruoloConVisore` dice se il visore si apre (planimetria e illustrazione sì, emblema e nessuna no). Ogni scrittura di un'immagine di mappa passa da `dopoImmagineMappa`, che riallinea chiave, dimensioni e ruolo; la migrazione 107 ha applicato la regola una volta.
+- **Miniature**: `shared/miniature.ts` (`LARGHEZZE_MINIATURA`, `urlMiniatura`, `srcsetMiniature`) e `server/services/miniatureService.ts`, con cache nella tabella `immagine_miniatura` (108); rotta `GET /api/immagini/:ambito/:chiave/file?l=`.
+- **Illustrazioni dei posti**: `IllustrazioneDto` nei DTO di quartiere e Palazzo (`illustrazioneDellaMappa`), mostrate da `IllustrazioneConSegno`.
+- **Pezzi**: `mappe/pezziMappa.ts` (`confermaPezzi`, 409 `mappa-con-pezzi`).
+
+### Vocabolario unico
+- **Condizioni** (`shared/condizioniSpillo.ts`): il tipo `RequisitoSpillo` (alias `Condizione`) è un'unione discriminata per `tipo` (per esempio `data`, `intervallo`, `fascia`, `meteo`, `giorno-settimana`, `quartiere`, `invito`, `palazzo`, `dote`, `confidente`, `richiesta`, `lettura`, `articolo`, `attivita`, `evento`, `contatore`, `pesca-sessione`, `persona-arcano`, `spillo`, `voce-guida`, più `gruppo` e `non` per le combinazioni). Un'unica funzione le descrive in italiano (`descriviRequisitoSpillo`) e un unico valutatore le valuta sul server (`server/services/condizioni/valutatore.ts`, `POST /api/condizioni/valuta`, esiti `vero`, `falso`, `avviso`, `grigio`); `condizioneEffettiva.ts`, `nomiCondizioni.ts`, `finestrePalazzi.ts` e `importazione.ts` stanno nella stessa cartella. Gli eventi di storia (`EVENTI_STORIA`) sono la fonte delle aperture dei dedali.
+- **Elementi** (`shared/elementi.ts`, L8): le chiavi stabili (`phys`, `gun`, `fire`, `ice`, `electric`, `wind`, `psy`, `nuclear`, `bless`, `curse`, `almighty`) e i nomi italiani della guida (`ELEMENTI`, `NOME_ELEMENTO`), i tipi di skill (`TIPI_SKILL`), gli esiti delle affinità (`ESITI_AFFINITA`) e le personalità delle Ombre (`PERSONALITA_OMBRA`, `UMORI`). Le forme vecchie («Psichico», «Oscurità», «Quasi-divino», «Guarigione», «Tuono», «Gelo», «respinge») si riconoscono in lettura ma si mostrano col nome canonico; la migrazione 162 ha portato le etichette di `traduzione`.
+
+### Il Diario come motore
+La voce del Diario (`voce_giornata`) è l'unico gesto che produce effetti sulla partita: `server/services/motoreDiario.ts` legge gli effetti dichiarati (`shared/effettiVoce.ts`) e li trasforma in proposte da confermare (`propostePartitaService.ts`, `shared/propostePartita.ts`), acquisti con fonte `diario` (`acquistiService.ts`), Fortuna (`fortunaService.ts`), effetti di stato (`effettiDiStatoService.ts`), punti dei Confidenti per generazione (`puntiCronologici.ts`), inviti registrati dalla voce (`registraInvito` in `inviti.ts`) e visite di pesca (`pescaService.ts`). Ciò che una voce ha applicato si toglie togliendo la voce o la spunta (`annullaEffettiDiStato`, `togliEventiDellaVoce`, `annullaInvito` con `voceUid`). Gli yen restano un promemoria (utente 031).
+
+### Correzioni, ripristino e cestino
+- Ogni dato correggibile ha «Modifica» e «Ripristina»: `ripristinoService.ts` (`elencaCorrezioni`, `schedaCorrezione`, `correggi`, `ripristina`) con `TIPI_MODIFICABILI` (`shared/types.ts`). Per le righe il valore della guida è la fotografia `seed_json` presa alla prima correzione; per i blocchi JSON di `dati_guida` il blocco non si riscrive e le correzioni stanno in `correzione_dati_guida`, applicate in lettura (`datiGuidaCorretti`).
+- Il **cestino** (`cestinoService.ts`; tabella `cestino` 104, utente 021 per le partite) registra le eliminazioni con trigger temporanei su ogni tabella dei due file; un registro catturato prima di un drop torna senza la colonna tolta (`colonneCompatibili` in `fontiTolte.ts`).
+
+### Ricerca globale
+`GET /api/ricerca` (`routes/ricerca.ts`, `ricercaService.ts`): cerca nei nomi (mostrato, originale, sinonimi) di un indice in memoria (`ricerca/indiceRicerca.ts`, un costruttore per ognuno dei 23 tipi di `TIPI_RICERCA` in `shared/ricerca.ts`), raggruppa per tipo e restituisce percorso, casa e immagine. Le cose nascoste non entrano; i luoghi chiusi sì, con il loro stato (`ricerca/statoRicerca.ts`). L'indice si ricostruisce quando un dato di gioco cambia (registro `cacheDiGioco.ts`).
+
+### Pacchetto, import ed export
+- Il pacchetto di gioco è `gioco.db` (`pacchettoGiocoService.ts`). «Importa» passa dall'anteprima, fa una **copia di sicurezza** (`prima-del-ripristino-<timbro>` in `data/backups`, conservate le ultime `COPIE_DI_RIPRISTINO = 3` in `impostazioniService.ts`), **sostituisce** `gioco.db` e riapre l'istanza (le migrazioni portano avanti un file più vecchio); non unisce e non tocca `partite.db`. I file passano dalla cartella d'appoggio (`depositoService.ts`, `DEPOSITO_DIR`); una sola sostituzione alla volta (`lucchettoIstanza.ts`); le cache di gioco si svuotano insieme (`cacheDiGioco.ts`).
+- Le correzioni dell'utente stanno nel database, quindi nell'export e nelle copie di sicurezza; dopo l'import di un file più vecchio le correzioni successive a quel file non sono nel DB ma restano nella copia di sicurezza. Tre import di fila fanno scorrere via la copia più vecchia.
+- Il backup di avvio (`backupService.ts`) copia i due file prima delle migrazioni e tiene le ultime 7.
+
+### Migrazioni
+- **Gioco**: 194 migrazioni registrate in `server/db/migrations/index.ts`, l'ultima è la 194 (`194_articolo_disponibile_dal_tolto`). **Utente**: 43 registrate in `server/db/migrazioniUtente/index.ts`, l'ultima è la 043 (`043_toglie_lettura_partita`). Registri append-only; `index.test.ts` pretende id consecutivi; ogni migrazione gira in una transazione con `foreign_key_check` prima di avanzare `user_version`.
+- Punti di svolta (gioco): 099 aree dei dedali · 104 cestino · 107 ruolo dalla gerarchia · 108 miniature · 109 aree del mondo · 110 aree dei Palazzi e infiltrazioni · 115 luoghi fonte unica · 118 condizioni uniche · 121 catalogo degli oggetti · 138 pesca · 139 note storiche · 161 ranghi con modo · 162 vocabolario degli elementi · 163 disponibilità strutturata · 164 eventi↔voci · 166 Ombra · 168 giorno unico · 169–170 Persona del gruppo · 175 Iweleth nei Memento · 176–177 marcatori, piante e legami delle mappe tolti · 178 correzioni · 184–194 frasi e copie tolte.
+- Punti di svolta (utente): 021 cestino delle partite · 025 inviti · 028 acquisti e proposte · 029 pesca · 030 continuità degli acquisti · 031 yen come promemoria · 032 Fortuna · 036 effetti di stato della voce · 040 piazzamento agli esami · 041 punti cronologici · 043 `lettura_partita` tolta.
+
+### Strutture tolte
+`server/db/fontiTolte.ts` (`FONTI_TOLTE`) è il registro di ogni tabella o colonna eliminata da una migrazione; una voce non si toglie mai (serve ai cestini e ai backup vecchi), e `tabellaTolta`/`colonnaTolta`/`colonneCompatibili` lo leggono. Elenco delle voci di oggi (la fonte è il file):
+
+| Struttura tolta | Migrazione | Dove vive ora il dato |
+|---|---|---|
+| `marcatore_mappa`, `marcatore_luogo`, `pianta_area` | 176 | i pin della guida (le schede dei punti sulle planimetrie); archivio `archivio-marcatori-e-piante-l11` |
+| `mappa.entita_tipo`, `mappa.entita_chiave`, `mappa_entita`, `mappa_presentazione.gruppo_immagini_json` | 177 | chiave e tipo della mappa, legami Area↔infiltrazioni, Area della planimetria, versione della mappa; archivio `archivio-legami-e-presentazione-mappe-l11` |
+| `guida_mappa`, `organizzazione_mappa_esito` | 177 | nome e descrizione dell'infiltrazione (`dungeon_area`); nomi di prima in `guida_alias` |
+| `luogo.giorni`, `luogo.giorni_json`, `negozio.orari`, `luogo.quando` | 184, 193 | `orari_json` del luogo e del negozio, disponibilità dei Confidenti; archivio `archivio-frasi-l11` |
+| `negozio.sblocco`, `quartiere.sblocco`, `articolo.condizione`, `articolo.disponibile_dal` | 184, 187, 188, 194 | le condizioni (`sblocco_json`, `condizioni_json`); il «disponibile dal» mostrato è generato dalle condizioni |
+| `luogo.negozio`, `luogo.attivita_json` | 187 | `negozio.sede_chiave`, `attivita.sede_chiave` |
+| `giorno_calendario`, `giorno_percorso` | 189 | il giorno unico (`giorno`); le azioni del percorso sono le voci del Diario, copia storica in `archivio-giorno-percorso-azioni-l11` |
+| `utente.lettura_partita` | utente 043 | `progresso_libro_partita`, `progresso_film_partita` |
 
 ## 6. Motore di fusione *(fasi 1–4 realizzate)*
 - `server/services/fusione/motoreFusione.ts`: snapshot in memoria del compendio (invalidato con le altre cache di gioco, `cacheDiGioco`, quando il pacchetto cambia) e contesti memoizzati per insieme di DLC posseduti;
@@ -1715,34 +1780,11 @@ Nessuna chiave, rotta o codice d'errore è cambiato.
   - Indice delle Mappe: la parola «pin», le carte col numero dei pin di contenuto nel riquadro e «più N passaggi e N note» nell'intestazione; le planimetrie con un nome vero restano nella griglia anche senza pin (UX3-8).
 - **Linea di rilascio storica di L3:** `newreview-l3`, dal 2026-10-20, con la stessa regola di L2: cherry-pick con patch-id uguali, poi push su `newreview` dopo l'approvazione e merge nella linea di sviluppo. L'integrazione «Guida nel visore» (migrazione 114, `planimetriaDellaVoce.ts`) era fuori da quel rilascio. Per la ripresa attuale vale soltanto `newreview`, come indicato in `STATO-ATTUALE.md`.
 
-### L7 in lavorazione locale (21 ottobre 2026, non ancora pubblicato)
+### Catalogo degli oggetti (L7)
+Il catalogo è separato dall'equipaggiamento storico `oggetto`, citato dalle Persona per nome inglese. L'identità di un oggetto è la riga di `catalogo_oggetto` (migrazione 121, utente 026); le offerte (`articolo`), i regali dei Confidenti, i contenuti e le ricompense la citano per chiave. Letture: `catalogoOggettiLetture.ts` (base, senza dipendere dai consumatori) e `catalogoOggettiService.ts` (aggrega offerte, regali, contenuti); scritture: `catalogoOggettiScritture.ts` (identità), `catalogoOggettiProposte.ts` (proposte di abbinamento, conferme, legami) e `catalogoOggettiFusione.ts` (fusione reversibile tramite il cestino). Router `/api/catalogo-oggetti` (`routes/catalogoOggetti.ts`); pagine `OggettiPage` (catalogo) e `OggettoPage`, componenti in `src/components/catalogo/`. Le note storiche (`nota_storica`, 139) dicono una discordanza della guida senza cambiare prezzi o acquisti e si correggono con Ripristina (`noteStoricheService.ts`).
 
-**Riscontro 04:17Z.** Dopo M7 la sezione Scambi usa riferimenti ai listini reali, con nomi/sedi/conteggi dal DB, senza leggere la vecchia tabella commerciale JSON. Il percorso storico del negozio risolve la sede L5; nessun secondo componente di acquisto o prezzo. `noteScambi121` conserva il testo precedente in `negozio.note` e nei soli snapshot già esistenti, senza cambiare origine o creare un ripristino alla guida per negozi dell'utente. Le note si modificano nel punto del negozio già esistente; la copia della guida resta archivio. `TestoRipiegabile` riusato in Negozio/Luogo, fuori dalla testata Negozio. Tre varianti del Venditore sono soltanto proposte di identità; i sei baratti Gachapon, distinti dalla capsula casuale, restano aperti. Descrizioni delle dieci API in `descrizioni/catalogoOggetti.ts`, non ancora registrate insieme a router/tag. Typecheck/lint/build verdi e tre riesami statici, non prova runtime; M7 ancora inattiva, nessuna scrittura o pubblicazione.
-
-**Riscontro 04:02Z, prevale sui limiti storici sotto.** Premi di esami, doni dei Confidenti, finali del Covo e oggetti di Battaglie Sfida/boss preparati nella M7 e consumati dai DTO/viste. `premiOggetti121` congela i dati attestati degli esami e i riconoscimenti del donatore/punteggio: nessuna interpretazione a runtime. Doti, PE/yen e premi ornamentali non diventano identità. `fontiRicompenseOggetti` risolve nomi/testi/case attuali in blocco per dettaglio e proposte; `sfideService` estende una copia dei dati congelati. Gli oggetti ricevuti dal Confidente sono separati dai regali consegnabili. Le condizioni del premio restano note, non disponibilità/ottenimenti presunti. `proposta_abbinamento.nota` conserva queste note in conferma/alternativa/fusione; note precedenti non sovrascritte. Guide originali sempre conservate. Typecheck/lint/build verdi e tre riesami statici; M7/router BE ancora inattivi, DB readonly schema 120 senza catalogo, nessuna scrittura o prova runtime. Perimetro e residui nel checkpoint L7.
-
-Il catalogo nuovo è separato dall'equipaggiamento storico `oggetto`, citato dalle Persona per nome inglese. Schema 121 e utente 026 non sono ancora registrati/eseguiti. `catalogoOggettiLetture` fornisce le letture di base senza dipendere dai consumatori; `catalogoOggettiService` aggrega offerte, regali, contenuti e letture riusando disponibilità e avanzamento esistenti. `catalogoOggettiScritture`, `catalogoOggettiProposte` e `catalogoOggettiFusione` gestiscono identità, conferme e fusione reversibile tramite il cestino già presente. Router nuovo non montato; consumatori e pagine ancora da integrare.
-
-Le alternative di ogni contenuto hanno un `gruppo` distinto: una conferma non scarta gli altri contenuti della stessa voce. La fusione conserva gli alias e i riferimenti dei regali senza riscrivere nomi/data storici; il suo registro comprende gli stati delle proposte. I progressi di lettura distinti e le quantità discordanti non si uniscono perdendo informazioni. Il selettore FE riusa `Selettore` con testo di ricerca aggiuntivo per gli alias, senza cambiare i nomi mostrati.
-
-La pagina/catalogo e il modulo oggetto sono predisposti in `OggettoPage` e `components/catalogo/`, non ancora montati. `ComandiProgressoLettura` è la parte presentazionale estratta e riusata da Libri/Film/Videogiochi e dal nuovo `LetturaDellOggetto`; la coda e le API di avanzamento restano quelle esistenti. Il dettaglio passa Lettura rapida dal servizio libri, include i regali sconsigliati e marca i costi di scambio illeggibili, senza ricadere su «Gratis». M7 aggrega i contenuti certi per identità prima dell'inserimento, preservando le quantità degli alias; nessuna sincronizzazione col testo delle voci.
-
-Per i listini condivisi M7 aggiunge i riferimenti tecnici `negozio.listino_condiviso` e `articolo.articolo_condiviso`, senza cancellare le chiavi storiche. `negozio_luogo_extra` resta la sede aggiuntiva; `negozio_sede_spillo` ne registra l'UID confermato, distinguendo 1768 da 1769 pur avendo lo stesso negozio e la stessa Area. `listiniCondivisi` legge i legami per negozi, luoghi, mappe, disponibilità e acquisti, senza cicli fra servizi. I lettori precedenti restano compatibili con schema 120 finché M7 non è registrata. Il campo opzionale `sede` nell'acquisto applica presenza/orari della sede effettiva, non della scuola; le spunte equivalenti non vengono duplicate o riscritte. Il cestino include il gruppo associato nel riepilogo e nella stessa operazione reversibile. Nessuna nuova migrazione eseguita o runtime dichiarato verificato; varianti commerciali e pin non approvati restano separati.
-
-La variante `meteo{condizione: 'senza-allerta', allerta: <chiave>}` legge direttamente le allerte del calendario nella data/fascia corrente; non duplica date nelle offerte. I vecchi piove/non-piove sono invariati. Le regole mancanti sulle offerte già corrette dall'utente restano proposte. Dettaglio e limiti in `docs/coordinamento/lotti/L7/ripresa-implementazione.md`; non descrivere queste basi come rilascio funzionante o lotto completato.
-
-`regaliPartita` separa l'identità dalla consegna storica: il comando esistente accetta `catalogo` oppure il vecchio `regalo`; nomi e date salvati non si riscrivono. I riferimenti già presenti prevalgono su un successivo cambio della guida, i nomi senza chiave si risolvono soltanto con corrispondenza esatta e univoca. Il DTO conserva `regaliFatti` e affianca `regaliFattiCatalogo`; `compendioService` restituisce il nome corrente e il `nomeStorico`. La spunta del Confidente e il gesto dalla pagina Oggetto seguono la stessa API; `SceltaRegalo` riusa il selettore del catalogo limitato ai regali graditi già collegati. Non segnano acquisti o punti. Il riferimento opzionale degli orfani verso il catalogo tutela anche l'importazione di un backup; nessuna nuova dipendenza del file utente da foreign key fra database. Prezzi/dove dei regali restano da integrare in B3: non dichiarare completato R7-10.
-
-`contenutiOggetti121` è una regola congelata della migrazione, non un parser dei testi a runtime: distingue contenuti nominativi diretti da istruzioni, statistiche e arredi, rispettando le parentesi nella separazione dei nomi. Non tratta come raccolto un forziere soltanto sbloccato da una vittoria. Il dubbio Tavola dei semi resta aperto nel checkpoint; nessun nome inventato o testo/pin riscritto per forzare il collegamento. Alle 01:43Z schema locale ancora 120 (sola lettura), migrazioni non registrate/eseguite; router e pagina Oggetto/catalogo non montati. La build include il nuovo selettore dalla pagina Confidente, non la pagina Oggetto ancora irraggiungibile.
-
-**Aggiornamento lettori L7, 02:04Z (supera i limiti sopra su prezzi dei regali e altri lettori già integrati).** `catalogoOggettiLetture` è la base senza dipendenze dai consumatori: mappe per fonte/chiavi e offerte di guida in blocco, con controllo della presenza di M7. Libri, film/DVD e videogiochi leggono titolo/alias/prezzo da catalogo e vendite, ma mantengono chiavi, sessioni, progressi ed effetti nelle tabelle originali; prezzo senza vendita come nota, non offerta. Nomi nelle condizioni, listini e ricerca seguono l'identità corrente. Le offerte restano proprietarie di prezzo/costo, quantità e requisiti; i filtri della ricerca operano sui valori correnti prima del limite. Il lettore dei regali deriva costo/dove dalle vendite e sedi visibili, conserva prosa precedente in nota e non presume disponibilità senza partita. Nessuno storico già salvato viene rinominato.
-
-`CostoDellOggetto` è condiviso da listino, pagina oggetto e visore; il DTO mini conserva riferimento, scambio e flag del costo malformato. Non si inventa un prezzo in yen né si tratta un oggetto di scambio mancante come gratuito. Le righe acquistate del visore restano a piena opacità; nomi canonici collegati alla casa dell'oggetto. Typecheck/lint/build verdi, non prova runtime: M7/router e pagina Oggetto/catalogo ancora non montati. `oggettiSelezionabili` resta da sostituire nel vecchio editor e il suo lettore è confinato alla compatibilità prima di M7; non descriverlo già rimosso. Copertura B3/B6/F3 ancora parziale, dettagli nel checkpoint.
-
-**Aggiornamento 02:34Z.** Contenuti delle voci e ricompense delle Richieste sono letti in blocco dal catalogo, con filtro per chiave nei DTO singoli; testo originale e stato L4/Richiesta restano indipendenti. `OggettiCollegati` è la resa comune nella scheda, guida nel visore, Richieste e ricette. `compendioService.oggettiGuida` mantiene il contratto delle sezioni storiche, ma dopo M7 legge identità/offerte per fonte e chiave; il crosswalk per nome resta solo prima di M7. Il JSON guida condiviso/congelato non si modifica. Gli oggetti eliminati/nascosti non sono ricreati dalle vecchie liste; prodotti/materiali delle ricette mantengono riferimenti propri. I suggerimenti collegano le offerte di libro/film/videogioco per chiave, non titolo; le altre euristiche restano preesistenti. Le sette sezioni di OggettiPage sono ancora da sostituire/integrare con il catalogo F2, non già il catalogo unico finale.
-
-La resa non dichiarata delle ricette resta `null`: `RicompensaOggettoDto` la distingue da `ContenutoOggettoDto`, che ha quantità nota positiva. M7, proposte e legami consentono null soltanto per un prodotto di ricetta; non su contenuti, materiali o costi di scambio. Conferma/scelta alternativa preservano null e non sommano la resa a quella precedente. La UI dice «Quantità non indicata dalla guida», senza inventare una unità. Non è il campo `articolo.quantita` (limite d'acquisto, già distinto). Alle 02:34Z typecheck/lint/build verdi, DB locale readonly ancora schema 120: nessuna migrazione, scrittura o prova runtime. Dettagli/parti aperte nel checkpoint L7.
-
-**Aggiornamento 03:14Z, supera i limiti precedenti sul montaggio FE.** `ModuloArticolo` sceglie l'identità per `catalogo_chiave`, senza copiare nome/proprietà/prezzo; dati del catalogo caricati una sola volta e condivisi dal selettore dell'identità e dei componenti del costo. Il costo appartiene all'offerta: yen oppure fiori/oggetti per chiave e quantità. Se non editato viene omesso dal corpo, anche se non leggibile; una modifica esplicita valida riferimenti in blocco e conserva i nomi soltanto nel catalogo. Le offerte storiche senza legame restano modificabili; snapshot anteriori a M7 non azzerano i campi nuovi. Il catalogo sostituisce i tre elenchi paralleli di OggettiPage, conservando vecchi URL come gruppi e le quattro sezioni della guida; rotta FE della pagina Oggetto ora montata. Typecheck/lint/build verdi con i nuovi chunk inclusi. Migrazioni e router BE ancora non attivati, DB readonly schema 120 senza catalogo: non è una consegna o prova runtime. Stato operativo e perimetro restante nel checkpoint L7.
-
-**Aggiornamento 03:34Z — proposte e contenuto manuale.** `AbbinamentiDaApprovare` è la stessa sezione nel catalogo e nelle Impostazioni; `AbbinamentiDellaVoce` riusa la stessa interfaccia sui DTO della guida, letti in blocco con guardia pre-M7. Riepilogo prima di conferma/scarto/fusione, alternativa dal selettore unico; il client non sostituisce con 1 la quantità ignota del prodotto di ricetta. Le alternative sono indipendenti per gruppo; le nuove letture server prevalgono sullo stato transitorio delle righe nel FE. `ContenutoDellaVoce` modifica soltanto i legami, quantità e note: testo, pin e stato restano distinti. Fonte precedente sparita o destinazione già collegata producono 409 prima della scrittura; sostituzione conserva ordine e nota omessa, null manuale toglie la nota. Confermare una proposta non cancella note esistenti, anche con resa non additiva. Nomi/prezzi/scambi e condizioni correnti mostrati prima del gesto. Typecheck/lint/build verdi, non prova runtime: M7/router BE non attivi e nessuna scrittura eseguita.
+- **Listini condivisi**: `listiniCondivisi.ts` legge i legami fra negozi (`negozio.listino_condiviso`, `articolo.articolo_condiviso`, migrazione 121) per negozi, luoghi, mappe, disponibilità e acquisti.
+- **Regali**: `regaliPartita.ts` separa l'identità dalla consegna storica: il comando accetta `catalogo` (chiave dell'oggetto) oppure il vecchio `regalo` per nome, risolto solo se univoco; nomi e date salvati non si riscrivono; il DTO conserva `regaliFatti` e affianca `regaliFattiCatalogo`. Il regalo con punti e acquisto è l'azione `POST /api/partite/:id/regali` (utente 035).
+- **Quantità ignota**: la resa non dichiarata di una ricetta resta `null`; `RicompensaOggettoDto` la distingue da `ContenutoOggettoDto`, che ha quantità nota positiva.
+- **Costo**: appartiene all'offerta (yen oppure fiori/oggetti per chiave e quantità) ed è reso da `CostoDellOggetto` (`src/components/catalogo/`), condiviso da listino, pagina Oggetto e visore.
+- **Sezioni della guida collegate**: `OggettiCollegati` è la resa comune delle ricompense e dei contenuti nelle schede, nella guida del visore, nelle Richieste e nelle ricette; i contenuti delle voci si modificano con `ContenutoDellaVoce`.
