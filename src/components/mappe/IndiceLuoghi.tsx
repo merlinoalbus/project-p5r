@@ -179,9 +179,12 @@ export function IndiceLuoghi() {
     { chiave: 'da-collocare', etichetta: `Da collocare (${g.totali.daCollocare})` },
   ] : [];
 
-  return <div className="flex flex-col gap-4 lg:gap-3">
-    <IntestazionePagina titolo="Luoghi della guida" sottotitolo="Città, Palazzi e Memento con le loro aree"
-      azioni={g && <div className="flex w-full min-w-[220px] sm:w-72"><CampoRicerca valore={ricerca} onCambia={setRicerca} segnaposto="Cerca un luogo" /></div>} />
+  return <div className="flex flex-col gap-2">
+    {/* niente sottotitolo: le schede subito sotto dicono già che cosa c'è (Città, Palazzi, Memento, Da collocare) */}
+    {/* la ricerca sta nella riga del titolo (a destra, o sotto il titolo sul telefono) e le schede da sole nella riga sotto:
+        così l'intestazione resta entro il 30% dell'altezza a ogni formato */}
+    <IntestazionePagina compatta titolo="Luoghi della guida"
+      azioni={g && <div className="flex w-full min-w-[220px] md:w-72"><CampoRicerca valore={ricerca} onCambia={setRicerca} segnaposto="Cerca un luogo" /></div>} />
     <PageState isLoading={gerarchia.caricamento} error={gerarchia.errore} onRetry={gerarchia.ricarica}>
       {g && <>
         <FilaScorrevole role="tablist" aria-label="Sezioni dei luoghi" title={testoConteggiPin(g.totali.pin)}>
