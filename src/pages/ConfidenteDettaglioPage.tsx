@@ -33,6 +33,7 @@ import { sitoDellaFonte } from '../utils/fonti';
 import { SceltaRegalo } from '../components/catalogo/SceltaRegalo';
 import { RipristinoCostoRegalo } from '../components/catalogo/RipristinoCostoRegalo';
 import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
+import { ModificaGuida } from '../components/guida/ModificaGuida';
 
 /** Un dialogo di rango: scelte in ordine, con le migliori evidenziate (punti massimi), le romantiche e gli avvisi. */
 export function DialogoRango({ d, aperto, onToggle, azioni }: { d: DialogoConfidenteDto; aperto: boolean; onToggle: () => void; azioni?: ReactNode }) {
@@ -280,12 +281,27 @@ export function ConfidenteDettaglioPage() {
                     {g.effetto && <span className="chip">{g.effetto}</span>}
                     <span className="text-text-secondary">{g.catalogo && g.listinoCollegato === false ? 'Indicazioni della guida: ' : ''}{[g.dove, g.costo].filter(Boolean).join(' · ')}</span>
                     {g.nota && <span className="w-full whitespace-pre-line text-[12px] text-text-muted">{g.nota}</span>}
+                    {g.modificato && <span className="chip" title="Cambiato rispetto alla guida">Modificato</span>}
                     <RipristinoCostoRegalo confidente={chiave} regalo={g} onSalvato={ricarica} />
+                    <ModificaGuida tipo="regalo" chiave={`${chiave}:${g.ordine}`} cosa={`il regalo «${g.nome}»`} soloIcona className="ml-auto" onSalvato={() => void ricarica()} />
                   </li>
                 ))}
               </ul>
             )}
-            {c.regaliSconsigliati.length > 0 && <p className="m-0 text-[12px] text-text-muted">Sconsigliati: {c.regaliSconsigliati.map((s) => s.nome).join(', ')}.</p>}
+            {c.regaliSconsigliati.length > 0 && (
+              <div className="flex flex-col gap-1">
+                <h3 className="m-0 text-[12px] font-semibold text-text-muted">Sconsigliati (non danno punti)</h3>
+                <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0" aria-label="Regali sconsigliati">
+                  {c.regaliSconsigliati.map((s) => (
+                    <li key={s.ordine} className="flex flex-wrap items-center gap-2 py-1 text-[13px] text-text-muted">
+                      <span className="min-w-0 break-words">{s.nome}</span>
+                      {s.modificato && <span className="chip" title="Cambiato rispetto alla guida">Modificato</span>}
+                      <ModificaGuida tipo="regalo" chiave={`${chiave}:${s.ordine}`} cosa={`il regalo sconsigliato «${s.nome}»`} soloIcona className="ml-auto" onSalvato={() => void ricarica()} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </section>
 
           {!!c.oggettiRicompensa?.length && <section className="card flex min-w-0 flex-col gap-2" aria-label="Oggetti ricevuti dal Confidente">
