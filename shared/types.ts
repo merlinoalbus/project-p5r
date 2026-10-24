@@ -2527,7 +2527,8 @@ export interface ArchivioDelPalazzoDto {
   /** Il dungeon che confluisce (la riga tecnica `iweleth`) e il suo nome. */
   dungeon: string;
   nome: string;
-  planimetrie: Array<{ chiave: string; nome: string; areaDedalo: string | null; areaNome: string | null; nota: string }>;
+  /** `identita` è la chiave interna della mappa (quella che indirizza la correzione `mappa-dedalo`); `chiave` è il suo percorso pubblico. */
+  planimetrie: Array<{ chiave: string; identita?: string; nome: string; areaDedalo: string | null; areaNome: string | null; nota: string }>;
   /** Quante voci del Palazzo sono diventate Trama del dedalo e quante Persona doppie puntano alla voce del dedalo (nessuna si perde). */
   voci: { convertite: number; doppie: number };
 }
@@ -3456,7 +3457,9 @@ export const TIPI_MODIFICABILI = ['quartiere', 'trofeo', 'dote', 'trasformazione
   'evento-calendario', 'allerta-meteo', 'esame', 'ombra', 'battaglia-sezione', 'regalo', 'persona', 'skill',
   // R11-17/1: i dati veri che prima si cambiavano solo nel pacchetto
   'arcana', 'fusione-arcana', 'fusione-speciale', 'tesoro', 'eredita-tipo', 'dlc-set',
-  'confidente', 'esame-premi', 'settimana-guida', 'evento-voce'] as const;
+  'confidente', 'esame-premi', 'settimana-guida', 'evento-voce',
+  'negoziazione-variante', 'negoziazione-risposta', 'negoziazione-verdetto', 'negoziazione-umore',
+  'dedalo-confluenza', 'mappa-dedalo', 'infiltrazione-dedalo'] as const;
 export type TipoModificabile = (typeof TIPI_MODIFICABILI)[number];
 export type TipoCampoCorrezione = 'testo' | 'testolungo' | 'numero' | 'booleano' | 'elenco' | 'scelta' | 'oggetto';
 export type ValoreCampoCorrezione = string | number | boolean | null | string[];

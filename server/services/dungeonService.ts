@@ -124,7 +124,7 @@ function archiviDeiDedali(): Map<string, ArchivioDelPalazzoDto> {
     const voci = prepared("SELECT COALESCE(SUM(azione = 'convertita'), 0) AS convertite, COALESCE(SUM(azione = 'doppia'), 0) AS doppie FROM voce_confluenza").get() as { convertite: number; doppie: number };
     out.set(c.dedalo_chiave, {
       dungeon: c.dungeon_chiave, nome: c.nome, voci,
-      planimetrie: mappe.map((m) => ({ chiave: chiaveMappa(m.mappa_chiave), nome: nomePercorso(m.mappa_chiave), areaDedalo: m.area_dedalo_chiave, areaNome: m.area_nome, nota: m.nota })),
+      planimetrie: mappe.map((m) => ({ chiave: chiaveMappa(m.mappa_chiave), identita: m.mappa_chiave, nome: nomePercorso(m.mappa_chiave), areaDedalo: m.area_dedalo_chiave, areaNome: m.area_nome, nota: m.nota })),
     });
   }
   return out;

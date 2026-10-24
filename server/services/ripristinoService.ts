@@ -42,6 +42,13 @@ const NOTE: Partial<Record<TipoModificabile, string>> = {
   'esame-premi': 'Ogni testo dei premi si corregge a parte; la struttura dei premi non cambia.',
   'settimana-guida': 'Il numero della settimana e l’indirizzo della fonte non si correggono.',
   'evento-voce': 'Si corregge la certezza del collegamento; quale evento e quale voce sono collegati non si cambia da qui.',
+  'negoziazione-variante': 'Si corregge la resa italiana; il testo originale, la fonte e il localizzatore non si correggono.',
+  'negoziazione-risposta': 'Si corregge la resa italiana; il testo originale e i collegamenti con le risposte dell’app non si correggono.',
+  'negoziazione-verdetto': 'L’esito e la sua origine vanno insieme: senza esito non c’è origine. Il valore grezzo della fonte, l’umore e il localizzatore non si correggono.',
+  'negoziazione-umore': 'Nome, descrizione, cose da evitare e il testo di ogni esempio; la provenienza degli esempi non si corregge.',
+  'dedalo-confluenza': 'Il Palazzo che confluisce è l’identità della riga e non si corregge.',
+  'mappa-dedalo': 'L’area del dedalo a cui appartiene la planimetria del vecchio Palazzo.',
+  'infiltrazione-dedalo': 'Registro di conversione di Iweleth: nessuna pagina lo mostra.',
   'dlc-set': 'Una Persona sta in un solo set. Il set non ha un nome: si riconosce dalle sue Persona.',
   'allerta-meteo': 'Vale per questo giorno: le condizioni delle partite che leggono l’allerta (per esempio «piove») seguono le fasce che scegli.',
 };
