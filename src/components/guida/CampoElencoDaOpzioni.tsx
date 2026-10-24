@@ -22,14 +22,16 @@ interface Props {
 export function CampoElencoDaOpzioni({ campo, valore, imposta, occupato }: Props) {
   const voci = Array.isArray(valore) ? valore : [];
   const disponibili = (campo.opzioni ?? []).filter((o) => !voci.includes(o.chiave));
+  /** Il valore di una voce è la chiave dell'elemento: si mostra il nome. */
+  const nomeDi = (v: string): string => campo.opzioni?.find((o) => o.chiave === v)?.nome ?? v;
   return (
     <fieldset className="regole-editor flex min-w-0 flex-col gap-2 sm:col-span-2">
       <legend>{campo.etichetta}</legend>
       {voci.length === 0 && <p className="m-0 text-[12px] text-text-muted">Nessuna voce.</p>}
       {voci.map((v) => (
         <div key={v} className="flex items-center gap-2">
-          <span className="min-w-0 flex-1 break-words text-[13px]">{v}</span>
-          <button type="button" className="btn btn-ghost btn-sm touch shrink-0" disabled={occupato} onClick={() => imposta(voci.filter((x) => x !== v))} aria-label={`Togli «${v}» da ${campo.etichetta}`}>Togli</button>
+          <span className="min-w-0 flex-1 break-words text-[13px]">{nomeDi(v)}</span>
+          <button type="button" className="btn btn-ghost btn-sm touch shrink-0" disabled={occupato} onClick={() => imposta(voci.filter((x) => x !== v))} aria-label={`Togli «${nomeDi(v)}» da ${campo.etichetta}`}>Togli</button>
         </div>
       ))}
       <Selettore etichetta="Aggiungi" valore="" ricerca="sempre" segnaposto="Cerca per nome…" disabilitato={occupato}

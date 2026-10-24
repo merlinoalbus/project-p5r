@@ -167,7 +167,8 @@ function metaRiga(def: DefRiga, chiave: string): { seed: Valori | null; aggiorna
   const r = prepared(`SELECT seed_json, updated_at FROM ${def.tabella} WHERE ${def.colonnaChiave} = ?`).get(chiave) as { seed_json: string | null; updated_at: string | null } | undefined;
   if (!r?.seed_json) return { seed: null, aggiornata: null };
   try {
-    return { seed: JSON.parse(r.seed_json) as Valori, aggiornata: r.updated_at };
+    const seed = JSON.parse(r.seed_json) as Valori;
+    return { seed: def.normalizzaGuida ? def.normalizzaGuida(seed) : seed, aggiornata: r.updated_at };
   } catch {
     return { seed: null, aggiornata: null };
   }

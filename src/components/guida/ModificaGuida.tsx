@@ -29,7 +29,8 @@ type Bozza = Record<string, ValoreCampoCorrezione>;
 function mostra(c: CampoCorrezioneDto, v: ValoreCampoCorrezione): string {
   if (v === null || v === '') return '(vuoto)';
   if (typeof v === 'boolean') return v ? 'sì' : 'no';
-  if (Array.isArray(v)) return v.length === 0 ? '(elenco vuoto)' : v.join(' · ');
+  // le voci di un elenco da opzioni sono chiavi: si mostrano i nomi
+  if (Array.isArray(v)) return v.length === 0 ? '(elenco vuoto)' : v.map((x) => c.opzioni?.find((o) => o.chiave === x)?.nome ?? x).join(' · ');
   if (c.tipo === 'scelta') return c.opzioni?.find((o) => o.chiave === v)?.nome ?? String(v);
   const t = String(v);
   return t.length > 200 ? `${t.slice(0, 200)}…` : t;

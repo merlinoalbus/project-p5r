@@ -4,7 +4,7 @@
 //
 // Quattro oggetti «a riga» del registro dei ripristini (`righe.ts`). Sono elenchi di righe figlie: l'oggetto è il padre (il libro, il film, il negozio,
 // la nota) e il valore della guida è la fotografia `seed_json` presa alla prima correzione, che sta in una tabella-fotografia propria con una riga per
-// padre (migrazione 225: `libro_posizione_foto`, `film_posizione_foto`, `negozio_sede_foto`, `nota_storica_legame_foto`; le tabelle padre hanno già un
+// padre (migrazione 227: `libro_posizione_foto`, `film_posizione_foto`, `negozio_sede_foto`, `nota_storica_legame_foto`; le tabelle padre hanno già un
 // `seed_json` per altro e un oggetto con zero righe non potrebbe tenere la propria fotografia sulle righe).
 //
 //   - `libro-posizioni` (`libro_posizione`) e `film-posizioni` (`film_posizione`): dove si ottiene un libro, dove si guarda un film. Ogni posizione è un
@@ -12,7 +12,8 @@
 //     sono a posti numerati: il posto N è la riga con `ordine` N-1, così svuotare un posto non sposta gli altri e «Rimetti questo» di un posto è esatto.
 //     Si può aggiungere una posizione (posto libero) e toglierne una (posto «Nessuno»); la fotografia è l'elenco intero.
 //   - `negozio-sedi` (`negozio_luogo_extra` con `negozio_sede_spillo`): gli altri luoghi in cui un negozio vende lo stesso listino (i distributori) e, per
-//     ognuno, il pin che li conferma sulla mappa. La sede principale del negozio non sta qui (si corregge dal negozio). Il pin deve essere un pin DI QUESTO
+//     ognuno, il pin che li conferma sulla mappa. Le sedi e i legami sono CHIAVI (dei luoghi, delle offerte, degli oggetti): i nomi servono solo a mostrarli,
+//     così rinominare un luogo o un oggetto non rende la fotografia diversa da ciò che è. La sede principale del negozio non sta qui (si corregge dal negozio). Il pin deve essere un pin DI QUESTO
 //     negozio sull'Area del luogo (è la condizione con cui i listini lo leggono, `listiniCondivisi`): l'elenco propone solo quelli, e un altro valore si rifiuta.
 //     Un pin è la sede di un solo luogo. Una sede con più pin si corregge dall'editor delle mappe.
 //   - `nota-storica-legami` (`nota_storica_legame`): le offerte e gli oggetti del catalogo a cui si riferisce una nota storica. Il testo della nota ha già il
@@ -248,13 +249,22 @@ const sediDi = (negozio: string): RigaSede[] => prepared(
    WHERE e.negozio_chiave = ? ORDER BY l.ordine, l.chiave`).all(negozio) as RigaSede[];
 const etichettaLuogo = (r: { nome: string; quartiere: string }): string => `${r.nome} — ${r.quartiere}`;
 
-/** I luoghi con la loro etichetta («Nome — Quartiere»), per scegliere una sede: quelli non nascosti più gli indicati. */
+const luogoEsiste = (chiave: string): boolean => !!prepared('SELECT 1 FROM luogo WHERE chiave = ?').get(chiave);
+/** Il nome per mostrare un luogo («Nome — Quartiere»); se non esiste più, la chiave con la dicitura. */
+function nomeLuogo(chiave: string): string {
+  const r = prepared('SELECT l.nome AS nome, q.nome AS quartiere FROM luogo l JOIN quartiere q ON q.chiave = l.quartiere_chiave WHERE l.chiave = ?').get(chiave) as { nome: string; quartiere: string } | undefined;
+  return r ? etichettaLuogo(r) : `${chiave} — luogo che non esiste più`;
+}
+
+/** I luoghi da scegliere come sede: il valore è la CHIAVE del luogo, il nome («Nome — Quartiere») serve solo a mostrarlo. Quelli non nascosti più gli indicati (anche spariti). */
 function luoghiScegliibili(inUso: string[]): Array<{ chiave: string; nome: string }> {
   const righe = prepared(`SELECT l.chiave AS luogo, l.nome AS nome, q.nome AS quartiere, l.nascosto AS nascosto FROM luogo l JOIN quartiere q ON q.chiave = l.quartiere_chiave ORDER BY q.ordine, l.ordine`)
     .all() as Array<{ luogo: string; nome: string; quartiere: string; nascosto: number }>;
-  return righe.filter((r) => r.nascosto === 0 || inUso.includes(r.luogo)).map((r) => ({ chiave: etichettaLuogo(r), nome: etichettaLuogo(r) }));
+  const out = righe.filter((r) => r.nascosto === 0 || inUso.includes(r.luogo)).map((r) => ({ chiave: r.luogo, nome: etichettaLuogo(r) }));
+  for (const k of inUso) if (!righe.some((r) => r.luogo === k)) out.push({ chiave: k, nome: nomeLuogo(k) });
+  return out;
 }
-/** Etichetta → chiave del luogo; null per le etichette ambigue (due luoghi con lo stesso nome nello stesso quartiere). */
+/** Solo per leggere le fotografie scritte con le etichette: etichetta → chiave del luogo; null per le etichette ambigue (due luoghi con lo stesso nome nello stesso quartiere). */
 function mappaLuoghi(): Map<string, string | null> {
   const m = new Map<string, string | null>();
   for (const r of prepared('SELECT l.chiave AS luogo, l.nome AS nome, q.nome AS quartiere FROM luogo l JOIN quartiere q ON q.chiave = l.quartiere_chiave').all() as Array<{ luogo: string; nome: string; quartiere: string }>) {
@@ -299,17 +309,28 @@ function luoghiConPin(negozio: string, seme: Valori | null): string[] {
   return [...l];
 }
 
+/** La fotografia delle sedi tiene le CHIAVI dei luoghi. Una scritta con le etichette («Nome — Quartiere»), prima di questa forma, si porta alle chiavi (le etichette ambigue restano com'erano). */
+function normalizzaSedi(guida: Valori): Valori {
+  if (!Array.isArray(guida.sedi)) return guida;
+  const mappa = mappaLuoghi();
+  const posto = new Map((prepared('SELECT chiave FROM luogo ORDER BY ordine, chiave').pluck().all() as string[]).map((k, i) => [k, i]));
+  // nell'ordine con cui `sediDi` le legge (l'ordine delle sedi non è un dato: due elenchi con le stesse sedi sono lo stesso valore)
+  const sedi = (guida.sedi as string[]).map((e) => (typeof e !== 'string' || luogoEsiste(e) ? e : (mappa.get(e) ?? e)));
+  sedi.sort((a, b) => (posto.get(a) ?? Number.MAX_SAFE_INTEGER) - (posto.get(b) ?? Number.MAX_SAFE_INTEGER));
+  return { ...guida, sedi };
+}
+const semeSedi = (chiave: string): Valori | null => { const s = semeDi(FOTO_SEDI, 'negozio_chiave', chiave); return s ? normalizzaSedi(s) : null; };
+
 const negozioSedi: DefRiga = {
   modalita: 'riga', etichetta: 'Sedi del listino', tabella: FOTO_SEDI, colonnaChiave: 'negozio_chiave',
   chiavi: () => (prepared('SELECT chiave FROM negozio ORDER BY ordine').pluck().all() as string[]),
   esiste: (chiave) => !!prepared('SELECT 1 FROM negozio WHERE chiave = ?').get(chiave),
+  normalizzaGuida: normalizzaSedi,
   campi: (chiave) => {
-    const seme = semeDi(FOTO_SEDI, 'negozio_chiave', chiave);
+    const seme = semeSedi(chiave);
     const sedi = sediDi(chiave);
     const sediGuida = seme?.sedi;
-    const dellaGuida = Array.isArray(sediGuida) ? sediGuida : [];
-    const mappa = mappaLuoghi();
-    const luoghiGuida = dellaGuida.map((e) => mappa.get(e)).filter((x): x is string => typeof x === 'string');
+    const luoghiGuida = Array.isArray(sediGuida) ? sediGuida.filter((x): x is string => typeof x === 'string') : [];
     const out: CampoDef[] = [{ p: 'sedi', e: 'Altri luoghi in cui si vende (oltre alla sede del negozio)', t: 'elenco', opzioni: luoghiScegliibili([...sedi.map((s) => s.luogo), ...luoghiGuida]) }];
     for (const luogo of luoghiConPin(chiave, seme)) {
       const r = prepared('SELECT l.nome AS nome, q.nome AS quartiere, l.area_chiave AS area FROM luogo l JOIN quartiere q ON q.chiave = l.quartiere_chiave WHERE l.chiave = ?').get(luogo) as { nome: string; quartiere: string; area: string | null } | undefined;
@@ -322,18 +343,16 @@ const negozioSedi: DefRiga = {
     return out;
   },
   leggi: (chiave) => {
-    const v: Valori = { sedi: sediDi(chiave).map(etichettaLuogo) };
-    for (const luogo of luoghiConPin(chiave, semeDi(FOTO_SEDI, 'negozio_chiave', chiave))) v[kPin(luogo)] = pinDi(chiave, luogo)[0] ?? '';
+    const v: Valori = { sedi: sediDi(chiave).map((s) => s.luogo) };
+    for (const luogo of luoghiConPin(chiave, semeSedi(chiave))) v[kPin(luogo)] = pinDi(chiave, luogo)[0] ?? '';
     return v;
   },
   scrivi: (chiave, v) => {
     assicuraFoto(FOTO_SEDI, 'negozio_chiave', chiave);
     if (v.sedi !== undefined) {
-      const mappa = mappaLuoghi();
       const attuali = sediDi(chiave);
-      const perEtichetta = new Map(attuali.map((s) => [etichettaLuogo(s), s.luogo]));
-      const volute = new Set((Array.isArray(v.sedi) ? v.sedi : []).map((e) => perEtichetta.get(e) ?? mappa.get(e) ?? ''));
-      if (volute.has('')) throw invalido('sedi', 'Una sede non è un luogo dell’elenco: scegline uno dai suggerimenti.');
+      const volute = new Set(Array.isArray(v.sedi) ? v.sedi : []);
+      if ([...volute].some((k) => !luogoEsiste(k))) throw invalido('sedi', 'Una sede non è un luogo dell’elenco: scegline uno dai suggerimenti.');
       for (const s of attuali) {
         if (volute.has(s.luogo)) continue;
         prepared('DELETE FROM negozio_sede_spillo WHERE negozio_chiave = ? AND luogo_chiave = ?').run(chiave, s.luogo);
@@ -355,18 +374,14 @@ const negozioSedi: DefRiga = {
   },
   nome: (chiave) => `Sedi del listino di «${(prepared('SELECT nome FROM negozio WHERE chiave = ?').pluck().get(chiave) as string | undefined) ?? chiave}»`,
   valida: (chiave, fusi) => {
-    const mappa = mappaLuoghi();
     const attuali = sediDi(chiave);
-    const perEtichetta = new Map(attuali.map((s) => [etichettaLuogo(s), s.luogo]));
-    const etichette = Array.isArray(fusi.sedi) ? fusi.sedi : [];
+    const scelti = Array.isArray(fusi.sedi) ? fusi.sedi : [];
     const principale = prepared('SELECT sede_chiave FROM negozio WHERE chiave = ?').pluck().get(chiave) as string | null | undefined;
     const volute: string[] = [];
-    for (const e of etichette) {
-      const luogo = perEtichetta.get(e) ?? mappa.get(e);
-      if (luogo === undefined) throw invalido('sedi', `«${e}»: non è un luogo dell'elenco, scegli dai suggerimenti.`);
-      if (luogo === null) throw invalido('sedi', `«${e}»: nell'elenco ce n'è più di uno con questo nome, non si può indicare con certezza.`);
-      if (volute.includes(luogo)) throw invalido('sedi', `«${e}» compare due volte.`);
-      if (luogo === principale) throw invalido('sedi', `«${e}» è già la sede del negozio: qui vanno gli altri luoghi.`);
+    for (const luogo of scelti) {
+      if (!luogoEsiste(luogo)) throw invalido('sedi', 'Una sede scelta non è un luogo dell’elenco: scegli dai suggerimenti.');
+      if (volute.includes(luogo)) throw invalido('sedi', `«${nomeLuogo(luogo)}» compare due volte.`);
+      if (luogo === principale) throw invalido('sedi', `«${nomeLuogo(luogo)}» è già la sede del negozio: qui vanno gli altri luoghi.`);
       volute.push(luogo);
     }
     const prima = new Map(attuali.map((s) => [s.luogo, pinDi(chiave, s.luogo)]));
@@ -390,8 +405,7 @@ const negozioSedi: DefRiga = {
   // la fotografia rimette luoghi e pin: i luoghi devono esistere (la sede è una chiave esterna) e i pin non devono confermare altro
   verificaRipristino: (chiave, guida) => {
     if (Array.isArray(guida.sedi)) {
-      const mappa = mappaLuoghi();
-      for (const e of guida.sedi) if (typeof mappa.get(e) !== 'string') throw httpErrors.conflict('sede-originale-mancante', `Il luogo «${e}» della guida non esiste più: non si può rimettere.`);
+      for (const k of guida.sedi) if (!luogoEsiste(k)) throw httpErrors.conflict('sede-originale-mancante', 'Un luogo della guida non esiste più: non si può rimettere.');
     }
     for (const [k, valore] of Object.entries(guida)) {
       if (!luogoDaPin(k) || typeof valore !== 'string' || valore === '') continue;
@@ -423,7 +437,10 @@ function mappaLegami(tipo: TipoLegame): Map<string, string | null> {
   for (const [chiave, e] of righe) m.set(e, m.has(e) ? null : chiave);
   return m;
 }
-/** L'etichetta di un legame esistente (o della fotografia): se l'elemento non c'è più, la chiave con la dicitura «non esiste più». */
+const TABELLA_LEGAME: Record<TipoLegame, string> = { articolo: 'articolo', catalogo: 'catalogo_oggetto' };
+const legameEsiste = (tipo: TipoLegame, chiave: string): boolean => !!prepared(`SELECT 1 FROM ${TABELLA_LEGAME[tipo]} WHERE chiave = ?`).get(chiave);
+
+/** L'etichetta per mostrare un legame (il valore è la CHIAVE): se l'elemento non c'è più, la chiave con la dicitura «non esiste più». */
 function etichettaLegame(tipo: TipoLegame, chiave: string): string {
   const r = tipo === 'articolo'
     ? prepared(`SELECT ${NOME_ARTICOLO} AS nome, n.nome AS negozio FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave
@@ -433,43 +450,59 @@ function etichettaLegame(tipo: TipoLegame, chiave: string): string {
   return tipo === 'articolo' ? etichettaArticolo(r as { nome: string; negozio: string }) : etichettaOggetto(r as { nome: string; categoria: string });
 }
 const legamiDi = (nota: string, tipo: TipoLegame): string[] => prepared('SELECT chiave FROM nota_storica_legame WHERE nota_chiave = ? AND tipo = ? ORDER BY chiave').pluck().all(nota, tipo) as string[];
-/** Le etichette di adesso, in ordine di nome. */
-const etichetteDi = (nota: string, tipo: TipoLegame): string[] => legamiDi(nota, tipo).map((k) => etichettaLegame(tipo, k)).sort((a, b) => a.localeCompare(b, 'it'));
+const CAMPI_LEGAMI = [['articoli', 'articolo'], ['oggetti', 'catalogo']] as const;
 
-/** Etichetta → chiave: dai legami di adesso (anche quelli spariti), da quelli indicati e dall'elenco di tutti. */
-function risolviLegame(tipo: TipoLegame, etichetta: string, nota: string, mappa: Map<string, string | null>): string | null | undefined {
-  const adesso = legamiDi(nota, tipo).find((k) => etichettaLegame(tipo, k) === etichetta);
-  if (adesso !== undefined) return adesso;
-  if (etichetta.endsWith(SUFFISSO_SPARITO)) return etichetta.slice(0, -SUFFISSO_SPARITO.length);
-  return mappa.get(etichetta);
+/** La fotografia tiene le CHIAVI degli elementi. Una scritta con le etichette, prima di questa forma, si porta alle chiavi (le etichette ambigue restano com'erano). */
+function normalizzaLegami(guida: Valori): Valori {
+  const out: Valori = { ...guida };
+  for (const [campo, tipo] of CAMPI_LEGAMI) {
+    const elenco = guida[campo];
+    if (!Array.isArray(elenco)) continue;
+    let mappa: Map<string, string | null> | null = null;
+    out[campo] = (elenco as string[]).map((e) => {
+      if (typeof e !== 'string' || legameEsiste(tipo, e)) return e;
+      if (e.endsWith(SUFFISSO_SPARITO)) return e.slice(0, -SUFFISSO_SPARITO.length);
+      mappa ??= mappaLegami(tipo);
+      return mappa.get(e) ?? e;
+    }).sort(); // `legamiDi` le legge per chiave: l'ordine dei legami non è un dato
+  }
+  return out;
 }
+const semeLegami = (nota: string): Valori | null => { const s = semeDi(FOTO_NOTE, 'nota_chiave', nota); return s ? normalizzaLegami(s) : null; };
 
-function opzioniLegami(tipo: TipoLegame, nota: string): Array<{ chiave: string; nome: string }> {
-  const e = new Set([...mappaLegami(tipo).keys(), ...etichetteDi(nota, tipo)]);
-  return [...e].sort((a, b) => a.localeCompare(b, 'it')).map((x) => ({ chiave: x, nome: x }));
+/** Gli elementi da scegliere: il valore è la CHIAVE, il nome serve a mostrarlo. Più quelli indicati (già legati o nella guida) anche se spariti. */
+function opzioniLegami(tipo: TipoLegame, inUso: string[]): Array<{ chiave: string; nome: string }> {
+  const out: Array<{ chiave: string; nome: string }> = [];
+  const presenti = new Set<string>();
+  const tutti = tipo === 'articolo'
+    ? (prepared(`SELECT a.chiave AS chiave, ${NOME_ARTICOLO} AS nome, n.nome AS negozio FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave
+        LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave`).all() as Array<{ chiave: string; nome: string; negozio: string }>).map((r) => ({ chiave: r.chiave, nome: etichettaArticolo(r) }))
+    : (prepared('SELECT chiave, nome, categoria FROM catalogo_oggetto').all() as Array<{ chiave: string; nome: string; categoria: string }>).map((r) => ({ chiave: r.chiave, nome: etichettaOggetto(r) }));
+  for (const t of tutti) if (!presenti.has(t.chiave)) { presenti.add(t.chiave); out.push(t); }
+  for (const k of inUso) if (!presenti.has(k)) { presenti.add(k); out.push({ chiave: k, nome: etichettaLegame(tipo, k) }); }
+  return out.sort((a, b) => a.nome.localeCompare(b.nome, 'it'));
 }
 
 const notaStoricaLegami: DefRiga = {
   modalita: 'riga', etichetta: 'Dove compare la nota storica', tabella: FOTO_NOTE, colonnaChiave: 'nota_chiave',
   chiavi: () => (prepared('SELECT chiave FROM nota_storica ORDER BY chiave').pluck().all() as string[]),
   esiste: (chiave) => !!prepared('SELECT 1 FROM nota_storica WHERE chiave = ?').get(chiave),
-  campi: (chiave) => [
-    { p: 'articoli', e: 'Offerte dei negozi a cui si riferisce', t: 'elenco', opzioni: opzioniLegami('articolo', chiave) },
-    { p: 'oggetti', e: 'Oggetti del catalogo a cui si riferisce', t: 'elenco', opzioni: opzioniLegami('catalogo', chiave) },
-  ],
-  leggi: (chiave) => ({ articoli: etichetteDi(chiave, 'articolo'), oggetti: etichetteDi(chiave, 'catalogo') }),
+  normalizzaGuida: normalizzaLegami,
+  campi: (chiave) => {
+    const seme = semeLegami(chiave);
+    const dellaGuida = (campo: 'articoli' | 'oggetti'): string[] => { const x = seme?.[campo]; return Array.isArray(x) ? x.filter((e): e is string => typeof e === 'string') : []; };
+    return [
+      { p: 'articoli', e: 'Offerte dei negozi a cui si riferisce', t: 'elenco', opzioni: opzioniLegami('articolo', [...legamiDi(chiave, 'articolo'), ...dellaGuida('articoli')]) },
+      { p: 'oggetti', e: 'Oggetti del catalogo a cui si riferisce', t: 'elenco', opzioni: opzioniLegami('catalogo', [...legamiDi(chiave, 'catalogo'), ...dellaGuida('oggetti')]) },
+    ];
+  },
+  leggi: (chiave) => ({ articoli: legamiDi(chiave, 'articolo'), oggetti: legamiDi(chiave, 'catalogo') }),
   scrivi: (chiave, v) => {
     assicuraFoto(FOTO_NOTE, 'nota_chiave', chiave);
-    for (const [campo, tipo] of [['articoli', 'articolo'], ['oggetti', 'catalogo']] as const) {
+    for (const [campo, tipo] of CAMPI_LEGAMI) {
       const elenco = v[campo];
       if (elenco === undefined) continue;
-      const mappa = mappaLegami(tipo);
-      const chiavi = new Set<string>();
-      for (const e of Array.isArray(elenco) ? elenco : []) {
-        const k = risolviLegame(tipo, e, chiave, mappa);
-        if (typeof k !== 'string') throw invalido(campo, `«${e}»: non è nell'elenco, scegli dai suggerimenti.`);
-        chiavi.add(k);
-      }
+      const chiavi = new Set<string>(Array.isArray(elenco) ? elenco : []);
       prepared('DELETE FROM nota_storica_legame WHERE nota_chiave = ? AND tipo = ?').run(chiave, tipo);
       for (const k of chiavi) prepared('INSERT INTO nota_storica_legame (nota_chiave, tipo, chiave) VALUES (?, ?, ?)').run(chiave, tipo, k);
     }
@@ -479,17 +512,14 @@ const notaStoricaLegami: DefRiga = {
     return `Nota: ${t.length > 60 ? `${t.slice(0, 60)}…` : t}`;
   },
   valida: (chiave, fusi) => {
-    for (const [campo, tipo] of [['articoli', 'articolo'], ['oggetti', 'catalogo']] as const) {
+    for (const [campo, tipo] of CAMPI_LEGAMI) {
       const elenco = Array.isArray(fusi[campo]) ? fusi[campo] : [];
-      const mappa = mappaLegami(tipo);
+      const attuali = legamiDi(chiave, tipo);
       const visti = new Set<string>();
-      for (const e of elenco) {
-        const k = risolviLegame(tipo, e, chiave, mappa);
-        if (k === undefined) throw invalido(campo, `«${e}»: non è nell'elenco, scegli dai suggerimenti.`);
-        if (k === null) throw invalido(campo, `«${e}»: nell'elenco ce n'è più di uno con questo nome, non si può indicare con certezza.`);
+      for (const k of elenco) {
         // un legame che c'era e non è stato toccato non si ricontrolla (può puntare a un elemento sparito); uno nuovo deve esistere
-        if (e.endsWith(SUFFISSO_SPARITO) && !legamiDi(chiave, tipo).includes(k)) throw invalido(campo, `«${e}»: non esiste più.`);
-        if (visti.has(k)) throw invalido(campo, `«${e}» compare due volte.`);
+        if (!attuali.includes(k) && !legameEsiste(tipo, k)) throw invalido(campo, 'Una voce scelta non è nell’elenco: scegli dai suggerimenti.');
+        if (visti.has(k)) throw invalido(campo, `«${etichettaLegame(tipo, k)}» compare due volte.`);
         visti.add(k);
       }
     }
