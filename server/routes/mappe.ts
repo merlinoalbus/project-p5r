@@ -24,8 +24,7 @@ import { bodyAggiornaCopiaPezzo, bodyAggiornaMappa, bodyCreaCopiaPezzo, bodyAggi
 import { guidaDellaPlanimetria } from '../services/dungeonService.js';
 import { gerarchiaMappe } from '../services/mappe/gerarchiaMappe.js';
 import { httpErrors } from '../utils/httpError.js';
-import { precondizioneRaccordoSpillo, type DatiAggiornaSpillo } from '../services/mappe/mappeService.js';
-import { queryPrecondizioneRaccordo } from '../schemas/mappe.js';
+import { type DatiAggiornaSpillo } from '../services/mappe/mappeService.js';
 import { precondizioneRimozioneSpillo } from '../services/mappe/mappeService.js';
 import { bodyRimozionePin, queryPrecondizioneRimozionePin } from '../schemas/mappe.js';
 import type { RichiestaRimozionePin } from '../../shared/rimozionePin.js';
@@ -147,13 +146,6 @@ router.post('/:chiave/spilli', validate({ params: paramsMappa, body: bodyCreaSpi
 /** Passaggio verso un'altra mappa in un punto libero scelto dal server (albero dell'editor, 15.24); 409 se esiste già. */
 router.post('/:chiave/passaggi', validate({ params: paramsMappa, body: bodyCreaPassaggio }), (req, res) => {
   res.status(201).json(creaPassaggio(String(req.params.chiave), (req.body as { destinazione: string }).destinazione));
-});
-/** Impronta volatile per collegare un pin personale senza alterarne gli altri campi. */
-router.get('/spilli/:id/precondizione-raccordo', (_req, res, next) => {
-  res.setHeader('Cache-Control', 'no-store');
-  next();
-}, validate({ params: paramsSpillo, query: queryPrecondizioneRaccordo }), (req, res) => {
-  res.json(precondizioneRaccordoSpillo(Number(req.params.id), String(req.query.luogo), typeof req.query.areaLuogo === 'string' ? req.query.areaLuogo : undefined));
 });
 router.put('/spilli/:id', validate({ params: paramsSpillo, body: bodyAggiornaSpillo }), (req, res) => {
   res.json(aggiornaSpillo(Number(req.params.id), req.body as DatiAggiornaSpillo));

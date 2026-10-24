@@ -8,7 +8,7 @@
 // ============================================================
 
 import { calcolaCollezioniImmagini } from './collezioniImmagini.js';
-import { applicaAreaRaccordoPin, improntaRaccordoPin, richiestaRaccordoPin, type PrecondizioneRaccordoPinDto } from './precondizioneRaccordoPin.js';
+import { applicaAreaRaccordoPin, improntaRaccordoPin, richiestaRaccordoPin } from './precondizioneRaccordoPin.js';
 import { fotografiaRimozionePin, richiestaRimozionePin } from './precondizioneRimozionePin.js';
 import type { PrecondizioneRimozionePinDto, RichiestaRimozionePin } from '../../../shared/rimozionePin.js';
 import { invalidaCacheDiGioco } from '../cacheDiGioco.js';
@@ -1218,16 +1218,6 @@ export function creaSpillo(mappaChiave: string, dati: DatiSpillo & { tipo: TipoS
   salvaDestinazioneSpillo(Number(info.lastInsertRowid), destinazione);
   prepared("UPDATE mappa SET updated_at = ? WHERE chiave = ?").run(adesso, mappaChiave);
   return spilloDto(prepared('SELECT * FROM spillo WHERE id = ?').get(Number(info.lastInsertRowid)) as RigaSpillo);
-  })();
-}
-
-/** Sola lettura coerente: restituisce solo il token, senza fotografia né effetti sulle relazioni. */
-export function precondizioneRaccordoSpillo(id: number, luogo: string, areaLuogo?: string): PrecondizioneRaccordoPinDto {
-  const db = getDb();
-  return db.transaction(() => {
-    const r = db.prepare('SELECT * FROM spillo WHERE id = ?').get(id) as RigaSpillo | undefined;
-    if (!r) throw httpErrors.notFound('spillo-non-trovato', `Lo spillo ${id} non esiste.`);
-    return { revisioneRaccordoAttesa: improntaRaccordoPin(db, r, luogo, areaLuogo) };
   })();
 }
 
