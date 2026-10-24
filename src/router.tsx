@@ -124,6 +124,8 @@ export const router = createBrowserRouter([
           pagina('fusione', FusionePage),
           pagina('partita', PartitaPage),
           pagina('confidenti/:chiave', ConfidenteDettaglioPage),
+          // R9-09/3: «i Confidenti» (il link del pin Confidente non ancora collegato) porta all'elenco che già c'è, i Personaggi, che aprono la scheda: nessuna pagina nuova
+          { path: 'confidenti', element: <Navigate to="/guida/personaggi" replace /> },
           pagina('guida', GuidaPage),
           pagina('guida/domande', DomandePage),
           pagina('guida/calendario', CalendarioPage),
