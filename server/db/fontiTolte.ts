@@ -98,6 +98,10 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     schema: 'main', tabella: 'giorno_percorso', colonna: null, tolta: 'L11 · migrazione 189',
     sostituitaDa: 'il giorno unico (tabella `giorno`, L9): fase, trama, vincoli e avvisi; le azioni del percorso sono le voci del Diario e la copia storica resta nell’archivio «archivio-giorno-percorso-azioni-l11»',
   },
+  {
+    schema: 'utente', tabella: 'lettura_partita', colonna: null, tolta: 'L11 · migrazione utente 43',
+    sostituitaDa: 'l’avanzamento di libri e film (`progresso_libro_partita`, `progresso_film_partita`): «letto» si calcola da lì',
+  },
 ];
 
 export const tabellaTolta = (schema: string, tabella: string): FonteTolta | undefined =>
