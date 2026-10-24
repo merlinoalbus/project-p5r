@@ -11,7 +11,7 @@ export function RegistroAcquistiPartita({ partitaId, onCambiato }: { partitaId: 
   return <details className="card min-w-0">
     <summary className="touch cursor-pointer font-display text-[17px] uppercase">Registro degli acquisti{registro.dati ? ` · ${articoli.length} articoli` : ''}</summary>
     <div className="flex min-w-0 flex-col gap-3 pt-2 text-[13px]">
-      <p className="m-0">Fatti, fonti e vecchie presenze della partita, comprese le offerte eliminate. Le nuove consumazioni si registrano dalla loro offerta; qui puoi leggere e togliere la fonte indicata.</p>
+      <p className="m-0">Gli acquisti registrati in questa partita, anche di offerte che nel negozio non ci sono più. I nuovi acquisti si registrano dalla pagina dell’offerta; qui puoi rileggerli e togliere quello segnato per errore.</p>
       <button className="btn btn-ghost touch self-start" type="button" onClick={() => void registro.ricarica()}>Rileggi il registro</button>
       {registro.caricamento && <p role="status" className="m-0">Caricamento del registro…</p>}
       {registro.errore && <p role="alert" className="m-0 text-error">{registro.errore}</p>}
