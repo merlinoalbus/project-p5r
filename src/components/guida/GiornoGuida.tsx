@@ -22,6 +22,8 @@ import { avvisoSpunta } from '../../utils/percorso';
 import { dotiDaSegnareDaEffetti } from '../../utils/dotiDaSegnare';
 import type { AzionePercorsoDto, FasciaGioco, GenereVoce, PercorsoGiornoDto } from '../../types';
 import { DataP5 } from '../shared/DataP5';
+import { Maniglia } from '../shared/Maniglia';
+import { useRiordinoCollegato } from '../../hooks/useRiordino';
 import { MeteoIcona } from './MeteoIcona';
 import { TagAllerte } from '../shared/TagAllerta';
 import { FasciaGiornata, IconaFascia } from './FasciaGiornata';
@@ -69,6 +71,10 @@ interface PropsAzione {
   onMenu?: (aperto: boolean) => void;
   /** Un'operazione della giornata è in corso: i gesti aspettano. */
   bloccata?: boolean;
+  /** Riordino per trascinamento: la maniglia ⠿ (in testa alla riga), il riferimento della riga e le classi dello stato di trascinamento. */
+  maniglia?: ReactNode;
+  rifRiga?: (el: HTMLElement | null) => void;
+  classeRiga?: string;
 }
 
 /** Una riga d'azione della giornata (della guida o aggiunta): spunta, immagine dell'entità, testo, tipo, collegamento, stato, note, gesti. */
@@ -77,7 +83,7 @@ export function Azione(props: PropsAzione) {
   const contesto = JSON.stringify([partitaId, a.uid, a.fatta, a.giorno, a.fascia, a.genere, a.azione, a.tipo, a.riferimento, a.rangoAtteso, a.effettiVoce?.revisione]);
   return <AzioneNelContesto key={contesto} {...props} />;
 }
-function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata, gesti, menuAperto = false, onMenu, bloccata }: PropsAzione) {
+function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata, gesti, menuAperto = false, onMenu, bloccata, maniglia, rifRiga, classeRiga }: PropsAzione) {
   const [occupato, setOccupato] = useState(false);
   const [chiediAcquisti, setChiediAcquisti] = useState<{ noteRisposta?: 1 | 2 | 3; senzaPunti: boolean; aperture?: string[] } | null>(null);
   const vivo = useRef(true);
@@ -132,7 +138,8 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
   const stato = a.fatta ? null : a.stato;
   const classeStato = stato?.tipo === 'consigliata' ? 'azione--consigliata' : stato?.tipo === 'bloccata' ? 'azione--bloccata' : '';
   return (
-    <li id={`voce-${a.uid}`} className={`azione flex flex-wrap items-start gap-2 py-1.5 ${classeStato} ${evidenziata ? 'azione--evidenziata' : ''}`} aria-current={evidenziata ? 'true' : undefined}>
+    <li id={`voce-${a.uid}`} ref={rifRiga} className={`azione flex flex-wrap items-start gap-2 py-1.5 ${classeStato} ${evidenziata ? 'azione--evidenziata' : ''} ${classeRiga ?? ''}`} aria-current={evidenziata ? 'true' : undefined}>
+      {maniglia}
       {/* il bersaglio è l'etichetta, non il quadratino: 44 px senza cambiarne l'aspetto */}
       {partitaId && <label className="touch flex items-start justify-center shrink-0 -my-1 pr-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 mt-2 shrink-0" checked={a.fatta} disabled={occupato || bloccata || !!pendente || (!a.fatta && a.effettiVoce?.stato === 'legacy-da-correggere')} onChange={(e) => void cambia(e.target.checked)} aria-label={`Fatto: ${a.azione.slice(0, 60)}`} /></label>}
       <ImmagineAzione a={a} />
@@ -275,6 +282,35 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
     { chiave: 'elimina', titolo: 'Elimina', tono: 'pericolo', icona: <IconaAzione chiave="elimina" dimensione={20} />, onClick: () => elimina(v) },
   ];
 
+  // Riordino per trascinamento (progetto approvato, tavola «Ordinamento nel diario: trascina»): una maniglia ⠿ su ogni voce, dentro la
+  // fascia e da una fascia all'altra. Salva con la stessa API del modulo (`fascia` + `posizione`); poi la giornata si ricarica.
+  const riordino = useRiordinoCollegato(
+    (['giorno', 'sera'] as const).map((f) => ({ nome: f, ids: g.azioni.filter((a) => a.fascia === f).map((a) => a.uid) })),
+    occupato ? 'Un momento: sto salvando l’ultima modifica' : null,
+    (uid, lista, posizione) => {
+      const f: FasciaGioco = lista === 'sera' ? 'sera' : 'giorno';
+      const v = g.azioni.find((a) => a.uid === uid);
+      if (!v) return undefined;
+      return esegui(() => aggiornaVoceGiornata(uid, { fascia: f, posizione }, partita), f !== v.fascia ? `Spostata ${nomeFascia(f)}, per tutte le partite.` : null);
+    },
+  );
+  /** Lo stato di una riga durante il trascinamento: attenuata se è la trascinata, con la linea del rilascio sopra (o, per il fondo, sotto). */
+  const rigaRiordino = (fascia: FasciaGioco, voci: AzionePercorsoDto[], v: AzionePercorsoDto) => {
+    const { trascinato, rilascio } = riordino;
+    const trascinata = voci.find((x) => x.uid === trascinato);
+    const resto = voci.filter((x) => x.uid !== trascinato);
+    const dove = rilascio?.lista === fascia ? rilascio.indice : null;
+    // rilasciata dov'è già: nessuna linea, nessun cambiamento
+    const invariato = !!trascinata && dove !== null && dove === voci.indexOf(trascinata);
+    const sopra = trascinato !== null && dove !== null && !invariato && resto[dove]?.uid === v.uid;
+    const sotto = trascinato !== null && dove !== null && !invariato && dove >= resto.length && resto[resto.length - 1]?.uid === v.uid;
+    return {
+      maniglia: <Maniglia etichetta={`Sposta la voce «${v.azione.slice(0, 60)}»`} id={v.uid} riordino={riordino} />,
+      rifRiga: riordino.riga(v.uid),
+      classeRiga: `${trascinato === v.uid ? 'opacity-50' : ''} ${sopra ? 'relative [box-shadow:0_-3px_0_0_var(--color-primary)]' : sotto ? 'relative [box-shadow:0_3px_0_0_var(--color-primary)]' : ''}`,
+    };
+  };
+
   const azioni = g.azioni.filter((a) => a.genere === 'azione');
   const totali = { fatte: azioni.filter((a) => a.fatta).length, tutte: azioni.length };
   const consigliate = azioni.filter((a) => !a.fatta && a.stato?.tipo === 'consigliata').length;
@@ -289,8 +325,10 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
     const daFare = voci.filter((a) => a.genere === 'azione');
     const fatte = daFare.filter((a) => a.fatta).length;
     const tutteScelte = !!scelte && voci.length > 0 && voci.every((v) => scelte.has(v.uid));
+    // fascia di arrivo vuota: non ha righe su cui mostrare la linea, quindi è lei a evidenziarsi
+    const bersagloVuoto = riordino.trascinato !== null && riordino.rilascio?.lista === f && voci.length === 0;
     return (
-      <section key={f} className={`card flex flex-col gap-1 ${fasciaCorrente === f ? 'card--adesso' : ''}`} aria-current={fasciaCorrente === f ? 'true' : undefined} aria-label={f === 'giorno' ? 'Di giorno' : 'Di sera'}>
+      <section key={f} ref={riordino.lista(f)} className={`card flex flex-col gap-1 ${fasciaCorrente === f ? 'card--adesso' : ''} ${bersagloVuoto ? 'ring-2 ring-primary' : ''}`} aria-current={fasciaCorrente === f ? 'true' : undefined} aria-label={f === 'giorno' ? 'Di giorno' : 'Di sera'}>
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <FasciaGiornata fascia={f} attiva={fasciaCorrente === f} dettaglio={partitaId && daFare.length > 0 ? `${fatte} su ${daFare.length}` : undefined} />
           {scelte
@@ -319,10 +357,10 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
           : (
             <ul className="m-0 p-0 list-none divide-y divide-border-light" aria-label={f === 'giorno' ? 'Azioni di giorno' : 'Azioni di sera'}>
               {voci.map((v, i) => eEvento(v)
-                ? <VoceEvento key={v.uid} e={v} gesti={gesti(v, i, voci.length)} occupato={occupato} {...menuDi(v.uid)}
+                ? <VoceEvento key={v.uid} e={v} gesti={gesti(v, i, voci.length)} occupato={occupato} {...menuDi(v.uid)} {...rigaRiordino(f, voci, v)}
                     dichiarazioni={partitaId && v.effetti?.apertureDedali?.length ? <ApertureVisitaRegistrata a={v} partitaId={partitaId} onCambiata={onAggiorna} bloccata={occupato} /> : undefined} />
                 : <Azione key={`${partitaId}:${v.uid}`} a={v} partitaId={partitaId} onCambiata={onAggiorna} onSullaMappa={onSullaMappa} evidenziata={azioneEvidenziata === v.uid}
-                    gesti={gesti(v, i, voci.length)} bloccata={occupato} {...menuDi(v.uid)} />)}
+                    gesti={gesti(v, i, voci.length)} bloccata={occupato} {...menuDi(v.uid)} {...rigaRiordino(f, voci, v)} />)}
             </ul>
           )}
       </section>

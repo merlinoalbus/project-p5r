@@ -23,12 +23,17 @@ interface Props {
   gesti: GestoVoce[];
   occupato: boolean;
   dichiarazioni?: ReactNode;
+  /** Riordino per trascinamento: la maniglia ⠿ (in testa alla riga), il riferimento della riga e le classi dello stato di trascinamento. */
+  maniglia?: ReactNode;
+  rifRiga?: (el: HTMLElement | null) => void;
+  classeRiga?: string;
 }
 
 /** Evento, scadenza o promemoria: niente spunta (è qualcosa che succede, non da fare), cartellino del genere, menu dei gesti. */
-export function VoceEvento({ e, menuAperto, onMenu, gesti, occupato, dichiarazioni }: Props) {
+export function VoceEvento({ e, menuAperto, onMenu, gesti, occupato, dichiarazioni, maniglia, rifRiga, classeRiga }: Props) {
   return (
-    <li id={`voce-${e.uid}`} className="azione flex flex-wrap items-start gap-2 py-1.5">
+    <li id={`voce-${e.uid}`} ref={rifRiga} className={`azione flex flex-wrap items-start gap-2 py-1.5 ${classeRiga ?? ''}`}>
+      {maniglia}
       <IconaCategoria categoria={ICONA_EVENTO[e.genere]} dimensione={40} />
       <div className="flex flex-col gap-0.5 text-[13px] min-w-0 flex-1">
         <span>{e.azione}</span>
