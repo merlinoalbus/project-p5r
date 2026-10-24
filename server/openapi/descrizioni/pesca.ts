@@ -18,7 +18,6 @@ const gesti=[
 ] as const;
 export const DESCRIZIONI_PESCA:DescrizioniArea={
   [`GET ${base}`]:lettura('Registro della pesca della partita','`StatoPescaDto`'),
-  [`GET ${base}/sessioni/:sessione`]:lettura('Visita, fonti e osservazioni della sessione','`SessionePescaDto`'),
   [`GET ${base}/operazioni/:operazione`]:lettura('Ricevuta durevole del gesto pesca','`RicevutaOperazionePescaDto`;404 non dimostra un rifiuto pre-commit'),
   [`GET ${base}/fatti`]:lettura('Fatti della pesca con fonti e limiti temporali','`FattoPescaDto[]`'),
   ...Object.fromEntries(gesti.flatMap(([preview,salva,nome])=>{const [a,b]=coppia(nome);return [[`POST ${base}${preview}`,a],[`POST ${base}${salva}`,b]];})),

@@ -36,7 +36,7 @@ import { dettaglioNegozio, elencaNegozi, ricercaArticoli } from '../services/neg
 import { giornoPercorso, indicePercorso } from '../services/percorsoService.js';
 import { elenchiAzione } from '../services/azioniStrutturateService.js';
 import { aggiornaVoce, creaVoce, eliminaVoce, impostaInfiltrazioniVoce, rivediVoce, spostaVoce, trasferisciVoci, vocePercorso } from '../services/giornataService.js';
-import { leggiEffettiVoce, salvaEffettiVoce, elencaProposteEffettiVoce, anteprimaDecisioneEffettoVoce, decidiPropostaEffettoVoce } from '../services/motoreDiario.js';
+import { salvaEffettiVoce, elencaProposteEffettiVoce, anteprimaDecisioneEffettoVoce, decidiPropostaEffettoVoce } from '../services/motoreDiario.js';
 import { bodySalvaEffettiVoce, bodyAnteprimaDecisioneEffettoVoce, bodyDecisioneEffettoVoce } from '../schemas/acquisti.js';
 import { completamento } from '../services/completamentoService.js';
 import { sfide } from '../services/sfideService.js';
@@ -67,10 +67,6 @@ const queryArticoli = z.object({
 const queryCalendario = z.object({ partita: idParam.optional(), mese: z.string().regex(/^(0[1-9]|1[0-2])$/).optional() });
 const router = Router();
 
-router.get('/percorso/voci/:uid/effetti', validate({ params: paramsVoceGiornata }), (req, res) => {
-  res.setHeader('Cache-Control', 'no-store');
-  res.json(leggiEffettiVoce(String(req.params.uid)));
-});
 router.put('/percorso/voci/:uid/effetti', validate({ params: paramsVoceGiornata, body: bodySalvaEffettiVoce }), (req, res) => {
   res.json(salvaEffettiVoce(String(req.params.uid), req.body));
 });

@@ -9,10 +9,6 @@ import type { AzioneOperazionePesca } from '../../shared/pesca.js';
 const router=Router({mergeParams:true});
 router.use((_req,res,next)=>{res.set('Cache-Control','no-store');next();});
 router.get('/',validate({params:schemi.paramsPesca}),(req,res)=>res.json(statoPesca(Number(req.params.id))));
-router.get('/sessioni/:sessione',validate({params:schemi.paramsSessionePesca}),(req,res)=>{
-  const st=statoPesca(Number(req.params.id)),s=st.sessioni.find(s=>s.id===req.params.sessione);
-  if(!s)throw httpErrors.notFound('pesca-sessione-assente','La sessione non è più presente.');res.json(s);
-});
 router.get('/operazioni/:operazione',validate({params:schemi.paramsOperazionePesca}),(req,res)=>res.json(leggiOperazionePesca(Number(req.params.id),String(req.params.operazione))));
 router.get('/fatti',validate({params:schemi.paramsPesca}),(req,res)=>res.json(leggiFattiPesca(Number(req.params.id))));
 
@@ -36,5 +32,4 @@ for(const g of gesti){
     res.status(201).json(result);
   });
 }
-import { httpErrors } from '../utils/httpError.js';
 export default router;

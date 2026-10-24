@@ -15,11 +15,6 @@ const PARTITA_NON_TROVATA = [404, 'partita-non-trovata'] as const;
 
 /** Le descrizioni delle rotte montate sotto `/api/compendio` (`server/routes/compendio.ts`). */
 export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
-  'GET /api/compendio/percorso/voci/:uid/effetti': {
-    sommario: 'Fonte unica degli effetti ordinati di una voce',
-    descrizione: 'Legge UID stabili, ordine e origine di ciascun effetto. Lo stato legacy-da-correggere conserva il RAW completo e il motivo: una configurazione non convertibile non viene trattata come vuota.',
-    risposta: '`StatoEffettiVoceDto` con revisione CAS', errori: [[404,'voce-non-trovata']],
-  },
   'PUT /api/compendio/percorso/voci/:uid/effetti': {
     sommario: 'Modifica esplicitamente l’intero insieme degli effetti',
     descrizione: 'Corpo strict {revisioneEffettiAttesa,effetti:[{uid,effetto}]}. UID null crea un effetto nuovo. I tre tipi legacy e acquisto passano da un unico writer. La rimozione di un effetto non cancella fotografie o decisioni personali; le spunte precedenti non vengono rieseguite e ricevono proposte storiche distinte.',
