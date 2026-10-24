@@ -1,5 +1,6 @@
 // ============================================================
-// AlberoGerarchia — l'albero dei luoghi: Città › Quartieri › Aree › Planimetrie e Città › Palazzi › Aree › Planimetrie (L11 B5)
+// AlberoGerarchia — l'albero dei luoghi: Città › Quartieri › Aree › Planimetrie, Città › Palazzi › Aree › Planimetrie (L11 B5)
+// e Memento › Dedali › Aree del dedalo (L11 B6: l'area del dedalo non ha planimetrie)
 // ============================================================
 //
 // Ogni riga ha **due gesti separati**: a sinistra il pulsante che apre e chiude il ramo (44×44), poi il collegamento alla casa del nodo
@@ -58,6 +59,10 @@ function testoConteggi(n: NodoGerarchiaDto): string {
     case 'citta': return [parola(c.quartieri ?? 0, 'quartiere', 'quartieri'), parola(c.palazzi ?? 0, 'Palazzo', 'Palazzi')].join(' · ');
     case 'quartiere': return (aree === 0 ? ['nessuna area', pin] : [parola(aree, 'area', 'aree'), planimetrie, pin]).join(' · ');
     case 'palazzo': return [parola(aree, 'area', 'aree'), planimetrie, parola(c.infiltrazioni ?? 0, 'infiltrazione', 'infiltrazioni'), pin].join(' · ');
+    case 'memento': return [parola(c.dedali ?? 0, 'dedalo', 'dedali'), parola(aree, 'area', 'aree'), parola(c.persone ?? 0, 'Persona', 'Persona'), parola(c.trame ?? 0, 'Trama', 'Trame'),
+      parola(c.richieste ?? 0, 'Richiesta', 'Richieste'), ...((c.planimetrie ?? 0) > 0 ? [planimetrie] : [])].join(' · ');
+    case 'dedalo': return [parola(aree, 'area', 'aree'), parola(c.persone ?? 0, 'Persona', 'Persona'), parola(c.trame ?? 0, 'Trama', 'Trame'), parola(c.richieste ?? 0, 'Richiesta', 'Richieste')].join(' · ');
+    case 'area-dedalo': return [parola(c.persone ?? 0, 'Persona', 'Persona'), parola(c.trame ?? 0, 'Trama', 'Trame'), parola(c.richieste ?? 0, 'Richiesta', 'Richieste')].join(' · ');
     case 'area': return [planimetrie, pin].join(' · ');
     case 'planimetria': return pin;
     case 'da-collocare': return (c.planimetrie ?? 0) === 0 ? 'nessuna planimetria da collocare' : planimetrie;
@@ -67,14 +72,14 @@ function testoConteggi(n: NodoGerarchiaDto): string {
 
 /** Il suggerimento dei conteggi: i passaggi e le note che stanno accanto ai pin; per l'Area anche la regola del conteggio. */
 function suggerimentoConteggi(n: NodoGerarchiaDto): string | undefined {
-  if (n.tipo === 'da-collocare' || n.tipo === 'infiltrazione') return undefined;
+  if (n.tipo === 'da-collocare' || n.tipo === 'infiltrazione' || n.tipo === 'area-dedalo') return undefined;
   const base = testoConteggiPin(n.conteggi.pin);
   return n.tipo === 'area' ? `${base} — ogni oggetto una volta, anche se sta su più versioni` : base;
 }
 
 // ---- le righe ----
 
-/** I tipi con le loro etichette, in un oggetto statico (mai classi interpolate); `memento`, `dedalo` e `area-dedalo` sono già qui per B6. */
+/** I tipi con le loro etichette, in un oggetto statico (mai classi interpolate); un'area del dedalo non ha figli (nessuna planimetria). */
 const NOME_RAMO: Record<TipoNodoGerarchia, { ramo: string }> = {
   citta: { ramo: 'Quartieri, aree e Palazzi' },
   quartiere: { ramo: 'Aree' },
@@ -82,9 +87,9 @@ const NOME_RAMO: Record<TipoNodoGerarchia, { ramo: string }> = {
   planimetria: { ramo: '' },
   palazzo: { ramo: 'Aree' },
   infiltrazione: { ramo: '' },
-  memento: { ramo: 'Dedali' },
-  dedalo: { ramo: 'Aree' },
-  'area-dedalo': { ramo: 'Planimetrie' },
+  memento: { ramo: 'Dedali e strutture fisse' },
+  dedalo: { ramo: 'Aree e archivio' },
+  'area-dedalo': { ramo: '' },
   'da-collocare': { ramo: 'Planimetrie da collocare' },
 };
 
@@ -104,19 +109,18 @@ function haCorpo(n: NodoGerarchiaDto): boolean {
 
 /** La miniatura del nodo: il segno del Palazzo, altrimenti l'immagine del server (e lo stemma dove la mappa non ne ha una, come altrove). */
 function Miniatura({ nodo }: { nodo: NodoGerarchiaDto }) {
-  if (nodo.tipo === 'palazzo') return <span className="flex w-12 shrink-0 justify-center"><EmblemaDungeon chiave={nodo.chiave} nome={nodo.nome} dimensione={36} /></span>;
-  if (nodo.tipo === 'da-collocare' || nodo.tipo === 'infiltrazione') return null;
+  if (nodo.tipo === 'palazzo' || nodo.tipo === 'memento' || nodo.tipo === 'dedalo') return <span className="flex w-12 shrink-0 justify-center"><EmblemaDungeon chiave={nodo.chiave} nome={nodo.nome} dimensione={36} /></span>;
+  if (nodo.tipo === 'da-collocare' || nodo.tipo === 'infiltrazione' || nodo.tipo === 'area-dedalo') return null;
   // la chiave serve solo allo stemma di riserva di Tokyo e del Covo (`AnteprimaMappa`)
   const chiave = nodo.tipo === 'citta' ? 'tokyo' : nodo.tipo === 'area' ? nodo.slug : nodo.tipo === 'planimetria' ? nodo.chiave : undefined;
   return <AnteprimaMappa mappa={{ immagineUrl: nodo.immagine?.immagineUrl ?? null, asset: nodo.immagine?.asset ?? null, nome: nodo.nome, chiave }} className="h-9 w-12 shrink-0" sizes="48px" />;
 }
 
-/** I segni accanto al nome: «Da verificare», «Non ancora aperto», «Dedalo». */
+/** I segni accanto al nome: «Da verificare», «Non ancora aperto». */
 function Segni({ nodo }: { nodo: NodoGerarchiaDto }) {
   return <>
     {nodo.daVerificare && <span className="chip chip--attivo text-[11px]" title="Nessuna fonte colloca questa area: decidi se tenerla o rimuoverla">Da verificare</span>}
     {nodo.disponibile === false && <span className="chip text-[11px]" title={nodo.bloccoMotivo ?? undefined}>Non ancora aperto</span>}
-    {nodo.dedalo && <span className="chip text-[11px]" title={`${nodo.nome} è un dedalo dei Memento: qui restano le sue planimetrie come archivio, le aree e le voci stanno nel dedalo`}>Dedalo</span>}
   </>;
 }
 
@@ -133,7 +137,7 @@ function Infiltrazioni({ titolo, elenco }: { titolo: string; elenco: NodoGerarch
   );
 }
 
-/** Una riga con il suo ramo (se aperto): `livello` 0 è Tokyo, 1 quartieri e Palazzi, 2 aree, 3 planimetrie. */
+/** Una riga con il suo ramo (se aperto): `livello` 0 sono le radici (Tokyo e il Memento), 1 quartieri, Palazzi e dedali, 2 aree, 3 planimetrie. */
 function Riga({ nodo, livello, ctx, totali }: { nodo: NodoGerarchiaDto; livello: number; ctx: Contesto; totali: GerarchiaMappeDto['totali'] }) {
   const k = chiaveNodo(nodo);
   const corpo = haCorpo(nodo);

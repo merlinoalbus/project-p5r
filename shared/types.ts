@@ -1725,12 +1725,14 @@ export interface MappaDaCollocareDto { chiave: string; nome: string;
 
 // ---- La gerarchia dei luoghi (L11 B5): Città › Quartieri › Aree › Planimetrie e Città › Palazzi › Aree › Planimetrie ----
 
-/** I tipi di nodo. `memento`, `dedalo` e `area-dedalo` sono per B6 (Memento › Dedali › Aree): B5 non li produce, ma il tipo c'è già. */
+/** I tipi di nodo. `memento`, `dedalo` e `area-dedalo` sono il ramo Memento › Dedali › Aree (L11 B6): un'area del dedalo non ha planimetrie. */
 export type TipoNodoGerarchia = 'citta' | 'quartiere' | 'area' | 'planimetria' | 'palazzo' | 'infiltrazione' | 'memento' | 'dedalo' | 'area-dedalo' | 'da-collocare';
 
 /** Quel che un nodo contiene, contato dal server (E1, E2, E6): ogni cosa una volta sola, mai sommata dal client. I campi assenti non hanno senso per quel nodo. */
 export interface ConteggiNodoDto {
   quartieri?: number; palazzi?: number; aree?: number; planimetrie?: number; infiltrazioni?: number;
+  /** Ramo dei Memento (L11 B6): i dedali del Memento, e le Persona (distinte), le Trame e le Richieste di un dedalo o di un'area del dedalo. */
+  dedali?: number; persone?: number; trame?: number; richieste?: number;
   /** I pin: «contenuto» sono i pin veri, «passaggi» e «note» si dicono accanto. Nell'Area ogni oggetto conta una volta (riferimento, poi voci collegate, poi pin). */
   pin: ConteggiPinDto;
 }
@@ -1755,8 +1757,6 @@ export interface NodoGerarchiaDto {
   /** Quartiere e Area del mondo con una partita: già aperto? (`null` senza partita). Mai nascosto: si segna. */
   disponibile?: boolean | null;
   bloccoMotivo?: string | null;
-  /** Palazzo che si comporta da dedalo (`regola_boss='memento'`: oggi Iweleth). Il FE scrive «Dedalo» accanto al nome. */
-  dedalo?: boolean;
   /** Solo planimetria: la versione dentro l'Area. */
   versione?: { etichetta: string | null; ordine: number; predefinita: boolean };
   /** I nodi sotto: quartieri, aree della città e Palazzi sotto Tokyo; aree sotto un quartiere o un Palazzo; planimetrie sotto un'Area. */
@@ -1772,7 +1772,9 @@ export interface NodoGerarchiaDto {
 /** `GET /api/mappe/gerarchia`: le radici (Tokyo, e in fondo «Da collocare») e i totali dell'intestazione. */
 export interface GerarchiaMappeDto {
   radici: NodoGerarchiaDto[];
-  totali: { citta: number; quartieri: number; areeMondo: number; planimetrieMondo: number; palazzi: number; areePalazzi: number; planimetriePalazzi: number; infiltrazioni: number; daCollocare: number; pin: ConteggiPinDto };
+  totali: { citta: number; quartieri: number; areeMondo: number; planimetrieMondo: number; palazzi: number; areePalazzi: number; planimetriePalazzi: number; infiltrazioni: number; daCollocare: number; pin: ConteggiPinDto;
+    /** Ramo dei Memento (L11 B6): quanti dedali e quante aree dei dedali. */
+    dedali?: number; areeDedali?: number };
 }
 export interface QuartiereRiassuntoDto {
   mappaChiave?:string;

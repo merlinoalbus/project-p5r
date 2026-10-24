@@ -3,7 +3,7 @@
 // ============================================================
 //
 // Titolo, intestazione con i totali (tutti dal server: `totali` della gerarchia, nessuna somma qui) e l'albero Città › Quartieri › Aree ›
-// Planimetrie e Città › Palazzi › Aree › Planimetrie. La pagina scorre da sola (una barra); l'unico scorrimento annidato è quello di un
+// Planimetrie, Città › Palazzi › Aree › Planimetrie e Memento › Dedali › Aree. La pagina scorre da sola (una barra); l'unico scorrimento annidato è quello di un
 // quartiere o Palazzo aperto con molti figli. L'intestazione resta bassa: il titolo è breve e la riga dei totali va a capo senza
 // ripetere le sezioni (a ogni dispositivo l'intestazione sta entro il 30% dell'altezza della schermata).
 // ============================================================
@@ -28,6 +28,7 @@ function testoTotali(t: GerarchiaMappeDto['totali']): string {
     `${parola(t.areeMondo, 'area', 'aree')} (${parola(t.planimetrieMondo, 'planimetria', 'planimetrie')})`,
     parola(t.palazzi, 'Palazzo', 'Palazzi'),
     `${parola(t.areePalazzi, 'area', 'aree')} (${parola(t.planimetriePalazzi, 'planimetria', 'planimetrie')})`,
+    ...(t.dedali !== undefined ? [`${parola(t.dedali, 'dedalo', 'dedali')} (${parola(t.areeDedali ?? 0, 'area', 'aree')})`] : []),
     testoPin(t.pin.contenuto),
   ].join(' · ') + `, più ${t.pin.passaggi} ${t.pin.passaggi === 1 ? 'passaggio' : 'passaggi'} e ${t.pin.note} ${t.pin.note === 1 ? 'nota' : 'note'}.`;
 }
@@ -40,7 +41,7 @@ export function IndiceLuoghi() {
   const g = gerarchia.dati;
   return <div className="flex flex-col gap-4 lg:gap-3">
     <IntestazionePagina titolo="Luoghi della guida"
-      sottotitolo={<>Città e Palazzi con le loro aree e planimetrie.{g && <span className="block text-[12px] text-text-muted" title={testoConteggiPin(g.totali.pin)}>{testoTotali(g.totali)}</span>}</>} />
+      sottotitolo={<>Città, Palazzi e Memento con le loro aree.{g && <span className="block text-[12px] text-text-muted" title={testoConteggiPin(g.totali.pin)}>{testoTotali(g.totali)}</span>}</>} />
     <PageState isLoading={gerarchia.caricamento} error={gerarchia.errore} onRetry={gerarchia.ricarica}>
       {g && <AlberoGerarchia radici={g.radici} totali={g.totali} onRicarica={gerarchia.ricarica} />}
     </PageState>

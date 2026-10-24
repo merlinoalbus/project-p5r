@@ -71,6 +71,17 @@ export function casaDelPalazzo(dungeon: string): string {
   return `/guida/dungeon/${encodeURIComponent(dungeon)}`;
 }
 
+/** La casa del nodo Memento (L11 B6): la scheda dei Memento, con i suoi dedali. */
+export const casaDeiMemento = (): string => '/guida/dungeon/mementos';
+
+/**
+ * La casa di un dedalo (L11 B6, R11-12/4): il suo menù nella scheda dei Memento (`?area=<dedalo>`); con l'area del dedalo (`zona`) la scheda
+ * apre anche quella. Sono gli stessi indirizzi che la scheda scrive da sé quando si sceglie un dedalo o una sua area.
+ */
+export function casaDelDedalo(dedalo: string, areaDedalo?: string): string {
+  return `${casaDeiMemento()}?area=${encodeURIComponent(dedalo)}${areaDedalo ? `&zona=${encodeURIComponent(areaDedalo)}` : ''}`;
+}
+
 /** I campi di una riga di `mappa` che servono alla casa. */
 export interface RigaPerCasa { chiave: string; tipo: string; area_chiave?: string | null }
 
