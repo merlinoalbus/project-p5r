@@ -71,7 +71,7 @@ export function PartitaPage() {
           action={<button type="button" className="btn btn-primary" onClick={() => setNuova(true)}>Crea partita</button>}
         />
       ) : (
-        <div className={`flex flex-col gap-2 md:gap-3 ${scheda === 'oggi' || scheda === 'doti' ? 'scheda-riempi md:min-h-0' : ''}`}>
+        <div className={`flex flex-col gap-2 md:gap-3 ${scheda === 'oggi' || scheda === 'doti' ? 'scheda-riempi md:min-h-0' : scheda === 'letture' ? 'scheda-riempi-lg lg:min-h-0' : ''}`}>
           {/* i dati della partita stanno nella riga del titolo (a destra, o sotto sul telefono): con le schede su una riga sola
               l'intestazione resta entro il 30% dell'altezza (progetto dei Confidenti approvato il 2026-10-24) */}
           <IntestazionePagina titolo={attiva.nome} compatta azioniInRiga className="pt-0" azioni={
@@ -103,7 +103,7 @@ export function PartitaPage() {
           {scheda === 'doti' && <div className="md:flex-1 md:min-h-0 riempi-figli"><DotiSociali partitaId={attiva.id} /></div>}
           {scheda === 'squadra' && <SquadraPartita key={attiva.id} partitaId={attiva.id} />}
           {scheda === 'confidenti' && <ConfidentiPartita partitaId={attiva.id} />}
-          {scheda === 'letture' && <LettureEGiochi key={attiva.id} partitaId={attiva.id} />}
+          {scheda === 'letture' && <div className="lg:flex-1 lg:min-h-0 riempi-figli-lg"><LettureEGiochi key={attiva.id} partitaId={attiva.id} /></div>}
           {scheda === 'progressi' && <ProgressiPartita key={attiva.id} partitaId={attiva.id} />}
 {scheda === 'scorta' && <ScortaPersona partitaId={attiva.id} />}
           {scheda === 'compendio' && <CompendioPersonale partitaId={attiva.id} />}

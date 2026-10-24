@@ -28,6 +28,17 @@ import { bloccata, motivoBlocco } from '../../utils/letture';
 
 type Gruppo = 'libri' | 'film' | 'videogiochi';
 
+const GRUPPI: Gruppo[] = ['libri', 'film', 'videogiochi'];
+const CHIAVE_CATEGORIA = 'p5r.letture.categoria';
+
+/** L'ultima categoria scelta su questo dispositivo (libri se non c'è o la memoria non risponde). */
+function categoriaRicordata(): Gruppo {
+  try {
+    const v = localStorage.getItem(CHIAVE_CATEGORIA);
+    return GRUPPI.find((g) => g === v) ?? 'libri';
+  } catch { return 'libri'; }
+}
+
 /** Quel che serve per disegnare una riga, uguale per tutti e tre: il resto e' differenza di nome. */
 interface Voce {
   chiave: string;
@@ -75,19 +86,22 @@ function Riga({ v, unita, occupato, onCambia }: { v: Voce; unita: string; occupa
 
 /** Il riquadro di un gruppo (libri, film, videogiochi): intestazione con conteggio dei completati e
  * collegamento alla pagina della Guida, le voci da fare, e i completati chiusi dietro un pulsante. */
-function Sezione({ gruppo, voci, occupati, onCambia }: { gruppo: Gruppo; voci: Voce[]; occupati: Record<string, boolean>; onCambia: (g: Gruppo, v: Voce, n: number) => void }) {
+function Sezione({ gruppo, voci, occupati, visibile, onCambia }: { gruppo: Gruppo; voci: Voce[]; occupati: Record<string, boolean>; visibile: boolean; onCambia: (g: Gruppo, v: Voce, n: number) => void }) {
   const [mostraFatti, setMostraFatti] = useState(false);
   const e = ETICHETTA[gruppo];
   const daFare = voci.filter((v) => !v.fatto);
   const fatti = voci.filter((v) => v.fatto);
   return (
-    <section className="card flex flex-col gap-2" aria-label={e.titolo}>
+    // sotto i 1024 px si vede una categoria sola (scelta dalla barra di schede), da 1024 px tutte e tre in colonna
+    <section className={`card flex-col gap-2 lg:flex lg:h-full lg:min-h-0 ${visibile ? 'flex' : 'hidden'}`} aria-label={e.titolo}>
       <div className="flex flex-wrap items-center gap-2">
         <IconaCategoria categoria={e.categoria} dimensione={28} />
         <h3 className="m-0 flex-1 font-display text-[15px] uppercase leading-none">{e.titolo}</h3>
         <span className="chip text-[11px]">{fatti.length} di {voci.length}</span>
         <Link to={e.percorso} className="btn btn-ghost btn-sm touch">Apri</Link>
       </div>
+      {/* da 1024 px la testata sta ferma e scorre solo questo corpo (area interna, barra visibile); sotto scorre la pagina */}
+      <div className="flex flex-col gap-2 lg:min-h-0 lg:flex-1 lg:area-scorrevole lg:p-2">
       {daFare.length === 0
         ? <p className="m-0 text-[12px] text-text-muted" role="status">{voci.length === 0 ? 'Niente in catalogo.' : 'Finiti tutti.'}</p>
         : <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0" aria-label={`${e.titolo} da fare`}>
@@ -105,6 +119,7 @@ function Sezione({ gruppo, voci, occupati, onCambia }: { gruppo: Gruppo; voci: V
           )}
         </>
       )}
+      </div>
     </section>
   );
 }
@@ -122,6 +137,12 @@ export function LettureEGiochi({ partitaId }: { partitaId: number }) {
   // dice — e soprattutto significa avere due verita' che possono divergere.
   const [toccate, setToccate] = useState<Record<string, Voce>>({});
   const [occupati, setOccupati] = useState<Record<string, boolean>>({});
+  // categoria mostrata sotto i 1024 px, ricordata per visitatore
+  const [categoria, setCategoria] = useState<Gruppo>(categoriaRicordata);
+  const scegli = (g: Gruppo) => {
+    setCategoria(g);
+    try { localStorage.setItem(CHIAVE_CATEGORIA, g); } catch { /* memoria del browser non disponibile: si ricorda solo per questa visita */ }
+  };
 
   /** Un libro come `Voce`: sessioni sul totale, sempre con tetto. */
   const daLibro = (l: LibroDto): Voce => ({ chiave: l.chiave, nome: l.nome, progresso: l.progresso, totale: l.totaleSessioni, fatto: l.fatto, senzaTetto: false, bloccata: bloccata(l.disponibilita), motivo: motivoBlocco(l.disponibilita) });
@@ -165,14 +186,25 @@ export function LettureEGiochi({ partitaId }: { partitaId: number }) {
 
   return (
     <PageState isLoading={caricamento} error={errore} onRetry={() => { void libri.ricarica(); void film.ricarica(); void giochi.ricarica(); }}>
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 lg:h-full lg:min-h-0">
         <p className="m-0 text-[12px] text-text-secondary">
           Segna qui le sessioni senza uscire dalla partita: {totali.fatti} completati su {totali.tutti}. Le schede complete, con luoghi ed effetti, restano nella Guida.
         </p>
-        <div className="grid grid-cols-1 items-start gap-3 xl:grid-cols-3">
-          <Sezione gruppo="libri" voci={locali.libri} occupati={occupati} onCambia={(g, v, n) => void cambia(g, v, n)} />
-          <Sezione gruppo="film" voci={locali.film} occupati={occupati} onCambia={(g, v, n) => void cambia(g, v, n)} />
-          <Sezione gruppo="videogiochi" voci={locali.videogiochi} occupati={occupati} onCambia={(g, v, n) => void cambia(g, v, n)} />
+        {/* sotto i 1024 px: una barra di schede (una categoria alla volta, una sola barra di scorrimento, quella della pagina) */}
+        <div role="tablist" aria-label="Categoria" className="grid grid-cols-3 gap-2 lg:hidden">
+          {GRUPPI.map((g) => {
+            const fatti = locali[g].filter((v) => v.fatto).length;
+            const attiva = categoria === g;
+            return (
+              <button key={g} type="button" role="tab" aria-selected={attiva} className={`btn touch flex-col !gap-0 !px-1 ${attiva ? 'btn-primary' : 'btn-ghost'}`} onClick={() => scegli(g)}>
+                <span className="text-[13px] font-semibold">{ETICHETTA[g].titolo}</span>
+                <span className="text-[11px] tabular-nums">{fatti}/{locali[g].length}</span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="flex flex-col gap-3 lg:grid lg:min-h-[240px] lg:flex-1 lg:grid-cols-3">
+          {GRUPPI.map((g) => <Sezione key={g} gruppo={g} voci={locali[g]} occupati={occupati} visibile={categoria === g} onCambia={(gr, v, n) => void cambia(gr, v, n)} />)}
         </div>
       </div>
     </PageState>
