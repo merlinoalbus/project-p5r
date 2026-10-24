@@ -374,8 +374,8 @@ function immaginiDiSpillo(spilloId: number): ImmagineSpilloDto[] {
   }));
 }
 
-/** Contesto comune agli spilli di una risposta: partita, spilli raccolti, stato per le condizioni, nomi per le descrizioni. */
-interface ContestoSpilli { partitaId?: number; raccolti?: Set<string>; st?: StatoDisponibilita | null; nomi?: NomiCondizioni; palazzi?: Map<string, string>; destinazioni?: Map<number, string>; acquistati?: Set<string>;
+/** Contesto comune agli spilli di una risposta: partita, stato per le condizioni, nomi per le descrizioni (il segno dei pin lo legge `statoDelPin`). */
+interface ContestoSpilli { partitaId?: number; st?: StatoDisponibilita | null; nomi?: NomiCondizioni; palazzi?: Map<string, string>; destinazioni?: Map<number, string>; acquistati?: Set<string>;
   /** Le Aree (L2), lette al primo pin che porta a una mappa e poi riusate. */
   aree?: ContestoAree;
   /** L4: il modello dell'avanzamento, gli stati della partita (null senza), l'infiltrazione guardata (`?infiltrazione=`, null = quella
@@ -417,14 +417,12 @@ function avanzamentoDi(ctx: ContestoSpilli): AvanzamentoSpilli {
  *  Palazzo di ogni mappa e le destinazioni degli spilli, per chiudere gli ingressi. */
 function contestoSpilli(partitaId?: number, contesto: string | null = null): ContestoSpilli {
   if (partitaId) verificaPartita(partitaId);
-  // «raccolto» è legato all'uid dello spillo (067): sopravvive a un pacchetto reimportato o a un gioco.db sostituito
-  const raccolti = partitaId ? new Set((prepared('SELECT spillo_uid FROM spillo_partita WHERE partita_id = ? AND raccolto = 1').all(partitaId) as Array<{ spillo_uid: string }>).map((x) => x.spillo_uid)) : undefined;
   const st = partitaId ? statoDisponibilitaPartita(partitaId) : null;
   // per gli ingressi dei Palazzi conclusi: le mappe di ogni Palazzo e le destinazioni degli spilli, lette una volta
   const destinazioni = st && st.palazziConclusi.size > 0 && prepared("SELECT 1 FROM sqlite_master WHERE name='spillo_destinazione'").get()
     ? new Map((prepared('SELECT spillo_id, mappa_chiave FROM spillo_destinazione WHERE mappa_chiave IS NOT NULL').all() as Array<{ spillo_id: number; mappa_chiave: string }>).map((d) => [d.spillo_id, d.mappa_chiave]))
     : undefined;
-  return { partitaId, raccolti, st, nomi: nomiCondizioni(), palazzi: st && st.palazziConclusi.size > 0 ? palazzoDiOgniMappa() : undefined, destinazioni, contesto };
+  return { partitaId, st, nomi: nomiCondizioni(), palazzi: st && st.palazziConclusi.size > 0 ? palazzoDiOgniMappa() : undefined, destinazioni, contesto };
 }
 
 /**

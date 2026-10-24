@@ -160,7 +160,7 @@ export interface StatiDellaPartita {
   partita: number;
   /** Le righe di `punto_partita` (per le voci con pin, lo specchio). */
   segnate: Map<string, StatoPunto>;
-  /** Gli uid dei pin con `spillo_partita.raccolto = 1`. */
+  /** Gli uid dei pin con `spillo_partita.raccolto = 1` (i pin condivisi dai rigenerabili non hanno più la riga: utente 042). */
   raccolti: Set<string>;
   /** I pin condivisi dai rigenerabili: uid → le infiltrazioni in cui sono raccolti (`spillo_partita_infiltrazione`, utente 023). */
   raccoltiPerInfiltrazione: Map<string, Set<string>>;
@@ -558,7 +558,9 @@ export function pulisciDivergenzeRisolte(db: AppDatabase, partita: number): void
   if (righe.length === 0) return;
   const m = modelloAvanzamento(db);
   const s = statiDellaPartita(db, m, partita);
-  for (const r of righe) if (!s.raccolti.has(r.spillo_uid) || voceFatta(m, s, r.voce_chiave)) {
+  // il pin «ha il suo segno» se lo ha in `spillo_partita` o, per un pin condiviso dai rigenerabili, in una delle sue infiltrazioni
+  const haIlSegno = (uid: string): boolean => s.raccolti.has(uid) || (s.raccoltiPerInfiltrazione.get(uid)?.size ?? 0) > 0;
+  for (const r of righe) if (!haIlSegno(r.spillo_uid) || voceFatta(m, s, r.voce_chiave)) {
     db.prepare('DELETE FROM divergenza_partita WHERE partita_id = ? AND spillo_uid = ? AND voce_chiave = ?').run(partita, r.spillo_uid, r.voce_chiave);
   }
 }
@@ -569,7 +571,7 @@ export function pulisciDivergenzeRisolte(db: AppDatabase, partita: number): void
  * partita
  * 1. un pin che **cambia forma** — diventa condiviso dai rigenerabili di più infiltrazioni, smette di esserlo, o cambia infiltrazioni —
  *    porta il suo segno nella forma nuova, letto com'era in ogni infiltrazione (`mPrima`: il modello di prima del cambio), così niente
- *    cambia a vista; la riga che la forma nuova non legge più si toglie (per un pin che resta condiviso) o resta (L11, `spillo_partita`);
+ *    cambia a vista; la riga che la forma nuova non legge più si toglie (per un pin che resta condiviso, o che lo diventa: `spillo_partita` non porta più il suo segno);
  * 2. un pin **nuovo** di una voce che era fatta (collegato, creato già della voce, importato) prende il segno, nell'infiltrazione in cui
  *    la voce lo legge: la voce resta fatta, come prima di L4 («un punto già segnato segna i suoi pin»); un pin già segnato collegato a
  *    una voce i cui pin sono così tutti fatti la rende fatta (lo specchio, qui sotto);
@@ -638,6 +640,8 @@ function riportaLaFormaDeiPin(db: AppDatabase, mPrima: ModelloAvanzamento, mDopo
         const vecchie = infiltrazioniRigenerabiliDelPin(mPrima, id);
         for (const inf of nuove) scriviSegnoDelPin(db, partita, uid, inf, (vecchie.length === 0 || vecchie.includes(inf)) && letto(inf), adesso);
         db.prepare(`DELETE FROM spillo_partita_infiltrazione WHERE partita_id = ? AND spillo_uid = ? AND infiltrazione_chiave NOT IN (${nuove.map(() => '?').join(',')})`).run(partita, uid, ...nuove);
+        // il segno ora sta per infiltrazione (appena scritto, letto com'era): la riga di `spillo_partita` di un pin condiviso non si legge più (utente 042)
+        db.prepare('DELETE FROM spillo_partita WHERE partita_id = ? AND spillo_uid = ?').run(partita, uid);
       } else {
         // non più condiviso: il segno nell'infiltrazione delle sue rigenerabili (se ne ha), altrimenti in quella di contesto
         const rigenerabili = (mDopo.pin.get(id)?.contano ?? []).filter((v) => mDopo.voci.get(v)!.carattere === 'rigenerabile');
