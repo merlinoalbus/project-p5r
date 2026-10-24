@@ -90,6 +90,14 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     schema: 'main', tabella: 'quartiere', colonna: 'sblocco', tolta: 'L11 · migrazione 188',
     sostituitaDa: 'la condizione di sblocco del quartiere (`condizioni_json`) con gli inviti dei Confidenti; le frasi della guida restano nell’archivio «archivio-frasi-l11»',
   },
+  {
+    schema: 'main', tabella: 'giorno_calendario', colonna: null, tolta: 'L11 · migrazione 189',
+    sostituitaDa: 'il giorno unico (tabella `giorno`, L9): meteo in due fasce, tempo libero e settimana; il giorno della settimana si calcola dalla data',
+  },
+  {
+    schema: 'main', tabella: 'giorno_percorso', colonna: null, tolta: 'L11 · migrazione 189',
+    sostituitaDa: 'il giorno unico (tabella `giorno`, L9): fase, trama, vincoli e avvisi; le azioni del percorso sono le voci del Diario e la copia storica resta nell’archivio «archivio-giorno-percorso-azioni-l11»',
+  },
 ];
 
 export const tabellaTolta = (schema: string, tabella: string): FonteTolta | undefined =>

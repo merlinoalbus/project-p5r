@@ -247,9 +247,10 @@ const TABELLE_CON_CONDIZIONI: ReadonlyArray<{ tabella: string; cosa: string }> =
   { tabella: 'film', cosa: 'Film' }, { tabella: 'attivita', cosa: 'Attività' }, { tabella: 'luogo', cosa: 'Luogo' },
 ];
 
-// Le azioni della giornata sono le righe di `voce_giornata` (migrazione 092): `giorno_percorso.azioni_json` è rimasta come copia
-// storica della guida d'origine e nessuno la legge più, quindi non si conta e non si tocca (rilievo del validatore, 2026-10-11:
-// contarla diceva «2 azioni» per una sola).
+// Le azioni della giornata sono le righe di `voce_giornata` (migrazione 092): `giorno_percorso.azioni_json` era rimasta come copia
+// storica della guida d'origine e nessuno la legge più, quindi non si contava (rilievo del validatore, 2026-10-11: contarla diceva
+// «2 azioni» per una sola); la tabella è stata tolta (L11, migrazione 189) e la copia storica è in
+// `dati_guida.archivio-giorno-percorso-azioni-l11`.
 
 /** Chi cita la Richiesta, per l'avviso prima di eliminarla: partite con uno stato, pin, condizioni, requisiti, azioni della giornata. */
 export function citazioniRichiesta(chiave: string): CitazioniRichiestaDto {

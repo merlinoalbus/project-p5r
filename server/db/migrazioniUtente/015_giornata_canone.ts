@@ -100,11 +100,23 @@ export const utente015: Migration = {
     //    stata cambiata dopo la 092
     const seed = new Map<string, Array<{ azione?: string }>>();
     /** Il testo dell'azione `indice` del giorno nella guida d'origine (`giorno_percorso`), letto una volta per giorno; undefined se non c'è. */
+    // L11 (migrazione di gioco 189): `giorno_percorso` non c'è più; le sue azioni storiche sono in `dati_guida.archivio-giorno-percorso-azioni-l11`
+    const conPercorso = c('main', 'giorno_percorso');
+    let archivioAzioni: Record<string, Array<{ azione?: string }>> | null = null;
+    const azioniArchiviate = (data: string): Array<{ azione?: string }> => {
+      if (archivioAzioni === null) {
+        const json = c('main', 'dati_guida') ? db.prepare("SELECT json FROM main.dati_guida WHERE chiave = 'archivio-giorno-percorso-azioni-l11'").pluck().get() as string | undefined : undefined;
+        try { archivioAzioni = json ? ((JSON.parse(json) as { giorni?: Record<string, Array<{ azione?: string }>> }).giorni ?? {}) : {}; } catch { archivioAzioni = {}; }
+      }
+      return archivioAzioni[data] ?? [];
+    };
     const testoGuida = (data: string, indice: number): string | undefined => {
       if (!seed.has(data)) {
-        const r = db.prepare('SELECT azioni_json FROM main.giorno_percorso WHERE data = ?').get(data) as { azioni_json: string } | undefined;
         let azioni: Array<{ azione?: string }> = [];
-        try { azioni = r ? (JSON.parse(r.azioni_json) as Array<{ azione?: string }>) : []; } catch { /* guida illeggibile: nessuna azione */ }
+        if (conPercorso) {
+          const r = db.prepare('SELECT azioni_json FROM main.giorno_percorso WHERE data = ?').get(data) as { azioni_json: string } | undefined;
+          try { azioni = r ? (JSON.parse(r.azioni_json) as Array<{ azione?: string }>) : []; } catch { /* guida illeggibile: nessuna azione */ }
+        } else azioni = azioniArchiviate(data);
         seed.set(data, azioni);
       }
       return seed.get(data)![indice]?.azione;
