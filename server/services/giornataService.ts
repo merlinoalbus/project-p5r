@@ -143,6 +143,19 @@ function avvisiDisponibilitaDellaVoce(r: RigaVoce): Pick<AzionePercorsoDto, 'avv
   return { avvisiDisponibilita: [{ tipo: esito.causa === 'fascia' ? 'fuori-fascia' : 'fuori-giorno', testo: esito.motivo }] };
 }
 
+/**
+ * R9-06: il nome dal vivo. Il testo salvato nella voce (`riferimentoTesto`) è come la guida chiamava il Confidente («Yoshida - Sole», «Palazzo di Sae Niijima»); se è
+ * diverso dal nome di adesso («Toranosuke Yoshida - Sole») la voce porta anche il nome attuale, da mostrare accanto al testo. Il testo non si riscrive mai.
+ */
+function nomeAttualeDelRiferimento(r: RigaVoce, rif: RiferimentoAzioneDto | null): Pick<AzionePercorsoDto, 'riferimentoNomeAttuale'> {
+  if (!rif || rif.tipo !== 'confidente' || !r.riferimento_testo) return {};
+  let attuale: string;
+  try { attuale = nomeRiferimento(rif, { ancheNascosti: true }); } catch { return {}; }
+  // l'articolo dell'arcano non è una differenza di nome («Igor - Il Matto» e «Igor - Matto» sono lo stesso nome)
+  const piatto = (s: string): string => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\b(il|lo|la|l|i|gli|le)\b/g, ' ').replace(/\s+/g, ' ').trim();
+  return piatto(attuale) === piatto(r.riferimento_testo) ? {} : { riferimentoNomeAttuale: attuale };
+}
+
 /** La voce per l'interfaccia: i campi della guida più la frase degli effetti, la spunta e i suoi effetti nella partita,
  *  il semaforo (solo per le azioni, e solo se ci sono i Confidenti della partita), la mappa collegata e la guida del quiz. */
 function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
@@ -173,7 +186,7 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   const daApplicare = ctx.partita === undefined ? 0 : (prepared(`SELECT COUNT(*) FROM utente.da_applicare WHERE partita_id=? AND stato='aperta' AND (voce_uid=? OR (causa_tipo='acquisto' AND causa_chiave IN (SELECT acquisto_id FROM utente.acquisto_provenienza WHERE partita_id=? AND voce_uid=?)))`).pluck().get(ctx.partita, r.uid, ctx.partita, r.uid) as number);
   return {
     ...v, effettiVoce: fonte, ricevuteEffetti, ...(daApplicare > 0 ? { daApplicare } : {}),
-    ...(aperture.length ? { apertureDedali: aperture } : {}), ...avvisiDisponibilitaDellaVoce(r), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], produceTesto: spuntabile ? testoEffettiDellaFonte(fonte, ctx.nomi) : [],
+    ...(aperture.length ? { apertureDedali: aperture } : {}), ...avvisiDisponibilitaDellaVoce(r), ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], produceTesto: spuntabile ? testoEffettiDellaFonte(fonte, ctx.nomi) : [],
     fatta: spuntabile && ctx.fatte.has(r.uid), effetti: ctx.fatte.get(r.uid) ?? null,
     stato: ctx.conf && spuntabile ? statoAzione(v, ctx.conf, ctx.partita) : null, mappa: mappaAzione(v),
     // il Palazzo collegato: dove si atterra il giorno della voce (scelta dell'utente, 2026-10-04). L6 (R6-17): la destinazione unica, la stessa

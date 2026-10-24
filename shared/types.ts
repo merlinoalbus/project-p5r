@@ -1288,6 +1288,8 @@ export interface AzionePercorsoDto {
   oggettiCitati?: RiferimentoOggettoDto[];
   /** Solo sulle voci d'incontro con un Confidente che, al giorno o alla fascia della voce, non è disponibile (R9-03): un avviso, mai un blocco. */
   avvisiDisponibilita?: Array<{ tipo: 'fuori-giorno' | 'fuori-fascia'; testo: string }>;
+  /** R9-06: il nome di adesso del Confidente, solo quando il testo salvato nella voce (`riferimentoTesto`) cita un nome diverso: da mostrare accanto al testo, che non si riscrive. */
+  riferimentoNomeAttuale?: string;
   /** Identità stabile: le spunte delle partite si agganciano a questa. */
   uid: string;
   /** Giorno del calendario di gioco ('MM-GG'); «giorno» e non «data» per l'envelope `{ data }` delle risposte. */
