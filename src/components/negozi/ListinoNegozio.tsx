@@ -11,11 +11,16 @@ import { useMemo, useState } from 'react';
 import { ArticoliTabella } from '../guida/ArticoliTabella';
 import { ElementiRimossi } from '../guida/ElementiRimossi';
 import { FiltriArticoli } from '../guida/FiltriArticoli';
+import { ModificaGuida } from '../guida/ModificaGuida';
+import { elenchiDaOpzioni } from '../guida/elenchiDaOpzioni';
 import { FILTRO_VUOTO, categoriePresenti, destinatariPresenti, filtraArticoli, type FiltroArticoli as Filtro } from '../../utils/articoli';
 import type { ArticoloDto, NegozioDettaglioDto } from '../../types';
 import { TrasformazioniDiJose } from '../catalogo/TrasformazioniDiJose';
 
 type Articolo = ArticoloDto;
+
+/** Le sedi si scelgono per nome con la ricerca (il resto dei campi della finestra è standard). */
+const CAMPI_SEDI = elenchiDaOpzioni(['sedi']);
 
 interface Props {
   /** Il negozio, con gli articoli e gli acquisti della partita. */
@@ -42,6 +47,10 @@ export function ListinoNegozio({ negozio, partitaId, versione, onModifica, onCam
   return (
     <>
       <TrasformazioniDiJose trasformazioni={negozio.trasformazioni ?? []} onModificata={onRipristinato} />
+      {/* Le altre sedi del listino (i distributori in più luoghi) e il pin che le conferma: si correggono e si rimettono come la guida (R11-17/1) */}
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <ModificaGuida tipo="negozio-sedi" chiave={negozio.chiave} cosa={`le altre sedi del listino di «${negozio.nome}»`} etichetta="Altre sedi del listino" onSalvato={onRipristinato} campiSpeciali={CAMPI_SEDI} />
+      </div>
       {articoli.length > 0 && (
         <FiltriArticoli filtro={filtro} onCambia={setFiltro} categorie={categorie} destinatari={destinatari} conPartita={partitaId !== null} />
       )}

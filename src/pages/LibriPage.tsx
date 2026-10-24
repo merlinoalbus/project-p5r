@@ -27,6 +27,7 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { NotaPuntiDote } from '../components/shared/NotaPuntiDote';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
+import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
 import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
 import { ComandiProgressoLettura } from '../components/guida/ComandiProgressoLettura';
@@ -137,6 +138,7 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo="Mostra posizione"
           onClick={() => { setSelezionato(libro.chiave); setFonteSelezionata(0); }} />
         <CorreggiElemento tipo="libro" chiave={libro.chiave} onSalvato={() => void dati.ricarica()} />
+        <ModificaGuida tipo="libro-posizioni" chiave={libro.chiave} cosa={`dove si ottiene «${titolo}»`} etichetta="Posizioni" onSalvato={() => void dati.ricarica()} />
       </div>
     </li>;
   };
@@ -178,7 +180,7 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
       </>}
 
       {libroSelezionato && <section ref={pannelloRef} className="flex scroll-mt-20 flex-col gap-2" aria-label={`Posizione di ${libroSelezionato.nome}`}>
-        <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="m-0">Dove ottenere “{libroSelezionato.nome}”</h2><button type="button" className="btn btn-ghost btn-sm touch" onClick={() => setSelezionato(null)}>Chiudi</button></div>
+        <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="m-0">Dove ottenere “{libroSelezionato.nome}”</h2><span className="flex items-center gap-1"><ModificaGuida tipo="libro-posizioni" chiave={libroSelezionato.chiave} cosa={`dove si ottiene «${libroSelezionato.nome}»`} soloIcona onSalvato={() => void dati.ricarica()} /><button type="button" className="btn btn-ghost btn-sm touch" onClick={() => setSelezionato(null)}>Chiudi</button></span></div>
         {libroSelezionato.posizioni.length > 1 && <div className="flex flex-wrap gap-2">{libroSelezionato.posizioni.map((p, i) => <button key={`${p.tipo}/${p.chiave}`} type="button" className={`chip touch ${i === fonteSelezionata ? 'chip--attivo' : ''}`} onClick={() => setFonteSelezionata(i)}>{p.etichetta}</button>)}</div>}
         {posizione ? <DoveSiTrova tipo={posizione.tipo} chiave={posizione.chiave} titolo={posizione.etichetta} altezza={300} /> : <div className="card"><h3 className="m-0 text-base">Posizione non disponibile</h3><p className="mb-0 text-sm text-text-secondary">Questo libro si ottiene come ricompensa o evento e non ha un punto territoriale verificato.</p></div>}
       </section>}

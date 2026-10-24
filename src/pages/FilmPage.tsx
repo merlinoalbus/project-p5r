@@ -30,6 +30,7 @@ import { IconaCategoria } from '../components/guida/IconaCategoria';
 import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
 import { ComandiProgressoLettura } from '../components/guida/ComandiProgressoLettura';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
+import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { NOME_DOTE } from '../utils/citta';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione, IconaSegno } from '../components/shared/IconaAzione';
@@ -144,6 +145,7 @@ export function FilmPage({ soloChiave }: { soloChiave?: string } = {}) {
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo="Mostra posizione"
           onClick={() => { setSelezionato(film.chiave); setPosizioneSelezionata(0); }} aria-label={`Mostra posizione di ${titolo}`} />
         <CorreggiElemento tipo="film" chiave={film.chiave} onSalvato={() => void dati.ricarica()} />
+        <ModificaGuida tipo="film-posizioni" chiave={film.chiave} cosa={`dove si vede «${titolo}»`} etichetta="Posizioni" onSalvato={() => void dati.ricarica()} />
       </div>
     </li>;
   };
@@ -178,7 +180,7 @@ export function FilmPage({ soloChiave }: { soloChiave?: string } = {}) {
       </>}
 
       {filmSelezionato && <section ref={pannelloRef} className="flex scroll-mt-20 flex-col gap-2" aria-label={`Posizione di ${nomeFilm(filmSelezionato)}`}>
-        <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="m-0">Dove vedere “{nomeFilm(filmSelezionato)}”</h2><button type="button" className="btn btn-ghost btn-sm touch" onClick={() => setSelezionato(null)}>Chiudi</button></div>
+        <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="m-0">Dove vedere “{nomeFilm(filmSelezionato)}”</h2><span className="flex items-center gap-1"><ModificaGuida tipo="film-posizioni" chiave={filmSelezionato.chiave} cosa={`dove si vede «${nomeFilm(filmSelezionato)}»`} soloIcona onSalvato={() => void dati.ricarica()} /><button type="button" className="btn btn-ghost btn-sm touch" onClick={() => setSelezionato(null)}>Chiudi</button></span></div>
         {filmSelezionato.posizioni.length > 1 && <div className="flex flex-wrap gap-2">{filmSelezionato.posizioni.map((p, i) => <button key={`${p.ruolo}/${p.tipo}/${p.chiave}`} type="button" className={`chip touch ${i === posizioneSelezionata ? 'chip--attivo' : ''}`} onClick={() => setPosizioneSelezionata(i)}>{p.ruolo === 'noleggio' ? 'Noleggio · ' : p.ruolo === 'visione' ? 'Visione · ' : ''}{p.etichetta}</button>)}</div>}
         {posizione ? <DoveSiTrova tipo={posizione.tipo} chiave={posizione.chiave} titolo={posizione.etichetta} altezza={300} /> : <div className="card"><h3 className="m-0 text-base">Posizione non disponibile</h3><p className="mb-0 text-sm text-text-secondary">Non esiste ancora un punto territoriale verificato per questo titolo.</p></div>}
       </section>}
