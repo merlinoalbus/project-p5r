@@ -26,6 +26,7 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { piatto } from '../utils/testo';
 import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
+import { ModificaGuida } from '../components/guida/ModificaGuida';
 
 const NOME_TIPO: Record<DomandaDto['tipo'], string> = { classe: 'In classe', 'esame-medio': 'Esame di metà semestre', 'esame-finale': 'Esame di fine semestre', tv: 'Quiz in TV', altro: 'Altro' };
 type FiltroTipo = 'tutte' | 'classe' | 'esami' | 'tv';
@@ -159,6 +160,7 @@ export function DomandePage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <strong>{e.nome}</strong>
                     <span className="text-text-muted">{e.date.map(dataGiocoTesto).join(', ')}{e.dataRisultati ? ` · risultati il ${dataGiocoTesto(e.dataRisultati)}` : ''}</span>
+                    <ModificaGuida tipo="esame" chiave={e.chiave} cosa={`l’esame «${e.nome}»`} soloIcona className="ml-auto" onSalvato={() => void dati.ricarica()} />
                   </div>
                   {e.note && <span className="text-[12px] text-text-muted">{e.note}</span>}
                   {!!e.oggettiRicompensa?.length && <OggettiCollegati oggetti={e.oggettiRicompensa} />}
