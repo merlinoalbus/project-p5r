@@ -56,6 +56,12 @@ export const migration168: Migration = {
       FROM main.giorno_calendario c JOIN main.giorno_percorso p ON p.data = c.data ORDER BY c.ordine`).all() as Array<{
       data: string; ordine: number; meteo: string | null; tempo_libero_json: string | null; settimana: number | null;
       fase: string; trama: string; vincoli_json: string; avvisi_json: string; fonte: string; coperto: number }>;
+    // La JOIN scarterebbe in silenzio una data presente in una sola delle due tabelle: se ce n'è una, la migrazione si ferma e le dice (nessun giorno perso).
+    const inUna = db.prepare(`SELECT 'calendario' AS dove, data FROM main.giorno_calendario WHERE data NOT IN (SELECT data FROM main.giorno_percorso)
+      UNION ALL SELECT 'percorso', data FROM main.giorno_percorso WHERE data NOT IN (SELECT data FROM main.giorno_calendario)`).all() as Array<{ dove: string; data: string }>;
+    if (inUna.length > 0) throw new Error(`168: date presenti in una sola delle due tabelle (${inUna.map((r) => `${r.data} solo nel ${r.dove}`).join(', ')}): migrazione fermata, nessun giorno è stato scritto.`);
+    const totale = (db.prepare('SELECT COUNT(*) AS n FROM main.giorno_calendario').get() as { n: number }).n;
+    if (righe.length !== totale) throw new Error(`168: ${righe.length} giorni fusi su ${totale} del calendario: migrazione fermata.`);
     const inserisci = db.prepare(`INSERT OR IGNORE INTO main.giorno (data, ordine, meteo_giorno, meteo_sera, nota_meteo, meteo_da_verificare, tempo_libero_json, settimana,
       fase, trama, vincoli_json, avvisi_json, fonte, coperto, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`);
     for (const r of righe) {
