@@ -189,6 +189,7 @@ import { migration177 } from './177_legami_e_presentazione_delle_mappe.js';
 import { migration178 } from './178_correzioni_guida.js';
 import { migration179 } from './179_contatore_palestra.js';
 import { migration180 } from './180_contatore_studio.js';
+import { migration181 } from './181_fusioni_velluto_registrano_la_persona.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
 export const migrations: Migration[] = [
@@ -204,5 +205,5 @@ export const migrations: Migration[] = [
   migration091, migration092, migration093, migration094, migration095, migration096, migration097, migration098, migration099, migration100,
   migration101, migration102, migration103, migration104, migration105, migration106, migration107, migration108, migration109, migration110,
   migration111, migration112, migration113, migration114, migration115, migration116, migration117, migration118, migration119, migration120,
-  migration121, migration122, migration123, migration124, migration125, migration126, migration127, migration128, migration129, migration130, migration131, migration132, migration133, migration134, migration135, migration136, migration137, migration138, migration139, migration140, migration141, migration142, migration143, migration144, migration145, migration146, migration147, migration148, migration149, migration150, migration151, migration152, migration153, migration154, migration155, migration156, migration157, migration158, migration159, migration160, migration161, migration162, migration163, migration164, migration165, migration166, migration167, migration168, migration169, migration170, migration171, migration172, migration173, migration174, migration175, migration176, migration177, migration178, migration179, migration180,
+  migration121, migration122, migration123, migration124, migration125, migration126, migration127, migration128, migration129, migration130, migration131, migration132, migration133, migration134, migration135, migration136, migration137, migration138, migration139, migration140, migration141, migration142, migration143, migration144, migration145, migration146, migration147, migration148, migration149, migration150, migration151, migration152, migration153, migration154, migration155, migration156, migration157, migration158, migration159, migration160, migration161, migration162, migration163, migration164, migration165, migration166, migration167, migration168, migration169, migration170, migration171, migration172, migration173, migration174, migration175, migration176, migration177, migration178, migration179, migration180, migration181,
 ];
