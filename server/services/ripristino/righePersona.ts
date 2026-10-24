@@ -123,6 +123,12 @@ const leggiRigaTraduzione = (effetto: string): RigaTraduzione | null =>
 let primaDellaScrittura = new Map<string, RigaTraduzione | null>();
 const ricordaRiga = (effetto: string): void => { if (!primaDellaScrittura.has(effetto)) primaDellaScrittura.set(effetto, leggiRigaTraduzione(effetto)); };
 
+/** La fotografia (`seed_json`) di una skill, {} se manca o è illeggibile. */
+function seedDi(chiave: string): Valori {
+  const grezzo = prepared('SELECT seed_json FROM skill WHERE id = ?').pluck().get(chiave) as string | null | undefined;
+  try { return grezzo ? (JSON.parse(grezzo) as Valori) : {}; } catch { return {}; }
+}
+
 function righeRicordate(traccia: Valori): Map<string, RigaTraduzione | null> {
   const m = new Map<string, RigaTraduzione | null>();
   const grezzo = traccia[CHIAVE_TRACCIA];
@@ -212,19 +218,47 @@ const skill: DefRiga = {
     try { guida = grezzo ? (JSON.parse(grezzo) as Valori) : {}; } catch { guida = {}; }
     if (typeof guida.effetto === 'string' && guida.effetto !== effetto) return;
     if (guida.effetto_it !== undefined && (guida.effetto_it ?? null) !== effettoIt(effetto)) return;
-    rimettiRighe(ricordate);
+    // la riga ricordata per il testo della guida vale solo se è la resa della guida: una riga ricordata diversa (la resa di un'altra skill, vista quando questa
+    // l'ha toccata) non si rimette mai, perché porterebbe via la resa della guida appena riscritta
+    const daRimettere = new Map(ricordate);
+    if (guida.effetto_it !== undefined) {
+      const r = daRimettere.get(effetto);
+      if (r !== undefined && (r?.testo ?? null) !== (guida.effetto_it ?? null)) daRimettere.delete(effetto);
+    }
+    // si rimette, poi si controlla la resa FINALE: la traccia si svuota solo se coincide con la guida, altrimenti le righe tornano com'erano e la traccia resta
+    const prima = new Map([...daRimettere.keys()].map((k) => [k, leggiRigaTraduzione(k)] as const));
+    rimettiRighe(daRimettere);
+    if (guida.effetto_it !== undefined && (guida.effetto_it ?? null) !== effettoIt(effetto)) {
+      rimettiRighe(prima);
+      for (const [k, r] of prima) if (r === null) prepared("DELETE FROM traduzione WHERE ambito = 'effettoSkill' AND chiave = ?").run(k);
+      return;
+    }
     ctx.traccia[CHIAVE_TRACCIA] = []; // non `delete`: la fotografia conserva la traccia vecchia se la chiave manca
   },
   // «Rimetti questo» sulla sola resa italiana, con l'effetto ancora diverso da quello della guida, scriverebbe la resa del testo di prima sulla riga `traduzione` del
   // testo di adesso, che può essere la resa di un'altra skill: si rifiuta, la resa si rimette insieme all'effetto
   verificaRipristino: (chiave, guida) => {
-    if (guida.effetto_it === undefined || guida.effetto !== undefined) return;
-    const grezzo = prepared('SELECT seed_json FROM skill WHERE id = ?').pluck().get(chiave) as string | null | undefined;
-    let effettoGuida: unknown;
-    try { effettoGuida = grezzo ? (JSON.parse(grezzo) as Valori).effetto : undefined; } catch { effettoGuida = undefined; }
-    if (typeof effettoGuida === 'string' && effettoGuida !== rigaSkill(chiave).effetto) {
-      throw httpErrors.conflict('effetto-da-rimettere', 'L’effetto di questa skill è stato corretto: la resa italiana appartiene al testo dell’effetto, quindi si rimette insieme all’effetto (o rimetti tutta la skill).');
+    if (guida.effetto_it !== undefined && guida.effetto === undefined) {
+      const grezzo = prepared('SELECT seed_json FROM skill WHERE id = ?').pluck().get(chiave) as string | null | undefined;
+      let effettoGuida: unknown;
+      try { effettoGuida = grezzo ? (JSON.parse(grezzo) as Valori).effetto : undefined; } catch { effettoGuida = undefined; }
+      if (typeof effettoGuida === 'string' && effettoGuida !== rigaSkill(chiave).effetto) {
+        throw httpErrors.conflict('effetto-da-rimettere', 'L’effetto di questa skill è stato corretto: la resa italiana appartiene al testo dell’effetto, quindi si rimette insieme all’effetto (o rimetti tutta la skill).');
+      }
     }
+    // la resa è del TESTO, condivisa da tutte le skill con quel testo: se un'altra skill l'ha cambiata (e questa non ne ricorda la riga di partenza) rimetterla qui
+    // porterebbe via la correzione dell'altra
+    const testo = typeof guida.effetto === 'string' ? guida.effetto : guida.effetto_it !== undefined ? rigaSkill(chiave).effetto : null;
+    if (testo === null) return;
+    const riga = leggiRigaTraduzione(testo);
+    if (!riga || riga.fonte !== 'utente') return;
+    const mia = righeRicordate(seedDi(chiave)).get(testo);
+    if (mia !== undefined && (mia === null || mia.fonte !== 'utente')) return; // questa skill ha toccato la riga per prima: la sua riga di partenza è quella della guida
+    const altre = prepared("SELECT id, nome, seed_json FROM skill WHERE origine = 'utente' AND seed_json IS NOT NULL AND id <> ?").all(chiave) as Array<{ id: number; nome: string; seed_json: string }>;
+    const titolare = altre.find((s) => { try { return righeRicordate(JSON.parse(s.seed_json) as Valori).has(testo); } catch { return false; } });
+    const altra = titolare?.nome ?? (prepared('SELECT nome FROM skill WHERE effetto = ? AND id <> ? ORDER BY id').pluck().get(testo, chiave) as string | undefined);
+    if (altra === undefined) return;
+    throw httpErrors.conflict('resa-condivisa', `La resa italiana dell’effetto è condivisa da tutte le skill con lo stesso testo e quella attuale è stata corretta da un’altra skill («${altra}»): rimetterla qui la sovrascriverebbe. Rimettila da «${altra}» oppure correggi la resa insieme alle due skill.`);
   },
   nome: (chiave) => rigaSkill(chiave).nome,
   valida: (_chiave, fusi) => {
