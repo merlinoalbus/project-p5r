@@ -67,6 +67,10 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     sostituitaDa: 'gli orari del luogo (`orari_json`) e la disponibilità dei Confidenti; i valori restano nell’archivio «archivio-frasi-l11»',
   },
   {
+    schema: 'main', tabella: 'articolo', colonna: 'disponibile_dal', tolta: 'L11 · migrazione 194',
+    sostituitaDa: 'le condizioni dell’offerta (`condizioni_json`): il «disponibile dal» mostrato è generato da esse; i testi di prima restano nell’archivio «archivio-frasi-l11»',
+  },
+  {
     schema: 'main', tabella: 'luogo', colonna: 'quando', tolta: 'L11 · migrazione 193',
     sostituitaDa: 'gli orari del luogo (`orari_json`): il visore e la scheda mostrano l’orario ricavato dai dati; i valori (anche dei luoghi che divergevano) restano nell’archivio «archivio-frasi-l11»',
   },

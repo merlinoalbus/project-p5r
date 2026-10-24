@@ -8,7 +8,7 @@
 // sede fra i luoghi della città (072) e, se ce l'ha, un programma punti dichiarato (076).
 // ============================================================
 
-import { condizioneConTesto, leggiCondizioniSalvate, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
+import { condizioneConTesto, leggiCondizioniSalvate, ordineGioco, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import { createHash } from 'node:crypto';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { nuovaValutazioneLegacy } from '../db/acquistiLegacy.js';
@@ -36,7 +36,7 @@ interface PresenzaRiga { sblocco_json?: string | null; orari_json: string | null
 interface RigaNegozio extends PresenzaRiga { condizioni_json: string | null; orari_json: string | null; sede_chiave: string | null; sede_nome?: string | null; programma_punti_json: string | null; chiave: string; ordine: number; nome: string; luogo: string; luogo_chiave: string | null; tipo: string; gestore: string | null; confidente_chiave: string | null; orari: string | null; sblocco: string | null; note: string | null; fonte: string; confidente_nome?: string | null; quartiere_nome?: string | null; articoli?: number; verificati?: number }
 interface RigaArticolo { catalogo_chiave?: string | null; costo_json?: string | null; condizioni_json: string | null; oggetto_fonte: string | null; oggetto_chiave: string | null; quantita: number | null; chiave: string; negozio_chiave: string; negozio_confidente?: string | null; negozio_orari?: string | null;
   /** L5: eccezione d'orario e sede del negozio, con orari e sblocco della sede. */
-  negozio_sblocco?: string | null; negozio_eccezione?: string | null; negozio_sede?: string | null; sede_orari_json?: string | null; sede_condizioni_json?: string | null; ordine: number; nome: string; nome_it: string | null; categoria: string; per: string | null; prezzo: number | null; effetto: string | null; statistiche: string | null; disponibile_dal: string | null; nota: string | null; fonte: string; verificato: number; negozio_nome?: string }
+  negozio_sblocco?: string | null; negozio_eccezione?: string | null; negozio_sede?: string | null; sede_orari_json?: string | null; sede_condizioni_json?: string | null; ordine: number; nome: string; nome_it: string | null; categoria: string; per: string | null; prezzo: number | null; effetto: string | null; statistiche: string | null; nota: string | null; fonte: string; verificato: number; negozio_nome?: string }
 
 // L5: con la sede vengono anche i suoi orari e il suo sblocco (`l.orari_json`, `l.condizioni_json`): sono la presenza del negozio
 const SQL_NEGOZIO = `SELECT n.*, c.nome AS confidente_nome, q.nome AS quartiere_nome, l.nome AS sede_nome, l.orari_json AS sede_orari_json, l.condizioni_json AS sede_condizioni_json,
@@ -137,6 +137,21 @@ function statisticheDelCatalogo(o: CatalogoOggettoDto): string | null {
   return pezzi.join(' · ') || null;
 }
 
+/** Le condizioni di tempo di un'offerta: dove la data entra davvero («dal 18 aprile», «dopo il Palazzo di Madarame», «solo in primavera»). */
+const CONDIZIONI_DI_TEMPO: ReadonlySet<string> = new Set(['data', 'intervallo', 'stagione', 'arco', 'quartiere']);
+
+/**
+ * «Disponibile dal» dell'offerta, sempre dalle condizioni strutturate (R11-02/10; la colonna `articolo.disponibile_dal` è tolta, 194): le condizioni di tempo
+ * con la loro frase, e di più condizioni «dal» solo l'ultima (la data da cui l'offerta c'è davvero). Nessuna condizione di tempo: nessun testo.
+ */
+function tempisticaDelleCondizioni(condizioni: ReadonlyArray<RequisitoSpillo & { testo: string }>): string | null {
+  const di = condizioni.filter((c) => CONDIZIONI_DI_TEMPO.has(c.tipo));
+  const date = di.filter((c): c is RequisitoSpillo & { tipo: 'data'; dal: string; testo: string } => c.tipo === 'data');
+  const ultima = date.length > 1 ? date.reduce((a, b) => (ordineGioco(b.dal) > ordineGioco(a.dal) ? b : a)) : null;
+  const frasi = di.filter((c) => c.tipo !== 'data' || ultima === null || c === ultima).map((c) => c.testo.trim()).filter(Boolean);
+  return frasi.length ? frasi.join(' · ') : null;
+}
+
 function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponibilita, catalogo?: Map<string, CatalogoOggettoDto>, ricevuti: NonNullable<ArticoloDto['ricevuti']> = []): ArticoloDto {
   const oggetto = r.catalogo_chiave ? catalogo?.get(r.catalogo_chiave) : undefined;
   const costo = costoOggetto(r.costo_json ?? null);
@@ -146,7 +161,8 @@ function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponi
     const origine = prepared('SELECT n.nome FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave WHERE a.chiave = ?').get(articolo) as { nome: string } | undefined;
     return { articolo, negozioNome: origine?.nome ?? 'Offerta precedente' };
   });
-  return { ricevuti, condizioni: regole(r.condizioni_json), chiave: r.chiave, negozioChiave: r.negozio_chiave, negozioNome: r.negozio_nome ?? '', sedeChiave: r.negozio_sede ?? null,
+  const condizioniArticolo = regole(r.condizioni_json);
+  return { ricevuti, condizioni: condizioniArticolo, chiave: r.chiave, negozioChiave: r.negozio_chiave, negozioNome: r.negozio_nome ?? '', sedeChiave: r.negozio_sede ?? null,
     catalogo: oggetto ? { chiave: oggetto.chiave, nome: oggetto.nome, casa: oggetto.casa } : null,
     nomiAltri: oggetto?.nomiAltri ?? [], nomeOriginale: oggetto?.nomeOriginale ?? null, costo, costoDaVerificare: r.costo_json != null && costo === null,
     nome: oggetto?.nome ?? (r.nome || 'Oggetto da collegare'), nomeIt: oggetto?.nome ?? (r.nome_it || null),
@@ -154,7 +170,7 @@ function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponi
     per: oggetto ? (typeof oggetto.statistiche?.per === 'string' ? oggetto.statistiche.per : null) : r.per, prezzo: r.prezzo,
     effetto: oggetto ? oggetto.effetto || null : r.effetto, statistiche: oggetto ? statisticheDelCatalogo(oggetto) : r.statistiche,
     quantita: r.quantita, oggettoFonte: r.oggetto_fonte, oggettoChiave: r.oggetto_chiave,
-    disponibileDal: r.disponibile_dal, nota: r.nota, verificato: r.verificato === 1,
+    disponibileDal: tempisticaDelleCondizioni(condizioniArticolo), nota: r.nota, verificato: r.verificato === 1,
     // F6: la nota storica della fonte è un dato (migrazione 139), legato all'offerta
     noteStoriche: noteStoricheDi('articolo', r.chiave),
     acquistato: acquisti?.acquistato === true || articoliEquivalenti(r.chiave, lettureListiniCondivisi()).some(k => acquistati.has(k)), acquistiRegistrati, acquisti,
