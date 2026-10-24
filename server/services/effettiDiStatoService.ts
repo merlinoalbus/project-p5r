@@ -23,6 +23,8 @@ import { impostaStatoRichiesta } from './richiesteService.js';
 import { impostaAcquisto } from './negoziService.js';
 import { eOffertaAojiru } from '../../shared/acquisti.js';
 import { annullaInvito, registraInvito } from './inviti.js';
+import { registraPersona } from './partiteService.js';
+import { assicuraNonDelGruppo } from './personeDelGruppo.js';
 
 type StatoPrima = { gia: boolean; stato?: string | null };
 
@@ -39,13 +41,22 @@ export function verificaEffettoDiStato(e: EffettoDiStatoVoce): void {
     if (!a) throw httpErrors.notFound('articolo-non-trovato', `L'articolo '${e.articolo}' non esiste.`);
     if (eOffertaAojiru({ chiave: a.chiave, catalogoChiave: a.catalogo_chiave })) throw httpErrors.conflict('articolo-aojiru', 'L’Aojiru ha i suoi consumi: usa l’effetto «Acquisto Aojiru».');
   }
+  if (e.tipo === 'persona') {
+    if (!prepared('SELECT 1 FROM persona WHERE id = ?').get(e.persona)) throw httpErrors.notFound('persona-non-trovata', `La Persona ${e.persona} non esiste.`);
+    assicuraNonDelGruppo(e.persona);
+  }
   if (e.tipo === 'invito' && !prepared('SELECT 1 FROM confidente_invito WHERE chiave = ?').get(e.invito)) throw httpErrors.notFound('invito-non-trovato', `L'invito '${e.invito}' non esiste.`);
   if (e.tipo === 'richiesta' && !prepared('SELECT 1 FROM richiesta WHERE chiave = ?').get(e.richiesta)) throw httpErrors.notFound('richiesta-non-trovata', `La Richiesta '${e.richiesta}' non esiste.`);
 }
 
-const chiaveDi = (e: EffettoDiStatoVoce): string => e.tipo === 'storia' ? e.evento : e.tipo === 'domanda' ? String(e.domanda) : e.tipo === 'cruciverba' ? e.data : e.tipo === 'articolo' ? e.articolo : e.tipo === 'invito' ? e.invito : e.richiesta;
+const chiaveDi = (e: EffettoDiStatoVoce): string => e.tipo === 'storia' ? e.evento : e.tipo === 'domanda' ? String(e.domanda) : e.tipo === 'cruciverba' ? e.data : e.tipo === 'articolo' ? e.articolo : e.tipo === 'invito' ? e.invito : e.tipo === 'persona' ? String(e.persona) : e.richiesta;
 
 function leggiPrima(p: number, e: EffettoDiStatoVoce): StatoPrima {
+  // la Persona: «già» = registrata nel compendio; `stato` = 'riga' se c'era una riga di compendio non registrata (bonus, skill: si conserva), altrimenti null
+  if (e.tipo === 'persona') {
+    const r = prepared('SELECT registrata FROM compendio_partita WHERE partita_id = ? AND persona_id = ?').get(p, e.persona) as { registrata: number } | undefined;
+    return { gia: r?.registrata === 1, stato: r ? 'riga' : null };
+  }
   if (e.tipo === 'storia') return { gia: (prepared('SELECT avvenuto FROM evento_storia_partita WHERE partita_id = ? AND evento_chiave = ?').get(p, e.evento) as { avvenuto: number } | undefined)?.avvenuto === 1 };
   if (e.tipo === 'domanda') return { gia: !!prepared('SELECT 1 FROM domanda_partita WHERE partita_id = ? AND domanda_id = ?').get(p, e.domanda) };
   if (e.tipo === 'cruciverba') return { gia: !!prepared('SELECT 1 FROM cruciverba_partita WHERE partita_id = ? AND data = ?').get(p, e.data) };
@@ -59,6 +70,13 @@ function leggiPrima(p: number, e: EffettoDiStatoVoce): StatoPrima {
 function scrivi(p: number, e: EffettoDiStatoVoce, segna: boolean, statoRichiesta: string | null = null, voceUid: string | null = null): void {
   // l'invito: la stessa regola del gesto diretto («Invito avvenuto»): solo con le condizioni vere (409 `invito-non-possibile`), una volta sola; si toglie solo se l'ha scritto la voce
   if (e.tipo === 'invito') { if (segna) registraInvito(p, e.invito, voceUid); else annullaInvito(p, e.invito, voceUid); }
+  // la Persona: la stessa registrazione del compendio (`registraPersona`, l'unica scrittura); togliendo la spunta, la riga nata dalla spunta si toglie,
+  // una che c'era già (non registrata) torna non registrata senza perdere ciò che portava
+  else if (e.tipo === 'persona') {
+    if (segna) registraPersona(p, e.persona);
+    else if (statoRichiesta === 'riga') prepared('UPDATE compendio_partita SET registrata = 0 WHERE partita_id = ? AND persona_id = ?').run(p, e.persona);
+    else prepared('DELETE FROM compendio_partita WHERE partita_id = ? AND persona_id = ?').run(p, e.persona);
+  }
   else if (e.tipo === 'storia') impostaEventoStoria(p, e.evento, segna);
   else if (e.tipo === 'domanda') impostaDomandaFatta(p, e.domanda, segna, false);
   else if (e.tipo === 'cruciverba') impostaCruciverba(p, e.data, segna);
@@ -118,7 +136,7 @@ export function annullaEffettiDiStato(p: number, voceUid: string): void {
       }
     } else if (!prima.gia) {
       const e: EffettoDiStatoVoce = r.tipo === 'storia' ? { tipo: 'storia', evento: r.chiave } : r.tipo === 'domanda' ? { tipo: 'domanda', domanda: Number(r.chiave) }
-        : r.tipo === 'cruciverba' ? { tipo: 'cruciverba', data: r.chiave } : r.tipo === 'articolo' ? { tipo: 'articolo', articolo: r.chiave } : r.tipo === 'invito' ? { tipo: 'invito', invito: r.chiave } : { tipo: 'richiesta', richiesta: r.chiave };
+        : r.tipo === 'cruciverba' ? { tipo: 'cruciverba', data: r.chiave } : r.tipo === 'articolo' ? { tipo: 'articolo', articolo: r.chiave } : r.tipo === 'invito' ? { tipo: 'invito', invito: r.chiave } : r.tipo === 'persona' ? { tipo: 'persona', persona: Number(r.chiave) } : { tipo: 'richiesta', richiesta: r.chiave };
       // l'oggetto potrebbe non esserci più (guida cambiata): non si ferma l'annullo della spunta
       try { scrivi(p, e, false, prima.stato ?? null, voceUid); } catch (err) { if (!(err instanceof Error) || !/non-trovat|non esiste|Nessun/i.test(`${(err as { code?: string }).code ?? ''} ${err.message}`)) throw err; }
     }

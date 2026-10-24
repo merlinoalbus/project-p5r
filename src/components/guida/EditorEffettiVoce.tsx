@@ -57,7 +57,7 @@ export function CampiAcquistoEffetto({ effetto, righe, onCambia }: { effetto: Ac
 }
 
 /** Lista unica con identità per effetto: riordinare non cambia UID e non riscrive gli effetti storici. */
-const NOME_EFFETTO_STATO: Record<EffettoDiStatoVoce['tipo'], string> = { storia: 'evento di storia', domanda: 'domanda o esame', cruciverba: 'cruciverba', richiesta: 'Richiesta completata', articolo: 'articolo comprato', invito: 'invito avvenuto' };
+const NOME_EFFETTO_STATO: Record<EffettoDiStatoVoce['tipo'], string> = { storia: 'evento di storia', domanda: 'domanda o esame', cruciverba: 'cruciverba', richiesta: 'Richiesta completata', articolo: 'articolo comprato', invito: 'invito avvenuto', persona: 'Persona registrata' };
 
 /** L'oggetto citato dall'effetto, per chiave; il server rifiuta una chiave che non esiste. Spuntando la voce lo stato si segna, togliendo la spunta torna com'era. */
 function CampoEffettoDiStato({ effetto, onCambia }: { effetto: EffettoDiStatoVoce; onCambia: (e: EffettoDiStatoVoce) => void }) {
@@ -66,11 +66,12 @@ function CampoEffettoDiStato({ effetto, onCambia }: { effetto: EffettoDiStatoVoc
       : effetto.tipo === 'cruciverba' ? { etichetta: 'Data del cruciverba (MM-GG)', valore: effetto.data, aiuto: 'Il giorno del cruciverba, per esempio 02-01.' }
         : effetto.tipo === 'articolo' ? { etichetta: 'Articolo (chiave)', valore: effetto.articolo, aiuto: 'La chiave dell’offerta nel negozio, per esempio «takemi-clinic/…»; l’Aojiru ha il suo effetto. Gli yen del prezzo restano un promemoria da cambiare a mano.' }
           : effetto.tipo === 'invito' ? { etichetta: 'Invito (confidente/MM-GG)', valore: effetto.invito, aiuto: 'La chiave dell’invito del Confidente, per esempio «makoto/07-30»: si registra solo con le condizioni vere, come il gesto «Invito avvenuto». Con questo effetto i punti dell’incontro valgono ×1,2.' }
-          : { etichetta: 'Richiesta (chiave)', valore: effetto.richiesta, aiuto: 'La chiave della Richiesta nell’elenco delle Richieste.' };
+          : effetto.tipo === 'persona' ? { etichetta: 'Persona (numero)', valore: String(effetto.persona), aiuto: 'Il numero della Persona nel compendio: la spunta la registra nel compendio della partita, come «Registra».' }
+            : { etichetta: 'Richiesta (chiave)', valore: effetto.richiesta, aiuto: 'La chiave della Richiesta nell’elenco delle Richieste.' };
   const cambia = (v: string): void => onCambia(effetto.tipo === 'storia' ? { tipo: 'storia', evento: v } : effetto.tipo === 'domanda' ? { tipo: 'domanda', domanda: Math.max(1, Math.trunc(Number(v)) || 1) }
-    : effetto.tipo === 'cruciverba' ? { tipo: 'cruciverba', data: v } : effetto.tipo === 'articolo' ? { tipo: 'articolo', articolo: v } : effetto.tipo === 'invito' ? { tipo: 'invito', invito: v } : { tipo: 'richiesta', richiesta: v });
+    : effetto.tipo === 'cruciverba' ? { tipo: 'cruciverba', data: v } : effetto.tipo === 'articolo' ? { tipo: 'articolo', articolo: v } : effetto.tipo === 'invito' ? { tipo: 'invito', invito: v } : effetto.tipo === 'persona' ? { tipo: 'persona', persona: Math.max(1, Math.trunc(Number(v)) || 1) } : { tipo: 'richiesta', richiesta: v });
   return <>
-    <label className="flex flex-col gap-1">{campo.etichetta}<input className="form-input" type={effetto.tipo === 'domanda' ? 'number' : 'text'} min={1} value={campo.valore} onChange={(ev) => cambia(ev.target.value)} /></label>
+    <label className="flex flex-col gap-1">{campo.etichetta}<input className="form-input" type={effetto.tipo === 'domanda' || effetto.tipo === 'persona' ? 'number' : 'text'} min={1} value={campo.valore} onChange={(ev) => cambia(ev.target.value)} /></label>
     <p className="m-0 text-[12px] text-text-secondary">{campo.aiuto} Spuntando la voce lo stato si segna; togliendo la spunta torna com’era. Nessuna Dote cambia da sola.</p>
   </>;
 }

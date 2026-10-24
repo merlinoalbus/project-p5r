@@ -23,8 +23,10 @@ export type EffettoDiStatoVoce =
   /** Un articolo di un negozio segnato come comprato (qualunque offerta tranne l'Aojiru, che ha i suoi consumi). */
   | { tipo: 'articolo'; articolo: string }
   /** L'invito di un Confidente avvenuto (R10-11i): `invito` è la chiave di `confidente_invito` («makoto/07-30»); si registra solo con le condizioni vere. */
-  | { tipo: 'invito'; invito: string };
-export const eEffettoDiStato = (e: { tipo: string }): e is EffettoDiStatoVoce => e.tipo === 'storia' || e.tipo === 'domanda' || e.tipo === 'cruciverba' || e.tipo === 'richiesta' || e.tipo === 'articolo' || e.tipo === 'invito';
+  | { tipo: 'invito'; invito: string }
+  /** Una Persona registrata nel compendio della partita (R10-11/3, voci della Stanza di Velluto): `persona` è l'id della Persona; la spunta la registra con `registraPersona`. */
+  | { tipo: 'persona'; persona: number };
+export const eEffettoDiStato = (e: { tipo: string }): e is EffettoDiStatoVoce => e.tipo === 'persona' || e.tipo === 'storia' || e.tipo === 'domanda' || e.tipo === 'cruciverba' || e.tipo === 'richiesta' || e.tipo === 'articolo' || e.tipo === 'invito';
 /** La lettura della buona sorte di Chihaya: spuntando la voce si accende la Fortuna sulla Dote scelta, per il resto del giorno (R10-10/2). */
 export interface EffettoFortunaVoce { tipo: 'fortuna'; dote: DoteChiave }
 export interface EffettoVoceDto { uid: string; ordine: number; effetto: EffettoVoce; origine: 'seed' | 'regola' | 'utente' }
@@ -59,11 +61,12 @@ const oggetto = (x: unknown): Record<string, unknown> | null => x && typeof x ==
 const nota = (x: unknown): x is 1 | 2 | 3 => x === 1 || x === 2 || x === 3;
 export function normalizzaEffettoVoce(x: unknown): EffettoVoce | null {
   const o = oggetto(x); if (!o) return null;
-  const campi: Record<string, readonly string[]> = { dote: ['tipo','dote','note'], lettura: ['tipo','categoria','chiave','almeno'], turno: ['tipo','attivita','doti'], acquisto: ['tipo','articolo','variante','fortuna','sostituisceDoti'], pesca: ['tipo','regola','attivita','sostituisceTurni','sostituisceDoti'], fortuna: ['tipo','dote'], storia: ['tipo','evento'], domanda: ['tipo','domanda'], cruciverba: ['tipo','data'], richiesta: ['tipo','richiesta'], articolo: ['tipo','articolo'], invito: ['tipo','invito'] };
+  const campi: Record<string, readonly string[]> = { persona: ['tipo','persona'], dote: ['tipo','dote','note'], lettura: ['tipo','categoria','chiave','almeno'], turno: ['tipo','attivita','doti'], acquisto: ['tipo','articolo','variante','fortuna','sostituisceDoti'], pesca: ['tipo','regola','attivita','sostituisceTurni','sostituisceDoti'], fortuna: ['tipo','dote'], storia: ['tipo','evento'], domanda: ['tipo','domanda'], cruciverba: ['tipo','data'], richiesta: ['tipo','richiesta'], articolo: ['tipo','articolo'], invito: ['tipo','invito'] };
   if (typeof o.tipo!=='string'||!Object.hasOwn(campi,o.tipo)||Object.keys(o).some((k) => !campi[o.tipo as string]!.includes(k))) return null;
   if (o.tipo === 'dote') return eDote(o.dote) && nota(o.note) ? { tipo: 'dote', dote: o.dote, note: o.note } : null;
   if (o.tipo === 'fortuna') return eDote(o.dote) ? { tipo: 'fortuna', dote: o.dote } : null;
   if (o.tipo === 'storia') return typeof o.evento === 'string' && /^[a-z0-9][a-z0-9._:/-]{0,79}$/i.test(o.evento.trim()) ? { tipo: 'storia', evento: o.evento.trim() } : null;
+  if (o.tipo === 'persona') return Number.isSafeInteger(o.persona) && (o.persona as number) >= 1 ? { tipo: 'persona', persona: o.persona as number } : null;
   if (o.tipo === 'domanda') return Number.isSafeInteger(o.domanda) && (o.domanda as number) >= 1 ? { tipo: 'domanda', domanda: o.domanda as number } : null;
   if (o.tipo === 'cruciverba') return typeof o.data === 'string' && /^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(o.data) ? { tipo: 'cruciverba', data: o.data } : null;
   if (o.tipo === 'invito') return typeof o.invito === 'string' && /^[a-z0-9-]+\/(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(o.invito.trim()) ? { tipo: 'invito', invito: o.invito.trim() } : null;
@@ -109,6 +112,7 @@ export function descriviEffettoVoce(e: EffettoVoce): string {
   if (e.tipo === 'pesca') return 'Pesca a Ichigaya: sessione osservata';
   if (e.tipo === 'fortuna') return `Fortuna di Chihaya: ${nomeDote(e.dote)} ×1,5 per il resto del giorno`;
   if (e.tipo === 'storia') return `Segna l’evento di storia «${e.evento}»`;
+  if (e.tipo === 'persona') return `Registra la Persona ${e.persona} nel compendio`;
   if (e.tipo === 'domanda') return `Segna la domanda ${e.domanda} come fatta`;
   if (e.tipo === 'cruciverba') return `Segna il cruciverba del ${e.data} come risolto`;
   if (e.tipo === 'articolo') return `Segna come comprato: ${e.articolo}`;

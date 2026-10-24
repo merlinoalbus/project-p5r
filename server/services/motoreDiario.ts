@@ -61,7 +61,7 @@ export function leggiEffettiVocePerMostrare(uid:string):StatoEffettiVoceDto {
     return {voceUid:uid,stato:'legacy-da-correggere',effetti:[],rawLegacy:t?.raw_json??'[]',motivo:e.message,revisione:improntaDato({uid,errore:e.code,raw:t?.raw_json??null})};
   }
 }
-const chiaveEffetto=(e:EffettoVoce):string|null=>e.tipo==='acquisto'?e.articolo:e.tipo==='dote'||e.tipo==='fortuna'?e.dote:e.tipo==='lettura'?e.chiave:e.tipo==='storia'?e.evento:e.tipo==='domanda'?String(e.domanda):e.tipo==='cruciverba'?e.data:e.tipo==='richiesta'?e.richiesta:e.tipo==='articolo'?e.articolo:e.tipo==='invito'?e.invito:e.attivita;
+const chiaveEffetto=(e:EffettoVoce):string|null=>e.tipo==='acquisto'?e.articolo:e.tipo==='dote'||e.tipo==='fortuna'?e.dote:e.tipo==='lettura'?e.chiave:e.tipo==='storia'?e.evento:e.tipo==='domanda'?String(e.domanda):e.tipo==='cruciverba'?e.data:e.tipo==='richiesta'?e.richiesta:e.tipo==='articolo'?e.articolo:e.tipo==='invito'?e.invito:e.tipo==='persona'?String(e.persona):e.attivita;
 function verificaNuovoEffetto(e:EffettoVoce):void {if(e.tipo==='fortuna')return;if(eEffettoDiStato(e)){verificaEffettoDiStato(e);return;}if(e.tipo==='acquisto')verificaOffertaConsumo(e.articolo);else if(e.tipo==='pesca'){if(e.attivita!==ATTIVITA_PESCA||e.regola!==REGOLA_PESCA||leggiRegolaPesca(e.regola).stato!=='collegata')throw httpErrors.conflict('pesca-regola-assente','La fonte della pesca non è collegata a una regola leggibile.');}else verificaEffetti([e]);}
 function verificaLista(effetti:EffettoVoceDto[]):void {
   const ids=new Set<string>(),rivendicati=new Set<string>();
