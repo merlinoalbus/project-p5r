@@ -164,12 +164,13 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
   });
 
   // ---- aree della città (lo staff di Tokyo) ----
-  const nodiAreeCitta = aree.filter((a) => a.citta_chiave).map((a) => nodoArea(a, partitaId === undefined ? null : true, null));
+  // Le Aree della città e dei Palazzi non hanno una condizione di sblocco propria: `disponibile` resta «non valutata» (null), mai un `true` non calcolato.
+  const nodiAreeCitta = aree.filter((a) => a.citta_chiave).map((a) => nodoArea(a, null, null));
 
   // ---- Palazzi ----
   const nodiPalazzi: NodoGerarchiaDto[] = palazzi.map((d) => {
     const radice = radiceDelPalazzo(d.chiave);
-    const figliArea = aree.filter((a) => a.dungeon_chiave === d.chiave).map((a) => nodoArea(a, partitaId === undefined ? null : true, null));
+    const figliArea = aree.filter((a) => a.dungeon_chiave === d.chiave).map((a) => nodoArea(a, null, null));
     const conInfiltrazione = new Set(figliArea.flatMap((a) => (a.accanto ?? []).map((i) => i.chiave)));
     const proprie = infiltrazioniDeiPalazzi.filter((i) => i.dungeon_chiave === d.chiave);
     const senzaArea = proprie.filter((i) => !conInfiltrazione.has(i.chiave)).map((i) => nodoInfiltrazione(i, d.chiave));
