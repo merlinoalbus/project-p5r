@@ -9,11 +9,13 @@
 
 import { Link } from 'react-router-dom';
 import type { ArchivioDelPalazzoDto } from '../../types';
+import { ModificaGuida } from './ModificaGuida';
 
-interface Props { archivio: ArchivioDelPalazzoDto }
+interface Props { archivio: ArchivioDelPalazzoDto; onSalvato: () => void | Promise<void> }
 
-/** L'archivio in una sezione chiusa: titolo, conto, e le planimetrie per area del dedalo con il loro link. */
-export function ArchivioDelPalazzo({ archivio }: Props) {
+/** L'archivio in una sezione chiusa: titolo, conto, e le planimetrie per area del dedalo con il loro link; ogni legame (Palazzo ↔ dedalo, planimetria ↔ area) ha la sua matita. */
+export function ArchivioDelPalazzo({ archivio, onSalvato }: Props) {
+  const salvato = () => { void onSalvato(); };
   const gruppi = new Map<string, { nome: string; mappe: ArchivioDelPalazzoDto['planimetrie'] }>();
   for (const p of archivio.planimetrie) {
     const k = p.areaDedalo ?? '';
@@ -26,6 +28,10 @@ export function ArchivioDelPalazzo({ archivio }: Props) {
     <details className="rounded-lg border border-border-light p-2.5 text-[13px]" aria-label="Archivio del Palazzo">
       <summary className="touch cursor-pointer font-semibold">Archivio del Palazzo di {archivio.nome.replace(/^Dedalo di /, '')} · {archivio.planimetrie.length} planimetrie</summary>
       <div className="flex flex-col gap-2 pt-2">
+        <div className="flex items-center gap-1 text-[12px] text-text-secondary">
+          Il Palazzo confluisce nel dedalo di Iweleth.
+          <ModificaGuida tipo="dedalo-confluenza" chiave={archivio.dungeon} cosa={`la confluenza del Palazzo di ${archivio.nome.replace(/^Dedalo di /, '')}`} soloIcona onSalvato={salvato} />
+        </div>
         <p className="m-0 text-[12px] text-text-muted">
           Le aree e le voci sono nel dedalo ({archivio.voci.convertite} voci sono diventate Trama, {archivio.voci.doppie} Persona doppie puntano a quelle del dedalo: nessuna si è persa).
           Qui restano, in sola lettura, le planimetrie del vecchio Palazzo.
@@ -35,8 +41,9 @@ export function ArchivioDelPalazzo({ archivio }: Props) {
             <h4 className="m-0 text-[11px] font-semibold uppercase tracking-wide text-text-muted">{g.nome}</h4>
             <ul className="m-0 flex list-none flex-col p-0">
               {g.mappe.map((m) => (
-                <li key={m.chiave}>
+                <li key={m.chiave} className="flex items-center gap-1">
                   <Link to={`/guida/mappe/${m.chiave}`} className="touch inline-flex min-h-11 items-center text-[13px]" title={m.nota || undefined}>{m.nome.replace(/^Dedalo di Iweleth › /, '')}</Link>
+                  {m.identita && <ModificaGuida tipo="mappa-dedalo" chiave={m.identita} cosa={`la planimetria «${m.nome.replace(/^Dedalo di Iweleth › /, '')}»`} soloIcona onSalvato={salvato} />}
                 </li>
               ))}
             </ul>
