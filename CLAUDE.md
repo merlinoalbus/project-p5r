@@ -15,7 +15,8 @@ originali (nomi propri); i nomi delle skill restano nella forma canonica del dat
 italiana tramite la tabella `traduzione`.
 
 ## Documenti di bordo (tenerli aggiornati a ogni step)
-- **`docs/coordinamento/STATO-ATTUALE.md` — DA LEGGERE PER PRIMO per riprendere il lavoro del ramo `newreview`** (lotti fatti e in corso,
+- **`docs/coordinamento/STATO-ATTUALE.md` — DA LEGGERE PER PRIMO per riprendere il lavoro** (dal 2026-10-24 il ramo `newreview` e
+  l'istanza parallela p5s sono confluiti in `main` e nella produzione: un solo backend e un solo frontend; lotti fatti e in corso,
   punti aperti, regole dell'utente, come ripartire); sotto `docs/coordinamento/` c'è tutto il coordinamento del team (Regia, bacheca,
   lotti, decisioni, memoria del progetto)
 - `docs/ARCHITETTURA.md` — com'è fatto il sistema (stack, cartelle, flussi, DB, pacchetto di gioco, deploy)
@@ -26,7 +27,7 @@ italiana tramite la tabella `traduzione`.
 - `NOTICE` — attribuzioni delle fonti dati (Apache-2.0) (dallo step 0.2)
 
 ## Convenzioni tecniche (ereditate da project-jira, stesso autore)
-**Regola attuale dei dati (2026-10-21):** la fonte è il DB dell'istanza, non un pacchetto esterno. Le correzioni si applicano con migrazioni dirette e conservative. «Importa» resta per la sostituzione esplicita di `gioco.db` con un backup locale scelto dalla cartella d'appoggio del server, dopo anteprima e conferma; non è un aggiornamento automatico né un'unione. `partite.db` non viene sostituito da quel comando. I nomi tecnici `PacchettoGioco` e `/pacchetto` restano per compatibilità con l'implementazione esistente. I riferimenti al pacchetto completo qui sotto descrivono il vecchio flusso iniziale, non autorizzano a sovrascrivere i dati di p5s.
+**Regola attuale dei dati (2026-10-21):** la fonte è il DB dell'istanza, non un pacchetto esterno. Le correzioni si applicano con migrazioni dirette e conservative. «Importa» resta per la sostituzione esplicita di `gioco.db` con un backup locale scelto dalla cartella d'appoggio del server, dopo anteprima e conferma; non è un aggiornamento automatico né un'unione. `partite.db` non viene sostituito da quel comando. I nomi tecnici `PacchettoGioco` e `/pacchetto` restano per compatibilità con l'implementazione esistente. I riferimenti al pacchetto completo qui sotto descrivono il vecchio flusso iniziale, non autorizzano a sovrascrivere i dati dell'utente (dal 2026-10-24 sono quelli della produzione, che ha ricevuto i dati di p5s).
 
 - Backend: `server/index.ts` → `assicuraPacchettoIniziale` (al primo avvio copia `pacchetto/gioco.db`, in git, senza immagini: l'interfaccia si apre; il pacchetto COMPLETO — stesso nome, `pacchetto/completo/gioco.db`, ~311 MB con le immagini, fuori da git — si carica SEMPRE dall'app, dalla cartella d'appoggio (`DEPOSITO_DIR`: Impostazioni → Pacchetto di gioco), e sostituisce il file dell'istanza; vedi `pacchetto/README.md`) → `initDb` (apre `gioco.db` e attacca `partite.db` come schema `utente`) → `runBootBackup` → `runMigrations` (due sequenze: `db/migrations/` per i dati di gioco, `db/migrazioniUtente/` per le partite) → `regoleAllAvvio` → `listen`. Non esiste più un seed JSON: i dati di gioco vivono in `gioco.db` e si aggiornano con import/export del pacchetto.
   Route sottili in `server/routes/`, logica in `server/services/`, schemi zod in `server/schemas/` (cartelle create dallo step 0.4),
@@ -43,7 +44,7 @@ italiana tramite la tabella `traduzione`.
 
 1. Studiare il codice esistente e proporre la soluzione prima di implementare.
 2. **Zero test**: niente test nuovi/eseguiti né cicli di collaudo; le prove funzionali sono dell'utente. Dal 2026-10-21 ogni consegna deve essere verificata da un **agente distinto in modo avversariale**, accedendo direttamente alla specifica originale e alle successive istruzioni dell'utente. Il revisore cerca scostamenti e controesempi, confronta specifica e codice con riferimenti verificabili, dichiara copertura e limiti ed emette un esito motivato; non modifica il codice. Non basta il resoconto dell'implementatore né un controllo statico verde. I rilievi impediscono di dichiarare verificata la consegna finché risolti o sottoposti all'utente. La nuova disposizione supera il precedente divieto di verificatori, non il divieto di test. Vale anche per l'audit richiesto su L5, L6 e L7. Dettaglio: `docs/coordinamento/memoria-del-progetto/feedback-verifica-avversariale.md`.
-3. Ogni modifica: typecheck + lint verdi, build senza errori; non dichiarare verificato il runtime se non è stato osservato. Non avviare, fermare o riavviare altri servizi funzionanti. Non fare prove in scrittura sui dati dell'utente. A fine lotto: unico commit/push di codice e coordinamento su `newreview`, seguire la pipeline fino all'esito e aprire p5s nel browser. Nessun commit/pipeline per ogni aggiornamento documentale.
+3. Ogni modifica: typecheck + lint verdi, build senza errori; non dichiarare verificato il runtime se non è stato osservato. Non avviare, fermare o riavviare altri servizi funzionanti. Non fare prove in scrittura sui dati dell'utente. A fine lotto: unico commit/push di codice e coordinamento su `main`, seguire la pipeline fino all'esito e aprire la produzione nel browser. Nessun commit/pipeline per ogni aggiornamento documentale.
 4. Aggiornare `docs/ROADMAP.md` (stato) e, se cambia qualcosa di strutturale, `docs/ARCHITETTURA.md` / `docs/DECISIONI.md`.
 5. Niente mockup, placeholder o regressioni senza autorizzazione esplicita dell'utente.
 
