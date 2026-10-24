@@ -92,6 +92,8 @@ Le **4 tabelle senza lettore di prodotto**: `audit_aojiru_136` e `audit_pesca_13
 | gioco.pianta_quartiere | 210 | l'immagine dell'illustrazione del quartiere nel DB (o la grafica `mappe/citta-…`) | etichetta `cestinoService.ts:148` |
 | partite.lettura_partita | utente 43 | `progresso_libro_partita`, `progresso_film_partita` | DDL storico `db/schemaUtente.ts:21`; etichetta `cestinoService.ts:146` |
 
+**Dopo la misura** (commit `b287a7ae`): `partite.requisito_partita` (utente 44) è stata tolta, con voce in `FONTI_TOLTE`; l'etichetta del cestino resta. Le tabelle di partite diventano 63 e le colonne canoniche 1.370.
+
 Le etichette del cestino restano per regola (danno il nome leggibile alle righe saltate). Gli archivi dove sono finiti i valori sono blocchi di `dati_guida` (§7).
 
 ## 3. Tabelle
@@ -1868,9 +1870,9 @@ Le righe che seguono sono lette a mano nel codice (`SELECT` esplicite lette riga
 | gioco.negoziazione_umore.versione_fonte | 4/4 | provenienza dell'importazione (172); non selezionata in `negoziazioneService.ts:96` | provenienza |
 | gioco.negoziazione_importazione.input_runtime_json | 1/1 | input del runtime all'importazione (172) | provenienza non ricostruibile; solo l'utente |
 | gioco.dedalo_confluenza.nota | 1/1 | nota della 175 (Iweleth è dedalo dei Memento); le altre colonne sono lette (`dungeonService.ts:121,414`) | provenienza |
-| **gioco.infiltrazione_dedalo (tabella intera: infiltrazione_chiave, area_dedalo_chiave)** | 12/12 | quale infiltrazione di Iweleth corrisponde a quale area del dedalo (175); **nessun lettore né scrittore di prodotto**: la copertura si legge da `mappa_dedalo` e `persona_area_dedalo` | da decidere: tenere come dato di struttura (e farla leggere) o archiviare |
+| **gioco.infiltrazione_dedalo (tabella intera: infiltrazione_chiave, area_dedalo_chiave)** | 12/12 | quale infiltrazione di Iweleth corrisponde a quale area del dedalo (175); **nessun lettore né scrittore di prodotto**: la copertura si legge da `mappa_dedalo` e `persona_area_dedalo` | archivio per decisione del PM (§6.3b): registro della conversione di Iweleth (175) |
 | gioco.voce_confluenza.voce_chiave, voce_canonica, tipo_precedente, infiltrazione_chiave, nota, carattere_precedente, ordine_precedente (7) | 47/47 … | registro delle conversioni delle voci di Iweleth (175): di tutto il registro il codice legge solo l'aggregato per `azione` (`dungeonService.ts:124`) | provenienza/storia delle conversioni; solo l'utente può toglierla |
-| partite.requisito_partita.partita_id, confermato, updated_at (3) | 0/0 | tabella senza lettori né `INSERT`: solo 3 `DELETE` di pulizia (`requisitiConfidentiService.ts:50,116,131`); 0 righe | candidata a eliminazione (già in B15 di `ondata1`): corredo da togliere = i 3 `DELETE`, la riga di `RIFERIMENTI_PARTITE`, DDL storico |
+| partite.requisito_partita.partita_id, confermato, updated_at (3) | 0/0 | tabella senza lettori né `INSERT`: solo 3 `DELETE` di pulizia (`requisitiConfidentiService.ts:50,116,131`); 0 righe | **tolta** dalla migrazione utente 44 (§6.3b) |
 
 ### 6.2 Scritte e mai lette (22 colonne)
 
@@ -1909,14 +1911,14 @@ Strada scelta per ognuna: **di archivio** (dichiarata con il motivo, schema inva
 | gioco.negoziazione_umore.versione_fonte, negoziazione_importazione.input_runtime_json | 2 | archivio | provenienza dell'importazione del corpus (172), non ricostruibile |
 | gioco.dedalo_confluenza.nota | 1 | archivio | nota storica della 175 |
 | gioco.voce_confluenza (voce_chiave, voce_canonica, tipo_precedente, infiltrazione_chiave, nota, carattere_precedente, ordine_precedente) | 7 | archivio | registro delle conversioni di Iweleth (175): serve a ricostruire lo stato precedente; il codice ne legge l'aggregato per `azione` |
-| gioco.immagine_miniatura.byte, larghezza_reale, altezza_reale, created_at | 4 | archivio (metadati di cache) | descrivono la miniatura in cache e il suo momento; la cache si rigenera. È l'unico gruppo che si potrebbe togliere senza perdere storia: se il PM lo vuole, serve una migrazione che ricostruisca la tabella e tolga i valori dall'`INSERT` di `miniatureService.ts:131` e di `sc:genera-pacchetto.ts:66` |
+| gioco.immagine_miniatura.byte, larghezza_reale, altezza_reale, created_at | 4 | archivio (metadati di cache) | **decisione del PM (24/10): restano** — servono a diagnosticare la cache; descrivono la miniatura e il suo momento |
 | gioco.operazione_effetti_voce.voce_uid, prima_json, creata_il | 3 | archivio (registro) | registro delle operazioni sul Diario: lo stato precedente serve all'annullamento e alla diagnosi |
 | gioco.nota_storica.updated_at | 1 | archivio (provenienza) | marca di tempo |
-| gioco.infiltrazione_dedalo (2) | 2 | **lasciata al PM** | nessun lettore: un altro agente sta lavorando alle tabelle di R11-17/1 |
-| partite.requisito_partita (partita_id, confermato, updated_at) | 3 | **dichiarate, decide il PM** | tabella vuota senza lettori, solo `DELETE` di pulizia; dati dell'utente: non toccata |
-| partite.*_partita.updated_at / fatta_at / acceso_il / creato_il / creata_il (14 colonne elencate in §6.2) | 14 | **dichiarate, decide il PM** | marche di tempo delle righe di partita (provenienza) |
+| gioco.infiltrazione_dedalo (infiltrazione_chiave, area_dedalo_chiave) | 2 | archivio (registro di conversione) | **decisione del PM (24/10)**: registro della conversione di Iweleth (migrazione 175, Iweleth resta un solo dedalo per decisione dell'utente) — quale infiltrazione corrispondeva a quale area del dedalo. Non si toglie |
+| partite.*_partita.updated_at / fatta_at / acceso_il / creato_il / creata_il (14 colonne elencate in §6.2) | 14 | archivio (provenienza) | **decisione del PM (24/10)**: restano, tracciano quando è cambiata una riga |
+| partite.requisito_partita (partita_id, confermato, updated_at, più le altre 3) | 6 | **tolta** | **decisione del PM (24/10)**: tabella vuota e solo `DELETE` di pulizia; tolta dalla migrazione utente 44 (commit `b287a7ae`) con guardia «solo se vuota», i tre `DELETE`, il riferimento in `RIFERIMENTI_PARTITE` e la voce in `FONTI_TOLTE`. Provata su copia: vuota → tolta; con una riga → resta, con avviso nel log |
 
-Totale: 19+8+1+2+1+7+4+3+1 = 46 colonne di gioco di archivio, 2 di `infiltrazione_dedalo` lasciate, 17 di `partite.db` dichiarate. Quindi a fine di questo passo nessuna colonna resta senza lettore senza una dichiarazione; l'eliminazione resta aperta solo per `infiltrazione_dedalo`, `requisito_partita` e, a scelta, i metadati di `immagine_miniatura`.
+Totale: 46 colonne di gioco + 2 di `infiltrazione_dedalo` dichiarate di archivio, 14 marche di tempo di `partite.db` dichiarate di archivio, 6 colonne di `requisito_partita` tolte. **A fine di questo passo nessuna colonna resta senza lettore senza una dichiarazione e R11-01/1 è chiuso per quanto riguarda le colonne senza lettori.** Le cifre di §1, §3 e §5 descrivono il commit `1895f963`, prima della 044: `requisito_partita` (6 colonne, tolte) e le sue 3 colonne «senza lettore» di §6.1 non esistono più nello schema.
 
 ### 6.4 Rilievi che cambiano decisioni o richiedono un'azione
 
