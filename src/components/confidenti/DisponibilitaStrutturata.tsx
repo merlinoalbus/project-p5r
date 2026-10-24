@@ -7,14 +7,13 @@
 // continua a scrivere solo il testo e le note. Mai un blocco: l'esito «oggi» è un'informazione.
 // ============================================================
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
 import { useCarica } from '../../hooks/useCarica';
 import { getDisponibilitaStrutturata, getLuoghi, ripristinaDisponibilitaStrutturata, salvaDisponibilitaStrutturata } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
-import { AvvisoBozzaRipristinata } from '../shared/AvvisoBozzaRipristinata';
-import { leggiBozzaPersistente, scartaBozzaPersistente, useBozzaPersistente } from '../../utils/bozzeSporche';
+import { useBozzaSporca } from '../../utils/bozzeSporche';
 import {
   FASCE_DISPONIBILITA, GIORNI_DISPONIBILITA, MODI_DISPONIBILITA,
   type DisponibilitaConfidenteDto, type DisponibilitaStrutturata as Struttura, type EccezioneDisponibilita, type FasciaDisponibilita, type GiornoDisponibilita, type ModoDisponibilita,
@@ -83,7 +82,7 @@ export function EditorDisponibilitaStrutturata({ chiave, nome, onChiudi, onSalva
   const d = useCarica(() => getDisponibilitaStrutturata(chiave), [chiave]);
   const tuttiILuoghi = useCarica(() => getLuoghi(), []);
   return (
-    <Modal titolo={`Disponibilità di ${nome}`} aperta onChiudi={() => { scartaBozzaPersistente(`disponibilita:${chiave}`); onChiudi(); }} larga>
+    <Modal titolo={`Disponibilità di ${nome}`} aperta onChiudi={onChiudi} larga>
       {d.errore && <p role="alert" className="m-0 text-error">{d.errore}</p>}
       {!d.dati && !d.errore && <p role="status" className="m-0">Un attimo…</p>}
       {d.dati && <Corpo dati={d.dati} tutti={tuttiILuoghi.dati ?? []} chiave={chiave} onChiudi={onChiudi} onSalvato={onSalvato} />}
@@ -91,72 +90,27 @@ export function EditorDisponibilitaStrutturata({ chiave, nome, onChiudi, onSalva
   );
 }
 
-/** I campi dell'editor come si scrivono: i valori di partenza di una bozza e quel che si tiene in sessionStorage. */
-interface StatoDisponibilita { modo: ModoDisponibilita; giorni: GiornoDisponibilita[]; fasce: FasciaDisponibilita[]; eccezioni: EccezioneDisponibilita[]; dal: string; motivo: string; luoghi: string[] }
-const elencoDi = <T,>(x: unknown, ammessi: readonly T[]): T[] | null => (Array.isArray(x) && x.every((v) => (ammessi as readonly unknown[]).includes(v)) ? (x as T[]) : null);
-const interoTra = (x: unknown, min: number, max: number): x is number => typeof x === 'number' && Number.isInteger(x) && x >= min && x <= max;
-
-/** Un'eccezione ritrovata: solo le tre forme che l'editor sa fare, con campi e valori giusti; altrimenti null. */
-function eccezioneValida(x: unknown): EccezioneDisponibilita | null {
-  if (typeof x !== 'object' || x === null) return null;
-  const e = x as Record<string, unknown>;
-  if (e.tipo === 'pioggia' && e.effetto === 'non-disponibile' && (e.ranghi === undefined || (Array.isArray(e.ranghi) && e.ranghi.every((r) => interoTra(r, 1, 10))))) return { tipo: 'pioggia', effetto: 'non-disponibile', ...(e.ranghi ? { ranghi: e.ranghi as number[] } : {}) };
-  if (e.tipo === 'dopo-rango' && e.effetto === 'non-disponibile' && interoTra(e.giorni, 1, 30)) return { tipo: 'dopo-rango', giorni: e.giorni, effetto: 'non-disponibile' };
-  const fasceE = e.tipo === 'fascia-rango' ? elencoDi(e.fasce, FASCE_DISPONIBILITA) : null;
-  if (e.tipo === 'fascia-rango' && interoTra(e.rango, 1, 10) && fasceE && fasceE.length > 0) return { tipo: 'fascia-rango', rango: e.rango, fasce: fasceE };
-  return null;
-}
-
-/** Una bozza ritrovata vale solo se ogni campo ha la forma e i valori ammessi (modo, giorni, fasce, eccezioni, «dal» nel formato MM-GG, luoghi come testi). */
-function validaDisponibilita(dati: unknown): StatoDisponibilita | null {
-  if (typeof dati !== 'object' || dati === null) return null;
-  const d = dati as Record<string, unknown>;
-  const giorni = elencoDi(d.giorni, GIORNI_DISPONIBILITA);
-  const fasce = elencoDi(d.fasce, FASCE_DISPONIBILITA);
-  if (!giorni || !fasce || typeof d.modo !== 'string' || !(MODI_DISPONIBILITA as readonly string[]).includes(d.modo)) return null;
-  if (typeof d.dal !== 'string' || d.dal.length > 5 || typeof d.motivo !== 'string' || d.motivo.length > 500) return null;
-  if (!Array.isArray(d.eccezioni) || !Array.isArray(d.luoghi) || !d.luoghi.every((k) => typeof k === 'string' && k.length > 0 && k.length <= 120)) return null;
-  const eccezioni = d.eccezioni.map(eccezioneValida);
-  if (eccezioni.some((e) => e === null)) return null;
-  return { modo: d.modo as ModoDisponibilita, giorni, fasce, eccezioni: eccezioni as EccezioneDisponibilita[], dal: d.dal, motivo: d.motivo, luoghi: d.luoghi as string[] };
-}
-
 function Corpo({ dati, tutti, chiave, onChiudi, onSalvato }: { dati: DisponibilitaConfidenteDto; tutti: Array<{ chiave: string; nome: string; quartiereNome: string }>; chiave: string; onChiudi: () => void; onSalvato: () => void | Promise<void> }) {
   const partenza = dati.struttura;
-  const chiaveBozza = `disponibilita:${chiave}`;
-  const luoghiDiPartenza = dati.luoghi.map((l) => l.chiave);
-  const inizio: StatoDisponibilita = { modo: partenza.modo, giorni: partenza.giorni, fasce: partenza.fasce,
-    // le eccezioni con i campi nello stesso ordine di quelle ritrovate (`eccezioneValida`): il confronto è sul JSON e non deve vedere una differenza che non c'è
-    eccezioni: partenza.eccezioni.map((e) => eccezioneValida(e) ?? e), dal: partenza.dal ?? '', motivo: partenza.motivoSenzaLuogo, luoghi: luoghiDiPartenza };
-  // con una copia ritrovata in sessionStorage (pagina ricaricata) i campi ripartono da lì, ma solo se la disponibilità è ancora com'era quando fu salvata
-  const [avvio] = useState(() => leggiBozzaPersistente(chiaveBozza, inizio, validaDisponibilita));
-  const [ripristinata, setRipristinata] = useState(avvio !== null);
-  const [modo, setModo] = useState<ModoDisponibilita>((avvio ?? inizio).modo);
-  const [giorni, setGiorni] = useState<GiornoDisponibilita[]>((avvio ?? inizio).giorni);
-  const [fasce, setFasce] = useState<FasciaDisponibilita[]>((avvio ?? inizio).fasce);
-  const [eccezioni, setEccezioni] = useState<EccezioneDisponibilita[]>((avvio ?? inizio).eccezioni);
-  const [dal, setDal] = useState((avvio ?? inizio).dal);
-  const [motivo, setMotivo] = useState((avvio ?? inizio).motivo);
-  const [luoghi, setLuoghi] = useState<string[]>((avvio ?? inizio).luoghi);
+  const [modo, setModo] = useState<ModoDisponibilita>(partenza.modo);
+  const [giorni, setGiorni] = useState<GiornoDisponibilita[]>(partenza.giorni);
+  const [fasce, setFasce] = useState<FasciaDisponibilita[]>(partenza.fasce);
+  const [eccezioni, setEccezioni] = useState<EccezioneDisponibilita[]>(partenza.eccezioni);
+  const [dal, setDal] = useState(partenza.dal ?? '');
+  const [motivo, setMotivo] = useState(partenza.motivoSenzaLuogo);
+  const [luoghi, setLuoghi] = useState<string[]>(dati.luoghi.map((l) => l.chiave));
   const [occupato, setOccupato] = useState(false);
   const nomeLuogo = (k: string) => dati.luoghi.find((l) => l.chiave === k)?.nome ?? tutti.find((l) => l.chiave === k)?.nome ?? k;
   const dalValido = dal === '' || /^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(dal);
-  const sporca = modo !== partenza.modo || !uguali(giorni, partenza.giorni) || !uguali(fasce, partenza.fasce) || !uguali(eccezioni, inizio.eccezioni)
+  const sporca = modo !== partenza.modo || !uguali(giorni, partenza.giorni) || !uguali(fasce, partenza.fasce) || !uguali(eccezioni, partenza.eccezioni)
     || dal !== (partenza.dal ?? '') || motivo !== partenza.motivoSenzaLuogo || !uguali(luoghi, dati.luoghi.map((l) => l.chiave));
-  const stato = useMemo<StatoDisponibilita>(() => ({ modo, giorni, fasce, eccezioni, dal, motivo, luoghi }), [modo, giorni, fasce, eccezioni, dal, motivo, luoghi]);
-  useBozzaPersistente(chiaveBozza, 'la disponibilità del Confidente', stato, inizio, { sporca });
-  /** «Scarta» sulla bozza ripristinata: i campi tornano com'è la disponibilità e la copia si cancella. */
-  const scarta = () => {
-    scartaBozzaPersistente(chiaveBozza);
-    setModo(inizio.modo); setGiorni(inizio.giorni); setFasce(inizio.fasce); setEccezioni(inizio.eccezioni); setDal(inizio.dal); setMotivo(inizio.motivo); setLuoghi(inizio.luoghi);
-    setRipristinata(false);
-  };
+  useBozzaSporca(`disponibilita:${chiave}`, 'la disponibilità del Confidente', sporca);
   const alterna = <T,>(lista: T[], v: T): T[] => (lista.includes(v) ? lista.filter((x) => x !== v) : [...lista, v]);
   const ordinati = <T,>(lista: T[], ordine: readonly T[]): T[] => ordine.filter((x) => lista.includes(x));
 
   const esegui = async (azione: () => Promise<DisponibilitaConfidenteDto>, esito: string) => {
     setOccupato(true);
-    try { await azione(); scartaBozzaPersistente(chiaveBozza); notifica('success', esito); await onSalvato(); onChiudi(); }
+    try { await azione(); notifica('success', esito); await onSalvato(); onChiudi(); }
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Operazione non riuscita.'); }
     finally { setOccupato(false); }
   };
@@ -166,7 +120,6 @@ function Corpo({ dati, tutti, chiave, onChiudi, onSalvato }: { dati: Disponibili
 
   return (
     <div className="flex flex-col gap-3 text-[13px]">
-      {ripristinata && sporca && <AvvisoBozzaRipristinata onScarta={scarta} />}
       <Selettore etichetta="Come si incontra" valore={modo} opzioni={MODI_DISPONIBILITA.map((m) => ({ chiave: m, nome: NOME_MODO[m] }))} onCambia={(v) => setModo(v as ModoDisponibilita)} disabilitato={occupato} />
       {modo === 'settimanale' && (
         <>
@@ -216,7 +169,7 @@ function Corpo({ dati, tutti, chiave, onChiudi, onSalvato }: { dati: Disponibili
       )}
       <div className="flex flex-wrap justify-end gap-2">
         {dati.modificata && <button type="button" className="btn btn-ghost touch" disabled={occupato} onClick={() => void esegui(() => ripristinaDisponibilitaStrutturata(chiave), 'Struttura ripristinata come nella fonte.')}>Ripristina la struttura</button>}
-        <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={() => { scartaBozzaPersistente(chiaveBozza); onChiudi(); }}>Annulla</button>
+        <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={onChiudi}>Annulla</button>
         <button type="button" className="btn btn-primary touch" disabled={occupato || !sporca || !dalValido} onClick={() => void salva()}>Salva</button>
       </div>
     </div>

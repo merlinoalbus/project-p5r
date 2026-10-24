@@ -1,57 +1,31 @@
-import { useId, useMemo, useState, type FormEvent } from 'react';
+import { useId, useState, type FormEvent } from 'react';
 import { CATEGORIE_OGGETTO, CATEGORIA_OGGETTO, eCategoriaOggetto, type CategoriaOggetto } from '../../../shared/catalogo';
 import type { CatalogoOggettoDto, DatiNuovoOggettoDto } from '../../types';
 import { aggiornaOggettoCatalogo, creaOggettoCatalogo } from '../../services/api/catalogoOggetti';
 import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
-import { AvvisoBozzaRipristinata } from '../shared/AvvisoBozzaRipristinata';
-import { leggiBozzaPersistente, scartaBozzaPersistente, useBozzaPersistente, validaPiatta } from '../../utils/bozzeSporche';
+import { useBozzaSporca } from '../../utils/bozzeSporche';
 
 interface Props { oggetto?: CatalogoOggettoDto; onChiudi: () => void; onSalvato: (oggetto: CatalogoOggettoDto) => void }
-/** I campi del modulo come si scrivono: i valori di partenza di una bozza e quel che si tiene in sessionStorage. */
-interface CampiOggetto { categoria: string; nome: string; sottocategoria: string; originale: string; altri: string; effetto: string; descrizione: string; statistiche: string; per: string }
 
 /** Si corregge l'identità, non la copia del listino: qui non esiste un campo prezzo. */
 export function ModuloOggetto({ oggetto, onChiudi, onSalvato }: Props) {
   const id = useId();
-  const chiaveBozza = `modulo-oggetto:${oggetto?.chiave ?? 'nuovo'}`;
-  // i campi con cui si apre; con una copia ritrovata in sessionStorage (pagina ricaricata) ripartono da lì, ma solo se l'oggetto è ancora com'era quando fu salvata
-  const [avvio] = useState(() => {
-    const partenza: CampiOggetto = {
-      categoria: oggetto?.categoria ?? 'altro', nome: oggetto?.nome ?? '', sottocategoria: oggetto?.sottocategoria ?? '', originale: oggetto?.nomeOriginale ?? '',
-      altri: oggetto?.nomiAltri.join('\n') ?? '', effetto: oggetto?.effetto ?? '', descrizione: oggetto?.descrizione ?? '',
-      statistiche: typeof oggetto?.statistiche?.testo === 'string' ? oggetto.statistiche.testo : '', per: typeof oggetto?.statistiche?.per === 'string' ? oggetto.statistiche.per : '',
-    };
-    const piatta = validaPiatta(partenza);
-    const salvata = leggiBozzaPersistente(chiaveBozza, partenza, (d) => { const s = piatta(d); return s && eCategoriaOggetto(s.categoria) ? s : null; });
-    return { partenza, campi: salvata ?? partenza, ripristinata: salvata !== null };
-  });
-  const [ripristinata, setRipristinata] = useState(avvio.ripristinata);
-  const [categoria, setCategoria] = useState<CategoriaOggetto>(avvio.campi.categoria as CategoriaOggetto);
-  const [nome, setNome] = useState(avvio.campi.nome);
-  const [sottocategoria, setSottocategoria] = useState(avvio.campi.sottocategoria);
-  const [originale, setOriginale] = useState(avvio.campi.originale);
-  const [altri, setAltri] = useState(avvio.campi.altri);
-  const [effetto, setEffetto] = useState(avvio.campi.effetto);
-  const [descrizione, setDescrizione] = useState(avvio.campi.descrizione);
-  const [statistiche, setStatistiche] = useState(avvio.campi.statistiche);
-  const [per, setPer] = useState(avvio.campi.per);
+  const [categoria, setCategoria] = useState<CategoriaOggetto>(oggetto?.categoria ?? 'altro');
+  const [nome, setNome] = useState(oggetto?.nome ?? '');
+  const [sottocategoria, setSottocategoria] = useState(oggetto?.sottocategoria ?? '');
+  const [originale, setOriginale] = useState(oggetto?.nomeOriginale ?? '');
+  const [altri, setAltri] = useState(oggetto?.nomiAltri.join('\n') ?? '');
+  const [effetto, setEffetto] = useState(oggetto?.effetto ?? '');
+  const [descrizione, setDescrizione] = useState(oggetto?.descrizione ?? '');
+  const [statistiche, setStatistiche] = useState(typeof oggetto?.statistiche?.testo === 'string' ? oggetto.statistiche.testo : '');
+  const [per, setPer] = useState(typeof oggetto?.statistiche?.per === 'string' ? oggetto.statistiche.per : '');
   const [occupato, setOccupato] = useState(false);
   const [errore, setErrore] = useState<string | null>(null);
   // i campi com'erano all'apertura: se sono cambiati e non salvati la bozza è sporca (per «Aggiorna» e la chiusura della scheda del browser)
-  const campiCorrenti = useMemo<CampiOggetto>(() => ({ categoria, nome, sottocategoria, originale, altri, effetto, descrizione, statistiche, per }),
-    [categoria, nome, sottocategoria, originale, altri, effetto, descrizione, statistiche, per]);
-  const sporca = JSON.stringify(campiCorrenti) !== JSON.stringify(avvio.partenza);
-  useBozzaPersistente(chiaveBozza, oggetto ? `modifica di «${oggetto.nome}»` : 'nuovo oggetto', campiCorrenti, avvio.partenza, { sporca });
-  /** Chiude scartando la bozza (anche la copia in sessionStorage): Annulla, X, Esc e salvataggio riuscito passano da qui. */
-  const chiudi = () => { scartaBozzaPersistente(chiaveBozza); onChiudi(); };
-  /** «Scarta» sulla bozza ripristinata: i campi tornano com'è l'oggetto e la copia si cancella. */
-  const scarta = () => {
-    const p = avvio.partenza;
-    scartaBozzaPersistente(chiaveBozza);
-    setCategoria(p.categoria as CategoriaOggetto); setNome(p.nome); setSottocategoria(p.sottocategoria); setOriginale(p.originale); setAltri(p.altri);
-    setEffetto(p.effetto); setDescrizione(p.descrizione); setStatistiche(p.statistiche); setPer(p.per); setRipristinata(false);
-  };
+  const statoModulo = JSON.stringify({ categoria, nome, sottocategoria, originale, altri, effetto, descrizione, statistiche, per });
+  const [statoIniziale] = useState(statoModulo);
+  useBozzaSporca('modulo-oggetto', oggetto ? `modifica di «${oggetto.nome}»` : 'nuovo oggetto', statoModulo !== statoIniziale);
   const equipaggiamento = CATEGORIA_OGGETTO[categoria].gruppo === 'equipaggiamento';
   const salva = async (e: FormEvent) => {
     e.preventDefault();
@@ -64,16 +38,15 @@ export function ModuloOggetto({ oggetto, onChiudi, onSalvato }: Props) {
       campi.statistiche = { ...oggetto?.statistiche, testo: statistiche.trim() || null, per: per.trim() || null };
     }
     const patch = oggetto ? Object.fromEntries(Object.entries(campi).filter(([k, v]) => JSON.stringify(v) !== JSON.stringify(oggetto[k as keyof CatalogoOggettoDto]))) as Partial<DatiNuovoOggettoDto> : campi;
-    if (oggetto && !Object.keys(patch).length) { chiudi(); return; }
+    if (oggetto && !Object.keys(patch).length) { onChiudi(); return; }
     setOccupato(true); setErrore(null);
-    try { const salvato = oggetto ? await aggiornaOggettoCatalogo(oggetto.chiave, patch) : await creaOggettoCatalogo(campi); scartaBozzaPersistente(chiaveBozza); onSalvato(salvato); }
+    try { onSalvato(oggetto ? await aggiornaOggettoCatalogo(oggetto.chiave, patch) : await creaOggettoCatalogo(campi)); }
     catch (e) { setErrore(e instanceof Error ? e.message : 'Oggetto non salvato.'); }
     finally { setOccupato(false); }
   };
-  return <Modal aperta larga titolo={oggetto ? `Modifica «${oggetto.nome}»` : 'Nuovo oggetto'} onChiudi={() => { if (!occupato) chiudi(); }}
-    azioni={<><button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={chiudi}>Annulla</button><button type="submit" form={id} className="btn btn-primary touch" disabled={occupato || !nome.trim()}>{occupato ? 'Salvataggio…' : 'Salva'}</button></>}>
+  return <Modal aperta larga titolo={oggetto ? `Modifica «${oggetto.nome}»` : 'Nuovo oggetto'} onChiudi={() => { if (!occupato) onChiudi(); }}
+    azioni={<><button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={onChiudi}>Annulla</button><button type="submit" form={id} className="btn btn-primary touch" disabled={occupato || !nome.trim()}>{occupato ? 'Salvataggio…' : 'Salva'}</button></>}>
     <form id={id} onSubmit={(e) => void salva(e)} className="flex flex-col gap-3">
-      {ripristinata && sporca && <AvvisoBozzaRipristinata onScarta={scarta} />}
       {errore && <p role="alert" className="m-0 text-[13px] text-error">{errore}</p>}
       <fieldset disabled={occupato} className="m-0 grid min-w-0 grid-cols-1 gap-3 border-0 p-0 sm:grid-cols-2">
         <label className="editor-mappa__campo sm:col-span-2">Nome<input className="form-input" value={nome} required maxLength={300} onChange={(e) => setNome(e.target.value)} /></label>
