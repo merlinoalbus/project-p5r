@@ -112,17 +112,18 @@ function luoghiDelleOmbre(conclusi: Map<string, string> | null, chiave?: string)
     if (!l) {
       const parametro = tipo === 'mementos' ? 'area' : 'infiltrazione';
       const motivo = tipo === 'palazzo' ? conclusi?.get(dungeon) : undefined;
-      l = { dungeon, dungeonNome: nomeDungeon, tipo, infiltrazione, areeDedalo: [], fonti: [], casa: infiltrazione ? `/guida/dungeon/${dungeon}?${parametro}=${encodeURIComponent(infiltrazione.chiave)}` : `/guida/dungeon/${dungeon}`,
+      l = { dungeon, dungeonNome: nomeDungeon, tipo, infiltrazione, areeDedalo: [], fonti: [], righe: [], casa: infiltrazione ? `/guida/dungeon/${dungeon}?${parametro}=${encodeURIComponent(infiltrazione.chiave)}` : `/guida/dungeon/${dungeon}`,
         raggiungibile: conclusi ? motivo === undefined : null, ...(motivo !== undefined ? { motivoNonRaggiungibile: motivo } : {}) };
       posti.set(k, l);
     }
     return l;
   };
-  for (const r of prepared(`SELECT l.ombra_chiave, l.dungeon_chiave, d.nome AS dungeon_nome, d.tipo, l.infiltrazione_chiave, a.nome AS infiltrazione_nome, l.fonte
+  for (const r of prepared(`SELECT l.id, l.ombra_chiave, l.dungeon_chiave, d.nome AS dungeon_nome, d.tipo, l.infiltrazione_chiave, a.nome AS infiltrazione_nome, l.fonte
       FROM ombra_luogo l JOIN dungeon d ON d.chiave = l.dungeon_chiave LEFT JOIN dungeon_area a ON a.chiave = l.infiltrazione_chiave
-      ${chiave ? 'WHERE l.ombra_chiave = ?' : ''} ORDER BY d.ordine, COALESCE(a.ordine, 0), l.id`).all(...(chiave ? [chiave] : [])) as Array<{ ombra_chiave: string; dungeon_chiave: string; dungeon_nome: string; tipo: string; infiltrazione_chiave: string | null; infiltrazione_nome: string | null; fonte: 'battaglia' | 'voce' | 'utente' }>) {
+      ${chiave ? 'WHERE l.ombra_chiave = ?' : ''} ORDER BY d.ordine, COALESCE(a.ordine, 0), l.id`).all(...(chiave ? [chiave] : [])) as Array<{ id: number; ombra_chiave: string; dungeon_chiave: string; dungeon_nome: string; tipo: string; infiltrazione_chiave: string | null; infiltrazione_nome: string | null; fonte: 'battaglia' | 'voce' | 'utente' }>) {
     const l = posto(r.ombra_chiave, r.dungeon_chiave, r.dungeon_nome, r.tipo, r.infiltrazione_chiave ? { chiave: r.infiltrazione_chiave, nome: r.infiltrazione_nome ?? r.infiltrazione_chiave } : null);
     if (!l.fonti.includes(r.fonte)) l.fonti.push(r.fonte);
+    l.righe.push({ id: r.id, fonte: r.fonte });
   }
   for (const r of prepared(`SELECT v.ombra_chiave, v.dungeon_chiave, d.nome AS dungeon_nome, d.tipo, v.dedalo_chiave, da.nome AS dedalo_nome, v.area_dedalo_chiave, ad.nome AS area_nome
       FROM ombra_luogo_dedalo v JOIN dungeon d ON d.chiave = v.dungeon_chiave JOIN dungeon_area da ON da.chiave = v.dedalo_chiave JOIN area_dedalo ad ON ad.chiave = v.area_dedalo_chiave

@@ -26,6 +26,8 @@ export interface OmbraLuogoDto {
   areeDedalo: Array<{ chiave: string; nome: string }>;
   /** Da dove viene il dato: la guida alla Battaglia, una voce Persona della guida (Palazzo o dedalo). */
   fonti: Array<'battaglia' | 'voce' | 'dedalo' | 'utente'>;
+  /** Le righe di `ombra_luogo` di questo posto (id e fonte), che si correggono col tipo `ombra-luogo`; vuote se il posto viene solo dalle voci dei dedali (vista, nessuna riga propria). */
+  righe: Array<{ id: number; fonte: 'battaglia' | 'voce' | 'utente' }>;
   /** Il link alla guida del posto. */
   casa: string;
   /**

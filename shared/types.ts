@@ -3458,6 +3458,7 @@ export const TIPI_MODIFICABILI = ['quartiere', 'trofeo', 'dote', 'trasformazione
   // R11-17/1: i dati veri che prima si cambiavano solo nel pacchetto
   'arcana', 'fusione-arcana', 'fusione-speciale', 'tesoro', 'eredita-tipo', 'dlc-set',
   'confidente', 'esame-premi', 'settimana-guida', 'evento-voce',
+  'ombra-luogo', 'ombra-voce',
   'negoziazione-variante', 'negoziazione-risposta', 'negoziazione-verdetto', 'negoziazione-umore',
   'dedalo-confluenza', 'mappa-dedalo', 'infiltrazione-dedalo',
   'oggetto-compendio', 'note-categorie-attivita', 'sinonimo-ricerca', 'abbreviazione-ricerca'] as const;

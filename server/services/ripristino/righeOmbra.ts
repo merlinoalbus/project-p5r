@@ -10,8 +10,16 @@
 // negoziabilità, il livello, le note e le affinità PROPRIE dell'Ombra (le differenze rispetto alla sua Persona: per ognuno dei dieci elementi
 // «come la Persona» oppure un esito). Le affinità della Persona si correggono dalla scheda Persona (`affinitaPersonaService`): qui non si
 // copiano. NON si correggono: la chiave (la usano luoghi, voci e partite), la Persona abbinata (l'ha in carico L8: cambia l'identità
-// dell'Ombra) e i luoghi d'incontro (derivati dalla guida dei Palazzi e dei Memento, che si correggono dai loro pin).
+// dell'Ombra). I luoghi d'incontro e le voci della guida si correggono a parte, con i due tipi qui sotto (R11-17/1).
 // Nei dati non ci sono PV né oggetti lasciati dalle Ombre: l'Ombra ha solo il livello (3 Ombre su 131), e quello c'è.
+//
+// Gli altri due oggetti «a riga» di questo gruppo (colonne `origine`, `seed_json`, `updated_at` della migrazione 225):
+//   - `ombra-luogo` (`ombra_luogo`, chiave = id della riga): DOVE si incontra l'Ombra, cioè il posto (Palazzo, o Palazzo e infiltrazione, o Memento e dedalo). Si corregge il
+//     posto di una riga esistente, qualunque ne sia la fonte. NON si correggono l'Ombra della riga (è la sua identità) né la fonte (dice da dove viene la riga). Non si
+//     aggiungono né si tolgono righe: il registro corregge valori sul posto. Le righe con fonte «voce» nascono dal pin: se la voce passa a un'altra Ombra la sua riga di
+//     luogo non la segue da sola, si corregge a parte.
+//   - `ombra-voce` (`ombra_voce`, chiave = chiave del pin): QUALE Ombra descrive la voce Persona della guida. Si corregge l'Ombra; la voce (il pin) è l'identità della riga.
+//     Le aree dei dedali dove si incontra l'Ombra (vista `ombra_luogo_dedalo`) si ricalcolano da sole da questo legame.
 // ============================================================
 
 import { prepared } from '../../db/dbService.js';
@@ -20,6 +28,7 @@ import { ELEMENTI_AFFINITA, ESITI_AFFINITA, NOME_PERSONALITA, PERSONALITA_OMBRA,
 import type { ValoreCampoCorrezione } from '../../../shared/types.js';
 import type { CampoDef } from './registro.js';
 import type { DefRiga, Valori } from './righe.js';
+import { colonna, rigaDaColonne } from './righeComuni.js';
 
 const str = (v: ValoreCampoCorrezione | undefined): string | null => (typeof v === 'string' ? v : null);
 const NEGOZIABILE = [{ chiave: '', nome: 'Non verificata' }, { chiave: '1', nome: 'Sì, si negozia' }, { chiave: '0', nome: 'No, non si negozia' }];
@@ -101,4 +110,82 @@ const ombra: DefRiga = {
   },
 };
 
-export const DEFINIZIONI_OMBRA: { ombra: DefRiga } = { ombra };
+// ---- Luoghi d'incontro (ombra_luogo) ----
+
+const FONTE_LUOGO: Record<string, string> = { battaglia: 'dalla guida alla Battaglia', voce: 'da una voce Persona della guida', utente: 'aggiunto dall’utente' };
+const CHIAVE_LUOGO = 'CAST(id AS TEXT)';
+/** La chiave di un posto: «dungeon|infiltrazione» (l'infiltrazione manca se la fonte dice soltanto il Palazzo). */
+const chiavePosto = (dungeon: string, infiltrazione: string | null): string => `${dungeon}|${infiltrazione ?? ''}`;
+const dividiPosto = (k: string): { dungeon: string; infiltrazione: string | null } => {
+  const i = k.indexOf('|');
+  const inf = k.slice(i + 1);
+  return { dungeon: k.slice(0, i), infiltrazione: inf === '' ? null : inf };
+};
+
+/** Tutti i posti dove si può incontrare un'Ombra, con il nome: ogni Palazzo o Memento da solo, e ognuna delle sue infiltrazioni (dedali per i Memento). */
+function postiScelta(): Array<{ chiave: string; nome: string }> {
+  const dungeon = prepared('SELECT chiave, nome FROM dungeon ORDER BY ordine, chiave').all() as Array<{ chiave: string; nome: string }>;
+  const aree = prepared('SELECT chiave, nome, dungeon_chiave FROM dungeon_area ORDER BY ordine, chiave').all() as Array<{ chiave: string; nome: string; dungeon_chiave: string }>;
+  return dungeon.flatMap((d) => [
+    { chiave: chiavePosto(d.chiave, null), nome: `${d.nome} (senza un punto preciso)` },
+    ...aree.filter((a) => a.dungeon_chiave === d.chiave).map((a) => ({ chiave: chiavePosto(d.chiave, a.chiave), nome: `${d.nome} › ${a.nome}` })),
+  ]);
+}
+
+const nomePosto = (k: string): string => postiScelta().find((p) => p.chiave === k)?.nome ?? k;
+
+interface RigaLuogo { ombra_chiave: string; dungeon_chiave: string; infiltrazione_chiave: string | null; fonte: string }
+const rigaLuogo = (chiave: string): RigaLuogo =>
+  prepared(`SELECT ombra_chiave, dungeon_chiave, infiltrazione_chiave, fonte FROM ombra_luogo WHERE ${CHIAVE_LUOGO} = ?`).get(chiave) as RigaLuogo;
+
+/** Una riga dello stesso tipo (Ombra e fonte) è già in quel posto: l'indice unico lo vieta, e l'errore deve essere chiaro. */
+function esigiPostoLibero(chiave: string, posto: string, codice: string): void {
+  const r = rigaLuogo(chiave);
+  const { dungeon, infiltrazione } = dividiPosto(posto);
+  const altra = prepared(`SELECT 1 FROM ombra_luogo WHERE ombra_chiave = ? AND dungeon_chiave = ? AND IFNULL(infiltrazione_chiave, '') = ? AND fonte = ? AND ${CHIAVE_LUOGO} <> ?`)
+    .get(r.ombra_chiave, dungeon, infiltrazione ?? '', r.fonte, chiave);
+  if (altra) throw httpErrors.conflict(codice, `Quest’Ombra ha già un luogo d’incontro «${FONTE_LUOGO[r.fonte] ?? r.fonte}» in «${nomePosto(posto)}»: scegli un altro posto.`);
+}
+
+const ombraLuogo: DefRiga = {
+  modalita: 'riga', etichetta: 'Luogo d’incontro', tabella: 'ombra_luogo', colonnaChiave: CHIAVE_LUOGO,
+  chiavi: () => (prepared('SELECT CAST(id AS TEXT) FROM ombra_luogo ORDER BY id').pluck().all() as string[]),
+  esiste: (chiave) => !!prepared(`SELECT 1 FROM ombra_luogo WHERE ${CHIAVE_LUOGO} = ?`).get(chiave),
+  campi: () => [{ p: 'posto', e: 'Dove si incontra', t: 'scelta', opzioni: postiScelta() } as CampoDef],
+  leggi: (chiave) => {
+    const r = rigaLuogo(chiave);
+    return { posto: chiavePosto(r.dungeon_chiave, r.infiltrazione_chiave) };
+  },
+  scrivi: (chiave, v) => {
+    if (typeof v.posto !== 'string') return;
+    const { dungeon, infiltrazione } = dividiPosto(v.posto);
+    prepared(`UPDATE ombra_luogo SET dungeon_chiave = ?, infiltrazione_chiave = ? WHERE ${CHIAVE_LUOGO} = ?`).run(dungeon, infiltrazione, chiave);
+  },
+  nome: (chiave, v) => {
+    const r = rigaLuogo(chiave);
+    const ombra = (prepared('SELECT nome FROM ombra WHERE chiave = ?').pluck().get(r.ombra_chiave) as string | undefined) ?? r.ombra_chiave;
+    return `Dove si incontra «${ombra}»: ${nomePosto(String(v.posto))}`;
+  },
+  valida: (chiave, fusi) => { if (typeof fusi.posto === 'string') esigiPostoLibero(chiave, fusi.posto, 'luogo-gia-presente'); },
+  // il posto della guida deve esistere ancora e non essere occupato da un'altra riga della stessa fonte
+  verificaRipristino: (chiave, guida) => {
+    if (typeof guida.posto !== 'string') return;
+    if (!postiScelta().some((p) => p.chiave === guida.posto)) throw httpErrors.conflict('luogo-originale-mancante', 'Il posto della guida non esiste più: non si può rimettere.');
+    esigiPostoLibero(chiave, guida.posto, 'luogo-originale-occupato');
+  },
+};
+
+// ---- Voci della guida (ombra_voce) ----
+
+const ombreScelta = (): Array<{ chiave: string; nome: string }> => prepared('SELECT chiave, nome FROM ombra ORDER BY nome COLLATE NOCASE, chiave').all() as Array<{ chiave: string; nome: string }>;
+
+const ombraVoce: DefRiga = rigaDaColonne({
+  etichetta: 'Voce dell’Ombra', tabella: 'ombra_voce', colonnaChiave: 'voce_chiave', ordine: 'voce_chiave',
+  colonne: () => [colonna({ p: 'ombra', e: 'Ombra descritta dalla voce', t: 'scelta', opzioni: ombreScelta() }, 'ombra_chiave', 'scelta')],
+  nome: (chiave) => {
+    const r = prepared(`SELECT p.nome, d.nome AS dungeon FROM punto_interesse p LEFT JOIN dungeon_area a ON a.chiave = p.area_chiave LEFT JOIN dungeon d ON d.chiave = a.dungeon_chiave WHERE p.chiave = ?`).get(chiave) as { nome: string; dungeon: string | null } | undefined;
+    return r ? `Voce «${r.nome}»${r.dungeon ? ` (${r.dungeon})` : ''}: quale Ombra descrive` : `Voce «${chiave}»`;
+  },
+});
+
+export const DEFINIZIONI_OMBRA: { ombra: DefRiga; 'ombra-luogo': DefRiga; 'ombra-voce': DefRiga } = { ombra, 'ombra-luogo': ombraLuogo, 'ombra-voce': ombraVoce };
