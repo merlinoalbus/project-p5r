@@ -202,7 +202,7 @@ export function bonificaInformazioniMakoto(db: AppDatabase): void {
   if (s.registro?.bonifica) return;
   const registro = s.registro ?? nuovoRegistro(chiave, s.raw);
   if (!s.raw) registro.bonifica = { esito: 'assente', motivo: 'Riga assente, non ricreata. La creazione resta esplicita.' };
-  else if (!uguali(s.raw, MAKOTO_PUBBLICO)) registro.bonifica = { esito: 'esclusa', motivo: 'Firma RAW degli otto campi diversa dalla fotografia pubblica: nessuna modifica; proposta esplicita disponibile nell’editor.' };
+  else if (!uguali(s.raw, MAKOTO_PUBBLICO)) registro.bonifica = { esito: 'esclusa', motivo: 'Firma RAW degli otto campi diversa dalla fotografia pubblica: nessuna modifica; la modifica manuale resta disponibile nell’editor.' };
   else {
     const dopo = dopoProposta(s.raw);
     const colonne = CAMPI_RAW.filter(c => s.raw![c] !== dopo[c]);
