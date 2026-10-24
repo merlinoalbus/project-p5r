@@ -245,7 +245,8 @@ function ripristinaRiga(tipo: TipoModificabile, chiave: string, campi?: string[]
     const dopo = def.leggi(chiave);
     const traccia = soloTraccia(seed);
     def.propaga?.(chiave, attuale, dopo, { ripristino: true, traccia });
-    scriviMetaRiga(def, chiave, { ...seed, ...traccia }, dopo);
+    // la propagazione può cambiare i valori (la resa italiana di una skill): lo stato (origine, fotografia) si decide su quelli di adesso, riletti dopo
+    scriviMetaRiga(def, chiave, { ...seed, ...traccia }, def.leggi(chiave));
   })();
   return daRimettere;
 }
