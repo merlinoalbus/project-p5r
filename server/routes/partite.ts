@@ -17,6 +17,7 @@ import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, obiettivi } from '.
 import { aggiornaPianoSalvato, eliminaPianoSalvato, pianiSalvati, salvaPiano } from '../services/pianiSalvatiService.js';
 import { anteprimaFusione, eseguiForca, eseguiFusione, eseguiIsolamento, skillResistenzaIsolamento } from '../services/operazioniVellutoService.js';
 import { aggiornaCiclo, avanzaCiclo, cicliSalvati, eliminaCiclo, salvaCiclo } from '../services/cicliSalvatiService.js';
+import { capienzaScorta } from '../services/capienzaScortaService.js';
 import { impostaDomandaFatta } from '../services/domandeService.js';
 import { impostaPiazzamentoEsame } from '../services/piazzamentoEsamiService.js';
 import { impostaStatoPunto } from '../services/dungeonService.js';
@@ -286,6 +287,9 @@ router.delete('/:id/divergenze/:spilloUid', validate({ params: z.object({ id: id
 });
 
 // ---- Persona possedute ----
+router.get('/:id/scorta/capienza', validate({ params: paramsPartita }), (req, res) => {
+  res.json(capienzaScorta(Number(req.params.id)));
+});
 router.get('/:id/persona', validate({ params: paramsPartita }), (req, res) => {
   res.json(personePossedute(Number(req.params.id)));
 });

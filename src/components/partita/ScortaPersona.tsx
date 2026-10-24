@@ -4,19 +4,21 @@
 
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { aggiornaPosseduta, aggiungiPosseduta, getPersone, getPossedute, getSkills, isApiError, rimuoviPosseduta, getCompendioPartita, registraPosseduta } from '../../services/api';
+import { aggiornaPosseduta, aggiungiPosseduta, getCapienzaScorta, getPersone, getPossedute, getSkills, isApiError, rimuoviPosseduta, getCompendioPartita, registraPosseduta } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { PageState, EmptyState } from '../shared/PageState';
 import { Modal } from '../shared/Modal';
 import { CampoRicerca } from '../shared/CampoRicerca';
+import { Selettore } from '../shared/Selettore';
 import { ElementoChip } from '../compendio/ElementoChip';
 import { StatisticheBarre } from '../compendio/StatisticheBarre';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
 import { CHIAVI_STATISTICHE, origineStima, statisticheStimate } from '../../../shared/statistiche';
-import type { OsservazioneStatisticheDto, PersonaPossedutaDto, StatisticheDto } from '../../types';
+import type { CapienzaScortaDto, OsservazioneStatisticheDto, PersonaPossedutaDto, StatisticheDto } from '../../types';
 import { statoIstantanea } from '../../utils/istantaneaPersona';
-import { SIGLA_STATISTICA } from '../../utils/elementi';
+import { SIGLA_STATISTICA, coloreElemento } from '../../utils/elementi';
+import { AssetImg } from '../shared/AssetImg';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 
@@ -29,6 +31,36 @@ export function ScortaPersona({ partitaId }: Props) {
   const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => getPossedute(partitaId), [partitaId]);
   const [aggiunta, setAggiunta] = useState(false);
   const [modifica, setModifica] = useState<PersonaPossedutaDto | null>(null);
+  /** La Persona aperta nel cassetto (per id: si legge sempre dall'elenco corrente, così livello e stato restano aggiornati). */
+  const [selezionata, setSelezionata] = useState<number | null>(null);
+  const scelta = useMemo(() => dati?.find((x) => x.id === selezionata) ?? null, [dati, selezionata]);
+  // la capienza è un'informazione in più: se la lettura fallisce la scorta si mostra comunque, senza tacche
+  const capienza = useCarica(() => getCapienzaScorta(partitaId), [partitaId]);
+  const [vista, setVista] = useState<VistaScorta>(leggiVista);
+  const [filtriAperti, setFiltriAperti] = useState(false);
+  const cambiaVista = (parte: Partial<VistaScorta>) => {
+    const nuova = { ...vista, ...parte };
+    setVista(nuova);
+    salvaVista(nuova);
+  };
+  const arcani = useMemo(() => [...new Set((dati ?? []).map((p) => p.arcanaNome))].sort((a, b) => a.localeCompare(b, 'it')), [dati]);
+  const opzioniArcani = useMemo(() => arcani.map((a) => ({ chiave: a, nome: a })), [arcani]);
+  /** Se l'arcano ricordato non c'è più fra le Persona, il filtro non vale (altrimenti l'elenco resterebbe vuoto senza spiegazione). */
+  const arcanoValido = vista.arcano !== '' && arcani.includes(vista.arcano) ? vista.arcano : '';
+  const visibili = useMemo(() => {
+    const testo = vista.q.trim().toLowerCase();
+    const filtrate = (dati ?? []).filter((p) =>
+      (vista.presenza === 'tutte' || (vista.presenza === 'squadra' ? p.inSquadra : !p.inSquadra))
+      && (arcanoValido === '' || p.arcanaNome === arcanoValido)
+      && (testo === '' || p.nome.toLowerCase().includes(testo) || p.nomeIt.toLowerCase().includes(testo) || p.arcanaNome.toLowerCase().includes(testo)));
+    return [...filtrate].sort((a, b) => (vista.ordine === 'arcano' ? a.arcanaNome.localeCompare(b.arcanaNome, 'it') : 0) || b.livello - a.livello || a.nomeIt.localeCompare(b.nomeIt, 'it'));
+  }, [dati, vista.q, vista.presenza, vista.ordine, arcanoValido]);
+  const filtriAttivi = (vista.presenza !== 'tutte' ? 1 : 0) + (arcanoValido !== '' ? 1 : 0) + (vista.ordine !== 'livello' ? 1 : 0);
+  const filtroOn = vista.q.trim() !== '' || vista.presenza !== 'tutte' || arcanoValido !== '';
+  /** I posti liberi mostrati in griglia: solo se la capienza è nota e nessun filtro nasconde parte della scorta. */
+  const postiCapienza = capienza.dati?.capienza ?? null;
+  const postiLiberi = postiCapienza !== null && !filtroOn ? Math.max(0, postiCapienza - (dati?.length ?? 0)) : 0;
+  const addInTesta = postiLiberi === 0;
   const compendio = useCarica(() => getCompendioPartita(partitaId), [partitaId]);
   const istantanee = useMemo(() => new Map((compendio.dati ?? []).map((c) => [c.personaId, c])), [compendio.dati]);
   const [registrazione, setRegistrazione] = useState<number | null>(null);
@@ -75,6 +107,7 @@ export function ScortaPersona({ partitaId }: Props) {
     if (!dati || !window.confirm(`Rimuovere ${p.nomeIt} dalla scorta? Resta registrata nel compendio.`)) return;
     try {
       await rimuoviPosseduta(partitaId, p.id);
+      setSelezionata(null);
       imposta((correnti) => correnti.filter((x) => x.id !== p.id));
       notifica('info', `${p.nomeIt} rimossa dalla scorta.`);
     } catch (err) {
@@ -84,59 +117,83 @@ export function ScortaPersona({ partitaId }: Props) {
 
   return (
     <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
-      <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
-        <span className="text-[13px] text-text-muted">{dati?.length ?? 0} Persona in scorta</span>
-        <button type="button" className="btn btn-primary" onClick={() => setAggiunta(true)}>+ Aggiungi Persona</button>
-      </div>
-      {dati && dati.length === 0 ? (
+      {/* capienza in testa: quanti posti sono occupati e quando salgono (dal rango di Igor) */}
+      <IntestazioneCapienza quante={dati?.length ?? 0} capienza={capienza.dati ?? null} />
+      {dati && dati.length === 0 && (
         <EmptyState illustrazione="vuoto-persona" title="La scorta è vuota" hint="Aggiungi le Persona che possiedi nel gioco: livello, skill e statistiche vengono precompilati dal compendio." />
-      ) : (
-        <ul className="m-0 p-0 list-none grid gap-2 grid-cols-1 xl:grid-cols-2">
-          {dati?.map((p) => (
-            <li key={p.id} className="card flex flex-col gap-2">
-              <div className="flex items-center gap-2 flex-wrap">
-                <ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={64} />
-                <span className="flex items-center gap-1">
-                  <span className="w-11 h-11 rounded-md bg-bg-tertiary flex items-center justify-center font-bold text-primary" title="Livello">{p.livello}</span>
-                  <PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Livello"
-                    disabled={salita === p.id || p.livello >= 99} onClick={() => void saliDiLivello(p)}
-                    aria-label={`Sali di livello: ${p.nomeIt} al livello ${p.livello + 1}`}
-                    title={`Porta ${p.nomeIt} al livello ${p.livello + 1}. Le statistiche restano una stima: registra con «Modifica» quelle lette nel gioco`} />
-                </span>
-                <Link to={`/compendio/persona/${p.personaId}`} className="font-semibold text-[15px] no-underline text-text hover:text-primary">{p.nomeIt}</Link>
-                {p.nomeIt !== p.nome && <span className="text-[12px] text-text-muted">{p.nome}</span>}
-                <span className="chip">{p.arcanaNome}</span>
-                {!p.inSquadra && <span className="chip">In deposito</span>}
-                {p.statisticheConfermate
-                  ? <span className="chip chip--attivo" title="Statistiche lette nel gioco a questo livello">Valori reali</span>
-                  : p.origineStima === 'osservate' && p.osservate
-                    ? <span className="chip" title={`Stima dai valori reali registrati al livello ${p.osservate.livello}: ${descriviOsservate(p.osservate)}`}>Stima dal liv. {p.osservate.livello}</span>
-                    : <span className="chip" title={p.osservate ? `Stima dalla base del dataset: il livello ${p.livello} è sotto quello dei valori reali registrati (${p.osservate.livello})` : 'Stima dalla base del dataset: registra i valori letti nel gioco con «Modifica»'}>Stima</span>}
-                {!p.statisticheBase && <span className="chip chip--attivo" title={descriviBonus(p.bonus)}>Bonus {totaleBonus(p.bonus) > 0 ? '+' : ''}{totaleBonus(p.bonus)}</span>}
-                {(() => { const st = statoIstantanea(p, istantanee.get(p.personaId)); return st === 'aggiornata' ? <span className="chip" title="Il compendio conserva questa versione">Registrata</span> : null; })()}
-                <span className="flex-1" />
-                {statoIstantanea(p, istantanee.get(p.personaId)) !== 'aggiornata' && (
-                  <PulsanteVisivo compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Registra" dettaglio={statoIstantanea(p, istantanee.get(p.personaId)) === 'assente' ? 'nel compendio' : 'aggiorna il compendio'} disabled={registrazione === p.id} onClick={() => void registra(p)} title="Salva nel compendio livello, bonus, skill e tratto di questo esemplare: l'evocazione dal Registro li ripristina" />
-                )}
-                <PulsanteVisivo compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" onClick={() => setModifica(p)} />
-                <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Rimuovi" onClick={() => void rimuovi(p)} />
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {p.skill.map((s) => (
-                  <Link key={s.slot} to={`/skill/${s.id}`} className="no-underline" title={s.effettoNome}>
-                    <ElementoChip elemento={s.elemento} nome={s.nomeIt} piccolo />
-                  </Link>
-                ))}
-              </div>
-              {p.tratto && <div className="text-[12px] text-text-secondary">Tratto: <strong className="text-text">{p.tratto.nomeIt}</strong> — {p.tratto.effettoNome}</div>}
-              <details className="text-[13px]">
-                <summary className="cursor-pointer text-text-secondary touch flex items-center">Statistiche al livello {p.livello} {p.statisticheConfermate ? '(valori reali letti nel gioco)' : `(${p.origineStima === 'osservate' && p.osservate ? `stima dai valori reali del livello ${p.osservate.livello}` : 'stima del livello'}${p.statisticheBase ? '' : ` più bonus ${descriviBonus(p.bonus)}`})`}</summary>
-                <div className="pt-2"><StatisticheBarre statistiche={p.statistiche} base={p.statisticheStimate} compatta /></div>
-              </details>
-            </li>
-          ))}
-        </ul>
       )}
+      {dati && (
+        <>
+          {/* senza un posto libero in griglia (capienza ignota, scorta piena, filtri attivi) il comando sta in testa */}
+          {addInTesta && <div className="mb-2"><button type="button" className="btn btn-primary touch" onClick={() => setAggiunta(true)}>+ Aggiungi Persona</button></div>}
+          {dati.length > 0 && (
+            <div className="scorta-strumenti">
+              <CampoRicerca valore={vista.q} onCambia={(q) => cambiaVista({ q })} segnaposto="Cerca una Persona…" />
+              <button type="button" className="chip touch sm:hidden" aria-expanded={filtriAperti} onClick={() => setFiltriAperti((v) => !v)}>Filtri{filtriAttivi > 0 ? ` (${filtriAttivi})` : ''}</button>
+              <div className={`${filtriAperti ? 'flex' : 'hidden'} sm:flex scorta-strumenti__filtri`}>
+                <div className="flex gap-1 flex-wrap" role="group" aria-label="Presenza">
+                  {FILTRI_PRESENZA.map((f) => (
+                    <button key={f.k} type="button" className={`chip touch ${vista.presenza === f.k ? 'chip--attivo' : ''}`} aria-pressed={vista.presenza === f.k} onClick={() => cambiaVista({ presenza: f.k })}>{f.l}</button>
+                  ))}
+                </div>
+                <Selettore compatto etichetta="Arcano" valore={arcanoValido} vuoto="Tutti" opzioni={opzioniArcani} ricerca="mai" onCambia={(arcano) => cambiaVista({ arcano })} />
+                <Selettore compatto etichetta="Ordina per" valore={vista.ordine} opzioni={ORDINI} ricerca="mai" onCambia={(o) => cambiaVista({ ordine: o === 'arcano' ? 'arcano' : 'livello' })} />
+              </div>
+            </div>
+          )}
+          <ul className="griglia-scorta">
+            {visibili.map((p) => {
+              const st = statoIstantanea(p, istantanee.get(p.personaId));
+              return (
+                <li key={p.id} className={`riga-persona ${p.inSquadra ? '' : 'riga-persona--deposito'}`}>
+                  <button type="button" className="riga-persona__scelta" aria-haspopup="dialog" onClick={() => setSelezionata(p.id)}
+                    aria-label={`${p.nomeIt}, ${p.arcanaNome}, livello ${p.livello}${p.inSquadra ? '' : ', in deposito'}: apri la gestione`}>
+                    <ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={44} />
+                    <span className="riga-persona__testo">
+                      <span className="riga-persona__nome">
+                        <span className="truncate">{p.nomeIt}</span>
+                        <span className={`punto-stato ${p.statisticheConfermate ? 'punto-stato--reali' : 'punto-stato--stima'}`} role="img"
+                          aria-label={p.statisticheConfermate ? 'Statistiche reali' : 'Statistiche stimate'}
+                          title={p.statisticheConfermate ? 'Statistiche lette nel gioco a questo livello' : 'Statistiche stimate'} />
+                        {st === 'aggiornata' && <span className="riga-persona__registrata" title="Registrata nel compendio"><IconaAzione chiave="registra" dimensione={14} /><span className="sr-only">Registrata nel compendio</span></span>}
+                      </span>
+                      <span className="riga-persona__arcano">{p.arcanaNome}{p.inSquadra ? '' : ' · in deposito'}</span>
+                      <span className="riga-persona__skill">
+                        {p.skill.map((s) => <QuadratoSkill key={s.slot} elemento={s.elemento} nome={s.nomeIt} />)}
+                      </span>
+                    </span>
+                    <span className="riga-persona__livello"><span>{p.livello}</span><small>LIV</small></span>
+                  </button>
+                </li>
+              );
+            })}
+            {Array.from({ length: postiLiberi }, (_, i) => (
+              <li key={`libero-${i}`}>
+                {i === 0
+                  ? <button type="button" className="posto-libero posto-libero--aggiungi touch" onClick={() => setAggiunta(true)}>+ Aggiungi Persona</button>
+                  : <span className="posto-libero">libero</span>}
+              </li>
+            ))}
+          </ul>
+          {dati.length > 0 && visibili.length === 0 && <p className="m-0 py-3 text-[13px] text-text-muted">Nessuna Persona corrisponde ai filtri.</p>}
+        </>
+      )}
+
+      {/* il cassetto della Persona: tutti i comandi della scheda; la finestra «Modifica» si apre sopra di lui */}
+      <Modal titolo={scelta ? `${scelta.nomeIt}` : 'Persona'} aperta={scelta !== null} onChiudi={() => setSelezionata(null)} cassetto>
+        {scelta && (
+          <DettaglioPersona
+            p={scelta}
+            stato={statoIstantanea(scelta, istantanee.get(scelta.personaId))}
+            inSalita={salita === scelta.id}
+            inRegistrazione={registrazione === scelta.id}
+            onSali={() => void saliDiLivello(scelta)}
+            onRegistra={() => void registra(scelta)}
+            onModifica={() => setModifica(scelta)}
+            onRimuovi={() => void rimuovi(scelta)}
+          />
+        )}
+      </Modal>
 
       <AggiungiPersonaModal
         aperta={aggiunta}
@@ -153,6 +210,162 @@ export function ScortaPersona({ partitaId }: Props) {
         />
       )}
     </PageState>
+  );
+}
+
+// ---- Vista: ricerca, filtri e ordine, ricordati per visitatore (localStorage; la scheda funziona anche senza) ----
+
+interface VistaScorta {
+  q: string;
+  presenza: 'tutte' | 'squadra' | 'deposito';
+  arcano: string;
+  ordine: 'livello' | 'arcano';
+}
+
+const CHIAVE_VISTA = 'p5r.scortaPersona.vista';
+const VISTA_PREDEFINITA: VistaScorta = { q: '', presenza: 'tutte', arcano: '', ordine: 'livello' };
+const ORDINI = [{ chiave: 'livello', nome: 'Livello' }, { chiave: 'arcano', nome: 'Arcano' }];
+const FILTRI_PRESENZA: Array<{ k: VistaScorta['presenza']; l: string }> = [{ k: 'tutte', l: 'Tutte' }, { k: 'squadra', l: 'In squadra' }, { k: 'deposito', l: 'In deposito' }];
+
+/** La vista salvata (filtro di presenza, arcano, ordine); la ricerca di testo non si ricorda. Se manca o è illeggibile, quella predefinita. */
+function leggiVista(): VistaScorta {
+  try {
+    const grezzo = window.localStorage.getItem(CHIAVE_VISTA);
+    if (grezzo) {
+      const o = JSON.parse(grezzo) as Partial<Record<keyof VistaScorta, unknown>>;
+      return {
+        q: '',
+        presenza: o.presenza === 'squadra' || o.presenza === 'deposito' ? o.presenza : 'tutte',
+        arcano: typeof o.arcano === 'string' ? o.arcano : '',
+        ordine: o.ordine === 'arcano' ? 'arcano' : 'livello',
+      };
+    }
+  } catch { /* storage assente o contenuto illeggibile: vale la vista predefinita */ }
+  return { ...VISTA_PREDEFINITA };
+}
+
+/** Ricorda la vista; se lo storage non risponde si perde solo il ricordo. */
+function salvaVista(v: VistaScorta): void {
+  try {
+    window.localStorage.setItem(CHIAVE_VISTA, JSON.stringify({ presenza: v.presenza, arcano: v.arcano, ordine: v.ordine }));
+  } catch { /* storage pieno o bloccato */ }
+}
+
+// ---- Capienza in testa ----
+
+/** «n / capienza» con i posti come tacche e la frase su quando la capienza sale (rango di Igor). Senza capienza nota: solo il conteggio. */
+function IntestazioneCapienza({ quante, capienza }: { quante: number; capienza: CapienzaScortaDto | null }) {
+  const cap = capienza?.capienza ?? null;
+  const prossimo = capienza?.prossimo ?? null;
+  const primoGradino = capienza?.gradini[0] ?? null;
+  let frase: string | null = null;
+  if (capienza) {
+    if (prossimo) frase = `Sale a ${prossimo.capienza} al rango ${prossimo.rango} di Igor (ora rango ${capienza.rangoIgor}).`;
+    else if (cap !== null) frase = `Capienza massima: Igor è al rango ${capienza.rangoIgor}.`;
+    if (cap === null && primoGradino) frase = `Il valore di partenza non è nei dati: sale a ${primoGradino.capienza} al rango ${primoGradino.rango} di Igor (ora rango ${capienza.rangoIgor}).`;
+  }
+  return (
+    <div className="scorta-capienza">
+      <span className="scorta-capienza__numero">
+        <b>{cap !== null ? `${quante} / ${cap}` : quante}</b>
+        <small>Persona in scorta</small>
+      </span>
+      {cap !== null && (
+        <span className="scorta-capienza__tacche" role="img" aria-label={`${Math.min(quante, cap)} posti occupati su ${cap}`}>
+          {Array.from({ length: cap }, (_, i) => <i key={i} className={i < quante ? '' : 'scorta-capienza__vuota'} />)}
+        </span>
+      )}
+      {frase && <small className="scorta-capienza__frase">{frase}</small>}
+    </div>
+  );
+}
+
+/** Una skill come piccolo quadrato con l'icona e il colore dell'elemento (il nome sta nel titolo). */
+function QuadratoSkill({ elemento, nome }: { elemento: string; nome: string }) {
+  const colore = coloreElemento(elemento);
+  return (
+    <span className="quadrato-skill" title={nome} style={{ borderColor: colore, background: `color-mix(in srgb, ${colore} 18%, transparent)` }}>
+      <AssetImg nome={`elementi/${elemento}`} alt="" decorativa className="w-3.5 h-3.5 object-contain" fallback={<span className="inline-block w-2 h-2 rounded-full" style={{ background: colore }} aria-hidden="true" />} />
+      <span className="sr-only">{nome}</span>
+    </span>
+  );
+}
+
+// ---- Cassetto: tutti i comandi e le informazioni della Persona ----
+
+interface PropsDettaglio {
+  p: PersonaPossedutaDto;
+  stato: ReturnType<typeof statoIstantanea>;
+  inSalita: boolean;
+  inRegistrazione: boolean;
+  onSali: () => void;
+  onRegistra: () => void;
+  onModifica: () => void;
+  onRimuovi: () => void;
+}
+
+/** Il contenuto del cassetto: testata con livello, comandi (Livello +, Registra, Modifica, Rimuovi), cartellini di stato, skill, tratto e statistiche. */
+function DettaglioPersona({ p, stato, inSalita, inRegistrazione, onSali, onRegistra, onModifica, onRimuovi }: PropsDettaglio) {
+  return (
+    <div className="flex flex-col gap-3 min-w-0">
+      <div className="flex items-center gap-3">
+        <ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={64} />
+        <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+          <Link to={`/compendio/persona/${p.personaId}`} className="font-semibold text-[17px] no-underline text-text hover:text-primary">{p.nomeIt}</Link>
+          {p.nomeIt !== p.nome && <span className="text-[12px] text-text-muted">{p.nome}</span>}
+          <span className="text-[13px] text-text-secondary">{p.arcanaNome} · {p.inSquadra ? 'in squadra' : 'in deposito'}</span>
+        </div>
+        <div className="riga-persona__livello riga-persona__livello--grande" title="Livello"><span>{p.livello}</span><small>LIV</small></div>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Livello"
+          disabled={inSalita || p.livello >= 99} onClick={onSali}
+          aria-label={`Sali di livello: ${p.nomeIt} al livello ${p.livello + 1}`}
+          title={`Porta ${p.nomeIt} al livello ${p.livello + 1}. Le statistiche restano una stima: registra con «Modifica» quelle lette nel gioco`} />
+        {stato !== 'aggiornata' && (
+          <PulsanteVisivo compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Registra" dettaglio={stato === 'assente' ? 'nel compendio' : 'aggiorna il compendio'} disabled={inRegistrazione} onClick={onRegistra} title="Salva nel compendio livello, bonus, skill e tratto di questo esemplare: l'evocazione dal Registro li ripristina" />
+        )}
+        <PulsanteVisivo compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" onClick={onModifica} />
+        <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Rimuovi" onClick={onRimuovi} />
+      </div>
+
+      <div className="flex flex-wrap gap-1">
+        {p.statisticheConfermate
+          ? <span className="chip chip--attivo" title="Statistiche lette nel gioco a questo livello">Valori reali</span>
+          : p.origineStima === 'osservate' && p.osservate
+            ? <span className="chip" title={`Stima dai valori reali registrati al livello ${p.osservate.livello}: ${descriviOsservate(p.osservate)}`}>Stima dal liv. {p.osservate.livello}</span>
+            : <span className="chip" title={p.osservate ? `Stima dalla base del dataset: il livello ${p.livello} è sotto quello dei valori reali registrati (${p.osservate.livello})` : 'Stima dalla base del dataset: registra i valori letti nel gioco con «Modifica»'}>Stima</span>}
+        {!p.statisticheBase && <span className="chip chip--attivo" title={descriviBonus(p.bonus)}>Bonus {totaleBonus(p.bonus) > 0 ? '+' : ''}{totaleBonus(p.bonus)}</span>}
+        {stato === 'aggiornata' && <span className="chip" title="Il compendio conserva questa versione">Registrata</span>}
+        {!p.inSquadra && <span className="chip">In deposito</span>}
+      </div>
+
+      <section className="flex flex-col gap-1">
+        <span className="etichetta-campo-confidente">Skill</span>
+        <div className="flex flex-wrap gap-1">
+          {p.skill.map((s) => (
+            <Link key={s.slot} to={`/skill/${s.id}`} className="no-underline" title={s.effettoNome}>
+              <ElementoChip elemento={s.elemento} nome={s.nomeIt} piccolo />
+            </Link>
+          ))}
+          {p.skill.length === 0 && <span className="text-[12px] text-text-muted">Nessuna skill registrata.</span>}
+        </div>
+      </section>
+
+      {p.tratto && (
+        <section className="flex flex-col gap-1">
+          <span className="etichetta-campo-confidente">Tratto</span>
+          <div className="text-[12px] text-text-secondary"><strong className="text-text">{p.tratto.nomeIt}</strong> — {p.tratto.effettoNome}</div>
+        </section>
+      )}
+
+      <section className="flex flex-col gap-1">
+        <span className="etichetta-campo-confidente">Statistiche al livello {p.livello} {p.statisticheConfermate ? '(valori reali letti nel gioco)' : `(${p.origineStima === 'osservate' && p.osservate ? `stima dai valori reali del livello ${p.osservate.livello}` : 'stima del livello'}${p.statisticheBase ? '' : ` più bonus ${descriviBonus(p.bonus)}`})`}</span>
+        <StatisticheBarre statistiche={p.statistiche} base={p.statisticheStimate} compatta />
+      </section>
+      {p.note && <p className="m-0 text-[12px] text-text-secondary whitespace-pre-wrap">{p.note}</p>}
+    </div>
   );
 }
 

@@ -313,6 +313,12 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   },
 
   // ---- Persona possedute ----
+  'GET /api/partite/:id/scorta/capienza': {
+    sommario: 'La capienza della scorta di Persona',
+    descrizione: 'I posti della riserva di Personae secondo il rango di Igor nella partita, letti dalle abilità di Igor nei dati di gioco: rango attuale, posti correnti (null se il rango non ha ancora raggiunto un gradino documentato: il valore di partenza non è nei dati), tutti i gradini e il prossimo da raggiungere. Sola lettura.',
+    risposta: '`CapienzaScortaDto`',
+    errori: [PARTITA],
+  },
   'GET /api/partite/:id/persona': {
     sommario: 'La scorta di Persona della partita',
     descrizione: 'Le Persona possedute: prima quelle in squadra, poi per livello decrescente e nome. Ognuna con skill per slot, statistiche stimate al livello (dai valori reali registrati o dalla base del dataset) più i bonus, origine della stima, tratto e flag.',

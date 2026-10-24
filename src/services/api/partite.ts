@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  CompendioPartitaDto, ConfidentePartitaDto, OsservazioneStatisticheDto, Difficolta, DoteSocialePartitaDto, FasciaGioco, ModificaConfidente, ModificaDote, PartitaDto, AnteprimaFusioneDto, CicloSalvatoDto, DomandeDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, ObiettivoDto, PersonaPossedutaDto, ArticoloDto, AzionePercorsoDto, CruciverbaDto, FilmDto, GiornoCorrenteDto, LibroDto, PuntoInteresseDto, RichiestaDto, StatoPunto, StatoRichiesta, TrofeoDto, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto, SuggerimentoIsolamentoDto, SuggerimentiOggiDto, SquadraPartitaDto, TimbriDedaloDto } from '../../types';
+  CapienzaScortaDto, CompendioPartitaDto, ConfidentePartitaDto, OsservazioneStatisticheDto, Difficolta, DoteSocialePartitaDto, FasciaGioco, ModificaConfidente, ModificaDote, PartitaDto, AnteprimaFusioneDto, CicloSalvatoDto, DomandeDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, ObiettivoDto, PersonaPossedutaDto, ArticoloDto, AzionePercorsoDto, CruciverbaDto, FilmDto, GiornoCorrenteDto, LibroDto, PuntoInteresseDto, RichiestaDto, StatoPunto, StatoRichiesta, TrofeoDto, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto, SuggerimentoIsolamentoDto, SuggerimentiOggiDto, SquadraPartitaDto, TimbriDedaloDto } from '../../types';
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut, queryString } from './_helpers';
 import type { DivergenzaDto, EsitoRegaloDto, MeteoGiornoDto, RichiestaRegalo, VideogiocoDto } from '../../types';
 import type { MeteoPartita } from '../../../shared/meteoPartita';
@@ -156,6 +156,8 @@ export const getCompendioPartita = (id: number): Promise<CompendioPartitaDto[]> 
 export const aggiornaCompendio =(id: number, personaId: number, dati: { registrata: boolean; livelloRegistrato?: number | null; ombra?: string }): Promise<CompendioPartitaDto[]> =>
   apiPut(`/partite/${id}/compendio/${personaId}`, dati);
 
+/** La capienza della scorta secondo il rango di Igor nella partita (sola lettura). */
+export const getCapienzaScorta = (id: number): Promise<CapienzaScortaDto> => apiGet(`/partite/${id}/scorta/capienza`);
 /** Le Persona nella scorta della partita. */
 export const getPossedute = (id: number): Promise<PersonaPossedutaDto[]> => apiGet(`/partite/${id}/persona`);
 /** Aggiunge una Persona alla scorta con i dati indicati; risponde con l'esemplare creato. */

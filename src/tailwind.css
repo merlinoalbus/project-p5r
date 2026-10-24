@@ -928,6 +928,43 @@
   /* le schede dei Confidenti in griglia: una colonna sul telefono, poi quante ne stanno da 300 px (2 sul tablet, 3–5 sul desktop);
      sotto i 300 px nome e OGGI non ci stavano più accanto all'anello del rango */
   .griglia-confidenti { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); }
+  /* ---- Scheda «Scorta» della partita: capienza in testa, righe compatte in griglia, cassetto della Persona ----
+     Scorre solo la pagina; i comandi stanno nel cassetto (`Modal cassetto`, foglio dal basso sul telefono). */
+  .scorta-capienza { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 8px 12px; margin-bottom: 8px; border-radius: var(--radius-md);
+    border: 1px solid color-mix(in srgb, var(--color-primary) 55%, var(--color-border)); background: color-mix(in srgb, var(--color-primary) 9%, var(--color-bg-secondary)); }
+  .scorta-capienza__numero { display: flex; flex-direction: column; line-height: 1.1; }
+  .scorta-capienza__numero > b { font-family: var(--font-display); font-weight: 400; font-size: 24px; }
+  .scorta-capienza__numero > small, .scorta-capienza__frase { font-size: 11px; color: var(--color-text-muted); }
+  .scorta-capienza__tacche { display: flex; flex: 1 1 140px; gap: 3px; min-width: 120px; }
+  .scorta-capienza__tacche > i { flex: 1; height: 10px; border-radius: 2px; background: var(--color-primary); }
+  .scorta-capienza__tacche > i.scorta-capienza__vuota { background: var(--color-border); }
+  .scorta-strumenti { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .scorta-strumenti__filtri { flex-wrap: wrap; align-items: center; gap: 6px; }
+  /* 1 colonna sul telefono, 2 sul tablet, 3 sul desktop */
+  .griglia-scorta { margin: 0 0 8px; padding: 0; list-style: none; display: grid; gap: 6px; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 640px) { .griglia-scorta { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 1280px) { .griglia-scorta { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .riga-persona { min-width: 0; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: color-mix(in srgb, var(--color-bg-secondary) 94%, transparent); }
+  .riga-persona:hover { border-color: var(--color-primary); }
+  .riga-persona--deposito { opacity: .6; }
+  .riga-persona__scelta { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 56px; padding: 5px 10px 5px 5px; background: none; border: 0; color: inherit; text-align: left; cursor: pointer; border-radius: var(--radius-md); }
+  .riga-persona__scelta:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+  .riga-persona__testo { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .riga-persona__nome { display: flex; align-items: center; gap: 6px; min-width: 0; font-family: var(--font-display); font-size: 14px; letter-spacing: .03em; }
+  .riga-persona__arcano { font-size: 11px; color: var(--color-text-muted); }
+  .riga-persona__skill { display: flex; flex-wrap: wrap; gap: 2px; }
+  .riga-persona__registrata { display: inline-flex; color: var(--color-primary); flex-shrink: 0; }
+  .riga-persona__livello { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; min-width: 34px; line-height: 1; }
+  .riga-persona__livello > span { font-family: var(--font-display); font-size: 22px; }
+  .riga-persona__livello > small { font-size: 9px; font-weight: 600; color: var(--color-text-muted); }
+  .riga-persona__livello--grande > span { font-size: 30px; }
+  .punto-stato { display: inline-block; width: 9px; height: 9px; flex-shrink: 0; border-radius: 50%; }
+  .punto-stato--reali { background: #2fbf71; }
+  .punto-stato--stima { background: #f5c542; }
+  .quadrato-skill { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border: 1px solid var(--color-border); border-radius: 3px; }
+  .posto-libero { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 56px; border: 1px dashed var(--color-text-muted); border-radius: var(--radius-md); font-size: 12px; color: var(--color-text-muted); }
+  .posto-libero--aggiungi { background: none; cursor: pointer; color: var(--color-text); font-weight: 600; }
+  .posto-libero--aggiungi:hover { border-color: var(--color-primary); color: var(--color-primary); }
   /* il dettaglio (nel cassetto) si divide in due colonne quando è largo abbastanza (cassetto da 768 px in su): a sinistra il level up
      («Verso il rango N»: requisiti e moltiplicatori; poi Risposta ♪, regalo, uscita), a destra le risposte migliori; in una colonna sola
      (telefono) le risposte stanno fra i requisiti e le note ♪: prima si legge la risposta, poi si registra */
