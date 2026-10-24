@@ -832,6 +832,22 @@ export interface PersonaPossedutaDto {
   updatedAt: string;
 }
 
+/**
+ * La capienza della scorta (la «riserva di Personae» della Stanza di Velluto) nella partita. Viene dalle abilità del Confidente Igor
+ * nei dati di gioco («La capacità della riserva di Personae sale a N»): `gradini` sono i ranghi che la fanno salire. Il valore di
+ * partenza, prima del primo gradino, non è nei dati: finché non c'è `capienza` è `null` e l'app mostra la scorta senza tacche.
+ */
+export interface CapienzaScortaDto {
+  /** Rango di Igor nella partita (0 se non ancora incontrato). */
+  rangoIgor: number;
+  /** I posti disponibili al rango attuale; null se il rango non ha ancora raggiunto nessun gradino documentato. */
+  capienza: number | null;
+  /** Tutti i gradini documentati, dal rango più basso: a quel rango di Igor la capienza sale a `capienza`. */
+  gradini: Array<{ rango: number; capienza: number; abilita: string }>;
+  /** Il prossimo gradino ancora da raggiungere, o null se sono stati raggiunti tutti. */
+  prossimo: { rango: number; capienza: number; abilita: string } | null;
+}
+
 // ---- Obiettivi (Fase 5.2) ----
 
 export type StatoObiettivo = 'aperto' | 'raggiunto' | 'annullato';
