@@ -243,7 +243,7 @@
   /* le schede della Partita da 768 px: piastrelle basse con icona e nome affiancati, su una riga sola che scorre (intestazione ≤ 30%) */
   /* a ogni larghezza: icona e nome affiancati, 44 px di altezza, senza margine sotto (anche sul telefono: la fila scorre già) */
   .fila-schede-partita .piastrella-scheda { flex-direction: row; gap: 6px; min-width: 0; min-height: 44px; padding: 6px 12px; font-size: 12px; white-space: nowrap; }
-  .fila-scorrevole.fila-schede-partita { padding-bottom: 0; }
+  .fila-scorrevole.fila-schede-partita { padding-bottom: 0; height: 44px; }
   /* telefono: titolo e dati della partita sulla stessa riga (la fila dei dati scorre), nessun padding della testata */
   .intestazione.intestazione--partita { padding: 0; gap: 0; }
   /* una riga sola: il nome della partita non va a capo (la riga intera scorre se serve) e i dati non hanno margine sotto */
@@ -252,7 +252,7 @@
   @media (min-width: 768px) {
     .intestazione.intestazione--partita { padding: 4px 0 2px; gap: 8px; }
     .intestazione--partita .titolo-tasselli { flex-wrap: wrap; }
-    .fila-scorrevole.fila-scorrevole--sempre.fila-schede-partita { padding-bottom: 0; margin-top: -6px; }
+    .fila-scorrevole.fila-scorrevole--sempre.fila-schede-partita { padding-bottom: 0; margin-top: -6px; height: auto; }
     /* i dati e le scorciatoie della partita accanto al titolo: niente margine sotto (la barra sottile basta a dire che scorre) */
     .fila-scorrevole.fila-scorrevole--sempre.fila-dati-partita { padding-bottom: 0; }
   }
