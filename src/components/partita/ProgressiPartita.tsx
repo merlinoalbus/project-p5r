@@ -1,17 +1,17 @@
 // ============================================================
-// ProgressiPartita — quel che la partita calcola da sola, e quel che resta da segnare a mano
+// ProgressiPartita — le cose fatte in gioco che sbloccano Confidenti, negozi e attività
 // ============================================================
 //
-// **Calcolati dalla partita** (sola lettura): gli eventi «entra in squadra» — letti dalla scheda
-// Squadra, tre stati come i semafori: in squadra, dichiarato fuori, non ancora segnato — il grado
-// cliente dei negozi che ce l'hanno (dalla spesa segnata negli acquisti) e i contatori (libri
-// letti, film e videogiochi completati). **Da segnare**: gli eventi di storia che nessun dato
-// deduce (la mansarda pulita, il primo strumento), le attività che si contano per volte svolte,
-// i punti dei negozi con programma manuale. Le condizioni leggono da qui.
+// In testa lo scopo in una riga e un riepilogo a quattro tessere (Storia, Attività, Negozi, Pesca)
+// che fanno anche da schede: se ne vede una alla volta, la scelta si ricorda (localStorage, con
+// try/catch) e sta nell'indirizzo (`?sezione=`). Quello che l'app sa già si vede col cartellino
+// «automatico» e il collegamento alla sua fonte; quello che non può sapere lo segna chi gioca:
+// gli eventi di storia (prima quelli che restano da fare, gli avvenuti ripiegati), le volte di
+// ogni attività (raggruppate per tipo) e i punti dei negozi a passi di dieci.
 // ============================================================
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { getProgressiPartita, impostaAttivitaSvolta, impostaEventoStoria, impostaPuntiNegozio } from '../../services/api';
 import type { ProgressiPartitaDto as Progressi } from '../../types';
 import { useCarica } from '../../hooks/useCarica';
@@ -27,8 +27,24 @@ import { RegistroAcquistiPartita } from './RegistroAcquistiPartita';
 import { RegistroPesca } from '../pesca/RegistroPesca';
 import { ATTIVITA_PESCA, EVENTI_PESCA, SFIDA_PESCA } from '../../../shared/pesca';
 
+type Sezione = 'storia' | 'attivita' | 'negozi' | 'pesca';
+type Evento = Progressi['eventi'][number];
+
+const SEZIONI: ReadonlyArray<{ k: Sezione; nome: string }> = [
+  { k: 'storia', nome: 'Storia' }, { k: 'attivita', nome: 'Attività' }, { k: 'negozi', nome: 'Negozi' }, { k: 'pesca', nome: 'Pesca' },
+];
+const CHIAVE_MEMORIA = 'p5r:progressi:sezione';
+
+const eSezione = (v: unknown): v is Sezione => SEZIONI.some((s) => s.k === v);
+const leggiMemoria = (): Sezione | null => {
+  try { const v = localStorage.getItem(CHIAVE_MEMORIA); return eSezione(v) ? v : null; } catch { return null; }
+};
+const scriviMemoria = (s: Sezione) => { try { localStorage.setItem(CHIAVE_MEMORIA, s); } catch { /* memoria non disponibile: la scelta vale per questa visita */ } };
+
 /** Il testo di un errore: il messaggio se è un `Error`, altrimenti il valore convertito in stringa. */
 function messaggio(err: unknown): string { return err instanceof Error ? err.message : String(err); }
+
+const percorsoVoce = (v: { uid: string; giorno: string }) => `/guida/percorso/${v.giorno}?voce=${encodeURIComponent(v.uid)}`;
 
 /** Il pallino a tre stati: verde (sì), rosso (no), grigio (non segnato). */
 function Pallino({ stato }: { stato: boolean | null }) {
@@ -37,10 +53,36 @@ function Pallino({ stato }: { stato: boolean | null }) {
   return <span className={`inline-block h-3 w-3 shrink-0 rounded-full ${colore}`} role="img" aria-label={nome} />;
 }
 
-/** La scheda dei progressi: in lettura gli eventi «entra in squadra» col pallino a tre stati, il
- * grado cliente e i contatori; da segnare gli eventi di storia (casella), le volte di ogni attività
- * e i punti dei negozi a passi di dieci (−/+). Ogni risposta del server sostituisce tutti i
- * progressi mostrati. */
+/** Il cartellino di ciò che l'app ricava da sola. */
+function Automatico() {
+  return <span className="progressi-auto">automatico</span>;
+}
+
+/** Un evento di storia da segnare: casella grande, a che cosa serve e da quale voce del Diario viene. */
+function RigaEvento({ e, occupato, onCambia }: { e: Evento; occupato: boolean; onCambia: (avvenuto: boolean) => void }) {
+  return (
+    <li>
+      <label className="progressi-partita__riga progressi-partita__riga--evento touch">
+        <input type="checkbox" className="progressi-casella" checked={e.manuale ?? e.avvenuto === true} aria-label={e.nome} disabled={occupato} onChange={(ev) => onCambia(ev.target.checked)} />
+        <span className="min-w-0 flex-1">
+          <span className="block">{e.nome}</span>
+          {!!e.serveA?.length && <span className="block text-[12px] text-primary">Sblocca: {e.serveA.join(' · ')}</span>}
+          {e.visiteDiario && <span className="block text-[11px] text-text-muted">Le visite dichiarate nel Diario contano da sole; la casella è un tuo segno in più. Si correggono dal Diario.</span>}
+        </span>
+        <span className={`shrink-0 text-[11px] ${e.avvenuto ? 'text-success' : 'text-text-muted'}`}>{e.avvenuto ? 'avvenuto' : 'non ancora'}</span>
+      </label>
+      {!!e.daVoci?.length && <div className="flex flex-wrap items-center gap-x-2 pl-9 text-[11px] text-text-muted">
+        {e.daVoci.map((v) => <Link key={v.uid} className="touch text-primary inline-flex items-center" to={percorsoVoce(v)}>Già nel Diario: voce del {v.giorno.slice(3)}/{v.giorno.slice(0, 2)} · {v.testo.length > 60 ? `${v.testo.slice(0, 60)}…` : v.testo}</Link>)}
+      </div>}
+      {!!e.visiteDiario?.length && <div className="flex flex-wrap items-center gap-x-2 pl-9 text-[11px] text-text-muted">
+        <span>Già nel Diario:</span>
+        {e.visiteDiario.map((v) => <Link key={v.uid} className="touch text-primary inline-flex items-center" to={percorsoVoce(v)}>visita del {dataGiocoTesto(v.giorno)}</Link>)}
+      </div>}
+    </li>
+  );
+}
+
+/** La scheda dei progressi della partita. Ogni risposta del server sostituisce tutti i progressi mostrati. */
 export function ProgressiPartita(props: { partitaId: number }) {
   return <ProgressiPartitaNelContesto key={props.partitaId} {...props} />;
 }
@@ -48,7 +90,20 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
   const dati = useCarica(() => getProgressiPartita(partitaId), [partitaId]);
   const [occupato, setOccupato] = useState<string | null>(null);
   const [stato, setStato] = useState<Progressi | null>(null);
+  const [params, setParams] = useSearchParams();
+  const { hash } = useLocation();
+  // all'apertura: il collegamento alla pesca (#pesca) > l'indirizzo > l'ultima scelta > Storia
+  const [sezione, setSezione] = useState<Sezione>(() => {
+    const dallIndirizzo = params.get('sezione');
+    return hash === '#pesca' ? 'pesca' : eSezione(dallIndirizzo) ? dallIndirizzo : leggiMemoria() ?? 'storia';
+  });
   const p = stato ?? dati.dati;
+
+  const scegli = (s: Sezione) => {
+    setSezione(s);
+    scriviMemoria(s);
+    setParams((prec) => { const n = new URLSearchParams(prec); n.set('sezione', s); return n; }, { replace: true });
+  };
 
   /** Esegue l'azione tenendo occupata la riga `chiave`; con la risposta sostituisce i progressi,
    * invalida i suggerimenti e ricorda le Doti da segnare; un errore diventa una notifica. */
@@ -61,140 +116,186 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
       avvisaDotiDaSegnare(nuovo.daSegnare);
     }).catch((e) => notifica('error', messaggio(e))).finally(() => setOccupato(null));
   };
+  const rileggi = async () => { setStato(null); await dati.ricarica(); };
+
   const calcolati = p?.eventi.filter((e) => e.origine === 'calcolato') ?? [];
-  const manuali = p?.eventi.filter((e) => e.origine === 'manuale' && !EVENTI_PESCA.some(chiave => chiave === e.chiave)) ?? [];
+  const manuali = p?.eventi.filter((e) => e.origine === 'manuale' && !EVENTI_PESCA.some((chiave) => chiave === e.chiave)) ?? [];
+  const daSegnare = manuali.filter((e) => e.avvenuto !== true);
+  const avvenutiManuali = manuali.filter((e) => e.avvenuto === true);
+  const eventiTot = manuali.length + calcolati.length;
+  const eventiAvvenuti = avvenutiManuali.length + calcolati.filter((e) => e.avvenuto === true).length;
+  const volteTotali = p?.attivita.reduce((s, a) => s + a.volte, 0) ?? 0;
+  const visitePesca = p?.attivita.find((a) => a.chiave === ATTIVITA_PESCA)?.volte ?? 0;
+
+  const tessere: Record<Sezione, { valore: string; dettaglio: string }> = {
+    storia: { valore: `${eventiAvvenuti} di ${eventiTot}`, dettaglio: daSegnare.length ? `eventi avvenuti · ${daSegnare.length} da segnare` : 'eventi avvenuti · nulla da segnare' },
+    attivita: { valore: `${volteTotali}`, dettaglio: volteTotali === 1 ? 'volta o turno registrato' : 'volte e turni registrati' },
+    negozi: { valore: `${p?.rangoCliente.length ?? 0} ${p?.rangoCliente.length === 1 ? 'grado' : 'gradi'}`, dettaglio: `grado cliente · ${p?.puntiNegozio.length ?? 0} con punti` },
+    pesca: { valore: `${visitePesca} ${visitePesca === 1 ? 'visita' : 'visite'}`, dettaglio: 'al laghetto di Ichigaya' },
+  };
+
+  // le attività raggruppate per tipo, nell'ordine alfabetico del nome del tipo
+  const nomeTipo = (tipo: string) => (NOME_TIPO_ATTIVITA as Record<string, string>)[tipo] ?? tipo;
+  const gruppiAttivita = (() => {
+    const per = new Map<string, Progressi['attivita']>();
+    for (const a of p?.attivita ?? []) per.set(a.tipo, [...(per.get(a.tipo) ?? []), a]);
+    return [...per.entries()].sort((x, y) => nomeTipo(x[0]).localeCompare(nomeTipo(y[0]), 'it'));
+  })();
 
   return (
     <PageState isLoading={dati.caricamento && !p} error={dati.errore} onRetry={dati.ricarica}>
       {p && (
-        <div className="flex flex-col gap-4">
-          <RegistroAcquistiPartita key={`acquisti:${partitaId}`} partitaId={partitaId} onCambiato={async () => { setStato(null); await dati.ricarica(); }} />
-          <RegistroPesca key={`pesca:${partitaId}`} partitaId={partitaId} onCambiato={async () => { setStato(null); await dati.ricarica(); }} />
-          <section className="flex flex-col gap-2" aria-labelledby="progressi-calcolati">
-            <h2 id="progressi-calcolati" className="m-0 font-display text-[17px] uppercase leading-none">Calcolati dalla partita</h2>
-            <p className="m-0 text-[12px] text-text-muted">Sola lettura: l’app li ricava da quel che hai già segnato altrove. Le condizioni leggono da qui.</p>
-            <div className="progressi-partita">
-              <section className="card flex flex-col gap-2" aria-labelledby="progressi-squadra">
-                <h3 id="progressi-squadra" className="m-0 text-[15px]">Eventi «entra in squadra»</h3>
-                <p className="m-0 text-[12px] text-text-muted">Dalla scheda <Link to="/partita?scheda=squadra" className="text-primary">Denaro e squadra</Link>: un Ladro in squadra fa avvenire il suo evento.</p>
-                <ul className="m-0 p-0 list-none flex flex-col gap-1">
-                  {calcolati.map((e) => (
-                    <li key={e.chiave} className="progressi-partita__riga">
-                      <Pallino stato={e.avvenuto} />
-                      <span className="min-w-0 flex-1">{e.nome}</span>
-                      <Link to="/partita?scheda=squadra" className="touch inline-flex items-center text-[11px] text-text-muted">{e.avvenuto === true ? `${e.membroNome} in squadra` : e.avvenuto === false ? `${e.membroNome} non in squadra` : `${e.membroNome}: non segnato`}</Link>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-              {p.rangoCliente.length > 0 && (
-                <section className="card flex flex-col gap-2" aria-labelledby="progressi-rango">
-                  <h3 id="progressi-rango" className="m-0 text-[15px]">Grado cliente</h3>
-                  <p className="m-0 text-[12px] text-text-muted">Dalla spesa segnata negli acquisti del negozio.</p>
-                  <ul className="m-0 p-0 list-none flex flex-col gap-1">
-                    {p.rangoCliente.map((n) => (
-                      <li key={n.negozio} className="progressi-partita__riga">
-                        <span className="min-w-0 flex-1">
-                          <span className="block"><Link to={`/guida/negozi/${encodeURIComponent(n.negozio)}`} className="touch inline-flex items-center">{n.nome}</Link></span>
-                          <span className="block text-[11px] text-text-muted">spesi {formattaYen(n.spesa)}{n.prossimo ? ` · ${n.prossimo.nome} da ${formattaYen(n.prossimo.spesa)}` : ' · grado massimo'}</span>
-                        </span>
-                        <span className="chip chip--attivo">{n.rango.nome}</span>
-                      </li>
-                    ))}
-                  </ul>
+        <div className="flex flex-col gap-3">
+          <p className="progressi-scopo m-0">Le cose fatte in gioco che sbloccano Confidenti, negozi e attività. Quello che l’app sa già lo vedi; quello che non può sapere lo segni tu.</p>
+
+          <div className="progressi-riepilogo" role="tablist" aria-label="Argomenti dei progressi">
+            {SEZIONI.map((s) => (
+              <button key={s.k} type="button" role="tab" id={`progressi-tab-${s.k}`} aria-selected={sezione === s.k} aria-controls="progressi-pannello" className={`progressi-tessera touch ${sezione === s.k ? 'progressi-tessera--attiva' : ''}`} onClick={() => scegli(s.k)}>
+                <span className="progressi-tessera__nome">{s.nome}</span>
+                <span className="progressi-tessera__valore">{tessere[s.k].valore}</span>
+                <span className="progressi-tessera__dettaglio">{tessere[s.k].dettaglio}</span>
+              </button>
+            ))}
+          </div>
+
+          <div id="progressi-pannello" role="tabpanel" aria-labelledby={`progressi-tab-${sezione}`} className="flex min-w-0 flex-col gap-4">
+            {sezione === 'storia' && <>
+              <div className="progressi-partita">
+                <section className="card flex flex-col gap-2" aria-labelledby="progressi-da-segnare">
+                  <h2 id="progressi-da-segnare" className="m-0 font-display text-[17px] uppercase leading-none">Da segnare quando succede</h2>
+                  <p className="m-0 text-[12px] text-text-muted">Eventi della storia che l’app non può sapere: spunta la casella quando li fai in gioco.</p>
+                  {daSegnare.length === 0
+                    ? <p className="m-0 text-[13px] text-text-muted">Niente da segnare: tutti gli eventi sono avvenuti.</p>
+                    : <ul className="m-0 p-0 list-none flex flex-col gap-1">
+                      {daSegnare.map((e) => <RigaEvento key={e.chiave} e={e} occupato={occupato === e.chiave} onCambia={(v) => void salva(e.chiave, () => impostaEventoStoria(partitaId, e.chiave, v))} />)}
+                    </ul>}
+                  {avvenutiManuali.length > 0 && (
+                    <details className="progressi-avvenuti">
+                      <summary className="touch cursor-pointer text-[13px] text-text-secondary">Avvenuti ({avvenutiManuali.length})</summary>
+                      <ul className="m-0 p-0 list-none flex flex-col gap-1">
+                        {avvenutiManuali.map((e) => <RigaEvento key={e.chiave} e={e} occupato={occupato === e.chiave} onCambia={(v) => void salva(e.chiave, () => impostaEventoStoria(partitaId, e.chiave, v))} />)}
+                      </ul>
+                    </details>
+                  )}
                 </section>
-              )}
-              <section className="card flex flex-col gap-2" aria-labelledby="progressi-contatori">
-                <h3 id="progressi-contatori" className="m-0 text-[15px]">Contatori</h3>
-                <p className="m-0 text-[12px] text-text-muted">Da <Link to="/partita?scheda=letture" className="text-primary">Letture e giochi</Link>.</p>
-                <ul className="m-0 p-0 list-none flex flex-col gap-1">
-                  {p.contatori.map((c) => (
-                    <li key={c.chiave} className="progressi-partita__riga">
-                      <span className="min-w-0 flex-1">{c.nome}</span>
-                      <span className="font-display text-[17px] tabular-nums">{c.valore}</span>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            </div>
-          </section>
 
-          <section className="flex flex-col gap-2" aria-labelledby="progressi-da-segnare">
-            <h2 id="progressi-da-segnare" className="m-0 font-display text-[17px] uppercase leading-none">Da segnare</h2>
-            <p className="m-0 text-[12px] text-text-muted">Quel che nessun altro dato della partita sa dedurre.</p>
-            <div className="progressi-partita">
-              <section className="card flex flex-col gap-2" aria-labelledby="progressi-eventi">
-                <h3 id="progressi-eventi" className="m-0 text-[15px]">Eventi di storia</h3>
-                <ul className="m-0 p-0 list-none flex flex-col gap-1">
-                  {manuali.map((e) => (
-                    <li key={e.chiave}>
-                      <label className="progressi-partita__riga touch">
-                        <input type="checkbox" className="w-5 h-5" checked={e.manuale ?? e.avvenuto === true} aria-label={e.visiteDiario ? `Registrazione manuale: ${e.nome}` : e.nome} disabled={occupato === e.chiave} onChange={(ev) => void salva(e.chiave, () => impostaEventoStoria(partitaId, e.chiave, ev.target.checked))} />
-                        {/* a che cosa serve segnarlo: il rango del Confidente che lo aspetta, lo stesso
-                            dato del «Condizione soddisfatta» nella sua scheda */}
-                        <span className="min-w-0 flex-1">
-                          <span className="block">{e.nome}</span>
-                          {e.visiteDiario && <span className="block text-[11px] text-text-muted">Questa casella indica soltanto la registrazione manuale. Le aperture delle visite si correggono dal Diario.</span>}
-                          {e.serveA && e.serveA.length > 0 && <span className="block text-[11px] text-text-muted">Sblocca: {e.serveA.join(' · ')}</span>}
-                        </span>
-                        <span className={`shrink-0 text-[11px] ${e.avvenuto ? 'text-success' : 'text-text-muted'}`}>{e.avvenuto ? 'avvenuto' : 'non ancora'}</span>
-                      </label>
-                      {!!e.daVoci?.length && <div className="flex flex-wrap items-center gap-x-2 pl-7 text-[11px] text-text-muted">
-                        {e.daVoci.map((v) => <Link key={v.uid} className="touch text-primary inline-flex items-center" to={`/guida/percorso/${v.giorno}?voce=${encodeURIComponent(v.uid)}`}>da: voce del {v.giorno.slice(3)}/{v.giorno.slice(0, 2)} · {v.testo.length > 60 ? `${v.testo.slice(0, 60)}…` : v.testo}</Link>)}
-                      </div>}
-                      {!!e.visiteDiario?.length && <div className="flex flex-wrap items-center gap-2 pl-7 text-xs">
-                        <span>Dichiarato nel Diario:</span>
-                        {e.visiteDiario.map((v) => <Link key={v.uid} className="touch text-primary inline-flex items-center" to={`/guida/percorso/${v.giorno}?voce=${encodeURIComponent(v.uid)}`}>Visita del {dataGiocoTesto(v.giorno)}</Link>)}
-                      </div>}
-                    </li>
-                  ))}
-                </ul>
-              </section>
+                <div className="flex min-w-0 flex-col gap-3">
+                  <section className="card flex flex-col gap-2" aria-labelledby="progressi-squadra">
+                    <h2 id="progressi-squadra" className="m-0 flex flex-wrap items-center gap-2 font-display text-[17px] uppercase leading-none">Automatici dalla squadra <Automatico /></h2>
+                    <p className="m-0 text-[12px] text-text-muted">Un Ladro in squadra fa avvenire il suo evento. Si segna in <Link to="/partita?scheda=squadra" className="text-primary">Denaro e squadra</Link>.</p>
+                    <ul className="m-0 p-0 list-none flex flex-col gap-1">
+                      {calcolati.map((e) => (
+                        <li key={e.chiave} className="progressi-partita__riga">
+                          <Pallino stato={e.avvenuto} />
+                          <span className="min-w-0 flex-1">{e.nome}</span>
+                          <Link to="/partita?scheda=squadra" className="touch inline-flex items-center text-[11px] text-text-muted">{e.avvenuto === true ? `${e.membroNome} in squadra` : e.avvenuto === false ? `${e.membroNome} non in squadra` : `${e.membroNome}: non ancora segnato`}</Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                  <section className="card flex flex-col gap-2" aria-labelledby="progressi-contatori">
+                    <h2 id="progressi-contatori" className="m-0 flex flex-wrap items-center gap-2 font-display text-[17px] uppercase leading-none">Dalle letture <Automatico /></h2>
+                    <p className="m-0 text-[12px] text-text-muted">Si contano da sole in <Link to="/partita?scheda=letture" className="text-primary">Letture e giochi</Link>.</p>
+                    <ul className="m-0 p-0 list-none flex flex-col gap-1">
+                      {p.contatori.map((c) => (
+                        <li key={c.chiave} className="progressi-partita__riga">
+                          <span className="min-w-0 flex-1">{c.nome}</span>
+                          <span className="font-display text-[17px] tabular-nums">{c.valore}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                </div>
+              </div>
+            </>}
 
-              <section className="card flex flex-col gap-2" aria-labelledby="progressi-attivita">
-                <h3 id="progressi-attivita" className="m-0 text-[15px]">Attività svolte</h3>
-                <p className="m-0 text-[12px] text-text-muted">Quante volte l’hai fatta: le condizioni «svolta almeno n volte» leggono da qui, e ogni turno ti ricorda le Doti che dà, da segnare tu nella scheda Doti; spuntare un turno nella giornata della guida lo conta qui. I videogiochi si contano per round in Letture e giochi.</p>
-                <ul className="m-0 p-0 list-none flex flex-col gap-1">
-                  {p.attivita.map((a) => (
-                    <li key={a.chiave} className="progressi-partita__riga">
-                      <span className="min-w-0 flex-1">
-                        <span className="block">{a.nome}</span>
-                        <span className="block text-[11px] text-text-muted">{(NOME_TIPO_ATTIVITA as Record<string, string>)[a.tipo] ?? a.tipo}</span>
-                        {a.effettiTurno?.length > 0 && <span className="block text-[11px] text-text-secondary">{a.effettiTurno.join(' · ')}</span>}
-                      </span>
-                      <span className="condizione-numero" role="group" aria-label={`Volte: ${a.nome}`}>
-                        <button type="button" className="touch" aria-label={`${a.nome}: una volta in meno`} disabled={occupato === a.chiave || a.volte <= 0} onClick={() => void salva(a.chiave, () => impostaAttivitaSvolta(partitaId, a.chiave, a.volte - 1))}><IconaAzione chiave="meno" dimensione={16} /></button>
-                        <span className="condizione-numero__valore">{a.volte}</span>
-                        {a.chiave === ATTIVITA_PESCA || a.chiave === SFIDA_PESCA ? <a className="touch inline-flex items-center px-2 text-[12px]" href="#pesca">Registra la visita osservata</a> : <button type="button" className="touch" aria-label={`${a.nome}: una volta in più`} disabled={occupato === a.chiave || a.volte >= 999} onClick={() => void salva(a.chiave, () => impostaAttivitaSvolta(partitaId, a.chiave, a.volte + 1))}><IconaAzione chiave="piu" dimensione={16} /></button>}
-                      </span>
-                    </li>
+            {sezione === 'attivita' && (
+              <section className="flex flex-col gap-3" aria-labelledby="progressi-attivita">
+                <div className="flex flex-col gap-1">
+                  <h2 id="progressi-attivita" className="m-0 font-display text-[17px] uppercase leading-none">Attività svolte</h2>
+                  <p className="m-0 text-[12px] text-text-muted">Quante volte hai fatto ogni attività: serve a sbloccare ciò che chiede «almeno n volte». Ogni volta ti ricordo le Doti che dà, da segnare tu in Doti sociali. Spuntare un turno nella giornata della guida lo conta qui. I videogiochi si contano per round in Letture e giochi.</p>
+                </div>
+                <div className="progressi-partita">
+                  {gruppiAttivita.map(([tipo, righe]) => (
+                    <section key={tipo} className="card flex flex-col gap-2" aria-label={nomeTipo(tipo)}>
+                      <h3 className="m-0 text-[15px]">{nomeTipo(tipo)}</h3>
+                      <ul className="m-0 p-0 list-none flex flex-col gap-1">
+                        {righe.map((a) => {
+                          const pesca = a.chiave === ATTIVITA_PESCA || a.chiave === SFIDA_PESCA;
+                          return (
+                            <li key={a.chiave} className="progressi-partita__riga">
+                              <span className="min-w-0 flex-1">
+                                <span className="block">{a.nome}</span>
+                                {a.effettiTurno?.length > 0 && <span className="block text-[11px] text-text-secondary">Ogni turno: {a.effettiTurno.join(' · ')}</span>}
+                                {pesca && <span className="block text-[11px] text-text-muted">Si registra nella scheda Pesca</span>}
+                              </span>
+                              <span className="condizione-numero" role="group" aria-label={`Volte: ${a.nome}`}>
+                                <button type="button" className="touch" aria-label={`${a.nome}: una volta in meno`} disabled={occupato === a.chiave || a.volte <= 0} onClick={() => void salva(a.chiave, () => impostaAttivitaSvolta(partitaId, a.chiave, a.volte - 1))}><IconaAzione chiave="meno" dimensione={16} /></button>
+                                <span className="condizione-numero__valore">{a.volte}</span>
+                                {pesca
+                                  ? <button type="button" className="touch px-2 text-[12px]" onClick={() => scegli('pesca')}>→ Pesca</button>
+                                  : <button type="button" className="touch" aria-label={`${a.nome}: una volta in più`} disabled={occupato === a.chiave || a.volte >= 999} onClick={() => void salva(a.chiave, () => impostaAttivitaSvolta(partitaId, a.chiave, a.volte + 1))}><IconaAzione chiave="piu" dimensione={16} /></button>}
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </section>
                   ))}
-                </ul>
+                </div>
               </section>
+            )}
 
-              {p.puntiNegozio.length > 0 && (
-                <section className="card flex flex-col gap-2" aria-labelledby="progressi-punti">
-                  <h3 id="progressi-punti" className="m-0 text-[15px]">Punti negozio</h3>
-                  <p className="m-0 text-[12px] text-text-muted">I punti che il negozio ti ha dato, a passi di dieci: vengono dalle vendite, non dalla spesa.</p>
-                  <ul className="m-0 p-0 list-none flex flex-col gap-1">
-                    {p.puntiNegozio.map((n) => (
-                      <li key={n.negozio} className="progressi-partita__riga">
-                        <span className="min-w-0 flex-1">
-                          <span className="block"><Link to={`/guida/negozi/${encodeURIComponent(n.negozio)}`} className="touch inline-flex items-center">{n.nome}</Link></span>
-                          <span className="block text-[11px] text-text-muted">{n.programma} · {n.unita}</span>
-                        </span>
-                        <span className="condizione-numero" role="group" aria-label={`Punti: ${n.nome}`}>
-                          <button type="button" className="touch" aria-label={`${n.nome}: dieci punti in meno`} disabled={occupato === n.negozio || n.punti <= 0} onClick={() => void salva(n.negozio, () => impostaPuntiNegozio(partitaId, n.negozio, Math.max(0, n.punti - 10)))}><IconaAzione chiave="meno" dimensione={16} /></button>
-                          <span className="condizione-numero__valore">{n.punti}</span>
-                          <button type="button" className="touch" aria-label={`${n.nome}: dieci punti in più`} disabled={occupato === n.negozio || n.punti >= 999990} onClick={() => void salva(n.negozio, () => impostaPuntiNegozio(partitaId, n.negozio, n.punti + 10))}><IconaAzione chiave="piu" dimensione={16} /></button>
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              )}
-            </div>
-          </section>
+            {sezione === 'negozi' && <>
+              <div className="progressi-partita">
+                {p.rangoCliente.length > 0 && (
+                  <section className="card flex flex-col gap-2" aria-labelledby="progressi-rango">
+                    <h2 id="progressi-rango" className="m-0 flex flex-wrap items-center gap-2 font-display text-[17px] uppercase leading-none">Grado cliente <Automatico /></h2>
+                    <p className="m-0 text-[12px] text-text-muted">Cresce da solo con la spesa che segni negli acquisti del negozio.</p>
+                    <ul className="m-0 p-0 list-none flex flex-col gap-2">
+                      {p.rangoCliente.map((n) => {
+                        const quota = n.prossimo && n.prossimo.spesa > 0 ? Math.min(100, Math.round((n.spesa / n.prossimo.spesa) * 100)) : 100;
+                        return (
+                          <li key={n.negozio} className="flex flex-col gap-1 border-b border-border px-1.5 pb-2">
+                            <span className="flex items-center gap-2">
+                              <Link to={`/guida/negozi/${encodeURIComponent(n.negozio)}`} className="touch inline-flex min-w-0 flex-1 items-center">{n.nome}</Link>
+                              <span className="chip chip--attivo">{n.rango.nome}</span>
+                            </span>
+                            <span className="progressi-barra" role="progressbar" aria-label={`Verso il grado successivo: ${n.nome}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={quota}><span style={{ width: `${quota}%` }} /></span>
+                            <span className="text-[11px] text-text-muted">spesi {formattaYen(n.spesa)}{n.prossimo ? ` · ${n.prossimo.nome} da ${formattaYen(n.prossimo.spesa)}` : ' · grado massimo'}</span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </section>
+                )}
+                {p.puntiNegozio.length > 0 && (
+                  <section className="card flex flex-col gap-2" aria-labelledby="progressi-punti">
+                    <h2 id="progressi-punti" className="m-0 font-display text-[17px] uppercase leading-none">Punti negozio</h2>
+                    <p className="m-0 text-[12px] text-text-muted">I punti che il negozio ti ha dato, a passi di dieci: vengono dalle vendite, non dalla spesa.</p>
+                    <ul className="m-0 p-0 list-none flex flex-col gap-1">
+                      {p.puntiNegozio.map((n) => (
+                        <li key={n.negozio} className="progressi-partita__riga">
+                          <span className="min-w-0 flex-1">
+                            <span className="block"><Link to={`/guida/negozi/${encodeURIComponent(n.negozio)}`} className="touch inline-flex items-center">{n.nome}</Link></span>
+                            <span className="block text-[11px] text-text-muted">{n.programma} · {n.unita}</span>
+                          </span>
+                          <span className="condizione-numero" role="group" aria-label={`Punti: ${n.nome}`}>
+                            <button type="button" className="touch" aria-label={`${n.nome}: dieci punti in meno`} disabled={occupato === n.negozio || n.punti <= 0} onClick={() => void salva(n.negozio, () => impostaPuntiNegozio(partitaId, n.negozio, Math.max(0, n.punti - 10)))}><IconaAzione chiave="meno" dimensione={16} /></button>
+                            <span className="condizione-numero__valore">{n.punti}</span>
+                            <button type="button" className="touch" aria-label={`${n.nome}: dieci punti in più`} disabled={occupato === n.negozio || n.punti >= 999990} onClick={() => void salva(n.negozio, () => impostaPuntiNegozio(partitaId, n.negozio, n.punti + 10))}><IconaAzione chiave="piu" dimensione={16} /></button>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
+              </div>
+              <RegistroAcquistiPartita key={`acquisti:${partitaId}`} partitaId={partitaId} onCambiato={rileggi} />
+            </>}
+
+            {sezione === 'pesca' && <RegistroPesca key={`pesca:${partitaId}`} partitaId={partitaId} onCambiato={rileggi} />}
+          </div>
         </div>
       )}
     </PageState>
