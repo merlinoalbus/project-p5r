@@ -10,6 +10,7 @@ import type { DoteNote } from '../../../shared/effettiAzione';
 import type { DisponibilitaConfidenteDto, DisponibilitaStrutturata } from '../../../shared/disponibilitaStrutturata';
 import type { GiornoModificabileDto, ModificaGiorno } from '../../../shared/giorno';
 import type { ModificaAffinitaPersona } from '../../../shared/affinitaPersona';
+import type { AbilitaRangoDto, DialogoModificatoDto, ModoRango, RangoConfidenteDto, SceltaDialogo } from '../../../shared/confidentiScritture';
 
 /** I campi che il PUT accetta (tutti facoltativi) più le chiavi dei luoghi. */
 export type ModificaDisponibilitaStrutturata = Partial<Pick<DisponibilitaStrutturata, 'modo' | 'giorni' | 'fasce' | 'eccezioni' | 'dal' | 'motivoSenzaLuogo'>> & { luoghi?: string[] };
@@ -248,6 +249,38 @@ export const getConfidenteDettaglio =(chiave: string): Promise<ConfidenteDettagl
 /** La Dote a ogni incontro dei ranghi indicati (gli altri restano); risponde con la scheda aggiornata. */
 export const impostaDotiIncontro = (chiave: string, ranghi: Array<{ rango: number; doti: DoteNote[] }>): Promise<ConfidenteDettaglioDto> =>
   apiPut(`/compendio/confidenti/${encodeURIComponent(chiave)}/doti-incontro`, { ranghi });
+/** «Ripristina» la Dote del passaggio a quel rango com'era nella guida (409 `dote-della-guida` se non è stata modificata); risponde con la scheda aggiornata. */
+export const ripristinaDoteIncontro = (chiave: string, rango: number): Promise<ConfidenteDettaglioDto> =>
+  apiPost(`/compendio/confidenti/${encodeURIComponent(chiave)}/doti-incontro/${rango}/ripristina`, {}, { maxRetries: 0 });
+
+/** R9-07/1: come si sale di rango (modo e soglia in punti), con «modificato» rispetto alla guida. */
+export const getRanghiConfidente = (chiave: string): Promise<RangoConfidenteDto[]> => apiGet(`/compendio/confidenti/${encodeURIComponent(chiave)}/ranghi`);
+export const salvaRangoConfidente = (chiave: string, rango: number, dati: { modo: ModoRango; puntiNecessari: number }): Promise<RangoConfidenteDto[]> =>
+  apiPut(`/compendio/confidenti/${encodeURIComponent(chiave)}/ranghi/${rango}`, dati, { maxRetries: 0 });
+export const ripristinaRangoConfidente = (chiave: string, rango: number): Promise<RangoConfidenteDto[]> =>
+  apiPost(`/compendio/confidenti/${encodeURIComponent(chiave)}/ranghi/${rango}/ripristina`, {}, { maxRetries: 0 });
+/** R9-07/2: le abilità del Confidente per rango, con «modificato» rispetto alla guida. */
+export const getAbilitaConfidente = (chiave: string): Promise<AbilitaRangoDto[]> => apiGet(`/compendio/confidenti/${encodeURIComponent(chiave)}/abilita`);
+export const salvaAbilitaConfidente = (chiave: string, rango: number, abilita: Array<{ nome: string; descrizione: string }>): Promise<AbilitaRangoDto[]> =>
+  apiPut(`/compendio/confidenti/${encodeURIComponent(chiave)}/abilita/${rango}`, { abilita }, { maxRetries: 0 });
+export const ripristinaAbilitaConfidente = (chiave: string, rango: number): Promise<AbilitaRangoDto[]> =>
+  apiPost(`/compendio/confidenti/${encodeURIComponent(chiave)}/abilita/${rango}/ripristina`, {}, { maxRetries: 0 });
+/** R9-07/4: note e scelte (con i punti) di un dialogo del Confidente; «Ripristina» le rimette come nella guida (409 `dialogo-della-guida` se non modificato). */
+export const salvaDialogoConfidente = (chiave: string, id: number, dati: { note?: string; scelte?: Array<Omit<SceltaDialogo, 'ordine'>> }): Promise<DialogoModificatoDto> =>
+  apiPut(`/compendio/confidenti/${encodeURIComponent(chiave)}/dialoghi/${id}`, dati, { maxRetries: 0 });
+export const ripristinaDialogoConfidente = (chiave: string, id: number): Promise<DialogoModificatoDto> =>
+  apiPost(`/compendio/confidenti/${encodeURIComponent(chiave)}/dialoghi/${id}/ripristina`, {}, { maxRetries: 0 });
+/** R9-07c: gli inviti del Confidente; la data (MM-GG) è la chiave, quindi sta nel percorso e non si cambia. */
+export interface CorpoInvitoConfidente { apre: { tipo: 'quartiere' | 'luogo' | 'area'; chiave: string }; condizioni: Condizione[]; nota: string }
+export const creaInvitoConfidente = (chiave: string, dati: CorpoInvitoConfidente & { data: string }): Promise<InvitoDto> =>
+  apiPost(`/compendio/confidenti/${encodeURIComponent(chiave)}/inviti`, dati, { maxRetries: 0 });
+export const modificaInvitoConfidente = (chiave: string, data: string, dati: CorpoInvitoConfidente): Promise<InvitoDto> =>
+  apiPut(`/compendio/confidenti/${encodeURIComponent(chiave)}/inviti/${encodeURIComponent(data)}`, dati, { maxRetries: 0 });
+export const ripristinaInvitoConfidente = (chiave: string, data: string): Promise<InvitoDto> =>
+  apiPost(`/compendio/confidenti/${encodeURIComponent(chiave)}/inviti/${encodeURIComponent(data)}/ripristina`, {}, { maxRetries: 0 });
+/** Toglie un invito creato dall'utente (finisce nel Cestino); uno della guida si modifica e si ripristina soltanto. */
+export const eliminaInvitoConfidente = (chiave: string, data: string): Promise<void> =>
+  apiDelete(`/compendio/confidenti/${encodeURIComponent(chiave)}/inviti/${encodeURIComponent(data)}`);
 /** Elenco dei Confidenti del compendio. */
 export const getConfidenti =(): Promise<ConfidenteDto[]> => apiGet('/compendio/confidenti');
 /** R9-19: il giorno di gioco modificabile (meteo nelle due fasce, nota, trama, vincoli) e «Ripristina» com'è nella guida. */

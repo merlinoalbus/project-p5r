@@ -18,6 +18,8 @@ import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import { SemaforiRango } from '../components/partita/SemaforiRango';
 import { EditorRequisiti } from '../components/confidenti/EditorRequisiti';
 import { InvitiConfidente } from '../components/confidenti/InvitiConfidente';
+import { RanghiConfidente } from '../components/confidenti/RanghiConfidente';
+import { ModificaAbilita } from '../components/confidenti/ModificaAbilita';
 import { EditorDisponibilita } from '../components/confidenti/EditorDisponibilita';
 import { DisponibilitaStrutturataScheda, EditorDisponibilitaStrutturata } from '../components/confidenti/DisponibilitaStrutturata';
 import { IconChevronLeft } from '../components/shared/icons';
@@ -218,9 +220,13 @@ export function ConfidenteDettaglioPage() {
             {requisiti.errore && <p className="m-0 text-[13px]" role="alert">{requisiti.errore} <button type="button" className="btn btn-sm touch" onClick={() => void requisiti.ricarica()}>Riprova</button></p>}
             <button type="button" className="btn btn-secondary touch self-start" onClick={() => setRangoDaModificare(1)}>Modifica requisiti</button>
           </section>
+          <RanghiConfidente chiave={c.chiave} nome={c.nome} onSalvato={async () => { await Promise.all([ricarica(), stato.ricarica()]); }} />
           <InvitiConfidente filtro={{ confidente: c.chiave }} onCambiato={async () => { await Promise.all([ricarica(), stato.ricarica()]); }} />
           <section className="card flex flex-col gap-2">
-            <h2 className="m-0 text-[15px] font-semibold">Abilità per rango</h2>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="m-0 text-[15px] font-semibold">Abilità per rango</h2>
+              <ModificaAbilita chiave={c.chiave} nome={c.nome} onSalvato={ricarica} />
+            </div>
             {c.abilita.length === 0 ? <p className="m-0 text-[13px] text-text-muted">Nessuna abilità documentata.</p> : (
               <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light">
                 {c.abilita.map((a, i) => (
