@@ -113,6 +113,8 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi }: Props & { 
   const frase = (t: string) => <p className="m-0 text-[13px] break-words">{t}</p>;
   const scrivi = (e: EffettoVoce | null) => onCambia(impostaPrincipale(valore, e));
   const mancaQuale = (cosa: string) => frase(`Scegli ${cosa}: l’effetto della spunta si compila da solo.`);
+  /** Voce con effetti salvati ma nessuno principale: la frase «registra solo che l’hai fatta» sarebbe falsa. */
+  const soloAggiuntivi = 'Nessun effetto automatico dal collegamento: gli effetti salvati su questa voce sono quelli elencati negli effetti aggiuntivi qui sotto.';
 
   let corpo: ReactNode;
   if (righe === undefined && valore.fonteEffetti) {
@@ -155,7 +157,7 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi }: Props & { 
             <span className="text-[13px] text-text-secondary">{valore.tipo === 'dvd' ? 'Visioni o serate' : 'Sessioni'}: almeno</span>
             <FilaScelta etichetta="Fin dove arriva" valore={eff.almeno === null ? '' : String(eff.almeno)} opzioni={SESSIONI} onCambia={(v) => scrivi({ ...eff, almeno: v === '' ? null : Number(v) })} />
           </>
-        ) : rif ? frase('Questa attività non ha un avanzamento da segnare: la spunta registra solo che l’hai fatta.') : mancaQuale(cosa);
+        ) : rif ? frase(righe.length === 0 ? 'Questa attività non ha un avanzamento da segnare: la spunta registra solo che l’hai fatta.' : soloAggiuntivi) : mancaQuale(cosa);
         break;
       }
       case 'lavoro':
@@ -164,7 +166,7 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi }: Props & { 
             {frase(fraseEffetto(eff, nomi))}
             <DotiProprieTurno effetto={eff} onCambia={scrivi} />
           </>
-        ) : rif ? frase('Questa attività non si conta per turni: la spunta registra solo che l’hai fatta.') : mancaQuale('il lavoro');
+        ) : rif ? frase(righe.length === 0 ? 'Questa attività non si conta per turni: la spunta registra solo che l’hai fatta.' : soloAggiuntivi) : mancaQuale('il lavoro');
         break;
       case 'richiesta':
         corpo = eff?.tipo === 'richiesta' ? frase(`${fraseEffetto(eff, nomi)}. La spunta la segna; togliendola torna com’era.`) : mancaQuale('la Richiesta');

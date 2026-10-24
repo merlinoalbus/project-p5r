@@ -48,8 +48,43 @@ export function eDelCollegamento(tipo: TipoAzione, rif: Rif, e: EffettoVoce): bo
   }
 }
 
-/** Il posto, nella lista, dell'effetto principale (-1 se non c'è). */
-export const indicePrincipale = (righe: readonly RigaEffetto[], tipo: TipoAzione, rif: Rif): number => righe.findIndex((r) => eDelCollegamento(tipo, rif, r.effetto));
+/** L'effetto è del genere che il tipo produce, qualunque sia l'elemento (per i tipi con un effetto principale legato a «Quale»)? */
+function eDelGenere(tipo: TipoAzione, e: EffettoVoce): boolean {
+  switch (tipo) {
+    case 'libro': return e.tipo === 'lettura' && e.categoria === 'libro';
+    case 'dvd': return e.tipo === 'lettura' && e.categoria === 'film';
+    case 'attivita': return e.tipo === 'lettura' && e.categoria === 'videogioco';
+    case 'lavoro': return e.tipo === 'turno';
+    case 'dote': return e.tipo === 'dote';
+    case 'richiesta': return e.tipo === 'richiesta';
+    default: return false;
+  }
+}
+
+/** Il collegamento che l'effetto del genere implica (per una voce salvata senza collegamento); null se l'effetto non lo dice. */
+export function riferimentoDaEffetto(tipo: TipoAzione, e: EffettoVoce): Rif {
+  switch (tipo) {
+    case 'libro': return e.tipo === 'lettura' ? { tipo: 'libro', chiave: e.chiave } : null;
+    case 'dvd': return e.tipo === 'lettura' ? { tipo: 'film', chiave: e.chiave } : null;
+    case 'attivita': return e.tipo === 'lettura' ? { tipo: 'attivita', chiave: e.chiave } : null;
+    case 'lavoro': return e.tipo === 'turno' ? { tipo: 'attivita', chiave: e.attivita } : null;
+    case 'dote': return e.tipo === 'dote' ? { tipo: 'dote', chiave: e.dote } : null;
+    case 'richiesta': return e.tipo === 'richiesta' ? { tipo: 'richiesta', chiave: e.richiesta } : null;
+    default: return null;
+  }
+}
+
+/**
+ * Il posto, nella lista, dell'effetto principale (-1 se non c'è). Se la voce non ha un collegamento del genere del tipo (nullo, o di
+ * altro genere come un negozio su un lavoro) e fra gli effetti salvati ce n'è UNO SOLO del genere del tipo, quello è il principale:
+ * così non finisce fra gli aggiuntivi e «Quale» lo riscrive invece di duplicarlo.
+ */
+export function indicePrincipale(righe: readonly RigaEffetto[], tipo: TipoAzione, rif: Rif): number {
+  const esatto = righe.findIndex((r) => eDelCollegamento(tipo, rif, r.effetto));
+  if (esatto >= 0 || (rif && rif.tipo === RIFERIMENTO_DI_TIPO[tipo])) return esatto;
+  const candidati = righe.flatMap((r, i) => (eDelGenere(tipo, r.effetto) ? [i] : []));
+  return candidati.length === 1 ? candidati[0] : -1;
+}
 
 /** L'effetto con cui nasce una voce quando si sceglie «Quale»; null se il tipo non ne ha o se l'effetto si sceglie nel riquadro (articolo, domanda, evento). */
 export function effettoIniziale(tipo: TipoAzione, rif: Rif, ctx: ContestoEffetti): EffettoVoce | null {
