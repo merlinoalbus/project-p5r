@@ -14,7 +14,7 @@ export interface FonteTolta {
   tabella: string;
   /** Null = la tabella intera. */
   colonna: string | null;
-  /** Quale migrazione l'ha tolta, per esempio «L11 · migrazione 172». */
+  /** Quale migrazione l'ha tolta, per esempio «L11 · migrazione 176». */
   tolta: string;
   /** Dove vive ora il dato, in italiano e per l'utente: «le planimetrie dell'Area (L2)». */
   sostituitaDa: string;

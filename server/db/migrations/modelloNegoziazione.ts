@@ -4,7 +4,7 @@
 //
 // Gli ingressi: le 277 domande Royal (trascrizione B1), il file originale dell'app (230 domande, 691 risposte, 642 attestazioni), l'abbinamento
 // fra i due, le 49 rese italiane di G-021 §2 e — se c'è — la fotografia di runtime (`dati_guida.battaglia.negoziazione.domande`, che le
-// migrazioni 083 e 084 hanno già normalizzato: una domanda per testo, un verdetto per carattere, il peggiore). La migrazione (`170_…`) scrive il
+// migrazioni 083 e 084 hanno già normalizzato: una domanda per testo, un verdetto per carattere, il peggiore). La migrazione (`172_negoziazione_royal.ts`) scrive il
 // risultato; qui si decide che cosa diventa che cosa.
 //
 // Regole (contratto-negoziazione.md):

@@ -3,7 +3,7 @@
 // ============================================================
 //
 // Le «copie» da raccordare per chiave: le 217 righe di `dati_guida.battaglia.ombre`, le 131 voci Persona dei dedali dei Memento e le voci
-// Persona dei Palazzi. Qui si decide **chi è la stessa Ombra** e che cosa se ne sa; la migrazione (`163_modello_ombra.ts`) scrive il risultato.
+// Persona dei Palazzi. Qui si decide **chi è la stessa Ombra** e che cosa se ne sa; la migrazione (`166_modello_ombra.ts`) scrive il risultato.
 //
 // Identità: una Ombra è (nome normalizzato, Persona) e, se la stessa coppia ha personalità diverse in luoghi diversi, una per personalità
 // (sono nemici diversi del gioco: la variante si elenca). La Persona è la chiave del compendio; è NULL per le 5 Ombre non reclutabili
