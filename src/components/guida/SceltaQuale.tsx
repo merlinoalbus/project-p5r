@@ -47,7 +47,10 @@ function RitrattoConfidente({ chiave, nome }: { chiave: string; nome: string }) 
 function figura(tipo: TipoRiferimentoAzione, v: VoceElencoAzione): ReactNode {
   if (tipo === 'confidente') return <RitrattoConfidente chiave={v.chiave} nome={v.nome} />;
   if (tipo === 'dungeon') return <EmblemaDungeon chiave={v.chiave} nome={v.nome} dimensione={44} />;
-  return <IconaCategoria categoria={CATEGORIA[tipo]} dimensione={40} />;
+  const generica = <IconaCategoria categoria={CATEGORIA[tipo]} dimensione={40} />;
+  // la Dote ha la sua icona (la stessa della pagina Doti sociali); se manca, quella di categoria
+  if (tipo === 'dote') return <AssetImg nome={`doti/${v.chiave}`} alt="" decorativa className="h-10 w-10 object-contain" fallback={generica} />;
+  return generica;
 }
 
 interface Props {
