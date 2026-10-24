@@ -2022,6 +2022,13 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
   .progressi-scopo { line-height:1.3; }
   .progressi-dettaglio-attivo { margin:0; font-size:12px; line-height:1.3; color:var(--color-text-secondary); }
 }
+/* tablet (640-1023 px), DOPO le regole di base: nome e valore sulla stessa riga, dettaglio sotto (al massimo due righe) */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .progressi-tessera { display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:baseline; column-gap:6px; row-gap:0; padding:8px 10px; min-height:0; }
+  .progressi-tessera__nome { font-size:12px; letter-spacing:0.03em; }
+  .progressi-tessera__valore { font-size:22px; line-height:1.1; white-space:nowrap; }
+  .progressi-tessera__dettaglio { grid-column:1 / -1; line-height:1.3; }
+}
 /* Attività: elenco raggruppato per tipo, due colonne bilanciate da 1280 px */
 .progressi-attivita { column-gap:24px; }
 @media (min-width: 1280px) { .progressi-attivita { columns:2; } }
