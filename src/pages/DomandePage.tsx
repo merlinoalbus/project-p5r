@@ -169,7 +169,7 @@ export function DomandePage() {
             </ul>
             {d.premi && (
               <div className="text-[12px] text-text-secondary flex flex-col gap-0.5 pt-1 border-t border-border-light">
-                <span><strong>Premi:</strong> {Object.entries(d.premi.fascinoPerPiazzamento ?? {}).map(([k, v]) => `${k.replaceAll('_', ' ')}: ${v}`).join(' · ')}</span>
+                <span className="flex items-center gap-1 flex-wrap"><span><strong>Premi:</strong> {Object.entries(d.premi.fascinoPerPiazzamento ?? {}).map(([k, v]) => `${k.replaceAll('_', ' ')}: ${v}`).join(' · ')}</span><ModificaGuida tipo="esame-premi" chiave="premi" cosa="i premi dei piazzamenti agli esami" soloIcona onSalvato={() => void dati.ricarica()} /></span>
                 {d.premi.moltiplicatoreConfidenti && <span>{d.premi.moltiplicatoreConfidenti}</span>}
                 {d.premi.requisitoConoscenza && <span>Per il primo posto: {Object.entries(d.premi.requisitoConoscenza).filter(([k]) => k !== 'fonte').map(([k, v]) => `${k.replaceAll('_', ' ')}: ${v}`).join(' · ')}</span>}
                 {d.premi.trofeo && <span>{d.premi.trofeo}</span>}

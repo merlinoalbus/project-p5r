@@ -63,9 +63,13 @@ function Giorno({ g, oggi, aperto, onToggle, onImposta, onSalvato, onModificaGio
               </div>
               {e.dettaglio && <span className="text-text-secondary">{e.dettaglio}</span>}
               {e.voci.map((v) => (
-                <Link key={v.uid} className="touch inline-flex items-center text-primary break-words" to={`/guida/percorso/${v.giorno}?voce=${encodeURIComponent(v.uid)}`}>
-                  Voce del Diario · {dataGiocoTesto(v.giorno)}: {v.azione.length > 70 ? `${v.azione.slice(0, 70)}…` : v.azione}
-                </Link>
+                <div key={v.uid} className="flex items-center gap-2 flex-wrap">
+                  <Link className="touch inline-flex items-center text-primary break-words" to={`/guida/percorso/${v.giorno}?voce=${encodeURIComponent(v.uid)}`}>
+                    Voce del Diario · {dataGiocoTesto(v.giorno)}: {v.azione.length > 70 ? `${v.azione.slice(0, 70)}…` : v.azione}
+                  </Link>
+                  {v.certezza === 'D' && <span className="chip text-[11px]" title="Il collegamento fra l’evento e questa voce è dubbio">collegamento dubbio</span>}
+                  <ModificaGuida tipo="evento-voce" chiave={`${e.id}:${v.uid}`} cosa={`il collegamento di «${e.titolo}» con la voce del ${dataGiocoTesto(v.giorno)}`} soloIcona onSalvato={onSalvato} />
+                </div>
               ))}
               {e.fonte && <a href={e.fonte} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center">fonte</a>}
             </div>
@@ -144,7 +148,7 @@ export function CalendarioPage() {
               ) : <p className="m-0 text-[13px] text-text-muted">Nessun evento documentato oggi.</p>}
               {settimanaOggi && (
                 <div className="text-[13px] flex flex-col gap-0.5 pt-1 border-t border-border-light">
-                  <div className="flex items-center gap-2 flex-wrap"><strong>{settimanaOggi.titolo}</strong><span className="text-text-muted">{settimanaOggi.periodo}</span>{settimanaOggi.url && <a href={settimanaOggi.url} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center">guida</a>}</div>
+                  <div className="flex items-center gap-2 flex-wrap"><strong>{settimanaOggi.titolo}</strong><span className="text-text-muted">{settimanaOggi.periodo}</span>{settimanaOggi.url && <a href={settimanaOggi.url} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center">guida</a>}<ModificaGuida tipo="settimana-guida" chiave={String(settimanaOggi.numero)} cosa={`la settimana «${settimanaOggi.titolo}»`} soloIcona onSalvato={ricarica} /></div>
                   <span className="text-text-secondary">{settimanaOggi.riassunto}</span>
                   {settimanaOggi.incertezze && <span className="text-[12px] text-text-muted">Incertezze: {settimanaOggi.incertezze}</span>}
                 </div>

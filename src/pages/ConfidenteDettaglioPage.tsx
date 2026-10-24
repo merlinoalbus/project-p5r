@@ -178,6 +178,7 @@ export function ConfidenteDettaglioPage() {
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="titolo-display m-0 text-[24px] leading-tight">{c.nome}</h1>
                 <span className="chip chip--attivo">{c.arcanaNome}</span>
+                <ModificaGuida tipo="confidente" chiave={c.chiave} cosa={`il Confidente «${c.nome}»`} soloIcona onSalvato={() => void ricarica()} />
                 {mio && <span className="chip">Rango {mio.rango === 10 ? 'MAX' : mio.rango} nella partita</span>}
               </div>
             </div>
