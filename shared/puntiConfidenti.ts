@@ -25,6 +25,8 @@ export const MOLTIPLICATORE_INVITO = 1.2;
 export const CONFIDENTI_CON_BONUS_ESAME: readonly string[] = ['ryuji', 'ann', 'makoto', 'haru', 'sojiro', 'kawakami', 'kasumi'];
 /** Dove ci si è piazzati all'ultimo esame; vale fino ai risultati dell'esame successivo. */
 export type PiazzamentoEsame = 'primo' | 'primi-10' | 'altro';
+/** Un esame con il piazzamento segnato nella partita (null = non segnato). */
+export interface PiazzamentoEsameDto { esame: string; nome: string; dataRisultati: string | null; piazzamento: PiazzamentoEsame | null }
 /** Moltiplicatore per piazzamento: primo in classifica ×1,5, nei primi 10 ×1,2, altrove nessuno. */
 export const MOLTIPLICATORE_ESAME: Readonly<Record<PiazzamentoEsame, number>> = { primo: 1.5, 'primi-10': 1.2, altro: 1 };
 

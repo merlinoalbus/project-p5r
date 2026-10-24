@@ -248,6 +248,18 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
     risposta: '`PuntoInteresseDto` con lo stato con cui la voce risulta nella partita (e, per i Palazzi, carattere, oggetto, «da verificare», `avanzamento` k/N, il segno di ogni pin in `pin[].fatto`, `condivise` ed `effetti`)',
     errori: [PARTITA, [404, 'punto-non-trovato'], [400, 'punto-descrittivo'], [400, 'cattura-nel-compendio'], [400, 'voce-non-esauribile']],
   },
+  'GET /api/partite/:id/esami/piazzamenti': {
+    sommario: 'Il piazzamento agli esami della partita',
+    descrizione: 'I quattro esami con il piazzamento segnato (primo, primi-10, altro) o null. Il piazzamento che vale adesso è quello dell’ultimo esame i cui risultati sono usciti alla data di gioco, e dà il moltiplicatore ai sette Confidenti dell’esame.',
+    risposta: 'Elenco di `PiazzamentoEsameDto`',
+    errori: [PARTITA],
+  },
+  'PUT /api/partite/:id/esami/:esame/piazzamento': {
+    sommario: 'Segna (o toglie) il piazzamento a un esame',
+    descrizione: 'Corpo `{ piazzamento: "primo" | "primi-10" | "altro" | null }`, strict; null toglie il segno. È l’unica fonte del bonus dell’esame sui punti: il client non lo manda più nelle richieste dei punti.',
+    risposta: 'Elenco di `PiazzamentoEsameDto` aggiornato',
+    errori: [PARTITA, [404, 'esame-non-trovato']],
+  },
   'PUT /api/partite/:id/domande/:domandaId': {
     sommario: 'Segna una domanda in classe o d\'esame come risposta',
     descrizione: 'Segna (o toglie) la domanda come fatta nella partita. Alla prima spunta l\'evento `domanda-risposta` va nello storico; con `conoscenza: true` la risposta vale una nota di Conoscenza, che la risposta dice in `daSegnare`: le Doti si segnano a mano e qui non si toccano.',

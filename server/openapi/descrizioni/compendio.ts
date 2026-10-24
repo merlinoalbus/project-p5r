@@ -120,6 +120,42 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     risposta: '`EsitoInformazioniConfidenteDto`: esito salvata/invariata/gia-eseguita, versione e corrente',
     errori: [[404, 'confidente-non-trovato'], [409, 'storico-disponibilita-incoerente'], [409, 'informazioni-confidente-obsolete'], [409, 'anteprima-disponibilita-obsoleta'], [409, 'operazione-disponibilita-riutilizzata'], [409, 'informazioni-confidente-cambiate']],
   },
+  'GET /api/compendio/confidenti/:chiave/disponibilita-strutturata': {
+    sommario: 'Disponibilità strutturata del Confidente, con i luoghi per chiave e, con ?partita=, se è disponibile adesso',
+    descrizione: 'Sola lettura, no-store. La struttura (modo, giorni, fasce, eccezioni, «dal», motivo senza luogo, fonte G-036) è la fonte di ciò che l’app valuta; il testo libero resta nelle note. I luoghi sono quelli non nascosti di L5 (`luogo.confidenti_json`). Con `?partita=` aggiunge `oggi`: stato (disponibile, non-disponibile, su-messaggio, trama, sconosciuto), motivo e causa.',
+    risposta: '`DisponibilitaConfidenteDto`',
+    errori: [[404, 'confidente-non-trovato'], [404, 'disponibilita-non-trovata'], [404, 'partita-non-trovata']],
+  },
+  'PUT /api/compendio/confidenti/:chiave/disponibilita-strutturata': {
+    sommario: 'Cambia la disponibilità strutturata del Confidente (e i suoi luoghi per chiave)',
+    descrizione: 'Corpo strict e parziale: modo, giorni, fasce, eccezioni, dal (MM-GG o null), motivoSenzaLuogo, luoghi (chiavi). Alla prima modifica conserva la fotografia della fonte G-036 per «Ripristina». I luoghi si cambiano passando dal luogo (`aggiornaElemento`), con il suo «Ripristina»; una chiave inesistente è 400. Una sola transazione; no-store.',
+    risposta: '`DisponibilitaConfidenteDto` aggiornato',
+    errori: [[400, 'luogo-non-trovato'], [400, 'modo-non-valido'], [400, 'data-non-valida'], [404, 'confidente-non-trovato'], [404, 'disponibilita-non-trovata']],
+  },
+  'POST /api/compendio/confidenti/:chiave/disponibilita-strutturata/ripristina': {
+    sommario: 'Riporta la disponibilità strutturata alla fonte G-036',
+    descrizione: 'Rimette la struttura conservata alla prima modifica e toglie la fotografia. I luoghi non si ripristinano da qui: si ripristinano dal luogo. 409 `disponibilita-della-guida` se non è stata modificata.',
+    risposta: '`DisponibilitaConfidenteDto`',
+    errori: [[404, 'confidente-non-trovato'], [409, 'disponibilita-della-guida'], [409, 'disponibilita-fotografia-illeggibile']],
+  },
+  'GET /api/compendio/giorni/:data': {
+    sommario: 'Il giorno di gioco come lo vede l’editor (meteo nelle due fasce, nota, trama, vincoli)',
+    descrizione: 'Sola lettura. `data` è MM-GG. `modificato` è vero se il giorno è stato cambiato rispetto alla guida. Il giorno della settimana non si salva: si calcola dalla data.',
+    risposta: '`GiornoModificabileDto`',
+    errori: [[404, 'giorno-non-trovato']],
+  },
+  'PUT /api/compendio/giorni/:data': {
+    sommario: 'Cambia il giorno di gioco: meteo di giorno e di sera, nota, flag «da verificare», trama, vincoli',
+    descrizione: 'Corpo strict e parziale. Alla prima modifica la riga conserva com’era la guida (`seed_json`) e passa a origine «utente»; calendario, meteo della guida e guida del percorso leggono la stessa riga. Una modifica che non cambia niente non scrive.',
+    risposta: '`GiornoModificabileDto` aggiornato',
+    errori: [[404, 'giorno-non-trovato']],
+  },
+  'POST /api/compendio/giorni/:data/ripristina': {
+    sommario: 'Riporta il giorno di gioco alla guida',
+    descrizione: 'Rimette i campi conservati alla prima modifica, toglie la fotografia e riporta l’origine a «seed». 409 `giorno-della-guida` se il giorno non è stato modificato.',
+    risposta: '`GiornoModificabileDto`',
+    errori: [[404, 'giorno-non-trovato'], [409, 'giorno-della-guida'], [409, 'giorno-fotografia-illeggibile']],
+  },
 
   // ---- Blocchi della guida (dati_guida) ----
   'GET /api/compendio/oggetti-guida': {

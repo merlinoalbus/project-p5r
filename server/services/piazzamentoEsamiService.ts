@@ -11,9 +11,7 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { ordineGioco } from '../../shared/condizioniSpillo.js';
-import type { PiazzamentoEsame } from '../../shared/puntiConfidenti.js';
-
-export interface PiazzamentoEsameDto { esame: string; nome: string; dataRisultati: string | null; piazzamento: PiazzamentoEsame | null }
+import type { PiazzamentoEsame, PiazzamentoEsameDto } from '../../shared/puntiConfidenti.js';
 
 interface RigaEsame { chiave: string; nome: string; ordine: number; data_risultati: string | null }
 
