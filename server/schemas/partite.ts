@@ -55,10 +55,11 @@ export const bodyConfidente = z
     regalo: z.boolean().optional(),
     uscita: z.boolean().optional(),
     bonusArcano: z.boolean().optional(),
-    esame: z.enum(['primo', 'top10']).optional(),
     invito: z.boolean().optional(),
     note: z.string().max(2000).optional(),
   })
+  // il bonus dell'esame non arriva più dal client (R9-08): una richiesta con `esame` è un errore 400, non un campo ignorato
+  .strict()
   .refine((v) => [v.noteRisposta !== undefined, v.regalo === true, v.uscita === true, v.deltaPunti !== undefined, v.punti !== undefined].filter(Boolean).length <= 1, {
     message: 'Indicare una sola sorgente di punti fra note della risposta, regalo, uscita, deltaPunti e punti.',
   });
@@ -221,7 +222,7 @@ export const bodyRegalo = z.object({
 /** R10-18: l'azione unica «Regala» (oggetto per chiave del catalogo, moltiplicatori dei punti, acquisto da segnare insieme). */
 export const bodyRegala = z.object({
   confidente: z.string().trim().min(1).max(60), catalogo: z.string().trim().min(1).max(600),
-  bonusArcano: z.boolean().optional(), esame: z.enum(['primo', 'top10']).optional(), invito: z.boolean().optional(),
+  bonusArcano: z.boolean().optional(), invito: z.boolean().optional(),
   acquisto: z.object({ articolo: z.string().min(1).max(200), sede: z.string().min(1).max(300).optional() }).strict().optional(),
 }).strict();
 export const bodyAnnullaRegalo = z.object({ confidente: z.string().trim().min(1).max(60), catalogo: z.string().trim().min(1).max(600) }).strict();

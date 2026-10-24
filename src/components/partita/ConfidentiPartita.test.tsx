@@ -82,7 +82,7 @@ describe('ConfidentiPartita', () => {
     expect(screen.getByLabelText('Ryuji Sakamoto: regalo gradito (75 punti)')).toBeInTheDocument();
 
     await act(async () => { screen.getByLabelText('Ryuji Sakamoto: risposta da 2 note (15 punti)').click(); });
-    expect(aggiornaConfidente).toHaveBeenCalledWith(1, 'ryuji', { noteRisposta: 2, bonusArcano: true, esame: undefined, invito: false } satisfies ModificaConfidente);
+    expect(aggiornaConfidente).toHaveBeenCalledWith(1, 'ryuji', { noteRisposta: 2, bonusArcano: true, invito: false } satisfies ModificaConfidente);
     expect(await screen.findByText(/mancano/)).toHaveTextContent('mancano 5');
     expect(screen.getByRole('button', { name: /annulla l'ultimo incremento/ })).toHaveTextContent('Annulla ultimo (−15)');
 

@@ -6,7 +6,7 @@
 // Nel gioco ogni risposta mostra 1–3 note: valgono 5/10/15 punti base; un regalo gradito 50, un'uscita 10.
 // Moltiplicatori cumulativi: Persona dello stesso arcano in scorta ×1,5 (rilevata dalla scorta della partita,
 // modificabile per card), esami (1º ×1,5, top 10 ×1,2), invito accettato subito via SMS ×1,2.
-// La conversione la fa il backend (`noteRisposta`, `regalo`, `uscita`, `bonusArcano`, `esame`, `invito`).
+// La conversione la fa il backend (`noteRisposta`, `regalo`, `uscita`, `bonusArcano`, `invito`; il piazzamento agli esami è della partita).
 // ============================================================
 
 import { useState } from 'react';

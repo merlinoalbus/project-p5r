@@ -66,7 +66,7 @@ export function regala(partitaId: number, richiesta: RichiestaRegalo): EsitoRega
     const conPunti = prima.rango > 0 && prima.rango < 10 && prima.puntiNecessari !== null && prima.puntiNecessari > 0;
     let punti = 0;
     if (conPunti) {
-      const dopo = aggiornaConfidente(partitaId, confidente, { regalo: true, bonusArcano: richiesta.bonusArcano, esame: richiesta.esame, invito: richiesta.invito });
+      const dopo = aggiornaConfidente(partitaId, confidente, { regalo: true, bonusArcano: richiesta.bonusArcano, invito: richiesta.invito });
       punti = Math.round((dopo.punti - prima.punti) * 100) / 100;
     }
     scriviRegaloPartita(partitaId, confidente, { catalogo }, true);

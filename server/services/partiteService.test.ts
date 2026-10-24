@@ -48,16 +48,17 @@ describe('puntiConfidente', () => {
     expect(puntiConfidente({ regalo: true })).toBe(50);
     expect(puntiConfidente({ uscita: true })).toBe(10);
     expect(puntiConfidente({})).toBe(0);
-    expect(puntiConfidente({ bonusArcano: true, esame: 'primo', invito: true })).toBe(0);
+    expect(puntiConfidente({ bonusArcano: true, invito: true })).toBe(0);
   });
-  it('moltiplicatori cumulativi con arrotondamento ai centesimi', () => {
-    expect(puntiConfidente({ noteRisposta: 1, bonusArcano: true })).toBe(7.5);
-    expect(puntiConfidente({ noteRisposta: 3, bonusArcano: true })).toBe(22.5);
-    expect(puntiConfidente({ noteRisposta: 2, esame: 'top10' })).toBe(12);
-    expect(puntiConfidente({ noteRisposta: 2, esame: 'primo' })).toBe(15);
+  it('moltiplicatori in sequenza, troncati all\'intero a ogni passaggio; l\'esame solo per i sette e dal piazzamento della partita', () => {
+    expect(puntiConfidente({ noteRisposta: 1, bonusArcano: true })).toBe(7);
+    expect(puntiConfidente({ noteRisposta: 3, bonusArcano: true })).toBe(22);
+    expect(puntiConfidente({ noteRisposta: 2 }, 'ryuji', 'primi-10')).toBe(12);
+    expect(puntiConfidente({ noteRisposta: 2 }, 'ryuji', 'primo')).toBe(15);
     expect(puntiConfidente({ noteRisposta: 2, invito: true })).toBe(12);
-    expect(puntiConfidente({ regalo: true, bonusArcano: true, esame: 'top10' })).toBe(90);
-    expect(puntiConfidente({ noteRisposta: 1, bonusArcano: true, esame: 'primo', invito: true })).toBe(13.5);
-    expect(puntiConfidente({ noteRisposta: 1, esame: 'top10', invito: true })).toBe(7.2);
+    expect(puntiConfidente({ regalo: true, bonusArcano: true }, 'ann', 'primi-10')).toBe(90);
+    expect(puntiConfidente({ noteRisposta: 1, bonusArcano: true, invito: true }, 'kasumi', 'primo')).toBe(12);
+    expect(puntiConfidente({ noteRisposta: 1, invito: true }, 'haru', 'primi-10')).toBe(7);
+    expect(puntiConfidente({ noteRisposta: 2 }, 'igor', 'primo')).toBe(10);
   });
 });

@@ -722,9 +722,6 @@ export interface ConfidentePartitaDto extends ConfidenteDto {
   doteIncontro?: DoteDaSegnareDto[];
 }
 
-/** Bonus agli esami: primo del corso ×1,5, fra i primi dieci ×1,2. */
-export type BonusEsame = 'primo' | 'top10';
-
 /**
  * Modifica di un Confidente. I punti si possono impostare (`punti`), variare (`deltaPunti`) oppure aggiungere
  * come nel gioco: `noteRisposta` 1–3 (5/10/15 punti base), `regalo` (50 base), `uscita` (10 base), con i
@@ -741,7 +738,6 @@ export interface ModificaConfidente {
   regalo?: boolean;
   uscita?: boolean;
   bonusArcano?: boolean;
-  esame?: BonusEsame;
   invito?: boolean;
   note?: string;
 }
@@ -753,7 +749,6 @@ export interface RichiestaRegalo {
   /** Chiave dell'oggetto nel catalogo. */
   catalogo: string;
   bonusArcano?: boolean;
-  esame?: BonusEsame;
   invito?: boolean;
   acquisto?: { articolo: string; sede?: string };
 }
