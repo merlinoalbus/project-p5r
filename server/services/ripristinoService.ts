@@ -467,3 +467,10 @@ export function elencaCorrezioni(tipo?: string): RiepilogoCorrezioneDto[] {
   }
   return uscita;
 }
+
+/** Le chiavi degli oggetti di un tipo che si possono correggere (per le prove e per gli elenchi): di una riga le sue righe, di un blocco i suoi elementi. */
+export function chiaviDelTipo(tipo: string): string[] {
+  const t = verificaTipo(tipo);
+  if (eRiga(t)) return DEFINIZIONI_RIGA[t].chiavi();
+  return (elementiBlocco(defBlocco(t)) ?? []).map((e) => e.chiave);
+}
