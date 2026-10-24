@@ -3463,7 +3463,8 @@ export const TIPI_MODIFICABILI = ['quartiere', 'trofeo', 'dote', 'trasformazione
   'ombra-luogo', 'ombra-voce',
   'negoziazione-variante', 'negoziazione-risposta', 'negoziazione-verdetto', 'negoziazione-umore',
   'dedalo-confluenza', 'mappa-dedalo', 'infiltrazione-dedalo',
-  'oggetto-compendio', 'note-categorie-attivita', 'sinonimo-ricerca', 'abbreviazione-ricerca'] as const;
+  'oggetto-compendio', 'note-categorie-attivita', 'sinonimo-ricerca', 'abbreviazione-ricerca',
+  'libro-posizioni', 'film-posizioni', 'negozio-sedi', 'nota-storica-legami'] as const;
 export type TipoModificabile = (typeof TIPI_MODIFICABILI)[number];
 export type TipoCampoCorrezione = 'testo' | 'testolungo' | 'numero' | 'booleano' | 'elenco' | 'scelta' | 'oggetto';
 export type ValoreCampoCorrezione = string | number | boolean | null | string[];

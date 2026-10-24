@@ -56,6 +56,10 @@ const NOTE: Partial<Record<TipoModificabile, string>> = {
   'sinonimo-ricerca': 'Tipo e chiave della voce non si correggono. La ricerca legge al più 8 nomi per voce, di al più 80 caratteri: gli altri non hanno effetto.',
   'abbreviazione-ricerca': 'La ricerca espande l’abbreviazione quando un nome comincia così: le altre forme non si inventano.',
   'dlc-set': 'Una Persona sta in un solo set. Il set non ha un nome: si riconosce dalle sue Persona.',
+  'libro-posizioni': 'Ogni posizione è un posto (quartiere, luogo, negozio o attività) con il nome da mostrare; un posto lasciato su «Nessuno» non compare. Se cambi il posto, cambia anche il nome mostrato. I negozi che vendono il libro si correggono dal negozio.',
+  'film-posizioni': 'Ogni posizione è un posto (quartiere, luogo, negozio o attività) con il nome da mostrare e come si usa (cinema, noleggio o visione); un posto lasciato su «Nessuno» non compare. Se cambi il posto, cambia anche il nome mostrato.',
+  'negozio-sedi': 'Sono gli altri luoghi in cui il negozio vende lo stesso listino (la sede del negozio si corregge dal negozio). Il pin che conferma una sede deve essere un pin di questo negozio sull’Area del luogo; togliendo una sede si toglie anche il suo pin. Per un luogo appena aggiunto il pin si sceglie al salvataggio successivo.',
+  'nota-storica-legami': 'Il testo della nota si corregge dalla nota stessa: qui si sceglie su quali offerte e oggetti compare. Togliere un’offerta o un oggetto toglie solo la nota, non cambia prezzi, acquisti o progressi.',
   'allerta-meteo': 'Vale per questo giorno: le condizioni delle partite che leggono l’allerta (per esempio «piove») seguono le fasce che scegli.',
 };
 
