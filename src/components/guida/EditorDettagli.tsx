@@ -15,17 +15,19 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { etichetteRipetute, type RigaDettaglio } from '../../utils/dettagliVoce';
 
 /** L'editor: le righe (in JSON, perché il modulo della correzione tiene solo testi) e la loro modifica. */
-export function EditorDettagli({ valore, onCambia }: { valore: string; onCambia: (v: string) => void }) {
+export function EditorDettagli({ valore, onCambia, nascosti = [] }: { valore: string; onCambia: (v: string) => void; nascosti?: readonly string[] }) {
   const righe = JSON.parse(valore) as RigaDettaglio[];
   const cambia = (nuove: RigaDettaglio[]) => onCambia(JSON.stringify(nuove));
   const ripetute = etichetteRipetute(righe);
   const aggiorna = (i: number, parte: Partial<RigaDettaglio>) => cambia(righe.map((r, j) => (j === i ? { ...r, ...parte } : r)));
+  // le righe nascoste (le affinità di una Persona collegata al compendio) restano nei dati com'erano: qui non si vedono e non si toccano
+  const visibili = righe.map((r, i) => ({ r, i })).filter(({ r }) => !nascosti.includes(r.chiave));
   return (
     <fieldset className="m-0 flex w-full flex-col gap-2 border-0 p-0 text-[12px]">
       <legend className="mb-1 p-0">Dettagli</legend>
-      {righe.length === 0 && <p className="m-0 text-text-muted">Nessun dettaglio.</p>}
+      {visibili.length === 0 && <p className="m-0 text-text-muted">Nessun dettaglio.</p>}
       {ripetute.length > 0 && <p className="m-0 text-error" role="alert">Etichetta ripetuta: {ripetute.join(', ')}. Cambiala per salvare.</p>}
-      {righe.map((r, i) => (
+      {visibili.map(({ r, i }) => (
         <div key={i} className="flex flex-wrap items-start gap-2 rounded-md bg-white/[0.03] p-1.5" role="group" aria-label={`Dettaglio ${r.etichetta || i + 1}`}>
           <label className="flex w-full flex-col gap-1 sm:w-[170px]">
             Etichetta

@@ -23,6 +23,9 @@ export interface RigaDettaglio {
   originale?: unknown; testoIniziale?: string;
 }
 
+/** I dettagli che una voce Persona collegata alla Persona del compendio non corregge qui: le affinità stanno sulla Persona (matita della sua scheda). */
+export const AFFINITA_DELLA_PERSONA: readonly string[] = ['deboleA', 'resisteA', 'debolezze', 'resistenze'];
+
 /** Le righe dell'editor dai dettagli di una voce, nell'ordine, senza la `maschera`. */
 export function righeDaDettagli(d: Record<string, unknown>): RigaDettaglio[] {
   return Object.entries(d).filter(([k]) => k !== 'maschera').map(([k, v]): RigaDettaglio => {

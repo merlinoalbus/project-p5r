@@ -28,7 +28,7 @@ import { CampoCorrezione, CorrezioneGuida } from './CorrezioneGuida';
 import { DettagliPunto } from './DettagliPunto';
 import { ContenutoDellaVoce } from '../catalogo/ContenutoDellaVoce';
 import { EditorDettagli } from './EditorDettagli';
-import { dettagliDaRighe, etichetteRipetute, righeDaDettagli, type RigaDettaglio } from '../../utils/dettagliVoce';
+import { AFFINITA_DELLA_PERSONA, dettagliDaRighe, etichetteRipetute, righeDaDettagli, type RigaDettaglio } from '../../utils/dettagliVoce';
 import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione, type ChiaveAzione } from '../shared/IconaAzione';
@@ -502,7 +502,9 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
                   </label>
                   <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={LIMITI_GUIDA.punto.descrizione} onCambia={(v) => cambia({ descrizione: v })} />
                   {/* i dettagli della guida («ci sono elementi non modificabili come questo Contenuto», 2026-10-18) */}
-                  <EditorDettagli valore={b.dettagli} onCambia={(v) => cambia({ dettagli: v })} />
+                  {/* per una voce Persona collegata alla Persona del compendio le affinità (deboleA, resisteA, debolezze, resistenze) non si correggono qui:
+                      nessuna vista legge più questa copia, e si correggono soltanto dalla matita della scheda Persona */}
+                  <EditorDettagli valore={b.dettagli} onCambia={(v) => cambia({ dettagli: v })} nascosti={p.tipo === 'persona' && !!p.persona ? AFFINITA_DELLA_PERSONA : []} />
                 </>}
               </CorrezioneGuida>
             </div>
