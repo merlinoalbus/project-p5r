@@ -25,11 +25,12 @@ import { SceltaQuale } from './SceltaQuale';
 import { DotiProprieTurno } from './CampiEffettoVoce';
 import { opzioniArticoli, opzioniDomande, opzioniStoria, type ElenchiVoce } from '../../utils/opzioniEffetti';
 import { EffettiNonConvertibili } from './EditorEffettiVoce';
-import { TIPI_AZIONE, type EffettoAzione, type TipoAzione } from '../../../shared/effettiAzione';
+import { TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type TipoAzione } from '../../../shared/effettiAzione';
+import { NOME_QUALE } from '../../utils/elencoQuale';
 import { nomeDote } from '../../../shared/doti';
 import type { EffettoVoce } from '../../../shared/effettiVoce';
 import type { CampiStrutturati } from '../../utils/azioneStrutturata';
-import { cambiaCollegamento, contestoDa, fraseEffetto, impostaPrincipale, indicePrincipale, tipoQuale, type NomiEffetti } from '../../utils/effettoAutomatico';
+import { cambiaCollegamento, contestoDa, eAltroGenere, fraseEffetto, impostaPrincipale, indicePrincipale, tipoQuale, type NomiEffetti } from '../../utils/effettoAutomatico';
 
 interface Props {
   valore: CampiStrutturati;
@@ -75,6 +76,10 @@ export function SceltaTipoQuale({ valore, onCambia, elenchi }: Props) {
   const ctx = useMemo(() => contestoDa(elenchi.azione), [elenchi.azione]);
   const rif = valore.riferimento;
   const tq = tipoQuale(valore.tipo, rif);
+  // Collegamento salvato di altro genere (negozio su un lavoro): non si tocca finché l'utente non sceglie qui, e allora la sostituzione
+  // è dichiarata prima del salvataggio. «Quale» elenca il genere del tipo e nessuna tessera risulta scelta.
+  const altro = eAltroGenere(valore.tipo, rif);
+  const genereSalvato = rif ? TIPI_RIFERIMENTO_AZIONE.find((g) => g.chiave === rif.tipo)?.nome.toLowerCase() ?? rif.tipo : '';
   return (
     <div className="flex flex-col gap-3 min-w-0">
       <div className="flex flex-col gap-1.5">
@@ -82,8 +87,13 @@ export function SceltaTipoQuale({ valore, onCambia, elenchi }: Props) {
         <SelettoreIcone etichetta="Tipo della voce" compatto valore={valore.tipo} opzioni={TIPI_AZIONE.map((t) => ({ chiave: t.chiave, nome: t.nome, categoria: t.chiave }))}
           onCambia={(t) => { if (t !== valore.tipo) onCambia(cambiaCollegamento(valore, t as TipoAzione, null, ctx)); }} />
       </div>
+      {altro && rif && (
+        <p className="m-0 text-[13px] break-words" role="status">
+          Collegata a: {nomeCollegato(valore, elenchi) ?? rif.chiave} ({genereSalvato}). Scegliendo un elemento qui ({NOME_QUALE[tq!].toLowerCase()}) questo collegamento verrà sostituito.
+        </p>
+      )}
       {tq && (
-        <SceltaQuale tipo={tq} elenchi={elenchi.azione} valore={rif?.chiave ?? ''} soloTurni={valore.tipo === 'lavoro'}
+        <SceltaQuale tipo={tq} elenchi={elenchi.azione} valore={rif && rif.tipo === tq ? rif.chiave : ''} soloTurni={valore.tipo === 'lavoro'}
           onCambia={(chiave) => onCambia(cambiaCollegamento(valore, valore.tipo, chiave ? { tipo: tq, chiave } : null, ctx))} />
       )}
     </div>
@@ -108,7 +118,7 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi }: Props & { 
   const righe = valore.effettiVoce;
   const rif = valore.riferimento;
   const nome = nomeCollegato(valore, elenchi);
-  const i = righe ? indicePrincipale(righe, valore.tipo, rif) : -1;
+  const i = righe ? indicePrincipale(righe, valore.tipo, rif, valore.uidPrincipale) : -1;
   const eff: EffettoVoce | null = righe && i >= 0 ? righe[i].effetto : null;
   const frase = (t: string) => <p className="m-0 text-[13px] break-words">{t}</p>;
   const scrivi = (e: EffettoVoce | null) => onCambia(impostaPrincipale(valore, e));
@@ -117,6 +127,12 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi }: Props & { 
     ? `Scegli ${cosa}: gli effetti già salvati su questa voce restano, elencati negli effetti aggiuntivi qui sotto. Se la scelta produce un effetto automatico, lo riconosce fra quelli salvati o lo aggiunge.`
     : valore.tipo === 'attivita' ? `Scegli ${cosa}: se è un videogioco l’effetto della spunta si compila da solo.`
       : `Scegli ${cosa}: l’effetto della spunta si compila da solo.`);
+  /** Dote o Richiesta con un collegamento salvato di altro genere (film su una Dote) e nessun principale: la frase nomina il collegamento e gli effetti salvati, mai «Scegli…» come se non ci fosse nulla. */
+  const altroCollegamento = (cosa: string) => {
+    const genere = rif ? TIPI_RIFERIMENTO_AZIONE.find((g) => g.chiave === rif.tipo)?.nome.toLowerCase() ?? rif.tipo : '';
+    const salvati = (righe ?? []).map((r) => fraseEffetto(r.effetto, nomi));
+    return frase(`Collegata a: ${nome ?? rif?.chiave} (${genere}). ${salvati.length > 0 ? `Effetti salvati su questa voce: ${salvati.join('; ')}, elencati negli effetti aggiuntivi qui sotto.` : 'Nessun effetto salvato su questa voce.'} Scegliendo ${cosa} nella colonna «Quale» il collegamento verrà sostituito.`);
+  };
   /** Voce con effetti salvati ma nessuno principale: la frase «registra solo che l’hai fatta» sarebbe falsa. */
   const soloAggiuntivi = 'Nessun effetto automatico dal collegamento: gli effetti salvati su questa voce sono quelli elencati negli effetti aggiuntivi qui sotto.';
 
@@ -151,7 +167,7 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi }: Props & { 
             <span className="text-[13px] text-text-secondary">Note che dà il gioco</span>
             <FilaScelta etichetta="Note della Dote" valore={String(eff.note)} opzioni={NOTE} onCambia={(v) => scrivi({ ...eff, note: Number(v) as 1 | 2 | 3 })} />
           </>
-        ) : mancaQuale('la Dote');
+        ) : rif && eAltroGenere('dote', rif) ? altroCollegamento('la Dote') : mancaQuale('la Dote');
         break;
       case 'libro': case 'dvd': case 'attivita': {
         const cosa = valore.tipo === 'libro' ? 'il libro' : valore.tipo === 'dvd' ? 'il film' : 'l’attività';
@@ -173,7 +189,7 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi }: Props & { 
         ) : rif ? frase(righe.length === 0 ? 'Questa attività non si conta per turni: la spunta registra solo che l’hai fatta.' : soloAggiuntivi) : mancaQuale('il lavoro');
         break;
       case 'richiesta':
-        corpo = eff?.tipo === 'richiesta' ? frase(`${fraseEffetto(eff, nomi)}. La spunta la segna; togliendola torna com’era.`) : mancaQuale('la Richiesta');
+        corpo = eff?.tipo === 'richiesta' ? frase(`${fraseEffetto(eff, nomi)}. La spunta la segna; togliendola torna com’era.`) : rif && eAltroGenere('richiesta', rif) ? altroCollegamento('la Richiesta') : mancaQuale('la Richiesta');
         break;
       case 'acquisto':
         corpo = rif ? (
