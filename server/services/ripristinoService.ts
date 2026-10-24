@@ -38,6 +38,10 @@ const NOTE: Partial<Record<TipoModificabile, string>> = {
   'fusione-speciale': 'La Persona risultato non si corregge: si scrivono gli ingredienti, nell’ordine della ricetta, con il nome della Persona nel dataset.',
   tesoro: 'Lo spostamento di rango vale per la fusione del Demone con una Persona di quell’Arcano: più alto sposta verso l’alto, meno verso il basso.',
   'eredita-tipo': 'Dice quali tipi di skill un tipo può ereditare nella fusione; l’ordine e i nomi delle colonne non si correggono.',
+  confidente: 'La chiave e l’ordine del Confidente non si correggono (li usano ranghi, partite e mappe). Il nome si legge in tutta l’app.',
+  'esame-premi': 'Ogni testo dei premi si corregge a parte; la struttura dei premi non cambia.',
+  'settimana-guida': 'Il numero della settimana e l’indirizzo della fonte non si correggono.',
+  'evento-voce': 'Si corregge la certezza del collegamento; quale evento e quale voce sono collegati non si cambia da qui.',
   'dlc-set': 'Una Persona sta in un solo set. Il set non ha un nome: si riconosce dalle sue Persona.',
   'allerta-meteo': 'Vale per questo giorno: le condizioni delle partite che leggono l’allerta (per esempio «piove») seguono le fasce che scegli.',
 };

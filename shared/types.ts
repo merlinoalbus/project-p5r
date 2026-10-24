@@ -3455,7 +3455,8 @@ export const TIPI_MODIFICABILI = ['quartiere', 'trofeo', 'dote', 'trasformazione
   'fabbricazione', 'ricetta', 'armi', 'arma-effetto', 'arma-progressione', 'abiti', 'abito', 'jose',
   'evento-calendario', 'allerta-meteo', 'esame', 'ombra', 'battaglia-sezione', 'regalo', 'persona', 'skill',
   // R11-17/1: i dati veri che prima si cambiavano solo nel pacchetto
-  'arcana', 'fusione-arcana', 'fusione-speciale', 'tesoro', 'eredita-tipo', 'dlc-set'] as const;
+  'arcana', 'fusione-arcana', 'fusione-speciale', 'tesoro', 'eredita-tipo', 'dlc-set',
+  'confidente', 'esame-premi', 'settimana-guida', 'evento-voce'] as const;
 export type TipoModificabile = (typeof TIPI_MODIFICABILI)[number];
 export type TipoCampoCorrezione = 'testo' | 'testolungo' | 'numero' | 'booleano' | 'elenco' | 'scelta' | 'oggetto';
 export type ValoreCampoCorrezione = string | number | boolean | null | string[];

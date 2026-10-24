@@ -7,5 +7,6 @@
 // ============================================================
 
 import { DEFINIZIONI_COMPENDIO } from './righeCompendio.js';
+import { DEFINIZIONI_CONFIDENTI_CALENDARIO } from './righeConfidentiCalendario.js';
 
-export const DEFINIZIONI_DATI_VERI = { ...DEFINIZIONI_COMPENDIO } as const;
+export const DEFINIZIONI_DATI_VERI = { ...DEFINIZIONI_COMPENDIO, ...DEFINIZIONI_CONFIDENTI_CALENDARIO } as const;
