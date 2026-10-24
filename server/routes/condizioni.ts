@@ -23,7 +23,6 @@ import { nomiCondizioni, nomiCondizioniMemo, pinConStato, vociCitabili } from '.
 import { tuttiGliInviti } from '../services/condizioni/condizioneEffettiva.js';
 import { apertureDalDiario, apertureDichiarabili } from '../services/apertureDedaliService.js';
 import { censimentoLuoghiCondizioni } from '../services/censimentoLuoghiCondizioniService.js';
-import { fotografieIngressoMemento } from '../services/fotografieIngressoMementoService.js';
 import { statoAlGiorno, statoDisponibilitaPartita } from '../services/disponibilitaService.js';
 import { valutazione } from '../services/condizioni/valutatore.js';
 import { condizioneSpillo } from '../schemas/mappe.js';
@@ -45,11 +44,6 @@ const chiave = z.string().regex(/^[a-z0-9][a-z0-9-]{0,119}$/);
 router.get('/censimento', (_req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   res.json(censimentoLuoghiCondizioni());
-});
-
-router.get('/censimento/fotografie-ingresso-memento', (_req, res) => {
-  res.setHeader('Cache-Control', 'no-store');
-  res.json(fotografieIngressoMemento());
 });
 
 /** I negozi con il loro programma punti (null se non ne hanno). */

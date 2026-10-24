@@ -6,11 +6,6 @@ import type { DescrizioniArea } from '../tipi.js';
 
 /** Le descrizioni delle rotte di `/api/condizioni` (`routes/condizioni.ts`). */
 export const DESCRIZIONI_CONDIZIONI: DescrizioniArea = {
-  'GET /api/condizioni/censimento/fotografie-ingresso-memento': {
-    sommario: 'Metadati delle fotografie del solo ingresso dei Memento (L26)',
-    descrizione: 'Lettura fissa senza selettori di tabella, chiave o percorso. Confronta la riga corrente e il contesto del quartiere con il pacchetto pubblico 93 e la baseline Regia 122 precedente a 61ccb6ef. Proietta soltanto stati dei campi, formula esatta 05-09/05-07 o altra formula supportata, presenza e forma della fotografia seed e lati pertinenti dei passi D/U/I di main.cestino. Un NULL atteso è distinto da un NULL difforme e da un campo assente; le fotografie parziali non vengono completate. Chiavi interne contraddittorie, radici o passi illeggibili rendono la copertura incerta. Gli ordinali sono effimeri, non ID del cestino. Nessun valore raw, nome, nota, impronta, UID o dato di partita; nessuna mutazione, normalizzazione o approvazione della futura bonifica. Scansione senza taglio in una transazione di sole letture e Cache-Control: no-store anche prima di eventuali errori.',
-    risposta: '`FotografieIngressoMementoDto` (shared/fotografieIngressoMemento.ts)',
-  },
   'GET /api/condizioni/censimento': {
     sommario: 'Inventario corrente di frasi, condizioni, orari e collegamenti dei luoghi',
     descrizione: 'Lettura mirata per gli inventari L5/L6, nello stesso perimetro delle API esistenti. Include le righe nascoste e distingue frasi e orari storici, condizioni proprie salvate, collegamenti strutturati e dati derivati. I JSON mantengono il valore originale e la diagnosi di lettura: un valore illeggibile non diventa una lista vuota. Il contesto di sedi e pin permette di distinguere passaggi, riferimenti indiretti validi, assenze e riferimenti orfani; null non significa automaticamente difetto. Nessuna conversione, scrittura, lettura delle partite, copia del database o immagine. Risposta coerente fra le sezioni e intestazione Cache-Control: no-store. Il risultato descrive i dati correnti; non approva le proposte né prova l’equivalenza storica delle migrazioni.',

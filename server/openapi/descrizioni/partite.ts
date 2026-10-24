@@ -150,6 +150,19 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
     risposta: '`ConfidentePartitaDto` aggiornato, con `doteIncontro` (elenco di `DoteDaSegnareDto`)',
     errori: [PARTITA, [404, 'confidente-non-trovato'], [409, 'confidente-bloccato']],
   },
+  'PUT /api/partite/:id/inviti/:confidente/:data': {
+    sommario: 'Segna un invito di un Confidente come avvenuto',
+    descrizione: 'L\'invito è identificato dal Confidente e dalla data del gioco (`MM-GG`). Si registra solo se le sue condizioni sono vere adesso nella partita, altrimenti 409 `invito-non-possibile` con quel che manca (`manca`, `condizioni`). Già registrato: nessun cambiamento e risposta uguale. Il gesto diretto non lega l\'invito a una voce del Diario. Non scrive nello storico.',
+    risposta: '`InvitoDto` con lo stato aggiornato nella partita',
+    senzaCorpo: true,
+    errori: [PARTITA, [404, 'invito-non-trovato'], [409, 'invito-non-possibile']],
+  },
+  'DELETE /api/partite/:id/inviti/:confidente/:data': {
+    sommario: 'Annulla un invito di un Confidente nella partita',
+    descrizione: 'Toglie dalla partita la registrazione dell\'invito (`Confidente` e `MM-GG`); se non era registrato non cambia nulla. Risponde con l\'invito e il suo stato aggiornato, non con 204. Il gesto diretto toglie la registrazione qualunque ne sia l\'origine; solo la spunta tolta dal Diario cancella soltanto l\'invito scritto da quella voce.',
+    risposta: '`InvitoDto` con lo stato aggiornato nella partita',
+    errori: [PARTITA, [404, 'invito-non-trovato']],
+  },
   'PUT /api/partite/:id/confidenti/:chiave/requisiti': {
     sommario: 'Conferma a mano un requisito di rango di un Confidente',
     descrizione: 'Conferma (o revoca) un requisito che l\'app non sa verificare, indicato da rango e indice. Un requisito di tipo evento non ha una conferma sua: segna l\'evento di storia della partita, lo stesso di Partita → Progressi. Le avvertenze da controllare nel gioco non si confermano (400). Non scrive nello storico.',
@@ -247,12 +260,6 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
     descrizione: 'Imposta lo stato del punto nella partita: `ottenuto`, `esaurito` o `null` per azzerarlo. Da L4 §8.11 (NR4-1) ogni pin tiene il suo stato e una voce permanente o rigenerabile con pin è fatta quando lo sono tutti i suoi pin («in corso k/N» se una parte): «Segna» (o «Esaurito») segna **tutti i suoi pin** (un pin condiviso da rigenerabili di più infiltrazioni nella sua infiltrazione), «Riapri» toglie il segno a tutti; le altre voci di quei pin si ricalcolano e la risposta le elenca in `effetti` (`segnate`, `riaperte`). La riga di `punto_partita` resta come specchio della voce fatta. Una voce senza pin ha il suo stato come prima. `esaurito` solo per una voce esauribile (400 `voce-non-esauribile`; i dedali dei Memento come prima). Segnare la voce risolve le divergenze «da verificare» dei suoi pin. Un Enigma con i suoi passi segna o riapre i passi, e un passo porta con sé il suo Enigma. Una voce descrittiva «Altro» si legge e non si segna (400; azzerarla resta possibile). Una Persona dei Memento non ha uno stato suo: la cattura si segna registrandola nel compendio (400 `cattura-nel-compendio`, dal 2026-10-12; azzerarla resta possibile). Un nuovo stato va nello storico (`punto-dungeon`).',
     risposta: '`PuntoInteresseDto` con lo stato con cui la voce risulta nella partita (e, per i Palazzi, carattere, oggetto, «da verificare», `avanzamento` k/N, il segno di ogni pin in `pin[].fatto`, `condivise` ed `effetti`)',
     errori: [PARTITA, [404, 'punto-non-trovato'], [400, 'punto-descrittivo'], [400, 'cattura-nel-compendio'], [400, 'voce-non-esauribile']],
-  },
-  'GET /api/partite/:id/esami/piazzamenti': {
-    sommario: 'Il piazzamento agli esami della partita',
-    descrizione: 'I quattro esami con il piazzamento segnato (primo, primi-10, altro) o null. Il piazzamento che vale adesso è quello dell’ultimo esame i cui risultati sono usciti alla data di gioco, e dà il moltiplicatore ai sette Confidenti dell’esame.',
-    risposta: 'Elenco di `PiazzamentoEsameDto`',
-    errori: [PARTITA],
   },
   'PUT /api/partite/:id/esami/:esame/piazzamento': {
     sommario: 'Segna (o toglie) il piazzamento a un esame',
