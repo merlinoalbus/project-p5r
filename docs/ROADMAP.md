@@ -1312,7 +1312,7 @@ confermate dall'utente (U): l'elenco è sotto la tabella dei lotti. Un giro del 
 
 Stato letto il 2026-10-24 da `coordinamento/stato.json` (`pianoAtomico.voci`, campo `stato`; legenda della Regia: `chiuso` = chiusa,
 `chiuso-codice` = fatta nel codice, da verificare e pubblicare, `da-fare`, `riservato-utente`) e dal codice del ramo `newreview`
-(registri delle migrazioni: gioco fino alla 194, utente fino alla 043). I lotti L0–L4 non hanno voci nel `pianoAtomico`: il loro
+(registri delle migrazioni nell'ultimo commit: gioco fino alla 199, utente fino alla 043). I lotti L0–L4 non hanno voci nel `pianoAtomico`: il loro
 stato è quello delle fasi in `stato.json` → `lotti`.
 
 | Lotto | Contenuto | Stato |
