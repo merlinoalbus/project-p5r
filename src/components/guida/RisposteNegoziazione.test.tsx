@@ -7,8 +7,6 @@
 // che si legge sullo schermo mentre l'Ombra parla, e il carattere decide quale risposta è buona.
 // ============================================================
 
-import { fireEvent, render, screen, within } from '@testing-library/react';
-import { RisposteNegoziazione } from './RisposteNegoziazione';
 import { cercaDomande } from '../../utils/negoziazione';
 import type { NegoziazioneDomandaDto } from '../../types';
 
@@ -37,33 +35,9 @@ it('cerca nella domanda e nelle risposte, con tutte le parole scritte', () => {
   expect(cercaDomande(domande, '')).toHaveLength(2);
 });
 
-it('la ricerca riduce l’elenco a quel che l’Ombra ha davvero chiesto', () => {
-  render(<RisposteNegoziazione domande={domande} />);
-  expect(screen.getByText('Ehi, se hai delle medicine passamene un po’.')).toBeInTheDocument();
-  fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'maschera' } });
-  expect(screen.queryByText('Ehi, se hai delle medicine passamene un po’.')).toBeNull();
-  expect(screen.getByText('Dai, che ci fai con quella maschera?')).toBeInTheDocument();
-});
-
-it('ogni risposta dice a quale carattere va bene e a quale no', () => {
-  render(<RisposteNegoziazione domande={domande} />);
-  const riga = screen.getByText('Tanto non cambierebbe niente.').closest('li')!;
-  expect(within(riga).getByTitle(/Irritabile: risposta buona/)).toBeInTheDocument();
-  expect(within(riga).getByTitle(/Timida: risposta cattiva/)).toBeInTheDocument();
-  // una risposta che nessuno ha verificato lo dice, invece di far credere che sia indifferente
-  expect(within(screen.getByText('Tutto bene?').closest('li')!).getByText('nessun carattere verificato')).toBeInTheDocument();
-});
-
-it('scelto il carattere, la risposta buona per lui viene prima', () => {
-  render(<RisposteNegoziazione domande={domande} />);
-  fireEvent.click(screen.getByRole('button', { name: /Irritabile/ }));
-  const prima = screen.getByText('Ehi, se hai delle medicine passamene un po’.').closest('li')!;
-  const testi = within(prima).getAllByRole('listitem').map((li) => li.textContent ?? '');
-  expect(testi[0]).toContain('Tanto non cambierebbe niente.');
-});
-
-it('senza risultati lo dice, e dice anche perché', () => {
-  render(<RisposteNegoziazione domande={domande} />);
-  fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'katsudon' } });
-  expect(screen.getByRole('status')).toHaveTextContent(/Nessuna domanda con queste parole/);
-});
+// SUPERATI da R11-03/2: il componente `RisposteNegoziazione` era orfano (nessun importatore di produzione) ed è stato eliminato.
+// Corpi originali tolti per compilare; non eseguiti (zero test).
+it.skip('SUPERATO da R11-03/2: la ricerca riduce l’elenco a quel che l’Ombra ha davvero chiesto', () => {});
+it.skip('SUPERATO da R11-03/2: ogni risposta dice a quale carattere va bene e a quale no', () => {});
+it.skip('SUPERATO da R11-03/2: scelto il carattere, la risposta buona per lui viene prima', () => {});
+it.skip('SUPERATO da R11-03/2: senza risultati lo dice, e dice anche perché', () => {});
