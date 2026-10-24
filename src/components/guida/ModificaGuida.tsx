@@ -169,7 +169,7 @@ export function ModificaGuida({ tipo, chiave, cosa, soloIcona, etichetta = 'Modi
       case 'scelta':
         return (
           <Blocco key={c.percorso}>
-            <Selettore etichetta={c.etichetta} valore={typeof v === 'string' ? v : ''} ricerca="mai" disabilitato={occupato}
+            <Selettore etichetta={c.etichetta} valore={typeof v === 'string' ? v : ''} ricerca="auto" disabilitato={occupato}
               opzioni={(c.opzioni ?? []).map((o) => ({ chiave: o.chiave, nome: o.nome }))} onCambia={(k) => imposta(c.percorso, k)} />
           </Blocco>
         );

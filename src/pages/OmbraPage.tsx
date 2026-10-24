@@ -24,8 +24,12 @@ import type { OmbraDettaglioDto, OmbraLuogoDto } from '../../shared/ombre';
 /** Il percorso di un luogo: «Palazzo › infiltrazione» o «Memento › dedalo › aree». */
 const percorso = (l: OmbraLuogoDto): string => [l.dungeonNome, l.infiltrazione?.nome, l.areeDedalo.length > 0 ? l.areeDedalo.map((a) => a.nome).join(', ') : null].filter(Boolean).join(' › ');
 
-/** I luoghi d'incontro: ognuno un collegamento alla guida del posto; un Palazzo concluso è sparito dopo il furto (R8-15b). */
-function Luoghi({ o }: { o: OmbraDettaglioDto }) {
+/** Da dove viene una riga di luogo, per la matita (R11-17/1): per esteso nel nome accessibile, in breve accanto alla matita quando il posto ha più righe. */
+const FONTE_LUOGO = { battaglia: 'dalla guida alla Battaglia', voce: 'da una voce Persona della guida', utente: 'aggiunto da te' } as const;
+const FONTE_BREVE = { battaglia: 'Battaglia', voce: 'Voce', utente: 'Tuo' } as const;
+
+/** I luoghi d'incontro: ognuno un collegamento alla guida del posto; un Palazzo concluso è sparito dopo il furto (R8-15b). Ogni riga di luogo si corregge dalla sua matita (R11-17/1). */
+function Luoghi({ o, onSalvato }: { o: OmbraDettaglioDto; onSalvato: () => void }) {
   return (
     <section className="card flex flex-col gap-1.5" aria-label="Dove si incontra">
       <h2 className="m-0 font-display text-[15px] uppercase leading-none">Dove si incontra</h2>
@@ -38,6 +42,13 @@ function Luoghi({ o }: { o: OmbraDettaglioDto }) {
               <li key={`${l.dungeon}|${l.infiltrazione?.chiave ?? ''}`} className="flex flex-wrap items-center gap-x-2">
                 <Link to={l.casa} className={`touch inline-flex min-h-11 items-center text-[13px] ${l.raggiungibile === false ? 'opacity-60' : ''}`}>{percorso(l)}</Link>
                 {l.raggiungibile === false && <span className="chip text-[11px]" title={l.motivoNonRaggiungibile}>Non più raggiungibile: il Palazzo è sparito</span>}
+                {l.righe.map((r) => (
+                  <span key={r.id} className="inline-flex items-center gap-0.5">
+                    {l.righe.length > 1 && <span className="text-[11px] text-text-muted">{FONTE_BREVE[r.fonte]}</span>}
+                    <ModificaGuida tipo="ombra-luogo" chiave={String(r.id)} soloIcona onSalvato={onSalvato}
+                      cosa={`il luogo d’incontro «${percorso(l)}» di «${o.nome}» (${FONTE_LUOGO[r.fonte]})`} />
+                  </span>
+                ))}
               </li>
             ))}
           </ul>
@@ -89,7 +100,7 @@ export function OmbraPage() {
             {o.affinita.length > 0 ? <AffinitaGriglia affinita={o.affinita} /> : <p className="m-0 text-[13px] text-text-muted">La guida non dice a cosa sia debole.</p>}
             {o.affinitaProprie && <p className="m-0 text-[12px] text-text-muted">Alcune affinità sono proprie dell’Ombra: nel gioco sono diverse da quelle della sua Persona{o.persona ? '; le altre vengono dal compendio' : ''}.</p>}
           </section>
-          <Luoghi o={o} />
+          <Luoghi o={o} onSalvato={() => void dati.ricarica()} />
           <section className="card flex flex-col gap-1.5" aria-label="Negoziazione">
             <h2 className="m-0 font-display text-[15px] uppercase leading-none">Negoziazione</h2>
             {o.personalita === 'sconosciuta'
@@ -108,7 +119,11 @@ export function OmbraPage() {
               <h2 className="m-0 font-display text-[15px] uppercase leading-none">Nella guida</h2>
               <ul className="m-0 flex list-none flex-wrap gap-x-3 p-0 text-[12px]">
                 {o.voci.map((v) => (
-                  <li key={v.chiave}><Link to={`/guida/dungeon/${v.dungeon}?${v.dungeon === 'mementos' ? 'area' : 'infiltrazione'}=${encodeURIComponent(v.infiltrazione)}`} className="touch inline-flex min-h-11 items-center">{v.nome}</Link></li>
+                  <li key={v.chiave} className="flex items-center">
+                    <Link to={`/guida/dungeon/${v.dungeon}?${v.dungeon === 'mementos' ? 'area' : 'infiltrazione'}=${encodeURIComponent(v.infiltrazione)}`} className="touch inline-flex min-h-11 items-center">{v.nome}</Link>
+                    {/* R11-17/1: quale Ombra descrive la voce (se è un'altra, la voce passa alla sua pagina) */}
+                    <ModificaGuida tipo="ombra-voce" chiave={v.chiave} soloIcona cosa={`la voce «${v.nome}»: quale Ombra descrive`} onSalvato={() => void dati.ricarica()} />
+                  </li>
                 ))}
               </ul>
             </section>
