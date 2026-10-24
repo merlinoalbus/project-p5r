@@ -21,7 +21,11 @@ export const FilmPage = pigra<typeof import('../../pages/FilmPage'), PropsElemen
 export const AttivitaPage = pigra<typeof import('../../pages/AttivitaPage'), PropsElemento>(() => import('../../pages/AttivitaPage'), 'AttivitaPage');
 export const RichiestePage = pigra<typeof import('../../pages/RichiestePage'), PropsElemento>(() => import('../../pages/RichiestePage'), 'RichiestePage');
 
+/** Il bivio «Dove si trova» come vista del cassetto del Confidente (parametri: `tipo` e `chiave` dell'indirizzo `/guida/mondo/:tipo/:chiave`). */
+export interface PropsDoveSiTrova { tipo: string; chiave: string }
+export const DoveSiTrovaNelCassetto = pigra<typeof import('../../pages/AccessoMondoPage'), PropsDoveSiTrova>(() => import('../../pages/AccessoMondoPage'), 'AccessoMondoNelCassetto');
+
 /** I `precarica` delle pagine del pannello scheda (il modulo importato resta in memoria: la promessa riuscita è in cache). */
 export const precaricaPagineScheda: ReadonlyArray<() => Promise<void>> = [
-  ConfidenteDettaglioPage, DungeonDettaglioPage, NegozioPage, LuogoPage, OggettoPage, LibriPage, FilmPage, AttivitaPage, RichiestePage,
+  ConfidenteDettaglioPage, DungeonDettaglioPage, NegozioPage, LuogoPage, OggettoPage, LibriPage, FilmPage, AttivitaPage, RichiestePage, DoveSiTrovaNelCassetto,
 ].map((p) => p.precarica);

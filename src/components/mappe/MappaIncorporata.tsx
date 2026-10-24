@@ -122,7 +122,7 @@ function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, classN
   useEffect(() => {
     if (!intero) return;
     /** Esc riporta il visore dentro la pagina. */
-    const suTasto = (e: KeyboardEvent) => { if (e.key === 'Escape') setIntero(false); };
+    const suTasto = (e: KeyboardEvent) => { if (e.key === 'Escape' && !e.defaultPrevented && !document.querySelector('.modal-overlay')) setIntero(false); };
     window.addEventListener('keydown', suTasto);
     return () => window.removeEventListener('keydown', suTasto);
   }, [intero]);

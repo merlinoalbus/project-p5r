@@ -310,7 +310,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   useEffect(() => {
     if (!gruppoAperto) return;
     /** Esc chiude l'elenco del gruppo aperto. */
-    const suTasto = (e: KeyboardEvent) => { if (e.key === 'Escape') setGruppoAperto(null); };
+    const suTasto = (e: KeyboardEvent) => { if (e.key === 'Escape' && !e.defaultPrevented && !document.querySelector('.modal-overlay')) setGruppoAperto(null); };
     window.addEventListener('keydown', suTasto);
     return () => window.removeEventListener('keydown', suTasto);
   }, [gruppoAperto]);
