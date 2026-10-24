@@ -149,7 +149,7 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
           <p className="progressi-scopo m-0">
             <span className="hidden sm:inline">Le cose fatte in gioco che sbloccano Confidenti, negozi e attività. Quello che l’app sa già lo vedi; quello che non può sapere lo segni tu.</span>
             <span className="sm:hidden">Cosa hai sbloccato in gioco: l’app segna quello che sa, il resto lo segni tu.</span>
-          </p>Le cose fatte in gioco che sbloccano Confidenti, negozi e attività. Quello che l’app sa già lo vedi; quello che non può sapere lo segni tu.</p>
+          </p>
 
           <div className="progressi-riepilogo" role="tablist" aria-label="Argomenti dei progressi">
             {SEZIONI.map((s) => (
