@@ -17,7 +17,7 @@ const DATO = {
   fonte: {
     titolo: 'Persona 5: how to increase Persona capacity (Twinfinite)',
     url: 'https://twinfinite.net/guides/persona-5-increase-persona-capacity-carry-more-personas-how-to/',
-    nota: 'La guida italiana non riporta il valore di partenza; la guida inglese dice che si parte con un massimo di sei Persona (up to six Personas).',
+    nota: 'La guida italiana non riporta il valore di partenza; la guida inglese dice che si parte con un massimo di sei Persona (up to six Personas). L’articolo riguarda Persona 5 originale: il suo «massimo di 16» non vale per Royal, dove il massimo è 12 (guida italiana), e prevale il dato Royal.',
   },
 };
 
