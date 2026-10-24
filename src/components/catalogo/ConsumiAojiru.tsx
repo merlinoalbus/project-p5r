@@ -221,7 +221,9 @@ export function ConsumiAojiru({ partitaId, stato, onCambiato, registrabile = tru
     blocco.current = true; setOccupato(true); setErrore(null);
     const { anteprima: a, provenienza } = rimozione;
     try {
-      const bersaglio = { etichetta: provenienza ? `Voce che conferma il consumo ${a.acquisto?.identita.nome ?? a.articolo}` : `Vecchio segno ${a.articolo}`, articolo: a.articolo };
+      // l'etichetta finisce nelle notifiche: sempre il nome leggibile (il consumo ha quello della sua identità; questo componente tratta solo l'Aojiru), mai la chiave
+      const nomeArticolo = a.acquisto?.identita.nome ?? 'Aojiru';
+      const bersaglio = { etichetta: provenienza ? `Voce che conferma il consumo di ${nomeArticolo}` : `Vecchio segno «Acquistato» di ${nomeArticolo}`, articolo: a.articolo };
       if (provenienza) await annullaFonteConRegistro(partitaId, { operazioneId: a.operazioneId, provenienzaId: provenienza, revisioneAcquistiAttesa: a.revisioneAcquistiAttesa }, bersaglio);
       else await rimuoviLegacyConRegistro(partitaId, { operazioneId: a.operazioneId, articolo: a.articolo, revisioneAcquistiAttesa: a.revisioneAcquistiAttesa }, bersaglio);
       if (vivo.current) { setRicevuta('Tolto. Lo ritrovi nel Cestino.'); setRimozione(null); setIncerto(false); }
