@@ -5,7 +5,8 @@
 // Progetto dei Confidenti approvato dall'utente (2026-10-24, tavola 4): guardando la voce dal diario si vedono fra le sue note le
 // informazioni per un level up ottimale. Una voce con «Rango atteso N» mostra le scelte dell'evento del rango N (`a.dialogo`) con la
 // migliore in evidenza. Con una partita, se il Confidente vi sta a un rango diverso (`a.rangoPartita`) e il suo prossimo evento è un altro
-// (`a.dialogoPartita`), sotto c'è il rimando alle risposte di quell'evento (aperte da sole se la voce non ha un rango atteso).
+// (`a.dialogoPartita`), sotto c'è il rimando alle risposte di quell'evento. Senza rango atteso («Nessuno») la voce non prevede una salita
+// di rango e il blocco non c'è (scelta dell'utente, 2026-10-24).
 // Sola lettura: i punti li dà la scelta delle note alla spunta (`SceltaNote`).
 // ============================================================
 
@@ -32,23 +33,18 @@ function ScelteEvento({ d }: { d: DialogoVoceDto }) {
   );
 }
 
-/** Il blocco delle risposte migliori della voce (niente se la voce non ha dialoghi da mostrare). */
+/** Il blocco delle risposte migliori della voce: solo con un rango atteso (senza, la voce non prevede una salita di rango). */
 export function RisposteVoce({ a }: { a: AzionePercorsoDto }) {
   const [altroAperto, setAltroAperto] = useState(false);
   const d = a.dialogo;
-  const dp = a.dialogoPartita;
-  if (!d && !dp) return null;
-  // senza dialogo della voce, quello della partita è il blocco principale
-  const principale = d ?? dp!;
-  const secondario = d ? dp : undefined;
+  if (a.rangoAtteso === null || !d) return null;
+  const secondario = a.dialogoPartita;
   return (
-    <div className="risposte-voce" role="group" aria-label={`Risposte migliori, evento del rango ${principale.rango}`}>
-      <span className="risposte-voce__titolo">
-        {d ? `Level up al rango ${d.rango} · risposte migliori` : `Prossimo level up nella tua partita · rango ${principale.rango}`}
-      </span>
-      {principale.note && <span className="text-[12px] text-text-muted">{principale.note}</span>}
-      <ScelteEvento d={principale} />
-      {d && a.rangoPartita !== undefined && a.rangoPartita + 1 !== d.rango && (
+    <div className="risposte-voce" role="group" aria-label={`Risposte migliori, evento del rango ${d.rango}`}>
+      <span className="risposte-voce__titolo">Level up al rango {d.rango} · risposte migliori</span>
+      {d.note && <span className="text-[12px] text-text-muted">{d.note}</span>}
+      <ScelteEvento d={d} />
+      {a.rangoPartita !== undefined && a.rangoPartita + 1 !== d.rango && (
         <span className="text-[12px] text-text-secondary">
           Nella tua partita è al rango {a.rangoPartita}
           {secondario && (
