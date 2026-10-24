@@ -8,6 +8,7 @@ import { apiDelete, apiPut, apiPost, apiGet, queryString } from './_helpers';
 import type { AzionePercorsoDto, DatiVoceGiornata, ElenchiAzioneDto, EsitoRevisioneVoce, PuntiCopiatiDto, PuntiSpostatiDto, SpostaPuntiInArea, TrasferisciVociGiornata, VideogiochiDto, VociTrasferiteDto } from '../../types';
 import type { DoteNote } from '../../../shared/effettiAzione';
 import type { DisponibilitaConfidenteDto, DisponibilitaStrutturata } from '../../../shared/disponibilitaStrutturata';
+import type { GiornoModificabileDto, ModificaGiorno } from '../../../shared/giorno';
 
 /** I campi che il PUT accetta (tutti facoltativi) più le chiavi dei luoghi. */
 export type ModificaDisponibilitaStrutturata = Partial<Pick<DisponibilitaStrutturata, 'modo' | 'giorni' | 'fasce' | 'eccezioni' | 'dal' | 'motivoSenzaLuogo'>> & { luoghi?: string[] };
@@ -243,6 +244,13 @@ export const impostaDotiIncontro = (chiave: string, ranghi: Array<{ rango: numbe
   apiPut(`/compendio/confidenti/${encodeURIComponent(chiave)}/doti-incontro`, { ranghi });
 /** Elenco dei Confidenti del compendio. */
 export const getConfidenti =(): Promise<ConfidenteDto[]> => apiGet('/compendio/confidenti');
+/** R9-19: il giorno di gioco modificabile (meteo nelle due fasce, nota, trama, vincoli) e «Ripristina» com'è nella guida. */
+export const getGiornoModificabile = (data: string): Promise<GiornoModificabileDto> => apiGet(`/compendio/giorni/${encodeURIComponent(data)}`);
+export const salvaGiornoModificabile = (data: string, dati: ModificaGiorno): Promise<GiornoModificabileDto> =>
+  apiPut(`/compendio/giorni/${encodeURIComponent(data)}`, dati, { maxRetries: 0 });
+export const ripristinaGiornoModificabile = (data: string): Promise<GiornoModificabileDto> =>
+  apiPost(`/compendio/giorni/${encodeURIComponent(data)}/ripristina`, {}, { maxRetries: 0 });
+
 /** R9-01 (F4): la disponibilità strutturata di un Confidente; con la partita anche se è disponibile adesso. */
 export const getDisponibilitaStrutturata = (chiave: string, partita?: number): Promise<DisponibilitaConfidenteDto> =>
   apiGet(`/compendio/confidenti/${encodeURIComponent(chiave)}/disponibilita-strutturata${queryString({ partita })}`);
