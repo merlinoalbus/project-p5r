@@ -159,6 +159,16 @@ export function affinitaDi(perElemento: Map<string, string>): AffinitaDto[] {
 }
 
 /**
+ * R8-10/1: le affinità come le dà la guida, se l'utente ne ha corretta almeno una (altrimenti null: sono già quelle della guida). Il valore della
+ * guida di ogni riga è `seed_codice` (migrazione 186); un elemento senza riga in tabella vale «-», come per la lettura.
+ */
+function affinitaGuidaDi(personaId: number): AffinitaDto[] | null {
+  const righe = prepared('SELECT elemento, codice, origine, seed_codice FROM persona_affinita WHERE persona_id = ?').all(personaId) as Array<{ elemento: string; codice: string; origine: string; seed_codice: string | null }>;
+  if (!righe.some((r) => r.origine === 'utente')) return null;
+  return affinitaDi(new Map(righe.map((r) => [r.elemento, r.seed_codice ?? r.codice])));
+}
+
+/**
  * Da una riga della tabella `persona` al riassunto per l'API (nomi tradotti, flag booleani, statistiche, affinità).
  * Le affinità si possono passare già lette in blocco (elenco); se mancano si leggono per la sola Persona.
  */
@@ -350,6 +360,7 @@ export function dettaglioPersona(id: number): PersonaDettaglioDto {
   };
   return {
     ...base,
+    affinitaGuida: affinitaGuidaDi(id),
     nota: r.nota, notaNome: tOpz('notaPersona', r.nota),
     oggetto: r.oggetto, oggettoAllarme: r.oggetto_allarme, oggettoECarta: r.oggetto_e_carta === 1,
     oggettoDescrizione: descrizioneOggetto(r.oggetto), oggettoAllarmeDescrizione: descrizioneOggetto(r.oggetto_allarme),

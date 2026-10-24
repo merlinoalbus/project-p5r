@@ -8,6 +8,9 @@ import { domande } from '../services/domandeService.js';
 import { calendario, eventiDellaVoce } from '../services/calendarioService.js';
 import { aggiornaGiorno, leggiGiorno, ripristinaGiorno } from '../services/giorniService.js';
 import { METEO_GIORNO, type ModificaGiorno } from '../../shared/giorno.js';
+import { correggiAffinita, ripristinaAffinita } from '../services/affinitaPersonaService.js';
+import { ELEMENTI_AFFINITA, ESITI_AFFINITA } from '../../shared/elementi.js';
+import type { ModificaAffinitaPersona } from '../../shared/affinitaPersona.js';
 import { collegaSchedaAllaVoce, copieDelPalazzo, creaVoceDallaScheda, dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
 import { aggiornaRichiesta, citazioniRichiesta, collocaRichiesta, creaRichiesta, eliminaRichiesta, richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
@@ -471,6 +474,27 @@ router.put('/giorni/:data', validate({ params: paramsGiorno, body: bodyGiorno })
 /** «Ripristina»: il giorno torna come lo dà la guida. */
 router.post('/giorni/:data/ripristina', validate({ params: paramsGiorno }), (req, res) => {
   res.json(ripristinaGiorno(String(req.params.data)));
+});
+
+// ---- Le affinità di una Persona modificabili (L8 R8-10/1): correggere la griglia e rimetterla com'è nella guida ----
+const bodyAffinitaPersona = z.object({
+  affinita: z.array(z.object({
+    elemento: z.enum(ELEMENTI_AFFINITA.map((e) => e.chiave) as [string, ...string[]]),
+    codice: z.enum(ESITI_AFFINITA.map((e) => e.codice) as [string, ...string[]]),
+  }).strict()).length(ELEMENTI_AFFINITA.length),
+}).strict().superRefine((b, ctx) => {
+  const visti = new Set<string>();
+  b.affinita.forEach((a, i) => {
+    if (visti.has(a.elemento)) ctx.addIssue({ code: 'custom', path: ['affinita', i, 'elemento'], message: `L'elemento ${a.elemento} compare più di una volta.` });
+    visti.add(a.elemento);
+  });
+});
+router.put('/persona/:id/affinita', validate({ params: paramsId, body: bodyAffinitaPersona }), (req, res) => {
+  res.json(correggiAffinita(Number(req.params.id), req.body as ModificaAffinitaPersona));
+});
+/** «Ripristina»: le affinità corrette tornano quelle della guida. */
+router.post('/persona/:id/affinita/ripristina', validate({ params: paramsId }), (req, res) => {
+  res.json(ripristinaAffinita(Number(req.params.id)));
 });
 
 export default router;

@@ -132,6 +132,8 @@ export interface RicettaSpecialeDto {
 
 /** Scheda completa di una Persona. */
 export interface PersonaDettaglioDto extends PersonaRiassuntoDto {
+  /** R8-10/1: le affinità come le dà la guida, solo se l'utente ne ha corretta almeno una (altrimenti null): «Ripristina» le rimette. */
+  affinitaGuida: AffinitaDto[] | null;
   /** Testo originale sull'origine della figura (mai il testo del gioco), con fonte sintetica. */
   descrizione: string;
   fonteDescrizione: string;

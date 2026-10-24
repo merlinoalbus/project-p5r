@@ -66,8 +66,20 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   'GET /api/compendio/persona/:id': {
     sommario: 'Scheda completa di una Persona',
     descrizione: 'Riassunto più skill apprese per livello, dettaglio del tratto, ricetta speciale (se la Persona ne è il risultato) e ricette di cui è ingrediente, set DLC, carte skill ottenibili con l\'esecuzione, titolo di negoziazione, aree e piani di Mementos, oggetto e oggetto d\'allarme con nome e descrizione tradotti.',
-    risposta: '`PersonaDettaglioDto`',
+    risposta: '`PersonaDettaglioDto`; `affinitaGuida` porta le affinità come le dà la guida solo se l\'utente ne ha corretta almeno una, altrimenti null.',
     errori: [[404, 'persona-non-trovata']],
+  },
+  'PUT /api/compendio/persona/:id/affinita': {
+    sommario: 'Corregge le affinità di una Persona (la griglia dei 10 elementi)',
+    descrizione: 'Corpo strict `{ affinita: [{ elemento, codice }] }` con tutti e 10 gli elementi una volta sola (phys, gun, fire, ice, electric, wind, psy, nuclear, bless, curse; Divino non esiste) e il codice fra `wk`, `rs`, `nu`, `rp`, `ab`, `-`. Cambia solo le righe diverse dall\'attuale: alla prima correzione di una riga `persona_affinita` conserva il valore della guida (`seed_codice`) e passa a origine «utente»; riportare un elemento al valore della guida lo rimette «seed». Una griglia uguale all\'attuale non scrive. Svuota la cache dei dati di gioco: scheda Persona, Ombra, Battaglia, dedali e Stanza di Velluto leggono la stessa tabella, quindi mostrano subito il valore nuovo. Le differenze proprie di un\'Ombra non cambiano. Vale anche per le forme del gruppo.',
+    risposta: '`PersonaDettaglioDto` aggiornato',
+    errori: [[400, 'validation-error'], [404, 'persona-non-trovata']],
+  },
+  'POST /api/compendio/persona/:id/affinita/ripristina': {
+    sommario: 'Riporta le affinità di una Persona a quelle della guida',
+    descrizione: 'Rimette in `codice` il valore conservato in `seed_codice` di ogni riga corretta e riporta l\'origine a «seed». 409 `affinita-della-guida` se nessuna affinità della Persona è stata corretta.',
+    risposta: '`PersonaDettaglioDto` aggiornato',
+    errori: [[404, 'persona-non-trovata'], [409, 'affinita-della-guida']],
   },
   'GET /api/compendio/skill': {
     sommario: 'Elenco delle skill con filtri',
@@ -408,7 +420,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   // ---- Palazzi e Memento ----
   'GET /api/compendio/dungeon': {
     sommario: 'Elenco dei Palazzi e dei Memento',
-    descrizione: 'I riassunti in ordine di gioco: date, finestra di esistenza, livello consigliato, conteggi di aree e punti, raccolta sulle planimetrie (per i Memento gli obiettivi dei dedali). Con `?partita=` anche i punti gestiti, quanto è stato raccolto e, per i Palazzi, i due livelli del completamento (§8.10, decisione dell\'utente del 2026-10-20): `concluso` (Tesoro e boss finale: governa ingressi, mappa di Tokyo, requisiti e condizioni) e `completato` (concluso e tutti gli oggetti permanenti: anello, percentuale e segno «Completato»), ciascuno col perché. Per i Palazzi anche `voceBossFinale`, `bossFinaleCorretto`, `regolaBoss` (§8.14–8.15: `memento` = il boss segnato nella Guida, senza effetti di Palazzo e senza `concluso`, come Iweleth) e `bossFinaleDaDichiarare` (regola della voce senza voce dichiarata: il Palazzo non si conclude finché non la si sceglie con «Modifica › Boss finale»).',
+    descrizione: 'I riassunti in ordine di gioco: date, finestra di esistenza, livello consigliato, conteggi di aree e punti, raccolta sulle planimetrie (per i Memento gli obiettivi dei dedali). Con `?partita=` anche i punti gestiti, quanto è stato raccolto e, per i Palazzi, i due livelli del completamento (§8.10, decisione dell\'utente del 2026-10-20): `concluso` (Tesoro e boss finale: governa ingressi, mappa di Tokyo, requisiti e condizioni) e `completato` (concluso e tutti gli oggetti permanenti: anello, percentuale e segno «Completato»), ciascuno col perché. Per i Palazzi anche `voceBossFinale`, `bossFinaleCorretto`, `regolaBoss` (§8.14–8.15: `memento` = nessun boss finale da dichiarare, né anello né effetti di Palazzo e senza `concluso`: Iweleth, che vive come dedalo dei Memento) e `bossFinaleDaDichiarare` (regola della voce senza voce dichiarata: il Palazzo non si conclude finché non la si sceglie con «Modifica › Boss finale»).',
     risposta: 'Elenco di `DungeonRiassuntoDto`',
     errori: [PARTITA_NON_TROVATA],
   },
@@ -438,7 +450,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'PUT /api/compendio/dungeon/:chiave': {
     sommario: 'Corregge i testi della scheda di un Palazzo',
-    descrizione: 'Si cambiano solo i campi inviati (nome, sovrano, date, livello consigliato, note); un nome vuoto lascia quello di prima. È una correzione della guida: vale per tutte le partite ed entra nel pacchetto di gioco. L4 §8.14: `voceBossFinale` («Modifica › Boss finale») sceglie la voce del boss finale del Palazzo fra le sue voci «Boss» (null = nessuna, e il Palazzo non si conclude); il primo cambio conserva il valore della guida per «Ripristina». Nei Memento e nei Palazzi con `regolaBoss` `memento` (Iweleth, §8.15) non c\'è: il boss si segna nella Guida (400 `boss-finale-dei-memento`).',
+    descrizione: 'Si cambiano solo i campi inviati (nome, sovrano, date, livello consigliato, note); un nome vuoto lascia quello di prima. È una correzione della guida: vale per tutte le partite ed entra nel pacchetto di gioco. L4 §8.14: `voceBossFinale` («Modifica › Boss finale») sceglie la voce del boss finale del Palazzo fra le sue voci «Boss» (null = nessuna, e il Palazzo non si conclude); il primo cambio conserva il valore della guida per «Ripristina». Nei Memento e nei Palazzi con `regolaBoss` `memento` (Iweleth, §8.15) non c\'è: nessun boss finale da dichiarare (400 `boss-finale-dei-memento`).',
     risposta: 'La scheda aggiornata (senza stato di partita), `DungeonDettaglioDto`',
     errori: [[404, 'dungeon-non-trovato'], [404, 'punto-non-trovato'], [400, 'voce-non-boss'], [400, 'voce-di-un-altro-palazzo'], [400, 'boss-finale-dei-memento']],
   },
