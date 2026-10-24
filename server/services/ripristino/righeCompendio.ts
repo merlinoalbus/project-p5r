@@ -181,6 +181,21 @@ const dlcSet: DefRiga = {
   },
 };
 
+// ---- Oggetti del compendio (equipaggiamento delle Persona): categoria e vincolo ----
+
+/** Categoria e vincolo (a chi appartiene l'oggetto) dell'oggetto del compendio, `oggetto` (223, chiave = id). Nome e descrizione si correggono dalle traduzioni, il legame col catalogo dal catalogo. */
+const oggettoCompendio = rigaDaColonne({
+  etichetta: 'Oggetto del compendio', tabella: 'oggetto', colonnaChiave: 'CAST(id AS TEXT)', ordine: 'id',
+  colonne: () => [
+    colonna({ p: 'categoria', e: 'Categoria', t: 'scelta', opzioni: vociAmbito('tipoOggetto').map((v) => ({ chiave: v.chiave, nome: v.testo })) }, 'categoria', 'scelta'),
+    colonna({ p: 'vincolo', e: 'Chi lo può usare', t: 'scelta', opzioni: [{ chiave: '', nome: 'Nessun vincolo' }, ...vociAmbito('vincoloOggetto').map((v) => ({ chiave: v.chiave, nome: v.testo }))] }, 'vincolo', 'scelta'),
+  ],
+  nome: (chiave) => {
+    const nome = prepared('SELECT nome FROM oggetto WHERE CAST(id AS TEXT) = ?').pluck().get(chiave) as string | undefined;
+    return nome === undefined ? chiave : t('oggetto', nome);
+  },
+});
+
 export const DEFINIZIONI_COMPENDIO: {
-  arcana: DefRiga; 'fusione-arcana': DefRiga; 'fusione-speciale': DefRiga; tesoro: DefRiga; 'eredita-tipo': DefRiga; 'dlc-set': DefRiga;
-} = { arcana, 'fusione-arcana': fusioneArcana, 'fusione-speciale': fusioneSpeciale, tesoro, 'eredita-tipo': ereditaTipo, 'dlc-set': dlcSet };
+  arcana: DefRiga; 'fusione-arcana': DefRiga; 'fusione-speciale': DefRiga; tesoro: DefRiga; 'eredita-tipo': DefRiga; 'dlc-set': DefRiga; 'oggetto-compendio': DefRiga;
+} = { arcana, 'fusione-arcana': fusioneArcana, 'fusione-speciale': fusioneSpeciale, tesoro, 'eredita-tipo': ereditaTipo, 'dlc-set': dlcSet, 'oggetto-compendio': oggettoCompendio };

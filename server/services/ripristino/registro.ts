@@ -278,4 +278,22 @@ export const DEFINIZIONI_BLOCCO: Partial<Record<TipoModificabile, DefBlocco>> = 
       T('bossSegreto/statistiche/bottinoGarantito', 'Bottino garantito', { gruppo: 'Boss segreto: statistiche' }),
     ],
   },
+
+  // ---- R11-17/1: i due blocchi di `dati_guida` che prima si cambiavano solo nel pacchetto ----
+  // Le note comuni alle categorie di attività: oggi una sola, la frase dei videogiochi (chiave `videogioco`). Una categoria nuova nel blocco si aggiunge qui.
+  'note-categorie-attivita': {
+    modalita: 'blocco', blocco: 'note-categorie-attivita', etichetta: 'Note delle categorie di attività', radice: [], chiaveFissa: 'note-categorie-attivita',
+    campi: [L('videogioco', 'Videogiochi')],
+  },
+  // I nomi alternativi con cui la ricerca globale trova una voce (per tipo e chiave) e le abbreviazioni che espande. Tipo e chiave sono l'identità e non si correggono;
+  // la ricerca legge al più 8 nomi per voce, di al più 80 caratteri.
+  'sinonimo-ricerca': {
+    modalita: 'blocco', blocco: 'sinonimi-ricerca', etichetta: 'Sinonimi della ricerca', radice: ['sinonimi'], sel: 'chiave',
+    titolo: (el) => `${String(el.tipo ?? '')}: ${String(el.chiave ?? '')}`,
+    campi: [E('nomi', 'Nomi alternativi')],
+  },
+  'abbreviazione-ricerca': {
+    modalita: 'blocco', blocco: 'sinonimi-ricerca', etichetta: 'Abbreviazione della ricerca', radice: ['abbreviazioni'], sel: 'abbreviazione', campoTitolo: 'abbreviazione',
+    campi: [T('abbreviazione', 'Abbreviazione'), T('esteso', 'Forma estesa')],
+  },
 };

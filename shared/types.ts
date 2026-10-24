@@ -3459,7 +3459,8 @@ export const TIPI_MODIFICABILI = ['quartiere', 'trofeo', 'dote', 'trasformazione
   'arcana', 'fusione-arcana', 'fusione-speciale', 'tesoro', 'eredita-tipo', 'dlc-set',
   'confidente', 'esame-premi', 'settimana-guida', 'evento-voce',
   'negoziazione-variante', 'negoziazione-risposta', 'negoziazione-verdetto', 'negoziazione-umore',
-  'dedalo-confluenza', 'mappa-dedalo', 'infiltrazione-dedalo'] as const;
+  'dedalo-confluenza', 'mappa-dedalo', 'infiltrazione-dedalo',
+  'oggetto-compendio', 'note-categorie-attivita', 'sinonimo-ricerca', 'abbreviazione-ricerca'] as const;
 export type TipoModificabile = (typeof TIPI_MODIFICABILI)[number];
 export type TipoCampoCorrezione = 'testo' | 'testolungo' | 'numero' | 'booleano' | 'elenco' | 'scelta' | 'oggetto';
 export type ValoreCampoCorrezione = string | number | boolean | null | string[];

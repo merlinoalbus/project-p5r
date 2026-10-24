@@ -13,6 +13,7 @@
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
+import { datiGuidaCorretti } from './datiGuida.js';
 import { registraEvento } from './storicoService.js';
 import type { AttivitaDto, AttivitaTutteDto, CatalogoOggettoDto, CondizioneSpilloDto, DisponibilitaDto, DoteDaSegnareDto, FilmDto, FilmDvdDto, LibroDto, LibriDto, QuizVoceDto, TipoLettura, VideogiocoDto, VideogiochiDto, VoceEffettoDto } from '../../shared/types.js';
 import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
@@ -343,12 +344,10 @@ export function attivitaTutte(partitaId?: number): AttivitaTutteDto {
 
 /** Le note comuni a una categoria di attività (R9-14/1: la frase dei videogiochi sta qui una volta sola), per chiave di categoria. */
 function noteCategorieAttivita(): Record<string, string> {
-  const j = prepared("SELECT json FROM dati_guida WHERE chiave = 'note-categorie-attivita'").get() as { json: string } | undefined;
-  if (!j) return {};
-  try {
-    const v = JSON.parse(j.json) as Record<string, unknown>;
-    return Object.fromEntries(Object.entries(v).filter((e): e is [string, string] => typeof e[1] === 'string' && e[1].trim() !== ''));
-  } catch { return {}; }
+  // il blocco con le correzioni dell'utente sopra (R11-17/1: la frase si corregge e si ripristina dal registro dei ripristini)
+  const v = datiGuidaCorretti<Record<string, unknown>>('note-categorie-attivita');
+  if (v === null || typeof v !== 'object') return {};
+  return Object.fromEntries(Object.entries(v).filter((e): e is [string, string] => typeof e[1] === 'string' && e[1].trim() !== ''));
 }
 
 /** Vero se la partita ha letto «Anima da cineasta» (Royal): i punti di film e DVD salgono di uno scalino. La usano anche gli effetti delle azioni (K1). */

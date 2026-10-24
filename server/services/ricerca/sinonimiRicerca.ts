@@ -7,7 +7,7 @@
 // sinonimo, la ricerca funziona sui nomi. Una riga che punta a un oggetto che non c'è si salta (la riporta `sinonimiInAttesa`).
 // ============================================================
 
-import { datiGuida } from '../datiGuida.js';
+import { datiGuidaCorretti } from '../datiGuida.js';
 import { normalizzaTesto } from '../../../shared/testo.js';
 import { TIPI_RICERCA, type TipoRicerca } from '../../../shared/ricerca.js';
 
@@ -64,9 +64,9 @@ export function leggiSinonimi(blocco: unknown): SinonimiRicerca {
   return { sinonimi, abbreviazioni };
 }
 
-/** I sinonimi del database dell'app (blocco congelato e in memoria, svuotato dal registro comune delle cache di gioco). */
+/** I sinonimi del database dell'app, con le correzioni dell'utente sopra (R11-17/1; blocco congelato e in memoria, svuotato dal registro comune delle cache di gioco). */
 export function sinonimiRicerca(): SinonimiRicerca {
-  return leggiSinonimi(datiGuida<BloccoGrezzo>(CHIAVE_SINONIMI_RICERCA));
+  return leggiSinonimi(datiGuidaCorretti<BloccoGrezzo>(CHIAVE_SINONIMI_RICERCA));
 }
 
 /**

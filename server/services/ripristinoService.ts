@@ -49,6 +49,10 @@ const NOTE: Partial<Record<TipoModificabile, string>> = {
   'dedalo-confluenza': 'Il Palazzo che confluisce è l’identità della riga e non si corregge.',
   'mappa-dedalo': 'L’area del dedalo a cui appartiene la planimetria del vecchio Palazzo.',
   'infiltrazione-dedalo': 'Registro di conversione di Iweleth: nessuna pagina lo mostra.',
+  'oggetto-compendio': 'Il nome e la descrizione dell’oggetto si correggono dalle traduzioni, il legame col catalogo dal catalogo.',
+  'note-categorie-attivita': 'La frase comune a tutte le attività della categoria (oggi i videogiochi).',
+  'sinonimo-ricerca': 'Tipo e chiave della voce non si correggono. La ricerca legge al più 8 nomi per voce, di al più 80 caratteri: gli altri non hanno effetto.',
+  'abbreviazione-ricerca': 'La ricerca espande l’abbreviazione quando un nome comincia così: le altre forme non si inventano.',
   'dlc-set': 'Una Persona sta in un solo set. Il set non ha un nome: si riconosce dalle sue Persona.',
   'allerta-meteo': 'Vale per questo giorno: le condizioni delle partite che leggono l’allerta (per esempio «piove») seguono le fasce che scegli.',
 };
