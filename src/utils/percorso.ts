@@ -89,7 +89,8 @@ export function descriviEffetti(e: EffettiAzioneDto, opz: { senzaDoti?: boolean 
   const doti = (lista: Array<{ nome: string; delta: number }>, prima: string, dopo: string) => (!opz.senzaDoti && lista.length ? `${prima}${lista.map((d) => `${d.nome} +${d.delta}`).join(', ')}${dopo}` : '');
   const parti = opz.senzaDoti ? [] : e.doti.map((d) => `${d.nome} +${d.delta}${d.note ? ` (${'♪'.repeat(d.note)}${d.cinema ? ' + Anima da cineasta' : ''})` : ''}`);
   for (const l of e.letture ?? []) parti.push(`${l.dopo > l.prima ? `${l.nome} ${l.prima} → ${l.dopo}` : `${l.nome} già a ${l.prima}`}${doti(l.doti ?? [], ' (', ')')}`);
-  for (const t of e.turni ?? []) parti.push(`${t.nome}: turno ${t.ordine}${doti(t.doti, ' (', ')')}`);
+  // R9-12/2: la paga del turno è un promemoria (gli yen non si muovono da qui): «paga ¥X (fino a ¥Y)»
+  for (const t of e.turni ?? []) parti.push(`${t.nome}: turno ${t.ordine}${doti(t.doti, ' (', ')')}${t.paga ? ` · paga ¥${t.paga.yen.toLocaleString('it-IT')}${t.paga.massima ? ` (fino a ¥${t.paga.massima.toLocaleString('it-IT')})` : ''}, da segnare tu` : ''}`);
   if (e.incontro) {
     const rango = e.incontro.rango ? ` · rango ${e.incontro.rango.da} → ${e.incontro.rango.a}` : '';
     parti.push((e.incontro.giaContato ? `Incontro con ${e.incontro.nome} già contato` : `Incontro con ${e.incontro.nome}${doti(e.incontro.doti, ': ', '')}`) + rango);

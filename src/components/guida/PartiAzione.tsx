@@ -26,7 +26,7 @@ import { PulsanteGuidaQuiz } from './GuidaQuiz';
 /** Ciò che i cartellini di una riga d'azione leggono. */
 // L3: le infiltrazioni della voce servono a «Entra» (il cartellino del Palazzo apre l'infiltrazione giusta, `collegamentoAzione`)
 export type AzioneMostrata = Pick<AzionePercorsoDto, 'azione' | 'tipo' | 'riferimento' | 'riferimentoTesto' | 'rangoAtteso' | 'note' | 'produceTesto' | 'fatta' | 'effetti' | 'stato' | 'mappa' | 'atterraggio' | 'quiz'>
-  & Partial<Pick<AzionePercorsoDto, 'uid' | 'infiltrazioni' | 'infiltrazioneDaAprire' | 'infiltrazioniDelPalazzo' | 'propostaInfiltrazioni' | 'oggettoRiferimento' | 'oggettiCitati' | 'avvisiDisponibilita'>>;
+  & Partial<Pick<AzionePercorsoDto, 'uid' | 'infiltrazioni' | 'infiltrazioneDaAprire' | 'infiltrazioniDelPalazzo' | 'propostaInfiltrazioni' | 'oggettoRiferimento' | 'oggettiCitati' | 'avvisiDisponibilita' | 'riferimentoNomeAttuale'>>;
 
 /** L'immagine della riga: il ritratto del Confidente, l'emblema del Palazzo o l'icona del tipo. */
 export function ImmagineAzione({ a }: { a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento' | 'riferimentoTesto'> }) {
@@ -95,6 +95,8 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa }: PropsCartelli
       {stato?.tipo === 'consigliata' && <span className="chip chip--oro text-[11px]" title={stato.motivo ?? undefined}>Consigliata{stato.motivo ? ` · ${stato.motivo}` : ''}</span>}
       {stato?.tipo === 'bloccata' && <span className="chip chip--bloccata text-[11px]" title={stato.motivo ?? undefined}>Bloccata{stato.motivo ? `: ${stato.motivo}` : ''}</span>}
       {stato?.tipo === 'neutra' && stato.motivo && <span className="text-[12px] text-text-muted">{stato.motivo}</span>}
+      {/* R9-06: il testo salvato della voce non si riscrive; se il nome del Confidente è cambiato, il nome di adesso sta accanto */}
+      {a.riferimentoNomeAttuale && <span className="text-[12px] text-text-muted" title="Il testo della voce usa il nome di prima">oggi: {a.riferimentoNomeAttuale}</span>}
       {/* R9-03: il Confidente non è disponibile al giorno o alla fascia della voce: un avviso ambra, mai un blocco (la voce si spunta lo stesso) */}
       {a.avvisiDisponibilita?.map((v) => (
         <span key={`${v.tipo}:${v.testo}`} className="chip chip--icona text-[11px] text-warning" title={v.testo} role="img" aria-label={`Incontro ${v.tipo === 'fuori-fascia' ? 'fuori orario' : 'fuori giorno'}: ${v.testo}`}>
