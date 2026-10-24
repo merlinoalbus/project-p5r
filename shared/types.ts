@@ -3445,7 +3445,7 @@ export const TIPI_MODIFICABILI = ['quartiere', 'trofeo', 'dote', 'trasformazione
   'sfide-battaglie', 'battaglia-sfida', 'boss-segreto', 'sfide-magnate', 'magnate-sfida', 'tratto', 'sfide-tratti', 'sfide-quiz-tv',
   'finale', 'covo', 'covo-sfida', 'covo-premio', 'dlc', 'meteo', 'completamento-sezione',
   'fabbricazione', 'ricetta', 'armi', 'arma-effetto', 'arma-progressione', 'abiti', 'abito', 'jose',
-  'evento-calendario', 'allerta-meteo', 'esame', 'ombra', 'battaglia-sezione', 'regalo'] as const;
+  'evento-calendario', 'allerta-meteo', 'esame', 'ombra', 'battaglia-sezione', 'regalo', 'persona', 'skill'] as const;
 export type TipoModificabile = (typeof TIPI_MODIFICABILI)[number];
 export type TipoCampoCorrezione = 'testo' | 'testolungo' | 'numero' | 'booleano' | 'elenco' | 'scelta' | 'oggetto';
 export type ValoreCampoCorrezione = string | number | boolean | null | string[];

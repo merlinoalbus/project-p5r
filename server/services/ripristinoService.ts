@@ -30,6 +30,8 @@ const NOTE: Partial<Record<TipoModificabile, string>> = {
   dote: 'Il rango mostrato nelle partite si ricalcola dai punti: cambiare una soglia sposta il rango senza toccare i punti già segnati.',
   'evento-calendario': 'La data e il tipo dell’evento non si correggono; le voci del Diario collegate restano collegate.',
   ombra: 'Le affinità della Persona, la Persona abbinata e i luoghi d’incontro non si correggono da qui: le affinità si correggono dalla scheda della Persona. Qui le differenze proprie dell’Ombra.',
+  persona: 'Le affinità della Persona si correggono dal loro editor; il nome e le forme non si correggono. Le skill si scrivono «nome @ livello» (0 = innata). Cambiare una skill o una statistica cambia anche le fusioni e le Ombre che la usano.',
+  skill: 'La resa italiana dell’effetto vale per tutte le skill con lo stesso testo di effetto. Il nome della skill non si corregge: è la chiave delle traduzioni e delle Persona.',
   regalo: 'Il nome e l’effetto del regalo sono quelli dell’oggetto del catalogo (si correggono dal catalogo); i punti già dati nelle partite non cambiano.',
   'allerta-meteo': 'Vale per questo giorno: le condizioni delle partite che leggono l’allerta (per esempio «piove») seguono le fasce che scegli.',
 };

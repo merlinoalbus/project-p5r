@@ -1,0 +1,132 @@
+// ============================================================
+// righePersona — la Persona e le sue skill, correggibili e ripristinabili (L11 · R11-15/3)
+// ============================================================
+//
+// Due oggetti «a riga» del registro dei ripristini (`righe.ts`); il valore della guida è la fotografia `seed_json` presa alla prima correzione (colonne `origine`,
+// `seed_json`, `updated_at` della migrazione 213), che `ripristinoService` gestisce come per quartieri, trofei ed esami.
+//   - `persona` (259 righe, chiave = id): il livello, l'Arcano, le cinque statistiche di base e le skill con i loro livelli. Le skill sono un elenco di testi
+//     «<nome della skill> @ <livello>» (livello 0 = innata) oppure «<nome> @ risveglio|rango|terza-forma» (le skill che non si imparano a un livello): si riscrive
+//     l'elenco intero in `persona_skill`. Le affinità si correggono dal loro editor (`affinitaPersonaService`) e non stanno qui; non si correggono l'identità
+//     (nome, forme, personaggio) né gli altri dati.
+//   - `skill` (525 righe, chiave = id): il costo (tipo e valore), l'effetto (il testo canonico della guida) e la sua resa italiana (`traduzione`, ambito
+//     `effettoSkill`, che vale per tutte le skill con lo stesso testo di effetto). Il nome della skill è la chiave delle traduzioni e delle Persona: non si corregge.
+//     La «potenza» non è un dato a sé nel modello: sta nel testo dell'effetto.
+// ============================================================
+
+import { prepared } from '../../db/dbService.js';
+import { httpErrors } from '../../utils/httpError.js';
+import type { ValoreCampoCorrezione } from '../../../shared/types.js';
+import type { CampoDef } from './registro.js';
+import type { DefRiga, Valori } from './righe.js';
+
+const num = (v: ValoreCampoCorrezione | undefined): number => (typeof v === 'number' ? v : 0);
+const str = (v: ValoreCampoCorrezione | undefined): string | null => (typeof v === 'string' ? v : null);
+const MODI_SENZA_LIVELLO = ['risveglio', 'rango', 'terza-forma'] as const;
+const STATISTICHE = [['forza', 'Forza'], ['magia', 'Magia'], ['resistenza', 'Resistenza'], ['agilita', 'Agilità'], ['fortuna', 'Fortuna']] as const;
+
+interface RigaPersona { nome: string; arcana: string; livello: number; forza: number; magia: number; resistenza: number; agilita: number; fortuna: number }
+const rigaPersona = (chiave: string): RigaPersona => prepared('SELECT nome, arcana, livello, forza, magia, resistenza, agilita, fortuna FROM persona WHERE id = ?').get(chiave) as RigaPersona;
+
+/** Le skill di una Persona come testi «nome @ livello» (ordinate per livello, poi per nome). */
+function skillDi(chiave: string): string[] {
+  const righe = prepared('SELECT s.nome, ps.livello, ps.modo FROM persona_skill ps JOIN skill s ON s.id = ps.skill_id WHERE ps.persona_id = ?').all(chiave) as Array<{ nome: string; livello: number | null; modo: string }>;
+  return righe
+    .sort((a, b) => (a.livello ?? 999) - (b.livello ?? 999) || a.nome.localeCompare(b.nome))
+    .map((r) => `${r.nome} @ ${r.livello === null ? r.modo : r.livello}`);
+}
+
+interface SkillScritta { nome: string; livello: number | null; modo: string }
+/** «nome @ livello» → la riga di `persona_skill`: il livello è un intero 0-99 (0 = innata), oppure uno dei modi senza livello. */
+function leggiSkill(testo: string): SkillScritta {
+  const i = testo.lastIndexOf(' @ ');
+  if (i < 1) throw httpErrors.badRequest('skill-non-valida', `La skill «${testo}» deve essere scritta «nome @ livello».`, { campo: 'skill' });
+  const nome = testo.slice(0, i).trim();
+  const dopo = testo.slice(i + 3).trim();
+  if ((MODI_SENZA_LIVELLO as readonly string[]).includes(dopo)) return { nome, livello: null, modo: dopo };
+  const livello = Number(dopo);
+  if (!Number.isInteger(livello) || livello < 0 || livello > 99) throw httpErrors.badRequest('skill-non-valida', `Il livello di «${nome}» deve essere da 0 a 99, oppure risveglio, rango o terza-forma.`, { campo: 'skill' });
+  return { nome, livello, modo: livello === 0 ? 'iniziale' : 'livello' };
+}
+
+const persona: DefRiga = {
+  modalita: 'riga', etichetta: 'Persona', tabella: 'persona', colonnaChiave: 'id',
+  chiavi: () => (prepared('SELECT CAST(id AS TEXT) FROM persona ORDER BY id').pluck().all() as string[]),
+  esiste: (chiave) => !!prepared('SELECT 1 FROM persona WHERE id = ?').get(chiave),
+  campi: () => [
+    { p: 'livello', e: 'Livello', t: 'numero', max: 99 } as CampoDef,
+    { p: 'arcana', e: 'Arcano', t: 'scelta', opzioni: (prepared('SELECT chiave FROM arcana ORDER BY chiave').pluck().all() as string[]).map((c) => ({ chiave: c, nome: c })) } as CampoDef,
+    ...STATISTICHE.map(([p, e]): CampoDef => ({ p, e, t: 'numero', max: 99, gruppo: 'Statistiche di base' })),
+    { p: 'skill', e: 'Skill (nome @ livello)', t: 'elenco' } as CampoDef,
+  ],
+  leggi: (chiave) => {
+    const r = rigaPersona(chiave);
+    return { livello: r.livello, arcana: r.arcana, forza: r.forza, magia: r.magia, resistenza: r.resistenza, agilita: r.agilita, fortuna: r.fortuna, skill: skillDi(chiave) };
+  },
+  scrivi: (chiave, v) => {
+    if (v.livello !== undefined) prepared('UPDATE persona SET livello = ? WHERE id = ?').run(num(v.livello), chiave);
+    if (v.arcana !== undefined) prepared('UPDATE persona SET arcana = ? WHERE id = ?').run(str(v.arcana), chiave);
+    for (const [p] of STATISTICHE) if (v[p] !== undefined) prepared(`UPDATE persona SET ${p} = ? WHERE id = ?`).run(num(v[p]), chiave);
+    if (v.skill !== undefined) {
+      const elenco = Array.isArray(v.skill) ? v.skill.map(leggiSkill) : [];
+      const idDi = prepared('SELECT id FROM skill WHERE nome = ?');
+      const righe = elenco.map((s) => {
+        const id = idDi.pluck().get(s.nome) as number | undefined;
+        if (id === undefined) throw httpErrors.notFound('skill-non-trovata', `La skill «${s.nome}» non esiste.`);
+        return { id, ...s };
+      });
+      if (new Set(righe.map((r) => r.id)).size !== righe.length) throw httpErrors.badRequest('skill-ripetuta', 'Una skill compare due volte nell\'elenco.', { campo: 'skill' });
+      prepared('DELETE FROM persona_skill WHERE persona_id = ?').run(chiave);
+      const inserisci = prepared('INSERT INTO persona_skill (persona_id, skill_id, livello, modo) VALUES (?, ?, ?, ?)');
+      for (const r of righe) inserisci.run(chiave, r.id, r.livello, r.modo);
+    }
+  },
+  nome: (chiave) => rigaPersona(chiave).nome,
+  valida: (_chiave, fusi: Valori) => {
+    for (const [p, e] of [['livello', 'Livello'], ...STATISTICHE] as const) {
+      const v = fusi[p];
+      if (typeof v === 'number' && (!Number.isInteger(v) || v < 1 || v > 99)) throw httpErrors.badRequest('valore-non-valido', `${e}: serve un numero intero da 1 a 99.`, { campo: p });
+    }
+    if (Array.isArray(fusi.skill)) fusi.skill.forEach(leggiSkill);
+  },
+};
+
+interface RigaSkill { nome: string; costo_tipo: string; costo_valore: number; effetto: string }
+const rigaSkill = (chiave: string): RigaSkill => prepared('SELECT nome, costo_tipo, costo_valore, effetto FROM skill WHERE id = ?').get(chiave) as RigaSkill;
+const effettoIt = (effetto: string): string | null => (prepared("SELECT testo FROM traduzione WHERE ambito = 'effettoSkill' AND chiave = ?").pluck().get(effetto) as string | undefined) ?? null;
+
+const skill: DefRiga = {
+  modalita: 'riga', etichetta: 'Skill', tabella: 'skill', colonnaChiave: 'id',
+  chiavi: () => (prepared('SELECT CAST(id AS TEXT) FROM skill ORDER BY id').pluck().all() as string[]),
+  esiste: (chiave) => !!prepared('SELECT 1 FROM skill WHERE id = ?').get(chiave),
+  campi: () => [
+    { p: 'costo_tipo', e: 'Tipo di costo', t: 'scelta', opzioni: [{ chiave: 'sp', nome: 'SP' }, { chiave: 'hp', nome: 'HP (percentuale)' }, { chiave: 'nessuno', nome: 'Nessun costo' }] } as CampoDef,
+    { p: 'costo_valore', e: 'Valore del costo', t: 'numero', max: 999 } as CampoDef,
+    { p: 'effetto', e: 'Effetto (testo canonico)', t: 'testolungo', max: 600 } as CampoDef,
+    { p: 'effetto_it', e: 'Effetto in italiano', t: 'testolungo', nullable: true, max: 600 } as CampoDef,
+  ],
+  leggi: (chiave) => {
+    const r = rigaSkill(chiave);
+    return { costo_tipo: r.costo_tipo, costo_valore: r.costo_valore, effetto: r.effetto, effetto_it: effettoIt(r.effetto) };
+  },
+  scrivi: (chiave, v) => {
+    const prima = rigaSkill(chiave);
+    if (v.costo_tipo !== undefined) prepared('UPDATE skill SET costo_tipo = ? WHERE id = ?').run(str(v.costo_tipo), chiave);
+    if (v.costo_valore !== undefined) prepared('UPDATE skill SET costo_valore = ? WHERE id = ?').run(num(v.costo_valore), chiave);
+    if (v.effetto !== undefined) prepared('UPDATE skill SET effetto = ? WHERE id = ?').run(str(v.effetto) ?? '', chiave);
+    // la resa italiana sta in `traduzione` e vale per il testo dell'effetto: segue il testo nuovo
+    const effetto = v.effetto !== undefined ? (str(v.effetto) ?? '') : prima.effetto;
+    if (v.effetto_it !== undefined || v.effetto !== undefined) {
+      const it = v.effetto_it !== undefined ? str(v.effetto_it) : effettoIt(prima.effetto);
+      if (it === null || it === '') prepared("DELETE FROM traduzione WHERE ambito = 'effettoSkill' AND chiave = ?").run(effetto);
+      else prepared("INSERT INTO traduzione (ambito, chiave, testo, fonte, updated_at) VALUES ('effettoSkill', ?, ?, 'utente', ?) ON CONFLICT(ambito, chiave) DO UPDATE SET testo = excluded.testo, fonte = 'utente', updated_at = excluded.updated_at")
+        .run(effetto, it, new Date().toISOString());
+    }
+  },
+  nome: (chiave) => rigaSkill(chiave).nome,
+  valida: (_chiave, fusi) => {
+    if (typeof fusi.costo_valore === 'number' && (!Number.isInteger(fusi.costo_valore) || fusi.costo_valore < 0)) throw httpErrors.badRequest('valore-non-valido', 'Valore del costo: serve un numero intero da 0 in su.', { campo: 'costo_valore' });
+    if (typeof fusi.effetto === 'string' && fusi.effetto.trim() === '') throw httpErrors.badRequest('valore-non-valido', 'L\'effetto non può essere vuoto.', { campo: 'effetto' });
+  },
+};
+
+export const DEFINIZIONI_PERSONA: { persona: DefRiga; skill: DefRiga } = { persona, skill };
