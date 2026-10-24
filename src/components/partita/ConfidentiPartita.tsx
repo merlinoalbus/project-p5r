@@ -1,13 +1,13 @@
 // ============================================================
-// ConfidentiPartita — i 23 Confidenti della partita: elenco compatto a righe + pannello di dettaglio con tutti i comandi
+// ConfidentiPartita — i 23 Confidenti della partita: schede compatte in griglia + cassetto con tutti i comandi del Confidente
 // ============================================================
 //
-// Disposizione (approvata dall'utente): due gruppi richiudibili («Attivi e sbloccabili», «Non ancora disponibili»), una riga di
-// sintesi per Confidente (`RigaConfidente`: ritratto, nome, arcano, rango e UN solo stato) e il dettaglio del Confidente scelto
-// (`DettaglioConfidente`: rango ±, requisiti, note ♪ con le risposte migliori subito sotto, regalo, uscita, note…). Da 1024 px il
-// dettaglio sta in un pannello fisso a destra dell'elenco, con scorrimento interno; sotto i 1024 px (tablet verticale, telefono)
-// c'è solo l'elenco e il tocco su una riga apre il dettaglio in un foglio (`Modal`: dal basso sul telefono). Il Confidente scelto sta
-// nell'indirizzo (`?confidente=<chiave>`, accanto a `?scheda=`): Indietro chiude il foglio e i collegamenti puntano a un Confidente.
+// Disposizione (2026-10-24, una barra di scorrimento sola alla volta, regola dell'utente): due gruppi richiudibili («Attivi e
+// sbloccabili», «Non ancora disponibili») con una scheda di sintesi per Confidente (`RigaConfidente`: ritratto, nome, arcano, rango e
+// UN solo stato) in griglia; scorre solo la pagina. Il tocco su una scheda apre il cassetto (`Modal cassetto`: da destra, alto quanto lo
+// schermo; dal basso sul telefono) col dettaglio (`DettaglioConfidente`: targa del rango con − / +, requisiti, moltiplicatori, note ♪,
+// regalo e uscita, risposte migliori del prossimo rango a fianco); mentre è aperto scorre solo lui e la pagina sotto è ferma. Il
+// Confidente aperto sta nell'indirizzo (`?confidente=<chiave>`, accanto a `?scheda=`): Indietro chiude il cassetto.
 //
 // Nel gioco ogni risposta mostra 1–3 note: valgono 5/10/15 punti base; un regalo gradito 50, un'uscita 10.
 // Moltiplicatori cumulativi: Persona dello stesso arcano in scorta ×1,5 (rilevata dalla scorta della partita,
@@ -20,11 +20,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { aggiornaConfidente, annullaRegaloOggetto, getConfidentiPartita, confermaRequisitoConfidente, impostaPiazzamentoEsame } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
-import { useMedia } from '../../hooks/useMedia';
 import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';
 import { Modal } from '../shared/Modal';
-import { TestoRipiegabile } from '../shared/TestoRipiegabile';
 import { IconChevronRight } from '../shared/icons';
 import type { ConfidentePartitaDto, ModificaConfidente } from '../../types';
 import { anteprimaPunti, formattaPunti } from '../../utils/punti';
@@ -37,6 +35,7 @@ import { RigaConfidente } from './RigaConfidente';
 import { sogliaRaggiunta } from './regoleConfidente';
 import { DettaglioConfidente, type AzioniConfidente } from './DettaglioConfidente';
 import { svuotaDettagliConfidenti } from './useDettaglioConfidente';
+import { SchedaNelCassetto } from './SchedaNelCassetto';
 
 interface Props {
   partitaId: number;
@@ -82,17 +81,13 @@ function salvaGruppiAperti(stato: Record<ChiaveGruppo, boolean>): void {
   } catch { /* storage pieno o bloccato: si perde solo il ricordo */ }
 }
 
-/** Il pannello a destra compare da 1024 px (sidebar dell'app visibile); sotto, il dettaglio è un foglio. */
-const PANNELLO_AFFIANCATO = '(min-width: 1024px)';
-
-/** I Confidenti della partita in due gruppi richiudibili, una riga per Confidente e il dettaglio del Confidente scelto: rango con +/−
+/** I Confidenti della partita in due gruppi richiudibili, una scheda per Confidente e il cassetto del Confidente aperto: rango con +/−
  * (e «Segna comunque» se bloccato dai requisiti), semafori del rango successivo, punti con note della risposta e risposte migliori,
- * regalo e uscita calcolati coi moltiplicatori scelti in testa (esami, invito SMS) e col bonus arcano, «Annulla ultimo», sblocco e
+ * regalo e uscita calcolati coi moltiplicatori della partita (esami, invito SMS, scelti nel dettaglio) e col bonus arcano, «Annulla ultimo», sblocco e
  * note in una finestra. Ogni aggiornamento sostituisce il solo Confidente toccato. */
 export function ConfidentiPartita({ partitaId }: Props) {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
-  const affiancato = useMedia(PANNELLO_AFFIANCATO);
   // le correzioni a dialoghi, abilità e regali fatte nella scheda del Confidente si rileggono ogni volta che si apre questa scheda
   useState(() => { svuotaDettagliConfidenti(); return null; });
   const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => getConfidentiPartita(partitaId), [partitaId]);
@@ -122,6 +117,11 @@ export function ConfidentiPartita({ partitaId }: Props) {
   const cimaDi = (chiave: string) => ultimo[chiave]?.[ultimo[chiave].length - 1];
   // Il Confidente a cui si sta regalando (finestra unica «Regala»).
   const [regaloPer, setRegaloPer] = useState<string | null>(null);
+  // La vista del cassetto (Level up o Scheda completa, con i parametri della scheda); vale per il Confidente aperto, poi torna al Level up.
+  const [vista, setVista] = useState<{ chiave: string; tipo: 'levelup' | 'scheda'; search: string } | null>(null);
+  // Il rango appena raggiunto con «+» o «Sali al rango N», per Confidente: finché resta quello, le risposte mostrate sono dell'evento
+  // appena giocato (le note che dà valgono già verso il rango dopo); scendendo o salendo ancora si torna al prossimo evento.
+  const [appenaSalito, setAppenaSalito] = useState<Record<string, number>>({});
 
   /** Bonus arcano del Confidente: quello forzato a mano, altrimenti la presenza in scorta di una Persona dello stesso arcano. */
   const bonusArcanoDi = (c: ConfidentePartitaDto) => bonusForzato[c.chiave] ?? c.personaArcanoInScorta;
@@ -207,11 +207,20 @@ export function ConfidentiPartita({ partitaId }: Props) {
   /** Le azioni che il dettaglio chiede per un Confidente: stesse chiamate, stessi argomenti di quando i comandi stavano nella card. */
   const azioniDi = (c: ConfidentePartitaDto): AzioniConfidente => {
     const bonus = bonusArcanoDi(c);
+    /** Cambia il rango e, salendo, ricorda il rango raggiunto (le risposte dell'evento appena giocato restano in vista). */
+    const portaA = (rango: number, forza?: boolean) => void salva(c.chiave, forza ? { rango, forza: true } : { rango }).then((agg) => {
+      if (!agg) return;
+      setAppenaSalito((s) => {
+        const n = { ...s };
+        if (agg.rango > c.rango) n[c.chiave] = agg.rango; else delete n[c.chiave];
+        return n;
+      });
+    });
     return {
-      cambiaRango: (rango) => void salva(c.chiave, { rango }),
-      forzaRango: (rango) => void salva(c.chiave, { rango, forza: true }),
+      cambiaRango: (rango) => portaA(rango),
+      forzaRango: (rango) => portaA(rango, true),
       conferma: (rango, indice, confermato) => void conferma(c, rango, indice, confermato),
-      correggi: (rango) => navigate(`/confidenti/${encodeURIComponent(c.chiave)}?requisiti=${rango}`),
+      correggi: (rango) => setVista({ chiave: c.chiave, tipo: 'scheda', search: `?requisiti=${rango}` }),
       nota: (n) => void salva(c.chiave, { noteRisposta: n, bonusArcano: bonus, invito }),
       regala: () => setRegaloPer(c.chiave),
       regalo: () => void salva(c.chiave, { regalo: true, bonusArcano: bonus, invito }),
@@ -234,23 +243,22 @@ export function ConfidentiPartita({ partitaId }: Props) {
     .map((x) => x.c);
   const elencoDi = (gruppo: ChiaveGruppo) => (gruppo === 'attivi' ? attivi : tutti.filter((c) => gruppoDi(c) === 'bloccati'));
 
-  // Il Confidente scelto sta nell'indirizzo; affiancato, senza scelta vale il primo degli attivi
+  // Il Confidente aperto nel cassetto sta nell'indirizzo (`?confidente=`): il cassetto si apre con una voce di cronologia nuova,
+  // così Indietro lo chiude; un indirizzo condiviso lo apre già aperto
   const richiesto = params.get('confidente');
   const trovato = richiesto ? tutti.find((c) => c.chiave === richiesto) ?? null : null;
-  const selezionato = trovato ?? (affiancato ? attivi[0] ?? null : null);
-  const foglioAperto = !affiancato && trovato !== null;
-  // Il foglio si apre con una voce di cronologia nuova (Indietro lo chiude); il pannello affiancato sostituisce la voce (niente cronologia a ogni tocco)
+  const cassettoAperto = trovato !== null;
   const aperturaConCronologia = useRef(false);
   useEffect(() => {
-    if (!foglioAperto) aperturaConCronologia.current = false;
-  }, [foglioAperto]);
+    if (!cassettoAperto) aperturaConCronologia.current = false;
+  }, [cassettoAperto]);
   const scegli = (chiave: string) => {
     const p = new URLSearchParams(params);
     p.set('confidente', chiave);
-    if (!affiancato) aperturaConCronologia.current = true;
-    setParams(p, { replace: affiancato });
+    aperturaConCronologia.current = true;
+    setParams(p);
   };
-  /** Chiude il foglio: se l'ha aperto un tocco di questa pagina si torna indietro di una voce, altrimenti (indirizzo condiviso) si toglie il parametro. */
+  /** Chiude il cassetto: se l'ha aperto un tocco di questa pagina si torna indietro di una voce, altrimenti (indirizzo condiviso) si toglie il parametro. */
   const chiudiFoglio = () => {
     if (aperturaConCronologia.current) {
       aperturaConCronologia.current = false;
@@ -273,27 +281,47 @@ export function ConfidentiPartita({ partitaId }: Props) {
     return nuovo;
   });
 
-  /** Il dettaglio del Confidente `c` (nel pannello o nel foglio). */
+  /** I moltiplicatori della partita (esami, invito SMS): valgono per tutti i Confidenti, si scelgono nel dettaglio accanto al bonus
+   * dell'arcano, dove si registrano i punti; la spiegazione sta nel suggerimento di ciascuno. */
+  const moltiplicatori = (
+    <>
+      <PulsanteVisivo compatto attivo={piazzamentoEsame?.piazzamento === 'primi-10'} disabled={!piazzamentoEsame} icona={<IconaAzione chiave="esame-top10" dimensione={24} />} titolo="Esami top 10" dettaglio="×1,2 · scuola" onClick={() => scegliPiazzamento('primi-10')} aria-label="Esami top 10 ×1,2" title={piazzamentoEsame ? `Fra i primi dieci agli ultimi esami (${piazzamentoEsame.nome}): punti ×1,2 per Ryuji, Ann, Makoto, Haru, Sojiro, Kawakami e Kasumi fino all'esame successivo; vale per tutti i punti registrati` : 'I risultati del primo esame non sono ancora usciti'} />
+      <PulsanteVisivo compatto attivo={piazzamentoEsame?.piazzamento === 'primo'} disabled={!piazzamentoEsame} icona={<IconaAzione chiave="esame-primo" dimensione={24} />} titolo="Esami 1º" dettaglio="×1,5 · scuola" onClick={() => scegliPiazzamento('primo')} aria-label="Esami 1º ×1,5" title={piazzamentoEsame ? `Primo del corso agli ultimi esami (${piazzamentoEsame.nome}): punti ×1,5 per Ryuji, Ann, Makoto, Haru, Sojiro, Kawakami e Kasumi fino all'esame successivo; vale per tutti i punti registrati` : 'I risultati del primo esame non sono ancora usciti'} />
+      <PulsanteVisivo compatto attivo={invito} icona={<IconaAzione chiave="sms" dimensione={24} />} titolo="Invito SMS" dettaglio="×1,2 · uscita" onClick={() => setInvito((v) => !v)} aria-label="Invito SMS ×1,2" title="Invito accettato subito via SMS la sera prima: tutti i punti guadagnati durante l'uscita valgono ×1,2 (vale per tutti i Confidenti finché non lo spegni)" />
+    </>
+  );
+
+  /** Il dettaglio del Confidente `c` (nel cassetto). */
   const dettaglioDi = (c: ConfidentePartitaDto) => (
     <DettaglioConfidente key={c.chiave} c={c} occupato={occupato === c.chiave} bonus={bonusArcanoDi(c)} ultimo={cimaDi(c.chiave)}
-      oggi={oggi(c.chiave)} motivoOggi={sugg.motivo('confidenti', c.chiave)}
+      oggi={oggi(c.chiave)} motivoOggi={sugg.motivo('confidenti', c.chiave)} moltiplicatori={moltiplicatori}
+      appenaSalito={appenaSalito[c.chiave] === c.rango}
       anteprima={(cosa) => anteprima(c, cosa, bonusArcanoDi(c))} azioni={azioniDi(c)} />
   );
 
+  /** Il cassetto del Confidente aperto: le due viste (Level up, Scheda completa) e il loro contenuto. Tornando al Level up dalla scheda
+   * si rileggono i Confidenti della partita (dalla scheda si possono consegnare regali o confermare requisiti). */
+  const contenutoCassetto = (c: ConfidentePartitaDto) => {
+    const v = vista?.chiave === c.chiave ? vista : { chiave: c.chiave, tipo: 'levelup' as const, search: '' };
+    const vai = (tipo: 'levelup' | 'scheda') => {
+      if (tipo === v.tipo) return;
+      if (tipo === 'levelup') { setVista(null); void ricarica(); } else setVista({ chiave: c.chiave, tipo, search: '' });
+    };
+    return (
+      <>
+        <div className="flex gap-1.5" role="tablist" aria-label={`Viste di ${c.nome}`}>
+          <button type="button" role="tab" aria-selected={v.tipo === 'levelup'} className={`chip touch ${v.tipo === 'levelup' ? 'chip--attivo' : ''}`} onClick={() => vai('levelup')}>Level up</button>
+          <button type="button" role="tab" aria-selected={v.tipo === 'scheda'} className={`chip touch ${v.tipo === 'scheda' ? 'chip--attivo' : ''}`} onClick={() => vai('scheda')}>Scheda completa</button>
+        </div>
+        {v.tipo === 'levelup' ? dettaglioDi(c) : <SchedaNelCassetto key={`${c.chiave}${v.search}`} chiave={c.chiave} searchIniziale={v.search} />}
+      </>
+    );
+  };
+
   return (
     <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
-      <div className="flex flex-col gap-1.5 mb-3" role="group" aria-label="Moltiplicatori dei punti">
-        <span className="text-[11px] font-semibold uppercase tracking-[.06em] text-text-muted">Moltiplicatori · valgono per tutti i punti registrati</span>
-        <div className="flex flex-wrap gap-2">
-          <PulsanteVisivo compatto attivo={piazzamentoEsame?.piazzamento === 'primi-10'} disabled={!piazzamentoEsame} icona={<IconaAzione chiave="esame-top10" dimensione={32} />} titolo="Esami top 10" dettaglio="×1,2" onClick={() => scegliPiazzamento('primi-10')} aria-label="Esami top 10 ×1,2" title={piazzamentoEsame ? `Fra i primi dieci agli ultimi esami (${piazzamentoEsame.nome}): punti ×1,2 per Ryuji, Ann, Makoto, Haru, Sojiro, Kawakami e Kasumi fino all'esame successivo` : 'I risultati del primo esame non sono ancora usciti'} />
-          <PulsanteVisivo compatto attivo={piazzamentoEsame?.piazzamento === 'primo'} disabled={!piazzamentoEsame} icona={<IconaAzione chiave="esame-primo" dimensione={32} />} titolo="Esami 1º" dettaglio="×1,5" onClick={() => scegliPiazzamento('primo')} aria-label="Esami 1º ×1,5" title={piazzamentoEsame ? `Primo del corso agli ultimi esami (${piazzamentoEsame.nome}): punti ×1,5 per Ryuji, Ann, Makoto, Haru, Sojiro, Kawakami e Kasumi fino all'esame successivo` : 'I risultati del primo esame non sono ancora usciti'} />
-          <PulsanteVisivo compatto attivo={invito} icona={<IconaAzione chiave="sms" dimensione={32} />} titolo="Invito SMS" dettaglio="×1,2" onClick={() => setInvito((v) => !v)} aria-label="Invito SMS ×1,2" title="Invito accettato subito via SMS la sera prima: tutti i punti guadagnati durante l'uscita valgono ×1,2" />
-        </div>
-        <TestoRipiegabile massimo={70} className="text-[12px] text-text-muted"
-          testo="Le note mostrate in gioco valgono 5, 10 o 15 punti; il bonus della Persona dello stesso arcano (×1,5) viene proposto in base alla scorta della partita e si può forzare su ogni Confidente. Gli esami valgono solo per Ryuji, Ann, Makoto, Haru, Sojiro, Kawakami e Kasumi." />
-      </div>
-      <div className="confidenti-layout">
-        <div className="flex flex-col gap-3 min-w-0">
+      {/* una pagina sola che scorre: i gruppi richiudibili con le schede in griglia; il dettaglio si apre nel cassetto */}
+      <div className="flex flex-col gap-3">
           {GRUPPI.map(({ chiave: gruppo, titolo, descrizione }) => {
             const elenco = elencoDi(gruppo);
             // Il gruppo degli attivi resta visibile anche vuoto (a inizio partita lo e): senza spiegazione sembrerebbe che i Confidenti manchino.
@@ -303,20 +331,20 @@ export function ConfidentiPartita({ partitaId }: Props) {
             return (
               <section key={gruppo} className="flex flex-col gap-1.5" aria-label={titolo}>
                 <h3 className="m-0">
-                  {/* la descrizione sta nel suggerimento: accanto al titolo, nella colonna dell'elenco (400 px), lo mandava a capo */}
-                  <button type="button" className="gruppo-confidenti__testata touch" aria-expanded={aperto} aria-controls={idElenco} title={`${titolo}: ${descrizione}`} onClick={() => alternaGruppo(gruppo)}>
+                  <button type="button" className="gruppo-confidenti__testata touch" aria-expanded={aperto} aria-controls={idElenco} onClick={() => alternaGruppo(gruppo)}>
                     <IconChevronRight size={18} className={`shrink-0 transition-transform ${aperto ? 'rotate-90' : ''}`} />
                     <span className="font-display text-[19px] uppercase whitespace-nowrap">{titolo}</span>
-                    <span className="chip ml-auto tabular-nums" aria-label={`${elenco.length} Confidenti`}>{elenco.length}</span>
+                    <span className="chip tabular-nums" aria-label={`${elenco.length} Confidenti`}>{elenco.length}</span>
+                    <span className="hidden md:inline ml-auto text-[12px] text-text-muted">{descrizione}</span>
                   </button>
                 </h3>
                 <div id={idElenco} hidden={!aperto}>
                   {elenco.length === 0
                     ? <p className="m-0 text-[13px] text-text-secondary">Nessun Confidente è ancora avviabile: compariranno qui appena i requisiti del primo rango saranno soddisfatti (giorno di gioco, Dote sociale, Persona dell'arcano, Palazzo o richiesta).</p>
                     : (
-                      <ul className="m-0 p-0 list-none flex flex-col gap-1.5">
+                      <ul className="griglia-confidenti">
                         {elenco.map((c) => (
-                          <RigaConfidente key={c.chiave} c={c} selezionata={selezionato?.chiave === c.chiave} oggi={oggi(c.chiave)} motivoOggi={sugg.motivo('confidenti', c.chiave)} onScegli={() => scegli(c.chiave)} />
+                          <RigaConfidente key={c.chiave} c={c} selezionata={trovato?.chiave === c.chiave} oggi={oggi(c.chiave)} motivoOggi={sugg.motivo('confidenti', c.chiave)} onScegli={() => scegli(c.chiave)} />
                         ))}
                       </ul>
                     )}
@@ -324,16 +352,10 @@ export function ConfidentiPartita({ partitaId }: Props) {
               </section>
             );
           })}
-        </div>
-        {affiancato && (
-          <aside className="confidenti-dettaglio area-scorrevole" aria-label="Dettaglio del Confidente">
-            {selezionato ? dettaglioDi(selezionato) : <p className="m-0 text-[13px] text-text-muted">Scegli un Confidente dall'elenco per vederne i comandi.</p>}
-          </aside>
-        )}
       </div>
-      {/* sotto i 1024 px il dettaglio è un foglio: dal basso sul telefono, finestra larga sul tablet */}
-      <Modal titolo={trovato ? trovato.nome : 'Confidente'} aperta={foglioAperto} onChiudi={chiudiFoglioSeSolo} larga>
-        {trovato && dettaglioDi(trovato)}
+      {/* il dettaglio: cassetto da destra alto quanto lo schermo (foglio dal basso sul telefono); mentre è aperto scorre solo lui */}
+      <Modal titolo="Gestione del Confidente" aperta={cassettoAperto} onChiudi={chiudiFoglioSeSolo} cassetto>
+        {trovato && contenutoCassetto(trovato)}
       </Modal>
       {regaloPer && (() => {
         const c = tutti.find((x) => x.chiave === regaloPer);

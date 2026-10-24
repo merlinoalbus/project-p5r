@@ -29,6 +29,8 @@ interface ModalProps {
   children: ReactNode;
   azioni?: ReactNode;
   larga?: boolean;
+  /** Cassetto laterale: entra da destra, alto quanto lo schermo (sul telefono resta il foglio dal basso); scorre solo il suo corpo. */
+  cassetto?: boolean;
 }
 
 /** Gli elementi che ricevono il fuoco con Tab. */
@@ -69,7 +71,7 @@ function chiHaApertoLaFinestra(finestra: HTMLElement | null): HTMLElement | null
 }
 
 /** Finestra modale con intestazione, corpo scorrevole e piè di pagina opzionale. */
-export function Modal({ titolo, aperta, onChiudi, children, azioni, larga }: ModalProps) {
+export function Modal({ titolo, aperta, onChiudi, children, azioni, larga, cassetto }: ModalProps) {
   const finestra = useRef<HTMLDivElement | null>(null);
   // `onChiudi` è spesso una funzione scritta al volo: la si legge da un ref, così gli effetti dipendono solo da `aperta`
   // e il fuoco non viene rimesso a posto a ogni render della pagina che apre la finestra
@@ -122,10 +124,10 @@ export function Modal({ titolo, aperta, onChiudi, children, azioni, larga }: Mod
 
   if (!aperta) return null;
   return createPortal(
-    <div className="modal-overlay" role="presentation">
+    <div className={`modal-overlay ${cassetto ? 'modal-overlay--cassetto' : ''}`} role="presentation">
       <div
         ref={finestra}
-        className={`modal-content ${larga ? 'modal-content--larga' : ''}`}
+        className={`modal-content ${larga ? 'modal-content--larga' : ''} ${cassetto ? 'modal-content--cassetto' : ''}`}
         role="dialog"
         aria-modal="true"
         aria-label={titolo}

@@ -240,6 +240,13 @@
     cursor: pointer; transition: border-color .12s, color .12s, background-color .12s;
   }
   .piastrella-scheda > svg { flex-shrink: 0; }
+  /* le schede della Partita da 768 px: piastrelle basse con icona e nome affiancati, su una riga sola che scorre (intestazione ≤ 30%) */
+  @media (min-width: 768px) {
+    .fila-schede-partita .piastrella-scheda { flex-direction: row; gap: 6px; min-width: 0; min-height: 44px; padding: 6px 12px; font-size: 12px; white-space: nowrap; }
+    .fila-scorrevole.fila-scorrevole--sempre.fila-schede-partita { padding-bottom: 0; margin-top: -6px; }
+    /* i dati e le scorciatoie della partita accanto al titolo: niente margine sotto (la barra sottile basta a dire che scorre) */
+    .fila-scorrevole.fila-scorrevole--sempre.fila-dati-partita { padding-bottom: 0; }
+  }
   .piastrella-scheda:hover { border-color: var(--color-primary); color: var(--color-text); }
   .piastrella-scheda--attiva {
     border-color: var(--color-primary); background: color-mix(in oklab, var(--color-primary) 16%, var(--color-surface));
@@ -285,6 +292,20 @@
   @media (max-width: 767.98px) and (prefers-reduced-motion: reduce) {
     .modal-content, .modal-content--larga { animation: none; }
   }
+  /* Cassetto laterale (Confidenti della partita, 2026-10-24): da 768 px entra da destra ed è alto quanto lo schermo; la pagina sotto
+     resta ferma e scorre solo il suo corpo, una barra sola alla volta. Sul telefono resta il foglio dal basso, alto quanto lo schermo. */
+  @media (min-width: 768px) {
+    .modal-overlay--cassetto { justify-content: flex-end; align-items: stretch; padding: 0; }
+    .modal-content--cassetto { width: min(880px, calc(100vw - 56px)); max-height: none; height: 100dvh; border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+      border-right: none; animation: cassetto-entra 0.18s ease-out; }
+  }
+  @media (max-width: 767.98px) {
+    .modal-content--cassetto { height: calc(100dvh - 24px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .modal-content--cassetto { animation: none; }
+  }
+  @keyframes cassetto-entra { from { transform: translateX(40px); opacity: 0; } to { transform: none; opacity: 1; } }
   .modal-header {
     display: flex;
     align-items: center;
@@ -896,29 +917,37 @@
   .poster--bloccato:hover, .poster--bloccato:focus-within { filter: grayscale(.5); opacity: .9; }
   .blocco-confidente { display: flex; flex-direction: column; gap: 4px; padding: 6px 8px; border: 1px dashed var(--color-text-muted); }
 
-  /* ---- Scheda «Confidenti» della partita: elenco a righe compatte + pannello di dettaglio ----
-     Sotto i 1024 px c'è solo l'elenco (il dettaglio è un foglio, `Modal`); da 1024 px il dettaglio sta a destra, fermo in alto, con la
-     propria area che scorre (`area-scorrevole`: barra visibile, bordo, gesto che non passa alla pagina). Una barra sola alla volta. */
-  .confidenti-layout { display: flex; flex-direction: column; gap: 12px; }
-  @media (min-width: 1024px) {
-    /* fra 1024 e 1279 px (con il menu laterale) l'elenco resta a 300 px: a 400 il pannello dei comandi era più stretto dell'elenco */
-    .confidenti-layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 16px; align-items: start; }
-    .confidenti-dettaglio { position: sticky; top: 0; align-self: start; max-height: calc(100dvh - 5.5rem); padding: 14px; }
+  /* ---- Scheda «Confidenti» della partita: schede compatte in griglia + cassetto di dettaglio ----
+     Scorre solo la pagina; il dettaglio sta nel cassetto (`.modal-content--cassetto`), che mentre è aperto è l'unica area che scorre.
+     Una barra sola alla volta, mai due affiancate né una dentro l'altra. */
+  /* le schede dei Confidenti in griglia: una colonna sul telefono, poi quante ne stanno da 280 px (2 sul tablet, 3–4 sul desktop) */
+  .griglia-confidenti { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); }
+  /* il dettaglio (nel cassetto) si divide in due colonne quando è largo abbastanza (cassetto da 768 px in su): a sinistra il level up
+     («Verso il rango N»: requisiti e moltiplicatori; poi Risposta ♪, regalo, uscita), a destra le risposte migliori; in una colonna sola
+     (telefono) le risposte stanno fra i requisiti e le note ♪: prima si legge la risposta, poi si registra */
+  .dettaglio-confidente { display: flex; flex-direction: column; gap: 12px; min-width: 0; flex-shrink: 0; container-type: inline-size; }
+  .dettaglio-confidente__colonne { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "testa" "risposte" "registra" "altro"; gap: 12px; align-items: start; }
+  .dettaglio-confidente__testa { grid-area: testa; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .dettaglio-confidente__risposte { grid-area: risposte; min-width: 0; }
+  .dettaglio-confidente__registra { grid-area: registra; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .dettaglio-confidente__altro { grid-area: altro; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  @container (min-width: 620px) {
+    .dettaglio-confidente__colonne { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "testa risposte" "registra risposte" "altro risposte"; }
   }
-  @media (min-width: 1280px) {
-    .confidenti-layout { grid-template-columns: minmax(320px, 400px) minmax(0, 1fr); }
-  }
-  .dettaglio-confidente { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  /* etichetta breve davanti a una fila di comandi («Moltiplicatori», «Risposta») */
+  .etichetta-campo-confidente { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--color-text-muted); }
   /* intestazione di un gruppo: tutta la riga è il pulsante che apre e chiude */
   .gruppo-confidenti__testata { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 0 12px; text-align: left; cursor: pointer; color: inherit;
     background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
   .gruppo-confidenti__testata:hover { border-color: var(--color-primary); }
   .gruppo-confidenti__testata:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
-  /* riga di sintesi: il pulsante di scelta copre tutta la riga (anche il ritratto), la riga scelta ha il contorno rosso */
-  .riga-confidente { position: relative; display: flex; align-items: center; gap: 10px; min-height: 72px; padding: 4px 10px 4px 6px;
-    background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+  /* scheda compatta (grafica dei poster): il pulsante di scelta copre tutta la scheda (anche il ritratto); filigrana dell'arcano dietro,
+     rango in immagine nell'anello a destra; «Pronto» ha il bordo rosso, la scheda aperta il contorno */
+  .riga-confidente { position: relative; overflow: hidden; display: flex; align-items: center; gap: 10px; min-height: 96px; padding: 4px 10px 4px 4px;
+    background: color-mix(in srgb, var(--color-bg-secondary) 94%, transparent); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
   .riga-confidente:hover { border-color: var(--color-primary); }
-  .riga-confidente--scelta { outline: 2px solid var(--color-primary); outline-offset: -2px; background: color-mix(in srgb, var(--color-primary) 12%, var(--color-bg-secondary)); }
+  .riga-confidente--pronta { border-color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 10%, var(--color-bg-secondary)); }
+  .riga-confidente--scelta { outline: 2px solid var(--color-primary); outline-offset: -2px; }
   .riga-confidente:has(.riga-confidente__scelta:focus-visible) { outline: 2px solid var(--color-primary); outline-offset: 2px; }
   .riga-confidente__scelta { position: static; flex: 1 1 auto; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 8px; row-gap: 2px; align-items: center;
     padding: 2px 0; background: none; border: 0; color: inherit; text-align: left; cursor: pointer; }
@@ -926,14 +955,37 @@
   .riga-confidente__scelta::after { content: ""; position: absolute; inset: 0; z-index: 1; }
   .riga-confidente__scelta > :nth-child(1), .riga-confidente__scelta > :nth-child(2), .riga-confidente__stato { grid-column: 1; min-width: 0; }
   .riga-confidente__stato { display: block; font-size: 12px; line-height: 1.25; }
-  .riga-confidente__rango { grid-column: 2; grid-row: 1 / span 3; font-family: var(--font-display); font-size: 26px; line-height: 1; min-width: 28px; text-align: right; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
-  .riga-confidente__barra { display: block; height: 6px; margin-bottom: 3px; overflow: hidden; border-radius: 3px; background: var(--color-border); }
-  .riga-confidente__barra > span { display: block; height: 100%; background: var(--color-primary); }
-  /* il badge del rango nella testata del pannello è più piccolo di quello del poster */
-  .poster__rango.poster__rango--piccolo { right: -10px; bottom: -6px; }
+  .riga-confidente__rango { grid-column: 2; grid-row: 1 / span 3; display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.7)); }
+  /* la carta dell'arcano in miniatura nella testata del dettaglio (formato tarocco, 1:1,75) */
+  .carta-arcano-mini { width: 34px; height: 60px; flex-shrink: 0; object-fit: cover; border-radius: 3px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6); }
+  /* la targa del rango: il dato più guardato del dettaglio, col numero grande, la barra dei punti e il − / + */
+  /* testata del dettaglio: ritratto e nome in alto; la targa sotto a tutta larghezza nel cassetto stretto, accanto al ritratto in quello largo */
+  .testata-confidente { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "ritratto info" "targa targa"; gap: 10px 12px; align-items: start; }
+  .testata-confidente__ritratto { grid-area: ritratto; }
+  .testata-confidente__info { grid-area: info; min-width: 0; }
+  .testata-confidente__targa { grid-area: targa; }
+  @container (min-width: 560px) {
+    .testata-confidente { grid-template-rows: auto 1fr; grid-template-areas: "ritratto info" "ritratto targa"; }
+    .testata-confidente__targa { align-self: end; }
+  }
+  .targa-rango__info { flex: 1 1 150px; min-width: 0; }
+  .targa-rango { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-md);
+    border: 1px solid color-mix(in srgb, var(--color-primary) 55%, var(--color-border)); background: color-mix(in srgb, var(--color-primary) 9%, var(--color-bg-secondary)); }
+  .targa-rango--pronto { border-color: var(--color-primary); box-shadow: 0 0 0 1px var(--color-primary); }
+  .targa-rango--bloccato { border-color: var(--color-border); background: var(--color-bg-secondary); }
+  .targa-rango__barra { display: block; height: 8px; overflow: hidden; border-radius: 4px; background: var(--color-border); }
+  .targa-rango__barra > span { display: block; height: 100%; background: var(--color-primary); }
+  /* titolo delle sezioni del dettaglio («Verso il rango N»): stesso registro dei titoli a tasselli, più piccolo */
+  .titolo-sezione-confidente { margin: 0; font-family: var(--font-display); font-size: 17px; line-height: 1; text-transform: uppercase; letter-spacing: .04em; }
   /* le risposte migliori, in evidenza sotto le note ♪ */
   .risposte-migliori { display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid color-mix(in srgb, var(--color-primary) 55%, var(--color-border)); border-radius: var(--radius-md);
     background: color-mix(in srgb, var(--color-primary) 7%, transparent); }
+  /* le risposte migliori fra le note di una voce Confidente del diario (stesso registro del cassetto dei Confidenti, più compatto) */
+  .risposte-voce { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; padding: 8px; border-radius: var(--radius-md);
+    border: 1px solid color-mix(in srgb, var(--color-primary) 55%, var(--color-border)); background: color-mix(in srgb, var(--color-primary) 7%, transparent); }
+  .risposte-voce__titolo { font-family: var(--font-display); font-size: 14px; line-height: 1.1; text-transform: uppercase; letter-spacing: .04em; }
+  .risposta-voce { display: flex; align-items: center; gap: 6px; padding: 3px 6px; border-radius: 4px; font-size: 12px; background: color-mix(in srgb, var(--color-bg-secondary) 80%, transparent); }
+  .risposta-voce--migliore { background: color-mix(in srgb, var(--color-primary) 18%, var(--color-bg-secondary)); box-shadow: inset 0 0 0 1px var(--color-primary); }
   /* ---- Azioni della guida: consigliate in oro, bloccate in grigio (12.4) ---- */
   .azione { border-left: 3px solid transparent; padding-left: 6px; }
   .azione--consigliata { border-left-color: #f5c542; background: color-mix(in srgb, #f5c542 8%, transparent); }

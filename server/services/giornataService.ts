@@ -197,7 +197,7 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
     // L3: il campo «Infiltrazioni» (solo per le voci di un Palazzo) e lo stato «da rivedere» (solo se c'è)
     ...campiInfiltrazioni(r, ctx.partita),
     ...campiRevisione(r),
-    ...campoDialogo(v),
+    ...campoDialogo(v, ctx.conf),
   };
 }
 
@@ -209,17 +209,30 @@ function haInvitoDelConfidente(voceUid: string, riferimento: RiferimentoAzioneDt
 
 /**
  * R10-11/C: il dialogo del passaggio di rango di una voce di Confidente (`rangoAtteso`), dalle scelte di `confidente_dialogo` (L9). Sola
- * lettura: è la proposta che la spunta mostra accanto alle note; i punti li dà solo la scelta dell'utente. Senza riga di dialogo, nessun campo.
+ * lettura: la voce lo mostra fra le sue note (risposte migliori) e la spunta lo propone accanto alle note; i punti li dà solo la scelta
+ * dell'utente. Senza riga di dialogo, nessun campo. Con la partita, anche `rangoPartita` e `dialogoPartita` (il prossimo evento vero).
  */
-function campoDialogo(v: VoceBase): { dialogo?: DialogoVoceDto } {
-  if (v.tipo !== 'confidente' || v.riferimento?.tipo !== 'confidente' || v.rangoAtteso === null) return {};
-  const r = prepared('SELECT note, scelte_json FROM confidente_dialogo WHERE confidente_chiave = ? AND rango = ?').get(v.riferimento.chiave, v.rangoAtteso) as { note: string; scelte_json: string } | undefined;
-  if (!r) return {};
+function campoDialogo(v: VoceBase, conf: Map<string, ConfidentePartitaDto> | null): { dialogo?: DialogoVoceDto; rangoPartita?: number; dialogoPartita?: DialogoVoceDto } {
+  if (v.tipo !== 'confidente' || v.riferimento?.tipo !== 'confidente') return {};
+  const chiave = v.riferimento.chiave;
+  const dialogo = v.rangoAtteso !== null ? dialogoDelRango(chiave, v.rangoAtteso) : null;
+  // 2026-10-24 (progetto dei Confidenti approvato dall'utente): con una partita, anche il rango del Confidente nella partita e, se il
+  // prossimo evento non è quello del rango atteso della voce, il suo dialogo: la voce mostra le risposte di ciò che si gioca davvero
+  const c = conf?.get(chiave);
+  const prossimo = c && c.rango < 10 ? c.rango + 1 : null;
+  const dialogoPartita = prossimo !== null && prossimo !== v.rangoAtteso ? dialogoDelRango(chiave, prossimo) : null;
+  return { ...(dialogo ? { dialogo } : {}), ...(c ? { rangoPartita: c.rango } : {}), ...(dialogoPartita ? { dialogoPartita } : {}) };
+}
+
+/** Il dialogo dell'evento di un rango del Confidente (scelte di `confidente_dialogo`, L9), o null se manca o è illeggibile. */
+function dialogoDelRango(chiave: string, rango: number): DialogoVoceDto | null {
+  const r = prepared('SELECT note, scelte_json FROM confidente_dialogo WHERE confidente_chiave = ? AND rango = ?').get(chiave, rango) as { note: string; scelte_json: string } | undefined;
+  if (!r) return null;
   let scelte: Array<{ ordine: number; testo: string; punti: number | null; puntiTesto: string | null; romantica: boolean; avviso: string | null }>;
-  try { scelte = JSON.parse(r.scelte_json) as typeof scelte; } catch { return {}; }
-  if (!Array.isArray(scelte) || scelte.length === 0) return {};
-  return { dialogo: { confidente: v.riferimento.chiave, rango: v.rangoAtteso, note: r.note,
-    scelte: scelte.map((s) => ({ ordine: s.ordine, testo: s.testo, note: s.punti === 1 || s.punti === 2 || s.punti === 3 ? s.punti : null, puntiTesto: s.puntiTesto ?? null, romantica: !!s.romantica, avviso: s.avviso ?? null })) } };
+  try { scelte = JSON.parse(r.scelte_json) as typeof scelte; } catch { return null; }
+  if (!Array.isArray(scelte) || scelte.length === 0) return null;
+  return { confidente: chiave, rango, note: r.note,
+    scelte: scelte.map((s) => ({ ordine: s.ordine, testo: s.testo, note: s.punti === 1 || s.punti === 2 || s.punti === 3 ? s.punti : null, puntiTesto: s.puntiTesto ?? null, romantica: !!s.romantica, avviso: s.avviso ?? null })) };
 }
 
 // ---- L3: il campo «Infiltrazioni» delle voci di Palazzo (lotti/L3/modifiche.md §2.1.6, §3.4, §4.4) ----

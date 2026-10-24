@@ -1325,6 +1325,11 @@ export interface AzionePercorsoDto {
   daApplicare?: number;
   /** R10-11/C: il dialogo del passaggio di rango della voce (voce di un Confidente con `rangoAtteso`), dalle scelte di L9: solo una proposta, i punti li dà la scelta dell'utente alla spunta. */
   dialogo?: DialogoVoceDto;
+  /** 2026-10-24: con una partita, il rango del Confidente della voce nella partita (le note della voce lo citano se differisce dal rango atteso). */
+  rangoPartita?: number;
+  /** 2026-10-24: il dialogo del prossimo evento del Confidente nella partita (rango della partita + 1), quando non è quello del rango
+   *  atteso della voce (o la voce non ha rango atteso): è l'evento che si gioca davvero, e la scelta delle note alla spunta parte da qui. */
+  dialogoPartita?: DialogoVoceDto;
   /** Gli effetti di `produce` in parole, con i nomi di libri, film e attività («Zorro, il fuorilegge: completato»). */
   produceTesto: string[];
   /** Fatta nella partita. */

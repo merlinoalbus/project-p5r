@@ -10,7 +10,10 @@
 // note, lettura fino a un punto, turno di un lavoro con Doti proprie facoltative.
 // ============================================================
 
+import { useState } from 'react';
 import { Selettore, type OpzioneSelettore } from '../shared/Selettore';
+import { DialogoRango } from '../confidenti/DialogoRango';
+import { useDettaglioConfidente } from '../partita/useDettaglioConfidente';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { RigaEffettoVoceLegacy } from './RigaEffettoVoceLegacy';
@@ -52,6 +55,28 @@ interface Props {
   onCambia: (v: CampiStrutturati) => void;
 }
 
+/** Anteprima, mentre si scrive la voce, delle risposte migliori dell'evento del rango atteso: le stesse compariranno fra le note della
+ *  voce (progetto dei Confidenti approvato dall'utente, 2026-10-24). Sola lettura, dal dettaglio del Confidente (in cache). */
+function AnteprimaRisposte({ chiave, rango }: { chiave: string; rango: number }) {
+  const { dati, caricamento, errore } = useDettaglioConfidente(chiave);
+  const [chiusi, setChiusi] = useState<Record<number, boolean>>({});
+  const dialoghi = (dati?.dialoghi ?? []).filter((d) => d.rango === rango);
+  return (
+    <div className="risposte-voce" role="group" aria-label={`Anteprima delle risposte migliori del rango ${rango}`}>
+      <span className="risposte-voce__titolo">Anteprima · risposte migliori del rango {rango}</span>
+      <span className="text-[12px] text-text-muted">Compariranno fra le note della voce; spuntandola, la scelta delle note parte da qui.</span>
+      {caricamento && <span className="text-[12px] text-text-muted" role="status">Carico le risposte…</span>}
+      {errore && <span className="text-[12px] text-error" role="alert">Risposte non disponibili: {errore}</span>}
+      {dati && dialoghi.length === 0 && <span className="text-[12px] text-text-muted">Nessun dialogo documentato per il rango {rango}.</span>}
+      {dialoghi.length > 0 && (
+        <ul className="m-0 p-0 list-none flex flex-col gap-1.5">
+          {dialoghi.map((d) => <DialogoRango key={d.id} d={d} aperto={!chiusi[d.id]} onToggle={() => setChiusi((c) => ({ ...c, [d.id]: !c[d.id] }))} />)}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 /**
  * Classificazione ed effetti di un'azione della giornata: carica gli elenchi chiusi dal BE e mostra tipo, collegamento
  * (cambiandone il tipo si azzera l'elemento scelto e il rango atteso resta solo per i Confidenti), elemento collegato,
@@ -77,6 +102,7 @@ export function EditorAzioneStrutturata({ valore, onCambia }: Props) {
             onCambia={(v) => imposta({ rangoAtteso: v ? Number(v) : null })} />
         )}
       </div>
+      {rif?.tipo === 'confidente' && rif.chiave && valore.rangoAtteso !== null && <AnteprimaRisposte chiave={rif.chiave} rango={valore.rangoAtteso} />}
       {(valore.effettiVoce !== undefined || valore.fonteEffetti) && <EditorEffettiVoce valore={valore} elenchi={elenchi} onCambia={onCambia} />}
       {valore.effettiVoce === undefined && !valore.fonteEffetti && <div className="flex flex-col gap-2">
         {/* le Doti sono ciò che il gioco dà, da segnare a mano; letture e turni li segna la spunta (scelta dell'utente, 2026-09-30) */}

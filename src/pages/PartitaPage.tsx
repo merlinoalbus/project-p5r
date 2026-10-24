@@ -7,6 +7,7 @@ import { useSearchParams } from 'react-router-dom';
 import { IconaScheda } from '../components/shared/IconaAzione';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import { useMedia } from '../hooks/useMedia';
 import { useShallow } from 'zustand/react/shallow';
 import { usePartitaStore } from '../stores/partitaStore';
 import { PageState, EmptyState } from '../components/shared/PageState';
@@ -53,6 +54,8 @@ export function PartitaPage() {
   const { attiva, caricamento, caricata, errore, carica } = usePartitaStore(useShallow((s) => ({ attiva: s.attiva, caricamento: s.caricamento, caricata: s.caricata, errore: s.errore, carica: s.carica })));
   const [nuova, setNuova] = useState(false);
   const [params, setParams] = useSearchParams();
+  // da 768 px le piastrelle delle schede sono basse, con icona e nome affiancati (`.fila-schede-partita`): l'icona scende a 22 px
+  const schedeInRiga = useMedia('(min-width: 768px)');
   const richiesta = params.get('scheda');
   const scheda: Scheda = SCHEDE.some((s) => s.k === richiesta) ? (richiesta as Scheda) : 'oggi';
   // il giorno mostrato dalla scheda «Oggi» (null a scheda chiusa): senza, vale la data di gioco della partita
@@ -68,9 +71,11 @@ export function PartitaPage() {
           action={<button type="button" className="btn btn-primary" onClick={() => setNuova(true)}>Crea partita</button>}
         />
       ) : (
-        <div className={`flex flex-col gap-3 ${scheda === 'oggi' || scheda === 'doti' ? 'scheda-riempi md:min-h-0' : ''}`}>
-          <IntestazionePagina titolo={attiva.nome} compatta>
-            <div className="flex items-center gap-2 flex-wrap">
+        <div className={`flex flex-col gap-2 md:gap-3 ${scheda === 'oggi' || scheda === 'doti' ? 'scheda-riempi md:min-h-0' : ''}`}>
+          {/* i dati della partita stanno nella riga del titolo (a destra, o sotto sul telefono): con le schede su una riga sola
+              l'intestazione resta entro il 30% dell'altezza (progetto dei Confidenti approvato il 2026-10-24) */}
+          <IntestazionePagina titolo={attiva.nome} compatta azioniInRiga className="pt-0" azioni={
+            <FilaScorrevole className="fila-scorrevole--sempre fila-dati-partita items-center min-w-0" role="group" aria-label="Dati e scorciatoie della partita">
               <span className="chip">Liv. {attiva.livelloProtagonista}</span>
               {attiva.dataGioco && <span className="chip">{attiva.dataGioco}</span>}
               {attiva.nuovaPartitaPlus && <span className="chip">NG+</span>}
@@ -78,16 +83,17 @@ export function PartitaPage() {
               {/* le scorciatoie della scuola seguono il giorno guardato nella scheda «Oggi» (scelta dell'utente, 2026-10-11); la chiave
                   resta sulla data di gioco: scorrere i giorni filtra gli elenchi già caricati, non li rilegge */}
               <ScuolaOggi key={`${attiva.id}-${attiva.dataGioco ?? ''}`} partita={attiva} giorno={giornoScuola} />
-            </div>
-          </IntestazionePagina>
-          <FilaScorrevole role="tablist" aria-label="Schede della partita">
+            </FilaScorrevole>
+          } />
+          {/* una riga sola che scorre anche su tablet e desktop: a capo le 15 piastrelle facevano due righe e l'intestazione superava il 30% */}
+          <FilaScorrevole role="tablist" aria-label="Schede della partita" className="fila-scorrevole--sempre fila-schede-partita">
             {SCHEDE.map((s) => (
               // Prima l'immagine, poi la parola: erano pastiglie di testo con un'iconcina da 16 px
               // accanto, e in dieci schede si leggevano tutte uguali. Ora l'icona e' il segno che
               // si riconosce da lontano — 28 px — e l'etichetta sta sotto, piu' piccola. Resta
               // scritta: un'icona sola non dice «Piani salvati» a nessuno la prima volta.
               <button key={s.k} type="button" className={`piastrella-scheda touch ${scheda === s.k ? 'piastrella-scheda--attiva' : ''}`} onClick={() => setParams({ scheda: s.k })} aria-pressed={scheda === s.k} title={s.l}>
-                <IconaScheda chiave={s.k} dimensione={28} />
+                <IconaScheda chiave={s.k} dimensione={schedeInRiga ? 22 : 28} />
                 <span>{s.l}</span>
               </button>
             ))}
