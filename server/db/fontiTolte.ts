@@ -74,6 +74,18 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     schema: 'main', tabella: 'negozio', colonna: 'sblocco', tolta: 'L11 · migrazione 184',
     sostituitaDa: 'le condizioni di sblocco del negozio e della sua sede (`sblocco_json`, `condizioni_json`); le frasi restano nell’archivio «archivio-frasi-l11»',
   },
+  {
+    schema: 'main', tabella: 'luogo', colonna: 'negozio', tolta: 'L11 · migrazione 187',
+    sostituitaDa: 'i negozi della sede (`negozio.sede_chiave`): la chiave era la loro copia esatta',
+  },
+  {
+    schema: 'main', tabella: 'luogo', colonna: 'attivita_json', tolta: 'L11 · migrazione 187',
+    sostituitaDa: 'le attività della sede (`attivita.sede_chiave`); i tag liberi restano nell’archivio «archivio-frasi-l11»',
+  },
+  {
+    schema: 'main', tabella: 'articolo', colonna: 'condizione', tolta: 'L11 · migrazione 187',
+    sostituitaDa: 'le condizioni dell’offerta (`condizioni_json`); le frasi restano nell’archivio «archivio-frasi-l11»',
+  },
 ];
 
 export const tabellaTolta = (schema: string, tabella: string): FonteTolta | undefined =>

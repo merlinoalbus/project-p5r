@@ -543,6 +543,8 @@ export interface TurnoRegistrato {
   nome: string;
   ordine: number;
   doti: Array<{ chiave: string; nome: string; delta: number; note: number }>;
+  /** R9-12/2: la paga canonica dell'attività (`paga_yen` / `paga_massima`), letta e riportata; gli yen non si muovono da qui (promemoria: si cambiano a mano, BON-12). Null se non ne ha. */
+  paga: { yen: number; massima: number | null } | null;
 }
 
 /**
@@ -572,7 +574,7 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
       applicate.push({ chiave: d.dote, nome: nomeDote(d.dote), delta: punti, note: d.note });
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
-    return { attivita: chiave, nome: riga.nome, ordine, doti: applicate };
+    return { attivita: chiave, nome: riga.nome, ordine, doti: applicate, paga: riga.paga_yen != null ? { yen: riga.paga_yen, massima: riga.paga_massima ?? null } : null };
   })();
 }
 

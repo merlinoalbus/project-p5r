@@ -1217,7 +1217,9 @@ export interface EffettiAzioneDto {
    *  giornata, `giaContato` se quell'incontro (o il passaggio a quel rango) c'era già e non ha dato niente di nuovo. */
   incontro?: IncontroConfidenteDto;
   /** Turni registrati dalla spunta (`ordine` del turno nell'attività): togliendo la spunta si toglie quel turno e i suoi punti. */
-  turni?: Array<{ attivita: string; nome: string; ordine: number; doti: Array<{ chiave: string; nome: string; delta: number; note: number }> }>;
+  turni?: Array<{ attivita: string; nome: string; ordine: number; doti: Array<{ chiave: string; nome: string; delta: number; note: number }>;
+    /** R9-12/2: la paga canonica dell'attività al momento del turno (promemoria: gli yen non si muovono da qui). */
+    paga?: { yen: number; massima: number | null } | null }>;
   /** Aperture dichiarate dall'utente durante questa visita ai Memento. Valgono finché resta la spunta;
    *  altre visite o registrazioni manuali dello stesso evento restano indipendenti. Nessuna data presunta. */
   apertureDedali?: Array<{ chiave: string; nome: string }>;
