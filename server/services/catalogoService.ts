@@ -49,8 +49,8 @@ const CAMPI: Record<TipoCatalogo, readonly string[]> = {
   libro: ['condizioni_json', 'nome', 'dove', 'prezzo', 'dote', 'note', 'sblocca', 'effetto_json', 'effetti_json', 'sessioni', 'dettagli', 'verificato'],
   film: ['condizioni_json', 'nome', 'dove', 'dote', 'note', 'note_successive', 'effetti_json', 'prezzo', 'sessioni', 'dettagli', 'verificato'],
   attivita: ['pesca_regola_chiave','pesca_ruolo','confidente_chiave', 'condizioni_json', 'nome', 'tipo', 'luogo', 'luogo_chiave', 'sede_chiave', 'fascia', 'costo', 'sessioni', 'doti_json', 'paga_yen', 'paga_massima', 'dettagli', 'effetti_json', 'tracciamento', 'quiz_json', 'verificato'],
-  // L5 (R5-07, un modulo solo): orari strutturati (null = regola dell'app), Area, sblocco, Confidenti e piatti; `quando` resta (lo legge il
-  // sottotitolo del collegamento del pin di un luogo); i `giorni_json` del luogo sono gli orari (L11, migrazione 184)
+  // L5 (R5-07, un modulo solo): orari strutturati (null = regola dell'app), Area, sblocco, Confidenti e piatti; `quando` non è più una
+  // colonna (L11, migrazione 193: si ricava dagli orari) e i `giorni_json` del luogo sono gli orari (L11, migrazione 184)
   luogo: ['condizioni_json', 'quartiere_chiave', 'tipo', 'nome', 'cosa_offre', 'orari_json', 'area_chiave', 'confidenti_json', 'piatti_json', 'note', 'verificato'],
   domanda: ['data', 'tipo', 'chi', 'domanda', 'risposte_json', 'ricompensa', 'note', 'fonte'],
   cruciverba: ['data', 'indizio', 'risposta', 'risposta_en', 'fonte'],

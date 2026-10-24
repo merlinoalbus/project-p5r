@@ -15,7 +15,7 @@ interface OrigineCensimentoDto {
 export interface LuogoCensimentoDto extends OrigineCensimentoDto {
   chiave: string; nome: string; tipo: string | null;
   quartiere_chiave: string | null; area_chiave: string | null;
-  sblocco: string | null; quando: string | null; note: string | null;
+  note: string | null;
   solo_eventi_confidente: string | null;
   condizioni_json: JsonCensimentoCondizioniDto;
   orari_json: JsonCensimentoCondizioniDto;
@@ -37,14 +37,14 @@ export interface NegozioCensimentoDto extends OrigineCensimentoDto {
 export interface AttivitaCensimentoDto extends OrigineCensimentoDto {
   chiave: string; nome: string; tipo: string | null;
   luogo: string | null; luogo_chiave: string | null; sede_chiave: string | null;
-  sblocco: string | null; fascia: string | null;
+  fascia: string | null;
   condizioni_json: JsonCensimentoCondizioniDto;
 }
 
 export interface ArticoloCensimentoDto extends OrigineCensimentoDto {
   chiave: string; nome: string; negozio_chiave: string | null;
   catalogo_chiave: string | null; articolo_condiviso: string | null;
-  disponibile_dal: string | null; nota: string | null;
+  nota: string | null;
   condizioni_json: JsonCensimentoCondizioniDto;
 }
 

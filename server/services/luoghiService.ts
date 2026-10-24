@@ -33,7 +33,7 @@ import type { LuogoDettaglioDto, LuogoDto, PresenzaLuogoDto } from '../../shared
 
 /** Una riga di `luogo` (con le colonne della 115, assenti su uno schema di prima). */
 export interface RigaLuogo {
-  chiave: string; quartiere_chiave: string; ordine: number; tipo: string; nome: string; cosa_offre: string; quando: string | null;
+  chiave: string; quartiere_chiave: string; ordine: number; tipo: string; nome: string; cosa_offre: string;
   confidenti_json: string; piatti_json: string | null; note: string | null; fonte: string; verificato: number; origine: string;
   condizioni_json: string | null; seed_json?: string | null; area_chiave?: string | null; orari_json?: string | null; solo_eventi_confidente?: string | null;
 }
