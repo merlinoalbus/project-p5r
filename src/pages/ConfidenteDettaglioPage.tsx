@@ -225,7 +225,7 @@ export function ConfidenteDettaglioPage() {
             <button type="button" className="btn btn-secondary touch self-start" onClick={() => setRangoDaModificare(1)}>Modifica requisiti</button>
           </section>
           <RanghiConfidente chiave={c.chiave} nome={c.nome} onSalvato={async () => { await Promise.all([ricarica(), stato.ricarica()]); }} />
-          <InvitiConfidente filtro={{ confidente: c.chiave }} onCambiato={async () => { await Promise.all([ricarica(), stato.ricarica()]); }} />
+          <InvitiConfidente filtro={{ confidente: c.chiave }} nomeConfidente={c.nome} onCambiato={async () => { await Promise.all([ricarica(), stato.ricarica()]); }} />
           <section className="card flex flex-col gap-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="m-0 text-[15px] font-semibold">Abilità per rango</h2>
