@@ -246,8 +246,12 @@
   .fila-scorrevole.fila-schede-partita { padding-bottom: 0; }
   /* telefono: titolo e dati della partita sulla stessa riga (la fila dei dati scorre), nessun padding della testata */
   .intestazione.intestazione--partita { padding: 0; gap: 0; }
+  /* una riga sola: il nome della partita non va a capo (la riga intera scorre se serve) e i dati non hanno margine sotto */
+  .intestazione--partita .titolo-tasselli { flex-wrap: nowrap; }
+  .fila-scorrevole.fila-dati-partita { padding-bottom: 0; }
   @media (min-width: 768px) {
-    .intestazione.intestazione--partita { padding: 6px 0 4px; gap: 8px; }
+    .intestazione.intestazione--partita { padding: 4px 0 2px; gap: 8px; }
+    .intestazione--partita .titolo-tasselli { flex-wrap: wrap; }
     .fila-scorrevole.fila-scorrevole--sempre.fila-schede-partita { padding-bottom: 0; margin-top: -6px; }
     /* i dati e le scorciatoie della partita accanto al titolo: niente margine sotto (la barra sottile basta a dire che scorre) */
     .fila-scorrevole.fila-scorrevole--sempre.fila-dati-partita { padding-bottom: 0; }
@@ -2020,7 +2024,7 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
    il dettaglio resta ai lettori di schermo dentro la tessera e si legge per intero, una volta, nella riga
    `.progressi-dettaglio-attivo` sotto la fila (tessera attiva). */
 @media (max-width: 639px) {
-  .progressi-struttura { gap:4px; }
+  .progressi-struttura { gap:2px; }
   .progressi-riepilogo { gap:6px; }
   .progressi-tessera { position:relative; align-items:stretch; justify-content:center; gap:2px; padding:3px 4px; min-height:44px; }
   .progressi-tessera__nome { font-size:11px; line-height:1.2; letter-spacing:0.03em; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:1; line-clamp:1; overflow:hidden; }

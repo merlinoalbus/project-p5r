@@ -65,13 +65,13 @@ export function IntestazionePagina({ titolo, sottotitolo, azioni, illustrazione,
       ) : (
         <button type="button" className="btn btn-ghost btn-sm self-start -ml-2" onClick={indietro.onClick}><IconChevronLeft size={16} /> {indietro.etichetta}</button>
       ))}
-      <div className={`flex items-end gap-4 ${azioniInRiga && azioniAccanto ? 'flex-nowrap max-md:items-center max-md:gap-2' : 'flex-wrap'}`}>
-        <div className={`min-w-0 flex flex-col gap-2 ${azioniInRiga ? (azioniAccanto ? 'max-md:max-w-[55%] md:shrink-0' : 'md:shrink-0') : 'flex-1'}`}>
+      <div className={`flex items-end gap-4 ${azioniInRiga && azioniAccanto ? 'flex-nowrap max-md:items-center max-md:gap-2 max-md:overflow-x-auto max-md:[scrollbar-width:none]' : 'flex-wrap'}`}>
+        <div className={`min-w-0 flex flex-col gap-2 ${azioniInRiga ? (azioniAccanto ? 'shrink-0' : 'md:shrink-0') : 'flex-1'}`}>
           <h1 className="titolo-tasselli m-0">{tasselliTitolo(titolo)}</h1>
           {sottotitolo && <p className="m-0 text-[13px] text-text-secondary max-w-[78ch]">{sottotitolo}</p>}
           {children}
         </div>
-        {azioni && <div className={azioniInRiga ? `flex items-center min-w-0 ${azioniAccanto ? 'basis-0 flex-1' : 'basis-full md:basis-0 md:flex-1'} md:justify-end` : 'flex items-center gap-2 flex-wrap'}>{azioni}</div>}
+        {azioni && <div className={azioniInRiga ? `flex items-center min-w-0 ${azioniAccanto ? 'max-md:flex-none md:basis-0 md:flex-1' : 'basis-full md:basis-0 md:flex-1'} md:justify-end` : 'flex items-center gap-2 flex-wrap'}>{azioni}</div>}
         {illustrazione && !nelPannello && <AssetImg nome={illustrazione} alt="" decorativa className="intestazione__illustrazione" fallback={null} />}
       </div>
     </header>
