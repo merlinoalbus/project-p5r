@@ -28,13 +28,6 @@ import type { Osservazione, Statistiche } from './statistiche.js';
 import type { StatoAcquistiArticoloDto } from './acquisti.js';
 import type { StatoEffettiVoceDto, ReceiptEffettoVoceDto, RichiestaSalvaEffettiVoce } from './effettiVoce.js';
 
-/** Risposta di salute del backend. */
-export interface HealthDto {
-  status: 'ok' | 'degraded';
-  timestamp: string;
-  db: { ok: boolean; userVersion?: number; error?: string };
-}
-
 /** F6: una nota storica della fonte (discordanza documentale, G-034), non una fotografia dei prezzi pagati o dell'istanza importata. Vive
  *  in `nota_storica` (migrazione 139), si modifica dall'app e torna al valore della guida con «Ripristina». */
 export interface NotaStoricaOfferta {
@@ -2374,9 +2367,6 @@ export interface AreaDungeonDto {
    *  R4-22). Null senza partita. Per i Palazzi; assente per i dedali dei Memento. */
   completamento?: { oggetti: number; fatti: number | null; completata: boolean | null };
 }
-/** L'infiltrazione di un Palazzo (`dungeon_area`): il contratto resta `AreaDungeonDto` (L3 §0), questo nome è per il codice nuovo. */
-export type InfiltrazioneDto = AreaDungeonDto;
-
 /** Un collezionabile di una planimetria (forziere, seme, tesoro…) con il suo stato nella partita. */
 export interface SpilloRaccoltaDto {
   id: number;
