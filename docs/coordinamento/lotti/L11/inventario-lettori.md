@@ -1897,6 +1897,27 @@ Provate con SQL sui dati della copia (`a IS NOT b` = 0 righe) o per progetto; ne
 
 Le colonne `seed_json` (24 tabelle: dote_sociale, confidente_regalo, esame, dungeon, quartiere, luogo, attivita, libro, film, cruciverba, negozio, articolo, trofeo, domanda, allerta_meteo, area, confidente_invito, catalogo_oggetto, trasformazione_oggetto, regola_pesca, nota_storica, ombra, giorno, evento_calendario, più `persona` e `skill` dalla 213) e `spillo.seed_identita_json` sono la fotografia della riga della guida presa alla prima correzione: servono a «Ripristina» (letta da `ripristinoService.ts:140`, `catalogoService.ts:103`) e non sono copie da eliminare. `confidente_requisito_guida` è lo stesso meccanismo.
 
+### 6.3b Decisione per le 65 colonne senza lettore o solo scritte (richiesta del PM, 24/10)
+
+Strada scelta per ognuna: **di archivio** (dichiarata con il motivo, schema invariato) oppure **morta** (da togliere con migrazione conservativa). Esito: **nessuna migrazione, nessuna colonna morta**. Ogni colonna di `gioco.db` è storia, registro, provenienza o metadato di cache; tolta non darebbe nulla e non ne conosco una il cui scrittore sia un costo da eliminare. Le colonne di `partite.db` e `infiltrazione_dedalo` sono solo dichiarate, come richiesto, e restano all'utente/PM.
+
+| colonne | n. | strada | motivo dell'archivio |
+|---|---:|---|---|
+| gioco.audit_aojiru_136.*, audit_pesca_138.* | 19 | archivio | audit delle bonifiche 136 e 138 (BON-06): storia non ricostruibile, nessuno scrittore |
+| gioco.decisione_tanaka (negozio_chiave, revisione_confronto, revisione_piano, piano_json, confermata_il); decisione_tanaka_ripristino (operazione_id, prima_json, ripristinata_il) | 8 | archivio | registro delle decisioni di Tanaka: il resto della tabella è letto per l'integrità del listino (`tanakaStatoListino.ts:41,43`); il consenso è stato tolto da BON-08 |
+| gioco.proposta_infiltrazione_voce.regola | 1 | archivio | provenienza della regola con cui la proposta fu calcolata (110); le righe non si rigenerano |
+| gioco.negoziazione_umore.versione_fonte, negoziazione_importazione.input_runtime_json | 2 | archivio | provenienza dell'importazione del corpus (172), non ricostruibile |
+| gioco.dedalo_confluenza.nota | 1 | archivio | nota storica della 175 |
+| gioco.voce_confluenza (voce_chiave, voce_canonica, tipo_precedente, infiltrazione_chiave, nota, carattere_precedente, ordine_precedente) | 7 | archivio | registro delle conversioni di Iweleth (175): serve a ricostruire lo stato precedente; il codice ne legge l'aggregato per `azione` |
+| gioco.immagine_miniatura.byte, larghezza_reale, altezza_reale, created_at | 4 | archivio (metadati di cache) | descrivono la miniatura in cache e il suo momento; la cache si rigenera. È l'unico gruppo che si potrebbe togliere senza perdere storia: se il PM lo vuole, serve una migrazione che ricostruisca la tabella e tolga i valori dall'`INSERT` di `miniatureService.ts:131` e di `sc:genera-pacchetto.ts:66` |
+| gioco.operazione_effetti_voce.voce_uid, prima_json, creata_il | 3 | archivio (registro) | registro delle operazioni sul Diario: lo stato precedente serve all'annullamento e alla diagnosi |
+| gioco.nota_storica.updated_at | 1 | archivio (provenienza) | marca di tempo |
+| gioco.infiltrazione_dedalo (2) | 2 | **lasciata al PM** | nessun lettore: un altro agente sta lavorando alle tabelle di R11-17/1 |
+| partite.requisito_partita (partita_id, confermato, updated_at) | 3 | **dichiarate, decide il PM** | tabella vuota senza lettori, solo `DELETE` di pulizia; dati dell'utente: non toccata |
+| partite.*_partita.updated_at / fatta_at / acceso_il / creato_il / creata_il (14 colonne elencate in §6.2) | 14 | **dichiarate, decide il PM** | marche di tempo delle righe di partita (provenienza) |
+
+Totale: 19+8+1+2+1+7+4+3+1 = 46 colonne di gioco di archivio, 2 di `infiltrazione_dedalo` lasciate, 17 di `partite.db` dichiarate. Quindi a fine di questo passo nessuna colonna resta senza lettore senza una dichiarazione; l'eliminazione resta aperta solo per `infiltrazione_dedalo`, `requisito_partita` e, a scelta, i metadati di `immagine_miniatura`.
+
 ### 6.4 Rilievi che cambiano decisioni o richiedono un'azione
 
 1. **`utente.effetto_applicato.assorbita_da` manca nella copia di sviluppo** (la 028 fu modificata dopo l'applicazione, commit `814b17d8` del 21/10) ma il codice la usa: una base di partite già arrivata a 28 con la vecchia 028 darebbe errore in `motoreDiario.ts:352,360` e `propostePartitaService.ts:172,283`. Le basi create dalla catena da zero la hanno. Da verificare su p5s (che era a utente 30 il 23/10, quindi dopo la modifica) e, in generale, da evitare: **le migrazioni già applicate non si modificano**.
