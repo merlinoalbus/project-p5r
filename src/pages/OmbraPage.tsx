@@ -16,6 +16,7 @@ import { usePartitaStore } from '../stores/partitaStore';
 import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AffinitaGriglia } from '../components/compendio/AffinitaGriglia';
+import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { AvvisoTogliPersona, PiastrelleCattura } from '../components/guida/PiastrelleCattura';
 import { NOME_PERSONALITA } from '../../shared/elementi';
 import type { OmbraDettaglioDto, OmbraLuogoDto } from '../../shared/ombre';
@@ -57,7 +58,12 @@ export function OmbraPage() {
     <PageState isLoading={dati.caricamento && !o} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {o && (
         <div className="flex flex-col gap-3">
+          {/* L11 · R11-15/4: un solo punto di modifica dell'Ombra (nome, personalità, livello, negoziabilità, note, affinità proprie), con «Ripristina» ai valori della guida */}
           <IntestazionePagina indietro={{ etichetta: 'Aiuto in battaglia', to: '/guida/battaglia' }} titolo={o.nome}
+            azioni={<>
+              {o.origine === 'utente' && <span className="chip text-[11px]">corretta</span>}
+              <ModificaGuida tipo="ombra" chiave={o.chiave} cosa={`l’Ombra «${o.nome}»`} onSalvato={() => void dati.ricarica()} />
+            </>}
             sottotitolo={`${o.persona ? `Maschera ${o.persona.nomeIt}` : o.macheraNota ? `Maschera ${o.macheraNota}, non reclutabile` : 'Non reclutabile'}${o.livello !== null ? ` · livello ${o.livello}` : ''}${o.nomiAltri.length > 0 ? ` · detta anche ${o.nomiAltri.join(', ')}` : ''}`} />
           <section className="card flex flex-col gap-2" aria-label="Persona e cattura">
             <h2 className="m-0 font-display text-[15px] uppercase leading-none">Persona</h2>

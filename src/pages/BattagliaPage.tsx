@@ -19,6 +19,7 @@ import type { BattagliaDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { ElementoChip } from '../components/compendio/ElementoChip';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
+import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { NegoziazionePerUmore } from '../components/guida/NegoziazionePerUmore';
 import { AvvisoTogliPersona, PiastrelleCattura } from '../components/guida/PiastrelleCattura';
 import { SezioneConFregio } from '../components/shared/FregioSezione';
@@ -52,6 +53,11 @@ function Voce({ titolo, children }: { titolo: string; children: ReactNode }) {
       <span className="text-[13px]">{children}</span>
     </div>
   );
+}
+
+/** La matita di una sezione di testo della guida (R11-15/4): corregge i testi e li rimette com'erano; le tabelle e le fonti non si correggono. */
+function ModificaSezione({ sezione, cosa, onModificato }: { sezione: string; cosa: string; onModificato: () => void }) {
+  return <ModificaGuida tipo="battaglia-sezione" chiave={sezione} cosa={cosa} soloIcona onSalvato={onModificato} />;
 }
 
 /** I dati di una sezione: in colonna sul telefono, affiancati da tablet in su. */
@@ -155,7 +161,7 @@ function SchedaOmbre() {
  * JSON della guida); qui restano le parti discorsive della guida — quando e come si negozia, le opzioni dell'Hold Up — e, in fondo, regole,
  * incertezze e fonti separate da un punto.
  */
-function SchedaNegoziazione({ d }: { d: BattagliaDto }) {
+function SchedaNegoziazione({ d, onModificato }: { d: BattagliaDto; onModificato: () => void }) {
   const n = d.negoziazione;
   return (
     <div className="flex flex-col gap-3 text-[13px]">
@@ -163,7 +169,7 @@ function SchedaNegoziazione({ d }: { d: BattagliaDto }) {
           Le regole che spiegano il perché stanno sotto. */}
       <NegoziazionePerUmore />
       <SezioneConFregio chiave="battaglia-negoziazione" disposizione="fascia">
-        <h2 className="m-0 font-display text-[15px] uppercase leading-none">Quando e come</h2>
+        <div className="flex items-center gap-1"><h2 className="m-0 font-display text-[15px] uppercase leading-none">Quando e come</h2><ModificaSezione sezione="negoziazione" cosa="la negoziazione: quando e come, regole e incertezze" onModificato={onModificato} /></div>
         <p className="m-0">{n.quandoSiPuoNegoziare}</p>
         <Dati colonne={2}>
           <Voce titolo="Personalità dell’Ombra">{n.comeVerificarePersonalita}</Voce>
@@ -185,7 +191,7 @@ function SchedaNegoziazione({ d }: { d: BattagliaDto }) {
  * dello stato preso dal sistema di battaglia (trattino se manca), poi gli esiti del colpo, il
  * «1 More» e la nota di fine battaglia.
  */
-function SchedaTecnico({ d }: { d: BattagliaDto }) {
+function SchedaTecnico({ d, onModificato }: { d: BattagliaDto; onModificato: () => void }) {
   const effetti = new Map(d.sistema.statiAlterati.map((s) => [s.stato, s.effetto]));
   return (
     <div className="flex flex-col gap-3 text-[13px]">
@@ -197,7 +203,7 @@ function SchedaTecnico({ d }: { d: BattagliaDto }) {
         </table>
       </div>
       <SezioneConFregio chiave="battaglia-tecnico" disposizione="fascia">
-        <h2 className="m-0 font-display text-[15px] uppercase leading-none">Esiti del colpo</h2>
+        <div className="flex items-center gap-1"><h2 className="m-0 font-display text-[15px] uppercase leading-none">Esiti del colpo</h2><ModificaSezione sezione="sistema" cosa="il sistema di battaglia: esiti del colpo, 1 More e comandi" onModificato={onModificato} /></div>
         <Dati>
           {Object.entries(d.sistema.esitiColpo).map(([k, v]) => <Voce key={k} titolo={k === 'block' ? 'Block' : k.charAt(0).toUpperCase() + k.slice(1)}>{v}</Voce>)}
           <Voce titolo="1 More">{d.sistema.unoMore}</Voce>
@@ -210,12 +216,12 @@ function SchedaTecnico({ d }: { d: BattagliaDto }) {
 }
 
 /** Tre sezioni della guida: la Staffetta con i ranghi e i bonus, gli Speciali con la tabella delle coppie e dello sblocco, e Rapina, Assalto e Parla con i comandi di battaglia. */
-function SchedaStaffetta({ d }: { d: BattagliaDto }) {
+function SchedaStaffetta({ d, onModificato }: { d: BattagliaDto; onModificato: () => void }) {
   const s = d.staffetta; const sp = d.speciali; const a = d.assaltoEHoldUp;
   return (
     <div className="flex flex-col gap-3 text-[13px]">
       <SezioneConFregio chiave="battaglia-staffetta" disposizione="lato">
-        <h2 className="m-0 font-display text-[15px] uppercase leading-none">Staffetta</h2>
+        <div className="flex items-center gap-1"><h2 className="m-0 font-display text-[15px] uppercase leading-none">Staffetta</h2><ModificaSezione sezione="staffetta" cosa="la Staffetta" onModificato={onModificato} /></div>
         <p className="m-0">{s.cosaE}</p>
         <Dati>
           <Voce titolo="Disponibilità">{s.disponibilita}</Voce>
@@ -231,7 +237,7 @@ function SchedaStaffetta({ d }: { d: BattagliaDto }) {
         <Fonte etichetta="fonte: allgamestaff" allineato={false} url={s.urlFonte} />
       </SezioneConFregio>
       <SezioneConFregio chiave="battaglia-speciali" disposizione="lato">
-        <h2 className="m-0 font-display text-[15px] uppercase leading-none">Speciali</h2>
+        <div className="flex items-center gap-1"><h2 className="m-0 font-display text-[15px] uppercase leading-none">Speciali</h2><ModificaSezione sezione="speciali" cosa="gli Speciali" onModificato={onModificato} /></div>
         <p className="m-0">{sp.meccanica}</p>
         <Dati colonne={2}>
           <Voce titolo="Attivazione">{sp.attivazione}</Voce>
@@ -246,7 +252,7 @@ function SchedaStaffetta({ d }: { d: BattagliaDto }) {
         <Fonte etichetta="fonte: allgamestaff" allineato={false} url={sp.urlFonte} />
       </SezioneConFregio>
       <SezioneConFregio chiave="battaglia-assalto" disposizione="grande">
-        <h2 className="m-0 font-display text-[15px] uppercase leading-none">Rapina, Assalto e Parla</h2>
+        <div className="flex items-center gap-1"><h2 className="m-0 font-display text-[15px] uppercase leading-none">Rapina, Assalto e Parla</h2><ModificaSezione sezione="assalto" cosa="Rapina, Assalto e Parla" onModificato={onModificato} /></div>
         <Dati>
           <Voce titolo="Rapina">{a.rapina}</Voce>
           <Voce titolo="Assalto">{a.assalto}</Voce>
@@ -261,12 +267,12 @@ function SchedaStaffetta({ d }: { d: BattagliaDto }) {
 }
 
 /** I nemici speciali: le Ombre sciagura (riconoscimento, comportamento, stati, ricompense), il Mietitore con la strategia numerata e i Demoni del Tesoro con la loro tabella. */
-function SchedaNemici({ d }: { d: BattagliaDto }) {
+function SchedaNemici({ d, onModificato }: { d: BattagliaDto; onModificato: () => void }) {
   const o = d.ombreSciagura; const m = d.mietitore; const t = d.demoniTesoro;
   return (
     <div className="flex flex-col gap-3 text-[13px]">
       <SezioneConFregio chiave="battaglia-ombre-sciagura" disposizione="fascia">
-        <h2 className="m-0 font-display text-[15px] uppercase leading-none">Ombre sciagura <span className="text-text-muted text-[12px] normal-case">({o.nomeOriginale})</span></h2>
+        <div className="flex items-center gap-1"><h2 className="m-0 font-display text-[15px] uppercase leading-none">Ombre sciagura <span className="text-text-muted text-[12px] normal-case">({o.nomeOriginale})</span></h2><ModificaSezione sezione="sciagura" cosa="le Ombre sciagura" onModificato={onModificato} /></div>
         <p className="m-0">{o.cosaSono}</p>
         <ul className="m-0 pl-4">{o.caratteristiche.map((c) => <li key={c}>{c}</li>)}</ul>
         <Dati>
@@ -285,7 +291,7 @@ function SchedaNemici({ d }: { d: BattagliaDto }) {
         <Fonte etichetta="fonte: allgamestaff" allineato={false} url={o.urlFonte} />
       </SezioneConFregio>
       <SezioneConFregio chiave="battaglia-mietitore" disposizione="alta">
-        <h2 className="m-0 font-display text-[15px] uppercase leading-none">{m.categoria}</h2>
+        <div className="flex items-center gap-1"><h2 className="m-0 font-display text-[15px] uppercase leading-none">{m.categoria}</h2><ModificaSezione sezione="mietitore" cosa="il Mietitore" onModificato={onModificato} /></div>
         <Dati>
           <Voce titolo="Dove e quando">{m.dove}</Voce>
           <Voce titolo="Segnali">{m.comeSiManifesta}</Voce>
@@ -300,7 +306,7 @@ function SchedaNemici({ d }: { d: BattagliaDto }) {
         <Fonte etichetta="fonte: allgamestaff" allineato={false} url={m.urlFonte} />
       </SezioneConFregio>
       <SezioneConFregio chiave="battaglia-demoni-tesoro" disposizione="lato">
-        <h2 className="m-0 font-display text-[15px] uppercase leading-none">{t.categoria}</h2>
+        <div className="flex items-center gap-1"><h2 className="m-0 font-display text-[15px] uppercase leading-none">{t.categoria}</h2><ModificaSezione sezione="tesoro" cosa="i Demoni del Tesoro" onModificato={onModificato} /></div>
         <p className="m-0">{t.cosaSono}</p>
         <Dati>
           <Voce titolo="Come compaiono">{t.comeCompaiono}</Voce>
@@ -342,10 +348,10 @@ export function BattagliaPage() {
             {SCHEDE.map(([k, l, icona]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`piastrella-scheda touch ${scheda === k ? 'piastrella-scheda--attiva' : ''}`} onClick={() => setParams(k === 'ombre' ? {} : { scheda: k }, { replace: true })} title={l}><IconaCategoria categoria={icona} dimensione={28} /><span>{l}</span></button>)}
           </FilaScorrevole>
           {scheda === 'ombre' && <SchedaOmbre />}
-          {scheda === 'negoziazione' && <SchedaNegoziazione d={d} />}
-          {scheda === 'tecnico' && <SchedaTecnico d={d} />}
-          {scheda === 'staffetta' && <SchedaStaffetta d={d} />}
-          {scheda === 'nemici' && <SchedaNemici d={d} />}
+          {scheda === 'negoziazione' && <SchedaNegoziazione d={d} onModificato={() => void dati.ricarica()} />}
+          {scheda === 'tecnico' && <SchedaTecnico d={d} onModificato={() => void dati.ricarica()} />}
+          {scheda === 'staffetta' && <SchedaStaffetta d={d} onModificato={() => void dati.ricarica()} />}
+          {scheda === 'nemici' && <SchedaNemici d={d} onModificato={() => void dati.ricarica()} />}
         </div>
       )}
     </PageState>
