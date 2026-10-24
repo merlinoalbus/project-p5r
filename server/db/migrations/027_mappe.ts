@@ -9,7 +9,7 @@
 // ============================================================
 
 import type { Migration } from '../migrationRunner.js';
-import { sincronizzaMappe } from '../../services/mappe/sincronizzaMappe.js';
+import { sincronizzaMappe } from './congelati/sincronizzaMappe027.js';
 
 const SQL_027 = `
 CREATE TABLE mappa (

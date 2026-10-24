@@ -17,7 +17,7 @@
 
 import type { Migration } from '../migrationRunner.js';
 import { DDL_UTENTE, DDL_UTENTE_STORICHE, TABELLE_UTENTE, TABELLE_UTENTE_STORICHE } from '../schemaUtente.js';
-import { assegnaUidMancanti } from '../../services/mappe/identitaSpillo.js';
+import { assegnaUidMancanti } from './congelati/identitaSpillo067.js';
 import { logger } from '../../utils/logger.js';
 
 export const migration066: Migration = {

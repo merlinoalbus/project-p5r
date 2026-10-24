@@ -1,8 +1,14 @@
 // ============================================================
-// organizzazioneMappe — le vecchie mappe d'area diventano sezioni della guida del loro Palazzo
+// Copia congelata di `riconciliaAreeGuida` (`server/services/mappe/organizzazioneMappe.ts`) al 2026-10-24 (L11 · B9): NON si modifica e NON si importa da altro.
+// ============================================================
+//
+// La migrazione 042 (e `sincronizzaMappe027`) converte le vecchie mappe d'area in sezioni della guida con questa funzione, che legge
+// `mappa.entita_*` e scrive `guida_mappa` e `organizzazione_mappa_esito`: tabelle e colonne che dalla migrazione 177 non esistono più, ma che
+// ci sono ancora quando una base vecchia attraversa la 042. Senza la tabella `guida_mappa` non fa niente.
 // ============================================================
 
-import type { AppDatabase } from '../../db/dbService.js';
+import type { AppDatabase } from '../../dbService.js';
+
 /**
  * Converte le mappe legate a un'area della guida che non hanno niente di geografico: né immagine o asset, né figlie, né
  * spilli che vi portano con una destinazione, né un ingresso di quartiere. Per ognuna: la sezione in `guida_mappa`, i suoi

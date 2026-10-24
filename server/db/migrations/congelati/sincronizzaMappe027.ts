@@ -1,28 +1,47 @@
 // ============================================================
-// sincronizzaMappe — crea l'albero delle mappe dalle entità della guida e gli spilli dai marcatori esistenti (Fase 13.1)
+// Copia congelata di `server/services/mappe/sincronizzaMappe.ts` al 2026-10-24 (L11 · B9): NON si modifica e NON si importa da altro.
 // ============================================================
 //
-// Idempotente: aggiunge solo ciò che manca (mai sovrascrive modifiche dell'utente). Usata dalla migrazione 027 e dai
-// test; dal 2026-09-12 nessun avvio la chiama (il pacchetto di gioco è la fotografia dell'istanza di produzione).
+// La migrazione 027 crea l'albero delle mappe dalle entità della guida e gli spilli dai marcatori esistenti. Prima importava il servizio vivo,
+// che L11 ha tolto (le colonne `mappa.entita_*`, `guida_mappa`, `marcatore_mappa` e `marcatore_luogo` che legge non esistono più): qui resta
+// com'era, perché una base vecchia deve poter attraversare la 027. Importa ancora i condivisi di `shared/` (`categoriaSpillo`, `spilloPerPunto`,
+// `spilloPerLuogo`, `leggiCondizioniSalvate`), che non sono congelati: la 027 gira solo su basi anteriori alla versione 27, e il pacchetto
+// iniziale è alla 93.
+//
+// Idempotente: aggiunge solo ciò che manca (mai sovrascrive modifiche dell'utente).
 //   - `tokyo` (città) → `citta-<quartiere>` (quartiere, entità quartiere, asset `mappe/citta-<q>`, immagine dell'istanza se già scaricata)
 //   - `dungeon-<chiave>` (palazzo | dedalo, asset `palazzi/<chiave>`) → `<area>` (area, entità area, immagine dell'istanza se presente)
 //   - spilli: uno per marcatore dei punti (riferimento `punto`) e dei luoghi (riferimento `luogo`), stessa origine del marcatore;
 //     passaggi verso le mappe figlie (Tokyo → quartieri, Palazzo/Dedalo → aree) disposti in griglia, da posizionare nell'editor.
 // ============================================================
 
-import { nowIso } from '../../db/dbService.js';
-import type { AppDatabase } from '../../db/dbService.js';
-import type { RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
-import { categoriaSpillo, spilloPerPunto } from '../../../shared/spilli.js';
-import { spilloPerLuogo } from '../../../shared/tipiLuogo.js';
-import { assegnaUidMancanti } from './identitaSpillo.js';
-import { riconciliaAreeGuida } from './organizzazioneMappe.js';
-import { unisci } from './presenzaEntita.js';
-import { sincronizzaPercorsiMappe } from './percorsiMappe.js';
-import { leggiCondizioniSalvate } from '../../../shared/condizioniSpillo.js';
+import { nowIso } from '../../dbService.js';
+import type { AppDatabase } from '../../dbService.js';
+import type { RequisitoSpillo } from '../../../../shared/condizioniSpillo.js';
+import { categoriaSpillo, spilloPerPunto } from '../../../../shared/spilli.js';
+import { spilloPerLuogo } from '../../../../shared/tipiLuogo.js';
+import { assegnaUidMancanti } from './identitaSpillo067.js';
+import { riconciliaAreeGuida } from './organizzazioneMappe042.js';
+import { sincronizzaPercorsiMappe } from './percorsiMappe038.js';
+import { leggiCondizioniSalvate } from '../../../../shared/condizioniSpillo.js';
 
 /** Data e ora correnti in ISO, per `updated_at` delle righe create. */
 function adesso(): string { return new Date().toISOString(); }
+
+/** Unisce più fonti di condizioni senza ripetere la stessa condizione due volte (copia di `presenzaEntita.unisci`). */
+function unisci(...gruppi: RequisitoSpillo[][]): RequisitoSpillo[] {
+  const viste = new Set<string>();
+  const fuori: RequisitoSpillo[] = [];
+  for (const g of gruppi) {
+    for (const c of g) {
+      const k = JSON.stringify(c);
+      if (viste.has(k)) continue;
+      viste.add(k);
+      fuori.push(c);
+    }
+  }
+  return fuori;
+}
 
 /** Posizioni (in percentuale) dei quartieri sulla mappa globale di Tokyo del gioco (stima dalla mappa ufficiale: da rifinire nell'editor). */
 const POSIZIONI_TOKYO: Record<string, [number, number]> = {
@@ -45,12 +64,9 @@ function posizionePassaggio(radice: string, figlia: string, i: number, n: number
  *  la scuola era «attività» (il «servizio» resta sull'icona generica dell'attività: il Leblanc e la palestra non sono lavanderie). */
 const VECCHIA_CORRISPONDENZA: Record<string, string> = { scuola: 'attivita' };
 
-/** Gli spilli di seed dei luoghi seguono il catalogo dei tipi di luogo (shared/tipiLuogo) quando la
- *  corrispondenza cambia. Regola **mirata**: si tocca solo lo spillo rimasto al tipo della vecchia
- *  corrispondenza; i pacchetti possono assegnare tipi più fini (il bagno pubblico è «terme», non
- *  «lavanderia») e quelli restano. Non tocca gli spilli dell'utente. Si rifà a ogni avvio come le
- *  altre regole sui dati. */
-export function riallineaSpilliLuoghi(db: AppDatabase): number {
+/** Gli spilli di seed dei luoghi seguono il catalogo dei tipi di luogo (shared/tipiLuogo) quando la corrispondenza cambia (copia di
+ *  `riallineaSpilliLuoghi`, che nel servizio vivo vive in `server/services/mappe/riallineaSpilliLuoghi.ts`). */
+function riallineaSpilliLuoghi(db: AppDatabase): number {
   const tabelle = new Set((db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as Array<{ name: string }>).map((r) => r.name));
   if (!tabelle.has('spillo') || !tabelle.has('luogo')) return 0;
   const agg = db.prepare(`UPDATE spillo SET tipo = ?, updated_at = ? WHERE origine = 'seed' AND riferimento_tipo = 'luogo' AND tipo = ?
@@ -218,11 +234,3 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
   assegnaUidMancanti(db);
   return { mappe, spilli, riclassificati, conSblocco };
 }
-
-/**
- * Compatibilità dell'API interna: il collegamento dei Palazzi alla mappa reale non si ricava più
- * da `dati_guida.finestre-dungeon`. Le mappe pubblicate sono ormai la fotografia dei dati importati;
- * le finestre restano in `dungeon` e i passaggi validi vengono creati dall'importazione delle mappe.
- */
-export function collegaPalazziAiLuoghi(_db: AppDatabase): number { return 0; }
-

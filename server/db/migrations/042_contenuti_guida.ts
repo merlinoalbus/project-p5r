@@ -10,7 +10,7 @@
 // ============================================================
 
 import type { Migration } from '../migrationRunner.js';
-import { riconciliaAreeGuida } from '../../services/mappe/organizzazioneMappe.js';
+import { riconciliaAreeGuida } from './congelati/organizzazioneMappe042.js';
 export const migration042: Migration = { id: 42, name: 'contenuti_guida_distinti_da_planimetrie', up(db) {
   db.exec(`CREATE TABLE guida_mappa(area_chiave TEXT PRIMARY KEY REFERENCES dungeon_area(chiave) ON DELETE CASCADE,nome TEXT NOT NULL,note TEXT NOT NULL DEFAULT '',metadata_json TEXT NOT NULL DEFAULT '{}');
     CREATE TABLE guida_alias(chiave TEXT PRIMARY KEY,area_chiave TEXT NOT NULL REFERENCES dungeon_area(chiave) ON DELETE CASCADE);

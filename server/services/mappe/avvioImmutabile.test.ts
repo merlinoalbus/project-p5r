@@ -23,7 +23,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { closeDb, getDb } from '../../db/dbService.js';
 import { traduciNomiSpilli } from '../../db/migrations/053_nomi_spilli_in_italiano.js';
 import { collegaLuoghiAllePlanimetrie } from '../../db/migrations/054_luoghi_con_la_loro_planimetria.js';
-import { riallineaSpilliLuoghi } from './sincronizzaMappe.js';
+import { riallineaSpilliLuoghi } from './riallineaSpilliLuoghi.js';
 import { dbDiProva } from '../../../test/dbDiProva.js';
 
 /** Quel che l'avvio ordinario fa su un database già formato: le regole sui dati di server/index.ts, e nient'altro (il seed non c'è più). */

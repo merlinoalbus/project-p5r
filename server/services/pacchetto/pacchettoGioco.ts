@@ -24,18 +24,18 @@ import { resolveDbPath, type AppDatabase } from '../../db/dbService.js';
 import { runMigrations } from '../../db/migrationRunner.js';
 import { invalidaCacheDiGioco } from '../cacheDiGioco.js';
 import { traduciNomiSpilli } from '../../db/migrations/053_nomi_spilli_in_italiano.js';
-import { collegaLuoghiAllePlanimetrie } from '../../db/migrations/054_luoghi_con_la_loro_planimetria.js';
-import { riallineaSpilliLuoghi } from '../mappe/sincronizzaMappe.js';
+import { riallineaSpilliLuoghi } from '../mappe/riallineaSpilliLuoghi.js';
 import { assegnaUidMancanti } from '../mappe/identitaSpillo.js';
 import { assorbiFileDelleRighe } from '../../db/migrations/079_immagini_nel_database.js';
 import { pulisciMiniatureOrfane } from '../miniatureService.js';
 
 /** L'esito delle regole sui dati: i conteggi (0 se la regola è fallita) e i nomi delle regole fallite (solo in modo tollerante). */
-export interface EsitoRegoleAvvio { spilliTradotti: number; luoghiCollegati: number; spilliRiallineati: number; spilliIdentificati: number; immaginiAssorbite: number; miniatureOrfane: number; regoleFallite: string[] }
+export interface EsitoRegoleAvvio { spilliTradotti: number; spilliRiallineati: number; spilliIdentificati: number; immaginiAssorbite: number; miniatureOrfane: number; regoleFallite: string[] }
 
 /** Le regole sui dati che ogni avvio riapplica (non c'è più un seed da ricaricare): nomi degli
- *  spilli non identificati, luoghi legati alla planimetria omonima, spilli dei luoghi allineati
- *  al catalogo dei tipi, immagini rimaste su disco assorbite nel database. Tutte idempotenti.
+ *  spilli non identificati, spilli dei luoghi allineati al catalogo dei tipi, immagini rimaste su disco assorbite nel database.
+ *  Tutte idempotenti. (Il legame dei luoghi con la planimetria omonima, `collegaLuoghiAllePlanimetrie`, non si riapplica più: scriveva
+ *  `mappa_entita`, tolta da L11 · B9; la funzione resta nella migrazione 054.)
  *
  *  Una sola implementazione, due modi (R-1): `'tollerante'` è quello dell'avvio (decisione dell'utente: «il server deve partire»):
  *  ogni regola gira da sola, un errore si registra col nome della regola, vale 0 ed entra in `regoleFallite`, e le altre girano lo
@@ -49,7 +49,6 @@ export function regoleAllAvvio(db: AppDatabase, modo: 'rigido' | 'tollerante' = 
   };
   const esito = {
     spilliTradotti: prova('traduciNomiSpilli', () => traduciNomiSpilli(db)),
-    luoghiCollegati: prova('collegaLuoghiAllePlanimetrie', () => collegaLuoghiAllePlanimetrie(db)),
     spilliRiallineati: prova('riallineaSpilliLuoghi', () => riallineaSpilliLuoghi(db)),
     spilliIdentificati: prova('assegnaUidMancanti', () => assegnaUidMancanti(db)),
     immaginiAssorbite: prova('assorbiImmaginiSuDisco', () => assorbiImmaginiSuDisco(db)),

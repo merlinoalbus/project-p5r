@@ -14,7 +14,7 @@
 // ============================================================
 
 import type { Migration } from '../migrationRunner.js';
-import { assegnaUidMancanti } from '../../services/mappe/identitaSpillo.js';
+import { assegnaUidMancanti } from './congelati/identitaSpillo067.js';
 
 export const migration067: Migration = {
   id: 67,
