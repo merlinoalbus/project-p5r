@@ -29,11 +29,24 @@ function domandaDto(r: RigaDomanda, fatte: Set<number>, oggettiRicompensa: NonNu
   return { id: r.id, chiave: r.chiave ?? null, data: r.data, tipo: r.tipo, chi: r.chi, domanda: r.domanda, risposte: JSON.parse(r.risposte_json) as DomandaDto['risposte'], ricompensa: r.ricompensa, oggettiRicompensa, note: r.note, fonte: r.fonte, fatta: fatte.has(r.id) };
 }
 
-/** Gli esami in ordine, con date e domande lette dai rispettivi JSON. */
+/** Gli esami in ordine, con giorni e domande composti dalle righe riassuntive di `domanda` (R9-18: la fonte unica); `ordine` corre su tutto l'esame. */
 function esami(): EsameDto[] {
   const premi = ricompensePerFonte('esame');
-  return (prepared('SELECT chiave, nome, date_json, data_risultati, domande_json, note FROM esame ORDER BY ordine').all() as Array<{ chiave: string; nome: string; date_json: string; data_risultati: string | null; domande_json: string; note: string }>)
-    .map((e) => ({ chiave: e.chiave, nome: e.nome, date: JSON.parse(e.date_json) as string[], dataRisultati: e.data_risultati, domande: JSON.parse(e.domande_json) as EsameDto['domande'], note: e.note, oggettiRicompensa: premi.get(e.chiave) ?? [] }));
+  const righe = (prepared("SELECT data, tipo, ordine, risposte_json FROM domanda WHERE tipo IN ('esame-medio', 'esame-finale') ORDER BY ordine").all() as Array<{ data: string; tipo: string; ordine: number; risposte_json: string }>)
+    .sort((x, y) => indiceGiornoScolastico(x.data) - indiceGiornoScolastico(y.data) || x.ordine - y.ordine);
+  const risultatiPrecedenti = new Map<string, number>();
+  return (prepared('SELECT chiave, nome, data_risultati, note FROM esame ORDER BY ordine').all() as Array<{ chiave: string; nome: string; data_risultati: string | null; note: string }>)
+    .map((e) => {
+      // le righe dell'esame: del suo tipo (metà → esame-medio, fine → esame-finale), dopo i risultati dell'esame precedente dello stesso tipo e fino ai suoi
+      const tipo = /metà/i.test(e.nome) ? 'esame-medio' : 'esame-finale';
+      const fino = e.data_risultati ? indiceGiornoScolastico(e.data_risultati) : Number.POSITIVE_INFINITY;
+      const da = risultatiPrecedenti.get(tipo) ?? -1;
+      risultatiPrecedenti.set(tipo, fino);
+      const sue = righe.filter((r) => r.tipo === tipo && indiceGiornoScolastico(r.data) > da && indiceGiornoScolastico(r.data) <= fino);
+      const domande = sue.flatMap((r) => (JSON.parse(r.risposte_json) as Array<{ testo: string; domanda?: string }>).map((x) => ({ data: r.data, domanda: x.domanda ?? '', risposta: x.testo })))
+        .map((d, i) => ({ ...d, ordine: i + 1 }));
+      return { chiave: e.chiave, nome: e.nome, date: [...new Set(sue.map((r) => r.data))], dataRisultati: e.data_risultati, domande, note: e.note, oggettiRicompensa: premi.get(e.chiave) ?? [] };
+    });
 }
 
 /** Tutte le domande in ordine di data, con lo stato «fatta» della partita (se indicata) e le prossime rispetto alla data di gioco. */
