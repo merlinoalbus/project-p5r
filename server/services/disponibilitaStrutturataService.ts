@@ -47,7 +47,8 @@ function contestoDellaPartita(partitaId: number, confidente: string): ContestoDi
 export function disponibilitaConfidente(confidente: string, partitaId?: number): DisponibilitaConfidenteDto {
   const struttura = strutturaDaColonne(rigaStruttura(confidente));
   const dto: DisponibilitaConfidenteDto = { confidente, struttura, luoghi: luoghiDelConfidente(confidente), modificata: !!prepared('SELECT 1 FROM dati_guida WHERE chiave = ?').get(CHIAVE_SEED_DISPONIBILITA(confidente)) };
-  if (partitaId !== undefined) dto.oggi = valutaDisponibilita(struttura, contestoDellaPartita(partitaId, confidente));
+  // «oggi» sulla struttura effettiva (con il «dal» del requisito di rango 1 dove la struttura non ne ha uno), la stessa del Diario e dei semafori
+  if (partitaId !== undefined) dto.oggi = verdettoDelConfidente(confidente, contestoDellaPartita(partitaId, confidente)) ?? valutaDisponibilita(struttura, contestoDellaPartita(partitaId, confidente));
   return dto;
 }
 
@@ -56,8 +57,11 @@ let strutture: Map<string, DisponibilitaStrutturata> | null = null;
 registraCacheDiGioco(() => { strutture = null; });
 function tutteLeStrutture(): Map<string, DisponibilitaStrutturata> {
   if (!strutture) {
+    // R9-04/4: il «dal» di un Confidente senza una data propria nella struttura è la data del suo requisito di rango 1 (tipo «data»): prima di quel giorno non c'è
+    const dalRequisito = new Map((prepared("SELECT confidente_chiave, dati_json FROM confidente_requisito WHERE rango = 1 AND tipo = 'data' ORDER BY indice").all() as Array<{ confidente_chiave: string; dati_json: string }>)
+      .flatMap((r) => { try { const d = (JSON.parse(r.dati_json) as { dal?: unknown }).dal; return typeof d === 'string' && /^\d{2}-\d{2}$/.test(d) ? [[r.confidente_chiave, d] as const] : []; } catch { return []; } }));
     strutture = new Map((prepared(`SELECT confidente_chiave AS chiave, ${COLONNE} FROM confidente_disponibilita`).all() as Array<RigaStruttura & { chiave: string }>)
-      .map((r) => [r.chiave, strutturaDaColonne(r)]));
+      .map((r) => { const s = strutturaDaColonne(r); return [r.chiave, s.dal === null ? { ...s, dal: dalRequisito.get(r.chiave) ?? null } : s] as const; }));
   }
   return strutture;
 }
