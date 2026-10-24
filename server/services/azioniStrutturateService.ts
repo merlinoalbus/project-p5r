@@ -18,7 +18,8 @@ import { postoDelPin } from './mappe/nomiDeiPosti.js';
 import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
 import { descriviEffettoAzione, normalizzaEffettiAzione, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
-import type { ConfidentePartitaDto, ElenchiAzioneDto, StatoAzioneDto } from '../../shared/types.js';
+import { eOffertaAojiru } from '../../shared/acquisti.js';
+import type { ConfidentePartitaDto, ElenchiAzioneDto, ElenchiEffettiVoceDto, StatoAzioneDto } from '../../shared/types.js';
 
 const TIPI_RIFERIMENTO = new Set<string>(TIPI_RIFERIMENTO_AZIONE.map((r) => r.chiave));
 
@@ -178,5 +179,21 @@ export function elenchiAzione(): ElenchiAzioneDto {
     attivita: attivita.map((a) => ({ chiave: a.chiave, nome: a.nome, turni: !a.confidente_chiave && (eTracciamentoAttivita(a.tracciamento) ? a.tracciamento : tracciamentoPerTipo(a.tipo)) === 'svolta' })),
     negozi: pulite(voci('SELECT chiave, nome, luogo AS dettaglio FROM negozio WHERE nascosto = 0 ORDER BY ordine')),
     doti: pulite(voci('SELECT chiave, nome FROM dote_sociale ORDER BY ordine')),
+  };
+}
+
+/** Gli elenchi per scegliere per nome gli oggetti che gli effetti di una voce citano con una chiave interna: gli stessi che
+ *  `verificaEffettoDiStato` accetta (l'Aojiru ha il suo effetto, quindi non è fra gli articoli). Sola lettura. */
+export function elenchiEffettiVoce(): ElenchiEffettiVoceDto {
+  const articoli = (prepared(`SELECT a.chiave, COALESCE(NULLIF(c.nome, ''), NULLIF(a.nome, ''), a.chiave) AS nome, a.negozio_chiave AS negozio, n.nome AS negozioNome, a.prezzo, a.catalogo_chiave AS catalogoChiave
+    FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave AND n.nascosto = 0 LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave ORDER BY n.ordine, a.ordine`).all() as Array<{ chiave: string; nome: string; negozio: string; negozioNome: string; prezzo: number | null; catalogoChiave: string | null }>)
+    .filter((a) => !eOffertaAojiru({ chiave: a.chiave, catalogoChiave: a.catalogoChiave }))
+    .map(({ catalogoChiave: _scartata, ...a }) => a);
+  return {
+    articoli,
+    domande: (prepared('SELECT id, data AS giorno, domanda AS testo, tipo FROM domanda ORDER BY ordine').all() as ElenchiEffettiVoceDto['domande']),
+    cruciverba: prepared('SELECT data, indizio FROM cruciverba ORDER BY ordine').all() as ElenchiEffettiVoceDto['cruciverba'],
+    inviti: prepared(`SELECT i.chiave, i.confidente_chiave AS confidente, c.nome AS confidenteNome, i.data, i.nota FROM confidente_invito i JOIN confidente c ON c.chiave = i.confidente_chiave ORDER BY c.ordine, i.data`).all() as ElenchiEffettiVoceDto['inviti'],
+    persone: (prepared('SELECT id, nome, arcana, livello FROM persona ORDER BY nome').all() as Array<{ id: number; nome: string; arcana: string; livello: number }>).map((p) => ({ ...p, arcana: t('arcana', p.arcana) })),
   };
 }

@@ -1292,8 +1292,8 @@ export interface StatoAzioneDto {
   motivo: string | null;
 }
 
-/** Che cosa è una voce della giornata: un'azione (si spunta) o un evento, una scadenza, un promemoria (si mostrano). */
-export type GenereVoce = 'azione' | 'evento' | 'scadenza' | 'promemoria';
+/** Che cosa è una voce della giornata: una cosa da fare (`azione`, si spunta) o un promemoria (solo da leggere, senza casella). */
+export type GenereVoce = 'azione' | 'promemoria';
 
 /**
  * Una voce della giornata (`voce_giornata`, file di gioco, dalla migrazione 092): azione della guida, cosa da fare o evento
@@ -1411,6 +1411,21 @@ export interface ElenchiAzioneDto {
   attivita: Array<VoceElencoAzione & { turni: boolean }>;
   negozi: VoceElencoAzione[];
   doti: VoceElencoAzione[];
+}
+
+/**
+ * Gli elenchi per scegliere PER NOME gli oggetti che gli effetti di una voce citano con una chiave interna
+ * (`GET /api/compendio/percorso-elenchi-effetti`, sola lettura).
+ */
+export interface ElenchiEffettiVoceDto {
+  /** Articoli dei negozi (l'Aojiru ha il suo effetto e non c'è): `chiave` è «negozio/articolo». */
+  articoli: Array<{ chiave: string; nome: string; negozio: string; negozioNome: string; prezzo: number | null }>;
+  /** Domande in classe, esami e quiz: `id` è il numero che l'effetto «domanda» cita. */
+  domande: Array<{ id: number; giorno: string; testo: string; tipo: string }>;
+  cruciverba: Array<{ data: string; indizio: string }>;
+  /** Inviti dei Confidenti: `chiave` è «confidente/MM-GG». */
+  inviti: Array<{ chiave: string; confidente: string; confidenteNome: string; data: string | null; nota: string }>;
+  persone: Array<{ id: number; nome: string; arcana: string; livello: number }>;
 }
 
 /** I campi di una voce della giornata che si scrivono (creandola o modificandola): tutti, dal testo agli effetti della spunta,

@@ -5,7 +5,7 @@
 import type {
   CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, AreaDedaloDto, AreaDungeonDto, AtterraggioPalazzoDto, PuntoInteresseDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, CitazioniRichiestaDto, RichiestaDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto, LuogoOpzioneDto } from '../../types';
 import { apiDelete, apiPut, apiPost, apiGet, queryString } from './_helpers';
-import type { AzionePercorsoDto, DatiVoceGiornata, ElenchiAzioneDto, EsitoRevisioneVoce, PuntiCopiatiDto, PuntiSpostatiDto, SpostaPuntiInArea, TrasferisciVociGiornata, VideogiochiDto, VociTrasferiteDto } from '../../types';
+import type { AzionePercorsoDto, DatiVoceGiornata, ElenchiAzioneDto, ElenchiEffettiVoceDto,EsitoRevisioneVoce, PuntiCopiatiDto, PuntiSpostatiDto, SpostaPuntiInArea, TrasferisciVociGiornata, VideogiochiDto, VociTrasferiteDto } from '../../types';
 import type { DoteNote } from '../../../shared/effettiAzione';
 import type { DisponibilitaConfidenteDto, DisponibilitaStrutturata } from '../../../shared/disponibilitaStrutturata';
 import type { GiornoModificabileDto, ModificaGiorno } from '../../../shared/giorno';
@@ -87,6 +87,7 @@ export const getPercorsoIndice = (partita?: number): Promise<PercorsoIndiceDto> 
 export const getPercorsoGiorno = (data: string, partita?: number): Promise<PercorsoGiornoDto> => apiGet(`/compendio/percorso/${data}${queryString({ partita })}`);
 /** Gli elenchi per classificare, collegare e dare effetti a un'azione della giornata. */
 export const getElenchiAzione = (): Promise<ElenchiAzioneDto> => apiGet('/compendio/percorso-elenchi');
+export const getElenchiEffettiVoce = (): Promise<ElenchiEffettiVoceDto> => apiGet('/compendio/percorso-elenchi-effetti');
 // ---- Voci della giornata: canone della guida, per tutte le partite (`partita`: la risposta porta lo stato in quella partita) ----
 
 /** Aggiunge una voce al giorno, al posto `posizione` della sua fascia (in fondo se omesso). */

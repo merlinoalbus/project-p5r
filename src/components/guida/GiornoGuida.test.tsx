@@ -35,7 +35,7 @@ const voce = (p: Partial<AzionePercorsoDto> & Pick<AzionePercorsoDto, 'uid' | 'a
 const ZORRO = voce({ uid: uid(1), azione: 'Biblioteca: prendere Zorro', fatta: true, effetti: { doti: [{ chiave: 'coraggio', nome: 'Coraggio', delta: 3, note: 2, cinema: false }], confidente: null } });
 const PANE = voce({ uid: uid(2), azione: 'Comprare i Bionutrienti' });
 const PALAZZO = voce({ uid: uid(3), azione: 'Palazzo di Kamoshida: infiltrazione', note: 'Oggetti principali' });
-const CONSEGNA = voce({ uid: uid(4), azione: 'Consegna del Palazzo', fascia: 'sera', genere: 'scadenza' });
+const CONSEGNA = voce({ uid: uid(4), azione: 'Consegna del Palazzo', fascia: 'sera', genere: 'promemoria' });
 
 const base: PercorsoGiornoDto = {
   giorno: '04-12', giornoSettimana: 'mar', fase: 'Palazzo di Kamoshida', trama: 'Primo accesso.', vincoli: [], meteo: null, avvisi: [], fonte: '', coperto: true,

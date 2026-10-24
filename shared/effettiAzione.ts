@@ -42,6 +42,16 @@ export const TIPI_RIFERIMENTO_AZIONE = [
 ] as const;
 export type TipoRiferimentoAzione = (typeof TIPI_RIFERIMENTO_AZIONE)[number]['chiave'];
 
+/**
+ * A che cosa si collega ogni tipo di voce: il tipo decide il collegamento (finestra della voce, tavola approvata il 2026-10-24).
+ * `null` = nessun collegamento (domanda/esame, trama, Stanza di Velluto, altro). Il tipo «attività» e il tipo «lavoro» puntano
+ * entrambi a un'attività: il primo a un videogioco o a un'altra attività, il secondo a un lavoro contato per turni.
+ */
+export const RIFERIMENTO_DI_TIPO: Record<TipoAzione, TipoRiferimentoAzione | null> = {
+  confidente: 'confidente', dote: 'dote', palazzo: 'dungeon', richiesta: 'richiesta', acquisto: 'negozio', lavoro: 'attivita',
+  libro: 'libro', dvd: 'film', attivita: 'attivita', esame: null, trama: null, velluto: null, altro: null,
+};
+
 export const CATEGORIE_LETTURA = [
   { chiave: 'libro', nome: 'Libro' }, { chiave: 'film', nome: 'Film o DVD' }, { chiave: 'videogioco', nome: 'Videogioco' },
 ] as const;

@@ -2164,3 +2164,40 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--color-primary) 75%, transparent) transparent;
 }
+
+/* ---- Finestra della voce della giornata (tavole approvate il 2026-10-24) ----
+   Una colonna fino a 1023 px (stesso ordine: che cosa è, testo, tipo, quale, poi spuntando succede, quando, posto, effetti aggiuntivi);
+   da 1024 px due colonne. Scorre solo il corpo della finestra (`.modal-body`). */
+.voce-colonne { display: grid; gap: 16px; min-width: 0; }
+.voce-colonna { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+@media (min-width: 1024px) {
+  .voce-colonne { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+}
+/* «Quale»: griglia di tessere con l'immagine sopra e il nome sotto (bersagli ≥ 44 px), la scelta evidente */
+.quale-griglia { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 6px; min-width: 0; }
+.quale-tessera { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 4px; min-width: 0; min-height: 44px; padding: 6px 4px;
+  border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg-tertiary); color: var(--color-text); font: inherit; font-size: 11.5px; line-height: 1.15;
+  text-align: center; cursor: pointer; overflow-wrap: anywhere; }
+.quale-tessera:hover { border-color: var(--color-text-secondary); }
+.quale-tessera:focus-visible { outline: 2px solid white; outline-offset: 2px; }
+.quale-tessera--attiva { border-color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 22%, var(--color-bg-tertiary)); font-weight: 700; box-shadow: inset 0 0 0 1px var(--color-primary); }
+.quale-tessera__figura { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; line-height: 0; }
+.quale-tessera__dettaglio { font-size: 10px; font-weight: 400; color: var(--color-text-muted); }
+.quale-ritratto { display: inline-block; width: 44px; height: 58px; overflow: hidden; border: 1px solid var(--color-border); border-radius: var(--radius-sm, 4px); background: var(--color-bg-secondary); }
+/* il riquadro «Spuntando succede» e le file di scelta brevi (note ♪, rango atteso, sessioni) */
+.effetto-riquadro { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 10px; border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 55%, var(--color-border)); background: color-mix(in srgb, var(--color-primary) 7%, transparent); }
+.effetto-riquadro__titolo { font-family: var(--font-display); font-size: 17px; line-height: 1; text-transform: uppercase; letter-spacing: .04em; color: var(--color-primary); }
+.fila-scelta { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
+.fila-scelta__voce { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 0 10px; border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm, 4px); background: var(--color-bg-tertiary); color: var(--color-text); font: inherit; font-size: 14px; cursor: pointer; }
+.fila-scelta__voce:hover:not(:disabled) { border-color: var(--color-text-secondary); }
+.fila-scelta__voce:focus-visible { outline: 2px solid white; outline-offset: 2px; }
+.fila-scelta__voce--attiva { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-text-on-primary); font-weight: 700; }
+/* il posto della voce: maniglia di trascinamento (nessuno scorrimento della pagina mentre la si tiene), segnaposto e riga sollevata */
+.posto-voce__maniglia { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; border: 0; background: transparent; color: var(--color-text-secondary);
+  font-size: 20px; line-height: 1; cursor: grab; touch-action: none; }
+.posto-voce__maniglia:active { cursor: grabbing; }
+.posto-voce__maniglia:focus-visible { outline: 2px solid white; outline-offset: -2px; }
+.posto-voce__questa--trascinata { position: relative; z-index: 2; box-shadow: 0 10px 24px rgba(0, 0, 0, .6); outline: 1px solid var(--color-primary); }
+.posto-voce__slot { display: flex; align-items: center; justify-content: center; min-height: 28px; border: 2px dashed var(--color-primary); border-radius: 6px; font-size: 11px; color: var(--color-primary); }

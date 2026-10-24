@@ -322,6 +322,11 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     descrizione: 'Gli elementi a cui un\'azione si può collegare o che un effetto può nominare: Confidenti (con l\'arcano come dettaglio), dungeon, Richieste, libri, film, videogiochi, attività (con `turni` vero per quelle contate per volte), negozi e Doti. Sono gli stessi elementi che il server accetta salvando una voce; le righe nascoste dal catalogo sono escluse.',
     risposta: '`ElenchiAzioneDto`',
   },
+  'GET /api/compendio/percorso-elenchi-effetti': {
+    sommario: 'Elenchi per scegliere per nome gli oggetti citati dagli effetti di una voce',
+    descrizione: 'Sola lettura. Articoli dei negozi (con negozio e prezzo; l\'Aojiru ha il suo effetto e non c\'è), domande in classe, esami e quiz (con il numero che l\'effetto «domanda» cita), cruciverba per data, inviti dei Confidenti (chiave «confidente/MM-GG») e Persona del compendio. Servono alla finestra della voce per non far digitare chiavi interne.',
+    risposta: '`ElenchiEffettiVoceDto`',
+  },
   'POST /api/compendio/percorso/:data/voci': {
     sommario: 'Aggiunge una voce alla giornata (canone, per tutte le partite)',
     descrizione: 'La voce entra nella fascia indicata (`giorno` se omessa) al posto `posizione` (0 = in cima; omessa o oltre l\'ultima = in fondo) e la fascia si rinumera senza buchi. Genere predefinito «azione»; tipo ed effetti contano solo per le azioni; collegamento ed effetti si verificano contro la guida (devono puntare a elementi che esistono). `?partita=` facoltativo: si controlla prima di scrivere e la risposta porta lo stato della voce in quella partita.',
