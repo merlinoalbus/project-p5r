@@ -6,7 +6,7 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
-import { datiGuida, type Congelato } from './datiGuida.js';
+import { datiGuidaCorretti, type Congelato } from './datiGuida.js';
 import type { CompletamentoDto, TrofeoDto } from '../../shared/types.js';
 import { ricompensePerFonte } from './catalogoOggettiLetture.js';
 
@@ -25,7 +25,7 @@ function ottenutiPartita(partitaId: number | undefined): Set<string> {
 
 /** Trofei (con ottenuti nella partita) e sezioni di consultazione della guida. */
 export function completamento(partitaId?: number): Congelato<CompletamentoDto> {
-  const seed = datiGuida<SeedCompletamento>('completamento');
+  const seed = datiGuidaCorretti<SeedCompletamento>('completamento');
   if (!seed) throw httpErrors.notFound('completamento-non-disponibile', 'I dati di completamento non sono caricati.');
   const ottenuti = ottenutiPartita(partitaId);
   const trofei = (prepared('SELECT * FROM trofeo ORDER BY ordine').all() as RigaTrofeo[]).map((r) => dto(r, ottenuti));

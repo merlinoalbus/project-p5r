@@ -3452,3 +3452,59 @@ export interface EsitoRipristinoCestinoDto {
   partiteMancanti: boolean;
 }
 
+// ---- Correzioni ai dati della guida e «Ripristina» senza dipendenze (L11 · B11) ----
+
+/** Gli oggetti della guida che si correggono dalla loro pagina e si rimettono com'erano (`/api/correzioni`). */
+export const TIPI_MODIFICABILI = ['quartiere', 'trofeo', 'dote', 'trasformazione',
+  'personaggio', 'gruppo-personaggi',
+  'sfide-battaglie', 'battaglia-sfida', 'boss-segreto', 'sfide-magnate', 'magnate-sfida', 'tratto', 'sfide-tratti', 'sfide-quiz-tv',
+  'finale', 'covo', 'covo-sfida', 'covo-premio', 'dlc', 'meteo', 'completamento-sezione',
+  'fabbricazione', 'ricetta', 'armi', 'arma-effetto', 'arma-progressione', 'abiti', 'abito', 'jose'] as const;
+export type TipoModificabile = (typeof TIPI_MODIFICABILI)[number];
+export type TipoCampoCorrezione = 'testo' | 'testolungo' | 'numero' | 'booleano' | 'elenco' | 'scelta' | 'oggetto';
+export type ValoreCampoCorrezione = string | number | boolean | null | string[];
+export interface CampoCorrezioneDto {
+  /** L'indirizzo del campo dentro l'oggetto: la chiave del corpo della correzione e di `campi` nel ripristino. */
+  percorso: string;
+  etichetta: string;
+  gruppo?: string;
+  tipo: TipoCampoCorrezione;
+  nullable?: boolean;
+  /** Lunghezza massima di un testo o valore massimo di un numero, quando c'è. */
+  max?: number;
+  opzioni?: Array<{ chiave: string; nome: string }>;
+  /** Il valore che le pagine mostrano adesso, e quello della guida (identici se il campo non è corretto). */
+  valore: ValoreCampoCorrezione;
+  valoreGuida: ValoreCampoCorrezione;
+  modificato: boolean;
+}
+export interface SchedaCorrezioneDto {
+  tipo: TipoModificabile;
+  /** La chiave con cui chiamare l'oggetto adesso (se si è corretto il campo che lo identifica, è il valore nuovo). */
+  chiave: string;
+  nome: string;
+  modalita: 'riga' | 'blocco';
+  campi: CampoCorrezioneDto[];
+  /** Almeno un campo è diverso dalla guida. */
+  modificata: boolean;
+  /** Campi la cui guida è cambiata dopo la correzione (la correzione resta, il valore nuovo della guida non si vede finché dura). */
+  guidaCambiata: string[];
+  aggiornata: string | null;
+  nota?: string | null;
+}
+export interface RiepilogoCorrezioneDto {
+  tipo: TipoModificabile;
+  chiave: string;
+  nome: string;
+  campi: string[];
+  aggiornata: string | null;
+  /** Correzione che la guida di oggi non accoglie più (l'elemento è sparito o il valore ha cambiato tipo): non si applica e non si cancella. */
+  orfana: boolean;
+}
+export interface EsitoRipristinoCorrezioneDto {
+  tipo: TipoModificabile;
+  chiave: string;
+  campiRipristinati: string[];
+  scheda: SchedaCorrezioneDto;
+}
+

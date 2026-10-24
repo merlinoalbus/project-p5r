@@ -1,7 +1,7 @@
 // Nomi, testi e destinazioni attuali delle fonti, condivisi da dettaglio e proposte.
 // Nessuna dipendenza da avanzamenti o servizi aggregati; costi dal lettore base del catalogo.
 import { prepared } from '../db/dbService.js';
-import { datiGuida } from './datiGuida.js';
+import { datiGuidaCorretti } from './datiGuida.js';
 import type { CompletamentoDto, CostoOggettoDto, OggettiGuidaDto, SfideDto } from '../../shared/types.js';
 import { catalogoOggettiDisponibile, costoOggetto, oggettiConChiavi, ricompensePerFonte } from './catalogoOggettiLetture.js';
 import { normalizzaCostoScambio } from '../../shared/catalogo.js';
@@ -47,18 +47,18 @@ export function fontiRicompenseOggetti(tipi: Iterable<string>): Map<string, Font
   }
   if (richiesti.has('ricetta')) {
     const prodotti = ricompensePerFonte('ricetta');
-    for (const r of datiGuida<OggettiGuidaDto>('oggetti-guida')?.fabbricazione.ricette ?? []) {
+    for (const r of datiGuidaCorretti<OggettiGuidaDto>('oggetti-guida')?.fabbricazione.ricette ?? []) {
       const collegati = prodotti.get(r.attrezzo) ?? [];
       aggiungi('ricetta', r.attrezzo, { nome: collegati.length ? collegati.map((p) => p.nome).join(' / ') : 'Prodotto non collegato',
         testo: [r.effetto, !collegati.length ? `Nome nella fonte: ${r.attrezzo}` : null].filter(Boolean).join(' · '), casa: '/guida/oggetti?scheda=fabbricazione' });
     }
   }
-  if (richiesti.has('covo')) for (const r of datiGuida<CompletamentoDto>('completamento')?.covo.premi ?? []) {
+  if (richiesti.has('covo')) for (const r of datiGuidaCorretti<CompletamentoDto>('completamento')?.covo.premi ?? []) {
     const fonte = { nome: r.nome, testo: [r.sblocco, r.effetto].filter(Boolean).join(' · '), casa: '/guida/covo' };
     aggiungi('covo', r.nome, fonte);
   }
   if (richiesti.has('sfida')) {
-    const sfide = datiGuida<SfideDto>('sfide');
+    const sfide = datiGuidaCorretti<SfideDto>('sfide');
     for (const r of sfide?.battaglieSfida.elenco ?? []) aggiungi('sfida', r.chiave,
       { nome: r.nomeIt ?? r.nome, testo: r.ricompense.join(' · '), casa: '/guida/sfide?scheda=battaglie' });
     for (const r of sfide?.bossSegreti ?? []) aggiungi('sfida', r.chiave,

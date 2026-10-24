@@ -11,7 +11,7 @@ import type { DoteNote } from '../../shared/effettiAzione.js';
 import { dotiIncontro } from './dotiIncontroConfidente.js';
 import { invitiDelConfidente } from './inviti.js';
 import { catalogoOggettiDisponibile, materialiDelleRicette, offerteBaseDegliOggetti, oggettiConChiavi, oggettiPerFonte, ricompensePerFonte, riferimentiListiniScambi } from './catalogoOggettiLetture.js';
-import { datiGuida, type Congelato } from './datiGuida.js';
+import { datiGuida, datiGuidaCorretti, type Congelato } from './datiGuida.js';
 import { costoPrecedenteRegalo } from './costoRegaloService.js';
 import { disponibilitaConfidente } from './disponibilitaStrutturataService.js';
 import { postoDellArticolo, postoDelNegozio } from './mappe/nomiDeiPosti.js';
@@ -24,7 +24,7 @@ import type {
 
 /** L'API storica conserva le sezioni della guida, ma dopo M7 non usa il crosswalk per dare identità agli oggetti. */
 export function oggettiGuida(): Congelato<OggettiGuidaDto> {
-  const dati = datiGuida<OggettiGuidaDto>('oggetti-guida');
+  const dati = datiGuidaCorretti<OggettiGuidaDto>('oggetti-guida');
   if (!dati) throw httpErrors.notFound('oggetti-non-disponibili', 'I dati degli oggetti della guida non sono caricati.');
   if (!catalogoOggettiDisponibile()) {
     const ponte = datiGuida<{ abbinamenti: Array<{ nome: string; articolo?: string; negozi: string[] }> }>('oggetti-crosswalk');
@@ -208,7 +208,7 @@ export function glossario(): GlossarioDto {
     tipiOggetto: mappaAmbito('tipoOggetto'),
     vincoliOggetto: mappaAmbito('vincoloOggetto'),
     areeMementos: mappaAmbito('areaMementos'),
-    dotiSociali: (prepared('SELECT chiave FROM dote_sociale ORDER BY ordine').all() as Array<{ chiave: string }>).map((d) => ({ chiave: d.chiave, nome: t('doteSociale', d.chiave) })),
+    dotiSociali: (prepared('SELECT chiave, nome FROM dote_sociale ORDER BY ordine').all() as Array<{ chiave: string; nome: string }>).map((d) => ({ chiave: d.chiave, nome: d.nome })),
   };
 }
 

@@ -37,7 +37,7 @@ import { leggiEffettiVoce, salvaEffettiVoce, elencaProposteEffettiVoce, anteprim
 import { bodySalvaEffettiVoce, bodyAnteprimaDecisioneEffettoVoce, bodyDecisioneEffettoVoce } from '../schemas/acquisti.js';
 import { completamento } from '../services/completamentoService.js';
 import { sfide } from '../services/sfideService.js';
-import { datiGuida } from '../services/datiGuida.js';
+import { datiGuidaCorretti } from '../services/datiGuida.js';
 import { httpErrors } from '../utils/httpError.js';
 import { impostaAtterraggi, impostaFinestra, type RegolaAtterraggio } from '../services/atterraggioPalazziService.js';
 import type { DatiVoceGiornata, EsitoRevisioneVoce, PersonaggiDto, SpostaPuntiInArea, TrasferisciVociGiornata } from '../../shared/types.js';
@@ -126,7 +126,7 @@ router.get('/oggetti-guida', (_req, res) => {
   res.json(oggettiGuida());
 });
 router.get('/personaggi', (_req, res) => {
-  const dati = datiGuida<PersonaggiDto>('personaggi');
+  const dati = datiGuidaCorretti<PersonaggiDto>('personaggi');
   if (!dati) throw httpErrors.notFound('personaggi-non-disponibili', 'I dati dei personaggi non sono caricati.');
   res.json(dati);
 });

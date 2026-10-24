@@ -190,7 +190,7 @@ export function puntiDaNote(note: 1 | 2 | 3, libro = false, fortuna = false, cin
 /** I ranghi di una Dote sociale in ordine, con il nome italiano e la soglia di punti. */
 function ranghiDote(chiave: string): RangoDoteDto[] {
   return (prepared('SELECT rango, nome, soglia FROM dote_sociale_rango WHERE dote_chiave = ? ORDER BY rango').all(chiave) as Array<{ rango: number; nome: string; soglia: number }>)
-    .map((r) => ({ rango: r.rango, nome: t('rangoDote', `${chiave}/${r.rango}`), soglia: r.soglia }));
+    .map((r) => ({ rango: r.rango, nome: r.nome, soglia: r.soglia })); // L11 · B11: il nome è la colonna (migrazione 178), non più la traduzione
 }
 
 /** Rango raggiunto con `punti` e distanza dal successivo. */
@@ -208,14 +208,15 @@ export function dotiSociali(partitaId: number): DoteSocialePartitaDto[] {
     FROM dote_sociale d LEFT JOIN dote_sociale_partita dp ON dp.dote_chiave = d.chiave AND dp.partita_id = ? ORDER BY d.ordine`).all(partitaId) as Array<{ chiave: string; nome: string; ordine: number; punti: number; updated_at: string | null }>)
     .map((d) => {
       const ranghi = ranghiDote(d.chiave);
-      return { chiave: d.chiave, nome: t('doteSociale', d.chiave), ordine: d.ordine, punti: d.punti, ...progressoDote(d.punti, ranghi), ranghi, updatedAt: d.updated_at };
+      return { chiave: d.chiave, nome: d.nome, ordine: d.ordine, punti: d.punti, ...progressoDote(d.punti, ranghi), ranghi, updatedAt: d.updated_at };
     });
 }
 
 /** Il nome di una Dote sociale («Gentilezza»), per dire che cosa il gioco dà senza toccarla (`DoteDaSegnareDto`). */
 export function nomeDote(chiave: string): string {
-  if (!prepared('SELECT 1 FROM dote_sociale WHERE chiave = ?').get(chiave)) throw httpErrors.notFound('dote-non-trovata', `La dote sociale '${chiave}' non esiste.`);
-  return t('doteSociale', chiave);
+  const nome = prepared('SELECT nome FROM dote_sociale WHERE chiave = ?').pluck().get(chiave) as string | undefined;
+  if (nome === undefined) throw httpErrors.notFound('dote-non-trovata', `La dote sociale '${chiave}' non esiste.`);
+  return nome;
 }
 
 /**
@@ -228,7 +229,7 @@ export function nomeDote(chiave: string): string {
  */
 export function aggiornaDote(partitaId: number, chiave: string, mod: ModificaDote): DoteSocialePartitaDto {
   rigaPartita(partitaId);
-  const dote = prepared('SELECT chiave FROM dote_sociale WHERE chiave = ?').get(chiave);
+  const dote = prepared('SELECT chiave, nome FROM dote_sociale WHERE chiave = ?').get(chiave) as { chiave: string; nome: string } | undefined;
   if (!dote) throw httpErrors.notFound('dote-non-trovata', `La dote sociale '${chiave}' non esiste.`);
   const attuale = (prepared('SELECT punti FROM dote_sociale_partita WHERE partita_id = ? AND dote_chiave = ?').get(partitaId, chiave) as { punti: number } | undefined)?.punti ?? 0;
   // la Fortuna non arriva più dal chiamante: è lo stato della partita (R10-10/2), letto qui per la Dote che si sta segnando
@@ -241,7 +242,7 @@ export function aggiornaDote(partitaId: number, chiave: string, mod: ModificaDot
     prepared('INSERT INTO dote_sociale_partita (partita_id, dote_chiave, punti, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, dote_chiave) DO UPDATE SET punti = excluded.punti, updated_at = excluded.updated_at').run(partitaId, chiave, nuovo, nowIso());
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
     if (dopo.rango !== prima.rango) {
-      registraEvento(partitaId, 'dote-rango', `${t('doteSociale', chiave)}: rango ${dopo.rango} «${dopo.nomeRango}»`, `Da «${prima.nomeRango}» (rango ${prima.rango}) con ${nuovo} punti.`, { dote: chiave, da: prima.rango, a: dopo.rango, punti: nuovo });
+      registraEvento(partitaId, 'dote-rango', `${dote.nome}: rango ${dopo.rango} «${dopo.nomeRango}»`, `Da «${prima.nomeRango}» (rango ${prima.rango}) con ${nuovo} punti.`, { dote: chiave, da: prima.rango, a: dopo.rango, punti: nuovo });
     }
     return dotiSociali(partitaId).find((d) => d.chiave === chiave)!;
   })();

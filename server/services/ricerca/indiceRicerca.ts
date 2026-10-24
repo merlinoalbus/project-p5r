@@ -12,7 +12,7 @@
 
 import { getDb, type AppDatabase } from '../../db/dbService.js';
 import { registraCacheDiGioco } from '../cacheDiGioco.js';
-import { datiGuida } from '../datiGuida.js';
+import { datiGuidaCorretti } from '../datiGuida.js';
 import { t } from '../traduzioniService.js';
 import { casaDelPalazzo, casaDellArea, contestoAree, type ContestoAree, type RigaArea } from '../mappe/casaMappa.js';
 import { entitaDellaRadice } from '../mappe/alberoMappe.js';
@@ -334,7 +334,7 @@ const COSTRUTTORI: Record<TipoRicerca, CostruttoreTipo> = {
 
   // solo le dieci sfide con una chiave stabile (7 battaglie e 3 boss): i tratti, le sfide del Magnate e quelle del Covo non ne hanno una (D3)
   sfida: () => {
-    const g = datiGuida<{ battaglieSfida?: { elenco?: ReadonlyArray<{ chiave: string; nome: string; nomeIt?: string | null }> }; bossSegreti?: ReadonlyArray<{ chiave: string; nome: string }> }>('sfide');
+    const g = datiGuidaCorretti<{ battaglieSfida?: { elenco?: ReadonlyArray<{ chiave: string; nome: string; nomeIt?: string | null }> }; bossSegreti?: ReadonlyArray<{ chiave: string; nome: string }> }>('sfide');
     const battaglie: Bozza[] = (g?.battaglieSfida?.elenco ?? []).map((b) => ({
       tipo: 'sfida', chiave: b.chiave, nome: b.nome, altri: [b.nomeIt], casa: `/guida/sfide?scheda=battaglie&${PARAMETRO_ELEMENTO}=${encodeURIComponent(b.chiave)}`,
     }));

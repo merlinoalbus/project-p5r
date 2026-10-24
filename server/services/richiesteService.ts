@@ -10,7 +10,7 @@
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
-import { datiGuida, type Congelato } from './datiGuida.js';
+import { datiGuidaCorretti, type Congelato } from './datiGuida.js';
 import { registraEvento } from './storicoService.js';
 import { conCestino } from './cestinoService.js';
 import type { CitazioniRichiestaDto, JoseDto, RicompensaOggettoDto, RichiestaDto, RichiesteDto, StatoRichiesta } from '../../shared/types.js';
@@ -58,7 +58,7 @@ export function richieste(partitaId?: number): Congelato<RichiesteDto> {
     d.totale += 1;
     if (r.stato === 'completata') d.completate += 1;
   }
-  const fonteJose = datiGuida<JoseDto>('jose');
+  const fonteJose = datiGuidaCorretti<JoseDto>('jose');
   const jose = fonteJose && catalogoOggettiDisponibile() ? { ...fonteJose, scambi: [],
     listino: prepared("SELECT 1 FROM negozio WHERE chiave = 'jose' AND nascosto = 0").get() ? dettaglioNegozio('jose', partitaId) : null } : fonteJose;
   return { richieste: lista, jose, dedali, completate: lista.filter((r) => r.stato === 'completata').length, totale: lista.length, collocazioni: collocazioni() };

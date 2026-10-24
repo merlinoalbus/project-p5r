@@ -15,6 +15,7 @@
 
 import { prepared, type AppDatabase } from '../db/dbService.js';
 import { registraCacheDiGioco } from './cacheDiGioco.js';
+import { analizzaPercorso, generePrimitivo, impostaImmutabile, risolvi } from '../../shared/percorsoGuida.js';
 
 const cache = new Map<string, unknown>();
 let finestre: ReadonlyMap<string, FinestraDungeon> | null = null;
@@ -43,6 +44,69 @@ export function datiGuida<T>(chiave: string): Congelato<T> | null {
   return valore;
 }
 
+// ---- Il blocco con le correzioni dell'utente sopra (L11 · B11) ----
+
+interface RigaCorrezione { percorso: string; valore_json: string }
+interface BloccoCorretto { dati: unknown; orfane: string[] }
+const cacheCorretti = new Map<string, BloccoCorretto>();
+
+/** Le correzioni di un blocco (`correzione_dati_guida`), nell'ordine dell'indirizzo; vuote se la tabella non c'è (uno schema di prima della 178). */
+export function correzioniDelBlocco(chiave: string): RigaCorrezione[] {
+  try {
+    return prepared('SELECT percorso, valore_json FROM correzione_dati_guida WHERE blocco = ? ORDER BY percorso').all(chiave) as RigaCorrezione[];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Applica a `base` le correzioni, ciascuna risolta sulla BASE (non sul risultato parziale: correggere il campo-selettore di un elemento
+ * non sposta le altre correzioni dello stesso elemento). Una correzione che non si risolve più o il cui valore non ha più il tipo della
+ * guida è «orfana»: si salta e si dichiara, non si cancella.
+ */
+function applicaCorrezioni(base: unknown, righe: ReadonlyArray<RigaCorrezione>): BloccoCorretto {
+  let corrente = base;
+  const orfane: string[] = [];
+  for (const r of righe) {
+    try {
+      const esito = risolvi(base, analizzaPercorso(r.percorso));
+      const valore = JSON.parse(r.valore_json) as unknown;
+      const tipoGuida = generePrimitivo(esito.valore);
+      const tipoValore = generePrimitivo(valore);
+      const compatibile = tipoValore === 'null' || tipoGuida === 'null' || tipoGuida === tipoValore;
+      if (!esito.trovato || !compatibile || tipoValore === 'oggetto' || tipoGuida === 'oggetto') { orfane.push(r.percorso); continue; }
+      corrente = impostaImmutabile(corrente, esito.puntatore, valore);
+    } catch {
+      orfane.push(r.percorso);
+    }
+  }
+  return { dati: congela(corrente), orfane };
+}
+
+function bloccoCorretto(chiave: string): BloccoCorretto {
+  const noto = cacheCorretti.get(chiave);
+  if (noto) return noto;
+  const base = datiGuida<unknown>(chiave);
+  const righe = base === null ? [] : correzioniDelBlocco(chiave);
+  const risultato: BloccoCorretto = righe.length === 0 ? { dati: base, orfane: [] } : applicaCorrezioni(base, righe);
+  cacheCorretti.set(chiave, risultato);
+  return risultato;
+}
+
+/**
+ * Il blocco della guida con le correzioni dell'utente (B11): è quello che le pagine mostrano. Senza correzioni restituisce LO STESSO oggetto
+ * di `datiGuida` (nessun cambio di comportamento dove l'utente non ha corretto niente). Congelato e condiviso come `datiGuida`; si svuota
+ * con la stessa invalidazione. Le migrazioni e chi cerca l'identità di un elemento (chiavi, riferimenti al catalogo) leggono `datiGuida`.
+ */
+export function datiGuidaCorretti<T>(chiave: string): Congelato<T> | null {
+  return bloccoCorretto(chiave).dati as Congelato<T> | null;
+}
+
+/** Gli indirizzi delle correzioni di un blocco che la guida di oggi non accoglie più (elemento sparito o valore di un altro tipo). */
+export function correzioniOrfane(chiave: string): string[] {
+  return bloccoCorretto(chiave).orfane;
+}
+
 /**
  * Un blocco della guida letto da un database qualunque (le migrazioni e le conversioni lavorano su una connessione loro, prima
  * che l'app la usi): null se la tabella o la chiave non ci sono o se il JSON è illeggibile. Senza cache: la usa chi gira una volta.
@@ -62,6 +126,7 @@ export function bloccoGuidaDi(db: AppDatabase, chiave: string): unknown {
 /** Da chiamare dopo una scrittura su `dati_guida`; la chiamano anche le sostituzioni dei dati di gioco (registro comune). */
 export const invalidaDatiGuida = registraCacheDiGioco(() => {
   cache.clear();
+  cacheCorretti.clear();
   finestre = null;
 });
 
