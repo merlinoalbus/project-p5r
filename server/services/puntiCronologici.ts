@@ -39,6 +39,29 @@ function ordineDi(e: EventoDiario): [number, number, number, number] {
   return [ordineGioco(e.data), e.fascia === 'sera' ? 1 : 0, e.ordineVoce, e.tipo === 'passaggio' ? 0 : 1];
 }
 
+/** Rifà le chiavi d'ordine delle righe del Confidente dalla posizione di adesso delle voci (una voce può essere stata spostata di giorno, fascia o posto). */
+function rinfrescaChiavi(p: number, chiave: string): void {
+  const righe = prepared('SELECT id, voce_uid, tipo, o_data, o_fascia, o_voce, o_sub FROM utente.punti_confidente_voce WHERE partita_id = ? AND confidente_chiave = ?')
+    .all(p, chiave) as Array<{ id: number; voce_uid: string; tipo: 'punti' | 'passaggio'; o_data: number; o_fascia: number; o_voce: number; o_sub: number }>;
+  for (const r of righe) {
+    const v = prepared('SELECT data, fascia, ordine FROM main.voce_giornata WHERE uid = ?').get(r.voce_uid) as { data: string; fascia: string; ordine: number } | undefined;
+    if (!v) continue;
+    const [d, f, o, s] = [ordineGioco(v.data), v.fascia === 'sera' ? 1 : 0, v.ordine, r.tipo === 'passaggio' ? 0 : 1];
+    if (d !== r.o_data || f !== r.o_fascia || o !== r.o_voce || s !== r.o_sub) prepared('UPDATE utente.punti_confidente_voce SET o_data = ?, o_fascia = ?, o_voce = ?, o_sub = ? WHERE id = ?').run(d, f, o, s, r.id);
+  }
+}
+
+/**
+ * La voce ha cambiato giorno, fascia o posto (R10-11f «cambiarne i campi»): le chiavi d'ordine dei suoi eventi si rifanno e i Confidenti toccati si
+ * ricalcolano dalla base nel nuovo ordine. Solo gli eventi della generazione corrente; senza eventi non fa niente. Va chiamata nella transazione.
+ */
+export function riallineaVoceNelRegistro(voceUid: string): void {
+  const righe = prepared(`SELECT DISTINCT v.partita_id, v.confidente_chiave FROM utente.punti_confidente_voce v
+    JOIN utente.punti_confidente_generazione g ON g.partita_id = v.partita_id AND g.confidente_chiave = v.confidente_chiave AND g.generazione = v.generazione WHERE v.voce_uid = ?`)
+    .all(voceUid) as Array<{ partita_id: number; confidente_chiave: string }>;
+  for (const r of righe) ricalcola(r.partita_id, r.confidente_chiave);
+}
+
 /** La generazione corrente del Confidente nella partita; se non c'è si apre adesso, con la base uguale ai valori di questo momento. */
 function generazioneCorrente(p: number, chiave: string): number {
   const g = prepared('SELECT generazione FROM utente.punti_confidente_generazione WHERE partita_id = ? AND confidente_chiave = ?').get(p, chiave) as { generazione: number } | undefined;
@@ -55,6 +78,7 @@ function generazioneCorrente(p: number, chiave: string): number {
  */
 export function applicaEventoDiario(partitaId: number, chiave: string, e: EventoDiario): ConfidentePartitaDto {
   const generazione = generazioneCorrente(partitaId, chiave);
+  rinfrescaChiavi(partitaId, chiave);
   const [d, f, v, s] = ordineDi(e);
   const successivi = (prepared(`SELECT COUNT(*) AS n FROM utente.punti_confidente_voce WHERE partita_id = ? AND confidente_chiave = ? AND generazione = ?
     AND (o_data, o_fascia, o_voce, o_sub) > (?, ?, ?, ?)`).get(partitaId, chiave, generazione, d, f, v, s) as { n: number }).n;
@@ -72,6 +96,7 @@ export function ricalcola(partitaId: number, chiave: string): ConfidentePartitaD
   const g = prepared('SELECT generazione, rango_base, punti_base, sbloccato_base FROM utente.punti_confidente_generazione WHERE partita_id = ? AND confidente_chiave = ?')
     .get(partitaId, chiave) as { generazione: number; rango_base: number; punti_base: number; sbloccato_base: number } | undefined;
   if (!g) return leggiConfidente(partitaId, chiave);
+  rinfrescaChiavi(partitaId, chiave);
   const righe = prepared(`SELECT tipo, parametri_json FROM utente.punti_confidente_voce WHERE partita_id = ? AND confidente_chiave = ? AND generazione = ?
     ORDER BY o_data, o_fascia, o_voce, o_sub, id`).all(partitaId, chiave, g.generazione) as Array<{ tipo: 'punti' | 'passaggio'; parametri_json: string }>;
   let rango = g.rango_base, punti = g.punti_base;

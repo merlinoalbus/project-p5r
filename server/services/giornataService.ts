@@ -34,7 +34,7 @@ import { leggiEffettiVoce, leggiEffettiVocePerMostrare, salvaEffettiVoce, inizia
 import { descriviEffettoVoce, eEffettoDiStato, normalizzaEffettiVoce, type EffettoLegacyVoce, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import { conCestino, type ViciniCestino } from './cestinoService.js';
 import { leggiRicevutaEffettiAzione } from './effettiAzioneService.js';
-import { confidentiAnnullatiAlVecchioModo, nuovaGenerazione, senzaEventiGestiti, togliEventiDellaVoce } from './puntiCronologici.js';
+import { confidentiAnnullatiAlVecchioModo, nuovaGenerazione, riallineaVoceNelRegistro, senzaEventiGestiti, togliEventiDellaVoce } from './puntiCronologici.js';
 import { disponibilitaAcquistoCorrente } from './negoziService.js';
 import type { NuovaRegistrazioneAcquisto } from '../../shared/acquisti.js';
 import type { PropostaPartitaDto } from '../../shared/propostePartita.js';
@@ -595,6 +595,8 @@ export function aggiornaVoce(uid: string, d: DatiVoceGiornata, partitaId?: numbe
     } else if (d.posizione !== undefined) {
       posiziona(r.data, fascia, uid, d.posizione);
     }
+    // R10-11f: se la voce cambia fascia o posto, l'ordine dei suoi eventi nel registro dei punti cambia e i Confidenti toccati si ricalcolano
+    riallineaVoceNelRegistro(uid);
   })();
   return vociDelGiorno(r.data, partitaId).find((v) => v.uid === uid)!;
 }
@@ -607,6 +609,7 @@ export function spostaVoce(uid: string, verso: -1 | 1, partitaId?: number): Azio
     compatta(r.data, r.fascia);
     const ora = (prepared('SELECT ordine FROM voce_giornata WHERE uid = ?').get(uid) as { ordine: number }).ordine;
     posiziona(r.data, fasciaDi(r), uid, ora + verso);
+    riallineaVoceNelRegistro(uid); // R10-11f: il nuovo posto cambia l'ordine dei suoi eventi nel registro dei punti
   })();
   return vociDelGiorno(r.data, partitaId);
 }
@@ -655,6 +658,8 @@ export function trasferisciVoci(t: TrasferisciVociGiornata, partitaId?: number):
     });
     for (const chiave of lasciate) { const [data, fascia] = chiave.split('|'); compatta(data, fascia); }
     compatta(t.giorno, t.fascia);
+    // R10-11f: le voci spostate hanno un nuovo giorno, fascia o posto: l'ordine dei loro eventi nel registro dei punti si rifà
+    if (t.modo === 'sposta') for (const uid of arrivate) riallineaVoceNelRegistro(uid);
   })();
   return { giorno: t.giorno, fascia: t.fascia, uid: arrivate, voci: vociDelGiorno(t.giorno, partitaId) };
 }
