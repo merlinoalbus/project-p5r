@@ -163,7 +163,7 @@ export function GuidaNelVisore({ mappa, partitaId, spilloSelezionato, spilliQui,
         {apri && (
           <div className="flex flex-col gap-1.5 pb-1 pl-12 text-[12px]">
             {p.descrizione && <p className="m-0 whitespace-pre-wrap text-text-secondary">{p.descrizione}</p>}
-            <DettagliPunto d={p.dettagli} contenuto={p.contenuto} />
+            <DettagliPunto d={p.dettagli} contenuto={p.contenuto} senzaAffinita={p.tipo === 'persona' && !!p.persona} />
             {descrittiva(p) && <p className="m-0 text-[11px] text-text-muted">Voce descrittiva: si legge, non si segna.</p>}
             {p.pin.length > 0 && (
               <ul className="m-0 flex list-none flex-col gap-1 p-0" aria-label={`Pin di ${p.nome}`}>

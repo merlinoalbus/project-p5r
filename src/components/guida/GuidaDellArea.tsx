@@ -393,7 +393,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
         {aperto && (
           <div className="flex flex-col gap-1.5 pl-5">
             {p.descrizione && <p className="m-0 whitespace-pre-wrap text-text-secondary">{p.descrizione}</p>}
-            <DettagliPunto d={p.dettagli} contenuto={p.contenuto} />
+            <DettagliPunto d={p.dettagli} contenuto={p.contenuto} senzaAffinita={p.tipo === 'persona' && !!p.persona} />
             <ContenutoDellaVoce key={p.chiave} voce={p.chiave} contenuto={p.contenuto ?? []} onCambiato={onRicarica} disabilitato={occupato} />
             {p.carattere && <p className="m-0 text-[11px] text-text-muted">{SPIEGAZIONE_CARATTERE[p.carattere]}</p>}
             {conPassi && <p className="m-0 text-[11px] text-text-muted">Risolto quando i suoi passi sono fatti: segnarlo li segna tutti, riaprirlo li riapre. I pin stanno sui passi.</p>}

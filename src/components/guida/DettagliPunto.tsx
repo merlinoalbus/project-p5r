@@ -12,8 +12,10 @@ const CHIAVI_AFFINITA = new Set(['deboleA', 'resisteA', 'debolezze', 'resistenze
 const comeElemento = (k: string, x: unknown): string => (CHIAVI_AFFINITA.has(k) && typeof x === 'string' ? x.split(',').map((p) => nomeCanonicoNelTesto(p.trim())).join(', ') : String(x));
 
 /** Le voci non vuote di `dettagli`, con la chiave resa leggibile. */
-export function DettagliPunto({ d, contenuto = [] }: { d: Record<string, unknown>; contenuto?: readonly ContenutoOggettoDto[] }) {
-  const voci = Object.entries(d).filter(([, v]) => v !== null && v !== '' && !(Array.isArray(v) && v.length === 0));
+export function DettagliPunto({ d, contenuto = [], senzaAffinita = false }: { d: Record<string, unknown>; contenuto?: readonly ContenutoOggettoDto[]; senzaAffinita?: boolean }) {
+  // R8-10/1: di una voce «Persona» con la Persona del compendio le debolezze e le resistenze si leggono dal compendio (riquadro «i»): la copia nel
+  // testo dei dettagli non si mostra, così correggere le affinità della Persona cambia ciò che si vede ovunque. Nei dati la copia non si tocca.
+  const voci = Object.entries(d).filter(([k, v]) => v !== null && v !== '' && !(Array.isArray(v) && v.length === 0) && !(senzaAffinita && CHIAVI_AFFINITA.has(k)));
   if (voci.length === 0 && contenuto.length === 0) return null;
   return (
     <dl className="dl-scheda m-0 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-[12px]">

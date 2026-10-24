@@ -13,6 +13,7 @@ import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import { AffinitaGriglia } from '../components/compendio/AffinitaGriglia';
+import { ModificaAffinita } from '../components/compendio/ModificaAffinita';
 import { DoveSiIncontra } from '../components/compendio/DoveSiIncontra';
 import { StatisticheBarre } from '../components/compendio/StatisticheBarre';
 import { ElementoChip } from '../components/compendio/ElementoChip';
@@ -248,7 +249,11 @@ export function PersonaDettaglioPage() {
           <div className="grid gap-4 xl:grid-cols-2 items-start">
           <div className="flex flex-col gap-4">
           <section className="card">
-            <h2 className="m-0 mb-3 text-[15px] font-semibold">Affinità</h2>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <h2 className="m-0 text-[15px] font-semibold">Affinità</h2>
+              {p.affinitaGuida && <span className="chip text-[11px]">corrette da te</span>}
+              <ModificaAffinita personaId={p.id} nome={p.nomeIt} affinita={p.affinita} affinitaGuida={p.affinitaGuida} onCambiato={ricarica} />
+            </div>
             <AffinitaGriglia affinita={p.affinita} />
           </section>
 

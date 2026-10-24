@@ -9,6 +9,7 @@ import type { AzionePercorsoDto, DatiVoceGiornata, ElenchiAzioneDto, EsitoRevisi
 import type { DoteNote } from '../../../shared/effettiAzione';
 import type { DisponibilitaConfidenteDto, DisponibilitaStrutturata } from '../../../shared/disponibilitaStrutturata';
 import type { GiornoModificabileDto, ModificaGiorno } from '../../../shared/giorno';
+import type { ModificaAffinitaPersona } from '../../../shared/affinitaPersona';
 
 /** I campi che il PUT accetta (tutti facoltativi) più le chiavi dei luoghi. */
 export type ModificaDisponibilitaStrutturata = Partial<Pick<DisponibilitaStrutturata, 'modo' | 'giorni' | 'fasce' | 'eccezioni' | 'dal' | 'motivoSenzaLuogo'>> & { luoghi?: string[] };
@@ -60,6 +61,11 @@ export const getRegoleFusione = (): Promise<RegoleFusioneDto> => apiGet('/compen
 export const getPersone = (f: FiltriPersona = {}): Promise<PersonaRiassuntoDto[]> => apiGet(`/compendio/persona${queryString(f)}`);
 /** Scheda completa di una Persona per id. */
 export const getPersona = (id: number): Promise<PersonaDettaglioDto> => apiGet(`/compendio/persona/${id}`);
+/** R8-10/1: corregge la griglia delle 10 affinità di una Persona (vale ovunque) e «Ripristina» le rimette come le dà la guida. */
+export const salvaAffinitaPersona = (id: number, dati: ModificaAffinitaPersona): Promise<PersonaDettaglioDto> =>
+  apiPut(`/compendio/persona/${id}/affinita`, dati, { maxRetries: 0 });
+export const ripristinaAffinitaPersona = (id: number): Promise<PersonaDettaglioDto> =>
+  apiPost(`/compendio/persona/${id}/affinita/ripristina`, {}, { maxRetries: 0 });
 /** Elenco riassuntivo delle skill, filtrabile per testo (`q`) ed elemento. */
 export const getSkills = (f: { q?: string; elemento?: string } = {}): Promise<SkillRiassuntoDto[]> => apiGet(`/compendio/skill${queryString(f)}`);
 /** Scheda completa di una skill per id. */
