@@ -452,15 +452,23 @@ function etichettaLegame(tipo: TipoLegame, chiave: string): string {
 const legamiDi = (nota: string, tipo: TipoLegame): string[] => prepared('SELECT chiave FROM nota_storica_legame WHERE nota_chiave = ? AND tipo = ? ORDER BY chiave').pluck().all(nota, tipo) as string[];
 const CAMPI_LEGAMI = [['articoli', 'articolo'], ['oggetti', 'catalogo']] as const;
 
-/** La fotografia tiene le CHIAVI degli elementi. Una scritta con le etichette, prima di questa forma, si porta alle chiavi (le etichette ambigue restano com'erano). */
-function normalizzaLegami(guida: Valori): Valori {
+/**
+ * La fotografia tiene le CHIAVI degli elementi. Una scritta con le etichette, prima di questa forma, si porta alle chiavi: prima dai legami che la nota ha adesso
+ * (così un'etichetta ambigua si scioglie con quello che è già legato), poi dalla dicitura «non esiste più», poi dall'elenco di tutti gli elementi.
+ * Un'etichetta che non si scioglie resta com'era: il ripristino la rifiuta (`verificaRipristino`).
+ */
+function normalizzaLegami(guida: Valori, nota: string): Valori {
   const out: Valori = { ...guida };
   for (const [campo, tipo] of CAMPI_LEGAMI) {
     const elenco = guida[campo];
     if (!Array.isArray(elenco)) continue;
     let mappa: Map<string, string | null> | null = null;
+    let presenti: Map<string, string> | null = null;
     out[campo] = (elenco as string[]).map((e) => {
       if (typeof e !== 'string' || legameEsiste(tipo, e)) return e;
+      presenti ??= new Map(legamiDi(nota, tipo).map((k) => [etichettaLegame(tipo, k), k] as const));
+      const adesso = presenti.get(e);
+      if (adesso !== undefined) return adesso;
       if (e.endsWith(SUFFISSO_SPARITO)) return e.slice(0, -SUFFISSO_SPARITO.length);
       mappa ??= mappaLegami(tipo);
       return mappa.get(e) ?? e;
@@ -468,7 +476,7 @@ function normalizzaLegami(guida: Valori): Valori {
   }
   return out;
 }
-const semeLegami = (nota: string): Valori | null => { const s = semeDi(FOTO_NOTE, 'nota_chiave', nota); return s ? normalizzaLegami(s) : null; };
+const semeLegami = (nota: string): Valori | null => { const s = semeDi(FOTO_NOTE, 'nota_chiave', nota); return s ? normalizzaLegami(s, nota) : null; };
 
 /** Gli elementi da scegliere: il valore è la CHIAVE, il nome serve a mostrarlo. Più quelli indicati (già legati o nella guida) anche se spariti. */
 function opzioniLegami(tipo: TipoLegame, inUso: string[]): Array<{ chiave: string; nome: string }> {
@@ -521,6 +529,19 @@ const notaStoricaLegami: DefRiga = {
         if (!attuali.includes(k) && !legameEsiste(tipo, k)) throw invalido(campo, 'Una voce scelta non è nell’elenco: scegli dai suggerimenti.');
         if (visti.has(k)) throw invalido(campo, `«${etichettaLegame(tipo, k)}» compare due volte.`);
         visti.add(k);
+      }
+    }
+  },
+  // la fotografia rimette chiavi: ognuna deve essere un elemento che esiste o un legame che la nota ha già (una voce non sciolta resterebbe un'etichetta scritta come chiave)
+  verificaRipristino: (chiave, guida) => {
+    for (const [campo, tipo] of CAMPI_LEGAMI) {
+      const elenco = guida[campo];
+      if (!Array.isArray(elenco)) continue;
+      const attuali = legamiDi(chiave, tipo);
+      for (const k of elenco) {
+        if (typeof k !== 'string' || (!legameEsiste(tipo, k) && !attuali.includes(k))) {
+          throw httpErrors.conflict('legame-originale-mancante', `Una voce della guida («${String(k)}») non corrisponde più a nessun elemento: non si può rimettere.`);
+        }
       }
     }
   },

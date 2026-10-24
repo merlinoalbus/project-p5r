@@ -48,7 +48,7 @@ export interface DefRiga {
   /** Prima di rimettere la fotografia (lancia 409 se un riferimento della guida non esiste più). */
   verificaRipristino?(chiave: string, guida: Valori): void;
   /** Porta nella forma di oggi una fotografia scritta in una forma precedente (letta da `ripristinaService` ogni volta che apre la fotografia). */
-  normalizzaGuida?(guida: Valori): Valori;
+  normalizzaGuida?(guida: Valori, chiave: string): Valori;
 }
 
 const bool = (v: ValoreCampoCorrezione | undefined): number => (v === true ? 1 : 0);
