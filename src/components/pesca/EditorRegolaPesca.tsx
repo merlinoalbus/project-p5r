@@ -1,33 +1,86 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { DefinizioneRegolaPesca, RegolaPescaDto, ViaRegolaPesca } from '../../../shared/pesca';
 import { salvaRegolaPesca } from '../../services/api/pesca';
 import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
-import { useBozzaSporca } from '../../utils/bozzeSporche';
+import { AvvisoBozzaRipristinata } from '../shared/AvvisoBozzaRipristinata';
+import { leggiBozzaPersistente, scartaBozzaPersistente, useBozzaPersistente } from '../../utils/bozzeSporche';
 
 const righe = (s: string) => s.split('\n').map(v => v.trim()).filter(Boolean);
 const urlValido = (s: string) => { try { return ['https:', 'http:'].includes(new URL(s).protocol); } catch { return false; } };
 type ViaBozza = Omit<ViaRegolaPesca, 'fonti'> & { fontiTesto: string };
-const inBozza = (v: ViaRegolaPesca): ViaBozza => { const { fonti, ...resto } = v; return { ...resto, fontiTesto: fonti.join('\n') }; };
+// i campi in un ordine fisso (lo stesso di `viaValida`): il confronto fra bozza e partenza è sul JSON e una copia ritrovata non deve risultare diversa solo per l'ordine
+const inBozza = (v: ViaRegolaPesca): ViaBozza => ({
+  id: v.id, specie: v.specie, faseTerzoSemestre: v.faseTerzoSemestre, fascia: v.fascia, meteo: v.meteo, guardianoPrecedente: v.guardianoPrecedente,
+  rangoComparsa: v.rangoComparsa, rangoCattura: v.rangoCattura, tentativo: v.tentativo, seiCatture: v.seiCatture, fontiTesto: v.fonti.join('\n'), nota: v.nota,
+});
+
+/** I campi del modulo come si scrivono: i valori di partenza di una bozza e quel che si tiene in sessionStorage. */
+interface StatoRegola { nome: string; fonti: string; numeri: { giorno: string; sera: string; esca: string; base: string; bonus: string }; vie: ViaBozza[] }
+const bozzaDa = (regola: RegolaPescaDto): StatoRegola => ({
+  nome: regola.nome, fonti: regola.dati?.fonti.join('\n') ?? '',
+  numeri: {
+    giorno: String(regola.dati?.quote.giorno ?? ''), sera: String(regola.dati?.quote.sera ?? ''),
+    esca: String(regola.dati?.costoEscaPunti ?? ''), base: String(regola.dati?.beneficioPerizia.puntiBase ?? ''),
+    bonus: String(regola.dati?.beneficioPerizia.bonusFortuna ?? ''),
+  },
+  vie: regola.dati?.vie.map(inBozza) ?? [],
+});
+const unoDi = <T,>(x: unknown, ammessi: readonly T[]): x is T => (ammessi as readonly unknown[]).includes(x);
+const rangoDi = (x: unknown): boolean => typeof x === 'number' && Number.isInteger(x) && x >= 1 && x <= 5;
+/** Una via ritrovata: ogni campo ha il tipo e i valori ammessi (come le scelte del modulo), altrimenti null. */
+function viaValida(x: unknown): ViaBozza | null {
+  if (typeof x !== 'object' || x === null) return null;
+  const v = x as Record<string, unknown>;
+  if (typeof v.id !== 'string' || typeof v.nota !== 'string' || typeof v.fontiTesto !== 'string' || typeof v.faseTerzoSemestre !== 'boolean' || typeof v.seiCatture !== 'boolean') return null;
+  if (!unoDi(v.specie, ['guardiano', 'boss'] as const) || !unoDi(v.fascia, ['giorno', 'sera'] as const) || !unoDi(v.meteo, ['normale', 'pioggia-neve'] as const)) return null;
+  if (!unoDi(v.guardianoPrecedente, ['si', 'no', 'indifferente'] as const) || !unoDi(v.tentativo, ['primo', 'settimo'] as const)) return null;
+  if (!rangoDi(v.rangoCattura) || !(v.rangoComparsa === null || rangoDi(v.rangoComparsa))) return null;
+  return { id: v.id, specie: v.specie, faseTerzoSemestre: v.faseTerzoSemestre, fascia: v.fascia, meteo: v.meteo, guardianoPrecedente: v.guardianoPrecedente,
+    rangoComparsa: v.rangoComparsa as ViaBozza['rangoComparsa'], rangoCattura: v.rangoCattura as ViaBozza['rangoCattura'], tentativo: v.tentativo, seiCatture: v.seiCatture, fontiTesto: v.fontiTesto, nota: v.nota };
+}
+/** Una bozza ritrovata vale solo con forma e tipi giusti (nome, fonti, i cinque numeri come testo, al massimo 100 vie valide). */
+function validaBozzaRegola(dati: unknown): StatoRegola | null {
+  if (typeof dati !== 'object' || dati === null) return null;
+  const d = dati as Record<string, unknown>;
+  const n = d.numeri as Record<string, unknown> | null;
+  if (typeof d.nome !== 'string' || typeof d.fonti !== 'string' || typeof n !== 'object' || n === null || !Array.isArray(d.vie) || d.vie.length > 100) return null;
+  if (typeof n.giorno !== 'string' || typeof n.sera !== 'string' || typeof n.esca !== 'string' || typeof n.base !== 'string' || typeof n.bonus !== 'string') return null;
+  const vie = d.vie.map(viaValida);
+  if (vie.some((v) => v === null)) return null;
+  return { nome: d.nome, fonti: d.fonti, numeri: { giorno: n.giorno, sera: n.sera, esca: n.esca, base: n.base, bonus: n.bonus }, vie: vie as ViaBozza[] };
+}
 
 /** Modifica la fonte canonica della guida; nessuna attribuzione alla partita avviene salvando. */
 export function EditorRegolaPesca({ regola, onChiudi, onSalvata }: { regola: RegolaPescaDto; onChiudi: () => void; onSalvata: () => void | Promise<void> }) {
   const [fotografia] = useState(() => ({ chiave: regola.chiave, revisione: regola.revisione }));
-  const [nome, setNome] = useState(regola.nome);
-  const [fonti, setFonti] = useState(regola.dati?.fonti.join('\n') ?? '');
-  const [numeri, setNumeri] = useState(() => ({
-    giorno: String(regola.dati?.quote.giorno ?? ''), sera: String(regola.dati?.quote.sera ?? ''),
-    esca: String(regola.dati?.costoEscaPunti ?? ''), base: String(regola.dati?.beneficioPerizia.puntiBase ?? ''),
-    bonus: String(regola.dati?.beneficioPerizia.bonusFortuna ?? ''),
-  }));
-  const [vie, setVie] = useState<ViaBozza[]>(() => regola.dati?.vie.map(inBozza) ?? []);
+  const chiaveBozza = `regola-pesca:${regola.chiave}`;
+  // i valori della regola e, se c'è, la copia ritrovata in sessionStorage (pagina ricaricata): vale solo se la revisione della regola è la stessa di allora
+  const [avvio] = useState(() => {
+    const partenza = bozzaDa(regola);
+    const salvata = leggiBozzaPersistente(chiaveBozza, { chiave: regola.chiave, revisione: regola.revisione }, validaBozzaRegola);
+    return { partenza, corrente: salvata ?? partenza, ripristinata: salvata !== null };
+  });
+  const [ripristinata, setRipristinata] = useState(avvio.ripristinata);
+  const [nome, setNome] = useState(avvio.corrente.nome);
+  const [fonti, setFonti] = useState(avvio.corrente.fonti);
+  const [numeri, setNumeri] = useState(avvio.corrente.numeri);
+  const [vie, setVie] = useState<ViaBozza[]>(avvio.corrente.vie);
   const [occupato, setOccupato] = useState(false), [salvata, setSalvata] = useState(false), [errore, setErrore] = useState<string | null>(null);
   const [conferma, setConferma] = useState(false);
   const blocco = useRef(false), viva = useRef(true);
-  // la bozza com'era all'apertura è il metro per capire se c'è qualcosa di non salvato (per «Aggiorna» e la chiusura della scheda del browser)
-  const statoBozza = JSON.stringify({ nome, fonti, numeri, vie });
-  const [statoIniziale] = useState(statoBozza);
-  useBozzaSporca('editor-regola-pesca', 'regola della pesca', !salvata && statoBozza !== statoIniziale);
+  // la bozza com'era all'apertura (i valori della regola, non la copia ritrovata) è il metro per capire se c'è qualcosa di non salvato (per «Aggiorna» e la chiusura della scheda del browser)
+  const statoCorrente = useMemo<StatoRegola>(() => ({ nome, fonti, numeri, vie }), [nome, fonti, numeri, vie]);
+  const sporca = !salvata && JSON.stringify(statoCorrente) !== JSON.stringify(avvio.partenza);
+  useBozzaPersistente(chiaveBozza, 'regola della pesca', statoCorrente, { chiave: fotografia.chiave, revisione: fotografia.revisione }, { sporca });
+  /** Chiude scartando la bozza (anche la copia in sessionStorage). */
+  const chiudi = () => { scartaBozzaPersistente(chiaveBozza); onChiudi(); };
+  /** «Scarta» sulla bozza ripristinata: i campi tornano com'è la regola e la copia si cancella (la conferma resta da dare). */
+  const scarta = () => {
+    const p = avvio.partenza;
+    scartaBozzaPersistente(chiaveBozza);
+    setNome(p.nome); setFonti(p.fonti); setNumeri(p.numeri); setVie(p.vie); setConferma(false); setRipristinata(false);
+  };
   useLayoutEffect(() => { viva.current = true; return () => { viva.current = false; }; }, []);
   const cambia = () => { setConferma(false); setErrore(null); };
   const modificaVia = (i: number, patch: Partial<ViaBozza>) => { cambia(); setVie(v => v.map((x, j) => j === i ? { ...x, ...patch } : x)); };
@@ -54,18 +107,20 @@ export function EditorRegolaPesca({ regola, onChiudi, onSalvata }: { regola: Reg
     try {
       await salvaRegolaPesca(fotografia.chiave, { nome: nome.trim(), dati, revisioneAttesa: fotografia.revisione });
       acquisita = true;
+      scartaBozzaPersistente(chiaveBozza);
       if (!viva.current) return;
       setSalvata(true); await onSalvata();
     } catch (e) {
       if (viva.current) setErrore(`${acquisita ? 'Regola salvata, ma aggiornamento della vista non riuscito. ' : ''}${e instanceof Error ? e.message : 'Salvataggio non riuscito.'}`);
     } finally { blocco.current = false; if (viva.current) setOccupato(false); }
   };
-  return <Modal aperta larga titolo="Regola della pesca" onChiudi={() => { if (!occupato) onChiudi(); }} azioni={<>
-    <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={onChiudi}>{salvata ? 'Chiudi' : 'Annulla'}</button>
+  return <Modal aperta larga titolo="Regola della pesca" onChiudi={() => { if (!occupato) chiudi(); }} azioni={<>
+    <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={chiudi}>{salvata ? 'Chiudi' : 'Annulla'}</button>
     <button type="button" className="btn btn-primary touch" disabled={disabilitato || !valido || !conferma} onClick={() => void salva()}>Salva la regola</button>
   </>}>
     <div className="flex min-w-0 flex-col gap-3 text-sm">
       <p className="m-0">Questa è la fonte comune delle due attività di Ichigaya. Il salvataggio aggiorna la guida. Le visite già registrate conservano la fotografia dei costi e del beneficio applicabili alla visita; le loro osservazioni rimangono conservate. Ogni attribuzione alla partita richiede una proposta e una decisione esplicita.</p>
+      {ripristinata && sporca && <AvvisoBozzaRipristinata onScarta={scarta} />}
       {regola.motivi.map((m, i) => <p key={i} role="alert" className="m-0 text-warning">{m}</p>)}
       {fonteCambiata && !salvata && <p role="alert" className="m-0 text-warning">La fonte è cambiata mentre la bozza era aperta. Il salvataggio è bloccato; la bozza resta visibile con la sua revisione originale. Annulla e riapri la regola per leggere i dati aggiornati.</p>}
       <fieldset disabled={disabilitato} className="m-0 min-w-0 space-y-3 border-0 p-0">

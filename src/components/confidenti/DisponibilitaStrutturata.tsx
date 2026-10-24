@@ -125,7 +125,9 @@ function Corpo({ dati, tutti, chiave, onChiudi, onSalvato }: { dati: Disponibili
   const partenza = dati.struttura;
   const chiaveBozza = `disponibilita:${chiave}`;
   const luoghiDiPartenza = dati.luoghi.map((l) => l.chiave);
-  const inizio: StatoDisponibilita = { modo: partenza.modo, giorni: partenza.giorni, fasce: partenza.fasce, eccezioni: partenza.eccezioni, dal: partenza.dal ?? '', motivo: partenza.motivoSenzaLuogo, luoghi: luoghiDiPartenza };
+  const inizio: StatoDisponibilita = { modo: partenza.modo, giorni: partenza.giorni, fasce: partenza.fasce,
+    // le eccezioni con i campi nello stesso ordine di quelle ritrovate (`eccezioneValida`): il confronto è sul JSON e non deve vedere una differenza che non c'è
+    eccezioni: partenza.eccezioni.map((e) => eccezioneValida(e) ?? e), dal: partenza.dal ?? '', motivo: partenza.motivoSenzaLuogo, luoghi: luoghiDiPartenza };
   // con una copia ritrovata in sessionStorage (pagina ricaricata) i campi ripartono da lì, ma solo se la disponibilità è ancora com'era quando fu salvata
   const [avvio] = useState(() => leggiBozzaPersistente(chiaveBozza, inizio, validaDisponibilita));
   const [ripristinata, setRipristinata] = useState(avvio !== null);
@@ -139,7 +141,7 @@ function Corpo({ dati, tutti, chiave, onChiudi, onSalvato }: { dati: Disponibili
   const [occupato, setOccupato] = useState(false);
   const nomeLuogo = (k: string) => dati.luoghi.find((l) => l.chiave === k)?.nome ?? tutti.find((l) => l.chiave === k)?.nome ?? k;
   const dalValido = dal === '' || /^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(dal);
-  const sporca = modo !== partenza.modo || !uguali(giorni, partenza.giorni) || !uguali(fasce, partenza.fasce) || !uguali(eccezioni, partenza.eccezioni)
+  const sporca = modo !== partenza.modo || !uguali(giorni, partenza.giorni) || !uguali(fasce, partenza.fasce) || !uguali(eccezioni, inizio.eccezioni)
     || dal !== (partenza.dal ?? '') || motivo !== partenza.motivoSenzaLuogo || !uguali(luoghi, dati.luoghi.map((l) => l.chiave));
   const stato = useMemo<StatoDisponibilita>(() => ({ modo, giorni, fasce, eccezioni, dal, motivo, luoghi }), [modo, giorni, fasce, eccezioni, dal, motivo, luoghi]);
   useBozzaPersistente(chiaveBozza, 'la disponibilità del Confidente', stato, inizio, { sporca });
