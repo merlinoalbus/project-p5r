@@ -2,10 +2,11 @@
 // Maniglia — il pulsante ⠿ per riordinare un elenco trascinando (o con le frecce su/giù), con `useRiordino`
 // ============================================================
 
-import type { Riordino } from '../../hooks/useRiordino';
+import type { Riordino, RiordinoCollegato } from '../../hooks/useRiordino';
 
-/** La maniglia: un pulsante vero (il focus ci arriva, le frecce spostano), largo quanto un dito; ferma, dice perché. */
-export function Maniglia({ etichetta, id, i, riordino }: { etichetta: string; id: string; i: number; riordino: Riordino }) {
+/** La maniglia: un pulsante vero (il focus ci arriva, le frecce spostano), largo quanto un dito; ferma, dice perché.
+ *  Con `useRiordinoCollegato` (più elenchi) il posto lo ricava il hook dall'id: `i` si può omettere. */
+export function Maniglia({ etichetta, id, i = 0, riordino }: { etichetta: string; id: string; i?: number; riordino: Riordino | RiordinoCollegato }) {
   const bloccato = riordino.blocco !== null;
   return (
     <button type="button" ref={riordino.rifManiglia(id)} {...riordino.maniglia(id, i)} aria-label={etichetta} aria-keyshortcuts="ArrowUp ArrowDown" aria-disabled={bloccato || undefined}
