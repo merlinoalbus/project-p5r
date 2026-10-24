@@ -47,28 +47,28 @@ export function CompendioPersonale({ partitaId }: Props) {
 
   return (
     <PageState isLoading={tutte.caricamento || registrate.caricamento} error={tutte.errore ?? registrate.errore} onRetry={() => { void tutte.ricarica(); void registrate.ricarica(); }}>
-      <div className="flex flex-wrap items-center gap-3 mb-3">
-        <div className="kpi-tile">
+      <div className="min-w-0 max-w-full flex flex-wrap items-center gap-3 mb-3">
+        <div className="kpi-tile shrink-0">
           <span className="kpi-label kpi-label--segno"><IconaSegno chiave="completati" />Completamento</span>
           <span className="kpi-value">{totale ? Math.round((fatte / totale) * 100) : 0}%</span>
           <span className="text-[12px] text-text-muted">{fatte} di {totale}</span>
         </div>
-        <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca Persona…" />
-        <button type="button" className={`chip chip--icona touch ${soloMancanti ? 'chip--attivo' : ''}`} onClick={() => setSoloMancanti((v) => !v)} aria-pressed={soloMancanti}><IconaAzione chiave="obiettivo" dimensione={14} />Solo mancanti</button>
+        <div className="flex-1 min-w-[min(100%,180px)] flex"><CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca Persona…" /></div>
+        <button type="button" className={`chip chip--icona touch shrink-0 ${soloMancanti ? 'chip--attivo' : ''}`} onClick={() => setSoloMancanti((v) => !v)} aria-pressed={soloMancanti}><IconaAzione chiave="obiettivo" dimensione={14} />Solo mancanti</button>
       </div>
-      <ul className="m-0 p-0 list-none card py-0 divide-y divide-border-light">
+      <ul className="m-0 p-0 list-none card py-0 divide-y divide-border-light min-w-0 max-w-full overflow-hidden">
         {lista.map((p) => {
           const r = setRegistrate.get(p.id);
           return (
-            <li key={p.id} className="flex items-center gap-3 py-1">
-              <label className="touch flex items-center justify-center cursor-pointer">
+            <li key={p.id} className="flex flex-wrap items-center gap-x-3 gap-y-0 py-1 min-w-0">
+              <label className="touch flex items-center justify-center cursor-pointer shrink-0">
                 <input type="checkbox" className="w-6 h-6" checked={!!r} disabled={occupato === p.id} onChange={(e) => void cambia(p.id, e.target.checked)} aria-label={`${p.nomeIt} registrata`} />
               </label>
-              <span className="w-9 text-right text-[12px] text-text-muted">Liv. {p.livello}</span>
-              <Link to={`/compendio/persona/${p.id}`} className="touch flex items-center font-semibold no-underline text-text hover:text-primary flex-1">{p.nomeIt}{p.nomeIt !== p.nome && <span className="text-[12px] font-normal text-text-muted"> {p.nome}</span>}</Link>
-              <span className="chip">{p.arcanaNome}</span>
+              <span className="w-9 shrink-0 text-right text-[12px] text-text-muted">Liv. {p.livello}</span>
+              <Link to={`/compendio/persona/${p.id}`} className="touch flex items-center font-semibold no-underline text-text hover:text-primary flex-1 basis-[10rem] min-w-0 break-words">{p.nomeIt}{p.nomeIt !== p.nome && <span className="text-[12px] font-normal text-text-muted"> {p.nome}</span>}</Link>
+              <span className="chip shrink-0">{p.arcanaNome}</span>
               {r?.livelloRegistrato !== null && r?.livelloRegistrato !== undefined && (
-                <span className="text-[12px] text-text-secondary" title={`Istantanea registrata: livello ${r.livelloRegistrato}${r.skill.length ? ` · skill: ${r.skill.map((s) => s.nomeIt).join(', ')}` : ''}${r.tratto ? ` · tratto ${r.tratto.nomeIt}` : ''}${r.carica ? ' · carica' : ''}`}>
+                <span className="text-[12px] text-text-secondary min-w-0 max-w-full break-words" title={`Istantanea registrata: livello ${r.livelloRegistrato}${r.skill.length ? ` · skill: ${r.skill.map((s) => s.nomeIt).join(', ')}` : ''}${r.tratto ? ` · tratto ${r.tratto.nomeIt}` : ''}${r.carica ? ' · carica' : ''}`}>
                   reg. liv. {r.livelloRegistrato}{(['forza', 'magia', 'resistenza', 'agilita', 'fortuna'] as const).some((k) => r.bonus[k] !== 0) && ` · bonus ${(['forza', 'magia', 'resistenza', 'agilita', 'fortuna'] as const).filter((k) => r.bonus[k] !== 0).map((k) => `${k.slice(0, 2).toUpperCase()} ${r.bonus[k] > 0 ? '+' : ''}${r.bonus[k]}`).join(' ')}`}{r.skill.length > 0 && ` · ${r.skill.length} skill`}
                 </span>
               )}
