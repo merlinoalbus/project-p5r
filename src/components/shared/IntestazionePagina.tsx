@@ -65,7 +65,7 @@ export function IntestazionePagina({ titolo, sottotitolo, azioni, illustrazione,
       ) : (
         <button type="button" className="btn btn-ghost btn-sm self-start -ml-2" onClick={indietro.onClick}><IconChevronLeft size={16} /> {indietro.etichetta}</button>
       ))}
-      <div className={`flex items-end gap-4 ${azioniInRiga && azioniAccanto ? 'flex-nowrap max-md:items-center max-md:gap-2 max-md:overflow-x-auto max-md:[scrollbar-width:none]' : 'flex-wrap'}`}>
+      <div className={`flex items-end gap-4 ${azioniInRiga && azioniAccanto ? 'flex-nowrap max-md:items-center max-md:gap-2 max-md:h-11 max-md:overflow-x-automax-md:[scrollbar-width:none]' : 'flex-wrap'}`}>
         <div className={`min-w-0 flex flex-col gap-2 ${azioniInRiga ? (azioniAccanto ? 'shrink-0' : 'md:shrink-0') : 'flex-1'}`}>
           <h1 className="titolo-tasselli m-0">{tasselliTitolo(titolo)}</h1>
           {sottotitolo && <p className="m-0 text-[13px] text-text-secondary max-w-[78ch]">{sottotitolo}</p>}
