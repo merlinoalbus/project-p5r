@@ -203,10 +203,13 @@ const skill: DefRiga = {
     for (const [effetto, riga] of toccate) if (!ricordate.has(effetto)) ricordate.set(effetto, riga);
     if (ricordate.size > 0) ctx.traccia[CHIAVE_TRACCIA] = [...ricordate].map(([k, r]) => JSON.stringify({ k, r }));
     if (!ctx.ripristino) return;
-    // ripristino: solo se l'effetto è tornato quello di prima con la sua resa, si rimette `traduzione` com'era (un ripristino parziale lascia la traccia)
+    // ripristino: solo se l'effetto è tornato quello della guida si rimette `traduzione` com'era, SEMPRE con tutte le righe ricordate (anche se il testo della guida
+    // non è mai stato toccato: la sua riga attuale è proprio quella di partenza); con l'effetto ancora diverso (ripristino parziale) la traccia resta
     const effetto = rigaSkill(chiave).effetto;
-    if (!ricordate.has(effetto)) return;
-    if ((ricordate.get(effetto)?.testo ?? null) !== (leggiRigaTraduzione(effetto)?.testo ?? null)) return;
+    const grezzo = prepared('SELECT seed_json FROM skill WHERE id = ?').pluck().get(chiave) as string | null | undefined;
+    let effettoGuida: unknown;
+    try { effettoGuida = grezzo ? (JSON.parse(grezzo) as Valori).effetto : undefined; } catch { effettoGuida = undefined; }
+    if (typeof effettoGuida === 'string' && effettoGuida !== effetto) return;
     rimettiRighe(ricordate);
     ctx.traccia[CHIAVE_TRACCIA] = []; // non `delete`: la fotografia conserva la traccia vecchia se la chiave manca
   },
