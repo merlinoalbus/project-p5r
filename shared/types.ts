@@ -1425,7 +1425,7 @@ export interface ElenchiEffettiVoceDto {
   cruciverba: Array<{ data: string; indizio: string }>;
   /** Inviti dei Confidenti: `chiave` è «confidente/MM-GG». */
   inviti: Array<{ chiave: string; confidente: string; confidenteNome: string; data: string | null; nota: string }>;
-  persone: Array<{ id: number; nome: string; arcana: string; livello: number }>;
+  persone: Array<{ id: number; nome: string; nomeIt: string; arcana: string; livello: number }>;
 }
 
 /** I campi di una voce della giornata che si scrivono (creandola o modificandola): tutti, dal testo agli effetti della spunta,
