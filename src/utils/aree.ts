@@ -16,6 +16,18 @@ export function erroreImmagine(file: File): string | null {
   return null;
 }
 
+/** Il Palazzo (chiave del dungeon) a cui appartiene la mappa, risalendo i genitori fino alla radice; null se la radice non è un Palazzo (i Memento non lo sono) o senza albero. */
+function palazzoDellaMappa(chiave: string | undefined, albero?: ReadonlyArray<{ chiave: string; genitore: string | null; radiceDi: { tipo: string; chiave: string } | null }>): string | null {
+  if (!chiave || !albero) return null;
+  const perChiave = new Map(albero.map((m) => [m.chiave, m]));
+  let corrente = perChiave.get(chiave);
+  for (let passi = 0; corrente && passi < 50; passi++) {
+    if (corrente.genitore === null) return corrente.radiceDi?.tipo === 'dungeon' && corrente.radiceDi.chiave !== 'mementos' ? corrente.radiceDi.chiave : null;
+    corrente = perChiave.get(corrente.genitore);
+  }
+  return null;
+}
+
 /** Una mappa del mondo che sta in una pagina della città: Tokyo, un quartiere o una planimetria di un'Area della città o di un
  *  quartiere (la sua casa la calcola il server: `/guida/citta…`). Nell'editor non si creano mappe sciolte dentro di lei (R2-27). */
 export function eMappaDelMondo(mappa: { casa: string }): boolean {
@@ -32,10 +44,13 @@ export function haCasaPropria(mappa: { casa: string }): boolean {
  *  quartiere dell'Area (con «Aggiungi area», e da lì l'Area con «Aggiungi planimetria»); per un'Area della città, che un quartiere
  *  non ce l'ha, la sua pagina («Aggiungi planimetria»); per Tokyo la città, da cui si sceglie il quartiere; per un quartiere la sua
  *  pagina. Da L11 B5 anche per i Palazzi (la scheda del Palazzo). Null altrove (la radice dei Memento). */
-export function paginaPerAggiungere(mappa: { casa: string; tipo: string; area?: { casa: string; contenitore: { tipo: string; chiave: string } } | null }): { href: string; testo: string } | null {
+export function paginaPerAggiungere(mappa: { chiave?: string; casa: string; tipo: string; area?: { casa: string; contenitore: { tipo: string; chiave: string } } | null }, albero?: ReadonlyArray<{ chiave: string; genitore: string | null; radiceDi: { tipo: string; chiave: string } | null }>): { href: string; testo: string } | null {
   // L11 B5 (R11-14/1): in un Palazzo «Nuova mappa» il server la rifiuta sempre (409 `usa-aggiungi-area`): come nel mondo si aggiunge dalla
   // scheda del Palazzo (area e planimetria), e il collegamento prende il posto del pulsante. Fuori dal mondo e dai Palazzi (la radice dei Memento) null.
-  const scheda = /^\/guida\/dungeon\/[^/?#]+/.exec(mappa.casa);
+  // Il criterio è il TIPO (la radice dell'albero della mappa è un Palazzo), non il prefisso di `casa`: una planimetria di Palazzo senza Area ha per
+  // casa il visore, ma è sempre di un Palazzo. Senza l'albero (chi chiama non lo ha) si ripiega sulla casa.
+  const palazzo = palazzoDellaMappa(mappa.chiave, albero);
+  const scheda = palazzo ? { 0: `/guida/dungeon/${encodeURIComponent(palazzo)}` } : /^\/guida\/dungeon\/[^/?#]+/.exec(mappa.casa);
   if (scheda) return { href: scheda[0], testo: 'Aggiungi area / planimetria dalla scheda del Palazzo' };
   if (!eMappaDelMondo(mappa)) return null;
   const area = mappa.area;

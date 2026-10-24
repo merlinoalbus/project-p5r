@@ -270,7 +270,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
                   // FUN2-8: il messaggio del server resta scritto, con la strada giusta (un avviso che sparisce non bastava)
                   if (!isApiError(err, 'usa-aggiungi-area')) throw err;
                   const genitore = albero.dati?.find((m) => m.chiave === d.genitore);
-                  setAvvisoMondo({ messaggio: err.message, aggiunta: genitore ? paginaPerAggiungere(genitore) : null });
+                  setAvvisoMondo({ messaggio: err.message, aggiunta: genitore ? paginaPerAggiungere(genitore, albero.dati ?? []) : null });
                 }
               })}
               avvisoMondo={avvisoMondo} onChiudiAvvisoMondo={() => setAvvisoMondo(null)}
@@ -436,7 +436,7 @@ function PannelloEditor(p: PropsPannello) {
   const immagineDiBase = useImmagineMappa(mappa);
   // una mappa si «raggiunge» da questa se uno spillo (passaggio, stazione o altro) punta a lei: le figlie senza spillo e il genitore senza ritorno vengono segnalati
   const raggiunge = (destinazione: string) => mappa.spilli.some((s) => destinazioneMappaSpillo(s) === destinazione);
-  const aggiunta = paginaPerAggiungere(mappa);
+  const aggiunta = paginaPerAggiungere(mappa, p.albero);
   return (
     <>
       <nav className="editor-mappa__sezioni" aria-label="Sezioni dell’editor">
