@@ -25,7 +25,6 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { useSuggerimenti } from '../../stores/suggerimentiStore';
 import { classiSuggerito } from '../../utils/suggerimenti';
 import { TargaSuggerito } from '../shared/Suggerito';
-import { ModificaGuida } from '../guida/ModificaGuida';
 
 interface Props {
   partitaId: number;
@@ -129,7 +128,6 @@ export function DotiSociali({ partitaId }: Props) {
               <CartaDote
                 dote={d}
                 suggerita={sugg.evidenziato('doti', d.chiave) ? sugg.motivo('doti', d.chiave) : null}
-                onModificata={() => void ricarica()}
                 azioni={(
                   <div className="flex flex-wrap items-center gap-1.5 min-w-0 max-w-full">
                     {([1, 2, 3] as const).map((n) => (
@@ -159,7 +157,7 @@ export function DotiSociali({ partitaId }: Props) {
 }
 
 /** Intestazione compatta della dote: targhetta, rango con titolo, punti, barra e — sulla stessa riga — i pulsanti delle note. */
-function CartaDote({ dote: d, azioni, suggerita, onModificata }: { dote: DoteSocialePartitaDto; azioni?: ReactNode; suggerita?: string | null; onModificata: () => void }) {
+function CartaDote({ dote: d, azioni, suggerita }: { dote: DoteSocialePartitaDto; azioni?: ReactNode; suggerita?: string | null }) {
   const quota = Math.round(quotaVersoProssimoRango(d) * 100);
   const prossimo = d.ranghi.find((r) => r.rango === d.rango + 1);
   return (
@@ -173,8 +171,6 @@ function CartaDote({ dote: d, azioni, suggerita, onModificata }: { dote: DoteSoc
           <span className="font-display uppercase text-[20px] leading-none" aria-hidden="true">{d.nomeRango}</span>
         </span>
         {suggerita !== null && suggerita !== undefined && <TargaSuggerito motivo={suggerita} compatta />}
-        {/* L11 · B11 (R11-15/12): il nome della Dote, i nomi dei cinque ranghi e le loro soglie si correggono qui e si rimettono come la guida */}
-        <ModificaGuida tipo="dote" chiave={d.chiave} cosa={`la Dote «${d.nome}» e i suoi ranghi`} soloIcona onSalvato={onModificata} />
         <span className="ml-auto font-display text-[26px] leading-none tabular-nums">{d.punti}<span className="text-[12px] font-sans text-text-muted"> punti</span></span>
       </div>
       <div className="h-2 bg-bg-tertiary overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={d.sogliaProssima === null ? 100 : quota} aria-label={`Progresso verso il rango ${d.rango + 1}`}>
