@@ -47,6 +47,7 @@ import { CondizioniEditor } from '../components/guida/CondizioniEditor';
 import type { RequisitoSpillo } from '../../shared/condizioniSpillo';
 import type { SbloccoDto } from '../../shared/types';
 import { InvitiConfidente } from '../components/confidenti/InvitiConfidente';
+import { ModificaGuida } from '../components/guida/ModificaGuida';
 
 function condizioniDiSblocco(sblocco: SbloccoDto | undefined): RequisitoSpillo[] {
   if (!sblocco?.condizioneSalvata) return [];
@@ -239,6 +240,8 @@ export function QuartierePage() {
                 {q.ingresso && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo={`Entra: ${q.ingresso.area?.nome ?? q.ingresso.nome}`} onClick={() => setEntraAperta(true)} />}
                 <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Ingresso" dettaglio={q.ingresso ? undefined : 'da scegliere'} onClick={() => setFinestra('ingresso')} />
                 <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Aggiungi area" onClick={() => setFinestra('aggiungi')} />
+                {/* L11 · B11 (R11-15/6): nome e descrizione del quartiere, con «Ripristina» ai valori della guida */}
+                <ModificaGuida tipo="quartiere" chiave={q.chiave} cosa={`il quartiere «${q.nome}»`} etichetta="Modifica" onSalvato={() => void dati.ricarica()} />
               </div>
           </section>
 

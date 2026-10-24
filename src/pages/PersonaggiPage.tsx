@@ -17,6 +17,7 @@ import { IconaAzione } from '../components/shared/IconaAzione';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
+import { ModificaGuida } from '../components/guida/ModificaGuida';
 
 /**
  * La carta di un personaggio: immagine (quella del Confidente se lo è, altrimenti il ritratto),
@@ -24,7 +25,7 @@ import { TargaSuggerito } from '../components/shared/Suggerito';
  * dettagli» apre presentazione, armi, battaglia, scuola ed età, doppiatori (con il segno sui campi
  * da fonte secondaria), il rimando alla scheda Confidente e la fonte.
  */
-function Personaggio({ p, idCompendio }: { p: PersonaggioDto; idCompendio: Map<string, number> }) {
+function Personaggio({ p, idCompendio, onModificato }: { p: PersonaggioDto; idCompendio: Map<string, number>; onModificato: () => void }) {
   const [aperto, setAperto] = useState(false);
   const sugg = useSuggerimenti();
   const secondari = new Set(p.campiDaFontiSecondarie);
@@ -43,6 +44,8 @@ function Personaggio({ p, idCompendio }: { p: PersonaggioDto; idCompendio: Map<s
           {p.nomeCodice && <span className="chip chip--attivo">{p.nomeCodice}</span>}
           {p.arcano && <span className="chip">{p.arcano}</span>}
           {p.giocabile && <span className="chip text-[11px]">giocabile</span>}
+          {/* L11 · B11 (R11-15/8): nome, ruolo, armi e il resto della scheda; la Persona, `giocabile` e il Confidente collegato non si toccano da qui */}
+          <ModificaGuida tipo="personaggio" chiave={p.chiave} cosa={`la scheda di ${p.nome}`} soloIcona className="ml-auto" onSalvato={onModificato} />
         </div>
         <p className="m-0">{p.ruolo}</p>
         {p.persona.length > 0 && <PersonaDelPersonaggio personaggio={p.nome} persone={p.persona} idCompendio={idCompendio} />}
@@ -90,9 +93,12 @@ export function PersonaggiPage() {
           </FilaScorrevole>
           {gruppi.map((g) => (
             <section key={g.nome} className="flex flex-col gap-2">
-              <h2 className="m-0 text-[15px] font-semibold">{g.nome}</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="m-0 text-[15px] font-semibold">{g.nome}</h2>
+                <ModificaGuida tipo="gruppo-personaggi" chiave={g.nome} cosa={`il gruppo «${g.nome}»`} soloIcona onSalvato={() => { setGruppo(''); void dati.ricarica(); }} />
+              </div>
               <ul className="m-0 p-0 list-none grid gap-2 grid-cols-[minmax(0,1fr)] xl:grid-cols-2" aria-label={g.nome}>
-                {g.membri.map((m) => perChiave.get(m)).filter((p): p is PersonaggioDto => !!p).map((p) => <Personaggio key={`${g.nome}-${p.chiave}`} p={p} idCompendio={idCompendio} />)}
+                {g.membri.map((m) => perChiave.get(m)).filter((p): p is PersonaggioDto => !!p).map((p) => <Personaggio key={`${g.nome}-${p.chiave}`} p={p} idCompendio={idCompendio} onModificato={() => void dati.ricarica()} />)}
               </ul>
             </section>
           ))}
