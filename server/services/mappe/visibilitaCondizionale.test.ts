@@ -16,7 +16,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { closeDb, getDb, prepared } from '../../db/dbService.js';
 import { sincronizzaMappe } from '../../db/migrations/congelati/sincronizzaMappe027.js';
-import { applicaPresenzaAiLuoghi } from './presenzaEntita.js';
 import { nascondeIlPin } from '../../../shared/condizioniSpillo.js';
 import { eStrutturale } from '../../../shared/spilli.js';
 import { valutaRequisitiSpillo } from '../disponibilitaService.js';
@@ -32,7 +31,7 @@ describe.skip('visibilità condizionale dei pin', () => {
     // il pacchetto e' la fotografia della produzione: la formazione dalla guida (spilli dai marcatori,
     // presenza dei luoghi sui pin) non avviene piu' da sola, qui si chiede esplicitamente
     sincronizzaMappe(db);
-    applicaPresenzaAiLuoghi(db);
+    // (R11-03/1: `applicaPresenzaAiLuoghi` di `presenzaEntita.ts` è stato eliminato, orfano di produzione; suite non eseguita, da riscrivere)
   });
   afterAll(() => closeDb());
 
@@ -215,7 +214,7 @@ describe.skip('visibilità condizionale dei pin', () => {
     // e' lo stesso negozio visto da due mappe: se il quartiere non e' ancora aperto devono
     // sparire tutti e due, non uno solo. Prima la presenza si attaccava ai soli pin editoriali
     // e il gemello nativo restava visibile.
-    applicaPresenzaAiLuoghi(getDb());
+    // (R11-03/1: `applicaPresenzaAiLuoghi` è stato eliminato; qui non viene più chiamata, suite non eseguita, da riscrivere)
     const nativi = getDb().prepare(`SELECT s.condizioni_json FROM spillo s
       WHERE s.mappa_chiave LIKE 'nativo-%' AND s.tipo = 'negozio'
         AND s.riferimento_chiave LIKE 'akihabara/%'`).all() as Array<{ condizioni_json: string | null }>;

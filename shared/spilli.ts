@@ -172,7 +172,7 @@ export const RIFERIMENTI_PER_CATEGORIA: Record<CategoriaSpillo, readonly TipoRif
 /** Gli elementi fissi del mondo: l'arredo — una porta, una scala, un forziere, un passaggio, una stanza sicura.
  *
  * Non hanno orari propri: la presenza di un luogo (un negozio che chiude, un'attività solo di sera) non si copia sui loro pin
- * (`presenzaEntita`). Le condizioni scritte su di loro invece valgono come su ogni altro pin e, se non valgono, li nascondono
+ * (fino a R11-03 lo faceva `presenzaEntita`, eliminato perché orfano). Le condizioni scritte su di loro invece valgono come su ogni altro pin e, se non valgono, li nascondono
  * (decisione dell'utente, 2026-10-09: «se ci sta una condizione di visibilità questa deve essere assoluta»; prima restavano
  * in vista marcati «non ancora»).
  */
