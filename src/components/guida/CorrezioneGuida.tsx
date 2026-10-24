@@ -22,7 +22,8 @@ import { useState, type ReactNode } from 'react';
 import { notifica } from '../../stores/notificationStore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
-import { useBozzaSporca } from '../../utils/bozzeSporche';
+import { AvvisoBozzaRipristinata } from '../shared/AvvisoBozzaRipristinata';
+import { leggiBozzaPersistente, scartaBozzaPersistente, useBozzaPersistente, validaPiatta } from '../../utils/bozzeSporche';
 
 interface PropsCampo {
   etichetta: string;
@@ -75,19 +76,28 @@ interface Props<T extends Record<string, string>> {
  */
 export function CorrezioneGuida<T extends Record<string, string>>({ cosa, iniziale, children, onSalva, elimina, compatto, etichetta, aperta, onChiudi, classeEtichetta }: Props<T>) {
   const controllata = aperta !== undefined;
-  // aperta da fuori: la bozza parte dai valori del momento dell'apertura, come col pulsante
-  const [bozza, setBozza] = useState<{ partenza: T; corrente: T } | null>(() => {
-    if (!aperta) return null;
+  const chiaveBozza = `correzione-guida:${cosa}`;
+  /** I valori di partenza e la bozza: con una copia ritrovata in sessionStorage (pagina ricaricata) la bozza riparte da lì, a patto che i valori di partenza siano gli stessi. */
+  const apriBozza = () => {
     const v = iniziale();
-    return { partenza: v, corrente: v };
+    const salvata = leggiBozzaPersistente(chiaveBozza, v, validaPiatta(v));
+    return { bozza: { partenza: v, corrente: salvata ?? v }, ripristinata: salvata !== null && JSON.stringify(salvata) !== JSON.stringify(v) };
+  };
+  // aperta da fuori: la bozza parte dai valori del momento dell'apertura, come col pulsante
+  const [aperto, setAperto] = useState<{ bozza: { partenza: T; corrente: T }; ripristinata: boolean } | null>(() => (aperta ? apriBozza() : null));
+  const bozza = aperto?.bozza ?? null;
+  const ripristinata = aperto?.ripristinata ?? false;
+  const setBozza = (f: (b: { partenza: T; corrente: T } | null) => { partenza: T; corrente: T } | null) => setAperto((a) => {
+    const prossima = f(a?.bozza ?? null);
+    return prossima ? { bozza: prossima, ripristinata: a?.ripristinata ?? false } : null;
   });
   const [occupato, setOccupato] = useState(false);
   const [conferma, setConferma] = useState(false);
   // modulo aperto con un testo cambiato e non ancora salvato: «Aggiorna» e la chiusura della scheda lo nominano e chiedono conferma
   const modificato = bozza !== null && JSON.stringify(bozza.corrente) !== JSON.stringify(bozza.partenza);
-  useBozzaSporca('correzione-guida', `correzione «${cosa}»`, modificato);
-  /** Chiude il modulo: scarta la bozza e l'eventuale richiesta di conferma dell'eliminazione. */
-  const chiudi = () => { setBozza(null); setConferma(false); onChiudi?.(); };
+  useBozzaPersistente(chiaveBozza, `correzione «${cosa}»`, bozza?.corrente, bozza?.partenza, { sporca: modificato, attiva: bozza !== null });
+  /** Chiude il modulo: scarta la bozza (anche la copia in sessionStorage) e l'eventuale richiesta di conferma dell'eliminazione. */
+  const chiudi = () => { scartaBozzaPersistente(chiaveBozza); setAperto(null); setConferma(false); onChiudi?.(); };
 
   /** Salva la bozza con `onSalva`; a buon fine chiude il modulo e notifica, altrimenti lascia la bozza aperta e notifica l'errore. */
   const salva = async () => {
@@ -105,7 +115,7 @@ export function CorrezioneGuida<T extends Record<string, string>>({ cosa, inizia
         // Con una scritta accanto alla matita il nome accessibile comincia da quella (WCAG 2.5.3): chi dà comandi a
         // voce dice quello che legge, «Modifica testo», e deve trovarlo nel nome del pulsante.
         aria-label={etichetta ? `${etichetta}: ${cosa}` : `Correggi ${cosa}`} title={`Correggi ${cosa}`}
-        onClick={() => { const v = iniziale(); setBozza({ partenza: v, corrente: v }); }}>
+        onClick={() => setAperto(apriBozza())}>
         ✎{etichetta ? <span className={`ml-1 ${classeEtichetta ?? ''}`}>{etichetta}</span> : null}
       </button>
     );
@@ -113,6 +123,12 @@ export function CorrezioneGuida<T extends Record<string, string>>({ cosa, inizia
   return (
     <form className="flex w-full flex-col gap-2 rounded-md border border-border-light bg-white/[0.04] px-2 py-2"
       aria-label={`Correggi ${cosa}`} onSubmit={(e) => { e.preventDefault(); void salva(); }}>
+      {ripristinata && modificato && (
+        <AvvisoBozzaRipristinata onScarta={() => {
+          scartaBozzaPersistente(chiaveBozza);
+          setAperto((a) => (a ? { bozza: { partenza: a.bozza.partenza, corrente: a.bozza.partenza }, ripristinata: false } : a));
+        }} />
+      )}
       <div className="flex flex-wrap items-end gap-2">
         {children(bozza.corrente, (patch) => setBozza((b) => (b ? { ...b, corrente: { ...b.corrente, ...patch } } : b)))}
       </div>
