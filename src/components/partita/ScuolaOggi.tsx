@@ -116,7 +116,7 @@ export function ScuolaOggi({ partita, giorno: giornoVisto }: Props) {
             <li key={q.domanda} className="card flex flex-col gap-1 py-2">
               <span className="text-[11px] uppercase tracking-[.06em] text-text-muted">{q.esame}{q.ordine > 0 ? ` · domanda ${q.ordine}` : ''}</span>
               <p className="m-0 text-[14px]">{q.domanda}</p>
-              <p className="m-0 font-display uppercase text-[18px] leading-none text-primary">{q.risposta}</p>
+              <p className="m-0 font-display uppercase text-[18px] leading-none text-primary-testo">{q.risposta}</p>
             </li>
           ))}
         </ul>
@@ -129,7 +129,7 @@ export function ScuolaOggi({ partita, giorno: giornoVisto }: Props) {
               {cruciOggi.fatto && <span className="chip chip--attivo">Risolto</span>}
             </div>
             <p className="m-0 text-[14px] text-text-secondary">{cruciOggi.indizio}</p>
-            <p className="m-0 font-display uppercase text-[26px] leading-none text-primary">{cruciOggi.risposta}</p>
+            <p className="m-0 font-display uppercase text-[26px] leading-none text-primary-testo">{cruciOggi.risposta}</p>
             {cruciOggi.rispostaEn && <p className="m-0 text-[12px] text-text-muted">In inglese: {cruciOggi.rispostaEn}</p>}
           </div>
         )}
@@ -148,7 +148,7 @@ function ElencoDomande({ domande, data }: { domande: DomandaDto[]; data: string 
           <p className="m-0 text-[14px]">{d.domanda}</p>
           <ol className="m-0 pl-4 flex flex-col gap-0.5">
             {d.risposte.map((r) => (
-              <li key={`${r.ordine ?? 0}-${r.testo}`} className="font-display uppercase text-[17px] leading-tight text-primary">{r.testo}</li>
+              <li key={`${r.ordine ?? 0}-${r.testo}`} className="font-display uppercase text-[17px] leading-tight text-primary-testo">{r.testo}</li>
             ))}
           </ol>
           {d.ricompensa && <span className="text-[12px] text-text-secondary">{d.ricompensa}</span>}

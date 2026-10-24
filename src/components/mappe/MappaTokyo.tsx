@@ -451,7 +451,8 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
       <div
         className="mappa-tokyo__tela"
         style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }}
-        role="img"
+        // `group`, non `img`: dentro ci sono i cartellini da toccare, e un `img` li renderebbe invisibili ai lettori di schermo
+        role="group"
         aria-label={`Mappa di Tokyo con ${presenti.length} mete raggiungibili`}
       >
         {/* Le macchie più scure sono la terraferma, come nella schermata del gioco: danno un fondo

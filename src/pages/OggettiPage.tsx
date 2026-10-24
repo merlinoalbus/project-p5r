@@ -157,7 +157,7 @@ function SchedaScambi({ d }: { d: OggettiGuidaDto }) {
     <div className="flex flex-col gap-2 text-[13px]">
       {altrove.length > 0 && (
         <p className="m-0 text-[12px] text-text-muted">
-          Gli scambi di Jose stanno con le <Link to="/guida/richieste?foglio=jose" className="text-primary">Richieste dei Mementos</Link>, insieme ai fiori e ai timbri.
+          Gli scambi di Jose stanno con le <Link to="/guida/richieste?foglio=jose" className="text-primary-testo">Richieste dei Mementos</Link>, insieme ai fiori e ai timbri.
         </p>
       )}
       {venditori.map((s) => (

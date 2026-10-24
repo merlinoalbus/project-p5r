@@ -46,7 +46,7 @@ export function SelettoreSkill({ skill, scelte, onCambia, massimo = 4, etichetta
             <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light max-h-[260px] area-scorrevole" role="listbox" aria-label="Skill trovate">
               {candidate.map((s) => (
                 <li key={s.id} role="option" aria-selected={false}>
-                  <button type="button" className="w-full text-left flex items-center gap-2 py-2 bg-transparent border-none text-text cursor-pointer hover:text-primary touch" onClick={() => { onCambia([...scelte, s]); setQ(''); }}>
+                  <button type="button" className="w-full text-left flex items-center gap-2 py-2 bg-transparent border-none text-text cursor-pointer hover:text-primary-testo touch" onClick={() => { onCambia([...scelte, s]); setQ(''); }}>
                     <ElementoChip elemento={s.elemento} nome={s.elementoNome} piccolo />
                     <span className="font-semibold">{s.nomeIt}</span>
                     <span className="text-[12px] text-text-secondary truncate flex-1">{s.effettoNome}</span>

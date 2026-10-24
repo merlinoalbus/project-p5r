@@ -174,7 +174,7 @@ export function AttivitaPage({ soloChiave }: { soloChiave?: string } = {}) {
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
         <div className="flex flex-col gap-3">
-          <IntestazionePagina titolo="Attività e Doti sociali" sottotitolo={<>Mini-giochi, lavori e studio con le note (♪) delle Doti che alzano, dove e quando farli. I videogiochi hanno la <Link to="/guida/videogiochi" className="text-primary">loro pagina</Link>, con i round e quello che sbloccano.</>} />
+          <IntestazionePagina titolo="Attività e Doti sociali" sottotitolo={<>Mini-giochi, lavori e studio con le note (♪) delle Doti che alzano, dove e quando farli. I videogiochi hanno la <Link to="/guida/videogiochi" className="text-primary-testo">loro pagina</Link>, con i round e quello che sbloccano.</>} />
           <div className="flex flex-wrap items-center gap-1.5">
             <FilaScorrevole role="tablist" aria-label="Sezioni">
               {SCHEDE.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`piastrella-scheda touch ${scheda === k ? 'piastrella-scheda--attiva' : ''}`} onClick={() => setParams(k === 'attivita' ? {} : { scheda: k }, { replace: true })} title={l}><IconaCategoria categoria={k === 'attivita' ? 'minigiochi' : k} dimensione={28} /><span>{l}</span></button>)}

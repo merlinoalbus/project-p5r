@@ -383,7 +383,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
               <Fragment key={a.chiave}>
                 {i > 0 && (i === ancheIn.length - 1 ? <span>e</span> : <span className="-ml-1">,</span>)}
                 {onApriInfiltrazione
-                  ? <button type="button" className="chip touch min-w-11 justify-center text-[11px] text-primary" aria-label={`Anche nella ${a.ordine + 1}ª infiltrazione`} title={a.nome} onClick={() => onApriInfiltrazione(a.chiave)}>{a.ordine + 1}ª</button>
+                  ? <button type="button" className="chip touch min-w-11 justify-center text-[11px] text-primary-testo" aria-label={`Anche nella ${a.ordine + 1}ª infiltrazione`} title={a.nome} onClick={() => onApriInfiltrazione(a.chiave)}>{a.ordine + 1}ª</button>
                   : <span title={a.nome}>{a.ordine + 1}ª</span>}
               </Fragment>
             ))}

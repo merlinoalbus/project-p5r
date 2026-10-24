@@ -49,7 +49,7 @@ function Personaggio({ p, idCompendio, onModificato }: { p: PersonaggioDto; idCo
         </div>
         <p className="m-0">{p.ruolo}</p>
         {p.persona.length > 0 && <PersonaDelPersonaggio personaggio={p.nome} persone={p.persona} idCompendio={idCompendio} />}
-        <button type="button" className="text-left text-[12px] text-primary touch self-start" onClick={() => setAperto((v) => !v)} aria-expanded={aperto}>{aperto ? 'Meno dettagli' : 'Più dettagli'}</button>
+        <button type="button" className="text-left text-[12px] text-primary-testo touch self-start" onClick={() => setAperto((v) => !v)} aria-expanded={aperto}>{aperto ? 'Meno dettagli' : 'Più dettagli'}</button>
         {aperto && (
           <div className="flex flex-col gap-1">
             {p.presentazione && <p className="m-0 text-text-secondary">{p.presentazione}</p>}

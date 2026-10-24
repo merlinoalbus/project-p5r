@@ -60,7 +60,7 @@ export function SkillDettaglioPage() {
               <ul className="m-0 p-0 list-none grid gap-1 grid-cols-1 sm:grid-cols-2">
                 {s.persone.map((p) => (
                   <li key={p.id}>
-                    <Link to={`/compendio/persona/${p.id}`} className="flex items-center gap-2 py-1.5 no-underline text-text hover:text-primary">
+                    <Link to={`/compendio/persona/${p.id}`} className="flex items-center gap-2 py-1.5 no-underline text-text hover:text-primary-testo">
                       <span className="w-9 text-right text-[12px] text-text-muted">Liv. {p.livelloPersona}</span>
                       <span className="font-semibold">{p.nome}</span>
                       <span className="chip">{p.arcanaNome}</span>

@@ -134,7 +134,7 @@ export function StellaCinque({ assi, dimensione = 320, livelli = 5, onScegli, se
           </>
         );
         // Nome dell'asse in un suggerimento al passaggio del mouse (o al fuoco): i badge sono icone senza testo.
-        const classi = `absolute flex flex-col items-center gap-0.5 text-center whitespace-nowrap con-suggerimento ${selezionato === a.chiave ? 'text-primary' : 'text-text'}`;
+        const classi = `absolute flex flex-col items-center gap-0.5 text-center whitespace-nowrap con-suggerimento ${selezionato === a.chiave ? 'text-primary-testo' : 'text-text'}`;
         return onScegli ? (
           <button key={a.chiave} type="button" className={`${classi} touch bg-transparent border-0 p-0 cursor-pointer`} style={stile} onClick={() => onScegli(a.chiave)} aria-pressed={selezionato === a.chiave} aria-label={a.etichetta} title={a.etichetta} data-suggerimento={a.etichetta}>
             {contenuto}

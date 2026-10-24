@@ -16,7 +16,7 @@ export function FontePescaAttivita({ fonte, onCambiata }: { fonte: { regola: Reg
         <strong>{v.specie === 'guardiano' ? 'Guardiano' : 'Boss'}</strong>: {v.faseTerzoSemestre ? 'terzo semestre avviato' : 'prima del terzo semestre'}, {v.fascia}, {v.meteo === 'normale' ? 'meteo normale' : 'pioggia o neve'}; {v.guardianoPrecedente === 'si' ? 'Guardiano già catturato prima della visita; ' : v.guardianoPrecedente === 'no' ? 'Guardiano non ancora catturato prima della visita; ' : ''}
         comparsa {v.rangoComparsa === null ? 'senza rango stabilito' : `documentata al rango ${v.rangoComparsa}`}; catturabilità documentata al rango {v.rangoCattura}, {v.tentativo === 'primo' ? 'primo' : 'settimo'} tentativo{v.seiCatture ? ', dopo sei catture nella visita' : ''}.
         {v.nota && <p className="m-0 whitespace-pre-line">{v.nota}</p>}
-        <span className="flex flex-wrap gap-2">{v.fonti.filter(f => /^https?:\/\//.test(f)).map((f, i) => <a className="touch inline-flex items-center text-primary" key={`${i}:${f}`} href={f} target="_blank" rel="noreferrer">Fonte {i + 1}</a>)}</span>
+        <span className="flex flex-wrap gap-2">{v.fonti.filter(f => /^https?:\/\//.test(f)).map((f, i) => <a className="touch inline-flex items-center text-primary-testo" key={`${i}:${f}`} href={f} target="_blank" rel="noreferrer">Fonte {i + 1}</a>)}</span>
       </li>)}</ul>
       <p className="m-0 text-text-secondary">Le vie documentate sono sufficienti: un rango inferiore privo di prova resta da verificare.</p>
     </>}

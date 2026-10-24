@@ -15,6 +15,7 @@ import { getDoti, getPossedute } from '../services/api';
 import { usePartitaStore } from '../stores/partitaStore';
 import { IconBolt, IconBook, IconFusion, IconMask, IconStar } from '../components/shared/icons';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { StellaCinque } from '../components/shared/StellaCinque';
 import { AssetImg } from '../components/shared/AssetImg';
 import { IconMaschera } from '../components/shared/iconeGuida';
@@ -44,7 +45,7 @@ function AccessiRapidi() {
       {SCORCIATOIE.map((s) => (
         <Link key={s.to} to={s.to} className="card card--cliccabile no-underline text-text flex items-center gap-3 py-2">
           <AssetImg nome={s.asset} alt="" decorativa className="h-[26px] w-[26px] shrink-0 object-contain"
-            fallback={<span className="text-primary">{s.riserva}</span>} />
+            fallback={<span className="text-primary-testo">{s.riserva}</span>} />
           <span><strong>{s.titolo}</strong><br /><span className="text-[12px] text-text-secondary">{s.dettaglio}</span></span>
         </Link>
       ))}
@@ -106,7 +107,7 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
               </Link>
             </div>
             {scorta.dati && (
-              <div className="home-fila" role="group" aria-label="Arcani potenziati dalla scorta">
+              <FilaScorrevole className="home-fila" role="group" aria-label="Arcani potenziati dalla scorta">
                 <span className="text-[11px] font-semibold uppercase tracking-[.06em] text-text-muted">Arcani potenziati</span>
                 {arcaniInScorta.length === 0 && <span className="text-[12px] text-text-muted">nessuna Persona in scorta</span>}
                 {arcaniInScorta.map((a) => (
@@ -115,7 +116,7 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
                     {a.nome}
                   </Link>
                 ))}
-              </div>
+              </FilaScorrevole>
             )}
           </div>
         </div>
@@ -138,7 +139,7 @@ export function HomePage() {
       ) : (
         <>
           <div className="card text-[13px] text-text-secondary">
-            Nessuna partita attiva: <Link to="/partita" className="text-primary">creane una</Link> per iniziare a tracciare Doti sociali, Confidenti e Persona.
+            Nessuna partita attiva: <Link to="/partita" className="text-primary-testo">creane una</Link> per iniziare a tracciare Doti sociali, Confidenti e Persona.
           </div>
           <AccessiRapidi />
         </>

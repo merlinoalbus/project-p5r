@@ -159,7 +159,7 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
               <PulsanteVisivo compatto icona={<IconaAzione chiave="meno" dimensione={20} />} titolo="−1"
                 disabled={fermo || m.livello <= 1} aria-label={`Togli un livello a ${m.nome}`}
                 onClick={() => void conEsito(m.chiave, () => impostaMembroSquadra(partitaId, m.chiave, { deltaLivello: -1 })).then((riuscito) => { if (riuscito) riallineaPartite(m.chiave); })} />
-              <span className={`h-11 min-w-[52px] rounded-md flex items-center justify-center px-2 font-display text-[20px] tabular-nums bg-bg-tertiary ${m.segnato ? 'text-primary' : 'text-text-muted'}`}
+              <span className={`h-11 min-w-[52px] rounded-md flex items-center justify-center px-2 font-display text-[20px] tabular-nums bg-bg-tertiary ${m.segnato ? 'text-primary-testo' : 'text-text-muted'}`}
                 title={m.segnato ? `Livello ${m.livello}` : 'Livello non ancora segnato'}>{m.livello}</span>
               <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="+1"
                 disabled={fermo || m.livello >= 99} aria-label={`Sali di livello: ${m.nome} al livello ${m.livello + 1}`}

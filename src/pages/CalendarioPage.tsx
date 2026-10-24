@@ -64,7 +64,7 @@ function Giorno({ g, oggi, aperto, onToggle, onImposta, onSalvato, onModificaGio
               {e.dettaglio && <span className="text-text-secondary">{e.dettaglio}</span>}
               {e.voci.map((v) => (
                 <div key={v.uid} className="flex items-center gap-2 flex-wrap">
-                  <Link className="touch inline-flex items-center text-primary break-words" to={`/guida/percorso/${v.giorno}?voce=${encodeURIComponent(v.uid)}`}>
+                  <Link className="touch inline-flex items-center text-primary-testo break-words" to={`/guida/percorso/${v.giorno}?voce=${encodeURIComponent(v.uid)}`}>
                     Voce del Diario · {dataGiocoTesto(v.giorno)}: {v.azione.length > 70 ? `${v.azione.slice(0, 70)}…` : v.azione}
                   </Link>
                   {v.certezza === 'D' && <span className="chip text-[11px]" title="Il collegamento fra l’evento e questa voce è dubbio">collegamento dubbio</span>}
@@ -163,7 +163,7 @@ export function CalendarioPage() {
               )}
               <div className="flex flex-wrap items-center gap-2">
                 <button type="button" className="btn btn-secondary btn-sm touch" onClick={() => setGiornoInModifica(d.oggi?.data ?? null)}>Modifica il giorno</button>
-                <Link to="/guida/domande" className="touch inline-flex items-center text-[12px] text-primary">Domande in classe della data →</Link>
+                <Link to="/guida/domande" className="touch inline-flex items-center text-[12px] text-primary-testo">Domande in classe della data →</Link>
               </div>
             </section>
           )}

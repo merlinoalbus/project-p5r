@@ -66,17 +66,17 @@ function RigaEvento({ e, occupato, onCambia }: { e: Evento; occupato: boolean; o
         <input type="checkbox" className="progressi-casella" checked={e.manuale ?? e.avvenuto === true} aria-label={e.nome} disabled={occupato} onChange={(ev) => onCambia(ev.target.checked)} />
         <span className="min-w-0 flex-1">
           <span className="block">{e.nome}</span>
-          {!!e.serveA?.length && <span className="block text-[12px] text-primary">Sblocca: {e.serveA.join(' · ')}</span>}
+          {!!e.serveA?.length && <span className="block text-[12px] text-primary-testo">Sblocca: {e.serveA.join(' · ')}</span>}
           {e.visiteDiario && <span className="block text-[12px] text-text-secondary">Le visite dichiarate nel Diario contano da sole; la casella è un tuo segno in più. Si correggono dal Diario.</span>}
         </span>
         <span className={`shrink-0 text-[12px] ${e.avvenuto ? 'text-success' : 'text-text-secondary'}`}>{e.avvenuto ? 'avvenuto' : 'non ancora'}</span>
       </label>
       {!!e.daVoci?.length && <div className="flex flex-wrap items-center gap-x-2 pl-9 text-[12px] text-text-secondary">
-        {e.daVoci.map((v) => <Link key={v.uid} className="touch text-primary inline-flex items-center" to={percorsoVoce(v)}>Già nel Diario: voce del {v.giorno.slice(3)}/{v.giorno.slice(0, 2)} · {v.testo.length > 60 ? `${v.testo.slice(0, 60)}…` : v.testo}</Link>)}
+        {e.daVoci.map((v) => <Link key={v.uid} className="touch text-primary-testo inline-flex items-center" to={percorsoVoce(v)}>Già nel Diario: voce del {v.giorno.slice(3)}/{v.giorno.slice(0, 2)} · {v.testo.length > 60 ? `${v.testo.slice(0, 60)}…` : v.testo}</Link>)}
       </div>}
       {!!e.visiteDiario?.length && <div className="flex flex-wrap items-center gap-x-2 pl-9 text-[12px] text-text-secondary">
         <span>Già nel Diario:</span>
-        {e.visiteDiario.map((v) => <Link key={v.uid} className="touch text-primary inline-flex items-center" to={percorsoVoce(v)}>visita del {dataGiocoTesto(v.giorno)}</Link>)}
+        {e.visiteDiario.map((v) => <Link key={v.uid} className="touch text-primary-testo inline-flex items-center" to={percorsoVoce(v)}>visita del {dataGiocoTesto(v.giorno)}</Link>)}
       </div>}
     </li>
   );
@@ -186,7 +186,7 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
                 <div className="flex min-w-0 flex-col gap-3">
                   <section className="card flex flex-col gap-2" aria-labelledby="progressi-squadra">
                     <h2 id="progressi-squadra" className="m-0 flex flex-wrap items-center gap-2 font-display text-[17px] uppercase leading-none">Automatici dalla squadra <Automatico /></h2>
-                    <p className="m-0 text-[12px] text-text-muted">Un Ladro in squadra fa avvenire il suo evento. Si segna in <Link to="/partita?scheda=squadra" className="text-primary">Denaro e squadra</Link>.</p>
+                    <p className="m-0 text-[12px] text-text-muted">Un Ladro in squadra fa avvenire il suo evento. Si segna in <Link to="/partita?scheda=squadra" className="text-primary-testo">Denaro e squadra</Link>.</p>
                     <ul className="m-0 p-0 list-none flex flex-col gap-1">
                       {calcolati.map((e) => (
                         <li key={e.chiave} className="progressi-partita__riga">
@@ -199,7 +199,7 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
                   </section>
                   <section className="card flex flex-col gap-2" aria-labelledby="progressi-contatori">
                     <h2 id="progressi-contatori" className="m-0 flex flex-wrap items-center gap-2 font-display text-[17px] uppercase leading-none">Dalle letture <Automatico /></h2>
-                    <p className="m-0 text-[12px] text-text-muted">Si contano da sole in <Link to="/partita?scheda=letture" className="text-primary">Letture e giochi</Link>.</p>
+                    <p className="m-0 text-[12px] text-text-muted">Si contano da sole in <Link to="/partita?scheda=letture" className="text-primary-testo">Letture e giochi</Link>.</p>
                     <ul className="m-0 p-0 list-none flex flex-col gap-1">
                       {p.contatori.map((c) => (
                         <li key={c.chiave} className="progressi-partita__riga">

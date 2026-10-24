@@ -14,7 +14,7 @@ export type ChiaveSezione = 'timbri' | 'persona' | 'richieste' | 'trama';
 
 /** Il segno di riserva di una sezione, se l'icona di Codex non c'è: l'iniziale in un tondo. */
 function Riserva({ chiave }: { chiave: ChiaveSezione }) {
-  return <span aria-hidden className="inline-flex size-[22px] items-center justify-center rounded-full border border-primary/60 text-[11px] font-bold uppercase text-primary">{chiave[0]}</span>;
+  return <span aria-hidden className="inline-flex size-[22px] items-center justify-center rounded-full border border-primary/60 text-[11px] font-bold uppercase text-primary-testo">{chiave[0]}</span>;
 }
 
 interface Props {

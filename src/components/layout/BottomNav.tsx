@@ -21,7 +21,7 @@ export function BottomNav() {
           to={item.to}
           className={({ isActive }) =>
             `flex-1 flex flex-col items-center justify-center gap-1 text-[11px] no-underline transition-colors ${
-              isActive ? 'text-primary font-semibold' : 'text-text-secondary'
+              isActive ? 'text-primary-testo font-semibold' : 'text-text-secondary'
             }`
           }
         >

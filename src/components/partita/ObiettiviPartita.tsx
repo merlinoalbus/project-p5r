@@ -97,7 +97,7 @@ export function ObiettiviPartita({ partitaId }: Props) {
               <ImmagineEntita ambito="persona" chiave={o.nome} etichetta={o.nomeIt} dimensione={96} forma="quadrata" adatta="copri" />
               <div className="flex-1 min-w-0 flex flex-col gap-1 text-[13px]">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Link to={`/compendio/persona/${o.personaId}`} className="font-display uppercase text-[20px] leading-none text-text no-underline hover:text-primary">{o.nomeIt}</Link>
+                  <Link to={`/compendio/persona/${o.personaId}`} className="font-display uppercase text-[20px] leading-none text-text no-underline hover:text-primary-testo">{o.nomeIt}</Link>
                   <span className="text-text-muted">{o.arcanaNome} · livello base {o.livelloBase}</span>
                   <span className={`chip ${o.priorita === 2 ? 'chip--attivo' : ''}`}>Priorità {PRIORITA.find((p) => p.v === o.priorita)?.l.toLowerCase()}</span>
                   {o.stato === 'raggiunto' && <span className="chip">Raggiunto{o.raggiuntoAt ? ` il ${new Date(o.raggiuntoAt).toLocaleDateString('it-IT')}` : ''}</span>}

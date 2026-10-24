@@ -34,7 +34,7 @@ export function ProfiliPesca({ profili }: { profili: EsitoProfiloPescaDto[] }) {
     {!!p.incertezze.length && <ul className="m-0 pl-4 text-warning">{p.incertezze.map((s, i) => <li key={i}>{s}</li>)}</ul>}
     <details><summary className="touch cursor-pointer">Vie considerate e fonti</summary><ul className="m-0 flex list-none flex-col gap-2 p-0">{p.vie.map(v => <li key={v.id} className="flex min-w-0 flex-col gap-1 border-t border-border pt-1">
       <span>{v.descrizione}</span><span className="text-text-secondary">{v.esito === 'soddisfatta' ? 'Predicati della via soddisfatti' : v.esito === 'non-applicabile' ? 'Via non applicabile a questo contesto' : 'Via non dimostrata dai dati noti'}</span>
-      {v.fonti.map((f, i) => /^https?:\/\//.test(f) ? <a className="touch break-all text-primary" href={f} target="_blank" rel="noreferrer" key={i}>Fonte {i + 1}</a> : <span className="break-words text-text-secondary" key={i}>{f}</span>)}
+      {v.fonti.map((f, i) => /^https?:\/\//.test(f) ? <a className="touch break-all text-primary-testo" href={f} target="_blank" rel="noreferrer" key={i}>Fonte {i + 1}</a> : <span className="break-words text-text-secondary" key={i}>{f}</span>)}
     </li>)}</ul></details>
   </section>)}</div>;
 }

@@ -311,7 +311,7 @@ function DettaglioPersona({ p, stato, inSalita, inRegistrazione, onSali, onRegis
       <div className="flex items-center gap-3">
         <ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={64} />
         <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-          <Link to={`/compendio/persona/${p.personaId}`} className="font-semibold text-[17px] no-underline text-text hover:text-primary">{p.nomeIt}</Link>
+          <Link to={`/compendio/persona/${p.personaId}`} className="font-semibold text-[17px] no-underline text-text hover:text-primary-testo">{p.nomeIt}</Link>
           {p.nomeIt !== p.nome && <span className="text-[12px] text-text-muted">{p.nome}</span>}
           <span className="text-[13px] text-text-secondary">{p.arcanaNome} · {p.inSquadra ? 'in squadra' : 'in deposito'}</span>
         </div>

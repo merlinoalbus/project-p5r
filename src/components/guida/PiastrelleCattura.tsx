@@ -75,7 +75,7 @@ export function PiastrelleCattura({ voci, partitaId, catturate, occupata = null,
               <span className="w-full break-words text-[11px] font-semibold leading-tight">{nome}</span>
             </button>
             {onInfo && (
-              <button type="button" className={`touch mt-auto inline-flex items-center justify-center border-t border-border-light text-[12px] font-bold italic ${apertaChiave === v.chiave ? 'text-primary' : 'text-text-muted hover:text-text'}`}
+              <button type="button" className={`touch mt-auto inline-flex items-center justify-center border-t border-border-light text-[12px] font-bold italic ${apertaChiave === v.chiave ? 'text-primary-testo' : 'text-text-muted hover:text-text'}`}
                 aria-expanded={apertaChiave === v.chiave} aria-label={`Dettagli di ${nome}`} title="Debolezze e scheda del compendio" onClick={() => onInfo(apertaChiave === v.chiave ? null : v.chiave)}>
                 i
               </button>

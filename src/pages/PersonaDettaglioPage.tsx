@@ -77,8 +77,8 @@ function SezioneFusione({ personaId, rara, partitaId, livelloProtagonista }: { p
           <div className="flex items-baseline justify-between gap-2 flex-wrap">
             <span className="text-[13px] text-text-secondary">Come ottenerla: <strong className="text-text">{per.dati.totale}</strong> ricette{per.dati.totale > 0 ? ' (le più economiche)' : ''}</span>
             <span className="flex gap-3">
-              {per.dati.totale > 5 && <Link to={`/fusione?vista=ricette&ricette=${personaId}`} className="touch inline-flex items-center text-[13px] text-primary">Tutte le ricette →</Link>}
-              <Link to={`/fusione?vista=piani&piani=${personaId}`} className="touch inline-flex items-center text-[13px] text-primary">Piano di fusione →</Link>
+              {per.dati.totale > 5 && <Link to={`/fusione?vista=ricette&ricette=${personaId}`} className="touch inline-flex items-center text-[13px] text-primary-testo">Tutte le ricette →</Link>}
+              <Link to={`/fusione?vista=piani&piani=${personaId}`} className="touch inline-flex items-center text-[13px] text-primary-testo">Piano di fusione →</Link>
             </span>
           </div>
           {per.dati.ricette.length > 0 && (
@@ -92,7 +92,7 @@ function SezioneFusione({ personaId, rara, partitaId, livelloProtagonista }: { p
         <div>
           <div className="flex items-baseline justify-between gap-2 flex-wrap">
             <span className="text-[13px] text-text-secondary">Come ingrediente: <strong className="text-text">{con.dati.totale}</strong> fusioni possibili</span>
-            {con.dati.totale > 5 && <Link to={`/fusione?vista=con&con=${personaId}`} className="touch inline-flex items-center text-[13px] text-primary">Tutte le fusioni →</Link>}
+            {con.dati.totale > 5 && <Link to={`/fusione?vista=con&con=${personaId}`} className="touch inline-flex items-center text-[13px] text-primary-testo">Tutte le fusioni →</Link>}
           </div>
           <ul className="m-0 p-0 list-none divide-y divide-border-light">
             {con.dati.ricette.map((r) => <RicettaRiga key={r.ingredienti.map((i) => i.id).join('-') + r.risultato.id} ricetta={r} inScorta={inScorta} />)}
@@ -187,12 +187,17 @@ export function PersonaDettaglioPage() {
                     {p.speciale && <ModificaGuida tipo="fusione-speciale" chiave={String(p.id)} cosa={`la ricetta di «${p.nomeIt}»`} soloIcona onSalvato={() => void ricarica()} />}
                     {p.richiedeConfidenteMax && <span className="chip">Richiede Confidente al massimo</span>}
                   </div>
+                  {/* Sul telefono la scheda Affinità completa arriva dopo immagine, «Chi è» e statistiche, a più di due schermate: in
+                      battaglia debole/resiste è la prima cosa che serve, quindi qui c'è la riga compatta (sotto, la scheda intera resta) */}
+                  <div className="md:hidden">
+                    <AffinitaGriglia affinita={p.affinita} compatta etichetta="Affinità in breve" />
+                  </div>
                   <div className="text-[13px] text-text-secondary flex flex-wrap gap-x-4 gap-y-1">
                     <span>Eredità: <strong className="text-text">{p.ereditaNome ?? '—'}</strong></span>
                     {p.delParty && (
                       <span>
                         Persona del gruppo: <strong className="text-text">{p.forma}ª forma</strong>
-                        {p.derivaDa && <> — deriva da <Link to={`/compendio/persona/${p.derivaDa.id}`} className="touch inline-flex items-center text-primary">{p.derivaDa.nomeIt}</Link></>}
+                        {p.derivaDa && <> — deriva da <Link to={`/compendio/persona/${p.derivaDa.id}`} className="touch inline-flex items-center text-primary-testo">{p.derivaDa.nomeIt}</Link></>}
                       </span>
                     )}
                     {p.notaNome && <span className="text-warning">{p.notaNome}</span>}
@@ -271,10 +276,10 @@ export function PersonaDettaglioPage() {
             <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light">
               {p.skill.map((s) => (
                 <li key={s.id} className="py-2 flex items-start gap-3">
-                  <span className={`${p.delParty ? 'w-20' : 'w-14'} shrink-0 text-[12px] font-bold ${s.livello === 0 ? 'text-primary' : 'text-text-secondary'}`}>{etichettaApprendimento(s)}</span>
+                  <span className={`${p.delParty ? 'w-20' : 'w-14'} shrink-0 text-[12px] font-bold ${s.livello === 0 ? 'text-primary-testo' : 'text-text-secondary'}`}>{etichettaApprendimento(s)}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Link to={`/skill/${s.id}`} className="touch inline-flex items-center font-semibold no-underline text-text hover:text-primary">{s.nomeIt}</Link>
+                      <Link to={`/skill/${s.id}`} className="touch inline-flex items-center font-semibold no-underline text-text hover:text-primary-testo">{s.nomeIt}</Link>
                       {s.nomeIt !== s.nome && <span className="text-[12px] text-text-muted">{s.nome}</span>}
                       <ElementoChip elemento={s.elemento} nome={s.elementoNome} />
                       <span className="text-[12px] text-text-muted">{s.costo.testo}</span>
@@ -292,7 +297,7 @@ export function PersonaDettaglioPage() {
             <section className="card">
               <h2 className="m-0 mb-2 text-[15px] font-semibold">Tratto</h2>
               <div className="flex items-center gap-2 flex-wrap">
-                <Link to={`/skill/${p.trattoDettaglio.id}`} className="touch inline-flex items-center font-semibold no-underline text-text hover:text-primary">{p.trattoDettaglio.nomeIt}</Link>
+                <Link to={`/skill/${p.trattoDettaglio.id}`} className="touch inline-flex items-center font-semibold no-underline text-text hover:text-primary-testo">{p.trattoDettaglio.nomeIt}</Link>
                 {p.trattoDettaglio.nomeIt !== p.trattoDettaglio.nome && <span className="text-[12px] text-text-muted">{p.trattoDettaglio.nome}</span>}
               </div>
               <div className="text-[13px] text-text-secondary">{p.trattoDettaglio.effettoNome}</div>

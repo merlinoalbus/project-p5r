@@ -24,7 +24,7 @@ export function TestoRipiegabile({ testo, massimo = 110, className }: Props) {
     <div className={`flex flex-col items-start ${className ?? ''}`}>
       <p className="m-0">{aperto || !ripiegabile ? testo.trim() : breve}</p>
       {ripiegabile && (
-        <button type="button" className="touch bg-transparent border-0 px-0 py-1 text-primary text-[12px] font-semibold cursor-pointer underline underline-offset-2" onClick={() => setAperto((v) => !v)} aria-expanded={aperto}>
+        <button type="button" className="touch bg-transparent border-0 px-0 py-1 text-primary-testo text-[12px] font-semibold cursor-pointer underline underline-offset-2" onClick={() => setAperto((v) => !v)} aria-expanded={aperto}>
           {aperto ? 'Mostra meno' : 'Mostra tutto'}
         </button>
       )}

@@ -112,7 +112,7 @@ function Accesso({ tipo, chiave, incorporato = false }: { tipo: TipoAccessoMondo
             <Link className="card card--cliccabile group flex w-full flex-col gap-2 no-underline text-text" to={urlDestinazioneMondo(d)}>
               <AnteprimaMappa mappa={anteprima(d.mappa, d.nomeMappa)} className="aspect-[4/3] w-full" sizes="(min-width: 1280px) 25vw, (min-width: 640px) 33vw, 50vw" />
               <span className="flex flex-col gap-0.5">
-                <span className="text-[13px] font-semibold leading-tight group-hover:text-primary">{d.nomeMappa}</span>
+                <span className="text-[13px] font-semibold leading-tight group-hover:text-primary-testo">{d.nomeMappa}</span>
                 {/* Il nome dello spillo solo se aggiunge qualcosa: quasi sempre è il nome della
                     cosa che si sta già cercando, scritto nell'intestazione. */}
                 {d.nomeSpillo && d.nomeSpillo !== d.nomeMappa && <span className="text-[11px] text-text-muted">{d.nomeSpillo}</span>}
@@ -127,7 +127,7 @@ function Accesso({ tipo, chiave, incorporato = false }: { tipo: TipoAccessoMondo
           {guide.map(g => <li key={`${g.dungeon}:${g.area}`} className="flex">
             <Link className="card card--cliccabile group flex w-full flex-col gap-2 no-underline text-text" to={`/guida/mappe/${encodeURIComponent(g.mappaPalazzo)}?area=${encodeURIComponent(g.area)}`}>
               <AnteprimaMappa mappa={anteprima(g.mappaPalazzo, g.nome)} className="aspect-[4/3] w-full" sizes="(min-width: 1280px) 25vw, (min-width: 640px) 33vw, 50vw" />
-              <span className="text-[13px] font-semibold leading-tight group-hover:text-primary">{g.nome}</span>
+              <span className="text-[13px] font-semibold leading-tight group-hover:text-primary-testo">{g.nome}</span>
             </Link>
           </li>)}
         </ul>

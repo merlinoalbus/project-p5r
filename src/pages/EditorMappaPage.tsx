@@ -514,8 +514,8 @@ function PannelloEditor(p: PropsPannello) {
         <div role="alert" aria-label="La mappa non si sposta lì" className="flex flex-col gap-1.5 rounded-md border border-warning/60 bg-white/[0.04] p-2 text-[13px]">
           <p className="m-0">{p.avvisoMondo.messaggio}</p>
           <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            {p.avvisoMondo.aggiunta && <Link className="touch inline-flex items-center text-primary" to={p.avvisoMondo.aggiunta.href}>{p.avvisoMondo.aggiunta.testo}</Link>}
-            <Link className="touch inline-flex items-center text-primary" to="/guida/citta">Planimetrie da collocare</Link>
+            {p.avvisoMondo.aggiunta && <Link className="touch inline-flex items-center text-primary-testo" to={p.avvisoMondo.aggiunta.href}>{p.avvisoMondo.aggiunta.testo}</Link>}
+            <Link className="touch inline-flex items-center text-primary-testo" to="/guida/citta">Planimetrie da collocare</Link>
             <button type="button" className="btn btn-ghost btn-sm touch ml-auto" aria-label="Chiudi l’avviso" onClick={p.onChiudiAvvisoMondo}>Chiudi</button>
           </span>
         </div>
@@ -731,7 +731,7 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
       <form className="flex flex-col gap-2" onSubmit={salva}>
         <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} required maxLength={LIMITI_GUIDA.spillo.nome} readOnly={!!luogo} aria-describedby={luogo ? 'spillo-dal-luogo' : undefined} /></label>
         {luogo && <p id="spillo-dal-luogo" className="m-0 flex flex-wrap items-center gap-1.5 text-[12px] text-text-muted">Nome e descrizione vengono dal luogo «{luogo.nome}»: qui si scrive solo la nota del pin.
-          <Link to={luogo.casa!} className="touch inline-flex items-center text-primary">Modifica il luogo</Link></p>}
+          <Link to={luogo.casa!} className="touch inline-flex items-center text-primary-testo">Modifica il luogo</Link></p>}
         <div className="editor-mappa__campo">
           <Selettore etichetta="Tipo" valore={tipo} opzioni={CATEGORIE_SPILLO.flatMap((c) => tipiDellaCategoria(c).map((t) => ({ chiave: t, nome: DEFINIZIONI_SPILLO[t].nome, gruppo: DEFINIZIONI_CATEGORIA[c].nome })))} onCambia={(k) => cambiaTipo(k as TipoSpillo)} />
         </div>

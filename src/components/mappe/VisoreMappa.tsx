@@ -1348,7 +1348,7 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
       {!nonSpaziale && onNaviga && "mappaChiave" in s && <NavigazioneSpillo spillo={s} partitaId={partitaId} onNaviga={onNaviga} nomeMappa={s.destinazioneNomi?.mappa} nomeSpillo={s.destinazioneNomi?.spillo ?? undefined} />}
       {s.voci.length === 1 && (
         <p className="m-0 text-[12px] text-text-secondary">
-          {s.voci[0].esauribile ? 'Esauribile · ' : ''}{s.voci[0].stato ? `Nella Guida: ${s.voci[0].stato}` : 'Non ancora gestito nella Guida'} · <Link to={`/guida/dungeon/${encodeURIComponent(s.voci[0].dungeon)}`} className="text-primary">scheda del Palazzo</Link>
+          {s.voci[0].esauribile ? 'Esauribile · ' : ''}{s.voci[0].stato ? `Nella Guida: ${s.voci[0].stato}` : 'Non ancora gestito nella Guida'} · <Link to={`/guida/dungeon/${encodeURIComponent(s.voci[0].dungeon)}`} className="text-primary-testo">scheda del Palazzo</Link>
         </p>
       )}
       {/* più voci (098): ognuna col suo stato; il Palazzo è lo stesso per tutte (lo controlla ogni collegamento) */}
@@ -1357,13 +1357,13 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
           <ul className="m-0 flex list-none flex-col gap-0.5 p-0" aria-label="Voci della guida">
             {s.voci.map((v) => <li key={v.chiave} className="break-words">«{v.nome}»: {v.esauribile ? 'esauribile · ' : ''}{v.stato ? `nella Guida: ${v.stato}` : 'non ancora gestito nella Guida'}</li>)}
           </ul>
-          <Link to={`/guida/dungeon/${encodeURIComponent(s.voci[0].dungeon)}`} className="text-primary">scheda del Palazzo</Link>
+          <Link to={`/guida/dungeon/${encodeURIComponent(s.voci[0].dungeon)}`} className="text-primary-testo">scheda del Palazzo</Link>
         </div>
       )}
       {(d?.tipo === 'luogo' || d?.tipo === 'attivita') && d.luogo && (
         <p className="m-0 text-[12px] text-text-secondary">
           {/* L5 (T5): la pagina del luogo, col suo nome; gli orari dal luogo */}
-          {d.luogo.cosaOffre && d.luogo.cosaOffre !== s.descrizione ? `${d.luogo.cosaOffre} · ` : ''}{d.luogo.orariTesto ? `${d.luogo.orariTesto} · ` : d.luogo.quando ? `${d.luogo.quando} · ` : ''}<Link to={d.luogo.casa ?? `/guida/citta/${encodeURIComponent(d.luogo.quartiere)}`} className="text-primary">{d.luogo.casa ? d.luogo.nome : 'scheda del quartiere'}</Link>
+          {d.luogo.cosaOffre && d.luogo.cosaOffre !== s.descrizione ? `${d.luogo.cosaOffre} · ` : ''}{d.luogo.orariTesto ? `${d.luogo.orariTesto} · ` : d.luogo.quando ? `${d.luogo.quando} · ` : ''}<Link to={d.luogo.casa ?? `/guida/citta/${encodeURIComponent(d.luogo.quartiere)}`} className="text-primary-testo">{d.luogo.casa ? d.luogo.nome : 'scheda del quartiere'}</Link>
         </p>
       )}
       {negozio && (
@@ -1371,7 +1371,7 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <span className="text-[12px] font-semibold flex items-center gap-1.5 flex-wrap">{negozio.nome} · {articoliVisibili.length} {articoliVisibili.length === 1 ? 'articolo' : 'articoli'}<ChipDisponibilita disponibilita={negozio.disponibilita} compatto /></span>
             {/* L5 (T5): il negozio nella pagina del suo luogo, col suo nome */}
-            <Link to={d?.luogo?.negozi?.find((x) => x.chiave === negozio.chiave)?.casa ?? `/guida/negozi/${encodeURIComponent(negozio.chiave)}`} className="text-[12px] text-primary">{negozio.nome}</Link>
+            <Link to={d?.luogo?.negozi?.find((x) => x.chiave === negozio.chiave)?.casa ?? `/guida/negozi/${encodeURIComponent(negozio.chiave)}`} className="text-[12px] text-primary-testo">{negozio.nome}</Link>
           </div>
           {bloccati > 0 && (
             <button type="button" className="visore-mappa__azione-testo self-start" aria-pressed={mostraBloccati} onClick={() => setMostraBloccati((v) => !v)}>
@@ -1430,7 +1430,7 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
         {/* un passaggio con arrivo non si segna (le sue voci si segnano dalla guida) */}
         {partitaId && !passaggioConArrivo(s) && <AzioniStato spillo={s} occupato={occupato} onRaccolto={onRaccolto} onStatoPunto={onStatoPunto} />}
       </div>
-      {(statoDelPin(s) !== null || s.voci.length > 0 || negozio) && !partitaId && !passaggioConArrivo(s) && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary">partita</Link> per {invitoSenzaPartita(s, !!negozio)}.</span>}
+      {(statoDelPin(s) !== null || s.voci.length > 0 || negozio) && !partitaId && !passaggioConArrivo(s) && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary-testo">partita</Link> per {invitoSenzaPartita(s, !!negozio)}.</span>}
     </section>
   );
 }

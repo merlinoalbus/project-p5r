@@ -57,7 +57,7 @@ export function PannelloVelluto({ velluto, onCambiaAllarme }: Props) {
               {v.arcani.filter((a) => a.rango > 0).map((a) => (
                 <span key={a.arcana} className="chip" title={`${a.confidenteNome}: rango ${a.rango}`}>{a.arcanaNome} ×{a.moltiplicatoreExp.toLocaleString('it-IT')}</span>
               ))}
-              {v.arcani.every((a) => a.rango === 0) && <span className="text-text-muted">Nessun Confidente oltre il rango 0: aggiorna i ranghi nella scheda <Link to="/partita?scheda=confidenti" className="text-primary">Confidenti</Link>.</span>}
+              {v.arcani.every((a) => a.rango === 0) && <span className="text-text-muted">Nessun Confidente oltre il rango 0: aggiorna i ranghi nella scheda <Link to="/partita?scheda=confidenti" className="text-primary-testo">Confidenti</Link>.</span>}
             </div>
           </div>
           <div>

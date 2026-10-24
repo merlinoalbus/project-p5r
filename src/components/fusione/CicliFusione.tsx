@@ -135,7 +135,7 @@ export function CicliFusione({ persone, partitaId, livelloProtagonista, inScorta
           ) : dati ? (
             <>
               <p className="m-0 text-[12px] text-text-muted">
-                {dati.inScorta ? `${dati.persona.nomeIt} è nella scorta.` : `${dati.persona.nomeIt} non è nella scorta: prima procurala (`}{!dati.inScorta && <Link to={`/fusione?vista=piani&piani=${dati.persona.id}`} className="text-primary">piano di fusione</Link>}{!dati.inScorta && ').'}
+                {dati.inScorta ? `${dati.persona.nomeIt} è nella scorta.` : `${dati.persona.nomeIt} non è nella scorta: prima procurala (`}{!dati.inScorta && <Link to={`/fusione?vista=piani&piani=${dati.persona.id}`} className="text-primary-testo">piano di fusione</Link>}{!dati.inScorta && ').'}
                 {dati.sconto > 0 && ` Costi con lo sconto del Registro (${dati.sconto}%).`}
                 {!partitaId && ' Senza partita attiva scorta e Registro sono vuoti.'}
               </p>

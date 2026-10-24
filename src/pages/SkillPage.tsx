@@ -66,7 +66,7 @@ export function SkillPage() {
           <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light card py-0">
             {filtrate.map((s) => (
               <li key={s.id}>
-                <Link to={`/skill/${s.id}`} className="flex items-center gap-3 py-2.5 no-underline text-text hover:text-primary">
+                <Link to={`/skill/${s.id}`} className="flex items-center gap-3 py-2.5 no-underline text-text hover:text-primary-testo">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold">{s.nomeIt}</span>

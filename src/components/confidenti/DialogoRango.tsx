@@ -36,7 +36,7 @@ export function DialogoRango({ d, aperto, onToggle, azioni }: { d: DialogoConfid
           {d.scelte.map((s) => (
             <li key={s.ordine} className={`flex flex-wrap items-center gap-2 rounded-md px-2 py-1 ${s.punti !== null && s.punti === max && max > 0 ? 'bg-primary-bg' : ''}`}>
               <span className="text-text-muted w-5">{s.ordine}.</span>
-              <span className={s.romantica ? 'text-primary font-semibold' : ''}>{s.testo}</span>
+              <span className={s.romantica ? 'text-primary-testo font-semibold' : ''}>{s.testo}</span>
               {s.puntiTesto && <span className="chip" title="Punti secondo la guida">{s.puntiTesto}</span>}
               {s.romantica && <span className="chip chip--attivo" title="Scelta che avvia o riguarda la relazione romantica">romantica</span>}
               {s.avviso && <span className="text-[12px] text-warning">{s.avviso}</span>}

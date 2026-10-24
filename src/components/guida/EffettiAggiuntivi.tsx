@@ -111,7 +111,7 @@ export function EffettiAggiuntivi({ valore, onCambia, elenchi, nomi }: Props) {
                   <div className="flex min-w-0 items-start gap-2">
                     <IconaCategoria categoria={CATEGORIA_DI[r.effetto.tipo]} dimensione={32} />
                     <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                      <span className="font-display text-[13px] uppercase tracking-wide text-primary">{NOME_FAMIGLIA_EFFETTO[r.effetto.tipo]}</span>
+                      <span className="font-display text-[13px] uppercase tracking-wide text-primary-testo">{NOME_FAMIGLIA_EFFETTO[r.effetto.tipo]}</span>
                       <span className="text-[13px] break-words">{completo ? fraseEffetto(r.effetto, nomi) : 'Da scegliere qui sotto.'}</span>
                     </div>
                     <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={editing && completo ? 'Chiudi' : 'Modifica'}

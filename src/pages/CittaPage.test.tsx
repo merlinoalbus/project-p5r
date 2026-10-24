@@ -41,7 +41,7 @@ describe('CittaPage', () => {
     api.getQuartieri.mockResolvedValue([{ chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, descrizione: 'Il centro.' }] as QuartiereRiassuntoDto[]);
     api.getMappa.mockResolvedValue(mappa('tokyo', 'Tokyo'));
     render(<MemoryRouter><CittaPage /></MemoryRouter>);
-    expect(await screen.findByRole('img', { name: /^Mappa di Tokyo con/ })).toBeInTheDocument();
+    expect(await screen.findByRole('group', { name: /^Mappa di Tokyo con/ })).toBeInTheDocument();
     expect(screen.queryByTestId('visore-mappa')).not.toBeInTheDocument();
     expect(api.getMappa).not.toHaveBeenCalled();
     expect(screen.queryByRole('link', { name: 'Modifica mappa' })).toBeNull();
@@ -57,7 +57,7 @@ describe('CittaPage', () => {
       { chiave: 'ueno', nome: 'Ueno', mappaChiave: 'citta-ueno', luoghi: 3, verificati: 3, sblocco: null, descrizione: '' },
     ] as QuartiereRiassuntoDto[]);
     render(<MemoryRouter><CittaPage /></MemoryRouter>);
-    const mappa = await screen.findByRole('img', { name: /^Mappa di Tokyo con/ });
+    const mappa = await screen.findByRole('group', { name: /^Mappa di Tokyo con/ });
     expect(within(mappa).getByTitle('Shibuya')).toHaveAttribute('href', '/guida/citta/shibuya?ingresso=1');
     expect(within(mappa).getByTitle('Ueno')).toHaveAttribute('href', '/guida/citta/ueno?ingresso=1');
   });
@@ -76,7 +76,7 @@ describe('CittaPage', () => {
     // il giorno prima: non ci sono, come il Palazzo già chiuso
     usePartitaStore.setState({ attiva: { id: 1, nome: 'Prova', dataGioco: '05-08' } as PartitaDto });
     const primo = render(<MemoryRouter><CittaPage /></MemoryRouter>);
-    let mappa = await screen.findByRole('img', { name: /^Mappa di Tokyo con/ });
+    let mappa = await screen.findByRole('group', { name: /^Mappa di Tokyo con/ });
     // Il `title` dice nome **e** finestra («Memento — dal 05-09»): si cerca per inizio, non
     // esatto, o la prova fallisce per un trattino e sembra un difetto che non c'è.
     expect(within(mappa).queryByTitle(/^Memento/)).toBeNull();
@@ -86,7 +86,7 @@ describe('CittaPage', () => {
     // il giorno dopo: ci sono, con la targa corta e il collegamento alla loro mappa
     usePartitaStore.setState({ attiva: { id: 1, nome: 'Prova', dataGioco: '05-09' } as PartitaDto });
     render(<MemoryRouter><CittaPage /></MemoryRouter>);
-    mappa = await screen.findByRole('img', { name: /^Mappa di Tokyo con/ });
+    mappa = await screen.findByRole('group', { name: /^Mappa di Tokyo con/ });
     const memento = await within(mappa).findByTitle(/^Memento/);
     // senza una regola d'atterraggio, la scheda (L3, §4.1; prima `/guida/mondo/dungeon/<k>`)
     expect(memento).toHaveAttribute('href', '/guida/dungeon/mementos');
@@ -117,7 +117,7 @@ describe('CittaPage', () => {
       { chiave: 'ueno', nome: 'Ueno', mappaChiave: 'citta-ueno', luoghi: 3, verificati: 3, sblocco: null, descrizione: '' },
     ] as QuartiereRiassuntoDto[]);
     render(<MemoryRouter><CittaPage /></MemoryRouter>);
-    const mappa = await screen.findByRole('img', { name: /^Mappa di Tokyo con/ });
+    const mappa = await screen.findByRole('group', { name: /^Mappa di Tokyo con/ });
     const scheda = within(screen.getByRole('list', { name: 'Quartieri' })).getByRole('link', { name: /Shibuya/ });
     const cartellino = within(mappa).getByTitle('Shibuya');
     /** Lo stile della sagoma (l'`img` interna) dell'elemento: contiene il colore del contorno, bianco a riposo e oro se acceso. */
@@ -150,7 +150,7 @@ describe('CittaPage', () => {
       { chiave: 'ikebukuro', nome: 'Ikebukuro', mappaChiave: 'citta-ikebukuro', luoghi: 2, verificati: 2, sblocco: '1 settembre', sbloccoData: '09-01', descrizione: '' },
     ] as QuartiereRiassuntoDto[]);
     render(<MemoryRouter><CittaPage /></MemoryRouter>);
-    const mappa = await screen.findByRole('img', { name: /^Mappa di Tokyo con/ });
+    const mappa = await screen.findByRole('group', { name: /^Mappa di Tokyo con/ });
     expect(within(mappa).getByTitle('Shibuya')).toBeInTheDocument();
     expect(within(mappa).queryByTitle('Ikebukuro')).toBeNull();
     expect(within(mappa).queryByTitle('Ginza')).toBeNull();

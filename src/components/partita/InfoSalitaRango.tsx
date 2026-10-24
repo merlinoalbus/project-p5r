@@ -53,7 +53,7 @@ export function InfoSalitaRango({ c, onApriScheda }: { c: ConfidentePartitaDto; 
             })}
           </ul>
           {/* gli altri regali stanno nella Scheda completa del cassetto: niente collegamento che porta fuori */}
-          {altri > 0 && <button type="button" onClick={onApriScheda} className="touch inline-flex items-center text-[12px] text-primary underline underline-offset-2 self-start bg-transparent border-0 p-0 cursor-pointer">+ altri {altri} nella scheda completa</button>}
+          {altri > 0 && <button type="button" onClick={onApriScheda} className="touch inline-flex items-center text-[12px] text-primary-testo underline underline-offset-2 self-start bg-transparent border-0 p-0 cursor-pointer">+ altri {altri} nella scheda completa</button>}
         </div>
       )}
     </section>

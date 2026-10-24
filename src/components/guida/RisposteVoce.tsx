@@ -24,7 +24,7 @@ function ScelteEvento({ d }: { d: DialogoVoceDto }) {
         return (
           <li key={s.ordine} className={`risposta-voce ${top ? 'risposta-voce--migliore' : ''}`} title={s.avviso ?? undefined}>
             <span className="text-text-muted tabular-nums">{s.ordine}.</span>
-            <span className={`flex-1 min-w-0 ${s.romantica ? 'text-primary' : ''}`}>{s.testo}{s.romantica ? ' (relazione romantica)' : ''}</span>
+            <span className={`flex-1 min-w-0 ${s.romantica ? 'text-primary-testo' : ''}`}>{s.testo}{s.romantica ? ' (relazione romantica)' : ''}</span>
             {valore && <span className={`chip text-[11px] ${top ? 'chip--attivo' : ''}`}>{valore}</span>}
           </li>
         );

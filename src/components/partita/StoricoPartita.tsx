@@ -145,7 +145,7 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
                 {e.dettaglio && <div className="text-text-secondary">{e.dettaglio}</div>}
                 <div className="text-[12px] text-text-muted">
                   {e.tipoNome}
-                  {e.personaId && <> · <Link to={`/compendio/persona/${e.personaId}`} className="text-primary">{e.personaNomeIt}</Link></>}
+                  {e.personaId && <> · <Link to={`/compendio/persona/${e.personaId}`} className="text-primary-testo">{e.personaNomeIt}</Link></>}
                 </div>
               </div>
               {!compatto && <PulsanteVisivo tono="fantasma" compatto className="shrink-0" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" onClick={() => void elimina(e)} aria-label={`Elimina la voce ${e.titolo}`} />}

@@ -33,7 +33,7 @@ function SchedaPiano({ piano, inScorta, possedutaDi, partitaId, onCambiaTitolo, 
     <article className={`card flex flex-col gap-2 ${av.completato ? 'border-primary' : ''}`}>
       <div className="flex items-center gap-3 flex-wrap">
         <ImmagineEntita ambito="persona" chiave={piano.nome} etichetta={piano.nomeIt} dimensione={72} adatta="copri" />
-        <Link to={`/compendio/persona/${piano.personaId}`} className="font-display uppercase text-[20px] leading-none text-text no-underline hover:text-primary">{piano.nomeIt}</Link>
+        <Link to={`/compendio/persona/${piano.personaId}`} className="font-display uppercase text-[20px] leading-none text-text no-underline hover:text-primary-testo">{piano.nomeIt}</Link>
         <span className="text-[12px] text-text-muted">{piano.arcanaNome} · livello {piano.livello}</span>
         {modificaTitolo ? (
           <form className="flex items-center gap-1" onSubmit={(e) => { e.preventDefault(); onCambiaTitolo(titolo); setModificaTitolo(false); }}>
@@ -134,7 +134,7 @@ export function PianiSalvati({ partitaId }: Props) {
     <div className="flex flex-col gap-3">
       <p className="m-0 text-[13px] text-text-secondary">
         I piani salvati dalla vista «Piano di fusione» restano qui con l'avanzamento ricalcolato sulla scorta di adesso: foglie già possedute, fusioni già fatte e passi eseguibili subito.
-        {obiettivoId && <> Filtro: solo i piani dell'obiettivo. <Link to="/partita?scheda=piani" className="text-primary">Tutti i piani</Link></>}
+        {obiettivoId && <> Filtro: solo i piani dell'obiettivo. <Link to="/partita?scheda=piani" className="text-primary-testo">Tutti i piani</Link></>}
       </p>
       {lista.errore && <div className="text-[13px] text-error">{lista.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void lista.ricarica()} /></div>}
       {!lista.dati && !lista.errore && <div className="flex justify-center py-6"><Spinner /></div>}

@@ -112,7 +112,7 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
                     nome={c.rango === 0 ? null : c.rango === 10 ? 'ui/rango-max' : `ui/rango-${c.rango}`}
                     alt={c.rango === 10 ? 'Rango MAX' : `Rango ${c.rango}`}
                     className="h-11 w-11 object-contain"
-                    fallback={<span className={`font-display text-[28px] leading-none tabular-nums ${c.rango === 10 ? 'text-primary' : ''}`}>{c.rango === 10 ? 'MAX' : c.rango}</span>}
+                    fallback={<span className={`font-display text-[28px] leading-none tabular-nums ${c.rango === 10 ? 'text-primary-testo' : ''}`}>{c.rango === 10 ? 'MAX' : c.rango}</span>}
                   />
                 </AnelloAvanzamento>
               </div>
@@ -131,7 +131,7 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
                       <strong className="tabular-nums font-display text-[18px]">{formattaPunti(c.punti)}</strong>
                       <span className="text-text-secondary"> / {c.puntiNecessari} verso il {prossimo}</span>
                       {' · '}
-                      {c.mancanti === 0 ? <strong className="text-primary">soglia raggiunta</strong> : <span className="text-text-secondary">mancano <strong className="text-text">{formattaPunti(c.mancanti ?? 0)}</strong></span>}
+                      {c.mancanti === 0 ? <strong className="text-primary-testo">soglia raggiunta</strong> : <span className="text-text-secondary">mancano <strong className="text-text">{formattaPunti(c.mancanti ?? 0)}</strong></span>}
                     </>
                   ) : (
                     <span className="text-text-secondary">

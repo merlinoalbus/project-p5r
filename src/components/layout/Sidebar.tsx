@@ -41,7 +41,7 @@ export function Sidebar() {
               className={({ isActive }) =>
                 `touch voce-menu flex items-center gap-3 px-3 py-2 rounded-md text-[18px] no-underline transition-colors ${
                   isActive
-                    ? 'bg-primary-bg text-primary font-semibold'
+                    ? 'bg-primary-bg text-primary-testo font-semibold'
                     : 'text-text-secondary hover:bg-bg-tertiary hover:text-text'
                 }`
               }

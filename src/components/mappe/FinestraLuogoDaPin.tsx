@@ -196,11 +196,11 @@ export function FinestraLuogoDaPin({ spillo, mappa, partita, mappaRiletta, caric
     <div className="flex min-w-0 flex-col gap-3 text-[13px]">
       {ricevuta && <div role="status" className="flex flex-col gap-1"><strong>Luogo creato e collegato: {ricevuta.luogo.nome}.</strong>
         <span>La ricevuta conferma la creazione. La rilettura della vista è un’operazione separata.</span>
-        <Link className="touch inline-flex items-center text-primary" to={casaLuogo(ricevuta.luogo.chiave)}>Apri il luogo</Link></div>}
+        <Link className="touch inline-flex items-center text-primary-testo" to={casaLuogo(ricevuta.luogo.chiave)}>Apri il luogo</Link></div>}
       {fase === 'incerto' && <p role="alert" className="m-0">Esito del salvataggio non confermato. Rileggi lo stato del pin prima di procedere: il tentativo non viene ripetuto.</p>}
       {errore && <p role="alert" className="m-0 break-words">{errore}</p>}
       {erroreLettura && <p role="alert" className="m-0 break-words">{ricevuta ? 'Luogo creato, vista non aggiornata. ' : 'Stato corrente non verificabile. '}{erroreLettura}</p>}
-      {riscontro && <div role="status" className="flex flex-col gap-1"><p className="m-0">{riscontro.testo}</p>{riscontro.casa && <Link className="touch inline-flex items-center text-primary" to={riscontro.casa}>Apri il luogo osservato</Link>}</div>}
+      {riscontro && <div role="status" className="flex flex-col gap-1"><p className="m-0">{riscontro.testo}</p>{riscontro.casa && <Link className="touch inline-flex items-center text-primary-testo" to={riscontro.casa}>Apri il luogo osservato</Link>}</div>}
       {occupato && <p role="status" className="m-0">{fase === 'salvataggio' ? 'Salvataggio in corso…' : lettura ? 'Rilettura in corso…' : 'Preparazione dell’anteprima…'}</p>}
       {!ricevuta && <fieldset className="m-0 flex min-w-0 flex-col gap-2 border-0 p-0" disabled={occupato || bloccoEsito}>
         <legend className="mb-2 font-semibold">Nuovo luogo</legend>
@@ -227,7 +227,7 @@ export function FinestraLuogoDaPin({ spillo, mappa, partita, mappaRiletta, caric
         <h4 className="m-0 text-[14px]">Luoghi già presenti nel quartiere ({anteprima.dto.luoghiEsistenti.length})</h4>
         {anteprima.dto.luoghiEsistenti.length === 0 ? <p className="m-0">Non risultano altri luoghi nel quartiere.</p>
           : <ul className="m-0 flex min-w-0 flex-col gap-1 pl-5">{anteprima.dto.luoghiEsistenti.map(l => <li className="break-words" key={l.chiave}>
-            {l.casa && !occupato ? <Link className="text-primary" to={l.casa} onClick={e => { if (mutazionePendente.current) e.preventDefault(); }}>{l.nome}</Link> : <span>{l.nome}</span>}
+            {l.casa && !occupato ? <Link className="text-primary-testo" to={l.casa} onClick={e => { if (mutazionePendente.current) e.preventDefault(); }}>{l.nome}</Link> : <span>{l.nome}</span>}
             {` · ${eTipoLuogo(l.tipo) ? definizioneTipoLuogo(l.tipo).nome : l.tipo} · ${l.area?.nome ?? 'Da collocare'}${l.nascosto ? ' · nascosto' : ''}`}
           </li>)}</ul>}
         <p className="m-0 text-text-muted">Controlla l’elenco prima di creare un altro luogo. Nessuno di questi viene collegato automaticamente.</p>

@@ -30,7 +30,7 @@ interface Props {
 
 /** Lo stato sintetico della scheda: una sola indicazione per Confidente, nell'ordine di priorità del progetto. */
 function StatoSintetico({ c }: { c: ConfidentePartitaDto }) {
-  if (c.rango === 10) return <span className="riga-confidente__stato text-primary font-semibold">Rango massimo</span>;
+  if (c.rango === 10) return <span className="riga-confidente__stato text-primary-testo font-semibold">Rango massimo</span>;
   if (c.bloccato) {
     return (
       <span className="riga-confidente__stato line-clamp-2" title={c.bloccato.motivi.join(' · ')}>
@@ -39,7 +39,7 @@ function StatoSintetico({ c }: { c: ConfidentePartitaDto }) {
       </span>
     );
   }
-  if (sogliaRaggiunta(c)) return <span className="riga-confidente__stato text-primary font-semibold">Pronto per il rango {c.rango + 1}</span>;
+  if (sogliaRaggiunta(c)) return <span className="riga-confidente__stato text-primary-testo font-semibold">Pronto per il rango {c.rango + 1}</span>;
   if (aPuntiDi(c)) {
     return (
       <span className="riga-confidente__stato tabular-nums text-text-secondary">
@@ -78,7 +78,7 @@ export function RigaConfidente({ c, selezionata, oggi, motivoOggi, onScegli }: P
               nome={c.rango === 0 ? null : c.rango === 10 ? 'ui/rango-max' : `ui/rango-${c.rango}`}
               alt={c.rango === 10 ? 'Rango MAX' : `Rango ${c.rango}`}
               className="h-9 w-9 object-contain"
-              fallback={<span className={`font-display text-[22px] leading-none tabular-nums ${c.rango === 10 ? 'text-primary' : ''}`}>{c.rango === 10 ? 'MAX' : c.rango}</span>}
+              fallback={<span className={`font-display text-[22px] leading-none tabular-nums ${c.rango === 10 ? 'text-primary-testo' : ''}`}>{c.rango === 10 ? 'MAX' : c.rango}</span>}
             />
           </AnelloAvanzamento>
         </span>

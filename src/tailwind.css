@@ -45,10 +45,15 @@
 
   --color-text: #ececf1;
   --color-text-secondary: #a3a3b3;
-  --color-text-muted: #6f6f80;
+  /* 2026-10-24 (lotto A): #6f6f80 stava fra 3,2:1 e 4,0:1 sugli sfondi, sotto l'AA (4,5:1) per i testi da 11–13 px che lo usano;
+     #8e8ea0 fa almeno 4,8:1 anche sulla superficie e resta sotto il testo secondario, che conserva il suo stacco */
+  --color-text-muted: #8e8ea0;
 
   --color-primary: #e5352b;
   --color-primary-hover: #ff4d42;
+  /* il rosso usato come TESTO (scritte, link, etichette attive): #e5352b sui fondi scuri fa 3,6–4,3:1; questo fa almeno 4,7:1 anche
+     sul chip rosso trasparente. Fondi, bordi, barre e tasselli restano su --color-primary */
+  --color-primary-testo: #ff6359;
   --color-primary-bg: rgba(229, 53, 43, 0.14);
   /* oro dei suggerimenti del giorno (12.4) */
   --color-oro: #f5c542;
@@ -183,16 +188,16 @@
   }
   .btn::before { inset: 0; background: var(--btn-bordo); }
   .btn::after { inset: 1px; background: var(--btn-sfondo); }
-  .btn:disabled { opacity: 1; cursor: not-allowed; }
+  .btn:disabled, .btn[aria-disabled="true"] { opacity: 1; cursor: not-allowed; }
   .btn:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
   .btn-primary { --btn-sfondo: var(--color-primary); --btn-bordo: var(--color-primary); color: var(--color-text-on-primary); }
-  .btn-primary:hover:not(:disabled) { --btn-sfondo: var(--color-primary-hover); --btn-bordo: var(--color-primary-hover); }
+  .btn-primary:hover:not(:disabled):not([aria-disabled="true"]) { --btn-sfondo: var(--color-primary-hover); --btn-bordo: var(--color-primary-hover); }
   .btn-secondary { --btn-sfondo: var(--color-surface); --btn-bordo: var(--color-border); color: var(--color-text); }
-  .btn-secondary:hover:not(:disabled) { --btn-sfondo: var(--color-bg-tertiary); --btn-bordo: var(--color-primary); }
+  .btn-secondary:hover:not(:disabled):not([aria-disabled="true"]) { --btn-sfondo: var(--color-bg-tertiary); --btn-bordo: var(--color-primary); }
   .btn-ghost { color: var(--color-text-secondary); }
-  .btn-ghost:hover:not(:disabled) { color: var(--color-text); --btn-sfondo: rgba(255, 255, 255, 0.05); }
+  .btn-ghost:hover:not(:disabled):not([aria-disabled="true"]) { color: var(--color-text); --btn-sfondo: rgba(255, 255, 255, 0.05); }
   .btn-danger { color: var(--color-error); --btn-bordo: rgba(239, 68, 68, 0.45); }
-  .btn-danger:hover:not(:disabled) { --btn-sfondo: rgba(239, 68, 68, 0.12); }
+  .btn-danger:hover:not(:disabled):not([aria-disabled="true"]) { --btn-sfondo: rgba(239, 68, 68, 0.12); }
   /* L'altezza c'era gia'; mancava la larghezza. Un pulsante con dentro un solo carattere — la
      freccia che inverte l'ordinamento — misurava 35 px, e col dito un bersaglio e' quadrato:
      44 di alto e 35 di largo e' comunque un bersaglio da 35. */
@@ -600,7 +605,7 @@
      bersaglio da 41). Prima le regole qui le fissavano a 30-40 px e un blocco in coda al foglio, fuori dal layer, le
      riportava a 44 (rilievo R8‴ della verifica completa). */
   .visore-mappa__briciola { background: none; border: 0; padding: 4px 2px; color: var(--color-text-secondary); cursor: pointer; font: inherit; text-decoration: underline dotted; text-underline-offset: 3px; min-height: 44px; min-width: 44px; }
-  .visore-mappa__briciola:hover { color: var(--color-primary); }
+  .visore-mappa__briciola:hover { color: var(--color-primary-testo); }
 
   /* Una tappa del percorso: il `display` sta qui e non in una utility, che starebbe in un layer più forte e
      impedirebbe alla barra compatta di nasconderla. */
@@ -953,7 +958,7 @@
   .riga-persona__nome { display: flex; align-items: center; gap: 6px; min-width: 0; font-family: var(--font-display); font-size: 14px; letter-spacing: .03em; }
   .riga-persona__arcano { font-size: 11px; color: var(--color-text-muted); }
   .riga-persona__skill { display: flex; flex-wrap: wrap; gap: 2px; }
-  .riga-persona__registrata { display: inline-flex; color: var(--color-primary); flex-shrink: 0; }
+  .riga-persona__registrata { display: inline-flex; color: var(--color-primary-testo); flex-shrink: 0; }
   .riga-persona__livello { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; min-width: 34px; line-height: 1; }
   .riga-persona__livello > span { font-family: var(--font-display); font-size: 22px; }
   .riga-persona__livello > small { font-size: 9px; font-weight: 600; color: var(--color-text-muted); }
@@ -964,7 +969,7 @@
   .quadrato-skill { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border: 1px solid var(--color-border); border-radius: 3px; }
   .posto-libero { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 56px; border: 1px dashed var(--color-text-muted); border-radius: var(--radius-md); font-size: 12px; color: var(--color-text-muted); }
   .posto-libero--aggiungi { background: none; cursor: pointer; color: var(--color-text); font-weight: 600; }
-  .posto-libero--aggiungi:hover { border-color: var(--color-primary); color: var(--color-primary); }
+  .posto-libero--aggiungi:hover { border-color: var(--color-primary); color: var(--color-primary-testo); }
   /* il dettaglio (nel cassetto) si divide in due colonne quando è largo abbastanza (cassetto da 768 px in su): a sinistra il level up
      («Verso il rango N»: requisiti e moltiplicatori; poi Risposta ♪, regalo, uscita), a destra le risposte migliori; in una colonna sola
      (telefono) le risposte stanno fra i requisiti e le note ♪: prima si legge la risposta, poi si registra */
@@ -1406,7 +1411,7 @@
   .chip--attivo {
     --chip-sfondo: color-mix(in srgb, var(--color-primary) 18%, var(--color-bg-secondary));
     --chip-bordo: var(--color-primary);
-    color: var(--color-primary);
+    color: var(--color-primary-testo);
   }
   /* L3: un'area del Palazzo toccata dall'infiltrazione aperta (evidenziata, ma non scelta) */
   .chip--toccata { --chip-bordo: color-mix(in srgb, var(--color-primary) 60%, transparent); }
@@ -1517,7 +1522,7 @@
     background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-right: 0; border-radius: 8px 0 0 8px;
     color: var(--color-text-secondary); font-family: var(--font-display); text-transform: uppercase; letter-spacing: .06em; font-size: 13px;
   }
-  .home-linguetta:hover, .home-linguetta:focus-visible { color: var(--color-primary); }
+  .home-linguetta:hover, .home-linguetta:focus-visible { color: var(--color-primary-testo); }
   .home-linguetta__testo { writing-mode: vertical-rl; transform: rotate(180deg); }
   @media (hover: hover) and (pointer: fine) {
     .home-linguetta:hover ~ .home-mappa--a-scomparsa, .home-griglia--mappa-chiusa .home-mappa--a-scomparsa:hover {
@@ -1545,15 +1550,13 @@
   .home-carta__stella { display: block; flex: 0 0 auto; width: clamp(104px, 16vh, 132px); aspect-ratio: 1 / 1; }
   /* il rientro lascia dentro il riquadro le targhette dei vertici, che escono dal poligono di circa un 15% della sua larghezza */
   .home-carta__stella-interno { width: 100%; height: 100%; padding: 14%; box-sizing: border-box; }
-  .home-doti { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(max-content, 1fr); gap: 6px; max-width: 640px; min-width: 0;
-    overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; -ms-overflow-style: none; }
-  .home-doti::-webkit-scrollbar { display: none; }
+  /* 2026-10-24 (lotto A): le sei tessere vanno a capo invece di scorrere nascoste — in una colonna da 640 px «Scorta» non si
+     vedeva mai, nemmeno a 1440 px con mezza scheda vuota, e niente diceva che ce n'era dell'altro */
+  .home-doti { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 6px; max-width: 760px; min-width: 0; }
   .home-doti .kpi-tile--compatto { padding: 4px 10px; gap: 1px; }
   .home-doti .kpi-label { white-space: nowrap; overflow-wrap: normal; hyphens: none; }
-  .home-fila { display: flex; flex-wrap: nowrap; align-items: center; gap: 6px; min-width: 0;
-    overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; -ms-overflow-style: none; }
-  .home-fila::-webkit-scrollbar { display: none; }
-  .home-fila > * { flex: 0 0 auto; white-space: nowrap; }
+  .home-fila { align-items: center; min-width: 0; }
+  .home-fila > * { white-space: nowrap; }
   @media (max-width: 767px) {
     .home-carta__riga { flex-direction: column; align-items: stretch; gap: 8px; }
     .home-carta__stella { order: 2; align-self: center; width: min(64vw, 260px); }
@@ -1575,9 +1578,15 @@
     scrollbar-width: none;
     -ms-overflow-style: none;
     padding-bottom: 2px;
-    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 10px, #000 calc(100% - 22px), transparent 100%);
-    mask-image: linear-gradient(to right, transparent 0, #000 10px, #000 calc(100% - 22px), transparent 100%);
+    /* la sfumatura sta solo dal lato dove la fila continua (`data-prima`/`data-dopo`, da FilaScorrevole) ed è larga abbastanza
+       da leggersi come «c'è dell'altro»: prima era fissa a 22 px su entrambi i lati, anche a fila intera, e non si notava */
+    --fila-prima: 0px;
+    --fila-dopo: 0px;
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fila-prima), #000 calc(100% - var(--fila-dopo)), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 var(--fila-prima), #000 calc(100% - var(--fila-dopo)), transparent 100%);
   }
+  .fila-scorrevole[data-prima] { --fila-prima: 40px; }
+  .fila-scorrevole[data-dopo] { --fila-dopo: 48px; }
   .fila-scorrevole::-webkit-scrollbar { display: none; }
   .fila-scorrevole > * { flex: 0 0 auto; scroll-snap-align: start; }
   @media (min-width: 768px) {
@@ -1598,8 +1607,8 @@
       padding-bottom: 4px;
       scrollbar-width: thin;
       scrollbar-color: color-mix(in srgb, var(--color-primary) 75%, transparent) transparent;
-      -webkit-mask-image: linear-gradient(to right, transparent 0, #000 10px, #000 calc(100% - 22px), transparent 100%);
-      mask-image: linear-gradient(to right, transparent 0, #000 10px, #000 calc(100% - 22px), transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fila-prima), #000 calc(100% - var(--fila-dopo)), transparent 100%);
+      mask-image: linear-gradient(to right, transparent 0, #000 var(--fila-prima), #000 calc(100% - var(--fila-dopo)), transparent 100%);
     }
     .fila-scorrevole.fila-scorrevole--sempre::-webkit-scrollbar { display: block; height: 6px; }
   }
@@ -1723,7 +1732,7 @@
   .emblema { display: inline-flex; align-items: center; justify-content: center; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.65)); }
   .emblema--riserva {
     background: var(--color-bg-tertiary);
-    color: var(--color-primary);
+    color: var(--color-primary-testo);
     border: 2px solid var(--color-border);
     clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
     line-height: 1;
@@ -2008,7 +2017,7 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .progressi-tessera__nome { font-family:var(--font-display); font-size:13px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text-secondary); }
 .progressi-tessera__valore { font-family:var(--font-display); font-size:26px; line-height:1.1; }
 .progressi-tessera__dettaglio { font-size:12px; line-height:1.3; color:var(--color-text-secondary); overflow-wrap:normal; word-break:normal; }
-.progressi-tessera--attiva .progressi-tessera__nome { color:var(--color-primary); }
+.progressi-tessera--attiva .progressi-tessera__nome { color:var(--color-primary-testo); }
 @media (min-width: 640px) { .progressi-tessera__valore { font-size:28px; } }
 /* telefono: DOPO le regole di base (stessa specificità: vince l'ultima). Una sola fila di quattro tessere compatte;
    il dettaglio resta ai lettori di schermo dentro la tessera e si legge per intero, una volta, nella riga
@@ -2034,7 +2043,7 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 @media (min-width: 1280px) { .progressi-attivita { columns:2; } }
 .progressi-attivita__gruppo { break-inside:avoid; margin-bottom:16px; display:flex; flex-direction:column; gap:4px; }
 .progressi-attivita__riga { display:flex; flex-wrap:wrap; align-items:center; gap:12px; min-height:52px; padding:4px 6px; border-bottom:1px solid var(--color-border); font-size:14px; }
-.progressi-attivita__azione { white-space:nowrap; flex-shrink:0; min-height:44px; padding:0 12px; font-size:13px; border:1px solid var(--color-border); background:var(--color-bg-tertiary); color:var(--color-primary); cursor:pointer; }
+.progressi-attivita__azione { white-space:nowrap; flex-shrink:0; min-height:44px; padding:0 12px; font-size:13px; border:1px solid var(--color-border); background:var(--color-bg-tertiary); color:var(--color-primary-testo); cursor:pointer; }
 .progressi-auto { display:inline-flex; align-items:center; padding:1px 5px; border:1px solid var(--color-border); font-size:12px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--color-text-secondary); background:var(--color-bg-tertiary); }
 .progressi-avvenuti { border-top:1px solid var(--color-border); padding-top:4px; }
 .progressi-barra { display:block; height:6px; background:var(--color-bg-tertiary); border:1px solid var(--color-border); overflow:hidden; }
@@ -2213,7 +2222,7 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 /* il riquadro «Spuntando succede» e le file di scelta brevi (note ♪, rango atteso, sessioni) */
 .effetto-riquadro { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 10px; border-radius: var(--radius-md);
   border: 1px solid color-mix(in srgb, var(--color-primary) 55%, var(--color-border)); background: color-mix(in srgb, var(--color-primary) 7%, transparent); }
-.effetto-riquadro__titolo { font-family: var(--font-display); font-size: 17px; line-height: 1; text-transform: uppercase; letter-spacing: .04em; color: var(--color-primary); }
+.effetto-riquadro__titolo { font-family: var(--font-display); font-size: 17px; line-height: 1; text-transform: uppercase; letter-spacing: .04em; color: var(--color-primary-testo); }
 .fila-scelta { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
 .fila-scelta__voce { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 0 10px; border: 1px solid var(--color-border);
   border-radius: var(--radius-sm, 4px); background: var(--color-bg-tertiary); color: var(--color-text); font: inherit; font-size: 14px; cursor: pointer; }
@@ -2226,4 +2235,4 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .posto-voce__maniglia:active { cursor: grabbing; }
 .posto-voce__maniglia:focus-visible { outline: 2px solid white; outline-offset: -2px; }
 .posto-voce__questa--trascinata { position: relative; z-index: 2; box-shadow: 0 10px 24px rgba(0, 0, 0, .6); outline: 1px solid var(--color-primary); }
-.posto-voce__slot { display: flex; align-items: center; justify-content: center; min-height: 28px; border: 2px dashed var(--color-primary); border-radius: 6px; font-size: 11px; color: var(--color-primary); }
+.posto-voce__slot { display: flex; align-items: center; justify-content: center; min-height: 28px; border: 2px dashed var(--color-primary); border-radius: 6px; font-size: 11px; color: var(--color-primary-testo); }

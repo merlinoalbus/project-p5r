@@ -65,7 +65,7 @@ export function CompendioPersonale({ partitaId }: Props) {
                 <input type="checkbox" className="w-6 h-6" checked={!!r} disabled={occupato === p.id} onChange={(e) => void cambia(p.id, e.target.checked)} aria-label={`${p.nomeIt} registrata`} />
               </label>
               <span className="w-9 shrink-0 text-right text-[12px] text-text-muted">Liv. {p.livello}</span>
-              <Link to={`/compendio/persona/${p.id}`} className="touch flex items-center font-semibold no-underline text-text hover:text-primary flex-1 basis-[10rem] min-w-0 break-words">{p.nomeIt}{p.nomeIt !== p.nome && <span className="text-[12px] font-normal text-text-muted"> {p.nome}</span>}</Link>
+              <Link to={`/compendio/persona/${p.id}`} className="touch flex items-center font-semibold no-underline text-text hover:text-primary-testo flex-1 basis-[10rem] min-w-0 break-words">{p.nomeIt}{p.nomeIt !== p.nome && <span className="text-[12px] font-normal text-text-muted"> {p.nome}</span>}</Link>
               <span className="chip shrink-0">{p.arcanaNome}</span>
               {r?.livelloRegistrato !== null && r?.livelloRegistrato !== undefined && (
                 <span className="text-[12px] text-text-secondary min-w-0 max-w-full break-words" title={`Istantanea registrata: livello ${r.livelloRegistrato}${r.skill.length ? ` · skill: ${r.skill.map((s) => s.nomeIt).join(', ')}` : ''}${r.tratto ? ` · tratto ${r.tratto.nomeIt}` : ''}${r.carica ? ' · carica' : ''}`}>

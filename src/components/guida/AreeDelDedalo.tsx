@@ -160,7 +160,7 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, onApriPozzo, par
             <p className="m-0 whitespace-pre-wrap pt-1 text-text-secondary">{dedalo.descrizione}</p>
           </details>
         )}
-        {!partitaId && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary">partita</Link> per segnare timbri, catture, Richieste e Trama.</span>}
+        {!partitaId && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary-testo">partita</Link> per segnare timbri, catture, Richieste e Trama.</span>}
       </section>
 
       {/* ---- Le schede delle aree: restano in vista scorrendo (sul telefono e sul tablet scorre la pagina, che ha 16 px di

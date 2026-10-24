@@ -134,7 +134,7 @@ export function PersonaDellaPartita({ partitaId }: Props) {
             return (
               <li key={p.id} className="flex items-center gap-2 py-1 flex-wrap">
                 <span className="w-9 text-right text-[12px] text-text-muted" title="Livello base">Liv. {p.livello}</span>
-                <Link to={`/compendio/persona/${p.id}`} className="touch flex items-center font-semibold no-underline text-text hover:text-primary flex-1 min-w-[140px]">
+                <Link to={`/compendio/persona/${p.id}`} className="touch flex items-center font-semibold no-underline text-text hover:text-primary-testo flex-1 min-w-[140px]">
                   {p.nomeIt}{p.nomeIt !== p.nome && <span className="text-[12px] font-normal text-text-muted"> {p.nome}</span>}
                 </Link>
                 <span className="chip">{p.arcanaNome}</span>

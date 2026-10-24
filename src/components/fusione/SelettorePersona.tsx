@@ -54,7 +54,7 @@ export function SelettorePersona({ etichetta, persone, scelta, onScegli, senzaRa
         <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light max-h-[280px] area-scorrevole" role="listbox" aria-label={`Risultati per ${etichetta}`}>
           {candidate.map((p) => (
             <li key={p.id} role="option" aria-selected={false}>
-              <button type="button" className="w-full text-left flex items-center gap-3 py-2 bg-transparent border-none text-text cursor-pointer hover:text-primary touch" onClick={() => { onScegli(p); setQ(''); }}>
+              <button type="button" className="w-full text-left flex items-center gap-3 py-2 bg-transparent border-none text-text cursor-pointer hover:text-primary-testo touch" onClick={() => { onScegli(p); setQ(''); }}>
                 <span className="w-9 text-right text-[12px] text-text-muted">Liv. {p.livello}</span>
                 <span className="font-semibold flex-1 truncate">{p.nomeIt}{p.nomeIt !== p.nome && <span className="text-[12px] font-normal text-text-muted"> {p.nome}</span>}</span>
                 <span className="chip">{p.arcanaNome}</span>

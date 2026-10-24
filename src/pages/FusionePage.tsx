@@ -97,7 +97,7 @@ export function FusionePage() {
     <div className="flex flex-col gap-4">
       <IntestazionePagina titolo="Fusione" sottotitolo={<>Fondi due Persona, scopri come ottenerne una o cosa produce con le altre; i contenuti scaricabili considerati sono quelli della partita attiva{attiva ? ` («${attiva.nome}», protagonista al livello ${attiva.livelloProtagonista})` : ' (nessuna: solo contenuti base)'}. Le Persona nella scorta sono evidenziate.</>} />
       <PannelloVelluto velluto={velluto.dati ?? null} onCambiaAllarme={(v) => void cambiaAllarme(v)} />
-      <FilaScorrevole role="tablist" aria-label="Sezioni della fusione">
+      <FilaScorrevole role="group" aria-label="Sezioni della fusione">
         {visteMostrate.map(([k, l, icona]) => (
           // L'immagine sopra la parola, come nelle schede della Partita: l'iconcina da 16 px
           // accanto a un'etichetta lunga era un dettaglio che spariva, e otto pastiglie di testo
@@ -141,7 +141,7 @@ export function FusionePage() {
                 {risultato ? (
                   <>
                     <div className="text-[12px] text-text-muted uppercase tracking-wide">Arcano risultante</div>
-                    <div className="text-3xl font-black text-primary">{nome(risultato)}</div>
+                    <div className="text-3xl font-black text-primary-testo">{nome(risultato)}</div>
                     {rigaCoppia && (
                       <div className="flex justify-center mt-1">
                         <ModificaGuida tipo="fusione-arcana" chiave={`${rigaCoppia.a}:${rigaCoppia.b}`} cosa={`la fusione ${nome(rigaCoppia.a)} + ${nome(rigaCoppia.b)}`} onSalvato={() => void ricarica()} />

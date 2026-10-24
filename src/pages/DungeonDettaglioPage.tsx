@@ -100,7 +100,7 @@ function LineaDelTempo({ date, memento = false }: { date: DungeonDettaglioDto['d
     // `breve`: l'etichetta dei chip stretti (sotto i 1024 px) quando il valore è una frase; ha senso da sola (UX3-12)
     { chiave: 'sblocco', etichetta: 'Si apre', breve: 'Si apre', valore: date.sblocco, tono: 'bg-white/10 text-text', segno: 'si-apre' as const },
     { chiave: 'furto', etichetta: 'Furto consigliato', breve: 'Furto', valore: date.furtoConsigliato, tono: 'bg-[#f5c542]/15 text-[#f5c542]', segno: 'furto' as const },
-    { chiave: 'scadenza', etichetta: 'Scade', breve: 'Scade', valore: date.scadenza, tono: 'bg-primary/20 text-primary', segno: 'scade' as const },
+    { chiave: 'scadenza', etichetta: 'Scade', breve: 'Scade', valore: date.scadenza, tono: 'bg-primary/20 text-primary-testo', segno: 'scade' as const },
   ].filter((t) => !!t.valore);
   if (tappe.length === 0) return null;
   return (
@@ -164,7 +164,7 @@ function DedaloNelBinario({ a, scelto, suggerito, onScegli, fila }: { a: AreaDun
     <button type="button" aria-pressed={scelto} onClick={onScegli} title={a.nome}
       className={`touch flex w-full flex-col gap-1 rounded-md border px-2 py-1.5 text-left transition-colors ${scelto ? 'border-primary bg-primary-bg text-text' : 'border-transparent text-text-secondary hover:border-border hover:bg-white/[0.05] hover:text-text'} ${classiSuggerito(suggerito)}`}>
       <span className="flex items-baseline gap-1.5 text-[13px] leading-tight">
-        <span className={`w-4 shrink-0 text-right font-display ${scelto ? 'text-primary' : 'text-text-muted'}`}>{a.ordine + 1}</span>
+        <span className={`w-4 shrink-0 text-right font-display ${scelto ? 'text-primary-testo' : 'text-text-muted'}`}>{a.ordine + 1}</span>
         <span className="min-w-0 flex-1 font-semibold">{nomeBreve(a.nome)}{completato && <>{' '}<SpuntaCompletata dimensione={12} /><TestoCompletata /></>}</span>
         <span className="shrink-0 text-[11px] tabular-nums text-text-muted">{quota !== null ? `${Math.round(quota * 100)}%` : `${a.dedalo?.obiettivi.totale ?? 0} el.`}</span>
       </span>
@@ -1088,7 +1088,7 @@ export function DungeonDettaglioPage() {
                     </div>
                   </details>
                 )}
-                {!partitaId && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary">partita</Link> per segnare quel che raccogli.</span>}
+                {!partitaId && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary-testo">partita</Link> per segnare quel che raccogli.</span>}
                 {/* L4 (§4.3): i pin fatti con una voce non fatta, da prima dell'aggiornamento, coi due gesti che li sistemano */}
                 {quanteDaVerificare > 0 && partitaId && (
                   <details ref={sezioneDaVerificare} id="da-verificare" className="text-[12px]">

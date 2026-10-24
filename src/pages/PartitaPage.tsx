@@ -86,7 +86,7 @@ export function PartitaPage() {
             </FilaScorrevole>
           } />
           {/* una riga sola che scorre anche su tablet e desktop: a capo le 15 piastrelle facevano due righe e l'intestazione superava il 30% */}
-          <FilaScorrevole role="tablist" aria-label="Schede della partita" className="fila-scorrevole--sempre fila-schede-partita">
+          <FilaScorrevole role="group" aria-label="Schede della partita" className="fila-scorrevole--sempre fila-schede-partita">
             {SCHEDE.map((s) => (
               // Prima l'immagine, poi la parola: erano pastiglie di testo con un'iconcina da 16 px
               // accanto, e in dieci schede si leggevano tutte uguali. Ora l'icona e' il segno che

@@ -54,7 +54,7 @@ export function Calcolatore({ persone, partitaId, inScorta, inizialeA, inizialeB
               <ImmagineEntita ambito="persona" chiave={r.risultato.nome} etichetta={r.risultato.nomeIt} dimensione={120} forma="orizzontale" />
               <div className="flex-1 min-w-[200px]">
                 <div className="text-[12px] uppercase tracking-wide text-text-muted">Risultato</div>
-                <Link to={`/compendio/persona/${r.risultato.id}`} className="text-2xl font-black text-primary no-underline">{r.risultato.nomeIt}</Link>
+                <Link to={`/compendio/persona/${r.risultato.id}`} className="text-2xl font-black text-primary-testo no-underline">{r.risultato.nomeIt}</Link>
                 {r.risultato.nomeIt !== r.risultato.nome && <span className="text-[13px] text-text-muted ml-2">{r.risultato.nome}</span>}
                 <div className="text-[13px] text-text-secondary mt-1">{r.risultato.arcanaNome} · livello {r.risultato.livello}{r.risultato.speciale ? ' · fusione speciale' : ''}</div>
                 <div className="text-[13px] text-text-secondary">Tipo: {r.tipo === 'normale' ? 'normale' : r.tipo === 'stesso-arcano' ? 'stesso arcano' : r.tipo === 'tesoro' ? 'con Demone del Tesoro' : 'speciale'} · costo stimato <strong className="text-text">{formattaYen(r.costo)}</strong>{(esito?.sconto ?? 0) > 0 && <span className="text-text-muted"> (sconto Registro {esito?.sconto}%)</span>}</div>

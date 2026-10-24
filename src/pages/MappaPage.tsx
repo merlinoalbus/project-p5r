@@ -213,7 +213,7 @@ function Griglia({ mappe, nome, etichetta, titoli, onScendi, versioni }: { mappe
               contenuto, se ci sono. Il titolo tiene almeno 7rem: in una carta stretta (telefono) il riquadro va sotto il titolo invece di
               schiacciarlo sillaba per sillaba. */}
           <span className="flex flex-wrap items-start justify-between gap-x-2 gap-y-1">
-            <span className="min-w-0 flex-[1_1_7rem] break-words text-[13px] font-semibold leading-tight group-hover:text-primary">{titolo}</span>
+            <span className="min-w-0 flex-[1_1_7rem] break-words text-[13px] font-semibold leading-tight group-hover:text-primary-testo">{titolo}</span>
             <span className="chip chip--attivo shrink-0 text-[11px]">{testoPin(m.numeroSpilli)}</span>
           </span>
           {(nVersioni > 1 || dentro) && <span className="text-[11px] text-text-muted">

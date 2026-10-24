@@ -122,7 +122,7 @@ function Briciole({ sezione, percorso, vai }: { sezione: Sezione; percorso: Nodo
             {i > 0 && <span aria-hidden className="text-text-secondary">›</span>}
             {ultima
               ? <span aria-current="page" className="inline-flex min-h-[44px] items-center px-2 font-semibold text-text">{v.nome}</span>
-              : <button type="button" className="touch inline-flex items-center rounded px-2 text-text-secondary hover:text-primary" onClick={() => vai(v.ramo)}>{v.nome}</button>}
+              : <button type="button" className="touch inline-flex items-center rounded px-2 text-text-secondary hover:text-primary-testo" onClick={() => vai(v.ramo)}>{v.nome}</button>}
           </li>;
         })}
       </ol>

@@ -83,7 +83,7 @@ function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: D
         {!!d.oggettiRicompensa?.length && <OggettiCollegati oggetti={d.oggettiRicompensa} />}
         {/* Le risposte giuste, nell'ordine; per gli esami accanto a ogni risposta c'è il suo quesito. */}
         <ol className="m-0 p-0 list-none flex flex-col gap-0.5" aria-label="Risposte corrette">
-          {d.risposte.map((r, i) => <li key={i}>{r.domanda && <span className="text-text-secondary">{r.domanda} → </span>}<span className="text-primary font-semibold">{d.risposte.length > 1 && !r.domanda ? `${i + 1}. ` : !r.domanda ? '→ ' : ''}{r.testo}</span></li>)}
+          {d.risposte.map((r, i) => <li key={i}>{r.domanda && <span className="text-text-secondary">{r.domanda} → </span>}<span className="text-primary-testo font-semibold">{d.risposte.length > 1 && !r.domanda ? `${i + 1}. ` : !r.domanda ? '→ ' : ''}{r.testo}</span></li>)}
         </ol>
         {d.note && <div className="text-[12px] text-text-muted">{d.note}</div>}
         {d.chiave && <div className="mt-0.5"><CorreggiElemento tipo="domanda" chiave={d.chiave} onSalvato={onCorretta} /></div>}
@@ -141,7 +141,7 @@ export function DomandePage() {
       {d && (
         <div className="flex flex-col gap-4">
           <IntestazionePagina titolo="Domande in classe, esami e quiz in TV" sottotitolo={<>Le risposte giuste per ogni data di gioco. {partitaId ? `Nella partita «${attiva?.nome}» hai segnato ${d.fatte} domande su ${d.totale}; ` : 'Attiva una partita per segnare le domande fatte; '}
-              {partitaId && (d.dataGioco ? `data di gioco ${dataGiocoTesto(d.dataGioco)}.` : <>imposta la <Link to="/partita?scheda=riepilogo" className="text-primary">data di gioco</Link> nel Riepilogo per vedere il prossimo appuntamento.</>)}</>} />
+              {partitaId && (d.dataGioco ? `data di gioco ${dataGiocoTesto(d.dataGioco)}.` : <>imposta la <Link to="/partita?scheda=riepilogo" className="text-primary-testo">data di gioco</Link> nel Riepilogo per vedere il prossimo appuntamento.</>)}</>} />
 
           {/* Il prossimo appuntamento: un rimando, non un secondo elenco. Le righe sono evidenziate nel loro mese. */}
           {prossima && (
