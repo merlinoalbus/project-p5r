@@ -13,6 +13,7 @@ import { accendiFortunaDaVoce, spegniFortunaDaVoce } from './fortunaService.js';
 import { applicaEffettiDiStato, annullaEffettiDiStato, verificaEffettoDiStato } from './effettiDiStatoService.js';
 import { creaPropostaEffettoStorico, improntaDato, jsonCanonico, leggiJsonRegistro, leggiPropostePartita, nuovoUid, riconciliaBeneficiVoce, verificaBeneficio, saldoDoteVoce, trasferisciAttribuzioneDote } from './propostePartitaService.js';
 import { leggiRicevutaEffettiAzione } from './effettiAzioneService.js';
+import { confidentiAnnullatiAlVecchioModo, nuovaGenerazione, riconciliaRegistroDopoRipristino, senzaEventiGestiti, togliEventiDellaVoce } from './puntiCronologici.js';
 import { verificaEffetti } from './azioniStrutturateService.js';
 import { ATTIVITA_PESCA, REGOLA_PESCA, eAttivitaPesca, type NuovaSessionePesca, type RichiestaRegistraSessionePesca } from '../../shared/pesca.js';
 import { anteprimaPesca, confermaPesca, rimuoviFontePescaNellaTransazione } from './pescaService.js';
@@ -416,10 +417,18 @@ export function preparaRimozioneEffettiVoce(uid:string,porte:Pick<PorteEffettiLe
   const partite=new Set([...spunte.map((s)=>s.partita_id),...(prepared('SELECT DISTINCT partita_id FROM utente.effetto_applicato WHERE voce_uid=? UNION SELECT DISTINCT partita_id FROM utente.acquisto_provenienza WHERE voce_uid=?').all(uid,uid) as Array<{partita_id:number}>).map((r)=>r.partita_id)]);
   const validati=new Map(spunte.map((s)=>[s.partita_id,leggiRicevutaEffettiAzione(s.effetti_json)]));
   for(const p of partite)leggiRicevuteEffettiVoce(p,uid);
-  for(const p of partite)annullaEffettiVoce(p,uid,validati.get(p)??null,{...porte,applicaLegacy:()=>null});
+  // R10-11f: punti e rank up della voce stanno nel registro cronologico: si tolgono da lì (con ricalcolo) e non si annullano due volte; chi è disfatto col
+  // vecchio annullo riparte da una nuova base. Anche le righe del registro di partite senza spunta (orfane) se ne vanno con la voce.
+  for(const p of partite){
+    const ricevuta=validati.get(p)??null,tolti=togliEventiDellaVoce(p,uid);
+    annullaEffettiVoce(p,uid,senzaEventiGestiti(ricevuta,tolti),{...porte,applicaLegacy:()=>null});
+    for(const chiave of confidentiAnnullatiAlVecchioModo(ricevuta,tolti))nuovaGenerazione(p,chiave);
+  }
+  for(const r of prepared('SELECT DISTINCT partita_id FROM utente.punti_confidente_voce WHERE voce_uid=?').all(uid) as Array<{partita_id:number}>)togliEventiDellaVoce(r.partita_id,uid);
 }
 export function riconciliaEffettiDopoRipristino(p:number,uids:string[]):void {
   if(!getDb().inTransaction)throw new Error('Il ripristino richiede la transazione del cestino.');
+  riconciliaRegistroDopoRipristino(p,uids);
   const cause=prepared("SELECT DISTINCT causa_chiave FROM utente.da_applicare WHERE partita_id=? AND causa_tipo='voce' AND tipo<>'effetto-voce'").all(p) as Array<{causa_chiave:string}>;
   for(const c of cause){const [uid,e]=c.causa_chiave.split(':');if(uid&&e&&uids.includes(uid))riconciliaBeneficiVoce(p,uid,e);}
   // Una fotografia non riattiva i receipt durevoli già annullati. Una spunta ripristinata propone soltanto gli effetti mancanti.

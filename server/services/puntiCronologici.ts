@@ -162,5 +162,23 @@ export function nuovaGenerazione(partitaId: number, chiave: string): void {
     .run(s.rango, s.punti, s.sbloccato, nowIso(), partitaId, chiave);
 }
 
+/**
+ * Dopo il ripristino dal Cestino di una voce: il ripristino rimette la spunta e, con essa, le righe del registro, ma non è detto che abbia rimesso i
+ * valori del Confidente (se nel frattempo sono cambiati a mano, restano i nuovi). Le righe senza spunta si cancellano (orfane); per le altre la base
+ * riparte dai valori di adesso, e quelle righe non si ricalcolano più (la loro spunta si toglie con il vecchio annullo, dalla ricevuta). Così un
+ * ricalcolo successivo non riporta mai punti che lo stato non contiene.
+ */
+export function riconciliaRegistroDopoRipristino(partitaId: number, uids: readonly string[]): void {
+  for (const uid of uids) {
+    const chiavi = (prepared('SELECT DISTINCT confidente_chiave FROM utente.punti_confidente_voce WHERE partita_id = ? AND voce_uid = ?').all(partitaId, uid) as Array<{ confidente_chiave: string }>).map((r) => r.confidente_chiave);
+    if (chiavi.length === 0) continue;
+    if (!prepared('SELECT 1 FROM utente.spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').get(partitaId, uid)) {
+      prepared('DELETE FROM utente.punti_confidente_voce WHERE partita_id = ? AND voce_uid = ?').run(partitaId, uid);
+      continue;
+    }
+    for (const chiave of chiavi) nuovaGenerazione(partitaId, chiave);
+  }
+}
+
 /** Gli eventi di tutte le generazioni: serve al controllo di sola lettura di chi vuole vedere il registro di una partita. */
 export const eventiDelRegistro = (partitaId: number): number => (getDb().prepare('SELECT COUNT(*) AS n FROM utente.punti_confidente_voce WHERE partita_id = ?').get(partitaId) as { n: number }).n;
