@@ -51,7 +51,7 @@ export function aggiornaGiorno(data: string, mod: ModificaGiorno): GiornoModific
   if (JSON.stringify(nuovo) === JSON.stringify(prima)) return dto(r);
   getDb().transaction(() => {
     prepared(`UPDATE giorno SET meteo_giorno = ?, meteo_sera = ?, nota_meteo = ?, meteo_da_verificare = ?, trama = ?, vincoli_json = ?,
-      seed_json = COALESCE(seed_json, ?), updated_at = ? WHERE data = ?`)
+      seed_json = COALESCE(seed_json, ?), origine = 'utente', updated_at = ? WHERE data = ?`)
       .run(nuovo.meteo_giorno, nuovo.meteo_sera, nuovo.nota_meteo, nuovo.meteo_da_verificare, nuovo.trama, nuovo.vincoli_json, JSON.stringify(prima), nowIso(), data);
   })();
   invalidaCacheDiGioco();
@@ -68,7 +68,7 @@ export function ripristinaGiorno(data: string): GiornoModificabileDto {
     throw httpErrors.conflict('giorno-fotografia-illeggibile', 'La fotografia della guida di questo giorno non è leggibile: il giorno resta com’è.');
   }
   getDb().transaction(() => {
-    prepared(`UPDATE giorno SET meteo_giorno = ?, meteo_sera = ?, nota_meteo = ?, meteo_da_verificare = ?, trama = ?, vincoli_json = ?, seed_json = NULL, updated_at = ? WHERE data = ?`)
+    prepared(`UPDATE giorno SET meteo_giorno = ?, meteo_sera = ?, nota_meteo = ?, meteo_da_verificare = ?, trama = ?, vincoli_json = ?, seed_json = NULL, origine = 'seed', updated_at = ? WHERE data = ?`)
       .run(f.meteo_giorno ?? null, f.meteo_sera ?? null, f.nota_meteo ?? null, f.meteo_da_verificare, f.trama, f.vincoli_json, nowIso(), data);
   })();
   invalidaCacheDiGioco();
