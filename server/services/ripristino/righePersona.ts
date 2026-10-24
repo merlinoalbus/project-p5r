@@ -19,7 +19,7 @@ import { prepared } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
 import type { ValoreCampoCorrezione } from '../../../shared/types.js';
 import type { CampoDef } from './registro.js';
-import type { DefRiga, Valori } from './righe.js';
+import type { ContestoPropagazione, DefRiga, Valori } from './righe.js';
 
 const num = (v: ValoreCampoCorrezione | undefined): number => (typeof v === 'number' ? v : 0);
 const str = (v: ValoreCampoCorrezione | undefined): string | null => (typeof v === 'string' ? v : null);
@@ -153,6 +153,63 @@ function rimettiRighe(ricordate: Map<string, RigaTraduzione | null>): void {
   }
 }
 
+/** Registra le righe di `traduzione` toccate dalla scrittura e, in ripristino, rimette la resa italiana com'era se la skill è tornata quella della guida. */
+function scriviResaEPropaga(chiave: string, ctx: ContestoPropagazione): void {
+  const toccate = primaDellaScrittura;
+  primaDellaScrittura = new Map();
+  const ricordate = righeRicordate(ctx.traccia);
+  // la riga com'era si ricorda alla PRIMA volta che un testo viene toccato, anche da un ripristino: ogni riga di `traduzione` che una scrittura ha toccato
+  // entra sempre nella traccia (mai una resa cambiata senza poterla rimettere); le scritture successive non sovrascrivono la riga già ricordata
+  for (const [effetto, riga] of toccate) if (!ricordate.has(effetto)) ricordate.set(effetto, riga);
+  if (ricordate.size > 0) ctx.traccia[CHIAVE_TRACCIA] = [...ricordate].map(([k, r]) => JSON.stringify({ k, r }));
+  if (!ctx.ripristino) return;
+  // ripristino: si rimette `traduzione` com'era, SEMPRE con tutte le righe ricordate (anche se il testo della guida non è mai stato toccato: la sua riga attuale è
+  // proprio quella di partenza), SOLO se dopo il ripristino sia l'effetto sia la sua resa italiana sono quelli della guida; altrimenti (ripristino parziale: l'effetto
+  // è ancora diverso, o è stato rimesso un altro campo e la resa corretta va conservata) non si tocca niente e la traccia resta
+  const effetto = rigaSkill(chiave).effetto;
+  const grezzo = prepared('SELECT seed_json FROM skill WHERE id = ?').pluck().get(chiave) as string | null | undefined;
+  let guida: Valori;
+  try { guida = grezzo ? (JSON.parse(grezzo) as Valori) : {}; } catch { guida = {}; }
+  if (typeof guida.effetto === 'string' && guida.effetto !== effetto) return;
+  if (guida.effetto_it !== undefined && (guida.effetto_it ?? null) !== effettoIt(effetto)) return;
+  // la riga ricordata per il testo della guida vale solo se è la resa della guida: una riga ricordata diversa (la resa di un'altra skill, vista quando questa
+  // l'ha toccata) non si rimette mai, perché porterebbe via la resa della guida appena riscritta
+  const daRimettere = new Map(ricordate);
+  if (guida.effetto_it !== undefined) {
+    const r = daRimettere.get(effetto);
+    if (r !== undefined && (r?.testo ?? null) !== (guida.effetto_it ?? null)) daRimettere.delete(effetto);
+  }
+  // si rimette, poi si controlla la resa FINALE: la traccia si svuota solo se coincide con la guida, altrimenti le righe tornano com'erano e la traccia resta
+  const prima = new Map([...daRimettere.keys()].map((k) => [k, leggiRigaTraduzione(k)] as const));
+  rimettiRighe(daRimettere);
+  if (guida.effetto_it !== undefined && (guida.effetto_it ?? null) !== effettoIt(effetto)) {
+    rimettiRighe(prima);
+    for (const [k, r] of prima) if (r === null) prepared("DELETE FROM traduzione WHERE ambito = 'effettoSkill' AND chiave = ?").run(k);
+    return;
+  }
+  ctx.traccia[CHIAVE_TRACCIA] = []; // non `delete`: la fotografia conserva la traccia vecchia se la chiave manca
+}
+
+/** Lo stesso criterio di `scriviMetaRiga` per le skill che condividono il testo di effetto: se i valori attuali coincidono con la fotografia e la traccia delle traduzioni è vuota o già applicata, tornano alla guida. */
+function rivalutaCondividenti(chiave: string, testi: Array<string | null>): void {
+  const eguali = (x: unknown, y: unknown): boolean => JSON.stringify(x ?? null) === JSON.stringify(y ?? null);
+  for (const testo of new Set(testi.filter((x): x is string => x !== null))) {
+    const altre = prepared("SELECT id FROM skill WHERE effetto = ? AND id <> ? AND seed_json IS NOT NULL").pluck().all(testo, chiave) as number[];
+    for (const id of altre) {
+      const altraChiave = String(id);
+      const fotografia = seedDi(altraChiave);
+      const attuali = skill.leggi(altraChiave);
+      if (!Object.keys(fotografia).filter((p) => !p.startsWith('~')).every((p) => eguali(fotografia[p], attuali[p]))) continue;
+      const applicata = [...righeRicordate(fotografia)].every(([k, r]) => {
+        const ora = leggiRigaTraduzione(k);
+        return r === null ? ora === null : ora !== null && eguali(ora.testo, r.testo) && eguali(ora.fonte, r.fonte);
+      });
+      if (!applicata) continue;
+      prepared("UPDATE skill SET origine = 'seed', seed_json = NULL, updated_at = NULL WHERE id = ?").run(id);
+    }
+  }
+}
+
 const skill: DefRiga = {
   modalita: 'riga', etichetta: 'Skill', tabella: 'skill', colonnaChiave: 'CAST(id AS TEXT)',
   chiavi: () => (prepared('SELECT CAST(id AS TEXT) FROM skill ORDER BY id').pluck().all() as string[]),
@@ -200,40 +257,11 @@ const skill: DefRiga = {
         .run(effetto, it, new Date().toISOString());
     }
   },
-  propaga: (chiave, _prima, _dopo, ctx) => {
-    const toccate = primaDellaScrittura;
-    primaDellaScrittura = new Map();
-    const ricordate = righeRicordate(ctx.traccia);
-    // la riga com'era si ricorda alla PRIMA volta che un testo viene toccato, anche da un ripristino: ogni riga di `traduzione` che una scrittura ha toccato
-    // entra sempre nella traccia (mai una resa cambiata senza poterla rimettere); le scritture successive non sovrascrivono la riga già ricordata
-    for (const [effetto, riga] of toccate) if (!ricordate.has(effetto)) ricordate.set(effetto, riga);
-    if (ricordate.size > 0) ctx.traccia[CHIAVE_TRACCIA] = [...ricordate].map(([k, r]) => JSON.stringify({ k, r }));
-    if (!ctx.ripristino) return;
-    // ripristino: si rimette `traduzione` com'era, SEMPRE con tutte le righe ricordate (anche se il testo della guida non è mai stato toccato: la sua riga attuale è
-    // proprio quella di partenza), SOLO se dopo il ripristino sia l'effetto sia la sua resa italiana sono quelli della guida; altrimenti (ripristino parziale: l'effetto
-    // è ancora diverso, o è stato rimesso un altro campo e la resa corretta va conservata) non si tocca niente e la traccia resta
-    const effetto = rigaSkill(chiave).effetto;
-    const grezzo = prepared('SELECT seed_json FROM skill WHERE id = ?').pluck().get(chiave) as string | null | undefined;
-    let guida: Valori;
-    try { guida = grezzo ? (JSON.parse(grezzo) as Valori) : {}; } catch { guida = {}; }
-    if (typeof guida.effetto === 'string' && guida.effetto !== effetto) return;
-    if (guida.effetto_it !== undefined && (guida.effetto_it ?? null) !== effettoIt(effetto)) return;
-    // la riga ricordata per il testo della guida vale solo se è la resa della guida: una riga ricordata diversa (la resa di un'altra skill, vista quando questa
-    // l'ha toccata) non si rimette mai, perché porterebbe via la resa della guida appena riscritta
-    const daRimettere = new Map(ricordate);
-    if (guida.effetto_it !== undefined) {
-      const r = daRimettere.get(effetto);
-      if (r !== undefined && (r?.testo ?? null) !== (guida.effetto_it ?? null)) daRimettere.delete(effetto);
-    }
-    // si rimette, poi si controlla la resa FINALE: la traccia si svuota solo se coincide con la guida, altrimenti le righe tornano com'erano e la traccia resta
-    const prima = new Map([...daRimettere.keys()].map((k) => [k, leggiRigaTraduzione(k)] as const));
-    rimettiRighe(daRimettere);
-    if (guida.effetto_it !== undefined && (guida.effetto_it ?? null) !== effettoIt(effetto)) {
-      rimettiRighe(prima);
-      for (const [k, r] of prima) if (r === null) prepared("DELETE FROM traduzione WHERE ambito = 'effettoSkill' AND chiave = ?").run(k);
-      return;
-    }
-    ctx.traccia[CHIAVE_TRACCIA] = []; // non `delete`: la fotografia conserva la traccia vecchia se la chiave manca
+  propaga: (chiave, prima, _dopo, ctx) => {
+    const testoPrima = typeof prima.effetto === 'string' ? prima.effetto : null;
+    scriviResaEPropaga(chiave, ctx);
+    // la resa è del testo: le altre skill con lo stesso testo (prima o dopo la scrittura) cambiano insieme, quindi si rivalutano come fa `scriviMetaRiga`
+    rivalutaCondividenti(chiave, [testoPrima, rigaSkill(chiave).effetto]);
   },
   // «Rimetti questo» sulla sola resa italiana, con l'effetto ancora diverso da quello della guida, scriverebbe la resa del testo di prima sulla riga `traduzione` del
   // testo di adesso, che può essere la resa di un'altra skill: si rifiuta, la resa si rimette insieme all'effetto
