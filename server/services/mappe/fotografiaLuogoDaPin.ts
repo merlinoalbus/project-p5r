@@ -2,6 +2,7 @@
 // Tutte le letture usano la connessione della transazione; nessun RAW esce dal servizio.
 import type { AppDatabase } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
+import { tabellaTolta } from '../../db/fontiTolte.js';
 import { slug } from '../../../shared/slug.js';
 import { pinCompatibileConNuovoLuogo, type LuogoNuovoDaPin } from '../../../shared/luogoDaPin.js';
 import { canonico, verificaPin, type PinDelRaccordo } from './precondizioneRaccordoPin.js';
@@ -16,7 +17,6 @@ export interface FotografiaLuogoDaPin {
   luoghi: Riga[];
   aree: Riga[];
   relazioni: { destinazioni: Riga[]; legamiVoci: Riga[]; voci: Riga[]; legamiImmagini: Riga[]; immagini: Riga[] };
-  collocazioni: Riga[];
   sediPin: Riga[];
   riferimentiCandidata: Riga[];
   stati: Riga;
@@ -57,6 +57,8 @@ function passiDelRegistro(db: AppDatabase, schema: 'main' | 'utente', raw: unkno
     }
     sequenze.add(Number(p.seq));
     const tabellaEsistente = db.prepare(`SELECT sql FROM ${schema}.sqlite_master WHERE type = 'table' AND name = ?`).get(p.tabella) as { sql: string } | undefined;
+    // una tabella tolta dal modello (L11): quella riga non può più tornare, quindi non è in conflitto con niente
+    if (!tabellaEsistente && tabellaTolta(schema, p.tabella)) return { tabella: p.tabella, righe: [] };
     if (!tabellaEsistente || typeof tabellaEsistente.sql !== 'string' || !tabellaEsistente.sql.trim()) {
       conflitto('La tabella di una fotografia del cestino non esiste o non è riconoscibile.');
     }
@@ -93,14 +95,13 @@ function fotografiaCestino(db: AppDatabase, pin: PinLuogoDaPin, area: string, qu
     if (t === 'spillo') return r.id === pin.id || r.uid === pin.uid
       || (['luogo', 'attivita'].includes(String(r.riferimento_tipo)) && r.riferimento_chiave === chiave);
     if (t === 'luogo') return r.chiave === chiave || (r.quartiere_chiave === quartiere && typeof r.nome === 'string' && slug(r.nome) === slug(nome));
-    if (t === 'mappa') return r.chiave === pin.mappa_chiave || (r.entita_tipo === 'luogo' && r.entita_chiave === chiave);
+    if (t === 'mappa') return r.chiave === pin.mappa_chiave;
     if (t === 'area') return r.chiave === area;
     if (t === 'quartiere') return r.chiave === quartiere;
     if (t === 'spillo_voce' || t === 'spillo_immagine' || t === 'spillo_destinazione') return r.spillo_id === pin.id;
     if (t === 'negozio_sede_spillo') return r.spillo_uid === pin.uid || r.luogo_chiave === chiave;
     if (t === 'negozio' || t === 'attivita') return r.sede_chiave === chiave;
     if (t === 'negozio_luogo_extra') return r.luogo_chiave === chiave;
-    if (t === 'mappa_entita') return r.mappa_chiave === pin.mappa_chiave || (r.entita_tipo === 'luogo' && r.entita_chiave === chiave);
     return false;
   };
   if (principale) {
@@ -181,10 +182,7 @@ export function fotografiaLuogoDaPin(db: AppDatabase, id: number, nuovo: LuogoNu
   }
   const sediPin = db.prepare('SELECT * FROM negozio_sede_spillo WHERE spillo_uid = ? ORDER BY spillo_uid').all(pin.uid) as Riga[];
   if (sediPin.length) conflitto('Il pin ha già una sede commerciale strutturata: rivedila prima di creare un luogo.');
-  const collocazioni = db.prepare('SELECT * FROM mappa_entita WHERE mappa_chiave = ? ORDER BY entita_tipo, entita_chiave').all(pin.mappa_chiave) as Riga[];
   const riferimentiCandidata = db.prepare(`SELECT 'spillo' AS tabella, uid AS identita FROM spillo WHERE riferimento_tipo IN ('luogo', 'attivita') AND riferimento_chiave = @chiave
-    UNION ALL SELECT 'mappa', chiave FROM mappa WHERE entita_tipo = 'luogo' AND entita_chiave = @chiave
-    UNION ALL SELECT 'mappa_entita', mappa_chiave FROM mappa_entita WHERE entita_tipo = 'luogo' AND entita_chiave = @chiave
     UNION ALL SELECT 'negozio', chiave FROM negozio WHERE sede_chiave = @chiave
     UNION ALL SELECT 'attivita', chiave FROM attivita WHERE sede_chiave = @chiave
     UNION ALL SELECT 'negozio_luogo_extra', negozio_chiave FROM negozio_luogo_extra WHERE luogo_chiave = @chiave
@@ -198,7 +196,7 @@ export function fotografiaLuogoDaPin(db: AppDatabase, id: number, nuovo: LuogoNu
   )) ORDER BY i.ambito, i.chiave, i.id`).all(id) as Riga[];
   const stati = fotografiaStati(db, pin);
   const cestino = fotografiaCestino(db, pin, areaChiave, quartiereChiave, chiave, nuovo.nome, new Set(legamiVoci.map(v => String(v.voce_chiave))));
-  return { pin, mappa, area, quartiere, luoghi, aree, relazioni: { destinazioni, legamiVoci, voci, legamiImmagini, immagini }, collocazioni, sediPin, riferimentiCandidata, stati, cestino };
+  return { pin, mappa, area, quartiere, luoghi, aree, relazioni: { destinazioni, legamiVoci, voci, legamiImmagini, immagini }, sediPin, riferimentiCandidata, stati, cestino };
 }
 
 /** Formato dedicato: i booleani dei nuovi input e delle presenze non appartengono al vecchio hash v1/v2.

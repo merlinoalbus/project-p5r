@@ -12,7 +12,8 @@ import { idParam } from './comuni.js';
 
 const chiaveMappa = z.string().regex(/^[a-z0-9][a-z0-9-]{0,179}$/);
 const riferimento = z.object({ tipo: z.enum(TIPI_RIFERIMENTO), chiave: z.string().min(1).max(200) }).nullable();
-const entita = z.object({ tipo: z.string().min(1).max(40), chiave: z.string().min(1).max(200) }).nullable();
+/** L'unico legame che l'API scrive: un'infiltrazione sull'Area della planimetria (L11 · B9: i legami con quartiere, luogo e Palazzo non si scrivono più). */
+const entita = z.object({ tipo: z.literal('area'), chiave: z.string().min(1).max(200) }).nullable();
 // Stesso schema ricorsivo per tutte le condizioni dell’app; nessun testo interpretato.
 export const condizioneSpillo = z.custom<RequisitoSpillo>(v => normalizzaRequisitoSpillo(v) !== null, 'Condizione non valida')
   // la descrizione è solo documentazione (OpenAPI): la forma la controlla `normalizzaRequisitoSpillo`

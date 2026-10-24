@@ -11,13 +11,15 @@ import { createHash } from 'node:crypto';
 import type { MappaRiassuntoDto } from '../../../shared/types.js';
 export interface ImmagineCandidataCollezione {
  chiave:string;genitore:string|null;nome:string;ordine:number;fisica:boolean;
- contesti?:MappaRiassuntoDto['contesti'];gruppoImmagini?:MappaRiassuntoDto['gruppoImmagini'];
+ contesti?:MappaRiassuntoDto['contesti'];
+ /** La planimetria ha una stanza (una versione con etichetta: `mappa.versione_etichetta`): non entra nelle collezioni di omonime. */
+ inStanza?:boolean;
 }
 /** Famiglie di etichette, non luoghi: nessuna unione di immagini o coordinate. */
 export function calcolaCollezioniImmagini(righe:ImmagineCandidataCollezione[]):Map<string,NonNullable<MappaRiassuntoDto['immagineCollezione']>> {
  const famiglie=new Map<string,ImmagineCandidataCollezione[]>();
  for(const r of righe){
-  if(!r.fisica||r.gruppoImmagini)continue;
+  if(!r.fisica||r.inStanza)continue;
   const nomi=r.contesti?.length?[...new Set(r.contesti.map(c=>c.nome))].sort((a,b)=>String(a).localeCompare(String(b))):null;
   const titolo=nomi?.includes(null)?['contesto-parziale']:nomi??[r.nome];
   const famiglia=JSON.stringify([r.genitore,titolo]);

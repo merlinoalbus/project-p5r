@@ -65,7 +65,6 @@ export interface AreaCensimentoDto {
 export interface MappaCensimentoDto {
   chiave: string; nome: string; tipo: string | null; origine: string | null;
   area_chiave: string | null; genitore_chiave: string | null;
-  entita_tipo: string | null; entita_chiave: string | null;
 }
 
 export interface SedeExtraCensimentoDto { negozio_chiave: string; luogo_chiave: string }

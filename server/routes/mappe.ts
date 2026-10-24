@@ -19,7 +19,7 @@ import { validate } from '../middleware/validate.js';
 import { scaricaPiantaQuartiere } from '../services/cittaService.js';
 import express from 'express';
 import { MAX_BYTE_IMMAGINE } from '../services/immaginiService.js';
-import { aggiornaCopiaPezzoMappa, aggiornaImmagineSpillo, aggiornaMappa, creaCopiaPezzoMappa, creaPezzoMappa, eliminaCopiaPezzoMappa, eliminaPezzoMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, conteggiAlbero, creaMappa, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaAreeMappa, impostaImmagineMappa, impostaStanzaMappa, aggiornaPresentazioneMappa, riordinaMappe, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
+import { aggiornaCopiaPezzoMappa, aggiornaImmagineSpillo, aggiornaMappa, creaCopiaPezzoMappa, creaPezzoMappa, eliminaCopiaPezzoMappa, eliminaPezzoMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, conteggiAlbero, creaMappa, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaImmagineMappa, riordinaMappe, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
 import { bodyAggiornaCopiaPezzo, bodyAggiornaMappa, bodyCreaCopiaPezzo, bodyAggiornaSpillo, bodyCreaPezzo, bodyAreeMappa, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, bodyPresentazioneMappa, bodyRiordinaMappe, bodyStanzaMappa, paramsCopiaPezzo, paramsMappa, paramsPezzo, paramsSpillo, queryDidascalia, queryEsporta, queryGerarchia, queryGuidaMappa, queryImmagineMappa, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
 import { guidaDellaPlanimetria } from '../services/dungeonService.js';
 import { gerarchiaMappe } from '../services/mappe/gerarchiaMappe.js';
@@ -108,12 +108,12 @@ router.get('/:chiave/guida', validate({ params: paramsMappa, query: queryGuidaMa
 router.put('/:chiave', validate({ params: paramsMappa, body: bodyAggiornaMappa }), (req, res) => {
   res.json(aggiornaMappa(String(req.params.chiave), req.body as DatiMappa));
 });
-/** Le infiltrazioni della planimetria: si passa l'insieme, risponde con le infiltrazioni in ordine di guida. Rotta vecchia (L3 §3.3): per
- *  una planimetria con Area sono i legami dell'Area; per le mappe senza Area (Memento) resta quella di prima. */
+/** Le infiltrazioni della planimetria: si passa l'insieme, risponde con le infiltrazioni in ordine di guida. Rotta vecchia (L3 §3.3): sono i
+ *  legami dell'Area della planimetria; per le mappe senza Area (radici, fogli dei Memento) risponde 409 `mappa-senza-area` (L11 · B9). */
 router.put('/:chiave/aree', validate({ params: paramsMappa, body: bodyAreeMappa }), (req, res) => {
   const chiave = String(req.params.chiave);
   const aree = (req.body as { aree: string[] }).aree;
-  res.json({ aree: impostaInfiltrazioniDellaPlanimetria(chiave, aree) ?? impostaAreeMappa(chiave, aree) });
+  res.json({ aree: impostaInfiltrazioniDellaPlanimetria(chiave, aree) });
 });
 // L2: la planimetria dell'ingresso di un quartiere si elimina con `?conferma=1` (l'ingresso se ne va con lei)
 router.delete('/:chiave', validate({ params: paramsMappa, query: z.object({ conferma: boolQuery }) }), (req, res) => {
@@ -121,18 +121,18 @@ router.delete('/:chiave', validate({ params: paramsMappa, query: z.object({ conf
   res.status(204).end();
 });
 /** Raggruppamento della planimetria: l'Area (nome, o un'altra Area) e l'etichetta della sua versione. Rotta vecchia (L3 §3.3): per una
- *  planimetria con Area agisce sull'Area; per le mappe senza Area resta quella di prima (gruppo d'immagini). */
+ *  planimetria con Area agisce sull'Area; per le mappe senza Area risponde 409 `mappa-senza-area` (L11 · B9: il gruppo d'immagini non c'è più). */
 router.put('/:chiave/presentazione', validate({ params: paramsMappa, body: bodyPresentazioneMappa }), (req, res) => {
   const chiave = String(req.params.chiave);
-  const dati = req.body as Parameters<typeof aggiornaPresentazioneMappa>[1];
-  res.json(presentazioneDellaPlanimetria(chiave, dati) ? dettaglioMappa(chiave) : aggiornaPresentazioneMappa(chiave, dati));
+  presentazioneDellaPlanimetria(chiave, req.body as Parameters<typeof presentazioneDellaPlanimetria>[1]);
+  res.json(dettaglioMappa(chiave));
 });
 /** L'Area della planimetria: entra in quella di un'altra (`con`) o diventa un'Area a sé (`con: null`). Rotta vecchia (L3 §3.3): per
- *  le mappe senza Area resta quella di prima (gruppo d'immagini). */
+ *  le mappe senza Area risponde 409 `mappa-senza-area` (L11 · B9). */
 router.put('/:chiave/stanza', validate({ params: paramsMappa, body: bodyStanzaMappa }), (req, res) => {
   const chiave = String(req.params.chiave);
-  const dati = req.body as { con: string | null; nome?: string };
-  res.json(stanzaDellaPlanimetria(chiave, dati) ? dettaglioMappa(chiave) : impostaStanzaMappa(chiave, dati));
+  stanzaDellaPlanimetria(chiave, req.body as { con: string | null; nome?: string });
+  res.json(dettaglioMappa(chiave));
 });
 
 /** Immagine di base (corpo grezzo `image/*`): salvata nell'istanza nell'ambito «mappa» con la chiave della mappa. */

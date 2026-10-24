@@ -47,8 +47,7 @@ export function ContenutiGuidaMappa({ mappa, area, dungeon }: { mappa: string; a
       {area && !contenuti.dati.aree.some(a => a.chiave === area) && <p role="status">{memento ? 'Il dedalo richiesto non appartiene a questa mappa.' : 'L’infiltrazione richiesta non appartiene a questa mappa.'}</p>}
       {contenuti.dati.aree.map(a => <details className="border-b border-border-light py-2" key={`${a.chiave}:${area ?? ''}`} open={a.chiave === area || undefined}>
         <summary className="cursor-pointer font-semibold touch">{a.nome}</summary>
-        {a.descrizione && <p className="whitespace-pre-wrap">{a.descrizione}</p>}{a.note && <p className="whitespace-pre-wrap">{a.note}</p>}
-        {!!a.collegamenti?.length && <details><summary className="cursor-pointer touch">{memento ? 'Dettagli del dedalo' : 'Dettagli dell’infiltrazione'}</summary>{a.collegamenti.map(c => <div key={c.id}>
+        {a.descrizione && <p className="whitespace-pre-wrap">{a.descrizione}</p>}        {!!a.collegamenti?.length && <details><summary className="cursor-pointer touch">{memento ? 'Dettagli del dedalo' : 'Dettagli dell’infiltrazione'}</summary>{a.collegamenti.map(c => <div key={c.id}>
           <button type="button" className="touch inline-flex items-center text-left" onClick={() => seleziona(c.id)}>{c.nome}</button>
           {selezionato === c.id && <SchedaContenutoGuida key={`${c.id}:${attiva?.id ?? 'nessuna'}`} spillo={c} partitaId={attiva?.id ?? null} onChiudi={() => seleziona(null)} onCambiato={contenuti.ricarica} />}
         </div>)}</details>}

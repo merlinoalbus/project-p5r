@@ -23,5 +23,5 @@ export interface PuntoGuidaMappaDto { scheda?: SchedaContenutoGuidaDto; id: numb
   /** Il carattere della voce (permanente, rigenerabile, racconto; null per le Persona). */
   carattere?: CarattereVoce | null;
   esauribile?: boolean }
-export interface AreaGuidaMappaDto { collegamenti?: SchedaContenutoGuidaDto[]; chiave: string; nome: string; descrizione: string; note: string; punti: PuntoGuidaMappaDto[]; mappe: Array<{ chiave: string; nome: string }> }
+export interface AreaGuidaMappaDto { collegamenti?: SchedaContenutoGuidaDto[]; chiave: string; nome: string; descrizione: string; punti: PuntoGuidaMappaDto[]; mappe: Array<{ chiave: string; nome: string }> }
 export interface ContenutiMappaDto { mappa: string; aree: AreaGuidaMappaDto[] }

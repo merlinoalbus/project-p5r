@@ -2343,7 +2343,7 @@ export interface AreaDungeonDto {
   // `mappa: boolean` (un'immagine caricata con la chiave dell'infiltrazione, la vecchia «pianta pubblicata dalla guida», tolta il
   // 2026-09-18) è uscito col lotto L1 (2026-10-20): nessuna vista lo leggeva più, e l'immagine di un posto è quella delle sue
   // planimetrie, dal risolutore unico (`immagineMappa.ts`).
-  /** Le planimetrie native dell'atlante legate a quest'area (`mappa_entita`), in ordine.
+  /** Le planimetrie native dell'atlante legate a quest'area (i legami `infiltrazione_area`), in ordine.
    *
    * Servono alla scheda del Palazzo per **mostrare la mappa invece di un rimando**. L'area della
    * guida non è un nodo dell'atlante — il risolutore, interrogato sulla sua chiave, risponde
@@ -2550,7 +2550,7 @@ export interface DungeonDettaglioDto extends Omit<DungeonRiassuntoDto, 'aree'> {
   fonti: string[];
   aree: AreaDungeonDto[];
   /** Tutte le planimetrie del Palazzo (l'albero sotto `dungeon-<chiave>`, radice esclusa) nel loro
-   *  ordine logico, con i collezionabili di ognuna e le aree della guida che contiene (`mappa_entita`,
+   *  ordine logico, con i collezionabili di ognuna e le aree della guida che contiene (i legami `infiltrazione_area`,
    *  in ordine di guida: una planimetria può contenerne più d'una, 2026-09-29; un'area può stare su più
    *  planimetrie, 2026-10-04). Le planimetrie senza collezionabili ci sono lo stesso, perché è da qui che si
    *  ordinano, si legano e si cancellano. Vuoto per i Memento, che contano gli obiettivi dei dedali. */
@@ -2677,10 +2677,10 @@ export interface MappaRiassuntoDto {
   /** Ordinale di una collezione presentativa di immagini omonime, mai numero di piano. */
   immagineCollezione?: {indice:number;totale:number;ambito:string};
   contesti?: Array<{id:string;nome:string|null;campo:string;texpack:number}>;
-  /** La stanza (gruppo di immagini). `nomeRivisto`: il nome della stanza l'ha scelto una persona (2026-09-30),
-   *  e vince sul nome rivisto della singola mappa. */
-  gruppoImmagini?: {id:string;nome:string;ordine:number;etichetta?:string;nomeRivisto?:boolean};
-  /** `nome` l'ha scritto una persona nell'editor, non l'estrazione: vince su contesti e gruppo
+  /** La versione della planimetria dentro la sua stanza (l'Area): etichetta e ordine (`mappa.versione_*`, L11 · B9: sostituisce il gruppo
+   *  d'immagini). Null se la mappa non ha né etichetta né ordine di versione. */
+  versione: { etichetta: string | null; ordine: number } | null;
+  /** `nome` l'ha scritto una persona nell'editor, non l'estrazione: vince sui contesti
    * (082). Solo il salvataggio del nome lo accende; l'importazione di un pacchetto lo spegne. */
   nomeRivisto: boolean;
   nomeCompleto?: string;
@@ -2695,7 +2695,9 @@ export interface MappaRiassuntoDto {
   /** L'asset predefinito dichiarato dalla mappa (es. `mappe/native/nativo-rmap-001-3-0`), quando manca l'immagine caricata.
    *  Prima era costruito per convenzione e la colonna viaggiava come `assetOriginale` (L1: un'immagine sola, `useImmagineMappa`). */
   asset: string | null;
-  entita: { tipo: string; chiave: string } | null;
+  /** L'entità della guida di cui la mappa è la radice: il quartiere (`citta-<q>`) o il Palazzo/dedalo (`dungeon-<d>`), ricavata da chiave e tipo
+   *  (L11 · B9: sostituisce `entita`); null per tutte le altre mappe. */
+  radiceDi: { tipo: 'quartiere' | 'dungeon'; chiave: string } | null;
   origine: 'seed' | 'utente';
   /** I pin della sola mappa, tutti (resta per compatibilità: l'indice delle Mappe usa `conteggiPin`). */
   numeroSpilli: number;
@@ -2968,7 +2970,7 @@ export interface AreaPacchetto { chiave: string; quartiere: string | null; dunge
   updatedAt?: string }
 /** Un legame infiltrazione ↔ area di un Palazzo nel pacchetto delle mappe (L3, `infiltrazione_area`). */
 export interface LegamePacchetto { infiltrazione: string; area: string; ordine: number; /** Chiave pubblica della versione da aprire; null = la predefinita. */ planimetriaIniziale: string | null; origine: 'seed' | 'utente' | 'regola' }
-/** Un legame di una mappa con un'entità (`mappa_entita`, fino a L11), con la sua fonte com'è salvata: viaggia per l'andata e ritorno identica. */
+/** Un legame di una mappa con un'entità (`mappa_entita`, tolta da L11 · B9): resta come tipo di sola lettura per i pacchetti di prima. */
 export interface LegameEntitaPacchetto { tipo: string; chiave: string; fonte: string }
 export interface EsportazioneMappeDto {
   /** Gli ingressi dei quartieri; `area` (L2) è l'Area della planimetria, informativa: all'import si deduce dalla planimetria. */
@@ -2983,18 +2985,21 @@ export interface EsportazioneMappeDto {
   mappe: Array<{
     /** L3 (andata e ritorno identica, lotti/L3/modifiche.md §2.3): il nome rivisto a mano, l'origine, l'ultima modifica, il percorso
      *  pubblico fissato e i legami con le entità con la loro fonte. Assenti in un pacchetto di prima: l'import fa come allora. */
-    nomeRivisto?: boolean; origine?: 'seed' | 'utente'; updatedAt?: string; percorsoFisso?: string | null; entitaLegami?: LegameEntitaPacchetto[];
+    nomeRivisto?: boolean; origine?: 'seed' | 'utente'; updatedAt?: string; percorsoFisso?: string | null;
+    /** Solo in lettura (pacchetti di prima di L11 · B9): l'import li ignora, l'esportazione non li scrive più. */
+    entitaLegami?: LegameEntitaPacchetto[];
     /** L'Area della planimetria (chiave di `aree`) e la sua versione dentro l'Area (L2). */
     area?: string | null;
     versione?: { etichetta: string | null; ordine: number };
     ruoloImmagine?: RuoloImmagine;
     contesti?: Array<{id:string;nome:string|null;campo:string;texpack:number}>;
+    /** Solo in lettura (pacchetti di prima di L11 · B9): l'import lo ignora, l'esportazione non lo scrive più. */
     gruppoImmagini?: {id:string;nome:string;ordine:number;etichetta?:string;nomeRivisto?:boolean};
     assetOriginale?: string|null;
     chiave: string; nome: string; tipo: TipoMappa; genitore: string | null; ordine: number; immagine: string | null; asset: string | null; larghezza: number | null; altezza: number | null;
-    entita: { tipo: string; chiave: string } | null; note: string;
-    /** Tutte le aree della guida contenute nella planimetria, in ordine di guida (2026-09-29). `entita` ne
-     *  dichiara una sola, la prima; un pacchetto di prima non ha questo campo. */
+    /** Solo in lettura (pacchetti di prima di L11 · B9): un pacchetto senza `aree` ne ricava l'infiltrazione se è di tipo area. L'esportazione non lo scrive più. */
+    entita?: { tipo: string; chiave: string } | null; note: string;
+    /** Tutte le aree della guida contenute nella planimetria, in ordine di guida (2026-09-29); un pacchetto di prima non ha questo campo. */
     aree?: string[];
     /** I pezzi della planimetria (102), ognuno con le sue copie (103). Un pacchetto di prima della 102 non ha il campo: i pezzi della
      *  mappa restano com'erano; uno della 102 porta la posa accanto alla zona, e si legge come un pezzo con una copia. */

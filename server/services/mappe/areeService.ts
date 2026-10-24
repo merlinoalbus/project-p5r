@@ -14,7 +14,7 @@
 
 import { getDb, nowIso, prepared, type AppDatabase } from '../../db/dbService.js';
 import { assegnaAreePalazzi110, type EsitoAreePalazzi } from '../../db/migrations/110_aree_dei_palazzi.js';
-import { radiceDelPalazzo } from './alberoMappe.js';
+import { entitaDellaRadice, radiceDelPalazzo } from './alberoMappe.js';
 import { conLegami, impostaLegamiInfiltrazione, infiltrazioniDelleAree, staccaAreaDalleInfiltrazioni, type InfiltrazioneDellArea } from './legamiInfiltrazioni.js';
 // la raccolta per planimetria dei Palazzi è quella della scheda (dungeonService la usa a sua volta per le Aree: l'uso è nelle funzioni)
 import { raccoltaMappe } from '../dungeonService.js';
@@ -269,14 +269,15 @@ export function dettaglioArea(contenitore: ContenitoreRotta, chiave: string, slu
     }
     // un passaggio: dove porta, una volta per destinazione (un'Area vicina, o la mappa di un quartiere), lei esclusa
     const meta = prepared('SELECT * FROM mappa WHERE chiave = ?').get(idMappa(s.riferimento_chiave)) as
-      { chiave: string; nome: string; tipo: string; entita_tipo: string | null; entita_chiave: string | null; area_chiave: string | null } | undefined;
+      { chiave: string; nome: string; tipo: string; area_chiave: string | null } | undefined;
     if (!meta || proprie.has(meta.chiave)) continue;
     const areaMeta = meta.area_chiave ? ctx.aree.aree.get(meta.area_chiave) : undefined;
     if (areaMeta && partitaId !== undefined && !areaDisponibilePerPartita(areaMeta, partitaId)) continue;
     const chiaveVista = areaMeta ? `area:${areaMeta.chiave}` : `mappa:${meta.chiave}`;
     if (viste.has(chiaveVista)) continue;
     viste.add(chiaveVista);
-    const quartiere = areaMeta?.quartiere_chiave ?? (meta.tipo === 'quartiere' && meta.entita_tipo === 'quartiere' ? meta.entita_chiave : null);
+    const radice = entitaDellaRadice(meta);
+    const quartiere = areaMeta?.quartiere_chiave ?? (radice?.tipo === 'quartiere' ? radice.chiave : null);
     vicine.push({ nome: areaMeta?.nome ?? meta.nome, quartiereNome: quartiere ? ctx.aree.nomiQuartieri.get(quartiere) ?? null : null,
       casa: areaMeta ? casaDellArea(areaMeta) ?? casaDellaMappa(meta, ctx.aree) : casaDellaMappa(meta, ctx.aree) });
   }
@@ -676,8 +677,8 @@ export function mappeDaCollocare(): MappaDaCollocareDto[] {
   if (!conAree()) return [];
   const caricate = immaginiCaricateDelleMappe();
   return (prepared(`SELECT m.chiave, m.nome, m.immagine_chiave, m.asset, m.genitore_chiave, g.nome AS genitore_nome, (SELECT COUNT(*) FROM spillo s WHERE s.mappa_chiave = m.chiave) AS spilli
-      FROM mappa m JOIN mappa g ON g.chiave = m.genitore_chiave AND COALESCE(g.entita_chiave, '') <> 'mementos'
-        AND (g.tipo IN ('citta', 'quartiere') OR (g.tipo = 'palazzo' AND g.entita_tipo = 'dungeon'))
+      FROM mappa m JOIN mappa g ON g.chiave = m.genitore_chiave AND g.chiave NOT IN ('citta-mementos', 'dungeon-mementos')
+        AND g.tipo IN ('citta', 'quartiere', 'palazzo')
       WHERE (m.tipo IN ('luogo', 'area') OR g.tipo = 'palazzo') AND m.area_chiave IS NULL ORDER BY g.nome, m.ordine, m.chiave`).all() as
       Array<{ chiave: string; nome: string; immagine_chiave: string | null; asset: string | null; genitore_chiave: string | null; genitore_nome: string | null; spilli: number }>)
     .map((m) => {
@@ -687,12 +688,12 @@ export function mappeDaCollocare(): MappaDaCollocareDto[] {
     });
 }
 
-// ---- Le rotte vecchie dei gruppi e dei legami, sul modello nuovo (L3 §3.3) ----
+// ---- Le rotte vecchie dei gruppi e dei legami, sul modello nuovo (L3 §3.3, L11 · B9) ----
 //
 // `PUT /api/mappe/:k/aree`, `/presentazione` e `/stanza` scrivevano i legami per planimetria (`mappa_entita`) e i gruppi d'immagini,
-// che da L3 nessuno legge più. Restano per i client e i test di prima, riscritte così: per una planimetria che ha un'Area agiscono
-// sull'Area (legami, nome, etichetta della versione, spostamento della versione); per le mappe senza Area (i Memento, le radici)
-// restano le funzioni di prima, perché lì quei dati si leggono ancora.
+// tolti da L11 · B9. Restano per i client di prima, riscritte così: per una planimetria che ha un'Area agiscono sull'Area (legami, nome,
+// etichetta della versione, spostamento della versione); per le mappe senza Area (le radici, i fogli dei Memento) non c'è più niente da
+// scrivere: rispondono 409 `mappa-senza-area`.
 
 /** La riga di una mappa con la sua Area (null se non ne ha), dalla chiave pubblica. */
 function planimetriaConArea(chiavePubblica: string): { chiave: string; nome: string; genitore_chiave: string | null; area: RigaArea | null } {
@@ -701,6 +702,12 @@ function planimetriaConArea(chiavePubblica: string): { chiave: string; nome: str
   if (!r) throw httpErrors.notFound('mappa-non-trovata', `La mappa '${chiavePubblica}' non esiste.`);
   const area = r.area_chiave && conAree() ? prepared('SELECT * FROM area WHERE chiave = ?').get(r.area_chiave) as RigaArea | undefined : undefined;
   return { chiave: r.chiave, nome: r.nome, genitore_chiave: r.genitore_chiave, area: area ?? null };
+}
+
+/** L'Area di una planimetria, o 409 `mappa-senza-area`: senza Area (una radice, un foglio dei Memento) non ci sono legami né stanza da scrivere. */
+function areaDi(p: { nome: string; area: RigaArea | null }): RigaArea {
+  if (!p.area) throw httpErrors.conflict('mappa-senza-area', `«${p.nome}» non appartiene a nessuna area: legami, nome della stanza e versione si scrivono sull'area.`);
+  return p.area;
 }
 
 /** Il contenitore di un'Area già letta. */
@@ -719,14 +726,13 @@ function spostaVersione(mappa: string, area: RigaArea, verso: { area: RigaArea }
 /**
  * `PUT /api/mappe/:k/aree` (vecchia): le infiltrazioni «della planimetria» sono quelle della sua Area, quindi l'insieme dato diventa
  * quello dell'Area (`impostaLegamiInfiltrazione` dall'area). Gli errori sono quelli di prima: 400 `mappa-fuori-palazzo` per una mappa
- * del mondo, 400 `area-inesistente`, 400 `area-di-altro-palazzo`. Restituisce le infiltrazioni della planimetria; null per una mappa
- * senza Area (la radice, i Memento: chi chiama usa la funzione di prima, con i suoi errori).
+ * del mondo, 400 `area-inesistente`, 400 `area-di-altro-palazzo`; 409 `mappa-senza-area` per una mappa senza Area (la radice, i Memento).
+ * Restituisce le infiltrazioni della planimetria.
  */
-export function impostaInfiltrazioniDellaPlanimetria(chiavePubblica: string, infiltrazioni: readonly string[]): Array<{ chiave: string; nome: string; ordine: number }> | null {
-  const p = planimetriaConArea(chiavePubblica);
-  if (!p.area) return null;
+export function impostaInfiltrazioniDellaPlanimetria(chiavePubblica: string, infiltrazioni: readonly string[]): Array<{ chiave: string; nome: string; ordine: number }> {
+  const area = areaDi(planimetriaConArea(chiavePubblica));
   const uniche = [...new Set(infiltrazioni)];
-  const palazzo = p.area.dungeon_chiave;
+  const palazzo = area.dungeon_chiave;
   if (!palazzo) {
     if (uniche.length === 0) return [];
     throw httpErrors.badRequest('mappa-fuori-palazzo', 'Le infiltrazioni si legano solo alle planimetrie di un Palazzo.');
@@ -736,21 +742,30 @@ export function impostaInfiltrazioniDellaPlanimetria(chiavePubblica: string, inf
   if (mancanti.length) throw httpErrors.badRequest('area-inesistente', `Infiltrazione inesistente: ${mancanti.join(', ')}.`);
   const altrove = trovate.filter((t) => t.dungeon_chiave !== palazzo);
   if (altrove.length) throw httpErrors.badRequest('area-di-altro-palazzo', `Infiltrazione di un altro Palazzo: ${altrove.map((t) => t.chiave).join(', ')}.`);
-  impostaLegamiInfiltrazione({ area: p.area!.chiave, infiltrazioni: uniche });
+  impostaLegamiInfiltrazione({ area: area.chiave, infiltrazioni: uniche });
   invalidaCacheDiGioco();
-  return infiltrazioniDelleAree(palazzo).get(p.area!.chiave) ?? [];
+  return infiltrazioniDelleAree(palazzo).get(area.chiave) ?? [];
+}
+
+/** L'Area in cui sta la planimetria che ha per chiave (pubblica o interna, anche con il prefisso `utente:` dei vecchi id di gruppo); null se non c'è o non ha Area. */
+function areaDellaPlanimetriaDiChiave(chiave: string): RigaArea | null {
+  const candidate = [idMappa(chiave), ...(chiave.startsWith('utente:') ? [idMappa(chiave.slice('utente:'.length))] : [])];
+  for (const k of candidate) {
+    const a = prepared('SELECT a.* FROM mappa m JOIN area a ON a.chiave = m.area_chiave WHERE m.chiave = ?').get(k) as RigaArea | undefined;
+    if (a) return a;
+  }
+  return null;
 }
 
 /**
  * `PUT /api/mappe/:k/presentazione` (vecchia) per una planimetria con Area: `etichetta` è l'etichetta della versione, `gruppoNome` il
  * nome dell'Area (come «Modifica area»), `gruppoId` = l'id del gruppo d'immagini di un'altra planimetria → la versione va nella sua
- * Area; `gruppoId: null` senza nome → la versione diventa un'Area a sé (se l'Area ha altre versioni). Vero se l'ha gestita; falso per
- * una mappa senza Area (chi chiama usa la funzione di prima).
+ * Area; `gruppoId: null` senza nome → la versione diventa un'Area a sé (se l'Area ha altre versioni). 409 `mappa-senza-area` per
+ * una mappa senza Area. Da L11 · B9 `gruppoId` è la chiave di una planimetria (pubblica o interna): la versione va nell'Area di quella.
  */
-export function presentazioneDellaPlanimetria(chiavePubblica: string, dati: { gruppoId?: string | null; gruppoNome?: string; etichetta?: string | null }): boolean {
+export function presentazioneDellaPlanimetria(chiavePubblica: string, dati: { gruppoId?: string | null; gruppoNome?: string; etichetta?: string | null }): void {
   const p = planimetriaConArea(chiavePubblica);
-  if (!p.area) return false;
-  const area = p.area;
+  const area = areaDi(p);
   const c = contenitoreDellArea(area);
   const etichetta = dati.etichetta === undefined ? undefined : dati.etichetta?.trim() || null;
   const nome = dati.gruppoNome?.trim();
@@ -761,8 +776,7 @@ export function presentazioneDellaPlanimetria(chiavePubblica: string, dati: { gr
       return;
     }
     if (typeof dati.gruppoId === 'string') {
-      const verso = prepared(`SELECT a.* FROM mappa_presentazione mp JOIN mappa m ON m.chiave = mp.mappa_chiave JOIN area a ON a.chiave = m.area_chiave
-        WHERE mp.gruppo_immagini_json IS NOT NULL AND json_extract(mp.gruppo_immagini_json, '$.id') = ? ORDER BY m.ordine, m.chiave LIMIT 1`).get(dati.gruppoId) as RigaArea | undefined;
+      const verso = areaDellaPlanimetriaDiChiave(dati.gruppoId);
       if (verso && verso.chiave !== area.chiave) {
         spostaVersione(p.chiave, area, { area: verso });
         if (nome) aggiornaArea(c.rotta, c.chiave, verso.slug, { nome });
@@ -772,18 +786,16 @@ export function presentazioneDellaPlanimetria(chiavePubblica: string, dati: { gr
     if (nome) aggiornaArea(c.rotta, c.chiave, area.slug, { nome });
   })();
   invalidaCacheDiGioco();
-  return true;
 }
 
 /**
  * `PUT /api/mappe/:k/stanza` (vecchia) per una planimetria con Area: `con` = un'altra planimetria dello stesso posto → la versione va
- * nella sua Area; `con: null` → diventa un'Area a sé chiamata `nome` (se è già sola nella sua Area, l'Area prende quel nome). Vero se
- * l'ha gestita; falso per una mappa senza Area.
+ * nella sua Area; `con: null` → diventa un'Area a sé chiamata `nome` (se è già sola nella sua Area, l'Area prende quel nome). 409
+ * `mappa-senza-area` per una mappa senza Area.
  */
-export function stanzaDellaPlanimetria(chiavePubblica: string, dati: { con: string | null; nome?: string }): boolean {
+export function stanzaDellaPlanimetria(chiavePubblica: string, dati: { con: string | null; nome?: string }): void {
   const p = planimetriaConArea(chiavePubblica);
-  if (!p.area) return false;
-  const area = p.area;
+  const area = areaDi(p);
   const c = contenitoreDellArea(area);
   getDb().transaction(() => {
     if (dati.con === null) {
@@ -808,5 +820,4 @@ export function stanzaDellaPlanimetria(chiavePubblica: string, dati: { con: stri
     if (sola && !rivista && dati.nome?.trim()) aggiornaArea(c.rotta, c.chiave, altra.area.slug, { nome: dati.nome });
   })();
   invalidaCacheDiGioco();
-  return true;
 }

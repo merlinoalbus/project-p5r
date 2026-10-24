@@ -152,17 +152,23 @@ export interface EsitoAreeMondo { aree: number; planimetrie: number; etichette: 
  * vanno dopo le altre, che stavano già lì.
  */
 export function assegnaAreeDelMondo109(db: AppDatabase, adesso: string, spostate: ReadonlySet<string> = new Set()): EsitoAreeMondo {
+  // Questa regola gira in due momenti: dentro la migrazione 109 (e con un pacchetto di prima, su una base che ha ancora le colonne di prima di
+  // L11 · B9: `mappa.entita_*` e `mappa_presentazione.gruppo_immagini_json`) e, dopo la migrazione 177, a ogni importazione di un pacchetto di
+  // mappe, quando quelle colonne non ci sono più: il quartiere si ricava allora dalla chiave della sua mappa (`citta-<q>`) e non c'è più nessun
+  // gruppo d'immagini, quindi ogni planimetria senza Area è sciolta (una per Area). Con le colonne di prima le query sono quelle di sempre.
+  const conEntita = colonne(db, 'mappa').has('entita_tipo');
+  const gruppoSql = colonne(db, 'mappa_presentazione').has('gruppo_immagini_json') ? 'p.gruppo_immagini_json' : 'NULL';
   const zone = [
     ...db.prepare(`SELECT m.chiave, m.nome, m.ordine, m.origine, COALESCE(m.nome_rivisto, 0) AS nome_rivisto, 'quartiere' AS tipo,
-        q.entita_chiave AS contenitore, p.gruppo_immagini_json AS gruppo_json
+        ${conEntita ? 'q.entita_chiave' : "substr(q.chiave, 7)"} AS contenitore, ${gruppoSql} AS gruppo_json
       FROM mappa m
-      JOIN mappa q ON q.chiave = m.genitore_chiave AND q.tipo = 'quartiere' AND q.entita_tipo = 'quartiere' AND q.entita_chiave <> 'mementos'
-      JOIN quartiere qq ON qq.chiave = q.entita_chiave
+      JOIN mappa q ON q.chiave = m.genitore_chiave AND q.tipo = 'quartiere' AND ${conEntita ? "q.entita_tipo = 'quartiere' AND q.entita_chiave <> 'mementos'" : "q.chiave LIKE 'citta-%' AND q.chiave <> 'citta-mementos'"}
+      JOIN quartiere qq ON qq.chiave = ${conEntita ? 'q.entita_chiave' : 'substr(q.chiave, 7)'}
       LEFT JOIN mappa_presentazione p ON p.mappa_chiave = m.chiave
       WHERE m.tipo IN ('luogo', 'area') AND m.area_chiave IS NULL`).all() as RigaZona[],
     // la città: solo Tokyo (il CHECK di `area.citta_chiave`)
     ...db.prepare(`SELECT m.chiave, m.nome, m.ordine, m.origine, COALESCE(m.nome_rivisto, 0) AS nome_rivisto, 'citta' AS tipo,
-        'tokyo' AS contenitore, p.gruppo_immagini_json AS gruppo_json
+        'tokyo' AS contenitore, ${gruppoSql} AS gruppo_json
       FROM mappa m
       JOIN mappa c ON c.chiave = m.genitore_chiave AND c.chiave = 'tokyo' AND c.tipo = 'citta'
       LEFT JOIN mappa_presentazione p ON p.mappa_chiave = m.chiave

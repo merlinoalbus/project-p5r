@@ -5,9 +5,10 @@
 // Prima la stessa domanda aveva nove risposte scritte a mano: tre CTE ricorsive (raccolta e planimetrie del Palazzo, ingresso),
 // tre visite in JavaScript (Memento da togliere dall'albero, esportazione di un luogo, spostamento di una planimetria con le sue
 // discendenti), due risalite verso la radice (riordino, Palazzo di una planimetria) e la mappa → Palazzo dei Palazzi completati. E
-// «il Palazzo di una mappa» aveva due regole: la radice `dungeon-<k>` senza genitore, oppure la mappa che dichiara
-// `entita_tipo = 'dungeon'` (rilievi R3 e B13 della verifica completa, 2026-10-03). Sui dati coincidono (10 Palazzi su 10, in
-// `gioco.db` e nel pacchetto): resta la prima, che è quella con cui il Palazzo si crea e si cerca dappertutto.
+// «il Palazzo di una mappa» aveva due regole: la radice `dungeon-<k>` senza genitore, oppure la mappa che dichiarava
+// `entita_tipo = 'dungeon'` (rilievi R3 e B13 della verifica completa, 2026-10-03). Sui dati coincidevano (10 Palazzi su 10, in
+// `gioco.db` e nel pacchetto): resta la prima, che è quella con cui il Palazzo si crea e si cerca dappertutto (le colonne `entita_*` sono
+// state tolte da L11 · B9: `entitaDellaRadice` ricava l'entità dalla chiave e dal tipo).
 //
 // La CTE usa `UNION` (non `UNION ALL`): un ciclo nei genitori, che l'editor rifiuta ma un dato rovinato potrebbe avere, non la fa
 // girare all'infinito.
@@ -18,6 +19,23 @@ import { prepared } from '../../db/dbService.js';
 /** La mappa radice di un Palazzo (o dei Memento): `dungeon-<chiave>`, senza genitore. */
 export function radiceDelPalazzo(dungeon: string): string {
   return `dungeon-${dungeon}`;
+}
+
+/** La mappa di un quartiere: `citta-<chiave>`. */
+export function radiceDelQuartiere(quartiere: string): string {
+  return `citta-${quartiere}`;
+}
+
+/**
+ * L'entità della guida di cui una mappa è la radice: il quartiere (`citta-<q>`, tipo quartiere) o il Palazzo/dedalo (`dungeon-<d>`, tipo
+ * palazzo o dedalo); null per tutte le altre. Sostituisce le colonne `mappa.entita_tipo` / `entita_chiave` (L11 · B9, R11-02/1): la convenzione
+ * delle chiavi è biiettiva sui dati (24 quartieri su 24, 10 dungeon su 10) ed è quella con cui la mappa si crea e si cerca dappertutto.
+ * Non esclude i Memento: chi deve farlo (la casa) lo fa da sé. Funzione pura: non legge il database.
+ */
+export function entitaDellaRadice(r: { chiave: string; tipo: string }): { tipo: 'quartiere' | 'dungeon'; chiave: string } | null {
+  if (r.tipo === 'quartiere' && r.chiave.startsWith('citta-')) return { tipo: 'quartiere', chiave: r.chiave.slice('citta-'.length) };
+  if ((r.tipo === 'palazzo' || r.tipo === 'dedalo') && r.chiave.startsWith('dungeon-')) return { tipo: 'dungeon', chiave: r.chiave.slice('dungeon-'.length) };
+  return null;
 }
 
 /** Condizione SQL (sulla tabella `mappa`, senza alias) che riconosce la radice di un Palazzo. */

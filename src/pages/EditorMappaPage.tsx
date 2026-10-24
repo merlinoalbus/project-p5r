@@ -276,8 +276,8 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
               avvisoMondo={avvisoMondo} onChiudiAvvisoMondo={() => setAvvisoMondo(null)}
               onImmagine={caricaImmagine}
               onScaricaDallaGuida={() => esegui(async () => {
-                if (dati.entita?.tipo !== 'quartiere') return;
-                const quartiere = dati.entita.chiave;
+                if (dati.radiceDi?.tipo !== 'quartiere') return;
+                const quartiere = dati.radiceDi.chiave;
                 try {
                   await scaricaPiantaQuartiere(quartiere);
                   notifica('success', 'Pianta scaricata dalla guida nella tua istanza.');
@@ -430,7 +430,7 @@ function PannelloEditor(p: PropsPannello) {
   const [sovrascrivi, setSovrascrivi] = useState(false);
   const {sezione,onSezione:setSezione} = p;
   // solo la pianta di un quartiere si scarica dalla guida: quella delle aree dei Palazzi non c'è più (rotta tolta il 2026-09-18)
-  const scaricabile = mappa.entita?.tipo === 'quartiere';
+  const scaricabile = mappa.radiceDi?.tipo === 'quartiere';
   // l'immagine di base con la regola di ogni vista (`useImmagineMappa`, L1): la caricata, poi l'asset dichiarato se sta nel
   // manifesto degli asset — la stessa che il visore qui accanto mostra; prima l'editor la ricalcolava per conto suo
   const immagineDiBase = useImmagineMappa(mappa);

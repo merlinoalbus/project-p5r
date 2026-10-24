@@ -1,5 +1,6 @@
 import { getDb } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { entitaDellaRadice } from './mappe/alberoMappe.js';
 import type {
   AreaCensimentoDto, AreaGuidaCensimentoDto, ArticoloCensimentoDto, AttivitaCensimentoDto, CensimentoLuoghiCondizioniDto, DestinazioneSpilloCensimentoDto,
   JsonCensimentoCondizioniDto, LuogoCensimentoDto, MappaCensimentoDto, NegozioCensimentoDto,
@@ -14,7 +15,7 @@ const CAMPI = {
   articolo: ['chiave', 'nome', 'nome_it', 'negozio_chiave', 'condizione', 'disponibile_dal', 'condizioni_json', 'nota', 'fonte', 'origine', 'nascosto', 'catalogo_chiave', 'articolo_condiviso'],
   quartiere: ['chiave', 'nome', 'sblocco', 'sblocco_data', 'fonte', 'condizioni_json', 'condizioni_guida_json', 'fonte_condizioni_json', 'fonte_condizioni_guida_json'],
   area: ['chiave', 'nome', 'quartiere_chiave', 'dungeon_chiave', 'citta_chiave', 'origine'],
-  mappa: ['chiave', 'nome', 'tipo', 'origine', 'area_chiave', 'genitore_chiave', 'entita_tipo', 'entita_chiave'],
+  mappa: ['chiave', 'nome', 'tipo', 'origine', 'area_chiave', 'genitore_chiave'],
   spillo: ['id', 'uid', 'nome', 'tipo', 'origine', 'mappa_chiave', 'area_guida_chiave', 'ruolo_guida', 'riferimento_tipo', 'riferimento_chiave', 'condizioni_json'],
   negozio_luogo_extra: ['negozio_chiave', 'luogo_chiave'],
   negozio_sede_spillo: ['spillo_uid', 'negozio_chiave', 'luogo_chiave'],
@@ -88,7 +89,7 @@ export function censimentoLuoghiCondizioni(): CensimentoLuoghiCondizioniDto {
         if (!r) break;
         area ??= r.area_chiave;
         const quartiere = (r.area_chiave ? a.get(r.area_chiave)?.quartiere_chiave : null)
-          ?? (r.entita_tipo === 'quartiere' ? r.entita_chiave : null);
+          ?? ((radice) => (radice?.tipo === 'quartiere' ? radice.chiave : null))(entitaDellaRadice({ chiave: r.chiave, tipo: r.tipo ?? '' }));
         if (quartiere) return { area_chiave: area, quartiere_chiave: quartiere };
         corrente = r.genitore_chiave;
       }

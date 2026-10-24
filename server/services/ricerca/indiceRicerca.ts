@@ -15,6 +15,7 @@ import { registraCacheDiGioco } from '../cacheDiGioco.js';
 import { datiGuida } from '../datiGuida.js';
 import { t } from '../traduzioniService.js';
 import { casaDelPalazzo, casaDellArea, contestoAree, type ContestoAree, type RigaArea } from '../mappe/casaMappa.js';
+import { entitaDellaRadice } from '../mappe/alberoMappe.js';
 import { caricataDellaMappa, illustrazioneDaRiga, urlCaricata, type RigaPerIllustrazione } from '../mappe/immagineMappa.js';
 import { casaDelLuogo } from '../luoghiService.js';
 import { nomiAltriOggetto } from '../catalogoOggettiLetture.js';
@@ -60,7 +61,7 @@ interface Bozza {
 }
 
 /** Le righe di `mappa` che servono all'illustrazione e ai tipi derivati dalle planimetrie. */
-interface RigaMappa extends RigaPerIllustrazione { nome: string; tipo: string; area_chiave: string | null; versione_etichetta: string | null; entita_tipo: string | null; entita_chiave: string | null }
+interface RigaMappa extends RigaPerIllustrazione { nome: string; tipo: string; area_chiave: string | null; versione_etichetta: string | null }
 
 /** I dati che più costruttori leggono: una lettura sola per costruzione dell'indice. */
 export interface ContestoIndice {
@@ -377,12 +378,13 @@ function crea(b: Bozza): VoceIndice | null {
 
 /** Legge dal database tutto ciò che più costruttori condividono, una volta. */
 function contestoDi(db: AppDatabase): ContestoIndice {
-  const mappe = new Map((db.prepare('SELECT chiave, nome, tipo, immagine_chiave, asset, ruolo_immagine, area_chiave, versione_etichetta, entita_tipo, entita_chiave FROM mappa ORDER BY ordine, chiave').all() as RigaMappa[]).map((m) => [m.chiave, m] as const));
+  const mappe = new Map((db.prepare('SELECT chiave, nome, tipo, immagine_chiave, asset, ruolo_immagine, area_chiave, versione_etichetta FROM mappa ORDER BY ordine, chiave').all() as RigaMappa[]).map((m) => [m.chiave, m] as const));
   const mappaDelQuartiere = new Map<string, string>();
   const radiceDelDungeon = new Map<string, RigaMappa>();
   for (const m of mappe.values()) {
-    if (m.tipo === 'quartiere' && m.entita_tipo === 'quartiere' && m.entita_chiave) mappaDelQuartiere.set(m.entita_chiave, m.chiave);
-    if (m.entita_tipo === 'dungeon' && m.entita_chiave && !radiceDelDungeon.has(m.entita_chiave)) radiceDelDungeon.set(m.entita_chiave, m);
+    const radice = entitaDellaRadice(m);
+    if (radice?.tipo === 'quartiere') mappaDelQuartiere.set(radice.chiave, m.chiave);
+    if (radice?.tipo === 'dungeon' && !radiceDelDungeon.has(radice.chiave)) radiceDelDungeon.set(radice.chiave, m);
   }
   const chiaviImmagini = (ambito: string) => new Set((db.prepare('SELECT chiave FROM immagine WHERE ambito = ?').all(ambito) as Array<{ chiave: string }>).map((r) => r.chiave));
   const sinonimi = sinonimiRicerca();

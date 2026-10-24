@@ -761,7 +761,7 @@ function eliminaAreaInTransazione(chiaveArea: string, a: RigaArea): void {
     prepared('UPDATE richiesta SET area_dedalo_chiave = NULL WHERE area_dedalo_chiave IN (SELECT chiave FROM area_dedalo WHERE dedalo_chiave = ?)').run(chiaveArea);
     prepared('DELETE FROM area_dedalo WHERE dedalo_chiave = ?').run(chiaveArea);
     // L3: i legami con le Aree del Palazzo e il posto nei diari (insiemi e proposte, ricompattati); le aree e le voci restano.
-    // Le fonti vecchie (`mappa_entita`) non si scrivono più: restano fino a L11 e nessuno le legge
+    // Le fonti vecchie (`mappa_entita`) sono state tolte da L11 · B9: i legami stanno solo in `infiltrazione_area`
     if (conLegami()) prepared('DELETE FROM infiltrazione_area WHERE infiltrazione_chiave = ?').run(chiaveArea);
     staccaInfiltrazioneDalleVoci(chiaveArea);
     ripulisciRiferimentiTestuali(chiaveArea);

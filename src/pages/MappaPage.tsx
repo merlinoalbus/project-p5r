@@ -107,7 +107,7 @@ function LuogoSenzaPlanimetria({ mappa, nome, albero, partitaId }: {
       {/* Va detto, invece di lasciarlo capire dall'assenza: questo nodo raccoglie, non disegna. */}
       {contenute.length > 0 && <p className="m-0 text-[13px] text-text-secondary">Questa mappa non ha una pianta sua: raccoglie le mappe qui sotto.</p>}
       <div className="flex flex-wrap gap-2">
-        {mappa.entita && <CollegamentoVisivo to={schedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave)} tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={titoloSchedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave, mappa.nome)} />}
+        {mappa.radiceDi && <CollegamentoVisivo to={schedaAccessoMondo(mappa.radiceDi.tipo, mappa.radiceDi.chiave)} tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={titoloSchedaAccessoMondo(mappa.radiceDi.tipo, mappa.radiceDi.chiave, mappa.nome)} />}
         <CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={titoloModificaMappa(mappa)} />
         <TornaAllaPartita partitaId={partitaId} />
       </div>
@@ -257,7 +257,7 @@ function DettaglioMappa({ chiave, partitaId }: { chiave: string; partitaId: numb
         {!haPlanimetria(mappa) ? <LuogoSenzaPlanimetria mappa={mappa} nome={presentata!.nome} albero={albero} partitaId={partitaId} />
          : <><VisoreMappa
           key={`${mappa.chiave}-${spilloIniziale ?? ''}-${params.get('x') ?? ''}-${params.get('y') ?? ''}-${params.get('zoom') ?? ''}`}
-          contenutiPannello={<><SelettoreContestoMappa mappa={mappa} selezione={params.get('contesto')} onCambia={id => { const q = new URLSearchParams(params); if (id) q.set('contesto', id); else q.delete('contesto'); setParams(q, { replace: true }); }} />{mappa.gruppoImmagini ? <ImmaginiLuogo mappe={(albero.dati ?? [mappa]).filter(m => m.gruppoImmagini?.id === mappa.gruppoImmagini!.id)} attuale={mappa.chiave} /> : <nav aria-label={etichettaMappeSorelle(mappa.tipo)}><Selettore etichetta={titoloMappeSorelle(mappa.tipo)} valore={mappa.chiave} opzioni={(albero.dati ?? [mappa]).filter(m => m.chiave === mappa.chiave || (m.genitore === mappa.genitore && haPlanimetria(m))).map(m => ({ chiave: m.chiave, nome: nomePresentazioneMappa(m) }))} onCambia={k => navigate(urlMappa(k))} /></nav>}{/* L3 RG-1: nelle planimetrie dei Palazzi la guida si usa dal pulsante «Guida» della barra: la lista testuale non c'è più */}{mappa.area?.contenitore.tipo !== 'dungeon' && <ContenutiGuidaMappa mappa={mappa.chiave} area={params.get('area')} dungeon={mappa.entita?.tipo === 'dungeon' ? mappa.entita.chiave : undefined} />}</>}
+          contenutiPannello={<><SelettoreContestoMappa mappa={mappa} selezione={params.get('contesto')} onCambia={id => { const q = new URLSearchParams(params); if (id) q.set('contesto', id); else q.delete('contesto'); setParams(q, { replace: true }); }} />{mappa.area ? <ImmaginiLuogo mappe={(albero.dati ?? [mappa]).filter(m => m.area?.chiave === mappa.area!.chiave)} attuale={mappa.chiave} /> : <nav aria-label={etichettaMappeSorelle(mappa.tipo)}><Selettore etichetta={titoloMappeSorelle(mappa.tipo)} valore={mappa.chiave} opzioni={(albero.dati ?? [mappa]).filter(m => m.chiave === mappa.chiave || (m.genitore === mappa.genitore && haPlanimetria(m))).map(m => ({ chiave: m.chiave, nome: nomePresentazioneMappa(m) }))} onCambia={k => navigate(urlMappa(k))} /></nav>}{/* L3 RG-1: nelle planimetrie dei Palazzi la guida si usa dal pulsante «Guida» della barra: la lista testuale non c'è più */}{mappa.area?.contenitore.tipo !== 'dungeon' && <ContenutiGuidaMappa mappa={mappa.chiave} area={params.get('area')} dungeon={mappa.radiceDi?.tipo === 'dungeon' ? mappa.radiceDi.chiave : undefined} />}</>}
           guida={{ onCambiato: () => { void ricarica(); } }}
           mappa={presentata!}
           partitaId={partitaId}
@@ -269,9 +269,9 @@ function DettaglioMappa({ chiave, partitaId }: { chiave: string; partitaId: numb
           onAcquistiCambiati={ricarica}
           onChiudi={() => navigate(ritornoMappe() ?? '/guida/mappe')}
           ritorno={<TornaAllaPartita partitaId={partitaId} />}
-          azioni={<>{mappa.entita && <Link className="btn btn-secondary touch" to={schedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave)}>{titoloSchedaAccessoMondo(mappa.entita.tipo, mappa.entita.chiave, mappa.nome)}</Link>}<CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={titoloModificaMappa(mappa)} /></>}
+          azioni={<>{mappa.radiceDi && <Link className="btn btn-secondary touch" to={schedaAccessoMondo(mappa.radiceDi.tipo, mappa.radiceDi.chiave)}>{titoloSchedaAccessoMondo(mappa.radiceDi.tipo, mappa.radiceDi.chiave, mappa.nome)}</Link>}<CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={titoloModificaMappa(mappa)} /></>}
         /></>}
-        {!haPlanimetria(mappa) && <ContenutiGuidaMappa mappa={mappa.chiave} area={params.get('area')} dungeon={mappa.entita?.tipo === 'dungeon' ? mappa.entita.chiave : undefined} />}
+        {!haPlanimetria(mappa) && <ContenutiGuidaMappa mappa={mappa.chiave} area={params.get('area')} dungeon={mappa.radiceDi?.tipo === 'dungeon' ? mappa.radiceDi.chiave : undefined} />}
       </div>}
     </PageState>
   );

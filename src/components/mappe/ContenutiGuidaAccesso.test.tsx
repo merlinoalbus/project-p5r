@@ -36,7 +36,7 @@ function scheda(partita?: number): SchedaContenutoGuidaDto {
 /** Contenuti della mappa palazzo-castello: la sola area Biblioteca con l'unico punto che porta la scheda vista dalla partita data. */
 function contenuti(partita?:number):ContenutiMappaDto {
   const s=scheda(partita);
-  return {mappa:'palazzo-castello',aree:[{chiave:s.areaGuida,nome:'Biblioteca',descrizione:'Testo della guida conservato',note:'',mappe:[],punti:[{id:ID,nome:s.nome,descrizione:s.descrizione,tipo:s.tipo,riferimento:s.riferimento,collezionabile:true,soloPosizione:false,ruolo:'punto',scheda:s}]}]};
+  return {mappa:'palazzo-castello',aree:[{chiave:s.areaGuida,nome:'Biblioteca',descrizione:'Testo della guida conservato',mappe:[],punti:[{id:ID,nome:s.nome,descrizione:s.descrizione,tipo:s.tipo,riferimento:s.riferimento,collezionabile:true,soloPosizione:false,ruolo:'punto',scheda:s}]}]};
 }
 /** Partita di prova al 20 aprile: la 7 è di giorno, tutte le altre di sera. */
 function partita(id:number):PartitaDto {return {id,nome:`Partita ${id}`,dataGioco:'04-20',fasciaGioco:id===7?'giorno':'sera'} as PartitaDto;}

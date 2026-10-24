@@ -39,7 +39,7 @@ import { conDivergenze, conStatoPerInfiltrazione, effettiDelGestoDto, modelloAva
 import { pinCitati, verificaGiro } from './condizioniTraPin.js';
 import { z } from 'zod';
 import { condizioneConTesto, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
-import { palazzoDellaMappa, sottoalberoMappe } from './alberoMappe.js';
+import { entitaDellaRadice, palazzoDellaMappa, sottoalberoMappe } from './alberoMappe.js';
 import { casaDelLuogo, condizioniDiSblocco, lettureLuoghi, luogoDelPin, presenzaDelLuogo, type LettureLuoghi, type LuogoDelPin } from '../luoghiService.js';
 import { descriviOrariDelLuogo, orariDelLuogo } from '../../../shared/orariNegozio.js';
 import { allineaRuoliImmagine, assetEsistente, caricataDellaMappa, dimensioniImmagine, dopoImmagineMappa, immaginiCaricateDelleMappe, urlCaricata, type ImmagineCaricata } from './immagineMappa.js';
@@ -49,12 +49,11 @@ import { convertiManualiImportati } from '../condizioni/importazione.js';
 import { assegnaAreeDelMondo109 } from '../../db/migrations/109_aree_del_mondo.js';
 import { assegnaAreePalazzi110 } from '../../db/migrations/110_aree_dei_palazzi.js';
 import { conLegami, impostaLegamiInfiltrazione, infiltrazioniDellaMappa, infiltrazioniDelleMappe } from './legamiInfiltrazioni.js';
-import { senzaGergo } from '../../../shared/nomiMappe.js';
 import { ammetteCondizioni, categoriaSpillo, gruppoConteggioSpillo, sqlVoceDescrittiva, DEFINIZIONI_SPILLO, GRUPPI_CONTEGGIO_SPILLO, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, puntoDescrittivo, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
 import type { AreaPacchetto, LegamePacchetto, CondizioneSpilloDto, ConteggiAlberoDto, ConteggiPinDto, CopiaPezzoDto, DatiAggiornaCopiaPezzo, DatiCopiaPezzo, DatiNuovoPezzoMappa, DettaglioSpilloDto, DisponibilitaDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, PezzoMappaDto, SpilloDto } from '../../../shared/types.js';
 import { aggiornaCopia, confermaPezzi, conPezzi, copiaDto, creaCopia, creaPezzo, eliminaCopia, eliminaPezziDellaMappa, eliminaPezzo, pezziDellaMappa, pezziNellImmagine, pezziPerPacchetto, pezzoDto, righeCopie, rigaCopia, rigaPezzo, quanteCopie, quantiPezzi, schemaPezziPacchetto, sostituisciPezzi, type DimensioniMappa, type PezzoDaImportare } from './pezziMappa.js';
 
-interface RigaMappa { chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null; larghezza: number | null; altezza: number | null; entita_tipo: string | null; entita_chiave: string | null; origine: 'seed' | 'utente'; note: string; updated_at: string; ruolo_immagine: RuoloImmagine; nome_rivisto?: number;
+interface RigaMappa { chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null; larghezza: number | null; altezza: number | null; origine: 'seed' | 'utente'; note: string; updated_at: string; ruolo_immagine: RuoloImmagine; nome_rivisto?: number;
   /** L'Area della planimetria e la sua versione (109, L2); assenti su uno schema di prima. */
   area_chiave?: string | null; versione_etichetta?: string | null; versione_ordine?: number | null }
 interface RigaImmagineSpillo { id: number; spillo_id: number; ordine: number; immagine_chiave: string | null; asset: string | null; didascalia: string; updated_at: string }
@@ -107,7 +106,7 @@ function immagineDi(r: RigaMappa): ImmagineCaricata | null {
  * di tutte le 333 mappe a ogni dettaglio: era quasi metà del tempo di una mappa (rilievi P3 e P8 della verifica, 2026-10-03).
  */
 interface ContestoMappe {
-  presentazioni: Map<string, Pick<MappaRiassuntoDto, 'contesti' | 'gruppoImmagini'>>;
+  presentazioni: Map<string, Pick<MappaRiassuntoDto, 'contesti'>>;
   collezioni: ReturnType<typeof calcolaCollezioniImmagini>;
   spilli: Map<string, number>;
   figli: Map<string, number>;
@@ -121,10 +120,10 @@ interface ContestoMappe {
 /** Legge in blocco il contesto delle mappe: presentazioni (se la tabella c'è), collezioni, conteggi di spilli e figli, nomi e immagini. */
 function contestoMappe(): ContestoMappe {
   const righe = prepared('SELECT * FROM mappa').all() as RigaMappa[];
-  const presentazioni = new Map<string, Pick<MappaRiassuntoDto, 'contesti' | 'gruppoImmagini'>>();
+  const presentazioni = new Map<string, Pick<MappaRiassuntoDto, 'contesti'>>();
   if (prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_presentazione'").get()) {
-    for (const p of prepared('SELECT mappa_chiave, contesti_json, gruppo_immagini_json FROM mappa_presentazione').all() as Array<{ mappa_chiave: string; contesti_json: string; gruppo_immagini_json: string | null }>) {
-      presentazioni.set(p.mappa_chiave, { contesti: JSON.parse(p.contesti_json), ...(p.gruppo_immagini_json ? { gruppoImmagini: JSON.parse(p.gruppo_immagini_json) } : {}) });
+    for (const p of prepared('SELECT mappa_chiave, contesti_json FROM mappa_presentazione').all() as Array<{ mappa_chiave: string; contesti_json: string }>) {
+      presentazioni.set(p.mappa_chiave, { contesti: JSON.parse(p.contesti_json) });
     }
   }
   /** Da una query che restituisce chiave e conteggio a una mappa chiave → numero. */
@@ -133,7 +132,7 @@ function contestoMappe(): ContestoMappe {
     presentazioni,
     // La numerazione delle omonime riguarda le piante del gioco: l'illustrazione di un quartiere
     // porta lo stesso nome ma è un'altra cosa, e non entra nella collezione.
-    collezioni: calcolaCollezioniImmagini(righe.map((r) => ({ chiave: r.chiave, genitore: r.genitore_chiave, nome: r.nome, ordine: r.ordine, ...(presentazioni.get(r.chiave) ?? {}), fisica: r.ruolo_immagine === 'planimetria-nativa' }))),
+    collezioni: calcolaCollezioniImmagini(righe.map((r) => ({ chiave: r.chiave, genitore: r.genitore_chiave, nome: r.nome, ordine: r.ordine, ...(presentazioni.get(r.chiave) ?? {}), inStanza: (r.versione_etichetta ?? null) !== null, fisica: r.ruolo_immagine === 'planimetria-nativa' }))),
     spilli: conta('SELECT mappa_chiave AS chiave, COUNT(*) AS n FROM spillo WHERE mappa_chiave IS NOT NULL GROUP BY mappa_chiave'),
     // I figli si contano fra quelli che si vedono: il nodo dei Memento è tolto dall'albero, e contarlo lo stesso faceva dire a
     // Tokyo «venticinque luoghi» mostrandone ventiquattro. Un conteggio che non torna con l'elenco sotto è peggio di nessuno.
@@ -147,7 +146,7 @@ function contestoMappe(): ContestoMappe {
 /**
  * Il riassunto di una mappa per l'API: presentazione e posto nella collezione, chiavi pubbliche di mappa e genitore, nome
  * completo di percorso, l'immagine (caricata con l'URL versionato, poi l'asset dichiarato: il risolutore unico, L1), il ruolo,
- * l'entità legata e i conteggi. Il contesto si passa già letto quando i riassunti sono più d'uno.
+ * la mappa di cui è radice (quartiere o Palazzo), la versione e i conteggi. Il contesto si passa già letto quando i riassunti sono più d'uno.
  */
 function riassunto(r: RigaMappa, ctx: ContestoMappe = contestoMappe()): MappaRiassuntoDto {
   const img = caricataDellaMappa(r, ctx.immagini);
@@ -159,7 +158,9 @@ function riassunto(r: RigaMappa, ctx: ContestoMappe = contestoMappe()): MappaRia
     // L1: una sola immagine per ogni vista. Prima `asset` era costruito per convenzione (`mappe/<chiave pubblica>`, inesistente per
     // 316 mappe su 317) e la colonna viaggiava come `assetOriginale`: ogni vista sceglieva fra i due a modo suo.
     immagineUrl: img ? urlCaricata(img) : null,
-    asset: r.asset, entita: r.entita_tipo && r.entita_chiave ? { tipo: r.entita_tipo, chiave: r.entita_chiave } : null,
+    asset: r.asset, radiceDi: entitaDellaRadice(r),
+    // la versione dentro la stanza (etichetta e ordine): per una planimetria con Area è anche in `area`; qui c'è per ogni mappa che l'ha (i fogli dei Memento compresi)
+    versione: r.versione_etichetta != null || r.versione_ordine != null ? { etichetta: r.versione_etichetta ?? null, ordine: r.versione_ordine ?? 0 } : null,
     ruoloImmagine: r.ruolo_immagine,
     origine: r.origine, nomeRivisto: r.nome_rivisto === 1, numeroSpilli: ctx.spilli.get(r.chiave) ?? 0, numeroFigli: ctx.figli.get(r.chiave) ?? 0, updatedAt: r.updated_at,
     // L2: l'Area della planimetria con la sua versione, e la casa (l'unica pagina che la mostra)
@@ -607,19 +608,10 @@ export function dettaglioMappa(chiave: string, partitaId?: number, contesto: str
   };
 }
 
-/** Mappa collegata a un'entità della guida (quartiere, area…), se esiste. */
-export function mappaPerEntita(tipo: string, chiave: string): MappaRiassuntoDto | null {
-  // L3: un'infiltrazione sta nelle planimetrie delle sue Aree (`infiltrazione_area`): se è una sola, è quella
-  const righe = (tipo === 'area' && conLegami()
-    ? prepared('SELECT m.* FROM infiltrazione_area ia JOIN mappa m ON m.area_chiave = ia.area_chiave WHERE ia.infiltrazione_chiave = ? ORDER BY m.chiave').all(chiave)
-    : prepared('SELECT m.* FROM mappa m WHERE (m.entita_tipo=? AND m.entita_chiave=?) OR EXISTS(SELECT 1 FROM mappa_entita e WHERE e.mappa_chiave=m.chiave AND e.entita_tipo=? AND e.entita_chiave=?) ORDER BY m.chiave').all(tipo,chiave,tipo,chiave)) as RigaMappa[];
-  return righe.length===1 ? riassunto(righe[0]) : null;
-}
-
 // ---- Editor ----
 
 /** `passaggio`/`ritorno` (15.24) valgono solo alla creazione con un genitore: passaggio nel genitore verso la nuova mappa e viceversa. */
-export interface DatiMappa { nome?: string; tipo?: TipoMappa; genitore?: string | null; ordine?: number; asset?: string | null; larghezza?: number | null; altezza?: number | null; entita?: { tipo: string; chiave: string } | null; note?: string; passaggio?: boolean; ritorno?: boolean }
+export interface DatiMappa { nome?: string; tipo?: TipoMappa; genitore?: string | null; ordine?: number; asset?: string | null; larghezza?: number | null; altezza?: number | null; entita?: { tipo: 'area'; chiave: string } | null; note?: string; passaggio?: boolean; ritorno?: boolean }
 
 /** Primi segmenti letterali delle rotte di `/api/mappe` (`routes/mappe.ts`): una mappa con una di queste chiavi verrebbe oscurata
  *  dalla rotta omonima (`GET /api/mappe/albero` non arriverebbe mai alla mappa «albero»). `struttura-server.test.ts` verifica che
@@ -631,52 +623,6 @@ export const CHIAVI_MAPPA_RISERVATE: ReadonlySet<string> = new Set([
 
 /** Una chiave di mappa ammessa: minuscole, cifre e trattini (non all'inizio), al massimo 180 caratteri, non riservata alle rotte. */
 const chiaveValida = (chiave: string): boolean => /^[a-z0-9][a-z0-9-]{0,179}$/.test(chiave) && !CHIAVI_MAPPA_RISERVATE.has(chiave);
-
-/**
- * Il legame fra una mappa e l'entità della guida vive in due posti: le colonne `entita_tipo` /
- * `entita_chiave` della mappa e la tabella `mappa_entita`, che è quella che leggono la scheda del
- * Palazzo (`dungeonService`) e i contenuti della guida. L'editor scriveva solo le colonne: legare
- * una planimetria a un'area non si vedeva da nessuna parte. Qui i due posti si scrivono insieme.
- *
- * **Un'area può stare su più planimetrie** (decisione dell'utente, 2026-10-04, che supera quella del 2026-09-18):
- * legare un'area a una mappa la aggiunge, senza staccarla da quelle che già la avevano.
- */
-function sincronizzaLegameEntita(chiave: string, entita: { tipo: string; chiave: string } | null, precedente: { tipo: string | null; chiave: string | null } | null = null): void {
-  if (!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_entita'").get()) return;
-  // L3: il legame con un'infiltrazione (tipo `area`) è dell'Area della planimetria (`infiltrazione_area`, `aggiornaMappa` lo aggiunge lì):
-  // `mappa_entita` di tipo area resta com'era fino a L11 e non si scrive più (R3-09). Gli altri tipi restano qui.
-  if (conLegami() && (entita?.tipo === 'area' || precedente?.tipo === 'area')) {
-    for (const t of new Set([precedente?.tipo, entita?.tipo].filter((x): x is string => !!x && x !== 'area'))) {
-      prepared('DELETE FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = ?').run(chiave, t);
-    }
-    if (entita && entita.tipo !== 'area') {
-      prepared('INSERT OR REPLACE INTO mappa_entita (mappa_chiave, entita_tipo, entita_chiave, fonte_json) VALUES (?, ?, ?, ?)')
-        .run(chiave, entita.tipo, entita.chiave, JSON.stringify({ origine: 'utente', dichiarata: 'editor' }));
-    }
-    return;
-  }
-  // Si tocca **solo il legame dichiarato dalle colonne**: quello che c'era prima e quello nuovo.
-  // Una mappa può essere legata anche ad altro — un luogo della città, per esempio (migrazione 054) —
-  // e cancellare tutte le righe della mappa portava via legami che nessuno aveva chiesto di togliere.
-  // `precedente` arriva da chi chiama, perché l'aggiornamento della riga è già avvenuto: riletto
-  // dal database direbbe il legame nuovo, e quello vecchio non verrebbe tolto da nessuno.
-  // Le aree sono più d'una per mappa (2026-09-29): del tipo `area` si toglie **solo l'area che le colonne
-  // dichiaravano**, non tutte — le altre aree della planimetria restano. Gli altri tipi restano uno per mappa.
-  // Vale anche passando da un'area a un legame di altro tipo (un quartiere, un luogo): le colonne dichiarano
-  // il legame nuovo e le altre aree restano in `mappa_entita`; le aree si tolgono con `impostaAreeMappa`.
-  for (const t of new Set([precedente?.tipo, entita?.tipo].filter((x): x is string => !!x && x !== 'area'))) {
-    prepared('DELETE FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = ?').run(chiave, t);
-  }
-  if (precedente?.tipo === 'area' && precedente.chiave && !(entita?.tipo === 'area' && entita.chiave === precedente.chiave)) {
-    prepared("DELETE FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = 'area' AND entita_chiave = ?").run(chiave, precedente.chiave);
-  }
-  if (entita) {
-    prepared('INSERT OR REPLACE INTO mappa_entita (mappa_chiave, entita_tipo, entita_chiave, fonte_json) VALUES (?, ?, ?, ?)')
-      .run(chiave, entita.tipo, entita.chiave, JSON.stringify({ origine: 'utente', dichiarata: 'editor' }));
-  }
-  // le colonne dichiarano la prima area in ordine di guida, fra tutte quelle della planimetria
-  allineaColonneArea(chiave);
-}
 
 /**
  * Un'area si lega solo a una planimetria **del suo Palazzo**: una planimetria di Kamoshida con un'area di
@@ -695,27 +641,8 @@ function verificaAreePalazzo(genitore: string | null, aree: string[]): void {
   if (altrove.length) throw httpErrors.badRequest('area-di-altro-palazzo', `Infiltrazione di un altro Palazzo: ${altrove.map((t) => t.chiave).join(', ')}.`);
 }
 
-/**
- * Le colonne `entita_*` della mappa sono un legame solo, e le leggono ancora il riassunto, la scheda
- * del luogo e il pacchetto: quando la mappa è legata ad aree, dichiarano **la prima in ordine di
- * guida** (o nessuna, se non ne restano). Un legame di altro tipo (quartiere, Palazzo, luogo) non si tocca.
- */
-function allineaColonneArea(mappa: string): void {
-  const r = prepared('SELECT entita_tipo FROM mappa WHERE chiave = ?').get(mappa) as { entita_tipo: string | null } | undefined;
-  if (!r || (r.entita_tipo !== null && r.entita_tipo !== 'area')) return;
-  const prima = prepared(`SELECT e.entita_chiave AS chiave FROM mappa_entita e LEFT JOIN dungeon_area a ON a.chiave = e.entita_chiave
-    WHERE e.mappa_chiave = ? AND e.entita_tipo = 'area' ORDER BY a.ordine, e.entita_chiave LIMIT 1`).get(mappa) as { chiave: string } | undefined;
-  prepared('UPDATE mappa SET entita_tipo = ?, entita_chiave = ? WHERE chiave = ?').run(prima ? 'area' : null, prima?.chiave ?? null, mappa);
-}
-
-/** Le aree della guida legate a una mappa, in ordine di guida. */
-function areeDellaMappa(mappa: string): Array<{ chiave: string; nome: string; ordine: number }> {
-  return prepared(`SELECT a.chiave, a.nome, a.ordine FROM mappa_entita e JOIN dungeon_area a ON a.chiave = e.entita_chiave
-    WHERE e.mappa_chiave = ? AND e.entita_tipo = 'area' ORDER BY a.ordine, a.chiave`).all(mappa) as Array<{ chiave: string; nome: string; ordine: number }>;
-}
-
 // `staccaAreaDaOgniMappa` (eliminazione di un'infiltrazione) è uscita con L3: i legami stanno in `infiltrazione_area` e se ne vanno
-// con l'infiltrazione (`dungeonService.eliminaAreaInTransazione`); `mappa_entita` di tipo area non si scrive più (R3-09).
+// con l'infiltrazione (`dungeonService.eliminaAreaInTransazione`); `mappa_entita` e le colonne `mappa.entita_*` sono state tolte da L11 · B9.
 
 /**
  * Per il pacchetto delle mappe: le infiltrazioni contenute (chiavi, in ordine di guida), solo se ce ne sono. Da L3 sono quelle
@@ -723,40 +650,9 @@ function areeDellaMappa(mappa: string): Array<{ chiave: string; nome: string; or
  * viaggiano in `legami`).
  */
 function areePerPacchetto(mappa: string, perMappa?: ReadonlyMap<string, ReadonlyArray<{ chiave: string }>>): { aree?: string[] } {
-  if (conLegami()) {
-    const aree = (perMappa?.get(mappa) ?? infiltrazioniDellaMappa(mappa)).map((a) => a.chiave);
-    return aree.length ? { aree } : {};
-  }
-  if (!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_entita'").get()) return {};
-  const aree = areeDellaMappa(mappa).map((a) => a.chiave);
+  if (!conLegami()) return {};
+  const aree = (perMappa?.get(mappa) ?? infiltrazioniDellaMappa(mappa)).map((a) => a.chiave);
   return aree.length ? { aree } : {};
-}
-
-/**
- * Le aree della guida contenute in una planimetria (richiesta dell'utente, 2026-09-29: una mappa può
- * contenerne più d'una). Si passa **l'insieme**: le aree tolte si staccano da questa planimetria, quelle nuove si
- * aggiungono, e restano anche sulle altre planimetrie che le avevano (un'area può stare su più planimetrie, decisione
- * dell'utente del 2026-10-04); gli altri legami della mappa (luogo, quartiere) restano.
- */
-export function impostaAreeMappa(chiavePubblica: string, aree: string[]): Array<{ chiave: string; nome: string; ordine: number }> {
-  // la chiave che usa l'interfaccia è quella di percorso: la riga si trova come in tutte le altre operazioni
-  const r = rigaMappa(chiavePubblica);
-  const chiave = r.chiave;
-  const uniche = [...new Set(aree)];
-  if (uniche.length && chiave.startsWith('dungeon-') && !r.genitore_chiave) throw httpErrors.badRequest('mappa-fuori-palazzo', 'La mappa d\'insieme del Palazzo non è una planimetria: le infiltrazioni si legano alle sue planimetrie.');
-  verificaAreePalazzo(r.genitore_chiave, uniche);
-  getDb().transaction(() => {
-    const segnaposti = uniche.map(() => '?').join(',');
-    prepared(`DELETE FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = 'area'${uniche.length ? ` AND entita_chiave NOT IN (${segnaposti})` : ''}`).run(chiave, ...uniche);
-    for (const area of uniche) {
-      prepared("INSERT OR IGNORE INTO mappa_entita (mappa_chiave, entita_tipo, entita_chiave, fonte_json) VALUES (?, 'area', ?, ?)")
-        .run(chiave, area, JSON.stringify({ origine: 'utente', dichiarata: 'editor' }));
-    }
-    allineaColonneArea(chiave);
-    // come ogni modifica dall'app: la riga è dell'utente, e un pacchetto seed senza sovrascrittura non la tocca
-    prepared("UPDATE mappa SET origine = 'utente', updated_at = ? WHERE chiave = ?").run(nowIso(), chiave);
-  })();
-  return areeDellaMappa(chiave);
 }
 
 /**
@@ -769,172 +665,6 @@ export function impostaAreeMappa(chiavePubblica: string, aree: string[]): Array<
  * si riscrive da 0; le sorelle non elencate restano in coda nell'ordine che avevano. Si accetta
  * qualunque discendente di `genitore` (e `genitore` stesso conta come radice del sottoalbero).
  */
-/**
- * Il **raggruppamento** di una planimetria: a quale stanza appartiene e che cosa mostra la sua
- * versione. Sono i due nomi che si leggono nella scheda del Palazzo, e finora erano intoccabili
- * perché arrivavano dall'istantanea dell'estrazione: chi cura l'atlante deve poter dire «queste
- * due tavole sono la stessa stanza» e «questa è la porzione occidentale», senza toccare il file.
- *
- * `gruppo` sposta la mappa in un'altra stanza (l'id di un gruppo esistente, o un nome nuovo che ne
- * crea uno); `etichetta` è quel che distingue la versione dentro la stanza. Il nome della mappa
- * resta cosa sua, e si cambia con `aggiornaMappa`.
- */
-export function aggiornaPresentazioneMappa(chiave: string, dati: { gruppoId?: string | null; gruppoNome?: string; etichetta?: string | null }): MappaDto {
-  const r = rigaMappa(chiave);
-  chiave = r.chiave;
-  if (!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_presentazione'").get()) throw httpErrors.badRequest('presentazione-non-disponibile', 'Questa istanza non ha la tabella delle presentazioni.');
-  const riga = prepared('SELECT contesti_json, gruppo_immagini_json FROM mappa_presentazione WHERE mappa_chiave = ?').get(chiave) as { contesti_json: string; gruppo_immagini_json: string | null } | undefined;
-  const attuale = riga?.gruppo_immagini_json ? JSON.parse(riga.gruppo_immagini_json) as GruppoImmagini : null;
-  // niente gruppo e nessun nome nuovo: la mappa esce dal raggruppamento e torna a stare da sola
-  const esce = dati.gruppoId === null && !dati.gruppoNome;
-  let gruppo: GruppoImmagini | null = null;
-  if (!esce) {
-    const id = dati.gruppoId ?? attuale?.id ?? `utente:${chiave}`;
-    // il nome della stanza vale per tutte le mappe del gruppo: si scrive su tutte, o due tavole
-    // della stessa stanza finirebbero sotto due titoli diversi
-    const nome = dati.gruppoNome?.trim() || nomeDelGruppo(id) || attuale?.nome || r.nome;
-    const ordine = attuale?.ordine ?? 0;
-    const etichetta = dati.etichetta === undefined ? attuale?.etichetta : (dati.etichetta?.trim() || undefined);
-    // Un nome di stanza scritto da una persona vince sul nome rivisto della singola mappa (2026-09-30): senza
-    // questo segno, cambiare il nome della stanza non si vedeva e cambiare quello della planimetria rinominava
-    // anche la stanza. Chi entra in una stanza con il nome già scelto lo eredita.
-    const nomeRivisto = !!dati.gruppoNome?.trim() || !!attuale?.nomeRivisto || gruppoConNomeRivisto(id);
-    gruppo = { id, nome, ordine, ...(etichetta ? { etichetta } : {}), ...(nomeRivisto ? { nomeRivisto } : {}) };
-  }
-  getDb().transaction(() => {
-    prepared('INSERT INTO mappa_presentazione (mappa_chiave, contesti_json, gruppo_immagini_json) VALUES (?, ?, ?) ON CONFLICT(mappa_chiave) DO UPDATE SET gruppo_immagini_json = excluded.gruppo_immagini_json')
-      .run(chiave, riga?.contesti_json ?? '[]', gruppo ? JSON.stringify(gruppo) : null);
-    if (gruppo && dati.gruppoNome) rinominaGruppo(gruppo.id, gruppo.nome);
-    prepared("UPDATE mappa SET origine = 'utente', updated_at = ? WHERE chiave = ?").run(nowIso(), chiave);
-  })();
-  return dettaglioMappa(chiave);
-}
-
-/**
- * Le tavole di una stanza (le righe di `mappa_presentazione` con quel gruppo), nell'ordine della tabella. Il filtro sull'id
- * lo fa SQLite con `json_extract` (rilievo R5 della verifica completa): prima ognuna delle quattro domande sulla stanza
- * leggeva e interpretava tutte le presentazioni per tenerne poche. `json_extract` e `===` concordano sul tipo: un id
- * numerico non è uguale alla stringa con le stesse cifre, né qui né là.
- */
-function tavoleDelGruppo(id: string): Array<{ mappaChiave: string; gruppo: GruppoImmagini }> {
-  return (prepared(`SELECT mappa_chiave, gruppo_immagini_json FROM mappa_presentazione
-    WHERE gruppo_immagini_json IS NOT NULL AND json_extract(gruppo_immagini_json, '$.id') = ?`).all(id) as Array<{ mappa_chiave: string; gruppo_immagini_json: string }>)
-    .map((r) => ({ mappaChiave: r.mappa_chiave, gruppo: JSON.parse(r.gruppo_immagini_json) as GruppoImmagini }));
-}
-
-/** Il nome già in uso per quel gruppo, se qualche mappa ce l'ha. */
-function nomeDelGruppo(id: string): string | null {
-  const prima = tavoleDelGruppo(id)[0];
-  return prima ? prima.gruppo.nome : null;
-}
-
-/** Una stanza ha un nome solo: rinominarla lo scrive su tutte le sue tavole, segnato come scelto da una persona. */
-function rinominaGruppo(id: string, nome: string): void {
-  for (const { mappaChiave, gruppo: g } of tavoleDelGruppo(id)) {
-    if (g.nome === nome && g.nomeRivisto) continue;
-    prepared('UPDATE mappa_presentazione SET gruppo_immagini_json = ? WHERE mappa_chiave = ?').run(JSON.stringify({ ...g, nome, nomeRivisto: true }), mappaChiave);
-  }
-}
-
-/**
- * Rinominare una planimetria non rinomina la sua stanza (difetto segnalato dall'utente, 2026-09-30). Il titolo
- * di una stanza senza nome scelto viene dalla sua **prima** planimetria: il suo nome, se rivisto a mano,
- * altrimenti quello del gruppo senza il gergo dell'estrattore (`titoloGruppoImmagini`). Se la mappa che cambia
- * nome è quella prima, il titolo cambierebbe con lei: si fissa com'è adesso, come nome scelto per la stanza.
- * Vale da qualunque schermata, editor compreso. Una mappa senza stanza è stanza e planimetria insieme: lì il
- * nome è uno solo, e cambia per entrambe.
- */
-function nomeStanzaDaFissare(r: RigaMappa): { id: string; nome: string } | null {
-  if (!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_presentazione'").get()) return null;
-  const riga = prepared('SELECT gruppo_immagini_json FROM mappa_presentazione WHERE mappa_chiave = ?').get(r.chiave) as { gruppo_immagini_json: string | null } | undefined;
-  const gruppo = riga?.gruppo_immagini_json ? JSON.parse(riga.gruppo_immagini_json) as GruppoImmagini : null;
-  if (!gruppo || gruppo.nomeRivisto) return null;
-  // la prima planimetria della stanza, nell'ordine in cui la scheda del Palazzo le mostra
-  const membri = (prepared(`SELECT m.chiave FROM mappa m JOIN mappa_presentazione p ON p.mappa_chiave = m.chiave
-    WHERE p.gruppo_immagini_json IS NOT NULL AND json_extract(p.gruppo_immagini_json, '$.id') = ? ORDER BY m.ordine, m.chiave`).all(gruppo.id) as Array<{ chiave: string }>);
-  if (membri[0]?.chiave !== r.chiave) return null;
-  const nome = conNomeRivisto() && r.nome_rivisto ? r.nome : senzaGergo(gruppo.nome);
-  return { id: gruppo.id, nome };
-}
-
-/** Qualche tavola della stanza ha già il nome scelto da una persona. */
-function gruppoConNomeRivisto(id: string): boolean {
-  return tavoleDelGruppo(id).some((t) => !!t.gruppo.nomeRivisto);
-}
-
-type GruppoImmagini = { id: string; nome: string; ordine: number; etichetta?: string; nomeRivisto?: boolean };
-
-/**
- * In quale stanza sta una planimetria (richiesta dell'utente, 2026-09-30: «rendere una mappa censita come a sé
- * planimetria di un'altra, e viceversa eleggere una planimetria a mappa individuale»). La stanza è il gruppo
- * di immagini (`mappa_presentazione.gruppo_immagini_json`), e l'operazione è una sola, in transazione:
- * - `con` = un'altra planimetria: questa entra nella stanza di quella, **in fondo** alle sue versioni. Se
- *   quella non ha ancora una stanza, ne nasce una con il nome `nome` (quello con cui l'interfaccia la mostra);
- * - `con` = `null`: questa esce e diventa **una stanza a sé**, chiamata `nome`.
- * In entrambi i casi l'etichetta («che cosa mostra») resta. Solo fra planimetrie dello stesso luogo: una
- * stanza è un pezzo di un Palazzo, non un raccoglitore di tavole di posti diversi.
- */
-export function impostaStanzaMappa(chiavePubblica: string, dati: { con: string | null; nome?: string }): MappaDto {
-  const r = rigaMappa(chiavePubblica);
-  const chiave = r.chiave;
-  if (!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_presentazione'").get()) throw httpErrors.badRequest('presentazione-non-disponibile', 'Questa istanza non ha la tabella delle presentazioni.');
-  /** La presentazione di una mappa: i contesti in JSON (vuoti se non c'è riga) e la stanza, se ne ha una. */
-  const leggi = (k: string): { contesti: string; gruppo: GruppoImmagini | null } => {
-    const riga = prepared('SELECT contesti_json, gruppo_immagini_json FROM mappa_presentazione WHERE mappa_chiave = ?').get(k) as { contesti_json: string; gruppo_immagini_json: string | null } | undefined;
-    return { contesti: riga?.contesti_json ?? '[]', gruppo: riga?.gruppo_immagini_json ? JSON.parse(riga.gruppo_immagini_json) as GruppoImmagini : null };
-  };
-  /** Scrive la stanza di una mappa (crea la presentazione se manca) e segna la mappa come modificata dall'utente. */
-  const scrivi = (k: string, contesti: string, gruppo: GruppoImmagini) => {
-    prepared('INSERT INTO mappa_presentazione (mappa_chiave, contesti_json, gruppo_immagini_json) VALUES (?, ?, ?) ON CONFLICT(mappa_chiave) DO UPDATE SET gruppo_immagini_json = excluded.gruppo_immagini_json')
-      .run(k, contesti, JSON.stringify(gruppo));
-    prepared("UPDATE mappa SET origine = 'utente', updated_at = ? WHERE chiave = ?").run(nowIso(), k);
-  };
-  const questa = leggi(chiave);
-  const etichetta = questa.gruppo?.etichetta ? { etichetta: questa.gruppo.etichetta } : {};
-
-  if (dati.con === null) {
-    const nome = dati.nome?.trim() || r.nome;
-    // un id nuovo: con quello di prima resterebbe nella stanza che lascia
-    getDb().transaction(() => scrivi(chiave, questa.contesti, { id: `utente:${chiave}:${Date.now().toString(36)}`, nome, ordine: 0, ...etichetta, nomeRivisto: true }))();
-    return dettaglioMappa(chiave);
-  }
-
-  const altra = rigaMappa(dati.con);
-  if (altra.chiave === chiave) throw httpErrors.badRequest('stanza-non-valida', 'Una planimetria non può entrare nella propria area.');
-  if (altra.genitore_chiave !== r.genitore_chiave) throw httpErrors.badRequest('stanza-di-altro-luogo', 'Le due planimetrie non stanno nello stesso posto: un’area raccoglie solo planimetrie dello stesso Palazzo o quartiere.');
-  const diQuella = leggi(altra.chiave);
-  getDb().transaction(() => {
-    let gruppo = diQuella.gruppo;
-    if (!gruppo) {
-      gruppo = { id: `utente:${altra.chiave}`, nome: dati.nome?.trim() || altra.nome, ordine: 0, nomeRivisto: true };
-      scrivi(altra.chiave, diQuella.contesti, gruppo);
-    }
-    if (questa.gruppo?.id === gruppo.id) return;
-    // in fondo alle versioni della stanza: l'ordinale («Immagine N») non si sovrappone a quelli che ci sono
-    const tavole = tavoleDelGruppo(gruppo.id);
-    let ultimo = -1;
-    for (const t of tavole) ultimo = Math.max(ultimo, t.gruppo.ordine);
-    scrivi(chiave, questa.contesti, { id: gruppo.id, nome: gruppo.nome, ordine: ultimo + 1, ...etichetta, ...(gruppo.nomeRivisto ? { nomeRivisto: true } : {}) });
-    // Anche nell'ordine del luogo la planimetria va subito dopo l'ultima versione della stanza: le versioni si
-    // mostrano nell'ordine delle mappe, e restando dov'era poteva finire davanti a quelle che c'erano già
-    // («Immagine 2» sopra «Immagine 1» — verifica nel browser, 2026-09-30).
-    // stesso ordinamento della scheda del Palazzo (`planimetrieDelPalazzo`): a pari ordine decide la chiave
-    const fratelli = (r.genitore_chiave === null
-      ? prepared('SELECT chiave, ordine FROM mappa WHERE genitore_chiave IS NULL ORDER BY ordine, chiave').all()
-      : prepared('SELECT chiave, ordine FROM mappa WHERE genitore_chiave = ? ORDER BY ordine, chiave').all(r.genitore_chiave)) as Array<{ chiave: string; ordine: number }>;
-    // le tavole lette prima di scrivere questa: la planimetria che entra non c'era ancora (il filtro sulla chiave resta per chiarezza)
-    const membri = new Set(tavole.filter((t) => t.mappaChiave !== chiave).map((t) => t.mappaChiave));
-    const senza = fratelli.filter((f) => f.chiave !== chiave);
-    let dopo = -1;
-    senza.forEach((f, i) => { if (membri.has(f.chiave)) dopo = i; });
-    if (dopo >= 0) {
-      const nuovo = [...senza.slice(0, dopo + 1), { chiave, ordine: -1 }, ...senza.slice(dopo + 1)];
-      nuovo.forEach((f, i) => { if (f.ordine !== i) prepared('UPDATE mappa SET ordine = ? WHERE chiave = ?').run(i, f.chiave); });
-    }
-  })();
-  return dettaglioMappa(chiave);
-}
-
 /**
  * Riscrive l'ordine delle mappe elencate (riordino per trascinamento): le chiavi si raggruppano per genitore effettivo, ogni
  * gruppo di sorelle si numera da 0 con le scelte in testa e le non elencate in coda, in una transazione. Con `genitore` le
@@ -1008,10 +738,9 @@ export function creaMappa(chiave: string | undefined, dati: DatiMappa & { nome: 
   // `asset: null` esplicito resta «nessun asset»; un valore esplicito si conserva com'è (lo dichiara chi crea la mappa).
   const asset = dati.asset === undefined ? assetEsistente(assetPredefinitoMappa(chiave)) : dati.asset;
   getDb().transaction(() => {
-    prepared(`INSERT INTO mappa (chiave, nome, tipo, genitore_chiave, ordine, immagine_chiave, asset, larghezza, altezza, entita_tipo, entita_chiave, origine, note, updated_at)
-      VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, 'utente', ?, ?)`).run(chiave, dati.nome, dati.tipo, dati.genitore ?? null, dati.ordine ?? 0, asset, dati.larghezza ?? null, dati.altezza ?? null, dati.entita?.tipo ?? null, dati.entita?.chiave ?? null, dati.note ?? '', adesso);
+    prepared(`INSERT INTO mappa (chiave, nome, tipo, genitore_chiave, ordine, immagine_chiave, asset, larghezza, altezza, origine, note, updated_at)
+      VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?, 'utente', ?, ?)`).run(chiave, dati.nome, dati.tipo, dati.genitore ?? null, dati.ordine ?? 0, asset, dati.larghezza ?? null, dati.altezza ?? null, dati.note ?? '', adesso);
     sincronizzaPercorsiMappe(getDb());
-    sincronizzaLegameEntita(chiave, dati.entita ?? null);
     // il ruolo dell'immagine segue il posto nella gerarchia (L1): una mappa nata con un asset che esiste ha già la sua immagine
     allineaRuoliImmagine(getDb(), chiave);
     if (richiesta && richiesta !== chiave && !prepared('SELECT 1 FROM mappa_alias WHERE chiave = ?').get(richiesta)) prepared('INSERT INTO mappa_alias VALUES (?, ?)').run(richiesta, chiave);
@@ -1102,34 +831,27 @@ export function aggiornaMappa(chiave: string, dati: DatiMappa): MappaDto {
   // un'area si lega solo a una planimetria del suo Palazzo (controllo prima di scrivere: niente modifiche a metà)
   const genitoreDopo = dati.genitore === undefined ? r.genitore_chiave : dati.genitore;
   const legamiNuovi = conLegami();
-  if (genitoreDopo !== r.genitore_chiave && (legamiNuovi || prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_entita'").get())) {
+  if (genitoreDopo !== r.genitore_chiave && legamiNuovi) {
     // Spostata sotto un altro genitore, la planimetria porta con sé **tutte** le sue aree: devono restare
     // del Palazzo in cui arriva (rilievo della revisione). Quella che questo salvataggio sostituisce non conta.
     // Con lei si spostano le discendenti: anche le loro aree devono restare del Palazzo di arrivo.
     // Da L3 le infiltrazioni di una planimetria sono quelle della sua Area (`infiltrazione_area`).
     const sottoalbero = [...sottoalberoMappe([chiave])];
-    const areeDopo = new Set(sottoalbero.flatMap((k) => (legamiNuovi ? infiltrazioniDellaMappa(k) : areeDellaMappa(k)).map((a) => a.chiave)));
-    if (!legamiNuovi && dati.entita !== undefined && r.entita_tipo === 'area' && r.entita_chiave) areeDopo.delete(r.entita_chiave);
+    const areeDopo = new Set(sottoalbero.flatMap((k) => infiltrazioniDellaMappa(k).map((a) => a.chiave)));
     if (dati.entita?.tipo === 'area') areeDopo.add(dati.entita.chiave);
     verificaAreePalazzo(genitoreDopo, [...areeDopo]);
   } else if (dati.entita?.tipo === 'area') verificaAreePalazzo(genitoreDopo, [dati.entita.chiave]);
-  // L3: un'infiltrazione legata dall'editor si lega all'Area della planimetria; le colonne `entita_*` di tipo area non si scrivono più
+  // L3: un'infiltrazione legata dall'editor si lega all'Area della planimetria (le colonne `entita_*` sono state tolte da L11 · B9)
   const areaDellaPlanimetria = legamiNuovi && dati.entita?.tipo === 'area'
     ? (prepared('SELECT a.chiave FROM mappa m JOIN area a ON a.chiave = m.area_chiave AND a.dungeon_chiave IS NOT NULL WHERE m.chiave = ?').pluck().get(chiave) as string | undefined) ?? null
     : null;
   if (legamiNuovi && dati.entita?.tipo === 'area' && !areaDellaPlanimetria) throw httpErrors.badRequest('planimetria-senza-area', 'Questa planimetria non appartiene a un’area del Palazzo: le infiltrazioni si legano alle aree.');
-  const colonneArea = legamiNuovi && (dati.entita?.tipo === 'area' || (dati.entita === null && r.entita_tipo === 'area'));
-  // il titolo della «stanza» (gruppo d'immagini) da fissare non serve alle planimetrie dei Palazzi: il nome è quello dell'Area (L3)
-  const inPalazzo = legamiNuovi && !!prepared('SELECT 1 FROM mappa m JOIN area a ON a.chiave = m.area_chiave AND a.dungeon_chiave IS NOT NULL WHERE m.chiave = ?').get(chiave);
-  const stanzaDaFissare = dati.nome !== undefined && dati.nome.trim() !== r.nome && !inPalazzo ? nomeStanzaDaFissare(r) : null;
+  // rinominare una planimetria non cambia il nome della sua stanza: la stanza è l'Area, e il suo nome è `area.nome` (L11 · B9: il gruppo d'immagini non c'è più)
   getDb().transaction(()=>{
-  if (stanzaDaFissare) rinominaGruppo(stanzaDaFissare.id, stanzaDaFissare.nome);
   if (conNomeRivisto()) prepared('UPDATE mappa SET nome_rivisto = ? WHERE chiave = ?').run(rivisto, chiave);
-  prepared(`UPDATE mappa SET nome = ?, tipo = ?, genitore_chiave = ?, ordine = ?, asset = ?, larghezza = ?, altezza = ?, entita_tipo = ?, entita_chiave = ?, note = ?, origine = 'utente', updated_at = ? WHERE chiave = ?`).run(
+  prepared(`UPDATE mappa SET nome = ?, tipo = ?, genitore_chiave = ?, ordine = ?, asset = ?, larghezza = ?, altezza = ?, note = ?, origine = 'utente', updated_at = ? WHERE chiave = ?`).run(
     dati.nome ?? r.nome, dati.tipo ?? r.tipo, dati.genitore === undefined ? r.genitore_chiave : dati.genitore, dati.ordine ?? r.ordine, dati.asset === undefined ? r.asset : dati.asset,
-    dati.larghezza === undefined ? r.larghezza : dati.larghezza, dati.altezza === undefined ? r.altezza : dati.altezza,
-    dati.entita === undefined || colonneArea ? r.entita_tipo : dati.entita?.tipo ?? null, dati.entita === undefined || colonneArea ? r.entita_chiave : dati.entita?.chiave ?? null, dati.note ?? r.note, nowIso(), chiave);
-  if (dati.entita !== undefined) sincronizzaLegameEntita(chiave, dati.entita, { tipo: r.entita_tipo, chiave: r.entita_chiave });
+    dati.larghezza === undefined ? r.larghezza : dati.larghezza, dati.altezza === undefined ? r.altezza : dati.altezza, dati.note ?? r.note, nowIso(), chiave);
   if (areaDellaPlanimetria && dati.entita?.tipo === 'area') {
     const gia = (prepared('SELECT infiltrazione_chiave FROM infiltrazione_area WHERE area_chiave = ?').pluck().all(areaDellaPlanimetria) as string[]);
     if (!gia.includes(dati.entita.chiave)) impostaLegamiInfiltrazione({ area: areaDellaPlanimetria, infiltrazioni: [...gia, dati.entita.chiave] });
@@ -1821,15 +1543,8 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
   if(radice)radice=rigaMappa(radice).chiave;
   const ammesse = radice ? discendentiDi(radice) : null;
   const presentazioni = contestoMappe().presentazioni;
-  // L3 (andata e ritorno identica, §2.3): i legami con le entità di ogni mappa com'erano salvati, fonte compresa (`mappa_entita`, fino a
-  // L11), e le infiltrazioni di ogni planimetria (quelle della sua Area) per il campo vecchio `aree`
-  const conEntitaLegami = !!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_entita'").get();
-  const entitaPerMappa = new Map<string, Array<{ tipo: string; chiave: string; fonte: string }>>();
-  if (conEntitaLegami) {
-    for (const e of prepared('SELECT mappa_chiave, entita_tipo, entita_chiave, fonte_json FROM mappa_entita ORDER BY mappa_chiave, entita_tipo, entita_chiave').all() as Array<{ mappa_chiave: string; entita_tipo: string; entita_chiave: string; fonte_json: string }>) {
-      entitaPerMappa.set(e.mappa_chiave, [...(entitaPerMappa.get(e.mappa_chiave) ?? []), { tipo: e.entita_tipo, chiave: e.entita_chiave, fonte: e.fonte_json }]);
-    }
-  }
+  // L3 (andata e ritorno identica, §2.3): le infiltrazioni di ogni planimetria (quelle della sua Area) per il campo vecchio `aree`. Da L11 · B9 il
+  // pacchetto non porta più `entita`, `entitaLegami` e `gruppoImmagini`: l'import li accetta (pacchetti di prima) e li ignora.
   const infiltrazioniPerMappa = conLegami() ? infiltrazioniDelleMappe() : undefined;
   const conRivisto = conNomeRivisto();
   const conFisso = colonnaMappa('percorso_fisso');
@@ -1839,14 +1554,15 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
     ...(presentazioni.get(m.chiave) ?? {}),
     chiave: m.chiave, nome: m.nome, tipo: m.tipo, genitore: m.genitore_chiave, ordine: m.ordine, immagine: m.immagine_chiave, asset: m.asset, assetOriginale:m.asset, larghezza: m.larghezza, altezza: m.altezza,
     ruoloImmagine: m.ruolo_immagine,
-    entita: m.entita_tipo && m.entita_chiave ? { tipo: m.entita_tipo, chiave: m.entita_chiave } : null, note: m.note,
-    // L3: nome rivisto, origine, ultima modifica, percorso fissato e legami con le entità, perché l'import li rimetta identici
+    note: m.note,
+    // L3: nome rivisto, origine, ultima modifica e percorso fissato, perché l'import li rimetta identici
     ...(conRivisto ? { nomeRivisto: m.nome_rivisto === 1 } : {}), origine: m.origine, updatedAt: m.updated_at,
     ...(conFisso ? { percorsoFisso: (m as RigaMappa & { percorso_fisso?: string | null }).percorso_fisso ?? null } : {}),
-    ...(conEntitaLegami ? { entitaLegami: entitaPerMappa.get(m.chiave) ?? [] } : {}),
-    // L2: l'Area della planimetria e la sua versione (le Aree stanno nel campo `aree` del pacchetto)
-    ...(m.area_chiave ? { area: m.area_chiave, versione: { etichetta: m.versione_etichetta ?? null, ordine: m.versione_ordine ?? 0 } } : {}),
-    // le infiltrazioni contenute (2026-09-29; da L3 quelle dell'Area): `entita` ne dichiara una sola, la prima
+    // L2: l'Area della planimetria e la sua versione (le Aree stanno nel campo `aree` del pacchetto); una mappa senza Area porta la sola versione
+    // se ce l'ha (i fogli dei Memento: etichetta e ordine che prima stavano nel gruppo d'immagini)
+    ...(m.area_chiave ? { area: m.area_chiave, versione: { etichetta: m.versione_etichetta ?? null, ordine: m.versione_ordine ?? 0 } }
+      : m.versione_etichetta != null || m.versione_ordine != null ? { versione: { etichetta: m.versione_etichetta ?? null, ordine: m.versione_ordine ?? 0 } } : {}),
+    // le infiltrazioni contenute (2026-09-29; da L3 quelle dell'Area)
     ...areePerPacchetto(m.chiave, infiltrazioniPerMappa),
     // i pezzi (102), anche nessuno: un pacchetto che lo dice toglie, importato, quelli che la mappa avesse
     ...(conPezzi() ? { pezzi: pezziPerPacchetto(m.chiave) } : {}),
@@ -2145,7 +1861,7 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     const atterraggiDaRicollegare: Array<{ id: number; uid: string }> = [];
     const conAtterraggi = !!prepared("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'dungeon_atterraggio'").get();
     const conUid = colonnaSpillo('uid');
-    const areeDaLegare: Array<{ mappa: string; aree: string[]; fonte: string }> = [];
+    const areeDaLegare: Array<{ mappa: string; aree: string[] }> = [];
     // le voci della guida dei pin (098; prima della 098 la sola colonna della 094, che ne tiene una): da scrivere a genitori risolti;
     // quelle dei pin tolti, per uid, per chi torna con lo stesso
     const conTabellaVoci = !!prepared("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'spillo_voce'").get();
@@ -2169,8 +1885,7 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     // Lo schema non cambia durante l'importazione: colonne e tabelle si controllano una volta, non per ogni mappa e ogni pin
     // (rilievo P5 della verifica, 2026-10-03; nei test lo schema può essere indietro, per questo si controllano).
     const conRuolo = (prepared('PRAGMA table_info(mappa)').all() as Array<{ name: string }>).some((c) => c.name === 'ruolo_immagine');
-    const conEntita = !!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_entita'").get();
-    // L3: i legami infiltrazione ↔ area (110) al posto delle righe di tipo area di `mappa_entita`
+    // L3: i legami infiltrazione ↔ area (110)
     const legamiNuovi = conLegami();
     const conPresentazione = !!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_presentazione'").get();
     const conNativo = colonnaNativoJson();
@@ -2192,11 +1907,11 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       const ruolo: RuoloImmagine = m.ruoloImmagine && (RUOLI_IMMAGINE as readonly string[]).includes(m.ruoloImmagine)
         ? m.ruoloImmagine
         : m.asset?.startsWith('palazzi/') ? 'emblema' : (m.asset ?? m.immagine) ? 'illustrazione-editoriale' : 'nessuna';
-      prepared(`INSERT INTO mappa (chiave, nome, tipo, genitore_chiave, ordine, immagine_chiave, asset, larghezza, altezza, entita_tipo, entita_chiave, origine, note, updated_at${conRuolo ? ', ruolo_immagine' : ''})
-        VALUES (?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?${conRuolo ? ', ?' : ''})
+      prepared(`INSERT INTO mappa (chiave, nome, tipo, genitore_chiave, ordine, immagine_chiave, asset, larghezza, altezza, origine, note, updated_at${conRuolo ? ', ruolo_immagine' : ''})
+        VALUES (?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?${conRuolo ? ', ?' : ''})
         ON CONFLICT(chiave) DO UPDATE SET nome = excluded.nome, tipo = excluded.tipo, ordine = excluded.ordine, immagine_chiave = COALESCE(excluded.immagine_chiave, mappa.immagine_chiave), asset = excluded.asset,
-          larghezza = excluded.larghezza, altezza = excluded.altezza, entita_tipo = excluded.entita_tipo, entita_chiave = excluded.entita_chiave, origine = excluded.origine, note = excluded.note, updated_at = excluded.updated_at${conRuolo ? ', ruolo_immagine = excluded.ruolo_immagine' : ''}`)
-        .run(...[m.chiave, m.nome, m.tipo, m.ordine ?? 0, m.immagine ?? null, m.asset ?? null, m.larghezza ?? null, m.altezza ?? null, m.entita?.tipo ?? null, m.entita?.chiave ?? null,
+          larghezza = excluded.larghezza, altezza = excluded.altezza, origine = excluded.origine, note = excluded.note, updated_at = excluded.updated_at${conRuolo ? ', ruolo_immagine = excluded.ruolo_immagine' : ''}`)
+        .run(...[m.chiave, m.nome, m.tipo, m.ordine ?? 0, m.immagine ?? null, m.asset ?? null, m.larghezza ?? null, m.altezza ?? null,
           // L3 (andata e ritorno identica): l'origine e l'ultima modifica del pacchetto, salvo un'origine forzata da chi importa (il seed)
           opz.origine ?? m.origine ?? origine, m.note ?? '', m.updatedAt ?? adesso, ...(conRuolo ? [ruolo] : [])]);
       // Il nome ora è quello dichiarato dal pacchetto: qualunque revisione fatta a mano su questa
@@ -2204,43 +1919,31 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       // nome è rivisto (L3, difetto di andata e ritorno di lotti/L1/noreg.md §5: si azzerava su 38 planimetrie).
       if (conNomeRivisto()) prepared('UPDATE mappa SET nome_rivisto = ? WHERE chiave = ?').run(m.nomeRivisto ? 1 : 0, m.chiave);
       if (m.percorsoFisso !== undefined && colonnaMappa('percorso_fisso')) prepared('UPDATE mappa SET percorso_fisso = ? WHERE chiave = ?').run(m.percorsoFisso, m.chiave);
+      // la versione di una mappa senza Area (i fogli dei Memento) viaggia da sola; quella di una planimetria con Area la importa `importaAree`
+      if (!m.area && m.versione !== undefined && colonnaMappa('versione_ordine')) {
+        const v = z.object({ etichetta: z.string().min(1).max(160).nullable(), ordine: z.number().int().nonnegative() }).safeParse(m.versione);
+        if (!v.success) throw httpErrors.badRequest('versione-non-valida', `Versione non valida nella mappa '${m.chiave}'.`);
+        prepared('UPDATE mappa SET versione_etichetta = ?, versione_ordine = ? WHERE chiave = ? AND area_chiave IS NULL').run(v.data.etichetta, v.data.ordine, m.chiave);
+      }
       // il campo `aree` (le infiltrazioni della planimetria) si controlla sempre: un elenco rovinato è un 400, non un errore del database
       if (m.aree !== undefined && !z.array(z.string().trim().min(1).max(160)).max(200).safeParse(m.aree).success) {
         throw httpErrors.badRequest('aree-non-valide', `Infiltrazioni non valide nella mappa '${m.chiave}'.`);
       }
-      // L3: i legami con le entità dichiarati dal pacchetto com'erano salvati, fonte compresa (andata e ritorno identica): sostituiscono
-      // quelli della mappa. I legami con le infiltrazioni viaggiano in `legami` (o, nei pacchetti di prima, nel campo `aree`).
-      if (conEntita && m.entitaLegami !== undefined) {
-        const legamiEntita = z.array(z.object({ tipo: z.string().min(1).max(40), chiave: z.string().min(1).max(200), fonte: z.string().min(1).max(2000) })).max(200).safeParse(m.entitaLegami);
-        if (!legamiEntita.success) throw httpErrors.badRequest('entita-non-valide', `Legami con le entità non validi nella mappa '${m.chiave}'.`);
-        prepared('DELETE FROM mappa_entita WHERE mappa_chiave = ?').run(m.chiave);
-        for (const e of legamiEntita.data) prepared('INSERT OR REPLACE INTO mappa_entita (mappa_chiave, entita_tipo, entita_chiave, fonte_json) VALUES (?, ?, ?, ?)').run(m.chiave, e.tipo, e.chiave, e.fonte);
-      }
-      // L'entità dichiarata dalla mappa vale anche come associazione consultabile: è così che la
-      // scheda dell'area della guida mostra la sua planimetria e che le altre sezioni la trovano.
-      else if (conEntita) {
-        // Si sostituiscono solo i legami che il pacchetto dichiara — le aree della guida e il tipo di
-        // `entita` —, non tutti: un luogo legato dalla migrazione 054 non viaggia nel pacchetto e
-        // cancellarlo lo perdeva. Le aree sono l'elenco `aree` (2026-09-29, più d'una per planimetria);
-        // un pacchetto di prima porta solo `entita`. Da L3 (pacchetto di prima su una base con `infiltrazione_area`) le righe di tipo area
-        // non si scrivono più: le infiltrazioni del campo `aree` diventano legami dell'Area della planimetria, a importazione finita.
-        if (!legamiNuovi) prepared("DELETE FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = 'area'").run(m.chiave);
-        if (m.entita?.tipo && m.entita.tipo !== 'area') prepared('DELETE FROM mappa_entita WHERE mappa_chiave = ? AND entita_tipo = ?').run(m.chiave, m.entita.tipo);
-        const fonte = JSON.stringify({ origine, dichiarata: 'pacchetto' });
-        const dichiarate = m.aree !== undefined ? z.array(z.string().trim().min(1).max(160)).max(200).safeParse(m.aree) : null;
-        if (dichiarate && !dichiarate.success) throw httpErrors.badRequest('aree-non-valide', `Infiltrazioni non valide nella mappa '${m.chiave}'.`);
-        const aree = [...new Set(dichiarate ? dichiarate.data : m.entita?.tipo === 'area' && m.entita.chiave ? [m.entita.chiave] : [])];
-        if (m.entita?.tipo && m.entita.chiave && m.entita.tipo !== 'area') prepared('INSERT OR REPLACE INTO mappa_entita VALUES(?,?,?,?)').run(m.chiave, m.entita.tipo, m.entita.chiave, fonte);
-        // Le aree si verificano e si legano **dopo** il passaggio dei genitori: il Palazzo della planimetria
-        // si trova risalendo la catena nel database, e a questo punto le mappe nuove del pacchetto (e quelle
-        // che il pacchetto dichiara dopo la figlia) non hanno ancora un genitore (rilievo della revisione).
-        areeDaLegare.push({ mappa: m.chiave, aree, fonte });
-      }
-      if ((m.contesti !== undefined || m.gruppoImmagini !== undefined) && conPresentazione) {
-        const schema=z.object({contesti:z.array(z.object({id:z.string().min(1).max(160),nome:z.string().min(1).max(240).nullable(),campo:z.string().min(1).max(80),texpack:z.number().int().nonnegative()})).max(1000),gruppo:z.object({id:z.string().min(1).max(120),nome:z.string().min(1).max(160),ordine:z.number().int().nonnegative(),etichetta:z.string().min(1).max(160).optional(),nomeRivisto:z.boolean().optional()}).nullable()});
-        const v=schema.safeParse({contesti:m.contesti??[],gruppo:m.gruppoImmagini??null});
+      // `entita`, `entitaLegami` e `gruppoImmagini` dei pacchetti di prima si leggono e si ignorano (L11 · B9, R11-05): le tabelle e le colonne
+      // che li accoglievano non esistono più. Le infiltrazioni della planimetria sono l'elenco `aree`, o (pacchetto di prima) l'`entita` di tipo
+      // area: diventano legami dell'Area della planimetria a importazione finita, sempre (qualunque schema abbia la base).
+      // Le aree si verificano e si legano **dopo** il passaggio dei genitori: il Palazzo della planimetria si trova risalendo la catena nel
+      // database, e a questo punto le mappe nuove del pacchetto (e quelle che il pacchetto dichiara dopo la figlia) non hanno ancora un
+      // genitore (rilievo della revisione).
+      const dichiarate = m.aree !== undefined ? z.array(z.string().trim().min(1).max(160)).max(200).safeParse(m.aree) : null;
+      if (dichiarate && !dichiarate.success) throw httpErrors.badRequest('aree-non-valide', `Infiltrazioni non valide nella mappa '${m.chiave}'.`);
+      const aree = [...new Set(dichiarate ? dichiarate.data : m.entita?.tipo === 'area' && m.entita.chiave ? [m.entita.chiave] : [])];
+      areeDaLegare.push({ mappa: m.chiave, aree });
+      if (m.contesti !== undefined && conPresentazione) {
+        const schema=z.object({contesti:z.array(z.object({id:z.string().min(1).max(160),nome:z.string().min(1).max(240).nullable(),campo:z.string().min(1).max(80),texpack:z.number().int().nonnegative()})).max(1000)});
+        const v=schema.safeParse({contesti:m.contesti??[]});
         if(!v.success || new Set(v.data.contesti.map(c=>c.id)).size!==v.data.contesti.length)throw httpErrors.badRequest('contesti-non-validi','Contesti della planimetria non validi o duplicati.');
-        prepared('INSERT INTO mappa_presentazione VALUES(?,?,?) ON CONFLICT(mappa_chiave) DO UPDATE SET contesti_json=excluded.contesti_json,gruppo_immagini_json=excluded.gruppo_immagini_json').run(m.chiave,JSON.stringify(v.data.contesti),v.data.gruppo?JSON.stringify(v.data.gruppo):null);
+        prepared('INSERT INTO mappa_presentazione (mappa_chiave, contesti_json) VALUES(?,?) ON CONFLICT(mappa_chiave) DO UPDATE SET contesti_json=excluded.contesti_json').run(m.chiave,JSON.stringify(v.data.contesti));
       }
       // I pezzi (102) sono sempre dell'utente: un pacchetto che li dichiara sostituisce quelli della mappa, salvo un reseed (seed sopra
       // seed, senza «sovrascrivi»), che non li tocca; un pacchetto di prima, senza il campo, li lascia com'erano. Le condizioni si
@@ -2395,14 +2098,9 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       prepared('UPDATE mappa SET genitore_chiave = ? WHERE chiave = ?').run(genitore, m.chiave);
     }
     // a genitori scritti: le stesse regole dell'app (aree esistenti e dello stesso Palazzo della planimetria)
-    for (const { mappa, aree, fonte } of areeDaLegare) {
+    // (le infiltrazioni si legano all'Area della planimetria più sotto, quando le Aree ci sono tutte)
+    for (const { mappa, aree } of areeDaLegare) {
       verificaAreePalazzo((prepared('SELECT genitore_chiave FROM mappa WHERE chiave = ?').get(mappa) as { genitore_chiave: string | null }).genitore_chiave, aree);
-      // L3: con i legami nuovi le infiltrazioni si legano all'Area della planimetria più sotto, quando le Aree ci sono tutte
-      if (legamiNuovi) continue;
-      // un'area può stare su più planimetrie (2026-10-04): il pacchetto la aggiunge senza staccarla dalle altre
-      for (const area of aree) prepared("INSERT OR REPLACE INTO mappa_entita VALUES(?,'area',?,?)").run(mappa, area, fonte);
-      // anche con l'elenco vuoto: le colonne non devono dichiarare un'area che non c'è più
-      allineaColonneArea(mappa);
     }
     // già verificate prima degli inserimenti; lo spillo d'arrivo descritto per nome e posizione si risolve adesso, a mappe complete
     for (const arrivo of arrivi) salvaDestinazioneSpillo(arrivo.id, arrivo.valore, arrivo.invalidata);

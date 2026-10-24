@@ -12,7 +12,8 @@ import { closeDb, prepared } from '../db/dbService.js';
 import { createApp } from '../bootstrap.js';
 import { bodyAggiornaMappa } from '../schemas/mappe.js';
 import { LIMITI_GUIDA } from '../../shared/limitiGuida.js';
-import { aggiornaPresentazioneMappa } from '../services/mappe/mappeService.js';
+/** `aggiornaPresentazioneMappa` e il gruppo d'immagini sono stati tolti (L11 · B9): serve solo al test messo da parte con `it.skip`, perché compili. */
+const aggiornaPresentazioneMappa = (_chiave: string, _dati: unknown): never => { throw new Error('Tolta da L11 · B9'); };
 import { dettaglioDungeon } from '../services/dungeonService.js';
 import type { AreaDungeonDto, DungeonDettaglioDto, PuntoInteresseDto } from '../../shared/types.js';
 import { dbDiProva } from '../../test/dbDiProva.js';
@@ -101,7 +102,9 @@ describe('raggruppamento delle planimetrie', () => {
     expect([gruppoDi(una.chiave), gruppoDi(altra.chiave)]).toEqual([null, null]);
   });
 
-  it('una tavola può uscire dal raggruppamento e tornare a stare da sola', async () => {
+  // Superato dal lotto L11 (B9, migrazione 177): il gruppo d'immagini (`aggiornaPresentazioneMappa`, `gruppo_immagini_json`) non esiste più; per una
+  // mappa senza Area le rotte rispondono 409 `mappa-senza-area`. Il test resta, da riscrivere.
+  it.skip('una tavola può uscire dal raggruppamento e tornare a stare da sola', async () => {
     const sola = planimetriaDiPalazzo('kamoshida', { nome: 'Sala B' });
     const compagna = planimetriaDiPalazzo('kamoshida', { nome: 'Sala B bis' });
     await request(app).put(`/api/mappe/${sola.chiave}/stanza`).send({ con: compagna.chiave }).expect(200);

@@ -14,6 +14,7 @@ import { prepared } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { chiaveMappa, idMappa, nomePercorso } from './percorsiMappe.js';
 import { areeDelleInfiltrazioni } from './legamiInfiltrazioni.js';
+import { radiceDelPalazzo, radiceDelQuartiere } from './alberoMappe.js';
 import type { AccessoMondoDto, DestinazioneMondoDto, TipoAccessoMondo } from '../../../shared/accessoMondo.js';
 
 const TABELLE: Record<TipoAccessoMondo, string> = {
@@ -113,8 +114,8 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
         if (sede && !riferimenti.some((r) => r.tipo === 'luogo' && r.chiave === sede.sede_chiave)) riferimenti.push({ tipo: 'luogo', chiave: sede.sede_chiave });
       }
       /**
-       * Per ogni riferimento raccolto: i pin che lo citano nel riferimento (e, per un punto, nel campo della voce), le mappe
-       * che hanno quell'entità come propria e quelle che la dichiarano fra le loro entità (`mappa_entita`).
+       * Per ogni riferimento raccolto: i pin che lo citano nel riferimento (e, per un punto, nel campo della voce) e la mappa che
+       * è propria dell'entità (quartiere, Palazzo, Area di un luogo).
        */
       const cerca = () => {
         for (const r of riferimenti) {
@@ -131,7 +132,8 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
             }
           }
           // L3: un'infiltrazione sta nelle Aree che tocca (`infiltrazione_area`), ognuna sulla versione da aprire (o la predefinita);
-          // le colonne `mappa.entita_*` e `mappa_entita` di tipo area non si leggono più (R3-09)
+          // le colonne `mappa.entita_*` e `mappa_entita` non esistono più (L11 · B9): la mappa di un quartiere e quella di un Palazzo si
+          // ricavano dalla chiave (`citta-<q>`, `dungeon-<d>`)
           if (r.tipo === 'area') {
             for (const a of areeDelleInfiltrazioni().get(r.chiave) ?? []) {
               const m = a.planimetriaIniziale ?? a.predefinita;
@@ -139,8 +141,16 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
             }
             continue;
           }
-          for (const m of prepared('SELECT chiave FROM mappa WHERE entita_tipo=? AND entita_chiave=? ORDER BY chiave').all(r.tipo, r.chiave) as Array<{ chiave: string }>) aggiungi(m.chiave, null, null, 'entita-mappa', r);
-          for (const m of prepared('SELECT mappa_chiave AS chiave FROM mappa_entita WHERE entita_tipo=? AND entita_chiave=? ORDER BY mappa_chiave').all(r.tipo,r.chiave) as Array<{chiave:string}>) aggiungi(m.chiave,null,null,'entita-mappa',r);
+          if (r.tipo === 'quartiere') aggiungi(radiceDelQuartiere(r.chiave), null, null, 'entita-mappa', r);
+          if (r.tipo === 'dungeon') aggiungi(radiceDelPalazzo(r.chiave), null, null, 'entita-mappa', r);
+          // un luogo che sta in un'Area e non ha nessun pin è nella planimetria predefinita della sua Area (sostituisce i legami `mappa_entita` di
+          // tipo luogo, che erano questo per costruzione, e vale anche per i luoghi che prima ripiegavano sulla mappa del quartiere); con un pin,
+          // il posto esatto è il pin
+          if (r.tipo === 'luogo') {
+            const p = prepared(`SELECT a.planimetria_predefinita AS mappa FROM luogo l JOIN area a ON a.chiave = l.area_chiave WHERE l.chiave = ?
+              AND NOT EXISTS (SELECT 1 FROM spillo s WHERE s.riferimento_tipo = 'luogo' AND s.riferimento_chiave = l.chiave)`).get(r.chiave) as { mappa: string | null } | undefined;
+            if (p?.mappa) aggiungi(p.mappa, null, null, 'entita-mappa', r);
+          }
         }
       };
       cerca();

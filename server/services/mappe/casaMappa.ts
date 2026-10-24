@@ -8,12 +8,13 @@
 // tutto il resto (Memento, mappe senza Area) → il visore. La regola sta qui, una volta, e viaggia nei DTO: l'interfaccia non
 // la ricostruisce, e gli indirizzi vecchi `/guida/mappe/<chiave>` portano qui con il redirect.
 //
-// Senza dipendenze dagli altri servizi delle mappe (solo il database, i percorsi pubblici e i condivisi): lo usano `mappeService`,
+// Senza dipendenze dagli altri servizi delle mappe (solo il database, i percorsi pubblici, `alberoMappe` e i condivisi): lo usano `mappeService`,
 // `areeService`, `cittaService` e i contenuti della guida, e nessuno deve richiamarsi in cerchio.
 // ============================================================
 
 import { getDb, type AppDatabase } from '../../db/dbService.js';
 import { chiaveMappa } from './percorsiMappe.js';
+import { entitaDellaRadice } from './alberoMappe.js';
 import { httpErrors } from '../../utils/httpError.js';
 import type { AreaRifDto, ContenitoreAreaDto } from '../../../shared/types.js';
 
@@ -71,14 +72,15 @@ export function casaDelPalazzo(dungeon: string): string {
 }
 
 /** I campi di una riga di `mappa` che servono alla casa. */
-export interface RigaPerCasa { chiave: string; tipo: string; entita_tipo: string | null; entita_chiave: string | null; area_chiave?: string | null }
+export interface RigaPerCasa { chiave: string; tipo: string; area_chiave?: string | null }
 
-/** La casa di una mappa, con la regola del §1.2 (vedi l'intestazione). */
+/** La casa di una mappa, con la regola del §1.2 (vedi l'intestazione). L'entità di una radice si ricava da chiave e tipo (`entitaDellaRadice`). */
 export function casaDellaMappa(r: RigaPerCasa, ctx: ContestoAree): string {
   if (r.chiave === 'tokyo' && r.tipo === 'citta') return '/guida/citta';
-  if (r.tipo === 'quartiere' && r.entita_tipo === 'quartiere' && r.entita_chiave && r.entita_chiave !== 'mementos') return `/guida/citta/${encodeURIComponent(r.entita_chiave)}`;
+  const radice = entitaDellaRadice(r);
+  if (radice?.tipo === 'quartiere' && radice.chiave !== 'mementos') return `/guida/citta/${encodeURIComponent(radice.chiave)}`;
   // L3: la radice di un Palazzo (non dei Memento, che è un `dedalo`) → la scheda del Palazzo
-  if (r.tipo === 'palazzo' && r.entita_tipo === 'dungeon' && r.entita_chiave && r.entita_chiave !== 'mementos') return casaDelPalazzo(r.entita_chiave);
+  if (r.tipo === 'palazzo' && radice?.tipo === 'dungeon' && radice.chiave !== 'mementos') return casaDelPalazzo(radice.chiave);
   const area = r.area_chiave ? ctx.aree.get(r.area_chiave) : undefined;
   const dellArea = area ? casaDellArea(area, r.chiave) : null;
   return dellArea ?? `/guida/mappe/${encodeURIComponent(chiaveMappa(r.chiave))}`;

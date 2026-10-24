@@ -106,7 +106,7 @@ export function gerarchiaMappe(partitaId?: number): GerarchiaMappeDto {
 
   const nodoPlanimetria = (a: RigaArea, p: RigaPlanimetriaG, indice: number): NodoGerarchiaDto => ({
     tipo: 'planimetria', chiave: chiaveMappa(p.chiave), nome: p.versione_etichetta?.trim() || `Planimetria ${indice + 1}`,
-    casa: casaDellArea(a, p.chiave, chiaveMappa) ?? casaDellaMappa({ chiave: p.chiave, tipo: 'luogo', entita_tipo: null, entita_chiave: null, area_chiave: a.chiave }, ctx),
+    casa: casaDellArea(a, p.chiave, chiaveMappa) ?? casaDellaMappa({ chiave: p.chiave, tipo: 'luogo', area_chiave: a.chiave }, ctx),
     immagine: illustrazioneDaRiga(p, caricate),
     conteggi: { pin: pinPropri(p.chiave) },
     versione: { etichetta: p.versione_etichetta, ordine: p.versione_ordine, predefinita: a.planimetria_predefinita === p.chiave },

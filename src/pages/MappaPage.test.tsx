@@ -21,7 +21,7 @@ const { risolviMappa, getContenutiMappa, getAlberoMappe, getConteggiAlbero, getM
 vi.mock('../services/api', (vero) => moduloApi(vero, { risolviMappa, getContenutiMappa, getAlberoMappe, getConteggiAlbero, getMappa, impostaSpilloRaccolto, impostaStatoPunto, impostaAcquisto }));
 
 /** Il riassunto di una mappa senza genitore, spilli né figli, con chiave, nome e tipo (e il resto) presi da `extra`. */
-const riassunto = (extra: Partial<MappaRiassuntoDto> & { chiave: string; nome: string; tipo: MappaRiassuntoDto['tipo'] }): MappaRiassuntoDto => ({ genitore: null, nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'seed', numeroSpilli: 0, numeroFigli: 0, updatedAt: '', area: null, casa: `/guida/mappe/${encodeURIComponent(extra.chiave)}`, ...extra });
+const riassunto = (extra: Partial<MappaRiassuntoDto> & { chiave: string; nome: string; tipo: MappaRiassuntoDto['tipo'] }): MappaRiassuntoDto => ({ genitore: null, nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, radiceDi: null, versione: null, origine: 'seed', numeroSpilli: 0, numeroFigli: 0, updatedAt: '', area: null, casa: `/guida/mappe/${encodeURIComponent(extra.chiave)}`, ...extra });
 const albero: MappaRiassuntoDto[] = [
   riassunto({ chiave: 'tokyo', nome: 'Tokyo', tipo: 'citta', numeroFigli: 1, asset: 'mappe/tokyo' }),
   riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo', numeroSpilli: 2 }),
@@ -31,7 +31,7 @@ const albero: MappaRiassuntoDto[] = [
 const forziere: SpilloDto = { id: 4, mappaChiave: 'citta-shibuya', tipo: 'forziere', tipoNome: 'Forziere', colore: '#eab308', nome: 'Scrigno', descrizione: '', x: 30, y: 40, riferimento: null, collezionabile: true, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, voci: [], condizioni: [], immagini: [], updatedAt: '' };
 const dettaglio: MappaDto = { ...riassunto({ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo', numeroSpilli: 2, immagineUrl: '/pianta-test.png' }), larghezza: 800, altezza: 600, note: '', genitoreNome: 'Tokyo', percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'citta-shibuya', nome: 'Shibuya' }], figli: [], arrivi: [], pezzi: [], spilli: [forziere, { ...forziere, id: 5, nome: 'Passaggio', tipo: 'passaggio', tipoNome: 'Passaggio', collezionabile: false, x: 60, y: 60 }, { ...forziere, id: 6, nome: 'Tesoro del Palazzo', tipo: 'tesoro-palazzo', tipoNome: 'Tesoro del Palazzo', x: 70, y: 20, voci: [{ chiave: 'kamoshida-01/2', tipo: 'tesoro', nome: 'Tesoro del Palazzo', descrizione: '', esauribile: false, dungeon: 'kamoshida', area: 'kamoshida-01', areaDedalo: null, stato: null }] }] };
 /** Il Palazzo di Kamoshida come luogo senza pianta: elenca le sue planimetrie, con «Scheda del Palazzo» e «Modifica mappa». */
-const senzaPianta: MappaDto = { ...dettaglio, chiave: 'dungeon-kamoshida', nome: 'Palazzo di Kamoshida', tipo: 'palazzo', genitore: null, immagineUrl: null, asset: null, figli: [albero[3]], spilli: [], percorso: [{ chiave: 'dungeon-kamoshida', nome: 'Palazzo di Kamoshida' }], entita: { tipo: 'dungeon', chiave: 'kamoshida' } };
+const senzaPianta: MappaDto = { ...dettaglio, chiave: 'dungeon-kamoshida', nome: 'Palazzo di Kamoshida', tipo: 'palazzo', genitore: null, immagineUrl: null, asset: null, figli: [albero[3]], spilli: [], percorso: [{ chiave: 'dungeon-kamoshida', nome: 'Palazzo di Kamoshida' }], radiceDi: { tipo: 'dungeon', chiave: 'kamoshida' }, versione: null };
 
 /** La pagina Partita finta: il titolo e la scheda chiesta nell'indirizzo, per vedere dove arriva «Torna alla partita». */
 function PaginaPartita() {
@@ -116,7 +116,7 @@ describe('MappaPage', () => {
   // L0 (2026-10-20): la mappa dei Memento è dei Memento, non di un Palazzo, e non ha planimetrie da aggiungere
   it('la mappa dei Memento dice «Scheda dei Memento», è di tipo «Memento» e non chiede planimetrie', async () => {
     getAlberoMappe.mockResolvedValue([]);
-    getMappa.mockResolvedValue({ ...senzaPianta, chiave: 'dungeon-mementos', nome: 'Memento', tipo: 'dedalo', figli: [], percorso: [{ chiave: 'dungeon-mementos', nome: 'Memento' }], entita: { tipo: 'dungeon', chiave: 'mementos' } });
+    getMappa.mockResolvedValue({ ...senzaPianta, chiave: 'dungeon-mementos', nome: 'Memento', tipo: 'dedalo', figli: [], percorso: [{ chiave: 'dungeon-mementos', nome: 'Memento' }], radiceDi: { tipo: 'dungeon', chiave: 'mementos' }, versione: null });
     monta('/guida/mappe/dungeon-mementos');
     expect(await screen.findByRole('link', { name: 'Scheda dei Memento' })).toHaveAttribute('href', '/guida/dungeon/mementos');
     expect(screen.getByText('Memento', { selector: '.chip' })).toBeInTheDocument();
@@ -440,7 +440,7 @@ it('il contesto URL cambia il titolo del visore e il selettore può ripristinare
   expect(screen.getByRole('list',{name:'Nomi nei contesti del gioco'})).toBeInTheDocument();
 });
 
-const guidaAccessibile: ContenutiMappaDto = {mappa:'citta-shibuya',aree:[{chiave:'biblioteca',nome:'Biblioteca',descrizione:'Contenuto conservato',note:'',mappe:[],punti:[]}]};
+const guidaAccessibile: ContenutiMappaDto = {mappa:'citta-shibuya',aree:[{chiave:'biblioteca',nome:'Biblioteca',descrizione:'Contenuto conservato',mappe:[],punti:[]}]};
 it('l’emblema del palazzo senza dimensioni lascia guida e planimetrie accessibili senza visore',async()=>{
   getAlberoMappe.mockResolvedValue(albero);
   getContenutiMappa.mockResolvedValueOnce(guidaAccessibile);

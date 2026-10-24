@@ -76,13 +76,13 @@ export function casaDelLuogo(chiave: string): string {
 
 /** I pin di ogni luogo (riferimento `luogo`), in ordine di id, con la casa dell'area aperta sullo spillo e la nota propria del pin. */
 function pinDeiLuoghi(aree: ContestoAree, luogo?: string): Map<string, PinDelLuogo[]> {
-  const righe = prepared(`SELECT s.id, s.riferimento_chiave AS luogo, s.descrizione, m.chiave AS mappa, m.tipo, m.entita_tipo, m.entita_chiave, m.area_chiave, l.cosa_offre
+  const righe = prepared(`SELECT s.id, s.riferimento_chiave AS luogo, s.descrizione, m.chiave AS mappa, m.tipo, m.area_chiave, l.cosa_offre
     FROM spillo s JOIN mappa m ON m.chiave = s.mappa_chiave JOIN luogo l ON l.chiave = s.riferimento_chiave
     WHERE s.riferimento_tipo = 'luogo' ${luogo ? 'AND s.riferimento_chiave = ?' : ''} ORDER BY s.id`).all(...(luogo ? [luogo] : [])) as
-    Array<{ id: number; luogo: string; descrizione: string | null; mappa: string; tipo: string; entita_tipo: string | null; entita_chiave: string | null; area_chiave: string | null; cosa_offre: string }>;
+    Array<{ id: number; luogo: string; descrizione: string | null; mappa: string; tipo: string; area_chiave: string | null; cosa_offre: string }>;
   const out = new Map<string, PinDelLuogo[]>();
   for (const r of righe) {
-    const casa = casaDellaMappa({ chiave: r.mappa, tipo: r.tipo, entita_tipo: r.entita_tipo, entita_chiave: r.entita_chiave, area_chiave: r.area_chiave }, aree);
+    const casa = casaDellaMappa({ chiave: r.mappa, tipo: r.tipo, area_chiave: r.area_chiave }, aree);
     const descrizione = (r.descrizione ?? '').trim();
     (out.get(r.luogo) ?? out.set(r.luogo, []).get(r.luogo)!).push({ spillo: r.id, mappa: chiaveMappa(r.mappa), mappaNome: nomePercorso(r.mappa),
       casa: `${casa}${casa.includes('?') ? '&' : '?'}spillo=${r.id}`, notaPin: descrizione && descrizione !== r.cosa_offre.trim() ? descrizione : null });

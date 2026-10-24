@@ -6,7 +6,11 @@ import type { ConteggiPinDto, MappaDto, MappaRiassuntoDto } from '../types';
 import { nomeConVersione } from './etichettaVersione';
 // il gergo dell'estrattore: condiviso col server, che fissa i nomi delle stanze come li mostra l'interfaccia
 import { senzaGergo } from '../../shared/nomiMappe';
-type IdentitaMappa = Pick<MappaRiassuntoDto, 'nome' | 'contesti' | 'gruppoImmagini' | 'genitoreNome' | 'nomeRivisto'>;
+// L11 · B9: la stanza è l'Area della planimetria (`area`), la versione dentro la stanza è `versione`: il gruppo d'immagini non c'è più
+type IdentitaMappa = Pick<MappaRiassuntoDto, 'nome' | 'contesti' | 'genitoreNome' | 'nomeRivisto'> & Partial<Pick<MappaRiassuntoDto, 'area' | 'versione'>>;
+/** Il nome della stanza di una planimetria: quello della sua Area, solo se la planimetria è una versione con etichetta (come il gruppo d'immagini
+ *  di prima, che le planimetrie senza etichetta non avevano); altrimenti null. */
+const nomeStanza = (mappa: IdentitaMappa): string | null => (mappa.versione?.etichetta != null ? mappa.area?.nome ?? null : null);
 type RisoluzioneContesto = { stato: 'assente' | 'non-valido' | 'senza-titolo' | 'multiplo'; titolo: null; ids: string[] } | { stato: 'nominato'; titolo: string; ids: string[] };
 
 /** Raggruppa i titoli noti uguali; i contesti privi di titolo restano distinti. */
@@ -53,8 +57,8 @@ export function nomePresentazioneMappa(mappa: IdentitaMappa, selezione?: string 
   // contesto selezionato qui sopra: quella è la vista in corso, non il nome della mappa.
   if (mappa.nomeRivisto) return mappa.nome;
   if (mappa.contesti?.some(c => c.nome === null)) return mappa.genitoreNome ? `${mappa.genitoreNome} — Planimetria` : 'Planimetria';
-  const base = alternativeMappa(mappa).map(c => c.nome).join(' / ') || mappa.gruppoImmagini?.nome || mappa.nome;
-  return senzaGergo(nomeConVersione(mappa as MappaRiassuntoDto, base));
+  const base = alternativeMappa(mappa).map(c => c.nome).join(' / ') || nomeStanza(mappa) || mappa.nome;
+  return senzaGergo(nomeConVersione(mappa, base));
 }
 
 /** UX3-8 (L3): vero se la mappa è un foglio dell'estrazione **senza nome vero**, cioè col nome tecnico che l'estrazione dà ai fogli che
@@ -83,15 +87,14 @@ export const testoConteggiPin = (c: ConteggiPinDto): string =>
  * Esiste perché quei tre punti leggevano `gruppoImmagini.nome` per conto loro, e una mappa rivista
  * a mano finiva per chiamarsi in un modo nell'editor e in un altro nell'albero. */
 export function titoloGruppoImmagini(mappa: IdentitaMappa): string {
-  // Il nome della stanza scelto da una persona vince su tutto (2026-09-30): finché vinceva il nome rivisto della
-  // singola mappa, «Nome della stanza» non si vedeva e «Nome della planimetria» rinominava anche la stanza.
-  if (mappa.gruppoImmagini?.nomeRivisto) return mappa.gruppoImmagini.nome;
+  // Il nome della stanza è quello dell'Area (L11 · B9): un nome dato a mano all'Area è già `area.nome`, e vince su tutto (2026-09-30: il nome della
+  // stanza scelto da una persona vince sul nome rivisto della singola mappa; rinominare una planimetria non rinomina la sua stanza).
+  // Anche il nome della stanza passa dal filtro del gergo: è un'istantanea dell'estrazione come il resto, e quattro fogli non attribuiti
+  // di un Palazzo si presentavano ancora come «Palazzo di Kamoshida — Immagini native che nessun campo usa» (rilievo della revisione).
+  const stanza = nomeStanza(mappa);
+  if (stanza) return senzaGergo(stanza);
   if (mappa.nomeRivisto) return mappa.nome;
-  // Anche il nome del gruppo passa dal filtro del gergo: è un'istantanea dell'estrazione come il
-  // resto, e quattro fogli non attribuiti di un Palazzo si presentavano ancora come «Palazzo di
-  // Kamoshida — Immagini native che nessun campo usa». Il filtro stava solo sulla via del nome
-  // della singola mappa, e il titolo del gruppo gli girava intorno (rilievo della revisione).
-  return mappa.gruppoImmagini ? senzaGergo(mappa.gruppoImmagini.nome) : nomePresentazioneMappa(mappa);
+  return nomePresentazioneMappa(mappa);
 }
 
 

@@ -2,6 +2,7 @@
 import { createHash } from 'node:crypto';
 import type { AppDatabase } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
+import { tabellaTolta } from '../../db/fontiTolte.js';
 import { normalizzaRequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { ammetteCondizioni, categoriaSpillo, RIFERIMENTI_PER_CATEGORIA, TIPI_SPILLO } from '../../../shared/spilli.js';
 
@@ -114,7 +115,7 @@ function fotografiaAreaVenditore(db: AppDatabase, pin: PinDelRaccordo, luogo: Ri
   const mappaQuartiere = mappe.get('citta-shibuya');
   if (!area || !quartiere || area.quartiere_chiave !== 'shibuya' || area.dungeon_chiave !== null || area.citta_chiave !== null
     || area.slug !== 'central-street' || mappa?.area_chiave !== areaChiave || mappa.genitore_chiave !== 'citta-shibuya' || mappa.tipo !== 'luogo'
-    || mappaQuartiere?.tipo !== 'quartiere' || mappaQuartiere.entita_tipo !== 'quartiere' || mappaQuartiere.entita_chiave !== 'shibuya') {
+    || mappaQuartiere?.tipo !== 'quartiere') {
     conflittoArea('La planimetria, l’Area o il quartiere non corrispondono più alla collocazione proposta.');
   }
   const mappeUsate = new Map<string, Riga>();
@@ -175,10 +176,7 @@ function fotografiaAreaVenditore(db: AppDatabase, pin: PinDelRaccordo, luogo: Ri
     const daNegozio = p.riferimento_tipo === 'negozio' && (specifica ? s?.luogo_chiave === LUOGO_VENDITORE : pertinenti.has(String(p.riferimento_chiave)));
     if (diretta || daNegozio) aggiungi({ pin: p, sedePin: specifica ? s : null }, p.mappa_chiave, Number(p.id));
   }
-  const associazioni = [...(db.prepare('SELECT * FROM mappa_entita ORDER BY mappa_chiave, entita_tipo, entita_chiave').all() as Riga[]),
-    ...[...mappe.values()].map(m => ({ mappa_chiave: m.chiave, entita_tipo: m.entita_tipo, entita_chiave: m.entita_chiave }))];
-  for (const a of associazioni) if ((['luogo', 'attivita'].includes(String(a.entita_tipo)) && a.entita_chiave === LUOGO_VENDITORE)
-    || (a.entita_tipo === 'negozio' && pertinenti.has(String(a.entita_chiave)))) aggiungi(a, a.mappa_chiave, null);
+  // le associazioni mappa → entità (`mappa_entita`, colonne `mappa.entita_*`) sono state tolte da L11 · B9: restano i pin, le sedi e il cestino
   for (const c of db.prepare('SELECT registro_json FROM cestino').all() as Array<{ registro_json: string }>) {
     const passi = leggiJson(c.registro_json);
     if (!Array.isArray(passi)) conflittoArea('Un registro del cestino non è leggibile: occorre riconciliarlo prima del raccordo.');
@@ -193,6 +191,8 @@ function fotografiaAreaVenditore(db: AppDatabase, pin: PinDelRaccordo, luogo: Ri
       }
       sequenze.add(Number(p.seq));
       const struttura = db.prepare('SELECT name, pk FROM pragma_table_info(?, ?) ORDER BY pk').all(p.tabella, 'main') as Array<{ name: string; pk: number }>;
+      // una tabella tolta dal modello (L11): quella riga non può più tornare, quindi non è in conflitto con niente
+      if (!struttura.length && tabellaTolta('main', p.tabella)) continue;
       if (!struttura.length) conflittoArea('La tabella di una fotografia del cestino non è riconoscibile.');
       const primarie = struttura.filter(c => c.pk > 0).map(c => c.name);
       const identita = primarie.length ? primarie : ['rowid'];
@@ -208,9 +208,7 @@ function fotografiaAreaVenditore(db: AppDatabase, pin: PinDelRaccordo, luogo: Ri
             || (r?.riferimento_tipo === 'negozio' && pertinenti.has(String(r.riferimento_chiave)))))
           || (p.tabella === 'negozio' && (pertinenti.has(String(r?.chiave)) || r?.sede_chiave === LUOGO_VENDITORE))
           || (p.tabella === 'negozio_sede_spillo' && r?.luogo_chiave === LUOGO_VENDITORE)
-          || (p.tabella === 'mappa_entita' && (r?.entita_chiave === LUOGO_VENDITORE || (r?.entita_tipo === 'negozio' && pertinenti.has(String(r.entita_chiave)))))
-          || (p.tabella === 'mappa' && (mappeUsate.has(String(r?.chiave)) || r?.entita_chiave === LUOGO_VENDITORE
-            || (r?.entita_tipo === 'negozio' && pertinenti.has(String(r.entita_chiave))))) || (p.tabella === 'area' && r?.chiave === areaChiave)) {
+          || (p.tabella === 'mappa' && mappeUsate.has(String(r?.chiave))) || (p.tabella === 'area' && r?.chiave === areaChiave)) {
           conflittoArea('Il cestino conserva una fotografia pertinente: nessuna modifica automatica al suo ripristino.');
         }
       }

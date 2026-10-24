@@ -165,8 +165,13 @@ const COPPIA_PIN_777 = { infiltrazione: 'madarame-il-furto-del-cuore-di-madarame
  */
 export function assegnaAreePalazzi110(db: AppDatabase, adesso: string): EsitoAreePalazzi {
   const esito: EsitoAreePalazzi = { aree: 0, planimetrie: 0, etichette: 0, legami: 0, legamiDaRegola: 0 };
+  // Come la regola delle Aree del mondo (109): dopo la migrazione 177 (L11 · B9) non ci sono più `mappa_presentazione.gruppo_immagini_json` (ogni
+  // planimetria senza Area è sciolta) né `mappa_entita` (i legami con le infiltrazioni non si ricavano più da lì: l'import di un pacchetto li
+  // porta in `legami`, o nel campo `aree`). Con le colonne e la tabella di prima il comportamento è quello di sempre.
+  const gruppoSql = colonne(db, 'mappa_presentazione').has('gruppo_immagini_json') ? 'p.gruppo_immagini_json' : 'NULL';
+  const conMappaEntita = !!db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'mappa_entita'").get();
   const righe = db.prepare(`SELECT m.chiave, m.nome, m.ordine, m.origine, COALESCE(m.nome_rivisto, 0) AS nome_rivisto, d.chiave AS dungeon,
-      r.nome AS genitore_nome, p.gruppo_immagini_json AS gruppo_json, p.contesti_json
+      r.nome AS genitore_nome, ${gruppoSql} AS gruppo_json, p.contesti_json
     FROM mappa m
     JOIN mappa r ON r.chiave = m.genitore_chiave
     JOIN dungeon d ON r.chiave = 'dungeon-' || d.chiave AND d.tipo = 'palazzo'
@@ -217,7 +222,7 @@ export function assegnaAreePalazzi110(db: AppDatabase, adesso: string): EsitoAre
   }
   // i legami: per ogni infiltrazione, le Aree delle planimetrie a cui era legata (con la loro origine), più la coppia del pin 777
   interface Legame { infiltrazione: string; area: string; dungeon: string; ordineMin: number; ordineArea: number; iniziale: string; origine: 'seed' | 'utente' | 'regola' }
-  const legati = db.prepare(`SELECT me.entita_chiave AS infiltrazione, m.area_chiave AS area, a.dungeon_chiave AS dungeon, m.ordine, m.chiave, me.fonte_json, ar.ordine AS ordine_area
+  const legati = !conMappaEntita ? [] : db.prepare(`SELECT me.entita_chiave AS infiltrazione, m.area_chiave AS area, a.dungeon_chiave AS dungeon, m.ordine, m.chiave, me.fonte_json, ar.ordine AS ordine_area
     FROM mappa_entita me
     JOIN mappa m ON m.chiave = me.mappa_chiave AND m.area_chiave IS NOT NULL
     JOIN area ar ON ar.chiave = m.area_chiave AND ar.dungeon_chiave IS NOT NULL

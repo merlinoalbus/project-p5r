@@ -10,7 +10,7 @@ import type { MappaDto, MappaRiassuntoDto, SpilloDto } from '../../types';
 
 /** Riassunto di una mappa seed di tipo «luogo» figlia del quartiere, con chiave e nome (obbligatori) e gli altri campi di `extra`. */
 const riassunto = (extra: Partial<MappaRiassuntoDto> & { chiave: string; nome: string }): MappaRiassuntoDto =>
-  ({ tipo: 'luogo', genitore: 'quartiere', nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'seed', numeroSpilli: 0, numeroFigli: 0, updatedAt: '', area: null, casa: `/guida/mappe/${encodeURIComponent(extra.chiave)}`, ...extra });
+  ({ tipo: 'luogo', genitore: 'quartiere', nomeRivisto: false, ordine: 0, immagineUrl: null, asset: null, radiceDi: null, versione: null, origine: 'seed', numeroSpilli: 0, numeroFigli: 0, updatedAt: '', area: null, casa: `/guida/mappe/${encodeURIComponent(extra.chiave)}`, ...extra });
 
 /** Spillo di tipo «passaggio» al centro della mappa sottopasso, con id e nome (obbligatori) e gli altri campi di `extra`. */
 const spillo = (extra: Partial<SpilloDto> & { id: number; nome: string }): SpilloDto =>

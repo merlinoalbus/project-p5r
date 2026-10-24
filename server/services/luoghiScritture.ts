@@ -16,6 +16,7 @@
 import { getDb, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { idMappa } from './mappe/percorsiMappe.js';
+import { entitaDellaRadice } from './mappe/alberoMappe.js';
 import { creaSpillo, eliminaSpillo } from './mappe/mappeService.js';
 import { conCestino } from './cestinoService.js';
 import { preparaRimozioneArticoliAcquistati } from './acquistiService.js';
@@ -29,11 +30,12 @@ import type { OrariNegozio } from '../../shared/orariNegozio.js';
 
 /** Il quartiere di una mappa del mondo: dalla sua Area, o la mappa del quartiere stesso (`citta-<q>`); null fuori dai quartieri. */
 function quartiereDellaMappa(chiave: string): { quartiere: string | null; area: string | null } {
-  const m = prepared('SELECT m.chiave, m.tipo, m.entita_tipo, m.entita_chiave, m.area_chiave, a.quartiere_chiave FROM mappa m LEFT JOIN area a ON a.chiave = m.area_chiave WHERE m.chiave = ?').get(chiave) as
-    { chiave: string; tipo: string; entita_tipo: string | null; entita_chiave: string | null; area_chiave: string | null; quartiere_chiave: string | null } | undefined;
+  const m = prepared('SELECT m.chiave, m.tipo, m.area_chiave, a.quartiere_chiave FROM mappa m LEFT JOIN area a ON a.chiave = m.area_chiave WHERE m.chiave = ?').get(chiave) as
+    { chiave: string; tipo: string; area_chiave: string | null; quartiere_chiave: string | null } | undefined;
   if (!m) throw httpErrors.notFound('mappa-non-trovata', `La planimetria '${chiave}' non esiste.`);
   if (m.quartiere_chiave) return { quartiere: m.quartiere_chiave, area: m.area_chiave };
-  if (m.tipo === 'quartiere' && m.entita_tipo === 'quartiere' && m.entita_chiave) return { quartiere: m.entita_chiave, area: null };
+  const radice = entitaDellaRadice(m);
+  if (radice?.tipo === 'quartiere') return { quartiere: radice.chiave, area: null };
   return { quartiere: null, area: m.area_chiave };
 }
 
@@ -137,8 +139,6 @@ export function eliminaNelCestino(tipo: 'luogo' | 'negozio', chiave: string, con
       for (const s of prepared("SELECT id FROM spillo WHERE riferimento_tipo IN ('luogo', 'attivita') AND riferimento_chiave = ?").all(chiave) as Array<{ id: number }>) eliminaSpillo(s.id);
       prepared('UPDATE negozio SET sede_chiave = NULL WHERE sede_chiave = ?').run(chiave);
       prepared('UPDATE attivita SET sede_chiave = NULL WHERE sede_chiave = ?').run(chiave);
-      prepared("DELETE FROM mappa_entita WHERE entita_tipo = 'luogo' AND entita_chiave = ?").run(chiave);
-      prepared("UPDATE mappa SET entita_tipo = NULL, entita_chiave = NULL WHERE entita_tipo = 'luogo' AND entita_chiave = ?").run(chiave);
       prepared('DELETE FROM luogo WHERE chiave = ?').run(chiave);
     } else {
       const articoli = negozi.flatMap(k => (prepared('SELECT chiave FROM main.articolo WHERE negozio_chiave=?').all(k) as Array<{ chiave: string }>).map(a => a.chiave));
@@ -148,7 +148,6 @@ export function eliminaNelCestino(tipo: 'luogo' | 'negozio', chiave: string, con
         prepared('DELETE FROM utente.acquisto_partita WHERE articolo_chiave IN (SELECT chiave FROM articolo WHERE negozio_chiave = ?)').run(k);
         prepared('DELETE FROM utente.punti_negozio_partita WHERE negozio_chiave = ?').run(k);
         prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'negozio' AND riferimento_chiave = ?").run(k);
-        prepared("DELETE FROM mappa_entita WHERE entita_tipo = 'negozio' AND entita_chiave = ?").run(k);
         prepared('DELETE FROM articolo WHERE negozio_chiave = ?').run(k);
         prepared('DELETE FROM negozio WHERE chiave = ?').run(k);
       }

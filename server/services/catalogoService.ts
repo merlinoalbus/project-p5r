@@ -545,10 +545,6 @@ export function nascondiElemento(tipo: TipoCatalogo, chiave: string, nascosta: b
 function staccaDalleMappe(tipo: TipoCatalogo, chiave: string): void {
   const tipiPin = tipo === 'luogo' ? ['luogo', 'attivita'] : tipo === 'negozio' ? ['negozio'] : [];
   for (const t of tipiPin) prepared('UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = ? AND riferimento_chiave = ?').run(t, chiave);
-  if (tipo === 'luogo' || tipo === 'negozio') {
-    prepared('DELETE FROM mappa_entita WHERE entita_tipo = ? AND entita_chiave = ?').run(tipo, chiave);
-    prepared('UPDATE mappa SET entita_tipo = NULL, entita_chiave = NULL WHERE entita_tipo = ? AND entita_chiave = ?').run(tipo, chiave);
-  }
 }
 
 /**

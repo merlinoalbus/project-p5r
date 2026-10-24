@@ -9,7 +9,7 @@ import type { PrecondizioneRimozionePinDto, RichiestaRimozionePin } from '../../
 import { apiDelete, apiDeleteConCorpo, apiGet, apiPost, apiPut, inviaFile, queryString } from './_helpers';
 
 /** `passaggio`/`ritorno` valgono solo alla creazione con un genitore: spillo «passaggio» nel genitore verso la nuova mappa e viceversa (15.24). */
-export interface DatiMappaApi { nome?: string; tipo?: TipoMappa; genitore?: string | null; ordine?: number; asset?: string | null; larghezza?: number | null; altezza?: number | null; entita?: { tipo: string; chiave: string } | null; note?: string; passaggio?: boolean; ritorno?: boolean }
+export interface DatiMappaApi { nome?: string; tipo?: TipoMappa; genitore?: string | null; ordine?: number; asset?: string | null; larghezza?: number | null; altezza?: number | null; entita?: { tipo: 'area'; chiave: string } | null; note?: string; passaggio?: boolean; ritorno?: boolean }
 export interface DatiSpilloApi { soloPosizione?: boolean; destinazione?: DestinazioneSpillo | null; tipo?: TipoSpillo; nome?: string; descrizione?: string; x?: number; y?: number; riferimento?: { tipo: TipoRiferimento; chiave: string } | null; collezionabile?: boolean; ordine?: number; mappa?: string; condizioni?: RequisitoSpillo[] | null }
 
 /** Albero completo (riassunti piatti con genitore). */

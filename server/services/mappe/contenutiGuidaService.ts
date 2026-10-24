@@ -14,21 +14,23 @@ import { httpErrors } from '../../utils/httpError.js';
 import { verificaPartita } from '../verificaPartita.js';
 import { chiaveMappa, idMappa, nomePercorso } from './percorsiMappe.js';
 import { casaDellaMappa, casaDelPalazzo, contestoAree, type RigaPerCasa } from './casaMappa.js';
+import { entitaDellaRadice, radiceDelPalazzo } from './alberoMappe.js';
 import type { ContenutiMappaDto, DestinazioneGuidaDto, PuntoGuidaMappaDto, RisoluzioneMappaDto } from '../../../shared/organizzazioneMappe.js';
 import { categoriaSpillo, spilloPerPunto } from '../../../shared/spilli.js';
 
 /**
  * Dove si apre la sezione di guida di un'infiltrazione: la mappa del suo Palazzo, il nome (quello dell'infiltrazione: da L3 il nome
- * della sezione in `guida_mappa` non si legge più, R3-09) e la casa — la scheda del Palazzo sull'infiltrazione,
+ * della sezione non è più quello di `guida_mappa`, tolta da L11 · B9, R3-09) e la casa — la scheda del Palazzo sull'infiltrazione,
  * `/guida/dungeon/<k>?infiltrazione=<i>` (L3 §3.2); per i Memento, che non hanno scheda di Palazzo, il visore com'era (R3-12). Null se
  * l'infiltrazione non esiste o se il Palazzo non ha esattamente una mappa radice.
  */
 export function destinazioneGuida(area: string): DestinazioneGuidaDto | null {
   const r = prepared("SELECT a.chiave,a.dungeon_chiave,a.nome,d.tipo FROM dungeon_area a JOIN dungeon d ON d.chiave=a.dungeon_chiave WHERE a.chiave=?").get(area) as { chiave: string; dungeon_chiave: string; nome: string; tipo: string } | undefined;
   if (!r) return null;
-  const radici = prepared("SELECT chiave FROM mappa WHERE entita_tipo='dungeon' AND entita_chiave=?").all(r.dungeon_chiave) as Array<{ chiave: string }>;
-  if (radici.length !== 1) return null;
-  const mappaPalazzo = chiaveMappa(radici[0].chiave);
+  // la mappa radice del Palazzo è `dungeon-<chiave>` (senza genitore, tipo palazzo o dedalo): la sua esistenza è la prova che ce n'è una
+  const radice = radiceDelPalazzo(r.dungeon_chiave);
+  if (!prepared("SELECT 1 FROM mappa WHERE chiave=? AND genitore_chiave IS NULL AND tipo IN ('palazzo','dedalo')").get(radice)) return null;
+  const mappaPalazzo = chiaveMappa(radice);
   // la scheda del Palazzo; per i Memento il visore com'era
   const casa = r.tipo === 'palazzo' ? `${casaDelPalazzo(r.dungeon_chiave)}?infiltrazione=${encodeURIComponent(area)}` : `/guida/mappe/${encodeURIComponent(mappaPalazzo)}?area=${encodeURIComponent(area)}`;
   return { area, dungeon: r.dungeon_chiave, mappaPalazzo, nome: r.nome, casa };
@@ -61,14 +63,16 @@ export function contenutiMappa(chiave: string, partitaId?:number): ContenutiMapp
   // come prima: una partita che non esiste è un 404 anche se la mappa non c'è
   if (partitaId) verificaPartita(partitaId);
   const mappa = idMappa(chiave);
-  const m = prepared('SELECT entita_tipo,entita_chiave FROM mappa WHERE chiave=?').get(mappa) as { entita_tipo: string; entita_chiave: string } | undefined;
+  const m = prepared('SELECT chiave,tipo FROM mappa WHERE chiave=?').get(mappa) as { chiave: string; tipo: string } | undefined;
   if (!m) throw httpErrors.notFound('mappa-non-trovata','La mappa richiesta non esiste.');
-  // L3: le infiltrazioni di una planimetria sono quelle della sua Area (`infiltrazione_area`), col loro nome (R3-09); le note della
-  // sezione di guida restano quelle di `guida_mappa`, che è contenuto della guida e non un legame
-  const aree = prepared(`SELECT a.*,a.nome nome_visibile,COALESCE(g.note,'') note
-    FROM dungeon_area a LEFT JOIN guida_mappa g ON g.area_chiave=a.chiave
-    WHERE (?='dungeon' AND a.dungeon_chiave=?) OR EXISTS(SELECT 1 FROM mappa x JOIN infiltrazione_area ia ON ia.area_chiave=x.area_chiave WHERE x.chiave=? AND ia.infiltrazione_chiave=a.chiave)
-    ORDER BY a.ordine,a.chiave`).all(m.entita_tipo,m.entita_chiave,mappa) as Array<{ chiave: string; dungeon_chiave: string; nome_visibile: string; descrizione: string; note: string }>;
+  // L3: le infiltrazioni di una planimetria sono quelle della sua Area (`infiltrazione_area`), col loro nome (R3-09); se la mappa è la
+  // radice di un Palazzo (o dei Memento), tutte quelle del dungeon (la radice si riconosce da chiave e tipo, L11 · B9)
+  const radice = entitaDellaRadice(m);
+  const dungeon = radice?.tipo === 'dungeon' ? radice.chiave : null;
+  const aree = prepared(`SELECT a.*,a.nome nome_visibile
+    FROM dungeon_area a
+    WHERE (? IS NOT NULL AND a.dungeon_chiave=?) OR EXISTS(SELECT 1 FROM mappa x JOIN infiltrazione_area ia ON ia.area_chiave=x.area_chiave WHERE x.chiave=? AND ia.infiltrazione_chiave=a.chiave)
+    ORDER BY a.ordine,a.chiave`).all(dungeon,dungeon,mappa) as Array<{ chiave: string; dungeon_chiave: string; nome_visibile: string; descrizione: string }>;
   // le schede servono solo per gli elementi delle aree di questa mappa
   const schede = schedeContenutiGuida(partitaId, aree.map((a) => a.chiave));
   // L4 (§2.3): nei Palazzi i punti sono le voci della guida — le schede senza mappa legate a una voce sono assorbite nella voce (la loro
@@ -76,7 +80,7 @@ export function contenutiMappa(chiave: string, partitaId?:number): ContenutiMapp
   // scheda del Palazzo. I dedali dei Memento restano come prima (R4-30).
   const palazzi = new Set(prepared("SELECT chiave FROM dungeon WHERE tipo = 'palazzo'").pluck().all() as string[]);
   const avanzamento = (() => { let a: { m: ModelloAvanzamento; s: StatiDellaPartita | null } | null = null; return () => (a ??= ((m) => ({ m, s: partitaId ? statiDellaPartita(getDb(), m, partitaId) : null }))(modelloAvanzamento(getDb()))); })();
-  return { mappa: chiaveMappa(mappa), aree: aree.map(a => ({ chiave: a.chiave, nome: a.nome_visibile, descrizione: a.descrizione, note: a.note,
+  return { mappa: chiaveMappa(mappa), aree: aree.map(a => ({ chiave: a.chiave, nome: a.nome_visibile, descrizione: a.descrizione,
     collegamenti: (prepared("SELECT id FROM spillo WHERE area_guida_chiave=? AND ruolo_guida='sezione' ORDER BY ordine,id").all(a.chiave) as Array<{id:number}>).map(s=>schede.get(s.id)!),
     punti: palazzi.has(a.dungeon_chiave) ? vociDelPalazzo(a.chiave, avanzamento()) : conPassiDentro((prepared("SELECT id,nome,descrizione,tipo,riferimento_tipo,riferimento_chiave,collezionabile,solo_posizione,ruolo_guida FROM spillo WHERE area_guida_chiave=? AND ruolo_guida='punto' ORDER BY ordine,id").all(a.chiave) as Array<{ id: number; nome: string; descrizione: string; tipo: string; riferimento_tipo: string | null; riferimento_chiave: string | null; collezionabile: number; solo_posizione: number; ruolo_guida: 'punto' | 'sezione' }>).map((s): PuntoGuidaMappaDto => ({ scheda:schede.get(s.id),id:s.id,nome:s.nome,descrizione:s.descrizione,tipo:s.tipo,riferimento:s.riferimento_tipo&&s.riferimento_chiave?{tipo:s.riferimento_tipo,chiave:s.riferimento_chiave}:null,collezionabile:s.collezionabile===1,soloPosizione:s.solo_posizione===1,ruolo:s.ruolo_guida })).concat((prepared(`SELECT p.chiave,p.nome,p.descrizione,p.tipo,p.esauribile FROM punto_interesse p WHERE p.area_chiave=? AND NOT EXISTS(SELECT 1 FROM spillo s WHERE s.area_guida_chiave=p.area_chiave AND s.riferimento_tipo='punto' AND s.riferimento_chiave=p.chiave) ORDER BY p.ordine,p.chiave`).all(a.chiave) as Array<{chiave:string;nome:string;descrizione:string;tipo:string;esauribile:number}>).map((p):PuntoGuidaMappaDto=>({id:'punto:'+p.chiave,nome:p.nome,descrizione:p.descrizione,tipo:p.tipo,riferimento:{tipo:'punto',chiave:p.chiave},collezionabile:p.esauribile===1&&categoriaSpillo(spilloPerPunto(p.tipo))==='consumabile',soloPosizione:false,ruolo:'punto'})))),
     // le planimetrie dell'infiltrazione: tutte quelle delle sue aree, nell'ordine dei legami e delle versioni (L3 §1.2)
