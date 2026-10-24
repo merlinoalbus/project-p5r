@@ -146,7 +146,10 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
     <PageState isLoading={dati.caricamento && !p} error={dati.errore} onRetry={dati.ricarica}>
       {p && (
         <div className="flex flex-col gap-3">
-          <p className="progressi-scopo m-0">Le cose fatte in gioco che sbloccano Confidenti, negozi e attività. Quello che l’app sa già lo vedi; quello che non può sapere lo segni tu.</p>
+          <p className="progressi-scopo m-0">
+            <span className="hidden sm:inline">Le cose fatte in gioco che sbloccano Confidenti, negozi e attività. Quello che l’app sa già lo vedi; quello che non può sapere lo segni tu.</span>
+            <span className="sm:hidden">Cosa hai sbloccato in gioco: l’app segna quello che sa, il resto lo segni tu.</span>
+          </p>
 
           <div className="progressi-riepilogo" role="tablist" aria-label="Argomenti dei progressi">
             {SEZIONI.map((s) => (
