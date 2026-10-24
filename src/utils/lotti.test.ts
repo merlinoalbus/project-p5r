@@ -2,16 +2,9 @@
 // Test lotti
 // ============================================================
 
-import { lotti } from './lotti';
-
+// SUPERATI da R11-03/4: `lotti` (src/utils/lotti.ts) era orfana (importata solo da questo test) ed è stata eliminata.
+// Corpi originali tolti per compilare; non eseguiti (zero test).
 describe('lotti', () => {
-  it('divide in blocchi consecutivi, ultimo più corto', () => {
-    expect(lotti([1, 2, 3, 4, 5], 2)).toEqual([[1, 2], [3, 4], [5]]);
-    expect(lotti([1, 2], 10)).toEqual([[1, 2]]);
-    expect(lotti([], 3)).toEqual([]);
-  });
-  it('rifiuta dimensioni non valide', () => {
-    expect(() => lotti([1], 0)).toThrow();
-    expect(() => lotti([1], 1.5)).toThrow();
-  });
+  it.skip('SUPERATO da R11-03/4: divide in blocchi consecutivi, ultimo più corto', () => {});
+  it.skip('SUPERATO da R11-03/4: rifiuta dimensioni non valide', () => {});
 });
