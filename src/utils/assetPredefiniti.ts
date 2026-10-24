@@ -25,7 +25,9 @@ export function altezzaPerForma(forma: FormaRiquadro | undefined, larghezza: num
 export function chiaviAssetPredefinito(ambito: AmbitoImmagine, chiave: string, forma: FormaImmagine, dimensione: number): [string | null, string | null] {
   const s = slug(chiave);
   switch (ambito) {
-    case 'persona': return [`persona/${s}`, null];
+    // le Persona dei Ladri Fantasma (Arsène, Zorro, Mercurius, Diego…) hanno la figura in `persona-gruppo/`, la stessa che mostra la pagina
+    // Personaggi: è la riserva quando `persona/` non ce l'ha (prima il Compendio le lasciava senza immagine)
+    case 'persona': return [`persona/${s}`, `persona-gruppo/${s}`];
     // Carta intera per la forma "carta" o i riquadri grandi; icona piccola altrimenti (con l'altra come riserva).
     case 'arcana': return forma === 'carta' || dimensione >= 96 ? [`arcani/${s}`, `arcani/icona/${s}`] : [`arcani/icona/${s}`, `arcani/${s}`];
     case 'confidente': return [`confidenti/${s}-fedele`, `confidenti/${s}`];
