@@ -194,6 +194,6 @@ export function elenchiEffettiVoce(): ElenchiEffettiVoceDto {
     domande: (prepared('SELECT id, data AS giorno, domanda AS testo, tipo FROM domanda ORDER BY ordine').all() as ElenchiEffettiVoceDto['domande']),
     cruciverba: prepared('SELECT data, indizio FROM cruciverba ORDER BY ordine').all() as ElenchiEffettiVoceDto['cruciverba'],
     inviti: prepared(`SELECT i.chiave, i.confidente_chiave AS confidente, c.nome AS confidenteNome, i.data, i.nota FROM confidente_invito i JOIN confidente c ON c.chiave = i.confidente_chiave ORDER BY c.ordine, i.data`).all() as ElenchiEffettiVoceDto['inviti'],
-    persone: (prepared('SELECT id, nome, arcana, livello FROM persona ORDER BY nome').all() as Array<{ id: number; nome: string; arcana: string; livello: number }>).map((p) => ({ ...p, arcana: t('arcana', p.arcana) })),
+    persone: (prepared('SELECT id, nome, arcana, livello FROM persona ORDER BY nome').all() as Array<{ id: number; nome: string; arcana: string; livello: number }>).map((p) => ({ ...p, nomeIt: t('persona', p.nome), arcana: t('arcana', p.arcana) })),
   };
 }
