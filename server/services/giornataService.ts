@@ -34,6 +34,7 @@ import { leggiEffettiVoce, leggiEffettiVocePerMostrare, salvaEffettiVoce, inizia
 import { descriviEffettoVoce, eEffettoDiStato, normalizzaEffettiVoce, type EffettoLegacyVoce, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import { conCestino, type ViciniCestino } from './cestinoService.js';
 import { leggiRicevutaEffettiAzione } from './effettiAzioneService.js';
+import { confidentiAnnullatiAlVecchioModo, nuovaGenerazione, senzaEventiGestiti, togliEventiDellaVoce } from './puntiCronologici.js';
 import { disponibilitaAcquistoCorrente } from './negoziService.js';
 import type { NuovaRegistrazioneAcquisto } from '../../shared/acquisti.js';
 import type { PropostaPartitaDto } from '../../shared/propostePartita.js';
@@ -721,7 +722,7 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
       }
       // R10-22: gli eventi che i setter scrivono mentre la spunta applica i suoi effetti portano il legame con la voce e si revocano togliendola
       const { effettiLegacy: effetti } = conVoceDellaSpunta(uid, () => applicaEffettiVoce(partitaId, uid, {
-        applicaLegacy: (id, produce: EffettoLegacyVoce[]) => applicaEffettiAzione(id, { ...v, produce, apertureDedali: aperture, invito: haInvitoDelConfidente(uid, v.riferimento), momento: { data: r.data, fascia: v.fascia, origine: 'azione' } }, opz),
+        applicaLegacy: (id, produce: EffettoLegacyVoce[]) => applicaEffettiAzione(id, { ...v, produce, apertureDedali: aperture, invito: haInvitoDelConfidente(uid, v.riferimento), voceUid: uid, ordineVoce: r.ordine, momento: { data: r.data, fascia: v.fascia, origine: 'azione' } }, opz),
         annullaLegacy: annullaEffettiAzione,
       }, { acquisti: opz.acquisti, pesche:opz.pesche, porteAcquisti: { valutaCorrente: disponibilitaAcquistoCorrente }, spuntaFattaIl: adesso }));
       prepared('INSERT INTO spunta_voce_partita (partita_id, voce_uid, fatta_at, effetti_json) VALUES (?, ?, ?, ?)').run(partitaId, uid, adesso, effetti ? JSON.stringify(effetti) : null);
@@ -729,7 +730,13 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
       if (effetti) dett.push(descriviEffettiApplicati(effetti));
       registraEvento(partitaId, 'percorso', `Percorso ${r.data}: ${v.azione.slice(0, 80)}${v.azione.length > 80 ? '…' : ''}`, `${dett.join(' · ')}.`, { data: r.data, voce: uid, tipo: v.tipo, riferimento: v.riferimento, effetti }, null, uid);
     } else {
-      annullaEffettiVoce(partitaId, uid, leggiRicevutaEffettiAzione(precedente?.effetti_json ?? null), { applicaLegacy: () => null, annullaLegacy: annullaEffettiAzione });
+      // R10-11f: punti e rank up della voce stanno nel registro cronologico: si tolgono da lì e si ricalcola dalla base (i rank up non più raggiunti
+      // tornano indietro, i punti dopo si riassegnano); l'annullo vecchio, dalla ricevuta, resta per le spunte che non sono nel registro corrente
+      const ricevutaDellaSpunta = leggiRicevutaEffettiAzione(precedente?.effetti_json ?? null);
+      const eventiTolti = togliEventiDellaVoce(partitaId, uid);
+      annullaEffettiVoce(partitaId, uid, senzaEventiGestiti(ricevutaDellaSpunta, eventiTolti), { applicaLegacy: () => null, annullaLegacy: annullaEffettiAzione });
+      // chi è stato disfatto col vecchio annullo ha cambiato i valori fuori dal registro: la sua base riparte da qui
+      for (const chiave of confidentiAnnullatiAlVecchioModo(ricevutaDellaSpunta, eventiTolti)) nuovaGenerazione(partitaId, chiave);
       prepared('DELETE FROM spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').run(partitaId, uid);
       revocaEventiDellaVoce(partitaId, uid); // R10-22: solo gli eventi col legame esplicito alla voce; gli eventi storici (voce_uid nullo) restano
     }

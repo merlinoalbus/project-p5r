@@ -263,7 +263,7 @@ export function puntiConfidente(mod: ModificaConfidente, confidente?: string, pi
 }
 
 /** La soglia in punti del rango per il Confidente: > 0 solo dove il rango sale a punti (`modo = 'punti'`, migrazione 161); 0 altrove. */
-function sogliaAPunti(chiave: string, rango: number): number {
+export function sogliaAPunti(chiave: string, rango: number): number {
   const r = prepared('SELECT punti_necessari AS soglia, modo FROM confidente_rango WHERE confidente_chiave = ? AND rango = ?').get(chiave, rango) as { soglia: number | null; modo: string } | undefined;
   return r && r.modo === 'punti' && r.soglia !== null && r.soglia > 0 ? r.soglia : 0;
 }

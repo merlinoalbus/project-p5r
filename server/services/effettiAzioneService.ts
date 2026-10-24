@@ -16,6 +16,8 @@ import { prepared } from '../db/dbService.js';
 import type { EffettiAzioneDto, IncontroConfidenteDto, RiferimentoAzioneDto } from '../../shared/types.js';
 import type { EffettoAzione } from '../../shared/effettiAzione.js';
 import { aggiornaConfidente, annullaEffetti, confidente as confidenteDellaPartita, nomeDote, puntiDaNote } from './partiteService.js';
+import { applicaEventoDiario } from './puntiCronologici.js';
+import { piazzamentoCorrente } from './piazzamentoEsamiService.js';
 import { fortunaSu } from './fortunaService.js';
 import { avanzamentoLettura, haAnimaDaCineasta, impostaLettura, registraTurno, togliTurno } from './attivitaService.js';
 import { annullaIncontro, registraIncontro, type MomentoIncontro } from './incontriService.js';
@@ -69,6 +71,9 @@ export interface AzioneConEffetti {
   apertureDedali?: EffettiAzioneDto['apertureDedali'];
   /** La voce porta l'effetto «invito avvenuto» di questo Confidente (R10-11k): i punti dell'incontro valgono ×1,2 (invito accettato subito). */
   invito?: boolean;
+  /** La voce del Diario che applica gli effetti e il suo ordine nella giornata: i punti e il passaggio di rango entrano nel registro cronologico (R10-11c). */
+  voceUid?: string;
+  ordineVoce?: number;
 }
 
 /** Le visioni al cinema di un film già contate dalle spunte della partita (voci della giornata). */
@@ -120,7 +125,9 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
     if (incontro.passaggio && (incontro.id !== null || incontro.marcato !== null)) {
       const prima = confidenteDellaPartita(partitaId, a.riferimento.chiave);
       if (prima.rango < incontro.verso) {
-        aggiornaConfidente(partitaId, a.riferimento.chiave, { rango: incontro.verso, forza: true }, { origine: 'diario' });
+        // R10-11c: la voce del Diario entra nel registro cronologico (si ricalcola se viene prima di altre già applicate); senza voce, come prima
+        if (a.voceUid) applicaEventoDiario(partitaId, a.riferimento.chiave, { tipo: 'passaggio', voceUid: a.voceUid, data: a.momento.data, fascia: a.momento.fascia, ordineVoce: a.ordineVoce ?? 0, verso: incontro.verso });
+        else aggiornaConfidente(partitaId, a.riferimento.chiave, { rango: incontro.verso, forza: true }, { origine: 'diario' });
         incontro = { ...incontro, rango: { da: prima.rango, a: incontro.verso, punti: prima.punti, sbloccato: prima.sbloccato } };
       }
     }
@@ -131,7 +138,11 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
     const c = prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(a.riferimento.chiave) ? confidenteDellaPartita(partitaId, a.riferimento.chiave) : undefined;
     if (c && c.rango > 0 && c.rango < 10) {
       const prima = c.punti;
-      const agg = aggiornaConfidente(partitaId, c.chiave, { noteRisposta: opz.noteRisposta, bonusArcano: c.personaArcanoInScorta, ...(a.invito ? { invito: true } : {}) });
+      // R10-11c: le note entrano nel registro cronologico (con i parametri del calcolo, per rifarlo in ordine); senza voce, come prima
+      const agg = a.voceUid && a.momento
+        ? applicaEventoDiario(partitaId, c.chiave, { tipo: 'punti', voceUid: a.voceUid, data: a.momento.data, fascia: a.momento.fascia, ordineVoce: a.ordineVoce ?? 0,
+          parametri: { noteRisposta: opz.noteRisposta, bonusArcano: c.personaArcanoInScorta, invito: !!a.invito, piazzamento: piazzamentoCorrente(partitaId) } })
+        : aggiornaConfidente(partitaId, c.chiave, { noteRisposta: opz.noteRisposta, bonusArcano: c.personaArcanoInScorta, ...(a.invito ? { invito: true } : {}) });
       confidente = { chiave: c.chiave, nome: c.nome, noteRisposta: opz.noteRisposta, punti: Math.round((agg.punti - prima) * 100) / 100, bonusArcano: c.personaArcanoInScorta };
     }
   }

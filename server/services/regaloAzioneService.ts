@@ -20,6 +20,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { registraEvento } from './storicoService.js';
 import { aggiornaConfidente, confidente as confidenteDellaPartita } from './partiteService.js';
+import { nuovaGenerazione } from './puntiCronologici.js';
 import { regaliDellaPartita, scriviRegaloPartita } from './regaliPartita.js';
 import { impostaAcquisto } from './negoziService.js';
 import type { EsitoRegaloDto, RichiestaRegalo } from '../../shared/types.js';
@@ -67,6 +68,7 @@ export function regala(partitaId: number, richiesta: RichiestaRegalo): EsitoRega
     let punti = 0;
     if (conPunti) {
       const dopo = aggiornaConfidente(partitaId, confidente, { regalo: true, bonusArcano: richiesta.bonusArcano, invito: richiesta.invito });
+      nuovaGenerazione(partitaId, confidente); // R10-11: un regalo non è un evento del Diario: la base del registro cronologico riparte da qui
       punti = Math.round((dopo.punti - prima.punti) * 100) / 100;
     }
     scriviRegaloPartita(partitaId, confidente, { catalogo }, true);
@@ -97,6 +99,7 @@ export function annullaRegalo(partitaId: number, confidente: string, catalogo: s
     let punti = 0;
     if (riga.punti_dati && riga.punti_dati > 0 && prima.rango === riga.rango_al_regalo) {
       aggiornaConfidente(partitaId, confidente, { deltaPunti: -riga.punti_dati });
+      nuovaGenerazione(partitaId, confidente);
       punti = -riga.punti_dati;
     }
     scriviRegaloPartita(partitaId, confidente, { catalogo }, false);

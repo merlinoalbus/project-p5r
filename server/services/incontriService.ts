@@ -28,6 +28,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { aggiornaConfidente, nomeDote, puntiDaNote } from './partiteService.js';
+import { nuovaGenerazione } from './puntiCronologici.js';
 import { fortunaSu } from './fortunaService.js';
 import { leggiVociEffetto } from '../../shared/effettiCatalogo.js';
 import type { ConfidentePartitaDto, IncontroConfidenteDto, ModificaConfidente } from '../../shared/types.js';
@@ -145,6 +146,7 @@ export function aggiornaConfidenteDallaPagina(partitaId: number, chiave: string,
     const prima = rangoAttuale(partitaId, chiave);
     const puntiPrima = (prepared('SELECT punti FROM confidente_partita WHERE partita_id = ? AND confidente_chiave = ?').get(partitaId, chiave) as { punti: number } | undefined)?.punti ?? 0;
     const dto = aggiornaConfidente(partitaId, chiave, dati, { origine: 'pagina' });
+    nuovaGenerazione(partitaId, chiave); // R10-11: la correzione a mano è prioritaria: la base del registro cronologico riparte da qui
     const partita = prepared('SELECT data_gioco, fascia_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null; fascia_gioco: string };
     const momento: MomentoIncontro = { data: partita.data_gioco ?? '', fascia: partita.fascia_gioco ?? '', origine: 'pagina' };
     const cambi: Array<{ chiave: string; nome: string; delta: number }> = [];
