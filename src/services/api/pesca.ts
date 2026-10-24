@@ -2,7 +2,7 @@ import type {
   AnteprimaOperazionePescaDto, AzioneOperazionePesca, EventoPesca, FattoPescaDto,
   InputOperazionePesca, NuovaSessionePesca, NuovaOsservazionePesca, NuovoFattoPesca,
   NuovoAcquistoEscaPesca, NuovaRettificaPuntiPesca, RichiestaAnteprimaRimozionePesca,
-  RicevutaOperazionePescaDto, SessionePescaDto, StatoPescaDto,
+  RicevutaOperazionePescaDto, StatoPescaDto,
   RegolaPescaDto, RichiestaSalvaRegolaPesca,
 } from '../../../shared/pesca';
 import { apiGet, apiPost, apiPut } from './_helpers';
@@ -41,7 +41,6 @@ function percorso(id: number, o: AnteprimaClientPesca, anteprima: boolean): stri
 }
 
 export const leggiPesca = (id: number): Promise<StatoPescaDto> => apiGet(base(id), { maxRetries: 0 });
-export const leggiSessionePesca = (id: number, sessione: string): Promise<SessionePescaDto> => apiGet(`${base(id)}/sessioni/${uid(sessione)}`, { maxRetries: 0 });
 export const leggiFattiPesca = (id: number): Promise<FattoPescaDto[]> => apiGet(`${base(id)}/fatti`, { maxRetries: 0 });
 export const leggiRicevutaPesca = (id: number, operazioneId: string): Promise<RicevutaOperazionePescaDto> => apiGet(`${base(id)}/operazioni/${uid(operazioneId)}`, { maxRetries: 0, silent: true });
 export const anteprimaPesca = (id: number, o: AnteprimaClientPesca): Promise<AnteprimaOperazionePescaDto> => apiPost(percorso(id, o, true), o.richiesta, { maxRetries: 0 });

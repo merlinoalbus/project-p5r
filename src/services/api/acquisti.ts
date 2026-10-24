@@ -1,7 +1,7 @@
 import type {
   AnteprimaRegistrazioneAcquistoDto, AnteprimaRimozioneAcquistoDto, NuovaRegistrazioneAcquisto,
   RichiestaAnteprimaAnnullaProvenienza, RichiestaAnnullaProvenienza, RichiestaAnteprimaRimozioneLegacy,
-  RichiestaRegistraAcquisto, RichiestaRimozioneLegacy, RicevutaOperazioneAcquistoDto, StatoAcquistiDto,
+  RichiestaRegistraAcquisto,RicevutaOperazioneAcquistoDto, StatoAcquistiDto,
 } from '../../../shared/acquisti';
 import type {
   AnteprimaDecisioneProposteDto, PropostaPartitaDto, RichiestaAnteprimaDecisioneProposte,
@@ -24,8 +24,6 @@ export const annullaProvenienzaAcquisto = (id: number, dati: RichiestaAnnullaPro
   apiPost(`${acquisti(id)}/provenienze/annullo`, dati, senzaRipetizione);
 export const anteprimaRimuoviPresenzaStoricaAcquisto = (id: number, dati: RichiestaAnteprimaRimozioneLegacy): Promise<AnteprimaRimozioneAcquistoDto> =>
   apiPost(`${acquisti(id)}/legacy/rimozione/anteprima`, dati, senzaRipetizione);
-export const rimuoviPresenzaStoricaAcquisto = (id: number, dati: RichiestaRimozioneLegacy): Promise<RicevutaOperazioneAcquistoDto> =>
-  apiPost(`${acquisti(id)}/legacy/rimozione`, dati, senzaRipetizione);
 
 export const getDaApplicare = (id: number): Promise<PropostaPartitaDto[]> => apiGet(`${proposte(id)}?ancheChiuse=1`);
 export const anteprimaDecisioneProposte = (id: number, dati: RichiestaAnteprimaDecisioneProposte): Promise<AnteprimaDecisioneProposteDto> =>

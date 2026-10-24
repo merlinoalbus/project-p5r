@@ -6,7 +6,7 @@ import { schemaValutazionePresenza } from '../../shared/valutazioneAcquisto';
 import type { RichiestaRegistraAcquisto, RichiestaAnnullaProvenienza, RichiestaRimozioneLegacy, RicevutaOperazioneAcquistoDto } from '../../shared/acquisti';
 import type { RichiestaDecisioneProposte, RicevutaDecisioneProposteDto, RiferimentoPropostaPartita } from '../../shared/propostePartita';
 import type { AzionePercorsoDto } from '../../shared/types';
-import type { RichiestaDecisioneEffettoVoce, StatoEffettiVoceDto } from '../../shared/effettiVoce';
+import type { StatoEffettiVoceDto } from '../../shared/effettiVoce';
 import type { NuovaSessionePesca, RicevutaOperazionePescaDto } from '../../shared/pesca';
 import { confermaPesca, leggiRicevutaPesca, type OperazioneClientPesca } from './api/pesca';
 import { schemaEffettoGestoPesca, schemaNuovaSessioneGestoPesca, schemaOperazioneGestoPesca, schemaRegistraSessioneGestoPesca, schemaRicevutaGestoPesca } from './schemaGestoPesca';
@@ -370,7 +370,6 @@ export const eseguiPescaConRegistro = (id: number, dati: OperazioneClientPesca, 
 export const annullaFonteConRegistro = (id: number, dati: RichiestaAnnullaProvenienza, bersaglio: BersaglioGestoPartita): Promise<RicevutaOperazioneAcquistoDto> => esegui(id, { tipo: 'annullo-fonte', dati }, bersaglio) as Promise<RicevutaOperazioneAcquistoDto>;
 export const rimuoviLegacyConRegistro = (id: number, dati: RichiestaRimozioneLegacy, bersaglio: BersaglioGestoPartita): Promise<RicevutaOperazioneAcquistoDto> => esegui(id, { tipo: 'rimozione-legacy', dati }, bersaglio) as Promise<RicevutaOperazioneAcquistoDto>;
 export const decidiProposteConRegistro = (id: number, dati: RichiestaDecisioneProposte, bersaglio: BersaglioGestoPartita): Promise<RicevutaDecisioneProposteDto> => esegui(id, { tipo: 'decisione-proposte', dati }, bersaglio) as Promise<RicevutaDecisioneProposteDto>;
-export const decidiEffettoVoceConRegistro = (idProposta: string, dati: RichiestaDecisioneEffettoVoce, bersaglio: BersaglioGestoPartita & { voceUid: string }): Promise<StatoEffettiVoceDto> => esegui(null, { tipo: 'decisione-effetto-voce', propostaId: idProposta, dati }, bersaglio) as Promise<StatoEffettiVoceDto>;
 export function eseguiSpuntaAcquistiConRegistro(id: number, voceUid: string, dati: CorpoSpuntaAcquisti, bersaglio: BersaglioGestoPartita): Promise<AzionePercorsoDto> {
   if ('uid' in dati) return Promise.reject(new Error('L’identità della voce si passa una sola volta, separata dal corpo.'));
   return esegui(id, { tipo: 'spunta-acquisti', dati: { ...dati, uid: voceUid } }, bersaglio) as Promise<AzionePercorsoDto>;
