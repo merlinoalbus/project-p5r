@@ -113,7 +113,6 @@ export const STRUTTURE_PESCA_029 = [
   )`],
 ] as const;
 
-export const DDL_PESCA_029: readonly string[] = STRUTTURE_PESCA_029.map(([, , ddl]) => ddl);
 export const TABELLE_PESCA_029 = STRUTTURE_PESCA_029.filter(([tipo]) => tipo === 'table').map(([, nome]) => nome);
 
 /** La sola differenza dalla028 sono i tre vocabolari chiusi; colonne/default rimangono identici. */

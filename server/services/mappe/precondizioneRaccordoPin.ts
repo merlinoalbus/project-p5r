@@ -12,7 +12,6 @@ export interface PinDelRaccordo {
 }
 
 export interface RichiestaRaccordoPin { riferimentoLuogo: string; revisioneRaccordoAttesa: string; areaLuogo?: string }
-export interface PrecondizioneRaccordoPinDto { revisioneRaccordoAttesa: string }
 
 const TOKEN = /^[a-fA-F0-9]{64}$/;
 

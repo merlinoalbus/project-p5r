@@ -44,14 +44,6 @@ export function lettureListiniCondivisi(): LettureListiniCondivisi {
 export function listinoDelNegozio(chiave: string, letture: LettureListiniCondivisi): string { return letture.negozi.get(chiave) ?? chiave; }
 export function articoloDelListino(chiave: string, letture: LettureListiniCondivisi): string { return letture.articoli.get(chiave) ?? chiave; }
 
-/** Gli acquisti storici si leggono senza riscrivere una data o inserire una seconda spunta. */
-export function acquistiCondivisi(acquistati: Iterable<string>, letture: LettureListiniCondivisi): Set<string> {
-  const out = new Set(acquistati);
-  for (const k of out) out.add(articoloDelListino(k, letture));
-  for (const [prima, dopo] of letture.articoli) if (out.has(dopo)) out.add(prima);
-  return out;
-}
-
 export function articoliEquivalenti(chiave: string, letture: LettureListiniCondivisi): string[] {
   const canonica = articoloDelListino(chiave, letture);
   return [canonica, ...[...letture.articoli].filter(([, dopo]) => dopo === canonica).map(([prima]) => prima)];

@@ -17,7 +17,6 @@ export const AMBITI_CARICAMENTO = ['arcana', 'confidente', 'personaggio', 'perso
 
 /** Le famiglie della grafica predefinita che vivono nel database (tutto ciò che non è compendio né `ui/`). */
 export const AMBITI_PREDEFINITI = ['affinita', 'attivita', 'confidenti', 'decori', 'doti', 'elementi', 'guida', 'identita', 'illustrazioni', 'mappe', 'meteo', 'palazzi', 'persona-gruppo', 'personaggi', 'sfondi', 'spilli'] as const;
-export type AmbitoPredefinito = (typeof AMBITI_PREDEFINITI)[number];
 
 /** Tutti gli ambiti ammessi dalla tabella e dalle rotte. */
 export const AMBITI_IMMAGINE = [...AMBITI_CARICAMENTO, ...AMBITI_PREDEFINITI] as const;

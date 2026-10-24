@@ -1,4 +1,4 @@
-import { ATTIVITA_PESCA, EVENTI_PESCA, REGOLA_PESCA, type AnteprimaOperazionePescaDto, type AzioneOperazionePesca, type EventoPesca, type InputOperazionePesca, type NuovaSessionePesca, type OsservazionePesca, type RichiestaRegistraSessionePesca, type RicevutaOperazionePescaDto, type StatoPescaDto } from '../../shared/pesca.js';
+import { ATTIVITA_PESCA, EVENTI_PESCA, REGOLA_PESCA, type AnteprimaOperazionePescaDto, type AzioneOperazionePesca, type EventoPesca, type InputOperazionePesca, type NuovaSessionePesca, type OsservazionePesca, type RicevutaOperazionePescaDto, type StatoPescaDto } from '../../shared/pesca.js';
 import { normalizzaEffettoVoce } from '../../shared/effettiVoce.js';
 import { profiliPesca } from './profiliPescaService.js';
 import { dotiSociali } from './partiteService.js';
@@ -244,7 +244,6 @@ export function confermaPesca(p:number,azione:AzioneOperazionePesca,input:Confer
     prepared('UPDATE utente.partita SET updated_at=? WHERE id=?').run(receipt.creataIl,p);return receipt;
   }).immediate();
 }
-export const registraSessionePesca=(p:number,r:RichiestaRegistraSessionePesca):RicevutaOperazionePescaDto=>confermaPesca(p,'registra-sessione',r);
 export function applicaDeltaPuntiPesca(p:number,delta:number):void {
   if(!getDb().inTransaction)throw new Error('Il delta punti pesca richiede la decisione transazionale.');
   const r=prepared('SELECT saldo FROM utente.punti_pesca_partita WHERE partita_id=?').get(p) as {saldo:number|null}|undefined;

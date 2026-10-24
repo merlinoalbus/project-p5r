@@ -37,9 +37,6 @@ export const ELEMENTI_AFFINITA: ReadonlyArray<{ chiave: ChiaveElemento; nome: st
 /** Nome canonico di ogni elemento. */
 export const NOME_ELEMENTO = Object.fromEntries(ELEMENTI.map((e) => [e.chiave, e.nome])) as Record<ChiaveElemento, string>;
 
-/** Sigle brevi che cambiano con il vocabolario (le altre restano quelle dei dati): Psicocinesi → Psi, Maledizione → Mal, Divino → Div. */
-export const SIGLA_ELEMENTO: Readonly<Partial<Record<ChiaveElemento, string>>> = { psy: 'Psi', curse: 'Mal', almighty: 'Div' };
-
 /** Vero se la stringa è la chiave di un elemento. */
 export function eChiaveElemento(v: unknown): v is ChiaveElemento {
   return typeof v === 'string' && Object.hasOwn(NOME_ELEMENTO, v);
@@ -57,8 +54,6 @@ export const TIPI_SKILL: ReadonlyArray<{ chiave: ChiaveTipoSkill; nome: string; 
   { chiave: 'passive', nome: 'Passiva', plurale: 'Passive' },
   { chiave: 'trait', nome: 'Tratto', plurale: 'Tratti' },
 ];
-
-export const NOME_TIPO_SKILL = Object.fromEntries(TIPI_SKILL.map((t) => [t.chiave, t.nome])) as Record<ChiaveTipoSkill, string>;
 
 // ---- Esiti delle affinità ----
 
@@ -102,7 +97,6 @@ export const NOME_PERSONALITA: Readonly<Record<PersonalitaOmbra, string>> = { gi
 
 /** Gli esiti di una risposta di negoziazione (non sono gli esiti dell'affinità). */
 export type EsitoNegoziazione = 'buona' | 'passabile' | 'cattiva';
-export const ESITI_NEGOZIAZIONE: ReadonlyArray<EsitoNegoziazione> = ['buona', 'passabile', 'cattiva'];
 
 /** Dalla personalità scritta dalla guida («Giocosa», «-», «Non reclutabile», vuota) alla chiave; ciò che non è una delle quattro è «sconosciuta». */
 export function personalitaDaTesto(testo: unknown): PersonalitaOmbra {

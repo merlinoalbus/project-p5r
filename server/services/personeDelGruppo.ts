@@ -19,11 +19,6 @@ function nomeSeDelGruppo(personaId: number): string | null {
   return r?.nome ?? null;
 }
 
-/** Vero se l'ID è una forma delle Persona del gruppo. */
-export function eDelGruppo(personaId: number): boolean {
-  return nomeSeDelGruppo(personaId) !== null;
-}
-
 /** 409 `persona-del-gruppo` se l'ID è una forma del gruppo; non fa nulla per le altre e per gli ID inesistenti (ci pensa il 404 del chiamante). */
 export function assicuraNonDelGruppo(personaId: number): void {
   const nome = nomeSeDelGruppo(personaId);

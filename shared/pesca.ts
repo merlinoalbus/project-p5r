@@ -36,15 +36,10 @@ export interface NuovaSessionePesca {
 }
 export interface RichiestaRegistraSessionePesca extends NuovaSessionePesca { revisionePescaAttesa: string }
 export interface NuovaOsservazionePesca { operazioneId: string; osservazione: OsservazionePesca }
-export interface RichiestaSalvaOsservazionePesca extends NuovaOsservazionePesca { revisionePescaAttesa: string }
 export interface RichiestaAnteprimaRimozionePesca { operazioneId: string }
-export interface RichiestaRimozionePesca extends RichiestaAnteprimaRimozionePesca { revisionePescaAttesa: string }
 export interface NuovoFattoPesca { operazioneId: string; valore: ValoreFattoPesca; momento: MomentoPesca | null; nota: string }
-export interface RichiestaRegistraFattoPesca extends NuovoFattoPesca { revisionePescaAttesa: string }
 export interface NuovoAcquistoEscaPesca { operazioneId: string; momento: MomentoPesca; quantita: number }
-export interface RichiestaAcquistaEscaPesca extends NuovoAcquistoEscaPesca { revisionePescaAttesa: string }
 export interface NuovaRettificaPuntiPesca { operazioneId: string; saldoOsservato: number }
-export interface RichiestaRettificaPuntiPesca extends NuovaRettificaPuntiPesca { revisionePescaAttesa: string }
 export interface IntervalloBeneficioPesca { minimo: number; massimo: number | null }
 export interface BeneficioPescaDto {
   causa: string; tipo: 'dote' | 'yen' | 'punti-pesca'; chiave: string; unita: 'punti-interni' | 'yen' | 'punti-pesca';

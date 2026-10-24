@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { dataGioco, dote, idParam, uidVoce } from './comuni.js';
+import { dataGioco, dote, uidVoce } from './comuni.js';
 import { bodyAnteprimaSessionePesca } from './pesca.js';
 import { ATTIVITA_PESCA, REGOLA_PESCA } from '../../shared/pesca.js';
 import { schemaValutazionePresenza } from '../../shared/valutazioneAcquisto.js';
@@ -7,8 +7,6 @@ import { schemaValutazionePresenza } from '../../shared/valutazioneAcquisto.js';
 const uid = z.string().regex(/^[0-9a-f]{32}$/,'Identità non valida.');
 const revisione = z.string().regex(/^[0-9a-f]{64}$/,'Revisione non valida.');
 const chiave = z.string().trim().min(1).max(200);
-export const paramsAcquistoPartita = z.object({id:idParam}).strict();
-export const paramsProvenienzaAcquisto = z.object({id:idParam,provenienzaId:uid}).strict();
 const momento = z.object({giorno:dataGioco,fascia:z.enum(['giorno','sera']),ordine:z.number().int().min(0).max(1_000_000)}).strict();
 const fonte = z.discriminatedUnion('tipo',[
   z.object({tipo:z.literal('manuale')}).strict(),

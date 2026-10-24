@@ -5,7 +5,6 @@ export const ARTICOLO_AOJIRU = 'chiosco-kiyasuku/succo-aojiru';
 export const CATALOGO_AOJIRU = 'consumabile/succo-aojiru';
 export const ORDINE_AOJIRU: readonly DoteChiave[] = ['fascino', 'perizia', 'coraggio', 'gentilezza', 'conoscenza'];
 export const PREZZO_AOJIRU = 5000;
-export const PUNTI_BASE_AOJIRU = 2;
 export type AojiruVariante = DoteChiave;
 export type FortunaAojiru = boolean | null;
 export function eOffertaAojiru(o: { chiave: string; catalogoChiave?: string | null }): boolean {

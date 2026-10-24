@@ -99,10 +99,6 @@ export function targetBeneficiPesca(p:number,causa:string):TargetBeneficioPesca[
   if(a)momentoAcquistoEscaValido(a);
   return a?[{tipo:'punti-pesca',chiave:'',delta:-a.costo_punti,intervallo:{minimo:-a.costo_punti,massimo:-a.costo_punti},attiva:a.attivo===1,storica:true,motivo:'Acquisto osservato dell’esca speciale, in punti pesca; il possesso non prova il pagamento.'}]:[];
 }
-export function firmaTurnoPesca(p:number,ordine:number):string|null {
-  const t=prepared('SELECT * FROM utente.turno_partita WHERE partita_id=? AND attivita_chiave=? AND ordine=?').get(p,ATTIVITA_PESCA,ordine);
-  return t?firmaPesca(t):null;
-}
 export function fotografiaPesca(p:number):Record<string,unknown> {
   const tabelle=['pesca_sessione','pesca_provenienza','pesca_fatto_fonte','pesca_acquisto_esca','pesca_operazione','pesca_quota_storica','punti_pesca_partita','movimento_punti_pesca','da_applicare','beneficio_ciclo','proposta_operazione','effetto_applicato','movimento_yen','turno_partita','attivita_svolta_partita','effetto_lettura_partita','spunta_voce_partita','dote_sociale_partita'];
   const effetti=prepared("SELECT * FROM main.voce_effetto WHERE tipo='pesca' ORDER BY voce_uid,ordine,uid").all() as Array<{voce_uid:string}>;
