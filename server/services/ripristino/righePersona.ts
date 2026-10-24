@@ -111,6 +111,42 @@ function idDeiNomiPersona(nomi: ValoreCampoCorrezione | undefined): number[] {
   return ids;
 }
 
+// ---- La resa italiana dell'effetto: la riga di `traduzione` com'era prima della prima correzione ----
+// Correggere l'effetto sposta la resa sul testo nuovo (riga provvisoria, `fonte = 'utente'`) e riscrivere la resa sul testo di prima la porta a `fonte = 'utente'`:
+// per riportare `traduzione` IDENTICA (riga per riga, fonte e data comprese) si conserva nella traccia `~traduzioni` della fotografia la riga com'era (o l'assenza)
+// di ogni testo di effetto toccato dalle correzioni; il ripristino completo della skill rimette quelle righe e toglie le provvisorie.
+const CHIAVE_TRACCIA = '~traduzioni';
+type RigaTraduzione = Record<string, string | number | null>;
+const leggiRigaTraduzione = (effetto: string): RigaTraduzione | null =>
+  (prepared("SELECT * FROM traduzione WHERE ambito = 'effettoSkill' AND chiave = ?").get(effetto) as RigaTraduzione | undefined) ?? null;
+/** Le righe toccate dalla scrittura in corso (scrivi → propaga, stessa transazione e stesso filo): testo di effetto → riga com'era prima di toccarla. */
+let primaDellaScrittura = new Map<string, RigaTraduzione | null>();
+const ricordaRiga = (effetto: string): void => { if (!primaDellaScrittura.has(effetto)) primaDellaScrittura.set(effetto, leggiRigaTraduzione(effetto)); };
+
+function righeRicordate(traccia: Valori): Map<string, RigaTraduzione | null> {
+  const m = new Map<string, RigaTraduzione | null>();
+  const grezzo = traccia[CHIAVE_TRACCIA];
+  for (const s of Array.isArray(grezzo) ? grezzo : []) {
+    try {
+      const o = JSON.parse(s) as { k: string; r: RigaTraduzione | null };
+      if (typeof o.k === 'string') m.set(o.k, o.r ?? null);
+    } catch { /* voce illeggibile: si ignora */ }
+  }
+  return m;
+}
+
+/** Rimette `traduzione` com'era: le righe ricordate tornano identiche, le provvisorie (assenti prima) si tolgono se nessun'altra skill usa quel testo. */
+function rimettiRighe(ricordate: Map<string, RigaTraduzione | null>): void {
+  for (const [effetto, riga] of ricordate) {
+    if (riga) {
+      const colonne = Object.keys(riga);
+      prepared(`INSERT OR REPLACE INTO traduzione (${colonne.join(', ')}) VALUES (${colonne.map(() => '?').join(', ')})`).run(...colonne.map((c) => riga[c]!));
+    } else if (!prepared('SELECT 1 FROM skill WHERE effetto = ?').get(effetto)) {
+      prepared("DELETE FROM traduzione WHERE ambito = 'effettoSkill' AND chiave = ?").run(effetto);
+    }
+  }
+}
+
 const skill: DefRiga = {
   modalita: 'riga', etichetta: 'Skill', tabella: 'skill', colonnaChiave: 'CAST(id AS TEXT)',
   chiavi: () => (prepared('SELECT CAST(id AS TEXT) FROM skill ORDER BY id').pluck().all() as string[]),
@@ -139,12 +175,32 @@ const skill: DefRiga = {
     if (v.effetto !== undefined) prepared('UPDATE skill SET effetto = ? WHERE id = ?').run(str(v.effetto) ?? '', chiave);
     // la resa italiana sta in `traduzione` e vale per il testo dell'effetto: segue il testo nuovo
     const effetto = v.effetto !== undefined ? (str(v.effetto) ?? '') : prima.effetto;
+    primaDellaScrittura = new Map();
     if (v.effetto_it !== undefined || v.effetto !== undefined) {
-      const it = v.effetto_it !== undefined ? str(v.effetto_it) : effettoIt(prima.effetto);
+      ricordaRiga(prima.effetto);
+      ricordaRiga(effetto);
+      const it =v.effetto_it !== undefined ? str(v.effetto_it) : effettoIt(prima.effetto);
       if (it === null || it === '') prepared("DELETE FROM traduzione WHERE ambito = 'effettoSkill' AND chiave = ?").run(effetto);
       else prepared("INSERT INTO traduzione (ambito, chiave, testo, fonte, updated_at) VALUES ('effettoSkill', ?, ?, 'utente', ?) ON CONFLICT(ambito, chiave) DO UPDATE SET testo = excluded.testo, fonte = 'utente', updated_at = excluded.updated_at")
         .run(effetto, it, new Date().toISOString());
     }
+  },
+  propaga: (chiave, _prima, _dopo, ctx) => {
+    const toccate = primaDellaScrittura;
+    primaDellaScrittura = new Map();
+    const ricordate = righeRicordate(ctx.traccia);
+    if (!ctx.ripristino) {
+      // la riga com'era si ricorda alla PRIMA volta che un testo viene toccato: le correzioni successive non la sovrascrivono
+      for (const [effetto, riga] of toccate) if (!ricordate.has(effetto)) ricordate.set(effetto, riga);
+      if (ricordate.size > 0) ctx.traccia[CHIAVE_TRACCIA] = [...ricordate].map(([k, r]) => JSON.stringify({ k, r }));
+      return;
+    }
+    // ripristino: solo se l'effetto è tornato quello di prima con la sua resa, si rimette `traduzione` com'era (un ripristino parziale lascia la traccia)
+    const effetto = rigaSkill(chiave).effetto;
+    if (!ricordate.has(effetto)) return;
+    if ((ricordate.get(effetto)?.testo ?? null) !== (leggiRigaTraduzione(effetto)?.testo ?? null)) return;
+    rimettiRighe(ricordate);
+    ctx.traccia[CHIAVE_TRACCIA] = []; // non `delete`: la fotografia conserva la traccia vecchia se la chiave manca
   },
   nome: (chiave) => rigaSkill(chiave).nome,
   valida: (_chiave, fusi) => {
