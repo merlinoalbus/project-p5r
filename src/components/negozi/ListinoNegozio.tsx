@@ -41,7 +41,7 @@ export function ListinoNegozio({ negozio, partitaId, versione, onModifica, onCam
   const visibili = useMemo(() => filtraArticoli(articoli, filtro, partitaId !== null), [articoli, filtro, partitaId]);
   return (
     <>
-      <TrasformazioniDiJose trasformazioni={negozio.trasformazioni ?? []} />
+      <TrasformazioniDiJose trasformazioni={negozio.trasformazioni ?? []} onModificata={onRipristinato} />
       {articoli.length > 0 && (
         <FiltriArticoli filtro={filtro} onCambia={setFiltro} categorie={categorie} destinatari={destinatari} conPartita={partitaId !== null} />
       )}

@@ -83,6 +83,8 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
         {o.modificato && <button type="button" className="btn btn-ghost touch" disabled={occupato || regaloInCorso || dati.caricamento} onClick={() => setAzione('ripristina')}>Ripristina</button>}
         <button type="button" className="btn btn-ghost touch" disabled={occupato || regaloInCorso || dati.caricamento} onClick={() => setAzione('elimina')}>Elimina</button>
       </div>
+      {/* L11 · B11 (R11-15/5): un oggetto nato nell'app non ha un valore della guida da rimettere, e la pagina lo dice invece di nascondere «Ripristina» in silenzio */}
+      {o.origine === 'utente' && !o.modificato && <p className="m-0 text-[12px] text-text-muted">Creato da te: non c’è un valore della guida da rimettere.</p>}
       <div className="grid min-w-0 grid-cols-1 gap-3 xl:grid-cols-2">
         <div className="contents xl:flex xl:min-w-0 xl:flex-col xl:gap-3">
           <section className="card order-1 flex min-w-0 flex-col gap-2 xl:order-none" aria-labelledby="dove-si-compra">
@@ -121,7 +123,7 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
           </section>
           <section className="card order-5 flex min-w-0 flex-col gap-3 xl:order-none" aria-labelledby="dove-si-trova">
             <h2 id="dove-si-trova" className="m-0 text-lg">Dove si trova</h2>
-            <TrasformazioniDiJose trasformazioni={o.trasformazioni} />
+            <TrasformazioniDiJose trasformazioni={o.trasformazioni} onModificata={() => void dati.ricarica()} />
             <PosizioniDellaLettura oggetto={o} />
             {o.forzieri.length > 0 && <div><h3 className="m-0 text-base">Forzieri e contenuti della guida</h3><ul className="m-0 list-none divide-y divide-border p-0">{o.forzieri.map((f) => <li key={f.voce} className="flex flex-col gap-1 py-2 text-[13px]">
               <Link to={f.casa} className="touch inline-flex items-center">{f.palazzoNome} › {f.infiltrazioneNome}{f.areaNome ? ` › ${f.areaNome}` : ''}</Link>

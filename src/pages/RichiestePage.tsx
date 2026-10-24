@@ -44,6 +44,7 @@ import { TargaSuggerito } from '../components/shared/Suggerito';
 import { coloreElemento } from '../utils/elementi';
 import { piatto } from '../utils/testo';
 import { ModuloRichiesta } from '../components/guida/ModuloRichiesta';
+import { ModificaGuida } from '../components/guida/ModificaGuida';
 
 type Accettazione = 'tutte' | 'accettate' | 'non-accettate';
 type Completamento = 'tutte' | 'completate' | 'da-completare';
@@ -278,7 +279,11 @@ export function RichiestePage({ soloChiave }: { soloChiave?: string } = {}) {
           {foglio === 'jose' && d.jose && (
             <div className="flex flex-col gap-3 text-[13px]">
               <SezioneConFregio chiave="jose-fiori" disposizione="grande">
-                <h2 className="m-0 font-display text-[17px] uppercase leading-none">Jose: fiori, timbri e scambi</h2>
+                <div className="flex items-start gap-2">
+                  <h2 className="m-0 min-w-0 flex-1 font-display text-[17px] uppercase leading-none">Jose: fiori, timbri e scambi</h2>
+                  {/* L11 · B11 (R11-15/5): introduzione, fiori, timbri e boss segreto di Jose; gli scambi sono il suo listino */}
+                  <ModificaGuida tipo="jose" chiave="jose" cosa="i testi di Jose" soloIcona onSalvato={() => void dati.ricarica()} />
+                </div>
                 <p className="m-0 text-text-secondary">{d.jose.introduzione}</p>
                 <div className="grid gap-1.5 md:grid-cols-2">
                   {d.jose.fiori && <div className="flex flex-col gap-0.5 rounded-md bg-white/[0.04] px-2.5 py-2">
