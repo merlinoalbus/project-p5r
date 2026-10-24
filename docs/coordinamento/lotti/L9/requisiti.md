@@ -56,7 +56,7 @@ Tipo: **F** funzionale, **UX** esperienza, **NR** no-reg, **L** layout.
   - Mishima sale con le Richieste dei Memento;
   - Yoshida non ha soglie;
   - Akechi 9→10 e Maruki 10 sono automatici;
-  - in generale il 9→10 non ha soglia: il rango arriva all'evento successivo.
+  - il 9→10 non ha soglia in punti per Akechi e Maruki (automatici), Kawakami e Yoshida (a eventi) né per Igor, Morgana, Sae, Gemelle e Mishima (non a punti); per gli altri 14 Confidenti la soglia c'è e vale quella della tabella dei punti (`confidente_rango`, confermata da due fonti indipendenti: ricerca Royal del 24/10, `ricerca-royal-2-2026-10-24.md` §4). Nessuna pagina Royal letta dà un totale di punti: i dati non si toccano.
 
   Le soglie dell'app coincidono con i dati del gioco (Akechi 6→7 = 55, confermato).
 - R9-08 [F] Un solo modulo calcola i punti dei Confidenti (bonus esami compresi) per server e anteprime; le 5 copie della formula danno lo stesso risultato. Regola del gioco (Esperto, G-016c): il risultato dell'esame dà un moltiplicatore sui punti di **7 Confidenti**: Ryuji, Makoto, Haru, Sojiro, Kawakami, Kasumi e **Ann**. È massimo se si è primi in classifica, ridotto se si è nei primi 10, e vale fino ai risultati dell'esame successivo. Ann è stata aggiunta dalla correzione di G-016c in G-020: i numeri del gioco le danno ×1,2 / ×1,5, mentre la guida italiana la omette (discordanza dichiarata, vince il dato del gioco). Il modulo unico applica questa regola e i casi di prova la coprono (primo, nei primi 10, fuori; Confidente dei 6 e fuori dai 6).
