@@ -75,7 +75,15 @@ function scrivi(p: number, e: EffettoDiStatoVoce, segna: boolean, statoRichiesta
   else if (e.tipo === 'persona') {
     if (segna) registraPersona(p, e.persona);
     else if (statoRichiesta === 'riga') prepared('UPDATE compendio_partita SET registrata = 0 WHERE partita_id = ? AND persona_id = ?').run(p, e.persona);
-    else prepared('DELETE FROM compendio_partita WHERE partita_id = ? AND persona_id = ?').run(p, e.persona);
+    else {
+      // la riga è nata dalla spunta: si toglie solo se è ancora com'era alla nascita (niente livello, bonus, skill, tratto, carica o valori osservati
+      // scritti dopo); se qualcuno l'ha modificata dopo, resta com'è e torna solo «non registrata» (N-c: mai perdere ciò che è stato aggiunto)
+      const intatta = !!prepared(`SELECT 1 FROM compendio_partita WHERE partita_id = ? AND persona_id = ? AND livello_registrato IS NULL
+        AND bonus_forza = 0 AND bonus_magia = 0 AND bonus_resistenza = 0 AND bonus_agilita = 0 AND bonus_fortuna = 0 AND skill_ids_json IS NULL AND tratto_skill_id IS NULL AND carica = 0
+        AND osservate_livello IS NULL AND osservate_forza IS NULL AND osservate_magia IS NULL AND osservate_resistenza IS NULL AND osservate_agilita IS NULL AND osservate_fortuna IS NULL`).get(p, e.persona);
+      if (intatta) prepared('DELETE FROM compendio_partita WHERE partita_id = ? AND persona_id = ?').run(p, e.persona);
+      else prepared('UPDATE compendio_partita SET registrata = 0 WHERE partita_id = ? AND persona_id = ?').run(p, e.persona);
+    }
   }
   else if (e.tipo === 'storia') impostaEventoStoria(p, e.evento, segna);
   else if (e.tipo === 'domanda') impostaDomandaFatta(p, e.domanda, segna, false);
