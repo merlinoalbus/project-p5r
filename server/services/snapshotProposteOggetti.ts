@@ -22,7 +22,7 @@ export function snapshotFonteProposta(db: AppDatabase, p: Pick<ChiaveProposta, '
   const ricetta = (chiave: string) => elenco(record(guida('oggetti-guida').fabbricazione).ricette).find((r) => r.attrezzo === chiave);
   const articolo = (chiave: string) => {
     const r = uno('SELECT * FROM articolo WHERE chiave = ?', chiave);
-    const base = scegli(r, ['nome', 'nome_it', 'categoria', 'catalogo_chiave', 'prezzo', 'costo_json', 'condizioni_json', 'nascosto', 'negozio_chiave', 'articolo_condiviso']);
+    const base = scegli(r, ['nome', 'categoria', 'catalogo_chiave', 'prezzo', 'costo_json', 'condizioni_json', 'nascosto', 'negozio_chiave', 'articolo_condiviso']);
     if (!r || versione === 1) return base;
     // Solo le nuove proposte 126 adottano questo contratto; assente e null restano distinti.
     return { ...base, ...Object.fromEntries(['origine', 'seed_json', 'condizione', 'fonte'].map((c) =>
@@ -75,8 +75,19 @@ export function snapshotConVersioneSalvata(db: AppDatabase, p: ChiaveProposta): 
   return snapshotFonteProposta(db, p, versione);
 }
 
+/**
+ * Uno snapshot salvato prima di L11 (R11-02/10) porta nella fonte la copia `nome_it`, che la colonna tolta non ha più: non è un cambiamento della
+ * fonte. Si toglie dal solo confronto (lo snapshot salvato resta com'è), così una proposta ancora da approvare non diventa «cambiata».
+ */
+function senzaNomeIt(salvato: unknown): unknown {
+  const s = record(salvato), fonte = record(s.fonte);
+  if (!('nome_it' in fonte)) return salvato;
+  const { nome_it: _tolto, ...resto } = fonte;
+  return { ...s, fonte: resto };
+}
+
 export function snapshotPropostaCoincide(db: AppDatabase, p: ChiaveProposta): boolean {
-  const salvato = parse(p.fonte_snapshot_json);
+  const salvato = senzaNomeIt(parse(p.fonte_snapshot_json));
   return versioneSnapshot(p) !== null && !record(salvato).invalida
     && isDeepStrictEqual(salvato, snapshotConVersioneSalvata(db, p));
 }

@@ -47,8 +47,8 @@ function datiCatalogoLettura(oggetto: CatalogoOggettoDto | undefined, prezzoGuid
 }
 
 interface RigaAttivita { chiave: string; ordine: number; nome: string; tipo: string; luogo: string; luogo_chiave: string | null; sede_chiave: string | null; fascia: string | null; costo: number | null; sblocco: string | null; sessioni: number | null; doti_json: string; paga_yen: number | null; paga_massima: number | null; dettagli: string | null; effetti_json: string | null; tracciamento: string; quiz_json: string | null; fonte: string; verificato: number; condizioni_json: string | null }
-interface RigaLibro { effetti_json: string | null; chiave: string; ordine: number; nome: string; nome_it: string | null; dove: string; prezzo: number | null; disponibile_dal: string | null; dote: string | null; note: number | null; sblocca: string | null; sessioni: number | null; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
-interface RigaFilm { effetti_json: string | null; chiave: string; ordine: number; nome: string; nome_it: string | null; dove: 'cinema' | 'dvd'; periodo: string; dote: string | null; note: number | null; note_successive: number | null; prezzo: number | null; sessioni: number; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
+interface RigaLibro { effetti_json: string | null; chiave: string; ordine: number; nome: string; dove: string; prezzo: number | null; disponibile_dal: string | null; dote: string | null; note: number | null; sblocca: string | null; sessioni: number | null; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
+interface RigaFilm { effetti_json: string | null; chiave: string; ordine: number; nome: string; dove: 'cinema' | 'dvd'; periodo: string; dote: string | null; note: number | null; note_successive: number | null; prezzo: number | null; sessioni: number; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
 
 /** La disponibilità di una riga, dalle condizioni strutturate. La condizione non nasconde niente:
  *  dice «non ancora», che in una guida è un'informazione, non un ostacolo. */
@@ -157,7 +157,7 @@ const libroDto = (r: RigaLibro, stato: StatoLetture, posizioni: Map<string, Libr
   // Compatibilità dei vecchi campi API: stessa fonte calcolata, mai l'effetto storico.
   const quartiere = posti.find((p) => p.tipo === 'quartiere');
   return {
-    chiave: r.chiave, nome: oggetto?.nome ?? r.nome, nomeIt: oggetto?.nome ?? r.nome_it, dove: r.dove, ...datiCatalogoLettura(oggetto, r.prezzo), disponibileDal: r.disponibile_dal, dote: r.dote as LibroDto['dote'], note: r.note, sblocca: r.sblocca, sbloccaLuogo: quartiere?.chiave ?? null, sbloccaLuogoNome: quartiere?.nome ?? null, apre: posti, sessioni: r.sessioni, dettagli: r.dettagli,
+    chiave: r.chiave, nome: oggetto?.nome ?? r.nome, dove: r.dove, ...datiCatalogoLettura(oggetto, r.prezzo), disponibileDal: r.disponibile_dal, dote: r.dote as LibroDto['dote'], note: r.note, sblocca: r.sblocca, sbloccaLuogo: quartiere?.chiave ?? null, sbloccaLuogoNome: quartiere?.nome ?? null, apre: posti, sessioni: r.sessioni, dettagli: r.dettagli,
     ...effettiDto(r.effetti_json, true), negozi: negozi.get(r.chiave) ?? [],
     verificato: r.verificato === 1,
     posizioni: posizioni.get(r.chiave) ?? [], totaleSessioni, progresso: fatto ? totaleSessioni : Math.min(Math.max(grezzo, 0), totaleSessioni), fatto,
@@ -173,7 +173,7 @@ const filmDto = (r: RigaFilm, stato: StatoLetture, posizioni: Map<string, FilmDt
   const progresso = r.dove === 'dvd' ? Math.min(grezzo, totaleSessioni) : grezzo;
   const iniziato = progresso > 0;
   return {
-    chiave: r.chiave, nome: oggetto?.nome ?? r.nome, nomeIt: oggetto?.nome ?? r.nome_it, ...datiCatalogoLettura(oggetto, r.prezzo, r.dove === 'cinema'), negozi: negozi.get(r.chiave) ?? [], dove: r.dove, dote: r.dote as FilmDto['dote'], note: r.note, noteSuccessive: r.note_successive, dettagli: r.dettagli,
+    chiave: r.chiave, nome: oggetto?.nome ?? r.nome, ...datiCatalogoLettura(oggetto, r.prezzo, r.dove === 'cinema'), negozi: negozi.get(r.chiave) ?? [], dove: r.dove, dote: r.dote as FilmDto['dote'], note: r.note, noteSuccessive: r.note_successive, dettagli: r.dettagli,
     ...effettiDto(r.effetti_json), verificato: r.verificato === 1,
     posizioni: posizioni.get(r.chiave) ?? [], totaleSessioni, progresso, iniziato, fatto: r.dove === 'cinema' ? iniziato : progresso >= totaleSessioni,
     ...conDisponibilita(r.condizioni_json, st),
@@ -420,7 +420,7 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
   const riga = (tipo === 'libro' ? prepared('SELECT * FROM libro WHERE chiave = ? AND nascosto = 0').get(chiave) : tipo === 'film' ? prepared('SELECT * FROM film WHERE chiave = ? AND nascosto = 0').get(chiave) : prepared("SELECT * FROM attivita WHERE chiave = ? AND tipo='videogioco' AND nascosto = 0").get(chiave)) as RigaLibro | RigaFilm | RigaAttivita | undefined;
   if (!riga) throw httpErrors.notFound('lettura-non-trovata', `${tipo === 'libro' ? 'Il libro' : tipo === 'film' ? 'Il film' : 'Il videogioco'} '${chiave}' non esiste.`);
   const catalogo = oggettiPerFonte(tipo);
-  const nomeCorrente = catalogo.get(chiave)?.nome ?? (tipo === 'libro' ? (riga as RigaLibro).nome_it ?? riga.nome : riga.nome);
+  const nomeCorrente = catalogo.get(chiave)?.nome ?? riga.nome;
   const adesso = nowIso();
   const totale = tipo === 'libro' ? totaleLibro(riga as RigaLibro) : Math.max((riga as RigaFilm | RigaAttivita).sessioni ?? 1, 1);
   const richiesto = 'avanzamento' in modifica ? modifica.avanzamento : modifica.fatto ? totale : 0;
@@ -497,7 +497,7 @@ export function impostaLettura(partitaId: number, tipo: TipoLettura, chiave: str
 export function avanzamentoLettura(partitaId: number, tipo: TipoLettura, chiave: string): { avanzamento: number; totale: number | null; nome: string } {
   const riga = (tipo === 'libro' ? prepared('SELECT * FROM libro WHERE chiave = ? AND nascosto = 0').get(chiave) : tipo === 'film' ? prepared('SELECT * FROM film WHERE chiave = ? AND nascosto = 0').get(chiave) : prepared("SELECT * FROM attivita WHERE chiave = ? AND tipo='videogioco' AND nascosto = 0").get(chiave)) as RigaLibro | RigaFilm | RigaAttivita | undefined;
   if (!riga) throw httpErrors.notFound('lettura-non-trovata', `${tipo === 'libro' ? 'Il libro' : tipo === 'film' ? 'Il film' : 'Il videogioco'} '${chiave}' non esiste.`);
-  const nome = oggettiPerFonte(tipo).get(chiave)?.nome ?? (tipo === 'libro' ? (riga as RigaLibro).nome_it ?? riga.nome : riga.nome);
+  const nome = oggettiPerFonte(tipo).get(chiave)?.nome ?? riga.nome;
   if (tipo === 'libro') {
     const totale = totaleLibro(riga as RigaLibro);
     const r = prepared('SELECT avanzamento FROM progresso_libro_partita WHERE partita_id = ? AND libro_chiave = ?').get(partitaId, chiave) as { avanzamento: number } | undefined;

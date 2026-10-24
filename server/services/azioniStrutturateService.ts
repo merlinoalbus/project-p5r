@@ -24,7 +24,7 @@ const TIPI_RIFERIMENTO = new Set<string>(TIPI_RIFERIMENTO_AZIONE.map((r) => r.ch
 
 /** Le chiavi di lettura restano quelle originali; il titolo corrente segue anche una fonte confluita. */
 function titoliLettura(tabella: 'libro' | 'film' | 'attivita', coda = ''): string {
-  const originale = tabella === 'attivita' ? 'l.nome' : 'COALESCE(l.nome_it,l.nome)';
+  const originale = 'l.nome';
   if (!catalogoOggettiDisponibile()) return `SELECT l.*,${originale} AS titolo_corrente FROM ${tabella} l ${coda}`;
   return `SELECT l.*,COALESCE(c.nome,${originale}) AS titolo_corrente FROM ${tabella} l
     LEFT JOIN catalogo_oggetto c ON c.chiave = l.catalogo_chiave ${tabella === 'attivita' ? "AND l.tipo = 'videogioco'" : ''} ${coda}`;

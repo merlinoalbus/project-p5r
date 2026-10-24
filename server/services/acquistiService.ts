@@ -82,7 +82,7 @@ function offerta(chiave:string):{identita:IdentitaAcquisto;raw:Record<string,unk
   if(!r)throw httpErrors.notFound('articolo-non-trovato','L’offerta non esiste: non viene ricreata.');
   if(!eOffertaAojiru({chiave,catalogoChiave:r.catalogo_chiave as string|null}))throw httpErrors.conflict('offerta-non-aojiru','Questa identità non corrisponde all’offerta Aojiru riconosciuta.');
   if(r.prezzo!==PREZZO_AOJIRU||r.costo_json!=null||r.articolo_condiviso!=null)throw httpErrors.conflict('offerta-variata','Prezzo o identità dell’offerta sono diversi: nessuna regola viene imposta alla variante.');
-  return {identita:{articolo:chiave,nome:String(r.catalogo_nome??r.nome_it??r.nome),negozio:typeof r.negozio_chiave==='string'?r.negozio_chiave:null,negozioNome:String(r.negozio_nome??'Offerta precedente'),catalogo:typeof r.catalogo_chiave==='string'?r.catalogo_chiave:null},raw:r};
+  return {identita:{articolo:chiave,nome:String(r.catalogo_nome??r.nome),negozio:typeof r.negozio_chiave==='string'?r.negozio_chiave:null,negozioNome:String(r.negozio_nome??'Offerta precedente'),catalogo:typeof r.catalogo_chiave==='string'?r.catalogo_chiave:null},raw:r};
 }
 export function verificaOffertaConsumo(chiave:string):void {offerta(chiave);}
 function verificaFonte(partita:number,r:NuovaRegistrazioneAcquisto):{raw:unknown;ordine:number|null} {

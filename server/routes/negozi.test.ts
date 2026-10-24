@@ -72,7 +72,7 @@ describe('API negozi e inventario', () => {
     expect(d.articoliElenco.find((x) => x.chiave === acquistabile.chiave)?.acquistato).toBe(true);
     const storico = (await request(app).get(`/api/partite/${id}/storico?tipi=acquisto`)).body.data as StoricoDto;
     expect(storico.totale).toBe(1);
-    expect(storico.eventi[0].titolo).toContain(acquistabile.nomeIt ?? acquistabile.nome);
+    expect(storico.eventi[0].titolo).toContain(acquistabile.nome);
     a = (await request(app).put(`/api/partite/${id}/acquisti`).send({ articolo: acquistabile.chiave, fatto: false })).body.data as ArticoloDto;
     expect(a.acquistato).toBe(false);
     expect((await request(app).put(`/api/partite/${id}/acquisti`).send({ articolo: 'x/y', fatto: true })).status).toBe(404);

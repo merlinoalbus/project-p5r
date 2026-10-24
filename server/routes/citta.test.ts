@@ -110,7 +110,7 @@ describe('API città e attività', () => {
     expect(con.libri.find((l) => l.chiave === libro.chiave)?.fatto).toBe(true);
     const storico = (await request(app).get(`/api/partite/${id}/storico?tipi=lettura`)).body.data as StoricoDto;
     expect(storico.totale).toBe(2);
-    expect(storico.eventi.some((e) => e.titolo.includes(libro.nomeIt ?? libro.nome))).toBe(true);
+    expect(storico.eventi.some((e) => e.titolo.includes(libro.nome))).toBe(true);
     r = (await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave: libro.chiave, fatto: false })).body.data as LibroDto;
     expect(r.fatto).toBe(false);
     expect((await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave: 'nessuno', fatto: true })).status).toBe(404);

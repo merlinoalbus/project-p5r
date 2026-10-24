@@ -42,7 +42,7 @@ export interface AttivitaCensimentoDto extends OrigineCensimentoDto {
 }
 
 export interface ArticoloCensimentoDto extends OrigineCensimentoDto {
-  chiave: string; nome: string; nome_it: string | null; negozio_chiave: string | null;
+  chiave: string; nome: string; negozio_chiave: string | null;
   catalogo_chiave: string | null; articolo_condiviso: string | null;
   disponibile_dal: string | null; nota: string | null;
   condizioni_json: JsonCensimentoCondizioniDto;

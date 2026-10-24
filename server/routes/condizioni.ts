@@ -62,8 +62,9 @@ function attivitaConteggiabili() {
 router.get('/elenchi', (_req, res) => {
   const elenchi: ElenchiRegoleDto = {
     allerte: prepared('SELECT DISTINCT chiave,nome FROM allerta_meteo ORDER BY nome').all() as NonNullable<ElenchiRegoleDto['allerte']>,
-    articoli: prepared('SELECT a.chiave, COALESCE(a.nome_it, a.nome) AS nome, n.nome AS gruppo FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave WHERE a.nascosto = 0 AND n.nascosto = 0 ORDER BY n.nome, nome').all() as ElenchiRegoleDto['articoli'],
-    letture: prepared("SELECT chiave, COALESCE(nome_it, nome) AS nome, 'libro' AS categoria FROM libro WHERE nascosto = 0 UNION ALL SELECT chiave, COALESCE(nome_it, nome), 'film' FROM film WHERE nascosto = 0 ORDER BY nome").all() as ElenchiRegoleDto['letture'],
+    // il nome è quello del catalogo degli oggetti (la copia `nome_it` che lo ripeteva è stata tolta, L11 R11-02/10)
+    articoli: prepared("SELECT a.chiave, COALESCE(c.nome, NULLIF(a.nome, ''), 'Oggetto da collegare') AS nome, n.nome AS gruppo FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave WHERE a.nascosto = 0 AND n.nascosto = 0 ORDER BY n.nome, nome").all() as ElenchiRegoleDto['articoli'],
+    letture: prepared("SELECT l.chiave, COALESCE(c.nome, l.nome) AS nome, 'libro' AS categoria FROM libro l LEFT JOIN catalogo_oggetto c ON c.chiave = l.catalogo_chiave WHERE l.nascosto = 0 UNION ALL SELECT f.chiave, COALESCE(c.nome, f.nome), 'film' FROM film f LEFT JOIN catalogo_oggetto c ON c.chiave = f.catalogo_chiave WHERE f.nascosto = 0 ORDER BY nome").all() as ElenchiRegoleDto['letture'],
     arcani: prepared('SELECT DISTINCT arcana AS chiave, arcana AS nome FROM persona ORDER BY arcana').all() as ElenchiRegoleDto['arcani'],
     // L6 (R6-03): Persona e abilità si scelgono per nome e si salvano per id
     // le 27 forme del gruppo (`del_party = 1`) non si portano nella scorta né si registrano: non sono Persona da citare in una condizione (R8-20)

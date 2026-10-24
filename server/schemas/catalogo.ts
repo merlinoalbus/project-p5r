@@ -91,7 +91,6 @@ export const datiArticolo = z.object({
   condizioni_json: z.array(condizioneSpillo).max(20).transform(v=>JSON.stringify(v)).optional(),
   negozio_chiave: z.string().min(1).max(200),
   nome: testo(160).min(1).optional(),
-  nome_it: testo(160).nullable().optional(),
   // Le categorie di un articolo sono i tipi di cosa che un negozio può vendere, e le prime nove non
   // li coprivano: libri, DVD e videogiochi finivano in «altro», e i quattro consumabili che l'app
   // distingue dappertutto — cura, SP, battaglia, stato — sparivano dentro «consumabile».
@@ -131,7 +130,6 @@ const datiLibro = z.object({
   verificato: z.boolean().optional(),
   condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
-  nome_it: testo(160).nullable().optional(),
   dove: testo(300).default(''),
   prezzo: z.number().int().min(0).max(9_999_999).nullable().optional(),
   dote: dote.nullable().optional(),
@@ -160,7 +158,6 @@ const datiFilmBase = z.object({
   verificato: z.boolean().optional(),
   condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
-  nome_it: testo(160).nullable().optional(),
   dove: z.enum(['cinema', 'dvd']).default('cinema'),
   dote: dote.nullable().optional(),
   note: z.number().int().min(0).max(9).nullable().optional(),

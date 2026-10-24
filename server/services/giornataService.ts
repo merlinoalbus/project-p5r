@@ -73,12 +73,13 @@ function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzi
   return fonte.effetti.map(({ effetto: e }) => {
     if (e.tipo === 'articolo') {
       // l'articolo comprato e il suo prezzo come promemoria: gli yen si cambiano a mano
-      const a = prepared('SELECT COALESCE(nome_it, nome) AS nome, prezzo FROM articolo WHERE chiave = ?').get(e.articolo) as { nome: string; prezzo: number | null } | undefined;
+      // il nome è quello del catalogo; la colonna `nome` dell'articolo può essere vuota (il catalogo unico è il nome vero), e allora la riga non resta senza nome
+      const a = prepared("SELECT COALESCE(NULLIF(c.nome, ''), NULLIF(a.nome, ''), a.chiave) AS nome, a.prezzo FROM articolo a LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave WHERE a.chiave = ?").get(e.articolo) as { nome: string; prezzo: number | null } | undefined;
       return a ? `Acquisto: ${a.nome}${a.prezzo ? ` · ¥${a.prezzo.toLocaleString('it-IT')}: cambiali tu a mano` : ''}` : descriviEffettoVoce(e);
     }
     if (e.tipo === 'pesca' || e.tipo === 'fortuna' || eEffettoDiStato(e)) return descriviEffettoVoce(e);
     if (e.tipo === 'acquisto') {
-      const nome = (prepared('SELECT COALESCE(nome_it, nome) AS nome FROM articolo WHERE chiave = ?').get(e.articolo) as { nome: string } | undefined)?.nome;
+      const nome = (prepared("SELECT COALESCE(NULLIF(c.nome, ''), NULLIF(a.nome, ''), a.chiave) AS nome FROM articolo a LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave WHERE a.chiave = ?").get(e.articolo) as { nome: string } | undefined)?.nome;
       return nome ? descriviEffettoVoce(e).replace(e.articolo, nome) : descriviEffettoVoce(e);
     }
     const testo = testoEffetti([e], nomi)[0]!;

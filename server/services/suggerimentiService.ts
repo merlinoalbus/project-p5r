@@ -114,15 +114,13 @@ function indiceArticoli(): Map<string, Array<{ chiave: string; negozio: string }
     return mappa;
   }
   // Compatibilità prima della registrazione di M7; non viene usata sui dati convertiti.
-  const righe = prepared('SELECT chiave, negozio_chiave, nome, nome_it FROM articolo').all() as Array<{ chiave: string; negozio_chiave: string; nome: string; nome_it: string | null }>;
+  const righe = prepared('SELECT chiave, negozio_chiave, nome FROM articolo').all() as Array<{ chiave: string; negozio_chiave: string; nome: string }>;
   for (const a of righe) {
-    for (const nome of [a.nome, a.nome_it]) {
-      if (!nome) continue;
-      const k = slug(nome);
-      const elenco = mappa.get(k) ?? [];
-      elenco.push({ chiave: a.chiave, negozio: a.negozio_chiave });
-      mappa.set(k, elenco);
-    }
+    if (!a.nome) continue;
+    const k = slug(a.nome);
+    const elenco = mappa.get(k) ?? [];
+    elenco.push({ chiave: a.chiave, negozio: a.negozio_chiave });
+    mappa.set(k, elenco);
   }
   return mappa;
 }

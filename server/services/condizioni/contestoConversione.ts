@@ -38,6 +38,15 @@ function haTabella(db: Database.Database, nome: string): boolean {
   return !!db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?").get(nome);
 }
 
+/**
+ * La query che legge i nomi di una tabella: `nome_it` (la copia italiana, tolta dal modello di libri, film e articoli) si legge solo se la colonna
+ * c'è ancora, perché le migrazioni storiche girano anche su database di prima della sua eliminazione (L11, R11-02/10); dopo, non esiste più.
+ */
+function selezioneNomi(db: Database.Database, tabella: string): string {
+  const colonne = (db.prepare(`PRAGMA table_info(${tabella})`).all() as Array<{ name: string }>).map((c) => c.name);
+  return `SELECT chiave, nome${colonne.includes('nome_it') ? ', nome_it' : ''} FROM ${tabella}`;
+}
+
 /** Il contesto di base: le funzioni di ricerca sui dati della Guida. Ogni riga vi aggiunge negozio, gestore e chiave. */
 export function contestoConversione(db: Database.Database): ContestoConversione {
   /** Ricerca di ripiego per le tabelle che mancano: non trova mai nulla. */
@@ -48,9 +57,9 @@ export function contestoConversione(db: Database.Database): ContestoConversione 
   let finestre: Map<string, FinestraDungeon> | null = null;
   return {
     richiesta: ha('richiesta') ? cercaPerNome(db, 'SELECT chiave, nome FROM richiesta') : vuoto,
-    libro: ha('libro') ? cercaPerNome(db, 'SELECT chiave, nome, nome_it FROM libro') : vuoto,
-    film: ha('film') ? cercaPerNome(db, 'SELECT chiave, nome, nome_it FROM film') : vuoto,
-    articolo: ha('articolo') ? cercaPerNome(db, 'SELECT chiave, nome, nome_it FROM articolo') : vuoto,
+    libro: ha('libro') ? cercaPerNome(db, selezioneNomi(db, 'libro')) : vuoto,
+    film: ha('film') ? cercaPerNome(db, selezioneNomi(db, 'film')) : vuoto,
+    articolo: ha('articolo') ? cercaPerNome(db, selezioneNomi(db, 'articolo')) : vuoto,
     attivita: ha('attivita') ? cercaPerNome(db, 'SELECT chiave, nome FROM attivita') : vuoto,
     quartiereDatato: (q) => {
       if (!datati) datati = new Set(ha('quartiere') ? (db.prepare('SELECT chiave FROM quartiere WHERE sblocco_data IS NOT NULL').all() as Array<{ chiave: string }>).map((r) => r.chiave) : []);

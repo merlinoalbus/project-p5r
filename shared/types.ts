@@ -1569,7 +1569,6 @@ export interface ArticoloDto {
   negozioChiave: string;
   negozioNome: string;
   nome: string;
-  nomeIt: string | null;
   categoria: CategoriaArticolo;
   /** Personaggio destinatario, «tutti», «party» o null se non indicato. */
   per: string | null;
@@ -2000,7 +1999,6 @@ export interface LibroDto {
   daSegnare?: DoteDaSegnareDto[];
   chiave: string;
   nome: string;
-  nomeIt: string | null;
   dove: string;
   prezzo: number | null;
   disponibileDal: string | null;
@@ -2057,7 +2055,6 @@ export interface FilmDto {
   daSegnare?: DoteDaSegnareDto[];
   chiave: string;
   nome: string;
-  nomeIt: string | null;
   dove: 'cinema' | 'dvd';
   dote: DoteChiave | null;
   note: number | null;

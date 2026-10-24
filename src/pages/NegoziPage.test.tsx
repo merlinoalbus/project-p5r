@@ -125,7 +125,7 @@ it('con la partita i segmenti di stato e disponibilità arrivano al server', asy
 it('due spunte ravvicinate nei risultati: la risposta della prima, arrivata dopo la seconda, non toglie la seconda (B3")', async () => {
   usePartitaStore.setState({ attiva: { id: 5, nome: 'Prova' } as PartitaDto });
   /** Un'arma dell'Officina per Joker da 1000 yen, verificata e non ancora acquistata, con chiave e nome dati. */
-  const art = (chiave: string, nome: string): ArticoloDto => ({ chiave, negozioChiave: 'officina', negozioNome: 'Officina', nome, nomeIt: null, categoria: 'arma', per: 'Joker', prezzo: 1000, effetto: 'Effetto', statistiche: null, quantita: null, oggettoFonte: null, oggettoChiave: null, disponibileDal: null, condizione: null, nota: null, verificato: true, acquistato: false });
+  const art = (chiave: string, nome: string): ArticoloDto => ({ chiave, negozioChiave: 'officina', negozioNome: 'Officina', nome, categoria: 'arma', per: 'Joker', prezzo: 1000, effetto: 'Effetto', statistiche: null, quantita: null, oggettoFonte: null, oggettoChiave: null, disponibileDal: null, condizione: null, nota: null, verificato: true, acquistato: false });
   const articoli = [art('officina/spada', 'Spada'), art('officina/lancia', 'Lancia')];
   ricercaArticoli.mockResolvedValue({ totale: 2, articoli });
   let rispondiSpada!: (a: ArticoloDto) => void;

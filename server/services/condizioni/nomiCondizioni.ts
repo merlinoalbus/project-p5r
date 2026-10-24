@@ -44,12 +44,12 @@ export function nomiCondizioni(opz: { conPin?: boolean } = {}): NomiCondizioni {
   const dalCatalogo = (prima: string, dopo: string) => () => mappa(catalogoOggettiDisponibile() ? dopo : prima)();
   const elenchi: { [K in keyof NomiCondizioni]-?: () => NonNullable<NomiCondizioni[K]> } = {
     allerte: mappa('SELECT DISTINCT chiave,nome FROM allerta_meteo'),
-    articoli: dalCatalogo('SELECT chiave, COALESCE(nome_it, nome) AS nome FROM articolo',
-      "SELECT a.chiave,COALESCE(c.nome,NULLIF(a.nome_it,''),NULLIF(a.nome,''),'Oggetto da collegare') AS nome FROM articolo a LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave"),
-    letture: dalCatalogo('SELECT chiave, COALESCE(nome_it, nome) AS nome FROM libro UNION ALL SELECT chiave, COALESCE(nome_it, nome) FROM film',
-      `SELECT l.chiave,COALESCE(c.nome,l.nome_it,l.nome) AS nome FROM libro l
+    articoli: dalCatalogo('SELECT chiave, nome FROM articolo',
+      "SELECT a.chiave,COALESCE(c.nome,NULLIF(a.nome,''),'Oggetto da collegare') AS nome FROM articolo a LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave"),
+    letture: dalCatalogo('SELECT chiave, nome FROM libro UNION ALL SELECT chiave, nome FROM film',
+      `SELECT l.chiave,COALESCE(c.nome,l.nome) AS nome FROM libro l
         LEFT JOIN catalogo_oggetto c ON c.chiave = l.catalogo_chiave
-        UNION ALL SELECT f.chiave,COALESCE(c.nome,f.nome_it,f.nome) FROM film f
+        UNION ALL SELECT f.chiave,COALESCE(c.nome,f.nome) FROM film f
         LEFT JOIN catalogo_oggetto c ON c.chiave = f.catalogo_chiave`),
     confidenti: mappa('SELECT chiave, nome FROM confidente'), quartieri: mappa('SELECT chiave, nome FROM quartiere'),
     richieste: mappa('SELECT chiave, nome FROM richiesta'), dungeon: mappa('SELECT chiave, nome FROM dungeon'),

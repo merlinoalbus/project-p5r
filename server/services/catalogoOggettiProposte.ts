@@ -68,7 +68,7 @@ function testoFonte(tipo: TipoPropostaOggetto, chiave: string, nomi: ReturnType<
   const r = prepared(tipo === 'articolo' ? 'SELECT a.*,c.nome AS catalogo_nome FROM articolo a LEFT JOIN catalogo_oggetto c ON c.chiave = a.catalogo_chiave WHERE a.chiave = ?'
     : `SELECT * FROM ${tabella} WHERE chiave = ?`).get(chiave) as Riga | undefined;
   if (!r) return { nome: tipo === 'articolo' ? 'Nuova offerta proposta' : 'Fonte eliminata', testo: tipo === 'articolo' ? 'Questa offerta non è ancora presente nel listino.' : 'La fonte originale non è più disponibile.' };
-  const nome = typeof r.catalogo_nome === 'string' ? r.catalogo_nome : typeof r.nome_it === 'string' && r.nome_it ? r.nome_it : String(r.nome || 'Offerta senza oggetto collegato');
+  const nome = typeof r.catalogo_nome === 'string' ? r.catalogo_nome : String(r.nome || 'Offerta senza oggetto collegato');
   if (tipo === 'articolo') {
     const costo = costoOggetto(typeof r.costo_json === 'string' ? r.costo_json : null);
     const prezzo = r.costo_json != null ? costo?.tipo === 'fiori' ? `${costo.importo.toLocaleString('it-IT')} fiori`
@@ -170,7 +170,7 @@ function applicaArticolo(d: LegameCompleto, m: Modifica | null): void {
   if (m?.prezzo !== undefined) campi.prezzo = m.prezzo;
   if (m?.condizioni !== undefined) campi.condizioni_json = JSON.stringify(m.condizioni);
   if (m?.prima) {
-    const verificati = [...new Set([...Object.keys(campi), 'nome', 'nome_it'])];
+    const verificati = [...new Set([...Object.keys(campi), 'nome'])];
     if (verificati.some((c) => c in m.prima! && attuale[c] !== m.prima![c])) throw httpErrors.conflict('riga-cambiata-dopo-proposta',
       'La riga è stata corretta dopo la proposta. Nessun valore è stato sovrascritto: rileggi i dati attuali.');
   }

@@ -76,10 +76,12 @@ export const DOTI_DEI_LAVORI: Record<string, DoteNote[]> = {
  */
 export function contestoConversione(db: AppDatabase): ContestoConversione {
   const elementi = new Map<string, Elemento>();
-  for (const r of db.prepare('SELECT chiave, nome, nome_it, sessioni FROM libro').all() as Array<{ chiave: string; nome: string; nome_it: string | null; sessioni: number | null }>) {
+  // `nome_it` (copia italiana tolta dal modello, L11 R11-02/10) si legge solo dove la colonna c'è ancora: la conversione gira anche sui database di prima
+  const conNomeIt = (tabella: string): string => ((db.prepare(`PRAGMA table_info(${tabella})`).all() as Array<{ name: string }>).some((c) => c.name === 'nome_it') ? ', nome_it' : '');
+  for (const r of db.prepare(`SELECT chiave, nome${conNomeIt('libro')}, sessioni FROM libro`).all() as Array<{ chiave: string; nome: string; nome_it?: string | null; sessioni: number | null }>) {
     elementi.set(`libro:${r.chiave}`, { chiave: r.chiave, categoria: 'libro', nomi: [r.nome, r.nome_it].filter((n): n is string => !!n).map(piano), sessioni: Math.max(r.sessioni ?? 1, 1), cinema: false });
   }
-  for (const r of db.prepare('SELECT chiave, nome, nome_it, sessioni, dove FROM film').all() as Array<{ chiave: string; nome: string; nome_it: string | null; sessioni: number | null; dove: string }>) {
+  for (const r of db.prepare(`SELECT chiave, nome${conNomeIt('film')}, sessioni, dove FROM film`).all() as Array<{ chiave: string; nome: string; nome_it?: string | null; sessioni: number | null; dove: string }>) {
     elementi.set(`film:${r.chiave}`, { chiave: r.chiave, categoria: 'film', nomi: [r.nome, r.nome_it].filter((n): n is string => !!n).map(piano), sessioni: Math.max(r.sessioni ?? 1, 1), cinema: r.dove === 'cinema' });
   }
   const lavori = new Map<string, { chiave: string; doti: DoteNote[] }>();

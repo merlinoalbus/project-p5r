@@ -91,7 +91,10 @@ function fotografa(db: AppDatabase, raw: PresenzaLegacy, origine: ValutazioneLeg
   const n = negozio && esiste(db, 'main', 'negozio') ? db.prepare('SELECT nome FROM main.negozio WHERE chiave=?').get(negozio) as { nome: string } | undefined : undefined;
   const prezzo = articolo?.prezzo ?? null;
   if (prezzo !== null && (typeof prezzo !== 'number' || !Number.isSafeInteger(prezzo) || prezzo < 0)) return errore('Il prezzo da conservare richiede una riconciliazione esplicita.');
-  const identita: IdentitaLegacy = { articolo: raw.articolo_chiave, nome: String(articolo?.nome_it ?? articolo?.nome ?? raw.articolo_chiave), negozio,
+  // il nome è quello del catalogo degli oggetti (la copia `nome_it` che lo ripeteva non esiste più), poi quello della riga
+  const nomeCatalogo = typeof articolo?.catalogo_chiave === 'string' && esiste(db, 'main', 'catalogo_oggetto')
+    ? (db.prepare('SELECT nome FROM main.catalogo_oggetto WHERE chiave=?').get(articolo.catalogo_chiave) as { nome: string } | undefined)?.nome : undefined;
+  const identita: IdentitaLegacy = { articolo: raw.articolo_chiave, nome: String(nomeCatalogo ?? articolo?.nome ?? raw.articolo_chiave), negozio,
     negozioNome: n?.nome ?? 'Offerta precedente', catalogo: typeof articolo?.catalogo_chiave === 'string' ? articolo.catalogo_chiave : null };
   const ultima = db.prepare('SELECT MAX(generazione) AS n FROM utente.acquisto_legacy_valutazione WHERE partita_id=? AND articolo_chiave=?').get(raw.partita_id, raw.articolo_chiave) as { n: number | null };
   const generazione = (ultima.n ?? 0) + 1;

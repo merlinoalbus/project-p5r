@@ -15,7 +15,7 @@ vi.mock('../stores/notificationStore', (vero) => moduloNotifiche(vero));
 vi.mock('../components/mappe/DoveSiTrova', () => ({ DoveSiTrova: ({ tipo, chiave }: { tipo: string; chiave: string }) => <div>Dove: {tipo}/{chiave}</div> }));
 
 const base: LibroDto = {
-  chiave: 'prova', nome: 'Libro di prova', nomeIt: null, dove: 'Libreria Taiheido', prezzo: 700,
+  chiave: 'prova', nome: 'Libro di prova', dove: 'Libreria Taiheido', prezzo: 700,
   disponibileDal: '18 aprile', dote: 'conoscenza', note: 3, sblocca: null, sbloccaLuogo: null, sbloccaLuogoNome: null, sessioni: 2,
   dettagli: null, effetti: [{ effetto: { famiglia: 'dote', dote: 'conoscenza', note: 3 }, testo: 'Conoscenza ♪♪♪' }], effettiTesto: ['Conoscenza ♪♪♪'],
   negozi: [{ articolo: 'libreria-taiheido/prova', negozio: 'libreria-taiheido', negozioNome: 'Libreria Taiheido', prezzo: 700 }],

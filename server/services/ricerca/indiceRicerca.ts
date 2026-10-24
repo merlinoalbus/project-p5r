@@ -166,9 +166,9 @@ function urlImmagineCaricata(ambito: string, chiave: string, createdAt: string):
 /** Un costruttore di tipo del catalogo degli oggetti: categorie dentro o fuori dal gruppo, nascosto escluso, con le tabelle proprie dei libri e dei film. */
 function oggettiDelCatalogo(categorie: readonly string[], dentro: boolean, tipo: TipoRicerca, ctx: ContestoIndice): Bozza[] {
   const elenco = categorie.map((c) => `'${c}'`).join(',');
-  const righe = q<{ chiave: string; nome: string; nomi_altri_json: string; nome_originale: string | null; altro1: string | null; altro2: string | null }>(ctx,
+  const righe = q<{ chiave: string; nome: string; nomi_altri_json: string; nome_originale: string | null; altro1: string | null }>(ctx,
     `SELECT c.chiave, c.nome, c.nomi_altri_json, c.nome_originale,
-       ${tipo === 'libro' ? 'l.nome' : tipo === 'film' ? 'f.nome' : 'NULL'} AS altro1, ${tipo === 'libro' ? 'l.nome_it' : tipo === 'film' ? 'f.nome_it' : 'NULL'} AS altro2
+       ${tipo === 'libro' ? 'l.nome' : tipo === 'film' ? 'f.nome' : 'NULL'} AS altro1
      FROM catalogo_oggetto c
      ${tipo === 'libro' ? 'LEFT JOIN libro l ON l.catalogo_chiave = c.chiave' : tipo === 'film' ? 'LEFT JOIN film f ON f.catalogo_chiave = c.chiave' : ''}
      WHERE c.nascosto = 0 AND c.categoria ${dentro ? 'IN' : 'NOT IN'} (${elenco})
@@ -176,7 +176,7 @@ function oggettiDelCatalogo(categorie: readonly string[], dentro: boolean, tipo:
      ORDER BY c.nome COLLATE NOCASE, c.chiave`);
   return righe.map((r) => ({
     tipo, chiave: r.chiave, nome: r.nome, casa: casaOggetto(r.chiave),
-    altri: [...nomiAltriOggetto(r.nomi_altri_json), r.nome_originale, r.altro1, r.altro2, espandiAbbreviazione(r.nome, ctx.sinonimi.abbreviazioni)],
+    altri: [...nomiAltriOggetto(r.nomi_altri_json), r.nome_originale, r.altro1, espandiAbbreviazione(r.nome, ctx.sinonimi.abbreviazioni)],
   }));
 }
 

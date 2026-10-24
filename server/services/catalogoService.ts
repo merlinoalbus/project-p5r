@@ -45,9 +45,9 @@ const CAMPI: Record<TipoCatalogo, readonly string[]> = {
   // L5: `orari_json` conta solo per un negozio senza sede (online, televisione); con la sede valgono gli orari del luogo, salvo
   // `eccezione_orari_json` quando la guida distingue il negozio (R5-12b)
   negozio: ['nome', 'luogo', 'luogo_chiave', 'sede_chiave', 'tipo', 'gestore', 'confidente_chiave', 'orari_json', 'eccezione_orari_json', 'sblocco_json', 'programma_punti_json', 'note'],
-  articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'nome_it', 'categoria', 'per', 'prezzo', 'quantita', 'oggetto_fonte', 'oggetto_chiave', 'catalogo_chiave', 'costo_json', 'effetto_json', 'effetto', 'statistiche', 'nota', 'verificato'],
-  libro: ['condizioni_json', 'nome', 'nome_it', 'dove', 'prezzo', 'dote', 'note', 'sblocca', 'effetto_json', 'effetti_json', 'sessioni', 'dettagli', 'verificato'],
-  film: ['condizioni_json', 'nome', 'nome_it', 'dove', 'dote', 'note', 'note_successive', 'effetti_json', 'prezzo', 'sessioni', 'dettagli', 'verificato'],
+  articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'categoria', 'per', 'prezzo', 'quantita', 'oggetto_fonte', 'oggetto_chiave', 'catalogo_chiave', 'costo_json', 'effetto_json', 'effetto', 'statistiche', 'nota', 'verificato'],
+  libro: ['condizioni_json', 'nome', 'dove', 'prezzo', 'dote', 'note', 'sblocca', 'effetto_json', 'effetti_json', 'sessioni', 'dettagli', 'verificato'],
+  film: ['condizioni_json', 'nome', 'dove', 'dote', 'note', 'note_successive', 'effetti_json', 'prezzo', 'sessioni', 'dettagli', 'verificato'],
   attivita: ['pesca_regola_chiave','pesca_ruolo','confidente_chiave', 'condizioni_json', 'nome', 'tipo', 'luogo', 'luogo_chiave', 'sede_chiave', 'fascia', 'costo', 'sblocco', 'sessioni', 'doti_json', 'paga_yen', 'paga_massima', 'dettagli', 'effetti_json', 'tracciamento', 'quiz_json', 'verificato'],
   // L5 (R5-07, un modulo solo): orari strutturati (null = regola dell'app), Area, sblocco, Confidenti e piatti; `quando` resta (lo legge il
   // sottotitolo del collegamento del pin di un luogo); i `giorni_json` del luogo sono gli orari (L11, migrazione 184)
@@ -122,7 +122,7 @@ function dto(tipo: TipoCatalogo, r: Riga): ElementoCatalogoDto {
   if (tipo === 'articolo' && 'costo_json' in r) dati.costo_json = r.costo_json;
   const oggetto = typeof r.catalogo_chiave === 'string' ? riferimentoOggetto(r.catalogo_chiave) : null;
   if (categoriaLettura(tipo, r) && oggetto) {
-    dati.nome = oggetto.nome; dati.nome_it = oggetto.nome;
+    dati.nome = oggetto.nome;
     dati._catalogoCasa = oggetto.casa;
   }
   return {
@@ -301,7 +301,7 @@ function normalizzaScrittura(tipo: TipoCatalogo, dati: Record<string, unknown>, 
     if (d.costo_json != null) d.prezzo = null;
     if (conCatalogo && typeof chiave === 'string') {
       // Questi campi sono solo residui storici: non si copiano né si corregge l'identità dal listino.
-      for (const c of ['nome', 'nome_it', 'categoria', 'per', 'effetto_json', 'effetto', 'statistiche']) delete d[c];
+      for (const c of ['nome', 'categoria', 'per', 'effetto_json', 'effetto', 'statistiche']) delete d[c];
       // I vecchi NOT NULL restano fino a L11; valori vuoti/non classificati, mai una copia del nome.
       if (!esistente) { d.nome = ''; d.categoria = 'altro'; }
       if ('catalogo_chiave' in dati && dati.catalogo_chiave !== esistente?.catalogo_chiave) { d.oggetto_fonte = null; d.oggetto_chiave = null; }
@@ -509,7 +509,7 @@ function aggiornaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string, gr
   const titolo = lettura && typeof dati.nome === 'string' ? dati.nome.trim() : null;
   if (lettura && catalogoOggettiDisponibile()) {
     // Il titolo si modifica sull'identità; i valori storici della sorgente non si riscrivono.
-    delete dati.nome; delete dati.nome_it; delete dati.prezzo;
+    delete dati.nome; delete dati.prezzo;
     if (tipo === 'attivita') delete dati.costo;
   }
   const adesso = nowIso();

@@ -36,7 +36,7 @@ interface PresenzaRiga { sblocco_json?: string | null; orari_json: string | null
 interface RigaNegozio extends PresenzaRiga { condizioni_json: string | null; orari_json: string | null; sede_chiave: string | null; sede_nome?: string | null; programma_punti_json: string | null; chiave: string; ordine: number; nome: string; luogo: string; luogo_chiave: string | null; tipo: string; gestore: string | null; confidente_chiave: string | null; orari: string | null; sblocco: string | null; note: string | null; fonte: string; confidente_nome?: string | null; quartiere_nome?: string | null; articoli?: number; verificati?: number }
 interface RigaArticolo { catalogo_chiave?: string | null; costo_json?: string | null; condizioni_json: string | null; oggetto_fonte: string | null; oggetto_chiave: string | null; quantita: number | null; chiave: string; negozio_chiave: string; negozio_confidente?: string | null; negozio_orari?: string | null;
   /** L5: eccezione d'orario e sede del negozio, con orari e sblocco della sede. */
-  negozio_sblocco?: string | null; negozio_eccezione?: string | null; negozio_sede?: string | null; sede_orari_json?: string | null; sede_condizioni_json?: string | null; ordine: number; nome: string; nome_it: string | null; categoria: string; per: string | null; prezzo: number | null; effetto: string | null; statistiche: string | null; nota: string | null; fonte: string; verificato: number; negozio_nome?: string }
+  negozio_sblocco?: string | null; negozio_eccezione?: string | null; negozio_sede?: string | null; sede_orari_json?: string | null; sede_condizioni_json?: string | null; ordine: number; nome: string; categoria: string; per: string | null; prezzo: number | null; effetto: string | null; statistiche: string | null; nota: string | null; fonte: string; verificato: number; negozio_nome?: string }
 
 // L5: con la sede vengono anche i suoi orari e il suo sblocco (`l.orari_json`, `l.condizioni_json`): sono la presenza del negozio
 const SQL_NEGOZIO = `SELECT n.*, c.nome AS confidente_nome, q.nome AS quartiere_nome, l.nome AS sede_nome, l.orari_json AS sede_orari_json, l.condizioni_json AS sede_condizioni_json,
@@ -165,7 +165,7 @@ function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponi
   return { ricevuti, condizioni: condizioniArticolo, chiave: r.chiave, negozioChiave: r.negozio_chiave, negozioNome: r.negozio_nome ?? '', sedeChiave: r.negozio_sede ?? null,
     catalogo: oggetto ? { chiave: oggetto.chiave, nome: oggetto.nome, casa: oggetto.casa } : null,
     nomiAltri: oggetto?.nomiAltri ?? [], nomeOriginale: oggetto?.nomeOriginale ?? null, costo, costoDaVerificare: r.costo_json != null && costo === null,
-    nome: oggetto?.nome ?? (r.nome || 'Oggetto da collegare'), nomeIt: oggetto?.nome ?? (r.nome_it || null),
+    nome: oggetto?.nome ?? (r.nome || 'Oggetto da collegare'),
     categoria: oggetto ? categoriaDelListino(oggetto.categoria, oggetto.sottocategoria) : r.categoria as ArticoloDto['categoria'],
     per: oggetto ? (typeof oggetto.statistiche?.per === 'string' ? oggetto.statistiche.per : null) : r.per, prezzo: r.prezzo,
     effetto: oggetto ? oggetto.effetto || null : r.effetto, statistiche: oggetto ? statisticheDelCatalogo(oggetto) : r.statistiche,
@@ -283,7 +283,7 @@ export function ricercaArticoli(filtro: FiltroArticoli, partitaId?: number): Ric
   const acquistati = st?.articoliOttenuti ?? new Set<string>();
   const cond: string[] = ['a.nascosto = 0', 'n.nascosto = 0']; const par: unknown[] = [];
   const conCatalogo = catalogoOggettiDisponibile();
-  if (filtro.q && !conCatalogo) { cond.push('(a.nome LIKE ? OR a.nome_it LIKE ? OR a.effetto LIKE ? OR n.nome LIKE ?)'); const like = `%${filtro.q}%`; par.push(like, like, like, like); }
+  if (filtro.q && !conCatalogo) { cond.push('(a.nome LIKE ? OR a.effetto LIKE ? OR n.nome LIKE ?)'); const like = `%${filtro.q}%`; par.push(like, like, like); }
   const categorie = [...new Set([...(filtro.categorie ?? []), ...(filtro.categoria ? [filtro.categoria] : [])])];
   if (categorie.length && !conCatalogo) { cond.push(`a.categoria IN (${categorie.map(() => '?').join(',')})`); par.push(...categorie); }
   if (filtro.per && !conCatalogo) { cond.push("(a.per = ? OR a.per = 'tutti')"); par.push(filtro.per); }
@@ -311,7 +311,7 @@ export function ricercaArticoli(filtro: FiltroArticoli, partitaId?: number): Ric
   });
   if (conCatalogo) {
     const q = normalizzaNomeOggetto(filtro.q ?? '');
-    valutati = valutati.filter((a) => (!q || [a.nome, a.nomeIt ?? '', a.nomeOriginale ?? '', ...(a.nomiAltri ?? []), ...(a.ricevuti?.map((r) => r.nome) ?? []),
+    valutati = valutati.filter((a) => (!q || [a.nome, a.nomeOriginale ?? '', ...(a.nomiAltri ?? []), ...(a.ricevuti?.map((r) => r.nome) ?? []),
       ...(a.costo?.tipo === 'oggetti' ? a.costo.oggetti.map((o) => o.nome ?? '') : []), a.effetto ?? '', a.negozioNome].some((v) => normalizzaNomeOggetto(v).includes(q)))
       && (!categorie.length || categorie.includes(a.categoria)) && (!filtro.per || a.per === filtro.per || a.per === 'tutti'));
   }
@@ -352,10 +352,10 @@ export function impostaAcquisto(partitaId: number, articoloChiave: string, fatto
       prepared('INSERT INTO acquisto_partita (partita_id, articolo_chiave, updated_at) VALUES (?, ?, ?)').run(partitaId, articoloChiave, adesso);
       nuovaValutazioneLegacy(getDb(), { partita_id: partitaId, articolo_chiave: articoloChiave, updated_at: adesso });
     }
-    else if (!fatto && era) conCestinoPrivato({ tipo: 'fonte-acquisto', chiave: `legacy:${articoloChiave}`, nome: `Presenza storica: ${prodotto.nomeIt ?? prodotto.nome}`, partitaId }, () => {
+    else if (!fatto && era) conCestinoPrivato({ tipo: 'fonte-acquisto', chiave: `legacy:${articoloChiave}`, nome: `Presenza storica: ${prodotto.nome}`, partitaId }, () => {
       prepared('DELETE FROM acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').run(partitaId, articoloChiave);
     });
-    if (fatto && !era) registraEvento(partitaId, 'acquisto', `Acquistato: ${prodotto.nomeIt ?? prodotto.nome}`, `${r.negozio_nome ?? r.negozio_chiave}${r.costo_json != null ? ' · Scambio' : r.prezzo !== null ? ` · ${r.prezzo.toLocaleString('it-IT')} ¥` : ''}${prodotto.per ? ` · per ${prodotto.per}` : ''}.`, { articolo: articoloChiave });
+    if (fatto && !era) registraEvento(partitaId, 'acquisto', `Acquistato: ${prodotto.nome}`, `${r.negozio_nome ?? r.negozio_chiave}${r.costo_json != null ? ' · Scambio' : r.prezzo !== null ? ` · ${r.prezzo.toLocaleString('it-IT')} ¥` : ''}${prodotto.per ? ` · per ${prodotto.per}` : ''}.`, { articolo: articoloChiave });
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
   return articoloDto(r, acquistiPartita(partitaId), statoDisponibilitaPartita(partitaId), catalogo, ricevuti);
