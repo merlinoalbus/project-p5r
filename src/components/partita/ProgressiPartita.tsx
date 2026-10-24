@@ -145,12 +145,7 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
   return (
     <PageState isLoading={dati.caricamento && !p} error={dati.errore} onRetry={dati.ricarica}>
       {p && (
-        <div className="flex flex-col gap-3">
-          <p className="progressi-scopo m-0">
-            <span className="hidden sm:inline">Le cose fatte in gioco che sbloccano Confidenti, negozi e attività. Quello che l’app sa già lo vedi; quello che non può sapere lo segni tu.</span>
-            <span className="sm:hidden">Cosa hai sbloccato in gioco: l’app segna quello che sa, il resto lo segni tu.</span>
-          </p>
-
+        <div className="progressi-struttura">
           <div className="progressi-riepilogo" role="tablist" aria-label="Argomenti dei progressi">
             {SEZIONI.map((s) => (
               <button key={s.k} type="button" role="tab" id={`progressi-tab-${s.k}`} aria-selected={sezione === s.k} aria-controls="progressi-pannello" className={`progressi-tessera touch ${sezione === s.k ? 'progressi-tessera--attiva' : ''}`} onClick={() => scegli(s.k)}>
@@ -160,9 +155,16 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
               </button>
             ))}
           </div>
-          <p className="progressi-dettaglio-attivo sm:hidden" aria-hidden="true">{tessere[sezione].dettaglio}</p>
 
           <div id="progressi-pannello" role="tabpanel" aria-labelledby={`progressi-tab-${sezione}`} className="flex min-w-0 flex-col gap-4">
+            {/* scopo e dettaglio della tessera attiva aprono il contenuto del pannello: sopra restano solo le tessere (intestazione ≤ 30%) */}
+            <div className="flex flex-col gap-1">
+              <p className="progressi-scopo m-0">
+                <span className="hidden sm:inline">Le cose fatte in gioco che sbloccano Confidenti, negozi e attività. Quello che l’app sa già lo vedi; quello che non può sapere lo segni tu.</span>
+                <span className="sm:hidden">Cosa hai sbloccato in gioco: l’app segna quello che sa, il resto lo segni tu.</span>
+              </p>
+              <p className="progressi-dettaglio-attivo sm:hidden m-0" aria-hidden="true">{tessere[sezione].dettaglio}</p>
+            </div>
             {sezione === 'storia' && <>
               <div className="progressi-partita">
                 <section className="card flex flex-col gap-2" aria-labelledby="progressi-da-segnare">
