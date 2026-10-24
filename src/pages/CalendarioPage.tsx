@@ -19,6 +19,7 @@ import { MeteoIcona } from '../components/guida/MeteoIcona';
 import { TagAllerte } from '../components/shared/TagAllerta';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
+import { ModificaGuida } from '../components/guida/ModificaGuida';
 
 const NOME_TIPO: Record<string, string> = { storia: 'Storia', scadenza: 'Scadenza', sblocco: 'Sblocco', esame: 'Esame', festa: 'Festa', vacanza: 'Vacanza', consiglio: 'Consiglio', meteo: 'Meteo' };
 const CLASSE_TIPO: Record<string, string> = { scadenza: 'chip--attivo', esame: 'chip--attivo' };
@@ -31,7 +32,7 @@ const MESI_CHIAVE = ['04', '05', '06', '07', '08', '09', '10', '11', '12', '01',
  * tempo libero di giorno e di sera e, se c'è una partita e il giorno non è già oggi, il comando
  * per impostarlo come data di gioco.
  */
-function Giorno({ g, oggi, aperto, onToggle, onImposta }: { g: GiornoCalendarioDto; oggi: boolean; aperto: boolean; onToggle: () => void; onImposta?: () => void }) {
+function Giorno({ g, oggi, aperto, onToggle, onImposta, onSalvato }: { g: GiornoCalendarioDto; oggi: boolean; aperto: boolean; onToggle: () => void; onImposta?: () => void; onSalvato: () => void }) {
   const festivo = g.giornoSettimana === 'Domenica' || g.eventi.some((e) => e.tipo === 'festa' || e.tipo === 'vacanza');
   return (
     <li className={`rounded-lg border ${oggi ? 'border-primary bg-primary-bg' : 'border-border-light'}`}>
@@ -50,9 +51,15 @@ function Giorno({ g, oggi, aperto, onToggle, onImposta }: { g: GiornoCalendarioD
       {aperto && (
         <div className="px-3 pb-3 flex flex-col gap-2 text-[13px]">
           {g.eventi.length === 0 && <span className="text-text-muted">Nessun evento documentato per questo giorno.</span>}
+          {/* le allerte del giorno con la matita: nell'intestazione cliccabile non può stare (un pulsante dentro un pulsante) */}
+          {g.allerte.length > 0 && <div className="flex flex-wrap items-center gap-x-2 gap-y-1" role="group" aria-label="Allerte meteo del giorno"><TagAllerte allerte={g.allerte} modifica={{ data: g.data, onSalvato }} /></div>}
           {g.eventi.map((e) => (
             <div key={e.id} className="flex flex-col gap-0.5">
-              <div className="flex items-center gap-2 flex-wrap"><span className={`chip text-[11px] ${CLASSE_TIPO[e.tipo] ?? ''}`}>{NOME_TIPO[e.tipo] ?? e.tipo}</span><strong>{e.titolo}</strong></div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={`chip text-[11px] ${CLASSE_TIPO[e.tipo] ?? ''}`}>{NOME_TIPO[e.tipo] ?? e.tipo}</span><strong>{e.titolo}</strong>
+                {e.modificato && <span className="chip text-[11px]">corretto</span>}
+                {e.modificabile && <ModificaGuida tipo="evento-calendario" chiave={String(e.id)} cosa={`l’evento «${e.titolo}»`} soloIcona onSalvato={onSalvato} />}
+              </div>
               {e.dettaglio && <span className="text-text-secondary">{e.dettaglio}</span>}
               {e.voci.map((v) => (
                 <Link key={v.uid} className="touch inline-flex items-center text-primary break-words" to={`/guida/percorso/${v.giorno}?voce=${encodeURIComponent(v.uid)}`}>
@@ -90,6 +97,8 @@ export function CalendarioPage() {
   /** La settimana della guida a cui appartiene il giorno, o null se il giorno manca o non ha settimana. */
   const settimanaDi = (g: GiornoCalendarioDto | null) => (g?.settimana !== null && g?.settimana !== undefined ? d?.settimane.find((s) => s.numero === g.settimana) ?? null : null);
   const settimanaOggi = settimanaDi(d?.oggi ?? null);
+  /** Dopo una correzione o un ripristino di un evento o di un'allerta: il calendario si rilegge. */
+  const ricarica = () => void dati.ricarica();
 
   /** Salva la data come data di gioco della partita attiva, aggiorna lo store locale con la partita restituita e notifica l'esito (anche l'errore). */
   const imposta = async (data: string) => {
@@ -113,11 +122,17 @@ export function CalendarioPage() {
               {/* i tag delle allerte accanto al titolo, non dentro: nel titolo ne allungavano il nome per i lettori di schermo */}
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
                 <h2 className="m-0 flex items-center gap-3 flex-wrap"><span className="font-display uppercase tracking-wide text-[20px] leading-none">Oggi</span><DataP5 data={d.oggi.data} giornoSettimana={d.oggi.giornoSettimana} evidenzia />{d.oggi.meteo && <MeteoIcona meteo={d.oggi.meteo} dimensione={26} conTesto />}</h2>
-                <TagAllerte allerte={d.oggi.allerte} />
+                <TagAllerte allerte={d.oggi.allerte} modifica={{ data: d.oggi.data, onSalvato: ricarica }} />
               </div>
               {d.oggi.eventi.length > 0 ? (
                 <ul className="m-0 p-0 list-none flex flex-col gap-1 text-[13px]" aria-label="Eventi di oggi">
-                  {d.oggi.eventi.map((e) => <li key={e.id}><span className={`chip text-[11px] ${CLASSE_TIPO[e.tipo] ?? ''}`}>{NOME_TIPO[e.tipo] ?? e.tipo}</span> <strong>{e.titolo}</strong>{e.dettaglio ? <span className="text-text-secondary"> — {e.dettaglio}</span> : null}</li>)}
+                  {d.oggi.eventi.map((e) => (
+                    <li key={e.id} className="flex flex-wrap items-center gap-x-1">
+                      <span className={`chip text-[11px] ${CLASSE_TIPO[e.tipo] ?? ''}`}>{NOME_TIPO[e.tipo] ?? e.tipo}</span> <strong>{e.titolo}</strong>{e.dettaglio ? <span className="text-text-secondary"> — {e.dettaglio}</span> : null}
+                      {e.modificato && <span className="chip text-[11px]">corretto</span>}
+                      {e.modificabile && <ModificaGuida tipo="evento-calendario" chiave={String(e.id)} cosa={`l’evento «${e.titolo}»`} soloIcona onSalvato={ricarica} />}
+                    </li>
+                  ))}
                 </ul>
               ) : <p className="m-0 text-[13px] text-text-muted">Nessun evento documentato oggi.</p>}
               {settimanaOggi && (
@@ -146,7 +161,7 @@ export function CalendarioPage() {
           </FilaScorrevole>
           <ul className="m-0 p-0 list-none flex flex-col gap-1.5" aria-label={`Giorni di ${NOMI_MESI_GIOCO[MESI_CHIAVE.indexOf(mese)] ?? mese}`}>
             {giorniMese.map((g) => (
-              <Giorno key={g.data} g={g} oggi={g.data === d.dataGioco} aperto={aperto === g.data} onToggle={() => setAperto((a) => (a === g.data ? null : g.data))} onImposta={partitaId ? () => void imposta(g.data) : undefined} />
+              <Giorno key={g.data} g={g} oggi={g.data === d.dataGioco} aperto={aperto === g.data} onToggle={() => setAperto((a) => (a === g.data ? null : g.data))} onImposta={partitaId ? () => void imposta(g.data) : undefined} onSalvato={ricarica} />
             ))}
           </ul>
         </div>

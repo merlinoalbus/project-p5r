@@ -11,6 +11,8 @@
 
 import { AssetImg } from './AssetImg';
 import { IconaAzione } from './IconaAzione';
+import { ModificaGuida } from '../guida/ModificaGuida';
+import { dataGiocoTesto } from '../../utils/dateGioco';
 import type { AllertaGiornoDto } from '../../types';
 
 /** Il nome dell'asset dell'icona di un'allerta: `ui/allerta-<chiave>` senza il doppio «allerta» («allerta-polline» → `ui/allerta-polline`). */
@@ -30,8 +32,23 @@ export function TagAllerta({ allerta: a, compatto }: { allerta: AllertaGiornoDto
   );
 }
 
-/** I tag delle allerte di un giorno, uno per allerta; niente se il giorno non ne ha. */
-export function TagAllerte({ allerte, compatto }: { allerte: readonly AllertaGiornoDto[]; compatto?: boolean }) {
+/**
+ * I tag delle allerte di un giorno, uno per allerta; niente se il giorno non ne ha. Con `modifica` (R11-15/1) accanto a ogni tag c'è la matita
+ * per correggere l'allerta di quel giorno e rimetterla com'è nella guida (`ModificaGuida`, tipo `allerta-meteo`); un'allerta corretta lo dice.
+ * Senza `modifica` il tag non si tocca (scelta «Solo il nome»): così nelle intestazioni cliccabili e nella pagina Partita non cambia niente.
+ */
+export function TagAllerte({ allerte, compatto, modifica }: { allerte: readonly AllertaGiornoDto[]; compatto?: boolean; modifica?: { data: string; onSalvato: () => void } }) {
   if (allerte.length === 0) return null;
-  return <>{allerte.map((a) => <TagAllerta key={a.chiave} allerta={a} compatto={compatto} />)}</>;
+  if (!modifica) return <>{allerte.map((a) => <TagAllerta key={a.chiave} allerta={a} compatto={compatto} />)}</>;
+  return (
+    <>
+      {allerte.map((a) => (
+        <span key={a.chiave} className="inline-flex flex-wrap items-center gap-1">
+          <TagAllerta allerta={a} compatto={compatto} />
+          {a.modificata && <span className="chip text-[11px]">corretta</span>}
+          <ModificaGuida tipo="allerta-meteo" chiave={`${modifica.data}:${a.chiave}`} cosa={`l’allerta «${a.nome}» del ${dataGiocoTesto(modifica.data)}`} soloIcona onSalvato={modifica.onSalvato} />
+        </span>
+      ))}
+    </>
+  );
 }

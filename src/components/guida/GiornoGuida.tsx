@@ -171,13 +171,15 @@ interface Props {
   compatto?: boolean;
   /** Momento della giornata della partita per QUESTO giorno (solo se è il giorno corrente): la sezione «Di giorno» o «Di sera» viene evidenziata con «Adesso» (15.27). */
   fasciaCorrente?: 'giorno' | 'sera' | null;
+  /** R11-15/1: se c'è, accanto alle allerte meteo del giorno compare la matita per correggerle e rimetterle com'erano nella guida; il gesto la richiama per rileggere. Assente in Partita. */
+  onAllerteModificate?: () => void | Promise<void>;
 }
 
 /** Richiesta di conferma prima di un gesto che non si disfa (eliminare una voce). */
 interface Conferma { titolo: string; testo: ReactNode; scelte: Array<{ titolo: string; tono: 'primario' | 'pericolo'; icona: 'elimina' | 'annulla-ultimo'; esegui: () => Promise<unknown>; ok: string }> }
 
 /** Scheda del giorno e voci di giorno e di sera, nel loro ordine, modificabili. */
-export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, onSullaMappa, azioneEvidenziata, compatto, fasciaCorrente }: Props) {
+export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, onSullaMappa, azioneEvidenziata, compatto, fasciaCorrente, onAllerteModificate }: Props) {
   // R10-27: tornando da una scheda (indietro, o «Esci» del Palazzo) l'indirizzo porta `#voce-<uid>`: la voce si porta in vista una volta
   // per giorno mostrato. Qui e non nella riga, che si rimonta a ogni spunta e riprenderebbe a scorrere.
   const { hash } = useLocation();
@@ -326,7 +328,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
           <span className="chip">{g.fase}</span>
           {g.meteo && <MeteoIcona meteo={g.meteo} dimensione={26} conTesto />}
           {/* le allerte meteo del gioco del giorno, come tag (2026-10-12) */}
-          <TagAllerte allerte={g.allerte} />
+          <TagAllerte allerte={g.allerte} modifica={onAllerteModificate ? { data: g.giorno, onSalvato: () => void onAllerteModificate() } : undefined} />
           {partitaId && (consigliate > 0 || bloccate > 0) && (
             <span className="text-[12px] text-text-muted">{consigliate > 0 ? `${consigliate} consigliate` : ''}{consigliate > 0 && bloccate > 0 ? ' · ' : ''}{bloccate > 0 ? `${bloccate} bloccate` : ''}</span>
           )}

@@ -93,7 +93,7 @@ export function PercorsoPage() {
           </div>
           {editorGiornoAperto && <EditorGiorno key={g.giorno} data={g.giorno} onChiudi={() => setEditorGiornoAperto(false)} onSalvato={async () => { await Promise.all([giorno.ricarica(), indice.ricarica()]); }} />}
           <GestiPartita contestoChiave={`${partitaId}:${data}`} onCambiato={async () => { await Promise.all([giorno.ricarica(), indice.ricarica()]); }} />
-          <GiornoGuida onGiornataModificata={async () => { await Promise.all([giorno.ricarica(), indice.ricarica()]); }} g={g} partitaId={partitaId} onAggiorna={aggiorna} azioneEvidenziata={voceDaMostrare} onSullaMappa={(m) => navigate(`/guida/mappe/${encodeURIComponent(m.chiave)}${m.spilloId ? `?spillo=${m.spilloId}` : ''}`)} fasciaCorrente={partitaId && g.dataCorrente === g.giorno ? attiva?.fasciaGioco ?? 'giorno' : null} />
+          <GiornoGuida onGiornataModificata={async () => { await Promise.all([giorno.ricarica(), indice.ricarica()]); }} onAllerteModificate={async () => { await giorno.ricarica(); }} g={g} partitaId={partitaId} onAggiorna={aggiorna} azioneEvidenziata={voceDaMostrare} onSullaMappa={(m) => navigate(`/guida/mappe/${encodeURIComponent(m.chiave)}${m.spilloId ? `?spillo=${m.spilloId}` : ''}`)} fasciaCorrente={partitaId && g.dataCorrente === g.giorno ? attiva?.fasciaGioco ?? 'giorno' : null} />
         </div>
         </ProviderPannelloScheda>
       )}
