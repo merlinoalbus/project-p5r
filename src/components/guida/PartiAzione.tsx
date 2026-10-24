@@ -95,6 +95,12 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa }: PropsCartelli
       {stato?.tipo === 'consigliata' && <span className="chip chip--oro text-[11px]" title={stato.motivo ?? undefined}>Consigliata{stato.motivo ? ` · ${stato.motivo}` : ''}</span>}
       {stato?.tipo === 'bloccata' && <span className="chip chip--bloccata text-[11px]" title={stato.motivo ?? undefined}>Bloccata{stato.motivo ? `: ${stato.motivo}` : ''}</span>}
       {stato?.tipo === 'neutra' && stato.motivo && <span className="text-[12px] text-text-muted">{stato.motivo}</span>}
+      {/* R9-03: il Confidente non è disponibile al giorno o alla fascia della voce: un avviso ambra, mai un blocco (la voce si spunta lo stesso) */}
+      {a.avvisiDisponibilita?.map((v) => (
+        <span key={`${v.tipo}:${v.testo}`} className="chip chip--icona text-[11px] text-warning" title={v.testo} role="img" aria-label={`Incontro ${v.tipo === 'fuori-fascia' ? 'fuori orario' : 'fuori giorno'}: ${v.testo}`}>
+          <IconaAzione chiave="allarme" dimensione={12} />{v.tipo === 'fuori-fascia' ? 'Fuori orario' : 'Fuori giorno'}
+        </span>
+      ))}
       {a.rangoAtteso !== null && <span className="text-[12px] text-text-muted">rango atteso {a.rangoAtteso}</span>}
       {a.note && <span className="text-[12px] text-text-secondary">{a.note}</span>}
       {/* le Doti che il gioco dà si segnano a mano (scelta dell'utente, 2026-09-30): la riga le dice, la spunta non le tocca */}
