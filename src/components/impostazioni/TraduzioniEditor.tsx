@@ -2,7 +2,7 @@
 // TraduzioniEditor — consultazione e modifica delle rese italiane
 // ============================================================
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Selettore } from '../shared/Selettore';
 import { aggiornaTraduzione, getAmbitiTraduzioni, getTraduzioni, ripristinaTraduzione } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
@@ -23,11 +23,34 @@ const NOMI_AMBITO: Record<string, string> = {
   skill: 'Nomi delle skill', persona: 'Nomi delle Persona', oggetto: 'Nomi dell’equipaggiamento', termine: 'Termini di gioco',
 };
 
+interface PropsTraduzioniEditor {
+  /** Ambito e testo di partenza (da un collegamento, per esempio quello della scheda di una skill): l'editor si apre già filtrato e la pagina scorre fino a qui. */
+  ambitoIniziale?: string;
+  qIniziale?: string;
+}
+
 /** Editor: scegli l'ambito, cerca, modifica in linea, ripristina il testo del seed. */
-export function TraduzioniEditor() {
+export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniEditor = {}) {
   const ambiti = useCarica(() => getAmbitiTraduzioni(), []);
-  const [ambito, setAmbito] = useState('arcana');
-  const [q, setQ] = useState('');
+  const [ambito, setAmbito] = useState(ambitoIniziale ?? 'arcana');
+  const [q, setQ] = useState(qIniziale ?? '');
+  // Con un filtro di partenza la pagina scorre fino a qui. Le sezioni sopra si caricano dopo e spostano la pagina: finché l'utente non scorre da sé
+  // o non passano alcuni secondi, a ogni cambio di altezza si scorre di nuovo alla sezione (stesso criterio di «Nascosti dalla guida»).
+  const sezione = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = sezione.current;
+    if (!ambitoIniziale || !el) return;
+    const vai = () => el.scrollIntoView?.({ block: 'start' });
+    vai();
+    let attivo = true;
+    const basta = () => { attivo = false; osservatore?.disconnect(); };
+    const osservatore = typeof ResizeObserver === 'function' && el.parentElement ? new ResizeObserver(() => { if (attivo) vai(); }) : null;
+    if (el.parentElement) osservatore?.observe(el.parentElement);
+    const fine = window.setTimeout(basta, 4000);
+    const eventi = ['wheel', 'touchstart', 'keydown', 'pointerdown'] as const;
+    for (const e of eventi) window.addEventListener(e, basta, { passive: true, once: true });
+    return () => { window.clearTimeout(fine); basta(); for (const e of eventi) window.removeEventListener(e, basta); };
+  }, [ambitoIniziale, qIniziale]);
   const [soloUtente, setSoloUtente] = useState(false);
   const voci = useCarica(() => getTraduzioni({ ambito, q: q.trim() || undefined, soloUtente: soloUtente || undefined }), [ambito, q, soloUtente]);
   const [inModifica, setInModifica] = useState<TraduzioneDto | null>(null);
@@ -53,7 +76,7 @@ export function TraduzioniEditor() {
   };
 
   return (
-    <section className="card flex flex-col gap-3">
+    <section ref={sezione} id="traduzioni" className="card flex flex-col gap-3">
       <h2 className="m-0 text-[15px] font-semibold">Traduzioni</h2>
       <p className="m-0 text-[13px] text-text-secondary">Le rese italiane dei termini di gioco. Le voci modificate da te non vengono mai sovrascritte dagli aggiornamenti del dataset; "Ripristina" riporta il testo del seed.</p>
       <div className="flex flex-wrap gap-2 items-center">

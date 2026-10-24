@@ -34,7 +34,11 @@ export function SkillDettaglioPage() {
               <span className="chip">{s.costo.testo}</span>
               <ModificaGuida tipo="skill" chiave={String(s.id)} cosa={`la skill «${s.nomeIt}»`} onSalvato={() => void ricarica()} />
             </div>
-            <p className="m-0 text-[15px]">{s.effettoNome}</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="m-0 text-[15px] min-w-0 flex-1">{s.effettoNome}</p>
+              {/* la resa italiana dell'effetto è condivisa da tutte le skill con lo stesso testo: si modifica solo dalle Traduzioni */}
+              <Link to={`/impostazioni?${new URLSearchParams({ traduzione: 'effettoSkill', q: s.effetto }).toString()}`} className="btn btn-ghost btn-sm touch inline-flex items-center no-underline">Modifica la traduzione</Link>
+            </div>
             <dl className="dl-scheda m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[13px]">
               {s.fonteCartaNome && (<><dt className="text-text-muted">Carta abilità</dt><dd className="m-0">{s.fonteCartaNome}</dd></>)}
               {s.negoziazioneNome && (<><dt className="text-text-muted">Negoziazione</dt><dd className="m-0">{s.negoziazioneNome}</dd></>)}

@@ -33,7 +33,7 @@ const NOTE: Partial<Record<TipoModificabile, string>> = {
   'ombra-luogo': 'Si corregge il posto: l’Ombra e la fonte della riga non cambiano. Le righe «da una voce Persona» nascono dalla voce: se la voce passa a un’altra Ombra, il suo luogo non la segue da solo. I luoghi non si aggiungono né si tolgono da qui.',
   'ombra-voce': 'Si corregge quale Ombra descrive la voce; le aree dei dedali dove si incontra l’Ombra seguono da sole. Cambiando Ombra cambia anche la Persona che la voce fa catturare, e i luoghi d’incontro dell’Ombra non si spostano con la voce: si correggono a parte.',
   persona: 'Le affinità della Persona si correggono dal loro editor; il nome e le forme non si correggono. Le skill si scrivono «nome @ livello» (0 = innata). Cambiare una skill o una statistica cambia anche le fusioni e le Ombre che la usano.',
-  skill: 'La resa italiana dell’effetto vale per tutte le skill con lo stesso testo di effetto. Il nome della skill non si corregge: è la chiave delle traduzioni e delle Persona.',
+  skill: 'La resa italiana dell’effetto vale per tutte le skill con lo stesso testo di effetto e si modifica solo dalle Traduzioni (Impostazioni). Il nome della skill non si corregge: è la chiave delle traduzioni e delle Persona.',
   regalo: 'Il nome e l’effetto del regalo sono quelli dell’oggetto del catalogo (si correggono dal catalogo); i punti già dati nelle partite non cambiano.',
   arcana: 'L’ordine dell’Arcano (la sua posizione nella tabella di fusione) e il suo nome italiano non si correggono da qui: il nome si corregge dalle traduzioni.',
   'fusione-arcana': 'Vale per la coppia nella forma in cui sta in tabella (una sola volta, in qualunque ordine si fondano i due Arcani). Il motore di fusione usa subito il risultato nuovo.',
@@ -245,7 +245,7 @@ function ripristinaRiga(tipo: TipoModificabile, chiave: string, campi?: string[]
     const dopo = def.leggi(chiave);
     const traccia = soloTraccia(seed);
     def.propaga?.(chiave, attuale, dopo, { ripristino: true, traccia });
-    // la propagazione può cambiare i valori (la resa italiana di una skill): lo stato (origine, fotografia) si decide su quelli di adesso, riletti dopo
+    // la propagazione può cambiare la traccia (e altri dati): lo stato (origine, fotografia) si decide sui valori di adesso, riletti dopo
     scriviMetaRiga(def, chiave, { ...seed, ...traccia }, def.leggi(chiave));
   })();
   return daRimettere;

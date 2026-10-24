@@ -2,6 +2,7 @@
 // ImpostazioniPage — partite, traduzioni, immagini degli Arcani, cestino, informazioni
 // ============================================================
 
+import { useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useConfigStore } from '../stores/configStore';
 import { useGlossarioStore } from '../stores/glossarioStore';
@@ -33,6 +34,10 @@ export function ImpostazioniPage() {
   const graficaPredefinita = usePreferenzeStore((s) => s.graficaPredefinita);
   const impostaGrafica = usePreferenzeStore((s) => s.impostaGraficaPredefinita);
   const manifest = useAssetStore((s) => s.manifest);
+  // `?traduzione=<ambito>&q=<testo>`: l'editor delle traduzioni si apre già su quell'ambito e filtrato su quel testo (per esempio dalla scheda di una skill)
+  const [parametri] = useSearchParams();
+  const traduzioneAmbito = parametri.get('traduzione') ?? undefined;
+  const traduzioneQ = parametri.get('q') ?? undefined;
 
   return (
     <div className="flex flex-col gap-4">
@@ -73,7 +78,7 @@ export function ImpostazioniPage() {
         </div>
       </section>
       <ImmaginiCaricate />
-      <TraduzioniEditor />
+      <TraduzioniEditor ambitoIniziale={traduzioneAmbito} qIniziale={traduzioneQ} />
       <MieiDati />
       <Cestino />
       <NascostiDallaGuida />
