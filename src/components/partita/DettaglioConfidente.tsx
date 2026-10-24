@@ -39,6 +39,8 @@ export interface AzioniConfidente {
   conferma: (rango: number, indice: number, confermato: boolean) => void;
   /** «Correggi» un requisito: apre la scheda completa nel cassetto sui requisiti di quel rango. */
   correggi: (rango: number) => void;
+  /** Passa alla vista «Scheda completa» del cassetto (le informazioni non portano mai fuori). */
+  apriScheda: () => void;
   nota: (n: 1 | 2 | 3) => void;
   regala: () => void;
   regalo: () => void;
@@ -104,7 +106,7 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
             <div className="flex items-center gap-1.5 shrink-0">
               <button type="button" className="btn btn-secondary btn-sm touch w-11" disabled={occ || c.rango === 0} onClick={() => azioni.cambiaRango(c.rango - 1)} aria-label={`Rango di ${c.nome} meno uno`}>−</button>
               <div className="flex flex-col items-center gap-0.5 leading-none">
-                <span className="text-[10px] font-semibold uppercase tracking-[.14em] text-text-muted">Rango</span>
+                <span className="text-[11px] font-bold uppercase tracking-[.14em] text-text-secondary">Rango</span>
                 <AnelloAvanzamento quota={quota} dimensione={62} spessore={4} etichetta={aPunti ? `Progresso di ${c.nome} verso il rango ${prossimo}` : undefined}>
                   <AssetImg
                     nome={c.rango === 0 ? null : c.rango === 10 ? 'ui/rango-max' : `ui/rango-${c.rango}`}
@@ -210,7 +212,7 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
 
         {/* il resto: prossima abilità e regali graditi, sblocco (solo a rango 0), note */}
         <div className="dettaglio-confidente__altro">
-          <InfoSalitaRango c={c} />
+          <InfoSalitaRango c={c} onApriScheda={azioni.apriScheda} />
           {c.rango === 0 && (
             <PulsanteVisivo className="self-start" attivo={c.sbloccato} compatto icona={c.sbloccato ? <IconaAzione chiave="sbloccato" dimensione={20} /> : <IconaAzione chiave="bloccato" dimensione={20} />} titolo={c.sbloccato ? 'Sbloccato' : c.bloccato ? 'Bloccato' : 'Da sbloccare'} dettaglio={c.bloccato ? 'requisiti mancanti' : 'quando lo incontri in gioco'} disabled={occ || (!c.sbloccato && !!c.bloccato)} onClick={azioni.sbloccato} aria-label={`${c.nome}: ${c.sbloccato ? 'sbloccato' : c.bloccato ? 'bloccato dai requisiti' : 'da sbloccare quando lo incontri'}`} />
           )}

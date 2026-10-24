@@ -221,7 +221,8 @@ function campoDialogo(v: VoceBase, conf: Map<string, ConfidentePartitaDto> | nul
   // prossimo evento non è quello del rango atteso della voce, il suo dialogo: la voce mostra le risposte di ciò che si gioca davvero
   const c = conf?.get(chiave);
   const prossimo = c && c.rango < 10 ? c.rango + 1 : null;
-  const dialogoPartita = prossimo !== null && prossimo !== v.rangoAtteso ? dialogoDelRango(chiave, prossimo) : null;
+  // già al rango atteso (per esempio salito dal cassetto del Confidente): l'evento appena giocato è quello della voce, non il successivo
+  const dialogoPartita = c && prossimo !== null && prossimo !== v.rangoAtteso && c.rango !== v.rangoAtteso ? dialogoDelRango(chiave, prossimo) : null;
   return { ...(dialogo ? { dialogo } : {}), ...(c ? { rangoPartita: c.rango } : {}), ...(dialogoPartita ? { dialogoPartita } : {}) };
 }
 

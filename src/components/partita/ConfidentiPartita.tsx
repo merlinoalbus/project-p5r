@@ -224,6 +224,7 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
       forzaRango: (rango) => portaA(rango, true),
       conferma: (rango, indice, confermato) => void conferma(c, rango, indice, confermato),
       correggi: (rango) => setVista({ chiave: c.chiave, tipo: 'scheda', search: `?requisiti=${rango}` }),
+      apriScheda: () => setVista({ chiave: c.chiave, tipo: 'scheda', search: '' }),
       nota: (n) => void salva(c.chiave, { noteRisposta: n, bonusArcano: bonus, invito }),
       regala: () => setRegaloPer(c.chiave),
       regalo: () => void salva(c.chiave, { regalo: true, bonusArcano: bonus, invito }),
@@ -238,10 +239,11 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
   // ---- Elenco: gruppi, ordine e Confidente scelto ----
   const tutti = useMemo(() => dati ?? [], [dati]);
   const oggi = (chiave: string) => sugg.evidenziato('confidenti', chiave);
-  /** Dentro gli attivi: prima i suggeriti di oggi, poi chi ha la soglia raggiunta, poi gli altri nell'ordine di prima (ordinamento stabile). */
+  /** Dentro gli attivi: prima i suggeriti di oggi, poi i «Pronti» (soglia raggiunta e non bloccati, lo stesso criterio della scheda),
+   *  poi gli altri nell'ordine di prima (ordinamento stabile). */
   const attivi = tutti
     .filter((c) => gruppoDi(c) === 'attivi')
-    .map((c, indice) => ({ c, indice, peso: oggi(c.chiave) ? 0 : sogliaRaggiunta(c) ? 1 : 2 }))
+    .map((c, indice) => ({ c, indice, peso: oggi(c.chiave) ? 0 : sogliaRaggiunta(c) && !c.bloccato ? 1 : 2 }))
     .sort((a, b) => a.peso - b.peso || a.indice - b.indice)
     .map((x) => x.c);
   const elencoDi = (gruppo: ChiaveGruppo) => (gruppo === 'attivi' ? attivi : tutti.filter((c) => gruppoDi(c) === 'bloccati'));
@@ -253,9 +255,22 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
   const trovato = richiesto ? tutti.find((c) => c.chiave === richiesto) ?? null : null;
   const cassettoAperto = trovato !== null;
   const aperturaConCronologia = useRef(false);
+  // Alla chiusura del cassetto (✕, Esc o Indietro) si riparte dal Level up: la vista si azzera, le finestre aperte dal cassetto (note,
+  // «Regala») si chiudono con lui, e se si era nella Scheda completa si rileggono i Confidenti (lì si possono consegnare regali o
+  // confermare requisiti). La rilettura non smonta niente: i dati restano mentre arrivano quelli nuovi
+  const vistaCorrente = useRef(vista);
+  useEffect(() => { vistaCorrente.current = vista; }, [vista]);
+  const eraAperto = useRef(cassettoAperto);
   useEffect(() => {
-    if (!cassettoAperto) aperturaConCronologia.current = false;
-  }, [cassettoAperto]);
+    if (cassettoAperto) { eraAperto.current = true; return; }
+    aperturaConCronologia.current = false;
+    if (!eraAperto.current) return;
+    eraAperto.current = false;
+    if (vistaCorrente.current?.tipo === 'scheda') void ricarica();
+    setVista(null);
+    setModifica(null);
+    setRegaloPer(null);
+  }, [cassettoAperto, ricarica]);
   const scegli = (chiave: string) => {
     const p = new URLSearchParams(params);
     p.set('confidente', chiave);
@@ -273,11 +288,6 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
     const p = new URLSearchParams(params);
     p.delete('confidente');
     setParams(p, { replace: true });
-  };
-  /** Esc dentro il foglio chiude solo la finestra più in alto: se sopra al foglio c'è un'altra finestra (note, «Regala», ingrandimento) il foglio resta. */
-  const chiudiFoglioSeSolo = () => {
-    if (document.querySelectorAll('[role="dialog"]').length > 1) return;
-    chiudiFoglio();
   };
 
   const alternaGruppo = (gruppo: ChiaveGruppo) => setGruppiAperti((s) => {
@@ -315,10 +325,12 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
     return (
       <>
         <div className="flex gap-1.5" role="tablist" aria-label={`Viste di ${c.nome}`}>
-          <button type="button" role="tab" aria-selected={v.tipo === 'levelup'} className={`chip touch ${v.tipo === 'levelup' ? 'chip--attivo' : ''}`} onClick={() => vai('levelup')}>Level up</button>
-          <button type="button" role="tab" aria-selected={v.tipo === 'scheda'} className={`chip touch ${v.tipo === 'scheda' ? 'chip--attivo' : ''}`} onClick={() => vai('scheda')}>Scheda completa</button>
+          <button type="button" role="tab" id="vista-confidente-levelup" aria-controls="pannello-confidente" aria-selected={v.tipo === 'levelup'} className={`chip touch ${v.tipo === 'levelup' ? 'chip--attivo' : ''}`} onClick={() => vai('levelup')}>Level up</button>
+          <button type="button" role="tab" id="vista-confidente-scheda" aria-controls="pannello-confidente" aria-selected={v.tipo === 'scheda'} className={`chip touch ${v.tipo === 'scheda' ? 'chip--attivo' : ''}`} onClick={() => vai('scheda')}>Scheda completa</button>
         </div>
-        {v.tipo === 'levelup' ? dettaglioDi(c) : <SchedaNelCassetto key={`${c.chiave}${v.search}`} chiave={c.chiave} searchIniziale={v.search} />}
+        <div id="pannello-confidente" role="tabpanel" aria-labelledby={v.tipo === 'levelup' ? 'vista-confidente-levelup' : 'vista-confidente-scheda'} className="flex flex-col gap-4">
+          {v.tipo === 'levelup' ? dettaglioDi(c) : <SchedaNelCassetto key={`${c.chiave}${v.search}`} chiave={c.chiave} searchIniziale={v.search} onLevelUp={() => vai('levelup')} />}
+        </div>
       </>
     );
   };
@@ -361,8 +373,9 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
       </div>}
       {/* il dettaglio: cassetto da destra alto quanto lo schermo (foglio dal basso sul telefono); mentre è aperto scorre solo lui.
           Da solo si apre subito e, finché i Confidenti arrivano, dice che sta caricando (o l'errore, con Riprova) */}
-      <Modal titolo="Gestione del Confidente" aperta={soloCassetto ? true : cassettoAperto} onChiudi={chiudiFoglioSeSolo} cassetto>
-        {trovato ? contenutoCassetto(trovato) : soloCassetto && <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
+      {/* la ✕ chiude sempre; Esc solo se il cassetto è la finestra più in alto (lo decide `Modal`) */}
+      <Modal titolo="Gestione del Confidente" aperta={soloCassetto ? true : cassettoAperto} onChiudi={chiudiFoglio} cassetto>
+        {trovato ? contenutoCassetto(trovato) : soloCassetto && <PageState isLoading={caricamento && !dati} error={errore} onRetry={() => void ricarica()}>
           <p className="m-0 text-[13px] text-text-muted">Questo Confidente non è nella partita attiva.</p>
         </PageState>}
       </Modal>
@@ -400,5 +413,6 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
     </>
   );
   // da solo, niente stato di pagina: caricamento ed errore stanno dentro il cassetto
-  return soloCassetto ? contenuto : <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>{contenuto}</PageState>;
+  // lo spinner di pagina solo al primo caricamento: una rilettura (esami, ritorno dalla Scheda completa) non smonta elenco e cassetto
+  return soloCassetto ? contenuto : <PageState isLoading={caricamento && !dati} error={errore} onRetry={() => void ricarica()}>{contenuto}</PageState>;
 }

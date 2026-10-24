@@ -43,10 +43,12 @@ interface PropsCartellini {
   /** Apre una planimetria nella mappa accanto (la scheda «Oggi»): il cartellino di un Palazzo con una regola d'atterraggio la usa
    *  invece di cambiare pagina, come l'icona della mappa di Tokyo. Senza, il cartellino è un collegamento. */
   onApriMappa?: (mappa: { chiave: string; spilloId: number | null }) => void;
+  /** Dopo la chiusura del cassetto del Confidente aperto dal cartellino: la voce va riletta (rango della partita, stato, risposte). */
+  onCassettoChiuso?: () => void;
 }
 
 /** Tipo, collegamento, «Sulla mappa», la guida del quiz dei lavori, stato nella partita, rango atteso, note, effetti dichiarati o applicati. */
-export function CartelliniAzione({ a, onSullaMappa, onApriMappa }: PropsCartellini) {
+export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChiuso }: PropsCartellini) {
   const link = collegamentoAzione(a);
   const stato = a.fatta ? null : a.stato;
   // l'atterraggio di un Palazzo si apre nella mappa accanto, se c'è (un clic semplice: con un modificatore resta un collegamento)
@@ -92,7 +94,7 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa }: PropsCartelli
           ricordaVoce(e);
         }}>{link.etichetta}</Link>
         : a.riferimentoTesto && <span className="chip text-[11px]">{a.riferimentoTesto}</span>}
-      {cassetto && partitaAttiva !== null && <ConfidentiPartita partitaId={partitaAttiva} soloCassetto={{ chiave: cassetto, onChiudi: () => setCassetto(null) }} />}
+      {cassetto && partitaAttiva !== null && <ConfidentiPartita partitaId={partitaAttiva} soloCassetto={{ chiave: cassetto, onChiudi: () => { setCassetto(null); onCassettoChiuso?.(); } }} />}
       {a.mappa && onSullaMappa && (
         <button type="button" className="chip chip--icona touch text-[11px]" onClick={onSullaMappa} aria-label={`${a.mappa.posto ? `Apri in ${a.mappa.posto}` : 'Sulla mappa'}: ${a.azione.slice(0, 60)}`}>
           {/* L5 (M23): il nome del posto del pin («Clinica Takemi», «Central Street»); «Sulla mappa» solo se il posto non ha un nome */}

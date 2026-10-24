@@ -139,7 +139,12 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       <div className="flex flex-col gap-0.5 text-[13px] min-w-0 flex-1">
         <span className={a.fatta ? 'line-through' : ''}>{a.azione}{a.daRivedere && <>{' '}<DaRivedereVoce a={a} partitaId={partitaId} onCambiata={onCambiata} /></>}</span>
         <CartelliniAzione a={a} onSullaMappa={onSullaMappa && a.mappa ? () => onSullaMappa(a.mappa!, a.uid) : undefined}
-          onApriMappa={onSullaMappa ? (m) => onSullaMappa(m, a.uid) : undefined} />
+          onApriMappa={onSullaMappa ? (m) => onSullaMappa(m, a.uid) : undefined}
+          onCassettoChiuso={partitaId !== null ? () => {
+            // nel cassetto si può salire di rango o registrare punti: la voce si rilegge (stato, rango della partita, risposte proposte)
+            void getVocePercorso(a.uid, partitaId).then((agg) => { if (vivo.current) onCambiata(agg); useSuggerimentiStore.getState().invalida(); })
+              .catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Voce non aggiornata.'));
+          } : undefined} />
         {/* le risposte migliori del level up della voce Confidente, fra le sue note (progetto dei Confidenti, 2026-10-24) */}
         <RisposteVoce a={a} />
         {/* L3 (§4.4): il campo «Infiltrazioni» delle voci di Palazzo, accanto al cartellino del Palazzo */}
@@ -152,7 +157,7 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
         {!!a.ricevuteEffetti?.length && <details><summary className="touch">Ricevute degli effetti della spunta</summary><ul className="m-0 pl-4">{a.ricevuteEffetti.map((r) => <li key={r.id}>{r.tipo === 'acquisto' ? 'Consumazione' : r.tipo === 'pesca' ? 'Sessione di pesca' : r.tipo === 'contesto' ? 'Incontro e contesto della spunta' : r.tipo === 'dote' ? 'Dote' : r.tipo === 'lettura' ? 'Lettura o gioco' : 'Turno'} · {new Date(r.applicatoIl).toLocaleString('it-IT')} · {r.annullatoIl ? 'annullata' : 'attiva'}</li>)}</ul></details>}
         {chiediAcquisti && partitaId !== null && <PreparaAcquistiVoce key={`${partitaId}:${a.uid}:${a.effettiVoce?.revisione}`} a={a} partitaId={partitaId} onRileggi={onCambiata} onChiudi={() => setChiediAcquisti(null)} onConferma={(richieste, pesche) => cambia(true, chiediAcquisti.noteRisposta, chiediAcquisti.senzaPunti, chiediAcquisti.aperture, richieste, pesche)} />}
         {/* la scelta delle note parte dall'evento che si gioca davvero: il prossimo della partita, se diverso dal rango atteso della voce */}
-        {chiediNote && <SceltaNote dialogo={a.dialogoPartita ?? a.dialogo}occupato={occupato} onScegli={(n) => void cambia(true, n ?? undefined, n === null)} onAnnulla={() => setChiediNote(false)} />}
+        {chiediNote && <SceltaNote dialogo={a.dialogoPartita ?? a.dialogo} occupato={occupato} onScegli={(n) => void cambia(true, n ?? undefined, n === null)} onAnnulla={() => setChiediNote(false)} />}
         {chiediAperture && <SceltaApertureVisita a={a} occupato={occupato} onConferma={(c) => void cambia(true, noteVisita.note, noteVisita.senzaPunti, c)} onAnnulla={() => setChiediAperture(false)} />}
         {a.fatta && a.apertureDedali?.length && partitaId ? <ApertureVisitaRegistrata a={a} partitaId={partitaId} onCambiata={onCambiata} bloccata={bloccata || occupato} /> : null}
       </div>
