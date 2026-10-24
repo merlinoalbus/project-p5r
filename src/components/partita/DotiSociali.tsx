@@ -94,13 +94,13 @@ export function DotiSociali({ partitaId }: Props) {
 
   return (
     <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
-      <div className="grid gap-3 items-start grid-cols-[minmax(0,1fr)] md:grid-cols-[minmax(340px,460px)_minmax(0,1fr)] md:h-full md:min-h-0 md:items-stretch">
+      <div className="grid gap-3 items-start grid-cols-[minmax(0,1fr)] md:grid-cols-[minmax(340px,460px)_minmax(0,1fr)] lg:grid-cols-[minmax(400px,540px)_minmax(0,680px)] lg:justify-center md:h-full md:min-h-0 md:items-stretch">
         <section className="card flex flex-col items-center justify-center gap-2 px-4 pt-3 pb-3 overflow-visible min-w-0 md:min-h-0" aria-label="Stella delle Doti">
           <div className="w-full flex justify-center px-[12%]">
             <StellaCinque
               assi={(dati ?? []).map((d) => ({ chiave: d.chiave, etichetta: d.nome, valore: avanzamentoDote(d), badge: `doti/${d.chiave}`, badgeSotto: `ui/rango-${d.rango}`, testo: `Rango ${d.rango}` }))}
-              dimensione={480}
-              badgeAltezza={70}
+              dimensione={540}
+              badgeAltezza={84}
               etichettaAria="Stella delle Doti sociali"
               onScegli={vaiAllaDote}
               selezionato={selezionata}
@@ -136,7 +136,7 @@ export function DotiSociali({ partitaId }: Props) {
                       <button
                         key={n}
                         type="button"
-                        className="btn btn-primary btn-nota min-w-[64px]"
+                        className="btn btn-primary btn-nota min-w-[64px] lg:min-w-[54px] lg:px-2"
                         disabled={occupata === d.chiave}
                         onClick={() => void modifica(d.chiave, { note: n, libro, cinema })}
                         aria-label={`${d.nome}: aggiungi ${n} ${n === 1 ? 'nota' : 'note'} (${puntiAnteprima(n, libro, fortunaAttiva === d.chiave, cinema)} punti)`}
@@ -145,8 +145,8 @@ export function DotiSociali({ partitaId }: Props) {
                         <span className="text-[13px] opacity-90">+{puntiAnteprima(n, libro, fortunaAttiva === d.chiave, cinema)}</span>
                       </button>
                     ))}
-                    <button type="button" className="btn btn-secondary btn-nota min-w-[46px]" disabled={occupata === d.chiave || d.punti === 0} onClick={() => void modifica(d.chiave, { delta: -1 })} aria-label={`${d.nome}: togli un punto`}>−1</button>
-                    <button type="button" className="btn btn-secondary btn-nota min-w-[46px]" disabled={occupata === d.chiave} onClick={() => void modifica(d.chiave, { delta: 1 })} aria-label={`${d.nome}: aggiungi un punto`}>+1</button>
+                    <button type="button" className="btn btn-secondary btn-nota min-w-[46px] lg:min-w-[44px] lg:px-2" disabled={occupata === d.chiave || d.punti === 0} onClick={() => void modifica(d.chiave, { delta: -1 })} aria-label={`${d.nome}: togli un punto`}>−1</button>
+                    <button type="button" className="btn btn-secondary btn-nota min-w-[46px] lg:min-w-[44px] lg:px-2" disabled={occupata === d.chiave} onClick={() => void modifica(d.chiave, { delta: 1 })} aria-label={`${d.nome}: aggiungi un punto`}>+1</button>
                   </div>
                 )}
               />
@@ -165,7 +165,7 @@ function CartaDote({ dote: d, azioni, suggerita, onModificata }: { dote: DoteSoc
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center gap-2 flex-wrap">
-        <AssetImg nome={`doti/${d.chiave}`} alt={d.nome} className="h-7 w-auto object-contain" fallback={<span className="font-display uppercase text-[20px] leading-none">{d.nome}</span>} />
+        <AssetImg nome={`doti/${d.chiave}`} alt={d.nome} className="h-7 lg:h-12 w-auto object-contain" fallback={<span className="font-display uppercase text-[20px] leading-none">{d.nome}</span>} />
         <span className="flex items-center gap-1.5">
           <span className="sr-only">Rango {d.rango} · {d.nomeRango}</span>
           <span className="font-display uppercase text-[20px] leading-none" aria-hidden="true">Rango</span>
