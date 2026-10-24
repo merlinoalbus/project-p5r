@@ -268,6 +268,12 @@ function sogliaAPunti(chiave: string, rango: number): number {
   return r && r.modo === 'punti' && r.soglia !== null && r.soglia > 0 ? r.soglia : 0;
 }
 
+/** Il rango sale a punti? Una sola regola per il server (che somma i punti) e per l'anteprima (`contaPunti`): rango da 1 a 9 con una soglia in punti. Il rango 0 (non
+ *  ancora incontrato) e il 10 (massimo) non contano mai, qualunque riga ci sia. */
+function rangoAPunti(chiave: string, rango: number): boolean {
+  return rango > 0 && rango < 10 && sogliaAPunti(chiave, rango) > 0;
+}
+
 interface RigaConfidentePartita { chiave: string; nome: string; arcana: string; ordine: number; sbloccato: number; rango: number; punti: number; note: string; updated_at: string | null; punti_necessari: number | null; in_scorta: number }
 
 /** I Confidenti con lo stato nella partita; con `chiave`, quel Confidente solo. */
@@ -329,7 +335,7 @@ function confidentiDto(partitaId: number, righe: RigaConfidentePartita[], ranghi
       mancanti: c.rango >= 10 || c.punti_necessari === null ? null : round2(Math.max(0, c.punti_necessari - c.punti)),
       personaArcanoInScorta: c.in_scorta === 1,
       // R10-11: l'anteprima dei punti sta dietro le stesse regole del server: il rango sale a punti? e dov'è il piazzamento all'ultimo esame
-      contaPunti: c.rango > 0 && c.rango < 10 && sogliaAPunti(c.chiave, c.rango) > 0, piazzamentoEsame: esame,
+      contaPunti: rangoAPunti(c.chiave, c.rango), piazzamentoEsame: esame,
       regaliFatti: regali.get(c.chiave)?.nomi ?? [], regaliFattiCatalogo: regali.get(c.chiave)?.catalogo ?? [], haRegaliCatalogo: conRegaliCatalogo.has(c.chiave),
       note: c.note, semafori, updatedAt: c.updated_at,
       bloccato: bloccoRango(semafori, c.rango + 1),
@@ -411,7 +417,7 @@ export function aggiornaConfidente(partitaId: number, chiave: string, dati: Modi
   // Punti verso il rango successivo (R10-11, G-020 §4-5): i punti del motore si accumulano solo dove il rango sale a punti, anche oltre la
   // soglia («evento pronto»: la soglia raggiunta non li ferma). Il passaggio di rango spuntato nel Diario porta avanti l'eccedenza sulla
   // soglia; la correzione a mano dalla pagina imposta i valori e riparte da zero, senza riporto automatico. Un valore esplicito vince.
-  const incremento = (dati.deltaPunti ?? 0) + (sogliaAPunti(chiave, attuale.rango) > 0 ? puntiConfidente(dati, chiave, piazzamentoCorrente(partitaId)) : 0);
+  const incremento = (dati.deltaPunti ?? 0) + (rangoAPunti(chiave, attuale.rango) ? puntiConfidente(dati, chiave, piazzamentoCorrente(partitaId)) : 0);
   let riporto = 0;
   if (origine?.origine === 'diario' && rango > attuale.rango && dati.punti === undefined) {
     riporto = attuale.punti;
