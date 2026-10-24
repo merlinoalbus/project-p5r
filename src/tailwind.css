@@ -871,6 +871,11 @@
     /* i contenitori marcati passano l'altezza al figlio (PageState non aggiunge un livello proprio) */
     .riempi-figli, .riempi-figli > * { height: 100%; min-height: 0; }
   }
+  /* come sopra ma solo da 1024 px (Letture e giochi: tre colonne che scorrono da sole; sotto, una categoria alla volta e scorre la pagina) */
+  @media (min-width: 1024px) {
+    .scheda-riempi-lg { flex: 1 1 auto; min-height: 0; }
+    .riempi-figli-lg, .riempi-figli-lg > * { height: 100%; min-height: 0; }
+  }
   /* L5 (LAY5-1, decisione del PM): la Home riempie la schermata, con la guida del giorno in un'area interna, solo dove c'è altezza
      (da 1024 × 1150: misurato, a 1440×900 intestazione, carta e guida non ci stavano e scorreva anche la pagina, e a 1920×1080 l'area della
      guida restava di 331 px, sotto i 400 del criterio LAY5-1); a tutte le altezze più basse e sotto i 1024 px scorre come pagina, una barra
