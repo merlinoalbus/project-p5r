@@ -168,6 +168,60 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     risposta: '`GiornoModificabileDto`',
     errori: [[404, 'giorno-non-trovato'], [409, 'giorno-della-guida'], [409, 'giorno-fotografia-illeggibile']],
   },
+  'GET /api/compendio/confidenti/:chiave/ranghi': {
+    sommario: 'I ranghi del Confidente: modo di avanzamento e soglia in punti',
+    descrizione: 'Sola lettura. Per ogni rango da 1 a 9: modo (punti, evento, automatico, richieste, velluto), soglia in punti (solo per «punti»), fonte e se è stato modificato rispetto alla guida.',
+    risposta: 'Elenco di `RangoConfidenteDto`',
+    errori: [[404, 'confidente-non-trovato']],
+  },
+  'PUT /api/compendio/confidenti/:chiave/ranghi/:rango': {
+    sommario: 'Cambia il modo e la soglia di un rango del Confidente',
+    descrizione: 'Corpo strict `{ modo, puntiNecessari }`. Un rango «a punti» ha una soglia maggiore di zero, gli altri modi soglia zero (G-020). Alla prima modifica conserva la fotografia della guida per «Ripristina»; la fonte diventa «utente». Vale per tutte le partite.',
+    risposta: 'Elenco di `RangoConfidenteDto` aggiornato',
+    errori: [[400, 'modo-non-valido'], [400, 'soglia-non-valida'], [400, 'soglia-incoerente'], [404, 'confidente-non-trovato'], [404, 'rango-non-trovato']],
+  },
+  'POST /api/compendio/confidenti/:chiave/ranghi/:rango/ripristina': {
+    sommario: 'Riporta il rango del Confidente alla guida',
+    descrizione: 'Rimette modo, soglia e fonte conservati alla prima modifica e toglie la fotografia. 409 `rango-della-guida` se il rango non è stato modificato.',
+    risposta: 'Elenco di `RangoConfidenteDto`',
+    errori: [[404, 'confidente-non-trovato'], [409, 'rango-della-guida'], [409, 'confidente-fotografia-illeggibile']],
+  },
+  'GET /api/compendio/confidenti/:chiave/abilita': {
+    sommario: 'Le abilità del Confidente per rango',
+    descrizione: 'Sola lettura. Per ogni rango che ha abilità (o che ne aveva prima di una modifica): l’elenco nell’ordine della guida e se è stato modificato.',
+    risposta: 'Elenco di `AbilitaRangoDto`',
+    errori: [[404, 'confidente-non-trovato']],
+  },
+  'PUT /api/compendio/confidenti/:chiave/abilita/:rango': {
+    sommario: 'Sostituisce le abilità di un rango del Confidente',
+    descrizione: 'Corpo strict `{ abilita: [{ nome, descrizione }] }` (da 0 a 20, nome obbligatorio), nell’ordine dato. Alla prima modifica conserva la fotografia per «Ripristina». Vale per tutte le partite.',
+    risposta: 'Elenco di `AbilitaRangoDto` aggiornato',
+    errori: [[400, 'rango-non-valido'], [400, 'abilita-non-valide'], [404, 'confidente-non-trovato']],
+  },
+  'POST /api/compendio/confidenti/:chiave/abilita/:rango/ripristina': {
+    sommario: 'Riporta le abilità del rango alla guida',
+    descrizione: 'Rimette l’elenco conservato alla prima modifica e toglie la fotografia. 409 `abilita-della-guida` se il rango non è stato modificato.',
+    risposta: 'Elenco di `AbilitaRangoDto`',
+    errori: [[404, 'confidente-non-trovato'], [409, 'abilita-della-guida']],
+  },
+  'POST /api/compendio/confidenti/:chiave/doti-incontro/:rango/ripristina': {
+    sommario: 'Riporta la Dote a ogni incontro del passaggio alla guida',
+    descrizione: 'La scrittura della Dote (`PUT …/doti-incontro`) conserva com’era il passaggio alla prima modifica; qui lo si rimette. 409 `dote-della-guida` se il passaggio non è stato modificato.',
+    risposta: '`ConfidenteDettaglioDto` aggiornato',
+    errori: [[404, 'confidente-non-trovato'], [409, 'dote-della-guida']],
+  },
+  'PUT /api/compendio/confidenti/:chiave/dialoghi/:id': {
+    sommario: 'Cambia le note e le scelte di un dialogo del Confidente, con i punti',
+    descrizione: 'Corpo strict `{ note?, scelte? }`; una scelta ha testo, punti (0-100 o nessuno), testo dei punti, romantica e avviso; le scelte si rinumerano da 1. Alla prima modifica conserva la fotografia per «Ripristina». Vale per tutte le partite.',
+    risposta: '`DialogoModificatoDto`',
+    errori: [[400, 'scelte-non-valide'], [404, 'confidente-non-trovato'], [404, 'dialogo-non-trovato']],
+  },
+  'POST /api/compendio/confidenti/:chiave/dialoghi/:id/ripristina': {
+    sommario: 'Riporta il dialogo del Confidente alla guida',
+    descrizione: 'Rimette note e scelte conservate alla prima modifica e toglie la fotografia. 409 `dialogo-della-guida` se il dialogo non è stato modificato.',
+    risposta: '`DialogoModificatoDto`',
+    errori: [[404, 'confidente-non-trovato'], [404, 'dialogo-non-trovato'], [409, 'dialogo-della-guida']],
+  },
 
   // ---- Blocchi della guida (dati_guida) ----
   'GET /api/compendio/oggetti-guida': {

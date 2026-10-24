@@ -14,6 +14,7 @@ import { catalogoOggettiDisponibile, materialiDelleRicette, offerteBaseDegliOgge
 import { datiGuida, datiGuidaCorretti, type Congelato } from './datiGuida.js';
 import { costoPrecedenteRegalo } from './costoRegaloService.js';
 import { disponibilitaConfidente } from './disponibilitaStrutturataService.js';
+import { fotografaDoteIncontro } from './confidentiScritture.js';
 import { postoDellArticolo, postoDelNegozio } from './mappe/nomiDeiPosti.js';
 import type {
   AffinitaDto, ArcanaDto, ConfidenteDettaglioDto, ConfidenteDto, CostoSkillDto, GlossarioDto, OggettoDto, PersonaDettaglioDto,
@@ -453,6 +454,7 @@ export function impostaDotiIncontro(chiave: string, ranghi: Array<{ rango: numbe
   if (!prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(chiave)) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${chiave}' non esiste.`);
   getDb().transaction(() => {
     for (const r of ranghi) {
+      fotografaDoteIncontro(chiave, r.rango); // R9-07/3: com'era nella guida, per «Ripristina» (una volta sola)
       const voci = JSON.stringify(r.doti.map((d) => ({ effetto: { famiglia: 'dote', dote: d.dote, note: d.note } })));
       prepared('INSERT INTO confidente_dote_incontro (confidente_chiave, verso_rango, effetti_json) VALUES (?, ?, ?) ON CONFLICT(confidente_chiave, verso_rango) DO UPDATE SET effetti_json = excluded.effetti_json')
         .run(chiave, r.rango, voci);

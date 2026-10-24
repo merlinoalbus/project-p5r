@@ -11,6 +11,7 @@
 import type { Router } from 'express';
 import compendioRouter from './compendio.js';
 import disponibilitaStrutturataRouter from './disponibilitaStrutturata.js';
+import confidentiScrittureRouter from './confidentiScritture.js';
 import traduzioniRouter from './traduzioni.js';
 import partiteRouter from './partite.js';
 import immaginiRouter from './immagini.js';
@@ -32,6 +33,7 @@ import correzioniRouter from './correzioni.js';
 export const ROUTER_DI_AREA: ReadonlyArray<readonly [string, Router]> = [
   ['/api/compendio', compendioRouter],
   ['/api/compendio', disponibilitaStrutturataRouter],
+  ['/api/compendio', confidentiScrittureRouter],
   ['/api/traduzioni', traduzioniRouter],
   ['/api/partite', partiteRouter],
   ['/api/immagini', immaginiRouter],
