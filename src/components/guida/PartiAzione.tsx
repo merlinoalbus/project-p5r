@@ -26,7 +26,7 @@ import { PulsanteGuidaQuiz } from './GuidaQuiz';
 /** Ciò che i cartellini di una riga d'azione leggono. */
 // L3: le infiltrazioni della voce servono a «Entra» (il cartellino del Palazzo apre l'infiltrazione giusta, `collegamentoAzione`)
 export type AzioneMostrata = Pick<AzionePercorsoDto, 'azione' | 'tipo' | 'riferimento' | 'riferimentoTesto' | 'rangoAtteso' | 'note' | 'produceTesto' | 'fatta' | 'effetti' | 'stato' | 'mappa' | 'atterraggio' | 'quiz'>
-  & Partial<Pick<AzionePercorsoDto, 'uid' | 'infiltrazioni' | 'infiltrazioneDaAprire' | 'infiltrazioniDelPalazzo' | 'propostaInfiltrazioni' | 'oggettoRiferimento' | 'oggettiCitati'>>;
+  & Partial<Pick<AzionePercorsoDto, 'uid' | 'infiltrazioni' | 'infiltrazioneDaAprire' | 'infiltrazioniDelPalazzo' | 'propostaInfiltrazioni' | 'oggettoRiferimento' | 'oggettiCitati' | 'avvisiDisponibilita'>>;
 
 /** L'immagine della riga: il ritratto del Confidente, l'emblema del Palazzo o l'icona del tipo. */
 export function ImmagineAzione({ a }: { a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento' | 'riferimentoTesto'> }) {
