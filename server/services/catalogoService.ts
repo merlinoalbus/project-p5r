@@ -34,6 +34,7 @@ import { fonteConfidenteAttivita } from './fonteConfidenteAttivitaService.js';
 import { verificaAttivitaConfidente, verificaCampiAttivitaConfidente } from './vincoliAttivitaConfidente.js';
 import { verificaAttivitaPesca, verificaCampiAttivitaPesca } from './vincoliAttivitaPesca.js';
 import { leggiRegolaPesca } from './regolePescaService.js';
+import { verificaDomandaEsame } from './esamiCollegamento.js';
 
 /** Colonne scrivibili dall'utente, per tabella: quello che il modulo dell'interfaccia mostra e che i pacchetti trasportano. */
 // Dalla voce 5 (2026-09-12) il negozio non ha più `sblocco`, `fonte` e `condizioni_json` fra i campi
@@ -442,6 +443,7 @@ function creaElementoNellaTransazione(tipo: TipoCatalogo, grezzi: Record<string,
   if (grezzi.condizioni_json != null) grezzi = { ...grezzi, condizioni_json: verificaFormulaCompleta(grezzi.condizioni_json, 'creazione') };
   verificaRiferimenti(tipo, grezzi);
   const dati = normalizzaScrittura(tipo, grezzi, null);
+  if (tipo === 'domanda' && typeof dati.data === 'string' && typeof dati.tipo === 'string') verificaDomandaEsame(null, { data: dati.data, tipo: dati.tipo });
   if (tipo === 'attivita') verificaAttivitaConfidente(getDb(), dati);
   if (tipo === 'attivita') verificaAttivitaPesca(getDb(), dati);
   const nome = tipo === 'articolo' && typeof dati.catalogo_chiave === 'string' ? riferimentoOggetto(dati.catalogo_chiave)?.nome ?? ''
@@ -500,6 +502,7 @@ function aggiornaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string, gr
   if (typeof grezzi.condizioni_json === 'string') verificaCondizioni(JSON.parse(grezzi.condizioni_json));
   verificaRiferimenti(tipo, grezzi, r);
   const dati = normalizzaScrittura(tipo, grezzi, r);
+  if (tipo === 'domanda') verificaDomandaEsame({ id: Number(r.id), data: String(r.data), tipo: String(r.tipo) }, { data: String(dati.data ?? r.data), tipo: String(dati.tipo ?? r.tipo) });
   if (tipo === 'attivita') verificaAttivitaConfidente(getDb(), { ...r, ...dati }, r);
   if (tipo === 'attivita') verificaAttivitaPesca(getDb(), { ...r, ...dati }, r);
   const lettura = categoriaLettura(tipo, { ...r, ...dati });
@@ -622,6 +625,7 @@ function ripristinaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string):
   }
   const set = campi.map((c) => `${c} = @${c}`);
   const valori: Record<string, unknown> = { chiave, ...Object.fromEntries(campi.map((c) => [c, originale[c] ?? predefinito(c)])) };
+  if (tipo === 'domanda') verificaDomandaEsame({ id: Number(r.id), data: String(r.data), tipo: String(r.tipo) }, { data: String(valori.data ?? r.data), tipo: String(valori.tipo ?? r.tipo) });
   if (tipo === 'attivita') verificaAttivitaConfidente(getDb(), { ...r, ...valori }, r);
   if (tipo === 'attivita') verificaAttivitaPesca(getDb(), { ...r, ...valori }, r);
   verificaTipoVideogioco(tipo, r, originale.tipo ?? r.tipo);

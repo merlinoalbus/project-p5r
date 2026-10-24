@@ -11,6 +11,7 @@ import { fortunaSu } from './fortunaService.js';
 import { ordineGioco } from '../../shared/condizioniSpillo.js';
 import type { DomandaDto, DomandeDto, EsameDto } from '../../shared/types.js';
 import { ricompensePerFonte } from './catalogoOggettiLetture.js';
+import { righePerEsame } from './esamiCollegamento.js';
 
 interface RigaDomanda { id: number; chiave: string | null; ordine: number; data: string; tipo: DomandaDto['tipo']; chi: string; domanda: string; risposte_json: string; ricompensa: string; note: string; fonte: string }
 
@@ -34,15 +35,12 @@ function esami(): EsameDto[] {
   const premi = ricompensePerFonte('esame');
   const righe = (prepared("SELECT data, tipo, ordine, risposte_json FROM domanda WHERE tipo IN ('esame-medio', 'esame-finale') ORDER BY ordine").all() as Array<{ data: string; tipo: string; ordine: number; risposte_json: string }>)
     .sort((x, y) => indiceGiornoScolastico(x.data) - indiceGiornoScolastico(y.data) || x.ordine - y.ordine);
-  const risultatiPrecedenti = new Map<string, number>();
-  return (prepared('SELECT chiave, nome, data_risultati, note FROM esame ORDER BY ordine').all() as Array<{ chiave: string; nome: string; data_risultati: string | null; note: string }>)
+  const esamiDb = prepared('SELECT chiave, nome, data_risultati, note FROM esame ORDER BY ordine').all() as Array<{ chiave: string; nome: string; data_risultati: string | null; note: string }>;
+  // le righe di ogni esame: la regola unica di `esamiCollegamento` (tipo dal nome, dopo i risultati dell'esame precedente dello stesso tipo e fino ai suoi)
+  const righeDi = righePerEsame(esamiDb, righe);
+  return esamiDb
     .map((e) => {
-      // le righe dell'esame: del suo tipo (metà → esame-medio, fine → esame-finale), dopo i risultati dell'esame precedente dello stesso tipo e fino ai suoi
-      const tipo = /metà/i.test(e.nome) ? 'esame-medio' : 'esame-finale';
-      const fino = e.data_risultati ? indiceGiornoScolastico(e.data_risultati) : Number.POSITIVE_INFINITY;
-      const da = risultatiPrecedenti.get(tipo) ?? -1;
-      risultatiPrecedenti.set(tipo, fino);
-      const sue = righe.filter((r) => r.tipo === tipo && indiceGiornoScolastico(r.data) > da && indiceGiornoScolastico(r.data) <= fino);
+      const sue = righeDi.get(e.chiave) ?? [];
       const domande = sue.flatMap((r) => (JSON.parse(r.risposte_json) as Array<{ testo: string; domanda?: string }>).map((x) => ({ data: r.data, domanda: x.domanda ?? '', risposta: x.testo })))
         .map((d, i) => ({ ...d, ordine: i + 1 }));
       return { chiave: e.chiave, nome: e.nome, date: [...new Set(sue.map((r) => r.data))], dataRisultati: e.data_risultati, domande, note: e.note, oggettiRicompensa: premi.get(e.chiave) ?? [] };

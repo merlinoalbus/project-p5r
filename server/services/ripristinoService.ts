@@ -163,7 +163,8 @@ function schedaRiga(tipo: TipoModificabile, chiave: string): SchedaCorrezioneDto
   const attuale = def.leggi(chiave);
   const meta = metaRiga(def, chiave);
   const guida = meta.seed ?? attuale;
-  const campi = def.campi(chiave).map((c) => campoDto(c, attuale[c.p] ?? null, guida[c.p] ?? attuale[c.p] ?? null));
+  // un valore della guida vuoto (null) è un valore: se la fotografia ha il campo, il confronto è con quello (non con il valore di adesso)
+  const campi = def.campi(chiave).map((c) => campoDto(c, attuale[c.p] ?? null, c.p in guida ? (guida[c.p] ?? null) : (attuale[c.p] ?? null)));
   return { tipo, chiave, nome: def.nome(chiave, attuale), modalita: 'riga', campi, modificata: campi.some((c) => c.modificato), guidaCambiata: [], aggiornata: meta.aggiornata, nota: NOTE[tipo] ?? null };
 }
 
