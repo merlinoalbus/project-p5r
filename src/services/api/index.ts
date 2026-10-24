@@ -15,6 +15,7 @@ export * from './impostazioni';
 export * from './catalogo';
 export * from './catalogoOggetti';
 export * from './condizioni';
+export * from './correzioni';
 
 export * from './organizzazioneMappe';
 export * from './accessoMondo';
