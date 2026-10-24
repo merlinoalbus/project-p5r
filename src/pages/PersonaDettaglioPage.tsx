@@ -13,6 +13,7 @@ import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import { AffinitaGriglia } from '../components/compendio/AffinitaGriglia';
+import { DoveSiIncontra } from '../components/compendio/DoveSiIncontra';
 import { StatisticheBarre } from '../components/compendio/StatisticheBarre';
 import { ElementoChip } from '../components/compendio/ElementoChip';
 import { IconChevronLeft } from '../components/shared/icons';
@@ -250,6 +251,9 @@ export function PersonaDettaglioPage() {
             <h2 className="m-0 mb-3 text-[15px] font-semibold">Affinità</h2>
             <AffinitaGriglia affinita={p.affinita} />
           </section>
+
+          {/* L8 (R8-05, R8-07): dove si incontra e se è registrata nella partita, dalla stessa fonte della Battaglia e dei dedali. Le forme del gruppo non si catturano. */}
+          {!p.delParty && <DoveSiIncontra persona={{ id: p.id, nome: p.nome, nomeIt: p.nomeIt }} partitaId={attiva?.id ?? null} />}
 
           <section className="card">
             <h2 className="m-0 mb-3 text-[15px] font-semibold">Skill</h2>

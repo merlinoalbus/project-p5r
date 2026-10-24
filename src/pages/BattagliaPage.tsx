@@ -6,21 +6,25 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { Fonte } from '../components/shared/VoceFonte';
 import { Selettore } from '../components/shared/Selettore';
 import { Link, useSearchParams } from 'react-router-dom';
-import { getBattaglia } from '../services/api';
+import { getBattaglia, getOmbre } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import { useCatturaPersona } from '../hooks/useCatturaPersona';
+import { usePartitaStore } from '../stores/partitaStore';
 import { PageState } from '../components/shared/PageState';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { normalizzaTesto } from '../utils/testo';
-import type { BattagliaDto, OmbraDto } from '../types';
+import type { BattagliaDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { ElementoChip } from '../components/compendio/ElementoChip';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
-import { RisposteNegoziazione } from '../components/guida/RisposteNegoziazione';
+import { NegoziazionePerUmore } from '../components/guida/NegoziazionePerUmore';
+import { AvvisoTogliPersona, PiastrelleCattura } from '../components/guida/PiastrelleCattura';
 import { SezioneConFregio } from '../components/shared/FregioSezione';
 import { chiaveElementoDaTesto, nomeCanonicoNelTesto } from '../utils/elementiGuida';
-import { NOME_ELEMENTO } from '../../shared/elementi';
+import { NOME_ELEMENTO, NOME_ESITO_AFFINITA, NOME_PERSONALITA, PERSONALITA_OMBRA, type CodiceAffinita, type ChiaveElemento } from '../../shared/elementi';
+import type { OmbraLuogoDto, OmbraSchedaDto } from '../../shared/ombre';
 
 /** Le cinque schede, ognuna con la sua icona.
  *
@@ -61,84 +65,103 @@ function ChipElementoGuida({ testo }: { testo: string }) {
   return chiave ? <ElementoChip elemento={chiave} nome={nomeCanonicoNelTesto(testo)} piccolo /> : <span className="chip">{testo}</span>;
 }
 
-/** Elemento base di una debolezza/resistenza, col nome del vocabolario unico («Tuono (dimezza)» → «Elettricità»); un testo che non è un elemento resta com'è, senza la nota. */
-function elementoBase(v: string): string {
-  const chiave = chiaveElementoDaTesto(v);
-  return chiave ? NOME_ELEMENTO[chiave] : v.replace(/\s*\(.*\)\s*$/, '').trim();
-}
+/** Il testo breve di un luogo d'incontro: «Palazzo › infiltrazione» o «Memento › dedalo». */
+const luogoBreve = (l: OmbraLuogoDto): string => (l.infiltrazione ? `${l.dungeonNome} › ${l.infiltrazione.nome}` : l.dungeonNome);
+
+/** L'elemento della debolezza come chip, col nome del vocabolario unico (le affinità vengono dal compendio, R8-08). */
+const ChipElemento = ({ elemento, nome }: { elemento: string; nome?: string }) => <ElementoChip elemento={elemento} nome={nome ?? NOME_ELEMENTO[elemento as ChiaveElemento] ?? elemento} piccolo />;
 
 /**
- * Ricerca rapida delle Ombre: un testo libero (nome dell'Ombra, della Persona, della Persona
- * collegata o dell'area, confrontati normalizzati) e tre filtri (dungeon, debolezza ridotta
- * all'elemento base, personalità), con le opzioni ricavate dalle Ombre stesse. Mostra il conteggio
- * e una griglia di carte con debolezze, resistenze, livello, collegamento alla scheda Persona e
- * all'area del dungeon.
+ * Ricerca rapida delle Ombre (L8, R8-28): un testo libero (nome, nomi alternativi, Persona) e tre filtri (dove si incontra, debole a, personalità).
+ * Ogni carta porta le debolezze e le altre affinità **dal compendio** (nessuna copia), dove si incontra con il link alla guida del posto, il
+ * collegamento alla pagina dell'Ombra e — con una partita — la piastrella che la cattura con un tocco, la stessa di Palazzi e Memento.
+ * Dal telefono: cerchi l'Ombra e nella stessa carta vedi le debolezze e se la Persona è registrata (due tocchi al più, uno per registrarla).
  */
-function SchedaOmbre({ ombre }: { ombre: OmbraDto[] }) {
+function SchedaOmbre() {
+  const attiva = usePartitaStore((s) => s.attiva);
+  const partitaId = attiva?.id ?? null;
+  const dati = useCarica(() => getOmbre({ partita: partitaId ?? undefined }), [partitaId]);
+  const cattura = useCatturaPersona(partitaId);
   const [q, setQ] = useState('');
   const [dungeon, setDungeon] = useState('');
   const [elemento, setElemento] = useState('');
   const [personalita, setPersonalita] = useState('');
-  const dungeons = useMemo(() => [...new Map(ombre.map((o) => [o.dungeonChiave, o.dungeon])).entries()], [ombre]);
-  const elementi = useMemo(() => [...new Set(ombre.flatMap((o) => o.debolezze.map(elementoBase)))].sort((a, b) => a.localeCompare(b, 'it')), [ombre]);
-  const personalitaTutte = useMemo(() => [...new Set(ombre.map((o) => o.personalita).filter((p): p is string => !!p))].sort(), [ombre]);
+  const ombre = useMemo<OmbraSchedaDto[]>(() => dati.dati ?? [], [dati.dati]);
+  const dungeons = useMemo(() => [...new Map(ombre.flatMap((o) => o.luoghi.map((l) => [l.dungeon, l.dungeonNome] as const))).entries()].sort((a, b) => a[1].localeCompare(b[1], 'it')), [ombre]);
+  const elementi = useMemo(() => [...new Set(ombre.flatMap((o) => o.debolezze))], [ombre]);
   const visibili = useMemo(() => {
     const t = normalizzaTesto(q);
-    return ombre.filter((o) => (!dungeon || o.dungeonChiave === dungeon) && (!elemento || o.debolezze.some((d) => elementoBase(d) === elemento)) && (!personalita || o.personalita === personalita)
-      && (!t || normalizzaTesto(`${o.ombra ?? ''} ${o.persona ?? ''} ${o.personaCollegata?.nome ?? ''} ${o.personaCollegata?.nomeIt ?? ''} ${o.area ?? ''}`).includes(t)));
+    return ombre.filter((o) => (!dungeon || o.luoghi.some((l) => l.dungeon === dungeon)) && (!elemento || o.debolezze.includes(elemento)) && (!personalita || o.personalita === personalita)
+      && (!t || normalizzaTesto([o.nome, ...o.nomiAltri, o.persona?.nome ?? '', o.persona?.nomeIt ?? '', ...o.luoghi.map(luogoBreve)].join(' ')).includes(t)));
   }, [ombre, q, dungeon, elemento, personalita]);
   return (
-    <div className="flex flex-col gap-2">
-      <p className="m-0 text-[13px] text-text-secondary">Ricerca rapida delle Ombre di Palazzi e Dedali: scrivi il nome dell'Ombra o della Persona, oppure filtra per dungeon, debolezza e personalità (per la negoziazione).</p>
-      <CampoRicerca valore={q} onCambia={setQ} segnaposto="Ombra, Persona, infiltrazione o dedalo…" />
-      <div className="flex flex-wrap gap-1.5">
-        <Selettore compatto etichetta="Dungeon" valore={dungeon} vuoto="Tutti i dungeon" opzioni={dungeons.map(([k, n]) => ({ chiave: k, nome: n }))} onCambia={setDungeon} />
-        <Selettore compatto etichetta="Debole a" valore={elemento} vuoto="Qualsiasi debolezza" opzioni={elementi.map((e) => ({ chiave: e, nome: `Debole a ${e}` }))} onCambia={setElemento} />
-        <Selettore compatto etichetta="Personalità" valore={personalita} vuoto="Qualsiasi personalità" opzioni={personalitaTutte.map((p) => ({ chiave: p, nome: p }))} onCambia={setPersonalita} />
+    <PageState isLoading={dati.caricamento && !dati.dati} error={dati.errore} onRetry={() => void dati.ricarica()}>
+      <div className="flex flex-col gap-2">
+        <p className="m-0 text-[13px] text-text-secondary">Ricerca rapida delle Ombre di Palazzi e Dedali: scrivi il nome dell'Ombra o della Persona, oppure filtra per dove si incontra, debolezza e personalità. Le debolezze sono quelle della Persona nel compendio.</p>
+        <CampoRicerca valore={q} onCambia={setQ} segnaposto="Ombra, Persona, Palazzo o dedalo…" />
+        <div className="flex flex-wrap gap-1.5">
+          <Selettore compatto etichetta="Dove" valore={dungeon} vuoto="Ovunque" opzioni={dungeons.map(([k, n]) => ({ chiave: k, nome: n }))} onCambia={setDungeon} />
+          <Selettore compatto etichetta="Debole a" valore={elemento} vuoto="Qualsiasi debolezza" opzioni={elementi.map((e) => ({ chiave: e, nome: `Debole a ${NOME_ELEMENTO[e as ChiaveElemento] ?? e}` }))} onCambia={setElemento} />
+          <Selettore compatto etichetta="Personalità" valore={personalita} vuoto="Qualsiasi personalità" opzioni={PERSONALITA_OMBRA.map((p) => ({ chiave: p, nome: NOME_PERSONALITA[p] }))} onCambia={setPersonalita} />
+        </div>
+        <p className="m-0 text-[12px] text-text-muted" role="status">{visibili.length} Ombre su {ombre.length}.</p>
+        {cattura.daTogliere?.persona && <AvvisoTogliPersona nome={cattura.daTogliere.persona.nomeIt} occupato={cattura.occupata !== null} onConferma={cattura.conferma} onAnnulla={cattura.annulla} />}
+        {/* Una griglia e non una colonna: le schede sono corte e su uno schermo largo la colonna
+            unica lasciava tre quarti di pagina vuoti mentre si scorreva per centinaia di Ombre. */}
+        <ul className="m-0 grid list-none grid-cols-1 items-start gap-2 p-0 lg:grid-cols-2 2xl:grid-cols-3" aria-label="Ombre">
+          {visibili.length === 0 && <li className="text-[13px] text-text-muted" role="status">Nessuna Ombra con questi filtri.</li>}
+          {visibili.map((o) => (
+            <li key={o.chiave} className="card flex gap-2 p-2 text-[13px]">
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                  <Link to={o.casa} className="touch inline-flex items-center font-bold">{o.nome}</Link>
+                  {o.persona ? <span className="text-[12px] text-text-secondary">maschera {o.persona.nomeIt}</span> : <span className="text-[12px] text-text-muted">non reclutabile</span>}
+                  {o.livello !== null && <span className="chip text-[11px]">livello {o.livello}</span>}
+                  <span className="chip text-[11px]">{NOME_PERSONALITA[o.personalita]}</span>
+                </div>
+                {/* Le debolezze sono il motivo per cui si apre questa scheda: stanno su una riga loro, con le altre affinità sotto. */}
+                <div className="flex flex-wrap items-center gap-1">
+                  {o.debolezze.length > 0
+                    ? o.debolezze.map((d) => <ChipElemento key={d} elemento={d} />)
+                    : <span className="text-[12px] text-text-muted">nessuna debolezza nota</span>}
+                </div>
+                {o.resistenze.length > 0 && <div className="flex flex-wrap items-center gap-1 opacity-70">
+                  {o.resistenze.map((r) => <ChipElemento key={r.elemento} elemento={r.elemento} nome={`${NOME_ELEMENTO[r.elemento as ChiaveElemento] ?? r.elemento}: ${NOME_ESITO_AFFINITA[r.codice as CodiceAffinita] ?? r.codice}`} />)}
+                </div>}
+                {o.luoghi.length > 0 && (
+                  <div className="flex flex-wrap gap-x-3">
+                    {o.luoghi.map((l) => (
+                      <Link key={`${l.dungeon}|${l.infiltrazione?.chiave ?? ''}`} to={l.casa} className={`touch inline-flex items-center text-[12px] text-text-muted ${l.raggiungibile === false ? 'line-through opacity-60' : ''}`} title={l.raggiungibile === false ? 'Palazzo concluso: non più raggiungibile' : undefined}>{luogoBreve(l)}</Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {o.persona && (
+                <div className="w-[96px] shrink-0">
+                  <PiastrelleCattura aria-label={`Cattura di ${o.nome}`} partitaId={partitaId} catturate={cattura.catturate} occupata={cattura.occupata} onTocca={cattura.tocca}
+                    voci={[{ chiave: o.chiave, persona: o.persona, etichetta: o.persona.nomeIt, ombra: o.chiave, catturabile: o.catturabile }]} />
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
       </div>
-      <p className="m-0 text-[12px] text-text-muted">{visibili.length} Ombre su {ombre.length}.</p>
-      {/* Una griglia e non una colonna: le schede sono corte e su uno schermo largo la colonna
-          unica lasciava tre quarti di pagina vuoti mentre si scorreva per centinaia di Ombre. */}
-      <ul className="m-0 grid list-none grid-cols-1 items-start gap-2 p-0 lg:grid-cols-2 2xl:grid-cols-3" aria-label="Ombre">
-        {visibili.length === 0 && <li className="text-[13px] text-text-muted" role="status">Nessuna Ombra con questi filtri.</li>}
-        {visibili.map((o) => (
-          <li key={`${o.dungeonChiave}/${o.persona ?? o.ombra}`} className="card flex flex-col gap-1 p-2 text-[13px]">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-              <strong>{o.ombra ?? o.persona}</strong>
-              {o.persona && o.ombra && <span className="text-[12px] text-text-secondary">maschera {o.personaCollegata ? <Link to={`/compendio/persona/${o.personaCollegata.id}`}>{o.personaCollegata.nomeIt}</Link> : o.persona}</span>}
-              {o.persona && !o.ombra && o.personaCollegata && <Link to={`/compendio/persona/${o.personaCollegata.id}`} className="touch inline-flex items-center text-[12px]">scheda Persona</Link>}
-              {o.livello !== null && <span className="chip text-[11px]">livello {o.livello}</span>}
-              {o.personalita && <span className="chip text-[11px]">{o.personalita}</span>}
-            </div>
-            {/* Le debolezze sono il motivo per cui si apre questa scheda: stanno su una riga
-                loro, con le resistenze sotto, invece di essere due frasi in fila. */}
-            <div className="flex flex-wrap items-center gap-1">
-              {o.debolezze.length > 0
-                ? o.debolezze.map((d) => <ChipElementoGuida key={d} testo={d} />)
-                : <span className="text-[12px] text-text-muted">nessuna debolezza nota</span>}
-            </div>
-            {o.resistenze.length > 0 && <div className="flex flex-wrap items-center gap-1 opacity-70">
-              <span className="text-[11px] uppercase tracking-[0.06em] text-text-muted">resiste</span>
-              {o.resistenze.map((r) => <ChipElementoGuida key={r} testo={r} />)}
-            </div>}
-            {/* L3 (§4.1): nei Palazzi l'infiltrazione va in `?infiltrazione=`; i dedali dei Memento restano in `?area=` */}
-            <Link to={o.areaChiave ? `/guida/dungeon/${o.dungeonChiave}?${o.dungeonChiave === 'mementos' ? 'area' : 'infiltrazione'}=${encodeURIComponent(o.areaChiave)}` : `/guida/dungeon/${o.dungeonChiave}`} className="mt-auto touch inline-flex items-center text-[12px] text-text-muted">{o.area ?? o.dungeon}</Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+    </PageState>
   );
 }
 
 /**
- * La negoziazione: quando e come si negozia con le opzioni dell'Hold Up, la ricerca delle risposte
- * per domanda (quando la guida le ha), le carte per personalità con le risposte da dare e da
- * evitare, e infine regole, incertezze e fonti separate da un punto.
+ * La negoziazione (L8, B8): le domande e le risposte per umore vengono SOLO dal lettore unico (`NegoziazionePerUmore`, che non legge più il vecchio
+ * JSON della guida); qui restano le parti discorsive della guida — quando e come si negozia, le opzioni dell'Hold Up — e, in fondo, regole,
+ * incertezze e fonti separate da un punto.
  */
 function SchedaNegoziazione({ d }: { d: BattagliaDto }) {
   const n = d.negoziazione;
   return (
     <div className="flex flex-col gap-3 text-[13px]">
+      {/* La scelta dell'umore e la ricerca sulla domanda vengono prima di tutto: è l'unica cosa che si legge sullo schermo mentre l'Ombra parla.
+          Le regole che spiegano il perché stanno sotto. */}
+      <NegoziazionePerUmore />
       <SezioneConFregio chiave="battaglia-negoziazione" disposizione="fascia">
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Quando e come</h2>
         <p className="m-0">{n.quandoSiPuoNegoziare}</p>
@@ -147,31 +170,6 @@ function SchedaNegoziazione({ d }: { d: BattagliaDto }) {
           {n.opzioniHoldUp.map((o) => <Voce key={o.opzione} titolo={o.opzione}>{o.effetto}</Voce>)}
         </Dati>
       </SezioneConFregio>
-      {/* La ricerca sulla domanda viene prima di tutto: è l'unica cosa che si legge sullo schermo
-          mentre l'Ombra parla. Le quattro carte della regola restano sotto, che spiegano il perché. */}
-      {n.domande && n.domande.length > 0 && <RisposteNegoziazione domande={n.domande} fonte={n.fonteDomande} />}
-      {/* **Le risposte sono la cosa che si cerca sotto pressione**: una lista di pastiglie verdi
-          e rosse si trova con la coda dell'occhio, «Risposte efficaci: a · b · c» no. */}
-      <div className="grid gap-2 sm:grid-cols-2 2xl:grid-cols-3">
-        {n.personalita.map((p) => (
-          <section key={p.nome} className="card flex flex-col gap-2">
-            <h3 className="m-0 font-display text-[15px] uppercase leading-none">{p.nome}</h3>
-            <p className="m-0 text-[12px] text-text-secondary">{p.descrizione}</p>
-            <div className="flex flex-col gap-1">
-              <span className="text-[10px] uppercase tracking-[0.08em] text-success">Rispondi così</span>
-              <div className="flex flex-wrap gap-1">
-                {p.risposteEfficaci.map((r) => <span key={r} className="rounded-full border border-success/60 bg-success/10 px-2 py-0.5 text-[12px] text-success">{r}</span>)}
-              </div>
-            </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-[10px] uppercase tracking-[0.08em] text-error">Da evitare</span>
-              <div className="flex flex-wrap gap-1">
-                {p.risposteDaEvitare.map((r) => <span key={r} className="rounded-full border border-error/50 bg-error/10 px-2 py-0.5 text-[12px] text-error">{r}</span>)}
-              </div>
-            </div>
-          </section>
-        ))}
-      </div>
       <SezioneConFregio chiave="battaglia-regole" disposizione="grande">
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Regole</h2>
         <ul className="m-0 pl-4">{n.regole.map((r) => <li key={r}>{r}</li>)}</ul>
@@ -343,7 +341,7 @@ export function BattagliaPage() {
           <FilaScorrevole role="tablist" aria-label="Sezioni">
             {SCHEDE.map(([k, l, icona]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`piastrella-scheda touch ${scheda === k ? 'piastrella-scheda--attiva' : ''}`} onClick={() => setParams(k === 'ombre' ? {} : { scheda: k }, { replace: true })} title={l}><IconaCategoria categoria={icona} dimensione={28} /><span>{l}</span></button>)}
           </FilaScorrevole>
-          {scheda === 'ombre' && <SchedaOmbre ombre={d.ombre} />}
+          {scheda === 'ombre' && <SchedaOmbre />}
           {scheda === 'negoziazione' && <SchedaNegoziazione d={d} />}
           {scheda === 'tecnico' && <SchedaTecnico d={d} />}
           {scheda === 'staffetta' && <SchedaStaffetta d={d} />}

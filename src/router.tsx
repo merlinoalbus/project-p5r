@@ -48,6 +48,7 @@ const DungeonPage = pigra(() => import('./pages/DungeonPage'), 'DungeonPage');
 const DungeonDettaglioPage = pigra(() => import('./pages/DungeonDettaglioPage'), 'DungeonDettaglioPage');
 const RichiestePage = pigra(() => import('./pages/RichiestePage'), 'RichiestePage');
 const BattagliaPage = pigra(() => import('./pages/BattagliaPage'), 'BattagliaPage');
+const OmbraPage = pigra(() => import('./pages/OmbraPage'), 'OmbraPage');
 const CittaPage = pigra(() => import('./pages/CittaPage'), 'CittaPage');
 const MappaPage = pigra(() => import('./pages/MappaPage'), 'MappaPage');
 const AccessoMondoPage = pigra(() => import('./pages/AccessoMondoPage'), 'AccessoMondoPage');
@@ -127,11 +128,15 @@ export const router = createBrowserRouter([
           pagina('guida/domande', DomandePage),
           pagina('guida/calendario', CalendarioPage),
           pagina('guida/dungeon', DungeonPage),
+          // L8 (R8-16): Iweleth esiste solo come dedalo dei Memento; gli indirizzi di prima portano lì (la scheda del Palazzo resta come archivio delle planimetrie)
+          { path: 'guida/dungeon/iweleth', element: <Navigate to="/guida/dungeon/mementos?area=mementos-08-iweleth" replace /> },
+          { path: 'guida/dungeon/iweleth/area/:slug', element: <Navigate to="/guida/dungeon/mementos?area=mementos-08-iweleth" replace /> },
           pagina('guida/dungeon/:chiave', DungeonDettaglioPage),
           // L3: la casa di un'Area del Palazzo è la scheda stessa, con l'area aperta (`?infiltrazione=`, `?planimetria=`, `?spillo=`…)
           pagina('guida/dungeon/:chiave/area/:slug', DungeonDettaglioPage),
           pagina('guida/richieste', RichiestePage),
           pagina('guida/battaglia', BattagliaPage),
+          pagina('guida/ombra/:chiave', OmbraPage),
           pagina('guida/mappe', MappaPage),
           pagina('guida/mondo/:tipo/:chiave', AccessoMondoPage),
           pagina('guida/mappe/:chiave', MappaPage),
