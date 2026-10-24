@@ -37,6 +37,8 @@ import type { AppDatabase } from '../dbService.js';
 import { logger } from '../../utils/logger.js';
 
 const DEDALO = 'mementos-08-iweleth';
+/** Le voci di Iweleth scritte dal seed hanno per fonte la pagina del dedalo: un'altra fonte (o nessuna) indica una voce non della guida. */
+const FONTE_IWELETH = 'https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth';
 const area = (n: number): string => `${DEDALO}-area-${n}`;
 
 /** Infiltrazione storica → area del dedalo (corrispondenza nominale di 101; D5 e D6 senza voci nella fonte). */
@@ -104,7 +106,10 @@ export const migration175: Migration = {
         voce_canonica        TEXT REFERENCES punto_interesse(chiave) ON DELETE SET NULL,
         tipo_precedente      TEXT NOT NULL,
         infiltrazione_chiave TEXT NOT NULL REFERENCES dungeon_area(chiave) ON DELETE CASCADE,
-        nota                 TEXT NOT NULL DEFAULT ''
+        nota                 TEXT NOT NULL DEFAULT '',
+        -- com'era la voce prima della confluenza (la conversione azzera il carattere e riscrive l'ordine): niente si perde
+        carattere_precedente TEXT,
+        ordine_precedente    INTEGER NOT NULL DEFAULT 0
       );
     `);
 
@@ -156,16 +161,21 @@ export const migration175: Migration = {
     else rapporto.saltate.push({ cosa: area(8), motivo: 'l\'area 8 non c\'è più' });
 
     // ---- 4. le voci: Trama nel dedalo; le Persona doppie puntano alla voce del dedalo ----
-    const voci = db.prepare(`SELECT p.chiave, p.tipo, p.ordine, p.area_chiave, a.ordine AS ordine_infiltrazione FROM main.punto_interesse p JOIN main.dungeon_area a ON a.chiave = p.area_chiave
-      WHERE a.dungeon_chiave = 'iweleth' ORDER BY a.ordine, p.ordine, p.chiave`).all() as Array<{ chiave: string; tipo: string; ordine: number; area_chiave: string; ordine_infiltrazione: number }>;
+    const voci = db.prepare(`SELECT p.chiave, p.tipo, p.ordine, p.area_chiave, p.carattere, p.fonte, a.ordine AS ordine_infiltrazione FROM main.punto_interesse p JOIN main.dungeon_area a ON a.chiave = p.area_chiave
+      WHERE a.dungeon_chiave = 'iweleth' ORDER BY a.ordine, p.ordine, p.chiave`).all() as Array<{ chiave: string; tipo: string; ordine: number; area_chiave: string; carattere: string | null; fonte: string; ordine_infiltrazione: number }>;
     const ombraDi = db.prepare('SELECT ombra_chiave FROM main.ombra_voce WHERE voce_chiave = ?');
     const duplicataDi = db.prepare(`SELECT p.chiave FROM main.ombra_voce ov JOIN main.punto_interesse p ON p.chiave = ov.voce_chiave
       WHERE ov.ombra_chiave = ? AND p.area_chiave = ? AND p.tipo = 'persona'`);
-    const inserisci = db.prepare('INSERT OR IGNORE INTO main.voce_confluenza (voce_chiave, azione, voce_canonica, tipo_precedente, infiltrazione_chiave, nota) VALUES (?, ?, ?, ?, ?, ?)');
+    const inserisciGrezzo = db.prepare('INSERT OR IGNORE INTO main.voce_confluenza (voce_chiave, azione, voce_canonica, tipo_precedente, infiltrazione_chiave, nota, carattere_precedente, ordine_precedente) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+    let corrente: { carattere: string | null; ordine: number } = { carattere: null, ordine: 0 };
+    const inserisci = { run: (voce: string, azione: string, canonica: string | null, tipo: string, infiltrazione: string, nota: string) => inserisciGrezzo.run(voce, azione, canonica, tipo, infiltrazione, nota, corrente.carattere, corrente.ordine) };
     const converti = db.prepare("UPDATE main.punto_interesse SET tipo = 'trama', area_chiave = ?, area_dedalo_chiave = ?, ordine = ?, carattere = NULL WHERE chiave = ?");
     let abaddon: string | null = null;
     for (const v of voci) {
       if (db.prepare('SELECT 1 FROM main.voce_confluenza WHERE voce_chiave = ?').get(v.chiave)) continue;
+      // si tocca solo una voce della guida come il seed l'ha scritta: la fonte è la pagina del dedalo di Iweleth; una voce di altra origine resta com'è
+      if (!v.fonte.startsWith(FONTE_IWELETH)) { rapporto.saltate.push({ cosa: v.chiave, motivo: 'la voce non viene dalla guida del dedalo di Iweleth (fonte diversa): resta com\'è' }); continue; }
+      corrente = { carattere: v.carattere, ordine: v.ordine };
       if (v.tipo === 'persona') {
         const om = ombraDi.get(v.chiave) as { ombra_chiave: string } | undefined;
         const canonica = om ? (duplicataDi.get(om.ombra_chiave, DEDALO) as { chiave: string } | undefined)?.chiave : undefined;
