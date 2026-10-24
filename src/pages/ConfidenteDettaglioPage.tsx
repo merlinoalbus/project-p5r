@@ -2,7 +2,7 @@
 // ConfidenteDettaglioPage — scheda completa di un Confidente: abilità per rango, risposte migliori, regali, disponibilità (Fase 6.1)
 // ============================================================
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 // R10-27: la scheda si mostra anche nel pannello sopra il diario; questi hook, fuori dal pannello, sono quelli di react-router-dom
 import { useNavigate, useParams, useSearchParams } from '../components/scheda/routerScheda';
@@ -20,6 +20,7 @@ import { EditorRequisiti } from '../components/confidenti/EditorRequisiti';
 import { InvitiConfidente } from '../components/confidenti/InvitiConfidente';
 import { RanghiConfidente } from '../components/confidenti/RanghiConfidente';
 import { ModificaAbilita } from '../components/confidenti/ModificaAbilita';
+import { ModificaDialogo } from '../components/confidenti/ModificaDialogo';
 import { EditorDisponibilita } from '../components/confidenti/EditorDisponibilita';
 import { DisponibilitaStrutturataScheda, EditorDisponibilitaStrutturata } from '../components/confidenti/DisponibilitaStrutturata';
 import { IconChevronLeft } from '../components/shared/icons';
@@ -34,18 +35,21 @@ import { RipristinoCostoRegalo } from '../components/catalogo/RipristinoCostoReg
 import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
 
 /** Un dialogo di rango: scelte in ordine, con le migliori evidenziate (punti massimi), le romantiche e gli avvisi. */
-export function DialogoRango({ d, aperto, onToggle }: { d: DialogoConfidenteDto; aperto: boolean; onToggle: () => void }) {
+export function DialogoRango({ d, aperto, onToggle, azioni }: { d: DialogoConfidenteDto; aperto: boolean; onToggle: () => void; azioni?: ReactNode }) {
   const max = Math.max(0, ...d.scelte.map((s) => s.punti ?? 0));
   return (
     <li className="border border-border-light rounded-lg">
       {/* Il rango e il conteggio non si spezzano e non si comprimono: senza `shrink-0` la nota in
           mezzo si prendeva tutta la riga e loro finivano incolonnati lettera per lettera — «R a n g
           o 1» alto 135 px sul telefono. La nota, che è la parte elastica, va a capo per prima. */}
-      <button type="button" className="w-full text-left px-3 py-2 flex flex-wrap items-center gap-x-2 gap-y-1 touch" onClick={onToggle} aria-expanded={aperto}>
+      <div className="flex items-center gap-1 pr-2">
+      <button type="button" className="min-w-0 flex-1 text-left px-3 py-2 flex flex-wrap items-center gap-x-2 gap-y-1 touch" onClick={onToggle} aria-expanded={aperto}>
         <span className="font-semibold shrink-0 whitespace-nowrap">Rango {d.etichetta}</span>
         <span className="min-w-0 flex-1 text-[12px] text-text-muted">{d.note}</span>
         <span className="shrink-0 whitespace-nowrap text-[12px] text-text-muted">{d.scelte.length} {d.scelte.length === 1 ? 'scelta' : 'scelte'}</span>
       </button>
+      {azioni && <div className="flex shrink-0 items-center gap-1">{azioni}</div>}
+      </div>
       {/* Un rango senza scelte da fare esiste — il primo e l'ultimo di molti Confidenti — e aprendolo
           restava una striscia di dodici pixel di solo padding: il vuoto non dice che non c'è niente,
           lo fa solo sembrare rotto (rilievo del validatore, 2026-09-13). */}
@@ -246,7 +250,7 @@ export function ConfidenteDettaglioPage() {
             <p className="m-0 text-[12px] text-text-muted">Le scelte evidenziate danno il massimo dei punti secondo la guida; quelle in rosso avviano la relazione romantica. Registra poi le note ottenute nella scheda Confidenti della partita.</p>
             {c.dialoghi.length === 0 ? <p className="m-0 text-[13px] text-text-muted">Nessun dialogo documentato.</p> : (
               <ul className="m-0 p-0 list-none flex flex-col gap-1.5">
-                {c.dialoghi.map((d) => <DialogoRango key={d.id} d={d} aperto={aperti[d.id] === true} onToggle={() => setAperti((a) => { const n = { ...a }; if (n[d.id]) delete n[d.id]; else n[d.id] = true; return n; })} />)}
+                {c.dialoghi.map((d) => <DialogoRango key={d.id} d={d} azioni={<ModificaDialogo chiave={c.chiave} nome={c.nome} dialogo={d} onSalvato={ricarica} />} aperto={aperti[d.id] === true} onToggle={() => setAperti((a) => { const n = { ...a }; if (n[d.id]) delete n[d.id]; else n[d.id] = true; return n; })} />)}
               </ul>
             )}
           </section>
