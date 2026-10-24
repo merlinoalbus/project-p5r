@@ -20,6 +20,7 @@ import { TagAllerte } from '../components/shared/TagAllerta';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
+import { EditorGiorno } from '../components/guida/EditorGiorno';
 
 const NOME_TIPO: Record<string, string> = { storia: 'Storia', scadenza: 'Scadenza', sblocco: 'Sblocco', esame: 'Esame', festa: 'Festa', vacanza: 'Vacanza', consiglio: 'Consiglio', meteo: 'Meteo' };
 const CLASSE_TIPO: Record<string, string> = { scadenza: 'chip--attivo', esame: 'chip--attivo' };
@@ -32,7 +33,7 @@ const MESI_CHIAVE = ['04', '05', '06', '07', '08', '09', '10', '11', '12', '01',
  * tempo libero di giorno e di sera e, se c'è una partita e il giorno non è già oggi, il comando
  * per impostarlo come data di gioco.
  */
-function Giorno({ g, oggi, aperto, onToggle, onImposta, onSalvato }: { g: GiornoCalendarioDto; oggi: boolean; aperto: boolean; onToggle: () => void; onImposta?: () => void; onSalvato: () => void }) {
+function Giorno({ g, oggi, aperto, onToggle, onImposta, onSalvato, onModificaGiorno }: { g: GiornoCalendarioDto; oggi: boolean; aperto: boolean; onToggle: () => void; onImposta?: () => void; onSalvato: () => void; onModificaGiorno: () => void }) {
   const festivo = g.giornoSettimana === 'Domenica' || g.eventi.some((e) => e.tipo === 'festa' || e.tipo === 'vacanza');
   return (
     <li className={`rounded-lg border ${oggi ? 'border-primary bg-primary-bg' : 'border-border-light'}`}>
@@ -70,7 +71,11 @@ function Giorno({ g, oggi, aperto, onToggle, onImposta, onSalvato }: { g: Giorno
             </div>
           ))}
           {g.tempoLibero && <span className="text-[12px] text-text-muted">Tempo libero: giorno {g.tempoLibero.giorno ? 'sì' : 'no'}, sera {g.tempoLibero.sera ? 'sì' : 'no'}.</span>}
-          {onImposta && !oggi && <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Imposta come data di gioco della partita" onClick={onImposta} />}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* stesso modulo della pagina del giorno della guida: meteo, nota, trama e vincoli del giorno; fuori dall'intestazione cliccabile */}
+            <button type="button" className="btn btn-secondary btn-sm touch" onClick={onModificaGiorno}>Modifica il giorno</button>
+            {onImposta && !oggi && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Imposta come data di gioco della partita" onClick={onImposta} />}
+          </div>
         </div>
       )}
     </li>
@@ -99,6 +104,8 @@ export function CalendarioPage() {
   const settimanaOggi = settimanaDi(d?.oggi ?? null);
   /** Dopo una correzione o un ripristino di un evento o di un'allerta: il calendario si rilegge. */
   const ricarica = () => void dati.ricarica();
+  /** Il giorno ('MM-GG') aperto nell'editor del giorno, o null; l'editor è quello della pagina del giorno della guida. */
+  const [giornoInModifica, setGiornoInModifica] = useState<string | null>(null);
 
   /** Salva la data come data di gioco della partita attiva, aggiorna lo store locale con la partita restituita e notifica l'esito (anche l'errore). */
   const imposta = async (data: string) => {
@@ -150,7 +157,10 @@ export function CalendarioPage() {
                   </ul>
                 </div>
               )}
-              <Link to="/guida/domande" className="touch inline-flex items-center text-[12px] text-primary self-start">Domande in classe della data →</Link>
+              <div className="flex flex-wrap items-center gap-2">
+                <button type="button" className="btn btn-secondary btn-sm touch" onClick={() => setGiornoInModifica(d.oggi?.data ?? null)}>Modifica il giorno</button>
+                <Link to="/guida/domande" className="touch inline-flex items-center text-[12px] text-primary">Domande in classe della data →</Link>
+              </div>
             </section>
           )}
 
@@ -161,9 +171,10 @@ export function CalendarioPage() {
           </FilaScorrevole>
           <ul className="m-0 p-0 list-none flex flex-col gap-1.5" aria-label={`Giorni di ${NOMI_MESI_GIOCO[MESI_CHIAVE.indexOf(mese)] ?? mese}`}>
             {giorniMese.map((g) => (
-              <Giorno key={g.data} g={g} oggi={g.data === d.dataGioco} aperto={aperto === g.data} onToggle={() => setAperto((a) => (a === g.data ? null : g.data))} onImposta={partitaId ? () => void imposta(g.data) : undefined} onSalvato={ricarica} />
+              <Giorno key={g.data} g={g} oggi={g.data === d.dataGioco} aperto={aperto === g.data} onToggle={() => setAperto((a) => (a === g.data ? null : g.data))} onImposta={partitaId ? () => void imposta(g.data) : undefined} onSalvato={ricarica} onModificaGiorno={() => setGiornoInModifica(g.data)} />
             ))}
           </ul>
+          {giornoInModifica && <EditorGiorno key={giornoInModifica} data={giornoInModifica} onChiudi={() => setGiornoInModifica(null)} onSalvato={async () => { await dati.ricarica(); }} />}
         </div>
       )}
     </PageState>
