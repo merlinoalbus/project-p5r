@@ -560,6 +560,8 @@ export interface TraduzioneDto {
   extra: Record<string, unknown> | null;
   fonte: 'seed' | 'utente';
   updatedAt: string;
+  /** Solo nella risposta di «Ripristina» su una riga creata dall'utente (non esisteva nella guida): la riga è stata tolta. */
+  rimossa?: boolean;
 }
 
 // ---- Partite ----

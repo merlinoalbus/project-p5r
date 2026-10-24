@@ -13,7 +13,7 @@ export const queryTraduzioni = z.object({
 
 export const paramsTraduzione = z.object({
   ambito: z.string().trim().min(1).max(40),
-  chiave: z.string().min(1).max(300),
+  chiave: z.string().min(1).max(700), // anche il testo di un effetto di skill (fino a 600 caratteri)
 });
 
 export const bodyTraduzione = z.object({

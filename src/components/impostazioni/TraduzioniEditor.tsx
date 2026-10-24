@@ -55,7 +55,27 @@ export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniE
   const voci = useCarica(() => getTraduzioni({ ambito, q: q.trim() || undefined, soloUtente: soloUtente || undefined }), [ambito, q, soloUtente]);
   const [inModifica, setInModifica] = useState<TraduzioneDto | null>(null);
   const [testo, setTesto] = useState('');
+  const [testoNuovo, setTestoNuovo] = useState('');
   const ricaricaGlossario = useGlossarioStore((s) => s.ricarica);
+  // Se l'indirizzo cambia mentre l'editor è già aperto (un altro collegamento «Modifica la traduzione»), il filtro si riapplica
+  // (si aggiusta lo stato durante il render, confrontando con l'indirizzo già applicato: niente effetto con setState)
+  const [indirizzoApplicato, setIndirizzoApplicato] = useState(`${ambitoIniziale ?? ''}|${qIniziale ?? ''}`);
+  if (indirizzoApplicato !== `${ambitoIniziale ?? ''}|${qIniziale ?? ''}`) {
+    setIndirizzoApplicato(`${ambitoIniziale ?? ''}|${qIniziale ?? ''}`);
+    if (ambitoIniziale) {
+      setAmbito(ambitoIniziale);
+      setQ(qIniziale ?? '');
+      setSoloUtente(false);
+      setInModifica(null);
+      setTestoNuovo('');
+    }
+  }
+  // Il testo cercato dal collegamento non ha ancora una riga di traduzione (solo per gli effetti delle skill, dove il server ne crea una al primo salvataggio):
+  // l'editor mostra la voce «nessuna resa» con il campo già pronto per scriverla
+  const mancante: TraduzioneDto | null = ambitoIniziale === 'effettoSkill' && qIniziale && ambito === ambitoIniziale && q === qIniziale && !soloUtente
+    && voci.dati && !voci.caricamento && !voci.dati.some((v) => v.chiave === qIniziale)
+    ? { ambito, chiave: qIniziale, testo: '', extra: null, fonte: 'seed', updatedAt: '' }
+    : null;
 
   /**
    * Salva il testo `nuovo` della voce o, se manca, la riporta al testo del seed; poi sostituisce la voce
@@ -65,11 +85,15 @@ export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniE
     try {
       const agg = nuovo === undefined ? await ripristinaTraduzione(t.ambito, t.chiave) : await aggiornaTraduzione(t.ambito, t.chiave, nuovo);
       // dai dati correnti (forma funzionale): la risposta arriva dopo un `await`, e un'altra voce salvata nel frattempo si perderebbe
-      voci.imposta((correnti) => correnti.map((v) => (v.chiave === agg.chiave ? agg : v)));
+      // una riga creata da te (non esisteva nella guida) con «Ripristina» sparisce; una scritta per la prima volta si aggiunge all'elenco
+      voci.imposta((correnti) => (agg.rimossa
+        ? correnti.filter((v) => v.chiave !== agg.chiave)
+        : correnti.some((v) => v.chiave === agg.chiave) ? correnti.map((v) => (v.chiave === agg.chiave ? agg : v)) : [...correnti, agg]));
       setInModifica(null);
+      setTestoNuovo('');
       void ricaricaGlossario();
       void ambiti.ricarica();
-      notifica('success', nuovo === undefined ? 'Testo del seed ripristinato.' : 'Traduzione salvata.');
+      notifica('success', agg.rimossa ? 'Resa tolta: il testo torna senza traduzione.' : nuovo === undefined ? 'Testo del seed ripristinato.' : 'Traduzione salvata.');
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Operazione fallita.');
     }
@@ -86,6 +110,16 @@ export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniE
       </div>
       <PageState isLoading={voci.caricamento} error={voci.errore} onRetry={() => void voci.ricarica()}>
         <ul className="m-0 p-0 list-none divide-y divide-border-light max-h-[60vh] area-scorrevole">
+          {mancante && (
+            <li className="py-2 flex flex-col gap-1" aria-label="Testo senza resa italiana">
+              <div className="text-[12px] text-text-muted break-words">{mancante.chiave}</div>
+              <div className="flex gap-2 items-start flex-wrap">
+                <span className="chip">nessuna resa</span>
+                <textarea className="form-input min-h-[44px] flex-1 min-w-[200px]" aria-label="Resa italiana" placeholder="Scrivi la resa italiana…" value={testoNuovo} onChange={(e) => setTestoNuovo(e.target.value)} autoFocus />
+                <button type="button" className="btn btn-primary btn-sm touch" disabled={!testoNuovo.trim()} onClick={() => void applica(mancante, testoNuovo.trim())}>Salva</button>
+              </div>
+            </li>
+          )}
           {(voci.dati ?? []).map((t) => (
             <li key={t.chiave} className="py-2 flex flex-col gap-1">
               <div className="text-[12px] text-text-muted break-words">{t.chiave}</div>
@@ -105,7 +139,7 @@ export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniE
               )}
             </li>
           ))}
-          {voci.dati && voci.dati.length === 0 && <li className="py-3 text-[13px] text-text-muted">Nessuna voce.</li>}
+          {voci.dati && voci.dati.length === 0 && !mancante && <li className="py-3 text-[13px] text-text-muted">Nessuna voce.</li>}
         </ul>
       </PageState>
     </section>

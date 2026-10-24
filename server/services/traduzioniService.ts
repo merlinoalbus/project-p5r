@@ -104,19 +104,40 @@ export function elencaAmbiti(): Array<{ ambito: string; voci: number; modificate
   return prepared("SELECT ambito, COUNT(*) AS voci, SUM(CASE WHEN fonte = 'utente' THEN 1 ELSE 0 END) AS modificate FROM traduzione GROUP BY ambito ORDER BY ambito").all() as Array<{ ambito: string; voci: number; modificate: number }>;
 }
 
-/** Imposta la resa italiana di una voce esistente (diventa fonte='utente'). */
+/**
+ * Gli ambiti in cui si può scrivere la resa di un testo che non ha ancora una riga, con il controllo che la chiave sia un testo che esiste nei dati.
+ * `effettoSkill`: la chiave è il testo (inglese) dell'effetto di almeno una skill, quindi una resa non si scrive per un testo qualsiasi.
+ */
+const AMBITI_CREABILI: Record<string, (chiave: string) => boolean> = {
+  effettoSkill: (chiave) => !!prepared('SELECT 1 FROM skill WHERE effetto = ?').get(chiave),
+};
+/** Segna le righe che non esistevano nella guida (create dall'utente): «Ripristina» le toglie invece di rileggerle dal pacchetto. */
+const MARCA_CREATA = '{"creataDaUtente":true}';
+
+/** Imposta la resa italiana di una voce (diventa fonte='utente'); negli ambiti creabili la scrive anche se la riga non c'è ancora (upsert, riga marcata come creata). */
 export function aggiornaTraduzione(ambito: string, chiave: string, testo: string): TraduzioneDto {
   const esiste = prepared('SELECT 1 FROM traduzione WHERE ambito = ? AND chiave = ?').get(ambito, chiave);
-  if (!esiste) throw httpErrors.notFound('traduzione-non-trovata', `Nessuna voce per ${ambito}/${chiave}.`);
-  prepared("UPDATE traduzione SET testo = ?, fonte = 'utente', updated_at = ? WHERE ambito = ? AND chiave = ?").run(testo, nowIso(), ambito, chiave);
+  if (!esiste) {
+    const valida = AMBITI_CREABILI[ambito];
+    if (!valida) throw httpErrors.notFound('traduzione-non-trovata', `Nessuna voce per ${ambito}/${chiave}.`);
+    if (!valida(chiave)) throw httpErrors.notFound('traduzione-non-trovata', `${ambito}: il testo «${chiave}» non esiste nei dati, quindi non si può scrivere una resa.`);
+  }
+  prepared("INSERT INTO traduzione (ambito, chiave, testo, extra_json, fonte, updated_at) VALUES (?, ?, ?, ?, 'utente', ?) ON CONFLICT(ambito, chiave) DO UPDATE SET testo = excluded.testo, fonte = 'utente', updated_at = excluded.updated_at")
+    .run(ambito, chiave, testo, esiste ? null : MARCA_CREATA, nowIso());
   invalidaCacheTraduzioni();
   return versoDto(prepared('SELECT ambito, chiave, testo, extra_json, fonte, updated_at FROM traduzione WHERE ambito = ? AND chiave = ?').get(ambito, chiave) as RigaTraduzione);
 }
 
 /** Ripristina la resa della guida, letta dal pacchetto di gioco del repository (fonte torna 'seed'). */
 export function ripristinaTraduzione(ambito: string, chiave: string, pacchetto: string = percorsoPacchettoDb()): TraduzioneDto {
-  const esiste = prepared('SELECT 1 FROM traduzione WHERE ambito = ? AND chiave = ?').get(ambito, chiave);
+  const esiste = prepared('SELECT ambito, chiave, testo, extra_json, fonte, updated_at FROM traduzione WHERE ambito = ? AND chiave = ?').get(ambito, chiave) as RigaTraduzione | undefined;
   if (!esiste) throw httpErrors.notFound('traduzione-non-trovata', `Nessuna voce per ${ambito}/${chiave}.`);
+  // una riga creata dall'utente non esisteva nella guida: ripristinarla vuol dire toglierla (la risposta la dà com'era, con `rimossa`)
+  if (esiste.extra_json === MARCA_CREATA) {
+    prepared('DELETE FROM traduzione WHERE ambito = ? AND chiave = ?').run(ambito, chiave);
+    invalidaCacheTraduzioni();
+    return { ...versoDto(esiste), rimossa: true };
+  }
   const testoSeed = testoDalPacchetto(ambito, chiave, pacchetto);
   if (testoSeed === null) throw httpErrors.notFound('traduzione-seed-assente', `Il pacchetto di gioco non contiene ${ambito}/${chiave}: nulla da ripristinare.`);
   prepared("UPDATE traduzione SET testo = ?, fonte = 'seed', updated_at = ? WHERE ambito = ? AND chiave = ?").run(testoSeed, nowIso(), ambito, chiave);

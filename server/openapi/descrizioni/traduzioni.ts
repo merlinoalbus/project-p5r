@@ -17,14 +17,14 @@ export const DESCRIZIONI_TRADUZIONI: DescrizioniArea = {
     risposta: 'Elenco di `{ ambito, voci, modificate }`',
   },
   'PUT /api/traduzioni/:ambito/:chiave': {
-    sommario: 'Modifica la resa italiana di una voce esistente',
-    descrizione: 'Imposta il testo italiano della voce (ambito, chiave), che passa a `fonte = "utente"` con la data di modifica aggiornata. Si modificano solo voci che esistono già: la rotta non ne crea di nuove. La cache in memoria delle traduzioni viene invalidata, quindi ogni risposta successiva del compendio e delle altre aree usa subito la resa nuova. La modifica sta nei dati di gioco: un\'importazione del pacchetto di gioco la sostituisce.',
+    sommario: 'Modifica la resa italiana di una voce, o la scrive se manca (effetti delle skill)',
+    descrizione: 'Imposta il testo italiano della voce (ambito, chiave), che passa a `fonte = "utente"` con la data di modifica aggiornata. Le voci che esistono già si modificano; una voce che non esiste si crea (upsert) solo nell\'ambito `effettoSkill` e solo se la chiave è il testo dell\'effetto di una skill: la riga nuova è marcata come creata dall\'utente (`extra.creataDaUtente`) e «Ripristina» la toglie. Negli altri ambiti la rotta non ne crea di nuove. La cache in memoria delle traduzioni viene invalidata, quindi ogni risposta successiva del compendio e delle altre aree usa subito la resa nuova. La modifica sta nei dati di gioco: un\'importazione del pacchetto di gioco la sostituisce.',
     risposta: 'La voce aggiornata, `TraduzioneDto`',
     errori: [[404, 'traduzione-non-trovata']],
   },
   'DELETE /api/traduzioni/:ambito/:chiave': {
     sommario: 'Ripristina la resa originale di una voce dal pacchetto di gioco del repository',
-    descrizione: 'Non cancella la voce: rilegge in sola lettura la resa della stessa (ambito, chiave) dal pacchetto di gioco iniziale (`gioco.db` nella cartella del pacchetto, nel repository `pacchetto/gioco.db`) e la rimette, con `fonte = "seed"`. Risponde 404 se la voce non esiste nell\'istanza (`traduzione-non-trovata`) oppure se il pacchetto non la contiene o non è presente (`traduzione-seed-assente`). Invalida la cache in memoria delle traduzioni.',
+    descrizione: 'Se la voce è stata creata dall\'utente (non esisteva nella guida, `extra.creataDaUtente`) la toglie e risponde con la voce com\'era e `rimossa: true`. Altrimenti non cancella la voce: rilegge in sola lettura la resa della stessa (ambito, chiave) dal pacchetto di gioco iniziale (`gioco.db` nella cartella del pacchetto, nel repository `pacchetto/gioco.db`) e la rimette, con `fonte = "seed"`. Risponde 404 se la voce non esiste nell\'istanza (`traduzione-non-trovata`) oppure se il pacchetto non la contiene o non è presente (`traduzione-seed-assente`). Invalida la cache in memoria delle traduzioni.',
     risposta: 'La voce ripristinata, `TraduzioneDto`',
     errori: [[404, 'traduzione-non-trovata'], [404, 'traduzione-seed-assente']],
   },
