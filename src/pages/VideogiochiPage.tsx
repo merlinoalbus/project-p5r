@@ -23,6 +23,7 @@ import { AssetImg } from '../components/shared/AssetImg';
 import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
 import { ComandiVideogioco } from '../components/guida/ComandiVideogioco';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
+import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione, IconaSegno, type ChiaveSegno } from '../components/shared/IconaAzione';
@@ -108,6 +109,7 @@ export function VideogiochiPage() {
   const roundFatti = giochi.reduce((s, g) => s + g.progresso, 0);
   const roundTotali = giochi.reduce((s, g) => s + g.totaleRound, 0);
   const scelto = giochi.find((g) => g.chiave === selezionato) ?? null;
+  const notaComune = dati.dati?.noteCategorie?.videogioco ?? '';
 
   // Le stesse colonne di Libri e Film: due da tablet in su, tre su desktop largo.
   const griglia = 'm-0 grid list-none grid-cols-1 gap-3 p-0 md:grid-cols-2 xl:grid-cols-3';
@@ -124,6 +126,15 @@ export function VideogiochiPage() {
             <Numero valore={giochi.filter((g) => g.fatto).length} etichetta="Completati" segno="completati" />
             <Numero valore={`${roundFatti}/${roundTotali}`} etichetta="Round" segno="round" />
           </div>
+
+          {/* La frase comune ai sette giochi (R9-14/1) sta una volta sola in `dati_guida` e si mostra qui, in testa alla categoria; la matita resta anche
+              se la frase è vuota, così si può riscrivere o rimettere quella della guida. */}
+          <section className="card flex flex-col gap-1" aria-label="Nota comune ai videogiochi">
+            <div className="flex items-start gap-2">
+              <p className="m-0 min-w-0 flex-1 whitespace-pre-line text-sm text-text-secondary">{notaComune || 'Nessuna nota comune ai videogiochi.'}</p>
+              <ModificaGuida tipo="note-categorie-attivita" chiave="note-categorie-attivita" cosa="la nota comune ai videogiochi" soloIcona onSalvato={() => void dati.ricarica()} />
+            </div>
+          </section>
 
           {partitaId && <NotaPuntiDote cosa="quali giochi hai finito e a che round sei" />}
 

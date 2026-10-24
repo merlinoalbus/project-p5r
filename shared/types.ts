@@ -2114,6 +2114,8 @@ export interface VideogiochiDto {
   completati: number;
   roundFatti: number;
   roundObiettivo: number;
+  /** Le note comuni alle categorie (R9-14/1): `videogioco` è la frase comune ai sette giochi, da mostrare una volta sola in testa all'elenco. */
+  noteCategorie?: Record<string, string>;
 }
 
 export type TipoLettura = 'libro' | 'film' | 'videogioco';

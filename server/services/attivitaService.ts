@@ -233,7 +233,7 @@ export function videogiochiTutti(partitaId?: number): VideogiochiDto {
   const sedi = sediAttivita(); const negozi = articoliCollegati('videogiochi');
   const catalogo = oggettiPerFonte('videogioco');
   const videogiochi = (prepared("SELECT * FROM attivita WHERE tipo='videogioco' AND nascosto = 0 ORDER BY ordine").all() as RigaAttivita[]).map((r) => videogiocoDto(r, stato, sedi, negozi, st, catalogo));
-  return { videogiochi, iniziati: videogiochi.filter((v) => v.iniziato).length, completati: videogiochi.filter((v) => v.fatto).length, roundFatti: videogiochi.reduce((n, v) => n + v.progresso, 0), roundObiettivo: videogiochi.reduce((n, v) => n + v.totaleRound, 0) };
+  return { videogiochi, iniziati: videogiochi.filter((v) => v.iniziato).length, completati: videogiochi.filter((v) => v.fatto).length, roundFatti: videogiochi.reduce((n, v) => n + v.progresso, 0), roundObiettivo: videogiochi.reduce((n, v) => n + v.totaleRound, 0), noteCategorie: noteCategorieAttivita() };
 }
 
 /** Le posizioni di ogni film (`film_posizione`), raggruppate per film nell'ordine dichiarato. */
