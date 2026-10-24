@@ -62,6 +62,19 @@ export function DisponibilitaStrutturataScheda({ chiave, partita, versione, onMo
   );
 }
 
+/** «Quando» di un Confidente in una riga (struttura, «dal», eccezioni brevi) e, con la partita, se è disponibile adesso: per la scheda del luogo, dove si elencano i Confidenti che vi si incontrano. */
+export function QuandoConfidente({ chiave, partita }: { chiave: string; partita?: number }) {
+  const d = useCarica(() => getDisponibilitaStrutturata(chiave, partita), [chiave, partita]);
+  if (!d.dati) return d.errore ? null : <span className="text-[12px] text-text-muted">…</span>;
+  const { struttura: s, oggi } = d.dati;
+  return (
+    <span className="flex flex-wrap items-center gap-1.5 text-[12px] text-text-secondary">
+      <span>{testoQuando(s)}{s.dal ? ` · dal ${dataBreve(s.dal)}` : ''}{s.eccezioni.length > 0 ? ` · ${s.eccezioni.map(testoEccezione).join(' · ')}` : ''}</span>
+      {oggi && oggi.stato !== 'sconosciuto' && <span className={`chip text-[11px] ${oggi.stato === 'disponibile' ? 'chip--attivo' : ''}`} title={oggi.motivo}>{NOME_STATO[oggi.stato] ?? oggi.stato}</span>}
+    </span>
+  );
+}
+
 const uguali = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
 
 /** L'editor: struttura e luoghi, salvati col PUT; «Ripristina» riporta la struttura alla fonte. */

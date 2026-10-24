@@ -18,6 +18,7 @@ import { getArea, getElementoCatalogo, getLuogo, getQuartiere } from '../service
 import { FinestraAggiungiLuogo } from '../components/mappe/FinestraAggiungiLuogo';
 import { FinestraColloca } from '../components/mappe/FinestraColloca';
 import { InvitiConfidente } from '../components/confidenti/InvitiConfidente';
+import { QuandoConfidente } from '../components/confidenti/DisponibilitaStrutturata';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -197,7 +198,12 @@ export function LuogoPage() {
                 <section className="card order-4 flex flex-col gap-2 xl:order-none" aria-label="Chi e cosa si incontra qui">
                   {l.confidentiDettaglio.length > 0 && <>
                     <h2 className="m-0 font-display text-[15px] uppercase leading-none">Confidenti</h2>
-                    <div className="flex flex-wrap gap-1.5">{l.confidentiDettaglio.map((c) => <Link key={c.chiave} to={c.casa} className="chip chip--attivo touch no-underline">{c.nome} · {c.arcanaNome}</Link>)}</div>
+                    <ul className="m-0 flex list-none flex-col gap-2 p-0">{l.confidentiDettaglio.map((c) => (
+                      <li key={c.chiave} className="flex min-w-0 flex-col gap-0.5">
+                        <Link to={c.casa} className="chip chip--attivo touch self-start no-underline">{c.nome} · {c.arcanaNome}</Link>
+                        <QuandoConfidente chiave={c.chiave} partita={partitaId ?? undefined} />
+                      </li>
+                    ))}</ul>
                   </>}
                   {l.attivitaDettaglio.length > 0 && <>
                     <h2 className="m-0 font-display text-[15px] uppercase leading-none">Attività</h2>
