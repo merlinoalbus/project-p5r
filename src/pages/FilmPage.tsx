@@ -38,8 +38,8 @@ import type { FilmDto, FilmDvdDto } from '../types';
 
 type SupportoFiltro = 'tutti' | 'cinema' | 'dvd';
 const SUPPORTI: ReadonlyArray<{ chiave: SupportoFiltro; nome: string }> = [{ chiave: 'tutti', nome: 'Cinema e DVD' }, { chiave: 'cinema', nome: 'Solo cinema' }, { chiave: 'dvd', nome: 'Solo DVD' }];
-/** Il titolo da mostrare: quello italiano quando c'è, altrimenti l'originale. */
-const nomeFilm = (film: FilmDto) => film.nomeIt ?? film.nome;
+/** Il titolo da mostrare: il nome del catalogo (il solo nome del film). */
+const nomeFilm = (film: FilmDto) => film.nome;
 
 /**
  * Pagina di film e DVD: carica i titoli per la partita attiva, mostra i conteggi di riepilogo e i
@@ -80,7 +80,7 @@ export function FilmPage({ soloChiave }: { soloChiave?: string } = {}) {
       };
     }),
     // la visione dà le sue Doti: si segnano a mano, l'avviso le ricorda
-    dopoOgniInvio: (film) => avvisaDotiDaSegnare(film.daSegnare, film.nomeIt ?? film.nome),
+    dopoOgniInvio: (film) => avvisaDotiDaSegnare(film.daSegnare, film.nome),
     messaggioErrore: 'Aggiornamento della visione fallito.',
     segnalaErrore: (m) => notifica('error', m),
   });
@@ -96,7 +96,7 @@ export function FilmPage({ soloChiave }: { soloChiave?: string } = {}) {
     return (dati.dati?.film ?? []).filter((f) => {
       if (soloChiave && f.chiave !== soloChiave) return false;
       const progresso = progressoDi(f);
-      if (q && !`${f.nome} ${f.nomeIt ?? ''} ${(f.nomiAltri ?? []).join(' ')} ${f.effettiTesto.join(' ')} ${f.dettagli ?? ''}`.toLocaleLowerCase('it').includes(q)) return false;
+      if (q && !`${f.nome} ${(f.nomiAltri ?? []).join(' ')} ${f.effettiTesto.join(' ')} ${f.dettagli ?? ''}`.toLocaleLowerCase('it').includes(q)) return false;
       if (supporto !== 'tutti' && f.dove !== supporto) return false;
       if (dote && !haDote(f.effetti, dote)) return false;
       return passaStato(stato, progresso, completatoCon(f, progresso));

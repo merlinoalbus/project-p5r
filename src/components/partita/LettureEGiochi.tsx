@@ -124,9 +124,9 @@ export function LettureEGiochi({ partitaId }: { partitaId: number }) {
   const [occupati, setOccupati] = useState<Record<string, boolean>>({});
 
   /** Un libro come `Voce`: sessioni sul totale, sempre con tetto. */
-  const daLibro = (l: LibroDto): Voce => ({ chiave: l.chiave, nome: l.nomeIt ?? l.nome, progresso: l.progresso, totale: l.totaleSessioni, fatto: l.fatto, senzaTetto: false, bloccata: bloccata(l.disponibilita), motivo: motivoBlocco(l.disponibilita) });
+  const daLibro = (l: LibroDto): Voce => ({ chiave: l.chiave, nome: l.nome, progresso: l.progresso, totale: l.totaleSessioni, fatto: l.fatto, senzaTetto: false, bloccata: bloccata(l.disponibilita), motivo: motivoBlocco(l.disponibilita) });
   /** Un film come `Voce`: senza tetto quando si vede al cinema. */
-  const daFilm = (f: FilmDto): Voce => ({ chiave: f.chiave, nome: f.nomeIt ?? f.nome, progresso: f.progresso, totale: f.totaleSessioni, fatto: f.fatto, senzaTetto: f.dove === 'cinema', bloccata: bloccata(f.disponibilita), motivo: motivoBlocco(f.disponibilita) });
+  const daFilm = (f: FilmDto): Voce => ({ chiave: f.chiave, nome: f.nome, progresso: f.progresso, totale: f.totaleSessioni, fatto: f.fatto, senzaTetto: f.dove === 'cinema', bloccata: bloccata(f.disponibilita), motivo: motivoBlocco(f.disponibilita) });
   /** Un videogioco come `Voce`: round sul totale. */
   const daGioco = (g: VideogiocoDto): Voce => ({ chiave: g.chiave, nome: g.nome, progresso: g.progresso, totale: g.totaleRound, fatto: g.fatto, senzaTetto: false, bloccata: bloccata(g.disponibilita), motivo: motivoBlocco(g.disponibilita) });
 

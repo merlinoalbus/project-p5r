@@ -68,7 +68,7 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
       sessioniFatte: correnti.libri.reduce((n, l) => n + (l.chiave === libro.chiave ? libro.progresso : l.progresso), 0),
     })),
     // il libro finito dà le sue Doti: si segnano a mano, l'avviso le ricorda
-    dopoOgniInvio: (libro) => avvisaDotiDaSegnare(libro.daSegnare, libro.nomeIt ?? libro.nome),
+    dopoOgniInvio: (libro) => avvisaDotiDaSegnare(libro.daSegnare, libro.nome),
     messaggioErrore: 'Aggiornamento del libro fallito.',
     segnalaErrore: (m) => notifica('error', m),
   });
@@ -82,7 +82,7 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
       if (soloChiave && l.chiave !== soloChiave) return false;
       const progresso = valoreDi(l);
       // Nella ricerca entra anche il testo «dove» della guida: per i libri senza negozio né posizione (premi, eventi) è l'unica indicazione.
-      if (q && !`${l.nome} ${l.nomeIt ?? ''} ${(l.nomiAltri ?? []).join(' ')} ${l.negozi.map((n) => n.negozioNome).join(' ')} ${l.dove} ${l.effettiTesto.join(' ')}`.toLocaleLowerCase('it').includes(q)) return false;
+      if (q && !`${l.nome} ${(l.nomiAltri ?? []).join(' ')} ${l.negozi.map((n) => n.negozioNome).join(' ')} ${l.dove} ${l.effettiTesto.join(' ')}`.toLocaleLowerCase('it').includes(q)) return false;
       if (dote && !haDote(l.effetti, dote)) return false;
       return passaStato(stato, progresso, l.fatto);
     });
@@ -103,7 +103,7 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
     const progresso = valoreDi(libro);
     // «Lettura rapida» non tocca il libro stesso: è il pomeriggio che rende il doppio.
     const passo = d?.letturaRapida && libro.chiave !== 'lettura-rapida' ? 2 : 1;
-    const titolo = libro.nomeIt ?? libro.nome;
+    const titolo = libro.nome;
     // Dove si compra: i negozi collegati (con il prezzo) e i luoghi che non sono negozi.
     const negoziCollegati = new Set(libro.negozi.map((n) => n.negozio));
     const altrePosizioni = libro.posizioni.filter((p) => !(p.tipo === 'negozio' && negoziCollegati.has(p.chiave)));
@@ -177,8 +177,8 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
       </section>
       </>}
 
-      {libroSelezionato && <section ref={pannelloRef} className="flex scroll-mt-20 flex-col gap-2" aria-label={`Posizione di ${libroSelezionato.nomeIt ?? libroSelezionato.nome}`}>
-        <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="m-0">Dove ottenere “{libroSelezionato.nomeIt ?? libroSelezionato.nome}”</h2><button type="button" className="btn btn-ghost btn-sm touch" onClick={() => setSelezionato(null)}>Chiudi</button></div>
+      {libroSelezionato && <section ref={pannelloRef} className="flex scroll-mt-20 flex-col gap-2" aria-label={`Posizione di ${libroSelezionato.nome}`}>
+        <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="m-0">Dove ottenere “{libroSelezionato.nome}”</h2><button type="button" className="btn btn-ghost btn-sm touch" onClick={() => setSelezionato(null)}>Chiudi</button></div>
         {libroSelezionato.posizioni.length > 1 && <div className="flex flex-wrap gap-2">{libroSelezionato.posizioni.map((p, i) => <button key={`${p.tipo}/${p.chiave}`} type="button" className={`chip touch ${i === fonteSelezionata ? 'chip--attivo' : ''}`} onClick={() => setFonteSelezionata(i)}>{p.etichetta}</button>)}</div>}
         {posizione ? <DoveSiTrova tipo={posizione.tipo} chiave={posizione.chiave} titolo={posizione.etichetta} altezza={300} /> : <div className="card"><h3 className="m-0 text-base">Posizione non disponibile</h3><p className="mb-0 text-sm text-text-secondary">Questo libro si ottiene come ricompensa o evento e non ha un punto territoriale verificato.</p></div>}
       </section>}

@@ -40,7 +40,7 @@ export function LetturaDellOggetto({ lettura, partitaId, onSalvata }: { lettura:
     const libro = lettura.voce;
     const passo = lettura.letturaRapida && libro.chiave !== 'lettura-rapida' ? 2 : 1;
     return <>
-      <Avanzamento voce={libro} titolo={libro.nomeIt ?? libro.nome} tipo="libro" totale={libro.totaleSessioni} passo={passo} partitaId={partitaId}
+      <Avanzamento voce={libro} titolo={libro.nome} tipo="libro" totale={libro.totaleSessioni} passo={passo} partitaId={partitaId}
         invia={impostaProgressoLibro} onSalvata={(voce) => onSalvata({ ...lettura, voce })} />
       {passo === 2 && <p className="m-0 text-[13px] text-text-secondary">Lettura rapida: ogni sessione avanza di due; le letture già registrate non cambiano.</p>}
       {!!libro.apre?.length && <div className="flex flex-wrap items-center gap-2 text-[13px]"><strong>Apre, a lettura finita:</strong>{libro.apre.map((p) => p.casa
@@ -50,7 +50,7 @@ export function LetturaDellOggetto({ lettura, partitaId, onSalvata }: { lettura:
   }
   if (lettura.tipo === 'film') {
     const film = lettura.voce;
-    return <Avanzamento voce={film} titolo={film.nomeIt ?? film.nome} tipo={film.dove === 'cinema' ? 'cinema' : 'dvd'} totale={film.totaleSessioni}
+    return <Avanzamento voce={film} titolo={film.nome} tipo={film.dove === 'cinema' ? 'cinema' : 'dvd'} totale={film.totaleSessioni}
       partitaId={partitaId} invia={impostaProgressoFilm} onSalvata={(voce) => onSalvata({ ...lettura, voce })} />;
   }
   return <>

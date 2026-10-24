@@ -129,7 +129,7 @@ export function useMappaPartita(chiave: string, partitaId: number | null, opz: {
     try {
       const a = await impostaAcquisto(partitaId, articoloChiave, fatto, negozio.sedeChiave);
       aggiorna({ ...s, dettaglio: { ...s.dettaglio!, negozio: { ...negozio, articoli: negozio.articoli.map((x) => (x.chiave === a.chiave ? { ...x, comprato: a.acquistato } : x)) } } });
-      notifica('success', fatto ? `«${a.nomeIt ?? a.nome}» segnato come comprato.` : `«${a.nomeIt ?? a.nome}» riaperto.`);
+      notifica('success', fatto ? `«${a.nome}» segnato come comprato.` : `«${a.nome}» riaperto.`);
       opz.onCambiato?.();
       // un articolo ottenuto può essere la condizione di un altro pin
       void rileggiInSilenzio();

@@ -37,7 +37,7 @@ interface Props {
  */
 function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica, onContenutoCambiato }: Omit<Props, 'articoli'> & { a: ArticoloDto }) {
   const [occupato, setOccupato] = useState(false);
-  const nome = a.nomeIt ?? a.nome;
+  const nome = a.nome;
   const ripetibile = eOffertaAojiru({ chiave: a.chiave, catalogoChiave: a.catalogo?.chiave });
   const acquistoBloccato = a.disponibilita !== undefined && a.disponibilita.stato !== 'disponibile';
   /** Segna o toglie l'acquisto nella partita e passa al genitore l'articolo aggiornato; l'errore va in notifica. */
@@ -76,7 +76,7 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica, onConte
     <details className="catalogo-prodotto__dettagli">
       <summary className="touch">Dettagli{a.condizioni?.length ? ` · ${a.condizioni.length} ${a.condizioni.length === 1 ? 'requisito' : 'requisiti'}` : ''}{!a.verificato ? ' · fonte secondaria' : ''}</summary>
       <dl>
-        {(a.nomeOriginale || (a.nomeIt && a.nomeIt !== a.nome)) && <><dt>Nome originale</dt><dd>{a.nomeOriginale ?? a.nome}</dd></>}
+        {a.nomeOriginale && <><dt>Nome originale</dt><dd>{a.nomeOriginale}</dd></>}
         <dt>Disponibilità</dt><dd>{a.disponibilita?.requisiti.length ? <ul>{a.disponibilita.requisiti.map((r,i)=><li key={i}>{r.testo} — {r.dettaglio}</li>)}</ul> : a.condizioni?.length ? <ul>{a.condizioni.map((r,i)=><li key={i}>{r.tipo === 'avviso' ? descriviRequisitoSpillo(r) : r.testo}</li>)}</ul> : 'Nessun requisito'}</dd>
         <dt>Effetto</dt><dd>{a.effetto || 'Non indicato'}</dd>
         {a.nota && <><dt>Nota</dt><dd>{a.nota}</dd></>}
