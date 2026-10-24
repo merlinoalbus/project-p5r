@@ -6,6 +6,7 @@ export { ApiError, isApiError, apiGet, apiPost, apiPut, apiPatch, apiDelete, que
 export * from './compendio';
 export * from './traduzioni';
 export * from './partite';
+export * from './ombre';
 export * from './immagini';
 export * from './mappe';
 export * from './fusione';

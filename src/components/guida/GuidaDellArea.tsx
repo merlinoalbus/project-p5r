@@ -33,6 +33,7 @@ import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione, type ChiaveAzione } from '../shared/IconaAzione';
 import { TrasferisciVociInArea } from './TrasferisciVociInArea';
+import { PersoneDelPalazzo } from './PersoneDelPalazzo';
 import { NEL_CESTINO } from '../../utils/cestino';
 import { Modal } from '../shared/Modal';
 import { enigmiCheSiRiaprono, inCorso, righeRiapertura, testoAvanzamento, testoVociDelGesto } from '../../utils/gestiVoce';
@@ -112,6 +113,10 @@ interface Props {
   /** L4 (§4.1): le divergenze «da verificare» del Palazzo nella partita e l'apertura della finestra che le sistema (la apre la pagina). */
   divergenze?: ReadonlyArray<DivergenzaDto>;
   onDaVerificare?: (d: DivergenzaDaVerificare) => void;
+  /** L8 (R8-12, R8-29): nei Palazzi le voci Persona collegate a un'Ombra si catturano con la piastrella dei Memento, sopra l'elenco: le Persona registrate nel
+   *  compendio della partita (id; null senza partita) e il gesto che registra o toglie. Senza `onCattura` restano righe dell'elenco. */
+  catturate?: ReadonlySet<number> | null;
+  onCattura?: (personaId: number, catturata: boolean, ombra?: string) => Promise<void>;
 }
 
 /**
@@ -121,7 +126,11 @@ interface Props {
  * nella partita, pin collegati, spostamento, correzione o eliminazione e «Collega pin», che si fa sulla mappa della pagina
  * (`onCollegamento`): qui resta il conto dei pin collegati con «Fatto». Ogni modifica fa rileggere la scheda.
  */
-export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambiaStato, onPuntoAggiornato, onRicarica, areaDedalo, areePalazzo, onCollegamento, divergenze, onDaVerificare, onApriInfiltrazione, planimetriaMostrata = null }: Props) {
+export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaAperta, cambiaStato, onPuntoAggiornato, onRicarica, areaDedalo, areePalazzo, onCollegamento, divergenze, onDaVerificare, onApriInfiltrazione, planimetriaMostrata = null, catturate = null, onCattura }: Props) {
+  // L8 (R8-12, R8-29): le voci Persona di un Palazzo con la loro Persona e la loro Ombra non sono righe dell'elenco ma piastrelle di cattura (sopra);
+  // il resto della guida lavora sulle altre voci, quindi conteggi, filtri e «segnate» non le contano (la cattura sta nel compendio)
+  const daCatturare = useMemo(() => (!areaDedalo && onCattura ? areaIntera.punti.filter((p) => p.tipo === 'persona' && !!p.persona && !!p.ombra) : []), [areaIntera.punti, areaDedalo, onCattura]);
+  const area = useMemo(() => (daCatturare.length === 0 ? areaIntera : { ...areaIntera, punti: areaIntera.punti.filter((p) => !daCatturare.includes(p)) }), [areaIntera, daCatturare]);
   /** Una voce descrittiva si legge e basta; nelle aree dei dedali non ce ne sono (099, scelta dell'utente: «Tutti con stato»). */
   const descrittiva = (p: PuntoInteresseDto) => puntoDescrittivo(p.tipo, p.areaDedalo);
   /** Il nome di quel che la guida mostra: l'area del dedalo o l'area del Palazzo. */
@@ -520,6 +529,8 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
   };
 
   return (
+    <>
+    {daCatturare.length > 0 && onCattura && <PersoneDelPalazzo persone={daCatturare} nomeArea={nomeArea} partitaId={partitaId} catturate={catturate} onCattura={onCattura} />}
     <details className="text-[12px]" open aria-label={`Guida di ${nomeArea}`}>
       <summary className="touch cursor-pointer text-text-muted">
         {/* (UX3-14) con voci su altre planimetrie, i conti sono quelli della planimetria mostrata, e lo si dice */}
@@ -583,7 +594,7 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
           </section>
         )}
         <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0" aria-label={scelte ? `Voci di ${nomeArea} da scegliere` : `Voci della guida di ${nomeArea}`}>
-          {area.punti.length === 0 && <li className="py-2 text-[13px] text-text-muted">{areaDedalo ? 'Quest’area non ha ancora voci: aggiungile qui sotto.' : 'La guida non ha voci per quest’infiltrazione: aggiungile qui sotto.'}</li>}
+          {area.punti.length === 0 && <li className="py-2 text-[13px] text-text-muted">{areaDedalo ? 'Quest’area non ha ancora voci: aggiungile qui sotto.' : daCatturare.length > 0 ? 'Nessun’altra voce: le Persona da catturare sono qui sopra.' : 'La guida non ha voci per quest’infiltrazione: aggiungile qui sotto.'}</li>}
           {area.punti.length > 0 && puntiQui.length === 0 && <li className="py-2 text-[13px] text-text-muted">Nessuna voce su questa planimetria: le voci dell’infiltrazione stanno nelle altre planimetrie, qui sotto.</li>}
           {puntiQui.length > 0 && puntiVisibili.length === 0 && <li className="py-2 text-[13px] text-text-muted">Nessuna voce con questi filtri{!mostraGestiti && gestitiArea > 0 ? ` (${gestitiArea} segnate nascoste)` : ''}.</li>}
           {/* nella scelta le voci sono righe da spuntare (i passi seguono il loro Enigma e non si scelgono): niente scheda né gesti */}
@@ -647,5 +658,6 @@ export function GuidaDellArea({ area, planimetrie, partitaId, mappaAperta, cambi
         )}
       </div>
     </details>
+    </>
   );
 }

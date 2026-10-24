@@ -192,12 +192,7 @@ export function DungeonDettaglioPage() {
   const dati = useCarica(() => getDungeon(chiave, partitaId ?? undefined), [chiave, partitaId]);
   useDocumentTitle(dati.dati ? dati.dati.nome : 'Palazzo');
   const d = dati.dati;
-  // L8 (B7, R8-16): un Palazzo confluito in un dedalo (Iweleth) non ha una casa sua: l'indirizzo vecchio porta al dedalo, dove stanno le aree, le voci e
-  // le planimetrie come archivio. Nessun link rotto dai percorsi di prima.
-  const confluisceIn = d?.confluisceIn;
-  useEffect(() => {
-    if (confluisceIn) navigate(`/guida/dungeon/${confluisceIn.dungeon}?area=${encodeURIComponent(confluisceIn.dedalo)}`, { replace: true });
-  }, [confluisceIn, navigate]);
+  // (L8, R8-16: l'indirizzo di Iweleth porta al suo dedalo dalla rotta in `router.tsx`; qui non serve altro)
   const memento = d?.tipo === 'mementos';
   // L4 (§4.3): le divergenze conservate «da verificare» del Palazzo nella partita; si chiedono solo quando la scheda dice che ce ne sono
   const quanteDaVerificare = !memento ? d?.daVerificare ?? 0 : 0;
@@ -333,10 +328,10 @@ export function DungeonDettaglioPage() {
    * Nei Memento una Persona è catturata se è registrata nel compendio della partita (scelte dell'utente, 2026-10-12): la registra o
    * la toglie, aggiorna subito le catturate della scheda e notifica. Le catture non contano nella percentuale: niente da ricalcolare.
    */
-  const cattura = async (personaId: number, catturata: boolean): Promise<void> => {
+  const cattura = async (personaId: number, catturata: boolean, ombra?: string): Promise<void> => {
     if (!partitaId) return;
     try {
-      const compendio = await aggiornaCompendio(partitaId, personaId, { registrata: catturata });
+      const compendio = await aggiornaCompendio(partitaId, personaId, { registrata: catturata, ...(catturata && ombra ? { ombra } : {}) });
       const registrate = compendio.filter((c) => c.registrata).map((c) => c.personaId);
       dati.imposta((attuale) => ({ ...attuale, personeCatturate: registrate }));
     } catch (err) { notifica('error', err instanceof Error ? err.message : 'Compendio non aggiornato.'); }
@@ -708,7 +703,7 @@ export function DungeonDettaglioPage() {
   };
 
   return (
-    <PageState isLoading={(dati.caricamento && !d) || !!confluisceIn} error={dati.errore} onRetry={() => void dati.ricarica()}>
+    <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && area && (
         // **Da 1024 px il Palazzo sta in una schermata** (richiesta dell'utente, 2026-09-29): «componenti che
         // sforano la pagina… aggiungendo una scrollbar di pagina che non è accettabile… tutti i componenti devono
@@ -1120,7 +1115,7 @@ export function DungeonDettaglioPage() {
                 {/* La guida dell'area: voci modificabili, spostabili e collegate ai pin delle planimetrie (2026-10-01). */}
                 <GuidaDellArea key={area.chiave} area={area} planimetrie={d.planimetrie} partitaId={partitaId} mappaAperta={mappaScelta} areePalazzo={d.aree}
                   divergenze={divergenze.dati ?? undefined} onDaVerificare={setDaVerificare} onApriInfiltrazione={scegliInfiltrazione}
-                  planimetriaMostrata={mappaScelta}
+                  planimetriaMostrata={mappaScelta} catturate={catturate} onCattura={cattura}
                   cambiaStato={cambiaStato} onPuntoAggiornato={aggiornaPunto} onRicarica={async () => { await dati.ricarica(); setVersioneStati((v) => v + 1); }} onCollegamento={aggiornaCollegamento} />
               </aside>
             </div>

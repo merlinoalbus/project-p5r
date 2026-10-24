@@ -68,7 +68,7 @@ interface Props {
   /** Le Persona registrate nel compendio della partita (id): le catturate (2026-10-12); null senza partita. */
   catturate: ReadonlySet<number> | null;
   /** Registra (o toglie) una Persona nel compendio della partita. */
-  onCattura: (personaId: number, catturata: boolean) => Promise<void>;
+  onCattura: (personaId: number, catturata: boolean, ombra?: string) => Promise<void>;
   /** Rilegge la scheda (area aggiunta, corretta, spostata o eliminata; Richiesta collocata; voci cambiate). */
   onRicarica: () => Promise<void>;
 }

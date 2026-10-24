@@ -153,7 +153,7 @@ export const annullaRegaloOggetto = (id: number, confidente: string, catalogo: s
 /** Il compendio personale della partita: le Persona registrate con la loro istantanea. */
 export const getCompendioPartita = (id: number): Promise<CompendioPartitaDto[]> => apiGet(`/partite/${id}/compendio`);
 /** Registra a mano una Persona nel compendio (istantanea di solo livello, senza bonus né skill) o la toglie; risponde con il compendio intero. */
-export const aggiornaCompendio =(id: number, personaId: number, dati: { registrata: boolean; livelloRegistrato?: number | null }): Promise<CompendioPartitaDto[]> =>
+export const aggiornaCompendio =(id: number, personaId: number, dati: { registrata: boolean; livelloRegistrato?: number | null; ombra?: string }): Promise<CompendioPartitaDto[]> =>
   apiPut(`/partite/${id}/compendio/${personaId}`, dati);
 
 /** Le Persona nella scorta della partita. */
