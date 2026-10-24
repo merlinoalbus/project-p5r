@@ -48,10 +48,10 @@ const CAMPI: Record<TipoCatalogo, readonly string[]> = {
   articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'categoria', 'per', 'prezzo', 'quantita', 'oggetto_fonte', 'oggetto_chiave', 'catalogo_chiave', 'costo_json', 'effetto_json', 'effetto', 'statistiche', 'nota', 'verificato'],
   libro: ['condizioni_json', 'nome', 'dove', 'prezzo', 'dote', 'note', 'sblocca', 'effetto_json', 'effetti_json', 'sessioni', 'dettagli', 'verificato'],
   film: ['condizioni_json', 'nome', 'dove', 'dote', 'note', 'note_successive', 'effetti_json', 'prezzo', 'sessioni', 'dettagli', 'verificato'],
-  attivita: ['pesca_regola_chiave','pesca_ruolo','confidente_chiave', 'condizioni_json', 'nome', 'tipo', 'luogo', 'luogo_chiave', 'sede_chiave', 'fascia', 'costo', 'sblocco', 'sessioni', 'doti_json', 'paga_yen', 'paga_massima', 'dettagli', 'effetti_json', 'tracciamento', 'quiz_json', 'verificato'],
+  attivita: ['pesca_regola_chiave','pesca_ruolo','confidente_chiave', 'condizioni_json', 'nome', 'tipo', 'luogo', 'luogo_chiave', 'sede_chiave', 'fascia', 'costo', 'sessioni', 'doti_json', 'paga_yen', 'paga_massima', 'dettagli', 'effetti_json', 'tracciamento', 'quiz_json', 'verificato'],
   // L5 (R5-07, un modulo solo): orari strutturati (null = regola dell'app), Area, sblocco, Confidenti e piatti; `quando` resta (lo legge il
   // sottotitolo del collegamento del pin di un luogo); i `giorni_json` del luogo sono gli orari (L11, migrazione 184)
-  luogo: ['condizioni_json', 'quartiere_chiave', 'tipo', 'nome', 'cosa_offre', 'orari_json', 'area_chiave', 'sblocco', 'confidenti_json', 'piatti_json', 'note', 'verificato'],
+  luogo: ['condizioni_json', 'quartiere_chiave', 'tipo', 'nome', 'cosa_offre', 'orari_json', 'area_chiave', 'confidenti_json', 'piatti_json', 'note', 'verificato'],
   domanda: ['data', 'tipo', 'chi', 'domanda', 'risposte_json', 'ricompensa', 'note', 'fonte'],
   cruciverba: ['data', 'indizio', 'risposta', 'risposta_en', 'fonte'],
 };
@@ -593,7 +593,7 @@ function ripristinaElementoNellaTransazione(tipo: TipoCatalogo, chiave: string):
   if (!originale) throw httpErrors.badRequest('riga-del-seed', 'Questa riga arriva dai dati della guida e non è stata modificata: non c\'è nulla da ripristinare. Usa «Nascondi» se non vuoi vederla.');
   const conservaFonteConfidente = tipo === 'attivita' && r.confidente_chiave != null && !('confidente_chiave' in originale);
   if (conservaFonteConfidente) {
-    for (const c of ['fascia', 'condizioni_json', 'effetti_json', 'tracciamento', 'sessioni', 'quiz_json', 'costo', 'sblocco', 'paga_yen', 'paga_massima', 'doti_json']) originale[c] = r[c];
+    for (const c of ['fascia', 'condizioni_json', 'effetti_json', 'tracciamento', 'sessioni', 'quiz_json', 'costo', 'paga_yen', 'paga_massima', 'doti_json']) originale[c] = r[c];
   }
   const daProsaRip = PROFILO[tipo].condizioniDa;
   if (daProsaRip && originale.condizioni_json == null) originale.condizioni_json = condizioniCompleteDaProsa(tipo, String(r.chiave), originale, 'ripristino');

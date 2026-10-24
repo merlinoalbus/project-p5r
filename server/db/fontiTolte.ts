@@ -79,6 +79,14 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     sostituitaDa: 'le condizioni dell’offerta (`condizioni_json`): il «disponibile dal» mostrato è generato da esse; i testi di prima restano nell’archivio «archivio-frasi-l11»',
   },
   {
+    schema: 'main', tabella: 'luogo', colonna: 'sblocco', tolta: 'L11 · migrazione 218',
+    sostituitaDa: 'le condizioni del luogo (`condizioni_json`) e gli inviti che lo aprono: la frase mostrata è generata da esse; le frasi (anche quelle con la data sbagliata) restano nell’archivio «archivio-frasi-l11», e il racconto del Confidente nella nota del luogo',
+  },
+  {
+    schema: 'main', tabella: 'attivita', colonna: 'sblocco', tolta: 'L11 · migrazione 218',
+    sostituitaDa: 'le condizioni dell’attività (`condizioni_json`): la frase mostrata è generata da esse; le frasi restano nell’archivio «archivio-frasi-l11»',
+  },
+  {
     schema: 'main', tabella: 'luogo', colonna: 'quando', tolta: 'L11 · migrazione 193',
     sostituitaDa: 'gli orari del luogo (`orari_json`): il visore e la scheda mostrano l’orario ricavato dai dati; i valori (anche dei luoghi che divergevano) restano nell’archivio «archivio-frasi-l11»',
   },

@@ -32,6 +32,7 @@ import { avanzamentoCompleto, lettureCompletate, letturaCompletata } from './let
 import { sessioniVideogioco } from './sessioniVideogioco.js';
 import { disponibilitaAttivita, sediAttivita, type SediAttivita } from './disponibilitaAttivita.js';
 import { fonteConfidenteAttivita } from './fonteConfidenteAttivitaService.js';
+import { fraseDelleCondizioni } from './condizioni/fraseCondizioni.js';
 import { leggiRegolaPesca } from './regolePescaService.js';
 
 interface RigaAttivita { confidente_chiave: string | null; pesca_regola_chiave?: string | null; pesca_ruolo?: 'visita'|'obiettivi'|null }
@@ -46,7 +47,7 @@ function datiCatalogoLettura(oggetto: CatalogoOggettoDto | undefined, prezzoGuid
       ? `${cinema ? 'Costo della visione indicato nella guida' : 'Prezzo indicato nella guida'}: ${prezzoGuida.toLocaleString('it-IT')} ¥. Non è un prezzo di vendita ricavato dai listini.` : null };
 }
 
-interface RigaAttivita { chiave: string; ordine: number; nome: string; tipo: string; luogo: string; luogo_chiave: string | null; sede_chiave: string | null; fascia: string | null; costo: number | null; sblocco: string | null; sessioni: number | null; doti_json: string; paga_yen: number | null; paga_massima: number | null; dettagli: string | null; effetti_json: string | null; tracciamento: string; quiz_json: string | null; fonte: string; verificato: number; condizioni_json: string | null }
+interface RigaAttivita { chiave: string; ordine: number; nome: string; tipo: string; luogo: string; luogo_chiave: string | null; sede_chiave: string | null; fascia: string | null; costo: number | null; sessioni: number | null; doti_json: string; paga_yen: number | null; paga_massima: number | null; dettagli: string | null; effetti_json: string | null; tracciamento: string; quiz_json: string | null; fonte: string; verificato: number; condizioni_json: string | null }
 interface RigaLibro { effetti_json: string | null; chiave: string; ordine: number; nome: string; dove: string; prezzo: number | null; disponibile_dal: string | null; dote: string | null; note: number | null; sblocca: string | null; sessioni: number | null; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
 interface RigaFilm { effetti_json: string | null; chiave: string; ordine: number; nome: string; dove: 'cinema' | 'dvd'; periodo: string; dote: string | null; note: number | null; note_successive: number | null; prezzo: number | null; sessioni: number; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
 
@@ -93,12 +94,12 @@ const attivitaDto = (r: RigaAttivita, sedi: SediAttivita, st: StatoDisponibilita
   const { prezzo, ...identita } = datiCatalogoLettura(oggetto, r.costo);
   const fonteConfidente = fonteConfidenteAttivita({ ...r }, st);
   const tracciamento = eTracciamentoAttivita(r.tracciamento) ? r.tracciamento : tracciamentoPerTipo(r.tipo);
-  return {
+  const dto = {
     // R10-27/3: lo stato della partita nella scheda, come nelle schede di Confidente e Palazzo (volte svolte, dal contatore unico)
     ...(st && !fonteConfidente && tracciamento === 'svolta' ? { volteSvolte: st.attivitaSvolte.get(r.chiave) ?? 0 } : {}),
     pesca: r.pesca_regola_chiave && r.pesca_ruolo ? { regola: leggiRegolaPesca(r.pesca_regola_chiave), ruolo: r.pesca_ruolo } : null,
     confidenteChiave: r.confidente_chiave ?? null, fonteConfidente,
-    chiave: r.chiave, nome: oggetto?.nome ?? r.nome, ...identita, tipo: r.tipo as AttivitaDto['tipo'], luogo: r.luogo, luogoChiave: r.luogo_chiave, fascia: r.fascia as AttivitaDto['fascia'], costo: prezzo, sblocco: r.sblocco, sessioni: r.sessioni,
+    chiave: r.chiave, nome: oggetto?.nome ?? r.nome, ...identita, tipo: r.tipo as AttivitaDto['tipo'], luogo: r.luogo, luogoChiave: r.luogo_chiave, fascia: r.fascia as AttivitaDto['fascia'], costo: prezzo, sblocco: null, sessioni: r.sessioni,
     doti: fonteConfidente ? [] : JSON.parse(r.doti_json) as AttivitaDto['doti'],
     pagaYen: r.paga_yen, pagaMassima: r.paga_massima, dettagli: r.dettagli, ...effettiDto(fonteConfidente ? null : r.effetti_json),
     tracciamento, quiz: leggiQuiz(r.quiz_json),
@@ -107,6 +108,7 @@ const attivitaDto = (r: RigaAttivita, sedi: SediAttivita, st: StatoDisponibilita
     ...(fonteConfidente ? { fascia: null, sblocco: null, doti: [], effetti: [], effettiTesto: [], tracciamento: 'nessuno' as const,
       quiz: null, condizioni: null, disponibilita: null } : disponibilitaAttivita(r, st, sedi)),
   };
+  return { ...dto, sblocco: fraseDelleCondizioni(dto.condizioni) };
 };
 interface StatoLetture { fatti: Set<string>; progressiLibri: Map<string, number>; progressiFilm: Map<string, number>; progressiVideogiochi: Map<string, number>; sessioniVideogioco: ReturnType<typeof sessioniVideogioco> }
 /** Il libro che cambia le regole di tutti gli altri, **da lì in avanti**: «Lettura rapida» raddoppia

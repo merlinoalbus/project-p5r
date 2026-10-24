@@ -6,7 +6,6 @@ const elencoVuoto = (v: unknown): boolean => {
   if (typeof v !== 'string') return v == null;
   try { const x: unknown = JSON.parse(v); return Array.isArray(x) && x.length === 0; } catch { return false; }
 };
-const haTesto = (v: unknown): boolean => v != null && (typeof v !== 'string' || v.trim() !== '');
 
 /** Campi autonomi da risolvere esplicitamente prima di usare la fonte Confidente. Il RAW legacy delle Doti di
  * una riga già collegata può rimanere storico: non viene né esposto come premio né ricostruito in effetti. */
@@ -22,7 +21,6 @@ export function campiAutonomiAttivitaConfidente(d: Record<string, unknown>, conD
   if (d.quiz_json != null) campi.push('quiz_json');
   if (d.costo != null && d.costo !== 0) campi.push('costo');
   for (const c of ['paga_yen', 'paga_massima']) if (d[c] != null) campi.push(c);
-  for (const c of ['sblocco']) if (haTesto(d[c])) campi.push(c);
   return campi;
 }
 

@@ -70,7 +70,6 @@ function CampiLuogoL5({ dati, imposta, disabilitato }: Pick<PropsModulo, 'dati' 
           <Selettore etichetta="Area" valore={testoDi(dati.area_chiave)} vuoto="Da collocare" disabilitato={disabilitato || q.caricamento || !quartiere}
             opzioni={(q.dati?.aree ?? []).map((a) => ({ chiave: a.chiave, nome: a.nome }))} onCambia={(k) => imposta({ area_chiave: k || null })} />
         </Blocco>
-        <Campo nome="sblocco" etichetta="Sblocco (come lo dice la guida)" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={600} aiuto="Resta come nota: la condizione che l’app valuta sono le condizioni qui sotto" />
       </Griglia>
       <fieldset className="regole-editor flex flex-col gap-2">
         <legend>Confidenti che si incontrano qui</legend>

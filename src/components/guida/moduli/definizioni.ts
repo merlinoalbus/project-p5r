@@ -145,7 +145,6 @@ function attivitaCon(tipoFisso?: 'videogioco'): DefinizioneModulo {
         _effettiRaw: e?.dati.effetti_json ?? null, _quizRaw: e?.dati.quiz_json ?? null,
         _effettiDaRisolvere: !jsonSenzaPerdite(e?.dati.effetti_json, normalizzaVociEffetto),
         _quizDaRisolvere: !jsonSenzaPerdite(e?.dati.quiz_json, normalizzaQuiz),
-        sblocco: e?.dati.sblocco ?? null,
 
         sede_chiave: (e?.dati.sede_chiave as string | null) ?? null, luogo_chiave: (e?.dati.luogo_chiave as string | null) ?? null,
         costo: numeroDi(e?.dati.costo), paga_yen: numeroDi(e?.dati.paga_yen), paga_massima: numeroDi(e?.dati.paga_massima),
@@ -193,7 +192,6 @@ export const luogo: DefinizioneModulo = {
     // gli orari del luogo; null = la guida non li dà (regola dell'app, «giorno e sera»)
     orari_json: e?.dati.orari_json ? normalizzaOrari(jsonDi(e.dati.orari_json, ORARI_SEMPRE)) : null,
     area_chiave: (e?.dati.area_chiave as string | null) ?? null,
-    sblocco: testoDi(e?.dati.sblocco),
     confidenti_json: (jsonDi<unknown>(e?.dati.confidenti_json, []) as unknown[]).filter((c): c is string => typeof c === 'string'),
     piatti_json: jsonDi<PiattoLuogo[] | null>(e?.dati.piatti_json, null),
   }),
@@ -202,7 +200,7 @@ export const luogo: DefinizioneModulo = {
     const piatti = (d.piatti_json as PiattoLuogo[] | null) ?? null;
     return {
       ...senzaTemporanei(d), nome: testoDi(d.nome).trim(), cosa_offre: testoDi(d.cosa_offre).trim(), note: testoOnull(d.note),
-      sblocco: testoOnull(d.sblocco), confidenti_json: Array.isArray(d.confidenti_json) ? d.confidenti_json : [],
+      confidenti_json: Array.isArray(d.confidenti_json) ? d.confidenti_json : [],
       piatti_json: piatti && piatti.length > 0 ? piatti.map((p) => ({ nome: p.nome.trim(), prezzo: p.prezzo, effetto: p.effetto.trim() })) : null,
     };
   },

@@ -15,6 +15,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
 import { condizioniDiSblocco, invitiPerSblocco } from './sbloccoLuoghi.js';
+import { fraseDelleCondizioni } from './condizioni/fraseCondizioni.js';
 import type { RigaInvito } from './condizioni/condizioneEffettiva.js';
 import { elencaInviti } from './inviti.js';
 import { chiaveMappa, nomePercorso } from './mappe/percorsiMappe.js';
@@ -33,7 +34,7 @@ import type { LuogoDettaglioDto, LuogoDto, PresenzaLuogoDto } from '../../shared
 /** Una riga di `luogo` (con le colonne della 115, assenti su uno schema di prima). */
 export interface RigaLuogo {
   chiave: string; quartiere_chiave: string; ordine: number; tipo: string; nome: string; cosa_offre: string; quando: string | null;
-  sblocco: string | null; confidenti_json: string; piatti_json: string | null; note: string | null; fonte: string; verificato: number; origine: string;
+  confidenti_json: string; piatti_json: string | null; note: string | null; fonte: string; verificato: number; origine: string;
   condizioni_json: string | null; seed_json?: string | null; area_chiave?: string | null; orari_json?: string | null; solo_eventi_confidente?: string | null;
 }
 
@@ -157,7 +158,7 @@ export function luogoDto(r: RigaLuogo, l: LettureLuoghi): LuogoDto {
   const area = r.area_chiave ? l.aree.aree.get(r.area_chiave) : undefined;
   const pin = l.pin.get(r.chiave) ?? [];
   return {
-    chiave: r.chiave, ordine: r.ordine, tipo: r.tipo as LuogoDto['tipo'], nome: r.nome, cosaOffre: r.cosa_offre, quando, giorni, giorniTesto: descriviGiorni(giorni), sblocco: r.sblocco,
+    chiave: r.chiave, ordine: r.ordine, tipo: r.tipo as LuogoDto['tipo'], nome: r.nome, cosaOffre: r.cosa_offre, quando, giorni, giorniTesto: descriviGiorni(giorni), sblocco: fraseDelleCondizioni(condizioni),
     confidenti, attivita: l.attivita.get(r.chiave) ?? [], negozi, negozio: negozi[0]?.chiave ?? null, origine: r.origine === 'utente' ? 'utente' : 'seed',
     piatti: r.piatti_json ? (JSON.parse(r.piatti_json) as LuogoDto['piatti']) : null, note: r.note, verificato: r.verificato === 1,
     condizioni,

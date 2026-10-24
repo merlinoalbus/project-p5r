@@ -198,7 +198,6 @@ const datiAttivitaBase = z.object({
   sede_chiave: z.string().max(200).nullable().optional(),
   fascia: z.enum(chiaviDi(FASCE_ATTIVITA)).nullable().optional(),
   costo: z.number().int().min(0).max(9_999_999).nullable().optional(),
-  sblocco: testo(400).nullable().optional(),
   sessioni: z.number().int().min(1).max(99).nullable().optional(),
   paga_yen: z.number().int().min(0).max(9_999_999).nullable().optional(),
   paga_massima: z.number().int().min(0).max(9_999_999).nullable().optional(),
@@ -231,7 +230,6 @@ const datiLuogo = z.object({
   /** L'Area di L2 del luogo (chiave dell'area, del suo quartiere); null = «da collocare». */
   area_chiave: z.string().min(1).max(200).nullable().optional(),
   /** Lo sblocco come lo dice la guida (prosa, resta come nota: la condizione valutata è `condizioni_json`). */
-  sblocco: testo(600).nullable().optional(),
   /** I Confidenti che si incontrano qui. */
   confidenti_json: z.array(z.string().min(1).max(80)).max(30).transform((v) => JSON.stringify([...new Set(v)])).optional(),
   /** I piatti del menu (nome, prezzo, effetto). */
