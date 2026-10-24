@@ -39,6 +39,7 @@ export const NOME_TIPO_CESTINO: Record<TipoCestino, string> = {
   attivita: 'Attività',
   domanda: 'Domanda',
   cruciverba: 'Cruciverba',
+  invito: 'Invito del Confidente',
 };
 
 /**
@@ -111,7 +112,7 @@ export function contenutoLeggibile(v: Pick<VoceCestinoUnificatoDto, 'tipo' | 'ch
 }
 
 /** La tabella dell'elemento stesso, per tipo (la stessa regola del server). */
-const RADICE_CESTINO: Record<Exclude<TipoCestino, 'osservazione-pesca'>, string> = { area: 'dungeon_area', voce: 'punto_interesse', mappa: 'mappa', pin: 'spillo', 'area-dedalo': 'area_dedalo', 'area-fisica': 'area', luogo: 'luogo', negozio: 'negozio', richiesta: 'richiesta', oggetto: 'catalogo_oggetto', 'voce-diario': 'voce_giornata', partita: 'partita', 'fonte-acquisto': 'acquisto_provenienza', 'fonte-pesca': 'pesca_provenienza', 'sessione-pesca': 'pesca_sessione', 'persona-scorta': 'persona_posseduta', articolo: 'articolo', libro: 'libro', film: 'film', attivita: 'attivita', domanda: 'domanda', cruciverba: 'cruciverba' };
+const RADICE_CESTINO: Record<Exclude<TipoCestino, 'osservazione-pesca'>, string> = { area: 'dungeon_area', voce: 'punto_interesse', mappa: 'mappa', pin: 'spillo', 'area-dedalo': 'area_dedalo', 'area-fisica': 'area', luogo: 'luogo', negozio: 'negozio', richiesta: 'richiesta', oggetto: 'catalogo_oggetto', 'voce-diario': 'voce_giornata', partita: 'partita', 'fonte-acquisto': 'acquisto_provenienza', 'fonte-pesca': 'pesca_provenienza', 'sessione-pesca': 'pesca_sessione', 'persona-scorta': 'persona_posseduta', articolo: 'articolo', libro: 'libro', film: 'film', attivita: 'attivita', domanda: 'domanda', cruciverba: 'cruciverba', invito: 'confidente_invito' };
 
 /** Le due osservazioni autonome condividono il tipo Cestino, non la tabella radice. */
 function radiceCestino(v: Pick<VoceCestinoUnificatoDto, 'tipo' | 'chiave'>): string | null {

@@ -222,6 +222,30 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     risposta: '`DialogoModificatoDto`',
     errori: [[404, 'confidente-non-trovato'], [404, 'dialogo-non-trovato'], [409, 'dialogo-della-guida']],
   },
+  'POST /api/compendio/confidenti/:chiave/inviti': {
+    sommario: 'Crea un invito del Confidente per un giorno, con il posto che apre',
+    descrizione: 'Corpo strict `{ data: "MM-GG", apre: { tipo: quartiere|luogo|area, chiave }, condizioni, nota }`. La chiave dell’invito è `<confidente>/<data>`: un solo invito per giorno. Le condizioni sono quelle del vocabolario unico e devono riferirsi a dati esistenti. L’invito nasce senza fotografia della guida: si può togliere (Cestino) e non ha «Ripristina».',
+    risposta: '`InvitoDto` (201)',
+    errori: [[400, 'data-non-valida'], [400, 'condizione-circolare'], [404, 'confidente-non-trovato'], [404, 'posto-non-trovato'], [404, 'condizione-non-trovata'], [409, 'invito-esistente']],
+  },
+  'PUT /api/compendio/confidenti/:chiave/inviti/:data': {
+    sommario: 'Cambia il posto aperto, le condizioni e la nota di un invito',
+    descrizione: 'Corpo strict `{ apre, condizioni, nota }`; la data è la chiave e non si cambia. Per un invito della guida la fotografia resta com’era e `modificato` diventa vero: «Ripristina» rimette posto, condizioni e nota. Vale per tutte le partite.',
+    risposta: '`InvitoDto`',
+    errori: [[400, 'condizione-circolare'], [404, 'confidente-non-trovato'], [404, 'invito-non-trovato'], [404, 'posto-non-trovato'], [404, 'condizione-non-trovata']],
+  },
+  'POST /api/compendio/confidenti/:chiave/inviti/:data/ripristina': {
+    sommario: 'Riporta l’invito del Confidente alla guida',
+    descrizione: 'Rimette posto, condizioni e nota dalla fotografia della guida. 409 `invito-della-guida` se l’invito non è stato modificato, 409 `invito-creato-dall-utente` se non viene dalla guida.',
+    risposta: '`InvitoDto`',
+    errori: [[404, 'confidente-non-trovato'], [404, 'invito-non-trovato'], [409, 'invito-della-guida'], [409, 'invito-creato-dall-utente'], [409, 'invito-fotografia-illeggibile'], [409, 'invito-fotografia-incompleta']],
+  },
+  'DELETE /api/compendio/confidenti/:chiave/inviti/:data': {
+    sommario: 'Toglie un invito creato dall’utente (finisce nel Cestino)',
+    descrizione: 'Solo gli inviti creati dall’utente: uno della guida si modifica o si ripristina (409 `invito-della-guida`). 409 `invito-in-uso` se una partita l’ha già registrato, se un effetto di una voce del Diario lo cita o se la condizione di un altro dato lo cita. Risponde 204.',
+    risposta: 'Nessun contenuto (204)',
+    errori: [[404, 'confidente-non-trovato'], [404, 'invito-non-trovato'], [409, 'invito-della-guida'], [409, 'invito-in-uso']],
+  },
 
   // ---- Blocchi della guida (dati_guida) ----
   'GET /api/compendio/oggetti-guida': {

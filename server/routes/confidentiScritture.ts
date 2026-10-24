@@ -8,6 +8,8 @@ import { validate } from '../middleware/validate.js';
 import { paramsChiaveGuida } from '../schemas/guidaDungeon.js';
 import { abilitaDelConfidente, impostaAbilita, impostaDialogo, impostaRango, MODI_RANGO, ranghiDelConfidente, ripristinaAbilita, ripristinaDialogo, ripristinaDoteIncontro, ripristinaRango } from '../services/confidentiScritture.js';
 import { dettaglioConfidente } from '../services/compendioService.js';
+import { condizioneSpillo } from '../schemas/mappe.js';
+import { creaInvito, eliminaInvito, modificaInvito, ripristinaInvito, type CorpoInvito, type CorpoNuovoInvito } from '../services/invitiScritture.js';
 
 const router = Router();
 
@@ -50,6 +52,31 @@ router.put('/confidenti/:chiave/dialoghi/:id', validate({ params: paramsDialogo,
 router.post('/confidenti/:chiave/dialoghi/:id/ripristina', validate({ params: paramsDialogo }), (req, res) => {
   const p = req.params as unknown as { chiave: string; id: number };
   res.json(ripristinaDialogo(p.chiave, p.id));
+});
+
+/** Gli inviti del Confidente (R9-07c/1-2): la data è la chiave, quindi sta nel percorso e non si cambia. */
+const dataInvito = z.string().regex(/^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/);
+const paramsInvito = z.object({ chiave: z.string().min(1).max(200), data: dataInvito });
+const corpoInvito = z.object({
+  apre: z.object({ tipo: z.enum(['quartiere', 'luogo', 'area']), chiave: z.string().min(1).max(200) }).strict(),
+  condizioni: z.array(condizioneSpillo).max(20),
+  nota: z.string().max(500),
+}).strict();
+router.post('/confidenti/:chiave/inviti', validate({ params: paramsChiaveGuida, body: corpoInvito.extend({ data: dataInvito }).strict() }), (req, res) => {
+  res.status(201).json(creaInvito(String(req.params.chiave), req.body as CorpoNuovoInvito));
+});
+router.put('/confidenti/:chiave/inviti/:data', validate({ params: paramsInvito, body: corpoInvito }), (req, res) => {
+  const p = req.params as unknown as { chiave: string; data: string };
+  res.json(modificaInvito(p.chiave, p.data, req.body as CorpoInvito));
+});
+router.post('/confidenti/:chiave/inviti/:data/ripristina', validate({ params: paramsInvito }), (req, res) => {
+  const p = req.params as unknown as { chiave: string; data: string };
+  res.json(ripristinaInvito(p.chiave, p.data));
+});
+router.delete('/confidenti/:chiave/inviti/:data', validate({ params: paramsInvito }), (req, res) => {
+  const p = req.params as unknown as { chiave: string; data: string };
+  eliminaInvito(p.chiave, p.data);
+  res.status(204).end();
 });
 
 export default router;

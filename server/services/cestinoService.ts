@@ -93,6 +93,8 @@ const RADICE: Record<TipoElementoCestino, { tabella: string; colonna: string }> 
   attivita: { tabella: 'attivita', colonna: 'chiave' },
   domanda: { tabella: 'domanda', colonna: 'chiave' },
   cruciverba: { tabella: 'cruciverba', colonna: 'chiave' },
+  // R9-07c/1: un invito di un Confidente creato dall'utente
+  invito: { tabella: 'confidente_invito', colonna: 'chiave' },
   'voce-diario': { tabella: 'voce_giornata', colonna: 'uid' },
   pin: { tabella: 'spillo', colonna: 'uid' },
 };
@@ -147,6 +149,7 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   ombra: ['Ombra', 'Ombre'], giorno: ['giorno del gioco', 'giorni del gioco'], evento_calendario_voce: ['collegamento evento-voce', 'collegamenti evento-voce'],
   fortuna_partita: ['stato della Fortuna nelle partite', 'stati della Fortuna nelle partite'], effetto_stato_voce: ['stato segnato da una voce nelle partite', 'stati segnati dalle voci nelle partite'],
   esame_piazzamento_partita: ['piazzamento a un esame nelle partite', 'piazzamenti agli esami nelle partite'],
+  confidente_invito: ['invito del Confidente', 'inviti dei Confidenti'],
 };
 
 /** Il nome per l'utente di `quante` righe di una tabella (al singolare per una sola). */
