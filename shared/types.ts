@@ -603,6 +603,8 @@ export interface AllertaGiornoDto {
   effetti: string[];
   /** Le fasce in cui vale, prima giorno poi sera (la notte torrida solo di sera, l'ondata di calore solo di giorno). */
   fasce: FasciaGioco[];
+  /** R11-15/1: corretta dall'utente in quel giorno (si rimette con `/api/correzioni/allerta-meteo/MM-GG:chiave/ripristina`). */
+  modificata: boolean;
 }
 
 /** Il meteo di un giorno nella partita, di giorno e di sera («Sereno/Pioggia» della guida = sereno di giorno, pioggia di sera). */
@@ -2589,7 +2591,11 @@ export interface GiornoCalendarioDto {
   meteo: string | null;
   eventi: Array<{ id: number; tipo: 'storia' | 'scadenza' | 'sblocco' | 'esame' | 'festa' | 'vacanza' | 'consiglio' | 'meteo'; titolo: string; dettaglio: string; fonte: string;
     /** Le voci del Diario collegate all'evento (L9 R9-20): un collegamento per chiave, non una voce dell'evento. */
-    voci: Array<{ uid: string; giorno: string; fascia: 'giorno' | 'sera'; azione: string; certezza: 'C' | 'D' }> }>;
+    voci: Array<{ uid: string; giorno: string; fascia: 'giorno' | 'sera'; azione: string; certezza: 'C' | 'D' }>;
+    /** R11-15/1: dato proprio del Calendario (feste, trama, consigli, sblocchi «rango massimo»): si corregge con `/api/correzioni/evento-calendario/:id`. Gli altri si correggono dalla loro fonte. */
+    modificabile: boolean;
+    /** Corretto dall'utente: ha un valore della guida da rimettere. */
+    modificato: boolean }>;
   tempoLibero: { giorno: boolean; sera: boolean } | null;
   /** Numero della «Soluzione per settimana» della guida. */
   settimana: number | null;
@@ -3468,7 +3474,7 @@ export const TIPI_MODIFICABILI = ['quartiere', 'trofeo', 'dote', 'trasformazione
   'sfide-battaglie', 'battaglia-sfida', 'boss-segreto', 'sfide-magnate', 'magnate-sfida', 'tratto', 'sfide-tratti', 'sfide-quiz-tv',
   'finale', 'covo', 'covo-sfida', 'covo-premio', 'dlc', 'meteo', 'completamento-sezione',
   'fabbricazione', 'ricetta', 'armi', 'arma-effetto', 'arma-progressione', 'abiti', 'abito', 'jose',
-  'esame'] as const;
+  'evento-calendario', 'allerta-meteo', 'esame'] as const;
 export type TipoModificabile = (typeof TIPI_MODIFICABILI)[number];
 export type TipoCampoCorrezione = 'testo' | 'testolungo' | 'numero' | 'booleano' | 'elenco' | 'scelta' | 'oggetto';
 export type ValoreCampoCorrezione = string | number | boolean | null | string[];

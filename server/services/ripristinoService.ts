@@ -28,6 +28,8 @@ export { TIPI_MODIFICABILI };
 const NOTE: Partial<Record<TipoModificabile, string>> = {
   quartiere: 'Il nome del quartiere si riflette anche nel nome della sua mappa e nei percorsi delle mappe (gli indirizzi di prima restano validi).',
   dote: 'Il rango mostrato nelle partite si ricalcola dai punti: cambiare una soglia sposta il rango senza toccare i punti già segnati.',
+  'evento-calendario': 'La data e il tipo dell’evento non si correggono; le voci del Diario collegate restano collegate.',
+  'allerta-meteo': 'Vale per questo giorno: le condizioni delle partite che leggono l’allerta (per esempio «piove») seguono le fasce che scegli.',
 };
 
 // ---- Tipi e lettura del registro ----
@@ -424,7 +426,8 @@ export function elencaCorrezioni(tipo?: string): RiepilogoCorrezioneDto[] {
     if (filtro && t !== filtro) continue;
     if (!eRiga(t)) continue;
     const def: DefRiga = DEFINIZIONI_RIGA[t];
-    const chiavi = prepared(`SELECT ${def.colonnaChiave} FROM ${def.tabella} WHERE seed_json IS NOT NULL`).pluck().all() as string[];
+    // una chiave per oggetto: dove un oggetto sta su più righe (le fasce di un'allerta meteo) la stessa chiave non si ripete
+    const chiavi = [...new Set(prepared(`SELECT ${def.colonnaChiave} FROM ${def.tabella} WHERE seed_json IS NOT NULL`).pluck().all() as string[])];
     for (const chiave of chiavi) {
       if (!def.esiste(chiave)) continue;
       const attuale = def.leggi(chiave);

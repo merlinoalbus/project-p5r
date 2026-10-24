@@ -484,7 +484,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/calendario': {
     sommario: 'Calendario di gioco con eventi e settimane della guida',
-    descrizione: 'I giorni (tutti, o del solo mese `mese` nel formato MM) con meteo, allerte meteo del gioco (`allerte`, come nella scheda del giorno), tempo libero ed eventi, i riassunti delle settimane della guida e l\'elenco dei mesi. Con `?partita=` arrivano la data di gioco, il giorno corrente e le prossime sei scadenze o esami da quel giorno, con i giorni mancanti.',
+    descrizione: 'I giorni (tutti, o del solo mese `mese` nel formato MM) con meteo, allerte meteo del gioco (`allerte`, come nella scheda del giorno), tempo libero ed eventi, i riassunti delle settimane della guida e l\'elenco dei mesi. Ogni evento dice se è un dato proprio del Calendario che si corregge (`modificabile`, via `/api/correzioni/evento-calendario/:id`) e se è stato corretto (`modificato`); ogni allerta dice se è stata corretta in quel giorno (`modificata`, via `/api/correzioni/allerta-meteo/MM-GG:chiave`). Con `?partita=` arrivano la data di gioco, il giorno corrente e le prossime sei scadenze o esami da quel giorno, con i giorni mancanti.',
     risposta: '`CalendarioDto`',
     errori: [PARTITA_NON_TROVATA],
   },

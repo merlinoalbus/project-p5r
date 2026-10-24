@@ -87,8 +87,8 @@ describe('GiornoGuida — la giornata canone', () => {
 
   it('le allerte meteo del giorno sono tag accanto al meteo, nella scheda del giorno (2026-10-12); senza allerte nessun tag', () => {
     disegna({ ...base, meteo: 'Sereno', allerte: [
-      { chiave: 'notte-torrida', nome: 'Notte torrida', effetti: ['I distributori automatici restano senza bevande.'], fasce: ['sera'] },
-      { chiave: 'ondata-di-calore', nome: 'Ondata di calore', effetti: ['Le Ombre possono essere afflitte dallo stato In fiamme.'], fasce: ['giorno'] }] });
+      { chiave: 'notte-torrida', nome: 'Notte torrida', effetti: ['I distributori automatici restano senza bevande.'], fasce: ['sera'], modificata: false },
+      { chiave: 'ondata-di-calore', nome: 'Ondata di calore', effetti: ['Le Ombre possono essere afflitte dallo stato In fiamme.'], fasce: ['giorno'], modificata: false }] });
     const tag = [...document.querySelectorAll('.chip--allerta')];
     expect(tag.map((t) => t.textContent)).toEqual(['Allerta meteo: Notte torrida · solo di sera', 'Allerta meteo: Ondata di calore · solo di giorno']);
     // nella scheda del giorno, dopo il meteo

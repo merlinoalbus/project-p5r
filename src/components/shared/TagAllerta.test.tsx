@@ -7,9 +7,9 @@ import { render } from '@testing-library/react';
 import { TagAllerte } from './TagAllerta';
 import type { AllertaGiornoDto } from '../../types';
 
-const calore: AllertaGiornoDto = { chiave: 'ondata-di-calore', nome: 'Ondata di calore', effetti: ['I distributori automatici restano senza bevande.'], fasce: ['giorno'] };
-const torrida: AllertaGiornoDto = { chiave: 'notte-torrida', nome: 'Notte torrida', effetti: ['I distributori automatici restano senza bevande.'], fasce: ['sera'] };
-const gelo: AllertaGiornoDto = { chiave: 'ondata-di-gelo', nome: 'Ondata di gelo', effetti: ['Le Ombre possono essere afflitte da Congelamento.'], fasce: ['giorno', 'sera'] };
+const calore: AllertaGiornoDto = { chiave: 'ondata-di-calore', nome: 'Ondata di calore', effetti: ['I distributori automatici restano senza bevande.'], fasce: ['giorno'], modificata: false };
+const torrida: AllertaGiornoDto = { chiave: 'notte-torrida', nome: 'Notte torrida', effetti: ['I distributori automatici restano senza bevande.'], fasce: ['sera'], modificata: false };
+const gelo: AllertaGiornoDto = { chiave: 'ondata-di-gelo', nome: 'Ondata di gelo', effetti: ['Le Ombre possono essere afflitte da Congelamento.'], fasce: ['giorno', 'sera'], modificata: false };
 
 it('un tag per allerta: nome, la fascia se è una sola, gli effetti nel suggerimento; letto come «Allerta meteo»', () => {
   const { container } = render(<div><TagAllerte allerte={[torrida, calore, gelo]} /></div>);

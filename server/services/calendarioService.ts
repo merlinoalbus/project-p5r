@@ -8,9 +8,10 @@ import { indiceGiornoScolastico } from './domandeService.js';
 import { allerteDiOgniGiorno, testoMeteo } from './meteoService.js';
 import type { CalendarioDto, GiornoCalendarioDto, SettimanaGuidaDto } from '../../shared/types.js';
 import { giornoDellaSettimana } from '../../shared/date.js';
+import { eventoProprio } from './ripristino/righeCalendario.js';
 
 interface RigaGiorno { data: string; ordine: number; meteo_giorno: string | null; meteo_sera: string | null; nota_meteo: string | null; tempo_libero_json: string | null; settimana: number | null }
-interface RigaEvento { id: number; data: string; tipo: GiornoCalendarioDto['eventi'][number]['tipo']; titolo: string; dettaglio: string; fonte: string }
+interface RigaEvento { id: number; data: string; tipo: GiornoCalendarioDto['eventi'][number]['tipo']; titolo: string; dettaglio: string; fonte: string; origine: string }
 type VoceCollegata = GiornoCalendarioDto['eventi'][number]['voci'][number];
 
 /** Le voci del Diario collegate a ciascun evento (tabella `evento_calendario_voce`, L9 R9-20): sola lettura, in ordine di giorno, fascia e posizione. */
@@ -37,7 +38,8 @@ function giornoDto(g: RigaGiorno, eventi: RigaEvento[], allerte: GiornoCalendari
   return {
     data: g.data, giornoSettimana: giornoDellaSettimana(g.data) ?? '', meteo: testoMeteo(g), settimana: g.settimana,
     tempoLibero: g.tempo_libero_json ? (JSON.parse(g.tempo_libero_json) as { giorno: boolean; sera: boolean }) : null,
-    eventi: eventi.map((e) => ({ id: e.id, tipo: e.tipo, titolo: e.titolo, dettaglio: e.dettaglio, fonte: e.fonte, voci: voci.get(e.id) ?? [] })),
+    eventi: eventi.map((e) => ({ id: e.id, tipo: e.tipo, titolo: e.titolo, dettaglio: e.dettaglio, fonte: e.fonte, voci: voci.get(e.id) ?? [],
+      modificabile: eventoProprio(e.tipo, e.titolo), modificato: e.origine === 'utente' })),
     allerte,
   };
 }

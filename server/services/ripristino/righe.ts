@@ -13,6 +13,7 @@ import { httpErrors } from '../../utils/httpError.js';
 import { chiaveImmagineQuartiere } from '../cittaService.js';
 import { sincronizzaPercorsiMappe } from '../mappe/percorsiMappe.js';
 import type { CampoDef } from './registro.js';
+import { DEFINIZIONI_CALENDARIO } from './righeCalendario.js';
 import { DEFINIZIONI_SCUOLA } from './righeScuola.js';
 
 export type Valori = Record<string, ValoreCampoCorrezione>;
@@ -198,4 +199,4 @@ const trasformazione: DefRiga = {
   },
 };
 
-export const DEFINIZIONI_RIGA = { quartiere, trofeo, dote: doteSociale, trasformazione, ...DEFINIZIONI_SCUOLA } as const;
+export const DEFINIZIONI_RIGA = { quartiere, trofeo, dote: doteSociale, trasformazione, ...DEFINIZIONI_CALENDARIO, ...DEFINIZIONI_SCUOLA } as const;
