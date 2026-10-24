@@ -215,10 +215,6 @@ const datiAttivitaBase = z.object({
     note: z.number().int().min(0).max(9).nullable(),
     condizione: testo(400).nullable(),
   })).max(10).transform((v) => JSON.stringify(v)).optional(),
-  altri_effetti: testo(2000).nullable().optional(),
-  regole: testo(2000).default(''),
-  premi: testo(2000).nullable().optional(),
-  paga: testo(400).nullable().optional(),
   quiz_json: quizJson,
 });
 const datiAttivita =datiAttivitaBase.superRefine(rifinisciAttivita);

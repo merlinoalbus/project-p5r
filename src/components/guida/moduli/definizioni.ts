@@ -146,7 +146,7 @@ function attivitaCon(tipoFisso?: 'videogioco'): DefinizioneModulo {
         _effettiDaRisolvere: !jsonSenzaPerdite(e?.dati.effetti_json, normalizzaVociEffetto),
         _quizDaRisolvere: !jsonSenzaPerdite(e?.dati.quiz_json, normalizzaQuiz),
         sblocco: e?.dati.sblocco ?? null,
-        paga: e?.dati.paga ?? null, premi: e?.dati.premi ?? null, altri_effetti: e?.dati.altri_effetti ?? null,
+
         sede_chiave: (e?.dati.sede_chiave as string | null) ?? null, luogo_chiave: (e?.dati.luogo_chiave as string | null) ?? null,
         costo: numeroDi(e?.dati.costo), paga_yen: numeroDi(e?.dati.paga_yen), paga_massima: numeroDi(e?.dati.paga_massima),
         sessioni: numeroDi(e?.dati.sessioni) ?? (tipo === 'videogioco' ? 1 : null),

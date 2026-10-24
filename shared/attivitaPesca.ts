@@ -2,7 +2,7 @@
 export function campiAutonomiAttivitaPesca(r:Record<string,unknown>):string[] {
   const pieni:string[]=[];
   if(r.tipo==='videogioco')pieni.push('tipo');
-  for(const c of ['confidente_chiave','costo','sblocco','altri_effetti','paga','paga_yen','paga_massima'])if(r[c]!=null&&r[c]!=='')pieni.push(c);
+  for(const c of ['confidente_chiave','costo','sblocco','paga_yen','paga_massima'])if(r[c]!=null&&r[c]!=='')pieni.push(c);
   if(r.fascia!=null&&r.fascia!=='entrambe')pieni.push('fascia');
   if(r.sessioni!=null&&r.sessioni!==1)pieni.push('sessioni');
   for(const c of ['doti_json','effetti_json','condizioni_json']){

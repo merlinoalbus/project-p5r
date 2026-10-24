@@ -40,8 +40,8 @@ const OPZIONI_FASCIA: OpzioneIcone[] = FASCE_ATTIVITA.map((f) => ({ chiave: f.ch
 const NOMI_CAMPI: Record<string, string> = {
   tipo: 'Tipo videogioco', fascia: 'Fascia propria', condizioni_json: 'Condizioni proprie', effetti_json: 'Effetti propri',
   doti_json: 'Doti storiche', tracciamento: 'Conteggio', sessioni: 'Sessioni', quiz_json: 'Quiz', costo: 'Costo',
-  paga_yen: 'Paga in yen', paga_massima: 'Paga massima', paga: 'Paga in testo', premi: 'Premi in testo',
-  altri_effetti: 'Altri effetti in testo', sblocco: 'Sblocco in testo',
+  paga_yen: 'Paga in yen', paga_massima: 'Paga massima',
+  sblocco: 'Sblocco in testo',
   confidente_chiave: 'Progressione del Confidente',
 };
 
@@ -85,7 +85,7 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
   const normalizzaPesca = () => {
     if (!pesca || confidente || videogioco || (ruoloPesca !== 'visita' && ruoloPesca !== 'obiettivi') || confermaPesca !== firmaPesca || !impostaCondizioni) return;
     imposta({ fascia: 'entrambe', tracciamento: ruoloPesca === 'visita' ? 'svolta' : 'nessuno', sessioni: 1,
-      costo: null, paga_yen: null, paga_massima: null, paga: null, sblocco: null, altri_effetti: null,
+      costo: null, paga_yen: null, paga_massima: null, sblocco: null,
       doti_json: [], effetti_json: [], quiz_json: null, _giorniQuiz: '', _effettiDaRisolvere: false, _quizDaRisolvere: false });
     impostaCondizioni([]);
     setConfermaPesca(null);
@@ -161,7 +161,7 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
           </Blocco>
         )}
         <Campo nome="dettagli" etichetta="Come funziona, premi, note" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={4000} />
-        {(['paga', 'premi', 'altri_effetti', 'sblocco'] as const).filter((c) => testoDi(dati[c]).length > 0 || incompatibili.includes(c)).map((c) => <Campo key={c} nome={c} etichetta={NOMI_CAMPI[c]} tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={c === 'paga' || c === 'sblocco' ? 400 : 2000} />)}
+        {(['sblocco'] as const).filter((c) => testoDi(dati[c]).length > 0 || incompatibili.includes(c)).map((c) => <Campo key={c} nome={c} etichetta={NOMI_CAMPI[c]} tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={400} />)}
       </Griglia>
       {/* contata per volte (un lavoro): ogni turno dice i suoi punti (da segnare a mano), il primo le voci senza la spunta, gli altri quelle «dalla seconda volta in poi» */}
       {campiPropri && <EditorEffetti voci={dati.effetti_json as VoceEffetto[]} onCambia={(v) => imposta({ effetti_json: v })} disabilitato={disabilitato || !!dati._effettiDaRisolvere} {...nomi}

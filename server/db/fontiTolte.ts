@@ -66,6 +66,14 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     schema: 'main', tabella: 'luogo', colonna: 'giorni_json', tolta: 'L11 · migrazione 184',
     sostituitaDa: 'gli orari del luogo (`orari_json`) e la disponibilità dei Confidenti; i valori restano nell’archivio «archivio-frasi-l11»',
   },
+  ...(['altri_effetti', 'regole', 'premi'] as const).map((colonna): FonteTolta => ({
+    schema: 'main', tabella: 'attivita', colonna, tolta: 'L9 · migrazione 203',
+    sostituitaDa: 'il testo «dettagli» dell’attività (che la conteneva per intero) e gli effetti strutturati; i valori restano nell’archivio «archivio-frasi-l11»',
+  })),
+  {
+    schema: 'main', tabella: 'attivita', colonna: 'paga', tolta: 'L9 · migrazione 203',
+    sostituitaDa: 'la paga strutturata (`paga_yen`, `paga_massima`); le frasi restano nell’archivio «archivio-frasi-l11»',
+  },
   {
     schema: 'main', tabella: 'articolo', colonna: 'disponibile_dal', tolta: 'L11 · migrazione 194',
     sostituitaDa: 'le condizioni dell’offerta (`condizioni_json`): il «disponibile dal» mostrato è generato da esse; i testi di prima restano nell’archivio «archivio-frasi-l11»',

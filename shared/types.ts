@@ -1963,10 +1963,6 @@ export interface AttivitaDto {
   sessioni: number | null;
   /** `dote` nulla = effetto su una Dote variabile/non confermata, spiegato in `condizione`. */
   doti: Array<{ dote: DoteChiave | null; note: number | null; condizione: string | null }>;
-  altriEffetti: string | null;
-  regole: string;
-  premi: string | null;
-  paga: string | null;
   /** Paga in yen a turno e massimo dichiarato (migrazione 075); solo per i lavori. */
   pagaYen: number | null;
   pagaMassima: number | null;

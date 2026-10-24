@@ -22,7 +22,7 @@ export function campiAutonomiAttivitaConfidente(d: Record<string, unknown>, conD
   if (d.quiz_json != null) campi.push('quiz_json');
   if (d.costo != null && d.costo !== 0) campi.push('costo');
   for (const c of ['paga_yen', 'paga_massima']) if (d[c] != null) campi.push(c);
-  for (const c of ['sblocco', 'paga', 'premi', 'altri_effetti']) if (haTesto(d[c])) campi.push(c);
+  for (const c of ['sblocco']) if (haTesto(d[c])) campi.push(c);
   return campi;
 }
 
