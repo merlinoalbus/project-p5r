@@ -160,6 +160,7 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
               </button>
             ))}
           </div>
+          <p className="progressi-dettaglio-attivo sm:hidden" aria-hidden="true">{tessere[sezione].dettaglio}</p>
 
           <div id="progressi-pannello" role="tabpanel" aria-labelledby={`progressi-tab-${sezione}`} className="flex min-w-0 flex-col gap-4">
             {sezione === 'storia' && <>
