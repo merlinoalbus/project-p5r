@@ -22,12 +22,14 @@ import { useAssetStore } from '../stores/assetStore';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
+import { ModificaGuida } from '../components/guida/ModificaGuida';
 
 /** Impostazioni dell'app. */
 export function ImpostazioniPage() {
   useDocumentTitle('Impostazioni');
   const config = useConfigStore((s) => s.config);
   const glossario = useGlossarioStore((s) => s.glossario);
+  const ricaricaGlossario = useGlossarioStore((s) => s.ricarica);
   const graficaPredefinita = usePreferenzeStore((s) => s.graficaPredefinita);
   const impostaGrafica = usePreferenzeStore((s) => s.impostaGraficaPredefinita);
   const manifest = useAssetStore((s) => s.manifest);
@@ -62,6 +64,10 @@ export function ImpostazioniPage() {
             <div key={a.chiave} className="flex flex-col items-center gap-1">
               <ImmagineEntita ambito="arcana" chiave={a.chiave} etichetta={a.nome} dimensione={88} forma="carta" modificabile />
               <span className="text-[12px] text-text-secondary">{a.nome}</span>
+              <span className="flex items-center gap-1 text-[11px] text-text-muted">
+                {a.numero === null ? 'Senza numero' : `Numero ${a.numero}`}
+                <ModificaGuida tipo="arcana" chiave={a.chiave} cosa={`l’Arcano «${a.nome}»`} soloIcona onSalvato={() => void ricaricaGlossario()} />
+              </span>
             </div>
           ))}
         </div>

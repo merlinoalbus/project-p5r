@@ -180,8 +180,11 @@ export function PersonaDettaglioPage() {
                     {p.nomeIt !== p.nome && <span className="chip" title="Nome nella localizzazione inglese">{p.nome}</span>}
                     <span className="chip chip--attivo">{p.arcanaNome}</span>
                     {p.dlc && <BadgeStato nome="dlc" testo={`DLC${p.dlcSet ? ` ${p.dlcSet}` : ''}`} />}
+                    {p.dlc && p.dlcSet && <ModificaGuida tipo="dlc-set" chiave={String(p.dlcSet)} cosa={`il set DLC ${p.dlcSet}`} soloIcona onSalvato={() => void ricarica()} />}
                     {p.rara && <BadgeStato nome="tesoro" testo="Demone del Tesoro" />}
+                    {p.rara && <ModificaGuida tipo="tesoro" chiave={String(p.id)} cosa={`il Demone del Tesoro «${p.nomeIt}»`} soloIcona onSalvato={() => void ricarica()} />}
                     {p.speciale && <BadgeStato nome="speciale" testo="Fusione speciale" />}
+                    {p.speciale && <ModificaGuida tipo="fusione-speciale" chiave={String(p.id)} cosa={`la ricetta di «${p.nomeIt}»`} soloIcona onSalvato={() => void ricarica()} />}
                     {p.richiedeConfidenteMax && <span className="chip">Richiede Confidente al massimo</span>}
                   </div>
                   <div className="text-[13px] text-text-secondary flex flex-wrap gap-x-4 gap-y-1">

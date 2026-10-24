@@ -24,6 +24,7 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { PersonaChip } from '../components/fusione/PersonaChip';
 import { OperatoreRicetta } from '../components/fusione/RicettaRiga';
 import { IconaScheda, type ChiaveScheda } from '../components/shared/IconaAzione';
+import { ModificaGuida } from '../components/guida/ModificaGuida';
 
 type Vista = 'calcolatore' | 'ricette' | 'con' | 'piani' | 'skill' | 'cicli' | 'forca' | 'coppia' | 'matrice' | 'speciali' | 'tesori';
 const VISTE: Array<[Vista, string, ChiaveScheda]> = [
@@ -78,6 +79,9 @@ export function FusionePage() {
     const r = dati.tabella.find((t) => (t.a === a && t.b === b) || (t.a === b && t.b === a));
     return r?.risultato ?? null;
   }, [dati, a, b]);
+
+  /** La riga della tabella che dà il risultato della coppia scelta (a == b è la regola «stesso arcano», che non sta in tabella): serve a correggerla. */
+  const rigaCoppia = useMemo(() => (dati && a && b && a !== b ? dati.tabella.find((t) => (t.a === a && t.b === b) || (t.a === b && t.b === a)) ?? null : null), [dati, a, b]);
 
   const matrice = useMemo(() => {
     if (!dati) return new Map<string, string>();
@@ -138,6 +142,11 @@ export function FusionePage() {
                   <>
                     <div className="text-[12px] text-text-muted uppercase tracking-wide">Arcano risultante</div>
                     <div className="text-3xl font-black text-primary">{nome(risultato)}</div>
+                    {rigaCoppia && (
+                      <div className="flex justify-center mt-1">
+                        <ModificaGuida tipo="fusione-arcana" chiave={`${rigaCoppia.a}:${rigaCoppia.b}`} cosa={`la fusione ${nome(rigaCoppia.a)} + ${nome(rigaCoppia.b)}`} onSalvato={() => void ricarica()} />
+                      </div>
+                    )}
                     <div className="text-[13px] text-text-secondary mt-1">
                       {a === b ? 'Stesso arcano: il risultato è la Persona di livello più alto sotto la media dei due ingredienti (+1).' : 'Arcani diversi: il risultato è la prima Persona con livello ≥ media dei due ingredienti +1.'}
                     </div>
@@ -183,6 +192,7 @@ export function FusionePage() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <PersonaChip p={completa(r.risultato)} evidenza inScorta={inScorta.has(r.risultato.id)} />
                     <span className="text-[12px] text-text-muted">{r.ingredienti.length} ingredienti{r.ingredienti.every((i) => inScorta.has(i.id)) ? ' · tutti in scorta' : ''}</span>
+                    <ModificaGuida tipo="fusione-speciale" chiave={String(r.risultato.id)} cosa={`la ricetta di «${r.risultato.nomeIt}»`} soloIcona className="ml-auto" onSalvato={() => { void ricarica(); void persone.ricarica(); }} />
                   </div>
                   <div className="flex flex-wrap items-center gap-1.5 pl-2 border-l-2 border-border">
                     {r.ingredienti.map((i, idx) => (
@@ -205,7 +215,17 @@ export function FusionePage() {
               <thead>
                 <tr>
                   <th className="sticky left-0 bg-bg z-10">Arcano</th>
-                  {dati.tesori.nomi.map((n, i) => <th key={n} title={n}>{dati.tesori.nomiIt[i] ?? n}</th>)}
+                  {dati.tesori.nomi.map((n, i) => {
+                    const id = persone.dati?.find((p) => p.nome === n)?.id;
+                    return (
+                      <th key={n} title={n}>
+                        <div className="flex items-center justify-center gap-1">
+                          <span>{dati.tesori.nomiIt[i] ?? n}</span>
+                          {id !== undefined && <ModificaGuida tipo="tesoro" chiave={String(id)} cosa={`il Demone del Tesoro «${dati.tesori.nomiIt[i] ?? n}»`} soloIcona onSalvato={() => void ricarica()} />}
+                        </div>
+                      </th>
+                    );
+                  })}
                 </tr>
               </thead>
               <tbody>
