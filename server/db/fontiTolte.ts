@@ -122,6 +122,10 @@ export const FONTI_TOLTE: readonly FonteTolta[] = [
     schema: 'utente', tabella: 'lettura_partita', colonna: null, tolta: 'L11 · migrazione utente 43',
     sostituitaDa: 'l’avanzamento di libri e film (`progresso_libro_partita`, `progresso_film_partita`): «letto» si calcola da lì',
   },
+  {
+    schema: 'utente', tabella: 'requisito_partita', colonna: null, tolta: 'L11 · migrazione utente 44',
+    sostituitaDa: 'niente: le conferme a mano dei requisiti dei Confidenti non si leggevano più dalla R6-01b (la tabella era vuota)',
+  },
 ];
 
 export const tabellaTolta = (schema: string, tabella: string): FonteTolta | undefined =>

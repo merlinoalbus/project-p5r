@@ -114,7 +114,6 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
   { tabella: 'confidente_partita', colonna: 'confidente_chiave', entita: 'Confidente', tabellaGioco: 'confidente', colonnaGioco: 'chiave' },
   { tabella: 'regalo_partita', colonna: 'confidente_chiave', entita: 'Confidente', tabellaGioco: 'confidente', colonnaGioco: 'chiave' },
   { tabella: 'regalo_partita', colonna: 'catalogo_chiave', entita: 'oggetto', tabellaGioco: 'catalogo_oggetto', colonnaGioco: 'chiave', colonnaOpzionale: true },
-  { tabella: 'requisito_partita', colonna: 'confidente_chiave', entita: 'Confidente', tabellaGioco: 'confidente', colonnaGioco: 'chiave' },
   { tabella: 'incontro_confidente_partita', colonna: 'confidente_chiave', entita: 'Confidente', tabellaGioco: 'confidente', colonnaGioco: 'chiave' },
   { tabella: 'persona_posseduta', colonna: 'persona_id', entita: 'Persona', tabellaGioco: 'persona', colonnaGioco: 'id' },
   { tabella: 'persona_posseduta', colonna: 'tratto_skill_id', entita: 'abilità', tabellaGioco: 'skill', colonnaGioco: 'id' },

@@ -66,7 +66,7 @@ export interface StatoPartitaSemafori {
   invitiRegistrati?: Set<string>;
   /** Eventi manuali e aperture dichiarate nelle visite del Diario: i requisiti `evento` leggono il loro insieme. */
   eventi: Set<string>;
-  /** Non più letto (R6-01b: niente conferme a mano); resta nel tipo finché c'è `requisito_partita` (L11). */
+  /** Non più letto (R6-01b: niente conferme a mano); `requisito_partita` è stata tolta (utente 44). */
   conferme?: Set<string>;
 }
 

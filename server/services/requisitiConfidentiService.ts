@@ -47,7 +47,6 @@ export function correggiRequisitoRichiesta(confidente: string, rango: number, in
 export function togliRequisitoRichiesta(confidente: string, rango: number, indice: number): void {
   requisitoDiRichiesta(confidente, rango, indice);
   getDb().transaction(() => {
-    prepared('DELETE FROM requisito_partita WHERE confidente_chiave = ? AND rango = ? AND indice = ?').run(confidente, rango, indice);
     prepared('DELETE FROM confidente_requisito WHERE confidente_chiave = ? AND rango = ? AND indice = ?').run(confidente, rango, indice);
   })();
 }
@@ -113,7 +112,6 @@ export function impostaRequisitiRango(confidente: string, rango: number, requisi
       const testo = r.testo?.trim() || (r.condizione.tipo === 'avviso' ? r.condizione.testo : descriviRequisitoSpillo(r.condizione, nomi));
       ins.run(confidente, rango, indice, r.condizione.tipo, datiDellaCondizione(r.condizione), testo);
     });
-    prepared('DELETE FROM requisito_partita WHERE confidente_chiave = ? AND rango = ? AND indice >= ?').run(confidente, rango, requisiti.length);
   })();
   return requisitiDelConfidente(confidente);
 }
@@ -127,8 +125,6 @@ export function ripristinaRequisitiRango(confidente: string, rango: number): Req
     prepared('DELETE FROM confidente_requisito WHERE confidente_chiave = ? AND rango = ?').run(confidente, rango);
     const ins = prepared('INSERT INTO confidente_requisito (confidente_chiave, rango, indice, tipo, dati_json, testo) VALUES (?, ?, ?, ?, ?, ?)');
     for (const r of guida) ins.run(confidente, rango, r.indice, r.tipo, r.dati_json, r.testo);
-    const indici = guida.map((r) => r.indice);
-    prepared(`DELETE FROM requisito_partita WHERE confidente_chiave = ? AND rango = ?${indici.length ? ` AND indice NOT IN (${indici.map(() => '?').join(',')})` : ''}`).run(confidente, rango, ...indici);
   })();
   return requisitiDelConfidente(confidente);
 }

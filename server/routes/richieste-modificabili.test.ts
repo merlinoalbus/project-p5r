@@ -194,11 +194,9 @@ describe('le Richieste modificabili', () => {
     expect(prepared("SELECT dati_json FROM confidente_requisito WHERE confidente_chiave = 'chihaya' AND rango = 1 AND indice = 0").pluck().get()).toBe('{"richiesta":"Lo zio ingordo"}');
     expect(requisito()).toMatchObject({ stato: 'grigio', manuale: false, dettaglio: 'La Richiesta «Lo zio ingordo» non c’è più: correggi quel che la cita' });
     // toglierlo: se ne va, con le conferme delle partite; gli altri requisiti del rango tengono il loro indice
-    prepared("INSERT INTO requisito_partita (partita_id, confidente_chiave, rango, indice, confermato, updated_at) VALUES (?, 'chihaya', 1, 0, 1, 'x')").run(partita);
     await request(app).delete('/api/compendio/confidenti/chihaya/requisiti/1/0').expect(204);
     expect(requisito()).toBeUndefined();
     expect(prepared("SELECT indice FROM confidente_requisito WHERE confidente_chiave = 'chihaya' AND rango = 1 ORDER BY indice").pluck().all()).toEqual([1, 2]);
-    expect(prepared("SELECT COUNT(*) FROM requisito_partita WHERE confidente_chiave = 'chihaya' AND rango = 1 AND indice = 0").pluck().get()).toBe(0);
     // gli errori: requisito che non c'è, requisito di un altro tipo, Richiesta che non c'è
     expect((await request(app).delete('/api/compendio/confidenti/chihaya/requisiti/1/0')).status).toBe(404);
     expect((await request(app).put('/api/compendio/confidenti/chihaya/requisiti/1/1').send({ richiesta: 'lo-zio-ingordo' })).body.error.code).toBe('requisito-non-di-richiesta');
