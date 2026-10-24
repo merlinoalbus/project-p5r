@@ -23,6 +23,8 @@ export type ChiaveScheda = 'oggi' | 'doti' | 'confidenti' | 'letture' | 'progres
   | 'trofei' | 'finali' | 'dlc' | 'meteo' | 'nuova-partita' | 'tempo'
   | 'sfide-battaglia' | 'boss' | 'magnate' | 'tratti'
   | 'jose' | 'personalizzazione' | 'scambi'
+  // Scheda «Persona della partita» (R10-25): scorta e compendio personale in una vista
+  | 'persona-partita'
   // «Denaro e squadra»: i yen del gruppo e i livelli dei dieci Ladri. Riserva SVG qui sotto, riga
   // nel censimento (§28) perché Codex ne generi la figura.
   | 'squadra';
@@ -133,6 +135,7 @@ const RISERVA_SCHEDA: Record<ChiaveScheda, (dimensione: number) => ReactNode> = 
   jose: (d) => <IconGioca size={d} />,
   personalizzazione: (d) => <IconMatita size={d} />,
   scambi: (d) => <IconCiclo size={d} />,
+  'persona-partita': (d) => <IconPersone size={d} />,
   // Le persone: la scheda parla dei dieci Ladri prima che dei loro yen.
   squadra: (d) => <IconPersone size={d} />,
 };
