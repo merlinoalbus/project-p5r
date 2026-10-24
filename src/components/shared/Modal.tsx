@@ -73,6 +73,7 @@ function chiHaApertoLaFinestra(finestra: HTMLElement | null): HTMLElement | null
 /** Finestra modale con intestazione, corpo scorrevole e piè di pagina opzionale. */
 export function Modal({ titolo, aperta, onChiudi, children, azioni, larga, cassetto }: ModalProps) {
   const finestra = useRef<HTMLDivElement | null>(null);
+  const sfondo = useRef<HTMLDivElement | null>(null);
   // `onChiudi` è spesso una funzione scritta al volo: la si legge da un ref, così gli effetti dipendono solo da `aperta`
   // e il fuoco non viene rimesso a posto a ogni render della pagina che apre la finestra
   const chiudi = useRef(onChiudi);
@@ -80,9 +81,13 @@ export function Modal({ titolo, aperta, onChiudi, children, azioni, larga, casse
 
   useEffect(() => {
     if (!aperta) return;
-    /** Esc chiude la finestra. */
+    /** Esc chiude la finestra, ma solo quella più in alto: con una finestra aperta sopra un'altra (le note sopra il cassetto del
+     *  Confidente) un solo Esc chiudeva tutte e due. Le finestre si aggiungono in fondo a <body>: la più in alto è l'ultima. */
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') chiudi.current();
+      if (e.key !== 'Escape') return;
+      const aperte = document.querySelectorAll('.modal-overlay');
+      if (aperte.length > 0 && aperte[aperte.length - 1] !== sfondo.current) return;
+      chiudi.current();
     };
     window.addEventListener('keydown', onKey);
     // Blocca lo scorrimento della pagina sotto la finestra (ripristinato alla chiusura).
@@ -124,7 +129,7 @@ export function Modal({ titolo, aperta, onChiudi, children, azioni, larga, casse
 
   if (!aperta) return null;
   return createPortal(
-    <div className={`modal-overlay ${cassetto ? 'modal-overlay--cassetto' : ''}`} role="presentation">
+    <div ref={sfondo} className={`modal-overlay ${cassetto ? 'modal-overlay--cassetto' : ''}`} role="presentation">
       <div
         ref={finestra}
         className={`modal-content ${larga ? 'modal-content--larga' : ''} ${cassetto ? 'modal-content--cassetto' : ''}`}

@@ -105,7 +105,7 @@ export function PartitaPage() {
           {scheda === 'confidenti' && <ConfidentiPartita partitaId={attiva.id} />}
           {scheda === 'letture' && <div className="lg:flex-1 lg:min-h-0 riempi-figli-lg"><LettureEGiochi key={attiva.id} partitaId={attiva.id} /></div>}
           {scheda === 'progressi' && <ProgressiPartita key={attiva.id} partitaId={attiva.id} />}
-{scheda === 'scorta' && <ScortaPersona partitaId={attiva.id} />}
+          {scheda === 'scorta' && <ScortaPersona partitaId={attiva.id} />}
           {scheda === 'compendio' && <CompendioPersonale partitaId={attiva.id} />}
           {scheda === 'persona-partita' && <PersonaDellaPartita key={attiva.id} partitaId={attiva.id} />}
           {scheda === 'obiettivi' && <ObiettiviPartita key={attiva.id} partitaId={attiva.id} />}

@@ -1328,7 +1328,8 @@ export interface AzionePercorsoDto {
   /** 2026-10-24: con una partita, il rango del Confidente della voce nella partita (le note della voce lo citano se differisce dal rango atteso). */
   rangoPartita?: number;
   /** 2026-10-24: il dialogo del prossimo evento del Confidente nella partita (rango della partita + 1), quando non è quello del rango
-   *  atteso della voce (o la voce non ha rango atteso): è l'evento che si gioca davvero, e la scelta delle note alla spunta parte da qui. */
+   *  atteso della voce: è l'evento che si gioca davvero, e la scelta delle note alla spunta parte da qui. Solo per le voci con rango
+   *  atteso: senza, la voce non prevede una salita di rango e non porta dialoghi. */
   dialogoPartita?: DialogoVoceDto;
   /** Gli effetti di `produce` in parole, con i nomi di libri, film e attività («Zorro, il fuorilegge: completato»). */
   produceTesto: string[];

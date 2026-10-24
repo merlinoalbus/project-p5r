@@ -213,14 +213,16 @@ function haInvitoDelConfidente(voceUid: string, riferimento: RiferimentoAzioneDt
  * dell'utente. Senza riga di dialogo, nessun campo. Con la partita, anche `rangoPartita` e `dialogoPartita` (il prossimo evento vero).
  */
 function campoDialogo(v: VoceBase, conf: Map<string, ConfidentePartitaDto> | null): { dialogo?: DialogoVoceDto; rangoPartita?: number; dialogoPartita?: DialogoVoceDto } {
-  if (v.tipo !== 'confidente' || v.riferimento?.tipo !== 'confidente') return {};
+  // senza rango atteso la voce non prevede una salita di rango: nessun dialogo da proporre (scelta dell'utente, 2026-10-24)
+  if (v.tipo !== 'confidente' || v.riferimento?.tipo !== 'confidente' || v.rangoAtteso === null) return {};
   const chiave = v.riferimento.chiave;
-  const dialogo = v.rangoAtteso !== null ? dialogoDelRango(chiave, v.rangoAtteso) : null;
+  const dialogo = dialogoDelRango(chiave, v.rangoAtteso);
   // 2026-10-24 (progetto dei Confidenti approvato dall'utente): con una partita, anche il rango del Confidente nella partita e, se il
   // prossimo evento non è quello del rango atteso della voce, il suo dialogo: la voce mostra le risposte di ciò che si gioca davvero
   const c = conf?.get(chiave);
   const prossimo = c && c.rango < 10 ? c.rango + 1 : null;
-  const dialogoPartita = prossimo !== null && prossimo !== v.rangoAtteso ? dialogoDelRango(chiave, prossimo) : null;
+  // già al rango atteso (per esempio salito dal cassetto del Confidente): l'evento appena giocato è quello della voce, non il successivo
+  const dialogoPartita = c && prossimo !== null && prossimo !== v.rangoAtteso && c.rango !== v.rangoAtteso ? dialogoDelRango(chiave, prossimo) : null;
   return { ...(dialogo ? { dialogo } : {}), ...(c ? { rangoPartita: c.rango } : {}), ...(dialogoPartita ? { dialogoPartita } : {}) };
 }
 

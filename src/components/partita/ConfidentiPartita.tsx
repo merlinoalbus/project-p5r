@@ -39,6 +39,9 @@ import { SchedaNelCassetto } from './SchedaNelCassetto';
 
 interface Props {
   partitaId: number;
+  /** Solo il cassetto di un Confidente, sopra la pagina che lo apre (il cartellino del Confidente nel diario, 2026-10-24): niente elenco
+   *  né indirizzo; stesse azioni e stessa logica della scheda «Confidenti». `onChiudi` lo chiude (✕, Esc). */
+  soloCassetto?: { chiave: string; onChiudi: () => void };
 }
 
 type ChiaveGruppo = 'attivi' | 'bloccati';
@@ -85,7 +88,7 @@ function salvaGruppiAperti(stato: Record<ChiaveGruppo, boolean>): void {
  * (e «Segna comunque» se bloccato dai requisiti), semafori del rango successivo, punti con note della risposta e risposte migliori,
  * regalo e uscita calcolati coi moltiplicatori della partita (esami, invito SMS, scelti nel dettaglio) e col bonus arcano, «Annulla ultimo», sblocco e
  * note in una finestra. Ogni aggiornamento sostituisce il solo Confidente toccato. */
-export function ConfidentiPartita({ partitaId }: Props) {
+export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   // le correzioni a dialoghi, abilità e regali fatte nella scheda del Confidente si rileggono ogni volta che si apre questa scheda
@@ -221,6 +224,7 @@ export function ConfidentiPartita({ partitaId }: Props) {
       forzaRango: (rango) => portaA(rango, true),
       conferma: (rango, indice, confermato) => void conferma(c, rango, indice, confermato),
       correggi: (rango) => setVista({ chiave: c.chiave, tipo: 'scheda', search: `?requisiti=${rango}` }),
+      apriScheda: () => setVista({ chiave: c.chiave, tipo: 'scheda', search: '' }),
       nota: (n) => void salva(c.chiave, { noteRisposta: n, bonusArcano: bonus, invito }),
       regala: () => setRegaloPer(c.chiave),
       regalo: () => void salva(c.chiave, { regalo: true, bonusArcano: bonus, invito }),
@@ -235,23 +239,38 @@ export function ConfidentiPartita({ partitaId }: Props) {
   // ---- Elenco: gruppi, ordine e Confidente scelto ----
   const tutti = useMemo(() => dati ?? [], [dati]);
   const oggi = (chiave: string) => sugg.evidenziato('confidenti', chiave);
-  /** Dentro gli attivi: prima i suggeriti di oggi, poi chi ha la soglia raggiunta, poi gli altri nell'ordine di prima (ordinamento stabile). */
+  /** Dentro gli attivi: prima i suggeriti di oggi, poi i «Pronti» (soglia raggiunta e non bloccati, lo stesso criterio della scheda),
+   *  poi gli altri nell'ordine di prima (ordinamento stabile). */
   const attivi = tutti
     .filter((c) => gruppoDi(c) === 'attivi')
-    .map((c, indice) => ({ c, indice, peso: oggi(c.chiave) ? 0 : sogliaRaggiunta(c) ? 1 : 2 }))
+    .map((c, indice) => ({ c, indice, peso: oggi(c.chiave) ? 0 : sogliaRaggiunta(c) && !c.bloccato ? 1 : 2 }))
     .sort((a, b) => a.peso - b.peso || a.indice - b.indice)
     .map((x) => x.c);
   const elencoDi = (gruppo: ChiaveGruppo) => (gruppo === 'attivi' ? attivi : tutti.filter((c) => gruppoDi(c) === 'bloccati'));
 
   // Il Confidente aperto nel cassetto sta nell'indirizzo (`?confidente=`): il cassetto si apre con una voce di cronologia nuova,
   // così Indietro lo chiude; un indirizzo condiviso lo apre già aperto
-  const richiesto = params.get('confidente');
+  // (in `soloCassetto` il Confidente lo dice chi apre il cassetto, non l'indirizzo)
+  const richiesto = soloCassetto ? soloCassetto.chiave : params.get('confidente');
   const trovato = richiesto ? tutti.find((c) => c.chiave === richiesto) ?? null : null;
   const cassettoAperto = trovato !== null;
   const aperturaConCronologia = useRef(false);
+  // Alla chiusura del cassetto (✕, Esc o Indietro) si riparte dal Level up: la vista si azzera, le finestre aperte dal cassetto (note,
+  // «Regala») si chiudono con lui, e se si era nella Scheda completa si rileggono i Confidenti (lì si possono consegnare regali o
+  // confermare requisiti). La rilettura non smonta niente: i dati restano mentre arrivano quelli nuovi
+  const vistaCorrente = useRef(vista);
+  useEffect(() => { vistaCorrente.current = vista; }, [vista]);
+  const eraAperto = useRef(cassettoAperto);
   useEffect(() => {
-    if (!cassettoAperto) aperturaConCronologia.current = false;
-  }, [cassettoAperto]);
+    if (cassettoAperto) { eraAperto.current = true; return; }
+    aperturaConCronologia.current = false;
+    if (!eraAperto.current) return;
+    eraAperto.current = false;
+    if (vistaCorrente.current?.tipo === 'scheda') void ricarica();
+    setVista(null);
+    setModifica(null);
+    setRegaloPer(null);
+  }, [cassettoAperto, ricarica]);
   const scegli = (chiave: string) => {
     const p = new URLSearchParams(params);
     p.set('confidente', chiave);
@@ -260,6 +279,7 @@ export function ConfidentiPartita({ partitaId }: Props) {
   };
   /** Chiude il cassetto: se l'ha aperto un tocco di questa pagina si torna indietro di una voce, altrimenti (indirizzo condiviso) si toglie il parametro. */
   const chiudiFoglio = () => {
+    if (soloCassetto) { soloCassetto.onChiudi(); return; }
     if (aperturaConCronologia.current) {
       aperturaConCronologia.current = false;
       navigate(-1);
@@ -268,11 +288,6 @@ export function ConfidentiPartita({ partitaId }: Props) {
     const p = new URLSearchParams(params);
     p.delete('confidente');
     setParams(p, { replace: true });
-  };
-  /** Esc dentro il foglio chiude solo la finestra più in alto: se sopra al foglio c'è un'altra finestra (note, «Regala», ingrandimento) il foglio resta. */
-  const chiudiFoglioSeSolo = () => {
-    if (document.querySelectorAll('[role="dialog"]').length > 1) return;
-    chiudiFoglio();
   };
 
   const alternaGruppo = (gruppo: ChiaveGruppo) => setGruppiAperti((s) => {
@@ -310,18 +325,21 @@ export function ConfidentiPartita({ partitaId }: Props) {
     return (
       <>
         <div className="flex gap-1.5" role="tablist" aria-label={`Viste di ${c.nome}`}>
-          <button type="button" role="tab" aria-selected={v.tipo === 'levelup'} className={`chip touch ${v.tipo === 'levelup' ? 'chip--attivo' : ''}`} onClick={() => vai('levelup')}>Level up</button>
-          <button type="button" role="tab" aria-selected={v.tipo === 'scheda'} className={`chip touch ${v.tipo === 'scheda' ? 'chip--attivo' : ''}`} onClick={() => vai('scheda')}>Scheda completa</button>
+          <button type="button" role="tab" id="vista-confidente-levelup" aria-controls="pannello-confidente" aria-selected={v.tipo === 'levelup'} className={`chip touch ${v.tipo === 'levelup' ? 'chip--attivo' : ''}`} onClick={() => vai('levelup')}>Level up</button>
+          <button type="button" role="tab" id="vista-confidente-scheda" aria-controls="pannello-confidente" aria-selected={v.tipo === 'scheda'} className={`chip touch ${v.tipo === 'scheda' ? 'chip--attivo' : ''}`} onClick={() => vai('scheda')}>Scheda completa</button>
         </div>
-        {v.tipo === 'levelup' ? dettaglioDi(c) : <SchedaNelCassetto key={`${c.chiave}${v.search}`} chiave={c.chiave} searchIniziale={v.search} />}
+        <div id="pannello-confidente" role="tabpanel" aria-labelledby={v.tipo === 'levelup' ? 'vista-confidente-levelup' : 'vista-confidente-scheda'} className="flex flex-col gap-4">
+          {v.tipo === 'levelup' ? dettaglioDi(c) : <SchedaNelCassetto key={`${c.chiave}${v.search}`} chiave={c.chiave} searchIniziale={v.search} onLevelUp={() => vai('levelup')} />}
+        </div>
       </>
     );
   };
 
-  return (
-    <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
-      {/* una pagina sola che scorre: i gruppi richiudibili con le schede in griglia; il dettaglio si apre nel cassetto */}
-      <div className="flex flex-col gap-3">
+  const contenuto = (
+    <>
+      {/* una pagina sola che scorre: i gruppi richiudibili con le schede in griglia; il dettaglio si apre nel cassetto.
+          Nel cassetto da solo (diario) l'elenco non c'è */}
+      {!soloCassetto && <div className="flex flex-col gap-3">
           {GRUPPI.map(({ chiave: gruppo, titolo, descrizione }) => {
             const elenco = elencoDi(gruppo);
             // Il gruppo degli attivi resta visibile anche vuoto (a inizio partita lo e): senza spiegazione sembrerebbe che i Confidenti manchino.
@@ -352,10 +370,14 @@ export function ConfidentiPartita({ partitaId }: Props) {
               </section>
             );
           })}
-      </div>
-      {/* il dettaglio: cassetto da destra alto quanto lo schermo (foglio dal basso sul telefono); mentre è aperto scorre solo lui */}
-      <Modal titolo="Gestione del Confidente" aperta={cassettoAperto} onChiudi={chiudiFoglioSeSolo} cassetto>
-        {trovato && contenutoCassetto(trovato)}
+      </div>}
+      {/* il dettaglio: cassetto da destra alto quanto lo schermo (foglio dal basso sul telefono); mentre è aperto scorre solo lui.
+          Da solo si apre subito e, finché i Confidenti arrivano, dice che sta caricando (o l'errore, con Riprova) */}
+      {/* la ✕ chiude sempre; Esc solo se il cassetto è la finestra più in alto (lo decide `Modal`) */}
+      <Modal titolo="Gestione del Confidente" aperta={soloCassetto ? true : cassettoAperto} onChiudi={chiudiFoglio} cassetto>
+        {trovato ? contenutoCassetto(trovato) : soloCassetto && <PageState isLoading={caricamento && !dati} error={errore} onRetry={() => void ricarica()}>
+          <p className="m-0 text-[13px] text-text-muted">Questo Confidente non è nella partita attiva.</p>
+        </PageState>}
       </Modal>
       {regaloPer && (() => {
         const c = tutti.find((x) => x.chiave === regaloPer);
@@ -388,6 +410,9 @@ export function ConfidentiPartita({ partitaId }: Props) {
       >
         <textarea className="form-input min-h-[140px]" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Promemoria: prossimi eventi, regali graditi, risposte migliori…" />
       </Modal>
-    </PageState>
+    </>
   );
+  // da solo, niente stato di pagina: caricamento ed errore stanno dentro il cassetto
+  // lo spinner di pagina solo al primo caricamento: una rilettura (esami, ritorno dalla Scheda completa) non smonta elenco e cassetto
+  return soloCassetto ? contenuto : <PageState isLoading={caricamento && !dati} error={errore} onRetry={() => void ricarica()}>{contenuto}</PageState>;
 }

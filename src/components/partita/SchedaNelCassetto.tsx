@@ -9,7 +9,7 @@
 // `?requisiti=N`) restano nel cassetto; un collegamento verso un'altra pagina naviga davvero (e il cassetto si chiude con l'indirizzo).
 // ============================================================
 
-import { Suspense, useCallback, useMemo, useState } from 'react';
+import { Suspense, useCallback, useMemo, useState, type MouseEvent } from 'react';
 import { resolvePath, useNavigate, type NavigateOptions, type To } from 'react-router-dom';
 import { SchedaCorrenteContext, type SchedaCorrente } from '../scheda/contestoScheda';
 import { ConfidenteDettaglioPage } from '../scheda/pagineScheda';
@@ -19,10 +19,14 @@ interface Props {
   chiave: string;
   /** I parametri con cui aprire la scheda (es. `?requisiti=5` da «Correggi» dei requisiti). */
   searchIniziale?: string;
+  /** Torna alla vista «Level up» del cassetto: la usa «Aggiorna il rango» della scheda, che fuori dal cassetto porta alla pagina dei
+   *  Confidenti (dentro, quella funzione è già qui accanto). */
+  onLevelUp: () => void;
 }
 
-/** La pagina del Confidente dentro il cassetto, con la sua posizione virtuale `/confidenti/<chiave>`. */
-export function SchedaNelCassetto({ chiave, searchIniziale = '' }: Props) {
+/** La pagina del Confidente dentro il cassetto, con la sua posizione virtuale `/confidenti/<chiave>`. I collegamenti verso altre entità
+ *  (la mappa del luogo, gli oggetti regalo nel catalogo) restano collegamenti veri: portano alla loro pagina, per scelta. */
+export function SchedaNelCassetto({ chiave, searchIniziale = '', onLevelUp }: Props) {
   const navigate = useNavigate();
   const percorso = `/confidenti/${encodeURIComponent(chiave)}`;
   const [search, setSearch] = useState(searchIniziale);
@@ -38,11 +42,21 @@ export function SchedaNelCassetto({ chiave, searchIniziale = '' }: Props) {
     params: { chiave },
     naviga,
   }), [percorso, search, chiave, naviga]);
+  /** Un clic semplice su un collegamento alla scheda «Confidenti» della partita («Aggiorna il rango») torna al Level up del cassetto. */
+  const intercetta = (e: MouseEvent<HTMLDivElement>) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = (e.target as Element).closest('a[href]');
+    if (!a) return;
+    const url = new URL(a.getAttribute('href') ?? '', window.location.origin);
+    if (url.pathname === '/partita' && url.searchParams.get('scheda') === 'confidenti') { e.preventDefault(); onLevelUp(); }
+  };
   return (
     <SchedaCorrenteContext.Provider value={corrente}>
-      <Suspense fallback={<div className="flex justify-center py-10"><Spinner size={36} /></div>}>
-        <ConfidenteDettaglioPage.Componente />
-      </Suspense>
+      <div onClickCapture={intercetta}>
+        <Suspense fallback={<div className="flex justify-center py-10"><Spinner size={36} /></div>}>
+          <ConfidenteDettaglioPage.Componente />
+        </Suspense>
+      </div>
     </SchedaCorrenteContext.Provider>
   );
 }
