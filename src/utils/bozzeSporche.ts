@@ -164,17 +164,18 @@ function scriviBozza(k: string, impronta: string, dati: unknown): void {
 }
 
 /** Il validatore dei form con uno stato «piatto» (testi, numeri, booleani): stesse chiavi e stessi tipi dei valori di partenza, nient'altro. */
-export function validaPiatta<T extends Record<string, string | number | boolean>>(partenza: T): (dati: unknown) => T | null {
+export function validaPiatta<T extends object>(partenza: T): (dati: unknown) => T | null {
+  const modello = partenza as Record<string, unknown>;
   return (dati) => {
     if (typeof dati !== 'object' || dati === null || Array.isArray(dati)) return null;
-    const chiavi = Object.keys(partenza);
+    const chiavi = Object.keys(modello);
     const d = dati as Record<string, unknown>;
     if (Object.keys(d).length !== chiavi.length) return null;
     const pulito: Record<string, string | number | boolean> = {};
     for (const k of chiavi) {
       const v = d[k];
-      if (typeof v !== typeof partenza[k]) return null;
-      pulito[k] = v as string | number | boolean;
+      if (typeof v !== typeof modello[k] || (typeof v !== 'string' && typeof v !== 'number' && typeof v !== 'boolean')) return null;
+      pulito[k] = v;
     }
     return pulito as T;
   };

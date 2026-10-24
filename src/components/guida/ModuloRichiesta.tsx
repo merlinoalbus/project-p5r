@@ -21,7 +21,8 @@ import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { CampoCorrezione } from './CorrezioneGuida';
-import { useBozzaSporca } from '../../utils/bozzeSporche';
+import { AvvisoBozzaRipristinata } from '../shared/AvvisoBozzaRipristinata';
+import { leggiBozzaPersistente, scartaBozzaPersistente, useBozzaPersistente, validaPiatta } from '../../utils/bozzeSporche';
 import type { CitazioniRichiestaDto, RichiestaDto, RichiesteDto } from '../../types';
 
 const R = LIMITI_GUIDA.richiesta;
@@ -45,6 +46,9 @@ function bozzaDa(r: RichiestaDto | null, iniziale: { dedalo?: string | null; are
     ricompense: (r?.ricompense ?? []).join('\n'), confidente: r?.confidente?.chiave ?? NESSUNO, rango: r?.confidente?.rango ? String(r.confidente.rango) : '', note: r?.note ?? '',
   };
 }
+
+/** La chiave della bozza in sessionStorage: una per Richiesta, una per «nuova». */
+const chiaveBozza = (chiave: string | null): string => `modulo-richiesta:${chiave ?? 'nuova'}`;
 
 /** Le righe non vuote di un testo (una voce per riga). */
 const righe = (testo: string): string[] => testo.split('\n').map((x) => x.trim()).filter((x) => x.length > 0);
@@ -74,13 +78,15 @@ export function ModuloRichiesta({ chiave, iniziale = {}, onChiudi, onCambiata }:
   const confidenti = useCarica(() => getConfidenti(), []);
   const richiesta = chiave ? dati.dati?.richieste.find((r) => r.chiave === chiave) ?? null : null;
   const titolo = chiave ? `Modifica: ${richiesta?.nome ?? 'Richiesta'}` : 'Aggiungi una Richiesta';
+  // chiuso dal modulo (salvato, annullato, eliminato) o dalla finestra (X, Esc): la bozza non serve più, la copia in sessionStorage si cancella
+  const chiudiScartando = () => { scartaBozzaPersistente(chiaveBozza(chiave)); onChiudi(); };
   return (
-    <Modal titolo={titolo} aperta onChiudi={onChiudi} larga>
+    <Modal titolo={titolo} aperta onChiudi={chiudiScartando} larga>
       <PageState isLoading={(dati.caricamento && !dati.dati) || (confidenti.caricamento && !confidenti.dati)} error={dati.errore ?? confidenti.errore} onRetry={() => { void dati.ricarica(); void confidenti.ricarica(); }}>
         {dati.dati && confidenti.dati && (chiave && !richiesta
           ? <p className="m-0 text-[13px] text-text-muted" role="status">Questa Richiesta non c’è più.</p>
           : <Campi key={chiave ?? 'nuova'} richiesta={richiesta} iniziale={iniziale} collocazioni={dati.dati.collocazioni} confidenti={confidenti.dati.map((c) => ({ chiave: c.chiave, nome: c.nome, dettaglio: c.arcanaNome }))}
-              onChiudi={onChiudi} onCambiata={onCambiata} />)}
+              onChiudi={chiudiScartando} onCambiata={onCambiata} />)}
       </PageState>
     </Modal>
   );
@@ -92,9 +98,16 @@ function Campi({ richiesta, iniziale, collocazioni, confidenti, onChiudi, onCamb
   confidenti: Array<{ chiave: string; nome: string; dettaglio: string }>; onChiudi: () => void; onCambiata: () => void | Promise<void>;
 }) {
   // la bozza di partenza è anche il metro per capire se c'è qualcosa di non salvato (per «Aggiorna» e la chiusura della scheda del browser)
-  const [partenza] = useState<Bozza>(() => bozzaDa(richiesta, iniziale));
-  const [b, setB] = useState<Bozza>(partenza);
-  useBozzaSporca('modulo-richiesta', richiesta ? `modifica della Richiesta «${richiesta.nome}»` : 'nuova Richiesta', JSON.stringify(b) !== JSON.stringify(partenza));
+  // con una copia ritrovata in sessionStorage (pagina ricaricata) la bozza riparte da lì, ma solo se la Richiesta è ancora com'era quando fu salvata
+  const [avvio] = useState(() => {
+    const p = bozzaDa(richiesta, iniziale);
+    return { partenza: p, salvata: leggiBozzaPersistente(chiaveBozza(richiesta?.chiave ?? null), p, validaPiatta(p)) };
+  });
+  const partenza = avvio.partenza;
+  const [b, setB] = useState<Bozza>(avvio.salvata ?? partenza);
+  const sporca = JSON.stringify(b) !== JSON.stringify(partenza);
+  const [ripristinata, setRipristinata] = useState(avvio.salvata !== null);
+  useBozzaPersistente(chiaveBozza(richiesta?.chiave ?? null), richiesta ? `modifica della Richiesta «${richiesta.nome}»` : 'nuova Richiesta', b, partenza, { sporca });
   const [occupato, setOccupato] = useState(false);
   const [citazioni, setCitazioni] = useState<CitazioniRichiestaDto | null>(null);
   /** Cambia alcuni campi della bozza. */
@@ -144,6 +157,7 @@ function Campi({ richiesta, iniziale, collocazioni, confidenti, onChiudi, onCamb
 
   return (
     <form className="flex flex-col gap-3" aria-label={richiesta ? `Correggi la Richiesta «${richiesta.nome}»` : 'Nuova Richiesta'} onSubmit={(e) => { e.preventDefault(); void salva(); }}>
+      {ripristinata && sporca && <AvvisoBozzaRipristinata onScarta={() => { scartaBozzaPersistente(chiaveBozza(richiesta?.chiave ?? null)); setB(partenza); setRipristinata(false); }} />}
       <fieldset className="m-0 flex flex-wrap items-end gap-2 border-0 p-0">
         <legend className="mb-1 text-[11px] uppercase tracking-[0.08em] text-text-muted">La Richiesta</legend>
         <CampoCorrezione etichetta="Nome" valore={b.nome} massimo={R.nome} onCambia={(v) => cambia({ nome: v })} />
