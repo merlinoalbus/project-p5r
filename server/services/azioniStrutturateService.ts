@@ -51,9 +51,9 @@ export function statoAzione(a: AzioneClassificata, conf: Map<string, ConfidenteP
   // senza rango atteso la voce non prevede una salita di rango: nessuna frase sui requisiti del rango successivo (scelta dell'utente,
   // 2026-10-24: «non serve visualizzare nessuna frase per supportare la salita di rango»)
   if (atteso === null) return { tipo: 'neutra', motivo: null };
-  if (atteso !== null && c.rango >= atteso) return { tipo: 'neutra', motivo: `rango ${atteso} già raggiunto${correzioneARango(partitaId, c.chiave, atteso)}` };
-  if (!c.sbloccato && (atteso ?? 1) > 1) return { tipo: 'bloccata', motivo: 'Confidente non ancora sbloccato nella partita' };
-  const obiettivo = atteso ?? c.rango + 1;
+  if (c.rango >= atteso) return { tipo: 'neutra', motivo: `rango ${atteso} già raggiunto${correzioneARango(partitaId, c.chiave, atteso)}` };
+  if (!c.sbloccato && atteso > 1) return { tipo: 'bloccata', motivo: 'Confidente non ancora sbloccato nella partita' };
+  const obiettivo = atteso;
   // Solo il semaforo del rango obiettivo: un rango senza requisiti e libero (non si ripiega sul rango successivo).
   const sem = c.semafori.find((s) => s.rango === obiettivo);
   if (!sem || sem.requisiti.length === 0) return { tipo: 'neutra', motivo: null };

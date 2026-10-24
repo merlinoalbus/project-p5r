@@ -21,6 +21,7 @@ import { TIPI_ACCESSO_MONDO, urlDestinazioneMondo, type TipoAccessoMondo } from 
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { getAccessoMondo, getAlberoMappe } from '../services/api';
+import { Navigate as NavigateScheda } from '../components/scheda/NavigateScheda';
 import { PageState } from '../components/shared/PageState';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
@@ -40,6 +41,24 @@ export function AccessoMondoPage() {
   return <Accesso tipo={tipo as TipoAccessoMondo} chiave={chiave} />;
 }
 
+/** «Dove si trova» dentro il cassetto «Gestione del Confidente» (`SchedaNelCassetto`): consultare non porta ad altre pagine. Non c'è il
+ *  passaggio automatico alla mappa (anche con una sola posizione la si mostra, e la mappa intera si apre solo con il gesto esplicito sulla
+ *  sua carta). Un Palazzo si apre come scheda dentro il cassetto; un quartiere ha solo una pagina, e si apre con un collegamento esplicito. */
+export function AccessoMondoNelCassetto({ tipo, chiave }: { tipo: string; chiave: string }) {
+  if (!TIPI_ACCESSO_MONDO.includes(tipo as TipoAccessoMondo)) return <div role="alert">Destinazione non valida.</div>;
+  if (tipo === 'quartiere') {
+    return <div className="flex flex-col gap-3">
+      <h1 className="titolo-display m-0">Dove si trova</h1>
+      <p className="m-0 text-[13px] text-text-secondary">{nomeTipoAccessoMondo('quartiere', chiave)}</p>
+      <div className="flex flex-wrap gap-2">
+        <CollegamentoVisivo to={`/guida/citta/${encodeURIComponent(chiave)}`} tono="secondario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Apri il quartiere" />
+      </div>
+    </div>;
+  }
+  if (tipo === 'dungeon') return <NavigateScheda to={`/guida/dungeon/${encodeURIComponent(chiave)}${chiave === 'mementos' ? '' : '?infiltrazione=in-corso'}`} replace />;
+  return <Accesso tipo={tipo as TipoAccessoMondo} chiave={chiave} incorporato />;
+}
+
 /**
  * Il bivio vero e proprio: chiede al risolutore (`getAccessoMondo`) dove sta la cosa cercata e, a
  * parte, l'albero delle mappe per le anteprime. Se la destinazione è unica e non ci sono contenuti
@@ -47,7 +66,7 @@ export function AccessoMondoPage() {
  * voce non ha posizione, le carte delle posizioni (con anteprima della planimetria) e quelle dei
  * contenuti della guida, più i collegamenti alla scheda e a tutte le mappe.
  */
-function Accesso({ tipo, chiave }: { tipo: TipoAccessoMondo; chiave: string }) {
+function Accesso({ tipo, chiave, incorporato = false }: { tipo: TipoAccessoMondo; chiave: string; incorporato?: boolean }) {
   useDocumentTitle('Dove si trova');
   const carica = useCarica(() => getAccessoMondo(tipo, chiave), [tipo, chiave]);
   // L'albero serve solo alle anteprime: se non arriva, le carte restano col riquadro vuoto e la
@@ -65,7 +84,7 @@ function Accesso({ tipo, chiave }: { tipo: TipoAccessoMondo; chiave: string }) {
   const cercata = tipo === 'mappa' ? perChiave.get(chiave) : undefined;
   const livello = tipo !== 'mappa' ? nomeTipoAccessoMondo(tipo, chiave) : cercata?.area ? 'Area' : cercata ? nomeTipoMappa(cercata) : 'Planimetria';
   const nomeCercato = `${livello}: ${cercata?.area?.nome ?? dati?.destinazioni[0]?.nomeSpillo ?? chiave}`;
-  if (!carica.caricamento && !carica.errore && dati?.esito === 'unica' && dati.destinazioni.length === 1 && guide.length === 0) {
+  if (!incorporato && !carica.caricamento && !carica.errore && dati?.esito === 'unica' && dati.destinazioni.length === 1 && guide.length === 0) {
     return <Navigate to={urlDestinazioneMondo(dati.destinazioni[0])} replace />;
   }
   return <div className="flex flex-col gap-4">
@@ -84,7 +103,7 @@ function Accesso({ tipo, chiave }: { tipo: TipoAccessoMondo; chiave: string }) {
         <p className="m-0">Questa voce non ha una posizione sulla mappa: nel catalogo c’è, ma non è collocata su nessuna planimetria.</p>
         <p className="m-0 text-text-secondary text-[13px]">Succede per la merce dei negozi che stanno dentro un Palazzo e per quella che si compra online, che nel mondo non hanno un punto.</p>
       </div>}
-      {dati && dati.destinazioni.length > 0 && (dati.esito === 'multipla' || guide.length > 0) && <section className="flex flex-col gap-2" aria-label="Posizioni sulla mappa">
+      {dati && dati.destinazioni.length > 0 && (dati.esito === 'multipla' || guide.length > 0 || incorporato) && <section className="flex flex-col gap-2" aria-label="Posizioni sulla mappa">
         <p className="m-0 text-[13px] text-text-secondary">
           {dati.destinazioni.length === 1 ? 'Una posizione sulla mappa.' : `In ${dati.destinazioni.length} posti diversi: scegli quale aprire.`}
         </p>
@@ -117,7 +136,7 @@ function Accesso({ tipo, chiave }: { tipo: TipoAccessoMondo; chiave: string }) {
     <div className="flex flex-wrap gap-2">
       <CollegamentoVisivo to={schedaAccessoMondo(tipo, chiave)} tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Scheda e informazioni" />
       {/* «La città», non «Tutte le mappe» (L2, M13): il gesto porta il nome del posto */}
-      <CollegamentoVisivo to="/guida/citta" tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="La città" />
+      {!incorporato && <CollegamentoVisivo to="/guida/citta" tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="La città" />}
     </div>
   </div>;
 }

@@ -256,8 +256,8 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
   const cassettoAperto = trovato !== null;
   const aperturaConCronologia = useRef(false);
   // Alla chiusura del cassetto (✕, Esc o Indietro) si riparte dal Level up: la vista si azzera, le finestre aperte dal cassetto (note,
-  // «Regala») si chiudono con lui, e se si era nella Scheda completa si rileggono i Confidenti (lì si possono consegnare regali o
-  // confermare requisiti). La rilettura non smonta niente: i dati restano mentre arrivano quelli nuovi
+  // «Regala») si chiudono con lui, e se si era nella Scheda completa si rileggono i Confidenti (lì si possono consegnare regali; la
+  // conferma dei requisiti, nel cassetto, è in sola lettura). La rilettura non smonta niente: i dati restano mentre arrivano quelli nuovi
   const vistaCorrente = useRef(vista);
   useEffect(() => { vistaCorrente.current = vista; }, [vista]);
   const eraAperto = useRef(cassettoAperto);
@@ -315,7 +315,7 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
   );
 
   /** Il cassetto del Confidente aperto: le due viste (Level up, Scheda completa) e il loro contenuto. Tornando al Level up dalla scheda
-   * si rileggono i Confidenti della partita (dalla scheda si possono consegnare regali o confermare requisiti). */
+   * si rileggono i Confidenti della partita (dalla scheda si possono consegnare regali; i requisiti sono in sola lettura). */
   const contenutoCassetto = (c: ConfidentePartitaDto) => {
     const v = vista?.chiave === c.chiave ? vista : { chiave: c.chiave, tipo: 'levelup' as const, search: '' };
     const vai = (tipo: 'levelup' | 'scheda') => {

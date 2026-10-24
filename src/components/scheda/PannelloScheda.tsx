@@ -22,30 +22,12 @@ import { createPortal } from 'react-dom';
 import { resolvePath, useLocation, useNavigate, type NavigateOptions, type To } from 'react-router-dom';
 import { Spinner } from '../shared/PageState';
 import { ErroreInRiquadro } from '../shared/ErrorePagina';
-import {
-  AttivitaPage, ConfidenteDettaglioPage, DungeonDettaglioPage, FilmPage, LibriPage, LuogoPage, NegozioPage, OggettoPage, RichiestePage,
-} from './pagineScheda';
+import { ContenutoScheda } from './ContenutoScheda';
 import { IconChevronLeft, IconClose } from '../shared/icons';
 import { ApriPannelloContext, SchedaCorrenteContext, type ApriPannello, type SchedaCorrente } from './contestoScheda';
 import { conSchedaNelPannello, profonditaDaStato, schedaDaParametri, statoConProfondita, trovaScheda, type SchedaTrovata } from '../../utils/pannelloScheda';
 
-// le pagine pigre del pannello stanno in `pagineScheda` (il precarico in tempo morto le importa)
-
-/** La pagina che corrisponde alla scheda: le stesse del menù; per gli elenchi, filtrate sull'elemento. */
-function ContenutoScheda({ scheda }: { scheda: SchedaTrovata }) {
-  const solo = scheda.elemento ?? undefined;
-  switch (scheda.tipo) {
-    case 'confidente': return <ConfidenteDettaglioPage.Componente />;
-    case 'dungeon': return <DungeonDettaglioPage.Componente />;
-    case 'negozio': return <NegozioPage.Componente />;
-    case 'luogo': return <LuogoPage.Componente />;
-    case 'oggetto': return <OggettoPage.Componente />;
-    case 'libro': return <LibriPage.Componente soloChiave={solo} />;
-    case 'film': return <FilmPage.Componente soloChiave={solo} />;
-    case 'attivita': return <AttivitaPage.Componente soloChiave={solo} />;
-    case 'richiesta': return <RichiestePage.Componente soloChiave={solo} />;
-  }
-}
+// le pagine pigre del pannello stanno in `pagineScheda` (il precarico in tempo morto le importa); quale pagina mostrare, in `ContenutoScheda`
 
 /** Gli elementi che ricevono il fuoco con Tab. */
 const ATTIVABILI = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
