@@ -6,8 +6,9 @@ import { chiaviAssetPredefinito } from './assetPredefiniti';
 
 describe('chiaviAssetPredefinito', () => {
   it('Persona e Confidenti usano lo slug del nome/chiave', () => {
-    expect(chiaviAssetPredefinito('persona', 'Jack Frost', 'quadrata', 120)).toEqual(['persona/jack-frost', null]);
-    expect(chiaviAssetPredefinito('persona', 'Arsène', 'quadrata', 120)).toEqual(['persona/arsene', null]);
+    // la riserva è la figura delle Persona dei Ladri Fantasma (`persona-gruppo/`), come nella pagina Personaggi
+    expect(chiaviAssetPredefinito('persona', 'Jack Frost', 'quadrata', 120)).toEqual(['persona/jack-frost', 'persona-gruppo/jack-frost']);
+    expect(chiaviAssetPredefinito('persona', 'Arsène', 'quadrata', 120)).toEqual(['persona/arsene', 'persona-gruppo/arsene']);
     expect(chiaviAssetPredefinito('confidente', 'ryuji', 'tonda', 72)).toEqual(['confidenti/ryuji-fedele', 'confidenti/ryuji']);
   });
   it('Arcani: carta intera per forma carta o riquadri grandi, icona per i piccoli, con riserva incrociata', () => {

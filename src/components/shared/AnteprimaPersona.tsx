@@ -1,5 +1,5 @@
 // ============================================================
-// AnteprimaPersona — miniatura non interattiva di una Persona (immagine caricata → asset `persona/<slug>` → iniziali)
+// AnteprimaPersona — miniatura non interattiva di una Persona (immagine caricata → asset `persona/<slug>` → `persona-gruppo/<slug>` → iniziali)
 // ============================================================
 //
 // Da usare dentro pulsanti ed elenchi di scelta, dove il riquadro interattivo di ImmagineEntita non può stare.
@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react';
 import { useAsset } from '../../stores/assetStore';
 import { chiaviPresenti, urlImmagineVersionata } from './immaginiCache';
-import { slug } from '../../../shared/slug';
+import { chiaviAssetPredefinito } from '../../utils/assetPredefiniti';
 
 interface Props {
   /** Nome canonico (chiave dell'immagine e dell'asset). */
@@ -24,7 +24,11 @@ interface Props {
 /** Quadrato con l'immagine della Persona o le iniziali, senza comportamenti al tocco. */
 export function AnteprimaPersona({ nome, etichetta, dimensione = 40, className, contieni }: Props) {
   const [caricata, setCaricata] = useState<boolean | null>(null);
-  const asset = useAsset(`persona/${slug(nome)}`);
+  // le Persona dei Ladri Fantasma (Arsène, Zorro, Mercurius, Diego…) stanno in `persona-gruppo/`: riserva dopo `persona/`, come nei Personaggi
+  const [primaria, riserva] = chiaviAssetPredefinito('persona', nome, 'quadrata', dimensione);
+  const assetPrimario = useAsset(primaria);
+  const assetRiserva = useAsset(riserva);
+  const asset = assetPrimario ?? assetRiserva;
   useEffect(() => {
     let annullato = false;
     void chiaviPresenti('persona').then((set) => { if (!annullato) setCaricata(set.has(nome)); });

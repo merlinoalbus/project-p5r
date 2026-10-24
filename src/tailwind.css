@@ -920,8 +920,9 @@
   /* ---- Scheda «Confidenti» della partita: schede compatte in griglia + cassetto di dettaglio ----
      Scorre solo la pagina; il dettaglio sta nel cassetto (`.modal-content--cassetto`), che mentre è aperto è l'unica area che scorre.
      Una barra sola alla volta, mai due affiancate né una dentro l'altra. */
-  /* le schede dei Confidenti in griglia: una colonna sul telefono, poi quante ne stanno da 280 px (2 sul tablet, 3–4 sul desktop) */
-  .griglia-confidenti { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); }
+  /* le schede dei Confidenti in griglia: una colonna sul telefono, poi quante ne stanno da 300 px (2 sul tablet, 3–5 sul desktop);
+     sotto i 300 px nome e OGGI non ci stavano più accanto all'anello del rango */
+  .griglia-confidenti { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); }
   /* il dettaglio (nel cassetto) si divide in due colonne quando è largo abbastanza (cassetto da 768 px in su): a sinistra il level up
      («Verso il rango N»: requisiti e moltiplicatori; poi Risposta ♪, regalo, uscita), a destra le risposte migliori; in una colonna sola
      (telefono) le risposte stanno fra i requisiti e le note ♪: prima si legge la risposta, poi si registra */

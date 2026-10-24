@@ -33,7 +33,7 @@ function StatoSintetico({ c }: { c: ConfidentePartitaDto }) {
   if (c.rango === 10) return <span className="riga-confidente__stato text-primary font-semibold">Rango massimo</span>;
   if (c.bloccato) {
     return (
-      <span className="riga-confidente__stato truncate" title={c.bloccato.motivi.join(' · ')}>
+      <span className="riga-confidente__stato line-clamp-2" title={c.bloccato.motivi.join(' · ')}>
         <span className="inline-flex items-center gap-1 align-middle"><IconaAzione chiave="bloccato" dimensione={13} /></span>
         {' '}Bloccato · rango {c.bloccato.rango}{c.bloccato.motivi[0] ? ` · ${c.bloccato.motivi[0]}` : ''}
       </span>
@@ -63,13 +63,13 @@ export function RigaConfidente({ c, selezionata, oggi, motivoOggi, onScegli }: P
       <ImmagineEntita ambito="confidente" chiave={c.chiave} etichetta={c.nome} dimensione={44} forma="carta" adatta="copri" />
       {/* il nome accessibile è il contenuto stesso (nome, Oggi, arcano, stato, rango): niente aria-label che lo nasconda */}
       <button type="button" className="riga-confidente__scelta touch" onClick={onScegli} aria-current={selezionata ? 'true' : undefined}>
-        <span className="flex items-center gap-1.5 min-w-0">
-          <span className="font-display uppercase text-[18px] leading-none tracking-wide truncate">{c.nome}</span>
-          {oggi && <TargaSuggerito motivo={motivoOggi} compatta />}
-        </span>
+        {/* il nome va a capo (al massimo due righe) invece di essere troncato; OGGI sta sulla riga dell'arcano, dove c'è spazio, e non si
+            restringe mai (accanto al nome, nelle colonne strette, si schiacciava in «OGG I») */}
+        <span className="font-display uppercase text-[18px] leading-[1.05] tracking-wide line-clamp-2 break-words">{c.nome}</span>
         <span className="flex items-center gap-1.5 text-[12px] text-text-muted min-w-0">
           <AssetImg nome={`arcani/icona/${slug(c.arcana)}`} alt="" decorativa className="h-4 w-4 shrink-0 object-contain" fallback={null} />
           <span className="truncate">{c.arcanaNome}</span>
+          {oggi && <span className="shrink-0 whitespace-nowrap"><TargaSuggerito motivo={motivoOggi} compatta /></span>}
         </span>
         <StatoSintetico c={c} />
         <span className="riga-confidente__rango">

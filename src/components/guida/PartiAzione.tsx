@@ -8,7 +8,9 @@
 // mostra con questi pezzi; eventi, scadenze e promemoria hanno la loro riga (`VoceEvento` in VociAgenda).
 // ============================================================
 
-import type { MouseEvent } from 'react';
+import { useState, type MouseEvent } from 'react';
+import { usePartitaStore } from '../../stores/partitaStore';
+import { ConfidentiPartita } from '../partita/ConfidentiPartita';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { NOME_TIPO_AZIONE, collegamentoAzione, descriviEffetti } from '../../utils/percorso';
 import { conRitornoDiario } from '../../utils/ritornoDiario';
@@ -41,10 +43,12 @@ interface PropsCartellini {
   /** Apre una planimetria nella mappa accanto (la scheda «Oggi»): il cartellino di un Palazzo con una regola d'atterraggio la usa
    *  invece di cambiare pagina, come l'icona della mappa di Tokyo. Senza, il cartellino è un collegamento. */
   onApriMappa?: (mappa: { chiave: string; spilloId: number | null }) => void;
+  /** Dopo la chiusura del cassetto del Confidente aperto dal cartellino: la voce va riletta (rango della partita, stato, risposte). */
+  onCassettoChiuso?: () => void;
 }
 
 /** Tipo, collegamento, «Sulla mappa», la guida del quiz dei lavori, stato nella partita, rango atteso, note, effetti dichiarati o applicati. */
-export function CartelliniAzione({ a, onSullaMappa, onApriMappa }: PropsCartellini) {
+export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChiuso }: PropsCartellini) {
   const link = collegamentoAzione(a);
   const stato = a.fatta ? null : a.stato;
   // l'atterraggio di un Palazzo si apre nella mappa accanto, se c'è (un clic semplice: con un modificatore resta un collegamento)
@@ -57,6 +61,11 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa }: PropsCartelli
   const navigate = useNavigate();
   const apriPannello = useApriPannello();
   const uid = (a as { uid?: string }).uid;
+  // 2026-10-24 (scelta dell'utente): il cartellino di un Confidente apre il cassetto «Gestione del Confidente» sopra il diario, con la
+  // partita attiva (level up, note, regali, risposte migliori, scheda completa); senza partita resta il collegamento alla scheda
+  const partitaAttiva = usePartitaStore((s) => s.attiva?.id ?? null);
+  const [cassetto, setCassetto] = useState<string | null>(null);
+  const confidente = a.riferimento?.tipo === 'confidente' ? a.riferimento.chiave : null;
   // R10-28: l'«Entra» in un Palazzo porta la pagina di partenza e la voce, perché la scheda possa dire «Esci» e riportarci qui
   const partenza = `${posizione.pathname}${posizione.search}`;
   const ricordaVoce = (e: MouseEvent<HTMLElement>) => {
@@ -79,11 +88,13 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa }: PropsCartelli
       {link ? <Link to={conRitornoDiario(link.href, partenza, uid)} className="chip chip--attivo no-underline text-[11px]"
         onClick={(e) => {
           if (apriAccanto && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) { e.preventDefault(); onApriMappa!(apriAccanto); return; }
+          if (confidente && partitaAttiva !== null && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) { e.preventDefault(); setCassetto(confidente); return; }
           // il Palazzo porta con sé la pagina di partenza e la voce (R10-28): nel pannello la scheda dice «Esci» e riporta alla voce
           if (apriSopra(e, conRitornoDiario(link.scheda ?? link.href, partenza, uid))) return;
           ricordaVoce(e);
         }}>{link.etichetta}</Link>
         : a.riferimentoTesto && <span className="chip text-[11px]">{a.riferimentoTesto}</span>}
+      {cassetto && partitaAttiva !== null && <ConfidentiPartita partitaId={partitaAttiva} soloCassetto={{ chiave: cassetto, onChiudi: () => { setCassetto(null); onCassettoChiuso?.(); } }} />}
       {a.mappa && onSullaMappa && (
         <button type="button" className="chip chip--icona touch text-[11px]" onClick={onSullaMappa} aria-label={`${a.mappa.posto ? `Apri in ${a.mappa.posto}` : 'Sulla mappa'}: ${a.azione.slice(0, 60)}`}>
           {/* L5 (M23): il nome del posto del pin («Clinica Takemi», «Central Street»); «Sulla mappa» solo se il posto non ha un nome */}

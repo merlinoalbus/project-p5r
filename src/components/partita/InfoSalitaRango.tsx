@@ -8,7 +8,6 @@
 // I comandi per regalare stanno nel pannello («Regala»): qui nessun pulsante duplicato, solo il collegamento alla scheda completa.
 // ============================================================
 
-import { Link } from 'react-router-dom';
 import { useDettaglioConfidente } from './useDettaglioConfidente';
 import type { ConfidentePartitaDto, RegaloConfidenteDto } from '../../types';
 
@@ -22,7 +21,7 @@ function consegnato(c: ConfidentePartitaDto, g: RegaloConfidenteDto): boolean {
 }
 
 /** Prossima abilità e regali graditi del Confidente; nulla finché il dettaglio non c'è (il caricamento lo mostra la sezione delle risposte). */
-export function InfoSalitaRango({ c }: { c: ConfidentePartitaDto }) {
+export function InfoSalitaRango({ c, onApriScheda }: { c: ConfidentePartitaDto; onApriScheda: () => void }) {
   const { dati } = useDettaglioConfidente(c.chiave);
   if (!dati) return null;
   const abilita = c.rango < 10 ? dati.abilita.filter((a) => a.rango === c.rango + 1) : [];
@@ -53,7 +52,8 @@ export function InfoSalitaRango({ c }: { c: ConfidentePartitaDto }) {
               );
             })}
           </ul>
-          {altri > 0 && <Link to={`/confidenti/${encodeURIComponent(c.chiave)}`} className="touch inline-flex items-center text-[12px] text-primary underline underline-offset-2 self-start">+ altri {altri} nella scheda</Link>}
+          {/* gli altri regali stanno nella Scheda completa del cassetto: niente collegamento che porta fuori */}
+          {altri > 0 && <button type="button" onClick={onApriScheda} className="touch inline-flex items-center text-[12px] text-primary underline underline-offset-2 self-start bg-transparent border-0 p-0 cursor-pointer">+ altri {altri} nella scheda completa</button>}
         </div>
       )}
     </section>

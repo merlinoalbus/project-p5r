@@ -48,6 +48,9 @@ export function statoAzione(a: AzioneClassificata, conf: Map<string, ConfidenteP
   const c = conf.get(a.riferimento.chiave);
   if (!c) return { tipo: 'neutra', motivo: null };
   const atteso = a.rangoAtteso ?? null;
+  // senza rango atteso la voce non prevede una salita di rango: nessuna frase sui requisiti del rango successivo (scelta dell'utente,
+  // 2026-10-24: «non serve visualizzare nessuna frase per supportare la salita di rango»)
+  if (atteso === null) return { tipo: 'neutra', motivo: null };
   if (atteso !== null && c.rango >= atteso) return { tipo: 'neutra', motivo: `rango ${atteso} già raggiunto${correzioneARango(partitaId, c.chiave, atteso)}` };
   if (!c.sbloccato && (atteso ?? 1) > 1) return { tipo: 'bloccata', motivo: 'Confidente non ancora sbloccato nella partita' };
   const obiettivo = atteso ?? c.rango + 1;
