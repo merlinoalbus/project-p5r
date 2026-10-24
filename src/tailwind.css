@@ -895,6 +895,45 @@
   .poster--bloccato { filter: grayscale(.85); opacity: .7; }
   .poster--bloccato:hover, .poster--bloccato:focus-within { filter: grayscale(.5); opacity: .9; }
   .blocco-confidente { display: flex; flex-direction: column; gap: 4px; padding: 6px 8px; border: 1px dashed var(--color-text-muted); }
+
+  /* ---- Scheda «Confidenti» della partita: elenco a righe compatte + pannello di dettaglio ----
+     Sotto i 1024 px c'è solo l'elenco (il dettaglio è un foglio, `Modal`); da 1024 px il dettaglio sta a destra, fermo in alto, con la
+     propria area che scorre (`area-scorrevole`: barra visibile, bordo, gesto che non passa alla pagina). Una barra sola alla volta. */
+  .confidenti-layout { display: flex; flex-direction: column; gap: 12px; }
+  @media (min-width: 1024px) {
+    /* fra 1024 e 1279 px (con il menu laterale) l'elenco resta a 300 px: a 400 il pannello dei comandi era più stretto dell'elenco */
+    .confidenti-layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 16px; align-items: start; }
+    .confidenti-dettaglio { position: sticky; top: 0; align-self: start; max-height: calc(100dvh - 5.5rem); padding: 14px; }
+  }
+  @media (min-width: 1280px) {
+    .confidenti-layout { grid-template-columns: minmax(320px, 400px) minmax(0, 1fr); }
+  }
+  .dettaglio-confidente { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  /* intestazione di un gruppo: tutta la riga è il pulsante che apre e chiude */
+  .gruppo-confidenti__testata { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 0 12px; text-align: left; cursor: pointer; color: inherit;
+    background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+  .gruppo-confidenti__testata:hover { border-color: var(--color-primary); }
+  .gruppo-confidenti__testata:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+  /* riga di sintesi: il pulsante di scelta copre tutta la riga (anche il ritratto), la riga scelta ha il contorno rosso */
+  .riga-confidente { position: relative; display: flex; align-items: center; gap: 10px; min-height: 72px; padding: 4px 10px 4px 6px;
+    background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+  .riga-confidente:hover { border-color: var(--color-primary); }
+  .riga-confidente--scelta { outline: 2px solid var(--color-primary); outline-offset: -2px; background: color-mix(in srgb, var(--color-primary) 12%, var(--color-bg-secondary)); }
+  .riga-confidente:has(.riga-confidente__scelta:focus-visible) { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+  .riga-confidente__scelta { position: static; flex: 1 1 auto; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 8px; row-gap: 2px; align-items: center;
+    padding: 2px 0; background: none; border: 0; color: inherit; text-align: left; cursor: pointer; }
+  .riga-confidente__scelta:focus-visible { outline: none; }
+  .riga-confidente__scelta::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+  .riga-confidente__scelta > :nth-child(1), .riga-confidente__scelta > :nth-child(2), .riga-confidente__stato { grid-column: 1; min-width: 0; }
+  .riga-confidente__stato { display: block; font-size: 12px; line-height: 1.25; }
+  .riga-confidente__rango { grid-column: 2; grid-row: 1 / span 3; font-family: var(--font-display); font-size: 26px; line-height: 1; min-width: 28px; text-align: right; color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+  .riga-confidente__barra { display: block; height: 6px; margin-bottom: 3px; overflow: hidden; border-radius: 3px; background: var(--color-border); }
+  .riga-confidente__barra > span { display: block; height: 100%; background: var(--color-primary); }
+  /* il badge del rango nella testata del pannello è più piccolo di quello del poster */
+  .poster__rango.poster__rango--piccolo { right: -10px; bottom: -6px; }
+  /* le risposte migliori, in evidenza sotto le note ♪ */
+  .risposte-migliori { display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid color-mix(in srgb, var(--color-primary) 55%, var(--color-border)); border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--color-primary) 7%, transparent); }
   /* ---- Azioni della guida: consigliate in oro, bloccate in grigio (12.4) ---- */
   .azione { border-left: 3px solid transparent; padding-left: 6px; }
   .azione--consigliata { border-left-color: #f5c542; background: color-mix(in srgb, #f5c542 8%, transparent); }
