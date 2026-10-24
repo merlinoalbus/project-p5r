@@ -19,11 +19,11 @@ import { normalizza } from '../../shared/maschere.js';
 import { UMORI, type UmoreNegoziazione } from '../../shared/elementi.js';
 import {
   ATTESI_CONTRATTO, collegamentoSolido, confrontaConContratto, costruisciIndice, leggiCorrispondenze, leggiNoteVariante, riconcilia, valutaCellaApp, valutaCellaRoyal,
-  type AttestazioneNeg, type IndiceNegoziazione, type NegAttestazioneDto, type NegCellaDto, type NegDomandaDto, type NegoziazioneDto, type NegoziazioneVerificaDto,
+  type AttestazioneNeg, type IndiceNegoziazione, type NegAttestazioneDto, type NegCellaCompattaDto, type NegCellaDto, type NegDomandaCompattaDto, type NegDomandaDto, type NegoziazioneCompattaDto, type NegoziazioneDto, type NegoziazioneVerificaDto,
   type NegRispostaDto, type NegUmoreDto, type NegVarianteDto, type RigaNegDomanda, type RigaNegRisposta, type RigaNegVariante, type RigaNegVerdetto, type RigheNegoziazione, type ValutazioneCella,
 } from '../../shared/negoziazione.js';
 
-export interface FiltroNegoziazione { umore?: string; ombra?: string; q?: string }
+export interface FiltroNegoziazione { umore?: string; ombra?: string; q?: string; domanda?: string }
 
 interface Corpus { righe: RigheNegoziazione; indice: IndiceNegoziazione }
 
@@ -113,6 +113,72 @@ function carteDi(umori: ReadonlyArray<UmoreNegoziazione>): NegUmoreDto[] {
  */
 export function negoziazione(f: FiltroNegoziazione = {}): NegoziazioneDto {
   const c = corpus();
+  const { umori, ombra } = risolviUmori(f);
+  const ricerca = f.q ? normalizza(f.q) : '';
+  const domande: NegDomandaDto[] = [];
+  if (umori.length > 0) {
+    for (const d of c.righe.domande) {
+      if (f.domanda && d.chiave !== f.domanda) continue;
+      const varianti = c.indice.variantiDi.get(d.chiave) ?? [];
+      if (varianti.length === 0) continue;
+      if (ricerca && !famigliaContiene(c, varianti, ricerca)) continue;
+      const { testo, testoOrigine, principale } = intestazione(varianti);
+      domande.push({ chiave: d.chiave, ordine: d.ordine, testo, testoOrigine, principale, varianti: varianti.map((v) => varianteDto(c, v, umori)) });
+    }
+  }
+  return { umori, carte: carteDi(umori), ombra, domande, totale: domande.length };
+}
+
+/** La cella in breve: l'esito principale, le alternative se la fonte si contraddice, gli esiti delle altre provenienze che divergono. */
+function cellaCompatta(cella: NegCellaDto | undefined): NegCellaCompattaDto {
+  if (!cella) return { stato: 'senza-dato', esito: null };
+  const p = cella.principale;
+  const altre = cella.altre.filter((a) => !p || a.esito !== p.esito).map((a) => ({ esito: a.esito, fonte: a.fonte }));
+  return {
+    stato: cella.stato, esito: p ? p.esito : null,
+    ...((p ? p.incerto : cella.alternative.some((a) => a.incerto)) ? { incerto: true as const } : {}),
+    ...(p && p.fonte !== 'royal' ? { fonte: p.fonte } : {}),
+    ...(cella.alternative.length > 0 ? { alternative: cella.alternative.map((a) => a.esito) } : {}),
+    ...(altre.length > 0 ? { altre } : {}),
+    ...(cella.divergenza ? { divergenza: true as const } : {}),
+    ...(cella.nonConfermata ? { nonConfermata: true as const } : {}),
+  };
+}
+
+/**
+ * La negoziazione in forma compatta, per consultarla in battaglia (R8-07c/f): un solo umore (scelto o dell'Ombra), per ogni domanda le risposte
+ * della variante principale con la cella in breve. Il peso scende da ~800 KB a poche decine: il dettaglio di una famiglia (varianti, attestazioni,
+ * provenienze) si chiede a parte con `domanda`. Nessuna ricerca esclusa: `q` cerca nell'intero corpus, non solo in ciò che si vede.
+ */
+export function negoziazioneCompatta(f: FiltroNegoziazione = {}): NegoziazioneCompattaDto {
+  const c = corpus();
+  const { umori, ombra } = risolviUmori(f);
+  if (umori.length !== 1 && !(umori.length === 0 && ombra)) throw httpErrors.badRequest('umore-richiesto', 'La forma compatta vale per un umore solo: indica `umore` o `ombra`.');
+  const ricerca = f.q ? normalizza(f.q) : '';
+  const domande: NegDomandaCompattaDto[] = [];
+  if (umori.length === 1) {
+    for (const d of c.righe.domande) {
+      const varianti = c.indice.variantiDi.get(d.chiave) ?? [];
+      if (varianti.length === 0) continue;
+      if (ricerca && !famigliaContiene(c, varianti, ricerca)) continue;
+      const { testo, testoOrigine, principale } = intestazione(varianti);
+      const v = varianti.find((x) => x.chiave === principale) ?? varianti[0]!;
+      const dto = varianteDto(c, v, umori);
+      domande.push({
+        chiave: d.chiave, ordine: d.ordine, testo, testoOrigine, nVarianti: varianti.length,
+        risposte: dto.risposte.map((r) => {
+          // una risposta dell'app legata a una Royal non ripete le celle: valgono quelle della Royal collegata
+          const celle = r.celle.length > 0 ? r.celle : r.celleDa ? varianteDto(c, varianti.find((x) => c.indice.risposteDi.get(x.chiave)?.some((y) => y.chiave === r.celleDa)) ?? v, umori).risposte.find((y) => y.chiave === r.celleDa)?.celle ?? [] : [];
+          return { chiave: r.chiave, testo: r.testo ?? r.testoOriginale, testoOrigine: r.testoOrigine, testoDisponibile: r.testoDisponibile, cella: cellaCompatta(celle[0]) };
+        }),
+      });
+    }
+  }
+  return { umori, carte: carteDi(umori), ombra, domande, totale: domande.length };
+}
+
+/** L'umore (o gli umori) richiesti da `umore` o `ombra`; senza nessuno dei due, tutti e quattro. */
+function risolviUmori(f: FiltroNegoziazione): { umori: UmoreNegoziazione[]; ombra: NegoziazioneDto['ombra'] } {
   let umori: UmoreNegoziazione[] = UMORI.map((u) => u.chiave);
   let ombra: NegoziazioneDto['ombra'] = null;
   if (f.ombra) {
@@ -129,18 +195,7 @@ export function negoziazione(f: FiltroNegoziazione = {}): NegoziazioneDto {
     if (!u) throw httpErrors.badRequest('umore-sconosciuto', `«${f.umore}» non è uno degli umori della negoziazione.`);
     umori = [u];
   }
-  const ricerca = f.q ? normalizza(f.q) : '';
-  const domande: NegDomandaDto[] = [];
-  if (umori.length > 0) {
-    for (const d of c.righe.domande) {
-      const varianti = c.indice.variantiDi.get(d.chiave) ?? [];
-      if (varianti.length === 0) continue;
-      if (ricerca && !famigliaContiene(c, varianti, ricerca)) continue;
-      const { testo, testoOrigine, principale } = intestazione(varianti);
-      domande.push({ chiave: d.chiave, ordine: d.ordine, testo, testoOrigine, principale, varianti: varianti.map((v) => varianteDto(c, v, umori)) });
-    }
-  }
-  return { umori, carte: carteDi(umori), ombra, domande, totale: domande.length };
+  return { umori, ombra };
 }
 
 /** I conteggi rimisurati ora sulle righe, il confronto con il contratto e il rapporto scritto dall'importazione. */

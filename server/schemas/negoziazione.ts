@@ -15,5 +15,9 @@ export const queryNegoziazione = z.object({
   umore: z.enum(UMORI.map((u) => u.chiave) as [string, ...string[]]).optional(),
   ombra: z.string().trim().min(1).max(120).optional(),
   q: testoRicerca,
+  /** Una sola famiglia di domande, con tutto il dettaglio (varianti, attestazioni): si apre da un tocco nella vista compatta. */
+  domanda: z.string().trim().min(1).max(160).optional(),
+  /** `1` = la forma compatta per consultarla in battaglia (un umore alla volta, poche decine di KB). */
+  compatto: z.enum(['0', '1']).optional(),
 });
 export type QueryNegoziazione = z.infer<typeof queryNegoziazione>;

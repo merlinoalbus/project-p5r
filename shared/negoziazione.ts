@@ -601,6 +601,53 @@ export interface NegoziazioneDto {
   totale: number;
 }
 
+// ---- Forma compatta (B8): per consultare in battaglia, un umore alla volta ----
+
+/** La cella di una risposta per l'umore scelto, in breve: l'esito principale (o le alternative se la fonte si contraddice), da dove viene, se è dubbio. */
+export interface NegCellaCompattaDto {
+  stato: StatoCella;
+  /** L'esito principale; null se la fonte si contraddice (allora `alternative`) o non dice niente. */
+  esito: EsitoNegoziazione | null;
+  /** Presenti solo quando valgono (la forma compatta non spedisce campi vuoti): un esito dubbio (il punto interrogativo della fonte o dell'app). */
+  incerto?: true;
+  /** La fonte dell'esito principale, solo se non è Royal. */
+  fonte?: FonteNegoziazione;
+  /** Gli esiti in alternativa quando non c'è un principale. */
+  alternative?: EsitoNegoziazione[];
+  /** Gli esiti di altra provenienza che divergono dal principale (l'app accanto a Royal), tutti conservati nel dettaglio. */
+  altre?: Array<{ esito: EsitoNegoziazione; fonte: FonteNegoziazione }>;
+  divergenza?: true;
+  nonConfermata?: true;
+}
+
+export interface NegRispostaCompattaDto {
+  chiave: string;
+  testo: string;
+  testoOrigine: OrigineTesto;
+  /** false = il testo non è disponibile nella fonte (R230). */
+  testoDisponibile: boolean;
+  cella: NegCellaCompattaDto;
+}
+
+export interface NegDomandaCompattaDto {
+  chiave: string;
+  ordine: number;
+  testo: string;
+  testoOrigine: OrigineTesto;
+  /** Quante varianti ha la famiglia (Royal, app, ritocchi): il dettaglio completo si chiede per `domanda`. */
+  nVarianti: number;
+  risposte: NegRispostaCompattaDto[];
+}
+
+/** `GET /api/compendio/negoziazione?compatto=1`: un solo umore, le risposte della variante principale con la cella in breve. */
+export interface NegoziazioneCompattaDto {
+  umori: UmoreNegoziazione[];
+  carte: NegUmoreDto[];
+  ombra: NegoziazioneDto['ombra'];
+  domande: NegDomandaCompattaDto[];
+  totale: number;
+}
+
 export interface NegoziazioneVerificaDto {
   /** Le misure rifatte ora sulle righe. */
   misurato: RiconciliazioneNegoziazione;
