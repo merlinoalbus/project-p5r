@@ -42,6 +42,7 @@ import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 import { coloreElemento } from '../utils/elementi';
+import { chiaveElementoDaTesto, nomeCanonicoNelTesto } from '../utils/elementiGuida';
 import { piatto } from '../utils/testo';
 import { ModuloRichiesta } from '../components/guida/ModuloRichiesta';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
@@ -53,28 +54,10 @@ const COMPLETAMENTO: ReadonlyArray<{ chiave: Completamento; nome: string }> = [{
 /** I due fogli della pagina: le Richieste, e la bottega di Jose. */
 type Foglio = 'richieste' | 'jose';
 
-/** Dal nome italiano dell'elemento, come lo scrive la guida, alla chiave del colore. */
-const ELEMENTO_DA_TESTO: Array<[RegExp, string]> = [
-  [/^fuoco/i, 'fire'],
-  [/^ghiaccio/i, 'ice'],
-  [/^(tuono|elettricit)/i, 'electric'],
-  [/^vento/i, 'wind'],
-  [/^(psicocinesi|psichic|psio)/i, 'psy'],
-  [/^nucleare/i, 'nuclear'],
-  [/^sacro/i, 'bless'],
-  [/^(maledizione|oscurit)/i, 'curse'],
-  [/^(danni fisici|fisic|attacchi fisici)/i, 'phys'],
-  [/^armi da fuoco/i, 'gun'],
-];
-
-/** La chiave dell'elemento riconosciuta dall'inizio del testo della guida (spazi esterni ignorati), o null se nessuna regola lo riconosce. */
-function chiaveElemento(testo: string): string | null {
-  return ELEMENTO_DA_TESTO.find(([r]) => r.test(testo.trim()))?.[1] ?? null;
-}
-
-/** Pastiglia di una debolezza o di una resistenza: colorata se l'elemento si riconosce. */
-function Affinita({ testo, tipo }: { testo: string; tipo: 'debole' | 'resiste' }) {
-  const elemento = chiaveElemento(testo);
+/** Pastiglia di una debolezza o di una resistenza: colorata se l'elemento si riconosce (vocabolario unico `shared/elementi`), con il nome canonico. */
+function Affinita({ testo: scritto, tipo }: { testo: string; tipo: 'debole' | 'resiste' }) {
+  const elemento = chiaveElementoDaTesto(scritto);
+  const testo = nomeCanonicoNelTesto(scritto);
   if (!elemento) return <span className="chip text-[11px]" title={tipo === 'debole' ? 'Debolezza del bersaglio' : 'Il bersaglio resiste'}>{testo}</span>;
   const colore = coloreElemento(elemento);
   return <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] font-semibold"
