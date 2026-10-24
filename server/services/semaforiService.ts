@@ -19,7 +19,8 @@ import { eventiEffettivi } from './apertureDedaliService.js';
 import { EVENTI_PESCA } from '../../shared/pesca.js';
 import { leggiFattiPesca } from './pescaLetture.js';
 import { nomiCondizioniMemo } from './condizioni/nomiCondizioni.js';
-import { type MeteoPartita } from '../../shared/meteoPartita.js';
+import { piove, type MeteoPartita } from '../../shared/meteoPartita.js';
+import { eGiornoFestivo, verdettoDelConfidente } from './disponibilitaStrutturataService.js';
 import { meteoOra } from './meteoService.js';
 export { dataLeggibile };
 import { httpErrors } from '../utils/httpError.js';
@@ -135,10 +136,29 @@ export function semaforiConfidente(chiave: string, rangoAttuale: number, st: Sta
   const righe = prepared('SELECT * FROM confidente_requisito WHERE confidente_chiave = ? AND rango > ? ORDER BY rango, indice').all(chiave, rangoAttuale) as RigaRequisito[];
   const perRango = new Map<number, RigaRequisito[]>();
   for (const r of righe) { const l = perRango.get(r.rango) ?? []; l.push(r); perRango.set(r.rango, l); }
-  return [...perRango.entries()].map(([rango, lista]) => {
+  const disponibilita = semaforoDisponibilita(chiave, rangoAttuale, st);
+  return [...perRango.entries()].map(([rango, lista], i) => {
     const requisiti = lista.map((r) => valuta(r, st));
+    // la disponibilità d'adesso riguarda il prossimo incontro: sta solo nel primo rango, in coda, e non blocca mai (R9-01)
+    if (i === 0 && disponibilita) requisiti.push(disponibilita);
     return { rango, requisiti, pronto: requisiti.filter(requisitoBloccante).every((q) => q.stato === 'verde') };
   });
+}
+
+/**
+ * R9-01: il semaforo del giorno e della fascia dell'incontro, dalla disponibilità strutturata (stessa regola della scheda e degli avvisi del Diario;
+ * i requisiti di sblocco e di rango stanno nei semafori accanto): verde se nel giorno e nella fascia della partita il Confidente c'è, rosso se non c'è, grigio se manca un dato (meteo, giorno dell'ultimo rango) o se
+ * l'incontro non dipende dal calendario (su messaggio, con la trama). Non è mai bloccante. Senza una data di gioco non c'è.
+ */
+function semaforoDisponibilita(chiave: string, rangoAttuale: number, st: StatoValutazione): SemaforoRequisitoDto | null {
+  if (!st.dataGioco) return null;
+  const esito = verdettoDelConfidente(chiave, {
+    data: st.dataGioco, fascia: st.fasciaGioco ?? 'giorno', festivo: eGiornoFestivo(st.dataGioco),
+    piove: st.meteoOra ? piove(st.meteoOra.meteo) : null, rango: rangoAttuale, giorniDallUltimoRango: null,
+  });
+  if (!esito) return null;
+  return { indice: 900, tipo: 'disponibilita', testo: 'Giorno e fascia dell’incontro', stato: esito.stato === 'disponibile' ? 'verde' : esito.stato === 'non-disponibile' ? 'rosso' : 'grigio',
+    dettaglio: esito.motivo, manuale: false, confermato: false, bloccante: false };
 }
 
 /** Segna (o toglie) un evento di storia della partita: lo stesso dato dell'interruttore di Partita → Progressi. */
