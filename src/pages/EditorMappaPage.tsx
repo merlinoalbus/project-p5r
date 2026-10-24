@@ -40,7 +40,6 @@ import { copiePosate, nomeCopia, posizioneNuovaCopia, type CopiaPosata } from '.
 import { condizioniSenzaTesto, ELENCHI_VUOTI, type ElenchiCondizioni } from '../utils/condizioniSpillo';
 import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo';
 import { ammetteCondizioni, CATEGORIE_SPILLO, DEFINIZIONI_CATEGORIA, DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, RIFERIMENTI_PER_CATEGORIA, TIPI_MAPPA, categoriaSpillo, statoDelTipo, tipiDellaCategoria, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../shared/spilli';
-import { slug } from '../../shared/slug';
 import { ritornoMappe } from '../utils/ritornoMappe';
 import { NEL_CESTINO } from '../utils/cestino';
 import { haCasaPropria, paginaPerAggiungere } from '../utils/aree';
@@ -124,7 +123,6 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
   const [immagineDaConfermare, setImmagineDaConfermare] = useState<{ messaggio: string; sostituisci: () => Promise<unknown>; ok: string } | null>(null);
   const [occupato, setOccupato] = useState(false);
   const [confermaEliminaMappa, setConfermaEliminaMappa] = useState(false);
-  const [nuovaMappaAperta, setNuovaMappaAperta] = useState(false);
   /** FUN2-8 (L2): il rifiuto del server di mettere nel mondo una planimetria senza Area (409 `usa-aggiungi-area`), con la pagina da cui
    *  aggiungerla per bene accanto al genitore scelto. Resta scritto sopra le proprietà finché non si chiude o si salva di nuovo. */
   const [avvisoMondo, setAvvisoMondo] = useState<{ messaggio: string; aggiunta: { href: string; testo: string } | null } | null>(null);
@@ -290,7 +288,6 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
                 }
               })}
               onEliminaMappa={() => setConfermaEliminaMappa(true)}
-              onNuovaMappa={() => setNuovaMappaAperta(true)}
               onCreaPassaggio={(destinazione) => esegui(async () => {
                 const s = await creaPassaggio(chiave, destinazione);
                 seleziona(s.id); setStrumento('seleziona');
@@ -355,9 +352,6 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
           <p className="m-0 text-[13px]">Gli spilli della mappa vengono eliminati; le mappe figlie ({dati.figli.length}) restano senza genitore. {NEL_CESTINO}</p>
         </Modal>
       )}
-      {dati && <NuovaMappaModal key={nuovaMappaAperta ? 'aperta' : 'chiusa'} aperta={nuovaMappaAperta} genitore={dati} albero={albero.dati ?? []} occupato={occupato} onChiudi={() => setNuovaMappaAperta(false)}
-        onCrea={(d) => esegui(async () => { const m = await creaMappa(d); setNuovaMappaAperta(false); await albero.ricarica(); vai(m.chiave); },
-          d.passaggio ? `Mappa creata. Il passaggio verso «${d.nome}» è al centro di «${dati.nome}»: torna «Su» e trascinalo dove sta l'ingresso.${d.ritorno ? ' Qui in basso c\'è il passaggio di ritorno.' : ''}` : 'Mappa creata (senza passaggio: si aggiunge dall\'albero con «Crea passaggio»).')} />}
     </PageState>
       {pinDaRimuovere && pinDaRimuovere.contesto === contestoEditor && <FinestraRimozionePin
         key={`${pinDaRimuovere.spillo.id}:${pinDaRimuovere.spillo.uid}:${pinDaRimuovere.contesto}`}
@@ -404,7 +398,6 @@ interface PropsPannello {
   onImmagine: (file: File) => Promise<void>;
   onScaricaDallaGuida: () => Promise<void>;
   onEliminaMappa: () => void;
-  onNuovaMappa: () => void;
   /** Passaggio da questa mappa verso `destinazione` (figlia senza passaggio o genitore per il ritorno), 15.24. */
   onCreaPassaggio: (destinazione: string) => Promise<void>;
   onEsporta: () => void;
@@ -581,10 +574,8 @@ function PannelloEditor(p: PropsPannello) {
             ))}
           </ul>
         )}
-        {/* nel mondo non si crea una mappa sciolta: aree e planimetrie nascono dalle loro pagine (L2, R2-27) */}
-        {aggiunta
-          ? <Link to={aggiunta.href} className="visore-mappa__azione-testo touch inline-flex items-center">{aggiunta.testo}</Link>
-          : <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Nuova mappa" dettaglio={`figlia di ${nomePresentazioneMappa(mappa)}`} disabled={occupato} onClick={p.onNuovaMappa} />}
+        {/* R11-14: «Nuova mappa» generica non esiste più: aree e planimetrie nascono dalle loro pagine (L2, R2-27, e i Palazzi dalla scheda del Palazzo) */}
+        {aggiunta && <Link to={aggiunta.href} className="visore-mappa__azione-testo touch inline-flex items-center">{aggiunta.testo}</Link>}
       </section>
       <PassaggiMappa mappa={mappa} albero={p.albero} occupato={occupato} onVai={p.onVai} onCreaPassaggio={(k) => void p.onCreaPassaggio(k)} />
 
@@ -847,37 +838,5 @@ function FormMappa({ mappa, albero, occupato, onSalva, onElimina }: PropsFormMap
         </div>
       </form>
     </section>
-  );
-}
-
-interface PropsNuova { aperta: boolean; genitore: MappaDto; albero: MappaRiassuntoDto[]; occupato: boolean; onChiudi: () => void; onCrea: (dati: Parameters<typeof creaMappa>[0]) => Promise<void> }
-
-/** Finestra «Nuova mappa»: chiave proposta dal nome, tipo coerente col genitore; passaggio dal genitore (predefinito) e di ritorno (a scelta), 15.24. */
-function NuovaMappaModal({ aperta, genitore, albero, occupato, onChiudi, onCrea }: PropsNuova) {
-  const [nome, setNome] = useState('');
-  const [tipo, setTipo] = useState<TipoMappa>(genitore.tipo === 'dedalo' ? 'generica' : genitore.tipo === 'palazzo' || genitore.tipo === 'area' ? 'area' : genitore.tipo === 'citta' ? 'quartiere' : 'luogo');
-  const [passaggio, setPassaggio] = useState(true);
-  const [ritorno, setRitorno] = useState(false);
-  // la chiave nasce dal nome, preceduta da quella del genitore (non sotto la città): unica e valida per abilitare «Crea»;
-  // l'asset del repository non si chiede: lo pone il server, «mappe/<chiave>» (`assetPredefinitoMappa`)
-  const chiaveEffettiva = (genitore.tipo==='citta'?'':genitore.chiave+'-')+slug(nome);
-  const esiste = albero.some((m) => m.chiave === chiaveEffettiva);
-  const valida = /^[a-z0-9][a-z0-9-]{0,179}$/.test(chiaveEffettiva) && !esiste && nome.trim().length > 0;
-  return (
-    <Modal titolo="Nuova mappa" aperta={aperta} onChiudi={onChiudi}
-      azioni={<>
-        <button type="button" className="btn btn-secondary btn-sm" onClick={onChiudi}>Annulla</button>
-        <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Crea" disabled={occupato || !valida} onClick={() => void onCrea({ nome: nome.trim(), tipo, genitore: genitore.chiave, ordine: genitore.figli.length, passaggio, ritorno })} />
-      </>}>
-      <div className="flex flex-col gap-2">
-        <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} maxLength={LIMITI_GUIDA.mappa.nome} autoFocus /></label>
-        <div className="editor-mappa__campo">
-          <Selettore etichetta="Tipo di mappa" valore={tipo} opzioni={TIPI_MAPPA.map((t) => ({ chiave: t, nome: NOME_TIPO_MAPPA[t] }))} onCambia={(k) => setTipo(k as TipoMappa)} />
-        </div>
-        <p className="m-0 text-[12px] text-text-muted">Genitore: {genitore.nome}. {esiste ? <span className="editor-mappa__avviso">Esiste già una mappa con questa chiave.</span> : 'Nomi e file seguiranno automaticamente questo percorso.'}</p>
-        <label className="flex items-start gap-2 text-[13px] touch"><input type="checkbox" className="w-5 h-5 mt-0.5 shrink-0" checked={passaggio} onChange={(e) => setPassaggio(e.target.checked)} /> <span>Crea il passaggio su «{genitore.nome}» verso la nuova mappa <span className="text-text-muted">(al centro, in un punto libero: poi lo trascini dove sta l'ingresso)</span></span></label>
-        <label className="flex items-start gap-2 text-[13px] touch"><input type="checkbox" className="w-5 h-5 mt-0.5 shrink-0" checked={ritorno} onChange={(e) => setRitorno(e.target.checked)} /> <span>Crea anche il passaggio di ritorno verso «{genitore.nome}» nella nuova mappa <span className="text-text-muted">(in basso al centro)</span></span></label>
-      </div>
-    </Modal>
   );
 }
