@@ -9,6 +9,7 @@ import { getSkill } from '../services/api';
 import { PageState } from '../components/shared/PageState';
 import { ElementoChip } from '../components/compendio/ElementoChip';
 import { IconChevronLeft } from '../components/shared/icons';
+import { ModificaGuida } from '../components/guida/ModificaGuida';
 
 /** Scheda skill. */
 export function SkillDettaglioPage() {
@@ -31,6 +32,7 @@ export function SkillDettaglioPage() {
               {s.nomeIt !== s.nome && <span className="text-[13px] text-text-muted" title="Nome nella localizzazione inglese">{s.nome}</span>}
               <ElementoChip elemento={s.elemento} nome={s.elementoNome} />
               <span className="chip">{s.costo.testo}</span>
+              <ModificaGuida tipo="skill" chiave={String(s.id)} cosa={`la skill «${s.nomeIt}»`} onSalvato={() => void ricarica()} />
             </div>
             <p className="m-0 text-[15px]">{s.effettoNome}</p>
             <dl className="dl-scheda m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[13px]">
