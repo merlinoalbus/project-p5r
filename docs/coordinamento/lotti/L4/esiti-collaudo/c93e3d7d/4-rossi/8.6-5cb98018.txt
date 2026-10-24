@@ -4,7 +4,7 @@
 ### sorgenti da riportare a 5cb98018^: src/components/guida/GuidaDellArea.tsx src/components/guida/RaccoltaPlanimetrie.tsx src/components/mappe/MappaIncorporata.tsx src/pages/DungeonDettaglioPage.tsx src/utils/gestiVoce.ts ; sorgenti nuovi da togliere: nessuno
 ### 1) controllo sul codice di 5cb98018: npx vitest run --reporter=verbose src/components/guida/GuidaDellArea.test.tsx src/components/guida/RaccoltaPlanimetrie.test.tsx src/components/mappe/MappaIncorporata.test.tsx src/pages/DungeonDettaglioPage.test.tsx 
 
- RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L4
+ RUN  v4.1.11 ~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L4
 
  ✓ src/components/guida/RaccoltaPlanimetrie.test.tsx > ogni collezionabile si segna con la parola del suo tipo: boss «Sconfitto», forziere «Aperto», tesoro «Rubato», seme «Raccolto» (scelte dell’utente) 105ms
  ✓ src/components/guida/RaccoltaPlanimetrie.test.tsx > §8.6: prima di togliere il segno a un pin si chiede alla pagina > «Annulla» (la pagina risponde no): niente chiamata, la spunta resta 30ms
@@ -176,7 +176,7 @@ M  src/utils/gestiVoce.ts
 sì, identici al commit
 ### 2) sul codice di 5cb98018^: npx vitest run --reporter=verbose src/components/guida/GuidaDellArea.test.tsx src/components/guida/RaccoltaPlanimetrie.test.tsx src/components/mappe/MappaIncorporata.test.tsx src/pages/DungeonDettaglioPage.test.tsx 
 
- RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L4
+ RUN  v4.1.11 ~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L4
 
  ✓ src/components/mappe/MappaIncorporata.test.tsx > con la planimetria, le classi del riquadro vanno al contenitore del visore e non c’è altezza in linea 30ms
  ✓ src/components/guida/RaccoltaPlanimetrie.test.tsx > ogni collezionabile si segna con la parola del suo tipo: boss «Sconfitto», forziere «Aperto», tesoro «Rubato», seme «Raccolto» (scelte dell’utente) 108ms

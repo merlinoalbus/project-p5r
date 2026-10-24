@@ -128,7 +128,7 @@ Sola lettura; script `l7.cjs` e `lconcluso.cjs` (uscite `*-0440Z.json` nel mio s
   - La verifica di `modifiche.md` §5.1 («un forziere non preso di Kamoshida p1 risulta "Non più ottenibile"») oggi non ha un caso vero in p1: va fatta con la
     partita di prova.
 - **Impronta «prima» di L7 sulla base p5s-2026-10-20-0533Z** (richiesta del Manager). Script `impronta-l7.cjs` → `impronta-l7-0533Z.json`, nel mio scratchpad
-  `C:\Users\rober\AppData\Local\Temp\claude\C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941\161706c7-6e2c-47d6-bdb7-618347ce218c\scratchpad\`.
+  `~\AppData\Local\Temp\claude\C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941\161706c7-6e2c-47d6-bdb7-618347ce218c\scratchpad\`.
   Per ogni tabella: righe e sha256 di tutte le righe in ordine di chiave, senza `updated_at`/`created_at`. Sha256 complessivo
   **`b4d4737129d06ab5a5f8e1fd463fb2346761a79d258042a06ddaa8e56a787dcf`**, **identico sulla 0503Z** (la Prova non tocca L7) e stabile se rieseguito.
   | Dato | Righe | sha256 (inizio) |

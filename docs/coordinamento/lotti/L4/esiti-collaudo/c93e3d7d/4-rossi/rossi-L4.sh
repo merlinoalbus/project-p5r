@@ -4,7 +4,7 @@
 # collegato in sola lettura (junction), mai `git clean`. La linea di rilascio non si tocca.
 set -u
 LINEA="C:/Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2"
-W="C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L4"
+W="~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L4"
 O="$1"
 mkdir -p "$O"
 cd "$W" || exit 9

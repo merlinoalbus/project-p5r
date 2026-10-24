@@ -4,7 +4,7 @@
 ### sorgenti del commit da riportare a c8338fd0^: src/components/mappe/AlberoLuoghi.tsx src/pages/MappaPage.tsx src/services/api/mappe.ts src/utils/presentazioneMappa.ts ; sorgenti nuovi da togliere: nessuno
 ### 1) controllo sul codice di c8338fd0: npx vitest run --reporter=verbose src/pages/MappaPage.test.tsx 
 
- RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
+ RUN  v4.1.11 ~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
 
  ✓ src/pages/MappaPage.test.tsx > MappaPage > «Chiudi» del visore torna alla pagina da cui si era aperta la mappa; senza, all’elenco delle mappe 162ms
  ✓ src/pages/MappaPage.test.tsx > MappaPage > «Torna alla partita» porta alla pagina Partita, sulla scheda Oggi, e sta subito prima di «Chiudi» (2026-10-04) 46ms
@@ -51,7 +51,7 @@ M  src/utils/presentazioneMappa.ts
 sì, identici al commit
 ### 2) sul codice di c8338fd0^: npx vitest run --reporter=verbose src/pages/MappaPage.test.tsx 
 
- RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
+ RUN  v4.1.11 ~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
 
 
 ⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯

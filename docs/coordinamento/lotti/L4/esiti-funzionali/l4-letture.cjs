@@ -1,8 +1,8 @@
 // L4 sul 3201: sole letture (GET) contro modifiche.md §2.4 e be.md §2, più il confronto con le basi «prima» (schema 109) di voci e pin.
 const fs = require('fs');
 const B = 'http://localhost:3201';
-const BASE3 = 'C:/Users/rober/.claude/p5s-coordinamento/lotti/L3/esiti-funzionali/base-prima';
-const BASE4 = 'C:/Users/rober/.claude/p5s-coordinamento/lotti/L4/esiti-funzionali/base-prima';
+const BASE3 = '~/.claude/p5s-coordinamento/lotti/L3/esiti-funzionali/base-prima';
+const BASE4 = '~/.claude/p5s-coordinamento/lotti/L4/esiti-funzionali/base-prima';
 const get = async (p) => (await (await fetch(B + p)).json());
 const log = (...a) => console.log(...a);
 (async () => {

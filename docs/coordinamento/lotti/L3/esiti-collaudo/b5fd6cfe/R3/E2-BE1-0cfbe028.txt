@@ -4,7 +4,7 @@
 ### sorgenti del commit da riportare a 0cfbe028^: server/openapi/descrizioni/mappe.ts server/routes/mappe.ts server/services/mappe/mappeService.ts shared/spilli.ts shared/types.ts ; sorgenti nuovi da togliere: nessuno
 ### 1) controllo sul codice di 0cfbe028: npx vitest run --reporter=verbose server/routes/mappe-conteggi-pin.test.ts 
 
- RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
+ RUN  v4.1.11 ~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
 
  ✓ server/routes/mappe-conteggi-pin.test.ts > E2 — conteggi dei pin dell’indice delle Mappe > la regola unica: ogni tipo di pin ha il suo gruppo, letto dalla categoria 2ms
  ✓ server/routes/mappe-conteggi-pin.test.ts > E2 — conteggi dei pin dell’indice delle Mappe > ogni nodo dell’albero porta i conteggi del suo sottoalbero: Tokyo, Kamoshida e Madarame come in SQL, e per ogni nodo la somma dei gruppi 30ms
@@ -27,7 +27,7 @@ M  shared/types.ts
 sì, identici al commit
 ### 2) sul codice di 0cfbe028^: npx vitest run --reporter=verbose server/routes/mappe-conteggi-pin.test.ts 
 
- RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
+ RUN  v4.1.11 ~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
 
  × server/routes/mappe-conteggi-pin.test.ts > E2 — conteggi dei pin dell’indice delle Mappe > la regola unica: ogni tipo di pin ha il suo gruppo, letto dalla categoria 2ms
    → gruppoConteggioSpillo is not a function

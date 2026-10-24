@@ -1,5 +1,5 @@
 
- RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941/365ea5e8-f698-4350-bd74-d5465a3b19f3/scratchpad/l4commit/albero
+ RUN  v4.1.11 ~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941/365ea5e8-f698-4350-bd74-d5465a3b19f3/scratchpad/l4commit/albero
 
 
  Test Files  43 passed (43)

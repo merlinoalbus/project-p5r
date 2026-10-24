@@ -1,7 +1,7 @@
 # Piano di razionalizzazione P5R
 
 > Copia del piano del 19 ottobre 2026 (https://claude.ai/artifact/SWLetSorHYyBiLqVCPu7jZ), riportata nel repository il
-> 2026-10-20 come riferimento del branch `newreview` (istanza parallela https://p5s.nasmerlinoalbus.cloud). L'analisi AS-IS da
+> 2026-10-20 come riferimento del branch `newreview` (istanza parallela p5s). L'analisi AS-IS da
 > cui parte è https://claude.ai/artifact/3jwzuzsqKQq8vqu1PimcLS. Lo stato di avanzamento dei lotti sta in `docs/ROADMAP.md`
 > (fase «Razionalizzazione»), le scelte in `docs/DECISIONI.md`.
 

@@ -1,7 +1,7 @@
 # L1 «Immagini» — stato e correzioni da fare (fase: correzioni dopo il 1° giro del validatore)
 
 Il lotto è nel commit `bd20ed72` su `newreview` (cartella di sviluppo). Il validatore lo ha RIGETTATO: verdetto integrale in
-`C:\Users\rober\.claude\p5s-coordinamento\verdetto-L1-giro1.txt` (F1–F11). Requisiti: piano righe 89, 214, 414 (Lotto L1: «Un risolutore
+`~\.claude\p5s-coordinamento\verdetto-L1-giro1.txt` (F1–F11). Requisiti: piano righe 89, 214, 414 (Lotto L1: «Un risolutore
 d'immagine per tutte le viste; il ruolo dell'immagine si deduce dal posto nella gerarchia». Fatto quando: «Tokyo, i quartieri e ogni
 planimetria mostrano la stessa immagine in visore, indice, schede e miniature»).
 

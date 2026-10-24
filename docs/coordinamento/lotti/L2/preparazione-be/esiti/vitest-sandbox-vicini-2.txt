@@ -1,5 +1,5 @@
 
- RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941/365ea5e8-f698-4350-bd74-d5465a3b19f3/scratchpad/l2/sandbox
+ RUN  v4.1.11 ~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941/365ea5e8-f698-4350-bd74-d5465a3b19f3/scratchpad/l2/sandbox
 
  ✓ server/db/migrations/104_cestino.test.ts > crea il cestino nel file di gioco e la parte delle partite nel loro file, con i vincoli; rieseguirle non cambia niente 202ms
  ✓ server/db/migrations/108_miniature_delle_immagini.test.ts > crea immagine_miniatura vuota; solo le misure ammesse; eliminata la sorgente, le miniature se ne vanno; le altre tabelle invariate 203ms

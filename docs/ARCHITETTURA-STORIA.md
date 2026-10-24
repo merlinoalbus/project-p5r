@@ -1679,7 +1679,7 @@ Impostazioni → Cestino.
 ## Razionalizzazione (branch `newreview`, dal 2026-10-20)
 
 Il piano è `docs/analisi/2026-10-20-piano-razionalizzazione.md`; lo stato dei lotti in `ROADMAP.md`. L'istanza parallela
-https://p5s.nasmerlinoalbus.cloud gira con le immagini `:newreview` (`.github/workflows/docker-publish-newreview.yml`) nello stack
+L'istanza p5s gira con le immagini `:newreview` (`.github/workflows/docker-publish-newreview.yml`) nello stack
 `docker-compose.p5s.yml` (progetto `p5s`, container `project_p5r_review_be`/`project_p5r_review_fe`, volume `p5s_data`); il backend ha
 l'alias `project_p5r_be` sulla rete dello stack, così l'nginx dell'immagine del frontend non cambia.
 

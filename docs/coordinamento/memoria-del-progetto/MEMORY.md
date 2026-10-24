@@ -1,11 +1,5 @@
 # Indice della memoria — project-p5r
 
-- [Prevale sempre Persona5Royal](project-priorita-royal.md) — istruzione diretta23/10: app perRoyal; in caso di discrepanza prevale sempre il datoRoyal documentato
-
-- [Verifica avversariale delle consegne](feedback-verifica-avversariale.md) — dal 21/10 agente distinto, lettura diretta delle specifiche originali e confronto con il codice; supera il divieto di verificatori, resta zero test
-
-- [Commit e pubblicazione a fine lotto](feedback-commit-fine-lotto.md) — decisione del 20 ottobre; il prompt diretto del 21 ottobre richiede il salvataggio alla fermata, applicato alla consegna documentale dell'audit; «Importa» e guida del visore confermati
-
 - [Modifiche dirette ai file](feedback-modifiche-dirette.md) — niente patch né script (Python o tsx) che scrivono sorgenti, dati o documenti
 - [Flusso di lavoro dei lotti](project-flusso-di-lavoro-p5r.md) — worktree main, ramo lavoro/…, validatore emulato in sola lettura, PR + merge + solo main
 - [Browser pane nascosto](reference-browser-pane-p5r.md) — click/hover non arrivano (nascosto o sotto emulazione scalata): gesti a misura reale, misure in emulazione, pulire i dati di prova
@@ -28,7 +22,10 @@
 - [Lavoro da preservare](project-lavoro-da-preservare.md) — diario validato fino al 1° giugno, Palazzi di Kamoshida e Madarame: mai persi nelle migrazioni
 - [Dati di riferimento: p5s](project-dati-attuali-produzione.md) — dal 20/10 l'utente lavora su p5s (dati suoi, mai sovrascritti) e non tocca persona5royal; base = copia di p5s; alla fine sostituisce i principali
 - [Pacchetto obsoleto](project-pacchetto-obsoleto.md) — la fonte è solo il DB che sistemiamo; correzioni ai dati con migrazioni dirette, niente regole «al caricamento del pacchetto»
-- [Zero test](feedback-zero-test.md) — dal 20/10 sera: niente tester, cicli, validatore né test; implementare tutto, typecheck e lint verdi, pubblicare; i test li fa l'utente
+- [Zero test](feedback-zero-test.md) — dal 20/10 sera: niente tester, cicli né test; typecheck, lint e build verdi; i test li fa l'utente. Il divieto di validatore è superato dal 21/10 (vedi verifica avversariale)
+- [Verifica avversariale delle consegne](feedback-verifica-avversariale.md) — dal 21/10 ogni consegna la verifica un agente distinto, leggendo le specifiche originali; resta zero test
+- [Prevale sempre Persona5Royal](project-priorita-royal.md) — 23/10: in caso di discrepanza vince il dato Royal documentato; il dato superato resta nota storica
+- [Commit a fine lotto](feedback-commit-fine-lotto.md) — commit e push di codice e documenti insieme a fine lotto, niente pipeline per aggiornamenti intermedi; «Importa» resta; la guida del visore mostra tutte le infiltrazioni della planimetria
 - [Verifica su tutto](feedback-verifica-su-tutto.md) — «fatto» solo dopo una verifica sistematica su tutti i dati e le pagine; mai il solo caso dell'utente; elenco delle richieste aperte da rileggere
 - [Documentazione non blocca](feedback-documentazione-non-blocca.md) — app testata e corretta ⇒ si rilascia e si procede; i documenti si allineano al codice in parallelo
 - [Intestazione ≤ 30%](feedback-intestazione-30.md) — a ogni dispositivo l'intestazione occupa al massimo il 30% dell'altezza della schermata; telefono compreso

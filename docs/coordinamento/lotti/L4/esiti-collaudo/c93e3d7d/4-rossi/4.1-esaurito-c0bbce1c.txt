@@ -4,7 +4,7 @@
 ### sorgenti da riportare a c0bbce1c^: src/components/guida/GuidaDellArea.tsx ; sorgenti nuovi da togliere: nessuno
 ### 1) controllo sul codice di c0bbce1c: npx vitest run --reporter=verbose src/components/guida/GuidaDellArea.test.tsx 
 
- RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L4
+ RUN  v4.1.11 ~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L4
 
  ✓ src/components/guida/GuidaDellArea.test.tsx > i filtri per tipo sono una riga sola che si apre: i tipi con il conto, quanti sono scelti, «Tutti» li toglie (2026-10-18) 141ms
  ✓ src/components/guida/GuidaDellArea.test.tsx > la riga dice se la voce è collegata («N pin») o da collegare; le descrittive non dicono niente 22ms
@@ -89,7 +89,7 @@ M  src/components/guida/GuidaDellArea.tsx
 sì, identici al commit
 ### 2) sul codice di c0bbce1c^: npx vitest run --reporter=verbose src/components/guida/GuidaDellArea.test.tsx 
 
- RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L4
+ RUN  v4.1.11 ~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L4
 
  ✓ src/components/guida/GuidaDellArea.test.tsx > i filtri per tipo sono una riga sola che si apre: i tipi con il conto, quanti sono scelti, «Tutti» li toglie (2026-10-18) 144ms
  ✓ src/components/guida/GuidaDellArea.test.tsx > la riga dice se la voce è collegata («N pin») o da collegare; le descrittive non dicono niente 27ms

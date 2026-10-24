@@ -1,0 +1,167 @@
+{
+  "parte": 6,
+  "da_R": 200,
+  "a_R": 239,
+  "domande": [
+    {"R":200,"ombre":["Angel"],"q":"Well, I'm still here... That guy is really keeping me waiting.","risposte":[
+      {"n":1,"t":"Life isn't like fairy tales.","c":["-","-","-","-"]},
+      {"n":2,"t":"Just wait a little longer.","c":["-","-","-","O"]},
+      {"n":3,"t":"You'll never meet him.","c":["-","-","-","-"]}]},
+    {"R":201,"ombre":["Lilim","Kikuri-Hime","Angel"],"q":"We'll just say you win. So can we stop this?","risposte":[
+      {"n":1,"t":"I feel bad.","c":["O","g","G","O"]},
+      {"n":2,"t":"I don't agree with this.","c":["-","-","-","-"]},
+      {"n":3,"t":"Everyone wins.","c":["G","-","-","G"]}]},
+    {"R":202,"ombre":["Rangda","Kali","Dakini"],"q":"Well, quite frankly... No one wants you here. You do understand that, right?","risposte":[
+      {"n":1,"t":"I know.","c":["-","G","-","-"]},
+      {"n":2,"t":"I didn't know that.","c":["-","O","-","G"]},
+      {"n":3,"t":"Who cares?","c":["G","-","-","-"]}]},
+    {"R":203,"ombre":["Kodama","Obariyon","Sudama"],"q":"What are we gonna do, huh?","risposte":[
+      {"n":1,"t":"Tag.","c":["b","-","G","OK/BAD?"],"multi_non_confermate":[3]},
+      {"n":2,"t":"I don't feel like playing.","c":["-","G","-","-"]},
+      {"n":3,"t":"Cruise for chicks.","c":["-","G","-","G"]}]},
+    {"R":204,"ombre":["Kurama_Tengu","Nebiros","Baal"],"q":"What did I do to deserve this?","risposte":[
+      {"n":1,"t":"It's karma for your evil deeds.","c":["-","G","-","G"]},
+      {"n":2,"t":"Don't play the victim.","c":["b","-","G","-"]},
+      {"n":3,"t":"Nothing in particular.","c":["-","-","B","-"]}]},
+    {"R":205,"ombre":["Jatayu"],"q":"What did you want, coming all the way to a place like this?","risposte":[
+      {"n":1,"t":"A thrilling adventure.","c":["-","-","-","-"]},
+      {"n":2,"t":"A treasure hunt.","c":["-","-","-","B"]},
+      {"n":3,"t":"Slaughter.","c":["-","-","-","-"]}]},
+    {"R":206,"ombre":["Bicorn","Thor","Mara","Fuu-ki","Eligor"],"q":"What do ya usually eat?","risposte":[
+      {"n":1,"t":"Curry.","c":["-","g","G","O"]},
+      {"n":2,"t":"All sorts of things.","c":["G","G","o","O"]},
+      {"n":3,"t":"Protein.","c":["-","-","-","G"]}]},
+    {"R":207,"ombre":[],"q":"What do you hope to accomplish by injuring me further...?","risposte":[
+      {"n":1,"t":"More sleep.","c":["-","-","-","-"]},
+      {"n":2,"t":"Popularity.","c":["-","o","-","-"]},
+      {"n":3,"t":"There's no end if I start.","c":["-","o","-","-"]}]},
+    {"R":208,"ombre":["Yaksini","Lamia","Nekomata"],"q":"What do you think about humans showing pictures of their baby to others?","risposte":[
+      {"n":1,"t":"It's cute.","c":["O","-","g","G"]},
+      {"n":2,"t":"I'm not interested.","c":["G","G","-","-"]},
+      {"n":3,"t":"What are you talking about?","c":["G","-","-","-"]}]},
+    {"R":209,"ombre":["Pixie"],"q":"What do you think I should wear? I admit it, I wanna draw some attention to myself.","risposte":[
+      {"n":1,"t":"High School uniform.","c":["-","g","-","G"]},
+      {"n":2,"t":"A Kimono.","c":["-","-","G","-"]},
+      {"n":3,"t":"Don't wear anything.","c":["-","o","-","o"]}]},
+    {"R":210,"ombre":["Mithras","Koppa_Tengu","Oberon","Naga","Nebiros"],"q":"What has brought you to a place like this? What are you seeking?","risposte":[
+      {"n":1,"t":"An adventure.","c":["O","G","G","-"]},
+      {"n":2,"t":"Nothing, really.","c":["G","-","O","O"]},
+      {"n":3,"t":"A killing spree.","c":["-","O","-","G"]}]},
+    {"R":211,"ombre":["Koppa_Tengu","Oberon","Naga","Dionysus"],"q":"What if I was a human? Then, what you're doing... well, it'd be a criminal act!","risposte":[
+      {"n":1,"t":"That's true...","c":["o","-","G","G"]},
+      {"n":2,"t":"That can't be true.","c":["O","G","-","-"]},
+      {"n":3,"t":"That's irrelevant.","c":["G","G","-","-"]}]},
+    {"R":212,"ombre":["Ippon-Datara","Oni","Shiki-Ouji","Bicorn","Koropokguru","Moloch"],"q":"What in the hell are ya tryin' ta tell me, anyway?","risposte":[
+      {"n":1,"t":"You're going to die.","c":["G","G","O","O"]},
+      {"n":2,"t":"Why do we fight?","c":["G","o","G","G"]},
+      {"n":3,"t":"I don't really know...","c":["G","-","O","O"]}]},
+    {"R":213,"ombre":["Titania","Isis","Queen_Mab","Valkyrie"],"q":"What is irritating you so much?","risposte":[
+      {"n":1,"t":"Rotten adults.","c":["O","G","-","-"]},
+      {"n":2,"t":"Egotistical women.","c":["O","B","-","G"]},
+      {"n":3,"t":"I'm not irritated.","c":["b","O","g","-"]}]},
+    {"R":214,"ombre":["Eligor","Bicorn","Hanuman","Anubis","Shiki-Ouji"],"q":"What kinda \"fate\" do ya think there is in this meetin' between me and you?","risposte":[
+      {"n":1,"t":"Fate brought us together.","c":["-","G","-","O"]},
+      {"n":2,"t":"There is no such thing.","c":["G","G","g","O"]},
+      {"n":3,"t":"I want to end this fate.","c":["b","o","-","G"]}]},
+    {"R":215,"ombre":["Bicorn","Atavaka","Forneus","Hanuman"],"q":"What kinda \"hospitality\" will you show me at the end of my life?","risposte":[
+      {"n":1,"t":"You won't suffer long.","c":["-","G","-","-"]},
+      {"n":2,"t":"A coupon for a massage by me.","c":["b","b","-","G"]},
+      {"n":3,"t":"I'll be at your side until the end.","c":["G","b","-","-"]}]},
+    {"R":216,"ombre":["Loa","Macabre","Incubus","Choronzon","Ganesha","Ose"],"q":"What kinda guys piss you off?","risposte":[
+      {"n":1,"t":"Pissy guys.","c":["G","G","-","O"]},
+      {"n":2,"t":"Guys with no sense of humor. ","c":["-","-","O","G"]},
+      {"n":3,"t":"I never get mad. ","c":["-","-","G","B"]}]},
+    {"R":217,"ombre":["Sudama","Cait_Sith","Onmoraki","Kodama","Agathion"],"q":"What was that, anyway?","risposte":[
+      {"n":1,"t":"A love letter.","c":["O","-","G","G"]},
+      {"n":2,"t":"A threat letter.","c":["G","G","-","G"]},
+      {"n":3,"t":"A coupon.","c":["-","-","G","G"]}]},
+    {"R":218,"ombre":["Nebiros","Cu_Chulainn","Barong","Dyonisus"],"q":"What was... the cause of my defeat?","risposte":[
+      {"n":1,"t":"Your lack of resolve.","c":["-","G","-","O"]},
+      {"n":2,"t":"Just bad luck.","c":["-","-","G","G"]},
+      {"n":3,"t":"I'm not telling.","c":["g","-","-","-"]}]},
+    {"R":219,"ombre":["Unicorn","Inugami","Nue","Cerberus","Makami","Jatayu","Slime"],"q":"What you thinking now?","risposte":[
+      {"n":1,"t":"How to negotiate..","c":["-","G","G","-"]},
+      {"n":2,"t":"Nothing.","c":["G","O","-","-"]},
+      {"n":3,"t":"How can I get popular?","c":["-","B","O","G"]}]},
+    {"R":220,"ombre":["Macabre","Choronzon","Loa","Ose","Mot"],"q":"What're you gonna tell your kids about this shit?","risposte":[
+      {"n":1,"t":"It was a hard-fought battle.","c":["-","G","o","-"]},
+      {"n":2,"t":"It was an easy win.","c":["B","-","-","-"]},
+      {"n":3,"t":"I'll forget it happened.","c":["G","-","O","G"]}]},
+    {"R":221,"ombre":["Obariyon","Kodama","Onmoraki"],"q":"What's it like to be all kissy face with somebody?","risposte":[
+      {"n":1,"t":"It's incredible...","c":["G","B","-","B"]},
+      {"n":2,"t":"I shouldn't tell you.","c":["-","-","-","-"]},
+      {"n":3,"t":"Ask your parents.","c":["B","G","-","G"]}]},
+    {"R":222,"ombre":["Bicorn","Thor","Berith","Shiki-Ouji","Oni","Anubis","Moloch","Eligor"],"q":"What's wrong with the way I look, huh?","risposte":[
+      {"n":1,"t":"You tempt people.","c":["G","O","g","G"]},
+      {"n":2,"t":"You're ugly.","c":["-","G","-","O"]},
+      {"n":3,"t":"Nothing's wrong.","c":["-","G","-","B"]}]},
+    {"R":223,"ombre":["Skadi","Dakini","Rangda","Alilat"],"q":"When I was young, I could make anyone back off-if they were smart enough-with just my glare.","risposte":[
+      {"n":1,"t":"That's so neat.","c":["-","G","G","-"]},
+      {"n":2,"t":"I'm just that good.","c":["-","-","-","G"]},
+      {"n":3,"t":"You've grown old.","c":["G","-","-","-"]}]},
+    {"R":224,"ombre":["Pixie","Hua_Po","Mandrake","Succubus","Angel"],"q":"When it came right down to it, you couldn't do anything to me!","risposte":[
+      {"n":1,"t":"I could.","c":["O","G","O","O"]},
+      {"n":2,"t":"How could you tell?","c":["G","-","O","G"]},
+      {"n":3,"t":"What do you want me to do?","c":["G","-","G","G"]}]},
+    {"R":225,"ombre":["Kodama","Obariyon","Sudama"],"q":"When you eat curry, mister, what do you like to add?","risposte":[
+      {"n":1,"t":"Soy sauce.","c":["g","G","G","G"]},
+      {"n":2,"t":"Worcestershire sauce.","c":["-","-","b","-"]},
+      {"n":3,"t":"I don't add anything.","c":["-","-","b","-"]}]},
+    {"R":226,"ombre":["Obariyon","Onmoraki"],"q":"When you were little, what did you wanna be when you grow up?","risposte":[
+      {"n":1,"t":"A pro athlete.","c":["-","G","G","-"]},
+      {"n":2,"t":"I had no dream.","c":["G","B","-","b"]},
+      {"n":3,"t":"A winner in society.","c":["-","-","g","G"]}]},
+    {"R":227,"ombre":["Sudama","Obariyon","Kodama"],"q":"Where do babies come from?","risposte":[
+      {"n":1,"t":"Storks deliver them.","c":["-","G","-","-"]},
+      {"n":2,"t":"Ask your parents.","c":["-","G","-","-"]},
+      {"n":3,"t":"The love between two people.","c":["g","O","G","G"]}]},
+    {"R":228,"ombre":["King_Frost"],"q":"Where should I go? I want something yummy, ho!","risposte":[
+      {"n":1,"t":"A place with no wait.","c":["b","-","-","-"]},
+      {"n":2,"t":"A place with western toilets.","c":["g","-","-","G"]},
+      {"n":3,"t":"You won't survive.","c":["-","-","-","-"]}]},
+    {"R":229,"ombre":["Koppa_Tengu","Naga","Mithras","Andras","Barong","Oberon"],"q":"Who the blazes do you think you are?","risposte":[
+      {"n":1,"t":"I feel bad about that.","c":["O","B","G","G"]},
+      {"n":2,"t":"I'm ME!","c":["o","B","-","G"]},
+      {"n":3,"t":"I don't owe you an answer.","c":["G","G","-","B"]}]},
+    {"R":230,"ombre":[],"q":"Why are you so interested in me, anyway?","risposte":[
+      {"n":1,"t":"If it pleases you.","c":["-","G","-","-"]},
+      {"n":2,"t":"[…]","c":["-","-","-","-"],"testo_disponibile":false},
+      {"n":3,"t":"[…]","c":["-","-","-","-"],"testo_disponibile":false}]},
+    {"R":231,"ombre":["Rangda","Dakini","Skadi","Kali","Alilat"],"q":"Why did you come to this dangerous place? Isn't it safer in the real world?","risposte":[
+      {"n":1,"t":"I've got business here.","c":["-","G","G","-"]},
+      {"n":2,"t":"I'm here for the loot.","c":["-","O","-","G"]},
+      {"n":3,"t":"Just 'cause.","c":["G","-","O","-"]}]},
+    {"R":232,"ombre":[],"q":"Why do they like \"making out\"?","risposte":[
+      {"n":1,"t":"How should I know?","c":["g","-","-","-"]},
+      {"n":2,"t":"I can't tell you.","c":["-","-","-","b"]},
+      {"n":3,"t":"Ask your parents.","c":["-","-","G","-"]}]},
+    {"R":233,"ombre":["Sarasvati","Isis","High_Pixie","Apsaras","Leanan_Sidhe"],"q":"Why have you decided to be more communicative with me?","risposte":[
+      {"n":1,"t":"Your looks.","c":["o","-","G","G"]},
+      {"n":2,"t":"You seemed useful.","c":["O","G","B","G"]},
+      {"n":3,"t":"No particular reason.","c":["G","b","B","-"]}]},
+    {"R":234,"ombre":["Nue","Shiisaa","Inugami","Orthrus","Thoth","Thunderbird","Unicorn","Jatayu","Byakhee","Cerberus"],"q":"Why you come all the way here?","risposte":[
+      {"n":1,"t":"For a treasure hunt.","c":["O","G","G","B"]},
+      {"n":2,"t":"For girls.","c":["O","B","O","G"]},
+      {"n":3,"t":"I just felt like it.","c":["B","O","B","O"]}]},
+    {"R":235,"ombre":["Slime","Anzu","Thunderbird","Jatayu","Garuda","Yamata-no-Orochi","Arahabaki","Cerberus","Kin-ki"],"q":"Why you fight and put yourself in harm's way?","risposte":[
+      {"n":1,"t":"I want to get stronger.","c":["B","G","G","G"]},
+      {"n":2,"t":"Because I see an enemy.","c":["-","G","b","O"]},
+      {"n":3,"t":"I don't actually know.","c":["G","-","B","O"]}]},
+    {"R":236,"ombre":["Nue","Orthrus","Anzu","Arahabaki","Kelpie","Shiisaa","Inugami","Makami","Mothman","Byakhee","Hastur","Thoth","Jatayu"],"q":"Why you keep trampling here? What you humans thinking?","risposte":[
+      {"n":1,"t":"I'm sorry.","c":["B","b","G","G"]},
+      {"n":2,"t":"Should I take off my shoes?","c":["O","B","O","G"]},
+      {"n":3,"t":"Shut up.","c":["G","G","B","O"]}]},
+    {"R":237,"ombre":["Anzu","Nue","Chimera","Thunderbird","Arahabaki","Jatayu","Slime"],"q":"Why you not care for me like that? Why you treat me like this, then?","risposte":[
+      {"n":1,"t":"You look scary.","c":["O","G","O","O"]},
+      {"n":2,"t":"I want to cherish you.","c":["-","-","G","G"]},
+      {"n":3,"t":"You're not a beast.","c":["G","-","-","O"]}]},
+    {"R":238,"ombre":["Nue","Yamata-no-Orochi","Garuda"],"q":"Why you wear mask to fight, anyway?","risposte":[
+      {"n":1,"t":"I care about my looks.","c":["-","o","G","G"]},
+      {"n":2,"t":"It keeps my foes' blood off.","c":["-","-","O","-"]},
+      {"n":3,"t":"That's what I want to know.","c":["G","G","-","-"]}]},
+    {"R":239,"ombre":["Rakshasa","Take-Minakata","Ose","Incubus","Black_Ooze","Orobas","Sandman","Decarabia"],"q":"Why're you so desperate?","risposte":[
+      {"n":1,"t":"I don't want to die.","c":["G","O","G","G"]},
+      {"n":2,"t":"There's something I must do.","c":["o","G","G","B"]},
+      {"n":3,"t":"I want girls to like me.","c":["-","B","O","G"]}]}
+  ]
+}

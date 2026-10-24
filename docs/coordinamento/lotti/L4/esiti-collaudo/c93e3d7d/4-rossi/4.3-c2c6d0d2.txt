@@ -4,7 +4,7 @@
 ### sorgenti da riportare a c2c6d0d2^: src/pages/DungeonDettaglioPage.tsx src/services/api/compendio.ts ; sorgenti nuovi da togliere: src/components/guida/SchedeDaSistemare.tsx 
 ### 1) controllo sul codice di c2c6d0d2: npx vitest run --reporter=verbose src/pages/DungeonDettaglioPage.test.tsx 
 
- RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L4
+ RUN  v4.1.11 ~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L4
 
  ✓ src/pages/DungeonDettaglioPage.test.tsx > in un Palazzo la colonna elenca i collezionabili delle planimetrie e «Raccolto» aggiorna anello e conteggi subito, senza caricamento, poi rilegge la scheda in silenzio (voci e Enigmi, 095) 275ms
  ✓ src/pages/DungeonDettaglioPage.test.tsx > due riletture sovrapposte: la risposta vecchia che arriva dopo non sovrascrive quella nuova 123ms
@@ -105,7 +105,7 @@ M  src/services/api/compendio.ts
 sì, identici al commit
 ### 2) sul codice di c2c6d0d2^: npx vitest run --reporter=verbose src/pages/DungeonDettaglioPage.test.tsx 
 
- RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L4
+ RUN  v4.1.11 ~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L4
 
 
 ⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯

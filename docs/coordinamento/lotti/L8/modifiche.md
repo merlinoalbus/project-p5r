@@ -297,3 +297,10 @@ CREATE TABLE negoziazione_umore (umore TEXT PRIMARY KEY, nome TEXT NOT NULL, des
 5. **Verdetti**: vince Royal (G-021); quelli di oggi diversi restano come «altra fonte», quelli senza Royal come «solo P5» (non più «il peggiore»).
 6. **Vista «Persona della partita»**: in L10 (dubbio 6).
 7. **Personalità** delle 75 Ombre senza: dall'allegato di G-021; «sconosciuta» solo dove manca anche lì.
+
+## 9. Implementazione di B0 e B4 (2026-10-24): scarti dal disegno e punti aperti
+Commit `5ca53f49` (B0, migrazione 162) e `7e57b989` (B4, migrazione 166; i numeri 123 e M8 del disegno erano ipotetici).
+- **Scarti dal §1.1**: il legame voce → Ombra è la tabella `ombra_voce` (una voce, un'Ombra, `ON DELETE CASCADE`) e non la colonna `punto_interesse.ombra_chiave`: non cambia la forma di una tabella che dieci servizi leggono con `SELECT *`. `ombra_luogo` ha una chiave propria e indici univoci (la chiave composta con colonne NULL non impediva i doppioni) e porta il Palazzo e l'infiltrazione (o il dedalo); le aree dei dedali sono la vista `ombra_luogo_dedalo` da `persona_area_dedalo`, senza copia. Catturabilità (`catturabile`) e negoziabilità (`negoziabile`, NULL = non verificata) sono colonne distinte dall'abbinamento alla Persona, come vuole P1. Nessun legame all'Area fisica di L3: le fonti dicono il Palazzo o l'infiltrazione.
+- **Identità**: una Ombra è (nome, Persona); la stessa coppia con personalità diverse in luoghi diversi (10 casi) dà Ombre distinte. Le righe senza il nome dell'Ombra (Okumura) vanno all'Ombra della stessa Persona se è una sola e compatibile.
+- **Dati**: le 71 personalità di G-021 §5 sono in `server/db/migrations/dati/ombre-personalita.json`. Babau/Bugs (Orsacchiotto assassino) non è catturabile (AllGameStaff, settimana 40). Il rapporto delle decisioni è in `dati_guida` `ombre-l8-166` e in `GET /api/compendio/ombre/verifica`.
+- **Non fatto in questa ondata**: rotte di scrittura e cestino `ombra` (§4), il raccordo della tabella di Kamoshida (assente in p5s), i nomi di negoziazione delle altre Ombre, l'elenco delle occorrenze degli elementi nei testi liberi (`elementi-nei-testi.md`), tutte le viste (B8).

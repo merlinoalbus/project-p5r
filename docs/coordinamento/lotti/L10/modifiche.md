@@ -228,9 +228,12 @@ registro degli effetti), `partita` (`partiteService.ts:148-158`), `persona-scort
   `OggiPartita.tsx:28-51`), con lo stato della mappa in uno store (`oggiStore`) condiviso fra Home e Partita; la Home lo incorpora (stessa mappa, stesso
   centro), con `PageState` e `onGiorno` in entrambe.
 - **Pannello della scheda sopra il diario** (R10-27): toccare un oggetto citato da una voce (Confidente, luogo, Palazzo/infiltrazione, libro, oggetto,
-  attività) apre `PannelloScheda` (foglio dal basso su telefono, pannello laterale da 1024 px) con la pagina dell'oggetto in modo incorporato (le
-  pagine di L5, L7, L8, L9 accettano `incorporata`) e lo stato di partita; l'indirizzo prende `?scheda=<tipo>/<chiave>` (indietro lo chiude); chiudendo
-  si torna alla stessa voce **nella stessa posizione** (lo scorrimento del diario non cambia perché la pagina non cambia).
+  attività) apre `PannelloScheda` (`src/components/scheda/`: foglio dal basso su telefono, pannello laterale da 1024 px) con la pagina dell'oggetto così
+  com'è, che dentro il pannello legge la scheda al posto dell'indirizzo (`routerScheda`), e con lo stato di partita che la scheda già dice; l'indirizzo
+  prende `?pannello=<indirizzo della scheda>` (non `?scheda=`, che è della Partita; indietro lo chiude); chiudendo si torna alla stessa voce **nella
+  stessa posizione** (lo scorrimento del diario non cambia perché la pagina non cambia). Vale nella Home e nella Guida › Giorno per giorno; Partita ›
+  Oggi non cambia (i cartellini navigano, con il ritorno alla voce `#voce-<uid>`). Libri, film, attività e Richieste si aprono come
+  `/guida/libri?elemento=<chiave>` (e gli analoghi): l'elemento nell'elenco filtrato.
 - **«Entra» ed «Esci»** (R10-28, segnalazione E): «Entra» sulla voce di un Palazzo apre `/guida/dungeon/<k>?infiltrazione=<prima non completata
   dell'insieme della voce o in corso>&da=diario&voce=<uid>` (L3); su una visita ai Memento il menù del Dedalo con `da=diario`. La scheda in modalità
   diario mostra **«Esci»**: torna a `/partita?scheda=oggi#voce-<uid>` e propone «Segna la voce fatta» con il **riepilogo** (voci segnate dopo l'«Entra»:

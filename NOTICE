@@ -42,6 +42,15 @@ GooberSD/Chompobar — https://docs.google.com/document/d/1sPsQ2SPXJdsrhYBj3mMyj
 Tensei Fandom Wiki. La resa italiana è di questo progetto: il gioco in italiano può usare parole
 diverse, e le voci marcate «incerto» non sono verificate nemmeno dalla fonte.
 
+Il foglio Royal della negoziazione (docs/coordinamento/lotti/L8/dati-negoziazione/negoziazione-royal*.json:
+277 domande, 831 risposte, 3324 celle con esiti buono/passabile/cattivo per le quattro personalità, le celle
+«non confermate» segnate come tali) è trascritto dalla raccolta pubblica «Persona 5 & Royal Negotiation Guide» di
+joyce-chen — https://github.com/joyce-chen/persona5-negotiation (file royal.md, che il repository genera dal
+foglio data/persona-5-royal-questions.xlsx; letto il 2026-10-23), con i contributi di GooberSD/Chompobar
+citati dall'autore. Il repository non dichiara nessuna licenza: la copia è una decisione del proprietario di
+questo progetto del 2026-10-23, presa con questa attribuzione. I testi delle domande e delle risposte restano
+in inglese, come nella fonte.
+
 I riferimenti visivi citati nei prompt di generazione (docs/grafica/) rimandano a immagini
 ospitate da terzi (wiki, store ufficiali) usate esclusivamente come ispirazione: nessuna di esse
 è copiata in questo repository.

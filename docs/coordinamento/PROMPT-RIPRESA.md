@@ -2,7 +2,7 @@
 
 ---
 
-Riprendi il lavoro sul progetto project-p5r, ramo `newreview` (repository https://github.com/merlinoalbus/project-p5r), pubblicato su https://p5s.nasmerlinoalbus.cloud. Rispondi sempre in italiano.
+Riprendi il lavoro sul progetto project-p5r, ramo `newreview` (repository https://github.com/merlinoalbus/project-p5r), pubblicato sull'istanza p5s. Rispondi sempre in italiano.
 
 **1. Ricostruisci lo stato prima di fare qualunque cosa.** Non fidarti della memoria della conversazione: fidati solo dei file e di git.
 - Esiste **un solo ramo di lavoro: `newreview`**. Fai `git fetch`, passa a `newreview`, leggi `git log --oneline -30` e `git status`. Ogni push su `newreview` pubblica su p5s e applica le migrazioni ai dati dell'utente. `main` non si tocca.

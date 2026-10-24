@@ -1,7 +1,7 @@
 <task-notification>
 <task-id>ac901b983aa8a77db</task-id>
 <tool-use-id>toolu_01QinkjCnUPFQDq9hx9oJetU</tool-use-id>
-<output-file>C:\Users\rober\AppData\Local\Temp\claude\C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941\cffd8da6-5996-4013-b5ec-2c69430948db\tasks\ac901b983aa8a77db.output</output-file>
+<output-file>~\AppData\Local\Temp\claude\C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941\cffd8da6-5996-4013-b5ec-2c69430948db\tasks\ac901b983aa8a77db.output</output-file>
 <status>completed</status>
 <summary>Agent "Validazione lotto L1" finished</summary>
 <note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>

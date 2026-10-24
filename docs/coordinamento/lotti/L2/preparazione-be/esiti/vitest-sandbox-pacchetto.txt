@@ -1,5 +1,5 @@
 
- RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941/365ea5e8-f698-4350-bd74-d5465a3b19f3/scratchpad/l2/sandbox
+ RUN  v4.1.11 ~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941/365ea5e8-f698-4350-bd74-d5465a3b19f3/scratchpad/l2/sandbox
 
  ✓ server/services/pacchetto/ricaricaPezzi.test.ts > un pacchetto della 102: i ritagli arrivano senza la posa e la posa diventa la prima copia; le copie di prima se ne vanno 208ms
  ✓ server/services/pacchetto/ricaricaPezzi.test.ts > un pacchetto della 103 senza copie: nessuna copia resta senza il suo ritaglio 208ms

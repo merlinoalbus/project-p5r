@@ -111,14 +111,14 @@ scrive «grafica ripristinata». Ognuno usa una scheda sua e ripristina le dimen
   sessioni lavorano lì con percorsi assoluti, qualunque sia la cartella in cui sono state aperte. **Mai** fare checkout di altri branch lì.
 - **Server condivisi**: BE http://localhost:3201, FE http://localhost:5373 (girano dalla cartella di sviluppo sui dati `data/`, copia della
   produzione migrata). Il BE è in `tsx watch` e si riavvia da solo; se si ferma: `bash scripts/restart-be.sh` dalla cartella di sviluppo.
-- **Copia di produzione** per le prove di migrazione e i confronti: `C:\Users\rober\AppData\Local\Temp\claude\C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941\cffd8da6-5996-4013-b5ec-2c69430948db\scratchpad\prod-20261020\` (gioco.db, partite.db: SOLO LETTURA, se ne fanno copie) e l'impronta `impronta-prod-20261020.json` con lo script `impronta.cjs` accanto.
+- **Copia di produzione** per le prove di migrazione e i confronti: `~\AppData\Local\Temp\claude\C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941\cffd8da6-5996-4013-b5ec-2c69430948db\scratchpad\prod-20261020\` (gioco.db, partite.db: SOLO LETTURA, se ne fanno copie) e l'impronta `impronta-prod-20261020.json` con lo script `impronta.cjs` accanto.
 - Chi scrive codice: **solo** Implementazione BE (server/, shared/, migrazioni, test BE) e Implementazione FE (src/, test FE, stili). BE e FE non
   toccano gli stessi file nello stesso momento: se serve, BE scrive i tipi in shared/ e FE li usa.
 - Nessuno fa commit, push o merge tranne il Project manager. Gli altri lasciano le modifiche nella cartella di sviluppo.
 - Le analisi e i test **non modificano** codice né dati di `data/` (i test funzionali possono creare dati con una partita di prova creata apposta e devono pulirla alla fine; mai toccare la partita reale).
 
 ## Regole vincolanti per tutti
-- main e https://persona5royal.nasmerlinoalbus.cloud non si toccano; niente container, volumi o dati di produzione. La produzione nel
+- main e l'istanza di produzione non si toccano; niente container, volumi o dati di produzione. La produzione nel
   browser si usa **solo in lettura**: nessun clic che scrive, nessun modulo, nessuna impostazione, nemmeno il localStorage del browser di prova.
   Per prove con impostazioni diverse si usa solo l'istanza locale (5373) o p5s.
 - Lavoro dell'utente da preservare: diario validato 04-01..06-01 (254 voci: testo, ordine, giorno, fascia, uid, spunte invariati, più un segno
@@ -129,7 +129,7 @@ scrive «grafica ripristinata». Ognuno usa una scheda sua e ripristina le dimen
 - Grafica curata come l'originale: riordinare e ottimizzare, non svilire. Le figure della guida stanno nel loro spazio al 100%, non come sfondi velati.
 - Modifiche con Edit/Write diretti, mai script che scrivono sorgenti, dati o documenti. Typecheck (`npm run typecheck`) e lint (`npm run lint`) verdi;
   test solo mirati (`npx vitest run <percorso>`), mai tutta la suite. Migrazioni append-only con ID consecutivi.
-- Leggere prima: il piano, CLAUDE.md, la memoria utente (C:\Users\rober\.claude\projects\C--Repository-project-p5r\memory\MEMORY.md e i file
+- Leggere prima: il piano, CLAUDE.md, la memoria utente (~\.claude\projects\C--Repository-project-p5r\memory\MEMORY.md e i file
   che indicizza), docs/ROADMAP.md, docs/DECISIONI.md, docs/ARCHITETTURA.md.
 - Italiano ovunque.
 

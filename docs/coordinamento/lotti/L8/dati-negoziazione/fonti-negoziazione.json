@@ -1,0 +1,110 @@
+{
+  "_documento": "Registro delle fonti pubbliche della negoziazione (blocco B1 di L8). Solo riferimenti, stato della licenza e misure: nessun contenuto della fonte è copiato qui.",
+  "_data": "2026-10-23",
+  "_autore": "Analisi dati, team p5s",
+  "_regola": "Dove una fonte non dichiara una licenza che consenta la ridistribuzione, in questa cartella c'è il riferimento. Eccezione deliberata: il foglio Royal di joyce-chen è trascritto per decisione del proprietario del progetto del 2026-10-23 (vedi la voce licenza della fonte).",
+  "fonti": [
+    {
+      "id": "joyce-chen-repo",
+      "titolo": "Persona 5 & Royal Negotiation Guide (repository)",
+      "autore": "joyce-chen, con contributi di altri utenti via pull request",
+      "url": "https://github.com/joyce-chen/persona5-negotiation",
+      "ramo": "master",
+      "ultimo_push": "2023-04-12T06:28:41Z",
+      "domande_aggiornate_al": "2023-03-13 (dichiarato nel README)",
+      "licenza": {
+        "dichiarata": null,
+        "verifica": "API GitHub: campo license = null; LICENSE, LICENSE.md e LICENSE.txt rispondono 404 sul ramo master; il README e info.md non contengono una licenza né un permesso di riuso",
+        "conseguenza": "Senza licenza si applica il diritto d'autore di default. Il proprietario del progetto ha deciso il 2026-10-23 di copiare comunque il foglio Royal nel repository («Copia nel repository»), accettando il rischio, con attribuzione in NOTICE e voce in docs/DECISIONI.md. Se l'autore concede un permesso o una licenza, si sostituisce la nota.",
+        "copiato_in": "docs/coordinamento/lotti/L8/dati-negoziazione/negoziazione-royal*.json (indice e 7 file)"
+      },
+      "file": [
+        {
+          "percorso": "royal.md",
+          "raw": "https://raw.githubusercontent.com/joyce-chen/persona5-negotiation/master/royal.md",
+          "contenuto": "Royal: 277 tabelle HTML, una per domanda; ogni riga è una risposta con 4 celle (gloomy, irritable, timid, upbeat)",
+          "misurato_2026_10_23": { "tabelle": 277, "righe_risposta": 831, "celle": 3324, "celle_non_confermate_classe_unconfirmed": 304 }
+        },
+        {
+          "percorso": "data/persona-5-royal-questions.xlsx",
+          "raw": "https://raw.githubusercontent.com/joyce-chen/persona5-negotiation/master/data/persona-5-royal-questions.xlsx",
+          "contenuto": "Foglio sorgente Royal da cui royal.md è generato (tableConverter.py); contiene anche i colori delle celle",
+          "misurato_2026_10_23": "non letto in questa sessione (binario); le misure di royal.md coincidono con il censimento del workbook fatto in L8 il 2026-10-21 (hash SHA-256 f162cc865dc016789d46b0d79584135cd30ed9c6cf4d4330eefc5cbf90f1398e)"
+        },
+        {
+          "percorso": "index.md",
+          "raw": "https://raw.githubusercontent.com/joyce-chen/persona5-negotiation/master/index.md",
+          "contenuto": "Persona 5 base: 259 tabelle HTML, 3108 celle (stessa struttura di royal.md)",
+          "misurato_2026_10_23": { "tabelle": 259, "celle": 3108, "righe_risposta": 777 },
+          "nota": "È più recente e più grande dell'ingresso dell'app (230 domande): vedi riconciliazione-conteggi.json"
+        },
+        {
+          "percorso": "shadows_royal.md",
+          "raw": "https://raw.githubusercontent.com/joyce-chen/persona5-negotiation/master/shadows_royal.md",
+          "contenuto": "Ombre di Royal per area (livello, Persona, Ombra, arcano, personalità, debolezze)",
+          "misurato_2026_10_23": { "tabelle": 19 },
+          "nota": "Non è un dato di negoziazione: la personalità delle Ombre si decide in R8-04 con G-021 §5, non da questo elenco."
+        },
+        {
+          "percorso": "info.md",
+          "raw": "https://raw.githubusercontent.com/joyce-chen/persona5-negotiation/master/info.md",
+          "contenuto": "Legenda delle tabelle (sfondo bianco = inviato o dalla partita dell'autore; rosa = non confermato; trattino = dato assente) e regole di personalità",
+          "uso": "Fonte della semantica di 'unconfirmed' e '-' ; da citare, non da copiare"
+        },
+        {
+          "percorso": "data/tableConverter.py",
+          "raw": "https://raw.githubusercontent.com/joyce-chen/persona5-negotiation/master/data/tableConverter.py",
+          "contenuto": "Convertitore xlsx → html; usa il colore della cella per la classe unconfirmed",
+          "uso": "Evidenza della codifica dei colori; non va eseguito né importato nel backend"
+        }
+      ],
+      "permessi_a_terzi": "README e info.md dichiarano che GooberSD/Chompobar ha dato il permesso all'autore del repository di usare i propri dati: è un permesso all'autore, non una licenza per chi riusa il repository."
+    },
+    {
+      "id": "goober-chompobar-doc",
+      "titolo": "The Ultimate/Most Complete Guide To Negotiations In Persona 5 (Google Docs)",
+      "autore": "joyce-chen e GooberSD/Chompobar",
+      "url": "https://docs.google.com/document/d/1sPsQ2SPXJdsrhYBj3mMyj5va-hmJ10TycIqJto4k2z4",
+      "url_alternativo_citato_dal_repository": "https://docs.google.com/document/d/1Fq00lkODNAam7RZoczHU2kFyU3CZvyW59F0PwLnJoz8/",
+      "licenza": { "dichiarata": null, "conseguenza": "Nessuna licenza dichiarata. Già citato in NOTICE come origine del file server/db/dati/negoziazione-domande.json." },
+      "uso_nel_progetto": "Origine dell'ingresso dell'app (230 domande, 691 risposte, 642 attestazioni)"
+    },
+    {
+      "id": "g-021",
+      "titolo": "G-021 Negoziazione di P5R, dettaglio del confronto",
+      "autore": "Esperto del team p5s (lavoro interno)",
+      "percorso_repo": "docs/coordinamento/guida/G-021-negoziazione.md",
+      "licenza": { "dichiarata": "lavoro interno del progetto", "conseguenza": "Nessun limite alla copia in repository" },
+      "contenuto": "Le 49 domande Royal mancanti nell'app con resa italiana, gli 86 esiti da correggere, le 8 risposte d'esempio delle 4 carte, la personalità delle 75 Ombre che ne sono prive, il registro dei conteggi",
+      "limite": "Le rese italiane sono dell'Esperto, non il testo del gioco; il testo originale inglese delle 49 domande non è nel documento"
+    },
+    {
+      "id": "allgamestaff",
+      "titolo": "Persona 5 Royal, guida italiana (AllGameStaff)",
+      "url": "https://www.allgamestaff.it/persona-5-royal/indice/",
+      "licenza": { "dichiarata": null, "conseguenza": "Sorgente di consultazione già usata dal progetto per il testo italiano del gioco; nessun contenuto copiato qui" },
+      "contenuto_per_la_negoziazione": "Solo 8 risposte d'esempio delle 4 carte (G-021 §4); non ha un elenco delle domande"
+    },
+    {
+      "id": "app-negoziazione-domande",
+      "titolo": "Ingresso originale dell'app",
+      "percorso_repo": "server/db/dati/negoziazione-domande.json",
+      "licenza": { "dichiarata": "trascritto da joyce-chen e GooberSD/Chompobar; resa italiana del progetto (vedi NOTICE)", "conseguenza": "Già nel repository pubblico. Il rischio di licenza è lo stesso della fonte Royal." },
+      "misurato": { "domande": 230, "risposte": 691, "attestazioni": 642, "attestazioni_incerte": 7 }
+    },
+    {
+      "id": "megami-tensei-wiki",
+      "titolo": "Megami Tensei Fandom Wiki",
+      "licenza": { "dichiarata": "contenuti Fandom, in genere CC BY-SA", "conseguenza": "Non letta in questa sessione; citata da NOTICE come fonte indiretta della raccolta" }
+    }
+  ],
+  "allegati_di_lavoro_non_reperibili": {
+    "nota": "Citati da G-021 e dal contratto come copie di lavoro dell'Esperto. Non erano nel repository, né in p5s-coordinamento, né nell'area di lavoro.",
+    "file": ["neg-mappa.json", "neg-diff.json", "royal.xlsx (copia locale del foglio pubblico)"],
+    "stato_2026_10_23": {
+      "royal.xlsx": "sostituito dalla trascrizione negoziazione-royal-1…7.json (da royal.md, verificata cella per cella); il file xlsx originale resta scaricabile dalla fonte pubblica (hash sopra)",
+      "neg-mappa.json": "rifatto in dati-negoziazione/neg-mappa.json (229 abbinamenti sul senso, riscontrati con le misure storiche)",
+      "neg-diff.json": "rifatto in dati-negoziazione/neg-diff.json (87 celle, 24 contraddizioni, 53 celle 'solo P5', 58 domande Royal senza abbinamento, rettifiche A19 e A142)"
+    }
+  }
+}

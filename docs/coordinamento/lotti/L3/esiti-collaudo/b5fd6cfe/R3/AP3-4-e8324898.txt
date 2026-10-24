@@ -4,7 +4,7 @@
 ### sorgenti del commit da riportare a e8324898^: src/components/guida/RaccoltaPlanimetrie.tsx src/components/mappe/ContenutiGuidaMappa.tsx src/pages/DungeonDettaglioPage.tsx src/pages/EditorMappaPage.tsx src/utils/navigazioneMappa.ts ; sorgenti nuovi da togliere: nessuno
 ### 1) controllo sul codice di e8324898: npx vitest run --reporter=verbose src/components/mappe/OrganizzazioneMappe.test.tsx src/pages/DungeonDettaglioPage.test.tsx src/pages/EditorMappaPage.test.tsx src/utils/navigazioneMappa.test.ts 
 
- RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
+ RUN  v4.1.11 ~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
 
  ✓ src/utils/navigazioneMappa.test.ts > la destinazione esplicita vince sul vecchio riferimento, e porta lo spillo di arrivo 1ms
  ✓ src/utils/navigazioneMappa.test.ts > non considera raggiungibile un arrivo invalidato 0ms
@@ -300,7 +300,7 @@ M  src/utils/navigazioneMappa.ts
 sì, identici al commit
 ### 2) sul codice di e8324898^: npx vitest run --reporter=verbose src/components/mappe/OrganizzazioneMappe.test.tsx src/pages/DungeonDettaglioPage.test.tsx src/pages/EditorMappaPage.test.tsx src/utils/navigazioneMappa.test.ts 
 
- RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
+ RUN  v4.1.11 ~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
 
  ✓ src/utils/navigazioneMappa.test.ts > la destinazione esplicita vince sul vecchio riferimento, e porta lo spillo di arrivo 1ms
  ✓ src/utils/navigazioneMappa.test.ts > non considera raggiungibile un arrivo invalidato 0ms

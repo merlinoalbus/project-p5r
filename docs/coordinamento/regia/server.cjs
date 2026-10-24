@@ -8,11 +8,13 @@ const DIR = __dirname;
 // Dal 2026-10-20 sera l'unica fonte è il repository (docs/coordinamento/stato.json sul ramo newreview); si può cambiare con LAVAGNA
 const LAVAGNA = process.env.LAVAGNA || 'C:/Repository/project-p5r/.claude/worktrees/pensive-burnell-b50941/docs/coordinamento/stato.json';
 const PORTA = Number(process.env.PORTA || 5999);
+// Gli aggiornamenti periodici del PM (ogni 10 minuti), in un file piccolo accanto alla pagina
+const AGGIORNAMENTI = path.join(DIR, 'aggiornamenti.json');
 
 http.createServer((req, res) => {
   const url = (req.url || '/').split('?')[0];
-  if (url === '/stato.json') {
-    fs.readFile(LAVAGNA, (err, dati) => {
+  if (url === '/stato.json' || url === '/aggiornamenti.json') {
+    fs.readFile(url === '/stato.json' ? LAVAGNA : AGGIORNAMENTI, (err, dati) => {
       if (err) { res.writeHead(500, { 'content-type': 'text/plain; charset=utf-8' }); res.end(String(err)); return; }
       res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' });
       res.end(dati);

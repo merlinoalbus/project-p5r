@@ -21,7 +21,7 @@ Schermate in `lotti/L1/schermate-ux/`.
 
 ## Il «prima» (fissato il 2026-10-20)
 Fonti: istanza locale (http://localhost:5373, commit `bd20ed72`, la pagina La città non è ancora toccata dalle correzioni FE) e
-produzione https://persona5royal.nasmerlinoalbus.cloud in sola lettura per le intestazioni (in locale QuartierePage è a metà
+l'istanza di produzione in sola lettura per le intestazioni (in locale QuartierePage è a metà
 modifica della sessione FE: `ReferenceError: IllustrazioneConSegno is not defined`, lavoro in corso, non un difetto).
 
 ### La città — schede (locale)

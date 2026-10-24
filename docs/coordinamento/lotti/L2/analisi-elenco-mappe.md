@@ -6,7 +6,7 @@ Il lato visivo (schermate) lo copre Test UX.
 ## Fonti e metodo
 Tutto in sola lettura, solo GET.
 - **Istanze:**
-  - p5s (https://p5s.nasmerlinoalbus.cloud, codice L1);
+  - p5s (istanza p5s, codice L1);
   - Collaudo 3301/5473 (L2, base p5s-0533Z);
   - anteprima 3302/5474 (L3+L4 b83c30ac, base p5s-0503Z).
 - **Dati:** `GET /api/mappe/albero` di ogni istanza; `GET /api/mappe/:chiave` di tutte le 308 mappe di 3301, per gli spilli per tipo; `GET /api/compendio/citta`.

@@ -1,5 +1,5 @@
 
- RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941/79867d53-4ec1-4b44-8379-bf96cb5de1df/scratchpad/codice-ant0523
+ RUN  v4.1.11 ~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941/79867d53-4ec1-4b44-8379-bf96cb5de1df/scratchpad/codice-ant0523
 
 
  Test Files  17 passed (17)

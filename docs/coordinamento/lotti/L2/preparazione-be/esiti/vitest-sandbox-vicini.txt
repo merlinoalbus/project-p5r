@@ -1,5 +1,5 @@
 
- RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941/365ea5e8-f698-4350-bd74-d5465a3b19f3/scratchpad/l2/sandbox
+ RUN  v4.1.11 ~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-pensive-burnell-b50941/365ea5e8-f698-4350-bd74-d5465a3b19f3/scratchpad/l2/sandbox
 
  ✓ server/db/migrations/104_cestino.test.ts > crea il cestino nel file di gioco e la parte delle partite nel loro file, con i vincoli; rieseguirle non cambia niente 171ms
  ✓ server/db/migrations/107_ruolo_dalla_gerarchia.test.ts > radici dei Palazzi e dei Memento stemmi; città e quartieri con immagine illustrazioni; le altre con immagine planimetrie; senza immagine «nessuna» 178ms

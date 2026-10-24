@@ -1,0 +1,167 @@
+{
+  "parte": 2,
+  "da_R": 40,
+  "a_R": 79,
+  "domande": [
+    {"R":40,"ombre":["King_Frost"],"q":"Have you made an appointment, ho?","risposte":[
+      {"n":1,"t":"I have.","c":["o","-","-","G"]},
+      {"n":2,"t":"That's not it.","c":["-","-","-","B"]},
+      {"n":3,"t":"Just tell me what you know.","c":["-","-","-","-"]}]},
+    {"R":41,"ombre":["Power","Melchizedek"],"q":"...Heed my words. I am not the one you should detest.","risposte":[
+      {"n":1,"t":"You're right.","c":["-","G","-","-"]},
+      {"n":2,"t":"That's absurd.","c":["-","-","-","O"]},
+      {"n":3,"t":"I'll be the judge of that.","c":["-","-","-","G"]}]},
+    {"R":42,"ombre":["Kumbhanda","Rakshasa","Sui-ki","Decarabia","Take-Minakata","Girimehkala","Orobas","Black_Ooze","Ganesha"],"q":"Hell, I got all sortsa girls lined up if you're into that.","risposte":[
+      {"n":1,"t":"Really?","c":["O","B","G","G"]},
+      {"n":2,"t":"You're trying way too hard.","c":["B","O","o","O"]},
+      {"n":3,"t":"I'm not interested.","c":["G","G","B","B"]}]},
+    {"R":43,"ombre":["Kikuri-Hime"],"q":"Hey. Aren't you hungry? Can we take a break and go eat somewhere?","risposte":[
+      {"n":1,"t":"What're we getting?","c":["-","-","-","g"]},
+      {"n":2,"t":"Yeah.","c":["-","-","G","-"]},
+      {"n":3,"t":"Now's not the time.","c":["-","g","-","g"]}]},
+    {"R":44,"ombre":["Hua_Po","Angel","Lilim","Kikuri-Hime"],"q":"Hey, how about this? If you don't shoot me, then I'll kiss you. Not a bad deal, right?","risposte":[
+      {"n":1,"t":"Not a bad idea.","c":["O","-","G","G"]},
+      {"n":2,"t":"I don't want a kiss.","c":["B","-","-","O"]},
+      {"n":3,"t":"Have some self-respect.","c":["G","G","-","b"]}]},
+    {"R":45,"ombre":["Kikuri-Hime"],"q":"Hey, if I don't die here, what do you think I'll be like in the future?","risposte":[
+      {"n":1,"t":"A fashionable older woman.","c":["-","g","G","g"]},
+      {"n":2,"t":"I can't measure that.","c":["-","-","O","o"]},
+      {"n":3,"t":"Living in darkness.","c":["G","-","-","-"]}]},
+    {"R":46,"ombre":["Oni","Berith","Koropokguru","Fuu-ki","Bicorn"],"q":"Hey, if ya got any medicine, lend me some. One of them painkillers...","risposte":[
+      {"n":1,"t":"Are you okay?","c":["G","-","G","O"]},
+      {"n":2,"t":"I have some antacids.","c":["B","-","-","G"]},
+      {"n":3,"t":"That won't change anything.","c":["G","G","-","-"]}]},
+    {"R":47,"ombre":[],"q":"Hey, if you got any medicine, lend me some. They're supposed ta work miracles, right...?","risposte":[
+      {"n":1,"t":"Are you OK?","c":["-","-","-","-"]},
+      {"n":2,"t":"What kind of medicine?","c":["g","-","-","-"]},
+      {"n":3,"t":"That won't change anything?","c":["G","G","-","-"]}]},
+    {"R":48,"ombre":["Kikuri-Hime"],"q":"Hey, is my hair flat? Does it look weird?","risposte":[
+      {"n":1,"t":"It looks cute.","c":["-","-","G","-"]},
+      {"n":2,"t":"It's weird looking.","c":["-","-","-","-"]},
+      {"n":3,"t":"Who cares?","c":["-","-","-","-"]}]},
+    {"R":49,"ombre":["Sudama"],"q":"Hey, let's play a game! Guess what I wanna eat!","risposte":[
+      {"n":1,"t":"Hamburgers.","c":["-","-","G","G"]},
+      {"n":2,"t":"Curry.","c":["-","-","O","-"]},
+      {"n":3,"t":"Shut up.","c":["-","G","-","-"]}]},
+    {"R":50,"ombre":["Sudama","Obariyon","Kodama","Onmoraki"],"q":"Hey, mister, will you give me a yummy snack to eat?","risposte":[
+      {"n":1,"t":"Later.","c":["G","-","G","G"]},
+      {"n":2,"t":"No way.","c":["-","G","-","-"]},
+      {"n":3,"t":"What would you like?","c":["-","O","O","O"]}]},
+    {"R":51,"ombre":["Bicorn","Oni","Fafnir","Hanuman","Baphomet"],"q":"Hey. So whaddya feel when you think about the future?","risposte":[
+      {"n":1,"t":"An average level of happiness.","c":["-","G","G","O"]},
+      {"n":2,"t":"Live fast, die young.","c":["-","-","-","G"]},
+      {"n":3,"t":"Nothing.","c":["G","-","O","O"]}]},
+    {"R":52,"ombre":["Ippon-Datara","Eligor"],"q":"Hey, sonny if somethin's been botherin' you. I'm willin' ta give you a listen.","risposte":[
+      {"n":1,"t":"My relationships...","c":["-","g","G","B"]},
+      {"n":2,"t":"I smell sweaty.","c":["-","b","B","-"]},
+      {"n":3,"t":"I have no worries.","c":["G","-","-","-"]}]},
+    {"R":53,"ombre":["Lamia"],"q":"...Hey, there's no need for all this, right? Let's drop the drama and just go get something to eat. The thought has crossed your mind, hasn't it? Come on, where would you take me?","risposte":[
+      {"n":1,"t":"An expensive French restaurant.","c":["B","-","-","-"]},
+      {"n":2,"t":"A busy ramen joint.","c":["O","-","-","-"]},
+      {"n":3,"t":"Where would you like to go?","c":["G","-","-","-"]}]},
+    {"R":54,"ombre":["Anubis","Hanuman","Bicorn","Moloch","Ippon-Datara","Belphegor","Chernobog"],"q":"Hey. Why aren't ya at school?","risposte":[
+      {"n":1,"t":"It's after school.","c":["O","G","O","O"]},
+      {"n":2,"t":"I don't feel like going.","c":["G","o","G","G"]},
+      {"n":3,"t":"I actually finished school.","c":["-","o","-","G"]}]},
+    {"R":55,"ombre":["Lilim","Hua_Po"],"q":"Honestly, aren't I, like, a way better girl than those idols?","risposte":[
+      {"n":1,"t":"You're more unique.","c":["-","B","-","-"]},
+      {"n":2,"t":"Not really...","c":["-","-","-","-"]},
+      {"n":3,"t":"Who cares about idols?","c":["G","G","-","-"]}]},
+    {"R":56,"ombre":["Lamia","Nekomata","Yaksini"],"q":"How about we live together? What kind of place do you want to live in?","risposte":[
+      {"n":1,"t":"I can't live with you.","c":["B","G","-","-"]},
+      {"n":2,"t":"Next to a convenience store.","c":["O","-","-","G"]},
+      {"n":3,"t":"What are you talking about?","c":["G","O","-","-"]}]},
+    {"R":57,"ombre":["Black_Ooze","Rakshasa","Girimehkala","Mot"],"q":"How 'bout we have an interview? You're the winner, after all. I'll listen to whatever you gotta say.","risposte":[
+      {"n":1,"t":"I feel great.","c":["-","G","B","G"]},
+      {"n":2,"t":"I want to aim higher.","c":["-","G","o","o"]},
+      {"n":3,"t":"Fighting is pointless.","c":["G","-","G","B"]}]},
+    {"R":58,"ombre":["Anubis","Forneus","Bicorn","Moloch","Chernobog"],"q":"How 'bout you, sonny? What kinda trip do you wanna take?","risposte":[
+      {"n":1,"t":"A luxury cruise.","c":["B","G","-","G"]},
+      {"n":2,"t":"Don't want to go anywhere.","c":["G","b","G","o"]},
+      {"n":3,"t":"A trip to hell.","c":["O","b","-","-"]}]},
+    {"R":59,"ombre":["Kumbhanda","Take-Minakata","Sandman","Orobas","Black_Ooze","Rakshasa","Kaiwan"],"q":"How 'bout you? You wanna get married someday?","risposte":[
+      {"n":1,"t":"I do.","c":["O","G","-","o"]},
+      {"n":2,"t":"I don't.","c":["-","b","B","B"]},
+      {"n":3,"t":"That's impossible.","c":["G","-","-","B"]}]},
+    {"R":60,"ombre":["Jack_Frost","King_Frost"],"q":"How can you do such terrible things to a cute hee-ho like me!?","risposte":[
+      {"n":1,"t":"I'm sorry.","c":["-","-","G","-"]},
+      {"n":2,"t":"Now that you mention it...","c":["g","-","-","O"]},
+      {"n":3,"t":"...Cute?","c":["-","-","-","-"]}]},
+    {"R":61,"ombre":["King_Frost"],"q":"How did I lose to you? I mean... I win when it comes to looks, ho.","risposte":[
+      {"n":1,"t":"You're right.","c":["-","-","-","O"]},
+      {"n":2,"t":"No, I do.","c":["-","-","-","G"]},
+      {"n":3,"t":"It's all about heart.","c":["-","-","-","-"]}]},
+    {"R":62,"ombre":["Jack_Frost"],"q":"How did you find out about me, ho?","risposte":[
+      {"n":1,"t":"Some flyers.","c":["g","-","-","-"]},
+      {"n":2,"t":"A speciatly site.","c":["-","-","G","g"]},
+      {"n":3,"t":"Word of mouth.","c":["-","-","G","o"]}]},
+    {"R":63,"ombre":["Jack_Frost","Jack-o-Lantern","King_Frost"],"q":"Humans always want either an autograph or a self-hee, ho. Which is it, ho?","risposte":[
+      {"n":1,"t":"I want an autograph.","c":["O","-","o","-"]},
+      {"n":2,"t":"I want a photo.","c":["G","-","G","O"]},
+      {"n":3,"t":"Give me your credit card.","c":["G","-","-","b"]}]},
+    {"R":64,"ombre":["Oni","Berith","Ippon-Datara","Bicorn","Hanuman"],"q":"Humans talk over drinks, right? How 'bout it? Hell, let me buy ya a round, sonny.","risposte":[
+      {"n":1,"t":"Quit messing around.","c":["-","g","B","B"]},
+      {"n":2,"t":"You're really paying?","c":["-","-","-","G"]},
+      {"n":3,"t":"I'm a minor.","c":["G","G","-","B"]}]},
+    {"R":65,"ombre":["Isis","Norn","Sarasvati","Parvati","Queen_Mab"],"q":"I also have loved ones who would miss me. You do catch my meaning, yes?","risposte":[
+      {"n":1,"t":"I do now.","c":["B","-","G","O"]},
+      {"n":2,"t":"That doesn't matter.","c":["-","G","-","O"]},
+      {"n":3,"t":"I'm always alone.","c":["G","-","-","-"]}]},
+    {"R":66,"ombre":["King_Frost","Jack_Frost"],"q":"I can't sadden my fans, ho. ...You catch my drift, don't you?","risposte":[
+      {"n":1,"t":"I'm rooting for you.","c":["-","-","G","G"]},
+      {"n":2,"t":"Tell me.","c":["-","-","-","-"]},
+      {"n":3,"t":"You have no fans.","c":["-","-","-","-"]}]},
+    {"R":67,"ombre":["Take-Minakata","Ose","Choronzon","Mot","Loa","Rakshasa","Ganesha"],"q":"I coulda been a star...","risposte":[
+      {"n":1,"t":"A star?","c":["G","O","G","O"]},
+      {"n":2,"t":"That's not happening.","c":["-","G","-","B"]},
+      {"n":3,"t":"Are you giving up?","c":["G","O","G","G"]}]},
+    {"R":68,"ombre":["Oberon","Naga","Narcissus","Andras"],"q":"I don't hate you. No, I don't feel that way at all...","risposte":[
+      {"n":1,"t":"Is that so?","c":["G","-","-","-"]},
+      {"n":2,"t":"Too late.","c":["-","G","-","-"]},
+      {"n":3,"t":"Then let's hold hands.","c":["-","b","G","G"]}]},
+    {"R":69,"ombre":["Archangel","Power","Dominion","Naga"],"q":"I fear neither death, nor you.","risposte":[
+      {"n":1,"t":"In your situation?","c":["-","-","-","G"]},
+      {"n":2,"t":"You're tough.","c":["-","G","G","-"]},
+      {"n":3,"t":"Don't push yourself.","c":["-","-","G","O"]}]},
+    {"R":70,"ombre":["Oni","Koropokguru","Shiki-Ouji","Anubis","Hanuman","Baphomet","Moloch","Bicorn"],"q":"...I gotta ask. How do you work out?","risposte":[
+      {"n":1,"t":"I don't really train.","c":["G","G","-","O"]},
+      {"n":2,"t":"I just have a knack for it.","c":["o","b","G","B"]},
+      {"n":3,"t":"At a gym from hell.","c":["-","b","O","G"]}]},
+    {"R":71,"ombre":["Kali","Skadi","Alilat","Rangda"],"q":"I guess women are really more social these days, finding so many fun things to do outside the home.","risposte":[
+      {"n":1,"t":"That's so true.","c":["O","G","G","-"]},
+      {"n":2,"t":"Men are social too.","c":["O","G","-","-"]},
+      {"n":3,"t":"Is that so?","c":["G","-","-","-"]}]},
+    {"R":72,"ombre":["High_Pixie","Leanan_Sidhe","Sarasvati","Silky","Yaksini","Isis","Queen_Mab","Valkyrie","Apsaras"],"q":"I insist you surrender yourself to the authorities.","risposte":[
+      {"n":1,"t":"This is a misunderstanding.","c":["O","G","G","O"]},
+      {"n":2,"t":"I apologize.","c":["B","B","G","O"]},
+      {"n":3,"t":"You've got the wrong idea.","c":["G","O","O","G"]}]},
+    {"R":73,"ombre":["Kumbhanda","Rakshasa","Orobas","Kaiwan","Ose","Mot","Macabre"],"q":"I know when I'm gettin' all sweaty. I'm glistenin', ain't I?","risposte":[
+      {"n":1,"t":"Like a disco ball.","c":["O","G","G","o"]},
+      {"n":2,"t":"Not at all.","c":["B","b","G","G"]},
+      {"n":3,"t":"Why does that matter?","c":["G","o","O","O"]}]},
+    {"R":74,"ombre":["Nekomata","Yaksini","Lamia","Lilith"],"q":"I lost. Here I lay, at your feet, at your mercy. Just what do you want from me?","risposte":[
+      {"n":1,"t":"Give me something.","c":["O","G","G","G"]},
+      {"n":2,"t":"Grovel before me.","c":["-","G","-","B"]},
+      {"n":3,"t":"I don't know.","c":["G","b","-","-"]}]},
+    {"R":75,"ombre":["Narcissus","Koppa_Tengu","Dionysus"],"q":"I mean, how does it feel to wave your gun at an enemy who's completely lost the will to fight?","risposte":[
+      {"n":1,"t":"It's not bad.","c":["o","G","-","-"]},
+      {"n":2,"t":"...I could get used to it.","c":["o","-","-","G"]},
+      {"n":3,"t":"It pains my heart...","c":["o","-","G","-"]}]},
+    {"R":76,"ombre":["King_Frost"],"q":"I need to recover, ho. Don't you feel that way too?","risposte":[
+      {"n":1,"t":"Yeah, sometimes.","c":["-","-","g","G"]},
+      {"n":2,"t":"Battle is what soothes me.","c":["-","-","-","-"]},
+      {"n":3,"t":"Quit whining.","c":["-","-","-","-"]}]},
+    {"R":77,"ombre":["Isis","Leanan_Sidhe","Valkyrie","Sarasvati","Apsaras"],"q":"I occasionally wish to pamper myself as a reward for working hard. How would you do that?","risposte":[
+      {"n":1,"t":"Relax at home.","c":["b","o","G","o"]},
+      {"n":2,"t":"Go impulse shopping.","c":["-","O","-","g"]},
+      {"n":3,"t":"Don't be so selfish.","c":["G","b","-","-"]}]},
+    {"R":78,"ombre":["Rangda","Skadi"],"q":"I suppose it makes no difference if you kill me or if I die just a little bit later, dearie.","risposte":[
+      {"n":1,"t":"That's right","c":["-","G","-","-"]},
+      {"n":2,"t":"That isn't true","c":["B","-","-","-"]},
+      {"n":3,"t":"That's still a long ways off","c":["-","-","-","-"]}]},
+    {"R":79,"ombre":["Kali","Rangda","Dakini"],"q":"I suppose that's why I feel so confused, child. After all, why am I being treated like this?","risposte":[
+      {"n":1,"t":"Because you resisted.","c":["O","G","o","o"]},
+      {"n":2,"t":"It can't be helped.","c":["B","-","-","G"]},
+      {"n":3,"t":"It's for your own good.","c":["B","-","-","-"]}]}
+  ]
+}

@@ -1,7 +1,7 @@
 # L2 «Mondo: aree e planimetrie» — casi di layout (preparati prima del lotto)
 
 Sessione «Test layout multi device», 2026-10-20. Fonti: `requisiti.md` R2-40, R2-41, R2-42; `modifiche.md` §4.2–4.6 e §6.6.
-Strumento: `C:\Users\rober\.claude\p5s-coordinamento\strumenti-layout\misura-layout.js`, da incollare in javascript_tool dopo
+Strumento: `~\.claude\p5s-coordinamento\strumenti-layout\misura-layout.js`, da incollare in javascript_tool dopo
 navigate → resize_window → screenshot. Per le misure in serie (molte pagine, una sola informazione) uso un iframe della stessa origine
 dimensionato come la finestra (`strumenti-layout/README.md`). Grafica predefinita accesa; controllo `p5r-preferenze` prima di ogni giro.
 Misure: **1280×689, 1366×657, 1024×690** (barra di pagina), **768×1024**, **375×812**; 1280×800 come riferimento per le schermate «prima» di Analisi app.

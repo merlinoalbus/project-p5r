@@ -4,7 +4,7 @@
 ### sorgenti del commit da riportare a db7d0423^: src/components/shared/Selettore.tsx src/pages/DungeonDettaglioPage.tsx ; sorgenti nuovi da togliere: nessuno
 ### 1) controllo sul codice di db7d0423: npx vitest run --reporter=verbose src/components/mappe/SelettoreVersioni.test.tsx src/components/shared/Selettore.test.tsx 
 
- RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
+ RUN  v4.1.11 ~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
 
  ✓ src/components/mappe/SelettoreVersioni.test.tsx > il nome intero della versione scelta è nel nome del pulsante; l’elenco aperto non accorcia nessun nome (LAY3-7) 85ms
  ✓ src/components/shared/Selettore.test.tsx > Selettore > è un combobox che apre un listbox e sceglie la voce toccata 99ms
@@ -36,7 +36,7 @@ M  src/pages/DungeonDettaglioPage.tsx
 sì, identici al commit
 ### 2) sul codice di db7d0423^: npx vitest run --reporter=verbose src/components/mappe/SelettoreVersioni.test.tsx src/components/shared/Selettore.test.tsx 
 
- RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
+ RUN  v4.1.11 ~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
 
  ✓ src/components/mappe/SelettoreVersioni.test.tsx > il nome intero della versione scelta è nel nome del pulsante; l’elenco aperto non accorcia nessun nome (LAY3-7) 85ms
  ✓ src/components/shared/Selettore.test.tsx > Selettore > è un combobox che apre un listbox e sceglie la voce toccata 96ms

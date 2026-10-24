@@ -1,6 +1,6 @@
 ---
 name: feedback-produzione-sola-lettura
-description: "La produzione (persona5royal.nasmerlinoalbus.cloud) si guarda soltanto: niente localStorage, preferenze, gesti che scrivono, nemmeno se ripristinati subito dopo"
+description: "La produzione (istanza persona5royal) si guarda soltanto: niente localStorage, preferenze, gesti che scrivono, nemmeno se ripristinati subito dopo"
 metadata:
   node_type: memory
   type: feedback
@@ -8,7 +8,7 @@ metadata:
   modified: 2026-10-20T01:09:17.380Z
 ---
 
-Nei confronti con la produzione https://persona5royal.nasmerlinoalbus.cloud si fa **solo lettura**: pagine, DOM, schermate. Non si
+Nei confronti con l'istanza di produzione si fa **solo lettura**: pagine, DOM, schermate. Non si
 cambia nulla, nemmeno il localStorage del browser di prova (per esempio `p5r-preferenze`, la preferenza «grafica predefinita»),
 anche se lo si rimette subito com'era.
 

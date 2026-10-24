@@ -1,0 +1,262 @@
+{
+  "nota": "Aggiornamenti del PM, ogni 10 minuti; il più recente per primo. Il cruscotto li mostra in cima.",
+  "ultimi": [
+    {
+      "ora": "2026-10-24T05:46:00Z",
+      "complessivo": "Il piano è a 2171 voci su 2172 (manca il tuo collaudo). Il dodicesimo giro ha RESPINTO il rilascio: due difetti nel nuovo Modifica/Ripristina (traduzione di una skill sovrascrivibile, ripristino di sedi e note che salva nomi invece di chiavi), una nota della Taiheido non più vera, la frase di Big Bang Burger da rimettere come nota e dati personali nei documenti. Due agenti li correggono; le prove F7 e F11 sono già fatte e pulite. Nel frattempo quattro revisori Opus confrontano l'app con il piano iniziale e un agente fa l'inventario UX per gli sketch.",
+      "puntuale": [
+        { "chi": "PM (Opus)", "adesso": "Segue le correzioni; prepara la prova di Importa su tutti i tipi (F6).", "fatto": "F7 e F11 provate, F9 (righe superate di DECISIONI) e indirizzi tolti da stato.json e DECISIONI; tue risposte su Big Bang Burger e repository pubblico registrate.", "prossimo": "Tredicesimo giro e rilascio." },
+        { "chi": "FE (Sonnet)", "adesso": "Chiude l'ultimo turno, poi archiviata.", "fatto": "R11-17/1 Luoghi e note e Ombre.", "prossimo": "—" },
+        { "chi": "Agente correzioni del dodicesimo giro (Sonnet)", "adesso": "F1, F2, F3, F4, F13.", "fatto": "—", "prossimo": "Un commit per rilievo." },
+        { "chi": "Agente pulizia documenti (Sonnet)", "adesso": "Toglie nome utente e indirizzi dai documenti (F5).", "fatto": "—", "prossimo": "Resoconto, poi commit del PM." },
+        { "chi": "Revisori del piano (Opus ×4)", "adesso": "Confronto avversariale dell'app con il Piano di razionalizzazione: regole del modello, flusso di gioco, lotti L0–L5, lotti L6–L11.", "fatto": "—", "prossimo": "Esiti per regola e per lotto." },
+        { "chi": "Agente inventario UX (Sonnet)", "adesso": "Struttura, azioni e comportamento responsivo di ogni pagina.", "fatto": "—", "prossimo": "Base per gli sketch desktop, tablet e mobile." },
+        { "chi": "Verifica (Opus)", "adesso": "In attesa delle correzioni.", "fatto": "Dodicesimo giro: RESPINTO (F1, F2, F5 bloccanti).", "prossimo": "Tredicesimo giro." }
+      ],
+      "decisioni": []
+    },
+    {
+      "ora": "2026-10-24T05:35:00Z",
+      "complessivo": "Il piano è al 100% del lavoro di sviluppo: 2171 voci chiuse su 2172; l'unica aperta è il collaudo della ricerca, che è tuo. R11-17/1 è chiusa: tutti i dati di gioco si correggono con Ripristina. La prova delle migrazioni sui tuoi dati arriva a 227/44 senza errori, con il lavoro da preservare identico. È partito il dodicesimo giro di revisione su Opus sul commit ee754f35: se approva, pubblico su p5s.",
+      "puntuale": [
+        { "chi": "PM (Opus)", "adesso": "Attende il dodicesimo giro e i controlli sulla copia ferma.", "fatto": "Copia ferma ee754f35, terza prova delle migrazioni (227/44), R11-17/1 chiusa.", "prossimo": "Commit dei documenti, push, pipeline, controllo di p5s nei tre formati." },
+        { "chi": "FE (Sonnet)", "adesso": "Chiude l'ultimo turno, poi archiviata.", "fatto": "Luoghi e note (ee754f35), Ombre (a669218d).", "prossimo": "—" },
+        { "chi": "BE (Sonnet)", "adesso": "Archiviata.", "fatto": "Tutto il suo lavoro.", "prossimo": "—" },
+        { "chi": "Analisi dati (Sonnet)", "adesso": "Archiviata.", "fatto": "Tutto il suo lavoro.", "prossimo": "—" },
+        { "chi": "Verifica (Opus)", "adesso": "Dodicesimo giro sui 103 commit da c4eda1e3.", "fatto": "Undicesimo giro e lockfile APPROVATI.", "prossimo": "Verdetto sul rilascio." }
+      ],
+      "decisioni": []
+    },
+    {
+      "ora": "2026-10-24T05:25:00Z",
+      "complessivo": "Il piano è al 99,9%: 2170 voci chiuse su 2172. R11-17/1 avanza: anche Negoziazione e Dedalo sono modificabili (180018f5, 9ed07fca); mancano Luoghi e note, Ombre, oggetti e testi. Ho trovato un difetto prima della revisione: il censimento di luoghi e condizioni legge ancora colonne tolte dalle migrazioni 193, 194 e 218 e andrebbe in errore; un agente lo corregge e controlla ogni lettura di colonne tolte. BE e Analisi dati sono archiviate.",
+      "puntuale": [
+        { "chi": "PM (Opus)", "adesso": "Segue R11-17/1 e la correzione delle colonne tolte; prepara la prova dei servizi sulla copia.", "fatto": "BE e Analisi dati archiviate; difetto del censimento trovato e assegnato.", "prossimo": "Copia ferma, prova delle migrazioni e dei servizi, dodicesimo giro, rilascio." },
+        { "chi": "FE (Sonnet)", "adesso": "Due agenti su R11-17/1: Luoghi e note, Ombre.", "fatto": "Negoziazione e Dedalo lato FE (9ed07fca), Confidenti e Calendario (7e784f8a).", "prossimo": "Commit, poi archiviazione." },
+        { "chi": "BE (Sonnet)", "adesso": "Archiviata.", "fatto": "Tutto il suo lavoro.", "prossimo": "—" },
+        { "chi": "Analisi dati (Sonnet)", "adesso": "Archiviata.", "fatto": "Tutto il suo lavoro.", "prossimo": "—" },
+        { "chi": "Agente tabelle modificabili (Sonnet)", "adesso": "R11-17/1: oggetti e blocchi di testo.", "fatto": "Compendio, Confidenti e Calendario, Negoziazione e Dedalo (180018f5).", "prossimo": "Ultimo commit e resoconto." },
+        { "chi": "Agente colonne tolte (Sonnet)", "adesso": "Toglie dal censimento e da ogni altro lettore le colonne tolte dalle migrazioni.", "fatto": "—", "prossimo": "Commit con la prova sulla copia." },
+        { "chi": "Verifica (Opus)", "adesso": "In attesa.", "fatto": "Undicesimo giro e lockfile APPROVATI.", "prossimo": "Dodicesimo giro." }
+      ],
+      "decisioni": []
+    },
+    {
+      "ora": "2026-10-24T05:22:00Z",
+      "complessivo": "Il piano è al 99,9%: 2170 voci chiuse su 2172. Resta R11-17/1 (ultime tabelle da rendere modificabili: fatti Compendio, Confidenti e Calendario; mancano Negoziazione, Dedalo, oggetti e testi, Luoghi e note, Ombre) più il collaudo della ricerca, che è tuo. BE e Analisi dati hanno finito e sono archiviate. Previsione: R11-17/1 committata verso le 05:50Z, dodicesimo giro alle 06:10Z, rilascio su p5s verso le 06:40Z se la revisione approva al primo colpo (verso le 07:30Z se servono correzioni).",
+      "puntuale": [
+        { "chi": "PM (Opus)", "adesso": "Archivia le sessioni terminate; aspetta la fine di R11-17/1.", "fatto": "BE archiviata; tutte le decisioni del 24/10 registrate.", "prossimo": "Copia ferma, prova delle migrazioni, dodicesimo giro, rilascio." },
+        { "chi": "FE (Sonnet)", "adesso": "Due agenti su R11-17/1: Luoghi e note, Ombre.", "fatto": "Confidenti e Calendario (7e784f8a), Compendio (e5fe3ffc).", "prossimo": "Commit, resoconto, poi archiviazione." },
+        { "chi": "BE (Sonnet)", "adesso": "Archiviata: lavoro finito.", "fatto": "Ultime correzioni del Diario (3c0ac0d6, 222), Taiheido (2f7d6082), Confidenti e Calendario lato server (4910c407).", "prossimo": "—" },
+        { "chi": "Analisi dati (Sonnet)", "adesso": "Chiude l'ultimo turno, poi archiviata.", "fatto": "Elenco delle migrazioni nuove per il revisore (lotti/L11/migrazioni-nuove-da-c4eda1e3-2026-10-24.md).", "prossimo": "—" },
+        { "chi": "Agente tabelle modificabili (Sonnet)", "adesso": "R11-17/1: Negoziazione (223) e Dedalo (224), poi oggetti e blocchi di testo.", "fatto": "Compendio (f7451e9b), Confidenti e Calendario (4910c407).", "prossimo": "Commit per gruppo." },
+        { "chi": "Verifica (Opus)", "adesso": "In attesa.", "fatto": "Undicesimo giro e lockfile APPROVATI.", "prossimo": "Dodicesimo giro sui commit da c4eda1e3." }
+      ],
+      "decisioni": []
+    },
+    {
+      "ora": "2026-10-24T05:16:00Z",
+      "complessivo": "Il piano è al 99,9%: 2170 voci chiuse su 2172. Fatte le frasi di sblocco (prima aggiunte le condizioni che mancavano, poi tolte le frasi), i nomi doppi (un solo nome dal catalogo) e gli ultimi legami fra voci e infiltrazioni (Shido con 8 aree). Resta solo R11-17/1, le ultime tabelle da rendere modificabili, divisa fra FE e un agente; poi il dodicesimo giro di revisione e il rilascio. L'altra voce aperta è il collaudo della ricerca, che è tuo.",
+      "puntuale": [
+        { "chi": "PM (Opus)", "adesso": "Divide R11-17/1 fra FE e l'agente; prepara la copia ferma.", "fatto": "Chiuse R11-02/9, R11-02/10, R11-10c/2.", "prossimo": "Dodicesimo giro e rilascio." },
+        { "chi": "FE (Sonnet)", "adesso": "R11-17/1, gruppi Luoghi e note e Ombre.", "fatto": "nome_it (eef7fa8d, 2027dc60, 7d975e9d migrazione 215).", "prossimo": "Commit server e interfaccia per gruppo." },
+        { "chi": "BE (Sonnet)", "adesso": "Data delle Pagine ammuffite della Taiheido.", "fatto": "Frasi di sblocco (161e57fb, 84fc1c0c, 743f1f61, 218), 18 voci di M-B (5da949fa).", "prossimo": "In attesa del prossimo lavoro." },
+        { "chi": "Analisi dati (Sonnet)", "adesso": "Testi sospetti del 1/8 sera e del 4/10 (Okumura).", "fatto": "Sblocchi, M-B, Pagine ammuffite.", "prossimo": "Proposte con le fonti." },
+        { "chi": "Agente tabelle modificabili (Sonnet)", "adesso": "R11-17/1: Confidenti e Calendario, Negoziazione, Dedalo, oggetti, blocchi di testo.", "fatto": "Compendio e fusione (f7451e9b, e5fe3ffc).", "prossimo": "Commit per gruppo." },
+        { "chi": "Verifica (Opus)", "adesso": "In attesa.", "fatto": "Undicesimo giro e lockfile APPROVATI.", "prossimo": "Dodicesimo giro." }
+      ],
+      "decisioni": []
+    },
+    {
+      "ora": "2026-10-24T05:08:00Z",
+      "complessivo": "Il piano è al 99,8%: 2167 voci chiuse su 2172. L9 è completo (281/281). Si possono ora modificare e ripristinare dall'app Confidenti (regali compresi), Persona e Skill, Scuola, Calendario e Ombre; «Importa» mantiene le correzioni in 37 tipi su 37. Restano 4 voci: le frasi di sblocco, gli ultimi legami fra voci e infiltrazioni, i nomi doppi e le ultime tabelle da rendere modificabili; poi il dodicesimo giro di revisione e il rilascio.",
+      "puntuale": [
+        { "chi": "PM (Opus)", "adesso": "Allinea il piano ai commit e prepara il dodicesimo giro.", "fatto": "Chiuse R9-07/5, R11-15/2, R11-15/3, R11-15/7, R11-10c/11, R11-16/1, R11-01/1; decisioni su Harajuku e Shido registrate.", "prossimo": "Copia ferma e dodicesimo giro quando le 4 voci sono committate." },
+        { "chi": "FE (Sonnet)", "adesso": "Nomi doppi (R11-02/10).", "fatto": "Regali (9c89e26a), Persona (695ac17f) e Skill (539d4918), nome solo dal catalogo (eef7fa8d).", "prossimo": "Ultimi passi di nome_it e migrazione finale." },
+        { "chi": "BE (Sonnet)", "adesso": "Frasi di sblocco (R11-02/9), poi le 18 voci di M-B e la data della Taiheido.", "fatto": "Prova di «Importa» 37/37 (d34001bd, 0494b001).", "prossimo": "Un commit per voce." },
+        { "chi": "Analisi dati (Sonnet)", "adesso": "Due testi sospetti del Diario (08-01 sera, 10-04 Okumura).", "fatto": "Sblocchi, M-B, Pagine ammuffite (lotti/L11).", "prossimo": "Proposte con le fonti." },
+        { "chi": "Agente tabelle modificabili (Sonnet)", "adesso": "R11-17/1: Compendio e fusione, poi Confidenti e Calendario, poi le altre.", "fatto": "—", "prossimo": "Commit per gruppo." },
+        { "chi": "Verifica (Opus)", "adesso": "In attesa.", "fatto": "Undicesimo giro e lockfile APPROVATI.", "prossimo": "Dodicesimo giro." }
+      ],
+      "decisioni": []
+    },
+    {
+      "ora": "2026-10-24T04:56:00Z",
+      "complessivo": "Il piano è al 99%: 2160 voci chiuse su 2172. Il server è pronto per modificare e ripristinare regali (212) e Persona con le skill (213); ora FE fa le schermate. Tolta pianta_quartiere con lo scarico delle illustrazioni. Restano 11 voci: le schermate di regali e Persona, i nomi doppi, le frasi di sblocco, i legami incerti, la prova delle copie di ripristino e l'inventario.",
+      "puntuale": [
+        { "chi": "PM (Opus)", "adesso": "Coordina le ultime voci.", "fatto": "R11-02/8 chiusa; lavoro assegnato a FE e BE.", "prossimo": "Dodicesimo giro quando le ultime voci sono committate." },
+        { "chi": "FE (Sonnet)", "adesso": "Schermate di regali (R9-07/5) e Persona (R11-15/3), nomi doppi (R11-02/10).", "fatto": "pianta_quartiere (c55e23ff).", "prossimo": "Un commit per voce." },
+        { "chi": "BE (Sonnet)", "adesso": "Prova che le correzioni sopravvivono a «Importa», tipo per tipo (R11-16/1).", "fatto": "Regali (c2b30f7d, 212), Persona e skill (cd03ac2e, 213), chiavi della fonte del Calendario (211).", "prossimo": "Documento con l'esito." },
+        { "chi": "Analisi dati (Sonnet)", "adesso": "Frasi di sblocco, 18 voci con più infiltrazioni, data delle Pagine ammuffite della Taiheido.", "fatto": "Piano per nome_it.", "prossimo": "Proposte con le fonti." },
+        { "chi": "Agente inventario (Sonnet)", "adesso": "Inventario (R11-01/1) e dati modificabili solo nel pacchetto (R11-17/1).", "fatto": "—", "prossimo": "Documento." },
+        { "chi": "Verifica (Opus)", "adesso": "In attesa.", "fatto": "Undicesimo giro e lockfile APPROVATI.", "prossimo": "Dodicesimo giro." }
+      ],
+      "decisioni": []
+    },
+    {
+      "ora": "2026-10-24T04:46:00Z",
+      "complessivo": "Il piano è al 99%: 2159 voci chiuse su 2172. L9 ha una sola voce aperta (l'editor dei regali), L11 ne ha 11. Fatte da ultimo: Ombre e Battaglia modificabili con Ripristina, gli eventi del Calendario che leggono le date dalla fonte, Makoto al 4/8, i legami certi fra voci e infiltrazioni e le note delle Pagine ammuffite. Hai deciso di togliere la colonna doppia del nome italiano.",
+      "puntuale": [
+        { "chi": "PM (Opus)", "adesso": "Coordina le ultime voci di L9 e L11.", "fatto": "R11-15/4, R11-10c/1, R11-10c/7, R11-02b/5 e R9-21/2 chiuse; decisione su nome_it registrata; BE sbloccato su regali e Persona.", "prossimo": "Dodicesimo giro quando le ultime voci sono committate." },
+        { "chi": "FE (Sonnet)", "adesso": "Rimozione di pianta_quartiere (R11-02/8), poi la famiglia nome_it (R11-02/10).", "fatto": "Calendario (c8bf5f9d); stop pulito dell'agente su luogo.quando, già fatta da BE.", "prossimo": "Regali e Persona lato FE." },
+        { "chi": "BE (Sonnet)", "adesso": "Regali e Persona con il registro dei ripristini, poi la prova delle copie di ripristino (R11-16/1).", "fatto": "Chiavi della fonte del Calendario (95af07ea, 07baf021, 211), Makoto (32361379), luogo.quando (d04d2b6c, 193).", "prossimo": "Un commit per voce." },
+        { "chi": "Analisi dati (Sonnet)", "adesso": "Frasi di sblocco di luoghi e attività, 18 voci con più infiltrazioni possibili, data delle Pagine ammuffite della Taiheido.", "fatto": "Piano per nome_it (lotti/L11/nome-it-famiglia-2026-10-24.md).", "prossimo": "Proposte con le fonti." },
+        { "chi": "Agente inventario (Sonnet)", "adesso": "Inventario di tabelle e colonne (R11-01/1) e R11-17/1.", "fatto": "—", "prossimo": "Documento." },
+        { "chi": "Verifica (Opus)", "adesso": "In attesa.", "fatto": "Undicesimo giro e lockfile APPROVATI.", "prossimo": "Dodicesimo giro." }
+      ],
+      "decisioni": []
+    },
+    {
+      "ora": "2026-10-24T04:37:00Z",
+      "complessivo": "Il piano è al 99%: 2153 voci chiuse su 2172. Restano 3 voci di L9 e 16 di L11, tutte assegnate. Le tue decisioni di oggi sono applicate o in lavorazione: Iweleth un solo dedalo, Maruki al 3/2, Makoto al 4/8. Il Calendario ora modifica il giorno come il Diario, e il codice orfano è tolto.",
+      "puntuale": [
+        { "chi": "PM (Opus)", "adesso": "Coordina le ultime voci; assegna il lavoro residuo.", "fatto": "R11-15/1, R9-22/1, R11-03/1 e R11-03/4 chiuse; decisioni su Iweleth, Maruki e Makoto registrate.", "prossimo": "Dodicesimo giro quando il blocco è committato." },
+        { "chi": "FE (Sonnet)", "adesso": "Orari dei luoghi solo dai dati strutturati (R11-02/9) e rimozione di pianta_quartiere (R11-02/8).", "fatto": "Editor del giorno nel Calendario (c8bf5f9d), Modifica/Ripristina del Calendario (45a7361c).", "prossimo": "Regali e Persona lato FE." },
+        { "chi": "BE (Sonnet)", "adesso": "Makoto al 4/8, poi regali, R9-21/2, R9-22, Persona lato server, prova delle copie di ripristino.", "fatto": "Maruki e Iweleth (db3912ea), M-A (d0dd71e6), frasi delle attività (bf5537a9).", "prossimo": "Un commit per voce." },
+        { "chi": "Analisi dati (Sonnet)", "adesso": "Famiglia nome_it (ultimo residuo di R11-02/10).", "fatto": "Iweleth e Maruki sulle guide Royal; data dell'invito di Makoto.", "prossimo": "Piano di rimozione." },
+        { "chi": "Agente Ombre (Sonnet)", "adesso": "Modifica/Ripristina delle Ombre e dei dati di battaglia (R11-15/4).", "fatto": "—", "prossimo": "Commit e resoconto." },
+        { "chi": "Agente inventario (Sonnet)", "adesso": "Inventario di tabelle e colonne (R11-01/1) e dati modificabili solo nel pacchetto (R11-17/1).", "fatto": "—", "prossimo": "Documento in lotti/L11." },
+        { "chi": "Agente migrazioni (Sonnet)", "adesso": "Proposte di infiltrazione (R11-10c/2) e Pagine ammuffite (R11-10c/7).", "fatto": "—", "prossimo": "Commit con la prova sulla copia." },
+        { "chi": "Verifica (Opus)", "adesso": "In attesa.", "fatto": "Undicesimo giro e lockfile APPROVATI.", "prossimo": "Dodicesimo giro." }
+      ],
+      "decisioni": []
+    },
+    {
+      "ora": "2026-10-24T04:27:00Z",
+      "complessivo": "Il piano è al 99%: 2149 voci chiuse su 2172. Restano 4 voci di L9 e 19 di L11. Sono fatte le correzioni Royal del Diario (Gemelle, Ustione, 10-15, 10-31, Hagoromo: 197), la voce del 14/11 e quella dell'11-19, e il registro storico di ARCHITETTURA è separato dal modello vigente. Su Iweleth e sull'invito di Makoto del 30/7 Analisi dati verifica le guide Royal, come hai chiesto.",
+      "puntuale": [
+        { "chi": "PM (Opus)", "adesso": "Coordina L9 e L11; aspetta le verifiche Royal su Iweleth e Makoto.", "fatto": "M-A approvato (12 segni da togliere più 2 dopo le correzioni); R11-18/1, R11-19, R11-20 e R11-03/2 chiuse.", "prossimo": "Dodicesimo giro di revisione." },
+        { "chi": "FE (Sonnet)", "adesso": "Due agenti: Modifica/Ripristina di Scuola (198) e Calendario (199).", "fatto": "Migrazioni 198 (a94f3700, 12ff28e9) e 199 (af5e9e6d).", "prossimo": "Regali e Persona lato FE." },
+        { "chi": "BE (Sonnet)", "adesso": "M-A, poi regali, R9-21/2, R9-22, R9-14/1 e Persona lato server.", "fatto": "M-C (5700bd12, 197), voce del 14/11 (b9505a8f), voce dell'11-19 (be45a578).", "prossimo": "Un commit per voce." },
+        { "chi": "Analisi dati (Sonnet)", "adesso": "Iweleth nelle guide Royal (richiesta tua), poi la data Royal dell'invito di Makoto.", "fatto": "Elenco M-A (lotti/L11/M-A-elenco-da-rivedere-2026-10-24.md), frasi delle attività.", "prossimo": "Proposte con le fonti." },
+        { "chi": "Agente codice orfano (Sonnet)", "adesso": "Client FE senza chiamanti e DTO rimasti (R11-03/1, R11-03/4).", "fatto": "Servizio, componenti, utility e 14 esportazioni tolti (9eab32a5, b7370247, 1abe77fa, 73b5e054, 10808802).", "prossimo": "Elenco delle rotte candidate." },
+        { "chi": "Verifica (Opus)", "adesso": "In attesa.", "fatto": "Undicesimo giro e lockfile APPROVATI.", "prossimo": "Dodicesimo giro." }
+      ],
+      "decisioni": []
+    },
+    {
+      "ora": "2026-10-24T04:20:00Z",
+      "complessivo": "Il piano è al 99%: 2143 voci chiuse su 2172. L10 è completo (143/143) e L9 è a 277 su 281. Su p5s gira la versione approvata. Il team lavora sulle voci rimaste: editor dei Confidenti fatti (manca solo la parte dei regali), disponibilità degli articoli dalla condizione (194), cruciverba doppione del 29/8 nel Cestino, codice orfano tolto, descrizioni OpenAPI.",
+      "puntuale": [
+        { "chi": "PM (Opus)", "adesso": "Coordina L9 e L11; registra le tue decisioni e le mie scelte sui dati Royal.", "fatto": "Rilascio su p5s; R9-18 chiusa; regali «Anche l'oggetto» registrato; voce del 14/11 e date dei «rango massimo» decise sulle regole.", "prossimo": "Dodicesimo giro di revisione quando il blocco in corso è committato." },
+        { "chi": "FE (Sonnet)", "adesso": "Modifica/Ripristina della Scuola (R11-15/7) e del Calendario (R11-15/1).", "fatto": "Editor dei Confidenti: ranghi e abilità (c5503dd9), Dote (94bdc257), dialoghi (3dc11190), inviti (f2183fd2).", "prossimo": "Regali e Persona lato FE, quando BE ha le rotte." },
+        { "chi": "BE (Sonnet)", "adesso": "Decisioni dell'utente su L11, poi D8 e M-C con i dati Royal.", "fatto": "«Disponibile dal» in archivio (53c964e7, 194), cruciverba del 29/8 nel Cestino (9842b394), rotte senza client tolte (6c676ccf).", "prossimo": "Regali, R9-21/2, voce del 14/11, R9-22, Persona lato server." },
+        { "chi": "Analisi dati (Sonnet)", "adesso": "Elenco delle frasi ripetute delle 30 attività (R9-14/1) e voce dell'11/19.", "fatto": "Dati Royal M-C (lotti/L11/M-C-dati-royal-2026-10-24.md), voce del 14/11 e voci aperte di L9.", "prossimo": "Elenco da approvare." },
+        { "chi": "Agente documenti L11 (Sonnet)", "adesso": "ARCHITETTURA, ROADMAP e redirect (R11-18/1, R11-19, R11-20/2).", "fatto": "Descrizioni OpenAPI (224c3787).", "prossimo": "Resoconto." },
+        { "chi": "Agente codice orfano L11 (Sonnet)", "adesso": "Ultimi controlli.", "fatto": "Servizio, componenti e utility orfani tolti (9eab32a5, b7370247, 1abe77fa).", "prossimo": "Resoconto con le prove." },
+        { "chi": "Verifica (Opus)", "adesso": "In attesa.", "fatto": "Undicesimo giro e lockfile APPROVATI.", "prossimo": "Dodicesimo giro." }
+      ],
+      "decisioni": []
+    },
+    {
+      "ora": "2026-10-24T04:16:00Z",
+      "complessivo": "RILASCIATO: p5s ora gira sulla versione approvata (schema da 138 a 187, migrazioni applicate ai tuoi dati). L'ho controllata in sola lettura: partita al 2 giugno intatta, nessuna richiesta in errore, «Da applicare» sparito, intestazione della Home fra il 20 e il 22% dello schermo in tutti i formati. Il piano è al 98%: 2140 voci chiuse su 2172. L10 è completo.",
+      "puntuale": [
+        { "chi": "PM (Opus)", "adesso": "Coordina il lavoro rimasto (L9 e L11).", "fatto": "Rilascio su p5s (9ef4514c più c4eda1e3) con pipeline verde; controllo di p5s a 1280, 1366, 1024, 768 e 375; R10-24/7 chiusa.", "prossimo": "Dodicesimo giro sui commit nuovi, poi il rilascio successivo." },
+        { "chi": "FE (Sonnet)", "adesso": "Editor dei Confidenti lato FE (ranghi, abilità, Dote, dialoghi, regali, inviti).", "fatto": "N1 (2521c307), N5 (a6d36d2e).", "prossimo": "Modifica/Ripristina della Persona lato FE." },
+        { "chi": "BE (Sonnet)", "adesso": "luogo.quando e «disponibile dal».", "fatto": "R9-18 (56572421), Museo 1P/2P (ad5825de), N4 (be1f458d).", "prossimo": "Voce del 13/11, R9-22, pianta_quartiere, cruciverba del 29/8, Persona lato server." },
+        { "chi": "Analisi dati (Sonnet)", "adesso": "Dati Royal per R11-10c/11.", "fatto": "Stato reale di L10 e L11.", "prossimo": "Tabelle per le migrazioni." },
+        { "chi": "Verifica (Opus)", "adesso": "In attesa.", "fatto": "Undicesimo giro e lockfile APPROVATI.", "prossimo": "Dodicesimo giro." }
+      ],
+      "decisioni": []
+    },
+    {
+      "ora": "2026-10-24T04:10:00Z",
+      "complessivo": "Il piano è al 98%: 2139 voci chiuse su 2172. La pipeline del rilascio è verde (verify con audit, immagini backend e frontend): p5s si aggiorna da sola dalle immagini nuove, e appena cambia versione la controllo nei tre formati. Il team continua: domande d'esame in un solo posto (191), nomi «Museo 1P/2P» (192), punti che non spariscono più dopo un ripristino dal Cestino.",
+      "puntuale": [
+        { "chi": "PM (Opus)", "adesso": "Attende che p5s prenda le immagini nuove (oggi è ancora allo schema 138).", "fatto": "Pipeline verde su c4eda1e3; testo della voce del 13/11 approvato; regola di R9-22 corretta per rispettare «Restano eventi collegati».", "prossimo": "Controllo di p5s a 1280, 768 e 375 e misure della Home." },
+        { "chi": "FE (Sonnet)", "adesso": "Editor dei Confidenti lato FE (ranghi, abilità, Dote, dialoghi, regali, inviti).", "fatto": "N1 (2521c307), N5 (a6d36d2e).", "prossimo": "Modifica/Ripristina della Persona lato FE." },
+        { "chi": "BE (Sonnet)", "adesso": "luogo.quando e «disponibile dal» (tue decisioni), poi la voce del 13/11 e R9-22.", "fatto": "R9-18 (56572421, migrazione 191), D6 Museo 1P/2P (ad5825de, 192), N4 (be1f458d).", "prossimo": "pianta_quartiere, cruciverba del 29/8, Persona lato server." },
+        { "chi": "Analisi dati (Sonnet)", "adesso": "Dati Royal per R11-10c/11 (Lavenza, Ustione, 10-15, 10-31, Hagoromo).", "fatto": "Stato reale di L10 e L11.", "prossimo": "Tabelle per le migrazioni." },
+        { "chi": "Verifica (Opus)", "adesso": "In attesa.", "fatto": "Undicesimo giro e correzione del lockfile: APPROVATI.", "prossimo": "Dodicesimo giro sui commit nuovi." }
+      ],
+      "decisioni": []
+    },
+    {
+      "ora": "2026-10-24T04:06:00Z",
+      "complessivo": "Il piano è al 98%: 2139 voci chiuse su 2172. L'undicesimo giro di revisione ha APPROVATO il candidato 9ef4514c, che è stato pubblicato. La pipeline però si è fermata su due vulnerabilità nuove di librerie esterne (body-parser e zod). Le ho corrette solo nel lockfile, il revisore ha approvato e la pipeline sta ripartendo: poi controllo p5s. Le tue 8 decisioni nuove su L11 sono registrate e passate al team.",
+      "puntuale": [
+        { "chi": "PM (Opus)", "adesso": "Segue la pipeline della correzione c4eda1e3 su newreview.", "fatto": "Rilascio di 9ef4514c (approvato all'undicesimo giro); correzione del lockfile approvata; 8 decisioni dell'utente registrate; piano corretto (R11-02/9, R11-02/10, R11-02b/5 tornano parziali).", "prossimo": "Controllo di p5s nei tre formati, misure della Home." },
+        { "chi": "FE (Sonnet)", "adesso": "N1: togliere una spunta non toglie mai punti che lo stato non ha più, anche per le spunte vecchie.", "fatto": "N5 (a6d36d2e), affinità copiate tolte dall'editor (88a4eaf6), N-c (eee8e8a9).", "prossimo": "Editor dei Confidenti lato FE (regali, inviti), poi Modifica/Ripristina della Persona." },
+        { "chi": "BE (Sonnet)", "adesso": "Decisioni dell'utente su L11: luogo.quando, disponibile dal, voce del 13/11, Museo 1P/2P, pianta_quartiere, cruciverba del 29/8.", "fatto": "Editor dei Confidenti (446097da), inviti con Cestino (144662a5, 54b0e245), migrazioni 189 (98b5a927) e utente 043 (7528d665).", "prossimo": "Modifica/Ripristina della Persona lato server, R9-18 ed R9-22." },
+        { "chi": "Analisi dati (Sonnet)", "adesso": "Dati Royal per R11-10c/11 (Lavenza, Ustione, 10-15, 10-31, Hagoromo) e testo serale del 13/11.", "fatto": "Stato reale di L10 e L11 (lotti/L11/stato-reale-L10-L11-2026-10-24.md).", "prossimo": "Tabelle per le migrazioni." },
+        { "chi": "Verifica (Opus)", "adesso": "In attesa.", "fatto": "Undicesimo giro: APPROVATO; correzione del lockfile: APPROVATA.", "prossimo": "Dodicesimo giro sui commit nuovi." }
+      ],
+      "decisioni": []
+    },
+    {
+      "ora": "2026-10-24T03:50:00Z",
+      "complessivo": "Il piano è al 98%: 2134 voci chiuse su 2172. Ho confrontato una per una le voci aperte con i commit e ne ho segnate 27 già fatte nel codice: L9 sale a 268/281, L10 a 142/143, L11 a 58/82. Restano 37 voci da fare e il collaudo della ricerca, che è tuo. Il candidato al rilascio (9ef4514c) è all'undicesimo giro di revisione su Opus.",
+      "puntuale": [
+        { "chi": "PM (Opus)", "adesso": "Attende l'undicesimo giro; piano allineato al codice reale.", "fatto": "27 voci segnate con il commit che le chiude: L9 (R9-04, R9-06, R9-09/3, R9-10, R9-12/2, R9-21), L10 (contatori, Velluto, ricalcolo dei punti), L11 (R11-02, R11-02b, R11-03/3, R11-11/3, R11-12/4, R11-14/1).", "prossimo": "Commit, push, pipeline e controllo di p5s se il giro approva." },
+        { "chi": "FE (Sonnet)", "adesso": "Voci aperte di L11 (Modifica/Ripristina, inventario, documenti).", "fatto": "Affinità copiate tolte dall'editor delle voci Persona (88a4eaf6), N-c (eee8e8a9), bozze tolte (1087b35c), R11-02b/2-4.", "prossimo": "Un commit per voce." },
+        { "chi": "BE (Sonnet)", "adesso": "R9-07 e R9-07c (editor dei ranghi e degli inviti).", "fatto": "R9-06 e R9-12/2 (381ba4d6, c99a3d77), R9-04/4 (6c7df7b6).", "prossimo": "R9-18 ed R9-22 con le regole nuove, R9-14, R9-21/2." },
+        { "chi": "Analisi dati (Sonnet)", "adesso": "Stato reale nel codice delle voci aperte di L10 e L11.", "fatto": "Esami, eventi ricavati e debolezze (lotti/L9/esami-eventi-debolezze-2026-10-24.md).", "prossimo": "Documento con le voci da chiudere e da assegnare." },
+        { "chi": "Verifica (Opus)", "adesso": "Undicesimo giro sulla copia ferma 9ef4514c.", "fatto": "Decimo giro.", "prossimo": "Verdetto sul rilascio." }
+      ],
+      "decisioni": []
+    },
+    {
+      "ora": "2026-10-24T03:44:00Z",
+      "complessivo": "Il piano è al 97%: 2107 voci chiuse su 2172. L8 è completo nel codice (1227/1227), con la modifica delle affinità e il ripristino. Il candidato al rilascio (9ef4514c) ha typecheck, lint e build verdi, e le migrazioni sui tuoi dati arrivano a 187/42 senza errori e con il lavoro da preservare identico. Ora è all'undicesimo giro di revisione su Opus: se approva, pubblico su p5s.",
+      "puntuale": [
+        { "chi": "PM (Opus)", "adesso": "Attende l'undicesimo giro sulla copia ferma 9ef4514c.", "fatto": "Seconda prova delle migrazioni (187/42), regole per R9-18 ed R9-22 registrate in DECISIONI.md.", "prossimo": "Commit, push, pipeline e controllo di p5s se il giro approva." },
+        { "chi": "FE (Sonnet)", "adesso": "Campi delle affinità copiati da nascondere nell'editor delle voci Persona, poi le voci aperte di L11.", "fatto": "Bozze tolte (1087b35c), N-c (eee8e8a9), N-b (64b4927b), N-d e N-g (57a69e37), R11-02b/2-4 (299b1b44, 102fb504, 5bf3fa90).", "prossimo": "Un commit per voce." },
+        { "chi": "BE (Sonnet)", "adesso": "R9-07 e R9-07c, poi R9-18 ed R9-22 con le regole nuove.", "fatto": "R9-06 (381ba4d6), R9-04/4 (6c7df7b6), R9-09/3 (9673721e), R9-12/2 (f34a795a).", "prossimo": "Un commit per regola." },
+        { "chi": "Analisi dati (Sonnet)", "adesso": "Stato reale nel codice delle 7 voci aperte di L10 e delle 35 di L11.", "fatto": "Esami, eventi ricavati e debolezze (lotti/L9/esami-eventi-debolezze-2026-10-24.md).", "prossimo": "Documento con le voci da chiudere e quelle da assegnare." },
+        { "chi": "Verifica (Opus)", "adesso": "Undicesimo giro: F1 e i 20 commit dopo il decimo.", "fatto": "Decimo giro.", "prossimo": "Verdetto sul rilascio." }
+      ],
+      "decisioni": []
+    },
+    {
+      "ora": "2026-10-24T03:35:00Z",
+      "complessivo": "Il piano è al 97%: 2106 voci chiuse su 2172. Il decimo giro di revisione ha trovato un solo difetto bloccante (F1: eliminando una voce spuntata, i suoi punti tornavano al ricalcolo), già corretto nel commit ced9ca75. Hai deciso di togliere le bozze dei moduli: lo fa FE. Poi faccio l'undicesimo giro su Opus e, se approva, pubblico su p5s.",
+      "puntuale": [
+        { "chi": "PM (Opus)", "adesso": "Attende la rimozione delle bozze per preparare la copia ferma dell'undicesimo giro.", "fatto": "Prova delle migrazioni; R8-21/1, R8-02/3 e R10-25/1 chiuse; decisione sulle bozze registrata.", "prossimo": "Undicesimo giro, poi commit, push, pipeline e controllo di p5s." },
+        { "chi": "FE (Sonnet)", "adesso": "Rimozione delle bozze dei moduli (tua decisione «No, toglile»), poi N-b, N-c, N-d e N-g.", "fatto": "F1 (ced9ca75), migrazione 184 sulle frasi di orari e sblocco (04eef9d1).", "prossimo": "Voci aperte di L11." },
+        { "chi": "BE (Sonnet)", "adesso": "Registra la migrazione 185, poi le voci aperte di L9 (R9-09/3, R9-12/2, R9-04/4, R9-06, R9-07, R9-14, R9-21/2).", "fatto": "Date dei Confidenti (182), scadenze dei Palazzi (183), attività (185).", "prossimo": "Un commit per gruppo." },
+        { "chi": "Analisi dati (Sonnet)", "adesso": "Riscontro di R9-18 ed R9-22, e controllo delle debolezze copiate nel testo di 161 Persona.", "fatto": "Chiusura di L8 (lotti/L8/chiusura-2026-10-24.md).", "prossimo": "Regola per R9-18 ed R9-22." },
+        { "chi": "Agente affinità L8 (Sonnet)", "adesso": "R8-10/1: modifica delle affinità di una Persona, con ripristino.", "fatto": "—", "prossimo": "Commit e resoconto." },
+        { "chi": "Verifica (Opus)", "adesso": "In attesa.", "fatto": "Decimo giro: respinto per il solo F1, tutto il resto approvato.", "prossimo": "Undicesimo giro." }
+      ],
+      "decisioni": []
+    },
+    {
+      "ora": "2026-10-24T03:26:55Z",
+      "complessivo": "Il piano è al 97%: 2103 voci chiuse su 2172. La prova di tutte le migrazioni su una copia dei tuoi dati è pulita: da 138/30 a 181/41, lavoro da preservare identico, nessun errore. Il candidato al rilascio (f4075b61) ha typecheck, lint e build verdi ed è al decimo giro di revisione su Opus: se approva, pubblico su p5s. Le tue decisioni su Kawakami, sulle scadenze e su Hifumi sono registrate e passate a BE.",
+      "puntuale": [
+        { "chi": "PM (Opus)", "adesso": "Attende il decimo giro sul candidato f4075b61.", "fatto": "Prova delle migrazioni (docs/coordinamento/prova-migrazioni-rilascio-2026-10-24.md); controlli verdi sulla copia ferma.", "prossimo": "Commit, push, pipeline, controllo di p5s." },
+        { "chi": "FE (Sonnet)", "adesso": "Voci aperte di L11: ramo Memento, archivio delle fonti, migrazioni di consolidamento.", "fatto": "«Nuova mappa» tolta ovunque (f4075b61), rotta orfana tolta (941995aa).", "prossimo": "Chiusura di L11." },
+        { "chi": "BE (Sonnet)", "adesso": "Voci aperte di L9 con i dati Royal e le tue decisioni.", "fatto": "F-A (57da77b9), N-1, N-2, N-4, N-5, descrizioni OpenAPI (d1b7fdfb).", "prossimo": "Un commit per gruppo." },
+        { "chi": "Analisi dati (Sonnet)", "adesso": "Le 3 voci aperte di L8.", "fatto": "Ricerca Royal 2 per L9.", "prossimo": "Documento di chiusura di L8." },
+        { "chi": "Verifica (Opus)", "adesso": "Decimo giro sul candidato al rilascio.", "fatto": "Nono giro.", "prossimo": "Verdetto sul rilascio." }
+      ],
+      "decisioni": []
+    },
+    {
+      "ora": "2026-10-24T03:14:29Z",
+      "complessivo": "Il piano è al 95%: 2056 voci chiuse su 2172. Il nono giro di revisione ha respinto il rilascio per un difetto reale (voci del Diario che risultano «Bloccata» per errore) e per la mancanza della prova completa delle migrazioni. BE corregge il difetto, l'Analisi dati applica tutta la catena a una copia dei tuoi dati. Hai chiesto di pubblicare dopo la prova: appena passa faccio commit, push, pipeline e controllo di p5s. Sono fatti anche il ricalcolo dei punti «solo da oggi», la matita delle Doti e il Velluto che registra la Persona.",
+      "puntuale": [
+        { "chi": "PM (Opus)", "adesso": "Attende la prova delle migrazioni e la correzione di «Bloccata» per pubblicare; un agente allinea le voci di L11.", "fatto": "Decisioni committate (36f85c78); tua conferma «Prima la prova, poi pubblico».", "prossimo": "Decimo giro e rilascio." },
+        { "chi": "FE (Sonnet)", "adesso": "L11, ondata 1 e bozze.", "fatto": "Ricalcolo solo da oggi (74f28517), matita delle Doti (3a54cfdd), bozze (3fdc5c23, 3dd1fc87).", "prossimo": "Il resto di L11." },
+        { "chi": "BE (Sonnet)", "adesso": "F-A: «Bloccata» falso (il semaforo della disponibilità non blocca mai).", "fatto": "Velluto (ece233a2, d07d77fb).", "prossimo": "N-1, N-2, N-4, N-5, poi L9." },
+        { "chi": "Analisi dati (Sonnet)", "adesso": "Prova di tutta la catena di migrazioni su una copia di p5s.", "fatto": "L9 allineato.", "prossimo": "Ricerca Royal per L9." },
+        { "chi": "Agente piano L11 (Sonnet)", "adesso": "Allinea le voci di L11 al codice.", "fatto": "—", "prossimo": "Conteggi." },
+        { "chi": "Verifica (Opus)", "adesso": "In attesa.", "fatto": "Nono giro: quasi tutto approvato, 1 difetto bloccante e prove mancanti.", "prossimo": "Decimo giro." }
+      ],
+      "decisioni": []
+    },
+    {
+      "ora": "2026-10-24T03:08:59Z",
+      "complessivo": "Il piano è al 95%: 2056 voci chiuse su 2172. L9 è a 258/281 e L10 a 135/143. È fatta la scheda «Persona della partita» che hai approvato, e anche i contatori di palestra e studio. Il nono giro di revisione su Opus legge una copia ferma del commit aa69c873, il candidato al rilascio. Niente è ancora pubblicato su p5s.",
+      "puntuale": [
+        { "chi": "PM (Opus)", "adesso": "Attende il nono giro sul candidato al rilascio.", "fatto": "Copia ferma aa69c873 per il revisore; tue decisioni registrate (ricalcolo solo da oggi, scheda Persona, matita delle Doti).", "prossimo": "Rilascio se approvato." },
+        { "chi": "FE (Sonnet)", "adesso": "Ricalcolo dei punti «solo da oggi» (R10-11c/f), poi la matita delle Doti in Partita (che hai approvato), poi L11.", "fatto": "Scheda Persona della partita (4e92d2a7), bozze dei form (43c59241).", "prossimo": "Un commit per voce." },
+        { "chi": "BE (Sonnet)", "adesso": "Stanza di Velluto (R10-11/2-3), poi le 23 voci aperte di L9.", "fatto": "Contatori di palestra (c268f652) e studio (cbbe2a88).", "prossimo": "Resoconto." },
+        { "chi": "Analisi dati (Sonnet)", "adesso": "Ricerca Royal per le voci aperte di L9 (sblocchi, sedi, scadenze, soglia 9→10).", "fatto": "L9 allineato: 258/281.", "prossimo": "Tabelle per le migrazioni." },
+        { "chi": "Verifica (Opus)", "adesso": "Nono giro sulla copia ferma aa69c873.", "fatto": "Ottavo giro.", "prossimo": "Esito sul rilascio." }
+      ],
+      "decisioni": []
+    }
+  ]
+}

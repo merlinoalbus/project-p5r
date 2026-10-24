@@ -51,4 +51,4 @@ Un solo mondo completo navigabile. Mappe, Città, Palazzi e Dedali, negozi e inv
 
 ## Ambiente originario
 
-Checkout attivo:C:/Repository/project-p5r-main, ramo codex/atlante-mondo prima della consegna diretta su main. App locale5275/backend3103, DATA_DIR C:/Users/rober/Documents/Codex/2026-09-05/al/work/runtime-atlante. Altri ambienti3101/5273 e3102/5274 non sono quelli di questo lavoro. I task separati aperti su richiesta e poi annullati sono stati fermati e archiviati. Non riavviare l'obiettivo automaticamente: l'utente ha affidato la prosecuzione ad altri.
+Checkout attivo:C:/Repository/project-p5r-main, ramo codex/atlante-mondo prima della consegna diretta su main. App locale5275/backend3103, DATA_DIR ~/Documents/Codex/2026-09-05/al/work/runtime-atlante. Altri ambienti3101/5273 e3102/5274 non sono quelli di questo lavoro. I task separati aperti su richiesta e poi annullati sono stati fermati e archiviati. Non riavviare l'obiettivo automaticamente: l'utente ha affidato la prosecuzione ad altri.

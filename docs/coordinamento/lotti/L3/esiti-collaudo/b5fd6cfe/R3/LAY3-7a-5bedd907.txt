@@ -4,7 +4,7 @@
 ### sorgenti del commit da riportare a 5bedd907^: src/components/guida/AreePalazzo.tsx ; sorgenti nuovi da togliere: nessuno
 ### 1) controllo sul codice di 5bedd907: npx vitest run --reporter=verbose src/components/guida/AreePalazzo.test.tsx 
 
- RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
+ RUN  v4.1.11 ~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
 
  ✓ src/components/guida/AreePalazzo.test.tsx > colonna: ogni area dice numero, nome, versioni, raccolta e le infiltrazioni che la toccano in ordine di guida 96ms
  ✓ src/components/guida/AreePalazzo.test.tsx > senza partita niente è completo e la raccolta dice solo quanto c’è 18ms
@@ -28,7 +28,7 @@ M  src/components/guida/AreePalazzo.tsx
 sì, identici al commit
 ### 2) sul codice di 5bedd907^: npx vitest run --reporter=verbose src/components/guida/AreePalazzo.test.tsx 
 
- RUN  v4.1.11 C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
+ RUN  v4.1.11 ~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3
 
  ✓ src/components/guida/AreePalazzo.test.tsx > colonna: ogni area dice numero, nome, versioni, raccolta e le infiltrazioni che la toccano in ordine di guida 112ms
  ✓ src/components/guida/AreePalazzo.test.tsx > senza partita niente è completo e la raccolta dice solo quanto c’è 20ms

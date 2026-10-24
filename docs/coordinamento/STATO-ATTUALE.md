@@ -1,6 +1,14 @@
-# Stato attuale del lavoro — ramo newreview / p5s (aggiornato 2026-10-22, ripresa)
+# Stato attuale del lavoro — ramo newreview / p5s (aggiornato 2026-10-23 sera)
 
-## DOVE SIAMO ADESSO (leggere per primo; prevale su tutto quanto c'è sotto)
+## RIPRESA DEL 23 OTTOBRE SERA (leggere per prima; prevale su tutto quanto c'è sotto)
+- **Chi lavora.** Codex si è fermato dopo L7-TANAKA-NOTA. Il 23 sera l'utente ha chiesto a Claude (PM) di verificare il suo lavoro, integrare mancanze e dubbi e completare il piano.
+- **Pubblicato.** p5s è a `f63f10b0`, schema 138/30, health 200. Sul codice typecheck, lint e build sono verdi.
+- **Verifica di Codex.** Il revisore distinto ha dato RIGETTATO con 11 rilievi; tre hanno ricevuto una decisione dell'utente. Il lavoro da preservare è riconciliato: 613 pin utente; la voce mancante di Madarame è nel Cestino ed è stata eliminata dall'app il 20/10. Tutto il dettaglio è in `verifica-ripresa-2026-10-23.md`.
+- **In corso.** La sessione «Implementazione FE» corregge F1, F2, F3, F5, F6 e F9 sul ramo locale, senza push. Dopo: revisione distinta, poi un unico commit e push con i documenti, poi pipeline e p5s.
+- **Poi.** Si riprende la lista `stato.json` → `pianoAtomico.voci` da L7-TANAKA-TRANSAZIONE: residui di L5–L7, poi L8–L11.
+- **Regole.** Zero test; typecheck, lint e build verdi; verifica avversariale distinta per ogni consegna; prevale il dato Royal; niente backup manuale del volume (decisione dell'utente); commit e push a fine lotto o al punto di fermata.
+
+## DOVE SIAMO ADESSO (scritto da Codex fino al 23/10 mattina; storia)
 - **23 ottobre,08:44 italiana — NOTA chiuso con PASS finale circoscrittoGalaxy; STOP per ordineutente.**2e856938/CI39912246213 SUCCESS,backend06:37:04Z/frontend06:40:14Z attivi automaticamente,health200/hashnota identico al locale. Quattroviste osservate autonomamente(listinoDettagli,offertavecchiooggetto-2,Royal senzaofferte,confronto),notaG034/versione1 leggibile econsolewarn/error vuota. Confronto coordinatore06:43:18–22Z vs06:29:45–50Z:tutte100main+63utente tabelle inclsistema,DDL/versioni138/30 identiche,7RAW/foto/binding/contributi invariati,FK0/0. Nessuntest/writer/pixel;prezzi e note personali intatti. Tanaka4/9punti chiusi,nessun punto attivo;non iniziareTRANSAZIONE finché l'utente non chiede di riprendere. R7-13b/L7,consenso ealtri residuiL5–L11 aperti. La regolaRoyal prevale sempre nei dati di gioco documentati.
 - **23 ottobre — NOTA al rilascio, stop richiesto dopo questo punto.** Soluzione e delta approvati staticamente da Galaxy; notaG034 versionata separata da note personali/prezzi, consultabile nei quattro consumatori e inclusa nel DTO/hash del confronto. Typecheck57838/lint85334/build25325 exit0; dopo il controllo è cambiata soltanto la formulazione per recepire il chiarimentoRoyal, al riesame finale. Baseline readonly06:29:45–50Z, nessuna migrazione o modificaDB. L'utente ordina di fermarsi dopo NOTA: non iniziare TRANSAZIONE. Nuova regola generale: in ogni discrepanza prevale sempre il dato documentato di Persona5Royal; perHomunculus5000,120000solo nota.
 - **23 ottobre,08:23 italiana — SNAPSHOT chiuso con PASS finale circoscrittoGalaxy.**5b00327a/pipeline39910122517 SUCCESS; backend/FE aggiornati automaticamente06:16:15/16Z, health200 e hashservizio identico al locale. Browser autonomi20/18/28,20diagnosi124+8creazioni,RAW distinti,sblocco separato e rinvio sulla stessa pagina;consolevuota. Confronto coordinatore06:18:44–48Z vs06:06:29–33Z:main100/100 eutente62/63 tabelle identiche,solo sqlite_stat1 da36a40(statistiche aggiornate daPRAGMAoptimize);DDL/versioni138-30/7prove/binding/contributi eFK0/0 invariati. Nessun test/writer/verifica pixel;non chiudeR7-13b oL7. Tanaka3/9chiusi, unico punto attivoNOTA; si prosegue senza nuovo via.
@@ -156,7 +164,7 @@
 Documento per riprendere il lavoro da zero, con qualunque IA o persona. Il dettaglio è nella Regia (`stato.json`), nella bacheca e in `lotti/`. **Leggere tutto prima di toccare qualcosa.**
 
 ## Obiettivo
-Mandato dell'utente: completare la razionalizzazione in lotti L0–L11 sul ramo `newreview`, pubblicato su https://p5s.nasmerlinoalbus.cloud. Il ramo `main` e la produzione persona5royal non si toccano. A fine progetto, dopo la validazione dell'utente, i dati di p5s sostituiscono quelli di produzione.
+Mandato dell'utente: completare la razionalizzazione in lotti L0–L11 sul ramo `newreview`, pubblicato sull'istanza p5s. Il ramo `main` e la produzione persona5royal non si toccano. A fine progetto, dopo la validazione dell'utente, i dati di p5s sostituiscono quelli di produzione.
 
 ## Avanzamento dei lotti
 | Lotto | Stato |

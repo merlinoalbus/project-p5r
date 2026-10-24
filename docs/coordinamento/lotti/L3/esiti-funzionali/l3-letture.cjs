@@ -4,7 +4,7 @@ const path = require('path');
 const radice = 'C:/Repository/project-p5r/.claude/worktrees/pensive-burnell-b50941';
 const Database = require(path.join(radice, 'node_modules/better-sqlite3'));
 const B = 'http://localhost:3201';
-const BASE = 'C:/Users/rober/.claude/p5s-coordinamento/lotti/L3/esiti-funzionali/base-prima';
+const BASE = '~/.claude/p5s-coordinamento/lotti/L3/esiti-funzionali/base-prima';
 const db = new Database(path.join(radice, 'data/gioco.db'), { readonly: true, fileMustExist: true });
 const q = (s, ...p) => db.prepare(s).all(...p);
 const get = async (p) => { const r = await fetch(B + p); return { s: r.status, j: await r.json().catch(() => null) }; };

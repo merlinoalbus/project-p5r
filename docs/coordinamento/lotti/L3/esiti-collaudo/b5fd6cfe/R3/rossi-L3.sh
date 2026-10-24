@@ -4,8 +4,8 @@
 # sola lettura (junction), mai `git clean`. La linea di rilascio non si tocca.
 set -u
 LINEA="C:/Repository/project-p5r/.claude/worktrees/p5s-sviluppo-l2"
-W="C:/Users/rober/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3"
-O="C:/Users/rober/.claude/p5s-coordinamento/lotti/L3/esiti-collaudo/b5fd6cfe/R3"
+W="~/AppData/Local/Temp/claude/C--Repository-project-p5r--claude-worktrees-p5s-sviluppo-l2/a4ff2e39-92e9-416b-be66-a66bc1f16e27/scratchpad/rossi-L3"
+O="~/.claude/p5s-coordinamento/lotti/L3/esiti-collaudo/b5fd6cfe/R3"
 mkdir -p "$O"
 cd "$W" || exit 9
 RIEP="$O/0-riepilogo.txt"
