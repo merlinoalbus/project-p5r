@@ -30,6 +30,7 @@ const NOTE: Partial<Record<TipoModificabile, string>> = {
   dote: 'Il rango mostrato nelle partite si ricalcola dai punti: cambiare una soglia sposta il rango senza toccare i punti già segnati.',
   'evento-calendario': 'La data e il tipo dell’evento non si correggono; le voci del Diario collegate restano collegate.',
   ombra: 'Le affinità della Persona, la Persona abbinata e i luoghi d’incontro non si correggono da qui: le affinità si correggono dalla scheda della Persona. Qui le differenze proprie dell’Ombra.',
+  regalo: 'Il nome e l’effetto del regalo sono quelli dell’oggetto del catalogo (si correggono dal catalogo); i punti già dati nelle partite non cambiano.',
   'allerta-meteo': 'Vale per questo giorno: le condizioni delle partite che leggono l’allerta (per esempio «piove») seguono le fasce che scegli.',
 };
 
