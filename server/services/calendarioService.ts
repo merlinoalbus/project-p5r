@@ -5,6 +5,7 @@
 import { prepared } from '../db/dbService.js';
 import { partitaNonTrovata } from './verificaPartita.js';
 import { indiceGiornoScolastico } from './domandeService.js';
+import { risolutoreFonti } from './calendarioFonti.js';
 import { allerteDiOgniGiorno, testoMeteo } from './meteoService.js';
 import type { CalendarioDto, GiornoCalendarioDto, SettimanaGuidaDto } from '../../shared/types.js';
 import { giornoDellaSettimana } from '../../shared/date.js';
@@ -29,8 +30,12 @@ function vociDegliEventi(): Map<number, VoceCollegata[]> {
 
 /** Gli eventi del calendario che puntano a una voce del Diario (sola lettura). */
 export function eventiDellaVoce(uid: string): Array<{ id: number; data: string; tipo: string; titolo: string; certezza: 'C' | 'D' }> {
-  return prepared(`SELECT e.id, e.data, e.tipo, e.titolo, l.certezza FROM evento_calendario_voce l JOIN evento_calendario e ON e.id = l.evento_id
-    WHERE l.voce_uid = ? ORDER BY e.data, e.ordine`).all(uid) as Array<{ id: number; data: string; tipo: string; titolo: string; certezza: 'C' | 'D' }>;
+  const risolvi = risolutoreFonti();
+  return (prepared(`SELECT e.id, e.data, e.tipo, e.titolo, e.fonte_chiave, e.ordine, l.certezza FROM evento_calendario_voce l JOIN evento_calendario e ON e.id = l.evento_id
+    WHERE l.voce_uid = ?`).all(uid) as Array<{ id: number; data: string; tipo: string; titolo: string; fonte_chiave: string | null; ordine: number; certezza: 'C' | 'D' }>)
+    .map(({ fonte_chiave, ordine, ...e }) => { const f = risolvi(fonte_chiave); return { e: f ? { ...e, data: f.data, tipo: f.tipo } : e, ordine }; })
+    .sort((x, y) => (x.e.data < y.e.data ? -1 : x.e.data > y.e.data ? 1 : x.ordine - y.ordine))
+    .map((x) => x.e);
 }
 
 /** Un giorno del calendario come DTO: il giorno della settimana calcolato dalla data (R9-16), tempo libero dal JSON, gli eventi già raccolti per quella data e le sue allerte del gioco (2026-10-12). */
@@ -60,7 +65,11 @@ export function calendario(partitaId?: number, mese?: string): CalendarioDto {
   const giorni = (mese
     ? prepared("SELECT * FROM giorno WHERE substr(data, 1, 2) = ? ORDER BY ordine").all(mese)
     : prepared('SELECT * FROM giorno ORDER BY ordine').all()) as RigaGiorno[];
-  const eventiTutti = prepared('SELECT * FROM evento_calendario ORDER BY data, ordine').all() as RigaEvento[];
+  // data e tipo di un evento con la chiave della fonte si leggono dalla fonte, non dalla riga (R9-22)
+  const risolvi = risolutoreFonti();
+  const eventiTutti = (prepared('SELECT * FROM evento_calendario').all() as Array<RigaEvento & { fonte_chiave?: string | null; ordine: number }>)
+    .map((e) => { const f = risolvi(e.fonte_chiave); return f ? { ...e, data: f.data, tipo: f.tipo } : e; })
+    .sort((x, y) => (x.data < y.data ? -1 : x.data > y.data ? 1 : x.ordine - y.ordine)) as RigaEvento[];
   const perData = new Map<string, RigaEvento[]>();
   for (const e of eventiTutti) {
     if (!perData.has(e.data)) perData.set(e.data, []);

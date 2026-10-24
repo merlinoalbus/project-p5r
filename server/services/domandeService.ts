@@ -31,7 +31,7 @@ function domandaDto(r: RigaDomanda, fatte: Set<number>, oggettiRicompensa: NonNu
 }
 
 /** Gli esami in ordine, con giorni e domande composti dalle righe riassuntive di `domanda` (R9-18: la fonte unica); `ordine` corre su tutto l'esame. */
-function esami(): EsameDto[] {
+export function esami(): EsameDto[] {
   const premi = ricompensePerFonte('esame');
   const righe = (prepared("SELECT data, tipo, ordine, risposte_json FROM domanda WHERE tipo IN ('esame-medio', 'esame-finale') ORDER BY ordine").all() as Array<{ data: string; tipo: string; ordine: number; risposte_json: string }>)
     .sort((x, y) => indiceGiornoScolastico(x.data) - indiceGiornoScolastico(y.data) || x.ordine - y.ordine);
