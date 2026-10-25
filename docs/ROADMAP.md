@@ -1442,7 +1442,16 @@ Fonte: `docs/coordinamento/lotti/L13/censimento-2026-10-25.md`. Si procede per o
 | d | Proposte «da completare» (solo preparazione): tabella `main.proposta_conversione_voce` (migrazione 236, vuota, contenuto immutabile per trigger), rotte `GET /api/compendio/proposte-conversione`, `POST …/:id/applica`, `POST …/:id/scarta` (fuori dall'elenco del giocatore), segno «da completare · N» sulla voce nel Diario, finestra con Applica (dopo aver completato elemento, copie o note se chiesto) / Modifica (finestra della voce con la proposta già applicata) / Scarta, elenco «Proposte da completare» dalle Impostazioni (`/guida/da-completare`) filtrabile per periodo e stato. Applicare scrive con `aggiornaVoce` (mai SQL parallelo); le ricevute delle partite non si riscrivono; l'edizione di rilascio esce con la tabella vuota | fatto nel codice (nessuna proposta reale: le carica la 4b) |
 | e | `EditorGiorno` e `EditorDisponibilitaStrutturata`: una sola `FinestraModifica` dall'apertura alla chiusura (`caricamento` / `erroreCaricamento`), niente più finestra di caricamento che si smonta all'arrivo dei dati | fatto nel codice |
 | f | Finestra della voce sulla `FinestraModifica` comune (piè fisso, conferma prima di chiudere con modifiche non salvate); testo corretto sugli effetti di una voce già spuntata (l'«Applica» vale per Doti, letture, turni, Aojiru, pesca e yen) | fatto nel codice |
-| g | Conversione dei dati delle voci | non in questa sottofase (4b) |
+| g | Conversione dei dati delle voci | vedi ondata 4b |
+
+### Ondata 4b — conversione delle voci del Diario dall'elenco v8 (25 ottobre) — fatto nel codice, da provare dall'utente
+
+| Punto | Che cosa | Stato |
+|---|---|---|
+| a | Elenco v8 (la v7 con i due rilievi della verifica avversariale): il bagno pubblico del 05-02 (lunedì) e del 05-26 (giovedì) passa a «da decidere», perché l'esito automatico di quei giorni è il bagno medicinale (Fascino +3) e la nota dice +2; 24 motivi superati («nessun tipo di effetto…») riscritti sui tipi dell'ondata 3 (sblocco, trofeo, oggetto ricevuto), più 18 righe senza proposta | fatto (elenco nello scratchpad, verificato) |
+| b | Migrazione 238 (audit `audit-238-proposte-L13-4b`, dati in `server/db/migrations/dati/238-*.json`): 433 proposte in `proposta_conversione_voce` con `id` fisso (un secondo giro non duplica nulla). Le 177 righe «certo» fuori dal periodo validato si applicano con `applicaPropostaConversione`, la stessa funzione della pagina, solo se la voce è ancora come letta (impronta di testo, note, collegamento, `updated_at` ed effetti) e se nessuna partita la cita. Prova su una copia dei dati del 25/10: 176 applicate su 158 voci, 1 saltata (06-02, ea60e256: ha ricevute annullate in una partita) e lasciata aperta; restano aperte 111 proposte del periodo validato e 146 fuori periodo; schema delle partite identico | fatto nel codice |
+| c | Da portare all'utente: le voci 29c27bf2 (06-09), 2bfee883 (06-13) e b33c622e (06-16), collegate al bagno dalla 234, scrivono «Fascino +2» in giorni da bagno medicinale (+3). Va stabilito se sono sbagliate le condizioni della 233 o il Diario | aperto (decisione dell'utente) |
+| d | Proposte del periodo validato (04-01…05-31), anche quelle «certo»: si applicano solo con il sì dell'utente, riga per riga, dalla pagina «Da completare» | aperto (decisione dell'utente) |
 
 ## Razionalizzazione (dal 20 ottobre 2026) — branch `newreview`, istanza parallela p5s
 
