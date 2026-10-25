@@ -12,6 +12,9 @@ import type { PersonaRiassuntoDto, PuntoInteresseDto } from '../../types';
 const api = vi.hoisted(() => ({ getPersone: vi.fn(), creaPunto: vi.fn(), aggiornaPunto: vi.fn(), eliminaPunto: vi.fn() }));
 vi.mock('../../services/api', (vero) => moduloApi(vero, api));
 vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
+// la conferma dell'eliminazione passa da `conferma()` (DialogoConferma in primo piano), non più da un riquadro in fondo al corpo della finestra (L13)
+const { conferma } = vi.hoisted(() => ({ conferma: vi.fn() }));
+vi.mock('../../stores/confermaStore', async (vero) => ({ ...(await vero<typeof import('../../stores/confermaStore')>()), conferma }));
 
 /** Una Persona del compendio, quanto basta al modulo. */
 const persona = (id: number, nome: string, nomeIt: string): PersonaRiassuntoDto => ({ id, nome, nomeIt, arcanaNome: 'Magia', livello: id } as PersonaRiassuntoDto);
@@ -57,7 +60,7 @@ it('corregge una Persona: nome, area e la stessa Persona (il server lascia i det
   expect(await screen.findByRole('dialog', { name: 'Modifica: Pixie' })).toBeInTheDocument();
   expect(valoreSelettore('Persona del compendio')).toBe('Pixie');
   expect(screen.queryByText(/se ne vanno/)).toBeNull();
-  fireEvent.change(screen.getByRole('textbox', { name: 'Nome dell’Ombra (vuoto = quello della Persona)' }), { target: { value: 'Fatina' } });
+  fireEvent.change(screen.getByRole('textbox', { name: 'Nome dell’Ombra' }), { target: { value: 'Fatina' } });
   // si incontra anche nei Binari: le aree si scelgono tutte, nell'ordine del dedalo
   expect(screen.getByRole('checkbox', { name: 'Banchina' })).toBeChecked();
   fireEvent.click(screen.getByRole('checkbox', { name: 'Binari' }));
@@ -74,7 +77,7 @@ it('senza aree non si salva; se le aree non cambiano non si mandano', async () =
   fireEvent.click(screen.getByRole('checkbox', { name: 'Banchina' }));
   expect(screen.getByRole('button', { name: /^Salva/ })).toBeDisabled();
   fireEvent.click(screen.getByRole('checkbox', { name: 'Banchina' }));
-  fireEvent.change(screen.getByRole('textbox', { name: 'Nome dell’Ombra (vuoto = quello della Persona)' }), { target: { value: 'Fatina' } });
+  fireEvent.change(screen.getByRole('textbox', { name: 'Nome dell’Ombra' }), { target: { value: 'Fatina' } });
   api.aggiornaPunto.mockResolvedValue(voce);
   fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
   await waitFor(() => expect(api.aggiornaPunto).toHaveBeenCalledWith('q/4', { nome: 'Fatina', descrizione: 'Ombra del dedalo', persona: 7 }));
@@ -89,16 +92,17 @@ it('con un\'altra Persona dice che resistenze, debolezze e personalità dell\'Om
   expect(screen.queryByText(/se ne vanno/)).toBeNull();
 });
 
-it('«Elimina» chiede conferma; «No» torna indietro, «Confermo» elimina la voce', async () => {
+it('«Elimina» chiede conferma; con «no» non succede niente, con «sì» elimina la voce', async () => {
   const { onChiudi, onCambiata } = monta(voce);
   await screen.findByRole('dialog', { name: 'Modifica: Pixie' });
+  conferma.mockResolvedValueOnce(false);
   fireEvent.click(screen.getByRole('button', { name: /^Elimina/ }));
-  expect(screen.getByRole('region', { name: 'Conferma: eliminare la Persona' })).toHaveTextContent('Se ne va dalla guida, da tutte le aree del dedalo e per tutte le partite. Il compendio delle partite non cambia. Finisce nel cestino (Impostazioni → Cestino): da lì la rimetti com’era.');
-  fireEvent.click(screen.getByRole('button', { name: /^No/ }));
-  expect(screen.queryByRole('region', { name: 'Conferma: eliminare la Persona' })).toBeNull();
+  await waitFor(() => expect(conferma).toHaveBeenCalledTimes(1));
+  expect((conferma.mock.calls[0][0] as { testo: string }).testo).toBe('Se ne va dalla guida, da tutte le aree del dedalo e per tutte le partite. Il compendio delle partite non cambia. Finisce nel cestino (Impostazioni → Cestino): da lì la rimetti com’era.');
+  expect(api.eliminaPunto).not.toHaveBeenCalled();
+  conferma.mockResolvedValueOnce(true);
   fireEvent.click(screen.getByRole('button', { name: /^Elimina/ }));
   api.eliminaPunto.mockResolvedValue(undefined);
-  fireEvent.click(screen.getByRole('button', { name: /^Confermo/ }));
   await waitFor(() => expect(api.eliminaPunto).toHaveBeenCalledWith('q/4'));
   await waitFor(() => expect(onChiudi).toHaveBeenCalled());
   expect(onCambiata).toHaveBeenCalled();

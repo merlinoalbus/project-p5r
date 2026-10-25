@@ -582,15 +582,50 @@
   }
 
   /* ---- Campi form ---- */
-  .form-label {
-    font-size: var(--testo-12);
+  /* L13 · modelli comuni (1): l'UNICO stile di campo dell'app. Etichetta sopra il campo (testo-13, peso 600), campo da 44 px sotto,
+     aiuto ed errore ancora sotto. Lo portano il componente `Campo` (`.campo`) e i due nomi storici che gli stanno accanto —
+     `.form-label` (fusione, partita) e `.editor-mappa__campo` (moduli e editor) — nella STESSA regola: prima erano tre definizioni
+     con tre tipografie e due altezze (36 e 44 px, vinceva l'ordine nel file). Il testo digitato nel campo resta peso 400. */
+  .campo, .form-label, .editor-mappa__campo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    font-size: var(--testo-13);
     font-weight: 600;
+    line-height: 1.3;
     color: var(--color-text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-bottom: 6px;
-    display: block;
   }
+  /* il peso 600 è dell'etichetta, non di quel che sta nel campo: ogni figlio diretto (campo, selettore, tessere, aiuto) torna a 400
+     e lo trasmette ai suoi discendenti — i nomi storici portano il testo dell'etichetta come testo nudo, senza elemento proprio */
+  .campo > *:not(.campo__etichetta), .form-label > *, .editor-mappa__campo > * { font-weight: 400; }
+  .campo .form-input, .form-label .form-input, .editor-mappa__campo .form-input { margin-top: 0; }
+  /* l'etichetta ha la tipografia anche fuori da `.campo` (la porta il `Selettore`, che la mette sopra il suo pulsante) */
+  .campo__etichetta { display: block; font-size: var(--testo-13); font-weight: 600; line-height: 1.3; color: var(--color-text-secondary); }
+  /* l'asterisco dei campi obbligatori: decorativo per il lettore di schermo, che ha `aria-required` sul campo */
+  .campo__obbligatorio { margin-left: 3px; color: var(--color-error-testo); }
+  .campo__aiuto, .campo__errore { font-size: var(--testo-12); font-weight: 400; line-height: 1.35; }
+  .campo__aiuto { color: var(--color-text-muted); }
+  .campo__errore { color: var(--color-error-testo); }
+  /* il testo lungo si allunga con quello che contiene (nessun riquadro che scorre dentro la finestra): l'altezza la fissa `Campo` */
+  .campo__lungo { resize: none; overflow: hidden; }
+
+  /* L13 · modelli comuni (5): la griglia dei campi di ogni finestra di modifica — UNA colonna sotto 768 px, DUE da 768 in su. Prima i moduli
+     passavano a due colonne a 640 px (`sm:`) e certi campi larghi (`sm:col-span-2`) a un'altra misura ancora. `.campo--largo` occupa
+     tutta la riga (`1 / -1`, vale anche nella griglia a una colonna, dove `span 2` creerebbe una colonna in più). */
+  .griglia-campi { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: start; }
+  @media (min-width: 768px) { .griglia-campi { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .griglia-campi > .campo--largo { grid-column: 1 / -1; }
+  /* una sezione della finestra: titolo uniforme (stessa tipografia dei titoli di sezione delle pagine) e griglia dei suoi campi */
+  .finestra-sezione { margin: 0; padding: 0; border: 0; min-width: 0; }
+  .finestra-sezione__titolo { padding: 0; margin: 0 0 8px; font-size: var(--testo-12); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted); }
+  .finestra-sezione__campi { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: start; }
+  @media (min-width: 768px) { .finestra-sezione__campi { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .finestra-sezione__campi > .campo--largo { grid-column: 1 / -1; }
+  /* le finestre di modifica hanno un solo corpo che scorre (`.modal-body`): le sezioni si impilano con più aria dei campi */
+  .finestra-modifica { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+  /* «Elimina» sta a sinistra del piè, separato da Annulla e Salva (che ha il tono primario a destra) */
+  .finestra-modifica__elimina { margin-right: auto; }
   .form-input {
     width: 100%;
     padding: 10px 12px;
@@ -1129,8 +1164,7 @@
   .editor-mappa__tipo { display: flex; align-items: center; gap: 6px; background: none; border: 1px solid var(--color-border); padding: 4px 6px; color: var(--color-text); font: inherit; font-size: var(--testo-12); cursor: pointer; min-height: 44px; text-align: left; } /* 44 px: bersaglio touch (rilievo del validatore, 15.24) */
   .editor-mappa__tipo:hover { border-color: var(--color-primary); }
   .editor-mappa__tipo--attivo { border-color: var(--color-primary); background: var(--color-primary-bg); }
-  .editor-mappa__campo { display: flex; flex-direction: column; gap: 3px; font-size: var(--testo-12); color: var(--color-text-secondary); }
-  .editor-mappa__campo .form-input { min-height: 36px; padding: 4px 8px; font-size: var(--testo-13); }
+  /* `.editor-mappa__campo` ha la sua definizione unica insieme a `.campo` e `.form-label` (sezione «Campi form») */
   .editor-mappa__avviso { font-size: var(--testo-12); color: var(--color-warning); }
   /* palette dei tipi a gruppi (15.24) e righe «senza passaggio» dell'albero: testo + pulsante «Crea passaggio» (44 px al tocco) */
   .editor-mappa__gruppo { font-size: var(--testo-12); text-transform: uppercase; letter-spacing: .06em; color: var(--color-text-muted); padding: 2px 0 0; }
@@ -2072,10 +2106,16 @@
    selettore gli passa (EditorAzioneStrutturata, RigaDote, TraduzioniEditor), e la larghezza minima chiesta veniva ignorata.
    Le altre regole del selettore restano dove sono: spostarle cambierebbe la cascata anche per `width`/`display` del compatto. */
 @layer components { .selettore { position:relative; min-width:0; } }
-.selettore__scelta { position:relative; display:flex; flex-direction:column; align-items:flex-start; width:100%; min-height:44px; padding:3px 22px 3px 8px; border:1px solid var(--color-border-input); background:var(--color-bg-tertiary); color:var(--color-text); font:inherit; text-align:left; cursor:pointer; }
+/* L13 · modelli comuni (1): il selettore è un campo come gli altri — l'etichetta sta SOPRA (`.campo__etichetta`, fuori dal pulsante), il
+   pulsante ha bordo, raggio, fondo e altezza (44 px) di `.form-input`. L'etichetta dentro il pulsante (maiuscoletto sopra il valore) resta
+   solo come variante `etichettaDentro`, per i comandi fitti dove una riga in più romperebbe la barra. */
+.selettore__scelta { position:relative; display:flex; flex-direction:row; align-items:center; width:100%; min-height:44px; padding:8px 30px 8px 12px; border:1px solid var(--color-border-input); border-radius:var(--radius-md); background:var(--color-surface); color:var(--color-text); font:inherit; text-align:left; cursor:pointer; }
+.selettore--con-etichetta { display:flex; flex-direction:column; gap:4px; }
+.selettore--etichetta-dentro .selettore__scelta { flex-direction:column; align-items:flex-start; padding:3px 22px 3px 8px; }
 .selettore__scelta:disabled { opacity:1; cursor:default; }
 .selettore__etichetta { font-size:var(--testo-12); text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); line-height:1; }
-.selettore__valore { font-size:var(--testo-13); line-height:1.2; overflow-wrap:anywhere; }
+.selettore__valore { font-size:var(--testo-15); font-weight:400; line-height:1.2; overflow-wrap:anywhere; }
+.selettore--etichetta-dentro .selettore__valore { font-size:var(--testo-13); }
 .selettore__valore--vuoto { color:var(--color-text-muted); font-style:italic; }
 .selettore__tendina { position:absolute; z-index:30; left:0; top:calc(100% + 2px); width:max(100%, 260px); max-width:min(92vw, 420px); border:1px solid var(--color-border); background:var(--color-bg-secondary); box-shadow:0 8px 24px rgba(0,0,0,0.45); padding:6px; }
 .selettore__campo { width:100%; min-height:44px; margin-bottom:4px; }
@@ -2104,18 +2144,11 @@
 .selettore--in-linea .selettore__tendina { position:static; width:auto; max-width:none; margin-top:2px; box-shadow:none; }
 /* l'elenco aperto allunga la finestra: più basso, perché ci stia intero (a 1366×657 la finestra andava a scorrere insieme all'elenco) */
 @media (min-width: 640px) { .selettore--in-linea .selettore__elenco { max-height:min(30vh, 320px); } }
-/* Il selettore dell'editor sta accanto a campi da 44 px: due comandi affiancati con due misure
-   erano l'ultima misura doppia rimasta. */
-.editor-mappa__campo .selettore__scelta { min-height:44px; }
 
 /* (lotto C) regole che erano fuori da ogni @layer: dentro `components`, così le utility di Tailwind le possono
    sovrascrivere come per tutte le altre componenti */
 @layer components {
-/* Stessa ragione per i campi di testo: i 36 px sono nati per il pannello fitto dell'editor su
-   monitor, ma la classe la usano anche schede che si compilano col tablet in mano (Denaro e
-   squadra), dove un campo alto 36 px si manca e si sbaglia riga. A ogni larghezza, perché un campo
-   basso lo è anche col mouse. */
-.editor-mappa__campo .form-input { min-height:44px; padding:8px 10px; font-size:var(--testo-15); }
+/* (L13) i campi dell'editor non hanno più una misura propria: 44 px a ogni larghezza come ogni `.form-input`, regola unica in «Campi form» */
 
 /* Un chip che **si tocca** è un comando, non un'etichetta: «Sulla mappa» negli Oggetti, «Dove si
    trova» in Attività e Confidenti erano alti 23 px, e con il dito si manca o si apre quello sotto.
@@ -2206,7 +2239,6 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .editor-mappa__contenuto { display:flex; flex-direction:column; gap:12px; min-width:0; }
 .editor-mappa__contenuto[hidden] { display:none; }
 .editor-mappa__aiuto { margin:0; padding:12px; background:#1b1c20; font-size:var(--testo-14); line-height:1.5; color:var(--color-text-secondary); }
-.visore-mappa--editor .editor-mappa__campo .form-input { min-height:44px; font-size:var(--testo-14); }
 .visore-mappa--editor .visore-mappa__pannello { background:#131419; }
 @media (max-width: 860px) { .editor-mappa__sezioni { grid-template-columns:repeat(4,minmax(0,1fr)); } .editor-mappa__sezioni button { font-size:var(--testo-12); padding:4px 2px; } }
 

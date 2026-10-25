@@ -12,6 +12,9 @@ import type { RichiestaDto, RichiesteDto } from '../../types';
 const api = vi.hoisted(() => ({ getRichieste: vi.fn(), getConfidenti: vi.fn(), aggiornaRichiesta: vi.fn(), creaRichiesta: vi.fn(), getCitazioniRichiesta: vi.fn(), eliminaRichiesta: vi.fn() }));
 vi.mock('../../services/api', (vero) => moduloApi(vero, api));
 vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
+// la conferma dell'eliminazione passa da `conferma()` (DialogoConferma in primo piano), non più da un riquadro in fondo al corpo della finestra (L13)
+const { conferma } = vi.hoisted(() => ({ conferma: vi.fn() }));
+vi.mock('../../stores/confermaStore', async (vero) => ({ ...(await vero<typeof import('../../stores/confermaStore')>()), conferma }));
 
 const richiesta: RichiestaDto = {
   chiave: 'bulli', nome: 'Bullismo sui bulli', committente: 'Mishima', disponibileDal: '20 maggio', scadenza: '', area: 'Dedalo di Aiyatsbus', areaChiave: 'aiy', piano: 'Area 3',
@@ -44,16 +47,22 @@ it('si apre coi campi della Richiesta e salva i dati veri: righe in elenchi, num
   const { onChiudi, onCambiata } = monta('bulli');
   expect(await screen.findByRole('dialog', { name: 'Modifica: Bullismo sui bulli' })).toBeInTheDocument();
   expect(campo('Nome')).toHaveValue('Bullismo sui bulli');
-  expect(campo('Debolezze (una per riga)')).toHaveValue('Fuoco\nGhiaccio');
-  expect(campo('Ricompense (una per riga)')).toHaveValue('485 PE\nPozione');
+  // debolezze e resistenze sono tessere con l'icona dell'elemento (accese se la voce nomina l'elemento da solo), le ricompense righe a campo
+  const debolezze = within(screen.getByRole('group', { name: 'Debolezze' }));
+  expect(debolezze.getByRole('button', { name: 'Fuoco' })).toHaveAttribute('aria-pressed', 'true');
+  expect(debolezze.getByRole('button', { name: 'Ghiaccio' })).toHaveAttribute('aria-pressed', 'true');
+  expect(debolezze.getByRole('button', { name: 'Vento' })).toHaveAttribute('aria-pressed', 'false');
+  expect(screen.getByRole('textbox', { name: 'Ricompense: voce 1' })).toHaveValue('485 PE');
+  expect(screen.getByRole('textbox', { name: 'Ricompense: voce 2' })).toHaveValue('Pozione');
   expect(valoreSelettore('Dedalo')).toBe('Dedalo di Aiyatsbus');
   expect(valoreSelettore('Area del dedalo')).toBe('Area 1');
   expect(valoreSelettore('Confidente')).toBe('Ryuji Sakamoto');
   // le aree offerte sono quelle del dedalo scelto, più «da collocare»
   expect(vociSelettore('Area del dedalo')).toEqual(['— da collocare —', 'Area 1', 'Binari']);
   scegliVoce('Area del dedalo', 'Binari');
-  fireEvent.change(campo('Resistenze (una per riga)'), { target: { value: 'Vento\n\n Sacro ' } });
-  fireEvent.change(campo('Livello'), { target: { value: '12' } });
+  // si accende «Sacro» fra le resistenze: il nome canonico si aggiunge in coda, «Vento» resta com'era
+  fireEvent.click(within(screen.getByRole('group', { name: 'Resistenze' })).getByRole('button', { name: 'Sacro' }));
+  fireEvent.change(screen.getByRole('spinbutton', { name: 'Livello' }), { target: { value: '12' } });
   api.aggiornaRichiesta.mockResolvedValue(richiesta);
   fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
   await waitFor(() => expect(api.aggiornaRichiesta).toHaveBeenCalledWith('bulli', {
@@ -73,7 +82,7 @@ it('cambiando dedalo l’area torna «da collocare»; senza dedalo non c’è ar
   scegliVoce('Dedalo', '— nessun dedalo —');
   expect(screen.queryByRole('combobox', { name: 'Area del dedalo' })).toBeNull();
   scegliVoce('Confidente', '— nessuno —');
-  expect(screen.queryByRole('textbox', { name: 'Rango' })).toBeNull();
+  expect(screen.queryByRole('combobox', { name: 'Rango' })).toBeNull();
   api.aggiornaRichiesta.mockResolvedValue(richiesta);
   fireEvent.click(screen.getByRole('button', { name: /^Salva/ }));
   await waitFor(() => expect(api.aggiornaRichiesta).toHaveBeenCalledWith('bulli', expect.objectContaining({ dedalo: null, areaDedalo: null, confidente: null, confidenteRango: null })));
@@ -91,36 +100,47 @@ it('una nuova nasce nel dedalo e nell’area dati; senza nome o bersaglio, o con
   fireEvent.click(screen.getByRole('button', { name: /^Aggiungi/ }));
   await waitFor(() => expect(notifica).toHaveBeenCalledWith('error', 'Il nome del bersaglio è obbligatorio.'));
   fireEvent.change(campo('Bersaglio'), { target: { value: 'Ombra' } });
-  fireEvent.change(campo('Livello'), { target: { value: '200' } });
+  fireEvent.change(screen.getByRole('spinbutton', { name: 'Livello' }), { target: { value: '200' } });
   fireEvent.click(screen.getByRole('button', { name: /^Aggiungi/ }));
   await waitFor(() => expect(notifica).toHaveBeenCalledWith('error', 'Livello del bersaglio: un numero intero da 1 a 99 (vuoto = nessuno).'));
   expect(api.creaRichiesta).not.toHaveBeenCalled();
-  fireEvent.change(campo('Livello'), { target: { value: '' } });
+  fireEvent.change(screen.getByRole('spinbutton', { name: 'Livello' }), { target: { value: '' } });
   api.creaRichiesta.mockResolvedValue({ ...richiesta, chiave: 'il-cartello', nome: 'Il cartello' });
   fireEvent.click(screen.getByRole('button', { name: /^Aggiungi/ }));
   await waitFor(() => expect(api.creaRichiesta).toHaveBeenCalledWith(expect.objectContaining({ nome: 'Il cartello', dedalo: 'aiy', areaDedalo: 'aiy-2', bersaglio: expect.objectContaining({ nome: 'Ombra', livello: null }), confidente: null })));
   await waitFor(() => expect(onChiudi).toHaveBeenCalled());
 });
 
-it('«Elimina» dice prima chi la cita, e solo «Confermo» la elimina', async () => {
+it('«Elimina» dice prima chi la cita nella domanda di conferma, e solo dopo il «sì» la elimina', async () => {
   const { onCambiata } = monta('bulli');
   await screen.findByRole('dialog');
   api.getCitazioniRichiesta.mockResolvedValue({ partite: 2, pin: ['Cartello'], condizioni: ['Libro: Il Principe'], requisiti: ['Futaba Sakura, rango 7'], azioni: 1 });
+  // risposta «no» alla domanda: non si elimina niente
+  conferma.mockResolvedValueOnce(false);
   fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
-  const conferma = await screen.findByRole('region', { name: 'Conferma dell’eliminazione' });
-  expect(conferma).toHaveTextContent('Lo stato segnato in 2 partite se ne va con lei.');
-  expect(conferma).toHaveTextContent('il pin: Cartello (restano sulla mappa)');
-  expect(conferma).toHaveTextContent('Perdono il collegamento 1 azione della giornata (restano, col loro testo).');
-  expect(conferma).toHaveTextContent('Restano, da correggere, le condizioni di: Libro: Il Principe.');
-  expect(conferma).toHaveTextContent('Restano, da correggere, i requisiti dei Confidenti: Futaba Sakura, rango 7.');
-  // «No» torna indietro senza eliminare
-  fireEvent.click(within(conferma).getByRole('button', { name: 'No' }));
+  await waitFor(() => expect(conferma).toHaveBeenCalledTimes(1));
+  const domanda = conferma.mock.calls[0][0] as { titolo: string; testo: string };
+  expect(domanda.titolo).toBe('Eliminare «Bullismo sui bulli» per tutte le partite?');
+  expect(domanda.testo).toContain('Lo stato segnato in 2 partite se ne va con lei.');
+  expect(domanda.testo).toContain('il pin: Cartello (restano sulla mappa)');
+  expect(domanda.testo).toContain('Perdono il collegamento 1 azione della giornata (restano, col loro testo).');
+  expect(domanda.testo).toContain('Restano, da correggere, le condizioni di: Libro: Il Principe.');
+  expect(domanda.testo).toContain('Restano, da correggere, i requisiti dei Confidenti: Futaba Sakura, rango 7.');
   expect(api.eliminaRichiesta).not.toHaveBeenCalled();
-  fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
+  // risposta «sì»: elimina
+  conferma.mockResolvedValueOnce(true);
   api.eliminaRichiesta.mockResolvedValue(undefined);
-  fireEvent.click(within(await screen.findByRole('region', { name: 'Conferma dell’eliminazione' })).getByRole('button', { name: 'Confermo' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
   await waitFor(() => expect(api.eliminaRichiesta).toHaveBeenCalledWith('bulli'));
   await waitFor(() => expect(onCambiata).toHaveBeenCalled());
+});
+
+it('i comandi stanno nel piè fisso della finestra, non nel corpo che scorre', async () => {
+  monta('bulli');
+  const finestra = await screen.findByRole('dialog');
+  const piede = finestra.querySelector('.modal-footer') as HTMLElement;
+  for (const nome of ['Elimina', 'Annulla', 'Salva']) expect(within(piede).getByRole('button', { name: nome })).toBeInTheDocument();
+  expect(within(finestra.querySelector('.modal-body') as HTMLElement).queryByRole('button', { name: 'Salva' })).toBeNull();
 });
 
 it('una Richiesta che non c’è più lo dice', async () => {

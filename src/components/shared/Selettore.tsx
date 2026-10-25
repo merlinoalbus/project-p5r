@@ -41,6 +41,10 @@ export interface PropsSelettore {
    *  Dal lotto accessibilità vale già per ogni selettore `compatto` (l'etichetta non è visibile, il testo visibile è il valore: 2.5.3);
    *  per gli altri, che mostrano l'etichetta sopra il valore, il valore è nella descrizione accessibile. */
   valoreNelNome?: boolean;
+  /** L13 (modelli comuni, 1): per i selettori non compatti l'etichetta sta SOPRA il pulsante, come in ogni campo dell'app (`Campo`).
+   *  Con `etichettaDentro` torna la forma vecchia (maiuscoletto sopra il valore, dentro il pulsante), per i comandi fitti — barre di filtri,
+   *  righe di tabella — dove una riga in più romperebbe la barra. Il compatto non ha mai l'etichetta visibile e ignora la prop. */
+  etichettaDentro?: boolean;
   className?: string;
 }
 
@@ -50,7 +54,7 @@ export interface PropsSelettore {
  * voci (con l'invito a restringere se ce ne sono di più), filtra senza accenti su nome, dettaglio e gruppo, e si
  * chiude scegliendo, con Esc o toccando fuori.
  */
-export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, segnaposto = 'Scegli…', vuoto, ricerca = 'auto', compatto, valoreNelNome, className }: PropsSelettore) {
+export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, segnaposto = 'Scegli…', vuoto, ricerca = 'auto', compatto, valoreNelNome, etichettaDentro, className }: PropsSelettore) {
   const [aperto, setAperto] = useState(false);
   const [testo, setTesto] = useState('');
   const [evidenziata, setEvidenziata] = useState(0);
@@ -166,9 +170,11 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
   };
 
   return (
-    <div ref={radice} onBlur={perdeFuoco} className={`selettore ${compatto ? 'selettore--compatto' : ''} ${className ?? ''}`}>
+    <div ref={radice} onBlur={perdeFuoco} className={`selettore ${compatto ? 'selettore--compatto' : etichettaDentro ? 'selettore--etichetta-dentro' : 'selettore--con-etichetta'} ${className ?? ''}`}>
+      {/* etichetta sopra il pulsante (stile unico dei campi); il nome accessibile lo dà già `aria-label` del pulsante */}
+      {!compatto && !etichettaDentro && <span className="campo__etichetta" aria-hidden="true">{etichetta}</span>}
       <button ref={pulsante} type="button" role="combobox" className="selettore__scelta touch" aria-haspopup="listbox" aria-expanded={aperto} aria-controls={id} aria-activedescendant={aperto && !conRicerca && attiva >= 0 ? idVoce(attiva) : undefined} aria-label={nomeConValore ? `${etichetta}: ${scelta ? scelta.nome : segnaposto}` : etichetta} aria-describedby={nomeConValore ? undefined : idValore} disabled={disabilitato} onClick={() => (aperto ? setAperto(false) : apri())} onKeyDown={tastieraPulsante} onKeyUp={rilascioPulsante} title={scelta ? scelta.nome : segnaposto}>
-        {!compatto && <span className="selettore__etichetta">{etichetta}</span>}
+        {!compatto && etichettaDentro && <span className="selettore__etichetta">{etichetta}</span>}
         <span id={idValore} className={`selettore__valore ${scelta ? '' : 'selettore__valore--vuoto'}`}>{scelta ? scelta.nome : segnaposto}</span>
         <span className="selettore__freccia" aria-hidden="true">▾</span>
       </button>

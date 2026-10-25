@@ -75,7 +75,7 @@ export function EseguiForcaModal({ partitaId, ricevente, sacrificio, stima, alla
         {!incidente && (
           <>
             <label className="form-label">Livello raggiunto da {ricevente.nomeIt}
-              <input type="number" min={ricevente.livello} max={99} className="form-input mt-1" value={nuovoLivello} onChange={(e) => setNuovoLivello(Math.min(99, Math.max(ricevente.livello, Number(e.target.value) || ricevente.livello)))} aria-label="Livello raggiunto" />
+              <input type="number" min={ricevente.livello} max={99} className="form-input" value={nuovoLivello} onChange={(e) => setNuovoLivello(Math.min(99, Math.max(ricevente.livello, Number(e.target.value) || ricevente.livello)))} aria-label="Livello raggiunto" />
               <span className="block testo-12 text-text-muted mt-1">Ogni livello vale +3 punti statistica (ripartizione casuale): se vuoi registrarla, indica i punti qui sotto.</span>
             </label>
             <div>

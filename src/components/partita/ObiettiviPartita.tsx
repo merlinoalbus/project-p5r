@@ -206,7 +206,7 @@ export function ObiettivoModal({ partitaId, obiettivo, personaIniziale, onChiudi
         {!obiettivo && !personaIniziale && (
           <div className="flex flex-col gap-2">
             <label className="form-label">Persona
-              <input className="form-input mt-1" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cerca per nome o arcano…" aria-label="Cerca la Persona" />
+              <input className="form-input" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cerca per nome o arcano…" aria-label="Cerca la Persona" />
             </label>
             {sceltaNome && <div className="testo-13">Scelta: <strong>{sceltaNome}</strong></div>}
             {persone.dati && (
@@ -224,14 +224,14 @@ export function ObiettivoModal({ partitaId, obiettivo, personaIniziale, onChiudi
         {tutteSkill.dati ? <SelettoreSkill skill={tutteSkill.dati} scelte={skill} onCambia={setSkill} massimo={8} etichetta="Skill desiderate (facoltative)" /> : <Spinner size={18} />}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <label className="form-label">Livello minimo (facoltativo)
-            <input type="number" min={1} max={99} className="form-input mt-1" value={livelloMin} onChange={(e) => setLivelloMin(e.target.value === '' ? '' : Math.min(99, Math.max(1, Number(e.target.value))))} aria-label="Livello minimo" />
+            <input type="number" min={1} max={99} className="form-input" value={livelloMin} onChange={(e) => setLivelloMin(e.target.value === '' ? '' : Math.min(99, Math.max(1, Number(e.target.value))))} aria-label="Livello minimo" />
           </label>
           <div className="form-label">
             <Selettore etichetta="Priorità" valore={String(priorita)} opzioni={PRIORITA.map((p) => ({ chiave: String(p.v), nome: p.l }))} onCambia={(k) => setPriorita(Number(k))} />
           </div>
         </div>
         <label className="form-label">Note
-          <textarea className="form-input mt-1 min-h-[70px]" value={note} onChange={(e) => setNote(e.target.value)} maxLength={2000} />
+          <textarea className="form-input min-h-[70px]" value={note} onChange={(e) => setNote(e.target.value)} maxLength={2000} />
         </label>
         <div className="flex justify-end gap-2">
           <button type="button" className="btn btn-secondary" onClick={onChiudi}>Annulla</button>

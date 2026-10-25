@@ -22,6 +22,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { notifica } from '../../stores/notificationStore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { CampoTesto } from '../shared/Campo';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { NienteInRilascio } from '../shared/SoloPreparazione';
 
@@ -36,16 +37,10 @@ interface PropsCampo {
   massimo?: number;
 }
 
-/** Un campo del modulo di correzione: la stessa forma per titoli, date e prose. */
+/** Un campo del modulo di correzione: la stessa forma per titoli, date e prose. Dal L13 è il `CampoTesto` condiviso (etichetta sopra, 44 px,
+ *  il testo lungo si allunga da sé); in una riga di campi (`flex-wrap`) occupa almeno 180 px e si divide lo spazio con gli altri. */
 export function CampoCorrezione({ etichetta, valore, onCambia, multilinea, massimo = 400 }: PropsCampo) {
-  return (
-    <label className="flex min-w-[180px] flex-1 flex-col gap-1 testo-12">
-      {etichetta}
-      {multilinea
-        ? <textarea className="form-input min-h-[70px]" value={valore} maxLength={massimo} onChange={(e) => onCambia(e.target.value)} />
-        : <input className="form-input" value={valore} maxLength={massimo} onChange={(e) => onCambia(e.target.value)} />}
-    </label>
-  );
+  return <CampoTesto className="min-w-[180px] flex-1" etichetta={etichetta} valore={valore} onCambia={onCambia} tipo={multilinea ? 'lungo' : 'testo'} righe={3} massimo={massimo} />;
 }
 
 interface Props<T extends Record<string, string>> {

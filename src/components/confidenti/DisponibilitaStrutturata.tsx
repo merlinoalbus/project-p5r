@@ -10,6 +10,9 @@
 import { useState } from 'react';
 import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
+import { SelettoreData } from '../shared/SelettoreData';
+import { Campo, CampoTesto } from '../shared/Campo';
+import { FinestraModifica } from '../shared/FinestraModifica';
 import { useCarica } from '../../hooks/useCarica';
 import { getDisponibilitaStrutturata, getLuoghi, ripristinaDisponibilitaStrutturata, salvaDisponibilitaStrutturata } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
@@ -88,16 +91,20 @@ export const EditorDisponibilitaStrutturata: StrumentoDiModifica<typeof EditorDi
 function EditorDisponibilitaStrutturataReale({ chiave, nome, onChiudi, onSalvato }: { chiave: string; nome: string; onChiudi: () => void; onSalvato: () => void | Promise<void> }) {
   const d = useCarica(() => getDisponibilitaStrutturata(chiave), [chiave]);
   const tuttiILuoghi = useCarica(() => getLuoghi(), []);
-  return (
-    <Modal titolo={`Disponibilità di ${nome}`} aperta onChiudi={onChiudi} larga>
-      {d.errore && <p role="alert" className="m-0 text-error-testo">{d.errore}</p>}
-      {!d.dati && !d.errore && <p role="status" className="m-0">Un attimo…</p>}
-      {d.dati && <Corpo dati={d.dati} tutti={tuttiILuoghi.dati ?? []} chiave={chiave} onChiudi={onChiudi} onSalvato={onSalvato} />}
-    </Modal>
-  );
+  const titolo = `Disponibilità di ${nome}`;
+  // finché la struttura non c'è (o è in errore) la finestra è un guscio semplice; poi la `FinestraModifica` con il piè fisso (L13)
+  if (!d.dati) {
+    return (
+      <Modal titolo={titolo} aperta onChiudi={onChiudi} larga>
+        {d.errore && <p role="alert" className="m-0 text-error-testo">{d.errore}</p>}
+        {!d.errore && <p role="status" className="m-0">Un attimo…</p>}
+      </Modal>
+    );
+  }
+  return <Corpo titolo={titolo} dati={d.dati} tutti={tuttiILuoghi.dati ?? []} chiave={chiave} onChiudi={onChiudi} onSalvato={onSalvato} />;
 }
 
-function Corpo({ dati, tutti, chiave, onChiudi, onSalvato }: { dati: DisponibilitaConfidenteDto; tutti: Array<{ chiave: string; nome: string; quartiereNome: string }>; chiave: string; onChiudi: () => void; onSalvato: () => void | Promise<void> }) {
+function Corpo({ titolo, dati, tutti, chiave, onChiudi, onSalvato }: { titolo: string; dati: DisponibilitaConfidenteDto; tutti: Array<{ chiave: string; nome: string; quartiereNome: string }>; chiave: string; onChiudi: () => void; onSalvato: () => void | Promise<void> }) {
   const partenza = dati.struttura;
   const [modo, setModo] = useState<ModoDisponibilita>(partenza.modo);
   const [giorni, setGiorni] = useState<GiornoDisponibilita[]>(partenza.giorni);
@@ -126,6 +133,8 @@ function Corpo({ dati, tutti, chiave, onChiudi, onSalvato }: { dati: Disponibili
   const luoghiAggiungibili = tutti.filter((l) => !luoghi.includes(l.chiave)).map((l) => ({ chiave: l.chiave, nome: l.nome, dettaglio: l.quartiereNome }));
 
   return (
+    <FinestraModifica titolo={titolo} onChiudi={onChiudi} onSalva={salva} salvabile={sporca && dalValido} occupato={occupato} sporca={sporca}
+      azioniExtra={dati.modificata ? <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina la struttura" disabled={occupato} onClick={() => void esegui(() => ripristinaDisponibilitaStrutturata(chiave), 'Struttura ripristinata come nella fonte.')} /> : undefined}>
     <div className="flex flex-col gap-3 testo-13">
       <Selettore etichetta="Come si incontra" valore={modo} opzioni={MODI_DISPONIBILITA.map((m) => ({ chiave: m, nome: NOME_MODO[m] }))} onCambia={(v) => setModo(v as ModoDisponibilita)} disabilitato={occupato} />
       {modo === 'settimanale' && (
@@ -138,10 +147,10 @@ function Corpo({ dati, tutti, chiave, onChiudi, onSalvato }: { dati: Disponibili
           </fieldset>
         </>
       )}
-      <label className="flex flex-col gap-1">Disponibile dal (MM-GG, facoltativo)
-        <input className="form-input" value={dal} maxLength={5} placeholder="05-18" disabled={occupato} onChange={(e) => setDal(e.target.value)} aria-invalid={!dalValido} />
-        {!dalValido && <span className="text-error-testo">Scrivi mese e giorno come 05-18.</span>}
-      </label>
+      {/* L13: la data si sceglie (mese e giorno del calendario di gioco), non si digita; si salva sempre come «MM-GG», o niente */}
+      <Campo etichetta="Disponibile dal" aiuto="Facoltativa: «nessuna» = disponibile fin dall’inizio." errore={dalValido ? undefined : 'La data salvata non è un giorno del calendario di gioco: sceglila di nuovo (o «nessuna»).'}>
+        <SelettoreData etichetta="Disponibile dal" facoltativa valore={dal} onCambia={setDal} disabilitato={occupato} />
+      </Campo>
       <fieldset className="m-0 flex flex-col gap-2 border-0 p-0"><legend className="p-0 text-text-secondary">Eccezioni</legend>
         {eccezioni.length === 0 && <span className="text-text-muted">Nessuna eccezione.</span>}
         {eccezioni.map((e, i) => (
@@ -170,15 +179,9 @@ function Corpo({ dati, tutti, chiave, onChiudi, onSalvato }: { dati: Disponibili
         <Selettore etichetta="Aggiungi un luogo" valore="" vuoto="Scegli un luogo" opzioni={luoghiAggiungibili} onCambia={(k) => { if (k) setLuoghi((l) => (l.includes(k) ? l : [...l, k])); }} disabilitato={occupato || luoghiAggiungibili.length === 0} />
       </fieldset>
       {luoghi.length === 0 && (
-        <label className="flex flex-col gap-1">Perché non ha un luogo
-          <input className="form-input" value={motivo} maxLength={500} disabled={occupato} onChange={(e) => setMotivo(e.target.value)} />
-        </label>
+        <CampoTesto etichetta="Perché non ha un luogo" valore={motivo} massimo={500} disabilitato={occupato} onCambia={setMotivo} />
       )}
-      <div className="flex flex-wrap justify-end gap-2">
-        {dati.modificata && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina la struttura" disabled={occupato} onClick={() => void esegui(() => ripristinaDisponibilitaStrutturata(chiave), 'Struttura ripristinata come nella fonte.')} />}
-        <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={onChiudi}>Annulla</button>
-        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" disabled={occupato || !sporca || !dalValido} onClick={() => void salva()} />
-      </div>
     </div>
+    </FinestraModifica>
   );
 }

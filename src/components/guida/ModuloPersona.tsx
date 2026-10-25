@@ -18,10 +18,10 @@ import { notifica } from '../../stores/notificationStore';
 import { LIMITI_GUIDA } from '../../../shared/limitiGuida';
 import { Modal } from '../shared/Modal';
 import { PageState } from '../shared/PageState';
-import { Selettore } from '../shared/Selettore';
-import { PulsanteVisivo } from '../shared/PulsanteVisivo';
-import { IconaAzione } from '../shared/IconaAzione';
-import { CampoCorrezione } from './CorrezioneGuida';
+import { CampoTesto, SezioneCampi } from '../shared/Campo';
+import { FinestraModifica } from '../shared/FinestraModifica';
+import { SceltaDaCatalogo } from '../shared/SceltaDaCatalogo';
+import { conferma } from '../../stores/confermaStore';
 import { NEL_CESTINO } from '../../utils/cestino';
 import type { PersonaRiassuntoDto, PuntoInteresseDto } from '../../types';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
@@ -50,23 +50,28 @@ function ModuloPersonaReale(props: Props) {
   const { voce, aree, areaIniziale, onChiudi } = props;
   const persone = useCarica(() => getPersone(), []);
   const nomeArea = aree.find((a) => a.chiave === areaIniziale)?.nome ?? 'quest’area';
-  return (
-    <Modal titolo={voce ? `Modifica: ${voce.persona?.nomeIt ?? voce.nome}` : `Aggiungi una Persona in ${nomeArea}`} aperta onChiudi={onChiudi}>
-      <PageState isLoading={persone.caricamento && !persone.dati} error={persone.errore} onRetry={() => void persone.ricarica()}>
-        {persone.dati && <Campi {...props} persone={persone.dati} />}
-      </PageState>
-    </Modal>
-  );
+  const titolo = voce ? `Modifica: ${voce.persona?.nomeIt ?? voce.nome}` : `Aggiungi una Persona in ${nomeArea}`;
+  // finché il compendio non c'è (o è in errore) la finestra è un guscio semplice con il suo stato; poi la `FinestraModifica` con il piè fisso
+  if (!persone.dati) {
+    return (
+      <Modal titolo={titolo} aperta onChiudi={onChiudi}>
+        <PageState isLoading={persone.caricamento} error={persone.errore} onRetry={() => void persone.ricarica()}>{null}</PageState>
+      </Modal>
+    );
+  }
+  return <Campi {...props} titolo={titolo} persone={persone.dati} />;
 }
 
 /** I campi (Persona, nome dell'Ombra, aree, descrizione), «Salva», «Annulla» e, per una voce che c'è, «Elimina» con conferma. */
-function Campi({ voce, dedalo, areaIniziale, aree, persone, onChiudi, onCambiata }: Props & { persone: PersonaRiassuntoDto[] }) {
+function Campi({ titolo, voce, dedalo, areaIniziale, aree, persone, onChiudi, onCambiata }: Props & { titolo: string; persone: PersonaRiassuntoDto[] }) {
   const [persona, setPersona] = useState(voce?.persona ? String(voce.persona.id) : '');
   const [nome, setNome] = useState(voce?.nome ?? '');
   const [descrizione, setDescrizione] = useState(voce?.descrizione ?? '');
   const [scelteAree, setScelteAree] = useState<ReadonlySet<string>>(() => new Set(voce ? voce.areeDedalo : [areaIniziale]));
   const [occupato, setOccupato] = useState(false);
-  const [conferma, setConferma] = useState(false);
+  // i valori di partenza sono il metro per sapere se c'è qualcosa di non salvato (chiudere con modifiche chiede conferma)
+  const [partenza] = useState(() => ({ persona, nome, descrizione, aree: [...scelteAree].sort().join('|') }));
+  const sporca = persona !== partenza.persona || nome !== partenza.nome || descrizione !== partenza.descrizione || [...scelteAree].sort().join('|') !== partenza.aree;
   const scelta = persone.find((p) => String(p.id) === persona) ?? null;
   const cambiaPersona = voce !== null && persona !== '' && persona !== String(voce.persona?.id ?? '');
   /** Le aree scelte, nell'ordine del dedalo. */
@@ -94,9 +99,10 @@ function Campi({ voce, dedalo, areaIniziale, aree, persone, onChiudi, onCambiata
     } catch (err) { notifica('error', err instanceof Error ? err.message : 'Persona non salvata.'); }
     finally { setOccupato(false); }
   };
-  /** Elimina la voce per tutte le partite, dopo la conferma. */
+  /** Elimina la voce per tutte le partite, dopo la conferma (la domanda in primo piano, mai un riquadro in fondo al corpo che scorre). */
   const elimina = async () => {
     if (!voce) return;
+    if (!(await conferma({ titolo: `Eliminare «${voce.persona?.nomeIt ?? voce.nome}»?`, testo: `Se ne va dalla guida, da tutte le aree del dedalo e per tutte le partite. Il compendio delle partite non cambia. ${NEL_CESTINO}`, etichetta: 'Elimina' }))) return;
     setOccupato(true);
     try { await eliminaPunto(voce.chiave); notifica('success', `Persona «${voce.persona?.nomeIt ?? voce.nome}» eliminata.`); await onCambiata(); onChiudi(); }
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Eliminazione non riuscita.'); }
@@ -104,40 +110,29 @@ function Campi({ voce, dedalo, areaIniziale, aree, persone, onChiudi, onCambiata
   };
 
   return (
-    <form className="flex flex-col gap-3 testo-13" onSubmit={(e) => { e.preventDefault(); void salva(); }}>
-      {/* in linea: in cima a una finestra breve la tendina sovrapposta restava tagliata dal corpo scorrevole */}
-      <Selettore className="selettore--in-linea" etichetta="Persona del compendio" valore={persona} vuoto="— scegli —" ricerca="sempre"
-        opzioni={persone.map((p) => ({ chiave: String(p.id), nome: p.nomeIt, dettaglio: `${p.arcanaNome} · liv. ${p.livello}` }))} onCambia={setPersona} />
-      {cambiaPersona && voce && Object.keys(voce.dettagli).some((k) => k !== 'maschera') && (
-        <p className="m-0 testo-12 text-warning" role="status">Con un’altra Persona le resistenze, le debolezze e la personalità dell’Ombra di prima se ne vanno: erano della maschera di prima.</p>
-      )}
-      <CampoCorrezione etichetta="Nome dell’Ombra (vuoto = quello della Persona)" valore={nome} massimo={LIMITI_GUIDA.punto.nome} onCambia={setNome} />
-      <fieldset className="m-0 flex flex-col gap-1 border-0 p-0">
-        <legend className="mb-1 testo-12">Aree in cui si incontra · {areeScelte.length} di {aree.length}</legend>
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-x-2">
+    <FinestraModifica titolo={titolo} stretta nomeModulo={voce ? `Correggi la Persona «${voce.persona?.nomeIt ?? voce.nome}»` : 'Nuova Persona'} onChiudi={onChiudi} onSalva={salva}
+      titoloSalva={voce ? 'Salva' : 'Aggiungi'} salvabile={!!scelta && areeScelte.length > 0} occupato={occupato} sporca={sporca} onElimina={voce ? () => void elimina() : undefined}>
+      <SezioneCampi titolo="La Persona">
+        {/* in linea: in cima a una finestra breve la tendina sovrapposta restava tagliata dal corpo scorrevole */}
+        <div className="campo--largo">
+          <SceltaDaCatalogo tipo="persona" inLinea valore={persona} vuoto="— scegli —" persone={persone} disabilitato={occupato} onCambia={setPersona} />
+        </div>
+        {cambiaPersona && voce && Object.keys(voce.dettagli).some((k) => k !== 'maschera') && (
+          <p className="campo--largo m-0 testo-12 text-warning" role="status">Con un’altra Persona le resistenze, le debolezze e la personalità dell’Ombra di prima se ne vanno: erano della maschera di prima.</p>
+        )}
+        <CampoTesto etichetta="Nome dell’Ombra" aiuto="Vuoto = quello della Persona." valore={nome} massimo={LIMITI_GUIDA.punto.nome} onCambia={setNome} disabilitato={occupato} largo />
+      </SezioneCampi>
+      <fieldset className="finestra-sezione">
+        <legend className="finestra-sezione__titolo">Aree in cui si incontra · {areeScelte.length} di {aree.length}</legend>
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-x-2">
           {aree.map((a) => (
-            <label key={a.chiave} className="touch flex items-center gap-1.5 testo-12">
-              <input type="checkbox" className="h-5 w-5" checked={scelteAree.has(a.chiave)} onChange={() => alternaArea(a.chiave)} />{a.nome}
+            <label key={a.chiave} className="touch flex items-center gap-2 testo-13">
+              <input type="checkbox" className="h-5 w-5" checked={scelteAree.has(a.chiave)} disabled={occupato} onChange={() => alternaArea(a.chiave)} />{a.nome}
             </label>
           ))}
         </div>
       </fieldset>
-      <CampoCorrezione etichetta="Descrizione" valore={descrizione} multilinea massimo={LIMITI_GUIDA.punto.descrizione} onCambia={setDescrizione} />
-      <div className="flex flex-wrap items-center gap-1.5">
-        <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={voce ? 'Salva' : 'Aggiungi'} disabled={occupato || !scelta || areeScelte.length === 0} />
-        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" disabled={occupato} onClick={onChiudi} />
-        <span className="flex-1" />
-        {voce && !conferma && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" disabled={occupato} onClick={() => setConferma(true)} />}
-      </div>
-      {voce && conferma && (
-        <section className="flex flex-col gap-1.5 rounded-md border border-primary/40 px-2.5 py-2 testo-12" aria-label="Conferma: eliminare la Persona">
-          <span>Se ne va dalla guida, da tutte le aree del dedalo e per tutte le partite. Il compendio delle partite non cambia. {NEL_CESTINO}</span>
-          <div className="flex flex-wrap gap-1.5">
-            <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Confermo" disabled={occupato} onClick={() => void elimina()} />
-            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="No" disabled={occupato} onClick={() => setConferma(false)} />
-          </div>
-        </section>
-      )}
-    </form>
+      <CampoTesto etichetta="Descrizione" tipo="lungo" righe={3} valore={descrizione} massimo={LIMITI_GUIDA.punto.descrizione} onCambia={setDescrizione} disabilitato={occupato} />
+    </FinestraModifica>
   );
 }

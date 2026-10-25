@@ -9,7 +9,7 @@
 // ============================================================
 
 import { useState } from 'react';
-import { GIORNI_NEL_MESE, MESI_GIOCO, dataLeggibile, dataValida, type Condizione } from '../../../shared/condizioniSpillo';
+import { dataLeggibile, dataValida, type Condizione } from '../../../shared/condizioniSpillo';
 import { creaInvitoConfidente, getAreeCitta, getLuoghi, getQuartieri, modificaInvitoConfidente, ripristinaInvitoConfidente } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
@@ -18,6 +18,8 @@ import type { InvitoDto } from '../../types';
 import { CondizioniEditor } from '../guida/CondizioniEditor';
 import { Modal } from '../shared/Modal';
 import { Selettore, type OpzioneSelettore } from '../shared/Selettore';
+import { SelettoreData } from '../shared/SelettoreData';
+import { Campo, CampoTesto } from '../shared/Campo';
 import { conferma, CHIUDI_SENZA_SALVARE } from '../../stores/confermaStore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -47,24 +49,23 @@ function usePostiInvito() {
 export const EditorInvito: StrumentoDiModifica<typeof EditorInvitoReale> = IN_RILASCIO ? NienteInRilascio : EditorInvitoReale;
 function EditorInvitoReale({ confidente, invito, onChiudi, onSalvato }: { confidente: { chiave: string; nome: string }; invito: InvitoDto | null; onChiudi: () => void; onSalvato: () => void | Promise<void> }) {
   const posti = usePostiInvito();
-  const [mese, setMese] = useState('');
-  const [giorno, setGiorno] = useState('');
+  // il giorno di un invito nuovo ('MM-GG'; '' finché non è scelto): lo dà `SelettoreData`, lo stesso di ogni data di gioco dell'app
+  const [dataNuova, setDataNuova] = useState('');
   const [tipo, setTipo] = useState<TipoPosto>(invito?.apre.tipo ?? 'quartiere');
   const [posto, setPosto] = useState(invito?.apre.chiave ?? '');
   const [condizioni, setCondizioni] = useState<Condizione[]>(invito?.condizioni ?? []);
   const [nota, setNota] = useState(invito?.nota ?? '');
   const [occupato, setOccupato] = useState(false);
-  const data = invito?.data ?? (mese && giorno ? `${mese}-${giorno.padStart(2, '0')}` : '');
+  const data = invito?.data ?? dataNuova;
   const dataOk = data !== '' && dataValida(data);
   const sporca = invito
     ? tipo !== invito.apre.tipo || posto !== invito.apre.chiave || nota !== invito.nota || JSON.stringify(condizioni) !== JSON.stringify(invito.condizioni)
-    : mese !== '' || giorno !== '' || posto !== '' || nota !== '' || condizioni.length > 0;
+    : dataNuova !== '' || posto !== '' || nota !== '' || condizioni.length > 0;
   useBozzaSporca(`invito:${confidente.chiave}:${invito?.data ?? 'nuovo'}`, `l’invito di ${confidente.nome}`, sporca);
 
   // Il posto di un invito della guida che non sta negli elenchi (per esempio un'Area fuori dalla città) resta scelto, col suo nome.
   const elenco = posti.dati?.[tipo] ?? [];
   const opzioni = invito && invito.apre.tipo === tipo && !elenco.some((o) => o.chiave === invito.apre.chiave) ? [{ chiave: invito.apre.chiave, nome: invito.apre.nome }, ...elenco] : elenco;
-  const giorniDelMese = mese ? Array.from({ length: GIORNI_NEL_MESE[mese] ?? 31 }, (_, i) => String(i + 1)) : [];
 
   const chiudi = async () => {
     if (occupato) return;
@@ -94,19 +95,16 @@ function EditorInvitoReale({ confidente, invito, onChiudi, onSalvato }: { confid
         <p className="m-0 text-text-muted">Le modifiche valgono per tutte le partite. L’invito si registra solo se le condizioni sono vere.</p>
         {posti.errore && <p role="alert" className="m-0 text-error-testo">{posti.errore} <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void posti.ricarica()} /></p>}
         {invito ? <p className="m-0"><strong className="text-text">Giorno:</strong> {invito.data ? dataLeggibile(invito.data) : '—'} <span className="text-text-muted">(il giorno non si cambia)</span></p> : (
-          <div className="flex flex-wrap gap-3">
-            <Selettore etichetta="Mese" valore={mese} vuoto="Scegli il mese" opzioni={MESI_GIOCO.map((m) => ({ chiave: m.numero, nome: m.nome }))} onCambia={(v) => { setMese(v); if (v && Number(giorno) > (GIORNI_NEL_MESE[v] ?? 31)) setGiorno(''); }} disabilitato={occupato} ricerca="mai" />
-            <Selettore etichetta="Giorno" valore={giorno} vuoto="Scegli il giorno" opzioni={giorniDelMese.map((g) => ({ chiave: g, nome: g }))} onCambia={setGiorno} disabilitato={occupato || mese === ''} ricerca="mai" />
-          </div>
+          <Campo etichetta="Giorno dell’invito" aiuto="Mese e giorno del calendario di gioco: dopo la creazione non si cambia." obbligatorio>
+            <SelettoreData etichetta="Giorno dell’invito" valore={dataNuova} onCambia={setDataNuova} disabilitato={occupato} />
+          </Campo>
         )}
         <Selettore etichetta="Che cosa apre" valore={tipo} opzioni={TIPI.map((t) => ({ chiave: t, nome: NOME_TIPO[t] }))} onCambia={(v) => { setTipo(v as TipoPosto); setPosto(''); }} disabilitato={occupato} ricerca="mai" />
         <Selettore etichetta="Posto" valore={posto} vuoto="Scegli il posto" opzioni={opzioni} onCambia={setPosto} disabilitato={occupato || (!posti.dati && !posti.errore)} />
         <fieldset className="m-0 flex flex-col gap-1 border-0 p-0"><legend className="p-0 text-text-secondary">Condizioni (vuote = sempre)</legend>
           <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} disabilitato={occupato} massimo={20} />
         </fieldset>
-        <label className="flex flex-col gap-1">Nota
-          <textarea className="form-input" rows={2} value={nota} maxLength={500} disabled={occupato} onChange={(e) => setNota(e.target.value)} />
-        </label>
+        <CampoTesto etichetta="Nota" tipo="lungo" valore={nota} massimo={500} disabilitato={occupato} onCambia={setNota} />
       </div>
     </Modal>
   );

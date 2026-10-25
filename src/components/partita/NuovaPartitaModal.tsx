@@ -53,7 +53,7 @@ export function NuovaPartitaModal({ aperta, onChiudi }: Props) {
       }
     >
       <label className="form-label">Nome
-        <input className="form-input mt-1" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="es. Prima partita" autoFocus maxLength={80} />
+        <input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="es. Prima partita" autoFocus maxLength={80} />
       </label>
       <div className="form-label">
         <Selettore etichetta="Difficoltà" valore={difficolta} opzioni={[{ chiave: 'sicura', nome: 'Sicura' }, { chiave: 'facile', nome: 'Facile' }, { chiave: 'normale', nome: 'Normale' }, { chiave: 'difficile', nome: 'Difficile' }, { chiave: 'spietata', nome: 'Spietata' }]} onCambia={(k) => setDifficolta(k as Difficolta)} />

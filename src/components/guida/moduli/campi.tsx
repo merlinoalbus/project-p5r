@@ -1,11 +1,17 @@
 // ============================================================
 // campi — i campi elementari dei moduli: testo, numero, testo lungo; la griglia; il blocco senza label
 // ============================================================
+//
+// L13 (modelli comuni 1 e 5): `Campo` è un involucro sottile sul `CampoTesto` condiviso (etichetta sopra, 44 px, aiuto sotto), `Griglia`
+// è la griglia unica delle finestre di modifica (una colonna sotto 768 px, due da lì in su: `.griglia-campi`) e `Blocco` un campo che
+// porta da sé il proprio nome. I dati salvati non cambiano: il modulo scambia con `dati`/`imposta` come prima.
+// ============================================================
 
 import type { ReactNode } from 'react';
 import { testoDi, type Dati } from './base';
 import { PulsanteVisivo } from '../../shared/PulsanteVisivo';
 import { IconaAzione } from '../../shared/IconaAzione';
+import { CampoTesto } from '../../shared/Campo';
 
 interface PropsCampo {
   nome: string;
@@ -21,25 +27,17 @@ interface PropsCampo {
   segnaposto?: string;
 }
 
-/** Un campo di testo, numero o testo lungo, con la sua etichetta e l'aiuto. */
+/** Un campo di testo, numero o testo lungo, con la sua etichetta e l'aiuto (il testo lungo si allunga con quello che contiene). */
 export function Campo({ nome, etichetta, dati, imposta, tipo = 'testo', aiuto, disabilitato, largo, max, segnaposto }: PropsCampo) {
-  const valore = testoDi(dati[nome]);
-  const classe = `editor-mappa__campo ${largo || tipo === 'testolungo' ? 'sm:col-span-2' : ''}`;
   return (
-    <label className={classe}>
-      {etichetta}
-      {tipo === 'testolungo'
-        ? <textarea className="form-input" rows={2} maxLength={max ?? 2000} value={valore} disabled={disabilitato} placeholder={segnaposto} onChange={(e) => imposta({ [nome]: e.target.value })} />
-        : <input className="form-input" type={tipo === 'numero' ? 'number' : 'text'} min={tipo === 'numero' ? 0 : undefined} maxLength={max ?? 400} value={valore} disabled={disabilitato} placeholder={segnaposto}
-          onChange={(e) => imposta({ [nome]: tipo === 'numero' ? (e.target.value === '' ? null : Number(e.target.value)) : e.target.value })} />}
-      {aiuto && <span className="testo-12 text-text-muted">{aiuto}</span>}
-    </label>
+    <CampoTesto etichetta={etichetta} valore={testoDi(dati[nome])} tipo={tipo === 'testolungo' ? 'lungo' : tipo} aiuto={aiuto} disabilitato={disabilitato} largo={largo} massimo={max} segnaposto={segnaposto}
+      onCambia={(v) => imposta({ [nome]: tipo === 'numero' ? (v === '' ? null : Number(v)) : v })} />
   );
 }
 
-/** La griglia dei campi: una colonna sul telefono, due da tablet in su. */
+/** La griglia dei campi: una colonna sotto 768 px, due da lì in su; i campi `largo` occupano la riga intera. */
 export function Griglia({ children }: { children: ReactNode }) {
-  return <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">{children}</div>;
+  return <div className="griglia-campi">{children}</div>;
 }
 
 /** Un elenco di testi come righe in ordine: ogni voce ha il suo campo e «Togli», in fondo «Aggiungi» (L11 · B11, modifica dei testi della guida). */
@@ -56,7 +54,7 @@ export function CampoElenco({ etichetta, voci, onCambia, disabilitato, max = 200
   /** Cambia il testo della voce in posizione `i`. */
   const cambia = (i: number, testo: string) => onCambia(voci.map((v, j) => (j === i ? testo : v)));
   return (
-    <fieldset className="regole-editor flex min-w-0 flex-col gap-2 sm:col-span-2">
+    <fieldset className="regole-editor campo--largo flex min-w-0 flex-col gap-2">
       <legend>{etichetta}</legend>
       {voci.length === 0 && <p className="m-0 testo-12 text-text-muted">Nessuna voce.</p>}
       {voci.map((v, i) => (
@@ -79,5 +77,5 @@ export function CampoElenco({ etichetta, voci, onCambia, disabilitato, max = 200
 
 /** Un contenitore senza `<label>` per i campi che portano da sé la propria etichetta (Selettore, tessere). */
 export function Blocco({ children, largo }: { children: ReactNode; largo?: boolean }) {
-  return <div className={`editor-mappa__campo ${largo ? 'sm:col-span-2' : ''}`}>{children}</div>;
+  return <div className={`campo ${largo ? 'campo--largo' : ''}`}>{children}</div>;
 }
