@@ -1356,6 +1356,15 @@ più l'indagine sui testi grezzi (C4) e la parte CSS (C5) del PM; verifiche avve
 
 Non fatto per scelta: divisione di `VisoreMappa.tsx` e `DungeonDettaglioPage.tsx` (rischio di regressione senza test).
 
+**R12-03 · gruppo accessibilità (WCAG 2.2, 25 ottobre).** `Selettore` secondo lo schema APG (voci `option` senza pulsanti dentro,
+`aria-activedescendant`, Home/Fine/PagSu/PagGiù/Spazio, Tab e perdita del fuoco chiudono; nome accessibile col valore per ogni selettore
+`compatto`, valore nella descrizione per gli altri); `Segmenti` con roving tabindex e frecce; effetto delle skill a capo in `ScortaPersona` e
+`SelettoreSkill`, «Rimuovi <nome>»; contrasti: `--color-primary-fondo` (#d42d24, 5,0:1; hover #b8241c) per i fondi rossi con scritta bianca e
+`--color-border-input` (#7a7a90, 3,7:1) per campi, selettori e segmenti, anello di fuoco sui campi; fuoco verso l'interno nelle file che
+scorrono e stile di fuoco della `.piastrella-scheda`; nome scritto accanto alle icone `icona-lg/xl` sui dispositivi senza hover e suggerimento al
+fuoco al tocco; blocco globale `prefers-reduced-motion` (con eccezioni documentate); titoli in rem; `--color-text-primary` indefinita sostituita.
+Non toccato: visore mappa da tastiera, errori che spariscono (già persistenti dal lotto C), salto al contenuto (lotto C).
+
 Verifiche distinte: codice APPROVATO (dopo un giro di correzioni), interfaccia APPROVATO (dopo due giri), migrazione dei testi (ora 232) APPROVATO
 (dopo quattro giri e un controllo mirato; 657 voci). Aperti, minori: a metà scorrimento le frecce delle file possono coprire 30–44 px di
 una scheda (limite delle frecce sovrapposte); in Oggetti su telefono il contorno del fuoco circonda solo il nome; la pagina 404 non ha

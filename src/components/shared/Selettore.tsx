@@ -9,7 +9,11 @@
 // solo a filtrare — il valore è **sempre** una voce dell'elenco, mai quello che hai digitato.
 //
 // Le voci possono avere un gruppo (intestazione nell'elenco) e un dettaglio (in grigio a destra).
-// `vuoto` aggiunge in testa la voce «nessuna scelta» con chiave ''. Da tastiera: frecce, Invio, Esc.
+// `vuoto` aggiunge in testa la voce «nessuna scelta» con chiave ''. Da tastiera: frecce, Home/Fine, Invio, Esc, Tab.
+//
+// Accessibilità (WCAG 2.2, schema APG del combobox con listbox): il fuoco resta sul pulsante (o sul campo di ricerca) e la voce
+// evidenziata è dichiarata con `aria-activedescendant`; le voci sono `option` senza pulsanti dentro, quindi Tab non le attraversa
+// una a una e chiude la tendina. Il nome accessibile dice anche il valore quando l'etichetta non è visibile (selettore compatto).
 // ============================================================
 
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
@@ -33,7 +37,9 @@ export interface PropsSelettore {
   /** Stretto quanto il contenuto, senza l'etichetta sopra il valore: per i filtri in linea. */
   compatto?: boolean;
   /** LAY3-7: il nome accessibile del pulsante dice anche il valore scelto, intero («Infiltrazione 1 di 9: 1. Passaggio…»), per i
-   *  selettori compatti il cui valore chiuso si accorcia coi puntini (l'elenco aperto mostra comunque i nomi interi). */
+   *  selettori compatti il cui valore chiuso si accorcia coi puntini (l'elenco aperto mostra comunque i nomi interi).
+   *  Dal lotto accessibilità vale già per ogni selettore `compatto` (l'etichetta non è visibile, il testo visibile è il valore: 2.5.3);
+   *  per gli altri, che mostrano l'etichetta sopra il valore, il valore è nella descrizione accessibile. */
   valoreNelNome?: boolean;
   className?: string;
 }
@@ -53,8 +59,12 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
   const radice = useRef<HTMLDivElement | null>(null);
   const pulsante = useRef<HTMLButtonElement | null>(null);
   const elenco = useRef<HTMLUListElement | null>(null);
+  /** Spazio gestito alla pressione: il rilascio non deve riattivare il pulsante (che riaprirebbe la tendina appena chiusa). */
+  const spazioGestito = useRef(false);
   const tutte = useMemo(() => (vuoto === undefined ? opzioni : [{ chiave: '', nome: vuoto }, ...opzioni]), [opzioni, vuoto]);
   const scelta = tutte.find((o) => o.chiave === valore) ?? null;
+  /** Il nome accessibile porta il valore quando il testo visibile è solo il valore (compatto: 2.5.3) o lo chiede il chiamante. */
+  const nomeConValore = !!compatto || !!valoreNelNome;
   const conRicerca = ricerca === 'sempre' || (ricerca === 'auto' && tutte.length >= SOGLIA_RICERCA);
 
   const { filtrate, tagliate } = useMemo(() => {
@@ -63,6 +73,11 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
       || (o.gruppo ? piatto(o.gruppo).includes(q) : false) || (o.testoRicerca ? piatto(o.testoRicerca).includes(q) : false)) : tutte;
     return { filtrate: base.slice(0, TETTO_VOCI), tagliate: base.length > TETTO_VOCI };
   }, [tutte, testo, conRicerca]);
+
+  /** Indice della voce evidenziata, riportato dentro l'elenco filtrato (-1 se l'elenco è vuoto). */
+  const attiva = filtrate.length === 0 ? -1 : Math.min(evidenziata, filtrate.length - 1);
+  const idVoce = (i: number) => `${id}-voce-${i}`;
+  const idValore = `${id}-valore`;
 
   /** Apre la tendina con il filtro vuoto e la voce scelta evidenziata, decidendo da che lato ancorarla. */
   const apri = () => {
@@ -105,12 +120,32 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
     if (!aperto) return;
     elenco.current?.querySelector<HTMLElement>('.selettore__voce--evidenziata')?.scrollIntoView?.({ block: 'nearest' });
   }, [aperto, evidenziata, filtrate]);
-  /** Tastiera nella tendina: Esc chiude, frecce spostano l'evidenziazione entro le voci filtrate, Invio sceglie quella evidenziata. */
+  /**
+   * Tastiera nella tendina: Esc chiude, frecce spostano l'evidenziazione entro le voci filtrate (PagSu/PagGiù di dieci), Invio sceglie
+   * quella evidenziata; Home/Fine portano alla prima/ultima voce solo senza campo di ricerca (nel campo spostano il cursore del testo);
+   * Spazio sceglie solo senza campo (nel campo è un carattere); Tab chiude senza rubare il fuoco e lo lascia proseguire.
+   */
   const tastiera = (e: React.KeyboardEvent) => {
+    const ultima = Math.max(0, filtrate.length - 1);
     if (e.key === 'Escape') { e.preventDefault(); chiudi(); return; }
-    if (e.key === 'ArrowDown') { e.preventDefault(); setEvidenziata((i) => Math.min(filtrate.length - 1, i + 1)); return; }
-    if (e.key === 'ArrowUp') { e.preventDefault(); setEvidenziata((i) => Math.max(0, i - 1)); return; }
-    if (e.key === 'Enter') { e.preventDefault(); const o = filtrate[Math.min(evidenziata, filtrate.length - 1)]; if (o) scegli(o.chiave); }
+    if (e.key === 'Tab') {
+      // dal campo di ricerca il fuoco torna prima sul pulsante: la tendina sparisce con il campo e il Tab riparte da un punto certo
+      if (e.target !== pulsante.current) pulsante.current?.focus();
+      setAperto(false);
+      return;
+    }
+    if (e.key === 'ArrowDown') { e.preventDefault(); setEvidenziata(Math.min(ultima, attiva + 1)); return; }
+    if (e.key === 'ArrowUp') { e.preventDefault(); setEvidenziata(Math.max(0, attiva - 1)); return; }
+    if (e.key === 'PageDown') { e.preventDefault(); setEvidenziata(Math.min(ultima, attiva + 10)); return; }
+    if (e.key === 'PageUp') { e.preventDefault(); setEvidenziata(Math.max(0, attiva - 10)); return; }
+    if (!conRicerca && e.key === 'Home') { e.preventDefault(); setEvidenziata(0); return; }
+    if (!conRicerca && e.key === 'End') { e.preventDefault(); setEvidenziata(ultima); return; }
+    if (e.key === 'Enter' || (!conRicerca && e.key === ' ')) {
+      e.preventDefault();
+      if (e.key === ' ') spazioGestito.current = true;
+      const o = filtrate[attiva];
+      if (o) scegli(o.chiave);
+    }
   };
   /**
    * Tastiera sul pulsante: a tendina chiusa le frecce la aprono; a tendina aperta i tasti passano a `tastiera` se non
@@ -120,33 +155,44 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
     if (!aperto && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) { e.preventDefault(); apri(); return; }
     if (aperto && (!conRicerca || e.key === 'Escape')) tastiera(e);
   };
+  /** Lo Spazio già usato per scegliere non deve riattivare il pulsante al rilascio. */
+  const rilascioPulsante = (e: React.KeyboardEvent) => {
+    if (e.key === ' ' && spazioGestito.current) { e.preventDefault(); spazioGestito.current = false; }
+  };
+  /** Il fuoco è andato fuori dal selettore (tocco su altro, Maiusc+Tab, scorciatoia): la tendina si chiude. */
+  const perdeFuoco = (e: React.FocusEvent) => {
+    const verso = e.relatedTarget as Node | null;
+    if (aperto && verso && radice.current && !radice.current.contains(verso)) setAperto(false);
+  };
 
   return (
-    <div ref={radice} className={`selettore ${compatto ? 'selettore--compatto' : ''} ${className ?? ''}`}>
-      <button ref={pulsante} type="button" role="combobox" className="selettore__scelta touch" aria-haspopup="listbox" aria-expanded={aperto} aria-controls={id} aria-label={valoreNelNome && scelta ? `${etichetta}: ${scelta.nome}` : etichetta} disabled={disabilitato} onClick={() => (aperto ? setAperto(false) : apri())} onKeyDown={tastieraPulsante} title={scelta ? scelta.nome : segnaposto}>
+    <div ref={radice} onBlur={perdeFuoco} className={`selettore ${compatto ? 'selettore--compatto' : ''} ${className ?? ''}`}>
+      <button ref={pulsante} type="button" role="combobox" className="selettore__scelta touch" aria-haspopup="listbox" aria-expanded={aperto} aria-controls={id} aria-activedescendant={aperto && !conRicerca && attiva >= 0 ? idVoce(attiva) : undefined} aria-label={nomeConValore ? `${etichetta}: ${scelta ? scelta.nome : segnaposto}` : etichetta} aria-describedby={nomeConValore ? undefined : idValore} disabled={disabilitato} onClick={() => (aperto ? setAperto(false) : apri())} onKeyDown={tastieraPulsante} onKeyUp={rilascioPulsante} title={scelta ? scelta.nome : segnaposto}>
         {!compatto && <span className="selettore__etichetta">{etichetta}</span>}
-        <span className={`selettore__valore ${scelta ? '' : 'selettore__valore--vuoto'}`}>{scelta ? scelta.nome : segnaposto}</span>
+        <span id={idValore} className={`selettore__valore ${scelta ? '' : 'selettore__valore--vuoto'}`}>{scelta ? scelta.nome : segnaposto}</span>
         <span className="selettore__freccia" aria-hidden="true">▾</span>
       </button>
       {aperto && (
         <div className={`selettore__tendina ${aDestra ? 'selettore__tendina--destra' : ''}`} onKeyDown={conRicerca ? tastiera : undefined}>
-          {conRicerca && <input className="form-input selettore__campo" type="search" value={testo} onChange={(e) => { setTesto(e.target.value); setEvidenziata(0); }} placeholder={`Cerca ${etichetta.toLowerCase()}…`} aria-label={`Cerca ${etichetta}`} aria-controls={id} autoComplete="off" autoFocus />}
-          <ul ref={elenco} id={id} role="listbox" aria-label={etichetta} className="selettore__elenco">
-            {filtrate.length === 0 && <li className="selettore__vuoto">Nessuna voce corrisponde.</li>}
+          {conRicerca && <input className="form-input selettore__campo" type="search" value={testo} onChange={(e) => { setTesto(e.target.value); setEvidenziata(0); }} placeholder={`Cerca ${etichetta.toLowerCase()}…`} aria-label={`Cerca ${etichetta}`} aria-controls={id} aria-activedescendant={attiva >= 0 ? idVoce(attiva) : undefined} autoComplete="off" autoFocus />}
+          {/* il fuoco resta sul pulsante o sul campo: premere su una voce non deve spostarlo (toglierebbe la tendina da sotto il dito) */}
+          <ul ref={elenco} id={id} role="listbox" aria-label={etichetta} className="selettore__elenco" onMouseDown={(e) => e.preventDefault()}>
+            {filtrate.length === 0 && <li role="presentation" className="selettore__vuoto">Nessuna voce corrisponde.</li>}
             {filtrate.map((o, i) => {
               // Le intestazioni di gruppo compaiono solo dove il gruppo cambia, nell'ordine dell'elenco.
               const intestazione = o.gruppo && (i === 0 || filtrate[i - 1].gruppo !== o.gruppo) ? o.gruppo : null;
               return [
                 intestazione ? <li key={`gruppo:${o.chiave}`} role="presentation" className="selettore__gruppo">{intestazione}</li> : null,
-                <li key={o.chiave || '__vuoto'} role="option" aria-selected={o.chiave === valore} className={`selettore__voce ${i === evidenziata ? 'selettore__voce--evidenziata' : ''} ${o.chiave === valore ? 'selettore__voce--scelta' : ''}`}>
-                  <button type="button" className="selettore__pulsante touch" onMouseEnter={() => setEvidenziata(i)} onClick={() => scegli(o.chiave)}>
+                // La voce è l'`option` stessa (nessun pulsante dentro): ha un id per `aria-activedescendant`, il tocco la sceglie.
+                <li key={o.chiave || '__vuoto'} id={idVoce(i)} role="option" aria-selected={o.chiave === valore} onMouseEnter={() => setEvidenziata(i)} onClick={() => scegli(o.chiave)} className={`selettore__voce ${i === attiva ? 'selettore__voce--evidenziata' : ''} ${o.chiave === valore ? 'selettore__voce--scelta' : ''}`}>
+                  <div className="selettore__pulsante touch">
                     <span className="min-w-0 flex-1 break-words">{o.nome}</span>
                     {o.dettaglio && <span className="text-text-muted testo-12 shrink-0">{o.dettaglio}</span>}
-                  </button>
+                  </div>
                 </li>,
               ];
             })}
-            {tagliate && <li className="selettore__vuoto">Scrivi qualche lettera in più per restringere.</li>}
+            {tagliate && <li role="presentation" className="selettore__vuoto">Scrivi qualche lettera in più per restringere.</li>}
           </ul>
         </div>
       )}

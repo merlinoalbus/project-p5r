@@ -178,7 +178,7 @@ describe('ConfidentiPartita — requisito da correggere (2026-10-11)', () => {
     fireEvent.click(await screen.findByRole('button', { name: /Correggi/ }));
     const finestra = await screen.findByRole('dialog', { name: /^Correggi il requisito · .+, rango 3$/ });
     fireEvent.click(within(finestra).getByRole('combobox', { name: 'Richiesta da citare al suo posto' }));
-    fireEvent.click(within(screen.getByRole('listbox', { name: 'Richiesta da citare al suo posto' })).getByRole('button', { name: /^Lo zio ingordo/ }));
+    fireEvent.click(within(screen.getByRole('listbox', { name: 'Richiesta da citare al suo posto' })).getByRole('option', { name: /^Lo zio ingordo/ }));
     const letture = getConfidentiPartita.mock.calls.length;
     await act(async () => { fireEvent.click(within(finestra).getByRole('button', { name: /^Salva/ })); });
     expect(correggiRequisitoRichiesta).toHaveBeenCalledWith(expect.any(String), 3, 0, 'lo-zio-ingordo');

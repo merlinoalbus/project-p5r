@@ -125,7 +125,7 @@ describe('Selettore', () => {
 
   it('la variante compatta non mostra l’etichetta nel pulsante ma la conserva per chi legge', () => {
     render(<Selettore compatto etichetta="Categoria" valore="" vuoto="Tutte" opzioni={poche} onCambia={() => {}} />);
-    const pulsante = screen.getByRole('combobox', { name: 'Categoria' });
+    const pulsante = screen.getByRole('combobox', { name: 'Categoria: Tutte' });
     expect(pulsante.querySelector('.selettore__etichetta')).toBeNull();
     expect(pulsante.closest('.selettore')).toHaveClass('selettore--compatto');
     expect(valoreSelettore('Categoria')).toBe('Tutte');
@@ -133,7 +133,7 @@ describe('Selettore', () => {
 
   it('quando a destra non c’è spazio la tendina si appende al bordo destro del pulsante', () => {
     render(<Selettore compatto etichetta="Partita attiva" valore="" opzioni={poche} onCambia={() => {}} />);
-    const pulsante = screen.getByRole('combobox', { name: 'Partita attiva' });
+    const pulsante = screen.getByRole('combobox', { name: 'Partita attiva: Scegli…' });
     const larghezzaOriginale = window.innerWidth;
     Object.defineProperty(window, 'innerWidth', { value: 1000, configurable: true });
     /** Rettangolo finto del pulsante (80×44 px) con il bordo sinistro alla coordinata data. */
@@ -199,8 +199,11 @@ describe('Selettore', () => {
     expect(within(elenco).getByRole('option', { selected: true })).toHaveTextContent('1. Passaggio Centrale / Sala d’Ingresso');
   });
 
-  it('senza `valoreNelNome` il nome del pulsante resta l’etichetta', () => {
-    render(<Selettore compatto etichetta="Scelta" valore="a" opzioni={poche} onCambia={() => {}} />);
-    expect(screen.getByRole('combobox', { name: 'Scelta' })).toBeInTheDocument();
+  it('compatto anche senza `valoreNelNome`: il valore sta nel nome (l’etichetta non è visibile); non compatto: nella descrizione', () => {
+    const { unmount } = render(<Selettore compatto etichetta="Scelta" valore="a" opzioni={poche} onCambia={() => {}} />);
+    expect(screen.getByRole('combobox', { name: 'Scelta: Alfa' })).toBeInTheDocument();
+    unmount();
+    render(<Selettore etichetta="Scelta" valore="a" opzioni={poche} onCambia={() => {}} />);
+    expect(screen.getByRole('combobox', { name: 'Scelta', description: 'Alfa' })).toBeInTheDocument();
   });
 });
