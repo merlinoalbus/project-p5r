@@ -37,6 +37,7 @@ import { VoceEvento } from './VociAgenda';
 import { CartelliniAzione, ImmagineAzione, SceltaNote } from './PartiAzione';
 import { DaRivedereVoce, InfiltrazioniVoce } from './InfiltrazioniVoce';
 import { RisposteVoce } from './RisposteVoce';
+import { RicevuteVoce } from './RicevuteVoce';
 import { chiedeNote } from '../../utils/azioneStrutturata';
 import { seGiornoAvanzato } from '../../utils/giornoAvanzato';
 import { TrasferisciVoci } from './TrasferisciVoci';
@@ -167,11 +168,11 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
             // nel cassetto si può salire di rango o registrare punti: la voce si rilegge (stato, rango della partita, risposte proposte)
             void getVocePercorso(a.uid, partitaId).then((agg) => { if (vivo.current) onCambiata(agg); useSuggerimentiStore.getState().invalida(); })
               .catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Voce non aggiornata.'));
-          } : undefined} />
+          } : undefined}
+          // L3 (§4.4): il campo «Infiltrazioni» delle voci di Palazzo, subito sotto il cartellino del Palazzo e sopra «Il gioco dà» (2026-10-25)
+          infiltrazioni={<InfiltrazioniVoce a={a} partitaId={partitaId} onCambiata={onCambiata} />} />
         {/* le risposte migliori del level up della voce Confidente, fra le sue note (progetto dei Confidenti, 2026-10-24) */}
         <RisposteVoce a={a} />
-        {/* L3 (§4.4): il campo «Infiltrazioni» delle voci di Palazzo, accanto al cartellino del Palazzo */}
-        <InfiltrazioniVoce a={a} partitaId={partitaId} onCambiata={onCambiata} />
         {a.effettiVoce?.stato === 'legacy-da-correggere' && <p role="alert" className="m-0 text-warning">Effetti da correggere: {a.effettiVoce.motivo}. Il dato originario resta visibile nell’editor.</p>}
         {pendente && <p role="status" className="m-0 text-warning">Operazione da verificare nel registro dei gesti: questa voce non viene rispuntata.</p>}
         {/* BON-01: i punti della voce che aspettano una decisione, con «Applica» sulla voce (nessun pannello a parte) */}
@@ -179,7 +180,6 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
         {/* la frase con i nomi la scrive il server (`produceTesto`, nell'ordine degli effetti): una sola scrittura per ogni vista (R12-01/1).
             Da fare, Aojiru, pesca e Fortuna stanno già in «Il gioco dà» (`RiepilogoEffettiVoce`, nei cartellini): qui restano a voce fatta */}
         {a.fatta && a.effettiVoce?.effetti.map((e, i) => (e.effetto.tipo === 'acquisto' || e.effetto.tipo === 'pesca' || e.effetto.tipo === 'fortuna') && a.produceTesto[i] ? <span key={e.uid}>{a.produceTesto[i]}</span> : null)}
-        {!!a.ricevuteEffetti?.length && <details><summary className="touch">Ricevute degli effetti della spunta</summary><ul className="m-0 pl-4">{a.ricevuteEffetti.map((r) => <li key={r.id}>{r.tipo === 'acquisto' ? 'Consumazione' : r.tipo === 'pesca' ? 'Sessione di pesca' : r.tipo === 'contesto' ? 'Incontro e contesto della spunta' : r.tipo === 'dote' ? 'Dote' : r.tipo === 'lettura' ? 'Lettura o gioco' : 'Turno'} · {new Date(r.applicatoIl).toLocaleString('it-IT')} · {r.annullatoIl ? 'annullata' : 'attiva'}</li>)}</ul></details>}
         {chiediAcquisti && partitaId !== null && <PreparaAcquistiVoce key={`${partitaId}:${a.uid}:${a.effettiVoce?.revisione}`} a={a} partitaId={partitaId} onRileggi={onCambiata} onChiudi={() => setChiediAcquisti(null)} onConferma={(richieste, pesche) => cambia(true, chiediAcquisti.noteRisposta, chiediAcquisti.senzaPunti, chiediAcquisti.aperture, richieste, pesche, chiediAcquisti.esiti)} />}
         {chiediEsiti && a.scelteEsito && <SceltaEsitiVoce scelte={a.scelteEsito} occupato={occupato} onConferma={(s) => void cambia(true, chiediEsiti.noteRisposta, chiediEsiti.senzaPunti, chiediEsiti.aperture, undefined, undefined, s)} onAnnulla={() => setChiediEsiti(null)} />}
         {/* la scelta delle note parte dall'evento che si gioca davvero: il prossimo della partita, se diverso dal rango atteso della voce */}
@@ -187,7 +187,14 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
         {chiediAperture && <SceltaApertureVisita a={a} occupato={occupato} onConferma={(c) => void cambia(true, noteVisita.note, noteVisita.senzaPunti, c)} onAnnulla={() => setChiediAperture(false)} />}
         {a.fatta && a.apertureDedali?.length && partitaId ? <ApertureVisitaRegistrata a={a} partitaId={partitaId} onCambiata={onCambiata} bloccata={bloccata || occupato} /> : null}
       </div>
-      {gesti && onMenu && <PulsanteMenuVoce voce={a.azione} aperto={menuAperto} onCambia={onMenu} disabled={occupato || bloccata} />}
+      {/* la colonna dei comandi della voce: il menu e, sotto, le ricevute della spunta dietro un pulsantino (2026-10-25: «magari andrebbero
+          visualizzati con un pulsantino e non restando la sotto sempre visibili»); impilati, non tolgono larghezza al testo sul telefono */}
+      {((gesti && onMenu) || !!a.ricevuteEffetti?.length) && (
+        <span className="flex shrink-0 flex-col self-start">
+          {gesti && onMenu && <PulsanteMenuVoce voce={a.azione} aperto={menuAperto} onCambia={onMenu} disabled={occupato || bloccata} />}
+          <RicevuteVoce ricevute={a.ricevuteEffetti} />
+        </span>
+      )}
       {gesti && menuAperto && <GestiVoce gesti={gesti} disabled={occupato || bloccata} etichetta={`Gesti per: ${a.azione.slice(0, 60)}`} voce={a.uid} />}
     </li>
   );

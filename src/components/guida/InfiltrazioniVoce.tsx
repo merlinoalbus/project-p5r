@@ -3,7 +3,8 @@
 // ============================================================
 //
 // Ogni voce che ha un Palazzo (`palazzoDellaVoce`: riferimento `dungeon`, oppure infiltrazioni già scelte, oppure una proposta) mostra
-// «Infiltrazioni:» con l'insieme **in ordine** (la stessa infiltrazione può tornare, mai di seguito). Si cambia in una finestra (foglio
+// l'insieme delle infiltrazioni **in ordine**, come chip (la stessa infiltrazione può tornare, mai di seguito; dal 2026-10-25 senza
+// l'etichetta «Infiltrazioni:», sotto il cartellino del Palazzo e sopra «Il gioco dà»). Si cambia in una finestra (foglio
 // dal basso sul telefono): ↑/↓ da 44 px, «Togli», «Aggiungi infiltrazione» fra quelle già esistenti del Palazzo (esclusa solo l'ultima
 // dell'insieme). Ogni cambio salva subito e non tocca nient'altro della voce. Con l'insieme vuoto e una proposta: «Proposta: …» con la
 // certezza e «Conferma», che scrive l'insieme proposto nell'ordine.
@@ -59,16 +60,25 @@ export function InfiltrazioniVoce({ a, partitaId, onCambiata }: Props) {
   // una ripetuta non va di seguito: chi sposta o toglie la rifarebbe consecutiva, il server la rifiuta (400) e lo dice
   const ultima = chiavi[chiavi.length - 1];
   const daAggiungere = opzioni.filter((o) => o.chiave !== ultima);
+  // nel rilascio un insieme vuoto non dice niente a chi gioca (non c'è niente da scegliere né da confermare): la riga non c'è
+  if (IN_RILASCIO && insieme.length === 0) return null;
   return (
+    // 2026-10-25 («le etichette di testo devono essere visibili solo se hanno senso»): niente «Infiltrazioni:» davanti ai chip, che stanno
+    // subito sotto il cartellino del Palazzo e si chiamano come l'infiltrazione («Tutorial Palazzo 11/04»): il nome dell'elenco lo
+    // dicono `aria-label` e il suggerimento. Il numero d'ordine serve solo con più infiltrazioni; la matita sta da sola (44 px, nome
+    // accessibile e suggerimento), senza la parola «Modifica». Con l'insieme vuoto la riga è il pulsante che dice che cosa manca.
     <div className="flex flex-wrap items-center gap-1 testo-12">
-      <span className="text-text-muted">Infiltrazioni:</span>
-      {insieme.length === 0
-        ? <span className="text-text-muted">nessuna</span>
-        : <ol className="m-0 flex list-none flex-wrap items-center gap-1 p-0" aria-label="Infiltrazioni della voce, in ordine">
-            {insieme.map((x, i) => <li key={`${x.chiave}:${i}`} className="chip testo-12">{i + 1}. {x.nome}{chiavi.indexOf(x.chiave) < i ? ' (di nuovo)' : ''}</li>)}
-          </ol>}
+      {insieme.length > 0 && (
+        <ol className="m-0 flex list-none flex-wrap items-center gap-1 p-0" aria-label="Infiltrazioni della voce, in ordine" title="Infiltrazioni della voce, in ordine">
+          {insieme.map((x, i) => <li key={`${x.chiave}:${i}`} className="chip testo-12">{insieme.length > 1 ? `${i + 1}. ` : ''}{x.nome}{chiavi.indexOf(x.chiave) < i ? ' (di nuovo)' : ''}</li>)}
+        </ol>
+      )}
       {/* L12 (passo 8): nel rilascio (sola lettura) l'insieme delle infiltrazioni si legge ma non si cambia e la proposta non si conferma */}
-      {!IN_RILASCIO && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" disabled={occupato} onClick={() => setAperta(true)} />}
+      {!IN_RILASCIO && (insieme.length > 0
+        ? <button type="button" className="btn btn-sm btn-ghost touch shrink-0" aria-label="Modifica le infiltrazioni" title="Modifica le infiltrazioni" disabled={occupato} onClick={() => setAperta(true)}>
+            <IconaAzione chiave="modifica" dimensione={20} />
+          </button>
+        : <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Scegli le infiltrazioni" disabled={occupato} onClick={() => setAperta(true)} />)}
       {!IN_RILASCIO && proposta && (
         <span className="flex basis-full flex-wrap items-center gap-1.5 rounded-md bg-white/[0.04] px-2 py-1" role="status">
           <span>Proposta: {proposta.infiltrazioni.map((x) => x.nome).join(', ')} — {proposta.motivo} <span className="text-text-muted">({CERTEZZA[proposta.certezza]})</span></span>

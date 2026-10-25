@@ -63,7 +63,7 @@ export function PreparaAcquistiVoce({ a, partitaId, onChiudi, onConferma, onRile
       <strong>{a.azione}</strong>
       <p className="m-0">Ogni riquadro prepara soltanto i dati. Il comando finale registra insieme spunta, consumazioni e sessioni osservate. Doti, yen e punti pesca restano proposte da decidere.</p>
       {invalidazioneAnteprima > 0 && mancaPreparazione && <p role="status" className="m-0 text-warning">Gli input e le catture sono conservati. Rivedi una nuova anteprima e riconferma ogni riquadro prima della spunta; il comando precedente non viene ripetuto.</p>}
-      <details><summary className="touch">Tutti gli effetti della voce</summary><RiepilogoEffettiVoce gruppi={gruppiDellaVoce(a)} titolo="Che cosa dà la voce" /></details>
+      <details><summary className="touch">Tutti gli effetti della voce</summary><RiepilogoEffettiVoce gruppi={gruppiDellaVoce(a)} titolo="Che cosa dà la voce" titoloVisibile={false} /></details>
       {verifica.caricamento && <p role="status">Verifico la configurazione corrente della voce…</p>}
       {verifica.errore && <p role="alert" className="m-0 text-error-testo">{verifica.errore}<PulsanteVisivo tono="fantasma" className="ml-2" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi la voce conservando i dati" disabled={occupato || incerto} onClick={() => void verifica.ricarica()} /></p>}
       {verifica.dati?.fatta && <p role="alert" className="m-0 text-warning">Questa voce risulta già fatta: nessuna nuova spunta viene inviata. Mostra la voce aggiornata; gli eventuali effetti mancanti compaiono come pulsante «Applica» sulla voce.</p>}

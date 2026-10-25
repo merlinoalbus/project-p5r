@@ -85,12 +85,13 @@ export function collegamentoAzione(a: Pick<AzionePercorsoDto, 'tipo' | 'riferime
 
 /**
  * I gruppi di «Il gioco dà» di una voce (`RiepilogoEffettiVoce`): quelli del server (`produceRiepilogo`); per una voce che non li porta
- * (una risposta di prima) le frasi di `produceTesto` in un gruppo solo, così nessuna voce perde che cosa dà.
+ * (una risposta di prima) le frasi di `produceTesto` in un gruppo solo, così nessuna voce perde che cosa dà. Quel gruppo non ha titolo:
+ * «Effetti» sotto «Il gioco dà» ripeteva il riquadro (2026-10-25, «le etichette di testo devono essere visibili solo se hanno senso»).
  */
 export function gruppiDellaVoce(a: { produceTesto?: string[]; produceRiepilogo?: GruppoRiepilogoEffettiDto[] }): GruppoRiepilogoEffettiDto[] {
   if (a.produceRiepilogo) return a.produceRiepilogo;
   const frasi = a.produceTesto ?? [];
-  return frasi.length ? [{ chiave: 'effetti', titolo: 'Effetti', righe: frasi.map((nome) => ({ nome })) }] : [];
+  return frasi.length ? [{ chiave: 'effetti', titolo: '', righe: frasi.map((nome) => ({ nome })) }] : [];
 }
 
 /** Due nomi dicono lo stesso posto? Senza maiuscole, spazi in più e accenti (il collegamento e il pin della mappa possono scriverlo un po' diverso). */

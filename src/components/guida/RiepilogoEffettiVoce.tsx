@@ -7,6 +7,14 @@
 // che il server costruisce (`AzionePercorsoDto.produceRiepilogo`, `shared/riepilogoEffetti.ts`): l'etichetta del gruppo, un elenco con una
 // riga per elemento (nome a sinistra, copie, prezzo o note a destra; su un telefono il dettaglio va a capo sotto il nome, mai troncato) e
 // il totale degli acquisti. Solo lettura: nessun comando.
+//
+// 2026-10-25 («a che prò quel ottenuto messo lì come testo semplice e distanziato? Impaginazione non top»; «le etichette di testo devono
+// essere visibili solo se hanno senso»): il dettaglio sta subito dopo il nome, non spinto al bordo opposto della colonna. Le righe di un
+// gruppo sono una griglia a due colonne larghe quanto il contenuto (sottogriglia per riga, così l'elemento resta un `<li>`): i prezzi
+// si allineano in colonna accanto al nome più lungo, senza il vuoto in mezzo; su un telefono le due colonne si stringono e il testo va
+// a capo, mai troncato. Il titolo del gruppo si mostra solo se dice qualcosa che la riga non dice già (non «Aojiru» sopra «Aojiru»,
+// non «Effetti» sopra le frasi di una voce di prima); il titolo del riquadro si può tenere solo per i lettori di schermo dove il
+// contenitore lo dice già («Tutti gli effetti della voce»).
 // ============================================================
 
 import { useId } from 'react';
@@ -16,35 +24,42 @@ interface Props {
   gruppi: readonly GruppoRiepilogoEffettiDto[];
   /** Il titolo del riquadro (per chi legge con un lettore di schermo è anche il nome della regione). */
   titolo?: string;
+  /** Falso quando il contenitore dice già che cosa contiene il riquadro: il titolo resta solo per i lettori di schermo. */
+  titoloVisibile?: boolean;
 }
 
-/** Un gruppo: etichetta, elenco delle righe, totale e nota. */
+/** Il nome senza maiuscole, spazi in più e accenti, per capire se il titolo del gruppo ripete la sua unica riga. */
+const norma = (s: string): string => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/\s+/g, ' ').trim();
+
+/** Un gruppo: etichetta (se aggiunge qualcosa), elenco delle righe, totale e nota. */
 function Gruppo({ g }: { g: GruppoRiepilogoEffettiDto }) {
   const id = useId();
+  // il titolo che ripete l'unica riga («Aojiru» sopra «Aojiru · Conoscenza») o che manca non si scrive: l'elenco prende il nome dalla riga
+  const titoloUtile = !!g.titolo && !(g.righe.length === 1 && norma(g.righe[0].nome) === norma(g.titolo));
   return (
-    <div className="flex min-w-0 flex-col gap-0.5">
-      <span id={id} className="testo-12 font-semibold text-text-secondary break-words">{g.titolo}</span>
-      <ul aria-labelledby={id} className="m-0 flex list-none flex-col p-0">
+    <div className="flex w-fit min-w-0 max-w-full flex-col gap-0.5">
+      {titoloUtile && <span id={id} className="testo-12 font-semibold text-text-secondary break-words">{g.titolo}</span>}
+      <ul aria-labelledby={titoloUtile ? id : undefined} className="m-0 grid list-none grid-cols-[minmax(0,max-content)_minmax(0,max-content)] gap-x-3 p-0">
         {g.righe.map((r, i) => (
-          <li key={`${i}:${r.nome}`} className="flex min-w-0 flex-wrap items-baseline justify-between gap-x-3 testo-13">
-            <span className="min-w-0 break-words">{r.nome}</span>
-            {r.dettaglio && <span className="break-words text-text-secondary tabular-nums">{r.dettaglio}</span>}
+          <li key={`${i}:${r.nome}`} className="col-span-2 grid grid-cols-subgrid items-baseline testo-13">
+            <span className={`min-w-0 break-words ${r.dettaglio ? '' : 'col-span-2'}`}>{r.nome}</span>
+            {r.dettaglio && <span className="min-w-0 break-words text-text-secondary tabular-nums">{r.dettaglio}</span>}
           </li>
         ))}
       </ul>
       {g.totale && <p className="m-0 border-t border-border pt-0.5 testo-13 font-semibold tabular-nums break-words">{g.totale}</p>}
-      {g.nota && <p className="m-0 testo-12 text-text-muted break-words">{g.nota}</p>}
+      {g.nota && <p className="m-0 testo-12 text-text-muted break-words text-pretty">{g.nota}</p>}
     </div>
   );
 }
 
 /** Il riepilogo della voce: niente se non ci sono gruppi. */
-export function RiepilogoEffettiVoce({ gruppi, titolo = 'Il gioco dà' }: Props) {
+export function RiepilogoEffettiVoce({ gruppi, titolo = 'Il gioco dà', titoloVisibile = true }: Props) {
   const id = useId();
   if (gruppi.length === 0) return null;
   return (
     <section aria-labelledby={id} className="flex min-w-0 flex-col gap-1.5 rounded-md border border-border bg-bg-tertiary p-2">
-      <span id={id} className="testo-12 text-text-muted">{titolo}</span>
+      <span id={id} className={titoloVisibile ? 'testo-12 text-text-muted' : 'sr-only'}>{titolo}</span>
       <div className="grid min-w-0 grid-cols-[repeat(auto-fill,minmax(min(100%,15rem),1fr))] gap-x-4 gap-y-2">
         {gruppi.map((g) => <Gruppo key={g.chiave} g={g} />)}
       </div>

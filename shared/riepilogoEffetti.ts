@@ -18,7 +18,7 @@ import { nomeDote } from './doti.js';
 import { partiEffettoAzione, type NomiEffettiAzione } from './effettiAzione.js';
 import { contoArticoli, type EffettoVoce, type NomiFraseEffetto } from './effettiVoce.js';
 
-/** Una riga del riepilogo: il nome dell'elemento e, se c'è, che cosa ne viene (copie e prezzo, note, «completato»). */
+/** Una riga del riepilogo: il nome dell'elemento e, se aggiunge qualcosa al titolo del gruppo, che cosa ne viene (copie e prezzo, note, paga). */
 export interface RigaRiepilogoEffettiDto { nome: string; dettaglio?: string }
 /** Un gruppo del riepilogo: l'etichetta, le righe nell'ordine degli effetti, il totale (solo gli acquisti) e una nota che vale per tutto il gruppo. */
 export interface GruppoRiepilogoEffettiDto {
@@ -96,7 +96,8 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
         if (!conto) break;
         for (const r of conto.righe) {
           const prezzo = r.prezzo === null ? 'senza prezzo' : r.copie > 1 && r.prezzoUnitario !== null ? `${yen(r.prezzo)} (${yen(r.prezzoUnitario)} l’uno)` : yen(r.prezzo);
-          g.righe.push({ nome: r.nome, dettaglio: `×${r.copie} · ${prezzo}` });
+          // «×1» non dice niente (una copia è il caso normale): le copie compaiono solo da due in su
+          g.righe.push({ nome: r.nome, dettaglio: r.copie > 1 ? `×${r.copie} · ${prezzo}` : prezzo });
         }
         const copie = conto.righe.reduce((s, r) => s + r.copie, 0);
         if (conto.totale !== null && (conto.righe.length > 1 || copie > 1)) g.totale = `Totale ${yen(conto.totale)}${conto.senzaPrezzo ? ` (più ${conto.senzaPrezzo} senza prezzo)` : ''}`;
@@ -115,13 +116,17 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
       case 'yen': riga('yen', e.importo > 0 ? 'Ricevuti' : 'Spesi', yen(e.importo)); break;
       case 'oggetto': riga('oggetti', n.frase.oggetto?.(e.oggetto) ?? 'Oggetto del catalogo', e.quantita > 1 ? `×${e.quantita}` : undefined); break;
       case 'richiesta': riga('richieste', n.frase.richiesta(e.richiesta) ?? 'Richiesta'); break;
-      case 'sblocco': riga('sblocchi', (e.bersaglio === 'richiesta' ? n.frase.richiesta(e.chiave) : n.frase.attivita?.(e.chiave)) ?? (e.bersaglio === 'richiesta' ? 'Richiesta' : 'Attività'), e.bersaglio === 'richiesta' ? 'Richiesta' : 'attività'); break;
+      // 2026-10-25 («a che prò quel ottenuto messo lì come testo semplice e distanziato?»; «le etichette di testo devono essere visibili
+      // solo se hanno senso»): una riga porta un dettaglio solo se aggiunge qualcosa al titolo del gruppo. «Trofei · ottenuto», «Domande in
+      // classe · risposta», «Cruciverba · risolto», «Compendio · registrata nel compendio» ripetevano il titolo: restano il nome e basta.
+      // Lo sblocco dice ancora se è una richiesta o un'attività (il gruppo «Sblocchi» le tiene insieme), la pesca e la Fortuna come valgono.
+      case 'sblocco': riga('sblocchi', (e.bersaglio === 'richiesta' ? n.frase.richiesta(e.chiave) : n.frase.attivita?.(e.chiave)) ?? (e.bersaglio === 'richiesta' ? 'Richiesta' : 'Attività'), e.bersaglio === 'richiesta' ? 'richiesta' : 'attività'); break;
       case 'storia': riga('storia', EVENTI_STORIA.find((s) => s.chiave === e.evento)?.nome ?? e.evento); break;
-      case 'domanda': riga('domande', n.frase.domanda(e.domanda) ?? 'Domanda', 'risposta'); break;
-      case 'cruciverba': riga('cruciverba', `Del ${dataLeggibile(e.data)}`, 'risolto'); break;
+      case 'domanda': riga('domande', n.frase.domanda(e.domanda) ?? 'Domanda'); break;
+      case 'cruciverba': riga('cruciverba', `Del ${dataLeggibile(e.data)}`); break;
       case 'invito': { const i = n.frase.invito(e.invito); riga('inviti', i ? `${i.confidenteNome}${i.data ? `, ${dataLeggibile(i.data)}` : ''}` : 'Invito', 'i punti dell’incontro valgono ×1,2'); break; }
-      case 'persona': riga('persone', n.frase.persona(e.persona) ?? 'Persona', 'registrata nel compendio'); break;
-      case 'trofeo': riga('trofei', n.frase.trofeo?.(e.trofeo) ?? 'Trofeo', 'ottenuto'); break;
+      case 'persona': riga('persone', n.frase.persona(e.persona) ?? 'Persona'); break;
+      case 'trofeo': riga('trofei', n.frase.trofeo?.(e.trofeo) ?? 'Trofeo'); break;
       case 'pesca': riga('pesca', 'Sessione a Ichigaya', 'da osservare alla spunta'); break;
       case 'fortuna': riga('fortuna', nomeDote(e.dote), 'per il resto del giorno'); break;
     }

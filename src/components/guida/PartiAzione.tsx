@@ -8,7 +8,7 @@
 // mostra con questi pezzi; eventi, scadenze e promemoria hanno la loro riga (`VoceEvento` in VociAgenda).
 // ============================================================
 
-import { useState, type MouseEvent } from 'react';
+import { useState, type MouseEvent, type ReactNode } from 'react';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { ConfidentiPartita } from '../partita/ConfidentiPartita';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -46,10 +46,13 @@ interface PropsCartellini {
   onApriMappa?: (mappa: { chiave: string; spilloId: number | null }) => void;
   /** Dopo la chiusura del cassetto del Confidente aperto dal cartellino: la voce va riletta (rango della partita, stato, risposte). */
   onCassettoChiuso?: () => void;
+  /** Le infiltrazioni della voce di Palazzo (`InfiltrazioniVoce`): stanno subito sotto i cartellini e sopra «Il gioco dà» (2026-10-25,
+   *  «Infiltrazioni e la scelta dell'infiltrazione tecnicamente dovrebbe essere messa sopra i premi ottenuti dalla voce»). */
+  infiltrazioni?: ReactNode;
 }
 
 /** Tipo, collegamento, «Sulla mappa», la guida del quiz dei lavori, stato nella partita, rango atteso, note, effetti dichiarati o applicati. */
-export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChiuso }: PropsCartellini) {
+export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChiuso, infiltrazioni }: PropsCartellini) {
   const link = collegamentoAzione(a);
   const stato = a.fatta ? null : a.stato;
   // l'atterraggio di un Palazzo si apre nella mappa accanto, se c'è (un clic semplice: con un modificatore resta un collegamento)
@@ -128,6 +131,8 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
       {a.fatta && a.produceTesto?.filter((t) => t.includes(' paga ¥')).map((t) => <span key={t} className="testo-12 text-text-muted">{t.slice(t.indexOf('paga ¥'))}</span>)}
       {a.fatta && a.effetti && <span className="chip chip--attivo testo-12" title="Effetti della spunta: togliendola si annullano i punti del Confidente e i turni; le Doti le segni tu (la spunta non le tocca), letture e visioni restano (si disfano dalla loro pagina)">{descriviEffetti(a.effetti)}</span>}
     </span>
+    {/* dove avviene la voce (le infiltrazioni del Palazzo, accanto al suo cartellino) prima di che cosa dà */}
+    {infiltrazioni}
     {/* che cosa dà il gioco, per gruppi (richiesta dell'utente del 2026-10-25, «formattarlo in modo adeguato, per tutti gli acquisti»): le Doti
         si segnano a mano (scelta dell'utente, 2026-09-30); gli yen non compaiono come istruzione, solo come prezzi e totale */}
     <RiepilogoEffettiVoce gruppi={gruppi} />
