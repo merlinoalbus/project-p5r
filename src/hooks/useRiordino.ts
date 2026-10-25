@@ -157,7 +157,9 @@ export function useRiordinoCollegato(liste: ReadonlyArray<ElencoRiordino>, blocc
   const inCorso = useRef<string | null>(null);
   // la pressione lunga in attesa (dito appoggiato sulla maniglia, trascinamento non ancora partito)
   const attesa = useRef<{ timer: number; x: number; y: number } | null>(null);
-  useLayoutEffect(() => { corrente.current = liste; });
+  // il blocco del momento, letto dal timer della pressione lunga
+  const bloccatoOra = useRef(bloccato);
+  useLayoutEffect(() => { corrente.current = liste; bloccatoOra.current = bloccato; });
   const annullaAttesa = () => { if (attesa.current) { window.clearTimeout(attesa.current.timer); attesa.current = null; } };
   useEffect(() => () => { if (attesa.current) window.clearTimeout(attesa.current.timer); }, []);
   // Col dito la maniglia lascia scorrere la pagina finché il trascinamento non parte; da lì lo scorrimento si ferma (`touchmove`
@@ -251,12 +253,15 @@ export function useRiordinoCollegato(liste: ReadonlyArray<ElencoRiordino>, blocc
         if (bloccato || e.button !== 0) return;
         const el = e.currentTarget;
         if (e.pointerType !== 'mouse') {
-          // col dito (o la penna) si aspetta la pressione lunga ferma: intanto la pagina può scorrere e un tocco non sposta niente
+          // col dito (o la penna) si aspetta la pressione lunga ferma: intanto la pagina può scorrere e un tocco non sposta niente.
+          // Limite noto: la penna non genera `touchmove`, quindi a trascinamento partito lo scorrimento non si ferma come col dito.
           annullaAttesa();
           const { pointerId, clientX: x, clientY: y } = e;
           ultimoY.current = y;
           attesa.current = { x, y, timer: window.setTimeout(() => {
             attesa.current = null;
+            // nei 350 ms il riordino può essersi fermato (si sta salvando un altro spostamento): allora niente trascinamento
+            if (bloccatoOra.current) return;
             navigator.vibrate?.(15);
             avvia(el, pointerId, ultimoY.current, id);
           }, PRESSIONE_LUNGA_MS) };
