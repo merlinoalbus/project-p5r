@@ -19,5 +19,5 @@ export function CollegamentoMappa({ tipo, chiave, testo = 'Dove si trova', compa
   return <Link
     to={percorsoAccessoMondo(tipo, chiave)}
     className={compatto ? 'chip no-underline inline-flex items-center gap-1' : 'btn btn-ghost btn-sm touch self-start inline-flex items-center gap-1.5'}
-  ><IconaAzione chiave="mappa" dimensione={compatto ? 14 : 16} />{testo}</Link>;
+  >{compatto && <span className="chip__tocco" aria-hidden="true" />}<IconaAzione chiave="mappa" dimensione={compatto ? 14 : 16} />{testo}</Link>;
 }

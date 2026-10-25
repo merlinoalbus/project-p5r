@@ -1753,8 +1753,12 @@
   /* Collegamento dentro una frase: da solo è alto una riga (16 px). Il riempimento verticale di un elemento «inline» allarga l'area di tocco
      a 44 px SENZA cambiare l'altezza della riga né il disegno (la sottolineatura resta dov'è); vale per i sottotitoli delle intestazioni e per
      i paragrafi con la classe `testo-link-esteso`. In orizzontale +6 px per lato (compensati dal margine negativo, quindi il testo non si muove):
-     una parola corta come «Diner» è larga 33 px. */
-  .intestazione p a, .testo-link-esteso a { padding: 14px 6px; margin-inline: -6px; }
+     una parola corta come «Diner» è larga 33 px. Solo i collegamenti di testo: chip e pulsanti-collegamento hanno un disegno proprio (fondo,
+     bordo, taglio) e la loro area di tocco (`.chip__tocco`, `.touch`). */
+  .intestazione p a:not(.chip):not(.btn):not(.touch), .testo-link-esteso a:not(.chip):not(.btn):not(.touch) { padding: 14px 6px; margin-inline: -6px; }
+  /* Area di tocco di 44 px per i chip-collegamento compatti («Dove si trova»): il chip usa già ::before e ::after per il taglio diagonale, quindi
+     l'area è un figlio vuoto centrato sul chip (che è `position: relative`); il disegno non cambia. */
+  .chip__tocco { position: absolute; left: 50%; top: 50%; width: max(100%, 44px); height: 44px; transform: translate(-50%, -50%); }
   /* Schermi bassi (portatili e tablet in orizzontale: 1280×689, 1366×657): l'intestazione, barra superiore compresa, deve restare entro il 30%
      dell'altezza. Misurato a 1280×689: titolo da 42 px + sottotitolo su 3 righe portavano il fondo dell'intestazione al 31–37%. Il titolo scende
      a 32 px al massimo (restano i tasselli e il carattere «display») e, in `IntestazionePagina`, il sottotitolo si allarga a due righe. La Partita
