@@ -45747,7 +45747,8 @@
         "id": "R12-02",
         "lotto": "L12",
         "titolo": "Fase 2: istanza pubblica di rilascio separata da quella di preparazione",
-        "stato": "da-fare",
+        "stato": "chiuso-codice",
+        "esitoRiscontro": "2026-10-25: codice in main 6bb472e9 (progetto lotti/L12/progetto-due-istanze.md): modalità fissata nella build, rotte del giocatore in elenco, gioco.db in sola lettura su tre livelli, identità Cloudflare Access con partite per proprietario (migrazione utente 045), Prepara edizione, Dockerfile/nginx/compose/pipeline di rilascio. Validazione ECC: tre revisori + riverifica di sicurezza APPROVATO. Preparazione verificata in produzione invariata. Restano all'utente: Cloudflare (nome host, applicazione Access), stack pubblico, prima edizione dopo il congelamento (R12-04).",
         "fonte": "lotti/L12/requisiti.md",
         "criterio": "Due istanze: preparazione privata con tutte le funzioni; rilascio pubblico con gioco.db in sola lettura garantita dal database, senza funzioni di modifica, configurazione, importazione o deposito, con partite separate per utente riconosciuto da Cloudflare Access, sul dominio indicato dall'utente.",
         "tipo": "F"
