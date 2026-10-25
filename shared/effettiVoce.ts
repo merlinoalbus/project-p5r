@@ -1,4 +1,5 @@
 import { eDote, nomeDote, type DoteChiave } from './doti.js';
+import { EVENTI_STORIA, dataLeggibile } from './condizioniSpillo.js';
 import { ATTIVITA_PESCA, REGOLA_PESCA, type EffettoPescaVoce } from './pesca.js';
 
 export type CategoriaLetturaVoce = 'libro' | 'film' | 'videogioco';
@@ -105,18 +106,40 @@ export function normalizzaEffettiVoce(x: unknown): EffettoVoce[] | null {
   const out = x.map(normalizzaEffettoVoce);
   return out.some((e) => e === null) ? null : out as EffettoVoce[];
 }
-export function descriviEffettoVoce(e: EffettoVoce): string {
-  if (e.tipo === 'dote') return `${nomeDote(e.dote)}: ${e.note} ${e.note === 1 ? 'nota' : 'note'}`;
-  if (e.tipo === 'lettura') return `${e.chiave}: ${e.almeno === null ? 'completato' : `almeno ${e.almeno}`}`;
-  if (e.tipo === 'turno') return `Turno: ${e.attivita}`;
-  if (e.tipo === 'pesca') return 'Pesca a Ichigaya: sessione osservata';
-  if (e.tipo === 'fortuna') return `Fortuna di Chihaya: ${nomeDote(e.dote)} ×1,5 per il resto del giorno`;
-  if (e.tipo === 'storia') return `Segna l’evento di storia «${e.evento}»`;
-  if (e.tipo === 'persona') return `Registra la Persona ${e.persona} nel compendio`;
-  if (e.tipo === 'domanda') return `Segna la domanda ${e.domanda} come fatta`;
-  if (e.tipo === 'cruciverba') return `Segna il cruciverba del ${e.data} come risolto`;
-  if (e.tipo === 'articolo') return `Segna come comprato: ${e.articolo}`;
-  if (e.tipo === 'invito') return `Registra l'invito avvenuto: ${e.invito}`;
-  if (e.tipo === 'richiesta') return `Segna la Richiesta «${e.richiesta}» come completata`;
-  return `Acquisto: ${e.articolo}${e.variante ? ` · ${nomeDote(e.variante)}` : ' · variante da dichiarare'}`;
+/**
+ * I nomi con cui scrivere la frase di un effetto che cita il suo oggetto per chiave o per id (R12-01/1: «mai chiavi, sempre nomi»).
+ * Sono funzioni di ricerca e non elenchi: il server cerca la riga che serve, la pagina legge le mappe già servite dall'API. Chi non
+ * trova il nome restituisce `undefined`, e la frase resta generica («Domanda risposta»): una chiave grezza non compare mai.
+ */
+export interface NomiFraseEffetto {
+  domanda: (id: number) => string | undefined;
+  richiesta: (chiave: string) => string | undefined;
+  articolo: (chiave: string) => { nome: string; prezzo: number | null } | undefined;
+  invito: (chiave: string) => { confidenteNome: string; data: string | null } | undefined;
+  persona: (id: number) => string | undefined;
+}
+
+/** Gli effetti la cui frase passa da `fraseEffettoConNomi`: quelli che citano il loro oggetto per chiave, più pesca e Fortuna. */
+export type EffettoConNomiVoce = EffettoDiStatoVoce | EffettoFortunaVoce | EffettoPescaVoce;
+export const eEffettoConNomi = (e: { tipo: string }): e is EffettoConNomiVoce => eEffettoDiStato(e) || e.tipo === 'pesca' || e.tipo === 'fortuna';
+
+const breve = (t: string, n = 70) => (t.length > n ? `${t.slice(0, n - 1).trimEnd()}…` : t);
+
+/**
+ * La frase che dice all'utente che cosa succede spuntando, per gli effetti che citano l'oggetto per chiave (storia, domanda,
+ * cruciverba, Richiesta, articolo, invito, Persona) e per pesca e Fortuna. È l'UNICA scrittura di queste frasi: la usano il server
+ * (il «Il gioco dà» del Diario) e la pagina (editor della voce), ognuno con i propri nomi.
+ */
+export function fraseEffettoConNomi(e: EffettoConNomiVoce, n: NomiFraseEffetto): string {
+  switch (e.tipo) {
+    case 'pesca': return 'Sessione di pesca a Ichigaya osservata';
+    case 'fortuna': return `Fortuna di Chihaya su ${nomeDote(e.dote)} per il resto del giorno`;
+    case 'storia': return `Evento di storia: ${EVENTI_STORIA.find((s) => s.chiave === e.evento)?.nome ?? e.evento}`;
+    case 'domanda': { const d = n.domanda(e.domanda); return d ? `Domanda risposta: ${breve(d)}` : 'Domanda risposta'; }
+    case 'cruciverba': return `Cruciverba del ${dataLeggibile(e.data)} risolto`;
+    case 'richiesta': return `Richiesta «${n.richiesta(e.richiesta) ?? 'Richiesta'}» completata`;
+    case 'articolo': { const a = n.articolo(e.articolo); return a ? `Articolo comprato: ${a.nome}${a.prezzo !== null ? ` · ¥${a.prezzo.toLocaleString('it-IT')}` : ''}` : 'Articolo comprato'; }
+    case 'invito': { const i = n.invito(e.invito); return i ? `Invito di ${i.confidenteNome}${i.data ? ` del ${dataLeggibile(i.data)}` : ''} avvenuto: i punti dell'incontro valgono ×1,2` : 'Invito avvenuto'; }
+    case 'persona': { const p = n.persona(e.persona); return p ? `Persona registrata nel compendio: ${p}` : 'Persona registrata nel compendio'; }
+  }
 }

@@ -11,11 +11,9 @@
 
 import { RIFERIMENTO_DI_TIPO, type TipoAzione, type TipoRiferimentoAzione } from '../../shared/effettiAzione';
 import { eDote, nomeDote } from '../../shared/doti';
-import type { EffettoVoce, RichiestaSalvaEffettiVoce } from '../../shared/effettiVoce';
-import { EVENTI_STORIA } from '../../shared/condizioniSpillo';
+import { fraseEffettoConNomi, type EffettoVoce, type NomiFraseEffetto, type RichiestaSalvaEffettiVoce } from '../../shared/effettiVoce';
 import type { ElenchiAzioneDto, ElenchiEffettiVoceDto } from '../types';
 import type { CampiStrutturati } from './azioneStrutturata';
-import { dataGiocoTesto } from './dateGioco';
 
 export type RigaEffetto = RichiestaSalvaEffettiVoce['effetti'][number];
 type Rif = CampiStrutturati['riferimento'];
@@ -178,11 +176,7 @@ export function nomiEffettiDa(e: ElenchiAzioneDto, x: ElenchiEffettiVoceDto): No
 }
 
 const note = (n: number) => '♪'.repeat(n);
-const breve = (t: string, n = 70) => (t.length > n ? `${t.slice(0, n - 1).trimEnd()}…` : t);
 const sessioni = (n: number, film: boolean) => (film ? (n === 1 ? 'visione o serata' : 'visioni o serate') : n === 1 ? 'sessione' : 'sessioni');
-
-/** Il nome dell'evento di storia (dall'elenco condiviso). */
-export const nomeEventoStoria = (chiave: string): string => EVENTI_STORIA.find((e) => e.chiave === chiave)?.nome ?? chiave;
 
 /** La frase che dice che cosa succede spuntando: mai chiavi, sempre nomi. */
 export function fraseEffetto(e: EffettoVoce, n: NomiEffetti): string {
@@ -199,17 +193,16 @@ export function fraseEffetto(e: EffettoVoce, n: NomiEffetti): string {
       return `Turno: ${nome} — ${e.doti?.length ? `Doti proprie di questo turno (${e.doti.map((d) => `${nomeDote(d.dote)} ${note(d.note)}`).join('; ')})` : 'le Doti sono quelle del lavoro'}`;
     }
     case 'acquisto': return `Acquisto Aojiru${e.variante ? `: ${nomeDote(e.variante)}` : ' (variante da osservare nella partita)'}`;
-    case 'pesca': return 'Sessione di pesca a Ichigaya osservata';
-    case 'fortuna': return `Fortuna di Chihaya su ${nomeDote(e.dote)} per il resto del giorno`;
-    case 'storia': return `Evento di storia: ${nomeEventoStoria(e.evento)}`;
-    case 'domanda': { const d = n.domande.get(e.domanda); return d ? `Domanda risposta: ${breve(d.testo)}` : 'Domanda risposta'; }
-    case 'cruciverba': return `Cruciverba del ${dataGiocoTesto(e.data)} risolto`;
-    case 'richiesta': return `Richiesta «${n.richieste.get(e.richiesta) ?? 'Richiesta'}» completata`;
-    case 'articolo': { const a = n.articoli.get(e.articolo); return a ? `Articolo comprato: ${a.nome}${a.prezzo !== null ? ` · ¥${a.prezzo.toLocaleString('it-IT')}` : ''}` : 'Articolo comprato'; }
-    case 'invito': { const i = n.inviti.get(e.invito); return i ? `Invito di ${i.confidenteNome}${i.data ? ` del ${dataGiocoTesto(i.data)}` : ''} avvenuto: i punti dell'incontro valgono ×1,2` : 'Invito avvenuto'; }
-    case 'persona': { const p = n.persone.get(e.persona); return p ? `Persona registrata nel compendio: ${p.nome}` : 'Persona registrata nel compendio'; }
+    // gli effetti che citano l'oggetto per chiave, più pesca e Fortuna: la frase è quella condivisa col server (una sola scrittura)
+    default: return fraseEffettoConNomi(e, nomiFrase(n));
   }
 }
+
+/** I nomi della pagina (mappe già servite dall'API) nella forma con cui la frase condivisa li cerca. */
+const nomiFrase = (n: NomiEffetti): NomiFraseEffetto => ({
+  domanda: (id) => n.domande.get(id)?.testo, richiesta: (k) => n.richieste.get(k), articolo: (k) => n.articoli.get(k),
+  invito: (k) => n.inviti.get(k), persona: (id) => n.persone.get(id)?.nome,
+});
 
 /** Il nome di una famiglia di effetto, per le schede degli effetti aggiuntivi. */
 export const NOME_FAMIGLIA_EFFETTO: Record<EffettoVoce['tipo'], string> = {
