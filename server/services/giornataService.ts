@@ -39,6 +39,7 @@ import { confidentiAnnullatiAlVecchioModo, nuovaGenerazione, riallineaVoceNelReg
 import { disponibilitaAcquistoCorrente } from './negoziService.js';
 import type { NuovaRegistrazioneAcquisto } from '../../shared/acquisti.js';
 import type { PropostaPartitaDto } from '../../shared/propostePartita.js';
+import { scelteEsitoDellaVoce } from './esitiAttivitaService.js';
 
 export interface RigaVoce {
   uid: string; data: string; fascia: string; ordine: number; genere: string; azione: string; note: string | null; tipo: string;
@@ -198,8 +199,13 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   }
   // BON-01: le proposte di punti ancora aperte di questa voce (quelle della voce e quelle del consumo che la voce ha confermato)
   const daApplicare = ctx.partita === undefined ? 0 : decisioniApertePerVoce(ctx.partita, r.uid);
+  // L13: le scelte che la spunta chiederà (esito del turno, note di una Dote a valori possibili), al giorno della voce; gli effetti rivendicati
+  // da un acquisto o da una pesca non si applicano come legacy e quindi non chiedono niente (stessa regola di `applicaEffettiVoce`)
+  const sostituiti = new Set(fonte.effetti.flatMap(({ effetto: e }) => e.tipo === 'acquisto' ? e.sostituisceDoti : e.tipo === 'pesca' ? [...e.sostituisceDoti, ...e.sostituisceTurni] : []));
+  const scelteEsito = ctx.partita !== undefined && spuntabile && !ctx.fatte.has(r.uid) && fonte.stato === 'convertita'
+    ? scelteEsitoDellaVoce(ctx.partita, { data: r.data, fascia: fasciaDi(r) }, fonte.effetti.filter((e) => !sostituiti.has(e.uid))) : [];
   return {
-    ...v, effettiVoce: fonte, ricevuteEffetti, ...(daApplicare > 0 ? { daApplicare } : {}),
+    ...v, effettiVoce: fonte, ricevuteEffetti, ...(daApplicare > 0 ? { daApplicare } : {}), ...(scelteEsito.length ? { scelteEsito } : {}),
     ...(aperture.length ? { apertureDedali: aperture } : {}), ...avvisiDisponibilitaDellaVoce(r), ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], produceTesto: spuntabile ? testoEffettiDellaFonte(fonte, ctx.nomi) : [],
     fatta: spuntabile && ctx.fatte.has(r.uid), effetti: ctx.fatte.get(r.uid) ?? null,
     stato: ctx.conf && spuntabile ? statoAzione(v, ctx.conf, ctx.partita) : null, mappa: mappaAzione(v),
@@ -760,7 +766,7 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
       const aperture = opz.apertureDedali === undefined ? undefined : verificaApertureScelte(opz.apertureDedali,
         eVisitaMemento(v) ? apertureDichiarabili() : apertureNegliEffetti(effettiPrima));
       if (precedente) {
-        if (opz.acquisti?.length||opz.pesche?.length) throw httpErrors.conflict('spunta-gia-presente', 'La spunta esiste già: collega il fatto attraverso la proposta storica, senza rieseguire la voce.');
+        if (opz.acquisti?.length||opz.pesche?.length||opz.scelteEsito?.length) throw httpErrors.conflict('spunta-gia-presente', 'La spunta esiste già: collega il fatto attraverso la proposta storica, senza rieseguire la voce (per cambiare l’esito togli e rimetti la spunta).');
         if (aperture === undefined) return; // idempotente: non riapplica punti, letture o turni
         // Mantiene tutti gli altri campi, anche quelli aggiunti da versioni successive. fatta_at e storico non cambiano.
         const effetti = { ...(effettiPrima ?? { doti: [], confidente: null }), apertureDedali: aperture };
@@ -770,9 +776,9 @@ export function spuntaVoce(partitaId: number, uid: string, fatta: boolean, opz: 
       }
       // R10-22: gli eventi che i setter scrivono mentre la spunta applica i suoi effetti portano il legame con la voce e si revocano togliendola
       const { effettiLegacy: effetti } = conVoceDellaSpunta(uid, () => applicaEffettiVoce(partitaId, uid, {
-        applicaLegacy: (id, produce: EffettoLegacyVoce[]) => applicaEffettiAzione(id, { ...v, produce, apertureDedali: aperture, invito: haInvitoDelConfidente(uid, v.riferimento), voceUid: uid, ordineVoce: r.ordine, momento: { data: r.data, fascia: v.fascia, origine: 'azione' } }, opz),
+        applicaLegacy: (id, produce: EffettoLegacyVoce[], scelte) => applicaEffettiAzione(id, { ...v, produce, scelte, apertureDedali: aperture, invito: haInvitoDelConfidente(uid, v.riferimento), voceUid: uid, ordineVoce: r.ordine, momento: { data: r.data, fascia: v.fascia, origine: 'azione' } }, opz),
         annullaLegacy: annullaEffettiAzione,
-      }, { acquisti: opz.acquisti, pesche:opz.pesche, porteAcquisti: { valutaCorrente: disponibilitaAcquistoCorrente }, spuntaFattaIl: adesso }));
+      }, { acquisti: opz.acquisti, pesche:opz.pesche, porteAcquisti: { valutaCorrente: disponibilitaAcquistoCorrente }, spuntaFattaIl: adesso, scelteEsito: opz.scelteEsito }));
       prepared('INSERT INTO spunta_voce_partita (partita_id, voce_uid, fatta_at, effetti_json) VALUES (?, ?, ?, ?)').run(partitaId, uid, adesso, effetti ? JSON.stringify(effetti) : null);
       const dett = [`${v.fascia === 'sera' ? 'Sera' : 'Giorno'} · ${v.tipo}${v.riferimentoTesto ? ` · ${v.riferimentoTesto}` : ''}`];
       if (effetti) dett.push(descriviEffettiApplicati(effetti));
@@ -798,7 +804,7 @@ export function applicaEffettoStoricoDiario(partitaId: number, proposta: Propost
   applicaEffettoStorico(partitaId, proposta, acquisto, tokenAcquisti, {
     // Solo gli effetti selezionati dal motore: niente contesto Confidente o
     // riesecuzione dell'intera voce già spuntata.
-    applicaLegacy: (id, produce) => applicaEffettiAzione(id, { tipo: 'altro', riferimento: null, produce }),
+    applicaLegacy: (id, produce, scelte) => applicaEffettiAzione(id, { tipo: 'altro', riferimento: null, produce, scelte }),
     annullaLegacy: annullaEffettiAzione,
   }, { valutaCorrente: disponibilitaAcquistoCorrente },pesca,tokenPesca);
 }

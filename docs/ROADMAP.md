@@ -1405,6 +1405,20 @@ Tutto dentro «Prepara edizione» e sulla COPIA di `gioco.db` (la preparazione n
    diverso da 2, immagini citate e assenti, correzioni non più accolte. Il rapporto mostra l'elenco (fino a 300 per genere), i conteggi prima e dopo
    dell'unione e gli SHA-256 completi dei file.
 
+## L13 — Dati in testo libero e meccanismi non modellati (censimento del 25 ottobre 2026)
+
+Fonte: `docs/coordinamento/lotti/L13/censimento-2026-10-25.md`. Si procede per ondate («approvo il piano L13 … prosegui ondata per ondata»).
+
+### Ondata 2 — esiti delle attività scelti alla spunta (25 ottobre) — fatto nel codice, da provare dall'utente
+
+| Punto | Che cosa | Stato |
+|---|---|---|
+| a | Meccanismo generale «esito scelto alla spunta»: l'attività dichiara i suoi esiti in UN punto (`attivita.esiti_json`, `shared/esitiAttivita.ts`: chiave stabile, nome, prova, articolo che dà prezzo e ranghi, condizioni, Doti, premi in parole; modo «scelta» o «automatico»); l'effetto `turno` della voce accetta l'esito atteso; alla spunta il Diario chiede l'esito (`SceltaEsitiVoce`, con «Senza punti»), la ricevuta lo ricorda (`turni[].esito`), togliere la spunta toglie il turno; senza scelta la spunta e il + non passano (409 `esito-da-scegliere`); il + di Partita → Progressi apre la stessa scelta (`SceltaEsitoTurno`) e non registra più turni vuoti; la scheda dell'attività mostra gli esiti al posto di «Nessun effetto dichiarato»; editor degli esiti nel modulo dell'attività (solo preparazione) | fatto nel codice |
+| b | Effetto Dote a valori possibili (`possibili` di `dote`, es. Perizia ♪♪ o ♪♪♪ per la fabbricazione): alla spunta si scelgono le note (o «Nessuna»), la ricevuta lo ricorda (`doti[].scelta`); editor nella finestra della voce | fatto nel codice (nessuna voce convertita: elenco da approvare) |
+| c | Migrazione 233 (conservativa, audit `audit-233-esiti-attivita`): Big Bang Burger 3 sfide × vinta/persa con il nome degli articoli («Cosmo Tower»), prezzo e ranghi solo negli articoli (`costo` dell'attività tolto), testo degli articoli che rimanda agli esiti; centro battute per colpi riusciti; bagno pubblico automatico per giorno della settimana; `doti_json` di queste tre svuotate | fatto nel codice, verificata su una copia in memoria dei dati reali |
+| d | Voci del Diario: nessuna conversione; `pianoCollegamentoVoceEsiti` e l'elenco `CANDIDATI_COLLEGAMENTO_ESITI` (9 voci dopo il 05-31) pronti, non applicati | in attesa del sì dell'utente |
+| e | Partite salvate: nessuna ricevuta riscritta, turni esistenti invariati | fatto |
+
 ## Razionalizzazione (dal 20 ottobre 2026) — branch `newreview`, istanza parallela p5s
 
 Mandato dell'utente del 2026-10-20: tutti i lotti del piano di razionalizzazione

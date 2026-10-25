@@ -45,6 +45,30 @@ export function DotiProprieTurno({ effetto: e, onCambia }: { effetto: Turno; onC
   );
 }
 
+type Dote = Extract<EffettoVoce, { tipo: 'dote' }>;
+
+/** L13: la fabbricazione e simili danno valori diversi: chi gioca sceglie le note alla spunta, fra quelle possibili (le note dell'effetto sono la proposta). */
+export function NotePossibiliDote({ effetto: e, onCambia }: { effetto: Dote; onCambia: (e: Dote) => void }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="flex items-center gap-2 testo-13 touch"><input type="checkbox" className="w-5 h-5" checked={!!e.possibili}
+        onChange={(ev) => onCambia(ev.target.checked ? { ...e, possibili: e.note === 3 ? [2, 3] : [e.note, (e.note + 1) as 2 | 3] } : { tipo: 'dote', dote: e.dote, note: e.note })} />Il gioco può dare valori diversi: le note si scelgono alla spunta</label>
+      {e.possibili && (
+        <span className="flex flex-wrap items-center gap-1.5 testo-13" role="group" aria-label="Note possibili">
+          <span className="text-text-secondary">Note possibili:</span>
+          {([1, 2, 3] as const).map((n) => {
+            const dentro = e.possibili!.includes(n);
+            // la proposta resta sempre fra le possibili, e le possibili sono almeno due
+            const bloccata = n === e.note || (dentro && e.possibili!.length <= 2);
+            return <button key={n} type="button" className={`chip touch ${dentro ? 'chip--attivo' : ''}`} aria-pressed={dentro} disabled={bloccata}
+              onClick={() => onCambia({ ...e, possibili: dentro ? e.possibili!.filter((x) => x !== n) : [...e.possibili!, n].sort() })}>{'♪'.repeat(n)}</button>;
+          })}
+        </span>
+      )}
+    </div>
+  );
+}
+
 interface Props {
   effetto: EffettoVoce;
   elenchi: ElenchiVoce;
@@ -58,7 +82,12 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
   const { azione, effetti } = elenchi;
   switch (e.tipo) {
     case 'dote':
-      return <RigaDote etichetta="Dote" dote={{ dote: e.dote, note: e.note }} onCambia={(d) => onCambia({ tipo: 'dote', ...d })} />;
+      return (
+        <div className="flex flex-col gap-2">
+          <RigaDote etichetta="Dote" dote={{ dote: e.dote, note: e.note }} onCambia={(d) => onCambia(e.possibili ? { tipo: 'dote', ...d, possibili: e.possibili.includes(d.note) ? e.possibili : [...e.possibili, d.note].sort() } : { tipo: 'dote', ...d })} />
+          <NotePossibiliDote effetto={e} onCambia={onCambia} />
+        </div>
+      );
     case 'lettura': {
       const lista = e.categoria === 'libro' ? azione.libri : e.categoria === 'film' ? azione.film : azione.videogiochi;
       return (
@@ -73,13 +102,19 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
         </div>
       );
     }
-    case 'turno':
+    case 'turno': {
+      // L13: un'attività con esiti dichiarati dà le Doti dell'esito scelto alla spunta: qui al più l'esito atteso, mai Doti proprie
+      const esiti = azione.attivita.find((a) => a.chiave === e.attivita)?.esiti;
       return (
         <div className="flex flex-col gap-2">
-          <Selettore etichetta="Attività (contata per volte)" valore={e.attivita} opzioni={conCorrente(azione.attivita.filter((a) => a.turni), e.attivita, 'Attività non più nell’elenco')} onCambia={(v) => onCambia({ ...e, attivita: v })} />
-          <DotiProprieTurno effetto={e} onCambia={onCambia} />
+          <Selettore etichetta="Attività (contata per volte)" valore={e.attivita} opzioni={conCorrente(azione.attivita.filter((a) => a.turni), e.attivita, 'Attività non più nell’elenco')} onCambia={(v) => onCambia({ tipo: 'turno', attivita: v })} />
+          {esiti?.modo === 'scelta' && <Selettore etichetta="Esito atteso (lo confermi alla spunta)" valore={e.esito ?? ''} vuoto="Nessuno: lo scegli alla spunta"
+            opzioni={conCorrente(esiti.elenco, e.esito ?? '', 'Esito non più dichiarato')} onCambia={(v) => onCambia(v ? { tipo: 'turno', attivita: e.attivita, esito: v } : { tipo: 'turno', attivita: e.attivita })} />}
+          {esiti?.modo === 'automatico' && <p className="m-0 testo-13 text-text-secondary">L’esito si ricava dal giorno della voce: nessuna scelta da indicare.</p>}
+          {!esiti && <DotiProprieTurno effetto={e} onCambia={onCambia} />}
         </div>
       );
+    }
     case 'acquisto': return <CampiAcquistoEffetto effetto={e} righe={righe} onCambia={onCambia} />;
     case 'pesca': return <EditorEffettoPescaVoce effetto={e} righe={righe} onCambia={onCambia} />;
     case 'fortuna':

@@ -47,9 +47,9 @@ export const DESCRIZIONI_CONDIZIONI: DescrizioniArea = {
   },
   'PUT /api/condizioni/partite/:partita/attivita/:chiave': {
     sommario: 'Porta il contatore delle volte svolte di un\'attività al valore indicato',
-    descrizione: 'Registra o toglie turni dell\'attività fino a `volte`; vale solo per le attività che si contano per volte svolte. Le Doti sociali non si toccano: la risposta dice in `daSegnare` che cosa danno i turni aggiunti (o davano quelli tolti), da segnare a mano.',
+    descrizione: 'Registra o toglie turni dell\'attività fino a `volte`; vale solo per le attività che si contano per volte svolte. Le Doti sociali non si toccano: la risposta dice in `daSegnare` che cosa danno i turni aggiunti (o davano quelli tolti), da segnare a mano. L13 (ondata 2): per un\'attività che dichiara esiti (`ProgressiPartitaDto.attivita[].esiti`) si aggiunge un turno alla volta con `esito` (la chiave, null = «senza punti»), che dà le Doti di quell\'esito; nel modo automatico l\'esito si ricava dal giorno della partita e `esito` non serve. Senza esito il + non registra un turno vuoto (409 `esito-da-scegliere`).',
     risposta: '`ProgressiPartitaDto` aggiornato, con `daSegnare` (elenco di `DoteDaSegnareDto`). Una fonte Confidente rifiuta nuovi incrementi con409; riduzioni e annullamenti della storia preesistente restano possibili e usano le fotografie dei vecchi turni, senza ricalcolare premi.',
-    errori: [[404, 'partita-non-trovata'], [404, 'attivita-non-trovata'], [400, 'attivita-non-conteggiabile'], [409, 'attivita-fonte-confidente']],
+    errori: [[404, 'partita-non-trovata'], [404, 'attivita-non-trovata'], [400, 'attivita-non-conteggiabile'], [409, 'attivita-fonte-confidente'], [400, 'esito-un-turno-alla-volta'], [400, 'esito-non-dichiarato'], [400, 'esito-sconosciuto'], [409, 'esito-da-scegliere'], [409, 'esito-non-disponibile'], [409, 'esito-automatico-incerto'], [409, 'esito-automatico']],
   },
   'PUT /api/condizioni/partite/:partita/punti-negozio/:chiave': {
     sommario: 'Imposta i punti accumulati in un negozio con programma punti manuale',

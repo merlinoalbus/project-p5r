@@ -35,6 +35,8 @@ import { disponibilitaAttivita, sediAttivita, type SediAttivita } from './dispon
 import { fonteConfidenteAttivita } from './fonteConfidenteAttivitaService.js';
 import { fraseDelleCondizioni } from './condizioni/fraseCondizioni.js';
 import { leggiRegolaPesca } from './regolePescaService.js';
+import { esitiDellAttivita, esitiDto, risolviEsitoTurno } from './esitiAttivitaService.js';
+import { leggiEsitiAttivita } from '../../shared/esitiAttivita.js';
 
 interface RigaAttivita { confidente_chiave: string | null; pesca_regola_chiave?: string | null; pesca_ruolo?: 'visita'|'obiettivi'|null }
 
@@ -48,7 +50,9 @@ function datiCatalogoLettura(oggetto: CatalogoOggettoDto | undefined, prezzoGuid
       ? `${cinema ? 'Costo della visione indicato nella guida' : 'Prezzo indicato nella guida'}: ${prezzoGuida.toLocaleString('it-IT')} ¥. Non è un prezzo di vendita ricavato dai listini.` : null };
 }
 
-interface RigaAttivita { chiave: string; ordine: number; nome: string; tipo: string; luogo: string; luogo_chiave: string | null; sede_chiave: string | null; fascia: string | null; costo: number | null; sessioni: number | null; doti_json: string; paga_yen: number | null; paga_massima: number | null; dettagli: string | null; effetti_json: string | null; tracciamento: string; quiz_json: string | null; fonte: string; verificato: number; condizioni_json: string | null }
+interface RigaAttivita { chiave: string; ordine: number; nome: string; tipo: string; luogo: string; luogo_chiave: string | null; sede_chiave: string | null; fascia: string | null; costo: number | null; sessioni: number | null; doti_json: string; paga_yen: number | null; paga_massima: number | null; dettagli: string | null; effetti_json: string | null; tracciamento: string; quiz_json: string | null; fonte: string; verificato: number; condizioni_json: string | null;
+  /** L13 (migrazione 233): gli esiti dichiarati; assente su uno schema di prima. */
+  esiti_json?: string | null }
 interface RigaLibro { effetti_json: string | null; chiave: string; ordine: number; nome: string; dove: string; prezzo: number | null; disponibile_dal: string | null; dote: string | null; note: number | null; sblocca: string | null; sessioni: number | null; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
 interface RigaFilm { effetti_json: string | null; chiave: string; ordine: number; nome: string; dove: 'cinema' | 'dvd'; periodo: string; dote: string | null; note: number | null; note_successive: number | null; prezzo: number | null; sessioni: number; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
 
@@ -95,7 +99,10 @@ const attivitaDto = (r: RigaAttivita, sedi: SediAttivita, st: StatoDisponibilita
   const { prezzo, ...identita } = datiCatalogoLettura(oggetto, r.costo);
   const fonteConfidente = fonteConfidenteAttivita({ ...r }, st);
   const tracciamento = eTracciamentoAttivita(r.tracciamento) ? r.tracciamento : tracciamentoPerTipo(r.tipo);
+  // L13: gli esiti dichiarati (un solo punto: `esiti_json`), con la disponibilità nella partita; mai per le fonti Confidente o pesca
+  const esiti = !fonteConfidente && !r.pesca_regola_chiave ? leggiEsitiAttivita(r.esiti_json) : null;
   const dto = {
+    esiti: esiti ? esitiDto(esiti, st) : null,
     // R10-27/3: lo stato della partita nella scheda, come nelle schede di Confidente e Palazzo (volte svolte, dal contatore unico)
     ...(st && !fonteConfidente && tracciamento === 'svolta' ? { volteSvolte: st.attivitaSvolte.get(r.chiave) ?? 0 } : {}),
     pesca: r.pesca_regola_chiave && r.pesca_ruolo ? { regola: leggiRegolaPesca(r.pesca_regola_chiave), ruolo: r.pesca_ruolo } : null,
@@ -556,6 +563,8 @@ export interface TurnoRegistrato {
   doti: Array<{ chiave: string; nome: string; delta: number; note: number }>;
   /** R9-12/2: la paga canonica dell'attività (`paga_yen` / `paga_massima`), letta e riportata; gli yen non si muovono da qui (promemoria: si cambiano a mano, BON-12). Null se non ne ha. */
   paga: { yen: number; massima: number | null } | null;
+  /** L13: l'esito ottenuto (null = «senza punti»), per le attività che dichiarano esiti; assente per le altre. */
+  esito?: { chiave: string; nome: string; automatico?: boolean } | null;
 }
 
 /**
@@ -563,7 +572,7 @@ export interface TurnoRegistrato {
  * stato della partita già calcolato da chi registra più turni di fila (P5'): il turno ne aggiorna il conto delle volte, l'unica
  * parte dello stato che un turno cambia, così ogni turno vede quel che vedrebbe ricalcolandolo.
  */
-export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ dote: string; note: 1 | 2 | 3 }>, st?: StatoDisponibilita, interno?:{pescaAutorizzata:true}): TurnoRegistrato {
+export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ dote: string; note: 1 | 2 | 3 }>, st?: StatoDisponibilita, interno?:{pescaAutorizzata:true}, esito?: TurnoRegistrato['esito']): TurnoRegistrato {
   const riga = attivitaConTurni(chiave,false,interno?.pescaAutorizzata===true);
   const adesso = nowIso();
   return getDb().transaction(() => {
@@ -585,7 +594,7 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
       applicate.push({ chiave: d.dote, nome: nomeDote(d.dote), delta: punti, note: d.note });
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
-    return { attivita: chiave, nome: riga.nome, ordine, doti: applicate, paga: riga.paga_yen != null ? { yen: riga.paga_yen, massima: riga.paga_massima ?? null } : null };
+    return { attivita: chiave, nome: riga.nome, ordine, doti: applicate, paga: riga.paga_yen != null ? { yen: riga.paga_yen, massima: riga.paga_massima ?? null } : null, ...(esito !== undefined ? { esito } : {}) };
   })();
 }
 
@@ -615,14 +624,24 @@ export function togliTurno(partitaId: number, chiave: string, ordine?: number, i
 }
 
 /** Il contatore dell'attività: porta le volte a `volte` registrando o togliendo turni. Dice che cosa danno i turni
- *  aggiunti (o davano quelli tolti), da segnare a mano nelle Doti. */
-export function impostaVolteAttivita(partitaId: number, chiave: string, volte: number): DoteDaSegnareDto[] {
+ *  aggiunti (o davano quelli tolti), da segnare a mano nelle Doti.
+ *  L13: un'attività che dichiara esiti aggiunge un turno alla volta, con l'esito scelto (`esito`: la chiave, null = «senza punti»;
+ *  nel modo automatico si ricava dal giorno della partita): senza scelta il + si ferma (409) e non registra un turno vuoto. */
+export function impostaVolteAttivita(partitaId: number, chiave: string, volte: number, esito?: string | null): DoteDaSegnareDto[] {
   const prima = puntiRegistrati(partitaId, 'attivita', chiave);
   getDb().transaction(() => {
     // lo stato della partita si calcola una volta per tutti i turni da aggiungere, non una per turno (P5')
     const da = volteSvolte(partitaId, chiave);
     attivitaConTurni(chiave, volte <= da);
     const st = da < volte ? statoDisponibilitaPartita(partitaId) : undefined;
+    const esiti = da < volte ? esitiDellAttivita(chiave)?.esiti ?? null : null;
+    if (esiti) {
+      if (volte - da !== 1) throw httpErrors.badRequest('esito-un-turno-alla-volta', 'Questa attività dichiara i suoi esiti: aggiungi un turno alla volta, scegliendo l’esito.');
+      const r = risolviEsitoTurno(chiave, esiti, esito, st!);
+      registraTurno(partitaId, chiave, r.doti, st, undefined, r.esito);
+      return;
+    }
+    if (esito !== undefined && da < volte) throw httpErrors.badRequest('esito-non-dichiarato', 'Questa attività non dichiara esiti da scegliere.');
     for (let v = da; v < volte; v++) registraTurno(partitaId, chiave, undefined, st);
     for (let v = volteSvolte(partitaId, chiave); v > volte; v--) togliTurno(partitaId, chiave);
   })();

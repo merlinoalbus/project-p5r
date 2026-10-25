@@ -32,6 +32,8 @@ import { verificaPartita } from '../services/verificaPartita.js';
 import { dataGioco, idParam } from '../schemas/comuni.js';
 import { effettiDelTurno, impostaVolteAttivita } from '../services/attivitaService.js';
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
+import { leggiEsitiAttivita } from '../../shared/esitiAttivita.js';
+import { esitiDto } from '../services/esitiAttivitaService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { CONTATORI, EVENTI_STORIA, RANGHI_CLIENTE, dataValida, membroDellEvento, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 import type { ElenchiRegoleDto, PinConStatoDto, ProgressiPartitaDto, RispostaValutaCondizioniDto, VoceCitabileDto } from '../../shared/types.js';
@@ -54,9 +56,12 @@ function negoziConProgramma() {
 /** Le attività che si contano per volte svolte: le sole che una condizione «svolta almeno n volte» può leggere. */
 function attivitaConteggiabili() {
   // contata per volte come la intendono i turni (`attivitaConTurni`): un valore fuori catalogo vale quello del tipo
-  return (prepared('SELECT chiave, nome, tipo, tracciamento, effetti_json FROM attivita WHERE nascosto = 0 ORDER BY nome').all() as Array<{ chiave: string; nome: string; tipo: string; tracciamento: string; effetti_json: string | null }>)
+  // `SELECT *`: su uno schema di prima della 233 `esiti_json` non c'è (nessun esito); si portano fuori solo i campi dichiarati
+  return (prepared('SELECT * FROM attivita WHERE nascosto = 0 ORDER BY nome').all() as Array<{ chiave: string; nome: string; tipo: string; tracciamento: string; effetti_json: string | null; esiti_json?: string | null; confidente_chiave?: string | null; pesca_regola_chiave?: string | null }>)
     .filter((a) => (eTracciamentoAttivita(a.tracciamento) ? a.tracciamento : tracciamentoPerTipo(a.tipo)) === 'svolta')
-    .map(({ effetti_json, tracciamento: _t, ...a }) => ({ ...a, effettiTurno: effettiDelTurno({ effetti_json }) }));
+    .map((a) => ({ chiave: a.chiave, nome: a.nome, tipo: a.tipo, effettiTurno: effettiDelTurno({ effetti_json: a.effetti_json }),
+      // L13: gli esiti dichiarati (mai per le fonti Confidente o pesca, che hanno la loro progressione)
+      esitiDichiarati: a.confidente_chiave || a.pesca_regola_chiave ? null : leggiEsitiAttivita(a.esiti_json) }));
 }
 
 router.get('/elenchi', (_req, res) => {
@@ -129,7 +134,8 @@ function progressi(id: number): ProgressiPartitaDto {
       const avvenuto = st.membriSquadra.has(membro) ? true : st.membriFuoriSquadra.has(membro) ? false : null;
       return { chiave: e.chiave, nome: e.nome, origine: 'calcolato' as const, avvenuto, membro, membroNome: nomiSquadra.get(membro) ?? membro };
     }),
-    attivita: attivitaConteggiabili().map((a) => ({ ...a, volte: svolte.get(a.chiave) ?? 0 })),
+    // L13: con gli esiti dichiarati il + apre la scelta dell'esito, valutata sullo stato della partita (il giorno corrente)
+    attivita: attivitaConteggiabili().map(({ esitiDichiarati, ...a }) => ({ ...a, volte: svolte.get(a.chiave) ?? 0, esiti: esitiDichiarati ? esitiDto(esitiDichiarati, st) : null })),
     puntiNegozio: negozi.filter((n) => n.programma?.calcolo === 'manuale').map((n) => ({ negozio: n.chiave, nome: n.nome, programma: n.programma!.nome, unita: n.programma!.unita, punti: punti.get(n.chiave) ?? 0 })),
     rangoCliente: negozi.filter((n) => n.programma?.calcolo === 'rango-cliente').map((n) => {
       const spesa = st.spesaPerNegozio.get(n.chiave) ?? 0;
@@ -182,11 +188,13 @@ router.put('/partite/:partita/eventi/:chiave', validate({ params: z.object({ par
   res.json(progressi(id));
 });
 
-router.put('/partite/:partita/attivita/:chiave', validate({ params: z.object({ partita: idPartita, chiave }), body: z.object({ volte: z.number().int().min(0).max(999) }) }), (req, res) => {
+router.put('/partite/:partita/attivita/:chiave', validate({ params: z.object({ partita: idPartita, chiave }), body: z.object({ volte: z.number().int().min(0).max(999),
+  // L13: l'esito del turno aggiunto per un'attività che dichiara esiti (null = «senza punti»)
+  esito: z.string().regex(/^[a-z0-9][a-z0-9-]{0,59}$/).nullable().optional() }) }), (req, res) => {
   const id = Number(req.params.partita); verificaPartita(id);
   // ogni turno aggiunto o tolto dice le Doti che dà (o dava), da segnare a mano: le Doti non si toccano
-  const { volte } = req.body as { volte: number };
-  const daSegnare = impostaVolteAttivita(id, String(req.params.chiave), volte);
+  const { volte, esito } = req.body as { volte: number; esito?: string | null };
+  const daSegnare = impostaVolteAttivita(id, String(req.params.chiave), volte, esito);
   res.json({ ...progressi(id), daSegnare });
 });
 

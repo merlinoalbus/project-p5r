@@ -18,6 +18,7 @@ import type { OrariDelLuogo, OrariNegozio } from './orariNegozio.js';
 import type { VoceEffetto } from './effettiCatalogo.js';
 import type { DoteChiave } from './doti.js';
 import type { CategoriaArticolo } from './articoli.js';
+import type { EsitiAttivitaDto, SceltaEsitoVoceDto } from './esitiAttivita.js';
 import type { CategoriaOggetto } from './catalogo.js';
 import type { CategoriaLettura, DoteNote, EffettoAzione } from './effettiAzione.js';
 import type { MeteoPartita } from './meteoPartita.js';
@@ -1241,7 +1242,8 @@ export interface IncontroConfidenteDto {
 
 export interface EffettiAzioneDto {
   /** `delta` sono i punti applicati; `note` le note della guida da cui derivano (1–3); `cinema` se «Anima da cineasta» ha alzato lo scalino. */
-  doti: Array<{ chiave: string; nome: string; delta: number; note?: number; cinema?: boolean }>;
+  /** L13: `note` 0 e `delta` 0 = Dote a valori possibili per cui chi gioca ha scelto «nessuna nota» alla spunta (`scelta` vero quando le note sono state scelte). */
+  doti: Array<{ chiave: string; nome: string; delta: number; note?: number; cinema?: boolean; scelta?: boolean }>;
   confidente: { chiave: string; nome: string; noteRisposta: 1 | 2 | 3; punti: number; bonusArcano: boolean } | null;
   /** Letture e visioni portate avanti dalla spunta (`prima` → `dopo`) con le Doti che l'elemento dà (`doti`, da segnare a
    *  mano: l'app non le tocca), e togliere la spunta non disfa la lettura. `visione`: una visione al cinema contata con le altre spunte. */
@@ -1253,7 +1255,10 @@ export interface EffettiAzioneDto {
   /** Turni registrati dalla spunta (`ordine` del turno nell'attività): togliendo la spunta si toglie quel turno e i suoi punti. */
   turni?: Array<{ attivita: string; nome: string; ordine: number; doti: Array<{ chiave: string; nome: string; delta: number; note: number }>;
     /** R9-12/2: la paga canonica dell'attività al momento del turno (promemoria: gli yen non si muovono da qui). */
-    paga?: { yen: number; massima: number | null } | null }>;
+    paga?: { yen: number; massima: number | null } | null;
+    /** L13: l'esito ottenuto, fra quelli dichiarati dall'attività (le Doti del turno sono le sue); null = «senza punti» scelto alla spunta.
+     *  Assente per le attività senza esiti e nelle ricevute di prima. `automatico`: ricavato dalle condizioni (il giorno), non scelto. */
+    esito?: { chiave: string; nome: string; automatico?: boolean } | null }>;
   /** Aperture dichiarate dall'utente durante questa visita ai Memento. Valgono finché resta la spunta;
    *  altre visite o registrazioni manuali dello stesso evento restano indipendenti. Nessuna data presunta. */
   apertureDedali?: Array<{ chiave: string; nome: string }>;
@@ -1355,6 +1360,9 @@ export interface AzionePercorsoDto {
   dialogoPartita?: DialogoVoceDto;
   /** Gli effetti di `produce` in parole, con i nomi di libri, film e attività («Zorro, il fuorilegge: completato»). */
   produceTesto: string[];
+  /** L13: con una partita e la voce da spuntare, le scelte che la spunta chiede (l'esito del turno di un'attività che dichiara esiti, le note di
+   *  una Dote a valori possibili), con gli esiti disponibili al giorno della voce. Assente se non ce ne sono. */
+  scelteEsito?: SceltaEsitoVoceDto[];
   /** Fatta nella partita. */
   fatta: boolean;
   /** Ciò che la spunta ha applicato (dagli effetti `produce` e dalle note del Confidente): Doti, punti e turni si annullano togliendola, le letture restano. */
@@ -1416,7 +1424,8 @@ export interface ElenchiAzioneDto {
   film: VoceElencoAzione[];
   videogiochi: VoceElencoAzione[];
   /** `turni`: si conta per volte, quindi può essere l'attività di un effetto «turno». */
-  attivita: Array<VoceElencoAzione & { turni: boolean }>;
+  /** L13 `esiti`: gli esiti dichiarati dall'attività (nome e chiave) con il modo, per l'esito atteso del turno nella voce. */
+  attivita: Array<VoceElencoAzione & { turni: boolean; esiti?: { modo: 'scelta' | 'automatico'; elenco: Array<{ chiave: string; nome: string }> } }>;
   negozi: VoceElencoAzione[];
   doti: VoceElencoAzione[];
 }
@@ -2063,6 +2072,8 @@ export interface AttivitaDto {
   condizioni: CondizioneSpilloDto[] | null;
   /** Se la riga, al punto in cui è la partita, è già disponibile. Null senza partita. */
   disponibilita: DisponibilitaDto | null;
+  /** L13: gli esiti che l'attività dichiara (`esiti_json`), con la disponibilità nella partita; null se non ne dichiara. */
+  esiti?: EsitiAttivitaDto | null;
 }
 
 export interface LibroDto {
@@ -3315,7 +3326,9 @@ export interface ProgressiPartitaDto {
     /** Le voci del Diario la cui spunta ha segnato l'evento (R10-22/3): giorno e testo, per la riga «da: voce del 09/04 · …». */
     daVoci?: Array<{ uid: string; giorno: string; testo: string }> }>;
   /** Le sole attività che si contano per volte svolte; `effettiTurno`: che cosa dà un turno («1° turno: Gentilezza, 2 note»). */
-  attivita: Array<{ chiave: string; nome: string; tipo: string; volte: number; effettiTurno: string[] }>;
+  attivita: Array<{ chiave: string; nome: string; tipo: string; volte: number; effettiTurno: string[];
+    /** L13: gli esiti dichiarati dall'attività con la disponibilità nella partita: il + apre la scelta dell'esito (null se non ne dichiara). */
+    esiti: EsitiAttivitaDto | null }>;
   /** Dopo un + o − del contatore: le Doti che i turni aggiunti danno (o quelli tolti davano), da segnare a mano nelle Doti. */
   daSegnare?: DoteDaSegnareDto[];
   /** I negozi con programma punti manuale. */

@@ -20,6 +20,7 @@ import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivit
 import { descriviEffettoAzione, normalizzaEffettiAzione, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
 import type { NomiFraseEffetto } from '../../shared/effettiVoce.js';
 import { eOffertaAojiru } from '../../shared/acquisti.js';
+import { leggiEsitiAttivita } from '../../shared/esitiAttivita.js';
 import type { ConfidentePartitaDto, ElenchiAzioneDto, ElenchiEffettiVoceDto, StatoAzioneDto } from '../../shared/types.js';
 
 const TIPI_RIFERIMENTO = new Set<string>(TIPI_RIFERIMENTO_AZIONE.map((r) => r.chiave));
@@ -140,9 +141,27 @@ export function verificaEffetti(grezzi: unknown[]): EffettoAzione[] {
       if ((eTracciamentoAttivita(a.tracciamento) ? a.tracciamento : tracciamentoPerTipo(a.tipo)) !== 'svolta') {
         throw httpErrors.badRequest('effetto-non-valido', `L'attività «${e.attivita}» non si conta per volte: non ha turni.`);
       }
+      // L13: con gli esiti dichiarati le Doti del turno sono quelle dell'esito (un solo punto): niente Doti proprie, e l'esito atteso deve esistere
+      const esiti = leggiEsitiAttivita((prepared('SELECT * FROM attivita WHERE chiave = ?').get(e.attivita) as { esiti_json?: string | null }).esiti_json);
+      if (esiti && e.doti?.length) throw httpErrors.badRequest('turno-doti-con-esiti', `L'attività «${e.attivita}» dichiara i suoi esiti: le Doti del turno vengono dall'esito scelto, non si scrivono nella voce.`);
+      if (e.esito && !esiti?.esiti.some((x) => x.chiave === e.esito)) throw httpErrors.badRequest('esito-sconosciuto', `L'attività «${e.attivita}» non dichiara l'esito «${e.esito}».`);
+      if (e.esito && esiti?.modo === 'automatico') throw httpErrors.badRequest('esito-automatico', `L'attività «${e.attivita}» ricava l'esito dal giorno: la voce non ne indica uno.`);
     }
   }
   return produce;
+}
+
+/** L13: i nomi degli esiti («attività/esito») e il modo di ogni attività che li dichiara, per la frase del turno. */
+function nomiEsiti(): Pick<NomiEffettiAzione, 'esiti' | 'modiEsiti'> {
+  const esiti: Record<string, string> = {}, modiEsiti: Record<string, 'scelta' | 'automatico'> = {};
+  // `SELECT *`: su uno schema di prima della 233 la colonna non c'è e nessuna attività ha esiti
+  for (const r of prepared('SELECT * FROM attivita').all() as Array<{ chiave: string; esiti_json?: string | null }>) {
+    const e = leggiEsitiAttivita(r.esiti_json);
+    if (!e) continue;
+    modiEsiti[r.chiave] = e.modo;
+    for (const x of e.esiti) esiti[`${r.chiave}/${x.chiave}`] = x.nome;
+  }
+  return { esiti, modiEsiti };
 }
 
 /** I nomi di libri, film, videogiochi e attività per descrivere gli effetti: una lettura per richiesta. */
@@ -154,6 +173,7 @@ export function nomiEffetti(): NomiEffettiAzione {
     film: mappa(`SELECT chiave,titolo_corrente AS nome FROM (${titoliLettura('film')})`),
     videogiochi: mappa(`SELECT chiave,titolo_corrente AS nome FROM (${titoliLettura('attivita', "WHERE l.tipo = 'videogioco'")})`),
     attivita: mappa(`SELECT chiave,titolo_corrente AS nome FROM (${titoliLettura('attivita')})`),
+    ...nomiEsiti(),
   };
 }
 
@@ -191,7 +211,11 @@ export function elenchiAzione(): ElenchiAzioneDto {
   const voci = (sql: string) => prepared(sql).all() as Array<{ chiave: string; nome: string; dettaglio?: string | null }>;
   /** Le stesse righe senza `dettaglio` quando è vuoto o nullo, così il campo compare solo se ha un valore. */
   const pulite = (r: Array<{ chiave: string; nome: string; dettaglio?: string | null }>) => r.map((x) => ({ chiave: x.chiave, nome: x.nome, ...(x.dettaglio ? { dettaglio: x.dettaglio } : {}) }));
-  const attivita = prepared(`SELECT chiave,titolo_corrente AS nome,tipo,tracciamento,confidente_chiave FROM (${titoliLettura('attivita', 'WHERE l.nascosto = 0 ORDER BY l.ordine')})`).all() as Array<{ chiave: string; nome: string; tipo: string; tracciamento: string; confidente_chiave: string | null }>;
+  // `*` e poi `titolo_corrente`: su uno schema di prima della 233 `esiti_json` non c'è (nessun esito)
+  const attivita = (prepared(`SELECT * FROM (${titoliLettura('attivita', 'WHERE l.nascosto = 0 ORDER BY l.ordine')})`).all() as Array<{ chiave: string; titolo_corrente: string; tipo: string; tracciamento: string; confidente_chiave: string | null; esiti_json?: string | null }>)
+    .map((a) => ({ ...a, nome: a.titolo_corrente, esiti_json: a.esiti_json ?? null }));
+  // L13: gli esiti di ogni attività, per scegliere nella voce l'esito atteso del turno (solo nel modo «scelta»)
+  const esitiDi = (json: string | null) => { const e = leggiEsitiAttivita(json); return e ? { esiti: { modo: e.modo, elenco: e.esiti.map((x) => ({ chiave: x.chiave, nome: x.nome })) } } : {}; };
   return {
     confidenti: (prepared('SELECT chiave, nome, arcana FROM confidente ORDER BY ordine').all() as Array<{ chiave: string; nome: string; arcana: string }>).map((c) => ({ chiave: c.chiave, nome: c.nome, dettaglio: t('arcana', c.arcana) })),
     dungeon: pulite(voci('SELECT chiave, nome FROM dungeon ORDER BY ordine')),
@@ -199,7 +223,7 @@ export function elenchiAzione(): ElenchiAzioneDto {
     libri: pulite(voci(`SELECT chiave,titolo_corrente AS nome,${catalogoOggettiDisponibile() ? 'NULL' : 'dove'} AS dettaglio FROM (${titoliLettura('libro', 'WHERE l.nascosto = 0 ORDER BY l.ordine')})`)),
     film: pulite(voci(`SELECT chiave,titolo_corrente AS nome,CASE dove WHEN 'cinema' THEN 'Cinema' ELSE 'DVD' END AS dettaglio FROM (${titoliLettura('film', 'WHERE l.nascosto = 0 ORDER BY l.ordine')})`)),
     videogiochi: attivita.filter((a) => a.tipo === 'videogioco').map((a) => ({ chiave: a.chiave, nome: a.nome })),
-    attivita: attivita.map((a) => ({ chiave: a.chiave, nome: a.nome, turni: !a.confidente_chiave && (eTracciamentoAttivita(a.tracciamento) ? a.tracciamento : tracciamentoPerTipo(a.tipo)) === 'svolta' })),
+    attivita: attivita.map((a) => ({ chiave: a.chiave, nome: a.nome, turni: !a.confidente_chiave && (eTracciamentoAttivita(a.tracciamento) ? a.tracciamento : tracciamentoPerTipo(a.tipo)) === 'svolta', ...(a.confidente_chiave ? {} : esitiDi(a.esiti_json)) })),
     negozi: pulite(voci('SELECT chiave, nome, luogo AS dettaglio FROM negozio WHERE nascosto = 0 ORDER BY ordine')),
     doti: pulite(voci('SELECT chiave, nome FROM dote_sociale ORDER BY ordine')),
   };

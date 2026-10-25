@@ -10,6 +10,8 @@ export function campiAutonomiAttivitaPesca(r:Record<string,unknown>):string[] {
     try{const v=typeof raw==='string'?JSON.parse(raw) as unknown:raw;if(!Array.isArray(v)||v.length!==0)pieni.push(c);}catch{pieni.push(c);}
   }
   if(r.quiz_json!=null&&r.quiz_json!=='')pieni.push('quiz_json');
+  // L13: la pesca ha il suo registro dei risultati, non gli esiti generici dell'attività
+  if(r.esiti_json!=null&&r.esiti_json!==''&&r.esiti_json!=='null')pieni.push('esiti_json');
   const atteso=r.pesca_ruolo==='visita'?'svolta':'nessuno';
   if(r.tracciamento!==undefined&&r.tracciamento!==atteso)pieni.push('tracciamento');
   return pieni;

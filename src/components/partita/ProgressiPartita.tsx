@@ -28,6 +28,7 @@ import { RegistroPesca } from '../pesca/RegistroPesca';
 import { ATTIVITA_PESCA, EVENTI_PESCA, SFIDA_PESCA } from '../../../shared/pesca';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { TitoloSezione } from '../shared/TitoloSezione';
+import { SceltaEsitoTurno } from '../guida/SceltaEsito';
 
 type Sezione = 'storia' | 'attivita' | 'negozi' | 'pesca';
 type Evento = Progressi['eventi'][number];
@@ -92,6 +93,8 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
   const dati = useCarica(() => getProgressiPartita(partitaId), [partitaId]);
   const [occupato, setOccupato] = useState<string | null>(null);
   const [stato, setStato] = useState<Progressi | null>(null);
+  // L13: l'attività di cui il + ha aperto la scelta dell'esito (una per volta)
+  const [sceltaEsito, setSceltaEsito] = useState<string | null>(null);
   const [params, setParams] = useSearchParams();
   const { hash } = useLocation();
   // all'apertura: il collegamento alla pesca (#pesca) > l'indirizzo > l'ultima scelta > Storia
@@ -221,7 +224,7 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
               <section className="flex flex-col gap-3" aria-labelledby="progressi-attivita">
                 <div className="flex flex-col gap-1">
                   <TitoloSezione variante="display" id="progressi-attivita">Attività svolte</TitoloSezione>
-                  <p className="m-0 testo-13 text-text-secondary">Quante volte hai fatto ogni attività: ogni + ti ricorda le Doti da segnare.</p>
+                  <p className="m-0 testo-13 text-text-secondary">Quante volte hai fatto ogni attività: ogni + ti ricorda le Doti da segnare; dove l’attività ha più esiti, il + ti chiede quale hai ottenuto.</p>
                 </div>
                 <div className="progressi-attivita">
                   {gruppiAttivita.map(([tipo, righe]) => (
@@ -230,18 +233,28 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
                       <ul className="m-0 p-0 list-none flex flex-col">
                         {righe.map((a) => {
                           const pesca = a.chiave === ATTIVITA_PESCA || a.chiave === SFIDA_PESCA;
+                          // L13: con gli esiti dichiarati il + chiede l'esito (modo «scelta») o lo ricava dal giorno (modo automatico): mai un turno vuoto
+                          const esiti = a.esiti;
+                          const piu = () => esiti?.modo === 'scelta' ? setSceltaEsito(a.chiave) : void salva(a.chiave, () => impostaAttivitaSvolta(partitaId, a.chiave, a.volte + 1));
                           return (
                             <li key={a.chiave} className="progressi-attivita__riga">
                               <span className="min-w-0 flex-[1_1_12rem]">
                                 <span className="block">{a.nome}</span>
                                 {a.effettiTurno?.length > 0 && <span className="block testo-12 text-text-secondary">Ogni turno: {a.effettiTurno.join(' · ')}</span>}
+                                {esiti && <span className="block testo-12 text-text-secondary">{esiti.modo === 'automatico'
+                                  ? `Esito dal giorno: ${esiti.esiti.map((e) => `${e.nome} (${e.doti.map((d) => `${d.nome} ${'♪'.repeat(d.note)}`).join(', ') || 'nessuna Dote'})`).join(' · ')}${esiti.automatico ? '' : ' · oggi non se ne ricava uno'}`
+                                  : `Esiti: ${esiti.esiti.length} da scegliere a ogni +`}</span>}
                               </span>
                               {pesca && <PulsanteVisivo compatto className="shrink-0" icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Registra nella scheda Pesca" onClick={() => scegli('pesca')} />}
                               <span className="condizione-numero shrink-0" role="group" aria-label={`Volte: ${a.nome}`}>
                                 <button type="button" className="touch" aria-label={`${a.nome}: una volta in meno`} disabled={occupato === a.chiave || a.volte <= 0} onClick={() => void salva(a.chiave, () => impostaAttivitaSvolta(partitaId, a.chiave, a.volte - 1))}><IconaAzione chiave="meno" dimensione={16} /></button>
                                 <span className="condizione-numero__valore">{a.volte}</span>
-                                {!pesca && <button type="button" className="touch" aria-label={`${a.nome}: una volta in più`} disabled={occupato === a.chiave || a.volte >= 999} onClick={() => void salva(a.chiave, () => impostaAttivitaSvolta(partitaId, a.chiave, a.volte + 1))}><IconaAzione chiave="piu" dimensione={16} /></button>}
+                                {!pesca && <button type="button" className="touch" aria-label={`${a.nome}: una volta in più`} aria-expanded={esiti?.modo === 'scelta' ? sceltaEsito === a.chiave : undefined} disabled={occupato === a.chiave || a.volte >= 999 || (esiti?.modo === 'automatico' && !esiti.automatico)} onClick={piu}><IconaAzione chiave="piu" dimensione={16} /></button>}
                               </span>
+                              {esiti?.modo === 'scelta' && sceltaEsito === a.chiave && (
+                                <SceltaEsitoTurno nome={a.nome} esiti={esiti.esiti} occupato={occupato === a.chiave} onAnnulla={() => setSceltaEsito(null)}
+                                  onScegli={(esito) => void salva(a.chiave, () => impostaAttivitaSvolta(partitaId, a.chiave, a.volte + 1, esito)).then(() => setSceltaEsito(null))} />
+                              )}
                             </li>
                           );
                         })}

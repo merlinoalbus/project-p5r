@@ -23,8 +23,8 @@ const dati: ProgressiPartitaDto = {
     { chiave: 'evento-haru', nome: 'Evento con Haru (entra in squadra)', origine: 'calcolato', avvenuto: null, membro: 'haru', membroNome: 'Haru Okumura' },
   ],
   attivita: [
-    { chiave: 'biliardo', nome: 'Biliardo', tipo: 'mini-gioco', volte: 1, effettiTurno: [] },
-    { chiave: 'lavoro-rafflesia', nome: 'Fioraio Rafflesia', tipo: 'lavoro', volte: 0, effettiTurno: ['1° turno: Gentilezza, 2 note', 'Dal 2° turno: Gentilezza, 2 note'] },
+    { chiave: 'biliardo', nome: 'Biliardo', tipo: 'mini-gioco', volte: 1, effettiTurno: [], esiti: null },
+    { chiave: 'lavoro-rafflesia', nome: 'Fioraio Rafflesia', tipo: 'lavoro', volte: 0, effettiTurno: ['1° turno: Gentilezza, 2 note', 'Dal 2° turno: Gentilezza, 2 note'], esiti: null },
   ],
   puntiNegozio: [{ negozio: 'vestiti-usati-kichijoji', nome: 'Vestiti usati', programma: 'Punti del negozio', unita: 'punti', punti: 20 }],
   rangoCliente: [{ negozio: 'tanaka-affari-loschi', nome: 'Affari loschi di Tanaka', programma: 'Grado cliente', spesa: 12000, rango: { chiave: 'nero', nome: 'Nero' }, prossimo: { chiave: 'oscuro', nome: 'Oscuro', spesa: 50000 } }],

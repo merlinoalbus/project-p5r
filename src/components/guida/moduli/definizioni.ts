@@ -11,6 +11,7 @@ import { campiAutonomiAttivitaConfidente } from '../../../../shared/attivitaConf
 import { campiAutonomiAttivitaPesca } from '../../../../shared/attivitaPesca';
 import { leggiGiorniQuiz, normalizzaQuiz, type QuizAttivita } from '../../../../shared/quizAttivita';
 import { normalizzaCostoScambio } from '../../../../shared/catalogo';
+import { normalizzaEsitiAttivita } from '../../../../shared/esitiAttivita';
 import type { TipoCatalogo } from '../../../types';
 import { jsonDi, jsonSenzaPerdite, numeroDi, senzaTemporanei, testoDi, testoOnull, verificatoDi, type Dati, type DefinizioneModulo } from './base';
 
@@ -145,6 +146,10 @@ function attivitaCon(tipoFisso?: 'videogioco'): DefinizioneModulo {
         _effettiRaw: e?.dati.effetti_json ?? null, _quizRaw: e?.dati.quiz_json ?? null,
         _effettiDaRisolvere: !jsonSenzaPerdite(e?.dati.effetti_json, normalizzaVociEffetto),
         _quizDaRisolvere: !jsonSenzaPerdite(e?.dati.quiz_json, normalizzaQuiz),
+        // L13: gli esiti scelti alla spunta; un valore salvato che l'editor non sa leggere resta com'è finché non lo si sostituisce
+        esiti_json: normalizzaEsitiAttivita(jsonDi<unknown>(e?.dati.esiti_json, null)),
+        _esitiRaw: e?.dati.esiti_json ?? null,
+        _esitiDaRisolvere: e?.dati.esiti_json != null && normalizzaEsitiAttivita(jsonDi<unknown>(e.dati.esiti_json, null)) === null,
 
         sede_chiave: (e?.dati.sede_chiave as string | null) ?? null, luogo_chiave: (e?.dati.luogo_chiave as string | null) ?? null,
         costo: numeroDi(e?.dati.costo), paga_yen: numeroDi(e?.dati.paga_yen), paga_massima: numeroDi(e?.dati.paga_massima),
@@ -158,7 +163,8 @@ function attivitaCon(tipoFisso?: 'videogioco'): DefinizioneModulo {
     },
     // con la guida del quiz i giorni devono essere giorni del mese
     valido: (d) => testoDi(d.nome).trim().length > 0 && (d.tipo !== 'videogioco' || (numeroDi(d.sessioni) ?? 0) >= 1)
-      && !d._effettiDaRisolvere && !d._quizDaRisolvere
+      && !d._effettiDaRisolvere && !d._quizDaRisolvere && !d._esitiDaRisolvere
+      && (d.esiti_json == null || normalizzaEsitiAttivita(d.esiti_json) !== null)
       && (!d.quiz_json || leggiGiorniQuiz(testoDi(d._giorniQuiz)) !== null)
       && (!testoOnull(d.pesca_regola_chiave) ? !testoOnull(d.pesca_ruolo) : (d.tipo !== 'videogioco' && !testoOnull(d.confidente_chiave) && (d.pesca_ruolo === 'visita' || d.pesca_ruolo === 'obiettivi')
         && campiAutonomiAttivitaPesca({ ...d, fascia: testoOnull(d.fascia), doti_json: d.doti_json ?? d._dotiStoriche }).length === 0))

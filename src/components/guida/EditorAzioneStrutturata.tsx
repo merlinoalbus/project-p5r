@@ -22,7 +22,7 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { FilaScelta } from './FilaScelta';
 import { SceltaQuale } from './SceltaQuale';
-import { DotiProprieTurno } from './CampiEffettoVoce';
+import { DotiProprieTurno, NotePossibiliDote } from './CampiEffettoVoce';
 import { opzioniArticoli, opzioniDomande, opzioniStoria, type ElenchiVoce } from '../../utils/opzioniEffetti';
 import { EffettiNonConvertibili } from './EditorEffettiVoce';
 import { TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type TipoAzione } from '../../../shared/effettiAzione';
@@ -165,7 +165,9 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi }: Props & { 
           <>
             {frase(`${nomeDote(eff.dote)} +${'♪'.repeat(eff.note)}: la Dote che dà il gioco, da segnare nelle Doti.`)}
             <span className="testo-13 text-text-secondary">Note che dà il gioco</span>
-            <FilaScelta etichetta="Note della Dote" valore={String(eff.note)} opzioni={NOTE} onCambia={(v) => scrivi({ ...eff, note: Number(v) as 1 | 2 | 3 })} />
+            {/* L13: con le note possibili (scelte alla spunta) la proposta resta sempre fra le possibili */}
+            <FilaScelta etichetta="Note della Dote" valore={String(eff.note)} opzioni={NOTE} onCambia={(v) => { const note = Number(v) as 1 | 2 | 3; scrivi(eff.possibili ? { ...eff, note, possibili: eff.possibili.includes(note) ? eff.possibili : [...eff.possibili, note].sort() } : { ...eff, note }); }} />
+            <NotePossibiliDote effetto={eff} onCambia={scrivi} />
           </>
         ) : rif && eAltroGenere('dote', rif) ? altroCollegamento('la Dote') : mancaQuale('la Dote');
         break;

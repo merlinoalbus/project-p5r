@@ -24,6 +24,8 @@ import { annullaIncontro, registraIncontro, type MomentoIncontro } from './incon
 import { z } from 'zod';
 import { httpErrors } from '../utils/httpError.js';
 import type { RichiestaRegistraAcquisto } from '../../shared/acquisti.js';
+import type { SceltaEsitoSpunta } from '../../shared/esitiAttivita.js';
+import { esitiDellAttivita, type SceltaRisolta } from './esitiAttivitaService.js';
 
 const numeroReceipt = z.number().finite();
 const chiaveReceipt = z.string().min(1);
@@ -58,6 +60,8 @@ export interface OpzioniSpunta {
   noteRisposta?: 1 | 2 | 3;
   /** Scelte esplicite della visita, validate da giornataService; assente preserva quelle già registrate. */
   apertureDedali?: string[];
+  /** L13: l'esito dei turni delle attività che dichiarano esiti e le note delle Doti a valori possibili, per uid dell'effetto (`risolviScelteSpunta`). */
+  scelteEsito?: SceltaEsitoSpunta[];
 }
 
 /** Ciò che serve dell'azione: il tipo e il collegamento dicono se è un incontro, `produce` il resto. `momento` (giorno, fascia,
@@ -74,6 +78,8 @@ export interface AzioneConEffetti {
   /** La voce del Diario che applica gli effetti e il suo ordine nella giornata: i punti e il passaggio di rango entrano nel registro cronologico (R10-11c). */
   voceUid?: string;
   ordineVoce?: number;
+  /** L13: le scelte già risolte, nella stessa posizione degli effetti di `produce` (undefined = l'effetto non chiede una scelta). */
+  scelte?: ReadonlyArray<SceltaRisolta | undefined>;
 }
 
 /** Le visioni al cinema di un film già contate dalle spunte della partita (voci della giornata). */
@@ -96,11 +102,15 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
   const turni: NonNullable<EffettiAzioneDto['turni']> = [];
   // le Doti di un'azione su un film o un DVD salgono di uno scalino con «Anima da cineasta», come i film stessi
   const cinema = (a.tipo === 'dvd' || a.riferimento?.tipo === 'film') && haAnimaDaCineasta(partitaId);
-  for (const e of a.produce) {
+  for (const [i, e] of a.produce.entries()) {
+    const scelta = a.scelte?.[i];
     if (e.tipo === 'dote') {
+      // L13: una Dote a valori possibili vale le note scelte alla spunta (0 = nessuna: la ricevuta lo ricorda, nessuna proposta)
+      if (e.possibili && scelta?.tipo !== 'dote') throw httpErrors.conflict('esito-da-scegliere', `${nomeDote(e.dote)}: scegli quante note hai ottenuto prima di spuntare.`);
+      const note = scelta?.tipo === 'dote' ? scelta.note : e.note;
       // le Doti si segnano a mano (`aggiornaDote`): qui si dice che cosa il gioco dà, e lo si ricorda
-      const punti = puntiDaNote(e.note, false, fortunaSu(partitaId, e.dote), cinema);
-      doti.push({ chiave: e.dote, nome: nomeDote(e.dote), delta: punti, note: e.note, cinema });
+      const punti = note === 0 ? 0 : puntiDaNote(note, false, fortunaSu(partitaId, e.dote), cinema);
+      doti.push({ chiave: e.dote, nome: nomeDote(e.dote), delta: punti, note, cinema, ...(scelta?.tipo === 'dote' ? { scelta: true } : {}) });
     } else if (e.tipo === 'lettura') {
       const stato = avanzamentoLettura(partitaId, e.categoria, e.chiave);
       // al cinema (nessun totale) «completato» è una visione: le visioni sono quante le spunte che le contano, questa compresa
@@ -111,7 +121,10 @@ export function applicaEffettiAzione(partitaId: number, a: AzioneConEffetti, opz
       const dateDallaLettura = obiettivo > stato.avanzamento ? impostaLettura(partitaId, e.categoria, e.chiave, { avanzamento: obiettivo }).daSegnare ?? [] : [];
       letture.push({ categoria: e.categoria, chiave: e.chiave, nome: stato.nome, prima: stato.avanzamento, dopo: Math.max(obiettivo, stato.avanzamento), ...(dateDallaLettura.length ? { doti: dateDallaLettura } : {}), ...(visione ? { visione: true } : {}) });
     } else {
-      const t = registraTurno(partitaId, e.attivita, e.doti);
+      // L13: il turno di un'attività che dichiara esiti dà le Doti dell'esito scelto (o ricavato dal giorno), e la ricevuta lo ricorda;
+      // senza la scelta risolta il turno non si registra (sarebbe un turno vuoto: la regola vale per ogni strada che arriva qui)
+      if (scelta?.tipo !== 'turno' && esitiDellAttivita(e.attivita)?.esiti) throw httpErrors.conflict('esito-da-scegliere', 'Questa attività dichiara i suoi esiti: scegli l’esito ottenuto prima di registrare il turno.');
+      const t = scelta?.tipo === 'turno' ? registraTurno(partitaId, e.attivita, scelta.doti, undefined, undefined, scelta.esito) : registraTurno(partitaId, e.attivita, e.doti);
       turni.push(t);
     }
   }
@@ -167,9 +180,10 @@ function descriviIncontro(i: IncontroConfidenteDto): string {
 
 /** La frase di ciò che la spunta ha fatto, per lo storico. Le Doti sono quelle che il gioco dà, da segnare a mano. */
 export function descriviEffettiApplicati(e: EffettiAzioneDto): string {
-  const parti = e.doti.map((d) => `${d.nome} +${d.delta}${d.note ? ` (${'♪'.repeat(d.note)}${d.cinema ? ' + Anima da cineasta' : ''})` : ''} da segnare nelle Doti`);
+  // L13: «nessuna nota» scelta alla spunta per una Dote a valori possibili si dice, non si propone
+  const parti = e.doti.map((d) => d.scelta && d.note === 0 ? `${d.nome}: nessuna nota (scelta alla spunta)` : `${d.nome} +${d.delta}${d.note ? ` (${'♪'.repeat(d.note)}${d.cinema ? ' + Anima da cineasta' : ''}${d.scelta ? ', scelte alla spunta' : ''})` : ''} da segnare nelle Doti`);
   for (const l of e.letture ?? []) parti.push(`${l.dopo > l.prima ? `${l.nome}: da ${l.prima} a ${l.dopo}` : `${l.nome}: già a ${l.prima}`}${l.doti?.length ? ` (${l.doti.map((d) => `${d.nome} +${d.delta}`).join(', ')})` : ''}`);
-  for (const t of e.turni ?? []) parti.push(`${t.nome}: turno ${t.ordine}${t.doti.length ? ` (${t.doti.map((d) => `${d.nome} +${d.delta}`).join(', ')})` : ''}`);
+  for (const t of e.turni ?? []) parti.push(`${t.nome}: turno ${t.ordine}${t.esito ? ` · esito ${t.esito.nome}${t.esito.automatico ? ' (dal giorno)' : ''}` : t.esito === null ? ' · senza punti' : ''}${t.doti.length ? ` (${t.doti.map((d) => `${d.nome} +${d.delta}`).join(', ')})` : ''}`);
   if (e.incontro) parti.push(descriviIncontro(e.incontro));
   if (e.confidente) parti.push(`${e.confidente.nome} +${e.confidente.punti} punti (${e.confidente.noteRisposta} ${e.confidente.noteRisposta === 1 ? 'nota' : 'note'}${e.confidente.bonusArcano ? ', bonus arcano' : ''})`);
   for (const a of e.apertureDedali ?? []) parti.push(a.nome);

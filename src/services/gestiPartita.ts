@@ -63,6 +63,11 @@ const spunta = z.object({ uid, fatta: z.literal(true), noteRisposta: z.union([z.
   apertureDedali: z.array(z.string().min(1).max(200)).max(100).refine(a => new Set(a).size === a.length).optional(),
   acquisti: z.array(registra).min(1).max(100).refine(a => new Set(a.map(r => r.operazioneId)).size === a.length).optional(),
   pesche: z.array(schemaRegistraSessioneGestoPesca).min(1).max(100).refine(a => new Set(a.map(r => r.operazioneId)).size === a.length).optional(),
+  // L13: le scelte d'esito viaggiano con la spunta (stesso corpo della rotta)
+  scelteEsito: z.array(z.discriminatedUnion('tipo', [
+    z.object({ effettoUid: uid, tipo: z.literal('turno'), esito: z.string().regex(/^[a-z0-9][a-z0-9-]{0,59}$/).nullable() }).strict(),
+    z.object({ effettoUid: uid, tipo: z.literal('dote'), note: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]) }).strict(),
+  ])).min(1).max(50).refine(a => new Set(a.map(s => s.effettoUid)).size === a.length).optional(),
 }).strict().refine(v => ((v.acquisti?.length ?? 0) + (v.pesche?.length ?? 0) > 0) && [...(v.acquisti ?? []), ...(v.pesche ?? [])].every(r => r.fonte.tipo === 'diario' && r.fonte.voceUid === v.uid));
 const bersaglioSchema = z.object({ etichetta: z.string().min(1).max(500), articolo: chiave.optional(), voceUid: uid.optional(), effettoUid: uid.optional(), pesca: z.literal(true).optional(), sessionePesca: uid.optional(), fontePesca: uid.optional() }).strict();
 export type BersaglioGestoPartita = z.infer<typeof bersaglioSchema>;

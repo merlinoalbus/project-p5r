@@ -9,6 +9,12 @@ import { APERTURE_DEDALI } from '../../shared/condizioniSpillo.js';
 import { bodyRegistraAcquisto } from './acquisti.js';
 import { bodyRegistraSessionePesca } from './pesca.js';
 
+/** L13: la scelta d'esito di un effetto della voce alla spunta (`shared/esitiAttivita.ts`, `SceltaEsitoSpunta`). */
+const sceltaEsitoSpunta = z.discriminatedUnion('tipo', [
+  z.object({ effettoUid: uidVoce, tipo: z.literal('turno'), esito: z.string().regex(/^[a-z0-9][a-z0-9-]{0,59}$/).nullable() }).strict(),
+  z.object({ effettoUid: uidVoce, tipo: z.literal('dote'), note: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]) }).strict(),
+]);
+
 export const difficolta = z.enum(['sicura', 'facile', 'normale', 'difficile', 'spietata']);
 
 const campiPartita = {
@@ -195,7 +201,9 @@ export const bodyAzionePercorso = z.object({
   pesche: z.array(bodyRegistraSessionePesca).max(100).optional(),
   apertureDedali: z.array(z.string().refine((c) => APERTURE_DEDALI.some((a) => a.chiave === c), 'Apertura di dedalo non riconosciuta.'))
     .max(APERTURE_DEDALI.length).refine((c) => new Set(c).size === c.length, 'Un dedalo si dichiara una sola volta nella visita.').optional(),
-}).strict().refine((d) => d.fatta || (!d.apertureDedali?.length && !d.acquisti?.length&&!d.pesche?.length), 'Aperture e fatti osservati si dichiarano quando si registra la visita, non quando si toglie la spunta.');
+  /** L13: l'esito dei turni delle attività che dichiarano esiti e le note delle Doti a valori possibili, per uid dell'effetto. */
+  scelteEsito: z.array(sceltaEsitoSpunta).max(50).refine((s) => new Set(s.map((x) => x.effettoUid)).size === s.length, 'Ogni effetto ha una sola scelta.').optional(),
+}).strict().refine((d) => d.fatta || (!d.apertureDedali?.length && !d.acquisti?.length&&!d.pesche?.length&&!d.scelteEsito?.length), 'Aperture, esiti e fatti osservati si dichiarano quando si registra la visita, non quando si toglie la spunta.');
 export const bodyGiornoCorrente = z.object({ data: dataGioco });
 
 // ---- Meteo della partita ----

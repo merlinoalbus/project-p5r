@@ -13,6 +13,7 @@ import { normalizzaEffettoOggetto, type EffettoOggetto } from '../../shared/effe
 import { TIPI_LUOGO } from '../../shared/tipiLuogo.js';
 import { LIMITI_QUIZ, normalizzaQuiz } from '../../shared/quizAttivita.js';
 import { LIMITI_COSTO_OGGETTO } from '../../shared/catalogo.js';
+import { normalizzaEsitiAttivita } from '../../shared/esitiAttivita.js';
 
 /** Le chiavi di un elenco di costanti, nella forma di tupla non vuota che `z.enum` richiede. */
 const chiaviDi = <T extends { chiave: string }>(elenco: readonly T[]) => elenco.map((e) => e.chiave) as [string, ...string[]];
@@ -212,6 +213,14 @@ const datiAttivitaBase = z.object({
     condizione: testo(400).nullable(),
   })).max(10).transform((v) => JSON.stringify(v)).optional(),
   quiz_json: quizJson,
+  /** L13: gli esiti scelti alla spunta (`shared/esitiAttivita.ts`), validi per intero o rifiutati; null = nessun esito dichiarato. */
+  esiti_json: z.unknown().superRefine((v, ctx) => {
+    if (v === null) return;
+    const e = normalizzaEsitiAttivita(v);
+    if (e === null) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Gli esiti non sono validi: chiavi distinte, un nome, Doti con 1–3 note, condizioni riconosciute.' });
+    else if (e.esiti.some((x) => x.condizioni.some((c) => foglieCondizione(c).some((f) => f.tipo === 'spillo' || f.tipo === 'voce-guida')))) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Lo stato di un pin o di una voce della guida si usa solo nelle condizioni dei pin delle mappe.' });
+  })
+    .transform((v) => (v === null ? null : JSON.stringify(normalizzaEsitiAttivita(v)))).optional(),
 });
 const datiAttivita =datiAttivitaBase.superRefine(rifinisciAttivita);
 const datiAttivitaParziale = datiAttivitaBase.partial().superRefine(rifinisciAttivita);

@@ -23,6 +23,7 @@
 // ============================================================
 
 import { eDote, nomeDote, type DoteChiave } from './doti.js';
+import { notePossibili } from './effettiVoce.js';
 
 /** I tipi di un'azione della giornata (`AzionePercorsoDto.tipo`), con il nome che l'interfaccia mostra. */
 export const TIPI_AZIONE = [
@@ -59,10 +60,11 @@ export type CategoriaLettura = (typeof CATEGORIE_LETTURA)[number]['chiave'];
 
 export interface DoteNote { dote: DoteChiave; note: 1 | 2 | 3 }
 
+/** `possibili` (Dote) e `esito` (turno): i valori scelti alla spunta (L13, ondata 2; vedi `shared/effettiVoce.ts` e `shared/esitiAttivita.ts`). */
 export type EffettoAzione =
-  | { tipo: 'dote'; dote: DoteChiave; note: 1 | 2 | 3 }
+  | { tipo: 'dote'; dote: DoteChiave; note: 1 | 2 | 3; possibili?: Array<1 | 2 | 3> }
   | { tipo: 'lettura'; categoria: CategoriaLettura; chiave: string; almeno: number | null }
-  | { tipo: 'turno'; attivita: string; doti?: DoteNote[] };
+  | { tipo: 'turno'; attivita: string; doti?: DoteNote[]; esito?: string };
 
 export const TIPI_EFFETTO_AZIONE = [
   { chiave: 'dote', nome: 'Dote sociale' }, { chiave: 'lettura', nome: 'Lettura o visione' }, { chiave: 'turno', nome: 'Turno di un’attività' },
@@ -89,7 +91,10 @@ function normalizzaEffettoAzione(x: unknown): EffettoAzione | null {
   const o = x as Record<string, unknown>;
   if (o.tipo === 'dote') {
     const d = doteNote(o);
-    return d ? { tipo: 'dote', ...d } : null;
+    if (!d) return null;
+    if (o.possibili === undefined) return { tipo: 'dote', ...d };
+    const possibili = notePossibili(o.possibili, d.note);
+    return possibili ? { tipo: 'dote', ...d, possibili } : null;
   }
   if (o.tipo === 'lettura') {
     if (typeof o.categoria !== 'string' || !CATEGORIE.has(o.categoria) || typeof o.chiave !== 'string' || !o.chiave.trim()) return null;
@@ -99,6 +104,10 @@ function normalizzaEffettoAzione(x: unknown): EffettoAzione | null {
   }
   if (o.tipo === 'turno') {
     if (typeof o.attivita !== 'string' || !o.attivita.trim()) return null;
+    if (o.esito !== undefined) {
+      if (o.doti != null || typeof o.esito !== 'string' || !/^[a-z0-9][a-z0-9-]{0,59}$/.test(o.esito)) return null;
+      return { tipo: 'turno', attivita: o.attivita.trim(), esito: o.esito };
+    }
     if (o.doti === undefined || o.doti === null) return { tipo: 'turno', attivita: o.attivita.trim() };
     // «Doti proprie» vuote non dicono niente: o ci sono, o il turno usa quelle dell'attività
     if (!Array.isArray(o.doti) || o.doti.length === 0) return null;
@@ -120,19 +129,28 @@ export interface NomiEffettiAzione {
   film?: Record<string, string>;
   videogiochi?: Record<string, string>;
   attivita?: Record<string, string>;
+  /** I nomi degli esiti dichiarati dalle attività, per chiave «attività/esito» (L13). */
+  esiti?: Record<string, string>;
+  /** Le attività che dichiarano esiti, con il loro modo (L13): il turno dice che l'esito si sceglie alla spunta o vale da solo. */
+  modiEsiti?: Record<string, 'scelta' | 'automatico'>;
 }
 
 /** «1 nota», «2 note». */
 const noteTesto = (n: number): string => `${n} ${n === 1 ? 'nota' : 'note'}`;
+/** «2 o 3 note». */
+const possibiliTesto = (p: ReadonlyArray<number>): string => `${p.slice(0, -1).join(', ')} o ${p[p.length - 1]} note`;
 
 /** La frase di un effetto: «Gentilezza, 2 note», «Zorro, il fuorilegge: completato», «Turno: Fioraio Rafflesia». */
 export function descriviEffettoAzione(e: EffettoAzione, nomi: NomiEffettiAzione = {}): string {
-  if (e.tipo === 'dote') return `${nomeDote(e.dote)}, ${noteTesto(e.note)}`;
+  if (e.tipo === 'dote') return e.possibili ? `${nomeDote(e.dote)}, ${possibiliTesto(e.possibili)}: le scegli alla spunta (proposte ${noteTesto(e.note)})` : `${nomeDote(e.dote)}, ${noteTesto(e.note)}`;
   if (e.tipo === 'lettura') {
     const elenco = e.categoria === 'libro' ? nomi.libri : e.categoria === 'film' ? nomi.film : nomi.videogiochi;
     const nome = elenco?.[e.chiave] ?? e.chiave;
     return `${nome}: ${e.almeno === null ? (e.categoria === 'film' ? 'completato (al cinema: una visione)' : 'completato') : `almeno ${e.almeno} ${e.categoria === 'film' ? (e.almeno === 1 ? 'visione o serata' : 'visioni o serate') : e.almeno === 1 ? 'sessione' : 'sessioni'}`}`;
   }
   const nome = nomi.attivita?.[e.attivita] ?? e.attivita;
-  return `Turno: ${nome}${e.doti?.length ? ` (${e.doti.map((d) => `${nomeDote(d.dote)}, ${noteTesto(d.note)}`).join('; ')})` : ''}`;
+  const modo = nomi.modiEsiti?.[e.attivita];
+  const esito = e.esito ? ` · esito atteso: ${nomi.esiti?.[`${e.attivita}/${e.esito}`] ?? 'esito non più dichiarato dall’attività'}, lo confermi alla spunta`
+    : modo === 'scelta' ? ' · esito da scegliere alla spunta' : modo === 'automatico' ? ' · esito automatico secondo il giorno' : '';
+  return `Turno: ${nome}${e.doti?.length ? ` (${e.doti.map((d) => `${nomeDote(d.dote)}, ${noteTesto(d.note)}`).join('; ')})` : ''}${esito}`;
 }

@@ -20,13 +20,16 @@ import { anteprimaPesca, confermaPesca, rimuoviFontePescaNellaTransazione } from
 import { fontiPesca } from './pescaLetture.js';
 import { leggiRegolaPesca } from './regolePescaService.js';
 import { provaUidTurnoPesca } from './allocazioniTurniPesca.js';
+import { risolviScelteSpunta, type SceltaRisolta } from './esitiAttivitaService.js';
+import type { SceltaEsitoSpunta } from '../../shared/esitiAttivita.js';
 
 interface RigaEffetto {uid:string;voce_uid:string;ordine:number;tipo:string;chiave:string|null;dati_json:string;origine:EffettoVoceDto['origine'];updated_at:string}
 interface Transizione {voce_uid:string;stato:StatoEffettiVoceDto['stato'];raw_json:string;motivo:string|null;impronta:string;aggiornata_il:string}
 interface RigaRicevuta {id:string;partita_id:number;voce_uid:string;effetto_uid:string;effetto_ordine:number;formato:number;tipo:string;chiave:string|null;prima_json:string|null;ricevuta_json:string;creato:number;applicato_il:string;annullato_il:string|null;sostituita_da:string|null;assorbita_da:string|null}
 interface RigaProposta {id:string;voce_uid:string;tipo:string;chiave:string|null;gruppo:string;dati_json:string;motivo:string;certezza:PropostaEffettoVoceDto['certezza'];stato:PropostaEffettoVoceDto['stato'];updated_at:string}
 export interface PorteEffettiLegacy {
-  applicaLegacy:(partitaId:number,produce:EffettoLegacyVoce[])=>EffettiAzioneDto|null;
+  /** `scelte`: L13, le scelte d'esito già risolte nella stessa posizione di `produce` (undefined dove l'effetto non ne chiede). */
+  applicaLegacy:(partitaId:number,produce:EffettoLegacyVoce[],scelte?:ReadonlyArray<SceltaRisolta|undefined>)=>EffettiAzioneDto|null;
   annullaLegacy:(partitaId:number,ricevuta:EffettiAzioneDto)=>void;
 }
 const righeEffetti=(uid:string):RigaEffetto[]=>prepared('SELECT * FROM main.voce_effetto WHERE voce_uid=? ORDER BY ordine').all(uid) as RigaEffetto[];
@@ -295,7 +298,7 @@ function preparaAssorbimentiDote(p:number,uid:string,e:EffettoVoceDto,r:NuovaReg
   }
   return out;
 }
-export function applicaEffettiVoce(p:number,uid:string,porte:PorteEffettiLegacy,opz:{acquisti?:RichiestaRegistraAcquisto[];pesche?:RichiestaRegistraSessionePesca[];porteAcquisti?:PorteDisponibilitaAcquisto;spuntaFattaIl:string}):{effettiLegacy:EffettiAzioneDto|null;receiptNuovi:ReceiptEffettoVoceDto[];proposte:PropostaPartitaDto[]} {
+export function applicaEffettiVoce(p:number,uid:string,porte:PorteEffettiLegacy,opz:{acquisti?:RichiestaRegistraAcquisto[];pesche?:RichiestaRegistraSessionePesca[];porteAcquisti?:PorteDisponibilitaAcquisto;spuntaFattaIl:string;scelteEsito?:SceltaEsitoSpunta[]}):{effettiLegacy:EffettiAzioneDto|null;receiptNuovi:ReceiptEffettoVoceDto[];proposte:PropostaPartitaDto[]} {
   if(!getDb().inTransaction)throw new Error('L’applicazione degli effetti richiede la transazione della spunta.');
   verificaPartita(p);const stato=leggiEffettiVoce(uid);
   if(stato.stato!=='convertita')throw httpErrors.conflict('effetti-da-correggere','Il RAW storico non è convertibile: correggi gli effetti prima di una nuova spunta.');
@@ -312,7 +315,10 @@ export function applicaEffettiVoce(p:number,uid:string,porte:PorteEffettiLegacy,
   for(const e of pesche){const r=richiestePesca.find(r=>r.fonte.tipo==='diario'&&r.fonte.effettoUid===e.uid)!;const {revisionePescaAttesa:_prima,...input}=r;receiptNuovi.push(registraPesca(p,uid,e,{...input,revisionePescaAttesa:anteprimaPesca(p,'registra-sessione',input).revisionePescaAttesa},generazione,true));}
   const sostituite=new Set([...consumi.flatMap((e)=>e.effetto.tipo==='acquisto'?e.effetto.sostituisceDoti:[]),...pesche.flatMap(e=>e.effetto.tipo==='pesca'?[...e.effetto.sostituisceDoti,...e.effetto.sostituisceTurni]:[])]);
   const legacy=stato.effetti.filter((e):e is EffettoVoceDto&{effetto:EffettoLegacyVoce}=>e.effetto.tipo!=='acquisto'&&e.effetto.tipo!=='pesca'&&e.effetto.tipo!=='fortuna'&&!eEffettoDiStato(e.effetto)&&!sostituite.has(e.uid));
-  const effettiLegacy=porte.applicaLegacy(p,legacy.map((e)=>e.effetto)),porzioni=porzioniLegacy(legacy,effettiLegacy),spunta={fattaIl:opz.spuntaFattaIl,raw:effettiLegacy?JSON.stringify(effettiLegacy):null};
+  // L13: le scelte d'esito (turni delle attività con esiti, Doti a valori possibili) si verificano tutte insieme, prima degli effetti legacy e nella
+  // transazione della spunta: una scelta mancante o rifiutata annulla anche consumi e pesca già registrati qui sopra (niente resta a metà)
+  const v=voce(uid),risolte=risolviScelteSpunta(p,{data:v.data,fascia:v.fascia},legacy,opz.scelteEsito);
+  const effettiLegacy=porte.applicaLegacy(p,legacy.map((e)=>e.effetto),legacy.map((e)=>risolte.get(e.uid))),porzioni=porzioniLegacy(legacy,effettiLegacy),spunta={fattaIl:opz.spuntaFattaIl,raw:effettiLegacy?JSON.stringify(effettiLegacy):null};
   for(const e of legacy){const segmento=porzioni.get(e.uid)!;receiptNuovi.push(registraRicevuta(p,uid,e,{benefici:beneficiLegacy(segmento,false),legacy:segmento,risorse:risorseLegacy(p,segmento),gestitaDaSpunta:true,spunta},true));}
   if(effettiLegacy&&(effettiLegacy.confidente||effettiLegacy.incontro||effettiLegacy.apertureDedali?.length)){
     const contesto:EffettiAzioneDto={doti:[],confidente:effettiLegacy.confidente,...(effettiLegacy.incontro?{incontro:effettiLegacy.incontro}:{}),...(effettiLegacy.apertureDedali?{apertureDedali:effettiLegacy.apertureDedali}:{})};
@@ -343,6 +349,9 @@ export function applicaEffettoStorico(p:number,proposta:PropostaPartitaDto,acqui
     if(!acquisto||!token)throw httpErrors.badRequest('consumazione-richiesta','Rivedi la consumazione completa prima del raccordo.');
     if(anteprimaRegistrazioneAcquisto(p,acquisto,porteAcquisti).revisioneAcquistiAttesa!==token)throw httpErrors.conflict('acquisti-cambiati','Il contesto dell’acquisto è cambiato.');
   }else if(acquisto!==undefined||token!==undefined)throw httpErrors.badRequest('payload-acquisto-inatteso','Un effetto diverso da acquisto non accetta una consumazione.');
+  // L13: nel raccordo nessuno sceglie: vale l'esito atteso dichiarato dalla voce (o quello automatico del giorno), altrimenti si ferma
+  // PRIMA di annullare la versione precedente (la voce si rispunta per scegliere)
+  const sceltaStorica=risolviScelteSpunta(p,{data:voce(uid).data,fascia:voce(uid).fascia},[e],undefined,{storico:true}).get(e.uid);
   if(attiva){
     if(attiva.tipo==='contesto')throw httpErrors.conflict('contesto-non-sostituibile','Il contesto dell’incontro non è un effetto modificabile.');
     if(attiva.tipo==='acquisto')annullaFontiDiarioNellaTransazione(p,uid,[String(attiva.ricevuta.provenienzaId)],id);else if(attiva.tipo==='pesca'){const f=fontiPesca(p).find(f=>f.id===attiva.ricevuta.provenienzaId);if(f)rimuoviFontePescaNellaTransazione(p,f.id);}else if(vecchioLegacy)porte.annullaLegacy(p,vecchioLegacy);
@@ -364,7 +373,7 @@ export function applicaEffettoStorico(p:number,proposta:PropostaPartitaDto,acqui
     leggiRicevuteEffettiVoce(p,uid);return;
   }
   if(e.effetto.tipo==='fortuna'||eEffettoDiStato(e.effetto))throw httpErrors.conflict('raccordo-non-valido','Questo effetto si applica spuntando la voce: non si raccorda a una spunta già fatta.');
-  const legacy=porte.applicaLegacy(p,[e.effetto]);
+  const legacy=porte.applicaLegacy(p,[e.effetto],[sceltaStorica]);
   registraRicevuta(p,uid,e,{benefici:beneficiLegacy(legacy,true),legacy,risorse:risorseLegacy(p,legacy),gestitaDaSpunta:false,...(attiva?{sostituisceRicevuta:attiva.id}:{})},true,{id:nuovaRicevuta});
 }
 export function annullaEffettiVoce(p:number,uid:string,legacy:EffettiAzioneDto|null,porte:PorteEffettiLegacy):void {

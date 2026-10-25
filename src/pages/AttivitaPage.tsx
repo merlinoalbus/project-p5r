@@ -54,6 +54,38 @@ function Effetti({ testi }: { testi: string[] }) {
 }
 
 /**
+ * L13: gli esiti che l'attività dichiara (un solo punto: `esiti_json`), raggruppati per prova: nome, Doti con i punti, prezzo e condizioni
+ * dell'articolo (le sfide della Big Bang Burger), premi in parole e, con una partita, se sono già possibili. Come si usano lo dice la riga
+ * in testa: si sceglie alla spunta del Diario e al + del contatore, oppure vale da solo secondo il giorno.
+ */
+function EsitiDellAttivita({ esiti }: { esiti: NonNullable<AttivitaDto['esiti']> }) {
+  const gruppi: Array<{ gruppo: string | null; esiti: typeof esiti.esiti }> = [];
+  for (const e of esiti.esiti) { const g = gruppi.find((x) => x.gruppo === e.gruppo); if (g) g.esiti.push(e); else gruppi.push({ gruppo: e.gruppo, esiti: [e] }); }
+  return (
+    <div className="flex min-w-0 flex-col gap-1">
+      <strong className="text-text">Esiti</strong>
+      <p className="m-0 text-text-secondary">{esiti.modo === 'scelta'
+        ? 'Quando spunti la voce del Diario (o premi + in Partita → Progressi) scegli l’esito che hai ottenuto: le sue Doti diventano il promemoria «Applica».'
+        : 'L’esito vale da solo secondo il giorno: spuntando la voce (o premendo +) l’app registra quello giusto.'}</p>
+      {gruppi.map((g) => (
+        <div key={g.gruppo ?? '-'} className="flex min-w-0 flex-col gap-0.5">
+          {g.gruppo && <span className="font-semibold">{g.gruppo}{g.esiti[0]?.articolo ? ` · ${g.esiti[0].articolo.prezzo != null ? formattaYen(g.esiti[0].articolo.prezzo) : 'prezzo non indicato'}` : ''}</span>}
+          <ul className="m-0 pl-4">
+            {g.esiti.map((e) => (
+              <li key={e.chiave} className={e.disponibile ? '' : 'text-text-muted'}>
+                {e.gruppo && e.nome.startsWith(`${e.gruppo} · `) ? e.nome.slice(e.gruppo.length + 3) : e.nome}: {e.doti.length ? e.doti.map((d) => `${d.nome} ${'♪'.repeat(d.note)} (${d.punti} punti)`).join(', ') : 'nessuna Dote'}
+                {e.premi ? ` · ${e.premi}` : ''}
+                {e.condizioniTesto ? ` · ${e.disponibile ? '' : 'non ancora: '}${e.condizioniTesto}` : ''}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
  * La carta di un'attività o di un lavoro: figura (o icona del tipo), intestazione cliccabile che
  * apre e chiude i dettagli (tipo, fascia, effetti, disponibilità, suggerimento, dato non
  * verificato), riga con sede collegata al quartiere, mappa, costo, paga e la guida del quiz (in oro nei giorni del quiz della
@@ -79,6 +111,7 @@ function Attivita({ a, onCambiata, mappaAperta, onMappa, apertaIniziale = false 
         {sugg.evidenziato('attivita', a.chiave) && <TargaSuggerito motivo={sugg.motivo('attivita', a.chiave)} compatta />}
         {a.fascia && <span className="chip">{NOME_FASCIA_ATTIVITA[a.fascia] ?? a.fascia}</span>}
         <Effetti testi={a.effettiTesto} />
+        {a.esiti && <span className="chip chip--attivo">{a.esiti.modo === 'scelta' ? `${a.esiti.esiti.length} esiti da scegliere` : 'Esito dal giorno'}</span>}
         {a.confidenteChiave && <span className="chip">Confidente: {a.fonteConfidente?.nome ?? a.confidenteChiave}</span>}
         {a.pesca && <span className="chip">{a.pesca.ruolo === 'visita' ? 'Registro delle visite di pesca' : 'Obiettivi della visita di pesca'}</span>}
         <ChipDisponibilita disponibilita={a.disponibilita ?? undefined} compatto />
@@ -104,7 +137,8 @@ function Attivita({ a, onCambiata, mappaAperta, onMappa, apertaIniziale = false 
           </div>}
           {a.fonteConfidente && <FonteConfidenteAttivita fonte={a.fonteConfidente} />}
           {a.pesca && <FontePescaAttivita fonte={a.pesca} onCambiata={onCambiata} />}
-          {!a.confidenteChiave && !a.pesca && a.effettiTesto.length === 0 && <p className="m-0 text-text-muted">Nessun effetto dichiarato.</p>}
+          {a.esiti && <EsitiDellAttivita esiti={a.esiti} />}
+          {!a.confidenteChiave && !a.pesca && a.effettiTesto.length === 0 && !a.esiti && <p className="m-0 text-text-muted">Nessun effetto dichiarato.</p>}
           {/* La mappa si apre una per volta in tutta la pagina. */}
           {mappaAperta
             ? <div className="flex flex-col gap-1">

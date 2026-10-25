@@ -313,7 +313,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/percorso/:data': {
     sommario: 'Scheda di un giorno della guida con le sue voci',
-    descrizione: '`data` nel formato MM-GG. Trama, vincoli, meteo, allerte meteo del gioco (`allerte`: una per allerta, con le fasce in cui vale e gli effetti), avvisi e fonte del giorno, le voci in ordine (prima di giorno, poi di sera; una voce che registra un turno di un\'attività con un quiz, o che vi è collegata, ne porta la guida in `quiz`, con `oggi` vero nei giorni del quiz), giorno precedente e successivo. Con `?partita=` le voci dicono se sono fatte, e arrivano il giorno corrente e il meteo della partita per quel giorno.',
+    descrizione: '`data` nel formato MM-GG. Trama, vincoli, meteo, allerte meteo del gioco (`allerte`: una per allerta, con le fasce in cui vale e gli effetti), avvisi e fonte del giorno, le voci in ordine (prima di giorno, poi di sera; una voce che registra un turno di un\'attività con un quiz, o che vi è collegata, ne porta la guida in `quiz`, con `oggi` vero nei giorni del quiz), giorno precedente e successivo. Con `?partita=` le voci dicono se sono fatte, e arrivano il giorno corrente e il meteo della partita per quel giorno; una voce ancora da spuntare porta in `scelteEsito` le scelte che la spunta chiederà (L13: esito del turno di un\'attività con esiti, note di una Dote a valori possibili), valutate al giorno della voce.',
     risposta: '`PercorsoGiornoDto`',
     errori: [[404, 'giorno-non-trovato'], PARTITA_NON_TROVATA],
   },
@@ -446,7 +446,7 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
   },
   'GET /api/compendio/attivita': {
     sommario: 'Attività, lavori, libri e film',
-    descrizione: 'Attività visibili, lavori separati, libri e film con posizioni ed effetti; le attività con quiz ne portano la guida. Dopo M7 libri, film e attività videogioco leggono nome e alias dal catalogo e prezzi dalle offerte; senza prezzo di vendita la copia della guida è solo `notaPrezzo`. Con `?partita=` avanzamenti, disponibilità e conteggi. Chiavi, effetti e progressi delle letture restano quelli delle voci originali.',
+    descrizione: 'Attività visibili, lavori separati, libri e film con posizioni ed effetti; le attività con quiz ne portano la guida. Dopo M7 libri, film e attività videogioco leggono nome e alias dal catalogo e prezzi dalle offerte; senza prezzo di vendita la copia della guida è solo `notaPrezzo`. Con `?partita=` avanzamenti, disponibilità e conteggi. Chiavi, effetti e progressi delle letture restano quelli delle voci originali. L13 (ondata 2): `esiti` (`EsitiAttivitaDto`, null se l\'attività non ne dichiara) elenca gli esiti scelti alla spunta (modo «scelta») o ricavati dalle condizioni (modo «automatico»), con Doti e punti, articolo che dà prezzo e ranghi, premi in parole e, con `?partita=`, se sono già possibili.',
     risposta: '`AttivitaTutteDto`. Le attività con confidenteChiave dichiarano fonteConfidente: identità e link canonici, giorni/fasce/avvertenze della fonte, requisiti del rango1 e del prossimo rango esatto (anche senza requisiti), Doti per passaggio. Disponibilità e condizioni autonome sono null, Doti/effetti generici vuoti. Nessuna partita: prossimoPasso e rangoAttuale null; rango10: nessun prossimo passo. Un conflitto non diventa disponibilità positiva.',
     errori: [PARTITA_NON_TROVATA],
   },

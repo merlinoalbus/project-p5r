@@ -18,7 +18,9 @@ import type { QuizAttivita } from '../../../../shared/quizAttivita';
 import { SceltaLuogo } from '../SceltaLuogo';
 import { FASCE_ATTIVITA, TIPI_ATTIVITA, TRACCIAMENTI_ATTIVITA, tracciamentoPerTipo } from '../../../../shared/attivita';
 import type { VoceEffetto } from '../../../../shared/effettiCatalogo';
-import { testoDi, testoOnull, type PropsModulo } from './base';
+import { jsonDi, testoDi, testoOnull, type PropsModulo } from './base';
+import { EditorEsiti } from '../EditorEsiti';
+import { normalizzaEsitiAttivita, type EsitiAttivita } from '../../../../shared/esitiAttivita';
 import { campiAutonomiAttivitaConfidente } from '../../../../shared/attivitaConfidente';
 import { campiAutonomiAttivitaPesca } from '../../../../shared/attivitaPesca';
 import { REGOLA_PESCA, type RegolaPescaDto } from '../../../../shared/pesca';
@@ -42,7 +44,7 @@ const OPZIONI_FASCIA: OpzioneIcone[] = FASCE_ATTIVITA.map((f) => ({ chiave: f.ch
 const NOMI_CAMPI: Record<string, string> = {
   tipo: 'Tipo videogioco', fascia: 'Fascia propria', condizioni_json: 'Condizioni proprie', effetti_json: 'Effetti propri',
   doti_json: 'Doti storiche', tracciamento: 'Conteggio', sessioni: 'Sessioni', quiz_json: 'Quiz', costo: 'Costo',
-  paga_yen: 'Paga in yen', paga_massima: 'Paga massima',
+  paga_yen: 'Paga in yen', paga_massima: 'Paga massima', esiti_json: 'Esiti scelti alla spunta',
   confidente_chiave: 'Progressione del Confidente',
 };
 
@@ -79,7 +81,7 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
   const normalizzaFonte = () => {
     if (pesca) return;
     imposta({ fascia: null, tracciamento: 'nessuno', sessioni: 1, costo: null, paga_yen: null, paga_massima: null,
-      effetti_json: [], quiz_json: null, _giorniQuiz: '', _effettiDaRisolvere: false, _quizDaRisolvere: false,
+      effetti_json: [], quiz_json: null, _giorniQuiz: '', _effettiDaRisolvere: false, _quizDaRisolvere: false, esiti_json: null, _esitiDaRisolvere: false,
       ...(!giaCollegata ? { doti_json: [] } : {}) });
     impostaCondizioni?.([]);
   };
@@ -87,7 +89,7 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
     if (!pesca || confidente || videogioco || (ruoloPesca !== 'visita' && ruoloPesca !== 'obiettivi') || confermaPesca !== firmaPesca || !impostaCondizioni) return;
     imposta({ fascia: 'entrambe', tracciamento: ruoloPesca === 'visita' ? 'svolta' : 'nessuno', sessioni: 1,
       costo: null, paga_yen: null, paga_massima: null,
-      doti_json: [], effetti_json: [], quiz_json: null, _giorniQuiz: '', _effettiDaRisolvere: false, _quizDaRisolvere: false });
+      doti_json: [], effetti_json: [], quiz_json: null, _giorniQuiz: '', _effettiDaRisolvere: false, _quizDaRisolvere: false, esiti_json: null, _esitiDaRisolvere: false });
     impostaCondizioni([]);
     setConfermaPesca(null);
   };
@@ -170,6 +172,16 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
         aiuto={testoDi(dati.tracciamento) === 'svolta'
           ? 'Il gioco dà questi punti a ogni turno: l\'app te li ricorda quando registri un turno (dalla spunta della giornata o dal contatore in Partita → Progressi) e li segni tu nella scheda Doti. Il primo turno le voci senza la spunta, dal secondo in poi quelle con «vale dalla seconda volta in poi». Un lavoro che dà sempre la stessa Dote ha le due voci uguali.'
           : undefined} />}
+      {/* L13: gli esiti scelti alla spunta, solo per un'attività autonoma contata per volte (Confidente e pesca hanno la loro progressione) */}
+      {campiPropri && !videogioco && !confidente && !pesca && (testoDi(dati.tracciamento) === 'svolta' || dati.esiti_json != null) && <>
+        {!!dati._esitiDaRisolvere && <div className="flex flex-col gap-2 rounded-md border border-warning p-3 text-sm">
+          <p role="alert" className="m-0">Gli esiti salvati contengono parti che l’editor non sa rappresentare. Il valore originale è conservato finché non scegli esplicitamente la sostituzione.</p>
+          <p className="m-0 whitespace-pre-wrap break-all">{typeof dati._esitiRaw === 'string' ? dati._esitiRaw : JSON.stringify(dati._esitiRaw)}</p>
+          <PulsanteVisivo icona={<IconaAzione chiave="scarta" dimensione={22} />} titolo="Sostituisci con gli esiti dell’editor" className="min-h-11 self-start" disabled={disabilitato} onClick={() => imposta({ _esitiDaRisolvere: false })} />
+        </div>}
+        <EditorEsiti esiti={(dati.esiti_json as EsitiAttivita | null) ?? null} onCambia={(esiti_json) => imposta({ esiti_json })} disabilitato={disabilitato || !!dati._esitiDaRisolvere}
+          chiaviSalvate={new Set((normalizzaEsitiAttivita(jsonDi<unknown>(dati._esitiRaw, null))?.esiti ?? []).map((e) => e.chiave))} />
+      </>}
       {/* la guida del quiz è dei lavori (generica per tutti, scelta dell'utente 2026-10-17); un'altra attività che ne ha già una la tiene */}
       {campiPropri && (lavoro || !!dati.quiz_json) && (
         <EditorQuiz quiz={(dati.quiz_json as QuizAttivita | null) ?? null} giorni={testoDi(dati._giorniQuiz)} onCambia={imposta} disabilitato={disabilitato || !!dati._quizDaRisolvere} />
