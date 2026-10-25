@@ -116,7 +116,8 @@ export function CittaPage() {
                   {suggerito && <TargaSuggerito motivo={sugg.motivo('quartieri', x.chiave)} compatta />}
                   <span className="testo-12 text-text-secondary">{x.luoghi} {x.luoghi === 1 ? 'luogo' : 'luoghi'}{x.verificati < x.luoghi ? ` · ${x.luoghi - x.verificati} da fonte secondaria` : ''}</span>
                   {x.sbloccoCondizione?.testo && <span className="break-words testo-12 text-text-muted">Sblocco: {x.sbloccoCondizione.testo}</span>}
-                  {x.descrizione && <span className="testo-12 text-text-secondary line-clamp-2">{x.descrizione}</span>}
+                  {/* la descrizione intera: tagliata a due righe con «…» nascondeva informazione (3 quartieri a 1280 px, 4 a 768) */}
+                  {x.descrizione && <span className="testo-12 text-text-secondary">{x.descrizione}</span>}
                   </span>
                 </Link>
               </li>

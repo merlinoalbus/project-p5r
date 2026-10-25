@@ -137,13 +137,16 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
       {eventi && eventi.length > 0 && (
         <ol className="m-0 p-0 list-none flex flex-col divide-y divide-border-light" aria-label="Eventi della partita">
           {eventi.map((e) => (
-            <li key={e.id} className={`py-2 flex items-start gap-3 testo-13 ${selezionati[e.id] ? 'bg-primary-bg' : ''}`}>
+            // Sul telefono (sotto i 640 px) la riga va su due righe: sopra casella, data, miniatura ed «Elimina», sotto il testo a tutta
+            // larghezza (prima casella 44 + data 92 + miniatura 40 + pulsante 44 + spazi lasciavano ~75 px al titolo: una parola per riga a 375 px).
+            // Da 640 px la riga è quella di sempre, tutta su una linea (`sm:flex-nowrap`, il testo torna al suo posto con `sm:order-none`).
+            <li key={e.id} className={`py-2 flex flex-wrap sm:flex-nowrap items-start gap-x-3 gap-y-1 testo-13 ${selezionati[e.id] ? 'bg-primary-bg' : ''}`}>
               {/* la casella da sola è 20 px: l'etichetta attorno la rende toccabile per 44 */}
               {!compatto && <label className="touch flex items-start justify-center shrink-0 -my-1 pr-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 mt-2 shrink-0" checked={!!selezionati[e.id]} onChange={(ev) => setSelezionati((m) => { const n = { ...m }; if (ev.target.checked) n[e.id] = true; else delete n[e.id]; return n; })} aria-label={`Seleziona la voce ${e.titolo}`} /></label>}
-              <time dateTime={e.createdAt} className="shrink-0 w-[92px] testo-12 text-text-muted tabular-nums pt-0.5">{formattaIstante(e.createdAt)}</time>
+              <time dateTime={e.createdAt} className="max-sm:flex-1 sm:shrink-0 sm:w-[92px] testo-12 text-text-muted tabular-nums pt-0.5">{formattaIstante(e.createdAt)}</time>
               {e.personaNome && <ImmagineEntita ambito="persona" chiave={e.personaNome} etichetta={e.personaNomeIt ?? e.personaNome} dimensione={40} adatta="copri" />}
-              <div className="flex-1 min-w-0">
-                <div className="font-semibold">{e.titolo}</div>
+              <div className="max-sm:order-last max-sm:basis-full flex-1 min-w-0">
+                <div className="font-semibold break-words">{e.titolo}</div>
                 {e.dettaglio && <div className="text-text-secondary">{e.dettaglio}</div>}
                 <div className="testo-12 text-text-muted">
                   {e.tipoNome}

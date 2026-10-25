@@ -85,7 +85,8 @@ function Attivita({ a, onCambiata, mappaAperta, onMappa, apertaIniziale = false 
         {a.volteSvolte !== undefined && <span className={`chip ${a.volteSvolte > 0 ? 'chip--attivo' : ''}`} title="Quante volte risulta svolta nella partita attiva">{a.volteSvolte === 0 ? 'Mai svolta' : `Svolta ${a.volteSvolte} ${a.volteSvolte === 1 ? 'volta' : 'volte'}`}</span>}
         {!a.verificato && <span className="chip testo-12" title="Dato da fonte secondaria">da fonte secondaria</span>}
       </button>
-      <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-text-secondary">
+      {/* `testo-link-esteso`: il collegamento alla sede sta dentro una frase da una riga (16 px): l'area di tocco sale a 44 px senza cambiare la riga */}
+      <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-text-secondary testo-link-esteso">
         {/* La sede apre la pagina del suo luogo (L5); senza sede resta il quartiere o il testo. */}
         {(a.sedeChiave || a.luogoChiave || a.luogo) && <span><strong className="text-text">Dove:</strong> {a.sedeChiave && a.luogoChiave ? <Link to={urlLuogo(a.sedeChiave)}>{a.sedeNome ?? a.sedeChiave}</Link> : a.luogoChiave ? <Link to={`/guida/citta/${a.luogoChiave}`}>{a.luogo || a.luogoChiave}</Link> : a.luogo}</span>}
         {a.orariSedeTesto && <span><strong className="text-text">Orari della sede:</strong> {a.orariSedeTesto}</span>}

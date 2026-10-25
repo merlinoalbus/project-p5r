@@ -35,7 +35,8 @@ export function MieiDati() {
   return (
     <section className="card flex flex-col gap-3" aria-label="I miei dati">
       <TitoloSezione>I miei dati</TitoloSezione>
-      <p className="m-0 testo-13 text-text-secondary">
+      {/* `testo-link-esteso`: il collegamento «Nascosti dalla guida» sta dentro la frase (16 px di altezza): area di tocco da 44 px senza cambiare la riga */}
+      <p className="m-0 testo-13 text-text-secondary testo-link-esteso">
         Le righe che hai aggiunto o corretto tu sopra i dati della guida. Restano anche quando i dati vengono ricaricati:
         «Ripristina dalla guida» rimette l'originale, e le righe che hai aggiunto tu si eliminano dallo stesso pulsante.
         Le righe nascoste dagli elenchi stanno in <a href="#nascosti">Nascosti dalla guida</a>, qui sotto nel Cestino, con il ripristino in un tocco.
