@@ -5,7 +5,8 @@ import { verificaPartita } from './verificaPartita.js';
 import { eDote } from '../../shared/doti.js';
 import { chiaveSblocco, eEffettoDiStato, fondiArticoliUguali, motivoYenGiaStrutturati, normalizzaEffettoVoce, normalizzaEffettiVoce } from '../../shared/effettiVoce.js';
 import { yenDelDato } from './yenDeiDati.js';
-import { MOTIVO_VOCE_ELIMINATA, conMotivoDiRestituzione, conYenInOrdine, muoviYenAutomatico, restituisciYenAutomatico, restituisciYenAutomaticiDellaVoce, segnaYenDellaSpuntaFuoriRegistro, yenPropostiInSospeso } from './yenAutomaticiService.js';
+import { MOTIVO_VOCE_ELIMINATA, conMotivoDiRestituzione, conYenInOrdine, muoviYenAutomatico, restituisciYenAutomatico, restituisciYenAutomaticiDellaVoce, restituisciYenDeiTurniDellaVoce, scartaYenInCoda, segnaYenDellaSpuntaFuoriRegistro, yenAutomaticoAttivo, yenFuoriRegistro, yenPropostiInSospeso } from './yenAutomaticiService.js';
+import { articoloPagatoDalTurno } from './attivitaService.js';
 import type { AnteprimaDecisioneEffettoVoceDto, EffettoLegacyVoce, EffettoVoce, EffettoVoceDto, PropostaEffettoVoceDto, ReceiptEffettoVoceDto, RichiestaAnteprimaDecisioneEffettoVoce, RichiestaDecisioneEffettoVoce, RichiestaSalvaEffettiVoce, StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import type { NuovaRegistrazioneAcquisto, RichiestaRegistraAcquisto } from '../../shared/acquisti.js';
 import type { EffettiAzioneDto } from '../../shared/types.js';
@@ -418,8 +419,28 @@ function applicaEffettiVoceInOrdine(p:number,uid:string,porte:PorteEffettiLegacy
   applicaEffettiDiStato(p,uid,stato.effetti.flatMap((e)=>eEffettoDiStato(e.effetto)?[{uid:e.uid,effetto:e.effetto}]:[]));
   // gli articoli comprati: il loro prezzo, solo se l'acquisto è stato davvero segnato (un articolo non ancora disponibile resta da segnare dal negozio)
   for(const e of stato.effetti)if(e.effetto.tipo==='articolo')yenDaMuovere.push(yenDellEffetto(p,uid,e));
+  // i turni registrati qui che non devono muovere yen (`scartaYenDeiTurni`): quelli degli effetti di una voce di prima rispuntata, e la sfida
+  // che un articolo della stessa voce paga già (lo stesso acquisto si paga una volta, dall'articolo)
+  const articoliPagati=new Set(stato.effetti.flatMap((e)=>e.effetto.tipo==='articolo'&&yenDaMuovere.some((m)=>m?.effettoUid===e.uid)?[e.effetto.articolo]:[]));
+  scartaYenDeiTurni(p,uid,legacy.flatMap((e)=>(porzioni.get(e.uid)?.turni??[]).map((turno)=>({effettoUid:e.uid,turno}))),articoliPagati);
   muoviYenDellaVoce(p,uid,yenDaMuovere);
   return {effettiLegacy,receiptNuovi,proposte:leggiPropostePartita(p)};
+}
+
+/**
+ * L13 (decisione 18): toglie dalla coda del gesto (`conYenInOrdine`) il movimento dei turni appena registrati che non devono muovere yen, senza
+ * toccare il saldo:
+ *   - il turno di un effetto della voce spuntata prima degli yen automatici (fuori registro togliendo la spunta): rispuntando la stessa voce quel
+ *     turno era già nel saldo. Un effetto «turno» aggiunto dopo ha un'altra chiave e muove i suoi yen;
+ *   - la sfida che un articolo della stessa voce paga già (decisione 2: gli yen li muove un dato solo; lo stesso acquisto non si conta due volte).
+ * Un turno che non è in coda (un movimento già in vigore) non si tocca.
+ */
+function scartaYenDeiTurni(p:number,uid:string,turni:ReadonlyArray<{effettoUid:string;turno:{attivita:string;ordine:number;esito?:{chiave:string}|null}}>,articoliPagati:ReadonlySet<string>):void {
+  for(const {effettoUid,turno:t} of turni){
+    const diPrima=yenFuoriRegistro(p,{tipo:'voce',chiave:`${uid}:${effettoUid}`});
+    const sfida=t.esito?articoloPagatoDalTurno(t.attivita,t.esito.chiave):null;
+    if(diPrima||(sfida!==null&&articoliPagati.has(sfida)))scartaYenInCoda(p,{tipo:'turno',chiave:`${t.attivita}:${t.ordine}`});
+  }
 }
 
 /** Raccordo esplicito di un effetto nuovo su una spunta già esistente; mai riesecuzione dell'intera spunta. */
@@ -473,7 +494,15 @@ export function applicaEffettoStorico(p:number,proposta:PropostaPartitaDto,acqui
   // L13: un effetto Yen aggiunto (o cambiato) su una voce già spuntata, confermato qui: decisione 18, gli yen entrano o si scalano da soli (mai sotto
   // zero); solo con yen ancora proposti in sospeso per lo stesso effetto la ricevuta dichiara il beneficio e resta la proposta «Applica», com'era
   if(e.effetto.tipo==='yen'){restituisciYenAutomatico(p,causaYen,'versione-sostituita');const y=ricevutaYen(p,uid,e as EffettoVoceDto&{effetto:Extract<EffettoVoce,{tipo:'yen'}>},{gestitaDaSpunta:false,...(attiva?{sostituisceRicevuta:attiva.id}:{})},true,{id:nuovaRicevuta});muoviYenDellaVoce(p,uid,[y.movimento]);return;}
-  const legacy=porte.applicaLegacy(p,[e.effetto],[sceltaStorica]);
+  // L13 (decisione 18): il turno raccordato muove i suoi yen alla fine (`conYenInOrdine`), tranne quello dell'effetto di una voce di prima
+  // rispuntata e la sfida che un articolo della voce ha già pagato (`scartaYenDeiTurni`)
+  const effettoLegacy=e.effetto;
+  const legacy=conYenInOrdine(()=>{
+    const l=porte.applicaLegacy(p,[effettoLegacy],[sceltaStorica]);
+    const articoliPagati=new Set(leggiEffettiVoce(uid).effetti.flatMap((x)=>x.effetto.tipo==='articolo'&&yenAutomaticoAttivo(p,{tipo:'voce',chiave:`${uid}:${x.uid}`})?[x.effetto.articolo]:[]));
+    scartaYenDeiTurni(p,uid,(l?.turni??[]).map((turno)=>({effettoUid:id,turno})),articoliPagati);
+    return l;
+  });
   registraRicevuta(p,uid,e,{benefici:beneficiLegacy(legacy,true),legacy,risorse:risorseLegacy(p,legacy),gestitaDaSpunta:false,...(attiva?{sostituisceRicevuta:attiva.id}:{})},true,{id:nuovaRicevuta});
   sostituisciYen(yenDellEffetto(p,uid,e,undefined,legacy),false);
 }
@@ -518,6 +547,9 @@ function annullaEffettiVoceInOrdine(p:number,uid:string,legacy:EffettiAzioneDto|
   restituisciYenAutomaticiDellaVoce(p,uid,'spunta-tolta');
   if(legacyDaAnnullare)porte.annullaLegacy(p,legacyDaAnnullare);
   for(const r of extra)if(r)porte.annullaLegacy(p,r);
+  // L13 (decisione 18): i turni della spunta che l'annullo non ha tolto (la voce rimessa dal cestino ha le ricevute già annullate, e il suo
+  // turno resta) non tengono gli yen mossi dalla spunta: togliendola la spesa o la paga torna sempre
+  restituisciYenDeiTurniDellaVoce(p,uid,'spunta-tolta');
   for(const x of turniRaccordatiExtra){const adesso=nowIso();prepared("INSERT INTO utente.effetto_applicato(id,partita_id,voce_uid,effetto_uid,effetto_ordine,formato,tipo,chiave,prima_json,ricevuta_json,creato,applicato_il,annullato_il) VALUES(?,?,?,?,0,1,'contesto',NULL,NULL,?,0,?,?)").run(x.marker,p,uid,x.marker,jsonCanonico({voceUid:uid,effettoUid:x.marker,benefici:[],annulloTurnoOriginario:x.r.id}),adesso,adesso);}
   annullaFontiDiarioNellaTransazione(p,uid,ricevute.filter((r)=>r.tipo==='acquisto').map((r)=>String(r.ricevuta.provenienzaId)));
   for(const r of ricevute.filter(r=>r.tipo==='pesca')){const f=fontiPesca(p).find(f=>f.id===r.ricevuta.provenienzaId);if(f){if(f.voce_uid!==uid||f.effetto_uid!==r.effettoUid||f.generazione!==r.ricevuta.generazione)throw httpErrors.conflict('pesca-annullo-fonte-diversa','La fonte appartiene a un’altra generazione della spunta.');rimuoviFontePescaNellaTransazione(p,f.id);}}

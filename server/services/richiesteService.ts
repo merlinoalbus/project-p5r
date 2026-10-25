@@ -111,10 +111,11 @@ function statoCalcolato(r: RigaRichiesta, segnato: StatoRichiesta | null, st: St
   return { ...base, stato: 'disponibile', accettabile: true, motivi: grigi };
 }
 
-/** Decisione 18: che cosa fanno gli yen della ricompensa nella partita (proposta «Applica» di prima, entrati da soli, già nel saldo da prima). */
-function yenDellaRicompensa(partitaId: number, chiave: string, completata: boolean): Pick<StatoCalcolatoRichiestaDto, 'yenDaProposta' | 'yenRicompensa'> {
+/** Decisione 18: che cosa fanno gli yen della ricompensa nella partita (proposta «Applica» di prima, entrati da soli, già nel saldo da prima,
+ *  non entrati), ricavato dal registro e dal momento del completamento. */
+function yenDellaRicompensa(partitaId: number, chiave: string): Pick<StatoCalcolatoRichiestaDto, 'yenDaProposta' | 'yenRicompensa'> {
   if (yenPropostiInSospeso(partitaId, 'richiesta', chiave)) return { yenDaProposta: true };
-  const y = statoYenRichiesta(partitaId, chiave, completata);
+  const y = statoYenRichiesta(partitaId, chiave);
   return y ? { yenRicompensa: y } : {};
 }
 
@@ -134,7 +135,7 @@ function dto(r: RigaRichiesta, stati: Map<string, StatoRichiesta>, premi = ricom
       ...statoCalcolato(r, stati.get(r.chiave) ?? null, st, nomi),
       // decisione 18: gli yen di una Richiesta con una proposta «Applica» di prima passano ancora da lei (la pagina non dice che entrano da soli);
       // altrimenti che cosa fanno davvero nella partita (entrati da soli, o già nel saldo da prima), perché la frase della pagina sia sempre vera
-      ...(st.partitaId !== undefined && r.yen != null && r.yen > 0 ? yenDellaRicompensa(st.partitaId, r.chiave, stati.get(r.chiave) === 'completata') : {}),
+      ...(st.partitaId !== undefined && r.yen != null && r.yen > 0 ? yenDellaRicompensa(st.partitaId, r.chiave) : {}),
     } } : {}),
     chiave: r.chiave, nome: r.nome, committente: r.committente, disponibileDal: r.disponibile_dal, scadenza: r.scadenza, area: r.area, areaChiave: r.area_chiave, piano: r.piano,
     bersaglio, ricompense: JSON.parse(r.ricompense_json) as string[],
@@ -211,7 +212,8 @@ export function impostaStatoRichiesta(partitaId: number, chiave: string, stato: 
   if (!r) throw httpErrors.notFound('richiesta-non-trovata', `La Richiesta '${chiave}' non esiste.`);
   const adesso = nowIso();
   getDb().transaction(() => {
-    const prima = (prepared('SELECT stato FROM richiesta_partita WHERE partita_id = ? AND richiesta_chiave = ?').get(partitaId, chiave) as { stato: StatoRichiesta } | undefined)?.stato ?? null;
+    const rigaPrima = prepared('SELECT stato, updated_at FROM richiesta_partita WHERE partita_id = ? AND richiesta_chiave = ?').get(partitaId, chiave) as { stato: StatoRichiesta; updated_at: string } | undefined;
+    const prima = rigaPrima?.stato ?? null;
     // L13: «Accetta» solo da disponibile (bloccata o scaduta: 409 col motivo). Completarla resta sempre possibile (la spunta di una voce
     // o chi gioca la segna fatta: un dato di sblocco sbagliato non deve impedire di registrare quel che è successo nel gioco)
     if (stato === 'accettata' && prima !== 'accettata') {
@@ -219,7 +221,9 @@ export function impostaStatoRichiesta(partitaId: number, chiave: string, stato: 
       if (!s.accettabile) throw httpErrors.conflict('richiesta-non-disponibile', `La Richiesta «${r.nome}» non si può accettare: ${s.stato === 'scaduta' ? 'è scaduta' : s.stato === 'completata' ? 'è già completata' : 'è bloccata'}${s.motivi.length ? ` (${s.motivi.join('; ')})` : ''}.`);
     }
     if (stato === null) prepared('DELETE FROM richiesta_partita WHERE partita_id = ? AND richiesta_chiave = ?').run(partitaId, chiave);
-    else prepared('INSERT INTO richiesta_partita (partita_id, richiesta_chiave, stato, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, richiesta_chiave) DO UPDATE SET stato = excluded.stato, updated_at = excluded.updated_at').run(partitaId, chiave, stato, adesso);
+    // L13 (decisione 18): `updated_at` è il momento in cui la Richiesta ha preso il suo stato (per gli yen, il momento del completamento,
+    // `yenAutomaticiService.statoYenRichiesta`): segnare di nuovo lo stesso stato non lo sposta
+    else prepared('INSERT INTO richiesta_partita (partita_id, richiesta_chiave, stato, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, richiesta_chiave) DO UPDATE SET stato = excluded.stato, updated_at = CASE WHEN richiesta_partita.stato = excluded.stato THEN richiesta_partita.updated_at ELSE excluded.updated_at END').run(partitaId, chiave, stato, adesso);
     if (stato === 'completata' && prima !== 'completata') {
       const b = JSON.parse(r.bersaglio_json) as { nome: string };
       registraEvento(partitaId, 'richiesta-completata', `Richiesta completata: ${r.nome}`, `${r.area}${r.piano ? ` (${r.piano})` : ''} · bersaglio ${b.nome}${r.confidente_nome ? ` · Confidente ${r.confidente_nome}` : ''}.`, { richiesta: chiave });
@@ -228,7 +232,8 @@ export function impostaStatoRichiesta(partitaId: number, chiave: string, stato: 
     // completandola e si tolgono (al più fino a zero) riaprendola (`riallineaYenRichiesta`); una proposta «Applica» nata prima resta al suo
     // registro (aperta: decidibile; applicata: la sua inversa). Gli oggetti: il registro degli oggetti ottenuti li legge dallo stato completato
     // (`oggettiOttenutiPartita`), una volta sola e senza copie da tenere allineate
-    if ((prima === 'completata') !== (stato === 'completata')) { riallineaYenRichiesta(partitaId, chiave, 'stato'); riconciliaBeneficiRichiesta(partitaId, chiave); }
+    // riaprendola, il momento del completamento dice se la sua ricompensa era già nel saldo da prima degli yen automatici
+    if ((prima === 'completata') !== (stato === 'completata')) { riallineaYenRichiesta(partitaId, chiave, 'stato', prima === 'completata' ? rigaPrima?.updated_at ?? null : null); riconciliaBeneficiRichiesta(partitaId, chiave); }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
   // con lo stato calcolato dopo il cambio (la pagina sostituisce la carta con questa)

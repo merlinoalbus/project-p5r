@@ -26,7 +26,7 @@ import { aggiornaConfidente, confidente as confidenteDellaPartita } from './part
 import { nuovaGenerazione } from './puntiCronologici.js';
 import { regaliDellaPartita, scriviRegaloPartita } from './regaliPartita.js';
 import { impostaAcquisto } from './negoziService.js';
-import { causaYenRegalo, muoviYenAutomatico, restituisciYenAutomatico } from './yenAutomaticiService.js';
+import { causaYenRegalo, muoviYenAutomatico, regaloYenGiaNelSaldo, restituisciYenAutomatico } from './yenAutomaticiService.js';
 import type { EsitoRegaloDto, RichiestaRegalo } from '../../shared/types.js';
 
 interface RigaRegalo {
@@ -90,7 +90,9 @@ export function regala(partitaId: number, richiesta: RichiestaRegalo): EsitoRega
       const nome = (prepared('SELECT regalo FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ? AND catalogo_chiave = ?').get(partitaId, confidente, catalogo) as { regalo: string }).regalo;
       const causa = causaYenRegalo(confidente, nome);
       restituisciYenAutomatico(partitaId, causa, 'regalo-non-piu-presente');
-      if (prezzo != null && prezzo > 0) muoviYenAutomatico(partitaId, causa, -prezzo, `Regalo comprato: ${oggetto.nome}`);
+      // la consegna di prima degli yen automatici, tolta e ridata nello stesso momento di gioco, è la stessa consegna corretta: il suo prezzo
+      // era già nel saldo e non si scala (`regaloYenGiaNelSaldo`); in un altro momento è un regalo nuovo e si paga
+      if (prezzo != null && prezzo > 0 && !regaloYenGiaNelSaldo(partitaId, confidente, catalogo)) muoviYenAutomatico(partitaId, causa, -prezzo, `Regalo comprato: ${oggetto.nome}`);
     }
     const quando = momento.data_gioco ? ` Giorno di gioco ${momento.data_gioco}${momento.fascia_gioco ? `, ${momento.fascia_gioco}` : ''}.` : '';
     registraEvento(partitaId, 'regalo', `Regalo a ${conf.nome}: ${oggetto.nome}`,

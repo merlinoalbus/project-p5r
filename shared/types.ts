@@ -728,6 +728,9 @@ export interface ConfidentePartitaDto extends ConfidenteDto {
   regaliFatti: string[];
   /** Identità consegnate; i nomi storici sopra non vengono riscritti dopo una rinomina. */
   regaliFattiCatalogo?: string[];
+  /** L13 (decisione 18): gli oggetti del catalogo che, regalati adesso con l'acquisto, non scalano il prezzo: una consegna data prima che gli yen
+   *  si muovessero da soli, tolta e ridata nello stesso momento di gioco (il suo prezzo era già nel saldo). Assente se nessuno. */
+  regaliYenGiaNelSaldo?: string[];
   /** Il Confidente ha regali graditi collegati a un oggetto del catalogo: solo allora la finestra «Regala» ha oggetti da scegliere. */
   haRegaliCatalogo?: boolean;
   note: string;
@@ -1355,8 +1358,9 @@ export interface AzionePercorsoDto {
   /** L13 (decisione 18): gli yen che la spunta della voce ha mosso da soli nella partita (spese scalate dal saldo, mai sotto zero; guadagni entrati),
    *  con l'importo chiesto e quello davvero mosso. Assente se la voce non è spuntata o non ha mosso yen. */
   yenAutomatici?: MovimentoYenAutomaticoDto[];
-  /** L13 (decisione 18): vero se la voce, spuntata prima che gli yen si muovessero da soli, è stata tolta e rimessa: il suo denaro era già nel
-   *  saldo, e la spunta non lo muove (né togliendola né rimettendola). Assente altrimenti. */
+  /** L13 (decisione 18): vero se la voce ha effetti con yen (prezzo, paga, costo, ricompensa, yen) nati prima che gli yen si muovessero da
+   *  soli: con la spunta di allora ancora in piedi, o tolta (e magari rimessa). Il loro denaro era già nel saldo e la spunta non lo muove (né
+   *  togliendola né rimettendola); gli effetti aggiunti dopo si muovono come sempre (`yenAutomatici`). Assente altrimenti. */
   yenFuoriRegistro?: true;
   /** R10-11/C: il dialogo del passaggio di rango della voce (voce di un Confidente con `rangoAtteso`), dalle scelte di L9: solo una proposta, i punti li dà la scelta dell'utente alla spunta. */
   dialogo?: DialogoVoceDto;
@@ -2356,9 +2360,10 @@ export interface StatoCalcolatoRichiestaDto {
    *  a zero): allora non entrano da soli e vale quella proposta. Assente se entrano da soli. */
   yenDaProposta?: boolean;
   /** L13 (decisione 18), senza proposta di prima: `entrati` se la ricompensa è entrata da sola nel saldo completandola (riaprendola si toglie);
-   *  `fuori-registro` se il suo denaro era già nel saldo da prima degli yen automatici (completata senza movimento, o riaperta dopo):
-   *  completarla o riaprirla non cambia il saldo. Assente: completandola entrerà da sola. */
-  yenRicompensa?: 'entrati' | 'fuori-registro';
+   *  `fuori-registro` se il suo denaro era già nel saldo da prima degli yen automatici (completata prima, o riaperta dopo esserlo stata):
+   *  completarla o riaprirla non cambia il saldo; `non-entrati` se è stata completata dopo senza che la ricompensa entrasse (in quel momento
+   *  non era scritta: una correzione dei dati non muove il saldo). Assente: completandola entrerà da sola. */
+  yenRicompensa?: 'entrati' | 'fuori-registro' | 'non-entrati';
 }
 
 /**

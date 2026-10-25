@@ -126,16 +126,21 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
       {a.rangoAtteso !== null && <span className="testo-12 text-text-muted">rango atteso {a.rangoAtteso}</span>}
       {/* un solo valore: il testo della guida si nasconde se dice lo stesso dell'effetto («Perizia +2» = «Perizia ♪♪ · 3 punti»), altrimenti si etichetta */}
       {a.note && !noteDellaGuidaCoincideConEffetto(a.note, a.produce ?? []) && <span className="testo-12 text-text-secondary">Guida: {a.note}</span>}
-      {a.fatta && !a.yenAutomatici?.length && a.produceTesto?.filter((t) => t.includes(' paga ¥')).map((t) => <span key={t} className="testo-12 text-text-muted">{t.slice(t.indexOf('paga ¥'))}</span>)}
-      {a.fatta && a.effetti && <span className="chip chip--attivo testo-12" title="Effetti della spunta: togliendola si annullano i punti del Confidente, i turni e gli yen mossi dalla spunta; le Doti le segni tu (la spunta non le tocca), letture e visioni restano (si disfano dalla loro pagina)">{descriviEffetti(a.effetti)}</span>}
+      {/* la paga di un turno di prima degli yen automatici (era già nel saldo): il fatto, senza la promessa di un movimento; la paga mossa dalla
+          spunta la dice il chip del movimento */}
+      {a.fatta && a.yenFuoriRegistro && !a.yenAutomatici?.some((m) => m.causa === 'turno') && a.produceTesto?.filter((t) => t.includes(' paga ¥')).map((t) => <span key={t} className="testo-12 text-text-muted tabular-nums">{t.slice(t.indexOf('paga ¥'))}</span>)}
+      {a.fatta && a.effetti && <span className="chip chip--attivo testo-12" title={`Effetti della spunta: togliendola si annullano i punti del Confidente${a.yenAutomatici?.length ? ', i turni e gli yen mossi dalla spunta' : ' e i turni'}; le Doti le segni tu (la spunta non le tocca), letture e visioni restano (si disfano dalla loro pagina)`}>{descriviEffetti(a.effetti, { turniConYen: new Set((a.yenAutomatici ?? []).filter((m) => m.causa === 'turno').map((m) => m.chiave)) })}</span>}
       {/* L13 (decisione 18): gli yen che la spunta ha mosso da soli, uno per causa, con l'importo davvero mosso (il saldo non scende sotto zero) */}
-      {a.fatta && a.yenAutomatici?.map((m, i) => (
-        <span key={`${m.creatoIl}:${i}`} className="chip testo-12" title="Mossi da soli dalla spunta: togliendola tornano com'erano">
+      {a.fatta && a.yenAutomatici?.map((m) => (
+        <span key={`${m.causa}:${m.chiave}`} className="chip testo-12 tabular-nums" title="Mossi da soli dalla spunta: togliendola torna quanto era stato mosso">
           {m.motivo} · {fraseMovimentoYen(m)}
         </span>
       ))}
-      {/* la voce spuntata prima degli yen automatici, tolta e rimessa: il suo denaro era già nel saldo, e la spunta non lo muove */}
-      {a.fatta && a.yenFuoriRegistro && <span className="testo-12 text-text-muted">Yen già nel saldo da prima che si muovessero da soli: questa spunta non li muove.</span>}
+      {/* gli effetti con yen nati prima degli yen automatici (spunta di allora, o tolta e rimessa): il loro denaro era già nel saldo, e la spunta
+          non lo muove; con altri yen mossi dalla stessa spunta, la frase dice che vale per gli altri */}
+      {a.fatta && a.yenFuoriRegistro && <span className="testo-12 text-text-muted">{a.yenAutomatici?.length
+        ? 'Gli altri yen di questa voce erano già nel saldo da prima che si muovessero da soli: la spunta non li muove.'
+        : 'Gli yen di questa voce erano già nel saldo da prima che si muovessero da soli: la spunta non li muove.'}</span>}
     </span>
     {/* che cosa dà il gioco, per gruppi (richiesta dell'utente del 2026-10-25, «formattarlo in modo adeguato, per tutti gli acquisti»): le Doti
         si segnano a mano (scelta dell'utente, 2026-09-30); gli yen (decisione 18) si muovono da soli spuntando la voce, e il riepilogo lo dice */}

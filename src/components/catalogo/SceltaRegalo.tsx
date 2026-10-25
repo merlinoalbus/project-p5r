@@ -127,7 +127,11 @@ export function SceltaRegalo({ partita, confidente, nomeConfidente, regali, amme
               opzioni={acquistabili.map((o) => ({ chiave: chiaveOfferta(o), nome: etichettaOfferta(o) }))} onCambia={setOffertaScelta} />
           )}
           {segna && acquistabili.length === 1 && <span className="testo-12 text-text-muted">{etichettaOfferta(offerta!)}</span>}
-          {segna && offerta?.prezzo ? <span className="testo-12 text-text-muted">Regalando, {formattaYen(offerta.prezzo)} si scalano da soli dal saldo della squadra, mai sotto zero (il regalo si registra anche se il saldo non basta); togliendo il regalo tornano.</span> : null}
+          {/* L13 (decisione 18): la frase dice che cosa farà davvero il prezzo; la consegna di prima, tolta e ridata nello stesso momento di gioco,
+              aveva il prezzo già nel saldo (`regaliYenGiaNelSaldo`, dal server) */}
+          {segna && offerta?.prezzo ? <span className="testo-12 text-text-muted tabular-nums">{sc?.regaliYenGiaNelSaldo?.includes(chiave)
+            ? `Il prezzo (${formattaYen(offerta.prezzo)}) era già nel saldo: questo regalo era stato dato in questo momento del gioco prima che gli yen si muovessero da soli, e ridandolo non si scala.`
+            : `Regalando, ${formattaYen(offerta.prezzo)} si scalano da soli dal saldo della squadra, mai sotto zero (il regalo si registra anche se il saldo non basta); togliendo il regalo tornano.`}</span> : null}
         </div>
       )}
       {errore && <p role="alert" className="m-0 testo-13">{errore}</p>}

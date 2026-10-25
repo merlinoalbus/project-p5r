@@ -36,7 +36,7 @@ import { fonteConfidenteAttivita } from './fonteConfidenteAttivitaService.js';
 import { fraseDelleCondizioni } from './condizioni/fraseCondizioni.js';
 import { leggiRegolaPesca } from './regolePescaService.js';
 import { esitiDellAttivita, esitiDto, risolviEsitoTurno } from './esitiAttivitaService.js';
-import { muoviYenAutomatico, nataPrimaDegliYenAutomatici, restituisciYenAutomatico, segnaYenFuoriRegistro } from './yenAutomaticiService.js';
+import { muoviYenAutomatico, restituisciYenAutomatico } from './yenAutomaticiService.js';
 import { leggiEsitiAttivita } from '../../shared/esitiAttivita.js';
 
 interface RigaAttivita { confidente_chiave: string | null; pesca_regola_chiave?: string | null; pesca_ruolo?: 'visita'|'obiettivi'|null }
@@ -612,17 +612,26 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
  * L13 (decisione 18): gli yen di un turno, fotografati quando si registra. La paga base del lavoro (`paga_yen`) entra; altrimenti si scala il
  * prezzo dell'articolo dell'esito scelto (la sfida della Big Bang Burger: il prezzo vive solo nell'articolo) o, senza, il costo dell'attività
  * (`costo`: freccette, palestra…). Un esito «senza punti» di un'attività con sfide a prezzi diversi non dice quale sfida si è pagata: niente.
+ * `articolo`: l'articolo della sfida che il turno paga, perché lo stesso acquisto non si conti due volte (`articoloPagatoDalTurno`).
  */
-function yenDelTurno(riga: RigaAttivita, esito?: { chiave: string; nome: string }): { importo: number; motivo: string } | null {
+function yenDelTurno(riga: Pick<RigaAttivita, 'chiave' | 'nome' | 'paga_yen' | 'costo'>, esito?: { chiave: string; nome: string }): { importo: number; motivo: string; articolo?: string } | null {
   if (riga.paga_yen != null && riga.paga_yen > 0) return { importo: riga.paga_yen, motivo: `Paga del turno: ${riga.nome}` };
   const dichiarati = esitiDellAttivita(riga.chiave)?.esiti;
   const articolo = esito ? dichiarati?.esiti.find((e) => e.chiave === esito.chiave)?.articolo ?? null : null;
   if (articolo) {
     const prezzo = (prepared('SELECT prezzo FROM main.articolo WHERE chiave = ?').get(articolo) as { prezzo: number | null } | undefined)?.prezzo ?? null;
-    return prezzo != null && prezzo > 0 ? { importo: -prezzo, motivo: `${riga.nome}: ${esito!.nome}` } : null;
+    return prezzo != null && prezzo > 0 ? { importo: -prezzo, motivo: `${riga.nome}: ${esito!.nome}`, articolo } : null;
   }
   if (dichiarati && !esito && dichiarati.esiti.some((e) => e.articolo)) return null;
   return riga.costo != null && riga.costo > 0 ? { importo: -riga.costo, motivo: `Costo dell'attività: ${riga.nome}` } : null;
+}
+/**
+ * L13 (decisione 18, doppio conteggio): l'articolo che il turno dell'attività con l'esito scelto paga da solo (la sfida della Big Bang Burger),
+ * con la stessa regola di `yenDelTurno`; null se il turno non paga un articolo (paga del lavoro, costo dell'attività, nessun prezzo).
+ */
+export function articoloPagatoDalTurno(attivita: string, esito: string): string | null {
+  const riga = prepared('SELECT chiave, nome, paga_yen, costo FROM main.attivita WHERE chiave = ?').get(attivita) as Pick<RigaAttivita, 'chiave' | 'nome' | 'paga_yen' | 'costo'> | undefined;
+  return riga ? yenDelTurno(riga, { chiave: esito, nome: '' })?.articolo ?? null : null;
 }
 
 /** Toglie un turno con i punti che aveva dato: quello di `ordine` (la spunta che lo aveva registrato), solo se c'è
@@ -643,18 +652,13 @@ export function togliTurno(partitaId: number, chiave: string, ordine?: number, i
       if(collegata)prepared('UPDATE utente.pesca_sessione SET turno_revocato_il=? WHERE partita_id=? AND id=?').run(adesso,partitaId,collegata.id);
       // il turno esce dal registro; le Doti restano come sono (si segnano a mano). L13 (decisione 18): gli yen che il turno aveva mosso da
       // soli tornano (la spesa restituita com'era stata scalata, la paga tolta al più fino a zero). Un turno registrato prima degli yen automatici
-      // non ha movimento (il saldo di allora lo contava già): resta fuori registro, così rifacendo lo stesso turno il saldo non cambia
-      const causa = { tipo: 'turno' as const, chiave: `${chiave}:${bersaglio}` };
-      const nato = (prepared('SELECT created_at FROM turno_partita WHERE partita_id = ? AND attivita_chiave = ? AND ordine = ?').get(partitaId, chiave, bersaglio) as { created_at: string } | undefined)?.created_at;
-      if (nataPrimaDegliYenAutomatici(nato)) segnaYenFuoriRegistro(partitaId, causa, 'turno-di-prima-tolto');
-      restituisciYenAutomatico(partitaId, causa, 'turno-tolto');
+      // non ha movimento (il saldo di allora lo contava già) e non restituisce niente. Non si segna: il + del contatore è sempre un turno nuovo,
+      // nato adesso, e muove i suoi yen; il turno di una voce di prima rispuntata lo scarta la spunta (`motoreDiario.applicaEffettiVoce`)
+      restituisciYenAutomatico(partitaId, { tipo: 'turno', chiave: `${chiave}:${bersaglio}` }, 'turno-tolto');
       prepared("DELETE FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = 'attivita' AND chiave = ? AND ordine = ?").run(partitaId, chiave, bersaglio);
       prepared('DELETE FROM turno_partita WHERE partita_id = ? AND attivita_chiave = ? AND ordine = ?').run(partitaId, chiave, bersaglio);
-    } else if (prima > 0) {
-      // uno dei turni contati prima del registro dei turni (nessuna riga, ben prima degli yen automatici): il saldo lo contava già. Il prossimo
-      // turno registrato prende il suo posto (`ordine` = volte): resta fuori registro, così togliere e rifare quel turno non sposta yen
-      segnaYenFuoriRegistro(partitaId, { tipo: 'turno', chiave: `${chiave}:${prima}` }, 'turno-di-prima-tolto');
     }
+    // un turno contato prima del registro dei turni (nessuna riga, ben prima degli yen automatici) non ha movimento: il − non restituisce niente
     if (prima > 0) scriviVolte(partitaId, chiave, prima - 1, adesso);
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();

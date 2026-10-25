@@ -31,7 +31,7 @@ import type { EsitoRevisioneVoce } from '../../shared/types.js';
 import { riferimentiOggettiPerFonti } from './catalogoOggettiLetture.js';
 import { apertureDichiarabili, apertureNegliEffetti, eVisitaMemento, verificaApertureScelte } from './apertureDedaliService.js';
 import { leggiEffettiVoce, leggiEffettiVocePerMostrare, salvaEffettiVoce, inizializzaEffettiVoce, copiaEffettiVoce, preparaRimozioneEffettiVoce, applicaEffettiVoce, annullaEffettiVoce, leggiRicevuteEffettiVoce, applicaEffettoStorico, verificaYenVoce } from './motoreDiario.js';
-import { eEffettoConNomi, eEffettoDiStato, fraseEffettoConNomi, normalizzaEffettiVoce, type EffettoLegacyVoce, type NomiFraseEffetto, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
+import { eEffettoConNomi, eEffettoDiStato, fraseEffettoConNomi, normalizzaEffettiVoce, type EffettoLegacyVoce, type EffettoVoce, type NomiFraseEffetto, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import { riepilogoEffettiVoce, type GruppoRiepilogoEffettiDto } from '../../shared/riepilogoEffetti.js';
 import { nomeDote } from '../../shared/doti.js';
 import { conCestino, type ViciniCestino } from './cestinoService.js';
@@ -41,7 +41,8 @@ import { disponibilitaAcquistoCorrente } from './negoziService.js';
 import type { NuovaRegistrazioneAcquisto } from '../../shared/acquisti.js';
 import type { PropostaPartitaDto } from '../../shared/propostePartita.js';
 import { scelteEsitoDellaVoce } from './esitiAttivitaService.js';
-import { spuntaYenFuoriRegistro, yenAutomaticiDellaVoce } from './yenAutomaticiService.js';
+import { effettiConYenGiaNelSaldo, yenAutomaticiDellaVoce } from './yenAutomaticiService.js';
+import { yenDelDato } from './yenDeiDati.js';
 
 export interface RigaVoce {
   uid: string; data: string; fascia: string; ordine: number; genere: string; azione: string; note: string | null; tipo: string;
@@ -86,16 +87,31 @@ const nomeNegozio = (chiave: string): string | undefined => (prepared('SELECT no
  * `i`), e il riepilogo per gruppi che la pagina mostra («Il gioco dà», richiesta dell'utente del 2026-10-25: «formattarlo in modo adeguato,
  * per tutti gli acquisti»). Il totale degli articoli sta nel riepilogo (gruppo «Acquisti · negozio»), non più in una riga «In tutto» in coda.
  */
-function cosaDaLaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione): { testo: string[]; riepilogo: GruppoRiepilogoEffettiDto[] } {
+function cosaDaLaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione, yenGiaNelSaldo: ReadonlySet<string> = new Set()): { testo: string[]; riepilogo: GruppoRiepilogoEffettiDto[] } {
   const nomiFrase = nomiFraseEffetto();
+  // L13 (decisione 18): gli effetti i cui yen erano già nel saldo da prima (per posizione, come gli effetti del riepilogo)
+  const vecchi = new Set(fonte.effetti.flatMap((x, i) => (yenGiaNelSaldo.has(x.uid) ? [i] : [])));
   return {
-    testo: testoEffettiDellaFonte(fonte, nomi, nomiFrase),
-    riepilogo: riepilogoEffettiVoce(fonte.effetti.map((x) => x.effetto), { frase: nomiFrase, azione: nomi, negozio: nomeNegozio, pagaTurno: pagaDelTurno }),
+    testo: testoEffettiDellaFonte(fonte, nomi, nomiFrase, yenGiaNelSaldo),
+    riepilogo: riepilogoEffettiVoce(fonte.effetti.map((x) => x.effetto), { frase: nomiFrase, azione: nomi, negozio: nomeNegozio, pagaTurno: pagaDelTurno }, { yenGiaNelSaldo: vecchi }),
   };
 }
+/**
+ * L13 (decisione 18): vero se l'effetto porta yen che la spunta muoverebbe (un articolo con il prezzo, la consumazione, la pesca, gli yen, il
+ * turno di un'attività con paga, costo o sfida, la visione di un film con il biglietto, una Richiesta con la ricompensa): per i testi che dicono
+ * che i suoi yen erano già nel saldo, che compaiono solo dove c'è qualcosa da dire.
+ */
+function effettoConYen(e: EffettoVoce): boolean {
+  if (e.tipo === 'yen' || e.tipo === 'acquisto' || e.tipo === 'pesca') return true;
+  if (e.tipo === 'articolo') return (articoloConNome(e.articolo)?.prezzo ?? 0) > 0;
+  if (e.tipo === 'turno') return (yenDelDato('attivita', e.attivita) ?? 0) > 0;
+  if (e.tipo === 'lettura' && e.categoria === 'film') return (yenDelDato('film', e.chiave) ?? 0) > 0;
+  if (e.tipo === 'richiesta') return (yenDelDato('richiesta', e.richiesta) ?? 0) > 0;
+  return false;
+}
 /** La frase di ogni effetto della fonte unica, anche acquisto e pesca, con i nomi degli elementi. */
-function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione, nomiFrase: NomiFraseEffetto): string[] {
-  return fonte.effetti.map(({ effetto: e }) => {
+function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione, nomiFrase: NomiFraseEffetto, yenGiaNelSaldo: ReadonlySet<string>): string[] {
+  return fonte.effetti.map(({ uid, effetto: e }) => {
     if (e.tipo === 'articolo') {
       // l'articolo comprato e il suo prezzo (decisione 18: spuntando la voce si scala da solo dal saldo, `motoreDiario.yenDellEffetto`)
       // il nome è quello del catalogo; la colonna `nome` dell'articolo può essere vuota (il catalogo unico è il nome vero), e allora la riga non resta senza nome
@@ -109,10 +125,11 @@ function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzi
       return `Acquisto: ${nome}${e.variante ? ` · ${nomeDote(e.variante)}` : ' · variante da dichiarare'}`;
     }
     const testo = testoEffetti([e], nomi)[0]!;
-    // R10-06: la paga del turno non è mai una proposta (decisione 18: entra da sola nel saldo registrando il turno)
+    // R10-06: la paga del turno non è mai una proposta (decisione 18: entra da sola nel saldo registrando il turno). Il di più di una paga
+    // variabile non entra da solo, e la frase lo dice; non per un turno di prima, la cui paga era già nel saldo (lo dice la nota del riepilogo)
     if (e.tipo === 'turno') {
       const paga = pagaDelTurno(e.attivita);
-      if (paga) return `${testo} · paga ¥${paga.yen.toLocaleString('it-IT')}${paga.massima && paga.massima > paga.yen ? ` (fino a ¥${paga.massima.toLocaleString('it-IT')}: entra da sola la paga base, il di più no)` : ''}`;
+      if (paga) return `${testo} · paga ¥${paga.yen.toLocaleString('it-IT')}${paga.massima && paga.massima > paga.yen ? ` (fino a ¥${paga.massima.toLocaleString('it-IT')}${yenGiaNelSaldo.has(uid) ? '' : ': entra da sola la paga base, il di più no'})` : ''}`;
     }
     return testo;
   });
@@ -227,16 +244,24 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   const daApplicare = ctx.partita === undefined ? 0 : decisioniApertePerVoce(ctx.partita, r.uid);
   // L13 (decisione 18): gli yen che la spunta di questa voce ha mosso da soli nella partita (spese scalate, guadagni entrati), da mostrare sulla voce
   const yenAutomatici = ctx.partita === undefined || !ctx.fatte.has(r.uid) ? [] : yenAutomaticiDellaVoce(ctx.partita, r.uid);
-  // la voce di prima degli yen automatici, tolta e rimessa: il suo denaro era già nel saldo e la spunta non lo muove (la voce lo dice)
-  const yenFuoriRegistro = ctx.partita !== undefined && ctx.fatte.has(r.uid) && !yenAutomatici.length && spuntaYenFuoriRegistro(ctx.partita, r.uid);
+  // gli effetti con yen nati prima che gli yen si muovessero da soli (spunta di allora ancora in piedi, o tolta e rimessa): il loro denaro era
+  // già nel saldo e la spunta non lo muove. Le frasi e le note della voce lo dicono, invece di promettere un movimento che non c'è
+  const yenGiaNelSaldo = ctx.partita === undefined || !spuntabile ? new Set<string>() : (() => {
+    const fattaIl = ctx.fatte.has(r.uid) ? (prepared('SELECT fatta_at FROM utente.spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').get(ctx.partita, r.uid) as { fatta_at: string } | undefined)?.fatta_at ?? null : null;
+    const conYen = fonte.effetti.filter((x) => effettoConYen(x.effetto)).map((x) => x.uid);
+    return conYen.length ? effettiConYenGiaNelSaldo(ctx.partita, r.uid, fattaIl, conYen) : new Set<string>();
+  })();
+  const yenFuoriRegistro = yenGiaNelSaldo.size > 0;
   // L13: le scelte che la spunta chiederà (esito del turno, note di una Dote a valori possibili), al giorno della voce; gli effetti rivendicati
   // da un acquisto o da una pesca non si applicano come legacy e quindi non chiedono niente (stessa regola di `applicaEffettiVoce`)
   const sostituiti = new Set(fonte.effetti.flatMap(({ effetto: e }) => e.tipo === 'acquisto' ? e.sostituisceDoti : e.tipo === 'pesca' ? [...e.sostituisceDoti, ...e.sostituisceTurni] : []));
   const scelteEsito = ctx.partita !== undefined && spuntabile && !ctx.fatte.has(r.uid) && fonte.stato === 'convertita'
     ? scelteEsitoDellaVoce(ctx.partita, { data: r.data, fascia: fasciaDi(r) }, fonte.effetti.filter((e) => !sostituiti.has(e.uid))) : [];
   return {
-    ...v, effettiVoce: fonte, ricevuteEffetti, ...(daApplicare > 0 ? { daApplicare } : {}), ...(scelteEsito.length ? { scelteEsito } : {}), ...(yenAutomatici.length ? { yenAutomatici } : {}), ...(yenFuoriRegistro ? { yenFuoriRegistro: true as const } : {}),
-    ...(aperture.length ? { apertureDedali: aperture } : {}), ...avvisiDisponibilitaDellaVoce(r), ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], ...campiCosaDa(spuntabile ? cosaDaLaFonte(fonte, ctx.nomi) : null),
+    ...v, effettiVoce: fonte, ricevuteEffetti, ...(daApplicare > 0 ? { daApplicare } : {}),
+    // decisione 18: la scelta dell'esito di un turno di prima dice che il prezzo della sfida era già nel saldo (la spunta non lo scala)
+    ...(scelteEsito.length ? { scelteEsito: scelteEsito.map((s) => (s.tipo === 'turno' && yenGiaNelSaldo.has(s.effettoUid) ? { ...s, yenGiaNelSaldo: true as const } : s)) } : {}), ...(yenAutomatici.length ? { yenAutomatici } : {}), ...(yenFuoriRegistro ? { yenFuoriRegistro: true as const } : {}),
+    ...(aperture.length ? { apertureDedali: aperture } : {}), ...avvisiDisponibilitaDellaVoce(r), ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], ...campiCosaDa(spuntabile ? cosaDaLaFonte(fonte, ctx.nomi, yenGiaNelSaldo) : null),
     fatta: spuntabile && ctx.fatte.has(r.uid), effetti: ctx.fatte.get(r.uid) ?? null,
     stato: ctx.conf && spuntabile ? statoAzione(v, ctx.conf, ctx.partita) : null, mappa: mappaAzione(v),
     // il Palazzo collegato: dove si atterra il giorno della voce (scelta dell'utente, 2026-10-04). L6 (R6-17): la destinazione unica, la stessa

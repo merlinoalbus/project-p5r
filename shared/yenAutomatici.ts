@@ -19,6 +19,8 @@ export type CausaYenAutomatico = 'voce' | 'turno' | 'richiesta' | 'regalo';
 /** Un movimento automatico ancora in vigore: `richiesto` con il segno (negativo = spesa), `applicato` quello davvero mosso sul saldo. */
 export interface MovimentoYenAutomaticoDto {
   causa: CausaYenAutomatico;
+  /** La chiave della causa: `voce:effetto` per un effetto della voce, `attività:ordine` per un turno, la chiave della Richiesta, il regalo. */
+  chiave: string;
   /** Che cosa l'ha mosso, in parole («Paga del turno: Commesso al Triple Seven», «Acquisti: Arginade ×2»). */
   motivo: string;
   richiesto: number;

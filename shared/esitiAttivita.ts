@@ -141,5 +141,7 @@ export interface EsitiAttivitaDto {
 }
 /** Le scelte che la spunta di una voce chiede, nell'ordine degli effetti. */
 export type SceltaEsitoVoceDto =
-  | { effettoUid: string; tipo: 'turno'; attivita: string; attivitaNome: string; preselezionato: string | null; esiti: EsitoDisponibileDto[] }
+  /** `yenGiaNelSaldo` (L13, decisione 18): l'effetto «turno» è di una voce spuntata prima che gli yen si muovessero da soli, ora rispuntata: il
+   *  prezzo della sfida era già nel saldo e non si scala (la scelta lo dice). */
+  | { effettoUid: string; tipo: 'turno'; attivita: string; attivitaNome: string; preselezionato: string | null; esiti: EsitoDisponibileDto[]; yenGiaNelSaldo?: true }
   | { effettoUid: string; tipo: 'dote'; dote: DoteChiave; doteNome: string; possibili: Array<1 | 2 | 3>; preselezionato: 1 | 2 | 3 };

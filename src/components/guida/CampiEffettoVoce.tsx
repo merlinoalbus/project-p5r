@@ -90,7 +90,7 @@ export function CampoYen({ importo, onCambia }: { importo: number; onCambia: (im
         <input className="form-input min-h-11 w-40" type="number" inputMode="numeric" min={1} max={YEN_MASSIMI_EFFETTO} step={1} value={valore || ''}
           onChange={(ev) => { const n = Math.min(YEN_MASSIMI_EFFETTO, Math.max(0, Math.trunc(Number(ev.target.value) || 0))); onCambia(verso === 'spesi' ? -n : n); }} />
       </label>
-      <p className="m-0 testo-12 text-text-secondary">Spuntando la voce gli yen entrano da soli nel saldo della partita (ricevuti) o se ne scalano (spesi), mai sotto zero: la spunta resta possibile anche se il saldo non basta. Togliendo la spunta tornano com’erano. Non si usa se la voce ha già un acquisto, una pesca o una Richiesta completata (i loro yen li porta quel dato).</p>
+      <p className="m-0 testo-12 text-text-secondary">Spuntando la voce gli yen entrano da soli nel saldo della partita (ricevuti) o se ne scalano (spesi), mai sotto zero: la spunta resta possibile anche se il saldo non basta. Togliendo la spunta torna quanto era stato mosso. Non si usa se la voce ha già un dato che porta i suoi yen: un acquisto o un articolo comprato, una pesca, una Richiesta completata, il turno di un’attività o di un lavoro con costo, paga o sfida, la visione di un film con il biglietto, o il collegamento della voce a un film, un’attività o una Richiesta con i loro yen (li porta quel dato).</p>
     </div>
   );
 }

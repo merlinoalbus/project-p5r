@@ -61,7 +61,9 @@ export function PreparaAcquistiVoce({ a, partitaId, onChiudi, onConferma, onRile
   </>}>
     <div className="flex min-w-0 flex-col gap-3 testo-13">
       <strong>{a.azione}</strong>
-      <p className="m-0">Ogni riquadro prepara soltanto i dati. Il comando finale registra insieme spunta, consumazioni e sessioni osservate. Doti e punti pesca restano proposte da decidere; il prezzo di una consumazione nuova e la quota di una visita nuova si scalano da soli dal saldo, mai sotto zero (la spunta resta possibile anche se il saldo non basta).</p>
+      <p className="m-0">Ogni riquadro prepara soltanto i dati. Il comando finale registra insieme spunta, consumazioni e sessioni osservate. Doti e punti pesca restano proposte da decidere; {a.yenFuoriRegistro
+        ? 'gli yen degli effetti segnati prima che si muovessero da soli erano già nel saldo e non si muovono, gli altri si scalano da soli dal saldo, mai sotto zero (la spunta resta possibile anche se il saldo non basta).'
+        : 'il prezzo di una consumazione nuova e la quota di una visita nuova si scalano da soli dal saldo, mai sotto zero (la spunta resta possibile anche se il saldo non basta).'}</p>
       {invalidazioneAnteprima > 0 && mancaPreparazione && <p role="status" className="m-0 text-warning">Gli input e le catture sono conservati. Rivedi una nuova anteprima e riconferma ogni riquadro prima della spunta; il comando precedente non viene ripetuto.</p>}
       <details><summary className="touch">Tutti gli effetti della voce</summary><RiepilogoEffettiVoce gruppi={gruppiDellaVoce(a)} titolo="Che cosa dà la voce" /></details>
       {verifica.caricamento && <p role="status">Verifico la configurazione corrente della voce…</p>}
