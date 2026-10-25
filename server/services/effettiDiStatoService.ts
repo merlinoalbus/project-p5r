@@ -4,7 +4,8 @@
 //
 // Quattro tipi di effetto che citano il loro oggetto per chiave: `storia` (un evento di storia, per esempio la mansarda pulita),
 // `domanda` (una domanda in classe o un esame), `cruciverba` (un cruciverba risolto), `richiesta` (una Richiesta completata),
-// `articolo` (un articolo di un negozio comprato, tranne l'Aojiru; gli yen restano un promemoria). La spunta li segna con gli
+// `articolo` (un articolo di un negozio comprato, tranne l'Aojiru; L13, decisione 18: il prezzo lo scala da solo `motoreDiario.yenDellEffetto`,
+// solo se l'acquisto è stato davvero segnato qui). La spunta li segna con gli
 // STESSI setter delle pagine (`impostaEventoStoria`, `impostaDomandaFatta`, `impostaCruciverba`, `impostaStatoRichiesta`,
 // `impostaAcquisto`: una sola regola per azione); togliere la spunta riporta lo stato com'era PRIMA, anche dopo un
 // ricaricamento (il «prima» sta in `utente.effetto_stato_voce`, non nella pagina). Ciò che c'era già non si disfa: se l'evento era

@@ -5,6 +5,7 @@ import { verificaPartita } from './verificaPartita.js';
 import { eDote } from '../../shared/doti.js';
 import { chiaveSblocco, eEffettoDiStato, fondiArticoliUguali, motivoYenGiaStrutturati, normalizzaEffettoVoce, normalizzaEffettiVoce } from '../../shared/effettiVoce.js';
 import { yenDelDato } from './yenDeiDati.js';
+import { muoviYenAutomatico, restituisciYenAutomatico, restituisciYenAutomaticiDellaVoce, yenPropostiInSospeso } from './yenAutomaticiService.js';
 import type { AnteprimaDecisioneEffettoVoceDto, EffettoLegacyVoce, EffettoVoce, EffettoVoceDto, PropostaEffettoVoceDto, ReceiptEffettoVoceDto, RichiestaAnteprimaDecisioneEffettoVoce, RichiestaDecisioneEffettoVoce, RichiestaSalvaEffettiVoce, StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import type { NuovaRegistrazioneAcquisto, RichiestaRegistraAcquisto } from '../../shared/acquisti.js';
 import type { EffettiAzioneDto } from '../../shared/types.js';
@@ -18,7 +19,7 @@ import { confidentiAnnullatiAlVecchioModo, nuovaGenerazione, riconciliaRegistroD
 import { verificaEffetti } from './azioniStrutturateService.js';
 import { ATTIVITA_PESCA, REGOLA_PESCA, eAttivitaPesca, type NuovaSessionePesca, type RichiestaRegistraSessionePesca } from '../../shared/pesca.js';
 import { anteprimaPesca, confermaPesca, rimuoviFontePescaNellaTransazione } from './pescaService.js';
-import { fontiPesca } from './pescaLetture.js';
+import { fontiPesca, quotaSessionePesca } from './pescaLetture.js';
 import { leggiRegolaPesca } from './regolePescaService.js';
 import { provaUidTurnoPesca } from './allocazioniTurniPesca.js';
 import { risolviScelteSpunta, type SceltaRisolta } from './esitiAttivitaService.js';
@@ -68,8 +69,58 @@ export function leggiEffettiVocePerMostrare(uid:string):StatoEffettiVoceDto {
 }
 const chiaveEffetto=(e:EffettoVoce):string|null=>e.tipo==='acquisto'?e.articolo:e.tipo==='dote'||e.tipo==='fortuna'?e.dote:e.tipo==='lettura'?e.chiave:e.tipo==='storia'?e.evento:e.tipo==='domanda'?String(e.domanda):e.tipo==='cruciverba'?e.data:e.tipo==='richiesta'?e.richiesta:e.tipo==='articolo'?e.articolo:e.tipo==='invito'?e.invito:e.tipo==='persona'?String(e.persona)
   :e.tipo==='yen'?'yen':e.tipo==='oggetto'?e.oggetto:e.tipo==='trofeo'?e.trofeo:e.tipo==='sblocco'?chiaveSblocco(e.bersaglio,e.chiave):e.attivita;
-/** L13: il beneficio in yen di un effetto «yen» (come la Dote: la ricevuta lo dichiara, la proposta «Applica» lo porta nel saldo). */
+/**
+ * L13: il beneficio in yen di un effetto «yen» nel vecchio registro delle proposte (la ricevuta lo dichiara, la proposta «Applica» lo porta nel
+ * saldo). Dalla decisione 18 si usa SOLO per una causa che ha ancora yen proposti in sospeso (`yenPropostiInSospeso`): così la proposta applicata
+ * prima ritrova la sua causa e niente si conta due volte. Altrimenti gli yen si muovono da soli (`ricevutaYen`, `muoviYenDellaVoce`).
+ */
 const beneficioYen=(e:Extract<EffettoVoce,{tipo:'yen'}>,storica:boolean)=>({tipo:'yen' as const,chiave:'yen',delta:e.importo,motivo:e.importo>0?'Yen della voce: applicali quando li ricevi nel gioco.':'Yen spesi nella voce: applicali quando li spendi nel gioco.',storica});
+/**
+ * L13 (decisione 18): la ricevuta di un effetto «yen» e il suo movimento. Con yen ancora proposti in sospeso per lo stesso effetto (proposta aperta
+ * o applicata prima, non tornata a zero) resta il registro delle proposte, com'era; altrimenti la ricevuta non dichiara benefici (nessuna
+ * proposta «Applica») e gli yen entrano o si scalano da soli dal saldo, mai sotto zero.
+ */
+function ricevutaYen(p:number,uid:string,e:EffettoVoceDto&{effetto:Extract<EffettoVoce,{tipo:'yen'}>},dati:Record<string,unknown>,storica:boolean,opz:{id?:string}={}):{ricevuta:ReceiptEffettoVoceDto;movimento:YenDaMuovere|null} {
+  if(yenPropostiInSospeso(p,'voce',`${uid}:${e.uid}`))return {ricevuta:registraRicevuta(p,uid,e,{...dati,benefici:[beneficioYen(e.effetto,storica)]},true,opz),movimento:null};
+  return {ricevuta:registraRicevuta(p,uid,e,{...dati,benefici:[],yenAutomatici:true},true,opz),movimento:{effettoUid:e.uid,importo:e.effetto.importo,motivo:e.effetto.importo>0?'Yen ricevuti nella voce':'Yen spesi nella voce'}};
+}
+/** Un movimento automatico della voce da fare (`muoviYenDellaVoce`): l'effetto, l'importo con il segno, il motivo. */
+interface YenDaMuovere {effettoUid:string;importo:number;motivo:string}
+/** Muove gli yen della voce: prima i guadagni, poi le spese, così il tetto a zero non mangia una spesa che il guadagno della stessa voce copriva. */
+function muoviYenDellaVoce(p:number,uid:string,elenco:Array<YenDaMuovere|null>):void {
+  for(const m of elenco.filter((x):x is YenDaMuovere=>x!==null).sort((a,b)=>b.importo-a.importo))muoviYenAutomatico(p,{tipo:'voce',chiave:`${uid}:${m.effettoUid}`},m.importo,m.motivo,uid);
+}
+/**
+ * L13 (decisione 18): gli yen che la spunta muove da soli per un effetto che porta già il suo prezzo (decisione 2: li muove quel dato), fotografati
+ * al gesto: gli articoli comprati (prezzo × copie, solo se l'acquisto è stato davvero segnato), la consumazione Aojiru nuova, la visita di pesca
+ * nuova (la sua quota), il biglietto del cinema di una visione. I turni li muove il turno stesso (`attivitaService.registraTurno`), le Richieste la
+ * Richiesta completata (`riallineaYenRichiesta`). Mai sotto zero, e la spunta non si ferma per il saldo.
+ */
+function yenDellEffetto(p:number,uid:string,e:EffettoVoceDto,ricevuta?:ReceiptEffettoVoceDto,porzione?:EffettiAzioneDto|null):YenDaMuovere|null {
+  const x=e.effetto,spesa=(importo:number,motivo:string):YenDaMuovere=>({effettoUid:e.uid,importo:-importo,motivo});
+  if(x.tipo==='articolo'){
+    if(!prepared('SELECT 1 FROM utente.effetto_stato_voce WHERE partita_id=? AND voce_uid=? AND effetto_uid=?').get(p,uid,e.uid))return null;
+    // il nome del catalogo, se il file di gioco lo ha (come `esitiAttivitaService.articoloEsito`), altrimenti quello del listino
+    const conCatalogo=!!prepared("SELECT 1 FROM main.sqlite_master WHERE type='table' AND name='catalogo_oggetto'").get();
+    const a=prepared(conCatalogo?"SELECT COALESCE(c.nome,NULLIF(a.nome,''),a.chiave) AS nome,a.prezzo FROM main.articolo a LEFT JOIN main.catalogo_oggetto c ON c.chiave=a.catalogo_chiave WHERE a.chiave=?":"SELECT COALESCE(NULLIF(nome,''),chiave) AS nome,prezzo FROM main.articolo WHERE chiave=?").get(x.articolo) as {nome:string;prezzo:number|null}|undefined;
+    const copie=x.quantita??1;
+    return a?.prezzo!=null&&a.prezzo>0?spesa(a.prezzo*copie,`Acquisto: ${a.nome}${copie>1?` ×${copie}`:''}`):null;
+  }
+  if(x.tipo==='acquisto'&&ricevuta?.creato){
+    const a=prepared('SELECT prezzo_yen FROM utente.acquisto_registrato WHERE partita_id=? AND id=?').get(p,String(ricevuta.ricevuta.acquistoId)) as {prezzo_yen:number}|undefined;
+    return a&&a.prezzo_yen>0?spesa(a.prezzo_yen,'Consumazione Aojiru'):null;
+  }
+  if(x.tipo==='pesca'&&ricevuta?.creato){
+    const quota=quotaSessionePesca(p,String(ricevuta.ricevuta.sessioneId));
+    return quota!==null&&quota>0?spesa(quota,'Quota della visita di pesca'):null;
+  }
+  if(x.tipo==='lettura'&&x.categoria==='film'){
+    const l=porzione?.letture?.find((v)=>v.categoria==='film'&&v.chiave===x.chiave);
+    const f=prepared('SELECT nome,prezzo FROM main.film WHERE chiave=?').get(x.chiave) as {nome:string;prezzo:number|null}|undefined;
+    return l&&(l.visione===true||l.dopo>l.prima)&&f?.prezzo!=null&&f.prezzo>0?spesa(f.prezzo,`Biglietto del cinema: ${f.nome}`):null;
+  }
+  return null;
+}
 function verificaNuovoEffetto(e:EffettoVoce):void {if(e.tipo==='fortuna'||e.tipo==='yen')return;if(eEffettoDiStato(e)){verificaEffettoDiStato(e);return;}if(e.tipo==='acquisto')verificaOffertaConsumo(e.articolo);else if(e.tipo==='pesca'){if(e.attivita!==ATTIVITA_PESCA||e.regola!==REGOLA_PESCA||leggiRegolaPesca(e.regola).stato!=='collegata')throw httpErrors.conflict('pesca-regola-assente','La fonte della pesca non è collegata a una regola leggibile.');}else verificaEffetti([e]);}
 function verificaLista(effetti:EffettoVoceDto[]):void {
   const ids=new Set<string>(),rivendicati=new Set<string>();
@@ -334,17 +385,20 @@ export function applicaEffettiVoce(p:number,uid:string,porte:PorteEffettiLegacy,
   for(const e of pesche){const r=richiestePesca.find(r=>r.fonte.tipo==='diario'&&r.fonte.voceUid===uid&&r.fonte.effettoUid===e.uid);if(!r)throw httpErrors.conflict('pesca-osservazione-mancante','Manca la visita osservata per un effetto pesca.');const {revisionePescaAttesa,...input}=r;if(anteprimaPesca(p,'registra-sessione',input).revisionePescaAttesa!==revisionePescaAttesa)throw httpErrors.conflict('pesca-cambiata','Una visita del gruppo è cambiata: nessun effetto viene applicato.');}
   // Tutti i token sono riferiti al medesimo stato precedente: non mutare un acquisto prima di validare gli altri.
   for(const e of consumi){const richiesta=richieste.find((r)=>r.fonte.tipo==='diario'&&r.fonte.effettoUid===e.uid);if(!richiesta)throw httpErrors.conflict('richiesta-acquisto-mancante','Manca il riepilogo di una consumazione.');const {revisioneAcquistiAttesa,...nuovo}=richiesta;if(anteprimaRegistrazioneAcquisto(p,nuovo,opz.porteAcquisti).revisioneAcquistiAttesa!==revisioneAcquistiAttesa)throw httpErrors.conflict('acquisti-cambiati','Una consumazione del gruppo è cambiata: nessuna spunta viene applicata.');}
-  for(const e of consumi){const richiesta=richieste.find((r)=>r.fonte.tipo==='diario'&&r.fonte.effettoUid===e.uid)!;const {revisioneAcquistiAttesa:_prima,...nuovo}=richiesta;const token=anteprimaRegistrazioneAcquisto(p,nuovo,opz.porteAcquisti).revisioneAcquistiAttesa;receiptNuovi.push(registraConsumo(p,uid,e,{...nuovo,revisioneAcquistiAttesa:token},opz.porteAcquisti,true,{generazione}));}
-  for(const e of pesche){const r=richiestePesca.find(r=>r.fonte.tipo==='diario'&&r.fonte.effettoUid===e.uid)!;const {revisionePescaAttesa:_prima,...input}=r;receiptNuovi.push(registraPesca(p,uid,e,{...input,revisionePescaAttesa:anteprimaPesca(p,'registra-sessione',input).revisionePescaAttesa},generazione,true));}
+  // L13 (decisione 18): gli yen che la spunta muove da soli, raccolti e mossi alla fine (prima i guadagni, poi le spese)
+  const yenDaMuovere:Array<YenDaMuovere|null>=[];
+  for(const e of consumi){const richiesta=richieste.find((r)=>r.fonte.tipo==='diario'&&r.fonte.effettoUid===e.uid)!;const {revisioneAcquistiAttesa:_prima,...nuovo}=richiesta;const token=anteprimaRegistrazioneAcquisto(p,nuovo,opz.porteAcquisti).revisioneAcquistiAttesa;const ricevuta=registraConsumo(p,uid,e,{...nuovo,revisioneAcquistiAttesa:token},opz.porteAcquisti,true,{generazione});receiptNuovi.push(ricevuta);yenDaMuovere.push(yenDellEffetto(p,uid,e,ricevuta));}
+  for(const e of pesche){const r=richiestePesca.find(r=>r.fonte.tipo==='diario'&&r.fonte.effettoUid===e.uid)!;const {revisionePescaAttesa:_prima,...input}=r;const ricevuta=registraPesca(p,uid,e,{...input,revisionePescaAttesa:anteprimaPesca(p,'registra-sessione',input).revisionePescaAttesa},generazione,true);receiptNuovi.push(ricevuta);yenDaMuovere.push(yenDellEffetto(p,uid,e,ricevuta));}
   const sostituite=new Set([...consumi.flatMap((e)=>e.effetto.tipo==='acquisto'?e.effetto.sostituisceDoti:[]),...pesche.flatMap(e=>e.effetto.tipo==='pesca'?[...e.effetto.sostituisceDoti,...e.effetto.sostituisceTurni]:[])]);
   const legacy=stato.effetti.filter((e):e is EffettoVoceDto&{effetto:EffettoLegacyVoce}=>e.effetto.tipo!=='acquisto'&&e.effetto.tipo!=='pesca'&&e.effetto.tipo!=='fortuna'&&e.effetto.tipo!=='yen'&&!eEffettoDiStato(e.effetto)&&!sostituite.has(e.uid));
   // L13: le scelte d'esito (turni delle attività con esiti, Doti a valori possibili) si verificano tutte insieme, prima degli effetti legacy e nella
   // transazione della spunta: una scelta mancante o rifiutata annulla anche consumi e pesca già registrati qui sopra (niente resta a metà)
   const v=voce(uid),risolte=risolviScelteSpunta(p,{data:v.data,fascia:v.fascia},legacy,opz.scelteEsito);
   const effettiLegacy=porte.applicaLegacy(p,legacy.map((e)=>e.effetto),legacy.map((e)=>risolte.get(e.uid))),porzioni=porzioniLegacy(legacy,effettiLegacy),spunta={fattaIl:opz.spuntaFattaIl,raw:effettiLegacy?JSON.stringify(effettiLegacy):null};
-  for(const e of legacy){const segmento=porzioni.get(e.uid)!;receiptNuovi.push(registraRicevuta(p,uid,e,{benefici:beneficiLegacy(segmento,false),legacy:segmento,risorse:risorseLegacy(p,segmento),gestitaDaSpunta:true,spunta},true));}
-  // L13: gli yen della voce: una ricevuta col beneficio, da cui nasce la proposta «Applica» (gli yen non si muovono da soli); togliendo la spunta la ricevuta si annulla e la proposta si chiude
-  for(const e of stato.effetti)if(e.effetto.tipo==='yen')receiptNuovi.push(registraRicevuta(p,uid,e,{benefici:[beneficioYen(e.effetto,false)],gestitaDaSpunta:true,spunta},true));
+  for(const e of legacy){const segmento=porzioni.get(e.uid)!;receiptNuovi.push(registraRicevuta(p,uid,e,{benefici:beneficiLegacy(segmento,false),legacy:segmento,risorse:risorseLegacy(p,segmento),gestitaDaSpunta:true,spunta},true));yenDaMuovere.push(yenDellEffetto(p,uid,e,undefined,segmento));}
+  // L13 (decisione 18): gli yen della voce entrano o si scalano da soli (mai sotto zero), con la ricevuta che lo dice; togliendo la spunta tornano.
+  // Solo una causa con yen ancora proposti in sospeso (proposta di prima, aperta o applicata) resta alla proposta «Applica», com'era
+  for(const e of stato.effetti)if(e.effetto.tipo==='yen'){const y=ricevutaYen(p,uid,e as EffettoVoceDto&{effetto:Extract<EffettoVoce,{tipo:'yen'}>},{gestitaDaSpunta:true,spunta},false);receiptNuovi.push(y.ricevuta);yenDaMuovere.push(y.movimento);}
   if(effettiLegacy&&(effettiLegacy.confidente||effettiLegacy.incontro||effettiLegacy.apertureDedali?.length)){
     const contesto:EffettiAzioneDto={doti:[],confidente:effettiLegacy.confidente,...(effettiLegacy.incontro?{incontro:effettiLegacy.incontro}:{}),...(effettiLegacy.apertureDedali?{apertureDedali:effettiLegacy.apertureDedali}:{})};
     receiptNuovi.push(registraRicevuta(p,uid,{uid:createHash('sha256').update(`contesto-voce\0${uid}`).digest('hex').slice(0,32),ordine:stato.effetti.length,effetto:null},{benefici:beneficiLegacy(contesto,false),legacy:contesto,gestitaDaSpunta:true,contesto:true,spunta},true));
@@ -353,6 +407,9 @@ export function applicaEffettiVoce(p:number,uid:string,porte:PorteEffettiLegacy,
   for(const e of stato.effetti)if(e.effetto.tipo==='fortuna')accendiFortunaDaVoce(p,uid,e.effetto.dote);
   // gli effetti «segna lo stato» (evento di storia, domanda, cruciverba, Richiesta): stessi setter delle pagine, con il «prima» ricordato
   applicaEffettiDiStato(p,uid,stato.effetti.flatMap((e)=>eEffettoDiStato(e.effetto)?[{uid:e.uid,effetto:e.effetto}]:[]));
+  // gli articoli comprati: il loro prezzo, solo se l'acquisto è stato davvero segnato (un articolo non ancora disponibile resta da segnare dal negozio)
+  for(const e of stato.effetti)if(e.effetto.tipo==='articolo')yenDaMuovere.push(yenDellEffetto(p,uid,e));
+  muoviYenDellaVoce(p,uid,yenDaMuovere);
   return {effettiLegacy,receiptNuovi,proposte:leggiPropostePartita(p)};
 }
 
@@ -382,11 +439,16 @@ export function applicaEffettoStorico(p:number,proposta:PropostaPartitaDto,acqui
     if(attiva.tipo==='acquisto')annullaFontiDiarioNellaTransazione(p,uid,[String(attiva.ricevuta.provenienzaId)],id);else if(attiva.tipo==='pesca'){const f=fontiPesca(p).find(f=>f.id===attiva.ricevuta.provenienzaId);if(f)rimuoviFontePescaNellaTransazione(p,f.id);}else if(vecchioLegacy)porte.annullaLegacy(p,vecchioLegacy);
     if(prepared('UPDATE utente.effetto_applicato SET annullato_il=?,sostituita_da=? WHERE partita_id=? AND id=? AND annullato_il IS NULL AND sostituita_da IS NULL').run(nowIso(),nuovaRicevuta,p,attiva.id).changes!==1)throw httpErrors.conflict('versione-cambiata','La versione precedente è cambiata.');
   }
+  // L13 (decisione 18): gli yen che la versione precedente aveva mosso da soli tornano com'erano e la nuova versione muove i suoi. Per una
+  // consumazione o una visita collegata allo stesso fatto già pagato (non nuova) il movimento di prima resta: quel fatto è lo stesso
+  const causaYen={tipo:'voce' as const,chiave:`${uid}:${id}`};
+  const sostituisciYen=(nuovo:YenDaMuovere|null,fattoNuovo:boolean):void=>{if(fattoNuovo||e.effetto.tipo==='yen'||(e.effetto.tipo!=='acquisto'&&e.effetto.tipo!=='pesca'))restituisciYenAutomatico(p,causaYen,'versione-sostituita');muoviYenDellaVoce(p,uid,[nuovo]);};
   if(e.effetto.tipo==='acquisto'){
     for(const a of assorbimenti)if(prepared('UPDATE utente.effetto_applicato SET annullato_il=?,assorbita_da=? WHERE partita_id=? AND id=? AND annullato_il IS NULL AND assorbita_da IS NULL AND sostituita_da IS NULL').run(nowIso(),nuovaRicevuta,p,a.ricevuta.id).changes!==1)throw httpErrors.conflict('sidecar-dote-cambiato','La Dote precedente è cambiata durante il raccordo.');
     const tokenCorrente=anteprimaRegistrazioneAcquisto(p,acquisto!,porteAcquisti).revisioneAcquistiAttesa;
     const nuova=registraConsumo(p,uid,e,{...acquisto!,revisioneAcquistiAttesa:tokenCorrente},porteAcquisti,false,{id:nuovaRicevuta,sostituisceRicevuta:attiva?.id,assorbeRicevute:assorbimenti.map((a)=>a.ricevuta.id)});
     for(const a of assorbimenti)trasferisciAttribuzioneDote(p,uid,a.nodo.uid,a.ricevuta.id,nuova.id,String(nuova.ricevuta.acquistoId),a.nodo.effetto.dote,a.q);
+    sostituisciYen(yenDellEffetto(p,uid,e,nuova),nuova.creato);
     leggiRicevuteEffettiVoce(p,uid);return;
   }
   if(e.effetto.tipo==='pesca'){
@@ -395,13 +457,16 @@ export function applicaEffettoStorico(p:number,proposta:PropostaPartitaDto,acqui
     const tokenCorrente=anteprimaPesca(p,'registra-sessione',pesca).revisionePescaAttesa;
     const nuova=registraPesca(p,uid,e,{...pesca,revisionePescaAttesa:tokenCorrente},nuovoUid(),false,{id:nuovaRicevuta,sostituisceRicevuta:attiva?.id,assorbeRicevute:assorbimentiPesca.map(a=>a.ricevuta.id)});
     for(const a of assorbimentiPesca)trasferisciAttribuzioneDote(p,uid,a.ricevuta.effettoUid,a.ricevuta.id,nuova.id,String(nuova.ricevuta.sessioneId),'perizia',a.q,'pesca');
+    sostituisciYen(yenDellEffetto(p,uid,e,nuova),nuova.creato);
     leggiRicevuteEffettiVoce(p,uid);return;
   }
   if(e.effetto.tipo==='fortuna'||eEffettoDiStato(e.effetto))throw httpErrors.conflict('raccordo-non-valido','Questo effetto si applica spuntando la voce: non si raccorda a una spunta già fatta.');
-  // L13: un effetto Yen aggiunto a una voce già spuntata: la sua ricevuta (beneficio da dichiarare), poi la proposta «Applica» come per la Dote
-  if(e.effetto.tipo==='yen'){registraRicevuta(p,uid,e,{benefici:[beneficioYen(e.effetto,true)],gestitaDaSpunta:false,...(attiva?{sostituisceRicevuta:attiva.id}:{})},true,{id:nuovaRicevuta});return;}
+  // L13: un effetto Yen aggiunto (o cambiato) su una voce già spuntata, confermato qui: decisione 18, gli yen entrano o si scalano da soli (mai sotto
+  // zero); solo con yen ancora proposti in sospeso per lo stesso effetto la ricevuta dichiara il beneficio e resta la proposta «Applica», com'era
+  if(e.effetto.tipo==='yen'){restituisciYenAutomatico(p,causaYen,'versione-sostituita');const y=ricevutaYen(p,uid,e as EffettoVoceDto&{effetto:Extract<EffettoVoce,{tipo:'yen'}>},{gestitaDaSpunta:false,...(attiva?{sostituisceRicevuta:attiva.id}:{})},true,{id:nuovaRicevuta});muoviYenDellaVoce(p,uid,[y.movimento]);return;}
   const legacy=porte.applicaLegacy(p,[e.effetto],[sceltaStorica]);
   registraRicevuta(p,uid,e,{benefici:beneficiLegacy(legacy,true),legacy,risorse:risorseLegacy(p,legacy),gestitaDaSpunta:false,...(attiva?{sostituisceRicevuta:attiva.id}:{})},true,{id:nuovaRicevuta});
+  sostituisciYen(yenDellEffetto(p,uid,e,undefined,legacy),false);
 }
 export function annullaEffettiVoce(p:number,uid:string,legacy:EffettiAzioneDto|null,porte:PorteEffettiLegacy):void {
   if(!getDb().inTransaction)throw new Error('L’annullo richiede la transazione della spunta.');
@@ -434,6 +499,9 @@ export function annullaEffettiVoce(p:number,uid:string,legacy:EffettiAzioneDto|n
   const turniRaccordatiExtra=tutte.filter(r=>r.tipo==='turno'&&r.assorbitaDa&&r.ricevuta.gestitaDaSpunta===false&&tutte.some(x=>x.id===r.assorbitaDa&&x.tipo==='pesca')).map(r=>({r,marker:createHash('sha256').update(`annullo-turno-originario\0${r.id}`).digest('hex').slice(0,32)})).filter(x=>!prepared('SELECT 1 FROM utente.effetto_applicato WHERE partita_id=? AND id=?').get(p,x.marker));
   for(const x of turniRaccordatiExtra){verificaRisorseRicevuta(p,x.r);extra.push(verificaPorzionePesca(x.r));}
   // Valida tutto prima della prima mutazione. L'annullo legge i receipt, mai la configurazione attuale.
+  // L13 (decisione 18): per primi tornano gli yen che gli effetti della voce avevano mosso da soli (le spese restituite com'erano state scalate,
+  // poi i guadagni tolti al più fino a zero); quelli dei turni li restituisce il turno tolto qui sotto, quelli di una Richiesta la Richiesta riaperta
+  restituisciYenAutomaticiDellaVoce(p,uid,'spunta-tolta');
   if(legacyDaAnnullare)porte.annullaLegacy(p,legacyDaAnnullare);
   for(const r of extra)if(r)porte.annullaLegacy(p,r);
   for(const x of turniRaccordatiExtra){const adesso=nowIso();prepared("INSERT INTO utente.effetto_applicato(id,partita_id,voce_uid,effetto_uid,effetto_ordine,formato,tipo,chiave,prima_json,ricevuta_json,creato,applicato_il,annullato_il) VALUES(?,?,?,?,0,1,'contesto',NULL,NULL,?,0,?,?)").run(x.marker,p,uid,x.marker,jsonCanonico({voceUid:uid,effettoUid:x.marker,benefici:[],annulloTurnoOriginario:x.r.id}),adesso,adesso);}

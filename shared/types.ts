@@ -18,6 +18,7 @@ import type { OrariDelLuogo, OrariNegozio } from './orariNegozio.js';
 import type { VoceEffetto } from './effettiCatalogo.js';
 import type { DoteChiave } from './doti.js';
 import type { CategoriaArticolo } from './articoli.js';
+import type { MovimentoYenAutomaticoDto } from './yenAutomatici.js';
 import type { GruppoRiepilogoEffettiDto } from './riepilogoEffetti.js';
 import type { EsitiAttivitaDto, SceltaEsitoVoceDto } from './esitiAttivita.js';
 import type { CategoriaOggetto } from './catalogo.js';
@@ -1255,7 +1256,7 @@ export interface EffettiAzioneDto {
   incontro?: IncontroConfidenteDto;
   /** Turni registrati dalla spunta (`ordine` del turno nell'attività): togliendo la spunta si toglie quel turno e i suoi punti. */
   turni?: Array<{ attivita: string; nome: string; ordine: number; doti: Array<{ chiave: string; nome: string; delta: number; note: number }>;
-    /** R9-12/2: la paga canonica dell'attività al momento del turno (promemoria: gli yen non si muovono da qui). */
+    /** R9-12/2: la paga canonica dell'attività al momento del turno. L13 (decisione 18): la paga base entra da sola nel saldo con il turno. */
     paga?: { yen: number; massima: number | null } | null;
     /** L13: l'esito ottenuto, fra quelli dichiarati dall'attività (le Doti del turno sono le sue); null = «senza punti» scelto alla spunta.
      *  Assente per le attività senza esiti e nelle ricevute di prima. `automatico`: ricavato dalle condizioni (il giorno), non scelto. */
@@ -1351,6 +1352,9 @@ export interface AzionePercorsoDto {
   ricevuteEffetti?: ReceiptEffettoVoceDto[];
   /** Quante proposte di punti aspettano una decisione per questa voce nella partita: se > 0 la voce mostra il pulsante «Applica» (BON-01). */
   daApplicare?: number;
+  /** L13 (decisione 18): gli yen che la spunta della voce ha mosso da soli nella partita (spese scalate dal saldo, mai sotto zero; guadagni entrati),
+   *  con l'importo chiesto e quello davvero mosso. Assente se la voce non è spuntata o non ha mosso yen. */
+  yenAutomatici?: MovimentoYenAutomaticoDto[];
   /** R10-11/C: il dialogo del passaggio di rango della voce (voce di un Confidente con `rangoAtteso`), dalle scelte di L9: solo una proposta, i punti li dà la scelta dell'utente alla spunta. */
   dialogo?: DialogoVoceDto;
   /** 2026-10-24: con una partita, il rango del Confidente della voce nella partita (le note della voce lo citano se differisce dal rango atteso). */

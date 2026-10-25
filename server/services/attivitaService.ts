@@ -36,6 +36,7 @@ import { fonteConfidenteAttivita } from './fonteConfidenteAttivitaService.js';
 import { fraseDelleCondizioni } from './condizioni/fraseCondizioni.js';
 import { leggiRegolaPesca } from './regolePescaService.js';
 import { esitiDellAttivita, esitiDto, risolviEsitoTurno } from './esitiAttivitaService.js';
+import { muoviYenAutomatico, restituisciYenAutomatico } from './yenAutomaticiService.js';
 import { leggiEsitiAttivita } from '../../shared/esitiAttivita.js';
 
 interface RigaAttivita { confidente_chiave: string | null; pesca_regola_chiave?: string | null; pesca_ruolo?: 'visita'|'obiettivi'|null }
@@ -561,7 +562,8 @@ export interface TurnoRegistrato {
   nome: string;
   ordine: number;
   doti: Array<{ chiave: string; nome: string; delta: number; note: number }>;
-  /** R9-12/2: la paga canonica dell'attività (`paga_yen` / `paga_massima`), letta e riportata; gli yen non si muovono da qui (promemoria: si cambiano a mano, BON-12). Null se non ne ha. */
+  /** R9-12/2: la paga canonica dell'attività (`paga_yen` / `paga_massima`), letta e riportata. L13 (decisione 18): la paga base entra da sola nel
+   *  saldo quando il turno si registra (`yenDelTurno`, `utente.yen_automatico`), e si toglie togliendo il turno. Null se non ne ha. */
   paga: { yen: number; massima: number | null } | null;
   /** L13: l'esito ottenuto (null = «senza punti»), per le attività che dichiarano esiti; assente per le altre. */
   esito?: { chiave: string; nome: string; automatico?: boolean } | null;
@@ -593,9 +595,34 @@ export function registraTurno(partitaId: number, chiave: string, doti?: Array<{ 
         .run(partitaId, chiave, ordine, d.dote, punti, d.note, adesso);
       applicate.push({ chiave: d.dote, nome: nomeDote(d.dote), delta: punti, note: d.note });
     }
+    // L13 (decisione 18): gli yen del turno si muovono da soli (la paga del lavoro entra; il costo dell'attività o il prezzo della sfida
+    // dell'esito si scalano, mai sotto zero). I turni della pesca no: la loro quota la porta la visita. Un movimento rimasto aperto con lo
+    // stesso turno (un turno tolto per un'altra strada) si chiude prima, così ogni turno ha il suo
+    if (!interno?.pescaAutorizzata) {
+      const y = yenDelTurno(riga, esito ?? undefined), causa = { tipo: 'turno' as const, chiave: `${chiave}:${ordine}` };
+      restituisciYenAutomatico(partitaId, causa, 'turno-non-piu-presente');
+      if (y) muoviYenAutomatico(partitaId, causa, y.importo, y.motivo);
+    }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
     return { attivita: chiave, nome: riga.nome, ordine, doti: applicate, paga: riga.paga_yen != null ? { yen: riga.paga_yen, massima: riga.paga_massima ?? null } : null, ...(esito !== undefined ? { esito } : {}) };
   })();
+}
+
+/**
+ * L13 (decisione 18): gli yen di un turno, fotografati quando si registra. La paga base del lavoro (`paga_yen`) entra; altrimenti si scala il
+ * prezzo dell'articolo dell'esito scelto (la sfida della Big Bang Burger: il prezzo vive solo nell'articolo) o, senza, il costo dell'attività
+ * (`costo`: freccette, palestra…). Un esito «senza punti» di un'attività con sfide a prezzi diversi non dice quale sfida si è pagata: niente.
+ */
+function yenDelTurno(riga: RigaAttivita, esito?: { chiave: string; nome: string }): { importo: number; motivo: string } | null {
+  if (riga.paga_yen != null && riga.paga_yen > 0) return { importo: riga.paga_yen, motivo: `Paga del turno: ${riga.nome}` };
+  const dichiarati = esitiDellAttivita(riga.chiave)?.esiti;
+  const articolo = esito ? dichiarati?.esiti.find((e) => e.chiave === esito.chiave)?.articolo ?? null : null;
+  if (articolo) {
+    const prezzo = (prepared('SELECT prezzo FROM main.articolo WHERE chiave = ?').get(articolo) as { prezzo: number | null } | undefined)?.prezzo ?? null;
+    return prezzo != null && prezzo > 0 ? { importo: -prezzo, motivo: `${riga.nome}: ${esito!.nome}` } : null;
+  }
+  if (dichiarati && !esito && dichiarati.esiti.some((e) => e.articolo)) return null;
+  return riga.costo != null && riga.costo > 0 ? { importo: -riga.costo, motivo: `Costo dell'attività: ${riga.nome}` } : null;
 }
 
 /** Toglie un turno con i punti che aveva dato: quello di `ordine` (la spunta che lo aveva registrato), solo se c'è
@@ -614,7 +641,9 @@ export function togliTurno(partitaId: number, chiave: string, ordine?: number, i
       const collegata=prepared('SELECT s.* FROM utente.pesca_sessione s JOIN utente.turno_partita t ON t.uid=s.turno_uid WHERE t.partita_id=? AND t.attivita_chiave=? AND t.ordine=?').get(partitaId,chiave,bersaglio) as {id:string;origine_turno:string}|undefined;
       if(collegata&&collegata.origine_turno==='creato'&&!interno?.pescaAutorizzata)throw httpErrors.conflict('pesca-turno-posseduto','Il turno è posseduto dal registro della pesca: rimuovi la fonte o la sessione con la relativa anteprima.');
       if(collegata)prepared('UPDATE utente.pesca_sessione SET turno_revocato_il=? WHERE partita_id=? AND id=?').run(adesso,partitaId,collegata.id);
-      // il turno esce dal registro; le Doti restano come sono (si segnano a mano)
+      // il turno esce dal registro; le Doti restano come sono (si segnano a mano). L13 (decisione 18): gli yen che il turno aveva mosso da
+      // soli tornano (la spesa restituita com'era stata scalata, la paga tolta al più fino a zero)
+      restituisciYenAutomatico(partitaId, { tipo: 'turno', chiave: `${chiave}:${bersaglio}` }, 'turno-tolto');
       prepared("DELETE FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = 'attivita' AND chiave = ? AND ordine = ?").run(partitaId, chiave, bersaglio);
       prepared('DELETE FROM turno_partita WHERE partita_id = ? AND attivita_chiave = ? AND ordine = ?').run(partitaId, chiave, bersaglio);
     }

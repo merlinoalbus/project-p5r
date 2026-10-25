@@ -1453,6 +1453,17 @@ Fonte: `docs/coordinamento/lotti/L13/censimento-2026-10-25.md`. Si procede per o
 | c | Da portare all'utente: le voci 29c27bf2 (06-09), 2bfee883 (06-13) e b33c622e (06-16), collegate al bagno dalla 234, scrivono «Fascino +2» in giorni da bagno medicinale (+3). Va stabilito se sono sbagliate le condizioni della 233 o il Diario | aperto (decisione dell'utente) |
 | d | Proposte del periodo validato (04-01…05-31), anche quelle «certo»: si applicano solo con il sì dell'utente, riga per riga, dalla pagina «Da completare» | aperto (decisione dell'utente) |
 
+### Decisione 18 — yen automatici (25 ottobre) — fatto nel codice (ramo `lavoro/l13-yen`), da provare dall'utente
+
+| Punto | Che cosa | Stato |
+|---|---|---|
+| a | Utente 048: `utente.yen_automatico`, un movimento per causa (effetto di una voce, turno, Richiesta, regalo) con importo chiesto e importo davvero mosso, e il suo inverso. Un solo punto lo scrive: `server/services/yenAutomaticiService.ts`. Il saldo non scende sotto zero né supera 9.999.999, e il gesto non si ferma mai per il saldo | fatto nel codice |
+| b | Si scalano da soli spuntando la voce: articoli comprati (prezzo × copie, solo se l'acquisto è segnato), consumazione Aojiru nuova, quota di una visita di pesca nuova, biglietto del cinema, effetto «Yen spesi»; costo dell'attività o prezzo della sfida scelta registrando un turno; l'acquisto segnato con un regalo. Entrano da soli: paga base del lavoro (con il turno, anche dal contatore), ricompensa della Richiesta completata, effetto «Yen ricevuti». Togliendo il gesto torna solo quanto era stato mosso (prima le spese, poi i guadagni, al più fino a zero) | fatto nel codice |
+| c | Restano a mano: combattimenti, vendite nei Palazzi e nei Memento, modifica diretta del saldo | invariato |
+| d | Proposte «Applica» degli yen nate prima: non si applicano in silenzio. Una causa con una proposta aperta o yen già applicati non tornati a zero resta in quel registro (decidibile, con la sua inversa); le nuove cause non creano proposte. Copia del 25/10: 0 proposte yen (aperte o applicate), 0 `movimento_yen` | fatto nel codice |
+| e | Cestino: i movimenti sono storia durevole; fuori dal ripristino di una partita intera il saldo non si rimette da solo; una Richiesta rimessa ritrova la ricompensa dove l'eliminazione l'aveva tolta | fatto nel codice |
+| f | Testi: riepilogo della voce, effetto «Yen», esiti, regalo, Richieste, contatore delle attività; la voce spuntata mostra gli yen mossi («Scalati ¥300 dal saldo: la spesa era ¥500, il saldo non bastava») | fatto nel codice |
+
 ## Razionalizzazione (dal 20 ottobre 2026) — branch `newreview`, istanza parallela p5s
 
 Mandato dell'utente del 2026-10-20: tutti i lotti del piano di razionalizzazione

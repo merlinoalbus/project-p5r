@@ -12,7 +12,9 @@
 //   5. scrive l'evento `regalo` nello storico.
 // Annullare toglie esattamente ciò che l'azione ha fatto: i punti (se il Confidente è ancora allo stesso rango: cambiando rango i punti
 // ripartono da zero e non c'è niente da togliere), l'acquisto che aveva segnato, la consegna e l'evento. Le consegne già date prima
-// (punti_dati nullo) si tolgono come sempre, senza toccare punti né acquisti. I yen restano un promemoria (BON-12): niente movimento.
+// (punti_dati nullo) si tolgono come sempre, senza toccare punti né acquisti. L13 (decisione 18): l'acquisto segnato insieme al regalo scala da
+// solo il prezzo dell'articolo dal saldo (mai sotto zero, il regalo si registra anche con il saldo a zero), e togliendo il regalo torna ciò che
+// era stato scalato (`utente.yen_automatico`, causa «regalo»).
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
@@ -23,6 +25,7 @@ import { aggiornaConfidente, confidente as confidenteDellaPartita } from './part
 import { nuovaGenerazione } from './puntiCronologici.js';
 import { regaliDellaPartita, scriviRegaloPartita } from './regaliPartita.js';
 import { impostaAcquisto } from './negoziService.js';
+import { muoviYenAutomatico, restituisciYenAutomatico } from './yenAutomaticiService.js';
 import type { EsitoRegaloDto, RichiestaRegalo } from '../../shared/types.js';
 
 interface RigaRegalo {
@@ -78,7 +81,11 @@ export function regala(partitaId: number, richiesta: RichiestaRegalo): EsitoRega
         WHERE partita_id = ? AND confidente_chiave = ? AND catalogo_chiave = ?`)
         .run(conPunti ? punti : null, conPunti ? prima.rango : null, articolo, momento.data_gioco, momento.fascia_gioco, partitaId, confidente, catalogo);
     }
-    if (articolo) impostaAcquisto(partitaId, articolo, true, richiesta.acquisto?.sede);
+    if (articolo) {
+      impostaAcquisto(partitaId, articolo, true, richiesta.acquisto?.sede);
+      const prezzo = (prepared('SELECT prezzo FROM articolo WHERE chiave = ?').get(articolo) as { prezzo: number | null } | undefined)?.prezzo ?? null;
+      if (prezzo != null && prezzo > 0) muoviYenAutomatico(partitaId, { tipo: 'regalo', chiave: `${confidente}:${catalogo}` }, -prezzo, `Regalo comprato: ${oggetto.nome}`);
+    }
     const quando = momento.data_gioco ? ` Giorno di gioco ${momento.data_gioco}${momento.fascia_gioco ? `, ${momento.fascia_gioco}` : ''}.` : '';
     registraEvento(partitaId, 'regalo', `Regalo a ${conf.nome}: ${oggetto.nome}`,
       `${conPunti ? `+${punti} punti.` : 'Nessun punto: il rango di questo Confidente non li conta.'}${articolo ? ' Segnato anche come comprato.' : ''}${quando}`,
@@ -106,6 +113,8 @@ export function annullaRegalo(partitaId: number, confidente: string, catalogo: s
     if (riga.acquisto_articolo && prepared('SELECT 1 FROM acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').get(partitaId, riga.acquisto_articolo)) {
       impostaAcquisto(partitaId, riga.acquisto_articolo, false);
     }
+    // L13 (decisione 18): il prezzo che il regalo aveva scalato da solo torna (solo quello davvero scalato)
+    restituisciYenAutomatico(partitaId, { tipo: 'regalo', chiave: `${confidente}:${catalogo}` }, 'regalo-tolto');
     prepared("DELETE FROM evento_partita WHERE partita_id = ? AND tipo = 'regalo' AND json_extract(dati_json, '$.confidente') = ? AND json_extract(dati_json, '$.catalogo') = ?")
       .run(partitaId, confidente, catalogo);
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);

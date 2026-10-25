@@ -66,6 +66,13 @@ function identitaSessione(s:RigaSessionePesca):{nome:string;regola:import('../..
   if(!schemaMomentoPesca.safeParse(momentoSessione(s)).success)throw httpErrors.conflict('pesca-momento-illeggibile','Momento della sessione non riconoscibile.');
   return {nome:d.nome,regola:regola.data};
 }
+/** L13 (decisione 18): la quota in yen della visita, dalla regola fotografata nella sessione (mai la guida di adesso); null se la sessione non c'è. */
+export function quotaSessionePesca(p:number,sessioneId:string):number|null {
+  const s=sessioniPesca(p).find(x=>x.id===sessioneId);
+  if(!s)return null;
+  const quota=identitaSessione(s).regola.quote[s.fascia];
+  return Number.isSafeInteger(quota)?quota:null;
+}
 export interface TargetBeneficioPesca {tipo:'dote'|'yen'|'punti-pesca';chiave:string;delta:number;intervallo:IntervalloBeneficioPesca;attiva:boolean;storica:boolean;motivo:string}
 interface RigaAcquistoEsca {id:string;momento_json:string;quantita:number;costo_punti:number;attivo:number;identita_json:string;creato_il:string}
 /** La medesima prova vale nel registro e nel calcolo diretto delle proposte. */
@@ -91,7 +98,8 @@ export function targetBeneficiPesca(p:number,causa:string):TargetBeneficioPesca[
     // nell'editor della regola): è l'unico dato letto. Il valore di fabbrica (2 + 1) coincide con il ×1,5 per difetto di `moltiplicaFortuna`.
     const base=dati.beneficioPerizia.puntiBase,max=base+dati.beneficioPerizia.bonusFortuna;
     const perizia:IntervalloBeneficioPesca=o.perizia.esito==='non-ricevuta'?{minimo:0,massimo:0}:o.perizia.esito==='ignota'?{minimo:0,massimo:max}:{minimo:o.fortuna.attiva===true?max:base,massimo:o.fortuna.attiva===false?base:max};
-    // BON-12: la quota della visita non è più una proposta di yen: gli yen si cambiano a mano, qui resta solo il promemoria nel motivo
+    // BON-12: la quota della visita non è una proposta di yen. L13 (decisione 18): la visita nuova registrata dalla spunta di una voce la scala da
+    // sola dal saldo (`motoreDiario.yenDellEffetto`, `quotaSessionePesca`); qui resta solo il dato nel motivo
     const quota=dati.quote[s.fascia];
     return [{tipo:'dote',chiave:'perizia',delta:perizia.minimo,intervallo:perizia,attiva,storica:true,motivo:`Perizia finale osservata, distinta dalla cattura. L’intervallo conserva il bonus Fortuna ignoto. Quota della visita: ${quota.toLocaleString('it-IT')} yen.`}];
   }

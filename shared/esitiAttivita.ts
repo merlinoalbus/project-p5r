@@ -13,7 +13,7 @@
 //   - `modo` «scelta»: alla spunta (e al + del contatore) chi gioca sceglie l'esito fra quelli possibili, o «senza punti»;
 //     `modo` «automatico»: l'esito è quello le cui condizioni valgono in quel momento (il bagno pubblico: il lunedì e il giovedì il
 //     bagno medicinale), senza domande. La scelta dell'utente del 2026-10-25 per il bagno è «valore fisso per giorno della settimana».
-// Gli yen non stanno qui: si cambiano a mano (promemoria) e il prezzo, se c'è, è quello dell'articolo.
+// Gli yen non stanno qui: il prezzo, se c'è, è quello dell'articolo, e (decisione 18) registrando il turno si scala da solo dal saldo, mai sotto zero.
 // ============================================================
 
 import { eDote, nomeDote, puntiDaNote, type DoteChiave } from './doti.js';

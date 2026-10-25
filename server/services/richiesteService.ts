@@ -23,6 +23,7 @@ import { catalogoOggettiDisponibile, ricompensePerFonte } from './catalogoOggett
 import { dettaglioNegozio } from './negoziService.js';
 import { profiliOmbre } from './ombreService.js';
 import { riconciliaBeneficiRichiesta } from './propostePartitaService.js';
+import { riallineaYenRichiesta } from './yenAutomaticiService.js';
 import { NOME_ELEMENTO, NOME_ESITO_AFFINITA, eChiaveElemento, eCodiceAffinita } from '../../shared/elementi.js';
 import { GIORNI_AVVISO_SCADENZA_RICHIESTE } from '../../shared/richieste.js';
 
@@ -211,10 +212,11 @@ export function impostaStatoRichiesta(partitaId: number, chiave: string, stato: 
       const b = JSON.parse(r.bersaglio_json) as { nome: string };
       registraEvento(partitaId, 'richiesta-completata', `Richiesta completata: ${r.nome}`, `${r.area}${r.piano ? ` (${r.piano})` : ''} · bersaglio ${b.nome}${r.confidente_nome ? ` · Confidente ${r.confidente_nome}` : ''}.`, { richiesta: chiave });
     }
-    // L13 (decisione 3): le ricompense della Richiesta le applica solo lei, completata. Gli yen: la proposta «Applica» (causa «richiesta»), come
-    // gli yen di una voce; togliendo il completamento la proposta aperta si chiude, quella già applicata ha la sua inversa. Gli oggetti: il
-    // registro degli oggetti ottenuti li legge dallo stato completato (`oggettiOttenutiPartita`), una volta sola e senza copie da tenere allineate
-    if ((prima === 'completata') !== (stato === 'completata')) riconciliaBeneficiRichiesta(partitaId, chiave);
+    // L13 (decisione 3): le ricompense della Richiesta le applica solo lei, completata. Gli yen (decisione 18): entrano da soli nel saldo
+    // completandola e si tolgono (al più fino a zero) riaprendola (`riallineaYenRichiesta`); una proposta «Applica» nata prima resta al suo
+    // registro (aperta: decidibile; applicata: la sua inversa). Gli oggetti: il registro degli oggetti ottenuti li legge dallo stato completato
+    // (`oggettiOttenutiPartita`), una volta sola e senza copie da tenere allineate
+    if ((prima === 'completata') !== (stato === 'completata')) { riallineaYenRichiesta(partitaId, chiave, 'stato'); riconciliaBeneficiRichiesta(partitaId, chiave); }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
   // con lo stato calcolato dopo il cambio (la pagina sostituisce la carta con questa)
@@ -314,7 +316,9 @@ function aggiornaCampiStrutturati(chiave: string, dati: DatiRichiesta): void {
   const yenPrima = (prepared('SELECT yen FROM richiesta WHERE chiave = ?').get(chiave) as { yen: number | null } | undefined)?.yen ?? null;
   if (nomi.length) prepared(`UPDATE richiesta SET ${nomi.map((n) => `${n} = ?`).join(', ')} WHERE chiave = ?`).run(...nomi.map((n) => campi[n]), chiave);
   scriviOggetti(chiave, dati.oggetti);
-  // L13 (decisione 3): gli yen corretti di una Richiesta già completata in qualche partita: la sua proposta si riallinea (la differenza, mai un doppio)
+  // L13 (decisione 3): gli yen corretti di una Richiesta già completata in qualche partita: la sua proposta di prima, se c'è, si riallinea (la
+  // differenza, mai un doppio). Decisione 18: gli yen già entrati da soli restano quelli del completamento (fotografati al gesto, come la quota
+  // della pesca): il nuovo importo vale dal prossimo completamento, nessun saldo cambia in silenzio per una correzione dei dati
   if (dati.yen !== undefined && (dati.yen ?? null) !== yenPrima) {
     for (const p of prepared("SELECT partita_id FROM richiesta_partita WHERE richiesta_chiave = ? AND stato = 'completata'").pluck().all(chiave) as number[]) riconciliaBeneficiRichiesta(p, chiave);
   }
@@ -492,18 +496,19 @@ export function citazioniRichiesta(chiave: string): CitazioniRichiestaDto {
  *
  * L13: se ne vanno con lei anche gli sblocchi ricevuti nelle partite (`utente.sblocco_partita`, scritti dalle voci con l'effetto «sblocco»):
  * sono uno stato della Richiesta nella partita come `richiesta_partita`, e il cestino li registra e li rimette col ripristino (gli effetti
- * delle voci che la citano restano, come le condizioni). Gli yen della Richiesta completata si riallineano come togliendo il completamento: la
- * proposta aperta si chiude, quella già applicata ha la sua inversa (dopo il ripristino si riallineano di nuovo, `riconciliaBeneficiRichiesta`).
+ * delle voci che la citano restano, come le condizioni). Gli yen della Richiesta completata si riallineano come togliendo il completamento: quelli
+ * entrati da soli tornano (al più fino a zero), la proposta aperta di prima si chiude, quella già applicata ha la sua inversa (dopo il ripristino si
+ * riallineano di nuovo, `riallineaYenRichiesta` e `riconciliaBeneficiRichiesta`).
  */
 export function eliminaRichiesta(chiave: string): void {
   const r = rigaRichiesta(chiave);
   conCestino({ tipo: 'richiesta', chiave, nome: r.nome, contesto: r.area }, () => {
-    const partite = prepared("SELECT partita_id FROM richiesta_partita WHERE richiesta_chiave = ? UNION SELECT partita_id FROM utente.da_applicare WHERE causa_tipo = 'richiesta' AND causa_chiave = ?").pluck().all(chiave, chiave) as number[];
+    const partite = prepared("SELECT partita_id FROM richiesta_partita WHERE richiesta_chiave = ? UNION SELECT partita_id FROM utente.da_applicare WHERE causa_tipo = 'richiesta' AND causa_chiave = ? UNION SELECT partita_id FROM utente.yen_automatico WHERE causa_tipo = 'richiesta' AND causa_chiave = ? AND annullato_il IS NULL").pluck().all(chiave, chiave, chiave) as number[];
     prepared('DELETE FROM richiesta_partita WHERE richiesta_chiave = ?').run(chiave);
     prepared("DELETE FROM utente.sblocco_partita WHERE bersaglio_tipo = 'richiesta' AND bersaglio_chiave = ?").run(chiave);
     prepared("UPDATE spillo SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'richiesta' AND riferimento_chiave = ?").run(chiave);
     prepared("UPDATE voce_giornata SET riferimento_tipo = NULL, riferimento_chiave = NULL WHERE riferimento_tipo = 'richiesta' AND riferimento_chiave = ?").run(chiave);
     prepared('DELETE FROM richiesta WHERE chiave = ?').run(chiave);
-    for (const p of partite) riconciliaBeneficiRichiesta(p, chiave);
+    for (const p of partite) { riallineaYenRichiesta(p, chiave, 'eliminazione'); riconciliaBeneficiRichiesta(p, chiave); }
   });
 }

@@ -50,6 +50,8 @@ export function registraEvento(partitaId: number, tipo: TipoEvento, titolo: stri
 const voceDellaSpunta = new AsyncLocalStorage<string>();
 /** Esegue `f` come applicazione degli effetti della spunta di `voceUid`: gli eventi registrati dentro `f` portano il suo `voce_uid`. */
 export const conVoceDellaSpunta = <T>(voceUid: string, f: () => T): T => voceDellaSpunta.run(voceUid, f);
+/** L13 (decisione 18): la voce la cui spunta sta applicando i suoi effetti (null fuori da una spunta), per legare alla voce gli yen che si muovono da soli. */
+export const voceDellaSpuntaCorrente = (): string | null => voceDellaSpunta.getStore() ?? null;
 
 /** R10-22: togliere la spunta di una voce toglie dallo storico gli eventi che quella spunta ha registrato (legame esplicito `voce_uid`).
  * Gli eventi storici, senza legame, non si toccano mai. Va chiamata dentro la transazione della modifica. */

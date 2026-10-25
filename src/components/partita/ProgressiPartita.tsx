@@ -224,7 +224,7 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
               <section className="flex flex-col gap-3" aria-labelledby="progressi-attivita">
                 <div className="flex flex-col gap-1">
                   <TitoloSezione variante="display" id="progressi-attivita">Attività svolte</TitoloSezione>
-                  <p className="m-0 testo-13 text-text-secondary">Quante volte hai fatto ogni attività: ogni + ti ricorda le Doti da segnare; dove l’attività ha più esiti, il + ti chiede quale hai ottenuto.</p>
+                  <p className="m-0 testo-13 text-text-secondary">Quante volte hai fatto ogni attività: ogni + ti ricorda le Doti da segnare; dove l’attività ha più esiti, il + ti chiede quale hai ottenuto. La paga di un lavoro entra da sola nel saldo e il costo di un’attività (o della sfida) se ne scala, mai sotto zero; il − li riporta com’erano.</p>
                 </div>
                 <div className="progressi-attivita">
                   {gruppiAttivita.map(([tipo, righe]) => (

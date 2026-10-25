@@ -18,10 +18,11 @@ export type EffettoVoce = EffettoLegacyVoce | EffettoPescaVoce | {
   tipo: 'acquisto'; articolo: string; variante: DoteChiave | null; sostituisceDoti: string[];
 } | EffettoFortunaVoce | EffettoDiStatoVoce | EffettoYenVoce;
 /**
- * L13 (ondata 3, decisione 1): gli yen che la voce dà o toglie (`importo` con il segno: positivo = ricevuti, negativo = spesi). Come le
- * Doti, la spunta non li muove da sola: nasce la proposta «Applica» sulla voce (`utente.da_applicare` di tipo `yen`), e applicandola il
- * saldo cambia con il suo movimento (`utente.movimento_yen`). Decisione 2: mai insieme a un dato che porta già il suo prezzo (articolo,
- * consumazione, pesca, Richiesta completata): il server rifiuta la lista.
+ * L13 (ondata 3, decisione 1): gli yen che la voce dà o toglie (`importo` con il segno: positivo = ricevuti, negativo = spesi). Decisione 18:
+ * la spunta li muove da sola sul saldo della partita, mai sotto zero, con il movimento registrato (`utente.yen_automatico`); togliendo la
+ * spunta tornano com'erano (solo quanto era stato davvero mosso). Le proposte «Applica» nate prima (`utente.da_applicare` di tipo `yen`, con
+ * `utente.movimento_yen`) restano decidibili. Decisione 2: mai insieme a un dato che porta già il suo prezzo (articolo, consumazione, pesca,
+ * Richiesta completata): il server rifiuta la lista.
  */
 export interface EffettoYenVoce { tipo: 'yen'; importo: number }
 /** Il tetto degli yen di un effetto (lo stesso del denaro del gruppo, `bodyYen`). */
@@ -194,7 +195,7 @@ export interface ContestoYenVoce {
   riferimento: { tipo: string; chiave: string } | null;
   yenDi: (tipo: DatoConYen, chiave: string) => number | null | undefined;
 }
-const NOME_DATO_CON_YEN: Record<DatoConYen, string> = { film: 'il film (il prezzo del biglietto)', attivita: 'l’attività o il lavoro (il costo o la paga)', richiesta: 'la Richiesta (la sua ricompensa in yen)' };
+const NOME_DATO_CON_YEN: Record<DatoConYen, string> = { film: 'il film (il prezzo del biglietto)', attivita: 'l’attività o il lavoro (il costo, la paga o il prezzo della sfida)', richiesta: 'la Richiesta (la sua ricompensa in yen)' };
 /**
  * L13 (decisione 2 dell'utente: «Yen già scritti in un altro dato, film, attività, lavori, pesca, Richiesta: li muove l'elemento collegato, mai
  * la voce»): perché un effetto «yen» non può stare in questa voce, o null se può. Gli yen li porta già: un acquisto o un articolo comprato (il

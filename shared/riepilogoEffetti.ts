@@ -6,7 +6,8 @@
 // acquisto dopo l'altro, ognuno con la sua nota sugli yen — «Non si capisce niente... non sarebbe possibile formattarlo in modo
 // adeguato? per tutti gli acquisti?» — e poi ha chiesto di togliere dalle frasi la nota sugli yen. La frase unica diventa un DATO: gruppi
 // con un'etichetta («Acquisti · Distributore del bagno pubblico», «Doti sociali», «Turni»…), una riga breve per elemento (nome e dettaglio
-// separati) e il totale degli acquisti. Nel riepilogo restano solo i fatti: nessuna istruzione sugli yen.
+// separati) e il totale degli acquisti. Nel riepilogo restano solo i fatti: nessuna istruzione sugli yen. L13 (decisione 18): gli yen si muovono
+// da soli spuntando la voce, e la nota del gruppo lo dice (si scalano dal saldo, mai sotto zero; la spunta resta possibile anche senza yen).
 //
 // È l'unico punto che costruisce il riepilogo: il server lo calcola per ogni voce (`AzionePercorsoDto.produceRiepilogo`, con i nomi del DB)
 // e la pagina lo mostra così com'è (`RiepilogoEffettiVoce`). Le parole dei singoli effetti vengono dalle stesse fonti delle frasi
@@ -37,7 +38,7 @@ export interface NomiRiepilogoEffetti {
   azione: NomiEffettiAzione;
   /** Il nome del negozio dalla sua chiave (la chiave di un articolo è «negozio/articolo»). */
   negozio: (chiave: string) => string | undefined;
-  /** La paga dell'attività per un turno, se l'attività ne ha una (solo un'informazione: gli yen non si muovono da qui). */
+  /** La paga dell'attività per un turno, se l'attività ne ha una (decisione 18: la paga base entra da sola nel saldo con il turno). */
   pagaTurno: (attivita: string) => { yen: number; massima: number | null } | undefined;
 }
 
@@ -45,15 +46,17 @@ const yen = (n: number): string => `¥${Math.abs(n).toLocaleString('it-IT')}`;
 /** Il negozio di un articolo: la parte della chiave prima della barra. */
 const negozioDellArticolo = (chiave: string): string => (chiave.includes('/') ? chiave.slice(0, chiave.indexOf('/')) : chiave);
 
+/** Decisione 18: che cosa succede agli yen spuntando la voce, detto una volta per gruppo. */
+const SCALA = 'Spuntando la voce si scalano da soli dal saldo, mai sotto zero (la spunta resta possibile anche senza yen); togliendo la spunta tornano.';
 /** Le etichette e le note fisse dei gruppi che non dipendono da un elemento. */
 const GRUPPI: Record<string, { titolo: string; nota?: string }> = {
-  aojiru: { titolo: 'Aojiru', nota: 'La variante si osserva alla spunta.' },
+  aojiru: { titolo: 'Aojiru', nota: 'La variante si osserva alla spunta. Il prezzo di una consumazione nuova si scala da solo dal saldo, mai sotto zero.' },
   doti: { titolo: 'Doti sociali', nota: 'Le Doti le segni tu nella scheda Doti.' },
   letture: { titolo: 'Letture e visioni', nota: 'Le segna la spunta.' },
   turni: { titolo: 'Turni', nota: 'Li segna la spunta.' },
-  yen: { titolo: 'Yen', nota: 'Si applicano con «Applica» sulla voce.' },
+  yen: { titolo: 'Yen', nota: 'Spuntando la voce entrano nel saldo o se ne scalano da soli, mai sotto zero; togliendo la spunta tornano.' },
   oggetti: { titolo: 'Oggetti ricevuti' },
-  richieste: { titolo: 'Richieste completate' },
+  richieste: { titolo: 'Richieste completate', nota: 'La ricompensa in yen di una Richiesta entra da sola nel saldo quando la Richiesta risulta completata.' },
   sblocchi: { titolo: 'Sblocchi' },
   storia: { titolo: 'Eventi di storia' },
   domande: { titolo: 'Domande in classe' },
@@ -61,7 +64,7 @@ const GRUPPI: Record<string, { titolo: string; nota?: string }> = {
   inviti: { titolo: 'Inviti' },
   persone: { titolo: 'Compendio' },
   trofei: { titolo: 'Trofei' },
-  pesca: { titolo: 'Pesca' },
+  pesca: { titolo: 'Pesca', nota: 'La quota di una visita nuova si scala da sola dal saldo, mai sotto zero.' },
   fortuna: { titolo: 'Fortuna di Chihaya' },
 };
 
@@ -92,6 +95,8 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
         if (gruppi.has(chiave)) break;
         const nome = n.negozio(neg);
         const g = gruppo(chiave, nome ? `Acquisti · ${nome}` : 'Acquisti');
+        // decisione 18: il prezzo degli articoli si scala da solo spuntando la voce (detto una volta per gruppo, mai un'istruzione «a mano»)
+        g.nota = SCALA;
         const conto = contoArticoli(effetti.filter((x) => x.tipo === 'articolo' && negozioDellArticolo(x.articolo) === neg), n.frase.articolo);
         if (!conto) break;
         for (const r of conto.righe) {
@@ -104,12 +109,21 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
       }
       case 'acquisto': riga('aojiru', n.frase.articolo(e.articolo)?.nome ?? 'Aojiru', e.variante ? nomeDote(e.variante) : 'variante da dichiarare'); break;
       case 'dote': { const p = partiEffettoAzione(e, n.azione); riga('doti', p.nome, p.dettaglio); break; }
-      case 'lettura': { const p = partiEffettoAzione(e, n.azione); riga('letture', p.nome, p.dettaglio); break; }
+      case 'lettura': {
+        const p = partiEffettoAzione(e, n.azione); riga('letture', p.nome, p.dettaglio);
+        // decisione 18: un film al cinema ha il suo biglietto, che la spunta scala da sola
+        if (e.categoria === 'film') gruppo('letture').nota = 'Le segna la spunta. Il biglietto di un film al cinema si scala da solo dal saldo, mai sotto zero.';
+        break;
+      }
       case 'turno': {
         const p = partiEffettoAzione(e, n.azione);
         const paga = n.pagaTurno(e.attivita);
         const testoPaga = paga ? `paga ${yen(paga.yen)}${paga.massima && paga.massima > paga.yen ? ` (fino a ${yen(paga.massima)})` : ''}` : '';
         riga('turni', p.nome, [p.dettaglio, testoPaga].filter(Boolean).join(' · ') || undefined);
+        // decisione 18: la paga base entra da sola con il turno; il costo di un'attività a pagamento (o della sfida scelta) si scala, mai sotto zero
+        gruppo('turni').nota = paga
+          ? 'Li segna la spunta: la paga base entra da sola nel saldo.'
+          : 'Li segna la spunta: se l’attività o la sfida scelta costa, il prezzo si scala da solo dal saldo, mai sotto zero.';
         break;
       }
       case 'yen': riga('yen', e.importo > 0 ? 'Ricevuti' : 'Spesi', yen(e.importo)); break;

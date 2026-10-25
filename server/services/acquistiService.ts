@@ -213,7 +213,8 @@ export function rimuoviPresenzaLegacy(p:number,r:RichiestaRimozioneLegacy):Ricev
   const ricevuta:RicevutaOperazioneAcquistoDto={operazioneId:r.operazioneId,esito:'presenza-rimossa',partitaId:p,acquistoId:null,provenienzaId:null,articolo:r.articolo,creataIl:nowIso()};salvaOperazione(p,r.operazioneId,'rimuovi-legacy',payload,ricevuta);return ricevuta;
 }
 
-export const TABELLE_DUREVOLI_ACQUISTI=['da_applicare','effetto_applicato','movimento_yen','acquisto_operazione','proposta_operazione','beneficio_ciclo'] as const;
+// L13 (decisione 18): con i movimenti automatici degli yen (utente 048), storia durevole del saldo come `movimento_yen`
+export const TABELLE_DUREVOLI_ACQUISTI=['da_applicare','effetto_applicato','movimento_yen','yen_automatico','acquisto_operazione','proposta_operazione','beneficio_ciclo'] as const;
 export interface ContestoRipristinoAcquisti {tipoCestino:string;partitaIds:number[];acquistoIds:string[];durevoli:Record<string,unknown[]>;identita:Record<string,unknown>[]}
 export function preparaRipristinoAcquisti(r:{tipoCestino:string;partitaIds:number[];acquistoIds:string[]}):ContestoRipristinoAcquisti {
   if(!getDb().inTransaction)throw new Error('Il ripristino richiede la transazione del cestino.');

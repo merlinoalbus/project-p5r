@@ -6,7 +6,8 @@
 // registra un turno, quale esito si è ottenuto: come la scelta delle note di un Confidente (`SceltaNote`), con «Senza punti» e «Annulla».
 // Una Dote a valori possibili (la fabbricazione: ♪♪ o ♪♪♪) chiede le note fra quelle dichiarate, o «nessuna». Gli esiti non ancora possibili
 // (le condizioni dell'esito o dell'articolo della sfida, per esempio il rango) si vedono con il motivo ma non si toccano: il server li rifiuta.
-// Ogni esito mostra le Doti che dà, con i punti, il prezzo dell'articolo (promemoria: gli yen si cambiano a mano) e i premi in parole.
+// Ogni esito mostra le Doti che dà, con i punti, il prezzo dell'articolo (L13, decisione 18: registrando il turno si scala da solo dal saldo,
+// mai sotto zero) e i premi in parole.
 // ============================================================
 
 import { useId, useState } from 'react';
@@ -37,7 +38,7 @@ function ElencoEsiti({ esiti, scelto, occupato, onScegli }: { esiti: readonly Es
     <span className="flex w-full flex-col gap-1.5">
       {perGruppo(esiti).map((g) => (
         <span key={g.gruppo ?? '-'} className="flex flex-col gap-1" role="group" aria-label={g.gruppo ?? 'Esiti'}>
-          {g.gruppo && <span className="text-text-secondary">{g.gruppo}{g.esiti[0]?.articolo?.prezzo != null ? ` · ${formattaYen(g.esiti[0].articolo.prezzo)}` : ''}</span>}
+          {g.gruppo && <span className="text-text-secondary">{g.gruppo}{g.esiti[0]?.articolo?.prezzo != null ? ` · ${formattaYen(g.esiti[0].articolo.prezzo)}, si scala da solo dal saldo (mai sotto zero)` : ''}</span>}
           <span className="flex flex-wrap gap-1.5">
             {g.esiti.map((e) => {
               const idMotivo = `${prefisso}-motivo-${e.chiave}`;

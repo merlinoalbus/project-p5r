@@ -4,8 +4,9 @@
 //
 // Una sola azione: dà i punti al Confidente (50 di base con i moltiplicatori, dove il rango li conta), registra la consegna per chiave
 // del catalogo e, se l'oggetto non risulta comprato e c'è un'offerta disponibile, può segnare anche l'acquisto. Sostituisce «Regalo» di
-// Partita › Confidenti (+50 senza dire quale oggetto) e «Regalo consegnato» della scheda (consegna senza punti). I yen non si muovono:
-// il prezzo è un promemoria (BON-12). La logica è nel server (`POST /partite/:id/regali`): qui si scelgono solo i dati.
+// Partita › Confidenti (+50 senza dire quale oggetto) e «Regalo consegnato» della scheda (consegna senza punti). L13 (decisione 18): con
+// l'acquisto segnato il prezzo si scala da solo dal saldo, mai sotto zero, e togliendo il regalo torna. La logica è nel server
+// (`POST /partite/:id/regali`): qui si scelgono solo i dati.
 // ============================================================
 
 import { useMemo, useState } from 'react';
@@ -126,7 +127,7 @@ export function SceltaRegalo({ partita, confidente, nomeConfidente, regali, amme
               opzioni={acquistabili.map((o) => ({ chiave: chiaveOfferta(o), nome: etichettaOfferta(o) }))} onCambia={setOffertaScelta} />
           )}
           {segna && acquistabili.length === 1 && <span className="testo-12 text-text-muted">{etichettaOfferta(offerta!)}</span>}
-          {segna && offerta?.prezzo ? <span className="testo-12 text-text-muted">I yen non si muovono da soli: ricordati di scalare {formattaYen(offerta.prezzo)} dalla squadra.</span> : null}
+          {segna && offerta?.prezzo ? <span className="testo-12 text-text-muted">Regalando, {formattaYen(offerta.prezzo)} si scalano da soli dal saldo della squadra, mai sotto zero (il regalo si registra anche se il saldo non basta); togliendo il regalo tornano.</span> : null}
         </div>
       )}
       {errore && <p role="alert" className="m-0 testo-13">{errore}</p>}
