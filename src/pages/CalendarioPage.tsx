@@ -22,6 +22,9 @@ import { IconaAzione } from '../components/shared/IconaAzione';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { EditorGiorno } from '../components/guida/EditorGiorno';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 const NOME_TIPO: Record<string, string> = { storia: 'Storia', scadenza: 'Scadenza', sblocco: 'Sblocco', esame: 'Esame', festa: 'Festa', vacanza: 'Vacanza', consiglio: 'Consiglio', meteo: 'Meteo' };
 const CLASSE_TIPO: Record<string, string> = { scadenza: 'chip--attivo', esame: 'chip--attivo' };
 const MESI_CHIAVE = ['04', '05', '06', '07', '08', '09', '10', '11', '12', '01', '02', '03'];
@@ -58,7 +61,7 @@ function Giorno({ g, oggi, aperto, onToggle, onImposta, onSalvato, onModificaGio
             <div key={e.id} className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className={`chip testo-12 ${CLASSE_TIPO[e.tipo] ?? ''}`}>{NOME_TIPO[e.tipo] ?? e.tipo}</span><strong>{e.titolo}</strong>
-                {e.modificato && <span className="chip testo-12">corretto</span>}
+                {!IN_RILASCIO && e.modificato && <span className="chip testo-12">corretto</span>}
                 {e.modificabile && <ModificaGuida tipo="evento-calendario" chiave={String(e.id)} cosa={`l’evento «${e.titolo}»`} soloIcona onSalvato={onSalvato} />}
               </div>
               {e.dettaglio && <span className="text-text-secondary">{e.dettaglio}</span>}
@@ -77,7 +80,7 @@ function Giorno({ g, oggi, aperto, onToggle, onImposta, onSalvato, onModificaGio
           {g.tempoLibero && <span className="testo-12 text-text-muted">Tempo libero: giorno {g.tempoLibero.giorno ? 'sì' : 'no'}, sera {g.tempoLibero.sera ? 'sì' : 'no'}.</span>}
           <div className="flex flex-wrap items-center gap-2">
             {/* stesso modulo della pagina del giorno della guida: meteo, nota, trama e vincoli del giorno; fuori dall'intestazione cliccabile */}
-            <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica il giorno" onClick={onModificaGiorno} />
+            {!IN_RILASCIO && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica il giorno" onClick={onModificaGiorno} />}
             {onImposta && !oggi && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Imposta come data di gioco della partita" onClick={onImposta} />}
           </div>
         </div>
@@ -140,7 +143,7 @@ export function CalendarioPage() {
                   {d.oggi.eventi.map((e) => (
                     <li key={e.id} className="flex flex-wrap items-center gap-x-1">
                       <span className={`chip testo-12 ${CLASSE_TIPO[e.tipo] ?? ''}`}>{NOME_TIPO[e.tipo] ?? e.tipo}</span> <strong>{e.titolo}</strong>{e.dettaglio ? <span className="text-text-secondary"> — {e.dettaglio}</span> : null}
-                      {e.modificato && <span className="chip testo-12">corretto</span>}
+                      {!IN_RILASCIO && e.modificato && <span className="chip testo-12">corretto</span>}
                       {e.modificabile && <ModificaGuida tipo="evento-calendario" chiave={String(e.id)} cosa={`l’evento «${e.titolo}»`} soloIcona onSalvato={ricarica} />}
                     </li>
                   ))}
@@ -162,7 +165,7 @@ export function CalendarioPage() {
                 </div>
               )}
               <div className="flex flex-wrap items-center gap-2">
-                <PulsanteVisivo compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica il giorno" onClick={() => setGiornoInModifica(d.oggi?.data ?? null)} />
+                {!IN_RILASCIO && <PulsanteVisivo compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica il giorno" onClick={() => setGiornoInModifica(d.oggi?.data ?? null)} />}
                 <Link to="/guida/domande" className="touch inline-flex items-center testo-12 text-primary-testo">Domande in classe della data →</Link>
               </div>
             </section>
@@ -178,7 +181,7 @@ export function CalendarioPage() {
               <Giorno key={g.data} g={g} oggi={g.data === d.dataGioco} aperto={aperto === g.data} onToggle={() => setAperto((a) => (a === g.data ? null : g.data))} onImposta={partitaId ? () => void imposta(g.data) : undefined} onSalvato={ricarica} onModificaGiorno={() => setGiornoInModifica(g.data)} />
             ))}
           </ul>
-          {giornoInModifica && <EditorGiorno key={giornoInModifica} data={giornoInModifica} onChiudi={() => setGiornoInModifica(null)} onSalvato={async () => { await dati.ricarica(); }} />}
+          {!IN_RILASCIO && giornoInModifica && <EditorGiorno key={giornoInModifica} data={giornoInModifica} onChiudi={() => setGiornoInModifica(null)} onSalvato={async () => { await dati.ricarica(); }} />}
         </div>
       )}
     </PageState>

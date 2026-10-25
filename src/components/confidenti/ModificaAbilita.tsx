@@ -17,6 +17,10 @@ import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { conferma, CHIUDI_SENZA_SALVARE } from '../../stores/confermaStore';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 type Voce = { nome: string; descrizione: string };
 const RANGHI = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
@@ -24,7 +28,9 @@ const etichettaRango = (r: number): string => (r === 10 ? 'MAX' : String(r));
 const uguali = (a: Voce[], b: Voce[]): boolean => JSON.stringify(a) === JSON.stringify(b);
 
 /** La matita «Modifica» delle abilità del Confidente; alla chiusura con qualcosa di cambiato la scheda si rilegge (`onSalvato`). */
-export function ModificaAbilita({ chiave, nome, onSalvato }: { chiave: string; nome: string; onSalvato: () => void | Promise<void> }) {
+// L12 (passo 8): nel rilascio (sola lettura) la modifica non esiste; la condizione è costante di build, `ModificaAbilitaReale` esce dal bundle
+export const ModificaAbilita: StrumentoDiModifica<typeof ModificaAbilitaReale> = IN_RILASCIO ? NienteInRilascio : ModificaAbilitaReale;
+function ModificaAbilitaReale({ chiave, nome, onSalvato }: { chiave: string; nome: string; onSalvato: () => void | Promise<void> }) {
   const [aperta, setAperta] = useState(false);
   return <>
     <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" aria-label={`Modifica le abilità di ${nome}`} onClick={() => setAperta(true)} />

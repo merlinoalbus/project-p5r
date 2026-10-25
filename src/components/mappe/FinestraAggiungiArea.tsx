@@ -20,6 +20,10 @@ import { SceltaPunto } from './SceltaPunto';
 import type { AreaDettaglioDto, QuartiereDettaglioDto } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 /** Il Palazzo che riceve l'area (L3): le sue infiltrazioni e quella da preselezionare. */
 export interface PalazzoNuovaArea { chiave: string; nome: string; infiltrazioni: Array<{ chiave: string; nome: string; ordine: number }>; preselezionata?: string | null }
@@ -32,7 +36,9 @@ type Props = {
 
 /** La finestra: nome e immagine obbligatori, etichetta facoltativa, punto sull'illustrazione (obbligatorio se c'è l'illustrazione) o
  *  infiltrazioni da collegare (Palazzo). */
-export function FinestraAggiungiArea({ quartiere: q, palazzo, aperta, onChiudi, onCreata }: Props) {
+// L12 (passo 8): nel rilascio (sola lettura) la finestra non esiste; la condizione è costante di build, `FinestraAggiungiAreaReale` esce dal bundle
+export const FinestraAggiungiArea: StrumentoDiModifica<typeof FinestraAggiungiAreaReale> = IN_RILASCIO ? NienteInRilascio : FinestraAggiungiAreaReale;
+function FinestraAggiungiAreaReale({ quartiere: q, palazzo, aperta, onChiudi, onCreata }: Props) {
   const [nome, setNome] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [etichetta, setEtichetta] = useState('');

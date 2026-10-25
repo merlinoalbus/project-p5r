@@ -31,6 +31,10 @@ import { STRUTTURA_VUOTA, campiCompleti, strutturaDi } from '../../utils/azioneS
 import { nomiEffettiDa } from '../../utils/effettoAutomatico';
 import type { AzionePercorsoDto, DatiVoceGiornata, FasciaGioco, GenereVoce } from '../../types';
 import { segnalaMutazioneEffetti } from '../../services/gestiPartita';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 export type SoggettoVoce =
   | { tipo: 'nuova'; fascia: FasciaGioco }
@@ -59,7 +63,9 @@ interface Props {
  * fascia, posto esatto fra le altre voci ed effetti aggiuntivi. «Salva»/«Aggiungi» è attivo solo con un testo e, per una cosa da fare,
  * con i collegamenti e gli effetti completi.
  */
-export function ModuloVoceGiornata({ soggetto, giorno, voci, partitaId, onChiudi, onSalvato }: Props) {
+// L12 (passo 8): nel rilascio (sola lettura, voci del diario comprese) il modulo non esiste; la condizione è costante di build, `ModuloVoceGiornataReale` esce dal bundle
+export const ModuloVoceGiornata: StrumentoDiModifica<typeof ModuloVoceGiornataReale> = IN_RILASCIO ? NienteInRilascio : ModuloVoceGiornataReale;
+function ModuloVoceGiornataReale({ soggetto, giorno, voci, partitaId, onChiudi, onSalvato }: Props) {
   const voce = soggetto.tipo === 'voce' ? soggetto.voce : null;
   /** Le altre voci di una fascia, nel loro ordine (senza quella che si modifica). */
   const altreDi = (f: FasciaGioco) => voci.filter((v) => v.fascia === f && v.uid !== voce?.uid);

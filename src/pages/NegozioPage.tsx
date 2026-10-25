@@ -28,6 +28,9 @@ import { TitoloSezione } from '../components/shared/TitoloSezione';
 import { IntestazioneScheda } from '../components/shared/IntestazioneScheda';
 import { MenuModifica } from '../components/shared/MenuModifica';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /**
  * Scheda di un negozio presa dalla chiave nell'URL: carica il negozio per la partita attiva
  * (ricaricando al cambio di giorno, fascia o meteo) e mostra intestazione, sede, orari, gestore,
@@ -70,7 +73,7 @@ export function NegozioPage() {
               {n.confidente && <Link to={`/confidenti/${n.confidente.chiave}`} className="chip chip--attivo no-underline">{n.confidente.nome}</Link>}
               <ChipDisponibilita disponibilita={n.disponibilita} />
             </>}
-            azioni={<MenuModifica cosa={`il negozio «${n.nome}»`}>
+            azioni={IN_RILASCIO ? undefined : <MenuModifica cosa={`il negozio «${n.nome}»`}>
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Aggiungi un articolo" dettaglio="a questo negozio" onClick={() => { setElementoArticolo(null); setModulo('articolo'); }} />
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Correggi il negozio" onClick={() => { void getElementoCatalogo('negozio', chiave).then((e) => { setElementoNegozio(e); setModulo('negozio'); }).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Caricamento fallito.')); }} />
             </MenuModifica>}>

@@ -23,6 +23,9 @@ import { tutteCompletate } from '../../utils/completamentoAree';
 import { useRiordino } from '../../hooks/useRiordino';
 import { Maniglia } from '../shared/Maniglia';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 interface Props {
   /** Le Aree del Palazzo, nell'ordine del Palazzo. */
   aree: AreaRiassuntoDto[];
@@ -104,7 +107,7 @@ function FilaAree({ aree, areaScelta, infiltrazioneScelta, completate, onScegliA
           );
         })}
       </FilaScorrevole>
-      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi area" onClick={onAggiungiArea} />
+      {!IN_RILASCIO && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi area" onClick={onAggiungiArea} />}
     </div>
   );
 }
@@ -134,16 +137,16 @@ function ElencoAree({ aree, infiltrazioni, areaScelta, infiltrazioneScelta, comp
     <div className="flex flex-col gap-2.5" role="group" aria-label="Aree del Palazzo">
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="m-0 font-display testo-15 uppercase leading-none">Aree · {aree.length}</h3>
-        <span className="ml-auto flex flex-wrap gap-1.5">
+        {!IN_RILASCIO && <span className="ml-auto flex flex-wrap gap-1.5">
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi area" onClick={onAggiungiArea} />
-        </span>
+        </span>}
       </div>
       {/* UX3-13: la legenda delle aree evidenziate, per esteso (da 1280 px la riga dell'infiltrazione non ha più la striscia «Aree toccate») */}
       {apertaInfiltrazione && <p className="m-0 flex items-center gap-1.5 testo-12 text-text-secondary">
         <span aria-hidden className="inline-block h-3 w-3 shrink-0 rounded-sm border border-primary/60 bg-white/[0.04]" />
         <span>Aree toccate da «{apertaInfiltrazione.ordine + 1}. {apertaInfiltrazione.nome}» · {quanteToccate}, evidenziate.</span>
       </p>}
-      {aree.length > 1 && <p className="m-0 testo-12 text-text-muted">Trascina ⠿ per l’ordine in cui percorri il Palazzo. Tocca un’area per vederla sulla mappa.</p>}
+      {aree.length > 1 && <p className="m-0 testo-12 text-text-muted">{IN_RILASCIO ? 'Tocca un’area per vederla sulla mappa.' : 'Trascina ⠿ per l’ordine in cui percorri il Palazzo. Tocca un’area per vederla sulla mappa.'}</p>}
       <ol className="m-0 flex list-none flex-col gap-1.5 p-0" aria-label="Aree">
         {elenco.map((a, i) => {
           // nell'ordine della guida, comunque arrivino
@@ -156,7 +159,7 @@ function ElencoAree({ aree, infiltrazioni, areaScelta, infiltrazioneScelta, comp
           return (
             <li key={a.slug} ref={riordino.riga(a.slug)}
               className={`flex items-stretch gap-1 rounded-md border px-1.5 py-1.5 ${scelta ? 'border-primary bg-primary-bg' : toccata ? 'border-primary/60 bg-white/[0.04]' : 'border-border-light bg-white/[0.02]'} ${riordino.trascinato === a.slug ? 'opacity-50' : ''} ${bersaglio ? 'ring-2 ring-primary' : ''}`}>
-              {aree.length > 1 && <Maniglia etichetta={`Sposta l’area «${a.nome}»`} id={a.slug} i={i} riordino={riordino} />}
+              {!IN_RILASCIO && aree.length > 1 && <Maniglia etichetta={`Sposta l’area «${a.nome}»`} id={a.slug} i={i} riordino={riordino} />}
               <button type="button" className="touch min-w-0 flex-1 text-left" aria-pressed={scelta} onClick={() => onScegliArea(a.slug)}>
                 <span className="flex items-baseline gap-1 testo-13 font-semibold leading-tight">
                   <span className="min-w-0">{i + 1}. {a.nome}{completa && <TestoCompletata />}</span>{completa && <SpuntaCompletata dimensione={14} />}
@@ -179,7 +182,7 @@ function ElencoAree({ aree, infiltrazioni, areaScelta, infiltrazioneScelta, comp
             </li>
           );
         })}
-        {aree.length === 0 && <li className="testo-12 text-text-muted" role="status">Questo Palazzo non ha ancora aree: aggiungine una.</li>}
+        {aree.length === 0 && <li className="testo-12 text-text-muted" role="status">{IN_RILASCIO ? 'Questo Palazzo non ha ancora aree.' : 'Questo Palazzo non ha ancora aree: aggiungine una.'}</li>}
       </ol>
       {senzaAree.length > 0 && (
         <section className="flex flex-col gap-1.5" aria-label="Infiltrazioni senza aree">
@@ -190,7 +193,7 @@ function ElencoAree({ aree, infiltrazioni, areaScelta, infiltrazioneScelta, comp
                 <button type="button" className="touch min-w-0 flex-1 text-left testo-13 font-semibold leading-tight" aria-pressed={x.chiave === infiltrazioneScelta} onClick={() => onScegliInfiltrazione(x.chiave)}>
                   {completate.has(x.chiave) && <SpuntaCompletata dimensione={14} />}{x.ordine + 1}. {x.nome}{completate.has(x.chiave) && <TestoCompletata />}
                 </button>
-                <PulsanteVisivo tono="fantasma" compatto className="shrink-0" icona={<IconaAzione chiave="url" dimensione={20} />} titolo="Collega aree" aria-label={`Collega aree a «${x.nome}»`} onClick={() => onCollegaAree(x.chiave)} />
+                {!IN_RILASCIO && <PulsanteVisivo tono="fantasma" compatto className="shrink-0" icona={<IconaAzione chiave="url" dimensione={20} />} titolo="Collega aree" aria-label={`Collega aree a «${x.nome}»`} onClick={() => onCollegaAree(x.chiave)} />}
               </li>
             ))}
           </ul>

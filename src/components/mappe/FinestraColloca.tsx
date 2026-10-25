@@ -9,6 +9,10 @@ import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 interface Props {
   luogo: { chiave: string; nome: string };
@@ -22,7 +26,9 @@ interface Props {
 }
 
 /** La finestra di «Colloca»: si sceglie l'area, «Colloca» la salva. */
-export function FinestraColloca({ luogo, aree, proposta = null, onChiudi, onFatto }: Props) {
+// L12 (passo 8): nel rilascio (sola lettura) la finestra non esiste; la condizione è costante di build, `FinestraCollocaReale` esce dal bundle
+export const FinestraColloca: StrumentoDiModifica<typeof FinestraCollocaReale> = IN_RILASCIO ? NienteInRilascio : FinestraCollocaReale;
+function FinestraCollocaReale({ luogo, aree, proposta = null, onChiudi, onFatto }: Props) {
   const [area, setArea] = useState(proposta ?? '');
   const [occupato, setOccupato] = useState(false);
   /** Salva l'area del luogo, notifica e fa rileggere. */

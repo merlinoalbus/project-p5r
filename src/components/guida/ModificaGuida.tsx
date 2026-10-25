@@ -15,6 +15,10 @@ import { uguali } from '../../../shared/percorsoGuida';
 import { correggiGuida, getSchedaCorrezione, ripristinaGuida } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 import type { CampoCorrezioneDto, SchedaCorrezioneDto, TipoModificabile, ValoreCampoCorrezione } from '../../types';
 import { SceltaCatalogoOggetto } from '../catalogo/SceltaCatalogoOggetto';
 import { Modal } from '../shared/Modal';
@@ -76,7 +80,7 @@ export interface PropsModificaGuida {
   campiSpeciali?: Record<string, EditorCampoSpeciale>;
 }
 
-export function ModificaGuida({ tipo, chiave, cosa, soloIcona, etichetta = 'Modifica', onSalvato, className = '', campiSpeciali }: PropsModificaGuida) {
+function ModificaGuidaReale({ tipo, chiave, cosa, soloIcona, etichetta = 'Modifica', onSalvato, className = '', campiSpeciali }: PropsModificaGuida) {
   const [scheda, setScheda] = useState<SchedaCorrezioneDto | null>(null);
   const [bozza, setBozza] = useState<Bozza>({});
   const [occupato, setOccupato] = useState(false);
@@ -278,3 +282,6 @@ export function ModificaGuida({ tipo, chiave, cosa, soloIcona, etichetta = 'Modi
     )}
   </>;
 }
+
+/** Nel rilascio (sola lettura) la correzione non esiste: componente vuoto e `ModificaGuidaReale` esce dal bundle (L12, passo 8). */
+export const ModificaGuida: StrumentoDiModifica<typeof ModificaGuidaReale> = IN_RILASCIO ? NienteInRilascio : ModificaGuidaReale;

@@ -8,11 +8,17 @@ import { Modal } from '../shared/Modal';
 import { NEL_CESTINO } from '../../utils/cestino';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 const testo = (e: unknown) => e instanceof Error ? e.message : 'Operazione non riuscita.';
 
 /** La conferma riguarda la fotografia letta e l’UID originale, anche se la selezione cambia durante la rete. */
-export function FinestraRimozionePin({ spillo, mappa, contestoAncoraAttivo, onChiudi, onRimosso }: {
+// L12 (passo 8): nel rilascio (sola lettura) la finestra non esiste; la condizione è costante di build, `FinestraRimozionePinReale` esce dal bundle
+export const FinestraRimozionePin: StrumentoDiModifica<typeof FinestraRimozionePinReale> = IN_RILASCIO ? NienteInRilascio : FinestraRimozionePinReale;
+function FinestraRimozionePinReale({ spillo, mappa, contestoAncoraAttivo, onChiudi, onRimosso }: {
   spillo: Pick<SpilloDto, 'id' | 'uid' | 'nome'>; mappa: string; contestoAncoraAttivo: () => boolean;
   onChiudi: () => void; onRimosso: () => void | Promise<void>;
 }) {

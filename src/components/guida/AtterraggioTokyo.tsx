@@ -29,6 +29,10 @@ import { Selettore } from '../shared/Selettore';
 import { SelettoreData } from '../shared/SelettoreData';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 /** Quando vale una regola: sempre, un giorno solo, da un giorno in poi, fra due giorni. */
 type Quando = 'sempre' | 'giorno' | 'da' | 'intervallo';
@@ -73,7 +77,9 @@ interface Props {
 }
 
 /** Il pulsante dell'intestazione del Palazzo e la finestra che modifica comparsa e atterraggio sulla mappa di Tokyo. */
-export function AtterraggioTokyo({ dungeon: d, onSalvato, compatto }: Props) {
+// L12 (passo 8): nel rilascio (sola lettura) la finestra del Palazzo e l'atterraggio non si impostano; la condizione è costante di build, `AtterraggioTokyoReale` esce dal bundle
+export const AtterraggioTokyo: StrumentoDiModifica<typeof AtterraggioTokyoReale> = IN_RILASCIO ? NienteInRilascio : AtterraggioTokyoReale;
+function AtterraggioTokyoReale({ dungeon: d, onSalvato, compatto }: Props) {
   const [aperta, setAperta] = useState(false);
   return (
     <>

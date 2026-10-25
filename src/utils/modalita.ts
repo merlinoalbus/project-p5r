@@ -31,6 +31,23 @@ function leggiModalitaBuild(): Modalita {
   return grezza;
 }
 
+// COME SI ESCLUDE IL CODICE DI MODIFICA DAL BUNDLE DI RILASCIO (L12, passo 8)
+// ---------------------------------------------------------------------------
+// Il bundler (Rolldown, in Vite 8) decide quali moduli e quali chiamate all'API restano PRIMA di piegare le costanti: una condizione
+// letta da un altro modulo (`import { IN_RILASCIO } from …`) non basta, il ramo «morto» resta raggiungibile per il grafo e si porta
+// dietro le sue importazioni (provato con la build di rilascio: i percorsi di scrittura restavano nel bundle). Funziona invece una
+// condizione costante DENTRO lo stesso modulo: Vite sostituisce `import.meta.env.VITE_MODALITA` con la stringa e il bundler valuta
+// `"rilascio" === 'rilascio'` mentre costruisce il grafo. Perciò ogni modulo che esclude codice dichiara la propria costante:
+//
+//     const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+//     export const ModuloX: StrumentoDiModifica<typeof ModuloXReale> = IN_RILASCIO ? NienteInRilascio : ModuloXReale;   // componente di modifica
+//     {IN_RILASCIO ? null : <ModuloX … />}  oppure  {!IN_RILASCIO && <ModuloX … />}                                      // punto d'uso
+//
+// Vale per l'operatore ternario, `&&` e `||`; NON per un `if` con `return` anticipato (il codice dopo il `return` resta nel grafo).
+// La stringa va scritta identica ('rilascio'): un refuso non dà errori, lascia il codice nel bundle, e lo scopre il controllo statico
+// del dist di rilascio (`scripts/verifica-bundle-rilascio.mjs`, passo di build della pipeline). `MODALITA_BUILD`/`CAPACITA_BUILD`/`useCapacita`
+// qui sotto restano per la presentazione e il confronto col backend: sono valori a runtime, non servono (e non bastano) a escludere codice.
+
 /** La modalità di questa build del frontend. */
 export const MODALITA_BUILD: Modalita = leggiModalitaBuild();
 

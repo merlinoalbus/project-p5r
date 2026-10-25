@@ -14,12 +14,16 @@ import { useCarica } from '../../hooks/useCarica';
 import { getDisponibilitaStrutturata, getLuoghi, ripristinaDisponibilitaStrutturata, salvaDisponibilitaStrutturata } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
 import {
   FASCE_DISPONIBILITA, GIORNI_DISPONIBILITA, MODI_DISPONIBILITA,
   type DisponibilitaConfidenteDto, type DisponibilitaStrutturata as Struttura, type EccezioneDisponibilita, type FasciaDisponibilita, type GiornoDisponibilita, type ModoDisponibilita,
 } from '../../../shared/disponibilitaStrutturata';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 const NOME_MODO: Record<ModoDisponibilita, string> = { settimanale: 'In certi giorni della settimana', 'su-messaggio': 'Su suo messaggio', 'stanza-velluto': 'Alla Stanza di Velluto', trama: 'Con la trama' };
 const NOME_GIORNO: Record<GiornoDisponibilita, string> = { lun: 'lunedì', mar: 'martedì', mer: 'mercoledì', gio: 'giovedì', ven: 'venerdì', sab: 'sabato', dom: 'domenica', festivi: 'festivi' };
@@ -56,10 +60,10 @@ export function DisponibilitaStrutturataScheda({ chiave, partita, versione, onMo
       <span><strong className="text-text">Quando:</strong> {testoQuando(s)}{s.dal ? ` · dal ${dataBreve(s.dal)}` : ''}</span>
       {s.eccezioni.length > 0 && <ul className="m-0 flex list-disc flex-col gap-0.5 pl-5">{s.eccezioni.map((e, i) => <li key={i}>{testoEccezione(e)}</li>)}</ul>}
       {oggi && <span><span className={`chip ${oggi.stato === 'disponibile' ? 'chip--attivo' : ''}`} title={oggi.motivo}>{NOME_STATO[oggi.stato] ?? oggi.stato}</span> <span className="text-text-muted">{oggi.motivo}</span></span>}
-      <span className="flex flex-wrap items-center gap-2">
+      {!IN_RILASCIO && <span className="flex flex-wrap items-center gap-2">
         <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica la disponibilità" onClick={onModifica} />
         {modificata && <span className="chip" title="La struttura è stata cambiata rispetto alla fonte">Modificata</span>}
-      </span>
+      </span>}
     </div>
   );
 }
@@ -79,8 +83,9 @@ export function QuandoConfidente({ chiave, partita }: { chiave: string; partita?
 
 const uguali = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
 
-/** L'editor: struttura e luoghi, salvati col PUT; «Ripristina» riporta la struttura alla fonte. */
-export function EditorDisponibilitaStrutturata({ chiave, nome, onChiudi, onSalvato }: { chiave: string; nome: string; onChiudi: () => void; onSalvato: () => void | Promise<void> }) {
+/** L'editor: struttura e luoghi, salvati col PUT; «Ripristina» riporta la struttura alla fonte. Nel rilascio (sola lettura) non esiste (costante di build). */
+export const EditorDisponibilitaStrutturata: StrumentoDiModifica<typeof EditorDisponibilitaStrutturataReale> = IN_RILASCIO ? NienteInRilascio : EditorDisponibilitaStrutturataReale;
+function EditorDisponibilitaStrutturataReale({ chiave, nome, onChiudi, onSalvato }: { chiave: string; nome: string; onChiudi: () => void; onSalvato: () => void | Promise<void> }) {
   const d = useCarica(() => getDisponibilitaStrutturata(chiave), [chiave]);
   const tuttiILuoghi = useCarica(() => getLuoghi(), []);
   return (

@@ -20,6 +20,9 @@ import { SezioneDellArea } from './SezioneDellArea';
 import { timbriDopoIlTocco } from '../../utils/dedali';
 import type { AreaDedaloDto } from '../../types';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 interface Props {
   area: AreaDedaloDto;
   partitaId: number | null;
@@ -47,7 +50,9 @@ function Timbro({ preso }: { preso: boolean }) {
 }
 
 /** La sezione dei timbri: la fila da toccare (con una partita), il conto, e in «Modifica la guida» il totale dell'area. */
-export function TimbriDellArea({ area, partitaId, modifica, onTimbri, onRicarica }: Props) {
+export function TimbriDellArea({ area, partitaId, modifica: modificaRichiesta, onTimbri, onRicarica }: Props) {
+  // L12 (passo 8): nel rilascio (sola lettura) il totale dei timbri non si imposta; i timbri si toccano (partita) come sempre
+  const modifica = !IN_RILASCIO && modificaRichiesta;
   const [occupato, setOccupato] = useState(false);
   const [totale, setTotale] = useState<string | null>(null);
   const t = area.timbri;
@@ -96,7 +101,7 @@ export function TimbriDellArea({ area, partitaId, modifica, onTimbri, onRicarica
           })}
         </ol>
       )}
-      {!t && !modifica && <p className="m-0 testo-12 text-text-muted">Il totale dei timbri di quest’area non è ancora impostato: si imposta in «Modifica la guida». Finché manca, i timbri non contano.</p>}
+      {!t && !modifica && <p className="m-0 testo-12 text-text-muted">Il totale dei timbri di quest’area non è ancora impostato{IN_RILASCIO ? '' : ': si imposta in «Modifica la guida»'}. Finché manca, i timbri non contano.</p>}
       {modifica && (totale === null
         ? <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={t ? 'Cambia il totale' : 'Imposta il totale'}
             aria-label={`${t ? 'Cambia' : 'Imposta'} il totale dei timbri di ${area.nome}`} onClick={() => setTotale(t ? String(t.totale) : '')} />

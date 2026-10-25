@@ -13,6 +13,10 @@ import { IconaSpillo } from './IconaSpillo';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 interface Props {
   spillo: SpilloDto;
@@ -45,7 +49,9 @@ function corrisponde(luogo: LuogoDettaglioDto, anteprima: AnteprimaLuogoDaPinDto
 }
 
 /** Crea il luogo sul pin esistente; anteprima, ricevuta e stato osservato restano esiti distinti. */
-export function FinestraLuogoDaPin({ spillo, mappa, partita, mappaRiletta, caricamentoMappa, erroreMappa,
+// L12 (passo 8): nel rilascio (sola lettura) la finestra non esiste; la condizione è costante di build, `FinestraLuogoDaPinReale` esce dal bundle
+export const FinestraLuogoDaPin: StrumentoDiModifica<typeof FinestraLuogoDaPinReale> = IN_RILASCIO ? NienteInRilascio : FinestraLuogoDaPinReale;
+function FinestraLuogoDaPinReale({ spillo, mappa, partita, mappaRiletta, caricamentoMappa, erroreMappa,
   onRileggi, onRiletta, contestoAncoraAttivo, onChiudi }: Props) {
   const [nome, setNome] = useState(spillo.nome);
   const [tipo, setTipo] = useState<TipoLuogo | null>(null);

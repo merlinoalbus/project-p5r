@@ -6,6 +6,10 @@ import { Selettore } from '../shared/Selettore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 const righe = (s: string) => s.split('\n').map(v => v.trim()).filter(Boolean);
 const urlValido = (s: string) => { try { return ['https:', 'http:'].includes(new URL(s).protocol); } catch { return false; } };
@@ -13,7 +17,9 @@ type ViaBozza = Omit<ViaRegolaPesca, 'fonti'> & { fontiTesto: string };
 const inBozza = (v: ViaRegolaPesca): ViaBozza => { const { fonti, ...resto } = v; return { ...resto, fontiTesto: fonti.join('\n') }; };
 
 /** Modifica la fonte canonica della guida; nessuna attribuzione alla partita avviene salvando. */
-export function EditorRegolaPesca({ regola, onChiudi, onSalvata }: { regola: RegolaPescaDto; onChiudi: () => void; onSalvata: () => void | Promise<void> }) {
+// L12 (passo 8): nel rilascio (sola lettura) l'editor delle regole non esiste; la condizione è costante di build, `EditorRegolaPescaReale` esce dal bundle
+export const EditorRegolaPesca: StrumentoDiModifica<typeof EditorRegolaPescaReale> = IN_RILASCIO ? NienteInRilascio : EditorRegolaPescaReale;
+function EditorRegolaPescaReale({ regola, onChiudi, onSalvata }: { regola: RegolaPescaDto; onChiudi: () => void; onSalvata: () => void | Promise<void> }) {
   const [fotografia] = useState(() => ({ chiave: regola.chiave, revisione: regola.revisione }));
   const [nome, setNome] = useState(regola.nome);
   const [fonti, setFonti] = useState(regola.dati?.fonti.join('\n') ?? '');

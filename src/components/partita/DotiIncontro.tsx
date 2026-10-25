@@ -21,6 +21,9 @@ import type { ConfidenteDettaglioDto } from '../../types';
 import { conferma, RIPRISTINA_CON_MODIFICHE } from '../../stores/confermaStore';
 import { TitoloSezione } from '../shared/TitoloSezione';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 interface Props {
   confidente: ConfidenteDettaglioDto;
   /** Il rango della partita attiva: il prossimo incontro vale verso il successivo (evidenziato). */
@@ -85,7 +88,7 @@ export function DotiIncontro({ confidente, rangoPartita, onSalvato }: Props) {
     <section className="card flex flex-col gap-2" aria-labelledby="doti-incontro">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <TitoloSezione id="doti-incontro">Dote al passaggio di rango</TitoloSezione>
-        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" onClick={apri} disabled={confidente.dotiIncontro.length === 0} />
+        {!IN_RILASCIO && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" onClick={apri} disabled={confidente.dotiIncontro.length === 0} />}
       </div>
       <p className="m-0 testo-12 text-text-muted">
         Il gioco dà queste Doti quando si passa al rango indicato: l'app te le ricorda quando registri il passaggio — spuntando nella giornata
@@ -102,7 +105,7 @@ export function DotiIncontro({ confidente, rangoPartita, onSalvato }: Props) {
           ))}
         </ul>
       )}
-      {aperta && (
+      {!IN_RILASCIO && aperta && (
         <Modal aperta larga titolo={`Dote al passaggio di rango: ${confidente.nome}`} onChiudi={() => setAperta(false)} azioni={(
           <div className="flex flex-wrap justify-end gap-1.5 w-full">
             <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" disabled={occupato} onClick={() => setAperta(false)} />

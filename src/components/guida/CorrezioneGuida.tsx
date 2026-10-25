@@ -23,6 +23,10 @@ import { notifica } from '../../stores/notificationStore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
+import { NienteInRilascio } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 interface PropsCampo {
   etichetta: string;
@@ -73,7 +77,10 @@ interface Props<T extends Record<string, string>> {
  * bozza e la funzione per aggiornarla. «Salva» è attivo solo se la bozza differisce dalla partenza; con `elimina` c'è
  * anche «Elimina», che chiede conferma mostrando l'avviso. Chiudere il modulo scarta la bozza.
  */
-export function CorrezioneGuida<T extends Record<string, string>>({ cosa, iniziale, children, onSalva, elimina, compatto, etichetta, aperta, onChiudi, classeEtichetta }: Props<T>) {
+// L12 (passo 8): nel rilascio (sola lettura) la matita di correzione non esiste; la condizione è costante di build, `CorrezioneGuidaReale` esce dal bundle.
+// Il componente è generico: l'asserzione di tipo conserva `T` (con `StrumentoDiModifica` si perderebbe).
+export const CorrezioneGuida = (IN_RILASCIO ? NienteInRilascio : CorrezioneGuidaReale) as typeof CorrezioneGuidaReale;
+function CorrezioneGuidaReale<T extends Record<string, string>>({ cosa, iniziale, children, onSalva, elimina, compatto, etichetta, aperta, onChiudi, classeEtichetta }: Props<T>) {
   const controllata = aperta !== undefined;
   // aperta da fuori: la bozza parte dai valori del momento dell'apertura, come col pulsante
   const [bozza, setBozza] = useState<{ partenza: T; corrente: T } | null>(() => {

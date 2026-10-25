@@ -30,6 +30,9 @@ import { IntestazioneScheda } from '../components/shared/IntestazioneScheda';
 import { IconaAzione, IconaScheda } from '../components/shared/IconaAzione';
 import { ritornoMappe } from '../utils/ritornoMappe';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /** Tokyo non ha un visore proprio: la sua mappa è quella disegnata nella Città.
  *
  * Il nodo `tokyo` dell'atlante resta — è il genitore dei quartieri, e senza di lui l'albero non
@@ -106,7 +109,7 @@ function LuogoSenzaPlanimetria({ mappa, nome, albero, partitaId }: {
       </>}
       azioni={<>
         {mappa.radiceDi && <CollegamentoVisivo to={schedaAccessoMondo(mappa.radiceDi.tipo, mappa.radiceDi.chiave)} tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={titoloSchedaAccessoMondo(mappa.radiceDi.tipo, mappa.radiceDi.chiave, mappa.nome)} />}
-        <CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={titoloModificaMappa(mappa)} />
+        {!IN_RILASCIO && <CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={titoloModificaMappa(mappa)} />}
         <TornaAllaPartita partitaId={partitaId} />
       </>}>
       {/* Va detto, invece di lasciarlo capire dall'assenza: questo nodo raccoglie, non disegna. */}

@@ -7,11 +7,17 @@ import { Selettore } from '../shared/Selettore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 interface Props { oggetto?: CatalogoOggettoDto; onChiudi: () => void; onSalvato: (oggetto: CatalogoOggettoDto) => void }
 
 /** Si corregge l'identità, non la copia del listino: qui non esiste un campo prezzo. */
-export function ModuloOggetto({ oggetto, onChiudi, onSalvato }: Props) {
+// L12 (passo 8): nel rilascio (sola lettura) il modulo non esiste; la condizione è costante di build, `ModuloOggettoReale` esce dal bundle
+export const ModuloOggetto: StrumentoDiModifica<typeof ModuloOggettoReale> = IN_RILASCIO ? NienteInRilascio : ModuloOggettoReale;
+function ModuloOggettoReale({ oggetto, onChiudi, onSalvato }: Props) {
   const id = useId();
   const [categoria, setCategoria] = useState<CategoriaOggetto>(oggetto?.categoria ?? 'altro');
   const [nome, setNome] = useState(oggetto?.nome ?? '');

@@ -47,6 +47,9 @@ import { piatto } from '../utils/testo';
 import { ModuloRichiesta } from '../components/guida/ModuloRichiesta';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 type Accettazione = 'tutte' | 'accettate' | 'non-accettate';
 type Completamento = 'tutte' | 'completate' | 'da-completare';
 const ACCETTAZIONE: ReadonlyArray<{ chiave: Accettazione; nome: string }> = [{ chiave: 'tutte', nome: 'Tutte' }, { chiave: 'accettate', nome: 'Accettate' }, { chiave: 'non-accettate', nome: 'Non accettate' }];
@@ -136,7 +139,7 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
         {r.areaChiave && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Apri il Dedalo" to={`/guida/dungeon/mementos?area=${r.areaChiave}`} />}
         {r.confidente && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Confidente" to={`/confidenti/${r.confidente.chiave}`} />}
         {/* la Richiesta si corregge (o si elimina) dove la si legge (scelta dell'utente, 2026-10-11) */}
-        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" aria-label={`Modifica la Richiesta «${r.nome}»`} onClick={onModifica} />
+        {!IN_RILASCIO && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" aria-label={`Modifica la Richiesta «${r.nome}»`} onClick={onModifica} />}
       </div>
     </li>
   );
@@ -230,7 +233,7 @@ export function RichiestePage({ soloChiave }: { soloChiave?: string } = {}) {
           </FilaScorrevole>}
 
           {foglio === 'richieste' && <>
-          <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una Richiesta" dettaglio="vale per tutte le partite" onClick={() => setModulo({ chiave: null })} />
+          {!IN_RILASCIO && <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una Richiesta" dettaglio="vale per tutte le partite" onClick={() => setModulo({ chiave: null })} />}
           {partitaId && <section className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Riepilogo delle Richieste">
             <div className="kpi-tile"><span className="kpi-value">{d.totale}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="catalogo" />in tutto</span></div>
             <div className="kpi-tile"><span className="kpi-value">{d.totale - d.completate - accettate}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="sfide" />da fare</span></div>

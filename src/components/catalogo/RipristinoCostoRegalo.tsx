@@ -5,8 +5,14 @@ import { Modal } from '../shared/Modal';
 import { notifica } from '../../stores/notificationStore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
 
-export function RipristinoCostoRegalo({ confidente, regalo, onSalvato }: { confidente: string; regalo: RegaloConfidenteDto; onSalvato: () => void }) {
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
+// L12 (passo 8): nel rilascio (sola lettura) il comando non esiste; la condizione è costante di build, `RipristinoCostoRegaloReale` esce dal bundle
+export const RipristinoCostoRegalo: StrumentoDiModifica<typeof RipristinoCostoRegaloReale> = IN_RILASCIO ? NienteInRilascio : RipristinoCostoRegaloReale;
+function RipristinoCostoRegaloReale({ confidente, regalo, onSalvato }: { confidente: string; regalo: RegaloConfidenteDto; onSalvato: () => void }) {
   const [aperto, setAperto] = useState(false);
   const [occupato, setOccupato] = useState(false);
   const copia = regalo.ripristinoCosto;

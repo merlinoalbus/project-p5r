@@ -36,6 +36,9 @@ import { COVO_AREA, PAGINA_COVO } from '../utils/covo';
 import { NEL_CESTINO } from '../utils/cestino';
 import type { AreaDettaglioDto, ElementoAreaDto } from '../types';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /** Il suggerimento del collegamento alle sfide del Covo, in testata o in fondo alla fila delle versioni. */
 const TITOLO_COVO = 'Nel gioco il Covo si apre dal menu, dal 6/5';
 
@@ -88,7 +91,8 @@ function Contenuto({ area: a, indirizzoContenitore, ricarica }: { area: AreaDett
   const [finestra, setFinestra] = useState<'modifica' | 'aggiungi' | 'elimina' | 'ripristina' | null>(null);
   // L5 (F5): «Aggiungi luogo» (null = luogo da scegliere) e «Posiziona» di un luogo senza pin, nelle aree di un quartiere
   const [aggiungiLuogo, setAggiungiLuogo] = useState<{ luogo: { chiave: string; nome: string } | null } | null>(null);
-  const conLuoghi = a.contenitore.tipo === 'quartiere';
+  // L12 (passo 8): nel rilascio (sola lettura) l'area non si modifica, non si eliminano né ripristinano valori e non si aggiungono luoghi o planimetrie
+  const conLuoghi = !IN_RILASCIO && a.contenitore.tipo === 'quartiere';
   const [riepilogoElimina, setRiepilogoElimina] = useState<string | null>(null);
   const [occupato, setOccupato] = useState(false);
   // «Luoghi qui» e «Aree vicine» (§4.3, UX2-1): da 1280 px nel pannello del visore, aperto all'arrivo, a destra; da 768 a 1279 px nel
@@ -186,7 +190,7 @@ function Contenuto({ area: a, indirizzoContenitore, ricarica }: { area: AreaDett
             {covo && <Link to={PAGINA_COVO} className={`chip touch no-underline testo-12 ${conFila ? 'lg:max-xl:hidden' : ''}`} title={TITOLO_COVO}>Sfide e Medaglie P del Covo</Link>}
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-1.5 lg:ml-auto">
+        {!IN_RILASCIO && <div className="flex flex-wrap items-center gap-1.5 lg:ml-auto">
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={<><span className="hidden md:max-lg:inline 2xl:inline">Modifica area</span><span className="md:max-lg:hidden lg:max-xl:hidden 2xl:hidden">Modifica</span></>} aria-label="Modifica area" onClick={() => setFinestra('modifica')} />
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo={<><span className="hidden md:max-lg:inline 2xl:inline">Aggiungi planimetria</span><span className="md:max-lg:hidden 2xl:hidden">Planimetria</span></>} aria-label="Aggiungi planimetria" onClick={() => setFinestra('aggiungi')} />
           {/* «Ripristina» ed «Elimina area» (variante accolta da Stesura, §4.3): visibili da 768 a 1023 px e da 1280 px, fantasma — mai primari — e sempre con
@@ -211,7 +215,7 @@ function Contenuto({ area: a, indirizzoContenitore, ricarica }: { area: AreaDett
               <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Elimina area" className="justify-start text-error" onClick={(e) => { e.currentTarget.closest('details')?.removeAttribute('open'); setRiepilogoElimina(null); setFinestra('elimina'); }} />
             </div>
           </details>
-        </div>
+        </div>}
       </header>
 
       {a.disponibile === false && <p className="m-0 shrink-0 testo-13 text-text-secondary" role="status">Non ancora aperta: {a.bloccoMotivo ?? a.sblocco?.manca ?? a.sblocco?.testo ?? 'il quartiere non è ancora disponibile nella partita'}.</p>}
@@ -233,7 +237,7 @@ function Contenuto({ area: a, indirizzoContenitore, ricarica }: { area: AreaDett
             pannelloIniziale={pannello} onPannello={setPannello} titoloVisore={a.nome} senzaVicine nonDisponibili={interruttore}
             classeVisore="h-[min(64dvh,560px)] lg:h-auto lg:min-h-[420px] lg:flex-1" className="lg:flex lg:min-h-0 lg:flex-1 lg:flex-col"
             contenutiPannello={telefono ? undefined : <PannelloArea area={a} elementi={elementiQui} onSeleziona={selezionaPin} nonDisponibili={interruttore} pinChiesto={spillo} onAggiungiLuogo={conLuoghi ? (l) => setAggiungiLuogo({ luogo: l }) : undefined} />} />
-        : <p className="card m-0 testo-13 text-text-secondary">{a.nome} non ha più planimetrie: aggiungine una.</p>}
+        : <p className="card m-0 testo-13 text-text-secondary">{a.nome} non ha più planimetrie{IN_RILASCIO ? '.' : ': aggiungine una.'}</p>}
       {scelta && telefono && <div className="card"><PannelloArea area={a} elementi={elementiQui} onSeleziona={selezionaPin} nonDisponibili={interruttore} pinChiesto={spillo} onAggiungiLuogo={conLuoghi ? (l) => setAggiungiLuogo({ luogo: l }) : undefined} /></div>}
       {aggiungiLuogo && scelta && (
         <FinestraAggiungiLuogo quartiere={a.contenitore.chiave} luogo={aggiungiLuogo.luogo} onChiudi={() => setAggiungiLuogo(null)} onFatto={() => void ricarica()}
@@ -244,14 +248,14 @@ function Contenuto({ area: a, indirizzoContenitore, ricarica }: { area: AreaDett
       {finestra === 'modifica' && <FinestraModificaArea area={a} aperta onChiudi={() => setFinestra(null)} onSalvata={ricarica} />}
       <FinestraAggiungiPlanimetria area={a} aperta={finestra === 'aggiungi'} onChiudi={() => setFinestra(null)}
         onAggiunta={(_nuova, chiave) => { void ricarica(); if (chiave) scegli(chiave); }} />
-      <Modal titolo={`Rimettere i valori della guida in ${a.nome}?`} aperta={finestra === 'ripristina'} onChiudi={() => setFinestra(null)}
+      {!IN_RILASCIO && <Modal titolo={`Rimettere i valori della guida in ${a.nome}?`} aperta={finestra === 'ripristina'} onChiudi={() => setFinestra(null)}
         azioni={<>
           <button type="button" className="btn btn-secondary touch" onClick={() => setFinestra(null)}>Annulla</button>
           <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina" disabled={occupato} onClick={() => { setFinestra(null); void ripristina(); }} />
         </>}>
         <p className="m-0 testo-14">Nome e planimetria predefinita tornano quelli della guida; le tue correzioni a quest’area si perdono.</p>
-      </Modal>
-      <Modal titolo={`Eliminare ${a.nome}?`} aperta={finestra === 'elimina'} onChiudi={() => setFinestra(null)}
+      </Modal>}
+      {!IN_RILASCIO && <Modal titolo={`Eliminare ${a.nome}?`} aperta={finestra === 'elimina'} onChiudi={() => setFinestra(null)}
         azioni={<>
           <button type="button" className="btn btn-secondary touch" onClick={() => setFinestra(null)}>Annulla</button>
           <PulsanteVisivo tono="pericolo" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Elimina" disabled={occupato} onClick={() => void elimina()} />
@@ -261,7 +265,7 @@ function Contenuto({ area: a, indirizzoContenitore, ricarica }: { area: AreaDett
           {riepilogoElimina && <p className="m-0 text-warning" role="alert">{riepilogoElimina}</p>}
           <p className="m-0 text-text-secondary">{NEL_CESTINO}</p>
         </div>
-      </Modal>
+      </Modal>}
     </div>
   );
 }
@@ -293,9 +297,9 @@ function PannelloArea({ area, elementi, onSeleziona, nonDisponibili, pinChiesto,
                 {/* L5: la pagina del luogo (per un negozio con sede, la sua sezione) */}
                 <Link className="testo-12 touch inline-flex items-center" to={e.casa ?? schedaElemento(e)} aria-label={`Scheda di ${e.nome}`}>Scheda</Link>
               </div>
-              {(chiusoAdesso(e) || e.daRivedere) && <div className="flex flex-wrap gap-1">
+              {(chiusoAdesso(e) || (!IN_RILASCIO && e.daRivedere)) && <div className="flex flex-wrap gap-1">
                 {chiusoAdesso(e) && <span className="chip chip--bloccata testo-12" title={motivoChiusura(e)}>{e.presenza?.sbloccato === false ? 'Non ancora nel mondo' : e.presenza?.aperto === false ? 'Chiuso adesso' : e.disponibilita?.stato === 'ignoto' ? 'Disponibilità da verificare' : 'Condizioni del pin non soddisfatte'}</span>}
-                {e.daRivedere === 'negozio-altro-quartiere' && <span className="chip chip--oro testo-12" title="Il pin è agganciato a un negozio di un altro quartiere: si sistema dall'editor della planimetria">Da rivedere · negozio di un altro quartiere</span>}
+                {!IN_RILASCIO && e.daRivedere === 'negozio-altro-quartiere' && <span className="chip chip--oro testo-12" title="Il pin è agganciato a un negozio di un altro quartiere: si sistema dall'editor della planimetria">Da rivedere · negozio di un altro quartiere</span>}
               </div>}
             </li>)}
           </ul>}

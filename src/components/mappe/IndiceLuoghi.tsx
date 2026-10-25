@@ -28,6 +28,9 @@ import { usePartitaStore } from '../../stores/partitaStore';
 import { testoConteggiPin } from '../../utils/presentazioneMappa';
 import type { GerarchiaMappeDto, NodoGerarchiaDto } from '../../types';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 type Sezione = 'citta' | 'palazzi' | 'memento' | 'da-collocare';
 
 /** Un oggetto statico (mai classi interpolate): il nome della radice di ogni scheda, per le briciole. */
@@ -158,7 +161,7 @@ export function IndiceLuoghi() {
   const memento = g?.radici.find((r) => r.tipo === 'memento');
   const daCollocare = g?.radici.find((r) => r.tipo === 'da-collocare');
   const richiesta = params.get('sezione');
-  const sezione: Sezione = richiesta === 'palazzi' || richiesta === 'da-collocare' || (richiesta === 'memento' && memento) ? richiesta : 'citta';
+  const sezione: Sezione = richiesta === 'palazzi' || (!IN_RILASCIO && richiesta === 'da-collocare') || (richiesta === 'memento' && memento) ? richiesta : 'citta';
   const ramo = leggiRamo(params.get('ramo'));
 
   /** Cambia scheda e ramo nell'indirizzo; le scese entrano nella cronologia (così «indietro» risale), il cambio di scheda la sostituisce. */
@@ -176,7 +179,8 @@ export function IndiceLuoghi() {
     { chiave: 'citta', etichetta: `Città (${parola(g.totali.quartieri, 'quartiere', 'quartieri')})` },
     { chiave: 'palazzi', etichetta: `Palazzi (${g.totali.palazzi})` },
     ...(memento ? [{ chiave: 'memento' as const, etichetta: `Memento (${parola(g.totali.dedali ?? memento.figli.length, 'dedalo', 'dedali')})` }] : []),
-    { chiave: 'da-collocare', etichetta: `Da collocare (${g.totali.daCollocare})` },
+    // le planimetrie da collocare sono un lavoro di redazione: nel rilascio (sola lettura) la scheda non esiste
+    ...(IN_RILASCIO ? [] : [{ chiave: 'da-collocare' as const, etichetta: `Da collocare (${g.totali.daCollocare})` }]),
   ] : [];
 
   return <div className="flex flex-col gap-2">

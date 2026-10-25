@@ -20,6 +20,9 @@ import { Modal } from './Modal';
 import { PulsanteVisivo } from './PulsanteVisivo';
 import { IconaAzione } from './IconaAzione';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 interface Props {
   ambito: AmbitoImmagine;
   chiave: string;
@@ -35,7 +38,10 @@ interface Props {
 }
 
 /** Riquadro immagine con ingrandimento e gestione del caricamento (file o URL). */
-export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, modificabile, forma = 'quadrata', adatta = 'contieni', className }: Props) {
+export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, modificabile: modificabileRichiesto, forma = 'quadrata', adatta = 'contieni', className }: Props) {
+  // L12 (passo 8): nel rilascio (sola lettura) le immagini si vedono e si ingrandiscono ma non si caricano, importano o rimuovono. La
+  // condizione è costante di build: i comandi (`modificabile && …`) e i gestori `suFile`/`suImporta`/`suRimuovi`, che nessuno richiama più, escono dal bundle.
+  const modificabile = !IN_RILASCIO && modificabileRichiesto === true;
   const idImmagine = `${ambito}/${chiave}`;
   const [versione, setVersione] = useState(() => versioni.get(idImmagine) ?? 0);
   const [presente, setPresente] = useState<boolean | null>(null);

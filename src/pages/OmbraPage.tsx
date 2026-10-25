@@ -25,6 +25,9 @@ import { NOME_PERSONALITA } from '../../shared/elementi';
 import type { OmbraDettaglioDto, OmbraLuogoDto } from '../../shared/ombre';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /** Il percorso di un luogo: «Palazzo › infiltrazione» o «Memento › dedalo › aree». */
 const percorso = (l: OmbraLuogoDto): string => [l.dungeonNome, l.infiltrazione?.nome, l.areeDedalo.length > 0 ? l.areeDedalo.map((a) => a.nome).join(', ') : null].filter(Boolean).join(' › ');
 
@@ -76,7 +79,7 @@ export function OmbraPage() {
           {/* L11 · R11-15/4: un solo punto di modifica dell'Ombra (nome, personalità, livello, negoziabilità, note, affinità proprie), con «Ripristina» ai valori della guida */}
           <IntestazioneScheda ripiego="/guida/battaglia" titolo={o.nome}
             chip={o.origine === 'utente' ? <span className="chip testo-12">corretta</span> : undefined}
-            azioni={<MenuModifica cosa={`l’Ombra «${o.nome}»`}>
+            azioni={IN_RILASCIO ? undefined : <MenuModifica cosa={`l’Ombra «${o.nome}»`}>
               <ModificaGuida tipo="ombra" chiave={o.chiave} cosa={`l’Ombra «${o.nome}»`} etichetta="Testi della guida" onSalvato={() => void dati.ricarica()} />
             </MenuModifica>}>
             <p className="m-0 testo-13 text-text-secondary">{`${o.persona ? `Maschera ${o.persona.nomeIt}` : o.macheraNota ? `Maschera ${o.macheraNota}, non reclutabile` : 'Non reclutabile'}${o.livello !== null ? ` · livello ${o.livello}` : ''}${o.nomiAltri.length > 0 ? ` · detta anche ${o.nomiAltri.join(', ')}` : ''}`}</p>

@@ -22,6 +22,10 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { PulsanteVisivo } from './PulsanteVisivo';
 import { IconaAzione } from './IconaAzione';
+import { NienteInRilascio, type StrumentoDiModifica } from './SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 /** Gli elementi del riquadro che ricevono il fuoco. */
 const VOCI = 'button:not([disabled]), a[href]';
@@ -39,7 +43,10 @@ interface Props {
 }
 
 /** Pulsante «Modifica ⋯» con il riquadro degli strumenti di modifica. */
-export function MenuModifica({ children, cosa, allinea = 'destra', classePulsante = '', className = '' }: Props) {
+// L12 (passo 8): nel rilascio (sola lettura) il menu «Modifica ⋯» non esiste, con tutte le voci che porta; la condizione è costante di build
+// e `MenuModificaReale` esce dal bundle. Tutti i suoi usi contengono solo strumenti di modifica (le azioni di gioco stanno fuori dal menu).
+export const MenuModifica: StrumentoDiModifica<typeof MenuModificaReale> = IN_RILASCIO ? NienteInRilascio : MenuModificaReale;
+function MenuModificaReale({ children, cosa, allinea = 'destra', classePulsante = '', className = '' }: Props) {
   const [aperto, setAperto] = useState(false);
   const radice = useRef<HTMLDivElement | null>(null);
   const pulsante = useRef<HTMLButtonElement | null>(null);

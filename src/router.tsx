@@ -23,6 +23,9 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import { useVersioneStore } from './stores/versioneStore';
 import { eErroreDiChunk, pigra as pigraBase, senzaRete, type PaginaPigra } from './utils/pagineLazy';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /** I `precarica` di tutte le pagine, nell'ordine in cui sono dichiarate: `main.tsx` li importa in tempo morto. */
 const precaricamenti: Array<() => Promise<void>> = [];
 export const tuttePrecarica: ReadonlyArray<() => Promise<void>> = precaricamenti;
@@ -52,7 +55,6 @@ const OmbraPage = pigra(() => import('./pages/OmbraPage'), 'OmbraPage');
 const CittaPage = pigra(() => import('./pages/CittaPage'), 'CittaPage');
 const MappaPage = pigra(() => import('./pages/MappaPage'), 'MappaPage');
 const AccessoMondoPage = pigra(() => import('./pages/AccessoMondoPage'), 'AccessoMondoPage');
-const EditorMappaPage = pigra(() => import('./pages/EditorMappaPage'), 'EditorMappaPage');
 const QuartierePage = pigra(() => import('./pages/QuartierePage'), 'QuartierePage');
 const LuogoPage = pigra(() => import('./pages/LuogoPage'), 'LuogoPage');
 const AreaPage = pigra(() => import('./pages/AreaPage'), 'AreaPage');
@@ -102,6 +104,15 @@ const pagina = (path: string, p: PaginaPigra): RouteObject => ({
   },
 });
 
+/**
+ * L12 (passo 8): l'editor delle mappe esiste solo nell'istanza di preparazione. Con `IN_RILASCIO` costante di build il ramo è `[]`: la
+ * pagina (`EditorMappaPage`, 800 righe di strumenti di modifica) non entra nel bundle, non diventa un chunk e `/guida/mappe/:chiave/modifica`
+ * cade nella pagina «non trovata». Il `pigra(...)` sta DENTRO il ramo perché registra il precarico (un effetto che il bundler non scarterebbe).
+ */
+const rotteEditorMappe: RouteObject[] = IN_RILASCIO
+  ? []
+  : [pagina('guida/mappe/:chiave/modifica', pigra(() => import('./pages/EditorMappaPage'), 'EditorMappaPage'))];
+
 /** Albero delle route applicative. */
 export const router = createBrowserRouter([
   {
@@ -142,7 +153,7 @@ export const router = createBrowserRouter([
           pagina('guida/mappe', MappaPage),
           pagina('guida/mondo/:tipo/:chiave', AccessoMondoPage),
           pagina('guida/mappe/:chiave', MappaPage),
-          pagina('guida/mappe/:chiave/modifica', EditorMappaPage),
+          ...rotteEditorMappe,
           pagina('guida/citta', CittaPage),
           pagina('guida/citta/:chiave', QuartierePage),
           // L2: la pagina di un'Area del mondo (e delle aree della città: `tokyo` come contenitore)

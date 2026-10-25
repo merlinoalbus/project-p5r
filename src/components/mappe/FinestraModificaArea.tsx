@@ -19,6 +19,10 @@ import { aggiornaAreaMondo, aggiornaPlanimetrieArea, collocaPlanimetria, elimina
 import { notifica } from '../../stores/notificationStore';
 import { nomeVersione } from '../../utils/aree';
 import type { AreaDettaglioDto } from '../../types';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 interface Props {
   area: AreaDettaglioDto;
@@ -39,7 +43,9 @@ const AREA_NUOVA = '__nuova';
 
 /** La finestra: nome, planimetria predefinita, tabella delle versioni (etichetta, ↑/↓, «Apri nell'editor», elimina, nei Palazzi
  *  «Sposta…») e, nei Palazzi, le infiltrazioni. */
-export function FinestraModificaArea({ area, aperta, onChiudi, onSalvata, infiltrazioniPalazzo, altreAree, onVersioneSpostata }: Props) {
+// L12 (passo 8): nel rilascio (sola lettura) la finestra non esiste; la condizione è costante di build, `FinestraModificaAreaReale` esce dal bundle
+export const FinestraModificaArea: StrumentoDiModifica<typeof FinestraModificaAreaReale> = IN_RILASCIO ? NienteInRilascio : FinestraModificaAreaReale;
+function FinestraModificaAreaReale({ area, aperta, onChiudi, onSalvata, infiltrazioniPalazzo, altreAree, onVersioneSpostata }: Props) {
   // «Sposta la versione in un'altra area» / «Rendila un'area a sé» (L3): la versione, la destinazione, il nome dell'area nuova e, se la
   // versione è l'unica dell'area, la frase del server da confermare (409 `area-si-svuota`: l'area va nel cestino con i suoi legami)
   const [spostamento, setSpostamento] = useState<{ chiave: string; verso: string; nome: string; svuota: string | null } | null>(null);

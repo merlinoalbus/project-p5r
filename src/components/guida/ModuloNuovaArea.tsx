@@ -13,6 +13,10 @@ import { CampoCorrezione } from './CorrezioneGuida';
 import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 const IN_FONDO = '__in-fondo';
 const IN_CIMA = '__in-cima';
@@ -40,7 +44,9 @@ interface Props {
  * dopo un'area; di partenza `dopoIniziale` se esiste, altrimenti in fondo). All'apertura si porta in vista e mette il
  * fuoco sul nome. Con `bloccato` mostra il motivo e non invia.
  */
-export function ModuloNuovaArea({ aree, areePalazzo, nomeIniziale = '', dopoIniziale, occupato, bloccato, onCrea, onAnnulla }: Props) {
+// L12 (passo 8): nel rilascio (sola lettura) il modulo non esiste; la condizione è costante di build, `ModuloNuovaAreaReale` esce dal bundle
+export const ModuloNuovaArea: StrumentoDiModifica<typeof ModuloNuovaAreaReale> = IN_RILASCIO ? NienteInRilascio : ModuloNuovaAreaReale;
+function ModuloNuovaAreaReale({ aree, areePalazzo, nomeIniziale = '', dopoIniziale, occupato, bloccato, onCrea, onAnnulla }: Props) {
   const [nome, setNome] = useState(nomeIniziale);
   const [toccate, setToccate] = useState<string[]>([]);
   const [descrizione, setDescrizione] = useState('');

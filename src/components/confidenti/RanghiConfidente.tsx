@@ -21,6 +21,9 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { TitoloSezione } from '../shared/TitoloSezione';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 const NOME_MODO: Record<ModoRango, string> = {
   punti: 'A punti legame',
   evento: 'Con un evento',
@@ -48,10 +51,10 @@ export function RanghiConfidente({ chiave, nome, onSalvato }: { chiave: string; 
             : <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0">{ranghi.map((r) => (
               <li key={r.rango} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-1 testo-13">
                 <span className="min-w-0 flex-1"><strong className="text-text">{passaggio(r.rango)}</strong>: <span className="text-text-secondary">{descrizione(r)}</span></span>
-                {r.modificato && <span className="chip" title="Cambiato rispetto alla guida">Modificato</span>}
-                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" aria-label={`Modifica: ${passaggio(r.rango).toLowerCase()} di ${nome}`} onClick={() => setAperto(r.rango)} />
+                {!IN_RILASCIO && r.modificato && <span className="chip" title="Cambiato rispetto alla guida">Modificato</span>}
+                {!IN_RILASCIO && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" aria-label={`Modifica: ${passaggio(r.rango).toLowerCase()} di ${nome}`} onClick={() => setAperto(r.rango)} />}
               </li>))}</ul>}
-      {inModifica && <EditorRango key={`${chiave}:${inModifica.rango}`} chiave={chiave} nome={nome} rango={inModifica} onChiudi={() => setAperto(null)} onSalvato={dopo} />}
+      {!IN_RILASCIO && inModifica && <EditorRango key={`${chiave}:${inModifica.rango}`} chiave={chiave} nome={nome} rango={inModifica} onChiudi={() => setAperto(null)} onSalvato={dopo} />}
     </section>
   );
 }

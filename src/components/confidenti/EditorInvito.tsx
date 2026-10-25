@@ -21,6 +21,10 @@ import { Selettore, type OpzioneSelettore } from '../shared/Selettore';
 import { conferma, CHIUDI_SENZA_SALVARE } from '../../stores/confermaStore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 type TipoPosto = 'quartiere' | 'luogo' | 'area';
 const NOME_TIPO: Record<TipoPosto, string> = { quartiere: 'Un quartiere', luogo: 'Un luogo', area: 'Un’Area' };
@@ -39,7 +43,9 @@ function usePostiInvito() {
 }
 
 /** La finestra: `invito` assente = nuovo invito del Confidente. */
-export function EditorInvito({ confidente, invito, onChiudi, onSalvato }: { confidente: { chiave: string; nome: string }; invito: InvitoDto | null; onChiudi: () => void; onSalvato: () => void | Promise<void> }) {
+// L12 (passo 8): nel rilascio (sola lettura) l'editor non esiste; la condizione è costante di build, `EditorInvitoReale` esce dal bundle
+export const EditorInvito: StrumentoDiModifica<typeof EditorInvitoReale> = IN_RILASCIO ? NienteInRilascio : EditorInvitoReale;
+function EditorInvitoReale({ confidente, invito, onChiudi, onSalvato }: { confidente: { chiave: string; nome: string }; invito: InvitoDto | null; onChiudi: () => void; onSalvato: () => void | Promise<void> }) {
   const posti = usePostiInvito();
   const [mese, setMese] = useState('');
   const [giorno, setGiorno] = useState('');

@@ -20,7 +20,8 @@ interface Props {
   e: AzionePercorsoDto & { genere: Exclude<GenereVoce, 'azione'> };
   menuAperto: boolean;
   onMenu: (aperto: boolean) => void;
-  gesti: GestoVoce[];
+  /** Gesti della voce: assenti = riga di sola lettura, senza menu (istanza di rilascio). */
+  gesti?: GestoVoce[];
   occupato: boolean;
   dichiarazioni?: ReactNode;
   /** Riordino per trascinamento: la maniglia ⠿ (in testa alla riga), il riferimento della riga e le classi dello stato di trascinamento. */
@@ -43,8 +44,8 @@ export function VoceEvento({ e, menuAperto, onMenu, gesti, occupato, dichiarazio
         </span>
         {dichiarazioni}
       </div>
-      <PulsanteMenuVoce voce={e.azione} aperto={menuAperto} onCambia={onMenu} disabled={occupato} />
-      {menuAperto && <GestiVoce gesti={gesti} disabled={occupato} etichetta={`Gesti per: ${e.azione.slice(0, 60)}`} voce={e.uid} />}
+      {gesti && <PulsanteMenuVoce voce={e.azione} aperto={menuAperto} onCambia={onMenu} disabled={occupato} />}
+      {gesti && menuAperto && <GestiVoce gesti={gesti} disabled={occupato} etichetta={`Gesti per: ${e.azione.slice(0, 60)}`} voce={e.uid} />}
     </li>
   );
 }

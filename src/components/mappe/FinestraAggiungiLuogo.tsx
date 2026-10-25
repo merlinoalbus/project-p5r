@@ -24,6 +24,10 @@ import { ORARI_SEMPRE, type OrariNegozio } from '../../../shared/orariNegozio';
 import type { PlanimetriaAreaDto } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 const OPZIONI_TIPO: OpzioneIcone[] = TIPI_LUOGO.map((t) => ({ chiave: t.chiave, nome: t.nome, icona: <IconaSpillo tipo={t.icona} dimensione={28} /> }));
 
@@ -40,7 +44,9 @@ interface Props {
 }
 
 /** La finestra di «Aggiungi luogo» (due passi) o di «Posiziona» (il solo punto). */
-export function FinestraAggiungiLuogo({ quartiere, planimetrie, luogo = null, onChiudi, onFatto }: Props) {
+// L12 (passo 8): nel rilascio (sola lettura) la finestra non esiste; la condizione è costante di build, `FinestraAggiungiLuogoReale` esce dal bundle
+export const FinestraAggiungiLuogo: StrumentoDiModifica<typeof FinestraAggiungiLuogoReale> = IN_RILASCIO ? NienteInRilascio : FinestraAggiungiLuogoReale;
+function FinestraAggiungiLuogoReale({ quartiere, planimetrie, luogo = null, onChiudi, onFatto }: Props) {
   const [passo, setPasso] = useState<1 | 2>(luogo ? 2 : 1);
   const [modo, setModo] = useState<'esistente' | 'nuovo'>('esistente');
   const [esistente, setEsistente] = useState(luogo?.chiave ?? '');

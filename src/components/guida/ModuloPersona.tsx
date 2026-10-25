@@ -24,6 +24,10 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { CampoCorrezione } from './CorrezioneGuida';
 import { NEL_CESTINO } from '../../utils/cestino';
 import type { PersonaRiassuntoDto, PuntoInteresseDto } from '../../types';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 interface Props {
   /** La voce Persona da correggere, o null per aggiungerne una. */
@@ -40,7 +44,9 @@ interface Props {
 }
 
 /** La finestra: carica il compendio delle Persona, poi i campi. */
-export function ModuloPersona(props: Props) {
+// L12 (passo 8): nel rilascio (sola lettura) il modulo non esiste; la condizione è costante di build, `ModuloPersonaReale` esce dal bundle
+export const ModuloPersona: StrumentoDiModifica<typeof ModuloPersonaReale> = IN_RILASCIO ? NienteInRilascio : ModuloPersonaReale;
+function ModuloPersonaReale(props: Props) {
   const { voce, aree, areaIniziale, onChiudi } = props;
   const persone = useCarica(() => getPersone(), []);
   const nomeArea = aree.find((a) => a.chiave === areaIniziale)?.nome ?? 'quest’area';

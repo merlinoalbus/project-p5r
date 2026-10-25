@@ -20,6 +20,9 @@ import { useImmagineMappa } from '../../hooks/useImmagineMappa';
 import { notifica } from '../../stores/notificationStore';
 import type { AreaRiassuntoDto, QuartiereDettaglioDto } from '../../types';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /** «2 planimetrie · 16 pin», «1 planimetria · nessun pin». */
 function conteggiArea(a: AreaRiassuntoDto): string {
   const planimetrie = a.numeroPlanimetrie === 1 ? '1 planimetria' : `${a.numeroPlanimetrie} planimetrie`;
@@ -58,15 +61,15 @@ export function AreeDelQuartiere({ quartiere: q, onCambiato, onAggiungi, onPinSe
   if (navigabili.length === 0) return (
     <section className="card flex flex-col items-start gap-2" aria-label={`Aree di ${q.nome}`}>
       <h2 className="m-0 font-display testo-17 uppercase leading-none">Aree</h2>
-      <p className="m-0 testo-13 text-text-secondary">{q.aree.length > 0 ? 'Le aree del quartiere non sono ancora aperte nella partita.' : `Nessuna area in ${q.nome}: aggiungine una.`}</p>
-      <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Aggiungi area" onClick={onAggiungi} />
+      <p className="m-0 testo-13 text-text-secondary">{q.aree.length > 0 ? 'Le aree del quartiere non sono ancora aperte nella partita.' : IN_RILASCIO ? `Nessuna area in ${q.nome}.` : `Nessuna area in ${q.nome}: aggiungine una.`}</p>
+      {!IN_RILASCIO && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Aggiungi area" onClick={onAggiungi} />}
     </section>
   );
   return (
     <section className="flex flex-col gap-2" aria-label={`Aree di ${q.nome}`}>
       <div className="flex flex-wrap items-center gap-2">
         <h2 className="m-0 font-display testo-17 uppercase leading-none">Aree <span className="text-text-muted">· {navigabili.length}</span></h2>
-        {navigabili.length > 1 && (riordina
+        {!IN_RILASCIO && navigabili.length > 1 && (riordina
           ? <span className="ml-auto flex gap-1.5">
             <PulsanteVisivo compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={() => setRiordina(null)} />
             <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva l’ordine" disabled={occupato} onClick={() => void salvaOrdine()} />
@@ -83,7 +86,7 @@ export function AreeDelQuartiere({ quartiere: q, onCambiato, onAggiungi, onPinSe
                 {a.ingresso && <span className="chip chip--attivo testo-12" title="Toccando il quartiere sulla mappa di Tokyo si apre quest’area">Ingresso</span>}
               </span>
               <span className="testo-12 text-text-muted">{conteggiArea(a)}</span>
-              {!a.passaggio && !riordina && <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="mappa" dimensione={20} />}
+              {!IN_RILASCIO && !a.passaggio && !riordina && <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="mappa" dimensione={20} />}
                 titolo="Segna sull’illustrazione" dettaglio="il suo pin manca" onClick={() => setDaSegnare(a)} />}
             </span>
             {riordina && <span className="flex flex-col gap-1">
@@ -93,7 +96,7 @@ export function AreeDelQuartiere({ quartiere: q, onCambiato, onAggiungi, onPinSe
           </li>
         ))}
       </ul>
-      <SegnaSullIllustrazione quartiere={q} area={daSegnare} onChiudi={() => setDaSegnare(null)} onSegnata={async (spillo) => { setDaSegnare(null); await onCambiato(); onPinSegnato?.(spillo); }} />
+      {!IN_RILASCIO && <SegnaSullIllustrazione quartiere={q} area={daSegnare} onChiudi={() => setDaSegnare(null)} onSegnata={async (spillo) => { setDaSegnare(null); await onCambiato(); onPinSegnato?.(spillo); }} />}
     </section>
   );
 }

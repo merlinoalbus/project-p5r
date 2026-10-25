@@ -10,6 +10,9 @@ import { SchedaSpillo } from './VisoreMappa';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /** Mostra la `SchedaSpillo` del visore in modalità non spaziale per un contenuto della guida, con
  * le azioni della partita (raccolto, stato del punto, acquisto), e un pulsante che apre o chiude
  * l'editor del contenuto. Ogni azione passa da `esegui`, che segna l'operazione in corso e mostra
@@ -33,8 +36,9 @@ export function SchedaContenutoGuida({ spillo, partitaId, onChiudi, onCambiato }
       onRaccolto={(s, valore) => esegui(() => impostaSpilloRaccolto(partitaId!, s.id, valore))}
       onStatoPunto={(_s, voce, stato) => esegui(() => impostaStatoPunto(partitaId!, voce, stato))}
       onAcquisto={(s, articolo, fatto) => esegui(() => impostaAcquisto(partitaId!, articolo, fatto, s.dettaglio?.negozio?.sedeChiave))} />
-    <PulsanteVisivo icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo={modifica ? 'Chiudi modifica' : 'Modifica contenuto'} disabled={occupato} onClick={() => setModifica(v => !v)} />
-    {modifica && <EditorContenuto key={spillo.id} spillo={spillo} occupato={occupato} esegui={esegui} />}
+    {/* L12 (passo 8): nel rilascio (sola lettura) il contenuto della guida non si modifica */}
+    {!IN_RILASCIO && <PulsanteVisivo icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo={modifica ? 'Chiudi modifica' : 'Modifica contenuto'} disabled={occupato} onClick={() => setModifica(v => !v)} />}
+    {!IN_RILASCIO && modifica && <EditorContenuto key={spillo.id} spillo={spillo} occupato={occupato} esegui={esegui} />}
   </div>;
 }
 

@@ -26,6 +26,9 @@ import { TrasformazioniDiJose } from '../components/catalogo/TrasformazioniDiJos
 import { PosizioniDellaLettura } from '../components/catalogo/PosizioniDellaLettura';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 const STATO_FORZIERE = { preso: 'Preso', 'non-piu-ottenibile': 'Non più ottenibile', 'da-prendere': 'Da prendere', 'da-jose': 'Da Jose', 'da-verificare': 'Raccolta da verificare: pin forziere non collegato' } as const;
 
 /** Una sola casa dell'oggetto; prezzi, stati dei forzieri e disponibilità arrivano dai rispettivi servizi. */
@@ -81,7 +84,7 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
     {o && <div className="flex min-w-0 flex-col gap-3">
       {/* Lotto B (punto 6): «Modifica | Elimina» venivano prima di che cosa fa l'oggetto; ora stanno nel menu «Modifica ⋯» dell'intestazione */}
       <IntestazioneScheda ripiego="/guida/oggetti" titolo={o.nome} chip={<span className="chip">{CATEGORIA_OGGETTO[o.categoria].nome}</span>}
-        azioni={<MenuModifica cosa={`l’oggetto «${o.nome}»`}>
+        azioni={IN_RILASCIO ? undefined : <MenuModifica cosa={`l’oggetto «${o.nome}»`}>
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica l’oggetto" aria-label="Modifica"
             disabled={occupato || regaloInCorso || dati.caricamento} onClick={() => setAzione('modifica')} />
           {o.modificato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Ripristina i valori della guida" aria-label="Ripristina"
@@ -90,7 +93,7 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
             disabled={occupato || regaloInCorso || dati.caricamento} onClick={() => setAzione('elimina')} />
         </MenuModifica>} />
       {/* L11 · B11 (R11-15/5): un oggetto nato nell'app non ha un valore della guida da rimettere, e la pagina lo dice invece di nascondere «Ripristina» in silenzio */}
-      {o.origine === 'utente' && !o.modificato && <p className="m-0 testo-12 text-text-muted">Creato da te: non c’è un valore della guida da rimettere.</p>}
+      {!IN_RILASCIO && o.origine === 'utente' && !o.modificato && <p className="m-0 testo-12 text-text-muted">Creato da te: non c’è un valore della guida da rimettere.</p>}
       <div className="grid min-w-0 grid-cols-1 gap-3 xl:grid-cols-2">
         <div className="contents xl:flex xl:min-w-0 xl:flex-col xl:gap-3">
           <section className="card order-1 flex min-w-0 flex-col gap-2 xl:order-none" aria-labelledby="dove-si-compra">
@@ -165,7 +168,7 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
           notifica('success', `Regalo consegnato a ${regalaA.nome}${esito.punti > 0 ? `: +${formattaPunti(esito.punti)} punti` : ''}${esito.acquistato ? ' · segnato anche comprato' : ''}.`);
         }} />}
       {azione === 'modifica' && <ModuloOggetto key={o.chiave} oggetto={o} onChiudi={() => setAzione(null)} onSalvato={() => { setAzione(null); void dati.ricarica(); }} />}
-      {(azione === 'elimina' || azione === 'ripristina') && <Modal aperta titolo={azione === 'elimina' ? `Elimina «${o.nome}»` : `Ripristina «${o.nome}»`} onChiudi={() => { if (!occupato) setAzione(null); }}
+      {!IN_RILASCIO && (azione === 'elimina' || azione === 'ripristina') && <Modal aperta titolo={azione === 'elimina' ? `Elimina «${o.nome}»` : `Ripristina «${o.nome}»`} onChiudi={() => { if (!occupato) setAzione(null); }}
         azioni={<><button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={() => setAzione(null)}>Annulla</button><PulsanteVisivo tono="primario" icona={<IconaAzione chiave="raggiunto" dimensione={22} />} titolo={occupato ? 'Attendi…' : 'Conferma'} disabled={occupato} onClick={() => void conferma()} /></>}>
         <p className="m-0">{azione === 'elimina' ? 'L’oggetto e i suoi collegamenti rimossi saranno recuperabili dal cestino. Gli acquisti e i progressi delle letture non vengono cancellati.' : 'Rimetti nome, descrizione e attributi conservati prima della correzione. I progressi della partita non cambiano.'}</p>
       </Modal>}

@@ -21,6 +21,10 @@ import { collegamentoAzione } from '../../utils/percorso';
 import type { AzionePercorsoDto, EsitoRevisioneVoce } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione, IconaSegno } from '../shared/IconaAzione';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 /** La certezza della proposta, a parole. */
 const CERTEZZA: Record<'certa' | 'multipla' | 'probabile', string> = { certa: 'certa', multipla: 'più infiltrazioni', probabile: 'probabile' };
@@ -63,14 +67,15 @@ export function InfiltrazioniVoce({ a, partitaId, onCambiata }: Props) {
         : <ol className="m-0 flex list-none flex-wrap items-center gap-1 p-0" aria-label="Infiltrazioni della voce, in ordine">
             {insieme.map((x, i) => <li key={`${x.chiave}:${i}`} className="chip testo-12">{i + 1}. {x.nome}{chiavi.indexOf(x.chiave) < i ? ' (di nuovo)' : ''}</li>)}
           </ol>}
-      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" disabled={occupato} onClick={() => setAperta(true)} />
-      {proposta && (
+      {/* L12 (passo 8): nel rilascio (sola lettura) l'insieme delle infiltrazioni si legge ma non si cambia e la proposta non si conferma */}
+      {!IN_RILASCIO && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" disabled={occupato} onClick={() => setAperta(true)} />}
+      {!IN_RILASCIO && proposta && (
         <span className="flex basis-full flex-wrap items-center gap-1.5 rounded-md bg-white/[0.04] px-2 py-1" role="status">
           <span>Proposta: {proposta.infiltrazioni.map((x) => x.nome).join(', ')} — {proposta.motivo} <span className="text-text-muted">({CERTEZZA[proposta.certezza]})</span></span>
           <PulsanteVisivo compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="Conferma" disabled={occupato} onClick={() => void salva(proposta.infiltrazioni.map((x) => x.chiave), 'Proposta confermata.')} />
         </span>
       )}
-      {aperta && (
+      {!IN_RILASCIO && aperta && (
         <Modal titolo="Infiltrazioni della voce" aperta onChiudi={() => setAperta(false)}
           azioni={<PulsanteVisivo tono="primario" icona={<IconaAzione chiave="raggiunto" dimensione={22} />} titolo="Fatto" onClick={() => setAperta(false)} />}>
           <div className="flex flex-col gap-3 testo-13">
@@ -109,7 +114,9 @@ export function InfiltrazioniVoce({ a, partitaId, onCambiata }: Props) {
 }
 
 /** Il chip «Da rivedere» di una voce aggiunta, corretta o segnalata dal team, con la sua finestra (§1.4). */
-export function DaRivedereVoce({ a, partitaId, onCambiata }: Props) {
+// L12 (passo 8): «Da rivedere» è un segnale del team di redazione con i gesti per risolverlo: nel rilascio non esiste (costante di build).
+export const DaRivedereVoce: StrumentoDiModifica<typeof DaRivedereVoceReale> = IN_RILASCIO ? NienteInRilascio : DaRivedereVoceReale;
+function DaRivedereVoceReale({ a, partitaId, onCambiata }: Props) {
   const [aperta, setAperta] = useState(false);
   const [occupato, setOccupato] = useState(false);
   if (!a.daRivedere) return null;

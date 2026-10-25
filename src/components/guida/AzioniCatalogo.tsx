@@ -24,9 +24,17 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { ModuloCatalogo } from './ModuloCatalogo';
 import { tipoCatalogoDi, type TipoModulo } from '../../utils/catalogo';
 import type { ElementoCatalogoDto } from '../../types';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 /** Il pulsante «aggiungi» di una pagina di catalogo, col suo modulo. */
-export function AggiungiAlCatalogo({ tipo, titolo, dettaglio = 'resta dopo gli aggiornamenti', onSalvato, className = '' }: {
+// L12 (passo 8): nel rilascio (sola lettura) «aggiungi» e «correggi» non esistono; la condizione è costante di build e le versioni reali escono dal bundle
+export const AggiungiAlCatalogo: StrumentoDiModifica<typeof AggiungiAlCatalogoReale> = IN_RILASCIO ? NienteInRilascio : AggiungiAlCatalogoReale;
+export const CorreggiElemento: StrumentoDiModifica<typeof CorreggiElementoReale> = IN_RILASCIO ? NienteInRilascio : CorreggiElementoReale;
+
+function AggiungiAlCatalogoReale({ tipo, titolo, dettaglio = 'resta dopo gli aggiornamenti', onSalvato, className = '' }: {
   tipo: TipoModulo;
   titolo: string;
   dettaglio?: string;
@@ -49,7 +57,7 @@ export function AggiungiAlCatalogo({ tipo, titolo, dettaglio = 'resta dopo gli a
  * servono a mostrarla, non quelli che servono a modificarla (l'originale del seed, l'origine, le
  * condizioni), e chiederli per ogni riga di un elenco di quarantasei sarebbe quarantasei
  * richieste per un modulo che forse non si apre. */
-export function CorreggiElemento({ tipo, chiave, titolo = 'Correggi', compatto = true, onSalvato }: {
+function CorreggiElementoReale({ tipo, chiave, titolo = 'Correggi', compatto = true, onSalvato }: {
   tipo: TipoModulo;
   chiave: string;
   titolo?: string;

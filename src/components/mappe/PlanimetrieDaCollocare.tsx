@@ -12,9 +12,15 @@ import { FinestraCollocaPlanimetria, type ContenitoreColloca } from './FinestraC
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import type { MappaDaCollocareDto } from '../../types';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 /** Le planimetrie da collocare, una riga per planimetria; a «Colloca» fatto chiede di rileggere l'albero (`onCollocata`). */
-export function PlanimetrieDaCollocare({ elenco, contenitori, onCollocata }: {
+// L12 (passo 8): nel rilascio (sola lettura) l'elenco da collocare non esiste; la condizione è costante di build, `PlanimetrieDaCollocareReale` esce dal bundle
+export const PlanimetrieDaCollocare: StrumentoDiModifica<typeof PlanimetrieDaCollocareReale> = IN_RILASCIO ? NienteInRilascio : PlanimetrieDaCollocareReale;
+function PlanimetrieDaCollocareReale({ elenco, contenitori, onCollocata }: {
   elenco: MappaDaCollocareDto[]; contenitori: ContenitoreColloca[]; onCollocata: () => Promise<void>;
 }) {
   const [scelta, setScelta] = useState<MappaDaCollocareDto | null>(null);

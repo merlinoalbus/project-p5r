@@ -18,6 +18,10 @@ import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { Selettore } from '../shared/Selettore';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 interface Props {
   personaId: number;
@@ -34,7 +38,9 @@ interface Props {
 const OPZIONI = ESITI_AFFINITA.map((e) => ({ chiave: e.codice, nome: e.nome }));
 const nomeCodice = (codice: string) => ESITI_AFFINITA.find((e) => e.codice === codice)?.nome ?? codice;
 
-export function ModificaAffinita({ personaId, nome, affinita, affinitaGuida, onCambiato }: Props) {
+// L12 (passo 8): nel rilascio (sola lettura) la modifica non esiste; la condizione è costante di build, `ModificaAffinitaReale` esce dal bundle
+export const ModificaAffinita: StrumentoDiModifica<typeof ModificaAffinitaReale> = IN_RILASCIO ? NienteInRilascio : ModificaAffinitaReale;
+function ModificaAffinitaReale({ personaId, nome, affinita, affinitaGuida, onCambiato }: Props) {
   const [aperta, setAperta] = useState(false);
   const [bozza, setBozza] = useState<Record<string, string>>({});
   const [occupato, setOccupato] = useState(false);

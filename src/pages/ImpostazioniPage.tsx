@@ -25,6 +25,9 @@ import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /** Impostazioni dell'app. */
 export function ImpostazioniPage() {
   useDocumentTitle('Impostazioni');
@@ -41,7 +44,9 @@ export function ImpostazioniPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <IntestazionePagina titolo="Impostazioni" sottotitolo="Partite, grafica predefinita, caratteri, immagini, traduzioni, cestino, pacchetto di gioco, backup della tua istanza e documentazione delle API." />
+      <IntestazionePagina titolo="Impostazioni" sottotitolo={IN_RILASCIO
+        ? 'Le tue partite e la grafica predefinita.'
+        : 'Partite, grafica predefinita, caratteri, immagini, traduzioni, cestino, pacchetto di gioco, backup della tua istanza e documentazione delle API.'} />
       <GestionePartite />
       <section className="card flex flex-col gap-3">
         <h2 className="m-0 testo-15 font-semibold">Grafica</h2>
@@ -60,8 +65,11 @@ export function ImpostazioniPage() {
           </span>
         </label>
       </section>
-      <CaratteriEditor />
-      <section className="card flex flex-col gap-3">
+      {/* L12 (passo 8): nel rilascio (sola lettura) restano solo le partite dell'utente, la grafica locale e le informazioni; tutto il resto
+          (caratteri, immagini, traduzioni, cestino dei contenuti, pacchetto, backup, documentazione delle API) è presente solo nella preparazione.
+          `IN_RILASCIO` è una costante di build: nel bundle di rilascio questi componenti e le chiamate all'API che usano non ci sono. */}
+      {!IN_RILASCIO && <CaratteriEditor />}
+      {!IN_RILASCIO && <section className="card flex flex-col gap-3">
         <h2 className="m-0 testo-15 font-semibold">Immagini degli Arcani</h2>
         <p className="m-0 testo-13 text-text-secondary">Tocca una carta per sostituirla con un tuo file: le immagini caricate hanno la precedenza sulla grafica predefinita e vengono usate nel compendio e nei Confidenti.</p>
         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
@@ -76,17 +84,19 @@ export function ImpostazioniPage() {
             </div>
           ))}
         </div>
-      </section>
-      <ImmaginiCaricate />
-      <TraduzioniEditor ambitoIniziale={traduzioneAmbito} qIniziale={traduzioneQ} />
-      <MieiDati />
-      <Cestino />
-      <NascostiDallaGuida />
+      </section>}
+      {!IN_RILASCIO && <ImmaginiCaricate />}
+      {!IN_RILASCIO && <TraduzioniEditor ambitoIniziale={traduzioneAmbito} qIniziale={traduzioneQ} />}
+      {!IN_RILASCIO && <MieiDati />}
+      {/* Il cestino (contenuti eliminati e righe nascoste) è dell'autore. Quello dell'utente, con le sue partite e registrazioni, tornerà qui
+          quando il backend di rilascio lo esporrà sotto `/api/partite/:id/cestino` (L12, passo 3): fino ad allora non c'è una rotta da chiamare. */}
+      {!IN_RILASCIO && <Cestino />}
+      {!IN_RILASCIO && <NascostiDallaGuida />}
       <GestiPartita />
-      <RimozioniConservate />
-      <PacchettoGioco />
-      <BackupIstanza />
-      <section className="card flex flex-col gap-3" aria-labelledby="titolo-documentazione-api">
+      {!IN_RILASCIO && <RimozioniConservate />}
+      {!IN_RILASCIO && <PacchettoGioco />}
+      {!IN_RILASCIO && <BackupIstanza />}
+      {!IN_RILASCIO && <section className="card flex flex-col gap-3" aria-labelledby="titolo-documentazione-api">
         <h2 id="titolo-documentazione-api" className="m-0 testo-15 font-semibold">Documentazione delle API</h2>
         <p className="m-0 testo-13 text-text-secondary">
           Tutte le rotte del server, con parametri, corpi e risposte descritti in italiano (OpenAPI 3.1). La pagina si apre in una nuova
@@ -97,7 +107,7 @@ export function ImpostazioniPage() {
           <CollegamentoVisivo to="/api/docs" target="_blank" rel="noopener" tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Apri la documentazione" dettaglio="Swagger, nuova scheda" />
           <CollegamentoVisivo to="/api/openapi.json" target="_blank" rel="noopener" tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Documento OpenAPI" dettaglio="JSON" />
         </div>
-      </section>
+      </section>}
       <section className="card testo-13 text-text-secondary">
         <h2 className="m-0 mb-1 testo-15 font-semibold text-text">Informazioni</h2>
         <div>Versione app {config?.appVersion} — {config?.gioco}</div>

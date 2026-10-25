@@ -9,6 +9,10 @@ import { CAMPI_INFORMAZIONI_CONFIDENTE, ETICHETTE_INFORMAZIONI_CONFIDENTE } from
 import type { AnteprimaInformazioniConfidenteDto, AzioneInformazioniConfidente, CampoInformazioniConfidente, InformazioniConfidente, InformazioniConfidenteRaw, SalvaInformazioniConfidente } from '../../../shared/disponibilitaConfidenti';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 
 const COLONNE: Record<CampoInformazioniConfidente, keyof InformazioniConfidenteRaw> = {
   giorni: 'giorni_json', fasce: 'fasce_json', luogo: 'luogo', sbloccoData: 'sblocco_data', sbloccoRequisiti: 'sblocco_requisiti',
@@ -18,7 +22,9 @@ const vuoti = (): InformazioniConfidente => ({ giorni: [], fasce: [], luogo: '',
 const comeTesto = (v: string | string[] | undefined) => Array.isArray(v) ? v.join('\n') : v ?? '';
 
 /** Legge il proprio endpoint: rimane accessibile anche quando il dettaglio non riesce a decodificare un vecchio JSON. */
-export function EditorDisponibilita({ chiave, onChiudi, onSalvato }: { chiave: string; onChiudi: () => void; onSalvato: () => void | Promise<void> }) {
+// L12 (passo 8): nel rilascio (sola lettura) l'editor non esiste; la condizione è costante di build, `EditorDisponibilitaReale` esce dal bundle
+export const EditorDisponibilita: StrumentoDiModifica<typeof EditorDisponibilitaReale> = IN_RILASCIO ? NienteInRilascio : EditorDisponibilitaReale;
+function EditorDisponibilitaReale({ chiave, onChiudi, onSalvato }: { chiave: string; onChiudi: () => void; onSalvato: () => void | Promise<void> }) {
   const dati = useCarica(() => getInformazioniConfidente(chiave), [chiave]);
   const [modalita, setModalita] = useState<'manuale' | 'storico'>('manuale');
   const [patch, setPatch] = useState<Partial<InformazioniConfidente>>({});

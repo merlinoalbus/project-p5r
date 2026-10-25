@@ -42,6 +42,9 @@ import { descriviOrari } from '../../shared/orariNegozio';
 import type { ElementoCatalogoDto, LuogoDettaglioDto, PlanimetriaAreaDto } from '../types';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
 
+// costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 /** Il badge della presenza: «Non ancora nel mondo», «Chiuso adesso», «Aperto adesso»; niente senza partita. */
 function BadgePresenza({ l }: { l: LuogoDettaglioDto }) {
   const p = l.presenza;
@@ -127,9 +130,9 @@ export function LuogoPage() {
                       1280 px sta in cima alla colonna di destra: lì il pulsante non c'è */}
                   <PulsanteVisivo tono="fantasma" compatto className="max-sm:hidden xl:hidden" icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo="Dove si trova"
                     onClick={() => document.getElementById('dove-si-trova')?.scrollIntoView({ block: 'start' })} />
-                  <MenuModifica cosa={`il luogo «${l.nome}»`}>
+                  {!IN_RILASCIO && <MenuModifica cosa={`il luogo «${l.nome}»`}>
                     <CorreggiElemento tipo="luogo" chiave={l.chiave} titolo="Correggi il luogo" onSalvato={() => void dati.ricarica()} />
-                  </MenuModifica>
+                  </MenuModifica>}
                 </>}>
                 {/* gli orari del luogo (o la regola dell'app), poi le eccezioni dei negozi della sede */}
                 <p className="m-0 testo-13 text-text-secondary"><strong className="text-text">Orari:</strong> {l.orariTesto ?? 'Orari non indicati'}</p>
@@ -161,10 +164,10 @@ export function LuogoPage() {
                       </div>
                       {n.note && <TestoRipiegabile key={n.chiave} testo={n.note} massimo={140} className="min-w-0 whitespace-pre-line break-words testo-13 text-text-secondary" />}
                       <p className="m-0 testo-12 text-text-muted">{n.articoli} articoli{n.verificati < n.articoli ? ` (${n.articoli - n.verificati} da fonte secondaria)` : ''}{partitaId ? ` · ${n.acquistati} acquistati nella partita «${attiva?.nome}»` : ' · attiva una partita per segnare gli acquisti'}.</p>
-                      <div className="flex flex-wrap gap-1.5">
+                      {!IN_RILASCIO && <div className="flex flex-wrap gap-1.5">
                         <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Aggiungi un articolo" onClick={() => setModulo({ negozio: n.chiave, elemento: null })} />
                         <CorreggiElemento tipo="negozio" chiave={n.chiave} titolo="Correggi il negozio" onSalvato={() => void dati.ricarica()} />
-                      </div>
+                      </div>}
                       {modulo?.negozio === n.chiave && <ModuloCatalogo tipo="articolo" elemento={modulo.elemento} negozioChiave={n.chiave} onChiudi={() => setModulo(null)} onSalvato={salvato} />}
                       <ListinoNegozio negozio={n} partitaId={partitaId} versione={versione} onModifica={(a) => apriArticolo(n.chiave, a)} onRipristinato={() => void dati.ricarica()}
                         onCambiato={(a) => dati.imposta((attuale) => ({ ...attuale, listini: attuale.listini.map((x) => (x.chiave !== n.chiave ? x : { ...x, articoliElenco: x.articoliElenco.map((y) => (y.chiave === a.chiave ? a : y)), acquistati: x.articoliElenco.filter((y) => (y.chiave === a.chiave ? a.acquistato : y.acquistato)).length })) }))} />
@@ -198,9 +201,9 @@ export function LuogoPage() {
                   : <div className="flex flex-col items-start gap-2">
                     <p className="m-0 testo-13 text-text-muted">{l.area ? `Non ancora posizionato su una planimetria di ${l.area.nome}.` : 'Non ancora posizionato: prima va collocato in un’area del quartiere.'}</p>
                     {/* L5 (F5): «Posiziona» (il tocco sul punto di una planimetria dell'area) o, senza area, «Colloca» */}
-                    {l.area
+                    {!IN_RILASCIO && (l.area
                       ? <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo="Posiziona" onClick={() => void apriPosiziona()} />
-                      : <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="pianta" dimensione={20} />} titolo="Colloca" onClick={() => void apriColloca()} />}
+                      : <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="pianta" dimensione={20} />} titolo="Colloca" onClick={() => void apriColloca()} />)}
                   </div>}
               </section>
 
