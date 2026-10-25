@@ -36,6 +36,14 @@ function violazioni(db: AppDatabase, schema: 'main' | 'utente'): Set<string> {
 /** Applica in ordine le migrazioni successive a `PRAGMA <schema>.user_version`. */
 function applica(db: AppDatabase, schema: 'main' | 'utente', list: Migration[]): void {
   const current = db.pragma(`${schema}.user_version`, { simple: true }) as number;
+  // Uno schema più nuovo del codice (rollback di un deploy, file copiato da un'istanza aggiornata) non si apre: il codice vecchio
+  // leggerebbe e scriverebbe tabelle che non corrispondono più al suo modello, con dati corrotti in silenzio. Si ferma l'avvio.
+  const ultimo = list.reduce((massimo, m) => Math.max(massimo, m.id), 0);
+  if (list.length > 0 && current > ultimo) {
+    throw new Error(
+      `Lo schema «${schema}» è alla versione ${current}, più nuova dell'ultima conosciuta da questa versione dell'app (${ultimo}): aggiorna l'app, oppure ripristina la copia di avvio in data/backups.`,
+    );
+  }
   const pending = [...list]
     .sort((a, b) => a.id - b.id)
     .filter((m) => m.id > current);

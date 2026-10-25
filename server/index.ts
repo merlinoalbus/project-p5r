@@ -6,8 +6,8 @@
 //   0. assicuraPacchettoIniziale() — senza gioco.db, lo copia da pacchetto/gioco.db (iniziale, senza immagini: l'interfaccia si apre;
 //      il completo, stesso nome in pacchetto/completo/ fuori da git, si importa da Impostazioni e sostituisce il file); senza iniziale, istanza vuota
 //   1. initDb()        — apertura di gioco.db + partite.db, FATALE su errore
-//   2. runBootBackup() — snapshot rotante pre-migrazioni, warn-only
-//   3. runMigrations() — schema versionato, FATALE su errore
+//   2. runBootBackup() — snapshot rotante pre-migrazioni di entrambi i file, FATALE se serve e non riesce
+//   3. runMigrations() — schema versionato, FATALE su errore o se uno schema è più nuovo del codice
 //   4. regole sui dati — nomi degli spilli, luoghi e planimetrie, spilli dei luoghi (rieseguite a ogni avvio)
 //   5. createApp() + listen(porta)
 //
@@ -50,7 +50,13 @@ try {
   process.exit(1);
 }
 
-await runBootBackup();
+try {
+  await runBootBackup();
+} catch (err) {
+  // senza la copia di sicurezza le migrazioni (senza marcia indietro) non partono: l'avvio si ferma
+  console.error('[project-p5r] FATALE: ', err);
+  process.exit(1);
+}
 
 try {
   runMigrations(initDb());
