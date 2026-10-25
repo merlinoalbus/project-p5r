@@ -23,7 +23,7 @@ import { catalogoOggettiDisponibile, ricompensePerFonte } from './catalogoOggett
 import { dettaglioNegozio } from './negoziService.js';
 import { profiliOmbre } from './ombreService.js';
 import { riconciliaBeneficiRichiesta } from './propostePartitaService.js';
-import { riallineaYenRichiesta, yenPropostiInSospeso } from './yenAutomaticiService.js';
+import { riallineaYenRichiesta, statoYenRichiesta, yenPropostiInSospeso } from './yenAutomaticiService.js';
 import { NOME_ELEMENTO, NOME_ESITO_AFFINITA, eChiaveElemento, eCodiceAffinita } from '../../shared/elementi.js';
 import { GIORNI_AVVISO_SCADENZA_RICHIESTE } from '../../shared/richieste.js';
 
@@ -111,6 +111,13 @@ function statoCalcolato(r: RigaRichiesta, segnato: StatoRichiesta | null, st: St
   return { ...base, stato: 'disponibile', accettabile: true, motivi: grigi };
 }
 
+/** Decisione 18: che cosa fanno gli yen della ricompensa nella partita (proposta «Applica» di prima, entrati da soli, già nel saldo da prima). */
+function yenDellaRicompensa(partitaId: number, chiave: string, completata: boolean): Pick<StatoCalcolatoRichiestaDto, 'yenDaProposta' | 'yenRicompensa'> {
+  if (yenPropostiInSospeso(partitaId, 'richiesta', chiave)) return { yenDaProposta: true };
+  const y = statoYenRichiesta(partitaId, chiave, completata);
+  return y ? { yenRicompensa: y } : {};
+}
+
 /** Una Richiesta come DTO: bersaglio (risolto dall'Ombra del compendio, se c'è) e ricompense dai JSON, Confidente collegato (con il nome,
  *  o la chiave se manca), dedalo e stato nella partita (null se non è segnata); con lo stato della partita, anche lo stato calcolato. */
 function dto(r: RigaRichiesta, stati: Map<string, StatoRichiesta>, premi = ricompensePerFonte('richiesta', [r.chiave]), st: StatoDisponibilita | null = null,
@@ -125,8 +132,9 @@ function dto(r: RigaRichiesta, stati: Map<string, StatoRichiesta>, premi = ricom
     yen: r.yen, esperienza: r.esperienza,
     ...(st ? { statoPartita: {
       ...statoCalcolato(r, stati.get(r.chiave) ?? null, st, nomi),
-      // decisione 18: gli yen di una Richiesta con una proposta «Applica» di prima passano ancora da lei (la pagina non dice che entrano da soli)
-      ...(st.partitaId !== undefined && r.yen != null && r.yen > 0 && yenPropostiInSospeso(st.partitaId, 'richiesta', r.chiave) ? { yenDaProposta: true } : {}),
+      // decisione 18: gli yen di una Richiesta con una proposta «Applica» di prima passano ancora da lei (la pagina non dice che entrano da soli);
+      // altrimenti che cosa fanno davvero nella partita (entrati da soli, o già nel saldo da prima), perché la frase della pagina sia sempre vera
+      ...(st.partitaId !== undefined && r.yen != null && r.yen > 0 ? yenDellaRicompensa(st.partitaId, r.chiave, stati.get(r.chiave) === 'completata') : {}),
     } } : {}),
     chiave: r.chiave, nome: r.nome, committente: r.committente, disponibileDal: r.disponibile_dal, scadenza: r.scadenza, area: r.area, areaChiave: r.area_chiave, piano: r.piano,
     bersaglio, ricompense: JSON.parse(r.ricompense_json) as string[],

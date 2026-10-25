@@ -184,6 +184,8 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
               <span className="flex items-center gap-1.5 testo-12 uppercase tracking-[0.08em] text-text-muted"><IconaSegno chiave="medaglie" dimensione={14} />Denaro del gruppo</span>
               <span className="font-display testo-28 leading-none tabular-nums">{formattaYen(dati.yen)}</span>
             </span>
+            {/* L13 (decisione 18): che cosa muove il saldo da solo e che cosa si segna qui, perché una spesa già scalata dalla spunta non si conti due volte */}
+            <p className="m-0 testo-12 text-text-muted">Le voci spuntate, i turni, le Richieste completate e i regali comprati muovono il saldo da soli. Qui segni il resto: combattimenti, vendite nei Palazzi e nei Memento, acquisti, film, pesca e Aojiru segnati fuori dal Diario, o il saldo da copiare dal gioco.</p>
             {/* Il numero si scrive una volta e poi si dice che cosa è: entrato, uscito, oppure il
                 saldo intero da copiare dal gioco («Imposta»), quando i conti non tornano più. */}
             <div className="flex flex-wrap items-end gap-x-3 gap-y-2">

@@ -148,6 +148,7 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   da_applicare: ['proposta personale', 'proposte personali'], movimento_yen: ['movimento di denaro', 'movimenti di denaro'],
   // L13 (decisione 18, utente 048)
   yen_automatico: ['movimento automatico di denaro', 'movimenti automatici di denaro'],
+  yen_fuori_registro: ['causa con gli yen già nel saldo da prima', 'cause con gli yen già nel saldo da prima'], yen_automatico_inizio: ['inizio degli yen automatici', 'inizi degli yen automatici'],
   proposta_operazione: ['decisione personale', 'decisioni personali'], beneficio_ciclo: ['stato del beneficio', 'stati dei benefici'],
   // R11-06: nomi leggibili per le righe saltate di tabelle tolte o recenti (le etichette delle tabelle tolte non si ripuliscono mai)
   lettura_partita: ['lettura completata nelle partite', 'letture completate nelle partite'], requisito_partita: ['requisito confermato nelle partite', 'requisiti confermati nelle partite'],
@@ -471,8 +472,9 @@ export function ripristinaCestinoPrivato(uid: string, partitaId?: number): Esito
 
 // L13 (decisione 18): anche i movimenti automatici degli yen (`yen_automatico`) sono storia durevole del saldo: un ripristino che non sia di una
 // partita intera non li riapre né li richiude, e non rimette il saldo (`partita.yen`, qui sotto); la Richiesta rimessa li riallinea da sé e la
-// voce rimessa rifà i movimenti che la sua eliminazione aveva chiuso (`rimettiYenDellaVoceRipristinata`), con nuove righe
-const DURATURE_ACQUISTI = new Set(['da_applicare', 'movimento_yen', 'yen_automatico', 'acquisto_operazione', 'proposta_operazione', 'effetto_applicato', 'beneficio_ciclo','pesca_operazione','pesca_quota_storica','movimento_punti_pesca','punti_pesca_partita']);
+// voce rimessa rifà i movimenti che la sua eliminazione aveva chiuso (`rimettiYenDellaVoceRipristinata`), con nuove righe. Anche le cause
+// segnate «già nel saldo da prima» (`yen_fuori_registro`, utente 049) restano: il ripristino non le toglie (rimetterle non è un gesto nuovo)
+const DURATURE_ACQUISTI = new Set(['da_applicare', 'movimento_yen', 'yen_automatico', 'yen_fuori_registro','acquisto_operazione', 'proposta_operazione', 'effetto_applicato', 'beneficio_ciclo','pesca_operazione','pesca_quota_storica','movimento_punti_pesca','punti_pesca_partita']);
 interface IdentitaRipristino { id: number | null; uid: string; tipo: TipoCestino; chiave: string; nome: string; registro_json: string; con_partite: number; vicini_json: string | null; partitaId?: number }
 function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: string }): EsitoRipristinoCestinoDto {
   const db = getDb();

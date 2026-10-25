@@ -5,7 +5,7 @@ import { verificaPartita } from './verificaPartita.js';
 import { eDote } from '../../shared/doti.js';
 import { chiaveSblocco, eEffettoDiStato, fondiArticoliUguali, motivoYenGiaStrutturati, normalizzaEffettoVoce, normalizzaEffettiVoce } from '../../shared/effettiVoce.js';
 import { yenDelDato } from './yenDeiDati.js';
-import { MOTIVO_VOCE_ELIMINATA, conMotivoDiRestituzione, conYenInOrdine, muoviYenAutomatico, restituisciYenAutomatico, restituisciYenAutomaticiDellaVoce, yenPropostiInSospeso } from './yenAutomaticiService.js';
+import { MOTIVO_VOCE_ELIMINATA, conMotivoDiRestituzione, conYenInOrdine, muoviYenAutomatico, restituisciYenAutomatico, restituisciYenAutomaticiDellaVoce, segnaYenDellaSpuntaFuoriRegistro, yenPropostiInSospeso } from './yenAutomaticiService.js';
 import type { AnteprimaDecisioneEffettoVoceDto, EffettoLegacyVoce, EffettoVoce, EffettoVoceDto, PropostaEffettoVoceDto, ReceiptEffettoVoceDto, RichiestaAnteprimaDecisioneEffettoVoce, RichiestaDecisioneEffettoVoce, RichiestaSalvaEffettiVoce, StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import type { NuovaRegistrazioneAcquisto, RichiestaRegistraAcquisto } from '../../shared/acquisti.js';
 import type { EffettiAzioneDto } from '../../shared/types.js';
@@ -512,6 +512,9 @@ function annullaEffettiVoceInOrdine(p:number,uid:string,legacy:EffettiAzioneDto|
   // Valida tutto prima della prima mutazione. L'annullo legge i receipt, mai la configurazione attuale.
   // L13 (decisione 18): per primi tornano gli yen che gli effetti della voce avevano mosso da soli (le spese restituite com'erano state scalate,
   // poi i guadagni tolti al più fino a zero); quelli dei turni li restituisce il turno tolto qui sotto, quelli di una Richiesta la Richiesta riaperta
+  // Una spunta nata prima degli yen automatici non ha movimenti da restituire (il saldo di allora la contava già): i suoi effetti senza movimento e
+  // la spunta stessa restano fuori registro, così rispuntando la voce il saldo non cambia (prima della restituzione: una riga in coda non conta più)
+  if(spunta)segnaYenDellaSpuntaFuoriRegistro(p,uid,spunta.fatta_at,[...righeEffetti(uid).map((e)=>e.uid),...tutte.map((r)=>r.effettoUid)]);
   restituisciYenAutomaticiDellaVoce(p,uid,'spunta-tolta');
   if(legacyDaAnnullare)porte.annullaLegacy(p,legacyDaAnnullare);
   for(const r of extra)if(r)porte.annullaLegacy(p,r);

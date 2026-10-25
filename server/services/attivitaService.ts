@@ -36,7 +36,7 @@ import { fonteConfidenteAttivita } from './fonteConfidenteAttivitaService.js';
 import { fraseDelleCondizioni } from './condizioni/fraseCondizioni.js';
 import { leggiRegolaPesca } from './regolePescaService.js';
 import { esitiDellAttivita, esitiDto, risolviEsitoTurno } from './esitiAttivitaService.js';
-import { muoviYenAutomatico, restituisciYenAutomatico } from './yenAutomaticiService.js';
+import { muoviYenAutomatico, nataPrimaDegliYenAutomatici, restituisciYenAutomatico, segnaYenFuoriRegistro } from './yenAutomaticiService.js';
 import { leggiEsitiAttivita } from '../../shared/esitiAttivita.js';
 
 interface RigaAttivita { confidente_chiave: string | null; pesca_regola_chiave?: string | null; pesca_ruolo?: 'visita'|'obiettivi'|null }
@@ -642,10 +642,18 @@ export function togliTurno(partitaId: number, chiave: string, ordine?: number, i
       if(collegata&&collegata.origine_turno==='creato'&&!interno?.pescaAutorizzata)throw httpErrors.conflict('pesca-turno-posseduto','Il turno è posseduto dal registro della pesca: rimuovi la fonte o la sessione con la relativa anteprima.');
       if(collegata)prepared('UPDATE utente.pesca_sessione SET turno_revocato_il=? WHERE partita_id=? AND id=?').run(adesso,partitaId,collegata.id);
       // il turno esce dal registro; le Doti restano come sono (si segnano a mano). L13 (decisione 18): gli yen che il turno aveva mosso da
-      // soli tornano (la spesa restituita com'era stata scalata, la paga tolta al più fino a zero)
-      restituisciYenAutomatico(partitaId, { tipo: 'turno', chiave: `${chiave}:${bersaglio}` }, 'turno-tolto');
+      // soli tornano (la spesa restituita com'era stata scalata, la paga tolta al più fino a zero). Un turno registrato prima degli yen automatici
+      // non ha movimento (il saldo di allora lo contava già): resta fuori registro, così rifacendo lo stesso turno il saldo non cambia
+      const causa = { tipo: 'turno' as const, chiave: `${chiave}:${bersaglio}` };
+      const nato = (prepared('SELECT created_at FROM turno_partita WHERE partita_id = ? AND attivita_chiave = ? AND ordine = ?').get(partitaId, chiave, bersaglio) as { created_at: string } | undefined)?.created_at;
+      if (nataPrimaDegliYenAutomatici(nato)) segnaYenFuoriRegistro(partitaId, causa, 'turno-di-prima-tolto');
+      restituisciYenAutomatico(partitaId, causa, 'turno-tolto');
       prepared("DELETE FROM effetto_lettura_partita WHERE partita_id = ? AND tipo = 'attivita' AND chiave = ? AND ordine = ?").run(partitaId, chiave, bersaglio);
       prepared('DELETE FROM turno_partita WHERE partita_id = ? AND attivita_chiave = ? AND ordine = ?').run(partitaId, chiave, bersaglio);
+    } else if (prima > 0) {
+      // uno dei turni contati prima del registro dei turni (nessuna riga, ben prima degli yen automatici): il saldo lo contava già. Il prossimo
+      // turno registrato prende il suo posto (`ordine` = volte): resta fuori registro, così togliere e rifare quel turno non sposta yen
+      segnaYenFuoriRegistro(partitaId, { tipo: 'turno', chiave: `${chiave}:${prima}` }, 'turno-di-prima-tolto');
     }
     if (prima > 0) scriviVolte(partitaId, chiave, prima - 1, adesso);
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);

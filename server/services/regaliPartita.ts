@@ -2,6 +2,25 @@
 import { nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { nomiAltriOggetto } from './catalogoOggettiLetture.js';
+import { causaYenRegalo, nataPrimaDegliYenAutomatici, restituisciYenAutomatico, segnaYenFuoriRegistro } from './yenAutomaticiService.js';
+
+/**
+ * L13 (decisione 18): la consegna tolta, per qualunque strada (l'azione «Togli regalo», o il vecchio comando per nome quando il collegamento al
+ * catalogo non c'è più), porta con sé il prezzo che il regalo aveva scalato da solo: torna ciò che era stato scalato. La causa è il nome storico
+ * della consegna, che non cambia con la fusione o l'eliminazione dell'oggetto. Una consegna di prima degli yen automatici non ha movimento:
+ * resta fuori registro, così ridando lo stesso regalo il saldo non cambia.
+ */
+function togliYenDelRegalo(partita: number, confidente: string, regalo: string, fattoAt: string | null, conAcquisto: boolean): void {
+  const causa = causaYenRegalo(confidente, regalo);
+  // solo una consegna di prima che aveva segnato anche l'acquisto aveva il suo prezzo nel saldo di allora (senza acquisto non c'era niente da pagare)
+  if (conAcquisto && nataPrimaDegliYenAutomatici(fattoAt)) segnaYenFuoriRegistro(partita, causa, 'regalo-di-prima-tolto');
+  restituisciYenAutomatico(partita, causa, 'regalo-tolto');
+}
+/** Vero se la consegna aveva segnato anche l'acquisto dell'articolo (colonna della 035; su un file più vecchio nessuna consegna lo ricorda). */
+function consegnaConAcquisto(partita: number, confidente: string, regalo: string): boolean {
+  if (!(prepared('PRAGMA utente.table_info(regalo_partita)').all() as Array<{ name: string }>).some((c) => c.name === 'acquisto_articolo')) return false;
+  return !!(prepared('SELECT acquisto_articolo FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ? AND regalo = ?').get(partita, confidente, regalo) as { acquisto_articolo: string | null } | undefined)?.acquisto_articolo;
+}
 
 export type SceltaRegalo = string | { catalogo: string };
 export interface RegaloDellaPartita { confidente: string; nome: string; catalogo: string | null }
@@ -50,13 +69,17 @@ export function scriviRegaloPartita(partita: number, confidente: string, scelta:
   if (!conChiavi) {
     if (nomeLegacy === null) throw httpErrors.conflict('catalogo-non-disponibile', 'Il catalogo dei regali non è ancora disponibile.');
     if (fatto) prepared('INSERT OR IGNORE INTO regalo_partita (partita_id,confidente_chiave,regalo,fatto_at) VALUES (?,?,?,?)').run(partita, confidente, nomeLegacy, nowIso());
-    else prepared('DELETE FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ? AND regalo = ?').run(partita, confidente, nomeLegacy);
+    else {
+      const fattoAt = (prepared('SELECT fatto_at FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ? AND regalo = ?').get(partita, confidente, nomeLegacy) as { fatto_at: string } | undefined)?.fatto_at;
+      const conAcquisto = consegnaConAcquisto(partita, confidente, nomeLegacy);
+      if (prepared('DELETE FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ? AND regalo = ?').run(partita, confidente, nomeLegacy).changes) togliYenDelRegalo(partita, confidente, nomeLegacy, fattoAt ?? null, conAcquisto);
+    }
     return;
   }
 
   const nomi = nomiDeiRegali(confidente);
-  const righe = prepared('SELECT regalo,catalogo_chiave FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ?')
-    .all(partita, confidente) as Array<{ regalo: string; catalogo_chiave: string | null }>;
+  const righe = prepared('SELECT regalo,catalogo_chiave,fatto_at FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ?')
+    .all(partita, confidente) as Array<{ regalo: string; catalogo_chiave: string | null; fatto_at: string }>;
   // Il riferimento già salvato prevale su un'associazione della guida cambiata nel frattempo.
   const storica = nomeLegacy === null ? undefined : righe.find((r) => r.regalo === nomeLegacy);
   const catalogo = typeof scelta === 'string' ? storica ? storica.catalogo_chiave : chiaveUnivoca(nomi, confidente, nomeLegacy!) : scelta.catalogo;
@@ -69,7 +92,11 @@ export function scriviRegaloPartita(partita: number, confidente: string, scelta:
   if (!fatto) {
     // Se la guida è cambiata, il vecchio comando per nome può ancora togliere la propria riga storica.
     const daTogliere = nomeLegacy !== null ? righe.filter((r) => equivalenti.includes(r) || r.regalo === nomeLegacy) : equivalenti;
-    for (const r of daTogliere) prepared('DELETE FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ? AND regalo = ?').run(partita, confidente, r.regalo);
+    for (const r of daTogliere) {
+      const conAcquisto = consegnaConAcquisto(partita, confidente, r.regalo);
+      prepared('DELETE FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ? AND regalo = ?').run(partita, confidente, r.regalo);
+      togliYenDelRegalo(partita, confidente, r.regalo, r.fatto_at, conAcquisto);
+    }
     return;
   }
   if (equivalenti.length) {

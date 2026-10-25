@@ -47,7 +47,7 @@ const yen = (n: number): string => `¥${Math.abs(n).toLocaleString('it-IT')}`;
 const negozioDellArticolo = (chiave: string): string => (chiave.includes('/') ? chiave.slice(0, chiave.indexOf('/')) : chiave);
 
 /** Decisione 18: che cosa succede agli yen spuntando la voce, detto una volta per gruppo. */
-const SCALA = 'Spuntando la voce, il prezzo di ciò che la spunta segna come comprato si scala da solo dal saldo, mai sotto zero (la spunta resta possibile anche senza yen); togliendo la spunta torna. Un articolo non ancora in vendita non viene segnato e non si scala; uno già segnato come comprato fuori dal Diario non si paga una seconda volta.';
+const SCALA = 'Spuntando la voce il prezzo si scala da solo dal saldo, mai sotto zero; togliendo la spunta torna. Un articolo già segnato come comprato fuori dal Diario non si paga due volte.';
 /** Le etichette e le note fisse dei gruppi che non dipendono da un elemento. */
 const GRUPPI: Record<string, { titolo: string; nota?: string }> = {
   aojiru: { titolo: 'Aojiru', nota: 'La variante si osserva alla spunta. Il prezzo di una consumazione nuova si scala da solo dal saldo, mai sotto zero.' },

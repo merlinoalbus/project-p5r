@@ -41,7 +41,7 @@ import { disponibilitaAcquistoCorrente } from './negoziService.js';
 import type { NuovaRegistrazioneAcquisto } from '../../shared/acquisti.js';
 import type { PropostaPartitaDto } from '../../shared/propostePartita.js';
 import { scelteEsitoDellaVoce } from './esitiAttivitaService.js';
-import { yenAutomaticiDellaVoce } from './yenAutomaticiService.js';
+import { spuntaYenFuoriRegistro, yenAutomaticiDellaVoce } from './yenAutomaticiService.js';
 
 export interface RigaVoce {
   uid: string; data: string; fascia: string; ordine: number; genere: string; azione: string; note: string | null; tipo: string;
@@ -227,13 +227,15 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   const daApplicare = ctx.partita === undefined ? 0 : decisioniApertePerVoce(ctx.partita, r.uid);
   // L13 (decisione 18): gli yen che la spunta di questa voce ha mosso da soli nella partita (spese scalate, guadagni entrati), da mostrare sulla voce
   const yenAutomatici = ctx.partita === undefined || !ctx.fatte.has(r.uid) ? [] : yenAutomaticiDellaVoce(ctx.partita, r.uid);
+  // la voce di prima degli yen automatici, tolta e rimessa: il suo denaro era già nel saldo e la spunta non lo muove (la voce lo dice)
+  const yenFuoriRegistro = ctx.partita !== undefined && ctx.fatte.has(r.uid) && !yenAutomatici.length && spuntaYenFuoriRegistro(ctx.partita, r.uid);
   // L13: le scelte che la spunta chiederà (esito del turno, note di una Dote a valori possibili), al giorno della voce; gli effetti rivendicati
   // da un acquisto o da una pesca non si applicano come legacy e quindi non chiedono niente (stessa regola di `applicaEffettiVoce`)
   const sostituiti = new Set(fonte.effetti.flatMap(({ effetto: e }) => e.tipo === 'acquisto' ? e.sostituisceDoti : e.tipo === 'pesca' ? [...e.sostituisceDoti, ...e.sostituisceTurni] : []));
   const scelteEsito = ctx.partita !== undefined && spuntabile && !ctx.fatte.has(r.uid) && fonte.stato === 'convertita'
     ? scelteEsitoDellaVoce(ctx.partita, { data: r.data, fascia: fasciaDi(r) }, fonte.effetti.filter((e) => !sostituiti.has(e.uid))) : [];
   return {
-    ...v, effettiVoce: fonte, ricevuteEffetti, ...(daApplicare > 0 ? { daApplicare } : {}), ...(scelteEsito.length ? { scelteEsito } : {}), ...(yenAutomatici.length ? { yenAutomatici } : {}),
+    ...v, effettiVoce: fonte, ricevuteEffetti, ...(daApplicare > 0 ? { daApplicare } : {}), ...(scelteEsito.length ? { scelteEsito } : {}), ...(yenAutomatici.length ? { yenAutomatici } : {}), ...(yenFuoriRegistro ? { yenFuoriRegistro: true as const } : {}),
     ...(aperture.length ? { apertureDedali: aperture } : {}), ...avvisiDisponibilitaDellaVoce(r), ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], ...campiCosaDa(spuntabile ? cosaDaLaFonte(fonte, ctx.nomi) : null),
     fatta: spuntabile && ctx.fatte.has(r.uid), effetti: ctx.fatte.get(r.uid) ?? null,
     stato: ctx.conf && spuntabile ? statoAzione(v, ctx.conf, ctx.partita) : null, mappa: mappaAzione(v),
@@ -742,12 +744,16 @@ export function trasferisciVoci(t: TrasferisciVociGiornata, partitaId?: number):
   return { giorno: t.giorno, fascia: t.fascia, uid: arrivate, voci: vociDelGiorno(t.giorno, partitaId) };
 }
 
-/** Storia attiva che impedisce di togliere la spuntabilità senza il proprio gesto di annullo. */
+/** Storia attiva che impedisce di togliere la spuntabilità senza il proprio gesto di annullo. L13 (decisione 18): anche gli yen che gli effetti
+ *  della voce hanno mosso da soli e che non sono tornati (cancellando la spunta non tornerebbero più): si tolgono togliendo la spunta. I
+ *  movimenti dei turni e delle Richieste seguono il loro dato, che resta anche quando la voce diventa un evento. */
 function partiteConEffetti(uid: string): string[] {
   return (prepared(`SELECT p.nome FROM utente.partita p WHERE
     EXISTS(SELECT 1 FROM utente.spunta_voce_partita s WHERE s.partita_id=p.id AND s.voce_uid=? AND s.effetti_json IS NOT NULL)
     OR EXISTS(SELECT 1 FROM utente.effetto_applicato e WHERE e.partita_id=p.id AND e.voce_uid=? AND e.annullato_il IS NULL)
-    OR EXISTS(SELECT 1 FROM utente.acquisto_provenienza a WHERE a.partita_id=p.id AND a.voce_uid=?) ORDER BY p.nome`).all(uid, uid, uid) as Array<{ nome: string }>).map((r) => r.nome);
+    OR EXISTS(SELECT 1 FROM utente.acquisto_provenienza a WHERE a.partita_id=p.id AND a.voce_uid=?)
+    OR EXISTS(SELECT 1 FROM utente.yen_automatico y WHERE y.partita_id=p.id AND y.causa_tipo='voce' AND y.causa_chiave LIKE ? AND y.annullato_il IS NULL) ORDER BY p.nome`)
+    .all(uid, uid, uid, `${uid}:%`) as Array<{ nome: string }>).map((r) => r.nome);
 }
 
 /** Elimina nel cestino comune, conservando tutte le fotografie; il motore annulla una sola volta ciascuna fonte. */

@@ -14,7 +14,8 @@
 // ripartono da zero e non c'è niente da togliere), l'acquisto che aveva segnato, la consegna e l'evento. Le consegne già date prima
 // (punti_dati nullo) si tolgono come sempre, senza toccare punti né acquisti. L13 (decisione 18): l'acquisto segnato insieme al regalo scala da
 // solo il prezzo dell'articolo dal saldo (mai sotto zero, il regalo si registra anche con il saldo a zero), e togliendo il regalo torna ciò che
-// era stato scalato (`utente.yen_automatico`, causa «regalo»).
+// era stato scalato (`utente.yen_automatico`, causa «regalo» con il nome storico della consegna: lo stesso dopo una fusione dell'oggetto),
+// anche quando la consegna si toglie con il vecchio comando per nome (`regaliPartita.scriviRegaloPartita`).
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
@@ -25,7 +26,7 @@ import { aggiornaConfidente, confidente as confidenteDellaPartita } from './part
 import { nuovaGenerazione } from './puntiCronologici.js';
 import { regaliDellaPartita, scriviRegaloPartita } from './regaliPartita.js';
 import { impostaAcquisto } from './negoziService.js';
-import { muoviYenAutomatico, restituisciYenAutomatico } from './yenAutomaticiService.js';
+import { causaYenRegalo, muoviYenAutomatico, restituisciYenAutomatico } from './yenAutomaticiService.js';
 import type { EsitoRegaloDto, RichiestaRegalo } from '../../shared/types.js';
 
 interface RigaRegalo {
@@ -84,7 +85,12 @@ export function regala(partitaId: number, richiesta: RichiestaRegalo): EsitoRega
     if (articolo) {
       impostaAcquisto(partitaId, articolo, true, richiesta.acquisto?.sede);
       const prezzo = (prepared('SELECT prezzo FROM articolo WHERE chiave = ?').get(articolo) as { prezzo: number | null } | undefined)?.prezzo ?? null;
-      if (prezzo != null && prezzo > 0) muoviYenAutomatico(partitaId, { tipo: 'regalo', chiave: `${confidente}:${catalogo}` }, -prezzo, `Regalo comprato: ${oggetto.nome}`);
+      // la causa è il nome storico della consegna appena scritta (resta uguale se l'oggetto si fonde o si elimina); un movimento rimasto aperto
+      // per la stessa consegna (tolta per un'altra strada) si chiude prima, così ogni consegna ha il suo e il regalo non si blocca mai
+      const nome = (prepared('SELECT regalo FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ? AND catalogo_chiave = ?').get(partitaId, confidente, catalogo) as { regalo: string }).regalo;
+      const causa = causaYenRegalo(confidente, nome);
+      restituisciYenAutomatico(partitaId, causa, 'regalo-non-piu-presente');
+      if (prezzo != null && prezzo > 0) muoviYenAutomatico(partitaId, causa, -prezzo, `Regalo comprato: ${oggetto.nome}`);
     }
     const quando = momento.data_gioco ? ` Giorno di gioco ${momento.data_gioco}${momento.fascia_gioco ? `, ${momento.fascia_gioco}` : ''}.` : '';
     registraEvento(partitaId, 'regalo', `Regalo a ${conf.nome}: ${oggetto.nome}`,
@@ -109,12 +115,12 @@ export function annullaRegalo(partitaId: number, confidente: string, catalogo: s
       nuovaGenerazione(partitaId, confidente);
       punti = -riga.punti_dati;
     }
+    // L13 (decisione 18): togliendo la consegna torna anche il prezzo che il regalo aveva scalato da solo (solo quello davvero scalato):
+    // lo fa `scriviRegaloPartita`, per ogni consegna tolta, qualunque sia la strada
     scriviRegaloPartita(partitaId, confidente, { catalogo }, false);
     if (riga.acquisto_articolo && prepared('SELECT 1 FROM acquisto_partita WHERE partita_id = ? AND articolo_chiave = ?').get(partitaId, riga.acquisto_articolo)) {
       impostaAcquisto(partitaId, riga.acquisto_articolo, false);
     }
-    // L13 (decisione 18): il prezzo che il regalo aveva scalato da solo torna (solo quello davvero scalato)
-    restituisciYenAutomatico(partitaId, { tipo: 'regalo', chiave: `${confidente}:${catalogo}` }, 'regalo-tolto');
     prepared("DELETE FROM evento_partita WHERE partita_id = ? AND tipo = 'regalo' AND json_extract(dati_json, '$.confidente') = ? AND json_extract(dati_json, '$.catalogo') = ?")
       .run(partitaId, confidente, catalogo);
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);

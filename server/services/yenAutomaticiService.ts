@@ -24,6 +24,11 @@
 // Le proposte «Applica» degli yen nate prima (`utente.da_applicare` di tipo `yen`, con il loro `movimento_yen`) non si toccano: una causa che
 // ha ancora una proposta aperta o yen già applicati con una proposta resta in quel registro («in sospeso», `yenPropostiInSospeso`) finché non
 // torna a zero, così niente si conta due volte e niente si applica in silenzio.
+//
+// Le cause nate prima che gli yen si muovessero da soli (utente 049, `yen_automatico_inizio`) erano già nel saldo e non hanno un movimento:
+// togliendole non torna niente, e rimettendole (la spunta rimessa, il turno rifatto, la Richiesta ricompletata, il regalo ridato) il saldo non
+// deve cambiare, perché nel gioco non è successo niente di nuovo. Chi toglie una di quelle cause la segna «fuori registro»
+// (`segnaYenFuoriRegistro`, prima di restituire) e `muoviYenAutomatico` non la muove più.
 // ============================================================
 
 import { randomBytes } from 'node:crypto';
@@ -52,6 +57,48 @@ const stessaCausa = (c: CausaYen, tipo: string, chiave: string): boolean => c.ti
 
 /** Il motivo con cui si chiudono i movimenti quando la voce va nel cestino: il ripristino della voce li rimette (`rimettiYenDellaVoceRipristinata`). */
 export const MOTIVO_VOCE_ELIMINATA = 'voce-eliminata';
+
+/** La causa del regalo: il Confidente e il nome storico della consegna (la chiave di `regalo_partita`), che resta uguale anche quando l'oggetto
+ *  del catalogo si fonde in un altro o si elimina (cambia solo `catalogo_chiave`): così la restituzione ritrova sempre il suo movimento. */
+export const causaYenRegalo = (confidente: string, regalo: string): CausaYen => ({ tipo: 'regalo', chiave: `${confidente}:${regalo}` });
+
+/** Il momento da cui gli yen si muovono da soli in questo file delle partite (utente 049); null se manca (nessuna causa è «di prima»). */
+function inizioRegistro(): string | null {
+  return (prepared('SELECT dal FROM utente.yen_automatico_inizio WHERE id = 1').get() as { dal: string } | undefined)?.dal ?? null;
+}
+/** Vero se una causa nata a `dal` (spunta, turno, consegna del regalo) è di prima che gli yen si muovessero da soli: il saldo di allora la contava già. */
+export function nataPrimaDegliYenAutomatici(dal: string | null | undefined): boolean {
+  const inizio = inizioRegistro();
+  return !!dal && !!inizio && dal < inizio;
+}
+/** Vero se la causa è «fuori registro»: tolta quando il suo denaro era già nel saldo senza un movimento, rimettendola non si muove niente. */
+export const yenFuoriRegistro = (p: number, c: CausaYen): boolean =>
+  !!prepared('SELECT 1 FROM utente.yen_fuori_registro WHERE partita_id = ? AND causa_tipo = ? AND causa_chiave = ?').get(p, c.tipo, c.chiave);
+
+/**
+ * La causa che si sta togliendo non ha un movimento in vigore (né in coda) perché il suo denaro era già nel saldo (nata prima degli yen
+ * automatici, o già fuori registro): si segna, così rimettendola il saldo non cambia. Da chiamare PRIMA della restituzione (una riga già in coda
+ * per la restituzione non conta più come in vigore). Chi chiama decide se la causa è davvero di prima (`nataPrimaDegliYenAutomatici`).
+ */
+export function segnaYenFuoriRegistro(p: number, causa: CausaYen, motivo: string): void {
+  richiedeTransazione('Il segno degli yen già nel saldo');
+  if (inVigore(p, causa) || inCoda(p, causa) >= 0) return;
+  prepared('INSERT OR IGNORE INTO utente.yen_fuori_registro (partita_id, causa_tipo, causa_chiave, motivo, creato_il) VALUES (?, ?, ?, ?, ?)')
+    .run(p, causa.tipo, causa.chiave, motivo, nowIso());
+}
+
+/**
+ * Togliendo la spunta di una voce spuntata prima degli yen automatici: ogni effetto della voce senza un movimento in vigore resta fuori registro,
+ * e anche la spunta stessa (causa «voce» con la sola chiave della voce), così i turni e le Richieste che la voce rispuntata segna non muovono
+ * yen. Un effetto confermato dopo (un raccordo, con il suo movimento) si restituisce e, rispuntando, si muove di nuovo come sempre.
+ */
+export function segnaYenDellaSpuntaFuoriRegistro(p: number, voceUid: string, fattaIl: string, effetti: readonly string[]): void {
+  if (!nataPrimaDegliYenAutomatici(fattaIl)) return;
+  for (const e of new Set(effetti)) segnaYenFuoriRegistro(p, { tipo: 'voce', chiave: `${voceUid}:${e}` }, 'spunta-di-prima-tolta');
+  segnaYenFuoriRegistro(p, { tipo: 'voce', chiave: voceUid }, 'spunta-di-prima-tolta');
+}
+/** Vero se la spunta della voce è fuori registro (tolta e rimessa dopo essere nata prima degli yen automatici). */
+export const spuntaYenFuoriRegistro = (p: number, voceUid: string): boolean => yenFuoriRegistro(p, { tipo: 'voce', chiave: voceUid });
 
 /**
  * L'ordine dei movimenti dentro un gesto che ne fa più d'uno (la spunta di una voce, il suo annullo): `conYenInOrdine` li mette in coda e li
@@ -131,6 +178,9 @@ export function muoviYenAutomatico(p: number, causa: CausaYen, importo: number, 
   // oltre il tetto del saldo un importo non cambia niente in più (il saldo va comunque a zero o al massimo): si registra entro il tetto
   const richiesto = Math.max(-YEN_MASSIMI_SALDO, Math.min(YEN_MASSIMI_SALDO, importo));
   if (richiesto === 0) return null;
+  // il suo denaro è già nel saldo da prima degli yen automatici (la causa, o la spunta della voce che la segna, è fuori registro): rimetterla
+  // non è un gesto nuovo nel gioco, e il saldo non cambia
+  if (yenFuoriRegistro(p, causa) || (causa.tipo !== 'voce' && voceUid !== null && spuntaYenFuoriRegistro(p, voceUid))) return null;
   if (inVigore(p, causa) || inCoda(p, causa) >= 0) throw httpErrors.conflict('yen-automatico-gia-attivo', 'Questi yen risultano già mossi: nessun secondo movimento per la stessa causa.');
   // dentro un gesto in coda (`conYenInOrdine`) il movimento si fa alla fine, nel suo ordine: qui si controlla solo che la partita ci sia
   if (coda) { saldo(p); coda.push({ tipo: 'muovi', p, causa, richiesto, motivo, voceUid }); return null; }
@@ -247,8 +297,12 @@ export function riallineaYenRichiesta(p: number, chiave: string, momento: 'stato
   const presente = inVigore(p, causa), accodato = inCoda(p, causa);
   if (!r) {
     // completata e riaperta nello stesso gesto: il movimento in coda non ha toccato il saldo ed esce dalla coda
-    if (accodato >= 0) coda!.splice(accodato, 1);
-    if (presente) chiudi(p, presente, momento === 'eliminazione' ? 'richiesta-eliminata' : 'richiesta-non-completata');
+    if (accodato >= 0) { coda!.splice(accodato, 1); return; }
+    if (presente) { chiudi(p, presente, momento === 'eliminazione' ? 'richiesta-eliminata' : 'richiesta-non-completata'); return; }
+    // riaperta senza un movimento da togliere: la sua ricompensa era già nel saldo (completata prima degli yen automatici, o già fuori registro).
+    // Si segna, così ricompletandola il saldo non cambia; una proposta «Applica» di prima resta al suo registro e non si segna
+    const yen = (prepared('SELECT yen FROM main.richiesta WHERE chiave = ?').get(chiave) as { yen: number | null } | undefined)?.yen ?? null;
+    if (momento === 'stato' && yen != null && yen > 0 && !yenPropostiInSospeso(p, 'richiesta', chiave)) segnaYenFuoriRegistro(p, causa, 'richiesta-di-prima-riaperta');
     return;
   }
   if (presente || accodato >= 0 || !Number.isSafeInteger(r.yen) || (r.yen as number) <= 0 || yenPropostiInSospeso(p, 'richiesta', chiave)) return;
@@ -257,4 +311,15 @@ export function riallineaYenRichiesta(p: number, chiave: string, momento: 'stato
     if (ultima?.annullo_motivo !== 'richiesta-eliminata') return;
   }
   muoviYenAutomatico(p, causa, r.yen as number, `Ricompensa della Richiesta «${r.nome}»`);
+}
+
+/**
+ * Che cosa fanno gli yen della ricompensa nella partita, per la frase della pagina delle Richieste: `entrati` (completata, la ricompensa è entrata
+ * da sola e riaprendola si toglie), `fuori-registro` (il suo denaro era già nel saldo: completata senza movimento, o riaperta dopo, e completarla
+ * o riaprirla non cambia il saldo), null (completandola entrerà da sola). Le proposte «Applica» di prima le dice `yenPropostiInSospeso`.
+ */
+export function statoYenRichiesta(p: number, chiave: string, completata: boolean): 'entrati' | 'fuori-registro' | null {
+  const causa: CausaYen = { tipo: 'richiesta', chiave };
+  if (attiva(p, causa)) return 'entrati';
+  return yenFuoriRegistro(p, causa) || completata ? 'fuori-registro' : null;
 }

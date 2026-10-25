@@ -1355,6 +1355,9 @@ export interface AzionePercorsoDto {
   /** L13 (decisione 18): gli yen che la spunta della voce ha mosso da soli nella partita (spese scalate dal saldo, mai sotto zero; guadagni entrati),
    *  con l'importo chiesto e quello davvero mosso. Assente se la voce non è spuntata o non ha mosso yen. */
   yenAutomatici?: MovimentoYenAutomaticoDto[];
+  /** L13 (decisione 18): vero se la voce, spuntata prima che gli yen si muovessero da soli, è stata tolta e rimessa: il suo denaro era già nel
+   *  saldo, e la spunta non lo muove (né togliendola né rimettendola). Assente altrimenti. */
+  yenFuoriRegistro?: true;
   /** R10-11/C: il dialogo del passaggio di rango della voce (voce di un Confidente con `rangoAtteso`), dalle scelte di L9: solo una proposta, i punti li dà la scelta dell'utente alla spunta. */
   dialogo?: DialogoVoceDto;
   /** 2026-10-24: con una partita, il rango del Confidente della voce nella partita (le note della voce lo citano se differisce dal rango atteso). */
@@ -2352,6 +2355,10 @@ export interface StatoCalcolatoRichiestaDto {
   /** L13 (decisione 18): vero se gli yen della ricompensa passano ancora da una proposta «Applica» nata prima (aperta, o applicata e non tornata
    *  a zero): allora non entrano da soli e vale quella proposta. Assente se entrano da soli. */
   yenDaProposta?: boolean;
+  /** L13 (decisione 18), senza proposta di prima: `entrati` se la ricompensa è entrata da sola nel saldo completandola (riaprendola si toglie);
+   *  `fuori-registro` se il suo denaro era già nel saldo da prima degli yen automatici (completata senza movimento, o riaperta dopo):
+   *  completarla o riaprirla non cambia il saldo. Assente: completandola entrerà da sola. */
+  yenRicompensa?: 'entrati' | 'fuori-registro';
 }
 
 /**
