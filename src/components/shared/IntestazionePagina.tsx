@@ -70,7 +70,9 @@ export function IntestazionePagina({ titolo, sottotitolo, azioni, illustrazione,
             colonna del testo scendeva a ~44 px, una parola per riga (il Compendio in errore, lotto B punto 9); ora le azioni vanno a capo */}
         <div className={`min-w-0 flex flex-col gap-2 ${azioniInRiga ? (azioniAccanto ? 'shrink-0' : 'md:shrink-0') : 'grow basis-[min(100%,14rem)]'}`}>
           <h1 className="titolo-tasselli m-0">{tasselliTitolo(titolo)}</h1>
-          {sottotitolo && <p className="m-0 testo-13 text-text-secondary max-w-[78ch]">{sottotitolo}</p>}
+          {/* da 768 px il sottotitolo si allarga (fino a 120 caratteri per riga): su due righe invece di tre, così l'intestazione resta entro il
+              30% dell'altezza a 1280×689; sul telefono la colonna è già stretta e vale il limite di 78 */}
+          {sottotitolo && <p className="m-0 testo-13 text-text-secondary max-w-[78ch] md:max-w-[120ch]">{sottotitolo}</p>}
           {children}
         </div>
         {azioni && <div className={azioniInRiga ? `flex items-center min-w-0 ${azioniAccanto ? 'max-md:flex-none md:basis-0 md:flex-1' : 'basis-full md:basis-0 md:flex-1'} md:justify-end` : 'flex items-center gap-2 flex-wrap'}>{azioni}</div>}

@@ -51,9 +51,11 @@ export function GlossarioPage() {
       <IntestazionePagina
         titolo="Glossario dei termini"
         indietro={{ to: '/compendio', etichetta: 'Compendio' }}
-        sottotitolo={<>Termini della localizzazione italiana ufficiale di Persona 5 Royal con il corrispondente inglese, ricavati dalla guida allgamestaff.it. Modificabili in Impostazioni → Traduzioni (ambito «termine»).</>}
         azioni={<span className="testo-13 text-text-muted">{dati ? `${filtrati.length} di ${dati.length}` : ''}</span>}
       />
+      {/* la descrizione sta nel corpo, non nell'intestazione: con titolo e «indietro» il sottotitolo portava il fondo dell'intestazione al 37%
+          dell'altezza a 1280×689 (soglia dell'utente: 30%) */}
+      <p className="m-0 testo-13 text-text-secondary max-w-[120ch]">Termini della localizzazione italiana ufficiale di Persona 5 Royal con il corrispondente inglese, ricavati dalla guida allgamestaff.it. Modificabili in Impostazioni → Traduzioni (ambito «termine»).</p>
       <div className="flex flex-wrap gap-2 items-center">
         <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca in italiano o inglese…" />
         <div className="flex gap-1.5 flex-wrap">

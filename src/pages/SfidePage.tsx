@@ -176,7 +176,10 @@ export function SfidePage() {
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
         <div className="flex flex-col gap-3">
-          <IntestazionePagina titolo="Battaglie Sfida, boss segreti e tratti" sottotitolo={<>Le {d.battaglieSfida.elenco.length} Battaglie Sfida con regole, nemici e ricompense; i boss segreti (Jose, Gemelle Custodi, Lavenza) con mosse e strategia; Magnate; i {d.tratti.elenco.length} tratti delle Persona con l'effetto in italiano. Le domande del game show in TV sono in <Link to="/guida/domande">Domande in classe ed esami</Link>.</>} />
+          <IntestazionePagina titolo="Battaglie Sfida, boss segreti e tratti" />
+          {/* la descrizione sta nel corpo, non nell'intestazione: con il titolo su più righe il sottotitolo portava il fondo dell'intestazione al
+              32% dell'altezza a 375×812 (soglia dell'utente: 30%); il collegamento ha l'area di tocco da 44 px (`testo-link-esteso`) */}
+          <p className="m-0 testo-13 text-text-secondary max-w-[120ch] testo-link-esteso">Le {d.battaglieSfida.elenco.length} Battaglie Sfida con regole, nemici e ricompense; i boss segreti (Jose, Gemelle Custodi, Lavenza) con mosse e strategia; Magnate; i {d.tratti.elenco.length} tratti delle Persona con l'effetto in italiano. Le domande del game show in TV sono in <Link to="/guida/domande">Domande in classe ed esami</Link>.</p>
           <FilaScorrevole {...schede.lista} aria-label="Sezioni">
             {SCHEDE.map(([k, l, icona]) => (
               <button key={k} type="button" {...schede.scheda(k)} title={l}

@@ -21,7 +21,8 @@ export function NotaPuntiDote({ cosa, dettaglio }: { cosa: string; dettaglio?: s
   return (
     <p className="m-0 flex items-start gap-2 rounded-md border border-border bg-bg-secondary px-3 py-2 testo-13 text-text-secondary" role="note">
       <span className="mt-0.5 shrink-0"><IconaAzione chiave="note" dimensione={18} /></span>
-      <span>
+      {/* `testo-link-esteso`: il collegamento «scheda Doti» sta in una frase (16 px di altezza): l'area di tocco sale a 44 px senza cambiare la riga */}
+      <span className="testo-link-esteso">
         Qui segni <strong>{cosa}</strong>. Le Doti te le ricorda un avviso: le segni tu nella{' '}
         <Link to="/partita?scheda=doti">scheda Doti</Link>.
         {dettaglio ? ` ${dettaglio}` : ''}
