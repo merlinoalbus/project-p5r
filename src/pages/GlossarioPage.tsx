@@ -5,7 +5,7 @@
 import { useMemo, useState } from 'react';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
-import { getTermini } from '../services/api';
+import { getTermini, URL_TERMINI } from '../services/api';
 import { PageState, EmptyState } from '../components/shared/PageState';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import type { TermineDto } from '../types';
@@ -28,7 +28,7 @@ const NOMI_CATEGORIA: Record<string, string> = {
 /** Glossario italiano ↔ inglese dei termini di gioco, con ricerca e filtro per categoria. */
 export function GlossarioPage() {
   useDocumentTitle('Glossario');
-  const { dati, inPrimoCaricamento, errore, ricarica } = useCarica(() => getTermini(), []);
+  const { dati, inPrimoCaricamento, errore, ricarica } = useCarica(() => getTermini(), [], { cacheUrl: URL_TERMINI });
   const [q, setQ] = useState('');
   const [categoria, setCategoria] = useState('');
 

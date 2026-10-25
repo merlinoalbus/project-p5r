@@ -15,7 +15,8 @@ import type { NextFunction, Request, Response } from 'express';
 import { invalidaIndiceRicerca } from '../services/ricerca/indiceRicerca.js';
 
 /** Le aree dell'API (percorso senza `/api`) che scrivono dati di gioco indicizzati. */
-const AREE_CHE_SCRIVONO = /^\/(compendio|traduzioni|immagini|mappe|impostazioni|catalogo|catalogo-oggetti|aree|luoghi)(\/|$)/;
+// `correzioni`: le domande (e gli esami) si correggono da lì e dal 25 ottobre sono indicizzate (tipo `domanda`)
+const AREE_CHE_SCRIVONO = /^\/(compendio|traduzioni|immagini|mappe|impostazioni|catalogo|catalogo-oggetti|aree|luoghi|correzioni)(\/|$)/;
 
 /** Da montare su `/api` prima dei router di area: dopo ogni scrittura riuscita su un'area che tocca i dati di gioco svuota l'indice. */
 export function indiceRicercaDopoScritture(req: Request, res: Response, next: NextFunction): void {

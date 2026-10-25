@@ -1356,6 +1356,12 @@ più l'indagine sui testi grezzi (C4) e la parte CSS (C5) del PM; verifiche avve
 
 Non fatto per scelta: divisione di `VisoreMappa.tsx` e `DungeonDettaglioPage.tsx` (rischio di regressione senza test).
 
+R12-03 (cache e ricerca, 25 ottobre): cache in memoria delle letture dei soli dati di gioco senza partita (`src/services/api/cacheGioco.ts`,
+`apiGetGioco`, opzione `cacheUrl` di `useCarica`; persone, skill, glossario, regole, oggetti, personaggi, sfide, battaglia): si mostra subito
+l'ultima lettura e nella preparazione si rilegge in silenzio, nel rilascio (contenuti fissi) la prima lettura di una chiave in cache non rifà la
+rete. Ogni scrittura fuori da `/partite` svuota la cache da `_helpers.ts` (e una lettura in volo non scrive più il suo risultato). La ricerca
+globale trova anche le Ombre (`/guida/ombra/<chiave>`) e le domande in classe (`/guida/domande?elemento=<chiave>`); `/api/correzioni` invalida l'indice.
+
 Verifiche distinte: codice APPROVATO (dopo un giro di correzioni), interfaccia APPROVATO (dopo due giri), migrazione dei testi (ora 232) APPROVATO
 (dopo quattro giri e un controllo mirato; 657 voci). Aperti, minori: a metà scorrimento le frecce delle file possono coprire 30–44 px di
 una scheda (limite delle frecce sovrapposte); in Oggetti su telefono il contorno del fuoco circonda solo il nome; la pagina 404 non ha

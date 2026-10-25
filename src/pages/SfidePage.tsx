@@ -6,7 +6,7 @@ import { useMemo, useState } from 'react';
 import { Fonte, VoceTesto } from '../components/shared/VoceFonte';
 import { Selettore } from '../components/shared/Selettore';
 import { Link, useSearchParams } from 'react-router-dom';
-import { getSfide } from '../services/api';
+import { getSfide, URL_SFIDE } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useSchede } from '../hooks/useSchede';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -163,7 +163,7 @@ function SchedaTratti({ d, onModificato }: { d: SfideDto; onModificato: () => vo
 /** Pagina delle sfide: carica una volta i dati, sceglie la scheda dal parametro `scheda` dell'URL (le Battaglie Sfida quando manca o non è valido) e mostra la barra delle quattro schede con quella attiva sotto. */
 export function SfidePage() {
   useDocumentTitle('Battaglie Sfida, boss segreti e tratti');
-  const dati = useCarica(() => getSfide(), []);
+  const dati = useCarica(() => getSfide(), [], { cacheUrl: URL_SFIDE });
   const [params, setParams] = useSearchParams();
   const scheda = (SCHEDE.some(([k]) => k === params.get('scheda')) ? params.get('scheda') : 'battaglie') as Scheda;
   const d = dati.dati;

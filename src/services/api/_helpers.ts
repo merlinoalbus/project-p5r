@@ -4,6 +4,7 @@
 
 import { API_BASE_URL } from '../../utils/constants';
 import { httpFetch, type HttpFetchOptions } from './_httpClient';
+import { epocaCacheGioco, scriviCacheGioco, svuotaCacheGioco } from './cacheGioco';
 
 /** Errore HTTP normalizzato con status, codice, dettagli e request ID backend. */
 export class ApiError extends Error {
@@ -56,19 +57,31 @@ async function requestJson<T>(
   body?: unknown,
   opts?: HttpFetchOptions,
 ): Promise<T> {
-  const res = await httpFetch(
-    `${API_BASE_URL}${path}`,
-    {
-      method,
-      headers: body !== undefined ? { 'Content-Type': 'application/json' } : undefined,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-    },
-    opts,
-  );
-  if (!res.ok) throw await parseError(res, `API ${method} ${path}`);
-  const text = await res.text();
-  if (!text) return undefined as T;
-  return payloadDellaBusta<T>(JSON.parse(text));
+  try {
+    const res = await httpFetch(
+      `${API_BASE_URL}${path}`,
+      {
+        method,
+        headers: body !== undefined ? { 'Content-Type': 'application/json' } : undefined,
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+      },
+      opts,
+    );
+    if (!res.ok) throw await parseError(res, `API ${method} ${path}`);
+    const text = await res.text();
+    if (!text) return undefined as T;
+    return payloadDellaBusta<T>(JSON.parse(text));
+  } finally {
+    // qualunque scrittura sui contenuti (anche una finita in errore o in timeout: può essere arrivata a metà) rende vecchie le
+    // letture in cache dei dati di gioco; l'avanzamento della partita non vi è mai (vedi `cacheGioco.ts`)
+    if (scriveContenuti(method, path)) svuotaCacheGioco();
+  }
+}
+
+/** Vero se la richiesta può cambiare i dati di gioco: ogni metodo di scrittura fuori da `/partite` (l'avanzamento non è in cache). */
+function scriveContenuti(method: string, path: string): boolean {
+  if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') return false;
+  return !/^\/partite(\/|\?|$)/.test(path);
 }
 
 /** Il contenuto della busta `{ data }` che il server mette su ogni risposta riuscita (`responseShape`). Si guarda la presenza
@@ -81,6 +94,17 @@ export function payloadDellaBusta<T>(parsed: unknown): T {
 /** GET → contenuto di `data`. */
 export const apiGet = <T>(path: string, opts?: HttpFetchOptions): Promise<T> =>
   requestJson<T>('GET', path, undefined, opts);
+/**
+ * GET di un dato di GIOCO (non dell'avanzamento): come `apiGet`, ma il risultato riuscito si memorizza per indirizzo in `cacheGioco`,
+ * da dove `useCarica` (opzione `cacheUrl`) lo mostra subito al ritorno su una pagina. La rete si interroga sempre: la cache non
+ * sostituisce la lettura, la anticipa. Da usare solo per indirizzi senza `partita` (altrimenti non si memorizza).
+ */
+export async function apiGetGioco<T>(path: string, opts?: HttpFetchOptions): Promise<T> {
+  const epocaAvvio = epocaCacheGioco();
+  const dati = await requestJson<T>('GET', path, undefined, opts);
+  scriviCacheGioco(path, dati, epocaAvvio);
+  return dati;
+}
 /** POST JSON → contenuto di `data`. */
 export const apiPost = <T>(path: string, body?: unknown, opts?: HttpFetchOptions): Promise<T> =>
   requestJson<T>('POST', path, body, opts);
@@ -103,13 +127,18 @@ export const apiDeleteConCorpo = <T>(path: string, body: unknown, opts?: HttpFet
  * «Unexpected token '<'» invece di un errore leggibile. Nessun nuovo tentativo: un caricamento non si ripete da solo.
  */
 export async function inviaFile<T>(method: 'PUT' | 'POST', path: string, file: File): Promise<T> {
-  const res = await httpFetch(
-    `${API_BASE_URL}${path}`,
-    { method, body: file, headers: { 'Content-Type': file.type || 'application/octet-stream' } },
-    { maxRetries: 0, timeoutMs: 120_000 },
-  );
-  if (!res.ok) throw await parseError(res, 'Caricamento fallito');
-  return payloadDellaBusta<T>(await res.json());
+  try {
+    const res = await httpFetch(
+      `${API_BASE_URL}${path}`,
+      { method, body: file, headers: { 'Content-Type': file.type || 'application/octet-stream' } },
+      { maxRetries: 0, timeoutMs: 120_000 },
+    );
+    if (!res.ok) throw await parseError(res, 'Caricamento fallito');
+    return payloadDellaBusta<T>(await res.json());
+  } finally {
+    // un file caricato cambia i contenuti (immagini, mappe importate): stessa regola delle scritture JSON
+    if (scriveContenuti(method, path)) svuotaCacheGioco();
+  }
 }
 
 /** Costruisce una query string da un oggetto, saltando i valori vuoti. */

@@ -6,7 +6,7 @@ import { memo, useDeferredValue, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
-import { getSkills } from '../services/api';
+import { getSkills, urlSkills } from '../services/api';
 import { useGlossarioStore } from '../stores/glossarioStore';
 import { PageState, EmptyState } from '../components/shared/PageState';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
@@ -44,7 +44,7 @@ const RigaSkill = memo(function RigaSkill({ s }: { s: SkillRiassuntoDto }) {
 export function SkillPage() {
   useDocumentTitle('Skill');
   const glossario = useGlossarioStore((s) => s.glossario);
-  const { dati, inPrimoCaricamento, errore, ricarica } = useCarica(() => getSkills(), []);
+  const { dati, inPrimoCaricamento, errore, ricarica } = useCarica(() => getSkills(), [], { cacheUrl: urlSkills() });
   const [q, setQ] = useState('');
   const [elemento, setElemento] = useState('');
 

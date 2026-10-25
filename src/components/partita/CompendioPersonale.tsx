@@ -4,7 +4,7 @@
 
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { aggiornaCompendio, getCompendioPartita, getPersone } from '../../services/api';
+import { aggiornaCompendio, getCompendioPartita, getPersone, urlPersone } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';
@@ -18,7 +18,7 @@ interface Props {
 
 /** Elenco completo del compendio con spunta "registrata" e percentuale di completamento. */
 export function CompendioPersonale({ partitaId }: Props) {
-  const tutte = useCarica(() => getPersone(), []);
+  const tutte = useCarica(() => getPersone(), [], { cacheUrl: urlPersone() });
   const registrate = useCarica(() => getCompendioPartita(partitaId), [partitaId]);
   const [q, setQ] = useState('');
   const [soloMancanti, setSoloMancanti] = useState(false);

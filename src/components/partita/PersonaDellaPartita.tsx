@@ -4,7 +4,7 @@
 
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getCompendioPartita, getPersone, getPossedute, registraPosseduta } from '../../services/api';
+import { getCompendioPartita, getPersone, getPossedute, registraPosseduta, urlPersone } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';
@@ -41,7 +41,7 @@ const FILTRO_REGISTRAZIONE = [
  * (la stessa registrazione della scheda «Scorta»). Ricerca per nome o arcano, filtri per arcano, scorta e registrazione.
  */
 export function PersonaDellaPartita({ partitaId }: Props) {
-  const tutte = useCarica(() => getPersone(), []);
+  const tutte = useCarica(() => getPersone(), [], { cacheUrl: urlPersone() });
   const possedute = useCarica(() => getPossedute(partitaId), [partitaId]);
   const compendio = useCarica(() => getCompendioPartita(partitaId), [partitaId]);
   const [q, setQ] = useState('');

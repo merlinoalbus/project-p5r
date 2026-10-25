@@ -5,7 +5,7 @@
 import { useMemo, useState } from 'react';
 import { Fonte, VoceTesto } from '../components/shared/VoceFonte';
 import { Link, useSearchParams } from 'react-router-dom';
-import { getOggettiGuida } from '../services/api';
+import { getOggettiGuida, URL_OGGETTI_GUIDA } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useSchede } from '../hooks/useSchede';
@@ -214,7 +214,7 @@ export function OggettiPage() {
 
 /** Le sezioni conservate si caricano solo quando aperte, senza rallentare o bloccare il catalogo. */
 function SezioniDellaGuida({ scheda }: { scheda: Exclude<Scheda, 'catalogo'> }) {
-  const dati = useCarica(() => getOggettiGuida(), []);
+  const dati = useCarica(() => getOggettiGuida(), [], { cacheUrl: URL_OGGETTI_GUIDA });
   const d = dati.dati;
   /** Dopo una correzione o un ripristino dei testi della guida (L11 · B11): la sezione rilegge i suoi dati. */
   const ricarica = () => void dati.ricarica();

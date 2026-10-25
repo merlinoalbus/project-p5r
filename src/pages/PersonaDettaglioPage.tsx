@@ -6,7 +6,7 @@ import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
-import { aggiungiPosseduta, getFusioniCon, getPersona, getPossedute, getRicettePer, isApiError } from '../services/api';
+import { aggiungiPosseduta, getFusioniCon, getPersona, getPossedute, getRicettePer, isApiError, urlPersona } from '../services/api';
 import { ObiettivoModal } from '../components/partita/ObiettiviPartita';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
@@ -113,7 +113,7 @@ function SezioneFusione({ personaId, rara, partitaId, livelloProtagonista }: { p
 export function PersonaDettaglioPage() {
   const { id } = useParams();
   const personaId = Number(id);
-  const { dati: p, inPrimoCaricamento, errore, ricarica } = useCarica(() => getPersona(personaId), [personaId]);
+  const { dati: p, inPrimoCaricamento, errore, ricarica } = useCarica(() => getPersona(personaId), [personaId], { cacheUrl: urlPersona(personaId) });
   useDocumentTitle(p ? p.nomeIt : 'Persona');
   const attiva = usePartitaStore((s) => s.attiva);
   const [livello, setLivello] = useState<number | null>(null);
