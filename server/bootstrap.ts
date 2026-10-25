@@ -26,12 +26,25 @@ import { getDb } from './db/dbService.js';
 import { ROUTER_DI_AREA } from './routes/index.js';
 import { documentoOpenApi, operazioniSenzaProva } from './openapi/documento.js';
 import { CARTELLA_SWAGGER_UI, paginaDocumentazione } from './openapi/pagina.js';
+import { capacitaDi, MODALITA_PREDEFINITA, type Modalita } from '../shared/capacita.js';
 
 // Messaggi di validazione zod in italiano (details.issues[].message).
 z.config(z.locales.it());
 
-/** Costruisce l'applicazione HTTP senza aprire una porta di rete. */
-export function createApp(): Express {
+/** Le opzioni di `createApp`. */
+export interface OpzioniApp {
+  /**
+   * La modalità dell'istanza (L12, passo 1): `preparazione` (predefinita, tutte le funzioni di oggi) o `rilascio` (pubblica, sola
+   * lettura). Per ora la modalità è soltanto ESPOSTA da `/api/config`, con le sue capacità; l'elenco delle rotte ammesse nel rilascio
+   * lo applica il passo 5 (`server/rilascio/rotteGiocatore.ts`). Chi la fissa è il punto d'avvio (`server/index.ts` → preparazione,
+   * `server/rilascio.ts` → rilascio), mai una variabile d'ambiente.
+   */
+  modalita?: Modalita;
+}
+
+/** Costruisce l'applicazione HTTP senza aprire una porta di rete. Senza opzioni è l'istanza di preparazione, identica a prima. */
+export function createApp(opzioni: OpzioniApp = {}): Express {
+  const modalita: Modalita = opzioni.modalita ?? MODALITA_PREDEFINITA;
   const app = express();
   app.disable('x-powered-by');
 
@@ -74,6 +87,8 @@ export function createApp(): Express {
     res.json({
       appVersion: config.appVersion,
       gioco: 'Persona 5 Royal',
+      modalita,
+      capacita: capacitaDi(modalita),
     });
   });
 

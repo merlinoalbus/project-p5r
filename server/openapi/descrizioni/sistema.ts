@@ -13,8 +13,8 @@ export const DESCRIZIONI_SISTEMA: DescrizioniArea = {
   },
   'GET /api/config': {
     sommario: 'Configurazione pubblica per il frontend',
-    descrizione: 'La versione dell\'app e il nome del gioco, mostrati in Impostazioni → Informazioni.',
-    risposta: '`{ appVersion, gioco }`',
+    descrizione: 'La versione dell\'app e il nome del gioco, mostrati in Impostazioni → Informazioni, più la modalità dell\'istanza (`preparazione`, con tutte le funzioni, o `rilascio`, in sola lettura) e le sue capacità (`shared/capacita.ts`). Il frontend confronta la modalità della propria build con questa risposta e si blocca se non coincidono.',
+    risposta: '`{ appVersion, gioco, modalita, capacita }`',
   },
   'GET /api/openapi.json': {
     sommario: 'Questo documento OpenAPI 3.1',

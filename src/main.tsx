@@ -18,6 +18,7 @@ import { tuttePrecarica } from './router';
 import { precaricaPagineScheda } from './components/scheda/pagineScheda';
 import { avviaControlloVersione } from './utils/versioneApp';
 import { precaricaInBackground } from './utils/pagineLazy';
+import { verificaCoerenzaModalita } from './utils/modalita';
 import type { AppConfigDto } from './types';
 
 const BOOT_CONFIG_TIMEOUT_MS = 15_000;
@@ -27,16 +28,19 @@ const BOOT_CONFIG_TIMEOUT_MS = 15_000;
  * linea, nessuna dipendenza da React o dal CSS del bundle), con il motivo e un pulsante che
  * ricarica la pagina. Se `#root` manca non fa niente.
  */
-function renderBootErrorScreen(reason: string): void {
+function renderBootErrorScreen(
+  reason: string,
+  suggerimento = 'Verifica che il backend sia in esecuzione e raggiungibile, poi ricarica.',
+): void {
   const root = document.getElementById('root');
   if (!root) return;
-  // HTML statico — nessun valore controllato dall'utente interpolato.
+  // HTML statico — nessun valore controllato dall'utente interpolato (motivo e suggerimento sono testi scritti nel codice).
   root.innerHTML = `
     <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#0b0b0e;color:#ececf1;padding:20px;box-sizing:border-box;">
       <div style="max-width:560px;padding:40px;text-align:center;background:#14141a;border-radius:12px;border:1px solid #34343f;box-shadow:0 10px 40px rgba(0,0,0,0.5);">
         <h1 style="color:#e5352b;margin:0 0 16px 0;font-size:1.5rem;">Impossibile avviare l'app</h1>
         <p style="margin:0 0 8px 0;line-height:1.5;color:#a3a3b3;">${reason}.</p>
-        <p style="margin:0 0 24px 0;line-height:1.5;color:#8e8ea0;font-size:0.9rem;">Verifica che il backend sia in esecuzione e raggiungibile, poi ricarica.</p>
+        <p style="margin:0 0 24px 0;line-height:1.5;color:#8e8ea0;font-size:0.9rem;">${suggerimento}</p>
         <button onclick="location.reload()" style="padding:12px 28px;background:#e5352b;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-size:1rem;">Ricarica</button>
       </div>
     </div>
@@ -59,6 +63,14 @@ async function boot(): Promise<void> {
     if (res.ok) {
       const body = await res.json();
       const config = (body?.data ?? body) as AppConfigDto;
+      // L12: la modalità fissata nella build deve coincidere con quella del backend; altrimenti si blocca tutto (un frontend di
+      // rilascio davanti a un backend di preparazione, o il contrario, non deve funzionare a metà)
+      const incoerenza = verificaCoerenzaModalita(config);
+      if (incoerenza) {
+        console.error('[boot] modalità incoerente:', incoerenza);
+        renderBootErrorScreen(incoerenza, 'Frontend e backend non appartengono alla stessa istanza: contatta chi gestisce l\'installazione.');
+        return;
+      }
       useConfigStore.getState().setConfig(config);
       configOk = true;
     } else {
