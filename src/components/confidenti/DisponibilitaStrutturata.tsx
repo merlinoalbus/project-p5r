@@ -8,7 +8,6 @@
 // ============================================================
 
 import { useState } from 'react';
-import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
 import { SelettoreData } from '../shared/SelettoreData';
 import { dataValida } from '../../../shared/condizioniSpillo';
@@ -87,38 +86,41 @@ export function QuandoConfidente({ chiave, partita }: { chiave: string; partita?
 
 const uguali = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
 
+/** I campi dell'editor: la struttura (con «dal» come testo, '' = nessuno) e le chiavi dei luoghi. */
+interface CampiDisponibilita { modo: ModoDisponibilita; giorni: GiornoDisponibilita[]; fasce: FasciaDisponibilita[]; eccezioni: EccezioneDisponibilita[]; dal: string; motivo: string; luoghi: string[] }
+const campiDisponibilitaDa = (d: DisponibilitaConfidenteDto): CampiDisponibilita => ({
+  modo: d.struttura.modo, giorni: d.struttura.giorni, fasce: d.struttura.fasce, eccezioni: d.struttura.eccezioni, dal: d.struttura.dal ?? '', motivo: d.struttura.motivoSenzaLuogo, luoghi: d.luoghi.map((l) => l.chiave),
+});
+/** Solo per scrivere il corpo mentre i dati arrivano: la finestra non lo mostra finché `campi` è nullo. */
+const CAMPI_VUOTI: CampiDisponibilita = { modo: 'settimanale', giorni: [], fasce: [], eccezioni: [], dal: '', motivo: '', luoghi: [] };
+
 /** L'editor: struttura e luoghi, salvati col PUT; «Ripristina» riporta la struttura alla fonte. Nel rilascio (sola lettura) non esiste (costante di build). */
 export const EditorDisponibilitaStrutturata: StrumentoDiModifica<typeof EditorDisponibilitaStrutturataReale> = IN_RILASCIO ? NienteInRilascio : EditorDisponibilitaStrutturataReale;
 function EditorDisponibilitaStrutturataReale({ chiave, nome, onChiudi, onSalvato }: { chiave: string; nome: string; onChiudi: () => void; onSalvato: () => void | Promise<void> }) {
   const d = useCarica(() => getDisponibilitaStrutturata(chiave), [chiave]);
   const tuttiILuoghi = useCarica(() => getLuoghi(), []);
   const titolo = `Disponibilità di ${nome}`;
-  // finché la struttura non c'è (o è in errore) la finestra è un guscio semplice; poi la `FinestraModifica` con il piè fisso (L13)
-  if (!d.dati) {
-    return (
-      <Modal titolo={titolo} aperta onChiudi={onChiudi} larga>
-        {d.errore && <p role="alert" className="m-0 text-error-testo">{d.errore}</p>}
-        {!d.errore && <p role="status" className="m-0">Un attimo…</p>}
-      </Modal>
-    );
-  }
-  return <Corpo titolo={titolo} dati={d.dati} tutti={tuttiILuoghi.dati ?? []} chiave={chiave} onChiudi={onChiudi} onSalvato={onSalvato} />;
-}
-
-function Corpo({ titolo, dati, tutti, chiave, onChiudi, onSalvato }: { titolo: string; dati: DisponibilitaConfidenteDto; tutti: Array<{ chiave: string; nome: string; quartiereNome: string }>; chiave: string; onChiudi: () => void; onSalvato: () => void | Promise<void> }) {
-  const partenza = dati.struttura;
-  const [modo, setModo] = useState<ModoDisponibilita>(partenza.modo);
-  const [giorni, setGiorni] = useState<GiornoDisponibilita[]>(partenza.giorni);
-  const [fasce, setFasce] = useState<FasciaDisponibilita[]>(partenza.fasce);
-  const [eccezioni, setEccezioni] = useState<EccezioneDisponibilita[]>(partenza.eccezioni);
-  const [dal, setDal] = useState(partenza.dal ?? '');
-  const [motivo, setMotivo] = useState(partenza.motivoSenzaLuogo);
-  const [luoghi, setLuoghi] = useState<string[]>(dati.luoghi.map((l) => l.chiave));
+  const dati = d.dati;
+  const tutti = tuttiILuoghi.dati ?? [];
+  // L13 (ondata 4a): una sola finestra dall'apertura alla chiusura (prima un guscio di caricamento a parte si smontava all'arrivo dei dati
+  // e nasceva un'altra finestra). I campi partono dai dati letti e diventano propri alla prima modifica (`modifiche`).
+  const [modifiche, setModifiche] = useState<CampiDisponibilita | null>(null);
+  const campi = modifiche ?? (dati ? campiDisponibilitaDa(dati) : null);
+  const aggiorna = (f: (c: CampiDisponibilita) => CampiDisponibilita) => { if (dati) setModifiche((m) => f(m ?? campiDisponibilitaDa(dati))); };
+  const setModo = (modo: ModoDisponibilita) => aggiorna((c) => ({ ...c, modo }));
+  const setGiorni = (giorni: GiornoDisponibilita[]) => aggiorna((c) => ({ ...c, giorni }));
+  const setFasce = (fasce: FasciaDisponibilita[]) => aggiorna((c) => ({ ...c, fasce }));
+  const setEccezioni = (f: (l: EccezioneDisponibilita[]) => EccezioneDisponibilita[]) => aggiorna((c) => ({ ...c, eccezioni: f(c.eccezioni) }));
+  const setDal = (dal: string) => aggiorna((c) => ({ ...c, dal }));
+  const setMotivo = (motivo: string) => aggiorna((c) => ({ ...c, motivo }));
+  const setLuoghi = (f: (l: string[]) => string[]) => aggiorna((c) => ({ ...c, luoghi: f(c.luoghi) }));
+  const { modo, giorni, fasce, eccezioni, dal, motivo, luoghi } = campi ?? CAMPI_VUOTI;
   const [occupato, setOccupato] = useState(false);
-  const nomeLuogo = (k: string) => dati.luoghi.find((l) => l.chiave === k)?.nome ?? tutti.find((l) => l.chiave === k)?.nome ?? k;
+  const nomeLuogo = (k: string) => dati?.luoghi.find((l) => l.chiave === k)?.nome ?? tutti.find((l) => l.chiave === k)?.nome ?? k;
   const dalValido = dal === '' || dataValida(dal);
-  const sporca = modo !== partenza.modo || !uguali(giorni, partenza.giorni) || !uguali(fasce, partenza.fasce) || !uguali(eccezioni, partenza.eccezioni)
-    || dal !== (partenza.dal ?? '') || motivo !== partenza.motivoSenzaLuogo || !uguali(luoghi, dati.luoghi.map((l) => l.chiave));
+  const partenza = dati?.struttura;
+  const sporca = !!dati && !!partenza && !!campi && (modo !== partenza.modo || !uguali(giorni, partenza.giorni) || !uguali(fasce, partenza.fasce) || !uguali(eccezioni, partenza.eccezioni)
+    || dal !== (partenza.dal ?? '') || motivo !== partenza.motivoSenzaLuogo || !uguali(luoghi, dati.luoghi.map((l) => l.chiave)));
   useBozzaSporca(`disponibilita:${chiave}`, 'la disponibilità del Confidente', sporca);
   const alterna = <T,>(lista: T[], v: T): T[] => (lista.includes(v) ? lista.filter((x) => x !== v) : [...lista, v]);
   const ordinati = <T,>(lista: T[], ordine: readonly T[]): T[] => ordine.filter((x) => lista.includes(x));
@@ -135,7 +137,8 @@ function Corpo({ titolo, dati, tutti, chiave, onChiudi, onSalvato }: { titolo: s
 
   return (
     <FinestraModifica titolo={titolo} onChiudi={onChiudi} onSalva={salva} salvabile={sporca && dalValido} occupato={occupato} sporca={sporca}
-      azioniExtra={dati.modificata ? <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina la struttura" disabled={occupato} onClick={() => void esegui(() => ripristinaDisponibilitaStrutturata(chiave), 'Struttura ripristinata come nella fonte.')} /> : undefined}>
+      caricamento={!campi} erroreCaricamento={campi ? null : d.errore}
+      azioniExtra={dati?.modificata ?<PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina la struttura" disabled={occupato} onClick={() => void esegui(() => ripristinaDisponibilitaStrutturata(chiave), 'Struttura ripristinata come nella fonte.')} /> : undefined}>
     <div className="flex flex-col gap-3 testo-13">
       <Selettore etichettaSopra etichetta="Come si incontra" valore={modo} opzioni={MODI_DISPONIBILITA.map((m) => ({ chiave: m, nome: NOME_MODO[m] }))} onCambia={(v) => setModo(v as ModoDisponibilita)} disabilitato={occupato} />
       {modo === 'settimanale' && (

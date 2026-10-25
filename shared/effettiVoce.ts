@@ -187,10 +187,6 @@ export const eEffettoConNomi = (e: { tipo: string }): e is EffettoConNomiVoce =>
 const yen = (n: number): string => `¥${Math.abs(n).toLocaleString('it-IT')}`;
 /** «×3» solo se le copie sono più d'una. */
 const copie = (q: number | undefined): string => (q && q > 1 ? ` ×${q}` : '');
-/**
- * Decisione 6: il riepilogo degli articoli di una voce somma copie e prezzo (stesso articolo in più effetti, o con la quantità): «3 articoli
- * comprati · ¥1.500 in tutto» (null se la voce non ne ha). I prezzi restano un promemoria: gli yen si cambiano dalla proposta o a mano.
- */
 /** I dati che possono portare già i loro yen (decisione 2): il film (prezzo), l'attività o il lavoro (costo o paga), la Richiesta (ricompensa). */
 export type DatoConYen = 'film' | 'attivita' | 'richiesta';
 /** Il contesto della voce per la decisione 2: il suo collegamento e gli yen che ogni dato porta già (0, null o assente = nessuno). */
@@ -223,12 +219,22 @@ export function motivoYenGiaStrutturati(effetti: readonly EffettoVoce[], c: Cont
   return chi ? `Gli yen di questa voce li porta già ${chi}: togli l’effetto Yen, non si contano due volte.` : null;
 }
 
-export function riepilogoArticoli(effetti: readonly EffettoVoce[], prezzo: (chiave: string) => number | null | undefined): string | null {
-  const articoli = effetti.filter((e): e is Extract<EffettoVoce, { tipo: 'articolo' }> => e.tipo === 'articolo');
-  if (articoli.length < 2 && !articoli.some((a) => (a.quantita ?? 1) > 1)) return null;
-  let copieTot = 0, totale = 0, ignoti = 0;
-  for (const a of articoli) { const q = a.quantita ?? 1; copieTot += q; const p = prezzo(a.articolo); if (typeof p === 'number') totale += p * q; else ignoti += q; }
-  return `${copieTot} ${copieTot === 1 ? 'articolo comprato' : 'articoli comprati'} · ${yen(totale)} in tutto${ignoti ? ` (${ignoti} senza prezzo)` : ''}`;
+/**
+ * L13 (ondata 4a, richiesta dell'utente): TUTTI gli articoli comprati della voce con le copie e il totale, «Arginade ×2 · Acqua della
+ * rinascita ×1 · ¥900». Lo stesso articolo in più effetti si conta una volta sola, con le copie sommate, al posto del primo; un articolo
+ * senza prezzo resta nell'elenco e il totale lo dice («2 senza prezzo»). null se la voce non compra articoli.
+ */
+export function riepilogoArticoli(effetti: readonly EffettoVoce[], articolo: (chiave: string) => { nome: string; prezzo: number | null } | null | undefined): string | null {
+  const copie = new Map<string, number>();
+  for (const e of effetti) if (e.tipo === 'articolo') copie.set(e.articolo, (copie.get(e.articolo) ?? 0) + (e.quantita ?? 1));
+  if (copie.size === 0) return null;
+  let totale = 0, ignoti = 0;
+  const righe = [...copie].map(([chiave, q]) => {
+    const a = articolo(chiave);
+    if (typeof a?.prezzo === 'number') totale += a.prezzo * q; else ignoti += q;
+    return `${a?.nome ?? 'Articolo'} ×${q}`;
+  });
+  return `${righe.join(' · ')} · ${yen(totale)}${ignoti ? ` (${ignoti} senza prezzo)` : ''}`;
 }
 
 const breve = (t: string, n = 70) => (t.length > n ? `${t.slice(0, n - 1).trimEnd()}…` : t);

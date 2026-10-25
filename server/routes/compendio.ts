@@ -38,6 +38,9 @@ import { elenchiAzione, elenchiEffettiVoce } from '../services/azioniStrutturate
 import { aggiornaVoce, creaVoce, eliminaVoce, impostaInfiltrazioniVoce, rivediVoce, spostaVoce, trasferisciVoci, vocePercorso } from '../services/giornataService.js';
 import { salvaEffettiVoce, elencaProposteEffettiVoce, anteprimaDecisioneEffettoVoce, decidiPropostaEffettoVoce } from '../services/motoreDiario.js';
 import { bodySalvaEffettiVoce, bodyAnteprimaDecisioneEffettoVoce, bodyDecisioneEffettoVoce } from '../schemas/acquisti.js';
+import { applicaPropostaConversione, elencaProposteConversione, scartaPropostaConversione } from '../services/proposteConversioneService.js';
+import { bodyApplicaProposta, bodyScartaProposta, paramsPropostaConversione, queryApplicaProposta, queryProposteConversione } from '../schemas/proposteConversione.js';
+import type { FiltroProposte, RichiestaApplicaProposta, RichiestaScartaProposta } from '../../shared/proposteConversione.js';
 import { completamento } from '../services/completamentoService.js';
 import { sfide } from '../services/sfideService.js';
 import { datiGuidaCorretti } from '../services/datiGuida.js';
@@ -81,6 +84,22 @@ router.post('/percorso/effetti/proposte/:id/anteprima', validate({ params: param
 });
 router.post('/percorso/effetti/proposte/:id/decisione', validate({ params: paramsPropostaEffetto, body: bodyDecisioneEffettoVoce }), (req, res) => {
   res.json(decidiPropostaEffettoVoce(String(req.params.id), req.body));
+});
+
+// ---- L13 (ondata 4a): le proposte «da completare» sulle voci del Diario. Solo preparazione: fuori dall'elenco del giocatore ----
+router.get('/proposte-conversione', validate({ query: queryProposteConversione }), (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  const q = req.query as unknown as FiltroProposte;
+  res.json(elencaProposteConversione({ da: q.da, a: q.a, stato: q.stato }));
+});
+router.post('/proposte-conversione/:id/applica', validate({ params: paramsPropostaConversione, body: bodyApplicaProposta, query: queryApplicaProposta }), (req, res) => {
+  const corpo = req.body as RichiestaApplicaProposta & { voce?: DatiVoceGiornata & { infiltrazioni?: unknown } };
+  // le infiltrazioni di una voce di Palazzo si salvano da sole, dalla voce: una proposta non le tocca
+  if (corpo.voce?.infiltrazioni !== undefined) throw httpErrors.badRequest('infiltrazioni-da-sole', 'Le infiltrazioni della voce si salvano da sole, dalla voce.');
+  res.json(applicaPropostaConversione(String(req.params.id), corpo, (req.query as unknown as { partita?: number }).partita));
+});
+router.post('/proposte-conversione/:id/scarta', validate({ params: paramsPropostaConversione, body: bodyScartaProposta }), (req, res) => {
+  res.json(scartaPropostaConversione(String(req.params.id), req.body as RichiestaScartaProposta));
 });
 
 router.get('/glossario', (_req, res) => {

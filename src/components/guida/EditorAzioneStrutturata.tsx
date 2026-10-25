@@ -6,14 +6,16 @@
 // le altre, e i punti della spunta vengono dagli effetti dichiarati, non dal testo delle note. Dal 2026-10-24:
 //   - il tipo (è l'icona della voce) si sceglie da una griglia di icone e decide a che cosa si collega la voce;
 //   - «Quale» si sceglie guardando (ritratti, emblemi, icone) e porta con sé l'effetto della spunta, già compilato;
-//   - l'effetto si legge come frase nel riquadro «Spuntando succede» e si regola solo il necessario (note ♪, sessioni, rango atteso).
-// Il formato degli effetti non cambia (`EffettoVoce`): cambia come si sceglie. Le due parti stanno in due colonne della finestra
-// (`ModuloVoceGiornata`), quindi sono due componenti.
+//   - l'effetto si legge come frase nel riquadro «Spuntando succede» e si regola solo il necessario.
+// L13 (ondata 4a, richiesta dell'utente sui due acquisti della stessa voce in due punti diversi): «Spuntando succede» è l'elenco di TUTTI
+// gli effetti (`ElencoEffettiVoce`), tutti allo stesso livello e con lo stesso editor per tipo; niente più «effetto principale» con i suoi
+// controlli e «Effetti aggiuntivi» ripiegati. In una voce d'acquisto collegata a un negozio, sopra l'elenco, gli «Acquisti da questo
+// negozio» con articoli, copie e totale. Il formato degli effetti non cambia (`EffettoVoce`). Le due parti stanno in due colonne della
+// finestra (`ModuloVoceGiornata`), quindi sono due componenti.
 // ============================================================
 
 import { useMemo, useState, type ReactNode } from 'react';
 import { SelettoreIcone } from '../shared/SelettoreIcone';
-import { Selettore } from '../shared/Selettore';
 import { AssetImg } from '../shared/AssetImg';
 import { DialogoRango } from '../confidenti/DialogoRango';
 import { useDettaglioConfidente } from '../partita/useDettaglioConfidente';
@@ -22,15 +24,15 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { FilaScelta } from './FilaScelta';
 import { SceltaQuale } from './SceltaQuale';
-import { CampoQuantita, DotiProprieTurno, NotePossibiliDote } from './CampiEffettoVoce';
-import { opzioniArticoli, opzioniDomande, opzioniStoria, type ElenchiVoce } from '../../utils/opzioniEffetti';
+import { ElencoEffettiVoce } from './ElencoEffettiVoce';
+import { AcquistiNegozioVoce } from './AcquistiNegozioVoce';
+import { eArticoloDelNegozio } from '../../utils/effettiDellaVoce';
+import type { ElenchiVoce } from '../../utils/opzioniEffetti';
 import { EffettiNonConvertibili } from './EditorEffettiVoce';
-import { TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type TipoAzione } from '../../../shared/effettiAzione';
+import { RIFERIMENTO_DI_TIPO, TIPI_AZIONE, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type TipoAzione } from '../../../shared/effettiAzione';
 import { NOME_QUALE } from '../../utils/elencoQuale';
-import { nomeDote } from '../../../shared/doti';
-import { riepilogoArticoli, type EffettoVoce } from '../../../shared/effettiVoce';
 import type { CampiStrutturati } from '../../utils/azioneStrutturata';
-import { cambiaCollegamento, contestoDa, eAltroGenere, fraseEffetto, impostaPrincipale, indicePrincipale, tipoQuale, type NomiEffetti } from '../../utils/effettoAutomatico';
+import { cambiaCollegamento, collegamentoSuggerito, contestoDa, eAltroGenere, indiceDelCollegamento, tipoQuale, type NomiEffetti } from '../../utils/effettoAutomatico';
 
 interface Props {
   valore: CampiStrutturati;
@@ -38,8 +40,6 @@ interface Props {
   elenchi: ElenchiVoce;
 }
 
-const NOTE = [{ chiave: '1', nome: '♪' }, { chiave: '2', nome: '♪♪' }, { chiave: '3', nome: '♪♪♪' }];
-const SESSIONI = [{ chiave: '', nome: 'Completato' }, ...Array.from({ length: 9 }, (_, i) => ({ chiave: String(i + 1), nome: String(i + 1) }))];
 /** Il rango atteso: Nessuno, 1…9 e MAX (il rango 10), con le cifre del rango (`ui/rango-N`) quando ci sono. */
 const RANGHI = [{ chiave: '', nome: 'Nessuno' }, ...Array.from({ length: 10 }, (_, i) => {
   const n = i + 1;
@@ -68,9 +68,20 @@ function AnteprimaRisposte({ chiave, rango }: { chiave: string; rango: number })
   );
 }
 
+/** Il nome di un elemento collegabile, dagli elenchi. */
+function nomeDi(rif: NonNullable<CampiStrutturati['riferimento']>, elenchi: ElenchiVoce): string | null {
+  const a = elenchi.azione;
+  const lista = rif.tipo === 'confidente' ? a.confidenti : rif.tipo === 'dungeon' ? a.dungeon : rif.tipo === 'richiesta' ? a.richieste : rif.tipo === 'libro' ? a.libri : rif.tipo === 'film' ? a.film : rif.tipo === 'attivita' ? a.attivita : rif.tipo === 'negozio' ? a.negozi : a.doti;
+  return lista.find((v) => v.chiave === rif.chiave)?.nome ?? null;
+}
+/** Il nome dell'elemento collegato, dagli elenchi. */
+const nomeCollegato = (valore: CampiStrutturati, elenchi: ElenchiVoce): string | null => (valore.riferimento ? nomeDi(valore.riferimento, elenchi) : null);
+const nomeGenere = (tipo: string): string => TIPI_RIFERIMENTO_AZIONE.find((g) => g.chiave === tipo)?.nome.toLowerCase() ?? tipo;
+
 /**
  * Colonna sinistra: la griglia dei 13 tipi (le icone delle voci, con il nome sotto) e «Quale» del tipo scelto. Cambiare tipo azzera
- * il collegamento e l'effetto che il vecchio tipo aveva dato (se nato in questa finestra); scegliere «Quale» compila l'effetto.
+ * il collegamento e l'effetto che il vecchio tipo aveva dato (se nato in questa finestra); scegliere «Quale» compila l'effetto. Una voce
+ * salvata senza collegamento i cui effetti ne indicano uno solo lo PROPONE («Collega a…»): non si scrive da solo.
  */
 export function SceltaTipoQuale({ valore, onCambia, elenchi }: Props) {
   const ctx = useMemo(() => contestoDa(elenchi.azione), [elenchi.azione]);
@@ -79,7 +90,7 @@ export function SceltaTipoQuale({ valore, onCambia, elenchi }: Props) {
   // Collegamento salvato di altro genere (negozio su un lavoro): non si tocca finché l'utente non sceglie qui, e allora la sostituzione
   // è dichiarata prima del salvataggio. «Quale» elenca il genere del tipo e nessuna tessera risulta scelta.
   const altro = eAltroGenere(valore.tipo, rif);
-  const genereSalvato = rif ? TIPI_RIFERIMENTO_AZIONE.find((g) => g.chiave === rif.tipo)?.nome.toLowerCase() ?? rif.tipo : '';
+  const suggerito = valore.effettiVoce ? collegamentoSuggerito(valore.tipo, rif, valore.effettiVoce) : null;
   return (
     <div className="flex flex-col gap-3 min-w-0">
       <div className="flex flex-col gap-1.5">
@@ -89,8 +100,15 @@ export function SceltaTipoQuale({ valore, onCambia, elenchi }: Props) {
       </div>
       {altro && rif && (
         <p className="m-0 testo-13 break-words" role="status">
-          Collegata a: {nomeCollegato(valore, elenchi) ?? rif.chiave} ({genereSalvato}). Scegliendo un elemento qui ({NOME_QUALE[tq!].toLowerCase()}) questo collegamento verrà sostituito.
+          Collegata a: {nomeCollegato(valore, elenchi) ?? rif.chiave} ({nomeGenere(rif.tipo)}). Scegliendo un elemento qui ({NOME_QUALE[tq!].toLowerCase()}) questo collegamento verrà sostituito.
         </p>
+      )}
+      {suggerito && (
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-border p-2" role="group" aria-label="Collegamento indicato dagli effetti">
+          <span className="min-w-0 flex-1 basis-48 testo-13 break-words">Gli effetti di questa voce indicano: <strong>{nomeDi(suggerito, elenchi) ?? suggerito.chiave}</strong> ({nomeGenere(suggerito.tipo)}). La voce non è collegata.</span>
+          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="esegui" dimensione={20} />} titolo="Collega" aria-label={`Collega la voce a ${nomeDi(suggerito, elenchi) ?? suggerito.chiave}`}
+            onClick={() => onCambia(cambiaCollegamento(valore, valore.tipo, suggerito, ctx))} />
+        </div>
       )}
       {tq && (
         <SceltaQuale tipo={tq} elenchi={elenchi.azione} valore={rif && rif.tipo === tq ? rif.chiave : ''} soloTurni={valore.tipo === 'lavoro'}
@@ -100,41 +118,18 @@ export function SceltaTipoQuale({ valore, onCambia, elenchi }: Props) {
   );
 }
 
-/** Il nome dell'elemento collegato, dagli elenchi. */
-function nomeCollegato(valore: CampiStrutturati, elenchi: ElenchiVoce): string | null {
-  const rif = valore.riferimento;
-  if (!rif) return null;
-  const a = elenchi.azione;
-  const lista = rif.tipo === 'confidente' ? a.confidenti : rif.tipo === 'dungeon' ? a.dungeon : rif.tipo === 'richiesta' ? a.richieste : rif.tipo === 'libro' ? a.libri : rif.tipo === 'film' ? a.film : rif.tipo === 'attivita' ? a.attivita : rif.tipo === 'negozio' ? a.negozi : a.doti;
-  return lista.find((v) => v.chiave === rif.chiave)?.nome ?? null;
-}
-
 /**
- * Colonna destra, in alto: «Spuntando succede». L'effetto principale è quello che tipo e «Quale» producono da soli, scritto come
- * frase e regolabile solo dove serve. Una voce di cui il formato originario degli effetti non si converte mostra l'avviso e il
- * testo originario; una senza elenco unico degli effetti (formato storico) conserva i vecchi controlli.
+ * Colonna destra, in alto: «Spuntando succede». Sopra, quello che dice il tipo (l'incontro e il rango atteso di un Confidente, le
+ * infiltrazioni di un Palazzo, «scegli Quale»); per un acquisto da un negozio gli articoli con copie e totale; poi l'elenco di TUTTI gli
+ * altri effetti. Una voce di cui il formato originario degli effetti non si converte mostra l'avviso e il testo originario; una senza
+ * elenco unico degli effetti (formato storico) conserva i vecchi controlli.
  */
-export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi }: Props & { nomi: NomiEffetti }) {
+export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi, fatta }: Props & { nomi: NomiEffetti; fatta?: boolean }) {
   const righe = valore.effettiVoce;
   const rif = valore.riferimento;
   const nome = nomeCollegato(valore, elenchi);
-  const i = righe ? indicePrincipale(righe, valore.tipo, rif, valore.uidPrincipale) : -1;
-  const eff: EffettoVoce | null = righe && i >= 0 ? righe[i].effetto : null;
   const frase = (t: string) => <p className="m-0 testo-13 break-words">{t}</p>;
-  const scrivi = (e: EffettoVoce | null) => onCambia(impostaPrincipale(valore, e));
-  /** Manca il principale: se la voce ha già effetti salvati, «si compila da solo» sarebbe falso (restano fra gli aggiuntivi, e quello che combacia con la scelta si adotta). */
-  const mancaQuale = (cosa: string) => frase(righe && righe.length > 0
-    ? `Scegli ${cosa}: gli effetti già salvati su questa voce restano, elencati negli effetti aggiuntivi qui sotto. Se la scelta produce un effetto automatico, lo riconosce fra quelli salvati o lo aggiunge.`
-    : valore.tipo === 'attivita' ? `Scegli ${cosa}: se è un videogioco l’effetto della spunta si compila da solo.`
-      : `Scegli ${cosa}: l’effetto della spunta si compila da solo.`);
-  /** Dote o Richiesta con un collegamento salvato di altro genere (film su una Dote) e nessun principale: la frase nomina il collegamento e gli effetti salvati, mai «Scegli…» come se non ci fosse nulla. */
-  const altroCollegamento = (cosa: string) => {
-    const genere = rif ? TIPI_RIFERIMENTO_AZIONE.find((g) => g.chiave === rif.tipo)?.nome.toLowerCase() ?? rif.tipo : '';
-    const salvati = (righe ?? []).map((r) => fraseEffetto(r.effetto, nomi));
-    return frase(`Collegata a: ${nome ?? rif?.chiave} (${genere}). ${salvati.length > 0 ? `Effetti salvati su questa voce: ${salvati.join('; ')}, elencati negli effetti aggiuntivi qui sotto.` : 'Nessun effetto salvato su questa voce.'} Scegliendo ${cosa} nella colonna «Quale» il collegamento verrà sostituito.`);
-  };
-  /** Voce con effetti salvati ma nessuno principale: la frase «registra solo che l’hai fatta» sarebbe falsa. */
-  const soloAggiuntivi = 'Nessun effetto automatico dal collegamento: gli effetti salvati su questa voce sono quelli elencati negli effetti aggiuntivi qui sotto.';
+  const tq = RIFERIMENTO_DI_TIPO[valore.tipo];
 
   let corpo: ReactNode;
   if (righe === undefined && valore.fonteEffetti) {
@@ -142,97 +137,40 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi }: Props & { 
   } else if (righe === undefined) {
     corpo = <EffettiStorici valore={valore} onCambia={onCambia} elenchi={elenchi} />;
   } else {
-    switch (valore.tipo) {
-      case 'confidente': {
-        const rango = valore.rangoAtteso;
-        corpo = (
-          <>
-            {nome ? frase(`Incontro con ${nome} (la Dote dell’incontro, se c’è) e le note della risposta che scegli alla spunta.`) : mancaQuale('il Confidente')}
-            {rif && (
-              <>
-                <span className="testo-13 text-text-secondary">Rango atteso</span>
-                <FilaScelta etichetta="Rango atteso" valore={rango === null ? '' : String(rango)} opzioni={RANGHI} onCambia={(v) => onCambia({ ...valore, rangoAtteso: v ? Number(v) : null })} />
-                {rango !== null && nome && frase(rango === 10 ? `Con il rango atteso MAX la spunta porta ${nome} al rango massimo.` : `Con il rango atteso ${rango} la spunta porta ${nome} al rango ${rango}.`)}
-                {rango !== null && <AnteprimaRisposte chiave={rif.chiave} rango={rango} />}
-              </>
-            )}
-          </>
-        );
-        break;
-      }
-      case 'dote':
-        corpo = eff?.tipo === 'dote' ? (
-          <>
-            {frase(`${nomeDote(eff.dote)} +${'♪'.repeat(eff.note)}: la Dote che dà il gioco, da segnare nelle Doti.`)}
-            <span className="testo-13 text-text-secondary">Note che dà il gioco</span>
-            {/* L13: con le note possibili (scelte alla spunta) la proposta resta sempre fra le possibili */}
-            <FilaScelta etichetta="Note della Dote" valore={String(eff.note)} opzioni={NOTE} onCambia={(v) => { const note = Number(v) as 1 | 2 | 3; scrivi(eff.possibili ? { ...eff, note, possibili: eff.possibili.includes(note) ? eff.possibili : [...eff.possibili, note].sort() } : { ...eff, note }); }} />
-            <NotePossibiliDote effetto={eff} onCambia={scrivi} />
-          </>
-        ) : rif && eAltroGenere('dote', rif) ? altroCollegamento('la Dote') : mancaQuale('la Dote');
-        break;
-      case 'libro': case 'dvd': case 'attivita': {
-        const cosa = valore.tipo === 'libro' ? 'il libro' : valore.tipo === 'dvd' ? 'il film' : 'l’attività';
-        corpo = eff?.tipo === 'lettura' ? (
-          <>
-            {frase(fraseEffetto(eff, nomi))}
-            <span className="testo-13 text-text-secondary">{valore.tipo === 'dvd' ? 'Visioni o serate' : 'Sessioni'}: almeno</span>
-            <FilaScelta etichetta="Fin dove arriva" valore={eff.almeno === null ? '' : String(eff.almeno)} opzioni={SESSIONI} onCambia={(v) => scrivi({ ...eff, almeno: v === '' ? null : Number(v) })} />
-          </>
-        ) : rif ? frase(righe.length === 0 ? 'Questa attività non ha un avanzamento da segnare: la spunta registra solo che l’hai fatta.' : soloAggiuntivi) : mancaQuale(cosa);
-        break;
-      }
-      case 'lavoro':
-        corpo = eff?.tipo === 'turno' ? (
-          <>
-            {frase(fraseEffetto(eff, nomi))}
-            <DotiProprieTurno effetto={eff} onCambia={scrivi} />
-          </>
-        ) : rif ? frase(righe.length === 0 ? 'Questa attività non si conta per turni: la spunta registra solo che l’hai fatta.' : soloAggiuntivi) : mancaQuale('il lavoro');
-        break;
-      case 'richiesta':
-        corpo = eff?.tipo === 'richiesta' ? frase(`${fraseEffetto(eff, nomi)}. La spunta la segna; togliendola torna com’era.`) : rif && eAltroGenere('richiesta', rif) ? altroCollegamento('la Richiesta') : mancaQuale('la Richiesta');
-        break;
-      case 'acquisto':
-        corpo = rif ? (
-          <>
-            {frase(eff?.tipo === 'articolo' ? fraseEffetto(eff, nomi) : `Acquisto${nome ? ` da ${nome}` : ''}: scegli l’articolo per segnarlo come comprato, oppure lascia solo il promemoria.`)}
-            <div className="flex flex-wrap items-end gap-2">
-              <Selettore className="min-w-[12rem] flex-1" etichetta="Articolo comprato" vuoto="Nessun articolo" valore={eff?.tipo === 'articolo' ? eff.articolo : ''} opzioni={opzioniArticoli(elenchi.effetti, rif.chiave)}
-                onCambia={(v) => scrivi(v ? (eff?.tipo === 'articolo' && eff.quantita ? { tipo: 'articolo', articolo: v, quantita: eff.quantita } : { tipo: 'articolo', articolo: v }) : null)} />
-              {/* L13 (decisione 6): le copie dello stesso articolo comprate insieme («Fai il pieno»: le scrive chi gioca) */}
-              {eff?.tipo === 'articolo' && <CampoQuantita valore={eff.quantita ?? 1} onCambia={(q) => scrivi(q > 1 ? { tipo: 'articolo', articolo: eff.articolo, quantita: q } : { tipo: 'articolo', articolo: eff.articolo })} />}
-            </div>
-            {/* il riepilogo somma TUTTI gli articoli della voce, anche quelli fra gli effetti aggiuntivi (un acquisto non resta fuori dal conto) */}
-            {(() => { const t = riepilogoArticoli((righe ?? []).map((r) => r.effetto), (k) => nomi.articoli.get(k)?.prezzo ?? null); return t ? <p className="m-0 testo-13"><strong>In tutto:</strong> {t}</p> : null; })()}
-            <span className="testo-12 text-text-muted">Gli yen del prezzo restano un promemoria da cambiare a mano.</span>
-          </>
-        ) : mancaQuale('il negozio');
-        break;
-      case 'esame':
-        corpo = (
-          <>
-            {frase(eff?.tipo === 'domanda' ? fraseEffetto(eff, nomi) : 'Scegli la domanda del giorno: la spunta la segna come risposta.')}
-            <Selettore etichetta="Domanda" vuoto="Nessuna domanda" valore={eff?.tipo === 'domanda' ? String(eff.domanda) : ''} opzioni={opzioniDomande(elenchi, eff?.tipo === 'domanda' ? eff.domanda : null)}
-              onCambia={(v) => scrivi(v ? { tipo: 'domanda', domanda: Number(v) } : null)} />
-          </>
-        );
-        break;
-      case 'trama':
-        corpo = (
-          <>
-            {frase(eff?.tipo === 'storia' ? fraseEffetto(eff, nomi) : 'Scegli l’evento di storia: la spunta lo segna avvenuto.')}
-            <Selettore etichetta="Evento di storia" vuoto="Nessun evento" valore={eff?.tipo === 'storia' ? eff.evento : ''} opzioni={opzioniStoria(eff?.tipo === 'storia' ? eff.evento : '')}
-              onCambia={(v) => scrivi(v ? { tipo: 'storia', evento: v } : null)} />
-          </>
-        );
-        break;
-      case 'palazzo':
-        corpo = frase('Nessun effetto della spunta: le infiltrazioni si scelgono sulla voce, come prima.');
-        break;
-      default:
-        corpo = frase('Nessun effetto automatico. Se serve, aggiungilo dagli effetti aggiuntivi qui sotto.');
+    const negozio = valore.tipo === 'acquisto' && rif?.tipo === 'negozio' ? rif.chiave : null;
+    let contesto: ReactNode = null;
+    if (valore.tipo === 'confidente') {
+      const rango = valore.rangoAtteso;
+      contesto = nome && rif ? (
+        <>
+          {frase(`Incontro con ${nome} (la Dote dell’incontro, se c’è) e le note della risposta che scegli alla spunta.`)}
+          <span className="testo-13 text-text-secondary">Rango atteso</span>
+          <FilaScelta etichetta="Rango atteso" valore={rango === null ? '' : String(rango)} opzioni={RANGHI} onCambia={(v) => onCambia({ ...valore, rangoAtteso: v ? Number(v) : null })} />
+          {rango !== null && frase(rango === 10 ? `Con il rango atteso MAX la spunta porta ${nome} al rango massimo.` : `Con il rango atteso ${rango} la spunta porta ${nome} al rango ${rango}.`)}
+          {rango !== null && <AnteprimaRisposte chiave={rif.chiave} rango={rango} />}
+        </>
+      ) : frase('Scegli il Confidente in «Quale»: alla spunta si registra l’incontro e si scelgono le note.');
+    } else if (valore.tipo === 'palazzo') {
+      contesto = frase('Le infiltrazioni si scelgono sulla voce, come prima.');
+    } else if ((valore.tipo === 'esame' && !righe.some((r) => r.effetto.tipo === 'domanda')) || (valore.tipo === 'trama' && !righe.some((r) => r.effetto.tipo === 'storia'))) {
+      contesto = frase(valore.tipo === 'esame'
+        ? 'La domanda del giorno si aggiunge qui sotto con «Aggiungi un effetto» → «Domanda risposta»: la spunta la segna come risposta.'
+        : 'L’evento di storia si aggiunge qui sotto con «Aggiungi un effetto» → «Evento di storia»: la spunta lo segna avvenuto.');
+    } else if (tq && (!rif || rif.tipo !== tq)) {
+      contesto = frase(valore.tipo === 'acquisto'
+        ? 'Scegli il negozio in «Quale»: qui compariranno gli articoli da segnare comprati.'
+        : `Scegli ${NOME_QUALE[tq].toLowerCase()} in «Quale»: l’effetto che gli corrisponde si aggiunge da solo a questo elenco (o si riconosce fra quelli che ci sono già).`);
+    } else if ((valore.tipo === 'attivita' || valore.tipo === 'lavoro') && rif && indiceDelCollegamento(righe, valore.tipo, rif) < 0) {
+      contesto = frase(valore.tipo === 'lavoro' ? 'Questa attività non si conta per turni: la spunta registra che l’hai fatta, più gli effetti qui sotto.' : 'Questa attività non ha un avanzamento da segnare: la spunta registra che l’hai fatta, più gli effetti qui sotto.');
     }
+    corpo = (
+      <>
+        {contesto}
+        {negozio && <AcquistiNegozioVoce valore={valore} onCambia={onCambia} elenchi={elenchi} nomi={nomi} negozio={negozio} nomeNegozio={nome} />}
+        {negozio && <h4 className="m-0 testo-13 font-semibold">Altri effetti</h4>}
+        <ElencoEffettiVoce valore={valore} onCambia={onCambia} elenchi={elenchi} nomi={nomi} fatta={fatta} altrove={negozio ? (r) => eArticoloDelNegozio(r, negozio) : undefined} />
+      </>
+    );
   }
   return (
     <section className="effetto-riquadro" aria-label="Spuntando succede">

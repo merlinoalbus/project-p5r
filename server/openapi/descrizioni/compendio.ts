@@ -35,6 +35,24 @@ export const DESCRIZIONI_COMPENDIO: DescrizioniArea = {
     descrizione: 'Corpo dell’anteprima più revisionePropostaAttesa. La decisione aggiorna solo il canone mediante il writer unico; per check preesistenti crea proposte personali esplicite. Operazione ID/payload idempotente, nessuna riscrittura delle ricevute storiche.',
     risposta: '`StatoEffettiVoceDto` dopo la decisione', errori: [[409,'proposta-cambiata'],[409,'operazione-diversa']],
   },
+  // ---- L13 (ondata 4a): proposte «da completare» sulle voci del Diario (solo preparazione) ----
+  'GET /api/compendio/proposte-conversione': {
+    sommario: 'Proposte «da completare» delle voci del Diario',
+    descrizione: 'Le proposte di conversione di una voce (collegamento, tipo, effetti da aggiungere con i valori proposti e da togliere, certezza, motivo, dati da completare), nell’ordine del Diario. Filtri: `da` e `a` (giorni di gioco MM-GG, estremi compresi, in ordine dell’anno scolastico), `stato` (`aperta` predefinito, `applicata`, `scartata`, `tutte`). Ogni proposta porta la sua `revisione`. Non esiste nel rilascio.',
+    risposta: '`PropostaConversioneDto[]`',
+  },
+  'POST /api/compendio/proposte-conversione/:id/applica': {
+    sommario: 'Applica una proposta «da completare»',
+    descrizione: 'Corpo `RichiestaApplicaProposta`: `revisionePropostaAttesa` più, se la proposta chiede di completare dati, gli `effetti` completati nello stesso ordine; oppure, da «Modifica», la `voce` come la salva la finestra. La voce si scrive con la stessa funzione dell’editor (`aggiornaVoce`: verifiche del collegamento e degli effetti, proposte «Applica» per le partite già spuntate, ricevute salvate intatte) e la proposta diventa `applicata` nella stessa transazione, con l’esito. `?partita=` per avere la voce con lo stato di quella partita.',
+    risposta: '`{ proposta: PropostaConversioneDto, voce: AzionePercorsoDto }`',
+    errori: [[400, 'proposta-da-completare'], [400, 'proposta-fuori-scelta'], [400, 'proposta-diversa'], [404, 'proposta-non-trovata'], [409, 'proposta-cambiata'], [409, 'proposta-decisa'], [409, 'proposta-superata'], [409, 'proposta-illeggibile']],
+  },
+  'POST /api/compendio/proposte-conversione/:id/scarta': {
+    sommario: 'Scarta una proposta «da completare»',
+    descrizione: 'Corpo `RichiestaScartaProposta` (`revisionePropostaAttesa`). La voce non cambia; la proposta resta registrata come `scartata`.',
+    risposta: '`PropostaConversioneDto`',
+    errori: [[404, 'proposta-non-trovata'], [409, 'proposta-cambiata'], [409, 'proposta-decisa']],
+  },
   // ---- Compendio: arcani, glossario, regole di fusione ----
   'GET /api/compendio/glossario': {
     sommario: 'Glossario dei codici del compendio con la resa italiana',

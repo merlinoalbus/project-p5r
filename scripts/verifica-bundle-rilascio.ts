@@ -64,6 +64,7 @@ const PERCORSI_VIETATI: readonly Vietata[] = [
   { testo: '/traduzioni/', cosa: 'scrittura delle traduzioni' },
   { testo: '/pesca/regola', cosa: 'scrittura delle regole di pesca' },
   { testo: '/legacy/rimozione', cosa: 'rimozione del vecchio segno «Acquistato» (rotte /partite/:id/acquisti/legacy, escluse dal rilascio)' },
+  { testo: '/compendio/proposte-conversione', cosa: 'proposte «da completare» delle voci del Diario (L13, ondata 4a)' },
   { testo: '/api/docs', cosa: 'documentazione delle API' },
   { testo: '/api/openapi.json', cosa: 'documento OpenAPI' },
 ];
@@ -91,6 +92,7 @@ const ETICHETTE_VIETATE: readonly Vietata[] = [
   { testo: 'Correggi la regola comune', cosa: 'correzione della regola comune della pesca' },
   { testo: 'Togli solo il vecchio segno', cosa: 'rimozione del vecchio segno «Acquistato» (rotte legacy)' },
   { testo: 'Luoghi da collocare', cosa: 'sezione dei luoghi da collocare con «Colloca»' },
+  { testo: 'Proposte da completare', cosa: 'elenco e finestra delle proposte «da completare» (L13, ondata 4a)' },
 ];
 
 const VIETATE: readonly Vietata[] = [...PERCORSI_VIETATI, ...ETICHETTE_VIETATE];

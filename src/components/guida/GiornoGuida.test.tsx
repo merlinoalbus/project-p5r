@@ -14,6 +14,8 @@ const api = vi.hoisted(() => ({
   creaVoceGiornata: vi.fn(), aggiornaVoceGiornata: vi.fn(), spostaVoceGiornata: vi.fn(), eliminaVoceGiornata: vi.fn(), impostaAzionePercorso: vi.fn(),
   getImmagini: vi.fn().mockResolvedValue([]), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(),
   getElenchiAzione: vi.fn(), getPercorsoIndice: vi.fn(), trasferisciVociGiornata: vi.fn(),
+  // L13 (ondata 4a): le proposte «da completare» del giorno (nessuna, in queste prove)
+  getProposteConversione: vi.fn().mockResolvedValue([]),
 }));
 const ELENCHI = {
   confidenti: [{ chiave: 'takemi', nome: 'Tae Takemi', dettaglio: 'Morte' }], dungeon: [{ chiave: 'kamoshida', nome: 'Palazzo di Kamoshida' }], richieste: [],

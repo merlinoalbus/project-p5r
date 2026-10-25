@@ -99,6 +99,12 @@ export function ImpostazioniPage() {
       {!IN_RILASCIO && <ImmaginiCaricate />}
       {!IN_RILASCIO && <TraduzioniEditor ambitoIniziale={traduzioneAmbito} qIniziale={traduzioneQ} />}
       {!IN_RILASCIO && <MieiDati />}
+      {/* L13 (ondata 4a): le proposte di conversione delle voci del Diario da approvare (solo preparazione) */}
+      {!IN_RILASCIO && <section className="card flex flex-col gap-3" aria-labelledby="titolo-da-completare">
+        <TitoloSezione id="titolo-da-completare">Proposte da completare</TitoloSezione>
+        <p className="m-0 testo-13 text-text-secondary">Le conversioni delle voci del Diario scritte a parole (collegamento, effetti con i valori proposti, certezza e motivo), da applicare, modificare o scartare. Sulla voce, nel Diario, le segna «da completare».</p>
+        <CollegamentoVisivo to="/guida/da-completare" tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="note" dimensione={20} />} titolo="Apri l’elenco" />
+      </section>}
       {/* Il cestino c'è in entrambe le istanze: nella preparazione è quello unificato (contenuti e partite), nel rilascio solo quello personale,
           sotto `/api/partite/cestino` (L12, passo 3). Le righe nascoste dalla guida (`NascostiDallaGuida`) restano dell'autore. */}
       <Cestino />

@@ -140,6 +140,8 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   voce_giornata: ['voce del Diario', 'voci del Diario'], voce_effetto: ['effetto della voce', 'effetti della voce'],
   voce_effetto_transizione: ['provenienza degli effetti', 'provenienze degli effetti'],
   proposta_effetto_voce: ['raccordo degli effetti', 'raccordi degli effetti'], operazione_effetti_voce: ['decisione sugli effetti', 'decisioni sugli effetti'],
+  // L13 (migrazione 236)
+  proposta_conversione_voce: ['proposta da completare di una voce del Diario', 'proposte da completare delle voci del Diario'],
   acquisto_registrato: ['consumazione registrata', 'consumazioni registrate'], acquisto_provenienza: ['fonte di acquisto', 'fonti di acquisto'],
   acquisto_operazione: ['ricevuta di acquisto', 'ricevute di acquisto'], effetto_applicato: ['ricevuta di un effetto', 'ricevute degli effetti'],
   da_applicare: ['proposta personale', 'proposte personali'], movimento_yen: ['movimento di denaro', 'movimenti di denaro'],
