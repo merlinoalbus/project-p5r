@@ -341,6 +341,7 @@ function chiaveMancante(c: RequisitoSpillo, e: Esistenze): string | null {
     case 'confidente': return manca('confidente', 'chiave', c.confidente, 'Il Confidente');
     case 'invito': return manca('confidente_invito', 'chiave', c.invito, 'L\'invito');
     case 'richiesta': return manca('richiesta', 'chiave', c.richiesta, 'La richiesta');
+    case 'sblocco': return c.bersaglio === 'richiesta' ? manca('richiesta', 'chiave', c.chiave, 'La richiesta') : manca('attivita', 'chiave', c.chiave, 'L\'attività');
     case 'palazzo': return manca('dungeon', 'chiave', c.dungeon, 'Il Palazzo');
     case 'rango-cliente': case 'punti-negozio': return manca('negozio', 'chiave', c.negozio, 'Il negozio');
     case 'articolo': return manca('articolo', 'chiave', c.articolo, 'L\'articolo');

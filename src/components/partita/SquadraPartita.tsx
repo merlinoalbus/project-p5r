@@ -27,6 +27,7 @@ import { usePartitaStore } from '../../stores/partitaStore';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
 import type { MembroSquadraDto, SquadraPartitaDto } from '../../types';
 import { formattaYen } from '../../utils/punti';
+import { OggettiOttenuti } from './OggettiOttenuti';
 
 /** Lo stesso tetto di `bodyYen` sul server: oltre, la richiesta verrebbe rifiutata. */
 const YEN_MASSIMI = 9_999_999;
@@ -204,6 +205,9 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
               </span>
             </div>
           </section>
+
+          {/* L13 (ondata 3): gli oggetti del catalogo che la partita ha ricevuto (voci del Diario, Richieste completate), accanto al denaro */}
+          <OggettiOttenuti partitaId={partitaId} />
 
           <ul className="m-0 p-0 list-none grid gap-2 grid-cols-1 xl:grid-cols-2" aria-label="Ladri Fantasma">
             {dati.membri.map(riga)}

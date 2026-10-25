@@ -24,6 +24,7 @@ import { CampoRicerca } from '../components/shared/CampoRicerca';
 // R10-27: la scheda si mostra anche nel pannello sopra il diario; questo hook, fuori dal pannello, è quello di react-router-dom
 import { useSearchParams } from '../components/scheda/routerScheda';
 import { getRichieste, impostaStatoRichiesta } from '../services/api';
+import { segnalaMutazioneEffetti } from '../services/gestiPartita';
 import { PARAMETRO_ELEMENTO } from '../../shared/ricerca';
 import { useCarica } from '../hooks/useCarica';
 import { useSchede } from '../hooks/useSchede';
@@ -31,7 +32,11 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
-import type { RichiestaDto, StatoRichiesta } from '../types';
+import type { RichiestaDto, StatoCalcolatoRichiestaDto, StatoRichiesta } from '../types';
+import { dataLeggibile } from '../../shared/condizioniSpillo';
+
+/** L13: il nome dello stato calcolato di una Richiesta nella partita. */
+const NOME_STATO: Record<StatoCalcolatoRichiestaDto['stato'], string> = { bloccata: 'Bloccata', disponibile: 'Disponibile', 'da-verificare': 'Da verificare', accettata: 'Accettata', completata: 'Completata', scaduta: 'Scaduta' };
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { SezioneConFregio } from '../components/shared/FregioSezione';
@@ -48,6 +53,9 @@ import { piatto } from '../utils/testo';
 import { ModuloRichiesta } from '../components/guida/ModuloRichiesta';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { TitoloSezione } from '../components/shared/TitoloSezione';
+import { DaApplicare } from '../components/partita/DaApplicare';
+import { conferma } from '../stores/confermaStore';
+import { GIORNI_AVVISO_SCADENZA_RICHIESTE as GIORNI_AVVISO } from '../../shared/richieste';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -88,8 +96,12 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
   /** Imposta lo stato della Richiesta nella partita (null la riapre), disattivando i comandi durante la richiesta; passa al genitore la Richiesta aggiornata o notifica l'errore. */
   const cambia = async (stato: StatoRichiesta | null) => {
     if (!partitaId) return;
+    // L13: una Richiesta «da verificare» si può accettare, ma prima si dice perché (sblocco o scadenza ancora solo nel testo della guida)
+    if (stato === 'accettata' && r.statoPartita?.stato === 'da-verificare'
+      && !(await conferma({ titolo: `Accettare «${r.nome}»?`, testo: `Lo sblocco o la scadenza non sono ancora dati verificati: ${r.statoPartita.motivi.join(' ')} Controlla nel gioco che sia davvero disponibile.`, etichetta: 'Accetta' }))) return;
     setOccupato(true);
-    try { onCambiata(await impostaStatoRichiesta(partitaId, r.chiave, stato)); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
+    // dopo il cambio di stato il server può aver creato o chiuso la proposta degli yen (decisione 3): «Applica» si rilegge subito
+    try { onCambiata(await impostaStatoRichiesta(partitaId, r.chiave, stato)); segnalaMutazioneEffetti(partitaId); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
   };
   return (
     <li className={`card flex min-w-0 flex-col gap-2 ${r.stato === 'completata' ? 'border-success/40 opacity-70' : ''} ${classiSuggerito(sugg.evidenziato('richieste', r.chiave))}`}>
@@ -99,8 +111,18 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
           <h3 className="m-0 testo-16 leading-tight">{r.nome}</h3>
           <span className="testo-12 text-text-muted">{r.areaNome ?? r.area}{r.piano ? ` · ${r.piano}` : ''}</span>
         </div>
-        {r.stato && <span className={`chip shrink-0 testo-12 ${r.stato === 'completata' ? '' : 'chip--attivo'}`}>{r.stato}</span>}
+        {r.statoPartita ? <span className={`chip shrink-0 testo-12 ${r.statoPartita.stato === 'accettata' || r.statoPartita.stato === 'disponibile' ? 'chip--attivo' : r.statoPartita.stato === 'da-verificare' ? 'border-warning text-warning' : ''}`}>{NOME_STATO[r.statoPartita.stato]}</span>
+          : r.stato && <span className={`chip shrink-0 testo-12 ${r.stato === 'completata' ? '' : 'chip--attivo'}`}>{r.stato}</span>}
       </div>
+      {/* L13: perché è bloccata, scaduta o da verificare (il server lo calcola, la pagina lo mostra); in scadenza entro una settimana lo dice */}
+      {r.statoPartita && r.statoPartita.motivi.length > 0 && (
+        <ul className={`m-0 flex flex-col gap-0.5 pl-4 testo-12 ${r.statoPartita.stato === 'bloccata' || r.statoPartita.stato === 'scaduta' || r.statoPartita.stato === 'da-verificare' ? 'text-warning' : 'text-text-secondary'}`}>
+          {r.statoPartita.motivi.map((m) => <li key={m}>{m}</li>)}
+        </ul>
+      )}
+      {r.statoPartita && r.statoPartita.giorniAllaScadenza !== null && r.statoPartita.giorniAllaScadenza <= GIORNI_AVVISO && r.statoPartita.stato !== 'completata' && r.statoPartita.stato !== 'bloccata' && (
+        <span className="testo-12 text-warning">{r.statoPartita.giorniAllaScadenza === 0 ? 'Scade oggi' : `Scade fra ${r.statoPartita.giorniAllaScadenza} ${r.statoPartita.giorniAllaScadenza === 1 ? 'giorno' : 'giorni'}`} ({dataLeggibile(r.statoPartita.scadenzaEffettiva!)})</span>
+      )}
       {sugg.evidenziato('richieste', r.chiave) && <TargaSuggerito motivo={sugg.motivo('richieste', r.chiave)} compatta />}
 
       {/* Il bersaglio è la ragione per cui si apre questa pagina prima di scendere: chi è, e a
@@ -111,6 +133,10 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
           {r.bersaglio.formaDemoniaca && <span className="text-text-secondary"> · {r.bersaglio.formaDemoniaca}</span>}
           {r.bersaglio.livello && <span className="text-text-muted"> · livello {r.bersaglio.livello}</span>}
         </span>
+        {/* L13: livello e affinità letti dalla scheda dell'Ombra del compendio (il server li risolve), detto in chiaro */}
+        {r.ombra && r.bersaglio.daOmbra && (r.bersaglio.daOmbra.livello || r.bersaglio.daOmbra.affinita) && (
+          <span className="testo-12 text-text-muted">{[r.bersaglio.daOmbra.livello ? 'Livello' : null, r.bersaglio.daOmbra.affinita ? 'affinità' : null].filter(Boolean).join(' e ')} dalla scheda dell’Ombra «{r.ombra.nome}»</span>
+        )}
         {(r.bersaglio.debolezze.length > 0 || r.bersaglio.resistenze.length > 0 || r.bersaglio.vulnerabileConfusione) && (
           <div className="flex flex-wrap gap-1">
             {r.bersaglio.debolezze.map((x, i) => <Affinita key={`d${i}`} testo={x} tipo="debole" />)}
@@ -121,27 +147,44 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
       </div>
 
       {r.confidente && <span className="testo-12 text-text-secondary">Confidente: <strong className="text-text">{r.confidente.nome}</strong>{r.confidente.rango ? ` · rango ${r.confidente.rango}` : ''}</span>}
+      {r.ombra && <span className="testo-12 text-text-secondary">Ombra del compendio: <strong className="text-text">{r.ombra.nome}</strong>{r.ombra.livello ? ` · livello ${r.ombra.livello}` : ''}</span>}
       {!!r.oggettiRicompensa?.length && <div className="min-w-0 testo-12"><span className="text-text-muted">Ricompense:</span><OggettiCollegati oggetti={r.oggettiRicompensa} /></div>}
+      {(r.yen || r.esperienza) && <span className="testo-12 text-text-secondary">{[r.yen ? `¥${r.yen.toLocaleString('it-IT')}` : null, r.esperienza ? `${r.esperienza.toLocaleString('it-IT')} PE` : null].filter(Boolean).join(' · ')}</span>}
       {r.ricompense.length > 0 && (r.oggettiRicompensa?.length
         ? <details className="testo-12 text-text-secondary"><summary className="touch">Indicazioni della guida sulle ricompense</summary><p className="m-0 whitespace-pre-line">{r.ricompense.join(', ')}</p></details>
         : <span className="testo-12 text-text-secondary"><span className="text-text-muted">Ricompense indicate dalla guida:</span> {r.ricompense.join(', ')}</span>)}
+
+      {/* L13 (decisione 3): le ricompense le applica la Richiesta completata. Gli yen: «Applica» qui (anche l'inversa, se la si riapre dopo
+          averli applicati); gli oggetti del catalogo sono fra gli oggetti ottenuti della partita, finché resta completata */}
+      {partitaId && !!r.yen && r.yen > 0 && <DaApplicare partitaId={partitaId} richiesta={r.chiave} />}
+      {partitaId && r.stato === 'completata' && !!r.oggettiRicompensa?.length && (
+        <CollegamentoVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Fra gli oggetti ottenuti"
+          aria-label="I suoi oggetti sono fra gli oggetti ottenuti: apri Partita, Denaro e squadra" to="/partita?scheda=squadra" />
+      )}
 
       <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="dettagli" dimensione={20} />} aria-expanded={aperta} onClick={() => setAperta((a) => !a)}
         titolo={<>{aperta ? 'Nascondi i dettagli' : 'Dettagli'}<FrecciaApertura aperto={aperta} /></>} />
       {aperta && (
         <div className="flex flex-col gap-1 testo-12 text-text-secondary">
           <span><span className="text-text-muted">Da:</span> {r.committente || '—'}</span>
-          <span><span className="text-text-muted">Disponibile dal</span> {r.disponibileDal || '—'}{r.scadenza ? ` · scadenza ${r.scadenza}` : ''}</span>
+          {r.condizioni.length > 0 && <span><span className="text-text-muted">Si sblocca:</span> {r.condizioni.map((c) => c.testo).join(' · ')}</span>}
+          {r.disponibileDal && <span><span className="text-text-muted">Disponibile dal (guida)</span> {r.disponibileDal}</span>}
+          {!r.condizioni.length && !r.disponibileDal && <span><span className="text-text-muted">Si sblocca:</span> da subito</span>}
+          {r.scadenzaData && <span><span className="text-text-muted">Scadenza</span> {dataLeggibile(r.scadenzaData)}{r.proroga ? ` · prorogata al ${dataLeggibile(r.proroga.data)} se ${r.proroga.condizioni.map((c) => c.testo).join(' e ') || 'vale la proroga'}` : ''}</span>}
+          {r.scadenza && <span><span className="text-text-muted">Scadenza (guida)</span> {r.scadenza}</span>}
           {r.note && <span>{r.note}</span>}
         </div>
       )}
 
       <div className="mt-auto flex flex-wrap items-center gap-1.5 pt-1">
-        {partitaId && r.stato !== 'accettata' && r.stato !== 'completata' && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="accettata" dimensione={20} />} titolo="Accettata" disabled={occupato} onClick={() => void cambia('accettata')} />}
+        {/* L13: «Accetta» solo se la Richiesta è disponibile nella partita, o da verificare con l'avviso (il server rifiuta il resto anche lui) */}
+        {partitaId && r.stato !== 'accettata' && r.stato !== 'completata' && (!r.statoPartita || r.statoPartita.accettabile) && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="accettata" dimensione={20} />} titolo="Accettata"
+          dettaglio={r.statoPartita?.stato === 'da-verificare' ? 'da verificare' : undefined} disabled={occupato} onClick={() => void cambia('accettata')} />}
         {partitaId && r.stato !== 'completata' && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="Completata" disabled={occupato} onClick={() => void cambia('completata')} />}
         {partitaId && r.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" disabled={occupato} onClick={() => void cambia(null)} />}
         {r.areaChiave && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Apri il Dedalo" to={`/guida/dungeon/mementos?area=${r.areaChiave}`} />}
         {r.confidente && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Confidente" to={`/confidenti/${r.confidente.chiave}`} />}
+        {r.ombra && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Ombra" aria-label={`Apri la scheda dell’Ombra «${r.ombra.nome}»`} to={`/guida/ombra/${encodeURIComponent(r.ombra.chiave)}`} />}
         {/* la Richiesta si corregge (o si elimina) dove la si legge (scelta dell'utente, 2026-10-11) */}
         {!IN_RILASCIO && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" aria-label={`Modifica la Richiesta «${r.nome}»`} onClick={onModifica} />}
       </div>

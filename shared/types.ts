@@ -1413,7 +1413,9 @@ export type EsitoRevisioneVoce = 'tieni' | 'rimetti' | 'fatto';
 export interface QuizVoceDto { attivita: string; nome: string; quiz: QuizAttivita; oggi: boolean }
 
 /** Un elemento che un'azione può collegare o nominare negli effetti. */
-export interface VoceElencoAzione { chiave: string; nome: string; dettaglio?: string }
+export interface VoceElencoAzione { chiave: string; nome: string; dettaglio?: string;
+  /** L13 (decisione 2): per film, attività e Richieste, gli yen che il dato porta già (prezzo, costo o paga, ricompensa); assente = nessuno. */
+  yen?: number }
 
 /** Gli elenchi da cui la finestra di un'azione sceglie collegamento ed effetti (`GET /api/compendio/percorso-elenchi`). */
 export interface ElenchiAzioneDto {
@@ -1443,6 +1445,9 @@ export interface ElenchiEffettiVoceDto {
   /** Inviti dei Confidenti: `chiave` è «confidente/MM-GG». */
   inviti: Array<{ chiave: string; confidente: string; confidenteNome: string; data: string | null; nota: string }>;
   persone: Array<{ id: number; nome: string; nomeIt: string; arcana: string; livello: number }>;
+  /** L13 (ondata 3): gli oggetti del catalogo (effetto «oggetto ricevuto», ricompense delle Richieste) e i trofei (effetto «trofeo»). */
+  oggetti?: Array<{ chiave: string; nome: string; categoria: string }>;
+  trofei?: Array<{ chiave: string; nome: string; tipo: string }>;
 }
 
 /** I campi di una voce della giornata che si scrivono (creandola o modificandola): tutti, dal testo agli effetti della spunta,
@@ -2286,7 +2291,12 @@ export interface RichiestaDto {
   area: string;
   areaChiave: string | null;
   piano: string;
-  bersaglio: { nome: string; livello: number | null; formaDemoniaca: string; debolezze: string[]; resistenze: string[]; vulnerabileConfusione: boolean };
+  bersaglio: { nome: string; livello: number | null; formaDemoniaca: string; debolezze: string[]; resistenze: string[]; vulnerabileConfusione: boolean;
+    /**
+     * Solo nelle risposte, con un'Ombra del compendio: che cosa del bersaglio viene dalla sua scheda e i campi propri salvati (che il modulo
+     * modifica e che valgono solo dove la scheda non sa: livello assente, nessuna affinità nota). Assente = tutto dai campi propri.
+     */
+    daOmbra?: { livello: boolean; affinita: boolean; propri: { livello: number | null; debolezze: string[]; resistenze: string[] } } };
   ricompense: string[];
   confidente: { chiave: string; nome: string; rango: number | null } | null;
   /** Il dedalo dei Memento (`dungeon_area`) in cui si svolge, e la sua posizione nel percorso. */
@@ -2298,6 +2308,67 @@ export interface RichiestaDto {
   note: string;
   fonte: string;
   stato: StatoRichiesta | null;
+  /** L13 (ondata 3): «Quando si sblocca», con il vocabolario unico delle condizioni (testo generato per mostrarle). */
+  condizioni: Array<import('./condizioniSpillo.js').RequisitoSpillo & { testo: string }>;
+  /** La scadenza come data di gioco (MM-GG) e la proroga, valida solo con le sue condizioni; null = non indicata (resta il testo `scadenza`). */
+  scadenzaData: string | null;
+  proroga: { data: string; condizioni: Array<import('./condizioniSpillo.js').RequisitoSpillo & { testo: string }> } | null;
+  /**
+   * Il bersaglio come Ombra del compendio: livello e affinità si leggono da lì (null = i campi propri di `bersaglio`). Il server li risolve
+   * dalla scheda dell'Ombra (livello, affinità della sua Persona con sopra le proprie: la stessa lettura del compendio delle Ombre) e li
+   * mette anche in `bersaglio`, che è quel che la pagina mostra; i campi propri restano salvati e valgono solo dove la scheda non sa
+   * (`bersaglio.daOmbra` dice che cosa viene dall'Ombra).
+   */
+  ombra: { chiave: string; nome: string; livello: number | null; debolezze: string[]; resistenze: string[] } | null;
+  /** Ricompense in yen e in PE (gli oggetti sono `oggettiRicompensa`, i testi rimasti `ricompense`). */
+  yen: number | null;
+  esperienza: number | null;
+  /** Solo con una partita: lo stato calcolato (Bloccata con il motivo, Disponibile, Accettata, Completata, Scaduta). */
+  statoPartita?: StatoCalcolatoRichiestaDto;
+}
+
+/** L13: lo stato di una Richiesta nella partita, calcolato da condizioni, scadenza e stato segnato (il client mostra, non valuta). */
+export interface StatoCalcolatoRichiestaDto {
+  /** `da-verificare`: nessuna condizione la blocca, ma lo sblocco o la scadenza sono ancora solo il testo della guida (non convertito, non
+   *  valutato): si può accettare, con l'avviso, e i motivi dicono il testo da verificare nel gioco. */
+  stato: 'bloccata' | 'disponibile' | 'da-verificare' | 'accettata' | 'completata' | 'scaduta';
+  /** Che cosa manca (bloccata), oppure perché è scaduta o da verificare. */
+  motivi: string[];
+  /** La scadenza che vale oggi (con la proroga se le sue condizioni sono vere), MM-GG. */
+  scadenzaEffettiva: string | null;
+  /** Giorni di gioco alla scadenza effettiva (0 = oggi), solo se nota e non passata. */
+  giorniAllaScadenza: number | null;
+  /** Vero se si può accettare adesso (da disponibile o da verificare). */
+  accettabile: boolean;
+}
+
+/**
+ * L13: il riepilogo leggero delle Richieste di una partita per la Home (`GET /api/partite/:id/richieste/riepilogo`): solo conteggi, dallo
+ * stesso stato calcolato della pagina delle Richieste (nessun bersaglio, ricompensa o dato di Jose).
+ */
+export interface RiepilogoRichiesteDto {
+  /** Le Richieste accettate e non ancora completate (né scadute). */
+  accettate: number;
+  /** Le Richieste ancora da fare (accettate, disponibili o da verificare) che scadono entro `giorniAvviso` giorni di gioco. */
+  inScadenza: number;
+  giorniAvviso: number;
+}
+
+/** L13: un oggetto del catalogo ottenuto nella partita, con le copie e da dove viene (`GET /api/partite/:id/oggetti-ottenuti`). */
+export interface OggettoOttenutoDto {
+  catalogoChiave: string;
+  /** Il nome nel catalogo (la chiave, se l'oggetto non c'è più). */
+  nome: string;
+  categoria: string | null;
+  quantita: number;
+  /** La voce del Diario spuntata (effetto «oggetto ricevuto») o la Richiesta completata che lo ha dato. */
+  origine: { tipo: 'voce'; voceUid: string; giorno: string | null; testo: string | null } | { tipo: 'richiesta'; chiave: string; nome: string };
+}
+
+/** L13: gli oggetti ottenuti nella partita: le righe per origine e il totale per oggetto (le copie dello stesso oggetto si sommano). */
+export interface OggettiOttenutiDto {
+  righe: OggettoOttenutoDto[];
+  totali: Array<{ catalogoChiave: string; nome: string; categoria: string | null; quantita: number }>;
 }
 
 export interface JoseDto {
@@ -2333,6 +2404,10 @@ export interface CitazioniRichiestaDto {
   requisiti: string[];
   /** Le azioni della giornata (`voce_giornata`) che la indicano (perdono il collegamento). */
   azioni: number;
+  /** L13: le voci del Diario con un effetto che la cita («Richiesta completata», «Sblocco»): restano, da correggere («Richiesta eliminata»). */
+  effetti: string[];
+  /** L13: in quante partite una voce spuntata l'ha sbloccata (lo sblocco se ne va con lei e torna col ripristino). */
+  sblocchi: number;
 }
 
 // ---- Dungeon: Palazzi e Dedali (Fase 7.1) ----

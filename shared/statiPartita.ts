@@ -88,6 +88,11 @@ export const STATI_PARTITA: readonly DefinizioneStato[] = [
   { chiave: 'squadra', nome: 'Ladro Fantasma', gruppo: 'Storia e progressi', origine: 'Partita → Denaro e squadra', operatori: [{ chiave: 'in-squadra', nome: 'in squadra', campi: [campo('membro', 'membro', 'Ladro')] }] },
   { chiave: 'richiesta', nome: 'Richiesta dei Mementos', gruppo: 'Storia e progressi', origine: 'Guida → Richieste', operatori: [{ chiave: 'completata', nome: 'completata', campi: [campo('richiesta', 'richiesta', 'Richiesta')] }] },
   { chiave: 'evento', nome: 'Evento di storia', gruppo: 'Storia e progressi', origine: 'Partita → Progressi', operatori: [{ chiave: 'avvenuto', nome: 'avvenuto', campi: [campo('evento', 'evento', 'Evento')] }] },
+  // L13 (decisioni 1 e 17): lo sblocco dato da un effetto «sblocco» di una voce del Diario spuntata
+  { chiave: 'sblocco', nome: 'Sblocco ricevuto', gruppo: 'Storia e progressi', origine: 'spunta della voce del Diario con l’effetto «Sblocco»', operatori: [
+    { chiave: 'richiesta', nome: 'della Richiesta', campi: [campo('chiave', 'richiesta', 'Richiesta')] },
+    { chiave: 'attivita', nome: 'dell’attività', campi: [campo('chiave', 'attivita', 'Attività o lavoro')] },
+  ] },
   { chiave: 'contatore', nome: 'Conteggio', gruppo: 'Storia e progressi', origine: 'Partita → Letture e giochi', operatori: [{ chiave: 'almeno', nome: 'almeno', campi: [campo('cosa', 'contatore', 'Cosa'), campo('almeno', 'almeno', 'Quanti')] }] },
   // — Guida —
   { chiave: 'libro', nome: 'Libro', gruppo: 'Guida', origine: 'Partita → Letture e giochi', operatori: [{ chiave: 'letto', nome: 'letto', campi: [campo('chiave', 'libro', 'Libro')] }] },
@@ -119,7 +124,7 @@ export const STATI_PARTITA: readonly DefinizioneStato[] = [
 export const STATO_DEL_TIPO: Record<Exclude<TipoCondizione, 'gruppo' | 'non'>, string> = {
   data: 'data-gioco', intervallo: 'data-gioco', fascia: 'fascia', piove: 'meteo', meteo: 'meteo', 'giorno-settimana': 'giorno-settimana',
   stagione: 'stagione', quartiere: 'quartiere', 'da-subito': 'da-subito', luogo: 'luogo', invito: 'invito', avviso: 'avviso', arco: 'arco',
-  'finestra-palazzo': 'finestra-palazzo', palazzo: 'palazzo', dote: 'dote', confidente: 'confidente', squadra: 'squadra', richiesta: 'richiesta', lettura: 'libro', articolo: 'articolo',
+  'finestra-palazzo': 'finestra-palazzo', palazzo: 'palazzo', dote: 'dote', confidente: 'confidente', squadra: 'squadra', richiesta: 'richiesta', sblocco: 'sblocco', lettura: 'libro', articolo: 'articolo',
   attivita: 'attivita', 'rango-cliente': 'rango-cliente', 'punti-negozio': 'punti-negozio', evento: 'evento', contatore: 'contatore',
   'pesca-sessione':'pesca-sessione',
   'persona-arcano': 'persona-arcano', 'persona-abilita': 'persona-abilita', spillo: 'spillo', 'voce-guida': 'voce-guida',
@@ -198,6 +203,7 @@ export function costruisciCondizione(scelta: SceltaCondizione): RequisitoSpillo 
     case 'confidente': return s(v.confidente) && n(v.rango) >= 1 && n(v.rango) <= 10 ? { tipo: 'confidente', confidente: s(v.confidente), rango: n(v.rango) } : null;
     case 'squadra': return s(v.membro) ? { tipo: 'squadra', membro: s(v.membro) } : null;
     case 'richiesta': return s(v.richiesta) ? { tipo: 'richiesta', richiesta: s(v.richiesta) } : null;
+    case 'sblocco': return s(v.chiave) && (scelta.operatore === 'richiesta' || scelta.operatore === 'attivita') ? { tipo: 'sblocco', bersaglio: scelta.operatore, chiave: s(v.chiave) } : null;
     case 'evento': return EVENTI_STORIA.some((e) => e.chiave === v.evento) ? { tipo: 'evento', evento: s(v.evento) } : null;
     case 'pesca-sessione': return ['esca-speciale','tentativo-residuo','guardiano-catturato','boss-catturato'].includes(s(v.dato))&&['si','no'].includes(scelta.operatore)?{tipo:'pesca-sessione',dato:s(v.dato) as 'esca-speciale'|'tentativo-residuo'|'guardiano-catturato'|'boss-catturato',valore:scelta.operatore==='si'}:null;
     case 'contatore': return CONTATORI.some((c) => c.chiave === v.cosa) && n(v.almeno) >= 1 ? { tipo: 'contatore', cosa: s(v.cosa) as ContatoreChiave, almeno: n(v.almeno) } : null;
@@ -239,6 +245,7 @@ export function scomponiCondizione(c: RequisitoSpillo): SceltaCondizione | null 
     case 'confidente': return { stato: 'confidente', operatore: 'almeno', valori: { confidente: c.confidente, rango: c.rango } };
     case 'squadra': return { stato: 'squadra', operatore: 'in-squadra', valori: { membro: c.membro } };
     case 'richiesta': return { stato: 'richiesta', operatore: 'completata', valori: { richiesta: c.richiesta } };
+    case 'sblocco': return { stato: 'sblocco', operatore: c.bersaglio, valori: { chiave: c.chiave } };
     case 'evento': return { stato: 'evento', operatore: 'avvenuto', valori: { evento: c.evento } };
     case 'pesca-sessione': return {stato:'pesca-sessione',operatore:c.valore?'si':'no',valori:{dato:c.dato}};
     case 'contatore': return { stato: 'contatore', operatore: 'almeno', valori: { cosa: c.cosa, almeno: c.almeno } };

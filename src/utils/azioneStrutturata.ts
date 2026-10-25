@@ -59,6 +59,10 @@ export function effettoCompleto(e: EffettoVoce): boolean {
     case 'articolo': return !!e.articolo;
     case 'invito': return !!e.invito;
     case 'persona': return e.persona >= 1;
+    case 'yen': return Number.isSafeInteger(e.importo) && e.importo !== 0;
+    case 'oggetto': return !!e.oggetto && e.quantita >= 1;
+    case 'trofeo': return !!e.trofeo;
+    case 'sblocco': return !!e.chiave;
     default: return true;
   }
 }

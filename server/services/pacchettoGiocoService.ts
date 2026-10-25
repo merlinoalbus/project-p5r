@@ -111,6 +111,12 @@ export const RIFERIMENTI_PARTITE: Riferimento[] = [
   { tabella: 'domanda_partita', colonna: 'domanda_id', entita: 'domanda', tabellaGioco: 'domanda', colonnaGioco: 'id' },
   { tabella: 'cruciverba_partita', colonna: 'data', entita: 'cruciverba', tabellaGioco: 'cruciverba', colonnaGioco: 'data' },
   { tabella: 'trofeo_partita', colonna: 'trofeo_chiave', entita: 'trofeo', tabellaGioco: 'trofeo', colonnaGioco: 'chiave' },
+  // L13 (utente 046): gli oggetti ricevuti dalle voci; un oggetto che sparisce dal catalogo lascia la riga orfana
+  { tabella: 'oggetto_ottenuto_partita', colonna: 'catalogo_chiave', entita: 'oggetto', tabellaGioco: 'catalogo_oggetto', colonnaGioco: 'chiave' },
+  // L13: gli sblocchi ricevuti (utente 046), uno per tipo di bersaglio; gli yen delle Richieste completate (utente 047)
+  { tabella: 'sblocco_partita', colonna: 'bersaglio_chiave', entita: 'Richiesta sbloccata', tabellaGioco: 'richiesta', colonnaGioco: 'chiave', filtro: "bersaglio_tipo = 'richiesta'" },
+  { tabella: 'sblocco_partita', colonna: 'bersaglio_chiave', entita: 'attività sbloccata', tabellaGioco: 'attivita', colonnaGioco: 'chiave', filtro: "bersaglio_tipo = 'attivita'" },
+  { tabella: 'da_applicare', colonna: 'causa_chiave', entita: 'Richiesta della proposta personale', tabellaGioco: 'richiesta', colonnaGioco: 'chiave', filtro: "causa_tipo = 'richiesta'" },
   { tabella: 'confidente_partita', colonna: 'confidente_chiave', entita: 'Confidente', tabellaGioco: 'confidente', colonnaGioco: 'chiave' },
   { tabella: 'regalo_partita', colonna: 'confidente_chiave', entita: 'Confidente', tabellaGioco: 'confidente', colonnaGioco: 'chiave' },
   { tabella: 'regalo_partita', colonna: 'catalogo_chiave', entita: 'oggetto', tabellaGioco: 'catalogo_oggetto', colonnaGioco: 'chiave', colonnaOpzionale: true },

@@ -285,9 +285,21 @@ export const DESCRIZIONI_PARTITE: DescrizioniArea = {
   },
   'PUT /api/partite/:id/richieste': {
     sommario: 'Stato di una Richiesta dei Memento',
-    descrizione: 'Imposta lo stato della Richiesta nella partita: `accettata`, `completata` o `null` per azzerarlo. Passare a «completata» da un altro stato registra l\'evento `richiesta-completata` nello storico.',
-    risposta: '`RichiestaDto` con lo stato nella partita',
-    errori: [PARTITA, [404, 'richiesta-non-trovata']],
+    descrizione: 'Imposta lo stato della Richiesta nella partita: `accettata`, `completata` o `null` per azzerarlo. Passare a «completata» da un altro stato registra l\'evento `richiesta-completata` nello storico. L13: «accettata» solo se lo stato calcolato è disponibile o da verificare (409 `richiesta-non-disponibile` con il motivo: bloccata, scaduta o già completata); «completata» resta sempre possibile. Decisione 3: completandola, gli yen della Richiesta nascono come proposta «Applica» (`da_applicare` con causa `richiesta`) e i suoi oggetti del catalogo entrano fra gli oggetti ottenuti (`GET /api/partite/:id/oggetti-ottenuti`); togliendo il completamento la proposta aperta si chiude (quella applicata ha la sua inversa) e gli oggetti non ci sono più.',
+    risposta: '`RichiestaDto` con lo stato nella partita e `statoPartita` ricalcolato',
+    errori: [PARTITA, [404, 'richiesta-non-trovata'], [409, 'richiesta-non-disponibile']],
+  },
+  'GET /api/partite/:id/richieste/riepilogo': {
+    sommario: 'Riepilogo leggero delle Richieste della partita (per la Home)',
+    descrizione: 'L13: quante Richieste sono accettate (e non completate né scadute) e quante di quelle ancora da fare (accettate, disponibili o da verificare) scadono entro `giorniAvviso` giorni di gioco. Lo stesso stato calcolato di `GET /api/compendio/richieste?partita=…`, senza bersagli, ricompense, dedali né Jose. Sola lettura.',
+    risposta: '`RiepilogoRichiesteDto`',
+    errori: [PARTITA],
+  },
+  'GET /api/partite/:id/oggetti-ottenuti': {
+    sommario: 'Gli oggetti del catalogo ottenuti nella partita',
+    descrizione: 'L13: le voci del Diario spuntate con l\'effetto «oggetto ricevuto» (una riga per voce ed effetto, tolta togliendo la spunta) e le Richieste completate con i loro oggetti del catalogo (decisione 3: una volta sola, finché la Richiesta è completata; letti dallo stato completato, non copiati). `righe` con l\'origine di ogni oggetto, `totali` con le copie sommate per oggetto. Sola lettura.',
+    risposta: '`OggettiOttenutiDto`',
+    errori: [PARTITA],
   },
   'PUT /api/partite/:id/timbri': {
     sommario: 'Timbri raccolti in un\'area di un dedalo dei Memento',

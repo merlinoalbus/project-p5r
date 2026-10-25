@@ -10,7 +10,7 @@
 
 import { useState } from 'react';
 import { ARTICOLO_AOJIRU } from '../../../shared/acquisti';
-import type { EffettoVoce } from '../../../shared/effettiVoce';
+import { motivoYenGiaStrutturati, type DatoConYen, type EffettoVoce } from '../../../shared/effettiVoce';
 import { ATTIVITA_PESCA, REGOLA_PESCA } from '../../../shared/pesca';
 import { PulsanteVisivo, FrecciaApertura } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -38,6 +38,10 @@ function effettoNuovo(t: Tipo): EffettoVoce {
     case 'articolo': return { tipo: 'articolo', articolo: '' };
     case 'invito': return { tipo: 'invito', invito: '' };
     case 'persona': return { tipo: 'persona', persona: 0 };
+    case 'yen': return { tipo: 'yen', importo: 0 };
+    case 'oggetto': return { tipo: 'oggetto', oggetto: '', quantita: 1 };
+    case 'trofeo': return { tipo: 'trofeo', trofeo: '' };
+    case 'sblocco': return { tipo: 'sblocco', bersaglio: 'richiesta', chiave: '' };
   }
 }
 
@@ -45,12 +49,19 @@ const MENU: ReadonlyArray<{ tipo: Tipo; nome: string; categoria: string }> = [
   { tipo: 'fortuna', nome: 'Fortuna di Chihaya', categoria: 'dote' }, { tipo: 'invito', nome: 'Invito avvenuto', categoria: 'confidente' }, { tipo: 'persona', nome: 'Persona registrata', categoria: 'velluto' },
   { tipo: 'cruciverba', nome: 'Cruciverba', categoria: 'esame' }, { tipo: 'dote', nome: 'Dote in più', categoria: 'dote' }, { tipo: 'lettura', nome: 'Lettura in più', categoria: 'libro' },
   { tipo: 'turno', nome: 'Turno in più', categoria: 'lavoro' },
+  // L13 (ondata 3, decisioni 1 e 17)
+  { tipo: 'yen', nome: 'Yen', categoria: 'acquisto' }, { tipo: 'oggetto', nome: 'Oggetto ricevuto', categoria: 'acquisto' },
+  { tipo: 'trofeo', nome: 'Trofeo ottenuto', categoria: 'trama' }, { tipo: 'sblocco', nome: 'Sblocco', categoria: 'richiesta' },
 ];
 const AVANZATE: ReadonlyArray<{ tipo: Tipo; nome: string; categoria: string }> = [
   { tipo: 'acquisto', nome: 'Aojiru', categoria: 'acquisto' }, { tipo: 'pesca', nome: 'Pesca a Ichigaya', categoria: 'attivita' },
   { tipo: 'storia', nome: 'Evento di storia', categoria: 'trama' }, { tipo: 'domanda', nome: 'Domanda risposta', categoria: 'esame' },
   { tipo: 'richiesta', nome: 'Richiesta completata', categoria: 'richiesta' }, { tipo: 'articolo', nome: 'Articolo comprato', categoria: 'acquisto' },
 ];
+/** Gli yen che film, attività e Richieste portano già, dagli elenchi dell'editor (il server li calcola con `yenDeiDati`). */
+const yenDelDato = (el: ElenchiVoce, tipo: DatoConYen, chiave: string): number | undefined =>
+  (tipo === 'film' ? el.azione.film : tipo === 'attivita' ? el.azione.attivita : el.azione.richieste).find((x) => x.chiave === chiave)?.yen;
+
 const CATEGORIA_DI: Record<Tipo, string> = Object.fromEntries([...MENU, ...AVANZATE].map((m) => [m.tipo, m.categoria])) as Record<Tipo, string>;
 
 interface Props {
@@ -90,13 +101,17 @@ export function EffettiAggiuntivi({ valore, onCambia, elenchi, nomi }: Props) {
   };
 
   if (valore.effettiVoce === undefined) return null;
+  // L13 (decisione 2): un effetto «yen» accanto a un dato che porta già i suoi yen (acquisto, articolo, pesca, Richiesta completata, turno
+  // o film con il prezzo, o il collegamento della voce) si segnala SUBITO, con la stessa regola che il server applica al salvataggio
+  const motivoYen = motivoYenGiaStrutturati(righe.map((r) => r.effetto), { riferimento: valore.riferimento, yenDi: (tipo, chiave) => yenDelDato(elenchi, tipo, chiave) });
   const voceMenu = (m: { tipo: Tipo; nome: string; categoria: string }) => (
     <PulsanteVisivo key={m.tipo} tono="secondario" disposizione="colonna" icona={<IconaCategoria categoria={m.categoria} dimensione={48} />} titolo={m.nome} onClick={() => aggiungi(m.tipo)} />
   );
   return (
     <section className="flex flex-col gap-2" aria-label="Effetti aggiuntivi">
       <PulsanteVisivo className="self-start" icona={<IconaAzione chiave="dettagli" dimensione={22} />} aria-expanded={aperto} onClick={() => setAperto((a) => !a)}
-        titolo={<>Effetti aggiuntivi{aggiuntivi.length ? ` (${aggiuntivi.length})` : ''}<FrecciaApertura aperto={aperto} /></>} dettaglio="Fortuna, invito, Persona, cruciverba…" />
+        titolo={<>Effetti aggiuntivi{aggiuntivi.length ? ` (${aggiuntivi.length})` : ''}<FrecciaApertura aperto={aperto} /></>} dettaglio="Fortuna, invito, yen, oggetti, sblocchi…" />
+      {motivoYen && <p role="alert" className="m-0 rounded border border-warning p-2 testo-13 text-warning">{motivoYen}</p>}
       {aperto && (
         <div className="flex flex-col gap-2">
           {aggiuntivi.length === 0 && <p className="m-0 testo-12 text-text-muted">Nessun effetto aggiuntivo.</p>}

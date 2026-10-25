@@ -48,6 +48,7 @@ import { radiceCestinoPesca, riconciliaPescaDopoRipristino, TIPI_CESTINO_PESCA }
 import { verificaAttivitaPesca } from './vincoliAttivitaPesca.js';
 import { eventoPescaMarcato } from './pescaStorico.js';
 import { riconciliaEffettiDopoRipristino } from './motoreDiario.js';
+import { riconciliaBeneficiRichiesta } from './propostePartitaService.js';
 import { ripristinaOrdineVoce } from './giornataService.js';
 import { azioneEventoAcquistoV1 } from './storicoService.js';
 import type { ContenutoCestinoDto, EsitoRipristinoCestinoDto, MotivoSaltataCestinoDto, SaltataCestinoDto, TipoCestino, VoceCestinoDto, VoceCestinoUnificatoDto } from '../../shared/types.js';
@@ -151,6 +152,7 @@ const ETICHETTE: Record<string, readonly [uno: string, molti: string]> = {
   fortuna_partita: ['stato della Fortuna nelle partite', 'stati della Fortuna nelle partite'], effetto_stato_voce: ['stato segnato da una voce nelle partite', 'stati segnati dalle voci nelle partite'],
   esame_piazzamento_partita: ['piazzamento a un esame nelle partite', 'piazzamenti agli esami nelle partite'],
   confidente_invito: ['invito del Confidente', 'inviti dei Confidenti'],
+  oggetto_ottenuto_partita: ['oggetto ricevuto nelle partite', 'oggetti ricevuti nelle partite'], sblocco_partita: ['sblocco ricevuto nelle partite', 'sblocchi ricevuti nelle partite'],
 };
 
 /** Il nome per l'utente di `quante` righe di una tabella (al singolare per una sola). */
@@ -749,6 +751,8 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
         .flatMap((s) => s.esempi.map((e) => e.split(' · ')).filter((x) => x.length >= 2).map(([p, c]) => `${p}|${c}`)));
       riconciliaEffettiDopoRipristino(partita, [...voceUids], confidentiNonRimessi);
       riconciliaPescaDopoRipristino(partita);
+      // L13 (decisione 3): una Richiesta rimessa torna completata dove lo era: i suoi yen si riallineano (proposta «Applica» o niente se già nel saldo)
+      if (r.tipo === 'richiesta') riconciliaBeneficiRichiesta(partita, r.chiave);
     }
     const vicini = r.vicini_json ? JSON.parse(r.vicini_json) as ViciniCestino : null;
     if (r.tipo === 'voce-diario') ripristinaOrdineVoce(r.chiave, vicini);

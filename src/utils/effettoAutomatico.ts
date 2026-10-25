@@ -163,6 +163,8 @@ export interface NomiEffetti {
   libri: Map<string, string>; film: Map<string, string>; videogiochi: Map<string, string>; attivita: Map<string, string>; richieste: Map<string, string>;
   articoli: Map<string, ElenchiEffettiVoceDto['articoli'][number]>; domande: Map<number, ElenchiEffettiVoceDto['domande'][number]>;
   inviti: Map<string, ElenchiEffettiVoceDto['inviti'][number]>; persone: Map<number, ElenchiEffettiVoceDto['persone'][number]>;
+  /** L13: oggetti del catalogo e trofei, per chiave (assenti finché il server non li serve). */
+  oggetti?: Map<string, string>; trofei?: Map<string, string>;
 }
 
 const mappa = <T extends { chiave: string; nome: string }>(l: T[]): Map<string, string> => new Map(l.map((x) => [x.chiave, x.nome]));
@@ -172,6 +174,7 @@ export function nomiEffettiDa(e: ElenchiAzioneDto, x: ElenchiEffettiVoceDto): No
     libri: mappa(e.libri), film: mappa(e.film), videogiochi: mappa(e.videogiochi), attivita: mappa(e.attivita), richieste: mappa(e.richieste),
     articoli: new Map(x.articoli.map((a) => [a.chiave, a])), domande: new Map(x.domande.map((d) => [d.id, d])),
     inviti: new Map(x.inviti.map((i) => [i.chiave, i])), persone: new Map(x.persone.map((p) => [p.id, p])),
+    oggetti: mappa(x.oggetti ?? []), trofei: mappa(x.trofei ?? []),
   };
 }
 
@@ -202,6 +205,7 @@ export function fraseEffetto(e: EffettoVoce, n: NomiEffetti): string {
 const nomiFrase = (n: NomiEffetti): NomiFraseEffetto => ({
   domanda: (id) => n.domande.get(id)?.testo, richiesta: (k) => n.richieste.get(k), articolo: (k) => n.articoli.get(k),
   invito: (k) => n.inviti.get(k), persona: (id) => n.persone.get(id)?.nome,
+  oggetto: (k) => n.oggetti?.get(k), trofeo: (k) => n.trofei?.get(k), attivita: (k) => n.attivita.get(k),
 });
 
 /** Il nome di una famiglia di effetto, per le schede degli effetti aggiuntivi. */
@@ -209,4 +213,5 @@ export const NOME_FAMIGLIA_EFFETTO: Record<EffettoVoce['tipo'], string> = {
   dote: 'Dote in più', lettura: 'Lettura o gioco in più', turno: 'Turno in più', acquisto: 'Aojiru', pesca: 'Pesca a Ichigaya', fortuna: 'Fortuna di Chihaya',
   storia: 'Evento di storia', domanda: 'Domanda risposta', cruciverba: 'Cruciverba', richiesta: 'Richiesta completata', articolo: 'Articolo comprato',
   invito: 'Invito avvenuto', persona: 'Persona registrata',
+  yen: 'Yen', oggetto: 'Oggetto ricevuto', trofeo: 'Trofeo ottenuto', sblocco: 'Sblocco',
 };

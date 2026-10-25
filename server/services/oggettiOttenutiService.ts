@@ -1,0 +1,49 @@
+// ============================================================
+// oggettiOttenutiService — gli oggetti del catalogo ottenuti in una partita (L13, ondata 3, decisioni 1 e 3)
+// ============================================================
+//
+// Il registro degli oggetti ottenuti ha due fonti, e una lettura sola (questa), che il giocatore vede in Partita → Squadra e denaro:
+//   - le voci del Diario spuntate con l'effetto «oggetto ricevuto»: una riga per voce ed effetto (`utente.oggetto_ottenuto_partita`, scritta
+//     dalla spunta e tolta togliendola, `effettiDiStatoService`);
+//   - le Richieste completate (decisione 3: le ricompense di una Richiesta le applica solo la Richiesta completata): i suoi oggetti del catalogo
+//     (`ricompensa_oggetto`, fonte «richiesta»), una volta sola per Richiesta, finché è completata nella partita; togliendo il completamento non
+//     ci sono più. Si leggono dallo stato completato e non si copiano in un'altra tabella: un dato in un solo punto, nessuna copia da tenere
+//     allineata quando la Richiesta si corregge, nessun doppio se la si completa da una voce e poi a mano.
+// Le copie dello stesso oggetto si sommano nei totali. Sola lettura: nessuna scrittura, anche nel rilascio.
+// ============================================================
+
+import { prepared } from '../db/dbService.js';
+import { verificaPartita } from './verificaPartita.js';
+import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
+import type { OggettiOttenutiDto, OggettoOttenutoDto } from '../../shared/types.js';
+
+/** Gli oggetti ottenuti nella partita: le righe per origine (in ordine di giorno, poi le Richieste) e i totali per oggetto. */
+export function oggettiOttenutiPartita(partitaId: number): OggettiOttenutiDto {
+  verificaPartita(partitaId);
+  const catalogo = catalogoOggettiDisponibile();
+  const nome = catalogo ? 'c.nome' : 'NULL';
+  const categoria = catalogo ? 'c.categoria' : 'NULL';
+  const unisciCatalogo = (colonna: string) => (catalogo ? `LEFT JOIN main.catalogo_oggetto c ON c.chiave = ${colonna}` : '');
+  const daVoci = prepared(`SELECT o.catalogo_chiave, o.quantita, o.voce_uid, v.data, v.azione, ${nome} AS nome, ${categoria} AS categoria
+    FROM utente.oggetto_ottenuto_partita o LEFT JOIN main.voce_giornata v ON v.uid = o.voce_uid ${unisciCatalogo('o.catalogo_chiave')}
+    WHERE o.partita_id = ? ORDER BY v.data IS NULL, v.data, v.fascia = 'sera', v.ordine, o.creato_il, o.effetto_uid`).all(partitaId) as
+    Array<{ catalogo_chiave: string; quantita: number; voce_uid: string; data: string | null; azione: string | null; nome: string | null; categoria: string | null }>;
+  const daRichieste = catalogo ? prepared(`SELECT ro.catalogo_chiave, COALESCE(ro.quantita, 1) AS quantita, r.chiave, r.nome AS richiesta_nome, c.nome, c.categoria
+    FROM utente.richiesta_partita rp JOIN main.richiesta r ON r.chiave = rp.richiesta_chiave
+    JOIN main.ricompensa_oggetto ro ON ro.fonte_tipo = 'richiesta' AND ro.fonte_chiave = r.chiave ${unisciCatalogo('ro.catalogo_chiave')}
+    WHERE rp.partita_id = ? AND rp.stato = 'completata' ORDER BY r.ordine, ro.ordine, ro.catalogo_chiave`).all(partitaId) as
+    Array<{ catalogo_chiave: string; quantita: number; chiave: string; richiesta_nome: string; nome: string | null; categoria: string | null }> : [];
+  const righe: OggettoOttenutoDto[] = [
+    ...daVoci.map((o): OggettoOttenutoDto => ({ catalogoChiave: o.catalogo_chiave, nome: o.nome ?? o.catalogo_chiave, categoria: o.categoria, quantita: o.quantita,
+      origine: { tipo: 'voce', voceUid: o.voce_uid, giorno: o.data, testo: o.azione } })),
+    ...daRichieste.map((o): OggettoOttenutoDto => ({ catalogoChiave: o.catalogo_chiave, nome: o.nome ?? o.catalogo_chiave, categoria: o.categoria, quantita: o.quantita,
+      origine: { tipo: 'richiesta', chiave: o.chiave, nome: o.richiesta_nome } })),
+  ];
+  const totali = new Map<string, OggettiOttenutiDto['totali'][number]>();
+  for (const r of righe) {
+    const t = totali.get(r.catalogoChiave);
+    if (t) t.quantita += r.quantita;
+    else totali.set(r.catalogoChiave, { catalogoChiave: r.catalogoChiave, nome: r.nome, categoria: r.categoria, quantita: r.quantita });
+  }
+  return { righe, totali: [...totali.values()].sort((a, b) => a.nome.localeCompare(b.nome, 'it')) };
+}

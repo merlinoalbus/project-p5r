@@ -16,7 +16,7 @@ import { FilaScelta } from './FilaScelta';
 import { CampiAcquistoEffetto, EditorEffettoPescaVoce } from './EditorEffettiVoce';
 import { CATEGORIE_LETTURA, type CategoriaLettura } from '../../../shared/effettiAzione';
 import { DOTI_SOCIALI, type DoteChiave } from '../../../shared/doti';
-import type { EffettoVoce, RichiestaSalvaEffettiVoce } from '../../../shared/effettiVoce';
+import { BERSAGLI_SBLOCCO, QUANTITA_MASSIMA_EFFETTO, YEN_MASSIMI_EFFETTO, type BersaglioSblocco, type EffettoVoce, type RichiestaSalvaEffettiVoce } from '../../../shared/effettiVoce';
 import { dataGiocoTesto } from '../../utils/dateGioco';
 import { breve, conCorrente, opzioniArticoli, opzioniDomande, opzioniStoria, type ElenchiVoce } from '../../utils/opzioniEffetti';
 
@@ -65,6 +65,32 @@ export function NotePossibiliDote({ effetto: e, onCambia }: { effetto: Dote; onC
           })}
         </span>
       )}
+    </div>
+  );
+}
+
+/** L13: quante copie (1–999; decisione 6: facoltativa, 1 se non indicata). */
+export function CampoQuantita({ valore, onCambia }: { valore: number; onCambia: (q: number) => void }) {
+  return (
+    <label className="flex flex-col gap-1 testo-13">Copie
+      <input className="form-input min-h-11 w-24" type="number" inputMode="numeric" min={1} max={QUANTITA_MASSIMA_EFFETTO} step={1} value={valore}
+        onChange={(ev) => { const n = Math.trunc(Number(ev.target.value)); onCambia(Number.isFinite(n) ? Math.min(QUANTITA_MASSIMA_EFFETTO, Math.max(1, n)) : 1); }} />
+    </label>
+  );
+}
+
+/** L13: gli yen dell'effetto, ricevuti o spesi (l'importo è sempre positivo nel campo; il verso si sceglie a parte). */
+export function CampoYen({ importo, onCambia }: { importo: number; onCambia: (importo: number) => void }) {
+  const verso = importo < 0 ? 'spesi' : 'ricevuti';
+  const valore = Math.abs(importo);
+  return (
+    <div className="flex flex-col gap-2">
+      <FilaScelta etichetta="Yen" valore={verso} opzioni={[{ chiave: 'ricevuti', nome: 'Ricevuti' }, { chiave: 'spesi', nome: 'Spesi' }]} onCambia={(v) => onCambia(v === 'spesi' ? -valore : valore)} />
+      <label className="flex flex-col gap-1 testo-13">Importo in yen
+        <input className="form-input min-h-11 w-40" type="number" inputMode="numeric" min={1} max={YEN_MASSIMI_EFFETTO} step={1} value={valore || ''}
+          onChange={(ev) => { const n = Math.min(YEN_MASSIMI_EFFETTO, Math.max(0, Math.trunc(Number(ev.target.value) || 0))); onCambia(verso === 'spesi' ? -n : n); }} />
+      </label>
+      <p className="m-0 testo-12 text-text-secondary">Come le Doti, gli yen non si muovono da soli: spuntando la voce compare «Applica» sulla voce. Non si usa se la voce ha già un acquisto, una pesca o una Richiesta completata (i loro yen li porta quel dato).</p>
     </div>
   );
 }
@@ -133,7 +159,31 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
     case 'richiesta':
       return <Selettore etichetta="Richiesta" valore={e.richiesta} opzioni={conCorrente(azione.richieste, e.richiesta, 'Richiesta non più nell’elenco')} onCambia={(v) => onCambia({ tipo: 'richiesta', richiesta: v })} />;
     case 'articolo':
-      return <Selettore etichetta="Articolo del negozio" valore={e.articolo} opzioni={conCorrente(opzioniArticoli(effetti), e.articolo, 'Articolo non più nell’elenco')} onCambia={(v) => onCambia({ tipo: 'articolo', articolo: v })} />;
+      return (
+        <div className="flex flex-wrap items-end gap-2">
+          <Selettore className="min-w-[12rem] flex-1" etichetta="Articolo del negozio" valore={e.articolo} opzioni={conCorrente(opzioniArticoli(effetti), e.articolo, 'Articolo non più nell’elenco')} onCambia={(v) => onCambia(e.quantita ? { tipo: 'articolo', articolo: v, quantita: e.quantita } : { tipo: 'articolo', articolo: v })} />
+          <CampoQuantita valore={e.quantita ?? 1} onCambia={(q) => onCambia(q > 1 ? { tipo: 'articolo', articolo: e.articolo, quantita: q } : { tipo: 'articolo', articolo: e.articolo })} />
+        </div>
+      );
+    case 'yen':
+      return <CampoYen importo={e.importo} onCambia={(importo) => onCambia({ tipo: 'yen', importo })} />;
+    case 'oggetto':
+      return (
+        <div className="flex flex-wrap items-end gap-2">
+          <Selettore className="min-w-[12rem] flex-1" etichetta="Oggetto del catalogo" valore={e.oggetto} opzioni={conCorrente((effetti.oggetti ?? []).map((o) => ({ chiave: o.chiave, nome: o.nome, gruppo: o.categoria })), e.oggetto, 'Oggetto non più nel catalogo')} onCambia={(v) => onCambia({ ...e, oggetto: v })} />
+          <CampoQuantita valore={e.quantita} onCambia={(quantita) => onCambia({ ...e, quantita })} />
+        </div>
+      );
+    case 'trofeo':
+      return <Selettore etichetta="Trofeo" valore={e.trofeo} opzioni={conCorrente((effetti.trofei ?? []).map((t) => ({ chiave: t.chiave, nome: t.nome, dettaglio: t.tipo })), e.trofeo, 'Trofeo non più nell’elenco')} onCambia={(v) => onCambia({ tipo: 'trofeo', trofeo: v })} />;
+    case 'sblocco':
+      return (
+        <div className="flex flex-col gap-2">
+          <FilaScelta etichetta="Che cosa sblocca" valore={e.bersaglio} opzioni={BERSAGLI_SBLOCCO.map((b) => ({ chiave: b.chiave, nome: b.nome }))} onCambia={(v) => { if (v !== e.bersaglio) onCambia({ tipo: 'sblocco', bersaglio: v as BersaglioSblocco, chiave: '' }); }} />
+          <Selettore etichetta={e.bersaglio === 'richiesta' ? 'Richiesta' : 'Attività o lavoro'} valore={e.chiave} opzioni={conCorrente(e.bersaglio === 'richiesta' ? azione.richieste : azione.attivita, e.chiave, 'Non più nell’elenco')} onCambia={(v) => onCambia({ ...e, chiave: v })} />
+          <p className="m-0 testo-12 text-text-secondary">Spuntando la voce lo sblocco vale nella partita; togliendo la spunta torna bloccato. Perché blocchi, la Richiesta o l’attività deve avere la condizione «Sblocco ricevuto».</p>
+        </div>
+      );
     case 'invito':
       return <Selettore etichetta="Invito del Confidente" valore={e.invito} opzioni={conCorrente(effetti.inviti.map((i) => ({ chiave: i.chiave, nome: i.data ? dataGiocoTesto(i.data) : (i.nota || 'Invito'), dettaglio: i.nota ? breve(i.nota, 40) : undefined, gruppo: i.confidenteNome })), e.invito, 'Invito non più nell’elenco')}
         onCambia={(v) => onCambia({ tipo: 'invito', invito: v })} />;

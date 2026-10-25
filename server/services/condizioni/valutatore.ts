@@ -256,6 +256,20 @@ export function valutaCondizione(r: RequisitoDisponibilita, indice: number, st: 
       const visibile = st.nomiRichieste?.get(chiave) ?? r.richiesta;
       return ok ? esito('richiesta', 'verde', `Richiesta «${visibile}» completata`) : esito('richiesta', 'rosso', `Richiesta «${visibile}» non risulta completata (Guida → Richieste)`);
     }
+    case 'sblocco': {
+      // L13 (decisioni 1 e 17): lo sblocco lo dà soltanto la spunta di una voce del Diario con l'effetto «sblocco». Il bersaglio deve
+      // esistere (altrimenti grigio, da correggere). Finché NESSUNA voce della guida dà questo sblocco la condizione non blocca (grigio,
+      // `bloccante: false`): un dato non ancora collegato non chiude un lavoro o una Richiesta nelle partite in corso; collegata la voce,
+      // vale per davvero (rosso fino alla spunta, verde dopo; togliendo la spunta torna rosso).
+      const tabella = r.bersaglio === 'richiesta' ? 'richiesta' : 'attivita';
+      const nome = (prepared(`SELECT nome FROM ${tabella} WHERE chiave = ?`).get(r.chiave) as { nome: string } | undefined)?.nome;
+      if (!nome) return esito('sblocco', 'grigio', `${r.bersaglio === 'richiesta' ? 'La Richiesta' : 'L’attività'} «${r.chiave}» non c’è più: correggi quel che la cita`);
+      const chiave = `${r.bersaglio}:${r.chiave}`;
+      if (st.sblocchiRicevuti?.has(chiave)) return esito('sblocco', 'verde', `${nome}: sbloccata da una voce del Diario`);
+      const voce = prepared("SELECT v.data, v.azione FROM voce_effetto e JOIN voce_giornata v ON v.uid = e.voce_uid WHERE e.tipo = 'sblocco' AND e.chiave = ? ORDER BY v.data, v.ordine LIMIT 1").get(chiave) as { data: string; azione: string } | undefined;
+      if (!voce) return { ...esito('sblocco', 'grigio', `${nome}: nessuna voce del Diario dà ancora questo sblocco, quindi non blocca`), bloccante: false };
+      return esito('sblocco', 'rosso', `${nome}: non ancora sbloccata. Lo sblocca la voce del ${dataLeggibile(voce.data)} «${voce.azione.length > 70 ? `${voce.azione.slice(0, 69)}…` : voce.azione}», spuntandola`);
+    }
     case 'evento': {
       const nome = EVENTI_STORIA.find((e) => e.chiave === r.evento)?.nome ?? r.evento;
       if(EVENTI_PESCA.includes(r.evento as typeof EVENTI_PESCA[number])){

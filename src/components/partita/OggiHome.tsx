@@ -19,12 +19,35 @@ import { useNomeDelPosto } from '../../hooks/useNomeDelPosto';
 import { usePreferenzeStore } from '../../stores/preferenzeStore';
 import { PageState } from '../shared/PageState';
 import { FilaScorrevole } from '../shared/FilaScorrevole';
-import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { useCarica } from '../../hooks/useCarica';
+import { useRileggiAlCambio } from '../../hooks/useRileggiAlCambio';
+import { getRiepilogoRichieste } from '../../services/api';
 import { IconaAzione } from '../shared/IconaAzione';
 import { OggiGuida } from './OggiGuida';
 import { OggiMappa } from './OggiMappa';
 import { ScuolaOggi } from './ScuolaOggi';
 import type { PartitaDto } from '../../types';
+
+/**
+ * L13: le Richieste accettate nella partita e quante di quelle ancora da fare scadono a breve (stato calcolato dal server, rotta leggera
+ * `GET /api/partite/:id/richieste/riepilogo`: solo i conteggi); un tocco porta alla pagina delle Richieste. Si rilegge senza azzerarsi
+ * quando la partita cambia (una spunta che sblocca o completa una Richiesta, il cambio di giorno: `useRileggiAlCambio`, come la scuola).
+ * Niente se non ce n'è nessuna (non occupa posto); se la lettura non riesce lo dice, con «Riprova».
+ */
+function RichiesteOggi({ partita }: { partita: PartitaDto }) {
+  const dati = useCarica(() => getRiepilogoRichieste(partita.id), [partita.id]);
+  useRileggiAlCambio(dati.ricarica, partita);
+  if (dati.errore && !dati.dati) {
+    return <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Richieste non lette: riprova"
+      aria-label={`Le Richieste non si sono potute leggere (${dati.errore}): riprova`} onClick={() => void dati.ricarica()} />;
+  }
+  const r = dati.dati;
+  if (!r || (!r.accettate && !r.inScadenza)) return null;
+  const parti = [r.accettate ? `${r.accettate} ${r.accettate === 1 ? 'accettata' : 'accettate'}` : null, r.inScadenza ? `${r.inScadenza} in scadenza` : null].filter(Boolean);
+  return <CollegamentoVisivo tono={r.inScadenza ? 'secondario' : 'fantasma'} compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} to="/guida/richieste"
+    titolo={`Richieste: ${parti.join(' · ')}`} aria-label={`Richieste: ${parti.join(', ')}${r.inScadenza ? ` (entro ${r.giorniAvviso} giorni)` : ''}. Apri le Richieste`} />;
+}
 
 interface Props {
   partita: PartitaDto;
@@ -83,6 +106,8 @@ export function OggiHome({ partita, testa }: Props) {
           <FilaScorrevole className="items-center gap-x-3 gap-y-1 shrink-0">
             <h2 className="m-0 font-display testo-20 uppercase">Oggi</h2>
             {guidaPronta && oggi.giorno && <ScuolaOggi partita={partita} giorno={oggi.giorno.giorno} soloDelGiorno />}
+            {/* L13 (ondata 3): le Richieste accettate e quelle in scadenza, sulla stessa riga: l'intestazione non cresce */}
+            <RichiesteOggi partita={partita} />
           </FilaScorrevole>
           {/* L5 (LAY5-1): l'area interna della guida solo dove c'è altezza; altrove la guida cresce con la pagina */}
           <div className={riempi ? 'flex-1 min-h-0 riempi-figli' : undefined}>
