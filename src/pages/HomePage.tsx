@@ -135,6 +135,7 @@ export function HomePage() {
   const attiva = usePartitaStore((s) => s.attiva);
   const caricata = usePartitaStore((s) => s.caricata);
   const errore = usePartitaStore((s) => s.errore);
+  const caricamento = usePartitaStore((s) => s.caricamento);
   const carica = usePartitaStore((s) => s.carica);
   return (
     <div className="home flex flex-col gap-3">
@@ -142,11 +143,12 @@ export function HomePage() {
       {attiva ? (
         <HomeConPartita key={attiva.id} partita={attiva} />
       ) : errore ? (
-        // R12-01/4: l'elenco non è arrivato: non si dice «nessuna partita» (e non si invita a crearne una seconda)
+        // R12-01/4: l'elenco non è arrivato: non si dice «nessuna partita» (e non si invita a crearne una seconda). La schermata resta
+        // anche mentre «Riprova» rilegge (lo store tiene l'errore fino all'esito) e il pulsante è disabilitato finché la lettura è in corso
         <VistaErrore
           titolo="Partite non caricate"
           spiegazione={`Non riesco a leggere le tue partite: ${errore}. Non significa che non ne hai: riprova.`}
-          azioni={<AzioneRiprova onClick={() => void carica()} />}
+          azioni={<AzioneRiprova inCorso={caricamento} onClick={() => { if (!caricamento) void carica(); }} />}
         />
       ) : !caricata ? (
         <div className="flex items-center justify-center min-h-[40vh]"><Spinner size={32} /></div>

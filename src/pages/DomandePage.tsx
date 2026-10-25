@@ -16,6 +16,7 @@ import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
+import { conferma } from '../stores/confermaStore';
 import { avvisaDotiDaSegnare } from '../utils/dotiDaSegnare';
 import { seGiornoAvanzato } from '../utils/giornoAvanzato';
 import { useSuggerimentiStore } from '../stores/suggerimentiStore';
@@ -57,6 +58,13 @@ function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: D
   /** Segna la domanda fatta o no nella partita, chiedendo la nota di Conoscenza solo quando la si segna fatta e la ricompensa la prevede; passa al genitore l'elenco restituito, ricorda le Doti da segnare o notifica l'errore. */
   const segna = async (fatta: boolean) => {
     if (!partitaId) return;
+    // con la voce del Diario collegata togliere la spunta è lo stesso gesto che la toglie alla voce: se la voce aveva applicato Doti
+    // (la Conoscenza) si annullano, senza altro avviso. Una conferma prima, come per ogni gesto che porta via qualcosa
+    if (!fatta && d.voceUid && !(await conferma({
+      titolo: 'Togliere la spunta?',
+      testo: 'Questa domanda è segnata anche dalla voce del Diario: togliendo la spunta si toglie anche quella della voce e si annullano le Doti che la voce aveva applicato (la Conoscenza), con il ricalcolo dei punti e dei ranghi.',
+      etichetta: 'Togli la spunta',
+    }))) return;
     setOccupato(true);
     try {
       const { giornoAvanzato, ...esito } = await impostaDomandaFatta(partitaId, d.id, fatta, fatta && daConoscenza);

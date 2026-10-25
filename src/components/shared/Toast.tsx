@@ -23,7 +23,7 @@ const TOAST_BORDER: Record<NotificationType, string> = {
  * ancorato che scende nella sua zona. In basso coprirebbe i pulsanti («Riapri» subito dopo «Ottenuto»), in alto la barra della
  * mappa: dove va copre solo la mappa, per qualche secondo. */
 export function ToastContainer() {
-  const { notifications, removeNotification } = useNotificationStore(useShallow((s) => ({ notifications: s.notifications, removeNotification: s.removeNotification })));
+  const { notifications, removeNotification, chiudiPersistenti } = useNotificationStore(useShallow((s) => ({ notifications: s.notifications, removeNotification: s.removeNotification, chiudiPersistenti: s.chiudiPersistenti })));
   const coda = useRef<HTMLDivElement | null>(null);
   const [posto, setPosto] = useState<PostoCoda>({ bottom: null, aSinistra: false });
   const visibile = notifications.length > 0;
@@ -66,16 +66,23 @@ export function ToastContainer() {
   // Prima l'`alert` stava dentro lo `status` e poteva essere annunciato due volte o per niente.
   const comuni = notifications.filter((n) => n.type !== 'error');
   const errori = notifications.filter((n) => n.type === 'error');
+  // errori e avvisi non si chiudono da soli: con più di uno a schermo un solo gesto li chiude tutti
+  const persistenti = notifications.filter((n) => (n.duration ?? 0) <= 0).length;
   return createPortal(
     <div>
-      {/* tanti errori ancora aperti non devono uscire dallo schermo: la coda scorre dentro se stessa */}
-      <div ref={coda} className="coda-notifiche fixed bottom-20 lg:bottom-5 right-5 flex flex-col z-[9999] max-h-[70vh] overflow-y-auto overscroll-contain" style={stile}>
+      {/* tanti errori ancora aperti non devono uscire dallo schermo: la coda scorre dentro se stessa (più bassa sul telefono, dove lo schermo è poco) */}
+      <div ref={coda} className="coda-notifiche fixed bottom-20 lg:bottom-5 right-5 flex flex-col z-[9999] max-h-[45vh] md:max-h-[70vh] overflow-y-auto overscroll-contain" style={stile}>
         <div role="status" aria-live="polite" className="flex flex-col gap-2">
           {comuni.map((n) => <Notifica key={n.id} n={n} chiudi={removeNotification} />)}
         </div>
         <div role="alert" className={`flex flex-col gap-2${errori.length > 0 && comuni.length > 0 ? ' mt-2' : ''}`}>
           {errori.map((n) => <Notifica key={n.id} n={n} chiudi={removeNotification} />)}
         </div>
+        {persistenti > 1 && (
+          <button type="button" className="btn btn-secondary btn-sm touch self-end mt-2 shrink-0" onClick={chiudiPersistenti}>
+            Chiudi tutti ({persistenti})
+          </button>
+        )}
       </div>
     </div>,
     document.body,

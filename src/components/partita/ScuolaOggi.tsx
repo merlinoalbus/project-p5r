@@ -11,6 +11,7 @@
 
 import { useMemo, useState } from 'react';
 import { useCarica } from '../../hooks/useCarica';
+import { useRileggiAlCambio } from '../../hooks/useRileggiAlCambio';
 import { getCruciverba, getDomande } from '../../services/api';
 import { Modal } from '../shared/Modal';
 import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
@@ -42,6 +43,10 @@ export function ScuolaOggi({ partita, giorno: giornoVisto, soloDelGiorno }: Prop
   const [aperta, setAperta] = useState<Finestra | null>(null);
   const domande = useCarica(() => getDomande(partita.id), [partita.id]);
   const cruciverba = useCarica(() => getCruciverba(partita.id), [partita.id]);
+  // lo stato «fatto» di una domanda o del cruciverba cambia con la partita (una spunta dal Diario, dalla Guida o il cambio di giorno
+  // mentre questa riga è in vista): si rileggono senza azzerare, così i pulsanti non spariscono e non restano al valore del primo caricamento
+  useRileggiAlCambio(domande.ricarica, partita);
+  useRileggiAlCambio(cruciverba.ricarica, partita);
   const giorno = giornoVisto ?? partita.dataGioco;
   // cambiando giorno la finestra aperta si chiude (senza rimontare il componente, che rileggerebbe gli elenchi)
   const [giornoPrima, setGiornoPrima] = useState(giorno);

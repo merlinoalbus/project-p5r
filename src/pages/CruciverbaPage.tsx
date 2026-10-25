@@ -13,6 +13,7 @@ import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
+import { conferma } from '../stores/confermaStore';
 import { avvisaDotiDaSegnare } from '../utils/dotiDaSegnare';
 import { seGiornoAvanzato } from '../utils/giornoAvanzato';
 import { useSuggerimentiStore } from '../stores/suggerimentiStore';
@@ -44,6 +45,13 @@ function Cruciverba({ c, partitaId, onCambiato, onCorretto, evidenzia }: { c: Cr
   /** Segna il cruciverba risolto o no nella partita, disattivando la spunta durante la richiesta; passa al genitore la riga aggiornata e ricorda le note di Doti da segnare, oppure notifica l'errore. */
   const cambia = async (fatto: boolean) => {
     if (!partitaId) return;
+    // con la voce del Diario collegata togliere la spunta toglie anche quella della voce e annulla le Doti che aveva applicato
+    // (la Conoscenza): una conferma prima, come per ogni gesto che porta via qualcosa
+    if (!fatto && c.voceUid && !(await conferma({
+      titolo: 'Togliere la spunta?',
+      testo: 'Questo cruciverba è segnato anche dalla voce del Diario: togliendo la spunta si toglie anche quella della voce e si annullano le Doti che la voce aveva applicato (la Conoscenza), con il ricalcolo dei punti e dei ranghi.',
+      etichetta: 'Togli la spunta',
+    }))) return;
     setOccupato(true);
     try {
       const { giornoAvanzato, ...esito } = await impostaCruciverba(partitaId, c.giorno, fatto);

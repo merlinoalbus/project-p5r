@@ -47,6 +47,7 @@ export function MainLayout() {
   const sfondo = useAsset('sfondi/pattern-nero');
   const location = useLocation();
   const allarmeAttivo = usePartitaStore((s) => !!s.attiva?.allarmeAttivo);
+  const haAttiva = usePartitaStore((s) => s.attiva !== null);
   const sfondoSezione = useAsset(sfondoPerPercorso(location.pathname, allarmeAttivo));
   const icona = useAsset('identita/icona-32');
   // Da quale pagina si entra nelle mappe: «Chiudi» di visore ed editor ci riporta lì (`utils/ritornoMappe`).
@@ -77,8 +78,9 @@ export function MainLayout() {
       <Topbar />
       {/* UI-ASSET-01: una sola riga, solo quando sul server c'è un'app più nuova (mai un ricaricamento da sola) */}
       <AvvisoNuovaVersione />
-      {/* R12-01/4: l'elenco delle partite non caricato si dichiara con «Riprova» (la Home ha già la sua schermata d'errore) */}
-      {location.pathname !== '/' && <AvvisoPartiteNonCaricate />}
+      {/* R12-01/4: l'elenco delle partite non caricato si dichiara con «Riprova». La Home (percorso «/home», «/» la rimanda lì) senza
+          partita attiva ha già la sua schermata d'errore a tutta pagina; con una partita attiva mostra i dati vecchi, quindi la striscia serve anche lì */}
+      {(!['/', '/home'].includes(location.pathname) || haAttiva) && <AvvisoPartiteNonCaricate />}
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
         <main className="flex-1 overflow-y-auto p-4 lg:p-5 pb-24 lg:pb-5 flex flex-col">

@@ -21,7 +21,7 @@ export function AvvisoPartiteNonCaricate() {
       <span className="flex-1 min-w-0 line-clamp-2 break-words leading-tight text-text">
         Partite non caricate: {errore}. Quel che vedi potrebbe non essere la tua partita.
       </span>
-      <span className="shrink-0"><AzioneRiprova tono="secondario" onClick={() => { if (!caricamento) void carica(); }} /></span>
+      <span className="shrink-0"><AzioneRiprova tono="secondario" inCorso={caricamento} onClick={() => { if (!caricamento) void carica(); }} /></span>
     </div>
   );
 }
