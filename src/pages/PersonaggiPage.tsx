@@ -3,7 +3,7 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { getPersonaggi, getPersone } from '../services/api';
+import { getPersonaggi, getPersone, URL_PERSONAGGI, urlPersone } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useSchede } from '../hooks/useSchede';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -77,11 +77,11 @@ function Personaggio({ p, idCompendio, onModificato }: { p: PersonaggioDto; idCo
  */
 export function PersonaggiPage() {
   useDocumentTitle('Personaggi');
-  const dati = useCarica(() => getPersonaggi(), []);
+  const dati = useCarica(() => getPersonaggi(), [], { cacheUrl: URL_PERSONAGGI });
   const d = dati.dati;
   const [gruppo, setGruppo] = useState<string>('');
   const perChiave = useMemo(() => new Map((d?.personaggi ?? []).map((p) => [p.chiave, p])), [d]);
-  const compendio = useCarica(() => getPersone(), []);
+  const compendio = useCarica(() => getPersone(), [], { cacheUrl: urlPersone() });
   const idCompendio = useMemo(() => new Map((compendio.dati ?? []).flatMap((p) => [[p.nomeIt, p.id] as [string, number], [p.nome, p.id] as [string, number], [p.nomeIt.toLowerCase(), p.id] as [string, number]])), [compendio.dati]);
   const gruppi = useMemo(() => (d?.gruppi ?? []).filter((g) => !gruppo || g.nome === gruppo), [d, gruppo]);
   // «Tutti» è la chiave vuota

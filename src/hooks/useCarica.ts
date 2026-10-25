@@ -2,8 +2,19 @@
 // useCarica — caricamento asincrono con stato uniforme (dati, caricamento, errore, ricarica)
 // ============================================================
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { notifica } from '../stores/notificationStore';
+import { leggiCacheGioco } from '../services/api/cacheGioco';
+
+/** Nel rilascio i contenuti sono fissi (condizione costante nello stesso modulo, come negli altri file: vedi progetto delle due istanze §7). */
+const CONTENUTI_FISSI = import.meta.env.VITE_MODALITA === 'rilascio';
+
+/** Opzioni di `useCarica`. */
+export interface OpzioniCarica {
+  /** L'indirizzo (come in `apiGetGioco`) di cui `carica` restituisce ESATTAMENTE il contenuto, per i soli dati di gioco senza partita:
+   *  l'ultima lettura in cache si mostra subito e poi si rilegge in silenzio. Non si passa se `carica` trasforma o unisce risposte. */
+  cacheUrl?: string | null;
+}
 
 interface Stato<T> {
   dati: T | null;
@@ -47,8 +58,13 @@ const MAX_RIAVVII = 2;
  * Una rilettura fallita (stesse dipendenze, dati già presenti) **non cancella i dati**: restano a schermo e l'errore va in
  * `erroreRilettura` e in una notifica. Solo un caricamento senza dati precedenti produce `errore` (la schermata «Riprova»).
  */
-export function useCarica<T>(carica: () => Promise<T>, dipendenze: unknown[]): Stato<T> {
+export function useCarica<T>(carica: () => Promise<T>, dipendenze: unknown[], opzioni?: OpzioniCarica): Stato<T> {
   const chiave = JSON.stringify(dipendenze);
+  const cacheUrl = opzioni?.cacheUrl ?? null;
+  // L'ultima lettura in cache di quell'indirizzo (una copia), presa una volta per indirizzo: è il dato mostrato subito, prima che
+  // arrivi la rilettura. Resta `undefined` per ogni lettura senza `cacheUrl` e per quelle mai fatte o svuotate da una scrittura.
+  const daCache = useMemo(() => leggiCacheGioco<T>(cacheUrl), [cacheUrl]);
+  const daCacheRef = useRef(daCache);
   const [tick, setTick] = useState(0);
   const [esito, setEsito] = useState<Esito<T> | null>(null);
   const caricaRef = useRef(carica);
@@ -64,6 +80,7 @@ export function useCarica<T>(carica: () => Promise<T>, dipendenze: unknown[]): S
 
   useEffect(() => {
     caricaRef.current = carica;
+    daCacheRef.current = daCache;
   });
 
   /** Scrive l'esito nello stato e nel riferimento sincrono. */
@@ -103,13 +120,23 @@ export function useCarica<T>(carica: () => Promise<T>, dipendenze: unknown[]): S
       attese.current = attese.current.filter((a) => a.tick > tick);
       for (const a of pronte) a.risolvi();
     };
-    caricaRef
-      .current()
+    // Nel rilascio i contenuti sono fissi: la prima lettura di una chiave già in cache non rifà la rete (l'edizione nuova cambia
+    // la versione dell'app e ricarica la pagina). Nella preparazione la cache si mostra subito e si rilegge in silenzio.
+    // Una `ricarica()` esplicita ha già un esito per questa chiave e va sempre in rete.
+    const dallaCache = daCacheRef.current;
+    const salvaRete = CONTENUTI_FISSI && dallaCache !== undefined && esitoRef.current?.chiave !== chiave;
+    (salvaRete ? Promise.resolve(dallaCache as T) : caricaRef.current())
       .then((d) => concludi({ chiave, tick, dati: d, errore: null, erroreRilettura: null }))
       .catch((err: unknown) => {
         const messaggio = err instanceof Error ? err.message : 'Errore di caricamento';
         const prima = esitoRef.current;
         // rilettura fallita con dati già mostrati per le stesse dipendenze: restano al loro posto, l'errore si dichiara a parte
+        // (anche se i dati mostrati sono quelli della cache: la pagina non sparisce per una rilettura silenziosa andata male)
+        if ((!prima || prima.chiave !== chiave) && dallaCache !== undefined) {
+          if (attivo) notifica('error', messaggio);
+          concludi({ chiave, tick, dati: dallaCache, errore: null, erroreRilettura: messaggio });
+          return;
+        }
         if (prima && prima.chiave === chiave && prima.dati !== null && prima.dati !== undefined) {
           // lo stesso messaggio che il client HTTP ha già notificato (se non era una lettura silenziosa) non si duplica: la coda
           // scarta le notifiche identiche ancora a schermo
@@ -134,8 +161,11 @@ export function useCarica<T>(carica: () => Promise<T>, dipendenze: unknown[]): S
     versioneRef.current += 1;
     const e = esitoRef.current;
     if (typeof d === 'function') {
-      if (!e || e.dati === null || e.dati === undefined) return;
-      scrivi({ ...e, dati: (d as (attuali: NonNullable<T>) => T)(e.dati as NonNullable<T>) });
+      // prima che arrivi un esito, i dati mostrati possono essere quelli della cache: l'aggiornamento parte da quelli
+      const attuali = e?.dati ?? daCacheRef.current;
+      if (attuali === null || attuali === undefined) return;
+      const nuovi = (d as (attuali: NonNullable<T>) => T)(attuali as NonNullable<T>);
+      scrivi(e ? { ...e, dati: nuovi } : { chiave, tick, dati: nuovi, errore: null, erroreRilettura: null });
       return;
     }
     scrivi(e ? { ...e, dati: d } : { chiave, tick, dati: d, errore: null, erroreRilettura: null });
@@ -143,7 +173,8 @@ export function useCarica<T>(carica: () => Promise<T>, dipendenze: unknown[]): S
 
   const aggiornato = esito !== null && esito.chiave === chiave && esito.tick === tick;
   // Durante una ricarica sulle stesse dipendenze si mantengono i dati precedenti visibili.
-  const dati = esito && esito.chiave === chiave ? esito.dati : null;
+  // Se per questa chiave non c'è ancora un esito si mostra la lettura in cache (se c'è): niente spinner, la rilettura arriva dopo.
+  const dati = esito && esito.chiave === chiave ? esito.dati : (daCache ?? null);
   return {
     dati,
     caricamento: !aggiornato,

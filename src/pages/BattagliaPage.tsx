@@ -6,7 +6,7 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { Fonte } from '../components/shared/VoceFonte';
 import { Selettore } from '../components/shared/Selettore';
 import { Link, useSearchParams } from 'react-router-dom';
-import { getBattaglia, getOmbre } from '../services/api';
+import { getBattaglia, getOmbre, URL_BATTAGLIA } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useSchede } from '../hooks/useSchede';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -337,7 +337,7 @@ function SchedaNemici({ d, onModificato }: { d: BattagliaDto; onModificato: () =
  */
 export function BattagliaPage() {
   useDocumentTitle('Aiuto in battaglia');
-  const dati = useCarica(() => getBattaglia(), []);
+  const dati = useCarica(() => getBattaglia(), [], { cacheUrl: URL_BATTAGLIA });
   const [params, setParams] = useSearchParams();
   const scheda = (SCHEDE.some(([k]) => k === params.get('scheda')) ? params.get('scheda') : 'ombre') as Scheda;
   const d = dati.dati;

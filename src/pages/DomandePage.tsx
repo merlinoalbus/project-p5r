@@ -28,6 +28,7 @@ import { dataGiocoTesto, meseGioco } from '../utils/dateGioco';
 import type { DomandaDto, DomandeDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
+import { useElementoDaIndirizzo } from '../hooks/useElementoDaIndirizzo';
 import { piatto } from '../utils/testo';
 import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
@@ -88,7 +89,8 @@ function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: D
           <input type="checkbox" className="w-5 h-5" checked={d.fatta} disabled={occupato} onChange={(e) => void segna(e.target.checked)} aria-label={`Domanda del ${dataGiocoTesto(d.data)} fatta`} />
         </label>
       )}
-      <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+      {/* `elemento-<chiave>`: dove la ricerca globale porta (`?elemento=`); l'`id` del `<li>` resta dell'ancora della data */}
+      <div id={`elemento-${d.chiave ?? d.id}`} className="flex-1 min-w-0 flex flex-col gap-0.5 scroll-mt-20">
         <div className="flex flex-wrap items-center gap-2">
           <strong className="tabular-nums">{dataGiocoTesto(d.data)}</strong>
           <span className="text-text-muted">{d.chi}</span>
@@ -127,6 +129,8 @@ export function DomandePage() {
   const [tipo, setTipo] = useState<FiltroTipo>('tutte');
   const [stato, setStato] = useState<FiltroStato>('tutte');
   const d = dati.dati;
+  // dalla ricerca globale: porta in vista la domanda citata da `?elemento=` a dati arrivati
+  useElementoDaIndirizzo(!!d);
   const q = piatto(ricerca.trim());
   const prossimeId = useMemo(() => new Set((d?.prossime ?? []).map((x) => x.id)), [d]);
   const visibili = useMemo(() => (d?.domande ?? []).filter((x) => {

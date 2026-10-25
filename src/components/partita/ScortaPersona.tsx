@@ -4,7 +4,7 @@
 
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { aggiornaPosseduta, aggiungiPosseduta, getCapienzaScorta, getPersone, getPossedute, getSkills, isApiError, rimuoviPosseduta, getCompendioPartita, registraPosseduta } from '../../services/api';
+import { aggiornaPosseduta, aggiungiPosseduta, getCapienzaScorta, getPersone, getPossedute, getSkills, isApiError, rimuoviPosseduta, getCompendioPartita, registraPosseduta, urlSkills } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { PageState, EmptyState } from '../shared/PageState';
@@ -432,7 +432,7 @@ function AggiungiPersonaModal({ aperta, onChiudi, onAggiunta, partitaId }: { ape
  * nel gioco (o il loro oblio) e skill, cercate nel catalogo escludendo i tratti e quelle già presenti. Tutto si salva insieme.
  */
 function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: { posseduta: PersonaPossedutaDto; partitaId: number; onChiudi: () => void; onSalvata: (p: PersonaPossedutaDto) => void }) {
-  const { dati: tutteSkill } = useCarica(() => getSkills(), []);
+  const { dati: tutteSkill } = useCarica(() => getSkills(), [], { cacheUrl: urlSkills() });
   const [livello, setLivello] = useState(posseduta.livello);
   const [inSquadra, setInSquadra] = useState(posseduta.inSquadra);
   const [note, setNote] = useState(posseduta.note);

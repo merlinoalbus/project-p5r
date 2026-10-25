@@ -5,7 +5,7 @@
 import { Link, useParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
-import { getSkill } from '../services/api';
+import { getSkill, urlSkill } from '../services/api';
 import { PageState } from '../components/shared/PageState';
 import { ElementoChip } from '../components/compendio/ElementoChip';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
@@ -22,7 +22,7 @@ const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 export function SkillDettaglioPage() {
   const { id } = useParams();
   const skillId = Number(id);
-  const { dati: s, inPrimoCaricamento, errore, ricarica } = useCarica(() => getSkill(skillId), [skillId]);
+  const { dati: s, inPrimoCaricamento, errore, ricarica } = useCarica(() => getSkill(skillId), [skillId], { cacheUrl: urlSkill(skillId) });
   useDocumentTitle(s ? s.nomeIt : 'Skill');
 
   return (

@@ -4,7 +4,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { cercaPerSkill, getSkills } from '../../services/api';
+import { cercaPerSkill, getSkills, urlSkills } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { SelettorePersona } from './SelettorePersona';
 import { SelettoreSkill } from './SelettoreSkill';
@@ -22,7 +22,7 @@ interface Props {
 
 /** Ricerca delle ricette per skill: skill scelte, risultato facoltativo, limite di livello; elenco per risultato e ricette. */
 export function CercaSkill({ persone, partitaId, livelloProtagonista, inScorta }: Props) {
-  const skill = useCarica(() => getSkills(), []);
+  const skill = useCarica(() => getSkills(), [], { cacheUrl: urlSkills() });
   const [scelte, setScelte] = useState<SkillRiassuntoDto[]>([]);
   const [risultato, setRisultato] = useState<PersonaRiassuntoDto | null>(null);
   const [soloLivello, setSoloLivello] = useState(false);

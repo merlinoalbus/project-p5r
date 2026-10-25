@@ -10,7 +10,7 @@ import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useMedia } from '../hooks/useMedia';
 import { useCarica } from '../hooks/useCarica';
-import { getPersone } from '../services/api';
+import { getPersone, urlPersone } from '../services/api';
 import { useGlossarioStore } from '../stores/glossarioStore';
 import { usePreferenzeStore } from '../stores/preferenzeStore';
 import { PageState, EmptyState } from '../components/shared/PageState';
@@ -56,7 +56,7 @@ export function CompendioPage() {
   const glossario = useGlossarioStore((s) => s.glossario);
   const vista = usePreferenzeStore((s) => s.vistaPersona);
   const impostaVista = usePreferenzeStore((s) => s.impostaVistaPersona);
-  const { dati, inPrimoCaricamento, errore, ricarica } = useCarica(() => getPersone({ delGruppo: true }), []);
+  const { dati, inPrimoCaricamento, errore, ricarica } = useCarica(() => getPersone({ delGruppo: true }), [], { cacheUrl: urlPersone({ delGruppo: true }) });
   const [params, setParams] = useSearchParams();
   // Lotto C: sul telefono le piastrelle diventano righe (arte piccola, nome, arcano e le dieci affinità su una riga):
   // da ~1,5 Persona per schermata a 4 e più, con le stesse informazioni.

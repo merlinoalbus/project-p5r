@@ -11,10 +11,10 @@ import type { IllustrazioneDto } from './types.js';
 
 /** Nell'ordine in cui il server costruisce l'indice e, a parità di punteggio, l'interfaccia mostra i gruppi. */
 export const TIPI_RICERCA = [
-  'confidente', 'persona', 'skill', 'oggetto', 'libro', 'film', 'videogioco',
+  'confidente', 'persona', 'ombra', 'skill', 'oggetto', 'libro', 'film', 'videogioco',
   'luogo', 'negozio', 'attivita', 'quartiere', 'citta', 'area', 'planimetria',
   'palazzo', 'infiltrazione', 'dedalo', 'area-dedalo', 'voce',
-  'richiesta', 'giorno', 'trofeo', 'sfida',
+  'richiesta', 'giorno', 'domanda', 'trofeo', 'sfida',
 ] as const;
 export type TipoRicerca = (typeof TIPI_RICERCA)[number];
 
@@ -22,6 +22,7 @@ export type TipoRicerca = (typeof TIPI_RICERCA)[number];
 export const ETICHETTE_RICERCA: Readonly<Record<TipoRicerca, { singolare: string; plurale: string }>> = {
   confidente: { singolare: 'Confidente', plurale: 'Confidenti' },
   persona: { singolare: 'Persona', plurale: 'Persona' },
+  ombra: { singolare: 'Ombra', plurale: 'Ombre' },
   skill: { singolare: 'Skill', plurale: 'Skill' },
   oggetto: { singolare: 'Oggetto', plurale: 'Oggetti' },
   libro: { singolare: 'Libro', plurale: 'Libri' },
@@ -41,6 +42,7 @@ export const ETICHETTE_RICERCA: Readonly<Record<TipoRicerca, { singolare: string
   voce: { singolare: 'Voce della guida', plurale: 'Voci della guida' },
   richiesta: { singolare: 'Richiesta', plurale: 'Richieste' },
   giorno: { singolare: 'Giorno', plurale: 'Giorni' },
+  domanda: { singolare: 'Domanda in classe', plurale: 'Domande in classe' },
   trofeo: { singolare: 'Trofeo', plurale: 'Trofei' },
   sfida: { singolare: 'Sfida', plurale: 'Sfide' },
 };

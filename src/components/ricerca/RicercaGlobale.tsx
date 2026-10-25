@@ -27,7 +27,7 @@ import { CampoRicerca } from '../shared/CampoRicerca';
 import { Spinner } from '../shared/PageState';
 import { IconBolt, IconClose, IconMask } from '../shared/icons';
 import {
-  IconAppunti, IconBersaglio, IconBussola, IconChiave, IconFilm, IconGioca, IconGioco, IconLibro, IconMedaglia, IconMessaggio, IconNegozio,
+  IconAppunti, IconBersaglio, IconBussola, IconCarte, IconChiave, IconFilm, IconGioca, IconGioco, IconLibro, IconMaschera, IconMedaglia, IconMessaggio, IconNegozio,
   IconOrologio, IconPersone, IconPianta, IconPosizione, IconRegalo, IconScudo,
 } from '../shared/iconeGuida';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
@@ -40,6 +40,7 @@ const ATTESA_MS = 200;
 const ICONE_TIPO: Readonly<Record<TipoRicerca, (dimensione: number) => ReactNode>> = {
   confidente: (s) => <IconPersone size={s} />,
   persona: (s) => <IconMask size={s} />,
+  ombra: (s) => <IconMaschera size={s} />,
   skill: (s) => <IconBolt size={s} />,
   oggetto: (s) => <IconRegalo size={s} />,
   libro: (s) => <IconLibro size={s} />,
@@ -59,6 +60,7 @@ const ICONE_TIPO: Readonly<Record<TipoRicerca, (dimensione: number) => ReactNode
   voce: (s) => <IconAppunti size={s} />,
   richiesta: (s) => <IconMessaggio size={s} />,
   giorno: (s) => <IconOrologio size={s} />,
+  domanda: (s) => <IconCarte size={s} />,
   trofeo: (s) => <IconMedaglia size={s} />,
   sfida: (s) => <IconBersaglio size={s} />,
 };

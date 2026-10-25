@@ -161,6 +161,32 @@ function urlImmagineCaricata(ambito: string, chiave: string, createdAt: string):
   return `/api/immagini/${ambito}/${encodeURIComponent(chiave)}/file?v=${encodeURIComponent(versioneImmagine(createdAt))}`;
 }
 
+/** L'immagine di una Persona del compendio (e di un'Ombra che ne ha una): la caricata, poi l'asset del gruppo o predefinito. */
+function immagineDellaPersona(nome: string, chiaveForma: string | null, ctx: ContestoIndice): IllustrazioneDto {
+  const caricata = ctx.caricatePersona.get(nome);
+  const gruppo = chiaveForma !== null && ctx.assetPersonaGruppo.has(slug(nome));
+  return caricata !== undefined ? { immagineUrl: urlImmagineCaricata('persona', nome, caricata), asset: null } : assetDi(gruppo ? 'persona-gruppo' : 'persona', nome);
+}
+
+/** I nomi altri di un'Ombra (array JSON di testi); un valore illeggibile non ne dà nessuno. */
+function nomiAltriDellOmbra(json: string): string[] {
+  try { const v = JSON.parse(json) as unknown; return Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []; } catch { return []; }
+}
+
+/** I testi delle risposte giuste di una domanda (`risposte_json`: [{ testo, domanda? }]); un JSON illeggibile non ne dà nessuno. */
+function risposteDellaDomanda(json: string): string[] {
+  try {
+    const v = JSON.parse(json) as unknown;
+    return Array.isArray(v) ? v.flatMap((r) => (r && typeof (r as { testo?: unknown }).testo === 'string' ? [(r as { testo: string }).testo] : [])) : [];
+  } catch { return []; }
+}
+
+/** Il testo di una domanda come nome di risultato: su una riga, al massimo 90 caratteri (con «…» se più lungo). */
+function accorcia(testo: string): string {
+  const uno = testo.replace(/\s+/g, ' ').trim();
+  return uno.length > 90 ? `${uno.slice(0, 89).trimEnd()}…` : uno;
+}
+
 // ---- I costruttori, uno per tipo ----
 
 /** Un costruttore di tipo del catalogo degli oggetti: categorie dentro o fuori dal gruppo, nascosto escluso, con le tabelle proprie dei libri e dei film. */
@@ -190,15 +216,21 @@ const COSTRUTTORI: Record<TipoRicerca, CostruttoreTipo> = {
     immagine: { immagineUrl: null, asset: ctx.assetConfidenti.has(`${c.chiave}-fedele`) ? `confidenti/${c.chiave}-fedele` : `confidenti/${c.chiave}` },
   })),
 
-  persona: (ctx) => q<{ id: number; nome: string; chiave_forma: string | null }>(ctx, 'SELECT id, nome, chiave_forma FROM persona ORDER BY id').map((p) => {
-    const caricata = ctx.caricatePersona.get(p.nome);
-    const gruppo = p.chiave_forma !== null && ctx.assetPersonaGruppo.has(slug(p.nome));
-    return {
-      tipo: 'persona', chiave: String(p.id), nome: t('persona', p.nome), casa: `/compendio/persona/${p.id}`,
-      altri: [p.nome, ...(ctx.sinonimi.sinonimi.get(chiaveSinonimo('persona', p.nome)) ?? [])],
-      immagine: caricata !== undefined ? { immagineUrl: urlImmagineCaricata('persona', p.nome, caricata), asset: null } : assetDi(gruppo ? 'persona-gruppo' : 'persona', p.nome),
-    };
-  }),
+  persona: (ctx) => q<{ id: number; nome: string; chiave_forma: string | null }>(ctx, 'SELECT id, nome, chiave_forma FROM persona ORDER BY id').map((p) => ({
+    tipo: 'persona', chiave: String(p.id), nome: t('persona', p.nome), casa: `/compendio/persona/${p.id}`,
+    altri: [p.nome, ...(ctx.sinonimi.sinonimi.get(chiaveSinonimo('persona', p.nome)) ?? [])],
+    immagine: immagineDellaPersona(p.nome, p.chiave_forma, ctx),
+  })),
+
+  // l'Ombra ha la sua pagina (`/guida/ombra/<chiave>`, la stessa di `casaOmbra` in ombreService); l'immagine è quella della sua Persona
+  // nel compendio (se ne ha una), con la stessa regola; i nomi altri e il nome della Persona permettono di trovarla anche con il nome della maschera
+  ombra: (ctx) => q<{ chiave: string; nome: string; nomi_altri_json: string; maschera_nota: string | null; persona_nome: string | null; chiave_forma: string | null }>(ctx,
+    `SELECT o.chiave, o.nome, o.nomi_altri_json, o.maschera_nota, p.nome AS persona_nome, p.chiave_forma
+     FROM ombra o LEFT JOIN persona p ON p.id = o.persona_id ORDER BY o.nome COLLATE NOCASE, o.chiave`).map((o) => ({
+    tipo: 'ombra', chiave: o.chiave, nome: o.nome, casa: `/guida/ombra/${encodeURIComponent(o.chiave)}`,
+    altri: [...nomiAltriDellOmbra(o.nomi_altri_json), o.persona_nome ? t('persona', o.persona_nome) : null, o.persona_nome, o.maschera_nota],
+    immagine: o.persona_nome ? immagineDellaPersona(o.persona_nome, o.chiave_forma, ctx) : null,
+  })),
 
   skill: (ctx) => q<{ id: number; nome: string; elemento: string }>(ctx, 'SELECT id, nome, elemento FROM skill ORDER BY id').map((s) => ({
     tipo: 'skill', chiave: String(s.id), nome: t('skill', s.nome), casa: `/skill/${s.id}`,
@@ -327,6 +359,19 @@ const COSTRUTTORI: Record<TipoRicerca, CostruttoreTipo> = {
     return {
       tipo: 'giorno', chiave: g.data, nome, casa: `/guida/percorso/${encodeURIComponent(g.data)}`,
       altri: [settimana ? `${settimana} ${nome}` : null, g.data, `${Number(giorno)}/${Number(mese)}`],
+    };
+  }),
+
+  // le domande in classe, gli esami e i quiz in TV stanno nella stessa pagina (`/guida/domande`), che porta in vista la riga con `?elemento=`
+  // (stessa chiave della riga: `chiave`, o l'id per le poche righe che non l'hanno). Il nome è il testo della domanda (accorciato); il
+  // percorso dice quando e a chi; le risposte giuste si trovano come «trovato come»
+  domanda: (ctx) => q<{ id: number; chiave: string | null; data: string; tipo: string; chi: string; domanda: string; risposte_json: string }>(ctx,
+    'SELECT id, chiave, data, tipo, chi, domanda, risposte_json FROM domanda ORDER BY ordine, id').map((d) => {
+    const chiave = d.chiave ?? String(d.id);
+    return {
+      tipo: 'domanda', chiave, nome: accorcia(d.domanda), casa: `/guida/domande?${PARAMETRO_ELEMENTO}=${encodeURIComponent(chiave)}`,
+      altri: [d.data, ...risposteDellaDomanda(d.risposte_json)],
+      percorso: [dataLeggibile(d.data), ...(d.chi ? [d.chi] : [])],
     };
   }),
 

@@ -5,7 +5,7 @@
 import { useMemo, useState } from 'react';
 import { Selettore } from '../shared/Selettore';
 import { Link } from 'react-router-dom';
-import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, getObiettivi, getPersone, getSkills, isApiError } from '../../services/api';
+import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, getObiettivi, getPersone, getSkills, isApiError, urlSkills } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { EmptyState, Spinner } from '../shared/PageState';
@@ -169,7 +169,7 @@ interface ModalProps {
  * livello minimo fra 1 e 99, priorità e note. Il risultato del salvataggio va a `onSalvato`. */
 export function ObiettivoModal({ partitaId, obiettivo, personaIniziale, onChiudi, onSalvato }: ModalProps) {
   const persone = useCarica(() => (obiettivo || personaIniziale ? Promise.resolve([] as PersonaRiassuntoDto[]) : getPersone()), [obiettivo?.id, personaIniziale?.id]);
-  const tutteSkill = useCarica(() => getSkills(), []);
+  const tutteSkill = useCarica(() => getSkills(), [], { cacheUrl: urlSkills() });
   const [q, setQ] = useState('');
   const [personaId, setPersonaId] = useState<number | null>(obiettivo?.personaId ?? personaIniziale?.id ?? null);
   const [skill, setSkill] = useState<SkillRiassuntoDto[]>(obiettivo?.skill ?? []);

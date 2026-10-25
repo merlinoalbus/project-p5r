@@ -4,7 +4,7 @@
 
 import { useState } from 'react';
 import { Selettore } from '../shared/Selettore';
-import { getPianiFusione, getSkills, salvaPiano } from '../../services/api';
+import { getPianiFusione, getSkills, salvaPiano, urlSkills } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { AlberoPiano } from './AlberoPiano';
 import { useCarica } from '../../hooks/useCarica';
@@ -66,7 +66,7 @@ export function PianiFusione({ persone, partitaId, livelloProtagonista, iniziale
   const [alternative, setAlternative] = useState(3);
   const [skillModificate, setSkillScelte] = useState<SkillRiassuntoDto[] | null>(null);
   const [slotFortunato, setSlotFortunato] = useState(false);
-  const tutteSkill = useCarica(() => getSkills(), []);
+  const tutteSkill = useCarica(() => getSkills(), [], { cacheUrl: urlSkills() });
   // Finché l'utente non tocca la selezione, le skill scelte sono quelle arrivate dall'URL (es. da un obiettivo).
   const skillScelte = skillModificate ?? (skillInizialiIds && tutteSkill.dati ? tutteSkill.dati.filter((s) => skillInizialiIds.includes(s.id)) : []);
   const skillIds = skillScelte.map((s) => s.id);

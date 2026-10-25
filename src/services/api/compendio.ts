@@ -4,7 +4,7 @@
 
 import type {
   CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, AreaDedaloDto, AreaDungeonDto, AtterraggioPalazzoDto, PuntoInteresseDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, CitazioniRichiestaDto, RichiestaDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto, LuogoOpzioneDto } from '../../types';
-import { apiDelete, apiPut, apiPost, apiGet, queryString } from './_helpers';
+import { apiDelete, apiPut, apiPost, apiGet, apiGetGioco, queryString } from './_helpers';
 import type { AzionePercorsoDto, DatiVoceGiornata, ElenchiAzioneDto, ElenchiEffettiVoceDto,EsitoRevisioneVoce, PuntiCopiatiDto, PuntiSpostatiDto, SpostaPuntiInArea, TrasferisciVociGiornata, VideogiochiDto, VociTrasferiteDto } from '../../types';
 import type { DoteNote } from '../../../shared/effettiAzione';
 import type { DisponibilitaConfidenteDto, DisponibilitaStrutturata } from '../../../shared/disponibilitaStrutturata';
@@ -51,34 +51,49 @@ export interface FiltriPersona {
   delGruppo?: boolean;
 }
 
+// ---- Letture dei dati di GIOCO (senza partita) con cache in memoria (`cacheGioco.ts`) ----
+// Ogni indirizzo è definito UNA volta qui: il lettore lo passa a `apiGetGioco` (che memorizza) e la pagina lo passa a
+// `useCarica(…, { cacheUrl })` (che mostra subito l'ultima lettura). Un indirizzo diverso nei due punti toglierebbe la cache, non la correttezza.
+export const URL_GLOSSARIO = '/compendio/glossario';
+export const URL_TERMINI = '/compendio/termini';
+export const URL_REGOLE_FUSIONE = '/compendio/fusione/regole';
+export const URL_OGGETTI_GUIDA = '/compendio/oggetti-guida';
+export const URL_PERSONAGGI = '/compendio/personaggi';
+export const URL_SFIDE = '/compendio/sfide';
+export const URL_BATTAGLIA = '/compendio/battaglia';
+export const urlPersone = (f: FiltriPersona = {}): string => `/compendio/persona${queryString(f)}`;
+export const urlPersona = (id: number): string => `/compendio/persona/${id}`;
+export const urlSkills = (f: { q?: string; elemento?: string } = {}): string => `/compendio/skill${queryString(f)}`;
+export const urlSkill = (id: number): string => `/compendio/skill/${id}`;
+
 /** Glossario dei codici del compendio con la resa italiana (arcani, elementi, affinità, statistiche, Doti sociali…). */
-export const getGlossario = (): Promise<GlossarioDto> => apiGet('/compendio/glossario');
+export const getGlossario = (): Promise<GlossarioDto> => apiGetGioco(URL_GLOSSARIO);
 /** Termini di gioco della localizzazione italiana, ordinati per categoria e nome. */
-export const getTermini = (): Promise<TermineDto[]> => apiGet('/compendio/termini');
+export const getTermini = (): Promise<TermineDto[]> => apiGetGioco(URL_TERMINI);
 
 /** Regole di fusione: tabella degli arcani, ricette speciali, modificatori dei tesori, eredità delle skill e gruppi DLC. */
-export const getRegoleFusione = (): Promise<RegoleFusioneDto> => apiGet('/compendio/fusione/regole');
+export const getRegoleFusione = (): Promise<RegoleFusioneDto> => apiGetGioco(URL_REGOLE_FUSIONE);
 /** Elenco riassuntivo delle Persona, filtrato con i parametri della query. */
-export const getPersone = (f: FiltriPersona = {}): Promise<PersonaRiassuntoDto[]> => apiGet(`/compendio/persona${queryString(f)}`);
+export const getPersone = (f: FiltriPersona = {}): Promise<PersonaRiassuntoDto[]> => apiGetGioco(urlPersone(f));
 /** Scheda completa di una Persona per id. */
-export const getPersona = (id: number): Promise<PersonaDettaglioDto> => apiGet(`/compendio/persona/${id}`);
+export const getPersona = (id: number): Promise<PersonaDettaglioDto> => apiGetGioco(urlPersona(id));
 /** R8-10/1: corregge la griglia delle 10 affinità di una Persona (vale ovunque) e «Ripristina» le rimette come le dà la guida. */
 export const salvaAffinitaPersona = (id: number, dati: ModificaAffinitaPersona): Promise<PersonaDettaglioDto> =>
   apiPut(`/compendio/persona/${id}/affinita`, dati, { maxRetries: 0 });
 export const ripristinaAffinitaPersona = (id: number): Promise<PersonaDettaglioDto> =>
   apiPost(`/compendio/persona/${id}/affinita/ripristina`, {}, { maxRetries: 0 });
 /** Elenco riassuntivo delle skill, filtrabile per testo (`q`) ed elemento. */
-export const getSkills = (f: { q?: string; elemento?: string } = {}): Promise<SkillRiassuntoDto[]> => apiGet(`/compendio/skill${queryString(f)}`);
+export const getSkills = (f: { q?: string; elemento?: string } = {}): Promise<SkillRiassuntoDto[]> => apiGetGioco(urlSkills(f));
 /** Scheda completa di una skill per id. */
-export const getSkill = (id: number): Promise<SkillDettaglioDto> => apiGet(`/compendio/skill/${id}`);
+export const getSkill = (id: number): Promise<SkillDettaglioDto> => apiGetGioco(urlSkill(id));
 /** Oggetti del compendio, filtrabili per testo (`q`) e categoria. */
 export const getOggetti =(f: { q?: string; categoria?: string } = {}): Promise<OggettoDto[]> => apiGet(`/compendio/oggetti${queryString(f)}`);
 /** Oggetti della guida: consumabili, chiave e materiali, fabbricazione, personalizzazione armi, abiti, scambi. */
-export const getOggettiGuida = (): Promise<OggettiGuidaDto> => apiGet('/compendio/oggetti-guida');
+export const getOggettiGuida = (): Promise<OggettiGuidaDto> => apiGetGioco(URL_OGGETTI_GUIDA);
 /** Personaggi senza spoiler con gruppi. */
-export const getPersonaggi = (): Promise<PersonaggiDto> => apiGet('/compendio/personaggi');
+export const getPersonaggi = (): Promise<PersonaggiDto> => apiGetGioco(URL_PERSONAGGI);
 /** Battaglie Sfida, boss segreti, Magnate e tratti. */
-export const getSfide = (): Promise<SfideDto> => apiGet('/compendio/sfide');
+export const getSfide = (): Promise<SfideDto> => apiGetGioco(URL_SFIDE);
 /** Trofei (con ottenuti della partita se indicata), finali, Covo dei Ladri, DLC, meteo, Nuova Partita+, tempo. */
 export const getCompletamento = (partita?: number): Promise<CompletamentoDto> => apiGet(`/compendio/completamento${queryString({ partita })}`);
 /** Indice della guida giorno per giorno (con azioni fatte e giorno corrente della partita se indicata). */
@@ -143,7 +158,7 @@ export const getFilm = (partita?: number): Promise<FilmDvdDto> => apiGet(`/compe
 /** Catalogo dei videogiochi con l'avanzamento nella partita se indicata. */
 export const getVideogiochi =(partita?: number): Promise<VideogiochiDto> => apiGet(`/compendio/videogiochi${queryString({ partita })}`);
 /** Aiuto in battaglia: sezioni della guida e indice delle Ombre. */
-export const getBattaglia = (): Promise<BattagliaDto> => apiGet('/compendio/battaglia');
+export const getBattaglia = (): Promise<BattagliaDto> => apiGetGioco(URL_BATTAGLIA);
 /** Richieste dei Mementos e dati di Jose (stato per partita se indicata). */
 export const getRichieste = (partita?: number): Promise<RichiesteDto> => apiGet(`/compendio/richieste${queryString({ partita })}`);
 /** Palazzi e Dedali con punti di interesse (stato e avanzamento se c'è la partita). */
