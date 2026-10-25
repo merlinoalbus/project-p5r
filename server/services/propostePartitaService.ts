@@ -3,7 +3,7 @@ import { moltiplicaFortuna } from '../../shared/fortuna.js';
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
-import { avanzaDopoDecisioni } from './avanzamentoGiornataService.js';
+import { avanzaDopoChiusuraAutomatica, avanzaDopoDecisioni, prelevaAvanzamentoValido } from './avanzamentoGiornataService.js';
 import { eDote, type DoteChiave } from '../../shared/doti.js';
 import type { NuovaRegistrazioneAcquisto } from '../../shared/acquisti.js';
 import type { EffettoVoceDto } from '../../shared/effettiVoce.js';
@@ -208,6 +208,9 @@ export function trasferisciAttribuzioneDote(p:number,voce:string,effetto:string,
 
 export function riconciliaBeneficiCausa(partita: number, causa: Causa): void {
   const adesso = nowIso();
+  // una proposta chiusa da sola (non più dovuta) può essere l'ultima decisione aperta di una giornata già spuntata: a fine riconciliazione (le proposte
+  // sostitutive sono già inserite) la partita avanza come dopo una decisione dell'utente (A1, 2026-10-25)
+  let chiusaDaSola = false;
   for (const t of targetCausa(partita,causa)) {
     const firma = firmaTarget(t);
     const prima = prepared('SELECT ciclo,attiva,impronta_target FROM utente.beneficio_ciclo WHERE partita_id=? AND causa_tipo=? AND causa_chiave=? AND tipo=? AND chiave=?').get(partita,causa.tipo,causa.chiave,t.tipo,t.chiave) as {ciclo:number;attiva:number;impronta_target:string}|undefined;
@@ -219,13 +222,14 @@ export function riconciliaBeneficiCausa(partita: number, causa: Causa): void {
     const rs = righeCausa(partita,causa).filter((r) => r.tipo === t.tipo && r.chiave === t.chiave);
     const aperta = rs.find((r) => r.stato === 'aperta');
     if (aperta && aperta.delta === s.differenza && aperta.revisione_causa === firma && aperta.ciclo === ciclo && s.differenza !== 0) continue;
-    if (aperta) prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='non-piu-dovuta',decisa_il=? WHERE id=? AND stato='aperta'").run(adesso,aperta.id);
+    if (aperta && prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='non-piu-dovuta',decisa_il=? WHERE id=? AND stato='aperta'").run(adesso,aperta.id).changes>0) chiusaDaSola=true;
     if (s.differenza === 0) continue;
     if (rs.some((r) => r.stato === 'scartata' && (r.chiusa_da === 'utente' || r.motivo_chiusura === 'gia-nel-saldo') && r.ciclo === ciclo && r.revisione_causa === firma && r.delta === s.differenza)) continue;
     const dati = {beneficio:t,fortunaIgnota:t.fortunaIgnota === true};
     prepared(`INSERT INTO utente.da_applicare(uid,partita_id,voce_uid,causa_tipo,causa_chiave,tipo,chiave,unita,ciclo,revisione_causa,delta,dati_json,motivo,verifica,creata_il)
       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(nuovoUid(),partita,causa.tipo === 'voce' ? causa.chiave.split(':')[0] : null,causa.tipo,causa.chiave,t.tipo,t.chiave,t.tipo === 'yen' ? 'yen' : t.tipo==='punti-pesca'?'punti-pesca':'punti-interni',ciclo,firma,s.differenza,jsonCanonico(dati),s.dovuto === 0 ? 'Proposta inversa: ultima fonte rimossa.' : t.motivo,t.storica ? 'da-dichiarare' : 'non-conteggiata',adesso);
   }
+  if (chiusaDaSola) avanzaDopoChiusuraAutomatica(partita,[{voce_uid:causa.tipo==='voce'?causa.chiave.split(':')[0]??null:null,causa_tipo:causa.tipo,causa_chiave:causa.chiave}]);
 }
 export const riconciliaBeneficiAcquisto = (p:number,id:string):void => riconciliaBeneficiCausa(p,{tipo:'acquisto',chiave:id});
 export const riconciliaBeneficiVoce = (p:number,voce:string,effetto:string):void => riconciliaBeneficiCausa(p,{tipo:'voce',chiave:`${voce}:${effetto}`});
@@ -234,12 +238,21 @@ export function beneficiPescaDto(p:number,id:string):import('../../shared/pesca.
   const c:Causa={tipo:'pesca',chiave:id};return targetCausa(p,c).map(t=>{const s=saldo(p,c,t);return {causa:id,tipo:t.tipo,chiave:t.chiave,unita:t.tipo==='dote'?'punti-interni':t.tipo,intervallo:s.intervallo??{minimo:s.dovuto!,massimo:s.dovuto!},attribuito:s.attribuito,deltaCerto:s.differenza,residuoIgnoto:s.residuoIgnoto??false,motivo:t.motivo};});
 }
 
+/**
+ * Propone (o chiude) il raccordo di un effetto già spuntato. Una proposta chiusa da sola (dote rivendicata da un acquisto, non più dovuta,
+ * configurazione cambiata) può essere l'ultima decisione aperta di una giornata già spuntata: a fine operazione, con l'eventuale proposta
+ * sostitutiva già inserita, la partita avanza come dopo una decisione dell'utente (A1, 2026-10-25).
+ */
 export function creaPropostaEffettoStorico(partita:number,voce:string,effetto:string,precedente?:EffettoVoceDto):void {
+  if(creaPropostaEffettoStoricoInterno(partita,voce,effetto,precedente))avanzaDopoChiusuraAutomatica(partita,[{voce_uid:voce,causa_tipo:'voce',causa_chiave:`${voce}:${effetto}`}]);
+}
+/** Dice se ha chiuso una proposta aperta. */
+function creaPropostaEffettoStoricoInterno(partita:number,voce:string,effetto:string,precedente?:EffettoVoceDto):boolean {
   const e = prepared('SELECT dati_json,ordine FROM main.voce_effetto WHERE voce_uid=? AND uid=?').get(voce,effetto) as {dati_json:string;ordine:number}|undefined;
-  if (!e || !prepared('SELECT 1 FROM utente.spunta_voce_partita WHERE partita_id=? AND voce_uid=?').get(partita,voce)) return;
+  if (!e || !prepared('SELECT 1 FROM utente.spunta_voce_partita WHERE partita_id=? AND voce_uid=?').get(partita,voce)) return false;
   // la Fortuna vale per il giorno della spunta: su una spunta già fatta non c'è niente da applicare dopo
   const tipoEffetto = leggiJsonRegistro<{tipo?:string}>(e.dati_json,'configurazione effetto').tipo;
-  if (tipoEffetto === 'fortuna' || tipoEffetto === 'storia' || tipoEffetto === 'domanda' || tipoEffetto === 'cruciverba' || tipoEffetto === 'richiesta' || tipoEffetto === 'articolo' || tipoEffetto === 'invito' || tipoEffetto === 'persona') return;
+  if (tipoEffetto === 'fortuna' || tipoEffetto === 'storia' || tipoEffetto === 'domanda' || tipoEffetto === 'cruciverba' || tipoEffetto === 'richiesta' || tipoEffetto === 'articolo' || tipoEffetto === 'invito' || tipoEffetto === 'persona') return false;
   const rivendicato=(prepared("SELECT dati_json FROM main.voce_effetto WHERE voce_uid=? AND tipo='acquisto'").all(voce) as Array<{dati_json:string}>).filter((r)=>{
     const acquisto=normalizzaEffettoVoce(leggiJsonRegistro(r.dati_json,'raccordo canonico'));
     if(!acquisto||acquisto.tipo!=='acquisto')throw httpErrors.conflict('raccordo-canonico-incoerente','La configurazione di acquisto non è riconoscibile.');
@@ -248,18 +261,19 @@ export function creaPropostaEffettoStorico(partita:number,voce:string,effetto:st
   if(rivendicato.length){
     const nodo=normalizzaEffettoVoce(leggiJsonRegistro(e.dati_json,'Dote rivendicata'));
     if(rivendicato.length!==1||nodo?.tipo!=='dote')throw httpErrors.conflict('rivendicazione-ambigua','La Dote è rivendicata da una configurazione non univoca.');
-    prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='dote-rivendicata-da-acquisto',decisa_il=? WHERE partita_id=? AND causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce' AND stato='aperta'").run(nowIso(),partita,`${voce}:${effetto}`);return;
+    return prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='dote-rivendicata-da-acquisto',decisa_il=? WHERE partita_id=? AND causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce' AND stato='aperta'").run(nowIso(),partita,`${voce}:${effetto}`).changes>0;
   }
   const ricevuta=prepared('SELECT id,prima_json FROM utente.effetto_applicato WHERE partita_id=? AND voce_uid=? AND effetto_uid=? AND annullato_il IS NULL').get(partita,voce,effetto) as {id:string;prima_json:string|null}|undefined;
-  if(ricevuta&&jsonCanonico(leggiJsonRegistro<Record<string,unknown>>(ricevuta.prima_json??'null')?.effetto)===jsonCanonico(leggiJsonRegistro(e.dati_json))){prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='non-piu-dovuta',decisa_il=? WHERE partita_id=? AND causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce' AND stato='aperta'").run(nowIso(),partita,`${voce}:${effetto}`);return;}
+  if(ricevuta&&jsonCanonico(leggiJsonRegistro<Record<string,unknown>>(ricevuta.prima_json??'null')?.effetto)===jsonCanonico(leggiJsonRegistro(e.dati_json))){return prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='non-piu-dovuta',decisa_il=? WHERE partita_id=? AND causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce' AND stato='aperta'").run(nowIso(),partita,`${voce}:${effetto}`).changes>0;}
   const causa = `${voce}:${effetto}`, firma = improntaDato(leggiOggettoRegistro(e.dati_json,'configurazione effetto'));
   const aperta = prepared("SELECT id,revisione_causa FROM utente.da_applicare WHERE partita_id=? AND causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce' AND stato='aperta'").get(partita,causa) as {id:number;revisione_causa:string}|undefined;
-  if (aperta?.revisione_causa === firma) return;
-  if (aperta) prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='configurazione-cambiata',decisa_il=? WHERE id=?").run(nowIso(),aperta.id);
-  if(prepared("SELECT 1 FROM utente.da_applicare WHERE partita_id=? AND causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce' AND revisione_causa=? AND (chiusa_da='utente' OR motivo_chiusura='gia-nel-saldo') AND stato='scartata'").get(partita,causa,firma))return;
+  if (aperta?.revisione_causa === firma) return false;
+  const chiusa = !!aperta && prepared("UPDATE utente.da_applicare SET stato='scartata',chiusa_da='causa',motivo_chiusura='configurazione-cambiata',decisa_il=? WHERE id=?").run(nowIso(),aperta.id).changes>0;
+  if(prepared("SELECT 1 FROM utente.da_applicare WHERE partita_id=? AND causa_tipo='voce' AND causa_chiave=? AND tipo='effetto-voce' AND revisione_causa=? AND (chiusa_da='utente' OR motivo_chiusura='gia-nel-saldo') AND stato='scartata'").get(partita,causa,firma))return chiusa;
   prepared(`INSERT INTO utente.da_applicare(uid,partita_id,voce_uid,causa_tipo,causa_chiave,tipo,chiave,unita,ciclo,revisione_causa,delta,dati_json,motivo,creata_il)
     VALUES(?,?,?,'voce',?,'effetto-voce',?,'azione',1,?,1,?,'Effetto che la spunta già presente avrebbe dato: serve conferma esplicita.',?)`)
     .run(nuovoUid(),partita,voce,causa,effetto,firma,jsonCanonico({voceUid:voce,effettoUid:effetto,...(prepared('SELECT data AS giorno,fascia FROM main.voce_giornata WHERE uid=?').get(voce) as object),articolo:(leggiJsonRegistro<Record<string,unknown>>(e.dati_json)).articolo,effetto:leggiJsonRegistro(e.dati_json),sostituzione:!!precedente||!!ricevuta,versionePrecedente:ricevuta?leggiJsonRegistro<Record<string,unknown>>(ricevuta.prima_json??'null')?.effetto??null:precedente?.effetto??null,ricevutaPrecedente:ricevuta?.id??null}),nowIso());
+  return chiusa;
 }
 
 function dto(r:RigaProposta):PropostaPartitaDto {
@@ -413,8 +427,9 @@ export function decidiProposte(partita:number,r:RichiestaDecisioneProposte,porte
     for(const c of cause.values())riconciliaBeneficiCausa(partita,c);
     prepared('UPDATE utente.partita SET updated_at=? WHERE id=?').run(adesso,partita);
     // decisione A1 (2026-10-25): chiusa l'ultima decisione aperta di una fascia/giornata già spuntata per intero, la partita avanza (alla sera o al
-    // giorno dopo) nella stessa transazione, e la risposta lo dice. L'avanzamento non entra nella ricevuta salvata: una ripetizione del gesto la rende com'era.
-    const avanzamento=avanzaDopoDecisioni(partita,decise);
+    // giorno dopo) nella stessa transazione, e la risposta lo dice. L'avanzamento non entra nella ricevuta salvata: una ripetizione del gesto la rende com'era (il client, che non trova l'esito, rilegge la partita e si allinea da solo: `giornoAvanzato.ts`).
+    // (chiusure automatiche comprese: la riconciliazione qui sopra può aver già fatto avanzare la partita, e allora l'esito è quello ricordato dalla richiesta)
+    const esplicito=avanzaDopoDecisioni(partita,decise),registrato=prelevaAvanzamentoValido(partita),avanzamento=esplicito??registrato;
     return avanzamento?{...ricevuta,...avanzamento}:ricevuta;
   })();
 }

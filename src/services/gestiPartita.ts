@@ -5,7 +5,8 @@ import { CHIAVI_DOTI } from '../../shared/doti';
 import { schemaValutazionePresenza } from '../../shared/valutazioneAcquisto';
 import type { RichiestaRegistraAcquisto, RichiestaAnnullaProvenienza, RichiestaRimozioneLegacy, RicevutaOperazioneAcquistoDto } from '../../shared/acquisti';
 import type { RichiestaDecisioneProposte, RicevutaDecisioneProposteDto, RiferimentoPropostaPartita } from '../../shared/propostePartita';
-import type { AzionePercorsoDto } from '../../shared/types';
+import type { AvanzamentoGiornataDto, AzionePercorsoDto } from '../../shared/types';
+import { allineaDopoDecisione, puntoPartitaNelloStore } from '../utils/giornoAvanzato';
 import type { StatoEffettiVoceDto } from '../../shared/effettiVoce';
 import type { NuovaSessionePesca, RicevutaOperazionePescaDto } from '../../shared/pesca';
 import { confermaPesca, leggiRicevutaPesca, type OperazioneClientPesca } from './api/pesca';
@@ -289,6 +290,12 @@ export function gestoPendenteNelloScope(partitaId: number | null, scope: ScopeGe
 /** Nel rilascio le rotte `/partite/:id/acquisti/legacy/*` non esistono (costante di build: il percorso esce dal bundle). */
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 const PERCORSO_RIMOZIONE_LEGACY: string | null = IN_RILASCIO ? null : '/acquisti/legacy/rimozione';
+/** Separa dalla risposta di una decisione l'eventuale avanzamento della partita (`giornoAvanzato` / `fasciaAvanzata`) dalla ricevuta vera e propria. */
+function separaAvanzamento(x: unknown): { avanzamento: AvanzamentoGiornataDto; resto: unknown } {
+  if (!x || typeof x !== 'object' || Array.isArray(x)) return { avanzamento: {}, resto: x };
+  const { giornoAvanzato, fasciaAvanzata, ...resto } = x as Record<string, unknown> & AvanzamentoGiornataDto;
+  return { avanzamento: { ...(giornoAvanzato ? { giornoAvanzato } : {}), ...(fasciaAvanzata ? { fasciaAvanzata } : {}) }, resto };
+}
 const cambia = (g: GestoPartita) => scrivi(store.getState().gesti.map(x => x.id === g.id ? g : x));
 /** Come si chiama il gesto nelle notifiche: solo parole (che cosa si stava facendo), mai identificativi tecnici (numero di partita, operazione). */
 const scopeTesto = (g: GestoPartita) => g.bersaglio.etichetta;
@@ -301,6 +308,8 @@ async function invia(g: GestoPartita, recupero = false): Promise<Ricevuta> {
   cambia(inInvio); // Deve riuscire PRIMA di qualunque richiesta.
   inVolo.add(g.id);
   let risposta: Ricevuta | null = null;
+  // dove vedeva la partita lo store prima del gesto (per riconoscere un avanzamento che la risposta non porta)
+  const prima = g.payload.tipo === 'decisione-proposte' && g.partitaId !== null ? puntoPartitaNelloStore(g.partitaId) : null;
   try {
     const prefisso = `/partite/${g.partitaId}`, p = g.payload, opzioni = { maxRetries: 0, silent: true };
     let x: unknown;
@@ -324,7 +333,10 @@ async function invia(g: GestoPartita, recupero = false): Promise<Ricevuta> {
       if (percorso === null) throw new Error('Questa operazione non è disponibile in questa istanza.');
       x = await apiPost(prefisso + percorso, p.dati, opzioni);
     }
-    risposta = validaRicevuta(x, g);
+    // L'avanzamento della partita (A1) viaggia accanto alla ricevuta di una decisione ma non ne fa parte: non si conserva nella scheda (una
+    // ripetizione del gesto non deve riapplicare una fotografia vecchia della partita) e non rende la ricevuta «non canonica».
+    const { avanzamento, resto } = p.tipo === 'decisione-proposte' ? separaAvanzamento(x) : { avanzamento: {} as AvanzamentoGiornataDto, resto: x };
+    risposta = validaRicevuta(resto, g);
     const riuscita = { ...g, stato: 'riuscita' as const, ricevuta: risposta, ricevutaPersistita: true, errore: null, aggiornatoIl: new Date().toISOString() };
     try { cambia(riuscita); }
     catch {
@@ -333,6 +345,9 @@ async function invia(g: GestoPartita, recupero = false): Promise<Ricevuta> {
     }
     segnalaMutazioneEffetti(g.partitaId);
     notifica('success', `${scopeTesto(g)}: ${recupero && p.tipo === 'spunta-acquisti' ? 'ricevute della transazione riscontrate; controlla lo stato attuale della spunta.' : 'operazione riuscita.'}`, 8000);
+    // Una decisione può aver fatto avanzare la partita (alla sera, al giorno dopo): con l'esito nella risposta si applica, senza (ricevuta ripetuta
+    // dopo una risposta persa) si rilegge la partita e si confronta con quella di prima del gesto. Non fallisce mai: la decisione è già registrata.
+    if (p.tipo === 'decisione-proposte' && g.partitaId !== null) await allineaDopoDecisione(g.partitaId, avanzamento, prima);
     return risposta;
   } catch (e) {
     if (risposta !== null) return risposta; // Una ricevuta acquisita non diventa «creazione fallita».

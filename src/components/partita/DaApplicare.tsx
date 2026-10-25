@@ -14,7 +14,6 @@ import { GestiPartita } from './GestiPartita';
 import { PreparazioneSessionePesca, RiepilogoSessionePreparata } from '../pesca/PreparazioneSessionePesca';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
-import { seGiornoAvanzato } from '../../utils/giornoAvanzato';
 
 const riferimento = (p: PropostaPartitaDto) => ({ id: p.id, uid: p.uid });
 const testoErrore = (e: unknown) => e instanceof Error ? e.message : 'Operazione non riuscita.';
@@ -92,8 +91,7 @@ function DaApplicareNelContesto({ partitaId, voceUid, onCambiato }: { partitaId:
       const riguardaPesca = anteprima.proposte.some(p => p.causa.tipo === 'pesca' || normalizzaEffettoVoce(p.dati.effetto)?.tipo === 'pesca');
       const r = await decidiProposteConRegistro(partitaId, { ...anteprima.richiesta, revisioneProposteAttesa: anteprima.revisioneProposteAttesa }, { etichetta: `Decisione su ${anteprima.proposte.length} proposte`, ...(riguardaPesca ? { pesca: true } : {}) });
       registrata = true;
-      // chiusa l'ultima decisione aperta di una fascia/giornata già spuntata per intero, il server ha fatto avanzare la partita: lo store si allinea e l'avviso lo dice
-      seGiornoAvanzato(r);
+      // l'eventuale avanzamento della partita (chiusa l'ultima decisione aperta di una fascia/giornata già spuntata) lo applica già il registro dei gesti
       if (vivo.current) {
         setRicevuta(r.proposte.length === 1 ? 'Fatto.' : `Fatto: ${r.proposte.length} voci decise.`);
         setAnteprima(null); setIncerto(false);

@@ -12,6 +12,7 @@ import type { Request, Response, NextFunction } from 'express';
 import { randomUUID } from 'node:crypto';
 import type { Logger } from 'pino';
 import { logger as rootLogger, withRequestId } from '../utils/logger.js';
+import type { AvanzamentoGiornataDto } from '../../shared/types.js';
 
 /**
  * Il proprietario delle partite quando l'identità non è verificata (L12, passo 3): tutte le partite esistenti prima della migrazione
@@ -28,6 +29,12 @@ export interface RequestContext {
   proprietario: string;
   /** L'email del token (solo per le partite create da un utente riconosciuto); `null` con il proprietario unico. */
   proprietarioEmail: string | null;
+  /**
+   * Gli avanzamenti automatici (alla sera, al giorno dopo: decisione A1 del 2026-10-25) provocati da questa richiesta senza che la sua rotta
+   * li sapesse, per partita: li registra `avanzaDopoChiusuraAutomatica` quando una decisione si chiude da sola; il corpo della risposta li porta
+   * (`responseShape`), così il client si allinea. Per richiesta: niente può passare da una richiesta all'altra.
+   */
+  avanzamenti?: Map<number, AvanzamentoGiornataDto>;
 }
 
 const storage = new AsyncLocalStorage<RequestContext>();
@@ -63,6 +70,21 @@ export function comeProprietario<T>(proprietario: string, email: string | null, 
     ? { ...attuale, proprietario, proprietarioEmail: email }
     : { requestId: 'fuori-richiesta', logger: rootLogger, proprietario, proprietarioEmail: email };
   return storage.run(ctx, fn);
+}
+
+/** Ricorda, per la risposta della richiesta in corso, che la partita è avanzata (fascia o giorno). Fuori da una richiesta non fa niente. */
+export function registraAvanzamentoRichiesta(partitaId: number, esito: AvanzamentoGiornataDto): void {
+  const ctx = storage.getStore();
+  if (!ctx) return;
+  (ctx.avanzamenti ??= new Map()).set(partitaId, esito);
+}
+
+/** L'avanzamento ricordato per la partita nella richiesta in corso (e lo toglie), o undefined. */
+export function prelevaAvanzamentoRichiesta(partitaId: number): AvanzamentoGiornataDto | undefined {
+  const ctx = storage.getStore();
+  const esito = ctx?.avanzamenti?.get(partitaId);
+  if (esito) ctx!.avanzamenti!.delete(partitaId);
+  return esito;
 }
 
 /** Child logger della richiesta corrente, o logger radice fuori richiesta. */

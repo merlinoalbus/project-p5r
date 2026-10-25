@@ -10,7 +10,7 @@ import { getDb, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { cambiaGiornoPartita } from './giornoPartitaService.js';
-import { avanzaSeFasciaCompleta } from './avanzamentoGiornataService.js';
+import { avanzaSeFasciaCompleta, prelevaAvanzamentoValido } from './avanzamentoGiornataService.js';
 import type { AzionePercorsoDto, GiornoCorrenteDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../../shared/types.js';
 import { confidenti, leggiPartita } from './partiteService.js';
 import { conteggiGiornate, spuntaVoce, vociDelGiorno } from './giornataService.js';
@@ -80,7 +80,11 @@ export function spuntaEAvanza(partitaId: number, uid: string, fatta: boolean, op
   return getDb().transaction(() => {
     const giaFatta = !!prepared('SELECT 1 FROM spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').get(partitaId, uid);
     const azione = spuntaVoce(partitaId, uid, fatta, opz);
-    const avanzamento = fatta && !giaFatta ? avanzaSeFasciaCompleta(partitaId, azione.giorno) : null;
+    const esplicito = fatta && !giaFatta ? avanzaSeFasciaCompleta(partitaId, azione.giorno) : null;
+    // una chiusura automatica di una decisione, durante la spunta o la sua riconciliazione, può aver già fatto avanzare la partita (A1): l'esito
+    // ricordato dalla richiesta si prende comunque, così non resta nel contesto e la risposta lo porta
+    const registrato = prelevaAvanzamentoValido(partitaId);
+    const avanzamento = esplicito ?? registrato;
     return avanzamento ? { ...azione, ...avanzamento } : azione;
   })();
 }

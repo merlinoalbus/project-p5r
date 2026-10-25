@@ -7,6 +7,8 @@
 //   2. spuntata l'ultima attività di SERA, e senza decisioni aperte nel giorno, la partita passa al GIORNO DOPO (di giorno);
 //   3. se una decisione resta aperta, l'avanzamento scatta quando si chiude l'ultima (`avanzaDopoDecisioni`, chiamata da `decidiProposte`
 //      nella stessa transazione), e la risposta lo dice (`fasciaAvanzata` / `giornoAvanzato`);
+//      Vale anche per le decisioni che si chiudono da sole (`avanzaDopoChiusuraAutomatica`, da `propostePartitaService`): l'esito si ricorda nel contesto
+//      della richiesta e la risposta della rotta lo porta (`prelevaAvanzamentoValido`, `responseShape`);
 //   4. togliere una spunta NON riporta indietro né la fascia né il giorno: chi chiama lo invoca solo a una spunta nuova o a una decisione chiusa;
 //   5. la regola è la stessa per ogni strada che spunta una voce: Diario, Home e Guida (domande, cruciverba) passano tutte da `spuntaEAvanza`.
 //
@@ -24,6 +26,7 @@ import { getDb, prepared } from '../db/dbService.js';
 import { cambiaGiornoPartita, passaAllaSeraPartita } from './giornoPartitaService.js';
 import { decisioniApertePerVoce, righeDelGiorno, spuntePartita } from './giornataService.js';
 import { leggiPartita } from './partiteService.js';
+import { prelevaAvanzamentoRichiesta, registraAvanzamentoRichiesta } from '../middleware/requestContext.js';
 import type { AvanzamentoGiornataDto } from '../../shared/types.js';
 
 /** Le decisioni aperte di tutte le voci date. */
@@ -70,6 +73,33 @@ export function avanzaSeFasciaCompleta(partitaId: number, data: string): Avanzam
 
 /** Una proposta appena decisa, quanto basta per risalire alla sua voce (e quindi al suo giorno). */
 export interface PropostaDecisa { voce_uid: string | null; causa_tipo: string; causa_chiave: string }
+
+/**
+ * Dopo che una decisione si è chiusa DA SOLA (la causa non la richiede più, la dote è rivendicata da un acquisto, la configurazione è cambiata:
+ * `propostePartitaService`): stessa regola di una decisione dell'utente, nella stessa transazione di chi ha provocato la chiusura. Chi ha
+ * provocato la chiusura non sa dell'avanzamento: l'esito si ricorda nel contesto della richiesta e la risposta della rotta lo porta
+ * (`prelevaAvanzamentoValido`, applicato anche dal middleware `responseShape`), così il client si allinea come dopo una spunta.
+ */
+export function avanzaDopoChiusuraAutomatica(partitaId: number, decise: readonly PropostaDecisa[]): void {
+  const esito = avanzaDopoDecisioni(partitaId, decise);
+  if (esito) registraAvanzamentoRichiesta(partitaId, esito);
+}
+
+/**
+ * L'avanzamento che la richiesta in corso ha provocato per la partita (chiusure automatiche comprese), togliendolo dal contesto; undefined se non
+ * c'è o se non corrisponde più allo stato della partita (la transazione che l'aveva prodotto è stata annullata: niente da dire al client).
+ */
+export function prelevaAvanzamentoValido(partitaId: number): AvanzamentoGiornataDto | undefined {
+  const esito = prelevaAvanzamentoRichiesta(partitaId);
+  if (!esito) return undefined;
+  const p = prepared('SELECT data_gioco, fascia_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null; fascia_gioco: string } | undefined;
+  if (!p) return undefined;
+  const g = esito.giornoAvanzato;
+  const f = esito.fasciaAvanzata;
+  if (g && p.data_gioco === g.a) return { giornoAvanzato: g };
+  if (f && p.data_gioco === f.giorno && p.fascia_gioco === f.a) return { fasciaAvanzata: f };
+  return undefined;
+}
 
 /**
  * Dopo una decisione sulle proposte: chiusa l'ultima decisione aperta, la fascia o il giorno già spuntati per intero avanzano (punto 3). Si guardano

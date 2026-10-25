@@ -34,3 +34,34 @@ export function seGiornoAvanzato(esito: AvanzamentoGiornataDto): void {
       f.decisioniAperte ? 0 : 6000, f.decisioniAperte ? { collegamento: { etichetta: `Vai ${dataGiocoConArticolo(f.giorno, 'a')}`, verso: `/guida/percorso/${f.giorno}` } } : undefined);
   }
 }
+
+/** Dove si trovava la partita (data e fascia di gioco) quando è partito il gesto: serve a riconoscere un avanzamento che la risposta non porta. */
+export interface PuntoPartita { dataGioco: string | null; fasciaGioco: string }
+
+/** Il punto in cui lo store vede la partita, o null se non è nell'elenco a schermo. */
+export function puntoPartitaNelloStore(partitaId: number): PuntoPartita | null {
+  const p = usePartitaStore.getState().partite.find((x) => x.id === partitaId);
+  return p ? { dataGioco: p.dataGioco, fasciaGioco: p.fasciaGioco } : null;
+}
+
+/**
+ * Dopo una decisione sulle proposte, in ogni caso (risposta nuova o ricevuta ripetuta): se la risposta porta l'avanzamento lo applica; se non lo porta
+ * (la risposta di un replay, dopo una risposta persa, è la sola ricevuta salvata, senza l'esito) rilegge la partita dal server e, se data o fascia
+ * sono cambiate rispetto a prima del gesto, allinea lo store e lo dice. Così il client resta allineato qualunque strada abbia fatto la risposta.
+ * Una rilettura fallita non rovescia la decisione, già registrata: l'avviso lo dice e lo store si allinea alla prossima lettura.
+ */
+export async function allineaDopoDecisione(partitaId: number, esito: AvanzamentoGiornataDto, prima: PuntoPartita | null): Promise<void> {
+  if (esito.giornoAvanzato || esito.fasciaAvanzata) { seGiornoAvanzato(esito); return; }
+  try {
+    await usePartitaStore.getState().carica();
+    // `carica` non lancia: un fallimento si legge nell'errore dello store
+    if (usePartitaStore.getState().errore) throw new Error(usePartitaStore.getState().errore!);
+    const dopo = puntoPartitaNelloStore(partitaId);
+    if (!prima || !dopo || (prima.dataGioco === dopo.dataGioco && prima.fasciaGioco === dopo.fasciaGioco)) return;
+    notifica('info', dopo.dataGioco && dopo.dataGioco !== prima.dataGioco
+      ? `La partita è passata ${dataGiocoConArticolo(dopo.dataGioco, 'a')}: la giornata era completa.`
+      : `La partita è passata alla sera${dopo.dataGioco ? ` ${dataGiocoConArticolo(dopo.dataGioco, 'di')}` : ''}: le attività di giorno erano complete.`, 6000);
+  } catch {
+    notifica('warning', 'Decisione registrata, ma non è stato possibile rileggere la partita: ricarica la pagina per vedere la data e la fascia aggiornate.', 8000);
+  }
+}
