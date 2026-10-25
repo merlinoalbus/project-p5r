@@ -112,7 +112,7 @@ function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzi
     // R10-06: la paga del turno non è mai una proposta (decisione 18: entra da sola nel saldo registrando il turno)
     if (e.tipo === 'turno') {
       const paga = pagaDelTurno(e.attivita);
-      if (paga) return `${testo} · paga ¥${paga.yen.toLocaleString('it-IT')}${paga.massima && paga.massima > paga.yen ? ` (fino a ¥${paga.massima.toLocaleString('it-IT')})` : ''}`;
+      if (paga) return `${testo} · paga ¥${paga.yen.toLocaleString('it-IT')}${paga.massima && paga.massima > paga.yen ? ` (fino a ¥${paga.massima.toLocaleString('it-IT')}: entra da sola la paga base, il di più no)` : ''}`;
     }
     return testo;
   });

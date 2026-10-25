@@ -5,7 +5,7 @@ import { verificaPartita } from './verificaPartita.js';
 import { eDote } from '../../shared/doti.js';
 import { chiaveSblocco, eEffettoDiStato, fondiArticoliUguali, motivoYenGiaStrutturati, normalizzaEffettoVoce, normalizzaEffettiVoce } from '../../shared/effettiVoce.js';
 import { yenDelDato } from './yenDeiDati.js';
-import { muoviYenAutomatico, restituisciYenAutomatico, restituisciYenAutomaticiDellaVoce, yenPropostiInSospeso } from './yenAutomaticiService.js';
+import { MOTIVO_VOCE_ELIMINATA, conMotivoDiRestituzione, conYenInOrdine, muoviYenAutomatico, restituisciYenAutomatico, restituisciYenAutomaticiDellaVoce, yenPropostiInSospeso } from './yenAutomaticiService.js';
 import type { AnteprimaDecisioneEffettoVoceDto, EffettoLegacyVoce, EffettoVoce, EffettoVoceDto, PropostaEffettoVoceDto, ReceiptEffettoVoceDto, RichiestaAnteprimaDecisioneEffettoVoce, RichiestaDecisioneEffettoVoce, RichiestaSalvaEffettiVoce, StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import type { NuovaRegistrazioneAcquisto, RichiestaRegistraAcquisto } from '../../shared/acquisti.js';
 import type { EffettiAzioneDto } from '../../shared/types.js';
@@ -86,7 +86,8 @@ function ricevutaYen(p:number,uid:string,e:EffettoVoceDto&{effetto:Extract<Effet
 }
 /** Un movimento automatico della voce da fare (`muoviYenDellaVoce`): l'effetto, l'importo con il segno, il motivo. */
 interface YenDaMuovere {effettoUid:string;importo:number;motivo:string}
-/** Muove gli yen della voce: prima i guadagni, poi le spese, così il tetto a zero non mangia una spesa che il guadagno della stessa voce copriva. */
+/** Muove gli yen degli effetti della voce: prima i guadagni, poi le spese, così il tetto a zero non mangia una spesa che il guadagno della stessa
+ *  voce copriva. Nella spunta e nel suo annullo l'ordine vale anche fra cause diverse (turni, Richieste): li esegue `conYenInOrdine`. */
 function muoviYenDellaVoce(p:number,uid:string,elenco:Array<YenDaMuovere|null>):void {
   for(const m of elenco.filter((x):x is YenDaMuovere=>x!==null).sort((a,b)=>b.importo-a.importo))muoviYenAutomatico(p,{tipo:'voce',chiave:`${uid}:${m.effettoUid}`},m.importo,m.motivo,uid);
 }
@@ -99,7 +100,13 @@ function muoviYenDellaVoce(p:number,uid:string,elenco:Array<YenDaMuovere|null>):
 function yenDellEffetto(p:number,uid:string,e:EffettoVoceDto,ricevuta?:ReceiptEffettoVoceDto,porzione?:EffettiAzioneDto|null):YenDaMuovere|null {
   const x=e.effetto,spesa=(importo:number,motivo:string):YenDaMuovere=>({effettoUid:e.uid,importo:-importo,motivo});
   if(x.tipo==='articolo'){
-    if(!prepared('SELECT 1 FROM utente.effetto_stato_voce WHERE partita_id=? AND voce_uid=? AND effetto_uid=?').get(p,uid,e.uid))return null;
+    // l'acquisto segnato dalla spunta: la riga dello stato c'è anche quando l'articolo risultava già comprato, e allora il prezzo si scala solo se
+    // a segnarlo era un'altra voce spuntata (un acquisto ripetuto nel gioco: Katsu il 06-05 e l'11-13). Già comprato dalla pagina del negozio, con
+    // un regalo o prima della decisione 18 (nessuna voce lo rivendica): è lo stesso acquisto, già pagato, e niente si scala due volte
+    const statoVoce=prepared('SELECT prima_json FROM utente.effetto_stato_voce WHERE partita_id=? AND voce_uid=? AND effetto_uid=?').get(p,uid,e.uid) as {prima_json:string}|undefined;
+    if(!statoVoce)return null;
+    const giaComprato=leggiJsonRegistro<{gia?:boolean}|null>(statoVoce.prima_json,'stato prima dell’acquisto')?.gia===true;
+    if(giaComprato&&!prepared("SELECT 1 FROM utente.effetto_stato_voce WHERE partita_id=? AND tipo='articolo' AND chiave=? AND voce_uid<>?").get(p,x.articolo,uid))return null;
     // il nome del catalogo, se il file di gioco lo ha (come `esitiAttivitaService.articoloEsito`), altrimenti quello del listino
     const conCatalogo=!!prepared("SELECT 1 FROM main.sqlite_master WHERE type='table' AND name='catalogo_oggetto'").get();
     const a=prepared(conCatalogo?"SELECT COALESCE(c.nome,NULLIF(a.nome,''),a.chiave) AS nome,a.prezzo FROM main.articolo a LEFT JOIN main.catalogo_oggetto c ON c.chiave=a.catalogo_chiave WHERE a.chiave=?":"SELECT COALESCE(NULLIF(nome,''),chiave) AS nome,prezzo FROM main.articolo WHERE chiave=?").get(x.articolo) as {nome:string;prezzo:number|null}|undefined;
@@ -372,7 +379,9 @@ function preparaAssorbimentiDote(p:number,uid:string,e:EffettoVoceDto,r:NuovaReg
   }
   return out;
 }
-export function applicaEffettiVoce(p:number,uid:string,porte:PorteEffettiLegacy,opz:{acquisti?:RichiestaRegistraAcquisto[];pesche?:RichiestaRegistraSessionePesca[];porteAcquisti?:PorteDisponibilitaAcquisto;spuntaFattaIl:string;scelteEsito?:SceltaEsitoSpunta[]}):{effettiLegacy:EffettiAzioneDto|null;receiptNuovi:ReceiptEffettoVoceDto[];proposte:PropostaPartitaDto[]} {
+/** La spunta della voce. L13 (decisione 18): gli yen che muove (effetti, turni, Richieste) si eseguono alla fine, prima ciò che entra (`conYenInOrdine`). */
+export function applicaEffettiVoce(...a:Parameters<typeof applicaEffettiVoceInOrdine>):ReturnType<typeof applicaEffettiVoceInOrdine> {return conYenInOrdine(()=>applicaEffettiVoceInOrdine(...a));}
+function applicaEffettiVoceInOrdine(p:number,uid:string,porte:PorteEffettiLegacy,opz:{acquisti?:RichiestaRegistraAcquisto[];pesche?:RichiestaRegistraSessionePesca[];porteAcquisti?:PorteDisponibilitaAcquisto;spuntaFattaIl:string;scelteEsito?:SceltaEsitoSpunta[]}):{effettiLegacy:EffettiAzioneDto|null;receiptNuovi:ReceiptEffettoVoceDto[];proposte:PropostaPartitaDto[]} {
   if(!getDb().inTransaction)throw new Error('L’applicazione degli effetti richiede la transazione della spunta.');
   verificaPartita(p);const stato=leggiEffettiVoce(uid);
   if(stato.stato!=='convertita')throw httpErrors.conflict('effetti-da-correggere','Il RAW storico non è convertibile: correggi gli effetti prima di una nuova spunta.');
@@ -468,7 +477,9 @@ export function applicaEffettoStorico(p:number,proposta:PropostaPartitaDto,acqui
   registraRicevuta(p,uid,e,{benefici:beneficiLegacy(legacy,true),legacy,risorse:risorseLegacy(p,legacy),gestitaDaSpunta:false,...(attiva?{sostituisceRicevuta:attiva.id}:{})},true,{id:nuovaRicevuta});
   sostituisciYen(yenDellEffetto(p,uid,e,undefined,legacy),false);
 }
-export function annullaEffettiVoce(p:number,uid:string,legacy:EffettiAzioneDto|null,porte:PorteEffettiLegacy):void {
+/** Togliere la spunta. L13 (decisione 18): gli yen tornano alla fine, prima le spese restituite e poi i guadagni tolti (`conYenInOrdine`). */
+export function annullaEffettiVoce(...a:Parameters<typeof annullaEffettiVoceInOrdine>):void {conYenInOrdine(()=>annullaEffettiVoceInOrdine(...a));}
+function annullaEffettiVoceInOrdine(p:number,uid:string,legacy:EffettiAzioneDto|null,porte:PorteEffettiLegacy):void {
   if(!getDb().inTransaction)throw new Error('L’annullo richiede la transazione della spunta.');
   const tutte=leggiRicevuteEffettiVoce(p,uid),ricevute=tutte.filter((r)=>r.annullatoIl===null);
   const spunta=prepared('SELECT fatta_at,effetti_json FROM utente.spunta_voce_partita WHERE partita_id=? AND voce_uid=?').get(p,uid) as {fatta_at:string;effetti_json:string|null}|undefined;
@@ -526,7 +537,8 @@ export function preparaRimozioneEffettiVoce(uid:string,porte:Pick<PorteEffettiLe
   // vecchio annullo riparte da una nuova base. Anche le righe del registro di partite senza spunta (orfane) se ne vanno con la voce.
   for(const p of partite){
     const ricevuta=validati.get(p)??null,tolti=togliEventiDellaVoce(p,uid);
-    annullaEffettiVoce(p,uid,senzaEventiGestiti(ricevuta,tolti),{...porte,applicaLegacy:()=>null});
+    // L13 (decisione 18): gli yen della voce tornano con il motivo «voce eliminata», così rimettendola dal cestino si muovono di nuovo
+    conMotivoDiRestituzione(MOTIVO_VOCE_ELIMINATA,()=>annullaEffettiVoce(p,uid,senzaEventiGestiti(ricevuta,tolti),{...porte,applicaLegacy:()=>null}));
     for(const chiave of confidentiAnnullatiAlVecchioModo(ricevuta,tolti))nuovaGenerazione(p,chiave);
   }
   for(const r of prepared('SELECT DISTINCT partita_id FROM utente.punti_confidente_voce WHERE voce_uid=?').all(uid) as Array<{partita_id:number}>)togliEventiDellaVoce(r.partita_id,uid);

@@ -2349,6 +2349,9 @@ export interface StatoCalcolatoRichiestaDto {
   giorniAllaScadenza: number | null;
   /** Vero se si può accettare adesso (da disponibile o da verificare). */
   accettabile: boolean;
+  /** L13 (decisione 18): vero se gli yen della ricompensa passano ancora da una proposta «Applica» nata prima (aperta, o applicata e non tornata
+   *  a zero): allora non entrano da soli e vale quella proposta. Assente se entrano da soli. */
+  yenDaProposta?: boolean;
 }
 
 /**

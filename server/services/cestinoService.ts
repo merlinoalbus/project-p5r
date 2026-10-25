@@ -49,7 +49,7 @@ import { verificaAttivitaPesca } from './vincoliAttivitaPesca.js';
 import { eventoPescaMarcato } from './pescaStorico.js';
 import { riconciliaEffettiDopoRipristino } from './motoreDiario.js';
 import { riconciliaBeneficiRichiesta } from './propostePartitaService.js';
-import { riallineaYenRichiesta } from './yenAutomaticiService.js';
+import { riallineaYenRichiesta, rimettiYenDellaVoceRipristinata } from './yenAutomaticiService.js';
 import { ripristinaOrdineVoce } from './giornataService.js';
 import { azioneEventoAcquistoV1 } from './storicoService.js';
 import type { ContenutoCestinoDto, EsitoRipristinoCestinoDto, MotivoSaltataCestinoDto, SaltataCestinoDto, TipoCestino, VoceCestinoDto, VoceCestinoUnificatoDto } from '../../shared/types.js';
@@ -470,7 +470,8 @@ export function ripristinaCestinoPrivato(uid: string, partitaId?: number): Esito
 }
 
 // L13 (decisione 18): anche i movimenti automatici degli yen (`yen_automatico`) sono storia durevole del saldo: un ripristino che non sia di una
-// partita intera non li riapre né li richiude, e non rimette il saldo (`partita.yen`, qui sotto); la Richiesta rimessa li riallinea da sé
+// partita intera non li riapre né li richiude, e non rimette il saldo (`partita.yen`, qui sotto); la Richiesta rimessa li riallinea da sé e la
+// voce rimessa rifà i movimenti che la sua eliminazione aveva chiuso (`rimettiYenDellaVoceRipristinata`), con nuove righe
 const DURATURE_ACQUISTI = new Set(['da_applicare', 'movimento_yen', 'yen_automatico', 'acquisto_operazione', 'proposta_operazione', 'effetto_applicato', 'beneficio_ciclo','pesca_operazione','pesca_quota_storica','movimento_punti_pesca','punti_pesca_partita']);
 interface IdentitaRipristino { id: number | null; uid: string; tipo: TipoCestino; chiave: string; nome: string; registro_json: string; con_partite: number; vicini_json: string | null; partitaId?: number }
 function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: string }): EsitoRipristinoCestinoDto {
@@ -760,6 +761,9 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
       const confidentiNonRimessi = new Set([...saltate.values()].filter((s) => s.tabella === 'confidente_partita' && s.motivo === 'cambiata-dopo')
         .flatMap((s) => s.esempi.map((e) => e.split(' · ')).filter((x) => x.length >= 2).map(([p, c]) => `${p}|${c}`)));
       riconciliaEffettiDopoRipristino(partita, [...voceUids], confidentiNonRimessi);
+      // L13 (decisione 18): la voce rimessa torna spuntata con i suoi stati; gli yen che la sua eliminazione aveva restituito si muovono di
+      // nuovo dove lo stato è tornato (articolo comprato, turno, Richiesta completata). Gli altri effetti tornano con la proposta di raccordo
+      for (const v of voceUids) rimettiYenDellaVoceRipristinata(partita, v);
       riconciliaPescaDopoRipristino(partita);
       // L13 (decisione 3): una Richiesta rimessa torna completata dove lo era: i suoi yen si riallineano. Decisione 18: rientrano da soli dove
       // l'eliminazione li aveva tolti; una proposta «Applica» di prima si riallinea nel suo registro (o niente se già nel saldo)

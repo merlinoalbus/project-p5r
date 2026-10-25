@@ -150,8 +150,11 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
       {r.ombra && <span className="testo-12 text-text-secondary">Ombra del compendio: <strong className="text-text">{r.ombra.nome}</strong>{r.ombra.livello ? ` · livello ${r.ombra.livello}` : ''}</span>}
       {!!r.oggettiRicompensa?.length && <div className="min-w-0 testo-12"><span className="text-text-muted">Ricompense:</span><OggettiCollegati oggetti={r.oggettiRicompensa} /></div>}
       {(r.yen || r.esperienza) && <span className="testo-12 text-text-secondary">{[r.yen ? `¥${r.yen.toLocaleString('it-IT')}` : null, r.esperienza ? `${r.esperienza.toLocaleString('it-IT')} PE` : null].filter(Boolean).join(' · ')}</span>}
-      {/* L13 (decisione 18): gli yen della ricompensa entrano da soli completandola, e si tolgono riaprendola */}
-      {partitaId && !!r.yen && r.yen > 0 && <span className="testo-12 text-text-muted">Completandola, la ricompensa in yen entra da sola nel saldo; riaprendola si toglie (al più fino a zero).</span>}
+      {/* L13 (decisione 18): gli yen della ricompensa entrano da soli completandola, e si tolgono riaprendola; con una proposta «Applica» nata
+          prima (`yenDaProposta`) vale quella, qui sotto, e la frase lo dice */}
+      {partitaId && !!r.yen && r.yen > 0 && <span className="testo-12 text-text-muted">{r.statoPartita?.yenDaProposta
+        ? 'La ricompensa in yen di questa Richiesta è legata a una proposta «Applica» nata prima: non entra né esce da sola dal saldo.'
+        : 'Completandola, la ricompensa in yen entra da sola nel saldo; riaprendola si toglie (al più fino a zero).'}</span>}
       {r.ricompense.length > 0 && (r.oggettiRicompensa?.length
         ? <details className="testo-12 text-text-secondary"><summary className="touch">Indicazioni della guida sulle ricompense</summary><p className="m-0 whitespace-pre-line">{r.ricompense.join(', ')}</p></details>
         : <span className="testo-12 text-text-secondary"><span className="text-text-muted">Ricompense indicate dalla guida:</span> {r.ricompense.join(', ')}</span>)}

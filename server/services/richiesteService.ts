@@ -23,7 +23,7 @@ import { catalogoOggettiDisponibile, ricompensePerFonte } from './catalogoOggett
 import { dettaglioNegozio } from './negoziService.js';
 import { profiliOmbre } from './ombreService.js';
 import { riconciliaBeneficiRichiesta } from './propostePartitaService.js';
-import { riallineaYenRichiesta } from './yenAutomaticiService.js';
+import { riallineaYenRichiesta, yenPropostiInSospeso } from './yenAutomaticiService.js';
 import { NOME_ELEMENTO, NOME_ESITO_AFFINITA, eChiaveElemento, eCodiceAffinita } from '../../shared/elementi.js';
 import { GIORNI_AVVISO_SCADENZA_RICHIESTE } from '../../shared/richieste.js';
 
@@ -123,7 +123,11 @@ function dto(r: RigaRichiesta, stati: Map<string, StatoRichiesta>, premi = ricom
     proroga: r.proroga_data ? { data: r.proroga_data, condizioni: leggiCondizioniSalvate(r.proroga_condizioni_json).map((c) => condizioneConTesto(c, nomi)) } : null,
     ombra,
     yen: r.yen, esperienza: r.esperienza,
-    ...(st ? { statoPartita: statoCalcolato(r, stati.get(r.chiave) ?? null, st, nomi) } : {}),
+    ...(st ? { statoPartita: {
+      ...statoCalcolato(r, stati.get(r.chiave) ?? null, st, nomi),
+      // decisione 18: gli yen di una Richiesta con una proposta «Applica» di prima passano ancora da lei (la pagina non dice che entrano da soli)
+      ...(st.partitaId !== undefined && r.yen != null && r.yen > 0 && yenPropostiInSospeso(st.partitaId, 'richiesta', r.chiave) ? { yenDaProposta: true } : {}),
+    } } : {}),
     chiave: r.chiave, nome: r.nome, committente: r.committente, disponibileDal: r.disponibile_dal, scadenza: r.scadenza, area: r.area, areaChiave: r.area_chiave, piano: r.piano,
     bersaglio, ricompense: JSON.parse(r.ricompense_json) as string[],
     oggettiRicompensa: premi.get(r.chiave) ?? [],
