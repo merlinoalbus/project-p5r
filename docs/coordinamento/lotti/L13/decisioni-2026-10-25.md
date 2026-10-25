@@ -34,4 +34,12 @@ verificati sulle copie in sola lettura dei dati reali.
     La data di disponibilità di Ore no Beko (oggi 06-05) si allinea alla candidatura del 05-06, inversione giorno/mese segnalata dal PM e
     approvata con la proposta. Le tre voci sono nel periodo validato: entrano negli elenchi da approvare riga per riga.
 
+18. **Yen automatici** (risposte dell'utente: «gli yen possono anche scendere da soli (senza mai andare sotto zero) ma devono restare
+    cmq possibili le azioni anche se il denaro disponibile non basta o è a 0» e «ci sono ovviamente altri soldi dai combattimenti e dalle
+    vendite degli oggetti dei palazzi e memento che non possono essere automatici»). Le spese delle voci spuntate (acquisti, effetto
+    yen negativo) scalano da sole il saldo della partita, mai sotto zero: l'azione resta sempre possibile anche con saldo insufficiente o
+    a zero, e togliendo la spunta si restituisce solo l'importo davvero scalato. I guadagni legati a voci ed eventi (paga dei lavori,
+    ricompense delle Richieste, effetto «Yen ricevuti») entrano da soli. Restano manuali i soldi dei combattimenti e delle vendite di
+    oggetti nei Palazzi e nei Memento.
+
 Le conversioni delle singole voci del periodo validato (fino al 05-31) restano da approvare riga per riga.
