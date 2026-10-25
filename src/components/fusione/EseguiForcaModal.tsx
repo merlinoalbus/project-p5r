@@ -10,6 +10,8 @@ import { CHIAVI_STATISTICHE, NOMI_STATISTICHE } from '../../../shared/statistich
 import { FORCA_INCIDENTE_BONUS } from '../../../shared/bonusVelluto';
 import type { EsitoForca } from '../../../shared/bonusVelluto';
 import type { EsitoForcaDto, PersonaPossedutaDto } from '../../types';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   partitaId: number;
@@ -63,7 +65,7 @@ export function EseguiForcaModal({ partitaId, ricevente, sacrificio, stima, alla
 
   return (
     <Modal titolo={`Forca: ${sacrificio.nomeIt} → ${ricevente.nomeIt}`} aperta onChiudi={onChiudi}>
-      <form className="flex flex-col gap-3 text-[13px]" onSubmit={(e) => { e.preventDefault(); void esegui(); }}>
+      <form className="flex flex-col gap-3 testo-13" onSubmit={(e) => { e.preventDefault(); void esegui(); }}>
         <p className="m-0 text-text-secondary">
           EXP stimata ×{stima.moltiplicatore.toLocaleString('it-IT')} ({stima.fattori.length ? stima.fattori.map((f) => `${f.nome} ×${f.valore.toLocaleString('it-IT')}`).join(' · ') : 'nessun bonus'}). Il gioco mostra il livello raggiunto: riportalo qui. Skill trasferibili: {stima.skillTrasferite}.
         </p>
@@ -74,7 +76,7 @@ export function EseguiForcaModal({ partitaId, ricevente, sacrificio, stima, alla
           <>
             <label className="form-label">Livello raggiunto da {ricevente.nomeIt}
               <input type="number" min={ricevente.livello} max={99} className="form-input mt-1" value={nuovoLivello} onChange={(e) => setNuovoLivello(Math.min(99, Math.max(ricevente.livello, Number(e.target.value) || ricevente.livello)))} aria-label="Livello raggiunto" />
-              <span className="block text-[12px] text-text-muted mt-1">Ogni livello vale +3 punti statistica (ripartizione casuale): se vuoi registrarla, indica i punti qui sotto.</span>
+              <span className="block testo-12 text-text-muted mt-1">Ogni livello vale +3 punti statistica (ripartizione casuale): se vuoi registrarla, indica i punti qui sotto.</span>
             </label>
             <div>
               <div className="form-label">Skill trasferite dal sacrificio ({trasferite.length}/{maxTrasferite})</div>
@@ -92,7 +94,7 @@ export function EseguiForcaModal({ partitaId, ricevente, sacrificio, stima, alla
           <div className="form-label">Punti statistica {incidente ? 'garantiti' : 'osservati'} (totale {totalePunti})</div>
           <div className="grid grid-cols-5 gap-2 mt-1">
             {CHIAVI_STATISTICHE.map((k) => (
-              <label key={k} className="text-[12px] flex flex-col gap-1">{NOMI_STATISTICHE[k]}
+              <label key={k} className="testo-12 flex flex-col gap-1">{NOMI_STATISTICHE[k]}
                 <input type="number" min={0} max={99} className="form-input" value={punti[k] ?? 0} onChange={(e) => setPunti((p) => ({ ...p, [k]: Math.max(0, Number(e.target.value) || 0) }))} aria-label={`Punti ${NOMI_STATISTICHE[k]}`} />
               </label>
             ))}
@@ -110,7 +112,7 @@ export function EseguiForcaModal({ partitaId, ricevente, sacrificio, stima, alla
         )}
         <div className="flex justify-end gap-2">
           <button type="button" className="btn btn-secondary" onClick={onChiudi}>Annulla</button>
-          <button type="submit" className="btn btn-primary" disabled={occupato || daDimenticare > 0 || (incidente && totalePunti === 0)}>Registra: rimuovi {sacrificio.nomeIt}</button>
+          <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo={<>Registra: rimuovi {sacrificio.nomeIt}</>} type="submit" disabled={occupato || daDimenticare > 0 || (incidente && totalePunti === 0)} />
         </div>
       </form>
     </Modal>

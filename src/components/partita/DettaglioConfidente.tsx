@@ -90,14 +90,14 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
         </div>
         <div className="testata-confidente__info flex flex-col gap-2">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="m-0 min-w-0 font-display uppercase text-[26px] leading-none tracking-wide break-words">{c.nome}</h3>
+            <h3 className="m-0 min-w-0 font-display uppercase testo-28 leading-none tracking-wide break-words">{c.nome}</h3>
             {oggi && <TargaSuggerito motivo={motivoOggi} compatta />}
           </div>
           <div className="flex items-center gap-2">
             <AssetImg nome={`arcani/${slug(c.arcana)}`} alt={`Carta dell'arcano ${c.arcanaNome}`} className="carta-arcano-mini" fallback={<IconMaschera size={20} />} />
             <div className="flex flex-col gap-1 min-w-0">
-              <span className="font-display uppercase text-[16px] leading-none tracking-wide">{c.arcanaNome}</span>
-              {c.regaliFatti.length > 0 && <span className="text-[12px] text-text-muted">{c.regaliFatti.length} {c.regaliFatti.length === 1 ? 'regalo consegnato' : 'regali consegnati'}</span>}
+              <span className="font-display uppercase testo-16 leading-none tracking-wide">{c.arcanaNome}</span>
+              {c.regaliFatti.length > 0 && <span className="testo-12 text-text-muted">{c.regaliFatti.length} {c.regaliFatti.length === 1 ? 'regalo consegnato' : 'regali consegnati'}</span>}
             </div>
           </div>
         </div>
@@ -106,13 +106,13 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
             <div className="flex items-center gap-1.5 shrink-0">
               <button type="button" className="btn btn-secondary btn-sm touch w-11" disabled={occ || c.rango === 0} onClick={() => azioni.cambiaRango(c.rango - 1)} aria-label={`Rango di ${c.nome} meno uno`}>−</button>
               <div className="flex flex-col items-center gap-0.5 leading-none">
-                <span className="text-[11px] font-bold uppercase tracking-[.14em] text-text-secondary">Rango</span>
+                <span className="testo-12 font-bold uppercase tracking-[.14em] text-text-secondary">Rango</span>
                 <AnelloAvanzamento quota={quota} dimensione={62} spessore={4} etichetta={aPunti ? `Progresso di ${c.nome} verso il rango ${prossimo}` : undefined}>
                   <AssetImg
                     nome={c.rango === 0 ? null : c.rango === 10 ? 'ui/rango-max' : `ui/rango-${c.rango}`}
                     alt={c.rango === 10 ? 'Rango MAX' : `Rango ${c.rango}`}
                     className="h-11 w-11 object-contain"
-                    fallback={<span className={`font-display text-[28px] leading-none tabular-nums ${c.rango === 10 ? 'text-primary' : ''}`}>{c.rango === 10 ? 'MAX' : c.rango}</span>}
+                    fallback={<span className={`font-display testo-28 leading-none tabular-nums ${c.rango === 10 ? 'text-primary-testo' : ''}`}>{c.rango === 10 ? 'MAX' : c.rango}</span>}
                   />
                 </AnelloAvanzamento>
               </div>
@@ -124,14 +124,14 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
                   <span style={{ width: `${Math.round(quota * 100)}%` }} />
                 </span>
               )}
-              <span className="text-[13px] leading-tight">
+              <span className="testo-13 leading-tight">
                 {c.bloccato ? <span className="text-text-secondary">Bloccato: il rango {c.bloccato.rango} {c.bloccato.motivi[0] ? `— ${c.bloccato.motivi[0]}` : 'ha requisiti mancanti'}</span>
                   : aPunti ? (
                     <>
-                      <strong className="tabular-nums font-display text-[18px]">{formattaPunti(c.punti)}</strong>
+                      <strong className="tabular-nums font-display testo-18">{formattaPunti(c.punti)}</strong>
                       <span className="text-text-secondary"> / {c.puntiNecessari} verso il {prossimo}</span>
                       {' · '}
-                      {c.mancanti === 0 ? <strong className="text-primary">soglia raggiunta</strong> : <span className="text-text-secondary">mancano <strong className="text-text">{formattaPunti(c.mancanti ?? 0)}</strong></span>}
+                      {c.mancanti === 0 ? <strong className="text-primary-testo">soglia raggiunta</strong> : <span className="text-text-secondary">mancano <strong className="text-text">{formattaPunti(c.mancanti ?? 0)}</strong></span>}
                     </>
                   ) : (
                     <span className="text-text-secondary">
@@ -143,7 +143,7 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
                   )}
               </span>
             </div>
-            {pronto && <button type="button" className="btn btn-primary touch shrink-0" disabled={occ} onClick={() => azioni.cambiaRango(prossimo)} aria-label={`${c.nome}: sali al rango ${prossimo}`}>Sali al rango {prossimo}</button>}
+            {pronto && <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="su" dimensione={22} />} titolo={<>Sali al rango {prossimo}</>} className="shrink-0" disabled={occ} onClick={() => azioni.cambiaRango(prossimo)} aria-label={`${c.nome}: sali al rango ${prossimo}`} />}
             {c.bloccato && (
               <PulsanteVisivo tono="fantasma" compatto className="shrink-0" icona={<IconaAzione chiave="attiva" dimensione={20} />} titolo="Segna comunque" dettaglio={`rango ${c.bloccato.rango}`} disabled={occ}
                 onClick={() => azioni.forzaRango(c.bloccato!.rango)}
@@ -156,7 +156,7 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
         {/* che cosa serve per salire: requisiti del prossimo rango e moltiplicatori dei punti */}
         <div className="dettaglio-confidente__testa">
           {c.rango < 10 && (semaforo || aPunti || (c.bloccato && !motiviNeiSemafori)) && <h4 className="titolo-sezione-confidente">Verso il rango {prossimo}</h4>}
-          {c.bloccato && !motiviNeiSemafori && <ul className="m-0 pl-4 text-[12px] text-text-secondary">{c.bloccato.motivi.map((m) => <li key={m}>{m}</li>)}</ul>}
+          {c.bloccato && !motiviNeiSemafori && <ul className="m-0 pl-4 testo-12 text-text-secondary">{c.bloccato.motivi.map((m) => <li key={m}>{m}</li>)}</ul>}
           {semaforo && (
             <SemaforiRango semafori={semaforo} compatto occupato={occ} onConferma={(rango, r, confermato) => azioni.conferma(rango, r.indice, confermato)} onCorreggi={(rango) => azioni.correggi(rango)} />
           )}
@@ -193,7 +193,7 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
                 const valore = anteprima({ noteRisposta: n });
                 return (
                   <button key={n} type="button" className="btn btn-primary btn-sm touch w-[76px]" disabled={occ} onClick={() => azioni.nota(n)} aria-label={`${c.nome}: risposta da ${n} ${n === 1 ? 'nota' : 'note'} (${formattaPunti(valore)} punti)`}>
-                    <span aria-hidden="true">{'♪'.repeat(n)}</span> <span className="text-[12px] opacity-90">+{formattaPunti(valore)}</span>
+                    <span aria-hidden="true">{'♪'.repeat(n)}</span> <span className="testo-12 opacity-90">+{formattaPunti(valore)}</span>
                   </button>
                 );
               })}
@@ -218,7 +218,7 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
           )}
           <div className="flex flex-col gap-1">
             <PulsanteVisivo className="self-start" tono="fantasma" compatto icona={<IconaAzione chiave="note" dimensione={20} />} titolo={c.note ? 'Note' : 'Aggiungi note'} onClick={azioni.apriNote} />
-            {c.note && <p className="m-0 text-[12px] text-text-secondary whitespace-pre-wrap line-clamp-3">{c.note}</p>}
+            {c.note && <p className="m-0 testo-12 text-text-secondary whitespace-pre-wrap line-clamp-3">{c.note}</p>}
           </div>
         </div>
       </div>

@@ -36,10 +36,10 @@ export function OrariEditor({ valore, onCambia, disabilitato }: Props) {
   return (
     <fieldset className="regole-editor orari-editor flex flex-col gap-2">
       <legend>Orari</legend>
-      <p className="m-0 text-[12px] text-text-muted">Nessun giorno acceso vuol dire tutti i giorni; nessuna fascia, giorno e sera.</p>
+      <p className="m-0 testo-12 text-text-muted">Nessun giorno acceso vuol dire tutti i giorni; nessuna fascia, giorno e sera.</p>
       <Interruttori etichetta="Giorni di apertura" scelte={valore.giorni} disabilitato={disabilitato} opzioni={GIORNI_SETTIMANA.map((g) => ({ chiave: g.chiave as GiornoChiave, nome: g.nome }))} onCambia={(giorni) => onCambia({ ...valore, giorni: ordina(giorni, GIORNI_SETTIMANA as ReadonlyArray<{ chiave: GiornoChiave }>) })} />
       <Interruttori etichetta="Fasce di apertura" scelte={valore.fasce} disabilitato={disabilitato} opzioni={FASCE_ORARIO.map((f) => ({ chiave: f.chiave as FasciaOrario, nome: f.nome }))} onCambia={(fasce) => onCambia({ ...valore, fasce: ordina(fasce, FASCE_ORARIO as ReadonlyArray<{ chiave: FasciaOrario }>) })} />
-      <label className="flex items-center gap-2 text-[13px] touch">
+      <label className="flex items-center gap-2 testo-13 touch">
         <input type="checkbox" className="w-5 h-5" checked={valore.chiusoConPioggia} disabled={disabilitato} onChange={(e) => onCambia({ ...valore, chiusoConPioggia: e.target.checked })} />
         Chiuso nei giorni di pioggia
       </label>
@@ -47,7 +47,7 @@ export function OrariEditor({ valore, onCambia, disabilitato }: Props) {
         Nota (ciò che non è un orario)
         <input className="form-input" type="text" maxLength={300} value={valore.nota ?? ''} disabled={disabilitato} onChange={(e) => onCambia({ ...valore, nota: e.target.value.trim() ? e.target.value : null })} placeholder="Per esempio: in date specifiche del calendario" />
       </label>
-      <p className="m-0 text-[12px] text-text-muted" role="status">Verrà mostrato così: <strong>{descriviOrari(valore)}</strong></p>
+      <p className="m-0 testo-12 text-text-muted" role="status">Verrà mostrato così: <strong>{descriviOrari(valore)}</strong></p>
     </fieldset>
   );
 }

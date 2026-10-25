@@ -3,7 +3,7 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
 import { aggiungiPosseduta, getFusioniCon, getPersona, getPossedute, getRicettePer, isApiError } from '../services/api';
@@ -19,7 +19,6 @@ import { campiPersona } from '../components/compendio/campiPersona';
 import { DoveSiIncontra } from '../components/compendio/DoveSiIncontra';
 import { StatisticheBarre } from '../components/compendio/StatisticheBarre';
 import { ElementoChip } from '../components/compendio/ElementoChip';
-import { IconChevronLeft } from '../components/shared/icons';
 import type { RicettaSpecialeDto, SkillAppresaDto } from '../types';
 import { CHIAVI_STATISTICHE, MASSIMO_STATISTICA, NOMI_STATISTICHE, statistichePerLivello } from '../../shared/statistiche';
 import { slug } from '../../shared/slug';
@@ -34,6 +33,9 @@ import { PersonaChip } from '../components/fusione/PersonaChip';
 import { Modal } from '../components/shared/Modal';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
+import { TitoloSezione } from '../components/shared/TitoloSezione';
+import { IntestazioneScheda } from '../components/shared/IntestazioneScheda';
+import { MenuModifica } from '../components/shared/MenuModifica';
 
 
 /** Come si impara una skill: «Innata», «Liv. N», oppure — per le forme del gruppo — con il risveglio, i ranghi del Confidente o la 3ª forma. */
@@ -69,16 +71,16 @@ function SezioneFusione({ personaId, rara, partitaId, livelloProtagonista }: { p
   const inScorta = useMemo(() => new Set((scorta.dati ?? []).map((x) => x.personaId)), [scorta.dati]);
   return (
     <section className="card flex flex-col gap-3">
-      <h2 className="m-0 text-[15px] font-semibold">Fusione</h2>
+      <TitoloSezione>Fusione</TitoloSezione>
       {rara ? (
-        <p className="m-0 text-[13px] text-text-secondary">Demone del Tesoro: non si ottiene per fusione, ma fuso con una Persona normale ne sposta il rango nell'arcano.</p>
+        <p className="m-0 testo-13 text-text-secondary">Demone del Tesoro: non si ottiene per fusione, ma fuso con una Persona normale ne sposta il rango nell'arcano.</p>
       ) : per.dati ? (
         <div>
           <div className="flex items-baseline justify-between gap-2 flex-wrap">
-            <span className="text-[13px] text-text-secondary">Come ottenerla: <strong className="text-text">{per.dati.totale}</strong> ricette{per.dati.totale > 0 ? ' (le più economiche)' : ''}</span>
+            <span className="testo-13 text-text-secondary">Come ottenerla: <strong className="text-text">{per.dati.totale}</strong> ricette{per.dati.totale > 0 ? ' (le più economiche)' : ''}</span>
             <span className="flex gap-3">
-              {per.dati.totale > 5 && <Link to={`/fusione?vista=ricette&ricette=${personaId}`} className="touch inline-flex items-center text-[13px] text-primary">Tutte le ricette →</Link>}
-              <Link to={`/fusione?vista=piani&piani=${personaId}`} className="touch inline-flex items-center text-[13px] text-primary">Piano di fusione →</Link>
+              {per.dati.totale > 5 && <Link to={`/fusione?vista=ricette&ricette=${personaId}`} className="touch inline-flex items-center testo-13 text-primary-testo">Tutte le ricette →</Link>}
+              <Link to={`/fusione?vista=piani&piani=${personaId}`} className="touch inline-flex items-center testo-13 text-primary-testo">Piano di fusione →</Link>
             </span>
           </div>
           {per.dati.ricette.length > 0 && (
@@ -87,19 +89,19 @@ function SezioneFusione({ personaId, rara, partitaId, livelloProtagonista }: { p
             </ul>
           )}
         </div>
-      ) : per.caricamento ? <span className="text-[13px] text-text-muted">Calcolo delle ricette…</span> : null}
+      ) : per.caricamento ? <span className="testo-13 text-text-muted">Calcolo delle ricette…</span> : null}
       {con.dati && (
         <div>
           <div className="flex items-baseline justify-between gap-2 flex-wrap">
-            <span className="text-[13px] text-text-secondary">Come ingrediente: <strong className="text-text">{con.dati.totale}</strong> fusioni possibili</span>
-            {con.dati.totale > 5 && <Link to={`/fusione?vista=con&con=${personaId}`} className="touch inline-flex items-center text-[13px] text-primary">Tutte le fusioni →</Link>}
+            <span className="testo-13 text-text-secondary">Come ingrediente: <strong className="text-text">{con.dati.totale}</strong> fusioni possibili</span>
+            {con.dati.totale > 5 && <Link to={`/fusione?vista=con&con=${personaId}`} className="touch inline-flex items-center testo-13 text-primary-testo">Tutte le fusioni →</Link>}
           </div>
           <ul className="m-0 p-0 list-none divide-y divide-border-light">
             {con.dati.ricette.map((r) => <RicettaRiga key={r.ingredienti.map((i) => i.id).join('-') + r.risultato.id} ricetta={r} inScorta={inScorta} />)}
           </ul>
         </div>
       )}
-      {livelloProtagonista !== null && <p className="m-0 text-[12px] text-text-muted">Nel calcolatore puoi limitare i risultati al livello {livelloProtagonista} del protagonista.</p>}
+      {livelloProtagonista !== null && <p className="m-0 testo-12 text-text-muted">Nel calcolatore puoi limitare i risultati al livello {livelloProtagonista} del protagonista.</p>}
     </section>
   );
 }
@@ -107,7 +109,6 @@ function SezioneFusione({ personaId, rara, partitaId, livelloProtagonista }: { p
 /** Scheda Persona: identità, statistiche, affinità, skill, tratto, fusioni, esecuzione, Mementos. */
 export function PersonaDettaglioPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const personaId = Number(id);
   const { dati: p, caricamento, errore, ricarica } = useCarica(() => getPersona(personaId), [personaId]);
   useDocumentTitle(p ? p.nomeIt : 'Persona');
@@ -146,9 +147,29 @@ export function PersonaDettaglioPage() {
     <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
       {p && (
         <div className="flex flex-col gap-4">
-          <button type="button" className="btn btn-ghost self-start -ml-2" onClick={() => navigate(-1)}>
-            <IconChevronLeft size={18} /> Indietro
-          </button>
+          {/* Lotto B: l'intestazione comune delle schede, prima dell'immagine (sul telefono il nome stava sotto l'arte, al 71% della
+              schermata); le correzioni della guida (Persona, set DLC, Demone del Tesoro, ricetta speciale) nel menu «Modifica ⋯» */}
+          <IntestazioneScheda ripiego="/compendio" titolo={p.nomeIt}
+            figura={<ImmagineEntita ambito="arcana" chiave={p.arcana} etichetta={p.arcanaNome} dimensione={44} forma="carta" />}
+            chip={<>
+              <LivelloBadge livello={p.livello} grande />
+              {p.rara && <AssetImg nome={`ui/tesoro-${slug(p.nome)}`} alt="" decorativa className="h-12 w-12 object-contain drop-shadow" fallback={null} />}
+            </>}
+            azioni={<MenuModifica cosa={`la Persona «${p.nomeIt}»`}>
+              <ModificaGuida tipo="persona" chiave={String(p.id)} cosa={`la Persona «${p.nomeIt}»`} etichetta="Testi della Persona" campiSpeciali={campiPersona(p.delParty)} onSalvato={() => void ricarica()} />
+              {p.dlc && p.dlcSet && <ModificaGuida tipo="dlc-set" chiave={String(p.dlcSet)} cosa={`il set DLC ${p.dlcSet}`} etichetta={`Set DLC ${p.dlcSet}`} onSalvato={() => void ricarica()} />}
+              {p.rara && <ModificaGuida tipo="tesoro" chiave={String(p.id)} cosa={`il Demone del Tesoro «${p.nomeIt}»`} etichetta="Demone del Tesoro" onSalvato={() => void ricarica()} />}
+              {p.speciale && <ModificaGuida tipo="fusione-speciale" chiave={String(p.id)} cosa={`la ricetta di «${p.nomeIt}»`} etichetta="Ricetta speciale" onSalvato={() => void ricarica()} />}
+            </MenuModifica>}>
+            <div className="flex items-center gap-2 flex-wrap">
+              {p.nomeIt !== p.nome && <span className="chip" title="Nome nella localizzazione inglese">{p.nome}</span>}
+              <span className="chip chip--attivo">{p.arcanaNome}</span>
+              {p.dlc && <BadgeStato nome="dlc" testo={`DLC${p.dlcSet ? ` ${p.dlcSet}` : ''}`} />}
+              {p.rara && <BadgeStato nome="tesoro" testo="Demone del Tesoro" />}
+              {p.speciale && <BadgeStato nome="speciale" testo="Fusione speciale" />}
+              {p.richiedeConfidenteMax && <span className="chip">Richiede Confidente al massimo</span>}
+            </div>
+          </IntestazioneScheda>
 
           <section
             className="hero-persona card relative overflow-hidden flex flex-col lg:flex-row gap-5"
@@ -160,39 +181,26 @@ export function PersonaDettaglioPage() {
               </CorniceArte>
               {p.descrizione && (
                 <section className="card mt-3 py-2.5 px-3 flex flex-col gap-1" aria-label="Chi è">
-                  <span className="text-[11px] font-semibold uppercase tracking-[.06em] text-text-muted">Chi è</span>
-                  <p className="m-0 text-[13px] leading-relaxed text-text-secondary h-[118px] area-scorrevole px-2 py-1">{p.descrizione}</p>
-                  {p.fonteDescrizione && <span className="text-[11px] text-text-muted">Origine: {p.fonteDescrizione}</span>}
+                  <span className="testo-12 font-semibold uppercase tracking-[.06em] text-text-muted">Chi è</span>
+                  <p className="m-0 testo-13 leading-relaxed text-text-secondary h-[118px] area-scorrevole px-2 py-1">{p.descrizione}</p>
+                  {p.fonteDescrizione && <span className="testo-12 text-text-muted">Origine: {p.fonteDescrizione}</span>}
                 </section>
               )}
             </div>
             <div className="flex-1 min-w-0 flex flex-col gap-3">
               <div className="flex items-start gap-3">
-                <ImmagineEntita ambito="arcana" chiave={p.arcana} etichetta={p.arcanaNome} dimensione={64} forma="carta" />
                 <div className="flex-1 min-w-0 flex flex-col gap-2">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <h1 className="titolo-display m-0">{p.nomeIt}</h1>
-                    <LivelloBadge livello={p.livello} grande />
-                    {p.rara && <AssetImg nome={`ui/tesoro-${slug(p.nome)}`} alt="" decorativa className="h-12 w-12 object-contain drop-shadow" fallback={null} />}
-                    <ModificaGuida tipo="persona" chiave={String(p.id)} cosa={`la Persona «${p.nomeIt}»`} campiSpeciali={campiPersona(p.delParty)} onSalvato={() => void ricarica()} />
+                  {/* Sul telefono la scheda Affinità completa arriva dopo immagine, «Chi è» e statistiche, a più di due schermate: in
+                      battaglia debole/resiste è la prima cosa che serve, quindi qui c'è la riga compatta (sotto, la scheda intera resta) */}
+                  <div className="md:hidden">
+                    <AffinitaGriglia affinita={p.affinita} compatta etichetta="Affinità in breve" />
                   </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {p.nomeIt !== p.nome && <span className="chip" title="Nome nella localizzazione inglese">{p.nome}</span>}
-                    <span className="chip chip--attivo">{p.arcanaNome}</span>
-                    {p.dlc && <BadgeStato nome="dlc" testo={`DLC${p.dlcSet ? ` ${p.dlcSet}` : ''}`} />}
-                    {p.dlc && p.dlcSet && <ModificaGuida tipo="dlc-set" chiave={String(p.dlcSet)} cosa={`il set DLC ${p.dlcSet}`} soloIcona onSalvato={() => void ricarica()} />}
-                    {p.rara && <BadgeStato nome="tesoro" testo="Demone del Tesoro" />}
-                    {p.rara && <ModificaGuida tipo="tesoro" chiave={String(p.id)} cosa={`il Demone del Tesoro «${p.nomeIt}»`} soloIcona onSalvato={() => void ricarica()} />}
-                    {p.speciale && <BadgeStato nome="speciale" testo="Fusione speciale" />}
-                    {p.speciale && <ModificaGuida tipo="fusione-speciale" chiave={String(p.id)} cosa={`la ricetta di «${p.nomeIt}»`} soloIcona onSalvato={() => void ricarica()} />}
-                    {p.richiedeConfidenteMax && <span className="chip">Richiede Confidente al massimo</span>}
-                  </div>
-                  <div className="text-[13px] text-text-secondary flex flex-wrap gap-x-4 gap-y-1">
+                  <div className="testo-13 text-text-secondary flex flex-wrap gap-x-4 gap-y-1">
                     <span>Eredità: <strong className="text-text">{p.ereditaNome ?? '—'}</strong></span>
                     {p.delParty && (
                       <span>
                         Persona del gruppo: <strong className="text-text">{p.forma}ª forma</strong>
-                        {p.derivaDa && <> — deriva da <Link to={`/compendio/persona/${p.derivaDa.id}`} className="touch inline-flex items-center text-primary">{p.derivaDa.nomeIt}</Link></>}
+                        {p.derivaDa && <> — deriva da <Link to={`/compendio/persona/${p.derivaDa.id}`} className="touch inline-flex items-center text-primary-testo">{p.derivaDa.nomeIt}</Link></>}
                       </span>
                     )}
                     {p.notaNome && <span className="text-warning">{p.notaNome}</span>}
@@ -202,7 +210,7 @@ export function PersonaDettaglioPage() {
                     {p.negoziazione && <span>Ombra: <strong className="text-text">{p.negoziazione.titoloNome}</strong></span>}
                   </div>
                   <div className="flex items-center gap-3 flex-wrap">
-                    <label className="text-[13px] text-text-secondary flex items-center gap-2">
+                    <label className="testo-13 text-text-secondary flex items-center gap-2">
                       Livello
                       <input type="number" min={p.livello} max={99} className="form-input w-[84px]" value={livelloScelto} onChange={(e) => setLivello(Math.min(99, Math.max(p.livello, Number(e.target.value) || p.livello)))} aria-label="Livello per la stima delle statistiche" />
                     </label>
@@ -219,12 +227,12 @@ export function PersonaDettaglioPage() {
                     <button type="button" className={`chip touch ${scalaUnica ? 'chip--attivo' : ''}`} onClick={() => setScalaUnica(true)} aria-pressed={scalaUnica}>Scala 0–{MASSIMO_STATISTICA}</button>
                     <button type="button" className={`chip touch ${scalaUnica ? '' : 'chip--attivo'}`} onClick={() => setScalaUnica(false)} aria-pressed={!scalaUnica}>Adatta (0–{tettoAdattato})</button>
                   </div>
-                  <span className="text-[11px] text-text-muted">Tocca la stella per ingrandirla</span>
+                  <span className="testo-12 text-text-muted">Tocca la stella per ingrandirla</span>
                 </div>
                 <Modal titolo={`${p.nomeIt} — statistiche`} aperta={stellaIngrandita} onChiudi={() => setStellaIngrandita(false)} larga>
                   <div className="flex flex-col items-center gap-3">
                     <StellaCinque assi={assiStella} dimensione={460} badgeAltezza={40} etichettaAria={etichettaStella} />
-                    <span className="text-[12px] text-text-muted">Scala 0–{tettoStella}{scalaUnica ? '' : ` (adattata; massimo ${MASSIMO_STATISTICA})`}</span>
+                    <span className="testo-12 text-text-muted">Scala 0–{tettoStella}{scalaUnica ? '' : ` (adattata; massimo ${MASSIMO_STATISTICA})`}</span>
                   </div>
                 </Modal>
               <StatisticheBarre
@@ -235,9 +243,8 @@ export function PersonaDettaglioPage() {
               </div>
               {attiva && !p.rara && !p.delParty && (
                 <div className="flex items-center gap-2 flex-wrap mt-1">
-                  <button type="button" className="btn btn-primary" disabled={occupato} onClick={() => void aggiungi()}>
-                    Aggiungi alla scorta al livello {livelloScelto}
-                  </button>
+                  <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="piu" dimensione={22} />} titolo="Aggiungi alla scorta" dettaglio={`al livello ${livelloScelto}`}
+                    disabled={occupato} onClick={() => void aggiungi()} />
                   <PulsanteVisivo tono="secondario" icona={<IconaAzione chiave="obiettivo" dimensione={22} />} titolo="Aggiungi agli obiettivi" onClick={() => setObiettivoAperto(true)} />
                 </div>
               )}
@@ -256,8 +263,8 @@ export function PersonaDettaglioPage() {
           <div className="flex flex-col gap-4">
           <section className="card">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <h2 className="m-0 text-[15px] font-semibold">Affinità</h2>
-              {p.affinitaGuida && <span className="chip text-[11px]">corrette da te</span>}
+              <TitoloSezione>Affinità</TitoloSezione>
+              {p.affinitaGuida && <span className="chip testo-12">corrette da te</span>}
               <ModificaAffinita personaId={p.id} nome={p.nomeIt} affinita={p.affinita} affinitaGuida={p.affinitaGuida} onCambiato={ricarica} />
             </div>
             <AffinitaGriglia affinita={p.affinita} />
@@ -267,19 +274,19 @@ export function PersonaDettaglioPage() {
           {!p.delParty && <DoveSiIncontra persona={{ id: p.id, nome: p.nome, nomeIt: p.nomeIt }} partitaId={attiva?.id ?? null} />}
 
           <section className="card">
-            <h2 className="m-0 mb-3 text-[15px] font-semibold">Skill</h2>
+            <TitoloSezione className="mb-3">Skill</TitoloSezione>
             <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light">
               {p.skill.map((s) => (
                 <li key={s.id} className="py-2 flex items-start gap-3">
-                  <span className={`${p.delParty ? 'w-20' : 'w-14'} shrink-0 text-[12px] font-bold ${s.livello === 0 ? 'text-primary' : 'text-text-secondary'}`}>{etichettaApprendimento(s)}</span>
+                  <span className={`${p.delParty ? 'w-20' : 'w-14'} shrink-0 testo-12 font-bold ${s.livello === 0 ? 'text-primary-testo' : 'text-text-secondary'}`}>{etichettaApprendimento(s)}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Link to={`/skill/${s.id}`} className="touch inline-flex items-center font-semibold no-underline text-text hover:text-primary">{s.nomeIt}</Link>
-                      {s.nomeIt !== s.nome && <span className="text-[12px] text-text-muted">{s.nome}</span>}
+                      <Link to={`/skill/${s.id}`} className="touch inline-flex items-center font-semibold no-underline text-text hover:text-primary-testo">{s.nomeIt}</Link>
+                      {s.nomeIt !== s.nome && <span className="testo-12 text-text-muted">{s.nome}</span>}
                       <ElementoChip elemento={s.elemento} nome={s.elementoNome} />
-                      <span className="text-[12px] text-text-muted">{s.costo.testo}</span>
+                      <span className="testo-12 text-text-muted">{s.costo.testo}</span>
                     </div>
-                    <div className="text-[13px] text-text-secondary">{s.effettoNome}</div>
+                    <div className="testo-13 text-text-secondary">{s.effettoNome}</div>
                   </div>
                 </li>
               ))}
@@ -290,12 +297,12 @@ export function PersonaDettaglioPage() {
 
           {p.trattoDettaglio && (
             <section className="card">
-              <h2 className="m-0 mb-2 text-[15px] font-semibold">Tratto</h2>
+              <TitoloSezione className="mb-2">Tratto</TitoloSezione>
               <div className="flex items-center gap-2 flex-wrap">
-                <Link to={`/skill/${p.trattoDettaglio.id}`} className="touch inline-flex items-center font-semibold no-underline text-text hover:text-primary">{p.trattoDettaglio.nomeIt}</Link>
-                {p.trattoDettaglio.nomeIt !== p.trattoDettaglio.nome && <span className="text-[12px] text-text-muted">{p.trattoDettaglio.nome}</span>}
+                <Link to={`/skill/${p.trattoDettaglio.id}`} className="touch inline-flex items-center font-semibold no-underline text-text hover:text-primary-testo">{p.trattoDettaglio.nomeIt}</Link>
+                {p.trattoDettaglio.nomeIt !== p.trattoDettaglio.nome && <span className="testo-12 text-text-muted">{p.trattoDettaglio.nome}</span>}
               </div>
-              <div className="text-[13px] text-text-secondary">{p.trattoDettaglio.effettoNome}</div>
+              <div className="testo-13 text-text-secondary">{p.trattoDettaglio.effettoNome}</div>
             </section>
           )}
 
@@ -303,16 +310,16 @@ export function PersonaDettaglioPage() {
 
           {(p.ricettaSpeciale || p.ingredienteDi.length > 0) && (
             <section className="card flex flex-col gap-3">
-              <h2 className="m-0 text-[15px] font-semibold">Fusioni speciali</h2>
+              <TitoloSezione>Fusioni speciali</TitoloSezione>
               {p.ricettaSpeciale && (
                 <div>
-                  <div className="text-[12px] text-text-muted mb-1">Si ottiene con</div>
+                  <div className="testo-12 text-text-muted mb-1">Si ottiene con</div>
                   <Ricetta r={p.ricettaSpeciale} />
                 </div>
               )}
               {p.ingredienteDi.length > 0 && (
                 <div>
-                  <div className="text-[12px] text-text-muted mb-1">È ingrediente di</div>
+                  <div className="testo-12 text-text-muted mb-1">È ingrediente di</div>
                   <div className="flex flex-col gap-1">{p.ingredienteDi.map((r) => <Ricetta key={r.risultato.id} r={r} />)}</div>
                 </div>
               )}
@@ -321,8 +328,8 @@ export function PersonaDettaglioPage() {
 
           {!p.delParty && (
           <section className="card">
-            <h2 className="m-0 mb-2 text-[15px] font-semibold">Esecuzione (Stanza di Velluto)</h2>
-            <dl className="dl-scheda m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[13px]">
+            <TitoloSezione className="mb-2">Esecuzione (Stanza di Velluto)</TitoloSezione>
+            <dl className="dl-scheda m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 testo-13">
               <dt className="text-text-muted">Normale</dt>
               <dd className="m-0"><strong>{p.oggettoCatalogo ? <Link to={p.oggettoCatalogo.casa} className="touch inline-flex items-center">{p.oggettoCatalogo.nome}</Link> : p.oggettoNomeIt ?? p.oggetto}</strong>{p.oggettoNomeIt && p.oggettoNomeIt !== p.oggetto && <span className="text-text-muted"> ({p.oggetto})</span>}{p.oggettoDescrizione && <span className="text-text-secondary"> — {p.oggettoDescrizione}</span>}</dd>
               <dt className="text-text-muted">Con Allarme</dt>

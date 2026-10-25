@@ -25,7 +25,8 @@ import { getAlberoMappe } from '../services/api';
 import { usePartitaStore } from '../stores/partitaStore';
 import { PageState } from '../components/shared/PageState';
 import { VisoreMappa } from '../components/mappe/VisoreMappa';
-import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
+import { CollegamentoVisivo, PulsanteVisivo } from '../components/shared/PulsanteVisivo';
+import { IntestazioneScheda } from '../components/shared/IntestazioneScheda';
 import { IconaAzione, IconaScheda } from '../components/shared/IconaAzione';
 import { ritornoMappe } from '../utils/ritornoMappe';
 
@@ -80,21 +81,20 @@ function LuogoSenzaPlanimetria({ mappa, nome, albero, partitaId }: {
   const nodo = (albero.dati ?? []).find((m) => m.chiave === mappa.chiave);
   const pinLuogo = nodo ? pinDiContenuto(nodo) : mappa.numeroSpilli;
   return <div className="flex flex-col gap-4">
-    <header className="card flex flex-col gap-2">
-      <nav aria-label="Percorso della mappa" className="flex flex-wrap items-center gap-1 text-[12px] text-text-muted">
+    <IntestazioneScheda ripiego="/guida/mappe" titolo={nome}
+      percorso={<nav aria-label="Percorso della mappa" className="flex flex-wrap items-center gap-1 testo-12 text-text-muted">
         {mappa.percorso.map((p, i) => <span key={p.chiave} className="flex items-center gap-1">
           {i > 0 && <span aria-hidden>›</span>}
           {i === mappa.percorso.length - 1
             ? <span className="text-text">{p.nome}</span>
             : <Link to={urlMappa(p.chiave)} className="text-text-secondary">{p.nome}</Link>}
         </span>)}
-      </nav>
-      <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-        <h1 className="titolo-display m-0 break-words">{nome}</h1>
-        <span className="chip text-[11px]">{nomeTipoMappa(mappa)}</span>
+      </nav>}
+      chip={<>
+        <span className="chip testo-12">{nomeTipoMappa(mappa)}</span>
         {/* L0: le mappe contenute si contano con la parola della gerarchia (quartieri di Tokyo, aree di un quartiere, planimetrie
             di un Palazzo); i Memento non ne hanno e non le contano */}
-        {mappa.tipo !== 'dedalo' && <span className="text-[12px] text-text-muted">
+        {mappa.tipo !== 'dedalo' && <span className="testo-12 text-text-muted">
           {mappa.tipo === 'citta'
             ? (contenute.length === 0 ? 'nessun quartiere' : contenute.length === 1 ? 'un quartiere' : `${contenute.length} quartieri`)
             : mappa.tipo === 'quartiere'
@@ -103,19 +103,19 @@ function LuogoSenzaPlanimetria({ mappa, nome, albero, partitaId }: {
           {/* E2 (L3): i pin di contenuto del luogo, dal suo nodo dell'albero (`conteggiPin`); senza, i suoi pin come prima */}
           {pinLuogo > 0 ? ` · ${testoPin(pinLuogo)}` : ''}
         </span>}
-      </div>
-      {/* Va detto, invece di lasciarlo capire dall'assenza: questo nodo raccoglie, non disegna. */}
-      {contenute.length > 0 && <p className="m-0 text-[13px] text-text-secondary">Questa mappa non ha una pianta sua: raccoglie le mappe qui sotto.</p>}
-      <div className="flex flex-wrap gap-2">
+      </>}
+      azioni={<>
         {mappa.radiceDi && <CollegamentoVisivo to={schedaAccessoMondo(mappa.radiceDi.tipo, mappa.radiceDi.chiave)} tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={titoloSchedaAccessoMondo(mappa.radiceDi.tipo, mappa.radiceDi.chiave, mappa.nome)} />}
         <CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={titoloModificaMappa(mappa)} />
         <TornaAllaPartita partitaId={partitaId} />
-      </div>
-    </header>
+      </>}>
+      {/* Va detto, invece di lasciarlo capire dall'assenza: questo nodo raccoglie, non disegna. */}
+      {contenute.length > 0 && <p className="m-0 testo-13 text-text-secondary">Questa mappa non ha una pianta sua: raccoglie le mappe qui sotto.</p>}
+    </IntestazioneScheda>
     <PageState isLoading={albero.caricamento} error={albero.errore} onRetry={albero.ricarica}>
       {contenute.length > 0
         ? <GriglieDelLuogo contenute={contenute} nome={nome} />
-        : <p className="m-0 text-[13px] text-text-muted" role="status">{mappa.tipo === 'dedalo' ? 'I Memento non hanno planimetrie: i piani si generano a ogni discesa, e i dedali stanno nella loro scheda.' : 'Qui non c’è ancora nessuna planimetria. Puoi aggiungerne una dall’editor.'}</p>}
+        : <p className="m-0 testo-13 text-text-muted" role="status">{mappa.tipo === 'dedalo' ? 'I Memento non hanno planimetrie: i piani si generano a ogni discesa, e i dedali stanno nella loro scheda.' : 'Qui non c’è ancora nessuna planimetria. Puoi aggiungerne una dall’editor.'}</p>}
     </PageState>
   </div>;
 }
@@ -169,9 +169,8 @@ function GriglieDelLuogo({ contenute: tutte, nome, onScendi }: { contenute: Mapp
   return <div className="flex flex-col gap-4">
     {inGriglia.length > 0 && <Griglia mappe={inGriglia} nome={nome} titoli={titoli} etichetta={`Contenuto di ${nome}`} onScendi={onScendi} versioni={versioni} />}
     {tecnicheSenzaPin.length > 0 && <section className="flex flex-col gap-2" aria-label="Fogli dell’estrazione senza nome">
-      <button type="button" className="btn btn-ghost btn-sm touch self-start" aria-expanded={mostraFogli} onClick={() => setMostraFogli((v) => !v)}>
-        {mostraFogli ? 'Nascondi' : 'Mostra'} i fogli dell’estrazione senza nome · {tecnicheSenzaPin.length}
-      </button>
+      <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="pianta" dimensione={20} />} aria-expanded={mostraFogli} onClick={() => setMostraFogli((v) => !v)}
+        titolo={`${mostraFogli ? 'Nascondi' : 'Mostra'} i fogli dell’estrazione senza nome`} dettaglio={`· ${tecnicheSenzaPin.length}`} />
       {mostraFogli && <Griglia mappe={tecnicheSenzaPin} nome={nome} titoli={titoli} etichetta={`Fogli dell’estrazione senza nome di ${nome}`} onScendi={onScendi} versioni={versioni} />}
     </section>}
   </div>;
@@ -213,10 +212,10 @@ function Griglia({ mappe, nome, etichetta, titoli, onScendi, versioni }: { mappe
               contenuto, se ci sono. Il titolo tiene almeno 7rem: in una carta stretta (telefono) il riquadro va sotto il titolo invece di
               schiacciarlo sillaba per sillaba. */}
           <span className="flex flex-wrap items-start justify-between gap-x-2 gap-y-1">
-            <span className="min-w-0 flex-[1_1_7rem] break-words text-[13px] font-semibold leading-tight group-hover:text-primary">{titolo}</span>
-            <span className="chip chip--attivo shrink-0 text-[11px]">{testoPin(m.numeroSpilli)}</span>
+            <span className="min-w-0 flex-[1_1_7rem] break-words testo-13 font-semibold leading-tight group-hover:text-primary-testo">{titolo}</span>
+            <span className="chip chip--attivo shrink-0 testo-12">{testoPin(m.numeroSpilli)}</span>
           </span>
-          {(nVersioni > 1 || dentro) && <span className="text-[11px] text-text-muted">
+          {(nVersioni > 1 || dentro) && <span className="testo-12 text-text-muted">
             {[nVersioni > 1 ? `${nVersioni} versioni` : null, dentro ? `${m.numeroFigli} dentro` : null].filter(Boolean).join(' · ')}
           </span>}
         </span>
@@ -269,7 +268,7 @@ function DettaglioMappa({ chiave, partitaId }: { chiave: string; partitaId: numb
           onAcquistiCambiati={ricarica}
           onChiudi={() => navigate(ritornoMappe() ?? '/guida/mappe')}
           ritorno={<TornaAllaPartita partitaId={partitaId} />}
-          azioni={<>{mappa.radiceDi && <Link className="btn btn-secondary touch" to={schedaAccessoMondo(mappa.radiceDi.tipo, mappa.radiceDi.chiave)}>{titoloSchedaAccessoMondo(mappa.radiceDi.tipo, mappa.radiceDi.chiave, mappa.nome)}</Link>}<CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={titoloModificaMappa(mappa)} /></>}
+          azioni={<>{mappa.radiceDi && <CollegamentoVisivo icona={<IconaAzione chiave="scheda" dimensione={22} />} titolo={titoloSchedaAccessoMondo(mappa.radiceDi.tipo, mappa.radiceDi.chiave, mappa.nome)} to={schedaAccessoMondo(mappa.radiceDi.tipo, mappa.radiceDi.chiave)} />}<CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={titoloModificaMappa(mappa)} /></>}
         /></>}
         {!haPlanimetria(mappa) && <ContenutiGuidaMappa mappa={mappa.chiave} area={params.get('area')} dungeon={mappa.radiceDi?.tipo === 'dungeon' ? mappa.radiceDi.chiave : undefined} />}
       </div>}

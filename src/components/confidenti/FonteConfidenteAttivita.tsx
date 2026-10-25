@@ -13,7 +13,7 @@ function Requisito({ testo, descrizione }: { testo: string; descrizione: string 
 export function FonteConfidenteAttivita({ fonte }: { fonte: FonteConfidenteAttivitaDto }) {
   const d = fonte.disponibilitaFonte;
   return <section className="flex min-w-0 flex-col gap-2 rounded-md border border-border p-3" aria-label="Progressione del Confidente">
-    <Link to={fonte.casa} className="touch inline-flex items-center self-start text-primary">
+    <Link to={fonte.casa} className="touch inline-flex items-center self-start text-primary-testo">
       Apri {fonte.nome ?? fonte.chiave}{fonte.arcanaNome ? ` · ${fonte.arcanaNome}` : ''}
     </Link>
     <p className="m-0 text-text-secondary">Incontri, ranghi e Doti si registrano nella progressione del Confidente.</p>

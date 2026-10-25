@@ -13,6 +13,8 @@ import { MomentoPescaForm } from './MomentoPescaForm';
 import { momentoPescaCompleto, type MomentoPescaInCompilazione } from '../../utils/pesca';
 import { OsservazionePescaForm } from './OsservazionePescaForm';
 import { BeneficiPesca, ProfiliSessionePesca, RiepilogoOsservazionePesca } from './ProfiliPesca';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 const nuovoId = () => crypto.randomUUID().replaceAll('-', '');
 const erroreTesto = (e: unknown) => e instanceof Error ? e.message : 'Operazione non riuscita.';
@@ -87,10 +89,10 @@ function ConfermaGestoPesca({ partitaId, pronto, onChiudi, onCambiato }: { parti
     finally { blocco.current = false; if (vivo.current) setOccupato(false); }
   };
   return <Modal aperta larga titolo={pronto.titolo} onChiudi={() => { if (!occupato) onChiudi(ricevuta !== null); }} azioni={<>
-    <button type="button" className="btn btn-ghost touch" disabled={occupato} onClick={() => onChiudi(ricevuta !== null)}>{ricevuta ? 'Chiudi' : 'Torna ai dati conservati'}</button>
-    {!ricevuta && <button type="button" className="btn btn-primary touch" disabled={occupato || !!pendente || rifiutata || !attestato || !anteprima.dati || anteprima.caricamento || !!anteprima.errore} onClick={() => void conferma()}>Conferma questo gesto</button>}
+    <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave={ricevuta ? 'chiudi' : 'indietro'} dimensione={22} />} titolo={ricevuta ? 'Chiudi' : 'Torna ai dati conservati'} disabled={occupato} onClick={() => onChiudi(ricevuta !== null)} />
+    {!ricevuta && <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="raggiunto" dimensione={22} />} titolo="Conferma questo gesto" disabled={occupato || !!pendente || rifiutata || !attestato || !anteprima.dati || anteprima.caricamento || !!anteprima.errore} onClick={() => void conferma()} />}
   </>}>
-    <div className="flex min-w-0 flex-col gap-3 text-[13px]">
+    <div className="flex min-w-0 flex-col gap-3 testo-13">
       <GestiPartita partitaId={partitaId} contestoChiave={o.richiesta.operazioneId} onCambiato={async (partitaRecuperata, esito) => {
         if (!vivo.current) return;
         const p = esito?.payload, r = esito?.ricevuta;
@@ -103,7 +105,7 @@ function ConfermaGestoPesca({ partitaId, pronto, onChiudi, onCambiato }: { parti
         catch (e) { if (vivo.current) setErrore(`Esito del recupero acquisito; aggiornamento della vista non riuscito: ${erroreTesto(e)}`); }
       }} />
       {anteprima.caricamento && !anteprima.dati && <p role="status">Preparo il riepilogo corrente…</p>}
-      {anteprima.errore && <p role="alert" className="text-error">{anteprima.errore}<button type="button" className="btn btn-ghost touch" disabled={occupato || !!pendente || !!ricevuta} onClick={() => { setAttestato(false); void anteprima.ricarica(); }}>Rileggi l’anteprima</button></p>}
+      {anteprima.errore && <p role="alert" className="text-error">{anteprima.errore}<PulsanteVisivo tono="fantasma" className="ml-2" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi l’anteprima" disabled={occupato || !!pendente || !!ricevuta} onClick={() => { setAttestato(false); void anteprima.ricarica(); }} /></p>}
       {anteprima.dati && <>
         <p className="m-0">{anteprima.dati.esitoPrevisto}</p>
         <BersaglioAnteprima dto={anteprima.dati} operazione={o} />
@@ -143,7 +145,7 @@ function CompilaGestoPesca({ partitaId, editor, stato, aperta, onChiudi, onPront
   };
   return <Modal aperta={aperta} larga titolo={titolo} onChiudi={onChiudi}>
     {editor.tipo === 'manuale' ? <PreparazioneSessionePesca partitaId={partitaId} fonte={{ tipo: 'manuale' }}
-      onConferma={r => { const { revisionePescaAttesa, ...richiesta } = r; return eseguiPescaConRegistro(partitaId, { azione: 'registra-sessione', richiesta, bersaglio: null, revisionePescaAttesa }, { etichetta: titolo, pesca: true }); }} onCambiato={onCambiato} /> : <form className="flex min-w-0 flex-col gap-3 text-[13px]" onSubmit={prepara}><fieldset className="m-0 flex min-w-0 flex-col gap-3 border-0 p-0" disabled={!!pendente}>
+      onConferma={r => { const { revisionePescaAttesa, ...richiesta } = r; return eseguiPescaConRegistro(partitaId, { azione: 'registra-sessione', richiesta, bersaglio: null, revisionePescaAttesa }, { etichetta: titolo, pesca: true }); }} onCambiato={onCambiato} /> : <form className="flex min-w-0 flex-col gap-3 testo-13" onSubmit={prepara}><fieldset className="m-0 flex min-w-0 flex-col gap-3 border-0 p-0" disabled={!!pendente}>
       {editor.tipo === 'osservazione' && osservazione && <>
         <p className="m-0">{quando(editor.sessione.momento)} · versione {editor.sessione.osservazione.versione}. La correzione conserva l’identità della visita e il turno, coinvolgendo tutte le fonti mostrate.</p><FontiSessione sessione={editor.sessione} />
         <OsservazionePescaForm partitaId={partitaId} valore={osservazione} onCambia={setOsservazione} />
@@ -158,7 +160,7 @@ function CompilaGestoPesca({ partitaId, editor, stato, aperta, onChiudi, onPront
       {editor.tipo === 'esca' && <><MomentoPescaForm valore={momento} onCambia={setMomento} /><label className="flex flex-col gap-1">Boilie sospetto effettivamente acquistate<input type="number" className="form-input" min={1} max={1_000_000} step={1} value={quantita} onChange={e => setQuantita(e.target.value)} /></label><p className="m-0">Costo per esca nella fonte letta: {stato.regola.dati?.costoEscaPunti.toLocaleString('it-IT') ?? 'non leggibile'} punti pesca. Il possesso o l’uso di un’esca non ne prova l’acquisto. La spesa resta una proposta da decidere.</p></>}
       {editor.tipo === 'saldo' && <><p className="m-0">Saldo attualmente osservato: {stato.saldoPunti === null ? 'ignoto' : stato.saldoPunti.toLocaleString('it-IT')} punti pesca.</p><label className="flex flex-col gap-1">Saldo che hai osservato nel gioco<input type="number" className="form-input" min={0} max={999_999_999} step={1} value={quantita} onChange={e => setQuantita(e.target.value)} /></label><p className="m-0">Questa rettifica non riconosce singole spese come già conteggiate, non modifica le attribuzioni provate e non elimina proposte.</p></>}
       </fieldset>{pendente && <p role="alert" className="m-0 text-warning">Il gesto originale resta da verificare nel registro. Nessuna nuova dichiarazione viene inviata.</p>}
-      <div className="flex flex-wrap gap-2"><button type="button" className="btn btn-ghost touch" onClick={onChiudi}>Annulla</button><button type="submit" className="btn btn-secondary touch" disabled={!completo || !!pendente}>Rivedi questa dichiarazione</button></div>
+      <div className="flex flex-wrap gap-2"><button type="button" className="btn btn-ghost touch" onClick={onChiudi}>Annulla</button><PulsanteVisivo type="submit" tono="secondario" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Rivedi questa dichiarazione" disabled={!completo || !!pendente} /></div>
     </form>}
   </Modal>;
 }
@@ -184,47 +186,47 @@ function RegistroPescaNelContesto({ partitaId, onCambiato }: { partitaId: number
     if (!pendente) setPronto({ titolo, operazione: { azione, bersaglio, richiesta: { operazioneId: nuovoId() } } });
   };
   return <section id="pesca" className="card flex min-w-0 flex-col gap-3" aria-label="Registro della pesca">
-    <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="m-0 font-display text-[17px] uppercase">Pesca a Ichigaya</h2><button type="button" className="btn btn-ghost touch" disabled={registro.caricamento} onClick={() => void registro.ricarica()}>Rileggi il registro pesca</button></div>
-    <p className="m-0 text-[13px]">Visite, catture, fatti osservati e spese hanno fonti distinte. I vecchi contatori non provano catture o premi; nessun saldo cambia senza una decisione esplicita.</p>
+    <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="m-0 font-display testo-17 uppercase">Pesca a Ichigaya</h2><PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi il registro pesca" disabled={registro.caricamento} onClick={() => void registro.ricarica()} /></div>
+    <p className="m-0 testo-13">Visite, catture, fatti osservati e spese hanno fonti distinte. I vecchi contatori non provano catture o premi; nessun saldo cambia senza una decisione esplicita.</p>
     <GestiPartita partitaId={partitaId} onCambiato={cambiato} />
     {registro.caricamento && !s && <p role="status">Leggo il registro pesca…</p>}
     {registro.errore && <p role="alert" className="m-0 text-error">{registro.errore}</p>}
     {s && <>
-      <p className="m-0 text-[13px]">Saldo punti pesca: <strong>{s.saldoPunti === null ? 'ignoto' : s.saldoPunti.toLocaleString('it-IT')}</strong>. Conteggio attività: {s.contatore.volte}; turni dettagliati: {s.contatore.turni.length}; quote storiche non rappresentate: {s.contatore.quoteNonRappresentate}.</p>
-      {registro.caricamento && <p role="status" className="m-0 text-[12px]">Rilettura in corso: i dati precedenti e le bozze restano visibili. Ogni conferma richiede una nuova anteprima del server.</p>}
+      <p className="m-0 testo-13">Saldo punti pesca: <strong>{s.saldoPunti === null ? 'ignoto' : s.saldoPunti.toLocaleString('it-IT')}</strong>. Conteggio attività: {s.contatore.volte}; turni dettagliati: {s.contatore.turni.length}; quote storiche non rappresentate: {s.contatore.quoteNonRappresentate}.</p>
+      {registro.caricamento && <p role="status" className="m-0 testo-12">Rilettura in corso: i dati precedenti e le bozze restano visibili. Ogni conferma richiede una nuova anteprima del server.</p>}
       {s.regola.stato !== 'collegata' && <p role="alert" className="m-0 text-warning">Regola non collegata integralmente: {s.regola.motivi.join(' ')}. I riferimenti personali esistenti restano visibili.</p>}
       {!!s.avvisi.length && <ul className="m-0 pl-4 text-warning">{s.avvisi.map((a, i) => <li key={i}>{a}</li>)}</ul>}
-      <div className="flex flex-wrap gap-2"><button type="button" className="btn btn-secondary touch" disabled={!!pendente || s.regola.stato !== 'collegata'} onClick={() => setEditor({ tipo: 'manuale' })}>Registra o collega una visita</button><button type="button" className="btn btn-ghost touch" disabled={!!pendente} onClick={() => setEditor({ tipo: 'esca' })}>Registra acquisto esca</button><button type="button" className="btn btn-ghost touch" disabled={!!pendente} onClick={() => setEditor({ tipo: 'saldo' })}>Rettifica saldo osservato</button></div>
-      <details><summary className="touch">Turni preesistenti e quote del conteggio</summary><p className="text-[13px]">Un raccordo usa la firma del turno originale o una quota storica libera, senza incremento né catture presunte.</p><ul className="m-0 pl-4 text-[12px]">{s.contatore.turni.map(t => <li key={t.firma}>Turno {t.ordine} · attività {t.attivita} · {t.uid ? `UID ${t.uid}` : 'UID non assegnato'}{t.raccordatoASessione ? ` · sessione ${t.raccordatoASessione}` : ' · non raccordato'}</li>)}</ul></details>
-      <h3 className="m-0 text-[15px]">Visite osservate · {s.sessioni.length}</h3>
-      {!s.sessioni.length && <p className="m-0 text-[13px]">Nessuna visita osservata registrata. Il conteggio precedente rimane distinto.</p>}
-      <ul className="m-0 flex min-w-0 list-none flex-col gap-3 p-0">{s.sessioni.map(v => <li key={v.id} className="flex min-w-0 flex-col gap-2 border-t border-border pt-2 text-[13px]">
+      <div className="flex flex-wrap gap-2"><PulsanteVisivo icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Registra o collega una visita" disabled={!!pendente || s.regola.stato !== 'collegata'} onClick={() => setEditor({ tipo: 'manuale' })} /><PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="negozio" dimensione={22} />} titolo="Registra acquisto esca" disabled={!!pendente} onClick={() => setEditor({ tipo: 'esca' })} /><PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo="Rettifica saldo osservato" disabled={!!pendente} onClick={() => setEditor({ tipo: 'saldo' })} /></div>
+      <details><summary className="touch">Turni preesistenti e quote del conteggio</summary><p className="testo-13">Un raccordo usa la firma del turno originale o una quota storica libera, senza incremento né catture presunte.</p><ul className="m-0 pl-4 testo-12">{s.contatore.turni.map(t => <li key={t.firma}>Turno {t.ordine} · attività {t.attivita} · {t.uid ? `UID ${t.uid}` : 'UID non assegnato'}{t.raccordatoASessione ? ` · sessione ${t.raccordatoASessione}` : ' · non raccordato'}</li>)}</ul></details>
+      <h3 className="m-0 testo-15">Visite osservate · {s.sessioni.length}</h3>
+      {!s.sessioni.length && <p className="m-0 testo-13">Nessuna visita osservata registrata. Il conteggio precedente rimane distinto.</p>}
+      <ul className="m-0 flex min-w-0 list-none flex-col gap-3 p-0">{s.sessioni.map(v => <li key={v.id} className="flex min-w-0 flex-col gap-2 border-t border-border pt-2 testo-13">
         <strong>{quando(v.momento)} · {v.attiva ? 'fonti attive' : 'senza fonti attive'}{v.orfana ? ' · riferimento guida mancante' : ''}</strong>
         <span>Turno {v.turno.ordine} · {v.turno.origine === 'creato' ? 'creato da questa sessione' : v.turno.origine === 'raccordato' ? 'preesistente raccordato: non posseduto dalla sessione' : 'quota compresa nel conteggio storico'}{v.turno.revocato ? ' · turno revocato successivamente' : ''}.</span>
-        <details><summary className="touch">Fonti e provenienze</summary><FontiSessione sessione={v} /><div className="flex flex-wrap gap-2 pt-2">{v.fonti.map(f => <button type="button" className="btn btn-ghost touch" key={f.id} disabled={!!pendente} onClick={() => rimuovi('rimuovi-fonte', f.id, 'Rimuovi soltanto questa fonte della visita')}>Rivedi rimozione {f.fonte.tipo === 'manuale' ? 'della dichiarazione manuale' : 'della fonte del Diario'}</button>)}</div></details>
+        <details><summary className="touch">Fonti e provenienze</summary><FontiSessione sessione={v} /><div className="flex flex-wrap gap-2 pt-2">{v.fonti.map(f => <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo={<>Rivedi rimozione {f.fonte.tipo === 'manuale' ? 'della dichiarazione manuale' : 'della fonte del Diario'}</>} key={f.id} disabled={!!pendente} onClick={() => rimuovi('rimuovi-fonte', f.id, 'Rimuovi soltanto questa fonte della visita')} />)}</div></details>
         <RiepilogoOsservazionePesca osservazione={v.osservazione.dati} /><ProfiliSessionePesca punto={v.punto} profili={v.profili} profiliPianificazione={v.profiliPianificazione} /><BeneficiPesca benefici={v.benefici} />
         {!!v.avvisi.length && <ul className="m-0 pl-4 text-warning">{v.avvisi.map((a, i) => <li key={i}>{a}</li>)}</ul>}
         <details><summary className="touch">Revisioni dell’osservazione · {v.revisioni.length}</summary><ul className="m-0 flex min-w-0 list-none flex-col gap-2 p-0">{v.revisioni.map(r => <li className="border-t border-border pt-2" key={r.id}><strong>Versione {r.versione}{r.id === v.osservazione.id ? ' · corrente' : ''}</strong><RiepilogoOsservazionePesca osservazione={r.dati} /></li>)}</ul></details>
-        <div className="flex flex-wrap gap-2"><button type="button" className="btn btn-secondary touch" disabled={!!pendente} onClick={() => setEditor({ tipo: 'osservazione', sessione: v })}>Correggi l’osservazione</button><button type="button" className="btn btn-ghost touch" disabled={!!pendente} onClick={() => rimuovi('rimuovi-sessione', v.id, 'Rimuovi la visita e tutte le sue fonti')}>Rivedi rimozione completa</button></div>
+        <div className="flex flex-wrap gap-2"><PulsanteVisivo icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo="Correggi l’osservazione" disabled={!!pendente} onClick={() => setEditor({ tipo: 'osservazione', sessione: v })} /><PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Rivedi rimozione completa" disabled={!!pendente} onClick={() => rimuovi('rimuovi-sessione', v.id, 'Rimuovi la visita e tutte le sue fonti')} /></div>
       </li>)}</ul>
-      <h3 className="m-0 text-[15px]">Fatti canonici e fonti temporali</h3>
+      <h3 className="m-0 testo-15">Fatti canonici e fonti temporali</h3>
       <ul className="m-0 flex min-w-0 list-none flex-col gap-3 p-0">{EVENTI_PESCA.map(evento => {
         const f = s.fatti.find(f => f.evento === evento);
-        return <li key={evento} className="flex min-w-0 flex-col gap-2 border-t border-border pt-2 text-[13px]">
+        return <li key={evento} className="flex min-w-0 flex-col gap-2 border-t border-border pt-2 testo-13">
           <strong>{nomeEventoPesca(evento)} · {f ? valoreFatto(f.valore) : 'ignoto: nessuna fonte letta'}</strong>
-          <button type="button" className="btn btn-ghost touch self-start" disabled={!!pendente} onClick={() => setEditor({ tipo: 'fatto', evento })}>Aggiungi un’osservazione manuale</button>
+          <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="piu" dimensione={22} />} titolo="Aggiungi un’osservazione manuale" className="self-start" disabled={!!pendente} onClick={() => setEditor({ tipo: 'fatto', evento })} />
           {f?.avvisi.map((a, i) => <p className="m-0 text-warning" key={i}>{a}</p>)}
           {!f?.fonti.length && <p className="m-0">Nessuna fonte: non equivale a «non avvenuto».</p>}
           <ul className="m-0 flex min-w-0 list-none flex-col gap-2 p-0">{f?.fonti.map(fonte => <li key={fonte.id} className="flex min-w-0 flex-col gap-1 border-l border-border pl-2">
             <FonteFatto fonte={fonte} />
-            {fonte.sessioneId ? <button type="button" className="btn btn-ghost touch self-start" disabled={!!pendente || !s.sessioni.some(v => v.id === fonte.sessioneId)} onClick={() => { const sessione = s.sessioni.find(v => v.id === fonte.sessioneId); if (sessione) setEditor({ tipo: 'osservazione', sessione }); }}>Correggi l’osservazione di origine</button>
-              : <button type="button" className="btn btn-ghost touch self-start" disabled={!!pendente} onClick={() => rimuovi('rimuovi-fatto', fonte.id, 'Revoca questa sola fonte del fatto')}>Rivedi revoca di questa fonte</button>}
+            {fonte.sessioneId ? <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo="Correggi l’osservazione di origine" className="self-start" disabled={!!pendente || !s.sessioni.some(v => v.id === fonte.sessioneId)} onClick={() => { const sessione = s.sessioni.find(v => v.id === fonte.sessioneId); if (sessione) setEditor({ tipo: 'osservazione', sessione }); }} />
+              : <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Rivedi revoca di questa fonte" className="self-start" disabled={!!pendente} onClick={() => rimuovi('rimuovi-fatto', fonte.id, 'Revoca questa sola fonte del fatto')} />}
           </li>)}</ul>
         </li>;
       })}</ul>
-      <h3 className="m-0 text-[15px]">Acquisti effettivi di esca · {s.acquistiEsca.length}</h3>
-      {!s.acquistiEsca.length && <p className="m-0 text-[13px]">Nessun acquisto registrato; possesso e uso restano osservazioni delle visite.</p>}
-      <ul className="m-0 flex min-w-0 list-none flex-col gap-3 p-0">{s.acquistiEsca.map(a => <li key={a.id} className="flex min-w-0 flex-col gap-2 border-t border-border pt-2 text-[13px]"><strong>{quando(a.momento)} · {a.quantita} Boilie sospetto · {a.costo.toLocaleString('it-IT')} punti pesca{a.attivo ? '' : ' · rimosso'}</strong><BeneficiPesca benefici={a.benefici} />{a.attivo && <button type="button" className="btn btn-ghost touch self-start" disabled={!!pendente} onClick={() => rimuovi('rimuovi-acquisto-esca', a.id, 'Rimuovi questo acquisto di esca')}>Rivedi rimozione dell’acquisto</button>}</li>)}</ul>
+      <h3 className="m-0 testo-15">Acquisti effettivi di esca · {s.acquistiEsca.length}</h3>
+      {!s.acquistiEsca.length && <p className="m-0 testo-13">Nessun acquisto registrato; possesso e uso restano osservazioni delle visite.</p>}
+      <ul className="m-0 flex min-w-0 list-none flex-col gap-3 p-0">{s.acquistiEsca.map(a => <li key={a.id} className="flex min-w-0 flex-col gap-2 border-t border-border pt-2 testo-13"><strong>{quando(a.momento)} · {a.quantita} Boilie sospetto · {a.costo.toLocaleString('it-IT')} punti pesca{a.attivo ? '' : ' · rimosso'}</strong><BeneficiPesca benefici={a.benefici} />{a.attivo && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Rivedi rimozione dell’acquisto" className="self-start" disabled={!!pendente} onClick={() => rimuovi('rimuovi-acquisto-esca', a.id, 'Rimuovi questo acquisto di esca')} />}</li>)}</ul>
       <Link className="touch self-start" to="/impostazioni">Apri il Cestino e i gesti conservati</Link>
       {editor && <CompilaGestoPesca key={editor.tipo === 'osservazione' ? `${editor.tipo}:${editor.sessione.id}:${editor.sessione.osservazione.id}` : editor.tipo === 'fatto' ? `${editor.tipo}:${editor.evento}` : editor.tipo} partitaId={partitaId} editor={editor} stato={s} aperta={pronto === null} onChiudi={() => setEditor(null)} onCambiato={cambiato} onPronto={setPronto} />}
     </>}

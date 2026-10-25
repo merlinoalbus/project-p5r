@@ -5,6 +5,8 @@
 // Boot bloccante su /api/config: se il backend non risponde si mostra
 // una schermata d'errore in HTML puro (funziona anche se il bundle
 // React ha problemi) e l'App NON viene montata.
+// Nell'attesa `#root` contiene l'anteprima statica di `index.html` (logo e «Caricamento…»): la sostituiscono il montaggio di
+// React (`render`, che svuota il contenitore) o la schermata d'errore qui sotto.
 // ============================================================
 
 import { StrictMode } from 'react';
@@ -34,7 +36,7 @@ function renderBootErrorScreen(reason: string): void {
       <div style="max-width:560px;padding:40px;text-align:center;background:#14141a;border-radius:12px;border:1px solid #34343f;box-shadow:0 10px 40px rgba(0,0,0,0.5);">
         <h1 style="color:#e5352b;margin:0 0 16px 0;font-size:1.5rem;">Impossibile avviare l'app</h1>
         <p style="margin:0 0 8px 0;line-height:1.5;color:#a3a3b3;">${reason}.</p>
-        <p style="margin:0 0 24px 0;line-height:1.5;color:#6f6f80;font-size:0.9rem;">Verifica che il backend sia in esecuzione e raggiungibile, poi ricarica.</p>
+        <p style="margin:0 0 24px 0;line-height:1.5;color:#8e8ea0;font-size:0.9rem;">Verifica che il backend sia in esecuzione e raggiungibile, poi ricarica.</p>
         <button onclick="location.reload()" style="padding:12px 28px;background:#e5352b;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-size:1rem;">Ricarica</button>
       </div>
     </div>

@@ -57,7 +57,7 @@ export function RicettePersona({ persone, partitaId, livelloProtagonista, inScor
       )}
       {scelta && (
         <>
-          <div className="flex flex-wrap items-center gap-2 text-[13px]">
+          <div className="flex flex-wrap items-center gap-2 testo-13">
             <button type="button" className={`chip touch ${soloLivello ? 'chip--attivo' : ''}`} disabled={!livelloProtagonista} onClick={() => setSoloLivello((v) => !v)} aria-pressed={soloLivello} title={livelloProtagonista ? `Solo Persona fino al livello ${livelloProtagonista} del protagonista` : 'Serve una partita attiva'}>
               Fino al livello {livelloProtagonista ?? '—'} del protagonista
             </button>
@@ -73,11 +73,11 @@ export function RicettePersona({ persone, partitaId, livelloProtagonista, inScor
             )}
           </div>
           {errore ? (
-            <p className="m-0 text-[13px] text-error">{errore}</p>
+            <p className="m-0 testo-13 text-error">{errore}</p>
           ) : caricamento && !dati ? (
             <div className="flex justify-center py-6"><Spinner /></div>
           ) : dati && dati.totale === 0 ? (
-            <p className="m-0 text-[13px] text-text-muted">
+            <p className="m-0 testo-13 text-text-muted">
               {scelta.rara ? 'I Demoni del Tesoro non si ottengono per fusione: si incontrano nei Palazzi e nei Mementos.' : modalita === 'per' ? 'Nessuna ricetta disponibile con i contenuti considerati.' : 'Nessuna fusione disponibile con questa Persona.'}
             </p>
           ) : dati ? (
@@ -85,7 +85,7 @@ export function RicettePersona({ persone, partitaId, livelloProtagonista, inScor
               {ricette.map((r) => (
                 <RicettaRiga key={r.ingredienti.map((i) => i.id).join('-') + '>' + r.risultato.id} ricetta={r} inScorta={inScorta} mostraRisultato={modalita === 'con'} />
               ))}
-              {ricette.length === 0 && <li className="py-3 text-[13px] text-text-muted">Nessuna ricetta pronta con la scorta attuale.</li>}
+              {ricette.length === 0 && <li className="py-3 testo-13 text-text-muted">Nessuna ricetta pronta con la scorta attuale.</li>}
             </ul>
           ) : null}
           {dati && dati.ricette.length < dati.totale && (

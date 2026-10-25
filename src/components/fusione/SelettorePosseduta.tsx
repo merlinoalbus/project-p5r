@@ -26,8 +26,8 @@ export function SelettorePosseduta({ etichetta, persone, sceltaId, onScegli, esc
         <div className="card flex items-center gap-3 py-2">
           <AnteprimaPersona nome={scelta.nome} etichetta={scelta.nomeIt} dimensione={48} />
           <span className="min-w-0 flex-1">
-            <span className="block font-display uppercase text-[18px] leading-none truncate">{scelta.nomeIt}</span>
-            <span className="block text-[12px] text-text-secondary">{scelta.arcanaNome} · livello {scelta.livello}</span>
+            <span className="block font-display uppercase testo-18 leading-none truncate">{scelta.nomeIt}</span>
+            <span className="block testo-12 text-text-secondary">{scelta.arcanaNome} · livello {scelta.livello}</span>
           </span>
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Cambia" onClick={() => onScegli(null)} aria-label={`Cambia ${etichetta}`} />
         </div>
@@ -38,8 +38,8 @@ export function SelettorePosseduta({ etichetta, persone, sceltaId, onScegli, esc
               <button type="button" className="w-full text-left flex items-center gap-2 card card--cliccabile py-1.5 px-2 touch" onClick={() => onScegli(p.id)} aria-label={`${etichetta}: ${p.nomeIt}`}>
                 <AnteprimaPersona nome={p.nome} etichetta={p.nomeIt} dimensione={40} />
                 <span className="min-w-0 flex-1">
-                  <span className="block font-semibold text-[13px] truncate">{p.nomeIt}</span>
-                  <span className="block text-[11px] text-text-muted truncate">{p.arcanaNome} · liv. {p.livello}</span>
+                  <span className="block font-semibold testo-13 truncate">{p.nomeIt}</span>
+                  <span className="block testo-12 text-text-muted truncate">{p.arcanaNome} · liv. {p.livello}</span>
                 </span>
               </button>
             </li>

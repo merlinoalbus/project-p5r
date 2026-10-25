@@ -10,6 +10,8 @@ import { getVocePercorso } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { gestoPendenteNelloScope, useGestiPartita } from '../../services/gestiPartita';
 import { PreparazioneSessionePesca } from '../pesca/PreparazioneSessionePesca';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 const fotografia = (a: AzionePercorsoDto) => JSON.stringify([a.uid, a.fatta, a.giorno, a.fascia, a.genere, a.azione, a.tipo, a.riferimento, a.rangoAtteso, a.effettiVoce?.revisione]);
 
@@ -53,21 +55,21 @@ export function PreparaAcquistiVoce({ a, partitaId, onChiudi, onConferma, onRile
   };
   return <Modal aperta larga titolo="Osservazioni della voce del Diario" onChiudi={() => { if (!occupato && !incerto) onChiudi(); }} azioni={<>
     <button type="button" className="btn btn-ghost touch" disabled={occupato || incerto} onClick={onChiudi}>Annulla</button>
-    <button type="button" className="btn btn-secondary touch" disabled={occupato || incerto} onClick={azzera}>Rivedi tutte le osservazioni</button>
-    <button type="button" className="btn btn-primary touch" disabled={occupato || incerto || !!pendente || nonPronta || mancaPreparazione} onClick={() => void spunta()}>Conferma la spunta e queste osservazioni</button>
+    <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Rivedi tutte le osservazioni" disabled={occupato || incerto} onClick={azzera} />
+    <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="raggiunto" dimensione={22} />} titolo="Conferma la spunta e queste osservazioni" disabled={occupato || incerto || !!pendente || nonPronta || mancaPreparazione} onClick={() => void spunta()} />
   </>}>
-    <div className="flex min-w-0 flex-col gap-3 text-[13px]">
+    <div className="flex min-w-0 flex-col gap-3 testo-13">
       <strong>{a.azione}</strong>
       <p className="m-0">Ogni riquadro prepara soltanto i dati. Il comando finale registra insieme spunta, consumazioni e sessioni osservate. Doti, yen e punti pesca restano proposte da decidere.</p>
       {invalidazioneAnteprima > 0 && mancaPreparazione && <p role="status" className="m-0 text-warning">Gli input e le catture sono conservati. Rivedi una nuova anteprima e riconferma ogni riquadro prima della spunta; il comando precedente non viene ripetuto.</p>}
       <details><summary className="touch">Tutti gli effetti della voce</summary><ul className="m-0 pl-4">{a.effettiVoce?.effetti.map((e) => <li key={e.uid}>{descriviEffettoVoce(e.effetto)}</li>)}</ul></details>
       {verifica.caricamento && <p role="status">Verifico la configurazione corrente della voce…</p>}
-      {verifica.errore && <p role="alert" className="m-0 text-error">{verifica.errore}<button type="button" className="btn btn-ghost touch" disabled={occupato || incerto} onClick={() => void verifica.ricarica()}>Rileggi la voce conservando i dati</button></p>}
+      {verifica.errore && <p role="alert" className="m-0 text-error">{verifica.errore}<PulsanteVisivo tono="fantasma" className="ml-2" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi la voce conservando i dati" disabled={occupato || incerto} onClick={() => void verifica.ricarica()} /></p>}
       {verifica.dati?.fatta && <p role="alert" className="m-0 text-warning">Questa voce risulta già fatta: nessuna nuova spunta viene inviata. Mostra la voce aggiornata; gli eventuali effetti mancanti compaiono come pulsante «Applica» sulla voce.</p>}
-      {cambiata && <p role="alert" className="m-0 text-warning">La voce è cambiata: nessuna spunta viene inviata.<button type="button" className="btn btn-secondary touch" onClick={() => { if (verifica.dati) { onRileggi(verifica.dati); onChiudi(); } }}>Mostra la voce aggiornata</button></p>}
+      {cambiata && <p role="alert" className="m-0 text-warning">La voce è cambiata: nessuna spunta viene inviata.<PulsanteVisivo className="ml-2" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Mostra la voce aggiornata" onClick={() => { if (verifica.dati) { onRileggi(verifica.dati); onChiudi(); } }} /></p>}
       <fieldset className="m-0 flex min-w-0 flex-col gap-3 border-0 p-0" disabled={occupato || incerto || nonPronta}>
         {effetti.map((e, i) => <section className="flex flex-col gap-2 border-t border-border pt-2" key={`${e.uid}:${generazione}`}>
-          <h3 className="m-0 text-[14px]">{e.effetto.tipo === 'pesca' ? 'Sessione di pesca' : 'Consumazione'} · osservazione {i + 1} di {effetti.length}</h3>
+          <h3 className="m-0 testo-14">{e.effetto.tipo === 'pesca' ? 'Sessione di pesca' : 'Consumazione'} · osservazione {i + 1} di {effetti.length}</h3>
           {e.effetto.tipo === 'pesca' ? <PreparazioneSessionePesca partitaId={partitaId} fonte={{ tipo: 'diario', voceUid: a.uid, effettoUid: e.uid }} giorno={a.giorno} fascia={a.fascia} confermaScrive={false} invalidazioneAnteprima={invalidazioneAnteprima}
             onConferma={async r => { if (vivo.current) { setPeschePreparate(p => ({ ...p, [e.uid]: r })); confermaPreparazione(e.uid); } }} /> : e.effetto.tipo === 'acquisto' ? <PreparazioneAcquistoAojiru partitaId={partitaId} articolo={e.effetto.articolo} fonte={{ tipo: 'diario', voceUid: a.uid, effettoUid: e.uid }} giorno={a.giorno} fascia={a.fascia} invalidazioneAnteprima={invalidazioneAnteprima}
             titoloConferma="Prepara questo consumo per la spunta" esitoConferma="Dati pronti; nessuna consumazione ancora registrata." confermaScrive={false}

@@ -25,7 +25,7 @@ import { useSearchParams } from '../scheda/routerScheda';
 import { creaAreaDedalo, eliminaAreaDedalo, aggiornaAreaDedalo, spostaAreaDedalo } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { LIMITI_GUIDA } from '../../../shared/limitiGuida';
-import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { PulsanteVisivo, FrecciaApertura } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { Selettore } from '../shared/Selettore';
 import { FilaScorrevole } from '../shared/FilaScorrevole';
@@ -110,8 +110,8 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, onApriPozzo, par
   /** L'interruttore «Gioca» / «Modifica la guida». */
   const interruttore = (
     <span className="inline-flex shrink-0 overflow-hidden rounded-md border border-border" role="group" aria-label="Modalità della pagina">
-      <button type="button" className={`touch px-3 text-[12px] ${!modifica ? 'bg-primary/25 font-semibold text-text' : 'text-text-muted hover:text-text'}`} aria-pressed={!modifica} onClick={() => onModifica(false)}>Gioca</button>
-      <button type="button" className={`touch border-l border-border px-3 text-[12px] ${modifica ? 'bg-primary/25 font-semibold text-text' : 'text-text-muted hover:text-text'}`} aria-pressed={modifica} onClick={() => onModifica(true)}>Modifica la guida</button>
+      <button type="button" className={`touch px-3 testo-12 ${!modifica ? 'bg-primary/25 font-semibold text-text' : 'text-text-muted hover:text-text'}`} aria-pressed={!modifica} onClick={() => onModifica(false)}>Gioca</button>
+      <button type="button" className={`touch border-l border-border px-3 testo-12 ${modifica ? 'bg-primary/25 font-semibold text-text' : 'text-text-muted hover:text-text'}`} aria-pressed={modifica} onClick={() => onModifica(true)}>Modifica la guida</button>
     </span>
   );
 
@@ -126,17 +126,17 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, onApriPozzo, par
           </span>
           <div className="flex min-w-0 flex-1 flex-col gap-1">
             <div className="flex min-w-0 items-center gap-2">
-              <h2 className="m-0 hidden min-w-0 font-display text-[19px] uppercase leading-none md:block">{dedalo.nome}{completato && <>{' '}<SpuntaCompletata dimensione={15} /><TestoCompletata /></>}</h2>
+              <h2 className="m-0 hidden min-w-0 font-display testo-20 uppercase leading-none md:block">{dedalo.nome}{completato && <>{' '}<SpuntaCompletata dimensione={15} /><TestoCompletata /></>}</h2>
               <span className="min-w-0 flex-1 md:hidden">
                 <Selettore compatto etichetta="Dedalo" valore={dedalo.chiave} ricerca="mai"
                   opzioni={dedali.map((x) => ({ chiave: x.chiave, nome: `${x.ordine + 1}. ${x.nome}`, dettaglio: x.dedalo?.completato ? 'completato' : x.dedalo && x.dedalo.obiettivi.fatti !== null && x.dedalo.obiettivi.totale > 0 ? `${Math.round((x.dedalo.obiettivi.fatti / x.dedalo.obiettivi.totale) * 100)}%` : undefined }))}
                   onCambia={onScegliDedalo} />
               </span>
-              {quota !== null && <span className="shrink-0 font-display text-[17px] tabular-nums leading-none">{Math.round(quota * 100)}%</span>}
+              {quota !== null && <span className="shrink-0 font-display testo-17 tabular-nums leading-none">{Math.round(quota * 100)}%</span>}
               <span className="hidden md:inline-flex">{interruttore}</span>
-              <button type="button" className="btn btn-ghost touch shrink-0 !px-2.5 md:hidden" aria-expanded={menu} aria-label="Altri comandi" onClick={() => setMenu((m) => !m)}>⋯</button>
+              <PulsanteVisivo tono="fantasma" compatto className="btn-visivo--stretto shrink-0 md:hidden" icona={<IconaAzione chiave="tutti" dimensione={20} />} titolo={<>Altro<FrecciaApertura aperto={menu} /></>} aria-expanded={menu} aria-label="Altro: altri comandi" onClick={() => setMenu((m) => !m)} />
             </div>
-            <span className="text-[12px] tabular-nums text-text-secondary">
+            <span className="testo-12 tabular-nums text-text-secondary">
               Timbri {conto(conti.timbri)}{conti.timbri.daImpostare > 0 ? ` (${conti.timbri.daImpostare} ${conti.timbri.daImpostare === 1 ? 'area' : 'aree'} senza totale)` : ''} · Richieste {conto(conti.richieste)} · Trama {conto(conti.trama)} · Persona {partitaId ? `${conti.persona.fatti}/${conti.persona.totale} catturate` : conti.persona.totale}
             </span>
             {quota !== null && (
@@ -155,12 +155,12 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, onApriPozzo, par
         )}
         {/* i dettagli della guida in una piega: lo spazio va all'area */}
         {dedalo.descrizione && (
-          <details className="text-[12px]">
+          <details className="testo-12">
             <summary className="touch cursor-pointer text-text-muted">Dettagli del dedalo dalla guida</summary>
             <p className="m-0 whitespace-pre-wrap pt-1 text-text-secondary">{dedalo.descrizione}</p>
           </details>
         )}
-        {!partitaId && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary">partita</Link> per segnare timbri, catture, Richieste e Trama.</span>}
+        {!partitaId && <span className="testo-12 text-text-muted">Attiva una <Link to="/partita" className="text-primary-testo">partita</Link> per segnare timbri, catture, Richieste e Trama.</span>}
       </section>
 
       {/* ---- Le schede delle aree: restano in vista scorrendo (sul telefono e sul tablet scorre la pagina, che ha 16 px di
@@ -187,14 +187,14 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, onApriPozzo, par
           </FilaScorrevole>
         </div>
       )}
-      {aree.length === 0 && <p className="m-0 text-[12px] text-text-muted" role="status">Questo dedalo non ha ancora aree{modifica ? ': aggiungine una qui sotto.' : ': si aggiungono in «Modifica la guida».'}</p>}
+      {aree.length === 0 && <p className="m-0 testo-12 text-text-muted" role="status">Questo dedalo non ha ancora aree{modifica ? ': aggiungine una qui sotto.' : ': si aggiungono in «Modifica la guida».'}</p>}
 
       {/* ---- L'area aperta ---- */}
       {area && (
         <div role="tabpanel" id={`area-${area.chiave}`} aria-labelledby={`scheda-${area.chiave}`} className="flex min-w-0 flex-col gap-2.5">
           {(area.descrizione || modifica) && (
             <div className="flex flex-wrap items-center gap-1.5">
-              {area.descrizione && <TestoRipiegabile testo={area.descrizione} massimo={140} className="min-w-0 flex-1 basis-60 text-[12px] text-text-secondary" />}
+              {area.descrizione && <TestoRipiegabile testo={area.descrizione} massimo={140} className="min-w-0 flex-1 basis-60 testo-12 text-text-secondary" />}
               {modifica && (() => {
                 const i = aree.findIndex((x) => x.chiave === area.chiave);
                 return <>
@@ -225,7 +225,7 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, onApriPozzo, par
               <SezioneDellArea chiave="richieste" titolo="Richieste" conto={partitaId ? `${area.richieste.filter((r) => r.stato === 'completata').length}/${area.richieste.length}` : String(area.richieste.length)}
                 azioni={modifica ? <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi" aria-label={`Aggiungi una Richiesta in ${area.nome}`} onClick={() => setModulo({ chiave: null, area: area.chiave })} /> : undefined}>
                 {area.richieste.length === 0
-                  ? <p className="m-0 text-[12px] text-text-muted">Nessuna Richiesta in quest’area.</p>
+                  ? <p className="m-0 testo-12 text-text-muted">Nessuna Richiesta in quest’area.</p>
                   : <ElencoRichieste richieste={area.richieste} dedalo={dedalo.chiave} area={area.chiave} aree={elencoAree} partitaId={partitaId} modifica={modifica}
                       onRichiesta={onRichiesta} onModifica={(k) => setModulo({ chiave: k, area: null })} onRicarica={onRicarica} />}
               </SezioneDellArea>
@@ -247,7 +247,7 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, onApriPozzo, par
       {dedalo.archivio && <ArchivioDelPalazzo archivio={dedalo.archivio} onSalvato={onRicarica} />}
 
       {/* ---- Gli attrezzi del dedalo, in «Modifica la guida» ---- */}
-      {!modifica && daCollocare.length > 0 && <p className="m-0 text-[11px] text-text-muted">{daCollocare.length === 1 ? '1 Richiesta del dedalo non sta' : `${daCollocare.length} Richieste del dedalo non stanno`} in nessuna area e non {daCollocare.length === 1 ? 'conta' : 'contano'}: si colloca in «Modifica la guida».</p>}
+      {!modifica && daCollocare.length > 0 && <p className="m-0 testo-12 text-text-muted">{daCollocare.length === 1 ? '1 Richiesta del dedalo non sta' : `${daCollocare.length} Richieste del dedalo non stanno`} in nessuna area e non {daCollocare.length === 1 ? 'conta' : 'contano'}: si colloca in «Modifica la guida».</p>}
       {modifica && (
         <section className="flex flex-col gap-2.5 rounded-lg border border-dashed border-border-light p-2.5" aria-label={`Attrezzi di ${dedalo.nome}`}>
           {daCollocare.length > 0 && (
@@ -260,7 +260,7 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, onApriPozzo, par
             <SezioneDellArea chiave="persona" titolo="Persona senza area" conto={String(senzaArea.length)} nota="non si vedono in nessuna area: sceglile">
               <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0">
                 {senzaArea.map((p) => (
-                  <li key={p.chiave} className="flex flex-wrap items-center gap-2 py-1 text-[13px]">
+                  <li key={p.chiave} className="flex flex-wrap items-center gap-2 py-1 testo-13">
                     <span className="min-w-0 flex-1">{p.persona?.nomeIt ?? p.nome}{p.persona && p.nome !== p.persona.nomeIt ? <span className="text-text-muted"> ({p.nome})</span> : null}</span>
                     <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" aria-label={`Modifica: ${p.persona?.nomeIt ?? p.nome}`} onClick={() => setPersonaSenzaArea(p)} />
                   </li>

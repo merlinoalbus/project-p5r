@@ -26,14 +26,14 @@ export function Topbar() {
           className="h-9 sm:h-10 lg:h-12 w-auto max-w-[104px] sm:max-w-[180px] lg:max-w-[300px] object-contain"
           fallback={
             <>
-              <AssetImg nome="identita/logo" alt={APP_NAME} className="w-8 h-8 object-contain" fallback={<span className="w-8 h-8 rounded-md bg-primary flex items-center justify-center text-white font-black text-[14px] tracking-tight">P5</span>} />
-              <span className="font-display uppercase text-[22px] leading-none hidden sm:inline">{APP_NAME}</span>
+              <AssetImg nome="identita/logo" alt={APP_NAME} className="w-8 h-8 object-contain" fallback={<span className="w-8 h-8 rounded-md bg-primary flex items-center justify-center text-white font-black testo-14 tracking-tight">P5</span>} />
+              <span className="font-display uppercase testo-24 leading-none hidden sm:inline">{APP_NAME}</span>
             </>
           }
         />
       </Link>
       {sezione && (
-        <span className="voce-menu text-[17px] text-text-secondary truncate hidden md:inline">
+        <span className="voce-menu testo-17 text-text-secondary truncate hidden md:inline">
           <span className="text-text-muted mr-2">/</span>
           {sezione.label}
         </span>

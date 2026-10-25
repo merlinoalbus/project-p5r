@@ -19,8 +19,9 @@ import type { CapienzaScortaDto, OsservazioneStatisticheDto, PersonaPossedutaDto
 import { statoIstantanea } from '../../utils/istantaneaPersona';
 import { SIGLA_STATISTICA, coloreElemento } from '../../utils/elementi';
 import { AssetImg } from '../shared/AssetImg';
-import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { PulsanteVisivo, FrecciaApertura } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { conferma } from '../../stores/confermaStore';
 
 interface Props {
   partitaId: number;
@@ -104,7 +105,7 @@ export function ScortaPersona({ partitaId }: Props) {
 
   /** Toglie la Persona dalla scorta dopo conferma (la registrazione nel compendio resta) e la leva dall'elenco. */
   const rimuovi = async (p: PersonaPossedutaDto) => {
-    if (!dati || !window.confirm(`Rimuovere ${p.nomeIt} dalla scorta? Resta registrata nel compendio.`)) return;
+    if (!dati || !(await conferma({ titolo: 'Rimuovere dalla scorta?', testo: `${p.nomeIt} esce dalla scorta. Resta registrata nel compendio.`, etichetta: 'Rimuovi' }))) return;
     try {
       await rimuoviPosseduta(partitaId, p.id);
       setSelezionata(null);
@@ -125,11 +126,12 @@ export function ScortaPersona({ partitaId }: Props) {
       {dati && (
         <>
           {/* senza un posto libero in griglia (capienza ignota, scorta piena, filtri attivi) il comando sta in testa */}
-          {addInTesta && <div className="mb-2"><button type="button" className="btn btn-primary touch" onClick={() => setAggiunta(true)}>+ Aggiungi Persona</button></div>}
+          {addInTesta && <div className="mb-2"><PulsanteVisivo tono="primario" icona={<IconaAzione chiave="piu" dimensione={22} />} titolo="Aggiungi Persona" onClick={() => setAggiunta(true)} /></div>}
           {dati.length > 0 && (
             <div className="scorta-strumenti">
               <CampoRicerca valore={vista.q} onCambia={(q) => cambiaVista({ q })} segnaposto="Cerca una Persona…" />
-              <button type="button" className="chip touch sm:hidden" aria-expanded={filtriAperti} onClick={() => setFiltriAperti((v) => !v)}>Filtri{filtriAttivi > 0 ? ` (${filtriAttivi})` : ''}</button>
+              <PulsanteVisivo tono="fantasma" compatto className="shrink-0 sm:hidden" icona={<IconaAzione chiave="filtri" dimensione={20} />} aria-expanded={filtriAperti} onClick={() => setFiltriAperti((v) => !v)}
+                titolo={<>Filtri{filtriAttivi > 0 ? ` (${filtriAttivi})` : ''}<FrecciaApertura aperto={filtriAperti} /></>} />
               <div className={`${filtriAperti ? 'flex' : 'hidden'} sm:flex scorta-strumenti__filtri`}>
                 <div className="flex gap-1 flex-wrap" role="group" aria-label="Presenza">
                   {FILTRI_PRESENZA.map((f) => (
@@ -170,12 +172,12 @@ export function ScortaPersona({ partitaId }: Props) {
             {Array.from({ length: postiLiberi }, (_, i) => (
               <li key={`libero-${i}`}>
                 {i === 0
-                  ? <button type="button" className="posto-libero posto-libero--aggiungi touch" onClick={() => setAggiunta(true)}>+ Aggiungi Persona</button>
+                  ? <button type="button" className="posto-libero posto-libero--aggiungi touch gap-2" onClick={() => setAggiunta(true)}><span className="inline-flex size-7 shrink-0" aria-hidden="true"><IconaAzione chiave="piu" dimensione={28} /></span>Aggiungi Persona</button>
                   : <span className="posto-libero">libero</span>}
               </li>
             ))}
           </ul>
-          {dati.length > 0 && visibili.length === 0 && <p className="m-0 py-3 text-[13px] text-text-muted">Nessuna Persona corrisponde ai filtri.</p>}
+          {dati.length > 0 && visibili.length === 0 && <p className="m-0 py-3 testo-13 text-text-muted">Nessuna Persona corrisponde ai filtri.</p>}
         </>
       )}
 
@@ -311,9 +313,9 @@ function DettaglioPersona({ p, stato, inSalita, inRegistrazione, onSali, onRegis
       <div className="flex items-center gap-3">
         <ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={64} />
         <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-          <Link to={`/compendio/persona/${p.personaId}`} className="font-semibold text-[17px] no-underline text-text hover:text-primary">{p.nomeIt}</Link>
-          {p.nomeIt !== p.nome && <span className="text-[12px] text-text-muted">{p.nome}</span>}
-          <span className="text-[13px] text-text-secondary">{p.arcanaNome} · {p.inSquadra ? 'in squadra' : 'in deposito'}</span>
+          <Link to={`/compendio/persona/${p.personaId}`} className="font-semibold testo-17 no-underline text-text hover:text-primary-testo">{p.nomeIt}</Link>
+          {p.nomeIt !== p.nome && <span className="testo-12 text-text-muted">{p.nome}</span>}
+          <span className="testo-13 text-text-secondary">{p.arcanaNome} · {p.inSquadra ? 'in squadra' : 'in deposito'}</span>
         </div>
         <div className="riga-persona__livello riga-persona__livello--grande" title="Livello"><span>{p.livello}</span><small>LIV</small></div>
       </div>
@@ -349,14 +351,14 @@ function DettaglioPersona({ p, stato, inSalita, inRegistrazione, onSali, onRegis
               <ElementoChip elemento={s.elemento} nome={s.nomeIt} piccolo />
             </Link>
           ))}
-          {p.skill.length === 0 && <span className="text-[12px] text-text-muted">Nessuna skill registrata.</span>}
+          {p.skill.length === 0 && <span className="testo-12 text-text-muted">Nessuna skill registrata.</span>}
         </div>
       </section>
 
       {p.tratto && (
         <section className="flex flex-col gap-1">
           <span className="etichetta-campo-confidente">Tratto</span>
-          <div className="text-[12px] text-text-secondary"><strong className="text-text">{p.tratto.nomeIt}</strong> — {p.tratto.effettoNome}</div>
+          <div className="testo-12 text-text-secondary"><strong className="text-text">{p.tratto.nomeIt}</strong> — {p.tratto.effettoNome}</div>
         </section>
       )}
 
@@ -364,7 +366,7 @@ function DettaglioPersona({ p, stato, inSalita, inRegistrazione, onSali, onRegis
         <span className="etichetta-campo-confidente">Statistiche al livello {p.livello} {p.statisticheConfermate ? '(valori reali letti nel gioco)' : `(${p.origineStima === 'osservate' && p.osservate ? `stima dai valori reali del livello ${p.osservate.livello}` : 'stima del livello'}${p.statisticheBase ? '' : ` più bonus ${descriviBonus(p.bonus)}`})`}</span>
         <StatisticheBarre statistiche={p.statistiche} base={p.statisticheStimate} compatta />
       </section>
-      {p.note && <p className="m-0 text-[12px] text-text-secondary whitespace-pre-wrap">{p.note}</p>}
+      {p.note && <p className="m-0 testo-12 text-text-secondary whitespace-pre-wrap">{p.note}</p>}
     </div>
   );
 }
@@ -405,13 +407,13 @@ function AggiungiPersonaModal({ aperta, onChiudi, onAggiunta, partitaId }: { ape
       <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light max-h-[50vh] area-scorrevole">
         {filtrate.map((p) => (
           <li key={p.id} className="flex items-center gap-2 py-2">
-            <span className="w-9 text-right text-[12px] text-text-muted">Liv. {p.livello}</span>
-            <span className="font-semibold flex-1">{p.nomeIt}{p.nomeIt !== p.nome && <span className="text-[12px] font-normal text-text-muted"> {p.nome}</span>}</span>
+            <span className="w-9 text-right testo-12 text-text-muted">Liv. {p.livello}</span>
+            <span className="font-semibold flex-1">{p.nomeIt}{p.nomeIt !== p.nome && <span className="testo-12 font-normal text-text-muted"> {p.nome}</span>}</span>
             <span className="chip">{p.arcanaNome}</span>
-            <button type="button" className="btn btn-primary btn-sm" disabled={occupato === p.id} onClick={() => void aggiungi(p.id, p.nomeIt)}>Aggiungi</button>
+            <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi" disabled={occupato === p.id} onClick={() => void aggiungi(p.id, p.nomeIt)} />
           </li>
         ))}
-        {dati && filtrate.length === 0 && <li className="py-3 text-[13px] text-text-muted">Nessuna Persona trovata.</li>}
+        {dati && filtrate.length === 0 && <li className="py-3 testo-13 text-text-muted">Nessuna Persona trovata.</li>}
       </ul>
     </Modal>
   );
@@ -485,7 +487,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
       azioni={
         <>
           <button type="button" className="btn btn-secondary" onClick={onChiudi}>Annulla</button>
-          <button type="button" className="btn btn-primary" disabled={occupato} onClick={() => void salva()}>Salva</button>
+          <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" disabled={occupato} onClick={() => void salva()} />
         </>
       }
     >
@@ -494,20 +496,20 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
           <label className="form-label">Livello
             <input type="number" min={1} max={99} className="form-input mt-1" value={livello} onFocus={(e) => e.target.select()} onChange={(e) => setLivello(Math.min(99, Math.max(1, Number(e.target.value) || 1)))} />
           </label>
-          <label className="flex items-center gap-2 text-[13px] touch">
+          <label className="flex items-center gap-2 testo-13 touch">
             <input type="checkbox" checked={inSquadra} onChange={(e) => setInSquadra(e.target.checked)} /> In squadra (non in deposito)
           </label>
           <div className="flex flex-col gap-1">
             <span className="form-label m-0">Valori reali nel gioco al livello {livello}</span>
             <div className="grid grid-cols-5 gap-1">
               {CHIAVI_STATISTICHE.map((k) => (
-                <label key={k} className="text-[11px] text-text-muted text-center">
+                <label key={k} className="testo-12 text-text-muted text-center">
                   {SIGLA_STATISTICA[k]}
                   <input type="number" min={1} max={99} className="form-input form-input--compatto min-h-[44px] mt-1 px-1 text-center w-full" value={realeMostrato(k)} onFocus={(e) => e.target.select()} onChange={(e) => impostaReale(k, Number(e.target.value))} aria-label={`${SIGLA_STATISTICA[k]} reale`} />
                 </label>
               ))}
             </div>
-            <p className="m-0 text-[11px] text-text-muted">
+            <p className="m-0 testo-12 text-text-muted">
               {reali
                 ? `Registrerai i valori letti nel gioco al livello ${reali.livello}: da qui in su la stima riparte da questi e i bonus ripartono da zero, perché i valori reali li comprendono già.`
                 : osservate
@@ -524,10 +526,10 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
             <span className="form-label m-0">Bonus per statistica (Potenziamento, Addestramento, Isolamento, Forca)</span>
             <div className="grid grid-cols-5 gap-1">
               {CHIAVI_STATISTICHE.map((k) => (
-                <label key={k} className="text-[11px] text-text-muted text-center">
+                <label key={k} className="testo-12 text-text-muted text-center">
                   {SIGLA_STATISTICA[k]} <span className="text-text-secondary">({stimate[k]})</span>
                   <input type="number" min={-99} max={99} className="form-input form-input--compatto min-h-[44px] mt-1 px-1 text-center w-full" value={bonus[k]} onFocus={(e) => e.target.select()} onChange={(e) => setBonus({ ...bonus, [k]: Math.max(-99, Math.min(99, Number(e.target.value) || 0)) })} aria-label={`Bonus ${SIGLA_STATISTICA[k]}`} />
-                  <span className="block text-[12px] font-semibold text-text mt-0.5">= {effettive[k]}</span>
+                  <span className="block testo-12 font-semibold text-text mt-0.5">= {effettive[k]}</span>
                 </label>
               ))}
             </div>
@@ -550,7 +552,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
             {skillIds.map((id, i) => {
               const s = nomeSkill(id);
               return (
-                <li key={id} className="flex items-center gap-2 text-[13px]">
+                <li key={id} className="flex items-center gap-2 testo-13">
                   <span className="w-5 text-text-muted">{i + 1}.</span>
                   {s ? <ElementoChip elemento={s.elemento} nome={s.nomeIt} piccolo /> : <span>#{id}</span>}
                   <span className="flex-1 text-text-secondary truncate">{s?.effettoNome}</span>
@@ -570,7 +572,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
                           passata statica, che guardava le caselle di spunta e non tutti i comandi. */}
                       <button type="button" className="touch w-full text-left flex items-center gap-2 px-2 py-2 rounded-md hover:bg-bg-tertiary bg-transparent border-none text-text cursor-pointer" onClick={() => { setSkillIds([...skillIds, s.id]); setRicerca(''); }}>
                         <ElementoChip elemento={s.elemento} nome={s.nomeIt} piccolo />
-                        <span className="text-[12px] text-text-secondary truncate">{s.effettoNome}</span>
+                        <span className="testo-12 text-text-secondary truncate">{s.effettoNome}</span>
                       </button>
                     </li>
                   ))}

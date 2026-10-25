@@ -45,9 +45,9 @@ export function PersoneDelPalazzo({ persone, nomeArea, partitaId, catturate, onC
         apertaChiave={aperta} onInfo={setAperta}
         onTocca={(v, catturata) => { const p = persone.find((x) => x.chiave === v.chiave); if (!p) return; if (catturata) void cattura(p, true); else setDaTogliere(p); }} />
       {info && (
-        <section className="flex flex-col gap-1.5 rounded-md border border-primary/40 bg-white/[0.03] px-2.5 py-2 text-[12px]" aria-label={`Dettagli di ${nomeDi(info)}`}>
+        <section className="flex flex-col gap-1.5 rounded-md border border-primary/40 bg-white/[0.03] px-2.5 py-2 testo-12" aria-label={`Dettagli di ${nomeDi(info)}`}>
           <div className="flex flex-wrap items-baseline gap-x-2">
-            <strong className="text-[13px]">{nomeDi(info)}</strong>
+            <strong className="testo-13">{nomeDi(info)}</strong>
             {info.persona && (info.ombra?.nome ?? info.nome) !== nomeDi(info) && <span className="text-text-muted">Ombra: {info.ombra?.nome ?? info.nome}</span>}
             {info.persona && <span className="text-text-muted">{presa(info) ? 'catturata' : 'non ancora catturata'}</span>}
           </div>

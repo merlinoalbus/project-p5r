@@ -4,7 +4,7 @@
 //
 // Un form con modifiche non salvate si segnala con `useBozzaSporca`. Finché ce n'è almeno una:
 // - `beforeunload` chiede conferma prima di chiudere o ricaricare la scheda del browser;
-// - «Aggiorna» (striscia «nuova versione», pagina d'errore, schermata «Ricarica app») nomina le schede sporche e chiede conferma.
+// - «Aggiorna» (striscia «nuova versione», pagina d'errore), «Ricarica l'app» e «Torna alla home» della schermata d'errore globale nominano le schede sporche e chiedono conferma.
 // Le bozze vivono solo in memoria: se la pagina viene davvero ricaricata una modifica non salvata si perde (decisione dell'utente).
 // ============================================================
 
@@ -19,7 +19,7 @@ const guardia = (e: BeforeUnloadEvent) => {
 let guardiaAttiva = false;
 
 /**
- * Toglie la guardia `beforeunload`: si chiama subito prima di un `reload()` già confermato dall'utente (nostra finestra «Aggiorna comunque»),
+ * Toglie la guardia `beforeunload`: si chiama subito prima di un `reload()` già confermato dall'utente (nostra finestra «Aggiorna comunque» o la domanda della schermata d'errore globale),
  * così il browser non chiede una seconda conferma. Una bozza segnalata dopo la riattiva.
  */
 export function disattivaGuardiaBozze(): void {

@@ -28,6 +28,8 @@ import { IconaAzione } from '../components/shared/IconaAzione';
 import { AnteprimaMappa } from '../components/mappe/AnteprimaMappa';
 import { nomeTipoAccessoMondo, schedaAccessoMondo } from '../utils/accessoMondo';
 import { nomeTipoMappa } from '../utils/vocabolarioMappe';
+import { TitoloSezione } from '../components/shared/TitoloSezione';
+import { IntestazioneScheda } from '../components/shared/IntestazioneScheda';
 
 /** Accesso al luogo comune; conserva le alternative e le schede della guida. */
 export function AccessoMondoPage() {
@@ -49,7 +51,7 @@ export function AccessoMondoNelCassetto({ tipo, chiave }: { tipo: string; chiave
   if (tipo === 'quartiere') {
     return <div className="flex flex-col gap-3">
       <h1 className="titolo-display m-0">Dove si trova</h1>
-      <p className="m-0 text-[13px] text-text-secondary">{nomeTipoAccessoMondo('quartiere', chiave)}</p>
+      <p className="m-0 testo-13 text-text-secondary">{nomeTipoAccessoMondo('quartiere', chiave)}</p>
       <div className="flex flex-wrap gap-2">
         <CollegamentoVisivo to={`/guida/citta/${encodeURIComponent(chiave)}`} tono="secondario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Apri il quartiere" />
       </div>
@@ -88,12 +90,12 @@ function Accesso({ tipo, chiave, incorporato = false }: { tipo: TipoAccessoMondo
     return <Navigate to={urlDestinazioneMondo(dati.destinazioni[0])} replace />;
   }
   return <div className="flex flex-col gap-4">
-    <header className="flex flex-col gap-1">
-      <h1 className="titolo-display m-0">Dove si trova</h1>
+    {/* incorporata (nel cassetto) la testa del cassetto ha già il suo ritorno */}
+    <IntestazioneScheda ripiego="/guida" titolo="Dove si trova" senzaIndietro={incorporato}>
       {/* Il nome della cosa cercata: «Apri luogo» non lo diceva, e su una pagina di passaggio
           arrivata da un clic altrove è la prima cosa da confermare. */}
-      <p className="m-0 text-[13px] text-text-secondary">{nomeCercato}</p>
-    </header>
+      <p className="m-0 testo-13 text-text-secondary">{nomeCercato}</p>
+    </IntestazioneScheda>
     <PageState isLoading={carica.caricamento} error={carica.errore} onRetry={carica.ricarica}>
       {/* Qualche voce non ha una posizione. Oggi sono quattro articoli: tre del negozio dentro il
           Palazzo di Niijima e uno del sito di Tanaka, che si apre dal laptop e non è un posto.
@@ -101,10 +103,10 @@ function Accesso({ tipo, chiave, incorporato = false }: { tipo: TipoAccessoMondo
           ma qui va detto chiaramente, invece di aprire una pagina che non mostra niente. */}
       {dati?.esito === 'assente' && guide.length === 0 && <div role="status" className="card flex flex-col gap-2">
         <p className="m-0">Questa voce non ha una posizione sulla mappa: nel catalogo c’è, ma non è collocata su nessuna planimetria.</p>
-        <p className="m-0 text-text-secondary text-[13px]">Succede per la merce dei negozi che stanno dentro un Palazzo e per quella che si compra online, che nel mondo non hanno un punto.</p>
+        <p className="m-0 text-text-secondary testo-13">Succede per la merce dei negozi che stanno dentro un Palazzo e per quella che si compra online, che nel mondo non hanno un punto.</p>
       </div>}
       {dati && dati.destinazioni.length > 0 && (dati.esito === 'multipla' || guide.length > 0 || incorporato) && <section className="flex flex-col gap-2" aria-label="Posizioni sulla mappa">
-        <p className="m-0 text-[13px] text-text-secondary">
+        <p className="m-0 testo-13 text-text-secondary">
           {dati.destinazioni.length === 1 ? 'Una posizione sulla mappa.' : `In ${dati.destinazioni.length} posti diversi: scegli quale aprire.`}
         </p>
         <ul className="m-0 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 xl:grid-cols-4">
@@ -112,22 +114,22 @@ function Accesso({ tipo, chiave, incorporato = false }: { tipo: TipoAccessoMondo
             <Link className="card card--cliccabile group flex w-full flex-col gap-2 no-underline text-text" to={urlDestinazioneMondo(d)}>
               <AnteprimaMappa mappa={anteprima(d.mappa, d.nomeMappa)} className="aspect-[4/3] w-full" sizes="(min-width: 1280px) 25vw, (min-width: 640px) 33vw, 50vw" />
               <span className="flex flex-col gap-0.5">
-                <span className="text-[13px] font-semibold leading-tight group-hover:text-primary">{d.nomeMappa}</span>
+                <span className="testo-13 font-semibold leading-tight group-hover:text-primary-testo">{d.nomeMappa}</span>
                 {/* Il nome dello spillo solo se aggiunge qualcosa: quasi sempre è il nome della
                     cosa che si sta già cercando, scritto nell'intestazione. */}
-                {d.nomeSpillo && d.nomeSpillo !== d.nomeMappa && <span className="text-[11px] text-text-muted">{d.nomeSpillo}</span>}
+                {d.nomeSpillo && d.nomeSpillo !== d.nomeMappa && <span className="testo-12 text-text-muted">{d.nomeSpillo}</span>}
               </span>
             </Link>
           </li>)}
         </ul>
       </section>}
       {guide.length > 0 && <section className="flex flex-col gap-2" aria-label="Contenuti della guida">
-        <h2 className="m-0 font-display text-[17px] uppercase leading-none">Contenuti della guida</h2>
+        <TitoloSezione variante="display">Contenuti della guida</TitoloSezione>
         <ul className="m-0 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 xl:grid-cols-4">
           {guide.map(g => <li key={`${g.dungeon}:${g.area}`} className="flex">
             <Link className="card card--cliccabile group flex w-full flex-col gap-2 no-underline text-text" to={`/guida/mappe/${encodeURIComponent(g.mappaPalazzo)}?area=${encodeURIComponent(g.area)}`}>
               <AnteprimaMappa mappa={anteprima(g.mappaPalazzo, g.nome)} className="aspect-[4/3] w-full" sizes="(min-width: 1280px) 25vw, (min-width: 640px) 33vw, 50vw" />
-              <span className="text-[13px] font-semibold leading-tight group-hover:text-primary">{g.nome}</span>
+              <span className="testo-13 font-semibold leading-tight group-hover:text-primary-testo">{g.nome}</span>
             </Link>
           </li>)}
         </ul>

@@ -57,19 +57,19 @@ export function AreeDelQuartiere({ quartiere: q, onCambiato, onAggiungi, onPinSe
 
   if (navigabili.length === 0) return (
     <section className="card flex flex-col items-start gap-2" aria-label={`Aree di ${q.nome}`}>
-      <h2 className="m-0 font-display text-[17px] uppercase leading-none">Aree</h2>
-      <p className="m-0 text-[13px] text-text-secondary">{q.aree.length > 0 ? 'Le aree del quartiere non sono ancora aperte nella partita.' : `Nessuna area in ${q.nome}: aggiungine una.`}</p>
+      <h2 className="m-0 font-display testo-17 uppercase leading-none">Aree</h2>
+      <p className="m-0 testo-13 text-text-secondary">{q.aree.length > 0 ? 'Le aree del quartiere non sono ancora aperte nella partita.' : `Nessuna area in ${q.nome}: aggiungine una.`}</p>
       <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Aggiungi area" onClick={onAggiungi} />
     </section>
   );
   return (
     <section className="flex flex-col gap-2" aria-label={`Aree di ${q.nome}`}>
       <div className="flex flex-wrap items-center gap-2">
-        <h2 className="m-0 font-display text-[17px] uppercase leading-none">Aree <span className="text-text-muted">· {navigabili.length}</span></h2>
+        <h2 className="m-0 font-display testo-17 uppercase leading-none">Aree <span className="text-text-muted">· {navigabili.length}</span></h2>
         {navigabili.length > 1 && (riordina
           ? <span className="ml-auto flex gap-1.5">
-            <button type="button" className="btn btn-secondary btn-sm touch" onClick={() => setRiordina(null)}>Annulla</button>
-            <button type="button" className="btn btn-primary btn-sm touch" disabled={occupato} onClick={() => void salvaOrdine()}>Salva l’ordine</button>
+            <PulsanteVisivo compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={() => setRiordina(null)} />
+            <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva l’ordine" disabled={occupato} onClick={() => void salvaOrdine()} />
           </span>
           : <PulsanteVisivo tono="fantasma" compatto className="ml-auto" icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Riordina" onClick={() => setRiordina(navigabili.map((a) => a.slug))} />)}
       </div>
@@ -80,15 +80,15 @@ export function AreeDelQuartiere({ quartiere: q, onCambiato, onAggiungi, onPinSe
             <span className="flex min-w-0 flex-1 flex-col gap-0.5">
               <span className="flex flex-wrap items-center gap-1.5">
                 <Link to={a.casa} className="touch inline-flex items-center font-semibold">{a.nome}</Link>
-                {a.ingresso && <span className="chip chip--attivo text-[11px]" title="Toccando il quartiere sulla mappa di Tokyo si apre quest’area">Ingresso</span>}
+                {a.ingresso && <span className="chip chip--attivo testo-12" title="Toccando il quartiere sulla mappa di Tokyo si apre quest’area">Ingresso</span>}
               </span>
-              <span className="text-[12px] text-text-muted">{conteggiArea(a)}</span>
+              <span className="testo-12 text-text-muted">{conteggiArea(a)}</span>
               {!a.passaggio && !riordina && <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="mappa" dimensione={20} />}
                 titolo="Segna sull’illustrazione" dettaglio="il suo pin manca" onClick={() => setDaSegnare(a)} />}
             </span>
             {riordina && <span className="flex flex-col gap-1">
-              <button type="button" className="btn btn-ghost touch" aria-label={`Sposta su ${a.nome}`} disabled={i === 0} onClick={() => sposta(i, -1)}>↑</button>
-              <button type="button" className="btn btn-ghost touch" aria-label={`Sposta giù ${a.nome}`} disabled={i === elenco.length - 1} onClick={() => sposta(i, 1)}>↓</button>
+              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Sposta su" aria-label={`Sposta su ${a.nome}`} disabled={i === 0} onClick={() => sposta(i, -1)} />
+              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Sposta giù" aria-label={`Sposta giù ${a.nome}`} disabled={i === elenco.length - 1} onClick={() => sposta(i, 1)} />
             </span>}
           </li>
         ))}
@@ -121,14 +121,14 @@ function SegnaSullIllustrazione({ quartiere: q, area, onChiudi, onSegnata }: { q
     <Modal titolo={area ? `Dove sta ${area.nome} in ${q.nome}` : ''} aperta={!!area} onChiudi={() => { setPunto(null); onChiudi(); }} larga
       azioni={<>
         <button type="button" className="btn btn-secondary touch" onClick={() => { setPunto(null); onChiudi(); }}>Annulla</button>
-        <button type="button" className="btn btn-primary touch" disabled={!punto || occupato || !src} onClick={() => void salva()}>Salva</button>
+        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" disabled={!punto || occupato || !src} onClick={() => void salva()} />
       </>}>
       {src
         ? <div className="flex flex-col gap-2">
           <SceltaPunto src={src} alt={`Illustrazione di ${q.nome}`} punto={punto} onPunto={setPunto} disabilitato={occupato} />
-          <span className="text-[12px] text-text-muted">Tocca dove si entra nell’area: lì comparirà il suo pin, che porta alla sua pagina.</span>
+          <span className="testo-12 text-text-muted">Tocca dove si entra nell’area: lì comparirà il suo pin, che porta alla sua pagina.</span>
         </div>
-        : <p className="m-0 text-[13px]">{q.nome} non ha un’illustrazione da toccare: caricala dall’editor dell’illustrazione.</p>}
+        : <p className="m-0 testo-13">{q.nome} non ha un’illustrazione da toccare: caricala dall’editor dell’illustrazione.</p>}
     </Modal>
   );
 }

@@ -18,10 +18,10 @@ const NOME_STATO: Record<SemaforoRequisitoDto['stato'], string> = { verde: 'sodd
 /** Condizioni dello spillo nel visore: con la partita i semafori del server, altrimenti il solo testo. */
 export function CondizioniSpilloElenco({ condizioni, disponibilita, compatto }: { condizioni: CondizioneSpilloDto[]; disponibilita?: DisponibilitaDto; compatto?: boolean }) {
   if (condizioni.length === 0) return null;
-  const testo = compatto ? 'text-[11px]' : 'text-[12px]';
+  const testo = compatto ? 'testo-12' : 'testo-12';
   return (
     <div className={`flex flex-col gap-0.5 ${testo}`} role="group" aria-label="Condizioni di visibilità">
-      <span className="flex items-center gap-1 text-text-muted uppercase tracking-wide text-[10px]"><IconaAzione chiave="bloccato" dimensione={12} />Condizioni</span>
+      <span className="flex items-center gap-1 text-text-muted uppercase tracking-wide testo-12"><IconaAzione chiave="bloccato" dimensione={12} />Condizioni</span>
       <ul className="m-0 p-0 list-none flex flex-col gap-0.5">
         {condizioni.map((c, i) => {
           const esito = disponibilita?.requisiti[i];

@@ -125,16 +125,16 @@ export function StellaCinque({ assi, dimensione = 320, livelli = 5, onScegli, se
         const contenuto = (
           <>
             <span className="relative inline-block">
-              <AssetImg nome={a.badge ?? null} alt="" decorativa className="block w-auto object-contain drop-shadow" style={{ height: altezzaBadge, maxWidth: `calc(${altezzaBadge} * 2.6)` }} fallback={<span className="text-[12px] font-semibold uppercase tracking-wide">{a.etichetta}</span>} />
+              <AssetImg nome={a.badge ?? null} alt="" decorativa className="block w-auto object-contain drop-shadow" style={{ height: altezzaBadge, maxWidth: `calc(${altezzaBadge} * 2.6)` }} fallback={<span className="testo-12 font-semibold uppercase tracking-wide">{a.etichetta}</span>} />
               {a.badgeSotto && (
-                <AssetImg nome={a.badgeSotto} alt="" decorativa className="absolute w-auto object-contain drop-shadow" style={{ height: `calc(${altezzaBadge} * 0.66)`, ...angoloTassello }} fallback={a.testo !== undefined ? <span className="absolute chip chip--attivo text-[10px] leading-none py-0.5 px-1.5" style={{ [dx >= 0 ? 'right' : 'left']: -4, [dy < 0 ? 'top' : 'bottom']: -8 }}>{a.testo}</span> : null} />
+                <AssetImg nome={a.badgeSotto} alt="" decorativa className="absolute w-auto object-contain drop-shadow" style={{ height: `calc(${altezzaBadge} * 0.66)`, ...angoloTassello }} fallback={a.testo !== undefined ? <span className="absolute chip chip--attivo testo-12 leading-none py-0.5 px-1.5" style={{ [dx >= 0 ? 'right' : 'left']: -4, [dy < 0 ? 'top' : 'bottom']: -8 }}>{a.testo}</span> : null} />
               )}
             </span>
-            {!a.badgeSotto && a.testo !== undefined && <span className="chip chip--attivo text-[11px] leading-none py-0.5 px-2">{a.testo}</span>}
+            {!a.badgeSotto && a.testo !== undefined && <span className="chip chip--attivo testo-12 leading-none py-0.5 px-2">{a.testo}</span>}
           </>
         );
         // Nome dell'asse in un suggerimento al passaggio del mouse (o al fuoco): i badge sono icone senza testo.
-        const classi = `absolute flex flex-col items-center gap-0.5 text-center whitespace-nowrap con-suggerimento ${selezionato === a.chiave ? 'text-primary' : 'text-text'}`;
+        const classi = `absolute flex flex-col items-center gap-0.5 text-center whitespace-nowrap con-suggerimento ${selezionato === a.chiave ? 'text-primary-testo' : 'text-text'}`;
         return onScegli ? (
           <button key={a.chiave} type="button" className={`${classi} touch bg-transparent border-0 p-0 cursor-pointer`} style={stile} onClick={() => onScegli(a.chiave)} aria-pressed={selezionato === a.chiave} aria-label={a.etichetta} title={a.etichetta} data-suggerimento={a.etichetta}>
             {contenuto}

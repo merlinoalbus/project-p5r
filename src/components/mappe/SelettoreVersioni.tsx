@@ -69,10 +69,10 @@ export function SelettoreVersioni({ nome, planimetrie, scelta, onScegli, classNa
         onClick={() => setAperto((v) => !v)}>
         <AnteprimaMappa mappa={corrente} className="h-9 w-12 shrink-0" sizes="48px" />
         <span className="flex min-w-0 flex-1 flex-col">
-          <span className="truncate text-[13px] font-semibold leading-tight">{nomeVersione(corrente, indice)}</span>
+          <span className="truncate testo-13 font-semibold leading-tight">{nomeVersione(corrente, indice)}</span>
           {avviso
-            ? <span className="truncate text-[11px] text-warning" title={avviso}>{avviso}</span>
-            : <span className="truncate text-[11px] text-text-muted">{dettaglio(corrente)} · versione {indice + 1} di {planimetrie.length}</span>}
+            ? <span className="truncate testo-12 text-warning" title={avviso}>{avviso}</span>
+            : <span className="truncate testo-12 text-text-muted">{dettaglio(corrente)} · versione {indice + 1} di {planimetrie.length}</span>}
         </span>
         <span aria-hidden className="shrink-0 pr-1 text-text-muted">▾</span>
       </button>
@@ -85,8 +85,8 @@ export function SelettoreVersioni({ nome, planimetrie, scelta, onScegli, classNa
                 onClick={() => { setAperto(false); if (p.chiave !== scelta) onScegli(p.chiave); }}>
                 <AnteprimaMappa mappa={p} className="h-10 w-[53px] shrink-0" sizes="64px" />
                 <span className="flex min-w-0 flex-col">
-                  <span className="text-[13px] font-semibold leading-tight">{nomeVersione(p, i)}</span>
-                  <span className="text-[11px] text-text-muted">{dettaglio(p)}</span>
+                  <span className="testo-13 font-semibold leading-tight">{nomeVersione(p, i)}</span>
+                  <span className="testo-12 text-text-muted">{dettaglio(p)}</span>
                 </span>
               </button>
             </li>

@@ -59,45 +59,45 @@ export function RaccoltaPlanimetrie({ planimetrie, partitaId, onRaccolto, etiche
     catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); }
     finally { setOccupati((o) => ({ ...o, [s.id]: false })); }
   };
-  if (conCollezionabili.length === 0) return <p className="m-0 text-[12px] text-text-muted" role="status">{vuoto}</p>;
+  if (conCollezionabili.length === 0) return <p className="m-0 testo-12 text-text-muted" role="status">{vuoto}</p>;
   return (
     <div className="flex flex-col gap-2" role="group" aria-label={etichetta}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="m-0 font-display text-[15px] uppercase leading-none">{etichetta} · {partitaId ? Math.max(0, totale - presi) : totale}</h3>
-        {partitaId && presi > 0 && <button type="button" className={`chip touch text-[11px] ${mostraRaccolti ? 'chip--attivo' : ''}`} aria-pressed={mostraRaccolti} onClick={() => setMostraRaccolti((v) => !v)}>Anche i raccolti ({presi})</button>}
+        <h3 className="m-0 font-display testo-15 uppercase leading-none">{etichetta} · {partitaId ? Math.max(0, totale - presi) : totale}</h3>
+        {partitaId && presi > 0 && <button type="button" className={`chip touch testo-12 ${mostraRaccolti ? 'chip--attivo' : ''}`} aria-pressed={mostraRaccolti} onClick={() => setMostraRaccolti((v) => !v)}>Anche i raccolti ({presi})</button>}
       </div>
-      {nota && <p className="m-0 text-[11px] text-text-muted">{nota}</p>}
+      {nota && <p className="m-0 testo-12 text-text-muted">{nota}</p>}
       {partitaId && totale > 0 && <div className="flex items-center gap-2">
         <span className="visore-mappa__progresso h-1.5 flex-1" role="progressbar" aria-label={`${etichetta}: raccolti`} aria-valuemin={0} aria-valuemax={totale} aria-valuenow={presi}>
           <span className="visore-mappa__progresso-barra" style={{ width: `${Math.round((presi / totale) * 100)}%` }} />
         </span>
-        <span className="shrink-0 text-[11px] tabular-nums text-text-muted">{presi}/{totale}</span>
+        <span className="shrink-0 testo-12 tabular-nums text-text-muted">{presi}/{totale}</span>
       </div>}
       <ul className="m-0 flex list-none flex-col gap-2 p-0">
         {conCollezionabili.map((p) => {
           const visibili = p.spilli.filter((s) => mostraRaccolti || !s.raccolto);
           return (
             <li key={p.chiave} className="flex flex-col gap-1 rounded-md bg-white/[0.04] px-2 py-1.5">
-              <div className="flex flex-wrap items-center justify-between gap-2 text-[13px]">
+              <div className="flex flex-wrap items-center justify-between gap-2 testo-13">
                 <Link to={indirizzo(p.chiave)} className="touch inline-flex items-center font-semibold">{nomeBreve(p.nome)}</Link>
-                <span className="text-[11px] tabular-nums text-text-muted">{p.presi !== null ? `${p.presi}/${p.n}` : p.n}</span>
+                <span className="testo-12 tabular-nums text-text-muted">{p.presi !== null ? `${p.presi}/${p.n}` : p.n}</span>
               </div>
               {visibili.length > 0 && (
                 <ul className="m-0 flex list-none flex-col p-0">
                   {visibili.map((s) => { const omonimiTutti = p.spilli.filter((x) => x.nome === s.nome); const numero = omonimiTutti.indexOf(s) + 1; const omonimi = omonimiTutti.length > 1;
                     // la parola del tipo: «aperto» per i forzieri, «rubato» per il Tesoro, «sconfitto» per i boss, «raccolto» per semi e oggetti… (scelta dell'utente, 2026-10-03)
                     const parola = parolaDelloStato({ tipo: s.tipo, collezionabile: true }); return (
-                    <li key={s.id} className="flex items-center gap-2 text-[12px]">
+                    <li key={s.id} className="flex items-center gap-2 testo-12">
                       <span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: s.colore }} aria-hidden="true" />
                       <span className={`min-w-0 flex-1 ${s.raccolto ? 'line-through text-text-muted' : ''}`}>{s.nome}{omonimi ? ` ${numero}` : ''}</span>
                       {partitaId
-                        ? <label className="touch flex items-center gap-1.5 text-[11px]"><input type="checkbox" className="h-5 w-5" checked={s.raccolto === true} disabled={!!occupati[s.id]} onChange={(e) => void cambia(s, e.target.checked)} aria-label={`${s.nome} ${numero} di ${nomeBreve(p.nome)} ${parola}`} />{parola.charAt(0).toUpperCase() + parola.slice(1)}</label>
+                        ? <label className="touch flex items-center gap-1.5 testo-12"><input type="checkbox" className="h-5 w-5" checked={s.raccolto === true} disabled={!!occupati[s.id]} onChange={(e) => void cambia(s, e.target.checked)} aria-label={`${s.nome} ${numero} di ${nomeBreve(p.nome)} ${parola}`} />{parola.charAt(0).toUpperCase() + parola.slice(1)}</label>
                         : null}
                     </li>
                   ); })}
                 </ul>
               )}
-              {visibili.length === 0 && <span className="text-[11px] text-text-muted">Tutto raccolto.</span>}
+              {visibili.length === 0 && <span className="testo-12 text-text-muted">Tutto raccolto.</span>}
             </li>
           );
         })}

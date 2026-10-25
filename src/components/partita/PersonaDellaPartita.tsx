@@ -121,10 +121,10 @@ export function PersonaDellaPartita({ partitaId }: Props) {
         <Selettore compatto etichetta="Arcano" valore={arcano} vuoto="Tutti gli arcani" opzioni={arcani} onCambia={(k) => { setArcano(k); setQuante(PASSO); }} />
         <Selettore compatto etichetta="Scorta" valore={scorta} opzioni={FILTRO_SCORTA} ricerca="mai" onCambia={(k) => { setScorta(k); setQuante(PASSO); }} />
         <Selettore compatto etichetta="Compendio personale" valore={registrazione} opzioni={FILTRO_REGISTRAZIONE} ricerca="mai" onCambia={(k) => { setRegistrazione(k); setQuante(PASSO); }} />
-        <span className="text-[13px] text-text-muted">{lista.length} Persona</span>
+        <span className="testo-13 text-text-muted">{lista.length} Persona</span>
       </div>
       {lista.length === 0 ? (
-        <p className="card text-[13px] text-text-muted m-0">Nessuna Persona corrisponde ai filtri.</p>
+        <p className="card testo-13 text-text-muted m-0">Nessuna Persona corrisponde ai filtri.</p>
       ) : (
         <ul className="m-0 p-0 list-none card py-0 divide-y divide-border-light">
           {visibili.map((p) => {
@@ -133,9 +133,9 @@ export function PersonaDellaPartita({ partitaId }: Props) {
             const { registrata, datata } = statoDi(p.id);
             return (
               <li key={p.id} className="flex items-center gap-2 py-1 flex-wrap">
-                <span className="w-9 text-right text-[12px] text-text-muted" title="Livello base">Liv. {p.livello}</span>
-                <Link to={`/compendio/persona/${p.id}`} className="touch flex items-center font-semibold no-underline text-text hover:text-primary flex-1 min-w-[140px]">
-                  {p.nomeIt}{p.nomeIt !== p.nome && <span className="text-[12px] font-normal text-text-muted"> {p.nome}</span>}
+                <span className="w-9 text-right testo-12 text-text-muted" title="Livello base">Liv. {p.livello}</span>
+                <Link to={`/compendio/persona/${p.id}`} className="touch flex items-center font-semibold no-underline text-text hover:text-primary-testo flex-1 min-w-[140px]">
+                  {p.nomeIt}{p.nomeIt !== p.nome && <span className="testo-12 font-normal text-text-muted"> {p.nome}</span>}
                 </Link>
                 <span className="chip">{p.arcanaNome}</span>
                 {esemplare
@@ -155,7 +155,7 @@ export function PersonaDellaPartita({ partitaId }: Props) {
       )}
       {lista.length > visibili.length && (
         <div className="flex justify-center mt-3">
-          <button type="button" className="btn btn-secondary touch" onClick={() => setQuante((n) => n + PASSO)}>Mostra altre ({lista.length - visibili.length})</button>
+          <PulsanteVisivo icona={<IconaAzione chiave="carica-altri" dimensione={22} />} titolo={<>Mostra altre ({lista.length - visibili.length})</>} onClick={() => setQuante((n) => n + PASSO)} />
         </div>
       )}
     </PageState>

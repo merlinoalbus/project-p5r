@@ -101,8 +101,8 @@ export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniE
 
   return (
     <section ref={sezione} id="traduzioni" className="card flex flex-col gap-3">
-      <h2 className="m-0 text-[15px] font-semibold">Traduzioni</h2>
-      <p className="m-0 text-[13px] text-text-secondary">Le rese italiane dei termini di gioco. Le voci modificate da te non vengono mai sovrascritte dagli aggiornamenti del dataset; "Ripristina" riporta il testo del seed.</p>
+      <h2 className="m-0 testo-15 font-semibold">Traduzioni</h2>
+      <p className="m-0 testo-13 text-text-secondary">Le rese italiane dei termini di gioco. Le voci modificate da te non vengono mai sovrascritte dagli aggiornamenti del dataset; "Ripristina" riporta il testo del seed.</p>
       <div className="flex flex-wrap gap-2 items-center">
         <Selettore compatto className="min-w-[220px]" etichetta="Ambito" valore={ambito} opzioni={(ambiti.dati ?? []).map((a) => ({ chiave: a.ambito, nome: NOMI_AMBITO[a.ambito] ?? a.ambito, dettaglio: `${a.voci}${a.modificate ? `, ${a.modificate} mod.` : ''}` }))} onCambia={setAmbito} />
         <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca chiave o testo…" />
@@ -112,26 +112,26 @@ export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniE
         <ul className="m-0 p-0 list-none divide-y divide-border-light max-h-[60vh] area-scorrevole">
           {mancante && (
             <li className="py-2 flex flex-col gap-1" aria-label="Testo senza resa italiana">
-              <div className="text-[12px] text-text-muted break-words">{mancante.chiave}</div>
+              <div className="testo-12 text-text-muted break-words">{mancante.chiave}</div>
               <div className="flex gap-2 items-start flex-wrap">
                 <span className="chip">nessuna resa</span>
                 <textarea className="form-input min-h-[44px] flex-1 min-w-[200px]" aria-label="Resa italiana" placeholder="Scrivi la resa italiana…" value={testoNuovo} onChange={(e) => setTestoNuovo(e.target.value)} autoFocus />
-                <button type="button" className="btn btn-primary btn-sm touch" disabled={!testoNuovo.trim()} onClick={() => void applica(mancante, testoNuovo.trim())}>Salva</button>
+                <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva" disabled={!testoNuovo.trim()} onClick={() => void applica(mancante, testoNuovo.trim())} />
               </div>
             </li>
           )}
           {(voci.dati ?? []).map((t) => (
             <li key={t.chiave} className="py-2 flex flex-col gap-1">
-              <div className="text-[12px] text-text-muted break-words">{t.chiave}</div>
+              <div className="testo-12 text-text-muted break-words">{t.chiave}</div>
               {inModifica?.chiave === t.chiave ? (
                 <div className="flex gap-2 items-start">
                   <textarea className="form-input min-h-[44px]" value={testo} onChange={(e) => setTesto(e.target.value)} autoFocus />
-                  <button type="button" className="btn btn-primary btn-sm" disabled={!testo.trim()} onClick={() => void applica(t, testo.trim())}>Salva</button>
+                  <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva" disabled={!testo.trim()} onClick={() => void applica(t, testo.trim())} />
                   <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={() => setInModifica(null)} />
                 </div>
               ) : (
                 <div className="flex gap-2 items-center flex-wrap">
-                  <span className="flex-1 text-[14px]">{t.testo}</span>
+                  <span className="flex-1 testo-14">{t.testo}</span>
                   {t.fonte === 'utente' && <span className="chip chip--attivo">modificata</span>}
                   <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" onClick={() => { setInModifica(t); setTesto(t.testo); }} />
                   {t.fonte === 'utente' && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="ricalcola" dimensione={20} />} titolo="Ripristina" onClick={() => void applica(t)} />}
@@ -139,7 +139,7 @@ export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniE
               )}
             </li>
           ))}
-          {voci.dati && voci.dati.length === 0 && !mancante && <li className="py-3 text-[13px] text-text-muted">Nessuna voce.</li>}
+          {voci.dati && voci.dati.length === 0 && !mancante && <li className="py-3 testo-13 text-text-muted">Nessuna voce.</li>}
         </ul>
       </PageState>
     </section>

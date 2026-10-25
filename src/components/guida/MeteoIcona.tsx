@@ -40,7 +40,7 @@ export function IconaMeteo({ chiave, dimensione = 22 }: { chiave: ChiaveMeteo; d
 /** Icone del meteo (giorno/sera se il testo ha due parti); il testo originale resta nel `title` e, a richiesta, accanto. */
 export function MeteoIcona({ meteo, dimensione = 22, conTesto, className }: Props) {
   const segmenti = segmentiMeteo(meteo);
-  if (!meteo || segmenti.length === 0) return meteo ? <span className={`text-[12px] text-text-secondary ${className ?? ''}`}>{meteo}</span> : null;
+  if (!meteo || segmenti.length === 0) return meteo ? <span className={`testo-12 text-text-secondary ${className ?? ''}`}>{meteo}</span> : null;
   return (
     <span className={`inline-flex items-center gap-1.5 text-text-secondary ${className ?? ''}`} title={meteo} aria-label={`Meteo: ${meteo}`} role="img">
       {segmenti.map((s, i) => {
@@ -53,7 +53,7 @@ export function MeteoIcona({ meteo, dimensione = 22, conTesto, className }: Prop
           </span>
         );
       })}
-      {conTesto && <span className="text-[12px]">{meteo}</span>}
+      {conTesto && <span className="testo-12">{meteo}</span>}
     </span>
   );
 }

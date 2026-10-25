@@ -4,6 +4,8 @@ import { salvaRegolaPesca } from '../../services/api/pesca';
 import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 const righe = (s: string) => s.split('\n').map(v => v.trim()).filter(Boolean);
 const urlValido = (s: string) => { try { return ['https:', 'http:'].includes(new URL(s).protocol); } catch { return false; } };
@@ -61,8 +63,10 @@ export function EditorRegolaPesca({ regola, onChiudi, onSalvata }: { regola: Reg
     } finally { blocco.current = false; if (viva.current) setOccupato(false); }
   };
   return <Modal aperta larga titolo="Regola della pesca" onChiudi={() => { if (!occupato) onChiudi(); }} azioni={<>
-    <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={onChiudi}>{salvata ? 'Chiudi' : 'Annulla'}</button>
-    <button type="button" className="btn btn-primary touch" disabled={disabilitato || !valido || !conferma} onClick={() => void salva()}>Salva la regola</button>
+    {salvata
+      ? <PulsanteVisivo icona={<IconaAzione chiave="chiudi" dimensione={22} />} titolo="Chiudi" disabled={occupato} onClick={onChiudi} />
+      : <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={onChiudi}>Annulla</button>}
+    <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva la regola" disabled={disabilitato || !valido || !conferma} onClick={() => void salva()} />
   </>}>
     <div className="flex min-w-0 flex-col gap-3 text-sm">
       <p className="m-0">Questa è la fonte comune delle due attività di Ichigaya. Il salvataggio aggiorna la guida. Le visite già registrate conservano la fotografia dei costi e del beneficio applicabili alla visita; le loro osservazioni rimangono conservate. Ogni attribuzione alla partita richiede una proposta e una decisione esplicita.</p>
@@ -90,9 +94,9 @@ export function EditorRegolaPesca({ regola, onChiudi, onSalvata }: { regola: Reg
           </div>
           <label className="flex flex-col gap-1">Fonti della via (indirizzi presenti nelle fonti della regola)<textarea className="form-input min-h-20" value={v.fontiTesto} onChange={e => modificaVia(i, { fontiTesto: e.target.value })} /></label>
           <label className="flex flex-col gap-1">Nota<textarea className="form-input min-h-20" maxLength={4000} value={v.nota} onChange={e => modificaVia(i, { nota: e.target.value })} /></label>
-          <button type="button" className="btn btn-ghost touch" onClick={() => { cambia(); setVie(x => x.filter((_, j) => i !== j)); }}>Rimuovi questa via dalla bozza</button>
+          <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Rimuovi questa via dalla bozza" onClick={() => { cambia(); setVie(x => x.filter((_, j) => i !== j)); }} />
         </fieldset>)}
-        <button type="button" className="btn btn-secondary touch" disabled={vie.length >= 100} onClick={() => { cambia(); setVie(x => [...x, { id: '', specie: 'guardiano', faseTerzoSemestre: false, fascia: 'giorno', meteo: 'normale', guardianoPrecedente: 'indifferente', rangoComparsa: null, rangoCattura: 1, tentativo: 'primo', seiCatture: false, fontiTesto: '', nota: '' }]); }}>Aggiungi una via alla bozza</button>
+        <PulsanteVisivo icona={<IconaAzione chiave="piu" dimensione={22} />} titolo="Aggiungi una via alla bozza" disabled={vie.length >= 100} onClick={() => { cambia(); setVie(x => [...x, { id: '', specie: 'guardiano', faseTerzoSemestre: false, fascia: 'giorno', meteo: 'normale', guardianoPrecedente: 'indifferente', rangoComparsa: null, rangoCattura: 1, tentativo: 'primo', seiCatture: false, fontiTesto: '', nota: '' }]); }} />
         {!valido && <p role="alert" className="m-0 text-warning">Completa nome, numeri interi non negativi, fonti e almeno una via con chiave distinta. Ogni fonte della via deve comparire nella regola; base e bonus non possono superare complessivamente 999 punti interni.</p>}
         <label className="flex items-center gap-2 touch"><input type="checkbox" checked={conferma} onChange={e => setConferma(e.target.checked)} />Confermo la modifica della fonte comune della guida.</label>
       </fieldset>

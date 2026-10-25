@@ -23,8 +23,8 @@ export function ProveNativeSpillo({ nativo }: { nativo: NativoSpilloDto }) {
   const vicini = p.etichetteDeiPuntiViciniTutte as Record<string, number> | undefined;
   const diffusione = p.diffusione as { pin?: number; planimetrieDungeon?: number; planimetrieUrbane?: number } | undefined;
 
-  return <section className="card flex flex-col gap-2 text-[13px]" aria-label="Prove da verificare">
-    <h3 className="m-0 text-[14px]">Significato da verificare</h3>
+  return <section className="card flex flex-col gap-2 testo-13" aria-label="Prove da verificare">
+    <h3 className="m-0 testo-14">Significato da verificare</h3>
     <p className="m-0 text-text-secondary">
       Il gioco disegna questo pin con la parte {nativo.partId ?? '—'}
       {nativo.nomeNativo ? <> , lo sprite chiamato <strong lang="ja">{nativo.nomeNativo}</strong></> : null}
@@ -50,7 +50,7 @@ export function ProveNativeSpillo({ nativo }: { nativo: NativoSpilloDto }) {
 function Elenco({ titolo, voci }: { titolo: string; voci: Record<string, number> }) {
   const righe = Object.entries(voci).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
   return <div>
-    <h4 className="m-0 text-[13px] text-text-secondary">{titolo}</h4>
+    <h4 className="m-0 testo-13 text-text-secondary">{titolo}</h4>
     <ul className="m-0 pl-4 text-text-muted">
       {righe.map(([nome, quante]) => <li key={nome}><code>{nome}</code> ×{quante}</li>)}
     </ul>

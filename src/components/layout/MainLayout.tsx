@@ -15,6 +15,7 @@ import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
 import { AvvisoNuovaVersione } from './AvvisoNuovaVersione';
 import { ToastContainer } from '../shared/Toast';
+import { HostConferma } from '../shared/DialogoConferma';
 import { Spinner } from '../shared/PageState';
 import { MeteoAlCambioGiorno } from '../partita/MeteoAlCambioGiorno';
 import { useGlossarioStore } from '../../stores/glossarioStore';
@@ -88,6 +89,8 @@ export function MainLayout() {
       {/* cambiato il giorno della partita, il meteo del giorno nuovo */}
       <MeteoAlCambioGiorno />
       <ToastContainer />
+      {/* le domande «sei sicuro?» di `conferma()` (stores/confermaStore), al posto di window.confirm */}
+      <HostConferma />
       {/* L11 B4: la ricerca globale, aperta dal pulsante della Topbar o dal tasto «/» */}
       <RicercaGlobale />
     </div>

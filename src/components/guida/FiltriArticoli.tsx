@@ -15,6 +15,8 @@ import { SelettoreIcone } from '../shared/SelettoreIcone';
 import { Segmenti } from '../shared/Segmenti';
 import { NOME_CATEGORIA_ARTICOLO, PERSONAGGI } from '../../utils/negozi';
 import { FILTRI_DISPONIBILITA, STATI_ACQUISTO, type FiltroArticoli as Filtro, filtroAttivo, FILTRO_VUOTO } from '../../utils/articoli';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   filtro: Filtro;
@@ -41,7 +43,7 @@ export function FiltriArticoli({ filtro, onCambia, categorie, destinatari, conPa
       <div className="filtri-articoli__riga">
         <CampoRicerca valore={filtro.q} onCambia={(q) => onCambia({ ...filtro, q })} segnaposto={segnaposto} />
         {per.length > 0 && <Selettore compatto etichetta="Per chi" valore={filtro.per} vuoto="Per chiunque" opzioni={per.map((p) => ({ chiave: p, nome: p }))} onCambia={(v) => onCambia({ ...filtro, per: v })} />}
-        {filtroAttivo(filtro) && <button type="button" className="btn btn-ghost btn-sm touch" onClick={() => onCambia({ ...FILTRO_VUOTO })}>Azzera i filtri</button>}
+        {filtroAttivo(filtro) && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Azzera i filtri" onClick={() => onCambia({ ...FILTRO_VUOTO })} />}
       </div>
       {voci.length > 1 && <SelettoreIcone multiplo compatto etichetta="Categorie" valore={filtro.categorie} opzioni={voci} onCambia={(c) => onCambia({ ...filtro, categorie: c })} />}
       {conPartita && (

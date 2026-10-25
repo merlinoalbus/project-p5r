@@ -17,6 +17,8 @@ import { carattereDaTipo } from '../../../shared/caratteriVoce';
 import type { AreaDungeonDto, PuntoInteresseDto, SchedaDaSistemareDto } from '../../types';
 import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 /** I tipi che una voce di un Palazzo può avere (Trama è solo dei Memento, come dice il server). */
 const TIPI_VOCE = (Object.keys(NOME_TIPO) as PuntoInteresseDto['tipo'][]).filter((t) => t !== 'trama');
@@ -63,18 +65,18 @@ export function SchedeDaSistemare({ schede, aree, onSistemata, completato = fals
   };
 
   return (
-    <details className="text-[12px]">
+    <details className="testo-12">
       <summary className="touch cursor-pointer font-semibold text-text-secondary">Schede da sistemare ({schede.length})</summary>
       <p className="m-0 pt-1 text-text-muted">Contenuti della guida che non stanno su una planimetria e non hanno una voce: creane la voce o collegali a una voce del Palazzo.</p>
       <ul className="m-0 flex list-none flex-col gap-1 p-0 pt-1.5" aria-label="Schede da sistemare">
         {schede.map((s) => (
           <li key={s.id} className="flex flex-col gap-1 rounded-md border border-border-light px-2 py-1">
-            <span className="text-[13px] font-semibold">{s.nome}</span>
-            <span className="text-[11px] text-text-muted">{s.infiltrazioneNome}</span>
-            {s.descrizione && <p className="m-0 whitespace-pre-wrap text-[12px] text-text-secondary">{s.descrizione}</p>}
+            <span className="testo-13 font-semibold">{s.nome}</span>
+            <span className="testo-12 text-text-muted">{s.infiltrazioneNome}</span>
+            {s.descrizione && <p className="m-0 whitespace-pre-wrap testo-12 text-text-secondary">{s.descrizione}</p>}
             <div className="flex flex-wrap gap-1.5 pt-0.5">
-              <button type="button" className="btn btn-secondary btn-sm touch" aria-label={`Crea la voce da «${s.nome}»`} onClick={() => setGesto({ scheda: s, cosa: 'crea', valore: tipoVocePerScheda(s.tipo) })}>Crea la voce</button>
-              <button type="button" className="btn btn-secondary btn-sm touch" aria-label={`Collega «${s.nome}» a una voce`} onClick={() => setGesto({ scheda: s, cosa: 'collega', valore: '' })}>Collega a una voce</button>
+              <PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Crea la voce" aria-label={`Crea la voce da «${s.nome}»`} onClick={() => setGesto({ scheda: s, cosa: 'crea', valore: tipoVocePerScheda(s.tipo) })} />
+              <PulsanteVisivo compatto icona={<IconaAzione chiave="url" dimensione={20} />} titolo="Collega a una voce" aria-label={`Collega «${s.nome}» a una voce`} onClick={() => setGesto({ scheda: s, cosa: 'collega', valore: '' })} />
             </div>
           </li>
         ))}
@@ -83,10 +85,10 @@ export function SchedeDaSistemare({ schede, aree, onSistemata, completato = fals
         <Modal titolo={gesto.cosa === 'crea' ? `Crea la voce da «${gesto.scheda.nome}»` : `Collega «${gesto.scheda.nome}» a una voce`} aperta onChiudi={() => !occupato && setGesto(null)}
           azioni={<>
             <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={() => setGesto(null)}>Annulla</button>
-            <button type="button" className="btn btn-primary touch" disabled={occupato || !gesto.valore} onClick={() => void conferma()}>{gesto.cosa === 'crea' ? 'Crea la voce' : 'Collega'}</button>
+            <PulsanteVisivo tono="primario" icona={<IconaAzione chiave={gesto.cosa === 'crea' ? 'piu' : 'url'} dimensione={22} />} titolo={gesto.cosa === 'crea' ? 'Crea la voce' : 'Collega'} disabled={occupato || !gesto.valore} onClick={() => void conferma()} />
           </>}>
           <div className="flex flex-col gap-3">
-            <p className="m-0 text-[14px]">
+            <p className="m-0 testo-14">
               {gesto.cosa === 'crea'
                 ? `Una voce nuova in fondo a «${gesto.scheda.infiltrazioneNome}», col nome e la descrizione della scheda. Nessuno stato si trasferisce.`
                 : 'La voce scelta prende il posto della scheda, che esce da quest’elenco. Nessuno stato si trasferisce.'}
@@ -94,7 +96,7 @@ export function SchedeDaSistemare({ schede, aree, onSistemata, completato = fals
             {/* FUN4-1 (strada (a) del PM): una voce di tipo permanente conta fra gli oggetti permanenti — la voce non si segna da sola
                 («1 B»), quindi lo si dice prima: nella partita che ha completato il Palazzo, questo torna a «Concluso» finché non la si segna */}
             {gesto.cosa === 'crea' && carattereDaTipo(gesto.valore, null) === 'permanente' && (
-              <p className="m-0 rounded-md border border-warning/50 px-2 py-1.5 text-[13px] text-warning" role="note">
+              <p className="m-0 rounded-md border border-warning/50 px-2 py-1.5 testo-13 text-warning" role="note">
                 {completato
                   ? 'La voce nuova conta fra gli oggetti permanenti: in questa partita il Palazzo torna da «Completato» a «Concluso» finché non la segni.'
                   : 'La voce nuova conta fra gli oggetti permanenti del Palazzo: la percentuale si ricalcola con lei.'}

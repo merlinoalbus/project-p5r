@@ -141,7 +141,7 @@ export function Selettore({ etichetta, valore, opzioni, onCambia, disabilitato, 
                 <li key={o.chiave || '__vuoto'} role="option" aria-selected={o.chiave === valore} className={`selettore__voce ${i === evidenziata ? 'selettore__voce--evidenziata' : ''} ${o.chiave === valore ? 'selettore__voce--scelta' : ''}`}>
                   <button type="button" className="selettore__pulsante touch" onMouseEnter={() => setEvidenziata(i)} onClick={() => scegli(o.chiave)}>
                     <span className="min-w-0 flex-1 break-words">{o.nome}</span>
-                    {o.dettaglio && <span className="text-text-muted text-[11px] shrink-0">{o.dettaglio}</span>}
+                    {o.dettaglio && <span className="text-text-muted testo-12 shrink-0">{o.dettaglio}</span>}
                   </button>
                 </li>,
               ];

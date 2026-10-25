@@ -100,7 +100,7 @@ describe('NegozioPage', () => {
     getNegozio.mockResolvedValue({ ...negozio, quiz: [{ attivita: 'lavoro-triple-seven', nome: 'Commesso al Triple Seven', quiz, oggi: true }] });
     render(<MemoryRouter initialEntries={['/guida/negozi/untouchable']}><Routes><Route path="/guida/negozi/:chiave" element={<NegozioPage />} /></Routes></MemoryRouter>);
     const pulsante = await screen.findByRole('button', { name: 'Guida del quiz: Commesso al Triple Seven (oggi c’è il quiz)' });
-    expect(pulsante).toHaveClass('chip--oro');
+    expect(pulsante).toHaveClass('btn-primary');
     fireEvent.click(pulsante);
     expect(screen.getByRole('dialog', { name: 'Guida del quiz — Commesso al Triple Seven' })).toHaveTextContent('Vicino alla coda');
   });

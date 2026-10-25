@@ -61,7 +61,7 @@ export function TrasferisciVoci({ modo, voci, giorno, partitaId, onChiudi, onFat
   return (
     <Modal titolo={`${verbo} ${quanteVoci(voci.length)} in un altro giorno`} aperta onChiudi={onChiudi}>
       <PageState isLoading={indice.caricamento && !indice.dati} error={indice.errore} onRetry={() => void indice.ricarica()}>
-        <div className="flex flex-col gap-3 text-[13px]">
+        <div className="flex flex-col gap-3 testo-13">
           <p className="m-0 text-text-secondary">
             {quanteVoci(voci.length)} {diGiorno > 0 && diGiorno < voci.length ? `(${diGiorno} di giorno, ${voci.length - diGiorno} di sera)` : diGiorno === voci.length ? 'di giorno' : 'di sera'} del {dataGiocoTesto(giorno)}.{' '}
             {modo === 'copia' ? 'Le copie nascono senza spunte; le voci di partenza restano.' : 'Le voci lasciano questo giorno e portano con sé le spunte delle partite.'}
@@ -74,18 +74,18 @@ export function TrasferisciVoci({ modo, voci, giorno, partitaId, onChiudi, onFat
               onCambia={setDestinazione} />
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[12px] text-text-muted">Fascia</span>
+            <span className="testo-12 text-text-muted">Fascia</span>
             <span className="inline-flex overflow-hidden rounded-md border border-border" role="radiogroup" aria-label="Fascia di destinazione">
               {(['giorno', 'sera'] as const).map((f) => (
                 <button key={f} type="button" role="radio" aria-checked={fascia === f} tabIndex={fascia === f ? 0 : -1}
-                  className={`touch min-w-20 border-l border-border px-3 text-[13px] first:border-l-0 ${fascia === f ? 'bg-primary/25 font-semibold text-text' : 'text-text-muted hover:text-text'}`}
+                  className={`touch min-w-20 border-l border-border px-3 testo-13 first:border-l-0 ${fascia === f ? 'bg-primary/25 font-semibold text-text' : 'text-text-muted hover:text-text'}`}
                   onClick={() => setFascia(f)} onKeyDown={(e) => { if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) { e.preventDefault(); setFascia(fascia === 'giorno' ? 'sera' : 'giorno'); } }}>
                   {f === 'giorno' ? 'Di giorno' : 'Di sera'}
                 </button>
               ))}
             </span>
           </div>
-          <p className="m-0 text-[12px] text-text-muted">Arrivano in fondo alla fascia, nell’ordine che hanno qui. Vale per tutte le partite: la giornata è la stessa per tutte.</p>
+          <p className="m-0 testo-12 text-text-muted">Arrivano in fondo alla fascia, nell’ordine che hanno qui. Vale per tutte le partite: la giornata è la stessa per tutte.</p>
           <div className="flex flex-wrap gap-1.5">
             <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave={modo === 'copia' ? 'copia' : 'incolla'} dimensione={20} />} titolo={`${verbo} nel ${dataGiocoTesto(destinazione)}, ${fasciaTesto}`}
               disabled={occupato || !indice.dati} onClick={() => void esegui()} />

@@ -13,6 +13,8 @@ import { getVocePercorso, impostaInfiltrazioniVoce } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { dataGiocoConArticolo } from '../../utils/dateGioco';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   uid: string;
@@ -43,13 +45,13 @@ export function PropostaDallaVoce({ uid, partitaId, onChiudi, onConfermata }: Pr
     }
   };
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-md border border-primary/50 bg-white/[0.04] px-2 py-1.5 text-[12px]" role="status">
+    <div className="flex flex-wrap items-center gap-2 rounded-md border border-primary/50 bg-white/[0.04] px-2 py-1.5 testo-12" role="status">
       <span className="min-w-0 flex-1 basis-60">
         Aperta dalla proposta della voce {dataGiocoConArticolo(v.giorno, 'di')}: {proposta.infiltrazioni.map((i) => i.nome).join(', ')} ({proposta.certezza})
       </span>
       <span className="flex flex-wrap gap-1.5">
-        <button type="button" className="btn btn-primary btn-sm touch" disabled={occupato} onClick={() => void conferma()}>Conferma</button>
-        <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={onChiudi}>Chiudi</button>
+        <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="Conferma" disabled={occupato} onClick={() => void conferma()} />
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Chiudi" disabled={occupato} onClick={onChiudi} />
       </span>
     </div>
   );

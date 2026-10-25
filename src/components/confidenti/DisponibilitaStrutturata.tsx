@@ -18,6 +18,8 @@ import {
   FASCE_DISPONIBILITA, GIORNI_DISPONIBILITA, MODI_DISPONIBILITA,
   type DisponibilitaConfidenteDto, type DisponibilitaStrutturata as Struttura, type EccezioneDisponibilita, type FasciaDisponibilita, type GiornoDisponibilita, type ModoDisponibilita,
 } from '../../../shared/disponibilitaStrutturata';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 const NOME_MODO: Record<ModoDisponibilita, string> = { settimanale: 'In certi giorni della settimana', 'su-messaggio': 'Su suo messaggio', 'stanza-velluto': 'Alla Stanza di Velluto', trama: 'Con la trama' };
 const NOME_GIORNO: Record<GiornoDisponibilita, string> = { lun: 'lunedì', mar: 'martedì', mer: 'mercoledì', gio: 'giovedì', ven: 'venerdì', sab: 'sabato', dom: 'domenica', festivi: 'festivi' };
@@ -45,17 +47,17 @@ function testoQuando(s: Struttura): string {
 /** La scheda: dove (luoghi per nome), quando (struttura), eccezioni, «dal» e se è disponibile adesso nella partita. */
 export function DisponibilitaStrutturataScheda({ chiave, partita, versione, onModifica }: { chiave: string; partita?: number; versione: number; onModifica: () => void }) {
   const d = useCarica(() => getDisponibilitaStrutturata(chiave, partita), [chiave, partita, versione]);
-  if (d.caricamento && !d.dati) return <p role="status" className="m-0 text-[13px] text-text-muted">Un attimo…</p>;
-  if (d.errore || !d.dati) return <p role="alert" className="m-0 text-[13px] text-error">{d.errore ?? 'Disponibilità non disponibile.'}</p>;
+  if (d.caricamento && !d.dati) return <p role="status" className="m-0 testo-13 text-text-muted">Un attimo…</p>;
+  if (d.errore || !d.dati) return <p role="alert" className="m-0 testo-13 text-error">{d.errore ?? 'Disponibilità non disponibile.'}</p>;
   const { struttura: s, luoghi, oggi, modificata } = d.dati;
   return (
-    <div className="flex flex-col gap-1 text-[13px] text-text-secondary">
+    <div className="flex flex-col gap-1 testo-13 text-text-secondary">
       <span><strong className="text-text">Dove:</strong> {luoghi.length ? luoghi.map((l) => l.nome).join(', ') : (s.motivoSenzaLuogo || '—')}</span>
       <span><strong className="text-text">Quando:</strong> {testoQuando(s)}{s.dal ? ` · dal ${dataBreve(s.dal)}` : ''}</span>
       {s.eccezioni.length > 0 && <ul className="m-0 flex list-disc flex-col gap-0.5 pl-5">{s.eccezioni.map((e, i) => <li key={i}>{testoEccezione(e)}</li>)}</ul>}
       {oggi && <span><span className={`chip ${oggi.stato === 'disponibile' ? 'chip--attivo' : ''}`} title={oggi.motivo}>{NOME_STATO[oggi.stato] ?? oggi.stato}</span> <span className="text-text-muted">{oggi.motivo}</span></span>}
       <span className="flex flex-wrap items-center gap-2">
-        <button type="button" className="btn btn-secondary btn-sm touch" onClick={onModifica}>Modifica la disponibilità</button>
+        <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica la disponibilità" onClick={onModifica} />
         {modificata && <span className="chip" title="La struttura è stata cambiata rispetto alla fonte">Modificata</span>}
       </span>
     </div>
@@ -65,12 +67,12 @@ export function DisponibilitaStrutturataScheda({ chiave, partita, versione, onMo
 /** «Quando» di un Confidente in una riga (struttura, «dal», eccezioni brevi) e, con la partita, se è disponibile adesso: per la scheda del luogo, dove si elencano i Confidenti che vi si incontrano. */
 export function QuandoConfidente({ chiave, partita }: { chiave: string; partita?: number }) {
   const d = useCarica(() => getDisponibilitaStrutturata(chiave, partita), [chiave, partita]);
-  if (!d.dati) return d.errore ? null : <span className="text-[12px] text-text-muted">…</span>;
+  if (!d.dati) return d.errore ? null : <span className="testo-12 text-text-muted">…</span>;
   const { struttura: s, oggi } = d.dati;
   return (
-    <span className="flex flex-wrap items-center gap-1.5 text-[12px] text-text-secondary">
+    <span className="flex flex-wrap items-center gap-1.5 testo-12 text-text-secondary">
       <span>{testoQuando(s)}{s.dal ? ` · dal ${dataBreve(s.dal)}` : ''}{s.eccezioni.length > 0 ? ` · ${s.eccezioni.map(testoEccezione).join(' · ')}` : ''}</span>
-      {oggi && oggi.stato !== 'sconosciuto' && <span className={`chip text-[11px] ${oggi.stato === 'disponibile' ? 'chip--attivo' : ''}`} title={oggi.motivo}>{NOME_STATO[oggi.stato] ?? oggi.stato}</span>}
+      {oggi && oggi.stato !== 'sconosciuto' && <span className={`chip testo-12 ${oggi.stato === 'disponibile' ? 'chip--attivo' : ''}`} title={oggi.motivo}>{NOME_STATO[oggi.stato] ?? oggi.stato}</span>}
     </span>
   );
 }
@@ -119,7 +121,7 @@ function Corpo({ dati, tutti, chiave, onChiudi, onSalvato }: { dati: Disponibili
   const luoghiAggiungibili = tutti.filter((l) => !luoghi.includes(l.chiave)).map((l) => ({ chiave: l.chiave, nome: l.nome, dettaglio: l.quartiereNome }));
 
   return (
-    <div className="flex flex-col gap-3 text-[13px]">
+    <div className="flex flex-col gap-3 testo-13">
       <Selettore etichetta="Come si incontra" valore={modo} opzioni={MODI_DISPONIBILITA.map((m) => ({ chiave: m, nome: NOME_MODO[m] }))} onCambia={(v) => setModo(v as ModoDisponibilita)} disabilitato={occupato} />
       {modo === 'settimanale' && (
         <>
@@ -145,20 +147,20 @@ function Corpo({ dati, tutti, chiave, onChiudi, onSalvato }: { dati: Disponibili
               <label className="flex items-center gap-1">rango <input className="form-input w-16" type="number" min={1} max={10} value={e.rango} disabled={occupato} onChange={(ev) => modificaEccezione(i, { ...e, rango: Math.min(10, Math.max(1, Math.trunc(Number(ev.target.value)) || 1)) })} /></label>
               {FASCE_DISPONIBILITA.map((f) => <button key={f} type="button" aria-pressed={e.fasce.includes(f)} disabled={occupato} className={`chip touch ${e.fasce.includes(f) ? 'chip--attivo' : ''}`} onClick={() => { const prossime = ordinati(alterna(e.fasce, f), FASCE_DISPONIBILITA); if (prossime.length > 0) modificaEccezione(i, { ...e, fasce: prossime }); }}>{NOME_FASCIA[f]}</button>)}
             </>}
-            <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => setEccezioni((l) => l.filter((_, j) => j !== i))}>Togli</button>
+            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={occupato} onClick={() => setEccezioni((l) => l.filter((_, j) => j !== i))} />
           </div>
         ))}
         <div className="flex flex-wrap gap-2">
-          <button type="button" className="btn btn-secondary btn-sm touch" disabled={occupato || eccezioni.some((e) => e.tipo === 'pioggia')} onClick={() => setEccezioni((l) => [...l, { tipo: 'pioggia', effetto: 'non-disponibile' }])}>Aggiungi: non con la pioggia</button>
-          <button type="button" className="btn btn-secondary btn-sm touch" disabled={occupato || eccezioni.some((e) => e.tipo === 'dopo-rango')} onClick={() => setEccezioni((l) => [...l, { tipo: 'dopo-rango', giorni: 2, effetto: 'non-disponibile' }])}>Aggiungi: giorni dopo un rango</button>
-          <button type="button" className="btn btn-secondary btn-sm touch" disabled={occupato} onClick={() => setEccezioni((l) => [...l, { tipo: 'fascia-rango', rango: 1, fasce: ['sera'] }])}>Aggiungi: fascia a un rango</button>
+          <PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi: non con la pioggia" disabled={occupato || eccezioni.some((e) => e.tipo === 'pioggia')} onClick={() => setEccezioni((l) => [...l, { tipo: 'pioggia', effetto: 'non-disponibile' }])} />
+          <PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi: giorni dopo un rango" disabled={occupato || eccezioni.some((e) => e.tipo === 'dopo-rango')} onClick={() => setEccezioni((l) => [...l, { tipo: 'dopo-rango', giorni: 2, effetto: 'non-disponibile' }])} />
+          <PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi: fascia a un rango" disabled={occupato} onClick={() => setEccezioni((l) => [...l, { tipo: 'fascia-rango', rango: 1, fasce: ['sera'] }])} />
         </div>
       </fieldset>
       <fieldset className="m-0 flex flex-col gap-2 border-0 p-0"><legend className="p-0 text-text-secondary">Luoghi</legend>
         {luoghi.length === 0 && <span className="text-text-muted">Nessun luogo.</span>}
         <ul className="m-0 flex list-none flex-col gap-1 p-0">{luoghi.map((k) => (
           <li key={k} className="flex min-w-0 items-center gap-2"><span className="min-w-0 flex-1 break-words">{nomeLuogo(k)}</span>
-            <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => setLuoghi((l) => l.filter((x) => x !== k))}>Togli</button></li>
+            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={occupato} onClick={() => setLuoghi((l) => l.filter((x) => x !== k))} /></li>
         ))}</ul>
         <Selettore etichetta="Aggiungi un luogo" valore="" vuoto="Scegli un luogo" opzioni={luoghiAggiungibili} onCambia={(k) => { if (k) setLuoghi((l) => (l.includes(k) ? l : [...l, k])); }} disabilitato={occupato || luoghiAggiungibili.length === 0} />
       </fieldset>
@@ -168,9 +170,9 @@ function Corpo({ dati, tutti, chiave, onChiudi, onSalvato }: { dati: Disponibili
         </label>
       )}
       <div className="flex flex-wrap justify-end gap-2">
-        {dati.modificata && <button type="button" className="btn btn-ghost touch" disabled={occupato} onClick={() => void esegui(() => ripristinaDisponibilitaStrutturata(chiave), 'Struttura ripristinata come nella fonte.')}>Ripristina la struttura</button>}
+        {dati.modificata && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina la struttura" disabled={occupato} onClick={() => void esegui(() => ripristinaDisponibilitaStrutturata(chiave), 'Struttura ripristinata come nella fonte.')} />}
         <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={onChiudi}>Annulla</button>
-        <button type="button" className="btn btn-primary touch" disabled={occupato || !sporca || !dalValido} onClick={() => void salva()}>Salva</button>
+        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" disabled={occupato || !sporca || !dalValido} onClick={() => void salva()} />
       </div>
     </div>
   );

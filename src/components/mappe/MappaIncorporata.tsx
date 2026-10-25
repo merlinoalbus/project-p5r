@@ -129,10 +129,10 @@ function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, classN
   if (!mappa && caricamento) return <div className="flex items-center justify-center py-10 text-text-muted" aria-busy="true"><Spinner /></div>;
   if (!mappa) {
     return (
-      <div className="card flex flex-col gap-2 text-[13px] text-text-secondary" role="status">
+      <div className="card flex flex-col gap-2 testo-13 text-text-secondary" role="status">
         {/* il nome del posto, mai la chiave interna (L2, M11); «La città», non «Tutte le mappe» */}
         <span>{errore ? `${nome ?? 'Questo posto'} non disponibile: ${errore}` : `${nome ?? 'Questo posto'} non c’è più nella guida.`}</span>
-        <div className="flex gap-1.5"><CollegamentoVisivo to="/guida/citta" tono="secondario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="La città" />{errore && <button type="button" className="visore-mappa__azione-testo" onClick={() => void ricarica()}>Riprova</button>}</div>
+        <div className="flex gap-1.5"><CollegamentoVisivo to="/guida/citta" tono="secondario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="La città" />{errore && <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void ricarica()} />}</div>
       </div>
     );
   }

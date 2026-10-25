@@ -18,6 +18,8 @@ import { notifica } from '../../stores/notificationStore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import type { DoteNote } from '../../../shared/effettiAzione';
 import type { ConfidenteDettaglioDto } from '../../types';
+import { conferma, RIPRISTINA_CON_MODIFICHE } from '../../stores/confermaStore';
+import { TitoloSezione } from '../shared/TitoloSezione';
 
 interface Props {
   confidente: ConfidenteDettaglioDto;
@@ -64,7 +66,7 @@ export function DotiIncontro({ confidente, rangoPartita, onSalvato }: Props) {
   /** «Ripristina» un passaggio: la Dote torna com'era nella guida. Il server risponde 409 se quel passaggio non è mai stato cambiato (la scheda non lo dice prima). */
   const ripristina = async (rango: number) => {
     if (occupato) return;
-    if (JSON.stringify(bozza) !== partenza && !window.confirm('Ci sono modifiche non salvate: ripristinando perdi anche quelle. Continuare?')) return;
+    if (JSON.stringify(bozza) !== partenza && !(await conferma(RIPRISTINA_CON_MODIFICHE))) return;
     setOccupato(true);
     try {
       await ripristinaDoteIncontro(confidente.chiave, rango);
@@ -82,18 +84,18 @@ export function DotiIncontro({ confidente, rangoPartita, onSalvato }: Props) {
   return (
     <section className="card flex flex-col gap-2" aria-labelledby="doti-incontro">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 id="doti-incontro" className="m-0 text-[15px] font-semibold">Dote al passaggio di rango</h2>
+        <TitoloSezione id="doti-incontro">Dote al passaggio di rango</TitoloSezione>
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" onClick={apri} disabled={confidente.dotiIncontro.length === 0} />
       </div>
-      <p className="m-0 text-[12px] text-text-muted">
+      <p className="m-0 testo-12 text-text-muted">
         Il gioco dà queste Doti quando si passa al rango indicato: l'app te le ricorda quando registri il passaggio — spuntando nella giornata
         l'azione del passaggio o alzando il rango in Partita → Confidenti —, una volta sola, e le segni tu nella scheda Doti. Un'uscita che dà
         solo punti non le ricorda.
       </p>
-      {conDoti.length === 0 ? <p className="m-0 text-[13px] text-text-muted">Nessuna Dote dichiarata.</p> : (
+      {conDoti.length === 0 ? <p className="m-0 testo-13 text-text-muted">Nessuna Dote dichiarata.</p> : (
         <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light">
           {conDoti.map((r) => (
-            <li key={r.rango} className="py-1.5 flex gap-3 items-center text-[13px]">
+            <li key={r.rango} className="py-1.5 flex gap-3 items-center testo-13">
               <span className={`chip shrink-0 ${verso === r.rango ? 'chip--oro' : ''}`} title={verso === r.rango ? 'Il prossimo passaggio di rango nella partita è a questo rango' : undefined}>rango {r.rango}</span>
               <span>{r.testo}</span>
             </li>
@@ -107,15 +109,15 @@ export function DotiIncontro({ confidente, rangoPartita, onSalvato }: Props) {
             <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva" disabled={occupato} onClick={() => void salva()} />
           </div>
         )}>
-          <p className="m-0 text-[12px] text-text-muted">Per ogni rango, le Doti che il gioco dà quando si passa a quel rango. Vale dai prossimi passaggi: le Doti delle partite non cambiano (le segni tu).</p>
+          <p className="m-0 testo-12 text-text-muted">Per ogni rango, le Doti che il gioco dà quando si passa a quel rango. Vale dai prossimi passaggi: le Doti delle partite non cambiano (le segni tu).</p>
           <ul className="m-0 p-0 list-none flex flex-col gap-3">
             {bozza.map((r) => (
               <li key={r.rango} className="flex flex-col gap-2 rounded border border-border p-2" aria-label={`Rango ${r.rango}`}>
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <strong className="text-[13px]">Al passaggio al rango {r.rango}</strong>
+                  <strong className="testo-13">Al passaggio al rango {r.rango}</strong>
                   <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Ripristina" aria-label={`Ripristina la Dote del rango ${r.rango} come nella guida`} disabled={occupato} onClick={() => void ripristina(r.rango)} />
                 </div>
-                {r.doti.length === 0 && <span className="text-[12px] text-text-muted">Nessuna Dote.</span>}
+                {r.doti.length === 0 && <span className="testo-12 text-text-muted">Nessuna Dote.</span>}
                 {r.doti.map((d, i) => (
                   <div key={i} className="flex flex-wrap items-end gap-2">
                     <div className="flex-1 min-w-0"><RigaDote etichetta={`Dote ${i + 1} del rango ${r.rango}`} dote={d} onCambia={(nuova) => cambiaRango(r.rango, r.doti.map((x, j) => (j === i ? nuova : x)))} /></div>

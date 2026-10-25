@@ -131,6 +131,11 @@ const monta = (chiave: string, coda = '') => render(<MemoryRouter initialEntries
   <Route path="/guida/dungeon/:chiave" element={<><DungeonDettaglioPage /><Indirizzo /></>} />
   <Route path="/guida/dungeon/:chiave/area/:slug" element={<><DungeonDettaglioPage /><Indirizzo /></>} />
 </Routes></MemoryRouter>);
+/** Lotto B (punto 6): gli strumenti di modifica del Palazzo stanno nel menu «Modifica ⋯»; lo apre se è chiuso. */
+const apriMenuModifica = () => {
+  const menu = screen.getByRole('button', { name: /^Modifica: il Palazzo/ });
+  if (menu.getAttribute('aria-expanded') !== 'true') fireEvent.click(menu);
+};
 
 // reset, non clear: le risposte «una volta» non consumate da un test non devono passare al successivo
 beforeEach(() => { vi.resetAllMocks(); media.larghezza = 0; getAlberoMappe.mockResolvedValue([]); getArea.mockImplementation(areaDellaPrimaLettura); usePartitaStore.setState({ attiva: { id: 4, nome: 'Royal' } as PartitaDto }); });
@@ -1003,6 +1008,7 @@ it('«Modifica area»: le versioni si riordinano e l’etichetta svuotata si tog
   monta('kamoshida');
   await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
   await screen.findByRole('group', { name: 'Versioni di Cancello' });
+  apriMenuModifica();
   fireEvent.click(screen.getByRole('button', { name: 'Modifica area' }));
   const finestra = within(await screen.findByRole('dialog', { name: 'Modifica Cancello' }));
   expect(finestra.getByLabelText('Etichetta di Pianta completa')).toHaveValue('Pianta completa');
@@ -1022,6 +1028,7 @@ it('«Modifica area» cambia nome, etichetta e infiltrazioni in un salvataggio, 
   impostaInfiltrazioniArea.mockResolvedValue({});
   await waitFor(() => expect(getArea).toHaveBeenCalled());
   expect(pannello.getByRole('button', { name: /^1\. Cancello/ })).toBeInTheDocument();
+  apriMenuModifica();
   fireEvent.click(await screen.findByRole('button', { name: 'Modifica area' }));
   const finestra = within(await screen.findByRole('dialog', { name: 'Modifica Cancello' }));
   const nome = finestra.getByRole('textbox', { name: /^Nome/ });
@@ -1047,6 +1054,7 @@ it('dalla finestra dell’area si elimina una versione (non l’ultima): va nel 
   eliminaMappa.mockResolvedValue(undefined);
   monta('kamoshida');
   await screen.findByRole('group', { name: 'Versioni di Cancello' });
+  apriMenuModifica();
   fireEvent.click(screen.getByRole('button', { name: 'Modifica area' }));
   const finestra = within(await screen.findByRole('dialog', { name: 'Modifica Cancello' }));
   fireEvent.click(finestra.getByRole('button', { name: 'Elimina Porzione ovest' }));
@@ -1058,12 +1066,11 @@ it('«Elimina area» dice che cosa si porta via (versioni, pin, legami; le voci 
   eliminaAreaMondo.mockResolvedValue(undefined);
   monta('kamoshida');
   await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
-  // UX3-3 (come UX2-3 nella pagina Area): «Elimina» in vista da 768 a 1023 px e da 1280 px, nel menu «Altro» sotto i 768 e da 1024 a 1279
-  const [inVista, nelMenu] = await screen.findAllByRole('button', { name: 'Elimina area' });
-  expect(inVista.parentElement).toHaveClass('hidden', 'md:max-lg:inline-flex', 'xl:inline-flex');
-  expect(nelMenu.closest('details')).toHaveClass('menu-altro', 'md:max-lg:hidden', 'xl:hidden');
-  expect(within(nelMenu.closest('details')!).getByText('Altro ▾')).toBeInTheDocument();
-  // dal menu si apre la stessa finestra di conferma
+  // lotto B: «Elimina area» sta nel menu «Modifica ⋯» del Palazzo, a ogni larghezza
+  apriMenuModifica();
+  const nelMenu = await screen.findByRole('button', { name: 'Elimina area' });
+  expect(nelMenu.closest('.menu-modifica')).not.toBeNull();
+  // dal menu si apre la finestra di conferma
   fireEvent.click(nelMenu);
   const finestra = within(screen.getByRole('dialog', { name: 'Eliminare Cancello?' }));
   expect(finestra.getByText(/la sua planimetria con 2 pin e il legame con 1 infiltrazione\. Le voci della guida restano nelle loro infiltrazioni\./)).toBeInTheDocument();
@@ -1082,6 +1089,7 @@ describe('un’infiltrazione su più aree, un’area con più infiltrazioni (L3,
     await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
     // le aree toccate dall'infiltrazione aperta, in ordine: toccarne una la apre
     expect(within(screen.getByRole('list', { name: 'Aree toccate da Cancello' })).getAllByRole('button').map((b) => b.textContent)).toEqual(['Cancello']);
+    apriMenuModifica();
     fireEvent.click(screen.getByRole('button', { name: 'Modifica aree' }));
     const finestra = within(await screen.findByRole('dialog', { name: 'Aree toccate da «Cancello»' }));
     // si propongono solo quelle non ancora legate
@@ -1102,6 +1110,7 @@ describe('un’infiltrazione su più aree, un’area con più infiltrazioni (L3,
     impostaAreeInfiltrazione.mockResolvedValue({});
     monta('kamoshida');
     await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+    apriMenuModifica();
     fireEvent.click(screen.getByRole('button', { name: 'Modifica aree' }));
     const finestra = within(await screen.findByRole('dialog', { name: 'Aree toccate da «Cancello»' }));
     fireEvent.click(finestra.getByRole('button', { name: 'Sposta giù Cancello' }));
@@ -1129,6 +1138,7 @@ describe('un’infiltrazione su più aree, un’area con più infiltrazioni (L3,
     getDungeon.mockResolvedValue(d);
     monta('kamoshida');
     await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+    apriMenuModifica();
     fireEvent.click((await screen.findAllByRole('button', { name: 'Elimina area' }))[0]);
     expect(within(screen.getByRole('dialog', { name: 'Eliminare Cancello?' })).getByText(/i legami con 2 infiltrazioni\./)).toBeInTheDocument();
   });
@@ -1148,6 +1158,7 @@ it('mentre un ordine si salva, la maniglia dice perché è ferma', async () => {
 it('rinominare l’area non cambia il suo indirizzo né le versioni: si manda solo il nome', async () => {
   await apriAree();
   aggiornaAreaMondo.mockResolvedValue({});
+  apriMenuModifica();
   fireEvent.click(await screen.findByRole('button', { name: 'Modifica area' }));
   const finestra = within(await screen.findByRole('dialog', { name: 'Modifica Cancello' }));
   expect(finestra.getByText('L’indirizzo della pagina non cambia.')).toBeInTheDocument();
@@ -1162,6 +1173,7 @@ it('«Sposta la versione in un’altra area»: l’unica versione si sposta solo
   await apriAree();
   collocaPlanimetria.mockRejectedValueOnce(new ApiError(409, 'area-si-svuota', 'Cancello resta senza planimetrie: la versione si sposta in Torre alta, Cancello va nel cestino con 1 legame a infiltrazioni.'))
     .mockResolvedValueOnce({ ...dettaglioDi(palazzo(true), 'torre-alta'), infiltrazioni: [] });
+  apriMenuModifica();
   fireEvent.click(await screen.findByRole('button', { name: 'Modifica area' }));
   const finestra = within(await screen.findByRole('dialog', { name: 'Modifica Cancello' }));
   fireEvent.click(finestra.getByRole('button', { name: 'Sposta Planimetria 1 in un’altra area' }));
@@ -1182,6 +1194,7 @@ it('una versione di un’area con più versioni diventa «un’area a sé», col
   collocaPlanimetria.mockResolvedValue({ ...dettaglioDi(palazzo(true), 'torre-alta'), slug: 'cancello-ovest', nome: 'Cancello ovest', infiltrazioni: [] });
   monta('kamoshida');
   await screen.findByRole('group', { name: 'Versioni di Cancello' });
+  apriMenuModifica();
   fireEvent.click(screen.getByRole('button', { name: 'Modifica area' }));
   const finestra = within(await screen.findByRole('dialog', { name: 'Modifica Cancello' }));
   fireEvent.click(finestra.getByRole('button', { name: 'Sposta Porzione ovest in un’altra area' }));
@@ -1198,9 +1211,11 @@ it('il testo di un’infiltrazione si modifica con «Modifica testo», anche di 
   monta('kamoshida');
   await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
   // il comando dice che cosa fa, e il nome accessibile comincia dal testo che si vede (chi comanda a voce dice «Modifica testo»)
+  apriMenuModifica();
   expect(screen.getByRole('button', { name: 'Modifica testo: l’infiltrazione «Cancello»' })).toHaveTextContent('Modifica testo');
   // la Torre non tocca aree: la si apre dalla coda dell'elenco
   fireEvent.click(within(screen.getByRole('region', { name: 'Infiltrazioni senza aree' })).getByRole('button', { name: /^2\. Torre/ }));
+  apriMenuModifica();
   fireEvent.click(await screen.findByRole('button', { name: 'Modifica testo: l’infiltrazione «Torre»' }));
   const modulo = within(screen.getByRole('form', { name: /Correggi l’infiltrazione/ }));
   fireEvent.change(modulo.getByLabelText('Nome dell’infiltrazione'), { target: { value: 'Torre nord' } });
@@ -1215,6 +1230,7 @@ it('anche l’infiltrazione aperta si elimina, dal suo modulo di correzione, e l
   monta('kamoshida?area=k-03');
   // il titolo dell'infiltrazione (livello 2); l'area aperta, anche lei «Cortile», ha il suo (livello 3)
   expect(await screen.findByRole('heading', { level: 2, name: 'Cortile' })).toBeInTheDocument();
+  apriMenuModifica();
   fireEvent.click(screen.getByRole('button', { name: /^Modifica testo: l’infiltrazione/ }));
   const modulo = within(screen.getByRole('form', { name: /Correggi l’infiltrazione/ }));
   fireEvent.click(modulo.getByRole('button', { name: 'Elimina' }));
@@ -1500,6 +1516,7 @@ it('le infiltrazioni di un’area si scelgono insieme nella finestra dell’area
   impostaInfiltrazioniArea.mockResolvedValue({});
   monta('kamoshida');
   await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' });
+  apriMenuModifica();
   fireEvent.click(await screen.findByRole('button', { name: 'Modifica area' }));
   const finestra = within(await screen.findByRole('dialog', { name: 'Modifica Cancello' }));
   const caselle = within(finestra.getByRole('group', { name: 'Infiltrazioni in quest’area' })).getAllByRole('checkbox');
@@ -1524,6 +1541,7 @@ it('la bozza di correzione appartiene al pezzo che stai correggendo, non alla sc
   expect(await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' })).toBeInTheDocument();
 
   // scrivo nel modulo dell'area, poi cambio area senza salvare
+  apriMenuModifica();
   fireEvent.click(screen.getByRole('button', { name: /^Modifica testo: l’infiltrazione/ }));
   const modulo = screen.getByRole('form', { name: /Correggi l’infiltrazione/ });
   fireEvent.change(within(modulo).getByLabelText('Nome dell’infiltrazione'), { target: { value: 'Scritto per sbaglio' } });
@@ -1532,6 +1550,7 @@ it('la bozza di correzione appartiene al pezzo che stai correggendo, non alla sc
   await screen.findByRole('heading', { level: 2, name: 'Torre' });
 
   // il modulo si è chiuso con la sua bozza: riaprendolo sull'altra area c'è il nome dell'altra area
+  apriMenuModifica();
   fireEvent.click(screen.getByRole('button', { name: /^Modifica testo: l’infiltrazione/ }));
   expect(within(screen.getByRole('form', { name: /Correggi l’infiltrazione/ })).getByLabelText('Nome dell’infiltrazione')).toHaveValue('Torre');
   expect(aggiornaArea).not.toHaveBeenCalled();
@@ -1543,6 +1562,7 @@ it('salvata l’intestazione, la scheda si rilegge con la partita attiva', async
   monta('kamoshida');
   expect(await screen.findByRole('heading', { name: 'Palazzo di Kamoshida' })).toBeInTheDocument();
   getDungeon.mockClear();
+  apriMenuModifica();
   fireEvent.click(screen.getByRole('button', { name: /^Correggi la scheda: il Palazzo/ }));
   const modulo = screen.getByRole('form', { name: /Correggi il Palazzo/ });
   fireEvent.change(within(modulo).getByLabelText('Nome'), { target: { value: 'Castello' } });
@@ -1555,6 +1575,7 @@ it('salvata l’intestazione, la scheda si rilegge con la partita attiva', async
 it('la finestra dell’area salva solo quel che cambia: la sola etichetta non tocca nome né infiltrazioni', async () => {
   await apriAree();
   aggiornaPlanimetrieArea.mockResolvedValue({});
+  apriMenuModifica();
   fireEvent.click(await screen.findByRole('button', { name: 'Modifica area' }));
   const finestra = within(await screen.findByRole('dialog', { name: 'Modifica Cancello' }));
   fireEvent.change(finestra.getByLabelText('Etichetta di Planimetria 1'), { target: { value: 'Livello 0' } });
@@ -1569,6 +1590,7 @@ it('la finestra dell’area salva solo quel che cambia: la sola etichetta non to
 it('«Aggiungi infiltrazione» crea un’infiltrazione con le aree che tocca: il modulo si apre dal nome', async () => {
   await apriAree();
   creaArea.mockResolvedValue({ chiave: 'kamoshida-torre-di-guardia', nome: 'Torre di guardia', ordine: 1 });
+  apriMenuModifica();
   fireEvent.click(screen.getByRole('button', { name: 'Aggiungi infiltrazione' }));
   const modulo = within(within(await screen.findByRole('dialog', { name: 'Nuova infiltrazione' })).getByRole('form', { name: 'Nuova infiltrazione' }));
   // il modulo si apre dal nome
@@ -1587,6 +1609,7 @@ it('«Aggiungi infiltrazione» crea un’infiltrazione con le aree che tocca: il
 it('l’infiltrazione nuova propone il posto subito dopo quella aperta; senza aree toccate non manda il campo', async () => {
   await apriAree();
   creaArea.mockResolvedValue({ chiave: 'kamoshida-garitta', nome: 'Garitta', ordine: 1 });
+  apriMenuModifica();
   fireEvent.click(screen.getByRole('button', { name: 'Aggiungi infiltrazione' }));
   const modulo = within(within(await screen.findByRole('dialog', { name: 'Nuova infiltrazione' })).getByRole('form', { name: 'Nuova infiltrazione' }));
   expect(modulo.getByText('Dopo «1. Cancello»')).toBeInTheDocument();
@@ -1597,6 +1620,7 @@ it('l’infiltrazione nuova propone il posto subito dopo quella aperta; senza ar
 
 it('senza nome l’infiltrazione nuova non si crea', async () => {
   await apriAree();
+  apriMenuModifica();
   fireEvent.click(screen.getByRole('button', { name: 'Aggiungi infiltrazione' }));
   const dialogo = await screen.findByRole('dialog', { name: 'Nuova infiltrazione' });
   const modulo = within(within(dialogo).getByRole('form', { name: 'Nuova infiltrazione' }));
@@ -1611,6 +1635,7 @@ it('un’infiltrazione nuova all’inizio del Palazzo: creata, la scheda la apre
   await apriAree();
   getDungeon.mockResolvedValue(conAtrio());
   creaArea.mockResolvedValue({ chiave: 'kamoshida-atrio', nome: 'Atrio', ordine: 0 });
+  apriMenuModifica();
   fireEvent.click(screen.getByRole('button', { name: 'Aggiungi infiltrazione' }));
   const finestra = within(await screen.findByRole('dialog', { name: 'Nuova infiltrazione' }));
   fireEvent.change(finestra.getByLabelText('Nome dell’infiltrazione'), { target: { value: 'Atrio' } });

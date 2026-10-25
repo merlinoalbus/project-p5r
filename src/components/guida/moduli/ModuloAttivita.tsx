@@ -27,6 +27,8 @@ import { FonteConfidenteAttivita } from '../../confidenti/FonteConfidenteAttivit
 import { FontePescaAttivita } from '../../pesca/FontePescaAttivita';
 import { Blocco, Campo, Griglia } from './campi';
 import { useNomiPerEffetti } from './nomiPerEffetti';
+import { PulsanteVisivo } from '../../shared/PulsanteVisivo';
+import { IconaAzione } from '../../shared/IconaAzione';
 
 /** La figura di ogni tipo: le illustrazioni delle categorie. */
 const CATEGORIA_TIPO: Record<string, string> = { 'mini-gioco': 'minigiochi', lavoro: 'lavori', studio: 'studio', lettura: 'libri', videogioco: 'minigiochi', allenamento: 'allenamento', cibo: 'cibo', sfida: 'obiettivo', altro: 'altro' };
@@ -96,15 +98,16 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
       {(!videogioco || !!confidente) && <div className="flex flex-col gap-2">
         <Selettore etichetta="Progressione del Confidente" valore={confidente} opzioni={opzioniConfidenti} vuoto="Attività autonoma"
           disabilitato={disabilitato} onCambia={(chiave) => imposta({ confidente_chiave: chiave || null })} />
-        {nomi.erroreNomi && <p role="alert" className="m-0 text-error">{nomi.erroreNomi} <button type="button" className="btn btn-secondary touch" disabled={disabilitato} onClick={nomi.riprovaNomi}>Riprova</button></p>}
+        {nomi.erroreNomi && <p role="alert" className="m-0 text-error">{nomi.erroreNomi} <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" disabled={disabilitato} onClick={nomi.riprovaNomi} /></p>}
         {confidente && <>
           <p className="m-0 text-sm">La guida degli incontri e delle Doti viene dal Confidente. Cambiare questa scelta conserva i campi: risolvi quelli incompatibili prima di salvare. Rimuovere il collegamento conserva i valori attuali.</p>
-          {fonte?.chiave === confidente ? <div className="flex flex-col gap-1"><p className="m-0 text-xs text-text-muted">Guida attualmente salvata; le modifiche del modulo non sono ancora applicate.</p><FonteConfidenteAttivita fonte={fonte} /></div> : <Link className="touch inline-flex self-start items-center text-primary" to={`/confidenti/${encodeURIComponent(confidente)}`}>Consulta la progressione del Confidente</Link>}
+          {fonte?.chiave === confidente ? <div className="flex flex-col gap-1"><p className="m-0 text-xs text-text-muted">Guida attualmente salvata; le modifiche del modulo non sono ancora applicate.</p><FonteConfidenteAttivita fonte={fonte} /></div> : <Link className="touch inline-flex self-start items-center text-primary-testo" to={`/confidenti/${encodeURIComponent(confidente)}`}>Consulta la progressione del Confidente</Link>}
           {incompatibiliConfidente.length > 0 && <div className="flex flex-col gap-2 rounded-md border border-warning p-3 text-sm">
             <p role="alert" className="m-0">Da risolvere: {incompatibiliConfidente.map((c) => NOMI_CAMPI[c] ?? c).join(', ')}.</p>
             {incompatibiliConfidente.includes('doti_json') && <p className="m-0 whitespace-pre-wrap break-words">Doti storiche: {JSON.stringify(dati.doti_json ?? dati._dotiStoriche)}</p>}
             <p className="m-0">Il comando seguente toglie fascia, condizioni, effetti e sblocco propri, quiz, costo e paghe numeriche; imposta nessun conteggio e una sessione{!giaCollegata ? ' e svuota le Doti storiche' : ''}. Comprende le parti non leggibili riportate sotto. I testi di paga, premi e altri effetti vanno risolti nei rispettivi campi. Dettagli e note personali restano.</p>
-            <button type="button" className="btn btn-secondary min-h-11 self-start" disabled={disabilitato || !impostaCondizioni || !!pesca} onClick={normalizzaFonte}>Usa la progressione del Confidente e rimuovi i campi propri elencati</button>
+            <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Usa la progressione del Confidente e rimuovi i campi propri elencati"
+              disabled={disabilitato || !impostaCondizioni || !!pesca} onClick={normalizzaFonte} />
           </div>}
         </>}
       </div>}
@@ -122,18 +125,18 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
           {videogioco && <p role="alert" className="m-0 text-error">Il modulo Videogioco richiede round e conteggio per sessioni; la fonte pesca richiede un turno per visita oppure nessun turno aggiuntivo per gli obiettivi. Rimuovi il collegamento pesca per conservare questa classificazione.</p>}
           {!!incompatibiliPesca.length && <div className="flex min-w-0 flex-col gap-2 rounded-md border border-warning p-3 text-sm">
             <p role="alert" className="m-0">Campi propri incompatibili con la fonte pesca: {incompatibiliPesca.map(c => NOMI_CAMPI[c] ?? c).join(', ')}.</p>
-            <dl className="m-0 flex min-w-0 flex-col gap-1">{incompatibiliPesca.map(c => <div key={c}><dt>{NOMI_CAMPI[c] ?? c}</dt><dd className="m-0 whitespace-pre-wrap break-all text-[12px]">{typeof valoreIncompatibile(c) === 'string' ? String(valoreIncompatibile(c)) : JSON.stringify(valoreIncompatibile(c)) ?? 'null'}</dd></div>)}</dl>
+            <dl className="m-0 flex min-w-0 flex-col gap-1">{incompatibiliPesca.map(c => <div key={c}><dt>{NOMI_CAMPI[c] ?? c}</dt><dd className="m-0 whitespace-pre-wrap break-all testo-12">{typeof valoreIncompatibile(c) === 'string' ? String(valoreIncompatibile(c)) : JSON.stringify(valoreIncompatibile(c)) ?? 'null'}</dd></div>)}</dl>
             <p className="m-0">Il comando rimuove esplicitamente condizioni proprie, effetti e Doti storiche, costo, paghe, sblocco e altri effetti in prosa e quiz. Imposta giorno e sera, una sessione e {ruoloPesca === 'visita' ? 'un turno per visita' : ruoloPesca === 'obiettivi' ? 'nessun conteggio aggiuntivo' : 'il conteggio del ruolo che devi scegliere'}. Dettagli, regole, premi e note rimangono.</p>
             <label className="touch flex items-start gap-2"><input className="h-5 w-5 shrink-0" type="checkbox" checked={confermaPesca === firmaPesca} disabled={disabilitato || !!confidente || videogioco || (ruoloPesca !== 'visita' && ruoloPesca !== 'obiettivi')} onChange={e => setConfermaPesca(e.target.checked ? firmaPesca : null)} /><span>Ho riletto i valori mostrati e confermo la rimozione di questi campi propri.</span></label>
-            <button type="button" className="btn btn-secondary touch self-start" disabled={disabilitato || !!confidente || videogioco || !impostaCondizioni || confermaPesca !== firmaPesca || (ruoloPesca !== 'visita' && ruoloPesca !== 'obiettivi')} onClick={normalizzaPesca}>Usa la fonte pesca e rimuovi i campi propri dichiarati</button>
+            <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Usa la fonte pesca e rimuovi i campi propri dichiarati"
+              disabled={disabilitato || !!confidente || videogioco || !impostaCondizioni || confermaPesca !== firmaPesca || (ruoloPesca !== 'visita' && ruoloPesca !== 'obiettivi')} onClick={normalizzaPesca} />
           </div>}
         </>}
       </div>
       {(['effetti', 'quiz'] as const).filter((c) => dati[`_${c}DaRisolvere`]).map((c) => <div key={c} className="flex flex-col gap-2 rounded-md border border-warning p-3 text-sm">
         <p role="alert" className="m-0">{c === 'effetti' ? 'Gli effetti salvati contengono' : 'Il quiz salvato contiene'} parti che l’editor non sa rappresentare. Il valore originale è conservato finché non scegli esplicitamente la sostituzione.</p>
         <p className="m-0 whitespace-pre-wrap break-all">{typeof dati[`_${c}Raw`] === 'string' ? String(dati[`_${c}Raw`]) : JSON.stringify(dati[`_${c}Raw`])}</p>
-        <button type="button" className="btn btn-secondary min-h-11 self-start" disabled={disabilitato}
-          onClick={() => imposta({ [`_${c}DaRisolvere`]: false })}>{c === 'quiz' && !dati.quiz_json ? 'Rimuovi il quiz non leggibile' : c === 'effetti' && (dati.effetti_json as VoceEffetto[]).length === 0 ? 'Sostituisci con nessun effetto' : `Usa ${c === 'effetti' ? 'gli effetti leggibili dell’editor' : 'il quiz leggibile dell’editor'} e scarta le altre parti`}</button>
+        <PulsanteVisivo icona={<IconaAzione chiave={(c === 'quiz' && !dati.quiz_json) || (c === 'effetti' && (dati.effetti_json as VoceEffetto[]).length === 0) ? 'elimina' : 'scarta'} dimensione={22} />} titolo={c === 'quiz' && !dati.quiz_json ? 'Rimuovi il quiz non leggibile' : c === 'effetti' && (dati.effetti_json as VoceEffetto[]).length === 0 ? 'Sostituisci con nessun effetto' : `Usa ${c === 'effetti' ? 'gli effetti leggibili dell’editor' : 'il quiz leggibile dell’editor'} e scarta le altre parti`} className="min-h-11 self-start" disabled={disabilitato} onClick={() => imposta({ [`_${c}DaRisolvere`]: false })} />
       </div>)}
       <Griglia>
         <Campo nome="nome" etichetta={videogioco ? 'Nome del videogioco' : 'Nome dell’attività'} dati={dati} imposta={imposta} disabilitato={disabilitato} max={160} largo />
@@ -144,8 +147,8 @@ export function ModuloAttivita({ dati, imposta, impostaCondizioni, disabilitato 
         )}
         {campiPropri && <Blocco largo>
           <SelettoreIcone compatto etichetta="Quando" valore={testoDi(dati.fascia)} opzioni={OPZIONI_FASCIA} disabilitato={disabilitato} onCambia={(fascia) => imposta({ fascia })} />
-          {confidente && <button type="button" className="btn btn-ghost touch" disabled={disabilitato} onClick={() => imposta({ fascia: null })}>Usa le fasce del Confidente</button>}
-          {pesca && <button type="button" className="btn btn-ghost touch" disabled={disabilitato} onClick={() => imposta({ fascia: 'entrambe' })}>Usa giorno e sera con i profili pesca</button>}
+          {confidente && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Usa le fasce del Confidente" disabled={disabilitato} onClick={() => imposta({ fascia: null })} />}
+          {pesca && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Usa giorno e sera con i profili pesca" disabled={disabilitato} onClick={() => imposta({ fascia: 'entrambe' })} />}
         </Blocco>}
         <SceltaLuogo etichetta="Dove si svolge" valore={{ sede: (dati.sede_chiave as string | null) ?? null, quartiere: (dati.luogo_chiave as string | null) ?? null }} disabilitato={disabilitato}
           onCambia={(v) => imposta({ sede_chiave: v.sede, luogo_chiave: v.quartiere })} />

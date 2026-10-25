@@ -17,6 +17,8 @@ import { piatto } from '../../utils/testo';
 import { NOME_QUALE, elencoQuale } from '../../utils/elencoQuale';
 import type { TipoRiferimentoAzione } from '../../../shared/effettiAzione';
 import type { ElenchiAzioneDto, VoceElencoAzione } from '../../types';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 /** Quante tessere si mostrano insieme: oltre, si invita a restringere con la ricerca. */
 const TETTO = 36;
@@ -79,7 +81,7 @@ export function SceltaQuale({ tipo, elenchi, valore, soloTurni = false, onCambia
   const nome = NOME_QUALE[tipo];
   return (
     <div className="flex flex-col gap-2 min-w-0">
-      <span className="text-[13px] text-text-secondary">Quale — {nome.toLowerCase()}</span>
+      <span className="testo-13 text-text-secondary">Quale — {nome.toLowerCase()}</span>
       {ricerca && (
         <input type="search" className="form-input" value={testo} onChange={(e) => setTesto(e.target.value)} placeholder={`Cerca: ${nome.toLowerCase()}…`} aria-label={`Cerca: ${nome.toLowerCase()}`} />
       )}
@@ -96,9 +98,9 @@ export function SceltaQuale({ tipo, elenchi, valore, soloTurni = false, onCambia
           );
         })}
       </div>
-      {filtrate.totale === 0 && <span className="text-[12px] text-text-muted" role="status">Nessun risultato.</span>}
-      {filtrate.totale > TETTO && <span className="text-[12px] text-text-muted" role="status">Mostrati {Math.min(TETTO, filtrate.totale)} di {filtrate.totale}: scrivi per restringere.</span>}
-      {valore && <button type="button" className="btn btn-ghost btn-sm touch self-start" onClick={() => onCambia('')}>Nessun collegamento</button>}
+      {filtrate.totale === 0 && <span className="testo-12 text-text-muted" role="status">Nessun risultato.</span>}
+      {filtrate.totale > TETTO && <span className="testo-12 text-text-muted" role="status">Mostrati {Math.min(TETTO, filtrate.totale)} di {filtrate.totale}: scrivi per restringere.</span>}
+      {valore && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Nessun collegamento" className="self-start" onClick={() => onCambia('')} />}
     </div>
   );
 }

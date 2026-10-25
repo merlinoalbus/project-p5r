@@ -27,13 +27,33 @@
 
 @theme {
   --spacing: 4px;
-  --text-xs: 12px;
-  --text-sm: 14px;
-  --text-base: 16px;
-  --text-lg: 18px;
-  --text-xl: 20px;
-  --text-2xl: 24px;
-  --text-3xl: 30px;
+  /* ---- Scala tipografica (lotto B, 2026-10-25) ----
+     In rem sulla radice al 93,75% (15 px con le impostazioni predefinite): i valori a schermo restano quelli di prima, ma seguono la
+     dimensione del testo scelta nel sistema o nel browser. Si usano con le utility `testo-N` (in fondo al file, `@utility testo-*`),
+     che fissano SOLO la dimensione e lasciano l'interlinea a chi la decide; nei fogli di stile con `var(--testo-N)`. N è la misura
+     in px a radice predefinita. Minimo 12 px per i testi informativi; `micro` (11 px) solo per segni decorativi o fitti (etichette
+     dei pin sulle mappe, zoom del visore, targhette «LV», iniziale di riserva dei ritratti). ESLint vieta `text-[Npx]`. */
+  --testo-micro: 0.7333rem;
+  --testo-12: 0.8rem;
+  --testo-13: 0.8667rem;
+  --testo-14: 0.9333rem;
+  --testo-15: 1rem;
+  --testo-16: 1.0667rem;
+  --testo-17: 1.1333rem;
+  --testo-18: 1.2rem;
+  --testo-20: 1.3333rem;
+  --testo-24: 1.6rem;
+  --testo-28: 1.8667rem;
+  --testo-32: 2.1333rem;
+  --testo-40: 2.6667rem;
+  /* le utility di Tailwind `text-xs`…`text-3xl` (con la loro interlinea) restano per gli usi che c'erano, sulla stessa radice */
+  --text-xs: var(--testo-12);
+  --text-sm: var(--testo-14);
+  --text-base: var(--testo-16);
+  --text-lg: var(--testo-18);
+  --text-xl: var(--testo-20);
+  --text-2xl: var(--testo-24);
+  --text-3xl: 2rem;
 
   /* ---- Colori ---- */
   --color-bg: #0b0b0e;
@@ -45,10 +65,15 @@
 
   --color-text: #ececf1;
   --color-text-secondary: #a3a3b3;
-  --color-text-muted: #6f6f80;
+  /* 2026-10-24 (lotto A): #6f6f80 stava fra 3,2:1 e 4,0:1 sugli sfondi, sotto l'AA (4,5:1) per i testi da 11–13 px che lo usano;
+     #8e8ea0 fa almeno 4,8:1 anche sulla superficie e resta sotto il testo secondario, che conserva il suo stacco */
+  --color-text-muted: #8e8ea0;
 
   --color-primary: #e5352b;
   --color-primary-hover: #ff4d42;
+  /* il rosso usato come TESTO (scritte, link, etichette attive): #e5352b sui fondi scuri fa 3,6–4,3:1; questo fa almeno 4,7:1 anche
+     sul chip rosso trasparente. Fondi, bordi, barre e tasselli restano su --color-primary */
+  --color-primary-testo: #ff6359;
   --color-primary-bg: rgba(229, 53, 43, 0.14);
   /* oro dei suggerimenti del giorno (12.4) */
   --color-oro: #f5c542;
@@ -106,7 +131,9 @@
 
 @layer base {
   :root {
-    font-size: 15px;
+    /* 93,75% = 15 px con le impostazioni predefinite: in percentuale e non in px, così la radice (e la scala `--testo-*` in rem)
+       segue la dimensione del testo scelta dall'utente nel sistema o nel browser */
+    font-size: 93.75%;
     color-scheme: dark;
   }
   body {
@@ -162,7 +189,7 @@
     border-radius: 0;
     background: transparent;
     font-family: var(--font-sans);
-    font-size: 14px;
+    font-size: var(--testo-14);
     font-weight: 600;
     line-height: 1.2;
     cursor: pointer;
@@ -183,26 +210,26 @@
   }
   .btn::before { inset: 0; background: var(--btn-bordo); }
   .btn::after { inset: 1px; background: var(--btn-sfondo); }
-  .btn:disabled { opacity: 1; cursor: not-allowed; }
+  .btn:disabled, .btn[aria-disabled="true"] { opacity: 1; cursor: not-allowed; }
   .btn:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
   .btn-primary { --btn-sfondo: var(--color-primary); --btn-bordo: var(--color-primary); color: var(--color-text-on-primary); }
-  .btn-primary:hover:not(:disabled) { --btn-sfondo: var(--color-primary-hover); --btn-bordo: var(--color-primary-hover); }
+  .btn-primary:hover:not(:disabled):not([aria-disabled="true"]) { --btn-sfondo: var(--color-primary-hover); --btn-bordo: var(--color-primary-hover); }
   .btn-secondary { --btn-sfondo: var(--color-surface); --btn-bordo: var(--color-border); color: var(--color-text); }
-  .btn-secondary:hover:not(:disabled) { --btn-sfondo: var(--color-bg-tertiary); --btn-bordo: var(--color-primary); }
+  .btn-secondary:hover:not(:disabled):not([aria-disabled="true"]) { --btn-sfondo: var(--color-bg-tertiary); --btn-bordo: var(--color-primary); }
   .btn-ghost { color: var(--color-text-secondary); }
-  .btn-ghost:hover:not(:disabled) { color: var(--color-text); --btn-sfondo: rgba(255, 255, 255, 0.05); }
+  .btn-ghost:hover:not(:disabled):not([aria-disabled="true"]) { color: var(--color-text); --btn-sfondo: rgba(255, 255, 255, 0.05); }
   .btn-danger { color: var(--color-error); --btn-bordo: rgba(239, 68, 68, 0.45); }
-  .btn-danger:hover:not(:disabled) { --btn-sfondo: rgba(239, 68, 68, 0.12); }
+  .btn-danger:hover:not(:disabled):not([aria-disabled="true"]) { --btn-sfondo: rgba(239, 68, 68, 0.12); }
   /* L'altezza c'era gia'; mancava la larghezza. Un pulsante con dentro un solo carattere — la
      freccia che inverte l'ordinamento — misurava 35 px, e col dito un bersaglio e' quadrato:
      44 di alto e 35 di largo e' comunque un bersaglio da 35. */
-  .btn-sm { font-size: 13px; padding: 6px 12px; min-height: 44px; min-width: 44px; --btn-taglio: 6px; }
+  .btn-sm { font-size: var(--testo-13); padding: 6px 12px; min-height: 44px; min-width: 44px; --btn-taglio: 6px; }
   /* Pulsanti d'incremento compatti (note delle Doti): piccoli col mouse, sempre 44px sui dispositivi a tocco */
   /* Le tendine prendono la larghezza dell'opzione piu lunga e non si restringono: entro il contenitore, sempre (telefono) */
   select.form-input { max-width: 100%; min-width: 0; }
   /* Le note delle Doti si premono decine di volte per partita: 44 px a ogni larghezza, come ogni
      altro comando. I 30 px valevano solo col mouse, ed erano l'ultima misura doppia rimasta. */
-  .btn-nota { font-size: 13px; padding: 6px 12px; min-height: 44px; --btn-taglio: 5px; gap: 5px; }
+  .btn-nota { font-size: var(--testo-13); padding: 6px 12px; min-height: 44px; --btn-taglio: 5px; gap: 5px; }
 
   /* ---- Pulsanti visivi: immagine prevalente (icona 40 px, 32 px compatta, 48 px a colonna) + titolo «display» piccolo + dettaglio
      (mai solo testo grigio). La dimensione dell'icona la decide il pulsante con --btn-visivo-icona, non chi la passa: le <img> di
@@ -215,15 +242,21 @@
   /* Il titolo va a capo dentro il pulsante, mai fuori: «Apri: Banchina della metropolitana di Yongen-Jaya»
      in un popup da 260 px sbordava dal riquadro (segnalazione dell'utente, 2026-09-11). */
   .btn-visivo { max-width: 100%; min-width: 0; }
-  .btn-visivo__titolo { font-family: var(--font-display); text-transform: uppercase; font-size: 14px; letter-spacing: .03em; white-space: normal; overflow-wrap: anywhere; line-height: 1.05; }
-  .btn-visivo__dettaglio { font-family: var(--font-sans); font-size: 11px; opacity: .82; letter-spacing: 0; text-transform: none; white-space: nowrap; }
+  .btn-visivo__titolo { font-family: var(--font-display); text-transform: uppercase; font-size: var(--testo-14); letter-spacing: .03em; white-space: normal; overflow-wrap: anywhere; line-height: 1.05; }
+  .btn-visivo__dettaglio { font-family: var(--font-sans); font-size: var(--testo-12); opacity: .82; letter-spacing: 0; text-transform: none; white-space: nowrap; }
+  /* ▸/▾ in coda al titolo dei pulsanti che aprono e chiudono (FrecciaApertura); nel <summary> di un menu ruota con [open] */
+  .btn-visivo__freccia { display: inline-block; margin-left: .3em; font-family: var(--font-sans); transition: transform .15s; }
+  /* il tassello «Altro» nelle testate strette (Area, Dedalo): meno aria attorno, perché resti sulla riga dei comandi e il suo menu,
+     ancorato a destra, non esca dallo schermo */
+  .btn-visivo.btn-visivo--stretto { padding-left: 2px; padding-right: 6px; gap: 4px; }
+  details[open] > summary .btn-visivo__freccia--menu { transform: rotate(90deg); }
   .btn-visivo--compatto { --btn-visivo-icona: 32px; padding: 3px 10px 3px 6px; min-height: 44px; gap: 6px; }
-  .btn-visivo--compatto .btn-visivo__titolo { font-size: 13px; }
+  .btn-visivo--compatto .btn-visivo__titolo { font-size: var(--testo-13); }
   /* Disposizione a colonna (gruppi di interruttori: modificatori delle Doti, moltiplicatori dei Confidenti): icona 48 px sopra al testo
      centrato che può andare a capo; i tasselli si dividono la riga (flex-basis 96 px, min-width 0) così stanno in tre anche a 375 px. */
   .btn-visivo--colonna { --btn-visivo-icona: 48px; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 6px 10px 5px; gap: 4px; flex: 1 1 96px; min-width: 0; max-width: 200px; }
   .btn-visivo--colonna .btn-visivo__testo { align-items: center; }
-  .btn-visivo--colonna .btn-visivo__titolo { font-size: 12px; white-space: normal; line-height: 1.05; }
+  .btn-visivo--colonna .btn-visivo__titolo { font-size: var(--testo-12); white-space: normal; line-height: 1.05; }
   .btn-visivo--colonna .btn-visivo__dettaglio { white-space: normal; line-height: 1.15; }
   /* `.chip--icona` sta dopo `.chip` (più sotto), come gli altri modificatori del chip */
 
@@ -236,13 +269,13 @@
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
     min-width: 84px; padding: 8px 10px; border-radius: 10px;
     border: 1px solid var(--color-border); background: var(--color-surface);
-    color: var(--color-text-secondary); font-size: 11px; line-height: 1.15; text-align: center;
+    color: var(--color-text-secondary); font-size: var(--testo-12); line-height: 1.15; text-align: center;
     cursor: pointer; transition: border-color .12s, color .12s, background-color .12s;
   }
   .piastrella-scheda > svg { flex-shrink: 0; }
   /* le schede della Partita da 768 px: piastrelle basse con icona e nome affiancati, su una riga sola che scorre (intestazione ≤ 30%) */
   /* a ogni larghezza: icona e nome affiancati, 44 px di altezza, senza margine sotto (anche sul telefono: la fila scorre già) */
-  .fila-schede-partita .piastrella-scheda { flex-direction: row; gap: 6px; min-width: 0; min-height: 44px; padding: 6px 12px; font-size: 12px; white-space: nowrap; }
+  .fila-schede-partita .piastrella-scheda { flex-direction: row; gap: 6px; min-width: 0; min-height: 44px; padding: 6px 12px; font-size: var(--testo-12); white-space: nowrap; }
   .fila-scorrevole.fila-schede-partita { padding-bottom: 0; height: 44px; }
   /* telefono: titolo e dati della partita sulla stessa riga (la fila dei dati scorre), nessun padding della testata */
   .intestazione.intestazione--partita { padding: 0; gap: 0; }
@@ -334,12 +367,18 @@
   }
   .modal-footer {
     display: flex;
+    flex-wrap: wrap;
     justify-content: flex-end;
     align-items: center;
     gap: 8px;
     padding: 16px 20px;
     border-top: 1px solid var(--color-border);
   }
+  /* Con tre o quattro tasselli sul telefono i pulsanti vanno a capo interi, allineati a destra come la prima riga: non si stringono
+     fino a spezzare il titolo a lettere («Salva» 68×77 a 360 px). Il tetto resta `max-width: 100%` del tassello, così un titolo lungo
+     va a capo fra le parole. Vale anche per i gruppi che le finestre mettono dentro il piè. */
+  .modal-footer .btn-visivo, .modal-footer > .btn { flex-shrink: 0; }
+  .modal-footer > div, .modal-footer > span { flex-wrap: wrap; justify-content: flex-end; }
 
   /* ---- Pannello della scheda sopra il diario (R10-27, decisione dell'utente del 2026-10-23) ----
      Toccando un oggetto citato da una voce del diario, la sua scheda si apre in un livello sopra la pagina: la pagina sotto non cambia e non
@@ -384,7 +423,7 @@
     flex: 1 1 auto;
     min-width: 0;
     font-family: var(--font-display, inherit);
-    font-size: 15px;
+    font-size: var(--testo-15);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--color-text-secondary);
@@ -519,7 +558,7 @@
 
   /* ---- Campi form ---- */
   .form-label {
-    font-size: 12px;
+    font-size: var(--testo-12);
     font-weight: 600;
     color: var(--color-text-secondary);
     text-transform: uppercase;
@@ -535,7 +574,7 @@
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     color: var(--color-text);
-    font-size: 15px;
+    font-size: var(--testo-15);
     box-sizing: border-box;
     outline: none;
     transition: border-color 0.15s;
@@ -551,7 +590,7 @@
      34 px col mouse e 44 col dito erano due misure per lo stesso campo. (L'ordinamento del
      Compendio e la lunghezza di un ciclo di fusione sono invece `Selettore compatto`, un'altra
      classe con la sua regola.) */
-  .form-input--compatto { width: auto; min-height: 44px; padding: 6px 8px; font-size: 13px; }
+  .form-input--compatto { width: auto; min-height: 44px; padding: 6px 8px; font-size: var(--testo-13); }
 
   /* ---- Griglia delle affinità: 5 per riga (2 righe), 10 per riga solo se il contenitore è largo; nomi mai spezzati ---- */
   .griglia-affinita { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); container-type: inline-size; }
@@ -571,14 +610,14 @@
   .persona-chip__cornice { display: inline-flex; padding: 2px; background: var(--color-primary); clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%); flex-shrink: 0; }
   .persona-chip__cornice > span { background: radial-gradient(circle at 50% 35%, #2a2a33 0, #0d0d10 70%); border: 0; }
   .persona-chip__testo { display: inline-flex; flex-direction: column; gap: 3px; line-height: 1; min-width: 0; }
-  .persona-chip__nome { font-family: var(--font-display); text-transform: uppercase; font-size: 17px; letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
-  .persona-chip--evidenza .persona-chip__nome { font-size: 19px; max-width: 240px; }
-  .persona-chip__riga { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--color-text-secondary); white-space: nowrap; }
-  .persona-chip__livello { font-family: var(--font-display); font-size: 13px; line-height: 1; padding: 3px 7px 2px; background: var(--color-primary); color: var(--color-text-on-primary); clip-path: polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%); letter-spacing: .04em; }
+  .persona-chip__nome { font-family: var(--font-display); text-transform: uppercase; font-size: var(--testo-17); letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+  .persona-chip--evidenza .persona-chip__nome { font-size: var(--testo-20); max-width: 240px; }
+  .persona-chip__riga { display: inline-flex; align-items: center; gap: 6px; font-size: var(--testo-12); color: var(--color-text-secondary); white-space: nowrap; }
+  .persona-chip__livello { font-family: var(--font-display); font-size: var(--testo-13); line-height: 1; padding: 3px 7px 2px; background: var(--color-primary); color: var(--color-text-on-primary); clip-path: polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%); letter-spacing: .04em; }
   .persona-chip--evidenza .persona-chip__livello { background: var(--color-text); color: var(--color-bg); }
   .persona-chip__arcano { width: 18px; height: 18px; object-fit: contain; }
-  .persona-chip__arcano-nome { text-transform: uppercase; letter-spacing: .05em; font-size: 10px; color: var(--color-text-muted); }
-  .persona-chip__rara { color: #f5c542; font-size: 12px; }
+  .persona-chip__arcano-nome { text-transform: uppercase; letter-spacing: .05em; font-size: var(--testo-12); color: var(--color-text-muted); }
+  .persona-chip__rara { color: #f5c542; font-size: var(--testo-12); }
   .persona-chip__suffisso { color: var(--color-success); font-weight: 700; }
   .persona-chip--scorta { border-color: var(--color-success); }
   .persona-chip__spunta { position: absolute; top: 0; right: 0; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; background: var(--color-success); color: #fff; clip-path: polygon(0 0, 100% 0, 100% 100%); padding: 1px 1px 0 0; box-sizing: border-box; }
@@ -591,11 +630,11 @@
   .ricetta-riga--pronta { background: var(--color-primary-bg); box-shadow: inset 3px 0 0 var(--color-primary); }
   .ricetta-riga__persone { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; min-width: 0; }
   .ricetta-riga__gruppo { display: inline-flex; align-items: center; gap: 8px; }
-  .ricetta-op { width: 26px; height: 26px; border-radius: 999px; background: var(--color-primary); color: var(--color-text-on-primary); font-family: var(--font-display); font-size: 19px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 35%, transparent); }
+  .ricetta-op { width: 26px; height: 26px; border-radius: 999px; background: var(--color-primary); color: var(--color-text-on-primary); font-family: var(--font-display); font-size: var(--testo-20); line-height: 1; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 35%, transparent); }
   .ricetta-op--risultato { background: var(--color-text); color: var(--color-bg); box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-text) 25%, transparent); }
   .ricetta-riga__dati { display: flex; align-items: center; justify-content: flex-end; gap: 10px; white-space: nowrap; }
-  .ricetta-riga__tipo { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--color-text-muted); border: 1px solid var(--color-border); padding: 3px 7px; }
-  .ricetta-riga__costo { font-family: var(--font-display); font-size: 17px; min-width: 92px; text-align: right; font-variant-numeric: tabular-nums; color: var(--color-text); }
+  .ricetta-riga__tipo { font-size: var(--testo-12); text-transform: uppercase; letter-spacing: .06em; color: var(--color-text-muted); border: 1px solid var(--color-border); padding: 3px 7px; }
+  .ricetta-riga__costo { font-family: var(--font-display); font-size: var(--testo-17); min-width: 92px; text-align: right; font-variant-numeric: tabular-nums; color: var(--color-text); }
   @media (max-width: 640px) { .ricetta-riga { grid-template-columns: 1fr; } .ricetta-riga__dati { justify-content: flex-start; } }
 
   /* ---- Visore delle mappe a livelli (Fase 13.2): tela, spilli a goccia, pannello laterale ---- */
@@ -603,18 +642,18 @@
   .visore-mappa--intero { position: fixed; inset: 0; z-index: 60; }
   .visore-mappa--incorporato { position: relative; height: 100%; min-height: 220px; border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; }
   .visore-mappa__barra { display: flex; align-items: center; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap; padding: 6px 10px; border-bottom: 1px solid var(--color-border); background: color-mix(in srgb, var(--color-bg-secondary) 92%, transparent); }
-  .visore-mappa__percorso { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; font-size: 13px; }
+  .visore-mappa__percorso { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; font-size: var(--testo-13); }
   /* Briciole, voci delle mappe figlie, azioni testuali, categorie e zoom sono i comandi con cui ci si sposta fra le mappe:
      44 px a ogni larghezza, mouse compreso, in altezza **e** in larghezza (una briciola «Tokyo» alta 44 e larga 41 resta un
      bersaglio da 41). Prima le regole qui le fissavano a 30-40 px e un blocco in coda al foglio, fuori dal layer, le
      riportava a 44 (rilievo R8‴ della verifica completa). */
   .visore-mappa__briciola { background: none; border: 0; padding: 4px 2px; color: var(--color-text-secondary); cursor: pointer; font: inherit; text-decoration: underline dotted; text-underline-offset: 3px; min-height: 44px; min-width: 44px; }
-  .visore-mappa__briciola:hover { color: var(--color-primary); }
+  .visore-mappa__briciola:hover { color: var(--color-primary-testo); }
 
   /* Una tappa del percorso: il `display` sta qui e non in una utility, che starebbe in un layer più forte e
      impedirebbe alla barra compatta di nasconderla. */
   .visore-mappa__tappa { display: inline-flex; align-items: center; gap: 4px; }
-  .visore-mappa__titolo { font-family: var(--font-display); font-size: 19px; text-transform: uppercase; letter-spacing: .02em; }
+  .visore-mappa__titolo { font-family: var(--font-display); font-size: var(--testo-20); text-transform: uppercase; letter-spacing: .02em; }
   .visore-mappa__strumenti { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   /* Colonna stretta (mappa incorporata accanto alla guida): barra a sole icone, il testo resta nel nome accessibile */
   @container (max-width: 460px) {
@@ -622,7 +661,7 @@
     .visore-mappa__strumenti .btn-visivo__testo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
     /* Solo icona: 6 + 32 + 6 = 44 px, bersaglio quadrato 44×44 (oggi 36×44 con glifo 20 px) */
     .visore-mappa__strumenti .btn-visivo { padding: 4px 6px; gap: 0; }
-    .visore-mappa__titolo { font-size: 15px; }
+    .visore-mappa__titolo { font-size: var(--testo-15); }
   }
   /* Visore incorporato fino a 720 px: **barra compatta** (2026-10-15). Nella scheda di un Palazzo a 1280 px il visore è largo
      242 px e la barra andava a capo pezzo per pezzo — briciola, titolo su due righe, tipo, pulsanti — fino a 180 px su 240,
@@ -702,6 +741,7 @@
   .versioni-area__segmento[aria-pressed="true"] { border-color: var(--color-primary); box-shadow: inset 0 0 0 1px var(--color-primary); background: color-mix(in srgb, var(--color-primary) 14%, var(--color-bg-secondary)); }
   /* ---- Il menu «Altro» (L2): azioni rare o distruttive raccolte in una tendina, sotto i 768 px nella testata dell'Area ---- */
   .menu-altro > summary::-webkit-details-marker { display: none; }
+  .menu-altro__voci.menu-altro__voci--destra { right: auto; left: 0; }
   .menu-altro__voci { position: absolute; right: 0; top: calc(100% + 4px); z-index: 30; display: flex; flex-direction: column; min-width: 220px; padding: 4px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg-secondary); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45); }
   /* 0,6 e non lo 0,4 della sagoma: un'illustrazione notturna (Shinjuku) a 0,45 sul fondo scuro della scheda spariva del tutto */
   .illustrazione-segno--spenta { opacity: 0.6; filter: grayscale(1); }
@@ -790,7 +830,7 @@
      amalgamarsi al corpo colorato: niente dischetto sotto, solo un'ombra appena accennata che da'
      rilievo senza staccarli. */
   .spillo-mappa__disegno { display: block; object-fit: contain; flex-shrink: 0; filter: drop-shadow(0 1px 1px rgba(0,0,0,.45)); }
-  .spillo-mappa__etichetta { position: absolute; top: 100%; margin-top: 2px; padding: 2px 6px; background: rgba(11,11,14,.92); border: 1px solid var(--color-border); font-size: 11px; white-space: nowrap; color: var(--color-text); opacity: 0; pointer-events: none; transition: opacity .1s; }
+  .spillo-mappa__etichetta { position: absolute; top: 100%; margin-top: 2px; padding: 2px 6px; background: rgba(11,11,14,.92); border: 1px solid var(--color-border); font-size: var(--testo-micro); white-space: nowrap; color: var(--color-text); opacity: 0; pointer-events: none; transition: opacity .1s; }
   .spillo-mappa:hover .spillo-mappa__etichetta, .spillo-mappa--selezionato .spillo-mappa__etichetta, .spillo-mappa--trovato .spillo-mappa__etichetta { opacity: 1; }
   /* Su telefono e tablet non c'è il passaggio del puntatore: i pin di spostamento (passaggi verso le aree, stazioni) mostrano sempre il
      nome della meta, altrimenti dall'illustrazione non si capisce quale area apre ciascuno finché non lo si tocca (UX2-6, L2) */
@@ -804,15 +844,15 @@
      una goccia da 38 qui fermavano il bersaglio a 40. Ne servono 5 per parte (rilievo del
      validatore, 2026-09-13, misurato con l'hit-testing e non col righello). */
   .spillo-mappa--gruppo::after { inset: -5px; }
-  .spillo-mappa__gruppo { min-width: 34px; height: 34px; padding: 0 8px; border-radius: 999px; background: var(--color-primary); color: var(--color-text-on-primary); border: 2px solid #fff; font-family: var(--font-display); font-size: 17px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,.6); }
+  .spillo-mappa__gruppo { min-width: 34px; height: 34px; padding: 0 8px; border-radius: 999px; background: var(--color-primary); color: var(--color-text-on-primary); border: 2px solid #fff; font-family: var(--font-display); font-size: var(--testo-17); display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,.6); }
   .spillo-mappa__punto { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; border: 1px solid rgba(255,255,255,.7); }
   .spillo-mappa__punto--grande { width: 34px; height: 34px; }
   .visore-mappa__pannello { container-type: inline-size; display: flex; flex-direction: column; gap: 12px; padding: 10px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--color-primary) 75%, transparent) transparent; border-right: 1px solid var(--color-border); background: color-mix(in srgb, var(--color-bg-secondary) 94%, transparent); min-height: 0; }
-  .visore-mappa__azione-testo { background: none; border: 1px solid var(--color-border); color: var(--color-text-secondary); font: inherit; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; padding: 4px 8px; cursor: pointer; min-height: 44px; min-width: 44px; }
+  .visore-mappa__azione-testo { background: none; border: 1px solid var(--color-border); color: var(--color-text-secondary); font: inherit; font-size: var(--testo-12); text-transform: uppercase; letter-spacing: .05em; padding: 4px 8px; cursor: pointer; min-height: 44px; min-width: 44px; }
   .visore-mappa__azione-testo:hover:not(:disabled) { border-color: var(--color-primary); color: var(--color-text); }
   .visore-mappa__azione-testo:disabled { opacity: .45; cursor: default; }
   .visore-mappa__categorie { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 8px; }
-  .visore-mappa__categoria { display: flex; align-items: center; gap: 6px; width: 100%; background: none; border: 1px solid transparent; padding: 4px 6px; color: var(--color-text); font: inherit; font-size: 12px; cursor: pointer; min-height: 44px; min-width: 44px; text-align: left; }
+  .visore-mappa__categoria { display: flex; align-items: center; gap: 6px; width: 100%; background: none; border: 1px solid transparent; padding: 4px 6px; color: var(--color-text); font: inherit; font-size: var(--testo-12); cursor: pointer; min-height: 44px; min-width: 44px; text-align: left; }
   .visore-mappa__categoria:hover { border-color: var(--color-border); background: var(--color-surface); }
   .visore-mappa__categoria--nascosta { opacity: .4; }
   .visore-mappa__categoria--nascosta .spillo-mappa__punto { filter: grayscale(1); opacity: .6; }
@@ -822,7 +862,7 @@
   .visore-mappa__controllo { width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--color-bg-secondary) 92%, transparent); border: 1px solid var(--color-border); color: var(--color-text); cursor: pointer; }
   .visore-mappa__controllo:hover:not(:disabled) { border-color: var(--color-primary); }
   .visore-mappa__controllo:disabled { opacity: .4; cursor: default; }
-  .visore-mappa__zoom { font-size: 11px; color: var(--color-text-muted); background: color-mix(in srgb, var(--color-bg-secondary) 92%, transparent); padding: 2px 6px; border: 1px solid var(--color-border); }
+  .visore-mappa__zoom { font-size: var(--testo-micro); color: var(--color-text-muted); background: color-mix(in srgb, var(--color-bg-secondary) 92%, transparent); padding: 2px 6px; border: 1px solid var(--color-border); }
   /* Spillo coinvolto nei suggerimenti del giorno: alone dorato attorno alla goccia, sopra al
      colore del tipo. Prima c'era anche una regola gemella per l'immagine intera dello spillo,
      quando il PNG *era* lo spillo: ora la figura sta dentro la goccia e l'alone lo porta lei. */
@@ -847,11 +887,11 @@
   /* Chiude il riquadro, e sul telefono è l'unica uscita del foglio: 44 px come ogni altro comando.
      Erano 28 anche all'hit-testing (rilievo del validatore, 2026-09-13); il segno resta piccolo,
      cresce l'area — la stessa regola di tutti gli altri bersagli di questa pagina. */
-  .spillo-popup__chiudi { background: none; border: 0; color: var(--color-text-muted); font-size: 18px; line-height: 1; cursor: pointer; padding: 0 2px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+  .spillo-popup__chiudi { background: none; border: 0; color: var(--color-text-muted); font-size: var(--testo-18); line-height: 1; cursor: pointer; padding: 0 2px; min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
   .spillo-popup__chiudi:hover { color: var(--color-text); }
   /* Popup dello spillo (260 px, riga azioni 238 px): icona 28 px e titolo 12 px, così due azioni («Ottenuto» + «Esaurito», «Apri…» + «Dettagli») restano su una riga */
   .spillo-popup .btn-visivo { --btn-visivo-icona: 28px; padding: 3px 8px 3px 6px; }
-  .spillo-popup .btn-visivo__titolo { font-size: 12px; }
+  .spillo-popup .btn-visivo__titolo { font-size: var(--testo-12); }
   /* La merce del negozio dentro il popup: poche righe, il resto scorre. */
   .spillo-popup__merce { max-height: 30vh; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--color-primary) 75%, transparent) transparent; border-block: 1px solid var(--color-border-light); }
   /* Sotto i 768 px il popup non sta più sulla mappa: diventa un foglio dal basso, largo quanto lo
@@ -915,15 +955,15 @@
   /* L'etichetta dice che cos'è il numero: tagliata con le ellissi («Conoscen…») non lo dice più.
      Va a capo invece di sparire — la tessera cresce di una riga, il dato resta leggibile. */
   .kpi-tile--compatto .kpi-label { white-space: normal; overflow-wrap: break-word; hyphens: auto; max-width: 100%; }
-  .kpi-tile--compatto .kpi-label { font-size: 10px; letter-spacing: .04em; }
-  .kpi-tile--compatto .kpi-value { font-size: 20px; line-height: 1.05; }
+  .kpi-tile--compatto .kpi-label { font-size: var(--testo-12); letter-spacing: .04em; }
+  .kpi-tile--compatto .kpi-value { font-size: var(--testo-20); line-height: 1.05; }
 
   /* ---- Suggerimenti del giorno (12.4): alone dorato sulle entità da toccare per seguire la guida ---- */
   .suggerito { position: relative; border-color: var(--color-oro, #f5c542) !important; box-shadow: 0 0 0 1px var(--color-oro, #f5c542), 0 0 16px rgba(245, 197, 66, .28); }
   .suggerito--riga { background: color-mix(in srgb, #f5c542 12%, transparent); box-shadow: inset 3px 0 0 var(--color-oro, #f5c542); border-color: transparent !important; }
   .suggerito--chip { --chip-sfondo: color-mix(in srgb, #f5c542 20%, var(--color-bg-secondary)); --chip-bordo: var(--color-oro, #f5c542); color: #f5c542; box-shadow: none; }
-  .targa-suggerito { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #1a1405; background: var(--color-oro, #f5c542); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); }
-  .targa-suggerito--compatta { padding: 1px 5px; font-size: 10px; }
+  .targa-suggerito { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; font-size: var(--testo-12); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #1a1405; background: var(--color-oro, #f5c542); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); }
+  .targa-suggerito--compatta { padding: 1px 5px; font-size: var(--testo-12); }
   .targa-suggerito > svg { flex-shrink: 0; }
 
   /* ---- Confidenti bloccati dai requisiti (12.3): carta spenta, motivi in evidenza ---- */
@@ -942,8 +982,8 @@
   .scorta-capienza { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 8px 12px; margin-bottom: 8px; border-radius: var(--radius-md);
     border: 1px solid color-mix(in srgb, var(--color-primary) 55%, var(--color-border)); background: color-mix(in srgb, var(--color-primary) 9%, var(--color-bg-secondary)); }
   .scorta-capienza__numero { display: flex; flex-direction: column; line-height: 1.1; }
-  .scorta-capienza__numero > b { font-family: var(--font-display); font-weight: 400; font-size: 24px; }
-  .scorta-capienza__numero > small, .scorta-capienza__frase { font-size: 11px; color: var(--color-text-muted); }
+  .scorta-capienza__numero > b { font-family: var(--font-display); font-weight: 400; font-size: var(--testo-24); }
+  .scorta-capienza__numero > small, .scorta-capienza__frase { font-size: var(--testo-12); color: var(--color-text-muted); }
   .scorta-capienza__tacche { display: flex; flex: 1 1 140px; gap: 3px; min-width: 120px; }
   .scorta-capienza__tacche > i { flex: 1; height: 10px; border-radius: 2px; background: var(--color-primary); }
   .scorta-capienza__tacche > i.scorta-capienza__vuota { background: var(--color-border); }
@@ -959,21 +999,21 @@
   .riga-persona__scelta { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 56px; padding: 5px 10px 5px 5px; background: none; border: 0; color: inherit; text-align: left; cursor: pointer; border-radius: var(--radius-md); }
   .riga-persona__scelta:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
   .riga-persona__testo { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-  .riga-persona__nome { display: flex; align-items: center; gap: 6px; min-width: 0; font-family: var(--font-display); font-size: 14px; letter-spacing: .03em; }
-  .riga-persona__arcano { font-size: 11px; color: var(--color-text-muted); }
+  .riga-persona__nome { display: flex; align-items: center; gap: 6px; min-width: 0; font-family: var(--font-display); font-size: var(--testo-14); letter-spacing: .03em; }
+  .riga-persona__arcano { font-size: var(--testo-12); color: var(--color-text-muted); }
   .riga-persona__skill { display: flex; flex-wrap: wrap; gap: 2px; }
-  .riga-persona__registrata { display: inline-flex; color: var(--color-primary); flex-shrink: 0; }
+  .riga-persona__registrata { display: inline-flex; color: var(--color-primary-testo); flex-shrink: 0; }
   .riga-persona__livello { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; min-width: 34px; line-height: 1; }
-  .riga-persona__livello > span { font-family: var(--font-display); font-size: 22px; }
-  .riga-persona__livello > small { font-size: 9px; font-weight: 600; color: var(--color-text-muted); }
-  .riga-persona__livello--grande > span { font-size: 30px; }
+  .riga-persona__livello > span { font-family: var(--font-display); font-size: var(--testo-24); }
+  .riga-persona__livello > small { font-size: var(--testo-micro); font-weight: 600; color: var(--color-text-muted); }
+  .riga-persona__livello--grande > span { font-size: var(--testo-32); }
   .punto-stato { display: inline-block; width: 9px; height: 9px; flex-shrink: 0; border-radius: 50%; }
   .punto-stato--reali { background: #2fbf71; }
   .punto-stato--stima { background: #f5c542; }
   .quadrato-skill { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border: 1px solid var(--color-border); border-radius: 3px; }
-  .posto-libero { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 56px; border: 1px dashed var(--color-text-muted); border-radius: var(--radius-md); font-size: 12px; color: var(--color-text-muted); }
+  .posto-libero { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 56px; border: 1px dashed var(--color-text-muted); border-radius: var(--radius-md); font-size: var(--testo-12); color: var(--color-text-muted); }
   .posto-libero--aggiungi { background: none; cursor: pointer; color: var(--color-text); font-weight: 600; }
-  .posto-libero--aggiungi:hover { border-color: var(--color-primary); color: var(--color-primary); }
+  .posto-libero--aggiungi:hover { border-color: var(--color-primary); color: var(--color-primary-testo); }
   /* il dettaglio (nel cassetto) si divide in due colonne quando è largo abbastanza (cassetto da 768 px in su): a sinistra il level up
      («Verso il rango N»: requisiti e moltiplicatori; poi Risposta ♪, regalo, uscita), a destra le risposte migliori; in una colonna sola
      (telefono) le risposte stanno fra i requisiti e le note ♪: prima si legge la risposta, poi si registra */
@@ -987,7 +1027,7 @@
     .dettaglio-confidente__colonne { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "testa risposte" "registra risposte" "altro risposte"; }
   }
   /* etichetta breve davanti a una fila di comandi («Moltiplicatori», «Risposta») */
-  .etichetta-campo-confidente { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--color-text-muted); }
+  .etichetta-campo-confidente { font-size: var(--testo-12); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--color-text-muted); }
   /* intestazione di un gruppo: tutta la riga è il pulsante che apre e chiude */
   .gruppo-confidenti__testata { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 0 12px; text-align: left; cursor: pointer; color: inherit;
     background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
@@ -1006,7 +1046,7 @@
   .riga-confidente__scelta:focus-visible { outline: none; }
   .riga-confidente__scelta::after { content: ""; position: absolute; inset: 0; z-index: 1; }
   .riga-confidente__scelta > :nth-child(1), .riga-confidente__scelta > :nth-child(2), .riga-confidente__stato { grid-column: 1; min-width: 0; }
-  .riga-confidente__stato { display: block; font-size: 12px; line-height: 1.25; }
+  .riga-confidente__stato { display: block; font-size: var(--testo-12); line-height: 1.25; }
   .riga-confidente__rango { grid-column: 2; grid-row: 1 / span 3; display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.7)); }
   /* la carta dell'arcano in miniatura nella testata del dettaglio (formato tarocco, 1:1,75) */
   .carta-arcano-mini { width: 34px; height: 60px; flex-shrink: 0; object-fit: cover; border-radius: 3px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6); }
@@ -1028,15 +1068,15 @@
   .targa-rango__barra { display: block; height: 8px; overflow: hidden; border-radius: 4px; background: var(--color-border); }
   .targa-rango__barra > span { display: block; height: 100%; background: var(--color-primary); }
   /* titolo delle sezioni del dettaglio («Verso il rango N»): stesso registro dei titoli a tasselli, più piccolo */
-  .titolo-sezione-confidente { margin: 0; font-family: var(--font-display); font-size: 17px; line-height: 1; text-transform: uppercase; letter-spacing: .04em; }
+  .titolo-sezione-confidente { margin: 0; font-family: var(--font-display); font-size: var(--testo-17); line-height: 1; text-transform: uppercase; letter-spacing: .04em; }
   /* le risposte migliori, in evidenza sotto le note ♪ */
   .risposte-migliori { display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid color-mix(in srgb, var(--color-primary) 55%, var(--color-border)); border-radius: var(--radius-md);
     background: color-mix(in srgb, var(--color-primary) 7%, transparent); }
   /* le risposte migliori fra le note di una voce Confidente del diario (stesso registro del cassetto dei Confidenti, più compatto) */
   .risposte-voce { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; padding: 8px; border-radius: var(--radius-md);
     border: 1px solid color-mix(in srgb, var(--color-primary) 55%, var(--color-border)); background: color-mix(in srgb, var(--color-primary) 7%, transparent); }
-  .risposte-voce__titolo { font-family: var(--font-display); font-size: 14px; line-height: 1.1; text-transform: uppercase; letter-spacing: .04em; }
-  .risposta-voce { display: flex; align-items: center; gap: 6px; padding: 3px 6px; border-radius: 4px; font-size: 12px; background: color-mix(in srgb, var(--color-bg-secondary) 80%, transparent); }
+  .risposte-voce__titolo { font-family: var(--font-display); font-size: var(--testo-14); line-height: 1.1; text-transform: uppercase; letter-spacing: .04em; }
+  .risposta-voce { display: flex; align-items: center; gap: 6px; padding: 3px 6px; border-radius: 4px; font-size: var(--testo-12); background: color-mix(in srgb, var(--color-bg-secondary) 80%, transparent); }
   .risposta-voce--migliore { background: color-mix(in srgb, var(--color-primary) 18%, var(--color-bg-secondary)); box-shadow: inset 0 0 0 1px var(--color-primary); }
   /* ---- Azioni della guida: consigliate in oro, bloccate in grigio (12.4) ---- */
   .azione { border-left: 3px solid transparent; padding-left: 6px; }
@@ -1047,21 +1087,21 @@
   /* `.chip--oro` e `.chip--bloccata` stanno dopo `.chip` (più sotto): con la stessa specificità vince la regola che viene dopo */
   /* ---- Editor delle mappe (13.3) ---- */
   .visore-mappa--editor .visore-mappa__barra { background: color-mix(in srgb, var(--color-primary) 22%, var(--color-bg-secondary)); border-bottom-color: var(--color-primary); }
-  .editor-mappa__targhetta { font-family: var(--font-display); font-size: 17px; text-transform: uppercase; letter-spacing: .04em; background: var(--color-primary); color: var(--color-text-on-primary); padding: 2px 10px; clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); }
+  .editor-mappa__targhetta { font-family: var(--font-display); font-size: var(--testo-17); text-transform: uppercase; letter-spacing: .04em; background: var(--color-primary); color: var(--color-text-on-primary); padding: 2px 10px; clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); }
   .editor-mappa__strumenti { display: flex; flex-wrap: wrap; gap: 4px; }
   .editor-mappa__palette { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px; }
-  .editor-mappa__tipo { display: flex; align-items: center; gap: 6px; background: none; border: 1px solid var(--color-border); padding: 4px 6px; color: var(--color-text); font: inherit; font-size: 12px; cursor: pointer; min-height: 44px; text-align: left; } /* 44 px: bersaglio touch (rilievo del validatore, 15.24) */
+  .editor-mappa__tipo { display: flex; align-items: center; gap: 6px; background: none; border: 1px solid var(--color-border); padding: 4px 6px; color: var(--color-text); font: inherit; font-size: var(--testo-12); cursor: pointer; min-height: 44px; text-align: left; } /* 44 px: bersaglio touch (rilievo del validatore, 15.24) */
   .editor-mappa__tipo:hover { border-color: var(--color-primary); }
   .editor-mappa__tipo--attivo { border-color: var(--color-primary); background: var(--color-primary-bg); }
-  .editor-mappa__campo { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--color-text-secondary); }
-  .editor-mappa__campo .form-input { min-height: 36px; padding: 4px 8px; font-size: 13px; }
-  .editor-mappa__avviso { font-size: 12px; color: var(--color-warning, #f5c542); }
+  .editor-mappa__campo { display: flex; flex-direction: column; gap: 3px; font-size: var(--testo-12); color: var(--color-text-secondary); }
+  .editor-mappa__campo .form-input { min-height: 36px; padding: 4px 8px; font-size: var(--testo-13); }
+  .editor-mappa__avviso { font-size: var(--testo-12); color: var(--color-warning, #f5c542); }
   /* palette dei tipi a gruppi (15.24) e righe «senza passaggio» dell'albero: testo + pulsante «Crea passaggio» (44 px al tocco) */
-  .editor-mappa__gruppo { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--color-text-muted); padding: 2px 0 0; }
-  .editor-mappa__senza-passaggio { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 2px 8px 4px 32px; font-size: 12px; color: var(--color-warning, #f5c542); }
+  .editor-mappa__gruppo { font-size: var(--testo-12); text-transform: uppercase; letter-spacing: .06em; color: var(--color-text-muted); padding: 2px 0 0; }
+  .editor-mappa__senza-passaggio { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 2px 8px 4px 32px; font-size: var(--testo-12); color: var(--color-warning, #f5c542); }
   .visore-mappa__sezione { display: flex; flex-direction: column; gap: 6px; }
-  .visore-mappa__intestazione { margin: 0; font-family: var(--font-display); font-size: 17px; text-transform: uppercase; letter-spacing: .03em; color: var(--color-text-secondary); }
-  .visore-mappa__figlia, .visore-mappa__voce { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: none; border: 1px solid transparent; padding: 6px 8px; color: var(--color-text); font: inherit; font-size: 13px; cursor: pointer; min-height: 44px; min-width: 44px; }
+  .visore-mappa__intestazione { margin: 0; font-family: var(--font-display); font-size: var(--testo-17); text-transform: uppercase; letter-spacing: .03em; color: var(--color-text-secondary); }
+  .visore-mappa__figlia, .visore-mappa__voce { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: none; border: 1px solid transparent; padding: 6px 8px; color: var(--color-text); font: inherit; font-size: var(--testo-13); cursor: pointer; min-height: 44px; min-width: 44px; }
   .visore-mappa__figlia:hover, .visore-mappa__voce:hover { border-color: var(--color-border); background: var(--color-surface); }
   .visore-mappa__voce--attiva { border-color: var(--color-primary); background: var(--color-primary-bg); }
   .visore-mappa__elenco { max-height: 40vh; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--color-primary) 75%, transparent) transparent; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
@@ -1102,24 +1142,24 @@
 
   /* ---- Passi guidati (Cerca per skill) ---- */
   .passo-guida { display: flex; gap: 10px; align-items: flex-start; }
-  .passo-guida__numero { width: 26px; height: 26px; border-radius: 999px; background: var(--color-primary); color: var(--color-text-on-primary); font-family: var(--font-display); font-size: 17px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .passo-guida__numero { width: 26px; height: 26px; border-radius: 999px; background: var(--color-primary); color: var(--color-text-on-primary); font-family: var(--font-display); font-size: var(--testo-17); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
   /* ---- Pannello dei filtri: gruppi etichettati, ordinati in griglia ---- */
   .pannello-filtri { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, max-content)); gap: 10px 22px; align-items: end; padding: 10px 14px; }
   .pannello-filtri__gruppo { display: flex; flex-direction: column; gap: 4px; }
-  .pannello-filtri__etichetta { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--color-text-muted); }
-  .form-hint { font-size: 12px; color: var(--color-text-muted); margin-top: 4px; }
+  .pannello-filtri__etichetta { font-size: var(--testo-12); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--color-text-muted); }
+  .form-hint { font-size: var(--testo-12); color: var(--color-text-muted); margin-top: 4px; }
 
   /* ---- Tabelle ---- */
   .tabella {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
+    font-size: var(--testo-14);
   }
   .tabella th {
     text-align: left;
     padding: 10px 12px;
-    font-size: 11px;
+    font-size: var(--testo-12);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--color-text-muted);
@@ -1137,7 +1177,7 @@
   }
   /* su schermi stretti celle più compatte, così le tabelle restano leggibili senza scorrimento */
   @media (max-width: 640px) {
-    .tabella { font-size: 13px; }
+    .tabella { font-size: var(--testo-13); }
     .tabella th, .tabella td { padding: 6px 6px; }
   }
   /* ---- Tabella adattiva: sotto una certa larghezza ogni riga diventa «etichetta: valore» ----
@@ -1165,7 +1205,7 @@
     .tabella--adattiva tbody tr { display: block; padding: 8px 0; border-bottom: 1px solid var(--color-border); }
     .tabella--adattiva tbody tr:hover { background: transparent; }
     .tabella--adattiva td { display: flex; gap: 8px; padding: 2px 0; border-bottom: 0; }
-    .tabella--adattiva td::before { content: attr(data-etichetta); flex: 0 0 34%; color: var(--color-text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; padding-top: 2px; }
+    .tabella--adattiva td::before { content: attr(data-etichetta); flex: 0 0 34%; color: var(--color-text-muted); font-size: var(--testo-12); text-transform: uppercase; letter-spacing: 0.05em; padding-top: 2px; }
     /* Una cella davvero senza etichetta non lascia il buco del 34%. */
     .tabella--adattiva td:not([data-etichetta])::before { display: none; }
     /* La casella e la sua etichetta sulla stessa riga: il bersaglio resta di 44 px come altrove. */
@@ -1177,7 +1217,7 @@
     .tabella--adattiva thead { display: none; }
     .tabella--adattiva tbody tr { display: block; padding: 8px 0; border-bottom: 1px solid var(--color-border); }
     .tabella--adattiva td { display: flex; gap: 8px; padding: 2px 0; border-bottom: 0; }
-    .tabella--adattiva td::before { content: attr(data-etichetta); flex: 0 0 34%; color: var(--color-text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; padding-top: 2px; }
+    .tabella--adattiva td::before { content: attr(data-etichetta); flex: 0 0 34%; color: var(--color-text-muted); font-size: var(--testo-12); text-transform: uppercase; letter-spacing: 0.05em; padding-top: 2px; }
     .tabella--adattiva td:not([data-etichetta])::before { display: none; }
   }
   .tabella tbody tr:hover { background: var(--color-bg-secondary); }
@@ -1281,7 +1321,7 @@
 
   /* ---- Crediti alle fonti: discreti, grigi e piccoli ---- */
   .credito {
-    font-size: 11px;
+    font-size: var(--testo-12);
     color: var(--color-text-muted);
     text-decoration: underline dotted;
     text-underline-offset: 2px;
@@ -1392,7 +1432,7 @@
     gap: 4px;
     padding: 4px 11px;
     border-radius: 0;
-    font-size: 12px;
+    font-size: var(--testo-12);
     font-weight: 600;
     /* i chip lunghi (effetti dei regali, livelli, note) vanno a capo invece di uscire dallo schermo */
     white-space: normal;
@@ -1415,7 +1455,7 @@
   .chip--attivo {
     --chip-sfondo: color-mix(in srgb, var(--color-primary) 18%, var(--color-bg-secondary));
     --chip-bordo: var(--color-primary);
-    color: var(--color-primary);
+    color: var(--color-primary-testo);
   }
   /* L3: un'area del Palazzo toccata dall'infiltrazione aperta (evidenziata, ma non scelta) */
   .chip--toccata { --chip-bordo: color-mix(in srgb, var(--color-primary) 60%, transparent); }
@@ -1441,7 +1481,7 @@
      182 px): ~300 px in tutto, dentro la colonna più stretta (325 px, la Home sul tablet a 768 px); se mai non ci
      stesse, le icone vanno a capo tutte insieme invece di schiacciare il testo. */
   .momento-meteo { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
-  .momento-meteo__fascia { justify-content: center; gap: 4px; padding-inline: 8px; font-size: 13px; white-space: nowrap; flex-shrink: 0; }
+  .momento-meteo__fascia { justify-content: center; gap: 4px; padding-inline: 8px; font-size: var(--testo-13); white-space: nowrap; flex-shrink: 0; }
   .momento-meteo__separatore { width: 1px; align-self: stretch; margin-block: 6px; background: var(--color-border); }
   .meteo-fascia { display: grid; flex-shrink: 0; grid-template-columns: repeat(4, 44px); gap: 2px; }
   /* un valore che vale ma non l'hai scelto tu (il meteo della guida): si vede, più tenue della scelta vera */
@@ -1524,9 +1564,9 @@
     position: absolute; top: 50%; right: 0; z-index: 20; transform: translateY(-50%);
     display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 6px;
     background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-right: 0; border-radius: 8px 0 0 8px;
-    color: var(--color-text-secondary); font-family: var(--font-display); text-transform: uppercase; letter-spacing: .06em; font-size: 13px;
+    color: var(--color-text-secondary); font-family: var(--font-display); text-transform: uppercase; letter-spacing: .06em; font-size: var(--testo-13);
   }
-  .home-linguetta:hover, .home-linguetta:focus-visible { color: var(--color-primary); }
+  .home-linguetta:hover, .home-linguetta:focus-visible { color: var(--color-primary-testo); }
   .home-linguetta__testo { writing-mode: vertical-rl; transform: rotate(180deg); }
   @media (hover: hover) and (pointer: fine) {
     .home-linguetta:hover ~ .home-mappa--a-scomparsa, .home-griglia--mappa-chiusa .home-mappa--a-scomparsa:hover {
@@ -1554,15 +1594,13 @@
   .home-carta__stella { display: block; flex: 0 0 auto; width: clamp(104px, 16vh, 132px); aspect-ratio: 1 / 1; }
   /* il rientro lascia dentro il riquadro le targhette dei vertici, che escono dal poligono di circa un 15% della sua larghezza */
   .home-carta__stella-interno { width: 100%; height: 100%; padding: 14%; box-sizing: border-box; }
-  .home-doti { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(max-content, 1fr); gap: 6px; max-width: 640px; min-width: 0;
-    overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; -ms-overflow-style: none; }
-  .home-doti::-webkit-scrollbar { display: none; }
+  /* 2026-10-24 (lotto A): le sei tessere vanno a capo invece di scorrere nascoste — in una colonna da 640 px «Scorta» non si
+     vedeva mai, nemmeno a 1440 px con mezza scheda vuota, e niente diceva che ce n'era dell'altro */
+  .home-doti { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 6px; max-width: 760px; min-width: 0; }
   .home-doti .kpi-tile--compatto { padding: 4px 10px; gap: 1px; }
   .home-doti .kpi-label { white-space: nowrap; overflow-wrap: normal; hyphens: none; }
-  .home-fila { display: flex; flex-wrap: nowrap; align-items: center; gap: 6px; min-width: 0;
-    overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; -ms-overflow-style: none; }
-  .home-fila::-webkit-scrollbar { display: none; }
-  .home-fila > * { flex: 0 0 auto; white-space: nowrap; }
+  .home-fila { align-items: center; min-width: 0; }
+  .home-fila > * { white-space: nowrap; }
   @media (max-width: 767px) {
     .home-carta__riga { flex-direction: column; align-items: stretch; gap: 8px; }
     .home-carta__stella { order: 2; align-self: center; width: min(64vw, 260px); }
@@ -1584,9 +1622,15 @@
     scrollbar-width: none;
     -ms-overflow-style: none;
     padding-bottom: 2px;
-    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 10px, #000 calc(100% - 22px), transparent 100%);
-    mask-image: linear-gradient(to right, transparent 0, #000 10px, #000 calc(100% - 22px), transparent 100%);
+    /* la sfumatura sta solo dal lato dove la fila continua (`data-prima`/`data-dopo`, da FilaScorrevole) ed è larga abbastanza
+       da leggersi come «c'è dell'altro»: prima era fissa a 22 px su entrambi i lati, anche a fila intera, e non si notava */
+    --fila-prima: 0px;
+    --fila-dopo: 0px;
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fila-prima), #000 calc(100% - var(--fila-dopo)), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 var(--fila-prima), #000 calc(100% - var(--fila-dopo)), transparent 100%);
   }
+  .fila-scorrevole[data-prima] { --fila-prima: 40px; }
+  .fila-scorrevole[data-dopo] { --fila-dopo: 48px; }
   .fila-scorrevole::-webkit-scrollbar { display: none; }
   .fila-scorrevole > * { flex: 0 0 auto; scroll-snap-align: start; }
   @media (min-width: 768px) {
@@ -1607,8 +1651,8 @@
       padding-bottom: 4px;
       scrollbar-width: thin;
       scrollbar-color: color-mix(in srgb, var(--color-primary) 75%, transparent) transparent;
-      -webkit-mask-image: linear-gradient(to right, transparent 0, #000 10px, #000 calc(100% - 22px), transparent 100%);
-      mask-image: linear-gradient(to right, transparent 0, #000 10px, #000 calc(100% - 22px), transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fila-prima), #000 calc(100% - var(--fila-dopo)), transparent 100%);
+      mask-image: linear-gradient(to right, transparent 0, #000 var(--fila-prima), #000 calc(100% - var(--fila-dopo)), transparent 100%);
     }
     .fila-scorrevole.fila-scorrevole--sempre::-webkit-scrollbar { display: block; height: 6px; }
   }
@@ -1647,6 +1691,30 @@
   }
   /* titolo in carattere display senza tasselli (schede di dettaglio con immagine accanto) */
   .titolo-display { font-family: var(--font-display); font-weight: 400; text-transform: uppercase; letter-spacing: 0.02em; font-size: clamp(24px, 2.6vw, 34px); line-height: 1; }
+  /* ---- Lotto B: intestazione delle schede di dettaglio (IntestazioneScheda), titoli di sezione (TitoloSezione), menu «Modifica ⋯» ---- */
+  /* due righe: la barra (ritorno e briciole a sinistra, azioni a destra) e il corpo (figura piccola, titolo con chip e metadati). Sul
+     telefono «Indietro» e «Modifica ⋯» restano solo icona (il nome resta per chi non vede): così la barra sta in una riga e la testata
+     entro il 30% della schermata (LAY3-5) */
+  .intestazione-scheda { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .intestazione-scheda__barra { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; min-width: 0; margin-top: -4px; }
+  .intestazione-scheda__corpo { display: flex; align-items: center; gap: 10px 14px; min-width: 0; }
+  .intestazione-scheda__figura { flex-shrink: 0; }
+  .intestazione-scheda__testo { display: flex; flex: 1 1 0; flex-direction: column; gap: 6px; min-width: 0; }
+  .intestazione-scheda__titolo { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; min-width: 0; }
+  .intestazione-scheda__azioni { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 6px; margin-left: auto; }
+  @media (max-width: 639px) {
+    .intestazione-scheda .menu-modifica > .btn-visivo { padding: 3px 6px; gap: 0; }
+    .intestazione-scheda .menu-modifica > .btn-visivo .btn-visivo__testo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  }
+  .titolo-sezione { margin: 0; color: var(--color-text); }
+  .titolo-sezione--sans { font-family: var(--font-sans); font-size: var(--testo-15); font-weight: 600; line-height: 1.25; }
+  .titolo-sezione--display { font-family: var(--font-display); font-weight: 400; font-size: var(--testo-17); line-height: 1; text-transform: uppercase; letter-spacing: .03em; }
+  .menu-modifica { position: relative; display: inline-flex; flex-shrink: 0; }
+  .menu-modifica__voci { position: absolute; right: 0; top: calc(100% + 4px); z-index: 30; display: flex; flex-direction: column; gap: 2px; width: max-content; min-width: 220px;
+    max-width: min(320px, calc(100vw - 32px)); padding: 4px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg-secondary); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45); }
+  .menu-modifica__voci--sinistra { right: auto; left: 0; }
+  .menu-modifica__voci[hidden] { display: none; }
+  .menu-modifica__voci > .btn, .menu-modifica__voci > * > .btn { width: 100%; justify-content: flex-start; }
   .intestazione__illustrazione { max-height: 120px; width: auto; max-width: 40vw; object-fit: contain; filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6)); }
   @media (max-width: 640px) { .intestazione__illustrazione { max-height: 64px; max-width: 26vw; } }
 
@@ -1694,15 +1762,15 @@
     background: var(--color-primary);
     color: #fff;
     font-family: var(--font-display);
-    font-size: 20px;
+    font-size: var(--testo-20);
     line-height: 1;
     clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
     white-space: nowrap;
   }
-  .livello-p5__etichetta { font-family: var(--font-sans); font-size: 10px; font-weight: 700; text-transform: uppercase; opacity: 0.85; }
-  .livello-p5--grande { font-size: 32px; padding: 5px 16px 3px; }
-  .livello-p5--grande .livello-p5__etichetta { font-size: 12px; }
+  .livello-p5__etichetta { font-family: var(--font-sans); font-size: var(--testo-micro); font-weight: 700; text-transform: uppercase; opacity: 0.85; }
+  .livello-p5--grande { font-size: var(--testo-32); padding: 5px 16px 3px; }
+  .livello-p5--grande .livello-p5__etichetta { font-size: var(--testo-12); }
   .piastrella { transition: transform 0.15s, border-color 0.15s; }
   .piastrella:hover { transform: translateY(-2px); }
   .cornice-arte {
@@ -1732,7 +1800,7 @@
   .emblema { display: inline-flex; align-items: center; justify-content: center; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.65)); }
   .emblema--riserva {
     background: var(--color-bg-tertiary);
-    color: var(--color-primary);
+    color: var(--color-primary-testo);
     border: 2px solid var(--color-border);
     clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
     line-height: 1;
@@ -1750,18 +1818,18 @@
     background: var(--color-text);
     color: var(--color-bg);
     font-family: var(--font-display);
-    font-size: 30px;
+    font-size: var(--testo-32);
     line-height: 1;
     clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
   }
   .data-p5--evidenza .data-p5__giorno { background: var(--color-primary); color: #fff; }
   .data-p5__testo { display: inline-flex; flex-direction: column; line-height: 1.1; }
-  .data-p5__mese { font-family: var(--font-display); text-transform: uppercase; font-size: 17px; letter-spacing: 0.03em; }
-  .data-p5__settimana { font-size: 12px; color: var(--color-text-secondary); }
-  .data-p5--compatta .data-p5__giorno { min-width: 34px; font-size: 20px; padding: 3px 7px 1px; }
+  .data-p5__mese { font-family: var(--font-display); text-transform: uppercase; font-size: var(--testo-17); letter-spacing: 0.03em; }
+  .data-p5__settimana { font-size: var(--testo-12); color: var(--color-text-secondary); }
+  .data-p5--compatta .data-p5__giorno { min-width: 34px; font-size: var(--testo-20); padding: 3px 7px 1px; }
   /* in compatta il mese torna al sans (regola di leggibilità: display solo ≥ 17 px) */
-  .data-p5--compatta .data-p5__mese { font-family: var(--font-sans); font-weight: 700; font-size: 11px; letter-spacing: 0.06em; }
-  .data-p5--compatta .data-p5__settimana { font-size: 11px; }
+  .data-p5--compatta .data-p5__mese { font-family: var(--font-sans); font-weight: 700; font-size: var(--testo-12); letter-spacing: 0.06em; }
+  .data-p5--compatta .data-p5__settimana { font-size: var(--testo-12); }
   .miniatura-mappa {
     display: inline-flex;
     align-items: center;
@@ -1787,7 +1855,7 @@
     content: attr(data-suggerimento);
     position: absolute; left: 50%; top: 100%; transform: translate(-50%, 4px);
     background: var(--color-bg); color: var(--color-text); border: 1px solid var(--color-border);
-    border-radius: 6px; padding: 2px 8px; font: 600 11px/1.3 var(--font-sans); letter-spacing: .02em; white-space: nowrap;
+    border-radius: 6px; padding: 2px 8px; font: 600 var(--testo-12)/1.3 var(--font-sans); letter-spacing: .02em; white-space: nowrap;
     opacity: 0; pointer-events: none; transition: opacity .12s ease; z-index: 30;
   }
   .con-suggerimento:hover::after, .con-suggerimento:focus-visible::after { opacity: 1; }
@@ -1831,9 +1899,9 @@
     gap: 4px;
     min-width: 120px;
   }
-  .kpi-value { font-size: 24px; font-weight: 700; line-height: 1.1; }
+  .kpi-value { font-size: var(--testo-24); font-weight: 700; line-height: 1.1; }
   .kpi-label {
-    font-size: 11px;
+    font-size: var(--testo-12);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--color-text-muted);
@@ -1865,24 +1933,24 @@
  * muro. Sotto i 1050 px torna a schede, che su un telefono e' la forma giusta. */
 .catalogo-prodotti { container-type: inline-size; min-width: 0; }
 .catalogo-prodotti > ul { margin:0; padding:0; list-style:none; display:grid; gap:10px; }
-.catalogo-prodotto { background:var(--color-surface); border:1px solid var(--color-border); border-radius:10px; padding:12px 14px; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px 16px; font-size:14px; line-height:1.45; }
+.catalogo-prodotto { background:var(--color-surface); border:1px solid var(--color-border); border-radius:10px; padding:12px 14px; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px 16px; font-size:var(--testo-14); line-height:1.45; }
 .catalogo-prodotto__nome { display:flex; flex-direction:column; min-width:0; overflow-wrap:anywhere; }
-.catalogo-prodotto__nome > strong { font-size:15px; color:var(--color-text); }
-.catalogo-prodotto__meta { color:var(--color-text-secondary); font-size:12px; }
+.catalogo-prodotto__nome > strong { font-size:var(--testo-15); color:var(--color-text); }
+.catalogo-prodotto__meta { color:var(--color-text-secondary); font-size:var(--testo-12); }
 .catalogo-prodotto__prezzo { display:flex; flex-direction:column; align-items:flex-end; white-space:nowrap; font-variant-numeric:tabular-nums; }
-.catalogo-prodotto__prezzo > strong { font-size:15px; }
-.catalogo-prodotto__etichetta { font-size:10px; letter-spacing:.08em; color:var(--color-text-muted); text-transform:uppercase; }
-.catalogo-prodotto__disponibilita { grid-column:1/-1; display:flex; flex-wrap:wrap; align-items:center; gap:8px; min-width:0; overflow-wrap:anywhere; font-size:12px; color:var(--color-text-secondary); }
+.catalogo-prodotto__prezzo > strong { font-size:var(--testo-15); }
+.catalogo-prodotto__etichetta { font-size:var(--testo-12); letter-spacing:.08em; color:var(--color-text-muted); text-transform:uppercase; }
+.catalogo-prodotto__disponibilita { grid-column:1/-1; display:flex; flex-wrap:wrap; align-items:center; gap:8px; min-width:0; overflow-wrap:anywhere; font-size:var(--testo-12); color:var(--color-text-secondary); }
 .catalogo-prodotto__azioni { grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
 .catalogo-prodotto__dettagli { grid-column:1/-1; border-top:1px solid var(--color-border-light); min-width:0; }
-.catalogo-prodotto__dettagli summary { cursor:pointer; align-content:center; color:var(--color-text-secondary); font-size:12px; }
-.catalogo-prodotto__dettagli dl { margin:0; display:grid; grid-template-columns:1fr; gap:4px; font-size:13px; }
+.catalogo-prodotto__dettagli summary { cursor:pointer; align-content:center; color:var(--color-text-secondary); font-size:var(--testo-12); }
+.catalogo-prodotto__dettagli dl { margin:0; display:grid; grid-template-columns:1fr; gap:4px; font-size:var(--testo-13); }
 .catalogo-prodotto__dettagli dt { color:var(--color-text-muted); font-weight:600; }
 .catalogo-prodotto__dettagli dd { margin:0 0 8px; overflow-wrap:anywhere; }
 .catalogo-prodotto--acquistato { border-left:3px solid var(--color-success); }
 .catalogo-prodotto--acquistato .catalogo-prodotto__nome > strong { color:var(--color-text-secondary); }
 .catalogo-risultati-negozi { display:flex; flex-wrap:wrap; gap:8px; }
-.catalogo-risultati-negozi h2 { flex-basis:100%; font-size:16px; margin:0; }
+.catalogo-risultati-negozi h2 { flex-basis:100%; font-size:var(--testo-16); margin:0; }
 @container (min-width:620px) {
   .catalogo-prodotti > ul { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
@@ -1909,8 +1977,8 @@
    ------------------------------------------------------------ */
 .condizioni-editor { border:1px solid #3c3d46; padding:0 12px 12px; min-width:0; background:#131419; margin:0; }
 .condizioni-editor__titolo { padding:0; }
-.condizioni-editor__titolo button { display:flex; align-items:center; gap:10px; min-height:44px; padding:0 6px; border:0; background:transparent; color:var(--color-text); font:inherit; font-weight:600; font-size:14px; cursor:pointer; }
-.condizioni-editor__conteggio { font-weight:400; font-size:12px; color:var(--color-text-muted); }
+.condizioni-editor__titolo button { display:flex; align-items:center; gap:10px; min-height:44px; padding:0 6px; border:0; background:transparent; color:var(--color-text); font:inherit; font-weight:600; font-size:var(--testo-14); cursor:pointer; }
+.condizioni-editor__conteggio { font-weight:400; font-size:var(--testo-12); color:var(--color-text-muted); }
 .condizioni-editor .form-input { max-width:100%; min-width:0; }
 
 .condizioni-blocco { --bordo-blocco: var(--color-primary); display:flex; flex-direction:column; gap:8px; min-width:0; border-left:3px solid var(--bordo-blocco); padding:6px 0 6px 10px; background:color-mix(in srgb, var(--bordo-blocco) 6%, transparent); }
@@ -1918,33 +1986,33 @@
 .condizioni-blocco--negato { --bordo-blocco: var(--color-error); }
 .condizioni-blocco--radice { border-left:0; padding-left:0; background:transparent; }
 .condizioni-blocco__testa { position:relative; display:flex; align-items:center; gap:8px; flex-wrap:wrap; min-width:0; padding-right:48px; }
-.condizioni-blocco__modo { display:inline-flex; align-items:baseline; gap:8px; min-height:44px; padding:0 10px; border:1px solid var(--bordo-blocco); background:color-mix(in srgb, var(--bordo-blocco) 18%, var(--color-bg-secondary)); color:var(--color-text); font:inherit; font-weight:700; font-size:12px; letter-spacing:0.06em; cursor:pointer; }
+.condizioni-blocco__modo { display:inline-flex; align-items:baseline; gap:8px; min-height:44px; padding:0 10px; border:1px solid var(--bordo-blocco); background:color-mix(in srgb, var(--bordo-blocco) 18%, var(--color-bg-secondary)); color:var(--color-text); font:inherit; font-weight:700; font-size:var(--testo-12); letter-spacing:0.06em; cursor:pointer; }
 .condizioni-blocco__modo--fisso { cursor:default; border-style:dashed; }
-.condizioni-blocco__spiega { font-weight:400; letter-spacing:0; font-size:12px; color:var(--color-text-muted); }
+.condizioni-blocco__spiega { font-weight:400; letter-spacing:0; font-size:var(--testo-12); color:var(--color-text-muted); }
 .condizioni-blocco__corpo { display:flex; flex-direction:column; gap:6px; min-width:0; }
 .condizioni-blocco__azioni { display:flex; flex-wrap:wrap; gap:6px; }
 .condizioni-blocco__azioni .btn { display:inline-flex; align-items:center; gap:4px; }
 
 .condizione-riga { position:relative; display:flex; flex-wrap:wrap; align-items:center; gap:6px; min-width:0; padding:4px 48px 4px 6px; border:1px solid var(--color-border); background:var(--color-bg-secondary); }
 .condizione-riga--negata { border-color:var(--color-error); }
-.condizione-non { min-height:44px; min-width:44px; padding:0 8px; border:1px solid var(--color-border); background:transparent; color:var(--color-text-muted); font:inherit; font-size:11px; font-weight:700; letter-spacing:0.08em; cursor:pointer; }
+.condizione-non { min-height:44px; min-width:44px; padding:0 8px; border:1px solid var(--color-border); background:transparent; color:var(--color-text-muted); font:inherit; font-size:var(--testo-12); font-weight:700; letter-spacing:0.08em; cursor:pointer; }
 .condizione-non--attivo { border-color:var(--color-error); background:color-mix(in srgb, var(--color-error) 22%, var(--color-bg-secondary)); color:var(--color-error); }
 .condizione-stato { flex:1 1 180px; min-width:160px; }
 /* I comandi delle condizioni: 36 px erano nati per il pannello fitto dell'editor delle mappe, ma
    `CondizioniEditor` lo usano anche il modulo del catalogo e la scheda dei contenuti della guida,
    che si compilano col tablet in mano — e lì l'innalzamento a 44 px, scritto solo dentro
    `.visore-mappa--editor`, non arrivava (rilievo del validatore, 2026-09-13). 44 a ogni larghezza. */
-.condizione-operatore { min-height:44px; font-size:13px; }
+.condizione-operatore { min-height:44px; font-size:var(--testo-13); }
 .condizione-operatore--fisso { display:inline-flex; align-items:center; padding:0 6px; color:var(--color-text-secondary); font-style:italic; }
 .condizione-data { display:inline-flex; gap:4px; }
-.condizione-data .form-input { min-height:44px; padding:6px 8px; font-size:13px; }
+.condizione-data .form-input { min-height:44px; padding:6px 8px; font-size:var(--testo-13); }
 .condizione-giorni { display:inline-flex; flex-wrap:wrap; gap:4px; }
 .condizione-numero { display:inline-flex; align-items:center; border:1px solid var(--color-border); background:var(--color-bg-tertiary); }
 .condizione-numero button { width:44px; min-height:44px; border:0; background:transparent; color:var(--color-text); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; }
 .condizione-numero button:disabled { opacity:0.4; cursor:default; }
 .condizione-numero__valore { min-width:36px; text-align:center; font-weight:600; font-variant-numeric:tabular-nums; }
-.condizione-presenza { font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); border:1px dashed var(--color-text-muted); padding:1px 5px; }
-.condizione-origine { display:none; font-size:10px; color:var(--color-text-muted); margin-left:auto; }
+.condizione-presenza { font-size:var(--testo-12); text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); border:1px dashed var(--color-text-muted); padding:1px 5px; }
+.condizione-origine { display:none; font-size:var(--testo-12); color:var(--color-text-muted); margin-left:auto; }
 @media (min-width: 1280px) { .condizione-origine { display:inline; } }
 .condizione-togli { position:absolute; top:2px; right:2px; width:44px; min-height:44px; border:0; background:transparent; color:var(--color-text-muted); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; }
 .condizione-togli:hover { color:var(--color-error); }
@@ -1956,24 +2024,24 @@
 @layer components { .selettore { position:relative; min-width:0; } }
 .selettore__scelta { position:relative; display:flex; flex-direction:column; align-items:flex-start; width:100%; min-height:44px; padding:3px 22px 3px 8px; border:1px solid var(--color-border); background:var(--color-bg-tertiary); color:var(--color-text); font:inherit; text-align:left; cursor:pointer; }
 .selettore__scelta:disabled { opacity:1; cursor:default; }
-.selettore__etichetta { font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); line-height:1; }
-.selettore__valore { font-size:13px; line-height:1.2; overflow-wrap:anywhere; }
+.selettore__etichetta { font-size:var(--testo-12); text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); line-height:1; }
+.selettore__valore { font-size:var(--testo-13); line-height:1.2; overflow-wrap:anywhere; }
 .selettore__valore--vuoto { color:var(--color-text-muted); font-style:italic; }
 .selettore__tendina { position:absolute; z-index:30; left:0; top:calc(100% + 2px); width:max(100%, 260px); max-width:min(92vw, 420px); border:1px solid var(--color-border); background:var(--color-bg-secondary); box-shadow:0 8px 24px rgba(0,0,0,0.45); padding:6px; }
 .selettore__campo { width:100%; min-height:44px; margin-bottom:4px; }
 .selettore__elenco { list-style:none; margin:0; padding:0; max-height:min(50vh, 320px); overflow:auto; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:color-mix(in srgb, var(--color-primary) 75%, transparent) transparent; }
-.selettore__gruppo { display:block; padding:6px 8px 2px; font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); }
-.selettore__pulsante { display:flex; align-items:center; gap:8px; width:100%; min-height:44px; padding:6px 8px; border:0; background:transparent; color:var(--color-text); font:inherit; font-size:13px; text-align:left; cursor:pointer; }
+.selettore__gruppo { display:block; padding:6px 8px 2px; font-size:var(--testo-12); text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); }
+.selettore__pulsante { display:flex; align-items:center; gap:8px; width:100%; min-height:44px; padding:6px 8px; border:0; background:transparent; color:var(--color-text); font:inherit; font-size:var(--testo-13); text-align:left; cursor:pointer; }
 .selettore__voce--evidenziata .selettore__pulsante { background:color-mix(in srgb, var(--color-primary) 18%, transparent); }
 .selettore__voce--scelta .selettore__pulsante { font-weight:600; }
-.selettore__vuoto { padding:8px; font-size:12px; color:var(--color-text-muted); }
-.selettore__freccia { position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:11px; color:var(--color-text-muted); pointer-events:none; }
+.selettore__vuoto { padding:8px; font-size:var(--testo-12); color:var(--color-text-muted); }
+.selettore__freccia { position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:var(--testo-12); color:var(--color-text-muted); pointer-events:none; }
 /* Compatto = stretto quanto serve, senza l'etichetta sopra: i filtri in linea delle pagine. */
 .selettore--compatto { display:inline-block; width:auto; }
 /* 44 px anche col mouse: il selettore compatto è il comando che sceglie la partita e filtra le
    pagine, non un ornamento, e i 40 px lo rendevano il solo bersaglio sotto soglia di tutta l'app. */
 .selettore--compatto .selettore__scelta { flex-direction:row; align-items:center; min-height:44px; padding:4px 22px 4px 8px; width:auto; max-width:100%; }
-.selettore--compatto .selettore__valore { font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.selettore--compatto .selettore__valore { font-size:var(--testo-13); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .selettore--compatto .selettore__tendina { width:max(100%, 260px); }
 /* Senza spazio a destra la tendina si appende al bordo destro del pulsante: mai fuori dalla finestra. */
 .selettore__tendina--destra { left:auto; right:0; }
@@ -1990,7 +2058,7 @@
    monitor, ma la classe la usano anche schede che si compilano col tablet in mano (Denaro e
    squadra), dove un campo alto 36 px si manca e si sbaglia riga. A ogni larghezza, perché un campo
    basso lo è anche col mouse. */
-.editor-mappa__campo .form-input { min-height:44px; padding:8px 10px; font-size:15px; }
+.editor-mappa__campo .form-input { min-height:44px; padding:8px 10px; font-size:var(--testo-15); }
 
 /* Un chip che **si tocca** è un comando, non un'etichetta: «Sulla mappa» negli Oggetti, «Dove si
    trova» in Attività e Confidenti erano alti 23 px, e con il dito si manca o si apre quello sotto.
@@ -2004,10 +2072,10 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 
 /* Progressi della partita: righe da 44 px, contatori a destra. */
 .progressi-partita { display:grid; gap:12px; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); align-items:start; }
-.progressi-partita__riga { display:flex; align-items:center; gap:10px; min-height:44px; padding:2px 6px; border-bottom:1px solid var(--color-border); font-size:13px; }
+.progressi-partita__riga { display:flex; align-items:center; gap:10px; min-height:44px; padding:2px 6px; border-bottom:1px solid var(--color-border); font-size:var(--testo-13); }
 .progressi-partita__riga--evento { min-height:52px; cursor:pointer; }
 .progressi-casella { width:28px; height:28px; flex-shrink:0; cursor:pointer; accent-color:var(--color-primary); }
-.progressi-scopo { border-left:3px solid var(--color-primary); padding-left:10px; font-size:13px; color:var(--color-text-secondary); }
+.progressi-scopo { border-left:3px solid var(--color-primary); padding-left:10px; font-size:var(--testo-13); color:var(--color-text-secondary); }
 /* il riepilogo fa anche da schede: quattro tessere sempre in una fila (sul telefono compatte, vedi in fondo al blocco) */
 .progressi-struttura { display:flex; flex-direction:column; gap:12px; }
 .progressi-riepilogo { display:grid; gap:8px; grid-template-columns:repeat(4, minmax(0, 1fr)); }
@@ -2015,11 +2083,11 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .progressi-tessera:hover { border-color:var(--color-text-secondary); }
 .progressi-tessera:focus-visible { outline:2px solid white; outline-offset:2px; }
 .progressi-tessera--attiva { border-color:var(--color-primary); box-shadow:0 0 0 1px var(--color-primary) inset; background:color-mix(in srgb, var(--color-primary) 14%, var(--color-bg-tertiary)); }
-.progressi-tessera__nome { font-family:var(--font-display); font-size:13px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text-secondary); }
-.progressi-tessera__valore { font-family:var(--font-display); font-size:26px; line-height:1.1; }
-.progressi-tessera__dettaglio { font-size:12px; line-height:1.3; color:var(--color-text-secondary); overflow-wrap:normal; word-break:normal; }
-.progressi-tessera--attiva .progressi-tessera__nome { color:var(--color-primary); }
-@media (min-width: 640px) { .progressi-tessera__valore { font-size:28px; } }
+.progressi-tessera__nome { font-family:var(--font-display); font-size:var(--testo-13); font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:var(--color-text-secondary); }
+.progressi-tessera__valore { font-family:var(--font-display); font-size:var(--testo-28); line-height:1.1; }
+.progressi-tessera__dettaglio { font-size:var(--testo-12); line-height:1.3; color:var(--color-text-secondary); overflow-wrap:normal; word-break:normal; }
+.progressi-tessera--attiva .progressi-tessera__nome { color:var(--color-primary-testo); }
+@media (min-width: 640px) { .progressi-tessera__valore { font-size:var(--testo-28); } }
 /* telefono: DOPO le regole di base (stessa specificità: vince l'ultima). Una sola fila di quattro tessere compatte;
    il dettaglio resta ai lettori di schermo dentro la tessera e si legge per intero, una volta, nella riga
    `.progressi-dettaglio-attivo` sotto la fila (tessera attiva). */
@@ -2027,18 +2095,18 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
   .progressi-struttura { gap:2px; }
   .progressi-riepilogo { gap:6px; }
   .progressi-tessera { position:relative; align-items:stretch; justify-content:center; gap:2px; padding:3px 4px; min-height:44px; }
-  .progressi-tessera__nome { font-size:11px; line-height:1.2; letter-spacing:0.03em; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:1; line-clamp:1; overflow:hidden; }
-  .progressi-tessera__valore { font-size:18px; line-height:1.1; white-space:nowrap; }
+  .progressi-tessera__nome { font-size:var(--testo-12); line-height:1.2; letter-spacing:0.03em; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:1; line-clamp:1; overflow:hidden; }
+  .progressi-tessera__valore { font-size:var(--testo-18); line-height:1.1; white-space:nowrap; }
   .progressi-tessera__dettaglio { position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
   .progressi-scopo { line-height:1.3; }
-  .progressi-dettaglio-attivo { margin:0; font-size:12px; line-height:1.3; color:var(--color-text-secondary); }
+  .progressi-dettaglio-attivo { margin:0; font-size:var(--testo-12); line-height:1.3; color:var(--color-text-secondary); }
 }
 /* tablet e desktop (da 640 px), DOPO le regole di base: nome e valore sulla stessa riga, dettaglio sotto (al massimo due righe) */
 @media (min-width: 640px) {
   .progressi-struttura { gap:8px; }
   .progressi-tessera { display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:baseline; column-gap:6px; row-gap:0; padding:8px 10px; min-height:0; }
-  .progressi-tessera__nome { font-size:12px; letter-spacing:0.03em; }
-  .progressi-tessera__valore { font-size:22px; line-height:1.1; white-space:nowrap; }
+  .progressi-tessera__nome { font-size:var(--testo-12); letter-spacing:0.03em; }
+  .progressi-tessera__valore { font-size:var(--testo-24); line-height:1.1; white-space:nowrap; }
   .progressi-tessera__dettaglio { grid-column:1 / -1; line-height:1.3; }
 }
 /* desktop (da 1024 px), DOPO il blocco precedente: le quattro tessere diventano una colonna a sinistra del contenuto,
@@ -2051,9 +2119,9 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .progressi-attivita { column-gap:24px; }
 @media (min-width: 1280px) { .progressi-attivita { columns:2; } }
 .progressi-attivita__gruppo { break-inside:avoid; margin-bottom:16px; display:flex; flex-direction:column; gap:4px; }
-.progressi-attivita__riga { display:flex; flex-wrap:wrap; align-items:center; gap:12px; min-height:52px; padding:4px 6px; border-bottom:1px solid var(--color-border); font-size:14px; }
-.progressi-attivita__azione { white-space:nowrap; flex-shrink:0; min-height:44px; padding:0 12px; font-size:13px; border:1px solid var(--color-border); background:var(--color-bg-tertiary); color:var(--color-primary); cursor:pointer; }
-.progressi-auto { display:inline-flex; align-items:center; padding:1px 5px; border:1px solid var(--color-border); font-size:12px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--color-text-secondary); background:var(--color-bg-tertiary); }
+.progressi-attivita__riga { display:flex; flex-wrap:wrap; align-items:center; gap:12px; min-height:52px; padding:4px 6px; border-bottom:1px solid var(--color-border); font-size:var(--testo-14); }
+.progressi-attivita__azione { white-space:nowrap; flex-shrink:0; min-height:44px; padding:0 12px; font-size:var(--testo-13); border:1px solid var(--color-border); background:var(--color-bg-tertiary); color:var(--color-primary-testo); cursor:pointer; }
+.progressi-auto { display:inline-flex; align-items:center; padding:1px 5px; border:1px solid var(--color-border); font-size:var(--testo-12); font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--color-text-secondary); background:var(--color-bg-tertiary); }
 .progressi-avvenuti { border-top:1px solid var(--color-border); padding-top:4px; }
 .progressi-barra { display:block; height:6px; background:var(--color-bg-tertiary); border:1px solid var(--color-border); overflow:hidden; }
 .progressi-barra > span { display:block; height:100%; background:var(--color-primary); }
@@ -2070,15 +2138,15 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 
 /* Editor: una sezione alla volta, campi conservati al cambio pannello. */
 .editor-mappa__sezioni { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; position:sticky; top:-10px; z-index:5; background:#131419; padding:8px 0; }
-.editor-mappa__sezioni button { min-height:44px; border:1px solid var(--color-border); background:#1b1c20; color:var(--color-text); font:inherit; font-size:13px; cursor:pointer; }
+.editor-mappa__sezioni button { min-height:44px; border:1px solid var(--color-border); background:#1b1c20; color:var(--color-text); font:inherit; font-size:var(--testo-13); cursor:pointer; }
 .editor-mappa__sezioni button[aria-pressed="true"] { background:var(--color-primary); color:var(--color-text-on-primary); border-color:var(--color-primary); }
 .editor-mappa__sezioni button:focus-visible { outline:2px solid white; outline-offset:2px; }
 .editor-mappa__contenuto { display:flex; flex-direction:column; gap:12px; min-width:0; }
 .editor-mappa__contenuto[hidden] { display:none; }
-.editor-mappa__aiuto { margin:0; padding:12px; background:#1b1c20; font-size:14px; line-height:1.5; color:var(--color-text-secondary); }
-.visore-mappa--editor .editor-mappa__campo .form-input { min-height:44px; font-size:14px; }
+.editor-mappa__aiuto { margin:0; padding:12px; background:#1b1c20; font-size:var(--testo-14); line-height:1.5; color:var(--color-text-secondary); }
+.visore-mappa--editor .editor-mappa__campo .form-input { min-height:44px; font-size:var(--testo-14); }
 .visore-mappa--editor .visore-mappa__pannello { background:#131419; }
-@media (max-width:860px) { .editor-mappa__sezioni { grid-template-columns:repeat(4,minmax(0,1fr)); } .editor-mappa__sezioni button { font-size:12px; padding:4px 2px; } }
+@media (max-width:860px) { .editor-mappa__sezioni { grid-template-columns:repeat(4,minmax(0,1fr)); } .editor-mappa__sezioni button { font-size:var(--testo-12); padding:4px 2px; } }
 
 .ingresso-quartiere__immagine { position:relative; width:min(100%,720px); align-self:center; cursor:crosshair; overflow:hidden; line-height:0; }
 .ingresso-quartiere__immagine img { width:100%; height:auto; display:block; }
@@ -2091,8 +2159,8 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 
 /* Selettore a tessere (SelettoreIcone): figura sopra, nome sotto, 44 px minimi; le tessere si dividono la riga e vanno a capo. */
 .selettore-icone { display:flex; flex-wrap:wrap; gap:6px; min-width:0; }
-.selettore-icone__tessera { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; min-width:96px; min-height:64px; padding:6px 8px; border:1px solid var(--color-border); background:var(--color-bg-tertiary); color:var(--color-text); font:inherit; font-size:12px; line-height:1.2; cursor:pointer; flex:1 1 96px; max-width:170px; }
-.selettore-icone--compatto .selettore-icone__tessera { min-height:56px; min-width:88px; flex-basis:88px; font-size:11px; }
+.selettore-icone__tessera { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; min-width:96px; min-height:64px; padding:6px 8px; border:1px solid var(--color-border); background:var(--color-bg-tertiary); color:var(--color-text); font:inherit; font-size:var(--testo-12); line-height:1.2; cursor:pointer; flex:1 1 96px; max-width:170px; }
+.selettore-icone--compatto .selettore-icone__tessera { min-height:56px; min-width:88px; flex-basis:88px; font-size:var(--testo-12); }
 .selettore-icone__tessera:hover { border-color:var(--color-text-secondary); }
 .selettore-icone__tessera:disabled { opacity:0.6; cursor:default; }
 .selettore-icone__tessera--attiva { background:var(--color-primary); color:var(--color-text-on-primary); border-color:var(--color-primary); }
@@ -2108,7 +2176,7 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .segmenti { display:inline-flex; flex-wrap:wrap; border:1px solid var(--color-border); }
 /* `overflow-wrap:normal`: il body ha `anywhere`, che sul telefono spezzava «Promemoria» a metà parola; così la voce non scende
    sotto la parola più lunga e, se lo spazio non basta, a capo va il segmento intero (`flex-wrap`), non le lettere. */
-.segmenti__voce { min-height:44px; padding:0 12px; border:0; background:var(--color-bg-tertiary); color:var(--color-text); font:inherit; font-size:13px; cursor:pointer; overflow-wrap:normal; }
+.segmenti__voce { min-height:44px; padding:0 12px; border:0; background:var(--color-bg-tertiary); color:var(--color-text); font:inherit; font-size:var(--testo-13); cursor:pointer; overflow-wrap:normal; }
 .segmenti__voce + .segmenti__voce { border-left:1px solid var(--color-border); }
 .segmenti__voce--attiva { background:var(--color-primary); color:var(--color-text-on-primary); }
 .segmenti__voce:focus-visible { outline:2px solid white; outline-offset:-2px; }
@@ -2119,7 +2187,7 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 /* Editor degli orari: chip per i giorni e le fasce, levetta per la pioggia, nota, anteprima. */
 .orari-editor { display:flex; flex-direction:column; gap:8px; }
 .orari-editor__gruppo { display:flex; flex-wrap:wrap; gap:6px; }
-.orari-editor__chip { min-height:44px; padding:0 12px; cursor:pointer; font:inherit; font-size:13px; }
+.orari-editor__chip { min-height:44px; padding:0 12px; cursor:pointer; font:inherit; font-size:var(--testo-13); }
 .orari-editor__chip:disabled { opacity:0.6; cursor:default; }
 
 /* Effetti dichiarati: una voce per riga, con bordo. */
@@ -2128,7 +2196,7 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 /* Rimossi: un blocco per tipo, in griglia su desktop. */
 .rimossi-griglia { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:12px; }
 .rimossi-elenco { display:flex; flex-direction:column; gap:6px; padding:12px; border:1px solid var(--color-border); background:var(--color-surface); min-width:0; }
-.rimossi-elenco__titolo { margin:0; font-size:14px; font-weight:600; }
+.rimossi-elenco__titolo { margin:0; font-size:var(--testo-14); font-weight:600; }
 .rimossi-elenco__riga { display:flex; align-items:center; gap:8px; min-height:44px; border-bottom:1px solid var(--color-border-light, var(--color-border)); }
 .rimossi-elenco__riga:last-child { border-bottom:0; }
 /* Barra di un lavoro in corso sul server: non c'è una percentuale da mostrare, quindi scorre.
@@ -2220,28 +2288,34 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 /* «Quale»: griglia di tessere con l'immagine sopra e il nome sotto (bersagli ≥ 44 px), la scelta evidente */
 .quale-griglia { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 6px; min-width: 0; }
 .quale-tessera { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 4px; min-width: 0; min-height: 44px; padding: 6px 4px;
-  border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg-tertiary); color: var(--color-text); font: inherit; font-size: 11.5px; line-height: 1.15;
+  border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg-tertiary); color: var(--color-text); font: inherit; font-size: var(--testo-12); line-height: 1.15;
   text-align: center; cursor: pointer; overflow-wrap: anywhere; }
 .quale-tessera:hover { border-color: var(--color-text-secondary); }
 .quale-tessera:focus-visible { outline: 2px solid white; outline-offset: 2px; }
 .quale-tessera--attiva { border-color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 22%, var(--color-bg-tertiary)); font-weight: 700; box-shadow: inset 0 0 0 1px var(--color-primary); }
 .quale-tessera__figura { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; line-height: 0; }
-.quale-tessera__dettaglio { font-size: 10px; font-weight: 400; color: var(--color-text-muted); }
+.quale-tessera__dettaglio { font-size: var(--testo-12); font-weight: 400; color: var(--color-text-muted); }
 .quale-ritratto { display: inline-block; width: 44px; height: 58px; overflow: hidden; border: 1px solid var(--color-border); border-radius: var(--radius-sm, 4px); background: var(--color-bg-secondary); }
 /* il riquadro «Spuntando succede» e le file di scelta brevi (note ♪, rango atteso, sessioni) */
 .effetto-riquadro { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 10px; border-radius: var(--radius-md);
   border: 1px solid color-mix(in srgb, var(--color-primary) 55%, var(--color-border)); background: color-mix(in srgb, var(--color-primary) 7%, transparent); }
-.effetto-riquadro__titolo { font-family: var(--font-display); font-size: 17px; line-height: 1; text-transform: uppercase; letter-spacing: .04em; color: var(--color-primary); }
+.effetto-riquadro__titolo { font-family: var(--font-display); font-size: var(--testo-17); line-height: 1; text-transform: uppercase; letter-spacing: .04em; color: var(--color-primary-testo); }
 .fila-scelta { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
 .fila-scelta__voce { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 0 10px; border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm, 4px); background: var(--color-bg-tertiary); color: var(--color-text); font: inherit; font-size: 14px; cursor: pointer; }
+  border-radius: var(--radius-sm, 4px); background: var(--color-bg-tertiary); color: var(--color-text); font: inherit; font-size: var(--testo-14); cursor: pointer; }
 .fila-scelta__voce:hover:not(:disabled) { border-color: var(--color-text-secondary); }
 .fila-scelta__voce:focus-visible { outline: 2px solid white; outline-offset: 2px; }
 .fila-scelta__voce--attiva { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-text-on-primary); font-weight: 700; }
 /* il posto della voce: maniglia di trascinamento (nessuno scorrimento della pagina mentre la si tiene), segnaposto e riga sollevata */
 .posto-voce__maniglia { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; border: 0; background: transparent; color: var(--color-text-secondary);
-  font-size: 20px; line-height: 1; cursor: grab; touch-action: none; }
+  font-size: var(--testo-20); line-height: 1; cursor: grab; touch-action: none; }
 .posto-voce__maniglia:active { cursor: grabbing; }
 .posto-voce__maniglia:focus-visible { outline: 2px solid white; outline-offset: -2px; }
 .posto-voce__questa--trascinata { position: relative; z-index: 2; box-shadow: 0 10px 24px rgba(0, 0, 0, .6); outline: 1px solid var(--color-primary); }
-.posto-voce__slot { display: flex; align-items: center; justify-content: center; min-height: 28px; border: 2px dashed var(--color-primary); border-radius: 6px; font-size: 11px; color: var(--color-primary); }
+.posto-voce__slot { display: flex; align-items: center; justify-content: center; min-height: 28px; border: 2px dashed var(--color-primary); border-radius: 6px; font-size: var(--testo-12); color: var(--color-primary-testo); }
+
+/* Scala tipografica: `testo-12`, `testo-13`… `testo-micro` (valori in `--testo-*`, @theme). Solo la dimensione, non l'interlinea:
+   prende il posto delle dimensioni scritte a mano `text-[Npx]`, che non toccavano l'interlinea. */
+@utility testo-* {
+  font-size: --value(--testo-*);
+}

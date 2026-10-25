@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import type { RegolaPescaDto } from '../../../shared/pesca';
 import { EditorRegolaPesca } from './EditorRegolaPesca';
+import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 export function FontePescaAttivita({ fonte, onCambiata }: { fonte: { regola: RegolaPescaDto; ruolo: 'visita' | 'obiettivi' }; onCambiata?: () => void | Promise<void> }) {
   const [editor, setEditor] = useState(false);
@@ -16,14 +17,14 @@ export function FontePescaAttivita({ fonte, onCambiata }: { fonte: { regola: Reg
         <strong>{v.specie === 'guardiano' ? 'Guardiano' : 'Boss'}</strong>: {v.faseTerzoSemestre ? 'terzo semestre avviato' : 'prima del terzo semestre'}, {v.fascia}, {v.meteo === 'normale' ? 'meteo normale' : 'pioggia o neve'}; {v.guardianoPrecedente === 'si' ? 'Guardiano già catturato prima della visita; ' : v.guardianoPrecedente === 'no' ? 'Guardiano non ancora catturato prima della visita; ' : ''}
         comparsa {v.rangoComparsa === null ? 'senza rango stabilito' : `documentata al rango ${v.rangoComparsa}`}; catturabilità documentata al rango {v.rangoCattura}, {v.tentativo === 'primo' ? 'primo' : 'settimo'} tentativo{v.seiCatture ? ', dopo sei catture nella visita' : ''}.
         {v.nota && <p className="m-0 whitespace-pre-line">{v.nota}</p>}
-        <span className="flex flex-wrap gap-2">{v.fonti.filter(f => /^https?:\/\//.test(f)).map((f, i) => <a className="touch inline-flex items-center text-primary" key={`${i}:${f}`} href={f} target="_blank" rel="noreferrer">Fonte {i + 1}</a>)}</span>
+        <span className="flex flex-wrap gap-2">{v.fonti.filter(f => /^https?:\/\//.test(f)).map((f, i) => <a className="touch inline-flex items-center text-primary-testo" key={`${i}:${f}`} href={f} target="_blank" rel="noreferrer">Fonte {i + 1}</a>)}</span>
       </li>)}</ul>
       <p className="m-0 text-text-secondary">Le vie documentate sono sufficienti: un rango inferiore privo di prova resta da verificare.</p>
     </>}
     {r.motivi.map((m, i) => <p role="alert" key={i} className="m-0 text-warning">{m}</p>)}
     <div className="flex flex-wrap gap-2">
-      <Link to="/partita?scheda=progressi#pesca" className="btn btn-secondary touch">Visite, osservazioni e profili</Link>
-      {onCambiata && <button type="button" className="btn btn-ghost touch" disabled={r.stato !== 'collegata'} onClick={() => setEditor(true)}>Correggi la regola comune</button>}
+      <CollegamentoVisivo icona={<IconaAzione chiave="scheda" dimensione={22} />} titolo="Visite, osservazioni e profili" to="/partita?scheda=progressi#pesca" />
+      {onCambiata && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo="Correggi la regola comune" disabled={r.stato !== 'collegata'} onClick={() => setEditor(true)} />}
     </div>
     {editor && onCambiata && <EditorRegolaPesca key={r.chiave} regola={r} onChiudi={() => setEditor(false)} onSalvata={onCambiata} />}
   </section>;

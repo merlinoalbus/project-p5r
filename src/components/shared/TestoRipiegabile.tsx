@@ -4,6 +4,8 @@
 
 import { useState } from 'react';
 import { sintesi } from '../../utils/testoBreve';
+import { PulsanteVisivo, FrecciaApertura } from './PulsanteVisivo';
+import { IconaAzione } from './IconaAzione';
 
 interface Props {
   testo: string;
@@ -24,9 +26,8 @@ export function TestoRipiegabile({ testo, massimo = 110, className }: Props) {
     <div className={`flex flex-col items-start ${className ?? ''}`}>
       <p className="m-0">{aperto || !ripiegabile ? testo.trim() : breve}</p>
       {ripiegabile && (
-        <button type="button" className="touch bg-transparent border-0 px-0 py-1 text-primary text-[12px] font-semibold cursor-pointer underline underline-offset-2" onClick={() => setAperto((v) => !v)} aria-expanded={aperto}>
-          {aperto ? 'Mostra meno' : 'Mostra tutto'}
-        </button>
+        <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="dettagli" dimensione={20} />} onClick={() => setAperto((v) => !v)} aria-expanded={aperto}
+          titolo={<>{aperto ? 'Mostra meno' : 'Mostra tutto'}<FrecciaApertura aperto={aperto} /></>} />
       )}
     </div>
   );

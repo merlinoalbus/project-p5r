@@ -8,6 +8,8 @@ import { usePartitaStore } from '../../stores/partitaStore';
 import { notifica } from '../../stores/notificationStore';
 import { Modal } from '../shared/Modal';
 import type { Difficolta } from '../../types';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaScheda } from '../shared/IconaAzione';
 
 interface Props {
   aperta: boolean;
@@ -46,7 +48,7 @@ export function NuovaPartitaModal({ aperta, onChiudi }: Props) {
       azioni={
         <>
           <button type="button" className="btn btn-secondary" onClick={onChiudi}>Annulla</button>
-          <button type="button" className="btn btn-primary" disabled={occupato || !nome.trim()} onClick={() => void conferma()}>Crea</button>
+          <PulsanteVisivo tono="primario" icona={<IconaScheda chiave="nuova-partita" dimensione={22} />} titolo="Crea" disabled={occupato || !nome.trim()} onClick={() => void conferma()} />
         </>
       }
     >
@@ -56,7 +58,7 @@ export function NuovaPartitaModal({ aperta, onChiudi }: Props) {
       <div className="form-label">
         <Selettore etichetta="Difficoltà" valore={difficolta} opzioni={[{ chiave: 'sicura', nome: 'Sicura' }, { chiave: 'facile', nome: 'Facile' }, { chiave: 'normale', nome: 'Normale' }, { chiave: 'difficile', nome: 'Difficile' }, { chiave: 'spietata', nome: 'Spietata' }]} onCambia={(k) => setDifficolta(k as Difficolta)} />
       </div>
-      <label className="flex items-center gap-2 text-[13px] touch">
+      <label className="flex items-center gap-2 testo-13 touch">
         <input type="checkbox" checked={ngPlus} onChange={(e) => setNgPlus(e.target.checked)} /> Nuova Partita +
       </label>
     </Modal>

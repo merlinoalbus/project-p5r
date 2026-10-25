@@ -16,6 +16,9 @@ const { getObiettivi, aggiornaObiettivo, creaObiettivo, eliminaObiettivo, getPer
 }));
 vi.mock('../../services/api', (vero) => moduloApi(vero, { getObiettivi, aggiornaObiettivo, creaObiettivo, eliminaObiettivo, getPersone, getSkills }));
 vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
+// le domande di conferma passano da `conferma()` (DialogoConferma), non più da window.confirm
+const { conferma } = vi.hoisted(() => ({ conferma: vi.fn() }));
+vi.mock('../../stores/confermaStore', async (vero) => ({ ...(await vero<typeof import('../../stores/confermaStore')>()), conferma }));
 vi.mock('../shared/ImmagineEntita', () => ({ ImmagineEntita: () => null }));
 
 /** Riassunto di una skill di Fuoco da 4 PS con il nome italiano uguale al nome. */
@@ -74,7 +77,7 @@ describe('ObiettiviPartita — due gesti ravvicinati (B3", validazione voce 2)',
   const pixie = () => ob(2, { personaId: 3, nome: 'Pixie', nomeIt: 'Pixie' });
   beforeEach(() => {
     getObiettivi.mockReset(); aggiornaObiettivo.mockReset(); eliminaObiettivo.mockReset();
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    conferma.mockResolvedValue(true);
   });
   afterEach(() => vi.restoreAllMocks());
   /** La voce d'elenco il cui testo contiene il nome dato (si assume che esista). */

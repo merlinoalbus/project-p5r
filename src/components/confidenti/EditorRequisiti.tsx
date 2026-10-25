@@ -6,6 +6,9 @@ import { useCarica } from '../../hooks/useCarica';
 import { CondizioniEditor } from '../guida/CondizioniEditor';
 import { Modal } from '../shared/Modal';
 import { PageState } from '../shared/PageState';
+import { conferma, CHIUDI_SENZA_SALVARE } from '../../stores/confermaStore';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 type Rango = RequisitiConfidenteDto['ranghi'][number];
 
@@ -34,8 +37,8 @@ function RequisitiRango({ confidente, rango, condizioni, onCambia, occupato, onO
     <CondizioniEditor condizioni={condizioni} onCambia={onCambia} disabilitato={occupato} massimo={10} />
     {errore && <p role="alert" className="m-0 text-error">{errore}</p>}
     <div className="flex flex-wrap gap-2">
-      <button type="button" className="btn btn-primary touch" disabled={occupato || condizioni.length > 10} onClick={() => void cambia(false)}>{occupato ? 'Salvataggio…' : `Salva rango ${rango.rango}`}</button>
-      {rango.modificato && <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={() => void cambia(true)}>Ripristina dalla guida</button>}
+      <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo={occupato ? 'Salvataggio…' : `Salva rango ${rango.rango}`} disabled={occupato || condizioni.length > 10} onClick={() => void cambia(false)} />
+      {rango.modificato && <PulsanteVisivo icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina dalla guida" disabled={occupato} onClick={() => void cambia(true)} />}
     </div>
   </div>;
 }
@@ -51,17 +54,17 @@ export function EditorRequisiti({ confidente, rangoIniziale, onChiudi, onSalvato
     const b = bozze[rango];
     return !!b && JSON.stringify(b.condizioni) !== JSON.stringify(b.originale.requisiti.map((r) => r.condizione));
   };
-  const chiudi = () => {
+  const chiudi = async () => {
     if (occupato) return;
-    if (Object.keys(bozze).some((r) => modificata(Number(r))) && !window.confirm('Ci sono requisiti non salvati. Chiudere senza salvarli?')) return;
+    if (Object.keys(bozze).some((r) => modificata(Number(r))) && !(await conferma({ ...CHIUDI_SENZA_SALVARE, testo: 'Ci sono requisiti non salvati: chiudendo si perdono.' }))) return;
     onChiudi();
   };
   return <Modal titolo={`Requisiti di ${confidente.nome}`} aperta onChiudi={chiudi} larga>
-    <p className="mt-0 text-[13px] text-text-secondary">Le modifiche valgono per tutte le partite. Salva un rango alla volta; «Ripristina» recupera le condizioni della guida.</p>
+    <p className="mt-0 testo-13 text-text-secondary">Le modifiche valgono per tutte le partite. Salva un rango alla volta; «Ripristina» recupera le condizioni della guida.</p>
     <PageState isLoading={dati.caricamento} error={dati.errore} onRetry={() => void dati.ricarica()}>
       <div className="flex flex-col gap-2">{dati.dati?.ranghi.map((r) => <section key={r.rango} className="rounded border border-border">
         <button type="button" className="touch flex w-full flex-wrap items-center gap-2 p-3 text-left" disabled={occupato} aria-expanded={rangoAperto === r.rango} onClick={() => setRangoAperto((aperto) => aperto === r.rango ? null : r.rango)}>
-          <strong>Rango {r.rango}</strong><span className="min-w-0 text-[13px] text-text-secondary">{r.requisiti.map((c) => c.descrizione).join(' · ') || 'Nessuna condizione'}</span>{modificata(r.rango) ? <span className="chip">Non salvato</span> : r.modificato && <span className="chip">Modificato</span>}
+          <strong>Rango {r.rango}</strong><span className="min-w-0 testo-13 text-text-secondary">{r.requisiti.map((c) => c.descrizione).join(' · ') || 'Nessuna condizione'}</span>{modificata(r.rango) ? <span className="chip">Non salvato</span> : r.modificato && <span className="chip">Modificato</span>}
         </button>
         {rangoAperto === r.rango && <RequisitiRango key={JSON.stringify(r)} confidente={confidente.chiave} rango={bozze[r.rango]?.originale ?? r}
           condizioni={bozze[r.rango]?.condizioni ?? r.requisiti.map((c) => c.condizione)}

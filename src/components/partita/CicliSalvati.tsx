@@ -17,6 +17,7 @@ import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { PersonaChip } from '../fusione/PersonaChip';
 import { OperatoreRicetta } from '../fusione/RicettaRiga';
+import { conferma } from '../../stores/confermaStore';
 
 interface Props {
   partitaId: number;
@@ -71,25 +72,25 @@ function SchedaCicloSalvato({ ciclo, partitaId, onCambiato, onElimina }: { ciclo
     <article className="card flex flex-col gap-2">
       <div className="flex items-center gap-3 flex-wrap">
         <ImmagineEntita ambito="persona" chiave={ciclo.nome} etichetta={ciclo.nomeIt} dimensione={72} adatta="copri" />
-        <Link to={`/compendio/persona/${ciclo.personaId}`} className="font-display uppercase text-[20px] leading-none text-text no-underline hover:text-primary">{ciclo.nomeIt}</Link>
-        <span className="text-[12px] text-text-muted">{ciclo.arcanaNome}</span>
+        <Link to={`/compendio/persona/${ciclo.personaId}`} className="font-display uppercase testo-20 leading-none text-text no-underline hover:text-primary-testo">{ciclo.nomeIt}</Link>
+        <span className="testo-12 text-text-muted">{ciclo.arcanaNome}</span>
         <span className="chip">{ciclo.titolo}</span>
         <span className="chip chip--attivo" title="Iterazioni complete registrate">{ciclo.iterazioni} {ciclo.iterazioni === 1 ? 'giro' : 'giri'}</span>
         <span className="ml-auto font-black tabular-nums">{formattaYen(ciclo.costo)} / giro</span>
       </div>
       <ol className="m-0 p-0 list-none flex flex-col gap-1" aria-label={`Anelli di ${ciclo.titolo}`}>
         {ciclo.anelli.map((x, i) => (
-          <li key={i} className={`flex flex-wrap items-center gap-1.5 text-[13px] rounded-md px-1 ${i === ciclo.anelloCorrente ? 'bg-primary-bg' : ''}`}>
+          <li key={i} className={`flex flex-wrap items-center gap-1.5 testo-13 rounded-md px-1 ${i === ciclo.anelloCorrente ? 'bg-primary-bg' : ''}`}>
             <button type="button" className={`chip touch ${i === ciclo.anelloCorrente ? 'chip--attivo' : ''}`} onClick={() => void impostaAnello(i)} title="Imposta come anello corrente" aria-pressed={i === ciclo.anelloCorrente}>{i + 1}</button>
             <PersonaChip p={x.ingrediente} /><OperatoreRicetta tipo="piu" /><PersonaChip p={x.partner} />
-            <span className="text-[12px] text-text-muted">{NOME_MODO_PARTNER[x.partnerModo]}{x.partnerModo === 'registro' ? ` · ${formattaYen(x.partnerCosto)}` : ''}</span>
+            <span className="testo-12 text-text-muted">{NOME_MODO_PARTNER[x.partnerModo]}{x.partnerModo === 'registro' ? ` · ${formattaYen(x.partnerCosto)}` : ''}</span>
             <OperatoreRicetta tipo="risultato" /><PersonaChip p={x.risultato} evidenza />
-            {x.bonusLivelli.max > 0 && <span className="text-[12px] text-text-muted">+{x.bonusLivelli.min === x.bonusLivelli.max ? x.bonusLivelli.min : `${x.bonusLivelli.min}…${x.bonusLivelli.max}`} livelli</span>}
+            {x.bonusLivelli.max > 0 && <span className="testo-12 text-text-muted">+{x.bonusLivelli.min === x.bonusLivelli.max ? x.bonusLivelli.min : `${x.bonusLivelli.min}…${x.bonusLivelli.max}`} livelli</span>}
           </li>
         ))}
       </ol>
-      <div className="flex flex-col gap-1 text-[13px]">
-        <div className="text-[12px] uppercase tracking-wide text-text-muted">Anello corrente: {ciclo.anelloCorrente + 1} di {ciclo.lunghezza}</div>
+      <div className="flex flex-col gap-1 testo-13">
+        <div className="testo-12 uppercase tracking-wide text-text-muted">Anello corrente: {ciclo.anelloCorrente + 1} di {ciclo.lunghezza}</div>
         <div className="flex flex-wrap items-center gap-2">
           <span className={`chip ${av.ingredientePossedutaId ? 'chip--attivo' : ''}`}>{a.ingrediente.nomeIt}: {av.ingredientePossedutaId ? 'in scorta' : 'non in scorta'}</span>
           <span className={`chip ${av.partnerPossedutaId ? 'chip--attivo' : ''}`}>{a.partner.nomeIt}: {av.partnerPossedutaId ? 'in scorta' : av.partnerRegistrato ? 'da evocare dal Registro' : a.partnerModo === 'cattura' ? 'da catturare' : 'da procurare'}</span>
@@ -97,11 +98,11 @@ function SchedaCicloSalvato({ ciclo, partitaId, onCambiato, onElimina }: { ciclo
             <PulsanteVisivo compatto icona={<IconaAzione chiave="evoca" dimensione={20} />} titolo={av.partnerRegistrato ? `Evoca ${a.partner.nomeIt} (${formattaYen(a.partnerCosto)})` : `Segna ${a.partner.nomeIt} ottenuta`} disabled={occupato} onClick={() => void procuraPartner()} />
           )}
           {!av.ingredientePossedutaId && ciclo.anelloCorrente === 0 && <CollegamentoVisivo to={`/fusione?vista=piani&piani=${a.ingrediente.id}`} tono="fantasma" compatto icona={<IconaAzione chiave="ricetta" dimensione={20} />} titolo={`Come ottenere ${a.ingrediente.nomeIt}`} />}
-          {!av.ingredientePossedutaId && ciclo.anelloCorrente > 0 && <span className="text-[12px] text-warning">Il risultato dell'anello precedente non è in scorta: reimposta l'anello corrente.</span>}
+          {!av.ingredientePossedutaId && ciclo.anelloCorrente > 0 && <span className="testo-12 text-warning">Il risultato dell'anello precedente non è in scorta: reimposta l'anello corrente.</span>}
           <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="esegui" dimensione={20} />} titolo={`Esegui anello ${ciclo.anelloCorrente + 1}`} disabled={!av.eseguibile} onClick={() => setEsecuzione(true)} />
         </div>
       </div>
-      {ciclo.note && <div className="text-[13px] text-text-secondary">{ciclo.note}</div>}
+      {ciclo.note && <div className="testo-13 text-text-secondary">{ciclo.note}</div>}
       <div className="flex flex-wrap gap-1.5">
         <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" onClick={onElimina} />
       </div>
@@ -123,7 +124,7 @@ export function CicliSalvati({ partitaId }: Props) {
   const sostituisci = (c: CicloSalvatoDto) => { lista.imposta((correnti) => correnti.map((x) => (x.id === c.id ? c : x))); void scorta.ricarica(); };
   /** Elimina il ciclo dopo conferma e lo toglie dall'elenco. */
   const elimina = async (c: CicloSalvatoDto) => {
-    if (!window.confirm(`Eliminare il ciclo «${c.titolo}»?`)) return;
+    if (!(await conferma({ titolo: 'Eliminare il ciclo?', testo: `Il ciclo «${c.titolo}» esce dai cicli salvati della partita.`, etichetta: 'Elimina' }))) return;
     try {
       await eliminaCiclo(partitaId, c.id);
       lista.imposta((correnti) => correnti.filter((x) => x.id !== c.id));
@@ -134,14 +135,14 @@ export function CicliSalvati({ partitaId }: Props) {
   };
   return (
     <div className="flex flex-col gap-3">
-      <p className="m-0 text-[13px] text-text-secondary">
+      <p className="m-0 testo-13 text-text-secondary">
         I cicli salvati dalla vista «Cicli di fusione» si eseguono qui anello per anello: procura il partner (evocazione dal Registro o cattura), esegui la fusione dalla scorta, e al ritorno sulla Persona di partenza il giro viene contato.
         {lista.dati && lista.dati.length > 0 && ` Giri completati in totale: ${totaleGiri}.`}
       </p>
-      {lista.errore && <div className="text-[13px] text-error">{lista.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void lista.ricarica()} /></div>}
+      {lista.errore && <div className="testo-13 text-error">{lista.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void lista.ricarica()} /></div>}
       {!lista.dati && !lista.errore && <div className="flex justify-center py-6"><Spinner /></div>}
       {lista.dati && lista.dati.length === 0 && (
-        <EmptyState illustrazione="vuoto-cicli" title="Nessun ciclo salvato" hint="Trova un ciclo nella pagina Fusione («Cicli di fusione») e premi «Salva ciclo»." action={<Link to="/fusione?vista=cicli" className="btn btn-primary no-underline">Vai ai cicli di fusione</Link>} />
+        <EmptyState illustrazione="vuoto-cicli" title="Nessun ciclo salvato" hint="Trova un ciclo nella pagina Fusione («Cicli di fusione») e premi «Salva ciclo»." action={<CollegamentoVisivo tono="primario" icona={<IconaAzione chiave="scheda" dimensione={22} />} titolo="Vai ai cicli di fusione" to="/fusione?vista=cicli" />} />
       )}
       {lista.dati && lista.dati.length > 0 && (
         <div className="flex flex-col gap-3">

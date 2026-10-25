@@ -83,7 +83,7 @@ describe('DotiSociali', () => {
     getDoti.mockResolvedValue([{ ...dote(140, 5, 'Irresistibile', null), punti: 0 }]);
     render(<DotiSociali partitaId={1} />);
     expect(await screen.findByText('Rango massimo raggiunto.')).toBeInTheDocument();
-    expect(screen.getByLabelText('Fascino: togli un punto')).toBeDisabled();
+    expect(screen.getByLabelText('Fascino: togli un punto')).toHaveAttribute('aria-disabled', 'true');
   });
 
   it('mostra l\'errore del backend senza alterare i dati', async () => {
@@ -109,10 +109,10 @@ describe('DotiSociali — due gesti ravvicinati (B3", validazione voce 2)', () =
     await screen.findAllByText('Rango 1 · Indifferente');
     await act(async () => { screen.getByLabelText('Fascino: aggiungi un punto').click(); }); // in volo
     await act(async () => { screen.getByLabelText('Coraggio: aggiungi un punto').click(); }); // arriva subito
-    expect(screen.getByLabelText('Coraggio: togli un punto')).not.toBeDisabled(); // Coraggio a 1 punto
+    expect(screen.getByLabelText('Coraggio: togli un punto')).not.toHaveAttribute('aria-disabled'); // Coraggio a 1 punto
     await act(async () => { rispondiFascino(dote(1, 1, 'Indifferente', 6)); });
     // entrambe a 1: la risposta di Fascino non ha rimesso Coraggio a 0
-    expect(screen.getByLabelText('Fascino: togli un punto')).not.toBeDisabled();
-    expect(screen.getByLabelText('Coraggio: togli un punto')).not.toBeDisabled();
+    expect(screen.getByLabelText('Fascino: togli un punto')).not.toHaveAttribute('aria-disabled');
+    expect(screen.getByLabelText('Coraggio: togli un punto')).not.toHaveAttribute('aria-disabled');
   });
 });

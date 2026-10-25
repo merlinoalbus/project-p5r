@@ -51,22 +51,22 @@ export function NascostiDallaGuida() {
   return (
     <section ref={sezione} id="nascosti" className="card flex flex-col gap-3" aria-labelledby="titolo-nascosti">
       <div className="flex flex-col gap-1">
-        <h2 id="titolo-nascosti" className="m-0 text-[15px] font-semibold">Nascosti dalla guida{elenco.dati ? <span className="text-text-muted"> · {righe.length}</span> : null}</h2>
-        <p className="m-0 text-[13px] text-text-secondary">Le righe che hai nascosto dagli elenchi restano nei dati: qui le rimetti con un tocco.</p>
+        <h2 id="titolo-nascosti" className="m-0 testo-15 font-semibold">Nascosti dalla guida{elenco.dati ? <span className="text-text-muted"> · {righe.length}</span> : null}</h2>
+        <p className="m-0 testo-13 text-text-secondary">Le righe che hai nascosto dagli elenchi restano nei dati: qui le rimetti con un tocco.</p>
       </div>
-      {elenco.errore && <p role="alert" className="m-0 text-[13px] text-error">{elenco.errore}</p>}
-      {elenco.caricamento && !elenco.dati && <p role="status" className="m-0 text-[13px]">Un attimo…</p>}
-      {elenco.dati && righe.length === 0 && <p className="m-0 text-[13px] text-text-muted">Nessuna riga nascosta.</p>}
+      {elenco.errore && <p role="alert" className="m-0 testo-13 text-error">{elenco.errore}</p>}
+      {elenco.caricamento && !elenco.dati && <p role="status" className="m-0 testo-13">Un attimo…</p>}
+      {elenco.dati && righe.length === 0 && <p className="m-0 testo-13 text-text-muted">Nessuna riga nascosta.</p>}
       {TIPI_CATALOGO.map((tipo) => {
         const delTipo = righe.filter((r) => r.tipo === tipo);
         if (delTipo.length === 0) return null;
         return (
           <section key={tipo} className="flex flex-col gap-1" aria-label={`${NOME_TIPO_CATALOGO[tipo].plurale} nascosti`}>
-            <h3 className="m-0 text-[14px] font-semibold">{NOME_TIPO_CATALOGO[tipo].plurale}<span className="text-text-muted"> · {delTipo.length}</span></h3>
+            <h3 className="m-0 testo-14 font-semibold">{NOME_TIPO_CATALOGO[tipo].plurale}<span className="text-text-muted"> · {delTipo.length}</span></h3>
             <ul className="m-0 flex list-none flex-col gap-1 p-0">
               {delTipo.map((e) => (
                 <li key={`${tipo}:${e.chiave}`} className="flex min-w-0 items-center gap-2">
-                  <span className="min-w-0 flex-1 break-words text-[13px]">{e.nome}{tipo === 'articolo' && e.dati.negozio_chiave ? <span className="text-text-muted"> · {nomeNegozio(e.dati.negozio_chiave)}</span> : null}</span>
+                  <span className="min-w-0 flex-1 break-words testo-13">{e.nome}{tipo === 'articolo' && e.dati.negozio_chiave ? <span className="text-text-muted"> · {nomeNegozio(e.dati.negozio_chiave)}</span> : null}</span>
                   <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Rimetti negli elenchi" onClick={() => ripristina(tipo, e.chiave, e.nome)} />
                 </li>
               ))}

@@ -22,11 +22,11 @@ interface Props {
 /** Intestazione h2 in carattere display con l'icona della fascia. */
 export function FasciaGiornata({ fascia, dettaglio, attiva }: Props) {
   return (
-    <h2 className="m-0 flex items-center gap-2 font-display uppercase tracking-wide text-[20px] leading-none">
+    <h2 className="m-0 flex items-center gap-2 font-display uppercase tracking-wide testo-20 leading-none">
       <IconaFascia fascia={fascia} />
       {fascia === 'sera' ? 'Di sera' : 'Di giorno'}
-      {attiva && <span className="chip chip--attivo font-sans normal-case tracking-normal text-[11px]" title="Momento della giornata impostato nella partita">Adesso</span>}
-      {dettaglio && <span className="font-sans normal-case tracking-normal text-[12px] text-text-muted">{dettaglio}</span>}
+      {attiva && <span className="chip chip--attivo font-sans normal-case tracking-normal testo-12" title="Momento della giornata impostato nella partita">Adesso</span>}
+      {dettaglio && <span className="font-sans normal-case tracking-normal testo-12 text-text-muted">{dettaglio}</span>}
     </h2>
   );
 }

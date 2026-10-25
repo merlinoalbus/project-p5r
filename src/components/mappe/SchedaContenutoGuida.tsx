@@ -7,6 +7,8 @@ import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMapp
 import { aggiornaSpillo, aggiungiImmagineSpillo, aggiornaImmagineSpillo, eliminaImmagineSpillo, impostaSpilloRaccolto, impostaStatoPunto, impostaAcquisto } from '../../services/api';
 import { CondizioniEditor } from '../guida/CondizioniEditor';
 import { SchedaSpillo } from './VisoreMappa';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 /** Mostra la `SchedaSpillo` del visore in modalità non spaziale per un contenuto della guida, con
  * le azioni della partita (raccolto, stato del punto, acquisto), e un pulsante che apre o chiude
@@ -31,7 +33,7 @@ export function SchedaContenutoGuida({ spillo, partitaId, onChiudi, onCambiato }
       onRaccolto={(s, valore) => esegui(() => impostaSpilloRaccolto(partitaId!, s.id, valore))}
       onStatoPunto={(_s, voce, stato) => esegui(() => impostaStatoPunto(partitaId!, voce, stato))}
       onAcquisto={(s, articolo, fatto) => esegui(() => impostaAcquisto(partitaId!, articolo, fatto, s.dettaglio?.negozio?.sedeChiave))} />
-    <button type="button" className="btn" disabled={occupato} onClick={() => setModifica(v => !v)}>{modifica ? 'Chiudi modifica' : 'Modifica contenuto'}</button>
+    <PulsanteVisivo icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo={modifica ? 'Chiudi modifica' : 'Modifica contenuto'} disabled={occupato} onClick={() => setModifica(v => !v)} />
     {modifica && <EditorContenuto key={spillo.id} spillo={spillo} occupato={occupato} esegui={esegui} />}
   </div>;
 }
@@ -54,11 +56,11 @@ function EditorContenuto({ spillo, occupato, esegui }: { spillo: SchedaContenuto
       <label>Descrizione<textarea className="form-input" value={descrizione} onChange={e => setDescrizione(e.target.value)} /></label>
       <label className="touch flex items-center gap-2"><input type="checkbox" className="w-5 h-5" checked={collezionabile} onChange={e => setCollezionabile(e.target.checked)} /> Collezionabile</label>
       <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} disabilitato={occupato} />
-      <button className="btn" type="submit">Salva contenuto</button>
+      <PulsanteVisivo icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva contenuto" type="submit" />
       <label className="flex flex-col gap-1">Aggiungi immagine<input className="touch" type="file" accept="image/*" onChange={e => { const f = e.target.files?.[0]; if (f) void esegui(() => aggiungiImmagineSpillo(spillo.id, f)); e.target.value = ''; }} /></label>
       {spillo.immagini.map(i => <div key={i.id}>
         <label>Didascalia<input className="form-input" defaultValue={i.didascalia} onBlur={e => { if (e.target.value !== i.didascalia) void esegui(() => aggiornaImmagineSpillo(i.id, { didascalia: e.target.value })); }} /></label>
-        <button type="button" className="btn btn-sm btn-secondary self-start" onClick={() => void esegui(() => eliminaImmagineSpillo(i.id))}>Rimuovi immagine</button>
+        <PulsanteVisivo compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Rimuovi immagine" className="self-start" onClick={() => void esegui(() => eliminaImmagineSpillo(i.id))} />
       </div>)}
     </fieldset>
   </form>;

@@ -19,8 +19,8 @@ export function GuidaPage() {
           <li key={s.chiave} className="min-w-0">
             <Link to={s.to} className="card card--cliccabile piastrella piastrella-guida no-underline text-text flex flex-col gap-2 h-full">
               <AssetImg nome={`guida/${s.chiave}`} alt="" decorativa className="piastrella-guida__icona object-contain" fallback={<span className="piastrella-guida__riserva" aria-hidden="true">{s.icona}</span>} />
-              <span className="font-display uppercase text-[20px] leading-none">{s.titolo}</span>
-              <span className="text-[12px] text-text-secondary">{s.descrizione}</span>
+              <span className="font-display uppercase testo-20 leading-none">{s.titolo}</span>
+              <span className="testo-12 text-text-secondary">{s.descrizione}</span>
             </Link>
           </li>
         ))}

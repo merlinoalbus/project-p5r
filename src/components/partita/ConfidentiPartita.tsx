@@ -351,14 +351,14 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
                 <h3 className="m-0">
                   <button type="button" className="gruppo-confidenti__testata touch" aria-expanded={aperto} aria-controls={idElenco} onClick={() => alternaGruppo(gruppo)}>
                     <IconChevronRight size={18} className={`shrink-0 transition-transform ${aperto ? 'rotate-90' : ''}`} />
-                    <span className="font-display text-[19px] uppercase whitespace-nowrap">{titolo}</span>
+                    <span className="font-display testo-20 uppercase whitespace-nowrap">{titolo}</span>
                     <span className="chip tabular-nums" aria-label={`${elenco.length} Confidenti`}>{elenco.length}</span>
-                    <span className="hidden md:inline ml-auto text-[12px] text-text-muted">{descrizione}</span>
+                    <span className="hidden md:inline ml-auto testo-12 text-text-muted">{descrizione}</span>
                   </button>
                 </h3>
                 <div id={idElenco} hidden={!aperto}>
                   {elenco.length === 0
-                    ? <p className="m-0 text-[13px] text-text-secondary">Nessun Confidente è ancora avviabile: compariranno qui appena i requisiti del primo rango saranno soddisfatti (giorno di gioco, Dote sociale, Persona dell'arcano, Palazzo o richiesta).</p>
+                    ? <p className="m-0 testo-13 text-text-secondary">Nessun Confidente è ancora avviabile: compariranno qui appena i requisiti del primo rango saranno soddisfatti (giorno di gioco, Dote sociale, Persona dell'arcano, Palazzo o richiesta).</p>
                     : (
                       <ul className="griglia-confidenti">
                         {elenco.map((c) => (
@@ -376,7 +376,7 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
       {/* la ✕ chiude sempre; Esc solo se il cassetto è la finestra più in alto (lo decide `Modal`) */}
       <Modal titolo="Gestione del Confidente" aperta={soloCassetto ? true : cassettoAperto} onChiudi={chiudiFoglio} cassetto>
         {trovato ? contenutoCassetto(trovato) : soloCassetto && <PageState isLoading={caricamento && !dati} error={errore} onRetry={() => void ricarica()}>
-          <p className="m-0 text-[13px] text-text-muted">Questo Confidente non è nella partita attiva.</p>
+          <p className="m-0 testo-13 text-text-muted">Questo Confidente non è nella partita attiva.</p>
         </PageState>}
       </Modal>
       {regaloPer && (() => {
@@ -404,7 +404,7 @@ export function ConfidentiPartita({ partitaId, soloCassetto }: Props) {
         azioni={
           <>
             <button type="button" className="btn btn-secondary" onClick={() => setModifica(null)}>Annulla</button>
-            <button type="button" className="btn btn-primary" disabled={occupato !== null} onClick={() => void salvaNote()}>Salva</button>
+            <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" disabled={occupato !== null} onClick={() => void salvaNote()} />
           </>
         }
       >

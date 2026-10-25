@@ -98,19 +98,19 @@ function Campi({ voce, dedalo, areaIniziale, aree, persone, onChiudi, onCambiata
   };
 
   return (
-    <form className="flex flex-col gap-3 text-[13px]" onSubmit={(e) => { e.preventDefault(); void salva(); }}>
+    <form className="flex flex-col gap-3 testo-13" onSubmit={(e) => { e.preventDefault(); void salva(); }}>
       {/* in linea: in cima a una finestra breve la tendina sovrapposta restava tagliata dal corpo scorrevole */}
       <Selettore className="selettore--in-linea" etichetta="Persona del compendio" valore={persona} vuoto="— scegli —" ricerca="sempre"
         opzioni={persone.map((p) => ({ chiave: String(p.id), nome: p.nomeIt, dettaglio: `${p.arcanaNome} · liv. ${p.livello}` }))} onCambia={setPersona} />
       {cambiaPersona && voce && Object.keys(voce.dettagli).some((k) => k !== 'maschera') && (
-        <p className="m-0 text-[12px] text-warning" role="status">Con un’altra Persona le resistenze, le debolezze e la personalità dell’Ombra di prima se ne vanno: erano della maschera di prima.</p>
+        <p className="m-0 testo-12 text-warning" role="status">Con un’altra Persona le resistenze, le debolezze e la personalità dell’Ombra di prima se ne vanno: erano della maschera di prima.</p>
       )}
       <CampoCorrezione etichetta="Nome dell’Ombra (vuoto = quello della Persona)" valore={nome} massimo={LIMITI_GUIDA.punto.nome} onCambia={setNome} />
       <fieldset className="m-0 flex flex-col gap-1 border-0 p-0">
-        <legend className="mb-1 text-[12px]">Aree in cui si incontra · {areeScelte.length} di {aree.length}</legend>
+        <legend className="mb-1 testo-12">Aree in cui si incontra · {areeScelte.length} di {aree.length}</legend>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-x-2">
           {aree.map((a) => (
-            <label key={a.chiave} className="touch flex items-center gap-1.5 text-[12px]">
+            <label key={a.chiave} className="touch flex items-center gap-1.5 testo-12">
               <input type="checkbox" className="h-5 w-5" checked={scelteAree.has(a.chiave)} onChange={() => alternaArea(a.chiave)} />{a.nome}
             </label>
           ))}
@@ -124,7 +124,7 @@ function Campi({ voce, dedalo, areaIniziale, aree, persone, onChiudi, onCambiata
         {voce && !conferma && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" disabled={occupato} onClick={() => setConferma(true)} />}
       </div>
       {voce && conferma && (
-        <section className="flex flex-col gap-1.5 rounded-md border border-primary/40 px-2.5 py-2 text-[12px]" aria-label="Conferma: eliminare la Persona">
+        <section className="flex flex-col gap-1.5 rounded-md border border-primary/40 px-2.5 py-2 testo-12" aria-label="Conferma: eliminare la Persona">
           <span>Se ne va dalla guida, da tutte le aree del dedalo e per tutte le partite. Il compendio delle partite non cambia. {NEL_CESTINO}</span>
           <div className="flex flex-wrap gap-1.5">
             <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Confermo" disabled={occupato} onClick={() => void elimina()} />

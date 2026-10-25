@@ -10,19 +10,21 @@ interface Props {
   affinita: AffinitaDto[];
   /** true: versione compatta per gli elenchi (solo sigle). */
   compatta?: boolean;
+  /** Nome del gruppo per i lettori di schermo (predefinito «Affinità»): serve a distinguere due griglie sulla stessa pagina. */
+  etichetta?: string;
 }
 
 /** Griglia delle affinità: elemento in alto, codice colorato sotto. */
-export function AffinitaGriglia({ affinita, compatta }: Props) {
+export function AffinitaGriglia({ affinita, compatta, etichetta = 'Affinità' }: Props) {
   if (compatta) {
     return (
-      <div className="flex gap-1 flex-wrap" role="group" aria-label="Affinità">
+      <div className="flex gap-1 flex-wrap" role="group" aria-label={etichetta}>
         {affinita.map((a) => {
           const stile = STILE_AFFINITA[a.codice] ?? STILE_AFFINITA['-'];
           return (
             <span
               key={a.elemento}
-              className={`inline-flex flex-col items-center justify-center w-[42px] h-[46px] rounded-md text-[11px] leading-tight ${stile.classe}`}
+              className={`inline-flex flex-col items-center justify-center w-[42px] h-[46px] rounded-md testo-12 leading-tight ${stile.classe}`}
               title={`${a.elementoNome}: ${a.codiceNome}`}
             >
               <span style={{ color: coloreElemento(a.elemento) }} className="font-bold">{a.elementoSigla}</span>
@@ -34,15 +36,20 @@ export function AffinitaGriglia({ affinita, compatta }: Props) {
     );
   }
   return (
-    <div className="griglia-affinita gap-2" role="group" aria-label="Affinità">
+    <div className="griglia-affinita gap-2" role="group" aria-label={etichetta}>
       {affinita.map((a) => {
         const stile = STILE_AFFINITA[a.codice] ?? STILE_AFFINITA['-'];
         return (
           <div key={a.elemento} className={`flex flex-col items-center justify-center gap-1 rounded-lg py-2 px-1 text-center ${stile.classe}`} title={`${a.elementoNome}: ${a.codiceNome}`}>
             <AssetImg nome={`elementi/${a.elemento}`} alt="" decorativa className="w-9 h-9 object-contain" fallback={null} />
-            <span className="text-[12px] font-bold leading-tight whitespace-nowrap max-w-full overflow-hidden text-ellipsis" style={{ color: coloreElemento(a.elemento) }} title={a.elementoNome}>{a.elementoNome}</span>
+            {/* sul telefono le cinque colonne sono larghe ~60 px e «Elettricità» diventava «Elettri…»: lì si legge la sigla (come
+                nella griglia compatta) e il nome intero resta per i lettori di schermo */}
+            <span className="testo-12 font-bold leading-tight whitespace-nowrap max-w-full overflow-hidden text-ellipsis" style={{ color: coloreElemento(a.elemento) }} title={a.elementoNome}>
+              {a.elementoSigla && <span className="sm:hidden" aria-hidden="true">{a.elementoSigla}</span>}
+              <span className={a.elementoSigla ? 'max-sm:sr-only' : undefined}>{a.elementoNome}</span>
+            </span>
             <AssetImg nome={`affinita/${a.codice === '-' ? 'normale' : a.codice}-senza-testo`} alt="" decorativa className="w-9 h-9 object-contain" fallback={null} />
-            <span className="text-[12px] font-semibold leading-tight whitespace-nowrap max-w-full overflow-hidden text-ellipsis">{a.codiceNome}</span>
+            <span className="testo-12 font-semibold leading-tight whitespace-nowrap max-w-full overflow-hidden text-ellipsis">{a.codiceNome}</span>
           </div>
         );
       })}

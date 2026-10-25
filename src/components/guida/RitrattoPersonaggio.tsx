@@ -82,7 +82,7 @@ function Faccia({ chiave, dimensione }: { chiave: string; dimensione: number }) 
   return (
     <AssetImg nome={p.asset} alt={p.nome} className="rounded-full border border-border-light bg-bg-tertiary object-cover object-top"
       style={{ width: dimensione, height: dimensione }}
-      fallback={<span className="grid place-items-center rounded-full bg-bg-tertiary text-[9px] text-text-muted"
+      fallback={<span className="grid place-items-center rounded-full bg-bg-tertiary testo-micro text-text-muted"
         style={{ width: dimensione, height: dimensione }}>{p.nome.slice(0, 2)}</span>} />
   );
 }
@@ -105,7 +105,7 @@ export function RitrattoPersonaggio({ chi, dimensione = 24 }: { chi: string; dim
       <span className="flex flex-wrap items-center gap-0.5" title={chi}>
         {chiavi.map((k) => <Faccia key={k} chiave={k} dimensione={dimensione} />)}
       </span>
-      <span className="text-[11px] text-text-muted">{chi}</span>
+      <span className="testo-12 text-text-muted">{chi}</span>
     </span>
   );
 }

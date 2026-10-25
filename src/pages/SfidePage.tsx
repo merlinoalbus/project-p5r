@@ -36,7 +36,7 @@ function Elenco({ titolo, voci }: { titolo: string; voci: string[] }) {
 function SchedaBattaglie({ d, onModificato }: { d: SfideDto; onModificato: () => void }) {
   const b = d.battaglieSfida;
   return (
-    <div className="flex flex-col gap-2 text-[13px]">
+    <div className="flex flex-col gap-2 testo-13">
       <section className="card flex flex-col gap-1">
         <div className="flex items-start gap-2">
           <p className="m-0 min-w-0 flex-1">{b.introduzione}</p>
@@ -48,7 +48,7 @@ function SchedaBattaglie({ d, onModificato }: { d: SfideDto; onModificato: () =>
       </section>
       {b.elenco.map((s) => (
         <section key={s.chiave} id={`elemento-${s.chiave}`} className="card flex flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2"><h2 className="m-0 text-[15px] font-semibold">{s.nomeIt ?? s.nome}</h2>{s.nomeIt && s.nomeIt !== s.nome && <span className="text-text-muted text-[12px]">({s.nome})</span>}{s.livelloConsigliato && <span className="chip">livello {s.livelloConsigliato}</span>}{!s.verificato && <span className="chip text-[11px]">da fonte secondaria</span>}<ModificaGuida tipo="battaglia-sfida" chiave={s.chiave} cosa={`la Battaglia Sfida «${s.nomeIt ?? s.nome}»`} soloIcona className="ml-auto" onSalvato={onModificato} /></div>
+          <div className="flex flex-wrap items-center gap-2"><h2 className="m-0 testo-15 font-semibold">{s.nomeIt ?? s.nome}</h2>{s.nomeIt && s.nomeIt !== s.nome && <span className="text-text-muted testo-12">({s.nome})</span>}{s.livelloConsigliato && <span className="chip">livello {s.livelloConsigliato}</span>}{!s.verificato && <span className="chip testo-12">da fonte secondaria</span>}<ModificaGuida tipo="battaglia-sfida" chiave={s.chiave} cosa={`la Battaglia Sfida «${s.nomeIt ?? s.nome}»`} soloIcona className="ml-auto" onSalvato={onModificato} /></div>
           <VoceTesto titolo="Regole">{s.regole}</VoceTesto>
           <Elenco titolo="Nemici" voci={s.nemici} />
           {s.punteggi && <VoceTesto titolo="Punteggi">{s.punteggi}</VoceTesto>}
@@ -65,10 +65,10 @@ function SchedaBattaglie({ d, onModificato }: { d: SfideDto; onModificato: () =>
 /** I boss segreti, una carta ciascuno con il ritratto (le Gemelle Custodi ne hanno due, Caroline e Justine), dove, quando, requisiti, mosse, debolezze, resistenze, strategia, ricompense e statistiche; in fondo il rimando al Mietitore e ai Demoni del Tesoro. */
 function SchedaBoss({ d, onModificato }: { d: SfideDto; onModificato: () => void }) {
   return (
-    <div className="flex flex-col gap-2 text-[13px]">
+    <div className="flex flex-col gap-2 testo-13">
       {d.bossSegreti.map((b) => (
         <section key={b.chiave} id={`elemento-${b.chiave}`} className="card flex flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2">{(b.chiave === 'gemelle-custodi' ? ['caroline', 'justine'] : [b.chiave]).map((k) => <AssetImg key={k} nome={`personaggi/${k}`} alt="" decorativa className="h-16 w-auto object-contain" fallback={null} />)}<h2 className="m-0 text-[15px] font-semibold">{b.nome}</h2>{b.livelloConsigliato && <span className="chip">livello {b.livelloConsigliato}</span>}{!b.verificato && <span className="chip text-[11px]">da fonte secondaria</span>}<ModificaGuida tipo="boss-segreto" chiave={b.chiave} cosa={`il boss segreto «${b.nome}»`} soloIcona className="ml-auto" onSalvato={onModificato} /></div>
+          <div className="flex flex-wrap items-center gap-2">{(b.chiave === 'gemelle-custodi' ? ['caroline', 'justine'] : [b.chiave]).map((k) => <AssetImg key={k} nome={`personaggi/${k}`} alt="" decorativa className="h-16 w-auto object-contain" fallback={null} />)}<h2 className="m-0 testo-15 font-semibold">{b.nome}</h2>{b.livelloConsigliato && <span className="chip">livello {b.livelloConsigliato}</span>}{!b.verificato && <span className="chip testo-12">da fonte secondaria</span>}<ModificaGuida tipo="boss-segreto" chiave={b.chiave} cosa={`il boss segreto «${b.nome}»`} soloIcona className="ml-auto" onSalvato={onModificato} /></div>
           <VoceTesto titolo="Dove">{b.dove}</VoceTesto>
           <VoceTesto titolo="Quando">{b.quando}</VoceTesto>
           <Elenco titolo="Requisiti" voci={b.requisiti} />
@@ -79,11 +79,11 @@ function SchedaBoss({ d, onModificato }: { d: SfideDto; onModificato: () => void
           {!!b.oggettiRicompensa?.length && <OggettiCollegati oggetti={b.oggettiRicompensa} />}
           <Elenco titolo={b.oggettiRicompensa?.length ? 'Indicazioni della guida' : 'Ricompense'} voci={b.ricompense} />
           {b.statistiche && <VoceTesto titolo="Statistiche">{Object.entries(b.statistiche).map(([k, v]) => `${k.toUpperCase()} ${v}`).join(' · ')}</VoceTesto>}
-          {b.nota && <p className="m-0 text-[12px] text-text-muted">{b.nota}</p>}
+          {b.nota && <p className="m-0 testo-12 text-text-muted">{b.nota}</p>}
           <Fonte url={b.fonte} />
         </section>
       ))}
-      <p className="m-0 text-[12px] text-text-muted">Il Mietitore e i Demoni del Tesoro sono in <Link to="/guida/battaglia?scheda=nemici">Aiuto in battaglia → Nemici speciali</Link>.</p>
+      <p className="m-0 testo-12 text-text-muted">Il Mietitore e i Demoni del Tesoro sono in <Link to="/guida/battaglia?scheda=nemici">Aiuto in battaglia → Nemici speciali</Link>.</p>
     </div>
   );
 }
@@ -95,14 +95,14 @@ function SchedaBoss({ d, onModificato }: { d: SfideDto; onModificato: () => void
  */
 function SchedaMagnate({ d, onModificato }: { d: SfideDto; onModificato: () => void }) {
   const m = d.magnate;
-  if (!m) return <p className="m-0 text-[13px] text-text-muted">Nessun dato su Magnate.</p>;
+  if (!m) return <p className="m-0 testo-13 text-text-muted">Nessun dato su Magnate.</p>;
   // le sfide di Magnate sono un elenco di oggetti: si leggono (e si correggono) una per una, non come testo
   const sfideMagnate = Array.isArray(m.sfide) ? (m.sfide as Array<{ nome: string; condizione: string; ricompensa: string }>) : [];
   const campi: Array<[string, unknown]> = Object.entries(m).filter(([k]) => !['fonte', 'verificato', 'sfide'].includes(k));
   return (
-    <section className="card flex flex-col gap-1 text-[13px]">
+    <section className="card flex flex-col gap-1 testo-13">
       <div className="flex items-start gap-2">
-        <h2 className="m-0 min-w-0 flex-1 text-[15px] font-semibold">Magnate (gioco di carte)</h2>
+        <h2 className="m-0 min-w-0 flex-1 testo-15 font-semibold">Magnate (gioco di carte)</h2>
         <ModificaGuida tipo="sfide-magnate" chiave="magnate" cosa="le regole di Magnate" soloIcona onSalvato={onModificato} />
       </div>
       {sfideMagnate.length > 0 && (
@@ -137,7 +137,7 @@ function SchedaTratti({ d, onModificato }: { d: SfideDto; onModificato: () => vo
   const categorie = useMemo(() => [...new Set(t.elenco.map((x) => x.categoria).filter((c): c is string => !!c))], [t]);
   const visibili = useMemo(() => { const n = normalizzaTesto(q); return t.elenco.filter((x) => (!categoria || x.categoria === categoria) && (!n || normalizzaTesto(`${x.nome} ${x.nomeEn ?? ''} ${x.effetto} ${x.personaggio ?? ''}`).includes(n))); }, [t, q, categoria]);
   return (
-    <div className="flex flex-col gap-2 text-[13px]">
+    <div className="flex flex-col gap-2 testo-13">
       <div className="flex items-start gap-2">
         <p className="m-0 min-w-0 flex-1 text-text-secondary">{t.introduzione}</p>
         <ModificaGuida tipo="sfide-tratti" chiave="tratti" cosa="l’introduzione dei tratti" soloIcona onSalvato={onModificato} />
@@ -146,9 +146,9 @@ function SchedaTratti({ d, onModificato }: { d: SfideDto; onModificato: () => vo
         <div className="flex-1 min-w-[200px]"><CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca un tratto o un effetto…" /></div>
         <Selettore compatto etichetta="Categoria" valore={categoria} vuoto="Tutte le categorie" opzioni={categorie.map((c) => ({ chiave: c, nome: c }))} onCambia={setCategoria} />
       </div>
-      <p className="m-0 text-[12px] text-text-muted">{visibili.length} tratti su {t.elenco.length}.</p>
+      <p className="m-0 testo-12 text-text-muted">{visibili.length} tratti su {t.elenco.length}.</p>
       <div className="area-scorrevole-x">
-        <table className="tabella tabella--adattiva text-[12px]">
+        <table className="tabella tabella--adattiva testo-12">
           <thead><tr><th>Tratto</th><th>Effetto</th><th>Categoria</th><th>Di chi</th></tr></thead>
           <tbody>{visibili.map((x) => <tr key={x.nome}><td data-etichetta="Tratto"><div className="flex items-start gap-1"><span className="min-w-0 flex-1"><strong>{x.nome}</strong>{x.nomeEn && x.nomeEn !== x.nome && <span className="text-text-muted"> ({x.nomeEn})</span>}</span><ModificaGuida tipo="tratto" chiave={x.nome} cosa={`il tratto «${x.nome}»`} soloIcona onSalvato={onModificato} /></div></td><td data-etichetta="Effetto">{x.effetto}</td><td data-etichetta="Categoria">{x.categoria ?? '—'}</td><td data-etichetta="Di chi">{x.personaggio ?? '—'}</td></tr>)}</tbody>
         </table>

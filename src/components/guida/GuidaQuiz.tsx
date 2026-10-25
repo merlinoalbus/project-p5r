@@ -17,6 +17,8 @@ import { CampoRicerca } from '../shared/CampoRicerca';
 import { corrispondeRicerca } from '../../utils/testo';
 import { giorniDelQuizTesto, type QuizAttivita } from '../../../shared/quizAttivita';
 import type { QuizVoceDto } from '../../types';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 /** Da quanti elementi in su compare la ricerca: con pochi si leggono a colpo d'occhio. */
 const SOGLIA_RICERCA = 7;
@@ -30,8 +32,8 @@ export function GuidaQuiz({ quiz, oggi = false }: { quiz: QuizAttivita; oggi?: b
   const visibili = useMemo(() => quiz.voci.filter((v) => corrispondeRicerca(cerca, v.oggetto, v.altroNome, v.risposta)), [quiz.voci, cerca]);
   const giorni = giorniDelQuizTesto(quiz.giorni);
   return (
-    <div className="flex flex-col gap-3 text-[13px]">
-      {oggi && <p className="m-0 chip chip--oro self-start text-[12px]">Oggi c’è il quiz</p>}
+    <div className="flex flex-col gap-3 testo-13">
+      {oggi && <p className="m-0 chip chip--oro self-start testo-12">Oggi c’è il quiz</p>}
       {(giorni || quiz.spiegazione) && (
         <p className="m-0 text-text-secondary">
           {giorni && <><strong className="text-text">Quando:</strong> {giorni}. </>}
@@ -50,11 +52,11 @@ export function GuidaQuiz({ quiz, oggi = false }: { quiz: QuizAttivita; oggi?: b
                   <li key={`${v.oggetto}|${v.risposta}`} className="grid grid-cols-1 gap-x-3 gap-y-0.5 border-b border-border py-2 last:border-b-0 sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
                     <span className="flex min-w-0 flex-col">
                       <strong className="text-text">{v.oggetto}</strong>
-                      {v.altroNome && <span className="text-[12px] text-text-muted">anche «{v.altroNome}»</span>}
+                      {v.altroNome && <span className="testo-12 text-text-muted">anche «{v.altroNome}»</span>}
                     </span>
                     <span className="flex min-w-0 flex-col">
                       <span className="text-text">{v.risposta}</span>
-                      {v.nota && <span className="text-[12px] text-warning">{v.nota}</span>}
+                      {v.nota && <span className="testo-12 text-warning">{v.nota}</span>}
                     </span>
                   </li>
                 ))}
@@ -82,10 +84,9 @@ export function PulsanteGuidaQuiz({ voce }: { voce: QuizVoceDto }) {
   const [aperta, setAperta] = useState(false);
   return (
     <>
-      <button type="button" className={`chip touch text-[11px] ${voce.oggi ? 'chip--oro' : 'chip--attivo'}`} onClick={() => setAperta(true)}
-        aria-label={`Guida del quiz: ${voce.nome}${voce.oggi ? ' (oggi c’è il quiz)' : ''}`}>
-        {voce.oggi ? 'Oggi c’è il quiz · Guida' : 'Guida del quiz'}
-      </button>
+      <PulsanteVisivo tono={voce.oggi ? 'primario' : 'secondario'} compatto className="self-start" icona={<IconaAzione chiave="libro" dimensione={20} />} onClick={() => setAperta(true)}
+        titolo="Guida del quiz" dettaglio={voce.oggi ? 'oggi c’è il quiz' : undefined}
+        aria-label={`Guida del quiz: ${voce.nome}${voce.oggi ? ' (oggi c’è il quiz)' : ''}`} />
       {aperta && (
         <Modal titolo={`Guida del quiz — ${voce.nome}`} aperta onChiudi={() => setAperta(false)} larga>
           <GuidaQuiz quiz={voce.quiz} oggi={voce.oggi} />

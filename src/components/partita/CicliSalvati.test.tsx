@@ -16,6 +16,9 @@ const { getCicliSalvati, getPossedute, aggiungiPosseduta, avanzaCiclo, aggiornaC
 }));
 vi.mock('../../services/api', (vero) => moduloApi(vero, { getCicliSalvati, getPossedute, aggiungiPosseduta, avanzaCiclo, aggiornaCiclo, eliminaCiclo, getImmagini: vi.fn().mockResolvedValue([]), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(), }));
 vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
+// le domande di conferma passano da `conferma()` (DialogoConferma), non più da window.confirm
+const { conferma } = vi.hoisted(() => ({ conferma: vi.fn() }));
+vi.mock('../../stores/confermaStore', async (vero) => ({ ...(await vero<typeof import('../../stores/confermaStore')>()), conferma }));
 vi.mock('../fusione/EseguiFusioneModal', () => ({ EseguiFusioneModal: ({ possedutaIds, onEseguita }: { possedutaIds: number[]; onEseguita: () => void }) => <div><span>Modale fusione {possedutaIds.join('+')}</span><button type="button" onClick={onEseguita}>Conferma fusione</button></div> }));
 vi.mock('../shared/Modal', () => ({ Modal: ({ children }: { children: ReactNode }) => <div>{children}</div> }));
 
@@ -71,7 +74,7 @@ describe('CicliSalvati — due gesti ravvicinati (B3", validazione voce 2)', () 
   beforeEach(() => {
     getCicliSalvati.mockReset(); getPossedute.mockReset(); aggiornaCiclo.mockReset(); eliminaCiclo.mockReset();
     getPossedute.mockResolvedValue([]);
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    conferma.mockResolvedValue(true);
   });
   afterEach(() => vi.restoreAllMocks());
   /** Il secondo pulsante «Imposta come anello corrente» nell'elenco degli anelli del ciclo con il titolo dato. */

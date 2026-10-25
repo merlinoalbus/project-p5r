@@ -37,9 +37,9 @@ export function SelettorePersona({ etichetta, persone, scelta, onScegli, senzaRa
       <div className="card flex items-center gap-3">
         <ImmagineEntita ambito="persona" chiave={scelta.nome} etichetta={scelta.nomeIt} dimensione={64} />
         <div className="flex-1 min-w-0">
-          <div className="text-[12px] uppercase tracking-wide text-text-muted">{etichetta}</div>
-          <div className="font-semibold text-[15px]">{scelta.nomeIt}{scelta.nomeIt !== scelta.nome && <span className="text-[12px] font-normal text-text-muted"> {scelta.nome}</span>}</div>
-          <div className="text-[12px] text-text-secondary">{scelta.arcanaNome} · livello {scelta.livello}{scelta.rara ? ' · Demone del Tesoro' : ''}{scelta.speciale ? ' · speciale' : ''}{scelta.dlc ? ' · DLC' : ''}</div>
+          <div className="testo-12 uppercase tracking-wide text-text-muted">{etichetta}</div>
+          <div className="font-semibold testo-15">{scelta.nomeIt}{scelta.nomeIt !== scelta.nome && <span className="testo-12 font-normal text-text-muted"> {scelta.nome}</span>}</div>
+          <div className="testo-12 text-text-secondary">{scelta.arcanaNome} · livello {scelta.livello}{scelta.rara ? ' · Demone del Tesoro' : ''}{scelta.speciale ? ' · speciale' : ''}{scelta.dlc ? ' · DLC' : ''}</div>
         </div>
         <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Cambia" onClick={() => onScegli(null)} aria-label={`Cambia ${etichetta}`} />
       </div>
@@ -48,15 +48,15 @@ export function SelettorePersona({ etichetta, persone, scelta, onScegli, senzaRa
 
   return (
     <div className="card flex flex-col gap-2 relative">
-      <span className="text-[12px] uppercase tracking-wide text-text-muted">{etichetta}</span>
+      <span className="testo-12 uppercase tracking-wide text-text-muted">{etichetta}</span>
       <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca per nome o arcano…" />
       {candidate.length > 0 && (
         <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light max-h-[280px] area-scorrevole" role="listbox" aria-label={`Risultati per ${etichetta}`}>
           {candidate.map((p) => (
             <li key={p.id} role="option" aria-selected={false}>
-              <button type="button" className="w-full text-left flex items-center gap-3 py-2 bg-transparent border-none text-text cursor-pointer hover:text-primary touch" onClick={() => { onScegli(p); setQ(''); }}>
-                <span className="w-9 text-right text-[12px] text-text-muted">Liv. {p.livello}</span>
-                <span className="font-semibold flex-1 truncate">{p.nomeIt}{p.nomeIt !== p.nome && <span className="text-[12px] font-normal text-text-muted"> {p.nome}</span>}</span>
+              <button type="button" className="w-full text-left flex items-center gap-3 py-2 bg-transparent border-none text-text cursor-pointer hover:text-primary-testo touch" onClick={() => { onScegli(p); setQ(''); }}>
+                <span className="w-9 text-right testo-12 text-text-muted">Liv. {p.livello}</span>
+                <span className="font-semibold flex-1 truncate">{p.nomeIt}{p.nomeIt !== p.nome && <span className="testo-12 font-normal text-text-muted"> {p.nome}</span>}</span>
                 <span className="chip">{p.arcanaNome}</span>
                 {inScorta?.has(p.id) && <span className="chip chip--attivo" title="Nella scorta">Scorta</span>}
               </button>
@@ -64,7 +64,7 @@ export function SelettorePersona({ etichetta, persone, scelta, onScegli, senzaRa
           ))}
         </ul>
       )}
-      {q.trim() && candidate.length === 0 && <span className="text-[13px] text-text-muted">Nessuna Persona trovata.</span>}
+      {q.trim() && candidate.length === 0 && <span className="testo-13 text-text-muted">Nessuna Persona trovata.</span>}
     </div>
   );
 }

@@ -101,14 +101,14 @@ export function BackupIstanza() {
 
   return (
     <section className="card flex flex-col gap-3" aria-label="Backup e ripristino">
-      <h2 className="m-0 text-[15px] font-semibold">Backup e ripristino</h2>
-      <p className="m-0 text-[13px] text-text-secondary">
+      <h2 className="m-0 testo-15 font-semibold">Backup e ripristino</h2>
+      <p className="m-0 testo-13 text-text-secondary">
         Scarica una copia di tutto e rimettila quando vuoi, anche su un altro dispositivo. L'<strong>istanza completa</strong> contiene i dati di gioco con le
         immagini, le partite con il loro tracking e i caratteri che hai caricato. Ogni scaricamento lascia una copia anche nella <strong>cartella d'appoggio</strong>
         del server: è da lì che si ripristina, perché un file da centinaia di MB non passa dal browser. Per i soli dati di gioco c'è la card «Pacchetto di gioco».
       </p>
       {s && (
-        <ul className="m-0 p-0 list-none grid gap-1 sm:grid-cols-2 text-[13px]">
+        <ul className="m-0 p-0 list-none grid gap-1 sm:grid-cols-2 testo-13">
           <li><strong>Dati di gioco</strong> <span className="text-text-muted">{s.database.inMemoria ? 'in memoria (nessun file)' : `${s.database.nome} · ${byteTesto(s.database.byte)} · schema ${s.versioneSchema}`}</span></li>
           <li><strong>File delle partite</strong> <span className="text-text-muted">{s.database.inMemoria ? 'in memoria (nessun file)' : `${s.databasePartite.nome} · ${byteTesto(s.databasePartite.byte)} · schema ${s.versioneSchemaPartite}`}</span></li>
           <li><strong>Partite</strong> <span className="text-text-muted">{s.partite}</span></li>
@@ -118,18 +118,18 @@ export function BackupIstanza() {
           <li><strong>Copie di sicurezza</strong> <span className="text-text-muted">{s.copieDiSicurezza} in data/backups</span></li>
         </ul>
       )}
-      {stato.errore && <p className="m-0 text-[13px] text-error">{stato.errore}</p>}
+      {stato.errore && <p className="m-0 testo-13 text-error">{stato.errore}</p>}
       <div className="flex flex-wrap gap-1.5 items-center">
         <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Scarica l'istanza completa" dettaglio="ZIP con dati di gioco, partite e caratteri" disabled={occupato} onClick={() => void esporta()} />
       </div>
       <section className="flex flex-col gap-1.5" aria-label="Cartella d'appoggio">
-        <h3 className="m-0 text-[14px]">Dalla cartella d'appoggio</h3>
-        <p className="m-0 text-[12px] text-text-muted">Gli ZIP dell'istanza depositati sul server (ci finiscono gli scaricamenti): il file non passa dal browser, quindi la dimensione non è un problema. I soli dati di gioco si importano dalla card «Pacchetto di gioco».</p>
+        <h3 className="m-0 testo-14">Dalla cartella d'appoggio</h3>
+        <p className="m-0 testo-12 text-text-muted">Gli ZIP dell'istanza depositati sul server (ci finiscono gli scaricamenti): il file non passa dal browser, quindi la dimensione non è un problema. I soli dati di gioco si importano dalla card «Pacchetto di gioco».</p>
         <div className="flex flex-wrap gap-1.5 items-center">
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="ricalcola" dimensione={20} />} titolo="Cerca i file disponibili" dettaglio="guarda nella cartella d'appoggio" disabled={occupato} onClick={() => void cercaNelDeposito()} />
         </div>
-        {deposito && !deposito.disponibile && <p className="m-0 text-[13px] text-warning" role="status">{deposito.motivo}</p>}
-        {deposito?.disponibile && deposito.file.length === 0 && <p className="m-0 text-[13px] text-text-muted" role="status">Nessun backup in <code>{deposito.cartella}</code>.</p>}
+        {deposito && !deposito.disponibile && <p className="m-0 testo-13 text-warning" role="status">{deposito.motivo}</p>}
+        {deposito?.disponibile && deposito.file.length === 0 && <p className="m-0 testo-13 text-text-muted" role="status">Nessun backup in <code>{deposito.cartella}</code>.</p>}
         {deposito?.disponibile && deposito.file.length > 0 && (
           <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-end">
             <Selettore
@@ -152,11 +152,11 @@ export function BackupIstanza() {
         azioni={
           <>
             <button type="button" className="btn btn-secondary" onClick={() => setDalDeposito(null)}>Annulla</button>
-            <button type="button" className="btn btn-danger" disabled={occupato} onClick={() => void ripristinaDalDeposito()}>Sostituisci l'istanza</button>
+            <PulsanteVisivo tono="pericolo" icona={<IconaAzione chiave="carica" dimensione={22} />} titolo="Sostituisci l'istanza" disabled={occupato} onClick={() => void ripristinaDalDeposito()} />
           </>
         }
       >
-        <p className="m-0 text-[14px]">
+        <p className="m-0 testo-14">
           Il file «{dalDeposito}» della cartella d'appoggio sostituirà partite, tracking e dati di questa istanza.
           Lo legge il server, quindi non viene caricato da qui. Prima della sostituzione viene salvata una copia di sicurezza in <code>data/backups</code>.
         </p>

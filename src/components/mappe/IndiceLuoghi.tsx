@@ -99,8 +99,8 @@ function contenitoriDa(radici: NodoGerarchiaDto[]): ContenitoreColloca[] {
 /** L'intestazione di un gruppo di carte: sta su uno sfondo suo (mai il testo direttamente sull'immagine decorativa). */
 function TitoloGruppo({ titolo, dettaglio }: { titolo: string; dettaglio?: string }) {
   return (
-    <h2 className="m-0 inline-flex max-w-full flex-wrap items-baseline gap-x-2 self-start rounded-md bg-bg-secondary px-3 py-1.5 font-display text-[15px] uppercase leading-tight text-text">
-      {titolo}{dettaglio && <span className="font-body text-[12px] normal-case text-text-secondary">{dettaglio}</span>}
+    <h2 className="m-0 inline-flex max-w-full flex-wrap items-baseline gap-x-2 self-start rounded-md bg-bg-secondary px-3 py-1.5 font-display testo-15 uppercase leading-tight text-text">
+      {titolo}{dettaglio && <span className="font-body testo-12 normal-case text-text-secondary">{dettaglio}</span>}
     </h2>
   );
 }
@@ -115,14 +115,14 @@ function Briciole({ sezione, percorso, vai }: { sezione: Sezione; percorso: Nodo
   const voci = [{ nome: NOME_SEZIONE[sezione], ramo: [] as string[] }, ...percorso.map((n, i) => ({ nome: n.nome, ramo: percorso.slice(0, i + 1).map(segmento) }))];
   return (
     <nav aria-label="Percorso" className="card p-1.5">
-      <ol className="m-0 flex list-none flex-wrap items-center gap-x-1 p-0 text-[14px]">
+      <ol className="m-0 flex list-none flex-wrap items-center gap-x-1 p-0 testo-14">
         {voci.map((v, i) => {
           const ultima = i === voci.length - 1;
           return <li key={v.ramo.join(',') || 'radice'} className="flex items-center gap-1">
             {i > 0 && <span aria-hidden className="text-text-secondary">›</span>}
             {ultima
               ? <span aria-current="page" className="inline-flex min-h-[44px] items-center px-2 font-semibold text-text">{v.nome}</span>
-              : <button type="button" className="touch inline-flex items-center rounded px-2 text-text-secondary hover:text-primary" onClick={() => vai(v.ramo)}>{v.nome}</button>}
+              : <button type="button" className="touch inline-flex items-center rounded px-2 text-text-secondary hover:text-primary-testo" onClick={() => vai(v.ramo)}>{v.nome}</button>}
           </li>;
         })}
       </ol>
@@ -135,7 +135,7 @@ function TestataLivello({ nodo }: { nodo: NodoGerarchiaDto }) {
   return (
     <section className="card flex flex-wrap items-center gap-x-4 gap-y-2 p-3" aria-label={nodo.nome}>
       <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <h2 className="m-0 break-words font-display text-[20px] leading-tight text-text">{nodo.nome}</h2>
+        <h2 className="m-0 break-words font-display testo-20 leading-tight text-text">{nodo.nome}</h2>
         <SegniNodo nodo={nodo} />
         <ChipConteggi nodo={nodo} />
         {nodo.tipo === 'area' && (nodo.accanto?.length ?? 0) > 0 && <Infiltrazioni titolo="Infiltrazioni:" elenco={nodo.accanto ?? []} />}
@@ -209,7 +209,7 @@ function Risultati({ trovati, testo, scendi }: { trovati: Trovato[]; testo: stri
   return <section className="flex flex-col gap-2" aria-label="Risultati della ricerca">
     <TitoloGruppo titolo="Risultati" dettaglio={parola(corrispondenti.length, 'luogo', 'luoghi')} />
     <GrigliaLuoghi voci={voci} etichetta="Risultati della ricerca" />
-    {corrispondenti.length > mostrati.length && <p className="card m-0 p-3 text-[13px] text-text-secondary" role="status">Mostrati i primi {MASSIMO_RISULTATI} luoghi su {corrispondenti.length}: scrivi di più per restringere.</p>}
+    {corrispondenti.length > mostrati.length && <p className="card m-0 p-3 testo-13 text-text-secondary" role="status">Mostrati i primi {MASSIMO_RISULTATI} luoghi su {corrispondenti.length}: scrivi di più per restringere.</p>}
   </section>;
 }
 

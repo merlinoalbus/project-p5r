@@ -46,7 +46,7 @@ describe('FilmPage', () => {
     await act(async () => prima({ ...base, progresso: 1, iniziato: true }));
     await waitFor(() => expect(impostaProgressoFilm).toHaveBeenCalledTimes(2));
     await act(async () => seconda({ ...base, progresso: 2, iniziato: true, fatto: true }));
-    fireEvent.click(await screen.findByRole('button', { name: /Mostra i completati · 1/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /Mostra i completati 1/ }));
     expect(screen.getByText('2 di 2 sessioni')).toBeInTheDocument();
   });
 
@@ -63,7 +63,7 @@ describe('FilmPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Aggiungi una visione a Film di prova' }));
     await waitFor(() => expect(impostaProgressoFilm).toHaveBeenCalledWith(7, 'cinema-prova', 1));
     // finito, va nei completati ma il «+» resta attivo: rivedere conta
-    fireEvent.click(await screen.findByRole('button', { name: /Mostra i completati · 1/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /Mostra i completati 1/ }));
     expect(screen.getByRole('button', { name: 'Aggiungi una visione a Film di prova' })).toBeEnabled();
     fireEvent.click(screen.getByRole('radio', { name: 'Solo DVD' }));
     expect(screen.queryByText('Film di prova')).toBeNull();

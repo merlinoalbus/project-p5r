@@ -60,26 +60,31 @@ export function ToastContainer() {
     return () => { osservatore.disconnect(); dimensioni?.disconnect(); window.removeEventListener('resize', pianifica); if (frame) cancelAnimationFrame(frame); };
   }, [visibile]);
 
-  if (!visibile) return null;
-
   const stile = { ...(posto.bottom !== null ? { bottom: posto.bottom } : {}), ...(posto.aSinistra ? { left: MARGINE, right: 'auto' } : {}) };
+  // L'involucro `status` resta sempre nel DOM, anche a coda vuota: una regione live che nasce insieme al suo testo spesso non viene
+  // letta. Le notifiche entrano lì e si annunciano a fine lettura; gli errori hanno in più `role="alert"` e interrompono.
   return createPortal(
-    <div ref={coda} className="coda-notifiche fixed bottom-20 lg:bottom-5 right-5 flex flex-col gap-2 z-[9999]" style={stile}>
-      {notifications.map((n) => (
-        <div
-          key={n.id}
-          className={`flex items-center gap-3 px-4 py-3 rounded-md bg-surface border border-border shadow-[0_4px_12px_rgba(0,0,0,0.4)] min-w-[280px] max-w-[420px] animate-[toast-in_0.2s_ease-out] border-l-[3px] ${TOAST_BORDER[n.type]}`}
-        >
-          <span className="flex-1 text-[14px]">{n.message}</span>
-          <button
-            className="touch bg-transparent border-none text-text-muted cursor-pointer text-[20px] px-1 py-0 hover:text-text"
-            onClick={() => removeNotification(n.id)}
-            aria-label="Chiudi notifica"
-          >
-            ×
-          </button>
+    <div role="status" aria-live="polite">
+      {visibile && (
+        <div ref={coda} className="coda-notifiche fixed bottom-20 lg:bottom-5 right-5 flex flex-col gap-2 z-[9999]" style={stile}>
+          {notifications.map((n) => (
+            <div
+              key={n.id}
+              role={n.type === 'error' ? 'alert' : undefined}
+              className={`flex items-center gap-3 px-4 py-3 rounded-md bg-surface border border-border shadow-[0_4px_12px_rgba(0,0,0,0.4)] min-w-[280px] max-w-[420px] animate-[toast-in_0.2s_ease-out] border-l-[3px] ${TOAST_BORDER[n.type]}`}
+            >
+              <span className="flex-1 testo-14">{n.message}</span>
+              <button
+                className="touch bg-transparent border-none text-text-muted cursor-pointer testo-20 px-1 py-0 hover:text-text"
+                onClick={() => removeNotification(n.id)}
+                aria-label="Chiudi notifica"
+              >
+                ×
+              </button>
+            </div>
+          ))}
         </div>
-      ))}
+      )}
     </div>,
     document.body,
   );

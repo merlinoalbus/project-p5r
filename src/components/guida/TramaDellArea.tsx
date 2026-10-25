@@ -31,7 +31,7 @@ export function TramaDellArea({ dedalo, areaDedalo, partitaId, modifica, cambiaS
       cambiaStato={cambiaStato} onPuntoAggiornato={onPuntoAggiornato} onRicarica={onRicarica} areaDedalo={areaDedalo} />;
   }
   const voci = dedalo.punti;
-  if (voci.length === 0) return <p className="m-0 text-[12px] text-text-muted">Nessuna voce di Trama in quest’area.</p>;
+  if (voci.length === 0) return <p className="m-0 testo-12 text-text-muted">Nessuna voce di Trama in quest’area.</p>;
   /** Spunta o toglie la spunta a una voce. */
   const alterna = async (p: PuntoInteresseDto) => {
     if (!partitaId || occupata) return;
@@ -42,13 +42,13 @@ export function TramaDellArea({ dedalo, areaDedalo, partitaId, modifica, cambiaS
     <ul className="m-0 flex list-none flex-col p-0" aria-label={`Trama di ${areaDedalo.nome}`}>
       {voci.map((p) => (
         <li key={p.chiave} className="flex flex-col">
-          <label className={`touch flex items-start gap-2.5 py-1.5 text-[13px] ${partitaId ? 'cursor-pointer' : ''}`}>
+          <label className={`touch flex items-start gap-2.5 py-1.5 testo-13 ${partitaId ? 'cursor-pointer' : ''}`}>
             <input type="checkbox" className="mt-0.5 size-5 shrink-0 accent-[var(--color-primary)]" checked={!!p.stato} disabled={!partitaId || occupata === p.chiave}
               onChange={() => void alterna(p)} />
             <span className="flex min-w-0 flex-col gap-0.5">
               <span className={p.stato ? 'text-text-muted line-through' : ''}>{p.nome}</span>
               {/* due righe: per esteso nel suggerimento e in «Modifica la guida» */}
-              {p.descrizione && <span className="line-clamp-2 text-[11px] text-text-muted" title={p.descrizione}>{p.descrizione}</span>}
+              {p.descrizione && <span className="line-clamp-2 testo-12 text-text-muted" title={p.descrizione}>{p.descrizione}</span>}
             </span>
           </label>
         </li>

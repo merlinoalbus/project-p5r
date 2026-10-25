@@ -22,13 +22,13 @@ function Offerta({ offerta: o, nome, partitaId, onCambiata }: { offerta: Offerta
   const requisiti = o.disponibilita?.requisiti ?? [];
   const casa = o.sedeCasa ? `${o.sedeCasa.split('#')[0]}#${ancoraNegozio(o.negozio)}` : `/guida/negozi/${encodeURIComponent(o.negozio)}`;
   return <tr>
-    <td data-etichetta="Negozio"><Link to={casa} className="touch inline-flex items-center">{o.negozioNome}</Link>{o.sedeNome && <span className="block text-[12px] text-text-secondary">{o.sedeNome}</span>}</td>
+    <td data-etichetta="Negozio"><Link to={casa} className="touch inline-flex items-center">{o.negozioNome}</Link>{o.sedeNome && <span className="block testo-12 text-text-secondary">{o.sedeNome}</span>}</td>
     <td data-etichetta="Costo"><CostoDellOggetto costo={o.costo} prezzo={o.prezzo} daVerificare={o.costoDaVerificare} /><NoteStoricheOfferta note={o.noteStoriche} onLegamiCambiati={onCambiata} /></td>
     <td data-etichetta="Oggi"><div className="flex flex-col items-start gap-1">
-      <span className="text-[12px] text-text-secondary">{o.presenza === null ? 'Attiva una partita per la presenza' : o.presenza.stato === 'disponibile' ? 'Aperto adesso' : 'Presenza: vedi requisiti'}</span>
+      <span className="testo-12 text-text-secondary">{o.presenza === null ? 'Attiva una partita per la presenza' : o.presenza.stato === 'disponibile' ? 'Aperto adesso' : 'Presenza: vedi requisiti'}</span>
       {o.disponibileOggi === true && <span className="chip chip--attivo">Disponibile oggi</span>}
       <ChipDisponibilita disponibilita={o.disponibilita ?? undefined} compatto />
-      {(requisiti.length > 0 || o.condizioni.length > 0 || o.nota) && <details className="w-full text-[12px]">
+      {(requisiti.length > 0 || o.condizioni.length > 0 || o.nota) && <details className="w-full testo-12">
         <summary className="touch">Requisiti e note</summary>
         {requisiti.length ? <ul className="m-0 pl-4">{requisiti.map((r, i) => <li key={i}>{r.testo}{r.dettaglio ? ` — ${r.dettaglio}` : ''}</li>)}</ul>
           : o.condizioni.length > 0 && <ul className="m-0 pl-4">{o.condizioni.map((r, i) => <li key={i}>{r.tipo === 'avviso' ? descriviRequisitoSpillo(r) : r.testo}</li>)}</ul>}
@@ -39,13 +39,13 @@ function Offerta({ offerta: o, nome, partitaId, onCambiata }: { offerta: Offerta
       partitaId={partitaId} acquisti={o.acquisti} onRileggi={onCambiata}
       registrati={o.acquistiRegistrati} acquistato={o.acquistato} occupato={occupato}
       bloccato={o.disponibilita !== null && o.disponibilita.stato !== 'disponibile'} onCambia={(chiave, fatto) => void cambia(chiave, fatto)} />
-      {occupato && <span role="status" className="text-[12px] text-text-muted">Salvataggio…</span>}</td>}
+      {occupato && <span role="status" className="testo-12 text-text-muted">Salvataggio…</span>}</td>}
   </tr>;
 }
 
 export function OfferteDellOggetto({ offerte, nome, partitaId, onCambiata }: { offerte: OffertaOggettoDto[]; nome: string; partitaId: number | null; onCambiata: () => void | Promise<void> }) {
-  if (!offerte.length) return <p className="m-0 text-[13px] text-text-secondary">Nessun negozio collegato. Consulta anche dove si trova.</p>;
-  return <div className="min-w-0"><table className="tabella tabella--adattiva w-full text-[13px]">
+  if (!offerte.length) return <p className="m-0 testo-13 text-text-secondary">Nessun negozio collegato. Consulta anche dove si trova.</p>;
+  return <div className="min-w-0"><table className="tabella tabella--adattiva w-full testo-13">
     <thead><tr><th>Negozio</th><th>Costo</th><th>Oggi</th>{partitaId !== null && <th>Acquisto</th>}</tr></thead>
     <tbody>{offerte.map((o) => <Offerta key={`${partitaId}:${o.articolo}:${o.sedeChiave}`} offerta={o} nome={nome} partitaId={partitaId} onCambiata={onCambiata} />)}</tbody>
   </table></div>;

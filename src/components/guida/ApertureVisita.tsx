@@ -4,6 +4,8 @@ import { impostaAzionePercorso } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
 import { Modal } from '../shared/Modal';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 /** Nessuna apertura preselezionata nella prima visita; riaprendo si modificano solo le sue dichiarazioni. */
 export function SceltaApertureVisita({ a, occupato, onConferma, onAnnulla }: {
@@ -12,7 +14,7 @@ export function SceltaApertureVisita({ a, occupato, onConferma, onAnnulla }: {
   const [scelte, setScelte] = useState(() => (a.effetti?.apertureDedali ?? []).map((x) => x.chiave));
   return <Modal titolo="Aperture durante la visita" aperta onChiudi={() => { if (!occupato) onAnnulla(); }} azioni={<>
     <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={onAnnulla}>Annulla</button>
-    <button type="button" className="btn btn-primary touch" disabled={occupato} onClick={() => onConferma(scelte)}>{a.fatta || a.effetti ? 'Salva aperture' : 'Registra visita'}</button>
+    <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo={a.fatta || a.effetti ? 'Salva aperture' : 'Registra visita'} disabled={occupato} onClick={() => onConferma(scelte)} />
   </>}>
     <p className="m-0 mb-2 text-sm">Indica i dedali che hai aperto in questa visita. Puoi lasciare tutte le caselle vuote.</p>
     <div className="flex flex-col gap-1">
@@ -44,7 +46,7 @@ export function ApertureVisitaRegistrata({ a, partitaId, onCambiata, bloccata }:
   };
   return <div className="flex flex-col items-start gap-1">
     {!!a.effetti?.apertureDedali?.length && <span className="text-xs">In questa visita: {a.effetti.apertureDedali.map((x) => x.nome).join(' · ')}</span>}
-    <button type="button" className="btn btn-secondary btn-sm touch" disabled={occupato || bloccata} onClick={() => setAperta(true)}>Modifica aperture della visita</button>
+    <PulsanteVisivo compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica aperture della visita" disabled={occupato || bloccata} onClick={() => setAperta(true)} />
     {aperta && <SceltaApertureVisita a={a} occupato={occupato} onConferma={(c) => void salva(c)} onAnnulla={() => setAperta(false)} />}
   </div>;
 }

@@ -321,13 +321,13 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
             <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Sostituisci ed elimina i pezzi" disabled={occupato}
               onClick={() => { const da = immagineDaConfermare; setImmagineDaConfermare(null); if (da) void esegui(async () => { await da.sostituisci(); setCopiaId(null); }, da.ok); }} />
           </>}>
-          <p className="m-0 text-[13px]">{immagineDaConfermare?.messaggio} I pezzi sono ritagli in pixel di quell’immagine: su un’altra ritaglierebbero zone sbagliate.</p>
+          <p className="m-0 testo-13">{immagineDaConfermare?.messaggio} I pezzi sono ritagli in pixel di quell’immagine: su un’altra ritaglierebbero zone sbagliate.</p>
         </Modal>
       )}
       {condizioniImportate.length > 0 && <Modal titolo="Condizioni recuperate dall’importazione" aperta onChiudi={() => setCondizioniImportate([])} larga
-        azioni={<button type="button" className="btn btn-secondary touch" onClick={() => setCondizioniImportate([])}>Chiudi</button>}>
-        <p className="mt-0 text-[13px]">Queste vecchie condizioni «manuale» sono lette come avvisi non bloccanti. Gli elementi saltati o scartati non sono inclusi.</p>
-        <ul className="m-0 pl-4 text-[13px]">{condizioniImportate.map((c, i) => <li key={i} className="break-words">{c}</li>)}</ul>
+        azioni={<PulsanteVisivo icona={<IconaAzione chiave="chiudi" dimensione={22} />} titolo="Chiudi" onClick={() => setCondizioniImportate([])} />}>
+        <p className="mt-0 testo-13">Queste vecchie condizioni «manuale» sono lette come avvisi non bloccanti. Gli elementi saltati o scartati non sono inclusi.</p>
+        <ul className="m-0 pl-4 testo-13">{condizioniImportate.map((c, i) => <li key={i} className="break-words">{c}</li>)}</ul>
       </Modal>}
       {dati && (
         <Modal titolo={`Eliminare la mappa «${dati.nome}»?`} aperta={confermaEliminaMappa} onChiudi={() => setConfermaEliminaMappa(false)}
@@ -335,7 +335,7 @@ function EditorMappaRisolta({ chiave }: { chiave: string }) {
             <button type="button" className="btn btn-secondary btn-sm" onClick={() => setConfermaEliminaMappa(false)}>Annulla</button>
             <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" disabled={occupato} onClick={() => void esegui(async () => { await eliminaMappa(chiave); navigate(dati.genitore ? `/guida/mappe/${encodeURIComponent(dati.genitore)}/modifica` : '/guida/mappe'); }, 'Mappa eliminata.')} />
           </>}>
-          <p className="m-0 text-[13px]">Gli spilli della mappa vengono eliminati; le mappe figlie ({dati.figli.length}) restano senza genitore. {NEL_CESTINO}</p>
+          <p className="m-0 testo-13">Gli spilli della mappa vengono eliminati; le mappe figlie ({dati.figli.length}) restano senza genitore. {NEL_CESTINO}</p>
         </Modal>
       )}
     </PageState>
@@ -423,20 +423,20 @@ function PannelloEditor(p: PropsPannello) {
       <div hidden={sezione !== 'pezzi'} className="editor-mappa__contenuto">
       <section className="visore-mappa__sezione" aria-label="Pezzi della planimetria">
         <h3 className="visore-mappa__intestazione">Pezzi</h3>
-        <p className="m-0 text-[12px] text-text-muted">Le parti disegnate a parte nell’immagine (muri mobili, passerelle…): con «Ritaglia pezzo» trascini un rettangolo attorno a una, che sparisce dalla mappa e diventa un pezzo da posare dove va, della stessa misura, con le condizioni che lo mostrano.</p>
+        <p className="m-0 testo-12 text-text-muted">Le parti disegnate a parte nell’immagine (muri mobili, passerelle…): con «Ritaglia pezzo» trascini un rettangolo attorno a una, che sparisce dalla mappa e diventa un pezzo da posare dove va, della stessa misura, con le condizioni che lo mostrano.</p>
         <PulsanteVisivo tono="secondario" compatto attivo={strumento === 'ritaglia'} icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Ritaglia pezzo" dettaglio={strumento === 'ritaglia' ? 'trascina un rettangolo sulla mappa' : 'poi trascina sulla mappa'}
           disabled={occupato || !immagineDiBase} onClick={() => p.onStrumento(strumento === 'ritaglia' ? 'seleziona' : 'ritaglia')} />
-        {!immagineDiBase && <p className="m-0 text-[12px] text-text-muted">Serve un’immagine di base da cui ritagliare.</p>}
+        {!immagineDiBase && <p className="m-0 testo-12 text-text-muted">Serve un’immagine di base da cui ritagliare.</p>}
         {mappa.pezzi.length === 0
-          ? <p className="m-0 text-[12px] text-text-muted">Nessun pezzo su questa mappa.</p>
+          ? <p className="m-0 testo-12 text-text-muted">Nessun pezzo su questa mappa.</p>
           : (
             // ogni pezzo con le sue copie (103): il nome e la zona del ritaglio, poi una voce per copia
             <ul className="m-0 p-0 list-none flex flex-col gap-1" aria-label="Pezzi di questa mappa">
               {mappa.pezzi.map((pz) => (
                 <li key={pz.id}>
-                  <p className="m-0 px-2 pt-1 flex items-baseline gap-2 text-[12px]">
+                  <p className="m-0 px-2 pt-1 flex items-baseline gap-2 testo-12">
                     <span className="flex-1 min-w-0 truncate font-semibold">{pz.nome}</span>
-                    <span className="text-[11px] text-text-muted shrink-0">{pz.sorgente.larghezza}×{pz.sorgente.altezza} px · {pz.copie.length === 1 ? '1 copia' : `${pz.copie.length} copie`}</span>
+                    <span className="testo-12 text-text-muted shrink-0">{pz.sorgente.larghezza}×{pz.sorgente.altezza} px · {pz.copie.length === 1 ? '1 copia' : `${pz.copie.length} copie`}</span>
                   </p>
                   <ul className="m-0 pl-3 list-none flex flex-col" aria-label={`Copie di ${pz.nome}`}>
                     {pz.copie.map((c, i) => {
@@ -445,7 +445,7 @@ function PannelloEditor(p: PropsPannello) {
                         <li key={c.id}>
                           <button type="button" className={`visore-mappa__voce ${attiva ? 'visore-mappa__voce--attiva' : ''}`} aria-pressed={attiva} onClick={() => p.onSelezionaCopia(attiva ? null : c.id)}>
                             <span className="flex-1 min-w-0 truncate">{nomeCopia(pz, c, i)}</span>
-                            <span className="text-[11px] text-text-muted shrink-0">{c.posizione.x}, {c.posizione.y}{c.rotazione ? ` · ${c.rotazione}°` : ''}{c.condizioni.length ? ` · ${c.condizioni.length === 1 ? '1 condizione' : `${c.condizioni.length} condizioni`}` : ''}</span>
+                            <span className="testo-12 text-text-muted shrink-0">{c.posizione.x}, {c.posizione.y}{c.rotazione ? ` · ${c.rotazione}°` : ''}{c.condizioni.length ? ` · ${c.condizioni.length === 1 ? '1 condizione' : `${c.condizioni.length} condizioni`}` : ''}</span>
                           </button>
                         </li>
                       );
@@ -490,7 +490,7 @@ function PannelloEditor(p: PropsPannello) {
             ))}
           </div>
         )}
-        <p className="m-0 text-[12px] text-text-muted">{strumento === 'aggiungi' ? 'Tocca la mappa dove vuoi lo spillo: viene creato subito con il tipo scelto.' : strumento === 'incolla' ? `Tocca la mappa dove vuoi la copia di «${appunti?.nome ?? 'spillo'}»: stesso tipo, nome, descrizione, riferimento e condizioni di visibilità; gli appunti restano per altre copie, anche su altre mappe.` : 'Tocca uno spillo per modificarlo, trascinalo per spostarlo (posizione salvata al rilascio); il tipo si cambia dal pannello senza ricreare lo spillo.'}</p>
+        <p className="m-0 testo-12 text-text-muted">{strumento === 'aggiungi' ? 'Tocca la mappa dove vuoi lo spillo: viene creato subito con il tipo scelto.' : strumento === 'incolla' ? `Tocca la mappa dove vuoi la copia di «${appunti?.nome ?? 'spillo'}»: stesso tipo, nome, descrizione, riferimento e condizioni di visibilità; gli appunti restano per altre copie, anche su altre mappe.` : 'Tocca uno spillo per modificarlo, trascinalo per spostarlo (posizione salvata al rilascio); il tipo si cambia dal pannello senza ricreare lo spillo.'}</p>
       </section>
 
       {selezionato && (
@@ -502,7 +502,7 @@ function PannelloEditor(p: PropsPannello) {
       <div hidden={sezione !== 'mappa'} className="editor-mappa__contenuto">
       <section className="visore-mappa__sezione" aria-label="Immagine di base">
         <h3 className="visore-mappa__intestazione">Immagine di base</h3>
-        <p className="m-0 text-[12px] text-text-muted">{mappa.immagineUrl ? `Immagine dell'istanza${mappa.larghezza && mappa.altezza ? ` · ${mappa.larghezza}×${mappa.altezza}` : ''}` : mappa.asset ? (immagineDiBase ? `Asset del repository «${mappa.asset}».` : `Asset del repository «${mappa.asset}» non ancora consegnato: gli spilli stanno su una griglia.`) : 'Nessuna immagine: gli spilli stanno su una griglia.'} Cambiare immagine mantiene gli spilli (coordinate in percentuale).</p>
+        <p className="m-0 testo-12 text-text-muted">{mappa.immagineUrl ? `Immagine dell'istanza${mappa.larghezza && mappa.altezza ? ` · ${mappa.larghezza}×${mappa.altezza}` : ''}` : mappa.asset ? (immagineDiBase ? `Asset del repository «${mappa.asset}».` : `Asset del repository «${mappa.asset}» non ancora consegnato: gli spilli stanno su una griglia.`) : 'Nessuna immagine: gli spilli stanno su una griglia.'} Cambiare immagine mantiene gli spilli (coordinate in percentuale).</p>
         <input ref={inputImmagine} type="file" accept="image/*" className="sr-only" aria-label="File dell'immagine di base" onChange={(e: ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) void p.onImmagine(f); e.target.value = ''; }} />
         <div className="flex flex-wrap gap-1.5">
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo={mappa.immagineUrl ? 'Sostituisci immagine' : 'Carica immagine'} disabled={occupato} onClick={() => inputImmagine.current?.click()} />
@@ -511,12 +511,12 @@ function PannelloEditor(p: PropsPannello) {
 
       {/* FUN2-8: il server non mette nel mondo una planimetria senza Area; il suo messaggio resta qui, con le due strade */}
       {p.avvisoMondo && (
-        <div role="alert" aria-label="La mappa non si sposta lì" className="flex flex-col gap-1.5 rounded-md border border-warning/60 bg-white/[0.04] p-2 text-[13px]">
+        <div role="alert" aria-label="La mappa non si sposta lì" className="flex flex-col gap-1.5 rounded-md border border-warning/60 bg-white/[0.04] p-2 testo-13">
           <p className="m-0">{p.avvisoMondo.messaggio}</p>
           <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            {p.avvisoMondo.aggiunta && <Link className="touch inline-flex items-center text-primary" to={p.avvisoMondo.aggiunta.href}>{p.avvisoMondo.aggiunta.testo}</Link>}
-            <Link className="touch inline-flex items-center text-primary" to="/guida/citta">Planimetrie da collocare</Link>
-            <button type="button" className="btn btn-ghost btn-sm touch ml-auto" aria-label="Chiudi l’avviso" onClick={p.onChiudiAvvisoMondo}>Chiudi</button>
+            {p.avvisoMondo.aggiunta && <Link className="touch inline-flex items-center text-primary-testo" to={p.avvisoMondo.aggiunta.href}>{p.avvisoMondo.aggiunta.testo}</Link>}
+            <Link className="touch inline-flex items-center text-primary-testo" to="/guida/citta">Planimetrie da collocare</Link>
+            <PulsanteVisivo tono="fantasma" compatto className="ml-auto" icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Chiudi" aria-label="Chiudi l’avviso" onClick={p.onChiudiAvvisoMondo} />
           </span>
         </div>
       )}
@@ -526,14 +526,14 @@ function PannelloEditor(p: PropsPannello) {
       <div hidden={sezione !== 'collegamenti'} className="editor-mappa__contenuto">
       <section className="visore-mappa__sezione" aria-label="Albero delle mappe">
         <h3 className="visore-mappa__intestazione">Albero</h3>
-        <p className="m-0 text-[12px] text-text-muted">L'albero dice chi contiene chi; sulla mappa ci si sposta con gli spilli «passaggio». Una figlia «senza passaggio» si raggiunge solo da qui.</p>
+        <p className="m-0 testo-12 text-text-muted">L'albero dice chi contiene chi; sulla mappa ci si sposta con gli spilli «passaggio». Una figlia «senza passaggio» si raggiunge solo da qui.</p>
         {mappa.genitore && (
           <div className="flex flex-col gap-1">
             <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="indietro" dimensione={20} />} titolo={`Su: ${mappa.genitoreNome ?? mappa.genitore}`} onClick={() => p.onVai(mappa.genitore!)} />
             {!raggiunge(mappa.genitore) && (
               <div className="editor-mappa__senza-passaggio">
                 <span className="flex-1 min-w-0">Nessun passaggio di ritorno verso «{mappa.genitoreNome ?? mappa.genitore}».</span>
-                <button type="button" className="visore-mappa__azione-testo touch" disabled={occupato} onClick={() => void p.onCreaPassaggio(mappa.genitore!)}>Crea passaggio di ritorno</button>
+                <PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Crea passaggio di ritorno" disabled={occupato} onClick={() => void p.onCreaPassaggio(mappa.genitore!)} />
               </div>
             )}
           </div>
@@ -545,12 +545,12 @@ function PannelloEditor(p: PropsPannello) {
                 <button type="button" className="visore-mappa__figlia" onClick={() => p.onVai(f.chiave)}>
                   <IconaSpillo tipo="passaggio" dimensione={18} />
                   <span className="flex-1 min-w-0 truncate">{etichettaPlanimetria(f)}</span>
-                  <span className="text-[11px] text-text-muted">{NOME_TIPO_MAPPA[f.tipo]}{f.numeroSpilli > 0 ? ` · ${f.numeroSpilli}` : ''}</span>
+                  <span className="testo-12 text-text-muted">{NOME_TIPO_MAPPA[f.tipo]}{f.numeroSpilli > 0 ? ` · ${f.numeroSpilli}` : ''}</span>
                 </button>
                 {!raggiunge(f.chiave) && (
                   <div className="editor-mappa__senza-passaggio">
                     <span className="flex-1 min-w-0">Senza passaggio da questa mappa.</span>
-                    <button type="button" className="visore-mappa__azione-testo touch" disabled={occupato} onClick={() => void p.onCreaPassaggio(f.chiave)} aria-label={`Crea passaggio verso ${nomePresentazioneMappa(f)}`}>Crea passaggio</button>
+                    <PulsanteVisivo compatto className="shrink-0" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Crea passaggio" disabled={occupato} onClick={() => void p.onCreaPassaggio(f.chiave)} aria-label={`Crea passaggio verso ${nomePresentazioneMappa(f)}`} />
                   </div>
                 )}
               </li>
@@ -566,14 +566,14 @@ function PannelloEditor(p: PropsPannello) {
       <div hidden={sezione !== 'file'} className="editor-mappa__contenuto">
       <section className="visore-mappa__sezione" aria-label="Esportazione e importazione">
         <h3 className="visore-mappa__intestazione">Scambio</h3>
-        <p className="m-0 text-[12px] text-text-muted">Le mappe fanno parte dei dati di gioco: per portarle in un'altra istanza, o farne il dato predefinito dell'app, si usa il pacchetto di gioco (Impostazioni → Dati di gioco). «Esporta» salva tutte le mappe in un JSON (con le immagini dell'istanza in base64) per copie e trasferimenti; «Importa» legge lo stesso formato.</p>
+        <p className="m-0 testo-12 text-text-muted">Le mappe fanno parte dei dati di gioco: per portarle in un'altra istanza, o farne il dato predefinito dell'app, si usa il pacchetto di gioco (Impostazioni → Dati di gioco). «Esporta» salva tutte le mappe in un JSON (con le immagini dell'istanza in base64) per copie e trasferimenti; «Importa» legge lo stesso formato.</p>
         <input ref={inputImporta} type="file" accept="application/json,.json" className="sr-only" aria-label="File del pacchetto da importare" onChange={(e: ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) void p.onImporta(f, sovrascrivi); e.target.value = ''; }} />
         <div className="flex flex-wrap gap-1.5 items-center">
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Esporta" dettaglio="tutte le mappe, JSON" disabled={occupato} onClick={p.onEsporta} />
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Importa" disabled={occupato} onClick={() => inputImporta.current?.click()} />
           {/* `touch` sull'etichetta: senza, il bersaglio era alto 19 px — l'unica casella dell'app
               rimasta senza, insieme a quella della merce (misurato, non dedotto). */}
-          <label className="touch flex items-center gap-2 text-[12px]"><input type="checkbox" className="w-5 h-5" checked={sovrascrivi} onChange={(e) => setSovrascrivi(e.target.checked)} /> Sovrascrivi le mappe esistenti</label>
+          <label className="touch flex items-center gap-2 testo-12"><input type="checkbox" className="w-5 h-5" checked={sovrascrivi} onChange={(e) => setSovrascrivi(e.target.checked)} /> Sovrascrivi le mappe esistenti</label>
         </div>
       </section>
       </div>
@@ -592,12 +592,12 @@ function DestinazioneSpostamento({ valore, mappaCorrente, albero, disabilitato, 
   const spilli = useMemo(() => [{ chiave: '', nome: 'Nessuno: solo la mappa, adattata alla finestra' }, ...(arrivo.dati?.spilli ?? []).map((s) => ({ chiave: String(s.id), nome: s.nome, dettaglio: s.tipoNome }))], [arrivo.dati]);
   return (
     <fieldset className="m-0 p-0 border-0 flex flex-col gap-1.5" disabled={disabilitato}>
-      <legend className="text-[12px] text-text-secondary">Porta a</legend>
+      <legend className="testo-12 text-text-secondary">Porta a</legend>
       <Selettore ricerca="sempre" etichetta="Mappa di arrivo" valore={valore?.mappa ?? ''} opzioni={mappe} segnaposto="Scegli la mappa…" onCambia={(k) => onCambia(k ? { mappa: k, spillo: null } : null)} />
       {valore && (arrivo.errore
-        ? <p role="alert" className="m-0 text-[12px]">{arrivo.errore} <button type="button" className="visore-mappa__azione-testo" onClick={() => void arrivo.ricarica()}>Riprova</button></p>
+        ? <p role="alert" className="m-0 testo-12">{arrivo.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void arrivo.ricarica()} /></p>
         : <Selettore ricerca="sempre" etichetta="Spillo di arrivo (facoltativo)" valore={valore.spillo ? String(valore.spillo) : ''} opzioni={spilli} onCambia={(k) => onCambia({ mappa: valore.mappa, spillo: k ? Number(k) : null })} disabilitato={arrivo.caricamento} />)}
-      {valore && <div className="flex gap-2"><button type="button" className="visore-mappa__azione-testo" onClick={() => onCambia(null)}>Togli la destinazione</button></div>}
+      {valore && <div className="flex gap-2"><PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Togli la destinazione" onClick={() => onCambia(null)} /></div>}
     </fieldset>
   );
 }
@@ -610,14 +610,14 @@ function CollegamentoCitta({ valore, disabilitato, onCambia }: { valore: { tipo:
   const etichetta = COLLEGAMENTI_CITTA.find((c) => c.tipo === tipo)?.nome ?? 'Collegamento';
   return (
     <fieldset className="m-0 p-0 border-0 flex flex-col gap-1.5" disabled={disabilitato}>
-      <legend className="text-[12px] text-text-secondary">Collegato a</legend>
+      <legend className="testo-12 text-text-secondary">Collegato a</legend>
       <div className="flex flex-wrap gap-1" role="group" aria-label="Che cosa collegare">
         {COLLEGAMENTI_CITTA.map((c) => <button key={c.tipo} type="button" className={`chip chip--icona touch ${tipo === c.tipo ? 'chip--attivo' : ''}`} aria-pressed={tipo === c.tipo} onClick={() => { setTipo(c.tipo); if (valore && valore.tipo !== c.tipo) onCambia(null); }}>{c.nome}</button>)}
       </div>
       {voci.errore
-        ? <p role="alert" className="m-0 text-[12px]">{voci.errore} <button type="button" className="visore-mappa__azione-testo" onClick={() => void voci.ricarica()}>Riprova</button></p>
+        ? <p role="alert" className="m-0 testo-12">{voci.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void voci.ricarica()} /></p>
         : <Selettore ricerca="sempre" etichetta={`Elenco: ${etichetta}`} valore={valore?.tipo === tipo ? valore.chiave : ''} opzioni={opzioni} segnaposto="Scegli…" onCambia={(k) => onCambia(k ? { tipo, chiave: k } : null)} disabilitato={voci.caricamento} />}
-      {valore && <button type="button" className="visore-mappa__azione-testo self-start" onClick={() => onCambia(null)}>Togli il collegamento</button>}
+      {valore && <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Togli il collegamento" onClick={() => onCambia(null)} />}
     </fieldset>
   );
 }
@@ -633,20 +633,20 @@ function VociDelPin({ spillo: s, disabilitato, onCollega }: { spillo: SpilloDto;
   if (s.voci.length === 0 && !collegabili.errore && opzioni.length === 0) return null;
   return (
     <fieldset className="m-0 p-0 border-0 flex flex-col gap-1.5" disabled={disabilitato}>
-      <legend className="text-[12px] text-text-secondary">Voci della guida ({s.voci.length})</legend>
+      <legend className="testo-12 text-text-secondary">Voci della guida ({s.voci.length})</legend>
       {s.voci.length > 0 && (
         <ul className="m-0 p-0 list-none flex flex-col gap-1" aria-label="Voci della guida del pin">
           {s.voci.map((v) => (
-            <li key={v.chiave} className="flex items-center gap-1 text-[12px]">
+            <li key={v.chiave} className="flex items-center gap-1 testo-12">
               <strong className="min-w-0 flex-1 break-words">{v.nome}</strong>
-              <button type="button" className="visore-mappa__azione-testo touch" onClick={() => void onCollega(v.chiave, false)} aria-label={`Scollega la voce ${v.nome}`}>Scollega</button>
+              <PulsanteVisivo tono="fantasma" compatto className="shrink-0" icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Scollega" onClick={() => void onCollega(v.chiave, false)} aria-label={`Scollega la voce ${v.nome}`} />
             </li>
           ))}
         </ul>
       )}
-      {s.voci.length > 0 && <p className="m-0 text-[12px] text-text-muted">{s.voci.length === 1 ? 'Lo stato «ottenuto / esaurito» si condivide con la scheda del Palazzo.' : 'Ogni voce si segna da sola, anche dalla scheda del Palazzo; il pin è fatto quando lo sono tutte.'}</p>}
+      {s.voci.length > 0 && <p className="m-0 testo-12 text-text-muted">{s.voci.length === 1 ? 'Lo stato «ottenuto / esaurito» si condivide con la scheda del Palazzo.' : 'Ogni voce si segna da sola, anche dalla scheda del Palazzo; il pin è fatto quando lo sono tutte.'}</p>}
       {collegabili.errore
-        ? <p role="alert" className="m-0 text-[12px]">{collegabili.errore} <button type="button" className="visore-mappa__azione-testo" onClick={() => void collegabili.ricarica()}>Riprova</button></p>
+        ? <p role="alert" className="m-0 testo-12">{collegabili.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void collegabili.ricarica()} /></p>
         : opzioni.length > 0 && <Selettore ricerca="sempre" etichetta="Aggiungi voce" valore="" opzioni={opzioni} segnaposto="Scegli la voce…" disabilitato={collegabili.caricamento} onCambia={(k) => { if (k) void onCollega(k, true); }} />}
     </fieldset>
   );
@@ -719,8 +719,8 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
       <div className="flex items-start gap-2">
         <PuntoSpillo tipo={tipo} colore={DEFINIZIONI_SPILLO[tipo].colore} grande />
         <div className="flex-1 min-w-0">
-          <h3 className="m-0 font-display text-[19px] leading-tight break-words">{s.nome}</h3>
-          <p className="m-0 text-[11px] uppercase tracking-wide text-text-muted">{DEFINIZIONI_CATEGORIA[categoria].nome} · x {s.x}% · y {s.y}% · {s.origine}</p>
+          <h3 className="m-0 font-display testo-20 leading-tight break-words">{s.nome}</h3>
+          <p className="m-0 testo-12 uppercase tracking-wide text-text-muted">{DEFINIZIONI_CATEGORIA[categoria].nome} · x {s.x}% · y {s.y}% · {s.origine}</p>
         </div>
         <button type="button" className="btn btn-ghost btn-sm" onClick={onChiudi} aria-label="Chiudi le proprietà">×</button>
       </div>
@@ -730,20 +730,20 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
       )}
       <form className="flex flex-col gap-2" onSubmit={salva}>
         <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} required maxLength={LIMITI_GUIDA.spillo.nome} readOnly={!!luogo} aria-describedby={luogo ? 'spillo-dal-luogo' : undefined} /></label>
-        {luogo && <p id="spillo-dal-luogo" className="m-0 flex flex-wrap items-center gap-1.5 text-[12px] text-text-muted">Nome e descrizione vengono dal luogo «{luogo.nome}»: qui si scrive solo la nota del pin.
-          <Link to={luogo.casa!} className="touch inline-flex items-center text-primary">Modifica il luogo</Link></p>}
+        {luogo && <p id="spillo-dal-luogo" className="m-0 flex flex-wrap items-center gap-1.5 testo-12 text-text-muted">Nome e descrizione vengono dal luogo «{luogo.nome}»: qui si scrive solo la nota del pin.
+          <Link to={luogo.casa!} className="touch inline-flex items-center text-primary-testo">Modifica il luogo</Link></p>}
         <div className="editor-mappa__campo">
           <Selettore etichetta="Tipo" valore={tipo} opzioni={CATEGORIE_SPILLO.flatMap((c) => tipiDellaCategoria(c).map((t) => ({ chiave: t, nome: DEFINIZIONI_SPILLO[t].nome, gruppo: DEFINIZIONI_CATEGORIA[c].nome })))} onCambia={(k) => cambiaTipo(k as TipoSpillo)} />
         </div>
         {/* un informativo con uno stato suo (meccanismo, punto sensibile, nemico, porta chiusa: 2026-10-03) non è «un segno e basta» */}
-        <p className="m-0 text-[12px] text-text-muted">{categoria === 'informativo' && statoDelTipo(tipo) ? `Un segno sulla mappa con uno stato da segnare nella partita («${statoDelTipo(tipo)}»); non conta nel completamento della mappa.` : DEFINIZIONI_CATEGORIA[categoria].descrizione}</p>
+        <p className="m-0 testo-12 text-text-muted">{categoria === 'informativo' && statoDelTipo(tipo) ? `Un segno sulla mappa con uno stato da segnare nella partita («${statoDelTipo(tipo)}»); non conta nel completamento della mappa.` : DEFINIZIONI_CATEGORIA[categoria].descrizione}</p>
         {/* un pin di città con uno stato suo (il Confidente, «incontrato»: 2026-10-03) */}
-        {categoria === 'citta' && statoDelTipo(tipo) && <p className="m-0 text-[12px] text-text-muted">Ha uno stato da segnare nella partita («{statoDelTipo(tipo)}»); non conta nel completamento della mappa.</p>}
+        {categoria === 'citta' && statoDelTipo(tipo) && <p className="m-0 testo-12 text-text-muted">Ha uno stato da segnare nella partita («{statoDelTipo(tipo)}»); non conta nel completamento della mappa.</p>}
         <label className="editor-mappa__campo">{luogo ? 'Nota del pin' : 'Descrizione'}<textarea className="form-input" rows={3} value={descrizione} onChange={(e) => setDescrizione(e.target.value)} maxLength={LIMITI_GUIDA.spillo.descrizione} /></label>
         {luogo && descrizione && <div className="flex flex-wrap gap-1.5">
-          <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato || spostando} onClick={() => setDescrizione('')}>Togli la nota</button>
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli la nota" disabled={occupato || spostando} onClick={() => setDescrizione('')} />
           {/* L5 (M §4.4): la nota va nelle note del luogo, poi il campo si svuota; salvando lo spillo la nota esce dal pin (due gesti espliciti) */}
-          <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato || spostando} onClick={() => void spostaNelLuogo()}>Sposta nel luogo</button>
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="incolla" dimensione={20} />} titolo="Sposta nel luogo" disabled={occupato || spostando} onClick={() => void spostaNelLuogo()} />
         </div>}
 
         {categoria === 'spostamento' && <DestinazioneSpostamento valore={destinazione} mappaCorrente={mappa.chiave} albero={albero} disabilitato={occupato} onCambia={setDestinazione} />}
@@ -751,7 +751,7 @@ function FormSpillo({ spillo: s, mappa, albero, occupato, elenchi, onSalva, onCo
         {categoria === 'citta' && azioneLuogo}
         {puoCreareLuogo && (modificato || !s.uid) && <p className="editor-mappa__avviso">{!s.uid ? 'Ricarica la mappa per recuperare l’identità del pin.' : 'Salva prima le modifiche del pin.'}</p>}
         <VociDelPin spillo={s} disabilitato={occupato} onCollega={onCollegaVoce} />
-        {categoria === 'consumabile' && <p className="m-0 text-[12px] text-text-muted">Si segna nella partita («{statoDelTipo(tipo)}»); non porta da nessuna parte.</p>}
+        {categoria === 'consumabile' && <p className="m-0 testo-12 text-text-muted">Si segna nella partita («{statoDelTipo(tipo)}»); non porta da nessuna parte.</p>}
         {ammetteCondizioni(tipo) && <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} elenchi={elenchi} disabilitato={occupato} perSpillo pinCorrente={s.uid} />}
 
         <div className="flex flex-wrap gap-1.5">
@@ -808,7 +808,7 @@ function FormMappa({ mappa, albero, occupato, onSalva, onElimina }: PropsFormMap
           <label className="editor-mappa__campo">Ordine<input className="form-input" type="number" min={0} value={ordine} onChange={(e) => setOrdine(e.target.value)} /></label>
         </div>
         {dellArea && mappa.area
-          ? <p className="m-0 text-[12px] text-text-muted">Planimetria dell’area «{mappa.area.nome}» ({mappa.area.contenitore.nome}){mappa.area.versioneEtichetta ? `, versione «${mappa.area.versioneEtichetta}»` : ''}: l’area e le sue versioni si cambiano dalla <Link to={mappa.area.casa}>pagina dell’area</Link>.</p>
+          ? <p className="m-0 testo-12 text-text-muted">Planimetria dell’area «{mappa.area.nome}» ({mappa.area.contenitore.nome}){mappa.area.versioneEtichetta ? `, versione «${mappa.area.versioneEtichetta}»` : ''}: l’area e le sue versioni si cambiano dalla <Link to={mappa.area.casa}>pagina dell’area</Link>.</p>
           : (
             <div className="editor-mappa__campo">
               <Selettore etichetta="Mappa genitore" valore={genitore} vuoto="— nessuna (radice) —" opzioni={albero.filter((m) => !discendenti.has(m.chiave)).map((m) => ({ chiave: m.chiave, nome: etichettaPlanimetria(m), dettaglio: NOME_TIPO_MAPPA[m.tipo] }))} onCambia={setGenitore} />

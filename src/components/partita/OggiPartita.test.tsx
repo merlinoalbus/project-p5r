@@ -54,7 +54,7 @@ describe('OggiPartita', () => {
     // planimetria dell'atlante, cioe' una seconda rappresentazione della stessa citta' dentro la
     // stessa app. Percio' `getMappa('tokyo')` non viene piu' chiamata: quel livello non e' un
     // nodo da caricare, e' un disegno.
-    expect(await screen.findByRole('img', { name: /^Mappa di Tokyo con/ })).toBeInTheDocument();
+    expect(await screen.findByRole('group', { name: /^Mappa di Tokyo con/ })).toBeInTheDocument();
     expect(api.getMappa).not.toHaveBeenCalledWith('tokyo', 4);
     // i Palazzi con la partita: uno completato sulla mappa di Tokyo non c'è più
     expect(api.getDungeons).toHaveBeenCalledWith(4);
@@ -70,7 +70,7 @@ describe('OggiPartita', () => {
     expect(await screen.findByRole('dialog', { name: 'Cortile della Shujin' })).toBeInTheDocument();
     expect(within(screen.getByRole('list', { name: 'Azioni di giorno' })).getByRole('listitem')).toHaveAttribute('aria-current', 'true');
     fireEvent.click(screen.getByRole('button', { name: 'Torna a Tokyo' }));
-    expect(await screen.findByRole('img', { name: /^Mappa di Tokyo con/ })).toBeInTheDocument();
+    expect(await screen.findByRole('group', { name: /^Mappa di Tokyo con/ })).toBeInTheDocument();
   });
 
   it('«Giorno»/«Sera» cambiano il momento della giornata della partita: la PUT aggiorna lo store e la mappa incorporata si ricarica', async () => {

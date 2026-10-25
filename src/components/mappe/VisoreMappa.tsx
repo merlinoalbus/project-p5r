@@ -25,7 +25,7 @@ import { DEFINIZIONI_SPILLO, TIPI_SPILLO, categoriaSpillo, parolaDelloStato, pun
 import { useImmagineMappa } from '../../hooks/useImmagineMappa';
 import { IconaSpillo, PuntoSpillo, SpilloGrafico } from './IconaSpillo';
 import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
-import { IconaAzione } from '../shared/IconaAzione';
+import { IconaAzione, IconaSegno } from '../shared/IconaAzione';
 import { IconMappa } from '../shared/iconeGuida';
 import { AssetImg } from '../shared/AssetImg';
 import { Modal } from '../shared/Modal';
@@ -232,13 +232,13 @@ export function GalleriaSpillo({ immagini, nome, compatta }: { immagini: Immagin
         {immagini.map((i, n) => (
           <li key={i.id}>
             <button type="button" className="p-0 border border-border bg-bg-tertiary block" style={{ width: d, height: d }} onClick={() => setAperta(i)} title={i.didascalia || `Schermata ${n + 1}`} aria-label={`Ingrandisci: ${i.didascalia || `schermata ${n + 1}`}`}>
-              {i.url ? <img src={i.url} alt="" className="w-full h-full object-cover" draggable={false} /> : <AssetImg nome={i.asset} alt="" decorativa className="w-full h-full object-cover" fallback={<span className="text-[10px] text-text-muted">asset</span>} />}
+              {i.url ? <img src={i.url} alt="" className="w-full h-full object-cover" draggable={false} /> : <AssetImg nome={i.asset} alt="" decorativa className="w-full h-full object-cover" fallback={<span className="testo-12 text-text-muted">asset</span>} />}
             </button>
           </li>
         ))}
       </ul>
       <Modal titolo={aperta?.didascalia || nome} aperta={aperta !== null} onChiudi={() => setAperta(null)} larga>
-        {aperta && (aperta.url ? <img src={aperta.url} alt={aperta.didascalia || nome} className="max-w-full max-h-[75vh] mx-auto block" /> : <AssetImg nome={aperta.asset} alt={aperta.didascalia || nome} className="max-w-full max-h-[75vh] mx-auto block" fallback={<p className="m-0 text-[13px] text-text-muted">Asset «{aperta.asset}» non ancora presente nel repository.</p>} />)}
+        {aperta && (aperta.url ? <img src={aperta.url} alt={aperta.didascalia || nome} className="max-w-full max-h-[75vh] mx-auto block" /> : <AssetImg nome={aperta.asset} alt={aperta.didascalia || nome} className="max-w-full max-h-[75vh] mx-auto block" fallback={<p className="m-0 testo-13 text-text-muted">Asset «{aperta.asset}» non ancora presente nel repository.</p>} />)}
       </Modal>
     </>
   );
@@ -805,7 +805,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
               {i < mappa.percorso.length - 1 ? <button type="button" className="visore-mappa__briciola" onClick={() => onNaviga(p.chiave)}>{p.nome}</button> : <span className="visore-mappa__titolo" title={incorporato ? `${percorsoTesto} · ${nomeTipoMappa(mappa)}` : undefined}>{p.nome}</span>}
             </span>
           ))}
-          <span className="visore-mappa__tipo chip text-[11px]">{nomeTipoMappa(mappa)}</span>
+          <span className="visore-mappa__tipo chip testo-12">{nomeTipoMappa(mappa)}</span>
         </nav>
         <div className="visore-mappa__strumenti">
           {azioni}
@@ -834,7 +834,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                       <button type="button" className="visore-mappa__figlia" onClick={() => onNaviga(f.chiave)}>
                         <IconaAzione chiave="mappa" dimensione={18} />
                         <span className="flex-1 min-w-0 truncate">{nomeDellaMeta(f)}</span>
-                        <span className="text-[11px] text-text-muted">{nomeTipoMappa(f)}{f.numeroSpilli > 0 ? ` · ${f.numeroSpilli}` : ''}</span>
+                        <span className="testo-12 text-text-muted">{nomeTipoMappa(f)}{f.numeroSpilli > 0 ? ` · ${f.numeroSpilli}` : ''}</span>
                       </button>
                     </li>
                   ))}
@@ -848,13 +848,13 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
               <h3 className="visore-mappa__intestazione">Categorie</h3>
               {tipiPresenti.length > 0 && (
                 <span className="flex gap-1">
-                  <button type="button" className="visore-mappa__azione-testo" onClick={mostraTutti} disabled={tipiNascosti.size === 0}>Mostra tutti</button>
-                  <button type="button" className="visore-mappa__azione-testo" onClick={nascondiTutti} disabled={tipiNascosti.size === tipiPresenti.length}>Nascondi tutti</button>
+                  <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="tutti" dimensione={20} />} titolo="Mostra tutti" onClick={mostraTutti} disabled={tipiNascosti.size === 0} />
+                  <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Nascondi tutti" onClick={nascondiTutti} disabled={tipiNascosti.size === tipiPresenti.length} />
                 </span>
               )}
             </div>
             {/* «pin» e nessun «mappa» (R2-39, UX2-9 b) */}
-            {tipiPresenti.length === 0 && <p className="m-0 text-[12px] text-text-muted">Nessun pin qui.</p>}
+            {tipiPresenti.length === 0 && <p className="m-0 testo-12 text-text-muted">Nessun pin qui.</p>}
             <ul className="m-0 p-0 list-none visore-mappa__categorie" aria-label="Categorie degli spilli">
               {tipiPresenti.map((t) => {
                 const delTipo = mappa.spilli.filter((s) => s.tipo === t);
@@ -872,7 +872,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
               })}
             </ul>
             {(raccoltiNascosti > 0 || mostraRaccolti) && (
-              <button type="button" className={`chip chip--icona touch text-[11px] self-start ${mostraRaccolti ? 'chip--attivo' : ''}`} aria-pressed={mostraRaccolti} onClick={() => setMostraRaccolti((v) => !v)}>
+              <button type="button" className={`chip chip--icona touch testo-12 self-start ${mostraRaccolti ? 'chip--attivo' : ''}`} aria-pressed={mostraRaccolti} onClick={() => setMostraRaccolti((v) => !v)}>
                 <IconaAzione chiave="raggiunto" dimensione={14} />Mostra anche i raccolti ({raccoltiNascosti})
               </button>
             )}
@@ -880,11 +880,11 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 «cosa posso fare adesso» — ed è la vista predefinita — e «dove sarà quella cosa»,
                 che a una guida si chiede eccome. Acceso, i pin tornano grigi e marcati. */}
             {(bloccatiNascosti > 0 || (filtraBloccati && mostraNonDisponibili)) && (
-              <button type="button" className={`chip chip--icona touch text-[11px] self-start ${mostraNonDisponibili ? 'chip--attivo' : ''}`} aria-pressed={mostraNonDisponibili} onClick={() => setMostraNonDisponibili((v) => !v)}>
+              <button type="button" className={`chip chip--icona touch testo-12 self-start ${mostraNonDisponibili ? 'chip--attivo' : ''}`} aria-pressed={mostraNonDisponibili} onClick={() => setMostraNonDisponibili((v) => !v)}>
                 <IconaAzione chiave="bloccato" dimensione={14} />Mostra anche i non ancora disponibili ({bloccatiNascosti})
               </button>
             )}
-            <label className="flex flex-col gap-1 text-[12px]">
+            <label className="flex flex-col gap-1 testo-12">
               <span className="sr-only">Cerca uno spillo per nome</span>
               <input type="search" className="form-input" placeholder="Cerca uno spillo…" value={ricerca} onChange={(e) => setRicerca(e.target.value)} />
             </label>
@@ -896,7 +896,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
               <div className="visore-mappa__progresso" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={percentualeRaccolti} aria-label="Collezionabili raccolti">
                 <span className="visore-mappa__progresso-barra" style={{ width: `${percentualeRaccolti}%` }} />
               </div>
-              <span className="text-[12px] text-text-secondary">{raccolti} di {collezionabili.length} raccolti · {percentualeRaccolti}%{partitaId ? '' : ' · attiva una partita per segnarli'}</span>
+              <span className="testo-12 text-text-secondary">{raccolti} di {collezionabili.length} raccolti · {percentualeRaccolti}%{partitaId ? '' : ' · attiva una partita per segnarli'}</span>
             </section>
           )}
 
@@ -908,7 +908,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   <button type="button" className={`visore-mappa__voce ${s.id === selezionatoId ? 'visore-mappa__voce--attiva' : ''} ${s.raccolto ? 'opacity-60' : ''}`} onClick={() => { if (scelta) { scelta.onScegli(s); centraSu(s); return; } seleziona(s.id); centraSu(s); }} aria-pressed={scelta ? scelta.scelti.has(s.id) : s.id === selezionatoId}>
                     <PuntoSpillo tipo={s.tipo} colore={s.colore} />
                     <span className="flex-1 min-w-0 truncate">{nomePin(s)}</span>
-                    <span className="text-[11px] text-text-muted">{s.tipoNome}{s.raccolto ? ` · ${parolaSegnato(s)}` : ''}</span>
+                    <span className="testo-12 text-text-muted">{s.tipoNome}{s.raccolto ? ` · ${parolaSegnato(s)}` : ''}</span>
                   </button>
                 </li>
               ))}
@@ -932,8 +932,8 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
             ) : (
               <div className="visore-mappa__senza-immagine" role="img" aria-label="Nessuna immagine di base">
                 <IconMappa size={64} />
-                <span className="font-display text-[26px]">Nessuna immagine di base</span>
-                <span className="text-[13px] text-text-secondary">Caricala dall'editor oppure sposta gli spilli sulla griglia.</span>
+                <span className="font-display testo-28">Nessuna immagine di base</span>
+                <span className="testo-13 text-text-secondary">Caricala dall'editor oppure sposta gli spilli sulla griglia.</span>
               </div>
             )}
             {/* i pezzi posati (102), sotto i pin: parte del disegno della mappa, ritagliati dalla stessa immagine */}
@@ -1002,38 +1002,38 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 <div className="flex items-start gap-2">
                   <PuntoSpillo tipo={selezionato.tipo} colore={selezionato.colore} />
                   <div className="flex-1 min-w-0">
-                    <strong className="block text-[13px] leading-tight">{nomePin(selezionato)}</strong>
-                    <span className="block text-[11px] text-text-muted">{selezionato.tipoNome}{selezionato.raccolto ? ` · ${parolaSegnato(selezionato)}` : ''}</span>
+                    <strong className="block testo-13 leading-tight">{nomePin(selezionato)}</strong>
+                    <span className="block testo-12 text-text-muted">{selezionato.tipoNome}{selezionato.raccolto ? ` · ${parolaSegnato(selezionato)}` : ''}</span>
                     {/* L4 (§1.4, R4-34): a quale infiltrazione si riferisce lo stato di un pin di voci che si ripropongono */}
                     {/* §4.2: con voci di più infiltrazioni, l'infiltrazione dello stato si sceglie (la pagina rilegge in quella) */}
                     {selezionato.contestoInfiltrazione && (() => {
                       const contesto = selezionato.contestoInfiltrazione;
                       const infiltrazioni = [...new Map(selezionato.voci.filter((v) => v.infiltrazione).map((v) => [v.infiltrazione!.chiave, v.infiltrazione!])).values()];
                       return onContesto && infiltrazioni.length > 1
-                        ? <span className="flex w-full items-center gap-1.5 text-[11px] text-text-secondary" role="group" aria-label="Infiltrazione dello stato">
+                        ? <span className="flex w-full items-center gap-1.5 testo-12 text-text-secondary" role="group" aria-label="Infiltrazione dello stato">
                             <span className="shrink-0">Stato nella</span>
                             <Selettore compatto valoreNelNome className="min-w-0 flex-1" etichetta="Stato nella" valore={contesto.chiave} ricerca="mai"
                               opzioni={infiltrazioni.map((i) => ({ chiave: i.chiave, nome: i.nome }))} onCambia={(k) => { if (k && k !== contesto.chiave) onContesto(k); }} />
                           </span>
-                        : <span className="block text-[11px] text-text-secondary">Stato nella {contesto.nome}</span>;
+                        : <span className="block testo-12 text-text-secondary">Stato nella {contesto.nome}</span>;
                     })()}
                     {selezionato.disponibilita && <ChipDisponibilita disponibilita={selezionato.disponibilita} compatto />}
                     {/* L4 (§4.2): pin fatto con una voce non fatta, da prima dell'aggiornamento: il tocco apre la finestra che lo sistema */}
                     {selezionato.daVerificare && onDaVerificare && partitaId && selezionato.uid && (() => {
                       const voce = selezionato.voci.find((v) => v.daVerificare) ?? selezionato.voci[0];
-                      return voce ? <button type="button" className="chip chip--oro touch mt-1 text-[11px]"
-                        onClick={() => onDaVerificare({ spilloUid: selezionato.uid!, spilloNome: nomePin(selezionato), mappaNome: mappa.nome, voce: voce.chiave, voceNome: voce.nome, infiltrazioneNome: voce.infiltrazione?.nome ?? null })}>Da verificare</button> : null;
+                      return voce ? <PulsanteVisivo compatto className="mt-1 self-start" icona={<IconaSegno chiave="da-verificare" dimensione={20} />} titolo="Da verificare"
+                        onClick={() => onDaVerificare({ spilloUid: selezionato.uid!, spilloNome: nomePin(selezionato), mappaNome: mappa.nome, voce: voce.chiave, voceNome: voce.nome, infiltrazioneNome: voce.infiltrazione?.nome ?? null })} /> : null;
                     })()}
                   </div>
                   <button type="button" className="spillo-popup__chiudi" onClick={() => seleziona(null)} aria-label="Chiudi il popup">×</button>
                 </div>
                 {/* L5 §2: lo spillo chiesto che adesso non c'è (chiuso, non ancora sbloccato): lo si dice, col motivo */}
                 {selezionato.id === spilloChiesto && nonDisponibile(selezionato) && (
-                  <p className="m-0 flex flex-wrap items-center gap-1.5 text-[12px]" role="status"><span className="chip chip--attivo text-[11px]">Non disponibile adesso</span><span className="text-text-secondary">{selezionato.presenza?.testo ?? motivoNonDisponibile(selezionato.disponibilita)}</span></p>
+                  <p className="m-0 flex flex-wrap items-center gap-1.5 testo-12" role="status"><span className="chip chip--attivo testo-12">Non disponibile adesso</span><span className="text-text-secondary">{selezionato.presenza?.testo ?? motivoNonDisponibile(selezionato.disponibilita)}</span></p>
                 )}
-                {selezionato.descrizione && <p className="m-0 text-[12px] text-text-secondary spillo-popup__testo">{selezionato.descrizione}</p>}
+                {selezionato.descrizione && <p className="m-0 testo-12 text-text-secondary spillo-popup__testo">{selezionato.descrizione}</p>}
                 {/* L5: la descrizione propria del pin di un luogo, se diversa da quella del luogo */}
-                {selezionato.notaPin && <p className="m-0 text-[11px] text-text-muted">Nota del pin: {selezionato.notaPin}</p>}
+                {selezionato.notaPin && <p className="m-0 testo-12 text-text-muted">Nota del pin: {selezionato.notaPin}</p>}
                 <CondizioniSpilloElenco condizioni={selezionato.condizioni} disponibilita={selezionato.disponibilita} compatto />
                 {(selezionato.immagini.length > 0 || selezionato.dettaglio?.immagine) && (
                   <div className="flex flex-wrap gap-1 items-start">
@@ -1120,7 +1120,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 style={elenco.foglio ? undefined : { left: `${gruppoScelto.x}%`, top: `${gruppoScelto.y}%`, transform: `scale(${1 / zoom}) translate(calc(-50% + ${elencoDx}px), ${elencoSotto ? '26px' : 'calc(-100% - 26px)'})`, '--spillo-popup-freccia': `calc(50% - ${elencoDx}px)` } as CSSProperties}
                 onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
                 <div className="flex items-start gap-2">
-                  <strong className="flex-1 text-[13px] leading-tight">{gruppoScelto.spilli.length === 1 ? 'Un altro spillo qui' : `${gruppoScelto.spilli.length} spilli qui`}</strong>
+                  <strong className="flex-1 testo-13 leading-tight">{gruppoScelto.spilli.length === 1 ? 'Un altro spillo qui' : `${gruppoScelto.spilli.length} spilli qui`}</strong>
                   <button type="button" className="spillo-popup__chiudi touch" onClick={() => setGruppoAperto(null)} aria-label="Chiudi l’elenco">×</button>
                 </div>
                 <ul className={`m-0 list-none flex flex-col gap-0.5 ${elenco.altezzaVoci === undefined ? 'p-0' : 'area-scorrevole p-0.5'}`} style={elenco.altezzaVoci === undefined ? undefined : { maxHeight: elenco.altezzaVoci }}>
@@ -1132,7 +1132,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                         onClick={() => { if (scelta) { scelta.onScegli(s); return; } setGruppoAperto(null); if (vaSubito(s)) { vaiAllArrivo(s); return; } seleziona(s.id); }}>
                         <PuntoSpillo tipo={s.tipo} colore={s.colore} />
                         <span className="flex-1 min-w-0 break-words text-left">{nomePin(s)}</span>
-                        <span className="text-[11px] text-text-muted shrink-0">{s.tipoNome}{scelta?.scelti.has(s.id) ? ' · collegato' : ''}</span>
+                        <span className="testo-12 text-text-muted shrink-0">{s.tipoNome}{scelta?.scelti.has(s.id) ? ' · collegato' : ''}</span>
                       </button>
                     </li>
                   ))}
@@ -1199,16 +1199,16 @@ function MerceNelPopup({ negozio, spillo, partitaId, occupato, onAcquisto, onAcq
   const bloccati = negozio.articoli.length - disponibili.length;
   return (
     <div className="flex flex-col gap-1" role="group" aria-label={`Merce di ${negozio.nome}`}>
-      <div className="flex items-center justify-between gap-2 text-[11px] text-text-muted uppercase tracking-wide">
+      <div className="flex items-center justify-between gap-2 testo-12 text-text-muted uppercase tracking-wide">
         <span>{negozio.nome} · {disponibili.length === 1 ? '1 articolo' : `${disponibili.length} articoli`}{partitaId ? ' adesso' : ''}</span>
         {negozio.disponibilita && negozio.disponibilita.stato !== 'disponibile' && <ChipDisponibilita disponibilita={negozio.disponibilita} compatto />}
       </div>
       {disponibili.length === 0
-        ? <p className="m-0 text-[12px] text-text-secondary">{bloccati > 0 ? 'Niente in vendita in questo momento della partita.' : 'Nessun articolo registrato.'}</p>
+        ? <p className="m-0 testo-12 text-text-secondary">{bloccati > 0 ? 'Niente in vendita in questo momento della partita.' : 'Nessun articolo registrato.'}</p>
         : (
           <ul className="spillo-popup__merce m-0 p-0 list-none flex flex-col">
             {disponibili.map((a) => (
-              <li key={a.chiave} className="flex flex-wrap items-center gap-2 py-1 border-b border-border text-[12px]">
+              <li key={a.chiave} className="flex flex-wrap items-center gap-2 py-1 border-b border-border testo-12">
                 {/* L'etichetta attorno alla casella è il bersaglio: era l'unica casella dell'app a
                     non averla, e restava un quadratino di 20 px (trovata cercando nel codice, non
                     nelle misure: il criterio dice di misurare l'etichetta, e qui non c'era). */}
@@ -1223,7 +1223,7 @@ function MerceNelPopup({ negozio, spillo, partitaId, occupato, onAcquisto, onAcq
             ))}
           </ul>
         )}
-      {bloccati > 0 && <span className="text-[11px] text-text-muted">{bloccati === 1 ? '1 articolo non ancora in vendita' : `${bloccati} articoli non ancora in vendita`}: nella scheda del negozio.</span>}
+      {bloccati > 0 && <span className="testo-12 text-text-muted">{bloccati === 1 ? '1 articolo non ancora in vendita' : `${bloccati} articoli non ancora in vendita`}: nella scheda del negozio.</span>}
     </div>
   );
 }
@@ -1254,7 +1254,7 @@ function invitoSenzaPartita(s: SpilloDto | SchedaContenutoGuidaDto, negozio: boo
 
 /** Una voce descrittiva della guida («Altro» fuori dalle aree dei dedali: lì ogni voce ha uno stato, 099) si legge, non si segna (scelta
  *  dell'utente, 2026-10-01): come nella scheda del Palazzo. */
-const VOCE_DESCRITTIVA = <span className="text-[12px] text-text-muted">Voce descrittiva della guida: si legge, non si segna.</span>;
+const VOCE_DESCRITTIVA = <span className="testo-12 text-text-muted">Voce descrittiva della guida: si legge, non si segna.</span>;
 
 /** I pulsanti di una voce della guida: «Ottenuto», «Esaurito» (se esauribile), «Riapri» (se segnata); una descrittiva si legge e basta. */
 function AzioniVoce<T extends SpilloDto | SchedaContenutoGuidaDto>({ spillo: s, voce, occupato, onStatoPunto }: { spillo: T; voce: VoceDelPinDto; occupato: boolean; onStatoPunto: (spillo: T, voce: string, stato: StatoPuntoMappa) => Promise<void> }) {
@@ -1281,7 +1281,7 @@ export function AzioniStato<T extends SpilloDto | SchedaContenutoGuidaDto>({ spi
         {s.voci.map((v) => (
           <li key={v.chiave} className="flex flex-wrap items-center gap-1" role="group" aria-label={`Voce: ${v.nome}`}>
             {/* L4 §8.11: la voce col suo contatore dei pin fatti («In corso · 2/8»); lo stato del pin sta sopra */}
-            <span className="min-w-0 flex-1 basis-full text-[12px] font-semibold break-words">{v.nome}{v.stato ? ` · ${v.stato}` : ''}{testoAvanzamento(v.avanzamento) ? ` · ${testoAvanzamento(v.avanzamento)}` : ''}</span>
+            <span className="min-w-0 flex-1 basis-full testo-12 font-semibold break-words">{v.nome}{v.stato ? ` · ${v.stato}` : ''}{testoAvanzamento(v.avanzamento) ? ` · ${testoAvanzamento(v.avanzamento)}` : ''}</span>
             <AzioniVoce spillo={s} voce={v} occupato={occupato} onStatoPunto={onStatoPunto} />
           </li>
         ))}
@@ -1330,55 +1330,54 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
         <PuntoSpillo tipo={s.tipo} colore={s.colore} grande />
         <ImmagineRiferimento immagine={d?.immagine} nome={nomePin(s)} />
         <div className="flex-1 min-w-0">
-          <h3 className="m-0 font-display text-[19px] leading-tight break-words">{nomePin(s)}</h3>
+          <h3 className="m-0 font-display testo-20 leading-tight break-words">{nomePin(s)}</h3>
           {/* il nome proprio del pin, se diverso dalla meta, resta come nota (L2: «Banchina Metro», «Piano 2», «Mappa»…) */}
-          {nomePin(s) !== s.nome && <p className="m-0 text-[11px] text-text-muted">Pin: «{s.nome}»</p>}
-          <p className="m-0 text-[11px] uppercase tracking-wide text-text-muted">{s.tipoNome}{s.collezionabile ? ' · collezionabile' : ''}{s.raccolto ? ` · ${parolaSegnato(s)}` : ''}</p>
+          {nomePin(s) !== s.nome && <p className="m-0 testo-12 text-text-muted">Pin: «{s.nome}»</p>}
+          <p className="m-0 testo-12 uppercase tracking-wide text-text-muted">{s.tipoNome}{s.collezionabile ? ' · collezionabile' : ''}{s.raccolto ? ` · ${parolaSegnato(s)}` : ''}</p>
           {s.disponibilita && <ChipDisponibilita disponibilita={s.disponibilita} compatto />}
         </div>
         <button type="button" className="btn btn-ghost btn-sm" onClick={onChiudi} aria-label="Chiudi la scheda">×</button>
       </div>
-      {s.descrizione && <p className="m-0 text-[13px] text-text-secondary whitespace-pre-line">{s.descrizione}</p>}
+      {s.descrizione && <p className="m-0 testo-13 text-text-secondary whitespace-pre-line">{s.descrizione}</p>}
       {/* L5: la descrizione propria del pin di un luogo, se diversa da quella del luogo */}
-      {'notaPin' in s && s.notaPin && <p className="m-0 text-[12px] text-text-muted">Nota del pin: {s.notaPin}</p>}
+      {'notaPin' in s && s.notaPin && <p className="m-0 testo-12 text-text-muted">Nota del pin: {s.notaPin}</p>}
       {s.nativo?.daVerificare && <ProveNativeSpillo nativo={s.nativo} />}
       <CondizioniSpilloElenco condizioni={s.condizioni} disponibilita={s.disponibilita} />
       <GalleriaSpillo immagini={s.immagini} nome={nomePin(s)} />
 
       {!nonSpaziale && onNaviga && "mappaChiave" in s && <NavigazioneSpillo spillo={s} partitaId={partitaId} onNaviga={onNaviga} nomeMappa={s.destinazioneNomi?.mappa} nomeSpillo={s.destinazioneNomi?.spillo ?? undefined} />}
       {s.voci.length === 1 && (
-        <p className="m-0 text-[12px] text-text-secondary">
-          {s.voci[0].esauribile ? 'Esauribile · ' : ''}{s.voci[0].stato ? `Nella Guida: ${s.voci[0].stato}` : 'Non ancora gestito nella Guida'} · <Link to={`/guida/dungeon/${encodeURIComponent(s.voci[0].dungeon)}`} className="text-primary">scheda del Palazzo</Link>
+        <p className="m-0 testo-12 text-text-secondary">
+          {s.voci[0].esauribile ? 'Esauribile · ' : ''}{s.voci[0].stato ? `Nella Guida: ${s.voci[0].stato}` : 'Non ancora gestito nella Guida'} · <Link to={`/guida/dungeon/${encodeURIComponent(s.voci[0].dungeon)}`} className="text-primary-testo">scheda del Palazzo</Link>
         </p>
       )}
       {/* più voci (098): ognuna col suo stato; il Palazzo è lo stesso per tutte (lo controlla ogni collegamento) */}
       {s.voci.length > 1 && (
-        <div className="flex flex-col gap-0.5 text-[12px] text-text-secondary">
+        <div className="flex flex-col gap-0.5 testo-12 text-text-secondary">
           <ul className="m-0 flex list-none flex-col gap-0.5 p-0" aria-label="Voci della guida">
             {s.voci.map((v) => <li key={v.chiave} className="break-words">«{v.nome}»: {v.esauribile ? 'esauribile · ' : ''}{v.stato ? `nella Guida: ${v.stato}` : 'non ancora gestito nella Guida'}</li>)}
           </ul>
-          <Link to={`/guida/dungeon/${encodeURIComponent(s.voci[0].dungeon)}`} className="text-primary">scheda del Palazzo</Link>
+          <Link to={`/guida/dungeon/${encodeURIComponent(s.voci[0].dungeon)}`} className="text-primary-testo">scheda del Palazzo</Link>
         </div>
       )}
       {(d?.tipo === 'luogo' || d?.tipo === 'attivita') && d.luogo && (
-        <p className="m-0 text-[12px] text-text-secondary">
+        <p className="m-0 testo-12 text-text-secondary">
           {/* L5 (T5): la pagina del luogo, col suo nome; gli orari dal luogo */}
-          {d.luogo.cosaOffre && d.luogo.cosaOffre !== s.descrizione ? `${d.luogo.cosaOffre} · ` : ''}{d.luogo.orariTesto ? `${d.luogo.orariTesto} · ` : d.luogo.quando ? `${d.luogo.quando} · ` : ''}<Link to={d.luogo.casa ?? `/guida/citta/${encodeURIComponent(d.luogo.quartiere)}`} className="text-primary">{d.luogo.casa ? d.luogo.nome : 'scheda del quartiere'}</Link>
+          {d.luogo.cosaOffre && d.luogo.cosaOffre !== s.descrizione ? `${d.luogo.cosaOffre} · ` : ''}{d.luogo.orariTesto ? `${d.luogo.orariTesto} · ` : d.luogo.quando ? `${d.luogo.quando} · ` : ''}<Link to={d.luogo.casa ?? `/guida/citta/${encodeURIComponent(d.luogo.quartiere)}`} className="text-primary-testo">{d.luogo.casa ? d.luogo.nome : 'scheda del quartiere'}</Link>
         </p>
       )}
       {negozio && (
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between gap-2 flex-wrap">
-            <span className="text-[12px] font-semibold flex items-center gap-1.5 flex-wrap">{negozio.nome} · {articoliVisibili.length} {articoliVisibili.length === 1 ? 'articolo' : 'articoli'}<ChipDisponibilita disponibilita={negozio.disponibilita} compatto /></span>
+            <span className="testo-12 font-semibold flex items-center gap-1.5 flex-wrap">{negozio.nome} · {articoliVisibili.length} {articoliVisibili.length === 1 ? 'articolo' : 'articoli'}<ChipDisponibilita disponibilita={negozio.disponibilita} compatto /></span>
             {/* L5 (T5): il negozio nella pagina del suo luogo, col suo nome */}
-            <Link to={d?.luogo?.negozi?.find((x) => x.chiave === negozio.chiave)?.casa ?? `/guida/negozi/${encodeURIComponent(negozio.chiave)}`} className="text-[12px] text-primary">{negozio.nome}</Link>
+            <Link to={d?.luogo?.negozi?.find((x) => x.chiave === negozio.chiave)?.casa ?? `/guida/negozi/${encodeURIComponent(negozio.chiave)}`} className="testo-12 text-primary-testo">{negozio.nome}</Link>
           </div>
           {bloccati > 0 && (
-            <button type="button" className="visore-mappa__azione-testo self-start" aria-pressed={mostraBloccati} onClick={() => setMostraBloccati((v) => !v)}>
-              {mostraBloccati
+            <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="bloccato" dimensione={20} />} aria-pressed={mostraBloccati} onClick={() => setMostraBloccati((v) => !v)}
+              titolo={mostraBloccati
                 ? (bloccati === 1 ? 'Nascondi l’articolo non ancora in vendita' : `Nascondi i ${bloccati} articoli non ancora in vendita`)
-                : (bloccati === 1 ? 'Mostra anche l’articolo non ancora in vendita' : `Mostra anche i ${bloccati} articoli non ancora in vendita`)}
-            </button>
+                : (bloccati === 1 ? 'Mostra anche l’articolo non ancora in vendita' : `Mostra anche i ${bloccati} articoli non ancora in vendita`)} />
           )}
           {articoliVisibili.length > 0 && (
             <div className="area-scorrevole-x">
@@ -1401,11 +1400,11 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
                           onChange={(e) => void onAcquisto!(s, a.chiave, e.target.checked)} aria-label={`${a.nome} comprato`} /></label>
                       : <span className="w-5 shrink-0 text-center" role="img" aria-label={a.comprato ? 'comprato' : 'non comprato'}>{a.comprato ? '✓' : ''}</span>}
                     <div className="min-w-0 flex-1">
-                      <span className={`block text-[13px] leading-tight ${a.comprato && !eOffertaAojiru({ chiave: a.chiave }) ? 'line-through' : ''}`}>
+                      <span className={`block testo-13 leading-tight ${a.comprato && !eOffertaAojiru({ chiave: a.chiave }) ? 'line-through' : ''}`}>
                         {a.catalogo ? <Link to={a.catalogo.casa} className="touch inline-flex items-center">{a.nome}</Link> : a.nome}<span className="text-text-muted no-underline"> · {a.categoria}</span>
                       </span>
                       {!!a.ricevuti?.length && <OggettiCollegati oggetti={a.ricevuti} />}
-                      <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-text-secondary">
+                      <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 testo-12 text-text-secondary">
                         <span className="tabular-nums"><CostoDellOggetto costo={a.costo ?? null} prezzo={a.prezzo} daVerificare={a.costoDaVerificare} /></span>
                         {/* «sempre» si dice solo quando e' vero: accanto a un cartellino che avvisa
                             del contrario era una contraddizione scritta due volte sulla stessa riga. */}
@@ -1430,7 +1429,7 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
         {/* un passaggio con arrivo non si segna (le sue voci si segnano dalla guida) */}
         {partitaId && !passaggioConArrivo(s) && <AzioniStato spillo={s} occupato={occupato} onRaccolto={onRaccolto} onStatoPunto={onStatoPunto} />}
       </div>
-      {(statoDelPin(s) !== null || s.voci.length > 0 || negozio) && !partitaId && !passaggioConArrivo(s) && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary">partita</Link> per {invitoSenzaPartita(s, !!negozio)}.</span>}
+      {(statoDelPin(s) !== null || s.voci.length > 0 || negozio) && !partitaId && !passaggioConArrivo(s) && <span className="testo-12 text-text-muted">Attiva una <Link to="/partita" className="text-primary-testo">partita</Link> per {invitoSenzaPartita(s, !!negozio)}.</span>}
     </section>
   );
 }

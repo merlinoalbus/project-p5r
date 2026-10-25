@@ -14,6 +14,7 @@ import { useCatturaPersona } from '../../hooks/useCatturaPersona';
 import { AvvisoTogliPersona, PiastrelleCattura } from '../guida/PiastrelleCattura';
 import { NOME_PERSONALITA } from '../../../shared/elementi';
 import type { OmbraLuogoDto } from '../../../shared/ombre';
+import { TitoloSezione } from '../shared/TitoloSezione';
 
 interface Props {
   persona: { id: number; nome: string; nomeIt: string };
@@ -32,34 +33,34 @@ export function DoveSiIncontra({ persona, partitaId }: Props) {
   const registrata = cattura.catturate?.has(persona.id) ?? null;
   return (
     <section className="card flex flex-col gap-2" aria-label="Dove si incontra">
-      <h2 className="m-0 text-[15px] font-semibold">Dove si incontra</h2>
+      <TitoloSezione>Dove si incontra</TitoloSezione>
       <div className="flex flex-wrap items-start gap-3">
         <div className="w-[104px] shrink-0">
           <PiastrelleCattura aria-label={`Registrazione di ${persona.nomeIt}`} partitaId={partitaId} catturate={cattura.catturate} occupata={cattura.occupata} onTocca={cattura.tocca}
             voci={[{ chiave: `persona-${persona.id}`, persona, etichetta: persona.nomeIt, ...(daIncontro ? { ombra: daIncontro.chiave } : {}) }]} />
         </div>
-        <p className="m-0 min-w-0 flex-1 text-[13px]" role="status">
+        <p className="m-0 min-w-0 flex-1 testo-13" role="status">
           {!partitaId ? 'Attiva una partita per vedere se è registrata.' : registrata === null ? 'Leggo il compendio…' : registrata ? 'Registrata nel compendio della partita.' : 'Non registrata nel compendio della partita: tocca la piastrella per registrarla.'}
         </p>
       </div>
       {cattura.daTogliere?.persona && <AvvisoTogliPersona nome={cattura.daTogliere.persona.nomeIt} occupato={cattura.occupata !== null} onConferma={cattura.conferma} onAnnulla={cattura.annulla} />}
-      {ombre.errore && <p className="m-0 text-[12px] text-error" role="alert">{ombre.errore}</p>}
-      {!ombre.errore && elenco.length === 0 && !ombre.caricamento && <p className="m-0 text-[13px] text-text-muted">La guida non ha Ombre con questa Persona: si ottiene per fusione o la si registra dal compendio.</p>}
+      {ombre.errore && <p className="m-0 testo-12 text-error" role="alert">{ombre.errore}</p>}
+      {!ombre.errore && elenco.length === 0 && !ombre.caricamento && <p className="m-0 testo-13 text-text-muted">La guida non ha Ombre con questa Persona: si ottiene per fusione o la si registra dal compendio.</p>}
       {elenco.length > 0 && (
         <ul className="m-0 flex list-none flex-col gap-2 p-0">
           {elenco.map((o) => (
-            <li key={o.chiave} className="flex flex-col gap-0.5 text-[13px]">
+            <li key={o.chiave} className="flex flex-col gap-0.5 testo-13">
               <span className="flex flex-wrap items-center gap-x-2">
                 <Link to={o.casa} className="touch inline-flex min-h-11 items-center font-semibold">{o.nome}</Link>
-                <span className="chip text-[11px]">{NOME_PERSONALITA[o.personalita]}</span>
-                {!o.catturabile && <span className="text-[11px] text-text-muted">non si cattura dall’incontro</span>}
+                <span className="chip testo-12">{NOME_PERSONALITA[o.personalita]}</span>
+                {!o.catturabile && <span className="testo-12 text-text-muted">non si cattura dall’incontro</span>}
               </span>
               {o.luoghi.length === 0
-                ? <span className="text-[12px] text-text-muted">La guida non dice dove si incontra.</span>
+                ? <span className="testo-12 text-text-muted">La guida non dice dove si incontra.</span>
                 : o.luoghi.map((l) => (
                   <span key={`${l.dungeon}|${l.infiltrazione?.chiave ?? ''}`} className="flex flex-wrap items-center gap-x-2">
-                    <Link to={l.casa} className={`touch inline-flex min-h-11 items-center text-[12px] ${l.raggiungibile === false ? 'opacity-60' : ''}`}>{percorso(l)}</Link>
-                    {l.raggiungibile === false && <span className="chip text-[11px]" title={l.motivoNonRaggiungibile}>Non più raggiungibile: il Palazzo è sparito</span>}
+                    <Link to={l.casa} className={`touch inline-flex min-h-11 items-center testo-12 ${l.raggiungibile === false ? 'opacity-60' : ''}`}>{percorso(l)}</Link>
+                    {l.raggiungibile === false && <span className="chip testo-12" title={l.motivoNonRaggiungibile}>Non più raggiungibile: il Palazzo è sparito</span>}
                   </span>
                 ))}
             </li>

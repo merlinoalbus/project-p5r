@@ -73,9 +73,9 @@ function medaglie(n: number): string {
 function Numero({ etichetta, valore, nota, tono = '', segno }: { etichetta: string; valore: string; nota?: string; tono?: string; segno: ChiaveSegno }) {
   return (
     <span className={`flex flex-col gap-0.5 rounded-md px-3 py-2 ${tono || 'bg-white/[0.05]'}`}>
-      <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-text-muted"><IconaSegno chiave={segno} dimensione={14} />{etichetta}</span>
-      <span className="font-display text-[21px] leading-none tabular-nums">{valore}</span>
-      {nota && <span className="text-[11px] text-text-muted">{nota}</span>}
+      <span className="flex items-center gap-1.5 testo-12 uppercase tracking-[0.08em] text-text-muted"><IconaSegno chiave={segno} dimensione={14} />{etichetta}</span>
+      <span className="font-display testo-20 leading-none tabular-nums">{valore}</span>
+      {nota && <span className="testo-12 text-text-muted">{nota}</span>}
     </span>
   );
 }
@@ -108,7 +108,7 @@ export function CovoPage() {
           {/* un bersaglio da toccare: almeno 48 px di altezza a ogni larghezza (LAY2-6, gemello di LAY2-2) */}
           <Link to={COVO_AREA.pagina} className="card card--cliccabile touch no-underline text-text flex min-h-12 items-center gap-2 py-2 self-start">
             <IconaAzione chiave="mappa" dimensione={20} /><span className="font-semibold">Planimetrie del Covo</span>
-            <span className="text-[12px] text-text-muted">un’area di Yongen-Jaya</span>
+            <span className="testo-12 text-text-muted">un’area di Yongen-Jaya</span>
           </Link>
 
           <section className="card flex flex-col gap-3" aria-label="Come funziona il Covo">
@@ -123,16 +123,16 @@ export function CovoPage() {
               )}
             </div>
             <div className="flex items-start gap-2">
-              <p className="m-0 min-w-0 flex-1 text-[13px] text-text-secondary">{covo.introduzione}</p>
+              <p className="m-0 min-w-0 flex-1 testo-13 text-text-secondary">{covo.introduzione}</p>
               <ModificaGuida tipo="covo" chiave="covo" cosa="l’introduzione e le Medaglie P del Covo" soloIcona onSalvato={ricarica} />
             </div>
             {/* La cautela va detta accanto ai numeri, non in fondo: chi legge «36 voci» a colpo
                 d'occhio conclude «36 cose da comprare», e sarebbe il conto sbagliato. */}
-            <p className="m-0 text-[12px] text-text-muted">
+            <p className="m-0 testo-12 text-text-muted">
               Una voce del catalogo raccoglie spesso più elementi allo stesso prezzo, quindi i prezzi qui elencati non si sommano
               in una spesa complessiva; il totale delle medaglie ottenibili lo dichiara la guida, qui sotto.
             </p>
-            <TestoRipiegabile testo={covo.medaglie} massimo={180} className="text-[13px] text-text-secondary" />
+            <TestoRipiegabile testo={covo.medaglie} massimo={180} className="testo-13 text-text-secondary" />
             {covo.fonte && <a href={covo.fonte} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center self-start">fonte</a>}
           </section>
 
@@ -147,19 +147,19 @@ export function CovoPage() {
               lunghi e affiancarli darebbe due colonne strette invece di due elenchi leggibili. */}
           <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
             <section className="card flex flex-col gap-2" aria-label="Sfide del Covo">
-              <h2 className="m-0 font-display text-[17px] uppercase leading-none">Sfide · {sfide.length}{sfide.length !== covo.sfide.length ? ` di ${covo.sfide.length}` : ''}</h2>
+              <h2 className="m-0 font-display testo-17 uppercase leading-none">Sfide · {sfide.length}{sfide.length !== covo.sfide.length ? ` di ${covo.sfide.length}` : ''}</h2>
               {sfide.length === 0
-                ? <p className="m-0 text-[13px] text-text-muted" role="status">Nessuna sfida con questo testo.</p>
+                ? <p className="m-0 testo-13 text-text-muted" role="status">Nessuna sfida con questo testo.</p>
                 : <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0">
                     {sfide.map((s) => (
-                      <li key={s.nome} className="flex items-start justify-between gap-3 py-2 text-[13px]">
+                      <li key={s.nome} className="flex items-start justify-between gap-3 py-2 testo-13">
                         <span className="flex min-w-0 flex-col gap-0.5">
                           <span className="font-semibold">{s.nome}</span>
                           <span className="text-text-secondary">{s.requisito}</span>
                         </span>
                         {/* Il valore compare solo se c'è: oggi la guida non lo dichiara per
                             nessuna sfida, e una colonna di 52 trattini è rumore, non un dato. */}
-                        {s.medaglie !== null && <span className="shrink-0 tabular-nums text-[12px] text-text-muted">{medaglie(s.medaglie)}</span>}
+                        {s.medaglie !== null && <span className="shrink-0 tabular-nums testo-12 text-text-muted">{medaglie(s.medaglie)}</span>}
                         <ModificaGuida tipo="covo-sfida" chiave={s.nome} cosa={`la sfida «${s.nome}»`} soloIcona onSalvato={ricarica} />
                       </li>
                     ))}
@@ -167,20 +167,20 @@ export function CovoPage() {
             </section>
 
             <section className="card flex flex-col gap-2" aria-label="Premi del Covo">
-              <h2 className="m-0 font-display text-[17px] uppercase leading-none">Premi · {premi.length}{premi.length !== covo.premi.length ? ` di ${covo.premi.length}` : ''}</h2>
+              <h2 className="m-0 font-display testo-17 uppercase leading-none">Premi · {premi.length}{premi.length !== covo.premi.length ? ` di ${covo.premi.length}` : ''}</h2>
               {premi.length === 0
-                ? <p className="m-0 text-[13px] text-text-muted" role="status">Nessun premio con questo testo.</p>
+                ? <p className="m-0 testo-13 text-text-muted" role="status">Nessun premio con questo testo.</p>
                 : <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0">
                     {premi.map((p) => (
-                      <li key={p.nome} className="flex flex-col gap-0.5 py-2 text-[13px]">
+                      <li key={p.nome} className="flex flex-col gap-0.5 py-2 testo-13">
                         <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                           <div className="min-w-0 flex-1">{p.oggettiRicompensa?.length ? <OggettiCollegati oggetti={p.oggettiRicompensa} /> : <span className="font-semibold">{p.nome}</span>}</div>
-                          {p.costo !== null && <span className="shrink-0 tabular-nums text-[12px] text-text-muted">{medaglie(p.costo)}</span>}
+                          {p.costo !== null && <span className="shrink-0 tabular-nums testo-12 text-text-muted">{medaglie(p.costo)}</span>}
                           <ModificaGuida tipo="covo-premio" chiave={p.nome} cosa={`il premio «${p.nome}»`} soloIcona onSalvato={ricarica} />
                         </div>
-                        {!!p.oggettiRicompensa?.length && <span className="text-[12px] text-text-muted">Voce della guida: {p.nome}</span>}
+                        {!!p.oggettiRicompensa?.length && <span className="testo-12 text-text-muted">Voce della guida: {p.nome}</span>}
                         {p.effetto && <span className="text-text-secondary">{p.effetto}</span>}
-                        {p.sblocco && <span className="text-[12px] text-text-muted">Si sblocca: {p.sblocco}</span>}
+                        {p.sblocco && <span className="testo-12 text-text-muted">Si sblocca: {p.sblocco}</span>}
                       </li>
                     ))}
                   </ul>}

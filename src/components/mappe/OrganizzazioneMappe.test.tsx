@@ -60,7 +60,7 @@ it.skip('R1: nell’indice un’area da verificare porta il segno «Da verificar
   render(<MemoryRouter><AlberoLuoghi genitore="tokyo" mappe={[{...m('tokyo',null,'Tokyo'),tipo:'citta'},{...m('staff','tokyo','Area riservata allo staff'),area:area('staff','Area riservata allo staff',true)},{...m('torre','tokyo','Torre'),area:area('torre','Torre',false)}]}/></MemoryRouter>);
   const staff=screen.getByRole('link',{name:/^Area riservata allo staff/});
   const segno=within(staff.parentElement!).getByText('Da verificare');
-  expect(segno).toHaveClass('chip','chip--attivo','text-[11px]');
+  expect(segno).toHaveClass('chip','chip--attivo','testo-12');
   expect(segno).toHaveAttribute('title','Nessuna fonte colloca questa area: decidi se tenerla o rimuoverla');
   expect(within(screen.getByRole('link',{name:/^Torre/}).parentElement!).queryByText('Da verificare')).toBeNull();
 });

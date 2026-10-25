@@ -9,7 +9,7 @@
 // / IconaSpillo / AssetImg vale solo come riserva fuori dal pulsante.
 // ============================================================
 
-import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'react';
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode, Ref } from 'react';
 import { Link } from 'react-router-dom';
 
 export type TonoPulsante = 'primario' | 'secondario' | 'fantasma' | 'pericolo';
@@ -52,7 +52,7 @@ function Contenuto({ icona, titolo, dettaglio }: Pick<Base, 'icona' | 'titolo' |
   );
 }
 
-type PropsPulsante = Base & Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children' | 'className'>;
+type PropsPulsante = Base & Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children' | 'className'> & { ref?: Ref<HTMLButtonElement> };
 
 /** Pulsante a tassello con icona e titolo; `attivo` lo rende un interruttore acceso. */
 export function PulsanteVisivo({ icona, titolo, dettaglio, tono, attivo, compatto, disposizione, className, type = 'button', ...resto }: PropsPulsante) {
@@ -61,6 +61,12 @@ export function PulsanteVisivo({ icona, titolo, dettaglio, tono, attivo, compatt
       <Contenuto icona={icona} titolo={titolo} dettaglio={dettaglio} />
     </button>
   );
+}
+
+/** Il segno «aperto/chiuso» dei pulsanti che mostrano o nascondono qualcosa (▸ chiuso, ▾ aperto), da mettere in coda al titolo:
+ *  l'icona dice il gesto, questo dice lo stato. Decorativo: lo stato per i lettori di schermo è `aria-expanded` del pulsante. */
+export function FrecciaApertura({ aperto }: { aperto: boolean }) {
+  return <span className="btn-visivo__freccia" aria-hidden="true">{aperto ? '▾' : '▸'}</span>;
 }
 
 type PropsCollegamento = Base & { to: string } & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'children' | 'className' | 'href'>;

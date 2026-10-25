@@ -69,7 +69,7 @@ describe('PulsanteGuidaQuiz e cartellino della voce', () => {
     const { rerender } = render(<PulsanteGuidaQuiz voce={VOCE} />);
     const pulsante = screen.getByRole('button', { name: 'Guida del quiz: Commesso al Triple Seven' });
     expect(pulsante).toHaveTextContent('Guida del quiz');
-    expect(pulsante).toHaveClass('chip--attivo');
+    expect(pulsante).toHaveClass('btn-secondary');
     fireEvent.click(pulsante);
     const finestra = screen.getByRole('dialog', { name: 'Guida del quiz — Commesso al Triple Seven' });
     expect(within(finestra).getByText('Zebramen')).toBeInTheDocument();
@@ -77,8 +77,8 @@ describe('PulsanteGuidaQuiz e cartellino della voce', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
     rerender(<PulsanteGuidaQuiz voce={{ ...VOCE, oggi: true }} />);
     const oro = screen.getByRole('button', { name: 'Guida del quiz: Commesso al Triple Seven (oggi c’è il quiz)' });
-    expect(oro).toHaveTextContent('Oggi c’è il quiz · Guida');
-    expect(oro).toHaveClass('chip--oro');
+    expect(oro).toHaveTextContent('oggi c’è il quiz');
+    expect(oro).toHaveClass('btn-primary');
   });
 
   it('il cartellino della voce che registra il turno apre la guida; una voce senza quiz non ne ha', () => {

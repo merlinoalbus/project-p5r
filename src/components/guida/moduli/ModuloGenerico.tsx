@@ -18,7 +18,7 @@ function EditorRisposte({ risposte, onCambia, disabilitato }: { risposte: Rispos
   return (
     <fieldset className="regole-editor flex flex-col gap-2">
       <legend>Risposte giuste</legend>
-      <p className="m-0 text-[12px] text-text-muted">Che cosa rispondere, nell’ordine. Una sola riga per le domande in classe; più righe dove il gioco chiede una sequenza di risposte.</p>
+      <p className="m-0 testo-12 text-text-muted">Che cosa rispondere, nell’ordine. Una sola riga per le domande in classe; più righe dove il gioco chiede una sequenza di risposte.</p>
       {risposte.map((r, i) => (
         <div key={i} className="flex flex-wrap items-end gap-2">
           <span className="chip shrink-0" aria-hidden>{i + 1}</span>
@@ -26,7 +26,7 @@ function EditorRisposte({ risposte, onCambia, disabilitato }: { risposte: Rispos
             <span className="sr-only">Risposta {i + 1}</span>
             <input className="form-input" type="text" maxLength={300} value={r.testo} disabled={disabilitato} onChange={(e) => cambia(i, e.target.value)} placeholder="La risposta come la dà il gioco" aria-label={`Risposta ${i + 1}`} />
           </label>
-          <button type="button" className="btn btn-ghost btn-sm touch" disabled={disabilitato} onClick={() => togli(i)} aria-label={`Togli la risposta ${i + 1}`}>Togli</button>
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={disabilitato} onClick={() => togli(i)} aria-label={`Togli la risposta ${i + 1}`} />
         </div>
       ))}
       <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una risposta" disabled={disabilitato}

@@ -13,6 +13,8 @@ import { notifica } from '../../stores/notificationStore';
 import { SceltaImmagine } from './SceltaImmagine';
 import { erroreImmagine } from '../../utils/aree';
 import type { AreaDettaglioDto } from '../../types';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   area: AreaDettaglioDto;
@@ -49,14 +51,14 @@ export function FinestraAggiungiPlanimetria({ area, aperta, onChiudi, onAggiunta
     <Modal titolo={`Aggiungi planimetria a ${area.nome}`} aperta={aperta} onChiudi={chiudi}
       azioni={<>
         <button type="button" className="btn btn-secondary touch" onClick={chiudi}>Annulla</button>
-        <button type="button" className="btn btn-primary touch" disabled={!pronto} onClick={() => void salva()}>{occupato ? 'Salvataggio…' : 'Aggiungi'}</button>
+        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="piu" dimensione={22} />} titolo={occupato ? 'Salvataggio…' : 'Aggiungi'} disabled={!pronto} onClick={() => void salva()} />
       </>}>
       <div className="flex flex-col gap-3">
         <SceltaImmagine file={file} onCambia={setFile} />
-        <label className="flex flex-col gap-1 text-[13px] font-semibold">Etichetta (facoltativa)
+        <label className="flex flex-col gap-1 testo-13 font-semibold">Etichetta (facoltativa)
           <input className="form-input touch" value={etichetta} maxLength={80} placeholder="es. planimetria completa" onChange={(e) => setEtichetta(e.target.value)} />
         </label>
-        <label className="flex items-center gap-2 text-[13px] touch">
+        <label className="flex items-center gap-2 testo-13 touch">
           <input type="checkbox" className="h-5 w-5" checked={predefinita} onChange={(e) => setPredefinita(e.target.checked)} />
           Diventa la planimetria che {area.nome} mostra aprendola
         </label>

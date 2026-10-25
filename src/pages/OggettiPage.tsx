@@ -15,12 +15,13 @@ import { normalizzaTesto } from '../utils/testo';
 import type { OggettiGuidaDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
-import { IconaScheda } from '../components/shared/IconaAzione';
+import { IconaScheda, IconaAzione } from '../components/shared/IconaAzione';
 import { RitrattoPersonaggio } from '../components/guida/RitrattoPersonaggio';
 import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
 import { CatalogoOggetti } from '../components/catalogo/CatalogoOggetti';
 import type { GruppoOggetto } from '../../shared/catalogo';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
+import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 
 /** Un catalogo per le identità; le sezioni della guida sulle attività restano accessibili. */
 const SCHEDE = [
@@ -35,14 +36,14 @@ const GRUPPO_STORICO: Readonly<Record<string, GruppoOggetto>> = { consumabili: '
 
 /** Il segno «da fonte secondaria» accanto a una voce non verificata sulla guida italiana; niente se la voce è verificata. */
 function Secondaria({ v }: { v: boolean }) {
-  return v ? null : <span className="chip text-[11px]" title="Dato da fonte secondaria, non dalla guida italiana">da fonte secondaria</span>;
+  return v ? null : <span className="chip testo-12" title="Dato da fonte secondaria, non dalla guida italiana">da fonte secondaria</span>;
 }
 
 /** La fabbricazione degli attrezzi: introduzione, sblocco, regole e fonte, poi la tabella delle ricette con i materiali e le loro quantità. */
 function SchedaFabbricazione({ d, onModificato }: { d: OggettiGuidaDto; onModificato: () => void }) {
   const f = d.fabbricazione;
   return (
-    <div className="flex flex-col gap-2 text-[13px]">
+    <div className="flex flex-col gap-2 testo-13">
       <section className="card flex flex-col gap-1">
         <div className="flex items-start gap-2">
           <p className="m-0 min-w-0 flex-1">{f.introduzione}</p>
@@ -53,7 +54,7 @@ function SchedaFabbricazione({ d, onModificato }: { d: OggettiGuidaDto; onModifi
         <Fonte url={f.fonte} />
       </section>
       <div className="area-scorrevole-x">
-        <table className="tabella tabella--adattiva text-[12px]">
+        <table className="tabella tabella--adattiva testo-12">
           {/* Niente colonna «Prodotti»: la guida non la compila per **nessuna** ricetta, quindi
               era una colonna di trattini — larghezza tolta a «Materiali», che invece serve. */}
           <thead><tr><th>Attrezzo</th><th>Effetto</th><th>Materiali</th><th>Sblocco</th></tr></thead>
@@ -75,7 +76,7 @@ function SchedaFabbricazione({ d, onModificato }: { d: OggettiGuidaDto; onModifi
 function SchedaArmi({ d, onModificato }: { d: OggettiGuidaDto; onModificato: () => void }) {
   const p = d.personalizzazioneArmi;
   return (
-    <div className="flex flex-col gap-2 text-[13px]">
+    <div className="flex flex-col gap-2 testo-13">
       <section className="card flex flex-col gap-1">
         <div className="flex items-start gap-2">
           <p className="m-0 min-w-0 flex-1">{p.introduzione}</p>
@@ -88,7 +89,7 @@ function SchedaArmi({ d, onModificato }: { d: OggettiGuidaDto; onModificato: () 
       </section>
       {p.effetti.length > 0 && (
         <div className="area-scorrevole-x">
-          <table className="tabella tabella--adattiva text-[12px]">
+          <table className="tabella tabella--adattiva testo-12">
             <thead><tr><th>Modifica</th><th>Effetto</th><th>Costo</th></tr></thead>
             <tbody>{p.effetti.map((e) => <tr key={e.nome}><td data-etichetta="Modifica"><div className="flex items-start gap-1"><strong className="min-w-0 flex-1">{e.nome}</strong><ModificaGuida tipo="arma-effetto" chiave={e.nome} cosa={`la modifica «${e.nome}»`} soloIcona onSalvato={onModificato} /></div></td><td data-etichetta="Effetto">{e.effetto}</td><td data-etichetta="Costo">{e.costo ?? '—'}</td></tr>)}</tbody>
           </table>
@@ -96,7 +97,7 @@ function SchedaArmi({ d, onModificato }: { d: OggettiGuidaDto; onModificato: () 
       )}
       {p.progressioneConfidente.length > 0 && (
         <section className="card flex flex-col gap-1">
-          <h2 className="m-0 text-[15px] font-semibold">Progressione con il Confidente (Iwai)</h2>
+          <h2 className="m-0 testo-15 font-semibold">Progressione con il Confidente (Iwai)</h2>
           <ul className="m-0 pl-4">{p.progressioneConfidente.map((x) => <li key={typeof x === 'string' ? x : JSON.stringify(x)}>{typeof x === 'string' ? x : Object.entries(x as Record<string, unknown>).map(([k, v]) => `${k}: ${String(v)}`).join(' · ')}
             {typeof x === 'object' && x !== null && 'rango' in x && <ModificaGuida tipo="arma-progressione" chiave={String((x as { rango: unknown }).rango)} cosa={`il rango ${String((x as { rango: unknown }).rango)} della progressione`} soloIcona onSalvato={onModificato} />}</li>)}</ul>
         </section>
@@ -110,22 +111,22 @@ function SchedaAbiti({ d, onModificato }: { d: OggettiGuidaDto; onModificato: ()
   const [q, setQ] = useState('');
   const visibili = useMemo(() => { const n = normalizzaTesto(q); return d.abiti.elenco.filter((x) => !n || normalizzaTesto(`${x.nome} ${(x.nomiAltri ?? []).join(' ')} ${x.per} ${x.dove}`).includes(n)); }, [d, q]);
   return (
-    <div className="flex flex-col gap-2 text-[13px]">
+    <div className="flex flex-col gap-2 testo-13">
       <div className="flex items-start gap-2">
         <p className="m-0 min-w-0 flex-1 text-text-secondary">{d.abiti.introduzione}</p>
         <ModificaGuida tipo="abiti" chiave="abiti" cosa="l’introduzione e la lavanderia degli abiti" soloIcona onSalvato={onModificato} />
       </div>
       <section className="card flex flex-col gap-1">
-        <h2 className="m-0 text-[15px] font-semibold">Lavanderia</h2>
+        <h2 className="m-0 testo-15 font-semibold">Lavanderia</h2>
         <VoceTesto titolo="Dove">{d.abiti.lavanderia.dove}</VoceTesto>
         <VoceTesto titolo="Costo">{d.abiti.lavanderia.costo}</VoceTesto>
         {d.abiti.lavanderia.regole.length > 0 && <ul className="m-0 pl-4">{d.abiti.lavanderia.regole.map((r) => <li key={r}>{r}</li>)}</ul>}
         <Fonte url={d.abiti.lavanderia.fonte} />
       </section>
       <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca un abito o un personaggio…" />
-      <p className="m-0 text-[12px] text-text-muted">{visibili.length} abiti su {d.abiti.elenco.length}.</p>
+      <p className="m-0 testo-12 text-text-muted">{visibili.length} abiti su {d.abiti.elenco.length}.</p>
       <div className="area-scorrevole-x">
-        <table className="tabella tabella--adattiva text-[12px]">
+        <table className="tabella tabella--adattiva testo-12">
           <thead><tr><th>Abito</th><th>Per</th><th>Dove</th></tr></thead>
           <tbody>{visibili.map((x) => <tr key={x.catalogo?.chiave ?? `${x.nome}-${x.per}`}><td data-etichetta="Abito"><strong>{x.catalogo ? <Link to={x.catalogo.casa} className="touch inline-flex items-center">{x.nome}</Link> : x.nome}</strong></td><td data-etichetta="Per"><RitrattoPersonaggio chi={x.per} /></td><td data-etichetta="Dove"><div className="flex items-start gap-1"><span className="min-w-0 flex-1">{x.dove}</span>{x.catalogo && <ModificaGuida tipo="abito" chiave={x.catalogo.chiave} cosa={`dove si ottiene «${x.nome}»`} soloIcona onSalvato={onModificato} />}</div></td></tr>)}</tbody>
         </table>
@@ -136,17 +137,17 @@ function SchedaAbiti({ d, onModificato }: { d: OggettiGuidaDto; onModificato: ()
 
 /** Gli scambi dei venditori speciali, una carta per venditore con la tabella di quel che si riceve e si dà; Jose è escluso e resta solo il rimando alle Richieste dei Mementos. */
 function SchedaScambi({ d }: { d: OggettiGuidaDto }) {
-  if (d.listiniScambi !== undefined) return <div className="flex min-w-0 flex-col gap-2 text-[13px]">
+  if (d.listiniScambi !== undefined) return <div className="flex min-w-0 flex-col gap-2 testo-13">
     <p className="m-0 text-text-secondary">Ogni venditore ha un solo listino: lì trovi oggetti, costi, requisiti e gestione. Le indicazioni della guida precedente sono conservate nelle note del negozio, non come offerte aggiuntive.</p>
     {d.listiniScambi.length ? <ul className="m-0 grid list-none gap-2 p-0 md:grid-cols-2">
       {d.listiniScambi.map((n) => <li key={n.chiave} className="card flex min-w-0 flex-col items-start gap-2">
-        <h2 className="m-0 break-words text-[15px] font-semibold">{n.nome}</h2>
+        <h2 className="m-0 break-words testo-15 font-semibold">{n.nome}</h2>
         {n.posto && <span className="text-text-secondary">{n.posto}</span>}
-        <span className="text-[12px] text-text-muted">{n.offerte} {n.offerte === 1 ? 'offerta nel listino' : 'offerte nel listino'}</span>
-        <Link to={n.casa} className="btn btn-secondary touch max-w-full whitespace-normal">Apri il listino di {n.nome}</Link>
+        <span className="testo-12 text-text-muted">{n.offerte} {n.offerte === 1 ? 'offerta nel listino' : 'offerte nel listino'}</span>
+        <CollegamentoVisivo icona={<IconaAzione chiave="negozio" dimensione={22} />} titolo={<>Apri il listino di {n.nome}</>} className="max-w-full whitespace-normal" to={n.casa} />
       </li>)}
     </ul> : <p className="m-0 text-text-muted">Nessun listino visibile.</p>}
-    {d.listiniScambi.some((n) => n.chiave === 'jose') && <p className="m-0 text-[12px] text-text-muted">Fiori e timbri di Jose restano consultabili nelle <Link to="/guida/richieste?foglio=jose" className="touch inline-flex items-center">Richieste dei Mementos</Link>.</p>}
+    {d.listiniScambi.some((n) => n.chiave === 'jose') && <p className="m-0 testo-12 text-text-muted">Fiori e timbri di Jose restano consultabili nelle <Link to="/guida/richieste?foglio=jose" className="touch inline-flex items-center">Richieste dei Mementos</Link>.</p>}
   </div>;
   // **Jose sta nelle Richieste dei Mementos**, dove ha il suo foglio con i fiori, i timbri e la
   // tabella degli scambi. Ripeterlo qui era la stessa bottega scritta due volte in due pagine
@@ -154,18 +155,18 @@ function SchedaScambi({ d }: { d: OggettiGuidaDto }) {
   const altrove = d.scambi.filter((s) => /jose/i.test(s.venditore));
   const venditori = d.scambi.filter((s) => !/jose/i.test(s.venditore));
   return (
-    <div className="flex flex-col gap-2 text-[13px]">
+    <div className="flex flex-col gap-2 testo-13">
       {altrove.length > 0 && (
-        <p className="m-0 text-[12px] text-text-muted">
-          Gli scambi di Jose stanno con le <Link to="/guida/richieste?foglio=jose" className="text-primary">Richieste dei Mementos</Link>, insieme ai fiori e ai timbri.
+        <p className="m-0 testo-12 text-text-muted">
+          Gli scambi di Jose stanno con le <Link to="/guida/richieste?foglio=jose" className="text-primary-testo">Richieste dei Mementos</Link>, insieme ai fiori e ai timbri.
         </p>
       )}
       {venditori.map((s) => (
         <section key={s.venditore} className="card flex flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2"><h2 className="m-0 text-[15px] font-semibold">{s.venditore}</h2><span className="chip">{s.dove}</span><Secondaria v={s.verificato} /></div>
+          <div className="flex flex-wrap items-center gap-2"><h2 className="m-0 testo-15 font-semibold">{s.venditore}</h2><span className="chip">{s.dove}</span><Secondaria v={s.verificato} /></div>
           {s.quando && <VoceTesto titolo="Quando">{s.quando}</VoceTesto>}
           <div className="area-scorrevole-x">
-            <table className="tabella tabella--adattiva text-[12px]">
+            <table className="tabella tabella--adattiva testo-12">
               <thead><tr><th>Ricevi</th><th>Dai</th><th>Note</th></tr></thead>
               <tbody>{s.offerte.map((o, i) => <tr key={i}><td data-etichetta="Ricevi"><strong>{o.ricevi}</strong></td><td data-etichetta="Dai">{o.dai}</td><td data-etichetta="Note">{o.note ?? '—'}</td></tr>)}</tbody>
             </table>

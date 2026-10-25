@@ -41,7 +41,7 @@ export function ChipDisponibilita({ disponibilita: d, compatto }: { disponibilit
   if (!d) return null;
   const proprie = (d.requisiti ?? []).filter((r) => !r.daNegozio);
   const avvisi = proprie.filter((r) => r.bloccante === false);
-  const avvertenza = avvisi.length > 0 ? <span className={`chip chip--icona ${compatto ? 'text-[11px]' : ''}`} title={avvisi.map((r) => `${r.testo} — ${r.dettaglio}`).join(' · ')} role="img" aria-label={`Avviso non bloccante: ${avvisi.map((r) => r.testo).join(' · ')}`}>
+  const avvertenza = avvisi.length > 0 ? <span className={`chip chip--icona ${compatto ? 'testo-12' : ''}`} title={avvisi.map((r) => `${r.testo} — ${r.dettaglio}`).join(' · ')} role="img" aria-label={`Avviso non bloccante: ${avvisi.map((r) => r.testo).join(' · ')}`}>
     <IconaAzione chiave="allarme" dimensione={compatto ? 12 : 14} />Avviso
   </span> : null;
   if (d.stato === 'disponibile') return avvertenza;
@@ -49,7 +49,7 @@ export function ChipDisponibilita({ disponibilita: d, compatto }: { disponibilit
   if (d.stato === 'bloccato') {
     return (
       <span className="inline-flex flex-wrap items-center gap-1">
-      <span className={`chip chip--icona chip--bloccata ${compatto ? 'text-[11px]' : ''}`} title={motivi} role="img" aria-label={`Non ancora disponibile: ${motivi}`}>
+      <span className={`chip chip--icona chip--bloccata ${compatto ? 'testo-12' : ''}`} title={motivi} role="img" aria-label={`Non ancora disponibile: ${motivi}`}>
         <IconaAzione chiave="bloccato" dimensione={compatto ? 12 : 14} />Non ancora
       </span>
       {proprie.some((r) => r.tipo === 'evento' && r.stato !== 'verde') && <Link to="/partita?scheda=progressi" className="touch inline-flex items-center text-xs">Segna in Progressi</Link>}
@@ -80,7 +80,7 @@ export function ChipDisponibilita({ disponibilita: d, compatto }: { disponibilit
   // e il grigio di una Richiesta citata che non c'è più (eliminata, 2026-10-11): si corregge dove sta la condizione
   const daCorreggere = nellaMappa || grigiProprie.some((r) => r.tipo === 'richiesta');
   if (daCorreggere) return (
-    <span className={`chip chip--icona ${compatto ? 'text-[11px]' : ''}`} title={motivi} role="img" aria-label={`Condizione da correggere${nellaMappa ? ' nell’editor della mappa' : ''}: ${motivi}`}>
+    <span className={`chip chip--icona ${compatto ? 'testo-12' : ''}`} title={motivi} role="img" aria-label={`Condizione da correggere${nellaMappa ? ' nell’editor della mappa' : ''}: ${motivi}`}>
       <IconaSegno chiave="da-verificare" dimensione={compatto ? 12 : 14} />Da correggere
     </span>
   );
@@ -88,7 +88,7 @@ export function ChipDisponibilita({ disponibilita: d, compatto }: { disponibilit
     // **Un avviso che dice «segna» e non porta dove si segna e' mezzo avviso.** Il dettaglio
     // nominava la pagina — «Partita → Denaro e squadra» — ma restava testo in un `title`: bisognava
     // leggerlo, ricordarselo e cercarsela a mano. Qui il cartellino e' il collegamento.
-    <Link to={destinazione(grigiProprie)} className={`chip chip--icona no-underline ${compatto ? 'text-[11px]' : ''}`} title={motivi} aria-label={`Da segnare nella partita: ${motivi}`}>
+    <Link to={destinazione(grigiProprie)} className={`chip chip--icona no-underline ${compatto ? 'testo-12' : ''}`} title={motivi} aria-label={`Da segnare nella partita: ${motivi}`}>
       <IconaSegno chiave="da-verificare" dimensione={compatto ? 12 : 14} />Da segnare
     </Link>
   );

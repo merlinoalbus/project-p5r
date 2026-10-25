@@ -22,6 +22,7 @@ import { notifica } from '../stores/notificationStore';
 import { avvisaDotiDaSegnare } from '../utils/dotiDaSegnare';
 import { PageState } from '../components/shared/PageState';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
+import { TitoloSezione } from '../components/shared/TitoloSezione';
 import { IconaAzione, IconaSegno } from '../components/shared/IconaAzione';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { NotaPuntiDote } from '../components/shared/NotaPuntiDote';
@@ -160,7 +161,7 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
       {partitaId && <NotaPuntiDote cosa="quali libri hai letto e a che punto sei" />}
 
       {d.letturaRapida && (
-        <p className="m-0 flex items-center gap-2 rounded-md bg-success/10 px-3 py-2 text-[13px] text-text-secondary" role="status">
+        <p className="m-0 flex items-center gap-2 rounded-md bg-success/10 px-3 py-2 testo-13 text-text-secondary" role="status">
           <IconaAzione chiave="libro" dimensione={18} />
           <span>Hai letto <strong>Lettura rapida</strong>: da qui in avanti una sessione di lettura vale doppia, quindi
           ogni altro libro si finisce in metà pomeriggi. Le sessioni già fatte restano quelle che erano —
@@ -180,7 +181,7 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
       </>}
 
       {libroSelezionato && <section ref={pannelloRef} className="flex scroll-mt-20 flex-col gap-2" aria-label={`Posizione di ${libroSelezionato.nome}`}>
-        <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="m-0">Dove ottenere “{libroSelezionato.nome}”</h2><span className="flex items-center gap-1"><ModificaGuida tipo="libro-posizioni" chiave={libroSelezionato.chiave} cosa={`dove si ottiene «${libroSelezionato.nome}»`} soloIcona onSalvato={() => void dati.ricarica()} /><button type="button" className="btn btn-ghost btn-sm touch" onClick={() => setSelezionato(null)}>Chiudi</button></span></div>
+        <div className="flex flex-wrap items-center justify-between gap-2"><TitoloSezione variante="display" className="min-w-0">Dove ottenere “{libroSelezionato.nome}”</TitoloSezione><span className="flex items-center gap-1"><ModificaGuida tipo="libro-posizioni" chiave={libroSelezionato.chiave} cosa={`dove si ottiene «${libroSelezionato.nome}»`} soloIcona onSalvato={() => void dati.ricarica()} /><PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Chiudi" onClick={() => setSelezionato(null)} /></span></div>
         {libroSelezionato.posizioni.length > 1 && <div className="flex flex-wrap gap-2">{libroSelezionato.posizioni.map((p, i) => <button key={`${p.tipo}/${p.chiave}`} type="button" className={`chip touch ${i === fonteSelezionata ? 'chip--attivo' : ''}`} onClick={() => setFonteSelezionata(i)}>{p.etichetta}</button>)}</div>}
         {posizione ? <DoveSiTrova tipo={posizione.tipo} chiave={posizione.chiave} titolo={posizione.etichetta} altezza={300} /> : <div className="card"><h3 className="m-0 text-base">Posizione non disponibile</h3><p className="mb-0 text-sm text-text-secondary">Questo libro si ottiene come ricompensa o evento e non ha un punto territoriale verificato.</p></div>}
       </section>}

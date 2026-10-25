@@ -4,6 +4,8 @@ import type { RicompensaOggettoDto, DatiLegameOggettoDto, RiferimentoOggettoDto 
 import { impostaLegameOggetto } from '../../services/api/catalogoOggetti';
 import { notifica } from '../../stores/notificationStore';
 import { SceltaCatalogoOggetto } from './SceltaCatalogoOggetto';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 type Props = { contenuto: readonly RicompensaOggettoDto[]; onCambiato: () => Promise<void>; disabilitato?: boolean }
   & ({ voce: string; fonte?: never } | { voce?: never; fonte: { tipo: 'ricompensa'; chiave: string } });
@@ -32,14 +34,14 @@ export function ContenutoDellaVoce({ voce, fonte, contenuto, onCambiato, disabil
     finally { setOccupato(false); }
   };
   return <div className="flex min-w-0 flex-col gap-2">
-    <button type="button" className="btn btn-ghost touch self-start" disabled={bloccato} aria-expanded={aperto} onClick={() => { setAperto((v) => !v); azzera(); }}>{aperto ? 'Chiudi modifica contenuto' : 'Collega o modifica il contenuto'}</button>
+    <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo={aperto ? 'Chiudi modifica contenuto' : 'Collega o modifica il contenuto'} className="self-start" disabled={bloccato} aria-expanded={aperto} onClick={() => { setAperto((v) => !v); azzera(); }} />
     {aperto && <div className="flex min-w-0 flex-col gap-3 border border-border p-2">
-      <p className="m-0 text-[12px] text-text-muted">{fonte ? 'Questi sono i risultati collegati del baratto. Non modificano costo, acquisti o testo originale; usa la nota per distinguere un premio alternativo.' : 'Questi sono gli oggetti collegati alla voce, non il testo della guida. Quantità e nota del legame non modificano pin o spunte.'}</p>
-      {errore && <p role="alert" className="m-0 text-[13px] text-error">{errore}</p>}
-      {contenuto.map((o) => <div key={o.chiave} className="flex min-w-0 flex-wrap items-center gap-2 text-[13px]">
+      <p className="m-0 testo-12 text-text-muted">{fonte ? 'Questi sono i risultati collegati del baratto. Non modificano costo, acquisti o testo originale; usa la nota per distinguere un premio alternativo.' : 'Questi sono gli oggetti collegati alla voce, non il testo della guida. Quantità e nota del legame non modificano pin o spunte.'}</p>
+      {errore && <p role="alert" className="m-0 testo-13 text-error">{errore}</p>}
+      {contenuto.map((o) => <div key={o.chiave} className="flex min-w-0 flex-wrap items-center gap-2 testo-13">
         <span className="min-w-0 flex-1">{o.quantita} × <Link to={o.casa} className="touch inline-flex items-center">{o.nome}</Link>{o.nota && <span className="block text-text-muted">{o.nota}</span>}</span>
-        <button type="button" className="btn btn-secondary touch" disabled={bloccato} onClick={() => { setScelto(o); setPrecedente(o.chiave); setQuantita(o.quantita); setNota(o.nota ?? ''); setErrore(null); }}>Modifica</button>
-        <button type="button" className="btn btn-ghost touch" disabled={bloccato} onClick={() => void scrivi({ riga_tipo: target.tipo, riga_chiave: target.chiave, catalogo_chiave: o.chiave, togli: true })}>Togli collegamento</button>
+        <PulsanteVisivo icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo="Modifica" disabled={bloccato} onClick={() => { setScelto(o); setPrecedente(o.chiave); setQuantita(o.quantita); setNota(o.nota ?? ''); setErrore(null); }} />
+        <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="chiudi" dimensione={22} />} titolo="Togli collegamento" disabled={bloccato} onClick={() => void scrivi({ riga_tipo: target.tipo, riga_chiave: target.chiave, catalogo_chiave: o.chiave, togli: true })} />
       </div>)}
       <SceltaCatalogoOggetto valore={scelto?.chiave ?? ''} disabilitato={bloccato} etichetta={precedente ? 'Oggetto del contenuto da modificare' : 'Oggetto da collegare'}
         escludi={precedente ? contenuto.filter((o) => o.chiave !== precedente).map((o) => o.chiave) : undefined}
@@ -48,11 +50,10 @@ export function ContenutoDellaVoce({ voce, fonte, contenuto, onCambiato, disabil
         <label className="editor-mappa__campo">Quantità<input className="form-input" type="number" min={1} max={999999} step={1} value={quantita ?? ''} disabled={bloccato} onChange={(e) => setQuantita(e.target.value === '' ? null : Number(e.target.value))} /></label>
         <label className="editor-mappa__campo">Nota del collegamento<textarea className="form-input" rows={2} maxLength={6000} value={nota} disabled={bloccato} onChange={(e) => setNota(e.target.value)} /></label>
       </div>
-      {precedente && scelto && precedente !== scelto.chiave && <p className="m-0 text-[13px]">Il salvataggio sostituisce soltanto il collegamento che stai modificando con «{scelto.nome}».</p>}
+      {precedente && scelto && precedente !== scelto.chiave && <p className="m-0 testo-13">Il salvataggio sostituisce soltanto il collegamento che stai modificando con «{scelto.nome}».</p>}
       <div className="flex flex-wrap gap-2">
-        <button type="button" className="btn btn-primary touch" disabled={bloccato || !scelto || quantita === null || !Number.isSafeInteger(quantita) || quantita < 1 || quantita > 999999}
-          onClick={() => { if (scelto && quantita !== null) void scrivi({ riga_tipo: target.tipo, riga_chiave: target.chiave, catalogo_chiave: scelto.chiave, precedente_catalogo_chiave: precedente, quantita, nota: nota.trim() || null }); }}>{occupato ? 'Salvataggio…' : precedente ? 'Salva il collegamento' : 'Collega l’oggetto'}</button>
-        {precedente && <button type="button" className="btn btn-secondary touch" disabled={bloccato} onClick={azzera}>Annulla la modifica</button>}
+        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo={occupato ? 'Salvataggio…' : precedente ? 'Salva il collegamento' : 'Collega l’oggetto'} disabled={bloccato || !scelto || quantita === null || !Number.isSafeInteger(quantita) || quantita < 1 || quantita > 999999} onClick={() => { if (scelto && quantita !== null) void scrivi({ riga_tipo: target.tipo, riga_chiave: target.chiave, catalogo_chiave: scelto.chiave, precedente_catalogo_chiave: precedente, quantita, nota: nota.trim() || null }); }} />
+        {precedente && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla la modifica" disabled={bloccato} onClick={azzera} />}
       </div>
     </div>}
   </div>;

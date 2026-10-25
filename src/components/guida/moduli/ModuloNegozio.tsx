@@ -50,8 +50,8 @@ export function ModuloNegozio({ dati, imposta, disabilitato }: PropsModulo) {
       </Griglia>
       <fieldset className="regole-editor flex flex-col gap-2">
         <legend>Orari</legend>
-        <p className="m-0 text-[12px] text-text-muted">Gli orari sono quelli del luogo (la sede): si cambiano dal luogo. Qui solo se il negozio ha orari suoi.</p>
-        <label className="flex items-center gap-2 text-[13px] touch">
+        <p className="m-0 testo-12 text-text-muted">Gli orari sono quelli del luogo (la sede): si cambiano dal luogo. Qui solo se il negozio ha orari suoi.</p>
+        <label className="flex items-center gap-2 testo-13 touch">
           <input type="checkbox" className="h-5 w-5" checked={eccezione !== null} disabled={disabilitato} onChange={(e) => imposta({ eccezione_orari_json: e.target.checked ? { ...ORARI_SEMPRE } : null })} />
           Il negozio ha orari suoi, diversi da quelli del luogo
         </label>
@@ -59,12 +59,12 @@ export function ModuloNegozio({ dati, imposta, disabilitato }: PropsModulo) {
       </fieldset>
       <fieldset className="regole-editor flex flex-col gap-2">
         <legend>Sblocco del negozio</legend>
-        <p className="m-0 text-[12px] text-text-muted">Il luogo deve essere sbloccato. Aggiungi qui le eventuali condizioni proprie del negozio; lasciando vuoto valgono quelle della sede.</p>
+        <p className="m-0 testo-12 text-text-muted">Il luogo deve essere sbloccato. Aggiungi qui le eventuali condizioni proprie del negozio; lasciando vuoto valgono quelle della sede.</p>
         <CondizioniEditor condizioni={(dati.sblocco_json as RequisitoSpillo[] | undefined) ?? []} onCambia={(sblocco_json) => imposta({ sblocco_json })} disabilitato={disabilitato} />
       </fieldset>
       <fieldset className="regole-editor flex flex-col gap-2">
         <legend>Programma punti</legend>
-        <label className="flex items-center gap-2 text-[13px] touch">
+        <label className="flex items-center gap-2 testo-13 touch">
           <input type="checkbox" className="h-5 w-5" checked={programma !== null} disabled={disabilitato}
             onChange={(e) => imposta({ programma_punti_json: e.target.checked ? { nome: 'Punti', unita: 'punti', calcolo: 'manuale' } : null })} />
           Il negozio ha un programma punti

@@ -70,6 +70,8 @@ import { GuidaDellArea, type CollegamentoPin } from '../components/guida/GuidaDe
 import { BarraCollegamentoPin } from '../components/guida/BarraCollegamentoPin';
 import { IconaAzione, IconaSegno } from '../components/shared/IconaAzione';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
+import { IndietroScheda, TitoloScheda } from '../components/shared/IntestazioneScheda';
+import { MenuModifica } from '../components/shared/MenuModifica';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
@@ -77,6 +79,7 @@ import { AtterraggioTokyo } from '../components/guida/AtterraggioTokyo';
 import { MappaMemento } from '../components/mappe/MappaMemento';
 import { Modal } from '../components/shared/Modal';
 import { NEL_CESTINO } from '../utils/cestino';
+import { TitoloSezione } from '../components/shared/TitoloSezione';
 
 /** La versione mostrata non ha pin, un'altra sì (come nella pagina dell'Area): quale, e l'avviso; null altrimenti. */
 function versioneSenzaPin(versioni: PlanimetriaAreaDto[], scelta: string | null): { chiave: string; nome: string; testo: string } | null {
@@ -100,7 +103,7 @@ function LineaDelTempo({ date, memento = false }: { date: DungeonDettaglioDto['d
     // `breve`: l'etichetta dei chip stretti (sotto i 1024 px) quando il valore è una frase; ha senso da sola (UX3-12)
     { chiave: 'sblocco', etichetta: 'Si apre', breve: 'Si apre', valore: date.sblocco, tono: 'bg-white/10 text-text', segno: 'si-apre' as const },
     { chiave: 'furto', etichetta: 'Furto consigliato', breve: 'Furto', valore: date.furtoConsigliato, tono: 'bg-[#f5c542]/15 text-[#f5c542]', segno: 'furto' as const },
-    { chiave: 'scadenza', etichetta: 'Scade', breve: 'Scade', valore: date.scadenza, tono: 'bg-primary/20 text-primary', segno: 'scade' as const },
+    { chiave: 'scadenza', etichetta: 'Scade', breve: 'Scade', valore: date.scadenza, tono: 'bg-primary/20 text-primary-testo', segno: 'scade' as const },
   ].filter((t) => !!t.valore);
   if (tappe.length === 0) return null;
   return (
@@ -115,24 +118,24 @@ function LineaDelTempo({ date, memento = false }: { date: DungeonDettaglioDto['d
               e nel suggerimento */}
           <span className={`${memento ? 'flex flex-col gap-0.5 rounded-md px-2.5 py-1.5 lg:flex-row lg:items-center lg:gap-1 lg:px-1.5 lg:py-1' : 'flex flex-row items-center gap-1 rounded-md px-1 py-1 lg:px-1.5'} ${t.tono}`} title={`${t.etichetta}: ${t.valore!}`}>
             {/* segno ed etichetta all'opacità piena (regola dell'utente «opacità al 100%», UX3-11): erano a 0,80 */}
-            <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em]"><IconaSegno chiave={t.segno} dimensione={14} /><span className={memento ? 'lg:sr-only' : 'sr-only'}>{t.etichetta}</span></span>
+            <span className="flex items-center gap-1.5 testo-12 uppercase tracking-[0.08em]"><IconaSegno chiave={t.segno} dimensione={14} /><span className={memento ? 'lg:sr-only' : 'sr-only'}>{t.etichetta}</span></span>
             {/* LAY3-4 (decisione del PM, strada (b)): una «data» della guida che è una frase (Shido, Maruki) da 1024 px non si tronca:
                 il chip dice l'etichetta e la frase intera sta nei «Dettagli dalla guida». Andare a capo (strada (a)) alzava l'intestazione
                 e a 1024×690 il visore usciva dalla soglia di R3-41 (340 su 345). Una data vera resta la data, al massimo 6,5rem. */}
             {memento
               ? (eUnaData(t.valore!)
-                ? <span className="font-display text-[17px] leading-none lg:max-w-[6.5rem] lg:truncate lg:text-[14px]">{dataBreve(t.valore!)}</span>
-                : <span className="font-display text-[17px] leading-none lg:text-[14px]">
+                ? <span className="font-display testo-17 leading-none lg:max-w-[6.5rem] lg:truncate lg:testo-14">{dataBreve(t.valore!)}</span>
+                : <span className="font-display testo-17 leading-none lg:testo-14">
                     <span className="lg:hidden">{dataBreve(t.valore!)}</span>
                     <span aria-hidden className="hidden lg:inline">{t.etichetta}</span>
                   </span>)
               // nei Palazzi a ogni larghezza (LAY3-5): una data al massimo 6,5rem, una frase diventa l'etichetta (intera nei «Dettagli»)
               : eUnaData(t.valore!)
-                ? <span className="max-w-[6.5rem] truncate font-display text-[14px] leading-none">{dataBreve(t.valore!)}</span>
+                ? <span className="max-w-[6.5rem] truncate font-display testo-14 leading-none">{dataBreve(t.valore!)}</span>
                 // UX3-12: da 1024 px l'etichetta intera; sotto, quella breve del tipo della data («Si apre», «Furto», «Scade»), che ha senso
                 // da sola (l'abbreviazione presa dalla prima parola dava «Si»). «Furto consigliato» intero a 375 mandava a capo le date di
                 // Shido (intestazione 234 su 243, oltre la soglia con «Suggerito oggi»)
-                : <span className="font-display text-[14px] leading-none"><span className="sr-only">{dataBreve(t.valore!)}</span><span aria-hidden className="hidden lg:inline">{t.etichetta}</span><span aria-hidden className="lg:hidden">{t.breve}</span></span>}
+                : <span className="font-display testo-14 leading-none"><span className="sr-only">{dataBreve(t.valore!)}</span><span aria-hidden className="hidden lg:inline">{t.etichetta}</span><span aria-hidden className="lg:hidden">{t.breve}</span></span>}
           </span>
         </li>
       ))}
@@ -163,10 +166,10 @@ function DedaloNelBinario({ a, scelto, suggerito, onScegli, fila }: { a: AreaDun
   return (
     <button type="button" aria-pressed={scelto} onClick={onScegli} title={a.nome}
       className={`touch flex w-full flex-col gap-1 rounded-md border px-2 py-1.5 text-left transition-colors ${scelto ? 'border-primary bg-primary-bg text-text' : 'border-transparent text-text-secondary hover:border-border hover:bg-white/[0.05] hover:text-text'} ${classiSuggerito(suggerito)}`}>
-      <span className="flex items-baseline gap-1.5 text-[13px] leading-tight">
-        <span className={`w-4 shrink-0 text-right font-display ${scelto ? 'text-primary' : 'text-text-muted'}`}>{a.ordine + 1}</span>
+      <span className="flex items-baseline gap-1.5 testo-13 leading-tight">
+        <span className={`w-4 shrink-0 text-right font-display ${scelto ? 'text-primary-testo' : 'text-text-muted'}`}>{a.ordine + 1}</span>
         <span className="min-w-0 flex-1 font-semibold">{nomeBreve(a.nome)}{completato && <>{' '}<SpuntaCompletata dimensione={12} /><TestoCompletata /></>}</span>
-        <span className="shrink-0 text-[11px] tabular-nums text-text-muted">{quota !== null ? `${Math.round(quota * 100)}%` : `${a.dedalo?.obiettivi.totale ?? 0} el.`}</span>
+        <span className="shrink-0 testo-12 tabular-nums text-text-muted">{quota !== null ? `${Math.round(quota * 100)}%` : `${a.dedalo?.obiettivi.totale ?? 0} el.`}</span>
       </span>
       {quota !== null && <span className="visore-mappa__progresso ml-5 h-1" aria-hidden><span className="visore-mappa__progresso-barra" style={{ width: `${Math.round(quota * 100)}%` }} /></span>}
     </button>
@@ -477,6 +480,8 @@ export function DungeonDettaglioPage() {
   // la chiave dell'infiltrazione di cui si corregge il testo o si legge la descrizione: cambiando infiltrazione si chiudono da sé
   const [correggendoInfiltrazione, setCorreggendoInfiltrazione] = useState<string | null>(null);
   const [descrizioneAperta, setDescrizioneAperta] = useState<string | null>(null);
+  // lotto B: il modulo della scheda del Palazzo, aperto dal menu «Modifica ⋯»
+  const [correggendoPalazzo, setCorreggendoPalazzo] = useState(false);
   const [occupato, setOccupato] = useState(false);
   // L4 §8.6 (O4-2): la conferma prima di togliere un segno che riapre un Enigma risolto («Riapre anche l'Enigma «…»»), dalla colonna «Da
   // raccogliere» e dal popup del pin; la promessa si risolve con la scelta («Annulla» = false)
@@ -579,7 +584,7 @@ export function DungeonDettaglioPage() {
   // `sotto`: è l'istanza dei «Dettagli» della riga sotto il titolo (quella che si vede sotto i 1024 px); solo lei porta «Sulla mappa di
   // Tokyo», che così non è montato due volte
   const dettagliGuida = (classe: string, sotto = false) => d && (d.livelloConsigliato || d.note || tempoInProsa.length > 0 || !memento) ? (
-    <details className={`text-[12px] ${classe}`}>
+    <details className={`testo-12 ${classe}`}>
       <summary className="touch cursor-pointer text-text-muted">Dettagli dalla guida</summary>
       <div className="flex flex-col gap-1 pt-1.5">
         {/* LAY3-5: nei Palazzi sotto i 1024 px «Sulla mappa di Tokyo» sta qui, per esteso (nell'intestazione mandava a capo la riga) */}
@@ -594,16 +599,16 @@ export function DungeonDettaglioPage() {
         </span>}
         {/* il dettaglio del chip riassuntivo (R3-41, scelta 3): Tesoro e boss per esteso, e il perché del livello */}
         {!memento && d.completamento && d.completamento.tesoro !== null && d.completamento.boss !== null && (
-          <span className="block text-[12px] text-text-secondary">
+          <span className="block testo-12 text-text-secondary">
             Tesoro {d.completamento.tesoro ? 'raccolto' : 'da prendere'} · boss finale {d.completamento.boss ? 'sconfitto' : 'da sconfiggere'}{livello ? ` · ${livello.testo}: ${livello.perche}` : ''}
           </span>
         )}
         {/* LAY3-5 (e LAY3-2): sovrano e arcana interi, perché nell'intestazione si accorciano quando sono frasi lunghe */}
-        {!memento && d.sovrano && <TestoRipiegabile testo={`Sovrano: ${d.sovrano}`} massimo={120} className="text-[12px] text-text-secondary" />}
-        {!memento && d.arcanaSovranoNome && <TestoRipiegabile testo={`Arcana: ${d.arcanaSovranoNome}`} massimo={120} className="text-[12px] text-text-secondary" />}
-        {d.livelloConsigliato && <TestoRipiegabile testo={`Livello consigliato: ${d.livelloConsigliato}`} massimo={120} className="text-[13px] text-text-secondary" />}
-        {tempoInProsa.map((t) => <TestoRipiegabile key={t.etichetta} testo={`${t.etichetta}: ${t.valore}`} massimo={90} className="text-[12px] text-text-muted" />)}
-        {d.note && <TestoRipiegabile testo={d.note} massimo={140} className="text-[12px] text-text-muted whitespace-pre-wrap" />}
+        {!memento && d.sovrano && <TestoRipiegabile testo={`Sovrano: ${d.sovrano}`} massimo={120} className="testo-12 text-text-secondary" />}
+        {!memento && d.arcanaSovranoNome && <TestoRipiegabile testo={`Arcana: ${d.arcanaSovranoNome}`} massimo={120} className="testo-12 text-text-secondary" />}
+        {d.livelloConsigliato && <TestoRipiegabile testo={`Livello consigliato: ${d.livelloConsigliato}`} massimo={120} className="testo-13 text-text-secondary" />}
+        {tempoInProsa.map((t) => <TestoRipiegabile key={t.etichetta} testo={`${t.etichetta}: ${t.valore}`} massimo={90} className="testo-12 text-text-muted" />)}
+        {d.note && <TestoRipiegabile testo={d.note} massimo={140} className="testo-12 text-text-muted whitespace-pre-wrap" />}
       </div>
     </details>
   ) : null;
@@ -617,38 +622,74 @@ export function DungeonDettaglioPage() {
   const illustrato = !!useImmagineMappa(memento ? null : d?.illustrazione);
 
   const senzaPin = versioneSenzaPin(versioniArea, planimetriaScelta);
-  /** Le azioni dell'area aperta: «Modifica» e «Planimetria» (da 1280 px solo icona) ed «Elimina», che sotto i 768 px e da 1024 a 1279
-   *  sta nel menu «Altro» (UX2-3, UX3-3). Stanno nella riga del nome dell'area o, da 1024 px con più versioni, in fondo alla loro fila. */
-  const azioniArea = () => (
-    <span className="flex flex-wrap items-center gap-1.5 lg:shrink-0 lg:flex-nowrap">
-      <PulsanteVisivo tono="secondario" compatto className="btn-visivo--icona-xl" icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" aria-label="Modifica area" title="Modifica area" disabled={!dettaglioArea.dati} onClick={() => setFinestra('modifica-area')} />
-      {/* sotto i 768 px anche «Aggiungi planimetria» sta in «Altro» (UX3-3): «Modifica» e «Altro» stanno in una riga */}
-      <span className="hidden md:inline-flex">
-        <PulsanteVisivo tono="secondario" compatto className="btn-visivo--icona-xl" icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Planimetria" aria-label="Aggiungi planimetria" title="Aggiungi planimetria" disabled={!dettaglioArea.dati} onClick={() => setFinestra('aggiungi-planimetria')} />
-      </span>
-      {/* «Elimina» come nella pagina Area (UX2-3, UX3-3): in vista da 768 a 1023 px e da 1280 px (lì solo icona); sotto i
-          768 px e da 1024 a 1279 px nel menu «Altro», così a telefono la riga non va a capo e il visore sale */}
-      <span className="hidden md:max-lg:inline-flex xl:inline-flex">
-        <PulsanteVisivo tono="fantasma" compatto className="btn-visivo--icona-xl text-error" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" aria-label="Elimina area" title="Elimina area" onClick={() => setFinestra('elimina-area')} />
-      </span>
-      {/* sotto i 768 px «Altro» sta a inizio riga (la riga va a capo sotto il nome): il menu si apre verso destra, non fuori dallo schermo */}
-      <details className="menu-altro relative md:max-lg:hidden xl:hidden max-md:[&_.menu-altro\_\_voci]:left-0 max-md:[&_.menu-altro\_\_voci]:right-auto">
-        <summary className="btn btn-ghost btn-sm touch list-none" aria-label="Altre azioni dell’area">Altro ▾</summary>
-        <div className="menu-altro__voci">
-          <button type="button" className="btn btn-ghost touch justify-start md:hidden" disabled={!dettaglioArea.dati} onClick={(e) => { e.currentTarget.closest('details')?.removeAttribute('open'); setFinestra('aggiungi-planimetria'); }}>Aggiungi planimetria</button>
-          <button type="button" className="btn btn-ghost touch justify-start text-error" onClick={(e) => { e.currentTarget.closest('details')?.removeAttribute('open'); setFinestra('elimina-area'); }}>Elimina area</button>
-        </div>
-      </details>
-    </span>
+  /** La correzione della scheda (nome, sovrano, date, livello, note). Nei Memento è il pulsante ✎ dell'intestazione, in «Modifica la
+   *  guida»; nei Palazzi (lotto B) si apre dal menu «Modifica ⋯» e il modulo sta sotto l'intestazione (`onChiudi`). */
+  const correzioneScheda = (onChiudi?: () => void) => d && (
+    <CorrezioneGuida cosa={memento ? 'i Memento' : `il Palazzo «${d.nome}»`} etichetta="Correggi la scheda"
+      {...(onChiudi ? { aperta: true, onChiudi } : {})}
+      iniziale={() => ({ nome: d.nome, sovrano: d.sovrano, dataSblocco: d.date.sblocco, dataScadenza: d.date.scadenza, furtoConsigliato: d.date.furtoConsigliato, livelloConsigliato: d.livelloConsigliato, note: d.note })}
+      onSalva={async (b) => { await aggiornaDungeon(d.chiave, b); await dati.ricarica(); }}>
+      {(b, cambia) => {
+        /** Un campo del modulo di correzione legato alla chiave della bozza, con etichetta, limite di lunghezza ed eventuale testo su più righe. */
+        const campo = (k: keyof typeof b & string, etichetta: string, massimo: number, multilinea?: boolean) => <CampoCorrezione key={k} etichetta={etichetta} valore={b[k]} multilinea={multilinea} massimo={massimo} onCambia={(v) => cambia({ [k]: v } as Partial<typeof b>)} />;
+        return <>
+          {campo('nome', 'Nome', LIMITI_GUIDA.dungeon.nome)}{campo('sovrano', 'Sovrano', LIMITI_GUIDA.dungeon.sovrano)}
+          {campo('dataSblocco', 'Si apre', LIMITI_GUIDA.dungeon.data)}{campo('furtoConsigliato', 'Furto consigliato', LIMITI_GUIDA.dungeon.data)}{campo('dataScadenza', 'Scade', LIMITI_GUIDA.dungeon.data)}
+          {campo('livelloConsigliato', 'Livello consigliato', LIMITI_GUIDA.dungeon.livello)}{campo('note', 'Note della guida', LIMITI_GUIDA.dungeon.note, true)}
+        </>; }}
+    </CorrezioneGuida>
+  );
+
+  /** Lotto B (punto 6): gli strumenti di modifica del Palazzo in un solo menu «Modifica ⋯». Prima erano sparsi su tre righe («✎»
+   *  accanto al nome, «Modifica testo» e «+ Infiltrazione», «Modifica aree», «Modifica» e «Altro» dell'area): sul telefono riempivano
+   *  la prima schermata prima della mappa. Le voci hanno gli stessi nomi accessibili dei comandi di prima; le finestre e i moduli che
+   *  aprono sono gli stessi. Nei Memento resta la modalità «Modifica la guida», che c'era già e non cambia. */
+  const menuModifica = (classePulsante = '') => {
+    if (!d || !area || memento) return null;
+    return (
+      <MenuModifica cosa={`il Palazzo «${d.nome}»`} classePulsante={classePulsante}>
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Correggi la scheda" dettaglio="del Palazzo"
+          aria-label={`Correggi la scheda: il Palazzo «${d.nome}»`} onClick={() => setCorreggendoPalazzo(true)} />
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="note" dimensione={20} />} titolo="Modifica testo" dettaglio={area.nome}
+          aria-label={`Modifica testo: l’infiltrazione «${area.nome}»`} onClick={() => setCorreggendoInfiltrazione(area.chiave)} />
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Modifica aree" dettaglio="toccate dall’infiltrazione"
+          aria-label="Modifica aree" onClick={() => setLegami(area.chiave)} />
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi infiltrazione" onClick={() => setFinestra('nuova-infiltrazione')} />
+        {areaFisica && <>
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica area" dettaglio={areaFisica.nome}
+            aria-label="Modifica area" disabled={!dettaglioArea.dati} onClick={() => setFinestra('modifica-area')} />
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Aggiungi planimetria" dettaglio={areaFisica.nome}
+            aria-label="Aggiungi planimetria" disabled={!dettaglioArea.dati} onClick={() => setFinestra('aggiungi-planimetria')} />
+          <PulsanteVisivo tono="fantasma" compatto className="text-error" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina area" dettaglio={areaFisica.nome}
+            aria-label="Elimina area" onClick={() => setFinestra('elimina-area')} />
+        </>}
+      </MenuModifica>
+    );
+  };
+
+  /** Il modulo del testo dell'infiltrazione (nome e descrizione, con l'eliminazione), aperto dal menu «Modifica ⋯»: sotto la riga. */
+  const moduloInfiltrazione = () => d && area && correggendoInfiltrazione === area.chiave && (
+    <CorrezioneGuida key={area.chiave} aperta onChiudi={() => setCorreggendoInfiltrazione(null)} cosa={`l’infiltrazione «${area.nome}»`} etichetta="Modifica testo"
+      iniziale={() => ({ nome: area.nome, descrizione: area.descrizione })}
+      onSalva={async (b) => { await aggiornaArea(area.chiave, b); await dati.ricarica(); }}
+      // «Devo poter rimuovere un'area» (2026-09-30): l'eliminazione vera, per tutte le partite
+      elimina={{
+        avviso: `Se ne va dalla guida per tutte le partite${area.punti.length ? `, con i suoi ${area.punti.length} punti e quel che le partite ne avevano segnato` : ''}; le aree del Palazzo restano, con le loro altre infiltrazioni. ${NEL_CESTINO}`,
+        onElimina: async () => { const k = area.chiave; await eliminaArea(k); areaEliminata(k); await dati.ricarica(); },
+      }}>
+      {(b, cambia) => <>
+        <CampoCorrezione etichetta="Nome dell’infiltrazione" valore={b.nome} massimo={LIMITI_GUIDA.area.nome} onCambia={(v) => cambia({ nome: v })} />
+        <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={LIMITI_GUIDA.area.descrizione} onCambia={(v) => cambia({ descrizione: v })} />
+      </>}
+    </CorrezioneGuida>
   );
 
   /** R3-41 (decisione del PM, 2026-10-20), da 1024 px: la riga dell'infiltrazione è una sola — il selettore (il titolo), le aree toccate
    *  in una fila scorrevole (da 1280 i chip «Aree toccate»; da 1024 a 1279 la fila di tutte le aree, con le toccate evidenziate, che lì
-   *  sostituisce la colonna), il menu «Altro» con «Modifica testo», «Modifica aree» e «Descrizione», e «Aggiungi infiltrazione». Il
-   *  modulo della correzione e la descrizione si aprono sotto la riga, solo quando li si chiede. */
+   *  sostituisce la colonna), «Descrizione» e il menu «Modifica ⋯» (lotto B: al posto di «Altro» e di «+ Infiltrazione», solo icona).
+   *  Il modulo della correzione e la descrizione si aprono sotto la riga, solo quando li si chiede. */
   const rigaInfiltrazioneLarga = () => {
     if (!d || !area) return null;
-    const chiudiMenu = (e: { currentTarget: HTMLElement }) => e.currentTarget.closest('details')?.removeAttribute('open');
     return <>
       <div className="flex items-center gap-2">
         {d.aree.length > 1
@@ -660,9 +701,9 @@ export function DungeonDettaglioPage() {
                   intero è nell'elenco aperto con un tocco e nel nome accessibile del pulsante (`valoreNelNome`) */}
               <Selettore compatto valoreNelNome className="min-w-0 flex-1" etichetta={`Infiltrazione ${area.ordine + 1} di ${d.aree.length}`} valore={area.chiave}
                 opzioni={d.aree.map((a) => ({ chiave: a.chiave, nome: `${a.ordine + 1}. ${a.nome}`, dettaglio: completate.has(a.chiave) ? 'completata' : undefined }))} onCambia={scegliInfiltrazione} />
-              <span className="shrink-0 text-[11px] text-text-muted" aria-hidden>di {d.aree.length}</span>
+              <span className="shrink-0 testo-12 text-text-muted" aria-hidden>di {d.aree.length}</span>
             </div>
-          : <span className="flex shrink-0 flex-col"><h2 className="m-0 font-display text-[17px] uppercase leading-none">{area.nome}</h2><span className="text-[11px] text-text-muted">infiltrazione 1 di 1</span></span>}
+          : <span className="flex shrink-0 flex-col"><TitoloSezione variante="display">{area.nome}</TitoloSezione><span className="testo-12 text-text-muted">infiltrazione 1 di 1</span></span>}
         {/* UX3-13: da 1280 px la riga non ha più la striscia «Aree toccate» (51–190 px che scorreva di lato, già scorsa: etichetta
             tagliata, chip a metà, un gesto nascosto). Un comando visibile chiedeva 132 px e a capo sforava R3-41: le aree toccate sono
             quelle evidenziate nella colonna delle aree, con la legenda per esteso, e il selettore prende lo spazio liberato. */}
@@ -673,32 +714,13 @@ export function DungeonDettaglioPage() {
               onAggiungiArea={() => setFinestra('aggiungi-area')} onRiordina={riordinaAreePalazzo} />
           </div>
         )}
-        <details className="menu-altro relative shrink-0">
-          <summary className="btn btn-ghost btn-sm touch list-none" aria-label={`Altre azioni dell’infiltrazione «${area.nome}»`}>Altro ▾</summary>
-          <div className="menu-altro__voci">
-            <button type="button" className="btn btn-ghost touch justify-start" onClick={(e) => { chiudiMenu(e); setCorreggendoInfiltrazione(area.chiave); }}>✎ Modifica testo</button>
-            <button type="button" className="btn btn-ghost touch justify-start" onClick={(e) => { chiudiMenu(e); setLegami(area.chiave); }}>Modifica aree</button>
-            {area.descrizione && <button type="button" className="btn btn-ghost touch justify-start" aria-expanded={descrizioneAperta === area.chiave}
-              onClick={(e) => { chiudiMenu(e); setDescrizioneAperta((x) => (x === area.chiave ? null : area.chiave)); }}>{descrizioneAperta === area.chiave ? 'Nascondi la descrizione' : 'Descrizione'}</button>}
-          </div>
-        </details>
-        <PulsanteVisivo tono="fantasma" compatto className="btn-visivo--icona-xl shrink-0" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Infiltrazione" aria-label="Aggiungi infiltrazione" title="Aggiungi infiltrazione" onClick={() => setFinestra('nuova-infiltrazione')} />
+        {area.descrizione && <PulsanteVisivo tono="fantasma" compatto className="btn-visivo--icona-lg shrink-0" icona={<IconaAzione chiave="dettagli" dimensione={20} />}
+          titolo={descrizioneAperta === area.chiave ? 'Nascondi la descrizione' : 'Descrizione'} title="Descrizione dell’infiltrazione" aria-expanded={descrizioneAperta === area.chiave}
+          onClick={() => setDescrizioneAperta((x) => (x === area.chiave ? null : area.chiave))} />}
+        {menuModifica('btn-visivo--icona-lg')}
       </div>
-      {correggendoInfiltrazione === area.chiave && (
-        <CorrezioneGuida key={area.chiave} aperta onChiudi={() => setCorreggendoInfiltrazione(null)} cosa={`l’infiltrazione «${area.nome}»`} etichetta="Modifica testo"
-          iniziale={() => ({ nome: area.nome, descrizione: area.descrizione })}
-          onSalva={async (b) => { await aggiornaArea(area.chiave, b); await dati.ricarica(); }}
-          elimina={{
-            avviso: `Se ne va dalla guida per tutte le partite${area.punti.length ? `, con i suoi ${area.punti.length} punti e quel che le partite ne avevano segnato` : ''}; le aree del Palazzo restano, con le loro altre infiltrazioni. ${NEL_CESTINO}`,
-            onElimina: async () => { const k = area.chiave; await eliminaArea(k); areaEliminata(k); await dati.ricarica(); },
-          }}>
-          {(b, cambia) => <>
-            <CampoCorrezione etichetta="Nome dell’infiltrazione" valore={b.nome} massimo={LIMITI_GUIDA.area.nome} onCambia={(v) => cambia({ nome: v })} />
-            <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={LIMITI_GUIDA.area.descrizione} onCambia={(v) => cambia({ descrizione: v })} />
-          </>}
-        </CorrezioneGuida>
-      )}
-      {descrizioneAperta === area.chiave && area.descrizione && <p className="m-0 text-[13px] text-text-secondary whitespace-pre-wrap">{area.descrizione}</p>}
+      {moduloInfiltrazione()}
+      {descrizioneAperta === area.chiave && area.descrizione && <p className="m-0 testo-13 text-text-secondary whitespace-pre-wrap">{area.descrizione}</p>}
     </>;
   };
 
@@ -764,7 +786,7 @@ export function DungeonDettaglioPage() {
                   // un anello solo (è la barra di avanzamento della pagina): da 1024 px si rimpicciolisce, non si duplica
                   // LAY3-5: nei Palazzi piccolo (48 px) a ogni larghezza, come nei Memento
                   <AnelloAvanzamento quota={anello.quota} dimensione={64} spessore={5} className="size-12!" etichetta={anello.etichetta}>
-                    <span className="font-display text-[13px] leading-none tabular-nums">{percentuale}%</span>
+                    <span className="font-display testo-13 leading-none tabular-nums">{percentuale}%</span>
                   </AnelloAvanzamento>
                 )}
               </div>
@@ -775,29 +797,21 @@ export function DungeonDettaglioPage() {
                   <div className={`flex flex-wrap items-center gap-2 ${memento ? '' : 'max-lg:col-span-2 max-lg:row-start-1 max-lg:flex-nowrap'}`}>
                     {/* nei Palazzi solo l'icona (da 1024 px per R3-41, scelta 3 del PM; sotto per LAY3-5): il nome resta per chi non vede e nel
                         suggerimento */}
+                    {/* lotto B: il ritorno comune delle schede (la pagina di prima o, entrando da un collegamento diretto, l'elenco dei
+                        Palazzi); arrivando dal diario resta «Esci», che torna alla voce */}
                     {ritorno
                       ? <button type="button" className="btn btn-secondary btn-sm touch -ml-2 shrink-0" title="Esci dal Palazzo e torna alla voce del diario" onClick={esci}><IconChevronLeft size={18} /> Esci</button>
-                      : <button type="button" className="btn btn-ghost btn-sm touch -ml-2 shrink-0" title="Indietro" onClick={() => navigate(-1)}><IconChevronLeft size={18} /><span className={memento ? '' : 'sr-only'}> Indietro</span></button>}
-                    <h1 className="titolo-display m-0 min-w-0 break-words">{d.nome}</h1>
-                    {/* nei Memento la correzione della scheda è un comando per sistemare la guida: solo in «Modifica la guida» */}
-                    {(!memento || modifica) && <CorrezioneGuida cosa={memento ? 'i Memento' : `il Palazzo «${d.nome}»`} etichetta="Correggi la scheda" classeEtichetta={memento ? undefined : 'sr-only'}
-                      iniziale={() => ({ nome: d.nome, sovrano: d.sovrano, dataSblocco: d.date.sblocco, dataScadenza: d.date.scadenza, furtoConsigliato: d.date.furtoConsigliato, livelloConsigliato: d.livelloConsigliato, note: d.note })}
-                      onSalva={async (b) => { await aggiornaDungeon(d.chiave, b); await dati.ricarica(); }}>
-                      {(b, cambia) => {
-                        /** Un campo del modulo di correzione legato alla chiave della bozza, con etichetta, limite di lunghezza ed eventuale testo su più righe. */
-                        const campo = (k: keyof typeof b & string, etichetta: string, massimo: number, multilinea?: boolean) => <CampoCorrezione key={k} etichetta={etichetta} valore={b[k]} multilinea={multilinea} massimo={massimo} onCambia={(v) => cambia({ [k]: v } as Partial<typeof b>)} />;
-                        return <>
-                          {campo('nome', 'Nome', LIMITI_GUIDA.dungeon.nome)}{campo('sovrano', 'Sovrano', LIMITI_GUIDA.dungeon.sovrano)}
-                          {campo('dataSblocco', 'Si apre', LIMITI_GUIDA.dungeon.data)}{campo('furtoConsigliato', 'Furto consigliato', LIMITI_GUIDA.dungeon.data)}{campo('dataScadenza', 'Scade', LIMITI_GUIDA.dungeon.data)}
-                          {campo('livelloConsigliato', 'Livello consigliato', LIMITI_GUIDA.dungeon.livello)}{campo('note', 'Note della guida', LIMITI_GUIDA.dungeon.note, true)}
-                        </>; }}
-                    </CorrezioneGuida>}
+                      : <IndietroScheda ripiego="/guida/dungeon" etichettaNascosta={!memento} />}
+                    <TitoloScheda>{d.nome}</TitoloScheda>
+                    {/* nei Memento la correzione della scheda è un comando per sistemare la guida: solo in «Modifica la guida»; nei Palazzi
+                        sta nel menu «Modifica ⋯» (lotto B) e il modulo si apre sotto l'intestazione */}
+                    {memento && modifica && correzioneScheda()}
                   </div>
                   {/* Da 1024 px sovrano e arcana prendono quel che resta della riga del nome, ognuno su una riga coi puntini (testo intero nel
                       suggerimento): in Madarame e Okumura il sovrano è una frase e andava a capo (intestazione da 170 a 197 px), l'arcana di
                       Maruki la portava a 270 (L3, R3-41). Sotto i 128 px rimasti vanno a capo, interi come sotto i 1024 (erano 160: a 1024 in
                       Kamoshida, Kaneshiro e Madarame mandavano a capo «Dettagli dalla guida», intestazione da 106 a 154 px). */}
-                  <div className={`flex flex-wrap items-center gap-2 text-[13px] text-text-secondary lg:min-w-0 lg:flex-1 lg:basis-32 lg:gap-x-2 lg:gap-y-0 ${memento ? '' : 'max-lg:col-start-2 max-lg:row-start-2 max-lg:min-w-0 max-lg:gap-x-2 max-lg:gap-y-1'}`}>
+                  <div className={`flex flex-wrap items-center gap-2 testo-13 text-text-secondary lg:min-w-0 lg:flex-1 lg:basis-32 lg:gap-x-2 lg:gap-y-0 ${memento ? '' : 'max-lg:col-start-2 max-lg:row-start-2 max-lg:min-w-0 max-lg:gap-x-2 max-lg:gap-y-1'}`}>
                     {/* nei Memento, sul telefono, il sovrano sta nella piega dei dettagli: qui andava a capo su due righe */}
                     {/* LAY3-2: se sovrano e arcana non stanno in una riga, l'arcana va sulla seconda, sotto il sovrano: le due righe (18 + 22 px)
                         stanno nell'altezza della riga del titolo (44 px), quindi l'intestazione non cresce. Così il nome del sovrano e le parole
@@ -815,7 +829,7 @@ export function DungeonDettaglioPage() {
                 {/* Da 1024 px finestra, conteggi e dettagli stanno su una riga; i dettagli aperti vanno a capo, sotto. Nei Memento
                     (2026-10-12) la riga sta in una piega: lo spazio va ai dedali e alle aree, che sono la pagina. */}
                 {(() => { const riga = <>
-                {memento && d.sovrano && <span className="text-[13px] text-text-secondary md:hidden">{d.sovrano}</span>}
+                {memento && d.sovrano && <span className="testo-13 text-text-secondary md:hidden">{d.sovrano}</span>}
                 <LineaDelTempo date={d.date} memento={memento} />
                 {/* `lg:contents`: da 1024 px i chip entrano nella riga uno per uno, e vanno a capo solo quelli che non ci stanno (nei Palazzi
                     a ogni larghezza, LAY3-5). */}
@@ -857,7 +871,7 @@ export function DungeonDettaglioPage() {
                 {dettagliGuida(memento ? 'lg:open:basis-full' : 'lg:hidden', true)}
                 </>;
                 return memento
-                  ? <details className="text-[12px]">
+                  ? <details className="testo-12">
                       <summary className="touch cursor-pointer text-text-muted">Date, mappe e conteggi del Memento</summary>
                       <div className="flex flex-col gap-2.5 pt-1.5 lg:flex-row lg:flex-wrap lg:items-center lg:gap-2">{riga}</div>
                     </details>
@@ -867,6 +881,8 @@ export function DungeonDettaglioPage() {
               </div>
             </div>
           </header>}
+          {/* lotto B: la correzione della scheda del Palazzo, aperta dal menu «Modifica ⋯» */}
+          {!memento && correggendoPalazzo && <div className="shrink-0">{correzioneScheda(() => setCorreggendoPalazzo(false))}</div>}
 
           {/* Da 1024 px una riga sola, alta quanto resta (`minmax(0,1fr)`): le colonne si stirano fino in fondo. Il
               minimo evita colonne schiacciate su uno schermo più basso di un portatile con il browser aperto: lì, e
@@ -885,7 +901,7 @@ export function DungeonDettaglioPage() {
                 <nav aria-label="Dedali dei Memento" className="hidden min-h-0 flex-col gap-1.5 lg:flex">
                   <MappaMemento aree={d.aree} selezionata={area.chiave} onSeleziona={scegliArea} className="shrink-0" />
                   <div className="flex min-h-0 flex-1 flex-col gap-1 area-scorrevole p-1.5">
-                    <span className="px-1 text-[11px] uppercase tracking-wide text-text-muted">Dedali</span>
+                    <span className="px-1 testo-12 uppercase tracking-wide text-text-muted">Dedali</span>
                     {d.aree.map((a) => <DedaloNelBinario key={a.chiave} a={a} suggerito={areaSuggerita(a.chiave)} scelto={a.chiave === area.chiave} onScegli={() => scegliArea(a.chiave)} />)}
                   </div>
                 </nav>
@@ -946,47 +962,33 @@ export function DungeonDettaglioPage() {
                         <Selettore etichetta={`Infiltrazione ${area.ordine + 1} di ${d.aree.length}`} valore={area.chiave}
                           opzioni={d.aree.map((a) => ({ chiave: a.chiave, nome: `${a.ordine + 1}. ${a.nome}`, dettaglio: completate.has(a.chiave) ? 'completata' : undefined }))} onCambia={scegliInfiltrazione} />
                       </div>
-                    : <h2 className="m-0 font-display text-[19px] uppercase leading-none">{area.nome}</h2>}
-                  {/* `key`: cambiando area il modulo si rimonta, altrimenti resterebbe aperto con il
-                      testo dell'area di prima e lo salverebbe su quella nuova (rilievo della revisione). */}
-                  {/* «Modifica testo» per esteso: la sola ✎ accanto al titolo non si trovava («come faccio a modificare
-                      il testo delle Aree della guida?», 2026-09-30) */}
-                  <CorrezioneGuida key={area.chiave} cosa={`l’infiltrazione «${area.nome}»`} etichetta="Modifica testo"
-                    iniziale={() => ({ nome: area.nome, descrizione: area.descrizione })}
-                    onSalva={async (b) => { await aggiornaArea(area.chiave, b); await dati.ricarica(); }}
-                    // «Devo poter rimuovere un'area» (2026-09-30): l'eliminazione vera, per tutte le partite
-                    elimina={{
-                      avviso: `Se ne va dalla guida per tutte le partite${area.punti.length ? `, con i suoi ${area.punti.length} punti e quel che le partite ne avevano segnato` : ''}; le aree del Palazzo restano, con le loro altre infiltrazioni. ${NEL_CESTINO}`,
-                      onElimina: async () => { const k = area.chiave; await eliminaArea(k); areaEliminata(k); await dati.ricarica(); },
-                    }}>
-                    {(b, cambia) => <>
-                      <CampoCorrezione etichetta="Nome dell’infiltrazione" valore={b.nome} massimo={LIMITI_GUIDA.area.nome} onCambia={(v) => cambia({ nome: v })} />
-                      <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={LIMITI_GUIDA.area.descrizione} onCambia={(v) => cambia({ descrizione: v })} />
-                    </>}
-                  </CorrezioneGuida>
-                  {(collegamento || d.aree.length <= 1) && <span className="text-[12px] text-text-muted">infiltrazione {area.ordine + 1} di {d.aree.length}</span>}
-                  {!collegamento && <PulsanteVisivo tono="fantasma" compatto className="btn-visivo--icona-xl" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Infiltrazione" aria-label="Aggiungi infiltrazione" title="Aggiungi infiltrazione" onClick={() => setFinestra('nuova-infiltrazione')} />}
+                    : <TitoloSezione variante="display">{area.nome}</TitoloSezione>}
+                  {(collegamento || d.aree.length <= 1) && <span className="testo-12 text-text-muted">infiltrazione {area.ordine + 1} di {d.aree.length}</span>}
+                  {/* lotto B (punto 6): «Modifica testo», «+ Infiltrazione», «Modifica aree» e le azioni dell'area in un solo menu, accanto
+                      al selettore: la prima schermata del telefono mostra la mappa e non quattro comandi di modifica */}
+                  {!collegamento && menuModifica()}
                 </div>
+                {/* il modulo del testo si apre sotto la riga; `key`: cambiando infiltrazione si rimonta (rilievo della revisione) */}
+                {!collegamento && moduloInfiltrazione()}
                 {/* Collegando i pin resta solo la riga del titolo (2026-10-18: «è inutile tutto ad eccezione del titolo»). */}
                 {/* «Aree toccate» (§4.2): le aree che l'infiltrazione percorre, in ordine; toccarne una la apre. «Modifica aree» cambia i legami. */}
                 {!collegamento && (
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="text-[11px] uppercase tracking-wide text-text-muted">Aree toccate</span>
+                    <span className="testo-12 uppercase tracking-wide text-text-muted">Aree toccate</span>
                     <ol className="m-0 flex list-none flex-wrap gap-1 p-0" aria-label={`Aree toccate da ${area.nome}`}>
                       {(area.areePalazzo ?? []).map((a) => (
                         <li key={a.chiave}>
-                          <button type="button" className={`chip touch text-[11px] ${a.chiave === areaFisica?.chiave ? 'chip--attivo' : ''}`} aria-pressed={a.chiave === areaFisica?.chiave}
+                          <button type="button" className={`chip touch testo-12 ${a.chiave === areaFisica?.chiave ? 'chip--attivo' : ''}`} aria-pressed={a.chiave === areaFisica?.chiave}
                             onClick={() => apriArea(a.slug, area.chiave, a.planimetriaIniziale)}>{a.nome}</button>
                         </li>
                       ))}
                     </ol>
-                    <button type="button" className="chip touch text-[11px]" onClick={() => setLegami(area.chiave)}>Modifica aree</button>
                     {/* la descrizione dell'infiltrazione in una piega sulla stessa riga: per esteso (anche ripiegata a 140 caratteri) spingeva
                         il visore sotto il bordo della colonna; aperta, va a capo sotto */}
                     {area.descrizione && (
-                      <details className="text-[12px] open:basis-full">
+                      <details className="testo-12 open:basis-full">
                         <summary className="touch cursor-pointer text-text-muted">Descrizione</summary>
-                        <p className="m-0 pt-1 text-[13px] text-text-secondary whitespace-pre-wrap">{area.descrizione}</p>
+                        <p className="m-0 pt-1 testo-13 text-text-secondary whitespace-pre-wrap">{area.descrizione}</p>
                       </details>
                     )}
                   </div>
@@ -1017,12 +1019,10 @@ export function DungeonDettaglioPage() {
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-border-light pt-2 lg:border-t-0 lg:pt-0 xl:flex-nowrap">
                     {/* da 1280 px il nome prende tutto lo spazio libero e va a capo: troncato su una riga era «Canc…» (LAY3-1); i nomi
                         lunghi (le zone senza nome nativo, «Area riservata allo staff (verso …)») vanno su tre righe, ma si leggono interi */}
-                    <h3 className="m-0 break-words text-[15px] font-semibold xl:min-w-0 xl:flex-1" title={areaFisica.nome}>{areaFisica.nome}</h3>
+                    <h3 className="m-0 break-words testo-15 font-semibold xl:min-w-0 xl:flex-1" title={areaFisica.nome}>{areaFisica.nome}</h3>
                     {/* da 1280 px il chip non c'è: le versioni le mostra la fila subito sotto, e i suoi 74 px servono al nome (LAY3-1) */}
-                    {areaFisica.numeroPlanimetrie > 1 && <span className="chip shrink-0 whitespace-nowrap text-[11px] xl:hidden">{areaFisica.numeroPlanimetrie} versioni</span>}
-                    <span className="flex-1 xl:hidden" />
-                    {/* etichette corte, una riga: il nome completo lo sentono i lettori di schermo (come nella testata dell'Area, L2) */}
-                    {azioniArea()}
+                    {areaFisica.numeroPlanimetrie > 1 && <span className="chip shrink-0 whitespace-nowrap testo-12 xl:hidden">{areaFisica.numeroPlanimetrie} versioni</span>}
+                    {/* lotto B: le azioni dell'area («Modifica», «Planimetria», «Elimina», «Altro») stanno nel menu «Modifica ⋯» */}
                   </div>
                 )}
                 {areaFisica && !collegamento && versioniArea.length > 1 && planimetriaScelta && <>
@@ -1037,18 +1037,16 @@ export function DungeonDettaglioPage() {
                             da 44 sotto (R3-41); il testo intero è il nome del pulsante e il suggerimento */}
                         <SelettoreVersioni className="flex-1" nome={areaFisica.nome} planimetrie={versioniArea} scelta={planimetriaScelta} onScegli={scegliVersione}
                           avviso={senzaPin ? `nessun pin: stanno su «${senzaPin.nome}»` : undefined} />
-                        {senzaPin && <button type="button" className="btn btn-secondary btn-sm touch shrink-0" title={senzaPin.testo} aria-label={`Passa a «${senzaPin.nome}»`}
-                          onClick={() => scegliVersione(senzaPin.chiave)}>Passa</button>}
-                        {azioniArea()}
+                        {senzaPin && <PulsanteVisivo compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Passa" className="shrink-0" title={senzaPin.testo} aria-label={`Passa a «${senzaPin.nome}»`} onClick={() => scegliVersione(senzaPin.chiave)} />}
                       </div>
                     : <VersioniArea nome={areaFisica.nome} planimetrie={versioniArea} scelta={planimetriaScelta} onScegli={scegliVersione} />}
                 </>}
                 {/* la versione mostrata non ha pin, un'altra sì: lo si dice e si passa a quella in un tocco (come nella pagina dell'Area) */}
                 {/* da 1024 px l'avviso sta nella riga delle versioni (sopra); sotto, la sua riga com'era */}
                 {senzaPin && !collegamento && !largo && (
-                  <p className="m-0 flex flex-wrap items-center gap-2 text-[13px] text-text-secondary" role="status">
+                  <p className="m-0 flex flex-wrap items-center gap-2 testo-13 text-text-secondary" role="status">
                     {senzaPin.testo}
-                    <button type="button" className="btn btn-secondary btn-sm touch" onClick={() => scegliVersione(senzaPin.chiave)}>Passa a «{senzaPin.nome}»</button>
+                    <PulsanteVisivo compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo={<>Passa a «{senzaPin.nome}»</>} onClick={() => scegliVersione(senzaPin.chiave)} />
                   </p>
                 )}
                 {/* Collegando i pin di una voce (2026-10-18) la stessa mappa diventa quella di scelta: la barra sopra, tutti i pin
@@ -1069,9 +1067,9 @@ export function DungeonDettaglioPage() {
                 )}
                 {/* un'infiltrazione che non tocca aree (o un Palazzo senza aree): niente da mostrare, si collegano (§4.2) */}
                 {!mappaMostrata && !collegamento && (
-                  <div className="flex flex-col items-start gap-2 rounded-md bg-white/[0.04] px-3 py-2 text-[12px]" role="status">
+                  <div className="flex flex-col items-start gap-2 rounded-md bg-white/[0.04] px-3 py-2 testo-12" role="status">
                     <p className="m-0 text-text-muted">{areaFisica ? `${areaFisica.nome} non ha ancora planimetrie: aggiungine una.` : 'Quest’infiltrazione non tocca ancora aree.'}</p>
-                    {!areaFisica && <button type="button" className="chip touch" onClick={() => setLegami(area.chiave)}>Collega aree</button>}
+                    {!areaFisica && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="url" dimensione={20} />} titolo="Collega aree" onClick={() => setLegami(area.chiave)} />}
                   </div>
                 )}
               </section>
@@ -1081,17 +1079,17 @@ export function DungeonDettaglioPage() {
                 <RaccoltaPlanimetrie planimetrie={mappeArea} partitaId={partitaId} onRaccolto={segnaRaccolto} vuoto={vuotoArea} indirizzo={indirizzoRaccolta} primaDiTogliere={(id) => primaDiTogliereIlPin(id)} />
                 {/* Il resto del Palazzo, sempre ripiegato: con un'area aperta si vede quell'area (rilievo dell'utente, 2026-10-01). */}
                 {altrePlanimetrie.length > 0 && (
-                  <details className="text-[12px]">
+                  <details className="testo-12">
                     <summary className="touch cursor-pointer text-text-muted">Tutte le planimetrie del Palazzo · {restanoAltre} da raccogliere</summary>
                     <div className="pt-2">
                       <RaccoltaPlanimetrie planimetrie={altrePlanimetrie} partitaId={partitaId} onRaccolto={segnaRaccolto} etichetta="Nel resto del Palazzo" indirizzo={indirizzoRaccolta} primaDiTogliere={(id) => primaDiTogliereIlPin(id)} />
                     </div>
                   </details>
                 )}
-                {!partitaId && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary">partita</Link> per segnare quel che raccogli.</span>}
+                {!partitaId && <span className="testo-12 text-text-muted">Attiva una <Link to="/partita" className="text-primary-testo">partita</Link> per segnare quel che raccogli.</span>}
                 {/* L4 (§4.3): i pin fatti con una voce non fatta, da prima dell'aggiornamento, coi due gesti che li sistemano */}
                 {quanteDaVerificare > 0 && partitaId && (
-                  <details ref={sezioneDaVerificare} id="da-verificare" className="text-[12px]">
+                  <details ref={sezioneDaVerificare} id="da-verificare" className="testo-12">
                     <summary className="touch cursor-pointer font-semibold text-warning">Da verificare ({quanteDaVerificare})</summary>
                     <p className="m-0 pt-1 text-text-muted">{SPIEGAZIONE_DA_VERIFICARE} Tocca un pin per sistemarlo.</p>
                     <ul className="m-0 flex list-none flex-col gap-1 p-0 pt-1.5" aria-label="Pin da verificare">
@@ -1099,8 +1097,8 @@ export function DungeonDettaglioPage() {
                         <li key={`${x.spilloUid}/${x.voce}`}>
                           <button type="button" className="touch flex w-full flex-col items-start rounded-md border border-warning/50 px-2 py-1 text-left"
                             onClick={() => setDaVerificare({ spilloUid: x.spilloUid, spilloNome: x.spilloNome, mappaNome: nomeSenzaPalazzo(x.mappaNome), voce: x.voce, voceNome: x.voceNome, infiltrazioneNome: x.infiltrazioneNome })}>
-                            <span className="text-[13px] font-semibold">{x.spilloNome}</span>
-                            <span className="text-[11px] text-text-muted">{x.voceNome} · {x.infiltrazioneNome}</span>
+                            <span className="testo-13 font-semibold">{x.spilloNome}</span>
+                            <span className="testo-12 text-text-muted">{x.voceNome} · {x.infiltrazioneNome}</span>
                           </button>
                         </li>
                       ))}
@@ -1126,9 +1124,9 @@ export function DungeonDettaglioPage() {
               <Modal titolo={conferma.titolo} aperta onChiudi={() => chiudiConferma(false)}
                 azioni={<>
                   <button type="button" className="btn btn-secondary touch" onClick={() => chiudiConferma(false)}>Annulla</button>
-                  <button type="button" className="btn btn-primary touch" onClick={() => chiudiConferma(true)}>{conferma.azione}</button>
+                  <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="raggiunto" dimensione={22} />} titolo={conferma.azione} onClick={() => chiudiConferma(true)} />
                 </>}>
-                {conferma.righe.map((r) => <p key={r} className="m-0 text-[14px]">{r}</p>)}
+                {conferma.righe.map((r) => <p key={r} className="m-0 testo-14">{r}</p>)}
               </Modal>
             )}
             {daVerificare && partitaId && (
@@ -1153,9 +1151,9 @@ export function DungeonDettaglioPage() {
               <Modal titolo={`Eliminare ${areaFisica.nome}?`} aperta={finestra === 'elimina-area'} onChiudi={() => setFinestra(null)}
                 azioni={<>
                   <button type="button" className="btn btn-secondary touch" onClick={() => setFinestra(null)}>Annulla</button>
-                  <button type="button" className="btn btn-danger touch" disabled={occupato} onClick={() => void eliminaAreaFisica()}>Elimina</button>
+                  <PulsanteVisivo tono="pericolo" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Elimina" disabled={occupato} onClick={() => void eliminaAreaFisica()} />
                 </>}>
-                <div className="flex flex-col gap-2 text-[14px]">
+                <div className="flex flex-col gap-2 testo-14">
                   <p className="m-0">Si eliminano l’area, {areaFisica.numeroPlanimetrie === 1 ? 'la sua planimetria' : `le sue ${areaFisica.numeroPlanimetrie} planimetrie`}{areaFisica.numeroSpilli ? ` con ${areaFisica.numeroSpilli} pin` : ''} e {(areaFisica.infiltrazioni ?? []).length === 1 ? 'il legame con 1 infiltrazione' : `i legami con ${(areaFisica.infiltrazioni ?? []).length} infiltrazioni`}. Le voci della guida restano nelle loro infiltrazioni.</p>
                   <p className="m-0 text-text-secondary">{NEL_CESTINO}</p>
                 </div>
@@ -1187,11 +1185,11 @@ function InfiltrazioniInArea({ area, aperta, completate, onScegli }: { area: Are
     <section className="visore-mappa__sezione" aria-label="Infiltrazioni in quest’area">
       <h3 className="visore-mappa__intestazione">Infiltrazioni in quest’area</h3>
       {infiltrazioni.length === 0
-        ? <p className="m-0 text-[12px] text-text-muted">Nessuna infiltrazione passa di qui.</p>
+        ? <p className="m-0 testo-12 text-text-muted">Nessuna infiltrazione passa di qui.</p>
         : <ul className="m-0 flex list-none flex-wrap gap-1 p-0">
           {infiltrazioni.map((x) => (
             <li key={x.chiave}>
-              <button type="button" className={`chip touch text-[11px] ${x.chiave === aperta ? 'chip--attivo' : ''} ${completate.has(x.chiave) ? 'chip--icona' : ''}`} aria-pressed={x.chiave === aperta} onClick={() => onScegli(x.chiave)}>
+              <button type="button" className={`chip touch testo-12 ${x.chiave === aperta ? 'chip--attivo' : ''} ${completate.has(x.chiave) ? 'chip--icona' : ''}`} aria-pressed={x.chiave === aperta} onClick={() => onScegli(x.chiave)}>
                 {completate.has(x.chiave) && <SpuntaCompletata />}{x.ordine + 1}. {x.nome}{completate.has(x.chiave) && <TestoCompletata />}
               </button>
             </li>

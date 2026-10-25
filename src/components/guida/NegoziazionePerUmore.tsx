@@ -19,6 +19,8 @@ import { Selettore } from '../shared/Selettore';
 import { COLORE_TRATTO, NOME_TRATTO, SEGNO_ESITO, TRATTI_OMBRA } from '../../utils/negoziazione';
 import { NOME_PERSONALITA, type EsitoNegoziazione, type UmoreNegoziazione } from '../../../shared/elementi';
 import type { NegCellaCompattaDto, NegDomandaCompattaDto, NegDomandaDto, NegRispostaCompattaDto } from '../../../shared/negoziazione';
+import { PulsanteVisivo, FrecciaApertura } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 const NOME_ESITO: Record<EsitoNegoziazione, string> = { buona: 'Buona', passabile: 'Passabile', cattiva: 'Cattiva' };
 const CLASSE_ESITO: Record<EsitoNegoziazione, string> = {
@@ -29,7 +31,7 @@ const PASSO = 40;
 /** Un esito in parole e con un segno. */
 function Esito({ esito, incerto = false, piccolo = false }: { esito: EsitoNegoziazione; incerto?: boolean; piccolo?: boolean }) {
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-semibold ${piccolo ? 'text-[11px]' : 'text-[12px]'} ${CLASSE_ESITO[esito]}`}>
+    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-semibold ${piccolo ? 'testo-12' : 'testo-12'} ${CLASSE_ESITO[esito]}`}>
       <span aria-hidden>{SEGNO_ESITO[esito]}</span>{NOME_ESITO[esito]}{incerto && <span title="Nemmeno la fonte è certa" aria-label="incerto"> ?</span>}
     </span>
   );
@@ -42,11 +44,11 @@ function Cella({ c }: { c: NegCellaCompattaDto }) {
       {c.esito
         ? <Esito esito={c.esito} incerto={!!c.incerto} />
         : c.alternative && c.alternative.length > 0
-          ? <>{c.alternative.map((e, i) => <Esito key={`${e}${i}`} esito={e} incerto={!!c.incerto} />)}<span className="text-[11px] text-text-muted">la fonte si contraddice</span></>
-          : <span className="text-[12px] text-text-muted">non documentata</span>}
-      {c.fonte && c.fonte !== 'royal' && <span className="text-[11px] text-text-muted" title="Royal non documenta questa cella: l’esito viene dall’app e non è verificato">solo dall’app</span>}
-      {c.nonConfermata && <span className="text-[11px] text-text-muted" title="Esito ereditato dal gioco base, non confermato in Royal">ereditato, non confermato</span>}
-      {c.altre && c.altre.map((a, i) => <span key={`${a.fonte}${i}`} className="text-[11px] text-text-muted">anche «{NOME_ESITO[a.esito].toLowerCase()}» ({a.fonte === 'royal' ? 'Royal' : 'app'})</span>)}
+          ? <>{c.alternative.map((e, i) => <Esito key={`${e}${i}`} esito={e} incerto={!!c.incerto} />)}<span className="testo-12 text-text-muted">la fonte si contraddice</span></>
+          : <span className="testo-12 text-text-muted">non documentata</span>}
+      {c.fonte && c.fonte !== 'royal' && <span className="testo-12 text-text-muted" title="Royal non documenta questa cella: l’esito viene dall’app e non è verificato">solo dall’app</span>}
+      {c.nonConfermata && <span className="testo-12 text-text-muted" title="Esito ereditato dal gioco base, non confermato in Royal">ereditato, non confermato</span>}
+      {c.altre && c.altre.map((a, i) => <span key={`${a.fonte}${i}`} className="testo-12 text-text-muted">anche «{NOME_ESITO[a.esito].toLowerCase()}» ({a.fonte === 'royal' ? 'Royal' : 'app'})</span>)}
     </span>
   );
 }
@@ -58,12 +60,12 @@ function Dettaglio({ domanda, umore, onCambiato }: { domanda: string; umore: Umo
   const cambiato = () => { void d.ricarica(); onCambiato(); };
   /** La matita di un esito: la chiave è quella dell'attestazione. */
   const matitaEsito = (chiave: string) => <ModificaGuida tipo="negoziazione-verdetto" chiave={chiave} cosa="l’esito di questa risposta" soloIcona onSalvato={cambiato} />;
-  if (d.caricamento && !d.dati) return <p className="m-0 text-[12px] text-text-muted" role="status">Leggo il dettaglio…</p>;
-  if (d.errore) return <p className="m-0 text-[12px] text-error" role="alert">{d.errore}</p>;
+  if (d.caricamento && !d.dati) return <p className="m-0 testo-12 text-text-muted" role="status">Leggo il dettaglio…</p>;
+  if (d.errore) return <p className="m-0 testo-12 text-error" role="alert">{d.errore}</p>;
   const fam: NegDomandaDto | undefined = d.dati?.domande[0];
   if (!fam) return null;
   return (
-    <div className="flex flex-col gap-2 border-t border-border-light pt-2 text-[12px]">
+    <div className="flex flex-col gap-2 border-t border-border-light pt-2 testo-12">
       {fam.varianti.map((v) => (
         <section key={v.chiave} className="flex flex-col gap-1" aria-label={`Variante ${v.localizzatore}`}>
           <span className="flex items-center gap-1 text-text-secondary"><span><strong>{v.fonte === 'royal' ? 'Royal' : v.fonte === 'app-originale' ? 'App (file originale)' : 'Ritocco'}</strong> · {v.testo ?? v.testoOriginale}{v.nota ? ` — ${v.nota}` : ''}</span>
@@ -94,9 +96,9 @@ function Dettaglio({ domanda, umore, onCambiato }: { domanda: string; umore: Umo
 function Domanda({ d, umore, onCambiato }: { d: NegDomandaCompattaDto; umore: UmoreNegoziazione; onCambiato: () => void }) {
   const [aperta, setAperta] = useState(false);
   return (
-    <li className="card flex flex-col gap-1.5 p-2 text-[13px]">
+    <li className="card flex flex-col gap-1.5 p-2 testo-13">
       <strong className="leading-snug">{d.testo}</strong>
-      {d.testoOrigine !== 'gioco' && <span className="text-[11px] text-text-muted">resa in italiano, non il testo del gioco</span>}
+      {d.testoOrigine !== 'gioco' && <span className="testo-12 text-text-muted">resa in italiano, non il testo del gioco</span>}
       <ul className="m-0 flex list-none flex-col gap-1 p-0">
         {d.risposte.map((r: NegRispostaCompattaDto) => (
           <li key={r.chiave} className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-2">
@@ -105,9 +107,8 @@ function Domanda({ d, umore, onCambiato }: { d: NegDomandaCompattaDto; umore: Um
           </li>
         ))}
       </ul>
-      <button type="button" className="touch self-start text-[12px] text-text-muted underline" aria-expanded={aperta} onClick={() => setAperta((v) => !v)}>
-        {aperta ? 'Nascondi i dettagli' : `Dettagli e provenienze${d.nVarianti > 1 ? ` (${d.nVarianti} varianti)` : ''}`}
-      </button>
+      <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="dettagli" dimensione={20} />} aria-expanded={aperta} onClick={() => setAperta((v) => !v)}
+        titolo={<>{aperta ? 'Nascondi i dettagli' : `Dettagli e provenienze${d.nVarianti > 1 ? ` (${d.nVarianti} varianti)` : ''}`}<FrecciaApertura aperto={aperta} /></>} />
       {aperta && <Dettaglio domanda={d.chiave} umore={umore} onCambiato={onCambiato} />}
     </li>
   );
@@ -117,7 +118,7 @@ function Domanda({ d, umore, onCambiato }: { d: NegDomandaCompattaDto; umore: Um
 function OmbreDellUmore({ umore }: { umore: UmoreNegoziazione }) {
   const ombre = useCarica(() => getOmbre({ personalita: umore }), [umore]);
   return (
-    <details className="text-[12px]">
+    <details className="testo-12">
       <summary className="touch cursor-pointer text-text-muted">Ombre {NOME_PERSONALITA[umore].toLowerCase()}{ombre.dati ? ` · ${ombre.dati.length}` : ''}</summary>
       {ombre.dati && (
         <ul className="m-0 flex list-none flex-wrap gap-x-3 p-0 pt-1">
@@ -175,7 +176,7 @@ export function NegoziazionePerUmore() {
       <div className="flex flex-col gap-1.5" role="group" aria-label="Umore">
         <div className="flex flex-wrap gap-1.5">
           {TRATTI_OMBRA.map((t) => (
-            <button key={t.chiave} type="button" className={`chip touch text-[13px] ${umore === t.chiave && !ombra ? 'chip--attivo' : ''}`} aria-pressed={umore === t.chiave && !ombra}
+            <button key={t.chiave} type="button" className={`chip touch testo-13 ${umore === t.chiave && !ombra ? 'chip--attivo' : ''}`} aria-pressed={umore === t.chiave && !ombra}
               style={{ borderColor: umore === t.chiave ? t.colore : undefined }} onClick={() => imposta({ umore: t.chiave, ombra: null })}>
               <span aria-hidden className="inline-block size-2.5 rounded-full" style={{ background: t.colore }} />{t.nome}
             </button>
@@ -184,7 +185,7 @@ export function NegoziazionePerUmore() {
         <div className="flex flex-wrap items-end gap-2">
           <Selettore compatto etichetta="Ombra" valore={ombra} vuoto="Oppure scegli l’Ombra" opzioni={opzioniOmbre} onCambia={(k) => imposta({ ombra: k || null, umore: null })} />
           {ombra && r?.ombra && (
-            <span className="text-[12px] text-text-secondary" role="status">
+            <span className="testo-12 text-text-secondary" role="status">
               {r.ombra.umore ? <>Personalità <strong style={{ color: COLORE_TRATTO[r.ombra.umore] }}>{NOME_TRATTO[r.ombra.umore]}</strong> · <Link to={`/guida/ombra/${r.ombra.chiave}`}>pagina dell’Ombra</Link></>
                 : r.ombra.negoziabile === false ? <>«{r.ombra.nome}» non si negozia · <Link to={`/guida/ombra/${r.ombra.chiave}`}>pagina dell’Ombra</Link></>
                 : <>La personalità di «{r.ombra.nome}» non è nota: scegli tu l’umore · <Link to={`/guida/ombra/${r.ombra.chiave}`}>pagina dell’Ombra</Link></>}
@@ -193,39 +194,39 @@ export function NegoziazionePerUmore() {
         </div>
       </div>
 
-      {!umore && !ombra && <p className="m-0 text-[13px] text-text-muted" role="status">Scegli l’umore dell’Ombra (o l’Ombra): ogni risposta ti dice come la prende.</p>}
-      {!umore && ombra && r && <p className="m-0 text-[13px] text-text-muted" role="status">Nessun umore da proporre per quest’Ombra: scegli uno dei quattro qui sopra.</p>}
+      {!umore && !ombra && <p className="m-0 testo-13 text-text-muted" role="status">Scegli l’umore dell’Ombra (o l’Ombra): ogni risposta ti dice come la prende.</p>}
+      {!umore && ombra && r && <p className="m-0 testo-13 text-text-muted" role="status">Nessun umore da proporre per quest’Ombra: scegli uno dei quattro qui sopra.</p>}
 
       {umore && (
         <>
           {carta && (
             <section className="card flex flex-col gap-1.5 p-2" style={{ borderColor: COLORE_TRATTO[umore] }} aria-label={`Carta ${NOME_TRATTO[umore]}`}>
               <div className="flex items-center gap-1">
-                <h3 className="m-0 font-display text-[14px] uppercase leading-none" style={{ color: COLORE_TRATTO[umore] }}>{carta.nome}</h3>
+                <h3 className="m-0 font-display testo-14 uppercase leading-none" style={{ color: COLORE_TRATTO[umore] }}>{carta.nome}</h3>
                 <ModificaGuida tipo="negoziazione-umore" chiave={umore} cosa={`la carta «${carta.nome}»`} soloIcona onSalvato={() => void risposta.ricarica()} />
               </div>
-              <p className="m-0 text-[12px] text-text-secondary">{carta.descrizione}</p>
+              <p className="m-0 testo-12 text-text-secondary">{carta.descrizione}</p>
               {carta.esempi.filter((e) => !e.proposta && typeof e.testo === 'string').length > 0 && (
-                <div className="flex flex-wrap gap-1"><span className="text-[10px] uppercase tracking-[0.08em] text-success">Rispondi così</span>
-                  {carta.esempi.filter((e) => !e.proposta && typeof e.testo === 'string').map((e) => <span key={String(e.testo)} className="rounded-full border border-success/60 bg-success/10 px-2 py-0.5 text-[12px] text-success">{String(e.testo)}</span>)}</div>
+                <div className="flex flex-wrap gap-1"><span className="testo-12 uppercase tracking-[0.08em] text-success">Rispondi così</span>
+                  {carta.esempi.filter((e) => !e.proposta && typeof e.testo === 'string').map((e) => <span key={String(e.testo)} className="rounded-full border border-success/60 bg-success/10 px-2 py-0.5 testo-12 text-success">{String(e.testo)}</span>)}</div>
               )}
               {carta.daEvitare.length > 0 && (
-                <div className="flex flex-wrap gap-1"><span className="text-[10px] uppercase tracking-[0.08em] text-error">Da evitare</span>
-                  {carta.daEvitare.map((x) => <span key={x} className="rounded-full border border-error/50 bg-error/10 px-2 py-0.5 text-[12px] text-error">{x}</span>)}</div>
+                <div className="flex flex-wrap gap-1"><span className="testo-12 uppercase tracking-[0.08em] text-error">Da evitare</span>
+                  {carta.daEvitare.map((x) => <span key={x} className="rounded-full border border-error/50 bg-error/10 px-2 py-0.5 testo-12 text-error">{x}</span>)}</div>
               )}
             </section>
           )}
           <CampoRicerca valore={testo} onCambia={setTesto} segnaposto="Cerca la domanda o la risposta…" />
-          {risposta.caricamento && !r && <p className="m-0 text-[12px] text-text-muted" role="status">Leggo la negoziazione…</p>}
-          {risposta.errore && <p className="m-0 text-[12px] text-error" role="alert">{risposta.errore}</p>}
+          {risposta.caricamento && !r && <p className="m-0 testo-12 text-text-muted" role="status">Leggo la negoziazione…</p>}
+          {risposta.errore && <p className="m-0 testo-12 text-error" role="alert">{risposta.errore}</p>}
           {r && (
             <>
-              <p className="m-0 text-[12px] text-text-muted" role="status">{r.totale} {r.totale === 1 ? 'domanda' : 'domande'}{qCerca ? ` per «${qCerca}»` : ''}. Esiti di Royal; dove Royal tace, quelli dell’app, dichiarati.</p>
+              <p className="m-0 testo-12 text-text-muted" role="status">{r.totale} {r.totale === 1 ? 'domanda' : 'domande'}{qCerca ? ` per «${qCerca}»` : ''}. Esiti di Royal; dove Royal tace, quelli dell’app, dichiarati.</p>
               <ul className="m-0 grid list-none grid-cols-1 items-start gap-2 p-0 lg:grid-cols-2 2xl:grid-cols-3" aria-label="Domande">
                 {r.domande.slice(0, quante).map((d) => <Domanda key={d.chiave} d={d} umore={umore} onCambiato={() => void risposta.ricarica()} />)}
               </ul>
-              {r.domande.length > quante && <button type="button" className="btn btn-secondary btn-sm touch self-start" onClick={() => setQuante((n) => n + PASSO)}>Mostra altre {Math.min(PASSO, r.domande.length - quante)}</button>}
-              {r.totale === 0 && <p className="m-0 text-[13px] text-text-muted">Nessuna domanda con questo testo.</p>}
+              {r.domande.length > quante && <PulsanteVisivo compatto icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo={<>Mostra altre {Math.min(PASSO, r.domande.length - quante)}</>} className="self-start" onClick={() => setQuante((n) => n + PASSO)} />}
+              {r.totale === 0 && <p className="m-0 testo-13 text-text-muted">Nessuna domanda con questo testo.</p>}
             </>
           )}
           <OmbreDellUmore umore={umore} />

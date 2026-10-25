@@ -13,6 +13,9 @@ import type { NodoPianoDto, PianoSalvatoDto } from '../../types';
 const { getPianiSalvati, getPossedute, aggiornaPianoSalvato, eliminaPianoSalvato } = vi.hoisted(() => ({ getPianiSalvati: vi.fn(), getPossedute: vi.fn(), aggiornaPianoSalvato: vi.fn(), eliminaPianoSalvato: vi.fn() }));
 vi.mock('../../services/api', (vero) => moduloApi(vero, { getPianiSalvati, getPossedute, aggiornaPianoSalvato, eliminaPianoSalvato, getImmagini: vi.fn().mockResolvedValue([]), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(), }));
 vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
+// le domande di conferma passano da `conferma()` (DialogoConferma), non più da window.confirm
+const { conferma } = vi.hoisted(() => ({ conferma: vi.fn() }));
+vi.mock('../../stores/confermaStore', async (vero) => ({ ...(await vero<typeof import('../../stores/confermaStore')>()), conferma }));
 
 /** Persona di un nodo del piano: arcano Mago, livello 10, con il nome italiano uguale al nome. */
 const p = (id: number, nome: string): NodoPianoDto['persona'] => ({ id, nome, nomeIt: nome, arcana: 'Magician', arcanaNome: 'Mago', livello: 10, speciale: false, rara: false, dlc: false });
@@ -48,7 +51,7 @@ describe('PianiSalvati', () => {
     expect(aggiornaPianoSalvato).toHaveBeenCalledWith(7, 5, { nome: 'Nuovo titolo' });
     expect(await screen.findByRole('button', { name: /Nuovo titolo/ })).toBeInTheDocument();
     // eliminazione
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    conferma.mockResolvedValue(true);
     eliminaPianoSalvato.mockResolvedValue(undefined);
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Elimina' })); });
     expect(eliminaPianoSalvato).toHaveBeenCalledWith(7, 5);
@@ -71,7 +74,7 @@ describe('PianiSalvati — due gesti ravvicinati (B3", validazione voce 2)', () 
   beforeEach(() => {
     getPianiSalvati.mockReset(); getPossedute.mockReset(); aggiornaPianoSalvato.mockReset(); eliminaPianoSalvato.mockReset();
     getPossedute.mockResolvedValue([]);
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    conferma.mockResolvedValue(true);
   });
   afterEach(() => vi.restoreAllMocks());
   /** Rinomina il piano col titolo `vecchio` in `nuovo` dalla sua scheda. */

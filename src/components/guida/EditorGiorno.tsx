@@ -15,6 +15,8 @@ import { notifica } from '../../stores/notificationStore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { dataGiocoTesto } from '../../utils/dateGioco';
 import { METEO_GIORNO, type GiornoModificabileDto, type MeteoGiorno } from '../../../shared/giorno';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 const OPZIONI_METEO = METEO_GIORNO.map((m) => ({ chiave: m, nome: m }));
 
@@ -55,7 +57,7 @@ function Corpo({ dati, data, onChiudi, onSalvato }: { dati: GiornoModificabileDt
   }), 'Giorno salvato.');
 
   return (
-    <div className="flex flex-col gap-3 text-[13px]">
+    <div className="flex flex-col gap-3 testo-13">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Selettore etichetta="Meteo di giorno" valore={meteoGiorno} vuoto="Non indicato" opzioni={OPZIONI_METEO} onCambia={(v) => setMeteoGiorno(v as MeteoGiorno | '')} disabilitato={occupato} />
         <Selettore etichetta="Meteo di sera" valore={meteoSera} vuoto="Non indicato" opzioni={OPZIONI_METEO} onCambia={(v) => setMeteoSera(v as MeteoGiorno | '')} disabilitato={occupato} />
@@ -74,9 +76,9 @@ function Corpo({ dati, data, onChiudi, onSalvato }: { dati: GiornoModificabileDt
         <textarea className="form-input min-h-[72px]" value={vincoli} disabled={occupato} onChange={(e) => setVincoli(e.target.value)} />
       </label>
       <div className="flex flex-wrap justify-end gap-2">
-        {dati.modificato && <button type="button" className="btn btn-ghost touch" disabled={occupato} onClick={() => void esegui(() => ripristinaGiornoModificabile(data), 'Giorno ripristinato come nella guida.')}>Ripristina</button>}
+        {dati.modificato && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina" disabled={occupato} onClick={() => void esegui(() => ripristinaGiornoModificabile(data), 'Giorno ripristinato come nella guida.')} />}
         <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={onChiudi}>Annulla</button>
-        <button type="button" className="btn btn-primary touch" disabled={occupato || !sporca} onClick={() => void salva()}>Salva</button>
+        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" disabled={occupato || !sporca} onClick={() => void salva()} />
       </div>
     </div>
   );

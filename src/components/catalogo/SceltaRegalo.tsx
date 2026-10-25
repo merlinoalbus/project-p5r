@@ -18,6 +18,8 @@ import { anteprimaPunti, formattaPunti, formattaYen } from '../../utils/punti';
 import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
 import { SceltaCatalogoOggetto } from './SceltaCatalogoOggetto';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   partita: number;
@@ -95,27 +97,27 @@ export function SceltaRegalo({ partita, confidente, nomeConfidente, regali, amme
 
   return <Modal aperta titolo={`Regala a ${nomeConfidente}`} onChiudi={() => { if (!occupato) onChiudi(); }}
     azioni={<><button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={onChiudi}>Annulla</button>
-      <button type="button" className="btn btn-primary touch" disabled={occupato || !valido} onClick={() => void regala()}>{occupato ? 'Registrazione…' : 'Regala'}</button></>}>
+      <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="regalo" dimensione={22} />} titolo={occupato ? 'Registrazione…' : 'Regala'} disabled={occupato || !valido} onClick={() => void regala()} /></>}>
     <div className="flex min-w-0 flex-col gap-3">
       <SceltaCatalogoOggetto valore={chiave} onScegli={scegli} includi={ammessi} disabilitato={occupato} etichetta="Regalo gradito" />
-      {dettaglio.errore && <p role="alert" className="m-0 text-[13px]">{dettaglio.errore}</p>}
-      {chiave !== '' && !ammessi.includes(chiave) && !dettaglio.caricamento && <p role="alert" className="m-0 text-[13px]">Questo oggetto non è fra i regali graditi di {nomeConfidente}.</p>}
-      {giaConsegnato && <p role="status" className="m-0 text-[13px]">Questo oggetto risulta già consegnato a {nomeConfidente}. Toglilo dall’elenco dei regali per regalarlo di nuovo.</p>}
+      {dettaglio.errore && <p role="alert" className="m-0 testo-13">{dettaglio.errore}</p>}
+      {chiave !== '' && !ammessi.includes(chiave) && !dettaglio.caricamento && <p role="alert" className="m-0 testo-13">Questo oggetto non è fra i regali graditi di {nomeConfidente}.</p>}
+      {giaConsegnato && <p role="status" className="m-0 testo-13">Questo oggetto risulta già consegnato a {nomeConfidente}. Toglilo dall’elenco dei regali per regalarlo di nuovo.</p>}
       {chiave !== '' && !giaConsegnato && (
-        <p className="m-0 text-[13px] text-text-secondary" role="status">
+        <p className="m-0 testo-13 text-text-secondary" role="status">
           {conPunti
             ? <>Dà <strong className="text-text">+{formattaPunti(punti)} punti</strong> a {nomeConfidente} (50 di base{bonus || (piazzamento && piazzamento !== 'altro') || invito ?' con i moltiplicatori attivi' : ''}).</>
             : <>Nessun punto: al rango attuale di {nomeConfidente} i punti non contano. Si registra solo la consegna.</>}
         </p>
       )}
-      {chiave !== '' && oggetto.errore && <p role="alert" className="m-0 text-[13px]">{oggetto.errore}</p>}
-      {valido && comprato && <p className="m-0 text-[12px] text-text-muted">L’oggetto risulta già comprato nella partita.</p>}
+      {chiave !== '' && oggetto.errore && <p role="alert" className="m-0 testo-13">{oggetto.errore}</p>}
+      {valido && comprato && <p className="m-0 testo-12 text-text-muted">L’oggetto risulta già comprato nella partita.</p>}
       {valido && !comprato && offerte.length > 0 && acquistabili.length === 0 && (
-        <p className="m-0 text-[12px] text-text-muted">Non risulta comprato, ma adesso non è disponibile in nessun negozio: potrai segnarlo dai Negozi.</p>
+        <p className="m-0 testo-12 text-text-muted">Non risulta comprato, ma adesso non è disponibile in nessun negozio: potrai segnarlo dai Negozi.</p>
       )}
       {valido && acquistabili.length > 0 && (
         <div className="flex flex-col gap-1.5">
-          <label className="touch flex items-center gap-2 text-[13px]">
+          <label className="touch flex items-center gap-2 testo-13">
             <input type="checkbox" className="h-5 w-5" checked={segna} disabled={occupato} onChange={(e) => setVuoleAcquisto(e.target.checked)} />
             <span>Segna anche comprato</span>
           </label>
@@ -123,11 +125,11 @@ export function SceltaRegalo({ partita, confidente, nomeConfidente, regali, amme
             <Selettore etichetta="Dove l’hai comprato" valore={chiaveOfferta(offerta!)} disabilitato={occupato} ricerca="mai"
               opzioni={acquistabili.map((o) => ({ chiave: chiaveOfferta(o), nome: etichettaOfferta(o) }))} onCambia={setOffertaScelta} />
           )}
-          {segna && acquistabili.length === 1 && <span className="text-[12px] text-text-muted">{etichettaOfferta(offerta!)}</span>}
-          {segna && offerta?.prezzo ? <span className="text-[12px] text-text-muted">I yen non si muovono da soli: ricordati di scalare {formattaYen(offerta.prezzo)} dalla squadra.</span> : null}
+          {segna && acquistabili.length === 1 && <span className="testo-12 text-text-muted">{etichettaOfferta(offerta!)}</span>}
+          {segna && offerta?.prezzo ? <span className="testo-12 text-text-muted">I yen non si muovono da soli: ricordati di scalare {formattaYen(offerta.prezzo)} dalla squadra.</span> : null}
         </div>
       )}
-      {errore && <p role="alert" className="m-0 text-[13px]">{errore}</p>}
+      {errore && <p role="alert" className="m-0 testo-13">{errore}</p>}
     </div>
   </Modal>;
 }

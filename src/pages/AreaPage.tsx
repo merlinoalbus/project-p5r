@@ -21,8 +21,8 @@ import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { Modal } from '../components/shared/Modal';
-import { IconChevronLeft } from '../components/shared/icons';
-import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
+import { IndietroScheda, TitoloScheda } from '../components/shared/IntestazioneScheda';
+import { PulsanteVisivo, CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { MappaIncorporata } from '../components/mappe/MappaIncorporata';
 import { VersioniArea } from '../components/mappe/VersioniArea';
@@ -56,14 +56,13 @@ export function AreaPage() {
   const attiva = usePartitaStore((s) => s.attiva);
   const dati = useCarica(() => getArea(contenitore, slug, attiva?.id), [contenitore, slug, attiva]);
   const a = dati.dati;
-  const nomeContenitore = a?.contenitore.tipo === 'citta' ? 'La città' : a?.contenitore.nome;
   // il titolo della scheda del browser dice il posto e dove sta (L2, M8): «Central Street — Shibuya»
   useDocumentTitle(a ? `${a.nome} — ${a.contenitore.tipo === 'citta' ? 'Tokyo' : a.contenitore.nome}` : 'Area');
   const indirizzoContenitore = contenitore === 'tokyo' ? '/guida/citta' : `/guida/citta/${encodeURIComponent(contenitore)}`;
   if (dati.errore && !a) return <AreaNonTrovata errore={dati.errore} indietro={indirizzoContenitore} onRiprova={() => void dati.ricarica()} />;
   return (
     <PageState isLoading={dati.caricamento && !a} error={null} onRetry={() => void dati.ricarica()}>
-      {a && <Contenuto area={a} indirizzoContenitore={indirizzoContenitore} nomeContenitore={nomeContenitore ?? ''} ricarica={dati.ricarica} />}
+      {a && <Contenuto area={a} indirizzoContenitore={indirizzoContenitore} ricarica={dati.ricarica} />}
     </PageState>
   );
 }
@@ -73,17 +72,17 @@ function AreaNonTrovata({ errore, indietro, onRiprova }: { errore: string; indie
   return (
     <div className="card flex flex-col gap-2" role="alert">
       <h1 className="titolo-display m-0">Area non trovata</h1>
-      <p className="m-0 text-[13px] text-text-secondary">{errore}</p>
+      <p className="m-0 testo-13 text-text-secondary">{errore}</p>
       <span className="flex flex-wrap gap-2">
-        <Link className="btn btn-secondary touch" to={indietro}>Torna indietro</Link>
-        <button type="button" className="btn btn-ghost touch" onClick={onRiprova}>Riprova</button>
+        <CollegamentoVisivo icona={<IconaAzione chiave="indietro" dimensione={22} />} titolo="Torna indietro" to={indietro} />
+        <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riprova" dimensione={22} />} titolo="Riprova" onClick={onRiprova} />
       </span>
     </div>
   );
 }
 
 /** Il corpo della pagina di un'Area caricata. */
-function Contenuto({ area: a, indirizzoContenitore, nomeContenitore, ricarica }: { area: AreaDettaglioDto; indirizzoContenitore: string; nomeContenitore: string; ricarica: () => Promise<void> }) {
+function Contenuto({ area: a, indirizzoContenitore, ricarica }: { area: AreaDettaglioDto; indirizzoContenitore: string; ricarica: () => Promise<void> }) {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const [finestra, setFinestra] = useState<'modifica' | 'aggiungi' | 'elimina' | 'ripristina' | null>(null);
@@ -167,23 +166,24 @@ function Contenuto({ area: a, indirizzoContenitore, nomeContenitore, ricarica }:
       <header className="card flex shrink-0 flex-col gap-2 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-4 lg:py-2">
         {/* da 1024 px briciole e titolo stanno su una riga sola: la testata resta compatta e il visore ha l'altezza (R2-41) */}
         <div className="flex min-w-0 flex-col gap-1 lg:flex-1 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-3">
-          <nav aria-label="Dove sei" className="flex flex-wrap items-center gap-1 text-[12px] text-text-muted">
+          <nav aria-label="Dove sei" className="flex flex-wrap items-center gap-1 testo-12 text-text-muted">
             <Link to="/guida/citta" className="touch inline-flex items-center">La città</Link>
             {a.contenitore.tipo !== 'citta' && <><span aria-hidden>›</span><Link to={indirizzoContenitore} className="touch inline-flex items-center">{a.contenitore.nome}</Link></>}
             {/* da 1024 a 1279 px le briciole si fermano al contenitore: l'ultima tappa è il titolo subito accanto (variante (a) di Stesura) */}
             <span aria-hidden className="lg:max-xl:hidden">›</span><span className="text-text-secondary lg:max-xl:hidden">{a.nome}</span>
           </nav>
           <div className="flex flex-wrap items-center gap-2">
-            {/* da 1024 px il ritorno al contenitore lo fa la briciola accanto */}
-            <Link to={indirizzoContenitore} className="btn btn-ghost btn-sm touch -ml-2 lg:hidden"><IconChevronLeft size={16} /> {nomeContenitore}</Link>
-            <h1 className="titolo-display m-0 break-words" aria-current="page">{a.nome}</h1>
+            {/* da 1024 px il ritorno al contenitore lo fa la briciola accanto; sotto, il ritorno comune delle schede (lotto B): la
+                pagina di prima o, entrando da un collegamento diretto, il contenitore */}
+            <IndietroScheda ripiego={indirizzoContenitore} className="lg:hidden" />
+            <TitoloScheda aria-current="page">{a.nome}</TitoloScheda>
             {/* da 1024 px la versione la dice il segmento premuto della fila, subito sotto (variante 2 di Stesura): qui il chip solo sotto */}
-            {scelta && a.planimetrie.length > 1 && <span className="chip text-[11px] lg:hidden">Planimetria · {nomeVersione(scelta, indiceScelta)}</span>}
-            {a.daVerificare && <span className="chip chip--attivo text-[11px]" title="Nessuna fonte colloca questa area: decidi se tenerla o rimuoverla">Da verificare</span>}
+            {scelta && a.planimetrie.length > 1 && <span className="chip testo-12 lg:hidden">Planimetria · {nomeVersione(scelta, indiceScelta)}</span>}
+            {a.daVerificare && <span className="chip chip--attivo testo-12" title="Nessuna fonte colloca questa area: decidi se tenerla o rimuoverla">Da verificare</span>}
             {/* il Covo: le sfide e le Medaglie P stanno nella pagina del Covo (meta della metro); qui un collegamento compatto nella
                 testata, perché la carta a parte toglieva 53 px al visore (LAY2-1, decisione di Stesura). Da 1024 a 1279 px, se c'è la
                 fila delle versioni, va in fondo alla fila (sotto): la testata resta su una riga senza accorciare il nome (§4.3) */}
-            {covo && <Link to={PAGINA_COVO} className={`chip touch no-underline text-[12px] ${conFila ? 'lg:max-xl:hidden' : ''}`} title={TITOLO_COVO}>Sfide e Medaglie P del Covo</Link>}
+            {covo && <Link to={PAGINA_COVO} className={`chip touch no-underline testo-12 ${conFila ? 'lg:max-xl:hidden' : ''}`} title={TITOLO_COVO}>Sfide e Medaglie P del Covo</Link>}
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-1.5 lg:ml-auto">
@@ -195,24 +195,33 @@ function Contenuto({ area: a, indirizzoContenitore, nomeContenitore, ricarica }:
             {a.modificata && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo={<><span className="hidden md:max-lg:inline 2xl:inline">Ripristina i valori della guida</span><span className="md:max-lg:hidden 2xl:hidden">Ripristina</span></>} aria-label="Ripristina i valori della guida" disabled={occupato} onClick={() => setFinestra('ripristina')} />}
             <PulsanteVisivo tono="fantasma" compatto className="text-error" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo={<><span className="hidden md:max-lg:inline 2xl:inline">Elimina area</span><span className="md:max-lg:hidden 2xl:hidden">Elimina</span></>} aria-label="Elimina area" onClick={() => { setRiepilogoElimina(null); setFinestra('elimina'); }} />
           </span>
-          <details className="menu-altro relative md:max-lg:hidden xl:hidden">
-            <summary className="btn btn-ghost btn-sm touch list-none" aria-label="Altre azioni dell’area">Altro ▾</summary>
+          {/* il menu si apre verso sinistra (ancorato a destra); se «Altro» è andato a capo all'inizio della riga (telefono stretto) si apre
+              verso destra, così non esce dallo schermo */}
+          <details className="menu-altro relative md:max-lg:hidden xl:hidden" onToggle={(e) => {
+            const d = e.currentTarget;
+            d.querySelector('.menu-altro__voci')?.classList.toggle('menu-altro__voci--destra', d.open && d.getBoundingClientRect().right < 230);
+          }}>
+            {/* un <summary> non può essere un PulsanteVisivo: stesso aspetto (classi e interno del tassello compatto) scritto qui */}
+            <summary className="btn btn-sm btn-visivo btn-ghost btn-visivo--compatto btn-visivo--stretto list-none" aria-label="Altro: azioni dell’area">
+              <span className="btn-visivo__icona" aria-hidden="true"><IconaAzione chiave="tutti" dimensione={20} /></span>
+              <span className="btn-visivo__testo"><span className="btn-visivo__titolo">Altro<span className="btn-visivo__freccia btn-visivo__freccia--menu" aria-hidden="true">▸</span></span></span>
+            </summary>
             <div className="menu-altro__voci">
-              {a.modificata && <button type="button" className="btn btn-ghost touch justify-start" disabled={occupato} onClick={(e) => { e.currentTarget.closest('details')?.removeAttribute('open'); setFinestra('ripristina'); }}>Ripristina i valori della guida</button>}
-              <button type="button" className="btn btn-ghost touch justify-start text-error" onClick={(e) => { e.currentTarget.closest('details')?.removeAttribute('open'); setRiepilogoElimina(null); setFinestra('elimina'); }}>Elimina area</button>
+              {a.modificata && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina i valori della guida" className="justify-start" disabled={occupato} onClick={(e) => { e.currentTarget.closest('details')?.removeAttribute('open'); setFinestra('ripristina'); }} />}
+              <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Elimina area" className="justify-start text-error" onClick={(e) => { e.currentTarget.closest('details')?.removeAttribute('open'); setRiepilogoElimina(null); setFinestra('elimina'); }} />
             </div>
           </details>
         </div>
       </header>
 
-      {a.disponibile === false && <p className="m-0 shrink-0 text-[13px] text-text-secondary" role="status">Non ancora aperta: {a.bloccoMotivo ?? a.sblocco?.manca ?? a.sblocco?.testo ?? 'il quartiere non è ancora disponibile nella partita'}.</p>}
+      {a.disponibile === false && <p className="m-0 shrink-0 testo-13 text-text-secondary" role="status">Non ancora aperta: {a.bloccoMotivo ?? a.sblocco?.manca ?? a.sblocco?.testo ?? 'il quartiere non è ancora disponibile nella partita'}.</p>}
 
       <div className="shrink-0"><VersioniArea nome={a.nome} planimetrie={a.planimetrie} scelta={scelta?.chiave ?? ''} onScegli={scegli}
-        coda={covo ? <Link to={PAGINA_COVO} className="chip touch no-underline hidden shrink-0 whitespace-nowrap text-[12px] lg:max-xl:inline-flex" title={TITOLO_COVO}>Sfide e Medaglie P del Covo</Link> : undefined} /></div>
+        coda={covo ? <Link to={PAGINA_COVO} className="chip touch no-underline hidden shrink-0 whitespace-nowrap testo-12 lg:max-xl:inline-flex" title={TITOLO_COVO}>Sfide e Medaglie P del Covo</Link> : undefined} /></div>
 
-      {scelta && scelta.numeroSpilli === 0 && conPin && <p className="m-0 flex shrink-0 flex-wrap items-center gap-2 text-[13px] text-text-secondary" role="status">
+      {scelta && scelta.numeroSpilli === 0 && conPin && <p className="m-0 flex shrink-0 flex-wrap items-center gap-2 testo-13 text-text-secondary" role="status">
         Su questa planimetria non ci sono pin: quelli dell’area stanno su «{nomeVersione(conPin, a.planimetrie.indexOf(conPin))}».
-        <button type="button" className="btn btn-secondary btn-sm touch" onClick={() => scegli(conPin.chiave)}>Passa a «{nomeVersione(conPin, a.planimetrie.indexOf(conPin))}»</button>
+        <PulsanteVisivo compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo={<>Passa a «{nomeVersione(conPin, a.planimetrie.indexOf(conPin))}»</>} onClick={() => scegli(conPin.chiave)} />
       </p>}
 
       {/* il punto a cui tornare sul telefono (sopra il visore): alto zero, il margine negativo annulla lo spazio fra i blocchi */}
@@ -224,7 +233,7 @@ function Contenuto({ area: a, indirizzoContenitore, nomeContenitore, ricarica }:
             pannelloIniziale={pannello} onPannello={setPannello} titoloVisore={a.nome} senzaVicine nonDisponibili={interruttore}
             classeVisore="h-[min(64dvh,560px)] lg:h-auto lg:min-h-[420px] lg:flex-1" className="lg:flex lg:min-h-0 lg:flex-1 lg:flex-col"
             contenutiPannello={telefono ? undefined : <PannelloArea area={a} elementi={elementiQui} onSeleziona={selezionaPin} nonDisponibili={interruttore} pinChiesto={spillo} onAggiungiLuogo={conLuoghi ? (l) => setAggiungiLuogo({ luogo: l }) : undefined} />} />
-        : <p className="card m-0 text-[13px] text-text-secondary">{a.nome} non ha più planimetrie: aggiungine una.</p>}
+        : <p className="card m-0 testo-13 text-text-secondary">{a.nome} non ha più planimetrie: aggiungine una.</p>}
       {scelta && telefono && <div className="card"><PannelloArea area={a} elementi={elementiQui} onSeleziona={selezionaPin} nonDisponibili={interruttore} pinChiesto={spillo} onAggiungiLuogo={conLuoghi ? (l) => setAggiungiLuogo({ luogo: l }) : undefined} /></div>}
       {aggiungiLuogo && scelta && (
         <FinestraAggiungiLuogo quartiere={a.contenitore.chiave} luogo={aggiungiLuogo.luogo} onChiudi={() => setAggiungiLuogo(null)} onFatto={() => void ricarica()}
@@ -238,16 +247,16 @@ function Contenuto({ area: a, indirizzoContenitore, nomeContenitore, ricarica }:
       <Modal titolo={`Rimettere i valori della guida in ${a.nome}?`} aperta={finestra === 'ripristina'} onChiudi={() => setFinestra(null)}
         azioni={<>
           <button type="button" className="btn btn-secondary touch" onClick={() => setFinestra(null)}>Annulla</button>
-          <button type="button" className="btn btn-primary touch" disabled={occupato} onClick={() => { setFinestra(null); void ripristina(); }}>Ripristina</button>
+          <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina" disabled={occupato} onClick={() => { setFinestra(null); void ripristina(); }} />
         </>}>
-        <p className="m-0 text-[14px]">Nome e planimetria predefinita tornano quelli della guida; le tue correzioni a quest’area si perdono.</p>
+        <p className="m-0 testo-14">Nome e planimetria predefinita tornano quelli della guida; le tue correzioni a quest’area si perdono.</p>
       </Modal>
       <Modal titolo={`Eliminare ${a.nome}?`} aperta={finestra === 'elimina'} onChiudi={() => setFinestra(null)}
         azioni={<>
           <button type="button" className="btn btn-secondary touch" onClick={() => setFinestra(null)}>Annulla</button>
-          <button type="button" className="btn btn-danger touch" disabled={occupato} onClick={() => void elimina()}>Elimina</button>
+          <PulsanteVisivo tono="pericolo" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Elimina" disabled={occupato} onClick={() => void elimina()} />
         </>}>
-        <div className="flex flex-col gap-2 text-[14px]">
+        <div className="flex flex-col gap-2 testo-14">
           <p className="m-0">Si eliminano l’area, {contenutiArea} e i passaggi che portano qui da altre aree.</p>
           {riepilogoElimina && <p className="m-0 text-warning" role="alert">{riepilogoElimina}</p>}
           <p className="m-0 text-text-secondary">{NEL_CESTINO}</p>
@@ -276,31 +285,31 @@ function PannelloArea({ area, elementi, onSeleziona, nonDisponibili, pinChiesto,
       <section className="visore-mappa__sezione" aria-label="Luoghi qui">
         <h3 className="visore-mappa__intestazione">Luoghi qui</h3>
         {candidati.length === 0
-          ? <p className="m-0 text-[12px] text-text-muted">Nessun luogo segnato su questa planimetria.</p>
+          ? <p className="m-0 testo-12 text-text-muted">Nessun luogo segnato su questa planimetria.</p>
           : <ul className="m-0 flex list-none flex-col gap-1 p-0">
             {visibili.map((e) => <li key={`${e.tipo}:${e.chiave}:${e.spillo}`} className="flex flex-col gap-0.5">
               <div className="flex items-center justify-between gap-2">
                 <button type="button" className="visore-mappa__azione-testo touch text-left" onClick={() => onSeleziona(e.spillo)} title={motivoChiusura(e)}>{e.nome}</button>
                 {/* L5: la pagina del luogo (per un negozio con sede, la sua sezione) */}
-                <Link className="text-[12px] touch inline-flex items-center" to={e.casa ?? schedaElemento(e)} aria-label={`Scheda di ${e.nome}`}>Scheda</Link>
+                <Link className="testo-12 touch inline-flex items-center" to={e.casa ?? schedaElemento(e)} aria-label={`Scheda di ${e.nome}`}>Scheda</Link>
               </div>
               {(chiusoAdesso(e) || e.daRivedere) && <div className="flex flex-wrap gap-1">
-                {chiusoAdesso(e) && <span className="chip chip--bloccata text-[11px]" title={motivoChiusura(e)}>{e.presenza?.sbloccato === false ? 'Non ancora nel mondo' : e.presenza?.aperto === false ? 'Chiuso adesso' : e.disponibilita?.stato === 'ignoto' ? 'Disponibilità da verificare' : 'Condizioni del pin non soddisfatte'}</span>}
-                {e.daRivedere === 'negozio-altro-quartiere' && <span className="chip chip--oro text-[11px]" title="Il pin è agganciato a un negozio di un altro quartiere: si sistema dall'editor della planimetria">Da rivedere · negozio di un altro quartiere</span>}
+                {chiusoAdesso(e) && <span className="chip chip--bloccata testo-12" title={motivoChiusura(e)}>{e.presenza?.sbloccato === false ? 'Non ancora nel mondo' : e.presenza?.aperto === false ? 'Chiuso adesso' : e.disponibilita?.stato === 'ignoto' ? 'Disponibilità da verificare' : 'Condizioni del pin non soddisfatte'}</span>}
+                {e.daRivedere === 'negozio-altro-quartiere' && <span className="chip chip--oro testo-12" title="Il pin è agganciato a un negozio di un altro quartiere: si sistema dall'editor della planimetria">Da rivedere · negozio di un altro quartiere</span>}
               </div>}
             </li>)}
           </ul>}
         {chiusi > 0 && (
-          <button type="button" className={`chip chip--icona touch self-start text-[11px] ${nonDisponibili.valore ? 'chip--attivo' : ''}`} aria-pressed={nonDisponibili.valore} onClick={() => nonDisponibili.onCambia(!nonDisponibili.valore)}>
+          <button type="button" className={`chip chip--icona touch self-start testo-12 ${nonDisponibili.valore ? 'chip--attivo' : ''}`} aria-pressed={nonDisponibili.valore} onClick={() => nonDisponibili.onCambia(!nonDisponibili.valore)}>
             <IconaAzione chiave="bloccato" dimensione={14} />Mostra anche i non ancora disponibili ({chiusi})
           </button>
         )}
-        {onAggiungiLuogo && <button type="button" className="btn btn-secondary btn-sm touch self-start" onClick={() => onAggiungiLuogo(null)}>Aggiungi luogo</button>}
+        {onAggiungiLuogo && <PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi luogo" className="self-start" onClick={() => onAggiungiLuogo(null)} />}
       </section>
       {area.vicine.length > 0 && <section className="visore-mappa__sezione" aria-label="Aree vicine">
         <h3 className="visore-mappa__intestazione">Aree vicine</h3>
         <ul className="m-0 flex list-none flex-col gap-1 p-0">
-          {area.vicine.map((v) => <li key={v.casa}><Link className="touch inline-flex items-center" to={v.casa}>{v.nome}{v.quartiereNome && v.quartiereNome !== area.contenitore.nome ? <span className="ml-1 text-[11px] text-text-muted">· {v.quartiereNome}</span> : null}</Link></li>)}
+          {area.vicine.map((v) => <li key={v.casa}><Link className="touch inline-flex items-center" to={v.casa}>{v.nome}{v.quartiereNome && v.quartiereNome !== area.contenitore.nome ? <span className="ml-1 testo-12 text-text-muted">· {v.quartiereNome}</span> : null}</Link></li>)}
         </ul>
       </section>}
     </div>

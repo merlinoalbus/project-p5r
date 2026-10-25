@@ -25,15 +25,15 @@ export function NodoPiano({ nodo, radice, inScorta }: Props) {
   const classeModo = nodo.modo === 'scorta' ? 'chip--attivo' : nodo.modo === 'cattura' ? 'text-warning' : nodo.modo === 'registro' ? 'text-text-secondary' : '';
   return (
     <li className="flex flex-col gap-1">
-      <div className={`flex flex-wrap items-center gap-2 py-1 ${radice ? 'text-[15px]' : 'text-[13px]'}`}>
+      <div className={`flex flex-wrap items-center gap-2 py-1 ${radice ? 'testo-15' : 'testo-13'}`}>
         <PersonaChip p={p} evidenza={radice} inScorta={possedutaOra} suffisso={possedutaOra && inScorta && nodo.modo !== 'scorta' ? ' ✓' : ''} title={`${p.arcanaNome} · livello ${p.livello}${possedutaOra ? ' · ora in scorta' : ''}`} />
-        <span className={`chip chip--icona text-[11px] ${classeModo}`}>
+        <span className={`chip chip--icona testo-12 ${classeModo}`}>
           <IconaAzione chiave={ICONA_MODO[nodo.modo]} dimensione={13} />
           {nodo.modo === 'fusione' ? `${NOME_MODO.fusione} ${NOME_TIPO[nodo.tipo ?? 'normale']}` : NOME_MODO[nodo.modo]}
           {nodo.modo === 'registro' && ` · ${formattaYen(nodo.costo)}`}
         </span>
         {nodo.skillPortate.map((s) => (
-          <span key={s.id} className={`chip text-[11px] ${nodo.skillDaLivello.some((d) => d.id === s.id) ? 'text-warning' : 'chip--attivo'}`} title={nodo.skillDaLivello.some((d) => d.id === s.id) ? 'La apprende salendo di livello' : nodo.modo === 'fusione' ? 'Da ereditare in questa fusione' : 'Posseduta'}>
+          <span key={s.id} className={`chip testo-12 ${nodo.skillDaLivello.some((d) => d.id === s.id) ? 'text-warning' : 'chip--attivo'}`} title={nodo.skillDaLivello.some((d) => d.id === s.id) ? 'La apprende salendo di livello' : nodo.modo === 'fusione' ? 'Da ereditare in questa fusione' : 'Posseduta'}>
             {s.nomeIt}{nodo.skillDaLivello.some((d) => d.id === s.id) ? ' ↑' : ''}
           </span>
         ))}

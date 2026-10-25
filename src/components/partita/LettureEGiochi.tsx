@@ -16,7 +16,6 @@
 // ============================================================
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { getFilm, getLibri, getVideogiochi, impostaProgressoFilm, impostaProgressoLibro, impostaProgressoVideogioco } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
@@ -25,6 +24,8 @@ import { PageState } from '../shared/PageState';
 import { IconaCategoria } from '../guida/IconaCategoria';
 import type { FilmDto, LibroDto, VideogiocoDto } from '../../types';
 import { bloccata, motivoBlocco } from '../../utils/letture';
+import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 type Gruppo = 'libri' | 'film' | 'videogiochi';
 
@@ -67,13 +68,13 @@ function Riga({ v, unita, occupato, onCambia }: { v: Voce; unita: string; occupa
   return (
     <li className="flex items-center gap-2 py-1.5">
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="truncate text-[13px] font-semibold" title={v.nome}>{v.nome}</span>
+        <span className="truncate testo-13 font-semibold" title={v.nome}>{v.nome}</span>
         <span className="flex items-center gap-2">
           <span className="visore-mappa__progresso h-1.5 flex-1" role="progressbar" aria-label={`Progresso ${v.nome}`} aria-valuemin={0} aria-valuemax={v.totale} aria-valuenow={v.progresso}>
             <span className="visore-mappa__progresso-barra" style={{ width: `${percentuale}%` }} />
           </span>
-          <span className="shrink-0 text-[11px] tabular-nums text-text-muted">{v.senzaTetto ? `${v.progresso} ${unita}` : `${v.progresso}/${v.totale} ${unita}`}</span>
-          {v.bloccata && v.progresso === 0 && <span className="chip chip--bloccata shrink-0 text-[10px]" title={v.motivo}>Non ancora</span>}
+          <span className="shrink-0 testo-12 tabular-nums text-text-muted">{v.senzaTetto ? `${v.progresso} ${unita}` : `${v.progresso}/${v.totale} ${unita}`}</span>
+          {v.bloccata && v.progresso === 0 && <span className="chip chip--bloccata shrink-0 testo-12" title={v.motivo}>Non ancora</span>}
         </span>
       </span>
       <span className="flex shrink-0 gap-1">
@@ -96,22 +97,21 @@ function Sezione({ gruppo, voci, occupati, visibile, onCambia }: { gruppo: Grupp
     <section className={`card flex-col gap-2 lg:flex lg:h-full lg:min-h-0 ${visibile ? 'flex' : 'hidden'}`} aria-label={e.titolo}>
       <div className="flex flex-wrap items-center gap-2">
         <IconaCategoria categoria={e.categoria} dimensione={28} />
-        <h3 className="m-0 flex-1 font-display text-[15px] uppercase leading-none">{e.titolo}</h3>
-        <span className="chip text-[11px]">{fatti.length} di {voci.length}</span>
-        <Link to={e.percorso} className="btn btn-ghost btn-sm touch">Apri</Link>
+        <h3 className="m-0 flex-1 font-display testo-15 uppercase leading-none">{e.titolo}</h3>
+        <span className="chip testo-12">{fatti.length} di {voci.length}</span>
+        <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Apri" to={e.percorso} />
       </div>
       {/* da 1024 px la testata sta ferma e scorre solo questo corpo (area interna, barra visibile); sotto scorre la pagina */}
       <div className="flex flex-col gap-2 lg:min-h-0 lg:flex-1 lg:area-scorrevole lg:p-2">
       {daFare.length === 0
-        ? <p className="m-0 text-[12px] text-text-muted" role="status">{voci.length === 0 ? 'Niente in catalogo.' : 'Finiti tutti.'}</p>
+        ? <p className="m-0 testo-12 text-text-muted" role="status">{voci.length === 0 ? 'Niente in catalogo.' : 'Finiti tutti.'}</p>
         : <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0" aria-label={`${e.titolo} da fare`}>
             {daFare.map((v) => <Riga key={v.chiave} v={v} unita={e.unita} occupato={!!occupati[v.chiave]} onCambia={(x, n) => onCambia(gruppo, x, n)} />)}
           </ul>}
       {fatti.length > 0 && (
         <>
-          <button type="button" className="btn btn-ghost btn-sm touch self-start" aria-expanded={mostraFatti} onClick={() => setMostraFatti((x) => !x)}>
-            {mostraFatti ? 'Nascondi' : 'Mostra'} i completati · {fatti.length}
-          </button>
+          <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="completati" dimensione={20} />}
+            titolo={`${mostraFatti ? 'Nascondi' : 'Mostra'} i completati`} dettaglio={fatti.length} aria-expanded={mostraFatti} onClick={() => setMostraFatti((x) => !x)} />
           {mostraFatti && (
             <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0 opacity-70" aria-label={`${e.titolo} completati`}>
               {fatti.map((v) => <Riga key={v.chiave} v={v} unita={e.unita} occupato={!!occupati[v.chiave]} onCambia={(x, n) => onCambia(gruppo, x, n)} />)}
@@ -187,7 +187,7 @@ export function LettureEGiochi({ partitaId }: { partitaId: number }) {
   return (
     <PageState isLoading={caricamento} error={errore} onRetry={() => { void libri.ricarica(); void film.ricarica(); void giochi.ricarica(); }}>
       <div className="flex flex-col gap-3 lg:h-full lg:min-h-0">
-        <p className="m-0 text-[12px] text-text-secondary">
+        <p className="m-0 testo-12 text-text-secondary">
           Segna qui le sessioni senza uscire dalla partita: {totali.fatti} completati su {totali.tutti}. Le schede complete, con luoghi ed effetti, restano nella Guida.
         </p>
         {/* sotto i 1024 px: una barra di schede (una categoria alla volta, una sola barra di scorrimento, quella della pagina) */}
@@ -196,10 +196,9 @@ export function LettureEGiochi({ partitaId }: { partitaId: number }) {
             const fatti = locali[g].filter((v) => v.fatto).length;
             const attiva = categoria === g;
             return (
-              <button key={g} type="button" role="tab" aria-selected={attiva} className={`btn touch flex-col !gap-0 !px-1 ${attiva ? 'btn-primary' : 'btn-ghost'}`} onClick={() => scegli(g)}>
-                <span className="text-[13px] font-semibold">{ETICHETTA[g].titolo}</span>
-                <span className="text-[11px] tabular-nums">{fatti}/{locali[g].length}</span>
-              </button>
+              <PulsanteVisivo key={g} role="tab" aria-selected={attiva} tono={attiva ? 'primario' : 'fantasma'} disposizione="colonna" className="max-w-none"
+                icona={<IconaCategoria categoria={ETICHETTA[g].categoria} dimensione={48} />} titolo={ETICHETTA[g].titolo}
+                dettaglio={<span className="tabular-nums">{fatti}/{locali[g].length}</span>} onClick={() => scegli(g)} />
             );
           })}
         </div>

@@ -8,6 +8,8 @@ import { PageState } from '../shared/PageState';
 import { CampoRicerca } from '../shared/CampoRicerca';
 import { Selettore } from '../shared/Selettore';
 import { ModuloOggetto } from './ModuloOggetto';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 const GRUPPI = Object.entries(GRUPPI_OGGETTO) as Array<[GruppoOggetto, string]>;
 const ORDINI = [{ chiave: 'nome', nome: 'Nome' }, { chiave: 'prezzo', nome: 'Prezzo minimo' }];
@@ -57,7 +59,7 @@ export function CatalogoOggetti({ gruppoIniziale = '' }: { gruppoIniziale?: Grup
         <div className="min-w-0 flex-1 basis-64"><CampoRicerca valore={q} onCambia={(v) => cambia('q', v)} segnaposto="Cerca un nome, un altro nome o un effetto…" /></div>
         <Selettore etichetta="Ordina per" valore={ordine} opzioni={ORDINI} ricerca="mai" onCambia={(v) => cambia('ordine', v === 'nome' ? '' : v)} />
         <Selettore etichetta="Categoria" valore={categoria} vuoto="Tutte" opzioni={categorie} onCambia={(v) => cambia('categoria', v)} />
-        <button type="button" className="btn btn-secondary touch" onClick={() => setNuovo(true)}>Nuovo oggetto</button>
+        <PulsanteVisivo icona={<IconaAzione chiave="piu" dimensione={22} />} titolo="Nuovo oggetto" onClick={() => setNuovo(true)} />
       </div>
       <div className="flex flex-wrap gap-1.5" role="group" aria-label="Gruppi di oggetti">
         <button type="button" className={`chip touch${!gruppo ? ' chip--attivo' : ''}`} aria-pressed={!gruppo} onClick={() => cambia('gruppo', '')}>Tutti</button>
@@ -65,20 +67,20 @@ export function CatalogoOggetti({ gruppoIniziale = '' }: { gruppoIniziale?: Grup
       </div>
       {(gruppo === 'equipaggiamento' || per) && <Selettore etichetta="Per chi" valore={per} vuoto="Tutti" ricerca="auto"
         opzioni={[{ chiave: 'nessuno', nome: 'Senza vincolo' }, ...destinatari.map((n) => ({ chiave: n, nome: n }))]} onCambia={(v) => cambia('per', v)} />}
-      <p role="status" className="m-0 text-[12px] text-text-muted">{visibili.length} oggetti su {dati.dati?.length ?? 0}. Il prezzo minimo è quello delle offerte in yen; apri l’oggetto per i negozi e gli scambi.</p>
-      <div className="min-w-0"><table className="tabella tabella--adattiva w-full text-[13px]">
+      <p role="status" className="m-0 testo-12 text-text-muted">{visibili.length} oggetti su {dati.dati?.length ?? 0}. Il prezzo minimo è quello delle offerte in yen; apri l’oggetto per i negozi e gli scambi.</p>
+      <div className="min-w-0"><table className="tabella tabella--adattiva w-full testo-13">
         <thead><tr><th>Oggetto</th><th>Categoria</th><th>Che cosa fa</th><th>Prezzo minimo</th></tr></thead>
         <tbody>{visibili.map((o) => <tr key={o.chiave}>
           <td data-etichetta="Oggetto"><Link to={o.casa} className="touch inline-flex items-center font-semibold">{o.nome}</Link>
-            {o.nomeOriginale && o.nomeOriginale !== o.nome && <span className="block break-words text-[12px] text-text-muted">{o.nomeOriginale}</span>}
-            {typeof o.statistiche?.per === 'string' && o.statistiche.per && <span className="block text-[12px] text-text-secondary">{o.statistiche.per}</span>}
+            {o.nomeOriginale && o.nomeOriginale !== o.nome && <span className="block break-words testo-12 text-text-muted">{o.nomeOriginale}</span>}
+            {typeof o.statistiche?.per === 'string' && o.statistiche.per && <span className="block testo-12 text-text-secondary">{o.statistiche.per}</span>}
           </td>
           <td data-etichetta="Categoria">{CATEGORIA_OGGETTO[o.categoria].nome}</td>
           <td data-etichetta="Che cosa fa" className="break-words">{o.effetto || 'Non dichiarato'}</td>
           <td data-etichetta="Prezzo minimo">{o.prezzoMinimo === null ? 'Nessuna offerta in yen' : o.prezzoMinimo === 0 ? 'Gratis' : formattaYen(o.prezzoMinimo)}</td>
         </tr>)}</tbody>
       </table></div>
-      {!visibili.length && <p className="m-0 text-[13px] text-text-secondary">Nessun oggetto con questi filtri.</p>}
+      {!visibili.length && <p className="m-0 testo-13 text-text-secondary">Nessun oggetto con questi filtri.</p>}
     </section>
     {nuovo && <ModuloOggetto onChiudi={() => setNuovo(false)} onSalvato={(o) => { setNuovo(false); naviga(o.casa); }} />}
   </PageState>;

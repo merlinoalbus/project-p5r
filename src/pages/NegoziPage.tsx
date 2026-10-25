@@ -21,7 +21,7 @@ import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
 import { ModuloCatalogo } from '../components/guida/ModuloCatalogo';
-import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
+import { PulsanteVisivo, CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 
@@ -93,7 +93,7 @@ export function NegoziPage() {
           <IntestazionePagina titolo="Negozi e inventario" sottotitolo={<>{listaVisibile.length} {listaVisibile.length === 1 ? 'negozio o punto di acquisto' : 'negozi e punti di acquisto'} con {totaleArticoliVisibili} {totaleArticoliVisibili === 1 ? 'articolo' : 'articoli'}: armi, protezioni, accessori, oggetti, regali, cibo, libri, film e videogiochi con prezzi e requisiti. Cerca un articolo in tutti i negozi o apri un negozio.</>} />
           <div className="flex flex-wrap justify-start gap-1.5 sm:justify-end sm:-mt-2">
             <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Aggiungi un negozio" dettaglio="resta dopo gli aggiornamenti" onClick={() => setNuovoNegozio(true)} />
-            <Link to="/impostazioni#nascosti" className="btn btn-ghost btn-sm touch no-underline">Nascosti dalla guida</Link>
+            <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Nascosti dalla guida" to="/impostazioni#nascosti" />
           </div>
           {nuovoNegozio && <ModuloCatalogo tipo="negozio" onChiudi={() => setNuovoNegozio(false)} onSalvato={() => { setNuovoNegozio(false); void negozi.ricarica(); }} />}
           <FiltriArticoli filtro={filtro} onCambia={cambiaFiltro} conPartita={partitaId !== null} segnaposto="Cerca un articolo (nome, effetto) o un negozio…" />
@@ -108,7 +108,7 @@ export function NegoziPage() {
             <PageState isLoading={risultati.caricamento && !risultati.dati} error={risultati.errore} onRetry={() => void risultati.ricarica()}>
               {risultati.dati && (
                 <div className="flex flex-col gap-1.5">
-                  <p className="m-0 text-[12px] text-text-muted">{`${risultati.dati.totale} articoli trovati${risultati.dati.totale > articoliVisibili.length ? ` (mostrati i primi ${articoliVisibili.length})` : ''}`}.</p>
+                  <p className="m-0 testo-12 text-text-muted">{`${risultati.dati.totale} articoli trovati${risultati.dati.totale > articoliVisibili.length ? ` (mostrati i primi ${articoliVisibili.length})` : ''}`}.</p>
                   <ArticoliTabella articoli={articoliVisibili} partitaId={partitaId} mostraNegozio onCambiato={(a) => risultati.imposta((attuali) => ({ ...attuali, articoli: attuali.articoli.map((x) => (x.chiave === a.chiave ? a : x)) }))} />
                 </div>
               )}
@@ -116,16 +116,16 @@ export function NegoziPage() {
           ) : (
             gruppi.map(([k, g]) => (
               <section key={k} className="flex flex-col gap-1.5">
-                <h2 className="m-0 text-[15px] font-semibold">{k.startsWith('__') ? g.nome : <Link to={`/guida/citta/${k}`} className="touch inline-flex items-center no-underline text-text">{g.nome}</Link>}</h2>
+                <h2 className="m-0 testo-15 font-semibold">{k.startsWith('__') ? g.nome : <Link to={`/guida/citta/${k}`} className="touch inline-flex items-center no-underline text-text">{g.nome}</Link>}</h2>
                 <ul className="m-0 p-0 list-none grid gap-2 sm:grid-cols-2 xl:grid-cols-3" aria-label={`Negozi: ${g.nome}`}>
                   {g.negozi.map((n) => (
                     <li key={n.chiave}>
                       <div className={`card card--cliccabile text-text flex flex-col gap-2 h-full ${classiSuggerito(sugg.evidenziato('negozi', n.chiave))}`}>
                         {/* L5 (F4): il negozio con sede vive nella pagina del suo luogo */}
                         <Link to={n.sedeCasa ?? `/guida/negozi/${encodeURIComponent(n.chiave)}`} className="no-underline text-text flex flex-1 flex-col gap-1 touch">
-                          <span className="flex flex-wrap items-center gap-2"><IconaCategoria categoria={n.tipo} dimensione={30} /><strong className="font-display uppercase text-[18px] leading-none">{n.nome}</strong><span className="chip">{NOME_TIPO_NEGOZIO[n.tipo] ?? n.tipo}</span><ChipDisponibilita disponibilita={n.disponibilita} compatto />{sugg.evidenziato('negozi', n.chiave) && <TargaSuggerito motivo={sugg.motivo('negozi', n.chiave)} compatta />}</span>
-                          <span className="text-[12px] text-text-secondary">{n.articoli} {n.articoli === 1 ? 'articolo' : 'articoli'}{n.verificati < n.articoli ? ` · ${n.articoli - n.verificati} da fonte secondaria` : ''}{n.gestore ? ` · ${n.gestore}` : ''}</span>
-                          <span className="text-[12px] text-text-muted">{[n.sedeNome ?? n.luogo, n.orariTesto].filter(Boolean).join(' · ')}</span>
+                          <span className="flex flex-wrap items-center gap-2"><IconaCategoria categoria={n.tipo} dimensione={30} /><strong className="font-display uppercase testo-18 leading-none">{n.nome}</strong><span className="chip">{NOME_TIPO_NEGOZIO[n.tipo] ?? n.tipo}</span><ChipDisponibilita disponibilita={n.disponibilita} compatto />{sugg.evidenziato('negozi', n.chiave) && <TargaSuggerito motivo={sugg.motivo('negozi', n.chiave)} compatta />}</span>
+                          <span className="testo-12 text-text-secondary">{n.articoli} {n.articoli === 1 ? 'articolo' : 'articoli'}{n.verificati < n.articoli ? ` · ${n.articoli - n.verificati} da fonte secondaria` : ''}{n.gestore ? ` · ${n.gestore}` : ''}</span>
+                          <span className="testo-12 text-text-muted">{[n.sedeNome ?? n.luogo, n.orariTesto].filter(Boolean).join(' · ')}</span>
                         </Link>
                         <button type="button" className={`btn btn-sm touch self-start ${negozioSelezionato?.chiave === n.chiave ? 'btn-primary' : 'btn-ghost'}`} aria-label={`Mostra posizione di ${n.nome}`} aria-pressed={negozioSelezionato?.chiave === n.chiave} onClick={() => cambiaPosizione(n)}><IconaAzione chiave="mappa" dimensione={16} /> {n.sedeNome ?? 'Posizione'}</button>
                       </div>

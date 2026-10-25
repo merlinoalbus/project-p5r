@@ -36,16 +36,16 @@ function ElementoCestino({ v, occupato, onRimetti, onElimina }: { v: VoceCestino
   return (
     <li className="flex flex-col gap-2 rounded-md border border-border-light px-3 py-2 md:flex-row md:items-start md:justify-between" aria-label={`${NOME_TIPO_CESTINO[v.tipo]} «${v.nome}»`}>
       <div className="flex min-w-0 flex-col gap-1">
-        <span className="break-words text-[14px] font-semibold">{titolo}</span>
-        {con && <span className="break-words text-[13px] text-text-secondary">{con}</span>}
+        <span className="break-words testo-14 font-semibold">{titolo}</span>
+        {con && <span className="break-words testo-13 text-text-secondary">{con}</span>}
         {/* una nota del server che non è un posto (un'area fusa in un'altra) resta com'è */}
-        {v.contesto && /[«»]/.test(v.contesto) && <span className="break-words text-[12px] text-text-secondary">{v.contesto}</span>}
-        <span className="text-[12px] text-text-muted">Nel cestino dal {quando(v.eliminatoIl)} · {byteTesto(v.byte)}</span>
+        {v.contesto && /[«»]/.test(v.contesto) && <span className="break-words testo-12 text-text-secondary">{v.contesto}</span>}
+        <span className="testo-12 text-text-muted">Nel cestino dal {quando(v.eliminatoIl)} · {byteTesto(v.byte)}</span>
         {contenuto.length > 0 && <ul className="sr-only" aria-label="Che cosa si è portato via">
           {contenuto.map((c) => <li key={c.etichetta}>{c.quante.toLocaleString('it-IT')} {c.etichetta}</li>)}
         </ul>}
         {v.partite === 'mancante' && (
-          <span className="text-[12px] text-warning">Il file delle partite è stato sostituito dopo: si rimettono solo i dati di gioco, non le spunte.</span>
+          <span className="testo-12 text-warning">Il file delle partite è stato sostituito dopo: si rimettono solo i dati di gioco, non le spunte.</span>
         )}
       </div>
       <div className="flex shrink-0 flex-wrap gap-1.5">
@@ -59,7 +59,7 @@ function ElementoCestino({ v, occupato, onRimetti, onElimina }: { v: VoceCestino
 /** Che cosa non è tornato com'era dopo un ripristino, per tabella e motivo. */
 function EsitoRipristino({ esito }: { esito: EsitoRipristinoCestinoDto }) {
   return (
-    <div className="flex flex-col gap-2 text-[13px]">
+    <div className="flex flex-col gap-2 testo-13">
       <p className="m-0">«{esito.nome}»: di nuovo al suo posto, con {esito.rimesse.toLocaleString('it-IT')} righe rimesse com’erano.</p>
       {esito.partiteMancanti && <p className="m-0 text-warning">Il file delle partite è stato sostituito dopo l’eliminazione: le spunte e gli stati delle partite non sono tornati.</p>}
       {([
@@ -72,9 +72,9 @@ function EsitoRipristino({ esito }: { esito: EsitoRipristinoCestinoDto }) {
             {g.righe.map((s) => (
               <li key={`${s.tabella}|${s.motivo}`}>
                 <span className="font-semibold">{s.quante.toLocaleString('it-IT')} {s.etichetta}</span> {motivoSaltata(s.motivo, s.quante)}
-                {s.colonne && s.colonne.length > 0 && <span className="block text-[12px] text-text-muted">dato non conservato: {s.colonne.map((c) => <code key={c}>{c} </code>)}</span>}
-                {s.sostituitaDa && <span className="block text-[12px] text-text-muted">ora: {s.sostituitaDa}</span>}
-                {s.esempi.length > 0 && <span className="block break-words text-[12px] text-text-muted">{s.esempi.join(', ')}{s.quante > s.esempi.length ? ', …' : ''}</span>}
+                {s.colonne && s.colonne.length > 0 && <span className="block testo-12 text-text-muted">dato non conservato: {s.colonne.map((c) => <code key={c}>{c} </code>)}</span>}
+                {s.sostituitaDa && <span className="block testo-12 text-text-muted">ora: {s.sostituitaDa}</span>}
+                {s.esempi.length > 0 && <span className="block break-words testo-12 text-text-muted">{s.esempi.join(', ')}{s.quante > s.esempi.length ? ', …' : ''}</span>}
               </li>
             ))}
           </ul>
@@ -124,20 +124,20 @@ export function Cestino() {
     <section className="card flex flex-col gap-3" aria-labelledby="titolo-cestino">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex min-w-0 flex-col gap-1">
-          <h2 id="titolo-cestino" className="m-0 text-[15px] font-semibold">Cestino</h2>
-          <p className="m-0 text-[13px] text-text-secondary">
+          <h2 id="titolo-cestino" className="m-0 testo-15 font-semibold">Cestino</h2>
+          <p className="m-0 testo-13 text-text-secondary">
             {/* le aree del mondo ci finiscono da L2 (UX2-12) */}
             Le aree dei quartieri e della città, le planimetrie, le infiltrazioni dei Palazzi, le voci della guida e le aree dei dedali
             eliminate, le partite e le singole fonti d’acquisto, con tutto quel che si sono portate via (pin e segni delle partite compresi). «Rimetti» le riporta com’erano; quel che
             hai cambiato dopo resta com’è. Il cestino si svuota solo a mano: aree e planimetrie ci portano anche le loro immagini.
           </p>
-          {voci.length > 0 && <span className="text-[12px] text-text-muted">{voci.length === 1 ? '1 elemento' : `${voci.length} elementi`} · {byteTesto(peso)}</span>}
+          {voci.length > 0 && <span className="testo-12 text-text-muted">{voci.length === 1 ? '1 elemento' : `${voci.length} elementi`} · {byteTesto(peso)}</span>}
         </div>
         <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Svuota il cestino" disabled={occupato || voci.length === 0} onClick={() => setSvuotare(true)} />
       </div>
-      {elenco.errore && <p className="m-0 text-[13px] text-error" role="alert">{elenco.errore}</p>}
-      {elenco.caricamento && !elenco.dati && <p className="m-0 text-[13px] text-text-muted">Caricamento del cestino…</p>}
-      {elenco.dati && voci.length === 0 && <p className="m-0 text-[13px] text-text-muted">Il cestino è vuoto.</p>}
+      {elenco.errore && <p className="m-0 testo-13 text-error" role="alert">{elenco.errore}</p>}
+      {elenco.caricamento && !elenco.dati && <p className="m-0 testo-13 text-text-muted">Caricamento del cestino…</p>}
+      {elenco.dati && voci.length === 0 && <p className="m-0 testo-13 text-text-muted">Il cestino è vuoto.</p>}
       {voci.length > 0 && (
         <ul className="m-0 flex list-none flex-col gap-2 p-0" aria-label="Elementi del cestino">
           {voci.map((v) => <ElementoCestino key={v.id === null ? `utente:${v.riferimento.uid}` : `gioco:${v.id}`} v={v} occupato={occupato} onRimetti={() => void rimetti(v)} onElimina={() => setDaEliminare(v)} />)}
@@ -149,14 +149,14 @@ export function Cestino() {
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={() => setDaEliminare(null)} />
           <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina per sempre" disabled={occupato} onClick={() => { if (daEliminare) void elimina(daEliminare); }} />
         </>}>
-        {daEliminare && <p className="m-0 text-[13px]">{NOME_TIPO_CESTINO[daEliminare.tipo]} «{daEliminare.nome}»: non si potrà più rimettere. I dati di gioco e le partite di adesso non cambiano.</p>}
+        {daEliminare && <p className="m-0 testo-13">{NOME_TIPO_CESTINO[daEliminare.tipo]} «{daEliminare.nome}»: non si potrà più rimettere. I dati di gioco e le partite di adesso non cambiano.</p>}
       </Modal>
       <Modal titolo="Svuotare il cestino?" aperta={svuotare} onChiudi={() => setSvuotare(false)}
         azioni={<>
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={() => setSvuotare(false)} />
           <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Svuota il cestino" disabled={occupato} onClick={() => void svuota()} />
         </>}>
-        <p className="m-0 text-[13px]">
+        <p className="m-0 testo-13">
           {voci.length === 1 ? 'L’elemento nel cestino' : `Tutti i ${voci.length} elementi nel cestino`} ({byteTesto(peso)}) se ne vanno per sempre: non si potranno più
           rimettere. I dati di gioco e le partite di adesso non cambiano.
         </p>

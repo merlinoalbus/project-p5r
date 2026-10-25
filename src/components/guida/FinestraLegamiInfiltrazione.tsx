@@ -12,6 +12,8 @@ import { Modal } from '../shared/Modal';
 import { impostaAreeInfiltrazione } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import type { AreaDungeonDto, AreaRiassuntoDto } from '../../types';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   infiltrazione: AreaDungeonDto;
@@ -50,21 +52,21 @@ export function FinestraLegamiInfiltrazione({ infiltrazione: i, aree, partitaId,
     <Modal titolo={`Aree toccate da «${i.nome}»`} aperta onChiudi={onChiudi} larga
       azioni={<>
         <button type="button" className="btn btn-secondary touch" onClick={onChiudi}>Annulla</button>
-        <button type="button" className="btn btn-primary touch" disabled={occupato} onClick={() => void salva()}>Salva</button>
+        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" disabled={occupato} onClick={() => void salva()} />
       </>}>
       <div className="flex flex-col gap-3">
-        <p className="m-0 text-[13px] text-text-secondary">L’ordine è quello in cui l’infiltrazione le percorre: la prima si apre arrivando sull’infiltrazione. Voci della guida e pin restano dove sono.</p>
+        <p className="m-0 testo-13 text-text-secondary">L’ordine è quello in cui l’infiltrazione le percorre: la prima si apre arrivando sull’infiltrazione. Voci della guida e pin restano dove sono.</p>
         <section className="flex flex-col gap-1.5" aria-label="Aree toccate, in ordine">
-          <h3 className="m-0 text-[14px]">Aree toccate · {scelte.length}</h3>
-          {scelte.length === 0 && <p className="m-0 text-[12px] text-text-muted">Nessuna: l’infiltrazione non tocca aree.</p>}
+          <h3 className="m-0 testo-14">Aree toccate · {scelte.length}</h3>
+          {scelte.length === 0 && <p className="m-0 testo-12 text-text-muted">Nessuna: l’infiltrazione non tocca aree.</p>}
           <ol className="m-0 flex list-none flex-col gap-1.5 p-0">
             {scelte.map((s, n) => (
               <li key={s} className="card flex flex-wrap items-center gap-1 p-1.5">
-                <span className="min-w-0 flex-1 text-[13px] font-semibold">{n + 1}. {perSlug.get(s)?.nome ?? s}</span>
+                <span className="min-w-0 flex-1 testo-13 font-semibold">{n + 1}. {perSlug.get(s)?.nome ?? s}</span>
                 <span className="flex flex-wrap items-center gap-1">
-                  <button type="button" className="btn btn-ghost touch" aria-label={`Sposta su ${perSlug.get(s)?.nome ?? s}`} disabled={n === 0} onClick={() => sposta(n, -1)}>↑</button>
-                  <button type="button" className="btn btn-ghost touch" aria-label={`Sposta giù ${perSlug.get(s)?.nome ?? s}`} disabled={n === scelte.length - 1} onClick={() => sposta(n, 1)}>↓</button>
-                  <button type="button" className="btn btn-ghost touch whitespace-nowrap" aria-label={`Togli ${perSlug.get(s)?.nome ?? s}`} onClick={() => setScelte((x) => x.filter((k) => k !== s))}>Togli</button>
+                  <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Sposta su" aria-label={`Sposta su ${perSlug.get(s)?.nome ?? s}`} disabled={n === 0} onClick={() => sposta(n, -1)} />
+                  <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Sposta giù" aria-label={`Sposta giù ${perSlug.get(s)?.nome ?? s}`} disabled={n === scelte.length - 1} onClick={() => sposta(n, 1)} />
+                  <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Togli" className="whitespace-nowrap" aria-label={`Togli ${perSlug.get(s)?.nome ?? s}`} onClick={() => setScelte((x) => x.filter((k) => k !== s))} />
                 </span>
               </li>
             ))}
@@ -72,11 +74,11 @@ export function FinestraLegamiInfiltrazione({ infiltrazione: i, aree, partitaId,
         </section>
         {libere.length > 0 && (
           <section className="flex flex-col gap-1.5" aria-label="Aree da aggiungere">
-            <h3 className="m-0 text-[14px]">Aggiungi un’area</h3>
+            <h3 className="m-0 testo-14">Aggiungi un’area</h3>
             <ul className="m-0 flex list-none flex-wrap gap-1.5 p-0">
               {libere.map((a) => (
                 <li key={a.slug}>
-                  <button type="button" className="chip touch" onClick={() => setScelte((x) => [...x, a.slug])}>+ {a.nome}</button>
+                  <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo={a.nome} onClick={() => setScelte((x) => [...x, a.slug])} />
                 </li>
               ))}
             </ul>

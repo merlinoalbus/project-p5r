@@ -50,7 +50,7 @@ function Cruciverba({ c, partitaId, onCambiato, onCorretto, evidenzia }: { c: Cr
     } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
   };
   return (
-    <li id={evidenzia ? ancoraGiorno(c.giorno) : undefined} className={`card flex flex-col gap-1 text-[13px] scroll-mt-20 ${c.fatto ? 'opacity-70' : ''} ${evidenzia ? 'border-primary' : ''}`}>
+    <li id={evidenzia ? ancoraGiorno(c.giorno) : undefined} className={`card flex flex-col gap-1 testo-13 scroll-mt-20 ${c.fatto ? 'opacity-70' : ''} ${evidenzia ? 'border-primary' : ''}`}>
       <div className="flex flex-wrap items-center gap-2">
         {/* La casella da sola è un bersaglio di 20 px: col dito si manca, e qui è il gesto della
             pagina. L'etichetta attorno la rende toccabile per 44 px senza cambiarne l'aspetto. */}
@@ -59,8 +59,8 @@ function Cruciverba({ c, partitaId, onCambiato, onCorretto, evidenzia }: { c: Cr
             <input type="checkbox" className="w-5 h-5" checked={c.fatto} disabled={occupato} onChange={(e) => void cambia(e.target.checked)} aria-label={`Cruciverba del ${formattaDataGioco(c.giorno)} risolto`} />
           </label>
         )}
-        <strong className="text-[15px]">{formattaDataGioco(c.giorno)}</strong>
-        {evidenzia && <span className="chip chip--attivo text-[11px]">Prossimo</span>}
+        <strong className="testo-15">{formattaDataGioco(c.giorno)}</strong>
+        {evidenzia && <span className="chip chip--attivo testo-12">Prossimo</span>}
         <span className="text-text-secondary">{c.indizio}</span>
       </div>
       <div className="flex flex-wrap items-center gap-2">
@@ -122,8 +122,8 @@ export function CruciverbaPage() {
           <IntestazionePagina titolo="Cruciverba di Leblanc" sottotitolo={<>{d.totale} cruciverba sul tavolo di Leblanc (la sera, senza consumare tempo): ogni risposta esatta vale una nota di Conoscenza.{partitaId ? ` Nella partita «${attiva?.nome}»: ${d.risolti} risolti.` : ' Attiva una partita per spuntare quelli risolti.'}</>} />
           {prossimo && (
             <div className="card flex flex-wrap items-center justify-between gap-2 border-primary" role="status">
-              <span className="text-[13px]"><strong>Prossimo cruciverba:</strong> {formattaDataGioco(prossimo.giorno)} · {prossimo.indizio}</span>
-              <button type="button" className="btn btn-ghost btn-sm touch" onClick={vaiAlProssimo}>Vai al cruciverba</button>
+              <span className="testo-13"><strong>Prossimo cruciverba:</strong> {formattaDataGioco(prossimo.giorno)} · {prossimo.indizio}</span>
+              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Vai al cruciverba" onClick={vaiAlProssimo} />
             </div>
           )}
           <section className="filtri-articoli" role="search" aria-label="Filtri dei cruciverba">
@@ -133,10 +133,10 @@ export function CruciverbaPage() {
               <AggiungiAlCatalogo tipo="cruciverba" titolo="Aggiungi un cruciverba" onSalvato={() => void dati.ricarica()} />
             </div>
           </section>
-          {perMese.length === 0 && <p className="m-0 text-[13px] text-text-muted" role="status">Nessun cruciverba con questi filtri.</p>}
+          {perMese.length === 0 && <p className="m-0 testo-13 text-text-muted" role="status">Nessun cruciverba con questi filtri.</p>}
           {perMese.map(([mese, lista]) => (
             <section key={mese} className="flex flex-col gap-2" aria-label={`Cruciverba di ${mese}`}>
-              <h2 className="m-0 text-[15px] font-semibold">{mese}</h2>
+              <h2 className="m-0 testo-15 font-semibold">{mese}</h2>
               <ul className="m-0 p-0 list-none flex flex-col gap-2">
                 {lista.map((c) => <Cruciverba key={c.giorno} c={c} partitaId={partitaId} onCambiato={aggiorna} onCorretto={() => void dati.ricarica()} evidenzia={prossimo?.giorno === c.giorno} />)}
               </ul>

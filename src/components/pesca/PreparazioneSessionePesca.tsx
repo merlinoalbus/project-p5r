@@ -10,6 +10,8 @@ import { MomentoPescaForm } from './MomentoPescaForm';
 import { OsservazionePescaForm } from './OsservazionePescaForm';
 import { momentoPescaCompleto, osservazionePescaIgnota, type MomentoPescaInCompilazione } from '../../utils/pesca';
 import { BeneficiPesca, ProfiliSessionePesca, RiepilogoOsservazionePesca } from './ProfiliPesca';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 const nuovoId = () => crypto.randomUUID().replaceAll('-', '');
 const testo = (e: unknown) => e instanceof Error ? e.message : 'Operazione non riuscita.';
@@ -18,15 +20,15 @@ const canonico = (v: unknown): unknown => Array.isArray(v) ? v.map(canonico) : v
 const uguali = (a: unknown, b: unknown) => JSON.stringify(canonico(a)) === JSON.stringify(canonico(b));
 
 export function RiepilogoSessionePreparata({ richiesta: r, sessioneFotografata }: { richiesta: NuovaSessionePesca; sessioneFotografata?: SessionePescaDto }) {
-  return <div className="flex min-w-0 flex-col gap-2 rounded border border-border p-2 text-[13px]">
+  return <div className="flex min-w-0 flex-col gap-2 rounded border border-border p-2 testo-13">
     <strong>{r.scelta.tipo === 'nuova' ? 'Visita osservata da registrare' : 'Fonte da collegare alla visita esistente'}</strong>
     <span>{dataGiocoTesto(r.momento.giorno)} · {r.momento.fascia} · visita {r.momento.ordineVisita + 1} nella fascia.</span>
     <span>{r.turno.tipo === 'nuovo' ? 'Crea un solo nuovo turno.' : r.turno.tipo === 'esistente' ? `Collega il turno già registrato ${r.turno.ordine}; nessun incremento.` : 'Rappresenta una quota già compresa nel conteggio storico; nessun incremento.'}</span>
-    {r.turno.tipo === 'esistente' && <code className="break-all text-[11px]">Fotografia del turno originale: {r.turno.firmaTurno}</code>}
+    {r.turno.tipo === 'esistente' && <code className="break-all testo-12">Fotografia del turno originale: {r.turno.firmaTurno}</code>}
     <span>Fonte nuova: {r.fonte.tipo === 'manuale' ? 'dichiarazione manuale' : 'voce del Diario'}.</span>
-    {r.fonte.tipo === 'diario' && <code className="break-all text-[11px]">Voce {r.fonte.voceUid} · effetto {r.fonte.effettoUid}</code>}
+    {r.fonte.tipo === 'diario' && <code className="break-all testo-12">Voce {r.fonte.voceUid} · effetto {r.fonte.effettoUid}</code>}
     {r.scelta.tipo === 'collega' && <>
-      <code className="break-all text-[11px]">Sessione scelta: {r.scelta.sessioneId}</code>
+      <code className="break-all testo-12">Sessione scelta: {r.scelta.sessioneId}</code>
       {sessioneFotografata?.id === r.scelta.sessioneId ? <div className="flex min-w-0 flex-col gap-1">
         <strong>Fonti già collegate, fotografate dall’anteprima</strong>
         {!sessioneFotografata.fonti.length && <span>Nessuna fonte attiva nella fotografia.</span>}
@@ -117,7 +119,7 @@ export function PreparazioneSessionePesca({ partitaId, giorno, fascia, fonte, on
       }
     } finally { blocco.current = false; if (attiva()) setOccupato(false); }
   };
-  return <div className="flex min-w-0 flex-col gap-3 text-[13px]">
+  return <div className="flex min-w-0 flex-col gap-3 testo-13">
     {confermaScrive && <GestiPartita partitaId={partitaId} onCambiato={async (id, recupero) => {
       if (!attiva()) return;
       const r = anteprima?.richiesta;
@@ -133,7 +135,7 @@ export function PreparazioneSessionePesca({ partitaId, giorno, fascia, fonte, on
     }} />}
     <p className="m-0">Una visita corrisponde a un solo turno. Le vecchie visite non diventano catture; il collegamento a un turno o a una quota storica non aumenta il conteggio.</p>
     {registro.caricamento && !stato && <p role="status">Leggo visite e turni…</p>}
-    {registro.errore && <p role="alert" className="m-0 text-error">{registro.errore}<button type="button" className="btn btn-ghost touch" onClick={() => void registro.ricarica()}>Rileggi</button></p>}
+    {registro.errore && <p role="alert" className="m-0 text-error">{registro.errore}<PulsanteVisivo tono="fantasma" className="ml-2" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi" onClick={() => void registro.ricarica()} /></p>}
     {stato?.regola.stato !== 'collegata' && stato && <p role="alert" className="m-0 text-warning">La regola pesca non è collegata integralmente: {stato.regola.motivi.join(' ')} Nessuna visita viene registrata da questo modulo.</p>}
     <fieldset className="m-0 flex min-w-0 flex-col gap-3 border-0 p-0" disabled={disabilitato}>
       <Selettore etichetta="Visita da registrare" valore={sessione} disabilitato={disabilitato}
@@ -157,17 +159,17 @@ export function PreparazioneSessionePesca({ partitaId, giorno, fascia, fonte, on
       <OsservazionePescaForm partitaId={sessione ? undefined : partitaId} valore={osservazione} disabilitato={disabilitato || !!sessione} onCambia={o => { invalida(); setOsservazione(o); }} />
       {!!sessione && <p className="m-0 text-text-secondary">Le osservazioni della visita collegata sono conservate. Per correggerle usa la revisione della sessione nel registro pesca.</p>}
     </fieldset>
-    {!anteprima && !confermato && <button type="button" className="btn btn-secondary touch self-start" disabled={disabilitato || !momentoPescaCompleto(momento) || !turno() || stato?.regola.stato !== 'collegata'} onClick={() => void prepara()}>Rivedi questa visita</button>}
+    {!anteprima && !confermato && <PulsanteVisivo icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Rivedi questa visita" className="self-start" disabled={disabilitato || !momentoPescaCompleto(momento) || !turno() || stato?.regola.stato !== 'collegata'} onClick={() => void prepara()} />}
     {anteprima && !confermato && <div className="flex min-w-0 flex-col gap-3 border-t border-border pt-2">
       <RiepilogoSessionePreparata richiesta={anteprima.richiesta} sessioneFotografata={sessioneFotografata} />
       <p className="m-0">{anteprima.dto.esitoPrevisto}</p>
       <ul className="m-0 pl-4">{anteprima.dto.conseguenze.map((s, i) => <li key={i}>{s}</li>)}</ul>
       <ProfiliSessionePesca punto={anteprima.dto.punto} profili={anteprima.dto.profili} profiliPianificazione={anteprima.dto.profiliPianificazione} /><BeneficiPesca benefici={anteprima.dto.benefici} />
       <label className="touch flex items-start gap-2"><input type="checkbox" className="mt-1 h-5 w-5" checked={attestato} disabled={occupato || !!pendente} onChange={e => setAttestato(e.target.checked)} /><span>Confermo visita, fonte e rapporto con i turni mostrati. I benefici e le spese restano da rivedere separatamente.</span></label>
-      <div className="flex flex-wrap gap-2"><button type="button" className="btn btn-ghost touch" disabled={occupato || !!pendente} onClick={invalida}>Rivedi i dati</button><button type="button" className="btn btn-primary touch" disabled={occupato || !!pendente || !attestato} onClick={() => void conferma()}>{titoloConferma}</button></div>
+      <div className="flex flex-wrap gap-2"><PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Rivedi i dati" disabled={occupato || !!pendente} onClick={invalida} /><PulsanteVisivo tono="primario" icona={<IconaAzione chiave="raggiunto" dimensione={22} />} titolo={titoloConferma} disabled={occupato || !!pendente || !attestato} onClick={() => void conferma()} /></div>
     </div>}
     {confermato && <p role="status" className="m-0">{confermaScrive ? 'Visita registrata. Nessun nuovo invio viene eseguito da questo modulo.' : 'Visita preparata per la spunta. Nessun turno, cattura o beneficio ancora registrato.'}</p>}
-    {confermato && !confermaScrive && onInvalidata && <button type="button" className="btn btn-ghost touch self-start" onClick={() => { onInvalidata(); setConfermato(false); invalida(); }}>Riapri questa preparazione</button>}
+    {confermato && !confermaScrive && onInvalidata && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Riapri questa preparazione" className="self-start" onClick={() => { onInvalidata(); setConfermato(false); invalida(); }} />}
     {errore && <p role="alert" className="m-0 text-error">{errore}</p>}
     {pendente && <p role="alert" className="m-0 text-warning">Un gesto pesca è ancora da verificare nel registro della scheda. Nessun nuovo invio è consentito.</p>}
   </div>;

@@ -39,9 +39,9 @@ export function Sidebar() {
               title={ridotto ? item.label : undefined}
               aria-label={item.label}
               className={({ isActive }) =>
-                `touch voce-menu flex items-center gap-3 px-3 py-2 rounded-md text-[18px] no-underline transition-colors ${
+                `touch voce-menu flex items-center gap-3 px-3 py-2 rounded-md testo-18 no-underline transition-colors ${
                   isActive
-                    ? 'bg-primary-bg text-primary font-semibold'
+                    ? 'bg-primary-bg text-primary-testo font-semibold'
                     : 'text-text-secondary hover:bg-bg-tertiary hover:text-text'
                 }`
               }
@@ -56,7 +56,7 @@ export function Sidebar() {
           ))}
         </div>
         <div className="flex-1" />
-        <div className="barra-laterale__etichetta px-4 text-[11px] text-text-muted">v{version}</div>
+        <div className="barra-laterale__etichetta px-4 testo-12 text-text-muted">v{version}</div>
       </div>
     </nav>
   );

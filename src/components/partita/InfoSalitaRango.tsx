@@ -30,10 +30,10 @@ export function InfoSalitaRango({ c, onApriScheda }: { c: ConfidentePartitaDto; 
   const altri = ordinati.length - visibili.length;
   if (abilita.length === 0 && ordinati.length === 0) return null;
   return (
-    <section className="flex flex-col gap-2 text-[13px]" aria-label={`Per salire di rango: ${c.nome}`}>
+    <section className="flex flex-col gap-2 testo-13" aria-label={`Per salire di rango: ${c.nome}`}>
       {abilita.length > 0 && (
         <div className="flex flex-col gap-0.5">
-          <span className="text-[11px] font-semibold uppercase tracking-[.06em] text-text-muted">Al rango {c.rango + 1} ottieni</span>
+          <span className="testo-12 font-semibold uppercase tracking-[.06em] text-text-muted">Al rango {c.rango + 1} ottieni</span>
           {abilita.map((a) => (
             <p key={a.nome} className="m-0"><strong>{a.nome}</strong>{a.descrizione && <span className="text-text-secondary line-clamp-2"> — {a.descrizione}</span>}</p>
           ))}
@@ -41,7 +41,7 @@ export function InfoSalitaRango({ c, onApriScheda }: { c: ConfidentePartitaDto; 
       )}
       {ordinati.length > 0 && (
         <div className="flex flex-col gap-1">
-          <span className="text-[11px] font-semibold uppercase tracking-[.06em] text-text-muted">Regali graditi</span>
+          <span className="testo-12 font-semibold uppercase tracking-[.06em] text-text-muted">Regali graditi</span>
           <ul className="m-0 p-0 list-none flex flex-wrap gap-1.5">
             {visibili.map((g, i) => {
               const fatto = consegnato(c, g);
@@ -53,7 +53,7 @@ export function InfoSalitaRango({ c, onApriScheda }: { c: ConfidentePartitaDto; 
             })}
           </ul>
           {/* gli altri regali stanno nella Scheda completa del cassetto: niente collegamento che porta fuori */}
-          {altri > 0 && <button type="button" onClick={onApriScheda} className="touch inline-flex items-center text-[12px] text-primary underline underline-offset-2 self-start bg-transparent border-0 p-0 cursor-pointer">+ altri {altri} nella scheda completa</button>}
+          {altri > 0 && <button type="button" onClick={onApriScheda} className="touch inline-flex items-center testo-12 text-primary-testo underline underline-offset-2 self-start bg-transparent border-0 p-0 cursor-pointer">+ altri {altri} nella scheda completa</button>}
         </div>
       )}
     </section>

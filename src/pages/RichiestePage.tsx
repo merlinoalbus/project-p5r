@@ -34,7 +34,7 @@ import type { RichiestaDto, StatoRichiesta } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { SezioneConFregio } from '../components/shared/FregioSezione';
-import { PulsanteVisivo, CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
+import { PulsanteVisivo, CollegamentoVisivo, FrecciaApertura } from '../components/shared/PulsanteVisivo';
 import { IconaAzione, IconaSegno } from '../components/shared/IconaAzione';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
 import { IconaScheda } from '../components/shared/IconaAzione';
@@ -58,9 +58,9 @@ type Foglio = 'richieste' | 'jose';
 function Affinita({ testo: scritto, tipo }: { testo: string; tipo: 'debole' | 'resiste' }) {
   const elemento = chiaveElementoDaTesto(scritto);
   const testo = nomeCanonicoNelTesto(scritto);
-  if (!elemento) return <span className="chip text-[11px]" title={tipo === 'debole' ? 'Debolezza del bersaglio' : 'Il bersaglio resiste'}>{testo}</span>;
+  if (!elemento) return <span className="chip testo-12" title={tipo === 'debole' ? 'Debolezza del bersaglio' : 'Il bersaglio resiste'}>{testo}</span>;
   const colore = coloreElemento(elemento);
-  return <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] font-semibold"
+  return <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-0.5 testo-12 font-semibold"
     style={{ borderColor: colore, color: colore, background: `color-mix(in srgb, ${colore} ${tipo === 'debole' ? 18 : 8}%, transparent)` }}
     title={tipo === 'debole' ? 'Debolezza del bersaglio' : 'Il bersaglio resiste'}>
     <span aria-hidden>{tipo === 'debole' ? '▼' : '▲'}</span>{testo}
@@ -89,17 +89,17 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
       <div className="flex items-start gap-2.5">
         <IconaCategoria categoria="richiesta" dimensione={36} />
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <h3 className="m-0 text-[16px] leading-tight">{r.nome}</h3>
-          <span className="text-[12px] text-text-muted">{r.areaNome ?? r.area}{r.piano ? ` · ${r.piano}` : ''}</span>
+          <h3 className="m-0 testo-16 leading-tight">{r.nome}</h3>
+          <span className="testo-12 text-text-muted">{r.areaNome ?? r.area}{r.piano ? ` · ${r.piano}` : ''}</span>
         </div>
-        {r.stato && <span className={`chip shrink-0 text-[11px] ${r.stato === 'completata' ? '' : 'chip--attivo'}`}>{r.stato}</span>}
+        {r.stato && <span className={`chip shrink-0 testo-12 ${r.stato === 'completata' ? '' : 'chip--attivo'}`}>{r.stato}</span>}
       </div>
       {sugg.evidenziato('richieste', r.chiave) && <TargaSuggerito motivo={sugg.motivo('richieste', r.chiave)} compatta />}
 
       {/* Il bersaglio è la ragione per cui si apre questa pagina prima di scendere: chi è, e a
           che cosa cede. */}
       <div className="flex flex-col gap-1.5 rounded-md bg-white/[0.04] px-2.5 py-2">
-        <span className="text-[13px]">
+        <span className="testo-13">
           <strong>{r.bersaglio.nome}</strong>
           {r.bersaglio.formaDemoniaca && <span className="text-text-secondary"> · {r.bersaglio.formaDemoniaca}</span>}
           {r.bersaglio.livello && <span className="text-text-muted"> · livello {r.bersaglio.livello}</span>}
@@ -108,22 +108,21 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
           <div className="flex flex-wrap gap-1">
             {r.bersaglio.debolezze.map((x, i) => <Affinita key={`d${i}`} testo={x} tipo="debole" />)}
             {r.bersaglio.resistenze.map((x, i) => <Affinita key={`r${i}`} testo={x} tipo="resiste" />)}
-            {r.bersaglio.vulnerabileConfusione && <span className="chip text-[11px]" title="Confondendolo si ottengono yen">Confusione utile</span>}
+            {r.bersaglio.vulnerabileConfusione && <span className="chip testo-12" title="Confondendolo si ottengono yen">Confusione utile</span>}
           </div>
         )}
       </div>
 
-      {r.confidente && <span className="text-[12px] text-text-secondary">Confidente: <strong className="text-text">{r.confidente.nome}</strong>{r.confidente.rango ? ` · rango ${r.confidente.rango}` : ''}</span>}
-      {!!r.oggettiRicompensa?.length && <div className="min-w-0 text-[12px]"><span className="text-text-muted">Ricompense:</span><OggettiCollegati oggetti={r.oggettiRicompensa} /></div>}
+      {r.confidente && <span className="testo-12 text-text-secondary">Confidente: <strong className="text-text">{r.confidente.nome}</strong>{r.confidente.rango ? ` · rango ${r.confidente.rango}` : ''}</span>}
+      {!!r.oggettiRicompensa?.length && <div className="min-w-0 testo-12"><span className="text-text-muted">Ricompense:</span><OggettiCollegati oggetti={r.oggettiRicompensa} /></div>}
       {r.ricompense.length > 0 && (r.oggettiRicompensa?.length
-        ? <details className="text-[12px] text-text-secondary"><summary className="touch">Indicazioni della guida sulle ricompense</summary><p className="m-0 whitespace-pre-line">{r.ricompense.join(', ')}</p></details>
-        : <span className="text-[12px] text-text-secondary"><span className="text-text-muted">Ricompense indicate dalla guida:</span> {r.ricompense.join(', ')}</span>)}
+        ? <details className="testo-12 text-text-secondary"><summary className="touch">Indicazioni della guida sulle ricompense</summary><p className="m-0 whitespace-pre-line">{r.ricompense.join(', ')}</p></details>
+        : <span className="testo-12 text-text-secondary"><span className="text-text-muted">Ricompense indicate dalla guida:</span> {r.ricompense.join(', ')}</span>)}
 
-      <button type="button" className="touch self-start text-[12px] text-text-muted underline decoration-dotted underline-offset-2" aria-expanded={aperta} onClick={() => setAperta((a) => !a)}>
-        {aperta ? 'Nascondi i dettagli' : 'Dettagli'}
-      </button>
+      <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="dettagli" dimensione={20} />} aria-expanded={aperta} onClick={() => setAperta((a) => !a)}
+        titolo={<>{aperta ? 'Nascondi i dettagli' : 'Dettagli'}<FrecciaApertura aperto={aperta} /></>} />
       {aperta && (
-        <div className="flex flex-col gap-1 text-[12px] text-text-secondary">
+        <div className="flex flex-col gap-1 testo-12 text-text-secondary">
           <span><span className="text-text-muted">Da:</span> {r.committente || '—'}</span>
           <span><span className="text-text-muted">Disponibile dal</span> {r.disponibileDal || '—'}{r.scadenza ? ` · scadenza ${r.scadenza}` : ''}</span>
           {r.note && <span>{r.note}</span>}
@@ -132,7 +131,7 @@ function Richiesta({ r, partitaId, onCambiata, onModifica }: { r: RichiestaDto; 
 
       <div className="mt-auto flex flex-wrap items-center gap-1.5 pt-1">
         {partitaId && r.stato !== 'accettata' && r.stato !== 'completata' && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="accettata" dimensione={20} />} titolo="Accettata" disabled={occupato} onClick={() => void cambia('accettata')} />}
-        {partitaId && r.stato !== 'completata' && <button type="button" className="btn btn-primary btn-sm touch" disabled={occupato} onClick={() => void cambia('completata')}>Completata</button>}
+        {partitaId && r.stato !== 'completata' && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="Completata" disabled={occupato} onClick={() => void cambia('completata')} />}
         {partitaId && r.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" disabled={occupato} onClick={() => void cambia(null)} />}
         {r.areaChiave && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Apri il Dedalo" to={`/guida/dungeon/mementos?area=${r.areaChiave}`} />}
         {r.confidente && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Confidente" to={`/confidenti/${r.confidente.chiave}`} />}
@@ -244,7 +243,7 @@ export function RichiestePage({ soloChiave }: { soloChiave?: string } = {}) {
               <CampoRicerca valore={ricerca} onCambia={setRicerca} segnaposto="Cerca richiesta, bersaglio, Confidente, dedalo…" />
               {/* I dedali nell'ordine in cui si percorrono, con quante richieste hanno. */}
               <Selettore compatto etichetta="Dedalo" valore={dedalo} vuoto="Tutti i Dedali" opzioni={d.dedali.map((x) => ({ chiave: x.chiave, nome: x.nome, dettaglio: partitaId ? `${x.completate} completate su ${x.totale}` : `${x.totale} richieste` }))} onCambia={impostaDedalo} />
-              {filtriAttivi && <button type="button" className="btn btn-ghost btn-sm touch" onClick={() => { setRicerca(''); setAccettazione('tutte'); setCompletamento('tutte'); impostaDedalo(''); }}>Azzera i filtri</button>}
+              {filtriAttivi && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Azzera i filtri" onClick={() => { setRicerca(''); setAccettazione('tutte'); setCompletamento('tutte'); impostaDedalo(''); }} />}
             </div>
             {partitaId && <div className="filtri-articoli__riga">
               <Segmenti etichetta="Accettazione" valore={accettazione} opzioni={ACCETTAZIONE} onCambia={setAccettazione} />
@@ -252,51 +251,51 @@ export function RichiestePage({ soloChiave }: { soloChiave?: string } = {}) {
             </div>}
           </section>
 
-          <p className="m-0 text-[12px] text-text-muted">{visibili.length} {visibili.length === 1 ? 'richiesta' : 'richieste'}{dedalo ? ` in ${d.dedali.find((x) => x.chiave === dedalo)?.nome ?? dedalo}` : ''}</p>
+          <p className="m-0 testo-12 text-text-muted">{visibili.length} {visibili.length === 1 ? 'richiesta' : 'richieste'}{dedalo ? ` in ${d.dedali.find((x) => x.chiave === dedalo)?.nome ?? dedalo}` : ''}</p>
           <ul className="m-0 grid list-none grid-cols-1 items-start gap-3 p-0 md:grid-cols-2 xl:grid-cols-3" aria-label="Richieste">
-            {visibili.length === 0 && <li className="text-[13px] text-text-muted" role="status">Nessuna Richiesta con questi filtri.</li>}
+            {visibili.length === 0 && <li className="testo-13 text-text-muted" role="status">Nessuna Richiesta con questi filtri.</li>}
             {visibili.map((r) => <Richiesta key={r.chiave} r={r} partitaId={partitaId} onCambiata={aggiorna} onModifica={() => setModulo({ chiave: r.chiave })} />)}
           </ul>
           </>}
 
           {foglio === 'jose' && d.jose && (
-            <div className="flex flex-col gap-3 text-[13px]">
+            <div className="flex flex-col gap-3 testo-13">
               <SezioneConFregio chiave="jose-fiori" disposizione="grande">
                 <div className="flex items-start gap-2">
-                  <h2 className="m-0 min-w-0 flex-1 font-display text-[17px] uppercase leading-none">Jose: fiori, timbri e scambi</h2>
+                  <h2 className="m-0 min-w-0 flex-1 font-display testo-17 uppercase leading-none">Jose: fiori, timbri e scambi</h2>
                   {/* L11 · B11 (R11-15/5): introduzione, fiori, timbri e boss segreto di Jose; gli scambi sono il suo listino */}
                   <ModificaGuida tipo="jose" chiave="jose" cosa="i testi di Jose" soloIcona onSalvato={() => void dati.ricarica()} />
                 </div>
                 <p className="m-0 text-text-secondary">{d.jose.introduzione}</p>
                 <div className="grid gap-1.5 md:grid-cols-2">
                   {d.jose.fiori && <div className="flex flex-col gap-0.5 rounded-md bg-white/[0.04] px-2.5 py-2">
-                    <span className="text-[10px] uppercase tracking-[0.08em] text-text-muted">Fiori</span>
+                    <span className="testo-12 uppercase tracking-[0.08em] text-text-muted">Fiori</span>
                     <span>{typeof d.jose.fiori === 'string' ? d.jose.fiori : d.jose.fiori.descrizione}</span>
                   </div>}
                   {d.jose.timbri && <div className="flex flex-col gap-0.5 rounded-md bg-white/[0.04] px-2.5 py-2">
-                    <span className="text-[10px] uppercase tracking-[0.08em] text-text-muted">Timbri</span>
+                    <span className="testo-12 uppercase tracking-[0.08em] text-text-muted">Timbri</span>
                     <span>{typeof d.jose.timbri === 'string' ? d.jose.timbri : d.jose.timbri.descrizione}</span>
                   </div>}
                   {d.jose.bossSegreto && <div className="flex flex-col gap-0.5 rounded-md bg-white/[0.04] px-2.5 py-2 md:col-span-2">
-                    <span className="text-[10px] uppercase tracking-[0.08em] text-text-muted">Boss segreto</span>
+                    <span className="testo-12 uppercase tracking-[0.08em] text-text-muted">Boss segreto</span>
                     <span><strong>{d.jose.bossSegreto.nome}</strong> — {d.jose.bossSegreto.condizione}</span>
                   </div>}
                 </div>
               </SezioneConFregio>
               {d.jose.listino !== undefined ? (
                 <SezioneConFregio chiave="jose-scambi" forma="banda" disposizione="fascia" aria-label="Scambi con Jose">
-                  <h3 className="m-0 font-display text-[15px] uppercase leading-none">Che cosa dà, e per quanti fiori</h3>
+                  <h3 className="m-0 font-display testo-15 uppercase leading-none">Che cosa dà, e per quanti fiori</h3>
                   {d.jose.listino ? <>
                     <CollegamentoVisivo to={`/guida/negozi/${encodeURIComponent(d.jose.listino.chiave)}`} icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={`Apri il listino di ${d.jose.listino.nome}`} compatto />
-                    <p className="m-0 text-[12px] text-text-muted">Le aperture effettive dei dedali si segnano in Partita → Progressi. Costi, requisiti e acquisti sono gli stessi del listino.</p>
+                    <p className="m-0 testo-12 text-text-muted">Le aperture effettive dei dedali si segnano in Partita → Progressi. Costi, requisiti e acquisti sono gli stessi del listino.</p>
                     <ArticoliTabella articoli={d.jose.listino.articoliElenco} partitaId={partitaId} onCambiato={() => void dati.ricarica()} />
-                  </> : <p className="m-0 text-[13px] text-text-muted">Il listino di Jose è stato rimosso o nascosto. Le indicazioni della guida restano conservate.</p>}
+                  </> : <p className="m-0 testo-13 text-text-muted">Il listino di Jose è stato rimosso o nascosto. Le indicazioni della guida restano conservate.</p>}
                 </SezioneConFregio>
               ) : d.jose.scambi.length > 0 && (
                 <SezioneConFregio chiave="jose-scambi" forma="banda" disposizione="fascia" aria-label="Scambi con Jose">
-                  <h3 className="m-0 font-display text-[15px] uppercase leading-none">Che cosa dà, e per quanti fiori</h3>
+                  <h3 className="m-0 font-display testo-15 uppercase leading-none">Che cosa dà, e per quanti fiori</h3>
                   <div className="area-scorrevole-x">
-                    <table className="tabella tabella--adattiva text-[12px]">
+                    <table className="tabella tabella--adattiva testo-12">
                       <thead><tr><th>Oggetto</th><th>Fiori</th><th>Effetto</th><th>Requisito</th></tr></thead>
                       <tbody>{d.jose.scambi.map((s, i) => <tr key={i}><td data-etichetta="Oggetto"><strong>{s.nome}</strong></td><td data-etichetta="Fiori" className="tabular-nums">{s.costo}</td><td data-etichetta="Effetto">{s.effetto}</td><td data-etichetta="Requisito">{s.requisito}</td></tr>)}</tbody>
                     </table>

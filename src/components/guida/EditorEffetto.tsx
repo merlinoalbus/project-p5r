@@ -15,6 +15,8 @@ import { SelettoreIcone } from '../shared/SelettoreIcone';
 import { NOME_DOTE } from '../../utils/citta';
 import { BERSAGLI, FUNZIONI, GUADAGNI, MISURE, NOME_BERSAGLIO, NOME_FUNZIONE, NOME_GUADAGNO, NOME_RESA, NOME_RISORSA, NOME_STATISTICA, NOME_STATO, PROBABILITA, RESE, RISORSE, STATISTICHE_OGGETTO, STATI_ALTERATI, descriviEffetto, type EffettoOggetto, type StatoAlterato } from '../../../shared/effettiOggetto';
 import { OPZIONI_FAMIGLIA, effettoPredefinito, type NomiPerEffetti } from '../../utils/effetti';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props extends NomiPerEffetti {
   valore: EffettoOggetto | null;
@@ -88,8 +90,8 @@ export function EditorEffetto({ valore, onCambia, quartieri, attivita, confident
             );
           })}
           {erroreNomi
-            ? <span role="alert" className="text-[12px] text-error">Impossibile caricare i Confidenti. {riprovaNomi && <button type="button" className="btn btn-sm touch" onClick={riprovaNomi}>Riprova</button>}</span>
-            : (confidenti ?? []).length === 0 && valore.graditoA.length === 0 && <span className="text-[12px] text-text-muted">Carico i Confidenti…</span>}
+            ? <span role="alert" className="testo-12 text-error">Impossibile caricare i Confidenti. {riprovaNomi && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={riprovaNomi} />}</span>
+            : (confidenti ?? []).length === 0 && valore.graditoA.length === 0 && <span className="testo-12 text-text-muted">Carico i Confidenti…</span>}
         </div>
       )}
       {valore?.famiglia === 'sblocca-luogo' &&
@@ -106,7 +108,7 @@ export function EditorEffetto({ valore, onCambia, quartieri, attivita, confident
         scelta('Dove si guadagna di più', valore.dove, GUADAGNI, NOME_GUADAGNO, (dove) => onCambia({ ...valore, dove }))}
       {valore?.famiglia === 'descrittivo' &&
         campo('Descrizione', <textarea className="form-input" rows={2} maxLength={600} value={valore.testo} disabled={disabilitato} onChange={(e) => onCambia({ ...valore, testo: e.target.value })} />)}
-      {valore && <p className="m-0 text-[12px] text-text-muted" role="status">Verrà mostrato così: <strong>{descriviEffetto(valore, nomiEffetto)}</strong></p>}
+      {valore && <p className="m-0 testo-12 text-text-muted" role="status">Verrà mostrato così: <strong>{descriviEffetto(valore, nomiEffetto)}</strong></p>}
     </div>
   );
 }

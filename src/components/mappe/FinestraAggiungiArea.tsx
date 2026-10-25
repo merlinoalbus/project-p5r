@@ -18,6 +18,8 @@ import { SceltaImmagine } from './SceltaImmagine';
 import { erroreImmagine } from '../../utils/aree';
 import { SceltaPunto } from './SceltaPunto';
 import type { AreaDettaglioDto, QuartiereDettaglioDto } from '../../types';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 /** Il Palazzo che riceve l'area (L3): le sue infiltrazioni e quella da preselezionare. */
 export interface PalazzoNuovaArea { chiave: string; nome: string; infiltrazioni: Array<{ chiave: string; nome: string; ordine: number }>; preselezionata?: string | null }
@@ -63,33 +65,33 @@ export function FinestraAggiungiArea({ quartiere: q, palazzo, aperta, onChiudi, 
     <Modal titolo={`Aggiungi un’area a ${nomeContenitore}`} aperta={aperta} onChiudi={onChiudi} larga
       azioni={<>
         <button type="button" className="btn btn-secondary touch" onClick={onChiudi}>Annulla</button>
-        <button type="button" className="btn btn-primary touch" disabled={!pronto} onClick={() => void salva()}>{occupato ? 'Salvataggio…' : 'Aggiungi area'}</button>
+        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="piu" dimensione={22} />} titolo={occupato ? 'Salvataggio…' : 'Aggiungi area'} disabled={!pronto} onClick={() => void salva()} />
       </>}>
       <div className="flex flex-col gap-3">
-        <label className="flex flex-col gap-1 text-[13px] font-semibold">Nome
+        <label className="flex flex-col gap-1 testo-13 font-semibold">Nome
           <input className="form-input touch" value={nome} maxLength={80} placeholder={q ? 'es. Central Street' : 'es. Sala del Tesoro'} onChange={(e) => setNome(e.target.value)} />
         </label>
         <SceltaImmagine file={file} onCambia={setFile} etichetta="Immagine della prima planimetria" />
-        <label className="flex flex-col gap-1 text-[13px] font-semibold">Etichetta della planimetria (facoltativa)
+        <label className="flex flex-col gap-1 testo-13 font-semibold">Etichetta della planimetria (facoltativa)
           <input className="form-input touch" value={etichetta} maxLength={80} placeholder={q ? 'es. porzione occidentale' : 'es. Livello 1'} onChange={(e) => setEtichetta(e.target.value)} />
         </label>
         {q && <div className="flex flex-col gap-1.5">
-          <span className="text-[13px] font-semibold">Dove sta in {q.nome}</span>
+          <span className="testo-13 font-semibold">Dove sta in {q.nome}</span>
           {illustrazione
             ? <><SceltaPunto src={illustrazione} alt={`Illustrazione di ${q.nome}`} punto={punto} onPunto={setPunto} disabilitato={occupato} />
-              <span className="text-[12px] text-text-muted">{/* a parole, senza coordinate (UX2-9 a) */}{punto ? 'Punto scelto: il pin dell’area comparirà lì. Tocca un altro punto per spostarlo.' : 'Tocca l’illustrazione dove si entra nell’area: lì comparirà il suo pin.'}</span></>
-            : <span className="text-[12px] text-text-muted">{q.nome} non ha un’illustrazione da toccare: potrai segnarla poi.</span>}
+              <span className="testo-12 text-text-muted">{/* a parole, senza coordinate (UX2-9 a) */}{punto ? 'Punto scelto: il pin dell’area comparirà lì. Tocca un altro punto per spostarlo.' : 'Tocca l’illustrazione dove si entra nell’area: lì comparirà il suo pin.'}</span></>
+            : <span className="testo-12 text-text-muted">{q.nome} non ha un’illustrazione da toccare: potrai segnarla poi.</span>}
         </div>}
         {palazzo && <fieldset className="m-0 flex flex-col gap-1 border-0 p-0">
-          <legend className="mb-1 text-[13px] font-semibold">Infiltrazioni da collegare</legend>
-          {palazzo.infiltrazioni.length === 0 && <span className="text-[12px] text-text-muted">{palazzo.nome} non ha ancora infiltrazioni: potrai collegarla poi.</span>}
+          <legend className="mb-1 testo-13 font-semibold">Infiltrazioni da collegare</legend>
+          {palazzo.infiltrazioni.length === 0 && <span className="testo-12 text-text-muted">{palazzo.nome} non ha ancora infiltrazioni: potrai collegarla poi.</span>}
           {palazzo.infiltrazioni.map((x) => (
-            <label key={x.chiave} className="touch flex items-center gap-2 text-[13px]">
+            <label key={x.chiave} className="touch flex items-center gap-2 testo-13">
               <input type="checkbox" className="h-5 w-5 shrink-0" checked={infiltrazioni.includes(x.chiave)} onChange={(e) => cambiaInfiltrazione(x.chiave, e.target.checked)} />
               <span>{x.ordine + 1}. {x.nome}</span>
             </label>
           ))}
-          <span className="text-[12px] text-text-muted">Le voci della guida e i pin restano dove sono: il legame dice solo quali infiltrazioni passano di qui.</span>
+          <span className="testo-12 text-text-muted">Le voci della guida e i pin restano dove sono: il legame dice solo quali infiltrazioni passano di qui.</span>
         </fieldset>}
       </div>
     </Modal>

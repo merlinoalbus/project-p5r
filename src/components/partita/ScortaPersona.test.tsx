@@ -16,6 +16,9 @@ const api = vi.hoisted(() => ({
 }));
 vi.mock('../../services/api', (vero) => moduloApi(vero, api));
 vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
+// le domande di conferma passano da `conferma()` (DialogoConferma), non più da window.confirm
+const { conferma } = vi.hoisted(() => ({ conferma: vi.fn() }));
+vi.mock('../../stores/confermaStore', async (vero) => ({ ...(await vero<typeof import('../../stores/confermaStore')>()), conferma }));
 
 const zero = { forza: 0, magia: 0, resistenza: 0, agilita: 0, fortuna: 0 };
 /** Arsène al livello 2: la stima dalla base (2/2/2/3/1) dà 3/3/2/4/1; nel gioco dell'utente si legge 4/2/2/4/1. */
@@ -102,7 +105,7 @@ describe('ScortaPersona — due gesti ravvicinati (B3", validazione voce 2)', ()
     api.getCompendioPartita.mockResolvedValue([]);
     api.getSkills.mockResolvedValue([]);
     api.getImmagini.mockResolvedValue([]);
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    conferma.mockResolvedValue(true);
   });
   afterEach(() => vi.restoreAllMocks());
 
@@ -148,7 +151,7 @@ describe('ScortaPersona — due gesti ravvicinati (B3", validazione voce 2)', ()
     let risolviAggiunta!: (p: PersonaPossedutaDto) => void;
     api.aggiungiPosseduta.mockImplementation(() => new Promise<PersonaPossedutaDto>((ok) => { risolviAggiunta = ok; }));
     monta();
-    fireEvent.click(await screen.findByRole('button', { name: '+ Aggiungi Persona' }));
+    fireEvent.click(await screen.findByRole('button', { name: /Aggiungi Persona/ }));
     const finestra = within(await screen.findByRole('dialog'));
     fireEvent.click(await finestra.findByRole('button', { name: 'Aggiungi' })); // in volo
     fireEvent.click(screen.getByRole('button', { name: 'Sali di livello: Pixie al livello 3' })); // arriva subito

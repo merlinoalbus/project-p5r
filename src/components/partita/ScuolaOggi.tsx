@@ -103,7 +103,7 @@ export function ScuolaOggi({ partita, giorno: giornoVisto }: Props) {
           <PulsanteVisivo compatto attivo={cruciOggi.fatto} icona={<IconaAzione chiave="libro" dimensione={20} />} titolo="Cruciverba" dettaglio={cruciOggi.fatto ? 'risolto' : 'risposta pronta'} onClick={() => setAperta('cruciverba')} aria-label={`Cruciverba del ${dataTesto}`} />
         )}
         {niente && !domande.caricamento && !cruciverba.caricamento && (
-          <span className="text-[12px] text-text-muted">{quando} nessuna domanda in classe né cruciverba.</span>
+          <span className="testo-12 text-text-muted">{quando} nessuna domanda in classe né cruciverba.</span>
         )}
       </div>
 
@@ -114,9 +114,9 @@ export function ScuolaOggi({ partita, giorno: giornoVisto }: Props) {
         <ul className="m-0 p-0 list-none flex flex-col gap-2">
           {dEsame.map((q) => (
             <li key={q.domanda} className="card flex flex-col gap-1 py-2">
-              <span className="text-[11px] uppercase tracking-[.06em] text-text-muted">{q.esame}{q.ordine > 0 ? ` · domanda ${q.ordine}` : ''}</span>
-              <p className="m-0 text-[14px]">{q.domanda}</p>
-              <p className="m-0 font-display uppercase text-[18px] leading-none text-primary">{q.risposta}</p>
+              <span className="testo-12 uppercase tracking-[.06em] text-text-muted">{q.esame}{q.ordine > 0 ? ` · domanda ${q.ordine}` : ''}</span>
+              <p className="m-0 testo-14">{q.domanda}</p>
+              <p className="m-0 font-display uppercase testo-18 leading-none text-primary-testo">{q.risposta}</p>
             </li>
           ))}
         </ul>
@@ -128,9 +128,9 @@ export function ScuolaOggi({ partita, giorno: giornoVisto }: Props) {
               <DataP5 data={cruciOggi.giorno} compatta />
               {cruciOggi.fatto && <span className="chip chip--attivo">Risolto</span>}
             </div>
-            <p className="m-0 text-[14px] text-text-secondary">{cruciOggi.indizio}</p>
-            <p className="m-0 font-display uppercase text-[26px] leading-none text-primary">{cruciOggi.risposta}</p>
-            {cruciOggi.rispostaEn && <p className="m-0 text-[12px] text-text-muted">In inglese: {cruciOggi.rispostaEn}</p>}
+            <p className="m-0 testo-14 text-text-secondary">{cruciOggi.indizio}</p>
+            <p className="m-0 font-display uppercase testo-28 leading-none text-primary-testo">{cruciOggi.risposta}</p>
+            {cruciOggi.rispostaEn && <p className="m-0 testo-12 text-text-muted">In inglese: {cruciOggi.rispostaEn}</p>}
           </div>
         )}
       </Modal>
@@ -144,14 +144,14 @@ function ElencoDomande({ domande, data }: { domande: DomandaDto[]; data: string 
     <ul className="m-0 p-0 list-none flex flex-col gap-2">
       {domande.map((d) => (
         <li key={d.id} className="card flex flex-col gap-1 py-2">
-          <span className="text-[11px] uppercase tracking-[.06em] text-text-muted">{d.chi}{d.data !== data ? ` · ${d.data}` : ''}</span>
-          <p className="m-0 text-[14px]">{d.domanda}</p>
+          <span className="testo-12 uppercase tracking-[.06em] text-text-muted">{d.chi}{d.data !== data ? ` · ${d.data}` : ''}</span>
+          <p className="m-0 testo-14">{d.domanda}</p>
           <ol className="m-0 pl-4 flex flex-col gap-0.5">
             {d.risposte.map((r) => (
-              <li key={`${r.ordine ?? 0}-${r.testo}`} className="font-display uppercase text-[17px] leading-tight text-primary">{r.testo}</li>
+              <li key={`${r.ordine ?? 0}-${r.testo}`} className="font-display uppercase testo-17 leading-tight text-primary-testo">{r.testo}</li>
             ))}
           </ol>
-          {d.ricompensa && <span className="text-[12px] text-text-secondary">{d.ricompensa}</span>}
+          {d.ricompensa && <span className="testo-12 text-text-secondary">{d.ricompensa}</span>}
         </li>
       ))}
     </ul>

@@ -39,7 +39,7 @@ export function SkillPage() {
       <IntestazionePagina
         titolo="Skill"
         sottotitolo="Tutte le abilità con effetto, costo ed elemento, e le Persona che le apprendono."
-        azioni={<span className="text-[13px] text-text-muted">{dati ? `${filtrate.length} di ${dati.length}` : ''}</span>}
+        azioni={<span className="testo-13 text-text-muted">{dati ? `${filtrate.length} di ${dati.length}` : ''}</span>}
       />
       <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca per nome o effetto…" />
       <FilaScorrevole role="group" aria-label="Filtro per elemento">
@@ -66,15 +66,15 @@ export function SkillPage() {
           <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light card py-0">
             {filtrate.map((s) => (
               <li key={s.id}>
-                <Link to={`/skill/${s.id}`} className="flex items-center gap-3 py-2.5 no-underline text-text hover:text-primary">
+                <Link to={`/skill/${s.id}`} className="flex items-center gap-3 py-2.5 no-underline text-text hover:text-primary-testo">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold">{s.nomeIt}</span>
-                      {s.nomeIt !== s.nome && <span className="text-[12px] text-text-muted">{s.nome}</span>}
+                      {s.nomeIt !== s.nome && <span className="testo-12 text-text-muted">{s.nome}</span>}
                       <ElementoChip elemento={s.elemento} nome={s.elementoNome} piccolo />
-                      <span className="text-[12px] text-text-muted">{s.costo.testo}</span>
+                      <span className="testo-12 text-text-muted">{s.costo.testo}</span>
                     </div>
-                    <div className="text-[13px] text-text-secondary">{s.effettoNome}</div>
+                    <div className="testo-13 text-text-secondary">{s.effettoNome}</div>
                   </div>
                 </Link>
               </li>

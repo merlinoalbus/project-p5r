@@ -25,12 +25,12 @@ export function SceltaImmagine({ file, onCambia, etichetta = 'Immagine della pla
   const errore = file ? erroreImmagine(file) : null;
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-[13px] font-semibold">{etichetta}</label>
+      <label htmlFor={id} className="testo-13 font-semibold">{etichetta}</label>
       <input id={id} type="file" accept={FORMATI_PLANIMETRIA.join(',')} className="form-input touch"
         onChange={(e) => onCambia(e.currentTarget.files?.[0] ?? null)} />
-      <span className="text-[12px] text-text-muted">PNG, JPEG o WEBP, fino a 8 MB. Resta nella tua istanza.</span>
+      <span className="testo-12 text-text-muted">PNG, JPEG o WEBP, fino a 8 MB. Resta nella tua istanza.</span>
       {anteprima && !errore && <img src={anteprima} alt="Anteprima dell’immagine scelta" className="max-h-48 w-full rounded border border-border object-contain bg-[#0f0f14]" />}
-      {errore && <p className="m-0 text-[13px] text-error" role="alert">{errore}</p>}
+      {errore && <p className="m-0 testo-13 text-error" role="alert">{errore}</p>}
     </div>
   );
 }

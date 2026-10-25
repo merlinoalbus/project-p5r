@@ -27,6 +27,7 @@ import { ProgressiPartita } from '../components/partita/ProgressiPartita';
 import { OggiPartita } from '../components/partita/OggiPartita';
 import { ScuolaOggi } from '../components/partita/ScuolaOggi';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 
 type Scheda = 'oggi' | 'riepilogo' | 'doti' | 'squadra' | 'confidenti' | 'letture' | 'progressi' | 'scorta' | 'compendio' | 'persona-partita' | 'obiettivi' | 'piani' | 'cicli' | 'storico';
 
@@ -66,7 +67,7 @@ export function PartitaPage() {
         <EmptyState
           title="Nessuna partita attiva"
           hint="Crea la tua prima partita: potrai tracciare Doti sociali, Confidenti, Persona possedute e compendio. Puoi gestire più partite e passare dall'una all'altra dalla barra in alto."
-          action={<button type="button" className="btn btn-primary" onClick={() => setNuova(true)}>Crea partita</button>}
+          action={<PulsanteVisivo tono="primario" icona={<IconaScheda chiave="nuova-partita" dimensione={22} />} titolo="Crea partita" onClick={() => setNuova(true)} />}
         />
       ) : (
         <div className={`flex flex-col gap-0 max-sm:-mt-3 md:gap-1.5 ${scheda === 'oggi' || scheda === 'doti' ? 'scheda-riempi md:min-h-0' : scheda === 'letture' ? 'scheda-riempi-lg lg:min-h-0' : ''}`}>
@@ -84,7 +85,7 @@ export function PartitaPage() {
             </FilaScorrevole>
           } />
           {/* una riga sola che scorre anche su tablet e desktop: a capo le 15 piastrelle facevano due righe e l'intestazione superava il 30% */}
-          <FilaScorrevole role="tablist" aria-label="Schede della partita" className="fila-scorrevole--sempre fila-schede-partita">
+          <FilaScorrevole role="group" aria-label="Schede della partita" className="fila-scorrevole--sempre fila-schede-partita">
             {SCHEDE.map((s) => (
               // Prima l'immagine, poi la parola: erano pastiglie di testo con un'iconcina da 16 px
               // accanto, e in dieci schede si leggevano tutte uguali. Ora l'icona e' il segno che

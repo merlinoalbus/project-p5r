@@ -34,8 +34,8 @@ import type { VideogiocoDto } from '../types';
 function Numero({ valore, etichetta, segno }: { valore: number | string; etichetta: string; segno: ChiaveSegno }) {
   return (
     <span className="card flex flex-col gap-0.5 px-3 py-2">
-      <span className="font-display text-[21px] leading-none tabular-nums">{valore}</span>
-      <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-text-muted"><IconaSegno chiave={segno} dimensione={14} />{etichetta}</span>
+      <span className="font-display testo-20 leading-none tabular-nums">{valore}</span>
+      <span className="flex items-center gap-1.5 testo-12 uppercase tracking-[0.08em] text-text-muted"><IconaSegno chiave={segno} dimensione={14} />{etichetta}</span>
     </span>
   );
 }
@@ -146,17 +146,17 @@ export function VideogiochiPage() {
           {scelto && (
             <section className="flex flex-col gap-2" aria-label={`Posizione di ${scelto.nome}`}>
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <h2 className="m-0 font-display text-[17px] uppercase leading-none">Dove si gioca a «{scelto.nome}»</h2>
-                <button type="button" className="btn btn-ghost btn-sm touch" onClick={() => setSelezionato(null)}>Chiudi</button>
+                <h2 className="m-0 font-display testo-17 uppercase leading-none">Dove si gioca a «{scelto.nome}»</h2>
+                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Chiudi" onClick={() => setSelezionato(null)} />
               </div>
               <DoveSiTrova tipo="attivita" chiave={scelto.chiave} titolo={scelto.nome} altezza={300} />
             </section>
           )}
 
           <section className="flex flex-col gap-2" aria-label="Da giocare">
-            <h2 className="m-0 font-display text-[17px] uppercase leading-none">Da giocare · {daFare.length}</h2>
+            <h2 className="m-0 font-display testo-17 uppercase leading-none">Da giocare · {daFare.length}</h2>
             {daFare.length === 0
-              ? <p className="m-0 text-[13px] text-text-muted" role="status">{giochi.length === 0 ? 'Nessun gioco nel catalogo.' : q ? 'Nessun gioco da fare con questo testo.' : 'Finiti tutti.'}</p>
+              ? <p className="m-0 testo-13 text-text-muted" role="status">{giochi.length === 0 ? 'Nessun gioco nel catalogo.' : q ? 'Nessun gioco da fare con questo testo.' : 'Finiti tutti.'}</p>
               : <ul className={griglia} aria-label="Videogiochi da giocare">
                   {daFare.map((g) => <Scheda key={`${partitaId}:${g.chiave}`} g={g} partitaId={partitaId} onSalvata={salvaGioco} onCorretto={() => void dati.ricarica()} onPosizione={() => setSelezionato(g.chiave)} />)}
                 </ul>}
@@ -164,9 +164,8 @@ export function VideogiochiPage() {
 
           {fatti.length > 0 && (
             <section className="flex flex-col gap-2" aria-label="Completati">
-              <button type="button" className="btn btn-ghost btn-sm touch self-start" aria-expanded={mostraFatti} onClick={() => setMostraFatti((v) => !v)}>
-                {mostraFatti ? 'Nascondi' : 'Mostra'} i completati · {fatti.length}
-              </button>
+              <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="completati" dimensione={20} />}
+                titolo={`${mostraFatti ? 'Nascondi' : 'Mostra'} i completati`} dettaglio={fatti.length} aria-expanded={mostraFatti} onClick={() => setMostraFatti((v) => !v)} />
               {mostraFatti && (
                 <ul className={griglia} aria-label="Videogiochi completati">
                   {fatti.map((g) => <Scheda key={`${partitaId}:${g.chiave}`} g={g} partitaId={partitaId} onSalvata={salvaGioco} onCorretto={() => void dati.ricarica()} onPosizione={() => setSelezionato(g.chiave)} />)}
