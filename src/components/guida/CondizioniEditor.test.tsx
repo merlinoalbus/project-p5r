@@ -33,11 +33,11 @@ function Prova({ iniziali = [], onCambia }: { iniziali?: RequisitoSpillo[]; onCa
   const [c, setC] = useState<RequisitoSpillo[]>(iniziali);
   return <CondizioniEditor condizioni={c} onCambia={(n) => { setC(n); onCambia?.(n); }} />;
 }
-/** Dentro `ambito` apre il menu a tendina con l'etichetta data e clicca il pulsante dell'opzione `voce`. */
+/** Dentro `ambito` apre il menu a tendina con l'etichetta data e clicca l'opzione `voce` (la voce è l'`option` stessa: dentro non c'è più un pulsante). */
 const scegli = (ambito: ReturnType<typeof within>, etichetta: string, voce: string | RegExp) => {
   // il selettore compatto («Operatore») porta il valore nel nome accessibile: il nome puro o seguito da «: valore»
   fireEvent.click(ambito.getByRole('combobox', { name: (n: string) => n === etichetta || n.startsWith(`${etichetta}: `) }));
-  fireEvent.click(ambito.getByRole('option', { name: voce }).querySelector('button')!);
+  fireEvent.click(ambito.getByRole('option', { name: voce }));
 };
 
 describe('CondizioniEditor', () => {
@@ -61,7 +61,7 @@ describe('CondizioniEditor', () => {
     fireEvent.click(riga.getByRole('combobox', { name: 'Stato' }));
     fireEvent.change(riga.getByLabelText('Cerca Stato'), { target: { value: 'confid' } });
     expect(within(riga.getByRole('listbox')).getAllByRole('option').map((o) => o.textContent)).toEqual(['Confidente']);
-    fireEvent.click(riga.getByRole('option', { name: 'Confidente' }).querySelector('button')!);
+    fireEvent.click(riga.getByRole('option', { name: 'Confidente' }));
     expect(onCambia).toHaveBeenLastCalledWith([{ tipo: 'confidente', confidente: 'sojiro', rango: 1 }]);
     const nuova = within(screen.getByRole('group', { name: 'Condizione: Rango Confidente Sojiro Sakura 1' }));
     fireEvent.click(nuova.getByRole('button', { name: 'Rango: più' }));
