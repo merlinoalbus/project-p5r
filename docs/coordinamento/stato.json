@@ -45757,7 +45757,8 @@
         "id": "R12-03",
         "lotto": "L12",
         "titolo": "Fase 3: telefono, prestazioni e accessibilità",
-        "stato": "da-fare",
+        "stato": "chiuso-codice",
+        "esitoRiscontro": "2026-10-25: miniature WebP degli asset generate alla build, rotta immagini senza BLOB per 304, Compendio e Skill differiti, cache dei dati di gioco con identificativo dell'edizione e scadenza, ricerca di Ombre e domande, manifesto web, blocco dello standby, Selettore APG, Segmenti, contrasti AA, fuoco, movimento ridotto, testo delle skill leggibile. Validazione ECC: due revisori + riverifica APPROVATO. Restano: test di CondizioniEditor ed EditorMappaPage da adeguare al nuovo Selettore (non eseguiti per la regola zero test); visore mappa da tastiera.",
         "fonte": "lotti/L12/requisiti.md",
         "criterio": "Miniature delle immagini, Compendio reattivo, cache versionata dei dati di gioco, manifesto web, blocco dello standby, Guida nella barra in basso, ricerca di Ombre e domande; Selettore accessibile, contrasti AA, fuoco visibile, nessun testo di gioco troncato senza modo di leggerlo.",
         "tipo": "UX"
