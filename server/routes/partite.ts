@@ -6,6 +6,7 @@ import { Router } from 'express';
 import { applicaDeltaPuntiPesca } from '../services/pescaService.js';
 import { z } from 'zod';
 import { prepared } from '../db/dbService.js';
+import { verificaPartita } from '../services/verificaPartita.js';
 import { httpErrors } from '../utils/httpError.js';
 import { validate } from '../middleware/validate.js';
 import {
@@ -407,6 +408,7 @@ router.post('/:id/velluto/isolamento', validate({ params: paramsPartita, body: b
   res.json(eseguiIsolamento(Number(req.params.id), req.body as Parameters<typeof eseguiIsolamento>[1]));
 });
 router.get('/:id/velluto/isolamento/:possedutaId', validate({ params: paramsPartitaPosseduta }), (req, res) => {
+  verificaPartita(Number(req.params.id)); // seconda difesa: la partita deve essere del proprietario della richiesta
   const r = prepared('SELECT persona_id, livello FROM persona_posseduta WHERE id = ? AND partita_id = ?').get(Number(req.params.possedutaId), Number(req.params.id)) as { persona_id: number; livello: number } | undefined;
   if (!r) throw httpErrors.notFound('posseduta-non-trovata', 'La Persona posseduta non è nella scorta di questa partita.');
   const s = skillResistenzaIsolamento(r.persona_id, r.livello);

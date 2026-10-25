@@ -61,6 +61,21 @@ export function resolvePartitePath(): string {
   return path.join(config.partiteDir, config.partiteFileName);
 }
 
+/**
+ * Vero se il file dell'avanzamento (`partite.db`) e la sua cartella (per il WAL e il journal) sono scrivibili da questo processo.
+ * Serve a capire a quale dei due file si riferisce un `SQLITE_READONLY` (vedi `errorHandler`): non scrive niente, guarda soltanto i permessi.
+ * Un volume pieno non si vede da qui (resterebbe `SQLITE_FULL`, un altro codice); un volume rimontato in sola lettura sì.
+ */
+export function avanzamentoScrivibile(): boolean {
+  try {
+    fs.accessSync(resolvePartitePath(), fs.constants.W_OK);
+    fs.accessSync(config.partiteDir, fs.constants.W_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** Il file delle partite che accompagna un dato file di gioco (`:memory:` resta in memoria). */
 function percorsoPartiteDi(dbPath: string): string {
   if (dbPath === ':memory:') return ':memory:';

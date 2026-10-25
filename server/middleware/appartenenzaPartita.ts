@@ -41,8 +41,12 @@ export function idPartiteCitate(req: Pick<Request, 'path' | 'query' | 'body'>): 
   };
 
   // percorso: /partite/<id>/… oppure /condizioni/partite/<id>/… (il router è montato su /api: `req.path` parte da lì)
+  // I nomi dei segmenti si confrontano senza distinzione di maiuscole: il routing di Express è insensibile di default, quindi
+  // `/api/PARTITE/7/…` raggiunge le stesse rotte di `/api/partite/7/…` e non deve sfuggire al controllo.
   const segmenti = req.path.split('/').filter((s) => s.length > 0);
-  const posizione = segmenti[0] === 'partite' ? 1 : segmenti[0] === 'condizioni' && segmenti[1] === 'partite' ? 2 : -1;
+  const nome0 = segmenti[0]?.toLowerCase();
+  const nome1 = segmenti[1]?.toLowerCase();
+  const posizione = nome0 === 'partite' ? 1 : nome0 === 'condizioni' && nome1 === 'partite' ? 2 : -1;
   if (posizione > 0 && segmenti[posizione] !== undefined) {
     let grezzo = segmenti[posizione]!;
     try { grezzo = decodeURIComponent(grezzo); } catch { /* percorso non decodificabile: lo rifiuta la validazione della rotta */ }

@@ -10,7 +10,7 @@
 // ============================================================
 
 import { prepared } from '../db/dbService.js';
-import { partitaNonTrovata } from './verificaPartita.js';
+import { partitaNonTrovata, verificaPartita } from './verificaPartita.js';
 import { slug } from '../../shared/slug.js';
 import { confidenti } from './partiteService.js';
 import { statoAzione } from './azioniStrutturateService.js';
@@ -159,6 +159,7 @@ function personaggiDiConfidente(chiaveConfidente: string): string[] {
 
 /** Chiavi da evidenziare per le azioni ancora da fare del giorno corrente della partita. */
 export function suggerimentiOggi(partitaId: number): SuggerimentiOggiDto {
+  verificaPartita(partitaId); // seconda difesa: solo le partite del proprietario della richiesta
   const partita = prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null } | undefined;
   if (!partita) throw partitaNonTrovata(partitaId);
   const vuoto: SuggerimentiOggiDto = {

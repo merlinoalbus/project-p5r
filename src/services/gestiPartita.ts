@@ -286,6 +286,9 @@ export function gestoPendenteNelloScope(partitaId: number | null, scope: ScopeGe
     ...(scope.proposte ?? []).map(r => `proposta:${r.id}:${r.uid}`)].filter((s): s is string => !!s);
   return store.getState().gesti.find(g => g.partitaId === partitaId && pendente(g) && ambiti(g.payload, g.bersaglio).some(k => a.includes(k))) ?? null;
 }
+/** Nel rilascio le rotte `/partite/:id/acquisti/legacy/*` non esistono (costante di build: il percorso esce dal bundle). */
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+const PERCORSO_RIMOZIONE_LEGACY: string | null = IN_RILASCIO ? null : '/acquisti/legacy/rimozione';
 const cambia = (g: GestoPartita) => scrivi(store.getState().gesti.map(x => x.id === g.id ? g : x));
 /** Come si chiama il gesto nelle notifiche: solo parole (che cosa si stava facendo), mai identificativi tecnici (numero di partita, operazione). */
 const scopeTesto = (g: GestoPartita) => g.bersaglio.etichetta;
@@ -317,7 +320,8 @@ async function invia(g: GestoPartita, recupero = false): Promise<Ricevuta> {
       : await apiPut(`${prefisso}/percorso`, p.dati, opzioni);
     else {
       const percorso = p.tipo === 'acquisto' ? '/acquisti/registrazioni' : p.tipo === 'annullo-fonte' ? '/acquisti/provenienze/annullo'
-        : p.tipo === 'rimozione-legacy' ? '/acquisti/legacy/rimozione' : '/da-applicare/decisioni';
+        : p.tipo === 'rimozione-legacy' ? PERCORSO_RIMOZIONE_LEGACY : '/da-applicare/decisioni';
+      if (percorso === null) throw new Error('Questa operazione non è disponibile in questa istanza.');
       x = await apiPost(prefisso + percorso, p.dati, opzioni);
     }
     risposta = validaRicevuta(x, g);

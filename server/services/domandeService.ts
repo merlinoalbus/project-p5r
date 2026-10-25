@@ -53,6 +53,7 @@ export function domande(partitaId?: number): DomandeDto {
   let fatte = new Set<number>();
   let dataGioco: string | null = null;
   if (partitaId !== undefined) {
+    verificaPartita(partitaId); // solo le partite del proprietario della richiesta
     const p = prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null } | undefined;
     if (!p) throw partitaNonTrovata(partitaId);
     dataGioco = p.data_gioco;

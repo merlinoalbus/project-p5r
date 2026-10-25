@@ -83,6 +83,7 @@ function fascia(partita: MeteoPartita | null, guida: MeteoPartita | null, allert
 
 /** Il meteo del giorno nella partita, fascia per fascia. */
 export function meteoDelGiorno(partitaId: number, data: string): MeteoGiornoDto {
+  verificaPartita(partitaId); // seconda difesa: solo le partite del proprietario della richiesta
   const testoGuida = testoMeteoGuida(data);
   const guida = fasceDellaGuida(testoGuida);
   const partita = scelto(partitaId, data);

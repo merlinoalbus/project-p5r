@@ -9,7 +9,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
-import { partitaNonTrovata } from './verificaPartita.js';
+import { partitaNonTrovata, verificaPartita } from './verificaPartita.js';
 import { t } from './traduzioniService.js';
 import { skillDto } from './compendioService.js';
 import { registraEvento } from './storicoService.js';
@@ -39,6 +39,7 @@ function skillDi(possedutaId: number): number[] {
 
 /** Se l'allarme della fusione è attivo e il livello del protagonista; 404 se la partita non esiste. */
 function partitaInfo(partitaId: number): { allarme: boolean; livelloProtagonista: number } {
+  verificaPartita(partitaId); // seconda difesa: solo le partite del proprietario della richiesta (prima di ogni lettura o scrittura della scorta)
   const r = prepared('SELECT allarme_attivo, livello_protagonista FROM partita WHERE id = ?').get(partitaId) as { allarme_attivo: number; livello_protagonista: number } | undefined;
   if (!r) throw partitaNonTrovata(partitaId);
   return { allarme: r.allarme_attivo === 1, livelloProtagonista: r.livello_protagonista };

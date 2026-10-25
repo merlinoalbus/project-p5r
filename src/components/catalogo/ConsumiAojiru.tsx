@@ -28,6 +28,9 @@ import type { ValutazionePresenza } from '../../../shared/valutazioneAcquisto';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 
+/** Nel rilascio le rotte `/partite/:id/acquisti/legacy/*` (il vecchio segno «Acquistato») non esistono: l'azione che le chiama non si offre. */
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+const rifiutaLegacyInRilascio = (): never => { throw new Error('Questa operazione non è disponibile in questa istanza.'); };
 const nuovoId = () => crypto.randomUUID().replaceAll('-', '');
 const messaggio = (e: unknown) => e instanceof Error ? e.message : 'Operazione non riuscita.';
 const fortunaInParole = (f: boolean | null) => f === null ? 'Fortuna non nota' : f ? 'con Fortuna' : 'senza Fortuna';
@@ -213,7 +216,7 @@ export function ConsumiAojiru({ partitaId, stato, onCambiato, registrabile = tru
     blocco.current = true; setOccupato(true); setErrore(null); setRicevuta(null);
     try {
       const operazioneId = nuovoId();
-      const anteprima = provenienza ? await anteprimaAnnullaProvenienzaAcquisto(partitaId, { operazioneId, provenienzaId: provenienza }) : await anteprimaRimuoviPresenzaStoricaAcquisto(partitaId, { operazioneId, articolo: stato?.articolo ?? ARTICOLO_AOJIRU });
+      const anteprima = provenienza ? await anteprimaAnnullaProvenienzaAcquisto(partitaId, { operazioneId, provenienzaId: provenienza }) : IN_RILASCIO ? rifiutaLegacyInRilascio() : await anteprimaRimuoviPresenzaStoricaAcquisto(partitaId, { operazioneId, articolo: stato?.articolo ?? ARTICOLO_AOJIRU });
       if (vivo.current) setRimozione({ anteprima, provenienza });
     } catch (e) { if (vivo.current) setErrore(messaggio(e)); }
     finally { blocco.current = false; if (vivo.current) setOccupato(false); }
@@ -227,6 +230,7 @@ export function ConsumiAojiru({ partitaId, stato, onCambiato, registrabile = tru
       const nomeArticolo = a.acquisto?.identita.nome ?? 'Aojiru';
       const bersaglio = { etichetta: provenienza ? `Voce che conferma il consumo di ${nomeArticolo}` : `Vecchio segno «Acquistato» di ${nomeArticolo}`, articolo: a.articolo };
       if (provenienza) await annullaFonteConRegistro(partitaId, { operazioneId: a.operazioneId, provenienzaId: provenienza, revisioneAcquistiAttesa: a.revisioneAcquistiAttesa }, bersaglio);
+      else if (IN_RILASCIO) rifiutaLegacyInRilascio();
       else await rimuoviLegacyConRegistro(partitaId, { operazioneId: a.operazioneId, articolo: a.articolo, revisioneAcquistiAttesa: a.revisioneAcquistiAttesa }, bersaglio);
       if (vivo.current) { setRicevuta('Tolto. Lo ritrovi nel Cestino.'); setRimozione(null); setIncerto(false); }
       await aggiorna();
@@ -237,7 +241,7 @@ export function ConsumiAojiru({ partitaId, stato, onCambiato, registrabile = tru
     <span>{stato?.aojiru ? `${stato.aojiru.confermate} ${stato.aojiru.confermate === 1 ? 'consumo confermato' : 'consumi confermati'}` : `${stato?.registrazioni.length ?? 0} ${(stato?.registrazioni.length ?? 0) === 1 ? 'consumo registrato' : 'consumi registrati'}`}</span>
     {stato?.presenzaStorica && <div className="flex flex-col gap-1"><span>C’è un vecchio segno «Acquistato» senza giorno né succo{stato.presenzaStorica.rappresentataDa ? ', già collegato a un consumo' : ''}.</span>
       {stato.presenzaStorica.valutazione && <ProvaPresenza valutazione={stato.presenzaStorica.valutazione} />}
-      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli solo il vecchio segno" className="self-start" disabled={occupato} onClick={() => void preparaRimozione(null)} /></div>}
+      {!IN_RILASCIO && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli solo il vecchio segno" className="self-start" disabled={occupato} onClick={() => void preparaRimozione(null)} />}</div>}
     {stato?.aojiru?.varianteAttesa && <span>Prossimo previsto: {nomeDote(stato.aojiru.varianteAttesa)}; conferma quello che hai bevuto davvero.</span>}
     {!!stato?.aojiru?.incongruenze.length && <ul className="m-0 pl-4 text-warning">{stato.aojiru.incongruenze.map((m) => <li key={m}>{m}</li>)}</ul>}
     {registrabile && <PulsanteVisivo compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Registra un consumo" className="self-start" disabled={occupato} onClick={() => { setRicevuta(null); setErrore(null); setNuovo(true); }} />}

@@ -4,7 +4,7 @@
 
 import { prepared } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
-import { partitaNonTrovata } from '../verificaPartita.js';
+import { partitaNonTrovata, verificaPartita } from '../verificaPartita.js';
 import { t } from '../traduzioniService.js';
 import { assicuraNonDelGruppo } from '../personeDelGruppo.js';
 import type { EreditaFusioneDto, EsitoFusioneDto, NodoPianoDto, PersonaFusioneDto, PianiFusioneDto, RicercaSkillDto, RicettaFusioneDto, RicetteFusioneDto, SkillEreditaDto } from '../../../shared/types.js';
@@ -31,6 +31,7 @@ export interface OpzioniContesto {
 export function contestoDa(opz: OpzioniContesto): { ctx: Contesto; dlcPosseduti: number[] } {
   let dlc = opz.dlc ?? [];
   if (opz.partitaId !== undefined) {
+    verificaPartita(opz.partitaId); // solo le partite del proprietario della richiesta: «non è tua» e «non esiste» sono la stessa risposta
     const r = prepared('SELECT dlc_posseduti_json FROM partita WHERE id = ?').get(opz.partitaId) as { dlc_posseduti_json: string } | undefined;
     if (!r) throw partitaNonTrovata(opz.partitaId);
     dlc = JSON.parse(r.dlc_posseduti_json) as number[];
@@ -65,6 +66,7 @@ function ranghiPerArcana(partitaId: number | undefined): Map<string, { chiave: s
 
 /** Stato della Stanza di Velluto per la partita. */
 export function vellutoDto(partitaId: number): VellutoDto {
+  verificaPartita(partitaId); // solo le partite del proprietario della richiesta
   const partita = prepared('SELECT id, allarme_attivo FROM partita WHERE id = ?').get(partitaId) as { id: number; allarme_attivo: number } | undefined;
   if (!partita) throw partitaNonTrovata(partitaId);
   const c = scontoPartita(partitaId);

@@ -4,6 +4,9 @@ import { EditorRegolaPesca } from './EditorRegolaPesca';
 import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 
+/** Nel rilascio la regola comune della pesca si consulta soltanto: niente correzione (costante di build, come negli altri moduli). */
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+
 export function FontePescaAttivita({ fonte, onCambiata }: { fonte: { regola: RegolaPescaDto; ruolo: 'visita' | 'obiettivi' }; onCambiata?: () => void | Promise<void> }) {
   const [editor, setEditor] = useState(false);
   const r = fonte.regola, d = r.dati;
@@ -24,8 +27,8 @@ export function FontePescaAttivita({ fonte, onCambiata }: { fonte: { regola: Reg
     {r.motivi.map((m, i) => <p role="alert" key={i} className="m-0 text-warning">{m}</p>)}
     <div className="flex flex-wrap gap-2">
       <CollegamentoVisivo icona={<IconaAzione chiave="scheda" dimensione={22} />} titolo="Visite, osservazioni e profili" to="/partita?scheda=progressi#pesca" />
-      {onCambiata && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo="Correggi la regola comune" disabled={r.stato !== 'collegata'} onClick={() => setEditor(true)} />}
+      {!IN_RILASCIO && onCambiata && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo="Correggi la regola comune" disabled={r.stato !== 'collegata'} onClick={() => setEditor(true)} />}
     </div>
-    {editor && onCambiata && <EditorRegolaPesca key={r.chiave} regola={r} onChiudi={() => setEditor(false)} onSalvata={onCambiata} />}
+    {!IN_RILASCIO && editor && onCambiata && <EditorRegolaPesca key={r.chiave} regola={r} onChiudi={() => setEditor(false)} onSalvata={onCambiata} />}
   </section>;
 }

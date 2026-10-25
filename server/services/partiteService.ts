@@ -105,9 +105,20 @@ export function creaPartita(dati: DatiPartita & { nome: string; attiva?: boolean
     const attiva = dati.attiva || nessuna;
     // l'attiva è una per proprietario (indice unico `idx_partita_attiva_proprietario`): si toglie il segno solo alle SUE
     if (attiva) prepared('UPDATE partita SET attiva = 0 WHERE attiva = 1 AND proprietario = ?').run(proprietario);
-    const info = prepared(`INSERT INTO partita (nome, note, attiva, livello_protagonista, data_gioco, fascia_gioco, difficolta, nuova_partita_plus, dlc_posseduti_json, allarme_attivo, created_at, updated_at, proprietario, proprietario_email)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
-      dati.nome, dati.note ?? '', attiva ? 1 : 0, dati.livelloProtagonista ?? 1, dati.dataGioco ?? primoGiornoDelGioco(), dati.fasciaGioco ?? 'giorno', dati.difficolta ?? 'normale',
+    // L'id è ESPLICITO e mai quello di una partita eliminata che si può ancora ripristinare. `partita.id` è un INTEGER PRIMARY KEY senza
+    // AUTOINCREMENT: SQLite assegnerebbe max(id)+1, quindi dopo l'eliminazione della partita con l'id più alto il prossimo INSERT (anche
+    // di un altro utente, nell'istanza di rilascio) riceverebbe lo stesso id, e il ripristino dal cestino andrebbe in conflitto
+    // («identità già presente») per sempre. Il cestino delle partite (`utente.cestino_partite.partita_id`, e il vecchio `main.cestino`
+    // di tipo `partita`, la cui chiave è l'id) ricorda l'id della partita eliminata anche se la riga non c'è più: si sceglie un id
+    // maggiore sia del massimo in `partita` sia del massimo citato nel cestino. Vale in entrambe le modalità; la struttura delle
+    // tabelle non cambia (niente AUTOINCREMENT, che costringerebbe a ricostruire `partita`).
+    const maxPartita = (prepared('SELECT COALESCE(MAX(id), 0) AS m FROM partita').get() as { m: number }).m;
+    const maxCestino = (prepared("SELECT COALESCE(MAX(partita_id), 0) AS m FROM utente.cestino_partite WHERE partita_id IS NOT NULL").get() as { m: number }).m;
+    const maxCestinoGioco = (prepared("SELECT COALESCE(MAX(CAST(chiave AS INTEGER)), 0) AS m FROM main.cestino WHERE tipo = 'partita'").get() as { m: number }).m;
+    const idNuovo = Math.max(maxPartita, maxCestino, maxCestinoGioco) + 1;
+    const info = prepared(`INSERT INTO partita (id, nome, note, attiva, livello_protagonista, data_gioco, fascia_gioco, difficolta, nuova_partita_plus, dlc_posseduti_json, allarme_attivo, created_at, updated_at, proprietario, proprietario_email)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+      idNuovo, dati.nome, dati.note ?? '', attiva ? 1 : 0, dati.livelloProtagonista ?? 1, dati.dataGioco ?? primoGiornoDelGioco(), dati.fasciaGioco ?? 'giorno', dati.difficolta ?? 'normale',
       dati.nuovaPartitaPlus ? 1 : 0, JSON.stringify(dati.dlcPosseduti ?? []), dati.allarmeAttivo ? 1 : 0, adesso, adesso, proprietario, getProprietarioEmail(),
     );
     const id = Number(info.lastInsertRowid);

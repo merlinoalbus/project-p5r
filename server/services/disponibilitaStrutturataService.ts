@@ -11,6 +11,7 @@
 import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { meteoOra } from './meteoService.js';
+import { verificaPartita } from './verificaPartita.js';
 import { strutturaDaColonne, valutaDisponibilita } from '../../shared/disponibilitaStrutturata.js';
 import type { ContestoDisponibilita, DisponibilitaConfidenteDto, DisponibilitaStrutturata, EsitoDisponibilita, LuogoConfidente } from '../../shared/disponibilitaStrutturata.js';
 import { registraCacheDiGioco } from './cacheDiGioco.js';
@@ -34,6 +35,7 @@ export function luoghiDelConfidente(confidente: string): LuogoConfidente[] {
 
 /** Il momento della partita per il valutatore: data, fascia, meteo, rango; il giorno dell'ultimo rango non è registrato nella partita (null). */
 function contestoDellaPartita(partitaId: number, confidente: string): ContestoDisponibilita {
+  verificaPartita(partitaId); // solo le partite del proprietario della richiesta
   const p = prepared('SELECT data_gioco, fascia_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null; fascia_gioco: string } | undefined;
   if (!p) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
   const fascia = p.fascia_gioco === 'sera' ? 'sera' : 'giorno';

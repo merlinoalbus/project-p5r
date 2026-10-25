@@ -3,7 +3,7 @@
 // ============================================================
 
 import { prepared } from '../db/dbService.js';
-import { partitaNonTrovata } from './verificaPartita.js';
+import { partitaNonTrovata, verificaPartita } from './verificaPartita.js';
 import { indiceGiornoScolastico } from './domandeService.js';
 import { risolutoreFonti } from './calendarioFonti.js';
 import { allerteDiOgniGiorno, testoMeteo } from './meteoService.js';
@@ -58,6 +58,7 @@ function settimaneGuida():SettimanaGuidaDto[] {
 export function calendario(partitaId?: number, mese?: string): CalendarioDto {
   let dataGioco: string | null = null;
   if (partitaId !== undefined) {
+    verificaPartita(partitaId); // solo le partite del proprietario della richiesta
     const p = prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null } | undefined;
     if (!p) throw partitaNonTrovata(partitaId);
     dataGioco = p.data_gioco;

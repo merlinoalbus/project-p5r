@@ -260,7 +260,7 @@ export function QuartierePage() {
               {visibili.length === 0 && <p className="m-0 testo-13 text-text-muted" role="status">Nessun luogo di questo tipo in {q.nome}.</p>}
               {/* L5 (F4, F5): i luoghi del quartiere senza un'Area, con l'area proposta se la migrazione ne ha dedotta una: la loro pagina e
                   «Colloca» */}
-              {(q.luoghiDaCollocare?.length ?? 0) > 0 && (
+              {!IN_RILASCIO && (q.luoghiDaCollocare?.length ?? 0) > 0 && (
                 <details className="card testo-13">
                   <summary className="touch cursor-pointer font-semibold text-text-secondary">Luoghi da collocare ({q.luoghiDaCollocare!.length})</summary>
                   <ul className="m-0 flex list-none flex-col gap-1 p-0 pt-1.5" aria-label="Luoghi da collocare">

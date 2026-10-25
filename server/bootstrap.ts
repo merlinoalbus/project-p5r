@@ -82,6 +82,12 @@ export function createApp(opzioni: OpzioniApp = {}): Express {
   const identita = identitaDellApp(modalita, opzioni.identita);
   const app = express();
   app.disable('x-powered-by');
+  // L12: nel rilascio il percorso è esatto: `/api/PARTITE/7/…` o `/api/partite/` non sono le rotte di `/api/partite/7/…`. Il controllo di
+  // appartenenza confronta già senza maiuscole; questa è la seconda difesa. La preparazione resta con il comportamento di sempre.
+  if (modalita === 'rilascio') {
+    app.set('case sensitive routing', true);
+    app.set('strict routing', true);
+  }
 
   // ---- Middleware globali ----
   app.use(requestContextMiddleware);

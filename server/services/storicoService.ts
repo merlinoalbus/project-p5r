@@ -166,6 +166,7 @@ export function storico(partitaId: number, filtro: FiltroStorico = {}): StoricoD
 
 /** Elimina più voci dello storico in una transazione; restituisce quante ne ha trovate ed eliminate. */
 export function eliminaEventi(partitaId: number, ids: number[]): number {
+  verificaPartita(partitaId); // seconda difesa: solo le partite del proprietario della richiesta
   const unici = [...new Set(ids)];
   let eliminati = 0;
   const db = getDb();
@@ -177,6 +178,7 @@ export function eliminaEventi(partitaId: number, ids: number[]): number {
 
 /** Elimina una voce dello storico della partita (correzione di un errore dell'utente); 404 se non c'era. */
 export function eliminaEvento(partitaId: number, eventoId: number): void {
+  verificaPartita(partitaId); // seconda difesa: solo le partite del proprietario della richiesta
   const info = prepared('DELETE FROM evento_partita WHERE id = ? AND partita_id = ?').run(eventoId, partitaId);
   if (info.changes === 0) throw httpErrors.notFound('evento-non-trovato', `L'evento ${eventoId} non esiste in questa partita.`);
 }

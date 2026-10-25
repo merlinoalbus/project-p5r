@@ -180,7 +180,9 @@ export function routerDelGiocatore(area: ReadonlyArray<readonly [string, Router]
   const router: Array<readonly [string, Router]> = [];
   for (const [prefisso, originale] of area) {
     const opzioni = originale as unknown as { mergeParams?: boolean; strict?: boolean; caseSensitive?: boolean };
-    const nuovo = Router({ mergeParams: opzioni.mergeParams, strict: opzioni.strict, caseSensitive: opzioni.caseSensitive });
+    // Nel rilascio il percorso distingue le maiuscole (`/api/PARTITE/…` non è una rotta): `caseSensitive` è SEMPRE vero, qualunque cosa
+    // dica il router originale (che nella preparazione resta tollerante). È una difesa in più oltre al controllo centrale di appartenenza.
+    const nuovo = Router({ mergeParams: opzioni.mergeParams, strict: opzioni.strict, caseSensitive: true });
     const pilaNuovo = (nuovo as unknown as { stack: unknown[] }).stack;
     for (const layer of (originale as Router & { stack: LayerRotta[] }).stack) {
       if (!layer.route) { pilaNuovo.push(layer); continue; }

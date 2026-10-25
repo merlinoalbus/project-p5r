@@ -63,6 +63,7 @@ const PERCORSI_VIETATI: readonly Vietata[] = [
   { testo: '/ripristina-costo', cosa: 'ripristino dei costi dei regali' },
   { testo: '/traduzioni/', cosa: 'scrittura delle traduzioni' },
   { testo: '/pesca/regola', cosa: 'scrittura delle regole di pesca' },
+  { testo: '/legacy/rimozione', cosa: 'rimozione del vecchio segno «Acquistato» (rotte /partite/:id/acquisti/legacy, escluse dal rilascio)' },
   { testo: '/api/docs', cosa: 'documentazione delle API' },
   { testo: '/api/openapi.json', cosa: 'documento OpenAPI' },
 ];
@@ -86,6 +87,10 @@ const ETICHETTE_VIETATE: readonly Vietata[] = [
   { testo: 'Carica file', cosa: 'caricamento di immagini' },
   { testo: 'Rimuovi immagine', cosa: 'rimozione di immagini' },
   { testo: 'Modifica nota', cosa: 'editor delle note storiche' },
+  { testo: 'Nuovo oggetto', cosa: 'creazione di oggetti del catalogo' },
+  { testo: 'Correggi la regola comune', cosa: 'correzione della regola comune della pesca' },
+  { testo: 'Togli solo il vecchio segno', cosa: 'rimozione del vecchio segno «Acquistato» (rotte legacy)' },
+  { testo: 'Luoghi da collocare', cosa: 'sezione dei luoghi da collocare con «Colloca»' },
 ];
 
 const VIETATE: readonly Vietata[] = [...PERCORSI_VIETATI, ...ETICHETTE_VIETATE];

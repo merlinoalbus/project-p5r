@@ -15,7 +15,7 @@ import type { Request, Response, NextFunction } from 'express';
 import { HttpError } from '../utils/httpError.js';
 import { getRequestLogger, getRequestId } from './requestContext.js';
 import { segnaRispostaFormata } from './responseShape.js';
-import { eGiocoInSolaLettura } from '../db/dbService.js';
+import { avanzamentoScrivibile, eGiocoInSolaLettura } from '../db/dbService.js';
 
 interface RispostaErrore {
   status: number;
@@ -96,13 +96,27 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
     return;
   }
 
-  // L12, istanza di rilascio: una scrittura su `gioco.db` respinta da SQLite (SQLITE_READONLY) è il terzo livello di difesa che fa il
-  // suo lavoro, ma anche il segno di una rotta che non doveva arrivare fin lì: 403 per chi chiama, errore nel log per chi gestisce.
-  // Solo se questo processo ha aperto `gioco.db` in sola lettura: altrove lo stesso errore (disco pieno o in sola lettura) è un 500.
+  // L12, istanza di rilascio: `gioco.db` è aperto in sola lettura, quindi una scrittura sui contenuti respinta da SQLite
+  // (SQLITE_READONLY) è il terzo livello di difesa che fa il suo lavoro, ma anche il segno di una rotta che non doveva arrivare fin lì:
+  // 403 per chi chiama, errore nel log per chi gestisce.
+  // MA lo stesso codice lo dà anche `partite.db` quando il suo volume non è scrivibile (rimontato in sola lettura, permessi): in quel
+  // caso il messaggio «contenuti in sola lettura» sarebbe falso e nasconderebbe che l'avanzamento non si salva. SQLite non dice di
+  // quale file parla, quindi si attribuisce per esclusione sui fatti: `gioco.db` è in sola lettura PER COSTRUZIONE; se il file
+  // dell'avanzamento (e la sua cartella) sono scrivibili, la causa è per forza `main` → 403. Se non lo sono, o se non si può stabilire,
+  // è l'avanzamento → 500 con un messaggio chiaro. Fuori dal rilascio resta il 500 generico di sempre.
   if (eGiocoInSolaLettura() && eErroreSolaLettura(err)) {
-    log.error({ err, path: req.path, method: req.method }, 'scrittura respinta: i contenuti di gioco sono in sola lettura');
-    inviaErrore(res, 403, {
-      error: { code: 'contenuti-in-sola-lettura', message: 'I contenuti di gioco sono in sola lettura: questa operazione non è consentita.' },
+    const codiceSqlite = (err as Error & { code?: string }).code;
+    if (avanzamentoScrivibile()) {
+      log.error({ err, codiceSqlite, path: req.path, method: req.method }, 'scrittura respinta: i contenuti di gioco sono in sola lettura');
+      inviaErrore(res, 403, {
+        error: { code: 'contenuti-in-sola-lettura', message: 'I contenuti di gioco sono in sola lettura: questa operazione non è consentita.' },
+        ...(requestId ? { requestId } : {}),
+      });
+      return;
+    }
+    log.error({ err, codiceSqlite, path: req.path, method: req.method }, 'scrittura respinta: il file dell\'avanzamento non è scrivibile');
+    inviaErrore(res, 500, {
+      error: { code: 'avanzamento-non-salvabile', message: 'L\'avanzamento non si può salvare: il salvataggio delle partite non è al momento disponibile.' },
       ...(requestId ? { requestId } : {}),
     });
     return;

@@ -8,6 +8,9 @@ import { PageState } from '../shared/PageState';
 import { CampoRicerca } from '../shared/CampoRicerca';
 import { Selettore } from '../shared/Selettore';
 import { ModuloOggetto } from './ModuloOggetto';
+
+/** Nel rilascio il catalogo si consulta soltanto: niente creazione di oggetti (costante di build, come negli altri moduli). */
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 
@@ -59,7 +62,7 @@ export function CatalogoOggetti({ gruppoIniziale = '' }: { gruppoIniziale?: Grup
         <div className="min-w-0 flex-1 basis-64"><CampoRicerca valore={q} onCambia={(v) => cambia('q', v)} segnaposto="Cerca un nome, un altro nome o un effetto…" /></div>
         <Selettore etichetta="Ordina per" valore={ordine} opzioni={ORDINI} ricerca="mai" onCambia={(v) => cambia('ordine', v === 'nome' ? '' : v)} />
         <Selettore etichetta="Categoria" valore={categoria} vuoto="Tutte" opzioni={categorie} onCambia={(v) => cambia('categoria', v)} />
-        <PulsanteVisivo icona={<IconaAzione chiave="piu" dimensione={22} />} titolo="Nuovo oggetto" onClick={() => setNuovo(true)} />
+        {!IN_RILASCIO && <PulsanteVisivo icona={<IconaAzione chiave="piu" dimensione={22} />} titolo="Nuovo oggetto" onClick={() => setNuovo(true)} />}
       </div>
       <div className="flex flex-wrap gap-1.5" role="group" aria-label="Gruppi di oggetti">
         <button type="button" className={`chip touch${!gruppo ? ' chip--attivo' : ''}`} aria-pressed={!gruppo} onClick={() => cambia('gruppo', '')}>Tutti</button>

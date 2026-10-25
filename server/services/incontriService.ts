@@ -30,6 +30,7 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { aggiornaConfidente, nomeDote, puntiDaNote } from './partiteService.js';
 import { nuovaGenerazione } from './puntiCronologici.js';
 import { fortunaSu } from './fortunaService.js';
+import { verificaPartita } from './verificaPartita.js';
 import { leggiVociEffetto } from '../../shared/effettiCatalogo.js';
 import type { ConfidentePartitaDto, IncontroConfidenteDto, ModificaConfidente } from '../../shared/types.js';
 
@@ -142,6 +143,7 @@ export function annullaIncontro(partitaId: number, inc: IncontroConfidenteDto): 
  * (`doteIncontro`).
  */
 export function aggiornaConfidenteDallaPagina(partitaId: number, chiave: string, dati: ModificaConfidente): ConfidentePartitaDto {
+  verificaPartita(partitaId); // seconda difesa: solo le partite del proprietario della richiesta
   return getDb().transaction(() => {
     const prima = rangoAttuale(partitaId, chiave);
     const puntiPrima = (prepared('SELECT punti FROM confidente_partita WHERE partita_id = ? AND confidente_chiave = ?').get(partitaId, chiave) as { punti: number } | undefined)?.punti ?? 0;

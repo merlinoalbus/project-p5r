@@ -271,7 +271,7 @@ function DettaglioMappa({ chiave, partitaId }: { chiave: string; partitaId: numb
           onAcquistiCambiati={ricarica}
           onChiudi={() => navigate(ritornoMappe() ?? '/guida/mappe')}
           ritorno={<TornaAllaPartita partitaId={partitaId} />}
-          azioni={<>{mappa.radiceDi && <CollegamentoVisivo icona={<IconaAzione chiave="scheda" dimensione={22} />} titolo={titoloSchedaAccessoMondo(mappa.radiceDi.tipo, mappa.radiceDi.chiave, mappa.nome)} to={schedaAccessoMondo(mappa.radiceDi.tipo, mappa.radiceDi.chiave)} />}<CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={titoloModificaMappa(mappa)} /></>}
+          azioni={<>{mappa.radiceDi && <CollegamentoVisivo icona={<IconaAzione chiave="scheda" dimensione={22} />} titolo={titoloSchedaAccessoMondo(mappa.radiceDi.tipo, mappa.radiceDi.chiave, mappa.nome)} to={schedaAccessoMondo(mappa.radiceDi.tipo, mappa.radiceDi.chiave)} />}{!IN_RILASCIO && <CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={titoloModificaMappa(mappa)} />}</>}
         /></>}
         {!haPlanimetria(mappa) && <ContenutiGuidaMappa mappa={mappa.chiave} area={params.get('area')} dungeon={mappa.radiceDi?.tipo === 'dungeon' ? mappa.radiceDi.chiave : undefined} />}
       </div>}
