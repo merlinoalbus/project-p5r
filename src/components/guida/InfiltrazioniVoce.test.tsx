@@ -29,8 +29,8 @@ it('insieme vuoto con proposta: la dice con il motivo e la certezza; «Conferma�
   api.impostaInfiltrazioniVoce.mockResolvedValue(aggiornata);
   const onCambiata = vi.fn();
   render(<InfiltrazioniVoce a={voce({ propostaInfiltrazioni: proposta })} partitaId={7} onCambiata={onCambiata} />);
-  // 2026-10-25: niente «Infiltrazioni: nessuna»; con l'insieme vuoto la riga è il pulsante che dice che cosa manca
-  expect(screen.getByRole('button', { name: 'Scegli le infiltrazioni' })).toBeInTheDocument();
+  // 2026-10-25: niente «Infiltrazioni: nessuna»; con l'insieme vuoto la riga è il pulsante che dice che cosa manca (nome con la voce)
+  expect(screen.getByRole('button', { name: 'Scegli le infiltrazioni: Infiltrati nel Castello' })).toBeInTheDocument();
   expect(screen.getByRole('status')).toHaveTextContent('Proposta: Vecchio Castello, Tetto del Vecchio Castello, Torre — la voce descrive più infiltrazioni (più infiltrazioni)');
   fireEvent.click(screen.getByRole('button', { name: 'Conferma' }));
   await waitFor(() => expect(api.impostaInfiltrazioniVoce).toHaveBeenCalledWith('v-1', ['k-10', 'k-11', 'k-12'], 7));
@@ -47,7 +47,7 @@ it('con l’insieme valorizzato la proposta non c’è; la ripetuta si dice «(d
 // UX3-2: sulla voce il collegamento si chiama come il Palazzo, non «Entra»: la finestra lo nomina così
 it('la finestra nomina il collegamento della voce col suo nome («Palazzo di Madarame»), non «Entra»', async () => {
   render(<InfiltrazioniVoce a={voce({ tipo: 'palazzo', riferimento: { tipo: 'dungeon', chiave: 'madarame' }, riferimentoTesto: 'Palazzo di Madarame', infiltrazioni: [] } as Partial<AzionePercorsoDto>)} partitaId={7} onCambiata={() => {}} />);
-  fireEvent.click(screen.getByRole('button', { name: 'Scegli le infiltrazioni' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Scegli le infiltrazioni: Infiltrati nel Castello' }));
   const finestra = within(await screen.findByRole('dialog', { name: 'Infiltrazioni della voce' }));
   expect(finestra.getByText(/^In ordine, come le percorri: il collegamento «Palazzo di Madarame» apre la prima non completata\./)).toBeInTheDocument();
   expect(finestra.getByText('Nessuna: il collegamento «Palazzo di Madarame» apre la prima infiltrazione non completata del Palazzo.')).toBeInTheDocument();
@@ -58,7 +58,7 @@ it('la finestra nomina il collegamento della voce col suo nome («Palazzo di Mad
 it('senza collegamento la finestra dice a cosa servono le infiltrazioni per la voce, senza nominare un collegamento (UX3-9)', async () => {
   const proposta = { infiltrazioni: [{ chiave: 'k-10', nome: 'Vecchio Castello' }], motivo: 'la voce descrive il primo accesso', certezza: 'certa' as const };
   render(<InfiltrazioniVoce a={voce({ tipo: 'trama', riferimento: null, infiltrazioni: [], propostaInfiltrazioni: proposta } as Partial<AzionePercorsoDto>)} partitaId={7} onCambiata={() => {}} />);
-  fireEvent.click(screen.getByRole('button', { name: 'Scegli le infiltrazioni' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Scegli le infiltrazioni: Infiltrati nel Castello' }));
   const finestra = within(await screen.findByRole('dialog', { name: 'Infiltrazioni della voce' }));
   expect(finestra.queryByText(/collegamento/)).toBeNull();
   expect(finestra.getByText(/^In ordine, come le percorri: dicono in quali infiltrazioni avviene la voce, che non apre il Palazzo\./)).toBeInTheDocument();
@@ -68,7 +68,7 @@ it('senza collegamento la finestra dice a cosa servono le infiltrazioni per la v
 it('con una proposta la finestra dice che il collegamento apre la prima della proposta (UX3-1)', async () => {
   const proposta = { infiltrazioni: [{ chiave: 'k-11', nome: 'Tetto del Vecchio Castello' }, { chiave: 'k-12', nome: 'Torre' }], motivo: 'la voce descrive più infiltrazioni', certezza: 'multipla' as const };
   render(<InfiltrazioniVoce a={voce({ tipo: 'palazzo', riferimento: { tipo: 'dungeon', chiave: 'kamoshida' }, riferimentoTesto: 'Palazzo di Kamoshida', infiltrazioni: [], propostaInfiltrazioni: proposta } as Partial<AzionePercorsoDto>)} partitaId={7} onCambiata={() => {}} />);
-  fireEvent.click(screen.getByRole('button', { name: 'Scegli le infiltrazioni' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Scegli le infiltrazioni: Infiltrati nel Castello' }));
   const finestra = within(await screen.findByRole('dialog', { name: 'Infiltrazioni della voce' }));
   expect(finestra.getByText('Nessuna: il collegamento «Palazzo di Kamoshida» apre «Tetto del Vecchio Castello», la prima della proposta.')).toBeInTheDocument();
 });
@@ -79,7 +79,7 @@ it('con un atterraggio la finestra dice che il collegamento apre la planimetria 
   const proposta = { infiltrazioni: [{ chiave: 'k-11', nome: 'Tutorial Palazzo 12/04' }], motivo: 'la voce descrive il primo accesso', certezza: 'certa' as const };
   render(<InfiltrazioniVoce a={voce({ tipo: 'palazzo', riferimento: { tipo: 'dungeon', chiave: 'kamoshida' }, riferimentoTesto: 'Palazzo di Kamoshida', infiltrazioni: [], propostaInfiltrazioni: proposta,
     atterraggio: { mappa: 'palazzo-di-kamoshida-sala-centrale', spillo: null } } as Partial<AzionePercorsoDto>)} partitaId={7} onCambiata={() => {}} />);
-  fireEvent.click(screen.getByRole('button', { name: 'Scegli le infiltrazioni' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Scegli le infiltrazioni: Infiltrati nel Castello' }));
   const finestra = within(await screen.findByRole('dialog', { name: 'Infiltrazioni della voce' }));
   expect(finestra.getByText('Nessuna: il collegamento «Palazzo di Kamoshida» apre la planimetria d’arrivo del giorno, quella dell’atterraggio del Palazzo. Confermata la proposta, aprirà la prima non completata fra quelle scelte.')).toBeInTheDocument();
   expect(finestra.queryByText(/la prima della proposta/)).toBeNull();
@@ -88,7 +88,7 @@ it('con un atterraggio la finestra dice che il collegamento apre la planimetria 
 it('con un atterraggio e senza proposta la finestra descrive solo l’atterraggio (FUN3-3)', async () => {
   render(<InfiltrazioniVoce a={voce({ tipo: 'palazzo', riferimento: { tipo: 'dungeon', chiave: 'kamoshida' }, riferimentoTesto: 'Palazzo di Kamoshida', infiltrazioni: [],
     atterraggio: { mappa: 'palazzo-di-kamoshida-sala-centrale', spillo: 4 } } as Partial<AzionePercorsoDto>)} partitaId={7} onCambiata={() => {}} />);
-  fireEvent.click(screen.getByRole('button', { name: 'Scegli le infiltrazioni' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Scegli le infiltrazioni: Infiltrati nel Castello' }));
   const finestra = within(await screen.findByRole('dialog', { name: 'Infiltrazioni della voce' }));
   expect(finestra.getByText('Nessuna: il collegamento «Palazzo di Kamoshida» apre la planimetria d’arrivo del giorno, quella dell’atterraggio del Palazzo.')).toBeInTheDocument();
 });
@@ -96,8 +96,8 @@ it('con un atterraggio e senza proposta la finestra descrive solo l’atterraggi
 it('nella finestra: sposta, togli e aggiungi salvano subito l’insieme intero; l’ultima non si propone di seguito', async () => {
   api.impostaInfiltrazioniVoce.mockImplementation(async (_uid: string, chiavi: string[]) => voce({ infiltrazioni: chiavi.map((k) => ({ chiave: k, nome: OPZIONI.find((o) => o.chiave === k)!.nome })) }));
   render(<InfiltrazioniVoce a={voce({ infiltrazioni: [{ chiave: 'k-10', nome: 'Vecchio Castello' }, { chiave: 'k-11', nome: 'Tetto del Vecchio Castello' }] })} partitaId={7} onCambiata={() => {}} />);
-  // con l'insieme già scelto la matita è sola: il nome lo dice l'etichetta accessibile (2026-10-25)
-  fireEvent.click(screen.getByRole('button', { name: 'Modifica le infiltrazioni' }));
+  // con l'insieme già scelto la matita è sola: il nome lo dice l'etichetta accessibile, con il testo della voce (2026-10-25)
+  fireEvent.click(screen.getByRole('button', { name: 'Modifica le infiltrazioni: Infiltrati nel Castello' }));
   const finestra = within(await screen.findByRole('dialog', { name: 'Infiltrazioni della voce' }));
   fireEvent.click(finestra.getByRole('button', { name: 'Sposta giù Vecchio Castello' }));
   await waitFor(() => expect(api.impostaInfiltrazioniVoce).toHaveBeenLastCalledWith('v-1', ['k-11', 'k-10'], 7));

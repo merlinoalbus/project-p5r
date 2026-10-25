@@ -192,7 +192,7 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       {((gesti && onMenu) || !!a.ricevuteEffetti?.length) && (
         <span className="flex shrink-0 flex-col self-start">
           {gesti && onMenu && <PulsanteMenuVoce voce={a.azione} aperto={menuAperto} onCambia={onMenu} disabled={occupato || bloccata} />}
-          <RicevuteVoce ricevute={a.ricevuteEffetti} />
+          <RicevuteVoce ricevute={a.ricevuteEffetti} voce={a.azione} />
         </span>
       )}
       {gesti && menuAperto && <GestiVoce gesti={gesti} disabled={occupato || bloccata} etichetta={`Gesti per: ${a.azione.slice(0, 60)}`} voce={a.uid} />}

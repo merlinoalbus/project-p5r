@@ -46,11 +46,15 @@ const yen = (n: number): string => `¥${Math.abs(n).toLocaleString('it-IT')}`;
 const negozioDellArticolo = (chiave: string): string => (chiave.includes('/') ? chiave.slice(0, chiave.indexOf('/')) : chiave);
 
 /** Le etichette e le note fisse dei gruppi che non dipendono da un elemento. */
+// 2026-10-25 («le etichette di testo devono essere visibili solo se hanno senso»): una nota resta solo se dice un'eccezione. Che la spunta
+// segni letture e turni è il caso normale di ogni voce (via «Le segna la spunta.» e «Li segna la spunta.», uguali in ogni voce); restano le
+// Doti, che si segnano a mano, e gli yen, che aspettano «Applica». La nota dell'Aojiru ripeteva la sua riga («variante da dichiarare»): il
+// quando sta ora nella riga stessa, e solo se la variante non è ancora nota.
 const GRUPPI: Record<string, { titolo: string; nota?: string }> = {
-  aojiru: { titolo: 'Aojiru', nota: 'La variante si osserva alla spunta.' },
+  aojiru: { titolo: 'Aojiru' },
   doti: { titolo: 'Doti sociali', nota: 'Le Doti le segni tu nella scheda Doti.' },
-  letture: { titolo: 'Letture e visioni', nota: 'Le segna la spunta.' },
-  turni: { titolo: 'Turni', nota: 'Li segna la spunta.' },
+  letture: { titolo: 'Letture e visioni' },
+  turni: { titolo: 'Turni' },
   yen: { titolo: 'Yen', nota: 'Si applicano con «Applica» sulla voce.' },
   oggetti: { titolo: 'Oggetti ricevuti' },
   richieste: { titolo: 'Richieste completate' },
@@ -103,7 +107,7 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
         if (conto.totale !== null && (conto.righe.length > 1 || copie > 1)) g.totale = `Totale ${yen(conto.totale)}${conto.senzaPrezzo ? ` (più ${conto.senzaPrezzo} senza prezzo)` : ''}`;
         break;
       }
-      case 'acquisto': riga('aojiru', n.frase.articolo(e.articolo)?.nome ?? 'Aojiru', e.variante ? nomeDote(e.variante) : 'variante da dichiarare'); break;
+      case 'acquisto': riga('aojiru', n.frase.articolo(e.articolo)?.nome ?? 'Aojiru', e.variante ? nomeDote(e.variante) : 'variante da osservare alla spunta'); break;
       case 'dote': { const p = partiEffettoAzione(e, n.azione); riga('doti', p.nome, p.dettaglio); break; }
       case 'lettura': { const p = partiEffettoAzione(e, n.azione); riga('letture', p.nome, p.dettaglio); break; }
       case 'turno': {
@@ -120,7 +124,13 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
       // solo se hanno senso»): una riga porta un dettaglio solo se aggiunge qualcosa al titolo del gruppo. «Trofei · ottenuto», «Domande in
       // classe · risposta», «Cruciverba · risolto», «Compendio · registrata nel compendio» ripetevano il titolo: restano il nome e basta.
       // Lo sblocco dice ancora se è una richiesta o un'attività (il gruppo «Sblocchi» le tiene insieme), la pesca e la Fortuna come valgono.
-      case 'sblocco': riga('sblocchi', (e.bersaglio === 'richiesta' ? n.frase.richiesta(e.chiave) : n.frase.attivita?.(e.chiave)) ?? (e.bersaglio === 'richiesta' ? 'Richiesta' : 'Attività'), e.bersaglio === 'richiesta' ? 'richiesta' : 'attività'); break;
+      // Senza il nome, la riga di ripiego si chiama già «Richiesta» o «Attività»: il dettaglio lo ripeterebbe («Richiesta richiesta»).
+      case 'sblocco': {
+        const richiesta = e.bersaglio === 'richiesta';
+        const nome = richiesta ? n.frase.richiesta(e.chiave) : n.frase.attivita?.(e.chiave);
+        riga('sblocchi', nome ?? (richiesta ? 'Richiesta' : 'Attività'), nome ? (richiesta ? 'richiesta' : 'attività') : undefined);
+        break;
+      }
       case 'storia': riga('storia', EVENTI_STORIA.find((s) => s.chiave === e.evento)?.nome ?? e.evento); break;
       case 'domanda': riga('domande', n.frase.domanda(e.domanda) ?? 'Domanda'); break;
       case 'cruciverba': riga('cruciverba', `Del ${dataLeggibile(e.data)}`); break;

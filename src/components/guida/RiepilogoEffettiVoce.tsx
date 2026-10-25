@@ -11,8 +11,8 @@
 // 2026-10-25 («a che prò quel ottenuto messo lì come testo semplice e distanziato? Impaginazione non top»; «le etichette di testo devono
 // essere visibili solo se hanno senso»): il dettaglio sta subito dopo il nome, non spinto al bordo opposto della colonna. Le righe di un
 // gruppo sono una griglia a due colonne larghe quanto il contenuto (sottogriglia per riga, così l'elemento resta un `<li>`): i prezzi
-// si allineano in colonna accanto al nome più lungo, senza il vuoto in mezzo; su un telefono le due colonne si stringono e il testo va
-// a capo, mai troncato. Il titolo del gruppo si mostra solo se dice qualcosa che la riga non dice già (non «Aojiru» sopra «Aojiru»,
+// si allineano in colonna accanto al nome più lungo, senza il vuoto in mezzo; fino a 640 px (telefono) il dettaglio va sotto il nome
+// invece di stringere due colonne, e il testo va a capo, mai troncato. Il titolo del gruppo si mostra solo se dice qualcosa che la riga non dice già (non «Aojiru» sopra «Aojiru»,
 // non «Effetti» sopra le frasi di una voce di prima); il titolo del riquadro si può tenere solo per i lettori di schermo dove il
 // contenitore lo dice già («Tutti gli effetti della voce»).
 // ============================================================
@@ -31,18 +31,23 @@ interface Props {
 /** Il nome senza maiuscole, spazi in più e accenti, per capire se il titolo del gruppo ripete la sua unica riga. */
 const norma = (s: string): string => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/\s+/g, ' ').trim();
 
-/** Un gruppo: etichetta (se aggiunge qualcosa), elenco delle righe, totale e nota. */
-function Gruppo({ g }: { g: GruppoRiepilogoEffettiDto }) {
+/** Un gruppo: etichetta (se aggiunge qualcosa), elenco delle righe, totale e nota. `riquadro` è il nome del riquadro, che fa da nome
+ *  dell'elenco quando il gruppo non ne ha uno suo (il gruppo di ripiego delle voci di prima). */
+function Gruppo({ g, riquadro }: { g: GruppoRiepilogoEffettiDto; riquadro: string }) {
   const id = useId();
-  // il titolo che ripete l'unica riga («Aojiru» sopra «Aojiru · Conoscenza») o che manca non si scrive: l'elenco prende il nome dalla riga
+  // il titolo che ripete l'unica riga («Aojiru» sopra «Aojiru · Conoscenza») o che manca non si scrive; l'elenco tiene comunque un nome
+  // per i lettori di schermo: il titolo del gruppo (uguale alla riga) o, senza, quello del riquadro
   const titoloUtile = !!g.titolo && !(g.righe.length === 1 && norma(g.righe[0].nome) === norma(g.titolo));
+  // Impaginazione: fino a 640 px (telefono) il dettaglio va sotto il nome, perché due colonne strette andrebbero a capo entrambe;
+  // da 641 px le righe sono una griglia a due colonne larghe quanto il contenuto (sottogriglia per riga, così l'elemento resta un `<li>`)
   return (
     <div className="flex w-fit min-w-0 max-w-full flex-col gap-0.5">
       {titoloUtile && <span id={id} className="testo-12 font-semibold text-text-secondary break-words">{g.titolo}</span>}
-      <ul aria-labelledby={titoloUtile ? id : undefined} className="m-0 grid list-none grid-cols-[minmax(0,max-content)_minmax(0,max-content)] gap-x-3 p-0">
+      <ul aria-labelledby={titoloUtile ? id : undefined} aria-label={titoloUtile ? undefined : g.titolo || riquadro}
+        className="m-0 flex list-none flex-col gap-1 p-0 min-[641px]:grid min-[641px]:grid-cols-[minmax(0,max-content)_minmax(0,max-content)] min-[641px]:gap-x-3 min-[641px]:gap-y-0">
         {g.righe.map((r, i) => (
-          <li key={`${i}:${r.nome}`} className="col-span-2 grid grid-cols-subgrid items-baseline testo-13">
-            <span className={`min-w-0 break-words ${r.dettaglio ? '' : 'col-span-2'}`}>{r.nome}</span>
+          <li key={`${i}:${r.nome}`} className="flex min-w-0 flex-col testo-13 min-[641px]:col-span-2 min-[641px]:grid min-[641px]:grid-cols-subgrid min-[641px]:items-baseline">
+            <span className={`min-w-0 break-words ${r.dettaglio ? '' : 'min-[641px]:col-span-2'}`}>{r.nome}</span>
             {r.dettaglio && <span className="min-w-0 break-words text-text-secondary tabular-nums">{r.dettaglio}</span>}
           </li>
         ))}
@@ -61,7 +66,7 @@ export function RiepilogoEffettiVoce({ gruppi, titolo = 'Il gioco dà', titoloVi
     <section aria-labelledby={id} className="flex min-w-0 flex-col gap-1.5 rounded-md border border-border bg-bg-tertiary p-2">
       <span id={id} className={titoloVisibile ? 'testo-12 text-text-muted' : 'sr-only'}>{titolo}</span>
       <div className="grid min-w-0 grid-cols-[repeat(auto-fill,minmax(min(100%,15rem),1fr))] gap-x-4 gap-y-2">
-        {gruppi.map((g) => <Gruppo key={g.chiave} g={g} />)}
+        {gruppi.map((g) => <Gruppo key={g.chiave} g={g} riquadro={titolo} />)}
       </div>
     </section>
   );

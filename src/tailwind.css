@@ -1552,6 +1552,34 @@
   .chip--bloccata { --chip-sfondo: color-mix(in srgb, var(--color-text-muted) 18%, var(--color-bg-secondary)); --chip-bordo: var(--color-text-muted); color: var(--color-text-secondary); }
   /* il chip con l'icona («Sulla mappa»): 6 px fra icona e testo, che `.chip` (4 px) riscriveva quando stava prima */
   .chip--icona { gap: 6px; }
+  /* L'infiltrazione scelta di una voce del Diario (2026-10-25): senza la parola «Infiltrazioni:» il chip si distingue dai cartellini pieni
+     accanto (tipo, Palazzo, area) per il contorno e per la maschera dello spillo d'infiltrazione, che si vedono anche al tocco */
+  .chip--infiltrazione {
+    --chip-sfondo: var(--color-bg-secondary);
+    --chip-bordo: color-mix(in srgb, var(--color-text-secondary) 55%, transparent);
+    color: var(--color-text);
+    gap: 5px;
+  }
+  /* Il numero su un pulsante a sola icona (le ricevute della spunta): un distintivo nell'angolo in alto a destra, dentro i 44 px del
+     bersaglio (`.btn` è già `position: relative`), che non riceve il tocco; il nome accessibile del pulsante dice già il numero, quindi il
+     distintivo è nascosto ai lettori */
+  .conteggio-pulsante {
+    position: absolute;
+    top: 3px;
+    right: 1px;
+    min-width: 16px;
+    height: 16px;
+    padding-inline: 4px;
+    border-radius: 8px;
+    background: var(--color-primary-fondo);
+    color: var(--color-text-on-primary);
+    font-size: var(--testo-micro);
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
   /* ---- Momento della giornata e meteo (Partita → Oggi): una riga sola ----
      «Giorno», «Sera», un separatore e le quattro icone del meteo della fascia attiva (44 px, 2 px fra l'una e l'altra:
      182 px): ~300 px in tutto, dentro la colonna più stretta (325 px, la Home sul tablet a 768 px); se mai non ci

@@ -515,6 +515,15 @@ export function IconAltro(p: IconProps) {
   );
 }
 
+/** Scontrino col bordo basso a denti e le righe degli importi: le ricevute degli effetti della spunta (chiave azione «ricevute»). */
+export function IconRicevuta(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M6 3h12v18l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5L6 21z" /><path d="M9 8h6M9 12h6M9 16h3" />
+    </svg>
+  );
+}
+
 /** Imbuto: pannello dei filtri (chiave azione «filtri»). */
 export function IconFiltro(p: IconProps) {
   return (

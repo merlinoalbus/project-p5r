@@ -377,6 +377,18 @@ Finché il file manca, la riserva SVG è l'imbuto di `iconeGuida.tsx` (`IconFilt
 
 Prompt pronto (anteporre il blocco di stile del §0): `[blocco di stile] Icona di azione per l'interfaccia di Persona 5 Royal, PNG 128×128 con sfondo trasparente: un foglio rettangolare verticale tagliato in diagonale a metà altezza; la metà superiore resta ferma con due righe corte (barre), la metà inferiore si stacca e cade inclinata in basso a destra, con tre trattini di movimento. Forme piatte bianche #ececf1 con contorno nero #0b0b0e spesso, angoli tagliati in diagonale, ombra rossa #e5352b sfalsata in basso a destra. Nessun testo, nessun marchio; niente forbici, niente cestino, niente imbuto. → azione-scarta.png`
 
+### Aggiunta del 2026-10-25 — ricevute della spunta (2) — stesse regole
+Richiesta dell'utente: le ricevute degli effetti della spunta di una voce del Diario non stanno più sempre aperte sotto la voce, ma dietro
+un pulsantino a sola icona nella colonna dei comandi, con il numero delle ricevute in un distintivo. Prima l'icona era quella degli
+appunti (`azione-piano`), che nell'app vuol dire piani di fusione e domande in classe: serve una figura propria. Finché il file manca, la
+riserva SVG è lo scontrino di `iconeGuida.tsx` (`IconRicevuta`). Il distintivo col numero lo disegna l'app: la figura non porta cifre.
+
+| File | Uso nell'app | Soggetto |
+|---|---|---|
+| `azione-ricevute.png` | «Ricevute degli effetti della spunta» di una voce del Diario (apre l'elenco delle ricevute) | scontrino verticale con il bordo basso a denti di sega e tre righe orizzontali di importi, l'ultima più corta |
+
+Prompt pronto (anteporre il blocco di stile del §0): `[blocco di stile] Icona di azione per l'interfaccia di Persona 5 Royal, PNG 128×128 con sfondo trasparente: uno scontrino di cassa verticale con il bordo inferiore strappato a denti di sega e tre righe orizzontali di importi, l'ultima più corta. Forme piatte bianche #ececf1 con contorno nero #0b0b0e spesso, angoli tagliati in diagonale, ombra rossa #e5352b sfalsata in basso a destra. Nessun testo, nessuna cifra, nessun marchio; niente appunti con la molletta, niente libro. → azione-ricevute.png`
+
 ## 22. Icone di categoria (22) — `ui/categoria-<chiave>.png` (128×128, trasparente) — richieste il 2026-09-07
 Le figure che stanno **dentro il cartiglio rosso a taglio diagonale** delle schede: tipo di negozio, categoria di oggetto, tipo di attività, tipo di
 azione del percorso. L'app le mostra a 18–44 px sopra il cartiglio, quindi il soggetto deve leggersi anche piccolo: silhouette piena, niente

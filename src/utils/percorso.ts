@@ -94,10 +94,38 @@ export function gruppiDellaVoce(a: { produceTesto?: string[]; produceRiepilogo?:
   return frasi.length ? [{ chiave: 'effetti', titolo: '', righe: frasi.map((nome) => ({ nome })) }] : [];
 }
 
+/** Il nome senza maiuscole, spazi in più e accenti. */
+const normaNome = (s: string): string => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/\s+/g, ' ').trim();
+
 /** Due nomi dicono lo stesso posto? Senza maiuscole, spazi in più e accenti (il collegamento e il pin della mappa possono scriverlo un po' diverso). */
 export function stessoNomeDiPosto(a: string | null | undefined, b: string | null | undefined): boolean {
-  const norma = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/\s+/g, ' ').trim();
-  return !!a && !!b && norma(a) === norma(b);
+  return !!a && !!b && normaNome(a) === normaNome(b);
+}
+
+/** Le radici delle parole del nome di un tipo, senza la vocale finale né la «s» del plurale («Palazzo / Mementos» → palazz, mement;
+ *  «Domanda / esame» → domand, esam), così si ritrovano in un nome scritto altrimenti («Richieste dei Mementos», «Domande ed esami»). */
+const radiciDelTipo = (nome: string): string[] =>
+  normaNome(nome).split(/[^a-z0-9]+/).filter((p) => p.length >= 3).map((p) => p.replace(/[aeiou]s?$/, '')).filter((r) => r.length >= 3);
+
+/**
+ * Il cartellino del tipo della voce («Palazzo / Mementos», «Confidente», «Richiesta»…) ripeterebbe ciò che la riga dice già? 2026-10-25,
+ * sullo screenshot della voce di Kamoshida: «le etichette di testo devono essere visibili solo se hanno senso». Lo dice già:
+ * - una voce di Palazzo legata al suo Palazzo (l'emblema accanto e il collegamento «Palazzo di Kamoshida» / «Mementos»);
+ * - una voce di Confidente legata al suo Confidente (il ritratto accanto e il nome nel collegamento);
+ * - un collegamento o un riferimento il cui nome contiene il tipo («Richieste dei Mementos» per una Richiesta, «Domande in classe ed
+ *   esami» per una domanda, «Lavori» per un lavoro);
+ * - il tipo «Altro», che non dice niente di più della voce stessa.
+ * Negli altri casi il cartellino resta: un libro, un film, un negozio o un'attività col solo titolo non dicono che cosa sono, e sul tocco
+ * l'icona della categoria accanto non ha un nome scritto.
+ */
+export function tipoGiaDetto(a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento'>, testo: string | null | undefined): boolean {
+  if (a.tipo === 'altro') return true;
+  if (a.tipo === 'palazzo' && a.riferimento?.tipo === 'dungeon') return true;
+  if (a.tipo === 'confidente' && a.riferimento?.tipo === 'confidente') return true;
+  const nome = NOME_TIPO_AZIONE[a.tipo];
+  if (!nome || !testo) return false;
+  const parole = normaNome(testo).split(/[^a-z0-9]+/);
+  return radiciDelTipo(nome).some((r) => parole.some((p) => p.startsWith(r)));
 }
 
 /** Il testo senza spazi né maiuscole, per confrontare «Perizia +2» con «perizia+2». */

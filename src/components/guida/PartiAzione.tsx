@@ -12,7 +12,7 @@ import { useState, type MouseEvent, type ReactNode } from 'react';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { ConfidentiPartita } from '../partita/ConfidentiPartita';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { NOME_TIPO_AZIONE, collegamentoAzione, descriviEffetti, gruppiDellaVoce, noteDellaGuidaCoincideConEffetto, stessoNomeDiPosto } from '../../utils/percorso';
+import { NOME_TIPO_AZIONE, collegamentoAzione, descriviEffetti, gruppiDellaVoce, noteDellaGuidaCoincideConEffetto, stessoNomeDiPosto, tipoGiaDetto } from '../../utils/percorso';
 import { RiepilogoEffettiVoce } from './RiepilogoEffettiVoce';
 import { conRitornoDiario } from '../../utils/ritornoDiario';
 import { trovaScheda } from '../../utils/pannelloScheda';
@@ -94,7 +94,9 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
     <span className="flex flex-wrap items-center gap-1.5">
       {a.oggettiCitati?.filter((o) => o.casa !== link?.href).map((o) => <Link key={o.chiave} to={conRitornoDiario(o.casa, partenza, uid)}
         onClick={(e) => { if (!apriSopra(e, o.casa)) ricordaVoce(e); }} className="chip touch no-underline">{o.nome}</Link>)}
-      <span className="chip testo-12">{NOME_TIPO_AZIONE[a.tipo] ?? a.tipo}</span>
+      {/* il tipo della voce solo se la riga non lo dice già (emblema e «Palazzo di Kamoshida», ritratto e nome del Confidente, un nome che
+          contiene il tipo): 2026-10-25, «le etichette di testo devono essere visibili solo se hanno senso» (`tipoGiaDetto`) */}
+      {!tipoGiaDetto(a, link?.etichetta ?? a.riferimentoTesto) && <span className="chip testo-12">{NOME_TIPO_AZIONE[a.tipo] ?? a.tipo}</span>}
       {link ? <Link to={conRitornoDiario(link.href, partenza, uid)} className="chip chip--attivo no-underline testo-12"
         onClick={(e) => {
           if (apriAccanto && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) { e.preventDefault(); onApriMappa!(apriAccanto); return; }

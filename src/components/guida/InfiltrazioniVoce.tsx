@@ -4,7 +4,7 @@
 //
 // Ogni voce che ha un Palazzo (`palazzoDellaVoce`: riferimento `dungeon`, oppure infiltrazioni già scelte, oppure una proposta) mostra
 // l'insieme delle infiltrazioni **in ordine**, come chip (la stessa infiltrazione può tornare, mai di seguito; dal 2026-10-25 senza
-// l'etichetta «Infiltrazioni:», sotto il cartellino del Palazzo e sopra «Il gioco dà»). Si cambia in una finestra (foglio
+// l'etichetta «Infiltrazioni:» ma con la maschera dello spillo d'infiltrazione, sotto il cartellino del Palazzo e sopra «Il gioco dà»). Si cambia in una finestra (foglio
 // dal basso sul telefono): ↑/↓ da 44 px, «Togli», «Aggiungi infiltrazione» fra quelle già esistenti del Palazzo (esclusa solo l'ultima
 // dell'insieme). Ogni cambio salva subito e non tocca nient'altro della voce. Con l'insieme vuoto e una proposta: «Proposta: …» con la
 // certezza e «Conferma», che scrive l'insieme proposto nell'ordine.
@@ -23,6 +23,7 @@ import type { AzionePercorsoDto, EsitoRevisioneVoce } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione, IconaSegno } from '../shared/IconaAzione';
 import { NienteInRilascio, type StrumentoDiModifica } from '../shared/SoloPreparazione';
+import { IconaSpillo } from '../mappe/IconaSpillo';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -64,21 +65,30 @@ export function InfiltrazioniVoce({ a, partitaId, onCambiata }: Props) {
   if (IN_RILASCIO && insieme.length === 0) return null;
   return (
     // 2026-10-25 («le etichette di testo devono essere visibili solo se hanno senso»): niente «Infiltrazioni:» davanti ai chip, che stanno
-    // subito sotto il cartellino del Palazzo e si chiamano come l'infiltrazione («Tutorial Palazzo 11/04»): il nome dell'elenco lo
-    // dicono `aria-label` e il suggerimento. Il numero d'ordine serve solo con più infiltrazioni; la matita sta da sola (44 px, nome
-    // accessibile e suggerimento), senza la parola «Modifica». Con l'insieme vuoto la riga è il pulsante che dice che cosa manca.
+    // subito sotto il cartellino del Palazzo e si chiamano come l'infiltrazione («Tutorial Palazzo 11/04»). La parola tolta non toglie
+    // l'informazione: ogni chip porta la maschera dello spillo d'infiltrazione delle mappe e un contorno (`.chip--infiltrazione`) che lo
+    // distinguono dai cartellini pieni accanto (tipo, Palazzo, area), e si vedono anche al tocco, dove il suggerimento non compare; il
+    // nome dell'elenco resta per i lettori di schermo. Il numero d'ordine serve solo con più infiltrazioni; la matita sta da sola (44 px)
+    // accanto ai chip che modifica, senza la parola «Modifica». Con l'insieme vuoto la riga è il pulsante che dice che cosa manca. I nomi
+    // accessibili dei due pulsanti portano il testo della voce, come il menu «⋯» (`PulsanteMenuVoce`): in un giorno con più voci di Palazzo
+    // non si chiamano tutti uguali; il suggerimento resta corto.
     <div className="flex flex-wrap items-center gap-1 testo-12">
       {insieme.length > 0 && (
-        <ol className="m-0 flex list-none flex-wrap items-center gap-1 p-0" aria-label="Infiltrazioni della voce, in ordine" title="Infiltrazioni della voce, in ordine">
-          {insieme.map((x, i) => <li key={`${x.chiave}:${i}`} className="chip testo-12">{insieme.length > 1 ? `${i + 1}. ` : ''}{x.nome}{chiavi.indexOf(x.chiave) < i ? ' (di nuovo)' : ''}</li>)}
+        <ol className="m-0 flex list-none flex-wrap items-center gap-1 p-0" aria-label="Infiltrazioni della voce, in ordine">
+          {insieme.map((x, i) => (
+            <li key={`${x.chiave}:${i}`} className="chip chip--icona chip--infiltrazione testo-12">
+              <IconaSpillo tipo="infiltrazione" dimensione={14} className="shrink-0 object-contain" />
+              <span className="min-w-0 break-words">{insieme.length > 1 ? `${i + 1}. ` : ''}{x.nome}{chiavi.indexOf(x.chiave) < i ? ' (di nuovo)' : ''}</span>
+            </li>
+          ))}
         </ol>
       )}
       {/* L12 (passo 8): nel rilascio (sola lettura) l'insieme delle infiltrazioni si legge ma non si cambia e la proposta non si conferma */}
       {!IN_RILASCIO && (insieme.length > 0
-        ? <button type="button" className="btn btn-sm btn-ghost touch shrink-0" aria-label="Modifica le infiltrazioni" title="Modifica le infiltrazioni" disabled={occupato} onClick={() => setAperta(true)}>
+        ? <button type="button" className="btn btn-sm btn-ghost touch shrink-0" aria-haspopup="dialog" aria-label={`Modifica le infiltrazioni: ${a.azione.slice(0, 60)}`} title="Modifica le infiltrazioni" disabled={occupato} onClick={() => setAperta(true)}>
             <IconaAzione chiave="modifica" dimensione={20} />
           </button>
-        : <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Scegli le infiltrazioni" disabled={occupato} onClick={() => setAperta(true)} />)}
+        : <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Scegli le infiltrazioni" aria-haspopup="dialog" aria-label={`Scegli le infiltrazioni: ${a.azione.slice(0, 60)}`} disabled={occupato} onClick={() => setAperta(true)} />)}
       {!IN_RILASCIO && proposta && (
         <span className="flex basis-full flex-wrap items-center gap-1.5 rounded-md bg-white/[0.04] px-2 py-1" role="status">
           <span>Proposta: {proposta.infiltrazioni.map((x) => x.nome).join(', ')} — {proposta.motivo} <span className="text-text-muted">({CERTEZZA[proposta.certezza]})</span></span>

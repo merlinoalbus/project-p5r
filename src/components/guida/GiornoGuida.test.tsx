@@ -345,7 +345,9 @@ describe('GiornoGuida — la giornata canone', () => {
     })] });
     const giorno = within(sezione('Di giorno'));
     expect(giorno.queryByText('La mia')).toBeNull();
-    expect(giorno.getByText('Confidente')).toBeInTheDocument();
+    // il tipo «Confidente» non si scrive accanto al ritratto e al nome del Confidente, che lo dicono già (2026-10-25, `tipoGiaDetto`)
+    expect(giorno.queryByText('Confidente')).toBeNull();
+    expect(giorno.getByText('Tae Takemi - Morte')).toBeInTheDocument();
     expect(within(giorno.getByRole('region', { name: 'Il gioco dà' })).getByText('Coraggio, 1 nota')).toBeInTheDocument();
     expect(giorno.getByText(/^Consigliata/)).toBeInTheDocument();
     expect(giorno.getByText('rango atteso 2')).toBeInTheDocument();
