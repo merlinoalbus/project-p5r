@@ -55,9 +55,9 @@ export function VistaErrore({ titolo, spiegazione, dettaglio, azioni, livello = 
           ? <img src={autonoma.illustrazione} alt="" className={`${altezzaFigura} w-auto object-contain`} draggable={false} />
           : <IconAlert size={32} className="text-[#ef4444]" />
       ) : (
-        <AssetImg nome="illustrazioni/errore-senza-testo" alt="" decorativa className={`${altezzaFigura} w-auto object-contain`} fallback={<IconAlert size={32} className="text-error" />} />
+        <AssetImg nome="illustrazioni/errore-senza-testo" alt="" decorativa className={`${altezzaFigura} w-auto object-contain`} fallback={<IconAlert size={32} className="text-error-testo" />} />
       )}
-      <Titolo className={`m-0 font-decor uppercase tracking-wide leading-none ${compatta ? 'testo-24' : 'testo-28'} ${fisso ? 'text-[#ef4444]' : 'text-error'}`}>
+      <Titolo className={`m-0 font-decor uppercase tracking-wide leading-none ${compatta ? 'testo-24' : 'testo-28'} ${fisso ? 'text-[#ef4444]' : 'text-error-testo'}`}>
         {titolo}
       </Titolo>
       {spiegazione && <p className={`m-0 max-w-[460px] ${fisso ? 'text-[#a3a3b3]' : 'text-text-secondary'}`}>{spiegazione}</p>}

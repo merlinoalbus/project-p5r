@@ -17,6 +17,7 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { NOME_TIPO_CATALOGO } from '../../utils/catalogo';
 import { TIPI_CATALOGO } from '../../../shared/types';
+import { TitoloSezione } from '../shared/TitoloSezione';
 
 /** «Nascosti dalla guida»: le righe nascoste di ogni tipo, raggruppate per tipo, ciascuna con «Rimetti negli elenchi». */
 export function NascostiDallaGuida() {
@@ -51,10 +52,10 @@ export function NascostiDallaGuida() {
   return (
     <section ref={sezione} id="nascosti" className="card flex flex-col gap-3" aria-labelledby="titolo-nascosti">
       <div className="flex flex-col gap-1">
-        <h2 id="titolo-nascosti" className="m-0 testo-15 font-semibold">Nascosti dalla guida{elenco.dati ? <span className="text-text-muted"> · {righe.length}</span> : null}</h2>
+        <TitoloSezione id="titolo-nascosti">Nascosti dalla guida{elenco.dati ? <span className="text-text-muted"> · {righe.length}</span> : null}</TitoloSezione>
         <p className="m-0 testo-13 text-text-secondary">Le righe che hai nascosto dagli elenchi restano nei dati: qui le rimetti con un tocco.</p>
       </div>
-      {elenco.errore && <p role="alert" className="m-0 testo-13 text-error">{elenco.errore}</p>}
+      {elenco.errore && <p role="alert" className="m-0 testo-13 text-error-testo">{elenco.errore}</p>}
       {elenco.caricamento && !elenco.dati && <p role="status" className="m-0 testo-13">Un attimo…</p>}
       {elenco.dati && righe.length === 0 && <p className="m-0 testo-13 text-text-muted">Nessuna riga nascosta.</p>}
       {TIPI_CATALOGO.map((tipo) => {

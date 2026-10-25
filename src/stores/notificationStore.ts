@@ -14,11 +14,20 @@ export interface Notification {
   message: string;
   duration?: number;
   createdAt: number;
+  /** Solo visiva: non entra nelle regioni live della coda, perché chi la crea annuncia lui un testo più completo (lotto C:
+   *  il cambio di rango delle Doti si annunciava due volte, dalla regione `status` della pagina e dal toast). */
+  silenziosa?: boolean;
+}
+
+/** Opzioni di una notifica. */
+export interface OpzioniNotifica {
+  /** Vedi `Notification.silenziosa`. */
+  silenziosa?: boolean;
 }
 
 interface NotificationState {
   notifications: Notification[];
-  addNotification: (type: NotificationType, message: string, duration?: number) => void;
+  addNotification: (type: NotificationType, message: string, duration?: number, opzioni?: OpzioniNotifica) => void;
   removeNotification: (id: string) => void;
   clearAll: () => void;
 }
@@ -29,9 +38,9 @@ let counter = 0;
 export const useNotificationStore = create<NotificationState>((set) => ({
   notifications: [],
 
-  addNotification: (type, message, duration = 4000) => {
+  addNotification: (type, message, duration = 4000, opzioni) => {
     const id = `notif-${++counter}-${Date.now()}`;
-    const notification: Notification = { id, type, message, duration, createdAt: Date.now() };
+    const notification: Notification = { id, type, message, duration, createdAt: Date.now(), ...(opzioni?.silenziosa ? { silenziosa: true } : {}) };
     set((s) => ({ notifications: [...s.notifications, notification] }));
 
     if (duration > 0) {
@@ -48,6 +57,6 @@ export const useNotificationStore = create<NotificationState>((set) => ({
 }));
 
 /** Scorciatoia imperativa per mostrare un toast fuori dai componenti. */
-export function notifica(type: NotificationType, message: string, duration?: number): void {
-  useNotificationStore.getState().addNotification(type, message, duration);
+export function notifica(type: NotificationType, message: string, duration?: number, opzioni?: OpzioniNotifica): void {
+  useNotificationStore.getState().addNotification(type, message, duration, opzioni);
 }

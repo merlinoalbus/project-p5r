@@ -135,7 +135,7 @@ export function PreparazioneSessionePesca({ partitaId, giorno, fascia, fonte, on
     }} />}
     <p className="m-0">Una visita corrisponde a un solo turno. Le vecchie visite non diventano catture; il collegamento a un turno o a una quota storica non aumenta il conteggio.</p>
     {registro.caricamento && !stato && <p role="status">Leggo visite e turni…</p>}
-    {registro.errore && <p role="alert" className="m-0 text-error">{registro.errore}<PulsanteVisivo tono="fantasma" className="ml-2" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi" onClick={() => void registro.ricarica()} /></p>}
+    {registro.errore && <p role="alert" className="m-0 text-error-testo">{registro.errore}<PulsanteVisivo tono="fantasma" className="ml-2" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi" onClick={() => void registro.ricarica()} /></p>}
     {stato?.regola.stato !== 'collegata' && stato && <p role="alert" className="m-0 text-warning">La regola pesca non è collegata integralmente: {stato.regola.motivi.join(' ')} Nessuna visita viene registrata da questo modulo.</p>}
     <fieldset className="m-0 flex min-w-0 flex-col gap-3 border-0 p-0" disabled={disabilitato}>
       <Selettore etichetta="Visita da registrare" valore={sessione} disabilitato={disabilitato}
@@ -170,7 +170,7 @@ export function PreparazioneSessionePesca({ partitaId, giorno, fascia, fonte, on
     </div>}
     {confermato && <p role="status" className="m-0">{confermaScrive ? 'Visita registrata. Nessun nuovo invio viene eseguito da questo modulo.' : 'Visita preparata per la spunta. Nessun turno, cattura o beneficio ancora registrato.'}</p>}
     {confermato && !confermaScrive && onInvalidata && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Riapri questa preparazione" className="self-start" onClick={() => { onInvalidata(); setConfermato(false); invalida(); }} />}
-    {errore && <p role="alert" className="m-0 text-error">{errore}</p>}
+    {errore && <p role="alert" className="m-0 text-error-testo">{errore}</p>}
     {pendente && <p role="alert" className="m-0 text-warning">Un gesto pesca è ancora da verificare nel registro della scheda. Nessun nuovo invio è consentito.</p>}
   </div>;
 }

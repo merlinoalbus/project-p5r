@@ -24,6 +24,7 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
+import { TitoloSezione } from '../components/shared/TitoloSezione';
 
 /** Impostazioni dell'app. */
 export function ImpostazioniPage() {
@@ -44,7 +45,7 @@ export function ImpostazioniPage() {
       <IntestazionePagina titolo="Impostazioni" sottotitolo="Partite, grafica predefinita, caratteri, immagini, traduzioni, cestino, pacchetto di gioco, backup della tua istanza e documentazione delle API." />
       <GestionePartite />
       <section className="card flex flex-col gap-3">
-        <h2 className="m-0 testo-15 font-semibold">Grafica</h2>
+        <TitoloSezione>Grafica</TitoloSezione>
         <label className="flex items-start gap-3 cursor-pointer">
           <span className="touch flex items-center justify-center shrink-0">
             <input type="checkbox" className="w-6 h-6" checked={graficaPredefinita} onChange={(e) => impostaGrafica(e.target.checked)} />
@@ -62,7 +63,7 @@ export function ImpostazioniPage() {
       </section>
       <CaratteriEditor />
       <section className="card flex flex-col gap-3">
-        <h2 className="m-0 testo-15 font-semibold">Immagini degli Arcani</h2>
+        <TitoloSezione>Immagini degli Arcani</TitoloSezione>
         <p className="m-0 testo-13 text-text-secondary">Tocca una carta per sostituirla con un tuo file: le immagini caricate hanno la precedenza sulla grafica predefinita e vengono usate nel compendio e nei Confidenti.</p>
         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
           {glossario?.arcani.map((a) => (
@@ -87,7 +88,7 @@ export function ImpostazioniPage() {
       <PacchettoGioco />
       <BackupIstanza />
       <section className="card flex flex-col gap-3" aria-labelledby="titolo-documentazione-api">
-        <h2 id="titolo-documentazione-api" className="m-0 testo-15 font-semibold">Documentazione delle API</h2>
+        <TitoloSezione id="titolo-documentazione-api">Documentazione delle API</TitoloSezione>
         <p className="m-0 testo-13 text-text-secondary">
           Tutte le rotte del server, con parametri, corpi e risposte descritti in italiano (OpenAPI 3.1). La pagina si apre in una nuova
           scheda e funziona anche senza internet; «Prova» è attivo solo per le letture, perché parla con i dati veri di questa istanza.
@@ -99,7 +100,7 @@ export function ImpostazioniPage() {
         </div>
       </section>
       <section className="card testo-13 text-text-secondary">
-        <h2 className="m-0 mb-1 testo-15 font-semibold text-text">Informazioni</h2>
+        <TitoloSezione className="mb-1">Informazioni</TitoloSezione>
         <div>Versione app {config?.appVersion} — {config?.gioco}</div>
         <div>Dati del compendio derivati da chinhodado/persona5_calculator (Apache-2.0) con verifica su aqiu384/megaten-fusion-tool (Unlicense). Persona 5 Royal è di ATLUS/SEGA.</div>
       </section>

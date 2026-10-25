@@ -50,7 +50,7 @@ export function SceltaLuogo({ valore, onCambia, etichetta = 'Sede', disabilitato
           const luogo = dati.dati?.luoghi.find((l) => l.chiave === k);
           onCambia({ sede: k, quartiere: luogo?.quartiere ?? valore.quartiere });
         }} />
-      {dati.errore && <span role="alert" className="testo-12 text-error">Impossibile caricare i luoghi. <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void dati.ricarica()} /></span>}
+      {dati.errore && <span role="alert" className="testo-12 text-error-testo">Impossibile caricare i luoghi. <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void dati.ricarica()} /></span>}
     </div>
   );
 }

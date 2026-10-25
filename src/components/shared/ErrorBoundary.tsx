@@ -6,7 +6,8 @@
 // quelli di tutti gli errori dell'app (titolo, spiegazione, dettaglio, «Riprova» / «Ricarica l'app» / «Torna alla home»).
 //
 // La conferma per le bozze non salvate non usa né `window.confirm` né `DialogoConferma` (che vive in `MainLayout`, smontato
-// quando si arriva qui): è una domanda dentro la schermata stessa, con «Annulla» che prende il fuoco.
+// quando si arriva qui): è una domanda dentro la schermata stessa, con «Annulla» che prende il fuoco. Esc la chiude come «Annulla»
+// (lotto C) e, chiusa, il fuoco torna al pulsante che l'aveva aperta («Ricarica l'app» o «Torna alla home»).
 // ============================================================
 
 import { Component, createRef, type ReactNode, type ErrorInfo } from 'react';
@@ -36,6 +37,8 @@ const PULSANTE_SECONDARIO = `${PULSANTE} border border-[#a3a3b3] bg-transparent 
 /** Intercetta errori React non gestiti e mostra un recupero leggibile all'utente. */
 export class ErrorBoundary extends Component<Props, State> {
   private annulla = createRef<HTMLButtonElement>();
+  private ricarica = createRef<HTMLButtonElement>();
+  private home = createRef<HTMLButtonElement>();
 
   constructor(props: Props) {
     super(props);
@@ -52,10 +55,29 @@ export class ErrorBoundary extends Component<Props, State> {
     console.error('[ErrorBoundary] Errore catturato:', error, errorInfo);
   }
 
-  /** Aperta la domanda sulle bozze, il fuoco va su «Annulla» (come in DialogoConferma). */
+  /** Aperta la domanda sulle bozze, il fuoco va su «Annulla» (come in DialogoConferma) ed Esc la chiude; chiusa, il fuoco torna al
+   *  pulsante che l'aveva aperta. */
   componentDidUpdate(_: Props, prima: State) {
-    if (this.state.daConfermare && !prima.daConfermare) this.annulla.current?.focus();
+    if (this.state.daConfermare && !prima.daConfermare) {
+      this.annulla.current?.focus();
+      document.addEventListener('keydown', this.tasto);
+    }
+    if (!this.state.daConfermare && prima.daConfermare) {
+      document.removeEventListener('keydown', this.tasto);
+      if (this.state.hasError) (prima.daConfermare.uscita === 'home' ? this.home : this.ricarica).current?.focus();
+    }
   }
+
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.tasto);
+  }
+
+  /** Esc, con la domanda sulle bozze aperta: come «Annulla». */
+  private tasto = (e: KeyboardEvent) => {
+    if (e.key !== 'Escape' || !this.state.daConfermare) return;
+    e.preventDefault();
+    this.setState({ daConfermare: null });
+  };
 
   /** Esce davvero: ricarica la pagina o carica la Home (la guardia `beforeunload` è già stata superata dalla conferma). */
   private esci(uscita: Uscita) {
@@ -106,8 +128,8 @@ export class ErrorBoundary extends Component<Props, State> {
         ) : (
           <>
             <button type="button" className={PULSANTE_PRIMARIO} onClick={this.handleDismiss}>Riprova</button>
-            <button type="button" className={PULSANTE_SECONDARIO} onClick={() => this.chiedi('ricarica')}>Ricarica l'app</button>
-            <button type="button" className={PULSANTE_SECONDARIO} onClick={() => this.chiedi('home')}>Torna alla home</button>
+            <button ref={this.ricarica} type="button" className={PULSANTE_SECONDARIO} onClick={() => this.chiedi('ricarica')}>Ricarica l'app</button>
+            <button ref={this.home} type="button" className={PULSANTE_SECONDARIO} onClick={() => this.chiedi('home')}>Torna alla home</button>
           </>
         )}
       />

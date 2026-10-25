@@ -29,6 +29,7 @@ import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione, IconaSegno, type ChiaveSegno } from '../components/shared/IconaAzione';
 import { formattaYen, prezzoChip } from '../utils/letture';
 import type { VideogiocoDto } from '../types';
+import { TitoloSezione } from '../components/shared/TitoloSezione';
 
 /** Un numero di riepilogo in una carta: il valore in grande e sotto l'etichetta col suo segno. */
 function Numero({ valore, etichetta, segno }: { valore: number | string; etichetta: string; segno: ChiaveSegno }) {
@@ -146,7 +147,7 @@ export function VideogiochiPage() {
           {scelto && (
             <section className="flex flex-col gap-2" aria-label={`Posizione di ${scelto.nome}`}>
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <h2 className="m-0 font-display testo-17 uppercase leading-none">Dove si gioca a «{scelto.nome}»</h2>
+                <TitoloSezione variante="display">Dove si gioca a «{scelto.nome}»</TitoloSezione>
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Chiudi" onClick={() => setSelezionato(null)} />
               </div>
               <DoveSiTrova tipo="attivita" chiave={scelto.chiave} titolo={scelto.nome} altezza={300} />
@@ -154,7 +155,7 @@ export function VideogiochiPage() {
           )}
 
           <section className="flex flex-col gap-2" aria-label="Da giocare">
-            <h2 className="m-0 font-display testo-17 uppercase leading-none">Da giocare · {daFare.length}</h2>
+            <TitoloSezione variante="display">Da giocare · {daFare.length}</TitoloSezione>
             {daFare.length === 0
               ? <p className="m-0 testo-13 text-text-muted" role="status">{giochi.length === 0 ? 'Nessun gioco nel catalogo.' : q ? 'Nessun gioco da fare con questo testo.' : 'Finiti tutti.'}</p>
               : <ul className={griglia} aria-label="Videogiochi da giocare">

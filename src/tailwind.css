@@ -77,10 +77,18 @@
   --color-primary-bg: rgba(229, 53, 43, 0.14);
   /* oro dei suggerimenti del giorno (12.4) */
   --color-oro: #f5c542;
+  /* ---- Mappe (lotto C): i colori ripetuti delle illustrazioni dei Palazzi e dei Memento, presi dalle schermate del gioco ----
+     (le linee e i gradienti dei disegni restano nei loro SVG: sono il disegno, non l'interfaccia) */
+  --color-mappa-oro: #ffd23f;
+  --color-mappa-palazzo: #8b0000;
+  --color-mappa-memento: #8d0012;
 
   --color-success: #22c55e;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
+  /* il rosso d'errore usato come TESTO: #ef4444 fa 4,1:1 sulla superficie e sul fondo rosso trasparente delle affinità «Debole»;
+     questo fa almeno 4,6:1 (lotto C). Fondi e bordi d'errore restano su --color-error */
+  --color-error-testo: #fb7c7c;
   --color-info: #3b82f6;
   --color-text-on-primary: #ffffff;
 
@@ -108,6 +116,12 @@
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-full: 9999px;
+
+  /* ---- Breakpoint (lotto C) ----
+     La scala è quella di Tailwind: sm 640, md 768, lg 1024 (sidebar da qui in su, barra in basso sotto), xl 1280, 2xl 1536.
+     Nei fogli di stile i `@media` si scrivono con questi valori, in una sola forma: `min-width: N px` e, per «sotto», `max-width:
+     N-1 px` (639, 767, 1023). Restano soglie proprie di un solo componente, misurate sul suo contenuto: 420 (griglia dei KPI),
+     860 (sezioni dell'editor delle mappe), 1150 (colonne del Palazzo; e in altezza per i pannelli), 1360 (KPI) e 1440 (diario). */
 
   /* ---- Ombre ---- */
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
@@ -218,7 +232,7 @@
   .btn-secondary:hover:not(:disabled):not([aria-disabled="true"]) { --btn-sfondo: var(--color-bg-tertiary); --btn-bordo: var(--color-primary); }
   .btn-ghost { color: var(--color-text-secondary); }
   .btn-ghost:hover:not(:disabled):not([aria-disabled="true"]) { color: var(--color-text); --btn-sfondo: rgba(255, 255, 255, 0.05); }
-  .btn-danger { color: var(--color-error); --btn-bordo: rgba(239, 68, 68, 0.45); }
+  .btn-danger { color: var(--color-error-testo); --btn-bordo: rgba(239, 68, 68, 0.45); }
   .btn-danger:hover:not(:disabled):not([aria-disabled="true"]) { --btn-sfondo: rgba(239, 68, 68, 0.12); }
   /* L'altezza c'era gia'; mancava la larghezza. Un pulsante con dentro un solo carattere — la
      freccia che inverte l'ordinamento — misurava 35 px, e col dito un bersaglio e' quadrato:
@@ -318,11 +332,11 @@
   /* Sul telefono ogni finestra è un **foglio dal basso** (L2, §4.5, decisione di Stesura): largo quanto lo schermo, angoli tondi
      solo in alto, sopra il bordo inferiore (e lo spazio di sicurezza del telefono). Scorre solo il corpo: intestazione e piè di
      pagina restano fermi. Si chiude come prima, con la X o con Esc. A 768 px e oltre le finestre non cambiano. */
-  @media (max-width: 767.98px) {
+  @media (max-width: 767px) {
     .modal-overlay { align-items: flex-end; padding: 0; padding-top: calc(8px + env(safe-area-inset-top)); }
     .modal-content, .modal-content--larga { width: 100%; max-height: calc(100dvh - 24px); border-radius: var(--radius-lg) var(--radius-lg) 0 0; border-bottom: none; padding-bottom: env(safe-area-inset-bottom); animation: slide-up 0.18s ease-out; }
   }
-  @media (max-width: 767.98px) and (prefers-reduced-motion: reduce) {
+  @media (max-width: 767px) and (prefers-reduced-motion: reduce) {
     .modal-content, .modal-content--larga { animation: none; }
   }
   /* Cassetto laterale (Confidenti della partita, 2026-10-24): da 768 px entra da destra ed è alto quanto lo schermo; la pagina sotto
@@ -332,7 +346,7 @@
     .modal-content--cassetto { width: min(880px, calc(100vw - 56px)); max-height: none; height: 100dvh; border-radius: var(--radius-lg) 0 0 var(--radius-lg);
       border-right: none; animation: cassetto-entra 0.18s ease-out; }
   }
-  @media (max-width: 767.98px) {
+  @media (max-width: 767px) {
     .modal-content--cassetto { height: calc(100dvh - 24px); }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -608,7 +622,7 @@
   .persona-chip--evidenza .persona-chip__livello { background: var(--color-text); color: var(--color-bg); }
   .persona-chip__arcano { width: 18px; height: 18px; object-fit: contain; }
   .persona-chip__arcano-nome { text-transform: uppercase; letter-spacing: .05em; font-size: var(--testo-12); color: var(--color-text-muted); }
-  .persona-chip__rara { color: #f5c542; font-size: var(--testo-12); }
+  .persona-chip__rara { color: var(--color-oro); font-size: var(--testo-12); }
   .persona-chip__suffisso { color: var(--color-success); font-weight: 700; }
   .persona-chip--scorta { border-color: var(--color-success); }
   .persona-chip__spunta { position: absolute; top: 0; right: 0; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; background: var(--color-success); color: #fff; clip-path: polygon(0 0, 100% 0, 100% 100%); padding: 1px 1px 0 0; box-sizing: border-box; }
@@ -626,7 +640,7 @@
   .ricetta-riga__dati { display: flex; align-items: center; justify-content: flex-end; gap: 10px; white-space: nowrap; }
   .ricetta-riga__tipo { font-size: var(--testo-12); text-transform: uppercase; letter-spacing: .06em; color: var(--color-text-muted); border: 1px solid var(--color-border); padding: 3px 7px; }
   .ricetta-riga__costo { font-family: var(--font-display); font-size: var(--testo-17); min-width: 92px; text-align: right; font-variant-numeric: tabular-nums; color: var(--color-text); }
-  @media (max-width: 640px) { .ricetta-riga { grid-template-columns: 1fr; } .ricetta-riga__dati { justify-content: flex-start; } }
+  @media (max-width: 639px) { .ricetta-riga { grid-template-columns: 1fr; } .ricetta-riga__dati { justify-content: flex-start; } }
 
   /* ---- Visore delle mappe a livelli (Fase 13.2): tela, spilli a goccia, pannello laterale ---- */
   .visore-mappa { display: flex; flex-direction: column; background: var(--color-bg); color: var(--color-text); container-type: inline-size; }
@@ -950,10 +964,10 @@
   .kpi-tile--compatto .kpi-value { font-size: var(--testo-20); line-height: 1.05; }
 
   /* ---- Suggerimenti del giorno (12.4): alone dorato sulle entità da toccare per seguire la guida ---- */
-  .suggerito { position: relative; border-color: var(--color-oro, #f5c542) !important; box-shadow: 0 0 0 1px var(--color-oro, #f5c542), 0 0 16px rgba(245, 197, 66, .28); }
-  .suggerito--riga { background: color-mix(in srgb, #f5c542 12%, transparent); box-shadow: inset 3px 0 0 var(--color-oro, #f5c542); border-color: transparent !important; }
-  .suggerito--chip { --chip-sfondo: color-mix(in srgb, #f5c542 20%, var(--color-bg-secondary)); --chip-bordo: var(--color-oro, #f5c542); color: #f5c542; box-shadow: none; }
-  .targa-suggerito { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; font-size: var(--testo-12); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #1a1405; background: var(--color-oro, #f5c542); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); }
+  .suggerito { position: relative; border-color: var(--color-oro) !important; box-shadow: 0 0 0 1px var(--color-oro), 0 0 16px rgba(245, 197, 66, .28); }
+  .suggerito--riga { background: color-mix(in srgb, var(--color-oro) 12%, transparent); box-shadow: inset 3px 0 0 var(--color-oro); border-color: transparent !important; }
+  .suggerito--chip { --chip-sfondo: color-mix(in srgb, var(--color-oro) 20%, var(--color-bg-secondary)); --chip-bordo: var(--color-oro); color: var(--color-oro); box-shadow: none; }
+  .targa-suggerito { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; font-size: var(--testo-12); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #1a1405; background: var(--color-oro); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); }
   .targa-suggerito--compatta { padding: 1px 5px; font-size: var(--testo-12); }
   .targa-suggerito > svg { flex-shrink: 0; }
 
@@ -1000,7 +1014,7 @@
   .riga-persona__livello--grande > span { font-size: var(--testo-32); }
   .punto-stato { display: inline-block; width: 9px; height: 9px; flex-shrink: 0; border-radius: 50%; }
   .punto-stato--reali { background: #2fbf71; }
-  .punto-stato--stima { background: #f5c542; }
+  .punto-stato--stima { background: var(--color-oro); }
   .quadrato-skill { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border: 1px solid var(--color-border); border-radius: 3px; }
   .posto-libero { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 56px; border: 1px dashed var(--color-text-muted); border-radius: var(--radius-md); font-size: var(--testo-12); color: var(--color-text-muted); }
   .posto-libero--aggiungi { background: none; cursor: pointer; color: var(--color-text); font-weight: 600; }
@@ -1071,7 +1085,7 @@
   .risposta-voce--migliore { background: color-mix(in srgb, var(--color-primary) 18%, var(--color-bg-secondary)); box-shadow: inset 0 0 0 1px var(--color-primary); }
   /* ---- Azioni della guida: consigliate in oro, bloccate in grigio (12.4) ---- */
   .azione { border-left: 3px solid transparent; padding-left: 6px; }
-  .azione--consigliata { border-left-color: #f5c542; background: color-mix(in srgb, #f5c542 8%, transparent); }
+  .azione--consigliata { border-left-color: var(--color-oro); background: color-mix(in srgb, var(--color-oro) 8%, transparent); }
   .azione--bloccata { border-left-color: var(--color-text-muted); color: var(--color-text-secondary); }
   .azione--bloccata > div > span:first-child { color: var(--color-text-muted); }
   .azione--evidenziata { outline: 1px solid var(--color-primary); outline-offset: -1px; }
@@ -1086,10 +1100,10 @@
   .editor-mappa__tipo--attivo { border-color: var(--color-primary); background: var(--color-primary-bg); }
   .editor-mappa__campo { display: flex; flex-direction: column; gap: 3px; font-size: var(--testo-12); color: var(--color-text-secondary); }
   .editor-mappa__campo .form-input { min-height: 36px; padding: 4px 8px; font-size: var(--testo-13); }
-  .editor-mappa__avviso { font-size: var(--testo-12); color: var(--color-warning, #f5c542); }
+  .editor-mappa__avviso { font-size: var(--testo-12); color: var(--color-warning); }
   /* palette dei tipi a gruppi (15.24) e righe «senza passaggio» dell'albero: testo + pulsante «Crea passaggio» (44 px al tocco) */
   .editor-mappa__gruppo { font-size: var(--testo-12); text-transform: uppercase; letter-spacing: .06em; color: var(--color-text-muted); padding: 2px 0 0; }
-  .editor-mappa__senza-passaggio { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 2px 8px 4px 32px; font-size: var(--testo-12); color: var(--color-warning, #f5c542); }
+  .editor-mappa__senza-passaggio { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 2px 8px 4px 32px; font-size: var(--testo-12); color: var(--color-warning); }
   .visore-mappa__sezione { display: flex; flex-direction: column; gap: 6px; }
   .visore-mappa__intestazione { margin: 0; font-family: var(--font-display); font-size: var(--testo-17); text-transform: uppercase; letter-spacing: .03em; color: var(--color-text-secondary); }
   .visore-mappa__figlia, .visore-mappa__voce { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: none; border: 1px solid transparent; padding: 6px 8px; color: var(--color-text); font: inherit; font-size: var(--testo-13); cursor: pointer; min-height: 44px; min-width: 44px; }
@@ -1124,7 +1138,7 @@
   }
   /* Sul telefono il visore ospitato con `.visore-alto-quanto-immagine` (l'illustrazione del quartiere) è alto quanto la figura, con la
      proporzione che il visore dichiara: un riquadro fisso di 400 px lasciava 240 px vuoti sotto un'illustrazione larga (UX2-6, L2). */
-  @media (max-width: 639.98px) {
+  @media (max-width: 639px) {
     .visore-alto-quanto-immagine { height: auto !important; }
     .visore-alto-quanto-immagine > .visore-mappa { height: auto; }
     .visore-alto-quanto-immagine .visore-mappa--pannello-chiuso .visore-mappa__corpo { grid-template-rows: auto; }
@@ -1167,7 +1181,7 @@
     vertical-align: middle;
   }
   /* su schermi stretti celle più compatte, così le tabelle restano leggibili senza scorrimento */
-  @media (max-width: 640px) {
+  @media (max-width: 639px) {
     .tabella { font-size: var(--testo-13); }
     .tabella th, .tabella td { padding: 6px 6px; }
   }
@@ -1204,7 +1218,7 @@
   }
   /* La finestra stretta resta un caso valido: un telefono ha poco spazio anche se il contenitore
      dice altro, e le due condizioni non si escludono. */
-  @media (max-width: 640px) {
+  @media (max-width: 639px) {
     .tabella--adattiva thead { display: none; }
     .tabella--adattiva tbody tr { display: block; padding: 8px 0; border-bottom: 1px solid var(--color-border); }
     .tabella--adattiva td { display: flex; gap: 8px; padding: 2px 0; border-bottom: 0; }
@@ -1456,6 +1470,9 @@
   @media (min-width: 1024px) {
     .btn-visivo--icona-lg { padding: 4px 6px; gap: 0; }
     .btn-visivo--icona-lg .btn-visivo__testo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    /* nel menu «Modifica ⋯» il segno resta anche qui: senza, la matita sola non dice che apre un menu (lotto C) */
+    .menu-modifica > .btn-visivo--icona-lg .btn-visivo__testo { position: static; width: auto; height: auto; overflow: visible; clip-path: none; }
+    .menu-modifica > .btn-visivo--icona-lg .menu-modifica__parola { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   }
   @media (min-width: 1280px) {
     .btn-visivo--icona-xl { padding: 4px 6px; gap: 0; }
@@ -1463,7 +1480,7 @@
   }
   /* oro (azioni consigliate, scadenze, «Oggi c'è il quiz») e grigio (azioni bloccate, 12.4): stavano prima di `.chip`, che con la
      stessa specificità ne riscriveva colore e variabili, e uscivano grigi come un chip qualunque (trovato il 2026-10-17) */
-  .chip--oro { --chip-sfondo: color-mix(in srgb, #f5c542 22%, var(--color-bg-secondary)); --chip-bordo: #f5c542; color: #f5c542; }
+  .chip--oro { --chip-sfondo: color-mix(in srgb, var(--color-oro) 22%, var(--color-bg-secondary)); --chip-bordo: var(--color-oro); color: var(--color-oro); }
   .chip--bloccata { --chip-sfondo: color-mix(in srgb, var(--color-text-muted) 18%, var(--color-bg-secondary)); --chip-bordo: var(--color-text-muted); color: var(--color-text-secondary); }
   /* il chip con l'icona («Sulla mappa»): 6 px fra icona e testo, che `.chip` (4 px) riscriveva quando stava prima */
   .chip--icona { gap: 6px; }
@@ -1707,7 +1724,7 @@
   .menu-modifica__voci[hidden] { display: none; }
   .menu-modifica__voci > .btn, .menu-modifica__voci > * > .btn { width: 100%; justify-content: flex-start; }
   .intestazione__illustrazione { max-height: 120px; width: auto; max-width: 40vw; object-fit: contain; filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6)); }
-  @media (max-width: 640px) { .intestazione__illustrazione { max-height: 64px; max-width: 26vw; } }
+  @media (max-width: 639px) { .intestazione__illustrazione { max-height: 64px; max-width: 26vw; } }
 
   /* ---- Sfondo a tema della sezione (asset «sfondi/*»): livello sotto il contenuto con velo scuro per la leggibilità ---- */
   .sfondo-sezione {
@@ -1912,6 +1929,10 @@
    ============================================================ */
 .sr-only { top: 0; left: 0; }
 
+/* (lotto C) regole che erano fuori da ogni @layer: dentro `components`, così le utility di Tailwind le possono
+   sovrascrivere come per tutte le altre componenti */
+@layer components {
+
 /* Il contenuto decide il formato anche con la sidebar aperta.
  *
  * **Colori del tema, non tinte a mano.** Qui c'erano sette valori esadecimali scritti a mano
@@ -1973,7 +1994,7 @@
 .condizioni-editor .form-input { max-width:100%; min-width:0; }
 
 .condizioni-blocco { --bordo-blocco: var(--color-primary); display:flex; flex-direction:column; gap:8px; min-width:0; border-left:3px solid var(--bordo-blocco); padding:6px 0 6px 10px; background:color-mix(in srgb, var(--bordo-blocco) 6%, transparent); }
-.condizioni-blocco--almeno-una { --bordo-blocco: #f5c542; }
+.condizioni-blocco--almeno-una { --bordo-blocco: var(--color-oro); }
 .condizioni-blocco--negato { --bordo-blocco: var(--color-error); }
 .condizioni-blocco--radice { border-left:0; padding-left:0; background:transparent; }
 .condizioni-blocco__testa { position:relative; display:flex; align-items:center; gap:8px; flex-wrap:wrap; min-width:0; padding-right:48px; }
@@ -1987,7 +2008,7 @@
 .condizione-riga { position:relative; display:flex; flex-wrap:wrap; align-items:center; gap:6px; min-width:0; padding:4px 48px 4px 6px; border:1px solid var(--color-border); background:var(--color-bg-secondary); }
 .condizione-riga--negata { border-color:var(--color-error); }
 .condizione-non { min-height:44px; min-width:44px; padding:0 8px; border:1px solid var(--color-border); background:transparent; color:var(--color-text-muted); font:inherit; font-size:var(--testo-12); font-weight:700; letter-spacing:0.08em; cursor:pointer; }
-.condizione-non--attivo { border-color:var(--color-error); background:color-mix(in srgb, var(--color-error) 22%, var(--color-bg-secondary)); color:var(--color-error); }
+.condizione-non--attivo { border-color:var(--color-error); background:color-mix(in srgb, var(--color-error) 22%, var(--color-bg-secondary)); color:var(--color-error-testo); }
 .condizione-stato { flex:1 1 180px; min-width:160px; }
 /* I comandi delle condizioni: 36 px erano nati per il pannello fitto dell'editor delle mappe, ma
    `CondizioniEditor` lo usano anche il modulo del catalogo e la scheda dei contenuti della guida,
@@ -2006,7 +2027,8 @@
 .condizione-origine { display:none; font-size:var(--testo-12); color:var(--color-text-muted); margin-left:auto; }
 @media (min-width: 1280px) { .condizione-origine { display:inline; } }
 .condizione-togli { position:absolute; top:2px; right:2px; width:44px; min-height:44px; border:0; background:transparent; color:var(--color-text-muted); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; }
-.condizione-togli:hover { color:var(--color-error); }
+.condizione-togli:hover { color:var(--color-error-testo); }
+}
 
 /* Selettore con ricerca: pulsante con etichetta e valore; tendina con campo e voci da 44 px. */
 /* La regola di base sta nel livello dei componenti: fuori dai layer `min-width:0` batteva le utility `min-w-[…]` che chi usa il
@@ -2045,6 +2067,10 @@
 /* Il selettore dell'editor sta accanto a campi da 44 px: due comandi affiancati con due misure
    erano l'ultima misura doppia rimasta. */
 .editor-mappa__campo .selettore__scelta { min-height:44px; }
+
+/* (lotto C) regole che erano fuori da ogni @layer: dentro `components`, così le utility di Tailwind le possono
+   sovrascrivere come per tutte le altre componenti */
+@layer components {
 /* Stessa ragione per i campi di testo: i 36 px sono nati per il pannello fitto dell'editor su
    monitor, ma la classe la usano anche schede che si compilano col tablet in mano (Denaro e
    squadra), dove un campo alto 36 px si manca e si sbaglia riga. A ogni larghezza, perché un campo
@@ -2107,6 +2133,7 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .progressi-avvenuti { border-top:1px solid var(--color-border); padding-top:4px; }
 .progressi-barra { display:block; height:6px; background:var(--color-bg-tertiary); border:1px solid var(--color-border); overflow:hidden; }
 .progressi-barra > span { display:block; height:100%; background:var(--color-primary); }
+}
 
 @media (max-width: 639px) {
   .condizione-riga { padding:6px; }
@@ -2118,6 +2145,10 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
   .selettore--compatto .selettore__scelta { width:100%; }
 }
 
+/* (lotto C) regole che erano fuori da ogni @layer: dentro `components`, così le utility di Tailwind le possono
+   sovrascrivere come per tutte le altre componenti */
+@layer components {
+
 /* Editor: una sezione alla volta, campi conservati al cambio pannello. */
 .editor-mappa__sezioni { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; position:sticky; top:-10px; z-index:5; background:#131419; padding:8px 0; }
 .editor-mappa__sezioni button { min-height:44px; border:1px solid var(--color-border); background:#1b1c20; color:var(--color-text); font:inherit; font-size:var(--testo-13); cursor:pointer; }
@@ -2128,7 +2159,7 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .editor-mappa__aiuto { margin:0; padding:12px; background:#1b1c20; font-size:var(--testo-14); line-height:1.5; color:var(--color-text-secondary); }
 .visore-mappa--editor .editor-mappa__campo .form-input { min-height:44px; font-size:var(--testo-14); }
 .visore-mappa--editor .visore-mappa__pannello { background:#131419; }
-@media (max-width:860px) { .editor-mappa__sezioni { grid-template-columns:repeat(4,minmax(0,1fr)); } .editor-mappa__sezioni button { font-size:var(--testo-12); padding:4px 2px; } }
+@media (max-width: 860px) { .editor-mappa__sezioni { grid-template-columns:repeat(4,minmax(0,1fr)); } .editor-mappa__sezioni button { font-size:var(--testo-12); padding:4px 2px; } }
 
 .ingresso-quartiere__immagine { position:relative; width:min(100%,720px); align-self:center; cursor:crosshair; overflow:hidden; line-height:0; }
 .ingresso-quartiere__immagine img { width:100%; height:auto; display:block; }
@@ -2138,6 +2169,7 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 
 /* Tipo di luogo: la pastiglia porta il colore dello spillo del tipo (shared/tipiLuogo) come bordo sinistro e l'icona dello spillo. */
 .luogo-tipo { display:inline-flex; align-items:center; gap:4px; border-left:3px solid var(--luogo-tipo-colore, var(--color-border)); }
+}
 
 /* Selettore a tessere (SelettoreIcone): figura sopra, nome sotto, 44 px minimi; le tessere si dividono la riga e vanno a capo. */
 .selettore-icone { display:flex; flex-wrap:wrap; gap:6px; min-width:0; }
@@ -2149,12 +2181,15 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .selettore-icone__tessera:focus-visible { outline:2px solid white; outline-offset:2px; }
 .selettore-icone__icona { display:inline-flex; line-height:0; }
 .selettore-icone__nome { text-align:center; overflow-wrap:normal; word-break:normal; hyphens:auto; }
-@media (max-width:767px) { .selettore-icone__tessera, .selettore-icone--compatto .selettore-icone__tessera { max-width:none; min-width:0; flex:0 1 calc(33.333% - 4px); } }
+@media (max-width: 767px) { .selettore-icone__tessera, .selettore-icone--compatto .selettore-icone__tessera { max-width:none; min-width:0; flex:0 1 calc(33.333% - 4px); } }
+
+/* (lotto C) regole che erano fuori da ogni @layer: dentro `components`, così le utility di Tailwind le possono
+   sovrascrivere come per tutte le altre componenti */
+@layer components {
 
 /* Filtri degli articoli: una riga con ricerca, «Per chi» e azzera; sotto le categorie a tessere e i segmenti. */
 .filtri-articoli { display:flex; flex-direction:column; gap:8px; min-width:0; }
 .filtri-articoli__riga { display:flex; flex-wrap:wrap; align-items:center; gap:6px; min-width:0; }
-.filtri-articoli__riga > .relative { flex:1 1 240px; min-width:0; }
 .segmenti { display:inline-flex; flex-wrap:wrap; border:1px solid var(--color-border); }
 /* `overflow-wrap:normal`: il body ha `anywhere`, che sul telefono spezzava «Promemoria» a metà parola; così la voce non scende
    sotto la parola più lunga e, se lo spazio non basta, a capo va il segmento intero (`flex-wrap`), non le lettere. */
@@ -2164,7 +2199,7 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .segmenti__voce:focus-visible { outline:2px solid white; outline-offset:-2px; }
 /* Sul telefono le voci si spartiscono la riga in base al testo (`auto`, mai sotto la parola più lunga): a parti uguali
    (`1 1 0`) «Promemoria» usciva dal suo riquadro accanto a tre voci corte. */
-@media (max-width:767px) { .segmenti { display:flex; width:100%; } .segmenti__voce { flex:1 1 auto; min-width:min-content; padding:0 6px; } }
+@media (max-width: 767px) { .segmenti { display:flex; width:100%; } .segmenti__voce { flex:1 1 auto; min-width:min-content; padding:0 6px; } }
 
 /* Editor degli orari: chip per i giorni e le fasce, levetta per la pioggia, nota, anteprima. */
 .orari-editor { display:flex; flex-direction:column; gap:8px; }
@@ -2224,6 +2259,7 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
    invisibile dentro un contenitore che ritaglia non riceve niente. */
 .spillo-tokyo, .spillo-esteso { position: absolute; }
 .spillo-tokyo::after, .spillo-esteso::after { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
+}
 
 /* ---- Aree che scorrono dentro la pagina (richiesta dell'utente, 2026-09-29) ----
    «Quando gestisci gli scrollbar dentro altri scrollbar l'area in cui viene applicato lo scrollbar deve essere ben chiara;
@@ -2258,6 +2294,10 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--color-primary) 75%, transparent) transparent;
 }
+
+/* (lotto C) regole che erano fuori da ogni @layer: dentro `components`, così le utility di Tailwind le possono
+   sovrascrivere come per tutte le altre componenti */
+@layer components {
 
 /* ---- Finestra della voce della giornata (tavole approvate il 2026-10-24) ----
    Una colonna fino a 1023 px (stesso ordine: che cosa è, testo, tipo, quale, poi spuntando succede, quando, posto, effetti aggiuntivi);
@@ -2295,9 +2335,132 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .posto-voce__maniglia:focus-visible { outline: 2px solid white; outline-offset: -2px; }
 .posto-voce__questa--trascinata { position: relative; z-index: 2; box-shadow: 0 10px 24px rgba(0, 0, 0, .6); outline: 1px solid var(--color-primary); }
 .posto-voce__slot { display: flex; align-items: center; justify-content: center; min-height: 28px; border: 2px dashed var(--color-primary); border-radius: 6px; font-size: var(--testo-12); color: var(--color-primary-testo); }
+}
 
 /* Scala tipografica: `testo-12`, `testo-13`… `testo-micro` (valori in `--testo-*`, @theme). Solo la dimensione, non l'interlinea:
    prende il posto delle dimensioni scritte a mano `text-[Npx]`, che non toccavano l'interlinea. */
 @utility testo-* {
   font-size: --value(--testo-*);
 }
+
+/* (lotto C) regole che erano fuori da ogni @layer: dentro `components`, così le utility di Tailwind le possono
+   sovrascrivere come per tutte le altre componenti */
+@layer components {
+
+/* ============================================================
+   Lotto C (punto 10 e residui): navigazione e fuoco
+   ============================================================ */
+/* «Vai al contenuto»: il primo elemento col Tab; fuori dallo schermo finché non ha il fuoco, poi in alto a sinistra sopra la Topbar */
+.salta-al-contenuto { position: fixed; top: 8px; left: 8px; z-index: var(--z-toast); display: inline-flex; align-items: center; min-height: 44px; padding: 8px 16px;
+  border-radius: var(--radius-md); background: var(--color-primary); color: var(--color-text-on-primary); font-family: var(--font-sans); font-size: var(--testo-15);
+  font-weight: 700; text-decoration: none; transform: translateY(calc(-100% - 16px)); }
+.salta-al-contenuto:focus { transform: none; outline: 2px solid white; outline-offset: 2px; }
+/* il fuoco messo da programma su <main> e sul titolo della pagina (useFuocoNavigazione): niente cornice, non è un comando */
+#contenuto:focus, #contenuto h1[tabindex="-1"]:focus { outline: none; }
+/* «Modifica ⋯» sul telefono: la parola «Modifica» si nasconde (resta nel nome accessibile), il segno ⋯ resta accanto alla matita:
+   si capisce che apre un menu. Supera la regola delle testate (`.intestazione-scheda .menu-modifica`, sotto i 640 px) che nascondeva
+   tutto il testo. */
+.menu-modifica__segno { font-family: var(--font-sans); font-weight: 700; letter-spacing: 0; }
+@media (max-width: 639px) {
+  .intestazione-scheda .menu-modifica > .btn-visivo .btn-visivo__testo { position: static; width: auto; height: auto; overflow: visible; clip-path: none; }
+  .intestazione-scheda .menu-modifica > .btn-visivo { gap: 2px; }
+  .intestazione-scheda .menu-modifica__parola { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .intestazione-scheda .menu-modifica__segno { font-size: var(--testo-17); }
+}
+}
+
+/* ============================================================
+   Lotto C · C2 (2026-10-25) — densità su telefono, campi di ricerca, Home al 125%, misura della prosa
+   ============================================================ */
+@layer components {
+  /* Una sola «×» nei campi di ricerca: quella da 44 px di `CampoRicerca`; la croce nativa di `type="search"` si toglie. */
+  .campo-ricerca__input::-webkit-search-cancel-button,
+  .campo-ricerca__input::-webkit-search-decoration { -webkit-appearance: none; appearance: none; display: none; }
+
+  /* Catalogo degli oggetti: sul telefono ogni oggetto è una riga compatta — nome (e nome originale) con il prezzo a destra,
+     sotto la categoria e l'effetto su una riga sola (il testo intero nel suggerimento e nella scheda dell'oggetto). Era una
+     tabella etichetta/valore da ~137 px per oggetto con «OGGETTO» ripetuto. Da 641 px torna la tabella. */
+  :has(> .tabella-oggetti) { container-type: inline-size; }
+  .tabella-oggetti__breve { display: none; }
+  @container (max-width: 640px) {
+    .tabella-oggetti, .tabella-oggetti tbody { display: block; }
+    .tabella-oggetti thead { display: none; }
+    .tabella-oggetti tbody tr { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 8px; align-items: center;
+      padding: 2px 0 6px; border-bottom: 1px solid var(--color-border); }
+    .tabella-oggetti tbody tr:hover { background: transparent; }
+    .tabella-oggetti td { display: block; padding: 0; border-bottom: 0; min-width: 0; }
+    .tabella-oggetti td.tabella-oggetti__nome { grid-column: 1 / 3; grid-row: 1; display: flex; align-items: center; gap: 6px; overflow: hidden; }
+    .tabella-oggetti__nome > a { flex: 0 1 auto; min-width: 0; }
+    /* tutta la riga apre l'oggetto (il link del nome si estende sulla riga): il nome da solo era un bersaglio da 14–23 px */
+    .tabella-oggetti tbody tr { position: relative; }
+    .tabella-oggetti__nome > a::after { content: ""; position: absolute; inset: 0; }
+    /* il nome originale e il destinatario cedono lo spazio per primi: il nome dell'oggetto va a capo solo se da solo non ci sta */
+    .tabella-oggetti__nome > .tabella-oggetti__altro { display: inline; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1000 auto; min-width: 0; }
+    .tabella-oggetti td.tabella-oggetti__prezzo { grid-column: 3; grid-row: 1; text-align: right; white-space: nowrap; font-weight: 600; }
+    .tabella-oggetti td.tabella-oggetti__categoria { grid-column: 1; grid-row: 2; font-size: var(--testo-12); color: var(--color-text-muted); white-space: nowrap; }
+    .tabella-oggetti__categoria::after { content: " ·"; }
+    .tabella-oggetti td.tabella-oggetti__effetto { grid-column: 2 / 4; grid-row: 2; font-size: var(--testo-12); color: var(--color-text-secondary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tabella-oggetti__lungo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .tabella-oggetti__breve { display: inline; color: var(--color-text-muted); }
+  }
+
+  /* Home con il testo ingrandito (125%): «CONOSCENZA» in maiuscolo spaziato chiedeva ~119 px in una tessera da 98 e usciva
+     tagliato senza puntini. Le etichette delle tessere della Home vanno in tondo (~20% più strette), le colonne crescono con il
+     testo (6,25 rem: 100 px al 100%, 125 px al 125%) e, se ancora non bastasse, l'etichetta finisce in «…» con il nome intero
+     nel suggerimento. */
+  .home-doti { grid-template-columns: repeat(auto-fill, minmax(max(100px, 6.25rem), 1fr)); }
+  /* `min-width: 0`: il `.kpi-tile` di base (120 px, definito più avanti) vinceva su `.kpi-tile--compatto` e le tessere, più
+     larghe della loro colonna, si sovrapponevano l'una all'altra anche al 100% */
+  .home-doti .kpi-tile--compatto { padding: 4px 8px; min-width: 0; }
+  .home-doti .kpi-label { text-transform: none; letter-spacing: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .home-arcani-vuoto { line-height: 1.35; }
+  /* le targhette dei vertici della stella crescono con il testo e al 125% uscivano di ~35 px sopra le tessere accanto: il
+     margine laterale cresce con loro (0 al 100%, 32 px al 125%) */
+  @media (min-width: 768px) { .home-carta__stella { margin-inline: max(0px, calc((1rem - 16px) * 8)); } }
+
+  /* Misura di lettura per la prosa e gli elenchi `dl` su desktop largo: le righe oltre ~75 caratteri si leggono male.
+     Si mette sul contenitore del testo (o su un elenco `dl`); le griglie e le tabelle restano larghe. */
+  .prosa-misurata { max-width: 72ch; }
+  /* (lotto C) la stessa misura per i paragrafi di prosa di tutte le pagine: su desktop largo andavano fino a 1100–1200 px (oltre 200
+     caratteri per riga). 65ch fa circa 85–90 caratteri reali per riga; i paragrafi più stretti non cambiano. I centrati restano
+     liberi: un riquadro più stretto del contenitore li sposterebbe a sinistra */
+  #contenuto p:not(.text-center) { max-width: 65ch; }
+  .prosa-misurata-figli > :is(p, ul, ol, dl, div) { max-width: 72ch; }
+}
+/* ---- Lotto C (2026-10-25): le frecce sulle sfumature delle file che scorrono (FilaScorrevole) ----
+   La fila sta in una cornice (`.fila-cornice`) e le frecce le stanno sopra, ai bordi: compaiono solo dal lato in cui la fila
+   continua (`data-prima`/`data-dopo`, gli stessi attributi della sfumatura) e la fanno scorrere di una pagina. Coprono la parte già
+   sfumata della fila; sui dispositivi a tocco il bersaglio è di 44 px (e la sfumatura un poco più larga, a fargli posto), col mouse
+   basta il cerchio. Sono nascoste ai lettori di schermo e fuori dall'ordine di Tab: la tastiera scorre la fila seguendo il fuoco. */
+@layer components {
+  .fila-cornice { position: relative; display: flex; min-width: 0; }
+  .fila-cornice > .fila-scorrevole { flex: 1 1 auto; min-width: 0; }
+  /* quando la fila scorre, ai due capi c'è lo spazio di una freccia: a fila tutta a sinistra (o a destra) la prima (o l'ultima)
+     scheda non resta sotto la freccia dell'altro lato; e lo scorrimento col fuoco tiene la scheda fuori dalle frecce */
+  .fila-cornice > .fila-scorrevole[data-scorre] { padding-inline: 32px; scroll-padding-inline: 32px; }
+  @media (pointer: coarse) { .fila-cornice > .fila-scorrevole[data-scorre] { padding-inline: 44px; scroll-padding-inline: 44px; } }
+  .fila-freccia {
+    display: none; position: absolute; top: 50%; z-index: 1; width: 32px; height: 32px; transform: translateY(-50%);
+    align-items: center; justify-content: center; padding: 0; border: 0; background: transparent; color: var(--color-text); cursor: pointer;
+  }
+  .fila-freccia--prima { left: 0; justify-content: flex-start; }
+  .fila-freccia--dopo { right: 0; justify-content: flex-end; }
+  .fila-scorrevole[data-prima] ~ .fila-freccia--prima,
+  .fila-scorrevole[data-dopo] ~ .fila-freccia--dopo { display: flex; }
+  .fila-freccia__segno {
+    display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 999px;
+    border: 1px solid var(--color-border); background: color-mix(in srgb, var(--color-bg-secondary) 90%, transparent);
+    transition: border-color .12s, color .12s;
+  }
+  .fila-freccia:hover .fila-freccia__segno { border-color: var(--color-primary); color: var(--color-primary-testo); }
+  @media (pointer: coarse) {
+    .fila-freccia { width: 44px; height: 44px; }
+    .fila-scorrevole[data-prima] { --fila-prima: 48px; }
+    .fila-scorrevole[data-dopo] { --fila-dopo: 52px; }
+  }
+}
+
+/* Fuori da ogni @layer di proposito (lotto C): deve vincere sull'utility `min-w-[180px]` di `CampoRicerca`, che nella riga dei filtri
+   lascerebbe la ricerca a 180 px e allargherebbe il selettore accanto (misurato su Domande, Libri e Richieste a 390 px). */
+.filtri-articoli__riga > .relative { flex:1 1 240px; min-width:0; }

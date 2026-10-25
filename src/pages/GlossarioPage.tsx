@@ -10,6 +10,7 @@ import { PageState, EmptyState } from '../components/shared/PageState';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import type { TermineDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { TitoloSezione } from '../components/shared/TitoloSezione';
 
 const NOMI_CATEGORIA: Record<string, string> = {
   battaglia: 'Battaglia',
@@ -70,7 +71,7 @@ export function GlossarioPage() {
         ) : (
           [...perCategoria.entries()].map(([cat, termini]) => (
             <section key={cat} className="card">
-              <h2 className="m-0 mb-2 testo-15 font-semibold">{NOMI_CATEGORIA[cat] ?? cat}</h2>
+              <TitoloSezione className="mb-2">{NOMI_CATEGORIA[cat] ?? cat}</TitoloSezione>
               <dl className="m-0 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
                 {termini.map((t) => (
                   <div key={`${t.categoria}/${t.chiave}`} className="flex flex-col">

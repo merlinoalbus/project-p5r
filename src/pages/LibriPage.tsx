@@ -22,11 +22,11 @@ import { notifica } from '../stores/notificationStore';
 import { avvisaDotiDaSegnare } from '../utils/dotiDaSegnare';
 import { PageState } from '../components/shared/PageState';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
-import { TitoloSezione } from '../components/shared/TitoloSezione';
-import { IconaAzione, IconaSegno } from '../components/shared/IconaAzione';
+import { IconaAzione } from '../components/shared/IconaAzione';
+import { TesseraKpi } from '../components/shared/TesseraKpi';
+import { CatalogoDaCompletare, PannelloPosizione } from '../components/guida/CatalogoDaCompletare';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { NotaPuntiDote } from '../components/shared/NotaPuntiDote';
-import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
@@ -55,7 +55,6 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
   const [stato, setStato] = useState<StatoLettura>('tutti');
   const [dote, setDote] = useState('');
   const [selezionato, setSelezionato] = useState<string | null>(null);
-  const [mostraFatti, setMostraFatti] = useState(false);
   const [fonteSelezionata, setFonteSelezionata] = useState(0);
   const pannelloRef = useRef<HTMLElement | null>(null);
 
@@ -145,31 +144,29 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
   };
 
   return <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
-    {d && <div className="flex flex-col gap-4">
-      {!soloChiave && <>
-      <IntestazionePagina titolo="Libri" sottotitolo={partitaId
+    {d && <CatalogoDaCompletare
+      soloChiave={soloChiave}
+      intestazione={<IntestazionePagina titolo="Libri" sottotitolo={partitaId
         ? <>Segna ogni sessione letta nella partita «{attiva?.nome}». Gli effetti si applicano quando il volume è completato.</>
-        : <>I {d.libri.length} libri di Persona 5 Royal, con sessioni, effetti e dove si comprano. Attiva una partita per registrarne l’avanzamento.</>} />
-
-      <section className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Riepilogo lettura">
-        <div className="kpi-tile"><span className="kpi-value">{d.completati}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="completati" />completati</span></div>
-        <div className="kpi-tile"><span className="kpi-value">{d.libri.length - d.completati}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="iniziati" />da completare</span></div>
-        <div className="kpi-tile"><span className="kpi-value">{d.sessioniFatte}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="sessioni" />sessioni fatte</span></div>
-        <div className="kpi-tile"><span className="kpi-value">{d.sessioniTotali}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="sessioni" />sessioni totali</span></div>
-      </section>
-
-      {partitaId && <NotaPuntiDote cosa="quali libri hai letto e a che punto sei" />}
-
-      {d.letturaRapida && (
-        <p className="m-0 flex items-center gap-2 rounded-md bg-success/10 px-3 py-2 testo-13 text-text-secondary" role="status">
-          <IconaAzione chiave="libro" dimensione={18} />
-          <span>Hai letto <strong>Lettura rapida</strong>: da qui in avanti una sessione di lettura vale doppia, quindi
-          ogni altro libro si finisce in metà pomeriggi. Le sessioni già fatte restano quelle che erano —
-          l’effetto non è retroattivo — e «+» avanza di due per volta.</span>
-        </p>
-      )}
-
-      <section className="filtri-articoli" aria-label="Filtri libri">
+        : <>I {d.libri.length} libri di Persona 5 Royal, con sessioni, effetti e dove si comprano. Attiva una partita per registrarne l’avanzamento.</>} />}
+      riepilogo={{ etichetta: 'Riepilogo lettura', tessere: <>
+        <TesseraKpi valore={d.completati} segno="completati" etichetta="completati" />
+        <TesseraKpi valore={d.libri.length - d.completati} segno="iniziati" etichetta="da completare" />
+        <TesseraKpi valore={d.sessioniFatte} segno="sessioni" etichetta="sessioni fatte" />
+        <TesseraKpi valore={d.sessioniTotali} segno="sessioni" etichetta="sessioni totali" />
+      </> }}
+      avvisi={<>
+        {partitaId && <NotaPuntiDote cosa="quali libri hai letto e a che punto sei" />}
+        {d.letturaRapida && (
+          <p className="prosa-misurata m-0 flex items-center gap-2 rounded-md bg-success/10 px-3 py-2 testo-13 text-text-secondary" role="status">
+            <IconaAzione chiave="libro" dimensione={18} />
+            <span>Hai letto <strong>Lettura rapida</strong>: da qui in avanti una sessione di lettura vale doppia, quindi
+            ogni altro libro si finisce in metà pomeriggi. Le sessioni già fatte restano quelle che erano —
+            l’effetto non è retroattivo — e «+» avanza di due per volta.</span>
+          </p>
+        )}
+      </>}
+      filtri={{ etichetta: 'Filtri libri', contenuto: <>
         <div className="filtri-articoli__riga">
           <CampoRicerca valore={ricerca} onCambia={setRicerca} segnaposto="Cerca titolo, negozio o effetto…" />
           <Selettore compatto etichetta="Dote" valore={dote} vuoto="Tutte le Doti" opzioni={opzioniDaNomi(NOME_DOTE)} onCambia={setDote} />
@@ -177,32 +174,18 @@ export function LibriPage({ soloChiave }: { soloChiave?: string } = {}) {
         <div className="filtri-articoli__riga">
           <Segmenti etichetta="Stato lettura" valore={stato} opzioni={STATI_LETTURA} onCambia={setStato} />
         </div>
-      </section>
-      </>}
-
-      {libroSelezionato && <section ref={pannelloRef} className="flex scroll-mt-20 flex-col gap-2" aria-label={`Posizione di ${libroSelezionato.nome}`}>
-        <div className="flex flex-wrap items-center justify-between gap-2"><TitoloSezione variante="display" className="min-w-0">Dove ottenere “{libroSelezionato.nome}”</TitoloSezione><span className="flex items-center gap-1"><ModificaGuida tipo="libro-posizioni" chiave={libroSelezionato.chiave} cosa={`dove si ottiene «${libroSelezionato.nome}»`} soloIcona onSalvato={() => void dati.ricarica()} /><PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Chiudi" onClick={() => setSelezionato(null)} /></span></div>
-        {libroSelezionato.posizioni.length > 1 && <div className="flex flex-wrap gap-2">{libroSelezionato.posizioni.map((p, i) => <button key={`${p.tipo}/${p.chiave}`} type="button" className={`chip touch ${i === fonteSelezionata ? 'chip--attivo' : ''}`} onClick={() => setFonteSelezionata(i)}>{p.etichetta}</button>)}</div>}
-        {posizione ? <DoveSiTrova tipo={posizione.tipo} chiave={posizione.chiave} titolo={posizione.etichetta} altezza={300} /> : <div className="card"><h3 className="m-0 text-base">Posizione non disponibile</h3><p className="mb-0 text-sm text-text-secondary">Questo libro si ottiene come ricompensa o evento e non ha un punto territoriale verificato.</p></div>}
-      </section>}
-
-      {!soloChiave && <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="m-0 text-sm text-text-secondary">{visibili.length} libri mostrati{fatti.length > 0 ? ` · ${daFare.length} da leggere` : ''}</p>
-        <AggiungiAlCatalogo tipo="libro" titolo="Aggiungi un libro" onSalvato={() => void dati.ricarica()} />
-      </div>}
-      {/* Da leggere e completati separati, con i completati chiusi: in partita si guarda cosa manca. */}
-      <ul className={`m-0 grid list-none gap-3 p-0 ${soloChiave ? '' : 'md:grid-cols-2 xl:grid-cols-3'}`} aria-label="Libri da leggere">
-        {daFare.map(scheda)}
-      </ul>
-      {daFare.length === 0 && <p className="m-0 text-sm text-text-muted" role="status">{soloChiave ? 'Questo libro non è nel catalogo.' : 'Nessun libro da leggere con questi filtri.'}</p>}
-      {fatti.length > 0 && <section className="flex flex-col gap-3" aria-label="Libri completati">
-        <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="completati" dimensione={20} />}
-          titolo={`${mostraFatti ? 'Nascondi' : 'Mostra'} i completati`} dettaglio={fatti.length}
-          attivo={mostraFatti} onClick={() => setMostraFatti((v) => !v)} />
-        {mostraFatti && <ul className="m-0 grid list-none gap-3 p-0 md:grid-cols-2 xl:grid-cols-3" aria-label="Libri già completati">
-          {fatti.map(scheda)}
-        </ul>}
-      </section>}
-    </div>}
+      </> }}
+      posizione={libroSelezionato && <PannelloPosizione rif={pannelloRef}
+        titolo={<>Dove ottenere “{libroSelezionato.nome}”</>} etichetta={`Posizione di ${libroSelezionato.nome}`}
+        modifica={<ModificaGuida tipo="libro-posizioni" chiave={libroSelezionato.chiave} cosa={`dove si ottiene «${libroSelezionato.nome}»`} soloIcona onSalvato={() => void dati.ricarica()} />}
+        onChiudi={() => setSelezionato(null)}
+        scelte={libroSelezionato.posizioni.map((p) => ({ chiave: `${p.tipo}/${p.chiave}`, etichetta: p.etichetta }))}
+        indice={fonteSelezionata} onIndice={setFonteSelezionata} posizione={posizione}
+        assente="Questo libro si ottiene come ricompensa o evento e non ha un punto territoriale verificato." />}
+      conteggio={`${visibili.length} libri mostrati${fatti.length > 0 ? ` · ${daFare.length} da leggere` : ''}`}
+      aggiungi={<AggiungiAlCatalogo tipo="libro" titolo="Aggiungi un libro" onSalvato={() => void dati.ricarica()} />}
+      daFare={daFare} fatti={fatti} scheda={scheda}
+      testi={{ elenco: 'Libri da leggere', sezioneFatti: 'Libri completati', elencoFatti: 'Libri già completati', vuoto: 'Nessun libro da leggere con questi filtri.', vuotoSolo: 'Questo libro non è nel catalogo.' }}
+    />}
   </PageState>;
 }

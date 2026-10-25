@@ -25,7 +25,6 @@ import { avvisaDotiDaSegnare } from '../utils/dotiDaSegnare';
 import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { NotaPuntiDote } from '../components/shared/NotaPuntiDote';
-import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
 import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
 import { ComandiProgressoLettura } from '../components/guida/ComandiProgressoLettura';
@@ -33,8 +32,9 @@ import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/Azioni
 import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { NOME_DOTE } from '../utils/citta';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
-import { TitoloSezione } from '../components/shared/TitoloSezione';
-import { IconaAzione, IconaSegno } from '../components/shared/IconaAzione';
+import { IconaAzione } from '../components/shared/IconaAzione';
+import { TesseraKpi } from '../components/shared/TesseraKpi';
+import { CatalogoDaCompletare, PannelloPosizione } from '../components/guida/CatalogoDaCompletare';
 import { STATI_LETTURA, formattaYen, haDote, passaStato, type StatoLettura } from '../utils/letture';
 import type { FilmDto, FilmDvdDto } from '../types';
 
@@ -63,7 +63,6 @@ export function FilmPage({ soloChiave }: { soloChiave?: string } = {}) {
   const [dote, setDote] = useState('');
   const [selezionato, setSelezionato] = useState<string | null>(null);
   const [posizioneSelezionata, setPosizioneSelezionata] = useState(0);
-  const [mostraFatti, setMostraFatti] = useState(false);
   const pannelloRef = useRef<HTMLElement | null>(null);
 
   // Le pressioni rapide su visioni e sessioni: una richiesta per volta per film insegue l'ultimo valore chiesto, nella partita di partenza.
@@ -152,23 +151,20 @@ export function FilmPage({ soloChiave }: { soloChiave?: string } = {}) {
   };
 
   return <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
-    {d && <div className="flex flex-col gap-4">
-      {!soloChiave && <>
-      <IntestazionePagina titolo="Film e DVD" sottotitolo={partitaId
+    {d && <CatalogoDaCompletare
+      soloChiave={soloChiave}
+      intestazione={<IntestazionePagina titolo="Film e DVD" sottotitolo={partitaId
         ? <>Registra visioni e sessioni nella partita «{attiva?.nome}». Al cinema una visione basta e rivedere può valere ancora; un DVD si completa in più sessioni.</>
-        : <>I {d.film.length} titoli al cinema e in DVD di Persona 5 Royal, con quando si vedono, che cosa danno e dove. Attiva una partita per registrarne le visioni.</>} />
-
-      <section className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Riepilogo film e DVD">
-        <div className="kpi-tile"><span className="kpi-value">{d.iniziati}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="iniziati" />titoli iniziati</span></div>
-        <div className="kpi-tile"><span className="kpi-value">{d.completati}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="completati" />completati</span></div>
-        <div className="kpi-tile"><span className="kpi-value">{d.sessioniCompletamentoFatte}/{d.sessioniObiettivo}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="sessioni" />sessioni obiettivo</span></div>
-        <div className="kpi-tile"><span className="kpi-value">{d.visioniRegistrate}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="visioni" />visioni registrate</span></div>
-      </section>
-
-      {partitaId && <NotaPuntiDote cosa="quali titoli hai visto e quante volte"
+        : <>I {d.film.length} titoli al cinema e in DVD di Persona 5 Royal, con quando si vedono, che cosa danno e dove. Attiva una partita per registrarne le visioni.</>} />}
+      riepilogo={{ etichetta: 'Riepilogo film e DVD', tessere: <>
+        <TesseraKpi valore={d.iniziati} segno="iniziati" etichetta="titoli iniziati" />
+        <TesseraKpi valore={d.completati} segno="completati" etichetta="completati" />
+        <TesseraKpi valore={`${d.sessioniCompletamentoFatte}/${d.sessioniObiettivo}`} segno="sessioni" etichetta="sessioni obiettivo" />
+        <TesseraKpi valore={d.visioniRegistrate} segno="visioni" etichetta="visioni registrate" />
+      </> }}
+      avvisi={partitaId && <NotaPuntiDote cosa="quali titoli hai visto e quante volte"
         dettaglio="Al cinema prima visione e successive possono valere diverso: l’avviso dice quanto." />}
-
-      <section className="filtri-articoli" aria-label="Filtri film e DVD">
+      filtri={{ etichetta: 'Filtri film e DVD', contenuto: <>
         <div className="filtri-articoli__riga">
           <CampoRicerca valore={ricerca} onCambia={setRicerca} segnaposto="Cerca titolo o effetto…" />
           <Selettore compatto etichetta="Dote" valore={dote} vuoto="Tutte le Doti" opzioni={opzioniDaNomi(NOME_DOTE)} onCambia={setDote} />
@@ -177,31 +173,18 @@ export function FilmPage({ soloChiave }: { soloChiave?: string } = {}) {
           <Segmenti etichetta="Supporto" valore={supporto} opzioni={SUPPORTI} onCambia={setSupporto} />
           <Segmenti etichetta="Stato visione" valore={stato} opzioni={STATI_LETTURA} onCambia={setStato} />
         </div>
-      </section>
-      </>}
-
-      {filmSelezionato && <section ref={pannelloRef} className="flex scroll-mt-20 flex-col gap-2" aria-label={`Posizione di ${nomeFilm(filmSelezionato)}`}>
-        <div className="flex flex-wrap items-center justify-between gap-2"><TitoloSezione variante="display" className="min-w-0">Dove vedere “{nomeFilm(filmSelezionato)}”</TitoloSezione><span className="flex items-center gap-1"><ModificaGuida tipo="film-posizioni" chiave={filmSelezionato.chiave} cosa={`dove si vede «${nomeFilm(filmSelezionato)}»`} soloIcona onSalvato={() => void dati.ricarica()} /><PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Chiudi" onClick={() => setSelezionato(null)} /></span></div>
-        {filmSelezionato.posizioni.length > 1 && <div className="flex flex-wrap gap-2">{filmSelezionato.posizioni.map((p, i) => <button key={`${p.ruolo}/${p.tipo}/${p.chiave}`} type="button" className={`chip touch ${i === posizioneSelezionata ? 'chip--attivo' : ''}`} onClick={() => setPosizioneSelezionata(i)}>{p.ruolo === 'noleggio' ? 'Noleggio · ' : p.ruolo === 'visione' ? 'Visione · ' : ''}{p.etichetta}</button>)}</div>}
-        {posizione ? <DoveSiTrova tipo={posizione.tipo} chiave={posizione.chiave} titolo={posizione.etichetta} altezza={300} /> : <div className="card"><h3 className="m-0 text-base">Posizione non disponibile</h3><p className="mb-0 text-sm text-text-secondary">Non esiste ancora un punto territoriale verificato per questo titolo.</p></div>}
-      </section>}
-
-      {!soloChiave && <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="m-0 text-sm text-text-secondary">{visibili.length} titoli mostrati{fatti.length > 0 ? ` · ${daFare.length} da vedere` : ''}</p>
-        <AggiungiAlCatalogo tipo="film" titolo="Aggiungi un film o un DVD" onSalvato={() => void dati.ricarica()} />
-      </div>}
-      <ul className={`m-0 grid list-none gap-3 p-0 ${soloChiave ? '' : 'md:grid-cols-2 xl:grid-cols-3'}`} aria-label="Film e DVD da vedere">
-        {daFare.map(scheda)}
-      </ul>
-      {daFare.length === 0 && <p className="m-0 text-sm text-text-muted" role="status">{soloChiave ? 'Questo titolo non è nel catalogo.' : 'Nessun titolo da vedere con questi filtri.'}</p>}
-      {fatti.length > 0 && <section className="flex flex-col gap-3" aria-label="Film e DVD completati">
-        {/* come in Libri: il tassello con l'icona, il numero nel dettaglio */}
-        <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="completati" dimensione={20} />}
-          titolo={`${mostraFatti ? 'Nascondi' : 'Mostra'} i completati`} dettaglio={fatti.length} aria-expanded={mostraFatti} onClick={() => setMostraFatti((v) => !v)} />
-        {mostraFatti && <ul className="m-0 grid list-none gap-3 p-0 md:grid-cols-2 xl:grid-cols-3" aria-label="Film e DVD già completati">
-          {fatti.map(scheda)}
-        </ul>}
-      </section>}
-    </div>}
+      </> }}
+      posizione={filmSelezionato && <PannelloPosizione rif={pannelloRef}
+        titolo={<>Dove vedere “{nomeFilm(filmSelezionato)}”</>} etichetta={`Posizione di ${nomeFilm(filmSelezionato)}`}
+        modifica={<ModificaGuida tipo="film-posizioni" chiave={filmSelezionato.chiave} cosa={`dove si vede «${nomeFilm(filmSelezionato)}»`} soloIcona onSalvato={() => void dati.ricarica()} />}
+        onChiudi={() => setSelezionato(null)}
+        scelte={filmSelezionato.posizioni.map((p) => ({ chiave: `${p.ruolo}/${p.tipo}/${p.chiave}`, etichetta: <>{p.ruolo === 'noleggio' ? 'Noleggio · ' : p.ruolo === 'visione' ? 'Visione · ' : ''}{p.etichetta}</> }))}
+        indice={posizioneSelezionata} onIndice={setPosizioneSelezionata} posizione={posizione}
+        assente="Non esiste ancora un punto territoriale verificato per questo titolo." />}
+      conteggio={`${visibili.length} titoli mostrati${fatti.length > 0 ? ` · ${daFare.length} da vedere` : ''}`}
+      aggiungi={<AggiungiAlCatalogo tipo="film" titolo="Aggiungi un film o un DVD" onSalvato={() => void dati.ricarica()} />}
+      daFare={daFare} fatti={fatti} scheda={scheda}
+      testi={{ elenco: 'Film e DVD da vedere', sezioneFatti: 'Film e DVD completati', elencoFatti: 'Film e DVD già completati', vuoto: 'Nessun titolo da vedere con questi filtri.', vuotoSolo: 'Questo titolo non è nel catalogo.' }}
+    />}
   </PageState>;
 }

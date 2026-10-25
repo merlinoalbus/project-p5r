@@ -146,7 +146,8 @@ function avvisiDisponibilitaDellaVoce(r: RigaVoce): Pick<AzionePercorsoDto, 'avv
 
 /**
  * R9-06: il nome dal vivo. Il testo salvato nella voce (`riferimentoTesto`) è come la guida chiamava il Confidente («Yoshida - Sole», «Palazzo di Sae Niijima»); se è
- * diverso dal nome di adesso («Toranosuke Yoshida - Sole») la voce porta anche il nome attuale, da mostrare accanto al testo. Il testo non si riscrive mai.
+ * diverso dal nome di adesso («Toranosuke Yoshida - Sole») la voce porta anche il nome attuale, da mostrare accanto al testo. Il servizio non riscrive mai il
+ * testo; l'unica eccezione è una correzione di dati con migrazione (la 231 ha messo gli accenti mancanti in tre testi), e il confronto è comunque senza accenti.
  */
 function nomeAttualeDelRiferimento(r: RigaVoce, rif: RiferimentoAzioneDto | null): Pick<AzionePercorsoDto, 'riferimentoNomeAttuale'> {
   if (!rif || rif.tipo !== 'confidente' || !r.riferimento_testo) return {};

@@ -29,6 +29,7 @@ import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
+import { TitoloSezione } from '../components/shared/TitoloSezione';
 
 const NOME_TIPO: Record<DomandaDto['tipo'], string> = { classe: 'In classe', 'esame-medio': 'Esame di metà semestre', 'esame-finale': 'Esame di fine semestre', tv: 'Quiz in TV', altro: 'Altro' };
 type FiltroTipo = 'tutte' | 'classe' | 'esami' | 'tv';
@@ -143,7 +144,7 @@ export function DomandePage() {
       {d && (
         <div className="flex flex-col gap-4">
           <IntestazionePagina titolo="Domande in classe, esami e quiz in TV" sottotitolo={<>Le risposte giuste per ogni data di gioco. {partitaId ? `Nella partita «${attiva?.nome}» hai segnato ${d.fatte} domande su ${d.totale}; ` : 'Attiva una partita per segnare le domande fatte; '}
-              {partitaId && (d.dataGioco ? `data di gioco ${dataGiocoTesto(d.dataGioco)}.` : <>imposta la <Link to="/partita?scheda=riepilogo" className="text-primary-testo">data di gioco</Link> nel Riepilogo per vedere il prossimo appuntamento.</>)}</>} />
+              {partitaId && (d.dataGioco ? `data di gioco ${dataGiocoTesto(d.dataGioco)}.` : <>imposta la <Link to="/partita?scheda=riepilogo" className="text-primary-testo">data di gioco</Link> nei dati della partita per vedere il prossimo appuntamento.</>)}</>} />
 
           {/* Il prossimo appuntamento: un rimando, non un secondo elenco. Le righe sono evidenziate nel loro mese. */}
           {prossima && (
@@ -154,7 +155,7 @@ export function DomandePage() {
           )}
 
           <section className="card flex flex-col gap-2">
-            <h2 className="m-0 testo-15 font-semibold">Esami</h2>
+            <TitoloSezione>Esami</TitoloSezione>
             <p className="m-0 testo-12 text-text-muted">Date, risultati e premi. Le domande di ogni esame stanno nell’elenco per data, con il quesito accanto a ogni risposta.</p>
             <ul className="m-0 p-0 list-none flex flex-col gap-1 testo-13">
               {d.esami.map((e) => (
@@ -193,7 +194,7 @@ export function DomandePage() {
           {perMese.length === 0 && <p className="m-0 testo-13 text-text-muted" role="status">Nessuna domanda con questi filtri.</p>}
           {perMese.map(([mese, lista]) => (
             <section key={mese} className="card flex flex-col gap-1">
-              <h2 className="m-0 testo-15 font-semibold">{mese}</h2>
+              <TitoloSezione>{mese}</TitoloSezione>
               <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light" aria-label={`Domande di ${mese}`}>
                 {lista.map((x) => <RigaDomanda key={x.id} d={x} partitaId={partitaId} onCambiata={dati.imposta} onCorretta={() => void dati.ricarica()} evidenzia={prossimeId.has(x.id)} />)}
               </ul>

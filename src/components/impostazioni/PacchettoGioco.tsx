@@ -28,6 +28,7 @@ import type { AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchetto
 import { Selettore } from '../shared/Selettore';
 import { BarraInvio } from './BarraInvio';
 import { salvaFile } from '../../utils/salvaFile';
+import { TitoloSezione } from '../shared/TitoloSezione';
 
 /** Numero con i separatori delle migliaia all'italiana. */
 const numero = (n: number): string => n.toLocaleString('it-IT');
@@ -109,7 +110,7 @@ function Anteprima({ a, origine }: { a: AnteprimaPacchettoDto; origine: string }
         Il backup locale «{origine}» ({byteTesto(a.databaseByte)}) sostituirà il file <code>gioco.db</code> di questa istanza: compendio, guida, catalogo, mappe, luoghi e immagini. Le correzioni successive alla copia verranno sostituite dai valori del backup.
         Le <strong>partite non vengono toccate</strong>. Prima della sostituzione il server salva una copia di sicurezza in <code>data/backups</code>.
       </p>
-      {!a.importabile && <p className="m-0 text-error" role="alert">{a.motivo}</p>}
+      {!a.importabile && <p className="m-0 text-error-testo" role="alert">{a.motivo}</p>}
       <ul className="m-0 p-0 list-none grid gap-1 sm:grid-cols-2">
         <li><strong>Schema</strong> <span className="text-text-muted">backup {a.versioneSchema} · istanza {a.versioneSchemaIstanza} · app {a.versioneSchemaCodice}{daApplicare ? ` (${daApplicare} ${daApplicare === 1 ? 'migrazione da applicare' : 'migrazioni da applicare'})` : ''}</span></li>
         <li><strong>Database</strong> <span className="text-text-muted">{byteTesto(a.databaseByte)}</span></li>
@@ -300,7 +301,7 @@ export function PacchettoGioco() {
 
   return (
     <section className="card flex flex-col gap-3" aria-label="Backup dei dati di gioco">
-      <h2 className="m-0 testo-15 font-semibold">Backup dei dati di gioco</h2>
+      <TitoloSezione>Backup dei dati di gioco</TitoloSezione>
       <p className="m-0 testo-13 text-text-secondary">
         Un solo file, <code>gioco.db</code>: i <strong>dati di gioco</strong> senza le partite, con dentro compendio, guida, catalogo, mappe, luoghi e le immagini.
         «Scarica» salva una copia del database attuale. «Importa» sostituisce il file DB con un backup locale scelto dalla cartella d'appoggio del server, dopo l'anteprima e la conferma. Non tocca il file delle partite; per un backup che le comprenda usa «Backup e ripristino».
@@ -313,7 +314,7 @@ export function PacchettoGioco() {
       )}
       {s?.vuota && <p className="m-0 testo-13 text-warning" role="status">Questa istanza non ha dati di gioco: puoi ripristinarli importando un backup locale.</p>}
       {s && !s.vuota && !s.completo && <p className="m-0 testo-13 text-warning" role="status">Questa istanza ha solo i dati iniziali (nessuna immagine). Un backup completo di gioco.db può ripristinare anche mappe e grafica.</p>}
-      {stato.errore && <p className="m-0 testo-13 text-error">{stato.errore}</p>}
+      {stato.errore && <p className="m-0 testo-13 text-error-testo">{stato.errore}</p>}
       {anteprima === null && lavoroSulServer && (
         <div className="flex flex-col gap-1.5">
           <BarraInvio avanzamento={{ byteInviati: 0, byteTotali: 0, percentuale: 100, inviato: true }} etichetta="Lavoro sul server" elaborazione={NOME_FASE[lavoroSulServer] ?? 'Il server sta lavorando'} />

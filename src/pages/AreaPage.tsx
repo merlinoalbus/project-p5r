@@ -193,7 +193,7 @@ function Contenuto({ area: a, indirizzoContenitore, ricarica }: { area: AreaDett
               la conferma; sotto i 768 px (UX2-3) e da 1024 a 1279 px (variante (b): la testata sta su una riga) stanno nel menu «Altro» */}
           <span className="hidden flex-wrap items-center gap-1.5 md:max-lg:flex xl:flex">
             {a.modificata && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo={<><span className="hidden md:max-lg:inline 2xl:inline">Ripristina i valori della guida</span><span className="md:max-lg:hidden 2xl:hidden">Ripristina</span></>} aria-label="Ripristina i valori della guida" disabled={occupato} onClick={() => setFinestra('ripristina')} />}
-            <PulsanteVisivo tono="fantasma" compatto className="text-error" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo={<><span className="hidden md:max-lg:inline 2xl:inline">Elimina area</span><span className="md:max-lg:hidden 2xl:hidden">Elimina</span></>} aria-label="Elimina area" onClick={() => { setRiepilogoElimina(null); setFinestra('elimina'); }} />
+            <PulsanteVisivo tono="fantasma" compatto className="text-error-testo" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo={<><span className="hidden md:max-lg:inline 2xl:inline">Elimina area</span><span className="md:max-lg:hidden 2xl:hidden">Elimina</span></>} aria-label="Elimina area" onClick={() => { setRiepilogoElimina(null); setFinestra('elimina'); }} />
           </span>
           {/* il menu si apre verso sinistra (ancorato a destra); se «Altro» è andato a capo all'inizio della riga (telefono stretto) si apre
               verso destra, così non esce dallo schermo */}
@@ -208,7 +208,7 @@ function Contenuto({ area: a, indirizzoContenitore, ricarica }: { area: AreaDett
             </summary>
             <div className="menu-altro__voci">
               {a.modificata && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina i valori della guida" className="justify-start" disabled={occupato} onClick={(e) => { e.currentTarget.closest('details')?.removeAttribute('open'); setFinestra('ripristina'); }} />}
-              <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Elimina area" className="justify-start text-error" onClick={(e) => { e.currentTarget.closest('details')?.removeAttribute('open'); setRiepilogoElimina(null); setFinestra('elimina'); }} />
+              <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Elimina area" className="justify-start text-error-testo" onClick={(e) => { e.currentTarget.closest('details')?.removeAttribute('open'); setRiepilogoElimina(null); setFinestra('elimina'); }} />
             </div>
           </details>
         </div>

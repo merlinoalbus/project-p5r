@@ -19,6 +19,7 @@ import { creaSpillo, riordinaAree } from '../../services/api';
 import { useImmagineMappa } from '../../hooks/useImmagineMappa';
 import { notifica } from '../../stores/notificationStore';
 import type { AreaRiassuntoDto, QuartiereDettaglioDto } from '../../types';
+import { TitoloSezione } from '../shared/TitoloSezione';
 
 /** «2 planimetrie · 16 pin», «1 planimetria · nessun pin». */
 function conteggiArea(a: AreaRiassuntoDto): string {
@@ -57,7 +58,7 @@ export function AreeDelQuartiere({ quartiere: q, onCambiato, onAggiungi, onPinSe
 
   if (navigabili.length === 0) return (
     <section className="card flex flex-col items-start gap-2" aria-label={`Aree di ${q.nome}`}>
-      <h2 className="m-0 font-display testo-17 uppercase leading-none">Aree</h2>
+      <TitoloSezione variante="display">Aree</TitoloSezione>
       <p className="m-0 testo-13 text-text-secondary">{q.aree.length > 0 ? 'Le aree del quartiere non sono ancora aperte nella partita.' : `Nessuna area in ${q.nome}: aggiungine una.`}</p>
       <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Aggiungi area" onClick={onAggiungi} />
     </section>
@@ -65,7 +66,7 @@ export function AreeDelQuartiere({ quartiere: q, onCambiato, onAggiungi, onPinSe
   return (
     <section className="flex flex-col gap-2" aria-label={`Aree di ${q.nome}`}>
       <div className="flex flex-wrap items-center gap-2">
-        <h2 className="m-0 font-display testo-17 uppercase leading-none">Aree <span className="text-text-muted">· {navigabili.length}</span></h2>
+        <TitoloSezione variante="display">Aree <span className="text-text-muted">· {navigabili.length}</span></TitoloSezione>
         {navigabili.length > 1 && (riordina
           ? <span className="ml-auto flex gap-1.5">
             <PulsanteVisivo compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={() => setRiordina(null)} />

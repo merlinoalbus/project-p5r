@@ -49,7 +49,7 @@ export function ModuloOggetto({ oggetto, onChiudi, onSalvato }: Props) {
   return <Modal aperta larga titolo={oggetto ? `Modifica «${oggetto.nome}»` : 'Nuovo oggetto'} onChiudi={() => { if (!occupato) onChiudi(); }}
     azioni={<><button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={onChiudi}>Annulla</button><PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo={occupato ? 'Salvataggio…' : 'Salva'} type="submit" form={id} disabled={occupato || !nome.trim()} /></>}>
     <form id={id} onSubmit={(e) => void salva(e)} className="flex flex-col gap-3">
-      {errore && <p role="alert" className="m-0 testo-13 text-error">{errore}</p>}
+      {errore && <p role="alert" className="m-0 testo-13 text-error-testo">{errore}</p>}
       <fieldset disabled={occupato} className="m-0 grid min-w-0 grid-cols-1 gap-3 border-0 p-0 sm:grid-cols-2">
         <label className="editor-mappa__campo sm:col-span-2">Nome<input className="form-input" value={nome} required maxLength={300} onChange={(e) => setNome(e.target.value)} /></label>
         <Selettore etichetta="Categoria" valore={categoria} disabilitato={occupato} opzioni={CATEGORIE_OGGETTO.map((k) => ({ chiave: k, nome: CATEGORIA_OGGETTO[k].nome }))} onCambia={(v) => { if (eCategoriaOggetto(v)) setCategoria(v); }} />

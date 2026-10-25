@@ -15,6 +15,14 @@ const TOAST_BORDER: Record<NotificationType, string> = {
   info: 'border-l-info',
 };
 
+/** Il tipo detto a parole, davanti al messaggio, per chi non vede il colore del bordo. */
+const TIPO_TESTO: Record<NotificationType, string> = {
+  success: 'Fatto',
+  error: 'Errore',
+  warning: 'Attenzione',
+  info: 'Avviso',
+};
+
 /** Rende e anima la coda globale delle notifiche temporanee.
  *
  * Sta in un portale su `body` (2026-10-01): il layout è `isolate`, un contesto di sovrapposizione suo, e dentro di lui lo
@@ -61,20 +69,30 @@ export function ToastContainer() {
   }, [visibile]);
 
   const stile = { ...(posto.bottom !== null ? { bottom: posto.bottom } : {}), ...(posto.aSinistra ? { left: MARGINE, right: 'auto' } : {}) };
-  // L'involucro `status` resta sempre nel DOM, anche a coda vuota: una regione live che nasce insieme al suo testo spesso non viene
-  // letta. Le notifiche entrano lì e si annunciano a fine lettura; gli errori hanno in più `role="alert"` e interrompono.
+  // Lotto C (2026-10-25): le regioni live sono due, sorelle e sempre nel DOM (una regione che nasce insieme al suo testo spesso non
+  // viene letta): `status` per le notifiche normali, che si annunciano a fine lettura, e `alert` per gli errori, che interrompono.
+  // Prima l'`alert` dell'errore stava annidato nella regione `status`, e i lettori di schermo lo leggevano due volte o male. Le
+  // regioni hanno solo il testo, col tipo davanti («Errore: …», il colore del bordo da solo non lo dice); la coda visiva resta una
+  // sola, nell'ordine d'arrivo, fuori dalle regioni. Le notifiche `silenziose` stanno solo nella coda: chi le crea annuncia lui.
+  const annunci = notifications.filter((n) => !n.silenziosa);
   return createPortal(
-    <div role="status" aria-live="polite">
+    <div>
+      <div className="sr-only" role="status" aria-live="polite" aria-atomic="false">
+        {annunci.filter((n) => n.type !== 'error').map((n) => <p key={n.id}>{`${TIPO_TESTO[n.type]}: ${n.message}`}</p>)}
+      </div>
+      <div className="sr-only" role="alert" aria-live="assertive" aria-atomic="false">
+        {annunci.filter((n) => n.type === 'error').map((n) => <p key={n.id}>{`${TIPO_TESTO[n.type]}: ${n.message}`}</p>)}
+      </div>
       {visibile && (
         <div ref={coda} className="coda-notifiche fixed bottom-20 lg:bottom-5 right-5 flex flex-col gap-2 z-[9999]" style={stile}>
           {notifications.map((n) => (
             <div
               key={n.id}
-              role={n.type === 'error' ? 'alert' : undefined}
               className={`flex items-center gap-3 px-4 py-3 rounded-md bg-surface border border-border shadow-[0_4px_12px_rgba(0,0,0,0.4)] min-w-[280px] max-w-[420px] animate-[toast-in_0.2s_ease-out] border-l-[3px] ${TOAST_BORDER[n.type]}`}
             >
-              <span className="flex-1 testo-14">{n.message}</span>
+              <span className="flex-1 testo-14"><span className="sr-only">{TIPO_TESTO[n.type]}: </span>{n.message}</span>
               <button
+                type="button"
                 className="touch bg-transparent border-none text-text-muted cursor-pointer testo-20 px-1 py-0 hover:text-text"
                 onClick={() => removeNotification(n.id)}
                 aria-label="Chiudi notifica"

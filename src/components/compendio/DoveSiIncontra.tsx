@@ -44,7 +44,7 @@ export function DoveSiIncontra({ persona, partitaId }: Props) {
         </p>
       </div>
       {cattura.daTogliere?.persona && <AvvisoTogliPersona nome={cattura.daTogliere.persona.nomeIt} occupato={cattura.occupata !== null} onConferma={cattura.conferma} onAnnulla={cattura.annulla} />}
-      {ombre.errore && <p className="m-0 testo-12 text-error" role="alert">{ombre.errore}</p>}
+      {ombre.errore && <p className="m-0 testo-12 text-error-testo" role="alert">{ombre.errore}</p>}
       {!ombre.errore && elenco.length === 0 && !ombre.caricamento && <p className="m-0 testo-13 text-text-muted">La guida non ha Ombre con questa Persona: si ottiene per fusione o la si registra dal compendio.</p>}
       {elenco.length > 0 && (
         <ul className="m-0 flex list-none flex-col gap-2 p-0">

@@ -102,7 +102,7 @@ function LineaDelTempo({ date, memento = false }: { date: DungeonDettaglioDto['d
   const tappe = [
     // `breve`: l'etichetta dei chip stretti (sotto i 1024 px) quando il valore è una frase; ha senso da sola (UX3-12)
     { chiave: 'sblocco', etichetta: 'Si apre', breve: 'Si apre', valore: date.sblocco, tono: 'bg-white/10 text-text', segno: 'si-apre' as const },
-    { chiave: 'furto', etichetta: 'Furto consigliato', breve: 'Furto', valore: date.furtoConsigliato, tono: 'bg-[#f5c542]/15 text-[#f5c542]', segno: 'furto' as const },
+    { chiave: 'furto', etichetta: 'Furto consigliato', breve: 'Furto', valore: date.furtoConsigliato, tono: 'bg-oro/15 text-oro', segno: 'furto' as const },
     { chiave: 'scadenza', etichetta: 'Scade', breve: 'Scade', valore: date.scadenza, tono: 'bg-primary/20 text-primary-testo', segno: 'scade' as const },
   ].filter((t) => !!t.valore);
   if (tappe.length === 0) return null;
@@ -660,7 +660,7 @@ export function DungeonDettaglioPage() {
             aria-label="Modifica area" disabled={!dettaglioArea.dati} onClick={() => setFinestra('modifica-area')} />
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Aggiungi planimetria" dettaglio={areaFisica.nome}
             aria-label="Aggiungi planimetria" disabled={!dettaglioArea.dati} onClick={() => setFinestra('aggiungi-planimetria')} />
-          <PulsanteVisivo tono="fantasma" compatto className="text-error" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina area" dettaglio={areaFisica.nome}
+          <PulsanteVisivo tono="fantasma" compatto className="text-error-testo" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina area" dettaglio={areaFisica.nome}
             aria-label="Elimina area" onClick={() => setFinestra('elimina-area')} />
         </>}
       </MenuModifica>
@@ -725,7 +725,8 @@ export function DungeonDettaglioPage() {
   };
 
   return (
-    <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
+    <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}
+      scheda={{ titolo: chiave === 'mementos' ? 'Memento' : 'Palazzo', ripiego: '/guida/dungeon' }}>
       {d && area && (
         // **Da 1024 px il Palazzo sta in una schermata** (richiesta dell'utente, 2026-09-29): «componenti che
         // sforano la pagina… aggiungendo una scrollbar di pagina che non è accettabile… tutti i componenti devono

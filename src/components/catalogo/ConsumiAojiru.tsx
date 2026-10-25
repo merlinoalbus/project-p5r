@@ -146,8 +146,8 @@ export function PreparazioneAcquistoAojiru({ partitaId, fonte, articolo = ARTICO
     <p className="m-0">Domenica · 5.000 yen · non consuma tempo. Dà 2 punti (1 nota) alla Dote del succo, 3 se in quel giorno la Fortuna era accesa su quella Dote: la Fortuna la leggo dalla partita, non devi dirmela.</p>
     {stato?.aojiru && <p className="m-0">{stato.aojiru.varianteAttesa ? `Prossima variante prevista: ${nomeDote(stato.aojiru.varianteAttesa)}.` : 'Variante iniziale da osservare.'}</p>}
     {!!stato?.aojiru?.incongruenze.length && <ul className="m-0 pl-4 text-warning">{stato.aojiru.incongruenze.map((s) => <li key={s}>{s}</li>)}</ul>}
-    {registro.errore && <p role="alert" className="m-0 text-error">{registro.errore}<PulsanteVisivo tono="fantasma" className="ml-2" icona={<IconaAzione chiave="riprova" dimensione={22} />} titolo="Riprova" onClick={() => void registro.ricarica()} /></p>}
-    {fortuna.errore && <p role="alert" className="m-0 text-error">Non riesco a leggere la Fortuna della partita: {fortuna.errore}<PulsanteVisivo tono="fantasma" className="ml-2" icona={<IconaAzione chiave="riprova" dimensione={22} />} titolo="Riprova" onClick={() => void fortuna.ricarica()} /></p>}
+    {registro.errore && <p role="alert" className="m-0 text-error-testo">{registro.errore}<PulsanteVisivo tono="fantasma" className="ml-2" icona={<IconaAzione chiave="riprova" dimensione={22} />} titolo="Riprova" onClick={() => void registro.ricarica()} /></p>}
+    {fortuna.errore && <p role="alert" className="m-0 text-error-testo">Non riesco a leggere la Fortuna della partita: {fortuna.errore}<PulsanteVisivo tono="fantasma" className="ml-2" icona={<IconaAzione chiave="riprova" dimensione={22} />} titolo="Riprova" onClick={() => void fortuna.ricarica()} /></p>}
     {presenza?.valutazione && <ProvaPresenza valutazione={presenza.valutazione} />}
     <fieldset className="m-0 flex min-w-0 flex-col gap-3 border-0 p-0" disabled={occupato || incerto || !!anteprima || !registro.dati}>
       <Selettore etichetta="Consumo" valore={campi.scelta} opzioni={[{ chiave: '', nome: 'Un consumo nuovo' }, ...registrazioni.map((r) => ({ chiave: r.id, nome: `${dataGiocoTesto(r.momento.giorno)} · ${fasciaInParole(r.momento.fascia)} · ${nomeDote(r.consumo.variante)}${r.attiva ? '' : ' · non più confermato'}` }))]}
@@ -183,7 +183,7 @@ export function PreparazioneAcquistoAojiru({ partitaId, fonte, articolo = ARTICO
         {!incerto && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo="Correggi" disabled={occupato} onClick={() => { setAnteprima(null); setAttestato(false); }} />}
       </div>
     </div>}
-    {errore && <p role="alert" className="m-0 text-error">{errore}</p>}
+    {errore && <p role="alert" className="m-0 text-error-testo">{errore}</p>}
     {incerto && <p role="alert" className="m-0 text-warning">Non è sicuro che sia andata a buon fine. «Riprova» ripete la stessa operazione una volta sola: se era già riuscita, non si duplica.</p>}
     {occupato && <p role="status" className="m-0">Un attimo…</p>}
   </div>;
@@ -251,7 +251,7 @@ export function ConsumiAojiru({ partitaId, stato, onCambiato, registrabile = tru
       </li>)}
     </ul></details>}
     {ricevuta && <p role="status" className="m-0 text-success">{ricevuta}</p>}
-    {errore && <p role="alert" className="m-0 text-error">{errore}</p>}
+    {errore && <p role="alert" className="m-0 text-error-testo">{errore}</p>}
     <Modal aperta={nuovo} titolo="Registra il consumo di Aojiru" onChiudi={() => { if (!gestoPendenteNelloScope(partitaId, { articolo: stato?.articolo ?? ARTICOLO_AOJIRU })) setNuovo(false); }} larga>
       <PreparazioneAcquistoAojiru key={`${partitaId}:${stato?.articolo ?? ARTICOLO_AOJIRU}`} partitaId={partitaId} fonte={{ tipo: 'manuale' }} articolo={stato?.articolo} stato={stato}
         onRecuperato={aggiorna}
@@ -269,7 +269,7 @@ export function ConsumiAojiru({ partitaId, stato, onCambiato, registrabile = tru
       <p>{rimozione?.provenienza ? 'Si toglie soltanto questa voce.' : 'Si toglie soltanto il vecchio segno «Acquistato».'} {rimozione?.anteprima.ultimaFonte ? 'È l’ultima voce che lo conferma: il consumo non conta più. Se serve correggere i punti, compare il pulsante «Annulla» sulla voce.' : 'Le altre voci del consumo restano.'} Lo ritrovi nel Cestino.</p>
       {rimozione?.anteprima.acquisto && <DettagliConsumo acquisto={rimozione.anteprima.acquisto} fonteSelezionata={rimozione.provenienza} />}
       {rimozione?.anteprima.presenzaStorica && <div className="flex flex-col gap-1 break-words"><strong>Vecchio segno · {rimozione.anteprima.presenzaStorica.negozioNome}</strong><span>{rimozione.anteprima.presenzaStorica.orfana ? 'L’offerta non c’è più nel catalogo. ' : ''}Non dice quante volte, quando né quale succo.</span>{rimozione.anteprima.presenzaStorica.valutazione && <ProvaPresenza valutazione={rimozione.anteprima.presenzaStorica.valutazione} />}{rimozione.anteprima.presenzaStorica.rappresentataDa && <span>È già rappresentato da un consumo registrato.</span>}</div>}
-      {errore && <p role="alert" className="text-error">{errore}</p>}
+      {errore && <p role="alert" className="text-error-testo">{errore}</p>}
       {incerto && <p role="alert">Non è sicuro che sia andata a buon fine: la verifica ripete soltanto la stessa operazione.</p>}
       {incerto && <GestiPartita partitaId={partitaId} onCambiato={async () => { if (vivo.current) { setRimozione(null); setIncerto(false); await aggiorna(); } }} />}
     </Modal>

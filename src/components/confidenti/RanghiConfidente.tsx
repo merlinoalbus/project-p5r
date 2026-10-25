@@ -84,7 +84,7 @@ function EditorRango({ chiave, nome, rango, onChiudi, onSalvato }: { chiave: str
         {modo === 'punti' ? (
           <label className="flex flex-col gap-1">Punti necessari per salire
             <input className="form-input" type="number" inputMode="numeric" min={1} max={9999} step={1} value={soglia} disabled={occupato} onChange={(e) => setSoglia(e.target.value)} aria-invalid={!valido} />
-            {!valido && <span className="text-error">Scrivi un numero intero di punti maggiore di zero.</span>}
+            {!valido && <span className="text-error-testo">Scrivi un numero intero di punti maggiore di zero.</span>}
           </label>
         ) : <p className="m-0 text-text-secondary">Questo rango non sale a punti: non ha una soglia.</p>}
       </div>

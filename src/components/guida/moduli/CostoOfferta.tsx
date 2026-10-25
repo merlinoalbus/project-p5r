@@ -50,6 +50,6 @@ export function CostoOfferta({ dati, imposta, disabilitato, catalogo }: Props) {
     </>}
     {tipo === 'non-leggibile' && <p role="alert" className="m-0 testo-13 text-warning">Il costo salvato non è leggibile e non viene trattato come gratis. Scegli come si paga per sostituirlo esplicitamente; altrimenti resta invariato.</p>}
     {dati._costoModificato === true && dati.costo_json != null && !normalizzaCostoScambio(dati.costo_json)
-      && <p role="alert" className="m-0 testo-13 text-error">Completa il numero di fiori oppure aggiungi almeno un oggetto con una quantità intera positiva.</p>}
+      && <p role="alert" className="m-0 testo-13 text-error-testo">Completa il numero di fiori oppure aggiungi almeno un oggetto con una quantità intera positiva.</p>}
   </fieldset>;
 }

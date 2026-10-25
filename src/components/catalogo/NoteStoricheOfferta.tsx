@@ -48,10 +48,11 @@ function NotaStorica({ nota, onLegamiCambiati }: { nota: NotaStoricaOfferta; onL
     } catch (err) { notifica('error', err instanceof Error ? err.message : 'Salvataggio non riuscito.'); }
     finally { setOccupato(false); }
   };
-  const vuota = !testo.trim() || !fonte.trim();
+  // la fonte può mancare (una nota senza fonte citabile); il testo no
+  const vuota = !testo.trim();
   return <div className="min-w-0">
     <p className="m-0 whitespace-pre-line break-words"><strong>Nota storica della fonte. </strong>{attuale.testo}</p>
-    <p className="m-0 break-words text-text-secondary">Fonte: {attuale.fonte} · versione {attuale.versione}{attuale.modificata ? ' · modificata' : ''}</p>
+    <p className="m-0 break-words text-text-secondary">{attuale.fonte ? `Fonte: ${attuale.fonte} · ` : ''}versione {attuale.versione}{attuale.modificata ? ' · modificata' : ''}</p>
     <div className="mt-1 flex flex-wrap gap-2">
       <PulsanteVisivo compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica nota" onClick={() => apri('modifica')} />
       {attuale.modificata && <PulsanteVisivo compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Ripristina" onClick={() => apri('ripristina')} />}

@@ -121,7 +121,7 @@ export function EffettiAggiuntivi({ valore, onCambia, elenchi, nomi }: Props) {
               );
             })}
           </ul>
-          {errore && <p role="alert" className="m-0 text-error testo-12">{errore}</p>}
+          {errore && <p role="alert" className="m-0 text-error-testo testo-12">{errore}</p>}
           {righe.length < 100 && (
             <div className="flex flex-col gap-2">
               <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi un effetto" attivo={menu} aria-expanded={menu} onClick={() => setMenu((m) => !m)} />

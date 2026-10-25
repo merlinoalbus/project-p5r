@@ -27,6 +27,7 @@ import { RegistroAcquistiPartita } from './RegistroAcquistiPartita';
 import { RegistroPesca } from '../pesca/RegistroPesca';
 import { ATTIVITA_PESCA, EVENTI_PESCA, SFIDA_PESCA } from '../../../shared/pesca';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { TitoloSezione } from '../shared/TitoloSezione';
 
 type Sezione = 'storia' | 'attivita' | 'negozi' | 'pesca';
 type Evento = Progressi['eventi'][number];
@@ -167,7 +168,7 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
             {sezione === 'storia' && <>
               <div className="progressi-partita">
                 <section className="card flex flex-col gap-2" aria-labelledby="progressi-da-segnare">
-                  <h2 id="progressi-da-segnare" className="m-0 font-display testo-17 uppercase leading-none">Da segnare quando succede</h2>
+                  <TitoloSezione variante="display" id="progressi-da-segnare">Da segnare quando succede</TitoloSezione>
                   <p className="m-0 testo-12 text-text-muted">Eventi della storia che l’app non può sapere: spunta la casella quando li fai in gioco.</p>
                   {daSegnare.length === 0
                     ? <p className="m-0 testo-13 text-text-muted">Niente da segnare: tutti gli eventi sono avvenuti.</p>
@@ -186,7 +187,7 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
 
                 <div className="flex min-w-0 flex-col gap-3">
                   <section className="card flex flex-col gap-2" aria-labelledby="progressi-squadra">
-                    <h2 id="progressi-squadra" className="m-0 flex flex-wrap items-center gap-2 font-display testo-17 uppercase leading-none">Automatici dalla squadra <Automatico /></h2>
+                    <TitoloSezione variante="display" id="progressi-squadra" className="flex flex-wrap items-center gap-2">Automatici dalla squadra <Automatico /></TitoloSezione>
                     <p className="m-0 testo-12 text-text-muted">Un Ladro in squadra fa avvenire il suo evento. Si segna in <Link to="/partita?scheda=squadra" className="text-primary-testo">Denaro e squadra</Link>.</p>
                     <ul className="m-0 p-0 list-none flex flex-col gap-1">
                       {calcolati.map((e) => (
@@ -199,7 +200,7 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
                     </ul>
                   </section>
                   <section className="card flex flex-col gap-2" aria-labelledby="progressi-contatori">
-                    <h2 id="progressi-contatori" className="m-0 flex flex-wrap items-center gap-2 font-display testo-17 uppercase leading-none">Dalle letture <Automatico /></h2>
+                    <TitoloSezione variante="display" id="progressi-contatori" className="flex flex-wrap items-center gap-2">Dalle letture <Automatico /></TitoloSezione>
                     <p className="m-0 testo-12 text-text-muted">Si contano da sole in <Link to="/partita?scheda=letture" className="text-primary-testo">Letture e giochi</Link>.</p>
                     <ul className="m-0 p-0 list-none flex flex-col gap-1">
                       {p.contatori.map((c) => (
@@ -217,7 +218,7 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
             {sezione === 'attivita' && (
               <section className="flex flex-col gap-3" aria-labelledby="progressi-attivita">
                 <div className="flex flex-col gap-1">
-                  <h2 id="progressi-attivita" className="m-0 font-display testo-17 uppercase leading-none">Attività svolte</h2>
+                  <TitoloSezione variante="display" id="progressi-attivita">Attività svolte</TitoloSezione>
                   <p className="m-0 testo-13 text-text-secondary">Quante volte hai fatto ogni attività: ogni + ti ricorda le Doti da segnare.</p>
                 </div>
                 <div className="progressi-attivita">
@@ -253,7 +254,7 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
               <div className="progressi-partita">
                 {p.rangoCliente.length > 0 && (
                   <section className="card flex flex-col gap-2" aria-labelledby="progressi-rango">
-                    <h2 id="progressi-rango" className="m-0 flex flex-wrap items-center gap-2 font-display testo-17 uppercase leading-none">Grado cliente <Automatico /></h2>
+                    <TitoloSezione variante="display" id="progressi-rango" className="flex flex-wrap items-center gap-2">Grado cliente <Automatico /></TitoloSezione>
                     <p className="m-0 testo-12 text-text-muted">Cresce da solo con la spesa che segni negli acquisti del negozio.</p>
                     <ul className="m-0 p-0 list-none flex flex-col gap-2">
                       {p.rangoCliente.map((n) => {
@@ -274,7 +275,7 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
                 )}
                 {p.puntiNegozio.length > 0 && (
                   <section className="card flex flex-col gap-2" aria-labelledby="progressi-punti">
-                    <h2 id="progressi-punti" className="m-0 font-display testo-17 uppercase leading-none">Punti negozio</h2>
+                    <TitoloSezione variante="display" id="progressi-punti">Punti negozio</TitoloSezione>
                     <p className="m-0 testo-12 text-text-muted">I punti che il negozio ti ha dato, a passi di dieci: vengono dalle vendite, non dalla spesa.</p>
                     <ul className="m-0 p-0 list-none flex flex-col gap-1">
                       {p.puntiNegozio.map((n) => (

@@ -37,7 +37,7 @@ export function ContenutoDellaVoce({ voce, fonte, contenuto, onCambiato, disabil
     <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo={aperto ? 'Chiudi modifica contenuto' : 'Collega o modifica il contenuto'} className="self-start" disabled={bloccato} aria-expanded={aperto} onClick={() => { setAperto((v) => !v); azzera(); }} />
     {aperto && <div className="flex min-w-0 flex-col gap-3 border border-border p-2">
       <p className="m-0 testo-12 text-text-muted">{fonte ? 'Questi sono i risultati collegati del baratto. Non modificano costo, acquisti o testo originale; usa la nota per distinguere un premio alternativo.' : 'Questi sono gli oggetti collegati alla voce, non il testo della guida. Quantità e nota del legame non modificano pin o spunte.'}</p>
-      {errore && <p role="alert" className="m-0 testo-13 text-error">{errore}</p>}
+      {errore && <p role="alert" className="m-0 testo-13 text-error-testo">{errore}</p>}
       {contenuto.map((o) => <div key={o.chiave} className="flex min-w-0 flex-wrap items-center gap-2 testo-13">
         <span className="min-w-0 flex-1">{o.quantita} × <Link to={o.casa} className="touch inline-flex items-center">{o.nome}</Link>{o.nota && <span className="block text-text-muted">{o.nota}</span>}</span>
         <PulsanteVisivo icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo="Modifica" disabled={bloccato} onClick={() => { setScelto(o); setPrecedente(o.chiave); setQuantita(o.quantita); setNota(o.nota ?? ''); setErrore(null); }} />

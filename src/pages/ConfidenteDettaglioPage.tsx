@@ -130,7 +130,7 @@ export function ConfidenteDettaglioPage() {
 
   return (
     <>
-    <PageState isLoading={caricamento} error={errore || erroreInformativo} onRetry={() => void ricarica()}>
+    <PageState isLoading={caricamento} error={errore || erroreInformativo} onRetry={() => void ricarica()} scheda={{ titolo: 'Confidente', ripiego: '/partita?scheda=confidenti' }}>
       {c && !erroreInformativo && (
         <div className="flex flex-col gap-4">
           {/* Lotto B (punto 6): l'azione di gioco è il pulsante primario; gli strumenti di modifica stanno nel menu «Modifica ⋯», che

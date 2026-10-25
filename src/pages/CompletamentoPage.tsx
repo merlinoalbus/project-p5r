@@ -9,6 +9,7 @@ import { opzioniDaNomi } from '../utils/selettore';
 import { useSearchParams } from 'react-router-dom';
 import { getCompletamento, impostaTrofeo } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
+import { useSchede } from '../hooks/useSchede';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useElementoDaIndirizzo } from '../hooks/useElementoDaIndirizzo';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -22,6 +23,7 @@ import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { IconMedaglia } from '../components/shared/iconeGuida';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
+import { TitoloSezione } from '../components/shared/TitoloSezione';
 
 // Il Covo dei Ladri non è più una linguetta qui: ha una pagina sua, `/guida/covo`. Non era un
 // capitolo dei trofei — è un'area con una valuta propria, 52 sfide che la guadagnano e 36 premi
@@ -111,6 +113,7 @@ export function CompletamentoPage() {
   const ricarica = () => void dati.ricarica();
   // L11 B4 (R11-07/3): `?elemento=<chiave>` (la «casa» di un trofeo nella ricerca globale) porta in vista il trofeo e lo evidenzia
   useElementoDaIndirizzo(!!d && scheda === 'trofei', scheda);
+  const schede = useSchede({ chiavi: SCHEDE.map(([k]) => k), attiva: scheda, onScegli: (k) => setParams(k === 'trofei' ? {} : { scheda: k }, { replace: true }) });
   const trofeiVisibili = useMemo(() => (d?.trofei ?? []).filter((t) => (!tipo || t.tipo === tipo) && (!soloDaFare || !t.ottenuto)), [d, tipo, soloDaFare]);
   // dai dati correnti: la riga arriva dopo un `await`, e due spunte ravvicinate non devono annullarsi
   const aggiorna = (t: TrofeoDto) => dati.imposta((attuale) => { const trofei = attuale.trofei.map((x) => (x.chiave === t.chiave ? t : x)); return { ...attuale, trofei, ottenuti: trofei.filter((x) => x.ottenuto).length } as CompletamentoDto; });
@@ -122,15 +125,15 @@ export function CompletamentoPage() {
           {/* Il Covo stava qui come terza linguetta ed è andato in una pagina sua: chi lo cercava
               dov'era lo trova lo stesso, invece di concludere che è sparito. */}
           <CollegamentoVisivo to="/guida/covo" tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Covo dei Ladri" dettaglio="sfide, premi e Medaglie P" />
-          <FilaScorrevole role="tablist" aria-label="Sezioni">
+          <FilaScorrevole {...schede.lista} aria-label="Sezioni">
             {SCHEDE.map(([k, l, icona]) => (
-              <button key={k} type="button" role="tab" aria-selected={scheda === k} title={l}
-                className={`piastrella-scheda touch ${scheda === k ? 'piastrella-scheda--attiva' : ''}`}
-                onClick={() => setParams(k === 'trofei' ? {} : { scheda: k }, { replace: true })}>
+              <button key={k} type="button" {...schede.scheda(k)} title={l}
+                className={`piastrella-scheda touch ${scheda === k ? 'piastrella-scheda--attiva' : ''}`}>
                 <IconaScheda chiave={icona} dimensione={28} /><span>{l}</span>
               </button>
             ))}
           </FilaScorrevole>
+          <div {...schede.pannello(scheda)} className="flex min-w-0 flex-col gap-3">
           {scheda === 'trofei' && (
             <div className="flex flex-col gap-2">
               <div className="flex flex-wrap items-center gap-1.5">
@@ -164,7 +167,7 @@ export function CompletamentoPage() {
               {d.finali.map((f) => (
                 <li key={f.chiave} className="card flex flex-col gap-1 testo-13">
                   <div className="flex items-start gap-2">
-                    <h2 className="m-0 min-w-0 flex-1 testo-15 font-semibold">{f.nome}</h2>
+                    <TitoloSezione className="min-w-0 flex-1">{f.nome}</TitoloSezione>
                     <ModificaGuida tipo="finale" chiave={f.chiave} cosa={`il finale «${f.nome}»`} soloIcona onSalvato={ricarica} />
                   </div>
                   {f.descrizione && <p className="m-0 text-text-secondary">{f.descrizione}</p>}
@@ -189,7 +192,7 @@ export function CompletamentoPage() {
             <div className="flex flex-col gap-2 testo-13">
               <section className="card flex flex-col gap-1">
                 <div className="flex items-start gap-2">
-                  <h2 className="m-0 min-w-0 flex-1 testo-15 font-semibold">Nuova Partita+</h2>
+                  <TitoloSezione className="min-w-0 flex-1">Nuova Partita+</TitoloSezione>
                   <ModificaGuida tipo="completamento-sezione" chiave="ng" cosa="la sezione «Nuova Partita+»" soloIcona onSalvato={ricarica} />
                 </div>
                 {d.nuovaPartitaPlus.note && <p className="m-0 text-text-secondary">{d.nuovaPartitaPlus.note}</p>}
@@ -199,7 +202,7 @@ export function CompletamentoPage() {
               </section>
               <section className="card flex flex-col gap-1">
                 <div className="flex items-start gap-2">
-                  <h2 className="m-0 min-w-0 flex-1 testo-15 font-semibold">Differenze rispetto a Persona 5</h2>
+                  <TitoloSezione className="min-w-0 flex-1">Differenze rispetto a Persona 5</TitoloSezione>
                   <ModificaGuida tipo="completamento-sezione" chiave="differenze" cosa="le differenze rispetto a Persona 5" soloIcona onSalvato={ricarica} />
                 </div>
                 <ul className="m-0 pl-4">{d.differenzeRoyal.map((x) => <li key={x}>{x}</li>)}</ul>
@@ -209,7 +212,7 @@ export function CompletamentoPage() {
           {scheda === 'tempo' && (
             <section className="card flex flex-col gap-1 testo-13">
               <div className="flex items-start gap-2">
-                <h2 className="m-0 min-w-0 flex-1 testo-15 font-semibold">Fasce orarie e regole del tempo</h2>
+                <TitoloSezione className="min-w-0 flex-1">Fasce orarie e regole del tempo</TitoloSezione>
                 <ModificaGuida tipo="completamento-sezione" chiave="tempo" cosa="le fasce orarie e le regole del tempo" soloIcona onSalvato={ricarica} />
               </div>
               <ul className="m-0 pl-4">{d.tempo.fasce.map((x) => <li key={x}>{x}</li>)}</ul>
@@ -218,6 +221,7 @@ export function CompletamentoPage() {
               <Fonte url={d.tempo.fonte} />
             </section>
           )}
+          </div>
         </div>
       )}
     </PageState>

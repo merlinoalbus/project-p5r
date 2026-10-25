@@ -188,7 +188,7 @@ export function QuartierePage() {
     document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start' });
   }, [q, hash]);
   return (
-    <PageState isLoading={dati.caricamento && !q} error={dati.errore} onRetry={() => void dati.ricarica()}>
+    <PageState isLoading={dati.caricamento && !q} error={dati.errore} onRetry={() => void dati.ricarica()} scheda={{ titolo: 'Quartiere', ripiego: '/guida/citta' }}>
       {q && (
         <div className="flex flex-col gap-4">
           {/* L'illustrazione della mappa del quartiere (regola unica di L1), con sopra la sagoma della mappa di Tokyo, la stessa che si è
@@ -220,7 +220,8 @@ export function QuartierePage() {
               {q.descrizione && <p className="m-0 testo-13 text-text-secondary">{q.descrizione}</p>}
           </section>}
 
-          {q.sbloccoCondizione?.fonte && <p className="m-0 testo-12 text-text-muted" title={q.sbloccoCondizione.fonte.nota ?? undefined}>Fonte: {q.sbloccoCondizione.fonte.registro}, certezza {q.sbloccoCondizione.fonte.certezza}{q.sbloccoCondizione.fonte.certezza !== 'alta' ? ' — da verificare' : ''}.</p>}
+          {/* il registro della fonte («G-018») è tracciabilità del progetto, non un'informazione per chi gioca: si dice solo se va verificata */}
+          {q.sbloccoCondizione?.fonte && q.sbloccoCondizione.fonte.certezza !== 'alta' && <p className="m-0 testo-12 text-text-muted" title={q.sbloccoCondizione.fonte.nota ?? undefined}>Condizione con certezza {q.sbloccoCondizione.fonte.certezza}: da verificare.</p>}
           {q.sbloccoCondizione?.esito === 'falso' && <p className="m-0 testo-13 text-text-secondary">Manca: {q.sbloccoCondizione.manca ?? q.sbloccoCondizione.testo}.</p>}
           <InvitiConfidente filtro={{ apreTipo: 'quartiere', apreChiave: q.chiave }} onCambiato={dati.ricarica} />
 

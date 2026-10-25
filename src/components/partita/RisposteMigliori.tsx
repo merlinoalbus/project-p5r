@@ -50,7 +50,7 @@ export function RisposteMigliori({ chiave, nome, rangoEvento, appenaGiocato = fa
       </div>
       {caricamento && <div className="flex items-center gap-2 testo-13 text-text-muted" role="status"><Spinner size={18} /> Carico le risposte…</div>}
       {errore && (
-        <p className="m-0 testo-13 text-error" role="alert">
+        <p className="m-0 testo-13 text-error-testo" role="alert">
           Risposte non disponibili: {errore}{' '}
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={riprova} />
         </p>

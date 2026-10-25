@@ -24,6 +24,7 @@ import { IconaAzione } from '../shared/IconaAzione';
 import type { EsitoRipristinoCestinoDto, VoceCestinoUnificatoDto } from '../../types';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
+import { TitoloSezione } from '../shared/TitoloSezione';
 
 /** Data e ora di un'eliminazione, all'italiana. */
 const quando = (iso: string): string => new Date(iso).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' });
@@ -124,7 +125,7 @@ export function Cestino() {
     <section className="card flex flex-col gap-3" aria-labelledby="titolo-cestino">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex min-w-0 flex-col gap-1">
-          <h2 id="titolo-cestino" className="m-0 testo-15 font-semibold">Cestino</h2>
+          <TitoloSezione id="titolo-cestino">Cestino</TitoloSezione>
           <p className="m-0 testo-13 text-text-secondary">
             {/* le aree del mondo ci finiscono da L2 (UX2-12) */}
             Le aree dei quartieri e della città, le planimetrie, le infiltrazioni dei Palazzi, le voci della guida e le aree dei dedali
@@ -135,7 +136,7 @@ export function Cestino() {
         </div>
         <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Svuota il cestino" disabled={occupato || voci.length === 0} onClick={() => setSvuotare(true)} />
       </div>
-      {elenco.errore && <p className="m-0 testo-13 text-error" role="alert">{elenco.errore}</p>}
+      {elenco.errore && <p className="m-0 testo-13 text-error-testo" role="alert">{elenco.errore}</p>}
       {elenco.caricamento && !elenco.dati && <p className="m-0 testo-13 text-text-muted">Caricamento del cestino…</p>}
       {elenco.dati && voci.length === 0 && <p className="m-0 testo-13 text-text-muted">Il cestino è vuoto.</p>}
       {voci.length > 0 && (

@@ -14,6 +14,7 @@ import { ModuloCatalogo } from '../guida/ModuloCatalogo';
 import type { ElementoCatalogoDto, TipoCatalogo } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { TitoloSezione } from '../shared/TitoloSezione';
 
 /**
  * Card «I miei dati» delle Impostazioni: per ogni tipo del catalogo con righe dell'utente mostra quante ne ha
@@ -33,13 +34,13 @@ export function MieiDati() {
 
   return (
     <section className="card flex flex-col gap-3" aria-label="I miei dati">
-      <h2 className="m-0 testo-15 font-semibold">I miei dati</h2>
+      <TitoloSezione>I miei dati</TitoloSezione>
       <p className="m-0 testo-13 text-text-secondary">
         Le righe che hai aggiunto o corretto tu sopra i dati della guida. Restano anche quando i dati vengono ricaricati:
         «Ripristina dalla guida» rimette l'originale, e le righe che hai aggiunto tu si eliminano dallo stesso pulsante.
         Le righe nascoste dagli elenchi stanno in <a href="#nascosti">Nascosti dalla guida</a>, qui sotto nel Cestino, con il ripristino in un tocco.
       </p>
-      {riepilogo.errore && <p className="m-0 testo-13 text-error">{riepilogo.errore}</p>}
+      {riepilogo.errore && <p className="m-0 testo-13 text-error-testo">{riepilogo.errore}</p>}
       {totale === 0 && !riepilogo.caricamento && (
         <p className="m-0 testo-13 text-text-muted">Non hai ancora aggiunto né corretto nulla: lo puoi fare dalle pagine dei negozi e dei giorni.</p>
       )}
@@ -55,7 +56,7 @@ export function MieiDati() {
             </button>
             {aperto === t.tipo && (
               <ul className="m-0 p-0 list-none flex flex-col gap-0.5">
-                {elenco.errore && <li className="testo-13 text-error">{elenco.errore}</li>}
+                {elenco.errore && <li className="testo-13 text-error-testo">{elenco.errore}</li>}
                 {(elenco.dati ?? []).map((e) => (
                   <li key={e.chiave} className="flex items-center justify-between gap-2 testo-13 py-0.5">
                     <span className={`flex-1 min-w-0 ${e.nascosta ? 'line-through text-text-muted' : ''}`}>

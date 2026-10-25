@@ -26,7 +26,7 @@ export function EditorDettagli({ valore, onCambia, nascosti = [] }: { valore: st
     <fieldset className="m-0 flex w-full flex-col gap-2 border-0 p-0 testo-12">
       <legend className="mb-1 p-0">Dettagli</legend>
       {visibili.length === 0 && <p className="m-0 text-text-muted">Nessun dettaglio.</p>}
-      {ripetute.length > 0 && <p className="m-0 text-error" role="alert">Etichetta ripetuta: {ripetute.join(', ')}. Cambiala per salvare.</p>}
+      {ripetute.length > 0 && <p className="m-0 text-error-testo" role="alert">Etichetta ripetuta: {ripetute.join(', ')}. Cambiala per salvare.</p>}
       {visibili.map(({ r, i }) => (
         <div key={i} className="flex flex-wrap items-start gap-2 rounded-md bg-white/[0.03] p-1.5" role="group" aria-label={`Dettaglio ${r.etichetta || i + 1}`}>
           <label className="flex w-full flex-col gap-1 sm:w-[170px]">

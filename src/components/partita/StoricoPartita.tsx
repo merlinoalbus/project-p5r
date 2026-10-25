@@ -120,7 +120,7 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
           {eventi && <span className="ml-auto shrink-0 whitespace-nowrap testo-12 text-text-muted">{totale} {totale === 1 ? 'evento' : 'eventi'}</span>}
         </div>
       )}
-      {prima.errore && <div className="testo-13 text-error">{prima.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void prima.ricarica()} /></div>}
+      {prima.errore && <div className="testo-13 text-error-testo">{prima.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void prima.ricarica()} /></div>}
       {!eventi && !prima.errore && <div className="flex justify-center py-6"><Spinner /></div>}
       {eventi && eventi.length === 0 && (
         compatto

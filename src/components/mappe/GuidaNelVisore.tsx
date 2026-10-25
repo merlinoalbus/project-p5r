@@ -30,6 +30,7 @@ import { Modal } from '../shared/Modal';
 import { IconaAzione } from '../shared/IconaAzione';
 import type { PuntoInteresseDto } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { TitoloSezione } from '../shared/TitoloSezione';
 
 /** Larghezza della finestra fluttuante. */
 const LARGHEZZA = 340;
@@ -199,12 +200,12 @@ export function GuidaNelVisore({ mappa, partitaId, spilloSelezionato, spilliQui,
       style={largo ? { left: pos.x, top: pos.y, maxHeight: `min(560px, 70dvh, ${Math.max(ALTEZZA_UTILE, (typeof window === 'undefined' ? 800 : window.innerHeight) - pos.y - MARGINE)}px)` } : undefined}>
       <header className={`flex items-center gap-2 border-b border-border px-2 py-1 ${largo ? 'cursor-move touch-none select-none' : ''}`}
         onPointerDown={giu} onPointerMove={muovi} onPointerUp={su} onPointerCancel={su}>
-        <h2 className="m-0 min-w-0 flex-1 font-display testo-15 uppercase leading-tight">Guida <span className="testo-12 normal-case text-text-muted">· {daFare} da fare{fatte > 0 ? ` · ${fatte} fatte` : ''}</span></h2>
+        <TitoloSezione variante="display" className="min-w-0 flex-1 leading-tight">Guida <span className="testo-12 normal-case text-text-muted">· {daFare} da fare{fatte > 0 ? ` · ${fatte} fatte` : ''}</span></TitoloSezione>
         <button type="button" className="touch flex w-11 items-center justify-center bg-transparent text-text-muted" aria-label="Chiudi la guida" onClick={onChiudi}><IconaAzione chiave="chiudi" dimensione={20} /></button>
       </header>
       <div ref={elenco} className="area-scorrevole min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-1.5">
         {guida.caricamento && !guida.dati && <p className="m-0 py-2 testo-12 text-text-muted">Carico la guida…</p>}
-        {guida.errore && <p className="m-0 py-2 testo-12 text-error" role="alert">{guida.errore}</p>}
+        {guida.errore && <p className="m-0 py-2 testo-12 text-error-testo" role="alert">{guida.errore}</p>}
         {guida.dati && tutte.length === 0 && <p className="m-0 py-2 testo-12 text-text-muted">Nessuna voce della guida su questa planimetria.</p>}
         {!partitaId && tutte.length > 0 && <p className="m-0 pb-1 testo-12 text-text-muted">Attiva una partita per segnare quel che fai.</p>}
         {fatte > 0 && (

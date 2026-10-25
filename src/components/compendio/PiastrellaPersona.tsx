@@ -16,6 +16,9 @@ interface Props {
   evidenziata?: boolean;
   /** Chiamata quando si apre la scheda (per ricordare la Persona). */
   onApri?: () => void;
+  /** Disposizione a riga per il telefono (lotto C): arte piccola a sinistra, nome e arcano accanto, le dieci affinità
+   *  compatte su una riga sotto. Le informazioni sono le stesse della piastrella; ne entrano più per schermata. */
+  riga?: boolean;
 }
 
 /** Badge di stato da asset (`ui/badge-*`) con riserva sul chip testuale. */
@@ -24,7 +27,42 @@ export function BadgeStato({ nome, testo }: { nome: 'dlc' | 'tesoro' | 'speciale
 }
 
 /** Piastrella cliccabile verso la scheda; l'arte si ingrandisce senza seguire il collegamento (si sostituisce dalla scheda di dettaglio, per evitare caricamenti accidentali scorrendo la griglia). */
-export function PiastrellaPersona({ persona: p, evidenziata, onApri }: Props) {
+export function PiastrellaPersona({ persona: p, evidenziata, onApri, riga }: Props) {
+  const badge = <>
+    {p.dlc && <BadgeStato nome="dlc" testo="DLC" />}
+    {p.rara && <BadgeStato nome="tesoro" testo="Tesoro" />}
+    {p.speciale && <BadgeStato nome="speciale" testo="Speciale" />}
+    {p.richiedeConfidenteMax && <span className="chip">Confidente max</span>}
+  </>;
+  if (riga) {
+    return (
+      <li className="min-w-0" id={`persona-${p.id}`}>
+        <Link to={`/compendio/persona/${p.id}`} className={`card card--cliccabile piastrella no-underline text-text grid grid-cols-[72px_minmax(0,1fr)] items-start gap-x-3 gap-y-2 p-2.5 ${evidenziata ? 'card--evidenza' : ''}`} aria-label={`${p.nomeIt}, ${p.arcanaNome}, livello ${p.livello}`} onClick={onApri}>
+          <div className="relative">
+            <span onClick={(e) => e.preventDefault()} className="inline-flex"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={72} forma="quadrata" adatta="copri" /></span>
+            {p.rara && <AssetImg nome={`ui/tesoro-${slug(p.nome)}`} alt="" decorativa className="absolute -right-1 -bottom-1 w-8 h-8 object-contain drop-shadow" fallback={null} />}
+          </div>
+          <div className="flex min-w-0 flex-col gap-1">
+            <div className="flex min-w-0 items-start gap-2">
+              <LivelloBadge livello={p.livello} className="shrink-0" />
+              <div className="min-w-0 flex-1">
+                <div className="font-display uppercase testo-18 leading-[1.05] break-words" title={p.nomeIt}>{p.nomeIt}</div>
+                {p.nomeIt !== p.nome && <div className="testo-12 text-text-muted break-words">{p.nome}</div>}
+              </div>
+              <AssetImg nome={`arcani/icona/${slug(p.arcana)}`} alt="" decorativa className="w-7 h-7 shrink-0 object-contain drop-shadow" fallback={null} />
+            </div>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="chip">{p.arcanaNome}</span>
+              {badge}
+            </div>
+          </div>
+          <div className="col-span-2 min-w-0">
+            <AffinitaGriglia affinita={p.affinita} compatta fluida />
+          </div>
+        </Link>
+      </li>
+    );
+  }
   return (
     <li className="min-w-0" id={`persona-${p.id}`}>
       <Link to={`/compendio/persona/${p.id}`} className={`card card--cliccabile piastrella no-underline text-text flex flex-col gap-2 h-full ${evidenziata ? 'card--evidenza' : ''}`} aria-label={`${p.nomeIt}, ${p.arcanaNome}, livello ${p.livello}`} onClick={onApri}>
@@ -42,10 +80,7 @@ export function PiastrellaPersona({ persona: p, evidenziata, onApri }: Props) {
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="chip">{p.arcanaNome}</span>
-          {p.dlc && <BadgeStato nome="dlc" testo="DLC" />}
-          {p.rara && <BadgeStato nome="tesoro" testo="Tesoro" />}
-          {p.speciale && <BadgeStato nome="speciale" testo="Speciale" />}
-          {p.richiedeConfidenteMax && <span className="chip">Confidente max</span>}
+          {badge}
         </div>
         <div className="mt-auto">
           <AffinitaGriglia affinita={p.affinita} compatta />

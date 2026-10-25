@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import { AssetImg } from './AssetImg';
 import { useAssetMulti } from '../../stores/assetStore';
 import { AzioneHome, AzioneRiprova, TITOLO_ERRORE, VistaErrore } from './VistaErrore';
+import { IntestazioneScheda } from './IntestazioneScheda';
 
 const FOTOGRAMMI = Array.from({ length: 8 }, (_, i) => `illustrazioni/caricamento-${i + 1}`);
 const ILLUSTRAZIONE_NEUTRA = 'illustrazioni/vuoto-persona-senza-testo';
@@ -37,11 +38,14 @@ interface PageStateProps {
   isLoading: boolean;
   error: string | null;
   onRetry?: () => void;
+  /** Le schede di dettaglio (lotto C): in errore resta l'intestazione con «Indietro» e un h1 col nome generico della scheda («Skill»,
+   *  «Palazzo»), e l'errore sta sotto come h2. Senza, l'errore sarebbe un h2 senza h1 e senza modo di tornare se non dal menu. */
+  scheda?: { titolo: string; ripiego: string };
   children: ReactNode;
 }
 
 /** Switch uniforme caricamento / errore / contenuto per ogni pagina. */
-export function PageState({ isLoading, error, onRetry, children }: PageStateProps) {
+export function PageState({ isLoading, error, onRetry, scheda, children }: PageStateProps) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
@@ -51,7 +55,7 @@ export function PageState({ isLoading, error, onRetry, children }: PageStateProp
   }
   if (error) {
     // un solo aspetto per gli errori (VistaErrore); h2: sta sotto l'h1 dell'intestazione della pagina
-    return (
+    const vista = (
       <VistaErrore
         titolo={TITOLO_ERRORE}
         spiegazione={error}
@@ -60,6 +64,13 @@ export function PageState({ isLoading, error, onRetry, children }: PageStateProp
           <AzioneHome />
         </>}
       />
+    );
+    if (!scheda) return vista;
+    return (
+      <div className="flex flex-1 flex-col gap-4">
+        <IntestazioneScheda titolo={scheda.titolo} ripiego={scheda.ripiego} />
+        {vista}
+      </div>
     );
   }
   return <>{children}</>;

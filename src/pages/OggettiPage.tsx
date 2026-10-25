@@ -8,6 +8,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { getOggettiGuida } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import { useSchede } from '../hooks/useSchede';
 import { PageState } from '../components/shared/PageState';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
@@ -44,7 +45,7 @@ function SchedaFabbricazione({ d, onModificato }: { d: OggettiGuidaDto; onModifi
   const f = d.fabbricazione;
   return (
     <div className="flex flex-col gap-2 testo-13">
-      <section className="card flex flex-col gap-1">
+      <section className="card prosa-misurata-figli flex flex-col gap-1">
         <div className="flex items-start gap-2">
           <p className="m-0 min-w-0 flex-1">{f.introduzione}</p>
           <ModificaGuida tipo="fabbricazione" chiave="fabbricazione" cosa="l’introduzione e le regole della fabbricazione" soloIcona onSalvato={onModificato} />
@@ -77,7 +78,7 @@ function SchedaArmi({ d, onModificato }: { d: OggettiGuidaDto; onModificato: () 
   const p = d.personalizzazioneArmi;
   return (
     <div className="flex flex-col gap-2 testo-13">
-      <section className="card flex flex-col gap-1">
+      <section className="card prosa-misurata-figli flex flex-col gap-1">
         <div className="flex items-start gap-2">
           <p className="m-0 min-w-0 flex-1">{p.introduzione}</p>
           <ModificaGuida tipo="armi" chiave="armi" cosa="l’introduzione e i requisiti della personalizzazione delle armi" soloIcona onSalvato={onModificato} />
@@ -96,7 +97,7 @@ function SchedaArmi({ d, onModificato }: { d: OggettiGuidaDto; onModificato: () 
         </div>
       )}
       {p.progressioneConfidente.length > 0 && (
-        <section className="card flex flex-col gap-1">
+        <section className="card prosa-misurata-figli flex flex-col gap-1">
           <h2 className="m-0 testo-15 font-semibold">Progressione con il Confidente (Iwai)</h2>
           <ul className="m-0 pl-4">{p.progressioneConfidente.map((x) => <li key={typeof x === 'string' ? x : JSON.stringify(x)}>{typeof x === 'string' ? x : Object.entries(x as Record<string, unknown>).map(([k, v]) => `${k}: ${String(v)}`).join(' · ')}
             {typeof x === 'object' && x !== null && 'rango' in x && <ModificaGuida tipo="arma-progressione" chiave={String((x as { rango: unknown }).rango)} cosa={`il rango ${String((x as { rango: unknown }).rango)} della progressione`} soloIcona onSalvato={onModificato} />}</li>)}</ul>
@@ -112,11 +113,11 @@ function SchedaAbiti({ d, onModificato }: { d: OggettiGuidaDto; onModificato: ()
   const visibili = useMemo(() => { const n = normalizzaTesto(q); return d.abiti.elenco.filter((x) => !n || normalizzaTesto(`${x.nome} ${(x.nomiAltri ?? []).join(' ')} ${x.per} ${x.dove}`).includes(n)); }, [d, q]);
   return (
     <div className="flex flex-col gap-2 testo-13">
-      <div className="flex items-start gap-2">
+      <div className="prosa-misurata flex items-start gap-2">
         <p className="m-0 min-w-0 flex-1 text-text-secondary">{d.abiti.introduzione}</p>
         <ModificaGuida tipo="abiti" chiave="abiti" cosa="l’introduzione e la lavanderia degli abiti" soloIcona onSalvato={onModificato} />
       </div>
-      <section className="card flex flex-col gap-1">
+      <section className="card prosa-misurata-figli flex flex-col gap-1">
         <h2 className="m-0 testo-15 font-semibold">Lavanderia</h2>
         <VoceTesto titolo="Dove">{d.abiti.lavanderia.dove}</VoceTesto>
         <VoceTesto titolo="Costo">{d.abiti.lavanderia.costo}</VoceTesto>
@@ -138,7 +139,7 @@ function SchedaAbiti({ d, onModificato }: { d: OggettiGuidaDto; onModificato: ()
 /** Gli scambi dei venditori speciali, una carta per venditore con la tabella di quel che si riceve e si dà; Jose è escluso e resta solo il rimando alle Richieste dei Mementos. */
 function SchedaScambi({ d }: { d: OggettiGuidaDto }) {
   if (d.listiniScambi !== undefined) return <div className="flex min-w-0 flex-col gap-2 testo-13">
-    <p className="m-0 text-text-secondary">Ogni venditore ha un solo listino: lì trovi oggetti, costi, requisiti e gestione. Le indicazioni della guida precedente sono conservate nelle note del negozio, non come offerte aggiuntive.</p>
+    <p className="prosa-misurata m-0 text-text-secondary">Ogni venditore ha un solo listino: lì trovi oggetti, costi, requisiti e gestione. Le indicazioni della guida precedente sono conservate nelle note del negozio, non come offerte aggiuntive.</p>
     {d.listiniScambi.length ? <ul className="m-0 grid list-none gap-2 p-0 md:grid-cols-2">
       {d.listiniScambi.map((n) => <li key={n.chiave} className="card flex min-w-0 flex-col items-start gap-2">
         <h2 className="m-0 break-words testo-15 font-semibold">{n.nome}</h2>
@@ -187,20 +188,26 @@ export function OggettiPage() {
   const [params, setParams] = useSearchParams();
   const richiesta = params.get('scheda') ?? '';
   const scheda = (SCHEDE.some(([k]) => k === richiesta) ? richiesta : 'catalogo') as Scheda;
+  /** Apre una scheda scrivendola nell'indirizzo (il catalogo è l'indirizzo senza `scheda`), senza voci nuove nella cronologia. */
+  const apri = (k: Scheda) => setParams((prima) => { const dopo = new URLSearchParams(prima); if (k === 'catalogo') dopo.delete('scheda'); else dopo.set('scheda', k); return dopo; }, { replace: true });
+  const schede = useSchede({ chiavi: SCHEDE.map(([k]) => k), attiva: scheda, onScegli: apri });
   return (
         <div className="flex min-w-0 flex-col gap-3">
           <IntestazionePagina compatta titolo="Oggetti" sottotitolo="Un solo catalogo con nomi, effetti, vendite e collegamenti. Fabbricazione, personalizzazione, lavanderia e scambi restano nelle loro sezioni." />
-          <FilaScorrevole role="tablist" aria-label="Sezioni">
+          {/* Schede con il pattern completo (`useSchede`, come le altre pagine): Tab entra sulla scheda aperta, frecce, Inizio e
+              Fine passano alle altre e la aprono; ogni scheda controlla il suo pannello (lotto C). */}
+          <FilaScorrevole {...schede.lista} aria-label="Sezioni degli oggetti">
             {SCHEDE.map(([k, l, tipo, icona]) => (
-              <button key={k} type="button" role="tab" aria-selected={scheda === k} title={l}
-                className={`piastrella-scheda touch ${scheda === k ? 'piastrella-scheda--attiva' : ''}`}
-                onClick={() => setParams((prima) => { const dopo = new URLSearchParams(prima); if (k === 'catalogo') dopo.delete('scheda'); else dopo.set('scheda', k); return dopo; }, { replace: true })}>
+              <button key={k} type="button" {...schede.scheda(k)} title={l}
+                className={`piastrella-scheda touch ${scheda === k ? 'piastrella-scheda--attiva' : ''}`}>
                 {tipo === 'categoria' ? <IconaCategoria categoria={icona} dimensione={28} /> : <IconaScheda chiave={icona} dimensione={28} />}
                 <span>{l}</span>
               </button>
             ))}
           </FilaScorrevole>
-          {scheda === 'catalogo' ? <CatalogoOggetti gruppoIniziale={GRUPPO_STORICO[richiesta]} /> : <SezioniDellaGuida scheda={scheda} />}
+          <div {...schede.pannello(scheda)} className="min-w-0">
+            {scheda === 'catalogo' ? <CatalogoOggetti gruppoIniziale={GRUPPO_STORICO[richiesta]} /> : <SezioniDellaGuida scheda={scheda} />}
+          </div>
         </div>
   );
 }

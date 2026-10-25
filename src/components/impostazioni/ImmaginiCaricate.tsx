@@ -14,6 +14,7 @@ import { Modal } from '../shared/Modal';
 import { azzeraCacheImmagini } from '../shared/immaginiCache';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { TitoloSezione } from '../shared/TitoloSezione';
 
 const AMBITI: Array<{ chiave: AmbitoImmagine; nome: string }> = [
   { chiave: 'persona', nome: 'Persona' },
@@ -68,11 +69,11 @@ export function ImmaginiCaricate() {
 
   return (
     <section className="card flex flex-col gap-3">
-      <h2 className="m-0 testo-15 font-semibold">Immagini caricate</h2>
+      <TitoloSezione>Immagini caricate</TitoloSezione>
       <p className="m-0 testo-13 text-text-secondary">
         Le immagini che carichi dal riquadro di una Persona, di un Confidente o di un Arcano hanno la precedenza sulla grafica inclusa nell'app. Da qui le rimuovi per tornare agli asset predefiniti; le mappe scaricate dalla guida si riscaricano al prossimo accesso all'area.
       </p>
-      {elenco.errore && <p className="m-0 testo-13 text-error">{elenco.errore}</p>}
+      {elenco.errore && <p className="m-0 testo-13 text-error-testo">{elenco.errore}</p>}
       <ul className="m-0 p-0 list-none grid gap-2 sm:grid-cols-2 lg:grid-cols-3" aria-label="Immagini caricate per ambito">
         {AMBITI.map((a) => {
           const n = conteggi[a.chiave] ?? 0;

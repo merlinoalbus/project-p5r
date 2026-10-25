@@ -121,7 +121,7 @@ export function AreeDelDedalo({ dedalo, dedali, onScegliDedalo, onApriPozzo, par
       <section className="card flex flex-col gap-2 p-2.5" aria-label={`Scheda di ${dedalo.nome}`}>
         <div className="flex items-center gap-2.5">
           {/* il pezzo con cui il gioco disegna il dedalo nel pozzo: una miniatura (2026-10-11); sul telefono non c'è posto */}
-          <span className="hidden h-[52px] shrink-0 items-center justify-center overflow-hidden rounded bg-[#8d0012] p-0.5 md:flex" style={{ aspectRatio: '936 / 1086' }}>
+          <span className="hidden h-[52px] shrink-0 items-center justify-center overflow-hidden rounded bg-mappa-memento p-0.5 md:flex" style={{ aspectRatio: '936 / 1086' }}>
             <img src={urlStratoDedalo(dedalo.ordine)} alt={`${dedalo.nome}, come lo disegna il gioco`} className="max-h-full max-w-full object-contain" />
           </span>
           <div className="flex min-w-0 flex-1 flex-col gap-1">

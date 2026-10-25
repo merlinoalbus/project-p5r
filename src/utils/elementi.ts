@@ -39,7 +39,7 @@ export const ORDINE_ELEMENTI_SKILL = [
 /** Stile visivo dei codici di affinità. */
 export const STILE_AFFINITA: Record<string, { classe: string; titolo: string }> = {
   '-': { classe: 'bg-bg-tertiary text-text-muted', titolo: NOME_ESITO_AFFINITA['-'] },
-  wk: { classe: 'bg-error/25 text-error font-bold', titolo: NOME_ESITO_AFFINITA.wk },
+  wk: { classe: 'bg-error/25 text-error-testo font-bold', titolo: NOME_ESITO_AFFINITA.wk },
   rs: { classe: 'bg-info/20 text-info', titolo: NOME_ESITO_AFFINITA.rs },
   nu: { classe: 'bg-text-secondary/20 text-text', titolo: NOME_ESITO_AFFINITA.nu },
   rp: { classe: 'bg-warning/25 text-warning font-bold', titolo: NOME_ESITO_AFFINITA.rp },

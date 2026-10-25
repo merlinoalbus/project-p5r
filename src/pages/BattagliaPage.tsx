@@ -8,6 +8,7 @@ import { Selettore } from '../components/shared/Selettore';
 import { Link, useSearchParams } from 'react-router-dom';
 import { getBattaglia, getOmbre } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
+import { useSchede } from '../hooks/useSchede';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCatturaPersona } from '../hooks/useCatturaPersona';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -26,6 +27,7 @@ import { SezioneConFregio } from '../components/shared/FregioSezione';
 import { chiaveElementoDaTesto, nomeCanonicoNelTesto } from '../utils/elementiGuida';
 import { NOME_ELEMENTO, NOME_ESITO_AFFINITA, NOME_PERSONALITA, PERSONALITA_OMBRA, type CodiceAffinita, type ChiaveElemento } from '../../shared/elementi';
 import type { OmbraLuogoDto, OmbraSchedaDto } from '../../shared/ombre';
+import { TitoloSezione } from '../components/shared/TitoloSezione';
 
 /** Le cinque schede, ognuna con la sua icona.
  *
@@ -169,7 +171,7 @@ function SchedaNegoziazione({ d, onModificato }: { d: BattagliaDto; onModificato
           Le regole che spiegano il perché stanno sotto. */}
       <NegoziazionePerUmore />
       <SezioneConFregio chiave="battaglia-negoziazione" disposizione="fascia">
-        <div className="flex items-center gap-1"><h2 className="m-0 font-display testo-15 uppercase leading-none">Quando e come</h2><ModificaSezione sezione="negoziazione" cosa="la negoziazione: quando e come, regole e incertezze" onModificato={onModificato} /></div>
+        <div className="flex items-center gap-1"><TitoloSezione variante="display">Quando e come</TitoloSezione><ModificaSezione sezione="negoziazione" cosa="la negoziazione: quando e come, regole e incertezze" onModificato={onModificato} /></div>
         <p className="m-0">{n.quandoSiPuoNegoziare}</p>
         <Dati colonne={2}>
           <Voce titolo="Personalità dell’Ombra">{n.comeVerificarePersonalita}</Voce>
@@ -177,7 +179,7 @@ function SchedaNegoziazione({ d, onModificato }: { d: BattagliaDto; onModificato
         </Dati>
       </SezioneConFregio>
       <SezioneConFregio chiave="battaglia-regole" disposizione="grande">
-        <h2 className="m-0 font-display testo-15 uppercase leading-none">Regole</h2>
+        <TitoloSezione variante="display">Regole</TitoloSezione>
         <ul className="m-0 pl-4">{n.regole.map((r) => <li key={r}>{r}</li>)}</ul>
         {n.incertezze && <p className="m-0 text-text-muted testo-12">{n.incertezze}</p>}
         <span>{n.urlFonti.map((u) => <Fonte etichetta="fonte: allgamestaff" allineato={false} key={u} url={u} />).reduce<ReactNode[]>((acc, x, i) => (i ? [...acc, ' · ', x] : [x]), [])}</span>
@@ -203,7 +205,7 @@ function SchedaTecnico({ d, onModificato }: { d: BattagliaDto; onModificato: () 
         </table>
       </div>
       <SezioneConFregio chiave="battaglia-tecnico" disposizione="fascia">
-        <div className="flex items-center gap-1"><h2 className="m-0 font-display testo-15 uppercase leading-none">Esiti del colpo</h2><ModificaSezione sezione="sistema" cosa="il sistema di battaglia: esiti del colpo, 1 More e comandi" onModificato={onModificato} /></div>
+        <div className="flex items-center gap-1"><TitoloSezione variante="display">Esiti del colpo</TitoloSezione><ModificaSezione sezione="sistema" cosa="il sistema di battaglia: esiti del colpo, 1 More e comandi" onModificato={onModificato} /></div>
         <Dati>
           {Object.entries(d.sistema.esitiColpo).map(([k, v]) => <Voce key={k} titolo={k === 'block' ? 'Block' : k.charAt(0).toUpperCase() + k.slice(1)}>{v}</Voce>)}
           <Voce titolo="1 More">{d.sistema.unoMore}</Voce>
@@ -221,7 +223,7 @@ function SchedaStaffetta({ d, onModificato }: { d: BattagliaDto; onModificato: (
   return (
     <div className="flex flex-col gap-3 testo-13">
       <SezioneConFregio chiave="battaglia-staffetta" disposizione="lato">
-        <div className="flex items-center gap-1"><h2 className="m-0 font-display testo-15 uppercase leading-none">Staffetta</h2><ModificaSezione sezione="staffetta" cosa="la Staffetta" onModificato={onModificato} /></div>
+        <div className="flex items-center gap-1"><TitoloSezione variante="display">Staffetta</TitoloSezione><ModificaSezione sezione="staffetta" cosa="la Staffetta" onModificato={onModificato} /></div>
         <p className="m-0">{s.cosaE}</p>
         <Dati>
           <Voce titolo="Disponibilità">{s.disponibilita}</Voce>
@@ -237,7 +239,7 @@ function SchedaStaffetta({ d, onModificato }: { d: BattagliaDto; onModificato: (
         <Fonte etichetta="fonte: allgamestaff" allineato={false} url={s.urlFonte} />
       </SezioneConFregio>
       <SezioneConFregio chiave="battaglia-speciali" disposizione="lato">
-        <div className="flex items-center gap-1"><h2 className="m-0 font-display testo-15 uppercase leading-none">Speciali</h2><ModificaSezione sezione="speciali" cosa="gli Speciali" onModificato={onModificato} /></div>
+        <div className="flex items-center gap-1"><TitoloSezione variante="display">Speciali</TitoloSezione><ModificaSezione sezione="speciali" cosa="gli Speciali" onModificato={onModificato} /></div>
         <p className="m-0">{sp.meccanica}</p>
         <Dati colonne={2}>
           <Voce titolo="Attivazione">{sp.attivazione}</Voce>
@@ -252,7 +254,7 @@ function SchedaStaffetta({ d, onModificato }: { d: BattagliaDto; onModificato: (
         <Fonte etichetta="fonte: allgamestaff" allineato={false} url={sp.urlFonte} />
       </SezioneConFregio>
       <SezioneConFregio chiave="battaglia-assalto" disposizione="grande">
-        <div className="flex items-center gap-1"><h2 className="m-0 font-display testo-15 uppercase leading-none">Rapina, Assalto e Parla</h2><ModificaSezione sezione="assalto" cosa="Rapina, Assalto e Parla" onModificato={onModificato} /></div>
+        <div className="flex items-center gap-1"><TitoloSezione variante="display">Rapina, Assalto e Parla</TitoloSezione><ModificaSezione sezione="assalto" cosa="Rapina, Assalto e Parla" onModificato={onModificato} /></div>
         <Dati>
           <Voce titolo="Rapina">{a.rapina}</Voce>
           <Voce titolo="Assalto">{a.assalto}</Voce>
@@ -272,7 +274,7 @@ function SchedaNemici({ d, onModificato }: { d: BattagliaDto; onModificato: () =
   return (
     <div className="flex flex-col gap-3 testo-13">
       <SezioneConFregio chiave="battaglia-ombre-sciagura" disposizione="fascia">
-        <div className="flex items-center gap-1"><h2 className="m-0 font-display testo-15 uppercase leading-none">Ombre sciagura <span className="text-text-muted testo-12 normal-case">({o.nomeOriginale})</span></h2><ModificaSezione sezione="sciagura" cosa="le Ombre sciagura" onModificato={onModificato} /></div>
+        <div className="flex items-center gap-1"><TitoloSezione variante="display">Ombre sciagura <span className="text-text-muted testo-12 normal-case">({o.nomeOriginale})</span></TitoloSezione><ModificaSezione sezione="sciagura" cosa="le Ombre sciagura" onModificato={onModificato} /></div>
         <p className="m-0">{o.cosaSono}</p>
         <ul className="m-0 pl-4">{o.caratteristiche.map((c) => <li key={c}>{c}</li>)}</ul>
         <Dati>
@@ -291,7 +293,7 @@ function SchedaNemici({ d, onModificato }: { d: BattagliaDto; onModificato: () =
         <Fonte etichetta="fonte: allgamestaff" allineato={false} url={o.urlFonte} />
       </SezioneConFregio>
       <SezioneConFregio chiave="battaglia-mietitore" disposizione="alta">
-        <div className="flex items-center gap-1"><h2 className="m-0 font-display testo-15 uppercase leading-none">{m.categoria}</h2><ModificaSezione sezione="mietitore" cosa="il Mietitore" onModificato={onModificato} /></div>
+        <div className="flex items-center gap-1"><TitoloSezione variante="display">{m.categoria}</TitoloSezione><ModificaSezione sezione="mietitore" cosa="il Mietitore" onModificato={onModificato} /></div>
         <Dati>
           <Voce titolo="Dove e quando">{m.dove}</Voce>
           <Voce titolo="Segnali">{m.comeSiManifesta}</Voce>
@@ -306,7 +308,7 @@ function SchedaNemici({ d, onModificato }: { d: BattagliaDto; onModificato: () =
         <Fonte etichetta="fonte: allgamestaff" allineato={false} url={m.urlFonte} />
       </SezioneConFregio>
       <SezioneConFregio chiave="battaglia-demoni-tesoro" disposizione="lato">
-        <div className="flex items-center gap-1"><h2 className="m-0 font-display testo-15 uppercase leading-none">{t.categoria}</h2><ModificaSezione sezione="tesoro" cosa="i Demoni del Tesoro" onModificato={onModificato} /></div>
+        <div className="flex items-center gap-1"><TitoloSezione variante="display">{t.categoria}</TitoloSezione><ModificaSezione sezione="tesoro" cosa="i Demoni del Tesoro" onModificato={onModificato} /></div>
         <p className="m-0">{t.cosaSono}</p>
         <Dati>
           <Voce titolo="Come compaiono">{t.comeCompaiono}</Voce>
@@ -339,19 +341,22 @@ export function BattagliaPage() {
   const [params, setParams] = useSearchParams();
   const scheda = (SCHEDE.some(([k]) => k === params.get('scheda')) ? params.get('scheda') : 'ombre') as Scheda;
   const d = dati.dati;
+  const schede = useSchede({ chiavi: SCHEDE.map(([k]) => k), attiva: scheda, onScegli: (k) => setParams(k === 'ombre' ? {} : { scheda: k }, { replace: true }) });
   return (
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
         <div className="flex flex-col gap-3">
           <IntestazionePagina titolo="Aiuto in battaglia" sottotitolo="Debolezze delle Ombre per infiltrazione o dedalo, risposte in negoziazione, danno tecnico, Staffetta, Speciali e nemici speciali dalla guida allgamestaff." />
-          <FilaScorrevole role="tablist" aria-label="Sezioni">
-            {SCHEDE.map(([k, l, icona]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`piastrella-scheda touch ${scheda === k ? 'piastrella-scheda--attiva' : ''}`} onClick={() => setParams(k === 'ombre' ? {} : { scheda: k }, { replace: true })} title={l}><IconaCategoria categoria={icona} dimensione={28} /><span>{l}</span></button>)}
+          <FilaScorrevole {...schede.lista} aria-label="Sezioni">
+            {SCHEDE.map(([k, l, icona]) => <button key={k} type="button" {...schede.scheda(k)} className={`piastrella-scheda touch ${scheda === k ? 'piastrella-scheda--attiva' : ''}`} title={l}><IconaCategoria categoria={icona} dimensione={28} /><span>{l}</span></button>)}
           </FilaScorrevole>
-          {scheda === 'ombre' && <SchedaOmbre />}
-          {scheda === 'negoziazione' && <SchedaNegoziazione d={d} onModificato={() => void dati.ricarica()} />}
-          {scheda === 'tecnico' && <SchedaTecnico d={d} onModificato={() => void dati.ricarica()} />}
-          {scheda === 'staffetta' && <SchedaStaffetta d={d} onModificato={() => void dati.ricarica()} />}
-          {scheda === 'nemici' && <SchedaNemici d={d} onModificato={() => void dati.ricarica()} />}
+          <div {...schede.pannello(scheda)} className="flex min-w-0 flex-col gap-3">
+            {scheda === 'ombre' && <SchedaOmbre />}
+            {scheda === 'negoziazione' && <SchedaNegoziazione d={d} onModificato={() => void dati.ricarica()} />}
+            {scheda === 'tecnico' && <SchedaTecnico d={d} onModificato={() => void dati.ricarica()} />}
+            {scheda === 'staffetta' && <SchedaStaffetta d={d} onModificato={() => void dati.ricarica()} />}
+            {scheda === 'nemici' && <SchedaNemici d={d} onModificato={() => void dati.ricarica()} />}
+          </div>
         </div>
       )}
     </PageState>

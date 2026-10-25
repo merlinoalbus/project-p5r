@@ -18,7 +18,7 @@
 // chiave sbagliata. Qui ogni matita ha la sua, e si azzera da sé quando il modulo si chiude.
 // ============================================================
 
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { notifica } from '../../stores/notificationStore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -89,6 +89,31 @@ export function CorrezioneGuida<T extends Record<string, string>>({ cosa, inizia
   /** Chiude il modulo: scarta la bozza e l'eventuale richiesta di conferma dell'eliminazione. */
   const chiudi = () => { setBozza(null); setConferma(false); onChiudi?.(); };
 
+  // Lotto C: aperto il modulo (col pulsante o da un menu, come «Correggi la scheda» e «Modifica testo» del Palazzo), il fuoco va al primo
+  // campo; chiuso, torna da dove si era partiti (il pulsante «Modifica ⋯» o la matita) se il fuoco era rimasto nel modulo che sparisce.
+  const modulo = useRef<HTMLFormElement | null>(null);
+  const matita = useRef<HTMLButtonElement | null>(null);
+  const origine = useRef<HTMLElement | null>(null);
+  const aperto = bozza !== null;
+  useEffect(() => {
+    if (!aperto) return;
+    // da dove si è aperto (il fuoco già nel modulo vuol dire che lo si è già annotato: il secondo effetto di StrictMode)
+    const ora = document.activeElement;
+    if (!(ora && modulo.current?.contains(ora))) origine.current = ora instanceof HTMLElement && ora !== document.body ? ora : null;
+    modulo.current?.querySelector<HTMLElement>('input:not([disabled]), textarea:not([disabled]), select:not([disabled])')?.focus();
+    // chiuso il modulo (o smontato, quando è chi lo apre a toglierlo): il DOM è già cambiato, si guarda al fotogramma dopo. La matita
+    // va letta allora, non adesso: è il pulsante che ricompare al posto del modulo
+    const pulsanteMatita = matita;
+    return () => {
+      requestAnimationFrame(() => {
+        const adesso = document.activeElement;
+        if (adesso !== null && adesso !== document.body) return;
+        const da = origine.current;
+        (da?.isConnected ? da : pulsanteMatita.current)?.focus();
+      });
+    };
+  }, [aperto]);
+
   /** Salva la bozza con `onSalva`; a buon fine chiude il modulo e notifica, altrimenti lascia la bozza aperta e notifica l'errore. */
   const salva = async () => {
     if (!bozza) return;
@@ -101,7 +126,7 @@ export function CorrezioneGuida<T extends Record<string, string>>({ cosa, inizia
   if (!bozza) {
     if (controllata) return null;
     return (
-      <button type="button" className={`touch shrink-0 rounded px-1.5 text-text-muted hover:text-text ${compatto ? 'testo-12' : 'testo-12'}`}
+      <button ref={matita} type="button" className={`touch shrink-0 rounded px-1.5 text-text-muted hover:text-text ${compatto ? 'testo-12' : 'testo-12'}`}
         // Con una scritta accanto alla matita il nome accessibile comincia da quella (WCAG 2.5.3): chi dà comandi a
         // voce dice quello che legge, «Modifica testo», e deve trovarlo nel nome del pulsante.
         aria-label={etichetta ? `${etichetta}: ${cosa}` : `Correggi ${cosa}`} title={`Correggi ${cosa}`}
@@ -111,7 +136,7 @@ export function CorrezioneGuida<T extends Record<string, string>>({ cosa, inizia
     );
   }
   return (
-    <form className="flex w-full flex-col gap-2 rounded-md border border-border-light bg-white/[0.04] px-2 py-2"
+    <form ref={modulo} className="flex w-full flex-col gap-2 rounded-md border border-border-light bg-white/[0.04] px-2 py-2"
       aria-label={`Correggi ${cosa}`} onSubmit={(e) => { e.preventDefault(); void salva(); }}>
       <div className="flex flex-wrap items-end gap-2">
         {children(bozza.corrente, (patch) => setBozza((b) => (b ? { ...b, corrente: { ...b.corrente, ...patch } } : b)))}

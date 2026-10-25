@@ -19,8 +19,8 @@ export function RimozioniConservate() {
       <summary className="touch cursor-pointer font-display testo-17 uppercase">Rimozioni conservate in questa scheda</summary>
       <div className="flex min-w-0 flex-col gap-2 pt-2 testo-13">
         <p className="m-0">Il gesto originale resta anche se il pin non è più selezionabile. Il registro è della sola scheda del browser; nessuna richiesta viene ripetuta automaticamente.</p>
-        {registro.errore && <div role="alert" className="flex flex-col gap-1 text-error"><span>{registro.errore}</span><PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva gli esiti noti senza ripetere richieste" className="self-start" onClick={() => { try { salvaRegistroRimozioniPin(); setErrore(null); } catch (e) { setErrore(e instanceof Error ? e.message : 'Registro non salvato.'); } }} /></div>}
-        {errore && <p role="alert" className="m-0 text-error">{errore}</p>}
+        {registro.errore && <div role="alert" className="flex flex-col gap-1 text-error-testo"><span>{registro.errore}</span><PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva gli esiti noti senza ripetere richieste" className="self-start" onClick={() => { try { salvaRegistroRimozioniPin(); setErrore(null); } catch (e) { setErrore(e instanceof Error ? e.message : 'Registro non salvato.'); } }} /></div>}
+        {errore && <p role="alert" className="m-0 text-error-testo">{errore}</p>}
         <ul className="m-0 flex min-w-0 list-none flex-col gap-2 p-0">{registro.intenti.map(i => <li key={i.uid} className="flex min-w-0 flex-col gap-1 border-t border-border pt-2">
           <strong>{i.nome}</strong><code className="break-all testo-12">Pin {i.id} · UID {i.uid} · mappa {i.mappa}</code>
           <span>{i.stato === 'riuscita' ? 'Risposta204 ricevuta: rimozione confermata.' : i.stato === 'rifiutata' ? 'Richiesta rifiutata.' : i.stato === 'invio' ? 'Invio in corso.' : 'Esito da verificare.'}</span>

@@ -10,6 +10,7 @@ import { getContenutiMappa, risolviMappa } from '../../services/api';
 import { casaConInfiltrazione, urlMappa } from '../../utils/navigazioneMappa';
 import { useCarica } from '../../hooks/useCarica';
 import { PageState } from '../shared/PageState';
+import { TitoloSezione } from '../shared/TitoloSezione';
 /** Pannello «Contenuti della guida» di una mappa: un `details` per area, con descrizione, note,
  * dettagli collegati, planimetrie figlie ed elementi (i passi di un enigma rientrati sotto il loro
  * contenitore). Un elemento con scheda si apre in linea in `SchedaContenutoGuida`, una alla volta.
@@ -40,7 +41,7 @@ export function ContenutiGuidaMappa({ mappa, area, dungeon }: { mappa: string; a
   // I passi di un Enigma (095) arrivano dal server subito sotto di lui, con `contenitore`: qui rientrano, come nella scheda del Palazzo.
   return <PageState isLoading={contenuti.caricamento} error={contenuti.errore} onRetry={contenuti.ricarica}>
     {!!contenuti.dati?.aree.length && <section className="card flex flex-col gap-3" aria-label="Contenuti della guida">
-      <h2 className="m-0 text-lg">Contenuti della guida</h2>
+      <TitoloSezione>Contenuti della guida</TitoloSezione>
       {/* L3 (§4.1): nei Palazzi la scheda si apre sull'infiltrazione chiesta (`?infiltrazione=`); i Memento restano col loro `?area=`.
           Una richiesta che non appartiene a questa mappa apre la scheda e basta. */}
       {dungeon && <Link className="touch inline-flex items-center self-start" to={`/guida/dungeon/${encodeURIComponent(dungeon)}${area && contenuti.dati.aree.some(a => a.chiave === area) ? `?${memento ? 'area' : 'infiltrazione'}=${encodeURIComponent(area)}` : ''}`}>{memento ? 'Apri la scheda dei Memento' : 'Apri la scheda del Palazzo'}</Link>}

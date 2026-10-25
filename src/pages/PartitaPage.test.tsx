@@ -29,7 +29,8 @@ vi.mock('../components/partita/ScuolaOggi', () => ({
     return <div data-testid="scuola">{giorno ?? 'nessuno'}</div>;
   },
 }));
-vi.mock('../components/partita/RiepilogoPartita', () => ({ RiepilogoPartita: () => <div>scheda riepilogo</div> }));
+vi.mock('../components/partita/RiepilogoPartita', () => ({ RiepilogoPartita: () => <div>dati della partita</div> }));
+vi.mock('../components/partita/StoricoPartita', () => ({ StoricoPartita: () => <div>scheda storico</div> }));
 
 const partita = { id: 1, nome: 'Prova', livelloProtagonista: 1, dataGioco: '04-21', nuovaPartitaPlus: false, allarmeAttivo: false } as PartitaDto;
 
@@ -55,8 +56,8 @@ describe('PartitaPage', () => {
     expect(screen.getByTestId('scuola')).toHaveTextContent('04-21');
     act(() => richiamo.onGiorno?.('04-29'));
     // un'altra scheda: anche con un giorno rimasto in memoria vale la data di gioco
-    fireEvent.click(screen.getByRole('button', { name: /Riepilogo/ }));
-    expect(await screen.findByText('scheda riepilogo')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Storico/ }));
+    expect(await screen.findByText('scheda storico')).toBeInTheDocument();
     expect(screen.getByTestId('scuola')).toHaveTextContent('04-21');
     unmount();
   });

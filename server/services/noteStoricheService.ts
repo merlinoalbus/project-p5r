@@ -17,7 +17,8 @@ import type { NotaStoricaOfferta } from '../../shared/types.js';
 
 interface RigaNota { chiave: string; testo: string; fonte: string; versione: number; seed_json: string }
 
-const guida = z.object({ versione: z.number().int(), testo: z.string().min(1), fonte: z.string().min(1) });
+// la fonte può essere vuota (lotto C, migrazione 231: una nota la cui «fonte» era solo un riferimento di lavoro); il testo no
+const guida = z.object({ versione: z.number().int(), testo: z.string().min(1), fonte: z.string() });
 
 /** Il valore della guida (la copia in `seed_json`), o null se la copia non è leggibile. */
 function valoreGuida(r: RigaNota): z.infer<typeof guida> | null {
@@ -52,7 +53,7 @@ function riga(chiave: string): RigaNota {
 /** Modifica testo e fonte della nota. 409 se il testo è cambiato da quando la scheda è stata aperta. */
 export function modificaNotaStorica(chiave: string, d: { testo: string; fonte: string; testoAttuale: string }): NotaStoricaOfferta {
   const testo = d.testo.trim(), fonte = d.fonte.trim();
-  if (!testo || !fonte) throw httpErrors.badRequest('nota-storica-vuota', 'Testo e fonte della nota non possono essere vuoti.');
+  if (!testo) throw httpErrors.badRequest('nota-storica-vuota', 'Il testo della nota non può essere vuoto.');
   getDb().transaction(() => {
     const r = riga(chiave);
     if (r.testo !== d.testoAttuale) throw httpErrors.conflict('nota-storica-cambiata', 'La nota è cambiata: riapri la scheda prima di modificarla.');

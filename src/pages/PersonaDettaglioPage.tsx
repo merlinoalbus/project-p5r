@@ -144,7 +144,7 @@ export function PersonaDettaglioPage() {
   };
 
   return (
-    <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
+    <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()} scheda={{ titolo: 'Persona', ripiego: '/compendio' }}>
       {p && (
         <div className="flex flex-col gap-4">
           {/* Lotto B: l'intestazione comune delle schede, prima dell'immagine (sul telefono il nome stava sotto l'arte, al 71% della

@@ -120,7 +120,7 @@ export function ModificaAffinita({ personaId, nome, affinita, affinitaGuida, onC
               </div>
             </div>
           )}
-          {errore && <p role="alert" className="m-0 text-sm text-error">{errore} La finestra resta aperta.</p>}
+          {errore && <p role="alert" className="m-0 text-sm text-error-testo">{errore} La finestra resta aperta.</p>}
         </div>
       </Modal>
     )}
