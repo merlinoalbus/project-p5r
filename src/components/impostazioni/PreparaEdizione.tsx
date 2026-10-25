@@ -12,6 +12,7 @@
 // ============================================================
 
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { avviaPreparazioneEdizione, getStatoEdizione } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
@@ -20,7 +21,7 @@ import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { BarraInvio } from './BarraInvio';
-import type { EsitoEdizioneDto, FaseEdizione, StatoEdizioneDto } from '../../types';
+import type { CategoriaProblemaEdizione, EsitoEdizioneDto, FaseEdizione, ProblemaContenutoEdizioneDto, StatoEdizioneDto } from '../../types';
 
 /** Ogni quanto si richiede lo stato mentre il server lavora. */
 const ATTESA_FRA_CONTROLLI_MS = 3_000;
@@ -32,6 +33,7 @@ const numero = (n: number): string => n.toLocaleString('it-IT');
 const NOME_FASE: Record<FaseEdizione, string> = {
   copia: 'Il server sta copiando i dati di gioco',
   regole: 'Il server sta applicando le regole sui dati alla copia',
+  correzioni: 'Il server sta scrivendo le correzioni della guida dentro i blocchi della copia',
   miniature: 'Il server sta preparando le miniature di tutte le immagini',
   compattazione: 'Il server sta compattando il database dell’edizione',
   'partite-vuoto': 'Il server sta creando il file delle partite vuoto',
@@ -42,7 +44,72 @@ const NOME_FASE: Record<FaseEdizione, string> = {
   deposito: 'Il server sta depositando l’edizione nella cartella d’appoggio',
 };
 
-/** Il rapporto di un’edizione: problemi bloccanti, avvisi, file, controlli, compatibilità. */
+/** Il titolo di ciascun genere di problema dei contenuti. */
+const TITOLO_CATEGORIA: Record<CategoriaProblemaEdizione, string> = {
+  'condizione-illeggibile': 'Condizioni illeggibili',
+  'condizione-non-riconosciuta': 'Condizioni non riconosciute',
+  'json-malformato': 'JSON malformati',
+  'chiave-orfana': 'Riferimenti a chiavi che non esistono',
+  'spillo-senza-uid': 'Spilli senza uid',
+  'regola-pesca': 'Regole di pesca con punti base diversi da 2',
+  'immagine-mancante': 'Immagini citate e assenti',
+  'correzione-orfana': 'Correzioni della guida non più accolte',
+};
+
+/** L’elenco oggetto per oggetto dei problemi dei contenuti di una gravità: genere, oggetto, campo, dettaglio e la pagina dove correggerlo. */
+function ElencoContenuti({ e, gravita }: { e: EsitoEdizioneDto; gravita: ProblemaContenutoEdizioneDto['gravita'] }) {
+  const gruppi = e.riepilogoProblemi.filter((r) => r.gravita === gravita);
+  if (gruppi.length === 0) return null;
+  const bloccante = gravita === 'bloccante';
+  return (
+    <div className="flex flex-col gap-2">
+      <h3 className={`m-0 testo-14 ${bloccante ? 'text-error' : 'text-warning'}`}>{bloccante ? 'Contenuti da correggere nella preparazione (bloccano l’edizione)' : 'Contenuti da controllare (non bloccano)'}</h3>
+      {gruppi.map((g) => (
+        <details key={g.categoria} open={bloccante} className="rounded border border-border px-2 py-1">
+          <summary className="cursor-pointer">
+            <strong>{numero(g.totale)}</strong> {TITOLO_CATEGORIA[g.categoria]}
+            {g.mostrati < g.totale && <span className="text-text-muted"> · mostrati i primi {numero(g.mostrati)}</span>}
+          </summary>
+          <ul className="m-0 mt-1 p-0 list-none flex flex-col gap-1" aria-label={TITOLO_CATEGORIA[g.categoria]}>
+            {e.problemiContenuto.filter((p) => p.gravita === gravita && p.categoria === g.categoria).map((p, i) => (
+              <li key={`${p.tabella}|${p.oggetto}|${p.campo ?? ''}|${i}`} className="flex flex-col gap-0.5 border-t border-border pt-1">
+                <span><strong>{p.oggetto}</strong>{p.campo && <span className="text-text-muted"> · campo <code>{p.campo}</code></span>}</span>
+                <span className="text-text-secondary">{p.dettaglio}</span>
+                <span className="text-text-muted">
+                  {p.dove ? <>Dove correggerlo: <Link to={p.dove} className="underline">{p.dove}</Link></> : 'Nessuna pagina dedicata'} · tabella <code>{p.tabella}</code>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      ))}
+    </div>
+  );
+}
+
+/** Le correzioni della guida unite nei blocchi e le fotografie tolte, con i conteggi prima e dopo. */
+function UnioneCorrezioni({ e }: { e: EsitoEdizioneDto }) {
+  const u = e.correzioniGuida;
+  const foto = Object.keys(u.fotografie.righeFotoPrima);
+  return (
+    <div className="flex flex-col gap-1">
+      <h3 className="m-0 testo-14">Correzioni della guida nell’edizione</h3>
+      <ul className="m-0 p-0 list-none grid gap-1 sm:grid-cols-2">
+        <li><strong>Correzioni</strong> <span className="text-text-muted">{numero(u.correzioniPrima)} prima · {numero(u.correzioniApplicate)} scritte nei blocchi · {numero(u.correzioniOrfane)} non accolte · {numero(u.correzioniDopo)} dopo</span></li>
+        <li><strong>Blocchi della guida</strong> <span className="text-text-muted">{numero(u.blocchiGuida.prima)} prima · {numero(u.blocchiGuida.riscritti)} riscritti · {numero(u.blocchiGuida.dopo)} dopo</span></li>
+        <li><strong>Fotografie dei Confidenti</strong> <span className="text-text-muted">{numero(u.fotografie.chiaviGuidaPrima)} prima · {numero(u.fotografie.chiaviGuidaDopo)} dopo</span></li>
+        {foto.map((t) => <li key={t}><strong>{t}</strong> <span className="text-text-muted">{numero(u.fotografie.righeFotoPrima[t] ?? 0)} righe prima · {numero(u.fotografie.righeFotoDopo[t] ?? 0)} dopo</span></li>)}
+      </ul>
+      {u.blocchi.length > 0 && (
+        <ul className="m-0 p-0 list-none flex flex-col gap-0.5" aria-label="Correzioni per blocco">
+          {u.blocchi.map((b) => <li key={b.blocco} className="text-text-secondary"><code>{b.blocco}</code> <span className="text-text-muted">· {numero(b.prima)} prima · {numero(b.applicate)} scritte · {numero(b.orfane)} non accolte · {numero(b.dopo)} dopo</span></li>)}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/** Il rapporto di un’edizione: problemi bloccanti, avvisi, contenuti oggetto per oggetto, correzioni unite, file, controlli, compatibilità. */
 function Rapporto({ e }: { e: EsitoEdizioneDto }) {
   const c = e.compatibilita;
   return (
@@ -59,6 +126,9 @@ function Rapporto({ e }: { e: EsitoEdizioneDto }) {
           <ul className="m-0 pl-4 text-warning">{e.avvisi.map((a) => <li key={a}>{a}</li>)}</ul>
         </div>
       )}
+      <ElencoContenuti e={e} gravita="bloccante" />
+      <ElencoContenuti e={e} gravita="avviso" />
+      <UnioneCorrezioni e={e} />
       <ul className="m-0 p-0 list-none grid gap-1 sm:grid-cols-2">
         <li><strong>Schema</strong> <span className="text-text-muted">gioco {e.versioneSchemaGioco} · partite {e.versioneSchemaPartite}</span></li>
         <li><strong>Immagini</strong> <span className="text-text-muted">{numero(e.conteggi.immagini)} · {byteTesto(e.conteggi.byteImmagini)}</span></li>
@@ -105,7 +175,7 @@ function Rapporto({ e }: { e: EsitoEdizioneDto }) {
             <thead><tr className="text-left text-text-muted"><th className="py-0.5 pr-2 font-normal">File</th><th className="py-0.5 pr-2 font-normal text-right">Dimensione</th><th className="py-0.5 font-normal">SHA-256</th></tr></thead>
             <tbody>
               {e.file.map((f) => (
-                <tr key={f.nome}><td className="py-0.5 pr-2 font-mono">{f.nome}</td><td className="py-0.5 pr-2 text-right tabular-nums">{byteTesto(f.byte)}</td><td className="py-0.5 font-mono text-text-muted">{f.sha256.slice(0, 16)}…</td></tr>
+                <tr key={f.nome}><td className="py-0.5 pr-2 font-mono">{f.nome}</td><td className="py-0.5 pr-2 text-right tabular-nums">{byteTesto(f.byte)}</td><td className="py-0.5 font-mono text-text-muted break-all" title={f.sha256}>{f.sha256}</td></tr>
               ))}
             </tbody>
           </table>

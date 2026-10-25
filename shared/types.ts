@@ -3563,7 +3563,7 @@ export interface EsitoRipristinoCorrezioneDto {
 // ---- L12 (passi 7 e 9): «Prepara edizione», il prodotto che l'istanza di rilascio riceve ----
 
 /** Le fasi della preparazione di un'edizione, nell'ordine in cui si eseguono. */
-export type FaseEdizione = 'copia' | 'regole' | 'miniature' | 'compattazione' | 'partite-vuoto' | 'controlli' | 'caratteri' | 'compatibilita' | 'manifesto' | 'deposito';
+export type FaseEdizione = 'copia' | 'regole' | 'correzioni' | 'miniature' | 'compattazione' | 'partite-vuoto' | 'controlli' | 'caratteri' | 'compatibilita' | 'manifesto' | 'deposito';
 
 /** Un file dell'edizione, con l'impronta SHA-256 che il manifesto garantisce. */
 export interface FileEdizioneDto {
@@ -3606,6 +3606,66 @@ export interface JsonMalformatoEdizioneDto {
   righe: number;
 }
 
+/** Il genere di un problema trovato dal controllo dei contenuti (R12-04). */
+export type CategoriaProblemaEdizione =
+  | 'condizione-illeggibile' | 'condizione-non-riconosciuta' | 'json-malformato' | 'chiave-orfana'
+  | 'regola-pesca' | 'spillo-senza-uid' | 'immagine-mancante' | 'correzione-orfana';
+
+/**
+ * Un problema dei CONTENUTI, oggetto per oggetto: dice che cosa è, in quale campo e dove si corregge. L'edizione non corregge niente da sé:
+ * l'utente corregge nella preparazione e rilancia «Prepara edizione». `bloccante` impedisce l'edizione, `avviso` no.
+ */
+export interface ProblemaContenutoEdizioneDto {
+  gravita: 'bloccante' | 'avviso';
+  categoria: CategoriaProblemaEdizione;
+  /** La tabella del database (nome tecnico, per ritrovare la riga). */
+  tabella: string;
+  /** Che cos'è, in parole: «Negozio · Leblanc (leblanc)». */
+  oggetto: string;
+  /** Il campo o la colonna con il problema; null se riguarda l'oggetto intero. */
+  campo: string | null;
+  /** La pagina dell'app dove correggerlo (percorso); null se non c'è una pagina dedicata. */
+  dove: string | null;
+  dettaglio: string;
+}
+
+/** Quanti problemi di un genere e di una gravità: l'elenco `problemiContenuto` ne mostra al massimo `mostrati`, il totale è `totale`. */
+export interface RiepilogoProblemiEdizioneDto {
+  categoria: CategoriaProblemaEdizione;
+  gravita: 'bloccante' | 'avviso';
+  totale: number;
+  mostrati: number;
+}
+
+/** Una correzione della guida unita nel blocco, per blocco (R12-04). */
+export interface UnioneBloccoEdizioneDto {
+  blocco: string;
+  /** Le correzioni che il blocco aveva nella copia prima dell'unione. */
+  prima: number;
+  /** Quelle scritte dentro il blocco. */
+  applicate: number;
+  /** Quelle che la guida di oggi non accoglie più (elemento sparito o valore di un altro tipo): non entrano nell'edizione. */
+  orfane: number;
+  /** Le correzioni rimaste nella copia dopo l'unione (diverse da zero solo se il blocco non si legge). */
+  dopo: number;
+}
+
+/**
+ * Le correzioni della guida (`correzione_dati_guida`) scritte dentro i blocchi di `dati_guida`, e le fotografie di «Ripristina» tolte dalla copia.
+ * Tutti i conteggi sono della COPIA: i dati della preparazione non cambiano.
+ */
+export interface UnioneCorrezioniEdizioneDto {
+  correzioniPrima: number;
+  correzioniApplicate: number;
+  correzioniOrfane: number;
+  correzioniDopo: number;
+  /** Blocchi di `dati_guida`: quanti ce n'erano e quanti sono stati riscritti con le correzioni dentro. */
+  blocchiGuida: { prima: number; riscritti: number; dopo: number };
+  blocchi: UnioneBloccoEdizioneDto[];
+  /** Le fotografie di «Ripristina» tolte: chiavi `confidente-seed-v1:*` di `dati_guida` e righe delle tabelle-fotografia (`…_foto`), per tabella. */
+  fotografie: { chiaviGuidaPrima: number; chiaviGuidaDopo: number; righeFotoPrima: Record<string, number>; righeFotoDopo: Record<string, number> };
+}
+
 /** Che cosa ha fatto la preparazione (e com'è andata) per un'edizione. */
 export interface EsitoEdizioneDto {
   /** Il numero progressivo dell'edizione (uno più dell'ultima trovata nella cartella d'appoggio). */
@@ -3622,6 +3682,12 @@ export interface EsitoEdizioneDto {
   regole: { spilliTradotti: number; spilliRiallineati: number; spilliIdentificati: number; miniatureOrfane: number };
   miniature: { immagini: number; generate: number; dallaCache: number; originali: number; righe: number };
   controlli: { integrityCheck: string; violazioniChiaviEsterne: number; spilliSenzaUid: number; jsonMalformati: JsonMalformatoEdizioneDto[] };
+  /** R12-04: le correzioni della guida unite nei blocchi e le fotografie tolte, con i conteggi prima e dopo. */
+  correzioniGuida: UnioneCorrezioniEdizioneDto;
+  /** R12-04: il controllo completo dei contenuti, oggetto per oggetto (bloccanti prima, poi avvisi), al massimo 300 per genere e gravità. */
+  problemiContenuto: ProblemaContenutoEdizioneDto[];
+  /** I totali di ogni genere di problema (l'elenco sopra può essere troncato). */
+  riepilogoProblemi: RiepilogoProblemiEdizioneDto[];
   compatibilita: CompatibilitaEdizioneDto;
   conteggi: { immagini: number; byteImmagini: number; caratteri: number; tabelle: Record<string, number> };
   /** I problemi che impediscono di depositare l'edizione: finché ci sono, l'edizione non esce. */

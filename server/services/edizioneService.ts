@@ -22,9 +22,16 @@
 // fase e l'esito si leggono da `statoEdizione()`, anche se la pagina si ricarica nel frattempo. Il lavoro prende il lucchetto comune
 // dell'istanza (`occupaIstanza`): non può sovrapporsi a un'importazione, a un ripristino o a un'altra edizione.
 //
-// **Cosa blocca l'edizione** (non viene depositata, il report dice perché): controllo di integrità o di chiavi esterne non superato, spilli senza uid,
-// regole sui dati che alla seconda passata fanno ancora qualcosa, immagini rimaste su disco non assorbite, schema di gioco diverso da quello del codice.
-// Tutto il resto (JSON malformati, chiavi sparite rispetto all'edizione precedente, orfani delle partite) è un avviso: lo decide l'utente.
+// **Il congelamento dei contenuti (L12 · R12-04, `edizioneContenuti.ts`).** Sulla COPIA: le correzioni della guida (`correzione_dati_guida`) si scrivono
+// dentro i blocchi di `dati_guida` con la stessa funzione che le applica in lettura, la tabella delle correzioni si svuota (il rilascio legge un valore
+// solo) e si tolgono le fotografie di «Ripristina» (chiavi `confidente-seed-v1:*` e tabelle `…_foto`); poi il controllo completo dei contenuti, oggetto
+// per oggetto, con la pagina dove correggere. Nessuna correzione automatica dei dati: si segnala, corregge l'utente nella preparazione.
+//
+// **Cosa blocca l'edizione** (non viene depositata, il report dice perché): controllo di integrità non superato; i BLOCCANTI dei contenuti (condizioni
+// illeggibili o non riconosciute, JSON malformati, chiavi che non esistono comprese le violazioni delle chiavi esterne, spilli senza uid); regole sui
+// dati che alla seconda passata fanno ancora qualcosa; immagini rimaste su disco non assorbite; schema di gioco diverso da quello del codice.
+// Tutto il resto (regole di pesca con puntiBase diverso da 2, immagini citate e assenti, correzioni che la guida non accoglie più, chiavi sparite rispetto
+// all'edizione precedente, orfani delle partite) è un avviso: lo decide l'utente.
 //
 // Il server resta occupato in modo sincrono per la compattazione (`VACUUM INTO` di un file grande): è una manutenzione richiesta a mano
 // dall'unico utente della preparazione, non un percorso di esercizio.
@@ -50,8 +57,10 @@ import { LARGHEZZE_MINIATURA } from '../../shared/miniature.js';
 import { RIFERIMENTI_PARTITE, orfaniPartite, versioneSchemaCodice } from './pacchettoGiocoService.js';
 import { conCartellaDiLavoro, copiaDatabase, timbro } from './impostazioniService.js';
 import { occupaIstanza } from './lucchettoIstanza.js';
+import { RaccoltaProblemi, controllaContenuti, haColonna, haTabella, unisciCorrezioniGuida } from './edizioneContenuti.js';
 import type {
   ChiaviRimosseEdizioneDto, CompatibilitaEdizioneDto, EsitoEdizioneDto, FaseEdizione, FileEdizioneDto, JsonMalformatoEdizioneDto, StatoEdizioneDto,
+  UnioneCorrezioniEdizioneDto,
 } from '../../shared/types.js';
 
 /** Il prefisso delle cartelle delle edizioni dentro la cartella d'appoggio: `project-p5r-edizione-<numero a tre cifre>-<timbro>`. */
@@ -184,16 +193,6 @@ async function scriviJson(percorso: string, valore: unknown): Promise<void> {
   await fsp.writeFile(percorso, `${JSON.stringify(valore, null, 2)}\n`, 'utf8');
 }
 
-/** Vero se la tabella (nello schema principale) ha la colonna. */
-function haColonna(db: Database.Database, tabella: string, colonna: string): boolean {
-  return (db.prepare(`PRAGMA main.table_info("${tabella}")`).all() as Array<{ name: string }>).some((c) => c.name === colonna);
-}
-
-/** Vero se la tabella esiste nello schema principale. */
-function haTabella(db: Database.Database, tabella: string): boolean {
-  return !!db.prepare("SELECT 1 FROM main.sqlite_master WHERE type = 'table' AND name = ?").get(tabella);
-}
-
 /** Righe per tabella dello schema principale. */
 function conteggiTabelle(db: Database.Database): Record<string, number> {
   const out: Record<string, number> = {};
@@ -288,7 +287,8 @@ function testoLeggimi(numero: number, versioneSchemaGioco: number, versioneSchem
     'Questa cartella è il prodotto della funzione «Prepara edizione» dell\'istanza di preparazione. Contiene i contenuti chiusi che l\'istanza',
     'pubblica di rilascio legge in sola lettura:',
     '',
-    '  gioco.db            i dati di gioco (con le immagini e le loro miniature), senza giornale WAL',
+    '  gioco.db            i dati di gioco (con le immagini e le loro miniature), senza giornale WAL; le correzioni della guida sono già scritte',
+    '                      dentro i blocchi di dati_guida (la tabella delle correzioni è vuota) e le fotografie di «Ripristina» non ci sono',
     '  partite-vuoto.db    il file delle partite con la sola struttura: l\'istanza di rilascio lo copia al primo avvio',
     '  font/               i caratteri (se ce ne sono)',
     '  chiavi.json         le chiavi citate dalle partite (serve alla prossima edizione per il confronto di compatibilità)',
@@ -332,6 +332,8 @@ async function produciEdizione(dir: string): Promise<EsitoEdizioneDto> {
   // ---- 2. regole sui dati, sulla copia; 3. miniature di tutte le immagini ----
   let regole: EsitoEdizioneDto['regole'];
   let miniature: EsitoEdizioneDto['miniature'];
+  let correzioniGuida: UnioneCorrezioniEdizioneDto;
+  const raccolta = new RaccoltaProblemi();
   const lavoro = new Database(copia);
   try {
     lavoro.pragma('foreign_keys = ON');
@@ -351,6 +353,11 @@ async function produciEdizione(dir: string): Promise<EsitoEdizioneDto> {
     if (Object.values(seconda).some((n) => n > 0)) bloccanti.push(`Le regole sui dati non sono a zero alla seconda passata (${JSON.stringify(seconda)}): i dati non sono stabili.`);
     if (Object.values(regole).some((n) => n > 0)) avvisi.push(`Le regole sui dati hanno corretto la copia (${JSON.stringify(regole)}): nella preparazione verranno rifatte al prossimo avvio.`);
     if (fs.existsSync(path.join(config.dataDir, 'immagini'))) bloccanti.push('Nella cartella dati dell\'istanza c\'è ancora la cartella «immagini» (immagini su disco non assorbite nel database): l\'edizione non le conterrebbe. Riavvia la preparazione perché le assorba.');
+
+    // R12-04: le correzioni della guida dentro i blocchi (tabella delle correzioni a zero) e fuori le fotografie di «Ripristina». Solo sulla copia.
+    avanza('correzioni');
+    correzioniGuida = unisciCorrezioniGuida(lavoro, raccolta);
+    if (correzioniGuida.correzioniDopo > 0) avvisi.push(`${correzioniGuida.correzioniDopo} correzioni della guida sono rimaste nella copia perché il loro blocco non si legge: vedi l'elenco dei contenuti.`);
 
     avanza('miniature');
     miniature = await preparaMiniature(lavoro);
@@ -399,12 +406,18 @@ async function produciEdizione(dir: string): Promise<EsitoEdizioneDto> {
     const integrityCheck = integrita.length === 1 ? integrita[0].integrity_check : `${integrita.length} anomalie: ${integrita.slice(0, 3).map((r) => r.integrity_check).join('; ')}`;
     if (integrityCheck !== 'ok') bloccanti.push(`Il controllo di integrità del database non è superato: ${integrityCheck}.`);
     const violazioni = finale.pragma('foreign_key_check') as unknown[];
-    if (violazioni.length > 0) bloccanti.push(`Il controllo delle chiavi esterne trova ${violazioni.length} violazioni.`);
     const spilliSenzaUid = haTabella(finale, 'spillo') && haColonna(finale, 'spillo', 'uid')
       ? (finale.prepare("SELECT COUNT(*) AS n FROM main.spillo WHERE uid IS NULL OR uid = ''").get() as { n: number }).n : 0;
-    if (spilliSenzaUid > 0) bloccanti.push(`${spilliSenzaUid} spilli senza uid: nel rilascio non si potrebbero assegnare.`);
     const json = jsonMalformati(finale, avvisi);
-    if (json.length > 0) avvisi.push(`Colonne JSON con righe malformate: ${json.map((j) => `${j.tabella}.${j.colonna} (${j.righe})`).join(', ')}.`);
+    // R12-04: il controllo completo dei contenuti, oggetto per oggetto. Le violazioni delle chiavi esterne e gli spilli senza uid ci entrano
+    // (e diventano bloccanti da lì, con il nome e la pagina), così non c'è una seconda frase per lo stesso problema. Nessuna correzione.
+    controllaContenuti(finale, raccolta, violazioni);
+    bloccanti.push(...raccolta.frasi('bloccante'));
+    avvisi.push(...raccolta.frasi('avviso'));
+    // un controllo andato in errore non può far credere che il contenuto sia a posto: ferma l'edizione, con il motivo
+    bloccanti.push(...raccolta.nonEseguiti);
+    const problemiContenuto = raccolta.elenco();
+    const riepilogoProblemi = raccolta.riepilogo();
 
     const chiavi = raccogliChiavi(finale);
     const conteggi = conteggiTabelle(finale);
@@ -457,6 +470,8 @@ async function produciEdizione(dir: string): Promise<EsitoEdizioneDto> {
       file,
       conteggi: { immagini: immaginiRiga.n, byteImmagini: immaginiRiga.byte, miniature: miniature.righe, caratteri, tabelle: conteggi },
       controlli: { integrityCheck, violazioniChiaviEsterne: violazioni.length, spilliSenzaUid, jsonMalformati: json },
+      correzioniGuida,
+      contenuti: riepilogoProblemi,
       precedente: compatibilita.precedente,
       bloccanti,
       avvisi,
@@ -467,6 +482,7 @@ async function produciEdizione(dir: string): Promise<EsitoEdizioneDto> {
       numero, creataIl, cartella: null, depositata: false, versioneSchemaGioco, versioneSchemaPartite: vuoto.versione, improntaSchemaPartite: vuoto.impronta,
       file, regole, miniature,
       controlli: { integrityCheck, violazioniChiaviEsterne: violazioni.length, spilliSenzaUid, jsonMalformati: json },
+      correzioniGuida, problemiContenuto, riepilogoProblemi,
       compatibilita, conteggi: { immagini: immaginiRiga.n, byteImmagini: immaginiRiga.byte, caratteri, tabelle: conteggi }, bloccanti, avvisi,
     };
 

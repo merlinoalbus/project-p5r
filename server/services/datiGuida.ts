@@ -46,14 +46,28 @@ export function datiGuida<T>(chiave: string): Congelato<T> | null {
 
 // ---- Il blocco con le correzioni dell'utente sopra (L11 · B11) ----
 
-interface RigaCorrezione { percorso: string; valore_json: string }
-interface BloccoCorretto { dati: unknown; orfane: string[] }
+export interface RigaCorrezione { percorso: string; valore_json: string }
+export interface BloccoCorretto { dati: unknown; orfane: string[] }
 const cacheCorretti = new Map<string, BloccoCorretto>();
+
+const SQL_CORREZIONI_DEL_BLOCCO = 'SELECT percorso, valore_json FROM correzione_dati_guida WHERE blocco = ? ORDER BY percorso';
 
 /** Le correzioni di un blocco (`correzione_dati_guida`), nell'ordine dell'indirizzo; vuote se la tabella non c'è (uno schema di prima della 178). */
 export function correzioniDelBlocco(chiave: string): RigaCorrezione[] {
   try {
-    return prepared('SELECT percorso, valore_json FROM correzione_dati_guida WHERE blocco = ? ORDER BY percorso').all(chiave) as RigaCorrezione[];
+    return prepared(SQL_CORREZIONI_DEL_BLOCCO).all(chiave) as RigaCorrezione[];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Le correzioni di un blocco lette da un database qualunque (L12 · R12-04: «Prepara edizione» le legge dalla COPIA, per scriverle nel blocco).
+ * Stessa interrogazione di `correzioniDelBlocco`; vuote se la tabella non c'è.
+ */
+export function correzioniDelBloccoDi(db: AppDatabase, chiave: string): RigaCorrezione[] {
+  try {
+    return db.prepare(SQL_CORREZIONI_DEL_BLOCCO).all(chiave) as RigaCorrezione[];
   } catch {
     return [];
   }
@@ -63,8 +77,9 @@ export function correzioniDelBlocco(chiave: string): RigaCorrezione[] {
  * Applica a `base` le correzioni, ciascuna risolta sulla BASE (non sul risultato parziale: correggere il campo-selettore di un elemento
  * non sposta le altre correzioni dello stesso elemento). Una correzione che non si risolve più o il cui valore non ha più il tipo della
  * guida è «orfana»: si salta e si dichiara, non si cancella.
+ * Esportata perché l'unica logica di applicazione è questa: la usa anche «Prepara edizione» (R12-04) per scrivere le correzioni dentro i blocchi.
  */
-function applicaCorrezioni(base: unknown, righe: ReadonlyArray<RigaCorrezione>): BloccoCorretto {
+export function applicaCorrezioni(base: unknown, righe: ReadonlyArray<RigaCorrezione>): BloccoCorretto {
   let corrente = base;
   const orfane: string[] = [];
   for (const r of righe) {

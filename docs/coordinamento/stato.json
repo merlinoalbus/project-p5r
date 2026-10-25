@@ -45767,7 +45767,8 @@
         "id": "R12-04",
         "lotto": "L12",
         "titolo": "Fase 4: congelamento dei contenuti per il rilascio",
-        "stato": "da-fare",
+        "stato": "chiuso-codice",
+        "esitoRiscontro": "2026-10-25: nel prodotto di «Prepara edizione», sulla copia (preparazione intatta): correzioni di correzione_dati_guida scritte nei blocchi di dati_guida con applicaCorrezioni (datiGuida.ts, stessa logica della lettura) e tabella svuotata; fotografie di «Ripristina» tolte (chiavi confidente-seed-v1:* e tabelle …_foto), seed_json e origine delle tabelle di contenuto conservate perché portano la provenienza letta dalle viste; controllo completo dei contenuti oggetto per oggetto con pagina di correzione (server/services/edizioneContenuti.ts): bloccanti condizioni illeggibili o non riconosciute, JSON malformati, chiavi orfane, spilli senza uid; avvisi puntiBase di pesca diverso da 2, immagini assenti, correzioni non più accolte; rapporto con conteggi prima e dopo e SHA-256. Typecheck, lint, build e bundle di rilascio verdi; zero test, prova funzionale dell'utente alla prima edizione.",
         "fonte": "lotti/L12/requisiti.md",
         "criterio": "Controllo completo dei contenuti corretto dall'utente; correzioni dei blocchi JSON scritte nei blocchi; «Ripristina» e fotografie fuori dalla versione di rilascio; miniature generate una volta; struttura delle partite definitiva; nessuna migrazione nel prodotto di rilascio.",
         "tipo": "F"

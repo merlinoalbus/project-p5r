@@ -1386,6 +1386,25 @@ nella Topbar (`PulsanteStandby`, preferenza `bloccoStandby`, Screen Wake Lock in
 nelle due istanze. Scelta dichiarata: **nessun service worker e nessuna cache offline** (rischio di servire versioni vecchie dell'app e dei dati
 della partita; l'aggiornamento resta quello di `AvvisoNuovaVersione`). Il Wake Lock richiede HTTPS o localhost: in HTTP semplice il pulsante non compare.
 
+### R12-04 — congelamento dei contenuti nel prodotto di edizione (25 ottobre) — fatto nel codice, da provare dall'utente
+
+Tutto dentro «Prepara edizione» e sulla COPIA di `gioco.db` (la preparazione non viene toccata; zero test, i controlli funzionali sono dell'utente).
+`server/services/edizioneContenuti.ts` (nuovo) fa due lavori, richiamati da `edizioneService.ts` (nuova fase `correzioni`).
+1. **Correzioni della guida unite nei blocchi.** Le righe di `correzione_dati_guida` si scrivono dentro i blocchi di `dati_guida` con `applicaCorrezioni`
+   di `datiGuida.ts` (esportata: stessa logica della lettura, nessuna copia), poi la tabella nella copia si svuota; il rilascio legge un valore solo e
+   `datiGuidaCorretti` su una tabella vuota restituisce il blocco com'è. Una correzione che la guida non accoglie più, o di un blocco sparito, non entra e
+   diventa un avviso; un blocco illeggibile resta com'è con le sue correzioni ed è bloccante. Si tolgono le fotografie che servivano solo a «Ripristina»:
+   chiavi `confidente-seed-v1:*` di `dati_guida` e righe delle tabelle-fotografia `…_foto`. **Scelta motivata:** le colonne `seed_json` e `origine` delle
+   tabelle di contenuto NON si azzerano, perché portano la provenienza che le letture usano (`inviti.ts` `daUtente` = `seed_json IS NULL`,
+   `luoghiService.ts` `modificato`, `catalogoService.ts` conteggi): azzerarle farebbe diventare «creata dall'utente» una riga della guida. Restano come
+   dato, senza alcuna funzione che le legga per modificare.
+2. **Controllo completo dei contenuti, oggetto per oggetto** (nome, campo, pagina dove correggere, nessuna correzione automatica). Bloccanti: condizioni
+   illeggibili o non riconosciute (le regole di lettura sono quelle dell'app, `normalizzaRequisitoSpillo`), JSON malformati nelle colonne `…_json` e in
+   `dati_guida`, chiavi che non esistono (riferimenti delle condizioni, violazioni di chiave esterna, riferimenti senza chiave esterna: diario ed effetti,
+   inviti, oggetti del catalogo, Confidenti, planimetrie e Aree), spilli senza uid, controlli andati in errore. Avvisi: regole di pesca con `puntiBase`
+   diverso da 2, immagini citate e assenti, correzioni non più accolte. Il rapporto mostra l'elenco (fino a 300 per genere), i conteggi prima e dopo
+   dell'unione e gli SHA-256 completi dei file.
+
 ## Razionalizzazione (dal 20 ottobre 2026) — branch `newreview`, istanza parallela p5s
 
 Mandato dell'utente del 2026-10-20: tutti i lotti del piano di razionalizzazione
