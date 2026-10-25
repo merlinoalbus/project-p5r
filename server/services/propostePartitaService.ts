@@ -372,7 +372,7 @@ function prepara(partita:number,r:RichiestaAnteprimaDecisioneProposte):Anteprima
       // BON-12: gli yen di un consumo restano un promemoria a mano. L13 (ondata 3, decisione 1): gli yen dichiarati da un effetto «yen» di una
       // voce si applicano come la Dote, dal pulsante «Applica» sulla voce, con il movimento registrato (`movimento_yen`); così quelli di una Richiesta
       // completata (decisione 3), dal pulsante «Applica» sulla sua carta
-      if(p.tipo==='yen'&&p.causa.tipo!=='voce'&&p.causa.tipo!=='richiesta')throw httpErrors.conflict('yen-a-mano','Gli yen si cambiano a mano: non c’è niente da applicare.');
+      if(p.tipo==='yen'&&p.causa.tipo!=='voce'&&p.causa.tipo!=='richiesta')throw httpErrors.conflict('yen-a-mano','Gli yen non si applicano da qui: non c’è niente da applicare.');
       if(p.tipo==='effetto-voce'||!p.applicabile)throw httpErrors.conflict('proposta-non-applicabile',p.impedimenti.join(' ')||'Questa proposta richiede il raccordo esplicito.');
       const k=`${p.tipo}\0${p.chiave}`,v=virtuali.get(k)??{tipo:p.tipo,chiave:p.chiave,prima:valore(partita,p.tipo,p.chiave),delta:0,dopo:0};
       v.delta+=p.delta;v.dopo=v.prima+v.delta;

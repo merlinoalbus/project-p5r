@@ -95,10 +95,10 @@ function cosaDaLaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione): { t
 function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione, nomiFrase: NomiFraseEffetto): string[] {
   return fonte.effetti.map(({ effetto: e }) => {
     if (e.tipo === 'articolo') {
-      // l'articolo comprato e il suo prezzo come promemoria: gli yen si cambiano a mano
+      // l'articolo comprato e il suo prezzo (gli yen non si muovono da qui)
       // il nome è quello del catalogo; la colonna `nome` dell'articolo può essere vuota (il catalogo unico è il nome vero), e allora la riga non resta senza nome
       const a = articoloConNome(e.articolo), q = e.quantita ?? 1;
-      return a ? `Acquisto: ${a.nome}${q > 1 ? ` ×${q}` : ''}${a.prezzo ? ` · ¥${(a.prezzo * q).toLocaleString('it-IT')}: cambiali tu a mano` : ''}` : fraseEffettoConNomi(e, nomiFrase);
+      return a ? `Acquisto: ${a.nome}${q > 1 ? ` ×${q}` : ''}${a.prezzo ? ` · ¥${(a.prezzo * q).toLocaleString('it-IT')}` : ''}` : fraseEffettoConNomi(e, nomiFrase);
     }
     // R12-01/1: tutti gli altri effetti che citano un oggetto per chiave (evento di storia, Persona, domanda, cruciverba, invito, Richiesta), pesca e Fortuna: la frase con i nomi, la stessa dell'editor
     if (eEffettoConNomi(e)) return fraseEffettoConNomi(e, nomiFrase);
@@ -107,10 +107,10 @@ function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzi
       return `Acquisto: ${nome}${e.variante ? ` · ${nomeDote(e.variante)}` : ' · variante da dichiarare'}`;
     }
     const testo = testoEffetti([e], nomi)[0]!;
-    // R10-06: la paga del turno è un promemoria (gli yen si cambiano a mano), mai una proposta
+    // R10-06: la paga del turno è solo un'informazione, mai una proposta
     if (e.tipo === 'turno') {
       const paga = pagaDelTurno(e.attivita);
-      if (paga) return `${testo} · paga ¥${paga.yen.toLocaleString('it-IT')}${paga.massima && paga.massima > paga.yen ? ` (fino a ¥${paga.massima.toLocaleString('it-IT')})` : ''}: cambiali tu a mano`;
+      if (paga) return `${testo} · paga ¥${paga.yen.toLocaleString('it-IT')}${paga.massima && paga.massima > paga.yen ? ` (fino a ¥${paga.massima.toLocaleString('it-IT')})` : ''}`;
     }
     return testo;
   });

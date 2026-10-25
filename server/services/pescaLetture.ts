@@ -93,7 +93,7 @@ export function targetBeneficiPesca(p:number,causa:string):TargetBeneficioPesca[
     const perizia:IntervalloBeneficioPesca=o.perizia.esito==='non-ricevuta'?{minimo:0,massimo:0}:o.perizia.esito==='ignota'?{minimo:0,massimo:max}:{minimo:o.fortuna.attiva===true?max:base,massimo:o.fortuna.attiva===false?base:max};
     // BON-12: la quota della visita non è più una proposta di yen: gli yen si cambiano a mano, qui resta solo il promemoria nel motivo
     const quota=dati.quote[s.fascia];
-    return [{tipo:'dote',chiave:'perizia',delta:perizia.minimo,intervallo:perizia,attiva,storica:true,motivo:`Perizia finale osservata, distinta dalla cattura. L’intervallo conserva il bonus Fortuna ignoto. Promemoria: la quota della visita (${quota.toLocaleString('it-IT')} yen) non si applica da qui, cambia tu gli yen.`}];
+    return [{tipo:'dote',chiave:'perizia',delta:perizia.minimo,intervallo:perizia,attiva,storica:true,motivo:`Perizia finale osservata, distinta dalla cattura. L’intervallo conserva il bonus Fortuna ignoto. Quota della visita: ${quota.toLocaleString('it-IT')} yen.`}];
   }
   const a=prepared('SELECT * FROM utente.pesca_acquisto_esca WHERE partita_id=? AND id=?').get(p,causa) as RigaAcquistoEsca|undefined;
   if(a)momentoAcquistoEscaValido(a);

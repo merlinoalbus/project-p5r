@@ -106,7 +106,6 @@ export function AcquistiNegozioVoce({ valore, onCambia, elenchi, nomi, negozio, 
           <strong className="tabular-nums">{yen(conto.totale)}{conto.senzaPrezzo ? ` (più ${conto.senzaPrezzo} senza prezzo)` : ''}</strong>
         </p>
       )}
-      <span className="testo-12 text-text-muted">Il totale è un promemoria: gli yen li togli tu a mano dalla scheda del denaro (la spunta segna gli articoli comprati).</span>
     </section>
   );
 }

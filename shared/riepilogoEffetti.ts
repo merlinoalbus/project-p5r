@@ -2,11 +2,11 @@
 // riepilogoEffetti — che cosa dà una voce, raggruppato per tipo (richiesta dell'utente del 2026-10-25)
 // ============================================================
 //
-// L'utente, sulla voce «Raccogli oggetti curativi dal distributore accanto al Bagno Pubblico»: «Il gioco dà: Acquisto: Arginade ×2 · ¥200:
-// cambiali tu a mano · Acquisto: Acqua della rinascita ×2 · ¥200: cambiali tu a mano · In tutto: …» — «Non si capisce niente... non sarebbe
-// possibile formattarlo in modo adeguato? per tutti gli acquisti?». La frase unica diventa un DATO: gruppi con un'etichetta («Acquisti ·
-// Distributore del bagno pubblico», «Doti sociali», «Turni»…), una riga breve per elemento (nome e dettaglio separati), il totale degli
-// acquisti e una sola nota per gruppo (gli yen da cambiare a mano si dicono una volta, non per ogni articolo).
+// L'utente, sulla voce «Raccogli oggetti curativi dal distributore accanto al Bagno Pubblico», trovava illeggibile una frase unica con un
+// acquisto dopo l'altro, ognuno con la sua nota sugli yen — «Non si capisce niente... non sarebbe possibile formattarlo in modo
+// adeguato? per tutti gli acquisti?» — e poi ha chiesto di togliere dalle frasi la nota sugli yen. La frase unica diventa un DATO: gruppi
+// con un'etichetta («Acquisti · Distributore del bagno pubblico», «Doti sociali», «Turni»…), una riga breve per elemento (nome e dettaglio
+// separati) e il totale degli acquisti. Nel riepilogo restano solo i fatti: nessuna istruzione sugli yen.
 //
 // È l'unico punto che costruisce il riepilogo: il server lo calcola per ogni voce (`AzionePercorsoDto.produceRiepilogo`, con i nomi del DB)
 // e la pagina lo mostra così com'è (`RiepilogoEffettiVoce`). Le parole dei singoli effetti vengono dalle stesse fonti delle frasi
@@ -37,7 +37,7 @@ export interface NomiRiepilogoEffetti {
   azione: NomiEffettiAzione;
   /** Il nome del negozio dalla sua chiave (la chiave di un articolo è «negozio/articolo»). */
   negozio: (chiave: string) => string | undefined;
-  /** La paga dell'attività per un turno, se l'attività ne ha una (un promemoria: gli yen si cambiano a mano). */
+  /** La paga dell'attività per un turno, se l'attività ne ha una (solo un'informazione: gli yen non si muovono da qui). */
   pagaTurno: (attivita: string) => { yen: number; massima: number | null } | undefined;
 }
 
@@ -100,7 +100,6 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
         }
         const copie = conto.righe.reduce((s, r) => s + r.copie, 0);
         if (conto.totale !== null && (conto.righe.length > 1 || copie > 1)) g.totale = `Totale ${yen(conto.totale)}${conto.senzaPrezzo ? ` (più ${conto.senzaPrezzo} senza prezzo)` : ''}`;
-        g.nota = conto.totale !== null ? 'Gli yen li togli tu a mano: la spunta segna solo gli articoli comprati.' : 'La spunta segna gli articoli comprati.';
         break;
       }
       case 'acquisto': riga('aojiru', n.frase.articolo(e.articolo)?.nome ?? 'Aojiru', e.variante ? nomeDote(e.variante) : 'variante da dichiarare'); break;
@@ -111,7 +110,6 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
         const paga = n.pagaTurno(e.attivita);
         const testoPaga = paga ? `paga ${yen(paga.yen)}${paga.massima && paga.massima > paga.yen ? ` (fino a ${yen(paga.massima)})` : ''}` : '';
         riga('turni', p.nome, [p.dettaglio, testoPaga].filter(Boolean).join(' · ') || undefined);
-        if (paga) gruppo('turni').nota = 'Li segna la spunta; la paga la aggiungi tu a mano agli yen.';
         break;
       }
       case 'yen': riga('yen', e.importo > 0 ? 'Ricevuti' : 'Spesi', yen(e.importo)); break;

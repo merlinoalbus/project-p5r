@@ -2,11 +2,11 @@
 // RiepilogoEffettiVoce — «Il gioco dà», raggruppato per tipo (richiesta dell'utente del 2026-10-25)
 // ============================================================
 //
-// L'utente: «Il gioco dà: Acquisto: Arginade ×2 · ¥200: cambiali tu a mano · Acquisto: Acqua della rinascita ×2 · ¥200: cambiali tu a
-// mano · In tutto: …» — «Non si capisce niente... non sarebbe possibile formattarlo in modo adeguato? per tutti gli acquisti?». Al posto
-// della frase unica, i gruppi che il server costruisce (`AzionePercorsoDto.produceRiepilogo`, `shared/riepilogoEffetti.ts`): l'etichetta
-// del gruppo, un elenco con una riga per elemento (nome a sinistra, copie, prezzo o note a destra; su un telefono il dettaglio va a capo
-// sotto il nome, mai troncato), il totale degli acquisti e una nota sola per gruppo. Solo lettura: nessun comando.
+// L'utente trovava illeggibile la frase unica con un acquisto dopo l'altro — «Non si capisce niente... non sarebbe possibile formattarlo
+// in modo adeguato? per tutti gli acquisti?» — e ha chiesto di togliere dalle frasi la nota sugli yen. Al posto della frase unica, i gruppi
+// che il server costruisce (`AzionePercorsoDto.produceRiepilogo`, `shared/riepilogoEffetti.ts`): l'etichetta del gruppo, un elenco con una
+// riga per elemento (nome a sinistra, copie, prezzo o note a destra; su un telefono il dettaglio va a capo sotto il nome, mai troncato) e
+// il totale degli acquisti. Solo lettura: nessun comando.
 // ============================================================
 
 import { useId } from 'react';

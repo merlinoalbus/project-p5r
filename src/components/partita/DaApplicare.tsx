@@ -133,7 +133,7 @@ function DaApplicareNelContesto({ partitaId, voceUid, richiesta, onCambiato }: P
             return <span className="testo-14"><strong>{nome(p)}</strong>{p.tipo !== 'effetto-voce' && <>: {prima !== null ? <>{prima} → <strong>{prima + p.delta}</strong> punti</> : <strong>{valore(p)}</strong>}</>}</span>;
           })()}
           <span>{p.motivo}</span>
-          {!!p.promemoriaYen && <span className="rounded border border-border p-2 testo-12">Promemoria: questo consumo è costato ¥{p.promemoriaYen.toLocaleString('it-IT')}. L’app non tocca i tuoi yen: cambiali tu a mano.</span>}
+          {!!p.promemoriaYen && <span className="rounded border border-border p-2 testo-12">Costo del consumo: ¥{p.promemoriaYen.toLocaleString('it-IT')}</span>}
           {p.orfana && <span className="text-warning">{p.causa.tipo === 'richiesta' ? 'La Richiesta da cui nasce non c’è più.' : 'La voce o il consumo da cui nasce non c’è più.'}</span>}
           {(() => {
             // «Applica» non chiede più «già nel saldo?»: premerlo dice che i punti non sono ancora contati; chi li ha già contati lo dice a parte

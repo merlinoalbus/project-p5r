@@ -129,7 +129,7 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
       {a.fatta && a.effetti && <span className="chip chip--attivo testo-12" title="Effetti della spunta: togliendola si annullano i punti del Confidente e i turni; le Doti le segni tu (la spunta non le tocca), letture e visioni restano (si disfano dalla loro pagina)">{descriviEffetti(a.effetti)}</span>}
     </span>
     {/* che cosa dà il gioco, per gruppi (richiesta dell'utente del 2026-10-25, «formattarlo in modo adeguato, per tutti gli acquisti»): le Doti
-        si segnano a mano (scelta dell'utente, 2026-09-30), gli yen degli acquisti si tolgono a mano; ogni gruppo lo dice una volta sola */}
+        si segnano a mano (scelta dell'utente, 2026-09-30); gli yen non compaiono come istruzione, solo come prezzi e totale */}
     <RiepilogoEffettiVoce gruppi={gruppi} />
     </>
   );

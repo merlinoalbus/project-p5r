@@ -179,7 +179,7 @@ export function PreparazioneAcquistoAojiru({ partitaId, fonte, articolo = ARTICO
       {anteprima.nuovo.rapportoLegacy?.valutazione && <ProvaPresenza valutazione={anteprima.nuovo.rapportoLegacy.valutazione} />}
       {!!altreStessoGiorno.length && <div role="alert" className="flex flex-col gap-1 text-warning"><strong>Forse è già registrato.</strong><span>Per il {dataGiocoTesto(anteprima.nuovo.momento.giorno)} ci sono già {altreStessoGiorno.length} consumi. Se è lo stesso, collega quello; se è un altro, puoi registrarlo.</span>{altreStessoGiorno.map(r => <DettagliConsumo key={r.id} acquisto={r} />)}</div>}
       {anteprima.disponibilita.motivi.map((m) => <p className="m-0 text-warning" key={m}>{m}</p>)}
-      <p className="m-0">Punti e yen non cambiano da soli: i punti li applichi dal pulsante sulla voce, gli yen li cambi tu a mano.</p>
+      <p className="m-0">I punti si applicano dal pulsante sulla voce.</p>
       <label className="touch flex items-center gap-2"><input type="checkbox" className="h-5 w-5" checked={attestato} disabled={occupato || incerto} onChange={(e) => setAttestato(e.target.checked)} />Giorno, succo e vecchio segno sono giusti.</label>
       <div className="flex flex-wrap gap-2">
         <PulsanteVisivo tono="primario" icona={<IconaAzione chiave={incerto ? 'riprova' : 'raggiunto'} dimensione={22} />} titolo={incerto ? 'Riprova' : titoloConferma} disabled={occupato || !attestato} onClick={() => void conferma()} />
