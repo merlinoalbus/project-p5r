@@ -61,7 +61,7 @@ describe('RichiestePage', () => {
     expect(await within(screen.getByText('Un ex piuttosto appiccicoso').closest('li')!).findByText('completata')).toBeInTheDocument();
     // il dettaglio del dedalo nel selettore segue la spunta
     fireEvent.click(selettore('Dedalo'));
-    expect(screen.getByRole('button', { name: /Dedalo di Qimranut.*1 completate su 1/ })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: /Dedalo di Qimranut.*1 completate su 1/ })).toBeInTheDocument();
     fireEvent.click(selettore('Dedalo'));
     // i due segmenti sono indipendenti
     fireEvent.click(screen.getByRole('radio', { name: 'Da completare' }));

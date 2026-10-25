@@ -798,7 +798,7 @@ describe('§4.3: «Crea la voce» e «Collega a una voce» dalle schede da siste
     fireEvent.click(finestra.getByRole('combobox', { name: 'Voce' }));
     // la voce dell'infiltrazione della scheda (Cancello), sotto il nome dell'infiltrazione
     expect(finestra.getByText('1. Cancello')).toBeInTheDocument();
-    fireEvent.click(finestra.getByRole('option', { name: /Sicura del cancello/ }).querySelector('button')!);
+    fireEvent.click(finestra.getByRole('option', { name: /Sicura del cancello/ }));
     fireEvent.click(finestra.getByRole('button', { name: 'Collega' }));
     await waitFor(() => expect(collegaSchedaAllaVoce).toHaveBeenCalledWith(15, 'p1'));
     await waitFor(() => expect(notifica).toHaveBeenCalledWith('error', 'La voce non è del Palazzo della scheda.'));
@@ -1641,7 +1641,7 @@ it('un’infiltrazione nuova all’inizio del Palazzo: creata, la scheda la apre
   fireEvent.change(finestra.getByLabelText('Nome dell’infiltrazione'), { target: { value: 'Atrio' } });
   // il posto: «All'inizio del Palazzo»
   fireEvent.click(finestra.getByRole('combobox', { name: 'Dove va nella guida' }));
-  fireEvent.click(screen.getByRole('option', { name: 'All’inizio del Palazzo' }).querySelector('button')!);
+  fireEvent.click(screen.getByRole('option', { name: 'All’inizio del Palazzo' }));
   fireEvent.click(finestra.getByRole('button', { name: 'Crea l’infiltrazione' }));
   await waitFor(() => expect(creaArea).toHaveBeenCalledWith('kamoshida', { nome: 'Atrio', descrizione: '', dopo: null }));
   await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());

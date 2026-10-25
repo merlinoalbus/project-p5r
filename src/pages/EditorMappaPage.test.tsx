@@ -106,7 +106,7 @@ describe('EditorMappaPage', () => {
     fireEvent.click(await form.findByRole('combobox', { name: 'Elenco: Negozio' }));
     fireEvent.change(form.getByLabelText('Cerca Elenco: Negozio'), { target: { value: 'untou' } });
     expect(within(form.getByRole('listbox')).getAllByRole('option').map((o) => o.textContent)).toEqual(['Untouchablearmi']);
-    fireEvent.click(form.getByRole('option', { name: /Untouchable/ }).querySelector('button')!);
+    fireEvent.click(form.getByRole('option', { name: /Untouchable/ }));
     fireEvent.click(form.getByRole('button', { name: 'Salva spillo' }));
     await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(9, { nome: 'Armeria', tipo: 'negozio', descrizione: '', riferimento: { tipo: 'negozio', chiave: 'untouchable' }, condizioni: [], destinazione: null }));
     const elimina = await screen.findByRole('button', { name: 'Elimina' });
@@ -214,11 +214,11 @@ describe('EditorMappaPage', () => {
     // lo stato si sceglie da un elenco con ricerca: scrivere filtra, il valore è sempre una voce
     fireEvent.click(form.getByRole('combobox', { name: 'Stato' }));
     fireEvent.change(form.getByLabelText('Cerca Stato'), { target: { value: 'palaz' } });
-    fireEvent.click(form.getByRole('option', { name: 'Palazzo' }).querySelector('button')!);
+    fireEvent.click(form.getByRole('option', { name: 'Palazzo' }));
     expect(form.getByRole('group', { name: 'Condizione: dopo il Palazzo di Kamoshida' })).toBeInTheDocument();
     // il Palazzo viene dall'elenco della Guida
     fireEvent.click(form.getByRole('combobox', { name: 'Palazzo' }));
-    fireEvent.click(form.getByRole('option', { name: 'Palazzo di Madarame' }).querySelector('button')!);
+    fireEvent.click(form.getByRole('option', { name: 'Palazzo di Madarame' }));
     expect(form.getByRole('group', { name: 'Condizione: dopo il Palazzo di Madarame' })).toBeInTheDocument();
     // NON nega la riga; un gruppo ALMENO UNA si annida con una riga già dentro
     fireEvent.click(form.getByRole('button', { name: 'NON' }));
@@ -228,10 +228,10 @@ describe('EditorMappaPage', () => {
     expect(gruppo.getByRole('group', { name: 'Condizione: dal 18 aprile' })).toBeInTheDocument();
     // i quartieri offerti sono solo quelli con una data di sblocco nella Guida (Ueno dipende da un Confidente)
     fireEvent.click(gruppo.getByRole('combobox', { name: 'Stato' }));
-    fireEvent.click(gruppo.getByRole('option', { name: 'Quartiere' }).querySelector('button')!);
+    fireEvent.click(gruppo.getByRole('option', { name: 'Quartiere' }));
     fireEvent.click(gruppo.getByRole('combobox', { name: 'Quartiere' }));
     expect(gruppo.getAllByRole('option').map((o) => o.textContent)).toEqual(['Akihabaradal 31 agosto']);
-    fireEvent.click(gruppo.getByRole('option', { name: /Akihabara/ }).querySelector('button')!);
+    fireEvent.click(gruppo.getByRole('option', { name: /Akihabara/ }));
     fireEvent.click(form.getByRole('button', { name: 'Togli il gruppo' }));
     expect(form.queryByRole('group', { name: 'Gruppo ALMENO UNA' })).toBeNull();
     fireEvent.click(form.getByRole('button', { name: 'Salva spillo' }));
@@ -247,16 +247,16 @@ describe('EditorMappaPage', () => {
     fireEvent.click(await form.findByRole('button', { name: /^Condizioni/ }));
     fireEvent.click(await form.findByRole('button', { name: 'condizione' }));
     fireEvent.click(form.getByRole('combobox', { name: 'Stato' }));
-    fireEvent.click(form.getByRole('option', { name: 'Pin di una mappa' }).querySelector('button')!);
+    fireEvent.click(form.getByRole('option', { name: 'Pin di una mappa' }));
     // il primo pin dell'elenco, «segnato»; la parola è quella del suo tipo
     expect(form.getByRole('group', { name: 'Condizione: Leva del ponte (Palazzo di Kamoshida › Torre): azionato' })).toBeInTheDocument();
     // si cerca fra i pin di tutte le mappe
     fireEvent.click(form.getByRole('combobox', { name: 'Pin' }));
     fireEvent.change(form.getByLabelText('Cerca Pin'), { target: { value: 'cella' } });
-    fireEvent.click(form.getByRole('option', { name: /Chiave della cella/ }).querySelector('button')!);
+    fireEvent.click(form.getByRole('option', { name: /Chiave della cella/ }));
     expect(form.getByRole('group', { name: 'Condizione: Chiave della cella (Palazzo di Kamoshida › Prigione): raccolto' })).toBeInTheDocument();
     fireEvent.click(form.getByRole('combobox', { name: (n) => n === 'Operatore' || n.startsWith('Operatore: ') }));
-    fireEvent.click(form.getByRole('option', { name: 'non segnato' }).querySelector('button')!);
+    fireEvent.click(form.getByRole('option', { name: 'non segnato' }));
     const riga = form.getByRole('group', { name: 'Condizione: Chiave della cella (Palazzo di Kamoshida › Prigione): non raccolto' });
     // fa sparire il pin quando non vale
     expect(within(riga).getByLabelText(/Condizione di presenza/)).toBeInTheDocument();
@@ -273,16 +273,16 @@ describe('EditorMappaPage', () => {
     fireEvent.click(await form.findByRole('button', { name: /^Condizioni/ }));
     fireEvent.click(await form.findByRole('button', { name: 'condizione' }));
     fireEvent.click(form.getByRole('combobox', { name: 'Stato' }));
-    fireEvent.click(form.getByRole('option', { name: 'Voce della guida' }).querySelector('button')!);
+    fireEvent.click(form.getByRole('option', { name: 'Voce della guida' }));
     // la prima voce dell'elenco, «segnata», col suo posto
     expect(form.getByRole('group', { name: 'Condizione: Voce «Si apre la cucina» (Palazzo di Kamoshida › 4. Sala da pranzo): segnata' })).toBeInTheDocument();
     // si cerca fra le voci dei Palazzi e dei Memento, col tipo della voce accanto
     fireEvent.click(form.getByRole('combobox', { name: 'Voce' }));
     fireEvent.change(form.getByLabelText('Cerca Voce'), { target: { value: 'sbarre' } });
     expect(form.getByRole('option', { name: /Leve delle sbarre.*Meccanismo/ })).toBeInTheDocument();
-    fireEvent.click(form.getByRole('option', { name: /Leve delle sbarre/ }).querySelector('button')!);
+    fireEvent.click(form.getByRole('option', { name: /Leve delle sbarre/ }));
     fireEvent.click(form.getByRole('combobox', { name: (n) => n === 'Operatore' || n.startsWith('Operatore: ') }));
-    fireEvent.click(form.getByRole('option', { name: 'non segnata' }).querySelector('button')!);
+    fireEvent.click(form.getByRole('option', { name: 'non segnata' }));
     const riga = form.getByRole('group', { name: 'Condizione: Voce «Leve delle sbarre» (Palazzo di Kamoshida › 6. Corridoio delle Sbarre): non segnata' });
     // fa sparire il pin quando non vale
     expect(within(riga).getByLabelText(/Condizione di presenza/)).toBeInTheDocument();
@@ -299,7 +299,7 @@ describe('EditorMappaPage', () => {
     fireEvent.click(await form.findByRole('button', { name: /^Condizioni/ }));
     fireEvent.click(await form.findByRole('button', { name: 'condizione' }));
     fireEvent.click(form.getByRole('combobox', { name: 'Stato' }));
-    fireEvent.click(form.getByRole('option', { name: 'Pin di una mappa' }).querySelector('button')!);
+    fireEvent.click(form.getByRole('option', { name: 'Pin di una mappa' }));
     // il primo pin offerto è l'altro
     expect(form.getByRole('group', { name: /^Condizione: Chiave della cella/ })).toBeInTheDocument();
     fireEvent.click(form.getByRole('combobox', { name: 'Pin' }));
