@@ -86,8 +86,10 @@ export function CittaPage() {
               evidenziato={acceso} onEvidenzia={setAcceso} className="xl:sticky xl:top-2 xl:min-w-0" />
             {/* Tante colonne quante ne stanno con schede di almeno 300 px: con colonne fisse per larghezza della
                 finestra, da 1536 px ne entravano due nella colonna di 411 px accanto alla mappa, e il nome del
-                quartiere andava a capo una lettera per riga (rilievo dell'utente, 2026-09-29). */}
-            <ul className="m-0 p-0 list-none grid gap-2 grid-cols-[repeat(auto-fill,minmax(min(100%,300px),1fr))] xl:flex-1 xl:min-w-[340px] xl:max-h-[calc(68vh+2.5rem)] xl:area-scorrevole xl:p-1" aria-label="Quartieri">
+                quartiere andava a capo una lettera per riga (rilievo dell'utente, 2026-09-29). Le schede non scorrono in un riquadro proprio
+                (L13: era uno scroll dentro lo scroll della pagina, 5734 px in 504): scorre la pagina e la mappa a sinistra resta ferma (sticky),
+                così la sagoma si accende guardando la scheda che si scorre. */}
+            <ul className="m-0 p-0 list-none grid gap-2 grid-cols-[repeat(auto-fill,minmax(min(100%,300px),1fr))] xl:flex-1 xl:min-w-[340px]" aria-label="Quartieri">
             {q.map((x) => {
               const aperto = x.disponibile !== false;
               const suggerito = sugg.evidenziato('quartieri', x.chiave);

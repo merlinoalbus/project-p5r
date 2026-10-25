@@ -187,24 +187,39 @@ export function CompendioPage() {
   /** Toglie dall'URL tutti i parametri del pannello dei filtri in un solo aggiornamento, lasciando ricerca e ordinamento. */
   const azzeraFiltri = () => impostaTutti(Object.fromEntries(CHIAVI_FILTRI.map((k) => [k, null])));
 
+  const descrizione = 'Tutte le Persona di Royal con affinità, skill, statistiche e i modi per ottenerle; tocca una scheda per il dettaglio.';
+  const comandiVista = (
+    <div className="flex gap-1" role="group" aria-label="Vista">
+      <button type="button" className={`chip touch ${vista === 'piastrelle' ? 'chip--attivo' : ''}`} onClick={() => impostaVista('piastrelle')} aria-pressed={vista === 'piastrelle'}>Piastrelle</button>
+      <button type="button" className={`chip touch ${vista === 'elenco' ? 'chip--attivo' : ''}`} onClick={() => impostaVista('elenco')} aria-pressed={vista === 'elenco'}>Elenco</button>
+    </div>
+  );
+  const conteggio = <span className="testo-13 text-text-muted">{dati ? `${filtrate.length} di ${dati.length} Persona` : ''}</span>;
+
   return (
     <div className="flex flex-col gap-4">
+      {/* Sul telefono l'intestazione tiene solo titolo e i due collegamenti (una riga): la descrizione, i comandi di vista e il conteggio
+          passano nel corpo, subito sotto. Prima stavano tutti in testa e a 375×812 l'intestazione, barra superiore compresa, arrivava
+          al 36% dell'altezza (limite 30%); ora è sotto il 25%. Da 640 px resta com'era. */}
       <IntestazionePagina
         titolo="Compendio"
-        sottotitolo="Tutte le Persona di Royal con affinità, skill, statistiche e i modi per ottenerle; tocca una scheda per il dettaglio."
+        sottotitolo={telefono ? undefined : descrizione}
         azioni={
           <>
-            <div className="flex gap-1" role="group" aria-label="Vista">
-              <button type="button" className={`chip touch ${vista === 'piastrelle' ? 'chip--attivo' : ''}`} onClick={() => impostaVista('piastrelle')} aria-pressed={vista === 'piastrelle'}>Piastrelle</button>
-              <button type="button" className={`chip touch ${vista === 'elenco' ? 'chip--attivo' : ''}`} onClick={() => impostaVista('elenco')} aria-pressed={vista === 'elenco'}>Elenco</button>
-            </div>
+            {!telefono && comandiVista}
             <Link to="/compendio/glossario" className="chip touch no-underline">Glossario dei termini</Link>
             {/* Skill non è più nella barra in basso (lotto C: c'è la Guida): da qui resta a un tocco */}
             <Link to="/skill" className="chip touch no-underline">Skill</Link>
-            <span className="testo-13 text-text-muted">{dati ? `${filtrate.length} di ${dati.length} Persona` : ''}</span>
+            {!telefono && conteggio}
           </>
         }
       />
+      {telefono && (
+        <div className="flex flex-col gap-2">
+          <p className="m-0 testo-13 text-text-secondary">{descrizione}</p>
+          <div className="flex flex-wrap items-center justify-between gap-2">{comandiVista}{conteggio}</div>
+        </div>
+      )}
 
       {/* Ricerca e ordinamento sempre visibili; gli altri filtri in un pannello a gruppi etichettati, riassunti da chip rimovibili. */}
       <div className="flex flex-col gap-2">

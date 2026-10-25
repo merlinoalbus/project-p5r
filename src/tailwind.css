@@ -2502,7 +2502,9 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
     /* l'effetto va a capo per intero (era su una riga sola con «…»: le righe del catalogo tagliavano l'informazione di gioco) */
     .tabella-oggetti td.tabella-oggetti__effetto { grid-column: 2 / 4; grid-row: 2; font-size: var(--testo-12); color: var(--color-text-secondary);
       white-space: normal; overflow-wrap: anywhere; }
-    .tabella-oggetti__lungo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    /* il testo esteso del prezzo assente non è più nascosto con la tecnica «solo per lettori di schermo» (1×1 px con overflow nascosto: era
+       testo tagliato in 772 righe del catalogo): sul telefono resta il trattino, che porta lo stesso testo come nome accessibile (`role="img"`) */
+    .tabella-oggetti__lungo { display: none; }
     .tabella-oggetti__breve { display: inline; color: var(--color-text-muted); }
   }
 
