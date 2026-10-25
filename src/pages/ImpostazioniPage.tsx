@@ -2,6 +2,7 @@
 // ImpostazioniPage — partite, traduzioni, immagini degli Arcani, cestino, informazioni
 // ============================================================
 
+import { lazy, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useConfigStore } from '../stores/configStore';
@@ -24,6 +25,15 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
+import { SoloPreparazione } from '../components/shared/SoloPreparazione';
+
+/**
+ * «Prepara edizione» (L12, passi 7 e 9). Il componente si carica a richiesta e SOLO nella preparazione: con `VITE_MODALITA=rilascio` Vite sostituisce
+ * la costante, la condizione è statica e l'import dinamico esce dal bundle di rilascio (con lui il testo delle rotte dell'edizione).
+ */
+const PreparaEdizione = import.meta.env.VITE_MODALITA === 'rilascio'
+  ? null
+  : lazy(() => import('../components/impostazioni/PreparaEdizione').then((m) => ({ default: m.PreparaEdizione })));
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -95,6 +105,12 @@ export function ImpostazioniPage() {
       <GestiPartita />
       {!IN_RILASCIO && <RimozioniConservate />}
       {!IN_RILASCIO && <PacchettoGioco />}
+      {/* L12: «Prepara edizione» esiste solo nella preparazione (capacità `importaEsporta`) */}
+      {!IN_RILASCIO && PreparaEdizione && (
+        <SoloPreparazione funzione="importaEsporta">
+          <Suspense fallback={null}><PreparaEdizione /></Suspense>
+        </SoloPreparazione>
+      )}
       {!IN_RILASCIO && <BackupIstanza />}
       {!IN_RILASCIO && <section className="card flex flex-col gap-3" aria-labelledby="titolo-documentazione-api">
         <h2 id="titolo-documentazione-api" className="m-0 testo-15 font-semibold">Documentazione delle API</h2>

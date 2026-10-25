@@ -15,9 +15,33 @@ COPY vite/ ./vite/
 COPY public/ ./public/
 COPY src/ ./src/
 COPY shared/ ./shared/
-RUN npm run build
+# La modalità dell'istanza (L12, passo 9) è fissata QUI, nella build: Vite sostituisce `import.meta.env.VITE_MODALITA` con una costante e gli
+# editor escono dal bundle. Vuota (il valore predefinito) = preparazione, l'istanza di oggi: la pipeline di `main` non passa l'argomento e la
+# build resta identica. La pipeline del rilascio passa `--build-arg VITE_MODALITA=rilascio`. Va dichiarata subito prima della build, non
+# in testa: cambiarla non invalida lo strato di `npm ci`.
+ARG VITE_MODALITA=
+ENV VITE_MODALITA=$VITE_MODALITA
+RUN npm run build && echo "$VITE_MODALITA" > /app/.modalita
 
-# ---- Stage 2: nginx ----
+# ---- Stage 2a: nginx di RILASCIO (L12, passo 9) ----
+# Si costruisce solo con `--target rilascio`. Sta prima dello stage finale apposta: senza `--target` Docker costruisce l'ultimo, che resta quello di
+# preparazione. Due controlli sulla build (non test: falliscono la costruzione dell'immagine):
+#   1. la build dev'essere stata fatta con VITE_MODALITA=rilascio, altrimenti questa immagine pubblica conterrebbe gli editor;
+#   2. nel bundle non deve comparire il testo della rotta di «Prepara edizione» (il componente è un import dinamico escluso dalla build di rilascio).
+FROM nginx:1.30-alpine AS rilascio
+RUN rm /etc/nginx/conf.d/default.conf
+COPY nginx.rilascio.conf /etc/nginx/conf.d/default.conf
+COPY nginx.rilascio-intestazioni.conf /etc/nginx/snippets/intestazioni-sicurezza.conf
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY --from=build /app/.modalita /tmp/modalita
+RUN if [ "$(cat /tmp/modalita)" != "rilascio" ]; then echo "ERRORE: lo stage rilascio richiede --build-arg VITE_MODALITA=rilascio" >&2; exit 1; fi
+RUN if grep -rqF "istanza/edizione" /usr/share/nginx/html; then echo "ERRORE: il bundle di rilascio contiene la rotta di Prepara edizione" >&2; exit 1; fi
+RUN rm -f /tmp/modalita
+# la sintassi della configurazione si controlla alla costruzione, non al primo avvio in produzione
+RUN nginx -t
+EXPOSE 80
+
+# ---- Stage 2: nginx (PREPARAZIONE, lo stage finale) ----
 FROM nginx:1.30-alpine
 RUN rm /etc/nginx/conf.d/default.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf

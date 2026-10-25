@@ -109,4 +109,16 @@ export const DESCRIZIONI_IMPOSTAZIONI: DescrizioniArea = {
     descrizione: 'Si interroga quando la risposta dell\'importazione non arriva (un proxy può chiudere la richiesta prima che il lavoro finisca). Dice se un\'importazione è in corso, con identificativo, fase (`lettura`, `verifica`, `copia-di-sicurezza`, `sostituzione`, `riapertura`, `controllo`) e ora d\'inizio, e l\'esito dell\'ultima conclusa da quando il server è partito, con l\'esito completo se è riuscita. L\'identificativo cambia a ogni tentativo: confrontandolo con quello letto prima di chiedere l\'importazione si capisce se l\'esito è del proprio tentativo.',
     risposta: '`StatoImportazionePacchettoDto` (inCorso, operazione, fase, iniziataIl, ultima)',
   },
+  'POST /api/impostazioni/istanza/edizione': {
+    sommario: 'Prepara l\'edizione di rilascio: il prodotto chiuso che l\'istanza pubblica legge in sola lettura',
+    descrizione: 'L12, passi 7 e 9. Solo nell\'istanza di preparazione. Risponde subito (202) con l\'identificativo dell\'operazione e prosegue in background; la fase e l\'esito si leggono da `GET /api/impostazioni/istanza/edizione`. Lavora su COPIE: i dati dell\'istanza (`gioco.db`, `partite.db`, caratteri) non si toccano. Prende il lucchetto comune dell\'istanza (409 `importazione-in-corso` se un\'importazione o un ripristino sono in corso, 409 `edizione-in-corso` se un\'altra edizione lo è). Nell\'ordine: copia consistente di `gioco.db`; regole sui dati applicate e verificate a zero alla seconda passata; miniature di tutte le immagini a tutte le larghezze; `VACUUM INTO` con `journal_mode = DELETE`; `partite-vuoto.db` ottenuto applicando le migrazioni utente a un file vuoto (con versione e impronta dello schema); tabella `edizione`; `integrity_check`, `foreign_key_check`, spilli senza uid, JSON malformati; caratteri; confronto di compatibilità con l\'edizione precedente (chiavi citate dalle partite che non esistono più); manifesto con byte e SHA-256. Se non ci sono problemi bloccanti deposita la cartella `project-p5r-edizione-<numero>-<data>` nella cartella d\'appoggio (copia in `.parziale`, verifica degli SHA-256, poi rinomina; se ne tengono le ultime tre). Con problemi bloccanti nulla viene depositato e il report dice perché.',
+    risposta: '`{ operazione }` (202)',
+    senzaCorpo: true,
+    errori: [[409, 'edizione-in-corso'], [409, 'importazione-in-corso'], [400, 'istanza-in-memoria'], [400, 'deposito-non-configurato']],
+  },
+  'GET /api/impostazioni/istanza/edizione': {
+    sommario: 'A che punto è la preparazione dell\'edizione di rilascio, e com\'è finita l\'ultima',
+    descrizione: 'Dice se una preparazione è in corso (identificativo, fase fra `copia`, `regole`, `miniature`, `compattazione`, `partite-vuoto`, `controlli`, `caratteri`, `compatibilita`, `manifesto`, `deposito`, avanzamento delle miniature, ora d\'inizio), l\'esito dell\'ultima conclusa da quando il server è partito (report completo: file con SHA-256, regole, miniature, controlli, compatibilità, problemi bloccanti e avvisi), se la cartella d\'appoggio è scrivibile e quale è l\'ultima edizione già depositata. Sola lettura, `Cache-Control: no-store`.',
+    risposta: '`StatoEdizioneDto` (inCorso, operazione, fase, avanzamento, iniziataIl, ultima, depositoDisponibile, edizioneDepositata)',
+  },
 };

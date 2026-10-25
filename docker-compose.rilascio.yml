@@ -1,0 +1,100 @@
+# ============================================================
+# docker-compose.rilascio — stack dell'istanza PUBBLICA di rilascio, in sola lettura (L12, passo 9)
+# ============================================================
+# Uno stack SEPARATO da quello della preparazione (docker-compose.yml): servizi, rete e volumi propri, nessuna risorsa in comune tranne la rete
+# esterna del tunnel. Il codice è lo stesso, ma le IMMAGINI sono altre (stage `rilascio` dei Dockerfile, pubblicate dalla pipeline
+# `docker-publish-rilascio.yml` su tag `rilascio-v*`) e la modalità è scritta nella build, non in una variabile di questo file.
+#
+# Differenze volute rispetto alla preparazione:
+#   - NIENTE Watchtower e NIENTE `:latest`: la versione delle immagini è FISSA e la sceglie chi mette in servizio, con VERSIONE_RILASCIO. Un
+#     aggiornamento è un'azione deliberata (nuova edizione + nuova versione), mai automatica. Le label dicono esplicitamente a un Watchtower
+#     globale di non toccare questi container;
+#   - NIENTE cartella d'appoggio (NFS), NIENTE importazione, esportazione o deposito: nel rilascio non si sostituisce nulla;
+#   - i contenuti (`gioco.db` e i caratteri) stanno nel volume dell'EDIZIONE, montato in SOLA LETTURA (`:ro`): è il primo dei tre livelli con cui
+#     `gioco.db` resta intoccabile (gli altri: file 0444 senza giornale WAL, e il controllo all'avvio che una scrittura di prova fallisca);
+#   - il file delle partite sta in un volume suo, l'unico scrivibile; le copie dell'avanzamento in un altro ancora;
+#   - il filesystem del container è in sola lettura (con una tmpfs per /tmp, dove tsx tiene la sua cache), senza privilegi aggiuntivi.
+#
+# Variabili di stack (Portainer):
+#   VERSIONE_RILASCIO   la versione delle immagini, quella del tag `rilascio-v…` senza il prefisso (es. v1.0.0). OBBLIGATORIA, nessun predefinito
+#   CF_ACCESS_TEAM      il nome del team di Cloudflare Access che protegge l'istanza pubblica. OBBLIGATORIA (nessun valore nel repository)
+#   CF_ACCESS_AUD       l'AUD dell'applicazione Access dedicata all'istanza pubblica. OBBLIGATORIA (nessun valore nel repository)
+#   PROXY_NETWORK       nome della rete esterna del tunnel (facoltativa, default: proxy)
+#   LOG_LEVEL           livello di log del backend (facoltativa, default: info)
+# Il backend usa le tre cartelle del contratto con `server/rilascio.ts` (variabili d'ambiente dell'immagine, non da cambiare qui):
+#   EDIZIONE_DIR=/edizione (contenuti, :ro)   PARTITE_DIR=/partite (avanzamento)   BACKUP_DIR=/backup (copie dell'avanzamento)
+#
+# Messa in servizio di un'edizione (a mano, una volta per edizione; vedi anche il LEGGIMI.txt dentro l'edizione):
+#   1. «Prepara edizione» nelle Impostazioni della preparazione deposita la cartella dell'edizione nella cartella d'appoggio, con il manifesto.
+#   2. Verificare gli SHA-256 dei file con il manifesto.json.
+#   3. Copiare i file dell'edizione nel volume `project_p5r_rilascio_edizione` (un contenitore usa e getta che monta la cartella dell'edizione
+#      in lettura e il volume in scrittura, ad esempio con `docker run --rm -v project_p5r_rilascio_edizione:/dest -v <CARTELLA_EDIZIONE>:/src:ro
+#      alpine cp -r /src/. /dest/`), con lo stack fermo.
+#   4. Impostare VERSIONE_RILASCIO e (ri)creare lo stack. Al primo avvio il backend copia `partite-vuoto.db` in /partite; agli avvii successivi ne
+#      controlla versione e impronta dello schema contro il manifesto: se non coincidono l'avvio si ferma.
+# Cloudflare (nome host pubblico sul tunnel verso `project_p5r_rilascio_fe:80`, applicazione Access separata con il suo AUD, regola di limite di
+# frequenza su /api/) si imposta a mano e non sta in questo file.
+
+services:
+  project_p5r_rilascio_be:
+    image: ghcr.io/merlinoalbus/project-p5r-rilascio-backend:${VERSIONE_RILASCIO:?imposta VERSIONE_RILASCIO nelle variabili dello stack - la versione fissa delle immagini di rilascio, mai latest}
+    container_name: project_p5r_rilascio_be
+    restart: unless-stopped
+    expose:
+      - "3101"
+    environment:
+      - CF_ACCESS_TEAM=${CF_ACCESS_TEAM:?imposta CF_ACCESS_TEAM nelle variabili dello stack - il team di Cloudflare Access}
+      - CF_ACCESS_AUD=${CF_ACCESS_AUD:?imposta CF_ACCESS_AUD nelle variabili dello stack - l AUD dell applicazione Access dell istanza pubblica}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    volumes:
+      # I contenuti chiusi: sola lettura dal punto di vista del container.
+      - project_p5r_rilascio_edizione:/edizione:ro
+      # L'avanzamento di chi gioca: il solo file scrivibile.
+      - project_p5r_rilascio_partite:/partite
+      # Le copie dell'avanzamento (all'avvio e periodiche, con rotazione).
+      - project_p5r_rilascio_backup:/backup
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - project_p5r_rilascio_network
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
+
+  project_p5r_rilascio_fe:
+    image: ghcr.io/merlinoalbus/project-p5r-rilascio-frontend:${VERSIONE_RILASCIO:?imposta VERSIONE_RILASCIO nelle variabili dello stack - la versione fissa delle immagini di rilascio, mai latest}
+    container_name: project_p5r_rilascio_fe
+    restart: unless-stopped
+    expose:
+      - "80"
+    depends_on:
+      project_p5r_rilascio_be:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - project_p5r_rilascio_network
+      - proxy
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
+
+networks:
+  project_p5r_rilascio_network:
+    driver: bridge
+  proxy:
+    external: true
+    name: ${PROXY_NETWORK:-proxy}
+
+# Volumi con nome esplicito: il nome non dipende dal nome del progetto dello stack, così il comando di copia dell'edizione resta valido.
+# Tutti locali: SQLite non si apre su un filesystem di rete (vedi il commento di docker-compose.yml sul NAS).
+volumes:
+  project_p5r_rilascio_edizione:
+    name: project_p5r_rilascio_edizione
+  project_p5r_rilascio_partite:
+    name: project_p5r_rilascio_partite
+  project_p5r_rilascio_backup:
+    name: project_p5r_rilascio_backup

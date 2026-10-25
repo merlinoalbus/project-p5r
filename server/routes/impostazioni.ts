@@ -21,6 +21,7 @@ import { getRequestLogger } from '../middleware/requestContext.js';
 import fs from 'node:fs';
 import { copiaDatabase, copiaIstanza, elencaDepositoBackup, ripristinaIstanzaDaDeposito, statoIstanza } from '../services/impostazioniService.js';
 import { depositaCopia } from '../services/depositoService.js';
+import { avviaPreparazioneEdizione, statoEdizione } from '../services/edizioneService.js';
 import { anteprimaPacchettoDaDeposito, elencaDeposito, importaPacchettoDaDeposito, statoImportazione } from '../services/pacchettoGiocoService.js';
 import { elencoCestino, elencoCestinoUnificato, eliminaDalCestino, eliminaCestinoPrivato, ripristinaDalCestino, ripristinaCestinoPrivato, svuotaCestino, svuotaCestinoUnificato } from '../services/cestinoService.js';
 import { elencaTuttiNascosti } from '../services/catalogoService.js';
@@ -112,6 +113,17 @@ router.put('/istanza/deposito', validate({ body: corpoFileDeposito }), async (re
 /** A che punto è l'importazione: si interroga quando la risposta non arriva (un proxy può chiudere prima). */
 router.get('/istanza/gioco/importazione', (_req, res) => {
   res.json(statoImportazione());
+});
+
+/* ---- L12 (passi 7 e 9): l'edizione di rilascio. Solo la preparazione: nel rilascio queste rotte non sono nell'elenco del giocatore ---- */
+/** Avvia «Prepara edizione»: risponde subito (202) e il lavoro prosegue sul server; la fase e l'esito si leggono dallo stato. */
+router.post('/istanza/edizione', (_req, res) => {
+  res.status(202).json(avviaPreparazioneEdizione());
+});
+/** A che punto è la preparazione dell'edizione, com'è finita l'ultima e qual è l'edizione già depositata. */
+router.get('/istanza/edizione', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(statoEdizione());
 });
 
 /* ---- Il cestino (2026-10-16): aree, voci, planimetrie e aree dei dedali eliminate, da rimettere o togliere per sempre ---- */
