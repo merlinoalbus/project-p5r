@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
 import { SelettoreData } from '../shared/SelettoreData';
+import { dataValida } from '../../../shared/condizioniSpillo';
 import { Campo, CampoTesto } from '../shared/Campo';
 import { FinestraModifica } from '../shared/FinestraModifica';
 import { useCarica } from '../../hooks/useCarica';
@@ -115,7 +116,7 @@ function Corpo({ titolo, dati, tutti, chiave, onChiudi, onSalvato }: { titolo: s
   const [luoghi, setLuoghi] = useState<string[]>(dati.luoghi.map((l) => l.chiave));
   const [occupato, setOccupato] = useState(false);
   const nomeLuogo = (k: string) => dati.luoghi.find((l) => l.chiave === k)?.nome ?? tutti.find((l) => l.chiave === k)?.nome ?? k;
-  const dalValido = dal === '' || /^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(dal);
+  const dalValido = dal === '' || dataValida(dal);
   const sporca = modo !== partenza.modo || !uguali(giorni, partenza.giorni) || !uguali(fasce, partenza.fasce) || !uguali(eccezioni, partenza.eccezioni)
     || dal !== (partenza.dal ?? '') || motivo !== partenza.motivoSenzaLuogo || !uguali(luoghi, dati.luoghi.map((l) => l.chiave));
   useBozzaSporca(`disponibilita:${chiave}`, 'la disponibilità del Confidente', sporca);
@@ -136,7 +137,7 @@ function Corpo({ titolo, dati, tutti, chiave, onChiudi, onSalvato }: { titolo: s
     <FinestraModifica titolo={titolo} onChiudi={onChiudi} onSalva={salva} salvabile={sporca && dalValido} occupato={occupato} sporca={sporca}
       azioniExtra={dati.modificata ? <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina la struttura" disabled={occupato} onClick={() => void esegui(() => ripristinaDisponibilitaStrutturata(chiave), 'Struttura ripristinata come nella fonte.')} /> : undefined}>
     <div className="flex flex-col gap-3 testo-13">
-      <Selettore etichetta="Come si incontra" valore={modo} opzioni={MODI_DISPONIBILITA.map((m) => ({ chiave: m, nome: NOME_MODO[m] }))} onCambia={(v) => setModo(v as ModoDisponibilita)} disabilitato={occupato} />
+      <Selettore etichettaSopra etichetta="Come si incontra" valore={modo} opzioni={MODI_DISPONIBILITA.map((m) => ({ chiave: m, nome: NOME_MODO[m] }))} onCambia={(v) => setModo(v as ModoDisponibilita)} disabilitato={occupato} />
       {modo === 'settimanale' && (
         <>
           <fieldset className="m-0 flex flex-col gap-1 border-0 p-0"><legend className="p-0 text-text-secondary">Giorni</legend>
@@ -148,7 +149,7 @@ function Corpo({ titolo, dati, tutti, chiave, onChiudi, onSalvato }: { titolo: s
         </>
       )}
       {/* L13: la data si sceglie (mese e giorno del calendario di gioco), non si digita; si salva sempre come «MM-GG», o niente */}
-      <Campo etichetta="Disponibile dal" aiuto="Facoltativa: «nessuna» = disponibile fin dall’inizio." errore={dalValido ? undefined : 'La data salvata non è un giorno del calendario di gioco: sceglila di nuovo (o «nessuna»).'}>
+      <Campo etichetta="Disponibile dal" aiuto="Facoltativa: «nessuna» = disponibile fin dall’inizio." errore={dalValido ? undefined : 'La data salvata non è un giorno del calendario di gioco: sceglila di nuovo (o «nessuna»).'} senzaGruppo>
         <SelettoreData etichetta="Disponibile dal" facoltativa valore={dal} onCambia={setDal} disabilitato={occupato} />
       </Campo>
       <fieldset className="m-0 flex flex-col gap-2 border-0 p-0"><legend className="p-0 text-text-secondary">Eccezioni</legend>
@@ -176,7 +177,7 @@ function Corpo({ titolo, dati, tutti, chiave, onChiudi, onSalvato }: { titolo: s
           <li key={k} className="flex min-w-0 items-center gap-2"><span className="min-w-0 flex-1 break-words">{nomeLuogo(k)}</span>
             <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={occupato} onClick={() => setLuoghi((l) => l.filter((x) => x !== k))} /></li>
         ))}</ul>
-        <Selettore etichetta="Aggiungi un luogo" valore="" vuoto="Scegli un luogo" opzioni={luoghiAggiungibili} onCambia={(k) => { if (k) setLuoghi((l) => (l.includes(k) ? l : [...l, k])); }} disabilitato={occupato || luoghiAggiungibili.length === 0} />
+        <Selettore etichettaSopra etichetta="Aggiungi un luogo" valore="" vuoto="Scegli un luogo" opzioni={luoghiAggiungibili} onCambia={(k) => { if (k) setLuoghi((l) => (l.includes(k) ? l : [...l, k])); }} disabilitato={occupato || luoghiAggiungibili.length === 0} />
       </fieldset>
       {luoghi.length === 0 && (
         <CampoTesto etichetta="Perché non ha un luogo" valore={motivo} massimo={500} disabilitato={occupato} onCambia={setMotivo} />

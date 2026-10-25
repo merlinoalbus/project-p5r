@@ -227,7 +227,7 @@ export function ObiettivoModal({ partitaId, obiettivo, personaIniziale, onChiudi
             <input type="number" min={1} max={99} className="form-input" value={livelloMin} onChange={(e) => setLivelloMin(e.target.value === '' ? '' : Math.min(99, Math.max(1, Number(e.target.value))))} aria-label="Livello minimo" />
           </label>
           <div className="form-label">
-            <Selettore etichetta="Priorità" valore={String(priorita)} opzioni={PRIORITA.map((p) => ({ chiave: String(p.v), nome: p.l }))} onCambia={(k) => setPriorita(Number(k))} />
+            <Selettore etichettaSopra etichetta="Priorità" valore={String(priorita)} opzioni={PRIORITA.map((p) => ({ chiave: String(p.v), nome: p.l }))} onCambia={(k) => setPriorita(Number(k))} />
           </div>
         </div>
         <label className="form-label">Note

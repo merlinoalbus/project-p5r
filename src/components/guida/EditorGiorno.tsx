@@ -74,8 +74,8 @@ function Corpo({ titolo, dati, data, onChiudi, onSalvato }: { titolo: string; da
     <FinestraModifica titolo={titolo} onChiudi={onChiudi} onSalva={salva} salvabile={sporca} occupato={occupato} sporca={sporca}
       azioniExtra={dati.modificato ? <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina" disabled={occupato} onClick={() => void esegui(() => ripristinaGiornoModificabile(data), 'Giorno ripristinato come nella guida.')} /> : undefined}>
       <SezioneCampi titolo="Meteo">
-        <Selettore etichetta="Meteo di giorno" valore={meteoGiorno} vuoto="Non indicato" opzioni={OPZIONI_METEO} onCambia={(v) => setMeteoGiorno(v as MeteoGiorno | '')} disabilitato={occupato} />
-        <Selettore etichetta="Meteo di sera" valore={meteoSera} vuoto="Non indicato" opzioni={OPZIONI_METEO} onCambia={(v) => setMeteoSera(v as MeteoGiorno | '')} disabilitato={occupato} />
+        <Selettore etichettaSopra etichetta="Meteo di giorno" valore={meteoGiorno} vuoto="Non indicato" opzioni={OPZIONI_METEO} onCambia={(v) => setMeteoGiorno(v as MeteoGiorno | '')} disabilitato={occupato} />
+        <Selettore etichettaSopra etichetta="Meteo di sera" valore={meteoSera} vuoto="Non indicato" opzioni={OPZIONI_METEO} onCambia={(v) => setMeteoSera(v as MeteoGiorno | '')} disabilitato={occupato} />
         <CampoTesto etichetta="Nota sul meteo" largo valore={notaMeteo} massimo={200} disabilitato={occupato} onCambia={setNotaMeteo} />
         <label className="touch campo--largo flex items-center gap-2 testo-13">
           <input type="checkbox" checked={daVerificare} disabled={occupato} onChange={(e) => setDaVerificare(e.target.checked)} />

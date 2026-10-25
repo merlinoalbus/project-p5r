@@ -964,7 +964,7 @@ export function DungeonDettaglioPage() {
                   {!collegamento && d.aree.length > 1
                     ? <div className="min-w-0 flex-1 basis-44">
                         <h2 className="sr-only">{area.nome}</h2>
-                        <Selettore etichettaDentro etichetta={`Infiltrazione ${area.ordine + 1} di ${d.aree.length}`} valore={area.chiave}
+                        <Selettore etichetta={`Infiltrazione ${area.ordine + 1} di ${d.aree.length}`} valore={area.chiave}
                           opzioni={d.aree.map((a) => ({ chiave: a.chiave, nome: `${a.ordine + 1}. ${a.nome}`, dettaglio: completate.has(a.chiave) ? 'completata' : undefined }))} onCambia={scegliInfiltrazione} />
                       </div>
                     : <TitoloSezione variante="display">{area.nome}</TitoloSezione>}

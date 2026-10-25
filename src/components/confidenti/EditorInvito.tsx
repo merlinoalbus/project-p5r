@@ -95,12 +95,12 @@ function EditorInvitoReale({ confidente, invito, onChiudi, onSalvato }: { confid
         <p className="m-0 text-text-muted">Le modifiche valgono per tutte le partite. L’invito si registra solo se le condizioni sono vere.</p>
         {posti.errore && <p role="alert" className="m-0 text-error-testo">{posti.errore} <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void posti.ricarica()} /></p>}
         {invito ? <p className="m-0"><strong className="text-text">Giorno:</strong> {invito.data ? dataLeggibile(invito.data) : '—'} <span className="text-text-muted">(il giorno non si cambia)</span></p> : (
-          <Campo etichetta="Giorno dell’invito" aiuto="Mese e giorno del calendario di gioco: dopo la creazione non si cambia." obbligatorio>
+          <Campo etichetta="Giorno dell’invito" aiuto="Mese e giorno del calendario di gioco: dopo la creazione non si cambia." obbligatorio senzaGruppo>
             <SelettoreData etichetta="Giorno dell’invito" valore={dataNuova} onCambia={setDataNuova} disabilitato={occupato} />
           </Campo>
         )}
-        <Selettore etichetta="Che cosa apre" valore={tipo} opzioni={TIPI.map((t) => ({ chiave: t, nome: NOME_TIPO[t] }))} onCambia={(v) => { setTipo(v as TipoPosto); setPosto(''); }} disabilitato={occupato} ricerca="mai" />
-        <Selettore etichetta="Posto" valore={posto} vuoto="Scegli il posto" opzioni={opzioni} onCambia={setPosto} disabilitato={occupato || (!posti.dati && !posti.errore)} />
+        <Selettore etichettaSopra etichetta="Che cosa apre" valore={tipo} opzioni={TIPI.map((t) => ({ chiave: t, nome: NOME_TIPO[t] }))} onCambia={(v) => { setTipo(v as TipoPosto); setPosto(''); }} disabilitato={occupato} ricerca="mai" />
+        <Selettore etichettaSopra etichetta="Posto" valore={posto} vuoto="Scegli il posto" opzioni={opzioni} onCambia={setPosto} disabilitato={occupato || (!posti.dati && !posti.errore)} />
         <fieldset className="m-0 flex flex-col gap-1 border-0 p-0"><legend className="p-0 text-text-secondary">Condizioni (vuote = sempre)</legend>
           <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} disabilitato={occupato} massimo={20} />
         </fieldset>

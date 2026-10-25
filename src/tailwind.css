@@ -2106,16 +2106,17 @@
    selettore gli passa (EditorAzioneStrutturata, RigaDote, TraduzioniEditor), e la larghezza minima chiesta veniva ignorata.
    Le altre regole del selettore restano dove sono: spostarle cambierebbe la cascata anche per `width`/`display` del compatto. */
 @layer components { .selettore { position:relative; min-width:0; } }
-/* L13 · modelli comuni (1): il selettore è un campo come gli altri — l'etichetta sta SOPRA (`.campo__etichetta`, fuori dal pulsante), il
-   pulsante ha bordo, raggio, fondo e altezza (44 px) di `.form-input`. L'etichetta dentro il pulsante (maiuscoletto sopra il valore) resta
-   solo come variante `etichettaDentro`, per i comandi fitti dove una riga in più romperebbe la barra. */
-.selettore__scelta { position:relative; display:flex; flex-direction:row; align-items:center; width:100%; min-height:44px; padding:8px 30px 8px 12px; border:1px solid var(--color-border-input); border-radius:var(--radius-md); background:var(--color-surface); color:var(--color-text); font:inherit; text-align:left; cursor:pointer; }
-.selettore--con-etichetta { display:flex; flex-direction:column; gap:4px; }
-.selettore--etichetta-dentro .selettore__scelta { flex-direction:column; align-items:flex-start; padding:3px 22px 3px 8px; }
+.selettore__scelta { position:relative; display:flex; flex-direction:column; align-items:flex-start; width:100%; min-height:44px; padding:3px 22px 3px 8px; border:1px solid var(--color-border-input); background:var(--color-bg-tertiary); color:var(--color-text); font:inherit; text-align:left; cursor:pointer; }
 .selettore__scelta:disabled { opacity:1; cursor:default; }
 .selettore__etichetta { font-size:var(--testo-12); text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); line-height:1; }
-.selettore__valore { font-size:var(--testo-15); font-weight:400; line-height:1.2; overflow-wrap:anywhere; }
-.selettore--etichetta-dentro .selettore__valore { font-size:var(--testo-13); }
+.selettore__valore { font-size:var(--testo-13); line-height:1.2; overflow-wrap:anywhere; }
+/* L13 · modelli comuni (1): la forma da CAMPO di modulo, a scelta del chiamante (`etichettaSopra`): l'etichetta sta SOPRA il pulsante
+   (`.campo__etichetta`, fuori dal pulsante) e il pulsante ha bordo, raggio, fondo e altezza (44 px) di `.form-input`. È solo per i selettori
+   che stanno in una griglia di campi (finestre di modifica, form); i selettori nelle righe fitte, nelle barre di filtri e i compatti
+   restano come prima (etichetta maiuscoletto dentro il pulsante, o nessuna etichetta): una riga in più li disallineerebbe dai vicini. */
+.selettore--con-etichetta { display:flex; flex-direction:column; gap:4px; }
+.selettore--con-etichetta .selettore__scelta { flex-direction:row; align-items:center; padding:8px 30px 8px 12px; border-radius:var(--radius-md); background:var(--color-surface); }
+.selettore--con-etichetta .selettore__valore { font-size:var(--testo-15); font-weight:400; }
 .selettore__valore--vuoto { color:var(--color-text-muted); font-style:italic; }
 .selettore__tendina { position:absolute; z-index:30; left:0; top:calc(100% + 2px); width:max(100%, 260px); max-width:min(92vw, 420px); border:1px solid var(--color-border); background:var(--color-bg-secondary); box-shadow:0 8px 24px rgba(0,0,0,0.45); padding:6px; }
 .selettore__campo { width:100%; min-height:44px; margin-bottom:4px; }

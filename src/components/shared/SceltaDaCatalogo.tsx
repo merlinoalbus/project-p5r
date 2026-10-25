@@ -60,7 +60,7 @@ export function SceltaDaCatalogo(props: PropsSceltaDaCatalogo) {
 /** La Persona/Ombra del compendio, per nome, con arcano e livello in grigio. */
 function ScelteDellaPersona({ etichetta = 'Persona del compendio', valore, persone, onCambia, vuoto, disabilitato, inLinea }: PropsPersona) {
   const opzioni = useMemo(() => persone.map((p) => ({ chiave: String(p.id), nome: p.nomeIt, dettaglio: `${p.arcanaNome} · liv. ${p.livello}`, testoRicerca: p.nome })), [persone]);
-  return <Selettore className={inLinea ? 'selettore--in-linea' : undefined} etichetta={etichetta} valore={valore} vuoto={vuoto} ricerca="sempre" opzioni={opzioni} disabilitato={disabilitato} onCambia={onCambia} />;
+  return <Selettore etichettaSopra className={inLinea ? 'selettore--in-linea' : undefined} etichetta={etichetta} valore={valore} vuoto={vuoto} ricerca="sempre" opzioni={opzioni} disabilitato={disabilitato} onCambia={onCambia} />;
 }
 
 /** Il Confidente per nome (con l'arcano in grigio) e, se richiesto, il suo rango. */
@@ -68,7 +68,7 @@ function ScelteDelConfidente({ etichetta = 'Confidente', valore, confidenti, ran
   const conRango = rango !== undefined;
   const ranghi = useMemo(() => Array.from({ length: rangoMassimo }, (_, i) => ({ chiave: String(i + 1), nome: String(i + 1) })), [rangoMassimo]);
   const confidente = (
-    <Selettore className={inLinea ? 'selettore--in-linea' : undefined} etichetta={etichetta} valore={valore} vuoto={vuoto} opzioni={confidenti.map((c) => ({ chiave: c.chiave, nome: c.nome, dettaglio: c.dettaglio }))}
+    <Selettore etichettaSopra className={inLinea ? 'selettore--in-linea' : undefined} etichetta={etichetta} valore={valore} vuoto={vuoto} opzioni={confidenti.map((c) => ({ chiave: c.chiave, nome: c.nome, dettaglio: c.dettaglio }))}
       disabilitato={disabilitato} onCambia={(k) => onCambia(k, k ? rango ?? null : null)} />
   );
   if (!conRango || !valore) return confidente;
@@ -76,7 +76,7 @@ function ScelteDelConfidente({ etichetta = 'Confidente', valore, confidenti, ran
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_7rem] items-end gap-3">
       {confidente}
-      <Selettore etichetta="Rango" valore={rango ? String(rango) : ''} vuoto="nessuno" ricerca="mai" opzioni={ranghi} disabilitato={disabilitato} onCambia={(k) => onCambia(valore, k ? Number(k) : null)} />
+      <Selettore etichettaSopra etichetta="Rango" valore={rango ? String(rango) : ''} vuoto="nessuno" ricerca="mai" opzioni={ranghi} disabilitato={disabilitato} onCambia={(k) => onCambia(valore, k ? Number(k) : null)} />
     </div>
   );
 }

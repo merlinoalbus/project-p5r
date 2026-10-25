@@ -56,7 +56,7 @@ function ModuloOggettoReale({ oggetto, onChiudi, onSalvato }: Props) {
     {errore && <p role="alert" className="m-0 testo-13 text-error-testo">{errore}</p>}
     <SezioneCampi titolo="L’oggetto">
       <CampoTesto etichetta="Nome" obbligatorio largo valore={nome} massimo={300} onCambia={setNome} disabilitato={occupato} />
-      <Selettore etichetta="Categoria" valore={categoria} disabilitato={occupato} opzioni={CATEGORIE_OGGETTO.map((k) => ({ chiave: k, nome: CATEGORIA_OGGETTO[k].nome }))} onCambia={(v) => { if (eCategoriaOggetto(v)) setCategoria(v); }} />
+      <Selettore etichettaSopra etichetta="Categoria" valore={categoria} disabilitato={occupato} opzioni={CATEGORIE_OGGETTO.map((k) => ({ chiave: k, nome: CATEGORIA_OGGETTO[k].nome }))} onCambia={(v) => { if (eCategoriaOggetto(v)) setCategoria(v); }} />
       <CampoTesto etichetta="Sottocategoria" valore={sottocategoria} massimo={100} onCambia={setSottocategoria} disabilitato={occupato} />
       <CampoTesto etichetta="Nome originale" largo valore={originale} massimo={300} onCambia={setOriginale} disabilitato={occupato} />
       <CampoElenco etichetta="Altri nomi" voci={altri} lungo={false} max={300} onCambia={setAltri} disabilitato={occupato} />

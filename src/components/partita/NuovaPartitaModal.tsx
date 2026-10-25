@@ -56,7 +56,7 @@ export function NuovaPartitaModal({ aperta, onChiudi }: Props) {
         <input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="es. Prima partita" autoFocus maxLength={80} />
       </label>
       <div className="form-label">
-        <Selettore etichetta="Difficoltà" valore={difficolta} opzioni={[{ chiave: 'sicura', nome: 'Sicura' }, { chiave: 'facile', nome: 'Facile' }, { chiave: 'normale', nome: 'Normale' }, { chiave: 'difficile', nome: 'Difficile' }, { chiave: 'spietata', nome: 'Spietata' }]} onCambia={(k) => setDifficolta(k as Difficolta)} />
+        <Selettore etichettaSopra etichetta="Difficoltà" valore={difficolta} opzioni={[{ chiave: 'sicura', nome: 'Sicura' }, { chiave: 'facile', nome: 'Facile' }, { chiave: 'normale', nome: 'Normale' }, { chiave: 'difficile', nome: 'Difficile' }, { chiave: 'spietata', nome: 'Spietata' }]} onCambia={(k) => setDifficolta(k as Difficolta)} />
       </div>
       <label className="flex items-center gap-2 testo-13 touch">
         <input type="checkbox" checked={ngPlus} onChange={(e) => setNgPlus(e.target.checked)} /> Nuova Partita +

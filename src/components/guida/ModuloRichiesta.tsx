@@ -185,9 +185,9 @@ function Campi({ titolo, richiesta, iniziale, collocazioni, confidenti, onChiudi
         <CampoTesto etichetta="Scadenza" valore={b.scadenza} massimo={R.breve} aiuto="Come lo scrive la guida: «23 dicembre, estesa al 1 febbraio»." onCambia={(v) => cambia({ scadenza: v })} disabilitato={occupato} />
       </SezioneCampi>
       <SezioneCampi titolo="Dove">
-        <Selettore etichetta="Dedalo" valore={b.dedalo} disabilitato={occupato} opzioni={[{ chiave: NESSUNO, nome: '— nessun dedalo —' }, ...collocazioni.map((d) => ({ chiave: d.chiave, nome: d.nome }))]}
+        <Selettore etichettaSopra etichetta="Dedalo" valore={b.dedalo} disabilitato={occupato} opzioni={[{ chiave: NESSUNO, nome: '— nessun dedalo —' }, ...collocazioni.map((d) => ({ chiave: d.chiave, nome: d.nome }))]}
           onCambia={(v) => cambia({ dedalo: v, areaDedalo: v === b.dedalo ? b.areaDedalo : NESSUNO })} />
-        {b.dedalo && <Selettore etichetta="Area del dedalo" valore={b.areaDedalo} disabilitato={occupato} opzioni={[{ chiave: NESSUNO, nome: '— da collocare —', dettaglio: 'non conta' }, ...aree.map((a) => ({ chiave: a.chiave, nome: a.nome }))]}
+        {b.dedalo && <Selettore etichettaSopra etichetta="Area del dedalo" valore={b.areaDedalo} disabilitato={occupato} opzioni={[{ chiave: NESSUNO, nome: '— da collocare —', dettaglio: 'non conta' }, ...aree.map((a) => ({ chiave: a.chiave, nome: a.nome }))]}
           onCambia={(v) => cambia({ areaDedalo: v })} />}
       </SezioneCampi>
       <SezioneCampi titolo="Il bersaglio">

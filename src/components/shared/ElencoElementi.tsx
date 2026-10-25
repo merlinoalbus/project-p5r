@@ -7,14 +7,15 @@
 // vale col dito come col mouse; `aria-pressed` dice lo stato.
 //
 // **Il formato salvato non cambia**: resta un elenco di testi. Una tessera accesa è una voce del solo nome dell'elemento («Fuoco»,
-// «Armi da fuoco»: lo riconosce `chiaveElementoDaTesto`); accenderla aggiunge il nome canonico (`NOME_ELEMENTO`), spegnerla toglie le voci che
+// «Armi da fuoco»: lo riconosce `elementoPuro`, per corrispondenza dell'INTERO testo con il nome o una forma storica, mai per prefisso); accenderla aggiunge il nome canonico (`NOME_ELEMENTO`), spegnerla toglie le voci che
 // ne portano il solo nome. Le voci che NON sono un elemento puro — «Fuoco (Sig.ra Takase)», «Ghiaccio (annulla)», «Quasi tutti gli elementi
 // tranne Sacro» — restano in una riga a parte, ognuna con il suo campo e «Togli», e il loro testo non si tocca da sé: la guida le ha scritte
 // con una nota che l'elemento da solo perderebbe (la conversione in dato strutturato è un'altra ondata, con i suoi controlli).
 // ============================================================
 
-import { ELEMENTI_AFFINITA, NOME_ELEMENTO, chiaveElementoDaTesto, type ChiaveElemento } from '../../../shared/elementi';
+import { ELEMENTI_AFFINITA, NOME_ELEMENTO, type ChiaveElemento } from '../../../shared/elementi';
 import { coloreElemento } from '../../utils/elementi';
+import { piatto } from '../../utils/testo';
 import { AssetImg } from './AssetImg';
 import { IconaAzione } from './IconaAzione';
 import { PulsanteVisivo } from './PulsanteVisivo';
@@ -31,11 +32,26 @@ interface Props {
   maxVoci?: number;
 }
 
-/** L'elemento che una voce nomina da solo (senza note fra parentesi), o null. «Divino» non ha tessera (nessuna affinità lo ha): la sua voce resta fra quelle a testo. */
+/** I testi che valgono un elemento INTERO (nome canonico e forme storiche della guida), confrontati senza accenti né maiuscole. Il
+ *  riconoscimento è per corrispondenza dell'intero testo, mai per prefisso: «Fuoco e Ghiaccio» o «Quasi tutti gli elementi tranne Fisico»
+ *  NON sono un elemento puro e restano voci a testo (nessuna voce sparisce e nessuna si perde spegnendo una tessera). */
+const FORME_INTERE: ReadonlyArray<readonly [ChiaveElemento, readonly string[]]> = [
+  ['phys', ['fisico', 'danno fisico', 'danni fisici', 'attacco fisico', 'attacchi fisici']],
+  ['gun', ['arma da fuoco', 'armi da fuoco', 'arma', 'armi']],
+  ['fire', ['fuoco', 'fiamma', 'fiamme']],
+  ['ice', ['ghiaccio', 'gelo']],
+  ['electric', ['elettricita', 'elettrico', 'tuono']],
+  ['wind', ['vento', 'aria']],
+  ['psy', ['psicocinesi', 'psichico', 'psi']],
+  ['nuclear', ['nucleare', 'atomico']],
+  ['bless', ['sacro', 'benedizione', 'luce']],
+  ['curse', ['maledizione', 'oscurita', 'tenebre']],
+];
+
+/** L'elemento che una voce nomina da solo (nessuna nota, nessun altro testo), o null. «Divino» non ha tessera (nessuna affinità lo ha): la sua voce resta fra quelle a testo. */
 function elementoPuro(voce: string): ChiaveElemento | null {
-  if (/\(/.test(voce)) return null;
-  const chiave = chiaveElementoDaTesto(voce);
-  return chiave === 'almighty' ? null : chiave;
+  const testo = piatto(voce).trim().replace(/[.;:]+$/, '').replace(/\s+/g, ' ');
+  return FORME_INTERE.find(([, forme]) => forme.includes(testo))?.[0] ?? null;
 }
 
 /** Una tessera per ogni elemento (icona e colore), acceso se una voce lo nomina da solo; sotto, le voci che non sono un elemento puro. */

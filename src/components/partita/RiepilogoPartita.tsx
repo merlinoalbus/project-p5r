@@ -81,10 +81,10 @@ export function RiepilogoPartita({ partita, onNaviga }: Props) {
             <input type="number" min={1} max={99} className="form-input" value={livello} onChange={(e) => setLivello(Number(e.target.value))} />
           </label>
           {/* L13: la data di gioco si sceglie (mese e giorno), non si digita; si salva come «MM-GG» o `null` («nessuna») come prima */}
-          <Campo etichetta="Data di gioco">
+          <Campo etichetta="Data di gioco" senzaGruppo>
             <SelettoreData etichetta="Data di gioco" facoltativa valore={dataGioco} onCambia={setDataGioco} />
           </Campo>
-          <Selettore etichetta="Difficoltà" valore={difficolta} opzioni={DIFFICOLTA.map((d) => ({ chiave: d.v, nome: d.l }))} onCambia={(k) => setDifficolta(k as Difficolta)} />
+          <Selettore etichettaSopra etichetta="Difficoltà" valore={difficolta} opzioni={DIFFICOLTA.map((d) => ({ chiave: d.v, nome: d.l }))} onCambia={(k) => setDifficolta(k as Difficolta)} />
         </div>
         <label className="flex items-center gap-2 testo-13 touch">
           <input type="checkbox" checked={ngPlus} onChange={(e) => setNgPlus(e.target.checked)} /> Nuova Partita +

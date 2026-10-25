@@ -39,11 +39,14 @@ interface PropsCampo {
   /** Occupa tutta la riga della griglia a due colonne (`.griglia-campi`, `SezioneCampi`). */
   largo?: boolean;
   className?: string;
+  /** Solo per la forma a nodo: il controllo composto è già un gruppo con lo stesso nome (`SelettoreData`); il `Campo` non ne apre un
+   *  secondo, per non far annunciare due volte lo stesso gruppo. L'etichetta resta visibile e l'aiuto resta sotto. */
+  senzaGruppo?: boolean;
   children: ReactNode | ((p: ProprietaControllo) => ReactNode);
 }
 
 /** Un campo con la sua etichetta, l'aiuto e l'errore; vedi l'intestazione del file per le due forme dei figli. */
-export function Campo({ etichetta, aiuto, errore, obbligatorio, largo, className, children }: PropsCampo) {
+export function Campo({ etichetta, aiuto, errore, obbligatorio, largo, className, senzaGruppo, children }: PropsCampo) {
   const id = useId();
   const idAiuto = `${id}-aiuto`;
   const idErrore = `${id}-errore`;
@@ -70,7 +73,7 @@ export function Campo({ etichetta, aiuto, errore, obbligatorio, largo, className
     );
   }
   return (
-    <div className={classe} role="group" aria-labelledby={`${id}-etichetta`} aria-describedby={descrizione || undefined}>
+    <div className={classe} {...(senzaGruppo ? {} : { role: 'group', 'aria-labelledby': `${id}-etichetta`, 'aria-describedby': descrizione || undefined })}>
       <span id={`${id}-etichetta`} className="campo__etichetta">{etichetta}{asterisco}</span>
       {children}
       {note}

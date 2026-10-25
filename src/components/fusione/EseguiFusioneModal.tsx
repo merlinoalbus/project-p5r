@@ -88,11 +88,11 @@ export function EseguiFusioneModal({ partitaId, possedutaIds, risultatoId, onChi
               </span>
             </label>
             <div className="form-label">
-              <Selettore etichetta="Tratto" valore={trattoScelto === null ? '' : String(trattoScelto)} opzioni={a.tratti.map((t) => ({ chiave: String(t.id), nome: t.nomeIt, dettaglio: t.da === null ? 'proprio del risultato' : undefined }))} onCambia={(k) => setTratto(k ? Number(k) : null)} />
+              <Selettore etichettaSopra etichetta="Tratto" valore={trattoScelto === null ? '' : String(trattoScelto)} opzioni={a.tratti.map((t) => ({ chiave: String(t.id), nome: t.nomeIt, dettaglio: t.da === null ? 'proprio del risultato' : undefined }))} onCambia={(k) => setTratto(k ? Number(k) : null)} />
             </div>
           </div>
           <div>
-            <div className="form-label">Skill da ereditare ({skill.length}/{a.slotScelti}{a.allarme ? ', tutti gli slot con l\'Allarme' : ', una la assegna il gioco'})</div>
+            <div className="form-label mb-1.5">Skill da ereditare ({skill.length}/{a.slotScelti}{a.allarme ? ', tutti gli slot con l\'Allarme' : ', una la assegna il gioco'})</div>
             {ereditabili.length === 0 && <p className="m-0 text-text-muted">Nessuna skill ereditabile da questi ingredienti.</p>}
             <ul className="m-0 p-0 list-none flex flex-wrap gap-1.5 mt-1" aria-label="Skill ereditabili">
               {ereditabili.map((c) => (
