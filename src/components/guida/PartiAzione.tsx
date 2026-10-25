@@ -26,6 +26,7 @@ import { IconaAzione } from '../shared/IconaAzione';
 import { IconaSpillo } from '../mappe/IconaSpillo';
 import { PulsanteGuidaQuiz } from './GuidaQuiz';
 import { fraseMovimentoYen } from '../../../shared/yenAutomatici';
+import { fraseYenInParteNelSaldo } from '../../../shared/riepilogoEffetti';
 
 /** Ciò che i cartellini di una riga d'azione leggono. */
 // L3: le infiltrazioni della voce servono a «Entra» (il cartellino del Palazzo apre l'infiltrazione giusta, `collegamentoAzione`)
@@ -142,10 +143,10 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
         </span>
       ))}
       {/* gli effetti con yen il cui denaro era già nel saldo da prima (applicati da una spunta di prima, o segnati togliendola): la spunta non lo
-          muove. Tutti gli effetti con yen della voce, o solo una parte (gli altri hanno il loro chip, o li muoverà la spunta) */}
+          muove. Tutti gli effetti con yen della voce, o solo una parte, nominata (gli altri hanno il loro chip, o li muoverà la spunta) */}
       {a.fatta && a.yenGiaNelSaldo && <span className="testo-12 text-text-muted text-pretty">{a.yenGiaNelSaldo.tutti
         ? 'Gli yen di questa voce erano già nel saldo da prima che si muovessero da soli: la spunta non li muove.'
-        : 'Gli yen degli effetti segnati prima che si muovessero da soli erano già nel saldo: la spunta non li muove.'}</span>}
+        : fraseYenInParteNelSaldo(a.yenGiaNelSaldo.nomi)}</span>}
     </span>
     {/* che cosa dà il gioco, per gruppi (richiesta dell'utente del 2026-10-25, «formattarlo in modo adeguato, per tutti gli acquisti»): le Doti
         si segnano a mano (scelta dell'utente, 2026-09-30); gli yen (decisione 18) si muovono da soli spuntando la voce, e il riepilogo lo dice */}

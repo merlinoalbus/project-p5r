@@ -75,10 +75,28 @@ const NOTE_YEN: Record<string, string> = {
   richieste: 'La ricompensa in yen di una Richiesta entra da sola nel saldo quando la Richiesta risulta completata.',
   pesca: 'La quota di una visita nuova si scala da sola dal saldo, mai sotto zero.',
 };
-/** Decisione 18: gli effetti del gruppo nati prima che gli yen si muovessero da soli, tutti o in parte (il loro denaro era già nel saldo). */
+/** Decisione 18: gli effetti del gruppo nati prima che gli yen si muovessero da soli, tutti (il loro denaro era già nel saldo). */
 const YEN_GIA_NEL_SALDO = 'I loro yen erano già nel saldo da prima che si muovessero da soli: la spunta non li muove.';
 const YEN_DELLA_VOCE_GIA_NEL_SALDO = 'Erano già nel saldo da prima che gli yen si muovessero da soli: la spunta non li muove.';
-const YEN_IN_PARTE_NEL_SALDO = 'Quelli segnati prima che gli yen si muovessero da soli erano già nel saldo: la spunta non li muove.';
+
+/** «A», «B» e «C» (senza ripetere un nome uguale); `virgolette: false` per gli importi («Ricevuti ¥1.000»). */
+export function elencoNomi(nomi: readonly string[], virgolette = true): string {
+  const u = [...new Set(nomi.filter(Boolean))].map((x) => (virgolette ? `«${x}»` : x));
+  return u.length > 1 ? `${u.slice(0, -1).join(', ')} e ${u[u.length - 1]}` : u[0] ?? '';
+}
+/**
+ * Decisione 18, solo una parte degli effetti con yen era già nel saldo da prima: la frase li NOMINA (revisione dei testi del 26/10: «quelli
+ * segnati prima» non diceva quali), così si capisce quali yen la spunta non muove e quali sì. Vuota senza nomi.
+ */
+export function fraseYenInParteNelSaldo(nomi: readonly string[]): string {
+  const elenco = elencoNomi(nomi);
+  return elenco ? `Gli yen di ${elenco} erano già nel saldo da prima che si muovessero da soli: la spunta non li muove.` : '';
+}
+/** Come `fraseYenInParteNelSaldo`, per il gruppo «Yen», i cui nomi sono gli importi stessi («Ricevuti ¥1.000 erano già nel saldo…»). */
+const fraseImportiInParteNelSaldo = (nomi: readonly string[]): string => {
+  const elenco = elencoNomi(nomi, false);
+  return elenco ? `${elenco} erano già nel saldo da prima che gli yen si muovessero da soli: la spunta non li muove.` : '';
+};
 
 /** Il riepilogo nella partita. */
 export interface OpzioniRiepilogoEffetti {
@@ -88,19 +106,37 @@ export interface OpzioniRiepilogoEffetti {
 }
 
 /**
+ * Il nome con cui i testi degli yen già nel saldo citano un effetto con yen, lo stesso delle righe del riepilogo: l'articolo o la consumazione,
+ * l'attività del turno, il film, la Richiesta, gli yen con il loro importo, la sessione di pesca. Vuoto per un effetto senza yen.
+ */
+export function nomeEffettoConYen(e: EffettoVoce, n: NomiRiepilogoEffetti): string {
+  switch (e.tipo) {
+    case 'articolo': return n.frase.articolo(e.articolo)?.nome ?? 'Articolo';
+    case 'acquisto': return n.frase.articolo(e.articolo)?.nome ?? 'Aojiru';
+    case 'lettura': case 'turno': return partiEffettoAzione(e, n.azione).nome;
+    case 'yen': return `${e.importo > 0 ? 'Ricevuti' : 'Spesi'} ${yen(e.importo)}`;
+    case 'richiesta': return n.frase.richiesta(e.richiesta) ?? 'Richiesta';
+    case 'pesca': return 'Sessione a Ichigaya';
+    default: return '';
+  }
+}
+
+/**
  * Il riepilogo per gruppi di che cosa dà la voce: i gruppi nell'ordine in cui compare il loro primo effetto, le righe nell'ordine degli
  * effetti. Gli articoli si raggruppano per negozio, con le copie dello stesso articolo sommate (`contoArticoli`) e il totale. Lista vuota
  * senza effetti. La nota di un gruppo con yen dice che cosa ne fa la spunta, guardando TUTTI i suoi effetti (non l'ultimo).
  */
 export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRiepilogoEffetti, opz: OpzioniRiepilogoEffetti = {}): GruppoRiepilogoEffettiDto[] {
   const gruppi = new Map<string, GruppoRiepilogoEffettiDto>();
-  /** Per ogni gruppo con yen: quanti effetti ne portano e quanti erano già nel saldo da prima. */
-  const yenDelGruppo = new Map<string, { effetti: number; giaNelSaldo: number }>();
+  /** Per ogni gruppo con yen: quanti effetti ne portano e i nomi di quelli già nel saldo da prima. */
+  const yenDelGruppo = new Map<string, { effetti: number; giaNelSaldo: string[] }>();
+  const giaNelSaldo = (indice: number): boolean => opz.yenGiaNelSaldo?.has(indice) === true;
   const conYen = (chiave: string, indice: number): void => {
-    const y = yenDelGruppo.get(chiave) ?? { effetti: 0, giaNelSaldo: 0 };
-    yenDelGruppo.set(chiave, { effetti: y.effetti + 1, giaNelSaldo: y.giaNelSaldo + (opz.yenGiaNelSaldo?.has(indice) ? 1 : 0) });
+    const y = yenDelGruppo.get(chiave) ?? { effetti: 0, giaNelSaldo: [] };
+    yenDelGruppo.set(chiave, { effetti: y.effetti + 1, giaNelSaldo: giaNelSaldo(indice) ? [...y.giaNelSaldo, nomeEffettoConYen(effetti[indice]!, n)] : y.giaNelSaldo });
   };
-  /** I turni della voce, per la loro nota: con paga (e se variabile), senza paga (costo dell'attività o della sfida). */
+  /** I turni della voce i cui yen la spunta muove (non quelli già nel saldo da prima), per la loro nota: con paga (e se variabile), senza paga
+   *  (costo dell'attività o della sfida). Un turno già nel saldo non entra qui: la nota non promette per lui un movimento che non ci sarà. */
   const turni = { conPaga: false, pagaVariabile: false, senzaPaga: false };
   /** Il gruppo `chiave`, creato al primo effetto che lo usa. */
   const gruppo = (chiave: string, titolo?: string): GruppoRiepilogoEffettiDto => {
@@ -148,8 +184,11 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
         const testoPaga = paga ? `paga ${yen(paga.yen)}${paga.massima && paga.massima > paga.yen ? ` (fino a ${yen(paga.massima)})` : ''}` : '';
         riga('turni', p.nome, [p.dettaglio, testoPaga].filter(Boolean).join(' · ') || undefined);
         // decisione 18: la paga base entra da sola con il turno; il costo di un'attività a pagamento (o della sfida scelta) si scala, mai sotto
-        // zero. La nota guarda tutti i turni della voce (un lavoro pagato e un'attività a pagamento nella stessa voce: tutte e due le frasi)
-        if (paga) { turni.conPaga = true; if (paga.massima && paga.massima > paga.yen) turni.pagaVariabile = true; } else turni.senzaPaga = true;
+        // zero. La nota guarda tutti i turni della voce i cui yen la spunta muove (un lavoro pagato e un'attività a pagamento nella stessa voce:
+        // tutte e due le frasi); un turno già nel saldo da prima lo nomina la frase «in parte», mai la promessa della paga o del costo
+        if (!giaNelSaldo(i)) {
+          if (paga) { turni.conPaga = true; if (paga.massima && paga.massima > paga.yen) turni.pagaVariabile = true; } else turni.senzaPaga = true;
+        }
         conYen('turni', i);
         break;
       }
@@ -168,7 +207,7 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
     }
   }
   // decisione 18: la nota degli yen di ogni gruppo, una volta sola e su tutti i suoi effetti; se erano già nel saldo da prima, lo dice al posto
-  // della promessa di un movimento (in parte: la promessa e l'eccezione)
+  // della promessa di un movimento (in parte: la promessa per gli altri e l'eccezione, con i nomi degli effetti già nel saldo)
   const notaTurni = [
     ...(turni.conPaga ? [`La paga base di un lavoro entra da sola nel saldo.${turni.pagaVariabile ? ' Il di più che il gioco può dare, fino alla paga massima, non entra da solo.' : ''}`] : []),
     ...(turni.senzaPaga ? ['Se un’attività o la sfida scelta costa, il prezzo si scala da solo dal saldo, mai sotto zero.'] : []),
@@ -177,7 +216,9 @@ export function riepilogoEffettiVoce(effetti: readonly EffettoVoce[], n: NomiRie
     const g = gruppi.get(chiave);
     if (!g) continue;
     const normale = chiave === 'turni' ? notaTurni : NOTE_YEN[chiave.startsWith('acquisti:') ? 'acquisti' : chiave];
-    const notaYen = y.giaNelSaldo === y.effetti ? (chiave === 'yen' ? YEN_DELLA_VOCE_GIA_NEL_SALDO : YEN_GIA_NEL_SALDO) : [normale, y.giaNelSaldo > 0 ? YEN_IN_PARTE_NEL_SALDO : ''].filter(Boolean).join(' ');
+    const tutti = y.giaNelSaldo.length === y.effetti;
+    const eccezione = chiave === 'yen' ? fraseImportiInParteNelSaldo(y.giaNelSaldo) : fraseYenInParteNelSaldo(y.giaNelSaldo);
+    const notaYen = tutti ? (chiave === 'yen' ? YEN_DELLA_VOCE_GIA_NEL_SALDO : YEN_GIA_NEL_SALDO) : [normale, eccezione].filter(Boolean).join(' ');
     const nota = [g.nota, notaYen].filter(Boolean).join(' ');
     if (nota) g.nota = nota;
   }

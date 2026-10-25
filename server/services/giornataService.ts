@@ -32,7 +32,7 @@ import { riferimentiOggettiPerFonti } from './catalogoOggettiLetture.js';
 import { apertureDichiarabili, apertureNegliEffetti, eVisitaMemento, verificaApertureScelte } from './apertureDedaliService.js';
 import { leggiEffettiVoce, leggiEffettiVocePerMostrare, salvaEffettiVoce, inizializzaEffettiVoce, copiaEffettiVoce, preparaRimozioneEffettiVoce, applicaEffettiVoce, annullaEffettiVoce, leggiRicevuteEffettiVoce, applicaEffettoStorico, verificaYenVoce } from './motoreDiario.js';
 import { eEffettoConNomi, eEffettoDiStato, fraseEffettoConNomi, normalizzaEffettiVoce, type EffettoLegacyVoce, type EffettoVoce, type NomiFraseEffetto, type StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
-import { riepilogoEffettiVoce, type GruppoRiepilogoEffettiDto } from '../../shared/riepilogoEffetti.js';
+import { nomeEffettoConYen, riepilogoEffettiVoce, type GruppoRiepilogoEffettiDto, type NomiRiepilogoEffetti } from '../../shared/riepilogoEffetti.js';
 import { nomeDote } from '../../shared/doti.js';
 import { conCestino, type ViciniCestino } from './cestinoService.js';
 import { leggiRicevutaEffettiAzione } from './effettiAzioneService.js';
@@ -88,13 +88,17 @@ const nomeNegozio = (chiave: string): string | undefined => (prepared('SELECT no
  * per tutti gli acquisti»). Il totale degli articoli sta nel riepilogo (gruppo «Acquisti · negozio»), non più in una riga «In tutto» in coda.
  */
 function cosaDaLaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione, yenGiaNelSaldo: ReadonlySet<string> = new Set()): { testo: string[]; riepilogo: GruppoRiepilogoEffettiDto[] } {
-  const nomiFrase = nomiFraseEffetto();
+  const nomiRiepilogo = nomiDelRiepilogo(nomi);
   // L13 (decisione 18): gli effetti i cui yen erano già nel saldo da prima (per posizione, come gli effetti del riepilogo)
   const vecchi = new Set(fonte.effetti.flatMap((x, i) => (yenGiaNelSaldo.has(x.uid) ? [i] : [])));
   return {
-    testo: testoEffettiDellaFonte(fonte, nomi, nomiFrase, yenGiaNelSaldo),
-    riepilogo: riepilogoEffettiVoce(fonte.effetti.map((x) => x.effetto), { frase: nomiFrase, azione: nomi, negozio: nomeNegozio, pagaTurno: pagaDelTurno }, { yenGiaNelSaldo: vecchi }),
+    testo: testoEffettiDellaFonte(fonte, nomi, nomiRiepilogo.frase, yenGiaNelSaldo),
+    riepilogo: riepilogoEffettiVoce(fonte.effetti.map((x) => x.effetto), nomiRiepilogo, { yenGiaNelSaldo: vecchi }),
   };
+}
+/** I nomi del riepilogo e dei testi degli yen già nel saldo (`nomeEffettoConYen`): gli stessi per la nota del gruppo e per la voce. */
+function nomiDelRiepilogo(nomi: NomiEffettiAzione): NomiRiepilogoEffetti {
+  return { frase: nomiFraseEffetto(), azione: nomi, negozio: nomeNegozio, pagaTurno: pagaDelTurno };
 }
 /**
  * L13 (decisione 18): vero se l'effetto porta yen che la spunta muoverebbe (un articolo con il prezzo, la consumazione, la pesca, gli yen, il
@@ -112,6 +116,12 @@ function effettoConYen(e: EffettoVoce): boolean {
 /** L'effetto come lo legge la nozione degli yen già nel saldo: l'attività del turno e la Richiesta sono le cause vere dei loro yen. */
 function effettoPerYen(uid: string, e: EffettoVoce): EffettoPerYen {
   return { uid, tipo: e.tipo, chiave: e.tipo === 'turno' ? e.attivita : e.tipo === 'richiesta' ? e.richiesta : null };
+}
+/** Il campo `yenGiaNelSaldo` della voce: gli effetti con yen già nel saldo da prima, nell'ordine degli effetti, con i loro nomi (le frasi «in
+ *  parte» li nominano) e se sono tutti quelli con yen. */
+function datiYenGiaNelSaldo(conYen: ReadonlyArray<{ uid: string; effetto: EffettoVoce }>, gia: ReadonlySet<string>, nomi: NomiEffettiAzione): NonNullable<AzionePercorsoDto['yenGiaNelSaldo']> {
+  const n = nomiDelRiepilogo(nomi), vecchi = conYen.filter((x) => gia.has(x.uid));
+  return { effetti: vecchi.map((x) => x.uid), nomi: vecchi.map((x) => nomeEffettoConYen(x.effetto, n)), tutti: vecchi.length === conYen.length };
 }
 /** La frase di ogni effetto della fonte unica, anche acquisto e pesca, con i nomi degli elementi. */
 function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzione, nomiFrase: NomiFraseEffetto, yenGiaNelSaldo: ReadonlySet<string>): string[] {
@@ -261,7 +271,7 @@ function voceDto(r: RigaVoce, ctx: Contesto): AzionePercorsoDto {
   return {
     ...v, effettiVoce: fonte, ricevuteEffetti, ...(daApplicare > 0 ? { daApplicare } : {}),
     // decisione 18: la scelta dell'esito di un turno di prima dice che il prezzo della sfida era già nel saldo (la spunta non lo scala)
-    ...(scelteEsito.length ? { scelteEsito: scelteEsito.map((s) => (s.tipo === 'turno' && yenGiaNelSaldo.has(s.effettoUid) ? { ...s, yenGiaNelSaldo: true as const } : s)) } : {}), ...(yenAutomatici.length ? { yenAutomatici } : {}), ...(yenGiaNelSaldo.size ? { yenGiaNelSaldo: { effetti: [...yenGiaNelSaldo], tutti: yenGiaNelSaldo.size === conYen.length } } : {}),
+    ...(scelteEsito.length ? { scelteEsito: scelteEsito.map((s) => (s.tipo === 'turno' && yenGiaNelSaldo.has(s.effettoUid) ? { ...s, yenGiaNelSaldo: true as const } : s)) } : {}), ...(yenAutomatici.length ? { yenAutomatici } : {}), ...(yenGiaNelSaldo.size ? { yenGiaNelSaldo: datiYenGiaNelSaldo(conYen, yenGiaNelSaldo, ctx.nomi) } : {}),
     ...(aperture.length ? { apertureDedali: aperture } : {}), ...avvisiDisponibilitaDellaVoce(r), ...nomeAttualeDelRiferimento(r, v.riferimento), oggettoRiferimento, oggettiCitati: [...oggettiCitati.values()], ...campiCosaDa(spuntabile ? cosaDaLaFonte(fonte, ctx.nomi, yenGiaNelSaldo) : null),
     fatta: spuntabile && ctx.fatte.has(r.uid), effetti: ctx.fatte.get(r.uid) ?? null,
     stato: ctx.conf && spuntabile ? statoAzione(v, ctx.conf, ctx.partita) : null, mappa: mappaAzione(v),

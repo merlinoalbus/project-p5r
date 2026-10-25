@@ -32,7 +32,8 @@
 //     della spunta né dagli effetti di adesso. L'effetto è «già nel saldo da prima» solo se nessun movimento è in vigore per la sua causa vera
 //     (`voce:effetto`; i turni che ha registrato; la sua Richiesta; le proposte «Applica» di prima ancora in sospeso) E la spunta lo aveva
 //     applicato prima degli yen automatici (la ricevuta dell'effetto o lo stato che ha segnato, nati prima; per le spunte di prima delle ricevute
-//     per effetto, la spunta stessa, salvo una proposta di raccordo aperta, che prova che l'effetto non è stato applicato) o è segnato fuori
+//     per effetto, la spunta stessa, salvo una proposta di raccordo aperta o l'effetto aggiunto alla voce dopo gli yen automatici, letto dal
+//     registro delle operazioni sugli effetti: tutte e due provano che l'effetto non è stato applicato) o è segnato fuori
 //     registro da una tale spunta tolta. Un effetto con la proposta di raccordo aperta, o raccordato dopo (la sua ricevuta è nata dopo; una
 //     versione nuova confermata supera anche il segno, `superaYenFuoriRegistro`), muove i suoi yen come sempre. La usano l'annullo (il segno),
 //     la spunta (i turni da scartare) e i testi della voce;
@@ -153,18 +154,52 @@ function turniDellEffetto(p: number, voceUid: string, e: EffettoPerYen): string[
 /**
  * Vero se la spunta in piedi aveva applicato l'effetto prima degli yen automatici: la sua ricevuta in vigore è nata prima (una ricevuta nata
  * dopo è una spunta rifatta o un raccordo confermato dopo), o lo stato che ha segnato (l'articolo comprato, la Richiesta, …) è nato prima.
- * Le spunte di prima delle ricevute per effetto non hanno né l'una né l'altro: lì vale la spunta stessa, nata prima, salvo una proposta di
- * raccordo ancora aperta per l'effetto, che prova che la spunta non l'aveva applicato (un effetto aggiunto o cambiato dopo, da confermare).
+ * Le spunte di prima delle ricevute per effetto non hanno né l'una né l'altro: lì vale la spunta stessa, nata prima, salvo due prove che la
+ * spunta non l'aveva applicato: una proposta di raccordo ancora aperta per l'effetto (un effetto aggiunto o cambiato dopo, da confermare), o
+ * l'effetto aggiunto alla voce dopo gli yen automatici (`effettiAggiuntiDopo`, dal registro delle operazioni sugli effetti: un articolo o una
+ * Richiesta, che non hanno proposta di raccordo, aggiunti dopo a una voce spuntata prima).
  */
-function applicatoPrimaDegliYenAutomatici(p: number, voceUid: string, effettoUid: string, inizio: string): boolean {
+function applicatoPrimaDegliYenAutomatici(p: number, voceUid: string, effettoUid: string, inizio: string, aggiuntiDopo: () => ReadonlySet<string>): boolean {
   const primaDi = (quando: string): boolean => quando < inizio;
   const ricevuta = prepared('SELECT applicato_il FROM utente.effetto_applicato WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ? AND annullato_il IS NULL').get(p, voceUid, effettoUid) as { applicato_il: string } | undefined;
   if (ricevuta) return primaDi(ricevuta.applicato_il);
   const stato = prepared('SELECT applicato_il FROM utente.effetto_stato_voce WHERE partita_id = ? AND voce_uid = ? AND effetto_uid = ?').get(p, voceUid, effettoUid) as { applicato_il: string } | undefined;
   if (stato) return primaDi(stato.applicato_il);
   const spunta = prepared('SELECT fatta_at FROM utente.spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').get(p, voceUid) as { fatta_at: string } | undefined;
-  if (!spunta || !primaDi(spunta.fatta_at)) return false;
+  if (!spunta || !primaDi(spunta.fatta_at) || aggiuntiDopo().has(effettoUid)) return false;
   return !prepared("SELECT 1 FROM utente.da_applicare WHERE partita_id = ? AND causa_tipo = 'voce' AND causa_chiave = ? AND tipo = 'effetto-voce' AND stato = 'aperta'").get(p, `${voceUid}:${effettoUid}`);
+}
+/** Gli uid degli effetti di una porzione del registro delle operazioni: la lista degli effetti, o un oggetto che la contiene in `effetti` (lo
+ *  stato della fonte, la decisione su un candidato, il registro delle migrazioni). Null se la forma non è riconoscibile. */
+function uidDegliEffetti(x: unknown, profondita = 0): string[] | null {
+  if (Array.isArray(x)) return x.flatMap((e) => (e && typeof e === 'object' && typeof (e as { uid?: unknown }).uid === 'string' ? [(e as { uid: string }).uid] : []));
+  if (profondita < 2 && x && typeof x === 'object' && 'effetti' in x) return uidDegliEffetti((x as { effetti: unknown }).effetti, profondita + 1);
+  return null;
+}
+/** Vero se la porzione «prima» del registro è una fonte ancora da convertire (il testo legacy): convertirla non aggiunge effetti nuovi nel gioco,
+ *  li scrive come dati (i tre libri della revisione della 049 sono di questo tipo). */
+function fonteDaConvertire(x: unknown): boolean {
+  if (!x || typeof x !== 'object') return false;
+  const stato = (x as { stato?: unknown }).stato ?? ((x as { effetti?: unknown }).effetti as { stato?: unknown } | null | undefined)?.stato;
+  return typeof stato === 'string' && stato !== 'convertita';
+}
+/**
+ * Gli effetti aggiunti alla voce dopo che gli yen si muovono da soli, dal registro delle operazioni sugli effetti (`main.operazione_effetti_voce`,
+ * scritto da ogni salvataggio, decisione su un candidato e migrazione che aggiunge un effetto): un uid assente in `prima_json` e presente in
+ * `dopo_json` di un'operazione nata da `inizio` in poi. Una conversione della fonte legacy non conta (l'effetto c'era già, come testo). Una riga
+ * del registro illeggibile ferma il gesto (`registro-yen-illeggibile`): niente si muove alla cieca.
+ */
+function effettiAggiuntiDopo(voceUid: string, inizio: string): Set<string> {
+  const aggiunti = new Set<string>();
+  for (const r of prepared('SELECT prima_json, dopo_json FROM main.operazione_effetti_voce WHERE voce_uid = ? AND creata_il >= ? ORDER BY creata_il, rowid').all(voceUid, inizio) as Array<{ prima_json: string; dopo_json: string }>) {
+    const prima = leggiRegistroYen(r.prima_json, 'Il registro delle operazioni sugli effetti'), dopo = leggiRegistroYen(r.dopo_json, 'Il registro delle operazioni sugli effetti');
+    if (fonteDaConvertire(prima)) continue;
+    const primaUid = uidDegliEffetti(prima), dopoUid = uidDegliEffetti(dopo);
+    if (primaUid === null || dopoUid === null) throw httpErrors.conflict('registro-yen-illeggibile', 'Il registro delle operazioni sugli effetti non è leggibile: gli yen della voce non si possono ricavare.');
+    const c = new Set(primaUid);
+    for (const u of dopoUid) if (!c.has(u)) aggiunti.add(u);
+  }
+  return aggiunti;
 }
 /**
  * LA nozione (decisione 18): gli yen dell'effetto della voce erano già nel saldo da prima che si muovessero da soli, e la spunta non li muove.
@@ -176,21 +211,24 @@ function applicatoPrimaDegliYenAutomatici(p: number, voceUid: string, effettoUid
  * L'effetto «Richiesta» ha come causa vera la sua Richiesta: vale ciò che ne dice la Richiesta (`statoYenRichiesta`, completata prima o segnata
  * togliendola), così la voce e la pagina delle Richieste dicono la stessa cosa.
  */
-function yenDellEffettoGiaNelSaldo(p: number, voceUid: string, e: EffettoPerYen, inizio: string): boolean {
+function yenDellEffettoGiaNelSaldo(p: number, voceUid: string, e: EffettoPerYen, inizio: string, aggiuntiDopo: () => ReadonlySet<string>): boolean {
   if (e.tipo === 'richiesta') return e.chiave !== null && !yenPropostiInSospeso(p, 'richiesta', e.chiave) && statoYenRichiesta(p, e.chiave) === 'fuori-registro';
   const causa = causaDellEffetto(voceUid, e.uid);
   if (yenAutomaticoAttivo(p, causa) || yenPropostiInSospeso(p, 'voce', causa.chiave)) return false;
   if (e.tipo === 'turno' && turniDellEffetto(p, voceUid, e).some((k) => yenAutomaticoAttivo(p, { tipo: 'turno', chiave: k }))) return false;
-  return applicatoPrimaDegliYenAutomatici(p, voceUid, e.uid, inizio) || yenFuoriRegistro(p, causa);
+  return applicatoPrimaDegliYenAutomatici(p, voceUid, e.uid, inizio, aggiuntiDopo) || yenFuoriRegistro(p, causa);
 }
 /**
  * Gli effetti della voce i cui yen erano già nel saldo da prima degli yen automatici (`yenDellEffettoGiaNelSaldo`). Per i testi della voce,
- * spuntata o no, perché non promettano un movimento che non ci sarà (né dicano «già nel saldo» di yen che la spunta muoverà).
+ * spuntata o no, perché non promettano un movimento che non ci sarà (né dicano «già nel saldo» di yen che la spunta muoverà). Il registro
+ * delle operazioni sugli effetti si legge una volta sola per voce, e solo se serve (una spunta di prima senza ricevute).
  */
 export function effettiConYenGiaNelSaldo(p: number, voceUid: string, effetti: readonly EffettoPerYen[]): Set<string> {
   const inizio = inizioRegistro();
   if (!inizio) return new Set();
-  return new Set(effetti.filter((e) => yenDellEffettoGiaNelSaldo(p, voceUid, e, inizio)).map((e) => e.uid));
+  let aggiunti: Set<string> | null = null;
+  const aggiuntiDopo = (): ReadonlySet<string> => (aggiunti ??= effettiAggiuntiDopo(voceUid, inizio));
+  return new Set(effetti.filter((e) => yenDellEffettoGiaNelSaldo(p, voceUid, e, inizio, aggiuntiDopo)).map((e) => e.uid));
 }
 /**
  * Togliendo la spunta di una voce (prima della restituzione e prima di chiudere ricevute e proposte): ogni effetto i cui yen erano già nel saldo

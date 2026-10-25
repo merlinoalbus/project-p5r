@@ -13,15 +13,20 @@ import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { RiepilogoEffettiVoce } from './RiepilogoEffettiVoce';
 import { gruppiDellaVoce } from '../../utils/percorso';
+import { elencoNomi } from '../../../shared/riepilogoEffetti';
 
-/** L13 (decisione 18): che cosa fa la spunta con gli yen delle consumazioni e delle visite da osservare; `giaNelSaldo` di `totale` avevano
- *  il loro denaro già nel saldo da prima che gli yen si muovessero da soli (`AzionePercorsoDto.yenGiaNelSaldo`), e la spunta non lo muove. */
-function fraseYenOsservazioni(giaNelSaldo: number, totale: number): string {
+/** L13 (decisione 18): che cosa fa la spunta con gli yen delle consumazioni e delle visite da osservare; `giaNelSaldo` sono i nomi di quelle
+ *  (su `totale`) il cui denaro era già nel saldo da prima che gli yen si muovessero da soli (`AzionePercorsoDto.yenGiaNelSaldo`): la spunta
+ *  non lo muove, e la frase le nomina se sono solo una parte. */
+function fraseYenOsservazioni(giaNelSaldo: readonly string[], totale: number): string {
   const sempre = 'la spunta resta possibile anche se il saldo non basta';
-  if (totale > 0 && giaNelSaldo === totale) return `gli yen di queste osservazioni erano già nel saldo da prima che si muovessero da soli: la spunta non li muove (${sempre}).`;
-  if (giaNelSaldo > 0) return `gli yen delle osservazioni segnate prima che si muovessero da soli erano già nel saldo e non si muovono; per le altre prezzo e quota si scalano da soli dal saldo, mai sotto zero (${sempre}).`;
+  if (totale > 0 && giaNelSaldo.length === totale) return `gli yen di queste osservazioni erano già nel saldo da prima che si muovessero da soli: la spunta non li muove (${sempre}).`;
+  if (giaNelSaldo.length > 0) return `gli yen di ${elencoNomi(giaNelSaldo)} erano già nel saldo da prima che si muovessero da soli e non si muovono; per le altre osservazioni prezzo e quota si scalano da soli dal saldo, mai sotto zero (${sempre}).`;
   return `il prezzo di una consumazione nuova e la quota di una visita nuova si scalano da soli dal saldo, mai sotto zero (${sempre}).`;
 }
+/** I nomi (da `yenGiaNelSaldo.nomi`, allineati agli uid) delle osservazioni il cui denaro era già nel saldo da prima. */
+const nomiGiaNelSaldo = (a: AzionePercorsoDto, uid: readonly string[]): string[] =>
+  uid.flatMap((u) => { const i = a.yenGiaNelSaldo?.effetti.indexOf(u) ?? -1; return i >= 0 ? [a.yenGiaNelSaldo!.nomi[i] ?? ''] : []; });
 
 const fotografia = (a: AzionePercorsoDto) => JSON.stringify([a.uid, a.fatta, a.giorno, a.fascia, a.genere, a.azione, a.tipo, a.riferimento, a.rangoAtteso, a.effettiVoce?.revisione]);
 
@@ -70,7 +75,7 @@ export function PreparaAcquistiVoce({ a, partitaId, onChiudi, onConferma, onRile
   </>}>
     <div className="flex min-w-0 flex-col gap-3 testo-13">
       <strong>{a.azione}</strong>
-      <p className="m-0">Ogni riquadro prepara soltanto i dati. Il comando finale registra insieme spunta, consumazioni e sessioni osservate. Doti e punti pesca restano proposte da decidere; {fraseYenOsservazioni(effetti.filter((e) => a.yenGiaNelSaldo?.effetti.includes(e.uid)).length, effetti.length)}</p>
+      <p className="m-0">Ogni riquadro prepara soltanto i dati. Il comando finale registra insieme spunta, consumazioni e sessioni osservate. Doti e punti pesca restano proposte da decidere; {fraseYenOsservazioni(nomiGiaNelSaldo(a, effetti.map((e) => e.uid)), effetti.length)}</p>
       {invalidazioneAnteprima > 0 && mancaPreparazione && <p role="status" className="m-0 text-warning">Gli input e le catture sono conservati. Rivedi una nuova anteprima e riconferma ogni riquadro prima della spunta; il comando precedente non viene ripetuto.</p>}
       <details><summary className="touch">Tutti gli effetti della voce</summary><RiepilogoEffettiVoce gruppi={gruppiDellaVoce(a)} titolo="Che cosa dà la voce" /></details>
       {verifica.caricamento && <p role="status">Verifico la configurazione corrente della voce…</p>}
