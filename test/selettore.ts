@@ -10,6 +10,8 @@ import { fireEvent, screen, within } from '@testing-library/react';
 
 /** Il pulsante del selettore con quell'etichetta. */
 export function selettore(nome: string | RegExp, contenitore: HTMLElement = document.body): HTMLElement {
+  // il selettore compatto porta il valore nel nome accessibile («Dote: Tutte le Doti»): il nome puro o seguito da «: valore»
+  if (typeof nome === 'string') return within(contenitore).getByRole('combobox', { name: (n) => n === nome || n.startsWith(`${nome}: `) });
   return within(contenitore).getByRole('combobox', { name: nome });
 }
 
@@ -23,7 +25,8 @@ export function scegliVoce(nomeSelettore: string | RegExp, voce: string | RegExp
   const pulsante = selettore(nomeSelettore, contenitore);
   if (pulsante.getAttribute('aria-expanded') !== 'true') fireEvent.click(pulsante);
   const elenco = screen.getByRole('listbox', { name: nomeSelettore });
-  fireEvent.click(within(elenco).getByRole('button', { name: voce }));
+  // la voce è l'`option` stessa (nessun pulsante dentro: lotto accessibilità del Selettore)
+  fireEvent.click(within(elenco).getByRole('option', { name: voce }));
 }
 
 /** I nomi delle voci offerte dal selettore (lo apre e lo richiude). */

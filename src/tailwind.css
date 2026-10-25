@@ -62,6 +62,10 @@
   --color-surface: #23232d;
   --color-border: #34343f;
   --color-border-light: #2a2a34;
+  /* Bordo dei COMANDI di input (campi, selettori, segmenti) — WCAG 1.4.11 (contrasto dei componenti, almeno 3:1): #34343f faceva
+     1,27:1 sulla superficie e il campo non si distingueva dal fondo. #7a7a90 fa 3,7:1 sulla superficie, 4,9:1 sul fondo delle finestre
+     e almeno 3,4:1 anche sul bordo chiaro. --color-border resta per separatori e riquadri decorativi (il look scuro non cambia). */
+  --color-border-input: #7a7a90;
 
   --color-text: #ececf1;
   --color-text-secondary: #a3a3b3;
@@ -71,6 +75,11 @@
 
   --color-primary: #e5352b;
   --color-primary-hover: #ff4d42;
+  /* Il rosso come FONDO di un comando con scritta bianca (WCAG 1.4.3, almeno 4,5:1): bianco su #e5352b fa 4,3:1 e sul rosso schiarito
+     dell'hover 3,3:1. #d42d24 fa 5,0:1 (un rosso appena più cupo, sempre rosso P5R); al passaggio del cursore si SCURISCE a #b8241c
+     (6,4:1) invece di schiarirsi. --color-primary resta per bordi, barre, tasselli e anelli: lì non c'è scritta da leggere. */
+  --color-primary-fondo: #d42d24;
+  --color-primary-fondo-hover: #b8241c;
   /* il rosso usato come TESTO (scritte, link, etichette attive): #e5352b sui fondi scuri fa 3,6–4,3:1; questo fa almeno 4,7:1 anche
      sul chip rosso trasparente. Fondi, bordi, barre e tasselli restano su --color-primary */
   --color-primary-testo: #ff6359;
@@ -226,8 +235,8 @@
   .btn::after { inset: 1px; background: var(--btn-sfondo); }
   .btn:disabled, .btn[aria-disabled="true"] { opacity: 1; cursor: not-allowed; }
   .btn:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
-  .btn-primary { --btn-sfondo: var(--color-primary); --btn-bordo: var(--color-primary); color: var(--color-text-on-primary); }
-  .btn-primary:hover:not(:disabled):not([aria-disabled="true"]) { --btn-sfondo: var(--color-primary-hover); --btn-bordo: var(--color-primary-hover); }
+  .btn-primary { --btn-sfondo: var(--color-primary-fondo); --btn-bordo: var(--color-primary-fondo); color: var(--color-text-on-primary); }
+  .btn-primary:hover:not(:disabled):not([aria-disabled="true"]) { --btn-sfondo: var(--color-primary-fondo-hover); --btn-bordo: var(--color-primary-fondo-hover); }
   .btn-secondary { --btn-sfondo: var(--color-surface); --btn-bordo: var(--color-border); color: var(--color-text); }
   .btn-secondary:hover:not(:disabled):not([aria-disabled="true"]) { --btn-sfondo: var(--color-bg-tertiary); --btn-bordo: var(--color-primary); }
   .btn-ghost { color: var(--color-text-secondary); }
@@ -287,6 +296,8 @@
     cursor: pointer; transition: border-color .12s, color .12s, background-color .12s;
   }
   .piastrella-scheda > svg { flex-shrink: 0; }
+  /* senza questa regola la piastrella non aveva alcun segno di fuoco proprio (restava quello, tagliato, del browser) */
+  .piastrella-scheda:focus-visible { outline: 2px solid var(--color-primary-testo); outline-offset: 2px; }
   /* le schede della Partita da 768 px: piastrelle basse con icona e nome affiancati, su una riga sola che scorre (intestazione ≤ 30%) */
   /* a ogni larghezza: icona e nome affiancati, 44 px di altezza, senza margine sotto (anche sul telefono: la fila scorre già) */
   .fila-schede-partita .piastrella-scheda { flex-direction: row; gap: 6px; min-width: 0; min-height: 44px; padding: 6px 12px; font-size: var(--testo-12); white-space: nowrap; }
@@ -585,7 +596,7 @@
     padding: 10px 12px;
     min-height: 44px;
     background: var(--color-surface);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-border-input);
     border-radius: var(--radius-md);
     color: var(--color-text);
     font-size: var(--testo-15);
@@ -593,7 +604,11 @@
     outline: none;
     transition: border-color 0.15s;
   }
+  /* il fuoco non è più il solo cambio di colore del bordo da 1 px (invisibile a chi non distingue i rossi): anello di 2 px nel rosso
+     chiaro da testo (almeno 4,7:1 sui fondi scuri) staccato di 1 px. I campi di testo trattengono `:focus-visible` anche col tocco o
+     col mouse (si scrive in tutti i casi): l'anello compare sempre dove si sta scrivendo, ed è voluto */
   .form-input:focus { border-color: var(--color-primary); }
+  .form-input:focus-visible { outline: 2px solid var(--color-primary-testo); outline-offset: 1px; }
   /* Un'area di testo scorre per conto suo quando il testo è lungo, e spesso sta dentro una finestra che scorre
      (la descrizione di un'area nella sua scheda): arrivata in fondo, il gesto si ferma lì, non passa alla
      finestra — mai due barre che scorrono una dopo l'altra (regola dell'utente, 2026-09-29). */
@@ -627,7 +642,7 @@
   .persona-chip__nome { font-family: var(--font-display); text-transform: uppercase; font-size: var(--testo-17); letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
   .persona-chip--evidenza .persona-chip__nome { font-size: var(--testo-20); max-width: 240px; }
   .persona-chip__riga { display: inline-flex; align-items: center; gap: 6px; font-size: var(--testo-12); color: var(--color-text-secondary); white-space: nowrap; }
-  .persona-chip__livello { font-family: var(--font-display); font-size: var(--testo-13); line-height: 1; padding: 3px 7px 2px; background: var(--color-primary); color: var(--color-text-on-primary); clip-path: polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%); letter-spacing: .04em; }
+  .persona-chip__livello { font-family: var(--font-display); font-size: var(--testo-13); line-height: 1; padding: 3px 7px 2px; background: var(--color-primary-fondo); color: var(--color-text-on-primary); clip-path: polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%); letter-spacing: .04em; }
   .persona-chip--evidenza .persona-chip__livello { background: var(--color-text); color: var(--color-bg); }
   .persona-chip__arcano { width: 18px; height: 18px; object-fit: contain; }
   .persona-chip__arcano-nome { text-transform: uppercase; letter-spacing: .05em; font-size: var(--testo-12); color: var(--color-text-muted); }
@@ -644,7 +659,7 @@
   .ricetta-riga--pronta { background: var(--color-primary-bg); box-shadow: inset 3px 0 0 var(--color-primary); }
   .ricetta-riga__persone { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; min-width: 0; }
   .ricetta-riga__gruppo { display: inline-flex; align-items: center; gap: 8px; }
-  .ricetta-op { width: 26px; height: 26px; border-radius: 999px; background: var(--color-primary); color: var(--color-text-on-primary); font-family: var(--font-display); font-size: var(--testo-20); line-height: 1; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 35%, transparent); }
+  .ricetta-op { width: 26px; height: 26px; border-radius: 999px; background: var(--color-primary-fondo); color: var(--color-text-on-primary); font-family: var(--font-display); font-size: var(--testo-20); line-height: 1; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 35%, transparent); }
   .ricetta-op--risultato { background: var(--color-text); color: var(--color-bg); box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-text) 25%, transparent); }
   .ricetta-riga__dati { display: flex; align-items: center; justify-content: flex-end; gap: 10px; white-space: nowrap; }
   .ricetta-riga__tipo { font-size: var(--testo-12); text-transform: uppercase; letter-spacing: .06em; color: var(--color-text-muted); border: 1px solid var(--color-border); padding: 3px 7px; }
@@ -858,7 +873,7 @@
      una goccia da 38 qui fermavano il bersaglio a 40. Ne servono 5 per parte (rilievo del
      validatore, 2026-09-13, misurato con l'hit-testing e non col righello). */
   .spillo-mappa--gruppo::after { inset: -5px; }
-  .spillo-mappa__gruppo { min-width: 34px; height: 34px; padding: 0 8px; border-radius: 999px; background: var(--color-primary); color: var(--color-text-on-primary); border: 2px solid #fff; font-family: var(--font-display); font-size: var(--testo-17); display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,.6); }
+  .spillo-mappa__gruppo { min-width: 34px; height: 34px; padding: 0 8px; border-radius: 999px; background: var(--color-primary-fondo); color: var(--color-text-on-primary); border: 2px solid #fff; font-family: var(--font-display); font-size: var(--testo-17); display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,.6); }
   .spillo-mappa__punto { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; border: 1px solid rgba(255,255,255,.7); }
   .spillo-mappa__punto--grande { width: 34px; height: 34px; }
   .visore-mappa__pannello { container-type: inline-size; display: flex; flex-direction: column; gap: 12px; padding: 10px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--color-primary) 75%, transparent) transparent; border-right: 1px solid var(--color-border); background: color-mix(in srgb, var(--color-bg-secondary) 94%, transparent); min-height: 0; }
@@ -1102,7 +1117,7 @@
   /* `.chip--oro` e `.chip--bloccata` stanno dopo `.chip` (più sotto): con la stessa specificità vince la regola che viene dopo */
   /* ---- Editor delle mappe (13.3) ---- */
   .visore-mappa--editor .visore-mappa__barra { background: color-mix(in srgb, var(--color-primary) 22%, var(--color-bg-secondary)); border-bottom-color: var(--color-primary); }
-  .editor-mappa__targhetta { font-family: var(--font-display); font-size: var(--testo-17); text-transform: uppercase; letter-spacing: .04em; background: var(--color-primary); color: var(--color-text-on-primary); padding: 2px 10px; clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); }
+  .editor-mappa__targhetta { font-family: var(--font-display); font-size: var(--testo-17); text-transform: uppercase; letter-spacing: .04em; background: var(--color-primary-fondo); color: var(--color-text-on-primary); padding: 2px 10px; clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); }
   .editor-mappa__strumenti { display: flex; flex-wrap: wrap; gap: 4px; }
   .editor-mappa__palette { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px; }
   .editor-mappa__tipo { display: flex; align-items: center; gap: 6px; background: none; border: 1px solid var(--color-border); padding: 4px 6px; color: var(--color-text); font: inherit; font-size: var(--testo-12); cursor: pointer; min-height: 44px; text-align: left; } /* 44 px: bersaglio touch (rilievo del validatore, 15.24) */
@@ -1157,7 +1172,7 @@
 
   /* ---- Passi guidati (Cerca per skill) ---- */
   .passo-guida { display: flex; gap: 10px; align-items: flex-start; }
-  .passo-guida__numero { width: 26px; height: 26px; border-radius: 999px; background: var(--color-primary); color: var(--color-text-on-primary); font-family: var(--font-display); font-size: var(--testo-17); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .passo-guida__numero { width: 26px; height: 26px; border-radius: 999px; background: var(--color-primary-fondo); color: var(--color-text-on-primary); font-family: var(--font-display); font-size: var(--testo-17); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
   /* ---- Pannello dei filtri: gruppi etichettati, ordinati in griglia ---- */
   .pannello-filtri { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, max-content)); gap: 10px 22px; align-items: end; padding: 10px 14px; }
@@ -1477,14 +1492,17 @@
   /* L3: da 1280 px, nella colonna centrale stretta della scheda del Palazzo (fra «Aree» e «Da raccogliere»), i comandi delle righe
      restano solo icona: il nome lo dicono `aria-label` e il suggerimento, e la riga non va a capo (R3-41) */
   /* L3 (R3-41): la stessa cosa da 1024 px, per l'intestazione compatta della scheda del Palazzo («Sulla mappa di Tokyo») */
-  @media (min-width: 1024px) {
+  /* Accessibilità (WCAG 2.5.3, nome visibile): solo con un puntatore vero (mouse: `hover: hover` e `pointer: fine`), dove il suggerimento
+     `.con-suggerimento` compare al passaggio. Un tablet a tocco, anche a 1024–1279 px, non ha un hover affidabile: lì il nome resta
+     scritto accanto all'icona come sul telefono (la riga può andare a capo: le azioni hanno già `flex-wrap`). */
+  @media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
     .btn-visivo--icona-lg { padding: 4px 6px; gap: 0; }
     .btn-visivo--icona-lg .btn-visivo__testo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
     /* nel menu «Modifica ⋯» il segno resta anche qui: senza, la matita sola non dice che apre un menu (lotto C) */
     .menu-modifica > .btn-visivo--icona-lg .btn-visivo__testo { position: static; width: auto; height: auto; overflow: visible; clip-path: none; }
     .menu-modifica > .btn-visivo--icona-lg .menu-modifica__parola { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   }
-  @media (min-width: 1280px) {
+  @media (min-width: 1280px) and (hover: hover) and (pointer: fine) {
     .btn-visivo--icona-xl { padding: 4px 6px; gap: 0; }
     .btn-visivo--icona-xl .btn-visivo__testo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   }
@@ -1506,7 +1524,7 @@
   .chip--dalla-guida {
     --chip-sfondo: color-mix(in srgb, var(--color-primary) 7%, var(--color-bg-secondary));
     --chip-bordo: color-mix(in srgb, var(--color-primary) 45%, transparent);
-    color: var(--color-text-primary);
+    color: var(--color-text);
   }
   /* L'allerta meteo del gioco in una giornata (2026-10-12): il tag giallo d'avviso, accanto al meteo. Dopo `.chip`, che ha la
      stessa specificità e ne azzererebbe le variabili. */
@@ -1683,14 +1701,15 @@
     text-transform: uppercase;
     letter-spacing: 0.02em;
     /* Sul telefono comanda la larghezza (5.4vw), non un minimo fisso: cosi un titolo di tre parole resta su una riga sola. */
-    font-size: clamp(20px, 5.4vw, 42px);
+    /* in rem (radice al 93,75%: 20 px → 1.3333rem = --testo-20; 42 px → 2.8rem): il titolo segue la dimensione del testo scelta nel sistema */
+    font-size: clamp(var(--testo-20), 5.4vw, 2.8rem);
     line-height: 1;
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
     gap: 6px 8px;
   }
-  .intestazione--compatta .titolo-tasselli { font-size: clamp(18px, 4.6vw, 30px); }
+  .intestazione--compatta .titolo-tasselli { font-size: clamp(var(--testo-18), 4.6vw, 2rem); }
   .tassello {
     display: inline-block;
     white-space: nowrap;
@@ -1708,7 +1727,7 @@
     clip-path: polygon(0 3%, 98% 0, 100% 97%, 2% 100%);
   }
   /* titolo in carattere display senza tasselli (schede di dettaglio con immagine accanto) */
-  .titolo-display { font-family: var(--font-display); font-weight: 400; text-transform: uppercase; letter-spacing: 0.02em; font-size: clamp(24px, 2.6vw, 34px); line-height: 1; }
+  .titolo-display { font-family: var(--font-display); font-weight: 400; text-transform: uppercase; letter-spacing: 0.02em; font-size: clamp(var(--testo-24), 2.6vw, 2.2667rem); line-height: 1; }
   /* ---- Lotto B: intestazione delle schede di dettaglio (IntestazioneScheda), titoli di sezione (TitoloSezione), menu «Modifica ⋯» ---- */
   /* due righe: la barra (ritorno e briciole a sinistra, azioni a destra) e il corpo (figura piccola, titolo con chip e metadati). Sul
      telefono «Indietro» e «Modifica ⋯» restano solo icona (il nome resta per chi non vede): così la barra sta in una riga e la testata
@@ -1777,7 +1796,7 @@
     align-items: baseline;
     gap: 3px;
     padding: 3px 10px 1px;
-    background: var(--color-primary);
+    background: var(--color-primary-fondo);
     color: #fff;
     font-family: var(--font-display);
     font-size: var(--testo-20);
@@ -1811,7 +1830,7 @@
     height: 56px;
     align-items: center;
     justify-content: center;
-    background: var(--color-primary);
+    background: var(--color-primary-fondo);
     color: #fff;
     clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
   }
@@ -1840,7 +1859,7 @@
     line-height: 1;
     clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
   }
-  .data-p5--evidenza .data-p5__giorno { background: var(--color-primary); color: #fff; }
+  .data-p5--evidenza .data-p5__giorno { background: var(--color-primary-fondo); color: #fff; }
   .data-p5__testo { display: inline-flex; flex-direction: column; line-height: 1.1; }
   .data-p5__mese { font-family: var(--font-display); text-transform: uppercase; font-size: var(--testo-17); letter-spacing: 0.03em; }
   .data-p5__settimana { font-size: var(--testo-12); color: var(--color-text-secondary); }
@@ -1862,7 +1881,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    background: var(--color-primary);
+    background: var(--color-primary-fondo);
     color: #fff;
     clip-path: polygon(22% 0, 100% 0, 78% 100%, 0 100%);
   }
@@ -1877,6 +1896,8 @@
     opacity: 0; pointer-events: none; transition: opacity .12s ease; z-index: 30;
   }
   .con-suggerimento:hover::after, .con-suggerimento:focus-visible::after { opacity: 1; }
+  /* sul tablet e sul telefono (nessun hover): il tocco dà il fuoco al comando, e il nome compare finché il fuoco resta lì */
+  @media (hover: none) { .con-suggerimento:focus::after { opacity: 1; } }
 
   /* ---- Evidenza temporanea (ritorno dalla scheda alla Persona vista) ---- */
   @keyframes evidenza { from { box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 55%, transparent); } to { box-shadow: 0 0 0 0 transparent; } }
@@ -2045,7 +2066,7 @@
    selettore gli passa (EditorAzioneStrutturata, RigaDote, TraduzioniEditor), e la larghezza minima chiesta veniva ignorata.
    Le altre regole del selettore restano dove sono: spostarle cambierebbe la cascata anche per `width`/`display` del compatto. */
 @layer components { .selettore { position:relative; min-width:0; } }
-.selettore__scelta { position:relative; display:flex; flex-direction:column; align-items:flex-start; width:100%; min-height:44px; padding:3px 22px 3px 8px; border:1px solid var(--color-border); background:var(--color-bg-tertiary); color:var(--color-text); font:inherit; text-align:left; cursor:pointer; }
+.selettore__scelta { position:relative; display:flex; flex-direction:column; align-items:flex-start; width:100%; min-height:44px; padding:3px 22px 3px 8px; border:1px solid var(--color-border-input); background:var(--color-bg-tertiary); color:var(--color-text); font:inherit; text-align:left; cursor:pointer; }
 .selettore__scelta:disabled { opacity:1; cursor:default; }
 .selettore__etichetta { font-size:var(--testo-12); text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); line-height:1; }
 .selettore__valore { font-size:var(--testo-13); line-height:1.2; overflow-wrap:anywhere; }
@@ -2055,7 +2076,10 @@
 .selettore__elenco { list-style:none; margin:0; padding:0; max-height:min(50vh, 320px); overflow:auto; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:color-mix(in srgb, var(--color-primary) 75%, transparent) transparent; }
 .selettore__gruppo { display:block; padding:6px 8px 2px; font-size:var(--testo-12); text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); }
 .selettore__pulsante { display:flex; align-items:center; gap:8px; width:100%; min-height:44px; padding:6px 8px; border:0; background:transparent; color:var(--color-text); font:inherit; font-size:var(--testo-13); text-align:left; cursor:pointer; }
-.selettore__voce--evidenziata .selettore__pulsante { background:color-mix(in srgb, var(--color-primary) 18%, transparent); }
+.selettore__scelta:focus-visible { outline:2px solid var(--color-primary-testo); outline-offset:2px; }
+/* la voce evidenziata (col mouse o con le frecce, `aria-activedescendant`) ha anche una barra sul bordo: il solo velo rosso al 18% non
+   basta a chi naviga da tastiera, perché il fuoco vero resta sul pulsante o sul campo */
+.selettore__voce--evidenziata .selettore__pulsante { background:color-mix(in srgb, var(--color-primary) 18%, transparent); box-shadow:inset 3px 0 0 var(--color-primary-testo); }
 .selettore__voce--scelta .selettore__pulsante { font-weight:600; }
 .selettore__vuoto { padding:8px; font-size:var(--testo-12); color:var(--color-text-muted); }
 .selettore__freccia { position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:var(--testo-12); color:var(--color-text-muted); pointer-events:none; }
@@ -2171,7 +2195,7 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 /* Editor: una sezione alla volta, campi conservati al cambio pannello. */
 .editor-mappa__sezioni { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; position:sticky; top:-10px; z-index:5; background:#131419; padding:8px 0; }
 .editor-mappa__sezioni button { min-height:44px; border:1px solid var(--color-border); background:#1b1c20; color:var(--color-text); font:inherit; font-size:var(--testo-13); cursor:pointer; }
-.editor-mappa__sezioni button[aria-pressed="true"] { background:var(--color-primary); color:var(--color-text-on-primary); border-color:var(--color-primary); }
+.editor-mappa__sezioni button[aria-pressed="true"] { background:var(--color-primary-fondo); color:var(--color-text-on-primary); border-color:var(--color-primary-fondo); }
 .editor-mappa__sezioni button:focus-visible { outline:2px solid white; outline-offset:2px; }
 .editor-mappa__contenuto { display:flex; flex-direction:column; gap:12px; min-width:0; }
 .editor-mappa__contenuto[hidden] { display:none; }
@@ -2196,7 +2220,7 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .selettore-icone--compatto .selettore-icone__tessera { min-height:56px; min-width:88px; flex-basis:88px; font-size:var(--testo-12); }
 .selettore-icone__tessera:hover { border-color:var(--color-text-secondary); }
 .selettore-icone__tessera:disabled { opacity:0.6; cursor:default; }
-.selettore-icone__tessera--attiva { background:var(--color-primary); color:var(--color-text-on-primary); border-color:var(--color-primary); }
+.selettore-icone__tessera--attiva { background:var(--color-primary-fondo); color:var(--color-text-on-primary); border-color:var(--color-primary-fondo); }
 .selettore-icone__tessera:focus-visible { outline:2px solid white; outline-offset:2px; }
 .selettore-icone__icona { display:inline-flex; line-height:0; }
 .selettore-icone__nome { text-align:center; overflow-wrap:normal; word-break:normal; hyphens:auto; }
@@ -2209,12 +2233,12 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 /* Filtri degli articoli: una riga con ricerca, «Per chi» e azzera; sotto le categorie a tessere e i segmenti. */
 .filtri-articoli { display:flex; flex-direction:column; gap:8px; min-width:0; }
 .filtri-articoli__riga { display:flex; flex-wrap:wrap; align-items:center; gap:6px; min-width:0; }
-.segmenti { display:inline-flex; flex-wrap:wrap; border:1px solid var(--color-border); }
+.segmenti { display:inline-flex; flex-wrap:wrap; border:1px solid var(--color-border-input); }
 /* `overflow-wrap:normal`: il body ha `anywhere`, che sul telefono spezzava «Promemoria» a metà parola; così la voce non scende
    sotto la parola più lunga e, se lo spazio non basta, a capo va il segmento intero (`flex-wrap`), non le lettere. */
 .segmenti__voce { min-height:44px; padding:0 12px; border:0; background:var(--color-bg-tertiary); color:var(--color-text); font:inherit; font-size:var(--testo-13); cursor:pointer; overflow-wrap:normal; }
-.segmenti__voce + .segmenti__voce { border-left:1px solid var(--color-border); }
-.segmenti__voce--attiva { background:var(--color-primary); color:var(--color-text-on-primary); }
+.segmenti__voce + .segmenti__voce { border-left:1px solid var(--color-border-input); }
+.segmenti__voce--attiva { background:var(--color-primary-fondo); color:var(--color-text-on-primary); }
 .segmenti__voce:focus-visible { outline:2px solid white; outline-offset:-2px; }
 /* Sul telefono le voci si spartiscono la riga in base al testo (`auto`, mai sotto la parola più lunga): a parti uguali
    (`1 1 0`) «Promemoria» usciva dal suo riquadro accanto a tre voci corte. */
@@ -2241,7 +2265,8 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 .barra-invio { position:relative; width:100%; height:8px; border:1px solid var(--color-border); background:var(--color-bg-tertiary); overflow:hidden; }
 .barra-invio::after { content:""; position:absolute; inset:0 auto 0 0; width:40%; background:var(--color-primary); animation:barra-invio-scorre 1.3s ease-in-out infinite; }
 @keyframes barra-invio-scorre { from { transform:translateX(-100%); } to { transform:translateX(250%); } }
-@media (prefers-reduced-motion: reduce) { .barra-invio::after { animation-duration:3s; } }
+/* con «riduci movimento» questa resta lenta (3 s): è l'unico segno che il lavoro prosegue, quindi esce dal blocco globale in fondo al file */
+@media (prefers-reduced-motion: reduce) { .barra-invio::after { animation-duration:3s !important; animation-iteration-count:infinite !important; } }
 
 /* Le liste etichetta/valore a due colonne (`dl` con `grid-cols-[auto_1fr]`): l'etichetta non va
    sotto la propria larghezza, il valore sì.
@@ -2346,7 +2371,7 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
   border-radius: var(--radius-sm, 4px); background: var(--color-bg-tertiary); color: var(--color-text); font: inherit; font-size: var(--testo-14); cursor: pointer; }
 .fila-scelta__voce:hover:not(:disabled) { border-color: var(--color-text-secondary); }
 .fila-scelta__voce:focus-visible { outline: 2px solid white; outline-offset: 2px; }
-.fila-scelta__voce--attiva { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-text-on-primary); font-weight: 700; }
+.fila-scelta__voce--attiva { background: var(--color-primary-fondo); border-color: var(--color-primary-fondo); color: var(--color-text-on-primary); font-weight: 700; }
 /* il posto della voce: maniglia di trascinamento (nessuno scorrimento della pagina mentre la si tiene), segnaposto e riga sollevata */
 .posto-voce__maniglia { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; border: 0; background: transparent; color: var(--color-text-secondary);
   font-size: var(--testo-20); line-height: 1; cursor: grab; touch-action: none; }
@@ -2371,7 +2396,7 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
    ============================================================ */
 /* «Vai al contenuto»: il primo elemento col Tab; fuori dallo schermo finché non ha il fuoco, poi in alto a sinistra sopra la Topbar */
 .salta-al-contenuto { position: fixed; top: 8px; left: 8px; z-index: var(--z-toast); display: inline-flex; align-items: center; min-height: 44px; padding: 8px 16px;
-  border-radius: var(--radius-md); background: var(--color-primary); color: var(--color-text-on-primary); font-family: var(--font-sans); font-size: var(--testo-15);
+  border-radius: var(--radius-md); background: var(--color-primary-fondo); color: var(--color-text-on-primary); font-family: var(--font-sans); font-size: var(--testo-15);
   font-weight: 700; text-decoration: none; transform: translateY(calc(-100% - 16px)); }
 .salta-al-contenuto:focus { transform: none; outline: 2px solid white; outline-offset: 2px; }
 /* il fuoco messo da programma su <main> e sul titolo della pagina (useFuocoNavigazione): niente cornice, non è un comando */
@@ -2483,3 +2508,28 @@ a.chip, button.chip, .chip[role="button"] { min-height:44px; height:auto; align-
 /* Fuori da ogni @layer di proposito (lotto C): deve vincere sull'utility `min-w-[180px]` di `CampoRicerca`, che nella riga dei filtri
    lascerebbe la ricerca a 180 px e allargherebbe il selettore accanto (misurato su Domande, Libri e Richieste a 390 px). */
 .filtri-articoli__riga > .relative { flex:1 1 240px; min-width:0; }
+
+/* ============================================================
+   Accessibilità (WCAG 2.2) — fuoco nelle file che scorrono e movimento ridotto
+   ============================================================ */
+/* Fuori da ogni @layer di proposito: deve vincere sui `:focus-visible` dei singoli componenti (chip, pulsanti, piastrelle, che stanno nel
+   layer `components` con distacchi di 2–3 px verso l'esterno). Nelle file che scorrono (`overflow` ritaglia) l'anello esterno veniva
+   tagliato e non si vedeva quale scheda avesse il fuoco: dentro le file l'anello va verso l'interno (colore e spessore restano quelli
+   del componente). */
+.fila-scorrevole :focus-visible { outline-offset: -2px; }
+
+/* Movimento ridotto (WCAG 2.3.3): chi attiva «riduci movimento» nel sistema non vede più transizioni né animazioni — entrate delle
+   finestre, dissolvenze, evidenze, anello che gira. Le animazioni durano un istante e non si ripetono (lo stato finale resta quello
+   della pagina ferma). Eccezioni volute: la barra dei lavori in corso (sopra), che è il solo segno di vita, e gli otto fotogrammi
+   del caricamento, che invece di ruotare mostrano il primo, fermo. Fuori dai layer, come `!important`, per valere su ogni componente
+   e su ogni utility di Tailwind. */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .fotogramma { animation: none !important; }
+  .fotogramma:first-child { opacity: 1; }
+}

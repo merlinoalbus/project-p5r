@@ -92,8 +92,8 @@ describe('LibriPage', () => {
     expect(screen.queryByText('Libro di prova')).toBeNull();
     expect(screen.getByText('Altro libro')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('radio', { name: 'Tutti' }));
-    fireEvent.click(screen.getByRole('combobox', { name: 'Dote' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Conoscenza' }));
+    fireEvent.click(screen.getByRole('combobox', { name: /^Dote/ }));
+    fireEvent.click(screen.getByRole('option', { name: 'Conoscenza' }));
     expect(screen.getByText('Libro di prova')).toBeInTheDocument();
     expect(screen.queryByText('Altro libro')).toBeNull();
   });

@@ -46,10 +46,11 @@ export function SelettoreSkill({ skill, scelte, onCambia, massimo = 4, etichetta
             <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light max-h-[260px] area-scorrevole" role="listbox" aria-label="Skill trovate">
               {candidate.map((s) => (
                 <li key={s.id} role="option" aria-selected={false}>
-                  <button type="button" className="w-full text-left flex items-center gap-2 py-2 bg-transparent border-none text-text cursor-pointer hover:text-primary-testo touch" onClick={() => { onCambia([...scelte, s]); setQ(''); }}>
+                  <button type="button" className="w-full text-left flex flex-wrap items-center gap-x-2 gap-y-1 py-2 bg-transparent border-none text-text cursor-pointer hover:text-primary-testo touch" onClick={() => { onCambia([...scelte, s]); setQ(''); }}>
                     <ElementoChip elemento={s.elemento} nome={s.elementoNome} piccolo />
                     <span className="font-semibold">{s.nomeIt}</span>
-                    <span className="testo-12 text-text-secondary truncate flex-1">{s.effettoNome}</span>
+                    {/* l'effetto si legge intero (a capo, sotto il nome sul telefono): serve a scegliere la skill */}
+                    <span className="testo-12 min-w-32 flex-1 basis-40 break-words text-text-secondary">{s.effettoNome}</span>
                   </button>
                 </li>
               ))}

@@ -558,11 +558,13 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
             {skillIds.map((id, i) => {
               const s = nomeSkill(id);
               return (
-                <li key={id} className="flex items-center gap-2 testo-13">
+                // L'effetto della skill è un'informazione di gioco (si sceglie cosa insegnare leggendola): non si tronca con i puntini,
+                // va a capo e, dove la riga è stretta (telefono), scende sotto il chip invece di restare a 60–90 px.
+                <li key={id} className="flex flex-wrap items-center gap-x-2 gap-y-1 testo-13">
                   <span className="w-5 text-text-muted">{i + 1}.</span>
                   {s ? <ElementoChip elemento={s.elemento} nome={s.nomeIt} piccolo /> : <span>#{id}</span>}
-                  <span className="flex-1 text-text-secondary truncate">{s?.effettoNome}</span>
-                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => setSkillIds(skillIds.filter((x) => x !== id))} aria-label="Rimuovi skill">×</button>
+                  <span className="min-w-32 flex-1 basis-40 break-words text-text-secondary">{s?.effettoNome}</span>
+                  <button type="button" className="btn btn-ghost btn-sm ml-auto" onClick={() => setSkillIds(skillIds.filter((x) => x !== id))} aria-label={`Rimuovi ${s ? s.nomeIt : `la skill n. ${id}`}`}>×</button>
                 </li>
               );
             })}
@@ -576,9 +578,9 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
                     <li key={s.id}>
                       {/* `touch`: con il solo `py-2` la voce restava a 42 px — sfuggita alla prima
                           passata statica, che guardava le caselle di spunta e non tutti i comandi. */}
-                      <button type="button" className="touch w-full text-left flex items-center gap-2 px-2 py-2 rounded-md hover:bg-bg-tertiary bg-transparent border-none text-text cursor-pointer" onClick={() => { setSkillIds([...skillIds, s.id]); setRicerca(''); }}>
+                      <button type="button" className="touch w-full text-left flex flex-wrap items-center gap-x-2 gap-y-1 px-2 py-2 rounded-md hover:bg-bg-tertiary bg-transparent border-none text-text cursor-pointer" onClick={() => { setSkillIds([...skillIds, s.id]); setRicerca(''); }}>
                         <ElementoChip elemento={s.elemento} nome={s.nomeIt} piccolo />
-                        <span className="testo-12 text-text-secondary truncate">{s.effettoNome}</span>
+                        <span className="testo-12 min-w-32 flex-1 basis-40 break-words text-text-secondary">{s.effettoNome}</span>
                       </button>
                     </li>
                   ))}

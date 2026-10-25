@@ -221,7 +221,7 @@ describe('GiornoGuida — la giornata canone', () => {
     /** Nella finestra di modifica apre il menu a tendina `combo` e clicca l'opzione il cui nome comincia con `testo`. */
     const scegli = (combo: string, testo: string) => {
       fireEvent.click(within(finestra).getByRole('combobox', { name: combo }));
-      fireEvent.click(within(within(finestra).getByRole('listbox', { name: combo })).getByRole('button', { name: new RegExp(`^${testo}`) }));
+      fireEvent.click(within(within(finestra).getByRole('listbox', { name: combo })).getByRole('option', { name: new RegExp(`^${testo}`) }));
     };
     scegli('Tipo', 'Confidente');
     scegli('Collegata a', 'Confidente');
@@ -247,12 +247,12 @@ describe('GiornoGuida — la giornata canone', () => {
     await waitFor(() => expect(within(finestra).getByRole('button', { name: 'Aggiungi un effetto' })).toBeInTheDocument());
     fireEvent.click(within(finestra).getByRole('button', { name: 'Aggiungi un effetto' }));
     fireEvent.click(within(finestra).getByRole('combobox', { name: 'Effetto 1' }));
-    fireEvent.click(within(within(finestra).getByRole('listbox', { name: 'Effetto 1' })).getByRole('button', { name: /^Turno/ }));
+    fireEvent.click(within(within(finestra).getByRole('listbox', { name: 'Effetto 1' })).getByRole('option', { name: /^Turno/ }));
     expect(within(finestra).getByRole('button', { name: 'Salva' })).toBeDisabled();
     fireEvent.click(within(finestra).getByRole('combobox', { name: 'Attività (contata per volte)' }));
     const elenco = within(within(finestra).getByRole('listbox', { name: 'Attività (contata per volte)' }));
-    expect(elenco.getByRole('button', { name: /^Fioraio Rafflesia/ })).toBeInTheDocument();
-    expect(elenco.queryByRole('button', { name: /^Studio al Leblanc/ })).toBeNull();
+    expect(elenco.getByRole('option', { name: /^Fioraio Rafflesia/ })).toBeInTheDocument();
+    expect(elenco.queryByRole('option', { name: /^Studio al Leblanc/ })).toBeNull();
   });
 
   it('dal menu: Sposta su / giù solo dove si può, il menu resta sulla voce per spostarla ancora; Sposta di sera', async () => {
