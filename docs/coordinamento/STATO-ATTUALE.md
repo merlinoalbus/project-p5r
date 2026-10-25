@@ -17,10 +17,11 @@ compaiono domini, indirizzi, percorsi di server, AUD, email né token; si parla 
     volume dell'edizione dello stack di rilascio e poi si **riavvia il backend pubblico**. Contiene `gioco.db` chiuso, `partite-vuoto.db`,
     caratteri e manifesto con conteggi e impronte, più il report di compatibilità con l'edizione precedente.
 - **Edizione 1 provvisoria:** installata il 2026-10-25 per le prove; non è il congelamento definitivo.
+- **Controlli sui dati della preparazione (2026-10-25, sola lettura):** nessuna correzione sopra i blocchi della guida (le due istanze
+  leggono gli stessi valori); nessuno stato di partita che citi un pin inesistente; l'unica regola di pesca ha base 2 e bonus 1.
 - **Cosa resta (tutto in attesa dell'utente, nessuna decisione presa da noi):**
   - Doti delle tre attività: bagno pubblico, centro battute, Big Bang Burger.
   - Gravità dei JSON malformati nei controlli dell'edizione (bloccano la preparazione o solo avvisano).
-  - Stati dei pin orfani (chiavi che l'edizione non contiene più).
   - Chi accede all'istanza pubblica (elenco di email o accesso aperto, con il limite del piano gratuito).
   - Congelamento definitivo dei contenuti: solo dopo le decisioni sopra, poi la seconda edizione e il tag di rilascio.
   - Prove funzionali dell'utente sull'istanza pubblica (partite per utente, sola lettura, tre formati).
