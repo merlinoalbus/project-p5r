@@ -90,6 +90,21 @@ function conMiniature(db: AppDatabase): boolean {
   return !!db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'immagine_miniatura'").get();
 }
 
+/** I metadati di una immagine, senza il contenuto: bastano a calcolare l'ETag e a cercare la miniatura in cache (R12-03). */
+export type MetadatiMiniatura = Omit<SorgenteMiniatura, 'contenuto'>;
+
+/**
+ * La miniatura larga `l` già in cache per la versione e la generazione della sorgente, o null (da generare, o non ne ha: SVG e GIF, o
+ * una tabella delle miniature che non c'è). Legge solo i metadati dell'immagine e la riga della miniatura: l'originale, che può
+ * pesare megabyte, non si carica dal database (R12-03: prima la rotta lo leggeva sempre, anche per un 304 o una miniatura in cache).
+ */
+export function miniaturaInCache(m: MetadatiMiniatura, l: LarghezzaMiniatura, db: AppDatabase = getDb()): RispostaMiniatura | null {
+  if (SENZA_MINIATURA.has(m.mime) || !conMiniature(db)) return null;
+  const inCache = db.prepare('SELECT mime, contenuto FROM immagine_miniatura WHERE immagine_id = ? AND larghezza = ? AND versione = ?').get(m.id, l, versioneMiniatura(m.createdAt)) as
+    { mime: string; contenuto: Buffer } | undefined;
+  return inCache ? { contenuto: inCache.contenuto, mime: inCache.mime, etag: etagMiniatura(m, l), esito: 'cache' } : null;
+}
+
 /**
  * La miniatura larga `l` della sorgente: dalla cache se c'è per la sua versione, altrimenti generata e scritta; l'originale nei
  * casi dell'intestazione. Non solleva mai per un problema del generatore.
@@ -101,9 +116,8 @@ export async function miniaturaDi(s: SorgenteMiniatura, l: LarghezzaMiniatura, d
   const dim = dimensioniImmagine(s.contenuto);
   if (dim && l >= dim.larghezza && !CON_ALFA.has(s.mime)) return originale(s, l);
   const versione = versioneMiniatura(s.createdAt);
-  const inCache = db.prepare('SELECT mime, contenuto FROM immagine_miniatura WHERE immagine_id = ? AND larghezza = ? AND versione = ?').get(s.id, l, versione) as
-    { mime: string; contenuto: Buffer } | undefined;
-  if (inCache) return { contenuto: inCache.contenuto, mime: inCache.mime, etag: etagMiniatura(s, l), esito: 'cache' };
+  const inCache = miniaturaInCache(s, l, db);
+  if (inCache) return inCache;
   // L12, istanza di rilascio: `gioco.db` è chiuso e la cache non si scrive. L'edizione porta già tutte le miniature (le genera
   // «Prepara edizione»); se una manca si serve l'originale, senza generare né scrivere.
   if (eGiocoInSolaLettura()) return originale(s, l);
@@ -239,12 +253,18 @@ export async function riscaldaMiniature(immagini?: Array<{ ambito: string; chiav
     if (!conMiniature(db)) return { immagini: 0, generate: 0, ms: 0 };
     const elenco = immagini ?? immaginiDelleSchede(db);
     for (const { ambito, chiave } of elenco) {
-      const r = db.prepare('SELECT id, mime, byte, created_at, contenuto FROM immagine WHERE ambito = ? AND chiave = ?').get(ambito, chiave) as
-        { id: number; mime: string; byte: number; created_at: string; contenuto: Buffer | null } | undefined;
-      if (!r?.contenuto) continue;
+      // R12-03: prima i soli metadati (`contenuto IS NULL` non carica il contenuto) e la cache: a ogni avvio le immagini già calde non
+      // si rileggono per intero (diversi MB ciascuna) per scoprire che non c'è niente da fare
+      const meta = db.prepare('SELECT id, mime, byte, created_at, contenuto IS NULL AS senza FROM immagine WHERE ambito = ? AND chiave = ?').get(ambito, chiave) as
+        { id: number; mime: string; byte: number; created_at: string; senza: number } | undefined;
+      if (!meta || meta.senza) continue;
       n++;
+      const m: MetadatiMiniatura = { id: meta.id, mime: meta.mime, byte: meta.byte, createdAt: meta.created_at };
+      if (MISURE_SCHEDE.every((l) => miniaturaInCache(m, l, db) !== null)) continue;
+      const r = db.prepare('SELECT contenuto FROM immagine WHERE id = ?').get(meta.id) as { contenuto: Buffer | null } | undefined;
+      if (!r?.contenuto) continue;
       for (const l of MISURE_SCHEDE) {
-        const esito = await miniaturaDi({ id: r.id, contenuto: r.contenuto, mime: r.mime, byte: r.byte, createdAt: r.created_at }, l, db);
+        const esito = await miniaturaDi({ ...m, contenuto: r.contenuto }, l, db);
         if (esito.esito === 'generata') generate++;
       }
     }

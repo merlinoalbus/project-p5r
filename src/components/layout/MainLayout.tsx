@@ -28,6 +28,7 @@ import { usePartitaStore } from '../../stores/partitaStore';
 import { useAsset, useAssetStore } from '../../stores/assetStore';
 import { useFontStore } from '../../stores/fontStore';
 import { sfondoPerPercorso } from './sfondi';
+import { urlMiniatura } from '../../../shared/miniature';
 import { RicercaGlobale } from '../ricerca/RicercaGlobale';
 import { useScorciatoiaRicerca } from '../../hooks/useScorciatoiaRicerca';
 import { useFuocoNavigazione } from './useFuocoNavigazione';
@@ -53,7 +54,10 @@ export function MainLayout() {
   const location = useLocation();
   const allarmeAttivo = usePartitaStore((s) => !!s.attiva?.allarmeAttivo);
   const haAttiva = usePartitaStore((s) => s.attiva !== null);
-  const sfondoSezione = useAsset(sfondoPerPercorso(location.pathname, allarmeAttivo));
+  const sfondoSezioneIntero = useAsset(sfondoPerPercorso(location.pathname, allarmeAttivo));
+  // R12-03: lo sfondo della sezione sta sotto un gradiente scuro al 70-93%, quindi non serve a piena risoluzione: la miniatura da 1024 px
+  // del server (quella delle altre viste) se è un'immagine del database, invariato se è un asset statico
+  const sfondoSezione = sfondoSezioneIntero ? urlMiniatura(sfondoSezioneIntero, 1024) : null;
   const icona = useAsset('identita/icona-32');
   // Da quale pagina si entra nelle mappe: «Chiudi» di visore ed editor ci riporta lì (`utils/ritornoMappe`).
   const paginaPrecedente = useRef<string | null>(null);

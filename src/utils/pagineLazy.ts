@@ -52,11 +52,46 @@ export function pigra<M, P extends object = object>(carica: () => Promise<M>, no
   };
 }
 
+/** Senza `requestIdleCallback` (Safari su iPhone e iPad): attesa prima del primo import, perché l'app abbia finito di avviarsi. */
+const ATTESA_INIZIALE_MS = 4000;
+/** Senza `requestIdleCallback`: pausa fra un import e il successivo, perché la rete del telefono non lavori per i chunk di seguito. */
+const PAUSA_FRA_IMPORT_MS = 1500;
+/** Senza `requestIdleCallback`: da quanto non c'è un gesto dell'utente perché si possa importare. */
+const QUIETE_MS = 1500;
+/** I gesti che dicono «l'utente sta usando l'app»: toccare, scrivere, scorrere. */
+const EVENTI_GESTO = ['pointerdown', 'touchstart', 'keydown', 'wheel', 'scroll'] as const;
+
+/**
+ * Il «tempo morto» dove `requestIdleCallback` non c'è. Un `setTimeout` a 300 ms faceva partire una catena di trentanove import a
+ * distanza ravvicinata proprio mentre l'utente cominciava a toccare l'app (download, analisi ed esecuzione di ogni chunk sul thread
+ * principale). Qui si aspetta all'inizio, si lascia una pausa fra un import e l'altro, e si rimanda finché l'utente ha fatto un gesto
+ * da poco o la scheda è in secondo piano. I gesti si ascoltano con listener passivi, sul documento in cattura (anche lo scorrimento
+ * dei contenitori interni, che non risale).
+ */
+function tempoMortoSenzaIdle(): (f: () => void) => void {
+  let ultimoGesto = 0;
+  const segna = () => { ultimoGesto = Date.now(); };
+  for (const evento of EVENTI_GESTO) document.addEventListener(evento, segna, { passive: true, capture: true });
+  let primo = true;
+  return (f) => {
+    const attesa = primo ? ATTESA_INIZIALE_MS : PAUSA_FRA_IMPORT_MS;
+    primo = false;
+    const prova = () => {
+      const dalGesto = Date.now() - ultimoGesto;
+      if (document.hidden) globalThis.setTimeout(prova, PAUSA_FRA_IMPORT_MS);
+      else if (dalGesto < QUIETE_MS) globalThis.setTimeout(prova, QUIETE_MS - dalGesto);
+      else f();
+    };
+    globalThis.setTimeout(prova, attesa);
+  };
+}
+
 /** Importa le pagine una alla volta in tempo morto (non con connessione lenta o «risparmio dati»). */
 export function precaricaInBackground(precaricamenti: ReadonlyArray<() => Promise<void>>): void {
   const conn = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
   if (conn?.saveData || /(^|-)2g$/.test(conn?.effectiveType ?? '')) return;
-  const inTempoMorto = (f: () => void) => (typeof window.requestIdleCallback === 'function' ? window.requestIdleCallback(f, { timeout: 4000 }) : globalThis.setTimeout(f, 300));
+  const senzaIdle = typeof window.requestIdleCallback === 'function' ? null : tempoMortoSenzaIdle();
+  const inTempoMorto = (f: () => void) => (senzaIdle ? senzaIdle(f) : window.requestIdleCallback(f, { timeout: 4000 }));
   let i = 0;
   const passo = () => {
     const prossimo = precaricamenti[i++];

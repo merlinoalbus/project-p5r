@@ -84,7 +84,7 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
       {/* la filigrana dell'arcano resta dentro la testata (`overflow-hidden` qui, non sul contenitore: nel cassetto lo farebbe restringere) */}
       {/* griglia della testata: ritratto e nome sopra; la targa accanto al ritratto nel cassetto largo, sotto a tutta larghezza in quello stretto */}
       <header className="testata-confidente relative overflow-hidden">
-        <AssetImg nome={`arcani/${slug(c.arcana)}-senza-testo`} alt="" decorativa className="poster__filigrana" fallback={null} />
+        <AssetImg nome={`arcani/${slug(c.arcana)}-senza-testo`} alt="" decorativa dimensione={96} className="poster__filigrana" fallback={null} />
         <div className="testata-confidente__ritratto">
           <ImmagineEntita ambito="confidente" chiave={c.chiave} etichetta={c.nome} dimensione={96} forma="carta" adatta="copri" modificabile />
         </div>
@@ -94,7 +94,7 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
             {oggi && <TargaSuggerito motivo={motivoOggi} compatta />}
           </div>
           <div className="flex items-center gap-2">
-            <AssetImg nome={`arcani/${slug(c.arcana)}`} alt={`Carta dell'arcano ${c.arcanaNome}`} className="carta-arcano-mini" fallback={<IconMaschera size={20} />} />
+            <AssetImg nome={`arcani/${slug(c.arcana)}`} alt={`Carta dell'arcano ${c.arcanaNome}`} dimensione={34} className="carta-arcano-mini" fallback={<IconMaschera size={20} />} />
             <div className="flex flex-col gap-1 min-w-0">
               <span className="font-display uppercase testo-16 leading-none tracking-wide">{c.arcanaNome}</span>
               {c.regaliFatti.length > 0 && <span className="testo-12 text-text-muted">{c.regaliFatti.length} {c.regaliFatti.length === 1 ? 'regalo consegnato' : 'regali consegnati'}</span>}
@@ -167,7 +167,7 @@ export function DettaglioConfidente({ c, occupato: occ, bonus, ultimo, oggi, mot
                 <PulsanteVisivo
                   attivo={bonus}
                   compatto
-                  icona={<AssetImg nome={`arcani/icona/${slug(c.arcana)}`} alt="" decorativa className="h-6 w-6 object-contain" fallback={<IconMaschera size={20} />} />}
+                  icona={<AssetImg nome={`arcani/icona/${slug(c.arcana)}`} alt="" decorativa dimensione={24} quadrata className="h-6 w-6 object-contain" fallback={<IconMaschera size={20} />} />}
                   titolo={`Persona ${c.arcanaNome}`}
                   dettaglio={c.personaArcanoInScorta ? '×1,5 · in scorta' : '×1,5 · attiva a mano'}
                   onClick={() => azioni.bonus(!bonus)}

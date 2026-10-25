@@ -3,7 +3,7 @@
 // vista a piastrelle o compatta ricordata per dispositivo, ritorno alla Persona vista dopo la scheda di dettaglio
 // ============================================================
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Selettore } from '../components/shared/Selettore';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ImmagineEntita } from '../components/shared/ImmagineEntita';
@@ -25,6 +25,7 @@ import { ricordaUltimaPersona, ultimaPersonaVista } from '../utils/ultimaPersona
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { ELEMENTI_AFFINITA, ESITI_AFFINITA } from '../../shared/elementi';
+import type { PersonaRiassuntoDto } from '../types';
 
 type Ordine = 'livello' | 'nome' | 'arcana';
 type Immagine = '' | 'con' | 'senza';
@@ -41,6 +42,36 @@ const livelloValido = (v: string | null, predefinito: number): number => {
 
 /** Parametri dell'URL gestiti dal pannello dei filtri (ricerca e ordinamento esclusi). */
 const CHIAVI_FILTRI = ['arcana', 'lvMin', 'lvMax', 'el', 'aff', 'img', 'dlc', 'catturabili'] as const;
+
+/**
+ * Una Persona nella vista a elenco. Memoizzata come le piastrelle (R12-03): digitando nella ricerca restano uguali `persona`,
+ * `evidenziata` e `onApri` (la funzione del modulo, stabile), quindi le righe già disegnate non si rifanno.
+ */
+const RigaPersonaElenco = memo(function RigaPersonaElenco({ p, evidenziata, onApri }: { p: PersonaRiassuntoDto; evidenziata: boolean; onApri: (id: number) => void }) {
+  return (
+    <li id={`persona-${p.id}`}>
+      <Link to={`/compendio/persona/${p.id}`} className={`card card--cliccabile flex items-center gap-3 no-underline text-text ${evidenziata ? 'card--evidenza' : ''}`} onClick={() => onApri(p.id)}>
+        <span onClick={(e) => e.preventDefault()} className="shrink-0"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={64} adatta="copri" /></span>
+        <LivelloBadge livello={p.livello} />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-display uppercase testo-18 leading-none truncate">{p.nomeIt}</span>
+            {p.nomeIt !== p.nome && <span className="testo-12 text-text-muted truncate">{p.nome}</span>}
+            <span className="chip">{p.arcanaNome}</span>
+            {p.dlc && <BadgeStato nome="dlc" testo="DLC" />}
+            {p.rara && <BadgeStato nome="tesoro" testo="Tesoro" />}
+            {p.speciale && <BadgeStato nome="speciale" testo="Speciale" />}
+            {p.richiedeConfidenteMax && <span className="chip">Confidente max</span>}
+          </div>
+          <div className="mt-1.5">
+            <AffinitaGriglia affinita={p.affinita} compatta />
+          </div>
+        </div>
+        <IconChevronRight size={18} className="text-text-muted shrink-0" />
+      </Link>
+    </li>
+  );
+});
 
 /**
  * Pagina del compendio: carica tutte le Persona e legge ogni filtro dall'URL (ricerca su nome,
@@ -100,9 +131,13 @@ export function CompendioPage() {
     return () => { annullato = true; };
   }, []);
 
+  // R12-03: il campo di ricerca segue subito la battuta (`q` viene dall'URL), mentre l'elenco si rifà con il testo «differito»: React lo
+  // calcola e lo disegna a priorità bassa e lo interrompe alla battuta dopo, così la tastiera non aspetta le 233 piastrelle
+  const qDifferita = useDeferredValue(q);
+
   const filtrate = useMemo(() => {
     if (!dati) return [];
-    const testo = q.trim().toLowerCase();
+    const testo = qDifferita.trim().toLowerCase();
     const lista = dati.filter((p) =>
       (!testo || p.nome.toLowerCase().includes(testo) || p.nomeIt.toLowerCase().includes(testo) || p.arcanaNome.toLowerCase().includes(testo))
       && (!arcana || p.arcana === arcana)
@@ -120,7 +155,7 @@ export function CompendioPage() {
       return a.livello - b.livello || a.nomeIt.localeCompare(b.nomeIt, 'it');
     };
     return lista.sort((a, b) => (decrescente ? -confronto(a, b) : confronto(a, b)));
-  }, [dati, q, arcana, livelloMin, livelloMax, mostraDlc, soloCatturabili, ordine, decrescente, elemento, codice, immagine, conImmagine, glossario]);
+  }, [dati, qDifferita, arcana, livelloMin, livelloMax, mostraDlc, soloCatturabili, ordine, decrescente, elemento, codice, immagine, conImmagine, glossario]);
 
   // Ritorno dalla scheda: la Persona vista torna in vista ed è evidenziata per qualche secondo.
   const ultimaRef = useRef<number | null>(ultimaPersonaVista());
@@ -235,33 +270,11 @@ export function CompendioPage() {
           <EmptyState title="Nessuna Persona corrisponde ai filtri" hint="Prova ad allargare l'intervallo di livello, a cambiare arcano o a togliere i filtri di affinità e immagine." />
         ) : vista === 'piastrelle' ? (
           <ul className="m-0 p-0 list-none grid gap-2 grid-cols-1 sm:gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5" aria-label="Persona">
-            {filtrate.map((p) => <PiastrellaPersona key={p.id} persona={p} riga={telefono} evidenziata={evidenziata === p.id} onApri={() => ricordaUltimaPersona(p.id)} />)}
+            {filtrate.map((p) => <PiastrellaPersona key={p.id} persona={p} riga={telefono} evidenziata={evidenziata === p.id} onApri={ricordaUltimaPersona} />)}
           </ul>
         ) : (
           <ul className="m-0 p-0 list-none grid gap-2 grid-cols-1 xl:grid-cols-2" aria-label="Persona">
-            {filtrate.map((p) => (
-              <li key={p.id} id={`persona-${p.id}`}>
-                <Link to={`/compendio/persona/${p.id}`} className={`card card--cliccabile flex items-center gap-3 no-underline text-text ${evidenziata === p.id ? 'card--evidenza' : ''}`} onClick={() => ricordaUltimaPersona(p.id)}>
-                  <span onClick={(e) => e.preventDefault()} className="shrink-0"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={64} adatta="copri" /></span>
-                  <LivelloBadge livello={p.livello} />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-display uppercase testo-18 leading-none truncate">{p.nomeIt}</span>
-                      {p.nomeIt !== p.nome && <span className="testo-12 text-text-muted truncate">{p.nome}</span>}
-                      <span className="chip">{p.arcanaNome}</span>
-                      {p.dlc && <BadgeStato nome="dlc" testo="DLC" />}
-                      {p.rara && <BadgeStato nome="tesoro" testo="Tesoro" />}
-                      {p.speciale && <BadgeStato nome="speciale" testo="Speciale" />}
-                      {p.richiedeConfidenteMax && <span className="chip">Confidente max</span>}
-                    </div>
-                    <div className="mt-1.5">
-                      <AffinitaGriglia affinita={p.affinita} compatta />
-                    </div>
-                  </div>
-                  <IconChevronRight size={18} className="text-text-muted shrink-0" />
-                </Link>
-              </li>
-            ))}
+            {filtrate.map((p) => <RigaPersonaElenco key={p.id} p={p} evidenziata={evidenziata === p.id} onApri={ricordaUltimaPersona} />)}
           </ul>
         )}
       </PageState>

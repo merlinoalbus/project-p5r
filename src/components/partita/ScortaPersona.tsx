@@ -163,7 +163,7 @@ export function ScortaPersona({ partitaId }: Props) {
                         {st === 'aggiornata' && <span className="riga-persona__registrata" title="Registrata nel compendio"><IconaAzione chiave="registra" dimensione={14} /><span className="sr-only">Registrata nel compendio</span></span>}
                       </span>
                       <span className="riga-persona__arcano">
-                        <AssetImg nome={`arcani/icona/${slug(p.arcana)}`} alt="" decorativa className="h-4 w-4 shrink-0 object-contain" fallback={null} />
+                        <AssetImg nome={`arcani/icona/${slug(p.arcana)}`} alt="" decorativa dimensione={16} quadrata className="h-4 w-4 shrink-0 object-contain" fallback={null} />
                         <span className="truncate">{p.arcanaNome}{p.inSquadra ? '' : ' · in deposito'}</span>
                       </span>
                       <span className="riga-persona__skill">

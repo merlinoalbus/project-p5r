@@ -59,7 +59,7 @@ export function RigaConfidente({ c, selezionata, oggi, motivoOggi, onScegli }: P
   const pronto = sogliaRaggiunta(c) && !c.bloccato;
   return (
     <li className={`riga-confidente ${pronto ? 'riga-confidente--pronta' : ''} ${selezionata ? 'riga-confidente--scelta' : ''} ${c.bloccato && c.rango === 0 ? 'poster--bloccato' : ''} ${classiSuggerito(oggi, 'riga')}`}>
-      <AssetImg nome={`arcani/${slug(c.arcana)}-senza-testo`} alt="" decorativa className="poster__filigrana" fallback={null} />
+      <AssetImg nome={`arcani/${slug(c.arcana)}-senza-testo`} alt="" decorativa dimensione={96} className="poster__filigrana" fallback={null} />
       <ImmagineEntita ambito="confidente" chiave={c.chiave} etichetta={c.nome} dimensione={44} forma="carta" adatta="copri" />
       {/* il nome accessibile è il contenuto stesso (nome, Oggi, arcano, stato, rango): niente aria-label che lo nasconda */}
       <button type="button" className="riga-confidente__scelta touch" onClick={onScegli} aria-current={selezionata ? 'true' : undefined}>
@@ -67,7 +67,7 @@ export function RigaConfidente({ c, selezionata, oggi, motivoOggi, onScegli }: P
             restringe mai (accanto al nome, nelle colonne strette, si schiacciava in «OGG I») */}
         <span className="font-display uppercase testo-18 leading-[1.05] tracking-wide line-clamp-2 break-words">{c.nome}</span>
         <span className="flex items-center gap-1.5 testo-12 text-text-muted min-w-0">
-          <AssetImg nome={`arcani/icona/${slug(c.arcana)}`} alt="" decorativa className="h-4 w-4 shrink-0 object-contain" fallback={null} />
+          <AssetImg nome={`arcani/icona/${slug(c.arcana)}`} alt="" decorativa dimensione={16} quadrata className="h-4 w-4 shrink-0 object-contain" fallback={null} />
           <span className="truncate">{c.arcanaNome}</span>
           {oggi && <span className="shrink-0 whitespace-nowrap"><TargaSuggerito motivo={motivoOggi} compatta /></span>}
         </span>

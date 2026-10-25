@@ -55,7 +55,8 @@ describe('ImmagineEntita', () => {
     render(<ImmagineEntita ambito="altro" chiave="prova" etichetta="Prova Entità" modificabile dimensione={120} forma="orizzontale" />);
 
     const img = await screen.findByRole('img', { name: 'Prova Entità' });
-    expect(img).toHaveAttribute('src', '/api/immagini/altro/prova/file?v=x-0&r=0');
+    // R12-03: nel riquadro l'immagine del database si chiede in miniatura (320 px per un riquadro da 120 a densità doppia)
+    expect(img).toHaveAttribute('src', '/api/immagini/altro/prova/file?v=x-0&r=0&l=320');
     expect(img.className).toContain('object-contain');
     const riquadro = screen.getByRole('button', { name: /Immagine di Prova Entità/ });
     expect(riquadro).toHaveStyle({ width: '120px', height: '90px' });
@@ -78,6 +79,6 @@ describe('ImmagineEntita', () => {
     const img2 = await within(finestra).findByRole('img', { name: 'Prova Entità' });
     expect(img2.getAttribute('src')).toMatch(/&r=[1-9]\d*$/);
     // la card fuori dalla finestra mostra la stessa immagine aggiornata
-    expect(within(riquadro).getByRole('img').getAttribute('src')).toBe(img2.getAttribute('src'));
+    expect(within(riquadro).getByRole('img').getAttribute('src')).toBe(`${img2.getAttribute('src')}&l=320`);
   });
 });

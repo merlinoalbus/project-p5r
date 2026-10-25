@@ -82,6 +82,18 @@ export function leggiImmagine(ambito: string, chiave: string): ImmagineDto | nul
   return r ? dto(r) : null;
 }
 
+/**
+ * I metadati del file di una immagine, senza il contenuto (R12-03): bastano a rispondere 304 e a servire una miniatura già in cache,
+ * senza caricare dal database l'originale (anche diversi MB). Stessi 404 di `fileImmagine`; `contenuto IS NULL` si valuta senza
+ * leggere il contenuto.
+ */
+export function metadatiFileImmagine(ambito: string, chiave: string): { id: number; mime: string; byte: number; createdAt: string } {
+  const r = prepared('SELECT id, mime, byte, created_at, contenuto IS NULL AS senza FROM immagine WHERE ambito = ? AND chiave = ?').get(ambito, chiaveDi(ambito, chiave)) as { id: number; mime: string; byte: number; created_at: string; senza: number } | undefined;
+  if (!r) throw httpErrors.notFound('immagine-non-trovata', `Nessuna immagine per ${ambito}/${chiave}.`);
+  if (r.senza) throw httpErrors.notFound('immagine-file-mancante', `L'immagine ${ambito}/${chiave} è registrata ma non ha contenuto.`);
+  return { id: r.id, mime: r.mime, byte: r.byte, createdAt: r.created_at };
+}
+
 /** Contenuto e mime di una immagine (per l'invio); 404 se la riga manca o non ha contenuto. */
 export function fileImmagine(ambito: string, chiave: string): { id: number; contenuto: Buffer; mime: string; byte: number; createdAt: string } {
   const r = prepared('SELECT id, mime, byte, created_at, contenuto FROM immagine WHERE ambito = ? AND chiave = ?').get(ambito, chiaveDi(ambito, chiave)) as { id: number; mime: string; byte: number; created_at: string; contenuto: Buffer | null } | undefined;
