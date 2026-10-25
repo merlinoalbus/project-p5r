@@ -1081,6 +1081,8 @@ export interface DomandeDto {
   daSegnare?: DoteDaSegnareDto[];
   /** Solo nella risposta di una spunta dalla Guida che, passando dalla voce del Diario, ha completato la giornata: la partita è passata al giorno dopo. */
   giornoAvanzato?: GiornoAvanzatoDto;
+  /** Come `giornoAvanzato`, ma la partita è passata alla sera dello stesso giorno. */
+  fasciaAvanzata?: FasciaAvanzataDto;
   domande: DomandaDto[];
   esami: EsameDto[];
   premi: { fascinoPerPiazzamento?: Record<string, string>; moltiplicatoreConfidenti?: string; requisitoConoscenza?: Record<string, string>; trofeo?: string; fonte?: string; noteGenerali?: string } | null;
@@ -1369,8 +1371,10 @@ export interface AzionePercorsoDto {
   /** La guida del quiz delle attività di cui la voce registra un turno o a cui è collegata (migrazione 105), con `oggi` vero
    *  se il giorno della voce è uno dei giorni del quiz. Assente o vuoto: nessun quiz. */
   quiz?: QuizVoceDto[];
-  /** Solo nella risposta di una spunta: era l'ultima attività del giorno corrente e la partita è passata al giorno dopo. */
+  /** Solo nella risposta di una spunta: era l'ultima attività della sera del giorno corrente (senza decisioni aperte) e la partita è passata al giorno dopo. */
   giornoAvanzato?: GiornoAvanzatoDto;
+  /** Solo nella risposta di una spunta: era l'ultima attività di giorno del giorno corrente (senza decisioni aperte della fascia) e la partita è passata alla sera. */
+  fasciaAvanzata?: FasciaAvanzataDto;
   // ---- L3: il campo «Infiltrazioni» delle voci di Palazzo (presenti solo se la voce ha un Palazzo: riferimento `dungeon`,
   // oppure infiltrazioni già scelte, oppure una proposta — `palazzoDellaVoce`; assenti per le altre voci) ----
   /** L'insieme scelto, in ordine (la stessa infiltrazione può tornare, mai di seguito); vuoto = nessuna. */
@@ -1521,12 +1525,33 @@ export interface GiornoCorrenteDto {
   partita: PartitaDto;
 }
 
-/** Spuntata l'ultima attività del giorno corrente, la partita è passata al giorno dopo, di giorno (richiesta dell'utente,
- *  2026-09-30). Arriva nella risposta della spunta (azione della guida o cosa da fare) che l'ha fatto scattare. */
+/** Spuntata l'ultima attività della sera (e chiusa l'ultima decisione aperta del giorno), la partita è passata al giorno dopo, di giorno
+ *  (richiesta dell'utente, 2026-09-30; decisione A1 del 2026-10-25). Arriva nella risposta del gesto che l'ha fatto scattare: la
+ *  spunta (azione della guida o cosa da fare) oppure la decisione che ha chiuso l'ultima proposta aperta. */
 export interface GiornoAvanzatoDto {
   da: string;
   a: string;
   partita: PartitaDto;
+  /** Le decisioni ancora aperte nel giorno chiuso quando la partita è passata (per costruzione zero; se non lo sono, l'avviso porta al giorno chiuso). */
+  decisioniAperte?: number;
+}
+
+/** Spuntata l'ultima attività di giorno (e chiusa l'ultima decisione aperta della fascia), la partita è passata alla sera dello stesso giorno
+ *  (decisione A1 del 2026-10-25). Arriva nella risposta del gesto che l'ha fatto scattare, come `GiornoAvanzatoDto`. */
+export interface FasciaAvanzataDto {
+  /** 'MM-GG' del giorno, che non cambia. */
+  giorno: string;
+  da: FasciaGioco;
+  a: FasciaGioco;
+  partita: PartitaDto;
+  /** Le decisioni ancora aperte nel giorno (della sera) al momento del passaggio: l'avviso porta al giorno per decidere. */
+  decisioniAperte?: number;
+}
+
+/** L'avanzamento che un gesto può provocare: la fascia (giorno → sera) oppure il giorno (sera → giorno dopo), mai tutti e due. */
+export interface AvanzamentoGiornataDto {
+  giornoAvanzato?: GiornoAvanzatoDto;
+  fasciaAvanzata?: FasciaAvanzataDto;
 }
 
 export interface PercorsoGiornoDto {
@@ -1667,6 +1692,8 @@ export interface CruciverbaDto {
   voceUid?: string;
   /** Solo nella risposta di una spunta dalla Guida che, passando dalla voce del Diario, ha completato la giornata: la partita è passata al giorno dopo. */
   giornoAvanzato?: GiornoAvanzatoDto;
+  /** Come `giornoAvanzato`, ma la partita è passata alla sera dello stesso giorno. */
+  fasciaAvanzata?: FasciaAvanzataDto;
 }
 
 export interface CruciverbaTuttiDto {

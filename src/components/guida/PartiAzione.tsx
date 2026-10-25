@@ -12,7 +12,7 @@ import { useState, type MouseEvent } from 'react';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { ConfidentiPartita } from '../partita/ConfidentiPartita';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { NOME_TIPO_AZIONE, collegamentoAzione, descriviEffetti } from '../../utils/percorso';
+import { NOME_TIPO_AZIONE, collegamentoAzione, descriviEffetti, noteDellaGuidaCoincideConEffetto } from '../../utils/percorso';
 import { conRitornoDiario } from '../../utils/ritornoDiario';
 import { trovaScheda } from '../../utils/pannelloScheda';
 import { useApriPannello } from '../scheda/contestoScheda';
@@ -28,7 +28,7 @@ import { PulsanteGuidaQuiz } from './GuidaQuiz';
 /** Ciò che i cartellini di una riga d'azione leggono. */
 // L3: le infiltrazioni della voce servono a «Entra» (il cartellino del Palazzo apre l'infiltrazione giusta, `collegamentoAzione`)
 export type AzioneMostrata = Pick<AzionePercorsoDto, 'azione' | 'tipo' | 'riferimento' | 'riferimentoTesto' | 'rangoAtteso' | 'note' | 'produceTesto' | 'fatta' | 'effetti' | 'stato' | 'mappa' | 'atterraggio' | 'quiz'>
-  & Partial<Pick<AzionePercorsoDto, 'uid' | 'infiltrazioni' | 'infiltrazioneDaAprire' | 'infiltrazioniDelPalazzo' | 'propostaInfiltrazioni' | 'oggettoRiferimento' | 'oggettiCitati' | 'avvisiDisponibilita' | 'riferimentoNomeAttuale'>>;
+  & Partial<Pick<AzionePercorsoDto, 'uid' | 'infiltrazioni' | 'infiltrazioneDaAprire' | 'infiltrazioniDelPalazzo' | 'propostaInfiltrazioni' | 'oggettoRiferimento' | 'oggettiCitati' | 'avvisiDisponibilita' | 'riferimentoNomeAttuale' | 'produce'>>;
 
 /** L'immagine della riga: il ritratto del Confidente, l'emblema del Palazzo o l'icona del tipo. */
 export function ImmagineAzione({ a }: { a: Pick<AzionePercorsoDto, 'tipo' | 'riferimento' | 'riferimentoTesto'> }) {
@@ -115,7 +115,8 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
         </span>
       ))}
       {a.rangoAtteso !== null && <span className="testo-12 text-text-muted">rango atteso {a.rangoAtteso}</span>}
-      {a.note && <span className="testo-12 text-text-secondary">{a.note}</span>}
+      {/* un solo valore: il testo della guida si nasconde se dice lo stesso dell'effetto («Perizia +2» = «Perizia ♪♪ · 3 punti»), altrimenti si etichetta */}
+      {a.note && !noteDellaGuidaCoincideConEffetto(a.note, a.produce ?? []) && <span className="testo-12 text-text-secondary">Guida: {a.note}</span>}
       {/* le Doti che il gioco dà si segnano a mano (scelta dell'utente, 2026-09-30): la riga le dice, la spunta non le tocca */}
       {!a.fatta && a.produceTesto?.length > 0 && <span className="testo-12 text-text-muted" title="Che cosa dà il gioco: le Doti le segni tu nella scheda Doti, letture e turni li segna la spunta. Si cambia da «Modifica»">Il gioco dà: {a.produceTesto.join(' · ')}</span>}
       {a.fatta && a.produceTesto?.filter((t) => t.includes(' paga ¥')).map((t) => <span key={t} className="testo-12 text-text-muted">{t.slice(t.indexOf('paga ¥'))}</span>)}

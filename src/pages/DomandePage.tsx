@@ -69,13 +69,13 @@ function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: D
     }))) return;
     setOccupato(true);
     try {
-      const { giornoAvanzato, ...esito } = await impostaDomandaFatta(partitaId, d.id, fatta, fatta && daConoscenza);
+      const { giornoAvanzato, fasciaAvanzata, ...esito } = await impostaDomandaFatta(partitaId, d.id, fatta, fatta && daConoscenza);
       onCambiata(esito);
       // la nota di Conoscenza si segna a mano nelle Doti: l'avviso la ricorda. Con la voce del Diario collegata la spunta è la sua
       // (stesso stato, nessun avviso): la Conoscenza è il suo «Applica», qui sotto la riga, e la giornata può essere avanzata
       avvisaDotiDaSegnare(esito.daSegnare, 'Domanda segnata');
       if (d.voceUid) useSuggerimentiStore.getState().invalida();
-      seGiornoAvanzato({ giornoAvanzato });
+      seGiornoAvanzato({ giornoAvanzato, fasciaAvanzata });
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
     } finally {

@@ -10,9 +10,10 @@ import { getDb, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { cambiaGiornoPartita } from './giornoPartitaService.js';
-import type { AzionePercorsoDto, GiornoAvanzatoDto, GiornoCorrenteDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../../shared/types.js';
+import { avanzaSeFasciaCompleta } from './avanzamentoGiornataService.js';
+import type { AzionePercorsoDto, GiornoCorrenteDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../../shared/types.js';
 import { confidenti, leggiPartita } from './partiteService.js';
-import { conteggiGiornate, righeDelGiorno, spuntaVoce, spuntePartita, vociDelGiorno } from './giornataService.js';
+import { conteggiGiornate, spuntaVoce, vociDelGiorno } from './giornataService.js';
 import type { OpzioniSpunta } from './effettiAzioneService.js';
 import { allerteDelGiorno, meteoDelGiorno, testoMeteo } from './meteoService.js';
 import { giornoDellaSettimana } from '../../shared/date.js';
@@ -68,39 +69,19 @@ export function giornoPercorso(data: string, partitaId?: number): PercorsoGiorno
 }
 
 /**
- * Spuntata l'ultima attività del giorno corrente, la partita passa al giorno dopo, di giorno (richiesta dell'utente,
- * 2026-09-30: «se completo tutte le attività di un giorno deve spostare automaticamente il giorno corrente al giorno
- * successivo modalità giorno»). Le attività sono le voci che si spuntano (eventi, scadenze e promemoria no). Scatta solo se
- * `data` è il giorno corrente della partita e c'è almeno un'attività; togliere una spunta non torna indietro (chi chiama lo
- * invoca solo alla spunta). Restituisce il passaggio, o null.
- */
-export function avanzaSeGiornoCompleto(partitaId: number, data: string): GiornoAvanzatoDto | null {
-  if (dataCorrente(partitaId) !== data) return null;
-  const r = prepared('SELECT ordine FROM giorno WHERE data = ?').get(data) as { ordine: number } | undefined;
-  if (!r) return null;
-  const azioni = righeDelGiorno(data).filter((v) => v.genere === 'azione');
-  if (azioni.length === 0) return null;
-  const fatte = spuntePartita(partitaId, data);
-  if (!azioni.every((a) => fatte.has(a.uid))) return null;
-  const succ = prepared('SELECT data FROM giorno WHERE ordine > ? ORDER BY ordine ASC LIMIT 1').get(r.ordine) as { data: string } | undefined;
-  if (!succ) return null;
-  // la regola unica del cambio giorno (R10-16), con la sua descrizione nello storico
-  cambiaGiornoPartita(partitaId, succ.data, { titolo: `Giornata del ${data} completata`, dettaglio: `Tutte le attività del giorno sono fatte: la partita passa al ${succ.data}, di giorno.` });
-  return { da: data, a: succ.data, partita: leggiPartita(partitaId) };
-}
-
-/**
- * La spunta di una voce e l'eventuale passaggio al giorno dopo, in UN'unica transazione: o succedono tutte e due o nessuna. Prima la rotta
+ * La spunta di una voce e l'eventuale avanzamento della partita, in UN'unica transazione: o succedono tutte e due o nessuna. Prima la rotta
  * leggeva «era già fatta», spuntava e poi faceva avanzare il giorno in passi separati: se l'avanzamento falliva la spunta restava salvata e
- * il giorno non avanzava più (una nuova spunta la trovava «già fatta»). Il passaggio scatta solo alla spunta nuova (togliere una spunta o
- * ripetere quella già data non fa avanzare niente). È l'unica porta di tutte le spunte del Diario, dalla rotta come dalla Guida.
+ * il giorno non avanzava più (una nuova spunta la trovava «già fatta»). L'avanzamento (decisione A1 del 2026-10-25) è `avanzaSeFasciaCompleta`:
+ * dall'ultima attività di giorno alla sera, dall'ultima di sera al giorno dopo, sempre senza decisioni aperte (altrimenti scatta alla chiusura
+ * dell'ultima, in `decidiProposte`). Scatta solo alla spunta nuova (togliere una spunta o ripetere quella già data non fa avanzare niente né
+ * torna indietro). È l'unica porta di tutte le spunte del Diario, dalla rotta come dalla Guida.
  */
 export function spuntaEAvanza(partitaId: number, uid: string, fatta: boolean, opz: OpzioniSpunta = {}): AzionePercorsoDto {
   return getDb().transaction(() => {
     const giaFatta = !!prepared('SELECT 1 FROM spunta_voce_partita WHERE partita_id = ? AND voce_uid = ?').get(partitaId, uid);
     const azione = spuntaVoce(partitaId, uid, fatta, opz);
-    const giornoAvanzato = fatta && !giaFatta ? avanzaSeGiornoCompleto(partitaId, azione.giorno) : null;
-    return giornoAvanzato ? { ...azione, giornoAvanzato } : azione;
+    const avanzamento = fatta && !giaFatta ? avanzaSeFasciaCompleta(partitaId, azione.giorno) : null;
+    return avanzamento ? { ...azione, ...avanzamento } : azione;
   })();
 }
 

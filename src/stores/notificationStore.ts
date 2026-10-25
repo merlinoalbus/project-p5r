@@ -17,12 +17,22 @@ export interface Notification {
   /** Solo nella coda visiva, non nelle regioni live: chi la crea annuncia da sé lo stesso fatto in un testo più completo (lotto C, es.
    *  il cambio di rango delle Doti), così il lettore di schermo non lo sente due volte. */
   silenziosa?: boolean;
+  /** Un collegamento a una pagina dell'app, mostrato come pulsante nella notifica (es. dal passaggio alla sera al giorno con le decisioni ancora aperte). */
+  collegamento?: CollegamentoNotifica;
+}
+
+/** Dove porta il pulsante di una notifica: un percorso interno dell'app (react-router). */
+export interface CollegamentoNotifica {
+  etichetta: string;
+  verso: string;
 }
 
 /** Opzioni di una notifica. */
 export interface OpzioniNotifica {
   /** Vedi `Notification.silenziosa`. */
   silenziosa?: boolean;
+  /** Vedi `Notification.collegamento`. */
+  collegamento?: CollegamentoNotifica;
 }
 
 interface NotificationState {
@@ -77,7 +87,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       return;
     }
     const id = `notif-${++counter}-${Date.now()}`;
-    const notification: Notification = { id, type, message, duration, createdAt: Date.now(), ...(opzioni?.silenziosa ? { silenziosa: true } : {}) };
+    const notification: Notification = { id, type, message, duration, createdAt: Date.now(), ...(opzioni?.silenziosa ? { silenziosa: true } : {}), ...(opzioni?.collegamento ? { collegamento: opzioni.collegamento } : {}) };
     set((s) => {
       let notifications = [...s.notifications, notification];
       if (duration <= 0) {

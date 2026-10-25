@@ -1,6 +1,7 @@
 import type { DoteChiave } from './doti.js';
 import type { NuovaRegistrazioneAcquisto } from './acquisti.js';
 import type { IntervalloBeneficioPesca, NuovaSessionePesca } from './pesca.js';
+import type { AvanzamentoGiornataDto } from './types.js';
 
 export type StatoPropostaPartita = 'aperta' | 'applicata' | 'scartata';
 export type VerificaConteggioProposta = 'da-dichiarare' | 'non-conteggiata' | 'ignota';
@@ -34,7 +35,10 @@ export interface AnteprimaDecisioneProposteDto {
   richiesta: RichiestaAnteprimaDecisioneProposte; proposte: PropostaPartitaDto[];
   movimenti: MovimentoPropostoDto[]; revisioneProposteAttesa: string;
 }
-export interface RicevutaDecisioneProposteDto {
+export interface RicevutaDecisioneProposteDto extends AvanzamentoGiornataDto {
   operazioneId: string; partitaId: number; decisione: DecisioneProposte['tipo'];
   proposte: RiferimentoPropostaPartita[]; movimenti: MovimentoPropostoDto[]; decisaIl: string;
+  // `giornoAvanzato` / `fasciaAvanzata` (ereditati) compaiono solo nella risposta di una decisione che ha chiuso l'ultima decisione aperta di una
+  // fascia o giornata già spuntata per intero: la partita è passata alla sera o al giorno dopo. Non fanno parte della ricevuta salvata (una
+  // ripetizione dello stesso gesto restituisce la ricevuta senza).
 }

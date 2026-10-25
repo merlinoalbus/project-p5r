@@ -130,7 +130,7 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       // che cosa è successo e, a parte, le Doti da segnare a mano (la spunta non le tocca)
       if (agg.ricevuteEffetti?.length) notifica('success', fatta ? 'Spunta ed effetti registrati. I punti li applichi dal pulsante sulla voce, gli yen li cambi tu.' : 'Spunta rimossa usando le sue ricevute. Le correzioni ai punti compaiono come pulsante «Annulla» sulla voce.');
       else if (fatta && agg.effetti) notifica('success', avvisoSpunta(agg.effetti), dotiDaSegnareDaEffetti(agg.effetti).length ? 7000 : undefined);
-      // era l'ultima attività del giorno: la partita è passata al giorno dopo
+      // era l'ultima attività di giorno o di sera (senza decisioni aperte): la partita è passata alla sera o al giorno dopo
       seGiornoAvanzato(agg);
     } catch (err) {
       if (vivo.current) notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
