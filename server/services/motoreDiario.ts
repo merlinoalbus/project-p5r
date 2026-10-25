@@ -3,7 +3,8 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { HttpError, httpErrors } from '../utils/httpError.js';
 import { verificaPartita } from './verificaPartita.js';
 import { eDote } from '../../shared/doti.js';
-import { chiaveSblocco, eEffettoDiStato, normalizzaEffettoVoce, normalizzaEffettiVoce } from '../../shared/effettiVoce.js';
+import { chiaveSblocco, eEffettoDiStato, motivoYenGiaStrutturati, normalizzaEffettoVoce, normalizzaEffettiVoce } from '../../shared/effettiVoce.js';
+import { yenDelDato } from './yenDeiDati.js';
 import type { AnteprimaDecisioneEffettoVoceDto, EffettoLegacyVoce, EffettoVoce, EffettoVoceDto, PropostaEffettoVoceDto, ReceiptEffettoVoceDto, RichiestaAnteprimaDecisioneEffettoVoce, RichiestaDecisioneEffettoVoce, RichiestaSalvaEffettiVoce, StatoEffettiVoceDto } from '../../shared/effettiVoce.js';
 import type { NuovaRegistrazioneAcquisto, RichiestaRegistraAcquisto } from '../../shared/acquisti.js';
 import type { EffettiAzioneDto } from '../../shared/types.js';
@@ -74,9 +75,10 @@ function verificaLista(effetti:EffettoVoceDto[]):void {
   const ids=new Set<string>(),rivendicati=new Set<string>();
   for(const e of effetti){if(!/^[0-9a-f]{32}$/.test(e.uid)||ids.has(e.uid))throw httpErrors.badRequest('identita-effetto-non-valida','Gli UID degli effetti devono essere distinti.');ids.add(e.uid);}
   // L13 (decisione 2): gli yen che un altro dato porta già (il prezzo di un articolo o di una consumazione, la quota della pesca, le
-  // ricompense di una Richiesta completata) li muove quel dato: un effetto «yen» accanto a loro li conterebbe due volte
-  const conPrezzo=effetti.find((e)=>['articolo','acquisto','pesca','richiesta'].includes(e.effetto.tipo));
-  if(conPrezzo&&effetti.some((e)=>e.effetto.tipo==='yen'))throw httpErrors.conflict('yen-gia-strutturati',`Gli yen di questa voce li porta già l’effetto «${conPrezzo.effetto.tipo==='richiesta'?'Richiesta completata':conPrezzo.effetto.tipo==='pesca'?'pesca':'acquisto'}»: togli l’effetto Yen, non si contano due volte.`);
+  // ricompense di una Richiesta completata, la paga o il costo del turno di un'attività, il prezzo del film visto) li muove quel dato: un
+  // effetto «yen» accanto a loro li conterebbe due volte. Qui gli effetti; il collegamento della voce lo guarda `verificaYenVoce` al salvataggio
+  const motivo=motivoYenGiaStrutturati(effetti.map((e)=>e.effetto),{riferimento:null,yenDi:yenDelDato});
+  if(motivo)throw httpErrors.conflict('yen-gia-strutturati',motivo);
   if(effetti.filter((e)=>e.effetto.tipo==='yen').length>1)throw httpErrors.badRequest('yen-ripetuti','Una voce ha al più un effetto Yen: scrivi l’importo complessivo.');
   for(const e of effetti)if(e.effetto.tipo==='acquisto')for(const id of e.effetto.sostituisceDoti){
     const sostituito=effetti.find((x)=>x.uid===id);
@@ -87,8 +89,18 @@ function verificaLista(effetti:EffettoVoceDto[]):void {
     if(!sostituito||sostituito.effetto.tipo!==famiglia||rivendicati.has(id)||sostituito.effetto.tipo==='turno'&&!eAttivitaPesca(sostituito.effetto.attivita)||sostituito.effetto.tipo==='dote'&&sostituito.effetto.dote!=='perizia')throw httpErrors.conflict('pesca-sostituzione-non-valida','Ogni raccordo deve indicare un turno di pesca o una Dote Perizia presente, rivendicati da una sola fonte.');rivendicati.add(id);
   }
 }
+/**
+ * L13 (decisione 2): la regola degli yen già portati da un altro dato, con anche il collegamento della voce (film, attività o Richiesta con i
+ * suoi yen). Al salvataggio degli effetti e, cambiando il collegamento, dopo averlo scritto (`giornataService.aggiornaVoce`): 409 se non vale.
+ */
+export function verificaYenVoce(uid:string,effetti?:readonly EffettoVoce[]):void {
+  const v=prepared('SELECT riferimento_tipo,riferimento_chiave FROM main.voce_giornata WHERE uid=?').get(uid) as {riferimento_tipo:string|null;riferimento_chiave:string|null}|undefined;
+  const lista=effetti??(prepared('SELECT dati_json FROM main.voce_effetto WHERE voce_uid=? ORDER BY ordine').all(uid) as Array<{dati_json:string}>).flatMap((r)=>{const e=normalizzaEffettoVoce(leggiJsonRegistro(r.dati_json,'effetto della voce'));return e?[e]:[];});
+  const motivo=motivoYenGiaStrutturati(lista,{riferimento:v?.riferimento_tipo&&v.riferimento_chiave?{tipo:v.riferimento_tipo,chiave:v.riferimento_chiave}:null,yenDi:yenDelDato});
+  if(motivo)throw httpErrors.conflict('yen-gia-strutturati',motivo);
+}
 function scriviLista(uid:string,effetti:EffettoVoceDto[],raw:string):void {
-  verificaLista(effetti);const adesso=nowIso();
+  verificaLista(effetti);verificaYenVoce(uid,effetti.map((e)=>e.effetto));const adesso=nowIso();
   prepared('DELETE FROM main.voce_effetto WHERE voce_uid=?').run(uid);
   for(const [ordine,e] of effetti.entries())prepared('INSERT INTO main.voce_effetto(uid,voce_uid,ordine,tipo,chiave,dati_json,origine,updated_at) VALUES(?,?,?,?,?,?,?,?)').run(e.uid,uid,ordine,e.effetto.tipo,chiaveEffetto(e.effetto),jsonCanonico(e.effetto),e.origine,adesso);
   prepared(`INSERT INTO main.voce_effetto_transizione(voce_uid,stato,raw_json,motivo,impronta,aggiornata_il) VALUES(?,'convertita',?,NULL,?,?)

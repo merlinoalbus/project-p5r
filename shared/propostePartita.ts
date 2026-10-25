@@ -9,8 +9,9 @@ export interface RiferimentoPropostaPartita { id: number; uid: string }
 export interface SaldoBeneficioDto { dovuto: number | null; attribuito: number; differenza: number; ciclo: number; revisione: string; intervallo?: IntervalloBeneficioPesca; residuoIgnoto?: boolean }
 export interface PropostaPartitaDto extends RiferimentoPropostaPartita {
   partitaId: number; tipo: 'dote' | 'yen' | 'punti-pesca' | 'effetto-voce'; chiave: string;
-  causa: { tipo: 'acquisto' | 'voce' | 'pesca'; chiave: string };
-  /** Il testo della voce del Diario da cui nasce la proposta (null se non ce n'è una o non c'è più). */
+  /** L13 (decisione 3): `richiesta` = gli yen di una Richiesta completata (`chiave` = chiave della Richiesta): li applica solo lei. */
+  causa: { tipo: 'acquisto' | 'voce' | 'pesca' | 'richiesta'; chiave: string };
+  /** Il testo della voce del Diario da cui nasce la proposta (null se non ce n'è una o non c'è più); per una Richiesta, la frase che la nomina. */
   voceTesto?: string | null;
   /** La voce del Diario a cui si aggancia il pulsante «Applica» (null se la proposta non nasce da una voce). */
   voceUid?: string | null;

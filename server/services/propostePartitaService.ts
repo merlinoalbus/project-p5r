@@ -38,7 +38,10 @@ export function leggiOggettoRegistro(raw:string,contesto='registro'):Record<stri
   const x=leggiJsonRegistro<unknown>(raw,contesto);if(!x||typeof x!=='object'||Array.isArray(x))throw httpErrors.conflict('registro-non-valido',`Il ${contesto} non contiene un oggetto riconoscibile: nessun dato viene azzerato.`);return x as Record<string,unknown>;
 }
 
-type Causa = { tipo: 'acquisto' | 'voce' | 'pesca'; chiave: string };
+/** L13 (decisione 3, utente 047): `richiesta` = gli yen di una Richiesta completata, `chiave` = la chiave della Richiesta. */
+type Causa = { tipo: 'acquisto' | 'voce' | 'pesca' | 'richiesta'; chiave: string };
+/** La chiave di una Richiesta come la scrive `richiesteService` (slug, al più 200 caratteri). */
+const CHIAVE_RICHIESTA = /^[a-z0-9][a-z0-9._-]{0,199}$/i;
 interface Beneficio { tipo: 'dote' | 'yen' | 'punti-pesca'; chiave: string; delta: number; motivo: string; fortunaIgnota?: boolean; storica?: boolean; intervallo?: IntervalloBeneficioPesca }
 interface Target extends Beneficio { attiva: boolean }
 interface RigaProposta {
@@ -49,7 +52,7 @@ interface RigaProposta {
   applicazione_json: string | null; creata_il: string; decisa_il: string | null;
 }
 const righeCausa = (p: number, c: Causa): RigaProposta[] => prepared('SELECT * FROM utente.da_applicare WHERE partita_id=? AND causa_tipo=? AND causa_chiave=? ORDER BY id').all(p,c.tipo,c.chiave) as RigaProposta[];
-const causaDi = (r: RigaProposta): Causa => {if((r.causa_tipo==='voce'&&!/^[0-9a-f]{32}:[0-9a-f]{32}$/.test(r.causa_chiave))||(['acquisto','pesca'].includes(r.causa_tipo)&&!/^[0-9a-f]{32}$/.test(r.causa_chiave)))throw httpErrors.conflict('causa-incoerente','Il registro contiene un’identità di causa non riconoscibile.');return { tipo: r.causa_tipo, chiave: r.causa_chiave };};
+const causaDi = (r: RigaProposta): Causa => {if((r.causa_tipo==='voce'&&!/^[0-9a-f]{32}:[0-9a-f]{32}$/.test(r.causa_chiave))||(['acquisto','pesca'].includes(r.causa_tipo)&&!/^[0-9a-f]{32}$/.test(r.causa_chiave))||(r.causa_tipo==='richiesta'&&!CHIAVE_RICHIESTA.test(r.causa_chiave)))throw httpErrors.conflict('causa-incoerente','Il registro contiene un’identità di causa non riconoscibile.');return { tipo: r.causa_tipo, chiave: r.causa_chiave };};
 export const verificaBeneficio = (v: unknown): Beneficio => {
   if (!v || typeof v !== 'object' || Array.isArray(v)) throw httpErrors.conflict('beneficio-non-valido', 'La ricevuta del beneficio non è valida.');
   const b = v as Record<string, unknown>;
@@ -60,6 +63,15 @@ export const verificaBeneficio = (v: unknown): Beneficio => {
 };
 
 function targetCausa(partita: number, causa: Causa): Target[] {
+  if(causa.tipo==='richiesta'){
+    // L13 (decisione 3): gli yen della Richiesta li applica solo la Richiesta completata (`richiesta.yen`): beneficio attivo finché è completata
+    // nella partita; tolto il completamento (o eliminata la Richiesta) il beneficio resta descritto dalle righe di prima, non più attivo
+    const r=prepared("SELECT r.nome,r.yen FROM main.richiesta r JOIN utente.richiesta_partita p ON p.richiesta_chiave=r.chiave AND p.partita_id=? AND p.stato='completata' WHERE r.chiave=?").get(partita,causa.chiave) as {nome:string;yen:number|null}|undefined;
+    const insieme=new Map<string,Target>();
+    for(const x of righeCausa(partita,causa)){const b=verificaBeneficio(leggiOggettoRegistro(x.dati_json,'proposta richiesta').beneficio);insieme.set(`${b.tipo}\0${b.chiave}`,{...b,attiva:false});}
+    if(r&&Number.isSafeInteger(r.yen)&&(r.yen as number)>0)insieme.set('yen\0yen',{tipo:'yen',chiave:'yen',delta:r.yen as number,motivo:`Yen della Richiesta «${r.nome}» completata: applicali quando li ricevi nel gioco.`,fortunaIgnota:false,storica:false,attiva:true});
+    return [...insieme.values()];
+  }
   if(causa.tipo==='pesca'){
     const attuali=targetBeneficiPesca(partita,causa.chiave),insieme=new Map<string,Target>();
     for(const r of righeCausa(partita,causa)){const b=verificaBeneficio(leggiOggettoRegistro(r.dati_json,'proposta pesca').beneficio);insieme.set(`${b.tipo}\0${b.chiave}`,{...b,attiva:false});}
@@ -234,6 +246,8 @@ export function riconciliaBeneficiCausa(partita: number, causa: Causa): void {
 export const riconciliaBeneficiAcquisto = (p:number,id:string):void => riconciliaBeneficiCausa(p,{tipo:'acquisto',chiave:id});
 export const riconciliaBeneficiVoce = (p:number,voce:string,effetto:string):void => riconciliaBeneficiCausa(p,{tipo:'voce',chiave:`${voce}:${effetto}`});
 export const riconciliaBeneficiPesca = (p:number,id:string):void => riconciliaBeneficiCausa(p,{tipo:'pesca',chiave:id});
+/** L13 (decisione 3): riallinea gli yen di una Richiesta nella partita (completata: la proposta «Applica»; non più: la chiusura o l'inversa). */
+export const riconciliaBeneficiRichiesta = (p:number,chiave:string):void => riconciliaBeneficiCausa(p,{tipo:'richiesta',chiave});
 export function beneficiPescaDto(p:number,id:string):import('../../shared/pesca.js').BeneficioPescaDto[] {
   const c:Causa={tipo:'pesca',chiave:id};return targetCausa(p,c).map(t=>{const s=saldo(p,c,t);return {causa:id,tipo:t.tipo,chiave:t.chiave,unita:t.tipo==='dote'?'punti-interni':t.tipo,intervallo:s.intervallo??{minimo:s.dovuto!,massimo:s.dovuto!},attribuito:s.attribuito,deltaCerto:s.differenza,residuoIgnoto:s.residuoIgnoto??false,motivo:t.motivo};});
 }
@@ -312,10 +326,13 @@ function dto(r:RigaProposta):PropostaPartitaDto {
       const a=prepared('SELECT articolo_chiave FROM utente.acquisto_registrato WHERE partita_id=? AND id=?').get(r.partita_id,causa.chiave) as {articolo_chiave:string}|undefined;
       orfana=orfana||!a||!prepared('SELECT 1 FROM main.articolo WHERE chiave=?').get(a.articolo_chiave);
     } else if(causa.tipo==='voce')orfana=orfana||!prepared('SELECT 1 FROM main.voce_giornata WHERE uid=?').get(r.voce_uid);
+    else if(causa.tipo==='richiesta')orfana=orfana||!prepared('SELECT 1 FROM main.richiesta WHERE chiave=?').get(causa.chiave);
     else orfana=orfana||!prepared('SELECT 1 FROM utente.pesca_sessione WHERE partita_id=? AND id=? UNION ALL SELECT 1 FROM utente.pesca_acquisto_esca WHERE partita_id=? AND id=?').get(r.partita_id,causa.chiave,r.partita_id,causa.chiave);
   }
   // R10-10/4: il testo della voce del Diario da cui nasce la proposta, per dirlo all'utente in parole (non solo il suo identificativo)
-  const voceTesto=r.voce_uid?((prepared('SELECT azione FROM main.voce_giornata WHERE uid=?').get(r.voce_uid) as {azione:string}|undefined)?.azione??null):null;
+  // L13: per gli yen di una Richiesta completata, la frase che la nomina (non c'è una voce)
+  const voceTesto=r.voce_uid?((prepared('SELECT azione FROM main.voce_giornata WHERE uid=?').get(r.voce_uid) as {azione:string}|undefined)?.azione??null)
+    :causa.tipo==='richiesta'?`Richiesta «${(prepared('SELECT nome FROM main.richiesta WHERE chiave=?').get(causa.chiave) as {nome:string}|undefined)?.nome??causa.chiave}» completata`:null;
   // BON-12: la spesa del consumo non è una proposta; la proposta Dote la porta come promemoria (gli yen si cambiano a mano)
   const promemoriaYen=r.tipo==='dote'&&causa.tipo==='acquisto'?((prepared('SELECT prezzo_yen FROM utente.acquisto_registrato WHERE partita_id=? AND id=?').get(r.partita_id,causa.chiave) as {prezzo_yen:number}|undefined)?.prezzo_yen??null):null;
   // BON-01: la voce del Diario a cui il pulsante «Applica» si aggancia (quella della proposta, o quella che ha confermato il consumo)
@@ -353,8 +370,9 @@ function prepara(partita:number,r:RichiestaAnteprimaDecisioneProposte):Anteprima
   for(const p of proposte) {
     if(r.decisione.tipo==='applica') {
       // BON-12: gli yen di un consumo restano un promemoria a mano. L13 (ondata 3, decisione 1): gli yen dichiarati da un effetto «yen» di una
-      // voce si applicano come la Dote, dal pulsante «Applica» sulla voce, con il movimento registrato (`movimento_yen`)
-      if(p.tipo==='yen'&&p.causa.tipo!=='voce')throw httpErrors.conflict('yen-a-mano','Gli yen si cambiano a mano: non c’è niente da applicare.');
+      // voce si applicano come la Dote, dal pulsante «Applica» sulla voce, con il movimento registrato (`movimento_yen`); così quelli di una Richiesta
+      // completata (decisione 3), dal pulsante «Applica» sulla sua carta
+      if(p.tipo==='yen'&&p.causa.tipo!=='voce'&&p.causa.tipo!=='richiesta')throw httpErrors.conflict('yen-a-mano','Gli yen si cambiano a mano: non c’è niente da applicare.');
       if(p.tipo==='effetto-voce'||!p.applicabile)throw httpErrors.conflict('proposta-non-applicabile',p.impedimenti.join(' ')||'Questa proposta richiede il raccordo esplicito.');
       const k=`${p.tipo}\0${p.chiave}`,v=virtuali.get(k)??{tipo:p.tipo,chiave:p.chiave,prima:valore(partita,p.tipo,p.chiave),delta:0,dopo:0};
       v.delta+=p.delta;v.dopo=v.prima+v.delta;

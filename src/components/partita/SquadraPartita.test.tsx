@@ -14,7 +14,8 @@ import userEvent from '@testing-library/user-event';
 import { SquadraPartita } from './SquadraPartita';
 import type { SquadraPartitaDto } from '../../types';
 
-const api = vi.hoisted(() => ({ getSquadra: vi.fn(), impostaMembroSquadra: vi.fn(), impostaYen: vi.fn() }));
+// L13: la scheda mostra anche gli oggetti ottenuti (una lettura sua)
+const api = vi.hoisted(() => ({ getSquadra: vi.fn(), impostaMembroSquadra: vi.fn(), impostaYen: vi.fn(), getOggettiOttenuti: vi.fn() }));
 vi.mock('../../services/api', (vero) => moduloApi(vero, api));
 
 const squadra: SquadraPartitaDto = {
@@ -30,6 +31,7 @@ beforeEach(() => {
   api.getSquadra.mockResolvedValue(squadra);
   api.impostaMembroSquadra.mockResolvedValue(squadra);
   api.impostaYen.mockResolvedValue(squadra);
+  api.getOggettiOttenuti.mockResolvedValue({ righe: [], totali: [] });
 });
 
 /** Attende le voci d'elenco e restituisce, per cercarci dentro, quella che contiene un elemento con il titolo `nome`; se manca lancia un errore. */

@@ -5,7 +5,7 @@
 import type {
   CapienzaScortaDto, CompendioPartitaDto, ConfidentePartitaDto, OsservazioneStatisticheDto, Difficolta, DoteSocialePartitaDto, FasciaGioco, ModificaConfidente, ModificaDote, PartitaDto, AnteprimaFusioneDto, CicloSalvatoDto, DomandeDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, ObiettivoDto, PersonaPossedutaDto, ArticoloDto, AzionePercorsoDto, CruciverbaDto, FilmDto, GiornoCorrenteDto, LibroDto, PuntoInteresseDto, RichiestaDto, StatoPunto, StatoRichiesta, TrofeoDto, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto, SuggerimentoIsolamentoDto, SuggerimentiOggiDto, SquadraPartitaDto, TimbriDedaloDto } from '../../types';
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut, queryString } from './_helpers';
-import type { DivergenzaDto, EsitoRegaloDto, MeteoGiornoDto, RichiestaRegalo, VideogiocoDto } from '../../types';
+import type { DivergenzaDto, EsitoRegaloDto, MeteoGiornoDto, OggettiOttenutiDto, RichiestaRegalo, RiepilogoRichiesteDto, VideogiocoDto } from '../../types';
 import type { MeteoPartita } from '../../../shared/meteoPartita';
 import type { FortunaPartitaDto } from '../../../shared/fortuna';
 import type { RichiestaRegistraAcquisto } from '../../../shared/acquisti';
@@ -134,6 +134,12 @@ export const impostaProgressoFilm = (id: number, chiave: string, avanzamento: nu
 
 /** Stato di una Richiesta dei Mementos nella partita (null = riaperta). */
 export const impostaStatoRichiesta = (id: number, richiesta: string, stato: StatoRichiesta | null): Promise<RichiestaDto> => apiPut(`/partite/${id}/richieste`, { richiesta, stato });
+
+/** L13: il riepilogo leggero delle Richieste per la Home (accettate, in scadenza): solo conteggi, senza scaricare l'elenco intero. */
+export const getRiepilogoRichieste = (id: number): Promise<RiepilogoRichiesteDto> => apiGet(`/partite/${id}/richieste/riepilogo`);
+
+/** L13: gli oggetti del catalogo ottenuti nella partita (voci con l'effetto «oggetto ricevuto» e Richieste completate). */
+export const getOggettiOttenuti = (id: number): Promise<OggettiOttenutiDto> => apiGet(`/partite/${id}/oggetti-ottenuti`);
 
 /** I timbri raccolti in un dedalo dei Memento (0 = azzera); 400 se la guida non ne dichiara il totale. */
 export const impostaTimbri = (id: number, area: string, raccolti: number): Promise<TimbriDedaloDto> => apiPut(`/partite/${id}/timbri`, { area, raccolti });

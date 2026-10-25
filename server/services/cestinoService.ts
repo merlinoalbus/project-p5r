@@ -48,6 +48,7 @@ import { radiceCestinoPesca, riconciliaPescaDopoRipristino, TIPI_CESTINO_PESCA }
 import { verificaAttivitaPesca } from './vincoliAttivitaPesca.js';
 import { eventoPescaMarcato } from './pescaStorico.js';
 import { riconciliaEffettiDopoRipristino } from './motoreDiario.js';
+import { riconciliaBeneficiRichiesta } from './propostePartitaService.js';
 import { ripristinaOrdineVoce } from './giornataService.js';
 import { azioneEventoAcquistoV1 } from './storicoService.js';
 import type { ContenutoCestinoDto, EsitoRipristinoCestinoDto, MotivoSaltataCestinoDto, SaltataCestinoDto, TipoCestino, VoceCestinoDto, VoceCestinoUnificatoDto } from '../../shared/types.js';
@@ -750,6 +751,8 @@ function ripristinaRegistro(r: IdentitaRipristino, parteP?: { registro_json: str
         .flatMap((s) => s.esempi.map((e) => e.split(' · ')).filter((x) => x.length >= 2).map(([p, c]) => `${p}|${c}`)));
       riconciliaEffettiDopoRipristino(partita, [...voceUids], confidentiNonRimessi);
       riconciliaPescaDopoRipristino(partita);
+      // L13 (decisione 3): una Richiesta rimessa torna completata dove lo era: i suoi yen si riallineano (proposta «Applica» o niente se già nel saldo)
+      if (r.tipo === 'richiesta') riconciliaBeneficiRichiesta(partita, r.chiave);
     }
     const vicini = r.vicini_json ? JSON.parse(r.vicini_json) as ViciniCestino : null;
     if (r.tipo === 'voce-diario') ripristinaOrdineVoce(r.chiave, vicini);

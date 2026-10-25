@@ -18,7 +18,8 @@ import { postoDelPin } from './mappe/nomiDeiPosti.js';
 import { catalogoOggettiDisponibile } from './catalogoOggettiLetture.js';
 import { eTracciamentoAttivita, tracciamentoPerTipo } from '../../shared/attivita.js';
 import { descriviEffettoAzione, normalizzaEffettiAzione, TIPI_RIFERIMENTO_AZIONE, type EffettoAzione, type NomiEffettiAzione } from '../../shared/effettiAzione.js';
-import type { NomiFraseEffetto } from '../../shared/effettiVoce.js';
+import type { DatoConYen, NomiFraseEffetto } from '../../shared/effettiVoce.js';
+import { SQL_YEN_DEL_DATO } from './yenDeiDati.js';
 import { eOffertaAojiru } from '../../shared/acquisti.js';
 import { leggiEsitiAttivita } from '../../shared/esitiAttivita.js';
 import type { ConfidentePartitaDto, ElenchiAzioneDto, ElenchiEffettiVoceDto, StatoAzioneDto } from '../../shared/types.js';
@@ -219,14 +220,20 @@ export function elenchiAzione(): ElenchiAzioneDto {
     .map((a) => ({ ...a, nome: a.titolo_corrente, esiti_json: a.esiti_json ?? null }));
   // L13: gli esiti di ogni attività, per scegliere nella voce l'esito atteso del turno (solo nel modo «scelta»)
   const esitiDi = (json: string | null) => { const e = leggiEsitiAttivita(json); return e ? { esiti: { modo: e.modo, elenco: e.esiti.map((x) => ({ chiave: x.chiave, nome: x.nome })) } } : {}; };
+  // L13 (decisione 2): gli yen che film, attività e Richieste portano già (`yenDeiDati`, la stessa definizione del controllo del server), perché
+  // l'editor della voce avvisi subito di un effetto «yen» che li conterebbe due volte
+  const yenDi = (tabella: DatoConYen): Map<string, number> => new Map((prepared(`SELECT chiave, ${SQL_YEN_DEL_DATO[tabella]} AS yen FROM ${tabella}`).all() as Array<{ chiave: string; yen: number | null }>)
+    .flatMap((r) => (typeof r.yen === 'number' && r.yen > 0 ? [[r.chiave, r.yen] as [string, number]] : [])));
+  const conYen = <T extends { chiave: string }>(elenco: T[], yen: Map<string, number>): Array<T & { yen?: number }> => elenco.map((x) => (yen.has(x.chiave) ? { ...x, yen: yen.get(x.chiave)! } : x));
+  const yenFilm = yenDi('film'), yenAttivita = yenDi('attivita'), yenRichieste = yenDi('richiesta');
   return {
     confidenti: (prepared('SELECT chiave, nome, arcana FROM confidente ORDER BY ordine').all() as Array<{ chiave: string; nome: string; arcana: string }>).map((c) => ({ chiave: c.chiave, nome: c.nome, dettaglio: t('arcana', c.arcana) })),
     dungeon: pulite(voci('SELECT chiave, nome FROM dungeon ORDER BY ordine')),
-    richieste: pulite(voci('SELECT chiave, nome, committente AS dettaglio FROM richiesta ORDER BY ordine')),
+    richieste: conYen(pulite(voci('SELECT chiave, nome, committente AS dettaglio FROM richiesta ORDER BY ordine')), yenRichieste),
     libri: pulite(voci(`SELECT chiave,titolo_corrente AS nome,${catalogoOggettiDisponibile() ? 'NULL' : 'dove'} AS dettaglio FROM (${titoliLettura('libro', 'WHERE l.nascosto = 0 ORDER BY l.ordine')})`)),
-    film: pulite(voci(`SELECT chiave,titolo_corrente AS nome,CASE dove WHEN 'cinema' THEN 'Cinema' ELSE 'DVD' END AS dettaglio FROM (${titoliLettura('film', 'WHERE l.nascosto = 0 ORDER BY l.ordine')})`)),
+    film: conYen(pulite(voci(`SELECT chiave,titolo_corrente AS nome,CASE dove WHEN 'cinema' THEN 'Cinema' ELSE 'DVD' END AS dettaglio FROM (${titoliLettura('film', 'WHERE l.nascosto = 0 ORDER BY l.ordine')})`)), yenFilm),
     videogiochi: attivita.filter((a) => a.tipo === 'videogioco').map((a) => ({ chiave: a.chiave, nome: a.nome })),
-    attivita: attivita.map((a) => ({ chiave: a.chiave, nome: a.nome, turni: !a.confidente_chiave && (eTracciamentoAttivita(a.tracciamento) ? a.tracciamento : tracciamentoPerTipo(a.tipo)) === 'svolta', ...(a.confidente_chiave ? {} : esitiDi(a.esiti_json)) })),
+    attivita: attivita.map((a) => ({ chiave: a.chiave, nome: a.nome, ...(yenAttivita.has(a.chiave) ? { yen: yenAttivita.get(a.chiave)! } : {}), turni: !a.confidente_chiave && (eTracciamentoAttivita(a.tracciamento) ? a.tracciamento : tracciamentoPerTipo(a.tipo)) === 'svolta', ...(a.confidente_chiave ? {} : esitiDi(a.esiti_json)) })),
     negozi: pulite(voci('SELECT chiave, nome, luogo AS dettaglio FROM negozio WHERE nascosto = 0 ORDER BY ordine')),
     doti: pulite(voci('SELECT chiave, nome FROM dote_sociale ORDER BY ordine')),
   };

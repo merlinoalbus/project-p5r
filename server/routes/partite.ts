@@ -21,7 +21,8 @@ import { aggiornaCiclo, avanzaCiclo, cicliSalvati, eliminaCiclo, salvaCiclo } fr
 import { capienzaScorta } from '../services/capienzaScortaService.js';
 import { impostaPiazzamentoEsame } from '../services/piazzamentoEsamiService.js';
 import { impostaStatoPunto } from '../services/dungeonService.js';
-import { impostaStatoRichiesta } from '../services/richiesteService.js';
+import { impostaStatoRichiesta, riepilogoRichieste } from '../services/richiesteService.js';
+import { oggettiOttenutiPartita } from '../services/oggettiOttenutiService.js';
 import { impostaTimbri } from '../services/timbriService.js';
 import { impostaLettura, impostaSessioneVideogioco } from '../services/attivitaService.js';
 import { bodySessioneVideogioco } from '../schemas/partite.js';
@@ -273,6 +274,14 @@ router.put('/:id/sessione-videogioco', validate({ params: paramsPartita, body: b
 router.put('/:id/richieste', validate({ params: paramsPartita, body: bodyStatoRichiesta }), (req, res) => {
   const b = req.body as { richiesta: string; stato: 'accettata' | 'completata' | null };
   res.json(impostaStatoRichiesta(Number(req.params.id), b.richiesta, b.stato));
+});
+/** L13: il riepilogo leggero delle Richieste per la Home (accettate, in scadenza): solo conteggi. */
+router.get('/:id/richieste/riepilogo', validate({ params: paramsPartita }), (req, res) => {
+  res.json(riepilogoRichieste(Number(req.params.id)));
+});
+/** L13: gli oggetti del catalogo ottenuti nella partita (voci con l'effetto «oggetto ricevuto», Richieste completate). */
+router.get('/:id/oggetti-ottenuti', validate({ params: paramsPartita }), (req, res) => {
+  res.json(oggettiOttenutiPartita(Number(req.params.id)));
 });
 /** I timbri raccolti in un dedalo dei Memento (0 = azzera). */
 router.put('/:id/timbri', validate({ params: paramsPartita, body: z.object({ area: z.string().min(1).max(200), raccolti: z.number().int().min(0).max(999) }) }), (req, res) => {

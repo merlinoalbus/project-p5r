@@ -32,10 +32,12 @@ const canonico = (v: unknown): unknown => Array.isArray(v) ? v.map(canonico) : v
  * I punti di una voce spuntata che non sono ancora nella partita, con il pulsante «Applica» sulla voce (BON-01): nessun pannello a
  * parte. Nessun saldo cambia senza una decisione esplicita (D6). Senza proposte aperte né decise per la voce non mostra niente.
  */
-export function DaApplicare(props: { partitaId: number; voceUid: string; onCambiato?: () => void | Promise<void> }) {
-  return <DaApplicareNelContesto key={`${props.partitaId}:${props.voceUid}`} {...props} />;
+/** Le proposte di una voce del Diario (`voceUid`) o, L13 (decisione 3), gli yen di una Richiesta completata (`richiesta`, sulla sua carta). */
+type PropsDaApplicare = { partitaId: number; onCambiato?: () => void | Promise<void> } & ({ voceUid: string; richiesta?: undefined } | { richiesta: string; voceUid?: undefined });
+export function DaApplicare(props: PropsDaApplicare) {
+  return <DaApplicareNelContesto key={`${props.partitaId}:${props.voceUid ?? `richiesta:${props.richiesta}`}`} {...props} />;
 }
-function DaApplicareNelContesto({ partitaId, voceUid, onCambiato }: { partitaId: number; voceUid: string; onCambiato?: () => void | Promise<void> }) {
+function DaApplicareNelContesto({ partitaId, voceUid, richiesta, onCambiato }: PropsDaApplicare) {
   const gesti = useGestiPartita();
   const elenco = useCarica(() => getDaApplicare(partitaId), [partitaId, gesti.versionePerPartita[partitaId] ?? 0, gesti.versioneGuida]);
   // i punti attuali delle Doti, per dire «Fascino 50 → 52» (R10-10/4); si rileggono quando la partita cambia
@@ -50,7 +52,7 @@ function DaApplicareNelContesto({ partitaId, voceUid, onCambiato }: { partitaId:
   const blocco = useRef(false);
   const vivo = useRef(true);
   useLayoutEffect(() => { vivo.current = true; return () => { vivo.current = false; }; }, []);
-  const dellaVoce = (elenco.dati ?? []).filter((p) => p.voceUid === voceUid || p.dati.voceUid === voceUid);
+  const dellaVoce = (elenco.dati ?? []).filter((p) => (richiesta !== undefined ? p.causa.tipo === 'richiesta' && p.causa.chiave === richiesta : p.voceUid === voceUid || p.dati.voceUid === voceUid));
   const aperte = dellaVoce.filter((p) => p.stato === 'aperta');
   /** Annulla il non ancora contato e applica: chi preme «Applica» dice implicitamente che i punti non sono ancora nel saldo. */
   const applica = async (p: PropostaPartitaDto) => {
@@ -117,7 +119,7 @@ function DaApplicareNelContesto({ partitaId, voceUid, onCambiato }: { partitaId:
   const uidVoce = consumo && typeof consumo.dati.voceUid === 'string' ? consumo.dati.voceUid : null;
   const uidEffetto = consumo && typeof consumo.dati.effettoUid === 'string' ? consumo.dati.effettoUid : null;
   if (elenco.dati && !dellaVoce.length && !anteprima && !consumo && !ricevuta) return null;
-  return <section className="flex min-w-0 flex-col gap-2 rounded border border-border p-2" aria-label="Punti da applicare per questa voce">
+  return <section className="flex min-w-0 flex-col gap-2 rounded border border-border p-2" aria-label={richiesta !== undefined ? 'Yen da applicare per questa Richiesta' : 'Punti da applicare per questa voce'}>
     <GestiPartita partitaId={partitaId} onCambiato={async () => { if (vivo.current) { setAnteprima(null); setIncerto(false); await elenco.ricarica(); await onCambiato?.(); } }} />
     {elenco.caricamento && !elenco.dati && <p role="status" className="m-0 testo-13">Un attimo…</p>}
     {elenco.errore && <p role="alert" className="m-0 text-error-testo">{elenco.errore}</p>}
@@ -132,7 +134,7 @@ function DaApplicareNelContesto({ partitaId, voceUid, onCambiato }: { partitaId:
           })()}
           <span>{p.motivo}</span>
           {!!p.promemoriaYen && <span className="rounded border border-border p-2 testo-12">Promemoria: questo consumo è costato ¥{p.promemoriaYen.toLocaleString('it-IT')}. L’app non tocca i tuoi yen: cambiali tu a mano.</span>}
-          {p.orfana && <span className="text-warning">La voce o il consumo da cui nasce non c’è più.</span>}
+          {p.orfana && <span className="text-warning">{p.causa.tipo === 'richiesta' ? 'La Richiesta da cui nasce non c’è più.' : 'La voce o il consumo da cui nasce non c’è più.'}</span>}
           {(() => {
             // «Applica» non chiede più «già nel saldo?»: premerlo dice che i punti non sono ancora contati; chi li ha già contati lo dice a parte
             const soloVerifica = p.impedimenti.every((i) => i.startsWith('Prima indica'));

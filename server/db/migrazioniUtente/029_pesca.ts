@@ -3,12 +3,12 @@ import type { AppDatabase } from '../dbService.js';
 import type { Migration } from '../migrationRunner.js';
 import { ddlPropostePesca029, INDICI_PROPOSTE_029, STRUTTURE_PESCA_029, TABELLE_PESCA_029 } from './pesca029Schema.js';
 
-type OggettoSchema = { type: string; name: string; tbl_name: string; sql: string | null };
+export type OggettoSchema = { type: string; name: string; tbl_name: string; sql: string | null };
 const q = (nome: string) => `"${nome.replaceAll('"', '""')}"`;
 const errore = (motivo: string): never => { throw new Error(`029 pesca: ${motivo}; append annullato senza reset dei dati.`); };
 
-/** Si ignorano soltanto spazi SQL esterni ai letterali e le qualifiche del CREATE. */
-function normalizzaDDL(sql: string): string {
+/** Si ignorano soltanto spazi SQL esterni ai letterali e le qualifiche del CREATE. (Esportata per la utente 047, che rifà la stessa verifica.) */
+export function normalizzaDDL(sql: string): string {
   const s = sql.replace(/^CREATE (UNIQUE )?(TABLE|INDEX) (?:IF NOT EXISTS )?(?:utente\.)?/i, (_, unico: string | undefined, tipo: string) => `CREATE ${unico ?? ''}${tipo} `)
     .replace(/^CREATE TABLE "([a-z_0-9]+)"/, 'CREATE TABLE $1');
   let out = '', citazione = false;
@@ -23,12 +23,12 @@ function normalizzaDDL(sql: string): string {
   return out;
 }
 
-function oggetti(db: AppDatabase): OggettoSchema[] {
+export function oggetti(db: AppDatabase): OggettoSchema[] {
   return db.prepare('SELECT type,name,tbl_name,sql FROM utente.sqlite_master ORDER BY type,name').all() as OggettoSchema[];
 }
 
 /** Le firme rimangono in RAM. Gli interi SQLite non passano attraverso Number. */
-function firmaTabella(db: AppDatabase, tabella: string, colonne: string[]): string {
+export function firmaTabella(db: AppDatabase, tabella: string, colonne: string[]): string {
   const h = createHash('sha256');
   const struttura = db.prepare('SELECT name,pk FROM pragma_table_info(?,?) ORDER BY pk').all(tabella, 'utente') as Array<{ name: string; pk: number }>;
   const pk = struttura.filter(c => c.pk > 0).map(c => c.name);

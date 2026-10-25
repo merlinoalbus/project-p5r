@@ -155,6 +155,19 @@ export function elencaOmbre(f: FiltroOmbre = {}): OmbraSchedaDto[] {
 }
 
 /**
+ * L13 (ondata 3): livello, debolezze e resistenze delle Ombre date, con la stessa lettura dell'elenco (la griglia della Persona con sopra le
+ * affinità proprie, nell'ordine degli elementi): chi mostra un'Ombra altrove (il bersaglio di una Richiesta) la legge da qui, non la ricalcola.
+ */
+export function profiliOmbre(chiavi: readonly string[]): Map<string, { livello: number | null; debolezze: string[]; resistenze: OmbraResistenzaDto[] }> {
+  const out = new Map<string, { livello: number | null; debolezze: string[]; resistenze: OmbraResistenzaDto[] }>();
+  if (chiavi.length === 0) return out;
+  const righe = prepared(`SELECT ${COLONNE} FROM ombra WHERE chiave IN (SELECT value FROM json_each(?))`).all(JSON.stringify([...new Set(chiavi)])) as RigaOmbra[];
+  const perPersona = affinitaDellePersone([...new Set(righe.flatMap((r) => (r.persona_id !== null ? [r.persona_id] : [])))]);
+  for (const r of righe) out.set(r.chiave, { livello: r.livello, ...debolezzeEResistenze(affinitaDellOmbra(r, perPersona)) });
+  return out;
+}
+
+/**
  * Se e dove un'Ombra si cattura ancora in una partita (R8-15b, G-026): con almeno un incontro raggiungibile «si»; con tutti gli incontri
  * in Palazzi conclusi, «solo per fusione» se la Persona è fondibile, altrimenti «no»; senza incontri noti «ignoto» (la guida non dice dove:
  * non si promette una cattura). Un'Ombra non catturabile (Babau/Bugs, le non reclutabili) non espone la cattura dall'incontro.

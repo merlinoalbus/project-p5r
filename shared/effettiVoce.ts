@@ -191,6 +191,38 @@ const copie = (q: number | undefined): string => (q && q > 1 ? ` ×${q}` : '');
  * Decisione 6: il riepilogo degli articoli di una voce somma copie e prezzo (stesso articolo in più effetti, o con la quantità): «3 articoli
  * comprati · ¥1.500 in tutto» (null se la voce non ne ha). I prezzi restano un promemoria: gli yen si cambiano dalla proposta o a mano.
  */
+/** I dati che possono portare già i loro yen (decisione 2): il film (prezzo), l'attività o il lavoro (costo o paga), la Richiesta (ricompensa). */
+export type DatoConYen = 'film' | 'attivita' | 'richiesta';
+/** Il contesto della voce per la decisione 2: il suo collegamento e gli yen che ogni dato porta già (0, null o assente = nessuno). */
+export interface ContestoYenVoce {
+  riferimento: { tipo: string; chiave: string } | null;
+  yenDi: (tipo: DatoConYen, chiave: string) => number | null | undefined;
+}
+const NOME_DATO_CON_YEN: Record<DatoConYen, string> = { film: 'il film (il prezzo del biglietto)', attivita: 'l’attività o il lavoro (il costo o la paga)', richiesta: 'la Richiesta (la sua ricompensa in yen)' };
+/**
+ * L13 (decisione 2 dell'utente: «Yen già scritti in un altro dato, film, attività, lavori, pesca, Richiesta: li muove l'elemento collegato, mai
+ * la voce»): perché un effetto «yen» non può stare in questa voce, o null se può. Gli yen li porta già: un acquisto o un articolo comprato (il
+ * prezzo), la pesca (la quota), una Richiesta completata (la ricompensa, decisione 3), il turno di un'attività con costo o paga, la lettura di un
+ * film con il prezzo, o il dato a cui la voce è collegata (film, attività, Richiesta) se ha i suoi yen. Una regola sola: la usano il server
+ * (rifiuto 409 `yen-gia-strutturati`) e l'editor della voce (avviso subito, prima del salvataggio).
+ */
+export function motivoYenGiaStrutturati(effetti: readonly EffettoVoce[], c: ContestoYenVoce): string | null {
+  if (!effetti.some((e) => e.tipo === 'yen')) return null;
+  const conYen = (tipo: DatoConYen, chiave: string): boolean => { const n = c.yenDi(tipo, chiave); return typeof n === 'number' && n > 0; };
+  let chi: string | null = null;
+  for (const e of effetti) {
+    if (e.tipo === 'acquisto' || e.tipo === 'articolo') chi = 'l’effetto «acquisto» (il prezzo dell’articolo)';
+    else if (e.tipo === 'pesca') chi = 'l’effetto «pesca» (la quota della visita)';
+    else if (e.tipo === 'richiesta') chi = 'l’effetto «Richiesta completata» (la ricompensa della Richiesta)';
+    else if (e.tipo === 'turno' && conYen('attivita', e.attivita)) chi = `il turno: ${NOME_DATO_CON_YEN.attivita}`;
+    else if (e.tipo === 'lettura' && e.categoria === 'film' && conYen('film', e.chiave)) chi = `la visione: ${NOME_DATO_CON_YEN.film}`;
+    if (chi) break;
+  }
+  const r = c.riferimento;
+  if (!chi && r && (r.tipo === 'film' || r.tipo === 'attivita' || r.tipo === 'richiesta') && conYen(r.tipo, r.chiave)) chi = `il collegamento della voce: ${NOME_DATO_CON_YEN[r.tipo]}`;
+  return chi ? `Gli yen di questa voce li porta già ${chi}: togli l’effetto Yen, non si contano due volte.` : null;
+}
+
 export function riepilogoArticoli(effetti: readonly EffettoVoce[], prezzo: (chiave: string) => number | null | undefined): string | null {
   const articoli = effetti.filter((e): e is Extract<EffettoVoce, { tipo: 'articolo' }> => e.tipo === 'articolo');
   if (articoli.length < 2 && !articoli.some((a) => (a.quantita ?? 1) > 1)) return null;

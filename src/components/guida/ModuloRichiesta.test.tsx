@@ -78,7 +78,8 @@ it('si apre coi campi della Richiesta e salva i dati veri: righe in elenchi, num
     nome: 'Bullismo sui bulli', committente: 'Mishima', disponibileDal: '20 maggio', scadenza: '', dedalo: 'aiy', areaDedalo: 'aiy-2', piano: 'Area 3',
     bersaglio: { nome: 'Kazuo', formaDemoniaca: 'Ippon-Datara', livello: 12, debolezze: ['Fuoco', 'Ghiaccio'], resistenze: ['Vento', 'Sacro'], vulnerabileConfusione: false },
     ricompense: ['485 PE', 'Pozione'], confidente: 'ryuji', confidenteRango: null, note: 'Facile.',
-    condizioni: [{ tipo: 'confidente', confidente: 'ryuji', rango: 2 }], scadenzaData: null, proroga: null, ombra: null, yen: null, esperienza: null, oggetti: [],
+    // L13: gli oggetti della ricompensa non cambiati non si mandano (il server non tocca le righe né le loro note)
+    condizioni: [{ tipo: 'confidente', confidente: 'ryuji', rango: 2 }], scadenzaData: null, proroga: null, ombra: null, yen: null, esperienza: null,
   }));
   await waitFor(() => expect(onCambiata).toHaveBeenCalled());
   expect(onChiudi).toHaveBeenCalled();
@@ -125,7 +126,7 @@ it('una nuova nasce nel dedalo e nell’area dati; senza nome o bersaglio, o con
 it('«Elimina» dice prima chi la cita nella domanda di conferma, e solo dopo il «sì» la elimina', async () => {
   const { onCambiata } = monta('bulli');
   await screen.findByRole('dialog');
-  api.getCitazioniRichiesta.mockResolvedValue({ partite: 2, pin: ['Cartello'], condizioni: ['Libro: Il Principe'], requisiti: ['Futaba Sakura, rango 7'], azioni: 1 });
+  api.getCitazioniRichiesta.mockResolvedValue({ partite: 2, pin: ['Cartello'], condizioni: ['Libro: Il Principe'], requisiti: ['Futaba Sakura, rango 7'], azioni: 1, effetti: [], sblocchi: 0 });
   // risposta «no» alla domanda: non si elimina niente
   conferma.mockResolvedValueOnce(false);
   fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
