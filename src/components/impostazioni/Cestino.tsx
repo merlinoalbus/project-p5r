@@ -13,7 +13,10 @@
 // ============================================================
 
 import { useState } from 'react';
-import { eliminaDalCestinoUnificato, getCestinoUnificato, ripristinaDalCestinoUnificato, svuotaCestinoUnificato } from '../../services/api';
+import {
+  eliminaDalCestinoPersonale, eliminaDalCestinoUnificato, getCestinoPersonale, getCestinoUnificato, ripristinaDalCestinoPersonale, ripristinaDalCestinoUnificato,
+  svuotaCestinoPersonale, svuotaCestinoUnificato,
+} from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { byteTesto } from '../../utils/byte';
@@ -24,6 +27,14 @@ import { IconaAzione } from '../shared/IconaAzione';
 import type { EsitoRipristinoCestinoDto, VoceCestinoUnificatoDto } from '../../types';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
+
+// Costante di build, nello stesso modulo perché il bundler tolga il ramo dei contenuti (vedi utils/modalita.ts). Nel rilascio il cestino è
+// SOLO quello personale (`/api/partite/cestino`): le rotte di `/impostazioni` non esistono e non devono restare nel bundle.
+const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
+const leggiCestino = IN_RILASCIO ? getCestinoPersonale : getCestinoUnificato;
+const ripristinaVoce = IN_RILASCIO ? ripristinaDalCestinoPersonale : ripristinaDalCestinoUnificato;
+const eliminaVoce = IN_RILASCIO ? eliminaDalCestinoPersonale : eliminaDalCestinoUnificato;
+const svuotaVoci = IN_RILASCIO ? svuotaCestinoPersonale : svuotaCestinoUnificato;
 
 /** Data e ora di un'eliminazione, all'italiana. */
 const quando = (iso: string): string => new Date(iso).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' });
@@ -86,7 +97,7 @@ function EsitoRipristino({ esito }: { esito: EsitoRipristinoCestinoDto }) {
 
 /** La sezione «Cestino» delle Impostazioni. */
 export function Cestino() {
-  const elenco = useCarica(() => getCestinoUnificato(), []);
+  const elenco = useCarica(() => leggiCestino(), []);
   const [occupato, setOccupato] = useState(false);
   const [daEliminare, setDaEliminare] = useState<VoceCestinoUnificatoDto | null>(null);
   const [svuotare, setSvuotare] = useState(false);
@@ -103,7 +114,7 @@ export function Cestino() {
     }
   };
   const rimetti = (v: VoceCestinoUnificatoDto) => esegui(async () => {
-    const e = await ripristinaDalCestinoUnificato(v);
+    const e = await ripristinaVoce(v);
     if (e.saltate.length > 0 || e.partiteMancanti) setEsito(e);
     else notifica('success', `Di nuovo al suo posto: «${v.nome}».`);
     useSuggerimentiStore.getState().invalida();
@@ -111,12 +122,12 @@ export function Cestino() {
   });
   const elimina = (v: VoceCestinoUnificatoDto) => esegui(async () => {
     setDaEliminare(null);
-    await eliminaDalCestinoUnificato(v);
+    await eliminaVoce(v);
     notifica('success', `Eliminazione definitiva dal cestino: «${v.nome}».`);
   });
   const svuota = () => esegui(async () => {
     setSvuotare(false);
-    const { eliminati } = await svuotaCestinoUnificato();
+    const { eliminati } = await svuotaVoci();
     notifica('success', eliminati === 1 ? 'Cestino svuotato: tolto per sempre 1 elemento.' : `Cestino svuotato: tolti per sempre ${eliminati} elementi.`);
   });
 
@@ -126,10 +137,10 @@ export function Cestino() {
         <div className="flex min-w-0 flex-col gap-1">
           <h2 id="titolo-cestino" className="m-0 testo-15 font-semibold">Cestino</h2>
           <p className="m-0 testo-13 text-text-secondary">
-            {/* le aree del mondo ci finiscono da L2 (UX2-12) */}
-            Le aree dei quartieri e della città, le planimetrie, le infiltrazioni dei Palazzi, le voci della guida e le aree dei dedali
-            eliminate, le partite e le singole fonti d’acquisto, con tutto quel che si sono portate via (pin e segni delle partite compresi). «Rimetti» le riporta com’erano; quel che
-            hai cambiato dopo resta com’è. Il cestino si svuota solo a mano: aree e planimetrie ci portano anche le loro immagini.
+            {IN_RILASCIO
+              ? 'Le partite e le singole fonti d’acquisto eliminate, con tutto quel che si sono portate via. «Rimetti» le riporta com’erano; quel che hai cambiato dopo resta com’è. Il cestino si svuota solo a mano.'
+              /* le aree del mondo ci finiscono da L2 (UX2-12) */
+              : 'Le aree dei quartieri e della città, le planimetrie, le infiltrazioni dei Palazzi, le voci della guida e le aree dei dedali eliminate, le partite e le singole fonti d’acquisto, con tutto quel che si sono portate via (pin e segni delle partite compresi). «Rimetti» le riporta com’erano; quel che hai cambiato dopo resta com’è. Il cestino si svuota solo a mano: aree e planimetrie ci portano anche le loro immagini.'}
           </p>
           {voci.length > 0 && <span className="testo-12 text-text-muted">{voci.length === 1 ? '1 elemento' : `${voci.length} elementi`} · {byteTesto(peso)}</span>}
         </div>

@@ -55,7 +55,7 @@ export function ImpostazioniPage() {
   return (
     <div className="flex flex-col gap-4">
       <IntestazionePagina titolo="Impostazioni" sottotitolo={IN_RILASCIO
-        ? 'Le tue partite e la grafica predefinita.'
+        ? 'Le tue partite, la grafica predefinita e il cestino delle tue partite.'
         : 'Partite, grafica predefinita, caratteri, immagini, traduzioni, cestino, pacchetto di gioco, backup della tua istanza e documentazione delle API.'} />
       <GestionePartite />
       <section className="card flex flex-col gap-3">
@@ -75,8 +75,8 @@ export function ImpostazioniPage() {
           </span>
         </label>
       </section>
-      {/* L12 (passo 8): nel rilascio (sola lettura) restano solo le partite dell'utente, la grafica locale e le informazioni; tutto il resto
-          (caratteri, immagini, traduzioni, cestino dei contenuti, pacchetto, backup, documentazione delle API) è presente solo nella preparazione.
+      {/* L12 (passo 8): nel rilascio (sola lettura) restano solo le partite dell'utente, la grafica locale, il cestino personale e le informazioni; tutto il resto
+          (caratteri, immagini, traduzioni, righe nascoste della guida, pacchetto, backup, documentazione delle API) è presente solo nella preparazione.
           `IN_RILASCIO` è una costante di build: nel bundle di rilascio questi componenti e le chiamate all'API che usano non ci sono. */}
       {!IN_RILASCIO && <CaratteriEditor />}
       {!IN_RILASCIO && <section className="card flex flex-col gap-3">
@@ -98,9 +98,9 @@ export function ImpostazioniPage() {
       {!IN_RILASCIO && <ImmaginiCaricate />}
       {!IN_RILASCIO && <TraduzioniEditor ambitoIniziale={traduzioneAmbito} qIniziale={traduzioneQ} />}
       {!IN_RILASCIO && <MieiDati />}
-      {/* Il cestino (contenuti eliminati e righe nascoste) è dell'autore. Quello dell'utente, con le sue partite e registrazioni, tornerà qui
-          quando il backend di rilascio lo esporrà sotto `/api/partite/:id/cestino` (L12, passo 3): fino ad allora non c'è una rotta da chiamare. */}
-      {!IN_RILASCIO && <Cestino />}
+      {/* Il cestino c'è in entrambe le istanze: nella preparazione è quello unificato (contenuti e partite), nel rilascio solo quello personale,
+          sotto `/api/partite/cestino` (L12, passo 3). Le righe nascoste dalla guida (`NascostiDallaGuida`) restano dell'autore. */}
+      <Cestino />
       {!IN_RILASCIO && <NascostiDallaGuida />}
       <GestiPartita />
       {!IN_RILASCIO && <RimozioniConservate />}

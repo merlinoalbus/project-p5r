@@ -12,17 +12,18 @@
 // una struttura diversa non si «aggiusta» in esercizio (progetto §5: nuova edizione e conversione una tantum su copia, dopo il sì
 // dell'utente).
 //
-// Il formato del manifesto qui letto è la parte che serve all'avvio; «Prepara edizione» (passo 7) può aggiungere altri campi (sha256,
-// conteggi, report di compatibilità): `z.looseObject` li lascia passare. Per produrre `utente.impronta` si usa la stessa
-// `improntaSchema` esportata qui, aprendo `partite-vuoto.db` come connessione a sé (schema `main`).
+// Il formato del manifesto è UNO SOLO: lo scrive «Prepara edizione» (`server/services/edizioneService.ts`) e lo legge questo modulo, che ne
+// controlla la parte che serve all'avvio (versioni, algoritmo e impronta della struttura delle partite); gli altri campi (file, SHA-256,
+// conteggi, report di compatibilità) li lascia passare (`z.looseObject`). L'impronta si calcola con `improntaSchema` di
+// `server/db/improntaSchema.ts`, l'unica definizione dell'algoritmo, usata dai due lati.
 // ============================================================
 
-import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
 import { config } from '../config.js';
 import { resolvePartitePath, type AppDatabase } from '../db/dbService.js';
+import { ALGORITMO_IMPRONTA_SCHEMA, improntaSchema } from '../db/improntaSchema.js';
 import { logger } from '../utils/logger.js';
 
 /** Il nome del file del manifesto nel volume dell'edizione. */
@@ -32,8 +33,10 @@ export const FILE_PARTITE_VUOTO = 'partite-vuoto.db';
 
 /** La parte del manifesto che l'avvio controlla. */
 const schemaManifesto = z.looseObject({
-  gioco: z.looseObject({ versione: z.number().int().min(0) }),
-  utente: z.looseObject({ versione: z.number().int().min(0), impronta: z.string().min(16) }),
+  versioneSchemaGioco: z.number().int().min(0),
+  versioneSchemaPartite: z.number().int().min(0),
+  algoritmoImpronta: z.string().min(1),
+  improntaSchemaPartite: z.string().min(16),
 });
 export type ManifestoEdizione = z.infer<typeof schemaManifesto>;
 
@@ -43,19 +46,6 @@ export class ErroreEdizione extends Error {
     super(messaggio, opzioni);
     this.name = 'ErroreEdizione';
   }
-}
-
-/**
- * L'impronta della struttura di uno schema: SHA-256 di tabelle, indici, viste e trigger (tipo, nome, tabella, SQL con gli spazi
- * normalizzati), in ordine stabile. Le tabelle interne di SQLite (`sqlite_*`) restano fuori. Conta la STRUTTURA, non i dati.
- * `schema` è `utente` sulla connessione dell'istanza e `main` quando si apre `partite-vuoto.db` da solo.
- */
-export function improntaSchema(db: AppDatabase, schema: 'main' | 'utente'): string {
-  const righe = db.prepare(`SELECT type, name, tbl_name, sql FROM ${schema}.sqlite_master WHERE name NOT LIKE 'sqlite\\_%' ESCAPE '\\' ORDER BY type, name`).all() as
-    Array<{ type: string; name: string; tbl_name: string; sql: string | null }>;
-  const h = createHash('sha256');
-  for (const r of righe) h.update(`${r.type}|${r.name}|${r.tbl_name}|${(r.sql ?? '').replace(/\s+/g, ' ').trim()}\n`);
-  return h.digest('hex');
 }
 
 /** Legge e controlla il manifesto dell'edizione. Lancia `ErroreEdizione` se manca, non è JSON o non ha la forma attesa. */
@@ -88,10 +78,14 @@ export function verificaSchemaUtente(db: AppDatabase, manifesto: ManifestoEdizio
   const problemi: string[] = [];
   const versioneGioco = db.pragma('main.user_version', { simple: true }) as number;
   const versioneUtente = db.pragma('utente.user_version', { simple: true }) as number;
-  if (versioneGioco !== manifesto.gioco.versione) problemi.push(`versione di gioco.db ${versioneGioco}, il manifesto dice ${manifesto.gioco.versione}`);
-  if (versioneUtente !== manifesto.utente.versione) problemi.push(`versione di partite.db ${versioneUtente}, il manifesto dice ${manifesto.utente.versione}`);
-  const impronta = improntaSchema(db, 'utente');
-  if (impronta !== manifesto.utente.impronta) problemi.push(`l'impronta dello schema di partite.db (${impronta.slice(0, 12)}…) non coincide con quella del manifesto (${manifesto.utente.impronta.slice(0, 12)}…)`);
+  if (versioneGioco !== manifesto.versioneSchemaGioco) problemi.push(`versione di gioco.db ${versioneGioco}, il manifesto dice ${manifesto.versioneSchemaGioco}`);
+  if (versioneUtente !== manifesto.versioneSchemaPartite) problemi.push(`versione di partite.db ${versioneUtente}, il manifesto dice ${manifesto.versioneSchemaPartite}`);
+  if (manifesto.algoritmoImpronta !== ALGORITMO_IMPRONTA_SCHEMA) {
+    problemi.push(`il manifesto usa l'algoritmo d'impronta «${manifesto.algoritmoImpronta}», questo codice conosce «${ALGORITMO_IMPRONTA_SCHEMA}»`);
+  } else {
+    const impronta = improntaSchema(db, 'utente');
+    if (impronta !== manifesto.improntaSchemaPartite) problemi.push(`l'impronta dello schema di partite.db (${impronta.slice(0, 12)}…) non coincide con quella del manifesto (${manifesto.improntaSchemaPartite.slice(0, 12)}…)`);
+  }
   if (problemi.length > 0) {
     throw new ErroreEdizione(`la struttura delle partite non corrisponde all'edizione: ${problemi.join('; ')}. L'istanza di rilascio non migra: serve l'edizione giusta o una conversione una tantum su copia, decisa dall'utente.`);
   }
