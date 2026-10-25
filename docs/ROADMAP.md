@@ -1363,6 +1363,14 @@ h1; nella Fusione, scelta una Persona dalla ricerca, il fuoco va sul documento (
 Attività e link con un pulsante dentro nel Compendio (preesistenti); «Ripristina» delle traduzioni legge il pacchetto iniziale e
 rimette tre nomi senza accento; lo storico `testo_precedente_json` non è toccato dalla 232.
 
+### R12-03 — installazione a schermo intero e standby (gruppo pwa-standby)
+
+Manifesto web (`public/manifest.webmanifest`, icone in `public/pwa/` generate da `scripts/genera-icone-pwa.ts` dal logo del favicon, meta iOS e
+`theme-color` in `index.html`, tipo `application/manifest+json` dichiarato in entrambi i `nginx*.conf`) e interruttore «Schermo sempre acceso»
+nella Topbar (`PulsanteStandby`, preferenza `bloccoStandby`, Screen Wake Lock in `useBloccoStandby`, ripreso al ritorno in primo piano), uguali
+nelle due istanze. Scelta dichiarata: **nessun service worker e nessuna cache offline** (rischio di servire versioni vecchie dell'app e dei dati
+della partita; l'aggiornamento resta quello di `AvvisoNuovaVersione`). Il Wake Lock richiede HTTPS o localhost: in HTTP semplice il pulsante non compare.
+
 ## Razionalizzazione (dal 20 ottobre 2026) — branch `newreview`, istanza parallela p5s
 
 Mandato dell'utente del 2026-10-20: tutti i lotti del piano di razionalizzazione

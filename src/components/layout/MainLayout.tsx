@@ -30,6 +30,7 @@ import { useFontStore } from '../../stores/fontStore';
 import { sfondoPerPercorso } from './sfondi';
 import { RicercaGlobale } from '../ricerca/RicercaGlobale';
 import { useScorciatoiaRicerca } from '../../hooks/useScorciatoiaRicerca';
+import { useBloccoStandby } from '../../hooks/useBloccoStandby';
 import { useFuocoNavigazione } from './useFuocoNavigazione';
 
 /** Struttura principale con navigazione adattiva, contenuto route e overlay globali. */
@@ -47,6 +48,8 @@ export function MainLayout() {
 
   // il tasto «/» apre la ricerca globale da ogni pagina (non mentre si scrive in un campo)
   useScorciatoiaRicerca();
+  // R12-03: lo schermo resta acceso mentre si gioca, se l'interruttore della Topbar è acceso (e il browser lo permette)
+  useBloccoStandby();
 
   // Sfondo ripetibile, sfondo a tema della sezione (con variante Allarme in Fusione) e icona del sito dagli asset predefiniti (se presenti).
   const sfondo = useAsset('sfondi/pattern-nero');

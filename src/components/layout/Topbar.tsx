@@ -13,6 +13,7 @@ import { APP_NAME } from '../../utils/constants';
 import { voceDelPercorso } from './navigazione';
 import { PartitaSelettore } from './PartitaSelettore';
 import { PulsanteCerca } from '../ricerca/PulsanteCerca';
+import { PulsanteStandby } from './PulsanteStandby';
 import { IconGear } from '../shared/icons';
 import { AssetImg } from '../shared/AssetImg';
 import { useTitoloPaginaStore } from '../../stores/titoloPaginaStore';
@@ -70,6 +71,8 @@ export function Topbar() {
       <PartitaSelettore />
       {/* L11 B4 (R11-07/2): la ricerca si raggiunge da ogni pagina e a ogni larghezza; la barra in basso ha già il tetto di cinque voci */}
       <PulsanteCerca />
+      {/* L12 R12-03: «Schermo sempre acceso» durante la partita, su ogni pagina; nullo dove il browser non ha lo Screen Wake Lock */}
+      <PulsanteStandby />
       <Link
         to="/impostazioni"
         className="touch lg:hidden flex items-center justify-center rounded-md text-text-secondary hover:text-text"

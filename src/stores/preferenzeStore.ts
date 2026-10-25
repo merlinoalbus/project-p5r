@@ -7,6 +7,8 @@
 // segnaposto testuali. `vistaPersona`: elenco del compendio a piastrelle (default) o compatto.
 // `menuRidotto`: il menu laterale ridotto alle sole icone (si riapre col pulsante, o al passaggio del mouse).
 // `mappaHomeChiusa`: la mappa della Home chiusa in una linguetta sul bordo destro.
+// `bloccoStandby` (L12, R12-03): tiene lo schermo acceso mentre si gioca (Screen Wake Lock, vedi `hooks/useBloccoStandby.ts`); spento di
+// default (consuma batteria: lo accende chi vuole) e ricordato su questo dispositivo, come le altre preferenze.
 // La lettura/scrittura del localStorage è protetta: se non disponibile (modalità privata, quota, sandbox)
 // si usano i valori predefiniti senza errori.
 // ============================================================
@@ -22,9 +24,10 @@ export interface Preferenze {
   vistaPersona: VistaPersona;
   menuRidotto: boolean;
   mappaHomeChiusa: boolean;
+  bloccoStandby: boolean;
 }
 
-const PREDEFINITE: Preferenze = { graficaPredefinita: true, vistaPersona: 'piastrelle', menuRidotto: false, mappaHomeChiusa: false };
+const PREDEFINITE: Preferenze = { graficaPredefinita: true, vistaPersona: 'piastrelle', menuRidotto: false, mappaHomeChiusa: false, bloccoStandby: false };
 
 /** Legge le preferenze salvate partendo dai valori predefiniti: ogni campo si prende solo se ha un valore valido; storage
  *  assente o JSON illeggibile danno i predefiniti. */
@@ -39,6 +42,7 @@ function leggi(): Preferenze {
       ...(dati.vistaPersona === 'elenco' || dati.vistaPersona === 'piastrelle' ? { vistaPersona: dati.vistaPersona } : {}),
       ...(typeof dati.menuRidotto === 'boolean' ? { menuRidotto: dati.menuRidotto } : {}),
       ...(typeof dati.mappaHomeChiusa === 'boolean' ? { mappaHomeChiusa: dati.mappaHomeChiusa } : {}),
+      ...(typeof dati.bloccoStandby === 'boolean' ? { bloccoStandby: dati.bloccoStandby } : {}),
     };
   } catch {
     return PREDEFINITE;
@@ -59,6 +63,7 @@ interface PreferenzeState extends Preferenze {
   impostaVistaPersona: (valore: VistaPersona) => void;
   impostaMenuRidotto: (valore: boolean) => void;
   impostaMappaHomeChiusa: (valore: boolean) => void;
+  impostaBloccoStandby: (valore: boolean) => void;
 }
 
 /** Preferenze del dispositivo (persistite in localStorage quando possibile). */
@@ -67,7 +72,7 @@ export const usePreferenzeStore = create<PreferenzeState>((set, get) => {
   const salva = (modifica: Partial<Preferenze>) => {
     set(modifica);
     const s = get();
-    scrivi({ graficaPredefinita: s.graficaPredefinita, vistaPersona: s.vistaPersona, menuRidotto: s.menuRidotto, mappaHomeChiusa: s.mappaHomeChiusa });
+    scrivi({ graficaPredefinita: s.graficaPredefinita, vistaPersona: s.vistaPersona, menuRidotto: s.menuRidotto, mappaHomeChiusa: s.mappaHomeChiusa, bloccoStandby: s.bloccoStandby });
   };
   return {
     ...leggi(),
@@ -75,5 +80,6 @@ export const usePreferenzeStore = create<PreferenzeState>((set, get) => {
     impostaVistaPersona: (valore) => salva({ vistaPersona: valore }),
     impostaMenuRidotto: (valore) => salva({ menuRidotto: valore }),
     impostaMappaHomeChiusa: (valore) => salva({ mappaHomeChiusa: valore }),
+    impostaBloccoStandby: (valore) => salva({ bloccoStandby: valore }),
   };
 });
