@@ -53,7 +53,7 @@ export function PartitaPage() {
   const { attiva, caricamento, caricata, errore, carica } = usePartitaStore(useShallow((s) => ({ attiva: s.attiva, caricamento: s.caricamento, caricata: s.caricata, errore: s.errore, carica: s.carica })));
   const [nuova, setNuova] = useState(false);
   const [params, setParams] = useSearchParams();
-  // da 768 px le piastrelle delle schede sono basse, con icona e nome affiancati (`.fila-schede-partita`): l'icona scende a 22 px
+  // le piastrelle delle schede sono basse a ogni larghezza, con icona (22 px) e nome affiancati (`.fila-schede-partita`)
   const richiesta = params.get('scheda');
   const scheda: Scheda = SCHEDE.some((s) => s.k === richiesta) ? (richiesta as Scheda) : 'oggi';
   // il giorno mostrato dalla scheda «Oggi» (null a scheda chiusa): senza, vale la data di gioco della partita
@@ -69,7 +69,7 @@ export function PartitaPage() {
           action={<button type="button" className="btn btn-primary" onClick={() => setNuova(true)}>Crea partita</button>}
         />
       ) : (
-        <div className={`flex flex-col gap-0 md:gap-1.5 ${scheda === 'oggi' || scheda === 'doti' ? 'scheda-riempi md:min-h-0' : scheda === 'letture' ? 'scheda-riempi-lg lg:min-h-0' : ''}`}>
+        <div className={`flex flex-col gap-0 max-sm:-mt-3 md:gap-1.5 ${scheda === 'oggi' || scheda === 'doti' ? 'scheda-riempi md:min-h-0' : scheda === 'letture' ? 'scheda-riempi-lg lg:min-h-0' : ''}`}>
           {/* i dati della partita stanno nella riga del titolo (a destra, o sotto sul telefono): con le schede su una riga sola
               l'intestazione resta entro il 30% dell'altezza (progetto dei Confidenti approvato il 2026-10-24) */}
           <IntestazionePagina titolo={attiva.nome} compatta azioniInRiga azioniAccanto className="intestazione--partita pt-0" azioni={
