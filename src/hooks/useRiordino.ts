@@ -7,7 +7,7 @@
 // Il trascinamento è a puntatore, perché l'HTML5 drag-and-drop col dito non parte, e la colonna scorre da sola vicino ai bordi.
 // ============================================================
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type PointerEvent } from 'react';
 
 /** Di quanti pixel scorre la colonna a ogni passo quando il puntatore è vicino al bordo, e quanto è largo il bordo. */
 const PASSO_SCORRIMENTO = 14;
@@ -116,6 +116,10 @@ export type Riordino = ReturnType<typeof useRiordino>;
 export interface ElencoRiordino { nome: string; ids: string[] }
 export interface PostoRiordino { lista: string; indice: number }
 
+/** Col dito il trascinamento parte solo dopo una pressione lunga ferma: un tocco o uno scorrimento sopra la maniglia non spostano la voce. */
+const PRESSIONE_LUNGA_MS = 350;
+const TOLLERANZA_PRESSIONE = 10;
+
 /** Il primo antenato che scorre in verticale davvero (con altro contenuto da mostrare); null = scorre la finestra. */
 function antenatoScorrevole(el: HTMLElement | null): HTMLElement | null {
   for (let p = el?.parentElement ?? null; p; p = p.parentElement) {
@@ -151,7 +155,19 @@ export function useRiordinoCollegato(liste: ReadonlyArray<ElencoRiordino>, blocc
   const velocita = useRef(0);
   const corrente = useRef(liste);
   const inCorso = useRef<string | null>(null);
+  // la pressione lunga in attesa (dito appoggiato sulla maniglia, trascinamento non ancora partito)
+  const attesa = useRef<{ timer: number; x: number; y: number } | null>(null);
   useLayoutEffect(() => { corrente.current = liste; });
+  const annullaAttesa = () => { if (attesa.current) { window.clearTimeout(attesa.current.timer); attesa.current = null; } };
+  useEffect(() => () => { if (attesa.current) window.clearTimeout(attesa.current.timer); }, []);
+  // col dito la maniglia lascia scorrere la pagina finché il trascinamento non parte; da lì lo scorrimento si ferma (`touchmove`
+  // annullato), così il dito sposta la voce e non la pagina
+  useEffect(() => {
+    if (!trascinato) return;
+    const blocca = (ev: TouchEvent) => { if (ev.cancelable) ev.preventDefault(); };
+    document.addEventListener('touchmove', blocca, { passive: false });
+    return () => document.removeEventListener('touchmove', blocca);
+  }, [trascinato]);
 
   /** L'elenco e il posto in cui rilascerebbe un puntatore all'altezza `y`. Legge solo riferimenti. */
   const postoSotto = useCallback((y: number): PostoRiordino | null => {
@@ -204,11 +220,23 @@ export function useRiordinoCollegato(liste: ReadonlyArray<ElencoRiordino>, blocc
   const sposta = (id: string, lista: string, indice: number) => {
     void Promise.resolve(onSposta(id, lista, indice)).catch(() => undefined).finally(() => { daRifocalizzare.current = id; setGiro((g) => g + 1); });
   };
+  /** Fa partire il trascinamento della voce dalla sua maniglia (subito col mouse, dopo la pressione lunga col dito). */
+  const avvia = (el: HTMLButtonElement, pointerId: number, y: number, id: string) => {
+    try { el.setPointerCapture?.(pointerId); } catch { /* senza cattura il rilascio fuori dalla maniglia lo chiude la perdita del puntatore */ }
+    scorrevole.current = antenatoScorrevole(el);
+    ultimoY.current = y;
+    inCorso.current = id;
+    const p = postoDi(id);
+    setTrascinato(id);
+    setRilascio(p ? { lista: liste[p.k].nome, indice: p.i } : null);
+  };
 
   return {
     trascinato,
     rilascio,
     blocco,
+    /** La maniglia col dito chiede la pressione lunga: lascia scorrere la pagina (`touch-pan-y`) invece di bloccarla subito. */
+    pressioneLunga: true as const,
     riga: (id: string) => (el: HTMLElement | null) => { if (el) righe.current.set(id, el); else righe.current.delete(id); },
     lista: (nome: string) => (el: HTMLElement | null) => { if (el) contenitori.current.set(nome, el); else contenitori.current.delete(nome); },
     rifManiglia: (id: string) => (el: HTMLButtonElement | null) => { if (el) maniglie.current.set(id, el); else maniglie.current.delete(id); },
@@ -216,16 +244,30 @@ export function useRiordinoCollegato(liste: ReadonlyArray<ElencoRiordino>, blocc
       onPointerDown: (e: PointerEvent<HTMLButtonElement>) => {
         // solo il tasto principale (o il dito): il destro apre il menu, non trascina
         if (bloccato || e.button !== 0) return;
+        const el = e.currentTarget;
+        if (e.pointerType === 'touch') {
+          // col dito si aspetta la pressione lunga ferma: intanto la pagina può scorrere e un tocco non sposta niente
+          annullaAttesa();
+          const { pointerId, clientX: x, clientY: y } = e;
+          ultimoY.current = y;
+          attesa.current = { x, y, timer: window.setTimeout(() => {
+            attesa.current = null;
+            navigator.vibrate?.(15);
+            avvia(el, pointerId, ultimoY.current, id);
+          }, PRESSIONE_LUNGA_MS) };
+          return;
+        }
         e.preventDefault();
-        try { e.currentTarget.setPointerCapture?.(e.pointerId); } catch { /* senza cattura il rilascio fuori dalla maniglia lo chiude la perdita del puntatore */ }
-        scorrevole.current = antenatoScorrevole(e.currentTarget);
-        ultimoY.current = e.clientY;
-        inCorso.current = id;
-        const p = postoDi(id);
-        setTrascinato(id);
-        setRilascio(p ? { lista: liste[p.k].nome, indice: p.i } : null);
+        avvia(el, e.pointerId, e.clientY, id);
       },
       onPointerMove: (e: PointerEvent<HTMLButtonElement>) => {
+        const a = attesa.current;
+        if (a) {
+          // il dito si è mosso prima della pressione lunga: è uno scorrimento, non un trascinamento
+          if (Math.abs(e.clientX - a.x) > TOLLERANZA_PRESSIONE || Math.abs(e.clientY - a.y) > TOLLERANZA_PRESSIONE) annullaAttesa();
+          else ultimoY.current = e.clientY;
+          return;
+        }
         if (trascinato !== id) return;
         ultimoY.current = e.clientY;
         const r = scorrevole.current?.getBoundingClientRect();
@@ -235,15 +277,20 @@ export function useRiordinoCollegato(liste: ReadonlyArray<ElencoRiordino>, blocc
         imposta(e.clientY);
       },
       onPointerUp: () => {
+        // dito alzato prima della pressione lunga: era un tocco, niente da spostare
+        if (attesa.current) { annullaAttesa(); return; }
         const p = postoDi(id);
         const dove = rilascio;
         const cambia = trascinato === id && p !== null && dove !== null && (dove.lista !== liste[p.k].nome || dove.indice !== p.i);
         fine();
         if (cambia && dove) sposta(id, dove.lista, dove.indice);
       },
-      onPointerCancel: fine,
+      // annullato dal browser (lo scorrimento della pagina è partito): niente attesa né trascinamento
+      onPointerCancel: () => { annullaAttesa(); fine(); },
       // la cattura può perdersi senza pointerup (finestra che perde il fuoco…): il trascinamento finisce lì
       onLostPointerCapture: () => { if (trascinato === id) fine(); },
+      // la pressione lunga non apre il menu contestuale del browser sulla maniglia
+      onContextMenu: (e: MouseEvent<HTMLButtonElement>) => { if (attesa.current || trascinato === id) e.preventDefault(); },
       onKeyDown: (e: KeyboardEvent<HTMLButtonElement>) => {
         if (e.key === 'Escape' && trascinato === id) { e.preventDefault(); fine(); return; }
         if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;

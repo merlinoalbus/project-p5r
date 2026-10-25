@@ -14,11 +14,13 @@ import { Selettore } from '../shared/Selettore';
 import { ElementoChip } from '../compendio/ElementoChip';
 import { StatisticheBarre } from '../compendio/StatisticheBarre';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
+import { AnteprimaPersona } from '../shared/AnteprimaPersona';
 import { CHIAVI_STATISTICHE, origineStima, statisticheStimate } from '../../../shared/statistiche';
 import type { CapienzaScortaDto, OsservazioneStatisticheDto, PersonaPossedutaDto, StatisticheDto } from '../../types';
 import { statoIstantanea } from '../../utils/istantaneaPersona';
 import { SIGLA_STATISTICA, coloreElemento } from '../../utils/elementi';
 import { AssetImg } from '../shared/AssetImg';
+import { slug } from '../../../shared/slug';
 import { PulsanteVisivo, FrecciaApertura } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { conferma } from '../../stores/confermaStore';
@@ -150,7 +152,8 @@ export function ScortaPersona({ partitaId }: Props) {
                 <li key={p.id} className={`riga-persona ${p.inSquadra ? '' : 'riga-persona--deposito'}`}>
                   <button type="button" className="riga-persona__scelta" aria-haspopup="dialog" onClick={() => setSelezionata(p.id)}
                     aria-label={`${p.nomeIt}, ${p.arcanaNome}, livello ${p.livello}${p.inSquadra ? '' : ', in deposito'}: apri la gestione`}>
-                    <ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={44} />
+                    {/* dentro il pulsante della riga una miniatura non interattiva (un pulsante nel pulsante non è valido): l'ingrandimento sta nel cassetto */}
+                    <AnteprimaPersona nome={p.nome} etichetta={p.nomeIt} dimensione={44} className="rounded" />
                     <span className="riga-persona__testo">
                       <span className="riga-persona__nome">
                         <span className="truncate">{p.nomeIt}</span>
@@ -159,7 +162,10 @@ export function ScortaPersona({ partitaId }: Props) {
                           title={p.statisticheConfermate ? 'Statistiche lette nel gioco a questo livello' : 'Statistiche stimate'} />
                         {st === 'aggiornata' && <span className="riga-persona__registrata" title="Registrata nel compendio"><IconaAzione chiave="registra" dimensione={14} /><span className="sr-only">Registrata nel compendio</span></span>}
                       </span>
-                      <span className="riga-persona__arcano">{p.arcanaNome}{p.inSquadra ? '' : ' · in deposito'}</span>
+                      <span className="riga-persona__arcano">
+                        <AssetImg nome={`arcani/icona/${slug(p.arcana)}`} alt="" decorativa className="h-4 w-4 shrink-0 object-contain" fallback={null} />
+                        <span className="truncate">{p.arcanaNome}{p.inSquadra ? '' : ' · in deposito'}</span>
+                      </span>
                       <span className="riga-persona__skill">
                         {p.skill.map((s) => <QuadratoSkill key={s.slot} elemento={s.elemento} nome={s.nomeIt} />)}
                       </span>

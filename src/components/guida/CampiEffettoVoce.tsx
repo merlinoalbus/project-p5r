@@ -102,7 +102,7 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
       return (
         <div className="flex flex-wrap items-end gap-2">
           {p && <AnteprimaPersona nome={p.nome} etichetta={p.nomeIt} dimensione={44} />}
-          <Selettore className="min-w-[12rem] flex-1" etichetta="Persona del compendio" valore={String(e.persona)} opzioni={effetti.persone.map((x) => ({ chiave: String(x.id), nome: x.nome, dettaglio: `${x.arcana} · Lv ${x.livello}` }))} onCambia={(v) => onCambia({ tipo: 'persona', persona: Number(v) })} />
+          <Selettore className="min-w-[12rem] flex-1" etichetta="Persona del compendio" valore={String(e.persona)} opzioni={effetti.persone.map((x) => ({ chiave: String(x.id), nome: x.nome, dettaglio: `${x.arcana} · Liv. ${x.livello}` }))} onCambia={(v) => onCambia({ tipo: 'persona', persona: Number(v) })} />
         </div>
       );
     }
