@@ -17,6 +17,7 @@ import { useConfigStore } from './stores/configStore';
 import { tuttePrecarica } from './router';
 import { precaricaPagineScheda } from './components/scheda/pagineScheda';
 import { avviaControlloVersione } from './utils/versioneApp';
+import { registraEdizione } from './services/api/cacheGioco';
 import { precaricaInBackground } from './utils/pagineLazy';
 import { verificaCoerenzaModalita } from './utils/modalita';
 import type { AppConfigDto } from './types';
@@ -72,6 +73,7 @@ async function boot(): Promise<void> {
         return;
       }
       useConfigStore.getState().setConfig(config);
+      registraEdizione(config.edizione);
       configOk = true;
     } else {
       configErrorReason = `Il backend ha risposto con status ${res.status}`;

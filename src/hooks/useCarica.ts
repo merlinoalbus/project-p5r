@@ -4,7 +4,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { notifica } from '../stores/notificationStore';
-import { leggiCacheGioco } from '../services/api/cacheGioco';
+import { cacheFresca, leggiCacheGioco } from '../services/api/cacheGioco';
 
 /** Nel rilascio i contenuti sono fissi (condizione costante nello stesso modulo, come negli altri file: vedi progetto delle due istanze §7). */
 const CONTENUTI_FISSI = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -61,9 +61,13 @@ const MAX_RIAVVII = 2;
 export function useCarica<T>(carica: () => Promise<T>, dipendenze: unknown[], opzioni?: OpzioniCarica): Stato<T> {
   const chiave = JSON.stringify(dipendenze);
   const cacheUrl = opzioni?.cacheUrl ?? null;
-  // L'ultima lettura in cache di quell'indirizzo (una copia), presa una volta per indirizzo: è il dato mostrato subito, prima che
-  // arrivi la rilettura. Resta `undefined` per ogni lettura senza `cacheUrl` e per quelle mai fatte o svuotate da una scrittura.
-  const daCache = useMemo(() => leggiCacheGioco<T>(cacheUrl), [cacheUrl]);
+  // L'ultima lettura in cache di quell'indirizzo (una copia), presa una volta per indirizzo E per dipendenze: è il dato mostrato
+  // subito, prima che arrivi la rilettura. Resta `undefined` per ogni lettura senza `cacheUrl` e per quelle mai fatte o svuotate da
+  // una scrittura. CONTRATTO: `cacheUrl` deve identificare il contenuto che `carica` restituisce per quelle dipendenze (di norma
+  // l'indirizzo contiene già i parametri che sono anche nelle dipendenze); la chiave delle dipendenze è comunque nella chiave del
+  // `useMemo`, così un cambio di dipendenze con lo stesso `cacheUrl` rilegge la cache invece di tenere quella presa al montaggio.
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `chiave` è la sola serializzazione delle dipendenze: si usa come chiave, non nel calcolo
+  const daCache = useMemo(() => leggiCacheGioco<T>(cacheUrl), [cacheUrl, chiave]);
   const daCacheRef = useRef(daCache);
   const [tick, setTick] = useState(0);
   const [esito, setEsito] = useState<Esito<T> | null>(null);
@@ -120,11 +124,12 @@ export function useCarica<T>(carica: () => Promise<T>, dipendenze: unknown[], op
       attese.current = attese.current.filter((a) => a.tick > tick);
       for (const a of pronte) a.risolvi();
     };
-    // Nel rilascio i contenuti sono fissi: la prima lettura di una chiave già in cache non rifà la rete (l'edizione nuova cambia
-    // la versione dell'app e ricarica la pagina). Nella preparazione la cache si mostra subito e si rilegge in silenzio.
+    // Nel rilascio i contenuti sono fissi: la prima lettura di una chiave già in cache, e fresca, non rifà la rete. Una nuova edizione
+    // svuota la cache (`registraEdizione`, letto da `/api/config` a ogni rientro in primo piano) e una voce più vecchia di
+    // `TTL_CONTENUTI_FISSI_MS` si rilegge in silenzio come nella preparazione, dove la cache si mostra subito e si rilegge sempre.
     // Una `ricarica()` esplicita ha già un esito per questa chiave e va sempre in rete.
     const dallaCache = daCacheRef.current;
-    const salvaRete = CONTENUTI_FISSI && dallaCache !== undefined && esitoRef.current?.chiave !== chiave;
+    const salvaRete = CONTENUTI_FISSI && dallaCache !== undefined && esitoRef.current?.chiave !== chiave && cacheFresca(cacheUrl);
     (salvaRete ? Promise.resolve(dallaCache as T) : caricaRef.current())
       .then((d) => concludi({ chiave, tick, dati: d, errore: null, erroreRilettura: null }))
       .catch((err: unknown) => {
@@ -149,7 +154,7 @@ export function useCarica<T>(carica: () => Promise<T>, dipendenze: unknown[], op
     return () => {
       attivo = false;
     };
-  }, [chiave, tick, scrivi]);
+  }, [chiave, tick, scrivi, cacheUrl]);
 
   const ricarica = useCallback(() => {
     if (smontato.current) return Promise.resolve();

@@ -6,6 +6,7 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { ElencoRichieste } from './ElencoRichieste';
+import { selettore } from '../../../test/selettore';
 import type { RichiestaDelDedaloDto } from '../../types';
 
 const api = vi.hoisted(() => ({ impostaStatoRichiesta: vi.fn(), collocaRichiesta: vi.fn() }));
@@ -65,5 +66,5 @@ it('senza partita niente stati; in «Modifica la guida» «Modifica» e l\'area'
   const { onModifica } = monta(4, true);
   fireEvent.click(screen.getByRole('button', { name: 'Modifica la Richiesta «Il treno fantasma»' }));
   expect(onModifica).toHaveBeenCalledWith('r2');
-  expect(screen.getByRole('combobox', { name: 'Area di Un ex appiccicoso' })).toBeInTheDocument();
+  expect(selettore('Area di Un ex appiccicoso')).toBeInTheDocument();
 });

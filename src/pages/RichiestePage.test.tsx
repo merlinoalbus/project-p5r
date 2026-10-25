@@ -6,7 +6,7 @@
 // ============================================================
 
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { scegliVoce } from '../../test/selettore';
+import { scegliVoce, selettore } from '../../test/selettore';
 import { MemoryRouter } from 'react-router-dom';
 import { RichiestePage } from './RichiestePage';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -60,9 +60,9 @@ describe('RichiestePage', () => {
     expect(impostaStatoRichiesta).toHaveBeenCalledWith(7, 'a', 'completata');
     expect(await within(screen.getByText('Un ex piuttosto appiccicoso').closest('li')!).findByText('completata')).toBeInTheDocument();
     // il dettaglio del dedalo nel selettore segue la spunta
-    fireEvent.click(screen.getByRole('combobox', { name: 'Dedalo' }));
+    fireEvent.click(selettore('Dedalo'));
     expect(screen.getByRole('button', { name: /Dedalo di Qimranut.*1 completate su 1/ })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('combobox', { name: 'Dedalo' }));
+    fireEvent.click(selettore('Dedalo'));
     // i due segmenti sono indipendenti
     fireEvent.click(screen.getByRole('radio', { name: 'Da completare' }));
     expect(screen.queryByText('Un ex piuttosto appiccicoso')).toBeNull();

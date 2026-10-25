@@ -31,6 +31,9 @@ export function Segmenti<T extends string>({ etichetta, valore, opzioni, onCambi
 
   /** Frecce, Home e Fine: scelgono la voce di destinazione e le portano il fuoco. */
   const tastiera = (e: React.KeyboardEvent, i: number) => {
+    // con Alt, Ctrl o Meta le frecce sono scorciatoie del browser o del sistema (Alt+← indietro, Cmd+← inizio riga): lo schema APG
+    // non prevede modificatori, quindi non si intercettano e non cambiano la scelta
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
     const n = opzioni.length;
     let verso = -1;
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') verso = (i + 1) % n;

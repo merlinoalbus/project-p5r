@@ -260,6 +260,9 @@ export async function riscaldaMiniature(immagini?: Array<{ ambito: string; chiav
       if (!meta || meta.senza) continue;
       n++;
       const m: MetadatiMiniatura = { id: meta.id, mime: meta.mime, byte: meta.byte, createdAt: meta.created_at };
+      // SVG e GIF non hanno mai una miniatura (né una riga in cache): senza questo salto `every` sarebbe sempre falso e ad ogni avvio
+      // il loro contenuto, anche di megabyte, si leggerebbe per intero prima di scoprire che non c'è niente da generare
+      if (SENZA_MINIATURA.has(meta.mime)) continue;
       if (MISURE_SCHEDE.every((l) => miniaturaInCache(m, l, db) !== null)) continue;
       const r = db.prepare('SELECT contenuto FROM immagine WHERE id = ?').get(meta.id) as { contenuto: Buffer | null } | undefined;
       if (!r?.contenuto) continue;

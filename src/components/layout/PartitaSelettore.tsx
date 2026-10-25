@@ -33,7 +33,7 @@ export function PartitaSelettore() {
   return (
     <Selettore
       compatto
-      className="min-w-0 shrink max-w-[150px] sm:max-w-[240px]"
+      className="min-w-0 shrink max-w-[160px] sm:max-w-[240px]"
       etichetta="Partita attiva"
       valore={attiva ? String(attiva.id) : ''}
       segnaposto="Nessuna partita"

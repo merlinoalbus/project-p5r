@@ -55,6 +55,12 @@ export interface OpzioniApp {
    * dell'identità (proprietario unico) anche se le variabili ci sono.
    */
   identita?: OpzioniIdentita | null;
+  /**
+   * L12: l'identificativo dell'edizione servita (`identificativoEdizione`, calcolato dal punto d'avvio del rilascio). `/api/config` lo
+   * espone come `edizione`: il frontend di rilascio, che tiene in memoria le letture dei contenuti, svuota la cache quando cambia.
+   * Nella preparazione non c'è (i contenuti cambiano con le scritture e il frontend ha già la sua invalidazione): il campo manca.
+   */
+  edizione?: string | null;
 }
 
 /**
@@ -153,6 +159,7 @@ export function createApp(opzioni: OpzioniApp = {}): Express {
       gioco: 'Persona 5 Royal',
       modalita,
       capacita: capacitaDi(modalita),
+      ...(opzioni.edizione ? { edizione: opzioni.edizione } : {}),
     });
   });
 

@@ -18,6 +18,7 @@
 // `server/db/improntaSchema.ts`, l'unica definizione dell'algoritmo, usata dai due lati.
 // ============================================================
 
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
@@ -45,6 +46,21 @@ export class ErroreEdizione extends Error {
   constructor(messaggio: string, opzioni?: ErrorOptions) {
     super(messaggio, opzioni);
     this.name = 'ErroreEdizione';
+  }
+}
+
+/**
+ * L'identificativo dell'edizione che l'istanza sta servendo: l'impronta SHA-256 (16 caratteri esadecimali) del testo di `manifesto.json`,
+ * che elenca i file dell'edizione con i loro SHA-256 e il numero progressivo: cambia a ogni nuova edizione, anche di soli contenuti.
+ * `/api/config` lo espone e il frontend di rilascio, che tiene in memoria le letture dei contenuti, svuota la cache quando cambia
+ * (`src/services/api/cacheGioco.ts`). Lancia `ErroreEdizione` se il manifesto non si legge.
+ */
+export function identificativoEdizione(cartella: string = config.edizioneDir): string {
+  const file = path.join(cartella, FILE_MANIFESTO);
+  try {
+    return createHash('sha256').update(fs.readFileSync(file)).digest('hex').slice(0, 16);
+  } catch (err) {
+    throw new ErroreEdizione(`manifesto dell'edizione assente o illeggibile (${FILE_MANIFESTO}): senza non si può identificare l'edizione.`, { cause: err });
   }
 }
 

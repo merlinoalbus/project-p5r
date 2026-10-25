@@ -255,7 +255,7 @@ describe('EditorMappaPage', () => {
     fireEvent.change(form.getByLabelText('Cerca Pin'), { target: { value: 'cella' } });
     fireEvent.click(form.getByRole('option', { name: /Chiave della cella/ }).querySelector('button')!);
     expect(form.getByRole('group', { name: 'Condizione: Chiave della cella (Palazzo di Kamoshida › Prigione): raccolto' })).toBeInTheDocument();
-    fireEvent.click(form.getByRole('combobox', { name: 'Operatore' }));
+    fireEvent.click(form.getByRole('combobox', { name: (n) => n === 'Operatore' || n.startsWith('Operatore: ') }));
     fireEvent.click(form.getByRole('option', { name: 'non segnato' }).querySelector('button')!);
     const riga = form.getByRole('group', { name: 'Condizione: Chiave della cella (Palazzo di Kamoshida › Prigione): non raccolto' });
     // fa sparire il pin quando non vale
@@ -281,7 +281,7 @@ describe('EditorMappaPage', () => {
     fireEvent.change(form.getByLabelText('Cerca Voce'), { target: { value: 'sbarre' } });
     expect(form.getByRole('option', { name: /Leve delle sbarre.*Meccanismo/ })).toBeInTheDocument();
     fireEvent.click(form.getByRole('option', { name: /Leve delle sbarre/ }).querySelector('button')!);
-    fireEvent.click(form.getByRole('combobox', { name: 'Operatore' }));
+    fireEvent.click(form.getByRole('combobox', { name: (n) => n === 'Operatore' || n.startsWith('Operatore: ') }));
     fireEvent.click(form.getByRole('option', { name: 'non segnata' }).querySelector('button')!);
     const riga = form.getByRole('group', { name: 'Condizione: Voce «Leve delle sbarre» (Palazzo di Kamoshida › 6. Corridoio delle Sbarre): non segnata' });
     // fa sparire il pin quando non vale

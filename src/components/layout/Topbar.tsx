@@ -36,19 +36,28 @@ export function Topbar() {
     <header className="flex items-center gap-1 sm:gap-2 lg:gap-3 px-3 lg:px-5 h-[60px] lg:h-[68px] bg-bg-secondary border-b border-border shrink-0">
       {/* `touch`: il logo e' il collegamento alla Home ed e' su ogni pagina, ma misurava 104x36 —
           quattro pixel sotto il minimo che il progetto si e' dato per i bersagli tattili. */}
+      {/* Sotto i 640 px (telefono) il logo è il solo simbolo quadrato (il bersaglio resta da 44 px): a 375 px, con Cerca, Standby e
+          Impostazioni da 44 px, il logo orizzontale (fino a 104 px) lasciava al nome della partita attiva ~65 px di testo; così ne
+          restano ~120 px (circa 7,5 rem), e il nome della partita, l'unico punto dove si vede quale è attiva, resta leggibile. Da 640 px
+          in su il logo orizzontale è quello di prima. */}
       <Link to="/home" className="touch flex items-center gap-2 no-underline text-text shrink-0" aria-label={`${APP_NAME} — Home`}>
-        <AssetImg
-          nome="identita/logo-orizzontale"
-          alt={APP_NAME}
-          subito
-          className="h-9 sm:h-10 lg:h-12 w-auto max-w-[104px] sm:max-w-[180px] lg:max-w-[300px] object-contain"
-          fallback={
-            <>
-              <AssetImg nome="identita/logo" alt={APP_NAME} subito className="w-8 h-8 object-contain" fallback={<span className="w-8 h-8 rounded-md bg-primary flex items-center justify-center text-white font-black testo-14 tracking-tight">P5</span>} />
-              <span className="font-display uppercase testo-24 leading-none hidden sm:inline">{APP_NAME}</span>
-            </>
-          }
-        />
+        <span className="flex items-center justify-center sm:hidden">
+          <AssetImg nome="identita/logo" alt={APP_NAME} subito className="w-9 h-9 object-contain" fallback={<span className="w-9 h-9 rounded-md bg-primary flex items-center justify-center text-white font-black testo-14 tracking-tight">P5</span>} />
+        </span>
+        <span className="hidden sm:flex items-center gap-2">
+          <AssetImg
+            nome="identita/logo-orizzontale"
+            alt={APP_NAME}
+            subito
+            className="sm:h-10 lg:h-12 w-auto sm:max-w-[180px] lg:max-w-[300px] object-contain"
+            fallback={
+              <>
+                <AssetImg nome="identita/logo" alt={APP_NAME} subito className="w-8 h-8 object-contain" fallback={<span className="w-8 h-8 rounded-md bg-primary flex items-center justify-center text-white font-black testo-14 tracking-tight">P5</span>} />
+                <span className="font-display uppercase testo-24 leading-none">{APP_NAME}</span>
+              </>
+            }
+          />
+        </span>
       </Link>
       {sezione && (
         <nav aria-label="Briciole" className="hidden md:flex min-w-0">

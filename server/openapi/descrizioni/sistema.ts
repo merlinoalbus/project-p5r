@@ -13,8 +13,8 @@ export const DESCRIZIONI_SISTEMA: DescrizioniArea = {
   },
   'GET /api/config': {
     sommario: 'Configurazione pubblica per il frontend',
-    descrizione: 'La versione dell\'app e il nome del gioco, mostrati in Impostazioni → Informazioni, più la modalità dell\'istanza (`preparazione`, con tutte le funzioni, o `rilascio`, in sola lettura) e le sue capacità (`shared/capacita.ts`). Il frontend confronta la modalità della propria build con questa risposta e si blocca se non coincidono.',
-    risposta: '`{ appVersion, gioco, modalita, capacita }`',
+    descrizione: 'La versione dell\'app e il nome del gioco, mostrati in Impostazioni → Informazioni, più la modalità dell\'istanza (`preparazione`, con tutte le funzioni, o `rilascio`, in sola lettura) e le sue capacità (`shared/capacita.ts`). Il frontend confronta la modalità della propria build con questa risposta e si blocca se non coincidono. Nel rilascio c\'è anche `edizione`, l\'identificativo dell\'edizione servita (impronta del manifesto): il frontend svuota la memoria delle letture dei contenuti quando cambia.',
+    risposta: '`{ appVersion, gioco, modalita, capacita, edizione? }`',
   },
   'GET /api/openapi.json': {
     sommario: 'Questo documento OpenAPI 3.1',

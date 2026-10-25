@@ -28,7 +28,7 @@ import { logger } from './utils/logger.js';
 import { closeDb, initDb } from './db/dbService.js';
 import { createApp } from './bootstrap.js';
 import { verificaRuntimeNode } from './utils/nodeRuntime.js';
-import { assicuraPartiteIniziali, leggiManifesto, verificaSchemaUtente } from './rilascio/edizione.js';
+import { assicuraPartiteIniziali, identificativoEdizione, leggiManifesto, verificaSchemaUtente } from './rilascio/edizione.js';
 import { verificaSolaLettura } from './rilascio/solaLettura.js';
 import { avviaCopieUtente } from './rilascio/backupUtente.js';
 
@@ -38,11 +38,14 @@ verificaRuntimeNode(process.versions.node);
 /** Quanto può durare la ricezione di una richiesta: qui niente file nel corpo (256 kB al massimo), un minuto è già molto. */
 const RICEZIONE_MAX_MS = 60 * 1000;
 
+/** L'identificativo dell'edizione servita, esposto da `/api/config` (il frontend svuota la sua cache dei contenuti se cambia). */
+let edizione: string;
 try {
   assicuraPartiteIniziali();
   const db = initDb(undefined, { soloLettura: true });
   verificaSolaLettura(db);
   verificaSchemaUtente(db, leggiManifesto());
+  edizione = identificativoEdizione();
 } catch (err) {
   console.error('[project-p5r] FATALE: avvio dell\'istanza di rilascio non riuscito:', err);
   process.exit(1);
@@ -50,7 +53,7 @@ try {
 
 let app: ReturnType<typeof createApp>;
 try {
-  app = createApp({ modalita: 'rilascio' });
+  app = createApp({ modalita: 'rilascio', edizione });
 } catch (err) {
   console.error('[project-p5r] FATALE: montaggio delle rotte del giocatore non riuscito:', err);
   process.exit(1);

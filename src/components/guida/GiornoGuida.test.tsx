@@ -7,7 +7,7 @@
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { GiornoGuida } from './GiornoGuida';
-import { scegliVoce } from '../../../test/selettore';
+import { scegliVoce, selettore } from '../../../test/selettore';
 import type { AzionePercorsoDto, PercorsoGiornoDto } from '../../types';
 
 const api = vi.hoisted(() => ({
@@ -453,10 +453,10 @@ describe('GiornoGuida — copiare o spostare voci in un altro giorno (2026-10-12
     const finestra = await screen.findByRole('dialog', { name: 'Copia 2 voci in un altro giorno' });
     expect(finestra).toHaveTextContent('2 voci (1 di giorno, 1 di sera)');
     // parte dal giorno di partenza; la fascia, con voci di giorno e di sera, è «di giorno»
-    expect(within(finestra).getByRole('combobox', { name: 'Giorno' })).toHaveTextContent('12 aprile (mar)');
+    expect(selettore('Giorno', finestra)).toHaveTextContent('12 aprile (mar)');
     expect(within(finestra).getByRole('radio', { name: 'Di giorno' })).toHaveAttribute('aria-checked', 'true');
     scegliVoce('Mese', 'Maggio', finestra);
-    expect(within(finestra).getByRole('combobox', { name: 'Giorno' })).toHaveTextContent('2 maggio (lun)');
+    expect(selettore('Giorno', finestra)).toHaveTextContent('2 maggio (lun)');
     fireEvent.click(within(finestra).getByRole('radio', { name: 'Di sera' }));
     api.trasferisciVociGiornata.mockResolvedValue({ giorno: '05-02', fascia: 'sera', uid: ['n1', 'n2'], voci: [] });
     fireEvent.click(within(finestra).getByRole('button', { name: /^Copia nel 2 maggio, di sera/ }));

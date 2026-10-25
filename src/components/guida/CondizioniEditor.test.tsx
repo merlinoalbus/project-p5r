@@ -8,6 +8,7 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { useState } from 'react';
 import { CondizioniEditor } from './CondizioniEditor';
+import { selettore } from '../../../test/selettore';
 import type { RequisitoSpillo } from '../../../shared/condizioniSpillo';
 
 vi.mock('../../services/api', (vero) => moduloApi(vero, {
@@ -34,7 +35,8 @@ function Prova({ iniziali = [], onCambia }: { iniziali?: RequisitoSpillo[]; onCa
 }
 /** Dentro `ambito` apre il menu a tendina con l'etichetta data e clicca il pulsante dell'opzione `voce`. */
 const scegli = (ambito: ReturnType<typeof within>, etichetta: string, voce: string | RegExp) => {
-  fireEvent.click(ambito.getByRole('combobox', { name: etichetta }));
+  // il selettore compatto («Operatore») porta il valore nel nome accessibile: il nome puro o seguito da «: valore»
+  fireEvent.click(ambito.getByRole('combobox', { name: (n: string) => n === etichetta || n.startsWith(`${etichetta}: `) }));
   fireEvent.click(ambito.getByRole('option', { name: voce }).querySelector('button')!);
 };
 
@@ -152,9 +154,9 @@ describe('CondizioniEditor — righe con chiavi stabili (A3, verifica 2026-10-03
     scegli(seconda, 'Operatore', 'tra');
     // «tra» con le due date uguali si salva come un giorno solo: è lo stato della riga a ricordare la scelta (due campi)
     const dopoScelta = screen.getAllByRole('group').find((g) => g.getAttribute('aria-label')?.includes('2 maggio'))!;
-    expect(within(dopoScelta).getByRole('combobox', { name: 'Operatore' })).toHaveAttribute('title', 'tra');
+    expect(selettore('Operatore', dopoScelta)).toHaveAttribute('title', 'tra');
     fireEvent.click(screen.getByRole('button', { name: 'Togli la condizione: dal 18 aprile' }));
     const rimasta = screen.getAllByRole('group').find((g) => g.getAttribute('aria-label')?.includes('2 maggio'))!;
-    expect(within(rimasta).getByRole('combobox', { name: 'Operatore' })).toHaveAttribute('title', 'tra');
+    expect(selettore('Operatore', rimasta)).toHaveAttribute('title', 'tra');
   });
 });
