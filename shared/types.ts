@@ -3560,3 +3560,88 @@ export interface EsitoRipristinoCorrezioneDto {
   scheda: SchedaCorrezioneDto;
 }
 
+// ---- L12 (passi 7 e 9): «Prepara edizione», il prodotto che l'istanza di rilascio riceve ----
+
+/** Le fasi della preparazione di un'edizione, nell'ordine in cui si eseguono. */
+export type FaseEdizione = 'copia' | 'regole' | 'miniature' | 'compattazione' | 'partite-vuoto' | 'controlli' | 'caratteri' | 'compatibilita' | 'manifesto' | 'deposito';
+
+/** Un file dell'edizione, con l'impronta SHA-256 che il manifesto garantisce. */
+export interface FileEdizioneDto {
+  /** Percorso relativo alla cartella dell'edizione (`gioco.db`, `font/display.woff2`…). */
+  nome: string;
+  byte: number;
+  sha256: string;
+}
+
+/** Un insieme di chiavi di gioco citate dalle partite (es. `persona.id`) che nell'edizione precedente c'erano e in questa non ci sono più. */
+export interface ChiaviRimosseEdizioneDto {
+  /** L'insieme, nella forma `tabella.colonna` (con il filtro fra parentesi quadre quando le righe valgono solo in parte). */
+  insieme: string;
+  /** Quante chiavi sono sparite. */
+  rimosse: number;
+  /** Fino a dieci chiavi, per riconoscerle. */
+  esempi: string[];
+  /** Le colonne delle partite che citano quelle chiavi (`tabella.colonna`): è lì che resterebbe avanzamento senza voce. */
+  citatoDa: string[];
+}
+
+/** Il confronto con l'edizione precedente: che cosa del gioco sparisce sotto i piedi di chi ha già un avanzamento. */
+export interface CompatibilitaEdizioneDto {
+  /** L'edizione precedente trovata nella cartella d'appoggio; null per la prima edizione. */
+  precedente: { numero: number; cartella: string; creataIl: string } | null;
+  /** Vero se l'impronta dello schema delle partite è diversa da quella dell'edizione precedente: l'istanza di rilascio non ha una strada automatica per convertire. */
+  strutturaPartiteCambiata: boolean;
+  /** Le chiavi citate dalle partite che l'edizione precedente aveva e questa no. */
+  chiaviRimosse: ChiaviRimosseEdizioneDto[];
+  /** Quante chiavi nuove, in totale, rispetto all'edizione precedente. */
+  chiaviAggiunte: number;
+  /** I riferimenti delle partite della PREPARAZIONE che non trovano la loro voce nell'edizione (le partite dell'utente, come prova). */
+  orfaniPreparazione: OrfanoPartiteDto[];
+}
+
+/** Un controllo di forma sui JSON: le colonne `…_json` con righe che non sono JSON valido. */
+export interface JsonMalformatoEdizioneDto {
+  tabella: string;
+  colonna: string;
+  righe: number;
+}
+
+/** Che cosa ha fatto la preparazione (e com'è andata) per un'edizione. */
+export interface EsitoEdizioneDto {
+  /** Il numero progressivo dell'edizione (uno più dell'ultima trovata nella cartella d'appoggio). */
+  numero: number;
+  creataIl: string;
+  /** La cartella dell'edizione dentro la cartella d'appoggio; null se l'edizione è stata respinta e non è stata depositata. */
+  cartella: string | null;
+  depositata: boolean;
+  versioneSchemaGioco: number;
+  versioneSchemaPartite: number;
+  improntaSchemaPartite: string;
+  file: FileEdizioneDto[];
+  /** Ciò che le regole sui dati hanno corretto sulla COPIA (nella preparazione sono già a zero, se i dati erano a posto). */
+  regole: { spilliTradotti: number; spilliRiallineati: number; spilliIdentificati: number; miniatureOrfane: number };
+  miniature: { immagini: number; generate: number; dallaCache: number; originali: number; righe: number };
+  controlli: { integrityCheck: string; violazioniChiaviEsterne: number; spilliSenzaUid: number; jsonMalformati: JsonMalformatoEdizioneDto[] };
+  compatibilita: CompatibilitaEdizioneDto;
+  conteggi: { immagini: number; byteImmagini: number; caratteri: number; tabelle: Record<string, number> };
+  /** I problemi che impediscono di depositare l'edizione: finché ci sono, l'edizione non esce. */
+  bloccanti: string[];
+  /** Ciò che l'utente deve sapere ma non blocca. */
+  avvisi: string[];
+}
+
+/** A che punto è la preparazione dell'edizione, e com'è finita l'ultima (stessa logica dell'importazione del pacchetto: interrogabile anche se la richiesta è caduta). */
+export interface StatoEdizioneDto {
+  inCorso: boolean;
+  operazione: string | null;
+  fase: FaseEdizione | null;
+  /** Avanzamento della fase corrente, quando si può contare (le miniature); null altrimenti. */
+  avanzamento: { fatte: number; totale: number } | null;
+  iniziataIl: string | null;
+  ultima: { operazione: string; riuscita: boolean; conclusaIl: string; messaggio: string; esito: EsitoEdizioneDto | null } | null;
+  /** Vero se la cartella d'appoggio è configurata e scrivibile: senza, l'edizione non si può preparare. */
+  depositoDisponibile: boolean;
+  /** L'ultima edizione trovata nella cartella d'appoggio (anche di un avvio precedente del server); null se non ce ne sono. */
+  edizioneDepositata: { numero: number; cartella: string; creataIl: string } | null;
+}
+

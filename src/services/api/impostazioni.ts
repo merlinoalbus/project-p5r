@@ -8,7 +8,7 @@
 // è tutto del backend, che legge dal mount.
 // ============================================================
 
-import type { ElementoCatalogoDto, AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, EsitoRipristinoCestinoDto, EsitoRipristinoDto, StatoImportazionePacchettoDto, StatoIstanzaDto, VoceCestinoDto, VoceCestinoUnificatoDto } from '../../types';
+import type { ElementoCatalogoDto, AnteprimaPacchettoDto, DepositoFileDto, EsitoImportazionePacchettoDto, EsitoRipristinoCestinoDto, EsitoRipristinoDto, StatoEdizioneDto, StatoImportazionePacchettoDto, StatoIstanzaDto, VoceCestinoDto, VoceCestinoUnificatoDto } from '../../types';
 import { API_BASE_URL } from '../../utils/constants';
 import { httpFetch } from './_httpClient';
 import { ApiError, apiDelete, apiGet, apiPost, apiPut } from './_helpers';
@@ -73,6 +73,16 @@ export const ripristinaIstanzaDaDeposito = (nome: string): Promise<EsitoRipristi
 /** A che punto è l'importazione sul server: da chiedere quando la risposta non arriva (un proxy può chiudere prima). */
 export const statoImportazionePacchetto = (): Promise<StatoImportazionePacchettoDto> =>
   apiGet('/impostazioni/istanza/gioco/importazione', { maxRetries: 1, timeoutMs: 30_000 });
+
+// ---- L12: l'edizione di rilascio (solo nell'istanza di preparazione) ----
+
+/** Avvia «Prepara edizione»: il server risponde subito e lavora in background (non si ripete da sola: una seconda richiesta troverebbe il lavoro in corso). */
+export const avviaPreparazioneEdizione = (): Promise<{ operazione: string }> =>
+  apiPost('/impostazioni/istanza/edizione', undefined, { maxRetries: 0, timeoutMs: 60_000 });
+
+/** A che punto è la preparazione dell'edizione, com'è finita l'ultima e quale edizione c'è già nella cartella d'appoggio. */
+export const getStatoEdizione = (): Promise<StatoEdizioneDto> =>
+  apiGet('/impostazioni/istanza/edizione', { maxRetries: 1, timeoutMs: 30_000 });
 
 // ---- Il cestino (2026-10-16): aree, voci, planimetrie e aree dei dedali eliminate ----
 // Rimettere ed eliminare per sempre non si ripetono da soli (`maxRetries: 0`): una seconda richiesta partita dopo una risposta

@@ -1,0 +1,124 @@
+# ============================================================
+# Build & Push Docker Images (RILASCIO) — GHCR, su tag `rilascio-v*` (L12, passo 9)
+# ============================================================
+# Pubblica le immagini dell'istanza PUBBLICA in sola lettura (stage `rilascio` di Dockerfile.backend e Dockerfile.frontend). È un workflow a parte da
+# docker-publish.yml, che resta com'è: quello pubblica la preparazione a ogni push su `main` con `:latest` e `:sha`; questo parte SOLO quando si crea
+# a mano un tag `rilascio-vX.Y.Z`, ed è l'unico modo in cui un'immagine di rilascio nasce.
+#
+# Regole (progetto delle due istanze, §6):
+#   - immagini DISTINTE da quelle della preparazione (`project-p5r-rilascio-backend` / `project-p5r-rilascio-frontend`);
+#   - VERSIONE FISSA nel tag (vX.Y.Z, quella del tag git senza il prefisso `rilascio-`); MAI `:latest`, così nessun aggiornamento automatico può
+#     arrivare all'istanza pubblica; niente Watchtower (il compose di rilascio lo esclude esplicitamente);
+#   - il tag dev'essere nella forma `rilascio-vX.Y.Z` e dev'essere raggiungibile da `main`: un tag su un ramo di lavoro non produce un'immagine pubblica;
+#   - le immagini si pubblicano solo se il gate CI (ci.yml: typecheck, lint, audit) è verde, come per la preparazione;
+#   - il frontend si costruisce con `VITE_MODALITA=rilascio` e `target: rilascio`: il Dockerfile fallisce se la build non è di rilascio o se nel
+#     bundle compare la rotta di «Prepara edizione», e controlla la sintassi della configurazione nginx.
+
+name: Build & Push Docker Images (rilascio)
+
+on:
+  push:
+    tags:
+      - 'rilascio-v*'
+
+env:
+  REGISTRY: ghcr.io
+  BE_IMAGE: ghcr.io/merlinoalbus/project-p5r-rilascio-backend
+  FE_IMAGE: ghcr.io/merlinoalbus/project-p5r-rilascio-frontend
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    outputs:
+      versione: ${{ steps.versione.outputs.versione }}
+    steps:
+      - name: Checkout (storia completa, serve a verificare che il tag sia su main)
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Versione dal tag
+        id: versione
+        env:
+          # il nome del tag arriva da fuori: passa per l'ambiente, mai interpolato nello script
+          TAG: ${{ github.ref_name }}
+        run: |
+          versione="${TAG#rilascio-}"
+          if ! printf '%s' "$versione" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$'; then
+            echo "Il tag deve avere la forma rilascio-vX.Y.Z (anche con un suffisso -rc.1): trovato '$TAG'" >&2
+            exit 1
+          fi
+          echo "versione=$versione" >> "$GITHUB_OUTPUT"
+      - name: Il tag dev'essere su main
+        run: |
+          git fetch origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "Il commit del tag non è raggiungibile da main: un'immagine di rilascio nasce solo da codice già integrato" >&2
+            exit 1
+          fi
+
+  # lo stesso gate delle pull request e della pubblicazione della preparazione (ci.yml): una sola definizione
+  verify:
+    needs: tag
+    uses: ./.github/workflows/ci.yml
+
+  build-backend:
+    needs: [tag, verify]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build & push backend (stage rilascio)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./Dockerfile.backend
+          target: rilascio
+          push: true
+          # cache separate per immagine e per modalità: non si mescolano con quelle della preparazione
+          cache-from: type=gha,scope=rilascio-backend
+          cache-to: type=gha,mode=max,scope=rilascio-backend
+          # SOLO la versione fissa: nessun :latest
+          tags: |
+            ${{ env.BE_IMAGE }}:${{ needs.tag.outputs.versione }}
+
+  build-frontend:
+    needs: [tag, verify]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build & push frontend (stage rilascio, VITE_MODALITA=rilascio)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./Dockerfile.frontend
+          target: rilascio
+          build-args: |
+            VITE_MODALITA=rilascio
+          push: true
+          cache-from: type=gha,scope=rilascio-frontend
+          cache-to: type=gha,mode=max,scope=rilascio-frontend
+          tags: |
+            ${{ env.FE_IMAGE }}:${{ needs.tag.outputs.versione }}
