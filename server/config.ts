@@ -30,5 +30,14 @@ export const config = {
   /** Cartella d'appoggio da cui importare i pacchetti (il NAS montato in `/deposito`); vuota = nessun deposito. */
   depositoDir: process.env.DEPOSITO_DIR ? path.resolve(process.env.DEPOSITO_DIR) : '',
 
+  /**
+   * Cloudflare Access (L12, passo 3): il team (`<team>` oppure il nome host completo `<team>.cloudflareaccess.com`) e l'AUD
+   * dell'applicazione Access. Vengono SOLO dalle variabili dello stack, mai dal repository. Con entrambe valorizzate il middleware
+   * d'identità è attivo (ogni richiesta `/api` deve portare un token valido); in modalità `rilascio` sono obbligatorie (l'avvio
+   * si ferma se mancano); in preparazione, se mancano, resta il proprietario unico di sempre. Vuote = non impostate.
+   */
+  cfAccessTeam: (process.env.CF_ACCESS_TEAM ?? '').trim(),
+  cfAccessAud: (process.env.CF_ACCESS_AUD ?? '').trim(),
+
   appVersion: '0.1.0',
 } as const;

@@ -51,5 +51,6 @@ import { utente041 } from './041_punti_cronologici.js';
 import { utente042 } from './042_spillo_partita_dei_pin_condivisi_tolti.js';
 import { utente043 } from './043_toglie_lettura_partita.js';
 import { utente044 } from './044_toglie_requisito_partita.js';
+import { utente045 } from './045_proprietario_delle_partite.js';
 
-export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006, utente007, utente008, utente009, utente010, utente011, utente012, utente013, utente014, utente015, utente016, utente017, utente018, utente019, utente020, utente021, utente022, utente023, utente024, utente025, utente026, utente027, utente028, utente029, utente030, utente031, utente032, utente033, utente034, utente035, utente036, utente037, utente038, utente039, utente040, utente041, utente042, utente043, utente044];
+export const migrazioniUtente: Migration[] = [utente001, utente002, utente003, utente004, utente005, utente006, utente007, utente008, utente009, utente010, utente011, utente012, utente013, utente014, utente015, utente016, utente017, utente018, utente019, utente020, utente021, utente022, utente023, utente024, utente025, utente026, utente027, utente028, utente029, utente030, utente031, utente032, utente033, utente034, utente035, utente036, utente037, utente038, utente039, utente040, utente041, utente042, utente043, utente044, utente045];

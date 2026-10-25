@@ -54,6 +54,9 @@ export class HttpError extends Error {
 export const httpErrors = {
   badRequest: (code: string, message: string, details?: Record<string, unknown>) =>
     new HttpError(400, code, message, details),
+  /** 401: l'identità non è stata verificata (L12: token di Cloudflare Access assente, scaduto o non valido). */
+  unauthorized: (code: string, message: string, details?: Record<string, unknown>) =>
+    new HttpError(401, code, message, details),
   notFound: (code: string, message: string, details?: Record<string, unknown>) =>
     new HttpError(404, code, message, details),
   conflict: (code: string, message: string, details?: Record<string, unknown>) =>

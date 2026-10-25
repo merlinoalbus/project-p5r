@@ -4,6 +4,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { getProprietario, getProprietarioEmail, PROPRIETARIO_UNICO } from '../middleware/requestContext.js';
 import { partitaNonTrovata } from './verificaPartita.js';
 import { assicuraNonDelGruppo } from './personeDelGruppo.js';
 import { verificaCatturaDaIncontro } from './catturePersona.js';
@@ -46,16 +47,20 @@ function partitaDto(r: RigaPartita): PartitaDto {
 
 /** La riga di una partita; 404 se non esiste (è anche il controllo d'esistenza delle altre funzioni). */
 function rigaPartita(id: number): RigaPartita {
-  const r = prepared('SELECT * FROM partita WHERE id = ?').get(id) as RigaPartita | undefined;
+  // L12: solo le partite del proprietario della richiesta (in preparazione l'unico: tutte le partite di sempre)
+  const r = prepared('SELECT * FROM partita WHERE id = ? AND proprietario = ?').get(id, getProprietario()) as RigaPartita | undefined;
   if (!r) throw partitaNonTrovata(id);
   return r;
 }
 
 // ---- Partite ----
 
-/** Tutte le partite: prima quella attiva, poi le altre dalla modificata più di recente. */
+/** Quante partite al massimo può avere un utente riconosciuto (istanza pubblica); il proprietario unico della preparazione non ha limite. */
+export const MAX_PARTITE_PER_UTENTE = 20;
+
+/** Le partite del proprietario della richiesta: prima quella attiva, poi le altre dalla modificata più di recente. */
 export function elencaPartite(): PartitaDto[] {
-  return (prepared('SELECT * FROM partita ORDER BY attiva DESC, updated_at DESC').all() as RigaPartita[]).map(partitaDto);
+  return (prepared('SELECT * FROM partita WHERE proprietario = ? ORDER BY attiva DESC, updated_at DESC').all(getProprietario()) as RigaPartita[]).map(partitaDto);
 }
 
 /** Una partita per id (404 se non esiste). */
@@ -91,13 +96,19 @@ export function creaPartita(dati: DatiPartita & { nome: string; attiva?: boolean
   const db = getDb();
   return db.transaction(() => {
     const adesso = nowIso();
-    const nessuna = (prepared('SELECT COUNT(*) AS n FROM partita').get() as { n: number }).n === 0;
+    const proprietario = getProprietario();
+    const quante = (prepared('SELECT COUNT(*) AS n FROM partita WHERE proprietario = ?').get(proprietario) as { n: number }).n;
+    if (proprietario !== PROPRIETARIO_UNICO && quante >= MAX_PARTITE_PER_UTENTE) {
+      throw httpErrors.conflict('limite-partite', `Hai già ${MAX_PARTITE_PER_UTENTE} partite: eliminane una prima di crearne un'altra.`);
+    }
+    const nessuna = quante === 0;
     const attiva = dati.attiva || nessuna;
-    if (attiva) prepared('UPDATE partita SET attiva = 0 WHERE attiva = 1').run();
-    const info = prepared(`INSERT INTO partita (nome, note, attiva, livello_protagonista, data_gioco, fascia_gioco, difficolta, nuova_partita_plus, dlc_posseduti_json, allarme_attivo, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+    // l'attiva è una per proprietario (indice unico `idx_partita_attiva_proprietario`): si toglie il segno solo alle SUE
+    if (attiva) prepared('UPDATE partita SET attiva = 0 WHERE attiva = 1 AND proprietario = ?').run(proprietario);
+    const info = prepared(`INSERT INTO partita (nome, note, attiva, livello_protagonista, data_gioco, fascia_gioco, difficolta, nuova_partita_plus, dlc_posseduti_json, allarme_attivo, created_at, updated_at, proprietario, proprietario_email)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
       dati.nome, dati.note ?? '', attiva ? 1 : 0, dati.livelloProtagonista ?? 1, dati.dataGioco ?? primoGiornoDelGioco(), dati.fasciaGioco ?? 'giorno', dati.difficolta ?? 'normale',
-      dati.nuovaPartitaPlus ? 1 : 0, JSON.stringify(dati.dlcPosseduti ?? []), dati.allarmeAttivo ? 1 : 0, adesso, adesso,
+      dati.nuovaPartitaPlus ? 1 : 0, JSON.stringify(dati.dlcPosseduti ?? []), dati.allarmeAttivo ? 1 : 0, adesso, adesso, proprietario, getProprietarioEmail(),
     );
     const id = Number(info.lastInsertRowid);
     // Doti sociali a zero e Confidenti non sbloccati: righe esplicite così il tracking parte completo.
@@ -146,9 +157,10 @@ export function aggiornaPartita(id: number, dati: DatiPartita): PartitaDto {
 /** Rende attiva la partita (404 se non esiste) e toglie il segno a quella che lo era, in una transazione. */
 export function attivaPartita(id: number): PartitaDto {
   rigaPartita(id);
+  const proprietario = getProprietario();
   getDb().transaction(() => {
-    prepared('UPDATE partita SET attiva = 0 WHERE attiva = 1').run();
-    prepared('UPDATE partita SET attiva = 1, updated_at = ? WHERE id = ?').run(nowIso(), id);
+    prepared('UPDATE partita SET attiva = 0 WHERE attiva = 1 AND proprietario = ?').run(proprietario);
+    prepared('UPDATE partita SET attiva = 1, updated_at = ? WHERE id = ? AND proprietario = ?').run(nowIso(), id, proprietario);
   })();
   return partitaDto(rigaPartita(id));
 }
@@ -161,10 +173,10 @@ export function eliminaPartita(id: number): void {
     // del padre, senza affidarsi all'ordine delle cascate di SQLite.
     prepared('DELETE FROM utente.acquisto_provenienza WHERE partita_id=?').run(id);
     prepared('DELETE FROM utente.pesca_provenienza WHERE partita_id=?').run(id);
-    prepared('DELETE FROM partita WHERE id = ?').run(id);
+    prepared('DELETE FROM partita WHERE id = ? AND proprietario = ?').run(id, getProprietario());
     if (r.attiva === 1) {
-      // Promuove la partita più recente, se ne resta una.
-      const altra = prepared('SELECT id FROM partita ORDER BY updated_at DESC LIMIT 1').get() as { id: number } | undefined;
+      // Promuove la partita più recente DELLO STESSO proprietario, se ne resta una.
+      const altra = prepared('SELECT id FROM partita WHERE proprietario = ? ORDER BY updated_at DESC LIMIT 1').get(getProprietario()) as { id: number } | undefined;
       if (altra) prepared('UPDATE partita SET attiva = 1 WHERE id = ?').run(altra.id);
     }
   });

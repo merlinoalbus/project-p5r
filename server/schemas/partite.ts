@@ -27,6 +27,10 @@ export const bodyCreaPartita = z.object({ ...campiPartita, attiva: z.boolean().o
 export const bodyAggiornaPartita = z.object(campiPartita).partial();
 
 export const paramsPartita = z.object({ id: idParam });
+/** L12: l'UID di una voce del cestino personale (32 cifre esadecimali), da solo o dentro una partita. */
+const uidCestino = z.string().regex(/^[0-9a-f]{32}$/);
+export const paramsCestinoPersonale = z.object({ uid: uidCestino }).strict();
+export const paramsPartitaCestino = z.object({ id: idParam, uid: uidCestino }).strict();
 export const paramsPartitaChiave = z.object({ id: idParam, chiave: z.string().trim().min(1).max(40) });
 export const paramsPartitaPersona = z.object({ id: idParam, personaId: idParam });
 export const paramsPartitaPosseduta = z.object({ id: idParam, possedutaId: idParam });
