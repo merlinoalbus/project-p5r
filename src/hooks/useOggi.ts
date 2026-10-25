@@ -61,7 +61,16 @@ export function useOggi(partitaId: number): Oggi {
   const data = dataScelta ?? indice.dati?.dataCorrente ?? indice.dati?.giorni[0]?.giorno ?? null;
   // il meteo segnato dalla finestra del cambio di giorno (`MeteoAlCambioGiorno`) cambia la giornata mostrata: si rilegge
   const versioneMeteo = useMeteoStore((s) => s.versione);
-  const giorno = useCarica(() => (data ? getPercorsoGiorno(data, partitaId) : Promise.resolve(null)), [data, partitaId, versioneMeteo]);
+  // `versioneMeteo` NON è fra le dipendenze: cambiandole il giorno si azzererebbe (spinner al posto della giornata) a ogni meteo
+  // segnato. Si rilegge con `ricarica()`, che tiene a schermo la giornata mentre arriva quella nuova (effetto qui sotto).
+  const giorno = useCarica(() => (data ? getPercorsoGiorno(data, partitaId) : Promise.resolve(null)), [data, partitaId]);
+  const rileggiGiornoMeteo = giorno.ricarica;
+  const ultimaVersioneMeteo = useRef(versioneMeteo);
+  useEffect(() => {
+    if (ultimaVersioneMeteo.current === versioneMeteo) return;
+    ultimaVersioneMeteo.current = versioneMeteo;
+    void rileggiGiornoMeteo();
+  }, [versioneMeteo, rileggiGiornoMeteo]);
   // Il giorno della partita è cambiato fuori da qui (l'ultima attività spuntata l'ha fatto avanzare, il Calendario, il
   // Riepilogo): «Oggi» va al giorno nuovo e l'indice (giorno corrente, conteggi) si rilegge.
   const dataPartita = usePartitaStore((s) => (s.attiva?.id === partitaId ? s.attiva.dataGioco ?? null : null));

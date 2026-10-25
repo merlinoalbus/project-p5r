@@ -10,6 +10,7 @@ import { useInPannello } from '../components/scheda/contestoScheda';
 import { getConfidenteDettaglio, getConfidentiPartita, getRequisitiConfidente, impostaRegaloFatto, annullaRegaloOggetto, confermaRequisitoConfidente } from '../services/api';
 import { formattaPunti } from '../utils/punti';
 import { useCarica } from '../hooks/useCarica';
+import { useRileggiAlCambio } from '../hooks/useRileggiAlCambio';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
@@ -52,8 +53,10 @@ export function ConfidenteDettaglioPage() {
   // R10-27: nel pannello sopra il diario la scheda si legge e basta: i semafori non si confermano né si correggono da lì
   const nelPannello = useInPannello();
   const attiva = usePartitaStore((s) => s.attiva);
-  const { dati: c, caricamento, errore, ricarica } = useCarica(() => getConfidenteDettaglio(chiave), [chiave]);
-  const stato = useCarica(() => (attiva ? getConfidentiPartita(attiva.id) : Promise.resolve(null)), [attiva, chiave]);
+  const { dati: c, inPrimoCaricamento, errore, ricarica } = useCarica(() => getConfidenteDettaglio(chiave), [chiave]);
+  // per id della partita e Confidente; ai cambi di stato della partita si rilegge senza azzerare (`mio`, Rango e semafori restano)
+  const stato = useCarica(() => (attiva ? getConfidentiPartita(attiva.id) : Promise.resolve(null)), [attiva?.id, chiave]);
+  useRileggiAlCambio(stato.ricarica, attiva);
   const requisiti = useCarica(() => getRequisitiConfidente(chiave), [chiave]);
   useDocumentTitle(c ? c.nome : 'Confidente');
   const [aperti, setAperti] = useState<Record<number, true>>({});
@@ -130,7 +133,7 @@ export function ConfidenteDettaglioPage() {
 
   return (
     <>
-    <PageState isLoading={caricamento} error={errore || erroreInformativo} onRetry={() => void ricarica()}>
+    <PageState isLoading={inPrimoCaricamento} error={errore || erroreInformativo} onRetry={() => void ricarica()}>
       {c && !erroreInformativo && (
         <div className="flex flex-col gap-4">
           {/* Lotto B (punto 6): l'azione di gioco è il pulsante primario; gli strumenti di modifica stanno nel menu «Modifica ⋯», che

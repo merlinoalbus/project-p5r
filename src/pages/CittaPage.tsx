@@ -14,6 +14,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getDungeons, getQuartieri } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
+import { useRileggiAlCambio } from '../hooks/useRileggiAlCambio';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
@@ -39,7 +40,10 @@ export function CittaPage() {
   const attiva = usePartitaStore((s) => s.attiva);
   // La partita serve all'API, non solo alla pagina: senza, non può dire se un quartiere che si
   // apre col rango di un Confidente o con un libro sia già nel mondo.
-  const dati = useCarica(() => getQuartieri(attiva?.id), [attiva]);
+  // Dipende dall'**id** della partita; ai suoi cambi di stato (giorno, rango, meteo…) si rilegge con `ricarica()`, che tiene a
+  // schermo la mappa: con `[attiva]` fra le dipendenze ogni «+» di un livello la sostituiva con lo spinner.
+  const dati = useCarica(() => getQuartieri(attiva?.id), [attiva?.id]);
+  useRileggiAlCambio(dati.ricarica, attiva);
   // Mappa e schede sono **una** selezione vista in due modi, come nei Memento: si passa sopra a
   // una scheda e si accende la sagoma lassù, si passa sopra a una sagoma e si accende la scheda.
   // Su una mappa fatta di figure accostate, ritrovare «quale delle due è Ogikubo» è il lavoro che
@@ -51,7 +55,8 @@ export function CittaPage() {
   // ci stanno anche i Memento, che l'utente ha chiesto per nome e che dal 9 maggio sono un posto
   // dove si può andare quanto gli altri. Con la partita, perché un Palazzo completato sparisce.
   // Col giorno della partita, perché da quello dipende dove si atterra toccando un Palazzo (`atterraggio`, 2026-10-04).
-  const dungeon = useCarica(async () => radiciMetaverso(await getDungeons(attiva?.id)), [attiva]);
+  const dungeon = useCarica(async () => radiciMetaverso(await getDungeons(attiva?.id)), [attiva?.id]);
+  useRileggiAlCambio(dungeon.ricarica, attiva);
   const q = dati.dati;
   return (
     <PageState isLoading={dati.caricamento && !q} error={dati.errore} onRetry={() => void dati.ricarica()}>

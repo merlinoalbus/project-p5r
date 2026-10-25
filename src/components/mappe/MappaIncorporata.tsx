@@ -83,7 +83,7 @@ interface Props {
  * clicco su un pin mi si sposta la mappa», «mi si resetta anche lo zoom», 2026-10-18). */
 export function MappaIncorporata(props: Props) {
   const esito = useCarica(() => risolviMappa(props.chiave), [props.chiave]);
-  return <PageState isLoading={esito.caricamento} error={esito.errore} onRetry={esito.ricarica}>
+  return <PageState isLoading={esito.inPrimoCaricamento} error={esito.errore} onRetry={esito.ricarica}>
     {esito.dati?.tipo === 'guida' ? <div className="card flex flex-col gap-2">
       <h3 className="m-0 text-base">{esito.dati.nome}</h3>
       <Link className="touch inline-flex items-center self-start" to={`/guida/mappe/${encodeURIComponent(esito.dati.mappaPalazzo)}?area=${encodeURIComponent(esito.dati.area)}`}>Apri la planimetria e i contenuti della guida</Link>

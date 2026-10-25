@@ -34,7 +34,7 @@ interface Props {
 
 /** Stella delle Doti con schede compatte: incremento a note, rango attuale e distanza dal rango successivo. */
 export function DotiSociali({ partitaId }: Props) {
-  const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => getDoti(partitaId), [partitaId]);
+  const { dati, inPrimoCaricamento, errore, ricarica, imposta } = useCarica(() => getDoti(partitaId), [partitaId]);
   const [occupata, setOccupata] = useState<string | null>(null);
   /** Ultimo esito (totale della Dote, Fortuna accesa o spenta), letto dai lettori di schermo dalla regione `status`: il numero
    *  grande cambia, ma da solo non si annuncia. Il contatore fa rileggere anche un testo uguale al precedente. */
@@ -100,7 +100,7 @@ export function DotiSociali({ partitaId }: Props) {
     <>
       {/* fuori da PageState: la regione c'è già prima dei dati, e una regione live nata insieme al testo spesso non si legge */}
       <p className="sr-only" role="status" aria-live="polite"><span key={annuncio.n}>{annuncio.testo}</span></p>
-      <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
+      <PageState isLoading={inPrimoCaricamento} error={errore} onRetry={() => void ricarica()}>
         <div className="grid gap-3 items-start grid-cols-[minmax(0,1fr)] md:grid-cols-[minmax(340px,460px)_minmax(0,1fr)] lg:grid-cols-[minmax(400px,540px)_minmax(0,680px)] lg:justify-center md:h-full md:min-h-0 md:items-stretch">
           <section className="card flex flex-col items-center justify-center gap-2 px-4 pt-3 pb-3 overflow-visible min-w-0 md:min-h-0" aria-label="Stella delle Doti">
             <div className="w-full flex justify-center px-[12%]">

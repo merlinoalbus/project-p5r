@@ -46,7 +46,7 @@ export function CompendioPersonale({ partitaId }: Props) {
   };
 
   return (
-    <PageState isLoading={tutte.caricamento || registrate.caricamento} error={tutte.errore ?? registrate.errore} onRetry={() => { void tutte.ricarica(); void registrate.ricarica(); }}>
+    <PageState isLoading={tutte.inPrimoCaricamento || registrate.inPrimoCaricamento} error={tutte.errore ?? registrate.errore} onRetry={() => { void tutte.ricarica(); void registrate.ricarica(); }}>
       <div className="min-w-0 max-w-full flex flex-wrap items-center gap-3 mb-3">
         <div className="kpi-tile shrink-0">
           <span className="kpi-label kpi-label--segno"><IconaSegno chiave="completati" />Completamento</span>

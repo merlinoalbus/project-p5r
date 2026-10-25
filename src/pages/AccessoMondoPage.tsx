@@ -96,7 +96,7 @@ function Accesso({ tipo, chiave, incorporato = false }: { tipo: TipoAccessoMondo
           arrivata da un clic altrove è la prima cosa da confermare. */}
       <p className="m-0 testo-13 text-text-secondary">{nomeCercato}</p>
     </IntestazioneScheda>
-    <PageState isLoading={carica.caricamento} error={carica.errore} onRetry={carica.ricarica}>
+    <PageState isLoading={carica.inPrimoCaricamento} error={carica.errore} onRetry={carica.ricarica}>
       {/* Qualche voce non ha una posizione. Oggi sono quattro articoli: tre del negozio dentro il
           Palazzo di Niijima e uno del sito di Tanaka, che si apre dal laptop e non è un posto.
           Il comando «Sulla mappa» resta al suo posto — un comando che a volte sparisce è peggio —

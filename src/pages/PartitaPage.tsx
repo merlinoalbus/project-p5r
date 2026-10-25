@@ -62,7 +62,7 @@ export function PartitaPage() {
   const giornoScuola = (scheda === 'oggi' ? giornoOggi : null) ?? attiva?.dataGioco ?? null;
 
   return (
-    <PageState isLoading={caricamento && !caricata} error={errore} onRetry={() => void carica()}>
+    <PageState isLoading={caricamento && !caricata} error={attiva ? null : errore} onRetry={() => void carica()}>
       {!attiva ? (
         <EmptyState
           title="Nessuna partita attiva"
