@@ -11,10 +11,9 @@
 // ============================================================
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
-import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { aggiornaAreaMondo, aggiornaPlanimetrieArea, collocaPlanimetria, eliminaMappa, impostaInfiltrazioniArea, isApiError } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
@@ -130,17 +129,17 @@ export function FinestraModificaArea({ area, aperta, onChiudi, onSalvata, infilt
     <Modal titolo={`Modifica ${area.nome}`} aperta={aperta} onChiudi={onChiudi} larga
       azioni={<>
         <button type="button" className="btn btn-secondary touch" onClick={onChiudi}>Annulla</button>
-        <button type="button" className="btn btn-primary touch" disabled={occupato || !nome.trim()} onClick={() => void salva()}>Salva</button>
+        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" disabled={occupato || !nome.trim()} onClick={() => void salva()} />
       </>}>
       <div className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1 text-[13px] font-semibold">Nome
+        <label className="flex flex-col gap-1 testo-13 font-semibold">Nome
           <input className="form-input touch" value={nome} maxLength={80} onChange={(e) => setNome(e.target.value)} />
-          <span className="text-[12px] font-normal text-text-muted">L’indirizzo della pagina non cambia.</span>
+          <span className="testo-12 font-normal text-text-muted">L’indirizzo della pagina non cambia.</span>
         </label>
         {area.planimetrie.length > 1 && <Selettore etichetta="Planimetria che si apre per prima" valore={predefinita}
           opzioni={area.planimetrie.map((p, i) => ({ chiave: p.chiave, nome: nomeVersione(p, i), dettaglio: `${p.numeroSpilli} pin` }))} onCambia={setPredefinita} />}
         <section className="flex flex-col gap-2" aria-label="Planimetrie dell’area">
-          <h3 className="m-0 text-[14px]">Planimetrie</h3>
+          <h3 className="m-0 testo-14">Planimetrie</h3>
           <ol className="m-0 flex list-none flex-col gap-2 p-0">
             {ordineVivo.map((k, i) => {
               const p = perChiave.get(k);
@@ -150,17 +149,16 @@ export function FinestraModificaArea({ area, aperta, onChiudi, onSalvata, infilt
                   <span className="min-w-0 flex-1 basis-48">
                     <input className="form-input touch w-full" aria-label={`Etichetta di ${nomeVersione(p, i)}`} value={etichette[k] ?? ''} maxLength={80}
                       placeholder={`Planimetria ${i + 1}`} onChange={(e) => setEtichette((x) => ({ ...x, [k]: e.target.value }))} />
-                    <span className="text-[12px] text-text-muted">{p.numeroSpilli} pin{p.chiave === area.predefinita ? ' · si apre per prima' : ''}</span>
+                    <span className="testo-12 text-text-muted">{p.numeroSpilli} pin{p.chiave === area.predefinita ? ' · si apre per prima' : ''}</span>
                   </span>
                   {/* i comandi vanno a capo interi, mai a metà parola («ELIMI/NA» nel foglio stretto, UX2-9 c) */}
                   <span className="flex flex-wrap items-center gap-1">
-                    <button type="button" className="btn btn-ghost touch" aria-label={`Sposta su ${nomeVersione(p, i)}`} disabled={i === 0} onClick={() => sposta(i, -1)}>↑</button>
-                    <button type="button" className="btn btn-ghost touch" aria-label={`Sposta giù ${nomeVersione(p, i)}`} disabled={i === ordineVivo.length - 1} onClick={() => sposta(i, 1)}>↓</button>
-                    <Link className="btn btn-ghost touch whitespace-nowrap" to={`/guida/mappe/${encodeURIComponent(k)}/modifica`}>Apri nell’editor</Link>
+                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Sposta su" aria-label={`Sposta su ${nomeVersione(p, i)}`} disabled={i === 0} onClick={() => sposta(i, -1)} />
+                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Sposta giù" aria-label={`Sposta giù ${nomeVersione(p, i)}`} disabled={i === ordineVivo.length - 1} onClick={() => sposta(i, 1)} />
+                    <CollegamentoVisivo tono="fantasma" icona={<IconaAzione chiave="scheda" dimensione={22} />} titolo="Apri nell’editor" className="whitespace-nowrap" to={`/guida/mappe/${encodeURIComponent(k)}/modifica`} />
                     {area.planimetrie.length > 1 && <PulsanteVisivo tono="pericolo" compatto className="shrink-0 whitespace-nowrap" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina"
                       aria-label={`Elimina ${nomeVersione(p, i)}`} disabled={occupato} onClick={() => void elimina(k)} />}
-                    {altreAree && <button type="button" className="btn btn-ghost touch whitespace-nowrap" aria-expanded={spostamento?.chiave === k} aria-label={`Sposta ${nomeVersione(p, i)} in un’altra area`}
-                      disabled={occupato} onClick={() => setSpostamento(spostamento?.chiave === k ? null : { chiave: k, verso: '', nome: '', svuota: null })}>Sposta…</button>}
+                    {altreAree && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="incolla" dimensione={22} />} titolo="Sposta…" className="whitespace-nowrap" aria-expanded={spostamento?.chiave === k} aria-label={`Sposta ${nomeVersione(p, i)} in un’altra area`} disabled={occupato} onClick={() => setSpostamento(spostamento?.chiave === k ? null : { chiave: k, verso: '', nome: '', svuota: null })} />}
                   </span>
                   {/* «Sposta la versione in un'altra area» (L3, §4.3): un'area esistente del Palazzo, o un'area a sé (solo se l'area ne ha altre).
                       L'unica versione di un'area si sposta solo confermando che l'area, rimasta vuota, va nel cestino con i suoi legami. */}
@@ -170,17 +168,16 @@ export function FinestraModificaArea({ area, aperta, onChiudi, onSalvata, infilt
                         opzioni={[...altreAree.map((a) => ({ chiave: a.slug, nome: a.nome })), ...(area.planimetrie.length > 1 ? [{ chiave: AREA_NUOVA, nome: 'Un’area a sé (nuova)' }] : [])]}
                         onCambia={(v) => setSpostamento((s) => (s ? { ...s, verso: v, svuota: null } : s))} />
                       {spostamento.verso === AREA_NUOVA && (
-                        <label className="flex flex-col gap-1 text-[13px] font-semibold">Nome dell’area nuova
+                        <label className="flex flex-col gap-1 testo-13 font-semibold">Nome dell’area nuova
                           <input className="form-input touch" value={spostamento.nome} maxLength={80} onChange={(e) => setSpostamento((s) => (s ? { ...s, nome: e.target.value } : s))} />
                         </label>
                       )}
-                      {spostamento.svuota && <p className="m-0 text-[13px] text-warning" role="alert">{spostamento.svuota}</p>}
+                      {spostamento.svuota && <p className="m-0 testo-13 text-warning" role="alert">{spostamento.svuota}</p>}
                       <span className="flex flex-wrap justify-end gap-2">
-                        <button type="button" className="btn btn-secondary btn-sm touch" onClick={() => setSpostamento(null)}>Annulla</button>
+                        <PulsanteVisivo compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={() => setSpostamento(null)} />
                         {spostamento.svuota
-                          ? <button type="button" className="btn btn-danger btn-sm touch" disabled={occupato} onClick={() => void spostaVersione(true)}>Sposta e metti {area.nome} nel cestino</button>
-                          : <button type="button" className="btn btn-primary btn-sm touch" disabled={occupato || !spostamento.verso || (spostamento.verso === AREA_NUOVA && !spostamento.nome.trim())}
-                              onClick={() => void spostaVersione()}>Sposta</button>}
+                          ? <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo={<>Sposta e metti {area.nome} nel cestino</>} disabled={occupato} onClick={() => void spostaVersione(true)} />
+                          : <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="incolla" dimensione={20} />} titolo="Sposta" disabled={occupato || !spostamento.verso || (spostamento.verso === AREA_NUOVA && !spostamento.nome.trim())} onClick={() => void spostaVersione()} />}
                       </span>
                     </div>
                   )}
@@ -189,21 +186,21 @@ export function FinestraModificaArea({ area, aperta, onChiudi, onSalvata, infilt
             })}
           </ol>
           {infiltrazioniPalazzo && <fieldset className="m-0 mt-2 flex flex-col gap-1 border-0 p-0">
-            <legend className="mb-1 text-[14px] font-semibold">Infiltrazioni in quest’area</legend>
+            <legend className="mb-1 testo-14 font-semibold">Infiltrazioni in quest’area</legend>
             {infiltrazioniPalazzo.map((x) => (
-              <label key={x.chiave} className="touch flex items-center gap-2 text-[13px]">
+              <label key={x.chiave} className="touch flex items-center gap-2 testo-13">
                 <input type="checkbox" className="h-5 w-5 shrink-0" checked={infiltrazioni.includes(x.chiave)}
                   onChange={(e) => setInfiltrazioni((s) => (e.target.checked ? [...s, x.chiave] : s.filter((k) => k !== x.chiave)))} />
                 <span>{x.ordine + 1}. {x.nome}</span>
               </label>
             ))}
-            <span className="text-[12px] text-text-muted">Voci della guida e pin restano dove sono.</span>
+            <span className="testo-12 text-text-muted">Voci della guida e pin restano dove sono.</span>
           </fieldset>}
           {daConfermare && <div className="card flex flex-col gap-2 border-error" role="alert">
-            <p className="m-0 text-[13px]">{daConfermare.messaggio}</p>
+            <p className="m-0 testo-13">{daConfermare.messaggio}</p>
             <span className="flex gap-2">
-              <button type="button" className="btn btn-secondary touch" onClick={() => setDaConfermare(null)}>Annulla</button>
-              <button type="button" className="btn btn-danger touch" disabled={occupato} onClick={() => void elimina(daConfermare.chiave, true)}>Elimina lo stesso</button>
+              <PulsanteVisivo icona={<IconaAzione chiave="annulla" dimensione={22} />} titolo="Annulla" onClick={() => setDaConfermare(null)} />
+              <PulsanteVisivo tono="pericolo" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Elimina lo stesso" disabled={occupato} onClick={() => void elimina(daConfermare.chiave, true)} />
             </span>
           </div>}
         </section>

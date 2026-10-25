@@ -20,6 +20,8 @@ import { OggettiCollegati } from '../catalogo/OggettiCollegati';
 import { ContenutoDellaVoce } from '../catalogo/ContenutoDellaVoce';
 import { AcquistiOfferta } from '../catalogo/AcquistiOfferta';
 import { NoteStoricheOfferta } from '../catalogo/NoteStoricheOfferta';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   articoli: ArticoloDto[];
@@ -71,7 +73,7 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica, onConte
           onCambiato(articolo); await onContenutoCambiato?.();
         }}
         acquistato={a.acquistato} bloccato={acquistoBloccato} occupato={occupato} onCambia={(chiave, fatto) => void cambia(chiave, fatto)} />}
-      {onModifica && <button type="button" className="btn btn-ghost btn-sm touch" onClick={() => onModifica(a)} aria-label={`Correggi ${nome}`}>Modifica</button>}
+      {onModifica && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" onClick={() => onModifica(a)} aria-label={`Modifica ${nome}`} />}
     </div>
     <details className="catalogo-prodotto__dettagli">
       <summary className="touch">Dettagli{a.condizioni?.length ? ` · ${a.condizioni.length} ${a.condizioni.length === 1 ? 'requisito' : 'requisiti'}` : ''}{!a.verificato ? ' · fonte secondaria' : ''}</summary>

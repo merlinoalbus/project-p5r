@@ -5,6 +5,8 @@
 // Boot bloccante su /api/config: se il backend non risponde si mostra
 // una schermata d'errore in HTML puro (funziona anche se il bundle
 // React ha problemi) e l'App NON viene montata.
+// Nell'attesa `#root` contiene l'anteprima statica di `index.html` (logo e «Caricamento…»): la sostituiscono il montaggio di
+// React (`render`, che svuota il contenitore) o la schermata d'errore qui sotto.
 // ============================================================
 
 import { StrictMode } from 'react';

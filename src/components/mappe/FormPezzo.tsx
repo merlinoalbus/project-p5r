@@ -87,19 +87,19 @@ export function FormPezzo({ pezzo: p, copia: c, indice, immagine, elenchi, occup
     <section className="visore-mappa__sezione visore-mappa__scheda" aria-label={`Proprietà della copia: ${titolo}`}>
       <div className="flex items-start gap-2">
         <div className="flex-1 min-w-0">
-          <h3 className="m-0 font-display text-[19px] leading-tight break-words">{titolo}</h3>
-          <p className="m-0 text-[11px] uppercase tracking-wide text-text-muted">Copia {indice + 1} di {p.copie.length} · zona d’origine {p.sorgente.x}, {p.sorgente.y} · {p.sorgente.larghezza}×{p.sorgente.altezza} px</p>
+          <h3 className="m-0 font-display testo-20 leading-tight break-words">{titolo}</h3>
+          <p className="m-0 testo-12 uppercase tracking-wide text-text-muted">Copia {indice + 1} di {p.copie.length} · zona d’origine {p.sorgente.x}, {p.sorgente.y} · {p.sorgente.larghezza}×{p.sorgente.altezza} px</p>
         </div>
         <button type="button" className="btn btn-ghost btn-sm touch" onClick={onChiudi} aria-label="Chiudi le proprietà della copia">×</button>
       </div>
       <form className="flex flex-col gap-2" onSubmit={salva}>
         <label className="editor-mappa__campo">Nome del pezzo<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} maxLength={LIMITI_GUIDA.spillo.nome} /></label>
-        <span className="-mt-1 text-[11px] text-text-muted">Comune a tutte le copie del pezzo.</span>
+        <span className="-mt-1 testo-12 text-text-muted">Comune a tutte le copie del pezzo.</span>
         <label className="editor-mappa__campo">Etichetta della copia
           <input className="form-input" value={etichetta} onChange={(e) => setEtichetta(e.target.value)} maxLength={LIMITI_GUIDA.spillo.nome} placeholder={`${nomeNuovo} · copia ${indice + 1}`} />
         </label>
         <fieldset className="m-0 p-0 border-0 flex flex-col gap-1.5">
-          <legend className="text-[12px] text-text-secondary mb-1">Posizione (angolo in alto a sinistra, pixel dell’immagine)</legend>
+          <legend className="testo-12 text-text-secondary mb-1">Posizione (angolo in alto a sinistra, pixel dell’immagine)</legend>
           <div className="flex flex-wrap items-end gap-2">
             <label className="editor-mappa__campo w-24">X<input className="form-input" type="number" inputMode="numeric" min={0} max={xMax} step={1} value={x} onChange={(e) => setX(Number(e.target.value))} /></label>
             <label className="editor-mappa__campo w-24">Y<input className="form-input" type="number" inputMode="numeric" min={0} max={yMax} step={1} value={y} onChange={(e) => setY(Number(e.target.value))} /></label>
@@ -111,7 +111,7 @@ export function FormPezzo({ pezzo: p, copia: c, indice, immagine, elenchi, occup
           </div>
         </fieldset>
         <div className="flex flex-col gap-1">
-          <span className="text-[12px] text-text-secondary">Rotazione</span>
+          <span className="testo-12 text-text-secondary">Rotazione</span>
           <div className="flex flex-wrap gap-1" role="radiogroup" aria-label="Rotazione della copia">
             {ROTAZIONI.map((r) => (
               <button key={r} type="button" role="radio" aria-checked={rotazione === r} className={`btn btn-sm touch min-w-14 ${rotazione === r ? 'btn-primary' : 'btn-secondary'}`} disabled={occupato} onClick={() => setRotazione(r)}>{r}°</button>
@@ -119,10 +119,10 @@ export function FormPezzo({ pezzo: p, copia: c, indice, immagine, elenchi, occup
           </div>
         </div>
         <div className="flex flex-wrap gap-3">
-          <label className="touch flex items-center gap-2 text-[12px]"><input type="checkbox" className="w-5 h-5" checked={orizzontale} disabled={occupato} onChange={(e) => setOrizzontale(e.target.checked)} />Specchia in orizzontale</label>
-          <label className="touch flex items-center gap-2 text-[12px]"><input type="checkbox" className="w-5 h-5" checked={verticale} disabled={occupato} onChange={(e) => setVerticale(e.target.checked)} />Specchia in verticale</label>
+          <label className="touch flex items-center gap-2 testo-12"><input type="checkbox" className="w-5 h-5" checked={orizzontale} disabled={occupato} onChange={(e) => setOrizzontale(e.target.checked)} />Specchia in orizzontale</label>
+          <label className="touch flex items-center gap-2 testo-12"><input type="checkbox" className="w-5 h-5" checked={verticale} disabled={occupato} onChange={(e) => setVerticale(e.target.checked)} />Specchia in verticale</label>
         </div>
-        <p className="m-0 text-[12px] text-text-muted">La zona d’origine resta sempre cancellata dalla mappa. Ogni copia si vede quando valgono le sue condizioni; se no è nascosta, e compare in trasparenza con «Mostra anche i non ancora disponibili». Sulla mappa si sposta anche trascinandola.</p>
+        <p className="m-0 testo-12 text-text-muted">La zona d’origine resta sempre cancellata dalla mappa. Ogni copia si vede quando valgono le sue condizioni; se no è nascosta, e compare in trasparenza con «Mostra anche i non ancora disponibili». Sulla mappa si sposta anche trascinandola.</p>
         <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} elenchi={elenchi} disabilitato={occupato} perSpillo />
         <div className="flex flex-wrap gap-1.5">
           <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva copia" disabled={occupato || !modificato} />
@@ -139,7 +139,7 @@ export function FormPezzo({ pezzo: p, copia: c, indice, immagine, elenchi, occup
           <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" disabled={occupato}
             onClick={() => { const cosa = conferma; setConferma(null); void (cosa === 'pezzo' ? onEliminaPezzo() : onEliminaCopia()); }} />
         </>}>
-        <p className="m-0 text-[13px]">
+        <p className="m-0 testo-13">
           {conferma === 'pezzo'
             ? `Se ne vanno tutte le ${p.copie.length} copie e la zona d’origine torna visibile nell’immagine della mappa, per tutte le partite.`
             : ultima

@@ -102,16 +102,16 @@ export function CittaPage() {
                     senza={<SagomaQuartiere chiave={x.chiave} nome={x.nome} acceso={acceso === x.chiave} className={aperto ? '' : 'opacity-40 grayscale'} />} />
                   <span className="flex min-w-0 flex-1 flex-col gap-1">
                   <span className="flex flex-wrap items-center gap-1.5">
-                    <span className="font-display uppercase text-[20px] leading-none">{x.nome}</span>
+                    <span className="font-display uppercase testo-20 leading-none">{x.nome}</span>
                     {/* Il quartiere chiuso resta in elenco — la guida serve anche a sapere cosa
                         arriverà — ma la scheda lo dice, perché lassù non c'è una sagoma da
                         accendere e il collegamento sembrerebbe rotto. */}
-                    {!aperto && <span className="chip text-[11px]" title={x.bloccoMotivo ?? undefined}>Non ancora aperto</span>}
+                    {!aperto && <span className="chip testo-12" title={x.bloccoMotivo ?? undefined}>Non ancora aperto</span>}
                   </span>
                   {suggerito && <TargaSuggerito motivo={sugg.motivo('quartieri', x.chiave)} compatta />}
-                  <span className="text-[12px] text-text-secondary">{x.luoghi} {x.luoghi === 1 ? 'luogo' : 'luoghi'}{x.verificati < x.luoghi ? ` · ${x.luoghi - x.verificati} da fonte secondaria` : ''}</span>
-                  {x.sbloccoCondizione?.testo && <span className="break-words text-[12px] text-text-muted">Sblocco: {x.sbloccoCondizione.testo}</span>}
-                  {x.descrizione && <span className="text-[12px] text-text-secondary line-clamp-2">{x.descrizione}</span>}
+                  <span className="testo-12 text-text-secondary">{x.luoghi} {x.luoghi === 1 ? 'luogo' : 'luoghi'}{x.verificati < x.luoghi ? ` · ${x.luoghi - x.verificati} da fonte secondaria` : ''}</span>
+                  {x.sbloccoCondizione?.testo && <span className="break-words testo-12 text-text-muted">Sblocco: {x.sbloccoCondizione.testo}</span>}
+                  {x.descrizione && <span className="testo-12 text-text-secondary line-clamp-2">{x.descrizione}</span>}
                   </span>
                 </Link>
               </li>

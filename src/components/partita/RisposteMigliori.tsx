@@ -16,6 +16,8 @@ import { useState } from 'react';
 import { DialogoRango } from '../confidenti/DialogoRango';
 import { useDettaglioConfidente } from './useDettaglioConfidente';
 import { Spinner } from '../shared/PageState';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   chiave: string;
@@ -43,20 +45,20 @@ export function RisposteMigliori({ chiave, nome, rangoEvento, appenaGiocato = fa
   return (
     <section className="risposte-migliori" aria-label={`Risposte migliori di ${nome}`}>
       <div className="flex items-baseline gap-2 flex-wrap">
-        <h4 className="m-0 font-display uppercase text-[16px] tracking-wide">Risposte migliori</h4>
-        {!oltre && <span className="text-[12px] text-text-muted">{appenaGiocato ? `evento del rango ${arrivo} appena giocato: registra le note ottenute` : `evento del rango ${arrivo}`}</span>}
+        <h4 className="m-0 font-display uppercase testo-16 tracking-wide">Risposte migliori</h4>
+        {!oltre && <span className="testo-12 text-text-muted">{appenaGiocato ? `evento del rango ${arrivo} appena giocato: registra le note ottenute` : `evento del rango ${arrivo}`}</span>}
       </div>
-      {caricamento && <div className="flex items-center gap-2 text-[13px] text-text-muted" role="status"><Spinner size={18} /> Carico le risposte…</div>}
+      {caricamento && <div className="flex items-center gap-2 testo-13 text-text-muted" role="status"><Spinner size={18} /> Carico le risposte…</div>}
       {errore && (
-        <p className="m-0 text-[13px] text-error" role="alert">
+        <p className="m-0 testo-13 text-error" role="alert">
           Risposte non disponibili: {errore}{' '}
-          <button type="button" className="btn btn-secondary btn-sm touch" onClick={riprova}>Riprova</button>
+          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={riprova} />
         </p>
       )}
       {dati && (
         <>
-          {oltre && <p className="m-0 text-[13px] text-text-muted">Rango massimo: nessun altro dialogo da affrontare.</p>}
-          {!oltre && prossimi.length === 0 && <p className="m-0 text-[13px] text-text-muted">Nessun dialogo documentato per il rango {arrivo}.</p>}
+          {oltre && <p className="m-0 testo-13 text-text-muted">Rango massimo: nessun altro dialogo da affrontare.</p>}
+          {!oltre && prossimi.length === 0 && <p className="m-0 testo-13 text-text-muted">Nessun dialogo documentato per il rango {arrivo}.</p>}
           {prossimi.length > 0 && (
             <ul className="m-0 p-0 list-none flex flex-col gap-1.5">
               {prossimi.map((d) => <DialogoRango key={d.id} d={d} aperto={aperto(d.id, true)} onToggle={() => alterna(d.id, true)} />)}
@@ -64,9 +66,8 @@ export function RisposteMigliori({ chiave, nome, rangoEvento, appenaGiocato = fa
           )}
           {altri.length > 0 && (
             <>
-              <button type="button" className="btn btn-ghost btn-sm touch self-start" aria-expanded={tutte} onClick={() => setTutte((v) => !v)}>
-                {tutte ? 'Nascondi le altre risposte' : `Tutte le risposte (${altri.length} ${altri.length === 1 ? 'altro rango' : 'altri ranghi'})`}
-              </button>
+              <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="dettagli" dimensione={20} />} aria-expanded={tutte} onClick={() => setTutte((v) => !v)}
+                titolo={tutte ? 'Nascondi le altre risposte' : 'Tutte le risposte'} dettaglio={tutte ? undefined : `${altri.length} ${altri.length === 1 ? 'altro rango' : 'altri ranghi'}`} />
               {tutte && (
                 <ul className="m-0 p-0 list-none flex flex-col gap-1.5">
                   {altri.map((d) => <DialogoRango key={d.id} d={d} aperto={aperto(d.id, false)} onToggle={() => alterna(d.id, false)} />)}

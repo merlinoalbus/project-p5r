@@ -67,16 +67,16 @@ export function PersoneDellArea({ persone, dedalo, areaDedalo, aree, partitaId, 
   return (
     <SezioneDellArea chiave="persona" titolo="Persona" conto={partitaId ? `${quante}/${persone.length} catturate` : String(persone.length)} nota="non contano nel completamento"
       azioni={modifica ? <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi" aria-label={`Aggiungi una Persona in ${areaDedalo.nome}`} onClick={() => setModulo({ voce: null })} /> : undefined}>
-      {persone.length === 0 && <p className="m-0 text-[12px] text-text-muted">Nessuna Persona in quest’area.</p>}
+      {persone.length === 0 && <p className="m-0 testo-12 text-text-muted">Nessuna Persona in quest’area.</p>}
       {persone.length > 0 && (
         <PiastrelleCattura aria-label={`Persona che si incontrano in ${areaDedalo.nome}`} voci={persone.map(comePiastrella)} partitaId={partitaId} catturate={catturate} occupata={occupata}
           apertaChiave={aperta} onInfo={setAperta}
           onTocca={(v, catturata) => { const p = persone.find((x) => x.chiave === v.chiave); if (!p) return; if (catturata) void cattura(p, true); else setDaTogliere(p); }} />
       )}
       {info && (
-        <section className="flex flex-col gap-1.5 rounded-md border border-primary/40 bg-white/[0.03] px-2.5 py-2 text-[12px]" aria-label={`Dettagli di ${nomeDi(info)}`}>
+        <section className="flex flex-col gap-1.5 rounded-md border border-primary/40 bg-white/[0.03] px-2.5 py-2 testo-12" aria-label={`Dettagli di ${nomeDi(info)}`}>
           <div className="flex flex-wrap items-baseline gap-x-2">
-            <strong className="text-[13px]">{nomeDi(info)}</strong>
+            <strong className="testo-13">{nomeDi(info)}</strong>
             {/* il nome dell'Ombra è quello dell'entità Ombra (R8-03), non il testo della voce */}
             {info.persona && (info.ombra?.nome ?? info.nome) !== nomeDi(info) && <span className="text-text-muted">Ombra: {info.ombra?.nome ?? info.nome}</span>}
             {info.persona && <span className="text-text-muted">{presa(info) ? 'catturata' : 'non ancora catturata'}</span>}

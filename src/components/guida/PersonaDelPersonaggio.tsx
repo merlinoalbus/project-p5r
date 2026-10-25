@@ -52,15 +52,15 @@ export function PersonaDelPersonaggio({ personaggio, persone, idCompendio }: Pro
           <ImmaginePersona nome={nome} alt={`${nome}, Persona di ${personaggio}`} classe="w-[120px] h-[120px] rounded-lg shrink-0" />
         </button>
         <div className="flex flex-col gap-0.5 min-w-0">
-          <span className="font-display uppercase text-[20px] leading-[1.05] break-words">{nome}</span>
-          <span className="text-[12px] text-text-muted">{FASI[scelta] ?? `evoluzione ${scelta + 1}`} · {scelta + 1} di {persone.length}</span>
-          {id !== undefined && <Link to={`/compendio/persona/${id}`} className="touch inline-flex items-center text-[12px] text-primary-testo">Scheda nel compendio</Link>}
+          <span className="font-display uppercase testo-20 leading-[1.05] break-words">{nome}</span>
+          <span className="testo-12 text-text-muted">{FASI[scelta] ?? `evoluzione ${scelta + 1}`} · {scelta + 1} di {persone.length}</span>
+          {id !== undefined && <Link to={`/compendio/persona/${id}`} className="touch inline-flex items-center testo-12 text-primary-testo">Scheda nel compendio</Link>}
         </div>
       </div>
       <Modal titolo={`${nome} · Persona di ${personaggio}`} aperta={ingrandita} onChiudi={() => setIngrandita(false)} larga>
         <div className="flex flex-col items-center gap-2">
           <ImmaginePersona nome={nome} alt={`${nome}, Persona di ${personaggio}`} classe="w-full max-w-[560px] max-h-[70vh] rounded-lg" />
-          <span className="text-[12px] text-text-muted">{FASI[scelta] ?? `evoluzione ${scelta + 1}`} · {scelta + 1} di {persone.length}</span>
+          <span className="testo-12 text-text-muted">{FASI[scelta] ?? `evoluzione ${scelta + 1}`} · {scelta + 1} di {persone.length}</span>
         </div>
       </Modal>
       {persone.length > 1 && (
@@ -69,7 +69,7 @@ export function PersonaDelPersonaggio({ personaggio, persone, idCompendio }: Pro
             <li key={p}>
               <button type="button" className={`flex items-center gap-1.5 p-1 pr-2 rounded-md border bg-transparent cursor-pointer touch ${i === scelta ? 'border-primary text-primary-testo' : 'border-border text-text-secondary'}`} onClick={() => setScelta(i)} aria-pressed={i === scelta} aria-label={`${p} (${FASI[i] ?? `evoluzione ${i + 1}`})`}>
                 <ImmaginePersona nome={p} alt="" classe="w-9 h-9 rounded" />
-                <span className="text-[12px] font-semibold">{p}</span>
+                <span className="testo-12 font-semibold">{p}</span>
               </button>
             </li>
           ))}

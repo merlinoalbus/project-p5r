@@ -35,7 +35,7 @@ interface PropsCampo {
 /** Un campo del modulo di correzione: la stessa forma per titoli, date e prose. */
 export function CampoCorrezione({ etichetta, valore, onCambia, multilinea, massimo = 400 }: PropsCampo) {
   return (
-    <label className="flex min-w-[180px] flex-1 flex-col gap-1 text-[12px]">
+    <label className="flex min-w-[180px] flex-1 flex-col gap-1 testo-12">
       {etichetta}
       {multilinea
         ? <textarea className="form-input min-h-[70px]" value={valore} maxLength={massimo} onChange={(e) => onCambia(e.target.value)} />
@@ -101,7 +101,7 @@ export function CorrezioneGuida<T extends Record<string, string>>({ cosa, inizia
   if (!bozza) {
     if (controllata) return null;
     return (
-      <button type="button" className={`touch shrink-0 rounded px-1.5 text-text-muted hover:text-text ${compatto ? 'text-[11px]' : 'text-[12px]'}`}
+      <button type="button" className={`touch shrink-0 rounded px-1.5 text-text-muted hover:text-text ${compatto ? 'testo-12' : 'testo-12'}`}
         // Con una scritta accanto alla matita il nome accessibile comincia da quella (WCAG 2.5.3): chi dà comandi a
         // voce dice quello che legge, «Modifica testo», e deve trovarlo nel nome del pulsante.
         aria-label={etichetta ? `${etichetta}: ${cosa}` : `Correggi ${cosa}`} title={`Correggi ${cosa}`}
@@ -122,7 +122,7 @@ export function CorrezioneGuida<T extends Record<string, string>>({ cosa, inizia
         <span className="flex-1" />
         {elimina && !conferma && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" disabled={occupato} onClick={() => setConferma(true)} />}
         {elimina && conferma && (
-          <span className="flex flex-wrap items-center gap-1.5 text-[11px]">
+          <span className="flex flex-wrap items-center gap-1.5 testo-12">
             {elimina.avviso}
             <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Confermo" disabled={occupato}
               onClick={() => { setOccupato(true); void elimina.onElimina().then(() => { notifica('success', `Eliminato: ${cosa}.`); chiudi(); }).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Eliminazione non riuscita.')).finally(() => setOccupato(false)); }} />

@@ -35,11 +35,11 @@ export function VoceEvento({ e, menuAperto, onMenu, gesti, occupato, dichiarazio
     <li id={`voce-${e.uid}`} ref={rifRiga} className={`azione flex flex-wrap items-start gap-2 py-1.5 ${classeRiga ?? ''}`}>
       {maniglia}
       <IconaCategoria categoria={ICONA_EVENTO[e.genere]} dimensione={40} />
-      <div className="flex flex-col gap-0.5 text-[13px] min-w-0 flex-1">
+      <div className="flex flex-col gap-0.5 testo-13 min-w-0 flex-1">
         <span>{e.azione}</span>
         <span className="flex flex-wrap items-center gap-1.5">
-          <span className="chip text-[11px] chip--attivo">{NOME_TIPO_EVENTO[e.genere]}</span>
-          {e.note && <span className="text-[12px] text-text-secondary">{e.note}</span>}
+          <span className="chip testo-12 chip--attivo">{NOME_TIPO_EVENTO[e.genere]}</span>
+          {e.note && <span className="testo-12 text-text-secondary">{e.note}</span>}
         </span>
         {dichiarazioni}
       </div>

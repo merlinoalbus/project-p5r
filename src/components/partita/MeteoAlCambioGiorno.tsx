@@ -79,17 +79,17 @@ export function MeteoAlCambioGiorno() {
   return (
     <Modal titolo={`Che tempo fa ${dataGiocoConArticolo(richiesta.data)}?`} aperta onChiudi={chiudi}
       azioni={<PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="accettata" dimensione={20} />} titolo="Fatto" onClick={chiudi} />}>
-      {!meteo ? <p className="m-0 text-[13px] text-text-muted" aria-busy="true">Carico il meteo del giorno…</p> : (
+      {!meteo ? <p className="m-0 testo-13 text-text-muted" aria-busy="true">Carico il meteo del giorno…</p> : (
         <div className="flex flex-col gap-3">
-          <p className="m-0 text-[13px] text-text-secondary">
+          <p className="m-0 testo-13 text-text-secondary">
             {meteo.testoGuida ? `La guida dice «${meteo.testoGuida}»: vale quello finché non lo cambi.` : 'La guida non dice il meteo di questo giorno: segnalo tu.'} Un tocco sull'icona lo segna; ritoccarla torna alla guida.
           </p>
           {(['giorno', 'sera'] as const).map((fascia) => (
             <div key={fascia} className="flex flex-col gap-1">
-              <span className="text-[12px] font-semibold text-text-muted">{NOME_FASCIA_METEO[fascia]}</span>
+              <span className="testo-12 font-semibold text-text-muted">{NOME_FASCIA_METEO[fascia]}</span>
               <MeteoGiornata fascia={fascia} meteo={meteo[fascia]} occupato={occupato} onCambia={(f, v) => void cambia(f, v)} />
               {meteo[fascia].allerte.map((a) => (
-                <span key={a.chiave} className="flex items-start gap-1.5 text-[12px] text-text-secondary">
+                <span key={a.chiave} className="flex items-start gap-1.5 testo-12 text-text-secondary">
                   <span className="text-warning shrink-0" aria-hidden="true"><IconaAzione chiave="allarme" dimensione={14} /></span>
                   <span><strong>{a.nome}</strong>{a.effetti.length > 0 ? `: ${a.effetti.join(' ')}` : ''}</span>
                 </span>

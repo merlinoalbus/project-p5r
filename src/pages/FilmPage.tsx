@@ -33,6 +33,7 @@ import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/Azioni
 import { ModificaGuida } from '../components/guida/ModificaGuida';
 import { NOME_DOTE } from '../utils/citta';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
+import { TitoloSezione } from '../components/shared/TitoloSezione';
 import { IconaAzione, IconaSegno } from '../components/shared/IconaAzione';
 import { STATI_LETTURA, formattaYen, haDote, passaStato, type StatoLettura } from '../utils/letture';
 import type { FilmDto, FilmDvdDto } from '../types';
@@ -180,7 +181,7 @@ export function FilmPage({ soloChiave }: { soloChiave?: string } = {}) {
       </>}
 
       {filmSelezionato && <section ref={pannelloRef} className="flex scroll-mt-20 flex-col gap-2" aria-label={`Posizione di ${nomeFilm(filmSelezionato)}`}>
-        <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="m-0">Dove vedere “{nomeFilm(filmSelezionato)}”</h2><span className="flex items-center gap-1"><ModificaGuida tipo="film-posizioni" chiave={filmSelezionato.chiave} cosa={`dove si vede «${nomeFilm(filmSelezionato)}»`} soloIcona onSalvato={() => void dati.ricarica()} /><button type="button" className="btn btn-ghost btn-sm touch" onClick={() => setSelezionato(null)}>Chiudi</button></span></div>
+        <div className="flex flex-wrap items-center justify-between gap-2"><TitoloSezione variante="display" className="min-w-0">Dove vedere “{nomeFilm(filmSelezionato)}”</TitoloSezione><span className="flex items-center gap-1"><ModificaGuida tipo="film-posizioni" chiave={filmSelezionato.chiave} cosa={`dove si vede «${nomeFilm(filmSelezionato)}»`} soloIcona onSalvato={() => void dati.ricarica()} /><PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Chiudi" onClick={() => setSelezionato(null)} /></span></div>
         {filmSelezionato.posizioni.length > 1 && <div className="flex flex-wrap gap-2">{filmSelezionato.posizioni.map((p, i) => <button key={`${p.ruolo}/${p.tipo}/${p.chiave}`} type="button" className={`chip touch ${i === posizioneSelezionata ? 'chip--attivo' : ''}`} onClick={() => setPosizioneSelezionata(i)}>{p.ruolo === 'noleggio' ? 'Noleggio · ' : p.ruolo === 'visione' ? 'Visione · ' : ''}{p.etichetta}</button>)}</div>}
         {posizione ? <DoveSiTrova tipo={posizione.tipo} chiave={posizione.chiave} titolo={posizione.etichetta} altezza={300} /> : <div className="card"><h3 className="m-0 text-base">Posizione non disponibile</h3><p className="mb-0 text-sm text-text-secondary">Non esiste ancora un punto territoriale verificato per questo titolo.</p></div>}
       </section>}
@@ -194,9 +195,9 @@ export function FilmPage({ soloChiave }: { soloChiave?: string } = {}) {
       </ul>
       {daFare.length === 0 && <p className="m-0 text-sm text-text-muted" role="status">{soloChiave ? 'Questo titolo non è nel catalogo.' : 'Nessun titolo da vedere con questi filtri.'}</p>}
       {fatti.length > 0 && <section className="flex flex-col gap-3" aria-label="Film e DVD completati">
-        <button type="button" className="btn btn-ghost btn-sm touch self-start" aria-expanded={mostraFatti} onClick={() => setMostraFatti((v) => !v)}>
-          {mostraFatti ? 'Nascondi' : 'Mostra'} i completati · {fatti.length}
-        </button>
+        {/* come in Libri: il tassello con l'icona, il numero nel dettaglio */}
+        <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="completati" dimensione={20} />}
+          titolo={`${mostraFatti ? 'Nascondi' : 'Mostra'} i completati`} dettaglio={fatti.length} aria-expanded={mostraFatti} onClick={() => setMostraFatti((v) => !v)} />
         {mostraFatti && <ul className="m-0 grid list-none gap-3 p-0 md:grid-cols-2 xl:grid-cols-3" aria-label="Film e DVD già completati">
           {fatti.map(scheda)}
         </ul>}

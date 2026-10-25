@@ -49,12 +49,12 @@ export function ElementiRimossi({ tipo, negozio, onRipristinato, sempre, version
   return (
     <section className="rimossi-elenco" aria-label={`${NOME_TIPO_CATALOGO[tipo].plurale} rimossi`}>
       <h3 className="rimossi-elenco__titolo">{NOME_TIPO_CATALOGO[tipo].plurale}<span className="text-text-muted"> · {righe.length}</span></h3>
-      {elenco.errore && <p className="m-0 text-[13px] text-error" role="alert">{elenco.errore}</p>}
-      {righe.length === 0 && !elenco.caricamento && <p className="m-0 text-[13px] text-text-muted">Nessuna riga rimossa.</p>}
+      {elenco.errore && <p className="m-0 testo-13 text-error" role="alert">{elenco.errore}</p>}
+      {righe.length === 0 && !elenco.caricamento && <p className="m-0 testo-13 text-text-muted">Nessuna riga rimossa.</p>}
       <ul className="m-0 flex list-none flex-col gap-1 p-0">
         {righe.map((e) => (
           <li key={e.chiave} className="rimossi-elenco__riga">
-            <span className="min-w-0 flex-1 text-[13px]">{e.nome}{tipo === 'articolo' && !negozio && e.dati.negozio_chiave ? <span className="text-text-muted"> · {nomeNegozio(e.dati.negozio_chiave)}</span> : null}</span>
+            <span className="min-w-0 flex-1 testo-13">{e.nome}{tipo === 'articolo' && !negozio && e.dati.negozio_chiave ? <span className="text-text-muted"> · {nomeNegozio(e.dati.negozio_chiave)}</span> : null}</span>
             <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Rimetti negli elenchi" onClick={() => ripristina(e.chiave, e.nome)} />
           </li>
         ))}

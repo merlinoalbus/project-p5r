@@ -11,6 +11,8 @@ import { SelettoreIcone } from '../shared/SelettoreIcone';
 import { OrariEditor } from '../guida/OrariEditor';
 import { IconaSpillo } from './IconaSpillo';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   spillo: SpilloDto;
@@ -187,13 +189,15 @@ export function FinestraLuogoDaPin({ spillo, mappa, partita, mappaRiletta, caric
   };
 
   return <Modal titolo="Crea un luogo da questo pin" aperta onChiudi={chiudi} larga azioni={<>
-    <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={chiudi}>{ricevuta || fase === 'incerto' ? 'Chiudi' : 'Annulla'}</button>
-    {!ricevuta && (fase !== 'incerto' || riscontro?.libero) && <button type="button" className="btn btn-secondary touch" disabled={occupato || !valida} onClick={() => void rivedi()}>Rivedi</button>}
-    {!ricevuta && fase !== 'incerto' && anteprima && <button type="button" className="btn btn-primary touch" disabled={occupato || anteprima.bozza !== bozza} onClick={() => void salva()}>Crea e collega questo pin</button>}
-    {!ricevuta && fase !== 'incerto' && errore && <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={() => void rileggi()}>Rileggi il pin</button>}
-    {(ricevuta || fase === 'incerto') && <button type="button" className="btn btn-primary touch" disabled={occupato} onClick={() => void rileggi()}>Rileggi lo stato corrente</button>}
+    {ricevuta || fase === 'incerto'
+      ? <PulsanteVisivo icona={<IconaAzione chiave="chiudi" dimensione={22} />} titolo="Chiudi" disabled={occupato} onClick={chiudi} />
+      : <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={chiudi}>Annulla</button>}
+    {!ricevuta && (fase !== 'incerto' || riscontro?.libero) && <PulsanteVisivo icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Rivedi" disabled={occupato || !valida} onClick={() => void rivedi()} />}
+    {!ricevuta && fase !== 'incerto' && anteprima && <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="piu" dimensione={22} />} titolo="Crea e collega questo pin" disabled={occupato || anteprima.bozza !== bozza} onClick={() => void salva()} />}
+    {!ricevuta && fase !== 'incerto' && errore && <PulsanteVisivo icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi il pin" disabled={occupato} onClick={() => void rileggi()} />}
+    {(ricevuta || fase === 'incerto') && <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi lo stato corrente" disabled={occupato} onClick={() => void rileggi()} />}
   </>}>
-    <div className="flex min-w-0 flex-col gap-3 text-[13px]">
+    <div className="flex min-w-0 flex-col gap-3 testo-13">
       {ricevuta && <div role="status" className="flex flex-col gap-1"><strong>Luogo creato e collegato: {ricevuta.luogo.nome}.</strong>
         <span>La ricevuta conferma la creazione. La rilettura della vista è un’operazione separata.</span>
         <Link className="touch inline-flex items-center text-primary-testo" to={casaLuogo(ricevuta.luogo.chiave)}>Apri il luogo</Link></div>}
@@ -212,7 +216,7 @@ export function FinestraLuogoDaPin({ spillo, mappa, partita, mappaRiletta, caric
         {orari && <OrariEditor valore={orari} disabilitato={occupato || bloccoEsito} onCambia={o => cambia(() => setOrari(o))} />}
       </fieldset>}
       {anteprima && !ricevuta && <section className="flex min-w-0 flex-col gap-2" aria-label="Anteprima del luogo da creare">
-        <h3 className="m-0 text-[16px]">Anteprima</h3>
+        <h3 className="m-0 testo-16">Anteprima</h3>
         <dl className="m-0 grid grid-cols-[max-content_minmax(0,1fr)] gap-x-3 gap-y-1">
           <dt>Nome</dt><dd className="m-0 break-words">{anteprima.dto.luogoPrevisto.nome}</dd>
           <dt>Chiave</dt><dd className="m-0 break-all">{anteprima.dto.luogoPrevisto.chiave}</dd>
@@ -224,7 +228,7 @@ export function FinestraLuogoDaPin({ spillo, mappa, partita, mappaRiletta, caric
           <dt>Planimetria</dt><dd className="m-0 break-words">{anteprima.dto.spillo.mappa.nome}</dd>
         </dl>
         <p className="m-0">Si collega il pin «{anteprima.dto.spillo.nome}» già presente. Posizione, tipo, condizioni, immagini, voci e progressi restano; la sua descrizione resta come nota del pin.</p>
-        <h4 className="m-0 text-[14px]">Luoghi già presenti nel quartiere ({anteprima.dto.luoghiEsistenti.length})</h4>
+        <h4 className="m-0 testo-14">Luoghi già presenti nel quartiere ({anteprima.dto.luoghiEsistenti.length})</h4>
         {anteprima.dto.luoghiEsistenti.length === 0 ? <p className="m-0">Non risultano altri luoghi nel quartiere.</p>
           : <ul className="m-0 flex min-w-0 flex-col gap-1 pl-5">{anteprima.dto.luoghiEsistenti.map(l => <li className="break-words" key={l.chiave}>
             {l.casa && !occupato ? <Link className="text-primary-testo" to={l.casa} onClick={e => { if (mutazionePendente.current) e.preventDefault(); }}>{l.nome}</Link> : <span>{l.nome}</span>}

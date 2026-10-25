@@ -7,6 +7,8 @@ import { collocaLuogo } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   luogo: { chiave: string; nome: string };
@@ -42,9 +44,9 @@ export function FinestraColloca({ luogo, aree, proposta = null, onChiudi, onFatt
     <Modal titolo={`Colloca «${luogo.nome}»`} aperta onChiudi={onChiudi}
       azioni={<>
         <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={onChiudi}>Annulla</button>
-        <button type="button" className="btn btn-primary touch" disabled={occupato || !area} onClick={() => void salva()}>Colloca</button>
+        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="pianta" dimensione={22} />} titolo="Colloca" disabled={occupato || !area} onClick={() => void salva()} />
       </>}>
-      <div className="flex flex-col gap-2 text-[13px]">
+      <div className="flex flex-col gap-2 testo-13">
         <p className="m-0 text-text-secondary">In quale area del quartiere sta il luogo. Il pin si mette poi con «Posiziona».</p>
         <Selettore className="selettore--in-linea" etichetta="Area" valore={area} segnaposto="Scegli l’area…" opzioni={aree.map((a) => ({ chiave: a.slug, nome: a.nome, dettaglio: a.slug === proposta ? 'proposta' : undefined }))} onCambia={setArea} />
       </div>

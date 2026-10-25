@@ -2,19 +2,22 @@
 // SkillDettaglioPage — scheda di una skill: chi la impara e come si ottiene
 // ============================================================
 
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
 import { getSkill } from '../services/api';
 import { PageState } from '../components/shared/PageState';
 import { ElementoChip } from '../components/compendio/ElementoChip';
-import { IconChevronLeft } from '../components/shared/icons';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
+import { TitoloSezione } from '../components/shared/TitoloSezione';
+import { IntestazioneScheda } from '../components/shared/IntestazioneScheda';
+import { MenuModifica } from '../components/shared/MenuModifica';
+import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
+import { IconaAzione } from '../components/shared/IconaAzione';
 
 /** Scheda skill. */
 export function SkillDettaglioPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const skillId = Number(id);
   const { dati: s, caricamento, errore, ricarica } = useCarica(() => getSkill(skillId), [skillId]);
   useDocumentTitle(s ? s.nomeIt : 'Skill');
@@ -23,23 +26,22 @@ export function SkillDettaglioPage() {
     <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
       {s && (
         <div className="flex flex-col gap-4">
-          <button type="button" className="btn btn-ghost self-start -ml-2" onClick={() => navigate(-1)}>
-            <IconChevronLeft size={18} /> Indietro
-          </button>
-          <div className="card flex flex-col gap-2">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="titolo-display m-0">{s.nomeIt}</h1>
-              {s.nomeIt !== s.nome && <span className="text-[13px] text-text-muted" title="Nome nella localizzazione inglese">{s.nome}</span>}
+          <IntestazioneScheda ripiego="/skill" titolo={s.nomeIt}
+            chip={<>
+              {s.nomeIt !== s.nome && <span className="testo-13 text-text-muted" title="Nome nella localizzazione inglese">{s.nome}</span>}
               <ElementoChip elemento={s.elemento} nome={s.elementoNome} />
               <span className="chip">{s.costo.testo}</span>
-              <ModificaGuida tipo="skill" chiave={String(s.id)} cosa={`la skill «${s.nomeIt}»`} onSalvato={() => void ricarica()} />
-            </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <p className="m-0 text-[15px] min-w-0 flex-1">{s.effettoNome}</p>
+            </>}
+            azioni={<MenuModifica cosa={`la skill «${s.nomeIt}»`}>
+              <ModificaGuida tipo="skill" chiave={String(s.id)} cosa={`la skill «${s.nomeIt}»`} etichetta="Testi della skill" onSalvato={() => void ricarica()} />
               {/* la resa italiana dell'effetto è condivisa da tutte le skill con lo stesso testo: si modifica solo dalle Traduzioni */}
-              <Link to={`/impostazioni?${new URLSearchParams({ traduzione: 'effettoSkill', q: s.effetto }).toString()}`} className="btn btn-ghost btn-sm touch inline-flex items-center no-underline">Modifica la traduzione</Link>
-            </div>
-            <dl className="dl-scheda m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[13px]">
+              <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Traduzione dell’effetto"
+                to={`/impostazioni?${new URLSearchParams({ traduzione: 'effettoSkill', q: s.effetto }).toString()}`} />
+            </MenuModifica>}>
+            <p className="m-0 testo-15 min-w-0">{s.effettoNome}</p>
+          </IntestazioneScheda>
+          {(s.fonteCartaNome || s.negoziazioneNome || s.unicaNome || s.fontiEsecuzione.length > 0) && <div className="card flex flex-col gap-2">
+            <dl className="dl-scheda m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 testo-13">
               {s.fonteCartaNome && (<><dt className="text-text-muted">Carta abilità</dt><dd className="m-0">{s.fonteCartaNome}</dd></>)}
               {s.negoziazioneNome && (<><dt className="text-text-muted">Negoziazione</dt><dd className="m-0">{s.negoziazioneNome}</dd></>)}
               {s.unicaNome && (<><dt className="text-text-muted">Esclusiva</dt><dd className="m-0">{s.unicaNome}</dd></>)}
@@ -50,21 +52,21 @@ export function SkillDettaglioPage() {
                 </>
               )}
             </dl>
-          </div>
+          </div>}
 
           <section className="card">
-            <h2 className="m-0 mb-2 text-[15px] font-semibold">Persona che la imparano ({s.persone.length})</h2>
+            <TitoloSezione className="mb-2">Persona che la imparano ({s.persone.length})</TitoloSezione>
             {s.persone.length === 0 ? (
-              <p className="m-0 text-[13px] text-text-muted">Nessuna Persona del compendio la apprende per livello.</p>
+              <p className="m-0 testo-13 text-text-muted">Nessuna Persona del compendio la apprende per livello.</p>
             ) : (
               <ul className="m-0 p-0 list-none grid gap-1 grid-cols-1 sm:grid-cols-2">
                 {s.persone.map((p) => (
                   <li key={p.id}>
                     <Link to={`/compendio/persona/${p.id}`} className="flex items-center gap-2 py-1.5 no-underline text-text hover:text-primary-testo">
-                      <span className="w-9 text-right text-[12px] text-text-muted">Liv. {p.livelloPersona}</span>
+                      <span className="w-9 text-right testo-12 text-text-muted">Liv. {p.livelloPersona}</span>
                       <span className="font-semibold">{p.nome}</span>
                       <span className="chip">{p.arcanaNome}</span>
-                      <span className="text-[12px] text-text-secondary ml-auto">{p.livello === 0 ? 'innata' : `a liv. ${p.livello}`}</span>
+                      <span className="testo-12 text-text-secondary ml-auto">{p.livello === 0 ? 'innata' : `a liv. ${p.livello}`}</span>
                     </Link>
                   </li>
                 ))}

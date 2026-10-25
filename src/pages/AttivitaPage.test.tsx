@@ -62,13 +62,13 @@ describe('AttivitaPage', () => {
     getAttivita.mockResolvedValue({ ...dati, lavori: [{ ...dati.lavori[0], quiz }] });
     render(<MemoryRouter initialEntries={['/guida/attivita?scheda=lavori']}><AttivitaPage /></MemoryRouter>);
     const pulsante = await screen.findByRole('button', { name: 'Guida del quiz: Commesso al Triple Seven (oggi c’è il quiz)' });
-    expect(pulsante).toHaveClass('chip--oro');
+    expect(pulsante).toHaveClass('btn-primary');
     fireEvent.click(pulsante);
     expect(screen.getByRole('dialog', { name: 'Guida del quiz — Commesso al Triple Seven' })).toHaveTextContent('Vicino alle informazioni sulla zebra');
     fireEvent.click(screen.getByRole('button', { name: 'Chiudi' }));
     // un giorno senza quiz: il pulsante resta, non in oro
     act(() => usePartitaStore.setState({ attiva: { id: 5, nome: 'Prova', dataGioco: '05-18' } as PartitaDto }));
-    expect(screen.getByRole('button', { name: 'Guida del quiz: Commesso al Triple Seven' })).toHaveClass('chip--attivo');
+    expect(screen.getByRole('button', { name: 'Guida del quiz: Commesso al Triple Seven' })).toHaveClass('btn-secondary');
     fireEvent.click(screen.getByRole('tab', { name: 'Attività' }));
     expect(screen.queryByRole('button', { name: /Guida del quiz/ })).toBeNull();
   });

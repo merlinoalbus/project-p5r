@@ -20,6 +20,8 @@ import { arrivoSpillo } from '../../utils/navigazioneMappa';
 import { nomePresentazioneMappa } from '../../utils/presentazioneMappa';
 import { DEFINIZIONI_SPILLO } from '../../../shared/spilli';
 import { IconaSpillo } from './IconaSpillo';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 /** Che rapporto ha la mappa d'arrivo con questa: è l'informazione che dava l'albero e che qui non
  * va persa — una figlia si raggiunge anche scendendo, una sorella o un altro quartiere solo di qui. */
@@ -60,11 +62,11 @@ export function PassaggiMappa({ mappa, albero, occupato, onVai, onCreaPassaggio 
   return (
     <section className="visore-mappa__sezione" aria-label="Passaggi da e verso questa mappa">
       <h3 className="visore-mappa__intestazione">Passaggi</h3>
-      <p className="m-0 text-[12px] text-text-muted">Dove portano gli spilli di spostamento di questa mappa, e quali spilli di altre mappe portano qui. Toccandone uno si apre l’altra mappa, sempre in modifica.</p>
+      <p className="m-0 testo-12 text-text-muted">Dove portano gli spilli di spostamento di questa mappa, e quali spilli di altre mappe portano qui. Toccandone uno si apre l’altra mappa, sempre in modifica.</p>
 
-      <h4 className="m-0 text-[12px] uppercase tracking-wide text-text-secondary">Da qui si va a</h4>
+      <h4 className="m-0 testo-12 uppercase tracking-wide text-text-secondary">Da qui si va a</h4>
       {uscite.length === 0
-        ? <p className="m-0 text-[12px] text-text-secondary">Nessuno spillo di spostamento: da questa mappa non si esce.</p>
+        ? <p className="m-0 testo-12 text-text-secondary">Nessuno spillo di spostamento: da questa mappa non si esce.</p>
         : <ul className="m-0 p-0 list-none flex flex-col gap-1" aria-label="Passaggi in uscita">
             {uscite.map(({ spillo: s, arrivo }) => {
               const nome = nomeDi(arrivo.mappa, s.destinazioneNomi?.mappa);
@@ -73,9 +75,9 @@ export function PassaggiMappa({ mappa, albero, occupato, onVai, onCreaPassaggio 
                   <button type="button" className="visore-mappa__figlia touch" onClick={() => onVai(arrivo.mappa)} aria-label={`Apri ${nome}, dove porta «${s.nome}»`}>
                     <IconaSpillo tipo={s.tipo} dimensione={18} />
                     <span className="flex-1 min-w-0 truncate">{s.nome} → {nome}</span>
-                    <span className="text-[11px] text-text-muted">{DEFINIZIONI_SPILLO[s.tipo].nome}</span>
+                    <span className="testo-12 text-text-muted">{DEFINIZIONI_SPILLO[s.tipo].nome}</span>
                   </button>
-                  <span className="text-[11px] text-text-muted">{parentela(mappa, arrivo.mappa)}{arrivo.spillo ? ` · allo spillo «${s.destinazioneNomi?.spillo ?? 'indicato'}»` : ''}</span>
+                  <span className="testo-12 text-text-muted">{parentela(mappa, arrivo.mappa)}{arrivo.spillo ? ` · allo spillo «${s.destinazioneNomi?.spillo ?? 'indicato'}»` : ''}</span>
                   {(quanti.get(`${arrivo.mappa}|${s.nome}`) ?? 0) > 1 && <span className="editor-mappa__senza-passaggio">Due spilli «{s.nome}» portano alla stessa mappa.</span>}
                   {!arriviDa.has(arrivo.mappa) && <span className="editor-mappa__senza-passaggio">Di là non si torna: il ritorno si crea da «{nome}», che lo deve portare.</span>}
                 </li>
@@ -83,21 +85,21 @@ export function PassaggiMappa({ mappa, albero, occupato, onVai, onCreaPassaggio 
             })}
           </ul>}
 
-      <h4 className="m-0 text-[12px] uppercase tracking-wide text-text-secondary">Da dove si arriva qui</h4>
+      <h4 className="m-0 testo-12 uppercase tracking-wide text-text-secondary">Da dove si arriva qui</h4>
       {mappa.arrivi.length === 0
-        ? <p className="m-0 text-[12px] text-text-secondary">Nessuno spillo di altre mappe porta qui: ci si arriva solo dall’albero.</p>
+        ? <p className="m-0 testo-12 text-text-secondary">Nessuno spillo di altre mappe porta qui: ci si arriva solo dall’albero.</p>
         : <ul className="m-0 p-0 list-none flex flex-col gap-1" aria-label="Passaggi in entrata">
             {mappa.arrivi.map((a) => (
               <li key={a.spilloId} className="flex flex-col">
                 <button type="button" className="visore-mappa__figlia touch" onClick={() => onVai(a.mappa)} aria-label={`Apri ${a.mappaNome}, da cui porta «${a.nome}»`}>
                   <IconaSpillo tipo={a.tipo} dimensione={18} />
                   <span className="flex-1 min-w-0 truncate">{a.mappaNome} → {a.nome}</span>
-                  <span className="text-[11px] text-text-muted">{DEFINIZIONI_SPILLO[a.tipo].nome}</span>
+                  <span className="testo-12 text-text-muted">{DEFINIZIONI_SPILLO[a.tipo].nome}</span>
                 </button>
                 {!usciteVerso.has(a.mappa) && (
                   <div className="editor-mappa__senza-passaggio">
                     <span className="flex-1 min-w-0">Da qui non si torna là.</span>
-                    <button type="button" className="visore-mappa__azione-testo touch" disabled={occupato} onClick={() => onCreaPassaggio(a.mappa)} aria-label={`Crea il passaggio verso ${a.mappaNome}`}>Crea il passaggio</button>
+                    <PulsanteVisivo compatto className="shrink-0" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Crea il passaggio" disabled={occupato} onClick={() => onCreaPassaggio(a.mappa)} aria-label={`Crea il passaggio verso ${a.mappaNome}`} />
                   </div>
                 )}
               </li>

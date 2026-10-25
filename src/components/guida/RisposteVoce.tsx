@@ -12,6 +12,8 @@
 
 import { useState } from 'react';
 import type { AzionePercorsoDto, DialogoVoceDto } from '../../types';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 /** Le scelte di un evento: la (o le) migliori in evidenza, il valore in note o come lo scrive la guida. */
 function ScelteEvento({ d }: { d: DialogoVoceDto }) {
@@ -25,7 +27,7 @@ function ScelteEvento({ d }: { d: DialogoVoceDto }) {
           <li key={s.ordine} className={`risposta-voce ${top ? 'risposta-voce--migliore' : ''}`} title={s.avviso ?? undefined}>
             <span className="text-text-muted tabular-nums">{s.ordine}.</span>
             <span className={`flex-1 min-w-0 ${s.romantica ? 'text-primary-testo' : ''}`}>{s.testo}{s.romantica ? ' (relazione romantica)' : ''}</span>
-            {valore && <span className={`chip text-[11px] ${top ? 'chip--attivo' : ''}`}>{valore}</span>}
+            {valore && <span className={`chip testo-12 ${top ? 'chip--attivo' : ''}`}>{valore}</span>}
           </li>
         );
       })}
@@ -42,17 +44,15 @@ export function RisposteVoce({ a }: { a: AzionePercorsoDto }) {
   return (
     <div className="risposte-voce" role="group" aria-label={`Risposte migliori, evento del rango ${d.rango}`}>
       <span className="risposte-voce__titolo">Level up al rango {d.rango} · risposte migliori</span>
-      {d.note && <span className="text-[12px] text-text-muted">{d.note}</span>}
+      {d.note && <span className="testo-12 text-text-muted">{d.note}</span>}
       <ScelteEvento d={d} />
       {a.rangoPartita !== undefined && a.rangoPartita + 1 !== d.rango && (
-        <span className="text-[12px] text-text-secondary">
+        <span className="testo-12 text-text-secondary">
           Nella tua partita è al rango {a.rangoPartita}
           {secondario && (
             <>
               {' · '}
-              <button type="button" className="btn btn-ghost btn-sm touch" aria-expanded={altroAperto} onClick={() => setAltroAperto((v) => !v)}>
-                {altroAperto ? 'Nascondi' : 'Mostra'} le risposte del rango {secondario.rango}
-              </button>
+              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="dettagli" dimensione={20} />} titolo={<>{altroAperto ? 'Nascondi' : 'Mostra'} le risposte del rango {secondario.rango}</>} aria-expanded={altroAperto} onClick={() => setAltroAperto((v) => !v)} />
             </>
           )}
         </span>

@@ -35,7 +35,7 @@ export function StatisticheBarre({ statistiche, base, didascalia, compatta }: Pr
         const diff = base ? valore - base[k] : 0;
         const quota = Math.min(100, (valore / MASSIMO_STATISTICA) * 100);
         return (
-          <div key={k} className={`flex items-center gap-2 ${compatta ? 'text-[12px]' : 'text-[13px]'}`} role="row">
+          <div key={k} className={`flex items-center gap-2 ${compatta ? 'testo-12' : 'testo-13'}`} role="row">
             <span className={`${compatta ? 'w-[68px]' : 'w-[88px]'} shrink-0 font-semibold text-text-secondary truncate`} title={`${nome} (${voce?.sigla ?? SIGLA_STATISTICA[k]})`} role="rowheader">
               {compatta ? (voce?.sigla ?? SIGLA_STATISTICA[k]) : nome}
             </span>
@@ -47,13 +47,13 @@ export function StatisticheBarre({ statistiche, base, didascalia, compatta }: Pr
             >
               <div className="h-full" style={{ width: `${quota}%`, background: 'linear-gradient(90deg, #b1261f, #e5352b)' }} />
             </div>
-            <span className={`${compatta ? 'w-7 text-[13px]' : 'w-9 text-[16px]'} text-right font-black tabular-nums`} role="cell">{valore}</span>
-            {base && <span className={`w-9 text-[11px] tabular-nums ${diff > 0 ? 'text-success' : diff < 0 ? 'text-error' : 'text-text-muted'}`} role="cell">{diff > 0 ? `+${diff}` : diff === 0 ? '—' : diff}</span>}
+            <span className={`${compatta ? 'w-7 testo-13' : 'w-9 testo-16'} text-right font-black tabular-nums`} role="cell">{valore}</span>
+            {base && <span className={`w-9 testo-12 tabular-nums ${diff > 0 ? 'text-success' : diff < 0 ? 'text-error' : 'text-text-muted'}`} role="cell">{diff > 0 ? `+${diff}` : diff === 0 ? '—' : diff}</span>}
           </div>
         );
       })}
       {!compatta && (
-        <div className="flex items-baseline justify-between gap-3 text-[12px] text-text-muted pt-0.5 flex-wrap">
+        <div className="flex items-baseline justify-between gap-3 testo-12 text-text-muted pt-0.5 flex-wrap">
           <span className="flex-1 min-w-[200px]">{didascalia ?? ''}</span>
           <span className="shrink-0">Totale <strong className="text-text tabular-nums">{totale}</strong> · scala 0–{MASSIMO_STATISTICA}</span>
         </div>

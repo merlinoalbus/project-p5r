@@ -33,12 +33,12 @@ function Piano({ piano, indice, onSalva, salvato }: { piano: PianoFusioneDto; in
     <article className="card flex flex-col gap-2">
       <div className="flex items-baseline gap-3 flex-wrap">
         <span className="font-semibold">Piano {indice + 1}</span>
-        <span className="text-[13px] text-text-secondary">
+        <span className="testo-13 text-text-secondary">
           {piano.fusioni} {piano.fusioni === 1 ? 'fusione' : 'fusioni'} · profondità {piano.profondita}
           {piano.evocazioni > 0 && ` · ${piano.evocazioni} dal Registro`}
           {piano.catture > 0 && ` · ${piano.catture} da catturare`}
         </span>
-        <span className="ml-auto font-black tabular-nums text-[16px]">{formattaYen(piano.costo)}</span>
+        <span className="ml-auto font-black tabular-nums testo-16">{formattaYen(piano.costo)}</span>
         {onSalva && (
           <PulsanteVisivo tono={salvato ? 'fantasma' : 'secondario'} compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={salvato ? 'Salvato ✓' : 'Salva piano'} onClick={onSalva} disabled={salvato} title="Salva questo piano nella partita: l'avanzamento verrà ricalcolato sulla scorta" />
         )}
@@ -99,7 +99,7 @@ export function PianiFusione({ persone, partitaId, livelloProtagonista, iniziale
       {scelta && (
         <>
           {tutteSkill.dati && <SelettoreSkill skill={tutteSkill.dati} scelte={skillScelte} onCambia={setSkillScelte} etichetta="Skill da portare sul bersaglio" />}
-          <div className="flex flex-wrap items-center gap-2 text-[13px]">
+          <div className="flex flex-wrap items-center gap-2 testo-13">
             <span className="flex items-center gap-1.5 touch">Profondità
               <Selettore compatto etichetta="Profondità massima" valore={String(profondita)} opzioni={[1, 2, 3, 4].map((n) => ({ chiave: String(n), nome: String(n) }))} onCambia={(k) => setProfondita(Number(k))} />
             </span>
@@ -116,28 +116,28 @@ export function PianiFusione({ persone, partitaId, livelloProtagonista, iniziale
               </button>
             )}
           </div>
-          <p className="m-0 text-[12px] text-text-muted">
+          <p className="m-0 testo-12 text-text-muted">
             Foglie: <span className="chip chip--attivo">in scorta</span> gratis (ogni esemplare una volta), <span className="text-text-secondary">dal Registro</span> al prezzo di evocazione, <span className="text-warning">da catturare</span> in battaglia. Il costo del piano è la somma delle evocazioni.
             {skillScelte.length > 0 && ' Le skill richieste sono propagate a catena: ogni fusione deve poterle ereditare (tipo compatibile e slot a scelta sufficienti) e le foglie devono possederle; «↑» = la Persona la apprende salendo di livello.'}
             {!partitaId && ' Senza partita attiva scorta e Registro sono considerati vuoti.'}
           </p>
           {errore ? (
-            <p className="m-0 text-[13px] text-error">{errore}</p>
+            <p className="m-0 testo-13 text-error">{errore}</p>
           ) : caricamento && !dati ? (
             <div className="flex justify-center py-6"><Spinner /></div>
           ) : dati && dati.motivo ? (
             <div className="card flex items-start gap-3 border-primary" role="status">
               <IconaAzione chiave="annulla" dimensione={28} />
               <div className="flex flex-col gap-1">
-                <span className="font-display uppercase text-[18px] leading-none">{TITOLO_MOTIVO[dati.motivo.codice]}</span>
-                <span className="text-[13px] text-text-secondary">{dati.motivo.testo}</span>
+                <span className="font-display uppercase testo-18 leading-none">{TITOLO_MOTIVO[dati.motivo.codice]}</span>
+                <span className="testo-13 text-text-secondary">{dati.motivo.testo}</span>
               </div>
             </div>
           ) : dati && dati.piani.length === 0 ? (
-            <p className="m-0 text-[13px] text-text-muted">Nessun piano trovato con queste opzioni: aumenta la profondità, ammetti le catture, togli il limite di livello{skillScelte.length > 0 ? ' o riduci le skill richieste (verifica che il tipo di eredità del bersaglio le ammetta)' : ''}.</p>
+            <p className="m-0 testo-13 text-text-muted">Nessun piano trovato con queste opzioni: aumenta la profondità, ammetti le catture, togli il limite di livello{skillScelte.length > 0 ? ' o riduci le skill richieste (verifica che il tipo di eredità del bersaglio le ammetta)' : ''}.</p>
           ) : dati ? (
             <>
-              {dati.sconto > 0 && <p className="m-0 text-[12px] text-text-muted">Costi con lo sconto del Registro ({dati.sconto}%) della partita.</p>}
+              {dati.sconto > 0 && <p className="m-0 testo-12 text-text-muted">Costi con lo sconto del Registro ({dati.sconto}%) della partita.</p>}
               <div className="flex flex-col gap-3">
                 {dati.piani.map((p, i) => {
                   const chiave = `${scelta.id}|${i}|${skillIds.join(',')}|${profondita}|${alternative}|${catture}|${limitaLivello}|${slotFortunato}`;

@@ -50,7 +50,7 @@ export function RicettaRiga({ ricetta, inScorta, mostraRisultato = true }: { ric
       <span className="ricetta-riga__dati">
         <span className="ricetta-riga__tipo">{NOME_TIPO[ricetta.tipo]}</span>
         <span className="ricetta-riga__costo">{formattaYen(ricetta.costo)}</span>
-        {tuttiInScorta && <span className="chip chip--attivo chip--icona text-[11px]" title="Hai tutti gli ingredienti nella scorta"><IconSpunta size={14} /> Pronta</span>}
+        {tuttiInScorta && <span className="chip chip--attivo chip--icona testo-12" title="Hai tutti gli ingredienti nella scorta"><IconSpunta size={14} /> Pronta</span>}
       </span>
     </li>
   );

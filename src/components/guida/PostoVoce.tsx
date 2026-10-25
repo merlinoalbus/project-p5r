@@ -77,8 +77,8 @@ export function PostoVoce({ altre, posto, testo, fascia, disabled, onPosto }: Pr
 
   return (
     <div ref={gruppo} className="flex flex-col gap-1" role="group" aria-label={`Posto nella giornata, ${nome}`}>
-      <span className="text-[13px] text-text-secondary">Posto nella giornata ({nome}): {posto + 1} di {altre.length + 1}</span>
-      <ol className="m-0 p-0 list-none flex flex-col border border-border-light rounded-md text-[13px] touch-pan-y">
+      <span className="testo-13 text-text-secondary">Posto nella giornata ({nome}): {posto + 1} di {altre.length + 1}</span>
+      <ol className="m-0 p-0 list-none flex flex-col border border-border-light rounded-md testo-13 touch-pan-y">
         {elenco.map((r) => {
           if (r.tipo === 'slot') return <li key="slot" aria-hidden="true" className="posto-voce__slot">rilascia qui · posto {trascina!.target + 1}</li>;
           if (r.tipo === 'altra') {
@@ -103,7 +103,7 @@ export function PostoVoce({ altre, posto, testo, fascia, disabled, onPosto }: Pr
           );
         })}
       </ol>
-      {altre.length === 0 && <span className="text-[12px] text-text-muted">È l’unica voce di questa fascia.</span>}
+      {altre.length === 0 && <span className="testo-12 text-text-muted">È l’unica voce di questa fascia.</span>}
     </div>
   );
 }

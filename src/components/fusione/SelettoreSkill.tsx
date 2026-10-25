@@ -30,14 +30,14 @@ export function SelettoreSkill({ skill, scelte, onCambia, massimo = 4, etichetta
   }, [q, skill, scelte, senzaTratti]);
   return (
     <div className="card flex flex-col gap-2">
-      <span className="text-[12px] uppercase tracking-wide text-text-muted">{etichetta} ({scelte.length}/{massimo})</span>
+      <span className="testo-12 uppercase tracking-wide text-text-muted">{etichetta} ({scelte.length}/{massimo})</span>
       <div className="flex flex-wrap gap-1.5">
         {scelte.map((s) => (
           <button key={s.id} type="button" className="chip chip--attivo touch" onClick={() => onCambia(scelte.filter((x) => x.id !== s.id))} aria-label={`Rimuovi ${s.nomeIt}`} title="Tocca per rimuovere">
             {s.nomeIt} ×
           </button>
         ))}
-        {scelte.length === 0 && <span className="text-[13px] text-text-muted">Nessuna skill scelta: cerca qui sotto.</span>}
+        {scelte.length === 0 && <span className="testo-13 text-text-muted">Nessuna skill scelta: cerca qui sotto.</span>}
       </div>
       {scelte.length < massimo && (
         <>
@@ -49,7 +49,7 @@ export function SelettoreSkill({ skill, scelte, onCambia, massimo = 4, etichetta
                   <button type="button" className="w-full text-left flex items-center gap-2 py-2 bg-transparent border-none text-text cursor-pointer hover:text-primary-testo touch" onClick={() => { onCambia([...scelte, s]); setQ(''); }}>
                     <ElementoChip elemento={s.elemento} nome={s.elementoNome} piccolo />
                     <span className="font-semibold">{s.nomeIt}</span>
-                    <span className="text-[12px] text-text-secondary truncate flex-1">{s.effettoNome}</span>
+                    <span className="testo-12 text-text-secondary truncate flex-1">{s.effettoNome}</span>
                   </button>
                 </li>
               ))}

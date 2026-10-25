@@ -9,6 +9,8 @@ import type { InvitoDto } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { EditorInvito } from './EditorInvito';
+import { conferma } from '../../stores/confermaStore';
+import { TitoloSezione } from '../shared/TitoloSezione';
 
 /** Gli stessi inviti e lo stesso gesto nelle pagine del Confidente, del quartiere e del luogo. Gli inviti si creano, si cambiano, si ripristinano e si
  *  tolgono solo dalla pagina del Confidente (R9-07c: è l'unico posto in cui si modificano), cioè quando il filtro nomina il Confidente. */
@@ -33,7 +35,7 @@ export function InvitiConfidente({ filtro, nomeConfidente, onCambiato }: { filtr
   /** Toglie un invito creato dall'utente: finisce nel Cestino (il server rifiuta se una partita lo ha registrato o un altro dato lo cita). */
   const togli = async (invito: InvitoDto) => {
     if (occupato || !invito.data) return;
-    if (!window.confirm(`Togliere l’invito del ${dataLeggibile(invito.data)}? Finisce nel Cestino.`)) return;
+    if (!(await conferma({ titolo: 'Togliere l’invito?', testo: `L’invito del ${dataLeggibile(invito.data)} finisce nel Cestino.`, etichetta: 'Togli l’invito' }))) return;
     setOccupato(invito.chiave);
     try {
       await eliminaInvitoConfidente(invito.confidente, invito.data);
@@ -47,13 +49,13 @@ export function InvitiConfidente({ filtro, nomeConfidente, onCambiato }: { filtr
   const confidente = { chiave: filtro.confidente ?? '', nome: nomeConfidente ?? dati.dati?.[0]?.confidenteNome ?? '' };
   return <section className="card flex flex-col gap-2" aria-label="Inviti dei Confidenti">
     <div className="flex flex-wrap items-center justify-between gap-2">
-      <h2 className="m-0 text-[15px] font-semibold">Inviti</h2>
+      <TitoloSezione>Inviti</TitoloSezione>
       {modificabile && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi un invito" onClick={() => setEditor(null)} />}
     </div>
-    {dati.errore ? <p className="m-0 text-[13px]" role="alert">{dati.errore} <button type="button" className="btn btn-sm touch" onClick={() => void dati.ricarica()}>Riprova</button></p>
-      : dati.caricamento && !dati.dati ? <p className="m-0 text-[13px]" role="status">Caricamento degli inviti…</p>
-        : !dati.dati?.length ? <p className="m-0 text-[13px] text-text-muted">Nessun invito.</p>
-          : <ul className="m-0 flex list-none flex-col gap-3 p-0">{dati.dati.map((invito) => <li key={invito.chiave} className="flex flex-col gap-1 text-[13px]">
+    {dati.errore ? <p className="m-0 testo-13" role="alert">{dati.errore} <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void dati.ricarica()} /></p>
+      : dati.caricamento && !dati.dati ? <p className="m-0 testo-13" role="status">Caricamento degli inviti…</p>
+        : !dati.dati?.length ? <p className="m-0 testo-13 text-text-muted">Nessun invito.</p>
+          : <ul className="m-0 flex list-none flex-col gap-3 p-0">{dati.dati.map((invito) => <li key={invito.chiave} className="flex flex-col gap-1 testo-13">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <Link className="touch inline-flex items-center" to={`/confidenti/${encodeURIComponent(invito.confidente)}`}>{invito.confidenteNome}</Link>
             {invito.data && <span>{dataLeggibile(invito.data)}</span>}
@@ -66,9 +68,10 @@ export function InvitiConfidente({ filtro, nomeConfidente, onCambiato }: { filtr
           {invito.condizioniTesto.length > 0 && <p className="m-0 text-text-secondary">Condizioni: {invito.condizioniTesto.join(' · ')}.</p>}
           {attiva && !invito.registrato && invito.possibile === false && <p className="m-0 text-text-secondary">Non ancora possibile: manca {invito.manca ?? 'una delle condizioni dell’invito'}.</p>}
           {invito.nota && <p className="m-0 text-text-muted">{invito.nota}</p>}
-          {attiva ? <button type="button" className="btn btn-secondary touch self-start" disabled={occupato !== null || (!invito.registrato && invito.possibile !== true)} onClick={() => void registra(invito.chiave, !invito.registrato)}>
-            {occupato === invito.chiave ? 'Salvataggio…' : invito.registrato ? 'Annulla invito avvenuto' : 'Invito avvenuto'}
-          </button> : <p className="m-0 text-text-muted">Seleziona una partita per registrare l’invito.</p>}
+          {attiva ? <PulsanteVisivo tono={invito.registrato ? 'fantasma' : 'secondario'} compatto className="self-start"
+            icona={<IconaAzione chiave={invito.registrato ? 'annulla-ultimo' : 'raggiunto'} dimensione={20} />}
+            titolo={occupato === invito.chiave ? 'Salvataggio…' : invito.registrato ? 'Annulla invito avvenuto' : 'Invito avvenuto'}
+            disabled={occupato !== null || (!invito.registrato && invito.possibile !== true)} onClick={() => void registra(invito.chiave, !invito.registrato)} /> : <p className="m-0 text-text-muted">Seleziona una partita per registrare l’invito.</p>}
         </li>)}</ul>}
     {modificabile && editor !== undefined && <EditorInvito key={editor?.chiave ?? 'nuovo'} confidente={confidente} invito={editor} onChiudi={() => setEditor(undefined)} onSalvato={dopoModifica} />}
   </section>;

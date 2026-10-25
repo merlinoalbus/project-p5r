@@ -151,7 +151,7 @@ export function ModificaGuida({ tipo, chiave, cosa, soloIcona, etichetta = 'Modi
     const speciale = campiSpeciali?.[c.percorso];
     if (speciale?.disegna) return <Fragment key={c.percorso}>{speciale.disegna(c, v, (nuovo) => imposta(c.percorso, nuovo), occupato)}</Fragment>;
     const problema = speciale?.errore?.(v) ?? null;
-    if (problema && !uguali(v, c.valore)) return <Fragment key={c.percorso}>{campoStandard(c, v)}<p role="alert" className="m-0 text-[12px] text-error sm:col-span-2">{problema}</p></Fragment>;
+    if (problema && !uguali(v, c.valore)) return <Fragment key={c.percorso}>{campoStandard(c, v)}<p role="alert" className="m-0 testo-12 text-error sm:col-span-2">{problema}</p></Fragment>;
     return campoStandard(c, v);
   };
 
@@ -162,7 +162,7 @@ export function ModificaGuida({ tipo, chiave, cosa, soloIcona, etichetta = 'Modi
         return <CampoElenco key={c.percorso} etichetta={c.etichetta} voci={Array.isArray(v) ? v : []} disabilitato={occupato} onCambia={(voci) => imposta(c.percorso, voci)} />;
       case 'booleano':
         return (
-          <label key={c.percorso} className="touch flex items-center gap-2 text-[13px] sm:col-span-2">
+          <label key={c.percorso} className="touch flex items-center gap-2 testo-13 sm:col-span-2">
             <input type="checkbox" className="h-5 w-5" checked={v === true} disabled={occupato} onChange={(e) => imposta(c.percorso, e.target.checked)} />
             {c.etichetta}
           </label>
@@ -179,9 +179,9 @@ export function ModificaGuida({ tipo, chiave, cosa, soloIcona, etichetta = 'Modi
           <Blocco key={c.percorso} largo>
             <SceltaCatalogoOggetto etichetta={c.etichetta} valore={typeof v === 'string' ? v : ''} disabilitato={occupato} onScegli={(o) => imposta(c.percorso, o.chiave)} />
             {c.nullable && v !== null && v !== '' && (
-              <button type="button" className="btn btn-ghost btn-sm touch self-start" disabled={occupato} onClick={() => imposta(c.percorso, null)}>Nessun oggetto</button>
+              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Nessun oggetto" className="self-start" disabled={occupato} onClick={() => imposta(c.percorso, null)} />
             )}
-            {v === null && <span className="text-[11px] text-text-muted">Nessun oggetto scelto.</span>}
+            {v === null && <span className="testo-12 text-text-muted">Nessun oggetto scelto.</span>}
           </Blocco>
         );
       case 'numero':
@@ -213,9 +213,9 @@ export function ModificaGuida({ tipo, chiave, cosa, soloIcona, etichetta = 'Modi
   const rigaGuida = (c: CampoCorrezioneDto) => {
     if (!c.modificato) return null;
     return (
-      <div key={`${c.percorso}-guida`} className="flex flex-wrap items-center gap-2 text-[11px] text-text-muted sm:col-span-2">
+      <div key={`${c.percorso}-guida`} className="flex flex-wrap items-center gap-2 testo-12 text-text-muted sm:col-span-2">
         <span className="min-w-0 flex-1 break-words">Guida: {mostra(c, c.valoreGuida)}</span>
-        <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => setConferma({ campi: [c.percorso] })}>Rimetti questo</button>
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Rimetti questo" disabled={occupato} onClick={() => setConferma({ campi: [c.percorso] })} />
       </div>
     );
   };
@@ -226,46 +226,49 @@ export function ModificaGuida({ tipo, chiave, cosa, soloIcona, etichetta = 'Modi
   const corpo: ReactNode[] = [];
   let gruppo: string | undefined;
   for (const c of scheda?.campi ?? []) {
-    if (c.gruppo && c.gruppo !== gruppo) corpo.push(<h3 key={`g-${c.gruppo}`} className="m-0 mt-2 text-[12px] font-semibold uppercase tracking-wide text-text-muted sm:col-span-2">{c.gruppo}</h3>);
+    if (c.gruppo && c.gruppo !== gruppo) corpo.push(<h3 key={`g-${c.gruppo}`} className="m-0 mt-2 testo-12 font-semibold uppercase tracking-wide text-text-muted sm:col-span-2">{c.gruppo}</h3>);
     gruppo = c.gruppo;
     corpo.push(disegnaCampo(c), rigaGuida(c));
   }
 
   return <>
     {soloIcona
-      ? <button type="button" className={`touch shrink-0 rounded px-1.5 text-[12px] text-text-muted hover:text-text ${className}`} aria-label={`Modifica ${cosa}`} title={`Modifica ${cosa}`} disabled={occupato} onClick={apri}>✎</button>
+      ? <button type="button" className={`touch shrink-0 rounded px-1.5 testo-12 text-text-muted hover:text-text ${className}`} aria-label={`Modifica ${cosa}`} title={`Modifica ${cosa}`} disabled={occupato} onClick={apri}>✎</button>
       : <PulsanteVisivo tono="fantasma" compatto className={className} icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={etichetta}
         aria-label={`${etichetta}: ${cosa}`} disabled={occupato} onClick={apri} />}
     {scheda && (
       <Modal titolo={`${scheda.nome}`} aperta onChiudi={() => chiudi()} larga
         azioni={<>
-          <button type="button" className="btn btn-secondary" disabled={occupato} onClick={() => chiudi()}>{rimesso ? 'Chiudi' : 'Annulla'}</button>
-          {scheda.modificata && <button type="button" className="btn btn-secondary" disabled={occupato} onClick={() => setConferma({})}>Ripristina i valori della guida</button>}
-          <button type="button" className="btn btn-primary" disabled={occupato || cambiati.length === 0 || !tuttiValidi} onClick={() => void salva()}>Salva</button>
+          {/* «Annulla» della finestra resta di solo testo (ROADMAP 12.8); dopo «Rimetti questo» diventa «Chiudi», con l'icona */}
+          {rimesso
+            ? <PulsanteVisivo icona={<IconaAzione chiave="chiudi" dimensione={22} />} titolo="Chiudi" disabled={occupato} onClick={() => chiudi()} />
+            : <button type="button" className="btn btn-secondary" disabled={occupato} onClick={() => chiudi()}>Annulla</button>}
+          {scheda.modificata && <PulsanteVisivo icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina i valori della guida" disabled={occupato} onClick={() => setConferma({})} />}
+          <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" disabled={occupato || cambiati.length === 0 || !tuttiValidi} onClick={() => void salva()} />
         </>}>
         <div className="flex flex-col gap-3">
-          <p className="m-0 text-[12px] text-text-muted">
+          <p className="m-0 testo-12 text-text-muted">
             {scheda.modificata
               ? 'Hai corretto questo oggetto: «Ripristina i valori della guida» (o «Rimetti questo» sotto un campo) rimette quello che diceva la guida.'
               : 'Salvando, la correzione vale in tutta l’app e resta anche dopo gli aggiornamenti; potrai rimettere il valore della guida.'}
             {scheda.nota ? ` ${scheda.nota}` : ''}
           </p>
           {scheda.guidaCambiata.length > 0 && (
-            <p role="status" className="m-0 rounded-md border border-warning p-2 text-[12px]">
+            <p role="status" className="m-0 rounded-md border border-warning p-2 testo-12">
               La guida è cambiata dopo la tua correzione ({scheda.guidaCambiata.map((p) => scheda.campi.find((c) => c.percorso === p)?.etichetta ?? p).join(', ')}): la tua versione resta in uso finché non la rimetti.
             </p>
           )}
           <Griglia>{corpo}</Griglia>
           {conferma && (
-            <div role="alert" className="flex flex-col gap-2 rounded-md border border-warning p-3 text-[13px]">
+            <div role="alert" className="flex flex-col gap-2 rounded-md border border-warning p-3 testo-13">
               <p className="m-0 font-semibold">Perdi la tua versione:</p>
               <ul className="m-0 flex list-none flex-col gap-1 p-0">
                 {daPerdere.map((c) => <li key={c.percorso} className="break-words"><span className="text-text-muted">{c.etichetta}:</span> {mostra(c, c.valore)}</li>)}
               </ul>
               {cambiati.length > 0 && <p className="m-0 text-text-muted">Anche le modifiche di questa finestra non ancora salvate vanno perse.</p>}
               <div className="flex flex-wrap gap-2">
-                <button type="button" className="btn btn-danger touch" disabled={occupato} onClick={() => void ripristina(conferma.campi)}>Rimetti la guida</button>
-                <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={() => setConferma(null)}>No</button>
+                <PulsanteVisivo tono="pericolo" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Rimetti la guida" disabled={occupato} onClick={() => void ripristina(conferma.campi)} />
+                <PulsanteVisivo icona={<IconaAzione chiave="annulla" dimensione={22} />} titolo="No" disabled={occupato} onClick={() => setConferma(null)} />
               </div>
             </div>
           )}

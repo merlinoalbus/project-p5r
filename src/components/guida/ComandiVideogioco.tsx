@@ -38,7 +38,7 @@ export function ComandiVideogioco({ gioco, partitaId, onSalvata }: {
     <ComandiProgressoLettura titolo={gioco.nome} tipo="videogioco" progresso={gioco.progresso} totale={gioco.totaleRound}
       partita={partitaId !== null} occupato={occupato} bloccaDuranteSalvataggio disponibilita={gioco.disponibilita}
       onCambia={(avanzamento) => void salva((id) => impostaProgressoVideogioco(id, gioco.chiave, avanzamento))} />
-    {partitaId !== null && <label className="touch flex items-center gap-2 text-[13px]">
+    {partitaId !== null && <label className="touch flex items-center gap-2 testo-13">
       <input type="checkbox" checked={gioco.sessioneDichiarata ?? false}
         disabled={occupato || (!gioco.sessioneDichiarata && bloccata(gioco.disponibilita))}
         onChange={(e) => { const dichiarata = e.target.checked; void salva((id) => impostaSessioneVideogioco(id, gioco.chiave, dichiarata)); }} />

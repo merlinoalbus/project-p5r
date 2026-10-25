@@ -25,7 +25,7 @@ export function ProfiliSessionePesca({ punto, profili, profiliPianificazione }: 
 
 /** Gli esiti provengono dal valutatore comune: nessuna soglia viene ricostruita nel browser. */
 export function ProfiliPesca({ profili }: { profili: EsitoProfiloPescaDto[] }) {
-  return <div className="flex min-w-0 flex-col gap-2">{profili.map(p => <section className="flex min-w-0 flex-col gap-1 rounded border border-border p-2 text-[13px]" key={p.specie} aria-label={`Profilo ${specie(p.specie)}`}>
+  return <div className="flex min-w-0 flex-col gap-2">{profili.map(p => <section className="flex min-w-0 flex-col gap-1 rounded border border-border p-2 testo-13" key={p.specie} aria-label={`Profilo ${specie(p.specie)}`}>
     <div className="flex flex-wrap items-center gap-2"><strong>{specie(p.specie)}</strong><span className={`chip ${p.esito === 'via-documentata' ? 'chip--attivo' : ''}`}>{ESITO[p.esito]}</span></div>
     <span>{COMPARSA[p.comparsa]}</span>
     <span>Cattura: {p.catturabilita === 'via-documentata' ? 'via sufficiente documentata' : p.catturabilita === 'prerequisito-mancante' ? 'prerequisito documentato mancante' : 'da verificare'}.</span>
@@ -40,7 +40,7 @@ export function ProfiliPesca({ profili }: { profili: EsitoProfiloPescaDto[] }) {
 }
 
 export function BeneficiPesca({ benefici }: { benefici: BeneficioPescaDto[] }) {
-  return <ul className="m-0 flex list-none flex-col gap-2 p-0">{benefici.map(b => <li key={`${b.causa}:${b.tipo}:${b.chiave}`} className="flex min-w-0 flex-col gap-1 rounded border border-border p-2 text-[13px]">
+  return <ul className="m-0 flex list-none flex-col gap-2 p-0">{benefici.map(b => <li key={`${b.causa}:${b.tipo}:${b.chiave}`} className="flex min-w-0 flex-col gap-1 rounded border border-border p-2 testo-13">
     <strong>{b.tipo === 'dote' ? 'Beneficio Perizia' : b.tipo === 'yen' ? 'Quota d’ingresso' : 'Punti pesca'}</strong>
     <span>Importo ricostruibile: <IntervalloPesca minimo={b.intervallo.minimo} massimo={b.intervallo.massimo} unita={b.unita === 'punti-interni' ? 'punti interni' : b.unita === 'yen' ? 'yen' : 'punti pesca'} />.</span>
     <span>Già attribuito con prova: {b.attribuito.toLocaleString('it-IT')}. Differenza certa da rivedere: {b.deltaCerto > 0 ? '+' : ''}{b.deltaCerto.toLocaleString('it-IT')}.</span>
@@ -51,7 +51,7 @@ export function BeneficiPesca({ benefici }: { benefici: BeneficioPescaDto[] }) {
 
 /** Mostra i fatti che si stanno confermando, anche quando sono ancora ignoti. */
 export function RiepilogoOsservazionePesca({ osservazione: o }: { osservazione: OsservazionePesca }) {
-  return <div className="flex min-w-0 flex-col gap-1 text-[13px]">
+  return <div className="flex min-w-0 flex-col gap-1 testo-13">
     <span>Rango Perizia osservato: {o.rangoPeriziaOsservato ?? 'non noto'}. Tentativi consumati: {o.tentativiConsumati ?? 'non noti'}.</span>
     <span>Meteo: {o.meteo ?? 'non noto'}; allerta gelo: {osservato(o.allertaGelo)}. Terzo semestre in corso: {osservato(o.faseTerzoSemestre)}.</span>
     <span>Boilie sospetto posseduto: {osservato(o.escaSpecialePosseduta)}. Quota pagata: {osservato(o.quota.pagata)}.</span>

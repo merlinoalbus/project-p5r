@@ -31,7 +31,7 @@ export function OggiGuida({ oggi, riempi, pannello }: Props) {
     <div className={`flex flex-col gap-2 min-w-0 ${riempi ? 'md:min-h-0' : ''}`}>
       <div className="flex flex-wrap items-center gap-1.5 shrink-0">
         <button type="button" className="btn btn-secondary btn-sm touch" disabled={!g.precedente} onClick={() => oggi.vaiAlGiorno(g.precedente)} aria-label="Giorno precedente"><IconChevronLeft size={16} /></button>
-        <span className="font-display text-[19px] uppercase">{dataGiocoTesto(g.giorno)}</span>
+        <span className="font-display testo-20 uppercase">{dataGiocoTesto(g.giorno)}</span>
         <button type="button" className="btn btn-secondary btn-sm touch" disabled={!g.successivo} onClick={() => oggi.vaiAlGiorno(g.successivo)} aria-label="Giorno successivo"><IconChevronRight size={16} /></button>
         {g.dataCorrente === g.giorno
           ? <span className="chip chip--attivo">Oggi nella partita</span>
@@ -39,7 +39,7 @@ export function OggiGuida({ oggi, riempi, pannello }: Props) {
         {indice.dataCorrente && indice.dataCorrente !== g.giorno && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Vai a oggi" onClick={() => oggi.vaiAlGiorno(indice.dataCorrente)} />}
         <CollegamentoVisivo to={`/guida/percorso/${g.giorno}`} tono="fantasma" compatto className="ml-auto" icona={<IconaAzione chiave="libro" dimensione={20} />} titolo="Guida completa" />
       </div>
-      {!indice.dataCorrente && <p className="m-0 text-[12px] text-text-muted shrink-0">Nessun giorno corrente impostato: scegli il giorno e premi «Segna come giorno corrente».</p>}
+      {!indice.dataCorrente && <p className="m-0 testo-12 text-text-muted shrink-0">Nessun giorno corrente impostato: scegli il giorno e premi «Segna come giorno corrente».</p>}
       {/* Una riga sola (richiesta dell'utente, 2026-09-30): «Giorno», «Sera» e le quattro icone del meteo della fascia
           attiva — passando a «Sera» le icone dicono e segnano il meteo della sera; un tocco salva. Niente etichetta sopra e
           niente spiegazione sotto: in una schermata senza scorrimento ogni riga tolta è guida che si vede. «Giorno» e

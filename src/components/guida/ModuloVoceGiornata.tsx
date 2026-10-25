@@ -145,13 +145,13 @@ export function ModuloVoceGiornata({ soggetto, giorno, voci, partitaId, onChiudi
     <div className="voce-colonna">
       <div className="flex flex-col gap-1">
         <Segmenti etichetta="Che cosa è" valore={campi.genere} opzioni={GENERI} onCambia={(g) => imposta({ genere: g })} />
-        <span className="text-[12px] text-text-muted">{azione ? 'Si spunta e può dare punti.' : 'Solo da leggere: compare in «Di giorno» o «Di sera» senza casella, e non ha tipo né effetti.'}</span>
+        <span className="testo-12 text-text-muted">{azione ? 'Si spunta e può dare punti.' : 'Solo da leggere: compare in «Di giorno» o «Di sera» senza casella, e non ha tipo né effetti.'}</span>
       </div>
-      <label className="flex flex-col gap-1 text-[13px] text-text-secondary">{azione ? 'Che cosa fare' : 'Che cosa succede'}
+      <label className="flex flex-col gap-1 testo-13 text-text-secondary">{azione ? 'Che cosa fare' : 'Che cosa succede'}
         <textarea className="form-input" rows={righe(campi.testo, 3, 24)} maxLength={2000} value={campi.testo} autoFocus onChange={(e) => imposta({ testo: e.target.value })}
           placeholder={azione ? 'es. Comprare il Set per retrogaming' : 'es. Domani esami: ripassare la sera prima'} />
       </label>
-      <label className="flex flex-col gap-1 text-[13px] text-text-secondary">{azione ? 'Note' : 'Dettagli'}
+      <label className="flex flex-col gap-1 testo-13 text-text-secondary">{azione ? 'Note' : 'Dettagli'}
         <textarea className="form-input" rows={righe(campi.note, 2, 8)} maxLength={2000} value={campi.note} onChange={(e) => imposta({ note: e.target.value })} />
       </label>
       {azione && elenchi && <SceltaTipoQuale valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} />}
@@ -161,8 +161,8 @@ export function ModuloVoceGiornata({ soggetto, giorno, voci, partitaId, onChiudi
   const colonnaDestra = (
     <div className="voce-colonna">
       {azione && elenchi && nomi && <SpuntandoSuccede valore={campi.struttura} onCambia={(s) => imposta({ struttura: s })} elenchi={elenchi} nomi={nomi} />}
-      {azione && !elenchi && !erroreElenchi && <p className="m-0 text-[12px] text-text-muted" role="status">Carico gli elenchi…</p>}
-      {azione && erroreElenchi && <p className="m-0 text-[12px] text-error" role="alert">Elenchi non disponibili: {erroreElenchi}</p>}
+      {azione && !elenchi && !erroreElenchi && <p className="m-0 testo-12 text-text-muted" role="status">Carico gli elenchi…</p>}
+      {azione && erroreElenchi && <p className="m-0 testo-12 text-error" role="alert">Elenchi non disponibili: {erroreElenchi}</p>}
       <Segmenti etichetta="Quando" valore={campi.fascia} opzioni={FASCE} onCambia={(f) => imposta({ fascia: f, posizione: postoIniziale(f) })} />
       <PostoVoce altre={altre} posto={posto} testo={campi.testo.trim() || (voce ? voce.azione : 'La voce nuova')} fascia={campi.fascia} disabled={occupato}
         onPosto={(n) => imposta({ posizione: Math.max(0, Math.min(altre.length, n)) })} />
@@ -189,8 +189,8 @@ export function ModuloVoceGiornata({ soggetto, giorno, voci, partitaId, onChiudi
           {colonnaSinistra}
           {colonnaDestra}
         </div>
-        {perdeEffetti && <p className="m-0 text-[12px] text-warning" role="status">Diventando un promemoria, la voce perde tipo, collegamento ed effetti della spunta.</p>}
-        <p className="m-0 text-[12px] text-text-muted">
+        {perdeEffetti && <p className="m-0 testo-12 text-warning" role="status">Diventando un promemoria, la voce perde tipo, collegamento ed effetti della spunta.</p>}
+        <p className="m-0 testo-12 text-text-muted">
           La modifica cambia la guida per tutte le partite ed entra nel pacchetto di gioco che esporti.
           {voce?.fatta ? ' Questa voce è già spuntata: le modifiche agli effetti compaiono come pulsante «Applica» sulla voce, senza rieseguire la spunta né modificare subito Doti e yen.' : ''}
         </p>

@@ -28,6 +28,7 @@ import { ProgressiPartita } from '../components/partita/ProgressiPartita';
 import { OggiPartita } from '../components/partita/OggiPartita';
 import { ScuolaOggi } from '../components/partita/ScuolaOggi';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 
 type Scheda = 'oggi' | 'riepilogo' | 'doti' | 'squadra' | 'confidenti' | 'letture' | 'progressi' | 'scorta' | 'compendio' | 'persona-partita' | 'obiettivi' | 'piani' | 'cicli' | 'storico';
 
@@ -68,7 +69,7 @@ export function PartitaPage() {
         <EmptyState
           title="Nessuna partita attiva"
           hint="Crea la tua prima partita: potrai tracciare Doti sociali, Confidenti, Persona possedute e compendio. Puoi gestire più partite e passare dall'una all'altra dalla barra in alto."
-          action={<button type="button" className="btn btn-primary" onClick={() => setNuova(true)}>Crea partita</button>}
+          action={<PulsanteVisivo tono="primario" icona={<IconaScheda chiave="nuova-partita" dimensione={22} />} titolo="Crea partita" onClick={() => setNuova(true)} />}
         />
       ) : (
         <div className={`flex flex-col gap-2 md:gap-3 ${scheda === 'oggi' || scheda === 'doti' ? 'scheda-riempi md:min-h-0' : scheda === 'letture' ? 'scheda-riempi-lg lg:min-h-0' : ''}`}>

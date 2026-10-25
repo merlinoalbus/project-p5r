@@ -31,7 +31,7 @@ export interface PiastrellaCatturabile {
 function SegnoCatturata() {
   return (
     <AssetImg nome="ui/persona-catturata" alt="" decorativa className="absolute right-0.5 top-0.5 size-5 object-contain"
-      fallback={<span aria-hidden className="absolute right-0.5 top-0.5 rounded-full bg-success px-1 text-[11px] font-bold leading-[18px] text-white">✓</span>} />
+      fallback={<span aria-hidden className="absolute right-0.5 top-0.5 rounded-full bg-success px-1 testo-12 font-bold leading-[18px] text-white">✓</span>} />
   );
 }
 
@@ -72,10 +72,10 @@ export function PiastrelleCattura({ voci, partitaId, catturate, occupata = null,
               onClick={() => v.persona && onTocca(v, !presa)}>
               <AnteprimaPersona nome={v.persona?.nome ?? v.etichetta} etichetta={nome} dimensione={56} contieni className="rounded" />
               {presa && <SegnoCatturata />}
-              <span className="w-full break-words text-[11px] font-semibold leading-tight">{nome}</span>
+              <span className="w-full break-words testo-12 font-semibold leading-tight">{nome}</span>
             </button>
             {onInfo && (
-              <button type="button" className={`touch mt-auto inline-flex items-center justify-center border-t border-border-light text-[12px] font-bold italic ${apertaChiave === v.chiave ? 'text-primary-testo' : 'text-text-muted hover:text-text'}`}
+              <button type="button" className={`touch mt-auto inline-flex items-center justify-center border-t border-border-light testo-12 font-bold italic ${apertaChiave === v.chiave ? 'text-primary-testo' : 'text-text-muted hover:text-text'}`}
                 aria-expanded={apertaChiave === v.chiave} aria-label={`Dettagli di ${nome}`} title="Debolezze e scheda del compendio" onClick={() => onInfo(apertaChiave === v.chiave ? null : v.chiave)}>
                 i
               </button>
@@ -93,7 +93,7 @@ export function PiastrelleCattura({ voci, partitaId, catturate, occupata = null,
  */
 export function AvvisoTogliPersona({ nome, occupato, onConferma, onAnnulla }: { nome: string; occupato: boolean; onConferma: () => void; onAnnulla: () => void }) {
   return (
-    <section className="flex flex-col gap-1.5 rounded-md border border-primary/40 px-2.5 py-2 text-[12px]" aria-label="Conferma: togliere la Persona dal compendio">
+    <section className="flex flex-col gap-1.5 rounded-md border border-primary/40 px-2.5 py-2 testo-12" aria-label="Conferma: togliere la Persona dal compendio">
       <span>{nome} esce dal compendio della partita, in tutte le aree e in tutti i dedali, con il livello, i bonus e le abilità che vi aveva registrati.</span>
       <div className="flex flex-wrap gap-1.5">
         <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli dal compendio" disabled={occupato} onClick={onConferma} />

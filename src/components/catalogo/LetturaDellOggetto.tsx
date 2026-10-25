@@ -28,9 +28,9 @@ function Avanzamento<T extends Voce>({ voce, titolo, tipo, totale, passo, partit
     <ComandiProgressoLettura titolo={titolo} tipo={tipo} progresso={coda.valore(voce)} totale={totale}
       passo={passo} partita={partitaId !== null} occupato={coda.occupato(voce)} disponibilita={voce.disponibilita}
       onCambia={(valore) => coda.accoda(voce, valore)} />
-    {!!voce.effettiTesto.length && <ul className="m-0 pl-5 text-[13px]">{voce.effettiTesto.map((e, i) => <li key={i}>{e}</li>)}</ul>}
-    {voce.dettagli && <p className="m-0 whitespace-pre-line text-[13px] text-text-secondary">{voce.dettagli}</p>}
-    {partitaId !== null ? <NotaPuntiDote cosa={tipo === 'videogioco' ? 'i round giocati' : tipo === 'cinema' ? 'le visioni' : 'le sessioni completate'} /> : <p className="m-0 text-[13px] text-text-muted">Attiva una partita per registrare l’avanzamento.</p>}
+    {!!voce.effettiTesto.length && <ul className="m-0 pl-5 testo-13">{voce.effettiTesto.map((e, i) => <li key={i}>{e}</li>)}</ul>}
+    {voce.dettagli && <p className="m-0 whitespace-pre-line testo-13 text-text-secondary">{voce.dettagli}</p>}
+    {partitaId !== null ? <NotaPuntiDote cosa={tipo === 'videogioco' ? 'i round giocati' : tipo === 'cinema' ? 'le visioni' : 'le sessioni completate'} /> : <p className="m-0 testo-13 text-text-muted">Attiva una partita per registrare l’avanzamento.</p>}
   </>;
 }
 
@@ -42,8 +42,8 @@ export function LetturaDellOggetto({ lettura, partitaId, onSalvata }: { lettura:
     return <>
       <Avanzamento voce={libro} titolo={libro.nome} tipo="libro" totale={libro.totaleSessioni} passo={passo} partitaId={partitaId}
         invia={impostaProgressoLibro} onSalvata={(voce) => onSalvata({ ...lettura, voce })} />
-      {passo === 2 && <p className="m-0 text-[13px] text-text-secondary">Lettura rapida: ogni sessione avanza di due; le letture già registrate non cambiano.</p>}
-      {!!libro.apre?.length && <div className="flex flex-wrap items-center gap-2 text-[13px]"><strong>Apre, a lettura finita:</strong>{libro.apre.map((p) => p.casa
+      {passo === 2 && <p className="m-0 testo-13 text-text-secondary">Lettura rapida: ogni sessione avanza di due; le letture già registrate non cambiano.</p>}
+      {!!libro.apre?.length && <div className="flex flex-wrap items-center gap-2 testo-13"><strong>Apre, a lettura finita:</strong>{libro.apre.map((p) => p.casa
         ? <Link key={`${p.tipo}:${p.chiave}`} to={p.casa} className="touch inline-flex items-center">{p.nome}</Link>
         : <span key={`${p.tipo}:${p.chiave}`}>{p.nome}</span>)}</div>}
     </>;
@@ -57,8 +57,8 @@ export function LetturaDellOggetto({ lettura, partitaId, onSalvata }: { lettura:
     <ChipDisponibilita disponibilita={lettura.voce.disponibilita ?? undefined} />
     {lettura.voce.orariSedeTesto && <p className="m-0 text-xs text-text-secondary">Orari della sede: {lettura.voce.orariSedeTesto}</p>}
     <ComandiVideogioco key={`${partitaId}:${lettura.voce.chiave}`} gioco={lettura.voce} partitaId={partitaId} onSalvata={(voce) => onSalvata({ ...lettura, voce })} />
-    {!!lettura.voce.effettiTesto.length && <ul className="m-0 pl-5 text-[13px]">{lettura.voce.effettiTesto.map((e, i) => <li key={i}>{e}</li>)}</ul>}
-    {lettura.voce.dettagli && <p className="m-0 whitespace-pre-line text-[13px] text-text-secondary">{lettura.voce.dettagli}</p>}
-    {partitaId !== null ? <NotaPuntiDote cosa="i round completati" /> : <p className="m-0 text-[13px] text-text-muted">Attiva una partita per registrare sessioni e round.</p>}
+    {!!lettura.voce.effettiTesto.length && <ul className="m-0 pl-5 testo-13">{lettura.voce.effettiTesto.map((e, i) => <li key={i}>{e}</li>)}</ul>}
+    {lettura.voce.dettagli && <p className="m-0 whitespace-pre-line testo-13 text-text-secondary">{lettura.voce.dettagli}</p>}
+    {partitaId !== null ? <NotaPuntiDote cosa="i round completati" /> : <p className="m-0 testo-13 text-text-muted">Attiva una partita per registrare sessioni e round.</p>}
   </>;
 }

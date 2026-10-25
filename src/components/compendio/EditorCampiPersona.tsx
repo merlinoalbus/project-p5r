@@ -31,8 +31,8 @@ export function CampoSkillPersona({ valore, imposta, occupato, delGruppo }: { va
   return (
     <fieldset className="regole-editor flex min-w-0 flex-col gap-2 sm:col-span-2">
       <legend>Skill e livelli a cui si imparano</legend>
-      {skill.errore && <p role="alert" className="m-0 text-[12px] text-error">Elenco delle skill non caricato: {skill.errore}</p>}
-      {righe.length === 0 && <p className="m-0 text-[12px] text-text-muted">Nessuna skill.</p>}
+      {skill.errore && <p role="alert" className="m-0 testo-12 text-error">Elenco delle skill non caricato: {skill.errore}</p>}
+      {righe.length === 0 && <p className="m-0 testo-12 text-text-muted">Nessuna skill.</p>}
       {righe.map((r, i) => (
         <div key={i} className="flex flex-wrap items-end gap-2">
           <span className="chip mb-2 shrink-0" aria-hidden>{i + 1}</span>
@@ -54,13 +54,12 @@ export function CampoSkillPersona({ valore, imposta, occupato, delGruppo }: { va
                 onChange={(e) => cambia(i, { ...r, livello: e.target.value === '' ? null : Number(e.target.value) })} />
             </label>
           )}
-          <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => imposta(voci.filter((_, j) => j !== i))}
-            aria-label={`Togli la skill ${r.nome ? nomeDi(r.nome) : i + 1}`}>Togli</button>
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={occupato} onClick={() => imposta(voci.filter((_, j) => j !== i))} aria-label={`Togli la skill ${r.nome ? nomeDi(r.nome) : i + 1}`} />
         </div>
       ))}
       <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una skill"
         disabled={occupato || voci.length >= 60} onClick={() => imposta([...voci, scriviSkill(RIGA_VUOTA)])} />
-      {problema && <p role="alert" className="m-0 text-[12px] text-error">{problema}</p>}
+      {problema && <p role="alert" className="m-0 testo-12 text-error">{problema}</p>}
     </fieldset>
   );
 }

@@ -51,7 +51,7 @@ export function CompendioPersonale({ partitaId }: Props) {
         <div className="kpi-tile shrink-0">
           <span className="kpi-label kpi-label--segno"><IconaSegno chiave="completati" />Completamento</span>
           <span className="kpi-value">{totale ? Math.round((fatte / totale) * 100) : 0}%</span>
-          <span className="text-[12px] text-text-muted">{fatte} di {totale}</span>
+          <span className="testo-12 text-text-muted">{fatte} di {totale}</span>
         </div>
         <div className="flex-1 min-w-[min(100%,180px)] flex"><CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca Persona…" /></div>
         <button type="button" className={`chip chip--icona touch shrink-0 ${soloMancanti ? 'chip--attivo' : ''}`} onClick={() => setSoloMancanti((v) => !v)} aria-pressed={soloMancanti}><IconaAzione chiave="obiettivo" dimensione={14} />Solo mancanti</button>
@@ -64,11 +64,11 @@ export function CompendioPersonale({ partitaId }: Props) {
               <label className="touch flex items-center justify-center cursor-pointer shrink-0">
                 <input type="checkbox" className="w-6 h-6" checked={!!r} disabled={occupato === p.id} onChange={(e) => void cambia(p.id, e.target.checked)} aria-label={`${p.nomeIt} registrata`} />
               </label>
-              <span className="w-9 shrink-0 text-right text-[12px] text-text-muted">Liv. {p.livello}</span>
-              <Link to={`/compendio/persona/${p.id}`} className="touch flex items-center font-semibold no-underline text-text hover:text-primary-testo flex-1 basis-[10rem] min-w-0 break-words">{p.nomeIt}{p.nomeIt !== p.nome && <span className="text-[12px] font-normal text-text-muted"> {p.nome}</span>}</Link>
+              <span className="w-9 shrink-0 text-right testo-12 text-text-muted">Liv. {p.livello}</span>
+              <Link to={`/compendio/persona/${p.id}`} className="touch flex items-center font-semibold no-underline text-text hover:text-primary-testo flex-1 basis-[10rem] min-w-0 break-words">{p.nomeIt}{p.nomeIt !== p.nome && <span className="testo-12 font-normal text-text-muted"> {p.nome}</span>}</Link>
               <span className="chip shrink-0">{p.arcanaNome}</span>
               {r?.livelloRegistrato !== null && r?.livelloRegistrato !== undefined && (
-                <span className="text-[12px] text-text-secondary min-w-0 max-w-full break-words" title={`Istantanea registrata: livello ${r.livelloRegistrato}${r.skill.length ? ` · skill: ${r.skill.map((s) => s.nomeIt).join(', ')}` : ''}${r.tratto ? ` · tratto ${r.tratto.nomeIt}` : ''}${r.carica ? ' · carica' : ''}`}>
+                <span className="testo-12 text-text-secondary min-w-0 max-w-full break-words" title={`Istantanea registrata: livello ${r.livelloRegistrato}${r.skill.length ? ` · skill: ${r.skill.map((s) => s.nomeIt).join(', ')}` : ''}${r.tratto ? ` · tratto ${r.tratto.nomeIt}` : ''}${r.carica ? ' · carica' : ''}`}>
                   reg. liv. {r.livelloRegistrato}{(['forza', 'magia', 'resistenza', 'agilita', 'fortuna'] as const).some((k) => r.bonus[k] !== 0) && ` · bonus ${(['forza', 'magia', 'resistenza', 'agilita', 'fortuna'] as const).filter((k) => r.bonus[k] !== 0).map((k) => `${k.slice(0, 2).toUpperCase()} ${r.bonus[k] > 0 ? '+' : ''}${r.bonus[k]}`).join(' ')}`}{r.skill.length > 0 && ` · ${r.skill.length} skill`}
                 </span>
               )}

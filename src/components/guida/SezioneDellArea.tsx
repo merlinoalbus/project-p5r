@@ -14,7 +14,7 @@ export type ChiaveSezione = 'timbri' | 'persona' | 'richieste' | 'trama';
 
 /** Il segno di riserva di una sezione, se l'icona di Codex non c'è: l'iniziale in un tondo. */
 function Riserva({ chiave }: { chiave: ChiaveSezione }) {
-  return <span aria-hidden className="inline-flex size-[22px] items-center justify-center rounded-full border border-primary/60 text-[11px] font-bold uppercase text-primary-testo">{chiave[0]}</span>;
+  return <span aria-hidden className="inline-flex size-[22px] items-center justify-center rounded-full border border-primary/60 testo-12 font-bold uppercase text-primary-testo">{chiave[0]}</span>;
 }
 
 interface Props {
@@ -37,8 +37,8 @@ export function SezioneDellArea({ chiave, titolo, conto, nota, azioni, children,
       <header className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <AssetImg nome={`ui/sezione-${chiave}`} alt="" decorativa className="size-[22px] shrink-0 object-contain" fallback={<Riserva chiave={chiave} />} />
         {/* il separatore fuori dallo span: dentro, il nome accessibile perdeva lo spazio («Persona· 1/3») */}
-        <h3 className="m-0 text-[14px] font-semibold leading-tight">{titolo}{conto ? <>{' · '}<span className="tabular-nums text-text-secondary">{conto}</span></> : null}</h3>
-        {nota && <span className="text-[11px] text-text-muted">{nota}</span>}
+        <h3 className="m-0 testo-14 font-semibold leading-tight">{titolo}{conto ? <>{' · '}<span className="tabular-nums text-text-secondary">{conto}</span></> : null}</h3>
+        {nota && <span className="testo-12 text-text-muted">{nota}</span>}
         {azioni && <span className="ml-auto flex flex-wrap items-center gap-1.5">{azioni}</span>}
       </header>
       {children}

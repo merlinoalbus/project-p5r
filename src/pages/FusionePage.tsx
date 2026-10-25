@@ -140,14 +140,14 @@ export function FusionePage() {
               <div className="text-center py-4">
                 {risultato ? (
                   <>
-                    <div className="text-[12px] text-text-muted uppercase tracking-wide">Arcano risultante</div>
+                    <div className="testo-12 text-text-muted uppercase tracking-wide">Arcano risultante</div>
                     <div className="text-3xl font-black text-primary-testo">{nome(risultato)}</div>
                     {rigaCoppia && (
                       <div className="flex justify-center mt-1">
                         <ModificaGuida tipo="fusione-arcana" chiave={`${rigaCoppia.a}:${rigaCoppia.b}`} cosa={`la fusione ${nome(rigaCoppia.a)} + ${nome(rigaCoppia.b)}`} onSalvato={() => void ricarica()} />
                       </div>
                     )}
-                    <div className="text-[13px] text-text-secondary mt-1">
+                    <div className="testo-13 text-text-secondary mt-1">
                       {a === b ? 'Stesso arcano: il risultato è la Persona di livello più alto sotto la media dei due ingredienti (+1).' : 'Arcani diversi: il risultato è la prima Persona con livello ≥ media dei due ingredienti +1.'}
                     </div>
                   </>
@@ -161,7 +161,7 @@ export function FusionePage() {
 
         {dati && vista === 'matrice' && (
           <div className="card area-scorrevole-x p-0">
-            <table className="tabella text-[11px]">
+            <table className="tabella testo-12">
               <thead>
                 <tr>
                   <th className="sticky left-0 bg-bg z-10">×</th>
@@ -185,13 +185,13 @@ export function FusionePage() {
 
         {dati && vista === 'speciali' && (
           <div className="flex flex-col gap-3">
-            <p className="m-0 text-[13px] text-text-secondary">{dati.speciali.length} ricette speciali: fusioni a più ingredienti prescritte dal gioco, in ordine di livello del risultato.</p>
+            <p className="m-0 testo-13 text-text-secondary">{dati.speciali.length} ricette speciali: fusioni a più ingredienti prescritte dal gioco, in ordine di livello del risultato.</p>
             <ul className="m-0 p-0 list-none grid gap-2 grid-cols-1 xl:grid-cols-2" aria-label="Ricette speciali">
               {[...dati.speciali].sort((x, y) => (perId.get(x.risultato.id)?.livello ?? 0) - (perId.get(y.risultato.id)?.livello ?? 0) || x.risultato.nomeIt.localeCompare(y.risultato.nomeIt)).map((r) => (
-                <li key={r.risultato.id} className="card flex flex-col gap-2 text-[13px]">
+                <li key={r.risultato.id} className="card flex flex-col gap-2 testo-13">
                   <div className="flex items-center gap-2 flex-wrap">
                     <PersonaChip p={completa(r.risultato)} evidenza inScorta={inScorta.has(r.risultato.id)} />
-                    <span className="text-[12px] text-text-muted">{r.ingredienti.length} ingredienti{r.ingredienti.every((i) => inScorta.has(i.id)) ? ' · tutti in scorta' : ''}</span>
+                    <span className="testo-12 text-text-muted">{r.ingredienti.length} ingredienti{r.ingredienti.every((i) => inScorta.has(i.id)) ? ' · tutti in scorta' : ''}</span>
                     <ModificaGuida tipo="fusione-speciale" chiave={String(r.risultato.id)} cosa={`la ricetta di «${r.risultato.nomeIt}»`} soloIcona className="ml-auto" onSalvato={() => { void ricarica(); void persone.ricarica(); }} />
                   </div>
                   <div className="flex flex-wrap items-center gap-1.5 pl-2 border-l-2 border-border">
@@ -210,8 +210,8 @@ export function FusionePage() {
 
         {dati && vista === 'tesori' && (
           <div className="card area-scorrevole-x p-0">
-            <p className="m-0 px-3 pt-3 text-[12px] text-text-secondary">Fondendo un Demone del Tesoro con una Persona, il risultato è la Persona dello stesso arcano spostata di tanti ranghi quanti indicati (+ verso l'alto, − verso il basso).</p>
-            <table className="tabella text-[12px]">
+            <p className="m-0 px-3 pt-3 testo-12 text-text-secondary">Fondendo un Demone del Tesoro con una Persona, il risultato è la Persona dello stesso arcano spostata di tanti ranghi quanti indicati (+ verso l'alto, − verso il basso).</p>
+            <table className="tabella testo-12">
               <thead>
                 <tr>
                   <th className="sticky left-0 bg-bg z-10">Arcano</th>

@@ -12,6 +12,8 @@ import { useCarica } from '../../hooks/useCarica';
 import { getLuoghi, getQuartieri } from '../../services/api';
 import { Selettore, type OpzioneSelettore } from '../shared/Selettore';
 import { definizioneTipoLuogo } from '../../../shared/tipiLuogo';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 export interface SedeScelta { sede: string | null; quartiere: string | null }
 
@@ -48,7 +50,7 @@ export function SceltaLuogo({ valore, onCambia, etichetta = 'Sede', disabilitato
           const luogo = dati.dati?.luoghi.find((l) => l.chiave === k);
           onCambia({ sede: k, quartiere: luogo?.quartiere ?? valore.quartiere });
         }} />
-      {dati.errore && <span role="alert" className="text-[11px] text-error">Impossibile caricare i luoghi. <button type="button" className="btn btn-sm touch" onClick={() => void dati.ricarica()}>Riprova</button></span>}
+      {dati.errore && <span role="alert" className="testo-12 text-error">Impossibile caricare i luoghi. <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void dati.ricarica()} /></span>}
     </div>
   );
 }

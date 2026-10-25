@@ -26,7 +26,7 @@ export function PlanimetrieDaCollocare({ elenco, contenitori, onCollocata }: {
             <AnteprimaMappa mappa={m} className="h-12 w-16" sizes="64px" />
             <span className="flex min-w-[10rem] flex-1 flex-col">
               <span className="break-words font-semibold">{m.nome}</span>
-              <span className="text-[12px] text-text-muted">{m.genitoreNome ?? 'senza genitore'} · {m.numeroSpilli === 1 ? '1 pin' : `${m.numeroSpilli} pin`}</span>
+              <span className="testo-12 text-text-muted">{m.genitoreNome ?? 'senza genitore'} · {m.numeroSpilli === 1 ? '1 pin' : `${m.numeroSpilli} pin`}</span>
             </span>
             <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Colloca" onClick={() => setScelta(m)} />
           </li>

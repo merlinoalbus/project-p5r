@@ -78,7 +78,7 @@ export function ModuloRichiesta({ chiave, iniziale = {}, onChiudi, onCambiata }:
     <Modal titolo={titolo} aperta onChiudi={onChiudi} larga>
       <PageState isLoading={(dati.caricamento && !dati.dati) || (confidenti.caricamento && !confidenti.dati)} error={dati.errore ?? confidenti.errore} onRetry={() => { void dati.ricarica(); void confidenti.ricarica(); }}>
         {dati.dati && confidenti.dati && (chiave && !richiesta
-          ? <p className="m-0 text-[13px] text-text-muted" role="status">Questa Richiesta non c’è più.</p>
+          ? <p className="m-0 testo-13 text-text-muted" role="status">Questa Richiesta non c’è più.</p>
           : <Campi key={chiave ?? 'nuova'} richiesta={richiesta} iniziale={iniziale} collocazioni={dati.dati.collocazioni} confidenti={confidenti.dati.map((c) => ({ chiave: c.chiave, nome: c.nome, dettaglio: c.arcanaNome }))}
               onChiudi={onChiudi} onCambiata={onCambiata} />)}
       </PageState>
@@ -145,14 +145,14 @@ function Campi({ richiesta, iniziale, collocazioni, confidenti, onChiudi, onCamb
   return (
     <form className="flex flex-col gap-3" aria-label={richiesta ? `Correggi la Richiesta «${richiesta.nome}»` : 'Nuova Richiesta'} onSubmit={(e) => { e.preventDefault(); void salva(); }}>
       <fieldset className="m-0 flex flex-wrap items-end gap-2 border-0 p-0">
-        <legend className="mb-1 text-[11px] uppercase tracking-[0.08em] text-text-muted">La Richiesta</legend>
+        <legend className="mb-1 testo-12 uppercase tracking-[0.08em] text-text-muted">La Richiesta</legend>
         <CampoCorrezione etichetta="Nome" valore={b.nome} massimo={R.nome} onCambia={(v) => cambia({ nome: v })} />
         <CampoCorrezione etichetta="Committente" valore={b.committente} massimo={R.breve} onCambia={(v) => cambia({ committente: v })} />
         <CampoCorrezione etichetta="Disponibile dal" valore={b.disponibileDal} massimo={R.breve} onCambia={(v) => cambia({ disponibileDal: v })} />
         <CampoCorrezione etichetta="Scadenza" valore={b.scadenza} massimo={R.breve} onCambia={(v) => cambia({ scadenza: v })} />
       </fieldset>
       <fieldset className="m-0 flex flex-wrap items-end gap-2 border-0 p-0">
-        <legend className="mb-1 text-[11px] uppercase tracking-[0.08em] text-text-muted">Dove</legend>
+        <legend className="mb-1 testo-12 uppercase tracking-[0.08em] text-text-muted">Dove</legend>
         <span className="min-w-[180px] flex-1">
           <Selettore etichetta="Dedalo" valore={b.dedalo} opzioni={[{ chiave: NESSUNO, nome: '— nessun dedalo —' }, ...collocazioni.map((d) => ({ chiave: d.chiave, nome: d.nome }))]}
             onCambia={(v) => cambia({ dedalo: v, areaDedalo: v === b.dedalo ? b.areaDedalo : NESSUNO })} />
@@ -164,26 +164,26 @@ function Campi({ richiesta, iniziale, collocazioni, confidenti, onChiudi, onCamb
         <CampoCorrezione etichetta="Piano" valore={b.piano} massimo={R.breve} onCambia={(v) => cambia({ piano: v })} />
       </fieldset>
       <fieldset className="m-0 flex flex-wrap items-end gap-2 border-0 p-0">
-        <legend className="mb-1 text-[11px] uppercase tracking-[0.08em] text-text-muted">Il bersaglio</legend>
+        <legend className="mb-1 testo-12 uppercase tracking-[0.08em] text-text-muted">Il bersaglio</legend>
         <CampoCorrezione etichetta="Bersaglio" valore={b.bersaglio} massimo={R.nome} onCambia={(v) => cambia({ bersaglio: v })} />
         <CampoCorrezione etichetta="Forma demoniaca" valore={b.formaDemoniaca} massimo={R.voce} onCambia={(v) => cambia({ formaDemoniaca: v })} />
-        <label className="flex min-w-[110px] flex-col gap-1 text-[12px]">
+        <label className="flex min-w-[110px] flex-col gap-1 testo-12">
           Livello
           <input className="form-input" inputMode="numeric" maxLength={2} value={b.livello} onChange={(e) => cambia({ livello: e.target.value })} />
         </label>
         <CampoCorrezione etichetta="Debolezze (una per riga)" valore={b.debolezze} multilinea massimo={R.voce * R.voci} onCambia={(v) => cambia({ debolezze: v })} />
         <CampoCorrezione etichetta="Resistenze (una per riga)" valore={b.resistenze} multilinea massimo={R.voce * R.voci} onCambia={(v) => cambia({ resistenze: v })} />
-        <label className="touch flex items-center gap-1.5 text-[12px]">
+        <label className="touch flex items-center gap-1.5 testo-12">
           <input type="checkbox" className="h-5 w-5" checked={b.confusione} onChange={(e) => cambia({ confusione: e.target.checked })} />Confusione utile (confondendolo dà yen)
         </label>
       </fieldset>
       <fieldset className="m-0 flex flex-wrap items-end gap-2 border-0 p-0">
-        <legend className="mb-1 text-[11px] uppercase tracking-[0.08em] text-text-muted">Ricompense e Confidente</legend>
+        <legend className="mb-1 testo-12 uppercase tracking-[0.08em] text-text-muted">Ricompense e Confidente</legend>
         <CampoCorrezione etichetta="Ricompense (una per riga)" valore={b.ricompense} multilinea massimo={R.voce * R.voci} onCambia={(v) => cambia({ ricompense: v })} />
         <span className="min-w-[180px] flex-1">
           <Selettore etichetta="Confidente" valore={b.confidente} opzioni={[{ chiave: NESSUNO, nome: '— nessuno —' }, ...confidenti]} onCambia={(v) => cambia({ confidente: v, rango: v ? b.rango : '' })} />
         </span>
-        {b.confidente && <label className="flex min-w-[110px] flex-col gap-1 text-[12px]">
+        {b.confidente && <label className="flex min-w-[110px] flex-col gap-1 testo-12">
           Rango
           <input className="form-input" inputMode="numeric" maxLength={2} value={b.rango} onChange={(e) => cambia({ rango: e.target.value })} />
         </label>}
@@ -196,8 +196,8 @@ function Campi({ richiesta, iniziale, collocazioni, confidenti, onChiudi, onCamb
         {richiesta && !citazioni && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" disabled={occupato} onClick={() => void chiediConferma()} />}
       </div>
       {richiesta && citazioni && (
-        <section className="flex flex-col gap-1.5 rounded-md border border-primary/40 px-2.5 py-2 text-[12px]" aria-label="Conferma dell’eliminazione">
-          <strong className="text-[13px]">Eliminare «{richiesta.nome}» per tutte le partite?</strong>
+        <section className="flex flex-col gap-1.5 rounded-md border border-primary/40 px-2.5 py-2 testo-12" aria-label="Conferma dell’eliminazione">
+          <strong className="testo-13">Eliminare «{richiesta.nome}» per tutte le partite?</strong>
           <ul className="m-0 flex list-disc flex-col gap-0.5 pl-4">
             <li>{citazioni.partite === 0 ? 'Nessuna partita ne ha segnato lo stato.' : `Lo stato segnato in ${citazioni.partite === 1 ? '1 partita' : `${citazioni.partite} partite`} se ne va con lei.`}</li>
             {citazioni.pin.length > 0 && <li>Perdono il collegamento {citazioni.pin.length === 1 ? 'il pin' : `${citazioni.pin.length} pin`}: {citazioni.pin.join(', ')} (restano sulla mappa).</li>}

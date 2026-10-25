@@ -12,6 +12,8 @@ import { NOME_TIPO_CATALOGO } from '../../utils/catalogo';
 import { useCarica } from '../../hooks/useCarica';
 import { ModuloCatalogo } from '../guida/ModuloCatalogo';
 import type { ElementoCatalogoDto, TipoCatalogo } from '../../types';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 /**
  * Card «I miei dati» delle Impostazioni: per ogni tipo del catalogo con righe dell'utente mostra quante ne ha
@@ -31,36 +33,36 @@ export function MieiDati() {
 
   return (
     <section className="card flex flex-col gap-3" aria-label="I miei dati">
-      <h2 className="m-0 text-[15px] font-semibold">I miei dati</h2>
-      <p className="m-0 text-[13px] text-text-secondary">
+      <h2 className="m-0 testo-15 font-semibold">I miei dati</h2>
+      <p className="m-0 testo-13 text-text-secondary">
         Le righe che hai aggiunto o corretto tu sopra i dati della guida. Restano anche quando i dati vengono ricaricati:
         «Ripristina dalla guida» rimette l'originale, e le righe che hai aggiunto tu si eliminano dallo stesso pulsante.
         Le righe nascoste dagli elenchi stanno in <a href="#nascosti">Nascosti dalla guida</a>, qui sotto nel Cestino, con il ripristino in un tocco.
       </p>
-      {riepilogo.errore && <p className="m-0 text-[13px] text-error">{riepilogo.errore}</p>}
+      {riepilogo.errore && <p className="m-0 testo-13 text-error">{riepilogo.errore}</p>}
       {totale === 0 && !riepilogo.caricamento && (
-        <p className="m-0 text-[13px] text-text-muted">Non hai ancora aggiunto né corretto nulla: lo puoi fare dalle pagine dei negozi e dei giorni.</p>
+        <p className="m-0 testo-13 text-text-muted">Non hai ancora aggiunto né corretto nulla: lo puoi fare dalle pagine dei negozi e dei giorni.</p>
       )}
       <ul className="m-0 p-0 list-none flex flex-col gap-1">
         {perTipo.filter((t) => t.creati + t.modificati + t.nascosti > 0).map((t) => (
           <li key={t.tipo} className="flex flex-col gap-1 border-b border-border-light last:border-0 pb-1">
-            <button type="button" className="flex items-center justify-between gap-2 text-left touch bg-transparent border-0 p-0 text-[14px]"
+            <button type="button" className="flex items-center justify-between gap-2 text-left touch bg-transparent border-0 p-0 testo-14"
               onClick={() => setAperto(aperto === t.tipo ? null : t.tipo)} aria-expanded={aperto === t.tipo}>
               <strong>{NOME_TIPO_CATALOGO[t.tipo]?.plurale ?? t.tipo}</strong>
-              <span className="text-[12px] text-text-secondary">
+              <span className="testo-12 text-text-secondary">
                 {[t.creati && `${t.creati} aggiunti`, t.modificati && `${t.modificati} corretti`, t.nascosti && `${t.nascosti} nascosti`].filter(Boolean).join(' · ')}
               </span>
             </button>
             {aperto === t.tipo && (
               <ul className="m-0 p-0 list-none flex flex-col gap-0.5">
-                {elenco.errore && <li className="text-[13px] text-error">{elenco.errore}</li>}
+                {elenco.errore && <li className="testo-13 text-error">{elenco.errore}</li>}
                 {(elenco.dati ?? []).map((e) => (
-                  <li key={e.chiave} className="flex items-center justify-between gap-2 text-[13px] py-0.5">
+                  <li key={e.chiave} className="flex items-center justify-between gap-2 testo-13 py-0.5">
                     <span className={`flex-1 min-w-0 ${e.nascosta ? 'line-through text-text-muted' : ''}`}>
                       {e.nome}
-                      <span className="text-[11px] text-text-muted"> · {e.modificata ? 'corretta da te' : e.origine === 'utente' ? 'aggiunta da te' : 'nascosta'}</span>
+                      <span className="testo-12 text-text-muted"> · {e.modificata ? 'corretta da te' : e.origine === 'utente' ? 'aggiunta da te' : 'nascosta'}</span>
                     </span>
-                    <button type="button" className="visore-mappa__azione-testo touch" onClick={() => setInModifica(e)} aria-label={`Apri ${e.nome}`}>Apri</button>
+                    <PulsanteVisivo tono="fantasma" compatto className="shrink-0" icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Apri" onClick={() => setInModifica(e)} aria-label={`Apri ${e.nome}`} />
                   </li>
                 ))}
               </ul>

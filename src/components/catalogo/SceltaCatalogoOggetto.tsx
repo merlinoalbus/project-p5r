@@ -4,6 +4,8 @@ import type { CatalogoOggettoDto } from '../../types';
 import { useCarica } from '../../hooks/useCarica';
 import { getCatalogoOggetti } from '../../services/api/catalogoOggetti';
 import { Selettore } from '../shared/Selettore';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   valore: string;
@@ -36,8 +38,8 @@ export function SceltaNelCatalogo({ valore, onScegli, etichetta = 'Oggetto', dis
     testoRicerca: [...o.nomiAltri, o.nomeOriginale ?? ''].join(' '),
   })), [oggetti, escludi, includi]);
   return <div className="flex min-w-0 flex-col gap-2">
-    {errore ? <p role="alert" className="m-0 text-[13px]">{errore} <button type="button" className="btn btn-ghost touch" disabled={disabilitato} onClick={onRicarica}>Riprova</button></p> : null}
-    {valore && oggetti && !oggetti.some((o) => o.chiave === valore) ? <p role="alert" className="m-0 text-[13px]">L’oggetto collegato non è più nel catalogo disponibile. La scelta resta finché non la cambi.</p> : null}
+    {errore ? <p role="alert" className="m-0 testo-13">{errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" disabled={disabilitato} onClick={onRicarica} /></p> : null}
+    {valore && oggetti && !oggetti.some((o) => o.chiave === valore) ? <p role="alert" className="m-0 testo-13">L’oggetto collegato non è più nel catalogo disponibile. La scelta resta finché non la cambi.</p> : null}
     <Selettore etichetta={etichetta} valore={valore} opzioni={opzioni} ricerca="sempre"
       disabilitato={disabilitato || caricamento || !!errore} segnaposto={caricamento ? 'Caricamento del catalogo…' : 'Cerca per nome o altro nome'}
       onCambia={(k) => { const o = oggetti?.find((o) => o.chiave === k); if (o) onScegli(o); }} />

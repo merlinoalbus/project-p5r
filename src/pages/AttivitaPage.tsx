@@ -66,14 +66,14 @@ function Attivita({ a, onCambiata, mappaAperta, onMappa, apertaIniziale = false 
   // il giorno corrente della partita accende «Oggi c'è il quiz» sul pulsante della guida
   const giorno = usePartitaStore((s) => s.attiva?.dataGioco ?? null);
   return (
-    <li className={`card flex gap-3 text-[13px] ${classiSuggerito(sugg.evidenziato('attivita', a.chiave))}`}>
+    <li className={`card flex gap-3 testo-13 ${classiSuggerito(sugg.evidenziato('attivita', a.chiave))}`}>
       {/* La figura dell'attività; finché l'illustrazione non c'è resta l'icona del tipo. */}
       <AssetImg nome={`attivita/${a.chiave}`} alt="" decorativa className="shrink-0 rounded-md object-contain"
         style={{ width: 56, height: 56 }}
         fallback={<span className="shrink-0"><IconaCategoria categoria={a.tipo} dimensione={56} /></span>} />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
       <button type="button" className="text-left flex flex-wrap items-center gap-2 touch" onClick={() => setAperta((x) => !x)} aria-expanded={aperta}>
-        <strong className="text-[15px]">{a.nome}</strong>
+        <strong className="testo-15">{a.nome}</strong>
         <span className="chip">{(NOME_TIPO_ATTIVITA as Record<string, string>)[a.tipo] ?? a.tipo}</span>
         {sugg.evidenziato('attivita', a.chiave) && <TargaSuggerito motivo={sugg.motivo('attivita', a.chiave)} compatta />}
         {a.fascia && <span className="chip">{NOME_FASCIA_ATTIVITA[a.fascia] ?? a.fascia}</span>}
@@ -82,7 +82,7 @@ function Attivita({ a, onCambiata, mappaAperta, onMappa, apertaIniziale = false 
         {a.pesca && <span className="chip">{a.pesca.ruolo === 'visita' ? 'Registro delle visite di pesca' : 'Obiettivi della visita di pesca'}</span>}
         <ChipDisponibilita disponibilita={a.disponibilita ?? undefined} compatto />
         {a.volteSvolte !== undefined && <span className={`chip ${a.volteSvolte > 0 ? 'chip--attivo' : ''}`} title="Quante volte risulta svolta nella partita attiva">{a.volteSvolte === 0 ? 'Mai svolta' : `Svolta ${a.volteSvolte} ${a.volteSvolte === 1 ? 'volta' : 'volte'}`}</span>}
-        {!a.verificato && <span className="chip text-[11px]" title="Dato da fonte secondaria">da fonte secondaria</span>}
+        {!a.verificato && <span className="chip testo-12" title="Dato da fonte secondaria">da fonte secondaria</span>}
       </button>
       <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-text-secondary">
         {/* La sede apre la pagina del suo luogo (L5); senza sede resta il quartiere o il testo. */}
@@ -108,7 +108,7 @@ function Attivita({ a, onCambiata, mappaAperta, onMappa, apertaIniziale = false 
             ? <div className="flex flex-col gap-1">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <strong className="text-text">Dove si trova</strong>
-                  <button type="button" className="btn btn-ghost btn-sm touch" onClick={onMappa}>Chiudi la mappa</button>
+                  <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Chiudi la mappa" onClick={onMappa} />
                 </div>
                 <DoveSiTrova tipo="attivita" chiave={a.chiave} titolo={a.nome} altezza={260} />
               </div>

@@ -16,6 +16,7 @@ import { IconMappa } from '../shared/iconeGuida';
 import type { ReactNode } from 'react';
 import { IconaAzione, IconaScheda } from '../shared/IconaAzione';
 import { AssetImg } from '../shared/AssetImg';
+import { conferma } from '../../stores/confermaStore';
 
 interface Props {
   partitaId: number;
@@ -81,7 +82,8 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
   /** Elimina dallo storico le voci selezionate dopo conferma, le segna come eliminate e svuota la selezione. */
   const eliminaSelezionati = async () => {
     if (idSelezionati.length === 0) return;
-    if (!window.confirm(`Eliminare ${idSelezionati.length} ${idSelezionati.length === 1 ? 'voce' : 'voci'} dallo storico? Le modifiche registrate restano valide.`)) return;
+    const quante = `${idSelezionati.length} ${idSelezionati.length === 1 ? 'voce' : 'voci'}`;
+    if (!(await conferma({ titolo: 'Eliminare dallo storico?', testo: `${quante} escono dallo storico. Le modifiche registrate restano valide.`, etichetta: `Elimina ${quante}` }))) return;
     setEliminazioneMultipla(true);
     try {
       const esito = await eliminaEventi(partitaId, idSelezionati);
@@ -97,7 +99,7 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
 
   /** Elimina una sola voce dallo storico dopo conferma e la segna come eliminata. */
   const elimina = async (e: EventoPartitaDto) => {
-    if (!window.confirm(`Eliminare la voce «${e.titolo}» dallo storico? La modifica registrata resta valida.`)) return;
+    if (!(await conferma({ titolo: 'Eliminare la voce dallo storico?', testo: `La voce «${e.titolo}» esce dallo storico. La modifica registrata resta valida.`, etichetta: 'Elimina' }))) return;
     try {
       await eliminaEvento(partitaId, e.id);
       setEliminati((m) => ({ ...m, [e.id]: true }));
@@ -115,18 +117,18 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
           {GRUPPI_EVENTO.map((g) => (
             <button key={g.chiave} type="button" className={`chip chip--icona touch ${gruppo === g.chiave ? 'chip--attivo' : ''}`} onClick={() => setGruppo(g.chiave)} aria-pressed={gruppo === g.chiave}>{ICONE_GRUPPO[g.chiave] ?? <IconaAzione chiave="tutti" dimensione={14} />}{g.nome}</button>
           ))}
-          {eventi && <span className="ml-auto shrink-0 whitespace-nowrap text-[12px] text-text-muted">{totale} {totale === 1 ? 'evento' : 'eventi'}</span>}
+          {eventi && <span className="ml-auto shrink-0 whitespace-nowrap testo-12 text-text-muted">{totale} {totale === 1 ? 'evento' : 'eventi'}</span>}
         </div>
       )}
-      {prima.errore && <div className="text-[13px] text-error">{prima.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void prima.ricarica()} /></div>}
+      {prima.errore && <div className="testo-13 text-error">{prima.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void prima.ricarica()} /></div>}
       {!eventi && !prima.errore && <div className="flex justify-center py-6"><Spinner /></div>}
       {eventi && eventi.length === 0 && (
         compatto
-          ? <p className="m-0 text-[13px] text-text-muted">Ancora nessun evento: ogni modifica alla partita comparirà qui.</p>
+          ? <p className="m-0 testo-13 text-text-muted">Ancora nessun evento: ogni modifica alla partita comparirà qui.</p>
           : <EmptyState illustrazione="vuoto-storico" title="Nessun evento" hint={gruppo === 'tutti' ? 'Le modifiche a scorta, Confidenti, Doti, compendio e Stanza di Velluto vengono registrate automaticamente.' : 'Nessun evento in questo gruppo.'} />
       )}
       {!compatto && eventi && eventi.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 text-[12px]" role="group" aria-label="Selezione multipla">
+        <div className="flex flex-wrap items-center gap-2 testo-12" role="group" aria-label="Selezione multipla">
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Seleziona tutte le voci visibili" onClick={() => setSelezionati(Object.fromEntries(eventi.map((e) => [e.id, true as const])))} />
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Deseleziona" disabled={idSelezionati.length === 0} onClick={() => setSelezionati({})} />
           <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo={`Elimina selezionate (${idSelezionati.length})`} disabled={idSelezionati.length === 0 || eliminazioneMultipla} onClick={() => void eliminaSelezionati()} />
@@ -135,15 +137,15 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
       {eventi && eventi.length > 0 && (
         <ol className="m-0 p-0 list-none flex flex-col divide-y divide-border-light" aria-label="Eventi della partita">
           {eventi.map((e) => (
-            <li key={e.id} className={`py-2 flex items-start gap-3 text-[13px] ${selezionati[e.id] ? 'bg-primary-bg' : ''}`}>
+            <li key={e.id} className={`py-2 flex items-start gap-3 testo-13 ${selezionati[e.id] ? 'bg-primary-bg' : ''}`}>
               {/* la casella da sola è 20 px: l'etichetta attorno la rende toccabile per 44 */}
               {!compatto && <label className="touch flex items-start justify-center shrink-0 -my-1 pr-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 mt-2 shrink-0" checked={!!selezionati[e.id]} onChange={(ev) => setSelezionati((m) => { const n = { ...m }; if (ev.target.checked) n[e.id] = true; else delete n[e.id]; return n; })} aria-label={`Seleziona la voce ${e.titolo}`} /></label>}
-              <time dateTime={e.createdAt} className="shrink-0 w-[92px] text-[12px] text-text-muted tabular-nums pt-0.5">{formattaIstante(e.createdAt)}</time>
+              <time dateTime={e.createdAt} className="shrink-0 w-[92px] testo-12 text-text-muted tabular-nums pt-0.5">{formattaIstante(e.createdAt)}</time>
               {e.personaNome && <ImmagineEntita ambito="persona" chiave={e.personaNome} etichetta={e.personaNomeIt ?? e.personaNome} dimensione={40} adatta="copri" />}
               <div className="flex-1 min-w-0">
                 <div className="font-semibold">{e.titolo}</div>
                 {e.dettaglio && <div className="text-text-secondary">{e.dettaglio}</div>}
-                <div className="text-[12px] text-text-muted">
+                <div className="testo-12 text-text-muted">
                   {e.tipoNome}
                   {e.personaId && <> · <Link to={`/compendio/persona/${e.personaId}`} className="text-primary-testo">{e.personaNomeIt}</Link></>}
                 </div>

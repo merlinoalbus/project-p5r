@@ -16,6 +16,8 @@ import { collocaPlanimetria, getQuartiere } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import type { MappaDaCollocareDto } from '../../types';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 /** Dove si può collocare una planimetria: un quartiere o un Palazzo, con la chiave pubblica della sua mappa e, se già note, le sue aree. */
 export interface ContenitoreColloca {
@@ -68,7 +70,7 @@ export function FinestraCollocaPlanimetria({ mappa, contenitori, onChiudi, onCol
     <Modal titolo={`Colloca ${mappa.nome}`} aperta onChiudi={onChiudi}
       azioni={<>
         <button type="button" className="btn btn-secondary touch" onClick={onChiudi}>Annulla</button>
-        <button type="button" className="btn btn-primary touch" disabled={!pronto} onClick={() => void salva()}>Colloca</button>
+        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="pianta" dimensione={22} />} titolo="Colloca" disabled={!pronto} onClick={() => void salva()} />
       </>}>
       <div className="flex flex-col gap-3">
         <Selettore etichetta={soloQuartieri ? 'Quartiere' : 'Quartiere o Palazzo'} valore={scelto}
@@ -76,10 +78,10 @@ export function FinestraCollocaPlanimetria({ mappa, contenitori, onChiudi, onCol
           onCambia={(k) => { setScelto(k); setArea(''); }} />
         <Selettore etichetta="Area" valore={area} segnaposto="Scegli un’area" disabilitato={!aree.dati}
           opzioni={[...(aree.dati ?? []).map((a) => ({ chiave: a.slug, nome: a.nome })), { chiave: NUOVA, nome: 'Un’area nuova…' }]} onCambia={setArea} />
-        {area === NUOVA && <label className="flex flex-col gap-1 text-[13px] font-semibold">Nome dell’area nuova
+        {area === NUOVA && <label className="flex flex-col gap-1 testo-13 font-semibold">Nome dell’area nuova
           <input className="form-input touch" value={nuova} maxLength={80} onChange={(e) => setNuova(e.target.value)} />
         </label>}
-        <label className="flex flex-col gap-1 text-[13px] font-semibold">Etichetta della planimetria (facoltativa)
+        <label className="flex flex-col gap-1 testo-13 font-semibold">Etichetta della planimetria (facoltativa)
           <input className="form-input touch" value={etichetta} maxLength={80} onChange={(e) => setEtichetta(e.target.value)} />
         </label>
       </div>

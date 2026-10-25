@@ -42,23 +42,23 @@ function Giorno({ g, oggi, aperto, onToggle, onImposta, onSalvato, onModificaGio
         {g.meteo && <MeteoIcona meteo={g.meteo} dimensione={20} />}
         {/* le allerte meteo del gioco del giorno, come tag (2026-10-12) */}
         <TagAllerte allerte={g.allerte} compatto />
-        {g.tempoLibero && !g.tempoLibero.giorno && !g.tempoLibero.sera && <span className="chip text-[11px]">Nessun tempo libero</span>}
+        {g.tempoLibero && !g.tempoLibero.giorno && !g.tempoLibero.sera && <span className="chip testo-12">Nessun tempo libero</span>}
         {oggi && <span className="chip chip--attivo">Oggi nella partita</span>}
         <span className="ml-auto flex flex-wrap gap-1">
-          {g.eventi.slice(0, 3).map((e) => <span key={e.id} className={`chip text-[11px] ${CLASSE_TIPO[e.tipo] ?? ''}`}>{e.titolo.length > 40 ? `${e.titolo.slice(0, 40)}…` : e.titolo}</span>)}
-          {g.eventi.length > 3 && <span className="chip text-[11px]">+{g.eventi.length - 3}</span>}
+          {g.eventi.slice(0, 3).map((e) => <span key={e.id} className={`chip testo-12 ${CLASSE_TIPO[e.tipo] ?? ''}`}>{e.titolo.length > 40 ? `${e.titolo.slice(0, 40)}…` : e.titolo}</span>)}
+          {g.eventi.length > 3 && <span className="chip testo-12">+{g.eventi.length - 3}</span>}
         </span>
       </button>
       {aperto && (
-        <div className="px-3 pb-3 flex flex-col gap-2 text-[13px]">
+        <div className="px-3 pb-3 flex flex-col gap-2 testo-13">
           {g.eventi.length === 0 && <span className="text-text-muted">Nessun evento documentato per questo giorno.</span>}
           {/* le allerte del giorno con la matita: nell'intestazione cliccabile non può stare (un pulsante dentro un pulsante) */}
           {g.allerte.length > 0 && <div className="flex flex-wrap items-center gap-x-2 gap-y-1" role="group" aria-label="Allerte meteo del giorno"><TagAllerte allerte={g.allerte} modifica={{ data: g.data, onSalvato }} /></div>}
           {g.eventi.map((e) => (
             <div key={e.id} className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className={`chip text-[11px] ${CLASSE_TIPO[e.tipo] ?? ''}`}>{NOME_TIPO[e.tipo] ?? e.tipo}</span><strong>{e.titolo}</strong>
-                {e.modificato && <span className="chip text-[11px]">corretto</span>}
+                <span className={`chip testo-12 ${CLASSE_TIPO[e.tipo] ?? ''}`}>{NOME_TIPO[e.tipo] ?? e.tipo}</span><strong>{e.titolo}</strong>
+                {e.modificato && <span className="chip testo-12">corretto</span>}
                 {e.modificabile && <ModificaGuida tipo="evento-calendario" chiave={String(e.id)} cosa={`l’evento «${e.titolo}»`} soloIcona onSalvato={onSalvato} />}
               </div>
               {e.dettaglio && <span className="text-text-secondary">{e.dettaglio}</span>}
@@ -67,17 +67,17 @@ function Giorno({ g, oggi, aperto, onToggle, onImposta, onSalvato, onModificaGio
                   <Link className="touch inline-flex items-center text-primary-testo break-words" to={`/guida/percorso/${v.giorno}?voce=${encodeURIComponent(v.uid)}`}>
                     Voce del Diario · {dataGiocoTesto(v.giorno)}: {v.azione.length > 70 ? `${v.azione.slice(0, 70)}…` : v.azione}
                   </Link>
-                  {v.certezza === 'D' && <span className="chip text-[11px]" title="Il collegamento fra l’evento e questa voce è dubbio">collegamento dubbio</span>}
+                  {v.certezza === 'D' && <span className="chip testo-12" title="Il collegamento fra l’evento e questa voce è dubbio">collegamento dubbio</span>}
                   <ModificaGuida tipo="evento-voce" chiave={`${e.id}:${v.uid}`} cosa={`il collegamento di «${e.titolo}» con la voce del ${dataGiocoTesto(v.giorno)}`} soloIcona onSalvato={onSalvato} />
                 </div>
               ))}
               {e.fonte && <a href={e.fonte} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center">fonte</a>}
             </div>
           ))}
-          {g.tempoLibero && <span className="text-[12px] text-text-muted">Tempo libero: giorno {g.tempoLibero.giorno ? 'sì' : 'no'}, sera {g.tempoLibero.sera ? 'sì' : 'no'}.</span>}
+          {g.tempoLibero && <span className="testo-12 text-text-muted">Tempo libero: giorno {g.tempoLibero.giorno ? 'sì' : 'no'}, sera {g.tempoLibero.sera ? 'sì' : 'no'}.</span>}
           <div className="flex flex-wrap items-center gap-2">
             {/* stesso modulo della pagina del giorno della guida: meteo, nota, trama e vincoli del giorno; fuori dall'intestazione cliccabile */}
-            <button type="button" className="btn btn-secondary btn-sm touch" onClick={onModificaGiorno}>Modifica il giorno</button>
+            <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica il giorno" onClick={onModificaGiorno} />
             {onImposta && !oggi && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Imposta come data di gioco della partita" onClick={onImposta} />}
           </div>
         </div>
@@ -132,38 +132,38 @@ export function CalendarioPage() {
             <section className="card flex flex-col gap-2 border-primary">
               {/* i tag delle allerte accanto al titolo, non dentro: nel titolo ne allungavano il nome per i lettori di schermo */}
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                <h2 className="m-0 flex items-center gap-3 flex-wrap"><span className="font-display uppercase tracking-wide text-[20px] leading-none">Oggi</span><DataP5 data={d.oggi.data} giornoSettimana={d.oggi.giornoSettimana} evidenzia />{d.oggi.meteo && <MeteoIcona meteo={d.oggi.meteo} dimensione={26} conTesto />}</h2>
+                <h2 className="m-0 flex items-center gap-3 flex-wrap"><span className="font-display uppercase tracking-wide testo-20 leading-none">Oggi</span><DataP5 data={d.oggi.data} giornoSettimana={d.oggi.giornoSettimana} evidenzia />{d.oggi.meteo && <MeteoIcona meteo={d.oggi.meteo} dimensione={26} conTesto />}</h2>
                 <TagAllerte allerte={d.oggi.allerte} modifica={{ data: d.oggi.data, onSalvato: ricarica }} />
               </div>
               {d.oggi.eventi.length > 0 ? (
-                <ul className="m-0 p-0 list-none flex flex-col gap-1 text-[13px]" aria-label="Eventi di oggi">
+                <ul className="m-0 p-0 list-none flex flex-col gap-1 testo-13" aria-label="Eventi di oggi">
                   {d.oggi.eventi.map((e) => (
                     <li key={e.id} className="flex flex-wrap items-center gap-x-1">
-                      <span className={`chip text-[11px] ${CLASSE_TIPO[e.tipo] ?? ''}`}>{NOME_TIPO[e.tipo] ?? e.tipo}</span> <strong>{e.titolo}</strong>{e.dettaglio ? <span className="text-text-secondary"> — {e.dettaglio}</span> : null}
-                      {e.modificato && <span className="chip text-[11px]">corretto</span>}
+                      <span className={`chip testo-12 ${CLASSE_TIPO[e.tipo] ?? ''}`}>{NOME_TIPO[e.tipo] ?? e.tipo}</span> <strong>{e.titolo}</strong>{e.dettaglio ? <span className="text-text-secondary"> — {e.dettaglio}</span> : null}
+                      {e.modificato && <span className="chip testo-12">corretto</span>}
                       {e.modificabile && <ModificaGuida tipo="evento-calendario" chiave={String(e.id)} cosa={`l’evento «${e.titolo}»`} soloIcona onSalvato={ricarica} />}
                     </li>
                   ))}
                 </ul>
-              ) : <p className="m-0 text-[13px] text-text-muted">Nessun evento documentato oggi.</p>}
+              ) : <p className="m-0 testo-13 text-text-muted">Nessun evento documentato oggi.</p>}
               {settimanaOggi && (
-                <div className="text-[13px] flex flex-col gap-0.5 pt-1 border-t border-border-light">
+                <div className="testo-13 flex flex-col gap-0.5 pt-1 border-t border-border-light">
                   <div className="flex items-center gap-2 flex-wrap"><strong>{settimanaOggi.titolo}</strong><span className="text-text-muted">{settimanaOggi.periodo}</span>{settimanaOggi.url && <a href={settimanaOggi.url} target="_blank" rel="noreferrer" className="credito touch inline-flex items-center">guida</a>}<ModificaGuida tipo="settimana-guida" chiave={String(settimanaOggi.numero)} cosa={`la settimana «${settimanaOggi.titolo}»`} soloIcona onSalvato={ricarica} /></div>
                   <span className="text-text-secondary">{settimanaOggi.riassunto}</span>
-                  {settimanaOggi.incertezze && <span className="text-[12px] text-text-muted">Incertezze: {settimanaOggi.incertezze}</span>}
+                  {settimanaOggi.incertezze && <span className="testo-12 text-text-muted">Incertezze: {settimanaOggi.incertezze}</span>}
                 </div>
               )}
               {d.prossimeScadenze.length > 0 && (
-                <div className="text-[13px] flex flex-col gap-0.5 pt-1 border-t border-border-light">
-                  <div className="text-[12px] uppercase tracking-wide text-text-muted">Prossime scadenze ed esami</div>
+                <div className="testo-13 flex flex-col gap-0.5 pt-1 border-t border-border-light">
+                  <div className="testo-12 uppercase tracking-wide text-text-muted">Prossime scadenze ed esami</div>
                   <ul className="m-0 p-0 list-none flex flex-col gap-0.5" aria-label="Prossime scadenze">
                     {d.prossimeScadenze.map((s, i) => <li key={i}><strong className="tabular-nums">{dataGiocoTesto(s.data)}</strong> <span className="text-text-muted">({s.giorniMancanti === 0 ? 'oggi' : s.giorniMancanti === 1 ? 'domani' : `fra ${s.giorniMancanti} giorni`})</span> · {s.titolo}</li>)}
                   </ul>
                 </div>
               )}
               <div className="flex flex-wrap items-center gap-2">
-                <button type="button" className="btn btn-secondary btn-sm touch" onClick={() => setGiornoInModifica(d.oggi?.data ?? null)}>Modifica il giorno</button>
-                <Link to="/guida/domande" className="touch inline-flex items-center text-[12px] text-primary-testo">Domande in classe della data →</Link>
+                <PulsanteVisivo compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica il giorno" onClick={() => setGiornoInModifica(d.oggi?.data ?? null)} />
+                <Link to="/guida/domande" className="touch inline-flex items-center testo-12 text-primary-testo">Domande in classe della data →</Link>
               </div>
             </section>
           )}

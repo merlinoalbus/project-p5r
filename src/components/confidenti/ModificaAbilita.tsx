@@ -16,6 +16,7 @@ import { useBozzaSporca } from '../../utils/bozzeSporche';
 import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { conferma, CHIUDI_SENZA_SALVARE } from '../../stores/confermaStore';
 
 type Voce = { nome: string; descrizione: string };
 const RANGHI = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
@@ -44,14 +45,14 @@ function EditorAbilita({ chiave, nome, onChiudi, onSalvato }: { chiave: string; 
   const valida = elenco.length <= 20 && elenco.every((v) => v.nome.trim() !== '' && v.nome.length <= 200 && v.descrizione.length <= 2000);
   useBozzaSporca(`abilita:${chiave}`, `le abilità di ${nome}`, sporca);
 
-  const scegliRango = (r: number) => {
+  const scegliRango = async (r: number) => {
     if (r === rango || occupato) return;
-    if (sporca && !window.confirm(`Ci sono modifiche non salvate al rango ${etichettaRango(rango)}. Cambiare rango senza salvarle?`)) return;
+    if (sporca && !(await conferma({ titolo: 'Cambiare rango senza salvare?', testo: `Ci sono modifiche non salvate al rango ${etichettaRango(rango)}: cambiando rango si perdono.`, etichetta: 'Cambia senza salvare', icona: 'chiudi' }))) return;
     setRango(r); setBozza(null);
   };
-  const chiudi = () => {
+  const chiudi = async () => {
     if (occupato) return;
-    if (sporca && !window.confirm('Ci sono modifiche non salvate. Chiudere senza salvarle?')) return;
+    if (sporca && !(await conferma(CHIUDI_SENZA_SALVARE))) return;
     onChiudi();
   };
   const cambia = (f: (v: Voce[]) => Voce[]) => setBozza(f(elenco));
@@ -66,12 +67,12 @@ function EditorAbilita({ chiave, nome, onChiudi, onSalvato }: { chiave: string; 
   return (
     <Modal titolo={`Abilità di ${nome}`} aperta larga onChiudi={chiudi} azioni={(
       <div className="flex w-full flex-wrap justify-end gap-2">
-        {delRango?.modificato && <button type="button" className="btn btn-ghost touch" disabled={occupato} onClick={() => void esegui(() => ripristinaAbilitaConfidente(chiave, rango), `Abilità del rango ${etichettaRango(rango)} ripristinate come nella guida.`)}>Ripristina</button>}
-        <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={chiudi}>Chiudi</button>
-        <button type="button" className="btn btn-primary touch" disabled={occupato || !sporca || !valida} onClick={() => void esegui(() => salvaAbilitaConfidente(chiave, rango, elenco.map((v) => ({ nome: v.nome.trim(), descrizione: v.descrizione.trim() }))), `Abilità del rango ${etichettaRango(rango)} salvate: valgono per tutte le partite.`)}>Salva il rango {etichettaRango(rango)}</button>
+        {delRango?.modificato && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina" disabled={occupato} onClick={() => void esegui(() => ripristinaAbilitaConfidente(chiave, rango), `Abilità del rango ${etichettaRango(rango)} ripristinate come nella guida.`)} />}
+        <PulsanteVisivo icona={<IconaAzione chiave="chiudi" dimensione={22} />} titolo="Chiudi" disabled={occupato} onClick={chiudi} />
+        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo={<>Salva il rango {etichettaRango(rango)}</>} disabled={occupato || !sporca || !valida} onClick={() => void esegui(() => salvaAbilitaConfidente(chiave, rango, elenco.map((v) => ({ nome: v.nome.trim(), descrizione: v.descrizione.trim() }))), `Abilità del rango ${etichettaRango(rango)} salvate: valgono per tutte le partite.`)} />
       </div>
     )}>
-      <div className="flex flex-col gap-3 text-[13px]">
+      <div className="flex flex-col gap-3 testo-13">
         <p className="m-0 text-text-muted">Scegli il rango, cambia l’elenco e salva: si salva un rango alla volta. «Ripristina» rimette l’elenco della guida.</p>
         {dati.errore && <p role="alert" className="m-0 text-error">{dati.errore}</p>}
         {!dati.dati && !dati.errore && <p role="status" className="m-0">Un attimo…</p>}
@@ -92,12 +93,12 @@ function EditorAbilita({ chiave, nome, onChiudi, onSalvato }: { chiave: string; 
                 <textarea className="form-input" rows={2} value={v.descrizione} maxLength={2000} disabled={occupato} onChange={(e) => cambia((l) => l.map((x, j) => (j === i ? { ...x, descrizione: e.target.value } : x)))} />
               </label>
               <div className="flex flex-wrap gap-2">
-                <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato || i === 0} onClick={() => sposta(i, -1)} aria-label={`Sposta in alto l’abilità ${i + 1}`}>Su</button>
-                <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato || i === elenco.length - 1} onClick={() => sposta(i, 1)} aria-label={`Sposta in basso l’abilità ${i + 1}`}>Giù</button>
-                <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => cambia((l) => l.filter((_, j) => j !== i))} aria-label={`Togli l’abilità ${i + 1}`}>Togli</button>
+                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Sposta su" disabled={occupato || i === 0} onClick={() => sposta(i, -1)} aria-label={`Sposta su l’abilità ${i + 1}`} />
+                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Sposta giù" disabled={occupato || i === elenco.length - 1} onClick={() => sposta(i, 1)} aria-label={`Sposta giù l’abilità ${i + 1}`} />
+                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={occupato} onClick={() => cambia((l) => l.filter((_, j) => j !== i))} aria-label={`Togli l’abilità ${i + 1}`} />
               </div>
             </li>))}</ul>
-          <div><button type="button" className="btn btn-secondary btn-sm touch" disabled={occupato || elenco.length >= 20} onClick={() => cambia((l) => [...l, { nome: '', descrizione: '' }])}>Aggiungi un’abilità</button></div>
+          <div><PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi un’abilità" disabled={occupato || elenco.length >= 20} onClick={() => cambia((l) => [...l, { nome: '', descrizione: '' }])} /></div>
         </>}
       </div>
     </Modal>

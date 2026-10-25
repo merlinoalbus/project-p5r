@@ -17,6 +17,7 @@ import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { PersonaChip } from '../fusione/PersonaChip';
 import { OperatoreRicetta } from '../fusione/RicettaRiga';
+import { conferma } from '../../stores/confermaStore';
 
 interface Props {
   partitaId: number;
@@ -33,14 +34,14 @@ function SchedaPiano({ piano, inScorta, possedutaDi, partitaId, onCambiaTitolo, 
     <article className={`card flex flex-col gap-2 ${av.completato ? 'border-primary' : ''}`}>
       <div className="flex items-center gap-3 flex-wrap">
         <ImmagineEntita ambito="persona" chiave={piano.nome} etichetta={piano.nomeIt} dimensione={72} adatta="copri" />
-        <Link to={`/compendio/persona/${piano.personaId}`} className="font-display uppercase text-[20px] leading-none text-text no-underline hover:text-primary-testo">{piano.nomeIt}</Link>
-        <span className="text-[12px] text-text-muted">{piano.arcanaNome} · livello {piano.livello}</span>
+        <Link to={`/compendio/persona/${piano.personaId}`} className="font-display uppercase testo-20 leading-none text-text no-underline hover:text-primary-testo">{piano.nomeIt}</Link>
+        <span className="testo-12 text-text-muted">{piano.arcanaNome} · livello {piano.livello}</span>
         {modificaTitolo ? (
           <form className="flex items-center gap-1" onSubmit={(e) => { e.preventDefault(); onCambiaTitolo(titolo); setModificaTitolo(false); }}>
             {/* `h-9` forzava 36 px e vinceva sul minimo della classe: un campo che si compila col
                 tablet in mano dev'essere alto 44 come tutti gli altri. */}
             <input className="form-input w-[180px]" value={titolo} onChange={(e) => setTitolo(e.target.value)} maxLength={80} aria-label="Titolo del piano" />
-            <button type="submit" className="btn btn-primary btn-sm">Ok</button>
+            <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="Ok" type="submit" />
           </form>
         ) : (
           <button type="button" className="chip chip--icona touch" onClick={() => setModificaTitolo(true)} title="Rinomina">{piano.titolo || 'Senza titolo'}<IconaAzione chiave="modifica" dimensione={13} /></button>
@@ -48,7 +49,7 @@ function SchedaPiano({ piano, inScorta, possedutaDi, partitaId, onCambiaTitolo, 
         {piano.obiettivoId && <Link to="/partita?scheda=obiettivi" className="chip no-underline" title={`Obiettivo ${piano.obiettivoStato ?? ''}`}>Obiettivo{piano.obiettivoStato === 'raggiunto' ? ' raggiunto' : ''}</Link>}
         <span className="ml-auto font-black tabular-nums">{formattaYen(piano.costo)}</span>
       </div>
-      <div className="text-[13px] text-text-secondary flex flex-wrap gap-x-3 gap-y-1">
+      <div className="testo-13 text-text-secondary flex flex-wrap gap-x-3 gap-y-1">
         <span>{piano.piano.fusioni} {piano.piano.fusioni === 1 ? 'fusione' : 'fusioni'} · profondità {piano.piano.profondita}</span>
         <span>Foglie in scorta: <strong className="text-text">{av.foglieInScorta}/{av.foglie}</strong></span>
         <span>Fusioni fatte: <strong className="text-text">{av.fusioniFatte}/{av.fusioni}</strong></span>
@@ -59,24 +60,24 @@ function SchedaPiano({ piano, inScorta, possedutaDi, partitaId, onCambiaTitolo, 
         <div className="chip chip--attivo self-start">Completato: {piano.nomeIt} è nella scorta</div>
       ) : av.passi.length > 0 ? (
         <div className="flex flex-col gap-1">
-          <div className="text-[12px] uppercase tracking-wide text-text-muted">Passi eseguibili adesso</div>
+          <div className="testo-12 uppercase tracking-wide text-text-muted">Passi eseguibili adesso</div>
           <ul className="m-0 p-0 list-none flex flex-col gap-1" aria-label="Passi eseguibili">
             {av.passi.map((p, i) => (
-              <li key={i} className="text-[13px] flex flex-wrap items-center gap-1.5">
+              <li key={i} className="testo-13 flex flex-wrap items-center gap-1.5">
                 {p.ingredienti.map((ing, j) => <PersonaChip key={j} p={ing} inScorta={possedutaDi.has(ing.id)} />)}
                 <OperatoreRicetta tipo="risultato" />
                 <PersonaChip p={p.risultato} evidenza />
                 <CollegamentoVisivo to={p.ingredienti.length === 2 ? `/fusione?vista=calcolatore&a=${p.ingredienti[0].id}&b=${p.ingredienti[1].id}` : `/fusione?vista=ricette&ricette=${p.risultato.id}`} tono="fantasma" compatto icona={<IconaAzione chiave="ricetta" dimensione={20} />} titolo="Ricetta" />
-                <span className="text-[12px] text-text-muted">fusione {p.tipo === 'speciale' ? 'speciale' : p.tipo === 'stesso-arcano' ? 'stesso arcano' : p.tipo === 'tesoro' ? 'con Demone del Tesoro' : 'normale'}{p.skillPortate.length ? ` · eredita ${p.skillPortate.map((s) => s.nomeIt).join(', ')}` : ''}</span>
+                <span className="testo-12 text-text-muted">fusione {p.tipo === 'speciale' ? 'speciale' : p.tipo === 'stesso-arcano' ? 'stesso arcano' : p.tipo === 'tesoro' ? 'con Demone del Tesoro' : 'normale'}{p.skillPortate.length ? ` · eredita ${p.skillPortate.map((s) => s.nomeIt).join(', ')}` : ''}</span>
                 {p.ingredienti.every((ing) => possedutaDi.has(ing.id)) && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="esegui" dimensione={20} />} titolo="Esegui" onClick={() => setPassoInEsecuzione(i)} />}
               </li>
             ))}
           </ul>
         </div>
       ) : (
-        <div className="text-[13px] text-text-muted">Nessun passo eseguibile adesso: procurati le foglie mancanti (dal Registro o catturandole).</div>
+        <div className="testo-13 text-text-muted">Nessun passo eseguibile adesso: procurati le foglie mancanti (dal Registro o catturandole).</div>
       )}
-      {piano.note && <div className="text-[13px] text-text-secondary">{piano.note}</div>}
+      {piano.note && <div className="testo-13 text-text-secondary">{piano.note}</div>}
       <div className="flex flex-wrap gap-1.5">
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="albero" dimensione={20} />} titolo={aperto ? 'Nascondi albero' : 'Mostra albero'} onClick={() => setAperto((a) => !a)} aria-expanded={aperto} />
         <CollegamentoVisivo to={`/fusione?vista=piani&piani=${piano.personaId}${piano.skill.length ? `&skill=${piano.skill.map((s) => s.id).join(',')}` : ''}`} tono="fantasma" compatto icona={<IconaAzione chiave="ricalcola" dimensione={20} />} titolo="Ricalcola" />
@@ -120,7 +121,7 @@ export function PianiSalvati({ partitaId }: Props) {
   };
   /** Elimina il piano dopo conferma e lo toglie dall'elenco. */
   const elimina = async (p: PianoSalvatoDto) => {
-    if (!window.confirm(`Eliminare il piano «${p.titolo || p.nomeIt}»?`)) return;
+    if (!(await conferma({ titolo: 'Eliminare il piano?', testo: `Il piano «${p.titolo || p.nomeIt}» esce dai piani salvati della partita.`, etichetta: 'Elimina' }))) return;
     try {
       await eliminaPianoSalvato(partitaId, p.id);
       lista.imposta((correnti) => correnti.filter((x) => x.id !== p.id));
@@ -132,14 +133,14 @@ export function PianiSalvati({ partitaId }: Props) {
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="m-0 text-[13px] text-text-secondary">
+      <p className="m-0 testo-13 text-text-secondary">
         I piani salvati dalla vista «Piano di fusione» restano qui con l'avanzamento ricalcolato sulla scorta di adesso: foglie già possedute, fusioni già fatte e passi eseguibili subito.
         {obiettivoId && <> Filtro: solo i piani dell'obiettivo. <Link to="/partita?scheda=piani" className="text-primary-testo">Tutti i piani</Link></>}
       </p>
-      {lista.errore && <div className="text-[13px] text-error">{lista.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void lista.ricarica()} /></div>}
+      {lista.errore && <div className="testo-13 text-error">{lista.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void lista.ricarica()} /></div>}
       {!lista.dati && !lista.errore && <div className="flex justify-center py-6"><Spinner /></div>}
       {lista.dati && lista.dati.length === 0 && (
-        <EmptyState illustrazione="vuoto-piani" title="Nessun piano salvato" hint="Calcola un piano nella pagina Fusione («Piano di fusione») e premi «Salva piano»." action={<Link to="/fusione?vista=piani" className="btn btn-primary no-underline">Vai ai piani di fusione</Link>} />
+        <EmptyState illustrazione="vuoto-piani" title="Nessun piano salvato" hint="Calcola un piano nella pagina Fusione («Piano di fusione») e premi «Salva piano»." action={<CollegamentoVisivo tono="primario" icona={<IconaAzione chiave="scheda" dimensione={22} />} titolo="Vai ai piani di fusione" to="/fusione?vista=piani" />} />
       )}
       {lista.dati && lista.dati.length > 0 && (
         <div className="flex flex-col gap-3">

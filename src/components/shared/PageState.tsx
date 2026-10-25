@@ -3,11 +3,9 @@
 // ============================================================
 
 import type { ReactNode } from 'react';
-import { IconAlert } from './icons';
 import { AssetImg } from './AssetImg';
 import { useAssetMulti } from '../../stores/assetStore';
-import { PulsanteVisivo } from './PulsanteVisivo';
-import { IconaAzione } from './IconaAzione';
+import { AzioneHome, AzioneRiprova, TITOLO_ERRORE, VistaErrore } from './VistaErrore';
 
 const FOTOGRAMMI = Array.from({ length: 8 }, (_, i) => `illustrazioni/caricamento-${i + 1}`);
 const ILLUSTRAZIONE_NEUTRA = 'illustrazioni/vuoto-persona-senza-testo';
@@ -52,15 +50,16 @@ export function PageState({ isLoading, error, onRetry, children }: PageStateProp
     );
   }
   if (error) {
+    // un solo aspetto per gli errori (VistaErrore); h2: sta sotto l'h1 dell'intestazione della pagina
     return (
-      <div className="flex flex-col items-center justify-center min-h-[40vh] gap-3 text-center" role="alert">
-        <AssetImg nome="illustrazioni/errore-senza-testo" alt="" decorativa className="max-h-[150px] w-auto object-contain" fallback={<IconAlert size={32} className="text-error" />} />
-        <h3 className="m-0 font-decor uppercase tracking-wide text-[26px] leading-none text-error">Qualcosa è andato storto</h3>
-        <p className="m-0 text-text-secondary max-w-[420px]">{error}</p>
-        {onRetry && (
-          <PulsanteVisivo tono="secondario" icona={<IconaAzione chiave="riprova" dimensione={22} />} titolo="Riprova" onClick={onRetry} />
-        )}
-      </div>
+      <VistaErrore
+        titolo={TITOLO_ERRORE}
+        spiegazione={error}
+        azioni={<>
+          {onRetry && <AzioneRiprova onClick={onRetry} />}
+          <AzioneHome />
+        </>}
+      />
     );
   }
   return <>{children}</>;
@@ -87,10 +86,10 @@ export function EmptyState({ icon, title, hint, action, illustrazione }: EmptySt
         alt=""
         decorativa
         className="max-h-[200px] w-auto object-contain"
-        fallback={icon ? <div className="text-text-muted text-[40px] leading-none">{icon}</div> : null}
+        fallback={icon ? <div className="text-text-muted testo-40 leading-none">{icon}</div> : null}
       />
-      <h3 className="m-0 font-decor uppercase tracking-wide text-[26px] leading-none text-text">{title}</h3>
-      {hint && <p className="m-0 text-[14px] text-text-muted max-w-[420px]">{hint}</p>}
+      <h3 className="m-0 font-decor uppercase tracking-wide testo-28 leading-none text-text">{title}</h3>
+      {hint && <p className="m-0 testo-14 text-text-muted max-w-[420px]">{hint}</p>}
       {action && <div className="mt-2 flex gap-2">{action}</div>}
     </div>
   );

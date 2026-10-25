@@ -51,7 +51,7 @@ export function GlossarioPage() {
         titolo="Glossario dei termini"
         indietro={{ to: '/compendio', etichetta: 'Compendio' }}
         sottotitolo={<>Termini della localizzazione italiana ufficiale di Persona 5 Royal con il corrispondente inglese, ricavati dalla guida allgamestaff.it. Modificabili in Impostazioni → Traduzioni (ambito «termine»).</>}
-        azioni={<span className="text-[13px] text-text-muted">{dati ? `${filtrati.length} di ${dati.length}` : ''}</span>}
+        azioni={<span className="testo-13 text-text-muted">{dati ? `${filtrati.length} di ${dati.length}` : ''}</span>}
       />
       <div className="flex flex-wrap gap-2 items-center">
         <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca in italiano o inglese…" />
@@ -70,12 +70,12 @@ export function GlossarioPage() {
         ) : (
           [...perCategoria.entries()].map(([cat, termini]) => (
             <section key={cat} className="card">
-              <h2 className="m-0 mb-2 text-[15px] font-semibold">{NOMI_CATEGORIA[cat] ?? cat}</h2>
+              <h2 className="m-0 mb-2 testo-15 font-semibold">{NOMI_CATEGORIA[cat] ?? cat}</h2>
               <dl className="m-0 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
                 {termini.map((t) => (
                   <div key={`${t.categoria}/${t.chiave}`} className="flex flex-col">
-                    <dt className="font-semibold text-[14px]">{t.nome} <span className="text-[12px] font-normal text-text-muted">({t.chiave})</span></dt>
-                    {t.definizione && <dd className="m-0 text-[13px] text-text-secondary">{t.definizione}</dd>}
+                    <dt className="font-semibold testo-14">{t.nome} <span className="testo-12 font-normal text-text-muted">({t.chiave})</span></dt>
+                    {t.definizione && <dd className="m-0 testo-13 text-text-secondary">{t.definizione}</dd>}
                   </div>
                 ))}
               </dl>

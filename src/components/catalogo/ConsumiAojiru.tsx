@@ -25,6 +25,8 @@ import { Selettore } from '../shared/Selettore';
 import { annullaFonteConRegistro, eseguiAcquistoConRegistro, gestoPendenteNelloScope, rimuoviLegacyConRegistro, useGestiPartita } from '../../services/gestiPartita';
 import { GestiPartita } from '../partita/GestiPartita';
 import type { ValutazionePresenza } from '../../../shared/valutazioneAcquisto';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 const nuovoId = () => crypto.randomUUID().replaceAll('-', '');
 const messaggio = (e: unknown) => e instanceof Error ? e.message : 'Operazione non riuscita.';
@@ -33,12 +35,12 @@ const fasciaInParole = (f: string) => f === 'sera' ? 'di sera' : 'di giorno';
 
 /** Quanto contava il vecchio segno «Acquistato», in parole: non è il prezzo davvero pagato. */
 function ProvaPresenza({ valutazione: v }: { valutazione: ValutazionePresenza }) {
-  return <span className="text-[12px]">Nel vecchio conteggio valeva {v.contributoYen.toLocaleString('it-IT')} yen{v.statoPrezzo === 'ignoto' ? ' (prezzo non noto)' : v.statoPrezzo === 'offerta-assente' ? ' (offerta non più presente)' : ''}: non è il prezzo davvero pagato.</span>;
+  return <span className="testo-12">Nel vecchio conteggio valeva {v.contributoYen.toLocaleString('it-IT')} yen{v.statoPrezzo === 'ignoto' ? ' (prezzo non noto)' : v.statoPrezzo === 'offerta-assente' ? ' (offerta non più presente)' : ''}: non è il prezzo davvero pagato.</span>;
 }
 
 /** Il consumo che sta per essere registrato, in parole (senza identificativi). */
 export function RiepilogoConsumoPreparato({ consumo: r }: { consumo: NuovaRegistrazioneAcquisto }) {
-  return <div className="flex min-w-0 flex-col gap-1 rounded border border-border p-2 text-[13px]">
+  return <div className="flex min-w-0 flex-col gap-1 rounded border border-border p-2 testo-13">
     <strong>Consumo da confermare</strong>
     <span>{dataGiocoTesto(r.momento.giorno)}, {fasciaInParole(r.momento.fascia)} · {nomeDote(r.variante)} · {fortunaInParole(r.fortuna)}.</span>
     <span>{r.scelta.tipo === 'nuova' ? 'È un consumo nuovo.' : 'Si collega a un consumo già registrato.'}{r.rapportoLegacy?.tipo === 'rappresenta' ? ' Prende il posto del vecchio segno «Acquistato».' : r.rapportoLegacy?.tipo === 'ulteriore' ? ' Il vecchio segno «Acquistato» resta: è un consumo in più.' : ''}</span>
@@ -140,12 +142,12 @@ export function PreparazioneAcquistoAojiru({ partitaId, fonte, articolo = ARTICO
   };
   if (confermato) return <p role="status" className="m-0 text-success">{esitoConferma}</p>;
   if (pendente) return <div className="flex flex-col gap-2"><p role="status" className="m-0 text-warning">C’è già un’operazione da completare per questa voce: finché non è chiusa non ne invio un’altra.</p><GestiPartita partitaId={partitaId} onCambiato={async () => { if (attiva()) await onRecuperato?.(); }} /></div>;
-  return <div className="flex min-w-0 flex-col gap-3 text-[13px]">
+  return <div className="flex min-w-0 flex-col gap-3 testo-13">
     <p className="m-0">Domenica · 5.000 yen · non consuma tempo. Dà 2 punti (1 nota) alla Dote del succo, 3 se in quel giorno la Fortuna era accesa su quella Dote: la Fortuna la leggo dalla partita, non devi dirmela.</p>
     {stato?.aojiru && <p className="m-0">{stato.aojiru.varianteAttesa ? `Prossima variante prevista: ${nomeDote(stato.aojiru.varianteAttesa)}.` : 'Variante iniziale da osservare.'}</p>}
     {!!stato?.aojiru?.incongruenze.length && <ul className="m-0 pl-4 text-warning">{stato.aojiru.incongruenze.map((s) => <li key={s}>{s}</li>)}</ul>}
-    {registro.errore && <p role="alert" className="m-0 text-error">{registro.errore}<button className="btn btn-ghost touch" onClick={() => void registro.ricarica()}>Riprova</button></p>}
-    {fortuna.errore && <p role="alert" className="m-0 text-error">Non riesco a leggere la Fortuna della partita: {fortuna.errore}<button className="btn btn-ghost touch" onClick={() => void fortuna.ricarica()}>Riprova</button></p>}
+    {registro.errore && <p role="alert" className="m-0 text-error">{registro.errore}<PulsanteVisivo tono="fantasma" className="ml-2" icona={<IconaAzione chiave="riprova" dimensione={22} />} titolo="Riprova" onClick={() => void registro.ricarica()} /></p>}
+    {fortuna.errore && <p role="alert" className="m-0 text-error">Non riesco a leggere la Fortuna della partita: {fortuna.errore}<PulsanteVisivo tono="fantasma" className="ml-2" icona={<IconaAzione chiave="riprova" dimensione={22} />} titolo="Riprova" onClick={() => void fortuna.ricarica()} /></p>}
     {presenza?.valutazione && <ProvaPresenza valutazione={presenza.valutazione} />}
     <fieldset className="m-0 flex min-w-0 flex-col gap-3 border-0 p-0" disabled={occupato || incerto || !!anteprima || !registro.dati}>
       <Selettore etichetta="Consumo" valore={campi.scelta} opzioni={[{ chiave: '', nome: 'Un consumo nuovo' }, ...registrazioni.map((r) => ({ chiave: r.id, nome: `${dataGiocoTesto(r.momento.giorno)} · ${fasciaInParole(r.momento.fascia)} · ${nomeDote(r.consumo.variante)}${r.attiva ? '' : ' · non più confermato'}` }))]}
@@ -160,10 +162,10 @@ export function PreparazioneAcquistoAojiru({ partitaId, fonte, articolo = ARTICO
         <label className="flex flex-col gap-1">Quale in quella fascia<input className="form-input w-24" type="number" min={1} max={1_000_001} step={1} value={campi.ordine} onChange={(e) => cambia({ ordine: e.target.value })} /></label>
       </div>
       <Selettore etichetta="Che succo hai bevuto" valore={campi.variante} opzioni={ORDINE_AOJIRU.map((d) => ({ chiave: d, nome: nomeDote(d) }))} onCambia={(d) => cambia({ variante: d as DoteChiave })} />
-      {!!campi.variante && <span className="text-[12px] text-text-secondary">{fortunaCalcolata === null ? 'Di quel giorno la partita non ricorda la Fortuna: conto solo i 2 punti certi.' : fortunaCalcolata ? 'In quel giorno la Fortuna era accesa su questa Dote: 3 punti.' : 'In quel giorno la Fortuna non era accesa su questa Dote: 2 punti.'}</span>}
+      {!!campi.variante && <span className="testo-12 text-text-secondary">{fortunaCalcolata === null ? 'Di quel giorno la partita non ricorda la Fortuna: conto solo i 2 punti certi.' : fortunaCalcolata ? 'In quel giorno la Fortuna era accesa su questa Dote: 3 punti.' : 'In quel giorno la Fortuna non era accesa su questa Dote: 2 punti.'}</span>}
       {presenza && <Selettore etichetta="Il vecchio segno «Acquistato»" valore={campi.rapporto} opzioni={[{ chiave: 'rappresenta', nome: 'Questo consumo prende il suo posto' }, { chiave: 'ulteriore', nome: 'È un consumo in più' }]} onCambia={(r) => cambia({ rapporto: r })} />}
     </fieldset>
-    {!anteprima && <button type="button" className="btn btn-secondary touch self-start" disabled={!valido || occupato || !registro.dati} onClick={() => void prepara()}>Mostra il riepilogo</button>}
+    {!anteprima && <PulsanteVisivo icona={<IconaAzione chiave="dettagli" dimensione={22} />} titolo="Mostra il riepilogo" className="self-start" disabled={!valido || occupato || !registro.dati} onClick={() => void prepara()} />}
     {anteprima && <div className="flex flex-col gap-2 rounded border border-border p-3">
       <strong>{anteprima.identita.nome} · {dataGiocoTesto(anteprima.nuovo.momento.giorno)}, {fasciaInParole(anteprima.nuovo.momento.fascia)} · {nomeDote(anteprima.effetto.dote)}</strong>
       <span>{anteprima.effetto.puntiConfermati === null ? 'Il totale dei punti non è certo.' : `${anteprima.effetto.puntiConfermati} punti · ${anteprima.effetto.note} ${anteprima.effetto.note === 1 ? 'nota' : 'note'}.`} Costo: 5.000 yen.</span>
@@ -177,8 +179,8 @@ export function PreparazioneAcquistoAojiru({ partitaId, fonte, articolo = ARTICO
       <p className="m-0">Punti e yen non cambiano da soli: i punti li applichi dal pulsante sulla voce, gli yen li cambi tu a mano.</p>
       <label className="touch flex items-center gap-2"><input type="checkbox" className="h-5 w-5" checked={attestato} disabled={occupato || incerto} onChange={(e) => setAttestato(e.target.checked)} />Giorno, succo e vecchio segno sono giusti.</label>
       <div className="flex flex-wrap gap-2">
-        <button type="button" className="btn btn-primary touch" disabled={occupato || !attestato} onClick={() => void conferma()}>{incerto ? 'Riprova' : titoloConferma}</button>
-        {!incerto && <button type="button" className="btn btn-ghost touch" disabled={occupato} onClick={() => { setAnteprima(null); setAttestato(false); }}>Correggi</button>}
+        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave={incerto ? 'riprova' : 'raggiunto'} dimensione={22} />} titolo={incerto ? 'Riprova' : titoloConferma} disabled={occupato || !attestato} onClick={() => void conferma()} />
+        {!incerto && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo="Correggi" disabled={occupato} onClick={() => { setAnteprima(null); setAttestato(false); }} />}
       </div>
     </div>}
     {errore && <p role="alert" className="m-0 text-error">{errore}</p>}
@@ -231,20 +233,20 @@ export function ConsumiAojiru({ partitaId, stato, onCambiato, registrabile = tru
     } catch (e) { if (vivo.current) { const dubbio = !!gestoPendenteNelloScope(partitaId, { articolo: a.articolo }); setIncerto(dubbio); setErrore(messaggio(e)); if (!dubbio) setRimozione(null); } }
     finally { blocco.current = false; if (vivo.current) setOccupato(false); }
   };
-  return <div className="flex min-w-0 flex-col gap-2 text-[12px]">
+  return <div className="flex min-w-0 flex-col gap-2 testo-12">
     <span>{stato?.aojiru ? `${stato.aojiru.confermate} ${stato.aojiru.confermate === 1 ? 'consumo confermato' : 'consumi confermati'}` : `${stato?.registrazioni.length ?? 0} ${(stato?.registrazioni.length ?? 0) === 1 ? 'consumo registrato' : 'consumi registrati'}`}</span>
     {stato?.presenzaStorica && <div className="flex flex-col gap-1"><span>C’è un vecchio segno «Acquistato» senza giorno né succo{stato.presenzaStorica.rappresentataDa ? ', già collegato a un consumo' : ''}.</span>
       {stato.presenzaStorica.valutazione && <ProvaPresenza valutazione={stato.presenzaStorica.valutazione} />}
-      <button type="button" className="btn btn-ghost btn-sm touch self-start" disabled={occupato} onClick={() => void preparaRimozione(null)}>Togli solo il vecchio segno</button></div>}
+      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli solo il vecchio segno" className="self-start" disabled={occupato} onClick={() => void preparaRimozione(null)} /></div>}
     {stato?.aojiru?.varianteAttesa && <span>Prossimo previsto: {nomeDote(stato.aojiru.varianteAttesa)}; conferma quello che hai bevuto davvero.</span>}
     {!!stato?.aojiru?.incongruenze.length && <ul className="m-0 pl-4 text-warning">{stato.aojiru.incongruenze.map((m) => <li key={m}>{m}</li>)}</ul>}
-    {registrabile && <button type="button" className="btn btn-secondary btn-sm touch self-start" disabled={occupato} onClick={() => { setRicevuta(null); setErrore(null); setNuovo(true); }}>Registra un consumo</button>}
+    {registrabile && <PulsanteVisivo compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Registra un consumo" className="self-start" disabled={occupato} onClick={() => { setRicevuta(null); setErrore(null); setNuovo(true); }} />}
     {!!stato?.registrazioni.length && <details><summary className="touch">Consumi e voci</summary><ul className="m-0 flex list-none flex-col gap-2 p-0">
       {stato.registrazioni.map((r) => <li key={r.id} className="flex flex-col gap-1 border-t border-border pt-2">
         <DettagliConsumo acquisto={r} />
         {r.provenienze.map((p) => <div className="flex flex-wrap items-center gap-1" key={p.id}>
           {p.fonte.tipo === 'manuale' ? <span>Inserito a mano</span> : p.voceCorrente ? <Link className="touch inline-flex items-center" to={`/guida/percorso/${p.voceCorrente.giorno}?voce=${encodeURIComponent(p.fonte.voceUid)}`}>Dal Diario · {dataGiocoTesto(p.voceCorrente.giorno)}</Link> : <span className="text-warning">La voce del Diario non c’è più</span>}
-          <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => void preparaRimozione(p.id)}>Togli solo questa voce</button>
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli solo questa voce" disabled={occupato} onClick={() => void preparaRimozione(p.id)} />
         </div>)}
       </li>)}
     </ul></details>}
@@ -262,7 +264,7 @@ export function ConsumiAojiru({ partitaId, stato, onCambiato, registrabile = tru
     </Modal>
     <Modal aperta={rimozione !== null} titolo="Vuoi toglierlo?" onChiudi={() => { if (!occupato && !gestoPendenteNelloScope(partitaId, { articolo: stato?.articolo ?? ARTICOLO_AOJIRU })) setRimozione(null); }} azioni={<>
       <button type="button" className="btn btn-ghost touch" disabled={occupato || incerto} onClick={() => setRimozione(null)}>Annulla</button>
-      <button type="button" className="btn btn-primary touch" disabled={occupato} onClick={() => void rimuovi()}>{incerto ? 'Riprova' : 'Sì, toglilo'}</button>
+      <PulsanteVisivo tono="primario" icona={<IconaAzione chiave={incerto ? 'riprova' : 'elimina'} dimensione={22} />} titolo={incerto ? 'Riprova' : 'Sì, toglilo'} disabled={occupato} onClick={() => void rimuovi()} />
     </>}>
       <p>{rimozione?.provenienza ? 'Si toglie soltanto questa voce.' : 'Si toglie soltanto il vecchio segno «Acquistato».'} {rimozione?.anteprima.ultimaFonte ? 'È l’ultima voce che lo conferma: il consumo non conta più. Se serve correggere i punti, compare il pulsante «Annulla» sulla voce.' : 'Le altre voci del consumo restano.'} Lo ritrovi nel Cestino.</p>
       {rimozione?.anteprima.acquisto && <DettagliConsumo acquisto={rimozione.anteprima.acquisto} fonteSelezionata={rimozione.provenienza} />}

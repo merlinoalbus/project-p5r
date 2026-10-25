@@ -46,7 +46,7 @@ function AccessiRapidi() {
         <Link key={s.to} to={s.to} className="card card--cliccabile no-underline text-text flex items-center gap-3 py-2">
           <AssetImg nome={s.asset} alt="" decorativa className="h-[26px] w-[26px] shrink-0 object-contain"
             fallback={<span className="text-primary-testo">{s.riserva}</span>} />
-          <span><strong>{s.titolo}</strong><br /><span className="text-[12px] text-text-secondary">{s.dettaglio}</span></span>
+          <span><strong>{s.titolo}</strong><br /><span className="testo-12 text-text-secondary">{s.dettaglio}</span></span>
         </Link>
       ))}
     </nav>
@@ -84,8 +84,8 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
           )}
           <div className="home-carta__corpo">
             <div className="home-carta__testa">
-              <span className="hidden sm:inline text-[11px] uppercase tracking-wide text-text-muted shrink-0">Partita attiva</span>
-              <span className="font-semibold text-[15px] truncate min-w-0">{partita.nome}</span>
+              <span className="hidden sm:inline testo-12 uppercase tracking-wide text-text-muted shrink-0">Partita attiva</span>
+              <span className="font-semibold testo-15 truncate min-w-0">{partita.nome}</span>
               <span className="chip shrink-0">Liv. {partita.livelloProtagonista}</span>
               {partita.allarmeAttivo && <span className="chip chip--attivo shrink-0">ALLARME</span>}
               {telefono && doti.dati && doti.dati.length > 0 && (
@@ -108,8 +108,8 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
             </div>
             {scorta.dati && (
               <FilaScorrevole className="home-fila" role="group" aria-label="Arcani potenziati dalla scorta">
-                <span className="text-[11px] font-semibold uppercase tracking-[.06em] text-text-muted">Arcani potenziati</span>
-                {arcaniInScorta.length === 0 && <span className="text-[12px] text-text-muted">nessuna Persona in scorta</span>}
+                <span className="testo-12 font-semibold uppercase tracking-[.06em] text-text-muted">Arcani potenziati</span>
+                {arcaniInScorta.length === 0 && <span className="testo-12 text-text-muted">nessuna Persona in scorta</span>}
                 {arcaniInScorta.map((a) => (
                   <Link key={a.chiave} to="/partita?scheda=confidenti" className="chip chip--icona chip--attivo no-underline" title={`Persona ${a.nome} in scorta: i Confidenti ${a.nome} guadagnano punti ×1,5`}>
                     <AssetImg nome={`arcani/icona/${slug(a.chiave)}`} alt="" decorativa className="h-4 w-4 object-contain" fallback={<IconMaschera size={14} />} />
@@ -138,7 +138,7 @@ export function HomePage() {
         <HomeConPartita key={attiva.id} partita={attiva} />
       ) : (
         <>
-          <div className="card text-[13px] text-text-secondary">
+          <div className="card testo-13 text-text-secondary">
             Nessuna partita attiva: <Link to="/partita" className="text-primary-testo">creane una</Link> per iniziare a tracciare Doti sociali, Confidenti e Persona.
           </div>
           <AccessiRapidi />

@@ -126,8 +126,8 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
               chiama `personaggi/joker`. Chiedendolo come Confidente non lo trovava e restava il vuoto. */}
           <ImmagineEntita ambito={m.chiave === 'joker' ? 'personaggio' : 'confidente'} chiave={m.chiave} etichetta={m.nome} dimensione={44} />
           <span className="min-w-0 flex-1">
-            <span className="block break-words font-semibold text-[15px] leading-tight" title={m.nome}>{m.nome}</span>
-            <span className="block text-[12px] text-text-muted">
+            <span className="block break-words font-semibold testo-15 leading-tight" title={m.nome}>{m.nome}</span>
+            <span className="block testo-12 text-text-muted">
               {m.segnato ? `Livello ${m.livello} · ${m.esperienza.toLocaleString('it-IT')} punti esperienza` : 'Non ancora segnato'}
             </span>
           </span>
@@ -140,7 +140,7 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
               Era una casella di 20 px: sul tablet non si centra col dito, ed è il gesto più frequente
               della scheda. Ora è l'interruttore a tassello, alto 44 px come tutti gli altri. */}
           {m.chiave === 'joker'
-            ? <span className="chip shrink-0 text-[11px]" title="Il protagonista è sempre nel gruppo">Sempre in squadra</span>
+            ? <span className="chip shrink-0 testo-12" title="Il protagonista è sempre nel gruppo">Sempre in squadra</span>
             : <PulsanteVisivo compatto className="shrink-0" attivo={m.inSquadra}
                 icona={<IconaAzione chiave={m.inSquadra ? 'accettata' : 'deseleziona'} dimensione={20} />}
                 titolo="In squadra" disabled={fermo}
@@ -149,17 +149,17 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
         </div>
         <div className="flex flex-wrap items-end gap-x-3 gap-y-2">
           <label className="editor-mappa__campo min-w-[150px] flex-1">
-            <span className="text-[10px] uppercase tracking-[0.06em] text-text-muted">Esperienza</span>
+            <span className="testo-12 uppercase tracking-[0.06em] text-text-muted">Esperienza</span>
             <CampoEsperienza valore={m.esperienza} nome={m.nome} disabilitato={fermo}
               onSalva={(v) => conEsito(m.chiave, () => impostaMembroSquadra(partitaId, m.chiave, { esperienza: v }))} />
           </label>
           <span className="editor-mappa__campo shrink-0">
-            <span className="text-[10px] uppercase tracking-[0.06em] text-text-muted">Livello</span>
+            <span className="testo-12 uppercase tracking-[0.06em] text-text-muted">Livello</span>
             <span className="flex items-center gap-1.5">
               <PulsanteVisivo compatto icona={<IconaAzione chiave="meno" dimensione={20} />} titolo="−1"
                 disabled={fermo || m.livello <= 1} aria-label={`Togli un livello a ${m.nome}`}
                 onClick={() => void conEsito(m.chiave, () => impostaMembroSquadra(partitaId, m.chiave, { deltaLivello: -1 })).then((riuscito) => { if (riuscito) riallineaPartite(m.chiave); })} />
-              <span className={`h-11 min-w-[52px] rounded-md flex items-center justify-center px-2 font-display text-[20px] tabular-nums bg-bg-tertiary ${m.segnato ? 'text-primary-testo' : 'text-text-muted'}`}
+              <span className={`h-11 min-w-[52px] rounded-md flex items-center justify-center px-2 font-display testo-20 tabular-nums bg-bg-tertiary ${m.segnato ? 'text-primary-testo' : 'text-text-muted'}`}
                 title={m.segnato ? `Livello ${m.livello}` : 'Livello non ancora segnato'}>{m.livello}</span>
               <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="+1"
                 disabled={fermo || m.livello >= 99} aria-label={`Sali di livello: ${m.nome} al livello ${m.livello + 1}`}
@@ -180,14 +180,14 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
               la cifra e i comandi. */}
           <section className="card flex flex-col gap-3" aria-label="Denaro del gruppo">
             <span className="flex flex-col gap-0.5">
-              <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-text-muted"><IconaSegno chiave="medaglie" dimensione={14} />Denaro del gruppo</span>
-              <span className="font-display text-[28px] leading-none tabular-nums">{formattaYen(dati.yen)}</span>
+              <span className="flex items-center gap-1.5 testo-12 uppercase tracking-[0.08em] text-text-muted"><IconaSegno chiave="medaglie" dimensione={14} />Denaro del gruppo</span>
+              <span className="font-display testo-28 leading-none tabular-nums">{formattaYen(dati.yen)}</span>
             </span>
             {/* Il numero si scrive una volta e poi si dice che cosa è: entrato, uscito, oppure il
                 saldo intero da copiare dal gioco («Imposta»), quando i conti non tornano più. */}
             <div className="flex flex-wrap items-end gap-x-3 gap-y-2">
               <label className="editor-mappa__campo min-w-[150px] flex-1">
-                <span className="text-[10px] uppercase tracking-[0.06em] text-text-muted">Importo</span>
+                <span className="testo-12 uppercase tracking-[0.06em] text-text-muted">Importo</span>
                 {/* Testo con tastiera numerica, non `type="number"`: quello legge «123.450» come
                     decimale e ne faceva 12.345 ¥, proprio col punto delle migliaia che si copia dal gioco. */}
                 <input className="form-input tabular-nums" type="text" inputMode="numeric" autoComplete="off" value={movimento} placeholder="0"
@@ -209,7 +209,7 @@ export function SquadraPartita({ partitaId }: { partitaId: number }) {
             {dati.membri.map(riga)}
           </ul>
 
-          <p className="m-0 text-[12px] text-text-muted">
+          <p className="m-0 testo-12 text-text-muted">
             Il livello del Protagonista è lo stesso che il calcolatore di fusione usa per sapere quali Persona puoi evocare:
             cambiarlo qui lo aggiorna anche lì.
           </p>

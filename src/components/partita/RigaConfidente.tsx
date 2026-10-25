@@ -65,8 +65,8 @@ export function RigaConfidente({ c, selezionata, oggi, motivoOggi, onScegli }: P
       <button type="button" className="riga-confidente__scelta touch" onClick={onScegli} aria-current={selezionata ? 'true' : undefined}>
         {/* il nome va a capo (al massimo due righe) invece di essere troncato; OGGI sta sulla riga dell'arcano, dove c'è spazio, e non si
             restringe mai (accanto al nome, nelle colonne strette, si schiacciava in «OGG I») */}
-        <span className="font-display uppercase text-[18px] leading-[1.05] tracking-wide line-clamp-2 break-words">{c.nome}</span>
-        <span className="flex items-center gap-1.5 text-[12px] text-text-muted min-w-0">
+        <span className="font-display uppercase testo-18 leading-[1.05] tracking-wide line-clamp-2 break-words">{c.nome}</span>
+        <span className="flex items-center gap-1.5 testo-12 text-text-muted min-w-0">
           <AssetImg nome={`arcani/icona/${slug(c.arcana)}`} alt="" decorativa className="h-4 w-4 shrink-0 object-contain" fallback={null} />
           <span className="truncate">{c.arcanaNome}</span>
           {oggi && <span className="shrink-0 whitespace-nowrap"><TargaSuggerito motivo={motivoOggi} compatta /></span>}
@@ -78,7 +78,7 @@ export function RigaConfidente({ c, selezionata, oggi, motivoOggi, onScegli }: P
               nome={c.rango === 0 ? null : c.rango === 10 ? 'ui/rango-max' : `ui/rango-${c.rango}`}
               alt={c.rango === 10 ? 'Rango MAX' : `Rango ${c.rango}`}
               className="h-9 w-9 object-contain"
-              fallback={<span className={`font-display text-[22px] leading-none tabular-nums ${c.rango === 10 ? 'text-primary-testo' : ''}`}>{c.rango === 10 ? 'MAX' : c.rango}</span>}
+              fallback={<span className={`font-display testo-24 leading-none tabular-nums ${c.rango === 10 ? 'text-primary-testo' : ''}`}>{c.rango === 10 ? 'MAX' : c.rango}</span>}
             />
           </AnelloAvanzamento>
         </span>

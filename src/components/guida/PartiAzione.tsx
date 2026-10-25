@@ -84,8 +84,8 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
     <span className="flex flex-wrap items-center gap-1.5">
       {a.oggettiCitati?.filter((o) => o.casa !== link?.href).map((o) => <Link key={o.chiave} to={conRitornoDiario(o.casa, partenza, uid)}
         onClick={(e) => { if (!apriSopra(e, o.casa)) ricordaVoce(e); }} className="chip touch no-underline">{o.nome}</Link>)}
-      <span className="chip text-[11px]">{NOME_TIPO_AZIONE[a.tipo] ?? a.tipo}</span>
-      {link ? <Link to={conRitornoDiario(link.href, partenza, uid)} className="chip chip--attivo no-underline text-[11px]"
+      <span className="chip testo-12">{NOME_TIPO_AZIONE[a.tipo] ?? a.tipo}</span>
+      {link ? <Link to={conRitornoDiario(link.href, partenza, uid)} className="chip chip--attivo no-underline testo-12"
         onClick={(e) => {
           if (apriAccanto && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) { e.preventDefault(); onApriMappa!(apriAccanto); return; }
           if (confidente && partitaAttiva !== null && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) { e.preventDefault(); setCassetto(confidente); return; }
@@ -93,33 +93,33 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
           if (apriSopra(e, conRitornoDiario(link.scheda ?? link.href, partenza, uid))) return;
           ricordaVoce(e);
         }}>{link.etichetta}</Link>
-        : a.riferimentoTesto && <span className="chip text-[11px]">{a.riferimentoTesto}</span>}
+        : a.riferimentoTesto && <span className="chip testo-12">{a.riferimentoTesto}</span>}
       {cassetto && partitaAttiva !== null && <ConfidentiPartita partitaId={partitaAttiva} soloCassetto={{ chiave: cassetto, onChiudi: () => { setCassetto(null); onCassettoChiuso?.(); } }} />}
       {a.mappa && onSullaMappa && (
-        <button type="button" className="chip chip--icona touch text-[11px]" onClick={onSullaMappa} aria-label={`${a.mappa.posto ? `Apri in ${a.mappa.posto}` : 'Sulla mappa'}: ${a.azione.slice(0, 60)}`}>
+        <button type="button" className="chip chip--icona touch testo-12" onClick={onSullaMappa} aria-label={`${a.mappa.posto ? `Apri in ${a.mappa.posto}` : 'Sulla mappa'}: ${a.azione.slice(0, 60)}`}>
           {/* L5 (M23): il nome del posto del pin («Clinica Takemi», «Central Street»); «Sulla mappa» solo se il posto non ha un nome */}
           <IconaSpillo tipo="passaggio" dimensione={14} />{a.mappa.posto ?? 'Sulla mappa'}
         </button>
       )}
       {/* la guida del quiz del lavoro (il quiz dei codici a barre al Triple Seven), consultabile da ogni turno: in oro nei giorni del quiz */}
       {a.quiz?.map((q) => <PulsanteGuidaQuiz key={q.attivita} voce={q} />)}
-      {stato?.tipo === 'consigliata' && <span className="chip chip--oro text-[11px]" title={stato.motivo ?? undefined}>Consigliata{stato.motivo ? ` · ${stato.motivo}` : ''}</span>}
-      {stato?.tipo === 'bloccata' && <span className="chip chip--bloccata text-[11px]" title={stato.motivo ?? undefined}>Bloccata{stato.motivo ? `: ${stato.motivo}` : ''}</span>}
-      {stato?.tipo === 'neutra' && stato.motivo && <span className="text-[12px] text-text-muted">{stato.motivo}</span>}
+      {stato?.tipo === 'consigliata' && <span className="chip chip--oro testo-12" title={stato.motivo ?? undefined}>Consigliata{stato.motivo ? ` · ${stato.motivo}` : ''}</span>}
+      {stato?.tipo === 'bloccata' && <span className="chip chip--bloccata testo-12" title={stato.motivo ?? undefined}>Bloccata{stato.motivo ? `: ${stato.motivo}` : ''}</span>}
+      {stato?.tipo === 'neutra' && stato.motivo && <span className="testo-12 text-text-muted">{stato.motivo}</span>}
       {/* R9-06: il testo salvato della voce non si riscrive; se il nome del Confidente è cambiato, il nome di adesso sta accanto */}
-      {a.riferimentoNomeAttuale && <span className="text-[12px] text-text-muted" title="Il testo della voce usa il nome di prima">oggi: {a.riferimentoNomeAttuale}</span>}
+      {a.riferimentoNomeAttuale && <span className="testo-12 text-text-muted" title="Il testo della voce usa il nome di prima">oggi: {a.riferimentoNomeAttuale}</span>}
       {/* R9-03: il Confidente non è disponibile al giorno o alla fascia della voce: un avviso ambra, mai un blocco (la voce si spunta lo stesso) */}
       {a.avvisiDisponibilita?.map((v) => (
-        <span key={`${v.tipo}:${v.testo}`} className="chip chip--icona text-[11px] text-warning" title={v.testo} role="img" aria-label={`Incontro ${v.tipo === 'fuori-fascia' ? 'fuori orario' : 'fuori giorno'}: ${v.testo}`}>
+        <span key={`${v.tipo}:${v.testo}`} className="chip chip--icona testo-12 text-warning" title={v.testo} role="img" aria-label={`Incontro ${v.tipo === 'fuori-fascia' ? 'fuori orario' : 'fuori giorno'}: ${v.testo}`}>
           <IconaAzione chiave="allarme" dimensione={12} />{v.tipo === 'fuori-fascia' ? 'Fuori orario' : 'Fuori giorno'}
         </span>
       ))}
-      {a.rangoAtteso !== null && <span className="text-[12px] text-text-muted">rango atteso {a.rangoAtteso}</span>}
-      {a.note && <span className="text-[12px] text-text-secondary">{a.note}</span>}
+      {a.rangoAtteso !== null && <span className="testo-12 text-text-muted">rango atteso {a.rangoAtteso}</span>}
+      {a.note && <span className="testo-12 text-text-secondary">{a.note}</span>}
       {/* le Doti che il gioco dà si segnano a mano (scelta dell'utente, 2026-09-30): la riga le dice, la spunta non le tocca */}
-      {!a.fatta && a.produceTesto?.length > 0 && <span className="text-[12px] text-text-muted" title="Che cosa dà il gioco: le Doti le segni tu nella scheda Doti, letture e turni li segna la spunta. Si cambia da «Modifica»">Il gioco dà: {a.produceTesto.join(' · ')}</span>}
-      {a.fatta && a.produceTesto?.filter((t) => t.includes(' paga ¥')).map((t) => <span key={t} className="text-[12px] text-text-muted">{t.slice(t.indexOf('paga ¥'))}</span>)}
-      {a.fatta && a.effetti && <span className="chip chip--attivo text-[11px]" title="Effetti della spunta: togliendola si annullano i punti del Confidente e i turni; le Doti le segni tu (la spunta non le tocca), letture e visioni restano (si disfano dalla loro pagina)">{descriviEffetti(a.effetti)}</span>}
+      {!a.fatta && a.produceTesto?.length > 0 && <span className="testo-12 text-text-muted" title="Che cosa dà il gioco: le Doti le segni tu nella scheda Doti, letture e turni li segna la spunta. Si cambia da «Modifica»">Il gioco dà: {a.produceTesto.join(' · ')}</span>}
+      {a.fatta && a.produceTesto?.filter((t) => t.includes(' paga ¥')).map((t) => <span key={t} className="testo-12 text-text-muted">{t.slice(t.indexOf('paga ¥'))}</span>)}
+      {a.fatta && a.effetti && <span className="chip chip--attivo testo-12" title="Effetti della spunta: togliendola si annullano i punti del Confidente e i turni; le Doti le segni tu (la spunta non le tocca), letture e visioni restano (si disfano dalla loro pagina)">{descriviEffetti(a.effetti)}</span>}
     </span>
   );
 }
@@ -128,7 +128,7 @@ export function CartelliniAzione({ a, onSullaMappa, onApriMappa, onCassettoChius
  *  dà le sue note (o nessun punto), come toccare le note; le scelte dal valore incerto (amicizia/amore) si leggono soltanto. */
 export function SceltaNote({ occupato, onScegli, onAnnulla, dialogo }: { occupato: boolean; onScegli: (note: 1 | 2 | 3 | null) => void; onAnnulla: () => void; dialogo?: DialogoVoceDto }) {
   return (
-    <span className="flex flex-wrap items-center gap-1.5 text-[12px]" role="group" aria-label="Note ottenute con il Confidente">
+    <span className="flex flex-wrap items-center gap-1.5 testo-12" role="group" aria-label="Note ottenute con il Confidente">
       {dialogo && (
         <span className="flex w-full flex-col gap-1" role="group" aria-label={`Scelte del dialogo, rango ${dialogo.rango}`}>
           <span className="text-text-secondary">Scelte del dialogo (rango {dialogo.rango})</span>
@@ -148,7 +148,7 @@ export function SceltaNote({ occupato, onScegli, onAnnulla, dialogo }: { occupat
       {([1, 2, 3] as const).map((n) => (
         <button key={n} type="button" className={`chip touch ${n === 2 ? 'chip--attivo' : ''}`} disabled={occupato} onClick={() => onScegli(n)} aria-label={`${n} ${n === 1 ? 'nota' : 'note'}`}>{'♪'.repeat(n)}</button>
       ))}
-      <button type="button" className="chip touch" disabled={occupato} onClick={() => onScegli(null)}>Nessun punto</button>
+      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Nessun punto" disabled={occupato} onClick={() => onScegli(null)} />
       <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={onAnnulla} />
     </span>
   );

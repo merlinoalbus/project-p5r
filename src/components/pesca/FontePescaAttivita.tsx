@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import type { RegolaPescaDto } from '../../../shared/pesca';
 import { EditorRegolaPesca } from './EditorRegolaPesca';
+import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 export function FontePescaAttivita({ fonte, onCambiata }: { fonte: { regola: RegolaPescaDto; ruolo: 'visita' | 'obiettivi' }; onCambiata?: () => void | Promise<void> }) {
   const [editor, setEditor] = useState(false);
@@ -22,8 +23,8 @@ export function FontePescaAttivita({ fonte, onCambiata }: { fonte: { regola: Reg
     </>}
     {r.motivi.map((m, i) => <p role="alert" key={i} className="m-0 text-warning">{m}</p>)}
     <div className="flex flex-wrap gap-2">
-      <Link to="/partita?scheda=progressi#pesca" className="btn btn-secondary touch">Visite, osservazioni e profili</Link>
-      {onCambiata && <button type="button" className="btn btn-ghost touch" disabled={r.stato !== 'collegata'} onClick={() => setEditor(true)}>Correggi la regola comune</button>}
+      <CollegamentoVisivo icona={<IconaAzione chiave="scheda" dimensione={22} />} titolo="Visite, osservazioni e profili" to="/partita?scheda=progressi#pesca" />
+      {onCambiata && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo="Correggi la regola comune" disabled={r.stato !== 'collegata'} onClick={() => setEditor(true)} />}
     </div>
     {editor && onCambiata && <EditorRegolaPesca key={r.chiave} regola={r} onChiudi={() => setEditor(false)} onSalvata={onCambiata} />}
   </section>;

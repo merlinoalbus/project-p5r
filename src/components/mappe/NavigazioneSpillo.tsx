@@ -9,7 +9,7 @@ import { IconaSpillo } from './IconaSpillo';
 
 /** Il pulsante di uno spillo di spostamento: apre la mappa d'arrivo adattata alla finestra e, se indicato, con lo spillo già selezionato. */
 export function NavigazioneSpillo({ spillo: s, partitaId, onNaviga, nomeMappa, nomeSpillo }: { spillo: SpilloDto; partitaId: number | null; onNaviga: NavigaMappa; nomeMappa?: string; nomeSpillo?: string }) {
-  if (s.destinazioneNonDisponibile) return <p role="status" className="text-[12px] text-text-muted">La mappa di arrivo non è più disponibile. Aggiorna il collegamento nell’editor.</p>;
+  if (s.destinazioneNonDisponibile) return <p role="status" className="testo-12 text-text-muted">La mappa di arrivo non è più disponibile. Aggiorna il collegamento nell’editor.</p>;
   const arrivo = arrivoSpillo(s);
   if (!arrivo) return null;
   const bloccato = partitaId !== null && s.disponibilita !== undefined && s.disponibilita.stato !== 'disponibile';

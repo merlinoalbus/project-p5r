@@ -16,6 +16,8 @@ import { salvaIngressoQuartiere } from '../../services/api';
 import { useImmagineMappa } from '../../hooks/useImmagineMappa';
 import { notifica } from '../../stores/notificationStore';
 import type { QuartiereDettaglioDto } from '../../types';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 const INGRANDIMENTI = [{ zoom: 1, nome: 'Intera' }, { zoom: 1.5, nome: 'Largo' }, { zoom: 2.5, nome: 'Medio' }, { zoom: 4, nome: 'Vicino' }] as const;
 
@@ -69,14 +71,14 @@ export function IngressoQuartiere({ quartiere: q, aperta, onChiudi, onSalvato }:
   return (
     <Modal titolo={`Ingresso di ${q.nome}`} aperta={aperta} onChiudi={onChiudi} larga
       azioni={<>
-        {q.ingresso && <button type="button" className="btn btn-ghost touch mr-auto" disabled={occupato} onClick={() => void salva(true)}>Togli l’ingresso</button>}
+        {q.ingresso && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Togli l’ingresso" className="mr-auto" disabled={occupato} onClick={() => void salva(true)} />}
         <button type="button" className="btn btn-secondary touch" onClick={onChiudi}>Annulla</button>
-        <button type="button" className="btn btn-primary touch" disabled={occupato || !scelta || !coordinateValide(x, y)} onClick={() => void salva()}>Salva</button>
+        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" disabled={occupato || !scelta || !coordinateValide(x, y)} onClick={() => void salva()} />
       </>}>
       <div className="flex flex-col gap-3">
-        <p className="m-0 text-[13px] text-text-secondary">Toccando {q.nome} sulla mappa di Tokyo si apre quest’area, centrata sul punto che scegli.</p>
+        <p className="m-0 testo-13 text-text-secondary">Toccando {q.nome} sulla mappa di Tokyo si apre quest’area, centrata sul punto che scegli.</p>
         {q.aree.length === 0
-          ? <p className="m-0 text-[13px]" role="status">{q.nome} non ha ancora aree: aggiungine una, poi sceglila qui.</p>
+          ? <p className="m-0 testo-13" role="status">{q.nome} non ha ancora aree: aggiungine una, poi sceglila qui.</p>
           : <>
             <Selettore etichetta="Area d’ingresso" valore={area} disabilitato={occupato} opzioni={q.aree.map((a) => ({ chiave: a.slug, nome: a.nome, dettaglio: a.numeroPlanimetrie > 1 ? `${a.numeroPlanimetrie} planimetrie` : undefined }))}
               onCambia={(k) => { setArea(k); setX(50); setY(50); }} />
@@ -87,16 +89,16 @@ export function IngressoQuartiere({ quartiere: q, aperta, onChiudi, onSalvato }:
                 <img src={src} alt={`Planimetria di ${scelta?.nome}`} draggable={false} />
                 <span className="ingresso-quartiere__punto" style={{ left: `${x}%`, top: `${y}%` }} aria-hidden="true">+</span>
               </div>
-            ) : <p className="m-0 text-[13px]">{scelta?.nome} non ha un’immagine da toccare: indica il punto sotto «Avanzate».</p>}
+            ) : <p className="m-0 testo-13">{scelta?.nome} non ha un’immagine da toccare: indica il punto sotto «Avanzate».</p>}
             <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Ingrandimento">
-              <span className="text-[12px] text-text-muted">Ingrandimento</span>
+              <span className="testo-12 text-text-muted">Ingrandimento</span>
               {INGRANDIMENTI.map((i) => <button key={i.zoom} type="button" className={`chip touch ${zoom === i.zoom ? 'chip--attivo' : ''}`} aria-pressed={zoom === i.zoom} disabled={occupato} onClick={() => setZoom(i.zoom)}>{i.nome} · {i.zoom}×</button>)}
               {!INGRANDIMENTI.some((i) => i.zoom === zoom) && <span className="chip chip--attivo">{zoom}×</span>}
             </div>
-            <p className="m-0 text-[12px] text-text-muted" role="status">
+            <p className="m-0 testo-12 text-text-muted" role="status">
               {q.ingresso ? <>Salvato: {q.ingresso.area?.nome ?? q.ingresso.nome}, {q.ingresso.x}% da sinistra, {q.ingresso.y}% dall’alto, {q.ingresso.zoom}×.</> : 'Nessun ingresso salvato: dalla metro si apre la pagina del quartiere.'}
             </p>
-            <details className="text-[13px]">
+            <details className="testo-13">
               <summary className="cursor-pointer text-text-secondary touch">Avanzate: coordinate esatte</summary>
               <div className="mt-2 flex flex-wrap items-end gap-2">
                 <label className="editor-mappa__campo w-[120px]">Orizzontale (%)<input className="form-input" type="number" min={0} max={100} step={0.01} value={x} onChange={(e) => setX(e.target.valueAsNumber)} /></label>

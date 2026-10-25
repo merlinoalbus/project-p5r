@@ -1,5 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { archiviaGestoPartita, rileggiRegistroGestiPartita, riprendiGestoPartita, useGestiPartita, type GestoPartita } from '../../services/gestiPartita';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 /** Che cosa è l'operazione, in parole (BON-02: niente identificativi, hash o JSON). */
 const nomi: Record<GestoPartita['payload']['tipo'], string> = {
@@ -53,27 +55,25 @@ export function GestiPartita({ partitaId, onCambiato, mostraVuoto = false, conte
   if (!elenco.length && !erroreArchivio && !errore && !mostraVuoto) return null;
   const daRivedere = elenco.some(g => g.stato === 'invio' || g.stato === 'incerto' || !g.ricevutaPersistita);
   return <details className="card min-w-0" open={daRivedere || !!erroreArchivio || !!errore || !elenco.length}>
-    <summary className="touch cursor-pointer font-display text-[17px] uppercase">Operazioni da completare{elenco.length ? ` · ${elenco.length}` : ''}</summary>
+    <summary className="touch cursor-pointer font-display testo-17 uppercase">Operazioni da completare{elenco.length ? ` · ${elenco.length}` : ''}</summary>
     <div className="flex min-w-0 flex-col gap-2 pt-2" aria-label="Operazioni sulla partita da completare">
-    <p className="m-0 text-[12px] text-text-secondary">Qui compaiono le operazioni di cui non c’è una conferma sicura, per esempio dopo una connessione caduta. «Riprova» le completa senza ripeterle due volte. Nulla parte da solo.</p>
-    {erroreArchivio && <div role="alert" className="flex flex-col items-start gap-2 text-error"><p className="m-0">L’elenco di questa scheda non si legge.</p><button type="button" className="btn btn-ghost btn-sm touch" onClick={rileggiRegistroGestiPartita}>Rileggi l’elenco</button></div>}
-    {errore && <p role="alert" className="m-0 text-[13px] text-error">{errore}</p>}
-    {!elenco.length && !erroreArchivio && <p className="m-0 text-[13px]">Nessuna operazione da completare.</p>}
+    <p className="m-0 testo-12 text-text-secondary">Qui compaiono le operazioni di cui non c’è una conferma sicura, per esempio dopo una connessione caduta. «Riprova» le completa senza ripeterle due volte. Nulla parte da solo.</p>
+    {erroreArchivio && <div role="alert" className="flex flex-col items-start gap-2 text-error"><p className="m-0">L’elenco di questa scheda non si legge.</p><PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="ricalcola" dimensione={20} />} titolo="Rileggi l’elenco" onClick={rileggiRegistroGestiPartita} /></div>}
+    {errore && <p role="alert" className="m-0 testo-13 text-error">{errore}</p>}
+    {!elenco.length && !erroreArchivio && <p className="m-0 testo-13">Nessuna operazione da completare.</p>}
     <ul className="m-0 flex min-w-0 list-none flex-col gap-2 p-0">{elenco.map(g => {
       const inCorso = g.stato === 'invio';
       const risolta = g.stato === 'riuscita' && g.ricevutaPersistita;
       const rifiutata = g.stato === 'rifiutata' && g.ricevutaPersistita;
       const readonly = g.payload.tipo === 'spunta-acquisti';
-      return <li key={g.id} className="flex min-w-0 flex-col gap-1 border-t border-border pt-2 text-[13px]">
+      return <li key={g.id} className="flex min-w-0 flex-col gap-1 border-t border-border pt-2 testo-13">
         <strong>{nomi[g.payload.tipo]} · {g.bersaglio.etichetta}</strong>
         <span>{statoInParole(g)}</span>
         {g.errore && <p className="m-0 break-words text-warning">{g.errore}</p>}
         {g.stato === 'incerto' && <span>{readonly ? 'Controllo solo che la voce e i suoi dati ci siano: non ripeto la spunta.' : 'Riprovando non si fa due volte la stessa cosa: se era già andata a buon fine, lo si vede subito.'}</span>}
         <div className="flex flex-wrap gap-2">
-          {!risolta && !rifiutata && <button type="button" className="btn btn-secondary btn-sm touch" disabled={inCorso || (erroreArchivio !== null && g.stato !== 'riuscita' && g.stato !== 'rifiutata')} onClick={() => void recupera(g)}>
-            {inCorso ? 'In corso…' : g.stato === 'riuscita' ? 'Salva l’esito' : g.stato === 'rifiutata' ? 'Salva l’esito' : readonly ? 'Controlla' : 'Riprova'}
-          </button>}
-          {(risolta || rifiutata) && <button type="button" className="btn btn-ghost btn-sm touch" disabled={inCorso || erroreArchivio !== null} onClick={() => archivia(g)}>Togli dall’elenco</button>}
+          {!risolta && !rifiutata && <PulsanteVisivo compatto icona={<IconaAzione chiave={g.stato === 'riuscita' || g.stato === 'rifiutata' ? 'registra' : 'riprova'} dimensione={20} />} titolo={inCorso ? 'In corso…' : g.stato === 'riuscita' ? 'Salva l’esito' : g.stato === 'rifiutata' ? 'Salva l’esito' : readonly ? 'Controlla' : 'Riprova'} disabled={inCorso || (erroreArchivio !== null && g.stato !== 'riuscita' && g.stato !== 'rifiutata')} onClick={() => void recupera(g)} />}
+          {(risolta || rifiutata) && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli dall’elenco" disabled={inCorso || erroreArchivio !== null} onClick={() => archivia(g)} />}
         </div>
       </li>;
     })}</ul>

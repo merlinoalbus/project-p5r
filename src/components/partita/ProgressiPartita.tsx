@@ -26,6 +26,7 @@ import { dataGiocoTesto } from '../../utils/dateGioco';
 import { RegistroAcquistiPartita } from './RegistroAcquistiPartita';
 import { RegistroPesca } from '../pesca/RegistroPesca';
 import { ATTIVITA_PESCA, EVENTI_PESCA, SFIDA_PESCA } from '../../../shared/pesca';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 
 type Sezione = 'storia' | 'attivita' | 'negozi' | 'pesca';
 type Evento = Progressi['eventi'][number];
@@ -66,15 +67,15 @@ function RigaEvento({ e, occupato, onCambia }: { e: Evento; occupato: boolean; o
         <input type="checkbox" className="progressi-casella" checked={e.manuale ?? e.avvenuto === true} aria-label={e.nome} disabled={occupato} onChange={(ev) => onCambia(ev.target.checked)} />
         <span className="min-w-0 flex-1">
           <span className="block">{e.nome}</span>
-          {!!e.serveA?.length && <span className="block text-[12px] text-primary-testo">Sblocca: {e.serveA.join(' · ')}</span>}
-          {e.visiteDiario && <span className="block text-[12px] text-text-secondary">Le visite dichiarate nel Diario contano da sole; la casella è un tuo segno in più. Si correggono dal Diario.</span>}
+          {!!e.serveA?.length && <span className="block testo-12 text-primary-testo">Sblocca: {e.serveA.join(' · ')}</span>}
+          {e.visiteDiario && <span className="block testo-12 text-text-secondary">Le visite dichiarate nel Diario contano da sole; la casella è un tuo segno in più. Si correggono dal Diario.</span>}
         </span>
-        <span className={`shrink-0 text-[12px] ${e.avvenuto ? 'text-success' : 'text-text-secondary'}`}>{e.avvenuto ? 'avvenuto' : 'non ancora'}</span>
+        <span className={`shrink-0 testo-12 ${e.avvenuto ? 'text-success' : 'text-text-secondary'}`}>{e.avvenuto ? 'avvenuto' : 'non ancora'}</span>
       </label>
-      {!!e.daVoci?.length && <div className="flex flex-wrap items-center gap-x-2 pl-9 text-[12px] text-text-secondary">
+      {!!e.daVoci?.length && <div className="flex flex-wrap items-center gap-x-2 pl-9 testo-12 text-text-secondary">
         {e.daVoci.map((v) => <Link key={v.uid} className="touch text-primary-testo inline-flex items-center" to={percorsoVoce(v)}>Già nel Diario: voce del {v.giorno.slice(3)}/{v.giorno.slice(0, 2)} · {v.testo.length > 60 ? `${v.testo.slice(0, 60)}…` : v.testo}</Link>)}
       </div>}
-      {!!e.visiteDiario?.length && <div className="flex flex-wrap items-center gap-x-2 pl-9 text-[12px] text-text-secondary">
+      {!!e.visiteDiario?.length && <div className="flex flex-wrap items-center gap-x-2 pl-9 testo-12 text-text-secondary">
         <span>Già nel Diario:</span>
         {e.visiteDiario.map((v) => <Link key={v.uid} className="touch text-primary-testo inline-flex items-center" to={percorsoVoce(v)}>visita del {dataGiocoTesto(v.giorno)}</Link>)}
       </div>}
@@ -166,16 +167,16 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
             {sezione === 'storia' && <>
               <div className="progressi-partita">
                 <section className="card flex flex-col gap-2" aria-labelledby="progressi-da-segnare">
-                  <h2 id="progressi-da-segnare" className="m-0 font-display text-[17px] uppercase leading-none">Da segnare quando succede</h2>
-                  <p className="m-0 text-[12px] text-text-muted">Eventi della storia che l’app non può sapere: spunta la casella quando li fai in gioco.</p>
+                  <h2 id="progressi-da-segnare" className="m-0 font-display testo-17 uppercase leading-none">Da segnare quando succede</h2>
+                  <p className="m-0 testo-12 text-text-muted">Eventi della storia che l’app non può sapere: spunta la casella quando li fai in gioco.</p>
                   {daSegnare.length === 0
-                    ? <p className="m-0 text-[13px] text-text-muted">Niente da segnare: tutti gli eventi sono avvenuti.</p>
+                    ? <p className="m-0 testo-13 text-text-muted">Niente da segnare: tutti gli eventi sono avvenuti.</p>
                     : <ul className="m-0 p-0 list-none flex flex-col gap-1">
                       {daSegnare.map((e) => <RigaEvento key={e.chiave} e={e} occupato={occupato === e.chiave} onCambia={(v) => void salva(e.chiave, () => impostaEventoStoria(partitaId, e.chiave, v))} />)}
                     </ul>}
                   {avvenutiManuali.length > 0 && (
                     <details className="progressi-avvenuti">
-                      <summary className="touch cursor-pointer text-[13px] text-text-secondary">Avvenuti ({avvenutiManuali.length})</summary>
+                      <summary className="touch cursor-pointer testo-13 text-text-secondary">Avvenuti ({avvenutiManuali.length})</summary>
                       <ul className="m-0 p-0 list-none flex flex-col gap-1">
                         {avvenutiManuali.map((e) => <RigaEvento key={e.chiave} e={e} occupato={occupato === e.chiave} onCambia={(v) => void salva(e.chiave, () => impostaEventoStoria(partitaId, e.chiave, v))} />)}
                       </ul>
@@ -185,26 +186,26 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
 
                 <div className="flex min-w-0 flex-col gap-3">
                   <section className="card flex flex-col gap-2" aria-labelledby="progressi-squadra">
-                    <h2 id="progressi-squadra" className="m-0 flex flex-wrap items-center gap-2 font-display text-[17px] uppercase leading-none">Automatici dalla squadra <Automatico /></h2>
-                    <p className="m-0 text-[12px] text-text-muted">Un Ladro in squadra fa avvenire il suo evento. Si segna in <Link to="/partita?scheda=squadra" className="text-primary-testo">Denaro e squadra</Link>.</p>
+                    <h2 id="progressi-squadra" className="m-0 flex flex-wrap items-center gap-2 font-display testo-17 uppercase leading-none">Automatici dalla squadra <Automatico /></h2>
+                    <p className="m-0 testo-12 text-text-muted">Un Ladro in squadra fa avvenire il suo evento. Si segna in <Link to="/partita?scheda=squadra" className="text-primary-testo">Denaro e squadra</Link>.</p>
                     <ul className="m-0 p-0 list-none flex flex-col gap-1">
                       {calcolati.map((e) => (
                         <li key={e.chiave} className="progressi-partita__riga">
                           <Pallino stato={e.avvenuto} />
                           <span className="min-w-0 flex-1">{e.nome}</span>
-                          <Link to="/partita?scheda=squadra" className="touch inline-flex items-center text-[12px] text-text-secondary">{e.avvenuto === true ? `${e.membroNome} in squadra` : e.avvenuto === false ? `${e.membroNome} non in squadra` : `${e.membroNome}: non ancora segnato`}</Link>
+                          <Link to="/partita?scheda=squadra" className="touch inline-flex items-center testo-12 text-text-secondary">{e.avvenuto === true ? `${e.membroNome} in squadra` : e.avvenuto === false ? `${e.membroNome} non in squadra` : `${e.membroNome}: non ancora segnato`}</Link>
                         </li>
                       ))}
                     </ul>
                   </section>
                   <section className="card flex flex-col gap-2" aria-labelledby="progressi-contatori">
-                    <h2 id="progressi-contatori" className="m-0 flex flex-wrap items-center gap-2 font-display text-[17px] uppercase leading-none">Dalle letture <Automatico /></h2>
-                    <p className="m-0 text-[12px] text-text-muted">Si contano da sole in <Link to="/partita?scheda=letture" className="text-primary-testo">Letture e giochi</Link>.</p>
+                    <h2 id="progressi-contatori" className="m-0 flex flex-wrap items-center gap-2 font-display testo-17 uppercase leading-none">Dalle letture <Automatico /></h2>
+                    <p className="m-0 testo-12 text-text-muted">Si contano da sole in <Link to="/partita?scheda=letture" className="text-primary-testo">Letture e giochi</Link>.</p>
                     <ul className="m-0 p-0 list-none flex flex-col gap-1">
                       {p.contatori.map((c) => (
                         <li key={c.chiave} className="progressi-partita__riga">
                           <span className="min-w-0 flex-1">{c.nome}</span>
-                          <span className="font-display text-[17px] tabular-nums">{c.valore}</span>
+                          <span className="font-display testo-17 tabular-nums">{c.valore}</span>
                         </li>
                       ))}
                     </ul>
@@ -216,13 +217,13 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
             {sezione === 'attivita' && (
               <section className="flex flex-col gap-3" aria-labelledby="progressi-attivita">
                 <div className="flex flex-col gap-1">
-                  <h2 id="progressi-attivita" className="m-0 font-display text-[17px] uppercase leading-none">Attività svolte</h2>
-                  <p className="m-0 text-[13px] text-text-secondary">Quante volte hai fatto ogni attività: ogni + ti ricorda le Doti da segnare.</p>
+                  <h2 id="progressi-attivita" className="m-0 font-display testo-17 uppercase leading-none">Attività svolte</h2>
+                  <p className="m-0 testo-13 text-text-secondary">Quante volte hai fatto ogni attività: ogni + ti ricorda le Doti da segnare.</p>
                 </div>
                 <div className="progressi-attivita">
                   {gruppiAttivita.map(([tipo, righe]) => (
                     <section key={tipo} className="progressi-attivita__gruppo" aria-labelledby={`progressi-tipo-${tipo}`}>
-                      <h3 id={`progressi-tipo-${tipo}`} className="m-0 font-display text-[17px] uppercase leading-none">{nomeTipo(tipo)}</h3>
+                      <h3 id={`progressi-tipo-${tipo}`} className="m-0 font-display testo-17 uppercase leading-none">{nomeTipo(tipo)}</h3>
                       <ul className="m-0 p-0 list-none flex flex-col">
                         {righe.map((a) => {
                           const pesca = a.chiave === ATTIVITA_PESCA || a.chiave === SFIDA_PESCA;
@@ -230,9 +231,9 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
                             <li key={a.chiave} className="progressi-attivita__riga">
                               <span className="min-w-0 flex-[1_1_12rem]">
                                 <span className="block">{a.nome}</span>
-                                {a.effettiTurno?.length > 0 && <span className="block text-[12px] text-text-secondary">Ogni turno: {a.effettiTurno.join(' · ')}</span>}
+                                {a.effettiTurno?.length > 0 && <span className="block testo-12 text-text-secondary">Ogni turno: {a.effettiTurno.join(' · ')}</span>}
                               </span>
-                              {pesca && <button type="button" className="progressi-attivita__azione" onClick={() => scegli('pesca')}>Registra nella scheda Pesca</button>}
+                              {pesca && <PulsanteVisivo compatto className="shrink-0" icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Registra nella scheda Pesca" onClick={() => scegli('pesca')} />}
                               <span className="condizione-numero shrink-0" role="group" aria-label={`Volte: ${a.nome}`}>
                                 <button type="button" className="touch" aria-label={`${a.nome}: una volta in meno`} disabled={occupato === a.chiave || a.volte <= 0} onClick={() => void salva(a.chiave, () => impostaAttivitaSvolta(partitaId, a.chiave, a.volte - 1))}><IconaAzione chiave="meno" dimensione={16} /></button>
                                 <span className="condizione-numero__valore">{a.volte}</span>
@@ -252,8 +253,8 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
               <div className="progressi-partita">
                 {p.rangoCliente.length > 0 && (
                   <section className="card flex flex-col gap-2" aria-labelledby="progressi-rango">
-                    <h2 id="progressi-rango" className="m-0 flex flex-wrap items-center gap-2 font-display text-[17px] uppercase leading-none">Grado cliente <Automatico /></h2>
-                    <p className="m-0 text-[12px] text-text-muted">Cresce da solo con la spesa che segni negli acquisti del negozio.</p>
+                    <h2 id="progressi-rango" className="m-0 flex flex-wrap items-center gap-2 font-display testo-17 uppercase leading-none">Grado cliente <Automatico /></h2>
+                    <p className="m-0 testo-12 text-text-muted">Cresce da solo con la spesa che segni negli acquisti del negozio.</p>
                     <ul className="m-0 p-0 list-none flex flex-col gap-2">
                       {p.rangoCliente.map((n) => {
                         const quota = n.prossimo && n.prossimo.spesa > 0 ? Math.min(100, Math.round((n.spesa / n.prossimo.spesa) * 100)) : 100;
@@ -264,7 +265,7 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
                               <span className="chip chip--attivo">{n.rango.nome}</span>
                             </span>
                             <span className="progressi-barra" role="progressbar" aria-label={`Verso il grado successivo: ${n.nome}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={quota}><span style={{ width: `${quota}%` }} /></span>
-                            <span className="text-[13px] text-text-secondary">spesi {formattaYen(n.spesa)}{n.prossimo ? ` · ${n.prossimo.nome} da ${formattaYen(n.prossimo.spesa)}` : ' · grado massimo'}</span>
+                            <span className="testo-13 text-text-secondary">spesi {formattaYen(n.spesa)}{n.prossimo ? ` · ${n.prossimo.nome} da ${formattaYen(n.prossimo.spesa)}` : ' · grado massimo'}</span>
                           </li>
                         );
                       })}
@@ -273,14 +274,14 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
                 )}
                 {p.puntiNegozio.length > 0 && (
                   <section className="card flex flex-col gap-2" aria-labelledby="progressi-punti">
-                    <h2 id="progressi-punti" className="m-0 font-display text-[17px] uppercase leading-none">Punti negozio</h2>
-                    <p className="m-0 text-[12px] text-text-muted">I punti che il negozio ti ha dato, a passi di dieci: vengono dalle vendite, non dalla spesa.</p>
+                    <h2 id="progressi-punti" className="m-0 font-display testo-17 uppercase leading-none">Punti negozio</h2>
+                    <p className="m-0 testo-12 text-text-muted">I punti che il negozio ti ha dato, a passi di dieci: vengono dalle vendite, non dalla spesa.</p>
                     <ul className="m-0 p-0 list-none flex flex-col gap-1">
                       {p.puntiNegozio.map((n) => (
                         <li key={n.negozio} className="progressi-partita__riga">
                           <span className="min-w-0 flex-1">
                             <span className="block"><Link to={`/guida/negozi/${encodeURIComponent(n.negozio)}`} className="touch inline-flex items-center">{n.nome}</Link></span>
-                            <span className="block text-[12px] text-text-secondary">{n.programma} · {n.unita}</span>
+                            <span className="block testo-12 text-text-secondary">{n.programma} · {n.unita}</span>
                           </span>
                           <span className="condizione-numero" role="group" aria-label={`Punti: ${n.nome}`}>
                             <button type="button" className="touch" aria-label={`${n.nome}: dieci punti in meno`} disabled={occupato === n.negozio || n.punti <= 0} onClick={() => void salva(n.negozio, () => impostaPuntiNegozio(partitaId, n.negozio, Math.max(0, n.punti - 10)))}><IconaAzione chiave="meno" dimensione={16} /></button>

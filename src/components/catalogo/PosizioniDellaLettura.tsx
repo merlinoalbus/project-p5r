@@ -9,7 +9,7 @@ export function PosizioniDellaLettura({ oggetto }: { oggetto: OggettoDettaglioDt
     const ruolo = 'ruolo' in p ? p.ruolo === 'cinema' ? 'Visione al cinema' : p.ruolo === 'noleggio' ? 'Noleggio' : 'Visione'
       : p.tipo === 'negozio' && negozi.has(p.chiave) ? 'Acquisto: offerta elencata sopra' : 'Ottenimento indicato dalla guida';
     return <div key={`${p.tipo}:${p.chiave}:${'ruolo' in p ? p.ruolo : ''}`} className="flex min-w-0 flex-col gap-1">
-      <span className="text-[13px] text-text-secondary">{ruolo} · {p.etichetta}</span>
+      <span className="testo-13 text-text-secondary">{ruolo} · {p.etichetta}</span>
       <DoveSiTrova tipo={p.tipo} chiave={p.chiave} titolo={p.etichetta} altezza={240} />
     </div>;
   })}</>;

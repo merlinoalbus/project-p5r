@@ -178,25 +178,25 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
         <>
           <button type="button" className="btn btn-secondary" onClick={onChiudi}>Annulla</button>
           {!nuovo && elemento.modificata && (
-            <button type="button" className="btn btn-secondary" disabled={occupato} onClick={() => void ripristina()}>{lettura ? 'Ripristina i dati di lettura' : 'Ripristina i valori della guida'}</button>
+            <PulsanteVisivo icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo={lettura ? 'Ripristina i dati di lettura' : 'Ripristina i valori della guida'} disabled={occupato} onClick={() => void ripristina()} />
           )}
           {!nuovo && (nelCestino || (elemento.origine === 'utente' && !elemento.modificata)) && (
-            <button type="button" className="btn btn-danger" disabled={occupato} onClick={() => (nelCestino ? setEliminazione({ riepilogo: null }) : void elimina())}>Elimina</button>
+            <PulsanteVisivo tono="pericolo" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Elimina" disabled={occupato} onClick={() => (nelCestino ? setEliminazione({ riepilogo: null }) : void elimina())} />
           )}
-          <button type="button" className="btn btn-primary" disabled={occupato || !regoleValide || !modulo.valido(datiModulo)} onClick={() => void salva()}>Salva</button>
+          <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" disabled={occupato || !regoleValide || !modulo.valido(datiModulo)} onClick={() => void salva()} />
         </>
       }
     >
       <div className="flex flex-col gap-3">
         {!nuovo && (
-          <p className="m-0 text-[12px] text-text-muted">
+          <p className="m-0 testo-12 text-text-muted">
             {elemento.origine === 'utente' && !elemento.modificata && 'Riga aggiunta da te.'}
             {elemento.modificata && (lettura ? 'Il ripristino riguarda sessioni, effetti e condizioni della lettura.' : 'Riga della guida corretta da te: «Ripristina i valori della guida» rimette i dati originali.')}
             {elemento.origine === 'seed' && !elemento.modificata && 'Riga dei dati della guida: salvando, la correzione resterà anche dopo gli aggiornamenti.'}
             {elemento.nascosta && ' Attualmente nascosta.'}
           </p>
         )}
-        {lettura && <p className="m-0 text-[12px] text-text-muted">Il titolo appartiene all’oggetto: cambiarlo aggiorna tutti i riferimenti. Il prezzo si modifica nell’offerta del negozio.
+        {lettura && <p className="m-0 testo-12 text-text-muted">Il titolo appartiene all’oggetto: cambiarlo aggiorna tutti i riferimenti. Il prezzo si modifica nell’offerta del negozio.
           {catalogoCasa && <> <Link to={catalogoCasa} onClick={onChiudi} className="touch inline-flex items-center">Apri l’oggetto per ripristinare il titolo o vedere le offerte</Link>.</>}
         </p>}
         <Componente dati={datiModulo} imposta={imposta} impostaCondizioni={impostaCondizioni} elemento={elemento ?? null} nuovo={nuovo} disabilitato={occupato} negozioChiave={negozioChiave} />
@@ -207,22 +207,22 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
           {condizioniDaRisolvere && <div className="flex flex-col gap-2 rounded-md border border-warning p-3 text-sm">
             <p role="alert" className="m-0">Le condizioni salvate contengono parti che l’editor non sa rappresentare. Il salvataggio resta bloccato finché non scegli esplicitamente come risolverle.</p>
             <p className="m-0 whitespace-pre-wrap break-all">{String(elemento?.dati.condizioni_json)}</p>
-            <button type="button" className="btn btn-secondary min-h-11 self-start" disabled={occupato} onClick={() => impostaCondizioni(condizioni)}>Usa le condizioni leggibili qui sotto e scarta le altre parti</button>
+            <PulsanteVisivo icona={<IconaAzione chiave="scarta" dimensione={22} />} titolo="Usa le condizioni leggibili qui sotto e scarta le altre parti" className="min-h-11 self-start" disabled={occupato} onClick={() => impostaCondizioni(condizioni)} />
           </div>}
           {(fonteConfidente || fontePesca) && !condizioniDaRisolvere && condizioni.length === 0
             ? <p className="m-0 text-sm">Condizioni proprie dell’attività: nessuna. {fontePesca ? 'L’ingresso dipende dalla sede; profili, vie documentate e casi ignoti vengono dalla fonte pesca.' : 'Disponibilità e requisiti vengono dalla fonte Confidente.'}</p>
             : <CondizioniEditor condizioni={condizioni} onCambia={impostaCondizioni} disabilitato={occupato || condizioniDaRisolvere} />}
-          {fontePesca && !!condizioni.length && <div className="flex flex-col gap-2 text-sm"><p role="alert" className="m-0 text-warning">La fonte pesca richiede l’eredità della sede e dei profili. Le condizioni proprie mostrate devono essere rimosse con un gesto esplicito prima di salvare.</p><button type="button" className="btn btn-secondary touch self-start" disabled={occupato || condizioniDaRisolvere} onClick={() => impostaCondizioni([])}>Rimuovi queste condizioni proprie e usa la fonte pesca</button></div>}
+          {fontePesca && !!condizioni.length && <div className="flex flex-col gap-2 text-sm"><p role="alert" className="m-0 text-warning">La fonte pesca richiede l’eredità della sede e dei profili. Le condizioni proprie mostrate devono essere rimosse con un gesto esplicito prima di salvare.</p><PulsanteVisivo icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Rimuovi queste condizioni proprie e usa la fonte pesca" className="self-start" disabled={occupato || condizioniDaRisolvere} onClick={() => impostaCondizioni([])} /></div>}
           {nuovo && !fonteConfidente && !fontePesca && condizioni.length === 0 && <div className="space-y-2 text-sm">
             <p>{condizioniScelte ? 'Hai scelto di non aggiungere condizioni proprie.' : 'Le condizioni proprie non sono ancora state scelte. Una frase non interamente compresa richiederà una tua scelta prima del salvataggio.'}</p>
-            {!condizioniScelte && <button type="button" className="btn btn-secondary min-h-11" disabled={occupato} onClick={() => setCondizioniScelte(true)}>Nessuna condizione propria</button>}
+            {!condizioniScelte && <PulsanteVisivo icona={<IconaAzione chiave="deseleziona" dimensione={22} />} titolo="Nessuna condizione propria" className="min-h-11" disabled={occupato} onClick={() => setCondizioniScelte(true)} />}
           </div>}
         </>}
         {erroreSalvataggio && <p role="alert" className="m-0 text-sm text-error">{erroreSalvataggio} La finestra resta aperta.</p>}
-        {!regoleValide && <p role="alert" className="m-0 text-[13px] text-error">Risolvi le parti non leggibili e completa o rimuovi i gruppi vuoti prima di salvare.</p>}
+        {!regoleValide && <p role="alert" className="m-0 testo-13 text-error">Risolvi le parti non leggibili e completa o rimuovi i gruppi vuoti prima di salvare.</p>}
         <div className="flex flex-wrap items-center justify-between gap-2">
           {modulo.conVerificato
-            ? <label className="flex items-center gap-2 text-[13px] touch" title="Il dato è confermato: senza la spunta compare come «da fonte secondaria»">
+            ? <label className="flex items-center gap-2 testo-13 touch" title="Il dato è confermato: senza la spunta compare come «da fonte secondaria»">
               <input type="checkbox" className="h-5 w-5" checked={dati.verificato === true} disabled={occupato} onChange={(e) => imposta({ verificato: e.target.checked })} />
               Confermato
             </label>
@@ -237,9 +237,9 @@ export function ModuloCatalogo({ tipo: tipoModulo, elemento, negozioChiave, onCh
         <Modal titolo={`Eliminare «${elemento.nome}»?`} aperta onChiudi={() => setEliminazione(null)}
           azioni={<>
             <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={() => setEliminazione(null)}>Annulla</button>
-            <button type="button" className="btn btn-danger touch" disabled={occupato} onClick={() => void eliminaLuogoNegozio()}>{eliminazione.riepilogo ? 'Metti nel cestino' : 'Elimina'}</button>
+            <PulsanteVisivo tono="pericolo" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo={eliminazione.riepilogo ? 'Metti nel cestino' : 'Elimina'} disabled={occupato} onClick={() => void eliminaLuogoNegozio()} />
           </>}>
-          <div className="flex flex-col gap-2 text-[14px]">
+          <div className="flex flex-col gap-2 testo-14">
             {eliminazione.riepilogo && <p className="m-0 text-warning" role="alert">Se ne vanno anche: {eliminazione.riepilogo}.</p>}
             <p className="m-0 text-text-secondary">Va nel cestino: si può rimettere da Impostazioni › Cestino.</p>
           </div>

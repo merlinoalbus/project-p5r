@@ -57,7 +57,7 @@ export function ElencoRichieste({ richieste, dedalo, area, aree, partitaId, modi
   return (
     <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0">
       {richieste.map((r) => (
-        <li key={r.chiave} className="flex flex-wrap items-center gap-x-2 gap-y-1 py-1.5 text-[13px]">
+        <li key={r.chiave} className="flex flex-wrap items-center gap-x-2 gap-y-1 py-1.5 testo-13">
           <Link to={`/guida/richieste?dedalo=${encodeURIComponent(dedalo)}`} className={`touch inline-flex min-w-[10rem] flex-1 items-center ${r.stato === 'completata' ? 'text-text-muted line-through' : ''}`}>{r.nome}</Link>
           {partitaId && (
             // da tastiera come vuole il ruolo: Tab entra sullo stato scelto, le frecce scelgono il precedente o il seguente
@@ -75,7 +75,7 @@ export function ElencoRichieste({ richieste, dedalo, area, aree, partitaId, modi
                 const scelto = (r.stato ?? null) === s.stato;
                 return (
                   <button key={s.etichetta} type="button" role="radio" aria-checked={scelto} tabIndex={scelto ? 0 : -1} title={s.titolo} disabled={occupata === r.chiave}
-                    className={`touch min-w-11 border-l border-border px-2.5 text-[12px] first:border-l-0 ${scelto ? (s.stato === 'completata' ? 'bg-success/25 font-semibold text-text' : s.stato ? 'bg-primary/25 font-semibold text-text' : 'bg-white/10 text-text') : 'text-text-muted hover:bg-white/5 hover:text-text'}`}
+                    className={`touch min-w-11 border-l border-border px-2.5 testo-12 first:border-l-0 ${scelto ? (s.stato === 'completata' ? 'bg-success/25 font-semibold text-text' : s.stato ? 'bg-primary/25 font-semibold text-text' : 'bg-white/10 text-text') : 'text-text-muted hover:bg-white/5 hover:text-text'}`}
                     onClick={() => { if (!scelto) void esegui(r.chiave, async () => onRichiesta(r.chiave, (await impostaStatoRichiesta(partitaId, r.chiave, s.stato)).stato), 'Stato non aggiornato.'); }}>
                     {s.etichetta}
                   </button>
@@ -83,7 +83,7 @@ export function ElencoRichieste({ richieste, dedalo, area, aree, partitaId, modi
               })}
             </span>
           )}
-          {!partitaId && r.stato === null && <span className="text-[11px] text-text-muted">da fare</span>}
+          {!partitaId && r.stato === null && <span className="testo-12 text-text-muted">da fare</span>}
           {modifica && (
             <span className="flex basis-full flex-wrap items-center gap-1.5">
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" aria-label={`Modifica la Richiesta «${r.nome}»`} onClick={() => onModifica(r.chiave)} />

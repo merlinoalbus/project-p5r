@@ -68,25 +68,25 @@ export function ImmaginiCaricate() {
 
   return (
     <section className="card flex flex-col gap-3">
-      <h2 className="m-0 text-[15px] font-semibold">Immagini caricate</h2>
-      <p className="m-0 text-[13px] text-text-secondary">
+      <h2 className="m-0 testo-15 font-semibold">Immagini caricate</h2>
+      <p className="m-0 testo-13 text-text-secondary">
         Le immagini che carichi dal riquadro di una Persona, di un Confidente o di un Arcano hanno la precedenza sulla grafica inclusa nell'app. Da qui le rimuovi per tornare agli asset predefiniti; le mappe scaricate dalla guida si riscaricano al prossimo accesso all'area.
       </p>
-      {elenco.errore && <p className="m-0 text-[13px] text-error">{elenco.errore}</p>}
+      {elenco.errore && <p className="m-0 testo-13 text-error">{elenco.errore}</p>}
       <ul className="m-0 p-0 list-none grid gap-2 sm:grid-cols-2 lg:grid-cols-3" aria-label="Immagini caricate per ambito">
         {AMBITI.map((a) => {
           const n = conteggi[a.chiave] ?? 0;
           return (
             <li key={a.chiave} className="flex items-center justify-between gap-2 border border-border-light px-3 py-2">
-              <span className="text-[13px]"><strong>{a.nome}</strong> <span className="text-text-muted">· {n} {n === 1 ? 'immagine' : 'immagini'}</span></span>
+              <span className="testo-13"><strong>{a.nome}</strong> <span className="text-text-muted">· {n} {n === 1 ? 'immagine' : 'immagini'}</span></span>
               <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Rimuovi" disabled={n === 0 || occupato} onClick={() => setDaRimuovere(a.chiave)} aria-label={`Rimuovi le immagini caricate per ${a.nome}`} />
             </li>
           );
         })}
       </ul>
       <div className="flex items-center gap-2 flex-wrap">
-        <button type="button" className="btn btn-danger btn-sm" disabled={totale === 0 || occupato} onClick={() => setDaRimuovere('tutte')}>Rimuovi tutte ({totale})</button>
-        <span className="text-[12px] text-text-muted">{elenco.dati ? `${totale} ${totale === 1 ? 'immagine caricata' : 'immagini caricate'} in questa istanza.` : 'Conteggio in corso…'}</span>
+        <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo={<>Rimuovi tutte ({totale})</>} disabled={totale === 0 || occupato} onClick={() => setDaRimuovere('tutte')} />
+        <span className="testo-12 text-text-muted">{elenco.dati ? `${totale} ${totale === 1 ? 'immagine caricata' : 'immagini caricate'} in questa istanza.` : 'Conteggio in corso…'}</span>
       </div>
       <Modal
         titolo="Conferma rimozione"
@@ -96,13 +96,13 @@ export function ImmaginiCaricate() {
           <>
             <button type="button" className="btn btn-secondary" onClick={chiudi}>Annulla</button>
             {pezziDaConfermare
-              ? <button type="button" className="btn btn-danger" disabled={occupato} onClick={() => void rimuovi(true)}>Rimuovi anche i pezzi</button>
-              : <button type="button" className="btn btn-danger" disabled={occupato} onClick={() => void rimuovi()}>Rimuovi</button>}
+              ? <PulsanteVisivo tono="pericolo" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Rimuovi anche i pezzi" disabled={occupato} onClick={() => void rimuovi(true)} />
+              : <PulsanteVisivo tono="pericolo" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Rimuovi" disabled={occupato} onClick={() => void rimuovi()} />}
           </>
         }
       >
-        <p className="m-0 text-[14px]">Rimuovere {daRimuovere ? nomeAmbito(daRimuovere) : ''}? L'app tornerà a mostrare la grafica predefinita; l'operazione non si può annullare.</p>
-        {pezziDaConfermare && <p className="m-0 mt-2 text-[14px] text-warning">{pezziDaConfermare} I pezzi sono ritagli in pixel di quelle immagini: senza di loro non hanno più senso e se ne vanno con loro.</p>}
+        <p className="m-0 testo-14">Rimuovere {daRimuovere ? nomeAmbito(daRimuovere) : ''}? L'app tornerà a mostrare la grafica predefinita; l'operazione non si può annullare.</p>
+        {pezziDaConfermare && <p className="m-0 mt-2 testo-14 text-warning">{pezziDaConfermare} I pezzi sono ritagli in pixel di quelle immagini: senza di loro non hanno più senso e se ne vanno con loro.</p>}
       </Modal>
     </section>
   );

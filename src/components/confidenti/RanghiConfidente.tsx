@@ -19,6 +19,7 @@ import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { TitoloSezione } from '../shared/TitoloSezione';
 
 const NOME_MODO: Record<ModoRango, string> = {
   punti: 'A punti legame',
@@ -40,12 +41,12 @@ export function RanghiConfidente({ chiave, nome, onSalvato }: { chiave: string; 
   const dopo = async () => { await Promise.all([dati.ricarica(), onSalvato()]); };
   return (
     <section className="card flex flex-col gap-2" aria-label="Come si sale di rango">
-      <h2 className="m-0 text-[15px] font-semibold">Come si sale di rango</h2>
-      {dati.errore ? <p className="m-0 text-[13px]" role="alert">{dati.errore} <button type="button" className="btn btn-sm touch" onClick={() => void dati.ricarica()}>Riprova</button></p>
-        : dati.caricamento && !dati.dati ? <p className="m-0 text-[13px]" role="status">Caricamento dei ranghi…</p>
-          : ranghi.length === 0 ? <p className="m-0 text-[13px] text-text-muted">Nessun rango documentato.</p>
+      <TitoloSezione>Come si sale di rango</TitoloSezione>
+      {dati.errore ? <p className="m-0 testo-13" role="alert">{dati.errore} <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void dati.ricarica()} /></p>
+        : dati.caricamento && !dati.dati ? <p className="m-0 testo-13" role="status">Caricamento dei ranghi…</p>
+          : ranghi.length === 0 ? <p className="m-0 testo-13 text-text-muted">Nessun rango documentato.</p>
             : <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0">{ranghi.map((r) => (
-              <li key={r.rango} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-1 text-[13px]">
+              <li key={r.rango} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-1 testo-13">
                 <span className="min-w-0 flex-1"><strong className="text-text">{passaggio(r.rango)}</strong>: <span className="text-text-secondary">{descrizione(r)}</span></span>
                 {r.modificato && <span className="chip" title="Cambiato rispetto alla guida">Modificato</span>}
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" aria-label={`Modifica: ${passaggio(r.rango).toLowerCase()} di ${nome}`} onClick={() => setAperto(r.rango)} />
@@ -72,12 +73,12 @@ function EditorRango({ chiave, nome, rango, onChiudi, onSalvato }: { chiave: str
   return (
     <Modal titolo={`${passaggio(rango.rango)}: ${nome}`} aperta onChiudi={() => { if (!occupato) onChiudi(); }} azioni={(
       <div className="flex w-full flex-wrap justify-end gap-2">
-        {rango.modificato && <button type="button" className="btn btn-ghost touch" disabled={occupato} onClick={() => void esegui(() => ripristinaRangoConfidente(chiave, rango.rango), 'Rango ripristinato come nella guida.')}>Ripristina</button>}
+        {rango.modificato && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina" disabled={occupato} onClick={() => void esegui(() => ripristinaRangoConfidente(chiave, rango.rango), 'Rango ripristinato come nella guida.')} />}
         <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={onChiudi}>Annulla</button>
-        <button type="button" className="btn btn-primary touch" disabled={occupato || !sporca || !valido} onClick={() => void esegui(() => salvaRangoConfidente(chiave, rango.rango, { modo, puntiNecessari: punti }), 'Rango salvato: vale per tutte le partite.')}>Salva</button>
+        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" disabled={occupato || !sporca || !valido} onClick={() => void esegui(() => salvaRangoConfidente(chiave, rango.rango, { modo, puntiNecessari: punti }), 'Rango salvato: vale per tutte le partite.')} />
       </div>
     )}>
-      <div className="flex flex-col gap-3 text-[13px]">
+      <div className="flex flex-col gap-3 testo-13">
         <p className="m-0 text-text-muted">Le modifiche valgono per tutte le partite. «Ripristina» rimette il rango come nella guida.</p>
         <Selettore etichetta="Come si sale" valore={modo} opzioni={MODI_RANGO.map((m) => ({ chiave: m, nome: NOME_MODO[m] }))} onCambia={(v) => setModo(v as ModoRango)} disabilitato={occupato} ricerca="mai" />
         {modo === 'punti' ? (

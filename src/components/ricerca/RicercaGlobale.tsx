@@ -30,6 +30,8 @@ import {
   IconAppunti, IconBersaglio, IconBussola, IconChiave, IconFilm, IconGioca, IconGioco, IconLibro, IconMedaglia, IconMessaggio, IconNegozio,
   IconOrologio, IconPersone, IconPianta, IconPosizione, IconRegalo, IconScudo,
 } from '../shared/iconeGuida';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 /** Quanto si aspetta dall'ultima battuta prima di chiedere al server. */
 const ATTESA_MS = 200;
@@ -88,10 +90,10 @@ function Riga({ r, onScelto }: { r: RisultatoRicercaDto; onScelto: (e: MouseEven
       <Link to={r.casa} className="ricerca-riga touch" data-riga-ricerca onClick={onScelto}>
         <Miniatura r={r} />
         <span className="ricerca-riga__testo">
-          <strong className="text-[14px] leading-tight"><span className="sr-only">{etichetta}: </span>{r.nome}</strong>
-          {r.trovatoCome && <span className="text-[12px] text-text-secondary">trovato come «{r.trovatoCome}»</span>}
-          {r.percorso.length > 0 && <span className="text-[12px] text-text-muted">{r.percorso.join(' › ')}</span>}
-          {r.stato && <span><span className={`chip text-[11px] ${r.stato.tipo === 'da-verificare' ? 'chip--attivo' : ''}`}>{r.stato.testo}</span></span>}
+          <strong className="testo-14 leading-tight"><span className="sr-only">{etichetta}: </span>{r.nome}</strong>
+          {r.trovatoCome && <span className="testo-12 text-text-secondary">trovato come «{r.trovatoCome}»</span>}
+          {r.percorso.length > 0 && <span className="testo-12 text-text-muted">{r.percorso.join(' › ')}</span>}
+          {r.stato && <span><span className={`chip testo-12 ${r.stato.tipo === 'da-verificare' ? 'chip--attivo' : ''}`}>{r.stato.testo}</span></span>}
         </span>
       </Link>
     </li>
@@ -223,7 +225,7 @@ function FinestraRicerca() {
         </div>
         <div className="area-scorrevole ricerca-globale__corpo" aria-busy={inCorso}>
           {/* una riga sola per dire come va: «Cerco…», quanti risultati, nessun risultato, il suggerimento */}
-          <p className="m-0 min-h-5 text-[12px] text-text-muted" role="status">
+          <p className="m-0 min-h-5 testo-12 text-text-muted" role="status">
             {!valida && `Scrivi almeno ${MIN_CARATTERI_RICERCA} lettere: si cerca per nome fra Persona, Skill, Confidenti, oggetti, luoghi, negozi, Palazzi, Richieste, trofei e altro.`}
             {valida && errore && 'La ricerca non è riuscita.'}
             {valida && !errore && inCorso && dati && 'Cerco…'}
@@ -231,8 +233,8 @@ function FinestraRicerca() {
           </p>
           {valida && errore && (
             <div className="flex flex-col items-start gap-2" role="alert">
-              <p className="m-0 text-[13px]">Non riesco a raggiungere la ricerca. Controlla la connessione e riprova.</p>
-              <button type="button" className="btn btn-secondary btn-sm touch" onClick={() => setTentativo((n) => n + 1)}>Riprova</button>
+              <p className="m-0 testo-13">Non riesco a raggiungere la ricerca. Controlla la connessione e riprova.</p>
+              <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => setTentativo((n) => n + 1)} />
             </div>
           )}
           {valida && !errore && inCorso && !dati && <div className="flex justify-center py-8"><Spinner size={36} /></div>}
@@ -241,20 +243,18 @@ function FinestraRicerca() {
               const titolo = ETICHETTE_RICERCA[g.tipo].plurale;
               return (
                 <section key={g.tipo} aria-label={titolo} className="flex min-w-0 flex-col gap-1">
-                  <h2 className="m-0 flex items-baseline gap-2 text-[13px] font-semibold uppercase tracking-[0.06em] text-text-secondary">
-                    {titolo}<span className="text-[12px] font-normal text-text-muted">{g.totale}</span>
+                  <h2 className="m-0 flex items-baseline gap-2 testo-13 font-semibold uppercase tracking-[0.06em] text-text-secondary">
+                    {titolo}<span className="testo-12 font-normal text-text-muted">{g.totale}</span>
                   </h2>
                   <ul className="m-0 flex list-none flex-col gap-0.5 p-0">
                     {g.risultati.map((r) => <Riga key={`${r.tipo}|${r.chiave}`} r={r} onScelto={scelto} />)}
                   </ul>
                   {g.totale > g.risultati.length && (
                     g.risultati.length < LIMITE_MASSIMO_RICERCA
-                      ? <button type="button" className="btn btn-ghost btn-sm touch self-start" disabled={inEspansione === g.tipo} onClick={() => void mostraTutti(g.tipo)}>
-                          {inEspansione === g.tipo ? 'Carico…' : `Mostra tutti (${g.totale})`}
-                        </button>
-                      : <p className="m-0 text-[12px] text-text-muted">Prime {g.risultati.length} di {g.totale}: scrivi di più per restringere.</p>
+                      ? <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo={inEspansione === g.tipo ? 'Carico…' : `Mostra tutti (${g.totale})`} className="self-start" disabled={inEspansione === g.tipo} onClick={() => void mostraTutti(g.tipo)} />
+                      : <p className="m-0 testo-12 text-text-muted">Prime {g.risultati.length} di {g.totale}: scrivi di più per restringere.</p>
                   )}
-                  {erroreEspansione === g.tipo && <p className="m-0 text-[12px] text-text-muted" role="alert">Non sono riuscito a caricare gli altri: riprova.</p>}
+                  {erroreEspansione === g.tipo && <p className="m-0 testo-12 text-text-muted" role="alert">Non sono riuscito a caricare gli altri: riprova.</p>}
                 </section>
               );
             })}

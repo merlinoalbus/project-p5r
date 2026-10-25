@@ -13,6 +13,8 @@ import { testoDi, type PropsModulo } from './base';
 import { OrariEditor } from '../OrariEditor';
 import { ORARI_SEMPRE, type OrariNegozio } from '../../../../shared/orariNegozio';
 import { Blocco, Campo, Griglia } from './campi';
+import { PulsanteVisivo } from '../../shared/PulsanteVisivo';
+import { IconaAzione } from '../../shared/IconaAzione';
 
 const OPZIONI_TIPO: OpzioneIcone[] = TIPI_LUOGO.map((t) => ({ chiave: t.chiave, nome: t.nome, icona: <IconaSpillo tipo={t.icona} dimensione={28} /> }));
 
@@ -32,7 +34,7 @@ export function ModuloLuogo({ dati, imposta, disabilitato }: PropsModulo) {
       </Blocco>
       <Blocco>
         <Selettore etichetta="Quartiere" valore={attuale} vuoto="Scegli il quartiere…" disabilitato={disabilitato || quartieri.caricamento} opzioni={opzioniQuartiere} onCambia={(k) => imposta({ quartiere_chiave: k })} />
-        {quartieri.errore && <span role="alert" className="text-[11px] text-error">Impossibile caricare i quartieri. <button type="button" className="btn btn-sm touch" onClick={() => void quartieri.ricarica()}>Riprova</button></span>}
+        {quartieri.errore && <span role="alert" className="testo-12 text-error">Impossibile caricare i quartieri. <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void quartieri.ricarica()} /></span>}
       </Blocco>
       <Campo nome="cosa_offre" etichetta="Che cosa offre" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={600} />
       <Campo nome="note" etichetta="Note" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} />
@@ -59,7 +61,7 @@ function CampiLuogoL5({ dati, imposta, disabilitato }: Pick<PropsModulo, 'dati' 
     <div className="flex flex-col gap-3">
       <fieldset className="regole-editor flex flex-col gap-2">
         <legend>Orari del luogo</legend>
-        <label className="flex items-center gap-2 text-[13px] touch">
+        <label className="flex items-center gap-2 testo-13 touch">
           <input type="checkbox" className="h-5 w-5" checked={orari === null} disabled={disabilitato} onChange={(e) => imposta({ orari_json: e.target.checked ? null : { ...ORARI_SEMPRE } })} />
           La guida non indica orari: vale la regola dell’app (giorno e sera)
         </label>
@@ -88,10 +90,10 @@ function CampiLuogoL5({ dati, imposta, disabilitato }: Pick<PropsModulo, 'dati' 
             <label className="editor-mappa__campo min-w-[160px] flex-1">Nome<input className="form-input" maxLength={160} value={p.nome} disabled={disabilitato} onChange={(e) => piatto(i, { ...p, nome: e.target.value })} /></label>
             <label className="editor-mappa__campo w-[110px]">Prezzo (¥)<input className="form-input" type="number" min={0} value={p.prezzo ?? ''} disabled={disabilitato} onChange={(e) => piatto(i, { ...p, prezzo: e.target.value === '' ? null : Math.max(0, Math.round(Number(e.target.value))) })} /></label>
             <label className="editor-mappa__campo min-w-[180px] flex-[2]">Effetto<input className="form-input" maxLength={400} value={p.effetto} disabled={disabilitato} onChange={(e) => piatto(i, { ...p, effetto: e.target.value })} /></label>
-            <button type="button" className="btn btn-ghost btn-sm touch" disabled={disabilitato} aria-label={`Togli il piatto ${p.nome || i + 1}`} onClick={() => piatto(i, null)}>Togli</button>
+            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={disabilitato} aria-label={`Togli il piatto ${p.nome || i + 1}`} onClick={() => piatto(i, null)} />
           </div>
         ))}
-        <button type="button" className="btn btn-secondary btn-sm touch self-start" disabled={disabilitato} onClick={() => imposta({ piatti_json: [...piatti, { nome: '', prezzo: null, effetto: '' }] })}>Aggiungi un piatto</button>
+        <PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi un piatto" className="self-start" disabled={disabilitato} onClick={() => imposta({ piatti_json: [...piatti, { nome: '', prezzo: null, effetto: '' }] })} />
       </fieldset>
     </div>
   );

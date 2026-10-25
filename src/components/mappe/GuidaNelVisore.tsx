@@ -29,6 +29,7 @@ import { DettagliPunto } from '../guida/DettagliPunto';
 import { Modal } from '../shared/Modal';
 import { IconaAzione } from '../shared/IconaAzione';
 import type { PuntoInteresseDto } from '../../types';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 
 /** Larghezza della finestra fluttuante. */
 const LARGHEZZA = 340;
@@ -155,22 +156,22 @@ export function GuidaNelVisore({ mappa, partitaId, spilloSelezionato, spilliQui,
               <input type="checkbox" className="h-5 w-5" checked={!!p.stato} disabled={!partitaId || occupato} onChange={(e) => casella(p, e.target.checked)}
                 aria-label={p.stato ? `${p.nome}: fatto, togli il segno per riaprire` : `${p.nome}: segna come fatto`} />
             </label>}
-          <button type="button" className={`touch min-w-0 flex-1 text-left text-[13px] ${p.stato ? 'opacity-60' : ''}`} aria-expanded={apri} onClick={() => setAperta(apri ? null : p.chiave)}>
+          <button type="button" className={`touch min-w-0 flex-1 text-left testo-13 ${p.stato ? 'opacity-60' : ''}`} aria-expanded={apri} onClick={() => setAperta(apri ? null : p.chiave)}>
             <span className="font-semibold">{p.nome}</span>
-            <span className="text-[11px] text-text-muted"> · {NOME_TIPO[p.tipo]}{p.stato ? ` · ${p.stato}` : ''}</span>
+            <span className="testo-12 text-text-muted"> · {NOME_TIPO[p.tipo]}{p.stato ? ` · ${p.stato}` : ''}</span>
           </button>
         </div>
         {apri && (
-          <div className="flex flex-col gap-1.5 pb-1 pl-12 text-[12px]">
+          <div className="flex flex-col gap-1.5 pb-1 pl-12 testo-12">
             {p.descrizione && <p className="m-0 whitespace-pre-wrap text-text-secondary">{p.descrizione}</p>}
             <DettagliPunto d={p.dettagli} contenuto={p.contenuto} senzaAffinita={p.tipo === 'persona' && !!p.persona} />
-            {descrittiva(p) && <p className="m-0 text-[11px] text-text-muted">Voce descrittiva: si legge, non si segna.</p>}
+            {descrittiva(p) && <p className="m-0 testo-12 text-text-muted">Voce descrittiva: si legge, non si segna.</p>}
             {p.pin.length > 0 && (
               <ul className="m-0 flex list-none flex-col gap-1 p-0" aria-label={`Pin di ${p.nome}`}>
                 {p.pin.map((x) => (
                   <li key={x.id}>
                     {spilliQui.has(x.id)
-                      ? <button type="button" className={`chip chip--icona touch text-[11px] ${x.id === spilloSelezionato ? 'chip--attivo' : ''}`} aria-label={`Mostra sulla mappa: ${x.nome}`} onClick={() => onCentra(x.id)}>
+                      ? <button type="button" className={`chip chip--icona touch testo-12 ${x.id === spilloSelezionato ? 'chip--attivo' : ''}`} aria-label={`Mostra sulla mappa: ${x.nome}`} onClick={() => onCentra(x.id)}>
                         <IconaAzione chiave="posizione" dimensione={14} />{x.nome}
                       </button>
                       : <span className="inline-flex items-center gap-1 text-text-muted"><IconaAzione chiave="posizione" dimensione={14} />{x.nome} · {nomeSenzaPalazzo(x.mappaNome)}</span>}
@@ -198,16 +199,16 @@ export function GuidaNelVisore({ mappa, partitaId, spilloSelezionato, spilliQui,
       style={largo ? { left: pos.x, top: pos.y, maxHeight: `min(560px, 70dvh, ${Math.max(ALTEZZA_UTILE, (typeof window === 'undefined' ? 800 : window.innerHeight) - pos.y - MARGINE)}px)` } : undefined}>
       <header className={`flex items-center gap-2 border-b border-border px-2 py-1 ${largo ? 'cursor-move touch-none select-none' : ''}`}
         onPointerDown={giu} onPointerMove={muovi} onPointerUp={su} onPointerCancel={su}>
-        <h2 className="m-0 min-w-0 flex-1 font-display text-[15px] uppercase leading-tight">Guida <span className="text-[11px] normal-case text-text-muted">· {daFare} da fare{fatte > 0 ? ` · ${fatte} fatte` : ''}</span></h2>
+        <h2 className="m-0 min-w-0 flex-1 font-display testo-15 uppercase leading-tight">Guida <span className="testo-12 normal-case text-text-muted">· {daFare} da fare{fatte > 0 ? ` · ${fatte} fatte` : ''}</span></h2>
         <button type="button" className="touch flex w-11 items-center justify-center bg-transparent text-text-muted" aria-label="Chiudi la guida" onClick={onChiudi}><IconaAzione chiave="chiudi" dimensione={20} /></button>
       </header>
       <div ref={elenco} className="area-scorrevole min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-1.5">
-        {guida.caricamento && !guida.dati && <p className="m-0 py-2 text-[12px] text-text-muted">Carico la guida…</p>}
-        {guida.errore && <p className="m-0 py-2 text-[12px] text-error" role="alert">{guida.errore}</p>}
-        {guida.dati && tutte.length === 0 && <p className="m-0 py-2 text-[12px] text-text-muted">Nessuna voce della guida su questa planimetria.</p>}
-        {!partitaId && tutte.length > 0 && <p className="m-0 pb-1 text-[11px] text-text-muted">Attiva una partita per segnare quel che fai.</p>}
+        {guida.caricamento && !guida.dati && <p className="m-0 py-2 testo-12 text-text-muted">Carico la guida…</p>}
+        {guida.errore && <p className="m-0 py-2 testo-12 text-error" role="alert">{guida.errore}</p>}
+        {guida.dati && tutte.length === 0 && <p className="m-0 py-2 testo-12 text-text-muted">Nessuna voce della guida su questa planimetria.</p>}
+        {!partitaId && tutte.length > 0 && <p className="m-0 pb-1 testo-12 text-text-muted">Attiva una partita per segnare quel che fai.</p>}
         {fatte > 0 && (
-          <button type="button" className={`chip touch mb-1 text-[11px] ${mostraFatte ? 'chip--attivo' : ''}`} aria-pressed={mostraFatte} onClick={() => setMostraFatte((v) => !v)}>Anche le fatte ({fatte})</button>
+          <button type="button" className={`chip touch mb-1 testo-12 ${mostraFatte ? 'chip--attivo' : ''}`} aria-pressed={mostraFatte} onClick={() => setMostraFatte((v) => !v)}>Anche le fatte ({fatte})</button>
         )}
         {infiltrazioni.map((i) => {
           const passiPer = new Map<string, PuntoInteresseDto[]>();
@@ -219,20 +220,20 @@ export function GuidaNelVisore({ mappa, partitaId, spilloSelezionato, spilliQui,
           if (inVista.length === 0) return null;
           return (
             <section key={i.chiave} className="flex flex-col gap-0.5 pb-1.5" aria-label={`${i.ordine + 1}. ${i.nome}`}>
-              {infiltrazioni.length > 1 && <h3 className="m-0 pt-1 text-[11px] font-semibold uppercase tracking-wide text-text-muted">{i.ordine + 1}. {i.nome}</h3>}
+              {infiltrazioni.length > 1 && <h3 className="m-0 pt-1 testo-12 font-semibold uppercase tracking-wide text-text-muted">{i.ordine + 1}. {i.nome}</h3>}
               <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0">{inVista.map((p) => voce(p, passiPer.get(p.chiave) ?? []))}</ul>
             </section>
           );
         })}
-        {guida.dati && tutte.length > 0 && !mostraFatte && daFare === 0 && <p className="m-0 py-2 text-[12px] text-text-muted">Tutto fatto su questa planimetria.</p>}
+        {guida.dati && tutte.length > 0 && !mostraFatte && daFare === 0 && <p className="m-0 py-2 testo-12 text-text-muted">Tutto fatto su questa planimetria.</p>}
       </div>
       {riapertura && (
         <Modal titolo={`Riaprire «${riapertura.voce.nome}»?`} aperta onChiudi={() => setRiapertura(null)}
           azioni={<>
             <button type="button" className="btn btn-secondary touch" onClick={() => setRiapertura(null)}>Annulla</button>
-            <button type="button" className="btn btn-primary touch" onClick={() => { const v = riapertura.voce; setRiapertura(null); void salva(v, null); }}>Riapri</button>
+            <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Riapri" onClick={() => { const v = riapertura.voce; setRiapertura(null); void salva(v, null); }} />
           </>}>
-          {riapertura.righe.map((r) => <p key={r} className="m-0 text-[14px]">{r}</p>)}
+          {riapertura.righe.map((r) => <p key={r} className="m-0 testo-14">{r}</p>)}
         </Modal>
       )}
     </section>

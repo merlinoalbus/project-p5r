@@ -18,6 +18,9 @@ import type { InvitoDto } from '../../types';
 import { CondizioniEditor } from '../guida/CondizioniEditor';
 import { Modal } from '../shared/Modal';
 import { Selettore, type OpzioneSelettore } from '../shared/Selettore';
+import { conferma, CHIUDI_SENZA_SALVARE } from '../../stores/confermaStore';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 type TipoPosto = 'quartiere' | 'luogo' | 'area';
 const NOME_TIPO: Record<TipoPosto, string> = { quartiere: 'Un quartiere', luogo: 'Un luogo', area: 'Un’Area' };
@@ -57,9 +60,9 @@ export function EditorInvito({ confidente, invito, onChiudi, onSalvato }: { conf
   const opzioni = invito && invito.apre.tipo === tipo && !elenco.some((o) => o.chiave === invito.apre.chiave) ? [{ chiave: invito.apre.chiave, nome: invito.apre.nome }, ...elenco] : elenco;
   const giorniDelMese = mese ? Array.from({ length: GIORNI_NEL_MESE[mese] ?? 31 }, (_, i) => String(i + 1)) : [];
 
-  const chiudi = () => {
+  const chiudi = async () => {
     if (occupato) return;
-    if (sporca && !window.confirm('Ci sono modifiche non salvate. Chiudere senza salvarle?')) return;
+    if (sporca && !(await conferma(CHIUDI_SENZA_SALVARE))) return;
     onChiudi();
   };
   const esegui = async (azione: () => Promise<unknown>, esito: string) => {
@@ -76,14 +79,14 @@ export function EditorInvito({ confidente, invito, onChiudi, onSalvato }: { conf
   return (
     <Modal titolo={invito ? `Invito di ${confidente.nome}: ${invito.data ? dataLeggibile(invito.data) : ''}` : `Nuovo invito di ${confidente.nome}`} aperta larga onChiudi={chiudi} azioni={(
       <div className="flex w-full flex-wrap justify-end gap-2">
-        {invito?.modificato && <button type="button" className="btn btn-ghost touch" disabled={occupato} onClick={() => void esegui(() => ripristinaInvitoConfidente(confidente.chiave, invito.data!), 'Invito ripristinato come nella guida.')}>Ripristina</button>}
+        {invito?.modificato && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina" disabled={occupato} onClick={() => void esegui(() => ripristinaInvitoConfidente(confidente.chiave, invito.data!), 'Invito ripristinato come nella guida.')} />}
         <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={chiudi}>Annulla</button>
-        <button type="button" className="btn btn-primary touch" disabled={occupato || !sporca || !dataOk || posto === '' || condizioni.length > 20} onClick={() => void salva()}>{invito ? 'Salva' : 'Crea l’invito'}</button>
+        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo={invito ? 'Salva' : 'Crea l’invito'} disabled={occupato || !sporca || !dataOk || posto === '' || condizioni.length > 20} onClick={() => void salva()} />
       </div>
     )}>
-      <div className="flex flex-col gap-3 text-[13px]">
+      <div className="flex flex-col gap-3 testo-13">
         <p className="m-0 text-text-muted">Le modifiche valgono per tutte le partite. L’invito si registra solo se le condizioni sono vere.</p>
-        {posti.errore && <p role="alert" className="m-0 text-error">{posti.errore} <button type="button" className="btn btn-sm touch" onClick={() => void posti.ricarica()}>Riprova</button></p>}
+        {posti.errore && <p role="alert" className="m-0 text-error">{posti.errore} <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void posti.ricarica()} /></p>}
         {invito ? <p className="m-0"><strong className="text-text">Giorno:</strong> {invito.data ? dataLeggibile(invito.data) : '—'} <span className="text-text-muted">(il giorno non si cambia)</span></p> : (
           <div className="flex flex-wrap gap-3">
             <Selettore etichetta="Mese" valore={mese} vuoto="Scegli il mese" opzioni={MESI_GIOCO.map((m) => ({ chiave: m.numero, nome: m.nome }))} onCambia={(v) => { setMese(v); if (v && Number(giorno) > (GIORNI_NEL_MESE[v] ?? 31)) setGiorno(''); }} disabilitato={occupato} ricerca="mai" />

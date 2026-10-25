@@ -17,6 +17,7 @@ import type { DialogoConfidenteDto } from '../../types';
 import { Modal } from '../shared/Modal';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { conferma, CHIUDI_SENZA_SALVARE, RIPRISTINA_CON_MODIFICHE } from '../../stores/confermaStore';
 
 /** Una scelta in modifica: i punti restano testo finché si scrive («» = nessuno). */
 interface SceltaBozza { testo: string; punti: string; puntiTesto: string; romantica: boolean; avviso: string }
@@ -51,9 +52,9 @@ function EditorDialogo({ chiave, nome, dialogo, onChiudi, onSalvato, onModificat
   const valida = scelte.length <= 40 && scelte.every((s) => s.testo.trim() !== '' && puntiValidi(s.punti));
   useBozzaSporca(`dialogo:${dialogo.id}`, `il dialogo di ${nome}`, sporca);
 
-  const chiudi = () => {
+  const chiudi = async () => {
     if (occupato) return;
-    if (sporca && !window.confirm('Ci sono modifiche non salvate. Chiudere senza salvarle?')) return;
+    if (sporca && !(await conferma(CHIUDI_SENZA_SALVARE))) return;
     onChiudi();
   };
   const cambiaScelta = (i: number, parte: Partial<SceltaBozza>) => setScelte((l) => l.map((x, j) => (j === i ? { ...x, ...parte } : x)));
@@ -70,7 +71,7 @@ function EditorDialogo({ chiave, nome, dialogo, onChiudi, onSalvato, onModificat
     finally { setOccupato(false); }
   };
   const ripristina = async () => {
-    if (sporca && !window.confirm('Ci sono modifiche non salvate: ripristinando perdi anche quelle. Continuare?')) return;
+    if (sporca && !(await conferma(RIPRISTINA_CON_MODIFICHE))) return;
     setOccupato(true);
     try {
       await ripristinaDialogoConfidente(chiave, dialogo.id);
@@ -86,12 +87,12 @@ function EditorDialogo({ chiave, nome, dialogo, onChiudi, onSalvato, onModificat
   return (
     <Modal titolo={`Dialogo del rango ${dialogo.etichetta}: ${nome}`} aperta larga onChiudi={chiudi} azioni={(
       <div className="flex w-full flex-wrap justify-end gap-2">
-        <button type="button" className="btn btn-ghost touch" disabled={occupato} onClick={() => void ripristina()}>Ripristina</button>
+        <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina" disabled={occupato} onClick={() => void ripristina()} />
         <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={chiudi}>Annulla</button>
-        <button type="button" className="btn btn-primary touch" disabled={occupato || !sporca || !valida} onClick={() => void salva()}>Salva</button>
+        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" disabled={occupato || !sporca || !valida} onClick={() => void salva()} />
       </div>
     )}>
-      <div className="flex flex-col gap-3 text-[13px]">
+      <div className="flex flex-col gap-3 testo-13">
         <p className="m-0 text-text-muted">Le modifiche valgono per tutte le partite. I punti sono un numero da 0 a 100; lasciali vuoti se la scelta non ne dà. «Ripristina» rimette note e scelte come nella guida.</p>
         <label className="flex flex-col gap-1">Note del dialogo
           <textarea className="form-input" rows={3} value={note} maxLength={4000} disabled={occupato} onChange={(e) => setNote(e.target.value)} />
@@ -116,12 +117,12 @@ function EditorDialogo({ chiave, nome, dialogo, onChiudi, onSalvato, onModificat
               </label>
               <label className="touch flex items-center gap-2"><input type="checkbox" className="h-5 w-5" checked={s.romantica} disabled={occupato} onChange={(e) => cambiaScelta(i, { romantica: e.target.checked })} /> Avvia o riguarda la relazione romantica</label>
               <div className="flex flex-wrap gap-2">
-                <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato || i === 0} onClick={() => sposta(i, -1)} aria-label={`Sposta in alto la scelta ${i + 1}`}>Su</button>
-                <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato || i === scelte.length - 1} onClick={() => sposta(i, 1)} aria-label={`Sposta in basso la scelta ${i + 1}`}>Giù</button>
-                <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => setScelte((l) => l.filter((_, j) => j !== i))} aria-label={`Togli la scelta ${i + 1}`}>Togli</button>
+                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Sposta su" disabled={occupato || i === 0} onClick={() => sposta(i, -1)} aria-label={`Sposta su la scelta ${i + 1}`} />
+                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Sposta giù" disabled={occupato || i === scelte.length - 1} onClick={() => sposta(i, 1)} aria-label={`Sposta giù la scelta ${i + 1}`} />
+                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={occupato} onClick={() => setScelte((l) => l.filter((_, j) => j !== i))} aria-label={`Togli la scelta ${i + 1}`} />
               </div>
             </li>))}</ol>
-          <div><button type="button" className="btn btn-secondary btn-sm touch" disabled={occupato || scelte.length >= 40} onClick={() => setScelte((l) => [...l, { testo: '', punti: '', puntiTesto: '', romantica: false, avviso: '' }])}>Aggiungi una scelta</button></div>
+          <div><PulsanteVisivo compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una scelta" disabled={occupato || scelte.length >= 40} onClick={() => setScelte((l) => [...l, { testo: '', punti: '', puntiTesto: '', romantica: false, avviso: '' }])} /></div>
         </fieldset>
       </div>
     </Modal>

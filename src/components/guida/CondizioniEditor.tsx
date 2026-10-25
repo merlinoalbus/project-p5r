@@ -31,6 +31,7 @@ import { ELENCHI_VUOTI, nomiDaElenchi, type ElenchiCondizioni } from '../../util
 import { Selettore, type OpzioneSelettore as OpzioneRicerca } from '../shared/Selettore';
 import { IconaAzione } from '../shared/IconaAzione';
 import { SelettoreData } from '../shared/SelettoreData';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 
 /** La condizione con cui nasce una riga nuova: valida, e la più comune. */
 const NUOVA: RequisitoSpillo = { tipo: 'data', dal: '04-18' };
@@ -294,12 +295,12 @@ export function CondizioniEditor({ condizioni, onCambia, elenchi, disabilitato, 
         </button>
       </legend>
       {(aperto || condizioni.length > 0) && (dati.errore
-        ? <p role="alert" className="m-0 text-[13px]">{dati.errore} <button type="button" className="btn btn-sm touch" onClick={() => void dati.ricarica()}>Riprova</button></p>
+        ? <p role="alert" className="m-0 testo-13">{dati.errore} <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void dati.ricarica()} /></p>
         : offerti
           ? <Blocco condizioni={condizioni} modo="tutte" onCambia={onCambia} profondita={0} elenchi={offerti} nomi={nomi} disabilitato={disabilitato} perSpillo={perSpillo} massimo={massimo} />
-          : <p className="m-0 text-[13px] text-text-muted">Caricamento degli elenchi…</p>)}
-      {(aperto || condizioni.length > 0) && attiva && <div className="mt-2 text-[13px]" aria-live="polite" aria-label="Anteprima delle condizioni">
-        {anteprima.caricamento ? <p className="m-0 text-text-muted">Valutazione sulla partita…</p> : anteprima.errore ? <p className="m-0" role="alert">{anteprima.errore} <button type="button" className="btn btn-sm touch" onClick={() => void anteprima.ricarica()}>Riprova</button></p> : anteprima.dati && <>
+          : <p className="m-0 testo-13 text-text-muted">Caricamento degli elenchi…</p>)}
+      {(aperto || condizioni.length > 0) && attiva && <div className="mt-2 testo-13" aria-live="polite" aria-label="Anteprima delle condizioni">
+        {anteprima.caricamento ? <p className="m-0 text-text-muted">Valutazione sulla partita…</p> : anteprima.errore ? <p className="m-0" role="alert">{anteprima.errore} <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void anteprima.ricarica()} /></p> : anteprima.dati && <>
           <p className="m-0 font-semibold">{anteprima.dati.complessivo.esito === 'vero' ? 'Disponibile' : anteprima.dati.complessivo.esito === 'avviso' ? 'Avviso: non blocca' : anteprima.dati.complessivo.esito === 'falso' ? `Manca: ${anteprima.dati.complessivo.manca ?? anteprima.dati.complessivo.testo}` : `Da verificare: ${anteprima.dati.complessivo.manca ?? anteprima.dati.complessivo.testo}`}</p>
           <ul className="m-0 list-none p-0">{anteprima.dati.condizioni.map((c, i) => <li key={i}>{c.esito === 'falso' ? `Manca: ${c.manca ?? c.testo}` : c.testo}</li>)}</ul>
         </>}

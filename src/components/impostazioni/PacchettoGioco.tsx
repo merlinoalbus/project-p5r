@@ -52,14 +52,14 @@ const NOME_FASE: Record<string, string> = {
 /** I riferimenti delle partite senza più la loro riga: tabella, quante righe e partite, esempi. */
 function ElencoOrfani({ orfani, quando }: { orfani: OrfanoPartiteDto[]; quando: 'prima' | 'dopo' }) {
   if (orfani.length === 0) {
-    return <p className="m-0 text-[13px] text-success">{quando === 'prima' ? 'Nessun riferimento delle partite resterebbe orfano.' : 'Nessun riferimento delle partite è rimasto orfano.'}</p>;
+    return <p className="m-0 testo-13 text-success">{quando === 'prima' ? 'Nessun riferimento delle partite resterebbe orfano.' : 'Nessun riferimento delle partite è rimasto orfano.'}</p>;
   }
   return (
     <div className="flex flex-col gap-1">
-      <p className="m-0 text-[13px] text-warning">
+      <p className="m-0 testo-13 text-warning">
         {quando === 'prima' ? 'Queste righe delle partite non troverebbero più la loro voce nei dati di gioco:' : 'Queste righe delle partite non trovano più la loro voce nei dati di gioco:'}
       </p>
-      <ul className="m-0 p-0 list-none flex flex-col gap-1 text-[13px]" aria-label="Riferimenti orfani">
+      <ul className="m-0 p-0 list-none flex flex-col gap-1 testo-13" aria-label="Riferimenti orfani">
         {orfani.map((o) => (
           <li key={`${o.tabella}.${o.colonna}.${o.entita}`} className="flex flex-col gap-0.5 rounded border border-border px-2 py-1">
             <span><strong>{o.entita}</strong> <span className="text-text-muted">· {o.tabella}.{o.colonna}</span></span>
@@ -74,7 +74,7 @@ function ElencoOrfani({ orfani, quando }: { orfani: OrfanoPartiteDto[]; quando: 
 
 /** R11-05/3: le strutture del backup che questa versione non usa più. Nessuna scelta da fare: non si importano e restano nella copia di sicurezza. */
 function ElencoScarti({ scarti, quando, copia }: { scarti: ScartoPacchettoDto[]; quando: 'prima' | 'dopo'; copia?: string }) {
-  if (scarti.length === 0) return <p className="m-0 text-[13px] text-success">{quando === 'prima' ? 'Il pacchetto non porta strutture che questa versione non usa più.' : 'Nessuna struttura del pacchetto è stata scartata.'}</p>;
+  if (scarti.length === 0) return <p className="m-0 testo-13 text-success">{quando === 'prima' ? 'Il pacchetto non porta strutture che questa versione non usa più.' : 'Nessuna struttura del pacchetto è stata scartata.'}</p>;
   const spiegati = scarti.filter((s) => s.spiegata), altri = scarti.filter((s) => !s.spiegata);
   const riga = (s: ScartoPacchettoDto) => (
     <li key={`${s.tabella}.${s.colonna ?? ''}`} className="flex flex-col gap-0.5 rounded border border-border px-2 py-1">
@@ -87,15 +87,15 @@ function ElencoScarti({ scarti, quando, copia }: { scarti: ScartoPacchettoDto[];
   );
   return (
     <div className="flex flex-col gap-1">
-      <p className="m-0 text-[13px] text-warning">{quando === 'prima' ? 'Non vengono importati; restano nella copia di sicurezza:' : 'Non sono stati importati:'}</p>
-      {spiegati.length > 0 && <ul className={`m-0 p-0 list-none flex flex-col gap-1 text-[13px] ${spiegati.length > 8 ? 'area-scorrevole max-h-[min(40vh,320px)]' : ''}`} aria-label="Strutture scartate">{spiegati.map(riga)}</ul>}
+      <p className="m-0 testo-13 text-warning">{quando === 'prima' ? 'Non vengono importati; restano nella copia di sicurezza:' : 'Non sono stati importati:'}</p>
+      {spiegati.length > 0 && <ul className={`m-0 p-0 list-none flex flex-col gap-1 testo-13 ${spiegati.length > 8 ? 'area-scorrevole max-h-[min(40vh,320px)]' : ''}`} aria-label="Strutture scartate">{spiegati.map(riga)}</ul>}
       {altri.length > 0 && (
         <>
-          <p className="m-0 text-[13px] text-text-secondary">Strutture non più nell’app (probabilmente rinominate):</p>
-          <ul className={`m-0 p-0 list-none flex flex-col gap-1 text-[13px] ${altri.length > 8 ? 'area-scorrevole max-h-[min(40vh,320px)]' : ''}`} aria-label="Strutture scartate non spiegate">{altri.map(riga)}</ul>
+          <p className="m-0 testo-13 text-text-secondary">Strutture non più nell’app (probabilmente rinominate):</p>
+          <ul className={`m-0 p-0 list-none flex flex-col gap-1 testo-13 ${altri.length > 8 ? 'area-scorrevole max-h-[min(40vh,320px)]' : ''}`} aria-label="Strutture scartate non spiegate">{altri.map(riga)}</ul>
         </>
       )}
-      {quando === 'dopo' && copia && <p className="m-0 text-[13px] text-text-muted">Nulla è perso: i dati sono nella copia di sicurezza <code>{copia}</code>.</p>}
+      {quando === 'dopo' && copia && <p className="m-0 testo-13 text-text-muted">Nulla è perso: i dati sono nella copia di sicurezza <code>{copia}</code>.</p>}
     </div>
   );
 }
@@ -104,8 +104,8 @@ function ElencoScarti({ scarti, quando, copia }: { scarti: ScartoPacchettoDto[];
 function Anteprima({ a, origine }: { a: AnteprimaPacchettoDto; origine: string }) {
   const daApplicare = a.versioneSchema < a.versioneSchemaCodice ? a.versioneSchemaCodice - a.versioneSchema : 0;
   return (
-    <div className="flex flex-col gap-3 text-[13px]">
-      <p className="m-0 text-[14px]">
+    <div className="flex flex-col gap-3 testo-13">
+      <p className="m-0 testo-14">
         Il backup locale «{origine}» ({byteTesto(a.databaseByte)}) sostituirà il file <code>gioco.db</code> di questa istanza: compendio, guida, catalogo, mappe, luoghi e immagini. Le correzioni successive alla copia verranno sostituite dai valori del backup.
         Le <strong>partite non vengono toccate</strong>. Prima della sostituzione il server salva una copia di sicurezza in <code>data/backups</code>.
       </p>
@@ -116,12 +116,12 @@ function Anteprima({ a, origine }: { a: AnteprimaPacchettoDto; origine: string }
         <li><strong>Immagini</strong> <span className="text-text-muted">{numero(a.immagini.pacchetto)} nel backup · {numero(a.immagini.istanza)} nell'istanza ora</span></li>
       </ul>
       <div className="flex flex-col gap-1">
-        <h3 className="m-0 text-[14px]">Tabelle che cambiano</h3>
+        <h3 className="m-0 testo-14">Tabelle che cambiano</h3>
         {a.differenze.length === 0 ? (
           <p className="m-0 text-text-muted">Stessi conteggi dell'istanza in ogni tabella.</p>
         ) : (
           <div className="area-scorrevole-x">
-            <table className="w-full border-collapse text-[13px]" aria-label="Tabelle che cambiano">
+            <table className="w-full border-collapse testo-13" aria-label="Tabelle che cambiano">
               <thead><tr className="text-left text-text-muted"><th className="py-0.5 pr-2 font-normal">Tabella</th><th className="py-0.5 pr-2 font-normal text-right">Ora</th><th className="py-0.5 font-normal text-right">Backup</th></tr></thead>
               <tbody>
                 {a.differenze.map((d) => (
@@ -134,15 +134,15 @@ function Anteprima({ a, origine }: { a: AnteprimaPacchettoDto; origine: string }
         {a.tabelleAssenti.length > 0 && <p className="m-0 text-text-muted">Non nel backup (le migrazioni le ricreano vuote): {a.tabelleAssenti.join(', ')}.</p>}
       </div>
       {a.scarti !== undefined && <div className="flex flex-col gap-1">
-        <h3 className="m-0 text-[14px]">Cosa questa versione non usa più</h3>
+        <h3 className="m-0 testo-14">Cosa questa versione non usa più</h3>
         <ElencoScarti scarti={a.scarti} quando="prima" />
       </div>}
       <div className="flex flex-col gap-1">
-        <h3 className="m-0 text-[14px]">Riferimenti delle partite</h3>
+        <h3 className="m-0 testo-14">Riferimenti delle partite</h3>
         <ElencoOrfani orfani={a.orfani} quando="prima" />
       </div>
       {a.tanaka && <div className="flex flex-col gap-1">
-        <h3 className="m-0 text-[14px]">Listino di Tanaka</h3>
+        <h3 className="m-0 testo-14">Listino di Tanaka</h3>
         <p className="m-0 text-text-muted">Ora: {LISTINO_TANAKA[a.tanaka.istanza.listino]}{a.tanaka.istanza.attiva ? ', decisione applicata' : ''} · nel backup: {LISTINO_TANAKA[a.tanaka.pacchetto.listino]}{a.tanaka.pacchetto.attiva ? ', decisione applicata' : ''} ({a.tanaka.pacchetto.decisioni} {a.tanaka.pacchetto.decisioni === 1 ? 'decisione' : 'decisioni'} nel registro). Gli acquisti delle partite non cambiano.</p>
         {a.tanaka.avvisi.map((v) => <p key={v} className="m-0 text-warning">{v}</p>)}
       </div>}
@@ -300,20 +300,20 @@ export function PacchettoGioco() {
 
   return (
     <section className="card flex flex-col gap-3" aria-label="Backup dei dati di gioco">
-      <h2 className="m-0 text-[15px] font-semibold">Backup dei dati di gioco</h2>
-      <p className="m-0 text-[13px] text-text-secondary">
+      <h2 className="m-0 testo-15 font-semibold">Backup dei dati di gioco</h2>
+      <p className="m-0 testo-13 text-text-secondary">
         Un solo file, <code>gioco.db</code>: i <strong>dati di gioco</strong> senza le partite, con dentro compendio, guida, catalogo, mappe, luoghi e le immagini.
         «Scarica» salva una copia del database attuale. «Importa» sostituisce il file DB con un backup locale scelto dalla cartella d'appoggio del server, dopo l'anteprima e la conferma. Non tocca il file delle partite; per un backup che le comprenda usa «Backup e ripristino».
       </p>
       {s && (
-        <ul className="m-0 p-0 list-none grid gap-1 sm:grid-cols-2 text-[13px]">
+        <ul className="m-0 p-0 list-none grid gap-1 sm:grid-cols-2 testo-13">
           <li><strong>Dati di gioco</strong> <span className="text-text-muted">{s.database.inMemoria ? 'in memoria (nessun file)' : `${s.database.nome} · ${byteTesto(s.database.byte)} · schema ${s.versioneSchema}`}</span></li>
           <li><strong>Immagini nel database</strong> <span className="text-text-muted">{numero(s.immagini.file)} · {byteTesto(s.immagini.byte)}</span></li>
         </ul>
       )}
-      {s?.vuota && <p className="m-0 text-[13px] text-warning" role="status">Questa istanza non ha dati di gioco: puoi ripristinarli importando un backup locale.</p>}
-      {s && !s.vuota && !s.completo && <p className="m-0 text-[13px] text-warning" role="status">Questa istanza ha solo i dati iniziali (nessuna immagine). Un backup completo di gioco.db può ripristinare anche mappe e grafica.</p>}
-      {stato.errore && <p className="m-0 text-[13px] text-error">{stato.errore}</p>}
+      {s?.vuota && <p className="m-0 testo-13 text-warning" role="status">Questa istanza non ha dati di gioco: puoi ripristinarli importando un backup locale.</p>}
+      {s && !s.vuota && !s.completo && <p className="m-0 testo-13 text-warning" role="status">Questa istanza ha solo i dati iniziali (nessuna immagine). Un backup completo di gioco.db può ripristinare anche mappe e grafica.</p>}
+      {stato.errore && <p className="m-0 testo-13 text-error">{stato.errore}</p>}
       {anteprima === null && lavoroSulServer && (
         <div className="flex flex-col gap-1.5">
           <BarraInvio avanzamento={{ byteInviati: 0, byteTotali: 0, percentuale: 100, inviato: true }} etichetta="Lavoro sul server" elaborazione={NOME_FASE[lavoroSulServer] ?? 'Il server sta lavorando'} />
@@ -323,15 +323,15 @@ export function PacchettoGioco() {
         <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Scarica backup dati di gioco" dettaglio="file gioco.db, immagini comprese" disabled={occupato} onClick={() => void esporta()} />
       </div>
       <section className="flex flex-col gap-1.5" aria-label="Cartella d'appoggio">
-        <h3 className="m-0 text-[14px]">Dalla cartella d'appoggio</h3>
-        <p className="m-0 text-[12px] text-text-muted">
+        <h3 className="m-0 testo-14">Dalla cartella d'appoggio</h3>
+        <p className="m-0 testo-12 text-text-muted">
           Deposita il backup locale di gioco.db nella cartella condivisa montata sul server e importalo da qui: il file non passa dal browser. Questo comando sostituisce i dati di gioco, non li unisce a quelli attuali.
         </p>
         <div className="flex flex-wrap gap-1.5 items-center">
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="ricalcola" dimensione={20} />} titolo="Cerca i file disponibili" dettaglio="guarda nella cartella d'appoggio" disabled={occupato} onClick={() => void cercaNelDeposito()} />
         </div>
-        {deposito && !deposito.disponibile && <p className="m-0 text-[13px] text-warning" role="status">{deposito.motivo}</p>}
-        {deposito?.disponibile && deposito.file.length === 0 && <p className="m-0 text-[13px] text-text-muted" role="status">Nessun backup in <code>{deposito.cartella}</code>.</p>}
+        {deposito && !deposito.disponibile && <p className="m-0 testo-13 text-warning" role="status">{deposito.motivo}</p>}
+        {deposito?.disponibile && deposito.file.length === 0 && <p className="m-0 testo-13 text-text-muted" role="status">Nessun backup in <code>{deposito.cartella}</code>.</p>}
         {deposito?.disponibile && deposito.file.length > 0 && (
           <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-end">
             <Selettore
@@ -354,7 +354,7 @@ export function PacchettoGioco() {
         azioni={
           <>
             <button type="button" className="btn btn-secondary" onClick={chiudiAnteprima}>Annulla</button>
-            <button type="button" className="btn btn-danger" disabled={occupato || !anteprima?.importabile} onClick={() => void importa()}>Sostituisci i dati di gioco</button>
+            <PulsanteVisivo tono="pericolo" icona={<IconaAzione chiave="carica" dimensione={22} />} titolo="Sostituisci i dati di gioco" disabled={occupato || !anteprima?.importabile} onClick={() => void importa()} />
           </>
         }
       >
@@ -362,7 +362,7 @@ export function PacchettoGioco() {
         {lavoroSulServer && (
           <div className="flex flex-col gap-1.5">
             <BarraInvio avanzamento={{ byteInviati: 0, byteTotali: 0, percentuale: 100, inviato: true }} etichetta="Lavoro sul server" elaborazione={NOME_FASE[lavoroSulServer] ?? 'Il server sta lavorando'} />
-            <button type="button" className="btn btn-secondary btn-sm touch self-start" onClick={() => { smetti.current = true; }}>Smetti di attendere</button>
+            <PulsanteVisivo compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Smetti di attendere" className="self-start" onClick={() => { smetti.current = true; }} />
           </div>
         )}
       </Modal>
@@ -373,21 +373,21 @@ export function PacchettoGioco() {
         larga
         azioni={
           <>
-            <button type="button" className="btn btn-secondary" onClick={() => setEsito(null)}>Chiudi</button>
-            <button type="button" className="btn btn-primary" onClick={() => window.location.reload()}>Ricarica l'app</button>
+            <PulsanteVisivo icona={<IconaAzione chiave="chiudi" dimensione={22} />} titolo="Chiudi" onClick={() => setEsito(null)} />
+            <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="riprova" dimensione={22} />} titolo="Ricarica l'app" onClick={() => window.location.reload()} />
           </>
         }
       >
         {esito && (
-          <div className="flex flex-col gap-3 text-[13px]">
-            <p className="m-0 text-[14px]">
+          <div className="flex flex-col gap-3 testo-13">
+            <p className="m-0 testo-14">
               I dati di gioco sono stati sostituiti: schema {esito.versioneSchema}{esito.migrazioniApplicate ? ` (${esito.migrazioniApplicate} ${esito.migrazioniApplicate === 1 ? 'migrazione applicata' : 'migrazioni applicate'} dal ${esito.versioneSchemaPacchetto})` : ''}, {numero(esito.immagini)} immagini.
               Copia di sicurezza: <code>{esito.copiaDiSicurezza}</code>. Le partite sono {numero(esito.stato.partite)}, intatte.
             </p>
             <ElencoOrfani orfani={esito.orfani} quando="dopo" />
-            {esito.scarti !== undefined && <section aria-label="Strutture scartate"><h3 className="m-0 text-[14px]">Scartato nell’importazione</h3><ElencoScarti scarti={esito.scarti} quando="dopo" copia={esito.riepilogoSalvatoIn ?? esito.copiaDiSicurezza} /></section>}
+            {esito.scarti !== undefined && <section aria-label="Strutture scartate"><h3 className="m-0 testo-14">Scartato nell’importazione</h3><ElencoScarti scarti={esito.scarti} quando="dopo" copia={esito.riepilogoSalvatoIn ?? esito.copiaDiSicurezza} /></section>}
             {!!esito.condizioniConvertite?.length && <section aria-label="Condizioni recuperate dal backup">
-              <h3 className="m-0 text-[14px]">Vecchie condizioni recuperate come avvisi</h3>
+              <h3 className="m-0 testo-14">Vecchie condizioni recuperate come avvisi</h3>
               <p className="m-0 text-text-secondary">Non bloccano la disponibilità. Le altre condizioni non sono state riscritte da questo recupero.</p>
               <ul className="m-0 pl-4">{esito.condizioniConvertite.map((c, i) => <li key={i}>{c}</li>)}</ul>
             </section>}

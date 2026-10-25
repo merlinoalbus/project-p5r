@@ -123,7 +123,7 @@ export function DotiSociali({ partitaId }: Props) {
               />
             </div>
             <div className="w-full flex flex-col items-center gap-1.5" role="group" aria-label="Modificatori delle note">
-              <span className="text-[11px] font-semibold uppercase tracking-[.06em] text-text-muted">Modificatori · valgono per tutte le note</span>
+              <span className="testo-12 font-semibold uppercase tracking-[.06em] text-text-muted">Modificatori · valgono per tutte le note</span>
               <div className="flex flex-wrap justify-center gap-2">
                 <PulsanteVisivo id={`fortuna-${partitaId}`} disposizione="colonna" attivo={fortunaAttiva !== null || scegliFortuna} disabled={!fortuna.dati} aria-disabled={occupata === 'fortuna' || undefined} icona={<IconaAzione chiave="fortuna" dimensione={48} />} titolo="Fortuna ×1,5" dettaglio={fortunaAttiva ? `su ${dati?.find((d) => d.chiave === fortunaAttiva)?.nome ?? fortunaAttiva}, per oggi` : 'lettura di Chihaya'} onClick={() => { if (fortunaAttiva) void cambiaFortuna(null); else setScegliFortuna((v) => !v); }} aria-label="Fortuna ×1,5: lettura della fortuna di Chihaya" title="Lettura della fortuna di Chihaya: i punti della Dote scelta valgono ×1,5 (per difetto) per il resto del giorno" />
                 <PulsanteVisivo disposizione="colonna" attivo={libro} icona={<IconaAzione chiave="libro" dimensione={48} />} titolo="Libro" dettaglio="3 note = 7 punti" onClick={() => setLibro((v) => !v)} aria-label="Libro: 3 note valgono 7 punti" title="Libri a resa maggiorata: 3 note valgono 7 punti" />
@@ -131,13 +131,13 @@ export function DotiSociali({ partitaId }: Props) {
               </div>
             </div>
             {scegliFortuna && <div className="flex flex-col items-center gap-1.5" role="group" aria-label="Dote della Fortuna">
-              <span className="text-[12px] text-text-secondary">Su quale Dote hai ricevuto la Fortuna? Vale per il resto di oggi.</span>
+              <span className="testo-12 text-text-secondary">Su quale Dote hai ricevuto la Fortuna? Vale per il resto di oggi.</span>
               <div className="flex flex-wrap justify-center gap-1.5">
-                {(dati ?? []).map((d) => <button key={d.chiave} type="button" className="btn btn-secondary btn-sm touch" aria-disabled={occupata === 'fortuna' || undefined} onClick={() => void cambiaFortuna(d.chiave)}>{d.nome}</button>)}
+                {(dati ?? []).map((d) => <PulsanteVisivo compatto icona={<IconaAzione chiave="fortuna" dimensione={20} />} titolo={d.nome} key={d.chiave} aria-disabled={occupata === 'fortuna' || undefined} onClick={() => void cambiaFortuna(d.chiave)} />)}
               </div>
             </div>}
-            {fortuna.dati?.scaduta && !scegliFortuna && <p className="m-0 text-[12px] text-text-muted text-center">La Fortuna di un altro giorno è finita: se ne hai una nuova, riaccendila.</p>}
-            <p className="m-0 text-[12px] text-text-muted text-center">Tocca un vertice per andare alla dote.</p>
+            {fortuna.dati?.scaduta && !scegliFortuna && <p className="m-0 testo-12 text-text-muted text-center">La Fortuna di un altro giorno è finita: se ne hai una nuova, riaccendila.</p>}
+            <p className="m-0 testo-12 text-text-muted text-center">Tocca un vertice per andare alla dote.</p>
           </section>
           <ul className="m-0 p-0 list-none flex flex-col gap-2 min-w-0 md:min-h-0 md:area-scorrevole md:p-1">
             {dati?.map((d) => (
@@ -158,7 +158,7 @@ export function DotiSociali({ partitaId }: Props) {
                           aria-label={`${d.nome}: aggiungi ${n} ${n === 1 ? 'nota' : 'note'} (${puntiAnteprima(n, libro, fortunaAttiva === d.chiave, cinema)} punti)`}
                         >
                           <span aria-hidden="true">{'♪'.repeat(n)}</span>
-                          <span className="text-[13px] opacity-90">+{puntiAnteprima(n, libro, fortunaAttiva === d.chiave, cinema)}</span>
+                          <span className="testo-13 opacity-90">+{puntiAnteprima(n, libro, fortunaAttiva === d.chiave, cinema)}</span>
                         </button>
                       ))}
                       <button type="button" className="btn btn-secondary btn-nota min-w-[46px] lg:min-w-[44px] lg:px-2" aria-disabled={occupata === d.chiave || d.punti === 0 || undefined} onClick={() => void modifica(d.chiave, { delta: -1 })} aria-label={`${d.nome}: togli un punto`}>−1</button>
@@ -182,23 +182,23 @@ function CartaDote({ dote: d, azioni, suggerita, onModificata }: { dote: DoteSoc
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center gap-2 flex-wrap">
-        <AssetImg nome={`doti/${d.chiave}`} alt={d.nome} className="h-7 lg:h-12 w-auto object-contain" fallback={<span className="font-display uppercase text-[20px] leading-none">{d.nome}</span>} />
+        <AssetImg nome={`doti/${d.chiave}`} alt={d.nome} className="h-7 lg:h-12 w-auto object-contain" fallback={<span className="font-display uppercase testo-20 leading-none">{d.nome}</span>} />
         <span className="flex items-center gap-1.5">
           <span className="sr-only">Rango {d.rango} · {d.nomeRango}</span>
-          <span className="font-display uppercase text-[20px] leading-none" aria-hidden="true">Rango</span>
-          <AssetImg nome={`ui/rango-${d.rango}`} alt="" decorativa className="h-9 w-auto object-contain" fallback={<span className="font-display text-[20px] leading-none" aria-hidden="true">{d.rango}</span>} />
-          <span className="font-display uppercase text-[20px] leading-none" aria-hidden="true">{d.nomeRango}</span>
+          <span className="font-display uppercase testo-20 leading-none" aria-hidden="true">Rango</span>
+          <AssetImg nome={`ui/rango-${d.rango}`} alt="" decorativa className="h-9 w-auto object-contain" fallback={<span className="font-display testo-20 leading-none" aria-hidden="true">{d.rango}</span>} />
+          <span className="font-display uppercase testo-20 leading-none" aria-hidden="true">{d.nomeRango}</span>
         </span>
         {suggerita !== null && suggerita !== undefined && <TargaSuggerito motivo={suggerita} compatta />}
         {/* L11 · B11 (R11-15/12): il nome della Dote, i nomi dei cinque ranghi e le loro soglie si correggono qui e si rimettono come la guida */}
         <ModificaGuida tipo="dote" chiave={d.chiave} cosa={`la Dote «${d.nome}» e i suoi ranghi`} soloIcona onSalvato={onModificata} />
-        <span className="ml-auto font-display text-[26px] leading-none tabular-nums">{d.punti}<span className="text-[12px] font-sans text-text-muted"> punti</span></span>
+        <span className="ml-auto font-display testo-28 leading-none tabular-nums">{d.punti}<span className="testo-12 font-sans text-text-muted"> punti</span></span>
       </div>
       <div className="h-2 bg-bg-tertiary overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={d.sogliaProssima === null ? 100 : quota} aria-label={`Progresso verso il rango ${d.rango + 1}`}>
         <div className="h-full bg-primary transition-[width]" style={{ width: `${d.sogliaProssima === null ? 100 : quota}%` }} />
       </div>
       <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="text-[13px] text-text-secondary min-w-0">
+        <div className="testo-13 text-text-secondary min-w-0">
           {d.mancanti !== null && prossimo
             ? <>Mancano <strong className="text-text">{d.mancanti}</strong> punti al rango {prossimo.rango} · {prossimo.nome} ({d.sogliaProssima})</>
             : <>Rango massimo raggiunto.</>}

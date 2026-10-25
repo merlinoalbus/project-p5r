@@ -81,11 +81,11 @@ export function ModificaAffinita({ personaId, nome, affinita, affinitaGuida, onC
       <Modal titolo={`Affinità di ${nome}`} aperta onChiudi={chiudi} larga
         azioni={<>
           <button type="button" className="btn btn-secondary" disabled={occupato} onClick={chiudi}>Annulla</button>
-          {affinitaGuida && <button type="button" className="btn btn-secondary" disabled={occupato} onClick={() => setConferma(true)}>Ripristina i valori della guida</button>}
-          <button type="button" className="btn btn-primary" disabled={occupato || cambiati.length === 0} onClick={() => void salva()}>Salva</button>
+          {affinitaGuida && <PulsanteVisivo icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina i valori della guida" disabled={occupato} onClick={() => setConferma(true)} />}
+          <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" disabled={occupato || cambiati.length === 0} onClick={() => void salva()} />
         </>}>
         <div className="flex flex-col gap-3">
-          <p className="m-0 text-[12px] text-text-muted">
+          <p className="m-0 testo-12 text-text-muted">
             {affinitaGuida
               ? 'Hai corretto le affinità di questa Persona: «Ripristina i valori della guida» (o «Rimetti questo» sotto un elemento) rimette quello che diceva la guida.'
               : 'Salvando, la correzione vale in tutta l’app (scheda, Ombre, Battaglia, dedali, Stanza di Velluto) e resta anche dopo gli aggiornamenti; potrai rimettere i valori della guida.'}
@@ -98,9 +98,9 @@ export function ModificaAffinita({ personaId, nome, affinita, affinitaGuida, onC
                 <div key={a.elemento} className="flex flex-col gap-1">
                   <Selettore etichetta={a.elementoNome} valore={attuale} ricerca="mai" disabilitato={occupato} opzioni={OPZIONI} onCambia={(k) => setBozza((b) => ({ ...b, [a.elemento]: k }))} />
                   {guida !== undefined && guida !== attuale && (
-                    <div className="flex flex-wrap items-center gap-2 text-[11px] text-text-muted">
+                    <div className="flex flex-wrap items-center gap-2 testo-12 text-text-muted">
                       <span className="min-w-0 flex-1">Guida: {nomeCodice(guida)}</span>
-                      <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => setBozza((b) => ({ ...b, [a.elemento]: guida }))}>Rimetti questo</button>
+                      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Rimetti questo" disabled={occupato} onClick={() => setBozza((b) => ({ ...b, [a.elemento]: guida }))} />
                     </div>
                   )}
                 </div>
@@ -108,15 +108,15 @@ export function ModificaAffinita({ personaId, nome, affinita, affinitaGuida, onC
             })}
           </div>
           {conferma && (
-            <div role="alert" className="flex flex-col gap-2 rounded-md border border-warning p-3 text-[13px]">
+            <div role="alert" className="flex flex-col gap-2 rounded-md border border-warning p-3 testo-13">
               <p className="m-0 font-semibold">Perdi la tua versione:</p>
               <ul className="m-0 flex list-none flex-col gap-1 p-0">
                 {daPerdere.map((a) => <li key={a.elemento}><span className="text-text-muted">{a.elementoNome}:</span> {a.codiceNome} → {nomeCodice(affinitaGuida?.find((g) => g.elemento === a.elemento)?.codice ?? a.codice)}</li>)}
               </ul>
               {cambiati.length > 0 && <p className="m-0 text-text-muted">Anche le modifiche di questa finestra non ancora salvate vanno perse.</p>}
               <div className="flex flex-wrap gap-2">
-                <button type="button" className="btn btn-danger touch" disabled={occupato} onClick={() => void ripristina()}>Rimetti la guida</button>
-                <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={() => setConferma(false)}>No</button>
+                <PulsanteVisivo tono="pericolo" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Rimetti la guida" disabled={occupato} onClick={() => void ripristina()} />
+                <PulsanteVisivo icona={<IconaAzione chiave="annulla" dimensione={22} />} titolo="No" disabled={occupato} onClick={() => setConferma(false)} />
               </div>
             </div>
           )}

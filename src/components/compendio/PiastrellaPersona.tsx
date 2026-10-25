@@ -37,8 +37,8 @@ export function PiastrellaPersona({ persona: p, evidenziata, onApri }: Props) {
         <div className="min-w-0">
           {/* il nome è l'identità della piastrella: va a capo invece di finire in «…» (i nomi lunghi —
               Magatsu-Izanagi Picaro, Amuleto dell'Imperatore — sbordavano di 60 px su telefono) */}
-          <div className="font-display uppercase text-[19px] leading-[1.05] break-words" title={p.nomeIt}>{p.nomeIt}</div>
-          {p.nomeIt !== p.nome && <div className="text-[11px] text-text-muted break-words">{p.nome}</div>}
+          <div className="font-display uppercase testo-20 leading-[1.05] break-words" title={p.nomeIt}>{p.nomeIt}</div>
+          {p.nomeIt !== p.nome && <div className="testo-12 text-text-muted break-words">{p.nome}</div>}
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="chip">{p.arcanaNome}</span>

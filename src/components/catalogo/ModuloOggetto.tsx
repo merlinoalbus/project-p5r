@@ -5,6 +5,8 @@ import { aggiornaOggettoCatalogo, creaOggettoCatalogo } from '../../services/api
 import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
 import { useBozzaSporca } from '../../utils/bozzeSporche';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props { oggetto?: CatalogoOggettoDto; onChiudi: () => void; onSalvato: (oggetto: CatalogoOggettoDto) => void }
 
@@ -45,9 +47,9 @@ export function ModuloOggetto({ oggetto, onChiudi, onSalvato }: Props) {
     finally { setOccupato(false); }
   };
   return <Modal aperta larga titolo={oggetto ? `Modifica «${oggetto.nome}»` : 'Nuovo oggetto'} onChiudi={() => { if (!occupato) onChiudi(); }}
-    azioni={<><button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={onChiudi}>Annulla</button><button type="submit" form={id} className="btn btn-primary touch" disabled={occupato || !nome.trim()}>{occupato ? 'Salvataggio…' : 'Salva'}</button></>}>
+    azioni={<><button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={onChiudi}>Annulla</button><PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo={occupato ? 'Salvataggio…' : 'Salva'} type="submit" form={id} disabled={occupato || !nome.trim()} /></>}>
     <form id={id} onSubmit={(e) => void salva(e)} className="flex flex-col gap-3">
-      {errore && <p role="alert" className="m-0 text-[13px] text-error">{errore}</p>}
+      {errore && <p role="alert" className="m-0 testo-13 text-error">{errore}</p>}
       <fieldset disabled={occupato} className="m-0 grid min-w-0 grid-cols-1 gap-3 border-0 p-0 sm:grid-cols-2">
         <label className="editor-mappa__campo sm:col-span-2">Nome<input className="form-input" value={nome} required maxLength={300} onChange={(e) => setNome(e.target.value)} /></label>
         <Selettore etichetta="Categoria" valore={categoria} disabilitato={occupato} opzioni={CATEGORIE_OGGETTO.map((k) => ({ chiave: k, nome: CATEGORIA_OGGETTO[k].nome }))} onCambia={(v) => { if (eCategoriaOggetto(v)) setCategoria(v); }} />
@@ -61,7 +63,7 @@ export function ModuloOggetto({ oggetto, onChiudi, onSalvato }: Props) {
           <label className="editor-mappa__campo">Statistiche<input className="form-input" value={statistiche} maxLength={2000} onChange={(e) => setStatistiche(e.target.value)} /></label>
         </>}
       </fieldset>
-      <p className="m-0 text-[12px] text-text-muted">Il prezzo e la disponibilità si modificano nel negozio. Rinominare l’oggetto non cambia la sua chiave né i progressi già registrati.</p>
+      <p className="m-0 testo-12 text-text-muted">Il prezzo e la disponibilità si modificano nel negozio. Rinominare l’oggetto non cambia la sua chiave né i progressi già registrati.</p>
     </form>
   </Modal>;
 }

@@ -13,6 +13,9 @@ import type { EventoPartitaDto, StoricoDto } from '../../types';
 const { getStorico, eliminaEvento, eliminaEventi } = vi.hoisted(() => ({ getStorico: vi.fn(), eliminaEvento: vi.fn(), eliminaEventi: vi.fn()}));
 vi.mock('../../services/api', (vero) => moduloApi(vero, { getStorico, eliminaEvento, eliminaEventi}));
 vi.mock('../../stores/notificationStore', (vero) => moduloNotifiche(vero));
+// le domande di conferma passano da `conferma()` (DialogoConferma), non più da window.confirm
+const { conferma } = vi.hoisted(() => ({ conferma: vi.fn() }));
+vi.mock('../../stores/confermaStore', async (vero) => ({ ...(await vero<typeof import('../../stores/confermaStore')>()), conferma }));
 
 /** Evento dello storico del gruppo «persona» con tipo e titolo dati (il nome del tipo ripete il tipo), con i campi di `extra` che sovrascrivono i predefiniti. */
 function ev(id: number, tipo: string, titolo: string, extra: Partial<EventoPartitaDto> = {}): EventoPartitaDto {
@@ -42,7 +45,7 @@ describe('StoricoPartita', () => {
     await waitFor(() => expect(getStorico).toHaveBeenLastCalledWith(7, { limite: 2, prima: undefined, tipi: expect.arrayContaining(['allarme', 'fusione-eseguita', 'forca', 'isolamento']) }));
     expect(await screen.findByText('1 evento')).toBeInTheDocument();
     // eliminazione con conferma
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    conferma.mockResolvedValue(true);
     eliminaEvento.mockResolvedValue(undefined);
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Elimina la voce Allarme attivo' })); });
     expect(eliminaEvento).toHaveBeenCalledWith(7, 9);
@@ -69,7 +72,7 @@ describe('StoricoPartita', () => {
     const evento = (id: number, titolo: string) => ({ id, tipo: 'partita-livello', tipoNome: 'Livello', gruppo: 'partita' as const, titolo, dettaglio: '', dati: {}, personaId: null, personaNome: null, personaNomeIt: null, createdAt: '2026-09-04T10:00:00.000Z' });
     getStorico.mockResolvedValue({ eventi: [evento(1, 'Livello 2'), evento(2, 'Livello 3'), evento(3, 'Livello 4')], totale: 3, prossimo: null });
     eliminaEventi.mockResolvedValue({ eliminati: 2 });
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    conferma.mockResolvedValue(true);
     render(<MemoryRouter><StoricoPartita partitaId={7} perPagina={10} /></MemoryRouter>);
     await screen.findByText('Livello 2');
     fireEvent.click(screen.getByRole('checkbox', { name: 'Seleziona la voce Livello 2' }));

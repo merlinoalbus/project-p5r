@@ -12,6 +12,8 @@ import { useState } from 'react';
 import { Modal } from '../shared/Modal';
 import { impostaStatoPunto, togliFattoAlPin } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 /** Quel che serve della divergenza: il pin (nome, uid, planimetria) e la voce (chiave, nome, infiltrazione). */
 export interface DivergenzaDaVerificare {
@@ -53,18 +55,18 @@ export function FinestraDaVerificare({ divergenza: d, partitaId, onChiudi, onRis
   return (
     <Modal titolo="Da verificare" aperta onChiudi={onChiudi}
       azioni={<>
-        <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={() => void esegui(() => togliFattoAlPin(partitaId, d.spilloUid), `«${d.spilloNome}» torna da fare.`)}>Togli il fatto al pin</button>
-        <button type="button" className="btn btn-primary touch" disabled={occupato} onClick={() => void esegui(() => impostaStatoPunto(partitaId, d.voce, 'ottenuto'), `«${d.voceNome}» segnata.`)}>Segna la voce</button>
+        <PulsanteVisivo icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Togli il fatto al pin" disabled={occupato} onClick={() => void esegui(() => togliFattoAlPin(partitaId, d.spilloUid), `«${d.spilloNome}» torna da fare.`)} />
+        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="raggiunto" dimensione={22} />} titolo="Segna la voce" disabled={occupato} onClick={() => void esegui(() => impostaStatoPunto(partitaId, d.voce, 'ottenuto'), `«${d.voceNome}» segnata.`)} />
       </>}>
-      <div className="flex flex-col gap-2 text-[14px]">
+      <div className="flex flex-col gap-2 testo-14">
         <p className="m-0">{SPIEGAZIONE_DA_VERIFICARE}</p>
-        <dl className="m-0 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-[13px]">
+        <dl className="m-0 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 testo-13">
           <dt className="text-text-muted">Pin</dt>
-          <dd className="m-0 break-words">{d.spilloNome}{d.mappaNome ? <span className="text-text-muted"> · {d.mappaNome}</span> : null} <span className="chip chip--oro text-[11px]">fatto</span></dd>
+          <dd className="m-0 break-words">{d.spilloNome}{d.mappaNome ? <span className="text-text-muted"> · {d.mappaNome}</span> : null} <span className="chip chip--oro testo-12">fatto</span></dd>
           <dt className="text-text-muted">Voce</dt>
-          <dd className="m-0 break-words">{d.voceNome}{d.infiltrazioneNome ? <span className="text-text-muted"> · {d.infiltrazioneNome}</span> : null} <span className="chip text-[11px]">non fatta</span></dd>
+          <dd className="m-0 break-words">{d.voceNome}{d.infiltrazioneNome ? <span className="text-text-muted"> · {d.infiltrazioneNome}</span> : null} <span className="chip testo-12">non fatta</span></dd>
         </dl>
-        <p className="m-0 text-[13px] text-text-secondary">«Segna la voce» la rende fatta; «Togli il fatto al pin» rimette il pin da fare e lascia la voce com’è.</p>
+        <p className="m-0 testo-13 text-text-secondary">«Segna la voce» la rende fatta; «Togli il fatto al pin» rimette il pin da fare e lascia la voce com’è.</p>
       </div>
     </Modal>
   );

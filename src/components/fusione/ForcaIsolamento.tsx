@@ -52,35 +52,35 @@ function Forca({ scorta, persone, velluto, partitaId, onScortaCambiata }: { scor
 
   return (
     <section className="card flex flex-col gap-3">
-      <h2 className="m-0 text-[15px] font-semibold">Forca (Potenziamento)</h2>
-      <p className="m-0 text-[13px] text-text-secondary">Sacrifica una Persona per dare EXP a un'altra. L'EXP di base dipende dal livello del sacrificio; qui vedi i moltiplicatori: rango del Confidente dell'arcano del ricevente (Igor al massimo aumenta), stesso arcano ×1,5, Demone del Tesoro ×3/×5, Allarme 2/3/5/7, sacrificio di livello superiore ×0,5. Una skill trasferita a caso (1–3 con l'Allarme); un uso al giorno per Persona (nessun limite con l'Allarme).</p>
+      <h2 className="m-0 testo-15 font-semibold">Forca (Potenziamento)</h2>
+      <p className="m-0 testo-13 text-text-secondary">Sacrifica una Persona per dare EXP a un'altra. L'EXP di base dipende dal livello del sacrificio; qui vedi i moltiplicatori: rango del Confidente dell'arcano del ricevente (Igor al massimo aumenta), stesso arcano ×1,5, Demone del Tesoro ×3/×5, Allarme 2/3/5/7, sacrificio di livello superiore ×0,5. Una skill trasferita a caso (1–3 con l'Allarme); un uso al giorno per Persona (nessun limite con l'Allarme).</p>
       {scorta.length < 2 ? (
-        <p className="m-0 text-[13px] text-text-muted">Servono almeno due Persona nella scorta della partita attiva.</p>
+        <p className="m-0 testo-13 text-text-muted">Servono almeno due Persona nella scorta della partita attiva.</p>
       ) : (
         <>
           <SelettorePosseduta etichetta="Persona ricevente" persone={scorta} sceltaId={riceventeId} onScegli={setRiceventeId} />
           {ricevente && (
             <>
-              <div className="text-[12px] text-text-muted">Confidente {ricevente.arcanaNome}: rango {rangoDi(ricevente.arcana)}{igorMax ? ' · Igor al massimo' : ''}{allarme ? ' · Allarme attivo' : ''}</div>
+              <div className="testo-12 text-text-muted">Confidente {ricevente.arcanaNome}: rango {rangoDi(ricevente.arcana)}{igorMax ? ' · Igor al massimo' : ''}{allarme ? ' · Allarme attivo' : ''}</div>
               <ul className="m-0 p-0 list-none divide-y divide-border-light" aria-label="Sacrifici possibili">
                 {candidati.map(({ p, esito }) => (
-                  <li key={p.id} className="py-2 flex flex-col gap-0.5 text-[13px]">
+                  <li key={p.id} className="py-2 flex flex-col gap-0.5 testo-13">
                     <div className="flex items-center gap-2 flex-wrap">
                       <AnteprimaPersona nome={p.nome} etichetta={p.nomeIt} dimensione={40} />
-                      <span className="font-display uppercase text-[17px] leading-none">{p.nomeIt}</span>
+                      <span className="font-display uppercase testo-17 leading-none">{p.nomeIt}</span>
                       <span className="text-text-muted">{p.arcanaNome} · livello {p.livello}</span>
                       {p.carica && <span className="chip" title="Creata durante l'Allarme: alla Forca provoca un incidente garantito con +10 punti">gialla</span>}
                       <span className="ml-auto chip chip--attivo font-black tabular-nums">EXP ×{esito.moltiplicatore.toLocaleString('it-IT')}</span>
                       <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="esegui" dimensione={20} />} titolo="Esegui" onClick={() => setSacrificioId(p.id)} />
                     </div>
-                    <div className="text-[12px] text-text-muted">
+                    <div className="testo-12 text-text-muted">
                       {esito.fattori.length === 0 ? 'Nessun bonus' : esito.fattori.map((f) => `${f.nome} ×${f.valore.toLocaleString('it-IT')}`).join(' · ')}
                       {esito.interpolato && ' · rango intermedio: valore stimato'} · skill trasferite: {esito.skillTrasferite}
                     </div>
                   </li>
                 ))}
               </ul>
-              {allarme && <p className="m-0 text-[12px] text-warning">Con l'Allarme un incidente azzera l'EXP ma garantisce +{FORCA_INCIDENTE_BONUS.sacrificioNormale} punti statistica (+{FORCA_INCIDENTE_BONUS.unaPersonaCarica}/+{FORCA_INCIDENTE_BONUS.entrambeCariche} con Persona «cariche»).</p>}
+              {allarme && <p className="m-0 testo-12 text-warning">Con l'Allarme un incidente azzera l'EXP ma garantisce +{FORCA_INCIDENTE_BONUS.sacrificioNormale} punti statistica (+{FORCA_INCIDENTE_BONUS.unaPersonaCarica}/+{FORCA_INCIDENTE_BONUS.entrambeCariche} con Persona «cariche»).</p>}
               {sacrificioId !== null && (() => {
                 const c = candidati.find((x) => x.p.id === sacrificioId);
                 return c ? (
@@ -128,9 +128,9 @@ function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: 
   };
   return (
     <section className="card flex flex-col gap-3">
-      <h2 className="m-0 text-[15px] font-semibold">Isolamento (addestramento)</h2>
-      <p className="m-0 text-[13px] text-text-secondary">Sbloccato al rango 3 delle Gemelle. La Persona in isolamento impara una skill di resistenza contro la sua debolezza (il tier dipende dal suo livello al deposito) e, bruciando un incenso, guadagna statistiche ogni 2 giorni (raddoppiate durante l'Allarme). Attenzione: avviso al giorno {ISOLAMENTO_AVVISO.giornoAvviso}, perdita al giorno {ISOLAMENTO_AVVISO.giornoPerdita}.</p>
-      {rangoGemelle < 3 && <p className="m-0 text-[12px] text-warning">Gemelle al rango {rangoGemelle}: l'Isolamento non è ancora sbloccato nella partita attiva.</p>}
+      <h2 className="m-0 testo-15 font-semibold">Isolamento (addestramento)</h2>
+      <p className="m-0 testo-13 text-text-secondary">Sbloccato al rango 3 delle Gemelle. La Persona in isolamento impara una skill di resistenza contro la sua debolezza (il tier dipende dal suo livello al deposito) e, bruciando un incenso, guadagna statistiche ogni 2 giorni (raddoppiate durante l'Allarme). Attenzione: avviso al giorno {ISOLAMENTO_AVVISO.giornoAvviso}, perdita al giorno {ISOLAMENTO_AVVISO.giornoPerdita}.</p>
+      {rangoGemelle < 3 && <p className="m-0 testo-12 text-warning">Gemelle al rango {rangoGemelle}: l'Isolamento non è ancora sbloccato nella partita attiva.</p>}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
         <div className="sm:col-span-3"><SelettorePosseduta etichetta="Persona da isolare" persone={scorta} sceltaId={possedutaId} onScegli={setPossedutaId} /></div>
         <div className="form-label">
@@ -140,7 +140,7 @@ function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: 
           <input type="number" min={1} max={ISOLAMENTO_AVVISO.giornoPerdita - 1} className="form-input mt-1" value={giorni} onChange={(e) => setGiorni(Math.min(ISOLAMENTO_AVVISO.giornoPerdita - 1, Math.max(1, Number(e.target.value) || 1)))} aria-label="Giorni di isolamento" />
         </label>
       </div>
-      <div className="text-[13px] flex flex-col gap-1">
+      <div className="testo-13 flex flex-col gap-1">
         <div>Durata dell'addestramento al rango {rangoGemelle} delle Gemelle: <strong>{giorniIsolamento(rangoGemelle)} giorni</strong>{rangoGemelle < 3 ? ' (una volta sbloccato)' : ''}.</div>
         <div>Incenso «{incenso.nome}» per {giorni} giorni{allarme ? ' con Allarme' : ''}: <strong>{guadagno.applicazioni}</strong> applicazioni → <strong>+{guadagno.puntiPerStatistica}</strong> per statistica interessata ({incenso.statistiche === 1 ? 'una statistica' : `${incenso.statistiche} statistiche`}, totale +{guadagno.totale}). {incenso.nota}.</div>
         {persona && (
@@ -154,15 +154,15 @@ function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: 
           <div>Skill di resistenza prevista: <strong>{suggerimento.dati.skill ? suggerimento.dati.skill.nomeIt : 'nessuna nel dataset'}</strong>{suggerimento.dati.elementoNome ? ` (debolezza: ${suggerimento.dati.elementoNome})` : ' (nessuna debolezza)'}.</div>
         )}
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[12px] text-text-muted">Statistiche interessate ({incenso.statistiche}):</span>
+          <span className="testo-12 text-text-muted">Statistiche interessate ({incenso.statistiche}):</span>
           {CHIAVI_STATISTICHE.map((k) => (
             <button key={k} type="button" className={`chip touch ${statScelte.includes(k) ? 'chip--attivo' : ''}`} aria-pressed={statScelte.includes(k)} onClick={() => setStatScelte((sc) => (sc.includes(k) ? sc.filter((x) => x !== k) : sc.length < incenso.statistiche ? [...sc, k] : [...sc.slice(1), k]))}>{NOMI_STATISTICHE[k]}</button>
           ))}
         </div>
         {persona && (
           <div className="flex items-center gap-2 flex-wrap">
-            <button type="button" className="btn btn-primary btn-sm" disabled={occupato || statScelte.length !== incenso.statistiche || rangoGemelle < 3} onClick={() => void registra()}>Registra l'isolamento su {persona.nomeIt}</button>
-            {statScelte.length !== incenso.statistiche && <span className="text-[12px] text-warning">Scegli esattamente {incenso.statistiche} {incenso.statistiche === 1 ? 'statistica' : 'statistiche'}.</span>}
+            <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={<>Registra l'isolamento su {persona.nomeIt}</>} disabled={occupato || statScelte.length !== incenso.statistiche || rangoGemelle < 3} onClick={() => void registra()} />
+            {statScelte.length !== incenso.statistiche && <span className="testo-12 text-warning">Scegli esattamente {incenso.statistiche} {incenso.statistiche === 1 ? 'statistica' : 'statistiche'}.</span>}
           </div>
         )}
       </div>
@@ -173,7 +173,7 @@ function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: 
 /** Vista «Forca e Isolamento». */
 export function ForcaIsolamento({ persone, partitaId, velluto }: Props) {
   const scorta = useCarica(() => (partitaId ? getPossedute(partitaId) : Promise.resolve([] as PersonaPossedutaDto[])), [partitaId]);
-  if (!partitaId) return <p className="m-0 text-[13px] text-text-muted">Serve una partita attiva con Persona nella scorta.</p>;
+  if (!partitaId) return <p className="m-0 testo-13 text-text-muted">Serve una partita attiva con Persona nella scorta.</p>;
   if (!scorta.dati) return <div className="flex justify-center py-6"><Spinner /></div>;
   return (
     <div className="flex flex-col gap-3">

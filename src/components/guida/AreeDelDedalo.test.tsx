@@ -254,8 +254,8 @@ it('sul telefono: la tendina dei dedali e il menu ⋯ con l\'interruttore e il p
   expect(vociSelettore('Dedalo')).toEqual(['1. Dedalo di Qimranut', '2. Dedalo di Aiyatsbus']);
   scegliVoce('Dedalo', /^2. Dedalo di Aiyatsbus/);
   expect(onScegliDedalo).toHaveBeenCalledWith('mementos-02-aiyatsbus');
-  fireEvent.click(screen.getByRole('button', { name: 'Altri comandi' }));
-  expect(screen.getByRole('button', { name: 'Altri comandi' })).toHaveAttribute('aria-expanded', 'true');
+  fireEvent.click(screen.getByRole('button', { name: 'Altro: altri comandi' }));
+  expect(screen.getByRole('button', { name: 'Altro: altri comandi' })).toHaveAttribute('aria-expanded', 'true');
   // l'interruttore c'è due volte (riga e menu, uno nascosto dal CSS per formato): quello del menu
   fireEvent.click(screen.getAllByRole('button', { name: 'Modifica la guida' })[1]);
   expect(onModifica).toHaveBeenCalledWith(true);

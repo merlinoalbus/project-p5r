@@ -31,6 +31,10 @@ interface ModalProps {
   larga?: boolean;
   /** Cassetto laterale: entra da destra, alto quanto lo schermo (sul telefono resta il foglio dal basso); scorre solo il suo corpo. */
   cassetto?: boolean;
+  /** `alertdialog` per le domande che interrompono (DialogoConferma); default `dialog`. */
+  ruolo?: 'dialog' | 'alertdialog';
+  /** Id dell'elemento che descrive la finestra (`aria-describedby`): il testo della domanda, letto subito dopo il titolo. */
+  idDescrizione?: string;
 }
 
 /** Gli elementi che ricevono il fuoco con Tab. */
@@ -71,7 +75,7 @@ function chiHaApertoLaFinestra(finestra: HTMLElement | null): HTMLElement | null
 }
 
 /** Finestra modale con intestazione, corpo scorrevole e piè di pagina opzionale. */
-export function Modal({ titolo, aperta, onChiudi, children, azioni, larga, cassetto }: ModalProps) {
+export function Modal({ titolo, aperta, onChiudi, children, azioni, larga, cassetto, ruolo = 'dialog', idDescrizione }: ModalProps) {
   const finestra = useRef<HTMLDivElement | null>(null);
   const sfondo = useRef<HTMLDivElement | null>(null);
   // `onChiudi` è spesso una funzione scritta al volo: la si legge da un ref, così gli effetti dipendono solo da `aperta`
@@ -133,14 +137,15 @@ export function Modal({ titolo, aperta, onChiudi, children, azioni, larga, casse
       <div
         ref={finestra}
         className={`modal-content ${larga ? 'modal-content--larga' : ''} ${cassetto ? 'modal-content--cassetto' : ''}`}
-        role="dialog"
+        role={ruolo}
         aria-modal="true"
         aria-label={titolo}
+        aria-describedby={idDescrizione}
         tabIndex={-1}
         onKeyDown={tieniIlFuoco}
       >
         <div className="modal-header">
-          <h2 className="m-0 text-[17px] font-semibold">{titolo}</h2>
+          <h2 className="m-0 testo-17 font-semibold">{titolo}</h2>
           <button type="button" className="touch flex items-center justify-center bg-transparent border-none text-text-muted hover:text-text cursor-pointer rounded-md" onClick={onChiudi} aria-label="Chiudi">
             <IconClose size={20} />
           </button>

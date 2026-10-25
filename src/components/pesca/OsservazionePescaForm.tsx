@@ -6,6 +6,8 @@ import { usePartitaStore } from '../../stores/partitaStore';
 import { fortunaDelConsumo } from '../../utils/fortunaConsumo';
 import { Selettore } from '../shared/Selettore';
 import { MeteoOsservatoPesca, NumeroOsservatoPesca, RangoPeriziaOsservato, SceltaOsservata } from './CampiPesca';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 const id = () => crypto.randomUUID().replaceAll('-', '');
 const SPECIE: Array<{ chiave: SpeciePesca; nome: string }> = [
@@ -37,7 +39,7 @@ export function OsservazionePescaForm({ valore: o, onCambia, disabilitato = fals
       <SceltaOsservata etichetta="Boilie sospetto posseduto nella visita" valore={o.escaSpecialePosseduta} disabilitato={disabilitato} onCambia={escaSpecialePosseduta => cambia({ escaSpecialePosseduta })} />
       <SceltaOsservata etichetta="Terzo semestre già in corso nella visita" valore={o.faseTerzoSemestre} disabilitato={disabilitato} onCambia={faseTerzoSemestre => cambia({ faseTerzoSemestre })} />
     </div>
-    <p className="m-0 text-[12px] text-text-secondary">Lascia ignoti i dati che non hai osservato. Possedere o usare un’esca non registra un acquisto; il rango di oggi non ricostruisce quello di una visita passata.</p>
+    <p className="m-0 testo-12 text-text-secondary">Lascia ignoti i dati che non hai osservato. Possedere o usare un’esca non registra un acquisto; il rango di oggi non ricostruisce quello di una visita passata.</p>
     <Selettore etichetta="Esiti delle catture" valore={o.catture === null ? 'ignoti' : 'osservati'} disabilitato={disabilitato}
       opzioni={[{ chiave: 'ignoti', nome: 'Non conosco gli esiti' }, { chiave: 'osservati', nome: 'Dichiaro gli esiti osservati' }]}
       onCambia={v => cambia({ catture: v === 'ignoti' ? null : [] })} />
@@ -52,14 +54,14 @@ export function OsservazionePescaForm({ valore: o, onCambia, disabilitato = fals
           <NumeroOsservatoPesca etichetta="Posizione nell’ordine osservato della visita" valore={c.posizione} disabilitato={disabilitato}
             onCambia={posizione => cambia({ catture: o.catture!.map(x => x.id === c.id ? { ...x, posizione } : x) })} />
         </div>
-        <button type="button" className="btn btn-ghost btn-sm touch self-start" disabled={disabilitato} onClick={() => cambia({ catture: o.catture!.filter(x => x.id !== c.id) })}>Togli questa cattura dalla dichiarazione</button>
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli questa cattura dalla dichiarazione" className="self-start" disabled={disabilitato} onClick={() => cambia({ catture: o.catture!.filter(x => x.id !== c.id) })} />
       </li>)}</ul>
       <div className="flex min-w-0 flex-wrap items-end gap-2">
         <Selettore etichetta="Cattura da aggiungere" valore={specie} vuoto="Scegli il pesce osservato" opzioni={SPECIE} disabilitato={disabilitato} onCambia={v => setSpecie(v as SpeciePesca | '')} />
-        <button type="button" className="btn btn-secondary touch" disabled={disabilitato || !specie} onClick={() => {
+        <PulsanteVisivo icona={<IconaAzione chiave="piu" dimensione={22} />} titolo="Aggiungi la cattura" disabled={disabilitato || !specie} onClick={() => {
           if (!specie) return;
           cambia({ catture: [...o.catture!, { id: id(), specie, tentativo: null, posizione: null }] }); setSpecie('');
-        }}>Aggiungi la cattura</button>
+        }} />
       </div>
     </div>}
     <div className="grid min-w-0 gap-3 sm:grid-cols-2">
@@ -75,8 +77,8 @@ export function OsservazionePescaForm({ valore: o, onCambia, disabilitato = fals
       {partitaId === undefined
         ? <SceltaOsservata etichetta="Fortuna sulla Perizia attiva nella data della visita" valore={o.fortuna.attiva} disabilitato={disabilitato}
           onCambia={attiva => cambia({ fortuna: { ...o.fortuna, attiva } })} />
-        : <p className="m-0 text-[13px]">Fortuna sulla Perizia in quel giorno: <strong>{o.fortuna.attiva === null ? 'non nota (la partita non la ricorda)' : o.fortuna.attiva ? 'accesa' : 'non accesa'}</strong>. La leggo dalla partita, non devi dirmela.</p>}
+        : <p className="m-0 testo-13">Fortuna sulla Perizia in quel giorno: <strong>{o.fortuna.attiva === null ? 'non nota (la partita non la ricorda)' : o.fortuna.attiva ? 'accesa' : 'non accesa'}</strong>. La leggo dalla partita, non devi dirmela.</p>}
     </div>
-    <p className="m-0 text-[12px] text-text-secondary">Una cattura non prova il beneficio finale. Le Doti si applicano dal pulsante sulla voce, gli yen della quota sono solo un promemoria da cambiare a mano; nessun saldo cambia con questa sola dichiarazione.</p>
+    <p className="m-0 testo-12 text-text-secondary">Una cattura non prova il beneficio finale. Le Doti si applicano dal pulsante sulla voce, gli yen della quota sono solo un promemoria da cambiare a mano; nessun saldo cambia con questa sola dichiarazione.</p>
   </fieldset>;
 }

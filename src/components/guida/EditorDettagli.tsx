@@ -23,7 +23,7 @@ export function EditorDettagli({ valore, onCambia, nascosti = [] }: { valore: st
   // le righe nascoste (le affinità di una Persona collegata al compendio) restano nei dati com'erano: qui non si vedono e non si toccano
   const visibili = righe.map((r, i) => ({ r, i })).filter(({ r }) => !nascosti.includes(r.chiave));
   return (
-    <fieldset className="m-0 flex w-full flex-col gap-2 border-0 p-0 text-[12px]">
+    <fieldset className="m-0 flex w-full flex-col gap-2 border-0 p-0 testo-12">
       <legend className="mb-1 p-0">Dettagli</legend>
       {visibili.length === 0 && <p className="m-0 text-text-muted">Nessun dettaglio.</p>}
       {ripetute.length > 0 && <p className="m-0 text-error" role="alert">Etichetta ripetuta: {ripetute.join(', ')}. Cambiala per salvare.</p>}

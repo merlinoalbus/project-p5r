@@ -27,6 +27,8 @@ import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/Azioni
 import { piatto } from '../utils/testo';
 import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
+import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
+import { IconaAzione } from '../components/shared/IconaAzione';
 
 const NOME_TIPO: Record<DomandaDto['tipo'], string> = { classe: 'In classe', 'esame-medio': 'Esame di metà semestre', 'esame-finale': 'Esame di fine semestre', tv: 'Quiz in TV', altro: 'Altro' };
 type FiltroTipo = 'tutte' | 'classe' | 'esami' | 'tv';
@@ -65,7 +67,7 @@ function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: D
     }
   };
   return (
-    <li id={evidenzia ? ancoraData(d.data) : undefined} className={`py-2 flex gap-3 text-[13px] scroll-mt-20 ${evidenzia ? 'bg-primary-bg rounded-md px-2' : ''}`}>
+    <li id={evidenzia ? ancoraData(d.data) : undefined} className={`py-2 flex gap-3 testo-13 scroll-mt-20 ${evidenzia ? 'bg-primary-bg rounded-md px-2' : ''}`}>
       {partitaId && (
         <label className="flex items-start pt-0.5 touch">
           <input type="checkbox" className="w-5 h-5" checked={d.fatta} disabled={occupato} onChange={(e) => void segna(e.target.checked)} aria-label={`Domanda del ${dataGiocoTesto(d.data)} fatta`} />
@@ -76,8 +78,8 @@ function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: D
           <strong className="tabular-nums">{dataGiocoTesto(d.data)}</strong>
           <span className="text-text-muted">{d.chi}</span>
           {d.tipo !== 'classe' && <span className="chip">{NOME_TIPO[d.tipo]}</span>}
-          {evidenzia && <span className="chip chip--attivo text-[11px]">Prossima</span>}
-          {d.ricompensa && <span className="text-[12px] text-text-muted">{d.ricompensa}</span>}
+          {evidenzia && <span className="chip chip--attivo testo-12">Prossima</span>}
+          {d.ricompensa && <span className="testo-12 text-text-muted">{d.ricompensa}</span>}
         </div>
         <div className={d.fatta ? 'line-through' : ''}>{d.domanda}</div>
         {!!d.oggettiRicompensa?.length && <OggettiCollegati oggetti={d.oggettiRicompensa} />}
@@ -85,7 +87,7 @@ function RigaDomanda({ d, partitaId, onCambiata, onCorretta, evidenzia }: { d: D
         <ol className="m-0 p-0 list-none flex flex-col gap-0.5" aria-label="Risposte corrette">
           {d.risposte.map((r, i) => <li key={i}>{r.domanda && <span className="text-text-secondary">{r.domanda} → </span>}<span className="text-primary-testo font-semibold">{d.risposte.length > 1 && !r.domanda ? `${i + 1}. ` : !r.domanda ? '→ ' : ''}{r.testo}</span></li>)}
         </ol>
-        {d.note && <div className="text-[12px] text-text-muted">{d.note}</div>}
+        {d.note && <div className="testo-12 text-text-muted">{d.note}</div>}
         {d.chiave && <div className="mt-0.5"><CorreggiElemento tipo="domanda" chiave={d.chiave} onSalvato={onCorretta} /></div>}
       </div>
     </li>
@@ -146,15 +148,15 @@ export function DomandePage() {
           {/* Il prossimo appuntamento: un rimando, non un secondo elenco. Le righe sono evidenziate nel loro mese. */}
           {prossima && (
             <div className="card flex flex-wrap items-center justify-between gap-2 border-primary" role="status">
-              <span className="text-[13px]"><strong>Prossimo appuntamento:</strong> {dataGiocoTesto(prossima.data)} · {prossima.chi}{d.prossime.length > 1 ? ` · ${d.prossime.length} domande` : ''}</span>
-              <button type="button" className="btn btn-ghost btn-sm touch" onClick={vaiAllaProssima}>Vai alla domanda</button>
+              <span className="testo-13"><strong>Prossimo appuntamento:</strong> {dataGiocoTesto(prossima.data)} · {prossima.chi}{d.prossime.length > 1 ? ` · ${d.prossime.length} domande` : ''}</span>
+              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Vai alla domanda" onClick={vaiAllaProssima} />
             </div>
           )}
 
           <section className="card flex flex-col gap-2">
-            <h2 className="m-0 text-[15px] font-semibold">Esami</h2>
-            <p className="m-0 text-[12px] text-text-muted">Date, risultati e premi. Le domande di ogni esame stanno nell’elenco per data, con il quesito accanto a ogni risposta.</p>
-            <ul className="m-0 p-0 list-none flex flex-col gap-1 text-[13px]">
+            <h2 className="m-0 testo-15 font-semibold">Esami</h2>
+            <p className="m-0 testo-12 text-text-muted">Date, risultati e premi. Le domande di ogni esame stanno nell’elenco per data, con il quesito accanto a ogni risposta.</p>
+            <ul className="m-0 p-0 list-none flex flex-col gap-1 testo-13">
               {d.esami.map((e) => (
                 <li key={e.chiave} className="flex min-w-0 flex-col gap-1 py-1">
                   <div className="flex flex-wrap items-center gap-2">
@@ -162,13 +164,13 @@ export function DomandePage() {
                     <span className="text-text-muted">{e.date.map(dataGiocoTesto).join(', ')}{e.dataRisultati ? ` · risultati il ${dataGiocoTesto(e.dataRisultati)}` : ''}</span>
                     <ModificaGuida tipo="esame" chiave={e.chiave} cosa={`l’esame «${e.nome}»`} soloIcona className="ml-auto" onSalvato={() => void dati.ricarica()} />
                   </div>
-                  {e.note && <span className="text-[12px] text-text-muted">{e.note}</span>}
+                  {e.note && <span className="testo-12 text-text-muted">{e.note}</span>}
                   {!!e.oggettiRicompensa?.length && <OggettiCollegati oggetti={e.oggettiRicompensa} />}
                 </li>
               ))}
             </ul>
             {d.premi && (
-              <div className="text-[12px] text-text-secondary flex flex-col gap-0.5 pt-1 border-t border-border-light">
+              <div className="testo-12 text-text-secondary flex flex-col gap-0.5 pt-1 border-t border-border-light">
                 <span className="flex items-center gap-1 flex-wrap"><span><strong>Premi:</strong> {Object.entries(d.premi.fascinoPerPiazzamento ?? {}).map(([k, v]) => `${k.replaceAll('_', ' ')}: ${v}`).join(' · ')}</span><ModificaGuida tipo="esame-premi" chiave="premi" cosa="i premi dei piazzamenti agli esami" soloIcona onSalvato={() => void dati.ricarica()} /></span>
                 {d.premi.moltiplicatoreConfidenti && <span>{d.premi.moltiplicatoreConfidenti}</span>}
                 {d.premi.requisitoConoscenza && <span>Per il primo posto: {Object.entries(d.premi.requisitoConoscenza).filter(([k]) => k !== 'fonte').map(([k, v]) => `${k.replaceAll('_', ' ')}: ${v}`).join(' · ')}</span>}
@@ -180,7 +182,7 @@ export function DomandePage() {
           <section className="filtri-articoli" role="search" aria-label="Filtri delle domande">
             <div className="filtri-articoli__riga">
               <CampoRicerca valore={ricerca} onCambia={setRicerca} segnaposto="Cerca domanda, risposta, chi la fa o data…" />
-              <span className="text-[12px] text-text-muted">{visibili.length} domande</span>
+              <span className="testo-12 text-text-muted">{visibili.length} domande</span>
               <AggiungiAlCatalogo tipo="domanda" titolo="Aggiungi una domanda" onSalvato={() => void dati.ricarica()} />
             </div>
             <div className="filtri-articoli__riga">
@@ -188,10 +190,10 @@ export function DomandePage() {
               {partitaId && <Segmenti etichetta="Stato" valore={stato} opzioni={STATI} onCambia={setStato} />}
             </div>
           </section>
-          {perMese.length === 0 && <p className="m-0 text-[13px] text-text-muted" role="status">Nessuna domanda con questi filtri.</p>}
+          {perMese.length === 0 && <p className="m-0 testo-13 text-text-muted" role="status">Nessuna domanda con questi filtri.</p>}
           {perMese.map(([mese, lista]) => (
             <section key={mese} className="card flex flex-col gap-1">
-              <h2 className="m-0 text-[15px] font-semibold">{mese}</h2>
+              <h2 className="m-0 testo-15 font-semibold">{mese}</h2>
               <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light" aria-label={`Domande di ${mese}`}>
                 {lista.map((x) => <RigaDomanda key={x.id} d={x} partitaId={partitaId} onCambiata={dati.imposta} onCorretta={() => void dati.ricarica()} evidenzia={prossimeId.has(x.id)} />)}
               </ul>

@@ -12,7 +12,7 @@ import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import type { PersonaggioDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { PersonaDelPersonaggio } from '../components/guida/PersonaDelPersonaggio';
-import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
+import { CollegamentoVisivo, PulsanteVisivo, FrecciaApertura } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
@@ -30,26 +30,26 @@ function Personaggio({ p, idCompendio, onModificato }: { p: PersonaggioDto; idCo
   const sugg = useSuggerimenti();
   const secondari = new Set(p.campiDaFontiSecondarie);
   /** Il segno «(fonte secondaria)» se quel campo del personaggio non viene dalla guida italiana, altrimenti niente. */
-  const nota = (campo: string) => (secondari.has(campo) ? <span className="text-[11px] text-text-muted" title="Dato da fonte secondaria, non dalla guida italiana"> (fonte secondaria)</span> : null);
+  const nota = (campo: string) => (secondari.has(campo) ? <span className="testo-12 text-text-muted" title="Dato da fonte secondaria, non dalla guida italiana"> (fonte secondaria)</span> : null);
   return (
     <li className={`card flex gap-3 min-w-0 ${classiSuggerito(sugg.evidenziato('personaggi', p.chiave))}`}>
       {/* stesso riquadro per tutti: i Confidenti usano la loro immagine, gli altri (Protagonista, Stanza di Velluto, Jose) il ritratto del personaggio, caricabile allo stesso modo */}
       {p.confidente
         ? <ImmagineEntita ambito="confidente" chiave={p.confidente} etichetta={p.nome} dimensione={88} forma="carta" modificabile />
         : <ImmagineEntita ambito="personaggio" chiave={p.chiave} etichetta={p.nome} dimensione={88} forma="carta" modificabile />}
-      <div className="flex flex-col gap-1 text-[13px] min-w-0 flex-1">
+      <div className="flex flex-col gap-1 testo-13 min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <strong className="text-[16px]">{p.nome}</strong>
+          <strong className="testo-16">{p.nome}</strong>
           {sugg.evidenziato('personaggi', p.chiave) && <TargaSuggerito motivo={sugg.motivo('personaggi', p.chiave)} compatta />}
           {p.nomeCodice && <span className="chip chip--attivo">{p.nomeCodice}</span>}
           {p.arcano && <span className="chip">{p.arcano}</span>}
-          {p.giocabile && <span className="chip text-[11px]">giocabile</span>}
+          {p.giocabile && <span className="chip testo-12">giocabile</span>}
           {/* L11 · B11 (R11-15/8): nome, ruolo, armi e il resto della scheda; la Persona, `giocabile` e il Confidente collegato non si toccano da qui */}
           <ModificaGuida tipo="personaggio" chiave={p.chiave} cosa={`la scheda di ${p.nome}`} soloIcona className="ml-auto" onSalvato={onModificato} />
         </div>
         <p className="m-0">{p.ruolo}</p>
         {p.persona.length > 0 && <PersonaDelPersonaggio personaggio={p.nome} persone={p.persona} idCompendio={idCompendio} />}
-        <button type="button" className="text-left text-[12px] text-primary-testo touch self-start" onClick={() => setAperto((v) => !v)} aria-expanded={aperto}>{aperto ? 'Meno dettagli' : 'Più dettagli'}</button>
+        <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="dettagli" dimensione={20} />} onClick={() => setAperto((v) => !v)} aria-expanded={aperto} titolo={<>{aperto ? 'Meno dettagli' : 'Più dettagli'}<FrecciaApertura aperto={aperto} /></>} />
         {aperto && (
           <div className="flex flex-col gap-1">
             {p.presentazione && <p className="m-0 text-text-secondary">{p.presentazione}</p>}
@@ -94,7 +94,7 @@ export function PersonaggiPage() {
           {gruppi.map((g) => (
             <section key={g.nome} className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <h2 className="m-0 text-[15px] font-semibold">{g.nome}</h2>
+                <h2 className="m-0 testo-15 font-semibold">{g.nome}</h2>
                 <ModificaGuida tipo="gruppo-personaggi" chiave={g.nome} cosa={`il gruppo «${g.nome}»`} soloIcona onSalvato={() => { setGruppo(''); void dati.ricarica(); }} />
               </div>
               <ul className="m-0 p-0 list-none grid gap-2 grid-cols-[minmax(0,1fr)] xl:grid-cols-2" aria-label={g.nome}>

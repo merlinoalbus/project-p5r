@@ -19,6 +19,8 @@ import { Modal } from '../shared/Modal';
 import { Selettore } from '../shared/Selettore';
 import { collegamentoAzione } from '../../utils/percorso';
 import type { AzionePercorsoDto, EsitoRevisioneVoce } from '../../types';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione, IconaSegno } from '../shared/IconaAzione';
 
 /** La certezza della proposta, a parole. */
 const CERTEZZA: Record<'certa' | 'multipla' | 'probabile', string> = { certa: 'certa', multipla: 'più infiltrazioni', probabile: 'probabile' };
@@ -54,25 +56,24 @@ export function InfiltrazioniVoce({ a, partitaId, onCambiata }: Props) {
   const ultima = chiavi[chiavi.length - 1];
   const daAggiungere = opzioni.filter((o) => o.chiave !== ultima);
   return (
-    <div className="flex flex-wrap items-center gap-1 text-[12px]">
+    <div className="flex flex-wrap items-center gap-1 testo-12">
       <span className="text-text-muted">Infiltrazioni:</span>
       {insieme.length === 0
         ? <span className="text-text-muted">nessuna</span>
         : <ol className="m-0 flex list-none flex-wrap items-center gap-1 p-0" aria-label="Infiltrazioni della voce, in ordine">
-            {insieme.map((x, i) => <li key={`${x.chiave}:${i}`} className="chip text-[11px]">{i + 1}. {x.nome}{chiavi.indexOf(x.chiave) < i ? ' (di nuovo)' : ''}</li>)}
+            {insieme.map((x, i) => <li key={`${x.chiave}:${i}`} className="chip testo-12">{i + 1}. {x.nome}{chiavi.indexOf(x.chiave) < i ? ' (di nuovo)' : ''}</li>)}
           </ol>}
-      <button type="button" className="chip touch text-[11px]" disabled={occupato} onClick={() => setAperta(true)}>Modifica</button>
+      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" disabled={occupato} onClick={() => setAperta(true)} />
       {proposta && (
         <span className="flex basis-full flex-wrap items-center gap-1.5 rounded-md bg-white/[0.04] px-2 py-1" role="status">
           <span>Proposta: {proposta.infiltrazioni.map((x) => x.nome).join(', ')} — {proposta.motivo} <span className="text-text-muted">({CERTEZZA[proposta.certezza]})</span></span>
-          <button type="button" className="btn btn-secondary btn-sm touch" disabled={occupato}
-            onClick={() => void salva(proposta.infiltrazioni.map((x) => x.chiave), 'Proposta confermata.')}>Conferma</button>
+          <PulsanteVisivo compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="Conferma" disabled={occupato} onClick={() => void salva(proposta.infiltrazioni.map((x) => x.chiave), 'Proposta confermata.')} />
         </span>
       )}
       {aperta && (
         <Modal titolo="Infiltrazioni della voce" aperta onChiudi={() => setAperta(false)}
-          azioni={<button type="button" className="btn btn-primary touch" onClick={() => setAperta(false)}>Fatto</button>}>
-          <div className="flex flex-col gap-3 text-[13px]">
+          azioni={<PulsanteVisivo tono="primario" icona={<IconaAzione chiave="raggiunto" dimensione={22} />} titolo="Fatto" onClick={() => setAperta(false)} />}>
+          <div className="flex flex-col gap-3 testo-13">
             {/* il collegamento della voce si chiama come il Palazzo («Palazzo di Madarame»): il testo lo nomina così (UX3-2) */}
             <p className="m-0 text-text-secondary">In ordine, come le percorri: {collegamento ? `${collegamento} apre la prima non completata` : 'dicono in quali infiltrazioni avviene la voce, che non apre il Palazzo'}. Ogni cambio si salva subito e non tocca il resto della voce.</p>
             {/* con un atterraggio il collegamento porta alla planimetria d'atterraggio del giorno (§4.1, prima della proposta: FUN3-3, strada (a)
@@ -88,10 +89,9 @@ export function InfiltrazioniVoce({ a, partitaId, onCambiata }: Props) {
                 <li key={`${x.chiave}:${i}`} className="card flex flex-wrap items-center gap-1 p-1.5">
                   <span className="min-w-0 flex-1 font-semibold">{i + 1}. {x.nome}{chiavi.indexOf(x.chiave) < i ? ' (di nuovo)' : ''}</span>
                   <span className="flex flex-wrap items-center gap-1">
-                    <button type="button" className="btn btn-ghost touch" aria-label={`Sposta su ${x.nome}`} disabled={occupato || i === 0} onClick={() => sposta(i, -1)}>↑</button>
-                    <button type="button" className="btn btn-ghost touch" aria-label={`Sposta giù ${x.nome}`} disabled={occupato || i === insieme.length - 1} onClick={() => sposta(i, 1)}>↓</button>
-                    <button type="button" className="btn btn-ghost touch whitespace-nowrap" aria-label={`Togli ${x.nome}`} disabled={occupato}
-                      onClick={() => void salva(chiavi.filter((_, j) => j !== i), `${x.nome}: tolta dalla voce.`)}>Togli</button>
+                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Sposta su" aria-label={`Sposta su ${x.nome}`} disabled={occupato || i === 0} onClick={() => sposta(i, -1)} />
+                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="giu" dimensione={20} />} titolo="Sposta giù" aria-label={`Sposta giù ${x.nome}`} disabled={occupato || i === insieme.length - 1} onClick={() => sposta(i, 1)} />
+                    <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Togli" className="whitespace-nowrap" aria-label={`Togli ${x.nome}`} disabled={occupato} onClick={() => void salva(chiavi.filter((_, j) => j !== i), `${x.nome}: tolta dalla voce.`)} />
                   </span>
                 </li>
               ))}
@@ -126,21 +126,21 @@ export function DaRivedereVoce({ a, partitaId, onCambiata }: Props) {
   };
   return (
     <>
-      <button type="button" className="chip chip--oro touch text-[11px]" onClick={() => setAperta(true)}>Da rivedere</button>
+      <PulsanteVisivo compatto icona={<IconaSegno chiave="da-verificare" dimensione={20} />} titolo="Da rivedere" onClick={() => setAperta(true)} />
       {aperta && (
         <Modal titolo={tipo} aperta onChiudi={() => setAperta(false)}
           azioni={precedente
             ? <>
-                <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={() => void rivedi('rimetti')}>Rimetti il precedente</button>
-                <button type="button" className="btn btn-primary touch" disabled={occupato} onClick={() => void rivedi('tieni')}>Tieni il nuovo</button>
+                <PulsanteVisivo icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Rimetti il precedente" disabled={occupato} onClick={() => void rivedi('rimetti')} />
+                <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="raggiunto" dimensione={22} />} titolo="Tieni il nuovo" disabled={occupato} onClick={() => void rivedi('tieni')} />
               </>
-            : <button type="button" className="btn btn-primary touch" disabled={occupato} onClick={() => void rivedi(a.aggiuntaDa === 'team' ? 'tieni' : 'fatto')}>{a.aggiuntaDa === 'team' ? 'Tieni la voce' : 'Fatto'}</button>}>
-          <div className="flex flex-col gap-2 text-[13px]">
+            : <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="raggiunto" dimensione={22} />} titolo={a.aggiuntaDa === 'team' ? 'Tieni la voce' : 'Fatto'} disabled={occupato} onClick={() => void rivedi(a.aggiuntaDa === 'team' ? 'tieni' : 'fatto')} />}>
+          <div className="flex flex-col gap-2 testo-13">
             {a.motivoRevisione && <p className="m-0">{a.motivoRevisione}</p>}
             <p className="m-0"><span className="text-text-muted">Adesso:</span> {a.azione}{a.note ? ` — ${a.note}` : ''}</p>
             {precedente && (
               <div className="rounded-md bg-white/[0.04] px-2 py-1.5 text-text-muted">
-                <span className="block text-[11px] uppercase tracking-wide">Testo precedente</span>
+                <span className="block testo-12 uppercase tracking-wide">Testo precedente</span>
                 {precedente.azione}{precedente.note ? ` — ${precedente.note}` : ''}{precedente.riferimentoTesto ? ` (${precedente.riferimentoTesto})` : ''}
               </div>
             )}

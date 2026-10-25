@@ -160,7 +160,7 @@ export function CompendioPage() {
               <button type="button" className={`chip touch ${vista === 'elenco' ? 'chip--attivo' : ''}`} onClick={() => impostaVista('elenco')} aria-pressed={vista === 'elenco'}>Elenco</button>
             </div>
             <Link to="/compendio/glossario" className="chip touch no-underline">Glossario dei termini</Link>
-            <span className="text-[13px] text-text-muted">{dati ? `${filtrate.length} di ${dati.length} Persona` : ''}</span>
+            <span className="testo-13 text-text-muted">{dati ? `${filtrate.length} di ${dati.length} Persona` : ''}</span>
           </>
         }
       />
@@ -169,7 +169,7 @@ export function CompendioPage() {
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap gap-2 items-center">
           <CampoRicerca valore={q} onCambia={(v) => imposta('q', v, '')} segnaposto="Cerca Persona o arcano…" />
-          <span className="flex items-center gap-1.5 text-[12px] text-text-secondary">
+          <span className="flex items-center gap-1.5 testo-12 text-text-secondary">
             Ordina
             <Selettore compatto etichetta="Ordinamento" valore={ordine} opzioni={[{ chiave: 'livello', nome: 'Livello' }, { chiave: 'nome', nome: 'Nome' }, { chiave: 'arcana', nome: 'Arcano' }]} onCambia={(k) => imposta('ordine', k, 'livello')} />
           </span>
@@ -240,8 +240,8 @@ export function CompendioPage() {
                   <LivelloBadge livello={p.livello} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-display uppercase text-[18px] leading-none truncate">{p.nomeIt}</span>
-                      {p.nomeIt !== p.nome && <span className="text-[12px] text-text-muted truncate">{p.nome}</span>}
+                      <span className="font-display uppercase testo-18 leading-none truncate">{p.nomeIt}</span>
+                      {p.nomeIt !== p.nome && <span className="testo-12 text-text-muted truncate">{p.nome}</span>}
                       <span className="chip">{p.arcanaNome}</span>
                       {p.dlc && <BadgeStato nome="dlc" testo="DLC" />}
                       {p.rara && <BadgeStato nome="tesoro" testo="Tesoro" />}

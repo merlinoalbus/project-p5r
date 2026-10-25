@@ -49,8 +49,8 @@ type Scheda = (typeof SCHEDE)[number][0];
 function Voce({ titolo, children }: { titolo: string; children: ReactNode }) {
   return (
     <div className="flex min-w-0 flex-col gap-0.5 rounded-md bg-white/[0.04] px-2.5 py-1.5">
-      <span className="text-[10px] uppercase tracking-[0.08em] text-text-muted">{titolo}</span>
-      <span className="text-[13px]">{children}</span>
+      <span className="testo-12 uppercase tracking-[0.08em] text-text-muted">{titolo}</span>
+      <span className="testo-13">{children}</span>
     </div>
   );
 }
@@ -103,33 +103,33 @@ function SchedaOmbre() {
   return (
     <PageState isLoading={dati.caricamento && !dati.dati} error={dati.errore} onRetry={() => void dati.ricarica()}>
       <div className="flex flex-col gap-2">
-        <p className="m-0 text-[13px] text-text-secondary">Ricerca rapida delle Ombre di Palazzi e Dedali: scrivi il nome dell'Ombra o della Persona, oppure filtra per dove si incontra, debolezza e personalità. Le debolezze sono quelle della Persona nel compendio.</p>
+        <p className="m-0 testo-13 text-text-secondary">Ricerca rapida delle Ombre di Palazzi e Dedali: scrivi il nome dell'Ombra o della Persona, oppure filtra per dove si incontra, debolezza e personalità. Le debolezze sono quelle della Persona nel compendio.</p>
         <CampoRicerca valore={q} onCambia={setQ} segnaposto="Ombra, Persona, Palazzo o dedalo…" />
         <div className="flex flex-wrap gap-1.5">
           <Selettore compatto etichetta="Dove" valore={dungeon} vuoto="Ovunque" opzioni={dungeons.map(([k, n]) => ({ chiave: k, nome: n }))} onCambia={setDungeon} />
           <Selettore compatto etichetta="Debole a" valore={elemento} vuoto="Qualsiasi debolezza" opzioni={elementi.map((e) => ({ chiave: e, nome: `Debole a ${NOME_ELEMENTO[e as ChiaveElemento] ?? e}` }))} onCambia={setElemento} />
           <Selettore compatto etichetta="Personalità" valore={personalita} vuoto="Qualsiasi personalità" opzioni={PERSONALITA_OMBRA.map((p) => ({ chiave: p, nome: NOME_PERSONALITA[p] }))} onCambia={setPersonalita} />
         </div>
-        <p className="m-0 text-[12px] text-text-muted" role="status">{visibili.length} Ombre su {ombre.length}.</p>
+        <p className="m-0 testo-12 text-text-muted" role="status">{visibili.length} Ombre su {ombre.length}.</p>
         {cattura.daTogliere?.persona && <AvvisoTogliPersona nome={cattura.daTogliere.persona.nomeIt} occupato={cattura.occupata !== null} onConferma={cattura.conferma} onAnnulla={cattura.annulla} />}
         {/* Una griglia e non una colonna: le schede sono corte e su uno schermo largo la colonna
             unica lasciava tre quarti di pagina vuoti mentre si scorreva per centinaia di Ombre. */}
         <ul className="m-0 grid list-none grid-cols-1 items-start gap-2 p-0 lg:grid-cols-2 2xl:grid-cols-3" aria-label="Ombre">
-          {visibili.length === 0 && <li className="text-[13px] text-text-muted" role="status">Nessuna Ombra con questi filtri.</li>}
+          {visibili.length === 0 && <li className="testo-13 text-text-muted" role="status">Nessuna Ombra con questi filtri.</li>}
           {visibili.map((o) => (
-            <li key={o.chiave} className="card flex gap-2 p-2 text-[13px]">
+            <li key={o.chiave} className="card flex gap-2 p-2 testo-13">
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                   <Link to={o.casa} className="touch inline-flex items-center font-bold">{o.nome}</Link>
-                  {o.persona ? <span className="text-[12px] text-text-secondary">maschera {o.persona.nomeIt}</span> : <span className="text-[12px] text-text-muted">non reclutabile</span>}
-                  {o.livello !== null && <span className="chip text-[11px]">livello {o.livello}</span>}
-                  <span className="chip text-[11px]">{NOME_PERSONALITA[o.personalita]}</span>
+                  {o.persona ? <span className="testo-12 text-text-secondary">maschera {o.persona.nomeIt}</span> : <span className="testo-12 text-text-muted">non reclutabile</span>}
+                  {o.livello !== null && <span className="chip testo-12">livello {o.livello}</span>}
+                  <span className="chip testo-12">{NOME_PERSONALITA[o.personalita]}</span>
                 </div>
                 {/* Le debolezze sono il motivo per cui si apre questa scheda: stanno su una riga loro, con le altre affinità sotto. */}
                 <div className="flex flex-wrap items-center gap-1">
                   {o.debolezze.length > 0
                     ? o.debolezze.map((d) => <ChipElemento key={d} elemento={d} />)
-                    : <span className="text-[12px] text-text-muted">nessuna debolezza nota</span>}
+                    : <span className="testo-12 text-text-muted">nessuna debolezza nota</span>}
                 </div>
                 {o.resistenze.length > 0 && <div className="flex flex-wrap items-center gap-1 opacity-70">
                   {o.resistenze.map((r) => <ChipElemento key={r.elemento} elemento={r.elemento} nome={`${NOME_ELEMENTO[r.elemento as ChiaveElemento] ?? r.elemento}: ${NOME_ESITO_AFFINITA[r.codice as CodiceAffinita] ?? r.codice}`} />)}
@@ -137,7 +137,7 @@ function SchedaOmbre() {
                 {o.luoghi.length > 0 && (
                   <div className="flex flex-wrap gap-x-3">
                     {o.luoghi.map((l) => (
-                      <Link key={`${l.dungeon}|${l.infiltrazione?.chiave ?? ''}`} to={l.casa} className={`touch inline-flex items-center text-[12px] text-text-muted ${l.raggiungibile === false ? 'line-through opacity-60' : ''}`} title={l.raggiungibile === false ? 'Palazzo concluso: non più raggiungibile' : undefined}>{luogoBreve(l)}</Link>
+                      <Link key={`${l.dungeon}|${l.infiltrazione?.chiave ?? ''}`} to={l.casa} className={`touch inline-flex items-center testo-12 text-text-muted ${l.raggiungibile === false ? 'line-through opacity-60' : ''}`} title={l.raggiungibile === false ? 'Palazzo concluso: non più raggiungibile' : undefined}>{luogoBreve(l)}</Link>
                     ))}
                   </div>
                 )}
@@ -164,12 +164,12 @@ function SchedaOmbre() {
 function SchedaNegoziazione({ d, onModificato }: { d: BattagliaDto; onModificato: () => void }) {
   const n = d.negoziazione;
   return (
-    <div className="flex flex-col gap-3 text-[13px]">
+    <div className="flex flex-col gap-3 testo-13">
       {/* La scelta dell'umore e la ricerca sulla domanda vengono prima di tutto: è l'unica cosa che si legge sullo schermo mentre l'Ombra parla.
           Le regole che spiegano il perché stanno sotto. */}
       <NegoziazionePerUmore />
       <SezioneConFregio chiave="battaglia-negoziazione" disposizione="fascia">
-        <div className="flex items-center gap-1"><h2 className="m-0 font-display text-[15px] uppercase leading-none">Quando e come</h2><ModificaSezione sezione="negoziazione" cosa="la negoziazione: quando e come, regole e incertezze" onModificato={onModificato} /></div>
+        <div className="flex items-center gap-1"><h2 className="m-0 font-display testo-15 uppercase leading-none">Quando e come</h2><ModificaSezione sezione="negoziazione" cosa="la negoziazione: quando e come, regole e incertezze" onModificato={onModificato} /></div>
         <p className="m-0">{n.quandoSiPuoNegoziare}</p>
         <Dati colonne={2}>
           <Voce titolo="Personalità dell’Ombra">{n.comeVerificarePersonalita}</Voce>
@@ -177,9 +177,9 @@ function SchedaNegoziazione({ d, onModificato }: { d: BattagliaDto; onModificato
         </Dati>
       </SezioneConFregio>
       <SezioneConFregio chiave="battaglia-regole" disposizione="grande">
-        <h2 className="m-0 font-display text-[15px] uppercase leading-none">Regole</h2>
+        <h2 className="m-0 font-display testo-15 uppercase leading-none">Regole</h2>
         <ul className="m-0 pl-4">{n.regole.map((r) => <li key={r}>{r}</li>)}</ul>
-        {n.incertezze && <p className="m-0 text-text-muted text-[12px]">{n.incertezze}</p>}
+        {n.incertezze && <p className="m-0 text-text-muted testo-12">{n.incertezze}</p>}
         <span>{n.urlFonti.map((u) => <Fonte etichetta="fonte: allgamestaff" allineato={false} key={u} url={u} />).reduce<ReactNode[]>((acc, x, i) => (i ? [...acc, ' · ', x] : [x]), [])}</span>
       </SezioneConFregio>
     </div>
@@ -194,7 +194,7 @@ function SchedaNegoziazione({ d, onModificato }: { d: BattagliaDto; onModificato
 function SchedaTecnico({ d, onModificato }: { d: BattagliaDto; onModificato: () => void }) {
   const effetti = new Map(d.sistema.statiAlterati.map((s) => [s.stato, s.effetto]));
   return (
-    <div className="flex flex-col gap-3 text-[13px]">
+    <div className="flex flex-col gap-3 testo-13">
       <p className="m-0 text-text-secondary">{d.sistema.esitiColpo.tecnico}. Colpisci un nemico già colpito da uno stato alterato con l'elemento indicato per ottenere un colpo Tecnico (danno bonus e possibile «1 More»).</p>
       <div className="area-scorrevole-x">
         <table className="tabella tabella--adattiva">
@@ -203,12 +203,12 @@ function SchedaTecnico({ d, onModificato }: { d: BattagliaDto; onModificato: () 
         </table>
       </div>
       <SezioneConFregio chiave="battaglia-tecnico" disposizione="fascia">
-        <div className="flex items-center gap-1"><h2 className="m-0 font-display text-[15px] uppercase leading-none">Esiti del colpo</h2><ModificaSezione sezione="sistema" cosa="il sistema di battaglia: esiti del colpo, 1 More e comandi" onModificato={onModificato} /></div>
+        <div className="flex items-center gap-1"><h2 className="m-0 font-display testo-15 uppercase leading-none">Esiti del colpo</h2><ModificaSezione sezione="sistema" cosa="il sistema di battaglia: esiti del colpo, 1 More e comandi" onModificato={onModificato} /></div>
         <Dati>
           {Object.entries(d.sistema.esitiColpo).map(([k, v]) => <Voce key={k} titolo={k === 'block' ? 'Block' : k.charAt(0).toUpperCase() + k.slice(1)}>{v}</Voce>)}
           <Voce titolo="1 More">{d.sistema.unoMore}</Voce>
         </Dati>
-        <p className="m-0 text-text-muted text-[12px]">{d.sistema.notaFineBattaglia}</p>
+        <p className="m-0 text-text-muted testo-12">{d.sistema.notaFineBattaglia}</p>
         <Fonte etichetta="fonte: allgamestaff" allineato={false} url={d.tecnico.urlFonte} />
       </SezioneConFregio>
     </div>
@@ -219,9 +219,9 @@ function SchedaTecnico({ d, onModificato }: { d: BattagliaDto; onModificato: () 
 function SchedaStaffetta({ d, onModificato }: { d: BattagliaDto; onModificato: () => void }) {
   const s = d.staffetta; const sp = d.speciali; const a = d.assaltoEHoldUp;
   return (
-    <div className="flex flex-col gap-3 text-[13px]">
+    <div className="flex flex-col gap-3 testo-13">
       <SezioneConFregio chiave="battaglia-staffetta" disposizione="lato">
-        <div className="flex items-center gap-1"><h2 className="m-0 font-display text-[15px] uppercase leading-none">Staffetta</h2><ModificaSezione sezione="staffetta" cosa="la Staffetta" onModificato={onModificato} /></div>
+        <div className="flex items-center gap-1"><h2 className="m-0 font-display testo-15 uppercase leading-none">Staffetta</h2><ModificaSezione sezione="staffetta" cosa="la Staffetta" onModificato={onModificato} /></div>
         <p className="m-0">{s.cosaE}</p>
         <Dati>
           <Voce titolo="Disponibilità">{s.disponibilita}</Voce>
@@ -232,19 +232,19 @@ function SchedaStaffetta({ d, onModificato }: { d: BattagliaDto; onModificato: (
           <Voce titolo="Catena completa">{s.effettoSpeciale}</Voce>
         </Dati>
         <div className="flex flex-wrap gap-1.5">
-          {s.ranghi.map((r) => <span key={r.rango} className="rounded-md border border-border-light bg-white/[0.03] px-2 py-1 text-[12px]"><strong className="font-display">Rango {r.rango}</strong> · {r.bonus}</span>)}
+          {s.ranghi.map((r) => <span key={r.rango} className="rounded-md border border-border-light bg-white/[0.03] px-2 py-1 testo-12"><strong className="font-display">Rango {r.rango}</strong> · {r.bonus}</span>)}
         </div>
         <Fonte etichetta="fonte: allgamestaff" allineato={false} url={s.urlFonte} />
       </SezioneConFregio>
       <SezioneConFregio chiave="battaglia-speciali" disposizione="lato">
-        <div className="flex items-center gap-1"><h2 className="m-0 font-display text-[15px] uppercase leading-none">Speciali</h2><ModificaSezione sezione="speciali" cosa="gli Speciali" onModificato={onModificato} /></div>
+        <div className="flex items-center gap-1"><h2 className="m-0 font-display testo-15 uppercase leading-none">Speciali</h2><ModificaSezione sezione="speciali" cosa="gli Speciali" onModificato={onModificato} /></div>
         <p className="m-0">{sp.meccanica}</p>
         <Dati colonne={2}>
           <Voce titolo="Attivazione">{sp.attivazione}</Voce>
           <Voce titolo="Danno">{sp.proprietaDanno}</Voce>
         </Dati>
         <div className="area-scorrevole-x">
-          <table className="tabella tabella--adattiva text-[12px]">
+          <table className="tabella tabella--adattiva testo-12">
             <thead><tr><th>Speciale</th><th>Coppia</th><th>Sblocco</th></tr></thead>
             <tbody>{sp.elenco.map((e) => <tr key={e.nome}><td data-etichetta="Speciale"><strong>{e.nome}</strong></td><td data-etichetta="Coppia">{e.personaggi.join(' e ')}</td><td data-etichetta="Sblocco">{e.sblocco}</td></tr>)}</tbody>
           </table>
@@ -252,7 +252,7 @@ function SchedaStaffetta({ d, onModificato }: { d: BattagliaDto; onModificato: (
         <Fonte etichetta="fonte: allgamestaff" allineato={false} url={sp.urlFonte} />
       </SezioneConFregio>
       <SezioneConFregio chiave="battaglia-assalto" disposizione="grande">
-        <div className="flex items-center gap-1"><h2 className="m-0 font-display text-[15px] uppercase leading-none">Rapina, Assalto e Parla</h2><ModificaSezione sezione="assalto" cosa="Rapina, Assalto e Parla" onModificato={onModificato} /></div>
+        <div className="flex items-center gap-1"><h2 className="m-0 font-display testo-15 uppercase leading-none">Rapina, Assalto e Parla</h2><ModificaSezione sezione="assalto" cosa="Rapina, Assalto e Parla" onModificato={onModificato} /></div>
         <Dati>
           <Voce titolo="Rapina">{a.rapina}</Voce>
           <Voce titolo="Assalto">{a.assalto}</Voce>
@@ -270,9 +270,9 @@ function SchedaStaffetta({ d, onModificato }: { d: BattagliaDto; onModificato: (
 function SchedaNemici({ d, onModificato }: { d: BattagliaDto; onModificato: () => void }) {
   const o = d.ombreSciagura; const m = d.mietitore; const t = d.demoniTesoro;
   return (
-    <div className="flex flex-col gap-3 text-[13px]">
+    <div className="flex flex-col gap-3 testo-13">
       <SezioneConFregio chiave="battaglia-ombre-sciagura" disposizione="fascia">
-        <div className="flex items-center gap-1"><h2 className="m-0 font-display text-[15px] uppercase leading-none">Ombre sciagura <span className="text-text-muted text-[12px] normal-case">({o.nomeOriginale})</span></h2><ModificaSezione sezione="sciagura" cosa="le Ombre sciagura" onModificato={onModificato} /></div>
+        <div className="flex items-center gap-1"><h2 className="m-0 font-display testo-15 uppercase leading-none">Ombre sciagura <span className="text-text-muted testo-12 normal-case">({o.nomeOriginale})</span></h2><ModificaSezione sezione="sciagura" cosa="le Ombre sciagura" onModificato={onModificato} /></div>
         <p className="m-0">{o.cosaSono}</p>
         <ul className="m-0 pl-4">{o.caratteristiche.map((c) => <li key={c}>{c}</li>)}</ul>
         <Dati>
@@ -287,11 +287,11 @@ function SchedaNemici({ d, onModificato }: { d: BattagliaDto; onModificato: () =
           <Voce titolo="Ricompense">{o.ricompense}</Voce>
           <Voce titolo="Dove">{o.doveCompaiono}</Voce>
         </Dati>
-        <p className="m-0 text-text-muted text-[12px]">{o.incertezze}</p>
+        <p className="m-0 text-text-muted testo-12">{o.incertezze}</p>
         <Fonte etichetta="fonte: allgamestaff" allineato={false} url={o.urlFonte} />
       </SezioneConFregio>
       <SezioneConFregio chiave="battaglia-mietitore" disposizione="alta">
-        <div className="flex items-center gap-1"><h2 className="m-0 font-display text-[15px] uppercase leading-none">{m.categoria}</h2><ModificaSezione sezione="mietitore" cosa="il Mietitore" onModificato={onModificato} /></div>
+        <div className="flex items-center gap-1"><h2 className="m-0 font-display testo-15 uppercase leading-none">{m.categoria}</h2><ModificaSezione sezione="mietitore" cosa="il Mietitore" onModificato={onModificato} /></div>
         <Dati>
           <Voce titolo="Dove e quando">{m.dove}</Voce>
           <Voce titolo="Segnali">{m.comeSiManifesta}</Voce>
@@ -306,7 +306,7 @@ function SchedaNemici({ d, onModificato }: { d: BattagliaDto; onModificato: () =
         <Fonte etichetta="fonte: allgamestaff" allineato={false} url={m.urlFonte} />
       </SezioneConFregio>
       <SezioneConFregio chiave="battaglia-demoni-tesoro" disposizione="lato">
-        <div className="flex items-center gap-1"><h2 className="m-0 font-display text-[15px] uppercase leading-none">{t.categoria}</h2><ModificaSezione sezione="tesoro" cosa="i Demoni del Tesoro" onModificato={onModificato} /></div>
+        <div className="flex items-center gap-1"><h2 className="m-0 font-display testo-15 uppercase leading-none">{t.categoria}</h2><ModificaSezione sezione="tesoro" cosa="i Demoni del Tesoro" onModificato={onModificato} /></div>
         <p className="m-0">{t.cosaSono}</p>
         <Dati>
           <Voce titolo="Come compaiono">{t.comeCompaiono}</Voce>
@@ -316,7 +316,7 @@ function SchedaNemici({ d, onModificato }: { d: BattagliaDto; onModificato: () =
           {t.tecnicheConsigliate.length > 0 && <Voce titolo="Tecniche consigliate">{t.tecnicheConsigliate.join('; ')}</Voce>}
         </Dati>
         <div className="area-scorrevole-x">
-          <table className="tabella tabella--adattiva text-[12px]">
+          <table className="tabella tabella--adattiva testo-12">
             <thead><tr><th>Demone del Tesoro</th><th>Livello</th><th>Arcano</th><th>Dove</th></tr></thead>
             <tbody>{t.elenco.map((e) => <tr key={e.nome}><td data-etichetta="Demone"><strong>{e.nome}</strong></td><td data-etichetta="Livello" className="tabular-nums">{e.livello}</td><td data-etichetta="Arcano">{e.arcano}</td><td data-etichetta="Dove">{e.dove}</td></tr>)}</tbody>
           </table>

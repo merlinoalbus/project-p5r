@@ -96,19 +96,19 @@ export function TimbriDellArea({ area, partitaId, modifica, onTimbri, onRicarica
           })}
         </ol>
       )}
-      {!t && !modifica && <p className="m-0 text-[12px] text-text-muted">Il totale dei timbri di quest’area non è ancora impostato: si imposta in «Modifica la guida». Finché manca, i timbri non contano.</p>}
+      {!t && !modifica && <p className="m-0 testo-12 text-text-muted">Il totale dei timbri di quest’area non è ancora impostato: si imposta in «Modifica la guida». Finché manca, i timbri non contano.</p>}
       {modifica && (totale === null
         ? <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={t ? 'Cambia il totale' : 'Imposta il totale'}
             aria-label={`${t ? 'Cambia' : 'Imposta'} il totale dei timbri di ${area.nome}`} onClick={() => setTotale(t ? String(t.totale) : '')} />
         : (
           <form className="flex flex-wrap items-end gap-2" onSubmit={(e) => { e.preventDefault(); void salvaTotale(); }}>
-            <label className="flex flex-col gap-1 text-[12px]">
+            <label className="flex flex-col gap-1 testo-12">
               Timbri dell’area (vuoto = nessuno)
               <input className="form-input w-28" inputMode="numeric" maxLength={3} value={totale} autoFocus onChange={(e) => setTotale(e.target.value)} />
             </label>
             <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva" disabled={occupato} />
             <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" disabled={occupato} onClick={() => setTotale(null)} />
-            {t && <span className="basis-full text-[11px] text-text-muted">Un totale più basso dei timbri già presi li riduce in ogni partita; vuoto li toglie.</span>}
+            {t && <span className="basis-full testo-12 text-text-muted">Un totale più basso dei timbri già presi li riduce in ogni partita; vuoto li toglie.</span>}
           </form>
         ))}
     </SezioneDellArea>

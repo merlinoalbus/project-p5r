@@ -24,13 +24,12 @@ import { FinestraColloca } from '../components/mappe/FinestraColloca';
 import { Modal } from '../components/shared/Modal';
 import { urlCasa } from '../utils/navigazioneMappa';
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { aggiornaSbloccoQuartiere, getQuartiere, ripristinaSbloccoQuartiere } from '../services/api';
 import { MappaIncorporata } from '../components/mappe/MappaIncorporata';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
-import { IconChevronLeft } from '../components/shared/icons';
 import { COLORE_TIPO_LUOGO, NOME_TIPO_LUOGO, ancoraLuogo, urlLuogo } from '../utils/citta';
 import { definizioneTipoLuogo, ordinaTipiLuogo } from '../../shared/tipiLuogo';
 import { IconaSpillo } from '../components/mappe/IconaSpillo';
@@ -48,6 +47,8 @@ import type { RequisitoSpillo } from '../../shared/condizioniSpillo';
 import type { SbloccoDto } from '../../shared/types';
 import { InvitiConfidente } from '../components/confidenti/InvitiConfidente';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
+import { IntestazioneScheda } from '../components/shared/IntestazioneScheda';
+import { MenuModifica } from '../components/shared/MenuModifica';
 
 function condizioniDiSblocco(sblocco: SbloccoDto | undefined): RequisitoSpillo[] {
   if (!sblocco?.condizioneSalvata) return [];
@@ -73,12 +74,12 @@ function EditorSbloccoQuartiere({ chiave, nome, sblocco, onChiudi, onSalvato }: 
     finally { setSalvando(false); }
   };
   return <Modal titolo={`Sblocco di ${nome}`} aperta onChiudi={onChiudi} larga
-    azioni={<><button type="button" className="btn btn-secondary touch" onClick={onChiudi} disabled={salvando}>Annulla</button><button type="button" className="btn btn-primary touch" onClick={() => void salva()} disabled={salvando}>{salvando ? 'Salvataggio…' : 'Salva sblocco'}</button></>}>
+    azioni={<><button type="button" className="btn btn-secondary touch" onClick={onChiudi} disabled={salvando}>Annulla</button><PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo={salvando ? 'Salvataggio…' : 'Salva sblocco'} onClick={() => void salva()} disabled={salvando} /></>}>
     <div className="flex flex-col gap-3">
-      <p className="m-0 text-[13px] text-text-secondary">Gli inviti dei Confidenti restano separati e continuano ad aprire {nome} quando spettano.</p>
+      <p className="m-0 testo-13 text-text-secondary">Gli inviti dei Confidenti restano separati e continuano ad aprire {nome} quando spettano.</p>
       <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} disabilitato={salvando} />
-      {sblocco?.modificato && <button type="button" className="btn btn-ghost btn-sm touch self-start" onClick={() => void ripristina()} disabled={salvando}>Ripristina la condizione della guida</button>}
-      {errore && <p className="m-0 text-[13px]" role="alert">{errore}</p>}
+      {sblocco?.modificato && <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Ripristina la condizione della guida" onClick={() => void ripristina()} disabled={salvando} />}
+      {errore && <p className="m-0 testo-13" role="alert">{errore}</p>}
     </div>
   </Modal>;
 }
@@ -99,18 +100,18 @@ function Luogo({ l, onSalvato }: { l: LuogoDto; onSalvato: () => void }) {
   const nonAncora = l.disponibilita != null && l.disponibilita.stato !== 'disponibile';
   const perche = l.disponibilita?.requisiti.filter((r) => r.stato === 'rosso').map((r) => r.dettaglio || r.testo).join(' · ');
   return (
-    <li id={ancoraLuogo(l.chiave)} className={`card flex flex-col gap-1 text-[13px] scroll-mt-20 ${nonAncora ? 'opacity-60' : ''} ${classiSuggerito(sugg.evidenziato('luoghi', l.chiave))}`}>
+    <li id={ancoraLuogo(l.chiave)} className={`card flex flex-col gap-1 testo-13 scroll-mt-20 ${nonAncora ? 'opacity-60' : ''} ${classiSuggerito(sugg.evidenziato('luoghi', l.chiave))}`}>
       <div className="flex flex-wrap items-center gap-2">
         {/* L5 (F4): il nome porta alla pagina del luogo, la fonte unica */}
-        {l.casa ? <Link to={l.casa} className="touch inline-flex items-center text-[15px] font-bold text-text">{l.nome}</Link> : <strong className="text-[15px]">{l.nome}</strong>}
-        {l.presenza && l.presenza.sbloccato !== false && l.presenza.aperto !== null && <span className={`chip text-[11px] ${l.presenza.aperto ? 'chip--dalla-guida' : 'chip--bloccata'}`} title={l.presenza.testo}>{l.presenza.aperto ? 'Aperto adesso' : 'Chiuso adesso'}</span>}
-        {l.negozi.length > 1 && <span className="text-[12px] text-text-muted">· {l.negozi.length} negozi</span>}
+        {l.casa ? <Link to={l.casa} className="touch inline-flex items-center testo-15 font-bold text-text">{l.nome}</Link> : <strong className="testo-15">{l.nome}</strong>}
+        {l.presenza && l.presenza.sbloccato !== false && l.presenza.aperto !== null && <span className={`chip testo-12 ${l.presenza.aperto ? 'chip--dalla-guida' : 'chip--bloccata'}`} title={l.presenza.testo}>{l.presenza.aperto ? 'Aperto adesso' : 'Chiuso adesso'}</span>}
+        {l.negozi.length > 1 && <span className="testo-12 text-text-muted">· {l.negozi.length} negozi</span>}
         <span className="chip luogo-tipo" style={{ '--luogo-tipo-colore': COLORE_TIPO_LUOGO[l.tipo] ?? COLORE_TIPO_LUOGO.altro } as React.CSSProperties}><IconaSpillo tipo={definizioneTipoLuogo(l.tipo).icona} dimensione={14} /> {NOME_TIPO_LUOGO[l.tipo] ?? l.tipo}</span>
         {sugg.evidenziato('luoghi', l.chiave) && <TargaSuggerito motivo={sugg.motivo('luoghi', l.chiave)} compatta />}
-        {nonAncora && <span className="chip chip--attivo text-[11px]" title={perche || undefined}>Non ancora nel mondo</span>}
-        {!nonAncora && l.condizioni && l.disponibilita && <span className="chip text-[11px]" title="La condizione scritta dalla guida risulta soddisfatta in questa partita">sbloccato</span>}
+        {nonAncora && <span className="chip chip--attivo testo-12" title={perche || undefined}>Non ancora nel mondo</span>}
+        {!nonAncora && l.condizioni && l.disponibilita && <span className="chip testo-12" title="La condizione scritta dalla guida risulta soddisfatta in questa partita">sbloccato</span>}
         {l.quando && <span className="chip">{l.quando === 'entrambe' ? 'giorno e sera' : l.quando}</span>}
-        {!l.verificato && <span className="chip text-[11px]" title="Dato da fonte secondaria, non confermato sulla guida italiana">da fonte secondaria</span>}
+        {!l.verificato && <span className="chip testo-12" title="Dato da fonte secondaria, non confermato sulla guida italiana">da fonte secondaria</span>}
       </div>
       <p className="m-0">{l.cosaOffre}</p>
       <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-text-secondary">
@@ -126,14 +127,14 @@ function Luogo({ l, onSalvato }: { l: LuogoDto; onSalvato: () => void }) {
       )}
       {l.piatti && l.piatti.length > 0 && (
         <div className="area-scorrevole-x">
-          <table className="tabella tabella--adattiva text-[12px]">
+          <table className="tabella tabella--adattiva testo-12">
             <thead><tr><th>Piatto</th><th>Prezzo</th><th>Effetto</th></tr></thead>
             <tbody>{l.piatti.map((p) => <tr key={p.nome}><td data-etichetta="Piatto"><strong>{p.nome}</strong></td><td data-etichetta="Prezzo" className="tabular-nums">{p.prezzo !== null ? `${p.prezzo.toLocaleString('it-IT')} ¥` : '—'}</td><td data-etichetta="Effetto">{p.effetto}</td></tr>)}</tbody>
           </table>
         </div>
       )}
       {l.negozio && <CollegamentoVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="negozio" dimensione={20} />} titolo="Articoli in vendita" to={l.casa ? urlLuogo(l.chiave, l.negozio) : `/guida/negozi/${l.negozio}`} />}
-      {l.note && <p className="m-0 text-[12px] text-text-muted">{l.note}</p>}
+      {l.note && <p className="m-0 testo-12 text-text-muted">{l.note}</p>}
     </li>
   );
 }
@@ -148,7 +149,6 @@ function Luogo({ l, onSalvato }: { l: LuogoDto; onSalvato: () => void }) {
  */
 export function QuartierePage() {
   const { chiave = '' } = useParams();
-  const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const attiva = usePartitaStore((s) => s.attiva);
   // La partita serve ai luoghi: senza, non si puo' dire quali a quel punto non ci sono ancora.
@@ -191,40 +191,37 @@ export function QuartierePage() {
     <PageState isLoading={dati.caricamento && !q} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {q && (
         <div className="flex flex-col gap-4">
-          <button type="button" className="btn btn-ghost btn-sm self-start touch -ml-2" onClick={() => navigate('/guida/citta')}><IconChevronLeft size={16} /> La città</button>
-
-          <header className="card flex items-center gap-3">
-            {/* L'illustrazione della mappa del quartiere (regola unica di L1), con sopra la sagoma della mappa di Tokyo, la
-                stessa che si è appena toccata: dice «sei nel posto che hai scelto» prima che si legga il titolo (scelta
-                dell'utente, 2026-10-20). L6: illustrazione e titolo compatti anche sul telefono; condizioni, descrizione e
-                comandi stanno nel corpo, per non allungare l'intestazione oltre il 30%. Stessa immagine, senza ritagli. */}
-            <IllustrazioneConSegno illustrazione={q.illustrazione} alt={`Illustrazione di ${q.nome}`}
+          {/* L'illustrazione della mappa del quartiere (regola unica di L1), con sopra la sagoma della mappa di Tokyo, la stessa che si è
+              appena toccata: dice «sei nel posto che hai scelto» prima che si legga il titolo (scelta dell'utente, 2026-10-20). L6:
+              illustrazione e titolo compatti anche sul telefono; condizioni e descrizione stanno nel corpo, per non allungare l'intestazione
+              oltre il 30%. Lotto B: l'intestazione comune delle schede; «Entra» è l'azione di gioco (primaria), ingresso, aree, sblocco e
+              testi della guida stanno nel menu «Modifica ⋯». */}
+          <IntestazioneScheda ripiego="/guida/citta" titolo={q.nome}
+            figura={<IllustrazioneConSegno illustrazione={q.illustrazione} alt={`Illustrazione di ${q.nome}`}
               className="w-[88px] shrink-0 sm:w-[112px] lg:w-[136px]"
               sizes="(min-width: 1024px) 136px, (min-width: 640px) 112px, 88px"
               segno={<SagomaQuartiere chiave={q.chiave} nome={q.nome} larghezza={72} altezza={54} />}
-              senza={<SagomaQuartiere chiave={q.chiave} nome={q.nome} larghezza={88} altezza={66} />} />
-            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-              <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-                <h1 className="titolo-display m-0 break-words text-[24px] leading-tight">{q.nome}</h1>
-                <span className="text-[12px] text-text-muted">{q.aree.length === 0 ? 'nessuna area' : q.aree.length === 1 ? 'un’area' : `${q.aree.length} aree`} · {q.luoghi.length} {q.luoghi.length === 1 ? 'luogo' : 'luoghi'}</span>
-              </div>
-            </div>
-          </header>
-          <section className="card flex flex-col gap-2" aria-label="Disponibilità e azioni del quartiere">
-              {q.sbloccoCondizione?.testo && <p className="m-0 break-words text-[13px]"><strong className="text-text-secondary">Si apre:</strong> {q.sbloccoCondizione.testo}</p>}
-              {q.sbloccoCondizione && <div className="flex flex-wrap items-center gap-1.5 text-[12px] text-text-muted"><span>{q.sbloccoCondizione.modificato ? 'Sblocco modificato' : 'Sblocco strutturato'}</span><button type="button" className="btn btn-ghost btn-sm touch" onClick={() => setFinestra('sblocco')}>Modifica sblocco</button>{q.sbloccoCondizione.modificato && <button type="button" className="btn btn-ghost btn-sm touch" onClick={() => setFinestra('sblocco')}>Ripristina</button>}</div>}
-              {q.descrizione && <p className="m-0 text-[13px] text-text-secondary">{q.descrizione}</p>}
-              <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                {q.ingresso && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo={`Entra: ${q.ingresso.area?.nome ?? q.ingresso.nome}`} onClick={() => setEntraAperta(true)} />}
-                <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Ingresso" dettaglio={q.ingresso ? undefined : 'da scegliere'} onClick={() => setFinestra('ingresso')} />
-                <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Aggiungi area" onClick={() => setFinestra('aggiungi')} />
+              senza={<SagomaQuartiere chiave={q.chiave} nome={q.nome} larghezza={88} altezza={66} />} />}
+            chip={<span className="testo-12 text-text-muted">{q.aree.length === 0 ? 'nessuna area' : q.aree.length === 1 ? 'un’area' : `${q.aree.length} aree`} · {q.luoghi.length} {q.luoghi.length === 1 ? 'luogo' : 'luoghi'}</span>}
+            azioni={<>
+              {q.ingresso && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo={`Entra: ${q.ingresso.area?.nome ?? q.ingresso.nome}`} onClick={() => setEntraAperta(true)} />}
+              <MenuModifica cosa={`il quartiere «${q.nome}»`}>
+                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Ingresso" dettaglio={q.ingresso ? undefined : 'da scegliere'} onClick={() => setFinestra('ingresso')} />
+                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo="Aggiungi area" onClick={() => setFinestra('aggiungi')} />
+                {/* la stessa finestra modifica lo sblocco e, se è stato cambiato, lo rimette com'era */}
+                {q.sbloccoCondizione && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="bloccato" dimensione={20} />} titolo="Sblocco"
+                  dettaglio={q.sbloccoCondizione.modificato ? 'modificato · ripristina' : undefined} aria-label="Modifica sblocco" onClick={() => setFinestra('sblocco')} />}
                 {/* L11 · B11 (R11-15/6): nome e descrizione del quartiere, con «Ripristina» ai valori della guida */}
-                <ModificaGuida tipo="quartiere" chiave={q.chiave} cosa={`il quartiere «${q.nome}»`} etichetta="Modifica" onSalvato={() => void dati.ricarica()} />
-              </div>
-          </section>
+                <ModificaGuida tipo="quartiere" chiave={q.chiave} cosa={`il quartiere «${q.nome}»`} etichetta="Testi della guida" onSalvato={() => void dati.ricarica()} />
+              </MenuModifica>
+            </>} />
+          {(q.sbloccoCondizione?.testo || q.descrizione) && <section className="card flex flex-col gap-2" aria-label="Disponibilità del quartiere">
+              {q.sbloccoCondizione?.testo && <p className="m-0 break-words testo-13"><strong className="text-text-secondary">Si apre:</strong> {q.sbloccoCondizione.testo}{q.sbloccoCondizione.modificato ? <span className="testo-12 text-text-muted"> (sblocco modificato)</span> : null}</p>}
+              {q.descrizione && <p className="m-0 testo-13 text-text-secondary">{q.descrizione}</p>}
+          </section>}
 
-          {q.sbloccoCondizione?.fonte && <p className="m-0 text-[12px] text-text-muted" title={q.sbloccoCondizione.fonte.nota ?? undefined}>Fonte: {q.sbloccoCondizione.fonte.registro}, certezza {q.sbloccoCondizione.fonte.certezza}{q.sbloccoCondizione.fonte.certezza !== 'alta' ? ' — da verificare' : ''}.</p>}
-          {q.sbloccoCondizione?.esito === 'falso' && <p className="m-0 text-[13px] text-text-secondary">Manca: {q.sbloccoCondizione.manca ?? q.sbloccoCondizione.testo}.</p>}
+          {q.sbloccoCondizione?.fonte && <p className="m-0 testo-12 text-text-muted" title={q.sbloccoCondizione.fonte.nota ?? undefined}>Fonte: {q.sbloccoCondizione.fonte.registro}, certezza {q.sbloccoCondizione.fonte.certezza}{q.sbloccoCondizione.fonte.certezza !== 'alta' ? ' — da verificare' : ''}.</p>}
+          {q.sbloccoCondizione?.esito === 'falso' && <p className="m-0 testo-13 text-text-secondary">Manca: {q.sbloccoCondizione.manca ?? q.sbloccoCondizione.testo}.</p>}
           <InvitiConfidente filtro={{ apreTipo: 'quartiere', apreChiave: q.chiave }} onCambiato={dati.ricarica} />
 
           <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
@@ -232,7 +229,7 @@ export function QuartierePage() {
                 centrata (o sullo spillo dell'indirizzo); l'ingresso serve a chi arriva dalla metro, e ha la sua finestra. */}
             <section className="flex flex-col gap-1.5 xl:sticky xl:top-2" aria-label={`Illustrazione di ${q.nome}`}>
               {q.mappaChiave && <MappaIncorporata chiave={q.mappaChiave} nome={q.nome} spilloIniziale={spillo} rivelaSpilloIniziale={spillo !== null && spillo === pinChiesto} versione={`0-${revisione}`} classeVisore="visore-alto-quanto-immagine h-[min(56vh,460px)] md:h-[max(420px,min(64vh,740px))]" />}
-              <div className="flex flex-wrap items-center gap-2 text-[12px] text-text-muted">
+              <div className="flex flex-wrap items-center gap-2 testo-12 text-text-muted">
                 {q.illustrazione.immagineUrl || q.illustrazione.asset
                   ? <span>Pin e immagine si modificano dall’editor.</span>
                   : <span>Nessuna illustrazione per {q.nome}: carica una tua immagine dall’editor (resta nella tua istanza).</span>}
@@ -254,17 +251,17 @@ export function QuartierePage() {
               <ul className="m-0 grid list-none grid-cols-1 items-start gap-2 p-0 md:grid-cols-2 xl:grid-cols-1" aria-label="Luoghi">
                 {visibili.map((l) => <Luogo key={l.chiave} l={l} onSalvato={() => void dati.ricarica()} />)}
               </ul>
-              {visibili.length === 0 && <p className="m-0 text-[13px] text-text-muted" role="status">Nessun luogo di questo tipo in {q.nome}.</p>}
+              {visibili.length === 0 && <p className="m-0 testo-13 text-text-muted" role="status">Nessun luogo di questo tipo in {q.nome}.</p>}
               {/* L5 (F4, F5): i luoghi del quartiere senza un'Area, con l'area proposta se la migrazione ne ha dedotta una: la loro pagina e
                   «Colloca» */}
               {(q.luoghiDaCollocare?.length ?? 0) > 0 && (
-                <details className="card text-[13px]">
+                <details className="card testo-13">
                   <summary className="touch cursor-pointer font-semibold text-text-secondary">Luoghi da collocare ({q.luoghiDaCollocare!.length})</summary>
                   <ul className="m-0 flex list-none flex-col gap-1 p-0 pt-1.5" aria-label="Luoghi da collocare">
                     {q.luoghiDaCollocare!.map((l) => <li key={l.chiave} className="flex flex-wrap items-center gap-1.5">
                       {l.casa ? <Link to={l.casa} className="touch inline-flex items-center">{l.nome}</Link> : <span>{l.nome}</span>}
-                      {l.areaProposta && <span className="text-[12px] text-text-muted">· proposta: {l.areaProposta.nome}</span>}
-                      <button type="button" className="btn btn-ghost btn-sm touch ml-auto" aria-label={`Colloca ${l.nome}`} onClick={() => setColloca({ luogo: { chiave: l.chiave, nome: l.nome }, proposta: l.areaProposta?.slug ?? null })}>Colloca</button>
+                      {l.areaProposta && <span className="testo-12 text-text-muted">· proposta: {l.areaProposta.nome}</span>}
+                      <PulsanteVisivo tono="fantasma" compatto className="ml-auto" icona={<IconaAzione chiave="pianta" dimensione={20} />} titolo="Colloca" aria-label={`Colloca ${l.nome}`} onClick={() => setColloca({ luogo: { chiave: l.chiave, nome: l.nome }, proposta: l.areaProposta?.slug ?? null })} />
                     </li>)}
                   </ul>
                 </details>
@@ -281,8 +278,8 @@ export function QuartierePage() {
               dell'ingresso; «Apri l'area» porta alla sua pagina con lo stesso punto, «Chiudi» resta qui e toglie `ingresso=1`. */}
           {q.ingresso && <Modal titolo={`${q.ingresso.area?.nome ?? q.ingresso.nome} — ingresso di ${q.nome}`} aperta={entraAperta || dallaMetro} onChiudi={chiudiEntra} larga
             azioni={<>
-              <button type="button" className="btn btn-secondary touch" onClick={chiudiEntra}>Chiudi</button>
-              {q.ingresso.area && <Link className="btn btn-primary touch" to={urlCasa(`/guida/citta/${encodeURIComponent(q.chiave)}/${encodeURIComponent(q.ingresso.area.slug)}`, { x: q.ingresso.x, y: q.ingresso.y, zoom: q.ingresso.zoom })}>Apri l’area</Link>}
+              <PulsanteVisivo icona={<IconaAzione chiave="chiudi" dimensione={22} />} titolo="Chiudi" onClick={chiudiEntra} />
+              {q.ingresso.area && <CollegamentoVisivo tono="primario" icona={<IconaAzione chiave="mappa" dimensione={22} />} titolo="Apri l’area" to={urlCasa(`/guida/citta/${encodeURIComponent(q.chiave)}/${encodeURIComponent(q.ingresso.area.slug)}`, { x: q.ingresso.x, y: q.ingresso.y, zoom: q.ingresso.zoom })} />}
             </>}>
             <MappaIncorporata chiave={q.ingresso.mappa} nome={q.ingresso.area?.nome ?? q.ingresso.nome} puntoIniziale={{ x: q.ingresso.x, y: q.ingresso.y, zoom: q.ingresso.zoom }} conEditor={false}
               altezza="min(64dvh, 620px)" />

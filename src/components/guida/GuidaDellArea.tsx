@@ -353,37 +353,37 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
     // L4 §4.1: le altre infiltrazioni in cui sta l'oggetto permanente della voce (nell'ordine della guida)
     const ancheIn = p.oggetto ? [...(areePalazzo ?? [])].filter((a) => a.chiave !== area.chiave && a.punti?.some((x) => x.oggetto === p.oggetto)).sort((x, y) => x.ordine - y.ordine) : [];
     return (
-      <li key={p.chiave} data-voce={p.chiave} className={`flex flex-col gap-1 rounded-md px-1 py-2 text-[13px] ${aperto ? 'bg-primary-bg' : ''}`}>
+      <li key={p.chiave} data-voce={p.chiave} className={`flex flex-col gap-1 rounded-md px-1 py-2 testo-13 ${aperto ? 'bg-primary-bg' : ''}`}>
         {/* segnata e chiusa, la riga si attenua: «esaurito» più di «ottenuto» (§4.1, R4-34: si distinguono a colpo d'occhio) */}
         <button type="button" className={`touch flex items-start gap-2 text-left ${p.stato && !aperto ? (p.stato === 'esaurito' ? 'opacity-40' : 'opacity-60') : ''}`} onClick={() => { apri(aperto ? null : p.chiave, pl); if (aperto) setCollegando(null); }} aria-expanded={aperto}>
           <span className="mt-1 inline-block h-3 w-3 shrink-0 rounded-full" style={{ background: COLORE_TIPO[p.tipo] }} aria-hidden="true" />
           <span className="min-w-0 flex-1">
             <span className="font-semibold">{p.nome}</span>
-            <span className="text-[12px] text-text-muted"> · {NOME_TIPO[p.tipo]}{p.esauribile ? ' · esauribile' : ''}{statoTesto ? ` · ${statoTesto}` : ''}{passiDaSegnare.length > 0 ? ` · ${passiFatti}/${passiDaSegnare.length} passi` : ''}</span>
+            <span className="testo-12 text-text-muted"> · {NOME_TIPO[p.tipo]}{p.esauribile ? ' · esauribile' : ''}{statoTesto ? ` · ${statoTesto}` : ''}{passiDaSegnare.length > 0 ? ` · ${passiFatti}/${passiDaSegnare.length} passi` : ''}</span>
             {/* L4 §4.1: il carattere accanto al tipo (assente per le voci dei dedali e per le Persona); nel testo, così va a capo con lui */}
-            {p.carattere && <span className={`chip chip--icona ml-1.5 align-middle text-[11px] ${CLASSE_CARATTERE[p.carattere]}`} title={SPIEGAZIONE_CARATTERE[p.carattere]}>
+            {p.carattere && <span className={`chip chip--icona ml-1.5 align-middle testo-12 ${CLASSE_CARATTERE[p.carattere]}`} title={SPIEGAZIONE_CARATTERE[p.carattere]}>
               <IconaAzione chiave={iconaCarattere(p.carattere, !!p.stato)} dimensione={14} />{NOME_CARATTERE[p.carattere]}
             </span>}
-            {p.stato === 'esaurito' && <span className="chip chip--icona chip--bloccata ml-1.5 align-middle text-[11px]"><IconaAzione chiave="esaurito" dimensione={14} />Esaurito</span>}
+            {p.stato === 'esaurito' && <span className="chip chip--icona chip--bloccata ml-1.5 align-middle testo-12"><IconaAzione chiave="esaurito" dimensione={14} />Esaurito</span>}
           </span>
           {/* L4 (§4.1): un suo pin risulta fatto ma la voce no (da prima dell'aggiornamento); si sistema dalla voce aperta */}
-          {p.daVerificare && <span className="chip chip--oro shrink-0 text-[11px]">Da verificare</span>}
+          {p.daVerificare && <span className="chip chip--oro shrink-0 testo-12">Da verificare</span>}
           {/* L4 §8.11: ogni pin tiene il suo stato e la voce lo calcola dai suoi pin; con più pin il contatore («In corso · 2/8») */}
-          {testoAvanzamento(p.avanzamento) && <span className={`chip shrink-0 text-[11px] ${inCorso(p.avanzamento) ? 'chip--attivo' : ''}`}>{testoAvanzamento(p.avanzamento)}</span>}
+          {testoAvanzamento(p.avanzamento) && <span className={`chip shrink-0 testo-12 ${inCorso(p.avanzamento) ? 'chip--attivo' : ''}`}>{testoAvanzamento(p.avanzamento)}</span>}
           {p.pin.length > 0
-            ? <span className="chip chip--icona shrink-0 text-[11px]" title={p.pin.map((x) => `${x.nome} (${nomeSenzaPalazzo(x.mappaNome)})`).join(', ')}><IconaAzione chiave="posizione" dimensione={14} />{p.pin.length === 1 ? '1 pin' : `${p.pin.length} pin`}</span>
-            : puntoDaCollegare(p.tipo) && !conPassi && <span className="chip shrink-0 text-[11px] text-text-muted">da collegare</span>}
+            ? <span className="chip chip--icona shrink-0 testo-12" title={p.pin.map((x) => `${x.nome} (${nomeSenzaPalazzo(x.mappaNome)})`).join(', ')}><IconaAzione chiave="posizione" dimensione={14} />{p.pin.length === 1 ? '1 pin' : `${p.pin.length} pin`}</span>
+            : puntoDaCollegare(p.tipo) && !conPassi && <span className="chip shrink-0 testo-12 text-text-muted">da collegare</span>}
         </button>
         {/* L4 §4.1: l'oggetto permanente sta anche in altre infiltrazioni (fatto in una, è fatto in tutte): sotto la riga, un tocco la apre */}
         {/* una riga sola anche con più infiltrazioni («Anche nella 2ª e 4ª infiltrazione»): ogni ordinale è un bersaglio da 44 px col nome intero */}
         {ancheIn.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1 pl-5 text-[11px] text-text-muted">
+          <div className="flex flex-wrap items-center gap-1 pl-5 testo-12 text-text-muted">
             <span>Anche nella</span>
             {ancheIn.map((a, i) => (
               <Fragment key={a.chiave}>
                 {i > 0 && (i === ancheIn.length - 1 ? <span>e</span> : <span className="-ml-1">,</span>)}
                 {onApriInfiltrazione
-                  ? <button type="button" className="chip touch min-w-11 justify-center text-[11px] text-primary-testo" aria-label={`Anche nella ${a.ordine + 1}ª infiltrazione`} title={a.nome} onClick={() => onApriInfiltrazione(a.chiave)}>{a.ordine + 1}ª</button>
+                  ? <button type="button" className="chip touch min-w-11 justify-center testo-12 text-primary-testo" aria-label={`Anche nella ${a.ordine + 1}ª infiltrazione`} title={a.nome} onClick={() => onApriInfiltrazione(a.chiave)}>{a.ordine + 1}ª</button>
                   : <span title={a.nome}>{a.ordine + 1}ª</span>}
               </Fragment>
             ))}
@@ -395,20 +395,19 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
             {p.descrizione && <p className="m-0 whitespace-pre-wrap text-text-secondary">{p.descrizione}</p>}
             <DettagliPunto d={p.dettagli} contenuto={p.contenuto} senzaAffinita={p.tipo === 'persona' && !!p.persona} />
             <ContenutoDellaVoce key={p.chiave} voce={p.chiave} contenuto={p.contenuto ?? []} onCambiato={onRicarica} disabilitato={occupato} />
-            {p.carattere && <p className="m-0 text-[11px] text-text-muted">{SPIEGAZIONE_CARATTERE[p.carattere]}</p>}
-            {conPassi && <p className="m-0 text-[11px] text-text-muted">Risolto quando i suoi passi sono fatti: segnarlo li segna tutti, riaprirlo li riapre. I pin stanno sui passi.</p>}
+            {p.carattere && <p className="m-0 testo-12 text-text-muted">{SPIEGAZIONE_CARATTERE[p.carattere]}</p>}
+            {conPassi && <p className="m-0 testo-12 text-text-muted">Risolto quando i suoi passi sono fatti: segnarlo li segna tutti, riaprirlo li riapre. I pin stanno sui passi.</p>}
             {p.daVerificare && partitaId && (() => {
               const div = divergenze?.find((x) => x.voce === p.chiave);
-              return <div className="flex flex-wrap items-center gap-2 rounded-md border border-warning/50 px-2 py-1 text-[12px]">
+              return <div className="flex flex-wrap items-center gap-2 rounded-md border border-warning/50 px-2 py-1 testo-12">
                 <span className="min-w-0 flex-1">Il pin {div ? `«${div.spilloNome}» ` : ''}risulta fatto ma la voce no: era così prima dell’aggiornamento.</span>
-                {onDaVerificare && <button type="button" className="btn btn-secondary btn-sm touch" disabled={!div}
-                  onClick={() => div && onDaVerificare({ spilloUid: div.spilloUid, spilloNome: div.spilloNome, mappaNome: nomeSenzaPalazzo(div.mappaNome), voce: div.voce, voceNome: div.voceNome, infiltrazioneNome: div.infiltrazioneNome })}>Sistema…</button>}
+                {onDaVerificare && <PulsanteVisivo compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Sistema…" disabled={!div} onClick={() => div && onDaVerificare({ spilloUid: div.spilloUid, spilloNome: div.spilloNome, mappaNome: nomeSenzaPalazzo(div.mappaNome), voce: div.voce, voceNome: div.voceNome, infiltrazioneNome: div.infiltrazioneNome })} />}
               </div>;
             })()}
             {p.pin.length > 0 && (
               <ul className="m-0 flex list-none flex-col gap-1 p-0" aria-label={`Pin collegati a ${p.nome}`}>
                 {p.pin.map((x) => (
-                  <li key={x.id} className="flex items-center gap-2 text-[12px]">
+                  <li key={x.id} className="flex items-center gap-2 testo-12">
                     <IconaAzione chiave="posizione" dimensione={16} />
                     <span className="min-w-0 flex-1">{x.nome} <span className="text-text-muted">· {nomeSenzaPalazzo(x.mappaNome)}</span></span>
                     <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={18} />} titolo="Scollega" aria-label={`Scollega ${x.nome} da ${p.nome}`} disabled={occupato} onClick={() => void scegliPin(p, x.id, x.nome)} />
@@ -418,9 +417,9 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
             )}
             {/* una voce descrittiva (solo «Altro») si legge e basta: niente stato, niente pin (scelta dell'utente) */}
             {descrittiva(p)
-              ? <p className="m-0 text-[11px] text-text-muted">Voce descrittiva: si legge, non si segna e non ha pin.</p>
+              ? <p className="m-0 testo-12 text-text-muted">Voce descrittiva: si legge, non si segna e non ha pin.</p>
               : <div className="flex flex-wrap items-center gap-1.5">
-                {partitaId && p.stato !== 'ottenuto' && <button type="button" className="btn btn-primary btn-sm touch" onClick={() => void segnaEPassaOltre(p, 'ottenuto', pl)}>{racconto ? 'Letto' : 'Ottenuto'}</button>}
+                {partitaId && p.stato !== 'ottenuto' && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo={racconto ? 'Letto' : 'Ottenuto'} onClick={() => void segnaEPassaOltre(p, 'ottenuto', pl)} />}
                 {partitaId && p.esauribile && p.stato !== 'esaurito' && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="esaurito" dimensione={20} />} titolo="Esaurito" onClick={() => void segnaEPassaOltre(p, 'esaurito', pl)} />}
                 {/* L4 §8.11: «Riapri» toglie il segno a tutti i suoi pin; se altre voci li condividono si riaprono anche loro, e prima lo si dice.
                     §8.6: se la voce è un passo di un Enigma risolto, l'Enigma si riapre: anche questo si dice prima */}
@@ -493,11 +492,11 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
                         <Selettore etichetta="Carattere" valore={b.carattere || regola} opzioni={CARATTERI.map((c) => ({ chiave: c, nome: NOME_CARATTERE[c], dettaglio: c === regola ? 'regola' : undefined }))} onCambia={(v) => cambia({ carattere: v })} />
                       </span>
                       {b.carattere
-                        ? <button type="button" className="btn btn-secondary btn-sm touch" onClick={() => cambia({ carattere: '' })}>Ripristina</button>
-                        : <span className="pb-3 text-[11px] text-text-muted">Dalla regola del tipo.</span>}
+                        ? <PulsanteVisivo compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Ripristina" onClick={() => cambia({ carattere: '' })} />
+                        : <span className="pb-3 testo-12 text-text-muted">Dalla regola del tipo.</span>}
                     </span>;
                   })()}
-                  <label className="touch flex items-center gap-1.5 text-[12px]">
+                  <label className="touch flex items-center gap-1.5 testo-12">
                     <input type="checkbox" className="h-5 w-5" checked={b.esauribile === 'sì'} onChange={(e) => cambia({ esauribile: e.target.checked ? 'sì' : 'no' })} />Esauribile
                   </label>
                   <CampoCorrezione etichetta="Descrizione" valore={b.descrizione} multilinea massimo={LIMITI_GUIDA.punto.descrizione} onCambia={(v) => cambia({ descrizione: v })} />
@@ -509,7 +508,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
               </CorrezioneGuida>
             </div>
             {scelta && (
-              <p className="scelta-pin m-0 text-[12px]" role="status" aria-label={`Scelta dei pin per ${p.nome}`}>
+              <p className="scelta-pin m-0 testo-12" role="status" aria-label={`Scelta dei pin per ${p.nome}`}>
                 Tocca i pin sulla mappa del Palazzo per collegarli o scollegarli; quelli grigi sono già raccolti o non ancora disponibili · <strong>{p.pin.length === 1 ? '1 collegato' : `${p.pin.length} collegati`}</strong>
               </p>
             )}
@@ -518,7 +517,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
         {/* i passi dell'Enigma, dentro di lui: ognuno è una voce vera, coi suoi pin e il suo stato */}
         {puoAccogliere && (conPassi || (nuovoPunto?.contenitore === p.chiave && nuovoPunto.dove === pl)) && (
           <div className="ml-5 mt-1 flex flex-col gap-1 border-l-2 border-border-light pl-2">
-            <p className="m-0 text-[11px] text-text-muted">Passi dell’Enigma</p>
+            <p className="m-0 testo-12 text-text-muted">Passi dell’Enigma</p>
             <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0" aria-label={`Passi di ${p.nome}`}>
               {/* (UX3-14) i passi di quest'elenco: quelli della sua planimetria */}
               {passi.filter((x) => sta(x, pl) && voceVisibile(x)).map((x) => riga(x, passi, pl))}
@@ -533,13 +532,13 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
   return (
     <>
     {daCatturare.length > 0 && onCattura && <PersoneDelPalazzo persone={daCatturare} nomeArea={nomeArea} partitaId={partitaId} catturate={catturate} onCattura={onCattura} />}
-    <details className="text-[12px]" open aria-label={`Guida di ${nomeArea}`}>
+    <details className="testo-12" open aria-label={`Guida di ${nomeArea}`}>
       <summary className="touch cursor-pointer text-text-muted">
         {/* (UX3-14) con voci su altre planimetrie, i conti sono quelli della planimetria mostrata, e lo si dice */}
         {areaDedalo ? 'Trama' : 'Guida dell’infiltrazione'} · {puntiQui.length === 1 ? '1 voce' : `${puntiQui.length} voci`}{quanteAltrove > 0 ? ' su questa planimetria' : ''}{gestitiArea > 0 ? ` (${gestitiArea} segnate)` : ''}{daCollegare > 0 ? ` · ${daCollegare} da collegare` : ''}
       </summary>
       <div className="flex flex-col gap-2 pt-2">
-        <p className="m-0 text-[11px] text-text-muted">
+        <p className="m-0 testo-12 text-text-muted">
           {areaDedalo
             ? 'Le voci di Trama si segnano e sono elementi dell’area: l’area è completata quando lo sono tutti i suoi elementi.'
             : 'Una voce collegata ai pin ha il loro stato; le altre si segnano qui e non contano nella percentuale, che misura le planimetrie.'}
@@ -550,18 +549,18 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
                 tipo» apre i tipi, con il conto di quelli scelti; «Tutti» e «Anche le segnate» restano accanto. Con un tipo solo (Trama,
                 nei dedali) i filtri per tipo non servono: resta «Anche le segnate» */}
             <div className="flex flex-wrap items-center gap-1">
-              {!areaDedalo && <button type="button" className={`chip touch text-[11px] ${filtro.size > 0 ? 'chip--attivo' : ''}`} aria-expanded={filtriAperti} onClick={() => setFiltriAperti((v) => !v)}>
+              {!areaDedalo && <button type="button" className={`chip touch testo-12 ${filtro.size > 0 ? 'chip--attivo' : ''}`} aria-expanded={filtriAperti} onClick={() => setFiltriAperti((v) => !v)}>
                 Filtra per tipo{filtro.size > 0 ? ` · ${filtro.size === 1 ? '1 scelto' : `${filtro.size} scelti`}` : ''} {filtriAperti ? '▴' : '▾'}
               </button>}
-              {filtro.size > 0 && <button type="button" className="chip touch text-[11px]" onClick={() => setFiltro(new Set())}>Tutti</button>}
+              {filtro.size > 0 && <button type="button" className="chip touch testo-12" onClick={() => setFiltro(new Set())}>Tutti</button>}
               {/* vale anche per gli elenchi delle altre planimetrie: il conto è di tutta l'infiltrazione */}
-              {gestitiTutti > 0 && <button type="button" className={`chip touch text-[11px] ${mostraGestiti ? 'chip--attivo' : ''}`} onClick={() => setMostraGestiti((v) => !v)} aria-pressed={mostraGestiti}>Anche le segnate ({gestitiTutti})</button>}
+              {gestitiTutti > 0 && <button type="button" className={`chip touch testo-12 ${mostraGestiti ? 'chip--attivo' : ''}`} onClick={() => setMostraGestiti((v) => !v)} aria-pressed={mostraGestiti}>Anche le segnate ({gestitiTutti})</button>}
             </div>
             {/* aperti: una griglia fitta, due o più colonne secondo la larghezza della colonna; un nome lungo va a capo, non si taglia */}
             {!areaDedalo && filtriAperti && (
               <div className="grid grid-cols-[repeat(auto-fill,minmax(128px,1fr))] gap-1">
                 {TIPI.filter((tp) => area.punti.some((p) => p.tipo === tp)).map((tp) => (
-                  <button key={tp} type="button" className={`chip touch w-full max-w-none text-[11px] ${filtro.has(tp) ? 'chip--attivo' : ''}`} aria-pressed={filtro.has(tp)} onClick={() => setFiltro((f) => { const n = new Set(f); if (n.has(tp)) n.delete(tp); else n.add(tp); return n; })}>
+                  <button key={tp} type="button" className={`chip touch w-full max-w-none testo-12 ${filtro.has(tp) ? 'chip--attivo' : ''}`} aria-pressed={filtro.has(tp)} onClick={() => setFiltro((f) => { const n = new Set(f); if (n.has(tp)) n.delete(tp); else n.add(tp); return n; })}>
                     <span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: COLORE_TIPO[tp] }} aria-hidden="true" />
                     <span className="min-w-0 leading-tight">{NOME_TIPO[tp]}</span>
                     <span className="ml-auto shrink-0 text-text-muted">{area.punti.filter((p) => p.tipo === tp).length}</span>
@@ -584,7 +583,7 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
                 non si restringono mai; sotto i 32rem la prima riga è conto, «Tutte» e «Fine» (la frase che spiega la scelta si vede da
                 32rem in su: l'etichetta della sezione la dice comunque) e la seconda «Copia in…» / «Sposta in…», così la barra fissa resta
                 di due righe; sopra, una riga sola */}
-            <span className="min-w-0 flex-1 text-[13px]"><strong>{scelte.size === 0 ? 'Scegli le voci' : scelte.size === 1 ? '1 voce scelta' : `${scelte.size} voci scelte`}</strong>
+            <span className="min-w-0 flex-1 testo-13"><strong>{scelte.size === 0 ? 'Scegli le voci' : scelte.size === 1 ? '1 voce scelta' : `${scelte.size} voci scelte`}</strong>
               <span className="hidden text-text-muted @lg:inline"> · da copiare o spostare in un’altra infiltrazione</span></span>
             {puntiVisibili.length > 0 && <PulsanteVisivo tono="fantasma" compatto className="shrink-0" icona={<IconaAzione chiave={tutteScelte ? 'deseleziona' : 'seleziona'} dimensione={20} />} titolo={tutteScelte ? 'Nessuna' : 'Tutte'}
               aria-label={tutteScelte ? 'Togli dalla scelta tutte le voci in elenco' : 'Scegli tutte le voci in elenco'} onClick={() => scegli(puntiVisibili.map((p) => p.chiave), !tutteScelte)} />}
@@ -596,21 +595,21 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
           </section>
         )}
         <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0" aria-label={scelte ? `Voci di ${nomeArea} da scegliere` : `Voci della guida di ${nomeArea}`}>
-          {area.punti.length === 0 && <li className="py-2 text-[13px] text-text-muted">{areaDedalo ? 'Quest’area non ha ancora voci: aggiungile qui sotto.' : daCatturare.length > 0 ? 'Nessun’altra voce: le Persona da catturare sono qui sopra.' : 'La guida non ha voci per quest’infiltrazione: aggiungile qui sotto.'}</li>}
-          {area.punti.length > 0 && puntiQui.length === 0 && <li className="py-2 text-[13px] text-text-muted">Nessuna voce su questa planimetria: le voci dell’infiltrazione stanno nelle altre planimetrie, qui sotto.</li>}
-          {puntiQui.length > 0 && puntiVisibili.length === 0 && <li className="py-2 text-[13px] text-text-muted">Nessuna voce con questi filtri{!mostraGestiti && gestitiArea > 0 ? ` (${gestitiArea} segnate nascoste)` : ''}.</li>}
+          {area.punti.length === 0 && <li className="py-2 testo-13 text-text-muted">{areaDedalo ? 'Quest’area non ha ancora voci: aggiungile qui sotto.' : daCatturare.length > 0 ? 'Nessun’altra voce: le Persona da catturare sono qui sopra.' : 'La guida non ha voci per quest’infiltrazione: aggiungile qui sotto.'}</li>}
+          {area.punti.length > 0 && puntiQui.length === 0 && <li className="py-2 testo-13 text-text-muted">Nessuna voce su questa planimetria: le voci dell’infiltrazione stanno nelle altre planimetrie, qui sotto.</li>}
+          {puntiQui.length > 0 && puntiVisibili.length === 0 && <li className="py-2 testo-13 text-text-muted">Nessuna voce con questi filtri{!mostraGestiti && gestitiArea > 0 ? ` (${gestitiArea} segnate nascoste)` : ''}.</li>}
           {/* nella scelta le voci sono righe da spuntare (i passi seguono il loro Enigma e non si scelgono): niente scheda né gesti */}
           {scelte
             ? puntiVisibili.map((p) => {
               const passi = passiPer.get(p.chiave)?.length ?? 0;
               return (
                 <li key={p.chiave}>
-                  <label className="touch flex cursor-pointer items-start gap-2.5 px-1 py-1.5 text-[13px]">
+                  <label className="touch flex cursor-pointer items-start gap-2.5 px-1 py-1.5 testo-13">
                     <input type="checkbox" className="mt-0.5 h-5 w-5 shrink-0" checked={scelte.has(p.chiave)} onChange={(e) => scegli([p.chiave], e.target.checked)} />
                     <span className="mt-1 inline-block h-3 w-3 shrink-0 rounded-full" style={{ background: COLORE_TIPO[p.tipo] }} aria-hidden="true" />
                     <span className="min-w-0 flex-1">
                       <span className="font-semibold">{p.nome}</span>
-                      <span className="text-[12px] text-text-muted"> · {NOME_TIPO[p.tipo]}{p.stato ? ` · ${p.stato}` : ''}{passi > 0 ? ` · con ${passi === 1 ? '1 passo' : `${passi} passi`}` : ''}{p.pin.length > 0 ? ` · ${p.pin.length} pin` : ''}</span>
+                      <span className="testo-12 text-text-muted"> · {NOME_TIPO[p.tipo]}{p.stato ? ` · ${p.stato}` : ''}{passi > 0 ? ` · con ${passi === 1 ? '1 passo' : `${passi} passi`}` : ''}{p.pin.length > 0 ? ` · ${p.pin.length} pin` : ''}</span>
                     </span>
                   </label>
                 </li>
@@ -630,16 +629,16 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
         {/* (UX3-14) le voci delle altre planimetrie dell'infiltrazione, raggruppate per planimetria, chiuse: la gestione completa resta qui,
             coi gesti di sempre (fuori dalla scelta di «Copia o sposta voci», che lavora sull'elenco) */}
         {!scelte && altrePlanimetrie.length > 0 && (
-          <details className="text-[12px]">
+          <details className="testo-12">
             <summary className="touch cursor-pointer text-text-muted">Nelle altre planimetrie · {quanteAltrove === 1 ? '1 voce' : `${quanteAltrove} voci`}</summary>
             <div className="flex flex-col gap-3 pt-2">
               {altrePlanimetrie.map((g) => {
                 const visibili = g.voci.filter((p) => inVistaSu(p, g.chiave));
                 return (
                   <section key={g.chiave} className="flex flex-col gap-1" aria-label={`Su ${g.nome}`}>
-                    <h4 className="m-0 text-[11px] font-semibold uppercase tracking-wide text-text-muted">{g.nome}</h4>
+                    <h4 className="m-0 testo-12 font-semibold uppercase tracking-wide text-text-muted">{g.nome}</h4>
                     <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0" aria-label={`Voci della guida su ${g.nome}`}>
-                      {visibili.length === 0 && <li className="py-1.5 text-[12px] text-text-muted">Nessuna voce con questi filtri.</li>}
+                      {visibili.length === 0 && <li className="py-1.5 testo-12 text-text-muted">Nessuna voce con questi filtri.</li>}
                       {visibili.map((p) => riga(p, vociDellArea, g.chiave))}
                     </ul>
                   </section>
@@ -653,9 +652,9 @@ export function GuidaDellArea({ area: areaIntera, planimetrie, partitaId, mappaA
           <Modal titolo={`Riaprire «${riapertura.voce.nome}»?`} aperta onChiudi={() => setRiapertura(null)}
             azioni={<>
               <button type="button" className="btn btn-secondary touch" onClick={() => setRiapertura(null)}>Annulla</button>
-              <button type="button" className="btn btn-primary touch" onClick={() => { const v = riapertura.voce; setRiapertura(null); void cambiaStato(v, null); }}>Riapri</button>
+              <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Riapri" onClick={() => { const v = riapertura.voce; setRiapertura(null); void cambiaStato(v, null); }} />
             </>}>
-            {riapertura.righe.map((r) => <p key={r} className="m-0 text-[14px]">{r}</p>)}
+            {riapertura.righe.map((r) => <p key={r} className="m-0 testo-14">{r}</p>)}
           </Modal>
         )}
       </div>

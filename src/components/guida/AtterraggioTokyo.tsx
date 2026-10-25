@@ -149,18 +149,18 @@ function FinestraAtterraggio({ d, onSalvato, onChiudi }: { d: DungeonDettaglioDt
   return (
     <Modal titolo={`Sulla mappa di Tokyo — ${d.nome}`} aperta onChiudi={onChiudi} larga
       azioni={<PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Chiudi" onClick={onChiudi} />}>
-      <div className="flex flex-col gap-5 text-[13px]">
+      <div className="flex flex-col gap-5 testo-13">
         <section aria-labelledby="tokyo-quando" className="flex flex-col gap-2">
-          <h3 id="tokyo-quando" className="m-0 font-display text-[16px] uppercase">Quando compare</h3>
-          <p className="m-0 text-[12px] text-text-muted">L’icona {delPosto} sta sulla mappa di Tokyo nei giorni della partita dentro questa finestra (ora: {testoFinestra(d.finestra)}). È la stessa finestra che dice l’arco della storia alle condizioni dei pin.</p>
+          <h3 id="tokyo-quando" className="m-0 font-display testo-16 uppercase">Quando compare</h3>
+          <p className="m-0 testo-12 text-text-muted">L’icona {delPosto} sta sulla mappa di Tokyo nei giorni della partita dentro questa finestra (ora: {testoFinestra(d.finestra)}). È la stessa finestra che dice l’arco della storia alle condizioni dei pin.</p>
           <div className="flex flex-wrap items-center gap-2">
             <SelettoreData etichetta="Compare dal" valore={dal} onCambia={setDal} disabilitato={occupato} />
-            <label className="touch flex items-center gap-1.5 text-[12px]">
+            <label className="touch flex items-center gap-1.5 testo-12">
               <input type="checkbox" className="h-5 w-5" checked={senzaFine} disabled={occupato} onChange={(e) => setSenzaFine(e.target.checked)} />Senza fine
             </label>
             {!senzaFine && <SelettoreData etichetta="Compare fino al" valore={al} onCambia={setAl} disabilitato={occupato} />}
           </div>
-          {finestraRovesciata && <p className="m-0 text-[12px] text-error" role="alert">La fine viene prima dell’inizio.</p>}
+          {finestraRovesciata && <p className="m-0 testo-12 text-error" role="alert">La fine viene prima dell’inizio.</p>}
           <div>
             <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva quando compare"
               disabled={occupato || !finestraCambiata || finestraRovesciata}
@@ -169,13 +169,13 @@ function FinestraAtterraggio({ d, onSalvato, onChiudi }: { d: DungeonDettaglioDt
         </section>
 
         <section aria-labelledby="tokyo-atterraggio" className="flex flex-col gap-2">
-          <h3 id="tokyo-atterraggio" className="m-0 font-display text-[16px] uppercase">Atterraggio dalla mappa di Tokyo</h3>
-          <p className="m-0 text-[12px] text-text-muted">
+          <h3 id="tokyo-atterraggio" className="m-0 font-display testo-16 uppercase">Atterraggio dalla mappa di Tokyo</h3>
+          <p className="m-0 testo-12 text-text-muted">
             Toccando {ilPosto} sulla mappa di Tokyo si apre la planimetria della <strong>prima</strong> regola che copre il giorno della partita, centrata sul pin d’arrivo se c’è.
             Senza partita vale la prima regola «Sempre». Se nessuna regola vale si apre la scheda {delPosto}.
           </p>
-          <p className="m-0 text-[12px]" data-atterraggio-oggi>{oggi ? <>Oggi si atterra su: <strong>{oggi}</strong>.</> : `Oggi nessuna regola vale: si apre la scheda ${delPosto}.`}</p>
-          {opzioniMappa.length === 0 ? <p className="m-0 text-[12px] text-text-muted">{memento ? 'I Memento non hanno planimetrie: toccandoli si apre la loro scheda.' : 'Questo Palazzo non ha planimetrie: toccandolo si apre la sua scheda.'}</p> : (
+          <p className="m-0 testo-12" data-atterraggio-oggi>{oggi ? <>Oggi si atterra su: <strong>{oggi}</strong>.</> : `Oggi nessuna regola vale: si apre la scheda ${delPosto}.`}</p>
+          {opzioniMappa.length === 0 ? <p className="m-0 testo-12 text-text-muted">{memento ? 'I Memento non hanno planimetrie: toccandoli si apre la loro scheda.' : 'Questo Palazzo non ha planimetrie: toccandolo si apre la sua scheda.'}</p> : (
             <>
               {regole.length > 0 && (
                 <ol className="m-0 flex list-none flex-col gap-2 p-0" aria-label="Regole d’atterraggio, nell’ordine in cui si provano">
@@ -187,7 +187,7 @@ function FinestraAtterraggio({ d, onSalvato, onChiudi }: { d: DungeonDettaglioDt
                     return (
                       <li key={r.id} className="flex flex-col gap-2 rounded-md border border-border-light bg-white/[0.04] p-2" aria-label={`Regola ${i + 1}`}>
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-display text-[15px] tabular-nums" aria-hidden>{i + 1}.</span>
+                          <span className="font-display testo-15 tabular-nums" aria-hidden>{i + 1}.</span>
                           <span className="min-w-[170px]">
                             <Selettore etichetta="Quando" ricerca="mai" valore={r.quando} disabilitato={occupato} opzioni={QUANDO.map((q) => ({ chiave: q.chiave, nome: q.nome }))} onCambia={(v) => cambia(r.id, { quando: v as Quando })} />
                           </span>
@@ -213,8 +213,8 @@ function FinestraAtterraggio({ d, onSalvato, onChiudi }: { d: DungeonDettaglioDt
                   })}
                 </ol>
               )}
-              {regole.length === 0 && <p className="m-0 text-[12px] text-text-muted">{`Nessuna regola: toccando ${ilPosto} si apre la ${memento ? 'loro' : 'sua'} scheda.`}</p>}
-              {rovesciate.length > 0 && <p className="m-0 text-[12px] text-error" role="alert">{rovesciate.length === 1 ? `Nella regola ${rovesciate[0]}` : `Nelle regole ${rovesciate.join(', ')}`} la fine viene prima dell’inizio.</p>}
+              {regole.length === 0 && <p className="m-0 testo-12 text-text-muted">{`Nessuna regola: toccando ${ilPosto} si apre la ${memento ? 'loro' : 'sua'} scheda.`}</p>}
+              {rovesciate.length > 0 && <p className="m-0 testo-12 text-error" role="alert">{rovesciate.length === 1 ? `Nella regola ${rovesciate[0]}` : `Nelle regole ${rovesciate.join(', ')}`} la fine viene prima dell’inizio.</p>}
               <div className="flex flex-wrap items-center gap-1.5">
                 <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una regola" disabled={occupato || regole.length >= 30} onClick={aggiungi} />
                 <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva le regole"

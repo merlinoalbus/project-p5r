@@ -12,7 +12,7 @@ import { useState } from 'react';
 import { ARTICOLO_AOJIRU } from '../../../shared/acquisti';
 import type { EffettoVoce } from '../../../shared/effettiVoce';
 import { ATTIVITA_PESCA, REGOLA_PESCA } from '../../../shared/pesca';
-import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { PulsanteVisivo, FrecciaApertura } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { IconaCategoria } from './IconaCategoria';
 import { CampiEffettoVoce } from './CampiEffettoVoce';
@@ -95,13 +95,11 @@ export function EffettiAggiuntivi({ valore, onCambia, elenchi, nomi }: Props) {
   );
   return (
     <section className="flex flex-col gap-2" aria-label="Effetti aggiuntivi">
-      <button type="button" className="btn btn-secondary touch justify-start text-left" aria-expanded={aperto} onClick={() => setAperto((a) => !a)}>
-        <span aria-hidden="true">{aperto ? '▾' : '▸'}</span> Effetti aggiuntivi{aggiuntivi.length ? ` (${aggiuntivi.length})` : ''}
-        <span className="text-[12px] text-text-muted font-normal"> — Fortuna, invito, Persona, cruciverba…</span>
-      </button>
+      <PulsanteVisivo className="self-start" icona={<IconaAzione chiave="dettagli" dimensione={22} />} aria-expanded={aperto} onClick={() => setAperto((a) => !a)}
+        titolo={<>Effetti aggiuntivi{aggiuntivi.length ? ` (${aggiuntivi.length})` : ''}<FrecciaApertura aperto={aperto} /></>} dettaglio="Fortuna, invito, Persona, cruciverba…" />
       {aperto && (
         <div className="flex flex-col gap-2">
-          {aggiuntivi.length === 0 && <p className="m-0 text-[12px] text-text-muted">Nessun effetto aggiuntivo.</p>}
+          {aggiuntivi.length === 0 && <p className="m-0 testo-12 text-text-muted">Nessun effetto aggiuntivo.</p>}
           <ul className="m-0 flex list-none flex-col gap-2 p-0">
             {aggiuntivi.map(({ r, i }) => {
               const completo = effettoCompleto(r.effetto);
@@ -111,8 +109,8 @@ export function EffettiAggiuntivi({ valore, onCambia, elenchi, nomi }: Props) {
                   <div className="flex min-w-0 items-start gap-2">
                     <IconaCategoria categoria={CATEGORIA_DI[r.effetto.tipo]} dimensione={32} />
                     <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                      <span className="font-display text-[13px] uppercase tracking-wide text-primary-testo">{NOME_FAMIGLIA_EFFETTO[r.effetto.tipo]}</span>
-                      <span className="text-[13px] break-words">{completo ? fraseEffetto(r.effetto, nomi) : 'Da scegliere qui sotto.'}</span>
+                      <span className="font-display testo-13 uppercase tracking-wide text-primary-testo">{NOME_FAMIGLIA_EFFETTO[r.effetto.tipo]}</span>
+                      <span className="testo-13 break-words">{completo ? fraseEffetto(r.effetto, nomi) : 'Da scegliere qui sotto.'}</span>
                     </div>
                     <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo={editing && completo ? 'Chiudi' : 'Modifica'}
                       aria-label={`${editing && completo ? 'Chiudi' : 'Modifica'}: ${NOME_FAMIGLIA_EFFETTO[r.effetto.tipo]}`} disabled={!completo} onClick={() => setInModifica(inModifica === i ? null : i)} />
@@ -123,20 +121,20 @@ export function EffettiAggiuntivi({ valore, onCambia, elenchi, nomi }: Props) {
               );
             })}
           </ul>
-          {errore && <p role="alert" className="m-0 text-error text-[12px]">{errore}</p>}
+          {errore && <p role="alert" className="m-0 text-error testo-12">{errore}</p>}
           {righe.length < 100 && (
             <div className="flex flex-col gap-2">
               <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi un effetto" attivo={menu} aria-expanded={menu} onClick={() => setMenu((m) => !m)} />
               {menu && (
                 <div className="flex flex-col gap-2">
                   <div className="flex flex-wrap gap-1.5">{MENU.map(voceMenu)}</div>
-                  <button type="button" className="btn btn-ghost btn-sm touch self-start" aria-expanded={avanzate} onClick={() => setAvanzate((a) => !a)}>{avanzate ? '▾' : '▸'} Avanzate</button>
+                  <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="dettagli" dimensione={20} />} titolo={<>Avanzate<FrecciaApertura aperto={avanzate} /></>} className="self-start" aria-expanded={avanzate} onClick={() => setAvanzate((a) => !a)} />
                   {avanzate && <div className="flex flex-wrap gap-1.5">{AVANZATE.map(voceMenu)}</div>}
                 </div>
               )}
             </div>
           )}
-          <p className="m-0 text-[12px] text-text-secondary">Su una voce già fatta, gli effetti aggiunti o modificati compaiono come pulsante «Applica» sulla voce. Le ricevute della spunta rimangono distinte dalla configurazione corrente.</p>
+          <p className="m-0 testo-12 text-text-secondary">Su una voce già fatta, gli effetti aggiunti o modificati compaiono come pulsante «Applica» sulla voce. Le ricevute della spunta rimangono distinte dalla configurazione corrente.</p>
         </div>
       )}
     </section>

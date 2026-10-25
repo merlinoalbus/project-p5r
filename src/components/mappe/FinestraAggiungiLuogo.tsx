@@ -22,6 +22,8 @@ import { OrariEditor } from '../guida/OrariEditor';
 import { TIPI_LUOGO } from '../../../shared/tipiLuogo';
 import { ORARI_SEMPRE, type OrariNegozio } from '../../../shared/orariNegozio';
 import type { PlanimetriaAreaDto } from '../../types';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 const OPZIONI_TIPO: OpzioneIcone[] = TIPI_LUOGO.map((t) => ({ chiave: t.chiave, nome: t.nome, icona: <IconaSpillo tipo={t.icona} dimensione={28} /> }));
 
@@ -78,13 +80,13 @@ export function FinestraAggiungiLuogo({ quartiere, planimetrie, luogo = null, on
     <Modal titolo={luogo ? `Posiziona «${luogo.nome}»` : 'Aggiungi luogo'} aperta onChiudi={onChiudi} larga
       azioni={<>
         <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={onChiudi}>Annulla</button>
-        {passo === 2 && !luogo && <button type="button" className="btn btn-ghost touch" disabled={occupato} onClick={() => setPasso(1)}>Indietro</button>}
+        {passo === 2 && !luogo && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="indietro" dimensione={22} />} titolo="Indietro" disabled={occupato} onClick={() => setPasso(1)} />}
         {passo === 1
-          ? <button type="button" className="btn btn-primary touch" disabled={!passo1Pronto} onClick={() => setPasso(2)}>Avanti: il punto</button>
-          : <button type="button" className="btn btn-primary touch" disabled={occupato || !punto || !mappa} onClick={() => void salva()}>Posiziona</button>}
+          ? <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="esegui" dimensione={22} />} titolo="Avanti: il punto" disabled={!passo1Pronto} onClick={() => setPasso(2)} />
+          : <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="mappa" dimensione={22} />} titolo="Posiziona" disabled={occupato || !punto || !mappa} onClick={() => void salva()} />}
       </>}>
       {passo === 1 ? (
-        <div className="flex flex-col gap-3 text-[13px]">
+        <div className="flex flex-col gap-3 testo-13">
           <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label="Quale luogo">
             <button type="button" role="radio" aria-checked={modo === 'esistente'} className={`chip touch ${modo === 'esistente' ? 'chip--attivo' : ''}`} onClick={() => setModo('esistente')}>Un luogo che esiste</button>
             <button type="button" role="radio" aria-checked={modo === 'nuovo'} className={`chip touch ${modo === 'nuovo' ? 'chip--attivo' : ''}`} onClick={() => setModo('nuovo')}>Nuovo luogo</button>
@@ -96,7 +98,7 @@ export function FinestraAggiungiLuogo({ quartiere, planimetrie, luogo = null, on
               <label className="editor-mappa__campo">Nome del luogo<input className="form-input" maxLength={160} value={nuovo.nome} onChange={(e) => setNuovo({ ...nuovo, nome: e.target.value })} /></label>
               <SelettoreIcone compatto etichetta="Tipo" valore={nuovo.tipo} opzioni={OPZIONI_TIPO} onCambia={(tipo) => setNuovo({ ...nuovo, tipo })} />
               <label className="editor-mappa__campo">Che cosa offre<textarea className="form-input" rows={2} maxLength={600} value={nuovo.cosaOffre} onChange={(e) => setNuovo({ ...nuovo, cosaOffre: e.target.value })} /></label>
-              <label className="flex items-center gap-2 text-[13px] touch">
+              <label className="flex items-center gap-2 testo-13 touch">
                 <input type="checkbox" className="h-5 w-5" checked={orari === null} onChange={(e) => setOrari(e.target.checked ? null : { ...ORARI_SEMPRE })} />
                 La guida non indica orari: vale la regola dell’app (giorno e sera)
               </label>
@@ -104,7 +106,7 @@ export function FinestraAggiungiLuogo({ quartiere, planimetrie, luogo = null, on
             </div>}
         </div>
       ) : (
-        <div className="flex flex-col gap-2 text-[13px]">
+        <div className="flex flex-col gap-2 testo-13">
           <p className="m-0 text-text-secondary">Tocca il punto dove sta {nomeScelto ? `«${nomeScelto}»` : 'il luogo'}: lì nasce il suo pin.</p>
           {planimetrie.length > 1 && (
             <Selettore className="selettore--in-linea" etichetta="Planimetria" valore={mappa} ricerca="mai"

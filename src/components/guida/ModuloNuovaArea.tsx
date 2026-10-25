@@ -73,9 +73,9 @@ export function ModuloNuovaArea({ aree, areePalazzo, nomeIniziale = '', dopoIniz
       <Selettore etichetta="Dove va nella guida" valore={posto} opzioni={opzioni} onCambia={setPosto} />
       {areePalazzo && areePalazzo.length > 0 && (
         <fieldset className="m-0 flex flex-col gap-1 border-0 p-0">
-          <legend className="mb-1 text-[12px] font-semibold text-text-secondary">Aree toccate</legend>
+          <legend className="mb-1 testo-12 font-semibold text-text-secondary">Aree toccate</legend>
           {areePalazzo.map((a) => (
-            <label key={a.slug} className="touch flex items-center gap-2 text-[13px]">
+            <label key={a.slug} className="touch flex items-center gap-2 testo-13">
               <input type="checkbox" className="h-5 w-5 shrink-0" checked={toccate.includes(a.slug)}
                 onChange={(e) => setToccate((x) => (e.target.checked ? [...x, a.slug] : x.filter((s) => s !== a.slug)))} />
               <span>{a.nome}</span>
@@ -83,8 +83,8 @@ export function ModuloNuovaArea({ aree, areePalazzo, nomeIniziale = '', dopoIniz
           ))}
         </fieldset>
       )}
-      <span className="text-[11px] text-text-muted">È un’infiltrazione della guida, per tutte le partite: dopo ci aggiungi le voci e colleghi i pin.</span>
-      {bloccato && <span className="text-[11px] text-text-muted" role="status">{bloccato}</span>}
+      <span className="testo-12 text-text-muted">È un’infiltrazione della guida, per tutte le partite: dopo ci aggiungi le voci e colleghi i pin.</span>
+      {bloccato && <span className="testo-12 text-text-muted" role="status">{bloccato}</span>}
       <div className="flex flex-wrap justify-end gap-1.5">
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={onAnnulla} />
         <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Crea l’infiltrazione" disabled={occupato || !!bloccato || !nome.trim()} />

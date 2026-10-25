@@ -143,7 +143,7 @@ function AzioneNelContesto({ a, partitaId, onCambiata, onSullaMappa, evidenziata
       {/* il bersaglio è l'etichetta, non il quadratino: 44 px senza cambiarne l'aspetto */}
       {partitaId && <label className="touch flex items-start justify-center shrink-0 -my-1 pr-1 cursor-pointer"><input type="checkbox" className="w-5 h-5 mt-2 shrink-0" checked={a.fatta} disabled={occupato || bloccata || !!pendente || (!a.fatta && a.effettiVoce?.stato === 'legacy-da-correggere')} onChange={(e) => void cambia(e.target.checked)} aria-label={`Fatto: ${a.azione.slice(0, 60)}`} /></label>}
       <ImmagineAzione a={a} />
-      <div className="flex flex-col gap-0.5 text-[13px] min-w-0 flex-1">
+      <div className="flex flex-col gap-0.5 testo-13 min-w-0 flex-1">
         <span className={a.fatta ? 'line-through' : ''}>{a.azione}{a.daRivedere && <>{' '}<DaRivedereVoce a={a} partitaId={partitaId} onCambiata={onCambiata} /></>}</span>
         <CartelliniAzione a={a} onSullaMappa={onSullaMappa && a.mappa ? () => onSullaMappa(a.mappa!, a.uid) : undefined}
           onApriMappa={onSullaMappa ? (m) => onSullaMappa(m, a.uid) : undefined}
@@ -341,19 +341,19 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
           <ul className="m-0 p-0 list-none divide-y divide-border-light" aria-label={`Voci ${nomeFascia(f)} da scegliere`}>
             {voci.map((v) => (
               <li key={v.uid}>
-                <label className="touch flex cursor-pointer items-start gap-2.5 py-1.5 text-[13px]">
+                <label className="touch flex cursor-pointer items-start gap-2.5 py-1.5 testo-13">
                   <input type="checkbox" className="mt-0.5 h-5 w-5 shrink-0" checked={scelte.has(v.uid)} onChange={(e) => scegli([v.uid], e.target.checked)} />
                   <span className="flex min-w-0 flex-col gap-0.5">
                     <span className="line-clamp-2">{v.azione}</span>
-                    {(v.genere !== 'azione' || v.riferimentoTesto) && <span className="text-[11px] text-text-muted">{[v.genere !== 'azione' ? { evento: 'Evento', scadenza: 'Scadenza', promemoria: 'Promemoria' }[v.genere] : null, v.riferimentoTesto].filter(Boolean).join(' · ')}</span>}
+                    {(v.genere !== 'azione' || v.riferimentoTesto) && <span className="testo-12 text-text-muted">{[v.genere !== 'azione' ? { evento: 'Evento', scadenza: 'Scadenza', promemoria: 'Promemoria' }[v.genere] : null, v.riferimentoTesto].filter(Boolean).join(' · ')}</span>}
                   </span>
                 </label>
               </li>
             ))}
           </ul>
         )}
-        {scelte ? (voci.length === 0 && <p className="m-0 text-[13px] text-text-muted py-1">Niente {nomeFascia(f)} da scegliere.</p>) : voci.length === 0
-          ? <p className="m-0 text-[13px] text-text-muted py-1">Niente {nomeFascia(f)} per questo giorno: con «Aggiungi» metti una cosa da fare o un evento.</p>
+        {scelte ? (voci.length === 0 && <p className="m-0 testo-13 text-text-muted py-1">Niente {nomeFascia(f)} da scegliere.</p>) : voci.length === 0
+          ? <p className="m-0 testo-13 text-text-muted py-1">Niente {nomeFascia(f)} per questo giorno: con «Aggiungi» metti una cosa da fare o un evento.</p>
           : (
             <ul className="m-0 p-0 list-none divide-y divide-border-light" aria-label={f === 'giorno' ? 'Azioni di giorno' : 'Azioni di sera'}>
               {voci.map((v, i) => eEvento(v)
@@ -369,7 +369,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
 
   return (
     <div className="flex flex-col gap-3">
-      <section className={`card flex flex-col gap-1 text-[13px] ${compatto ? 'py-3' : ''}`}>
+      <section className={`card flex flex-col gap-1 testo-13 ${compatto ? 'py-3' : ''}`}>
         <div className="flex flex-wrap items-center gap-2">
           <h2 className="m-0 flex items-center gap-3 flex-wrap"><DataP5 data={g.giorno} giornoSettimana={g.giornoSettimana} evidenzia={g.dataCorrente === g.giorno} /></h2>
           <span className="chip">{g.fase}</span>
@@ -377,7 +377,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
           {/* le allerte meteo del gioco del giorno, come tag (2026-10-12) */}
           <TagAllerte allerte={g.allerte} modifica={onAllerteModificate ? { data: g.giorno, onSalvato: () => void onAllerteModificate() } : undefined} />
           {partitaId && (consigliate > 0 || bloccate > 0) && (
-            <span className="text-[12px] text-text-muted">{consigliate > 0 ? `${consigliate} consigliate` : ''}{consigliate > 0 && bloccate > 0 ? ' · ' : ''}{bloccate > 0 ? `${bloccate} bloccate` : ''}</span>
+            <span className="testo-12 text-text-muted">{consigliate > 0 ? `${consigliate} consigliate` : ''}{consigliate > 0 && bloccate > 0 ? ' · ' : ''}{bloccate > 0 ? `${bloccate} bloccate` : ''}</span>
           )}
         </div>
         {g.trama ? <p className="m-0">{g.trama}</p> : <p className="m-0 text-text-muted">Nessun evento di trama annotato.</p>}
@@ -396,7 +396,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
         <section className="card sticky top-0 z-10 flex flex-wrap items-center gap-2 py-2" aria-label="Copia o sposta voci">
           {/* i comandi non si restringono mai (testo troncato); sul telefono «Fine» sta accanto al conto e «Copia in…» / «Sposta in…»
               prendono la riga sotto, così la barra fissa resta di due righe */}
-          <span className="min-w-0 flex-1 text-[13px]"><strong>{scelte.size === 0 ? 'Scegli le voci' : scelte.size === 1 ? '1 voce scelta' : `${scelte.size} voci scelte`}</strong>
+          <span className="min-w-0 flex-1 testo-13"><strong>{scelte.size === 0 ? 'Scegli le voci' : scelte.size === 1 ? '1 voce scelta' : `${scelte.size} voci scelte`}</strong>
             <span className="text-text-muted"> · da copiare o spostare in un altro giorno</span></span>
           <div className="order-last flex basis-full gap-2 sm:order-none sm:basis-auto">
             <PulsanteVisivo tono="primario" compatto className="shrink-0" icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia in…" disabled={scelte.size === 0} onClick={() => setTrasferimento('copia')} />
@@ -411,7 +411,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
         <TrasferisciVoci modo={trasferimento} voci={g.azioni.filter((v) => scelte.has(v.uid))} giorno={g.giorno} partitaId={partitaId}
           onChiudi={() => setTrasferimento(null)} onFatto={async () => { setScelta(null); await aggiornata(); }} />
       )}
-      {partitaId && totali.tutte > 0 && <p className="m-0 text-[12px] text-text-muted">{totali.fatte} azioni fatte su {totali.tutte}.</p>}
+      {partitaId && totali.tutte > 0 && <p className="m-0 testo-12 text-text-muted">{totali.fatte} azioni fatte su {totali.tutte}.</p>}
       {soggetto && <ModuloVoceGiornata soggetto={soggetto} giorno={g.giorno} voci={g.azioni} partitaId={partitaId} onChiudi={() => setSoggetto(null)} onSalvato={aggiornata} />}
       {conferma && (
         <Modal aperta titolo={conferma.titolo} onChiudi={() => setConferma(null)} azioni={(
@@ -423,7 +423,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onGiornataModificata, on
             ))}
           </div>
         )}>
-          <p className="m-0 text-[14px]">{conferma.testo}</p>
+          <p className="m-0 testo-14">{conferma.testo}</p>
         </Modal>
       )}
     </div>

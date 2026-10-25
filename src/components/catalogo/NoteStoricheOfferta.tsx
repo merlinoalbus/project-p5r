@@ -5,12 +5,14 @@ import { Modal } from '../shared/Modal';
 import { ModificaGuida } from '../guida/ModificaGuida';
 import { elenchiDaOpzioni } from '../guida/elenchiDaOpzioni';
 import { notifica } from '../../stores/notificationStore';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 /** La nota documentale è separata dalle note personali e dal prezzo letto dall'offerta. F6: è un dato (migrazione 139), che si
  *  modifica da qui e torna al valore della guida con «Ripristina»; lo stesso dato si vede in negozi, catalogo e confronto Tanaka. */
 export function NoteStoricheOfferta({ note, onLegamiCambiati }: { note?: readonly NotaStoricaOfferta[]; onLegamiCambiati?: () => void | Promise<void> }) {
   if (!note?.length) return null;
-  return <div className="flex min-w-0 flex-col gap-2 text-[12px]">{note.map(n => <NotaStorica key={n.id} nota={n} onLegamiCambiati={onLegamiCambiati} />)}</div>;
+  return <div className="flex min-w-0 flex-col gap-2 testo-12">{note.map(n => <NotaStorica key={n.id} nota={n} onLegamiCambiati={onLegamiCambiati} />)}</div>;
 }
 
 /** Le offerte e gli oggetti a cui si riferisce la nota si scelgono per nome con la ricerca (R11-17/1). */
@@ -51,14 +53,14 @@ function NotaStorica({ nota, onLegamiCambiati }: { nota: NotaStoricaOfferta; onL
     <p className="m-0 whitespace-pre-line break-words"><strong>Nota storica della fonte. </strong>{attuale.testo}</p>
     <p className="m-0 break-words text-text-secondary">Fonte: {attuale.fonte} · versione {attuale.versione}{attuale.modificata ? ' · modificata' : ''}</p>
     <div className="mt-1 flex flex-wrap gap-2">
-      <button type="button" className="btn btn-secondary btn-sm touch" onClick={() => apri('modifica')}>Modifica nota</button>
-      {attuale.modificata && <button type="button" className="btn btn-secondary btn-sm touch" onClick={() => apri('ripristina')}>Ripristina</button>}
+      <PulsanteVisivo compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica nota" onClick={() => apri('modifica')} />
+      {attuale.modificata && <PulsanteVisivo compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Ripristina" onClick={() => apri('ripristina')} />}
       {onLegamiCambiati && <ModificaGuida tipo="nota-storica-legami" chiave={attuale.id} cosa="dove compare la nota storica" etichetta="Dove compare" campiSpeciali={CAMPI_LEGAMI}
         onSalvato={() => void onLegamiCambiati()} />}
     </div>
     {aperta && <Modal aperta titolo={aperta === 'ripristina' ? 'Ripristina la nota storica' : 'Modifica la nota storica'} onChiudi={() => { if (!occupato) setAperta(null); }} azioni={<>
       <button type="button" className="btn btn-secondary touch" disabled={occupato} onClick={() => setAperta(null)}>Annulla</button>
-      <button type="button" className="btn btn-primary touch" disabled={occupato || (aperta === 'modifica' && vuota)} onClick={() => void esegui()}>{aperta === 'ripristina' ? 'Ripristina' : 'Salva'}</button>
+      <PulsanteVisivo tono="primario" icona={<IconaAzione chiave={aperta === 'ripristina' ? 'riapri' : 'registra'} dimensione={22} />} titolo={aperta === 'ripristina' ? 'Ripristina' : 'Salva'} disabled={occupato || (aperta === 'modifica' && vuota)} onClick={() => void esegui()} />
     </>}>
       {aperta === 'ripristina'
         ? <p className="m-0">Testo e fonte della nota tornano come li dà la guida. Prezzi, acquisti e progressi non cambiano.</p>

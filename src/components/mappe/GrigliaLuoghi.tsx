@@ -51,7 +51,7 @@ export function ChipConteggi({ nodo }: { nodo: NodoGerarchiaDto }) {
 /** Le infiltrazioni, ciascuna un collegamento alla sua casa, in una riga che va a capo. */
 export function Infiltrazioni({ titolo, elenco }: { titolo: string; elenco: NodoGerarchiaDto[] }) {
   return (
-    <p className="m-0 flex flex-wrap items-center gap-x-2 text-[12px] text-text-secondary">
+    <p className="m-0 flex flex-wrap items-center gap-x-2 testo-12 text-text-secondary">
       <span>{titolo}</span>
       {elenco.map((i, k) => <Fragment key={i.chiave}>
         {k > 0 && <span aria-hidden>·</span>}
@@ -82,8 +82,8 @@ export function CartaLuogo({ nodo, percorso, onScendi }: { nodo: NodoGerarchiaDt
         <ImmagineCarta nodo={nodo} />
         <div className="flex flex-1 flex-col gap-2 p-3">
           <div className="flex flex-col gap-0.5">
-            <h3 className="m-0 break-words font-display text-[18px] leading-tight text-text">{nodo.nome}</h3>
-            {percorso && <p className="m-0 text-[12px] text-text-secondary">{percorso}</p>}
+            <h3 className="m-0 break-words font-display testo-18 leading-tight text-text">{nodo.nome}</h3>
+            {percorso && <p className="m-0 testo-12 text-text-secondary">{percorso}</p>}
           </div>
           <SegniNodo nodo={nodo} />
           <ChipConteggi nodo={nodo} />

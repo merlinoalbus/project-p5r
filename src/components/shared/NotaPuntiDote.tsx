@@ -19,7 +19,7 @@ import { IconaAzione } from './IconaAzione';
  * successive valgono diverso. */
 export function NotaPuntiDote({ cosa, dettaglio }: { cosa: string; dettaglio?: string }) {
   return (
-    <p className="m-0 flex items-start gap-2 rounded-md border border-border bg-bg-secondary px-3 py-2 text-[13px] text-text-secondary" role="note">
+    <p className="m-0 flex items-start gap-2 rounded-md border border-border bg-bg-secondary px-3 py-2 testo-13 text-text-secondary" role="note">
       <span className="mt-0.5 shrink-0"><IconaAzione chiave="note" dimensione={18} /></span>
       <span>
         Qui segni <strong>{cosa}</strong>. Le Doti te le ricorda un avviso: le segni tu nella{' '}

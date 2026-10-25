@@ -33,25 +33,25 @@ export function SchedaCiclo({ ciclo, indice, onSalva, salvato }: { ciclo: CicloF
     <article className="card flex flex-col gap-2">
       <div className="flex items-baseline gap-3 flex-wrap">
         <span className="font-semibold">Ciclo {indice + 1}</span>
-        <span className="text-[13px] text-text-secondary">
+        <span className="testo-13 text-text-secondary">
           {ciclo.lunghezza} anelli · {ciclo.evocazioni} dal Registro{ciclo.catture > 0 ? ` · ${ciclo.catture} da catturare` : ''}{ciclo.dallaScorta > 0 ? ` · ${ciclo.dallaScorta} dalla scorta (solo la prima volta)` : ''}
         </span>
-        <span className="ml-auto font-black tabular-nums text-[16px]" title="Costo di una iterazione (evocazioni dal Registro)">{formattaYen(ciclo.costo)} / giro</span>
+        <span className="ml-auto font-black tabular-nums testo-16" title="Costo di una iterazione (evocazioni dal Registro)">{formattaYen(ciclo.costo)} / giro</span>
         {onSalva && <PulsanteVisivo tono={salvato ? 'fantasma' : 'secondario'} compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={salvato ? 'Salvato ✓' : 'Salva ciclo'} onClick={onSalva} disabled={salvato} />}
       </div>
       <ol className="m-0 p-0 list-none flex flex-col gap-1" aria-label={`Anelli del ciclo ${indice + 1}`}>
         {ciclo.anelli.map((a, i) => (
-          <li key={i} className="flex flex-wrap items-center gap-1.5 text-[13px]">
-            <span className="w-6 h-6 rounded-full bg-bg-tertiary text-text-muted text-[12px] font-semibold inline-flex items-center justify-center shrink-0" aria-hidden="true">{i + 1}</span>
+          <li key={i} className="flex flex-wrap items-center gap-1.5 testo-13">
+            <span className="w-6 h-6 rounded-full bg-bg-tertiary text-text-muted testo-12 font-semibold inline-flex items-center justify-center shrink-0" aria-hidden="true">{i + 1}</span>
             <PersonaChip p={a.ingrediente} evidenza={i === 0} />
             <OperatoreRicetta tipo="piu" />
             <span className="inline-flex flex-col items-start gap-0.5">
               <PersonaChip p={a.partner} title={`${a.partner.arcanaNome} · livello ${a.partner.livello}`} />
-              <span className={`chip chip--icona text-[11px] ${a.partnerModo === 'cattura' ? 'text-warning' : ''}`}><IconaAzione chiave={a.partnerModo === 'registro' ? 'evoca' : a.partnerModo === 'cattura' ? 'mappa' : 'raggiunto'} dimensione={12} />{NOME_MODO_PARTNER[a.partnerModo]}{a.partnerModo === 'registro' ? ` · ${formattaYen(a.partnerCosto)}` : ''}</span>
+              <span className={`chip chip--icona testo-12 ${a.partnerModo === 'cattura' ? 'text-warning' : ''}`}><IconaAzione chiave={a.partnerModo === 'registro' ? 'evoca' : a.partnerModo === 'cattura' ? 'mappa' : 'raggiunto'} dimensione={12} />{NOME_MODO_PARTNER[a.partnerModo]}{a.partnerModo === 'registro' ? ` · ${formattaYen(a.partnerCosto)}` : ''}</span>
             </span>
             <OperatoreRicetta tipo="risultato" />
             <PersonaChip p={a.risultato} evidenza={i === ciclo.anelli.length - 1} />
-            <span className="text-[12px] text-text-muted">
+            <span className="testo-12 text-text-muted">
               {a.tipo === 'tesoro' ? 'con Demone del Tesoro' : a.tipo === 'stesso-arcano' ? 'stesso arcano' : 'normale'}
               {a.bonusLivelli.max > 0 ? ` · nasce +${a.bonusLivelli.min === a.bonusLivelli.max ? a.bonusLivelli.min : `${a.bonusLivelli.min}…${a.bonusLivelli.max}`} livelli (${a.risultato.arcanaNome} rango ${a.rangoArcano})` : ` · ${a.risultato.arcanaNome} rango ${a.rangoArcano}: nessun bonus`}
             </span>
@@ -107,12 +107,12 @@ export function CicliFusione({ persone, partitaId, livelloProtagonista, inScorta
   return (
     <div className="flex flex-col gap-3">
       <SelettorePersona etichetta="Persona di partenza (e di arrivo)" persone={persone} scelta={scelta} onScegli={setScelta} inScorta={inScorta} senzaRare />
-      <p className="m-0 text-[13px] text-text-secondary">
+      <p className="m-0 testo-13 text-text-secondary">
         Un ciclo fonde la Persona scelta con un partner, poi il risultato con un altro partner, e così via finché l'ultima fusione la rigenera. Si ripete identico a ogni giro. In Royal la fusione non trasferisce statistiche né livelli dei materiali: ogni anello dà al risultato il bonus di livello del Confidente del suo arcano e, durante l'Allarme, +15/+20/+25 punti e lo stato «gialla» (utile poi alla Forca o come ingrediente). I partner dal Registro costano l'evocazione (sconto del compendio applicato), quelli da catturare vanno ripresi ogni giro.
       </p>
       {scelta && (
         <>
-          <div className="flex flex-wrap items-center gap-2 text-[13px]">
+          <div className="flex flex-wrap items-center gap-2 testo-13">
             <span className="flex items-center gap-1.5" role="group" aria-label="Numero di anelli">
               Anelli da
               <Selettore compatto etichetta="Numero minimo di anelli" valore={String(Math.min(lunghezzaMin, lunghezza))} opzioni={LUNGHEZZE.filter((n) => n <= lunghezza).map((n) => ({ chiave: String(n), nome: String(n) }))} onCambia={(k) => setLunghezzaMin(Number(k))} />
@@ -127,14 +127,14 @@ export function CicliFusione({ persone, partitaId, livelloProtagonista, inScorta
             <button type="button" className={`chip touch ${limitaLivello ? 'chip--attivo' : ''}`} disabled={livelloProtagonista === null} onClick={() => setLimitaLivello((v) => !v)} aria-pressed={limitaLivello && livelloProtagonista !== null}>Fino al livello {livelloProtagonista ?? '—'}</button>
           </div>
           {errore ? (
-            <p className="m-0 text-[13px] text-error">{errore}</p>
+            <p className="m-0 testo-13 text-error">{errore}</p>
           ) : caricamento && !dati ? (
             <div className="flex justify-center py-6"><Spinner /></div>
           ) : dati && dati.cicli.length === 0 ? (
-            <p className="m-0 text-[13px] text-text-muted">Nessun ciclo con queste opzioni: {dati.disponibilita.registro === 0 ? 'il Registro della partita è vuoto (registra Persona nel compendio o ammetti le catture)' : 'aumenta gli anelli, ammetti le catture o togli il limite di livello'}.</p>
+            <p className="m-0 testo-13 text-text-muted">Nessun ciclo con queste opzioni: {dati.disponibilita.registro === 0 ? 'il Registro della partita è vuoto (registra Persona nel compendio o ammetti le catture)' : 'aumenta gli anelli, ammetti le catture o togli il limite di livello'}.</p>
           ) : dati ? (
             <>
-              <p className="m-0 text-[12px] text-text-muted">
+              <p className="m-0 testo-12 text-text-muted">
                 {dati.inScorta ? `${dati.persona.nomeIt} è nella scorta.` : `${dati.persona.nomeIt} non è nella scorta: prima procurala (`}{!dati.inScorta && <Link to={`/fusione?vista=piani&piani=${dati.persona.id}`} className="text-primary-testo">piano di fusione</Link>}{!dati.inScorta && ').'}
                 {dati.sconto > 0 && ` Costi con lo sconto del Registro (${dati.sconto}%).`}
                 {!partitaId && ' Senza partita attiva scorta e Registro sono vuoti.'}

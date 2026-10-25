@@ -62,25 +62,25 @@ export function DungeonPage() {
                       <EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={84} />
                       {anello && (
                         <AnelloAvanzamento quota={anello.quota} dimensione={56} spessore={4} etichetta={anello.etichetta}>
-                          <span className="font-display text-[15px] leading-none tabular-nums">{Math.floor(anello.quota * 100)}%</span>
+                          <span className="font-display testo-15 leading-none tabular-nums">{Math.floor(anello.quota * 100)}%</span>
                         </AnelloAvanzamento>
                       )}
                     </div>
                     <div className="flex-1 min-w-0 flex flex-col gap-1.5">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-display uppercase text-[21px] leading-none">{d.nome}</span>
+                        <span className="font-display uppercase testo-20 leading-none">{d.nome}</span>
                         {sugg.evidenziato('dungeon', d.chiave) && <TargaSuggerito motivo={sugg.motivo('dungeon', d.chiave)} compatta />}
                         {d.arcanaSovranoNome && <span className="chip">{d.arcanaSovranoNome}</span>}
                         {livello && <span className={`chip ${livello.testo === 'Completato' ? 'chip--attivo' : ''}`} title={livello.perche}>{livello.testo}</span>}
                         {!!d.daVerificare && <span className="chip chip--oro" title="Pin fatti con una voce non fatta, da prima dell’aggiornamento: si sistemano dalla scheda">{d.daVerificare} da verificare</span>}
                       </div>
-                      {d.sovrano && <span className="text-[13px] text-text-secondary">{d.sovrano}</span>}
+                      {d.sovrano && <span className="testo-13 text-text-secondary">{d.sovrano}</span>}
                       <div className="flex flex-wrap gap-1.5">
                         {d.date.sblocco && <span className="chip" title={d.date.sblocco}>Sblocco {dataBreve(d.date.sblocco)}</span>}
                         {d.date.scadenza && <span className="chip chip--attivo" title={d.date.scadenza}>Scadenza {dataBreve(d.date.scadenza)}</span>}
                         {d.livelloConsigliato && <span className="chip" title={d.livelloConsigliato}>Livello: {sintesi(d.livelloConsigliato, 36)}</span>}
                       </div>
-                      <span className="text-[12px] text-text-muted">{d.aree} infiltrazioni · {d.raccolta.totale} da raccogliere · {d.esauribili} esauribili · {d.punti} punti in tutto{d.gestiti !== null ? ` · ${d.gestiti} segnati` : ''}</span>
+                      <span className="testo-12 text-text-muted">{d.aree} infiltrazioni · {d.raccolta.totale} da raccogliere · {d.esauribili} esauribili · {d.punti} punti in tutto{d.gestiti !== null ? ` · ${d.gestiti} segnati` : ''}</span>
                     </div>
                   </Link>
                 </li>

@@ -29,7 +29,7 @@ export function RigaEffettoVoceLegacy({ effetto, elenchi, onCambia, onTogli, num
     </div>}
     {effetto.tipo === 'turno' && <div className="flex flex-col gap-2">
       <Selettore etichetta="Attività (contata per volte)" valore={effetto.attivita} opzioni={elenchi.attivita.filter((a) => a.turni)} onCambia={(v) => onCambia({ ...effetto, attivita: v })} />
-      <label className="flex items-center gap-2 text-[13px] touch"><input type="checkbox" className="w-5 h-5" checked={effetto.doti !== undefined} onChange={(e) => onCambia(e.target.checked ? { ...effetto, doti: [{ dote: 'perizia', note: 2 }] } : { tipo: 'turno', attivita: effetto.attivita })} />Doti proprie di questo turno, al posto di quelle dell’attività</label>
+      <label className="flex items-center gap-2 testo-13 touch"><input type="checkbox" className="w-5 h-5" checked={effetto.doti !== undefined} onChange={(e) => onCambia(e.target.checked ? { ...effetto, doti: [{ dote: 'perizia', note: 2 }] } : { tipo: 'turno', attivita: effetto.attivita })} />Doti proprie di questo turno, al posto di quelle dell’attività</label>
       {effetto.doti?.map((d, i) => <div key={i} className="flex flex-wrap items-end gap-2">
         <div className="flex-1 min-w-0"><RigaDote etichetta={`Dote ${i + 1}`} dote={d} onCambia={(nuova) => onCambia({ ...effetto, doti: effetto.doti!.map((x, j) => j === i ? nuova : x) })} /></div>
         {effetto.doti!.length > 1 && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" aria-label={`Togli la Dote ${i + 1} dell’effetto ${numero}`} onClick={() => onCambia({ ...effetto, doti: effetto.doti!.filter((_, j) => j !== i) })} />}

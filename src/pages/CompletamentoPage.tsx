@@ -55,34 +55,34 @@ function Trofeo({ t, partitaId, onCambiato, onModificato }: { t: TrofeoDto; part
     try { onCambiato(await impostaTrofeo(partitaId, t.chiave, ottenuto)); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
   };
   return (
-    <li id={`elemento-${t.chiave}`} className={`card flex min-w-0 flex-col gap-2 text-[13px] ${t.ottenuto ? 'opacity-60' : ''}`} style={{ borderLeft: `3px solid ${colore}` }}>
+    <li id={`elemento-${t.chiave}`} className={`card flex min-w-0 flex-col gap-2 testo-13 ${t.ottenuto ? 'opacity-60' : ''}`} style={{ borderLeft: `3px solid ${colore}` }}>
       <div className="flex items-start gap-2.5">
         <span aria-hidden className="mt-0.5 shrink-0" style={{ color: colore }}><IconMedaglia size={28} /></span>
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <strong className={`text-[15px] leading-tight ${t.ottenuto ? 'line-through' : ''}`}>{t.nome}</strong>
-          {t.nomeEn && t.nomeEn !== t.nome && <span className="text-[11px] text-text-muted">{t.nomeEn}</span>}
+          <strong className={`testo-15 leading-tight ${t.ottenuto ? 'line-through' : ''}`}>{t.nome}</strong>
+          {t.nomeEn && t.nomeEn !== t.nome && <span className="testo-12 text-text-muted">{t.nomeEn}</span>}
         </div>
         <ModificaGuida tipo="trofeo" chiave={t.chiave} cosa={`il trofeo «${t.nome}»`} soloIcona onSalvato={onModificato} />
         {partitaId && (
-          <label className="touch flex shrink-0 items-center gap-1.5 text-[12px]" title={`Segna «${t.nome}» come ottenuto`}>
+          <label className="touch flex shrink-0 items-center gap-1.5 testo-12" title={`Segna «${t.nome}» come ottenuto`}>
             <input type="checkbox" className="h-5 w-5" checked={t.ottenuto} disabled={occupato} onChange={(e) => void cambia(e.target.checked)} aria-label={`Trofeo ${t.nome} ottenuto`} />
             Ottenuto
           </label>
         )}
       </div>
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="chip text-[11px]" style={{ borderColor: colore, color: colore }}>{NOME_TIPO_TROFEO[t.tipo]}</span>
-        {t.mancabile && <span className="chip chip--attivo text-[11px]" title="Se lo salti, in questa partita non lo prendi più">mancabile</span>}
-        {!t.verificato && <span className="chip text-[11px]" title="Dato da fonte secondaria">da fonte secondaria</span>}
+        <span className="chip testo-12" style={{ borderColor: colore, color: colore }}>{NOME_TIPO_TROFEO[t.tipo]}</span>
+        {t.mancabile && <span className="chip chip--attivo testo-12" title="Se lo salti, in questa partita non lo prendi più">mancabile</span>}
+        {!t.verificato && <span className="chip testo-12" title="Dato da fonte secondaria">da fonte secondaria</span>}
       </div>
       <p className="m-0 text-text-secondary">{t.descrizione}</p>
       {(t.come || t.quando) && (
         <div className="grid gap-1.5 sm:grid-cols-2">
           {t.come && <span className="flex flex-col gap-0.5 rounded-md bg-white/[0.04] px-2.5 py-1.5">
-            <span className="text-[10px] uppercase tracking-[0.08em] text-text-muted">Come</span>{t.come}
+            <span className="testo-12 uppercase tracking-[0.08em] text-text-muted">Come</span>{t.come}
           </span>}
           {t.quando && <span className="flex flex-col gap-0.5 rounded-md bg-white/[0.04] px-2.5 py-1.5">
-            <span className="text-[10px] uppercase tracking-[0.08em] text-text-muted">Quando</span>{t.quando}
+            <span className="testo-12 uppercase tracking-[0.08em] text-text-muted">Quando</span>{t.quando}
           </span>}
         </div>
       )}
@@ -135,8 +135,8 @@ export function CompletamentoPage() {
             <div className="flex flex-col gap-2">
               <div className="flex flex-wrap items-center gap-1.5">
                 <Selettore compatto etichetta="Tipo di trofeo" valore={tipo} vuoto="Tutti i tipi" opzioni={opzioniDaNomi(NOME_TIPO_TROFEO)} onCambia={setTipo} />
-                {partitaId && <label className="flex items-center gap-1.5 text-[13px] touch"><input type="checkbox" className="w-5 h-5" checked={soloDaFare} onChange={(e) => setSoloDaFare(e.target.checked)} /> Solo da ottenere</label>}
-                <span className="text-[12px] text-text-muted ml-auto">{trofeiVisibili.length} trofei</span>
+                {partitaId && <label className="flex items-center gap-1.5 testo-13 touch"><input type="checkbox" className="w-5 h-5" checked={soloDaFare} onChange={(e) => setSoloDaFare(e.target.checked)} /> Solo da ottenere</label>}
+                <span className="testo-12 text-text-muted ml-auto">{trofeiVisibili.length} trofei</span>
               </div>
               {/* Quanti ne mancano per metallo: la domanda che si fa chi guarda i trofei, e che
                   prima si poteva rispondere solo filtrando quattro volte e contando a occhio. */}
@@ -162,9 +162,9 @@ export function CompletamentoPage() {
           {scheda === 'finali' && (
             <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Finali">
               {d.finali.map((f) => (
-                <li key={f.chiave} className="card flex flex-col gap-1 text-[13px]">
+                <li key={f.chiave} className="card flex flex-col gap-1 testo-13">
                   <div className="flex items-start gap-2">
-                    <h2 className="m-0 min-w-0 flex-1 text-[15px] font-semibold">{f.nome}</h2>
+                    <h2 className="m-0 min-w-0 flex-1 testo-15 font-semibold">{f.nome}</h2>
                     <ModificaGuida tipo="finale" chiave={f.chiave} cosa={`il finale «${f.nome}»`} soloIcona onSalvato={ricarica} />
                   </div>
                   {f.descrizione && <p className="m-0 text-text-secondary">{f.descrizione}</p>}
@@ -176,20 +176,20 @@ export function CompletamentoPage() {
             </ul>
           )}
           {scheda === 'dlc' && (
-            <ul className="m-0 p-0 list-none flex flex-col gap-2 text-[13px]" aria-label="DLC">
-              {d.dlc.map((x) => <li key={x.nome} className="card flex flex-col gap-1"><div className="flex items-start gap-2"><strong className="min-w-0 flex-1 text-[15px]">{x.nome}</strong><ModificaGuida tipo="dlc" chiave={x.nome} cosa={`il contenuto «${x.nome}»`} soloIcona onSalvato={ricarica} /></div><p className="m-0">{x.contenuto}</p>{x.note && <p className="m-0 text-text-muted">{x.note}</p>}<Fonte url={x.fonte} /></li>)}
+            <ul className="m-0 p-0 list-none flex flex-col gap-2 testo-13" aria-label="DLC">
+              {d.dlc.map((x) => <li key={x.nome} className="card flex flex-col gap-1"><div className="flex items-start gap-2"><strong className="min-w-0 flex-1 testo-15">{x.nome}</strong><ModificaGuida tipo="dlc" chiave={x.nome} cosa={`il contenuto «${x.nome}»`} soloIcona onSalvato={ricarica} /></div><p className="m-0">{x.contenuto}</p>{x.note && <p className="m-0 text-text-muted">{x.note}</p>}<Fonte url={x.fonte} /></li>)}
             </ul>
           )}
           {scheda === 'meteo' && (
-            <ul className="m-0 p-0 list-none flex flex-col gap-2 text-[13px]" aria-label="Meteo">
-              {d.meteo.map((m) => <li key={m.condizione} className="card flex flex-col gap-1"><div className="flex items-start gap-2"><strong className="min-w-0 flex-1 text-[15px]">{m.condizione}</strong><ModificaGuida tipo="meteo" chiave={m.condizione} cosa={`il meteo «${m.condizione}»`} soloIcona onSalvato={ricarica} /></div><ul className="m-0 pl-4">{m.effetti.map((e) => <li key={e}>{e}</li>)}</ul><Fonte url={m.fonte} /></li>)}
+            <ul className="m-0 p-0 list-none flex flex-col gap-2 testo-13" aria-label="Meteo">
+              {d.meteo.map((m) => <li key={m.condizione} className="card flex flex-col gap-1"><div className="flex items-start gap-2"><strong className="min-w-0 flex-1 testo-15">{m.condizione}</strong><ModificaGuida tipo="meteo" chiave={m.condizione} cosa={`il meteo «${m.condizione}»`} soloIcona onSalvato={ricarica} /></div><ul className="m-0 pl-4">{m.effetti.map((e) => <li key={e}>{e}</li>)}</ul><Fonte url={m.fonte} /></li>)}
             </ul>
           )}
           {scheda === 'ng' && (
-            <div className="flex flex-col gap-2 text-[13px]">
+            <div className="flex flex-col gap-2 testo-13">
               <section className="card flex flex-col gap-1">
                 <div className="flex items-start gap-2">
-                  <h2 className="m-0 min-w-0 flex-1 text-[15px] font-semibold">Nuova Partita+</h2>
+                  <h2 className="m-0 min-w-0 flex-1 testo-15 font-semibold">Nuova Partita+</h2>
                   <ModificaGuida tipo="completamento-sezione" chiave="ng" cosa="la sezione «Nuova Partita+»" soloIcona onSalvato={ricarica} />
                 </div>
                 {d.nuovaPartitaPlus.note && <p className="m-0 text-text-secondary">{d.nuovaPartitaPlus.note}</p>}
@@ -199,7 +199,7 @@ export function CompletamentoPage() {
               </section>
               <section className="card flex flex-col gap-1">
                 <div className="flex items-start gap-2">
-                  <h2 className="m-0 min-w-0 flex-1 text-[15px] font-semibold">Differenze rispetto a Persona 5</h2>
+                  <h2 className="m-0 min-w-0 flex-1 testo-15 font-semibold">Differenze rispetto a Persona 5</h2>
                   <ModificaGuida tipo="completamento-sezione" chiave="differenze" cosa="le differenze rispetto a Persona 5" soloIcona onSalvato={ricarica} />
                 </div>
                 <ul className="m-0 pl-4">{d.differenzeRoyal.map((x) => <li key={x}>{x}</li>)}</ul>
@@ -207,13 +207,13 @@ export function CompletamentoPage() {
             </div>
           )}
           {scheda === 'tempo' && (
-            <section className="card flex flex-col gap-1 text-[13px]">
+            <section className="card flex flex-col gap-1 testo-13">
               <div className="flex items-start gap-2">
-                <h2 className="m-0 min-w-0 flex-1 text-[15px] font-semibold">Fasce orarie e regole del tempo</h2>
+                <h2 className="m-0 min-w-0 flex-1 testo-15 font-semibold">Fasce orarie e regole del tempo</h2>
                 <ModificaGuida tipo="completamento-sezione" chiave="tempo" cosa="le fasce orarie e le regole del tempo" soloIcona onSalvato={ricarica} />
               </div>
               <ul className="m-0 pl-4">{d.tempo.fasce.map((x) => <li key={x}>{x}</li>)}</ul>
-              <h3 className="m-0 mt-1 text-[14px] font-semibold">Regole</h3>
+              <h3 className="m-0 mt-1 testo-14 font-semibold">Regole</h3>
               <ul className="m-0 pl-4">{d.tempo.regole.map((x) => <li key={x}>{x}</li>)}</ul>
               <Fonte url={d.tempo.fonte} />
             </section>

@@ -39,20 +39,18 @@ function Voce({ voce, indice, onCambia, onTogli, conRipetuto, disabilitato, quar
   return (
     <li className="editor-effetti__voce">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <strong className="text-[13px]">Effetto {indice + 1}: <span className="font-normal text-text-secondary">{descriviVoceEffetto(voce, nomi)}</span></strong>
-        <button type="button" className="btn btn-ghost btn-sm touch" disabled={disabilitato} onClick={onTogli} aria-label={`Togli l'effetto ${indice + 1}`}>Togli</button>
+        <strong className="testo-13">Effetto {indice + 1}: <span className="font-normal text-text-secondary">{descriviVoceEffetto(voce, nomi)}</span></strong>
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="meno" dimensione={20} />} titolo="Togli" disabled={disabilitato} onClick={onTogli} aria-label={`Togli l'effetto ${indice + 1}`} />
       </div>
       <EditorEffetto etichetta={`Famiglia dell'effetto ${indice + 1}`} valore={voce.effetto} onCambia={(e) => onCambia({ ...voce, effetto: e ?? effettoPredefinito('dote') })} quartieri={quartieri} attivita={attivita} confidenti={confidenti} erroreNomi={erroreNomi} riprovaNomi={riprovaNomi} disabilitato={disabilitato} />
       <div className="flex flex-wrap items-center gap-3">
         {conRipetuto && (
-          <label className="flex items-center gap-2 text-[13px] touch">
+          <label className="flex items-center gap-2 testo-13 touch">
             <input type="checkbox" className="w-5 h-5" checked={voce.ripetuto === true} disabled={disabilitato} onChange={(e) => onCambia({ ...voce, ripetuto: e.target.checked || undefined })} />
             Vale dalla seconda volta in poi
           </label>
         )}
-        <button type="button" className="btn btn-ghost btn-sm touch" disabled={disabilitato} aria-expanded={condizioniAperte} onClick={() => setCondizioniAperte((a) => !a)}>
-          {condizioniAperte ? 'Nascondi le condizioni' : `Condizioni${voce.condizioni?.length ? ` · ${voce.condizioni.length}` : ''}`}
-        </button>
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="filtri" dimensione={20} />} titolo={condizioniAperte ? 'Nascondi le condizioni' : `Condizioni${voce.condizioni?.length ? ` · ${voce.condizioni.length}` : ''}`} disabled={disabilitato} aria-expanded={condizioniAperte} onClick={() => setCondizioniAperte((a) => !a)} />
       </div>
       {condizioniAperte && <CondizioniEditor condizioni={voce.condizioni ?? []} onCambia={(c) => onCambia({ ...voce, condizioni: c.length ? c : undefined })} disabilitato={disabilitato} />}
     </li>
@@ -69,8 +67,8 @@ export function EditorEffetti({ voci, onCambia, conRipetuto, disabilitato, quart
   return (
     <fieldset className="regole-editor editor-effetti flex flex-col gap-2">
       <legend>Che cosa fa</legend>
-      <p className="m-0 text-[12px] text-text-muted">{aiuto ?? 'Gli effetti dichiarati sono quelli che la partita applica: una Dote con le sue note diventa punti veri al completamento.'}</p>
-      {voci.length === 0 && <p className="m-0 text-[12px] text-text-muted" role="status">Nessun effetto dichiarato.</p>}
+      <p className="m-0 testo-12 text-text-muted">{aiuto ?? 'Gli effetti dichiarati sono quelli che la partita applica: una Dote con le sue note diventa punti veri al completamento.'}</p>
+      {voci.length === 0 && <p className="m-0 testo-12 text-text-muted" role="status">Nessun effetto dichiarato.</p>}
       <ul className="m-0 flex list-none flex-col gap-3 p-0">
         {voci.map((v, i) => (
           <Voce key={chiavi.ids[i]} voce={v} indice={i} conRipetuto={conRipetuto} disabilitato={disabilitato} quartieri={quartieri} attivita={attivita} confidenti={confidenti} erroreNomi={erroreNomi} riprovaNomi={riprovaNomi}

@@ -6,6 +6,8 @@ import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { Modal } from '../shared/Modal';
 import { NEL_CESTINO } from '../../utils/cestino';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 const testo = (e: unknown) => e instanceof Error ? e.message : 'Operazione non riuscita.';
 
@@ -84,21 +86,21 @@ export function FinestraRimozionePin({ spillo, mappa, contestoAncoraAttivo, onCh
     ['Condizioni che citano il pin', a.contenuti.condizioniRiferite],
   ] as const : [];
   return <Modal aperta titolo="Mettere il pin nel Cestino?" onChiudi={() => { if (!blocco.current) onChiudi(); }} azioni={<>
-    <button type="button" className="btn btn-ghost touch" disabled={occupato} onClick={onChiudi}>Chiudi</button>
-    {!incerto && !pendente && !rimossa && <button type="button" className="btn btn-primary touch" disabled={occupato || rifiutata || !registro.pronto || !!registro.errore || !identica || anteprima.caricamento || !!anteprima.errore} onClick={() => void rimuovi()}>Metti questo pin nel Cestino</button>}
+    <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="chiudi" dimensione={22} />} titolo="Chiudi" disabled={occupato} onClick={onChiudi} />
+    {!incerto && !pendente && !rimossa && <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Metti questo pin nel Cestino" disabled={occupato || rifiutata || !registro.pronto || !!registro.errore || !identica || anteprima.caricamento || !!anteprima.errore} onClick={() => void rimuovi()} />}
   </>}>
-    <div className="flex min-w-0 flex-col gap-2 text-[13px]">
+    <div className="flex min-w-0 flex-col gap-2 testo-13">
       <strong>{identica ? a!.spillo.nome : spillo.nome}</strong><p className="m-0">{NEL_CESTINO}</p>
-      {registro.errore && <div role="alert" className="flex flex-col gap-1 text-error"><span>{registro.errore}</span><button type="button" className="btn btn-ghost touch self-start" disabled={occupato} onClick={() => { try { salvaRegistroRimozioniPin(); } catch (e) { setErrore(testo(e)); } }}>Salva il registro senza ripetere la richiesta</button></div>}
+      {registro.errore && <div role="alert" className="flex flex-col gap-1 text-error"><span>{registro.errore}</span><PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva il registro senza ripetere la richiesta" className="self-start" disabled={occupato} onClick={() => { try { salvaRegistroRimozioniPin(); } catch (e) { setErrore(testo(e)); } }} /></div>}
       {anteprima.caricamento && <p role="status" className="m-0">Rileggo il pin e le conseguenze della rimozione…</p>}
       {anteprima.errore && <p role="alert" className="m-0 text-error">{anteprima.errore}</p>}
       {a && !identica && <p role="alert" className="m-0 text-error">Il pin o la mappa non coincidono più con la selezione: nessuna rimozione viene inviata.</p>}
-      {a && identica && <><span>Mappa: {a.spillo.mappa!.nome}</span><code className="break-all text-[11px]">Pin {a.spillo.id} · UID {a.spillo.uid}</code>
+      {a && identica && <><span>Mappa: {a.spillo.mappa!.nome}</span><code className="break-all testo-12">Pin {a.spillo.id} · UID {a.spillo.uid}</code>
         <ul className="m-0 pl-4">{conteggi.map(([nome, quante]) => <li key={nome}>{nome}: {quante}</li>)}</ul>
         <p className="m-0">{a.contenuti.riallineamento ? 'Le voci collegate richiedono il riallineamento degli stati della guida nelle partite; il Cestino conserva le righe interessate.' : 'La fotografia non richiede il riallineamento degli stati delle voci della guida.'}</p></>}
       {errore && <p role="alert" className="m-0 text-error">{errore}</p>}
-      {(incerto || pendente) && <><p role="alert" className="m-0 text-warning">Esito da verificare conservato per questo UID, anche dopo chiusura o reload. La richiesta non viene ripetuta: puoi soltanto rileggere la mappa e il Cestino.</p><button type="button" className="btn btn-secondary touch self-start" disabled={occupato || pendente?.stato === 'invio'} onClick={() => void rileggi()}>Rileggi lo stato senza ripetere la rimozione</button></>}
-      {!incerto && !pendente && !rimossa && <button type="button" className="btn btn-ghost touch self-start" disabled={occupato || anteprima.caricamento} onClick={() => { setRifiutata(false); setErrore(null); void anteprima.ricarica(); }}>Rileggi l’anteprima</button>}
+      {(incerto || pendente) && <><p role="alert" className="m-0 text-warning">Esito da verificare conservato per questo UID, anche dopo chiusura o reload. La richiesta non viene ripetuta: puoi soltanto rileggere la mappa e il Cestino.</p><PulsanteVisivo icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi lo stato senza ripetere la rimozione" className="self-start" disabled={occupato || pendente?.stato === 'invio'} onClick={() => void rileggi()} /></>}
+      {!incerto && !pendente && !rimossa && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi l’anteprima" className="self-start" disabled={occupato || anteprima.caricamento} onClick={() => { setRifiutata(false); setErrore(null); void anteprima.ricarica(); }} />}
       {riscontro && <p role="status" className="m-0">{riscontro}</p>}
     </div>
   </Modal>;

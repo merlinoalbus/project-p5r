@@ -366,6 +366,17 @@ finestra di una voce. Finché il file manca, la riserva SVG è in `iconeGuida.ts
 | `azione-su.png` | «Sposta su» una voce della giornata (un posto prima) | freccia spessa verso l'alto sopra una riga orizzontale corta |
 | `azione-giu.png` | «Sposta giù» una voce della giornata (un posto dopo) | freccia spessa verso il basso sotto una riga orizzontale corta |
 
+### Aggiunta del 2026-10-25 — parti illeggibili (1) — stesse regole
+Lotto B della revisione UX/UI: tutti i pulsanti hanno un'icona. Quando condizioni, effetti o quiz salvati contengono parti che l'editor non sa
+rappresentare, il pulsante «Usa le … leggibili e scarta le altre parti» tiene il leggibile e butta il resto: non è «ricalcola» né «elimina».
+Finché il file manca, la riserva SVG è l'imbuto di `iconeGuida.tsx` (`IconFiltro`), la stessa figura dei filtri: il file va distinto da quella.
+
+| File | Uso nell'app | Soggetto |
+|---|---|---|
+| `azione-scarta.png` | «Usa le condizioni / gli effetti / il quiz leggibili e scarta le altre parti» (moduli del catalogo e delle attività) | foglio verticale tagliato in diagonale a metà altezza: la metà alta resta intera con due righe corte, la metà bassa si stacca e cade inclinata verso il basso a destra, con tre trattini di movimento |
+
+Prompt pronto (anteporre il blocco di stile del §0): `[blocco di stile] Icona di azione per l'interfaccia di Persona 5 Royal, PNG 128×128 con sfondo trasparente: un foglio rettangolare verticale tagliato in diagonale a metà altezza; la metà superiore resta ferma con due righe corte (barre), la metà inferiore si stacca e cade inclinata in basso a destra, con tre trattini di movimento. Forme piatte bianche #ececf1 con contorno nero #0b0b0e spesso, angoli tagliati in diagonale, ombra rossa #e5352b sfalsata in basso a destra. Nessun testo, nessun marchio; niente forbici, niente cestino, niente imbuto. → azione-scarta.png`
+
 ## 22. Icone di categoria (22) — `ui/categoria-<chiave>.png` (128×128, trasparente) — richieste il 2026-09-07
 Le figure che stanno **dentro il cartiglio rosso a taglio diagonale** delle schede: tipo di negozio, categoria di oggetto, tipo di attività, tipo di
 azione del percorso. L'app le mostra a 18–44 px sopra il cartiglio, quindi il soggetto deve leggersi anche piccolo: silhouette piena, niente

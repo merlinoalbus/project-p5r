@@ -13,6 +13,8 @@ import { ElementoChip } from '../compendio/ElementoChip';
 import type { EsitoFusioneScortaDto } from '../../types';
 import { PersonaChip } from './PersonaChip';
 import { OperatoreRicetta } from './RicettaRiga';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   partitaId: number;
@@ -66,10 +68,10 @@ export function EseguiFusioneModal({ partitaId, possedutaIds, risultatoId, onChi
 
   return (
     <Modal titolo="Esegui la fusione dalla scorta" aperta onChiudi={onChiudi}>
-      {anteprima.errore && <p className="m-0 text-[13px] text-error">{anteprima.errore}</p>}
+      {anteprima.errore && <p className="m-0 testo-13 text-error">{anteprima.errore}</p>}
       {!a && !anteprima.errore && <div className="flex justify-center py-6"><Spinner /></div>}
       {a && (
-        <form className="flex flex-col gap-3 text-[13px]" onSubmit={(e) => { e.preventDefault(); void esegui(); }}>
+        <form className="flex flex-col gap-3 testo-13" onSubmit={(e) => { e.preventDefault(); void esegui(); }}>
           <div className="flex flex-wrap items-center gap-2">
             {a.ingredienti.map((i, n) => <span key={i.possedutaId} className="ricetta-riga__gruppo"><PersonaChip p={{ id: i.personaId, nome: i.nome, nomeIt: i.nomeIt, livello: i.livello }} suffisso={i.carica ? ' ⚡ carica' : undefined} />{n < a.ingredienti.length - 1 && <OperatoreRicetta tipo="piu" />}</span>)}
             <OperatoreRicetta tipo="risultato" />
@@ -80,7 +82,7 @@ export function EseguiFusioneModal({ partitaId, possedutaIds, risultatoId, onChi
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label className="form-label">Livello di partenza osservato
               <input type="number" min={a.livelloBase} max={99} className="form-input mt-1" value={livelloScelto} onChange={(e) => setLivello(Number(e.target.value) || a.livelloBase)} aria-label="Livello di partenza" />
-              <span className="block text-[12px] text-text-muted mt-1">
+              <span className="block testo-12 text-text-muted mt-1">
                 Base {a.livelloBase}{a.bonusLivelli.max > 0 ? ` + bonus Confidente ${a.bonusLivelli.min === a.bonusLivelli.max ? `+${a.bonusLivelli.min}` : `+${a.bonusLivelli.min}…+${a.bonusLivelli.max}`} (Matto rango ${a.bonusLivelli.rangoMatto}, ${a.risultato.arcanaNome} rango ${a.bonusLivelli.rangoArcano}; stima)` : ' · nessun bonus del Confidente (rango 0)'}.
                 {a.puntiAllarme > 0 && ` Con l'Allarme il gioco aggiunge +${a.puntiAllarme} punti statistica casuali: registrali dopo nella scheda della Persona.`}
               </span>
@@ -109,14 +111,14 @@ export function EseguiFusioneModal({ partitaId, possedutaIds, risultatoId, onChi
                 </ul>
               </details>
             )}
-            <p className="m-0 text-[12px] text-text-muted mt-1">Skill innate al livello scelto: {a.skillInnate.map((s) => s.nomeIt).join(', ') || '—'} (le ereditate hanno la precedenza, massimo 8 in tutto).</p>
+            <p className="m-0 testo-12 text-text-muted mt-1">Skill innate al livello scelto: {a.skillInnate.map((s) => s.nomeIt).join(', ') || '—'} (le ereditate hanno la precedenza, massimo 8 in tutto).</p>
           </div>
           <label className="form-label">Note
             <input className="form-input mt-1" value={note} onChange={(e) => setNote(e.target.value)} maxLength={2000} />
           </label>
           <div className="flex justify-end gap-2">
             <button type="button" className="btn btn-secondary" onClick={onChiudi}>Annulla</button>
-            <button type="submit" className="btn btn-primary" disabled={occupato}>Esegui: rimuovi gli ingredienti e aggiungi {a.risultato.nomeIt}</button>
+            <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="esegui" dimensione={22} />} titolo={<>Esegui: rimuovi gli ingredienti e aggiungi {a.risultato.nomeIt}</>} type="submit" disabled={occupato} />
           </div>
         </form>
       )}

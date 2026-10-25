@@ -25,7 +25,7 @@ const fasciaSola = (a: AllertaGiornoDto): string | null => (a.fasce.length === 1
 export function TagAllerta({ allerta: a, compatto }: { allerta: AllertaGiornoDto; compatto?: boolean }) {
   const fascia = fasciaSola(a);
   return (
-    <span className={`chip chip--allerta ${compatto ? 'text-[11px]' : ''}`} title={`${a.nome}${fascia ? ` (solo di ${fascia})` : ''}: ${a.effetti.join(' ')}`}>
+    <span className={`chip chip--allerta ${compatto ? 'testo-12' : ''}`} title={`${a.nome}${fascia ? ` (solo di ${fascia})` : ''}: ${a.effetti.join(' ')}`}>
       <AssetImg nome={assetAllerta(a.chiave)} alt="" decorativa className="size-4 shrink-0 object-contain" fallback={<IconaAzione chiave="allarme" dimensione={14} />} />
       <span><span className="sr-only">Allerta meteo: </span>{a.nome}{fascia ? <> · <span className="sr-only">solo di </span>{fascia}</> : null}</span>
     </span>
@@ -45,7 +45,7 @@ export function TagAllerte({ allerte, compatto, modifica }: { allerte: readonly 
       {allerte.map((a) => (
         <span key={a.chiave} className="inline-flex flex-wrap items-center gap-1">
           <TagAllerta allerta={a} compatto={compatto} />
-          {a.modificata && <span className="chip text-[11px]">corretta</span>}
+          {a.modificata && <span className="chip testo-12">corretta</span>}
           <ModificaGuida tipo="allerta-meteo" chiave={`${modifica.data}:${a.chiave}`} cosa={`l’allerta «${a.nome}» del ${dataGiocoTesto(modifica.data)}`} soloIcona onSalvato={modifica.onSalvato} />
         </span>
       ))}

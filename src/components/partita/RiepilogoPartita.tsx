@@ -80,30 +80,30 @@ export function RiepilogoPartita({ partita }: Props) {
             <Selettore etichetta="Difficoltà" valore={difficolta} opzioni={DIFFICOLTA.map((d) => ({ chiave: d.v, nome: d.l }))} onCambia={(k) => setDifficolta(k as Difficolta)} />
           </div>
         </div>
-        <label className="flex items-center gap-2 text-[13px] touch">
+        <label className="flex items-center gap-2 testo-13 touch">
           <input type="checkbox" checked={ngPlus} onChange={(e) => setNgPlus(e.target.checked)} /> Nuova Partita +
         </label>
         <label className="form-label">Note
           <textarea className="form-input mt-1 min-h-[100px]" value={note} onChange={(e) => setNote(e.target.value)} />
         </label>
         <div className="flex justify-end">
-          <button type="submit" className="btn btn-primary" disabled={occupato}>Salva</button>
+          <PulsanteVisivo type="submit" tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" disabled={occupato} />
         </div>
       </form>
       <div className="flex flex-col gap-3">
         <div className={`card flex flex-col gap-2 ${allarme ? 'border-primary bg-primary-bg' : ''}`}>
           <span className="form-label m-0">Stanza di Velluto</span>
-          <div className="text-[13px] text-text-secondary">Segna quando la Stanza è in <strong className="text-text">Allarme</strong>: le fusioni danno più skill e statistiche, ma la ghigliottina può incepparsi.</div>
+          <div className="testo-13 text-text-secondary">Segna quando la Stanza è in <strong className="text-text">Allarme</strong>: le fusioni danno più skill e statistiche, ma la ghigliottina può incepparsi.</div>
           <PulsanteVisivo attivo={allarme} className="self-start" icona={<IconaAzione chiave="allarme" dimensione={24} />} titolo={allarme ? 'Allarme attivo' : 'Attiva Allarme'} dettaglio={allarme ? 'tocca per disattivare' : 'fusioni con più skill e statistiche'} onClick={() => void cambiaAllarme(!allarme)} />
         </div>
         <div className="card flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <span className="form-label m-0">Ultimi eventi</span>
-            <Link to="/partita?scheda=storico" className="touch inline-flex items-center text-[12px] text-primary-testo">Tutto lo storico</Link>
+            <Link to="/partita?scheda=storico" className="touch inline-flex items-center testo-12 text-primary-testo">Tutto lo storico</Link>
           </div>
           <StoricoPartita key={partita.updatedAt} partitaId={partita.id} perPagina={5} compatto />
         </div>
-        <div className="card text-[13px] text-text-secondary flex flex-col gap-1">
+        <div className="card testo-13 text-text-secondary flex flex-col gap-1">
           <span className="form-label m-0">Info</span>
           <span>Creata: {new Date(partita.createdAt).toLocaleString('it-IT')}</span>
           <span>Ultimo aggiornamento: {new Date(partita.updatedAt).toLocaleString('it-IT')}</span>

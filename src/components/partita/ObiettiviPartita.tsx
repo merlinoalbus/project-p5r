@@ -17,6 +17,7 @@ import type { ObiettivoDto, PersonaRiassuntoDto, SkillRiassuntoDto, StatoObietti
 import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
 import type { ReactNode } from 'react';
 import { IconaAzione } from '../shared/IconaAzione';
+import { conferma } from '../../stores/confermaStore';
 
 interface Props {
   partitaId: number;
@@ -64,7 +65,7 @@ export function ObiettiviPartita({ partitaId }: Props) {
 
   /** Elimina l'obiettivo dopo conferma e lo toglie dall'elenco. */
   const elimina = async (o: ObiettivoDto) => {
-    if (!window.confirm(`Eliminare l'obiettivo «${o.nomeIt}»?`)) return;
+    if (!(await conferma({ titolo: "Eliminare l'obiettivo?", testo: `L'obiettivo «${o.nomeIt}» esce dall'elenco della partita.`, etichetta: 'Elimina' }))) return;
     try {
       await eliminaObiettivo(partitaId, o.id);
       lista.imposta((correnti) => correnti.filter((x) => x.id !== o.id));
@@ -84,8 +85,8 @@ export function ObiettiviPartita({ partitaId }: Props) {
         ))}
         <PulsanteVisivo tono="primario" className="ml-auto" icona={<IconaAzione chiave="obiettivo" dimensione={22} />} titolo="Nuovo obiettivo" onClick={() => setNuovo(true)} />
       </div>
-      <p className="m-0 text-[13px] text-text-secondary">Una Persona che vuoi ottenere, con le skill che deve avere e il livello minimo. L'obiettivo si chiude da solo quando una copia che soddisfa le condizioni entra nella scorta (o viene aggiornata).</p>
-      {lista.errore && <div className="text-[13px] text-error">{lista.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void lista.ricarica()} /></div>}
+      <p className="m-0 testo-13 text-text-secondary">Una Persona che vuoi ottenere, con le skill che deve avere e il livello minimo. L'obiettivo si chiude da solo quando una copia che soddisfa le condizioni entra nella scorta (o viene aggiornata).</p>
+      {lista.errore && <div className="testo-13 text-error">{lista.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void lista.ricarica()} /></div>}
       {!lista.dati && !lista.errore && <div className="flex justify-center py-6"><Spinner /></div>}
       {lista.dati && visibili.length === 0 && (
         <EmptyState illustrazione="vuoto-obiettivi" title={stato === 'aperto' ? 'Nessun obiettivo aperto' : 'Nessun obiettivo'} hint="Crea un obiettivo da qui o dalla scheda di una Persona («Aggiungi agli obiettivi»)." />
@@ -95,9 +96,9 @@ export function ObiettiviPartita({ partitaId }: Props) {
           {visibili.map((o) => (
             <li key={o.id} className={`card flex gap-3 ${o.stato !== 'aperto' ? 'opacity-80' : ''}`}>
               <ImmagineEntita ambito="persona" chiave={o.nome} etichetta={o.nomeIt} dimensione={96} forma="quadrata" adatta="copri" />
-              <div className="flex-1 min-w-0 flex flex-col gap-1 text-[13px]">
+              <div className="flex-1 min-w-0 flex flex-col gap-1 testo-13">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Link to={`/compendio/persona/${o.personaId}`} className="font-display uppercase text-[20px] leading-none text-text no-underline hover:text-primary-testo">{o.nomeIt}</Link>
+                  <Link to={`/compendio/persona/${o.personaId}`} className="font-display uppercase testo-20 leading-none text-text no-underline hover:text-primary-testo">{o.nomeIt}</Link>
                   <span className="text-text-muted">{o.arcanaNome} · livello base {o.livelloBase}</span>
                   <span className={`chip ${o.priorita === 2 ? 'chip--attivo' : ''}`}>Priorità {PRIORITA.find((p) => p.v === o.priorita)?.l.toLowerCase()}</span>
                   {o.stato === 'raggiunto' && <span className="chip">Raggiunto{o.raggiuntoAt ? ` il ${new Date(o.raggiuntoAt).toLocaleDateString('it-IT')}` : ''}</span>}
@@ -207,7 +208,7 @@ export function ObiettivoModal({ partitaId, obiettivo, personaIniziale, onChiudi
             <label className="form-label">Persona
               <input className="form-input mt-1" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cerca per nome o arcano…" aria-label="Cerca la Persona" />
             </label>
-            {sceltaNome && <div className="text-[13px]">Scelta: <strong>{sceltaNome}</strong></div>}
+            {sceltaNome && <div className="testo-13">Scelta: <strong>{sceltaNome}</strong></div>}
             {persone.dati && (
               <ul className="m-0 p-0 list-none flex flex-wrap gap-1.5" aria-label="Persona trovate">
                 {candidati.map((p) => (
@@ -219,7 +220,7 @@ export function ObiettivoModal({ partitaId, obiettivo, personaIniziale, onChiudi
             )}
           </div>
         )}
-        {personaIniziale && !obiettivo && <div className="text-[13px]">Persona: <strong>{personaIniziale.nomeIt}</strong> · {personaIniziale.arcanaNome} · livello base {personaIniziale.livello}</div>}
+        {personaIniziale && !obiettivo && <div className="testo-13">Persona: <strong>{personaIniziale.nomeIt}</strong> · {personaIniziale.arcanaNome} · livello base {personaIniziale.livello}</div>}
         {tutteSkill.dati ? <SelettoreSkill skill={tutteSkill.dati} scelte={skill} onCambia={setSkill} massimo={8} etichetta="Skill desiderate (facoltative)" /> : <Spinner size={18} />}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <label className="form-label">Livello minimo (facoltativo)
@@ -234,7 +235,7 @@ export function ObiettivoModal({ partitaId, obiettivo, personaIniziale, onChiudi
         </label>
         <div className="flex justify-end gap-2">
           <button type="button" className="btn btn-secondary" onClick={onChiudi}>Annulla</button>
-          <button type="submit" className="btn btn-primary" disabled={occupato || !personaId}>{obiettivo ? 'Salva' : 'Crea obiettivo'}</button>
+          <PulsanteVisivo tono="primario" icona={<IconaAzione chiave={obiettivo ? 'registra' : 'obiettivo'} dimensione={22} />} titolo={obiettivo ? 'Salva' : 'Crea obiettivo'} type="submit" disabled={occupato || !personaId} />
         </div>
       </form>
     </Modal>

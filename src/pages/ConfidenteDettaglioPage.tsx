@@ -5,7 +5,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 // R10-27: la scheda si mostra anche nel pannello sopra il diario; questi hook, fuori dal pannello, sono quelli di react-router-dom
-import { useNavigate, useParams, useSearchParams } from '../components/scheda/routerScheda';
+import { useParams, useSearchParams } from '../components/scheda/routerScheda';
 import { useInPannello } from '../components/scheda/contestoScheda';
 import { getConfidenteDettaglio, getConfidentiPartita, getRequisitiConfidente, impostaRegaloFatto, annullaRegaloOggetto, confermaRequisitoConfidente } from '../services/api';
 import { formattaPunti } from '../utils/punti';
@@ -23,10 +23,11 @@ import { ModificaAbilita } from '../components/confidenti/ModificaAbilita';
 import { ModificaDialogo } from '../components/confidenti/ModificaDialogo';
 import { EditorDisponibilita } from '../components/confidenti/EditorDisponibilita';
 import { DisponibilitaStrutturataScheda, EditorDisponibilitaStrutturata } from '../components/confidenti/DisponibilitaStrutturata';
-import { IconChevronLeft } from '../components/shared/icons';
 import type { RegaloConfidenteDto } from '../types';
 import { DialogoRango } from '../components/confidenti/DialogoRango';
-import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
+import { CollegamentoVisivo, PulsanteVisivo } from '../components/shared/PulsanteVisivo';
+import { IntestazioneScheda } from '../components/shared/IntestazioneScheda';
+import { MenuModifica } from '../components/shared/MenuModifica';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
 import { DotiIncontro } from '../components/partita/DotiIncontro';
@@ -35,6 +36,7 @@ import { SceltaRegalo } from '../components/catalogo/SceltaRegalo';
 import { RipristinoCostoRegalo } from '../components/catalogo/RipristinoCostoRegalo';
 import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
+import { TitoloSezione } from '../components/shared/TitoloSezione';
 
 /**
  * Scheda di un Confidente presa dalla chiave nell'URL: carica il dettaglio dal catalogo e, se c'è
@@ -46,7 +48,6 @@ import { ModificaGuida } from '../components/guida/ModificaGuida';
  */
 export function ConfidenteDettaglioPage() {
   const { chiave = '' } = useParams();
-  const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   // R10-27: nel pannello sopra il diario la scheda si legge e basta: i semafori non si confermano né si correggono da lì
   const nelPannello = useInPannello();
@@ -129,28 +130,32 @@ export function ConfidenteDettaglioPage() {
 
   return (
     <>
-    <div className="flex justify-end mb-3"><button type="button" className="btn btn-secondary touch" onClick={() => setInformazioniAperte(true)}>Modifica informazioni del Confidente</button></div>
     <PageState isLoading={caricamento} error={errore || erroreInformativo} onRetry={() => void ricarica()}>
       {c && !erroreInformativo && (
         <div className="flex flex-col gap-4">
-          {!nelPannello && <button type="button" className="btn btn-ghost self-start -ml-2" onClick={() => navigate(-1)}><IconChevronLeft size={18} /> Indietro</button>}
-          <header className="card flex items-center gap-3">
-            <ImmagineEntita ambito="confidente" chiave={c.chiave} etichetta={c.nome} dimensione={64} forma="carta" modificabile />
-            <div className="flex-1 min-w-0 flex flex-col gap-2">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="titolo-display m-0 text-[24px] leading-tight">{c.nome}</h1>
-                <span className="chip chip--attivo">{c.arcanaNome}</span>
-                <ModificaGuida tipo="confidente" chiave={c.chiave} cosa={`il Confidente «${c.nome}»`} soloIcona onSalvato={() => void ricarica()} />
-                {mio && <span className="chip">Rango {mio.rango === 10 ? 'MAX' : mio.rango} nella partita</span>}
-              </div>
-            </div>
-          </header>
+          {/* Lotto B (punto 6): l'azione di gioco è il pulsante primario; gli strumenti di modifica stanno nel menu «Modifica ⋯», che
+              compare con la scheda (prima «Modifica informazioni» stava fuori dallo stato della pagina e si vedeva durante il caricamento) */}
+          <IntestazioneScheda ripiego="/partita?scheda=confidenti" titolo={c.nome}
+            figura={<ImmagineEntita ambito="confidente" chiave={c.chiave} etichetta={c.nome} dimensione={44} forma="carta" modificabile />}
+            chip={<>
+              <span className="chip chip--attivo">{c.arcanaNome}</span>
+              {mio && <span className="chip">Rango {mio.rango === 10 ? 'MAX' : mio.rango} nella partita</span>}
+            </>}
+            azioni={<>
+              {/* il cassetto del Confidente nella Partita, già aperto su di lui: lì si segnano punti e rango */}
+              {mio && <CollegamentoVisivo tono="primario" compatto icona={<IconaAzione chiave="su" dimensione={20} />} titolo="Aggiorna il rango"
+                to={`/partita?scheda=confidenti&confidente=${encodeURIComponent(c.chiave)}`} />}
+              <MenuModifica cosa={`il Confidente «${c.nome}»`}>
+                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Informazioni del Confidente"
+                  aria-label="Modifica informazioni del Confidente" onClick={() => setInformazioniAperte(true)} />
+                <ModificaGuida tipo="confidente" chiave={c.chiave} cosa={`il Confidente «${c.nome}»`} etichetta="Testi della guida" onSalvato={() => void ricarica()} />
+              </MenuModifica>
+            </>} />
           <section className="card flex flex-col gap-2" aria-label="Disponibilità del Confidente">
               <div className="flex flex-wrap gap-2">
-                {mio && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Aggiorna il rango" to="/partita?scheda=confidenti" />}
                 <CollegamentoMappa tipo="confidente" chiave={c.chiave} compatto />
               </div>
-              <div className="text-[13px] text-text-secondary flex flex-col gap-1">
+              <div className="testo-13 text-text-secondary flex flex-col gap-1">
                 {c.disponibilitaStrutturata
                   ? <DisponibilitaStrutturataScheda chiave={c.chiave} partita={attiva?.id} versione={versioneDisponibilita} onModifica={() => setDisponibilitaAperta(true)} />
                   : <>
@@ -160,12 +165,12 @@ export function ConfidenteDettaglioPage() {
                 <span><strong className="text-text">Sblocco:</strong> {requisiti.caricamento ? 'Caricamento…' : requisiti.errore ? 'Requisiti non disponibili' : requisiti.dati?.ranghi.find((r) => r.rango === 1)?.requisiti.map((r) => r.descrizione).join(' · ') || 'Disponibile dall’inizio'}</span>
                 {c.disponibilita.note && <span>{c.disponibilita.note}</span>}
               </div>
-              {c.noteGenerali && <p className="m-0 text-[13px] text-text-secondary whitespace-pre-wrap">{c.noteGenerali}</p>}
+              {c.noteGenerali && <p className="m-0 testo-13 text-text-secondary whitespace-pre-wrap">{c.noteGenerali}</p>}
           </section>
 
           {prossimo !== null && prossimo <= 10 && c.dialoghi.some((d) => d.rango !== null && d.rango > (mio?.rango ?? 0) && d.rango <= prossimo) && (
             <section className="card flex flex-col gap-2 border-primary">
-              <h2 className="m-0 text-[15px] font-semibold">Prossimo passo: rango {prossimo}</h2>
+              <TitoloSezione>Prossimo passo: rango {prossimo}</TitoloSezione>
               {mio && mio.semafori.length > 0 && mio.semafori[0].rango <= prossimo && (
                 <SemaforiRango semafori={mio.semafori[0]} occupato={confermaInCorso} onConferma={nelPannello ? undefined : (rango, r, confermato) => void conferma(rango, r.indice, confermato)} onCorreggi={nelPannello ? undefined : (rango) => setRangoDaModificare(rango)} />
               )}
@@ -179,26 +184,26 @@ export function ConfidenteDettaglioPage() {
 
           {mio && mio.semafori.length > 1 && (
             <section className="card flex flex-col gap-3">
-              <h2 className="m-0 text-[15px] font-semibold">Requisiti dei ranghi successivi</h2>
+              <TitoloSezione>Requisiti dei ranghi successivi</TitoloSezione>
               {mio.semafori.slice(1).map((sr) => <SemaforiRango key={sr.rango} semafori={sr} compatto occupato={confermaInCorso} onConferma={nelPannello ? undefined : (rango, r, confermato) => void conferma(rango, r.indice, confermato)} onCorreggi={nelPannello ? undefined : (rango) => setRangoDaModificare(rango)} />)}
             </section>
           )}
           <section id="requisiti" className="card flex scroll-mt-20 flex-col gap-2">
-            <h2 className="m-0 text-[15px] font-semibold">Requisiti del Confidente</h2>
-            {requisiti.errore && <p className="m-0 text-[13px]" role="alert">{requisiti.errore} <button type="button" className="btn btn-sm touch" onClick={() => void requisiti.ricarica()}>Riprova</button></p>}
-            <button type="button" className="btn btn-secondary touch self-start" onClick={() => setRangoDaModificare(1)}>Modifica requisiti</button>
+            <TitoloSezione>Requisiti del Confidente</TitoloSezione>
+            {requisiti.errore && <p className="m-0 flex flex-wrap items-center gap-2 testo-13" role="alert">{requisiti.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void requisiti.ricarica()} /></p>}
+            <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica requisiti" onClick={() => setRangoDaModificare(1)} />
           </section>
           <RanghiConfidente chiave={c.chiave} nome={c.nome} onSalvato={async () => { await Promise.all([ricarica(), stato.ricarica()]); }} />
           <InvitiConfidente filtro={{ confidente: c.chiave }} nomeConfidente={c.nome} onCambiato={async () => { await Promise.all([ricarica(), stato.ricarica()]); }} />
           <section className="card flex flex-col gap-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="m-0 text-[15px] font-semibold">Abilità per rango</h2>
+              <TitoloSezione>Abilità per rango</TitoloSezione>
               <ModificaAbilita chiave={c.chiave} nome={c.nome} onSalvato={ricarica} />
             </div>
-            {c.abilita.length === 0 ? <p className="m-0 text-[13px] text-text-muted">Nessuna abilità documentata.</p> : (
+            {c.abilita.length === 0 ? <p className="m-0 testo-13 text-text-muted">Nessuna abilità documentata.</p> : (
               <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light">
                 {c.abilita.map((a, i) => (
-                  <li key={i} className={`py-1.5 flex gap-3 text-[13px] ${mio && a.rango <= mio.rango ? '' : 'text-text-secondary'}`}>
+                  <li key={i} className={`py-1.5 flex gap-3 testo-13 ${mio && a.rango <= mio.rango ? '' : 'text-text-secondary'}`}>
                     <span className={`chip shrink-0 ${mio && a.rango <= mio.rango ? 'chip--attivo' : ''}`}>{a.rango === 10 ? 'MAX' : a.rango}</span>
                     <div><strong className="text-text">{a.nome}</strong>{a.descrizione && <span> — {a.descrizione}</span>}</div>
                   </li>
@@ -210,9 +215,9 @@ export function ConfidenteDettaglioPage() {
           <DotiIncontro confidente={c} rangoPartita={mio ? mio.rango : null} onSalvato={ricarica} />
 
           <section className="card flex flex-col gap-2">
-            <h2 className="m-0 text-[15px] font-semibold">Risposte migliori per rango</h2>
-            <p className="m-0 text-[12px] text-text-muted">Le scelte evidenziate danno il massimo dei punti secondo la guida; quelle in rosso avviano la relazione romantica. Registra poi le note ottenute nella scheda Confidenti della partita.</p>
-            {c.dialoghi.length === 0 ? <p className="m-0 text-[13px] text-text-muted">Nessun dialogo documentato.</p> : (
+            <TitoloSezione>Risposte migliori per rango</TitoloSezione>
+            <p className="m-0 testo-12 text-text-muted">Le scelte evidenziate danno il massimo dei punti secondo la guida; quelle in rosso avviano la relazione romantica. Registra poi le note ottenute nella scheda Confidenti della partita.</p>
+            {c.dialoghi.length === 0 ? <p className="m-0 testo-13 text-text-muted">Nessun dialogo documentato.</p> : (
               <ul className="m-0 p-0 list-none flex flex-col gap-1.5">
                 {c.dialoghi.map((d) => <DialogoRango key={d.id} d={d} azioni={<ModificaDialogo chiave={c.chiave} nome={c.nome} dialogo={d} onSalvato={ricarica} />} aperto={aperti[d.id] === true} onToggle={() => setAperti((a) => { const n = { ...a }; if (n[d.id]) delete n[d.id]; else n[d.id] = true; return n; })} />)}
               </ul>
@@ -220,21 +225,24 @@ export function ConfidenteDettaglioPage() {
           </section>
 
           <section className="card flex flex-col gap-2">
-            <h2 className="m-0 text-[15px] font-semibold">Regali graditi</h2>
-            {attiva && c.regali.some((g) => g.catalogo) && <button type="button" className="btn btn-secondary touch self-start" disabled={regaloInCorso || stato.caricamento} onClick={() => { setRegaloIniziale(''); setSceltaRegaloPer(bersaglioRegalo); }}>Regala</button>}
+            <TitoloSezione>Regali graditi</TitoloSezione>
+            {attiva && c.regali.some((g) => g.catalogo) && <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="regalo" dimensione={20} />} titolo="Regala"
+              disabled={regaloInCorso || stato.caricamento} onClick={() => { setRegaloIniziale(''); setSceltaRegaloPer(bersaglioRegalo); }} />}
             {attiva && sceltaRegaloPer === bersaglioRegalo && <SceltaRegalo key={`${bersaglioRegalo}:${regaloIniziale}`} partita={attiva.id} confidente={chiave} nomeConfidente={c.nome} regali={c.regali} stato={mio} oggettoIniziale={regaloIniziale}
               onChiudi={() => setSceltaRegaloPer(null)} onFatto={(esito) => {
                 setSceltaRegaloPer((corrente) => corrente === bersaglioRegalo ? null : corrente);
                 void stato.ricarica();
                 notifica('success', `Regalo consegnato a ${c.nome}${esito.punti > 0 ? `: +${formattaPunti(esito.punti)} punti` : ''}${esito.acquistato ? ' · segnato anche comprato' : ''}.`);
               }} />}
-            {c.regali.length === 0 ? <p className="m-0 text-[13px] text-text-muted">Questo Confidente non accetta regali.</p> : (
+            {c.regali.length === 0 ? <p className="m-0 testo-13 text-text-muted">Questo Confidente non accetta regali.</p> : (
               <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light" aria-label="Regali">
                 {c.regali.map((g, i) => (
-                  <li key={i} className="py-1.5 flex flex-wrap items-center gap-2 text-[13px]">
+                  <li key={i} className="py-1.5 flex flex-wrap items-center gap-2 testo-13">
                     {attiva && g.catalogo && (regaloConsegnato(g)
-                      ? <button type="button" className="btn btn-ghost btn-sm touch" disabled={regaloInCorso || stato.caricamento} onClick={() => void segnaRegalo(g, false)} aria-label={`Annulla la consegna di ${g.nome}`}>Annulla consegna</button>
-                      : <button type="button" className="btn btn-secondary btn-sm touch" disabled={regaloInCorso || stato.caricamento} onClick={() => { setRegaloIniziale(g.catalogo!.chiave); setSceltaRegaloPer(bersaglioRegalo); }} aria-label={`Regala ${g.nome}`}>Regala</button>)}
+                      ? <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla-ultimo" dimensione={20} />} titolo="Annulla consegna" disabled={regaloInCorso || stato.caricamento}
+                          onClick={() => void segnaRegalo(g, false)} aria-label={`Annulla la consegna di ${g.nome}`} />
+                      : <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="regalo" dimensione={20} />} titolo="Regala" disabled={regaloInCorso || stato.caricamento}
+                          onClick={() => { setRegaloIniziale(g.catalogo!.chiave); setSceltaRegaloPer(bersaglioRegalo); }} aria-label={`Regala ${g.nome}`} />)}
                     {attiva && !g.catalogo && (
                       <label className="flex items-center gap-1.5 touch">
                         <input type="checkbox" className="w-5 h-5" disabled={regaloInCorso || stato.caricamento} checked={regaloConsegnato(g)} onChange={(e) => void segnaRegalo(g, e.target.checked)} aria-label={`Regalo ${g.nome} consegnato`} />
@@ -243,7 +251,7 @@ export function ConfidenteDettaglioPage() {
                     <strong className={regaloConsegnato(g) ? 'line-through text-text-muted' : ''}>{g.catalogo ? <Link to={g.catalogo.casa} className="touch inline-flex items-center">{g.nome}</Link> : g.nome}</strong>
                     {g.effetto && <span className="chip">{g.effetto}</span>}
                     <span className="text-text-secondary">{g.catalogo && g.listinoCollegato === false ? 'Indicazioni della guida: ' : ''}{[g.dove, g.costo].filter(Boolean).join(' · ')}</span>
-                    {g.nota && <span className="w-full whitespace-pre-line text-[12px] text-text-muted">{g.nota}</span>}
+                    {g.nota && <span className="w-full whitespace-pre-line testo-12 text-text-muted">{g.nota}</span>}
                     {g.modificato && <span className="chip" title="Cambiato rispetto alla guida">Modificato</span>}
                     <RipristinoCostoRegalo confidente={chiave} regalo={g} onSalvato={ricarica} />
                     <ModificaGuida tipo="regalo" chiave={`${chiave}:${g.ordine}`} cosa={`il regalo «${g.nome}»`} soloIcona className="ml-auto" onSalvato={() => void ricarica()} />
@@ -253,10 +261,10 @@ export function ConfidenteDettaglioPage() {
             )}
             {c.regaliSconsigliati.length > 0 && (
               <div className="flex flex-col gap-1">
-                <h3 className="m-0 text-[12px] font-semibold text-text-muted">Sconsigliati (non danno punti)</h3>
+                <h3 className="m-0 testo-12 font-semibold text-text-muted">Sconsigliati (non danno punti)</h3>
                 <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0" aria-label="Regali sconsigliati">
                   {c.regaliSconsigliati.map((s) => (
-                    <li key={s.ordine} className="flex flex-wrap items-center gap-2 py-1 text-[13px] text-text-muted">
+                    <li key={s.ordine} className="flex flex-wrap items-center gap-2 py-1 testo-13 text-text-muted">
                       <span className="min-w-0 break-words">{s.nome}</span>
                       {s.modificato && <span className="chip" title="Cambiato rispetto alla guida">Modificato</span>}
                       <ModificaGuida tipo="regalo" chiave={`${chiave}:${s.ordine}`} cosa={`il regalo sconsigliato «${s.nome}»`} soloIcona className="ml-auto" onSalvato={() => void ricarica()} />
@@ -268,13 +276,13 @@ export function ConfidenteDettaglioPage() {
           </section>
 
           {!!c.oggettiRicompensa?.length && <section className="card flex min-w-0 flex-col gap-2" aria-label="Oggetti ricevuti dal Confidente">
-            <h2 className="m-0 text-[15px] font-semibold">Oggetti ricevuti</h2>
-            <p className="m-0 text-[12px] text-text-muted">Doni del Confidente secondo la guida, con le rispettive condizioni. Non sono i regali da consegnargli e non risultano automaticamente ottenuti.</p>
+            <TitoloSezione>Oggetti ricevuti</TitoloSezione>
+            <p className="m-0 testo-12 text-text-muted">Doni del Confidente secondo la guida, con le rispettive condizioni. Non sono i regali da consegnargli e non risultano automaticamente ottenuti.</p>
             <OggettiCollegati oggetti={c.oggettiRicompensa} />
           </section>}
 
           {c.fonti.length > 0 && (
-            <p className="m-0 text-[11px] text-text-muted">Fonti: {c.fonti.map((f, i) => {
+            <p className="m-0 testo-12 text-text-muted">Fonti: {c.fonti.map((f, i) => {
               const sito = sitoDellaFonte(f);
               const separatore = i < c.fonti.length - 1 ? ', ' : '';
               return sito
@@ -287,6 +295,9 @@ export function ConfidenteDettaglioPage() {
       {rangoDaModificare !== null && c && <EditorRequisiti key={`${c.chiave}:${rangoDaModificare}`} confidente={{ chiave: c.chiave, nome: c.nome }} rangoIniziale={rangoDaModificare}
         onChiudi={() => setRangoDaModificare(null)} onSalvato={async () => { await Promise.all([ricarica(), stato.ricarica(), requisiti.ricarica()]); }} />}
     </PageState>
+    {/* con le informazioni illeggibili la scheda non si mostra: l'editor che le corregge resta raggiungibile da qui */}
+    {c && erroreInformativo && <PulsanteVisivo tono="secondario" compatto className="mt-3" icona={<IconaAzione chiave="modifica" dimensione={20} />}
+      titolo="Modifica informazioni del Confidente" onClick={() => setInformazioniAperte(true)} />}
     {disponibilitaAperta && c && <EditorDisponibilitaStrutturata key={`struttura:${chiave}`} chiave={chiave} nome={c.nome} onChiudi={() => setDisponibilitaAperta(false)} onSalvato={async () => { setVersioneDisponibilita((v) => v + 1); await ricarica(); }} />}
     {informazioniAperte && <EditorDisponibilita key={chiave} chiave={chiave} onChiudi={() => setInformazioniAperte(false)} onSalvato={ricarica} />}
     </>

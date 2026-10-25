@@ -27,7 +27,7 @@ export function BarraInvio({ avanzamento, etichetta, elaborazione }: {
   const testo = inviato ? `${elaborazione}…` : `${etichetta}… ${percentuale}%`;
   return (
     <div className="flex flex-col gap-1" role="status" aria-live="polite" aria-busy="true">
-      <span className="text-[13px] text-text-secondary">{testo}</span>
+      <span className="testo-13 text-text-secondary">{testo}</span>
       <div className="barra-invio" role="progressbar" aria-label={inviato ? elaborazione : etichetta} />
     </div>
   );

@@ -24,7 +24,7 @@ export function AffinitaGriglia({ affinita, compatta, etichetta = 'Affinità' }:
           return (
             <span
               key={a.elemento}
-              className={`inline-flex flex-col items-center justify-center w-[42px] h-[46px] rounded-md text-[11px] leading-tight ${stile.classe}`}
+              className={`inline-flex flex-col items-center justify-center w-[42px] h-[46px] rounded-md testo-12 leading-tight ${stile.classe}`}
               title={`${a.elementoNome}: ${a.codiceNome}`}
             >
               <span style={{ color: coloreElemento(a.elemento) }} className="font-bold">{a.elementoSigla}</span>
@@ -44,12 +44,12 @@ export function AffinitaGriglia({ affinita, compatta, etichetta = 'Affinità' }:
             <AssetImg nome={`elementi/${a.elemento}`} alt="" decorativa className="w-9 h-9 object-contain" fallback={null} />
             {/* sul telefono le cinque colonne sono larghe ~60 px e «Elettricità» diventava «Elettri…»: lì si legge la sigla (come
                 nella griglia compatta) e il nome intero resta per i lettori di schermo */}
-            <span className="text-[12px] font-bold leading-tight whitespace-nowrap max-w-full overflow-hidden text-ellipsis" style={{ color: coloreElemento(a.elemento) }} title={a.elementoNome}>
+            <span className="testo-12 font-bold leading-tight whitespace-nowrap max-w-full overflow-hidden text-ellipsis" style={{ color: coloreElemento(a.elemento) }} title={a.elementoNome}>
               {a.elementoSigla && <span className="sm:hidden" aria-hidden="true">{a.elementoSigla}</span>}
               <span className={a.elementoSigla ? 'max-sm:sr-only' : undefined}>{a.elementoNome}</span>
             </span>
             <AssetImg nome={`affinita/${a.codice === '-' ? 'normale' : a.codice}-senza-testo`} alt="" decorativa className="w-9 h-9 object-contain" fallback={null} />
-            <span className="text-[12px] font-semibold leading-tight whitespace-nowrap max-w-full overflow-hidden text-ellipsis">{a.codiceNome}</span>
+            <span className="testo-12 font-semibold leading-tight whitespace-nowrap max-w-full overflow-hidden text-ellipsis">{a.codiceNome}</span>
           </div>
         );
       })}

@@ -203,14 +203,14 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
                 <PulsanteVisivo tono="secondario" icona={<IconaAzione chiave="carica" dimensione={22} />} titolo="Carica file" disabled={occupato} onClick={() => inputFile.current?.click()} />
                 <PulsanteVisivo tono="secondario" icona={<IconaAzione chiave="url" dimensione={22} />} titolo="Da URL" disabled={occupato} onClick={() => setModalitaUrl(true)} />
                 {presente && (
-                  <button type="button" className="btn btn-danger" disabled={occupato} onClick={() => void suRimuovi()}>Rimuovi</button>
+                  <PulsanteVisivo tono="pericolo" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Rimuovi" disabled={occupato} onClick={() => void suRimuovi()} />
                 )}
               </>
             )}
             {modificabile && modalitaUrl && (
               <>
                 <PulsanteVisivo tono="secondario" icona={<IconaAzione chiave="indietro" dimensione={22} />} titolo="Indietro" disabled={occupato} onClick={() => { setModalitaUrl(false); setUrl(''); }} />
-                <button type="button" className="btn btn-primary" disabled={occupato || !url.trim()} onClick={() => void suImporta()}>Importa</button>
+                <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="carica" dimensione={22} />} titolo="Importa" disabled={occupato || !url.trim()} onClick={() => void suImporta()} />
               </>
             )}
             {urlAlternativa && <PulsanteVisivo attivo={alternativaFissa} icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo={alternativaFissa ? (srcUtente ? 'Immagine principale' : 'Ritratto fedele') : 'Versione stilizzata'} onClick={() => setAlternativaFissa((v) => !v)} />}
@@ -220,7 +220,7 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
       >
         <div className="flex flex-col items-center gap-3">
           <div className="w-full flex items-center justify-center bg-bg-tertiary rounded-lg p-2 min-h-[200px]">{immagine(true)}</div>
-          <p className="m-0 text-[12px] text-text-muted">{origine}</p>
+          <p className="m-0 testo-12 text-text-muted">{origine}</p>
           {modificabile && modalitaUrl && (
             <div className="w-full">
               <label className="form-label" htmlFor={`url-immagine-${ambito}-${chiave}`}>Indirizzo dell'immagine (http/https)</label>

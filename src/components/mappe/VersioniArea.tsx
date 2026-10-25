@@ -59,8 +59,8 @@ export function VersioniArea({ nome, planimetrie, scelta, onScegli, coda }: Prop
           <button key={p.chiave} type="button" className="versioni-area__segmento touch" aria-pressed={p.chiave === scelta} onClick={() => onScegli(p.chiave)}>
             <AnteprimaMappa mappa={p} className="h-10 w-[53px] shrink-0" sizes="64px" />
             <span className="flex min-w-0 flex-col items-start text-left">
-              <span className="whitespace-nowrap text-[13px] font-semibold leading-tight">{nomeVersione(p, i)}</span>
-              <span className="whitespace-nowrap text-[11px] text-text-muted">{p.numeroSpilli === 0 ? 'nessun pin' : p.numeroSpilli === 1 ? '1 pin' : `${p.numeroSpilli} pin`}{p.predefinita ? ' · si apre per prima' : ''}</span>
+              <span className="whitespace-nowrap testo-13 font-semibold leading-tight">{nomeVersione(p, i)}</span>
+              <span className="whitespace-nowrap testo-12 text-text-muted">{p.numeroSpilli === 0 ? 'nessun pin' : p.numeroSpilli === 1 ? '1 pin' : `${p.numeroSpilli} pin`}{p.predefinita ? ' · si apre per prima' : ''}</span>
             </span>
           </button>
         ))}

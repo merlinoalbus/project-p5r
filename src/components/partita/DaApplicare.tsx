@@ -12,6 +12,8 @@ import { Modal } from '../shared/Modal';
 import { decidiProposteConRegistro, gestoPendenteNelloScope, useGestiPartita } from '../../services/gestiPartita';
 import { GestiPartita } from './GestiPartita';
 import { PreparazioneSessionePesca, RiepilogoSessionePreparata } from '../pesca/PreparazioneSessionePesca';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 const riferimento = (p: PropostaPartitaDto) => ({ id: p.id, uid: p.uid });
 const testoErrore = (e: unknown) => e instanceof Error ? e.message : 'Operazione non riuscita.';
@@ -116,19 +118,19 @@ function DaApplicareNelContesto({ partitaId, voceUid, onCambiato }: { partitaId:
   if (elenco.dati && !dellaVoce.length && !anteprima && !consumo && !ricevuta) return null;
   return <section className="flex min-w-0 flex-col gap-2 rounded border border-border p-2" aria-label="Punti da applicare per questa voce">
     <GestiPartita partitaId={partitaId} onCambiato={async () => { if (vivo.current) { setAnteprima(null); setIncerto(false); await elenco.ricarica(); await onCambiato?.(); } }} />
-    {elenco.caricamento && !elenco.dati && <p role="status" className="m-0 text-[13px]">Un attimo…</p>}
+    {elenco.caricamento && !elenco.dati && <p role="status" className="m-0 testo-13">Un attimo…</p>}
     {elenco.errore && <p role="alert" className="m-0 text-error">{elenco.errore}</p>}
     {!!aperte.length && <>
       <ul className="m-0 flex list-none flex-col gap-2 p-0">{aperte.map((p) => {
         const e = normalizzaEffettoVoce(p.dati.effetto);
-        return <li key={p.uid} className="flex min-w-0 flex-col gap-1 text-[13px]">
+        return <li key={p.uid} className="flex min-w-0 flex-col gap-1 testo-13">
           {(() => {
             // «Fascino 50 → 52»: cosa cambia, con i punti di adesso quando si conoscono (R10-10/4)
             const prima = p.tipo === 'dote' ? puntiDote(p.dote) : null;
-            return <span className="text-[14px]"><strong>{nome(p)}</strong>{p.tipo !== 'effetto-voce' && <>: {prima !== null ? <>{prima} → <strong>{prima + p.delta}</strong> punti</> : <strong>{valore(p)}</strong>}</>}</span>;
+            return <span className="testo-14"><strong>{nome(p)}</strong>{p.tipo !== 'effetto-voce' && <>: {prima !== null ? <>{prima} → <strong>{prima + p.delta}</strong> punti</> : <strong>{valore(p)}</strong>}</>}</span>;
           })()}
           <span>{p.motivo}</span>
-          {!!p.promemoriaYen && <span className="rounded border border-border p-2 text-[12px]">Promemoria: questo consumo è costato ¥{p.promemoriaYen.toLocaleString('it-IT')}. L’app non tocca i tuoi yen: cambiali tu a mano.</span>}
+          {!!p.promemoriaYen && <span className="rounded border border-border p-2 testo-12">Promemoria: questo consumo è costato ¥{p.promemoriaYen.toLocaleString('it-IT')}. L’app non tocca i tuoi yen: cambiali tu a mano.</span>}
           {p.orfana && <span className="text-warning">La voce o il consumo da cui nasce non c’è più.</span>}
           {(() => {
             // «Applica» non chiede più «già nel saldo?»: premerlo dice che i punti non sono ancora contati; chi li ha già contati lo dice a parte
@@ -139,23 +141,23 @@ function DaApplicareNelContesto({ partitaId, voceUid, onCambiato }: { partitaId:
             return <>
               {!!altri.length && <ul className="m-0 pl-4 text-warning">{altri.map((i) => <li key={i}>{i}</li>)}</ul>}
               <div className="flex flex-wrap gap-1.5">
-                {p.tipo === 'effetto-voce' ? <button type="button" className="btn btn-primary btn-sm touch" disabled={occupato || !p.applicabile || !!gestoPendenteNelloScope(partitaId, { proposte: [riferimento(p)] })} onClick={() => {
+                {p.tipo === 'effetto-voce' ? <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo={e?.tipo === 'acquisto' && e.variante ? `Applica ${nomeDote(e.variante)}` : 'Completa l’effetto'} disabled={occupato || !p.applicabile || !!gestoPendenteNelloScope(partitaId, { proposte: [riferimento(p)] })} onClick={() => {
                   if (e?.tipo === 'acquisto' || e?.tipo === 'pesca') setConsumo(p);
                   else chiedi({ tipo: 'applica-effetto', proposta: riferimento(p) });
-                }}>{e?.tipo === 'acquisto' && e.variante ? `Applica ${nomeDote(e.variante)}` : 'Completa l’effetto'}</button> : <>
-                  <button type="button" className="btn btn-primary btn-sm touch" disabled={occupato || !(p.applicabile || (soloVerifica && !p.orfana))} onClick={() => void applica(p)}>{etichetta}</button>
-                  {!inverso && <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => chiedi({ tipo: 'gia-conteggiata', proposta: riferimento(p), quantita: Math.abs(p.delta) })}>L’ho già segnato a mano</button>}
+                }} /> : <>
+                  <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave={inverso ? 'annulla-ultimo' : 'raggiunto'} dimensione={20} />} titolo={etichetta} disabled={occupato || !(p.applicabile || (soloVerifica && !p.orfana))} onClick={() => void applica(p)} />
+                  {!inverso && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="L’ho già segnato a mano" disabled={occupato} onClick={() => chiedi({ tipo: 'gia-conteggiata', proposta: riferimento(p), quantita: Math.abs(p.delta) })} />}
                 </>}
-                {p.tipo === 'effetto-voce' && <button type="button" className="btn btn-ghost btn-sm touch" disabled={occupato} onClick={() => chiedi({ tipo: 'scarta', proposte: [riferimento(p)] })}>L’ho già segnato a mano</button>}
+                {p.tipo === 'effetto-voce' && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="L’ho già segnato a mano" disabled={occupato} onClick={() => chiedi({ tipo: 'scarta', proposte: [riferimento(p)] })} />}
               </div>
             </>;
           })()}
         </li>;
       })}</ul>
     </>}
-    {dellaVoce.some((p) => p.stato !== 'aperta') && <details><summary className="touch text-[13px]">Già deciso</summary><ul className="m-0 flex flex-col gap-2 pl-4 text-[12px]">{dellaVoce.filter((p) => p.stato !== 'aperta').map((p) => <li key={p.uid}>{nome(p)} ·{p.stato === 'applicata' ? (p.deltaApplicato !== 0 ? `aggiunti ${p.deltaApplicato > 0 ? '+' : ''}${p.deltaApplicato}` : 'applicata') : p.motivoChiusura === 'gia-nel-saldo' ? 'già nel tuo saldo' : p.chiusaDa === 'causa' ? 'non più dovuta' : 'scartata'}{p.deltaRiconosciuto !== 0 && p.motivoChiusura !== 'beneficio-riallocato' ? ` · già contati ${p.deltaRiconosciuto}` : ''}</li>)}</ul></details>}
-    {ricevuta && <p role="status" className="m-0 text-[13px] text-success">{ricevuta}</p>}
-    {errore && <p role="alert" className="m-0 text-[13px] text-error">{errore}</p>}
+    {dellaVoce.some((p) => p.stato !== 'aperta') && <details><summary className="touch testo-13">Già deciso</summary><ul className="m-0 flex flex-col gap-2 pl-4 testo-12">{dellaVoce.filter((p) => p.stato !== 'aperta').map((p) => <li key={p.uid}>{nome(p)} ·{p.stato === 'applicata' ? (p.deltaApplicato !== 0 ? `aggiunti ${p.deltaApplicato > 0 ? '+' : ''}${p.deltaApplicato}` : 'applicata') : p.motivoChiusura === 'gia-nel-saldo' ? 'già nel tuo saldo' : p.chiusaDa === 'causa' ? 'non più dovuta' : 'scartata'}{p.deltaRiconosciuto !== 0 && p.motivoChiusura !== 'beneficio-riallocato' ? ` · già contati ${p.deltaRiconosciuto}` : ''}</li>)}</ul></details>}
+    {ricevuta && <p role="status" className="m-0 testo-13 text-success">{ricevuta}</p>}
+    {errore && <p role="alert" className="m-0 testo-13 text-error">{errore}</p>}
     <Modal aperta={consumo !== null} titolo={effettoConsumo?.tipo === 'pesca' ? 'Completa la pesca della voce già fatta' : 'Completa l’acquisto della voce già fatta'} onChiudi={() => { if (!occupato) setConsumo(null); }} larga>
       {consumo && effettoConsumo?.tipo === 'pesca' && uidVoce && uidEffetto ? <PreparazioneSessionePesca key={consumo.uid} partitaId={partitaId} fonte={{ tipo: 'diario', voceUid: uidVoce, effettoUid: uidEffetto }} giorno={typeof consumo.dati.giorno === 'string' ? consumo.dati.giorno : undefined} fascia={consumo.dati.fascia === 'sera' || consumo.dati.fascia === 'giorno' ? consumo.dati.fascia : undefined} confermaScrive={false}
         onConferma={async r => {
@@ -171,9 +173,9 @@ function DaApplicareNelContesto({ partitaId, voceUid, onCambiato }: { partitaId:
     </Modal>
     <Modal aperta={anteprima !== null} titolo="Confermi?" onChiudi={() => { if (!occupato && !incerto) setAnteprima(null); }} azioni={<>
       <button type="button" className="btn btn-ghost touch" disabled={occupato || incerto} onClick={() => setAnteprima(null)}>Annulla</button>
-      <button type="button" className="btn btn-primary touch" disabled={occupato} onClick={() => void conferma()}>{incerto ? 'Riprova' : 'Conferma'}</button>
+      <PulsanteVisivo tono="primario" icona={<IconaAzione chiave={incerto ? 'riprova' : 'raggiunto'} dimensione={22} />} titolo={incerto ? 'Riprova' : 'Conferma'} disabled={occupato} onClick={() => void conferma()} />
     </>}>
-      {anteprima && <div className="flex flex-col gap-2 text-[13px]">
+      {anteprima && <div className="flex flex-col gap-2 testo-13">
         <strong>{dicituraDecisione[anteprima.richiesta.decisione.tipo]}</strong>
         <ul className="m-0 pl-4">{anteprima.proposte.map((p) => <li key={p.uid}>{titolo(p)} · {nome(p)} {valore(p)}</li>)}</ul>
         {anteprima.richiesta.decisione.tipo === 'applica-effetto' && anteprima.richiesta.decisione.acquisto && <RiepilogoConsumoPreparato consumo={anteprima.richiesta.decisione.acquisto} />}

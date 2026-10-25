@@ -1321,6 +1321,25 @@ Residui dichiarati: `role="alert"` annidato nella regione `status` dei toast; do
 pattern tab incompleto (senza pannelli e frecce) in altre 10 pagine; `--color-error` su `--color-surface` a 4,1:1; frecce sulle
 sfumature delle file.
 
+## Revisione UX/UI del 25 ottobre 2026 — lotto B: sistema (tipografia, intestazioni, conferme, errori, pulsanti)
+
+Richiesta dell'utente: «Procedi con il lotto B usando ECC». Tre agenti implementatori (B1 conferme, errori e avvio; B2 intestazioni,
+titoli e azioni; B4 pulsanti) più la scala tipografica (B3) fatta dal PM; verifiche avversariali distinte su codice e interfaccia.
+
+| Voce | Contenuto | Stato |
+|------|-----------|-------|
+| B1 | `DialogoConferma` (`conferma()` → `Promise<boolean>`, host in MainLayout, fuoco iniziale su «Annulla», `alertdialog`) al posto dei 16 `window.confirm`; `VistaErrore` unica per PageState, ErrorePagina ed ErrorBoundary (che resta senza dipendere dal tema); anteprima statica in `index.html` mentre arriva `/api/config`; intestazione del Compendio in errore corretta su telefono (colonna da 44 a 358 px) | fatto |
+| B2 | `IntestazioneScheda` e `useIndietro` (Confidente, Persona, Skill, Negozio, Luogo, Quartiere, Oggetto, Ombra, Mappa, «Dove si trova»; Area e Palazzo solo «Indietro» e titolo per R2-41/R3-41/LAY3-5); `TitoloSezione` (display 17 px, sans 15 px); menu «Modifica ⋯» (`MenuModifica`) con l'azione di gioco primaria su Confidente, Oggetto, Quartiere e Palazzo | fatto |
+| B3 | Scala `--testo-*` in rem, utility `testo-N`, radice 93,75%, 1.695 sostituzioni in 241 file più il CSS, minimo 12 px (eccezione `micro` per quattro segni), regola ESLint; `.claude` ignorata da ESLint (copie di lavoro degli agenti) | fatto |
+| B4 | 276 pulsanti di solo testo convertiti in 107 file (chiavi d'icona esistenti) | fatto |
+| B5 | Correzioni dalle verifiche: il menu non ruba più il fuoco alle finestre aperte da una voce; «Torna indietro» della pagina d'errore non esce dall'app; etichette della barra in basso senza spezzature; fumetto dei suggerimenti a 12 px | fatto |
+
+Intestazioni entro il 30% (metodo di LAY3-5, topbar esclusa) alle tre misure; con la topbar a 390 px Palazzo, Luogo e Area arrivano
+al 30–34%. Aperti: i moduli del Palazzo aperti dal menu non ricevono il fuoco; su telefono «Modifica ⋯» è solo una matita; nelle schede
+di dettaglio un errore toglie titolo e «Indietro»; al 125% «Conoscenza» della Home è tagliata; titoli dei pulsanti in carattere
+display (scelta di 12.8, ora su molti più pulsanti); circa 90 h2 fuori da `TitoloSezione`; Esc non chiude la domanda sulle bozze di
+ErrorBoundary.
+
 ## Razionalizzazione (dal 20 ottobre 2026) — branch `newreview`, istanza parallela p5s
 
 Mandato dell'utente del 2026-10-20: tutti i lotti del piano di razionalizzazione

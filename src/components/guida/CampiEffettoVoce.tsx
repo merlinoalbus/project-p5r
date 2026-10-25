@@ -32,7 +32,7 @@ type Turno = Extract<EffettoVoce, { tipo: 'turno' }>;
 export function DotiProprieTurno({ effetto: e, onCambia }: { effetto: Turno; onCambia: (e: Turno) => void }) {
   return (
     <div className="flex flex-col gap-2">
-      <label className="flex items-center gap-2 text-[13px] touch"><input type="checkbox" className="w-5 h-5" checked={e.doti !== undefined}
+      <label className="flex items-center gap-2 testo-13 touch"><input type="checkbox" className="w-5 h-5" checked={e.doti !== undefined}
         onChange={(ev) => onCambia(ev.target.checked ? { ...e, doti: [{ dote: 'perizia', note: 2 }] } : { tipo: 'turno', attivita: e.attivita })} />Doti proprie di questo turno, al posto di quelle dell’attività</label>
       {e.doti?.map((d, i) => (
         <div key={i} className="flex flex-wrap items-end gap-2">
@@ -68,7 +68,7 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
               onCambia={(v) => { if (v !== e.categoria) onCambia({ ...e, categoria: v as CategoriaLettura, chiave: '' }); }} />
             <Selettore className="min-w-[12rem] flex-1" etichetta="Titolo" valore={e.chiave} opzioni={conCorrente(lista, e.chiave, 'Titolo non più nell’elenco')} onCambia={(v) => onCambia({ ...e, chiave: v })} />
           </div>
-          <span className="text-[13px] text-text-secondary">Fin dove arriva</span>
+          <span className="testo-13 text-text-secondary">Fin dove arriva</span>
           <FilaScelta etichetta="Fin dove arriva" valore={e.almeno === null ? '' : String(e.almeno)} opzioni={FIN_DOVE} onCambia={(v) => onCambia({ ...e, almeno: v === '' ? null : Number(v) })} />
         </div>
       );

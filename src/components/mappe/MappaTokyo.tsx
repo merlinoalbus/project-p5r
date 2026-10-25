@@ -509,11 +509,11 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
       // Nella schermata senza scorrimento l'elenco per esteso (una trentina di nomi, 144 px su una colonna
       // di 360) spingeva la pagina a scorrere insieme alla guida: qui resta il conto, e i nomi — con il
       // perché scritto per esteso, che al passaggio del mouse col dito non si legge — stanno nella finestra.
-      <p className="m-0 flex flex-wrap items-center gap-x-2 text-[12px] text-text-muted">
+      <p className="m-0 flex flex-wrap items-center gap-x-2 testo-12 text-text-muted">
         <span>Non ancora nel mondo, {dataGiocoConArticolo(dataGioco, 'a')}: {assenti.length === 1 ? '1 meta' : `${assenti.length} mete`}.</span>
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="dettagli" dimensione={20} />} titolo="Quali" aria-label={`Quali mete non sono ancora nel mondo (${assenti.length})`} onClick={() => setElencoAssenti(true)} />
       </p>
-    ) : <p className="m-0 text-[12px] text-text-muted">
+    ) : <p className="m-0 testo-12 text-text-muted">
       {/* Non spariscono e basta: si dice **quali**, altrimenti la mappa sembra incompleta invece
           che aggiornata al giorno della partita. Il perché sta sul nome, al passaggio del mouse:
           da quando le condizioni non sono più solo date — un rango di Confidente, un libro da
@@ -524,17 +524,17 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
     </p>)}
     {elencoAssenti && dataGioco && (
       <Modal aperta titolo={`Non ancora nel mondo, ${dataGiocoConArticolo(dataGioco, 'a')}`} onChiudi={() => setElencoAssenti(false)}>
-        <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light text-[13px]">
+        <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light testo-13">
           {assenti.map((s) => (
             <li key={s.chiave} className="flex flex-wrap items-baseline justify-between gap-x-3 py-1.5">
               <span>{s.nome}</span>
-              <span className="text-[12px] text-text-muted">{s.quando ?? 'condizione non indicata'}</span>
+              <span className="testo-12 text-text-muted">{s.quando ?? 'condizione non indicata'}</span>
             </li>
           ))}
         </ul>
       </Modal>
     )}
-    {!dataGioco && <p className="m-0 text-[12px] text-text-muted">
+    {!dataGioco && <p className="m-0 testo-12 text-text-muted">
       Nessuna partita attiva: la mappa mostra il mondo intero, quartieri e Palazzi compresi.
     </p>}
   </div>;

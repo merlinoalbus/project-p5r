@@ -32,7 +32,7 @@ export function Campo({ nome, etichetta, dati, imposta, tipo = 'testo', aiuto, d
         ? <textarea className="form-input" rows={2} maxLength={max ?? 2000} value={valore} disabled={disabilitato} placeholder={segnaposto} onChange={(e) => imposta({ [nome]: e.target.value })} />
         : <input className="form-input" type={tipo === 'numero' ? 'number' : 'text'} min={tipo === 'numero' ? 0 : undefined} maxLength={max ?? 400} value={valore} disabled={disabilitato} placeholder={segnaposto}
           onChange={(e) => imposta({ [nome]: tipo === 'numero' ? (e.target.value === '' ? null : Number(e.target.value)) : e.target.value })} />}
-      {aiuto && <span className="text-[11px] text-text-muted">{aiuto}</span>}
+      {aiuto && <span className="testo-12 text-text-muted">{aiuto}</span>}
     </label>
   );
 }
@@ -58,7 +58,7 @@ export function CampoElenco({ etichetta, voci, onCambia, disabilitato, max = 200
   return (
     <fieldset className="regole-editor flex min-w-0 flex-col gap-2 sm:col-span-2">
       <legend>{etichetta}</legend>
-      {voci.length === 0 && <p className="m-0 text-[12px] text-text-muted">Nessuna voce.</p>}
+      {voci.length === 0 && <p className="m-0 testo-12 text-text-muted">Nessuna voce.</p>}
       {voci.map((v, i) => (
         <div key={i} className="flex flex-wrap items-start gap-2">
           <span className="chip mt-2 shrink-0" aria-hidden>{i + 1}</span>
@@ -68,7 +68,7 @@ export function CampoElenco({ etichetta, voci, onCambia, disabilitato, max = 200
               ? <textarea className="form-input min-h-11" rows={2} maxLength={max} value={v} disabled={disabilitato} onChange={(e) => cambia(i, e.target.value)} aria-label={`${etichetta}: voce ${i + 1}`} />
               : <input className="form-input min-h-11" type="text" maxLength={max} value={v} disabled={disabilitato} onChange={(e) => cambia(i, e.target.value)} aria-label={`${etichetta}: voce ${i + 1}`} />}
           </label>
-          <button type="button" className="btn btn-ghost btn-sm touch" disabled={disabilitato} onClick={() => onCambia(voci.filter((_, j) => j !== i))} aria-label={`Togli la voce ${i + 1} di ${etichetta}`}>Togli</button>
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={disabilitato} onClick={() => onCambia(voci.filter((_, j) => j !== i))} aria-label={`Togli la voce ${i + 1} di ${etichetta}`} />
         </div>
       ))}
       <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una voce" disabled={disabilitato || voci.length >= 60}

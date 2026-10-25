@@ -20,7 +20,7 @@ export function BottomNav() {
           key={item.to}
           to={item.to}
           className={({ isActive }) =>
-            `flex-1 flex flex-col items-center justify-center gap-1 text-[11px] no-underline transition-colors ${
+            `flex-1 flex flex-col items-center justify-center gap-1 testo-12 no-underline transition-colors ${
               isActive ? 'text-primary-testo font-semibold' : 'text-text-secondary'
             }`
           }
@@ -28,7 +28,8 @@ export function BottomNav() {
           {({ isActive }) => (
             <>
               <IconaNav voce={item} attiva={isActive} />
-              <span>{item.label}</span>
+              {/* una parola per voce: con il testo ingrandito si stringe, non si spezza a metà («Compendi/o») */}
+              <span className="whitespace-nowrap max-w-full overflow-hidden text-ellipsis px-0.5">{item.label}</span>
             </>
           )}
         </NavLink>

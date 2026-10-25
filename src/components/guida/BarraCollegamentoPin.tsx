@@ -31,7 +31,7 @@ export function BarraCollegamentoPin({ collegamento, mappa, onMappa, ricerca, on
   const n = collegamento.scelti.size;
   return (
     <section className="scelta-pin" aria-label={`Collegamento dei pin a ${collegamento.nome}`}>
-      <p className="m-0 text-[12px] leading-snug">
+      <p className="m-0 testo-12 leading-snug">
         Pin di <strong>«{collegamento.nome}»</strong> · <strong>{n === 1 ? '1 collegato' : `${n} collegati`}</strong>
       </p>
       <div className="flex flex-wrap items-center gap-1.5">

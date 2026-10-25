@@ -54,8 +54,8 @@ export function AreeDellaCitta({ quartieri }: { quartieri: QuartiereRiassuntoDto
   return (
     <>
       {(aree.dati?.length ?? 0) > 0 && <section className="flex flex-col gap-2" aria-label="Aree della città">
-        <h2 className="m-0 font-display text-[17px] uppercase leading-none">Aree della città</h2>
-        <p className="m-0 text-[13px] text-text-secondary">Posti di Tokyo che nessuna fonte colloca in un quartiere.</p>
+        <h2 className="m-0 font-display testo-17 uppercase leading-none">Aree della città</h2>
+        <p className="m-0 testo-13 text-text-secondary">Posti di Tokyo che nessuna fonte colloca in un quartiere.</p>
         <ul className="m-0 grid list-none grid-cols-1 gap-2 p-0 md:grid-cols-2">
           {aree.dati!.map((a) => (
             <li key={a.slug} className="card flex flex-wrap items-center gap-3 p-2">
@@ -65,9 +65,9 @@ export function AreeDellaCitta({ quartieri }: { quartieri: QuartiereRiassuntoDto
               <span className="flex min-w-[10rem] flex-1 flex-col gap-0.5">
                 <span className="flex flex-wrap items-center gap-1.5">
                   <Link to={a.casa} className="touch inline-flex items-center font-semibold">{a.nome}</Link>
-                  {a.daVerificare && <span className="chip chip--attivo text-[11px]">Da verificare</span>}
+                  {a.daVerificare && <span className="chip chip--attivo testo-12">Da verificare</span>}
                 </span>
-                <span className="text-[12px] text-text-muted">{a.numeroPlanimetrie === 1 ? '1 planimetria' : `${a.numeroPlanimetrie} planimetrie`} · {a.numeroSpilli === 1 ? '1 pin' : `${a.numeroSpilli} pin`}</span>
+                <span className="testo-12 text-text-muted">{a.numeroPlanimetrie === 1 ? '1 planimetria' : `${a.numeroPlanimetrie} planimetrie`} · {a.numeroSpilli === 1 ? '1 pin' : `${a.numeroSpilli} pin`}</span>
               </span>
               {a.daVerificare && <span className="ml-auto flex flex-wrap gap-1.5">
                 <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="accettata" dimensione={20} />} titolo="Tieni" disabled={occupato} onClick={() => void tieni(a)} />
@@ -86,7 +86,7 @@ export function AreeDellaCitta({ quartieri }: { quartieri: QuartiereRiassuntoDto
               <AnteprimaMappa mappa={m} className="h-12 w-16" sizes="64px" />
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="font-semibold">{m.nome}</span>
-                <span className="text-[12px] text-text-muted">{m.genitoreNome ?? 'senza genitore'} · {m.numeroSpilli === 1 ? '1 pin' : `${m.numeroSpilli} pin`}</span>
+                <span className="testo-12 text-text-muted">{m.genitoreNome ?? 'senza genitore'} · {m.numeroSpilli === 1 ? '1 pin' : `${m.numeroSpilli} pin`}</span>
               </span>
               <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Colloca" onClick={() => setDaCollocare(m)} />
             </li>
@@ -97,9 +97,9 @@ export function AreeDellaCitta({ quartieri }: { quartieri: QuartiereRiassuntoDto
       <Modal titolo={daRimuovere ? `Rimuovere ${daRimuovere.nome}?` : ''} aperta={!!daRimuovere} onChiudi={() => setDaRimuovere(null)}
         azioni={<>
           <button type="button" className="btn btn-secondary touch" onClick={() => setDaRimuovere(null)}>Annulla</button>
-          <button type="button" className="btn btn-danger touch" disabled={occupato} onClick={() => void rimuovi()}>Rimuovi</button>
+          <PulsanteVisivo tono="pericolo" icona={<IconaAzione chiave="elimina" dimensione={22} />} titolo="Rimuovi" disabled={occupato} onClick={() => void rimuovi()} />
         </>}>
-        <div className="flex flex-col gap-2 text-[14px]">
+        <div className="flex flex-col gap-2 testo-14">
           <p className="m-0">Si rimuovono l’area, {daRimuovere?.numeroPlanimetrie === 1 ? 'la sua planimetria' : `le sue ${daRimuovere?.numeroPlanimetrie ?? 0} planimetrie`}{daRimuovere?.numeroSpilli ? `, ${daRimuovere.numeroSpilli === 1 ? '1 pin' : `${daRimuovere.numeroSpilli} pin`}` : ''} e i passaggi che portano qui.</p>
           {riepilogo && <p className="m-0 text-warning" role="alert">{riepilogo}</p>}
           <p className="m-0 text-text-secondary">{NEL_CESTINO}</p>

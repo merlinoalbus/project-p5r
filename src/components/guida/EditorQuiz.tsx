@@ -72,13 +72,13 @@ export function EditorQuiz({ quiz, giorni, onCambia, disabilitato }: Props) {
   return (
     <fieldset className="regole-editor flex flex-col gap-2">
       <legend>Guida del quiz</legend>
-      <p className="m-0 text-[12px] text-text-muted">Si apre dalla voce del diario che registra un turno di questa attività, dalla pagina Attività e dalla pagina del negozio della stessa sede. Le righe lasciate vuote non si salvano.</p>
+      <p className="m-0 testo-12 text-text-muted">Si apre dalla voce del diario che registra un turno di questa attività, dalla pagina Attività e dalla pagina del negozio della stessa sede. Le righe lasciate vuote non si salvano.</p>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <label className="editor-mappa__campo">
           Giorni del mese
           <input className="form-input" type="text" maxLength={120} value={giorni} disabled={disabilitato} placeholder="7, 17, 27" aria-label="Giorni del mese"
             aria-invalid={giorniSbagliati} onChange={(e) => onCambia({ _giorniQuiz: e.target.value })} />
-          <span className={`text-[11px] ${giorniSbagliati ? 'text-error' : 'text-text-muted'}`}>{giorniSbagliati ? 'Scrivi solo giorni del mese, da 1 a 31, separati da virgole.' : 'Vuoto se il quiz non ha giorni fissi'}</span>
+          <span className={`testo-12 ${giorniSbagliati ? 'text-error' : 'text-text-muted'}`}>{giorniSbagliati ? 'Scrivi solo giorni del mese, da 1 a 31, separati da virgole.' : 'Vuoto se il quiz non ha giorni fissi'}</span>
         </label>
         <label className="editor-mappa__campo">
           Domanda
@@ -89,7 +89,7 @@ export function EditorQuiz({ quiz, giorni, onCambia, disabilitato }: Props) {
           <TestoCheCresce valore={quiz.spiegazione} max={LIMITI_QUIZ.testo} disabilitato={disabilitato} onCambia={(spiegazione) => cambia({ spiegazione })} />
         </label>
       </div>
-      <strong className="text-[13px]">Risposte</strong>
+      <strong className="testo-13">Risposte</strong>
       {quiz.voci.map((v, i) => (
         <div key={i} className="grid grid-cols-1 items-end gap-2 border-b border-border pb-2 sm:grid-cols-2">
           <label className="editor-mappa__campo">
@@ -108,12 +108,12 @@ export function EditorQuiz({ quiz, giorni, onCambia, disabilitato }: Props) {
             Nota
             <input className="form-input" type="text" maxLength={LIMITI_QUIZ.nota} value={v.nota ?? ''} disabled={disabilitato} placeholder="Facoltativa, sempre visibile" aria-label={`Nota della risposta ${i + 1}`} onChange={(e) => cambiaVoce(i, { nota: e.target.value || null })} />
           </label>
-          <button type="button" className="btn btn-ghost btn-sm touch justify-self-start" disabled={disabilitato} onClick={() => cambia({ voci: quiz.voci.filter((_, j) => j !== i) })} aria-label={`Togli la risposta ${i + 1}`}>Togli</button>
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" className="justify-self-start" disabled={disabilitato} onClick={() => cambia({ voci: quiz.voci.filter((_, j) => j !== i) })} aria-label={`Togli la risposta ${i + 1}`} />
         </div>
       ))}
       <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una risposta"
         disabled={disabilitato || quiz.voci.length >= LIMITI_QUIZ.voci} onClick={() => cambia({ voci: [...quiz.voci, { oggetto: '', altroNome: null, risposta: '', nota: null }] })} />
-      <strong className="text-[13px]">Premi</strong>
+      <strong className="testo-13">Premi</strong>
       {quiz.esiti.map((e, i) => (
         <div key={i} className="flex flex-wrap items-end gap-2">
           <label className="editor-mappa__campo min-w-[160px] flex-1">
@@ -124,7 +124,7 @@ export function EditorQuiz({ quiz, giorni, onCambia, disabilitato }: Props) {
             Premio
             <input className="form-input" type="text" maxLength={LIMITI_QUIZ.premio} value={e.premio} disabled={disabilitato} placeholder="7.400 ¥ e 3 punti Fascino" aria-label={`Premio ${i + 1}`} onChange={(ev) => cambiaEsito(i, { premio: ev.target.value })} />
           </label>
-          <button type="button" className="btn btn-ghost btn-sm touch" disabled={disabilitato} onClick={() => cambia({ esiti: quiz.esiti.filter((_, j) => j !== i) })} aria-label={`Togli il premio ${i + 1}`}>Togli</button>
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Togli" disabled={disabilitato} onClick={() => cambia({ esiti: quiz.esiti.filter((_, j) => j !== i) })} aria-label={`Togli il premio ${i + 1}`} />
         </div>
       ))}
       <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi un premio"

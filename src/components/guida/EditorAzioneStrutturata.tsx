@@ -42,7 +42,7 @@ const SESSIONI = [{ chiave: '', nome: 'Completato' }, ...Array.from({ length: 9 
 /** Il rango atteso: Nessuno, 1…9 e MAX (il rango 10), con le cifre del rango (`ui/rango-N`) quando ci sono. */
 const RANGHI = [{ chiave: '', nome: 'Nessuno' }, ...Array.from({ length: 10 }, (_, i) => {
   const n = i + 1;
-  return { chiave: String(n), nome: n === 10 ? 'Rango MAX' : `Rango ${n}`, contenuto: <AssetImg nome={n === 10 ? 'ui/rango-max' : `ui/rango-${n}`} alt="" decorativa className="h-7 w-7 object-contain" fallback={<span className="font-display text-[16px] leading-none">{n === 10 ? 'MAX' : n}</span>} /> };
+  return { chiave: String(n), nome: n === 10 ? 'Rango MAX' : `Rango ${n}`, contenuto: <AssetImg nome={n === 10 ? 'ui/rango-max' : `ui/rango-${n}`} alt="" decorativa className="h-7 w-7 object-contain" fallback={<span className="font-display testo-16 leading-none">{n === 10 ? 'MAX' : n}</span>} /> };
 })];
 
 /** Anteprima, mentre si scrive la voce, delle risposte migliori dell'evento del rango atteso: le stesse compariranno fra le note della
@@ -54,10 +54,10 @@ function AnteprimaRisposte({ chiave, rango }: { chiave: string; rango: number })
   return (
     <div className="risposte-voce" role="group" aria-label={`Anteprima delle risposte migliori del rango ${rango}`}>
       <span className="risposte-voce__titolo">Anteprima · risposte migliori del rango {rango}</span>
-      <span className="text-[12px] text-text-muted">Compariranno fra le note della voce; spuntandola, la scelta delle note parte da qui.</span>
-      {caricamento && <span className="text-[12px] text-text-muted" role="status">Carico le risposte…</span>}
-      {errore && <span className="text-[12px] text-error" role="alert">Risposte non disponibili: {errore}</span>}
-      {dati && dialoghi.length === 0 && <span className="text-[12px] text-text-muted">Nessun dialogo documentato per il rango {rango}.</span>}
+      <span className="testo-12 text-text-muted">Compariranno fra le note della voce; spuntandola, la scelta delle note parte da qui.</span>
+      {caricamento && <span className="testo-12 text-text-muted" role="status">Carico le risposte…</span>}
+      {errore && <span className="testo-12 text-error" role="alert">Risposte non disponibili: {errore}</span>}
+      {dati && dialoghi.length === 0 && <span className="testo-12 text-text-muted">Nessun dialogo documentato per il rango {rango}.</span>}
       {dialoghi.length > 0 && (
         <ul className="m-0 p-0 list-none flex flex-col gap-1.5">
           {dialoghi.map((d) => <DialogoRango key={d.id} d={d} aperto={!chiusi[d.id]} onToggle={() => setChiusi((c) => ({ ...c, [d.id]: !c[d.id] }))} />)}
@@ -78,7 +78,7 @@ export function SceltaTipoQuale({ valore, onCambia, elenchi }: Props) {
   return (
     <div className="flex flex-col gap-3 min-w-0">
       <div className="flex flex-col gap-1.5">
-        <span className="text-[13px] text-text-secondary">Tipo — è l’icona della voce</span>
+        <span className="testo-13 text-text-secondary">Tipo — è l’icona della voce</span>
         <SelettoreIcone etichetta="Tipo della voce" compatto valore={valore.tipo} opzioni={TIPI_AZIONE.map((t) => ({ chiave: t.chiave, nome: t.nome, categoria: t.chiave }))}
           onCambia={(t) => { if (t !== valore.tipo) onCambia(cambiaCollegamento(valore, t as TipoAzione, null, ctx)); }} />
       </div>
@@ -110,7 +110,7 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi }: Props & { 
   const nome = nomeCollegato(valore, elenchi);
   const i = righe ? indicePrincipale(righe, valore.tipo, rif) : -1;
   const eff: EffettoVoce | null = righe && i >= 0 ? righe[i].effetto : null;
-  const frase = (t: string) => <p className="m-0 text-[13px] break-words">{t}</p>;
+  const frase = (t: string) => <p className="m-0 testo-13 break-words">{t}</p>;
   const scrivi = (e: EffettoVoce | null) => onCambia(impostaPrincipale(valore, e));
   /** Manca il principale: se la voce ha già effetti salvati, «si compila da solo» sarebbe falso (restano fra gli aggiuntivi, e quello che combacia con la scelta si adotta). */
   const mancaQuale = (cosa: string) => frase(righe && righe.length > 0
@@ -134,7 +134,7 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi }: Props & { 
             {nome ? frase(`Incontro con ${nome} (la Dote dell’incontro, se c’è) e le note della risposta che scegli alla spunta.`) : mancaQuale('il Confidente')}
             {rif && (
               <>
-                <span className="text-[13px] text-text-secondary">Rango atteso</span>
+                <span className="testo-13 text-text-secondary">Rango atteso</span>
                 <FilaScelta etichetta="Rango atteso" valore={rango === null ? '' : String(rango)} opzioni={RANGHI} onCambia={(v) => onCambia({ ...valore, rangoAtteso: v ? Number(v) : null })} />
                 {rango !== null && nome && frase(rango === 10 ? `Con il rango atteso MAX la spunta porta ${nome} al rango massimo.` : `Con il rango atteso ${rango} la spunta porta ${nome} al rango ${rango}.`)}
                 {rango !== null && <AnteprimaRisposte chiave={rif.chiave} rango={rango} />}
@@ -148,7 +148,7 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi }: Props & { 
         corpo = eff?.tipo === 'dote' ? (
           <>
             {frase(`${nomeDote(eff.dote)} +${'♪'.repeat(eff.note)}: la Dote che dà il gioco, da segnare nelle Doti.`)}
-            <span className="text-[13px] text-text-secondary">Note che dà il gioco</span>
+            <span className="testo-13 text-text-secondary">Note che dà il gioco</span>
             <FilaScelta etichetta="Note della Dote" valore={String(eff.note)} opzioni={NOTE} onCambia={(v) => scrivi({ ...eff, note: Number(v) as 1 | 2 | 3 })} />
           </>
         ) : mancaQuale('la Dote');
@@ -158,7 +158,7 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi }: Props & { 
         corpo = eff?.tipo === 'lettura' ? (
           <>
             {frase(fraseEffetto(eff, nomi))}
-            <span className="text-[13px] text-text-secondary">{valore.tipo === 'dvd' ? 'Visioni o serate' : 'Sessioni'}: almeno</span>
+            <span className="testo-13 text-text-secondary">{valore.tipo === 'dvd' ? 'Visioni o serate' : 'Sessioni'}: almeno</span>
             <FilaScelta etichetta="Fin dove arriva" valore={eff.almeno === null ? '' : String(eff.almeno)} opzioni={SESSIONI} onCambia={(v) => scrivi({ ...eff, almeno: v === '' ? null : Number(v) })} />
           </>
         ) : rif ? frase(righe.length === 0 ? 'Questa attività non ha un avanzamento da segnare: la spunta registra solo che l’hai fatta.' : soloAggiuntivi) : mancaQuale(cosa);
@@ -181,7 +181,7 @@ export function SpuntandoSuccede({ valore, onCambia, elenchi, nomi }: Props & { 
             {frase(eff?.tipo === 'articolo' ? fraseEffetto(eff, nomi) : `Acquisto${nome ? ` da ${nome}` : ''}: scegli l’articolo per segnarlo come comprato, oppure lascia solo il promemoria.`)}
             <Selettore etichetta="Articolo comprato" vuoto="Nessun articolo" valore={eff?.tipo === 'articolo' ? eff.articolo : ''} opzioni={opzioniArticoli(elenchi.effetti, rif.chiave)}
               onCambia={(v) => scrivi(v ? { tipo: 'articolo', articolo: v } : null)} />
-            <span className="text-[12px] text-text-muted">Gli yen del prezzo restano un promemoria da cambiare a mano.</span>
+            <span className="testo-12 text-text-muted">Gli yen del prezzo restano un promemoria da cambiare a mano.</span>
           </>
         ) : mancaQuale('il negozio');
         break;
@@ -224,8 +224,8 @@ function EffettiStorici({ valore, onCambia, elenchi }: Props) {
   const nuovo: EffettoAzione = { tipo: 'dote', dote: 'fascino', note: 2 };
   return (
     <div className="flex flex-col gap-2">
-      {valore.produce.length === 0 && <p className="m-0 text-[12px] text-text-muted">Nessun effetto: la spunta segna solo che l’hai fatto.</p>}
-      {valore.produce.length > 0 && <p className="m-0 text-[12px] text-text-muted">Le Doti te le ricorda e le segni tu nella scheda Doti; letture e turni li segna la spunta.</p>}
+      {valore.produce.length === 0 && <p className="m-0 testo-12 text-text-muted">Nessun effetto: la spunta segna solo che l’hai fatto.</p>}
+      {valore.produce.length > 0 && <p className="m-0 testo-12 text-text-muted">Le Doti te le ricorda e le segni tu nella scheda Doti; letture e turni li segna la spunta.</p>}
       <ul className="flex flex-col gap-2 list-none m-0 p-0">
         {valore.produce.map((e, i) => (
           <RigaEffettoVoceLegacy key={i} numero={i + 1} effetto={e} elenchi={elenchi.azione}
