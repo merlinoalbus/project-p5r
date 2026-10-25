@@ -56,34 +56,74 @@ export function CatalogoOggetti({ gruppoIniziale = '' }: { gruppoIniziale?: Grup
         return a.nome.localeCompare(b.nome, 'it') || a.chiave.localeCompare(b.chiave);
       });
   }, [dati.dati, q, gruppo, categoria, per, ordine]);
+  // Lotto C: sul telefono il primo oggetto stava a y ≈ 640, dopo quattro file di filtri. Ricerca e «Filtri» restano in vista,
+  // ordinamento, categoria, gruppo e destinatario stanno nel pannello (come nel Compendio), riassunti da chip rimovibili.
+  const filtriAttivi: Array<{ chiave: string; testo: string; togli: () => void }> = [];
+  if (gruppo) filtriAttivi.push({ chiave: 'gruppo', testo: GRUPPI.find(([k]) => k === gruppo)?.[1] ?? gruppo, togli: () => cambia('gruppo', '') });
+  if (categoria) filtriAttivi.push({ chiave: 'categoria', testo: CATEGORIA_OGGETTO[categoria as keyof typeof CATEGORIA_OGGETTO]?.nome ?? categoria, togli: () => cambia('categoria', '') });
+  if (per) filtriAttivi.push({ chiave: 'per', testo: per === 'nessuno' ? 'Senza vincolo' : `Per ${per}`, togli: () => cambia('per', '') });
+  if (ordine === 'prezzo') filtriAttivi.push({ chiave: 'ordine', testo: 'Per prezzo minimo', togli: () => cambia('ordine', '') });
+  const [pannelloAperto, setPannelloAperto] = useState(() => ['gruppo', 'categoria', 'per', 'ordine'].some((k) => params.has(k)));
+  /** Toglie in un colpo gruppo, categoria, destinatario e ordinamento, lasciando la ricerca. */
+  const azzera = () => setParams((prima) => {
+    const dopo = new URLSearchParams(prima);
+    for (const k of ['scheda', 'gruppo', 'categoria', 'per', 'ordine']) dopo.delete(k);
+    return dopo;
+  }, { replace: true });
   return <PageState isLoading={dati.caricamento && !dati.dati} error={dati.errore} onRetry={() => void dati.ricarica()}>
-    <section className="flex min-w-0 flex-col gap-3" aria-label="Catalogo degli oggetti">
-      <div className="flex flex-wrap items-end gap-2">
-        <div className="min-w-0 flex-1 basis-64"><CampoRicerca valore={q} onCambia={(v) => cambia('q', v)} segnaposto="Cerca un nome, un altro nome o un effetto…" /></div>
-        <Selettore etichetta="Ordina per" valore={ordine} opzioni={ORDINI} ricerca="mai" onCambia={(v) => cambia('ordine', v === 'nome' ? '' : v)} />
-        <Selettore etichetta="Categoria" valore={categoria} vuoto="Tutte" opzioni={categorie} onCambia={(v) => cambia('categoria', v)} />
-        {!IN_RILASCIO && <PulsanteVisivo icona={<IconaAzione chiave="piu" dimensione={22} />} titolo="Nuovo oggetto" onClick={() => setNuovo(true)} />}
+    <section className="flex min-w-0 flex-col gap-2" aria-label="Catalogo degli oggetti">
+      <div className="flex flex-wrap items-center gap-2">
+        <CampoRicerca className="max-sm:basis-full" valore={q} onCambia={(v) => cambia('q', v)} segnaposto="Cerca per nome o effetto…" />
+        <PulsanteVisivo attivo={pannelloAperto} compatto icona={<IconaAzione chiave="filtri" dimensione={20} />} titolo="Filtri" dettaglio={filtriAttivi.length > 0 ? `(${filtriAttivi.length})` : undefined}
+          onClick={() => setPannelloAperto((v) => !v)} aria-expanded={pannelloAperto} aria-controls="pannello-filtri-oggetti" />
+        {filtriAttivi.length > 0 && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Azzera" onClick={azzera} />}
+        {!IN_RILASCIO && <PulsanteVisivo compatto className="ml-auto" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Nuovo oggetto" onClick={() => setNuovo(true)} />}
       </div>
-      <div className="flex flex-wrap gap-1.5" role="group" aria-label="Gruppi di oggetti">
-        <button type="button" className={`chip touch${!gruppo ? ' chip--attivo' : ''}`} aria-pressed={!gruppo} onClick={() => cambia('gruppo', '')}>Tutti</button>
-        {GRUPPI.map(([k, nome]) => <button key={k} type="button" className={`chip touch${gruppo === k ? ' chip--attivo' : ''}`} aria-pressed={gruppo === k} onClick={() => cambia('gruppo', k)}>{nome}</button>)}
-      </div>
-      {(gruppo === 'equipaggiamento' || per) && <Selettore etichetta="Per chi" valore={per} vuoto="Tutti" ricerca="auto"
-        opzioni={[{ chiave: 'nessuno', nome: 'Senza vincolo' }, ...destinatari.map((n) => ({ chiave: n, nome: n }))]} onCambia={(v) => cambia('per', v)} />}
-      <p role="status" className="m-0 testo-12 text-text-muted">{visibili.length} oggetti su {dati.dati?.length ?? 0}. Il prezzo minimo è quello delle offerte in yen; apri l’oggetto per i negozi e gli scambi.</p>
-      <div className="min-w-0"><table className="tabella tabella--adattiva w-full testo-13">
+      {filtriAttivi.length > 0 && (
+        <ul className="m-0 flex list-none flex-wrap gap-1.5 p-0" aria-label="Filtri attivi">
+          {filtriAttivi.map((f) => <li key={f.chiave}><button type="button" className="chip chip--attivo touch" onClick={f.togli} aria-label={`Togli il filtro ${f.testo}`}>{f.testo} ×</button></li>)}
+        </ul>
+      )}
+      {pannelloAperto && (
+        <div id="pannello-filtri-oggetti" className="card pannello-filtri" role="group" aria-label="Filtri del catalogo">
+          <div className="pannello-filtri__gruppo">
+            <span className="pannello-filtri__etichetta">Ordina per</span>
+            <Selettore compatto etichetta="Ordina per" valore={ordine} opzioni={ORDINI} ricerca="mai" onCambia={(v) => cambia('ordine', v === 'nome' ? '' : v)} />
+          </div>
+          <div className="pannello-filtri__gruppo">
+            <span className="pannello-filtri__etichetta">Categoria</span>
+            <Selettore compatto etichetta="Categoria" valore={categoria} vuoto="Tutte" opzioni={categorie} onCambia={(v) => cambia('categoria', v)} />
+          </div>
+          {(gruppo === 'equipaggiamento' || per) && <div className="pannello-filtri__gruppo">
+            <span className="pannello-filtri__etichetta">Per chi</span>
+            <Selettore compatto etichetta="Per chi" valore={per} vuoto="Tutti" ricerca="auto"
+              opzioni={[{ chiave: 'nessuno', nome: 'Senza vincolo' }, ...destinatari.map((n) => ({ chiave: n, nome: n }))]} onCambia={(v) => cambia('per', v)} />
+          </div>}
+          <div className="pannello-filtri__gruppo col-span-full">
+            <span className="pannello-filtri__etichetta" id="gruppi-oggetti">Gruppo</span>
+            <div className="flex flex-wrap gap-1.5" role="group" aria-labelledby="gruppi-oggetti">
+              <button type="button" className={`chip touch${!gruppo ? ' chip--attivo' : ''}`} aria-pressed={!gruppo} onClick={() => cambia('gruppo', '')}>Tutti</button>
+              {GRUPPI.map(([k, nome]) => <button key={k} type="button" className={`chip touch${gruppo === k ? ' chip--attivo' : ''}`} aria-pressed={gruppo === k} onClick={() => cambia('gruppo', k)}>{nome}</button>)}
+            </div>
+          </div>
+        </div>
+      )}
+      <p role="status" className="m-0 testo-12 text-text-muted">{visibili.length} oggetti su {dati.dati?.length ?? 0}.</p>
+      {/* Sul telefono ogni oggetto è una riga compatta (nome e prezzo, poi categoria ed effetto): `.tabella-oggetti` in src/tailwind.css. */}
+      <div className="min-w-0"><table className="tabella tabella-oggetti w-full testo-13">
         <thead><tr><th>Oggetto</th><th>Categoria</th><th>Che cosa fa</th><th>Prezzo minimo</th></tr></thead>
         <tbody>{visibili.map((o) => <tr key={o.chiave}>
-          <td data-etichetta="Oggetto"><Link to={o.casa} className="touch inline-flex items-center font-semibold">{o.nome}</Link>
-            {o.nomeOriginale && o.nomeOriginale !== o.nome && <span className="block break-words testo-12 text-text-muted">{o.nomeOriginale}</span>}
-            {typeof o.statistiche?.per === 'string' && o.statistiche.per && <span className="block testo-12 text-text-secondary">{o.statistiche.per}</span>}
+          <td className="tabella-oggetti__nome"><Link to={o.casa} className="touch inline-flex items-center font-semibold">{o.nome}</Link>
+            {o.nomeOriginale && o.nomeOriginale !== o.nome && <span className="tabella-oggetti__altro block break-words testo-12 text-text-muted">{o.nomeOriginale}</span>}
+            {typeof o.statistiche?.per === 'string' && o.statistiche.per && <span className="tabella-oggetti__altro block testo-12 text-text-secondary">{o.statistiche.per}</span>}
           </td>
-          <td data-etichetta="Categoria">{CATEGORIA_OGGETTO[o.categoria].nome}</td>
-          <td data-etichetta="Che cosa fa" className="break-words">{o.effetto || 'Non dichiarato'}</td>
-          <td data-etichetta="Prezzo minimo">{o.prezzoMinimo === null ? 'Nessuna offerta in yen' : o.prezzoMinimo === 0 ? 'Gratis' : formattaYen(o.prezzoMinimo)}</td>
+          <td className="tabella-oggetti__categoria">{CATEGORIA_OGGETTO[o.categoria].nome}</td>
+          <td className="tabella-oggetti__effetto break-words" title={o.effetto || undefined}>{o.effetto || 'Non dichiarato'}</td>
+          <td className="tabella-oggetti__prezzo">{o.prezzoMinimo === null ? <><span className="tabella-oggetti__lungo">Nessuna offerta in yen</span><span className="tabella-oggetti__breve" aria-hidden="true">—</span></> : o.prezzoMinimo === 0 ? 'Gratis' : formattaYen(o.prezzoMinimo)}</td>
         </tr>)}</tbody>
       </table></div>
       {!visibili.length && <p className="m-0 testo-13 text-text-secondary">Nessun oggetto con questi filtri.</p>}
+      {visibili.length > 0 && <p className="m-0 testo-12 text-text-muted">Il prezzo minimo è quello delle offerte in yen; apri l’oggetto per i negozi e gli scambi.</p>}
     </section>
     {nuovo && <ModuloOggetto onChiudi={() => setNuovo(false)} onSalvato={(o) => { setNuovo(false); naviga(o.casa); }} />}
   </PageState>;

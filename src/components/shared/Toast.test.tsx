@@ -15,7 +15,7 @@ it('la coda sta in un portale su body, non dentro il layout: lì lo z-index non 
   const messaggio = screen.getByText('«Torre Inferiore» segnato come ottenuto.');
   const coda = messaggio.closest('.coda-notifiche');
   expect(coda).not.toBeNull();
-  // la coda sta nell'involucro `status` (sempre montato, per gli annunci), e l'involucro è il portale su body
+  // la coda sta nell'involucro del portale su body, accanto alle regioni live (sempre montate, per gli annunci)
   expect(coda!.parentElement!.parentElement).toBe(document.body);
   expect(container.contains(coda)).toBe(false);
 });

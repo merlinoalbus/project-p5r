@@ -62,8 +62,15 @@ export function DotiSociali({ partitaId }: Props) {
       // tornerebbe indietro
       imposta((correnti) => correnti.map((d) => (d.chiave === chiave ? agg : d)));
       const punti = (n: number) => `${n} ${n === 1 ? 'punto' : 'punti'}`;
-      annuncia(`${agg.nome}: ${punti(agg.punti)}${agg.mancanti !== null ? `; al rango ${agg.rango + 1} ${agg.mancanti === 1 ? 'manca' : 'mancano'} ${punti(agg.mancanti)}` : ', rango massimo'}.`);
-      if (prima && agg.rango > prima.rango) notifica('success', `${agg.nome}: nuovo rango ${agg.rango} — ${agg.nomeRango}!`);
+      const distanza = agg.mancanti !== null ? `al rango ${agg.rango + 1} ${agg.mancanti === 1 ? 'manca' : 'mancano'} ${punti(agg.mancanti)}` : 'rango massimo';
+      // Lotto C (2026-10-25): al cambio di rango arrivava un doppio annuncio (questa regione e il toast). Ora se ne legge uno solo,
+      // completo, da qui; il toast resta per chi guarda ed è silenzioso (fuori dalle regioni live della coda).
+      if (prima && agg.rango > prima.rango) {
+        annuncia(`${agg.nome}: nuovo rango ${agg.rango}, ${agg.nomeRango}! ${punti(agg.punti)}; ${distanza}.`);
+        notifica('success', `${agg.nome}: nuovo rango ${agg.rango} — ${agg.nomeRango}!`, undefined, { silenziosa: true });
+      } else {
+        annuncia(`${agg.nome}: ${punti(agg.punti)}${agg.mancanti !== null ? `; ${distanza}` : `, ${distanza}`}.`);
+      }
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
     } finally {

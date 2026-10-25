@@ -80,7 +80,7 @@ function EditorAbilita({ chiave, nome, onChiudi, onSalvato }: { chiave: string; 
     )}>
       <div className="flex flex-col gap-3 testo-13">
         <p className="m-0 text-text-muted">Scegli il rango, cambia l’elenco e salva: si salva un rango alla volta. «Ripristina» rimette l’elenco della guida.</p>
-        {dati.errore && <p role="alert" className="m-0 text-error">{dati.errore}</p>}
+        {dati.errore && <p role="alert" className="m-0 text-error-testo">{dati.errore}</p>}
         {!dati.dati && !dati.errore && <p role="status" className="m-0">Un attimo…</p>}
         {dati.dati && <>
           <fieldset className="m-0 flex flex-col gap-1 border-0 p-0"><legend className="p-0 text-text-secondary">Rango (• = cambiato rispetto alla guida)</legend>

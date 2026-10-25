@@ -36,7 +36,7 @@ export function InfoOmbraPersona({ ombra = null, personaId = null, partitaId = n
     return null;
   }, [ombra, personaId, partitaId]);
   if (dati.caricamento && !dati.dati) return <p className="m-0 testo-12 text-text-muted" role="status">Leggo le affinità…</p>;
-  if (dati.errore) return <p className="m-0 testo-12 text-error" role="alert">{dati.errore}</p>;
+  if (dati.errore) return <p className="m-0 testo-12 text-error-testo" role="alert">{dati.errore}</p>;
   const d = dati.dati;
   if (!d) return <p className="m-0 testo-12 text-text-muted">Nessuna Persona del compendio: le affinità non si conoscono.</p>;
   return (

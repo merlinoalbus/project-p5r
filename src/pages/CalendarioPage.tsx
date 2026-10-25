@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { aggiornaPartita, getCalendario } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
+import { useSchede } from '../hooks/useSchede';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
@@ -106,6 +107,8 @@ export function CalendarioPage() {
   const [aperto, setAperto] = useState<string | null>(null);
   const mese = meseScelto ?? (d?.dataGioco ? d.dataGioco.slice(0, 2) : '04');
   const giorniMese = useMemo(() => (d?.giorni ?? []).filter((g) => g.data.startsWith(mese)), [d, mese]);
+  const mesiPresenti = useMemo(() => MESI_CHIAVE.filter((m) => d?.mesi.includes(m) ?? false), [d]);
+  const schedeMesi = useSchede({ chiavi: mesiPresenti, attiva: mese, onScegli: setMeseScelto });
   /** La settimana della guida a cui appartiene il giorno, o null se il giorno manca o non ha settimana. */
   const settimanaDi = (g: GiornoCalendarioDto | null) => (g?.settimana !== null && g?.settimana !== undefined ? d?.settimane.find((s) => s.numero === g.settimana) ?? null : null);
   const settimanaOggi = settimanaDi(d?.oggi ?? null);
@@ -171,16 +174,18 @@ export function CalendarioPage() {
             </section>
           )}
 
-          <FilaScorrevole className="items-center" role="tablist" aria-label="Mesi">
-            {MESI_CHIAVE.filter((m) => d.mesi.includes(m)).map((m, i) => (
-              <button key={m} type="button" role="tab" className={`chip touch ${mese === m ? 'chip--attivo' : ''}`} onClick={() => setMeseScelto(m)} aria-selected={mese === m}>{NOMI_MESI_GIOCO[MESI_CHIAVE.indexOf(m)] ?? m}{i === 0 ? '' : ''}</button>
+          <FilaScorrevole className="items-center" {...schedeMesi.lista} aria-label="Mesi">
+            {mesiPresenti.map((m) => (
+              <button key={m} type="button" {...schedeMesi.scheda(m)} className={`chip touch ${mese === m ? 'chip--attivo' : ''}`}>{NOMI_MESI_GIOCO[MESI_CHIAVE.indexOf(m)] ?? m}</button>
             ))}
           </FilaScorrevole>
-          <ul className="m-0 p-0 list-none flex flex-col gap-1.5" aria-label={`Giorni di ${NOMI_MESI_GIOCO[MESI_CHIAVE.indexOf(mese)] ?? mese}`}>
-            {giorniMese.map((g) => (
-              <Giorno key={g.data} g={g} oggi={g.data === d.dataGioco} aperto={aperto === g.data} onToggle={() => setAperto((a) => (a === g.data ? null : g.data))} onImposta={partitaId ? () => void imposta(g.data) : undefined} onSalvato={ricarica} onModificaGiorno={() => setGiornoInModifica(g.data)} />
-            ))}
-          </ul>
+          <div {...(mesiPresenti.includes(mese) ? schedeMesi.pannello(mese) : {})}>
+            <ul className="m-0 p-0 list-none flex flex-col gap-1.5" aria-label={`Giorni di ${NOMI_MESI_GIOCO[MESI_CHIAVE.indexOf(mese)] ?? mese}`}>
+              {giorniMese.map((g) => (
+                <Giorno key={g.data} g={g} oggi={g.data === d.dataGioco} aperto={aperto === g.data} onToggle={() => setAperto((a) => (a === g.data ? null : g.data))} onImposta={partitaId ? () => void imposta(g.data) : undefined} onSalvato={ricarica} onModificaGiorno={() => setGiornoInModifica(g.data)} />
+              ))}
+            </ul>
+          </div>
           {!IN_RILASCIO && giornoInModifica && <EditorGiorno key={giornoInModifica} data={giornoInModifica} onChiudi={() => setGiornoInModifica(null)} onSalvato={async () => { await dati.ricarica(); }} />}
         </div>
       )}

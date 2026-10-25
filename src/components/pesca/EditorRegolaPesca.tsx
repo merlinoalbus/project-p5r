@@ -107,7 +107,7 @@ function EditorRegolaPescaReale({ regola, onChiudi, onSalvata }: { regola: Regol
         <label className="flex items-center gap-2 touch"><input type="checkbox" checked={conferma} onChange={e => setConferma(e.target.checked)} />Confermo la modifica della fonte comune della guida.</label>
       </fieldset>
       {salvata && <p role="status" className="m-0">Regola salvata.</p>}
-      {errore && <p role="alert" className="m-0 text-error">{errore} La bozza rimane visibile; nessun nuovo invio automatico.</p>}
+      {errore && <p role="alert" className="m-0 text-error-testo">{errore} La bozza rimane visibile; nessun nuovo invio automatico.</p>}
     </div>
   </Modal>;
 }

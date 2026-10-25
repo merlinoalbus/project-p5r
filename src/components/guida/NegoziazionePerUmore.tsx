@@ -24,7 +24,7 @@ import { IconaAzione } from '../shared/IconaAzione';
 
 const NOME_ESITO: Record<EsitoNegoziazione, string> = { buona: 'Buona', passabile: 'Passabile', cattiva: 'Cattiva' };
 const CLASSE_ESITO: Record<EsitoNegoziazione, string> = {
-  buona: 'border-success/70 bg-success/10 text-success', passabile: 'border-warning/70 bg-warning/10 text-warning', cattiva: 'border-error/60 bg-error/10 text-error',
+  buona: 'border-success/70 bg-success/10 text-success', passabile: 'border-warning/70 bg-warning/10 text-warning', cattiva: 'border-error/60 bg-error/10 text-error-testo',
 };
 const PASSO = 40;
 
@@ -61,7 +61,7 @@ function Dettaglio({ domanda, umore, onCambiato }: { domanda: string; umore: Umo
   /** La matita di un esito: la chiave è quella dell'attestazione. */
   const matitaEsito = (chiave: string) => <ModificaGuida tipo="negoziazione-verdetto" chiave={chiave} cosa="l’esito di questa risposta" soloIcona onSalvato={cambiato} />;
   if (d.caricamento && !d.dati) return <p className="m-0 testo-12 text-text-muted" role="status">Leggo il dettaglio…</p>;
-  if (d.errore) return <p className="m-0 testo-12 text-error" role="alert">{d.errore}</p>;
+  if (d.errore) return <p className="m-0 testo-12 text-error-testo" role="alert">{d.errore}</p>;
   const fam: NegDomandaDto | undefined = d.dati?.domande[0];
   if (!fam) return null;
   return (
@@ -211,14 +211,14 @@ export function NegoziazionePerUmore() {
                   {carta.esempi.filter((e) => !e.proposta && typeof e.testo === 'string').map((e) => <span key={String(e.testo)} className="rounded-full border border-success/60 bg-success/10 px-2 py-0.5 testo-12 text-success">{String(e.testo)}</span>)}</div>
               )}
               {carta.daEvitare.length > 0 && (
-                <div className="flex flex-wrap gap-1"><span className="testo-12 uppercase tracking-[0.08em] text-error">Da evitare</span>
-                  {carta.daEvitare.map((x) => <span key={x} className="rounded-full border border-error/50 bg-error/10 px-2 py-0.5 testo-12 text-error">{x}</span>)}</div>
+                <div className="flex flex-wrap gap-1"><span className="testo-12 uppercase tracking-[0.08em] text-error-testo">Da evitare</span>
+                  {carta.daEvitare.map((x) => <span key={x} className="rounded-full border border-error/50 bg-error/10 px-2 py-0.5 testo-12 text-error-testo">{x}</span>)}</div>
               )}
             </section>
           )}
           <CampoRicerca valore={testo} onCambia={setTesto} segnaposto="Cerca la domanda o la risposta…" />
           {risposta.caricamento && !r && <p className="m-0 testo-12 text-text-muted" role="status">Leggo la negoziazione…</p>}
-          {risposta.errore && <p className="m-0 testo-12 text-error" role="alert">{risposta.errore}</p>}
+          {risposta.errore && <p className="m-0 testo-12 text-error-testo" role="alert">{risposta.errore}</p>}
           {r && (
             <>
               <p className="m-0 testo-12 text-text-muted" role="status">{r.totale} {r.totale === 1 ? 'domanda' : 'domande'}{qCerca ? ` per «${qCerca}»` : ''}. Esiti di Royal; dove Royal tace, quelli dell’app, dichiarati.</p>

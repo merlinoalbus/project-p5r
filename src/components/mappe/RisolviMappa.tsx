@@ -14,5 +14,5 @@ export function RisolviMappa({ chiave, children }: { chiave: string; children: (
   // L3 (§4.1): la sezione si apre sulla sua casa calcolata dal server (la scheda del Palazzo sull'infiltrazione, `?infiltrazione=`);
   // senza casa (dati di prima) la mappa del Palazzo con `?area=`, come prima
   if (esito.dati?.tipo === 'guida') return <Navigate replace to={esito.dati.casa ?? `/guida/mappe/${encodeURIComponent(esito.dati.mappaPalazzo)}?area=${encodeURIComponent(esito.dati.area)}`} />;
-  return <PageState isLoading={esito.caricamento} error={esito.errore} onRetry={esito.ricarica}>{esito.dati?.tipo === 'mappa' && children(esito.dati.mappa, esito.dati.casa)}</PageState>;
+  return <PageState isLoading={esito.caricamento} error={esito.errore} onRetry={esito.ricarica} scheda={{ titolo: 'Mappa', ripiego: '/guida/mappe' }}>{esito.dati?.tipo === 'mappa' && children(esito.dati.mappa, esito.dati.casa)}</PageState>;
 }

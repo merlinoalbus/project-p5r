@@ -34,6 +34,7 @@ import { COVO_AREA } from '../utils/covo';
 import type { CompletamentoDto } from '../types';
 import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
+import { TitoloSezione } from '../components/shared/TitoloSezione';
 
 type Covo = CompletamentoDto['covo'];
 
@@ -147,7 +148,7 @@ export function CovoPage() {
               lunghi e affiancarli darebbe due colonne strette invece di due elenchi leggibili. */}
           <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
             <section className="card flex flex-col gap-2" aria-label="Sfide del Covo">
-              <h2 className="m-0 font-display testo-17 uppercase leading-none">Sfide · {sfide.length}{sfide.length !== covo.sfide.length ? ` di ${covo.sfide.length}` : ''}</h2>
+              <TitoloSezione variante="display">Sfide · {sfide.length}{sfide.length !== covo.sfide.length ? ` di ${covo.sfide.length}` : ''}</TitoloSezione>
               {sfide.length === 0
                 ? <p className="m-0 testo-13 text-text-muted" role="status">Nessuna sfida con questo testo.</p>
                 : <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0">
@@ -167,7 +168,7 @@ export function CovoPage() {
             </section>
 
             <section className="card flex flex-col gap-2" aria-label="Premi del Covo">
-              <h2 className="m-0 font-display testo-17 uppercase leading-none">Premi · {premi.length}{premi.length !== covo.premi.length ? ` di ${covo.premi.length}` : ''}</h2>
+              <TitoloSezione variante="display">Premi · {premi.length}{premi.length !== covo.premi.length ? ` di ${covo.premi.length}` : ''}</TitoloSezione>
               {premi.length === 0
                 ? <p className="m-0 testo-13 text-text-muted" role="status">Nessun premio con questo testo.</p>
                 : <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0">

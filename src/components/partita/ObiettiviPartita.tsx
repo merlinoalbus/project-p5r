@@ -86,7 +86,7 @@ export function ObiettiviPartita({ partitaId }: Props) {
         <PulsanteVisivo tono="primario" className="ml-auto" icona={<IconaAzione chiave="obiettivo" dimensione={22} />} titolo="Nuovo obiettivo" onClick={() => setNuovo(true)} />
       </div>
       <p className="m-0 testo-13 text-text-secondary">Una Persona che vuoi ottenere, con le skill che deve avere e il livello minimo. L'obiettivo si chiude da solo quando una copia che soddisfa le condizioni entra nella scorta (o viene aggiornata).</p>
-      {lista.errore && <div className="testo-13 text-error">{lista.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void lista.ricarica()} /></div>}
+      {lista.errore && <div className="testo-13 text-error-testo">{lista.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void lista.ricarica()} /></div>}
       {!lista.dati && !lista.errore && <div className="flex justify-center py-6"><Spinner /></div>}
       {lista.dati && visibili.length === 0 && (
         <EmptyState illustrazione="vuoto-obiettivi" title={stato === 'aperto' ? 'Nessun obiettivo aperto' : 'Nessun obiettivo'} hint="Crea un obiettivo da qui o dalla scheda di una Persona («Aggiungi agli obiettivi»)." />

@@ -22,11 +22,13 @@ import { CollegamentoVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { useSearchParams } from '../scheda/routerScheda';
 import { useCarica } from '../../hooks/useCarica';
+import { useSchede } from '../../hooks/useSchede';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { getGerarchiaMappe } from '../../services/api';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { testoConteggiPin } from '../../utils/presentazioneMappa';
 import type { GerarchiaMappeDto, NodoGerarchiaDto } from '../../types';
+import { TitoloSezione } from '../shared/TitoloSezione';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -102,9 +104,9 @@ function contenitoriDa(radici: NodoGerarchiaDto[]): ContenitoreColloca[] {
 /** L'intestazione di un gruppo di carte: sta su uno sfondo suo (mai il testo direttamente sull'immagine decorativa). */
 function TitoloGruppo({ titolo, dettaglio }: { titolo: string; dettaglio?: string }) {
   return (
-    <h2 className="m-0 inline-flex max-w-full flex-wrap items-baseline gap-x-2 self-start rounded-md bg-bg-secondary px-3 py-1.5 font-display testo-15 uppercase leading-tight text-text">
+    <TitoloSezione variante="display" className="inline-flex max-w-full flex-wrap items-baseline gap-x-2 self-start rounded-md bg-bg-secondary px-3 py-1.5 leading-tight">
       {titolo}{dettaglio && <span className="font-body testo-12 normal-case text-text-secondary">{dettaglio}</span>}
-    </h2>
+    </TitoloSezione>
   );
 }
 
@@ -182,6 +184,8 @@ export function IndiceLuoghi() {
     // le planimetrie da collocare sono un lavoro di redazione: nel rilascio (sola lettura) la scheda non esiste
     ...(IN_RILASCIO ? [] : [{ chiave: 'da-collocare' as const, etichetta: `Da collocare (${g.totali.daCollocare})` }]),
   ] : [];
+  // durante la ricerca nessuna scheda è aperta: i risultati non sono il pannello di una scheda
+  const schedeLuoghi = useSchede({ chiavi: schede.map((s) => s.chiave), attiva: testoCercato === '' ? sezione : null, onScegli: (k) => { setRicerca(''); vai(k, [], true); } });
 
   return <div className="flex flex-col gap-2">
     {/* niente sottotitolo: le schede subito sotto dicono già che cosa c'è (Città, Palazzi, Memento, Da collocare) */}
@@ -191,14 +195,13 @@ export function IndiceLuoghi() {
       azioni={g && <div className="flex w-full min-w-[220px] md:w-72"><CampoRicerca valore={ricerca} onCambia={setRicerca} segnaposto="Cerca un luogo" /></div>} />
     <PageState isLoading={gerarchia.inPrimoCaricamento} error={gerarchia.errore} onRetry={gerarchia.ricarica}>
       {g && <>
-        <FilaScorrevole role="tablist" aria-label="Sezioni dei luoghi" title={testoConteggiPin(g.totali.pin)}>
-          {schede.map((s) => <button key={s.chiave} type="button" role="tab" aria-selected={sezione === s.chiave && testoCercato === ''}
-            className={`chip touch ${sezione === s.chiave && testoCercato === '' ? 'chip--attivo' : ''}`}
-            onClick={() => { setRicerca(''); vai(s.chiave, [], true); }}>{s.etichetta}</button>)}
+        <FilaScorrevole {...schedeLuoghi.lista} aria-label="Sezioni dei luoghi" title={testoConteggiPin(g.totali.pin)}>
+          {schede.map((s) => <button key={s.chiave} type="button" {...schedeLuoghi.scheda(s.chiave)}
+            className={`chip touch ${schedeLuoghi.aperta === s.chiave ? 'chip--attivo' : ''}`}>{s.etichetta}</button>)}
         </FilaScorrevole>
         {testoCercato !== ''
           ? <Risultati trovati={trovati} testo={testoCercato} scendi={(t) => { setRicerca(''); vai(t.sezione, t.ramo); }} />
-          : <Scheda g={g} sezione={sezione} ramo={ramo} tokyo={tokyo} memento={memento} daCollocare={daCollocare} vai={vai} onRicarica={gerarchia.ricarica} />}
+          : <div {...schedeLuoghi.pannello(sezione)} className="min-w-0"><Scheda g={g} sezione={sezione} ramo={ramo} tokyo={tokyo} memento={memento} daCollocare={daCollocare} vai={vai} onRicarica={gerarchia.ricarica} /></div>}
       </>}
     </PageState>
   </div>;

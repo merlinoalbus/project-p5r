@@ -16,6 +16,7 @@ import { useSearchParams } from '../components/scheda/routerScheda';
 import { Navigate } from '../components/scheda/NavigateScheda';
 import { getAttivita } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
+import { useSchede } from '../hooks/useSchede';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { PageState } from '../components/shared/PageState';
@@ -148,6 +149,7 @@ export function AttivitaPage({ soloChiave }: { soloChiave?: string } = {}) {
   // I videogiochi hanno la loro pagina, con i round e i contenuti che sbloccano.
   const attivitaVisibili = useMemo(() => (d?.attivita ?? []).filter((a) => a.tipo !== 'videogioco' && (!dote || haDoteAttivita(a, dote))), [d, dote]);
   const lavoriVisibili = useMemo(() => (d?.lavori ?? []).filter((a) => !dote || haDoteAttivita(a, dote)), [d, dote]);
+  const schede = useSchede({ chiavi: SCHEDE.map(([k]) => k), attiva: scheda, onScegli: (k) => setParams(k === 'attivita' ? {} : { scheda: k }, { replace: true }) });
   if (params.get('scheda') === 'libri') return <Navigate to="/guida/libri" replace />;
   if (params.get('scheda') === 'film') return <Navigate to="/guida/film" replace />;
   // L11 B4 (R11-07/3): l'indirizzo `?elemento=<chiave>` apre la stessa vista anche come pagina (è la «casa» di un'attività nella ricerca globale);
@@ -176,14 +178,16 @@ export function AttivitaPage({ soloChiave }: { soloChiave?: string } = {}) {
         <div className="flex flex-col gap-3">
           <IntestazionePagina titolo="Attività e Doti sociali" sottotitolo={<>Mini-giochi, lavori e studio con le note (♪) delle Doti che alzano, dove e quando farli. I videogiochi hanno la <Link to="/guida/videogiochi" className="text-primary-testo">loro pagina</Link>, con i round e quello che sbloccano.</>} />
           <div className="flex flex-wrap items-center gap-1.5">
-            <FilaScorrevole role="tablist" aria-label="Sezioni">
-              {SCHEDE.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`piastrella-scheda touch ${scheda === k ? 'piastrella-scheda--attiva' : ''}`} onClick={() => setParams(k === 'attivita' ? {} : { scheda: k }, { replace: true })} title={l}><IconaCategoria categoria={k === 'attivita' ? 'minigiochi' : k} dimensione={28} /><span>{l}</span></button>)}
+            <FilaScorrevole {...schede.lista} aria-label="Sezioni">
+              {SCHEDE.map(([k, l]) => <button key={k} type="button" {...schede.scheda(k)} className={`piastrella-scheda touch ${scheda === k ? 'piastrella-scheda--attiva' : ''}`} title={l}><IconaCategoria categoria={k === 'attivita' ? 'minigiochi' : k} dimensione={28} /><span>{l}</span></button>)}
             </FilaScorrevole>
             <Selettore compatto className="ml-auto" etichetta="Dote" valore={dote} vuoto="Tutte le Doti" opzioni={opzioniDaNomi(NOME_DOTE)} onCambia={setDote} />
             <AggiungiAlCatalogo tipo="attivita" titolo={scheda === 'lavori' ? 'Aggiungi un lavoro' : 'Aggiungi un’attività'} onSalvato={() => void dati.ricarica()} />
           </div>
+          <div {...schede.pannello(scheda)} className="min-w-0">
           {scheda === 'attivita' && <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Attività">{attivitaVisibili.map((a) => <Attivita key={a.chiave} a={a} onCambiata={() => void dati.ricarica()} mappaAperta={conMappa === a.chiave} onMappa={() => setConMappa((x) => (x === a.chiave ? null : a.chiave))} />)}</ul>}
           {scheda === 'lavori' && <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Lavori">{lavoriVisibili.map((a) => <Attivita key={a.chiave} a={a} onCambiata={() => void dati.ricarica()} mappaAperta={conMappa === a.chiave} onMappa={() => setConMappa((x) => (x === a.chiave ? null : a.chiave))} />)}</ul>}
+          </div>
         </div>
       )}
     </PageState>

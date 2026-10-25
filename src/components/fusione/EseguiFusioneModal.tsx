@@ -68,7 +68,7 @@ export function EseguiFusioneModal({ partitaId, possedutaIds, risultatoId, onChi
 
   return (
     <Modal titolo="Esegui la fusione dalla scorta" aperta onChiudi={onChiudi}>
-      {anteprima.errore && <p className="m-0 testo-13 text-error">{anteprima.errore}</p>}
+      {anteprima.errore && <p className="m-0 testo-13 text-error-testo">{anteprima.errore}</p>}
       {!a && !anteprima.errore && <div className="flex justify-center py-6"><Spinner /></div>}
       {a && (
         <form className="flex flex-col gap-3 testo-13" onSubmit={(e) => { e.preventDefault(); void esegui(); }}>

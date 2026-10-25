@@ -63,7 +63,7 @@ export function NegozioPage() {
   // di prima ci arriva da qui; i negozi senza sede (Tanaka, TV, il Palazzo di Niijima) restano in questa pagina
   if (n?.sedeCasa) return <Navigate to={n.sedeCasa} replace />;
   return (
-    <PageState isLoading={dati.caricamento && !n} error={dati.errore} onRetry={() => void dati.ricarica()}>
+    <PageState isLoading={dati.caricamento && !n} error={dati.errore} onRetry={() => void dati.ricarica()} scheda={{ titolo: 'Negozio', ripiego: '/guida/negozi' }}>
       {n && (
         <div className="negozio-pagina flex flex-col gap-3">
           {/* Lotto B: l'intestazione comune delle schede; «Aggiungi un articolo» e «Correggi il negozio» nel menu «Modifica ⋯» */}

@@ -29,7 +29,7 @@ import { ModificaGuida } from '../components/guida/ModificaGuida';
 
 type Vista = 'calcolatore' | 'ricette' | 'con' | 'piani' | 'skill' | 'cicli' | 'forca' | 'coppia' | 'matrice' | 'speciali' | 'tesori';
 const VISTE: Array<[Vista, string, ChiaveScheda]> = [
-  ['calcolatore', 'Calcolatore A + B', 'fusione-calcolatore'], ['ricette', 'Come ottenere', 'fusione-ricette'], ['con', 'Fusioni con…', 'fusione-con'], ['piani', 'Piano di fusione', 'fusione-piani'],
+  ['calcolatore', 'Calcolatore A + B', 'fusione-calcolatore'], ['ricette', 'Come ottenere', 'fusione-ricette'], ['con', 'Cosa produce', 'fusione-con'], ['piani', 'Piano di fusione', 'fusione-piani'],
   ['skill', 'Cerca per skill', 'fusione-skill'], ['cicli', 'Cicli di fusione', 'fusione-cicli'], ['forca', 'Forca e Isolamento', 'fusione-forca'], ['speciali', 'Ricette speciali', 'fusione-speciali'],
 ];
 /** Viste di calcolo interne (tabelle degli arcani e dei Demoni del Tesoro): non per l'utente finale, raggiungibili con `?strumenti=1`. */
@@ -155,7 +155,7 @@ export function FusionePage() {
                     </div>
                   </>
                 ) : (
-                  <div className="text-error font-semibold">Questa combinazione non è possibile.</div>
+                  <div className="text-error-testo font-semibold">Questa combinazione non è possibile.</div>
                 )}
               </div>
             )}
@@ -236,7 +236,7 @@ export function FusionePage() {
                   <tr key={k}>
                     <th className="sticky left-0 bg-bg z-10 text-left">{nome(k)}</th>
                     {(dati.tesori.modificatori[k] ?? []).map((m, i) => (
-                      <td key={i} className={m > 0 ? 'text-success font-semibold' : 'text-error font-semibold'}>{m > 0 ? `+${m}` : m}</td>
+                      <td key={i} className={m > 0 ? 'text-success font-semibold' : 'text-error-testo font-semibold'}>{m > 0 ? `+${m}` : m}</td>
                     ))}
                   </tr>
                 ))}

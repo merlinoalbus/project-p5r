@@ -10,7 +10,7 @@ export const DESCRIZIONI_CATALOGO_OGGETTI: DescrizioniArea = {
   },
   'PUT /api/catalogo-oggetti/note-storiche/:chiave': {
     sommario: 'Modifica testo e fonte di una nota storica',
-    descrizione: 'Corpo strict `{ testo, fonte, testoAttuale }`: testo (fino a 2000 caratteri) e fonte (fino a 500) non possono essere vuoti dopo il trim, e `testoAttuale` è la precondizione, cioè il testo che la scheda ha letto. Se nel frattempo la nota è cambiata risponde 409 `nota-storica-cambiata` e non scrive. Una nota storica dice una discordanza della guida senza cambiare prezzi, acquisti o progressi delle partite; è un dato di gioco, letto da negozi, catalogo e confronto dei listini. La chiave è quella della nota (`nota_storica`), non dell\'oggetto.',
+    descrizione: 'Corpo strict `{ testo, fonte, testoAttuale }`: il testo (fino a 2000 caratteri) non può essere vuoto dopo il trim, la fonte (fino a 500) sì: una nota può non avere una fonte citabile, e `testoAttuale` è la precondizione, cioè il testo che la scheda ha letto. Se nel frattempo la nota è cambiata risponde 409 `nota-storica-cambiata` e non scrive. Una nota storica dice una discordanza della guida senza cambiare prezzi, acquisti o progressi delle partite; è un dato di gioco, letto da negozi, catalogo e confronto dei listini. La chiave è quella della nota (`nota_storica`), non dell\'oggetto.',
     risposta: '`NotaStoricaOfferta` aggiornata, con `modificata` vero se differisce dalla guida',
     errori: [[404, 'nota-storica-non-trovata'], [400, 'nota-storica-vuota'], [409, 'nota-storica-cambiata']],
   },

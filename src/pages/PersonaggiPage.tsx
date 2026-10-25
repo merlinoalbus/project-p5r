@@ -5,6 +5,7 @@
 import { useMemo, useState } from 'react';
 import { getPersonaggi, getPersone } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
+import { useSchede } from '../hooks/useSchede';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
@@ -18,6 +19,7 @@ import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
+import { TitoloSezione } from '../components/shared/TitoloSezione';
 
 /**
  * La carta di un personaggio: immagine (quella del Confidente se lo è, altrimenti il ritratto),
@@ -82,19 +84,23 @@ export function PersonaggiPage() {
   const compendio = useCarica(() => getPersone(), []);
   const idCompendio = useMemo(() => new Map((compendio.dati ?? []).flatMap((p) => [[p.nomeIt, p.id] as [string, number], [p.nome, p.id] as [string, number], [p.nomeIt.toLowerCase(), p.id] as [string, number]])), [compendio.dati]);
   const gruppi = useMemo(() => (d?.gruppi ?? []).filter((g) => !gruppo || g.nome === gruppo), [d, gruppo]);
+  // «Tutti» è la chiave vuota
+  const chiaviGruppi = useMemo(() => ['', ...(d?.gruppi ?? []).map((g) => g.nome)], [d]);
+  const schede = useSchede({ chiavi: chiaviGruppi, attiva: gruppo, onScegli: setGruppo });
   return (
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
         <div className="flex flex-col gap-3">
           <IntestazionePagina titolo="Personaggi" sottotitolo="Il cast di Persona 5 Royal presentato senza spoiler: chi sono, il loro ruolo, le Persona, le armi e il ruolo in battaglia; ogni Confidente rimanda alla sua scheda con risposte e abilità." />
-          <FilaScorrevole role="tablist" aria-label="Gruppi">
-            <button type="button" role="tab" aria-selected={gruppo === ''} className={`chip touch ${gruppo === '' ? 'chip--attivo' : ''}`} onClick={() => setGruppo('')}>Tutti</button>
-            {d.gruppi.map((g) => <button key={g.nome} type="button" role="tab" aria-selected={gruppo === g.nome} className={`chip touch ${gruppo === g.nome ? 'chip--attivo' : ''}`} onClick={() => setGruppo(g.nome)}>{g.nome} ({g.membri.length})</button>)}
+          <FilaScorrevole {...schede.lista} aria-label="Gruppi">
+            <button type="button" {...schede.scheda('')} className={`chip touch ${gruppo === '' ? 'chip--attivo' : ''}`}>Tutti</button>
+            {d.gruppi.map((g) => <button key={g.nome} type="button" {...schede.scheda(g.nome)} className={`chip touch ${gruppo === g.nome ? 'chip--attivo' : ''}`}>{g.nome} ({g.membri.length})</button>)}
           </FilaScorrevole>
+          <div {...schede.pannello(schede.aperta ?? '')} className="flex min-w-0 flex-col gap-3">
           {gruppi.map((g) => (
             <section key={g.nome} className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <h2 className="m-0 testo-15 font-semibold">{g.nome}</h2>
+                <TitoloSezione>{g.nome}</TitoloSezione>
                 <ModificaGuida tipo="gruppo-personaggi" chiave={g.nome} cosa={`il gruppo «${g.nome}»`} soloIcona onSalvato={() => { setGruppo(''); void dati.ricarica(); }} />
               </div>
               <ul className="m-0 p-0 list-none grid gap-2 grid-cols-[minmax(0,1fr)] xl:grid-cols-2" aria-label={g.nome}>
@@ -102,6 +108,7 @@ export function PersonaggiPage() {
               </ul>
             </section>
           ))}
+          </div>
         </div>
       )}
     </PageState>

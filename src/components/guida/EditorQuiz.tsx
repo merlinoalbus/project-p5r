@@ -78,7 +78,7 @@ export function EditorQuiz({ quiz, giorni, onCambia, disabilitato }: Props) {
           Giorni del mese
           <input className="form-input" type="text" maxLength={120} value={giorni} disabled={disabilitato} placeholder="7, 17, 27" aria-label="Giorni del mese"
             aria-invalid={giorniSbagliati} onChange={(e) => onCambia({ _giorniQuiz: e.target.value })} />
-          <span className={`testo-12 ${giorniSbagliati ? 'text-error' : 'text-text-muted'}`}>{giorniSbagliati ? 'Scrivi solo giorni del mese, da 1 a 31, separati da virgole.' : 'Vuoto se il quiz non ha giorni fissi'}</span>
+          <span className={`testo-12 ${giorniSbagliati ? 'text-error-testo' : 'text-text-muted'}`}>{giorniSbagliati ? 'Scrivi solo giorni del mese, da 1 a 31, separati da virgole.' : 'Vuoto se il quiz non ha giorni fissi'}</span>
         </label>
         <label className="editor-mappa__campo">
           Domanda

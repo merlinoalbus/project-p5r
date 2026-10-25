@@ -18,6 +18,7 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { Spinner } from '../components/shared/PageState';
 import { AzioneRiprova, VistaErrore } from '../components/shared/VistaErrore';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
+import { TesseraKpi } from '../components/shared/TesseraKpi';
 import { StellaCinque } from '../components/shared/StellaCinque';
 import { AssetImg } from '../components/shared/AssetImg';
 import { IconMaschera } from '../components/shared/iconeGuida';
@@ -98,20 +99,20 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
             </div>
             <div className="home-doti">
               {doti.dati?.map((d) => (
-                <Link key={d.chiave} to="/partita?scheda=doti" className="kpi-tile kpi-tile--compatto no-underline text-text">
-                  <span className="kpi-label">{d.nome}</span>
-                  <span className="kpi-value">{d.punti}</span>
-                </Link>
+                <TesseraKpi key={d.chiave} to="/partita?scheda=doti" compatta etichettaSopra etichetta={d.nome} titolo={d.nome} valore={d.punti} />
               ))}
-              <Link to="/partita?scheda=scorta" className="kpi-tile kpi-tile--compatto no-underline text-text">
-                <span className="kpi-label">Scorta</span>
-                <span className="kpi-value">{scorta.dati?.length ?? '…'}</span>
-              </Link>
+              <TesseraKpi to="/partita?scheda=scorta" compatta etichettaSopra etichetta="Scorta" valore={scorta.dati?.length ?? '…'} />
             </div>
-            {scorta.dati && (
+            {/* Lotto C: senza Persona in scorta la frase va a capo (prima stava nella fila che scorre e, col testo al 125%,
+                usciva tagliata senza puntini); con gli Arcani resta la fila di chip che scorre. */}
+            {scorta.dati && arcaniInScorta.length === 0 && (
+              <p className="home-arcani-vuoto m-0 testo-12 text-text-muted">
+                <span className="font-semibold uppercase tracking-[.06em]">Arcani potenziati</span> nessuna Persona in scorta
+              </p>
+            )}
+            {scorta.dati && arcaniInScorta.length > 0 && (
               <FilaScorrevole className="home-fila" role="group" aria-label="Arcani potenziati dalla scorta">
                 <span className="testo-12 font-semibold uppercase tracking-[.06em] text-text-muted">Arcani potenziati</span>
-                {arcaniInScorta.length === 0 && <span className="testo-12 text-text-muted">nessuna Persona in scorta</span>}
                 {arcaniInScorta.map((a) => (
                   <Link key={a.chiave} to="/partita?scheda=confidenti" className="chip chip--icona chip--attivo no-underline" title={`Persona ${a.nome} in scorta: i Confidenti ${a.nome} guadagnano punti ×1,5`}>
                     <AssetImg nome={`arcani/icona/${slug(a.chiave)}`} alt="" decorativa className="h-4 w-4 object-contain" fallback={<IconMaschera size={14} />} />

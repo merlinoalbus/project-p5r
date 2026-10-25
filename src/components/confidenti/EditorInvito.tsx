@@ -92,7 +92,7 @@ function EditorInvitoReale({ confidente, invito, onChiudi, onSalvato }: { confid
     )}>
       <div className="flex flex-col gap-3 testo-13">
         <p className="m-0 text-text-muted">Le modifiche valgono per tutte le partite. L’invito si registra solo se le condizioni sono vere.</p>
-        {posti.errore && <p role="alert" className="m-0 text-error">{posti.errore} <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void posti.ricarica()} /></p>}
+        {posti.errore && <p role="alert" className="m-0 text-error-testo">{posti.errore} <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void posti.ricarica()} /></p>}
         {invito ? <p className="m-0"><strong className="text-text">Giorno:</strong> {invito.data ? dataLeggibile(invito.data) : '—'} <span className="text-text-muted">(il giorno non si cambia)</span></p> : (
           <div className="flex flex-wrap gap-3">
             <Selettore etichetta="Mese" valore={mese} vuoto="Scegli il mese" opzioni={MESI_GIOCO.map((m) => ({ chiave: m.numero, nome: m.nome }))} onCambia={(v) => { setMese(v); if (v && Number(giorno) > (GIORNI_NEL_MESE[v] ?? 31)) setGiorno(''); }} disabilitato={occupato} ricerca="mai" />

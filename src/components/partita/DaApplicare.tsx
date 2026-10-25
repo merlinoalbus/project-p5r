@@ -119,7 +119,7 @@ function DaApplicareNelContesto({ partitaId, voceUid, onCambiato }: { partitaId:
   return <section className="flex min-w-0 flex-col gap-2 rounded border border-border p-2" aria-label="Punti da applicare per questa voce">
     <GestiPartita partitaId={partitaId} onCambiato={async () => { if (vivo.current) { setAnteprima(null); setIncerto(false); await elenco.ricarica(); await onCambiato?.(); } }} />
     {elenco.caricamento && !elenco.dati && <p role="status" className="m-0 testo-13">Un attimo…</p>}
-    {elenco.errore && <p role="alert" className="m-0 text-error">{elenco.errore}</p>}
+    {elenco.errore && <p role="alert" className="m-0 text-error-testo">{elenco.errore}</p>}
     {!!aperte.length && <>
       <ul className="m-0 flex list-none flex-col gap-2 p-0">{aperte.map((p) => {
         const e = normalizzaEffettoVoce(p.dati.effetto);
@@ -157,7 +157,7 @@ function DaApplicareNelContesto({ partitaId, voceUid, onCambiato }: { partitaId:
     </>}
     {dellaVoce.some((p) => p.stato !== 'aperta') && <details><summary className="touch testo-13">Già deciso</summary><ul className="m-0 flex flex-col gap-2 pl-4 testo-12">{dellaVoce.filter((p) => p.stato !== 'aperta').map((p) => <li key={p.uid}>{nome(p)} ·{p.stato === 'applicata' ? (p.deltaApplicato !== 0 ? `aggiunti ${p.deltaApplicato > 0 ? '+' : ''}${p.deltaApplicato}` : 'applicata') : p.motivoChiusura === 'gia-nel-saldo' ? 'già nel tuo saldo' : p.chiusaDa === 'causa' ? 'non più dovuta' : 'scartata'}{p.deltaRiconosciuto !== 0 && p.motivoChiusura !== 'beneficio-riallocato' ? ` · già contati ${p.deltaRiconosciuto}` : ''}</li>)}</ul></details>}
     {ricevuta && <p role="status" className="m-0 testo-13 text-success">{ricevuta}</p>}
-    {errore && <p role="alert" className="m-0 testo-13 text-error">{errore}</p>}
+    {errore && <p role="alert" className="m-0 testo-13 text-error-testo">{errore}</p>}
     <Modal aperta={consumo !== null} titolo={effettoConsumo?.tipo === 'pesca' ? 'Completa la pesca della voce già fatta' : 'Completa l’acquisto della voce già fatta'} onChiudi={() => { if (!occupato) setConsumo(null); }} larga>
       {consumo && effettoConsumo?.tipo === 'pesca' && uidVoce && uidEffetto ? <PreparazioneSessionePesca key={consumo.uid} partitaId={partitaId} fonte={{ tipo: 'diario', voceUid: uidVoce, effettoUid: uidEffetto }} giorno={typeof consumo.dati.giorno === 'string' ? consumo.dati.giorno : undefined} fascia={consumo.dati.fascia === 'sera' || consumo.dati.fascia === 'giorno' ? consumo.dati.fascia : undefined} confermaScrive={false}
         onConferma={async r => {
@@ -182,7 +182,7 @@ function DaApplicareNelContesto({ partitaId, voceUid, onCambiato }: { partitaId:
         {anteprima.richiesta.decisione.tipo === 'applica-effetto' && anteprima.richiesta.decisione.pesca && <RiepilogoSessionePreparata richiesta={anteprima.richiesta.decisione.pesca} sessioneFotografata={anteprima.fotografiaSessionePesca} />}
         {anteprima.movimenti.length ? <ul className="m-0 pl-4">{anteprima.movimenti.map((m, i) => <li key={`${m.tipo}:${m.chiave}:${i}`}><strong>{m.tipo === 'yen' ? 'Denaro' : m.tipo === 'punti-pesca' ? 'Punti pesca' : nomeDote(m.chiave)}: {m.prima.toLocaleString('it-IT')} → {m.dopo.toLocaleString('it-IT')}</strong> ({m.delta > 0 ? '+' : ''}{m.delta} {m.tipo === 'yen' ? 'yen' : m.tipo === 'punti-pesca' ? 'punti pesca' : 'punti'})</li>)}</ul> : <p className="m-0">Non cambia nessun punteggio.</p>}
         {anteprima.richiesta.decisione.tipo === 'gia-conteggiata' && <p className="m-0">Segno che {anteprima.richiesta.decisione.quantita} punti sono già nel tuo saldo: non ne aggiungo altri.</p>}
-        {errore && <p role="alert" className="m-0 text-error">{errore}</p>}
+        {errore && <p role="alert" className="m-0 text-error-testo">{errore}</p>}
         {incerto && <p role="alert" className="m-0 text-warning">Non è sicuro che sia andata a buon fine. «Riprova» ripete la stessa operazione una volta sola: se era già riuscita, non si duplica.</p>}
         {incerto && <GestiPartita partitaId={partitaId} onCambiato={async () => { if (vivo.current) { setAnteprima(null); setIncerto(false); await elenco.ricarica(); await onCambiato?.(); } }} />}
       </div>}

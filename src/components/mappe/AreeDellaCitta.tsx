@@ -20,6 +20,7 @@ import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { NEL_CESTINO } from '../../utils/cestino';
 import type { AreaRiassuntoDto, MappaDaCollocareDto, QuartiereRiassuntoDto } from '../../types';
+import { TitoloSezione } from '../shared/TitoloSezione';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -58,7 +59,7 @@ export function AreeDellaCitta({ quartieri }: { quartieri: QuartiereRiassuntoDto
   return (
     <>
       {(aree.dati?.length ?? 0) > 0 && <section className="flex flex-col gap-2" aria-label="Aree della città">
-        <h2 className="m-0 font-display testo-17 uppercase leading-none">Aree della città</h2>
+        <TitoloSezione variante="display">Aree della città</TitoloSezione>
         <p className="m-0 testo-13 text-text-secondary">Posti di Tokyo che nessuna fonte colloca in un quartiere.</p>
         <ul className="m-0 grid list-none grid-cols-1 gap-2 p-0 md:grid-cols-2">
           {aree.dati!.map((a) => (

@@ -88,7 +88,8 @@ function MenuModificaReale({ children, cosa, allinea = 'destra', classePulsante 
       // il fuoco che esce dal menu (Tab oltre l'ultima voce) lo chiude
       onBlur={(e) => { if (aperto && e.relatedTarget && !radice.current?.contains(e.relatedTarget as Node)) setAperto(false); }}>
       <PulsanteVisivo ref={pulsante} tono="fantasma" compatto className={classePulsante} icona={<IconaAzione chiave="modifica" dimensione={20} />}
-        titolo={<>Modifica <span aria-hidden="true">⋯</span></>} aria-label={`Modifica: ${cosa}`} title={`Modifica ${cosa}`}
+        // lotto C: sul telefono la parola si nasconde nelle testate e il segno ⋯ resta accanto alla matita (si capisce che è un menu)
+        titolo={<><span className="menu-modifica__parola">Modifica</span> <span className="menu-modifica__segno" aria-hidden="true">⋯</span></>} aria-label={`Modifica: ${cosa}`} title={`Modifica ${cosa}`}
         aria-expanded={aperto} aria-controls={id} onClick={() => setAperto((a) => !a)} />
       {/* scelta una voce (il clic arriva qui dopo il suo gestore) il riquadro si chiude e il fuoco torna al pulsante. Solo i clic che
           stanno davvero nel riquadro (DOM): React fa risalire fin qui anche quelli dentro la finestra in portale che una voce apre, e

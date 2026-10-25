@@ -31,7 +31,7 @@ function EditorGiornoReale({ data, onChiudi, onSalvato }: { data: string; onChiu
   const d = useCarica(() => getGiornoModificabile(data), [data]);
   return (
     <Modal titolo={`Giorno ${dataGiocoTesto(data)}`} aperta onChiudi={onChiudi} larga>
-      {d.errore && <p role="alert" className="m-0 text-error">{d.errore}</p>}
+      {d.errore && <p role="alert" className="m-0 text-error-testo">{d.errore}</p>}
       {!d.dati && !d.errore && <p role="status" className="m-0">Un attimo…</p>}
       {d.dati && <Corpo dati={d.dati} data={data} onChiudi={onChiudi} onSalvato={onSalvato} />}
     </Modal>

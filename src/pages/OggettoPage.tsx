@@ -80,7 +80,7 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
     finally { setOccupato(false); }
   };
   useDocumentTitle(o?.nome ?? 'Oggetto');
-  return <PageState isLoading={dati.caricamento && !o} error={dati.errore} onRetry={() => void dati.ricarica()}>
+  return <PageState isLoading={dati.caricamento && !o} error={dati.errore} onRetry={() => void dati.ricarica()} scheda={{ titolo: 'Oggetto', ripiego: '/guida/oggetti' }}>
     {o && <div className="flex min-w-0 flex-col gap-3">
       {/* Lotto B (punto 6): «Modifica | Elimina» venivano prima di che cosa fa l'oggetto; ora stanno nel menu «Modifica ⋯» dell'intestazione */}
       <IntestazioneScheda ripiego="/guida/oggetti" titolo={o.nome} chip={<span className="chip">{CATEGORIA_OGGETTO[o.categoria].nome}</span>}
@@ -89,7 +89,7 @@ function SchedaOggetto({ chiave, partitaId }: { chiave: string; partitaId: numbe
             disabled={occupato || regaloInCorso || dati.caricamento} onClick={() => setAzione('modifica')} />
           {o.modificato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Ripristina i valori della guida" aria-label="Ripristina"
             disabled={occupato || regaloInCorso || dati.caricamento} onClick={() => setAzione('ripristina')} />}
-          <PulsanteVisivo tono="fantasma" compatto className="text-error" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" aria-label="Elimina"
+          <PulsanteVisivo tono="fantasma" compatto className="text-error-testo" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" aria-label="Elimina"
             disabled={occupato || regaloInCorso || dati.caricamento} onClick={() => setAzione('elimina')} />
         </MenuModifica>} />
       {/* L11 · B11 (R11-15/5): un oggetto nato nell'app non ha un valore della guida da rimettere, e la pagina lo dice invece di nascondere «Ripristina» in silenzio */}

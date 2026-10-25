@@ -62,7 +62,7 @@ export function MappaMemento({ aree, selezionata, onSeleziona, sbloccati, classN
       aperto: !sbloccati || sbloccati.size === 0 || sbloccati.has(a.chiave),
     })), [aree, sbloccati]);
 
-  return <div className={`relative w-full overflow-hidden rounded-lg bg-[#8d0012] ${className}`}
+  return <div className={`relative w-full overflow-hidden rounded-lg bg-mappa-memento ${className}`}
     style={{ aspectRatio: '16 / 10' }}>
     {/* Il cratere: centro in basso al centro, anelli concentrici e crepe che si irradiano su
         tutta la larghezza. È questa la forma della schermata del gioco. */}
@@ -117,7 +117,7 @@ export function MappaMemento({ aree, selezionata, onSeleziona, sbloccati, classN
               ? 'scale-[1.12] drop-shadow-[0_0_12px_rgba(255,210,63,0.95)]'
               : 'drop-shadow-[0_3px_8px_rgba(0,0,0,0.6)] group-hover:scale-[1.06] group-hover:drop-shadow-[0_0_10px_rgba(255,210,63,0.7)]'
           }`} />
-        {scelto && <span className="pointer-events-none absolute left-1/2 top-full -translate-x-1/2 -translate-y-1 whitespace-nowrap rounded-[2px] border-2 border-[#ffd23f] bg-black px-[0.5em] py-[0.12em] font-display testo-12 uppercase leading-none tracking-[0.05em] text-[#ffd23f] shadow-[0_2px_8px_rgba(0,0,0,0.8)] sm:testo-14">
+        {scelto && <span className="pointer-events-none absolute left-1/2 top-full -translate-x-1/2 -translate-y-1 whitespace-nowrap rounded-[2px] border-2 border-mappa-oro bg-black px-[0.5em] py-[0.12em] font-display testo-12 uppercase leading-none tracking-[0.05em] text-mappa-oro shadow-[0_2px_8px_rgba(0,0,0,0.8)] sm:testo-14">
           {t.area.nome.replace(/^Dedalo di /, '')}
         </span>}
       </button>;

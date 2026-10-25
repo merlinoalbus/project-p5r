@@ -48,7 +48,7 @@ export function StatisticheBarre({ statistiche, base, didascalia, compatta }: Pr
               <div className="h-full" style={{ width: `${quota}%`, background: 'linear-gradient(90deg, #b1261f, #e5352b)' }} />
             </div>
             <span className={`${compatta ? 'w-7 testo-13' : 'w-9 testo-16'} text-right font-black tabular-nums`} role="cell">{valore}</span>
-            {base && <span className={`w-9 testo-12 tabular-nums ${diff > 0 ? 'text-success' : diff < 0 ? 'text-error' : 'text-text-muted'}`} role="cell">{diff > 0 ? `+${diff}` : diff === 0 ? '—' : diff}</span>}
+            {base && <span className={`w-9 testo-12 tabular-nums ${diff > 0 ? 'text-success' : diff < 0 ? 'text-error-testo' : 'text-text-muted'}`} role="cell">{diff > 0 ? `+${diff}` : diff === 0 ? '—' : diff}</span>}
           </div>
         );
       })}

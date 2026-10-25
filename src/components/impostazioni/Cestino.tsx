@@ -27,6 +27,7 @@ import { IconaAzione } from '../shared/IconaAzione';
 import type { EsitoRipristinoCestinoDto, VoceCestinoUnificatoDto } from '../../types';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
+import { TitoloSezione } from '../shared/TitoloSezione';
 
 // Costante di build, nello stesso modulo perché il bundler tolga il ramo dei contenuti (vedi utils/modalita.ts). Nel rilascio il cestino è
 // SOLO quello personale (`/api/partite/cestino`): le rotte di `/impostazioni` non esistono e non devono restare nel bundle.
@@ -135,7 +136,7 @@ export function Cestino() {
     <section className="card flex flex-col gap-3" aria-labelledby="titolo-cestino">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex min-w-0 flex-col gap-1">
-          <h2 id="titolo-cestino" className="m-0 testo-15 font-semibold">Cestino</h2>
+          <TitoloSezione id="titolo-cestino">Cestino</TitoloSezione>
           <p className="m-0 testo-13 text-text-secondary">
             {IN_RILASCIO
               ? 'Le partite e le singole fonti d’acquisto eliminate, con tutto quel che si sono portate via. «Rimetti» le riporta com’erano; quel che hai cambiato dopo resta com’è. Il cestino si svuota solo a mano.'
@@ -146,7 +147,7 @@ export function Cestino() {
         </div>
         <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Svuota il cestino" disabled={occupato || voci.length === 0} onClick={() => setSvuotare(true)} />
       </div>
-      {elenco.errore && <p className="m-0 testo-13 text-error" role="alert">{elenco.errore}</p>}
+      {elenco.errore && <p className="m-0 testo-13 text-error-testo" role="alert">{elenco.errore}</p>}
       {elenco.caricamento && !elenco.dati && <p className="m-0 testo-13 text-text-muted">Caricamento del cestino…</p>}
       {elenco.dati && voci.length === 0 && <p className="m-0 testo-13 text-text-muted">Il cestino è vuoto.</p>}
       {voci.length > 0 && (

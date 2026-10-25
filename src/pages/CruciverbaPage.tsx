@@ -28,6 +28,7 @@ import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { piatto } from '../utils/testo';
+import { TitoloSezione } from '../components/shared/TitoloSezione';
 
 type FiltroStato = 'tutti' | 'da-fare' | 'fatti';
 const STATI: ReadonlyArray<{ chiave: FiltroStato; nome: string }> = [{ chiave: 'tutti', nome: 'Tutti' }, { chiave: 'da-fare', nome: 'Da fare' }, { chiave: 'fatti', nome: 'Fatti' }];
@@ -152,7 +153,7 @@ export function CruciverbaPage() {
           {perMese.length === 0 && <p className="m-0 testo-13 text-text-muted" role="status">Nessun cruciverba con questi filtri.</p>}
           {perMese.map(([mese, lista]) => (
             <section key={mese} className="flex flex-col gap-2" aria-label={`Cruciverba di ${mese}`}>
-              <h2 className="m-0 testo-15 font-semibold">{mese}</h2>
+              <TitoloSezione>{mese}</TitoloSezione>
               <ul className="m-0 p-0 list-none flex flex-col gap-2">
                 {lista.map((c) => <Cruciverba key={c.giorno} c={c} partitaId={partitaId} onCambiato={aggiorna} onCorretto={() => void dati.ricarica()} evidenzia={prossimo?.giorno === c.giorno} />)}
               </ul>

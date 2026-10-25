@@ -139,7 +139,7 @@ export function CicliSalvati({ partitaId }: Props) {
         I cicli salvati dalla vista «Cicli di fusione» si eseguono qui anello per anello: procura il partner (evocazione dal Registro o cattura), esegui la fusione dalla scorta, e al ritorno sulla Persona di partenza il giro viene contato.
         {lista.dati && lista.dati.length > 0 && ` Giri completati in totale: ${totaleGiri}.`}
       </p>
-      {lista.errore && <div className="testo-13 text-error">{lista.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void lista.ricarica()} /></div>}
+      {lista.errore && <div className="testo-13 text-error-testo">{lista.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void lista.ricarica()} /></div>}
       {!lista.dati && !lista.errore && <div className="flex justify-center py-6"><Spinner /></div>}
       {lista.dati && lista.dati.length === 0 && (
         <EmptyState illustrazione="vuoto-cicli" title="Nessun ciclo salvato" hint="Trova un ciclo nella pagina Fusione («Cicli di fusione») e premi «Salva ciclo»." action={<CollegamentoVisivo tono="primario" icona={<IconaAzione chiave="scheda" dimensione={22} />} titolo="Vai ai cicli di fusione" to="/fusione?vista=cicli" />} />

@@ -30,7 +30,7 @@ export function SceltaImmagine({ file, onCambia, etichetta = 'Immagine della pla
         onChange={(e) => onCambia(e.currentTarget.files?.[0] ?? null)} />
       <span className="testo-12 text-text-muted">PNG, JPEG o WEBP, fino a 8 MB. Resta nella tua istanza.</span>
       {anteprima && !errore && <img src={anteprima} alt="Anteprima dell’immagine scelta" className="max-h-48 w-full rounded border border-border object-contain bg-[#0f0f14]" />}
-      {errore && <p className="m-0 testo-13 text-error" role="alert">{errore}</p>}
+      {errore && <p className="m-0 testo-13 text-error-testo" role="alert">{errore}</p>}
     </div>
   );
 }

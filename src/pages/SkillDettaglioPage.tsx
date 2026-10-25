@@ -26,7 +26,7 @@ export function SkillDettaglioPage() {
   useDocumentTitle(s ? s.nomeIt : 'Skill');
 
   return (
-    <PageState isLoading={inPrimoCaricamento} error={errore} onRetry={() => void ricarica()}>
+    <PageState isLoading={inPrimoCaricamento} error={errore} onRetry={() => void ricarica()} scheda={{ titolo: 'Skill', ripiego: '/skill' }}>
       {s && (
         <div className="flex flex-col gap-4">
           <IntestazioneScheda ripiego="/skill" titolo={s.nomeIt}

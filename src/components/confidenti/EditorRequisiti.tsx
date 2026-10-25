@@ -39,7 +39,7 @@ function RequisitiRango({ confidente, rango, condizioni, onCambia, occupato, onO
   };
   return <div className="flex flex-col gap-3 p-3">
     <CondizioniEditor condizioni={condizioni} onCambia={onCambia} disabilitato={occupato} massimo={10} />
-    {errore && <p role="alert" className="m-0 text-error">{errore}</p>}
+    {errore && <p role="alert" className="m-0 text-error-testo">{errore}</p>}
     <div className="flex flex-wrap gap-2">
       <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo={occupato ? 'Salvataggio…' : `Salva rango ${rango.rango}`} disabled={occupato || condizioni.length > 10} onClick={() => void cambia(false)} />
       {rango.modificato && <PulsanteVisivo icona={<IconaAzione chiave="riapri" dimensione={22} />} titolo="Ripristina dalla guida" disabled={occupato} onClick={() => void cambia(true)} />}

@@ -99,7 +99,7 @@ function EditorDisponibilitaReale({ chiave, onChiudi, onSalvato }: { chiave: str
     <div className="flex flex-col gap-3 min-w-0">
       <p className="m-0 testo-13 text-text-secondary">Informazioni della guida, comuni alle partite. Non cambiano i requisiti operativi del rango 1, i semafori o i progressi.</p>
       {dati.caricamento && <p role="status">Lettura delle informazioni…</p>}
-      {(errore || dati.errore) && <p className="m-0 text-error whitespace-pre-wrap" role="alert">{errore || dati.errore} La bozza resta disponibile.</p>}
+      {(errore || dati.errore) && <p className="m-0 text-error-testo whitespace-pre-wrap" role="alert">{errore || dati.errore} La bozza resta disponibile.</p>}
       {c && <>
         {c.errori.length > 0 && <ul className="text-warning m-0 pl-5">{c.errori.map(e => <li key={e}>{e}</li>)}</ul>}
         {c.bonifica && <p className="m-0 testo-12 text-text-muted">Bonifica iniziale: {c.bonifica.esito}. {c.bonifica.motivo}</p>}

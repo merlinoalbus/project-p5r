@@ -224,8 +224,8 @@ function ModuloCatalogoReale({ tipo: tipoModulo, elemento, negozioChiave, onChiu
             {!condizioniScelte && <PulsanteVisivo icona={<IconaAzione chiave="deseleziona" dimensione={22} />} titolo="Nessuna condizione propria" className="min-h-11" disabled={occupato} onClick={() => setCondizioniScelte(true)} />}
           </div>}
         </>}
-        {erroreSalvataggio && <p role="alert" className="m-0 text-sm text-error">{erroreSalvataggio} La finestra resta aperta.</p>}
-        {!regoleValide && <p role="alert" className="m-0 testo-13 text-error">Risolvi le parti non leggibili e completa o rimuovi i gruppi vuoti prima di salvare.</p>}
+        {erroreSalvataggio && <p role="alert" className="m-0 text-sm text-error-testo">{erroreSalvataggio} La finestra resta aperta.</p>}
+        {!regoleValide && <p role="alert" className="m-0 testo-13 text-error-testo">Risolvi le parti non leggibili e completa o rimuovi i gruppi vuoti prima di salvare.</p>}
         <div className="flex flex-wrap items-center justify-between gap-2">
           {modulo.conVerificato
             ? <label className="flex items-center gap-2 testo-13 touch" title="Il dato è confermato: senza la spunta compare come «da fonte secondaria»">

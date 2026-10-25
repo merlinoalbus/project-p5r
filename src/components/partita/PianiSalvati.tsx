@@ -137,7 +137,7 @@ export function PianiSalvati({ partitaId }: Props) {
         I piani salvati dalla vista «Piano di fusione» restano qui con l'avanzamento ricalcolato sulla scorta di adesso: foglie già possedute, fusioni già fatte e passi eseguibili subito.
         {obiettivoId && <> Filtro: solo i piani dell'obiettivo. <Link to="/partita?scheda=piani" className="text-primary-testo">Tutti i piani</Link></>}
       </p>
-      {lista.errore && <div className="testo-13 text-error">{lista.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void lista.ricarica()} /></div>}
+      {lista.errore && <div className="testo-13 text-error-testo">{lista.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void lista.ricarica()} /></div>}
       {!lista.dati && !lista.errore && <div className="flex justify-center py-6"><Spinner /></div>}
       {lista.dati && lista.dati.length === 0 && (
         <EmptyState illustrazione="vuoto-piani" title="Nessun piano salvato" hint="Calcola un piano nella pagina Fusione («Piano di fusione») e premi «Salva piano»." action={<CollegamentoVisivo tono="primario" icona={<IconaAzione chiave="scheda" dimensione={22} />} titolo="Vai ai piani di fusione" to="/fusione?vista=piani" />} />

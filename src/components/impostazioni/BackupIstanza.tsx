@@ -23,6 +23,7 @@ import { BarraInvio } from './BarraInvio';
 import type { DepositoFileDto } from '../../types';
 import { Selettore } from '../shared/Selettore';
 import { salvaFile } from '../../utils/salvaFile';
+import { TitoloSezione } from '../shared/TitoloSezione';
 
 /**
  * Card «Backup e ripristino» delle Impostazioni: riepiloga lo stato dell'istanza (database, partite, immagini, caratteri,
@@ -101,7 +102,7 @@ export function BackupIstanza() {
 
   return (
     <section className="card flex flex-col gap-3" aria-label="Backup e ripristino">
-      <h2 className="m-0 testo-15 font-semibold">Backup e ripristino</h2>
+      <TitoloSezione>Backup e ripristino</TitoloSezione>
       <p className="m-0 testo-13 text-text-secondary">
         Scarica una copia di tutto e rimettila quando vuoi, anche su un altro dispositivo. L'<strong>istanza completa</strong> contiene i dati di gioco con le
         immagini, le partite con il loro tracking e i caratteri che hai caricato. Ogni scaricamento lascia una copia anche nella <strong>cartella d'appoggio</strong>
@@ -118,7 +119,7 @@ export function BackupIstanza() {
           <li><strong>Copie di sicurezza</strong> <span className="text-text-muted">{s.copieDiSicurezza} in data/backups</span></li>
         </ul>
       )}
-      {stato.errore && <p className="m-0 testo-13 text-error">{stato.errore}</p>}
+      {stato.errore && <p className="m-0 testo-13 text-error-testo">{stato.errore}</p>}
       <div className="flex flex-wrap gap-1.5 items-center">
         <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Scarica l'istanza completa" dettaglio="ZIP con dati di gioco, partite e caratteri" disabled={occupato} onClick={() => void esporta()} />
       </div>

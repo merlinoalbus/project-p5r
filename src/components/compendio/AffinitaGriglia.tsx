@@ -12,19 +12,21 @@ interface Props {
   compatta?: boolean;
   /** Nome del gruppo per i lettori di schermo (predefinito «Affinità»): serve a distinguere due griglie sulla stessa pagina. */
   etichetta?: string;
+  /** Con `compatta`: le dieci caselle su una riga sola che si divide la larghezza (piastrella a riga del Compendio sul telefono). */
+  fluida?: boolean;
 }
 
 /** Griglia delle affinità: elemento in alto, codice colorato sotto. */
-export function AffinitaGriglia({ affinita, compatta, etichetta = 'Affinità' }: Props) {
+export function AffinitaGriglia({ affinita, compatta, etichetta = 'Affinità', fluida }: Props) {
   if (compatta) {
     return (
-      <div className="flex gap-1 flex-wrap" role="group" aria-label={etichetta}>
+      <div className={`flex gap-1 ${fluida ? 'flex-nowrap' : 'flex-wrap'}`} role="group" aria-label={etichetta}>
         {affinita.map((a) => {
           const stile = STILE_AFFINITA[a.codice] ?? STILE_AFFINITA['-'];
           return (
             <span
               key={a.elemento}
-              className={`inline-flex flex-col items-center justify-center w-[42px] h-[46px] rounded-md testo-12 leading-tight ${stile.classe}`}
+              className={`inline-flex flex-col items-center justify-center ${fluida ? 'min-w-0 flex-1 basis-0 h-[44px]' : 'w-[42px] h-[46px]'} rounded-md testo-12 leading-tight ${stile.classe}`}
               title={`${a.elementoNome}: ${a.codiceNome}`}
             >
               <span style={{ color: coloreElemento(a.elemento) }} className="font-bold">{a.elementoSigla}</span>

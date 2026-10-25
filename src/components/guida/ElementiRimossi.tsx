@@ -55,7 +55,7 @@ function ElementiRimossiReale({ tipo, negozio, onRipristinato, sempre, versione 
   return (
     <section className="rimossi-elenco" aria-label={`${NOME_TIPO_CATALOGO[tipo].plurale} rimossi`}>
       <h3 className="rimossi-elenco__titolo">{NOME_TIPO_CATALOGO[tipo].plurale}<span className="text-text-muted"> · {righe.length}</span></h3>
-      {elenco.errore && <p className="m-0 testo-13 text-error" role="alert">{elenco.errore}</p>}
+      {elenco.errore && <p className="m-0 testo-13 text-error-testo" role="alert">{elenco.errore}</p>}
       {righe.length === 0 && !elenco.caricamento && <p className="m-0 testo-13 text-text-muted">Nessuna riga rimossa.</p>}
       <ul className="m-0 flex list-none flex-col gap-1 p-0">
         {righe.map((e) => (

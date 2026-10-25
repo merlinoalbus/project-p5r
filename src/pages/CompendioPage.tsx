@@ -8,6 +8,7 @@ import { Selettore } from '../components/shared/Selettore';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import { useMedia } from '../hooks/useMedia';
 import { useCarica } from '../hooks/useCarica';
 import { getPersone } from '../services/api';
 import { useGlossarioStore } from '../stores/glossarioStore';
@@ -57,6 +58,9 @@ export function CompendioPage() {
   const impostaVista = usePreferenzeStore((s) => s.impostaVistaPersona);
   const { dati, inPrimoCaricamento, errore, ricarica } = useCarica(() => getPersone({ delGruppo: true }), []);
   const [params, setParams] = useSearchParams();
+  // Lotto C: sul telefono le piastrelle diventano righe (arte piccola, nome, arcano e le dieci affinità su una riga):
+  // da ~1,5 Persona per schermata a 4 e più, con le stesse informazioni.
+  const telefono = useMedia('(max-width: 639px)');
 
   const q = params.get('q') ?? '';
   const arcana = params.get('arcana') ?? '';
@@ -160,6 +164,8 @@ export function CompendioPage() {
               <button type="button" className={`chip touch ${vista === 'elenco' ? 'chip--attivo' : ''}`} onClick={() => impostaVista('elenco')} aria-pressed={vista === 'elenco'}>Elenco</button>
             </div>
             <Link to="/compendio/glossario" className="chip touch no-underline">Glossario dei termini</Link>
+            {/* Skill non è più nella barra in basso (lotto C: c'è la Guida): da qui resta a un tocco */}
+            <Link to="/skill" className="chip touch no-underline">Skill</Link>
             <span className="testo-13 text-text-muted">{dati ? `${filtrate.length} di ${dati.length} Persona` : ''}</span>
           </>
         }
@@ -168,7 +174,7 @@ export function CompendioPage() {
       {/* Ricerca e ordinamento sempre visibili; gli altri filtri in un pannello a gruppi etichettati, riassunti da chip rimovibili. */}
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap gap-2 items-center">
-          <CampoRicerca valore={q} onCambia={(v) => imposta('q', v, '')} segnaposto="Cerca Persona o arcano…" />
+          <CampoRicerca className="max-sm:basis-full" valore={q} onCambia={(v) => imposta('q', v, '')} segnaposto="Cerca Persona o arcano…" />
           <span className="flex items-center gap-1.5 testo-12 text-text-secondary">
             Ordina
             <Selettore compatto etichetta="Ordinamento" valore={ordine} opzioni={[{ chiave: 'livello', nome: 'Livello' }, { chiave: 'nome', nome: 'Nome' }, { chiave: 'arcana', nome: 'Arcano' }]} onCambia={(k) => imposta('ordine', k, 'livello')} />
@@ -228,8 +234,8 @@ export function CompendioPage() {
         {filtrate.length === 0 ? (
           <EmptyState title="Nessuna Persona corrisponde ai filtri" hint="Prova ad allargare l'intervallo di livello, a cambiare arcano o a togliere i filtri di affinità e immagine." />
         ) : vista === 'piastrelle' ? (
-          <ul className="m-0 p-0 list-none grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5" aria-label="Persona">
-            {filtrate.map((p) => <PiastrellaPersona key={p.id} persona={p} evidenziata={evidenziata === p.id} onApri={() => ricordaUltimaPersona(p.id)} />)}
+          <ul className="m-0 p-0 list-none grid gap-2 grid-cols-1 sm:gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5" aria-label="Persona">
+            {filtrate.map((p) => <PiastrellaPersona key={p.id} persona={p} riga={telefono} evidenziata={evidenziata === p.id} onApri={() => ricordaUltimaPersona(p.id)} />)}
           </ul>
         ) : (
           <ul className="m-0 p-0 list-none grid gap-2 grid-cols-1 xl:grid-cols-2" aria-label="Persona">

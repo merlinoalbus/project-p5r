@@ -127,7 +127,7 @@ export function CicliFusione({ persone, partitaId, livelloProtagonista, inScorta
             <button type="button" className={`chip touch ${limitaLivello ? 'chip--attivo' : ''}`} disabled={livelloProtagonista === null} onClick={() => setLimitaLivello((v) => !v)} aria-pressed={limitaLivello && livelloProtagonista !== null}>Fino al livello {livelloProtagonista ?? '—'}</button>
           </div>
           {errore ? (
-            <p className="m-0 testo-13 text-error">{errore}</p>
+            <p className="m-0 testo-13 text-error-testo">{errore}</p>
           ) : caricamento && !dati ? (
             <div className="flex justify-center py-6"><Spinner /></div>
           ) : dati && dati.cicli.length === 0 ? (

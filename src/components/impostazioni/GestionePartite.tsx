@@ -7,15 +7,20 @@ import { useShallow } from 'zustand/react/shallow';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { notifica } from '../../stores/notificationStore';
 import { NuovaPartitaModal } from '../partita/NuovaPartitaModal';
+import { FinestraModificaPartita } from '../partita/FinestraModificaPartita';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione, IconaScheda } from '../shared/IconaAzione';
 import { conferma } from '../../stores/confermaStore';
+import { TitoloSezione } from '../shared/TitoloSezione';
 
 /** Gestione delle partite multiple. */
 export function GestionePartite() {
   const { partite, rendiAttiva, elimina } = usePartitaStore(useShallow((s) => ({ partite: s.partite, rendiAttiva: s.rendiAttiva, elimina: s.elimina })));
   const [nuova, setNuova] = useState(false);
   const [occupato, setOccupato] = useState<number | null>(null);
+  /** La partita di cui si stanno modificando i dati (finestra aperta), se c'è. */
+  const [inModifica, setInModifica] = useState<number | null>(null);
+  const partitaInModifica = partite.find((p) => p.id === inModifica) ?? null;
 
   /** Rende attiva la partita indicata; durante l'operazione disabilita i pulsanti della sua riga. */
   const attiva = async (id: number) => {
@@ -47,7 +52,7 @@ export function GestionePartite() {
   return (
     <section className="card flex flex-col gap-3">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="m-0 testo-15 font-semibold">Partite</h2>
+        <TitoloSezione>Partite</TitoloSezione>
         <PulsanteVisivo tono="primario" compatto icona={<IconaScheda chiave="nuova-partita" dimensione={20} />} titolo="Nuova partita" onClick={() => setNuova(true)} />
       </div>
       {partite.length === 0 ? (
@@ -61,12 +66,15 @@ export function GestionePartite() {
               <span className="testo-12 text-text-muted">{p.difficolta}{p.nuovaPartitaPlus ? ' · NG+' : ''}</span>
               <span className="flex-1" />
               {p.attiva ? <span className="chip chip--attivo">Attiva</span> : <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="attiva" dimensione={20} />} titolo="Rendi attiva" disabled={occupato === p.id} onClick={() => void attiva(p.id)} />}
+              <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" aria-label={`Modifica i dati della partita «${p.nome}»`} onClick={() => setInModifica(p.id)} />
               <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" disabled={occupato === p.id} onClick={() => void rimuovi(p.id, p.nome)} />
             </li>
           ))}
         </ul>
       )}
       <NuovaPartitaModal aperta={nuova} onChiudi={() => setNuova(false)} />
+      {/* i dati di una partita (anche non attiva): lo stesso modulo che si apre da «Modifica» nella Partita */}
+      {partitaInModifica && <FinestraModificaPartita partita={partitaInModifica} aperta onChiudi={() => setInModifica(null)} />}
     </section>
   );
 }

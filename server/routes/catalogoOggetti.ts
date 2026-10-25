@@ -27,7 +27,7 @@ router.post('/regali/:confidente/:ordine/ripristina-costo', validate({
 const paramsNotaStorica = schema.object({ chiave: schema.string().regex(/^[a-z0-9][a-z0-9-]{0,119}$/) });
 router.put('/note-storiche/:chiave', validate({
   params: paramsNotaStorica,
-  body: schema.object({ testo: schema.string().min(1).max(2000), fonte: schema.string().min(1).max(500), testoAttuale: schema.string().max(2000) }).strict(),
+  body: schema.object({ testo: schema.string().min(1).max(2000), fonte: schema.string().max(500), testoAttuale: schema.string().max(2000) }).strict(),
 }), (req, res) => {
   res.json(modificaNotaStorica(String(req.params.chiave), req.body as { testo: string; fonte: string; testoAttuale: string }));
 });

@@ -26,6 +26,7 @@ import { useSearchParams } from '../components/scheda/routerScheda';
 import { getRichieste, impostaStatoRichiesta } from '../services/api';
 import { PARAMETRO_ELEMENTO } from '../../shared/ricerca';
 import { useCarica } from '../hooks/useCarica';
+import { useSchede } from '../hooks/useSchede';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
@@ -46,6 +47,7 @@ import { chiaveElementoDaTesto, nomeCanonicoNelTesto } from '../utils/elementiGu
 import { piatto } from '../utils/testo';
 import { ModuloRichiesta } from '../components/guida/ModuloRichiesta';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
+import { TitoloSezione } from '../components/shared/TitoloSezione';
 
 // costante di build, nello stesso modulo perché il bundler tolga il ramo di modifica (vedi utils/modalita.ts)
 const IN_RILASCIO = import.meta.env.VITE_MODALITA === 'rilascio';
@@ -56,6 +58,8 @@ const ACCETTAZIONE: ReadonlyArray<{ chiave: Accettazione; nome: string }> = [{ c
 const COMPLETAMENTO: ReadonlyArray<{ chiave: Completamento; nome: string }> = [{ chiave: 'tutte', nome: 'Tutte' }, { chiave: 'completate', nome: 'Completate' }, { chiave: 'da-completare', nome: 'Da completare' }];
 /** I due fogli della pagina: le Richieste, e la bottega di Jose. */
 type Foglio = 'richieste' | 'jose';
+/** I fogli della pagina: chiave, nome e icona. */
+const FOGLI: ReadonlyArray<[Foglio, string, string]> = [['richieste', 'Le Richieste', 'richiesta'], ['jose', 'Jose: fiori e scambi', 'jose']];
 
 /** Pastiglia di una debolezza o di una resistenza: colorata se l'elemento si riconosce (vocabolario unico `shared/elementi`), con il nome canonico. */
 function Affinita({ testo: scritto, tipo }: { testo: string; tipo: 'debole' | 'resiste' }) {
@@ -192,6 +196,8 @@ export function RichiestePage({ soloChiave }: { soloChiave?: string } = {}) {
     return { ...attuale, richieste, completate: richieste.filter((x) => x.stato === 'completata').length, dedali: attuale.dedali.map((x) => ({ ...x, completate: richieste.filter((y) => y.areaChiave === x.chiave && y.stato === 'completata').length })) };
   });
   const filtriAttivi = !!q || !!dedalo || accettazione !== 'tutte' || completamento !== 'tutte';
+  const fogli = useSchede<Foglio>({ chiavi: FOGLI.map(([k]) => k), attiva: foglio,
+    onScegli: (k) => setParams((p) => { const n = new URLSearchParams(p); if (k === 'richieste') n.delete('foglio'); else n.set('foglio', k); return n; }, { replace: true }) });
 
   // L11 B4 (R11-07/3): l'indirizzo `?elemento=<chiave>` apre la stessa vista anche come pagina (è la «casa» di una Richiesta nella ricerca
   // globale); nel pannello il parametro è quello della scheda, che coincide con `soloChiave`
@@ -221,17 +227,18 @@ export function RichiestePage({ soloChiave }: { soloChiave?: string } = {}) {
           <IntestazionePagina titolo="Richieste dei Mementos" sottotitolo={<>{d.totale} Richieste: committente, date, dedalo, bersaglio con debolezze, ricompense e Confidente collegato.{partitaId ? ` Nella partita «${attiva?.nome}».` : ' Attiva una partita per segnare accettate e completate.'}</>} />
 
           {/* Jose è un foglio a parte: i suoi fiori, i timbri e la tabella degli scambi sono un'altra faccenda. */}
-          {d.jose && <FilaScorrevole role="tablist" aria-label="Fogli">
-            {([['richieste', 'Le Richieste', 'richiesta'], ['jose', 'Jose: fiori e scambi', 'jose']] as Array<[Foglio, string, string]>).map(([k, l, icona]) => (
-              <button key={k} type="button" role="tab" aria-selected={foglio === k} title={l}
-                className={`piastrella-scheda touch ${foglio === k ? 'piastrella-scheda--attiva' : ''}`}
-                onClick={() => setParams((p) => { const n = new URLSearchParams(p); if (k === 'richieste') n.delete('foglio'); else n.set('foglio', k); return n; }, { replace: true })}>
+          {d.jose && <FilaScorrevole {...fogli.lista} aria-label="Fogli">
+            {FOGLI.map(([k, l, icona]) => (
+              <button key={k} type="button" {...fogli.scheda(k)} title={l}
+                className={`piastrella-scheda touch ${foglio === k ? 'piastrella-scheda--attiva' : ''}`}>
                 {k === 'richieste' ? <IconaCategoria categoria={icona} dimensione={28} /> : <IconaScheda chiave="jose" dimensione={28} />}
                 <span>{l}</span>
               </button>
             ))}
           </FilaScorrevole>}
 
+          {/* i due fogli, come pannello delle schede quando ci sono (con Jose); senza, il contenuto e basta */}
+          <div {...(d.jose ? fogli.pannello(foglio) : {})} className="flex min-w-0 flex-col gap-4">
           {foglio === 'richieste' && <>
           {!IN_RILASCIO && <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una Richiesta" dettaglio="vale per tutte le partite" onClick={() => setModulo({ chiave: null })} />}
           {partitaId && <section className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Riepilogo delle Richieste">
@@ -265,7 +272,7 @@ export function RichiestePage({ soloChiave }: { soloChiave?: string } = {}) {
             <div className="flex flex-col gap-3 testo-13">
               <SezioneConFregio chiave="jose-fiori" disposizione="grande">
                 <div className="flex items-start gap-2">
-                  <h2 className="m-0 min-w-0 flex-1 font-display testo-17 uppercase leading-none">Jose: fiori, timbri e scambi</h2>
+                  <TitoloSezione variante="display" className="min-w-0 flex-1">Jose: fiori, timbri e scambi</TitoloSezione>
                   {/* L11 · B11 (R11-15/5): introduzione, fiori, timbri e boss segreto di Jose; gli scambi sono il suo listino */}
                   <ModificaGuida tipo="jose" chiave="jose" cosa="i testi di Jose" soloIcona onSalvato={() => void dati.ricarica()} />
                 </div>
@@ -307,6 +314,7 @@ export function RichiestePage({ soloChiave }: { soloChiave?: string } = {}) {
               )}
             </div>
           )}
+          </div>
         </div>
       )}
       {/* il modulo della Richiesta: per correggerne una o aggiungerne una nuova (2026-10-11) */}

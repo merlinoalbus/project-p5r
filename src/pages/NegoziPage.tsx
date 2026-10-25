@@ -99,7 +99,9 @@ export function NegoziPage() {
             <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Nascosti dalla guida" to="/impostazioni#nascosti" />
           </div>}
           {nuovoNegozio && <ModuloCatalogo tipo="negozio" onChiudi={() => setNuovoNegozio(false)} onSalvato={() => { setNuovoNegozio(false); void negozi.ricarica(); }} />}
-          <FiltriArticoli filtro={filtro} onCambia={cambiaFiltro} conPartita={partitaId !== null} segnaposto="Cerca un articolo (nome, effetto) o un negozio…" />
+          {/* Lotto C: le 19 tessere delle categorie (e «Per chi», stato e disponibilità) stanno nel pannello «Filtri»: sul telefono
+              il primo negozio arrivava a y ≈ 1110, dopo tutte le tessere. */}
+          <FiltriArticoli comprimibili filtro={filtro} onCambia={cambiaFiltro} conPartita={partitaId !== null} segnaposto="Cerca un articolo o un negozio…" />
           {selezioneVisibile && <DoveSiTrova
             tipo="negozio"
             chiave={selezioneVisibile.chiave}
@@ -123,14 +125,19 @@ export function NegoziPage() {
                 <ul className="m-0 p-0 list-none grid gap-2 sm:grid-cols-2 xl:grid-cols-3" aria-label={`Negozi: ${g.nome}`}>
                   {g.negozi.map((n) => (
                     <li key={n.chiave}>
-                      <div className={`card card--cliccabile text-text flex flex-col gap-2 h-full ${classiSuggerito(sugg.evidenziato('negozi', n.chiave))}`}>
-                        {/* L5 (F4): il negozio con sede vive nella pagina del suo luogo */}
+                      <div className={`card card--cliccabile text-text flex flex-col gap-1.5 h-full ${classiSuggerito(sugg.evidenziato('negozi', n.chiave))}`}>
+                        {/* L5 (F4): il negozio con sede vive nella pagina del suo luogo. Il cartellino di disponibilità (che può portare
+                            il collegamento «Segna in Progressi») sta fuori dal collegamento della scheda: un collegamento dentro un
+                            collegamento non è HTML valido (lotto C). */}
                         <Link to={n.sedeCasa ?? `/guida/negozi/${encodeURIComponent(n.chiave)}`} className="no-underline text-text flex flex-1 flex-col gap-1 touch">
-                          <span className="flex flex-wrap items-center gap-2"><IconaCategoria categoria={n.tipo} dimensione={30} /><strong className="font-display uppercase testo-18 leading-none">{n.nome}</strong><span className="chip">{NOME_TIPO_NEGOZIO[n.tipo] ?? n.tipo}</span><ChipDisponibilita disponibilita={n.disponibilita} compatto />{sugg.evidenziato('negozi', n.chiave) && <TargaSuggerito motivo={sugg.motivo('negozi', n.chiave)} compatta />}</span>
+                          <span className="flex flex-wrap items-center gap-2"><IconaCategoria categoria={n.tipo} dimensione={30} /><strong className="font-display uppercase testo-18 leading-none">{n.nome}</strong><span className="chip">{NOME_TIPO_NEGOZIO[n.tipo] ?? n.tipo}</span>{sugg.evidenziato('negozi', n.chiave) && <TargaSuggerito motivo={sugg.motivo('negozi', n.chiave)} compatta />}</span>
                           <span className="testo-12 text-text-secondary">{n.articoli} {n.articoli === 1 ? 'articolo' : 'articoli'}{n.verificati < n.articoli ? ` · ${n.articoli - n.verificati} da fonte secondaria` : ''}{n.gestore ? ` · ${n.gestore}` : ''}</span>
                           <span className="testo-12 text-text-muted">{[n.sedeNome ?? n.luogo, n.orariTesto].filter(Boolean).join(' · ')}</span>
                         </Link>
-                        <button type="button" className={`btn btn-sm touch self-start ${negozioSelezionato?.chiave === n.chiave ? 'btn-primary' : 'btn-ghost'}`} aria-label={`Mostra posizione di ${n.nome}`} aria-pressed={negozioSelezionato?.chiave === n.chiave} onClick={() => cambiaPosizione(n)}><IconaAzione chiave="mappa" dimensione={16} /> {n.sedeNome ?? 'Posizione'}</button>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button type="button" className={`btn btn-sm touch ${negozioSelezionato?.chiave === n.chiave ? 'btn-primary' : 'btn-ghost'}`} aria-label={`Mostra posizione di ${n.nome}`} aria-pressed={negozioSelezionato?.chiave === n.chiave} onClick={() => cambiaPosizione(n)}><IconaAzione chiave="mappa" dimensione={16} /> {n.sedeNome ?? 'Posizione'}</button>
+                          <ChipDisponibilita disponibilita={n.disponibilita} compatto />
+                        </div>
                       </div>
                     </li>
                   ))}

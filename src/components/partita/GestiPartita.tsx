@@ -58,8 +58,8 @@ export function GestiPartita({ partitaId, onCambiato, mostraVuoto = false, conte
     <summary className="touch cursor-pointer font-display testo-17 uppercase">Operazioni da completare{elenco.length ? ` · ${elenco.length}` : ''}</summary>
     <div className="flex min-w-0 flex-col gap-2 pt-2" aria-label="Operazioni sulla partita da completare">
     <p className="m-0 testo-12 text-text-secondary">Qui compaiono le operazioni di cui non c’è una conferma sicura, per esempio dopo una connessione caduta. «Riprova» le completa senza ripeterle due volte. Nulla parte da solo.</p>
-    {erroreArchivio && <div role="alert" className="flex flex-col items-start gap-2 text-error"><p className="m-0">L’elenco di questa scheda non si legge.</p><PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="ricalcola" dimensione={20} />} titolo="Rileggi l’elenco" onClick={rileggiRegistroGestiPartita} /></div>}
-    {errore && <p role="alert" className="m-0 testo-13 text-error">{errore}</p>}
+    {erroreArchivio && <div role="alert" className="flex flex-col items-start gap-2 text-error-testo"><p className="m-0">L’elenco di questa scheda non si legge.</p><PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="ricalcola" dimensione={20} />} titolo="Rileggi l’elenco" onClick={rileggiRegistroGestiPartita} /></div>}
+    {errore && <p role="alert" className="m-0 testo-13 text-error-testo">{errore}</p>}
     {!elenco.length && !erroreArchivio && <p className="m-0 testo-13">Nessuna operazione da completare.</p>}
     <ul className="m-0 flex min-w-0 list-none flex-col gap-2 p-0">{elenco.map(g => {
       const inCorso = g.stato === 'invio';

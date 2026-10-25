@@ -14,11 +14,20 @@ export interface Notification {
   message: string;
   duration?: number;
   createdAt: number;
+  /** Solo nella coda visiva, non nelle regioni live: chi la crea annuncia da sé lo stesso fatto in un testo più completo (lotto C, es.
+   *  il cambio di rango delle Doti), così il lettore di schermo non lo sente due volte. */
+  silenziosa?: boolean;
+}
+
+/** Opzioni di una notifica. */
+export interface OpzioniNotifica {
+  /** Vedi `Notification.silenziosa`. */
+  silenziosa?: boolean;
 }
 
 interface NotificationState {
   notifications: Notification[];
-  addNotification: (type: NotificationType, message: string, duration?: number) => void;
+  addNotification: (type: NotificationType, message: string, duration?: number, opzioni?: OpzioniNotifica) => void;
   removeNotification: (id: string) => void;
   clearAll: () => void;
   /** Chiude tutti gli errori e gli avvisi rimasti a schermo (quelli senza chiusura automatica); conferme e informazioni seguono il loro timer. */
@@ -58,7 +67,7 @@ function programmaChiusura(set: (f: (s: NotificationState) => Partial<Notificati
 export const useNotificationStore = create<NotificationState>((set, get) => ({
   notifications: [],
 
-  addNotification: (type, message, duration = DURATA_PREDEFINITA[type]) => {
+  addNotification: (type, message, duration = DURATA_PREDEFINITA[type], opzioni) => {
     // la stessa notifica ancora a schermo non si ripete (un errore segnalato dal client HTTP e poi dal chiamante, o un gesto
     // ripetuto che fallisce di nuovo): resta quella già visibile. Se però ha una chiusura automatica (una conferma ripetuta, es. «+»
     // alla stessa Dote) se ne rinnova il timer: la seconda conferma non deve sparire insieme alla prima
@@ -68,7 +77,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       return;
     }
     const id = `notif-${++counter}-${Date.now()}`;
-    const notification: Notification = { id, type, message, duration, createdAt: Date.now() };
+    const notification: Notification = { id, type, message, duration, createdAt: Date.now(), ...(opzioni?.silenziosa ? { silenziosa: true } : {}) };
     set((s) => {
       let notifications = [...s.notifications, notification];
       if (duration <= 0) {
@@ -97,6 +106,6 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
 }));
 
 /** Scorciatoia imperativa per mostrare un toast fuori dai componenti. */
-export function notifica(type: NotificationType, message: string, duration?: number): void {
-  useNotificationStore.getState().addNotification(type, message, duration);
+export function notifica(type: NotificationType, message: string, duration?: number, opzioni?: OpzioniNotifica): void {
+  useNotificationStore.getState().addNotification(type, message, duration, opzioni);
 }

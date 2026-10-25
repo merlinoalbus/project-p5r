@@ -73,7 +73,7 @@ export function RicettePersona({ persone, partitaId, livelloProtagonista, inScor
             )}
           </div>
           {errore ? (
-            <p className="m-0 testo-13 text-error">{errore}</p>
+            <p className="m-0 testo-13 text-error-testo">{errore}</p>
           ) : caricamento && !dati ? (
             <div className="flex justify-center py-6"><Spinner /></div>
           ) : dati && dati.totale === 0 ? (

@@ -8,6 +8,7 @@ import { Selettore } from '../components/shared/Selettore';
 import { Link, useSearchParams } from 'react-router-dom';
 import { getSfide } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
+import { useSchede } from '../hooks/useSchede';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useElementoDaIndirizzo } from '../hooks/useElementoDaIndirizzo';
 import { PageState } from '../components/shared/PageState';
@@ -20,6 +21,7 @@ import { AssetImg } from '../components/shared/AssetImg';
 import { IconaScheda } from '../components/shared/IconaAzione';
 import { OggettiCollegati } from '../components/catalogo/OggettiCollegati';
 import { ModificaGuida } from '../components/guida/ModificaGuida';
+import { TitoloSezione } from '../components/shared/TitoloSezione';
 
 const SCHEDE = [
   ['battaglie', 'Battaglie Sfida', 'sfide-battaglia'], ['boss', 'Boss segreti', 'boss'],
@@ -48,7 +50,7 @@ function SchedaBattaglie({ d, onModificato }: { d: SfideDto; onModificato: () =>
       </section>
       {b.elenco.map((s) => (
         <section key={s.chiave} id={`elemento-${s.chiave}`} className="card flex flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2"><h2 className="m-0 testo-15 font-semibold">{s.nomeIt ?? s.nome}</h2>{s.nomeIt && s.nomeIt !== s.nome && <span className="text-text-muted testo-12">({s.nome})</span>}{s.livelloConsigliato && <span className="chip">livello {s.livelloConsigliato}</span>}{!s.verificato && <span className="chip testo-12">da fonte secondaria</span>}<ModificaGuida tipo="battaglia-sfida" chiave={s.chiave} cosa={`la Battaglia Sfida «${s.nomeIt ?? s.nome}»`} soloIcona className="ml-auto" onSalvato={onModificato} /></div>
+          <div className="flex flex-wrap items-center gap-2"><TitoloSezione>{s.nomeIt ?? s.nome}</TitoloSezione>{s.nomeIt && s.nomeIt !== s.nome && <span className="text-text-muted testo-12">({s.nome})</span>}{s.livelloConsigliato && <span className="chip">livello {s.livelloConsigliato}</span>}{!s.verificato && <span className="chip testo-12">da fonte secondaria</span>}<ModificaGuida tipo="battaglia-sfida" chiave={s.chiave} cosa={`la Battaglia Sfida «${s.nomeIt ?? s.nome}»`} soloIcona className="ml-auto" onSalvato={onModificato} /></div>
           <VoceTesto titolo="Regole">{s.regole}</VoceTesto>
           <Elenco titolo="Nemici" voci={s.nemici} />
           {s.punteggi && <VoceTesto titolo="Punteggi">{s.punteggi}</VoceTesto>}
@@ -68,7 +70,7 @@ function SchedaBoss({ d, onModificato }: { d: SfideDto; onModificato: () => void
     <div className="flex flex-col gap-2 testo-13">
       {d.bossSegreti.map((b) => (
         <section key={b.chiave} id={`elemento-${b.chiave}`} className="card flex flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2">{(b.chiave === 'gemelle-custodi' ? ['caroline', 'justine'] : [b.chiave]).map((k) => <AssetImg key={k} nome={`personaggi/${k}`} alt="" decorativa className="h-16 w-auto object-contain" fallback={null} />)}<h2 className="m-0 testo-15 font-semibold">{b.nome}</h2>{b.livelloConsigliato && <span className="chip">livello {b.livelloConsigliato}</span>}{!b.verificato && <span className="chip testo-12">da fonte secondaria</span>}<ModificaGuida tipo="boss-segreto" chiave={b.chiave} cosa={`il boss segreto «${b.nome}»`} soloIcona className="ml-auto" onSalvato={onModificato} /></div>
+          <div className="flex flex-wrap items-center gap-2">{(b.chiave === 'gemelle-custodi' ? ['caroline', 'justine'] : [b.chiave]).map((k) => <AssetImg key={k} nome={`personaggi/${k}`} alt="" decorativa className="h-16 w-auto object-contain" fallback={null} />)}<TitoloSezione>{b.nome}</TitoloSezione>{b.livelloConsigliato && <span className="chip">livello {b.livelloConsigliato}</span>}{!b.verificato && <span className="chip testo-12">da fonte secondaria</span>}<ModificaGuida tipo="boss-segreto" chiave={b.chiave} cosa={`il boss segreto «${b.nome}»`} soloIcona className="ml-auto" onSalvato={onModificato} /></div>
           <VoceTesto titolo="Dove">{b.dove}</VoceTesto>
           <VoceTesto titolo="Quando">{b.quando}</VoceTesto>
           <Elenco titolo="Requisiti" voci={b.requisiti} />
@@ -102,7 +104,7 @@ function SchedaMagnate({ d, onModificato }: { d: SfideDto; onModificato: () => v
   return (
     <section className="card flex flex-col gap-1 testo-13">
       <div className="flex items-start gap-2">
-        <h2 className="m-0 min-w-0 flex-1 testo-15 font-semibold">Magnate (gioco di carte)</h2>
+        <TitoloSezione className="min-w-0 flex-1">Magnate (gioco di carte)</TitoloSezione>
         <ModificaGuida tipo="sfide-magnate" chiave="magnate" cosa="le regole di Magnate" soloIcona onSalvato={onModificato} />
       </div>
       {sfideMagnate.length > 0 && (
@@ -169,24 +171,26 @@ export function SfidePage() {
   const ricarica = () => void dati.ricarica();
   // L11 B4 (R11-07/3): `?scheda=<scheda>&elemento=<chiave>` (la «casa» di una sfida nella ricerca globale) porta in vista la carta e la evidenzia
   useElementoDaIndirizzo(!!d, scheda);
+  const schede = useSchede({ chiavi: SCHEDE.map(([k]) => k), attiva: scheda, onScegli: (k) => setParams(k === 'battaglie' ? {} : { scheda: k }, { replace: true }) });
   return (
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
         <div className="flex flex-col gap-3">
           <IntestazionePagina titolo="Battaglie Sfida, boss segreti e tratti" sottotitolo={<>Le {d.battaglieSfida.elenco.length} Battaglie Sfida con regole, nemici e ricompense; i boss segreti (Jose, Gemelle Custodi, Lavenza) con mosse e strategia; Magnate; i {d.tratti.elenco.length} tratti delle Persona con l'effetto in italiano. Le domande del game show in TV sono in <Link to="/guida/domande">Domande in classe ed esami</Link>.</>} />
-          <FilaScorrevole role="tablist" aria-label="Sezioni">
+          <FilaScorrevole {...schede.lista} aria-label="Sezioni">
             {SCHEDE.map(([k, l, icona]) => (
-              <button key={k} type="button" role="tab" aria-selected={scheda === k} title={l}
-                className={`piastrella-scheda touch ${scheda === k ? 'piastrella-scheda--attiva' : ''}`}
-                onClick={() => setParams(k === 'battaglie' ? {} : { scheda: k }, { replace: true })}>
+              <button key={k} type="button" {...schede.scheda(k)} title={l}
+                className={`piastrella-scheda touch ${scheda === k ? 'piastrella-scheda--attiva' : ''}`}>
                 <IconaScheda chiave={icona} dimensione={28} /><span>{l}</span>
               </button>
             ))}
           </FilaScorrevole>
-          {scheda === 'battaglie' && <SchedaBattaglie d={d} onModificato={ricarica} />}
-          {scheda === 'boss' && <SchedaBoss d={d} onModificato={ricarica} />}
-          {scheda === 'magnate' && <SchedaMagnate d={d} onModificato={ricarica} />}
-          {scheda === 'tratti' && <SchedaTratti d={d} onModificato={ricarica} />}
+          <div {...schede.pannello(scheda)} className="flex min-w-0 flex-col gap-3">
+            {scheda === 'battaglie' && <SchedaBattaglie d={d} onModificato={ricarica} />}
+            {scheda === 'boss' && <SchedaBoss d={d} onModificato={ricarica} />}
+            {scheda === 'magnate' && <SchedaMagnate d={d} onModificato={ricarica} />}
+            {scheda === 'tratti' && <SchedaTratti d={d} onModificato={ricarica} />}
+          </div>
         </div>
       )}
     </PageState>

@@ -90,7 +90,7 @@ export function EditorEffetto({ valore, onCambia, quartieri, attivita, confident
             );
           })}
           {erroreNomi
-            ? <span role="alert" className="testo-12 text-error">Impossibile caricare i Confidenti. {riprovaNomi && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={riprovaNomi} />}</span>
+            ? <span role="alert" className="testo-12 text-error-testo">Impossibile caricare i Confidenti. {riprovaNomi && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={riprovaNomi} />}</span>
             : (confidenti ?? []).length === 0 && valore.graditoA.length === 0 && <span className="testo-12 text-text-muted">Carico i Confidenti…</span>}
         </div>
       )}

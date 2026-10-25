@@ -52,7 +52,7 @@ function testoQuando(s: Struttura): string {
 export function DisponibilitaStrutturataScheda({ chiave, partita, versione, onModifica }: { chiave: string; partita?: number; versione: number; onModifica: () => void }) {
   const d = useCarica(() => getDisponibilitaStrutturata(chiave, partita), [chiave, partita, versione]);
   if (d.caricamento && !d.dati) return <p role="status" className="m-0 testo-13 text-text-muted">Un attimo…</p>;
-  if (d.errore || !d.dati) return <p role="alert" className="m-0 testo-13 text-error">{d.errore ?? 'Disponibilità non disponibile.'}</p>;
+  if (d.errore || !d.dati) return <p role="alert" className="m-0 testo-13 text-error-testo">{d.errore ?? 'Disponibilità non disponibile.'}</p>;
   const { struttura: s, luoghi, oggi, modificata } = d.dati;
   return (
     <div className="flex flex-col gap-1 testo-13 text-text-secondary">
@@ -90,7 +90,7 @@ function EditorDisponibilitaStrutturataReale({ chiave, nome, onChiudi, onSalvato
   const tuttiILuoghi = useCarica(() => getLuoghi(), []);
   return (
     <Modal titolo={`Disponibilità di ${nome}`} aperta onChiudi={onChiudi} larga>
-      {d.errore && <p role="alert" className="m-0 text-error">{d.errore}</p>}
+      {d.errore && <p role="alert" className="m-0 text-error-testo">{d.errore}</p>}
       {!d.dati && !d.errore && <p role="status" className="m-0">Un attimo…</p>}
       {d.dati && <Corpo dati={d.dati} tutti={tuttiILuoghi.dati ?? []} chiave={chiave} onChiudi={onChiudi} onSalvato={onSalvato} />}
     </Modal>
@@ -140,7 +140,7 @@ function Corpo({ dati, tutti, chiave, onChiudi, onSalvato }: { dati: Disponibili
       )}
       <label className="flex flex-col gap-1">Disponibile dal (MM-GG, facoltativo)
         <input className="form-input" value={dal} maxLength={5} placeholder="05-18" disabled={occupato} onChange={(e) => setDal(e.target.value)} aria-invalid={!dalValido} />
-        {!dalValido && <span className="text-error">Scrivi mese e giorno come 05-18.</span>}
+        {!dalValido && <span className="text-error-testo">Scrivi mese e giorno come 05-18.</span>}
       </label>
       <fieldset className="m-0 flex flex-col gap-2 border-0 p-0"><legend className="p-0 text-text-secondary">Eccezioni</legend>
         {eccezioni.length === 0 && <span className="text-text-muted">Nessuna eccezione.</span>}

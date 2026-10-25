@@ -166,7 +166,7 @@ function FinestraAtterraggio({ d, onSalvato, onChiudi }: { d: DungeonDettaglioDt
             </label>
             {!senzaFine && <SelettoreData etichetta="Compare fino al" valore={al} onCambia={setAl} disabilitato={occupato} />}
           </div>
-          {finestraRovesciata && <p className="m-0 testo-12 text-error" role="alert">La fine viene prima dell’inizio.</p>}
+          {finestraRovesciata && <p className="m-0 testo-12 text-error-testo" role="alert">La fine viene prima dell’inizio.</p>}
           <div>
             <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva quando compare"
               disabled={occupato || !finestraCambiata || finestraRovesciata}
@@ -220,7 +220,7 @@ function FinestraAtterraggio({ d, onSalvato, onChiudi }: { d: DungeonDettaglioDt
                 </ol>
               )}
               {regole.length === 0 && <p className="m-0 testo-12 text-text-muted">{`Nessuna regola: toccando ${ilPosto} si apre la ${memento ? 'loro' : 'sua'} scheda.`}</p>}
-              {rovesciate.length > 0 && <p className="m-0 testo-12 text-error" role="alert">{rovesciate.length === 1 ? `Nella regola ${rovesciate[0]}` : `Nelle regole ${rovesciate.join(', ')}`} la fine viene prima dell’inizio.</p>}
+              {rovesciate.length > 0 && <p className="m-0 testo-12 text-error-testo" role="alert">{rovesciate.length === 1 ? `Nella regola ${rovesciate[0]}` : `Nelle regole ${rovesciate.join(', ')}`} la fine viene prima dell’inizio.</p>}
               <div className="flex flex-wrap items-center gap-1.5">
                 <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Aggiungi una regola" disabled={occupato || regole.length >= 30} onClick={aggiungi} />
                 <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva le regole"

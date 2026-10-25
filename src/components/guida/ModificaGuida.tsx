@@ -155,7 +155,7 @@ function ModificaGuidaReale({ tipo, chiave, cosa, soloIcona, etichetta = 'Modifi
     const speciale = campiSpeciali?.[c.percorso];
     if (speciale?.disegna) return <Fragment key={c.percorso}>{speciale.disegna(c, v, (nuovo) => imposta(c.percorso, nuovo), occupato)}</Fragment>;
     const problema = speciale?.errore?.(v) ?? null;
-    if (problema && !uguali(v, c.valore)) return <Fragment key={c.percorso}>{campoStandard(c, v)}<p role="alert" className="m-0 testo-12 text-error sm:col-span-2">{problema}</p></Fragment>;
+    if (problema && !uguali(v, c.valore)) return <Fragment key={c.percorso}>{campoStandard(c, v)}<p role="alert" className="m-0 testo-12 text-error-testo sm:col-span-2">{problema}</p></Fragment>;
     return campoStandard(c, v);
   };
 
@@ -276,7 +276,7 @@ function ModificaGuidaReale({ tipo, chiave, cosa, soloIcona, etichetta = 'Modifi
               </div>
             </div>
           )}
-          {errore && <p role="alert" className="m-0 text-sm text-error">{errore} La finestra resta aperta.</p>}
+          {errore && <p role="alert" className="m-0 text-sm text-error-testo">{errore} La finestra resta aperta.</p>}
         </div>
       </Modal>
     )}

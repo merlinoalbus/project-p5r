@@ -5,9 +5,13 @@
 // ≥ lg (1024px, tablet orizzontale / desktop): Topbar + Sidebar + Outlet.
 // <  lg (tablet verticale / telefono): Topbar + Outlet + barra di
 //    navigazione in basso con bersagli touch da 56px.
+//
+// Lotto C (punto 10): il primo elemento della pagina è «Vai al contenuto» (visibile solo quando ha il fuoco), che porta a
+// `<main id="contenuto" tabIndex={-1}>`; dopo ogni cambio di pagina il fuoco va sull'h1 della pagina nuova (`useFuocoNavigazione`) e,
+// quando non lo si sposta, il cambio si annuncia nella regione `status` qui sotto.
 // ============================================================
 
-import { Suspense, useEffect, useRef } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState, type MouseEvent } from 'react';
 import { annotaNavigazione } from '../../utils/ritornoMappe';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Topbar } from './Topbar';
@@ -26,6 +30,7 @@ import { useFontStore } from '../../stores/fontStore';
 import { sfondoPerPercorso } from './sfondi';
 import { RicercaGlobale } from '../ricerca/RicercaGlobale';
 import { useScorciatoiaRicerca } from '../../hooks/useScorciatoiaRicerca';
+import { useFuocoNavigazione } from './useFuocoNavigazione';
 
 /** Struttura principale con navigazione adattiva, contenuto route e overlay globali. */
 export function MainLayout() {
@@ -58,6 +63,22 @@ export function MainLayout() {
     annotaNavigazione(paginaPrecedente.current, location.pathname);
     paginaPrecedente.current = qui;
   }, [location.pathname, location.search]);
+  // il fuoco dopo un cambio di pagina, e l'annuncio quando non si sposta (svuotata e riscritta: lo stesso titolo si riannuncia)
+  const main = useRef<HTMLElement | null>(null);
+  const [annuncio, setAnnuncio] = useState('');
+  const attesaAnnuncio = useRef<number | undefined>(undefined);
+  const annuncia = useCallback((testo: string) => {
+    setAnnuncio('');
+    window.clearTimeout(attesaAnnuncio.current);
+    attesaAnnuncio.current = window.setTimeout(() => setAnnuncio(testo), 50);
+  }, []);
+  useEffect(() => () => window.clearTimeout(attesaAnnuncio.current), []);
+  useFuocoNavigazione(main, annuncia);
+  /** «Vai al contenuto»: il fuoco su <main> senza toccare l'indirizzo (un `#contenuto` nell'URL sarebbe un cambio di posizione). */
+  const vaiAlContenuto = (e: MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    main.current?.focus();
+  };
   useEffect(() => {
     const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
     if (!link) return;
@@ -74,6 +95,7 @@ export function MainLayout() {
 
   return (
     <div className="relative isolate flex flex-col h-dvh" style={sfondo ? { backgroundImage: `url("${sfondo}")`, backgroundRepeat: 'repeat', backgroundSize: '512px' } : undefined}>
+      <a href="#contenuto" className="salta-al-contenuto" onClick={vaiAlContenuto}>Vai al contenuto</a>
       {sfondoSezione && <div key={sfondoSezione} className="sfondo-sezione" style={{ backgroundImage: `url("${sfondoSezione}")` }} aria-hidden="true" data-testid="sfondo-sezione" />}
       <Topbar />
       {/* UI-ASSET-01: una sola riga, solo quando sul server c'è un'app più nuova (mai un ricaricamento da sola) */}
@@ -83,7 +105,7 @@ export function MainLayout() {
       {(!['/', '/home'].includes(location.pathname) || haAttiva) && <AvvisoPartiteNonCaricate />}
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto p-4 lg:p-5 pb-24 lg:pb-5 flex flex-col">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-5 pb-24 lg:pb-5 flex flex-col" ref={main} id="contenuto" tabIndex={-1}>
           {/* le pagine arrivano alla prima visita (router.tsx): intanto la cornice resta e al centro gira l'attesa */}
           <Suspense fallback={<div className="flex-1 flex items-center justify-center"><Spinner size={40} /></div>}>
             <Outlet />
@@ -91,6 +113,8 @@ export function MainLayout() {
         </main>
       </div>
       <BottomNav />
+      {/* il cambio di pagina, quando il fuoco resta dov'è (vedi useFuocoNavigazione) */}
+      <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">{annuncio}</p>
       {/* cambiato il giorno della partita, il meteo del giorno nuovo */}
       <MeteoAlCambioGiorno />
       <ToastContainer />

@@ -4,14 +4,15 @@
 
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { IconaScheda } from '../components/shared/IconaAzione';
+import { IconaAzione, IconaScheda } from '../components/shared/IconaAzione';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import { dataGiocoTesto } from '../utils/dateGioco';
 import { useShallow } from 'zustand/react/shallow';
 import { usePartitaStore } from '../stores/partitaStore';
 import { PageState, EmptyState } from '../components/shared/PageState';
 import { NuovaPartitaModal } from '../components/partita/NuovaPartitaModal';
-import { RiepilogoPartita } from '../components/partita/RiepilogoPartita';
+import { FinestraModificaPartita } from '../components/partita/FinestraModificaPartita';
 import { SquadraPartita } from '../components/partita/SquadraPartita';
 import { DotiSociali } from '../components/partita/DotiSociali';
 import { ConfidentiPartita } from '../components/partita/ConfidentiPartita';
@@ -29,7 +30,7 @@ import { ScuolaOggi } from '../components/partita/ScuolaOggi';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 
-type Scheda = 'oggi' | 'riepilogo' | 'doti' | 'squadra' | 'confidenti' | 'letture' | 'progressi' | 'scorta' | 'compendio' | 'persona-partita' | 'obiettivi' | 'piani' | 'cicli' | 'storico';
+type Scheda = 'oggi' | 'doti' | 'squadra' | 'confidenti' | 'letture' | 'progressi' | 'scorta' | 'compendio' | 'persona-partita' | 'obiettivi' | 'piani' | 'cicli' | 'storico';
 
 const SCHEDE: Array<{ k: Scheda; l: string }> = [
   { k: 'oggi', l: 'Oggi' },
@@ -45,8 +46,9 @@ const SCHEDE: Array<{ k: Scheda; l: string }> = [
   { k: 'piani', l: 'Piani salvati' },
   { k: 'cicli', l: 'Cicli' },
   { k: 'storico', l: 'Storico' },
-  { k: 'riepilogo', l: 'Riepilogo' },
 ];
+// «Riepilogo» non è più una scheda (richiesta dell'utente, 2026-10-25): i dati della partita si modificano dalla finestra che apre
+// «Modifica» nella riga dei dati; il vecchio indirizzo `?scheda=riepilogo` (link della pagina Domande) apre quella finestra.
 
 /** Pagina della partita attiva con schede; senza partite propone la creazione. */
 export function PartitaPage() {
@@ -57,6 +59,8 @@ export function PartitaPage() {
   // le piastrelle delle schede sono basse a ogni larghezza, con icona (22 px) e nome affiancati (`.fila-schede-partita`)
   const richiesta = params.get('scheda');
   const scheda: Scheda = SCHEDE.some((s) => s.k === richiesta) ? (richiesta as Scheda) : 'oggi';
+  // finestra dei dati della partita: aperta anche dal vecchio indirizzo della scheda «Riepilogo»
+  const [modifica, setModifica] = useState(richiesta === 'riepilogo');
   // il giorno mostrato dalla scheda «Oggi» (null a scheda chiusa): senza, vale la data di gioco della partita
   const [giornoOggi, setGiornoOggi] = useState<string | null>(null);
   const giornoScuola = (scheda === 'oggi' ? giornoOggi : null) ?? attiva?.dataGioco ?? null;
@@ -75,8 +79,12 @@ export function PartitaPage() {
               l'intestazione resta entro il 30% dell'altezza (progetto dei Confidenti approvato il 2026-10-24) */}
           <IntestazionePagina titolo={attiva.nome} compatta azioniInRiga azioniAccanto className="intestazione--partita pt-0" azioni={
             <FilaScorrevole className="fila-scorrevole--sempre fila-dati-partita items-center min-w-0" role="group" aria-label="Dati e scorciatoie della partita">
+              {/* per primo: sul telefono e sul tablet la fila scorre, e in fondo «Modifica» restava fuori schermo */}
+              <PulsanteVisivo id="modifica-dati-partita" tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica"
+                aria-label="Modifica i dati della partita" onClick={() => setModifica(true)} />
               <span className="chip">Liv. {attiva.livelloProtagonista}</span>
-              {attiva.dataGioco && <span className="chip">{attiva.dataGioco}</span>}
+              {/* la data in forma italiana («9 aprile»), come nel resto dell'app: «04-09» si leggeva «4 settembre» (lotto C) */}
+              {attiva.dataGioco && <span className="chip">{dataGiocoTesto(attiva.dataGioco)}</span>}
               {attiva.nuovaPartitaPlus && <span className="chip">NG+</span>}
               {attiva.allarmeAttivo && <span className="chip chip--attivo">ALLARME</span>}
               {/* le scorciatoie della scuola seguono il giorno guardato nella scheda «Oggi» (scelta dell'utente, 2026-10-11); la chiave
@@ -97,8 +105,12 @@ export function PartitaPage() {
               </button>
             ))}
           </FilaScorrevole>
+          <FinestraModificaPartita partita={attiva} aperta={modifica} onChiudi={() => {
+            setModifica(false);
+            // aperta dal vecchio indirizzo non c'è un pulsante da cui è partita: il fuoco va su «Modifica», non in cima al documento
+            if (richiesta === 'riepilogo') { setParams({ scheda: 'oggi' }, { replace: true }); requestAnimationFrame(() => document.getElementById('modifica-dati-partita')?.focus()); }
+          }} />
           {scheda === 'oggi' && <div className="md:flex-1 md:min-h-0 riempi-figli"><OggiPartita key={attiva.id} partita={attiva} riempi onGiorno={setGiornoOggi} /></div>}
-          {scheda === 'riepilogo' && <RiepilogoPartita key={attiva.id} partita={attiva} />}
           {scheda === 'doti' && <div className="md:flex-1 md:min-h-0 riempi-figli"><DotiSociali partitaId={attiva.id} /></div>}
           {scheda === 'squadra' && <SquadraPartita key={attiva.id} partitaId={attiva.id} />}
           {scheda === 'confidenti' && <ConfidentiPartita partitaId={attiva.id} />}

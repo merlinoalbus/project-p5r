@@ -15,6 +15,7 @@ import { OsservazionePescaForm } from './OsservazionePescaForm';
 import { BeneficiPesca, ProfiliSessionePesca, RiepilogoOsservazionePesca } from './ProfiliPesca';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { TitoloSezione } from '../shared/TitoloSezione';
 
 const nuovoId = () => crypto.randomUUID().replaceAll('-', '');
 const erroreTesto = (e: unknown) => e instanceof Error ? e.message : 'Operazione non riuscita.';
@@ -105,7 +106,7 @@ function ConfermaGestoPesca({ partitaId, pronto, onChiudi, onCambiato }: { parti
         catch (e) { if (vivo.current) setErrore(`Esito del recupero acquisito; aggiornamento della vista non riuscito: ${erroreTesto(e)}`); }
       }} />
       {anteprima.caricamento && !anteprima.dati && <p role="status">Preparo il riepilogo corrente…</p>}
-      {anteprima.errore && <p role="alert" className="text-error">{anteprima.errore}<PulsanteVisivo tono="fantasma" className="ml-2" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi l’anteprima" disabled={occupato || !!pendente || !!ricevuta} onClick={() => { setAttestato(false); void anteprima.ricarica(); }} /></p>}
+      {anteprima.errore && <p role="alert" className="text-error-testo">{anteprima.errore}<PulsanteVisivo tono="fantasma" className="ml-2" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi l’anteprima" disabled={occupato || !!pendente || !!ricevuta} onClick={() => { setAttestato(false); void anteprima.ricarica(); }} /></p>}
       {anteprima.dati && <>
         <p className="m-0">{anteprima.dati.esitoPrevisto}</p>
         <BersaglioAnteprima dto={anteprima.dati} operazione={o} />
@@ -119,7 +120,7 @@ function ConfermaGestoPesca({ partitaId, pronto, onChiudi, onCambiato }: { parti
         {!ricevuta && <label className="touch flex items-start gap-2"><input type="checkbox" className="h-5 w-5 shrink-0" checked={attestato} disabled={occupato || !!pendente} onChange={e => setAttestato(e.target.checked)} /><span>Confermo il bersaglio e tutte le conseguenze mostrate per questa partita.</span></label>}
       </>}
       {ricevuta && <p role="status" className="m-0 text-success">Registrato: {ESITI_PESCA[ricevuta.esito] ?? 'operazione completata'}. Nessun nuovo invio da questa finestra.</p>}
-      {errore && <p role="alert" className="m-0 text-error">{errore}</p>}
+      {errore && <p role="alert" className="m-0 text-error-testo">{errore}</p>}
       {rifiutata && <p role="alert" className="m-0 text-warning">Questa richiesta è stata rifiutata e non viene ripetuta. Torna ai dati conservati per correggerli e preparare una nuova anteprima.</p>}
       {pendente && <p role="alert" className="m-0 text-warning">Esito conservato da verificare nel registro dei gesti: usa il recupero dell’operazione originale.</p>}
     </div>
@@ -186,11 +187,11 @@ function RegistroPescaNelContesto({ partitaId, onCambiato }: { partitaId: number
     if (!pendente) setPronto({ titolo, operazione: { azione, bersaglio, richiesta: { operazioneId: nuovoId() } } });
   };
   return <section id="pesca" className="card flex min-w-0 flex-col gap-3" aria-label="Registro della pesca">
-    <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="m-0 font-display testo-17 uppercase">Pesca a Ichigaya</h2><PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi il registro pesca" disabled={registro.caricamento} onClick={() => void registro.ricarica()} /></div>
+    <div className="flex flex-wrap items-center justify-between gap-2"><TitoloSezione variante="display">Pesca a Ichigaya</TitoloSezione><PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi il registro pesca" disabled={registro.caricamento} onClick={() => void registro.ricarica()} /></div>
     <p className="m-0 testo-13">Visite, catture, fatti osservati e spese hanno fonti distinte. I vecchi contatori non provano catture o premi; nessun saldo cambia senza una decisione esplicita.</p>
     <GestiPartita partitaId={partitaId} onCambiato={cambiato} />
     {registro.caricamento && !s && <p role="status">Leggo il registro pesca…</p>}
-    {registro.errore && <p role="alert" className="m-0 text-error">{registro.errore}</p>}
+    {registro.errore && <p role="alert" className="m-0 text-error-testo">{registro.errore}</p>}
     {s && <>
       <p className="m-0 testo-13">Saldo punti pesca: <strong>{s.saldoPunti === null ? 'ignoto' : s.saldoPunti.toLocaleString('it-IT')}</strong>. Conteggio attività: {s.contatore.volte}; turni dettagliati: {s.contatore.turni.length}; quote storiche non rappresentate: {s.contatore.quoteNonRappresentate}.</p>
       {registro.caricamento && <p role="status" className="m-0 testo-12">Rilettura in corso: i dati precedenti e le bozze restano visibili. Ogni conferma richiede una nuova anteprima del server.</p>}

@@ -97,7 +97,7 @@ export function CittaPage() {
                   onMouseEnter={() => setAcceso(x.chiave)} onMouseLeave={() => setAcceso(null)}
                   onFocus={() => setAcceso(x.chiave)} onBlur={() => setAcceso(null)}
                   className={`card card--cliccabile piastrella no-underline text-text flex w-full gap-3 ${classiSuggerito(suggerito)} ${
-                    acceso === x.chiave ? 'ring-2 ring-[#ffd23f] ring-offset-0' : ''}`}>
+                    acceso === x.chiave ? 'ring-2 ring-mappa-oro ring-offset-0' : ''}`}>
                   {/* L'illustrazione della mappa del quartiere, la stessa del visore e dell'indice (regola unica di L1), con
                       sopra la sagoma della mappa qui accanto come segno (scelta dell'utente, 2026-10-20). Senza illustrazione
                       resta la sola sagoma, a grandezza piena, com'era. */}

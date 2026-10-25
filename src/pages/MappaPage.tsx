@@ -253,7 +253,7 @@ function DettaglioMappa({ chiave, partitaId }: { chiave: string; partitaId: numb
   const presentata = mappa ? presentaMappa(mappa, params.get('contesto')) : null;
   useDocumentTitle(presentata ? `${presentata.nome} — Mappe` : 'Mappa');
   return (
-    <PageState isLoading={caricamento && !mappa} error={errore} onRetry={ricarica}>
+    <PageState isLoading={caricamento && !mappa} error={errore} onRetry={ricarica} scheda={{ titolo: 'Mappa', ripiego: '/guida/mappe' }}>
       {mappa && <div className="flex flex-col gap-4">
 
         {!haPlanimetria(mappa) ? <LuogoSenzaPlanimetria mappa={mappa} nome={presentata!.nome} albero={albero} partitaId={partitaId} />

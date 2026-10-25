@@ -23,11 +23,13 @@ const DIFFICOLTA: Array<{ v: Difficolta; l: string }> = [
 
 interface Props {
   partita: PartitaDto;
+  /** Chiamata quando si segue un collegamento verso un'altra scheda (dentro una finestra: la chiude). */
+  onNaviga?: () => void;
 }
 
 /** Modulo di modifica: nome, livello del protagonista, data di gioco, difficoltà, NG+, Allarme, note.
  *  Il genitore lo rimonta (prop `key`) quando la partita cambia, così lo stato locale riparte dai dati aggiornati. */
-export function RiepilogoPartita({ partita }: Props) {
+export function RiepilogoPartita({ partita, onNaviga }: Props) {
   const aggiornaLocale = usePartitaStore((s) => s.aggiornaLocale);
   const [nome, setNome] = useState(partita.nome);
   const [livello, setLivello] = useState(partita.livelloProtagonista);
@@ -40,6 +42,9 @@ export function RiepilogoPartita({ partita }: Props) {
 
   /** Salva insieme tutti i campi del modulo (data vuota come `null`) e aggiorna la partita nello store. */
   const salva = async () => {
+    // «Salva» resta abilitato durante il salvataggio (`aria-disabled`): un pulsante disabilitato perde il fuoco, che uscirebbe dalla
+    // finestra; il secondo invio si ferma qui
+    if (occupato) return;
     setOccupato(true);
     try {
       const p = await aggiornaPartita(partita.id, { nome, livelloProtagonista: livello, dataGioco: dataGioco || null, difficolta, nuovaPartitaPlus: ngPlus, allarmeAttivo: allarme, note });
@@ -87,7 +92,7 @@ export function RiepilogoPartita({ partita }: Props) {
           <textarea className="form-input mt-1 min-h-[100px]" value={note} onChange={(e) => setNote(e.target.value)} />
         </label>
         <div className="flex justify-end">
-          <PulsanteVisivo type="submit" tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" disabled={occupato} />
+          <PulsanteVisivo type="submit" tono="primario" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva" aria-disabled={occupato || undefined} />
         </div>
       </form>
       <div className="flex flex-col gap-3">
@@ -99,7 +104,7 @@ export function RiepilogoPartita({ partita }: Props) {
         <div className="card flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <span className="form-label m-0">Ultimi eventi</span>
-            <Link to="/partita?scheda=storico" className="touch inline-flex items-center testo-12 text-primary-testo">Tutto lo storico</Link>
+            <Link to="/partita?scheda=storico" className="touch inline-flex items-center testo-12 text-primary-testo" onClick={onNaviga}>Tutto lo storico</Link>
           </div>
           <StoricoPartita key={partita.updatedAt} partitaId={partita.id} perPagina={5} compatto />
         </div>

@@ -78,7 +78,9 @@ export function DungeonPage() {
                       <div className="flex flex-wrap gap-1.5">
                         {d.date.sblocco && <span className="chip" title={d.date.sblocco}>Sblocco {dataBreve(d.date.sblocco)}</span>}
                         {d.date.scadenza && <span className="chip chip--attivo" title={d.date.scadenza}>Scadenza {dataBreve(d.date.scadenza)}</span>}
-                        {d.livelloConsigliato && <span className="chip" title={d.livelloConsigliato}>Livello: {sintesi(d.livelloConsigliato, 36)}</span>}
+                        {/* la prima frase «Non esplicitato/indicato da…» è una nota di ricerca: nella chip si salta e si legge quel che segue («Il boss
+                            finale è di Livello 11»); il testo intero resta nel `title` e nella scheda */}
+                        {d.livelloConsigliato && <span className="chip" title={d.livelloConsigliato}>Livello: {sintesi(d.livelloConsigliato.replace(/^Non (esplicitato|indicato).*?\.\s+(?=[A-ZÀ-Ý])/, '') || d.livelloConsigliato, 36)}</span>}
                       </div>
                       <span className="testo-12 text-text-muted">{d.aree} infiltrazioni · {d.raccolta.totale} da raccogliere · {d.esauribili} esauribili · {d.punti} punti in tutto{d.gestiti !== null ? ` · ${d.gestiti} segnati` : ''}</span>
                     </div>

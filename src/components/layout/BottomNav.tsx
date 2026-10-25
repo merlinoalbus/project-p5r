@@ -11,7 +11,7 @@ export function BottomNav() {
   const voci = VOCI_NAV.filter((v) => v.principale);
   return (
     <nav
-      className="lg:hidden fixed bottom-0 inset-x-0 h-16 bg-bg-secondary border-t border-border flex items-stretch z-[100]"
+      className="lg:hidden fixed bottom-0 inset-x-0 h-16 bg-bg-secondary border-t border-border flex items-stretch z-(--z-popover)"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       aria-label="Navigazione principale"
     >

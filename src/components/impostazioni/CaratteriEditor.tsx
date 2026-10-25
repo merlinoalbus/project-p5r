@@ -14,6 +14,7 @@ import { notifica } from '../../stores/notificationStore';
 import type { FontDto, RuoloFont } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { TitoloSezione } from '../shared/TitoloSezione';
 
 interface Ruolo {
   ruolo: RuoloFont;
@@ -99,7 +100,7 @@ export function CaratteriEditor() {
   const elenco = useFontStore((s) => s.elenco);
   return (
     <section className="card flex flex-col gap-3">
-      <h2 className="m-0 testo-15 font-semibold">Caratteri</h2>
+      <TitoloSezione>Caratteri</TitoloSezione>
       <p className="m-0 testo-13 text-text-secondary">
         Carica i tuoi font in stile Persona 5 (TTF, OTF, WOFF o WOFF2, fino a 4 MB): restano solo in questa istanza, non vengono mai pubblicati e li usi sotto la tua responsabilità secondo la loro licenza.
         Senza caricamenti l'app usa i font liberi inclusi (Anton, Bebas Neue, Special Elite, Inter). Le lettere che un font non contiene, per esempio le accentate, vengono prese dal font predefinito.

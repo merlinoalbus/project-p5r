@@ -14,6 +14,7 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { useOggi } from '../../hooks/useOggi';
 import { useMedia } from '../../hooks/useMedia';
+import { useSchede } from '../../hooks/useSchede';
 import { useNomeDelPosto } from '../../hooks/useNomeDelPosto';
 import { usePreferenzeStore } from '../../stores/preferenzeStore';
 import { PageState } from '../shared/PageState';
@@ -57,20 +58,24 @@ export function OggiHome({ partita, testa }: Props) {
   const riempi = useMedia('(min-width: 1024px) and (min-height: 1150px)') && !aSchede;
   const chiusa = mappaChiusa && guidaPronta && !aSchede;
 
+  // le due schede «Guida | Mappa» (solo dove guida e mappa non stanno affiancate): ruolo completo, come in `useSchede`
+  const schede = useSchede<'guida' | 'mappa'>({ chiavi: ['guida', 'mappa'], attiva: schedaMappa ? 'mappa' : 'guida', onScegli: (k) => impostaSchedaMappa(k === 'mappa') });
+  const conSchede = aSchede && guidaPronta;
+
   const classi = ['home-griglia', chiusa ? 'home-griglia--mappa-chiusa' : '', aSchede ? 'home-griglia--a-schede' : '', riempi ? 'home-griglia--riempi' : ''].filter(Boolean).join(' ');
   return (
     <div className={classi}>
       {testa}
 
-      {aSchede && guidaPronta && (
-        <div className="home-schede" role="tablist" aria-label="Guida o mappa">
-          <button type="button" role="tab" aria-selected={!schedaMappa} className={`chip touch ${!schedaMappa ? 'chip--attivo' : ''}`} onClick={() => impostaSchedaMappa(false)}>Guida</button>
-          <button type="button" role="tab" aria-selected={schedaMappa} className={`chip touch ${schedaMappa ? 'chip--attivo' : ''}`} onClick={() => impostaSchedaMappa(true)}>{nomePosto ? `Mappa · ${nomePosto}` : 'Mappa'}</button>
+      {conSchede && (
+        <div className="home-schede" {...schede.lista} aria-label="Guida o mappa">
+          <button type="button" {...schede.scheda('guida')} className={`chip touch ${!schedaMappa ? 'chip--attivo' : ''}`}>Guida</button>
+          <button type="button" {...schede.scheda('mappa')} className={`chip touch ${schedaMappa ? 'chip--attivo' : ''}`}>{nomePosto ? `Mappa · ${nomePosto}` : 'Mappa'}</button>
         </div>
       )}
 
       {!(aSchede && schedaMappa && guidaPronta) && (
-        <section className="home-oggi flex flex-col gap-1.5" aria-label="Oggi nella partita">
+        <section className="home-oggi flex flex-col gap-1.5" aria-label="Oggi nella partita" {...(conSchede ? schede.pannello('guida') : {})}>
           {/* R12-01/6: la domanda in classe, l'esame e il cruciverba del giorno guardato con la risposta, a un tocco dalla Home; stessa fonte
               della Partita e della Guida (`ScuolaOggi`, nessuna copia). Sulla stessa riga del titolo: l'altezza della pagina non cresce. Sul telefono
               la riga non va a capo (tre pulsanti da 44 px diventerebbero tre righe e l'intestazione supererebbe il 30%): scorre di lato,
@@ -95,7 +100,7 @@ export function OggiHome({ partita, testa }: Props) {
         </button>
       )}
       {guidaPronta && (!aSchede || schedaMappa) && (
-        <div className={`home-mappa ${chiusa ? 'home-mappa--a-scomparsa' : ''}`}>
+        <div className={`home-mappa ${chiusa ? 'home-mappa--a-scomparsa' : ''}`} {...(conSchede ? schede.pannello('mappa') : {})}>
           {!aSchede && (
             <div className="home-mappa__barra">
               {mappaChiusa

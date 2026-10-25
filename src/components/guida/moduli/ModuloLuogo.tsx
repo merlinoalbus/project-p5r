@@ -34,7 +34,7 @@ export function ModuloLuogo({ dati, imposta, disabilitato }: PropsModulo) {
       </Blocco>
       <Blocco>
         <Selettore etichetta="Quartiere" valore={attuale} vuoto="Scegli il quartiere…" disabilitato={disabilitato || quartieri.caricamento} opzioni={opzioniQuartiere} onCambia={(k) => imposta({ quartiere_chiave: k })} />
-        {quartieri.errore && <span role="alert" className="testo-12 text-error">Impossibile caricare i quartieri. <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void quartieri.ricarica()} /></span>}
+        {quartieri.errore && <span role="alert" className="testo-12 text-error-testo">Impossibile caricare i quartieri. <PulsanteVisivo compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void quartieri.ricarica()} /></span>}
       </Blocco>
       <Campo nome="cosa_offre" etichetta="Che cosa offre" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} max={600} />
       <Campo nome="note" etichetta="Note" tipo="testolungo" dati={dati} imposta={imposta} disabilitato={disabilitato} />

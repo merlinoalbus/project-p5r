@@ -63,7 +63,7 @@ export function PreparaAcquistiVoce({ a, partitaId, onChiudi, onConferma, onRile
       {invalidazioneAnteprima > 0 && mancaPreparazione && <p role="status" className="m-0 text-warning">Gli input e le catture sono conservati. Rivedi una nuova anteprima e riconferma ogni riquadro prima della spunta; il comando precedente non viene ripetuto.</p>}
       <details><summary className="touch">Tutti gli effetti della voce</summary><ul className="m-0 pl-4">{a.effettiVoce?.effetti.map((e, i) => a.produceTesto[i] ? <li key={e.uid}>{a.produceTesto[i]}</li> : null)}</ul></details>
       {verifica.caricamento && <p role="status">Verifico la configurazione corrente della voce…</p>}
-      {verifica.errore && <p role="alert" className="m-0 text-error">{verifica.errore}<PulsanteVisivo tono="fantasma" className="ml-2" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi la voce conservando i dati" disabled={occupato || incerto} onClick={() => void verifica.ricarica()} /></p>}
+      {verifica.errore && <p role="alert" className="m-0 text-error-testo">{verifica.errore}<PulsanteVisivo tono="fantasma" className="ml-2" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi la voce conservando i dati" disabled={occupato || incerto} onClick={() => void verifica.ricarica()} /></p>}
       {verifica.dati?.fatta && <p role="alert" className="m-0 text-warning">Questa voce risulta già fatta: nessuna nuova spunta viene inviata. Mostra la voce aggiornata; gli eventuali effetti mancanti compaiono come pulsante «Applica» sulla voce.</p>}
       {cambiata && <p role="alert" className="m-0 text-warning">La voce è cambiata: nessuna spunta viene inviata.<PulsanteVisivo className="ml-2" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Mostra la voce aggiornata" onClick={() => { if (verifica.dati) { onRileggi(verifica.dati); onChiudi(); } }} /></p>}
       <fieldset className="m-0 flex min-w-0 flex-col gap-3 border-0 p-0" disabled={occupato || incerto || nonPronta}>
@@ -75,7 +75,7 @@ export function PreparaAcquistiVoce({ a, partitaId, onChiudi, onConferma, onRile
             onConferma={async (r) => { if (vivo.current) { setPreparati((p) => ({ ...p, [e.uid]: r })); confermaPreparazione(e.uid); } }} /> : null}
         </section>)}
       </fieldset>
-      {errore && <p role="alert" className="m-0 text-error">{errore}</p>}
+      {errore && <p role="alert" className="m-0 text-error-testo">{errore}</p>}
       {incerto && <p role="alert" className="m-0 text-warning">Il gesto resta nel registro delle operazioni. Da Oggi, Progressi o Impostazioni puoi verificare in sola lettura le ricevute della spunta; il comando non viene ripetuto. <Link className="touch inline-flex items-center" to="/impostazioni">Apri il registro delle operazioni</Link></p>}
     </div>
   </Modal>;

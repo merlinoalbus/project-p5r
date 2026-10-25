@@ -57,7 +57,7 @@ function AnteprimaRisposte({ chiave, rango }: { chiave: string; rango: number })
       <span className="risposte-voce__titolo">Anteprima · risposte migliori del rango {rango}</span>
       <span className="testo-12 text-text-muted">Compariranno fra le note della voce; spuntandola, la scelta delle note parte da qui.</span>
       {caricamento && <span className="testo-12 text-text-muted" role="status">Carico le risposte…</span>}
-      {errore && <span className="testo-12 text-error" role="alert">Risposte non disponibili: {errore}</span>}
+      {errore && <span className="testo-12 text-error-testo" role="alert">Risposte non disponibili: {errore}</span>}
       {dati && dialoghi.length === 0 && <span className="testo-12 text-text-muted">Nessun dialogo documentato per il rango {rango}.</span>}
       {dialoghi.length > 0 && (
         <ul className="m-0 p-0 list-none flex flex-col gap-1.5">

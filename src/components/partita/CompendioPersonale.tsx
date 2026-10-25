@@ -9,7 +9,8 @@ import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';
 import { CampoRicerca } from '../shared/CampoRicerca';
-import { IconaAzione, IconaSegno } from '../shared/IconaAzione';
+import { IconaAzione } from '../shared/IconaAzione';
+import { TesseraKpi } from '../shared/TesseraKpi';
 
 interface Props {
   partitaId: number;
@@ -48,11 +49,7 @@ export function CompendioPersonale({ partitaId }: Props) {
   return (
     <PageState isLoading={tutte.inPrimoCaricamento || registrate.inPrimoCaricamento} error={tutte.errore ?? registrate.errore} onRetry={() => { void tutte.ricarica(); void registrate.ricarica(); }}>
       <div className="min-w-0 max-w-full flex flex-wrap items-center gap-3 mb-3">
-        <div className="kpi-tile shrink-0">
-          <span className="kpi-label kpi-label--segno"><IconaSegno chiave="completati" />Completamento</span>
-          <span className="kpi-value">{totale ? Math.round((fatte / totale) * 100) : 0}%</span>
-          <span className="testo-12 text-text-muted">{fatte} di {totale}</span>
-        </div>
+        <TesseraKpi className="shrink-0" etichettaSopra segno="completati" etichetta="Completamento" valore={`${totale ? Math.round((fatte / totale) * 100) : 0}%`} nota={`${fatte} di ${totale}`} />
         <div className="flex-1 min-w-[min(100%,180px)] flex"><CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca Persona…" /></div>
         <button type="button" className={`chip chip--icona touch shrink-0 ${soloMancanti ? 'chip--attivo' : ''}`} onClick={() => setSoloMancanti((v) => !v)} aria-pressed={soloMancanti}><IconaAzione chiave="obiettivo" dimensione={14} />Solo mancanti</button>
       </div>

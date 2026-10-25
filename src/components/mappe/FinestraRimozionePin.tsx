@@ -97,14 +97,14 @@ function FinestraRimozionePinReale({ spillo, mappa, contestoAncoraAttivo, onChiu
   </>}>
     <div className="flex min-w-0 flex-col gap-2 testo-13">
       <strong>{identica ? a!.spillo.nome : spillo.nome}</strong><p className="m-0">{NEL_CESTINO}</p>
-      {registro.errore && <div role="alert" className="flex flex-col gap-1 text-error"><span>{registro.errore}</span><PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva il registro senza ripetere la richiesta" className="self-start" disabled={occupato} onClick={() => { try { salvaRegistroRimozioniPin(); } catch (e) { setErrore(testo(e)); } }} /></div>}
+      {registro.errore && <div role="alert" className="flex flex-col gap-1 text-error-testo"><span>{registro.errore}</span><PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="registra" dimensione={22} />} titolo="Salva il registro senza ripetere la richiesta" className="self-start" disabled={occupato} onClick={() => { try { salvaRegistroRimozioniPin(); } catch (e) { setErrore(testo(e)); } }} /></div>}
       {anteprima.caricamento && <p role="status" className="m-0">Rileggo il pin e le conseguenze della rimozione…</p>}
-      {anteprima.errore && <p role="alert" className="m-0 text-error">{anteprima.errore}</p>}
-      {a && !identica && <p role="alert" className="m-0 text-error">Il pin o la mappa non coincidono più con la selezione: nessuna rimozione viene inviata.</p>}
+      {anteprima.errore && <p role="alert" className="m-0 text-error-testo">{anteprima.errore}</p>}
+      {a && !identica && <p role="alert" className="m-0 text-error-testo">Il pin o la mappa non coincidono più con la selezione: nessuna rimozione viene inviata.</p>}
       {a && identica && <><span>Mappa: {a.spillo.mappa!.nome}</span><code className="break-all testo-12">Pin {a.spillo.id} · UID {a.spillo.uid}</code>
         <ul className="m-0 pl-4">{conteggi.map(([nome, quante]) => <li key={nome}>{nome}: {quante}</li>)}</ul>
         <p className="m-0">{a.contenuti.riallineamento ? 'Le voci collegate richiedono il riallineamento degli stati della guida nelle partite; il Cestino conserva le righe interessate.' : 'La fotografia non richiede il riallineamento degli stati delle voci della guida.'}</p></>}
-      {errore && <p role="alert" className="m-0 text-error">{errore}</p>}
+      {errore && <p role="alert" className="m-0 text-error-testo">{errore}</p>}
       {(incerto || pendente) && <><p role="alert" className="m-0 text-warning">Esito da verificare conservato per questo UID, anche dopo chiusura o reload. La richiesta non viene ripetuta: puoi soltanto rileggere la mappa e il Cestino.</p><PulsanteVisivo icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi lo stato senza ripetere la rimozione" className="self-start" disabled={occupato || pendente?.stato === 'invio'} onClick={() => void rileggi()} /></>}
       {!incerto && !pendente && !rimossa && <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi l’anteprima" className="self-start" disabled={occupato || anteprima.caricamento} onClick={() => { setRifiutata(false); setErrore(null); void anteprima.ricarica(); }} />}
       {riscontro && <p role="status" className="m-0">{riscontro}</p>}

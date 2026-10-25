@@ -122,7 +122,7 @@ export function PianiFusione({ persone, partitaId, livelloProtagonista, iniziale
             {!partitaId && ' Senza partita attiva scorta e Registro sono considerati vuoti.'}
           </p>
           {errore ? (
-            <p className="m-0 testo-13 text-error">{errore}</p>
+            <p className="m-0 testo-13 text-error-testo">{errore}</p>
           ) : caricamento && !dati ? (
             <div className="flex justify-center py-6"><Spinner /></div>
           ) : dati && dati.motivo ? (
