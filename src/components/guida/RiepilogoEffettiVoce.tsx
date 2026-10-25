@@ -19,6 +19,7 @@
 
 import { useId } from 'react';
 import type { GruppoRiepilogoEffettiDto } from '../../../shared/riepilogoEffetti';
+import { normaNome } from '../../utils/percorso';
 
 interface Props {
   gruppi: readonly GruppoRiepilogoEffettiDto[];
@@ -28,16 +29,13 @@ interface Props {
   titoloVisibile?: boolean;
 }
 
-/** Il nome senza maiuscole, spazi in più e accenti, per capire se il titolo del gruppo ripete la sua unica riga. */
-const norma = (s: string): string => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/\s+/g, ' ').trim();
-
 /** Un gruppo: etichetta (se aggiunge qualcosa), elenco delle righe, totale e nota. `riquadro` è il nome del riquadro, che fa da nome
  *  dell'elenco quando il gruppo non ne ha uno suo (il gruppo di ripiego delle voci di prima). */
 function Gruppo({ g, riquadro }: { g: GruppoRiepilogoEffettiDto; riquadro: string }) {
   const id = useId();
   // il titolo che ripete l'unica riga («Aojiru» sopra «Aojiru · Conoscenza») o che manca non si scrive; l'elenco tiene comunque un nome
   // per i lettori di schermo: il titolo del gruppo (uguale alla riga) o, senza, quello del riquadro
-  const titoloUtile = !!g.titolo && !(g.righe.length === 1 && norma(g.righe[0].nome) === norma(g.titolo));
+  const titoloUtile = !!g.titolo && !(g.righe.length === 1 && normaNome(g.righe[0].nome) === normaNome(g.titolo));
   // Impaginazione: fino a 640 px (telefono) il dettaglio va sotto il nome, perché due colonne strette andrebbero a capo entrambe;
   // da 641 px le righe sono una griglia a due colonne larghe quanto il contenuto (sottogriglia per riga, così l'elemento resta un `<li>`)
   return (

@@ -104,7 +104,7 @@ function testoEffettiDellaFonte(fonte: StatoEffettiVoceDto, nomi: NomiEffettiAzi
     if (eEffettoConNomi(e)) return fraseEffettoConNomi(e, nomiFrase);
     if (e.tipo === 'acquisto') {
       const nome = articoloConNome(e.articolo)?.nome ?? e.articolo;
-      return `Acquisto: ${nome}${e.variante ? ` · ${nomeDote(e.variante)}` : ' · variante da dichiarare'}`;
+      return `Acquisto: ${nome}${e.variante ? ` · ${nomeDote(e.variante)}` : ' · variante da osservare alla spunta'}`;
     }
     const testo = testoEffetti([e], nomi)[0]!;
     // R10-06: la paga del turno è solo un'informazione, mai una proposta

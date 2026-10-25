@@ -94,8 +94,8 @@ export function gruppiDellaVoce(a: { produceTesto?: string[]; produceRiepilogo?:
   return frasi.length ? [{ chiave: 'effetti', titolo: '', righe: frasi.map((nome) => ({ nome })) }] : [];
 }
 
-/** Il nome senza maiuscole, spazi in più e accenti. */
-const normaNome = (s: string): string => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/\s+/g, ' ').trim();
+/** Il nome senza maiuscole, spazi in più e accenti (anche per il titolo dei gruppi di «Il gioco dà», `RiepilogoEffettiVoce`). */
+export const normaNome =(s: string): string => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/\s+/g, ' ').trim();
 
 /** Due nomi dicono lo stesso posto? Senza maiuscole, spazi in più e accenti (il collegamento e il pin della mappa possono scriverlo un po' diverso). */
 export function stessoNomeDiPosto(a: string | null | undefined, b: string | null | undefined): boolean {

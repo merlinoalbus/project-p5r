@@ -337,7 +337,7 @@ describe('GiornoGuida — la giornata canone', () => {
     await waitFor(() => expect(notifica).toHaveBeenCalledWith('error', expect.stringContaining('«Altra»')));
   });
 
-  it('una voce aggiunta è come un\'azione della guida: tipo, collegamento, «Il gioco dà», stato; un incontro chiede le note', async () => {
+  it('una voce aggiunta è come un\'azione della guida: collegamento (senza il tipo che ripete), «Il gioco dà», stato; un incontro chiede le note', async () => {
     api.impostaAzionePercorso.mockResolvedValue(voce({ uid: uid(11), azione: 'Clinica Takemi', fatta: true, effetti: { doti: [{ chiave: 'coraggio', nome: 'Coraggio', delta: 2, note: 1 }], confidente: null } }));
     disegna({ ...base, azioni: [voce({
       uid: uid(11), azione: 'Clinica Takemi', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, riferimentoTesto: 'Tae Takemi - Morte', rangoAtteso: 2,
