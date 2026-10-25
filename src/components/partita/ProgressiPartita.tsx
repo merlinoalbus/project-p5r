@@ -241,9 +241,18 @@ function ProgressiPartitaNelContesto({ partitaId }: { partitaId: number }) {
                               <span className="min-w-0 flex-[1_1_12rem]">
                                 <span className="block">{a.nome}</span>
                                 {a.effettiTurno?.length > 0 && <span className="block testo-12 text-text-secondary">Ogni turno: {a.effettiTurno.join(' · ')}</span>}
-                                {esiti && <span className="block testo-12 text-text-secondary">{esiti.modo === 'automatico'
-                                  ? `Esito dal giorno: ${esiti.esiti.map((e) => `${e.nome} (${e.doti.map((d) => `${d.nome} ${'♪'.repeat(d.note)}`).join(', ') || 'nessuna Dote'})`).join(' · ')}${esiti.automatico ? '' : ' · oggi non se ne ricava uno'}`
-                                  : `Esiti: ${esiti.esiti.length} da scegliere a ogni +`}</span>}
+                                {esiti && esiti.modo === 'automatico' && (() => {
+                                  const oggi = esiti.esiti.find((e) => e.chiave === esiti.automatico);
+                                  return (
+                                    <>
+                                      <span className="block testo-12 text-text-secondary">{`Esito dal giorno: ${esiti.esiti.map((e) => `${e.nome} (${e.doti.map((d) => `${d.nome} ${'♪'.repeat(d.note)}`).join(', ') || 'nessuna Dote'})`).join(' · ')}`}</span>
+                                      <span className={`block testo-12 font-semibold ${oggi ? 'text-primary-testo' : 'text-warning'}`}>
+                                        {oggi ? `Oggi vale: ${oggi.nome} (${oggi.doti.map((d) => `${d.nome} ${'♪'.repeat(d.note)}`).join(', ') || 'nessuna Dote'})` : 'Oggi non se ne ricava uno'}
+                                      </span>
+                                    </>
+                                  );
+                                })()}
+                                {esiti && esiti.modo === 'scelta' && <span className="block testo-12 text-text-secondary">{`Esiti: ${esiti.esiti.length} da scegliere a ogni +`}</span>}
                               </span>
                               {pesca && <PulsanteVisivo compatto className="shrink-0" icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Registra nella scheda Pesca" onClick={() => scegli('pesca')} />}
                               <span className="condizione-numero shrink-0" role="group" aria-label={`Volte: ${a.nome}`}>

@@ -107,7 +107,12 @@ export function CampiEffettoVoce({ effetto: e, elenchi, righe, onCambia }: Props
       const esiti = azione.attivita.find((a) => a.chiave === e.attivita)?.esiti;
       return (
         <div className="flex flex-col gap-2">
-          <Selettore etichetta="Attività (contata per volte)" valore={e.attivita} opzioni={conCorrente(azione.attivita.filter((a) => a.turni), e.attivita, 'Attività non più nell’elenco')} onCambia={(v) => onCambia({ tipo: 'turno', attivita: v })} />
+          <Selettore etichetta="Attività (contata per volte)" valore={e.attivita} opzioni={conCorrente(azione.attivita.filter((a) => a.turni), e.attivita, 'Attività non più nell’elenco')} onCambia={(v) => {
+            // l'esito atteso è dell'attività di prima e non la segue; le Doti proprie si conservano se la nuova attività non dichiara esiti
+            // (con gli esiti le Doti le dà l'esito scelto: le proprie non sono ammesse)
+            const nuovaConEsiti = !!azione.attivita.find((a) => a.chiave === v)?.esiti;
+            onCambia(e.doti && !nuovaConEsiti ? { tipo: 'turno', attivita: v, doti: e.doti } : { tipo: 'turno', attivita: v });
+          }} />
           {esiti?.modo === 'scelta' && <Selettore etichetta="Esito atteso (lo confermi alla spunta)" valore={e.esito ?? ''} vuoto="Nessuno: lo scegli alla spunta"
             opzioni={conCorrente(esiti.elenco, e.esito ?? '', 'Esito non più dichiarato')} onCambia={(v) => onCambia(v ? { tipo: 'turno', attivita: e.attivita, esito: v } : { tipo: 'turno', attivita: e.attivita })} />}
           {esiti?.modo === 'automatico' && <p className="m-0 testo-13 text-text-secondary">L’esito si ricava dal giorno della voce: nessuna scelta da indicare.</p>}

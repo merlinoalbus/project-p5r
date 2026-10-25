@@ -9,7 +9,7 @@
 // Ogni esito mostra le Doti che dà, con i punti, il prezzo dell'articolo (promemoria: gli yen si cambiano a mano) e i premi in parole.
 // ============================================================
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import type { EsitoDisponibileDto, SceltaEsitoSpunta, SceltaEsitoVoceDto } from '../../../shared/esitiAttivita';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -30,22 +30,29 @@ function perGruppo(esiti: readonly EsitoDisponibileDto[]): Array<{ gruppo: strin
 
 /** L'elenco degli esiti come bersagli da toccare (≥ 44 px), con quello scelto in evidenza; i non possibili sono spenti col motivo. */
 function ElencoEsiti({ esiti, scelto, occupato, onScegli }: { esiti: readonly EsitoDisponibileDto[]; scelto: string | null | undefined; occupato: boolean; onScegli: (chiave: string) => void }) {
+  // gli esiti non ancora possibili restano raggiungibili da tastiera (aria-disabled, non disabled): il motivo è scritto nel bottone e
+  // collegato con aria-describedby; il tocco non fa nulla (il server li rifiuta comunque)
+  const prefisso = useId();
   return (
     <span className="flex w-full flex-col gap-1.5">
       {perGruppo(esiti).map((g) => (
         <span key={g.gruppo ?? '-'} className="flex flex-col gap-1" role="group" aria-label={g.gruppo ?? 'Esiti'}>
           {g.gruppo && <span className="text-text-secondary">{g.gruppo}{g.esiti[0]?.articolo?.prezzo != null ? ` · ${formattaYen(g.esiti[0].articolo.prezzo)}` : ''}</span>}
           <span className="flex flex-wrap gap-1.5">
-            {g.esiti.map((e) => (
-              <button key={e.chiave} type="button" className={`chip touch flex-col items-start text-left ${scelto === e.chiave ? 'chip--attivo' : ''}`} disabled={occupato || !e.disponibile}
-                aria-pressed={scelto === e.chiave} onClick={() => onScegli(e.chiave)}
-                title={!e.disponibile ? `Non ancora possibile: ${e.condizioniTesto ?? 'condizioni non soddisfatte'}` : e.condizioniTesto ?? undefined}
-                aria-label={`${e.nome}: ${dotiTesto(e)}${e.premi ? `; premi: ${e.premi}` : ''}${!e.disponibile ? `; non ancora possibile: ${e.condizioniTesto ?? 'condizioni non soddisfatte'}` : ''}`}>
-                <span>{e.gruppo && e.nome.startsWith(`${e.gruppo} · `) ? e.nome.slice(e.gruppo.length + 3) : e.nome}</span>
-                <span className="testo-12 text-text-secondary">{dotiTesto(e)}{e.premi ? ` · ${e.premi}` : ''}</span>
-                {!e.disponibile && <span className="testo-12 text-text-muted">Non ancora: {e.condizioniTesto ?? 'condizioni non soddisfatte'}</span>}
-              </button>
-            ))}
+            {g.esiti.map((e) => {
+              const idMotivo = `${prefisso}-motivo-${e.chiave}`;
+              return (
+                <button key={e.chiave} type="button" className={`chip touch flex-col items-start text-left ${scelto === e.chiave ? 'chip--attivo' : ''} ${!e.disponibile ? 'opacity-60 cursor-not-allowed' : ''}`} disabled={occupato}
+                  aria-disabled={!e.disponibile ? true : undefined} aria-describedby={!e.disponibile ? idMotivo : undefined}
+                  aria-pressed={scelto === e.chiave} onClick={() => { if (e.disponibile) onScegli(e.chiave); }}
+                  title={!e.disponibile ? `Non ancora possibile: ${e.condizioniTesto ?? 'condizioni non soddisfatte'}` : e.condizioniTesto ?? undefined}
+                  aria-label={`${e.nome}: ${dotiTesto(e)}${e.premi ? `; premi: ${e.premi}` : ''}${!e.disponibile ? '; non ancora possibile' : ''}`}>
+                  <span>{e.gruppo && e.nome.startsWith(`${e.gruppo} · `) ? e.nome.slice(e.gruppo.length + 3) : e.nome}</span>
+                  <span className="testo-12 text-text-secondary">{dotiTesto(e)}{e.premi ? ` · ${e.premi}` : ''}</span>
+                  {!e.disponibile && <span id={idMotivo} className="testo-12 text-text-muted">Non ancora: {e.condizioniTesto ?? 'condizioni non soddisfatte'}</span>}
+                </button>
+              );
+            })}
           </span>
         </span>
       ))}
@@ -73,19 +80,27 @@ function iniziali(scelte: readonly SceltaEsitoVoceDto[]): Record<string, Valore 
 }
 
 /**
- * Le scelte della spunta di una voce: una riga per effetto che le chiede. Il pulsante «Spunta» si accende quando ogni scelta è fatta
- * (anche «Senza punti» / «Nessuna» è una scelta); «Annulla» lascia la voce com'era.
+ * Le scelte della spunta di una voce: una riga per effetto che le chiede. Con una sola scelta il tocco sull'esito (o su «Senza punti» /
+ * «Nessuna») spunta subito; con più scelte il pulsante «Spunta» si accende quando ogni scelta è fatta (anche «Senza punti» / «Nessuna»
+ * è una scelta). «Annulla» lascia la voce com'era.
  */
 export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla }: { scelte: readonly SceltaEsitoVoceDto[]; occupato: boolean; onConferma: (s: SceltaEsitoSpunta[]) => void; onAnnulla: () => void }) {
   const [valori, setValori] = useState<Record<string, Valore | undefined>>(() => iniziali(scelte));
-  const imposta = (uid: string, v: Valore) => setValori((x) => ({ ...x, [uid]: v }));
+  // con UNA sola scelta un tocco basta (come le note di un Confidente e il + di Progressi): il tocco registra subito;
+  // con più scelte insieme si fanno tutte e poi si conferma
+  const unica = scelte.length === 1;
+  const costruisci = (v: Record<string, Valore | undefined>): SceltaEsitoSpunta[] => scelte.map((s): SceltaEsitoSpunta => {
+    const x = v[s.effettoUid]!;
+    return x.tipo === 'dote' ? { effettoUid: s.effettoUid, tipo: 'dote', note: x.note } : { effettoUid: s.effettoUid, tipo: 'turno', esito: x.esito };
+  });
+  const imposta = (uid: string, v: Valore) => {
+    if (unica) { onConferma(costruisci({ [uid]: v })); return; }
+    setValori((x) => ({ ...x, [uid]: v }));
+  };
   const complete = scelte.every((s) => valori[s.effettoUid] !== undefined);
   const conferma = () => {
     if (!complete) return;
-    onConferma(scelte.map((s): SceltaEsitoSpunta => {
-      const v = valori[s.effettoUid]!;
-      return v.tipo === 'dote' ? { effettoUid: s.effettoUid, tipo: 'dote', note: v.note } : { effettoUid: s.effettoUid, tipo: 'turno', esito: v.esito };
-    }));
+    onConferma(costruisci(valori));
   };
   return (
     <span className="flex w-full flex-col gap-2 testo-12" role="group" aria-label="Esiti da scegliere per la spunta">
@@ -110,7 +125,7 @@ export function SceltaEsitiVoce({ scelte, occupato, onConferma, onAnnulla }: { s
         );
       })}
       <span className="flex flex-wrap gap-1.5">
-        <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Spunta con questi esiti" disabled={occupato || !complete} onClick={conferma} />
+        {!unica && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Spunta con questi esiti" disabled={occupato || !complete} onClick={conferma} />}
         <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" disabled={occupato} onClick={onAnnulla} />
       </span>
     </span>
