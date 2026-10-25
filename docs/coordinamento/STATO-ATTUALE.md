@@ -1,4 +1,33 @@
-# Stato attuale del lavoro — ramo newreview / p5s (aggiornato 2026-10-23 sera)
+# Stato attuale del lavoro — lotto L12 «Verso il rilascio» (aggiornato 2026-10-25)
+
+## STATO AL 25 OTTOBRE 2026 — L12 «Verso il rilascio» (leggere per primo; prevale su tutto quanto c'è sotto)
+Dal 24/10 esiste un solo ambiente (`main` e produzione); il 25/10 è partito il lotto L12. Requisiti in `lotti/L12/requisiti.md`, progetto delle
+due istanze in `lotti/L12/progetto-due-istanze.md`, voci `R12-*` in `stato.json` → `pianoAtomico.voci`. Il repository è pubblico: qui non
+compaiono domini, indirizzi, percorsi di server, AUD, email né token; si parla di «dominio pubblico» e di «variabili dello stack».
+
+- **Fasi 1–4 del lotto:** sono nel codice e in produzione (R12-01 esperienza di gioco e protezione del lavoro; R12-02 istanza pubblica;
+  R12-03 telefono e accessibilità; R12-04 congelamento, ultimo passo «congelamento dei contenuti in Prepara edizione»).
+- **Due istanze dallo stesso codice**, con la modalità fissata nella build (costante `IN_RILASCIO`, non una variabile d'ambiente):
+  - **Preparazione (privata):** l'istanza attuale, con tutte le funzioni di modifica e configurazione e l'aggiornamento automatico.
+  - **Rilascio (pubblica):** `gioco.db` in sola lettura (volume montato in sola lettura, niente WAL, scrittura di prova che deve fallire
+    all'avvio), nessuna migrazione e nessun esecutore di migrazioni, rotte negate se non sono nell'elenco del giocatore, partite separate
+    per utente riconosciuto da Cloudflare Access, editor fuori dal bundle (controllo statico `scripts/verifica-bundle-rilascio.ts`).
+    Distribuita col tag `rilascio-vX.Y.Z` in uno stack separato (servizi, rete e volumi propri, immagini a versione fissa, mai `:latest`).
+  - **Edizione:** la produce «Prepara edizione» (Impostazioni della preparazione), che la deposita nella cartella d'appoggio; si copia nel
+    volume dell'edizione dello stack di rilascio e poi si **riavvia il backend pubblico**. Contiene `gioco.db` chiuso, `partite-vuoto.db`,
+    caratteri e manifesto con conteggi e impronte, più il report di compatibilità con l'edizione precedente.
+- **Edizione 1 provvisoria:** installata il 2026-10-25 per le prove; non è il congelamento definitivo.
+- **Cosa resta (tutto in attesa dell'utente, nessuna decisione presa da noi):**
+  - Doti delle tre attività: bagno pubblico, centro battute, Big Bang Burger.
+  - Gravità dei JSON malformati nei controlli dell'edizione (bloccano la preparazione o solo avvisano).
+  - Stati dei pin orfani (chiavi che l'edizione non contiene più).
+  - Chi accede all'istanza pubblica (elenco di email o accesso aperto, con il limite del piano gratuito).
+  - Congelamento definitivo dei contenuti: solo dopo le decisioni sopra, poi la seconda edizione e il tag di rilascio.
+  - Prove funzionali dell'utente sull'istanza pubblica (partite per utente, sola lettura, tre formati).
+- **Regole invariate:** zero test eseguiti; typecheck, lint e build verdi; verifica avversariale distinta per ogni consegna; prevale il dato
+  Royal; commit e push a fine lotto.
+- **Come ripartire:** leggere `requisiti.md` e `progetto-due-istanze.md`, poi le voci `R12-*` ancora aperte in `stato.json`; per le decisioni
+  dell'utente servono risposte esplicite prima di toccare dati o congelare.
 
 ## RIPRESA DEL 23 OTTOBRE SERA (leggere per prima; prevale su tutto quanto c'è sotto)
 - **Chi lavora.** Codex si è fermato dopo L7-TANAKA-NOTA. Il 23 sera l'utente ha chiesto a Claude (PM) di verificare il suo lavoro, integrare mancanze e dubbi e completare il piano.
