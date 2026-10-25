@@ -2,7 +2,7 @@
 // SkillPage — elenco delle 525 skill con ricerca ed elemento (client-side)
 // ============================================================
 
-import { useMemo, useState } from 'react';
+import { memo, useDeferredValue, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
@@ -16,6 +16,29 @@ import { ORDINE_ELEMENTI_SKILL, coloreElemento } from '../utils/elementi';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AssetImg } from '../components/shared/AssetImg';
 import { IconaAzione } from '../components/shared/IconaAzione';
+import type { SkillRiassuntoDto } from '../types';
+
+/**
+ * Una skill dell'elenco. Memoizzata (R12-03): digitando nella ricerca le righe già disegnate hanno la stessa skill e non si rifanno;
+ * si ridisegnano solo quelle che entrano nell'elenco.
+ */
+const RigaSkill = memo(function RigaSkill({ s }: { s: SkillRiassuntoDto }) {
+  return (
+    <li>
+      <Link to={`/skill/${s.id}`} className="flex items-center gap-3 py-2.5 no-underline text-text hover:text-primary-testo">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-semibold">{s.nomeIt}</span>
+            {s.nomeIt !== s.nome && <span className="testo-12 text-text-muted">{s.nome}</span>}
+            <ElementoChip elemento={s.elemento} nome={s.elementoNome} piccolo />
+            <span className="testo-12 text-text-muted">{s.costo.testo}</span>
+          </div>
+          <div className="testo-13 text-text-secondary">{s.effettoNome}</div>
+        </div>
+      </Link>
+    </li>
+  );
+});
 
 /** Elenco skill: ricerca su nome ed effetto italiano, filtro per elemento. */
 export function SkillPage() {
@@ -25,14 +48,17 @@ export function SkillPage() {
   const [q, setQ] = useState('');
   const [elemento, setElemento] = useState('');
 
+  // R12-03: il campo segue subito la battuta, l'elenco si rifà con il testo differito (calcolo e disegno interrompibili)
+  const qDifferita = useDeferredValue(q);
+
   const filtrate = useMemo(() => {
     if (!dati) return [];
-    const testo = q.trim().toLowerCase();
+    const testo = qDifferita.trim().toLowerCase();
     return dati.filter((s) =>
       (!elemento || s.elemento === elemento)
       && (!testo || s.nome.toLowerCase().includes(testo) || s.nomeIt.toLowerCase().includes(testo) || s.effettoNome.toLowerCase().includes(testo)),
     );
-  }, [dati, q, elemento]);
+  }, [dati, qDifferita, elemento]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -64,21 +90,7 @@ export function SkillPage() {
           <EmptyState title="Nessuna skill corrisponde alla ricerca" />
         ) : (
           <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light card py-0">
-            {filtrate.map((s) => (
-              <li key={s.id}>
-                <Link to={`/skill/${s.id}`} className="flex items-center gap-3 py-2.5 no-underline text-text hover:text-primary-testo">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold">{s.nomeIt}</span>
-                      {s.nomeIt !== s.nome && <span className="testo-12 text-text-muted">{s.nome}</span>}
-                      <ElementoChip elemento={s.elemento} nome={s.elementoNome} piccolo />
-                      <span className="testo-12 text-text-muted">{s.costo.testo}</span>
-                    </div>
-                    <div className="testo-13 text-text-secondary">{s.effettoNome}</div>
-                  </div>
-                </Link>
-              </li>
-            ))}
+            {filtrate.map((s) => <RigaSkill key={s.id} s={s} />)}
           </ul>
         )}
       </PageState>

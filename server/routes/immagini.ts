@@ -12,10 +12,10 @@
 import express, { Router } from 'express';
 import { validate } from '../middleware/validate.js';
 import { bodyDaUrl, paramsImmagine, queryConfermaPezzi, queryFileImmagine, queryImmagini, queryRimozioneImmagini } from '../schemas/immagini.js';
-import { MISURE_AMMESSE, etagMiniatura, miniaturaDi } from '../services/miniatureService.js';
+import { MISURE_AMMESSE, etagMiniatura, miniaturaDi, miniaturaInCache } from '../services/miniatureService.js';
 import { larghezzaMiniaturaAmmessa, type LarghezzaMiniatura } from '../../shared/miniature.js';
 import {
-  MAX_BYTE_IMMAGINE, eliminaImmagine, eliminaImmaginiAmbito, elencaImmagini, fileImmagine, importaImmagineDaUrl, leggiImmagine, manifestoPredefinite, salvaImmagine, type AmbitoImmagine,
+  MAX_BYTE_IMMAGINE, eliminaImmagine, eliminaImmaginiAmbito, elencaImmagini, fileImmagine, importaImmagineDaUrl, leggiImmagine, manifestoPredefinite, metadatiFileImmagine, salvaImmagine, type AmbitoImmagine,
 } from '../services/immaginiService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { impostaImmagineMappa, mappaEsiste, scaricaImmagineMappa } from '../services/mappe/mappeService.js';
@@ -47,24 +47,39 @@ router.get('/:ambito/:chiave/file', validate({ params: paramsImmagine, query: qu
   if (larghezza !== null && (!/^\d+$/.test(l!) || !larghezzaMiniaturaAmmessa(larghezza))) {
     throw httpErrors.badRequest('larghezza-non-ammessa', `Larghezza della miniatura non ammessa: usa una di ${MISURE_AMMESSE} pixel.`);
   }
-  const f = fileImmagine(String(req.params.ambito), String(req.params.chiave));
+  const ambito = String(req.params.ambito);
+  const chiave = String(req.params.chiave);
+  // R12-03: prima i soli metadati (id, mime, byte, data): bastano per l'ETag, per il 304 e per una miniatura già in cache. Il contenuto
+  // dell'originale (anche diversi MB, letto sul thread del server) si carica solo quando va davvero inviato o ridotto.
+  const meta = metadatiFileImmagine(ambito, chiave);
   // URL versionato (`?v=`): il contenuto può restare in cache per un anno perché ogni sostituzione cambia l'URL; senza versione,
   // rivalidazione a ogni richiesta con l'ETag (id + byte + data), così una sostituzione è visibile subito.
   const versionato = typeof v === 'string' && v.length > 0;
   res.setHeader('Cache-Control', versionato ? 'private, max-age=31536000, immutable' : 'private, no-cache');
   if (larghezza === null) {
-    const etag = `"${f.id}-${f.byte}-${f.createdAt}"`;
+    const etag = `"${meta.id}-${meta.byte}-${meta.createdAt}"`;
     res.setHeader('ETag', etag);
     if (req.headers['if-none-match'] === etag) { res.status(304).end(); return; }
+    const f = fileImmagine(ambito, chiave);
     res.type(f.mime);
     res.send(f.contenuto);
     return;
   }
   // con la larghezza: la miniatura WebP (dalla cache o generata ora), o l'originale quando non c'è niente da ridurre o il generatore
   // non c'è; l'ETag porta anche la generazione dell'algoritmo e la larghezza, e si confronta prima di generare
-  const etag = etagMiniatura(f, larghezza as LarghezzaMiniatura);
+  const etag = etagMiniatura(meta, larghezza as LarghezzaMiniatura);
   res.setHeader('ETag', etag);
   if (req.headers['if-none-match'] === etag) { res.status(304).end(); return; }
+  // già in cache: si risponde con la riga della miniatura, senza leggere l'originale
+  const inCache = miniaturaInCache(meta, larghezza as LarghezzaMiniatura);
+  if (inCache) {
+    res.setHeader('X-Miniatura', inCache.esito);
+    res.type(inCache.mime);
+    res.send(inCache.contenuto);
+    return;
+  }
+  // da generare, o da servire com'è: qui serve il contenuto (la lettura è sincrona, nessuna sostituzione può intervenire fra i due passi)
+  const f = fileImmagine(ambito, chiave);
   const m = await miniaturaDi({ id: f.id, contenuto: f.contenuto, mime: f.mime, byte: f.byte, createdAt: f.createdAt }, larghezza as LarghezzaMiniatura);
   res.setHeader('X-Miniatura', m.esito);
   res.type(m.mime);

@@ -27,12 +27,15 @@ function Iniziali({ nome, classe }: { nome: string; classe: string }) {
   return <span className={`${classe} flex items-center justify-center font-black text-text-muted bg-bg-tertiary`} aria-hidden="true">{nome.split(/\s+/).slice(0, 2).map((s) => s[0]?.toUpperCase() ?? '').join('')}</span>;
 }
 
-/** Immagine di una Persona del personaggio con la catena di riserve (compendio → asset dedicato → iniziali). */
-function ImmaginePersona({ nome, alt, classe }: { nome: string; alt: string; classe: string }) {
+/**
+ * Immagine di una Persona del personaggio con la catena di riserve (compendio → asset dedicato → iniziali). Con `dimensione` (la
+ * larghezza del riquadro) si chiede la miniatura; senza (la finestra di ingrandimento) il file pieno.
+ */
+function ImmaginePersona({ nome, alt, classe, dimensione }: { nome: string; alt: string; classe: string; dimensione?: number }) {
   const s = slug(nome);
   return (
-    <AssetImg nome={`persona/${s}`} alt={alt} className={`${classe} object-contain`} fallback={
-      <AssetImg nome={`persona-gruppo/${s}`} alt={alt} className={`${classe} object-contain`} fallback={<Iniziali nome={nome} classe={classe} />} />
+    <AssetImg nome={`persona/${s}`} alt={alt} dimensione={dimensione} className={`${classe} object-contain`} fallback={
+      <AssetImg nome={`persona-gruppo/${s}`} alt={alt} dimensione={dimensione} className={`${classe} object-contain`} fallback={<Iniziali nome={nome} classe={classe} />} />
     } />
   );
 }
@@ -49,7 +52,7 @@ export function PersonaDelPersonaggio({ personaggio, persone, idCompendio }: Pro
       <div className="flex items-center gap-3">
         {/* tocco sull'immagine: la Persona a tutto schermo nella finestra (le figure dei Ladri Fantasma meritano di essere guardate) */}
         <button type="button" className="p-0 border-0 bg-transparent cursor-zoom-in shrink-0 rounded-lg focus-visible:outline-2 focus-visible:outline-primary" onClick={() => setIngrandita(true)} aria-label={`Ingrandisci ${nome}`}>
-          <ImmaginePersona nome={nome} alt={`${nome}, Persona di ${personaggio}`} classe="w-[120px] h-[120px] rounded-lg shrink-0" />
+          <ImmaginePersona nome={nome} alt={`${nome}, Persona di ${personaggio}`} classe="w-[120px] h-[120px] rounded-lg shrink-0" dimensione={120} />
         </button>
         <div className="flex flex-col gap-0.5 min-w-0">
           <span className="font-display uppercase testo-20 leading-[1.05] break-words">{nome}</span>
@@ -68,7 +71,7 @@ export function PersonaDelPersonaggio({ personaggio, persone, idCompendio }: Pro
           {persone.map((p, i) => (
             <li key={p}>
               <button type="button" className={`flex items-center gap-1.5 p-1 pr-2 rounded-md border bg-transparent cursor-pointer touch ${i === scelta ? 'border-primary text-primary-testo' : 'border-border text-text-secondary'}`} onClick={() => setScelta(i)} aria-pressed={i === scelta} aria-label={`${p} (${FASI[i] ?? `evoluzione ${i + 1}`})`}>
-                <ImmaginePersona nome={p} alt="" classe="w-9 h-9 rounded" />
+                <ImmaginePersona nome={p} alt="" classe="w-9 h-9 rounded" dimensione={36} />
                 <span className="testo-12 font-semibold">{p}</span>
               </button>
             </li>

@@ -171,16 +171,16 @@ interface Props<C extends string> {
 
 /** Icona decorativa di un'azione (il nome accessibile lo dà il pulsante che la contiene). */
 export function IconaAzione({ chiave, dimensione = 24, className }: Props<ChiaveAzione>) {
-  return <AssetImg nome={`ui/azione-${chiave}`} alt="" decorativa className={`object-contain ${className ?? ''}`} style={{ width: dimensione, height: dimensione }} fallback={RISERVA_AZIONE[chiave](dimensione)} />;
+  return <AssetImg nome={`ui/azione-${chiave}`} alt="" decorativa subito className={`object-contain ${className ?? ''}`} style={{ width: dimensione, height: dimensione }} fallback={RISERVA_AZIONE[chiave](dimensione)} />;
 }
 
 /** Icona decorativa di una scheda della Partita. */
 export function IconaScheda({ chiave, dimensione = 16, className }: Props<ChiaveScheda>) {
-  return <AssetImg nome={`ui/scheda-${chiave}`} alt="" decorativa className={`object-contain ${className ?? ''}`} style={{ width: dimensione, height: dimensione }} fallback={RISERVA_SCHEDA[chiave](dimensione)} />;
+  return <AssetImg nome={`ui/scheda-${chiave}`} alt="" decorativa subito className={`object-contain ${className ?? ''}`} style={{ width: dimensione, height: dimensione }} fallback={RISERVA_SCHEDA[chiave](dimensione)} />;
 }
 
 /** Segno decorativo accanto all'etichetta di un dato: il testo resta e dice tutto, questo aiuta a
  *  ritrovarlo. Dimensione piccola per scelta — è un contorno, non un'illustrazione. */
 export function IconaSegno({ chiave, dimensione = 15, className }: Props<ChiaveSegno>) {
-  return <AssetImg nome={`ui/segno-${chiave}`} alt="" decorativa className={`shrink-0 object-contain ${className ?? ''}`} style={{ width: dimensione, height: dimensione }} fallback={RISERVA_SEGNO[chiave](dimensione)} />;
+  return <AssetImg nome={`ui/segno-${chiave}`} alt="" decorativa subito className={`shrink-0 object-contain ${className ?? ''}`} style={{ width: dimensione, height: dimensione }} fallback={RISERVA_SEGNO[chiave](dimensione)} />;
 }

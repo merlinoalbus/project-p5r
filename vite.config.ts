@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { pluginAssetPredefiniti } from './vite/assetPredefiniti.ts'
+import { pluginMiniatureAsset } from './vite/miniatureAsset.ts'
 
 // Tailwind 4 tramite plugin Vite ufficiale: raccoglie l'`@import "tailwindcss"`
 // in src/tailwind.css e genera le utility a richiesta (config CSS-first).
@@ -15,7 +16,7 @@ export default defineConfig(({ mode }) => {
   const portaFe = Number(env.FE_PORT || 5273)
   const portaBe = Number(env.BE_PORT || env.PORT || 3101)
   return {
-    plugins: [react(), tailwindcss(), pluginAssetPredefiniti()],
+    plugins: [react(), tailwindcss(), pluginAssetPredefiniti(), pluginMiniatureAsset()],
     server: {
       port: portaFe,
       strictPort: true,

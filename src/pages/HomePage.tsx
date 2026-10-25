@@ -115,7 +115,7 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
                 <span className="testo-12 font-semibold uppercase tracking-[.06em] text-text-muted">Arcani potenziati</span>
                 {arcaniInScorta.map((a) => (
                   <Link key={a.chiave} to="/partita?scheda=confidenti" className="chip chip--icona chip--attivo no-underline" title={`Persona ${a.nome} in scorta: i Confidenti ${a.nome} guadagnano punti ×1,5`}>
-                    <AssetImg nome={`arcani/icona/${slug(a.chiave)}`} alt="" decorativa className="h-4 w-4 object-contain" fallback={<IconMaschera size={14} />} />
+                    <AssetImg nome={`arcani/icona/${slug(a.chiave)}`} alt="" decorativa dimensione={16} quadrata className="h-4 w-4 object-contain" fallback={<IconMaschera size={14} />} />
                     {a.nome}
                   </Link>
                 ))}

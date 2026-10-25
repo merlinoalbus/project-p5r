@@ -20,7 +20,7 @@ interface Props {
 export function EmblemaDungeon({ chiave, nome, arcanaSovrano, dimensione = 72, className }: Props) {
   const iniziale = <span className="emblema emblema--riserva font-display" style={{ width: dimensione, height: dimensione, fontSize: Math.round(dimensione * 0.55) }} aria-hidden="true">{nome.replace(/^(Palazzo|Dedalo) di /i, '').charAt(0).toUpperCase()}</span>;
   const arcano = arcanaSovrano
-    ? <AssetImg nome={`arcani/icona/${slug(arcanaSovrano)}`} alt="" decorativa className="emblema object-contain" style={{ width: dimensione, height: dimensione }} fallback={iniziale} />
+    ? <AssetImg nome={`arcani/icona/${slug(arcanaSovrano)}`} alt="" decorativa dimensione={dimensione} quadrata className="emblema object-contain" style={{ width: dimensione, height: dimensione }} fallback={iniziale} />
     : iniziale;
   return (
     <span className={`inline-flex shrink-0 ${className ?? ''}`}>

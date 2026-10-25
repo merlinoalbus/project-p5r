@@ -16,6 +16,7 @@ import { chiaviPresenti, urlImmagineVersionata, registraImmagine, versioniImmagi
 import { notifica } from '../../stores/notificationStore';
 import { useAsset, useAssetStore } from '../../stores/assetStore';
 import { altezzaPerForma, chiaviAssetPredefinito, type FormaImmagine, type FormaRiquadro } from '../../utils/assetPredefiniti';
+import { attributiMiniatura } from '../../../shared/miniature';
 import { Modal } from './Modal';
 import { PulsanteVisivo } from './PulsanteVisivo';
 import { IconaAzione } from './IconaAzione';
@@ -51,6 +52,8 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
   const [occupato, setOccupato] = useState(false);
   const [passaggio, setPassaggio] = useState(false);
   const [alternativaFissa, setAlternativaFissa] = useState(false);
+  // l'URL per cui la miniatura non si è caricata: per quello si ripiega sul file pieno (cambiato l'URL, si riprova con la miniatura)
+  const [senzaMiniatura, setSenzaMiniatura] = useState<string | null>(null);
   const inputFile = useRef<HTMLInputElement>(null);
   const formaAsset: FormaImmagine = forma === 'orizzontale' ? 'quadrata' : forma;
   // per le Persona `etichetta` è il nome italiano: dà la chiave italiana di `persona-gruppo/` (Mercurius → mercurio)
@@ -166,15 +169,23 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
    * pigro) o nella finestra (sempre senza ritagli). Senza sorgente mostra le iniziali. Se l'immagine non si carica:
    * quella dell'utente si considera sparita, l'asset predefinito si segna come mancante nello store degli asset.
    */
-  const immagine = (grande: boolean) =>
-    src ? (
+  const immagine = (grande: boolean) => {
+    // R12-03: nel riquadro piccolo l'immagine si chiede in miniatura (varianti WebP degli asset del compendio, miniature del server per
+    // quelle del database), alla misura del riquadro; la finestra di ingrandimento usa sempre il file pieno
+    const miniatura = !grande && src && senzaMiniatura !== src ? attributiMiniatura(src, dimensione) : null;
+    return src ? (
       <img
-        src={src}
+        src={miniatura ? miniatura.src : src}
+        srcSet={miniatura?.srcSet}
+        sizes={miniatura?.sizes}
         alt={etichetta}
         className={grande ? 'max-w-full max-h-[70vh] object-contain' : `w-full h-full ${classeAdatta}`}
         loading={grande ? undefined : 'lazy'}
+        decoding="async"
         draggable={false}
         onError={() => {
+          // la miniatura che non arriva non è un'immagine sparita: prima si riprova con il file pieno
+          if (miniatura?.srcSet !== undefined) { setSenzaMiniatura(src); return; }
           if (srcUtente) void dopoCambio(false);
           else if (nomePredefinito) segnaMancante(nomePredefinito);
         }}
@@ -182,6 +193,7 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
     ) : (
       <span className="font-black text-text-muted select-none" style={{ fontSize: grande ? 96 : Math.max(14, dimensione / 3) }}>{iniziali}</span>
     );
+  };
 
   return (
     <>
