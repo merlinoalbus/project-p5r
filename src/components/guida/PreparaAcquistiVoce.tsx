@@ -11,6 +11,8 @@ import { gestoPendenteNelloScope, useGestiPartita } from '../../services/gestiPa
 import { PreparazioneSessionePesca } from '../pesca/PreparazioneSessionePesca';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { RiepilogoEffettiVoce } from './RiepilogoEffettiVoce';
+import { gruppiDellaVoce } from '../../utils/percorso';
 
 const fotografia = (a: AzionePercorsoDto) => JSON.stringify([a.uid, a.fatta, a.giorno, a.fascia, a.genere, a.azione, a.tipo, a.riferimento, a.rangoAtteso, a.effettiVoce?.revisione]);
 
@@ -61,7 +63,7 @@ export function PreparaAcquistiVoce({ a, partitaId, onChiudi, onConferma, onRile
       <strong>{a.azione}</strong>
       <p className="m-0">Ogni riquadro prepara soltanto i dati. Il comando finale registra insieme spunta, consumazioni e sessioni osservate. Doti, yen e punti pesca restano proposte da decidere.</p>
       {invalidazioneAnteprima > 0 && mancaPreparazione && <p role="status" className="m-0 text-warning">Gli input e le catture sono conservati. Rivedi una nuova anteprima e riconferma ogni riquadro prima della spunta; il comando precedente non viene ripetuto.</p>}
-      <details><summary className="touch">Tutti gli effetti della voce</summary><ul className="m-0 pl-4">{a.effettiVoce?.effetti.map((e, i) => a.produceTesto[i] ? <li key={e.uid}>{a.produceTesto[i]}</li> : null)}</ul></details>
+      <details><summary className="touch">Tutti gli effetti della voce</summary><RiepilogoEffettiVoce gruppi={gruppiDellaVoce(a)} titolo="Che cosa dà la voce" /></details>
       {verifica.caricamento && <p role="status">Verifico la configurazione corrente della voce…</p>}
       {verifica.errore && <p role="alert" className="m-0 text-error-testo">{verifica.errore}<PulsanteVisivo tono="fantasma" className="ml-2" icona={<IconaAzione chiave="ricalcola" dimensione={22} />} titolo="Rileggi la voce conservando i dati" disabled={occupato || incerto} onClick={() => void verifica.ricarica()} /></p>}
       {verifica.dati?.fatta && <p role="alert" className="m-0 text-warning">Questa voce risulta già fatta: nessuna nuova spunta viene inviata. Mostra la voce aggiornata; gli eventuali effetti mancanti compaiono come pulsante «Applica» sulla voce.</p>}

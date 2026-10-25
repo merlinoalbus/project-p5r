@@ -79,6 +79,6 @@ export function OsservazionePescaForm({ valore: o, onCambia, disabilitato = fals
           onCambia={attiva => cambia({ fortuna: { ...o.fortuna, attiva } })} />
         : <p className="m-0 testo-13">Fortuna sulla Perizia in quel giorno: <strong>{o.fortuna.attiva === null ? 'non nota (la partita non la ricorda)' : o.fortuna.attiva ? 'accesa' : 'non accesa'}</strong>. La leggo dalla partita, non devi dirmela.</p>}
     </div>
-    <p className="m-0 testo-12 text-text-secondary">Una cattura non prova il beneficio finale. Le Doti si applicano dal pulsante sulla voce, gli yen della quota sono solo un promemoria da cambiare a mano; nessun saldo cambia con questa sola dichiarazione.</p>
+    <p className="m-0 testo-12 text-text-secondary">Una cattura non prova il beneficio finale. Le Doti si applicano dal pulsante sulla voce; nessun saldo cambia con questa sola dichiarazione.</p>
   </fieldset>;
 }

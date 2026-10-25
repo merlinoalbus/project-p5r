@@ -229,7 +229,7 @@ describe('GiornoGuida — la giornata canone', () => {
       effettiVoce: fonteEffetti(uid(9), [{ tipo: 'turno', attivita: 'lavoro-rafflesia' }]),
     });
     disegna({ ...base, azioni: [rafflesia] });
-    expect(screen.getByText('Il gioco dà: Turno: Fioraio Rafflesia')).toBeInTheDocument();
+    expect(within(screen.getByRole('region', { name: 'Il gioco dà' })).getByText('Turno: Fioraio Rafflesia')).toBeInTheDocument();
     apriMenu('Sbloccare il lavoro');
     fireEvent.click(screen.getByRole('button', { name: 'Modifica' }));
     const finestra = screen.getByRole('dialog', { name: 'Modifica la voce della giornata' });
@@ -346,7 +346,7 @@ describe('GiornoGuida — la giornata canone', () => {
     const giorno = within(sezione('Di giorno'));
     expect(giorno.queryByText('La mia')).toBeNull();
     expect(giorno.getByText('Confidente')).toBeInTheDocument();
-    expect(giorno.getByText('Il gioco dà: Coraggio, 1 nota')).toBeInTheDocument();
+    expect(within(giorno.getByRole('region', { name: 'Il gioco dà' })).getByText('Coraggio, 1 nota')).toBeInTheDocument();
     expect(giorno.getByText(/^Consigliata/)).toBeInTheDocument();
     expect(giorno.getByText('rango atteso 2')).toBeInTheDocument();
     fireEvent.click(screen.getByLabelText('Fatto: Clinica Takemi'));

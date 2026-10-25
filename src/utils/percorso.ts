@@ -5,6 +5,7 @@
 import type { AzionePercorsoDto, EffettiAzioneDto, GenereVoce } from '../types';
 import { TIPI_AZIONE, type EffettoAzione } from '../../shared/effettiAzione';
 import { nomeDote } from '../../shared/doti';
+import type { GruppoRiepilogoEffettiDto } from '../../shared/riepilogoEffetti';
 import { dotiDaSegnareDaEffetti, promemoriaDoti } from './dotiDaSegnare';
 import { urlMappa } from './navigazioneMappa';
 import { indirizzoElemento } from './pannelloScheda';
@@ -80,6 +81,22 @@ export function collegamentoAzione(a: Pick<AzionePercorsoDto, 'tipo' | 'riferime
     case 'richiesta': return { href: '/guida/richieste', etichetta: testo ?? 'Richieste dei Mementos' };
     default: return null;
   }
+}
+
+/**
+ * I gruppi di «Il gioco dà» di una voce (`RiepilogoEffettiVoce`): quelli del server (`produceRiepilogo`); per una voce che non li porta
+ * (una risposta di prima) le frasi di `produceTesto` in un gruppo solo, così nessuna voce perde che cosa dà.
+ */
+export function gruppiDellaVoce(a: { produceTesto?: string[]; produceRiepilogo?: GruppoRiepilogoEffettiDto[] }): GruppoRiepilogoEffettiDto[] {
+  if (a.produceRiepilogo) return a.produceRiepilogo;
+  const frasi = a.produceTesto ?? [];
+  return frasi.length ? [{ chiave: 'effetti', titolo: 'Effetti', righe: frasi.map((nome) => ({ nome })) }] : [];
+}
+
+/** Due nomi dicono lo stesso posto? Senza maiuscole, spazi in più e accenti (il collegamento e il pin della mappa possono scriverlo un po' diverso). */
+export function stessoNomeDiPosto(a: string | null | undefined, b: string | null | undefined): boolean {
+  const norma = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/\s+/g, ' ').trim();
+  return !!a && !!b && norma(a) === norma(b);
 }
 
 /** Il testo senza spazi né maiuscole, per confrontare «Perizia +2» con «perizia+2». */
