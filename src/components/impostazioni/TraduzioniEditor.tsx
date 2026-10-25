@@ -110,7 +110,7 @@ export function TraduzioniEditor({ ambitoIniziale, qIniziale }: PropsTraduzioniE
         <button type="button" className={`chip touch ${soloUtente ? 'chip--attivo' : ''}`} onClick={() => setSoloUtente((v) => !v)} aria-pressed={soloUtente}>Solo modificate</button>
       </div>
       <PageState isLoading={voci.inPrimoCaricamento} error={voci.errore} onRetry={() => void voci.ricarica()}>
-        {/* L'elenco scorre con la pagina, non in un riquadro suo (L13: era uno scroll dentro lo scroll, 1991 px in 411/485): al massimo 512 voci per ambito */}
+        {/* L'elenco scorre con la pagina, non in un riquadro suo (L13: era uno scroll dentro lo scroll, 1991 px in 411/485). Nessun tetto: l'ambito più grande, gli effetti delle skill, ha oggi 512 voci */}
         <ul className="m-0 p-0 list-none divide-y divide-border-light">
           {mancante && (
             <li className="py-2 flex flex-col gap-1" aria-label="Testo senza resa italiana">

@@ -89,11 +89,12 @@ function ElencoScarti({ scarti, quando, copia }: { scarti: ScartoPacchettoDto[];
   return (
     <div className="flex flex-col gap-1">
       <p className="m-0 testo-13 text-warning">{quando === 'prima' ? 'Non vengono importati; restano nella copia di sicurezza:' : 'Non sono stati importati:'}</p>
-      {spiegati.length > 0 && <ul className={`m-0 p-0 list-none flex flex-col gap-1 testo-13 ${spiegati.length > 8 ? 'area-scorrevole max-h-[min(40vh,320px)]' : ''}`} aria-label="Strutture scartate">{spiegati.map(riga)}</ul>}
+      {/* L13: gli elenchi scorrono con la pagina, non in un riquadro proprio (niente scroll annidati) */}
+      {spiegati.length > 0 && <ul className="m-0 p-0 list-none flex flex-col gap-1 testo-13" aria-label="Strutture scartate">{spiegati.map(riga)}</ul>}
       {altri.length > 0 && (
         <>
           <p className="m-0 testo-13 text-text-secondary">Strutture non più nell’app (probabilmente rinominate):</p>
-          <ul className={`m-0 p-0 list-none flex flex-col gap-1 testo-13 ${altri.length > 8 ? 'area-scorrevole max-h-[min(40vh,320px)]' : ''}`} aria-label="Strutture scartate non spiegate">{altri.map(riga)}</ul>
+          <ul className="m-0 p-0 list-none flex flex-col gap-1 testo-13" aria-label="Strutture scartate non spiegate">{altri.map(riga)}</ul>
         </>
       )}
       {quando === 'dopo' && copia && <p className="m-0 testo-13 text-text-muted">Nulla è perso: i dati sono nella copia di sicurezza <code>{copia}</code>.</p>}
